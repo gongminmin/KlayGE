@@ -1,5 +1,5 @@
-// Frustum.hpp
-// KlayGE 视锥类 头文件
+// OctreeFrustum.hpp
+// KlayGE 八叉树视锥类 头文件
 // Ver 2.1.2
 // 版权所有(C) 龚敏敏, 2004
 // Homepage: http://klayge.sourceforge.net
@@ -10,8 +10,8 @@
 // 修改记录
 //////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _FRUSTUM_HPP
-#define _FRUSTUM_HPP
+#ifndef _OCTREEFRUSTUM_HPP
+#define _OCTREEFRUSTUM_HPP
 
 #include <KlayGE/Math.hpp>
 #include <boost/array.hpp>
@@ -24,7 +24,7 @@
 
 namespace KlayGE
 {
-	class Frustum
+	class OCTreeFrustum
 	{
 	public:
 		void CalculateFrustum(Matrix4 const & clip);
@@ -33,7 +33,9 @@ namespace KlayGE
 	private:
 		typedef boost::array<Plane, 6> PlanesType;
 		PlanesType planes_;
+
+		boost::array<int, 6> vertexLUT_;
 	};
 }
 
-#endif			// _FRUSTUM_HPP
+#endif			// _OCTREEFRUSTUM_HPP

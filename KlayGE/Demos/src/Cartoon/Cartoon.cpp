@@ -51,13 +51,19 @@ namespace
 		}
 
 		RenderEffectPtr GetRenderEffect() const
-			{ return effect_; }
+		{
+			return effect_;
+		}
 
 		VertexBufferPtr GetVertexBuffer() const
-			{ return vb_; }
+		{
+			return vb_;
+		}
 
 		Box GetBound() const
-			{ return box_; }
+		{
+			return box_;
+		}
 
 		std::wstring const & Name() const
 		{
@@ -176,4 +182,11 @@ void Cartoon::Update()
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"¿¨Í¨äÖÈ¾²âÊÔ");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), rw->Description());
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str().c_str());
+
+	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
+	stream.str(L"");
+	stream << sceneMgr.NumObjectsRendered() << " Renderables "
+		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
+		<< sceneMgr.NumVerticesRendered() << " Vertices";
+	font_->RenderText(0, 54, Color(1, 1, 1, 1), stream.str().c_str());
 }

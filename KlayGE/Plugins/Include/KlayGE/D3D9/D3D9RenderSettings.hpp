@@ -1,6 +1,7 @@
 #ifndef _D3D9RENDERSETTINGS_HPP
 #define _D3D9RENDERSETTINGS_HPP
 
+#define NOMINMAX
 #include <d3d9.h>
 #include <KlayGE/RenderSettings.hpp>
 

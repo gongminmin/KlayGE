@@ -585,20 +585,20 @@ namespace KlayGE
 				desc.pixel_format.flags |= DDSPF_RGB;
 				desc.pixel_format.rgb_bit_count = 16;
 
-				desc.pixel_format.rgb_alpha_bit_mask = 0;
-				desc.pixel_format.r_bit_mask = 0xF800;
-				desc.pixel_format.g_bit_mask = 0x7E0;
-				desc.pixel_format.b_bit_mask = 0x1F;
+				desc.pixel_format.rgb_alpha_bit_mask = 0x00000000;
+				desc.pixel_format.r_bit_mask = 0x0000F800;
+				desc.pixel_format.g_bit_mask = 0x000007E0;
+				desc.pixel_format.b_bit_mask = 0x0000001F;
 				break;
 
 			case PF_A4R4G4B4:
 				desc.pixel_format.flags |= DDSPF_RGB;
 				desc.pixel_format.rgb_bit_count = 16;
 
-				desc.pixel_format.rgb_alpha_bit_mask = 0xF000;
-				desc.pixel_format.r_bit_mask = 0xF800;
-				desc.pixel_format.g_bit_mask = 0x7E0;
-				desc.pixel_format.b_bit_mask = 0x1F;
+				desc.pixel_format.rgb_alpha_bit_mask = 0x0000F000;
+				desc.pixel_format.r_bit_mask = 0x00000F00;
+				desc.pixel_format.g_bit_mask = 0x000000F0;
+				desc.pixel_format.b_bit_mask = 0x0000000F;
 				break;
 
 			case PF_A8R8G8B8:
@@ -636,21 +636,42 @@ namespace KlayGE
 				desc.pixel_format.flags |= DDSPF_LUMINANCE;
 				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
 				desc.pixel_format.rgb_bit_count = 8;
+
+				desc.pixel_format.rgb_alpha_bit_mask = 0x000000F0;
+				desc.pixel_format.r_bit_mask = 0x0000000F;
+				desc.pixel_format.g_bit_mask = 0x00000000;
+				desc.pixel_format.b_bit_mask = 0x00000000;
 				break;
 
 			case PF_L8:
 				desc.pixel_format.flags |= DDSPF_LUMINANCE;
 				desc.pixel_format.rgb_bit_count = 8;
+				
+				desc.pixel_format.rgb_alpha_bit_mask = 0x00000000;
+				desc.pixel_format.r_bit_mask = 0x000000FF;
+				desc.pixel_format.g_bit_mask = 0x00000000;
+				desc.pixel_format.b_bit_mask = 0x00000000;
 				break;
 
 			case PF_A8L8:
 				desc.pixel_format.flags |= DDSPF_LUMINANCE;
 				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
 				desc.pixel_format.rgb_bit_count = 16;
+
+				desc.pixel_format.rgb_alpha_bit_mask = 0x0000FF00;
+				desc.pixel_format.r_bit_mask = 0x000000FF;
+				desc.pixel_format.g_bit_mask = 0x00000000;
+				desc.pixel_format.b_bit_mask = 0x00000000;
 				break;
 
 			case PF_A8:
 				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
+				desc.pixel_format.rgb_bit_count = 8;
+
+				desc.pixel_format.rgb_alpha_bit_mask = 0x000000FF;
+				desc.pixel_format.r_bit_mask = 0x00000000;
+				desc.pixel_format.g_bit_mask = 0x00000000;
+				desc.pixel_format.b_bit_mask = 0x00000000;
 				break;
 			}
 		}

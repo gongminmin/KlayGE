@@ -1,8 +1,11 @@
 // Box.hpp
-// KlayGE 边框盒 头文件
-// Ver 2.1.1
-// 版权所有(C) 龚敏敏, 2004
+// KlayGE AABB边框盒 头文件
+// Ver 2.4.0
+// 版权所有(C) 龚敏敏, 2004-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.4.0
+// 增加了Center和operator[] (2005.3.20)
 //
 // 2.1.1
 // 初次建立 (2004.4.22)
@@ -97,6 +100,40 @@ namespace KlayGE
 			return Box(-this->Min(), -this->Max());
 		}
 
+		Vector3 operator[](size_t i) const
+		{
+			switch (i)
+			{
+			case 0:
+				return this->LeftBottomNear();
+
+			case 1:
+				return this->LeftTopNear();
+
+			case 2:
+				return this->RightTopNear();
+
+			case 3:
+				return this->RightBottomNear();
+
+			case 4:
+				return this->LeftBottomFar();
+
+			case 5:
+				return this->LeftTopFar();
+
+			case 6:
+				return this->RightTopFar();
+
+			case 7:
+				return this->RightBottomFar();
+
+			default:
+				assert(false);
+				return Vector3::Zero();
+			}
+		}
+
 		// 属性
 		float Width() const
 		{
@@ -163,6 +200,10 @@ namespace KlayGE
 		Vector3 const & Max() const
 		{
 			return max_;
+		}
+		Vector3 Center() const
+		{
+			return (min_ + max_) / 2;
 		}
 
 		bool VecInBound(Vector3 const & v) const

@@ -13,7 +13,7 @@
 #include <KlayGE/D3D9/D3D9RenderSettings.hpp>
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
-#include <KlayGE/OCTree/OCTree.hpp>
+#include <KlayGE/Frustum/Frustum.hpp>
 
 #include <KlayGE/Input.hpp>
 #include <KlayGE/DInput/DInputFactory.hpp>
@@ -161,7 +161,7 @@ private:
 int main()
 {
 	Parallax app;
-	OCTree sceneMgr(Box(Vector3(-10, -10, -10), Vector3(10, 10, 10)));
+	Frustum sceneMgr;
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
@@ -283,4 +283,11 @@ void Parallax::Update()
 	renderPolygon->Render();
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Parallax²âÊÔ");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());
+
+	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
+	stream.str(L"");
+	stream << sceneMgr.NumObjectsRendered() << " Renderables "
+		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
+		<< sceneMgr.NumVerticesRendered() << " Vertices";
+	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str().c_str());
 }

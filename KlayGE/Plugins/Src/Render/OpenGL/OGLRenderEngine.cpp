@@ -1,8 +1,11 @@
 // OGLRenderEngine.cpp
 // KlayGE OpenGL渲染引擎类 实现文件
-// Ver 2.0.1
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.4.0
+// 版权所有(C) 龚敏敏, 2003-2005
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.4.0
+// 增加了PolygonMode (2005.3.20)
 //
 // 2.0.1
 // 初次建立 (2003.10.11)
@@ -123,7 +126,7 @@ namespace KlayGE
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	OGLRenderEngine::OGLRenderEngine()
-		: cullingMode_(RenderEngine::Cull_None)
+		: cullingMode_(RenderEngine::CM_None)
 	{
 	}
 
@@ -258,20 +261,48 @@ namespace KlayGE
 
 		switch (mode)
 		{
-		case Cull_None:
+		case CM_None:
 			glDisable(GL_CULL_FACE);
 			break;
 
-		case Cull_Clockwise:
+		case CM_Clockwise:
 			glEnable(GL_CULL_FACE);
 			glFrontFace(GL_CCW);
 			break;
 
-		case Cull_AntiClockwise:
+		case CM_AntiClockwise:
 			glEnable(GL_CULL_FACE);
 			glFrontFace(GL_CW);
 			break;
 		}
+	}
+
+	// 设置多变性填充模式
+	/////////////////////////////////////////////////////////////////////////////////
+	void OGLRenderEngine::PolygonMode(FillMode mode)
+	{
+		GLenum oglMode = GL_FILL;
+
+		switch (mode)
+		{
+		case FM_Point:
+			oglMode = GL_POINT;
+			break;
+
+		case FM_Line:
+			oglMode = GL_LINE;
+			break;
+
+		case FM_Fill:
+			oglMode = GL_FILL;
+			break;
+
+		default:
+			assert(false);
+			break;
+		}
+
+		glPolygonMode(GL_FRONT_AND_BACK, oglMode);
 	}
 
 	// 设置光源
@@ -476,33 +507,48 @@ namespace KlayGE
 			}
 		}
 
+		size_t const vertexCount = vb.UseIndices() ? vb.NumIndices() : vb.NumVertices();
 		GLenum mode = GL_POINTS;
+		size_t primCount = vertexCount;
 		switch (vb.Type())
 		{
 		case VertexBuffer::BT_PointList:
 			mode = GL_POINTS;
+			primCount = vertexCount;
 			break;
 
 		case VertexBuffer::BT_LineList:
 			mode = GL_LINES;
+			primCount = vertexCount / 2;
 			break;
 
 		case VertexBuffer::BT_LineStrip:
 			mode = GL_LINE_STRIP;
+			primCount = vertexCount - 1;
 			break;
 
 		case VertexBuffer::BT_TriangleList:
 			mode = GL_TRIANGLES;
+			primCount = vertexCount / 3;
 			break;
 
 		case VertexBuffer::BT_TriangleStrip:
 			mode = GL_TRIANGLE_STRIP;
+			primCount = vertexCount - 2;
 			break;
 
 		case VertexBuffer::BT_TriangleFan:
 			mode = GL_TRIANGLE_FAN;
+			primCount = vertexCount - 2;
+			break;
+
+		default:
+			assert(false);
 			break;
 		}
+
+		numPrimitivesJustRendered_ += primCount;
+		numVerticesJustRendered_ += vertexCount;
 
 		if (vb.UseIndices())
 		{

@@ -1,8 +1,11 @@
 // OCTree.hpp
 // KlayGE 八叉树类 头文件
-// Ver 2.1.2
-// 版权所有(C) 龚敏敏, 2004
+// Ver 2.4.0
+// 版权所有(C) 龚敏敏, 2004-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.4.0
+// 改用线性八叉树 (2005.3.20)
 //
 // 2.1.2
 // 初次建立 (2004.6.15)
@@ -19,9 +22,10 @@
 #include <KlayGE/Box.hpp>
 
 #include <vector>
-#include <boost/array.hpp>
+#include <map>
+#include <string>
 
-#include <KlayGE/OCTree/Frustum.hpp>
+#include <KlayGE/OCTree/OCTreeFrustum.hpp>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_Scene_OCTree_d.lib")
@@ -31,33 +35,11 @@
 
 namespace KlayGE
 {
-	class OCTreeNode;
-	typedef boost::shared_ptr<OCTreeNode> OCTreeNodePtr;
-
-	class OCTreeNode : boost::noncopyable, public SceneNode
-	{
-	public:
-		explicit OCTreeNode(Box const & box);
-		~OCTreeNode();
-
-		void Clear();
-
-		void AddRenderable(RenderablePtr const & renderable);
-		bool InsideNode(RenderablePtr const & renderable);
-
-		void Clip(Frustum const & frustum);
-
-		void GetRenderables(std::vector<RenderablePtr>& renderables);
-
-	private:
-		typedef boost::array<OCTreeNodePtr, 8> ChildrenType;
-		ChildrenType children_;
-
-		Box box_;
-	};
-
 	class OCTree : public SceneManager
 	{
+	public:
+		typedef std::string tree_id_t;
+
 	public:
 		OCTree(Box const & box);
 
@@ -65,13 +47,22 @@ namespace KlayGE
 		void PushRenderable(RenderablePtr const & obj);
 
 	private:
+		tree_id_t Child(tree_id_t const & id, int child_no);
+		Box AreaBox(tree_id_t const & id);
+		bool InsideChild(tree_id_t const & id, RenderablePtr renderable);
+
+	private:
 		OCTree(OCTree const & rhs);
 		OCTree& operator=(OCTree const & rhs);
 
 	private:
-		OCTreeNode root_;
+		typedef std::map<tree_id_t, RenderablePtr> linear_octree_t;
+		linear_octree_t linear_octree_;
+		Box root_box_;
 
-		Frustum frustum_;
+		std::vector<RenderablePtr> uncullables_;
+
+		OCTreeFrustum frustum_;
 	};
 }
 

@@ -1,3 +1,15 @@
+// OGLRenderEngine.cpp
+// KlayGE OpenGL渲染引擎类 头文件
+// Ver 2.4.0
+// 版权所有(C) 龚敏敏, 2003-2005
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.4.0
+// 增加了PolygonMode (2005.3.20)
+//
+// 修改记录
+//////////////////////////////////////////////////////////////////////////////////
+
 #ifndef _OGLRENDERENGINE_HPP
 #define _OGLRENDERENGINE_HPP
 
@@ -35,6 +47,7 @@ namespace KlayGE
 		RenderWindowPtr CreateRenderWindow(std::string const & name, RenderSettings const & settings);
 
 		void CullingMode(CullMode mode);
+		void PolygonMode(FillMode mode);
 
 		void SetMaterial(Material const & mat);
 

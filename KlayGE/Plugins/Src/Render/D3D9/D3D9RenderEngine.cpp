@@ -1,8 +1,11 @@
 // D3D9RenderEngine.cpp
 // KlayGE D3D9渲染引擎类 实现文件
-// Ver 2.0.4
-// 版权所有(C) 龚敏敏, 2003-2004
+// Ver 2.4.0
+// 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.4.0
+// 增加了PolygonMode (2005.3.20)
 //
 // 2.0.4
 // 去掉了WorldMatrices (2004.4.3)
@@ -36,6 +39,7 @@
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 #include <KlayGE/D3D9/D3D9VertexStream.hpp>
 #include <KlayGE/D3D9/D3D9IndexStream.hpp>
+#include <KlayGE/D3D9/D3D9Mapping.hpp>
 
 #include <cassert>
 #include <algorithm>
@@ -48,203 +52,10 @@
 
 namespace KlayGE
 {
-	// 从KlayGE的Matrix4转换到D3DMATRIX
-	/////////////////////////////////////////////////////////////////////////////////
-	D3DMATRIX Convert(Matrix4 const & mat)
-	{
-		D3DMATRIX d3dMat;
-		std::copy(mat.begin(), mat.end(), &d3dMat._11);
-
-		return d3dMat;
-	}
-
-	// 从D3DMATRIX转换到KlayGE的Matrix4
-	/////////////////////////////////////////////////////////////////////////////////
-	Matrix4 Convert(D3DMATRIX const & mat)
-	{
-		return Matrix4(&mat.m[0][0]);
-	}
-
-	// 从RenderEngine::CompareFunction转换到D3DCMPFUNC
-	/////////////////////////////////////////////////////////////////////////////////
-	D3DCMPFUNC Convert(RenderEngine::CompareFunction func)
-	{
-		D3DCMPFUNC ret = D3DCMP_NEVER;
-
-		switch (func)
-		{
-		case RenderEngine::CF_AlwaysFail:
-			ret = D3DCMP_NEVER;
-			break;
-
-		case RenderEngine::CF_AlwaysPass:
-			ret = D3DCMP_ALWAYS;
-			break;
-
-		case RenderEngine::CF_Less:
-			ret = D3DCMP_LESS;
-			break;
-
-		case RenderEngine::CF_LessEqual:
-			ret = D3DCMP_LESSEQUAL;
-			break;
-
-		case RenderEngine::CF_Equal:
-			ret = D3DCMP_EQUAL;
-			break;
-
-		case RenderEngine::CF_NotEqual:
-			ret = D3DCMP_NOTEQUAL;
-			break;
-
-		case RenderEngine::CF_GreaterEqual:
-			ret = D3DCMP_GREATEREQUAL;
-			break;
-
-		case RenderEngine::CF_Greater:
-			ret = D3DCMP_GREATER;
-			break;
-		};
-
-		return ret;
-	}
-
-	// 从RenderEngine::StencilOperation转换到D3DSTENCILOP
-	/////////////////////////////////////////////////////////////////////////////////
-	D3DSTENCILOP Convert(RenderEngine::StencilOperation op)
-	{
-		D3DSTENCILOP ret = D3DSTENCILOP_KEEP;
-
-		switch (op)
-		{
-		case RenderEngine::SOP_Keep:
-			ret = D3DSTENCILOP_KEEP;
-			break;
-
-		case RenderEngine::SOP_Zero:
-			ret = D3DSTENCILOP_ZERO;
-			break;
-
-		case RenderEngine::SOP_Replace:
-			ret = D3DSTENCILOP_REPLACE;
-			break;
-
-		case RenderEngine::SOP_Increment:
-			ret = D3DSTENCILOP_INCRSAT;
-			break;
-
-		case RenderEngine::SOP_Decrement:
-			ret = D3DSTENCILOP_DECRSAT;
-			break;
-
-		case RenderEngine::SOP_Invert:
-			ret = D3DSTENCILOP_INVERT;
-			break;
-		};
-
-		return ret;
-	}
-
-	// 从RenderEngine::TexFiltering转换到D3D的MagFilter标志
-	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t MagFilter(D3DCAPS9 const & caps, RenderEngine::TexFiltering tf)
-	{
-		// NOTE: Fall through if device doesn't support requested type
-		if ((RenderEngine::TF_Anisotropic == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFANISOTROPIC))
-		{
-			return D3DTEXF_ANISOTROPIC;
-		}
-		else
-		{
-			tf = RenderEngine::TF_Trilinear;
-		}
-
-		if ((RenderEngine::TF_Trilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFLINEAR))
-		{
-			return D3DTEXF_LINEAR;
-		}
-		else
-		{
-			tf = RenderEngine::TF_Bilinear;
-		}
-
-		if ((RenderEngine::TF_Bilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFLINEAR))
-		{
-			return D3DTEXF_LINEAR;
-		}
-
-		return D3DTEXF_POINT;
-	}
-
-	// 从RenderEngine::TexFiltering转换到D3D的MinFilter标志
-	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t MinFilter(D3DCAPS9 const & caps, RenderEngine::TexFiltering tf)
-	{
-		// NOTE: Fall through if device doesn't support requested type
-		if ((RenderEngine::TF_Anisotropic == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFANISOTROPIC))
-		{
-			return D3DTEXF_ANISOTROPIC;
-		}
-		else
-		{
-			tf = RenderEngine::TF_Trilinear;
-		}
-
-		if ((RenderEngine::TF_Trilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFLINEAR))
-		{
-			return D3DTEXF_LINEAR;
-		}
-		else
-		{
-			tf = RenderEngine::TF_Bilinear;
-		}
-
-		if ((RenderEngine::TF_Bilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFLINEAR))
-		{
-			return D3DTEXF_LINEAR;
-		}
-
-		return D3DTEXF_POINT;
-	}
-
-	// 从RenderEngine::TexFiltering转换到D3D的MipFilter标志
-	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t MipFilter(D3DCAPS9 const & caps, RenderEngine::TexFiltering tf)
-	{
-		// NOTE: Fall through if device doesn't support requested type
-		if ((RenderEngine::TF_Anisotropic == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR))
-		{
-			return D3DTEXF_LINEAR;
-		}
-		else
-		{
-			tf = RenderEngine::TF_Trilinear;
-		}
-
-		if ((RenderEngine::TF_Trilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR))
-		{
-			return D3DTEXF_LINEAR;
-		}
-		else
-		{
-			tf = RenderEngine::TF_Bilinear;
-		}
-
-		if ((RenderEngine::TF_Bilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR))
-		{
-			return D3DTEXF_POINT;
-		}
-
-		return D3DTEXF_NONE;
-	}
-}
-
-namespace KlayGE
-{
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D9RenderEngine::D3D9RenderEngine()
-						: cullingMode_(RenderEngine::Cull_None),
+						: cullingMode_(RenderEngine::CM_None),
 							clearFlags_(D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER)
 	{
 		// Create our Direct3D object
@@ -360,23 +171,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::ShadingType(ShadeOptions so)
 	{
-		D3DSHADEMODE shadeMode = D3DSHADE_FLAT;
-		switch (so)
-		{
-		case SO_Flat:
-			shadeMode = D3DSHADE_FLAT;
-			break;
-
-		case SO_Gouraud:
-			shadeMode = D3DSHADE_GOURAUD;
-			break;
-
-		case SO_Phong:
-			shadeMode = D3DSHADE_PHONG;
-			break;
-		}
-
-		TIF(d3dDevice_->SetRenderState(D3DRS_SHADEMODE, shadeMode));
+		TIF(d3dDevice_->SetRenderState(D3DRS_SHADEMODE, D3D9Mapping::Mapping(so)));
 	}
 
 	// 打开/关闭光源
@@ -413,26 +208,31 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::CullingMode(CullMode mode)
 	{
-		uint32_t d3dMode = D3DCULL_NONE;
-
 		cullingMode_ = mode;
 
-		switch (mode)
+		if ((*RenderEngine::ActiveRenderTarget())->RequiresTextureFlipping())
 		{
-		case Cull_None:
-			d3dMode = D3DCULL_NONE;
-			break;
-
-		case Cull_Clockwise:
-			d3dMode = (*RenderEngine::ActiveRenderTarget())->RequiresTextureFlipping() ? D3DCULL_CCW : D3DCULL_CW;
-			break;
-
-		case Cull_AntiClockwise:
-			d3dMode = (*RenderEngine::ActiveRenderTarget())->RequiresTextureFlipping() ? D3DCULL_CW : D3DCULL_CCW;
-			break;
+			if (CM_Clockwise == mode)
+			{
+				mode = CM_AntiClockwise;
+			}
+			else
+			{
+				if (CM_AntiClockwise == mode)
+				{
+					mode = CM_Clockwise;
+				}
+			}
 		}
 
-		TIF(d3dDevice_->SetRenderState(D3DRS_CULLMODE, d3dMode));
+		TIF(d3dDevice_->SetRenderState(D3DRS_CULLMODE, D3D9Mapping::Mapping(mode)));
+	}
+
+	// 设置多变性填充模式
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9RenderEngine::PolygonMode(FillMode mode)
+	{
+		TIF(d3dDevice_->SetRenderState(D3DRS_FILLMODE, D3D9Mapping::Mapping(mode)));
 	}
 
 	// 设置光源
@@ -442,35 +242,26 @@ namespace KlayGE
 		D3DLIGHT9 d3dLight;
 		std::memset(&d3dLight, 0, sizeof(d3dLight));
 
-		switch (lt.lightType)
+		d3dLight.Type = D3D9Mapping::Mapping(lt.lightType);
+
+		if (Light::LT_Spot == lt.lightType)
 		{
-		case Light::LT_Point:
-			d3dLight.Type = D3DLIGHT_POINT;
-			break;
-
-		case Light::LT_Directional:
-			d3dLight.Type = D3DLIGHT_DIRECTIONAL;
-			break;
-
-		case Light::LT_Spot:
-			d3dLight.Type		= D3DLIGHT_SPOT;
 			d3dLight.Falloff	= lt.spotFalloff;
 			d3dLight.Theta		= lt.spotInner;
 			d3dLight.Phi		= lt.spotOuter;
-			break;
 		}
 
-		d3dLight.Diffuse	= D3DXCOLOR(lt.diffuse.r(), lt.diffuse.g(), lt.diffuse.b(), lt.diffuse.a());
-		d3dLight.Specular	= D3DXCOLOR(lt.specular.r(), lt.specular.g(), lt.specular.b(), lt.specular.a());
-		d3dLight.Ambient	= D3DXCOLOR(lt.ambient.r(), lt.ambient.g(), lt.ambient.b(), lt.ambient.a());
+		d3dLight.Diffuse	= D3D9Mapping::MappingToFloat4Color(lt.diffuse);
+		d3dLight.Specular	= D3D9Mapping::MappingToFloat4Color(lt.specular);
+		d3dLight.Ambient	= D3D9Mapping::MappingToFloat4Color(lt.ambient);
 
 		if (lt.lightType != Light::LT_Directional)
 		{
-			d3dLight.Position = D3DXVECTOR3(lt.position.x(), lt.position.y(), lt.position.z());
+			d3dLight.Position = D3D9Mapping::Mapping(lt.position);
 		}
 		if (lt.lightType != Light::LT_Point)
 		{
-			d3dLight.Direction = D3DXVECTOR3(lt.direction.x(), lt.direction.y(), lt.direction.z());
+			d3dLight.Direction = D3D9Mapping::Mapping(lt.direction);
 		}
 
 		d3dLight.Range = lt.range;
@@ -492,7 +283,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::DoWorldMatrix()
 	{
-		D3DMATRIX d3dmat(Convert(worldMat_));
+		D3DMATRIX d3dmat(D3D9Mapping::Mapping(worldMat_));
 		TIF(d3dDevice_->SetTransform(D3DTS_WORLD, &d3dmat));
 	}
 
@@ -500,7 +291,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::DoViewMatrix()
 	{
-		D3DMATRIX d3dMat(Convert(viewMat_));
+		D3DMATRIX d3dMat(D3D9Mapping::Mapping(viewMat_));
 		TIF(d3dDevice_->SetTransform(D3DTS_VIEW, &d3dMat));
 	}
 
@@ -508,7 +299,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::DoProjectionMatrix()
 	{
-		D3DMATRIX d3dMat(Convert(projMat_));
+		D3DMATRIX d3dMat(D3D9Mapping::Mapping(projMat_));
 
 		if ((*activeRenderTarget_)->RequiresTextureFlipping())
 		{
@@ -524,10 +315,10 @@ namespace KlayGE
 	{
 		D3DMATERIAL9 material;
 
-		material.Diffuse	= D3DXCOLOR(m.diffuse.r(), m.diffuse.g(), m.diffuse.b(), m.diffuse.a());
-		material.Ambient	= D3DXCOLOR(m.ambient.r(), m.ambient.g(), m.ambient.b(), m.ambient.a());
-		material.Specular	= D3DXCOLOR(m.specular.r(), m.specular.g(), m.specular.b(), m.specular.a());
-		material.Emissive	= D3DXCOLOR(m.emissive.r(), m.emissive.g(), m.emissive.b(), m.emissive.a());
+		material.Diffuse	= D3D9Mapping::MappingToFloat4Color(m.diffuse);
+		material.Ambient	= D3D9Mapping::MappingToFloat4Color(m.ambient);
+		material.Specular	= D3D9Mapping::MappingToFloat4Color(m.specular);
+		material.Emissive	= D3D9Mapping::MappingToFloat4Color(m.emissive);
 		material.Power		= m.shininess;
 
 		TIF(d3dDevice_->SetMaterial(&material));
@@ -565,121 +356,28 @@ namespace KlayGE
 
 	// 渲染
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::Render(VertexBuffer const & rb)
+	void D3D9RenderEngine::Render(VertexBuffer const & vb)
 	{
-		D3DPRIMITIVETYPE primType = D3DPT_POINTLIST;
-		uint32_t primCount = 0;
-		uint32_t const vertexCount(static_cast<uint32_t>(rb.UseIndices() ? rb.NumIndices() : rb.NumVertices()));
-		switch (rb.Type())
-		{
-		case VertexBuffer::BT_PointList:
-			primType = D3DPT_POINTLIST;
-			primCount = vertexCount;
-			break;
+		D3DPRIMITIVETYPE primType;
+		uint32_t primCount;
+		D3D9Mapping::Mapping(primType, primCount, vb);
 
-		case VertexBuffer::BT_LineList:
-			primType = D3DPT_LINELIST;
-			primCount = vertexCount / 2;
-			break;
-
-		case VertexBuffer::BT_LineStrip:
-			primType = D3DPT_LINESTRIP;
-			primCount = vertexCount - 1;
-			break;
-
-		case VertexBuffer::BT_TriangleList:
-			primType = D3DPT_TRIANGLELIST;
-			primCount = vertexCount / 3;
-			break;
-
-		case VertexBuffer::BT_TriangleStrip:
-			primType = D3DPT_TRIANGLESTRIP;
-			primCount = vertexCount - 2;
-			break;
-
-		case VertexBuffer::BT_TriangleFan:
-			primType = D3DPT_TRIANGLEFAN;
-			primCount = vertexCount - 2;
-			break;
-		}
-
+		numPrimitivesJustRendered_ += primCount;
+		numVerticesJustRendered_ += vb.UseIndices() ? vb.NumIndices() : vb.NumVertices();
 
 		VertexDeclType shaderDecl;
 		shaderDecl.reserve(currentDecl_.size());
 
 		D3DVERTEXELEMENT9 element;
-		element.Offset = 0;
-		element.Method = D3DDECLMETHOD_DEFAULT;
 
-		for (VertexBuffer::VertexStreamConstIterator iter = rb.VertexStreamBegin();
-			iter != rb.VertexStreamEnd(); ++ iter)
+		for (VertexBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
+			iter != vb.VertexStreamEnd(); ++ iter)
 		{
 			VertexStream& stream(*(*iter));
-			VertexStreamType type(stream.Type());
+			assert(dynamic_cast<D3D9VertexStream*>(&stream) != NULL);
 
-			element.Stream = static_cast<WORD>(shaderDecl.size());
-
-			switch (type)
-			{
-			// Vertex xyzs
-			case VST_Positions:
-				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + static_cast<BYTE>(stream.ElementsPerVertex());
-				element.Usage		= D3DDECLUSAGE_POSITION;
-				element.UsageIndex	= 0;
-				break;
-
-			// Normal
-			case VST_Normals:
-				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + static_cast<BYTE>(stream.ElementsPerVertex());
-				element.Usage		= D3DDECLUSAGE_NORMAL;
-				element.UsageIndex	= 0;
-				break;
-
-			// Vertex colors
-			case VST_Diffuses:
-				element.Type		= D3DDECLTYPE_D3DCOLOR;
-				element.Usage		= D3DDECLUSAGE_COLOR;
-				element.UsageIndex	= 0;
-				break;
-
-			// Vertex speculars
-			case VST_Speculars:
-				element.Type		= D3DDECLTYPE_D3DCOLOR;
-				element.Usage		= D3DDECLUSAGE_COLOR;
-				element.UsageIndex	= 1;
-				break;
-			
-			// Blend Weights
-			case VST_BlendWeights:
-				element.Type		= D3DDECLTYPE_FLOAT4;
-				element.Usage		= D3DDECLUSAGE_BLENDWEIGHT;
-				element.UsageIndex	= 0;
-				break;
-
-			// Blend Indices
-			case VST_BlendIndices:
-				element.Type		= D3DDECLTYPE_D3DCOLOR;
-				element.Usage		= D3DDECLUSAGE_BLENDINDICES;
-				element.UsageIndex	= 0;
-				break;
-
-			// Do texture coords
-			case VST_TextureCoords0:
-			case VST_TextureCoords1:
-			case VST_TextureCoords2:
-			case VST_TextureCoords3:
-			case VST_TextureCoords4:
-			case VST_TextureCoords5:
-			case VST_TextureCoords6:
-			case VST_TextureCoords7:
-				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + static_cast<BYTE>(stream.ElementsPerVertex());
-				element.Usage		= D3DDECLUSAGE_TEXCOORD;
-				element.UsageIndex	= static_cast<BYTE>(type - VST_TextureCoords0);
-				break;
-			}
-
+			D3D9Mapping::Mapping(element, shaderDecl.size(), stream);
 			shaderDecl.push_back(element);
-
 
 			D3D9VertexStream& d3d9vs(static_cast<D3D9VertexStream&>(stream));
 			TIF(d3dDevice_->SetStreamSource(element.Stream,
@@ -716,9 +414,9 @@ namespace KlayGE
 		d3dDevice_->SetVertexDeclaration(currentVertexDecl_.get());
 
 
-		if (rb.UseIndices())
+		if (vb.UseIndices())
 		{
-			D3D9IndexStream& d3dis(static_cast<D3D9IndexStream&>(*rb.GetIndexStream()));
+			D3D9IndexStream& d3dis(static_cast<D3D9IndexStream&>(*vb.GetIndexStream()));
 			d3dDevice_->SetIndices(d3dis.D3D9Buffer().get());
 
 			for (uint32_t i = 0; i < renderPasses_; ++ i)
@@ -726,7 +424,7 @@ namespace KlayGE
 				renderEffect_->BeginPass(i);
 
 				TIF(d3dDevice_->DrawIndexedPrimitive(primType, 0, 0,
-					static_cast<UINT>(rb.NumVertices()), 0, primCount));
+					static_cast<UINT>(vb.NumVertices()), 0, primCount));
 
 				renderEffect_->EndPass();
 			}
@@ -776,7 +474,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::DepthBufferFunction(CompareFunction depthFunction)
 	{
-		TIF(d3dDevice_->SetRenderState(D3DRS_ZFUNC, Convert(depthFunction)));
+		TIF(d3dDevice_->SetRenderState(D3DRS_ZFUNC, D3D9Mapping::Mapping(depthFunction)));
 	}
 
 	// 设置深度偏移
@@ -795,34 +493,18 @@ namespace KlayGE
 		{
 			// just disable
 			d3dDevice_->SetRenderState(D3DRS_FOGTABLEMODE, D3DFOG_NONE);
-			d3dDevice_->SetRenderState(D3DRS_FOGENABLE, FALSE);
+			d3dDevice_->SetRenderState(D3DRS_FOGENABLE, false);
 		}
 		else
 		{
 			// Allow fog
-			d3dDevice_->SetRenderState(D3DRS_FOGENABLE, TRUE);
+			d3dDevice_->SetRenderState(D3DRS_FOGENABLE, true);
 
 			// Set pixel fog mode
-			D3DFOGMODE d3dFogMode = D3DFOG_LINEAR;
-			switch (mode)
-			{
-			case Fog_Linear:
-				d3dFogMode = D3DFOG_LINEAR;
-				break;
-
-			case Fog_Exp:
-				d3dFogMode = D3DFOG_EXP;
-				break;
-
-			case Fog_Exp2:
-				d3dFogMode = D3DFOG_EXP2;
-				break;
-			}
-
 			d3dDevice_->SetRenderState(D3DRS_FOGVERTEXMODE, D3DFOG_NONE);
-			d3dDevice_->SetRenderState(D3DRS_FOGTABLEMODE, d3dFogMode);
+			d3dDevice_->SetRenderState(D3DRS_FOGTABLEMODE, D3D9Mapping::Mapping(mode));
 
-			d3dDevice_->SetRenderState(D3DRS_FOGCOLOR, D3DCOLOR_COLORVALUE(color.r(), color.g(), color.b(), color.a()));
+			d3dDevice_->SetRenderState(D3DRS_FOGCOLOR, D3D9Mapping::MappingToUInt32Color(color));
 			d3dDevice_->SetRenderState(D3DRS_FOGSTART, *reinterpret_cast<uint32_t*>(&linearStart));
 			d3dDevice_->SetRenderState(D3DRS_FOGEND, *reinterpret_cast<uint32_t*>(&linearEnd));
 			d3dDevice_->SetRenderState(D3DRS_FOGDENSITY, *reinterpret_cast<uint32_t*>(&expDensity));
@@ -918,21 +600,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::TextureAddressingMode(uint32_t stage, TexAddressingMode tam)
 	{
-		D3DTEXTUREADDRESS d3dType = D3DTADDRESS_CLAMP;
-		switch (tam)
-		{
-		case TAM_Clamp:
-			d3dType = D3DTADDRESS_CLAMP;
-			break;
-
-		case TAM_Wrap:
-			d3dType = D3DTADDRESS_WRAP;
-			break;
-
-		case TAM_Mirror:
-			d3dType = D3DTADDRESS_MIRROR;
-			break;
-		}
+		uint32_t const d3dType = D3D9Mapping::Mapping(tam);
 
 		TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSU, d3dType));
 		TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSV, d3dType));
@@ -952,7 +620,7 @@ namespace KlayGE
 			// TODO: deal with 3D coordinates when cubic environment mapping supported
 			TIF(d3dDevice_->SetTextureStageState(stage, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2));
 
-			D3DMATRIX d3dMat(Convert(mat));
+			D3DMATRIX d3dMat(D3D9Mapping::Mapping(mat));
 			TIF(d3dDevice_->SetTransform(static_cast<D3DTRANSFORMSTATETYPE>(D3DTS_TEXTURE0 + stage), &d3dMat));
 		}
 	}
@@ -961,9 +629,9 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::TextureFiltering(uint32_t stage, TexFiltering texFiltering)
 	{
-		d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, MagFilter(caps_, texFiltering));
-		d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, MinFilter(caps_, texFiltering));
-		d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, MipFilter(caps_, texFiltering));
+		d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3D9Mapping::MappingToMagFilter(caps_, texFiltering));
+		d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3D9Mapping::MappingToMinFilter(caps_, texFiltering));
+		d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3D9Mapping::MappingToMipFilter(caps_, texFiltering));
 	}
 
 	// 设置纹理异性过滤
@@ -1003,7 +671,8 @@ namespace KlayGE
 		IDirect3DSurface9* surf;
 		D3DSURFACE_DESC surfDesc;
 		d3dDevice_->GetDepthStencilSurface(&surf);
-		surf->GetDesc(&surfDesc);
+		boost::shared_ptr<IDirect3DSurface9> surf_ptr = MakeCOMPtr(surf);
+		surf_ptr->GetDesc(&surfDesc);
 
 		if (D3DFMT_D24S8 == surfDesc.Format)
 		{
@@ -1026,7 +695,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::StencilBufferFunction(CompareFunction func)
 	{
-		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILFUNC, Convert(func)));
+		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILFUNC, D3D9Mapping::Mapping(func)));
 	}
 
 	// 设置模板缓冲区参考值
@@ -1047,20 +716,20 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::StencilBufferFailOperation(StencilOperation op)
 	{
-		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILFAIL, Convert(op)));
+		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILFAIL, D3D9Mapping::Mapping(op)));
 	}
 
 	// 设置模板缓冲区深度测试失败后的操作
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::StencilBufferDepthFailOperation(StencilOperation op)
 	{
-		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILZFAIL, Convert(op)));
+		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILZFAIL, D3D9Mapping::Mapping(op)));
 	}
 
 	// 设置模板缓冲区通过后的操作
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::StencilBufferPassOperation(StencilOperation op)
 	{
-		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILPASS, Convert(op)));
+		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILPASS, D3D9Mapping::Mapping(op)));
 	}
 }

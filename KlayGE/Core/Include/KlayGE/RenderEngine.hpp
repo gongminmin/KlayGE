@@ -1,8 +1,12 @@
 // RenderEngine.hpp
 // KlayGE 渲染引擎类 实现文件
-// Ver 2.0.4
-// 版权所有(C) 龚敏敏, 2003-2004
+// Ver 2.4.0
+// 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.4.0
+// 增加了NumFacesJustRendered和NumVerticesJustRendered (2005.3.21)
+// 增加了PolygonMode (2005.3.20)
 //
 // 2.0.4
 // 去掉了WorldMatrices (2004.4.3)
@@ -60,9 +64,16 @@ namespace KlayGE
 
 		enum CullMode
 		{
-			Cull_None,
-			Cull_Clockwise,
-			Cull_AntiClockwise,
+			CM_None,
+			CM_Clockwise,
+			CM_AntiClockwise,
+		};
+
+		enum FillMode
+		{
+			FM_Point,
+			FM_Line,
+			FM_Fill,
 		};
 
 		enum FogMode
@@ -153,6 +164,9 @@ namespace KlayGE
 		virtual void Render(VertexBuffer const & vb) = 0;
 		virtual void EndFrame() = 0;
 
+		size_t NumPrimitivesJustRendered();
+		size_t NumVerticesJustRendered();
+
 		virtual void ClearColor(Color const & clr) = 0;
 
 		virtual void ShadingType(ShadeOptions so) = 0;
@@ -163,6 +177,8 @@ namespace KlayGE
 		virtual RenderWindowPtr CreateRenderWindow(std::string const & name, RenderSettings const & settings) = 0;
 
 		virtual void CullingMode(CullMode mode) = 0;
+		virtual void PolygonMode(FillMode mode) = 0;
+
 		virtual void SetMaterial(Material const & mat) = 0;
 
 		virtual void SetLight(uint32_t index, Light const & lt) = 0;
@@ -250,6 +266,9 @@ namespace KlayGE
 		uint32_t renderPasses_;
 
 		Matrix4 worldMat_, viewMat_, projMat_;
+
+		size_t numPrimitivesJustRendered_;
+		size_t numVerticesJustRendered_;
 	};
 }
 

@@ -1,10 +1,11 @@
 // SceneManager.cpp
 // KlayGE 场景管理器类 实现文件
-// Ver 2.0.2
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.4.0
+// 版权所有(C) 龚敏敏, 2003-2005
+// Homepage: http://klayge.sourceforge.net
 //
-// 修改记录
+// 2.4.0
+// 增加了NumObjectsRendered，NumPrimitivesRendered和NumVerticesRendered (2005.3.20)
 //
 // 2.0.0
 // 初次建立(2003.10.1)
@@ -12,6 +13,7 @@
 // 2.0.2
 // 增强了PushRenderable (2003.11.25)
 //
+// 修改记录
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
@@ -63,13 +65,17 @@ namespace KlayGE
 	{
 		Context::Instance().AppInstance().Update();
 
-		this->Flash();
+		this->Flush();
 	}
 
 	// 把渲染队列中的物体渲染出来
 	/////////////////////////////////////////////////////////////////////////////////
-	void SceneManager::Flash()
+	void SceneManager::Flush()
 	{
+		numObjectsRendered_ = 0;
+		numPrimitivesRendered_ = 0;
+		numVerticesRendered_ = 0;
+
 		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		this->ClipScene((*renderEngine.ActiveRenderTarget())->GetViewport().camera);
@@ -86,9 +92,14 @@ namespace KlayGE
 			{
 				Renderable& obj(*(*itemIter));
 
+				++ numObjectsRendered_;
+
 				obj.OnRenderBegin();
 				renderEngine.Render(*obj.GetVertexBuffer());
 				obj.OnRenderEnd();
+
+				numPrimitivesRendered_ += renderEngine.NumPrimitivesJustRendered();
+				numVerticesRendered_ += renderEngine.NumVerticesJustRendered();
 			}
 		}
 		renderQueue_.clear();
@@ -96,5 +107,20 @@ namespace KlayGE
 		renderEngine.EndFrame();
 
 		Context::Instance().AppInstance().RenderOver();
+	}
+
+	size_t SceneManager::NumObjectsRendered() const
+	{
+		return numObjectsRendered_;
+	}
+
+	size_t SceneManager::NumPrimitivesRendered() const
+	{
+		return numPrimitivesRendered_;
+	}
+	
+	size_t SceneManager::NumVerticesRendered() const
+	{
+		return numVerticesRendered_;
 	}
 }

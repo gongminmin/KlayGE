@@ -1,8 +1,11 @@
 // RenderEngine.cpp
 // KlayGE 渲染引擎类 实现文件
-// Ver 2.0.4
-// 版权所有(C) 龚敏敏, 2003-2004
+// Ver 2.4.0
+// 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.4.0
+// 增加了NumPrimitivesJustRendered和NumVerticesJustRendered (2005.3.21)
 //
 // 2.0.3
 // 优化了RenderEffect的设置 (2004.2.16)
@@ -151,5 +154,23 @@ namespace KlayGE
 	{
 		projMat_ = mat;
 		this->DoProjectionMatrix();
+	}
+
+	// 上次Render()所渲染的图元数
+	/////////////////////////////////////////////////////////////////////////////////
+	size_t RenderEngine::NumPrimitivesJustRendered()
+	{
+		size_t const ret = numPrimitivesJustRendered_;
+		numPrimitivesJustRendered_ = 0;
+		return ret;
+	}
+
+	// 上次Render()所渲染的顶点数
+	/////////////////////////////////////////////////////////////////////////////////
+	size_t RenderEngine::NumVerticesJustRendered()
+	{
+		size_t const ret = numVerticesJustRendered_;
+		numVerticesJustRendered_ = 0;
+		return ret;
 	}
 }

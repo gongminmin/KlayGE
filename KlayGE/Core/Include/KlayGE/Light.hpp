@@ -2,6 +2,7 @@
 #define _LIGHT_HPP
 
 #include <KlayGE/Vector.hpp>
+#include <KlayGE/Color.hpp>
 
 #pragma comment(lib, "KlayGE_Core.lib")
 

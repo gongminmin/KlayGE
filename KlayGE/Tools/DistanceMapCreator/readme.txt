@@ -1,0 +1,4 @@
+DistanceMapCreator是KlayGE的距离映射图生成工具，可以通过height map得到distance map。用于Demo DisplacementMapping。
+使用方法 DistanceMapCreator height_map_name distance_map_name width height depth
+
+龚敏敏, 2005

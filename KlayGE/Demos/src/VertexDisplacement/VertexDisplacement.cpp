@@ -36,7 +36,8 @@ namespace
 	{
 	public:
 		Flag()
-			: vb_(new VertexBuffer(VertexBuffer::BT_TriangleList))
+			: vb_(new VertexBuffer(VertexBuffer::BT_TriangleList)),
+				numFaces_(0), numVertices_(0)
 		{
 			MathLib::Translation(model_, -WIDTH / 2.0f, HEIGHT / 2.0f, 0.0f);
 
@@ -48,6 +49,8 @@ namespace
 					pos.push_back(+x * (0.5f * WIDTH / MAX_X));
 					pos.push_back(-y * (0.5f * HEIGHT / MAX_Y));
 					pos.push_back(0.0f);
+
+					++ numVertices_;
 				}
 			}
 
@@ -73,6 +76,8 @@ namespace
 					index.push_back((y + 1) * (MAX_X * 2 + 1) + (x + 1));
 					index.push_back((y + 1) * (MAX_X * 2 + 1) + (x + 0));
 					index.push_back((y + 0) * (MAX_X * 2 + 1) + (x + 0));
+
+					numFaces_ += 2;
 				}
 			}
 
@@ -119,6 +124,9 @@ namespace
 
 		VertexBufferPtr vb_;
 		RenderEffectPtr effect_;
+
+		size_t numFaces_;
+		size_t numVertices_;
 
 		Matrix4 model_;
 		Box box_;
@@ -208,4 +216,11 @@ void VertexDisplacement::Update()
 	flag->Render();
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"¶¥µãÎ»ÒÆ");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());
+
+	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
+	stream.str(L"");
+	stream << sceneMgr.NumObjectsRendered() << " Renderables "
+		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
+		<< sceneMgr.NumVerticesRendered() << " Vertices";
+	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str().c_str());
 }

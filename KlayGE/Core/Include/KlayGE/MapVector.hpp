@@ -21,6 +21,7 @@
 #include <utility>
 #include <vector>
 
+#define NOMINMAX
 #pragma warning(disable : 4127)
 #pragma warning(disable : 4800)
 #include <boost/pool/pool_alloc.hpp>

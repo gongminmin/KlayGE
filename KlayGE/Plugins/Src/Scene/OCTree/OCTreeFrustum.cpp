@@ -1,4 +1,4 @@
-// Frustum.cpp
+// OCTreeFrustum.cpp
 // KlayGE 视锥类 实现文件
 // Ver 2.1.2
 // 版权所有(C) 龚敏敏, 2004
@@ -13,11 +13,11 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Math.hpp>
 
-#include <KlayGE/OCTree/Frustum.hpp>
+#include <KlayGE/OCTree/OCTreeFrustum.hpp>
 
 namespace KlayGE
 {
-	void Frustum::CalculateFrustum(Matrix4 const & clip)
+	void OCTreeFrustum::CalculateFrustum(Matrix4 const & clip)
 	{
 		Vector4 column1(clip(0, 0), clip(1, 0), clip(2, 0), clip(3, 0));
 		Vector4 column2(clip(0, 1), clip(1, 1), clip(2, 1), clip(3, 1));
@@ -38,11 +38,11 @@ namespace KlayGE
 		}
 	}
 
-	bool Frustum::Visiable(Vector3 const & v) const
+	bool OCTreeFrustum::Visiable(Vector3 const & v) const
 	{
-		for (PlanesType::const_iterator iter = planes_.begin(); iter != planes_.end(); ++ iter)
+		for (size_t i = 0; i < planes_.size(); ++ i)
 		{
-			if (MathLib::DotCoord(*iter, v) < 0)
+			if (MathLib::DotCoord(planes_[i], v) < 0)
 			{
 				return false;
 			}

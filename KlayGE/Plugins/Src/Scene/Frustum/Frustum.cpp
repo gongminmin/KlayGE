@@ -38,20 +38,12 @@ namespace KlayGE
 			
 				if (obj.CanBeCulled())
 				{
-					Box const & box(obj.GetBound());
+					Box box(obj.GetBound());
 					boost::array<Vector3, 8> vecs;
-					vecs[0] = box.LeftBottomNear();
-					vecs[1] = box.LeftTopNear();
-					vecs[2] = box.RightBottomNear();
-					vecs[3] = box.RightTopNear();
-					vecs[4] = box.LeftBottomFar();
-					vecs[5] = box.LeftTopFar();
-					vecs[6] = box.RightBottomFar();
-					vecs[7] = box.RightTopFar();
-
 					for (size_t i = 0; i < vecs.size(); ++ i)
 					{
-						MathLib::TransformCoord(vecs[i], vecs[i], obj.GetWorld());
+						MathLib::TransformCoord(vecs[i], box[i], obj.GetWorld());
+
 						if (this->Visiable(vecs[i]))
 						{
 							should_be_culled = false;
@@ -98,9 +90,9 @@ namespace KlayGE
 
 	bool Frustum::Visiable(Vector3 const & v) const
 	{
-		for (PlanesType::const_iterator iter = planes_.begin(); iter != planes_.end(); ++ iter)
+		for (size_t i = 0; i < planes_.size(); ++ i)
 		{
-			if (MathLib::DotCoord(*iter, v) < 0)
+			if (MathLib::DotCoord(planes_[i], v) < 0)
 			{
 				return false;
 			}

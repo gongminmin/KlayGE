@@ -7,6 +7,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "法线图生成器", "NormalMapGe
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DistanceMapCreator", "DistanceMapCreator\DistanceMapCreator.vcproj", "{A7A4F2AC-4B47-4685-8D7F-7675F246A87C}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NormalizerCubeMap", "NormalizerCubeMap\NormalizerCubeMap.vcproj", "{9C678BF0-CABD-41C5-BDD5-49BD0C9F3DDF}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -21,6 +29,14 @@ Global
 		{7526CFD8-84DB-4A4C-AA3C-D9FC7FF32DCF}.Debug.Build.0 = Debug|Win32
 		{7526CFD8-84DB-4A4C-AA3C-D9FC7FF32DCF}.Release.ActiveCfg = Release|Win32
 		{7526CFD8-84DB-4A4C-AA3C-D9FC7FF32DCF}.Release.Build.0 = Release|Win32
+		{A7A4F2AC-4B47-4685-8D7F-7675F246A87C}.Debug.ActiveCfg = Debug|Win32
+		{A7A4F2AC-4B47-4685-8D7F-7675F246A87C}.Debug.Build.0 = Debug|Win32
+		{A7A4F2AC-4B47-4685-8D7F-7675F246A87C}.Release.ActiveCfg = Release|Win32
+		{A7A4F2AC-4B47-4685-8D7F-7675F246A87C}.Release.Build.0 = Release|Win32
+		{9C678BF0-CABD-41C5-BDD5-49BD0C9F3DDF}.Debug.ActiveCfg = Debug|Win32
+		{9C678BF0-CABD-41C5-BDD5-49BD0C9F3DDF}.Debug.Build.0 = Debug|Win32
+		{9C678BF0-CABD-41C5-BDD5-49BD0C9F3DDF}.Release.ActiveCfg = Release|Win32
+		{9C678BF0-CABD-41C5-BDD5-49BD0C9F3DDF}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection

@@ -1,3 +1,15 @@
+// SceneManager.hpp
+// KlayGE 场景管理器类 头文件
+// Ver 2.4.0
+// 版权所有(C) 龚敏敏, 2003-2005
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.4.0
+// 增加了NumObjectsRendered，NumPrimitivesRendered和NumVerticesRendered (2005.3.20)
+//
+// 修改记录
+//////////////////////////////////////////////////////////////////////////////////
+
 #ifndef _SCENEMANAGER_HPP
 #define _SCENEMANAGER_HPP
 
@@ -32,10 +44,18 @@ namespace KlayGE
 		virtual void PushRenderable(RenderablePtr const & obj);
 
 		void Update();
-		void Flash();
+		void Flush();
+
+		size_t NumObjectsRendered() const;
+		size_t NumPrimitivesRendered() const;
+		size_t NumVerticesRendered() const;
 
 	protected:
 		RenderQueueType renderQueue_;
+
+		size_t numObjectsRendered_;
+		size_t numPrimitivesRendered_;
+		size_t numVerticesRendered_;
 	};
 }
 

@@ -133,7 +133,9 @@ namespace KlayGE
 		{
 			return iter->second;
 		}
-		THR(E_FAIL);
+
+		assert(false);
+		return AudioBufferPtr();
 	}
 
 	// 设置音效音量，vol的取值范围为0--1.0f

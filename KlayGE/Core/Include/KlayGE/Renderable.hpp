@@ -1,6 +1,6 @@
 // Renderable.hpp
 // KlayGE 可渲染对象类 头文件
-// Ver 2.3.0
+// Ver 2.4.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
 //

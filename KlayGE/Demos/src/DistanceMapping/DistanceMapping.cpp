@@ -22,7 +22,7 @@
 #include <sstream>
 #include <ctime>
 
-#include "Displacement.hpp"
+#include "DistanceMapping.hpp"
 
 using namespace std;
 using namespace KlayGE;
@@ -35,12 +35,12 @@ namespace
 		RenderPolygon()
 			: vb_(new VertexBuffer(VertexBuffer::BT_TriangleList))
 		{
-			effect_ = LoadRenderEffect("Displacement.fx");
+			effect_ = LoadRenderEffect("DistanceMapping.fx");
 			*(effect_->ParameterByName("diffusemap")) = LoadTexture("diffuse.dds");
 			*(effect_->ParameterByName("normalmap")) = LoadTexture("normal.dds");
 			*(effect_->ParameterByName("distancemap")) = LoadTexture("distance.dds");
 			*(effect_->ParameterByName("normalizermap")) = LoadTexture("normalizer.dds");
-			effect_->SetTechnique("Displacement");
+			effect_->SetTechnique("DistanceMapping");
 
 			Vector3 xyzs[] =
 			{
@@ -160,8 +160,8 @@ private:
 
 int main()
 {
-	Displacement app;
-	OCTree sceneMgr(Box(Vector3(-10, -10, -10), Vector3(10, 10, 10)));
+	DistanceMapping app;
+	OCTree sceneMgr(Box(Vector3(-20, -20, -20), Vector3(20, 20, 20)));
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
@@ -174,19 +174,19 @@ int main()
 	settings.colorDepth = 32;
 	settings.fullScreen = false;
 
-	app.Create("Displacement", settings);
+	app.Create("DistanceMapping", settings);
 	app.Run();
 
 	return 0;
 }
 
-Displacement::Displacement()
+DistanceMapping::DistanceMapping()
 {
 	ResLoader::Instance().AddPath("../media");
-	ResLoader::Instance().AddPath("../media/Displacement");
+	ResLoader::Instance().AddPath("../media/DistanceMapping");
 }
 
-void Displacement::InitObjects()
+void DistanceMapping::InitObjects()
 {
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("SIMYOU.TTF", 16);
@@ -209,7 +209,7 @@ void Displacement::InitObjects()
 	inputEngine.ActionMap(actionMap, true);
 }
 
-void Displacement::Update()
+void DistanceMapping::Update()
 {
 	static clock_t lastTime(std::clock());
 	clock_t curTime(std::clock());
@@ -281,6 +281,13 @@ void Displacement::Update()
 	stream << (*renderEngine.ActiveRenderTarget())->FPS();
 
 	renderPolygon->Render();
-	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Displacement²âÊÔ");
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"DistanceMapping²âÊÔ");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());
+
+	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
+	stream.str(L"");
+	stream << sceneMgr.NumObjectsRendered() << " Renderables "
+		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
+		<< sceneMgr.NumVerticesRendered() << " Vertices";
+	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str().c_str());
 }

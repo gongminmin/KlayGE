@@ -1,14 +1,14 @@
-#ifndef _DISPLACEMENT_HPP
-#define _DISPLACEMENT_HPP
+#ifndef _DISTANCEMAPPING_HPP
+#define _DISTANCEMAPPING_HPP
 
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/CameraController.hpp>
 
-class Displacement : public KlayGE::App3DFramework
+class DistanceMapping : public KlayGE::App3DFramework
 {
 public:
-	Displacement();
+	DistanceMapping();
 
 private:
 	void InitObjects();
@@ -20,4 +20,4 @@ private:
 	KlayGE::FirstPersonCameraController fpcController_;
 };
 
-#endif		// _DISPLACEMENT_HPP
+#endif		// _DISTANCEMAPPING_HPP

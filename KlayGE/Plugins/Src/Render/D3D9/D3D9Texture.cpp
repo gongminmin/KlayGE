@@ -326,8 +326,6 @@ namespace KlayGE
 	{
 		D3D9Texture& other(static_cast<D3D9Texture&>(target));
 
-		assert(target.Width() == width_);
-		assert(target.Height() == height_);
 		assert(target.Depth() == depth_);
 		assert(target.Type() == type_);
 
@@ -347,13 +345,17 @@ namespace KlayGE
 				for (uint32_t i = 0; i < maxLevel; ++ i)
 				{
 					IDirect3DSurface9* temp;
+
 					TIF(d3dTexture2D_->GetSurfaceLevel(i, &temp));
 					src = MakeCOMPtr(temp);
 
 					TIF(other.d3dTexture2D_->GetSurfaceLevel(i, &temp));
 					dst = MakeCOMPtr(temp);
 
-					TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DTEXF_NONE, 0));
+					RECT srcRc = { 0, 0, this->Width(), this->Height() };
+					RECT dstRc = { 0, 0, target.Width(), target.Height() };
+
+					TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, &dstRc, src.get(), NULL, &srcRc, D3DX_DEFAULT, 0));
 				}
 			}
 			break;
@@ -365,13 +367,17 @@ namespace KlayGE
 				for (uint32_t i = 0; i < maxLevel; ++ i)
 				{
 					IDirect3DVolume9* temp;
+					
 					TIF(d3dTexture3D_->GetVolumeLevel(i, &temp));
 					src = MakeCOMPtr(temp);
 
 					TIF(other.d3dTexture3D_->GetVolumeLevel(i, &temp));
 					dst = MakeCOMPtr(temp);
 
-					TIF(D3DXLoadVolumeFromVolume(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DTEXF_NONE, 0));
+					D3DBOX srcBox = { 0, 0, this->Width(), this->Height(), 0, this->Depth() };
+					D3DBOX dstBox = { 0, 0, target.Width(), target.Height(), 0, target.Depth() };
+
+					TIF(D3DXLoadVolumeFromVolume(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_DEFAULT, 0));
 				}
 			}
 			break;
@@ -385,13 +391,17 @@ namespace KlayGE
 					for (uint32_t level = 0; level < maxLevel; ++ level)
 					{
 						IDirect3DSurface9* temp;
+
 						TIF(d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &temp));
 						src = MakeCOMPtr(temp);
 
 						TIF(other.d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &temp));
 						dst = MakeCOMPtr(temp);
 
-						TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DTEXF_NONE, 0));
+						RECT srcRc = { 0, 0, this->Width(), this->Height() };
+						RECT dstRc = { 0, 0, target.Width(), target.Height() };
+
+						TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, &dstRc, src.get(), NULL, &srcRc, D3DX_DEFAULT, 0));
 					}
 				}
 			}

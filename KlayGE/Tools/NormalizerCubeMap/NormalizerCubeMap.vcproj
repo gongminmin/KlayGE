@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="Displacement"
-	ProjectGUID="{32EBA7EF-137A-4C06-8E1B-383F27A0E0C1}"
+	Name="NormalizerCubeMap"
+	ProjectGUID="{9C678BF0-CABD-41C5-BDD5-49BD0C9F3DDF}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -12,10 +12,10 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="../../bin"
+			OutputDirectory="Debug"
 			IntermediateDirectory="Debug"
 			ConfigurationType="1"
-			CharacterSet="1">
+			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
@@ -33,10 +33,10 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/Displacement.exe"
+				OutputFile="$(OutDir)/NormalizerCubeMap.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/Displacement.pdb"
+				ProgramDatabaseFile="$(OutDir)/NormalizerCubeMap.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
@@ -62,28 +62,25 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="../../bin"
-			IntermediateDirectory="Release"
+			OutputDirectory="..\bin"
+			IntermediateDirectory="..\Release"
 			ConfigurationType="1"
-			CharacterSet="1"
-			WholeProgramOptimization="TRUE">
+			CharacterSet="1">
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;STRICT"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="FALSE"
 				TreatWChar_tAsBuiltInType="TRUE"
 				ForceConformanceInForLoopScope="TRUE"
 				RuntimeTypeInfo="TRUE"
-				WarningLevel="3"
-				DebugInformationFormat="3"/>
+				WarningLevel="3"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/Displacement.exe"
+				OutputFile="$(OutDir)/NormalizerCubeMap.exe"
 				LinkIncremental="1"
-				GenerateDebugInformation="TRUE"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -118,19 +115,18 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath=".\Displacement.cpp">
-			</File>
-			<File
-				RelativePath="..\..\media\Displacement\Displacement.fx">
+				RelativePath=".\NormalizerCubeMap.cpp">
 			</File>
 		</Filter>
 		<Filter
 			Name="头文件"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
-			<File
-				RelativePath=".\Displacement.hpp">
-			</File>
+		</Filter>
+		<Filter
+			Name="资源文件"
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}">
 		</Filter>
 	</Files>
 	<Globals>

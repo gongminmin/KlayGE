@@ -19,7 +19,7 @@ struct VS_OUTPUT
 	float3 V			: TEXCOORD2;	// in tangent space
 };
 
-VS_OUTPUT DisplacementVS(VS_INPUT input,
+VS_OUTPUT DistanceMappingVS(VS_INPUT input,
 						uniform float4x4 worldviewproj,
 						uniform float4 lightPos,
 						uniform float4 eyePos)
@@ -94,7 +94,7 @@ samplerCUBE normalizerMapSampler = sampler_state
 	AddressW  = Clamp;
 };
 
-float4 DisplacementPS(float3 texCoord0	: TEXCOORD0,
+float4 DistanceMappingPS(float3 texCoord0	: TEXCOORD0,
 						float3 L		: TEXCOORD1,
 						float3 V		: TEXCOORD2,
 
@@ -124,12 +124,12 @@ float4 DisplacementPS(float3 texCoord0	: TEXCOORD0,
 	return float4(diffuse * diffuseFactor, 1);
 }
 
-technique Displacement
+technique DistanceMapping
 {
 	pass p0
 	{
-		VertexShader = compile vs_1_1 DisplacementVS(worldviewproj, lightPos, eyePos);
-		PixelShader = compile ps_2_a DisplacementPS(diffuseMapSampler,
+		VertexShader = compile vs_1_1 DistanceMappingVS(worldviewproj, lightPos, eyePos);
+		PixelShader = compile ps_2_a DistanceMappingPS(diffuseMapSampler,
 										normalMapSampler, distanceMapSampler,
 										normalizerMapSampler);
 	}

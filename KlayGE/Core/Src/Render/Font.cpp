@@ -82,16 +82,24 @@ namespace
 		}
 
 		RenderEffectPtr GetRenderEffect() const
-			{ return fontEffect_; }
+		{
+			return fontEffect_;
+		}
 
 		VertexBufferPtr GetVertexBuffer() const
-			{ return fontVB_; }
+		{
+			return fontVB_;
+		}
 
 		Box GetBound() const
-			{ return box_; }
+		{
+			return box_;
+		}
 
 		bool CanBeCulled() const
-			{ return false; }
+		{
+			return false;
+		}
 
 		void RenderText(uint32_t fontHeight, Font::CharInfoMapType& charInfoMap, float sx, float sy, float sz,
 			float xScale, float yScale, uint32_t clr, std::wstring const & text, uint32_t flags)

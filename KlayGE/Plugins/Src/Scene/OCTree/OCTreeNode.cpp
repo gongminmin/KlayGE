@@ -62,82 +62,10 @@ namespace KlayGE
 
 	void OCTreeNode::AddRenderable(RenderablePtr const & renderable)
 	{
-		if (!renderable->CanBeCulled())
-		{
-			SceneNode::AddRenderable(renderable);
-		}
-		else
-		{
-			if (this->InsideNode(renderable))
-			{
-				if (children_[0])
-				{
-					bool inserted(false);
-					for (ChildrenType::iterator iter = children_.begin(); iter != children_.end(); ++ iter)
-					{
-						if ((*iter)->InsideNode(renderable))
-						{
-							(*iter)->AddRenderable(renderable);
-							inserted = true;
-
-							break;
-						}
-					}
-
-					if (!inserted)
-					{
-						SceneNode::AddRenderable(renderable);
-					}
-				}
-				else
-				{
-					if (!renderables_.empty())
-					{
-						Vector3 center((box_.LeftBottomNear() + box_.RightTopFar()) / 2);
-
-						children_[0] = OCTreeNodePtr(new OCTreeNode(Box(box_.LeftBottomNear(), center)));
-						children_[1] = OCTreeNodePtr(new OCTreeNode(Box(box_.LeftTopNear(), center)));
-						children_[2] = OCTreeNodePtr(new OCTreeNode(Box(box_.RightBottomNear(), center)));
-						children_[3] = OCTreeNodePtr(new OCTreeNode(Box(box_.RightTopNear(), center)));
-						children_[4] = OCTreeNodePtr(new OCTreeNode(Box(box_.LeftBottomFar(), center)));
-						children_[5] = OCTreeNodePtr(new OCTreeNode(Box(box_.LeftTopFar(), center)));
-						children_[6] = OCTreeNodePtr(new OCTreeNode(Box(box_.RightBottomFar(), center)));
-						children_[7] = OCTreeNodePtr(new OCTreeNode(Box(box_.RightTopFar(), center)));
-
-						for (RenderablesType::iterator i = renderables_.begin(); i != renderables_.end();)
-						{
-							bool inserted(false);
-							for (ChildrenType::iterator iter = children_.begin(); iter != children_.end(); ++ iter)
-							{
-								if ((*iter)->InsideNode(*i))
-								{
-									(*iter)->AddRenderable(*i);
-									inserted = true;
-
-									break;
-								}
-							}
-
-							if (inserted)
-							{
-								i = renderables_.erase(i);
-							}
-							else
-							{
-								++ i;
-							}
-						}
-					}
-					else
-					{
-						SceneNode::AddRenderable(renderable);
-					}
-				}
-			}
-		}
+		
 	}
 
-	void OCTreeNode::Clip(Frustum const & frustum)
+	void OCTreeNode::Clip(OCTreeFrustum const & frustum)
 	{
 		for (ChildrenType::iterator iter = children_.begin(); iter != children_.end(); ++ iter)
 		{
