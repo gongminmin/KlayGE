@@ -1,3 +1,18 @@
+// RenderEngine.cpp
+// KlayGE 渲染引擎类 实现文件
+// Ver 2.0.3
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.0.3
+// 优化了RenderEffect的设置 (2004.2.16)
+//
+// 2.0.0
+// 初次建立(2003.10.1)
+//
+// 修改记录
+//////////////////////////////////////////////////////////////////////////////////
+
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/SharePtr.hpp>
 #include <KlayGE/Math.hpp>
@@ -62,13 +77,16 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void RenderEngine::SetRenderEffect(const RenderEffectPtr& effect)
 	{
-		if (renderEffect_.Get() != NULL)
+		if (renderEffect_ != effect)
 		{
-			renderEffect_->End();
-		}
+			if (renderEffect_.Get() != NULL)
+			{
+				renderEffect_->End();
+			}
 
-		renderEffect_ = effect;
-		renderPasses_ = renderEffect_->Begin();
+			renderEffect_ = effect;
+			renderPasses_ = renderEffect_->Begin();
+		}
 	}
 
 	// 渲染顶点缓冲区
