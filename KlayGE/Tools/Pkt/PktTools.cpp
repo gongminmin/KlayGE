@@ -12,12 +12,10 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
-#include <KlayGE/VFile.hpp>
-#include <KlayGE/DiskFile/DiskFile.hpp>
-#include <KlayGE/PackedFile/Pkt.hpp>
+#include <KlayGE/LZSS/LZSS.hpp>
 
 #include <iostream>
-#include <string>
+#include <fstream>
 
 using namespace std;
 using namespace KlayGE;
@@ -34,7 +32,7 @@ int main(int argc, char* argv[])
 	cout << "ÕýÔÚÑ¹Ëõ£¬ÇëÉÔºò..." << endl;
 
 	Pkt pkt;
-	pkt.Pack(argv[2], DiskFile(argv[3], VFile::OM_Write));
+	pkt.Pack(argv[2], std::ofstream(argv[3], std::ios_base::binary));
 
 	cout << "Ñ¹Ëõ³É¹¦" << endl;
 

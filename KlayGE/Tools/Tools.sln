@@ -1,13 +1,9 @@
 Microsoft Visual Studio Solution File, Format Version 8.00
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "纹理格式转换工具-KlayTXConvert", "KlayTXConvert\KlayTXConvert.vcproj", "{5E60B2D1-9F1E-4983-AC26-A54DF51876E9}"
-	ProjectSection(ProjectDependencies) = postProject
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "文件打包工具-Pkt", "Pkt\Pkt.vcproj", "{5E60B2D1-9F1E-4983-AC26-A54DF51876E9}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NormalMapGen", "NormalMapGen\NormalMapGen.vcproj", "{7526CFD8-84DB-4A4C-AA3C-D9FC7FF32DCF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "法线图生成器", "NormalMapGen\NormalMapGen.vcproj", "{7526CFD8-84DB-4A4C-AA3C-D9FC7FF32DCF}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
@@ -17,10 +13,6 @@ Global
 		Release = Release
 	EndGlobalSection
 	GlobalSection(ProjectConfiguration) = postSolution
-		{5E60B2D1-9F1E-4983-AC26-A54DF51876E9}.Debug.ActiveCfg = Debug|Win32
-		{5E60B2D1-9F1E-4983-AC26-A54DF51876E9}.Debug.Build.0 = Debug|Win32
-		{5E60B2D1-9F1E-4983-AC26-A54DF51876E9}.Release.ActiveCfg = Release|Win32
-		{5E60B2D1-9F1E-4983-AC26-A54DF51876E9}.Release.Build.0 = Release|Win32
 		{5E60B2D1-9F1E-4983-AC26-A54DF51876E9}.Debug.ActiveCfg = Debug|Win32
 		{5E60B2D1-9F1E-4983-AC26-A54DF51876E9}.Debug.Build.0 = Debug|Win32
 		{5E60B2D1-9F1E-4983-AC26-A54DF51876E9}.Release.ActiveCfg = Release|Win32

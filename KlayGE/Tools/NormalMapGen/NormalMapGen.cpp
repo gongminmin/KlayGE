@@ -1,8 +1,8 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Math.hpp>
-#include <KlayGE/DiskFile/DiskFile.hpp>
 
 #include <iostream>
+#include <fstream>
 #include <vector>
 
 using namespace std;
@@ -14,35 +14,35 @@ namespace
 
 	struct TGAHeader
 	{
-		U8		infoLength;
-		U8		colorMapType;
-		U8		imageTypeCode;
+		uint8_t	infoLength;
+		uint8_t	colorMapType;
+		uint8_t	imageTypeCode;
 
-		short	colorMapEntry;
-		short	colorMapLength;
-		U8		colorMapBits;
+		int16_t	colorMapEntry;
+		int16_t	colorMapLength;
+		uint8_t	colorMapBits;
 
-		short	leftbottomX;
-		short	leftbottomY;
+		int16_t	leftbottomX;
+		int16_t	leftbottomY;
 
-		short	width;
-		short	height;
+		int16_t	width;
+		int16_t	height;
 
-		U8		pixelSize;
-		U8		imageDescriptor;
+		uint8_t	pixelSize;
+		uint8_t	imageDescriptor;
 	};
 
 #pragma pack(pop)
 
 
-	void LoadHeightMap(TGAHeader& tgaHeader, std::vector<U8>& tgaData, std::string const & fileName)
+	void LoadHeightMap(TGAHeader& tgaHeader, std::vector<uint8_t>& tgaData, std::string const & fileName)
 	{
-		DiskFile file(fileName, VFile::OM_Read);
-		file.Read(&tgaHeader, sizeof(tgaHeader));
-		file.Seek(tgaHeader.infoLength, VFile::SM_Current);
+		ifstream file(fileName.c_str(), std::ios_base::binary);
+		file.read(reinterpret_cast<char*>(&tgaHeader), sizeof(tgaHeader));
+		file.seekg(tgaHeader.infoLength, std::ios_base::cur);
 
-		std::vector<U8> data(tgaHeader.width * tgaHeader.height * tgaHeader.pixelSize / 8);
-		file.Read(&data[0], data.size());
+		std::vector<uint8_t> data(tgaHeader.width * tgaHeader.height * tgaHeader.pixelSize / 8);
+		file.read(reinterpret_cast<char*>(&data[0]), data.size());
 
 		tgaData.clear();
 		tgaData.reserve(tgaHeader.width * tgaHeader.height);
@@ -65,13 +65,13 @@ namespace
 		}
 	}
 
-	void SaveNormalMap(TGAHeader& tgaHeader, std::vector<U8>& tgaData, std::string const & fileName)
+	void SaveNormalMap(TGAHeader& tgaHeader, std::vector<uint8_t>& tgaData, std::string const & fileName)
 	{
-		DiskFile file(fileName, VFile::OM_Write);
-		file.Write(&tgaHeader, sizeof(tgaHeader));
-		file.Seek(tgaHeader.infoLength, VFile::SM_Current);
+		std::ofstream file(fileName.c_str(), std::ios_base::binary);
+		file.write(reinterpret_cast<char*>(&tgaHeader), sizeof(tgaHeader));
+		file.seekp(tgaHeader.infoLength, std::ios_base::cur);
 
-		file.Write(&tgaData[0], tgaData.size());
+		file.write(reinterpret_cast<char*>(&tgaData[0]), tgaData.size());
 	}
 }
 
@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
 	}
 
 	TGAHeader header;
-	std::vector<U8> heightmap;
+	std::vector<uint8_t> heightmap;
 	LoadHeightMap(header, heightmap, argv[1]);
 
 	std::vector<char> dx;
@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
 		dy[(header.height - 1) * header.width + x] = 0;
 	}
 
-	std::vector<U8> normalmap;
+	std::vector<uint8_t> normalmap;
 	for (int y = 0; y < header.height; ++ y)
 	{
 		for (int x = 0; x < header.width; ++ x)
@@ -122,9 +122,9 @@ int main(int argc, char* argv[])
 
 			normal = normal * 0.5f + Vector3(0.5f, 0.5f, 0.5f);
 
-			normalmap.push_back(static_cast<U8>(normal.z() * 255));
-			normalmap.push_back(static_cast<U8>(normal.y() * 255));
-			normalmap.push_back(static_cast<U8>(normal.x() * 255));
+			normalmap.push_back(static_cast<uint8_t>(normal.z() * 255));
+			normalmap.push_back(static_cast<uint8_t>(normal.y() * 255));
+			normalmap.push_back(static_cast<uint8_t>(normal.x() * 255));
 		}
 	}
 
