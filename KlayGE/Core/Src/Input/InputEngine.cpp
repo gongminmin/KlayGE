@@ -17,6 +17,8 @@
 #include <cassert>
 #include <set>
 
+#include <boost/bind.hpp>
+
 #include <KlayGE/Input.hpp>
 
 namespace KlayGE
@@ -52,10 +54,8 @@ namespace KlayGE
 		}
 
 		// 对当前设备应用新的动作映射
-		for (InputDevicesType::iterator iter = devices_.begin(); iter != devices_.end(); ++ iter)
-		{
-			(*iter)->ActionMap(actionMap_);
-		}
+		std::for_each(devices_.begin(), devices_.end(),
+			boost::bind(&InputDevice::ActionMap, _1, actionMap_));
 	}
 
 	// 获取输入设备个数
@@ -78,10 +78,8 @@ namespace KlayGE
 		{
 			InputActionsType theAction((*iter)->Update());
 
-			for (InputActionsType::iterator it = theAction.begin(); it != theAction.end(); ++ it)
-			{
-				actions.insert(*it);
-			}
+			std::for_each(theAction.begin(), theAction.end(), 
+				boost::bind(&ActionSetType::insert, &actions, _1));
 		}
 
 		// 添加到动作列表
@@ -92,10 +90,8 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	void InputEngine::UnacquireDevices()
 	{
-		for (InputDevicesType::iterator iter = devices_.begin(); iter != devices_.end(); ++ iter)
-		{
-			(*iter)->Unacquire();
-		}
+		std::for_each(devices_.begin(), devices_.end(),
+			boost::bind(&InputDevice::Unacquire, _1));
 	}
 
 	// 获取设备接口

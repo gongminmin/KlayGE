@@ -23,8 +23,10 @@
 
 #include <vector>
 #include <string>
+#include <algorithm>
 
 #include <boost/array.hpp>
+#include <boost/lambda/bind.hpp>
 
 #pragma comment(lib, "KlayGE_Core.lib")
 
@@ -250,10 +252,8 @@ namespace KlayGE
 		template <typename ForwardIterator>
 		void AddActions(ForwardIterator first, ForwardIterator last)
 		{
-			for (ForwardIterator iter = first; iter != last; ++ iter)
-			{
-				this->AddAction(*iter);
-			}
+			std::for_each(first, last,
+				boost::lambda::bind(&InputActionMap::AddAction, this, boost::lambda::_1));
 		}
 
 		void UpdateInputActions(InputActionsType& actions, U16 key, long value = 0);
