@@ -518,7 +518,7 @@ namespace KlayGE
 			{
 				Vector_T<T, 4> temp(v.x(), v.y(), v.z(), T(0));
 				TransformHelper<T, 4>::Do(temp, temp, mat);
-				out = Vector_T<T, 3>(&temp[0]);
+				out = Vector_T<T, 3>(temp.x(), temp.y(), temp.z());
 			}
 		};
 		template <typename T>
@@ -528,7 +528,7 @@ namespace KlayGE
 			{
 				Vector_T<T, 3> temp(v.x(), v.y(), T(0));
 				TransformNormalHelper<T, 3>::Do(temp, temp, mat);
-				out = Vector_T<T, 2>(&temp[0]);
+				out = Vector_T<T, 2>(temp.x(), temp.y());
 			}
 		};
 

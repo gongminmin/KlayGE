@@ -37,6 +37,8 @@ namespace KlayGE
 
 		std::wstring const & Name() const;
 
+		virtual void Render();
+
 		template <typename ForwardIterator>
 		void AssignXYZs(ForwardIterator first, ForwardIterator last)
 			{ xyzs_.assign(first, last); }
@@ -61,6 +63,9 @@ namespace KlayGE
 
 		typedef std::vector<uint16_t> IndicesType;
 		IndicesType indices_;
+
+		typedef std::vector<StaticMeshPtr> StaticMeshesPtrType;
+		StaticMeshesPtrType children_;
 	};
 
 

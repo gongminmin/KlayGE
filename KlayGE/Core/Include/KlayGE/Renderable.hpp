@@ -36,7 +36,7 @@ namespace KlayGE
 
 		virtual bool CanBeCulled() const;
 
-		void Render();
+		virtual void Render();
 	};
 }
 

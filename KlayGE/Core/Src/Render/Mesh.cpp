@@ -1,6 +1,9 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Math.hpp>
 
+#include <algorithm>
+#include <boost/mem_fn.hpp>
+
 #include <KlayGE/Mesh.hpp>
 
 namespace KlayGE
@@ -18,6 +21,12 @@ namespace KlayGE
 	{
 		static std::wstring name(L"Static Mesh");
 		return name;
+	}
+
+	void StaticMesh::Render()
+	{
+		std::for_each(children_.begin(), children_.end(), boost::mem_fn(&StaticMesh::Render));
+		Renderable::Render();
 	}
 
 
