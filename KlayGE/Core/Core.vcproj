@@ -146,6 +146,9 @@
 					RelativePath=".\Src\Render\Renderable.cpp">
 				</File>
 				<File
+					RelativePath=".\Src\Render\RenderableHelper.cpp">
+				</File>
+				<File
 					RelativePath=".\Src\Render\RenderEffect.cpp">
 				</File>
 				<File
@@ -226,6 +229,9 @@
 				</File>
 				<File
 					RelativePath="Include\KlayGE\Renderable.hpp">
+				</File>
+				<File
+					RelativePath=".\Include\KlayGE\RenderableHelper.hpp">
 				</File>
 				<File
 					RelativePath=".\Include\KlayGE\RenderEffect.hpp">

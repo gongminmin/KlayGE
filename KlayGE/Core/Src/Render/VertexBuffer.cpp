@@ -74,6 +74,10 @@ namespace KlayGE
 			vertexStreams_.push_back(Context::Instance().RenderFactoryInstance().MakeVertexStream(type,
 				sizeElement, numElement, staticStream));
 		}
+		else
+		{
+			assert(false);
+		}
 	}
 
 	VertexStreamPtr VertexBuffer::GetVertexStream(VertexStreamType type) const
@@ -84,6 +88,8 @@ namespace KlayGE
 		{
 			return *iter;
 		}
+
+		assert(false);
 		return VertexStreamPtr();
 	}
 
@@ -124,6 +130,7 @@ namespace KlayGE
 
 	IndexStreamPtr VertexBuffer::GetIndexStream() const
 	{
+		assert(indexStream_);
 		return indexStream_;
 	}
 }

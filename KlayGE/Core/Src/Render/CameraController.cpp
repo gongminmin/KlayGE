@@ -63,13 +63,12 @@ namespace KlayGE
 		Vector3 movement(x, y, z);
 		movement *= moveScaler_;
 
-		Vector3 eyePos = this->EyePos();
-		Vector3 viewVec = this->WorldAhead();
-		Vector3 upVec = this->WorldUp();
+		Vector3 eyePos = camera_->EyePos();
+		Vector3 viewVec = camera_->ViewVec();
 
 		MathLib::TransformCoord(eyePos, movement, world_);
 
-		camera_->ViewParams(eyePos, eyePos + viewVec, upVec);
+		camera_->ViewParams(eyePos, eyePos + viewVec, camera_->UpVec());
 
 		this->Update();
 	}
@@ -78,9 +77,6 @@ namespace KlayGE
 	{
 		assert(camera_ != NULL);
 
-		Vector3 eyePos = this->EyePos();
-		Vector3 upVec = this->WorldUp();
-
 		Matrix4 rot;
 		MathLib::RotationYawPitchRoll(rot, yaw * rotationScaler_, pitch * rotationScaler_, roll * rotationScaler_);
 
@@ -88,7 +84,7 @@ namespace KlayGE
 		MathLib::TransformCoord(viewVec, Vector3(0, 0, 1), rot);
 		MathLib::TransformCoord(viewVec, viewVec, world_);
 
-		camera_->ViewParams(eyePos, viewVec, upVec);
+		camera_->ViewParams(camera_->EyePos(), viewVec, camera_->UpVec());
 
 		this->Update();
 	}

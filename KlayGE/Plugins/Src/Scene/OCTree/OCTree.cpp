@@ -17,6 +17,7 @@
 #include <KlayGE/Vector.hpp>
 #include <KlayGE/Plane.hpp>
 #include <KlayGE/Camera.hpp>
+#include <KlayGE/RenderableHelper.hpp>
 
 #include <set>
 
@@ -33,6 +34,10 @@ namespace KlayGE
 	{
 		frustum_.CalculateFrustum(camera.ViewMatrix() * camera.ProjMatrix());
 
+#ifdef KLAYGE_DEBUG
+		std::vector<RenderablePtr> renderBoxes;
+#endif
+
 		std::set<RenderablePtr> renderables;
 		for (linear_octree_t::iterator iter = linear_octree_.begin(); iter != linear_octree_.end(); ++ iter)
 		{
@@ -46,6 +51,10 @@ namespace KlayGE
 					break;
 				}
 			}
+
+#ifdef KLAYGE_DEBUG
+			renderBoxes.push_back(RenderablePtr(new RenderableBox(box)));
+#endif
 		}
 
 		renderQueue_.clear();
@@ -55,6 +64,14 @@ namespace KlayGE
 		{
 			SceneManager::PushRenderable(*iter);
 		}
+
+#ifdef KLAYGE_DEBUG
+		for (std::vector<RenderablePtr>::iterator iter = renderBoxes.begin();
+			iter != renderBoxes.end(); ++ iter)
+		{
+			SceneManager::PushRenderable(*iter);
+		}
+#endif
 
 		for (std::set<RenderablePtr>::iterator iter = renderables.begin();
 			iter != renderables.end(); ++ iter)
@@ -122,9 +139,9 @@ namespace KlayGE
 
 		for (tree_id_t::const_iterator iter = id.begin() + 1; iter != id.end(); ++ iter)
 		{
-			Vector3 min = ret.Min();
-			Vector3 max = ret.Max();
-			Vector3 center = ret.Center();
+			Vector3 const & min = ret.Min();
+			Vector3 const & max = ret.Max();
+			Vector3 const & center = ret.Center();
 
 			switch (*iter - '0')
 			{

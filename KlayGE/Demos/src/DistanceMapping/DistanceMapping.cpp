@@ -201,7 +201,7 @@ void DistanceMapping::InitObjects()
 	fpcController_.Scalers(0.005f, 0.1f);
 
 	this->LookAt(Vector3(2, 0, -2), Vector3(0, 0, 0));
-	this->Proj(0.1f, 20.0f);
+	this->Proj(0.1f, 100);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	KlayGE::InputActionMap actionMap;

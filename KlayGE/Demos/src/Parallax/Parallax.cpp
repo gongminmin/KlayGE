@@ -13,7 +13,7 @@
 #include <KlayGE/D3D9/D3D9RenderSettings.hpp>
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
-#include <KlayGE/Frustum/Frustum.hpp>
+#include <KlayGE/OCTree/OCTree.hpp>
 
 #include <KlayGE/Input.hpp>
 #include <KlayGE/DInput/DInputFactory.hpp>
@@ -161,7 +161,7 @@ private:
 int main()
 {
 	Parallax app;
-	Frustum sceneMgr;
+	OCTree sceneMgr(Box(Vector3(-20, -20, -20), Vector3(20, 20, 20)));
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
@@ -201,7 +201,7 @@ void Parallax::InitObjects()
 	fpcController_.Scalers(0.005f, 0.1f);
 
 	this->LookAt(Vector3(2, 0, -2), Vector3(0, 0, 0));
-	this->Proj(0.1f, 20.0f);
+	this->Proj(0.1f, 100);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	KlayGE::InputActionMap actionMap;
@@ -269,6 +269,8 @@ void Parallax::Update()
 
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+	renderEngine.ViewMatrix(view);
+	renderEngine.ProjectionMatrix(proj);
 
 	float degree(std::clock() / 700.0f);
 	Vector3 lightPos(2, 0, -2);
