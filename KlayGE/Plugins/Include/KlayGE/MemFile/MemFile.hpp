@@ -27,23 +27,11 @@ namespace KlayGE
 	public:
 		MemFile();
 		MemFile(void const * data, size_t length);
-		~MemFile();
-
-		void Open(void const * data, size_t length);
-		void Close();
-
-		size_t Length();
-		void Length(size_t newLen);
 
 		size_t Write(void const * data, size_t count);
 		size_t Read(void* data, size_t count);
-		size_t CopyFrom(VFile& src, size_t size);
 
-		size_t Seek(size_t offset, SeekMode from);
-		size_t Tell();
-
-	private:
-		std::stringstream	chunkData_;
+		void OnSeek(size_t offset, std::ios_base::seekdir from);
 	};
 }
 

@@ -1,11 +1,14 @@
 // DiskFile.hpp
 // KlayGE 磁盘文件类 头文件
-// Ver 2.1.0
+// Ver 2.2.0
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
 //
+// 2.2.0
+// 把大量代码抽象到基类 (2004.10.21)
+//
 // 2.1.0
-// 文件名改用String来保存 (2004.4.14)
+// 文件名改用string来保存 (2004.4.14)
 //
 // 2.0.0
 // 初次建立 (2003.8.10)
@@ -33,30 +36,15 @@ namespace KlayGE
 	class DiskFile : boost::noncopyable, public VFile
 	{
 	public:
-		DiskFile();
 		DiskFile(std::string const & fileName, OpenMode openMode);
-		~DiskFile();
-
-		bool Open(std::string const & fileName, OpenMode openMode);
-		void Close();
-
-		size_t Length();
-		void Length(size_t newLen);
 
 		size_t Write(void const * data, size_t count);
 		size_t Read(void* data, size_t count);
-		size_t CopyFrom(VFile& src, size_t size);
 
-		size_t Seek(size_t offset, SeekMode from);
-		size_t Tell();
-
-		void Flush();
+		void OnSeek(size_t offset, std::ios_base::seekdir from);
 
 	private:
-		std::fstream	file_;
-
 		std::string		fileName_;
-		OpenMode		openMode_;
 	};
 
 	class DiskFileResIdentifier : public ResIdentifier

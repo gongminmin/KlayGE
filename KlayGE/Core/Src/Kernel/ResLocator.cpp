@@ -47,19 +47,19 @@ namespace KlayGE
 	{
 		for (size_t i = 0; i < pathes_.size(); ++ i)
 		{
-			const std::string resName(pathes_[i] + name);
+			std::string const resName(pathes_[i] + name);
 
-			boost::shared_ptr<DiskFile> diskFile(new DiskFile);
+			boost::shared_ptr<DiskFile> diskFile(new DiskFile(resName, VFile::OM_Read));
 
-			if (diskFile->Open(resName, VFile::OM_Read))
+			if (!diskFile->Fail())
 			{
 				return ResIdentifierPtr(new DiskFileResIdentifier(resName));
 			}
 			else
 			{
-				boost::shared_ptr<PackedFile> packedFile(new PackedFile);
+				boost::shared_ptr<PackedFile> packedFile(new PackedFile(resName));
 
-				if (packedFile->Open(resName))
+				if (!packedFile->Fail())
 				{
 					return ResIdentifierPtr(new PackedFileResIdentifier(resName));
 				}

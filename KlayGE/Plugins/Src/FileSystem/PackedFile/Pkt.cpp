@@ -225,12 +225,11 @@ namespace
 	{
 		using namespace KlayGE;
 
-		DiskFile openFile;
 		U32 curPos(0);
 
 		for (std::vector<std::string>::const_iterator iter = files.begin(); iter != files.end(); ++ iter)
 		{
-			openFile.Open(rootName + '/' + *iter, VFile::OM_Read);
+			DiskFile openFile(rootName + '/' + *iter, VFile::OM_Read);
 
 			FileDes fd;
 			fd.DeComLength = static_cast<U32>(openFile.Length());

@@ -1,8 +1,11 @@
 // VFile.hpp
 // KlayGE 虚拟文件类 头文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.2.0
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.2.0
+// 大量代码从子类抽象过来 (2004.10.21)
 //
 // 2.0.0
 // 初次建立 (2003.8.3)
@@ -14,6 +17,9 @@
 #define _VFILE_HPP
 
 #include <KlayGE/PreDeclare.hpp>
+
+#include <ios>
+#include <boost/shared_ptr.hpp>
 
 #pragma comment(lib, "KlayGE_Core.lib")
 
@@ -41,24 +47,30 @@ namespace KlayGE
 		};
 
 	public:
-		virtual ~VFile()
-			{ }
+		VFile(OpenMode openMode);
+		virtual ~VFile();
 
 		static VFilePtr NullObject();
 
-		virtual void Close() = 0;
+		bool Fail();
 
-		virtual size_t Length() = 0;
-		virtual void Length(size_t newLen) = 0;
+		void Close();
+
+		size_t Length();
 
 		virtual size_t Write(void const * data, size_t count) = 0;
 		virtual size_t Read(void* data, size_t count) = 0;
-		virtual size_t CopyFrom(VFile& src, size_t size) = 0;
+		size_t CopyFrom(VFile& src, size_t size);
 
-		virtual size_t Seek(size_t offset, SeekMode from) = 0;
-		virtual size_t Tell() = 0;
-		virtual void Rewind()
-			{ this->Seek(0, SM_Begin); }
+		size_t Seek(size_t offset, SeekMode from);
+		size_t Tell();
+		void Rewind();
+
+	protected:
+		virtual void OnSeek(size_t offset, std::ios_base::seekdir from) = 0;
+
+		boost::shared_ptr<std::iostream> stream_;
+		OpenMode		openMode_;
 	};
 }
 

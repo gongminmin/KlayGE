@@ -6,7 +6,7 @@
 
 #include <cstring>
 
-#include <gl/gl.h>
+#include <GLLoader/GLLoader.h>
 
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 

@@ -1,8 +1,11 @@
 // DiskFile.cpp
 // KlayGE 磁盘文件类 实现文件
-// Ver 2.1.2
+// Ver 2.2.0
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.2.0
+// 把大量代码抽象到基类 (2004.10.21)
 //
 // 2.1.2
 // 修正了Seek的bug (2004.8.11)
@@ -28,30 +31,9 @@ namespace KlayGE
 {
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
-	DiskFile::DiskFile()
-			: openMode_(OM_Unknown)
-	{
-	}
-
 	DiskFile::DiskFile(std::string const & fileName, OpenMode openMode)
-			: openMode_(OM_Unknown)
+				: VFile(openMode)
 	{
-		this->Open(fileName, openMode);
-	}
-
-	// 析构函数
-	/////////////////////////////////////////////////////////////////////////////////
-	DiskFile::~DiskFile()
-	{
-		this->Close();
-	}
-
-	// 打开文件
-	/////////////////////////////////////////////////////////////////////////////////
-	bool DiskFile::Open(std::string const & fileName, OpenMode openMode)
-	{
-		this->Close();
-
 		std::ios_base::openmode mode(std::ios_base::binary);
 
 		switch (openMode)
@@ -74,57 +56,17 @@ namespace KlayGE
 		}
 
 		fileName_ = fileName;
-		openMode_ = openMode;
-
-		file_.open(fileName.c_str(), mode);
-
-		return !file_.fail();
-	}
-
-	// 关闭文件
-	/////////////////////////////////////////////////////////////////////////////////
-	void DiskFile::Close()
-	{
-		if (file_.is_open())
-		{
-			file_.close();
-		}
-		file_.clear();
-	}
-
-	// 获取文件长度
-	/////////////////////////////////////////////////////////////////////////////////
-	size_t DiskFile::Length()
-	{
-		assert(file_.is_open());
-
-		size_t curPos(this->Tell());
-		size_t len(this->Seek(0, SM_End));
-		this->Seek(curPos, SM_Begin);
-
-		return len;
-	}
-
-	// 设置文件长度
-	/////////////////////////////////////////////////////////////////////////////////
-	void DiskFile::Length(size_t newLen)
-	{
-		assert(file_.is_open());
-
-		this->Seek(newLen, SM_Begin);
-
-		short eof(EOF);
-		this->Write(&eof, sizeof(eof));
+		stream_ = boost::shared_ptr<std::iostream>(new std::fstream(fileName_.c_str(), mode));
 	}
 
 	// 把数据写入文件
 	/////////////////////////////////////////////////////////////////////////////////
 	size_t DiskFile::Write(void const * data, size_t count)
 	{
-		assert(file_.is_open());
+		assert(stream_);
 		assert(data != NULL);
 
-		file_.write(static_cast<char const *>(data),
+		stream_->write(static_cast<char const *>(data),
 			static_cast<std::streamsize>(count));
 
 		return count;
@@ -134,7 +76,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	size_t DiskFile::Read(void* data, size_t count)
 	{
-		assert(file_.is_open());
+		assert(stream_);
 		assert(data != NULL);
 
 		if (this->Tell() + count > this->Length())
@@ -142,79 +84,26 @@ namespace KlayGE
 			count = this->Length() - this->Tell();
 		}
 
-		file_.read(static_cast<char*>(data),
+		stream_->read(static_cast<char*>(data),
 			static_cast<std::streamsize>(count));
 
 		return count;
 	}
 
-	// 从文件拷贝数据到当前文件
-	/////////////////////////////////////////////////////////////////////////////////
-	size_t DiskFile::CopyFrom(VFile& src, size_t size)
-	{
-		std::vector<U8> data(size);
-		size = src.Read(&data[0], data.size());
-		return this->Write(&data[0], size);
-	}
-
 	// 把文件指针移到指定位置
 	/////////////////////////////////////////////////////////////////////////////////
-	size_t DiskFile::Seek(size_t offset, SeekMode from)
+	void DiskFile::OnSeek(size_t offset, std::ios_base::seekdir from)
 	{
-		assert(file_.is_open());
+		assert(stream_);
 
-		std::ios_base::seekdir seekFrom(std::ios_base::beg);
-		switch (from)
+		if (std::ios_base::in == openMode_)
 		{
-		case SM_Begin:
-			seekFrom = std::ios_base::beg;
-			break;
-
-		case SM_End:
-			seekFrom = std::ios_base::end;
-			break;
-
-		case SM_Current:
-			seekFrom = std::ios_base::cur;
-			break;
-		}
-
-		if (OM_Read == openMode_)
-		{
-			file_.seekg(static_cast<std::istream::off_type>(offset), seekFrom);
+			stream_->seekg(static_cast<std::iostream::off_type>(offset), from);
 		}
 		else
 		{
-			file_.seekp(static_cast<std::ostream::off_type>(offset), seekFrom);
+			stream_->seekp(static_cast<std::iostream::off_type>(offset), from);
 		}
-
-		return this->Tell();
-	}
-
-	// 过去文件指针位置
-	/////////////////////////////////////////////////////////////////////////////////
-	size_t DiskFile::Tell()
-	{
-		assert(file_.is_open());
-		assert(!file_.fail());
-
-		if (OM_Read == openMode_)
-		{
-			return file_.tellg();
-		}
-		else
-		{
-			return file_.tellp();
-		}
-	}
-
-	// 把数据立刻写入文件
-	/////////////////////////////////////////////////////////////////////////////////
-	void DiskFile::Flush()
-	{
-		assert(file_.is_open());
-
-		file_.flush();
 	}
 
 

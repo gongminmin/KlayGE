@@ -1,8 +1,11 @@
 // PackedFile.cpp
 // KlayGE 打包文件虚拟适配器类 实现文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.2.0
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.2.0
+// 把大量代码抽象到基类 (2004.10.21)
 //
 // 2.0.0
 // 初次建立 (2003.9.8)
@@ -21,82 +24,54 @@
 
 namespace KlayGE
 {
-	PackedFile::PackedFile()
-	{
-	}
-
 	PackedFile::PackedFile(std::string const & pathName)
-	{
-		this->Open(pathName);
-	}
-
-	bool PackedFile::Open(std::string const & pathName)
+				: VFile(OM_Read)
 	{
 		std::string::size_type const offset(pathName.rfind(".pkt/"));
 		std::string const pktName(pathName.substr(0, offset + 4));
 		std::string const fileName(pathName.substr(offset + 5));
 
-		boost::shared_ptr<DiskFile> pktFile(new DiskFile);
-		if (!pktFile->Open(pktName, VFile::OM_Read))
-		{
-			return false;
-		}
-		else
+		boost::shared_ptr<DiskFile> pktFile(new DiskFile(pktName, VFile::OM_Read));
+		if (!pktFile->Fail())
 		{
 			pktFile_ = pktFile;
-		}
 
-		try
-		{
 			unPkt_.Open(pktFile_);
 
-			this->Close();
+			stream_ = boost::shared_ptr<std::iostream>(
+				new std::stringstream(std::ios_base::in | std::ios_base::binary));
 
 			unPkt_.LocateFile(fileName);
 
-			file_ = VFilePtr(new MemFile);
-
-			std::vector<U8> data(unPkt_.CurFileSize());
+			std::vector<char> data(unPkt_.CurFileSize());
 			unPkt_.ReadCurFile(&data[0]);
-			file_->Write(&data[0], data.size());
-			file_->Rewind();
-		}
-		catch (...)
-		{
-			return false;
-		}
 
-		return true;
-	}
-
-	void PackedFile::Close()
-	{
-		if (file_)
-		{
-			file_->Close();
+			stream_->write(&data[0], data.size());
+			this->Rewind();
 		}
-	}
-
-	size_t PackedFile::Length()
-	{
-		return file_->Length();
 	}
 
 	size_t PackedFile::Read(void* data, size_t count)
 	{
 		assert(data != NULL);
 
-		return file_->Read(data, count);
+		if (this->Tell() + count > this->Length())
+		{
+			count = this->Length() - this->Tell();
+		}
+
+		stream_->read(static_cast<char*>(data),
+			static_cast<std::streamsize>(count));
+
+		stream_->seekp(static_cast<std::istream::off_type>(count), std::ios_base::cur);
+
+		return count;
 	}
 
-	size_t PackedFile::Seek(size_t off, SeekMode from)
+	void PackedFile::OnSeek(size_t offset, std::ios_base::seekdir from)
 	{
-		return file_->Seek(off, from);
-	}
-
-	size_t PackedFile::Tell()
-	{
-		return file_->Tell();
+		stream_->seekp(static_cast<std::iostream::off_type>(offset), from);
+		stream_->seekg(static_cast<std::iostream::off_type>(offset), from);
 	}
 
 

@@ -1,8 +1,11 @@
 // PackedFile.hpp
 // KlayGE 打包文件类 头文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.2.0
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.2.0
+// 把大量代码抽象到基类 (2004.10.21)
 //
 // 2.0.0
 // 初次建立 (2003.8.10)
@@ -30,29 +33,16 @@ namespace KlayGE
  	class PackedFile : boost::noncopyable, public VFile
 	{
 	public:
-		PackedFile();
 		PackedFile(std::string const & pathName);
-
-		bool Open(std::string const & pathName);
-		void Close();
-
-		size_t Length();
-		void Length(size_t /*newLen*/)
-			{ }
 
 		size_t Write(void const * /*data*/, size_t /*count*/)
 			{ return 0; }
 		size_t Read(void* data, size_t count);
-		size_t CopyFrom(VFile& /*src*/, size_t /*size*/)
-			{ return 0; }
 
-		size_t Seek(size_t offset, SeekMode from);
-		size_t Tell();
+		void OnSeek(size_t offset, std::ios_base::seekdir from);
 
 	private:
 		UnPkt		unPkt_;
-		VFilePtr	file_;
-
 		VFilePtr	pktFile_;
 	};
 
