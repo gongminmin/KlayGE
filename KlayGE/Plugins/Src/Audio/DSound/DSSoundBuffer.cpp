@@ -135,12 +135,10 @@ namespace KlayGE
 
 		if (iter == sources_.end())
 		{
-			boost::lagged_fibonacci607 rng;
-			boost::uniform_int<> ui(0, sources_.size());
-			boost::variate_generator<boost::lagged_fibonacci607, boost::uniform_int<> > vg(rng, ui);
-
 			iter = sources_.begin();
-			std::advance(iter, vg());
+			std::advance(iter,
+				boost::variate_generator<boost::lagged_fibonacci607, boost::uniform_int<> >(boost::lagged_fibonacci607(),
+					boost::uniform_int<>(0, sources_.size()))());
 		}
 
 		return iter;

@@ -45,7 +45,7 @@ namespace KlayGE
 
 		// 用整个waveFile填充缓冲区
 		std::vector<uint8_t> data(dataSource_->Size());
-        dataSource_->Read(&data[0], data.size());
+		dataSource_->Read(&data[0], data.size());
 
 		alBufferData(buffer_, Convert(format_), &data[0], static_cast<ALsizei>(data.size()), freq_);
 
@@ -85,12 +85,10 @@ namespace KlayGE
 
 		if (iter == sources_.end())
 		{
-			boost::lagged_fibonacci607 rng;
-			boost::uniform_int<> ui(0, sources_.size());
-			boost::variate_generator<boost::lagged_fibonacci607, boost::uniform_int<> > vg(rng, ui);
-
 			iter = sources_.begin();
-			std::advance(iter, vg());
+			std::advance(iter,
+				boost::variate_generator<boost::lagged_fibonacci607, boost::uniform_int<> >(boost::lagged_fibonacci607(),
+					boost::uniform_int<>(0, sources_.size()))());
 		}
 
 		return iter;
