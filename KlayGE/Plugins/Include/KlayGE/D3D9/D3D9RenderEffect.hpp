@@ -1,0 +1,70 @@
+// D3D9RenderEffect.hpp
+// KlayGE D3D9渲染效果类 头文件
+// Ver 2.0.0
+// 版权所有(C) 龚敏敏, 2003
+// Homepage: http://www.enginedev.com
+//
+// 2.0.0
+// 初次建立 (2003.8.15)
+//
+// 修改记录
+//////////////////////////////////////////////////////////////////////////////////
+
+#ifndef _D3D9RENDEREFFECT_HPP
+#define _D3D9RENDEREFFECT_HPP
+
+#include <KlayGE/PreDeclare.hpp>
+#include <KlayGE/COMPtr.hpp>
+
+#include <d3dx9effect.h>
+
+#include <KlayGE/RenderEffect.hpp>
+
+#pragma comment(lib, "KlayGE_RenderEngine_D3D9.lib")
+
+namespace KlayGE
+{
+	// 渲染效果
+	//////////////////////////////////////////////////////////////////////////////////
+	class D3D9RenderEffect : public RenderEffect
+	{
+	public:
+		D3D9RenderEffect(const String& srcData, UINT flags = 0);
+
+		void Desc(UINT& parameters, UINT& techniques, UINT& functions);
+
+		void SetValue(const String& name, const void* data, UINT bytes);
+		void* GetValue(const String& name, UINT bytes) const;
+
+		void SetFloat(const String& name, float value);
+		float GetFloat(const String& name) const;
+		void SetVector(const String& name, const Vector4& value);
+		Vector4 GetVector(const String& name) const;
+		void SetMatrix(const String& name, const Matrix4& value);
+		Matrix4 GetMatrix(const String& name) const;
+		void SetInt(const String& name, int value);
+		int GetInt(const String& name) const;
+		void SetBool(const String& name, bool value);
+		bool GetBool(const String& name) const;
+		void SetString(const String& name, const String& value);
+		String GetString(const String& name) const;
+
+		void SetTexture(const String& name, const Texture& tex);
+		void SetVertexShader(const String& name, U32 vsHandle);
+		void SetPixelShader(const String& name, U32 psHandle);
+
+		void Technique(const String& technique);
+		void Technique(UINT technique);
+		String Technique() const;
+		void Validate();
+
+		UINT Begin(UINT flags = 0);
+		void Pass(UINT passNum);
+		void End();
+
+	private:
+		COMPtr<ID3DXEffect> effect_;
+	};
+}
+
+#endif		// _D3D9RENDEREFFECT_HPP
