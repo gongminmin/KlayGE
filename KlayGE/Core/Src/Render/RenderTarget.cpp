@@ -2,7 +2,6 @@
 #include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Timer.hpp>
-#include <KlayGE/Engine.hpp>
 #include <KlayGE/Viewport.hpp>
 #include <KlayGE/SceneManager.hpp>
 
@@ -63,7 +62,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void RenderTarget::Update()
 	{
-		Engine::SceneManagerInstance().Update();
+		SceneManager::Instance().Update();
 
 		this->UpdateStats();
 	}

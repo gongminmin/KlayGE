@@ -30,16 +30,16 @@ namespace KlayGE
 
 	// 设置摄像机的观察矩阵
 	//////////////////////////////////////////////////////////////////////////////////
-	void Camera::ViewParams(const Vector3& eyePt, const Vector3& lookatPt,
+	void Camera::ViewParams(const Vector3& eyePos, const Vector3& lookat,
 										const Vector3& upVec)
 	{
 		// 设置观察矩阵的参数
-		eyePt_		= eyePt;
-		lookatPt_	= lookatPt;
+		eyePos_		= eyePos;
+		lookat_		= lookat;
 		upVec_		= upVec;
 		
-		MathLib::Normalize(viewVec_, lookatPt_ - eyePt_);
-		MathLib::LookAtLH(viewMat_, eyePt_, lookatPt_, upVec);
+		MathLib::Normalize(viewVec_, lookat_ - eyePos_);
+		MathLib::LookAtLH(viewMat_, eyePos_, lookat_, upVec);
 
 		reEvalBillboard_ = true;
 	}

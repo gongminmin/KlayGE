@@ -59,9 +59,6 @@ namespace KlayGE
 
 		virtual void SetTexture(const std::string& name, const TexturePtr& tex) = 0;
 
-		virtual void SetVertexShader(const std::string& name, const VertexShaderPtr& vs) = 0;
-		virtual void SetPixelShader(const std::string& name, const PixelShaderPtr& ps) = 0;
-
 		virtual void SetTechnique(const std::string& technique) = 0;
 		virtual void SetTechnique(UINT technique) = 0;
 
@@ -70,7 +67,7 @@ namespace KlayGE
 		virtual void End() = 0;
 	};
 
-	RenderEffectPtr LoadRenderEffect(const std::string& effectName, bool fromPack = false);
+	RenderEffectPtr LoadRenderEffect(const std::string& effectName);
 }
 
 #endif		// _RENDEREFFECT_HPP

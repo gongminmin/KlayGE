@@ -6,6 +6,7 @@
 //
 // 2.1.1
 // 修改了自定义类型 (2004.4.22)
+// 增加了网格函数 (2004.5.18)
 //
 // 2.0.4
 // 修改了Random的接口 (2004.3.29)
@@ -22,6 +23,7 @@
 #include <KlayGE/PreDeclare.hpp>
 
 #include <limits>
+#include <cstdlib>
 
 #include <boost/static_assert.hpp>
 
@@ -145,12 +147,12 @@ namespace KlayGE
 		}
 		// 浮点版本
 		inline float
-		Mod(float x, float y)
+		Mod(const float& x, const float& y)
 		{
 			return std::fmodf(x, y);
 		}
 		inline double
-		Mod(double x, double y)
+		Mod(const double& x, const double& y)
 		{
 			return std::fmod(x, y);
 		}
@@ -251,28 +253,103 @@ namespace KlayGE
 
 		// 基本数学运算
 		///////////////////////////////////////////////////////////////////////////////
-		float Abs(float x);
-		float Sqrt(float x);
-		float RecipSqrt(float x);
+		inline float
+		Abs(float x)
+		{
+			return std::fabsf(x);
+		}
+		inline float
+		Sqrt(float x)
+		{
+			return std::sqrtf(x);
+		}
+		inline float
+		RecipSqrt(float x)
+		{
+			float xhalf = 0.5f * x;
+			int n = *reinterpret_cast<int*>(&x);	// get bits for floating value
+			n = 0x5f3759df - (n >> 1);				// gives initial guess y0
+			x = *reinterpret_cast<float*>(&n);		// convert bits back to float
+			x = x * (1.5f - xhalf * x * x);			// Newton step, repeating increases accuracy
 
-		float Pow(float x, float y);
-		float Exp(float x);
+			return x;
+		}
 
-		float Log(float x);
-		float Log10(float x);
+		inline float
+		Pow(float x, float y)
+		{
+			return std::powf(x, y);
+		}
+		inline float
+		Exp(float x)
+		{
+			return std::expf(x);
+		}
 
-		float Sin(float x);
-		float Cos(float x);
-		void SinCos(float x, float& s, float& c);
-		float Tan(float x);
+		inline float
+		Log(float x)
+		{
+			return std::logf(x);
+		}
+		inline float
+		Log10(float x)
+		{
+			return std::log10f(x);
+		}
 
-		float ASin(float x);
-		float ACos(float x);
-		float ATan(float x);
+		inline float
+		Sin(float x)
+		{
+			return std::sinf(x);
+		}
+		inline float
+		Cos(float x)
+		{
+			return Sin(x + PI / 2);
+		}
+		inline void
+		SinCos(float x, float& s, float& c)
+		{
+			s = Sin(x);
+			c = Cos(x);
+		}
+		inline float
+		Tan(float x)
+		{
+			return std::tanf(x);
+		}
 
-		float Sinh(float x);
-		float Cosh(float x);
-		float Tanh(float x);
+		inline float
+		ASin(float x)
+		{
+			return std::asinf(x);
+		}
+		inline float
+		ACos(float x)
+		{
+			return std::acosf(x);
+		}
+		inline float
+		ATan(float x)
+		{
+			return std::atanf(x);
+		}
+
+		inline float
+		Sinh(float x)
+		{
+			return std::sinhf(x);
+		}
+		inline float
+		Cosh(float x)
+		{
+			return std::coshf(x);
+		}
+		inline float
+		Tanh(float x)
+		{
+			return std::tanhf(x);
+		}
 
 
 		template <typename T, int N>
@@ -490,7 +567,7 @@ namespace KlayGE
 		inline T&
 		Normalize(T& out, const T& rhs)
 		{
-			out = rhs / Length(rhs);
+			out = rhs * RecipSqrt(LengthSq(rhs));
 			return out;
 		}
 
@@ -533,17 +610,17 @@ namespace KlayGE
 			//  a = q.w()^2 - (q.v DOT q.v)
 			//  b = 2 * (q.v DOT v)
 			//  c = 2q.w()
-			const T a(q.w() * q.w() - Dot(q.v(), q.v()));
-			const T b(2 * Dot(q.v(), v));
-			const T c(q.w() + q.w());
+			const T a(quat.w() * quat.w() - Dot(quat.v(), quat.v()));
+			const T b(2 * Dot(quat.v(), v));
+			const T c(quat.w() + quat.w());
 
 			// Must store this, because result may alias v
 			Vector_T<T, 3> cross;
-			Cross(cross, q.v(), v);		// q.v CROSS v
+			Cross(cross, quat.v(), v);		// q.v CROSS v
 
-			out = Vector_T<T, 3>(a * v.x() + b * q.x() + c * cross.x(),
-				a * v.y() + b * q.y() + c * cross.y(),
-				a * v.z() + b * q.z() + c * cross.z());
+			out = Vector_T<T, 3>(a * v.x() + b * quat.x() + c * cross.x(),
+				a * v.y() + b * quat.y() + c * cross.y(),
+				a * v.z() + b * quat.z() + c * cross.z());
 			return out;
 		}
 
@@ -1060,12 +1137,12 @@ namespace KlayGE
 			Vector_T<T, 3> half;
 			Normalize(half, a + b);
 
-			out = UnitAxisToUnitAxis2(out, a, half);
+			out = UnitAxisToUnitAxis(out, a, half);
 			return out;
 		}
 		template <typename T>
 		inline Quaternion_T<T>&
-		UnitAxisToUnitAxis2(Quaternion_T<T>& out, const Vector_T<T, 3>& from, const Vector_T<T, 3>& to)
+		UnitAxisToUnitAxis(Quaternion_T<T>& out, const Vector_T<T, 3>& from, const Vector_T<T, 3>& to)
 		{
 			Vector_T<T, 3> axis;
 			Cross(axis, from, to);
@@ -1418,12 +1495,117 @@ namespace KlayGE
 		Color& Negative(Color& out, const Color& rhs);
 		Color& Modulate(Color& out, const Color& lhs, const Color& rhs);
 
+
 		// 范围
 		///////////////////////////////////////////////////////////////////////////////
 		bool VecInSphere(const Sphere& sphere, const Vector3& v);
 		bool BoundProbe(const Sphere& sphere, const Vector3& pos, const Vector3& dir);
 		bool VecInBox(const Box& box, const Vector3& v);
 		bool BoundProbe(const Box& box, const Vector3& orig, const Vector3& dir);
+
+
+		// 网格
+		///////////////////////////////////////////////////////////////////////////////
+
+		// 计算像素光照需要的TBN
+		template <typename TangentIterator, typename BinormIterator,
+			typename IndexIterator, typename PositionIterator, typename TexCoordIterator>
+		void ComputeTangent(TangentIterator targentBegin, BinormIterator binormBegin,
+								IndexIterator indicesBegin, IndexIterator indicesEnd,
+								PositionIterator xyzsBegin, PositionIterator xyzsEnd,
+								TexCoordIterator texsBegin)
+		{
+			for (int i = 0; i < xyzsEnd - xyzsBegin; ++ i)
+			{
+				*(targentBegin + i) = Vector3::Zero();
+				*(binormBegin + i) = Vector3::Zero();
+			}
+
+			for (IndexIterator iter = indicesBegin; iter != indicesEnd; iter += 3)
+			{
+				const U16 previousIndex = *(iter + 0);
+				const U16 currentIndex = *(iter + 1);
+				const U16 nextIndex = *(iter + 2);
+
+				const Vector3& currentXYZ(*(xyzsBegin + currentIndex));
+				const Vector3& previousXYZ(*(xyzsBegin + previousIndex));
+				const Vector3& nextXYZ(*(xyzsBegin + nextIndex));
+
+				Vector3 v1v0 = nextXYZ - currentXYZ;
+				Vector3 v2v0 = previousXYZ - currentXYZ;
+
+				const Vector2& nextTex(*(texsBegin + nextIndex));
+				const Vector2& currentTex(*(texsBegin + currentIndex));
+				const Vector2& previousTex(*(texsBegin + previousIndex));
+
+				float s1 = nextTex.x() - currentTex.x();
+				float t1 = nextTex.y() - currentTex.y();
+
+				float s2 = previousTex.x() - currentTex.x();
+				float t2 = previousTex.y() - currentTex.y();
+
+				float denominator = s1 * t2 - s2 * t1;
+				Vector3 T, B;
+				if (denominator < 0.0001f)
+				{
+					T = Vector3(1, 0, 0);
+					B = Vector3(0, 1, 0);
+				}
+				else
+				{
+					T = (t2 * v1v0 - t1 * v2v0) / denominator;
+					B = (s1 * v2v0 - s2 * v1v0) / denominator;
+				}
+				*(targentBegin + previousIndex) += T;
+				*(binormBegin + previousIndex) += B;
+
+				*(targentBegin + currentIndex) += T;
+				*(binormBegin + currentIndex) += B;
+
+				*(targentBegin + nextIndex) += T;
+				*(binormBegin + nextIndex) += B;
+			}
+
+			for (int i = 0; i < xyzsEnd - xyzsBegin; ++ i)
+			{
+				MathLib::Normalize(*(targentBegin + i), *(targentBegin + i));
+				MathLib::Normalize(*(binormBegin + i), *(binormBegin + i));
+			}
+		}
+
+		template <typename NormalIterator, typename IndexIterator, typename PositionIterator>
+		void ComputeNormal(NormalIterator normalBegin,
+								IndexIterator indicesBegin, IndexIterator indicesEnd,
+								PositionIterator xyzsBegin, PositionIterator xyzsEnd)
+		{
+			for (int i = 0; i < xyzsEnd - xyzsBegin; ++ i)
+			{
+				*(normalBegin + i) = Vector3::Zero();
+			}
+
+			for (IndexIterator iter = indicesBegin; iter != indicesEnd; iter += 3)
+			{
+				const U16 v0Index = *(iter + 0);
+				const U16 v1Index = *(iter + 1);
+				const U16 v2Index = *(iter + 2);
+
+				const Vector3& v0(*(xyzsBegin + v0Index));
+				const Vector3& v1(*(xyzsBegin + v1Index));
+				const Vector3& v2(*(xyzsBegin + v2Index));
+
+				Vector3 vec;
+				MathLib::Cross(vec, v1 - v0, v2 - v0);	
+
+				*(normalBegin + v0Index) += vec;
+				*(normalBegin + v1Index) += vec;
+				*(normalBegin + v2Index) += vec;
+			}
+
+			for (int i = 0; i < xyzsEnd - xyzsBegin; ++ i)
+			{
+				MathLib::Normalize(*(normalBegin + i), *(normalBegin + i));
+			}
+		}		
 	};
 
 

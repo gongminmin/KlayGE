@@ -3,7 +3,7 @@
 
 namespace KlayGE
 {
-	class Engine;
+	class Context;
 	template <typename T>
 	class SharedPtr;
 	template <typename T>
@@ -17,7 +17,10 @@ namespace KlayGE
 	template <typename T>
 	class tree;
 	class VFile;
-	typedef SharedPtr<VFile>	VFilePtr;
+	typedef SharedPtr<VFile> VFilePtr;
+	class ResIdentifier;
+	typedef SharedPtr<ResIdentifier> ResIdentifierPtr;
+	class ResLocator;
 
 	class Timer;
 
@@ -62,6 +65,8 @@ namespace KlayGE
 	typedef SharedPtr<Renderable> RenderablePtr;
 	class RenderEffect;
 	typedef SharedPtr<RenderEffect> RenderEffectPtr;
+	class Clipper;
+	typedef SharedPtr<Clipper> ClipperPtr;
 	class SceneManager;
 	class Texture;
 	typedef SharedPtr<Texture> TexturePtr;
@@ -76,12 +81,6 @@ namespace KlayGE
 	struct Viewport;
 	class RenderFactory;
 	typedef SharedPtr<RenderFactory> RenderFactoryPtr;
-	class ShaderParameter;
-	typedef SharedPtr<ShaderParameter> ShaderParameterPtr;
-	class VertexShader;
-	typedef SharedPtr<VertexShader> VertexShaderPtr;
-	class PixelShader;
-	typedef SharedPtr<PixelShader> PixelShaderPtr;
 
 	class Socket;
 	class Lobby;

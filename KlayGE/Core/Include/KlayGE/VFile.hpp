@@ -47,6 +47,8 @@ namespace KlayGE
 		virtual ~VFile()
 			{ }
 
+		static VFilePtr NullObject();
+
 		virtual void Close() = 0;
 
 		virtual size_t Length() = 0;

@@ -1,6 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/RenderFactory.hpp>
-#include <KlayGE/Engine.hpp>
+#include <KlayGE/Context.hpp>
 
 #include <KlayGE/RenderBuffer.hpp>
 
@@ -57,7 +57,7 @@ namespace KlayGE
 	{
 		if (!this->GetVertexStream(type))
 		{
-			vertexStreams_.push_back(Engine::RenderFactoryInstance().MakeVertexStream(type,
+			vertexStreams_.push_back(Context::Instance().RenderFactoryInstance().MakeVertexStream(type,
 				sizeElement, numElement, staticStream));
 		}
 	}
@@ -107,7 +107,7 @@ namespace KlayGE
 
 	void RenderBuffer::AddIndexStream(bool staticStream)
 	{
-		indexStream_ = Engine::RenderFactoryInstance().MakeIndexStream(staticStream);
+		indexStream_ = Context::Instance().RenderFactoryInstance().MakeIndexStream(staticStream);
 	}
 
 	IndexStreamPtr RenderBuffer::GetIndexStream() const

@@ -53,7 +53,7 @@ namespace KlayGE
 		}
 		Sphere& operator/=(float rhs)
 		{
-			return operator*=(1.0f / rhs);
+			return this->operator*=(1.0f / rhs);
 		}
 
 		Sphere& operator=(const Sphere& rhs)

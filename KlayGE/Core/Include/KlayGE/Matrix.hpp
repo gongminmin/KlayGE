@@ -77,6 +77,16 @@ namespace KlayGE
 		static size_t size()
 			{ return elem_num; }
 
+		static Matrix4_T Zero()
+		{
+			static Matrix4_T out(
+				0, 0, 0, 0,
+				0, 0, 0, 0,
+				0, 0, 0, 0,
+				0, 0, 0, 0);
+			return out;
+		}
+
 		static Matrix4_T Identity()
 		{
 			static Matrix4_T out(
@@ -104,8 +114,8 @@ namespace KlayGE
 		const_reference operator[](size_t index) const
 			{ return *(this->begin() + index); }
 
-		Vector_T<T, col_num>& Row(size_t index)
-			{ return m_[index]; }
+		void Row(size_t index, const Vector_T<T, col_num>& rhs)
+			{ m_[index] = rhs; }
 		const Vector_T<T, col_num>& Row(size_t index) const
 			{ return m_[index]; }
 		void Col(size_t index, const Vector_T<T, row_num>& rhs)
@@ -117,7 +127,7 @@ namespace KlayGE
 		}
 		const Vector_T<T, row_num> Col(size_t index) const
 		{
-			Vector_T<T, row_num> ret
+			Vector_T<T, row_num> ret;
 			for (size_t i = 0; i < row_num; ++ i)
 			{
 				ret[i] = m_[i][index];

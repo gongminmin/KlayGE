@@ -1,9 +1,78 @@
-texture cartoonTex;
+float4x4 proj : PROJECTION;
+float4x4 worldview : WORLDVIEW;
+float4x4 worldviewIT : WORLDVIEWIT;
+float4 lightPos;
+float4 eyePos;
+
+struct VS_INPUT
+{
+	float3 pos			: POSITION;
+	float3 normal		: NORMAL;
+};
+
+struct VS_OUTPUT
+{
+	float4 pos			: POSITION;
+	float1 texcoord0	: TEXCOORD0;
+	float1 texcoord1	: TEXCOORD1;
+};
+
+VS_OUTPUT ToonVS(VS_INPUT input)
+{
+	float4 pos = mul(float4(input.pos, 1), worldview);
+	float3 normal = normalize(mul(input.normal, (float3x3)worldviewIT));
+
+	float3 L = normalize(lightPos.xyz - input.pos);
+	float3 V = normalize(eyePos.xyz - pos.xyz);
+
+	VS_OUTPUT output;
+	output.pos = mul(pos, proj);
+	output.texcoord0.x = max(dot(normal, L), 0);
+	output.texcoord1.x = max(dot(normal, V), 0);
+
+	return output;
+}
+
+texture1D toon;
+texture1D edge;
+
+sampler1D toonMapSampler = sampler_state
+{
+	Texture = <toon>;
+	MinFilter = Point;
+	MagFilter = Point;
+	MipFilter = Point;
+	AddressU  = Clamp;
+};
+
+sampler1D edgeMapSampler = sampler_state
+{
+	Texture = <edge>;
+	MinFilter = Point;
+	MagFilter = Point;
+	MipFilter = Point;
+	AddressU  = Clamp;
+};
+
+float4 ToonPS(float2 toonTex	: TEXCOORD0,
+				float2 edgeTex	: TEXCOORD1,
+
+				uniform sampler1D toonMap,
+				uniform sampler1D edgeMap) : COLOR
+{
+	float3 toon = tex1D(toonMap, toonTex);
+	float3 edge = tex1D(edgeMap, edgeTex);
+
+	return float4(toon * edge, 1);
+}
 
 technique cartoonTec
 {
 	pass p0
 	{
+		Lighting = false;
+		SpecularEnable = false;
+
 		FillMode = Solid;
 		CullMode = CCW;
 		Stencilenable = false;
@@ -12,18 +81,7 @@ technique cartoonTec
 		ZEnable      = true;
 		ZWriteEnable = true;
 
-		Texture[0] = <cartoonTex>;
-		ColorOp[0] = SelectArg1;
-		ColorArg1[0] = Texture;
-		AlphaOp[0] = Disable;
-		MinFilter[0] = Point;
-		MagFilter[0] = Point;
-		MipFilter[0] = Point;
-
-		ColorOp[1] = Disable;
-		AlphaOp[1] = Disable;
-
-		AddressU[0] = Clamp;
-		AddressV[0] = Clamp;
+		VertexShader = compile vs_1_1 ToonVS();
+		PixelShader = compile ps_1_1 ToonPS(toonMapSampler, edgeMapSampler);
 	}
 }

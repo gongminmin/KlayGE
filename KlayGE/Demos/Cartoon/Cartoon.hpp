@@ -1,5 +1,5 @@
-#ifndef _TESTAPP3D_HPP
-#define _TESTAPP3D_HPP
+#ifndef _CARTOON_HPP
+#define _CARTOON_HPP
 
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Font.hpp>
@@ -15,6 +15,8 @@ private:
 
 	KlayGE::FontPtr font_;
 	float rotX, rotY;
+
+	KlayGE::Matrix4 view_, proj_;
 };
 
-#endif		// _TESTAPP3D_HPP
+#endif		// _CARTOON_HPP

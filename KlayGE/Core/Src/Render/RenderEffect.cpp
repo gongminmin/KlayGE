@@ -14,7 +14,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Config.hpp>
 #include <KlayGE/Math.hpp>
-#include <KlayGE/Engine.hpp>
+#include <KlayGE/Context.hpp>
 #include <KlaygE/RenderFactory.hpp>
 
 #include <KlayGE/PackedFile/PackedFile.hpp>
@@ -77,11 +77,6 @@ namespace KlayGE
 		void SetTexture(const std::string& name, const TexturePtr& tex)
 			{ }
 
-		void SetVertexShader(const std::string& name, const VertexShaderPtr& vs)
-			{ }
-		void SetPixelShader(const std::string& name, const PixelShaderPtr& ps)
-			{ }
-
 		void SetTechnique(const std::string& techName)
 			{ }
 		void SetTechnique(UINT tech)
@@ -101,41 +96,13 @@ namespace KlayGE
 		return obj;
 	}
 
-	RenderEffectPtr LoadRenderEffect(const std::string& effectName, bool fromPack)
+	RenderEffectPtr LoadRenderEffect(const std::string& effectName)
 	{
-		VFilePtr file;
-		if (fromPack)
-		{
-			SharedPtr<PackedFile> packedFile(new PackedFile);
-
-			if (!packedFile->Open(effectName))
-			{
-				if (!packedFile->Open(std::string(_RENDERFXPATH_) + effectName))
-				{
-					return RenderEffect::NullObject();
-				}
-			}
-
-			file = packedFile;
-		}
-		else
-		{
-			SharedPtr<DiskFile> diskFile(new DiskFile);
-
-			if (!diskFile->Open(effectName, VFile::OM_Read))
-			{
-				if (!diskFile->Open(std::string(_RENDERFXPATH_) + effectName, VFile::OM_Read))
-				{
-					return RenderEffect::NullObject();
-				}
-			}
-
-			file = diskFile;
-		}
+		VFilePtr file(ResLocator::Instance().Locate(effectName)->Load());
 
 		std::vector<char> data(file->Length());
 		file->Read(&data[0], data.size());
 
-		return Engine::RenderFactoryInstance().MakeRenderEffect(std::string(&data[0], data.size()));
+		return Context::Instance().RenderFactoryInstance().MakeRenderEffect(std::string(&data[0], data.size()));
 	}
 }

@@ -39,6 +39,12 @@ namespace KlayGE
 				Helper<N - 1>::DoCopy<U>(out + 1, rhs + 1);
 			}
 
+			static void DoAssign(T out[N], const T& rhs)
+			{
+				out[0] = rhs;
+				Helper<N - 1>::DoAssign(out + 1, rhs);
+			}
+
 			static void DoAdd(T out[N], const T lhs[N], const T rhs[N])
 			{
 				out[0] = lhs[0] + rhs[0];
@@ -67,6 +73,12 @@ namespace KlayGE
 			{
 				return Helper<1>::DoEqual(lhs, rhs) && Helper<N - 1>::DoEqual(lhs + 1, rhs + 1);
 			}
+
+			static void DoSwap(T lhs[N], T rhs[N])
+			{
+				std::swap(lhs[0], rhs[0]);
+				return Helper<1>::DoSwap(lhs + 1, rhs + 1);
+			}
 		};
 		template <>
 		struct Helper<1>
@@ -75,6 +87,11 @@ namespace KlayGE
 			static void DoCopy(T out[1], const U rhs[1])
 			{
 				out[0] = rhs[0];
+			}
+
+			static void DoAssign(T out[1], const T& rhs)
+			{
+				out[0] = rhs;
 			}
 
 			static void DoAdd(T out[1], const T lhs[1], const T rhs[1])
@@ -101,32 +118,53 @@ namespace KlayGE
 			{
 				return lhs[0] == rhs[0];
 			}
+
+			static void DoSwap(T lhs[1], T rhs[1])
+			{
+				std::swap(lhs[0], rhs[0]);
+			}
 		};
 
+		typedef boost::array<T, N>	DetailType;
+
 	public:
-		typedef T					value_type;
+		typedef typename DetailType::value_type			value_type;
 
-		typedef value_type*			pointer;
-		typedef const value_type*	const_pointer;
+		typedef value_type*								pointer;
+		typedef const value_type*						const_pointer;
 
-		typedef value_type&			reference;
-		typedef const value_type&	const_reference;
+		typedef typename DetailType::reference			reference;
+		typedef typename DetailType::const_reference	const_reference;
 
-		typedef value_type*			iterator;
-		typedef const value_type*	const_iterator;
+		typedef typename DetailType::iterator			iterator;
+		typedef typename DetailType::const_iterator		const_iterator;
+
+		typedef typename DetailType::size_type			size_type;
+		typedef typename DetailType::difference_type	difference_type;
 
 		enum { elem_num = N };
 
 	public:
 		Vector_T()
-			{ }
+		{
+		}
 		explicit Vector_T(const T* rhs)
-			{ Helper<N>::DoCopy(&vec_[0], rhs); }
+		{
+			Helper<N>::DoCopy(&vec_[0], rhs);
+		}
+		explicit Vector_T(const T& rhs)
+		{
+			Helper<N>::DoAssign(&vec_[0], rhs);
+		}
 		Vector_T(const Vector_T& rhs)
-			{ Helper<N>::DoCopy(&vec_[0], &rhs[0]); }
+		{
+			Helper<N>::DoCopy(&vec_[0], &rhs[0]);
+		}
 		template <typename U>
 		Vector_T(const Vector_T<U, N>& rhs)
-			{ Helper<N>::DoCopy<U>(&vec_[0], &rhs[0]); }
+		{
+			Helper<N>::DoCopy<U>(&vec_[0], &rhs[0]);
+		}
 
 		Vector_T(const T& x, const T& y)
 		{
@@ -148,28 +186,41 @@ namespace KlayGE
 		}
 
 		static size_t size()
-			{ return elem_num; }
+		{
+			return elem_num;
+		}
 
 		static const Vector_T& Zero()
 		{
-			static Vector_T<T, N> zero;
-			zero.vec_.assign(T(0));
+			static Vector_T<T, N> zero(T(0));
 			return zero;
 		}
 
 		// »°œÚ¡ø
 		iterator begin()
-			{ return vec_.begin(); }
+		{
+			return vec_.begin();
+		}
 		const_iterator begin() const
-			{ return vec_.begin(); }
+		{
+			return vec_.begin();
+		}
 		iterator end()
-			{ return vec_.end(); }
+		{
+			return vec_.end();
+		}
 		const_iterator end() const
-			{ return vec_.end(); }
+		{
+			return vec_.end();
+		}
 		reference operator[](size_t index)
-			{ return vec_[index]; }
+		{
+			return vec_[index];
+		}
 		const_reference operator[](size_t index) const
-			{ return vec_[index]; }
+		{
+			return vec_[index];
+		}
 
 		reference x()
 		{
@@ -268,6 +319,11 @@ namespace KlayGE
 			return temp;
 		}
 
+		void swap(Vector_T& rhs)
+		{
+			Helper<N>::DoSwap(&vec_[0], &rhs.vec_[0]);
+        }
+
 		friend bool
 		operator==(const Vector_T& lhs, const Vector_T& rhs)
 		{
@@ -275,7 +331,7 @@ namespace KlayGE
 		}
 
 	private:
-		boost::array<T, N> vec_;
+		DetailType vec_;
 	};
 
 	template <typename T, int N>
@@ -284,6 +340,12 @@ namespace KlayGE
 	{
 		return !(lhs == rhs);
 	}
+
+	template <typename T, int N>
+    inline void swap(Vector_T<T, N>& lhs, Vector_T<T, N>& rhs)
+	{
+		lhs.swap(rhs);
+    }
 
 	typedef Vector_T<float, 2> Vector2;
 	typedef Vector_T<float, 3> Vector3;

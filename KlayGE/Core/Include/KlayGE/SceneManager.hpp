@@ -15,6 +15,16 @@
 
 namespace KlayGE
 {
+	class Clipper
+	{
+	public:
+		virtual ~Clipper()
+			{ }
+
+		static ClipperPtr NullObject();
+		virtual void ClipScene(const Camera& camera) = 0;
+	};
+
 	class SceneManager : boost::noncopyable
 	{
 	protected:
@@ -22,20 +32,22 @@ namespace KlayGE
 		typedef MapVector<RenderEffectPtr, RenderItemsType>			RenderQueueType;
 
 	public:
-		SceneManager();
-		virtual ~SceneManager()
-			{ }
+		static SceneManager& Instance();
+
+		void AttachClipper(const SharedPtr<Clipper>& clipper);
 
 		void PushRenderable(const RenderablePtr& obj);
 
-		virtual void ClipScene()
-			{ }
-
 		void Update();
-		virtual void Flash();
+		void Flash();
 
-	protected:
+	private:
+		SceneManager();
+
+	private:
 		RenderQueueType renderQueue_;
+
+		SharedPtr<Clipper> clipper_;
 	};
 }
 

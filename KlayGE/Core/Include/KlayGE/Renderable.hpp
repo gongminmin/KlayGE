@@ -3,6 +3,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/SharedPtr.hpp>
+#include <string>
 
 namespace KlayGE
 {

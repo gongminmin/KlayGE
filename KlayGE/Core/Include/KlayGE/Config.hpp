@@ -3,6 +3,4 @@
 
 // 定义各种编译期选项
 
-#define _RENDERFXPATH_	"D:/KlayGE/RenderFX/"
-
 #endif		// _CONFIG_HPP

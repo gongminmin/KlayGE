@@ -25,12 +25,21 @@ namespace KlayGE
 	class Camera
 	{
 	public:
-		const Vector3& EyePt() const
-			{ return this->eyePt_; }
-		const Vector3& LookatPt() const
-			{ return this->lookatPt_; }
+		const Vector3& EyePos() const
+			{ return eyePos_; }
+		const Vector3& LookAt() const
+			{ return lookat_; }
 		const Vector3& UpVec() const
-			{ return this->upVec_; }
+			{ return upVec_; }
+
+		float FOV() const
+			{ return FOV_; }
+		float Aspect() const
+			{ return aspect_; }
+		float NearPlane() const
+			{ return nearPlane_; }
+		float FarPlane() const
+			{ return farPlane_; }
 
 		const Matrix4& ViewMatrix() const
 			{ return this->viewMat_; }
@@ -38,15 +47,15 @@ namespace KlayGE
 		const Matrix4& ProjMatrix() const
 			{ return this->projMat_; }
 
-		void ViewParams(const Vector3& eyePt, const Vector3& lookatPt,
+		void ViewParams(const Vector3& eyePos, const Vector3& lookat,
 			const Vector3& upVec = Vector3(0, 1, 0));
 		void ProjParams(float FOV, float aspect, float nearPlane, float farPlane);
 
 		Camera();
 
 	private:
-		Vector3		eyePt_;			// 观察矩阵的属性
-		Vector3		lookatPt_;
+		Vector3		eyePos_;			// 观察矩阵的属性
+		Vector3		lookat_;
 		Vector3		upVec_;
 		Vector3		viewVec_;
 		Matrix4		viewMat_;

@@ -9,8 +9,8 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/SceneManager.hpp>
-#include <KlayGE/Engine.hpp>
-#include <KlayGE/Shader.hpp>
+#include <KlayGE/Context.hpp>
+#include <KlayGE/ResLocator.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderSettings.hpp>
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
@@ -28,13 +28,12 @@ namespace
 {
 	struct RenderTorus : public Renderable
 	{
-		RenderTorus(const TexturePtr& texture)
+		RenderTorus(const TexturePtr& texture0, const TexturePtr& texture1)
 			: rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
 		{
-			vs_ = LoadVertexShader("Cartoon.vsh", "ToonVS", "vs_1_1");
-
 			effect_ = LoadRenderEffect("Cartoon.fx");
-			effect_->SetTexture("cartoonTex", texture);
+			effect_->SetTexture("toon", texture0);
+			effect_->SetTexture("edge", texture1);
 			effect_->SetTechnique("cartoonTec");
 
 			rb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
@@ -53,11 +52,6 @@ namespace
 		RenderBufferPtr GetRenderBuffer() const
 			{ return rb_; }
 
-		void OnRenderBegin()
-		{
-			vs_->Active();
-		}
-
 		const std::wstring& Name() const
 		{
 			static std::wstring name(L"Torus");
@@ -66,8 +60,6 @@ namespace
 
 		KlayGE::RenderBufferPtr rb_;
 		KlayGE::RenderEffectPtr effect_;
-
-		KlayGE::VertexShaderPtr vs_;
 	};
 
 	SharedPtr<RenderTorus> renderTorus;
@@ -78,7 +70,7 @@ int main()
 {
 	Cartoon app;
 
-	Engine::RenderFactoryInstance(D3D9RenderFactoryInstance());
+	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 
 	D3D9RenderSettings settings;
 	settings.width = 800;
@@ -95,31 +87,39 @@ int main()
 Cartoon::Cartoon()
 			: rotX(0), rotY(0)
 {
+	ResLocator::Instance().AddPath("D:/KlayGE/RenderFX");
 }
 
 void Cartoon::InitObjects()
 {
-	font_ = Engine::RenderFactoryInstance().MakeFont(L"ËÎÌå", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont(L"ËÎÌå", 16);
 
-	TexturePtr texture = Engine::RenderFactoryInstance().MakeTexture(16, 1, 0, PF_L8);
-	U8 cartoolShadeData[16] = { 0, 0, 0, 120, 120, 120, 160, 160, 160, 160, 160, 160, 255, 255, 255, 255 };
-	texture->CopyMemoryToTexture(cartoolShadeData, PF_L8);
+	U8 cartoolShadeData0[16] = { 120, 120, 120, 120, 120, 160, 160, 160, 160, 160, 160, 255, 255, 255, 255, 255 };
+	TexturePtr texture0 = Context::Instance().RenderFactoryInstance().MakeTexture(sizeof(cartoolShadeData0) / sizeof(cartoolShadeData0[0]), 1, 0, PF_L8);
+	texture0->CopyMemoryToTexture(cartoolShadeData0, PF_L8);
 
-	renderTorus = SharedPtr<RenderTorus>(new RenderTorus(texture));
+	U8 cartoolShadeData1[4] = { 0, 255, 255, 255 };
+	TexturePtr texture1 = Context::Instance().RenderFactoryInstance().MakeTexture(sizeof(cartoolShadeData1) / sizeof(cartoolShadeData1[0]), 1, 0, PF_L8);
+	texture1->CopyMemoryToTexture(cartoolShadeData1, PF_L8);
 
-	RenderEngine& renderEngine(Engine::RenderFactoryInstance().RenderEngineInstance());
+	renderTorus = SharedPtr<RenderTorus>(new RenderTorus(texture0, texture1));
+
+	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	this->LookAt(Vector3(0, 0, -6), Vector3(0, 0, 0));
-	this->Proj(0.1f, 20.0f);
+	MathLib::LookAtLH(view_, Vector3(0, 0, -6), Vector3(0, 0, 0));
+	MathLib::PerspectiveFovLH(proj_, PI / 4, 800.0f / 600, 0.1f, 20.0f);
 
-	renderTorus->vs_->GetNamedParameter("proj")->SetMatrix(renderEngine.ProjectionMatrix());
+	renderTorus->effect_->SetMatrix("proj", proj_);
+	renderTorus->effect_->SetVector("lightPos", Vector4(2, 2, -3, 1));
+	renderTorus->effect_->SetVector("eyePos", Vector4(0, 0, -6, 1));
 }
 
 void Cartoon::Update()
 {
-	RenderEngine& renderEngine(Engine::RenderFactoryInstance().RenderEngineInstance());
+	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+	SceneManager& sceneMgr(SceneManager::Instance());
 
 	rotX += 0.003f;
 	rotY += 0.003f;
@@ -128,14 +128,19 @@ void Cartoon::Update()
 	MathLib::RotationX(mat, rotX);
 	MathLib::RotationY(matY, rotY);
 	mat *= matY;
+	mat *= view_;
 
-	renderTorus->vs_->GetNamedParameter("worldview")->SetMatrix(mat * renderEngine.ViewMatrix());
+	renderTorus->effect_->SetMatrix("worldview", mat);
+
+	MathLib::Transpose(mat, mat);
+	MathLib::Inverse(mat, mat);
+	renderTorus->effect_->SetMatrix("worldviewIT", mat);
 
 	std::wostringstream stream;
 	stream << (*renderEngine.ActiveRenderTarget())->FPS();
 
-	Engine::SceneManagerInstance().PushRenderable(renderTorus);
+	sceneMgr.PushRenderable(renderTorus);
 
-	Engine::SceneManagerInstance().PushRenderable(font_->RenderText(0, 0, Color(1, 1, 0, 1), L"¿¨Í¨äÖÈ¾²âÊÔ"));
-	Engine::SceneManagerInstance().PushRenderable(font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str()));
+	sceneMgr.PushRenderable(font_->RenderText(0, 0, Color(1, 1, 0, 1), L"¿¨Í¨äÖÈ¾²âÊÔ"));
+	sceneMgr.PushRenderable(font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str()));
 }

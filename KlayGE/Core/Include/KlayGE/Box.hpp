@@ -56,7 +56,7 @@ namespace KlayGE
 		}
 		Box& operator/=(float rhs)
 		{
-			return operator*=(1.0f / rhs);
+			return this->operator*=(1.0f / rhs);
 		}
 		Box& operator&=(const Box& rhs)
 		{

@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="¿¨Í¨äÖÈ¾"
-	ProjectGUID="{DA5E7FC0-CC85-45A7-8D1E-E80A813F2705}"
+	Name="¶¥µãÎ»ÒÆ"
+	ProjectGUID="{63128457-8C79-4C9F-ACB7-506537BBC4BE}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -26,6 +26,7 @@
 				TreatWChar_tAsBuiltInType="TRUE"
 				ForceConformanceInForLoopScope="TRUE"
 				RuntimeTypeInfo="TRUE"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="4"/>
@@ -33,10 +34,10 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/Cartoon.exe"
+				OutputFile="$(OutDir)/VertexDisplacement.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/Cartoon.pdb"
+				ProgramDatabaseFile="$(OutDir)/VertexDisplacement.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
@@ -80,9 +81,8 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/Cartoon.exe"
+				OutputFile="$(OutDir)/VertexDisplacement.exe"
 				LinkIncremental="1"
-				ProgramDatabaseFile="$(OutDir)/Cartoon.pdb"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -117,10 +117,10 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath=".\Cartoon.cpp">
+				RelativePath=".\VertexDisplacement.cpp">
 			</File>
 			<File
-				RelativePath=".\Cartoon.fx">
+				RelativePath=".\VertexDisplacement.fx">
 			</File>
 		</Filter>
 		<Filter
@@ -128,10 +128,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
-				RelativePath=".\Cartoon.hpp">
+				RelativePath=".\Flag.hpp">
 			</File>
 			<File
-				RelativePath=".\Torus.hpp">
+				RelativePath=".\VertexDisplacement.hpp">
 			</File>
 		</Filter>
 	</Files>
