@@ -209,9 +209,9 @@ void PerPixelLighting::Update()
 	SceneManager& sceneMgr(Engine::SceneManagerInstance());
 
 	static float degree(0);
-	Vector3 lightPos(MakeVector(0.0f, 0.0f, 1.0f));
+	Vector3 lightPos(MakeVector(0.0f, 1.0f, 1.0f));
 	Matrix4 matRot;
-	math.RotationY(matRot, degree);
+	math.RotationZ(matRot, degree);
 	math.TransformNormal(lightPos, lightPos, matRot);
 	math.Normalize(lightPos, lightPos);
 	renderPolygon->effect_->SetVector("lightPos",

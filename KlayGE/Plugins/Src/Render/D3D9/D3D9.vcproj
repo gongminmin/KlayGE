@@ -33,7 +33,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_RenderSystem_D3D9.lib"/>
+				OutputFile="$(OutDir)/KlayGE_RenderEngine_D3D9.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
