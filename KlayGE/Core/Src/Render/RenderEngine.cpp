@@ -1,6 +1,6 @@
 // RenderEngine.cpp
 // KlayGE 渲染引擎类 实现文件
-// Ver 2.0.3
+// Ver 2.0.4
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
 //
@@ -29,7 +29,7 @@
 namespace KlayGE
 {
 	RenderEngine::RenderEngine()
-		: renderEffect_(NullRenderEffectInstance()),
+		: renderEffect_(RenderEffect::NullObject()),
 			renderPasses_(1),
 			worldMat_(Matrix4::Identity()),
 			viewMat_(Matrix4::Identity()),
@@ -43,7 +43,7 @@ namespace KlayGE
 	{
 	}
 
-	// 增加显示目标
+	// 增加渲染目标
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderEngine::RenderTargetListIterator RenderEngine::AddRenderTarget(const RenderTargetPtr& target)
 	{
@@ -54,7 +54,7 @@ namespace KlayGE
 		return iter;
 	}
 
-	// 显示目标列表的Begin迭代器
+	// 渲染目标列表的Begin迭代器
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderEngine::RenderTargetListIterator RenderEngine::RenderTargetListBegin()
 	{
@@ -68,7 +68,7 @@ namespace KlayGE
 		return renderTargetList_.end();
 	}
 
-	// 从显示目标列表中删除显示目标
+	// 从渲染目标列表中删除渲染目标
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderTargetPtr RenderEngine::RemoveRenderTarget(RenderTargetListIterator iter)
 	{
@@ -77,11 +77,18 @@ namespace KlayGE
 		return ret;
 	}
 
-	// 设置当前显示目标
+	// 设置当前渲染目标
 	/////////////////////////////////////////////////////////////////////////////////
 	void RenderEngine::ActiveRenderTarget(RenderTargetListIterator iter)
 	{
 		activeRenderTarget_ = iter;
+	}
+
+	// 获取当前渲染目标
+	/////////////////////////////////////////////////////////////////////////////////
+	const RenderEngine::RenderTargetListIterator& RenderEngine::ActiveRenderTarget() const
+	{
+		return activeRenderTarget_;
 	}
 
 	// 设置渲染状态
@@ -91,9 +98,16 @@ namespace KlayGE
 		if (renderEffect_ != effect)
 		{
 			renderEffect_->End();
-			renderEffect_ = (!effect) ? NullRenderEffectInstance() : effect;
+			renderEffect_ = (!effect) ? RenderEffect::NullObject() : effect;
 			renderPasses_ = renderEffect_->Begin();
 		}
+	}
+
+	// 获取渲染状态
+	/////////////////////////////////////////////////////////////////////////////////
+	RenderEffectPtr RenderEngine::GetRenderEffect() const
+	{
+		return renderEffect_;
 	}
 	
 
@@ -105,33 +119,45 @@ namespace KlayGE
 		return 1;
 	}
 
+	// 获取世界矩阵
+	/////////////////////////////////////////////////////////////////////////////////
 	Matrix4 RenderEngine::WorldMatrix() const
 	{
 		return worldMat_;
 	}
 
+	// 设置世界矩阵
+	/////////////////////////////////////////////////////////////////////////////////
 	void RenderEngine::WorldMatrix(const Matrix4& mat)
 	{
 		worldMat_ = mat;
 		this->DoWorldMatrix(mat);
 	}
 
+	// 获取观察矩阵
+	/////////////////////////////////////////////////////////////////////////////////
 	Matrix4 RenderEngine::ViewMatrix()
 	{
 		return viewMat_;
 	}
 
+	// 设置观察矩阵
+	/////////////////////////////////////////////////////////////////////////////////
 	void RenderEngine::ViewMatrix(const Matrix4& mat)
 	{
 		viewMat_ = mat;
 		this->DoViewMatrix(mat);
 	}
 
+	// 获取投射矩阵
+	/////////////////////////////////////////////////////////////////////////////////
 	Matrix4 RenderEngine::ProjectionMatrix()
 	{
 		return projMat_;
 	}
 
+	// 设置投射矩阵
+	/////////////////////////////////////////////////////////////////////////////////
 	void RenderEngine::ProjectionMatrix(const Matrix4& mat)
 	{
 		projMat_ = mat;

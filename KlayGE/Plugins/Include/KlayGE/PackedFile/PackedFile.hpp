@@ -28,18 +28,15 @@ namespace KlayGE
 	public:
 		PackedFile();
 		PackedFile(const WString& pathName);
-		PackedFile(const PackedFile& rhs);
 
 		bool Open(const WString& pathName);
 		void Close();
-
-		VFilePtr Clone() const;
 
 		size_t Length();
 		void Length(size_t /*newLen*/)
 			{ }
 
-		size_t Write(const void* /*pData*/, size_t /*count*/)
+		size_t Write(const void* /*data*/, size_t /*count*/)
 			{ return 0; }
 		size_t Read(void* data, size_t count);
 		size_t CopyFrom(VFile& /*src*/, size_t /*size*/)
@@ -53,6 +50,9 @@ namespace KlayGE
 		VFilePtr	file_;
 
 		VFilePtr	pktFile_;
+
+		PackedFile(const PackedFile& rhs);
+		PackedFile& operator=(const PackedFile& rhs);
 	};
 }
 

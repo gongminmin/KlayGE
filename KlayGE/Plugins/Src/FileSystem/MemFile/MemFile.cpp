@@ -34,12 +34,6 @@ namespace KlayGE
 		this->Open(data, length);
 	}
 
-	MemFile::MemFile(const MemFile& rhs)
-				: chunkData_(rhs.chunkData_),
-					curPos_(rhs.curPos_)
-	{
-	}
-
 	// 析构函数
 	/////////////////////////////////////////////////////////////////////////////////
 	MemFile::~MemFile()
@@ -71,21 +65,6 @@ namespace KlayGE
 
 		chunkData_.clear();
 		std::vector<U8>().swap(chunkData_);
-	}
-
-	// 克隆一个与对象相同的指针
-	/////////////////////////////////////////////////////////////////////////////////
-	VFilePtr MemFile::Clone() const
-	{
-		return VFilePtr(new MemFile(*this));
-	}
-
-	// 重载=
-	/////////////////////////////////////////////////////////////////////////////////
-	MemFile& MemFile::operator=(const MemFile& rhs)
-	{
-		MemFile(rhs).Swap(*this);
-		return *this;
 	}
 
 	// 获取文件长度
@@ -171,13 +150,5 @@ namespace KlayGE
 	size_t MemFile::Tell()
 	{
 		return curPos_;
-	}
-
-	// 交换两个内存文件对象
-	/////////////////////////////////////////////////////////////////////////////////
-	void MemFile::Swap(MemFile& rhs)
-	{
-		std::swap(chunkData_, rhs.chunkData_);
-		std::swap(curPos_, rhs.curPos_);
 	}
 }

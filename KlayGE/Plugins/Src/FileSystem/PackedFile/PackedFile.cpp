@@ -30,13 +30,6 @@ namespace KlayGE
 		this->Open(pathName);
 	}
 
-	PackedFile::PackedFile(const PackedFile& rhs)
-				: pktFile_(rhs.pktFile_),
-					file_(rhs.file_)
-	{
-		unPkt_.Open(*pktFile_);
-	}
-
 	bool PackedFile::Open(const WString& pathName)
 	{
 		const WString::size_type offset(pathName.rfind(L".pkt/"));
@@ -55,7 +48,7 @@ namespace KlayGE
 
 		try
 		{
-			unPkt_.Open(*pktFile_);
+			unPkt_.Open(pktFile_);
 
 			this->Close();
 
@@ -82,11 +75,6 @@ namespace KlayGE
 		{
 			file_->Close();
 		}
-	}
-
-	VFilePtr PackedFile::Clone() const
-	{
-		return VFilePtr(new PackedFile(*this));
 	}
 
 	size_t PackedFile::Length()

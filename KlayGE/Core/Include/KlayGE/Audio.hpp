@@ -1,8 +1,11 @@
 // Audio.hpp
 // KlayGE 声音引擎 头文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.0.4
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.0.4
+// 增加了NullObject (2004.4.7)
 //
 // 2.0.0
 // 初次建立 (2003.7.7)
@@ -30,6 +33,11 @@ namespace KlayGE
 	class AudioBuffer
 	{
 	public:
+		AudioBuffer(const AudioDataSourcePtr& dataSource);
+		virtual ~AudioBuffer();
+
+		static AudioBufferPtr NullObject();
+
 		virtual void Play(bool loop = false) = 0;
 		virtual void Reset() = 0;
 		virtual void Stop() = 0;
@@ -46,17 +54,6 @@ namespace KlayGE
 		virtual Vector3 Direction() const = 0;
 		virtual void Direction(const Vector3& v) = 0;
 
-	public:
-		virtual ~AudioBuffer()
-			{ }
-
-	protected:
-		AudioBuffer(const AudioDataSourcePtr& dataSource)
-			: dataSource_(dataSource),
-				format_(dataSource->Format()),
-				freq_(dataSource->Freq())
-			{ }
-
 	protected:
 		AudioDataSourcePtr dataSource_;
 
@@ -69,15 +66,12 @@ namespace KlayGE
 	class SoundBuffer : public AudioBuffer
 	{
 	public:
+		SoundBuffer(const AudioDataSourcePtr& dataSource);
+		virtual ~SoundBuffer();
+
 		virtual void Reset();
 
-		bool IsSound() const
-			{ return true; }
-
-	public:
-		SoundBuffer(const AudioDataSourcePtr& dataSource);
-		virtual ~SoundBuffer()
-			{ }
+		bool IsSound() const;
 
 	protected:
 		virtual void DoReset() = 0;
@@ -88,16 +82,14 @@ namespace KlayGE
 	class MusicBuffer : public AudioBuffer
 	{
 	public:
+		MusicBuffer(const AudioDataSourcePtr& dataSource);
+		virtual ~MusicBuffer();
+
 		void Play(bool loop = false);
 		void Stop();
 		void Reset();
 
-		bool IsSound() const
-			{ return false; }
-
-	public:
-		MusicBuffer(const AudioDataSourcePtr& dataSource);
-		virtual ~MusicBuffer();
+		bool IsSound() const;
 
 	protected:
 		virtual void DoReset() = 0;
@@ -118,23 +110,20 @@ namespace KlayGE
 
 	public:
 		AudioEngine();
-		virtual ~AudioEngine()
-			{ }
+		virtual ~AudioEngine();
+
+		static AudioEnginePtr NullObject();
 
 		virtual const WString& Name() const = 0;
-		virtual void CustomAttribute(const String& name, void* pData)
-			{ }
 
 		void AddBuffer(size_t id, const AudioBufferPtr& buffer);
 
 		size_t BufferNum() const;
-		AudioBufferPtr& Buffer(size_t bufID);
-		const AudioBufferPtr& Buffer(size_t bufID) const;
+		AudioBufferPtr Buffer(size_t bufID);
+		const AudioBufferPtr Buffer(size_t bufID) const;
 
-		void Play(size_t bufID, bool loop = false)
-			{ this->Buffer(bufID)->Play(loop); }
-		void Stop(size_t bufID)
-			{ this->Buffer(bufID)->Stop(); }
+		void Play(size_t bufID, bool loop = false);
+		void Stop(size_t bufID);
 		void PlayAll(bool loop = false);
 		void StopAll();
 
@@ -144,12 +133,12 @@ namespace KlayGE
 		void  MusicVolume(float vol);
 		float MusicVolume() const;
 
-		virtual Vector3 ListenerPos() const = 0;
-		virtual void ListenerPos(const Vector3& v) = 0;
-		virtual Vector3 ListenerVel() const = 0;
-		virtual void ListenerVel(const Vector3& v) = 0;
-		virtual void ListenerOri(Vector3& face, Vector3& up) const = 0;
-		virtual void ListenerOri(const Vector3& face, const Vector3& up) = 0;
+		virtual Vector3 GetListenerPos() const = 0;
+		virtual void SetListenerPos(const Vector3& v) = 0;
+		virtual Vector3 GetListenerVel() const = 0;
+		virtual void SetListenerVel(const Vector3& v) = 0;
+		virtual void GetListenerOri(Vector3& face, Vector3& up) const = 0;
+		virtual void SetListenerOri(const Vector3& face, const Vector3& up) = 0;
 
 	protected:
 		AudioBufs	audioBufs_;

@@ -35,7 +35,7 @@ namespace KlayGE
 		}
 
 		RenderEffectPtr Clone() const
-			{ return NullRenderEffectInstance(); }
+			{ return RenderEffect::NullObject(); }
 
 		void SetValue(const String& name, const void* data, UINT bytes)
 			{ }
@@ -94,7 +94,7 @@ namespace KlayGE
 			{ }
 	};
 
-	RenderEffectPtr NullRenderEffectInstance()
+	RenderEffectPtr RenderEffect::NullObject()
 	{
 		static RenderEffectPtr obj(new NullRenderEffect);
 		return obj;
@@ -111,7 +111,7 @@ namespace KlayGE
 			{
 				if (!packedFile->Open(WString(_RENDERFXPATH_) + effectName))
 				{
-					return NullRenderEffectInstance();
+					return RenderEffect::NullObject();
 				}
 			}
 
@@ -125,7 +125,7 @@ namespace KlayGE
 			{
 				if (!diskFile->Open(WString(_RENDERFXPATH_) + effectName, VFile::OM_Read))
 				{
-					return NullRenderEffectInstance();
+					return RenderEffect::NullObject();
 				}
 			}
 

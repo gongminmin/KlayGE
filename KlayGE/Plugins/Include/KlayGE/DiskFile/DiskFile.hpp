@@ -28,15 +28,10 @@ namespace KlayGE
 	public:
 		DiskFile();
 		DiskFile(const WString& fileName, OpenMode openMode);
-		DiskFile(const DiskFile& rhs);
 		~DiskFile();
-
-		DiskFile& operator=(const DiskFile& rhs);
 
 		bool Open(const WString& fileName, OpenMode openMode);
 		void Close();
-
-		VFilePtr Clone() const;
 
 		size_t Length();
 		void Length(size_t newLen);
@@ -50,13 +45,14 @@ namespace KlayGE
 
 		void Flush();
 
-		void Swap(DiskFile& rhs);
-
 	private:
-		SharedPtr<std::fstream> file_;
+		std::fstream file_;
 
 		WString		fileName_;
 		OpenMode	openMode_;
+
+		DiskFile(const DiskFile& rhs);
+		DiskFile& operator=(const DiskFile& rhs);
 	};
 }
 

@@ -195,11 +195,11 @@ namespace KlayGE
 
 	// 打开打包文件
 	/////////////////////////////////////////////////////////////////////////////////
-	void UnPkt::Open(const VFile& pktFile)
+	void UnPkt::Open(const VFilePtr& pktFile)
 	{
 		Close();
 
-		file_ = pktFile.Clone();
+		file_ = pktFile;
 
 		file_->Read(&mag_, sizeof(mag_));
 		Verify(MakeFourCC<'p', 'k', 't', ' '>::value == mag_.magic);

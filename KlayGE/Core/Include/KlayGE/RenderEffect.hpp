@@ -33,6 +33,8 @@ namespace KlayGE
 		virtual ~RenderEffect()
 			{ }
 
+		static RenderEffectPtr NullObject();
+
 		virtual RenderEffectPtr Clone() const = 0;
 
 		virtual void Desc(UINT& parameters, UINT& techniques, UINT& functions) = 0;
@@ -66,8 +68,6 @@ namespace KlayGE
 		virtual void Pass(UINT passNum) = 0;
 		virtual void End() = 0;
 	};
-
-	RenderEffectPtr NullRenderEffectInstance();
 
 	RenderEffectPtr LoadRenderEffect(const WString& effectName, bool fromPack = false);
 }

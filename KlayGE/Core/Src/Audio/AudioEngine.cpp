@@ -21,12 +21,81 @@
 
 namespace KlayGE
 {
+	class NullAudioEngine : public AudioEngine
+	{
+	public:
+		const WString& Name() const
+		{
+			static WString name(L"Null Audio Engine");
+			return name;
+		}
+
+		void AddBuffer(size_t id, const AudioBufferPtr& buffer)
+			{ }
+
+		size_t BufferNum() const
+			{ return 0; }
+		AudioBufferPtr Buffer(size_t bufID)
+			{ return AudioBuffer::NullObject(); }
+		const AudioBufferPtr Buffer(size_t bufID) const
+			{ return AudioBuffer::NullObject(); }
+
+		void Play(size_t bufID, bool loop = false)
+			{ }
+		void Stop(size_t bufID)
+			{ }
+		void PlayAll(bool loop = false)
+			{ }
+		void StopAll()
+			{ }
+
+		// 设置和获取音量
+		void  SoundVolume(float vol)
+			{ }
+		float SoundVolume() const
+			{ }
+		void  MusicVolume(float vol)
+			{ }
+		float MusicVolume() const
+			{ }
+
+		Vector3 GetListenerPos() const
+			{ return Vector3::Zero(); }
+		void SetListenerPos(const Vector3& v)
+			{ }
+		Vector3 GetListenerVel() const
+			{ return Vector3::Zero(); }
+		void SetListenerVel(const Vector3& v)
+			{ }
+		void GetListenerOri(Vector3& face, Vector3& up) const
+		{
+			face = Vector3::Zero();
+			up = Vector3::Zero();
+		}
+		void SetListenerOri(const Vector3& face, const Vector3& up)
+			{ }
+	};
+
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	AudioEngine::AudioEngine()
 					: soundVol_(1),
 						musicVol_(1)
 	{
+	}
+
+	// 析构函数
+	/////////////////////////////////////////////////////////////////////////////////
+	AudioEngine::~AudioEngine()
+	{
+	}
+
+	// 获取空对象
+	/////////////////////////////////////////////////////////////////////////////////
+	AudioEnginePtr AudioEngine::NullObject()
+	{
+		static AudioEnginePtr obj(new NullAudioEngine);
+		return obj;
 	}
 
 	// 往列表里添加一个音频缓冲区
@@ -36,13 +105,27 @@ namespace KlayGE
 		audioBufs_.insert(id, buffer);
 	}
 
+	// 播放id所指定的声音
+	/////////////////////////////////////////////////////////////////////////////////
+	void AudioEngine::Play(size_t bufID, bool loop)
+	{
+		this->Buffer(bufID)->Play(loop);
+	}
+
+	// 停止id所指定的声音
+	/////////////////////////////////////////////////////////////////////////////////
+	void AudioEngine::Stop(size_t bufID)
+	{
+		this->Buffer(bufID)->Stop();
+	}	
+
 	// 播放所有的声音
 	/////////////////////////////////////////////////////////////////////////////////
-	void AudioEngine::PlayAll(bool bLoop)
+	void AudioEngine::PlayAll(bool loop)
 	{
 		for (AudioBufsIter iter = audioBufs_.begin(); iter != audioBufs_.end(); ++ iter)
 		{
-			audioBufs_.data(iter)->Play(bLoop);
+			audioBufs_.data(iter)->Play(loop);
 		}
 	}
 
@@ -65,7 +148,7 @@ namespace KlayGE
 
 	// 获取声音缓冲区
 	/////////////////////////////////////////////////////////////////////////////////
-	AudioBufferPtr& AudioEngine::Buffer(size_t bufID)
+	AudioBufferPtr AudioEngine::Buffer(size_t bufID)
 	{
 		AudioBufsIter iter(audioBufs_.find(bufID));
 		if (iter != audioBufs_.end())
@@ -75,7 +158,7 @@ namespace KlayGE
 		THR(E_FAIL);
 	}
 
-	const AudioBufferPtr& AudioEngine::Buffer(size_t bufID) const
+	const AudioBufferPtr AudioEngine::Buffer(size_t bufID) const
 	{
 		AudioBufsConstIter iter(audioBufs_.find(bufID));
 		if (iter != audioBufs_.end())

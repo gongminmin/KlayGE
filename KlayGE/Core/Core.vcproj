@@ -355,6 +355,12 @@
 				Name="Ô´ÎÄ¼þ"
 				Filter="">
 				<File
+					RelativePath=".\Src\Audio\AudioBuffer.cpp">
+				</File>
+				<File
+					RelativePath=".\Src\Audio\AudioDataSource.cpp">
+				</File>
+				<File
 					RelativePath="Src\Audio\AudioEngine.cpp">
 				</File>
 				<File

@@ -73,14 +73,14 @@ namespace KlayGE
 
 	// 获取定时器复位到现在的时间
 	/////////////////////////////////////////////////////////////////////////////////
-	float Timer::AppTime()
+	float Timer::AppTime() const
 	{
 		return this->Time() - baseTime_;
 	}
 
 	// 获取时间
 	/////////////////////////////////////////////////////////////////////////////////
-	float Timer::Time()
+	float Timer::Time() const
 	{
 		if (stopTime_ != 0)
 		{

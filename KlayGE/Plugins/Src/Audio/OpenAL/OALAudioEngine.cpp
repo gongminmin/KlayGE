@@ -74,9 +74,9 @@ namespace KlayGE
 
 		alcMakeContextCurrent(Context);
 
-		this->ListenerPos(MakeVector(0.0f, 0.0f, 0.0f));
-		this->ListenerVel(MakeVector(0.0f, 0.0f, 0.0f));
-		this->ListenerOri(MakeVector(0.0f, 0.0f, 1.0f), MakeVector(0.0f, 1.0f, 0.0f));
+		this->SetListenerPos(MakeVector(0.0f, 0.0f, 0.0f));
+		this->SetListenerVel(MakeVector(0.0f, 0.0f, 0.0f));
+		this->SetListenerOri(MakeVector(0.0f, 0.0f, 1.0f), MakeVector(0.0f, 1.0f, 0.0f));
 
 		alDistanceModel(AL_INVERSE_DISTANCE);
 
@@ -109,7 +109,7 @@ namespace KlayGE
 
 	// 获取3D听者位置
 	/////////////////////////////////////////////////////////////////////////////////
-	Vector3 OALAudioEngine::ListenerPos() const
+	Vector3 OALAudioEngine::GetListenerPos() const
 	{
 		Vector3 v;
 		alGetListener3f(AL_POSITION, &v.x(), &v.y(), &v.z());
@@ -118,7 +118,7 @@ namespace KlayGE
 
 	// 设置3D听者位置
 	/////////////////////////////////////////////////////////////////////////////////
-	void OALAudioEngine::ListenerPos(const Vector3& v)
+	void OALAudioEngine::SetListenerPos(const Vector3& v)
 	{
 		Vector3 alv(VecToALVec(v));
 		alListener3f(AL_POSITION, alv.x(), alv.y(), alv.z());
@@ -126,7 +126,7 @@ namespace KlayGE
 
 	// 获取3D听者速度
 	/////////////////////////////////////////////////////////////////////////////////
-	Vector3 OALAudioEngine::ListenerVel() const
+	Vector3 OALAudioEngine::GetListenerVel() const
 	{
 		Vector3 v;
 		alGetListener3f(AL_VELOCITY, &v.x(), &v.y(), &v.z());
@@ -135,7 +135,7 @@ namespace KlayGE
 
 	// 设置3D听者速度
 	/////////////////////////////////////////////////////////////////////////////////
-	void OALAudioEngine::ListenerVel(const Vector3& v)
+	void OALAudioEngine::SetListenerVel(const Vector3& v)
 	{
 		Vector3 alv(VecToALVec(v));
 		alListener3f(AL_VELOCITY, alv.x(), alv.y(), alv.z());
@@ -143,7 +143,7 @@ namespace KlayGE
 
 	// 获取3D听者方向
 	/////////////////////////////////////////////////////////////////////////////////
-	void OALAudioEngine::ListenerOri(Vector3& face, Vector3& up) const
+	void OALAudioEngine::GetListenerOri(Vector3& face, Vector3& up) const
 	{
 		float v[6];
 		alGetListenerfv(AL_ORIENTATION, v);
@@ -153,7 +153,7 @@ namespace KlayGE
 
 	// 获取3D听者方向
 	/////////////////////////////////////////////////////////////////////////////////
-	void OALAudioEngine::ListenerOri(const Vector3& face, const Vector3& up)
+	void OALAudioEngine::SetListenerOri(const Vector3& face, const Vector3& up)
 	{
 		Vector3 alface(VecToALVec(face));
 		Vector3 alup(VecToALVec(up));

@@ -93,7 +93,7 @@ namespace KlayGE
 
 		static void Decode(VFile& Out, VFile& In);
 
-		void Open(const VFile& pktFile);
+		void Open(const VFilePtr& pktFile);
 		void Close();
 		
 		void Dir(const WString& dirName);

@@ -117,9 +117,9 @@ namespace KlayGE
 		TIF(primaryBuffer.QueryInterface<IID_IDirectSound3DListener>(ds3dListener_));
 
 
-		this->ListenerPos(MakeVector(0.0f, 0.0f, 0.0f));
-		this->ListenerVel(MakeVector(0.0f, 0.0f, 0.0f));
-		this->ListenerOri(MakeVector(0.0f, 0.0f, 1.0f), MakeVector(0.0f, 1.0f, 0.0f));
+		this->SetListenerPos(MakeVector(0.0f, 0.0f, 0.0f));
+		this->SetListenerVel(MakeVector(0.0f, 0.0f, 0.0f));
+		this->SetListenerOri(MakeVector(0.0f, 0.0f, 1.0f), MakeVector(0.0f, 1.0f, 0.0f));
 	}
 
 	// 析构函数
@@ -139,7 +139,7 @@ namespace KlayGE
 
 	// 获取3D听者位置
 	/////////////////////////////////////////////////////////////////////////////////
-	Vector3 DSAudioEngine::ListenerPos() const
+	Vector3 DSAudioEngine::GetListenerPos() const
 	{
 		D3DVECTOR vec;
 		this->ds3dListener_->GetPosition(&vec);
@@ -148,14 +148,14 @@ namespace KlayGE
 
 	// 设置3D听者位置
 	/////////////////////////////////////////////////////////////////////////////////
-	void DSAudioEngine::ListenerPos(const Vector3& v)
+	void DSAudioEngine::SetListenerPos(const Vector3& v)
 	{
 		this->ds3dListener_->SetPosition(v.x(), v.y(), v.z(), DS3D_IMMEDIATE);
 	}
 
 	// 获取3D听者速度
 	/////////////////////////////////////////////////////////////////////////////////
-	Vector3 DSAudioEngine::ListenerVel() const
+	Vector3 DSAudioEngine::GetListenerVel() const
 	{
 		D3DVECTOR vec;
 		this->ds3dListener_->GetVelocity(&vec);
@@ -164,14 +164,14 @@ namespace KlayGE
 
 	// 设置3D听者速度
 	/////////////////////////////////////////////////////////////////////////////////
-	void DSAudioEngine::ListenerVel(const Vector3& v)
+	void DSAudioEngine::SetListenerVel(const Vector3& v)
 	{
 		this->ds3dListener_->SetVelocity(v.x(), v.y(), v.z(), DS3D_IMMEDIATE);
 	}
 
 	// 获取3D听者方向
 	/////////////////////////////////////////////////////////////////////////////////
-	void DSAudioEngine::ListenerOri(Vector3& face, Vector3& up) const
+	void DSAudioEngine::GetListenerOri(Vector3& face, Vector3& up) const
 	{
 		D3DVECTOR d3dFace, d3dUp;
 		this->ds3dListener_->GetOrientation(&d3dFace, &d3dUp);
@@ -182,7 +182,7 @@ namespace KlayGE
 
 	// 获取3D听者方向
 	/////////////////////////////////////////////////////////////////////////////////
-	void DSAudioEngine::ListenerOri(const Vector3& face, const Vector3& up)
+	void DSAudioEngine::SetListenerOri(const Vector3& face, const Vector3& up)
 	{
 		this->ds3dListener_->SetOrientation(face.x(), face.y(), face.z(),
 			up.x(), up.y(), up.z(), DS3D_IMMEDIATE);

@@ -1,8 +1,11 @@
 // AudioDataSource.hpp
 // KlayGE 音频数据源引擎 头文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.0.4
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.0.4
+// 增加了NullObject (2004.4.7)
 //
 // 2.0.0
 // 初次建立 (2003.7.7)
@@ -22,24 +25,25 @@ namespace KlayGE
 		AF_Mono8,
 		AF_Mono16,
 		AF_Stereo8,
-		AF_Stereo16
+		AF_Stereo16,
+
+		AF_Unknown,
 	};
 
 	class AudioDataSource
 	{
 	public:
-		AudioFormat Format() const
-			{ return this->format_; }
-		U32 Freq() const
-			{ return this->freq_; }
+		static AudioDataSourcePtr NullObject();
+
+		AudioFormat Format() const;
+		U32 Freq() const;
 
 		virtual size_t Size() = 0;
 
 		virtual size_t Read(U8* data, size_t size) = 0;
 		virtual void Reset() = 0;
 
-		virtual ~AudioDataSource()
-			{ }
+		virtual ~AudioDataSource();
 
 	protected:
 		AudioFormat		format_;

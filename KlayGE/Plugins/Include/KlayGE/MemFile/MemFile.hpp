@@ -24,19 +24,14 @@ namespace KlayGE
 	{
 	public:
 		MemFile();
-		MemFile(const void* pData, size_t length);
-		MemFile(const MemFile& File);
+		MemFile(const void* data, size_t length);
 		~MemFile();
 
-		MemFile& operator=(const MemFile& rhs);
-
-		void Open(const void* pData, size_t length);
+		void Open(const void* data, size_t length);
 		void Close();
 
-		VFilePtr Clone() const;
-
 		size_t Length();
-		void Length(size_t NewLen);
+		void Length(size_t newLen);
 
 		size_t Write(const void* data, size_t count);
 		size_t Read(void* data, size_t count);
@@ -45,11 +40,12 @@ namespace KlayGE
 		size_t Seek(size_t offset, SeekMode from);
 		size_t Tell();
 
-		void Swap(MemFile& rhs);
-
 	private:
 		std::vector<U8>		chunkData_;
 		size_t				curPos_;
+
+		MemFile(const MemFile& rhs);
+		MemFile& operator=(const MemFile& rhs);
 	};
 }
 

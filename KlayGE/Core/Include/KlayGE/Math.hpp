@@ -143,7 +143,7 @@ namespace KlayGE
 		template <typename InputIterator, typename T>
 		static T Avg(InputIterator first, InputIterator last)
 		{
-			return Sum(first, last) / (last - first);
+			return MathLib::Sum(first, last) / (last - first);
 		}
 
 		// 限制 val 在 low 和 high 之间
@@ -204,11 +204,11 @@ namespace KlayGE
 		// 奇数则返回true
 		template <typename T>
 		static bool IsOdd(const T& x)
-			{ return Mod(x, 2) != 0; }
+			{ return MathLib::Mod(x, 2) != 0; }
 		// 偶数则返回true
 		template <typename T>
 		static bool IsEven(const T& x)
-			{ return !IsOdd(x); }
+			{ return !MathLib::IsOdd(x); }
 
 		// 判断 val 是否在 low 和 high 之间
 		template <typename T>
@@ -277,7 +277,7 @@ namespace KlayGE
 
 		// 几种类型的LengthSq
 		template <typename T>
-		typename T::value_type LengthSq(const T& rhs) const
+		static typename T::value_type LengthSq(const T& rhs)
 			{ return MathLib::Dot(rhs, rhs); }
 
 		// 几种类型的Length

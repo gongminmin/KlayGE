@@ -6,6 +6,7 @@
 //
 // 2.0.4
 // 去掉了WorldMatrices (2004.4.3)
+// 保存了三个矩阵 (2004.4.7)
 //
 // 2.0.3
 // 去掉了SoftwareBlend (2004.3.10)
@@ -144,8 +145,7 @@ namespace KlayGE
 		virtual void StartRendering() = 0;
 
 		void SetRenderEffect(const RenderEffectPtr& effect);
-		RenderEffectPtr GetRenderEffect() const
-			{ return renderEffect_; }
+		RenderEffectPtr GetRenderEffect() const;
 
 		virtual void BeginFrame() = 0;
 		virtual void Render(const RenderBuffer& vb) = 0;
@@ -191,8 +191,7 @@ namespace KlayGE
 		// Detaches the render target with the passed name from the render system and returns a pointer to it.
 		virtual RenderTargetPtr RemoveRenderTarget(RenderTargetListIterator iter);
 		virtual void ActiveRenderTarget(RenderTargetListIterator iter);
-		const RenderTargetListIterator& ActiveRenderTarget() const
-			{ return activeRenderTarget_; }
+		const RenderTargetListIterator& ActiveRenderTarget() const;
 
 		virtual void SetTexture(U32 stage, const Texture& texture) = 0;
 

@@ -135,12 +135,12 @@ namespace KlayGE
 
 		const WString& Name() const;
 
-		Vector3 ListenerPos() const;
-		void ListenerPos(const Vector3& v);
-		Vector3 ListenerVel() const;
-		void ListenerVel(const Vector3& v);
-		void ListenerOri(Vector3& face, Vector3& up) const;
-		void ListenerOri(const Vector3& face, const Vector3& up);
+		Vector3 GetListenerPos() const;
+		void SetListenerPos(const Vector3& v);
+		Vector3 GetListenerVel() const;
+		void SetListenerVel(const Vector3& v);
+		void GetListenerOri(Vector3& face, Vector3& up) const;
+		void SetListenerOri(const Vector3& face, const Vector3& up);
 
 	private:
 		COMPtr<IDirectSound>			dsound_;

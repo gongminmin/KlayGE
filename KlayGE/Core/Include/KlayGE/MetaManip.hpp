@@ -99,6 +99,15 @@ namespace KlayGE
 	public:
 		enum { exists = sizeof(typename Small) == sizeof(Test(MakeT())) };
 	};
+
+	// ÈÝÄÉSingletonµÄÄ£°å
+	////////////////////////////////////////////////////////////////////////////////
+	template <class T>
+	T& SingletonInstance()
+	{
+		static T t;
+		return t;
+	}
 }
 
 #endif			// _METAMANIP_HPP

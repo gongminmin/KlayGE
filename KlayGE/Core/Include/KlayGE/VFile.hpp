@@ -49,8 +49,6 @@ namespace KlayGE
 
 		virtual void Close() = 0;
 
-		virtual VFilePtr Clone() const = 0;
-
 		virtual size_t Length() = 0;
 		virtual void Length(size_t newLen) = 0;
 

@@ -27,13 +27,13 @@ namespace KlayGE
 		void Reset();
 		void Start();
 		void Stop();
-		float AbsoluteTime();
-		float AppTime();
+		static float AbsoluteTime();
+		float AppTime() const;
 
 	private:
 		Timer();
 
-		float Time();
+		float Time() const;
 
 		float	baseTime_;
 		float	stopTime_;

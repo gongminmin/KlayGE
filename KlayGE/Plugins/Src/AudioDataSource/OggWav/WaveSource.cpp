@@ -78,9 +78,9 @@ namespace KlayGE
 
 	// ¹¹Ôìº¯Êı
 	/////////////////////////////////////////////////////////////////////////////////
-	WaveSource::WaveSource(const VFile& file)
+	WaveSource::WaveSource(const VFilePtr& file)
 	{
-		wavFile_ = file.Clone();
+		wavFile_ = file;
 
 		this->ReadMMIO();
 		this->Reset();

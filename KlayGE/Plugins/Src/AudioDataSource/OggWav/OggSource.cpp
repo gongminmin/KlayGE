@@ -33,8 +33,8 @@ namespace KlayGE
 {
 	// ¹¹Ôìº¯Êý
 	/////////////////////////////////////////////////////////////////////////////////
-	OggSource::OggSource(const VFile& file)
-				: oggFile_(file.Clone())
+	OggSource::OggSource(const VFilePtr& file)
+				: oggFile_(file)
 	{
 		ogg_sync_init(&oy_); // Now we can read pages
 
