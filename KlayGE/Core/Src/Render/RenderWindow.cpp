@@ -1,0 +1,39 @@
+#include <KlayGE/KlayGE.hpp>
+#include <KlayGE/SharePtr.hpp>
+#include <KlayGE/Viewport.hpp>
+#include <KlayGE/RenderTarget.hpp>
+
+#include <KlayGE/RenderWindow.hpp>
+
+namespace KlayGE
+{
+	// 构造函数
+	/////////////////////////////////////////////////////////////////////////////////
+	RenderWindow::RenderWindow()
+	{
+	}
+
+	// 析构函数
+	/////////////////////////////////////////////////////////////////////////////////
+	RenderWindow::~RenderWindow()
+	{
+	}
+
+	// 获取是否是全屏状态
+	/////////////////////////////////////////////////////////////////////////////////
+	bool RenderWindow::FullScreen() const
+	{
+		return isFullScreen_;
+	}
+
+	// 更新渲染窗口
+	/////////////////////////////////////////////////////////////////////////////////
+	void RenderWindow::Update()
+	{
+		// call superclass
+		RenderTarget::Update();
+
+		// Swap buffers
+		this->SwapBuffers();
+	}
+}

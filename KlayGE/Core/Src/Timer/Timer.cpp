@@ -1,0 +1,94 @@
+// Timer.cpp
+// KlayGE 定时器 实现文件
+// Ver 2.0.0
+// 版权所有(C) 龚敏敏, 2003
+// Homepage: http://www.enginedev.com
+//
+// 2.0.0
+// 初次建立 (2003.8.6)
+//
+// 修改记录
+/////////////////////////////////////////////////////////////////////////////////
+
+#include <KlayGE/KlayGE.hpp>
+
+#include <ctime>
+
+#include <KlayGE/Timer.hpp>
+
+namespace KlayGE
+{
+	// 获取定时器实例。单件模式
+	/////////////////////////////////////////////////////////////////////////////////
+	Timer& Timer::Instance()
+	{
+		static Timer timer;
+		return timer;
+	}
+
+	// 构造函数
+	/////////////////////////////////////////////////////////////////////////////////
+	Timer::Timer()
+			: baseTime_(0),
+				stopTime_(0),
+				timerStopped_(false)
+	{
+	}
+
+	// 定时器复位
+	/////////////////////////////////////////////////////////////////////////////////
+	void Timer::Reset()
+	{
+		baseTime_		= this->Time();
+		stopTime_		= 0;
+		timerStopped_	= false;
+	}
+
+	// 启动定时器
+	/////////////////////////////////////////////////////////////////////////////////
+	void Timer::Start()
+	{
+		if (timerStopped_)
+		{
+			baseTime_ += this->AbsoluteTime() - stopTime_;
+		}
+		stopTime_		= 0;
+		timerStopped_	= false;
+	}
+
+	// 停止定时器
+	/////////////////////////////////////////////////////////////////////////////////
+	void Timer::Stop()
+	{
+		stopTime_		= this->Time();
+		timerStopped_	= true;
+	}
+
+	// 获取系统启动到现在的时间
+	/////////////////////////////////////////////////////////////////////////////////
+	float Timer::AbsoluteTime()
+	{
+		return std::clock() * 0.001f;
+	}
+
+	// 获取定时器复位到现在的时间
+	/////////////////////////////////////////////////////////////////////////////////
+	float Timer::AppTime()
+	{
+		return this->Time() - baseTime_;
+	}
+
+	// 获取时间
+	/////////////////////////////////////////////////////////////////////////////////
+	float Timer::Time()
+	{
+		if (stopTime_ != 0)
+		{
+			return stopTime_;
+		}
+		else
+		{
+			return this->AbsoluteTime();
+		}
+	}
+}
