@@ -38,7 +38,7 @@ namespace
 #pragma pack(pop)
 
 
-	void LoadTGA(TGAHeader& tgaHeader, std::vector<U8>& tgaData, const std::string& fileName)
+	void LoadTGA(TGAHeader& tgaHeader, std::vector<U8>& tgaData, std::string const & fileName)
 	{
 		DiskFile file(fileName, VFile::OM_Read);
 		file.Read(&tgaHeader, sizeof(tgaHeader));
@@ -61,7 +61,7 @@ namespace
 
 			for (short x = 0; x < tgaHeader.width; ++ x)
 			{
-				const size_t offset((line * tgaHeader.width + x) * (tgaHeader.pixelSize / 8));
+				size_t const offset((line * tgaHeader.width + x) * (tgaHeader.pixelSize / 8));
 
 				tgaData.push_back(data[offset + 0]);
 				tgaData.push_back(data[offset + 1]);
