@@ -15,6 +15,9 @@
 
 #include <KlayGE/OCTree/OCTree.hpp>
 
+#include <KlayGE/Input.hpp>
+#include <KlayGE/DInput/DInputFactory.hpp>
+
 #include <vector>
 #include <sstream>
 #include <ctime>
@@ -107,6 +110,29 @@ namespace
 	};
 
 	boost::shared_ptr<RenderPolygon> renderPolygon;
+
+
+	enum
+	{
+		TurnLeftRight,
+		TurnUpDown,
+
+		Forward,
+		Backward,
+		MoveLeft,
+		MoveRight,
+	};
+
+	InputAction actions[] = 
+	{
+		InputAction(TurnLeftRight, MS_X),
+		InputAction(TurnUpDown, MS_Y),
+
+		InputAction(Forward, KS_W),
+		InputAction(Backward, KS_S),
+		InputAction(MoveLeft, KS_A),
+		InputAction(MoveRight, KS_D),
+	};
 }
 
 
@@ -134,6 +160,8 @@ int main()
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
+
+	Context::Instance().InputFactoryInstance(DInputFactoryInstance());
 
 	TheRenderSettings settings;
 	settings.width = 800;
@@ -165,20 +193,67 @@ void Parallax::InitObjects()
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
 	fpcController_.AttachCamera(this->ActiveCamera());
+	fpcController_.Scalers(0.005f, 0.1f);
 
 	this->LookAt(Vector3(2, 0, -2), Vector3(0, 0, 0));
 	this->Proj(0.1f, 20.0f);
 
-	Matrix4 view = renderEngine.ViewMatrix();
-	Matrix4 proj = renderEngine.ProjectionMatrix();
-
-	*(renderPolygon->effect_->ParameterByName("worldviewproj")) = view * proj;
-	*(renderPolygon->effect_->ParameterByName("eyePos")) = Vector4(2, 0, -2, 1) - Vector4(0, 0, 0, 0);
+	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	KlayGE::InputActionMap actionMap;
+	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
+	inputEngine.ActionMap(actionMap, true);
 }
 
 void Parallax::Update()
 {
 	fpcController_.Update();
+
+	static clock_t startTime(std::clock());
+	clock_t curTime(std::clock());
+	if (curTime - startTime > 20)
+	{
+		startTime = curTime;
+
+		InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+		InputActionsType actions(inputEngine.Update());
+		for (InputActionsType::iterator iter = actions.begin(); iter != actions.end(); ++ iter)
+		{
+			switch (iter->first)
+			{
+			case TurnLeftRight:
+				fpcController_.Rotate(iter->second, 0, 0);
+				break;
+
+			case TurnUpDown:
+				fpcController_.Rotate(0, iter->second, 0);
+				break;
+
+			case Forward:
+				fpcController_.Move(0, 0, 1);
+				break;
+
+			case Backward:
+				fpcController_.Move(0, 0, -1);
+				break;
+
+			case MoveLeft:
+				fpcController_.Move(-1, 0, 0);
+				break;
+
+			case MoveRight:
+				fpcController_.Move(1, 0, 0);
+				break;
+			}
+		}
+	}
+
+	Matrix4 view = this->ActiveCamera().ViewMatrix();
+	Matrix4 proj = this->ActiveCamera().ProjMatrix();
+	Vector3 eyePos = this->ActiveCamera().EyePos();
+
+	*(renderPolygon->effect_->ParameterByName("worldviewproj")) = view * proj;
+	*(renderPolygon->effect_->ParameterByName("eyePos")) = Vector4(eyePos.x(), eyePos.y(), eyePos.z(), 0.0f);
+
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 

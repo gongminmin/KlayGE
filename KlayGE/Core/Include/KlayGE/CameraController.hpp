@@ -59,12 +59,10 @@ namespace KlayGE
 		Vector3 WorldRight() const;
 		Vector3 WorldUp() const;
 		Vector3 WorldAhead() const;
-        Vector3 EyePt() const;
+        Vector3 EyePos() const;
 
 	private:
 		Matrix4		world_;				// World matrix of the camera (inverse of the view matrix)
-
-		Quaternion	rotation_;
 	};
 }
 

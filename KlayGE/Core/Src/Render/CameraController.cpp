@@ -47,7 +47,6 @@ namespace KlayGE
 
 	FirstPersonCameraController::FirstPersonCameraController()
 	{
-		MathLib::RotationAxis(rotation_, Vector3(0.0f, 0.0f, 1.0f), 0.0f);
 	}
 
 	void FirstPersonCameraController::Update()
@@ -61,17 +60,14 @@ namespace KlayGE
 	{
 		assert(camera_ != NULL);
 
-		Matrix4 movement;
-		MathLib::Translation(movement, x * moveScaler_, y * moveScaler_, z * moveScaler_);
+		Vector3 movement(x, y, z);
+		movement *= moveScaler_;
 
-		Matrix4 rot;
-		MathLib::ToMatrix(rot, rotation_);
+		Vector3 eyePos = this->EyePos();
+		Vector3 viewVec = this->WorldAhead();
+		Vector3 upVec = this->WorldUp();
 
-		rot *= movement;
-
-		Vector3 eyePos = camera_->EyePos();
-		Vector3 viewVec = camera_->ViewVec();
-		Vector3 upVec = camera_->UpVec();
+		MathLib::TransformCoord(eyePos, movement, world_);
 
 		camera_->ViewParams(eyePos, eyePos + viewVec, upVec);
 
@@ -82,21 +78,20 @@ namespace KlayGE
 	{
 		assert(camera_ != NULL);
 
+		Vector3 eyePos = this->EyePos();
+		Vector3 viewVec = this->WorldAhead();
+		Vector3 upVec = this->WorldUp();
+
 		Quaternion rot;
-		MathLib::RotationYawPitchRoll(rot, yaw * rotationScaler_, pitch * rotationScaler_, roll * rotationScaler_);
-
-		rot = rotation_ * rot;
-
-		Vector3 eyePos = camera_->EyePos();
-		Vector3 viewVec = camera_->ViewVec();
-		Vector3 upVec = camera_->UpVec();
+		MathLib::RotationYawPitchRoll(rot, -yaw * rotationScaler_, -pitch * rotationScaler_, -roll * rotationScaler_);
 
 		Matrix4 rotMatrix;
 		MathLib::ToMatrix(rotMatrix, rot);
 
-		MathLib::TransformCoord(viewVec, viewVec, rotMatrix);
+		rotMatrix = world_ * rotMatrix;
+		MathLib::TransformCoord(viewVec, Vector3(0, 0, 1), rotMatrix);
 
-		camera_->ViewParams(eyePos, eyePos + viewVec, upVec);
+		camera_->ViewParams(eyePos, viewVec, upVec);
 
 		this->Update();
 	}
@@ -116,7 +111,7 @@ namespace KlayGE
 		return Vector3(world_(2, 0), world_(2, 1), world_(2, 2));
 	}
 
-    Vector3 FirstPersonCameraController::EyePt() const
+    Vector3 FirstPersonCameraController::EyePos() const
 	{
 		return Vector3(world_(3, 0), world_(3, 1), world_(3, 2));
 	}
