@@ -8,9 +8,8 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/ResLocator.hpp>
+#include <KlayGE/ResLoader.hpp>
 
-#include <KlayGE/DiskFile/DiskFile.hpp>
 #include <KlayGE/D3D9/D3D9RenderSettings.hpp>
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
@@ -50,18 +49,18 @@ namespace
 #pragma pack(pop)
 
 
-	KlayGE::TexturePtr LoadTGA(KlayGE::VFile& file)
+	KlayGE::TexturePtr LoadTGA(std::istream& file)
 	{
 		try
 		{
-			file.Read(&TGAHeader, sizeof(TGAHeader));
-			file.Seek(TGAHeader.infoLength, VFile::SM_Current);
+			file.read(reinterpret_cast<char*>(&TGAHeader), sizeof(TGAHeader));
+			file.seekg(TGAHeader.infoLength, std::ios_base::cur);
 
 			KlayGE::TexturePtr texture(Context::Instance().RenderFactoryInstance().MakeTexture(TGAHeader.width,
 				TGAHeader.height, 0, PF_X8R8G8B8));
 
 			vector<U8> data(TGAHeader.width * TGAHeader.height * TGAHeader.pixelSize / 8);
-			file.Read(&data[0], data.size());
+			file.read(reinterpret_cast<char*>(&data[0]), data.size());
 
 			vector<U8> tgaData;
 			tgaData.reserve(TGAHeader.width * TGAHeader.height * 4);
@@ -102,7 +101,7 @@ namespace
 			: rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
 		{
 			effect_ = LoadRenderEffect("VertexDisplacement.fx");
-			*(effect_->ParameterByName("flag")) = LoadTGA(*(ResLocator::Instance().Locate("Flag.tga")->Load()));
+			*(effect_->ParameterByName("flag")) = LoadTGA(*(ResLoader::Instance().Load("Flag.tga")));
 			effect_->SetTechnique("VertexDisplacement");
 
 			rb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
@@ -169,8 +168,8 @@ int main()
 
 VertexDisplacement::VertexDisplacement()
 {
-	ResLocator::Instance().AddPath("../media");
-	ResLocator::Instance().AddPath("../media/VertexDisplacement");
+	ResLoader::Instance().AddPath("../media");
+	ResLoader::Instance().AddPath("../media/VertexDisplacement");
 }
 
 void VertexDisplacement::InitObjects()

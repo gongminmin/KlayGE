@@ -1,10 +1,10 @@
-粘土游戏引擎(KlayGE) 2.1.3
+粘土游戏引擎(KlayGE) 2.2.0
 
 Homepage: http://klayge.sourceforge.net
 E-Mail:	  enginedev@163.com
 OICQ:     33611210
 
-欢迎使用粘土游戏引擎 2.1.3
+欢迎使用粘土游戏引擎 2.2.0
 包含的组件：KlayGE头文件，KlayGE源代码，KlayGE的VS.NET 2003工程文件
 
 KlayGE是一个开放，跨平台，插件结构的游戏引擎。
@@ -76,7 +76,7 @@ __________________________________________________________________
 2.2.0
 修正了DSound插件的音量问题 (2004.10.20)
 去掉了ManagerBase (2004.10.20)
-修改了FileSystem (2004.10.21)
+去掉了FileSystem (2004.10.26)
 
 2.1.3 (2004.10.19)
 增加了以boost::tuple为参数的ScriptEngine::Call

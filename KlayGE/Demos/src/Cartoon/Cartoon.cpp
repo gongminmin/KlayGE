@@ -9,7 +9,7 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/ResLocator.hpp>
+#include <KlayGE/ResLoader.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderSettings.hpp>
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
@@ -99,8 +99,8 @@ int main()
 Cartoon::Cartoon()
 			: rotX(0), rotY(0)
 {
-	ResLocator::Instance().AddPath("../media");
-	ResLocator::Instance().AddPath("../media/Cartoon");
+	ResLoader::Instance().AddPath("../media");
+	ResLoader::Instance().AddPath("../media/Cartoon");
 }
 
 void Cartoon::InitObjects()

@@ -8,8 +8,7 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/ResLocator.hpp>
-#include <KlayGE/DiskFile/DiskFile.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/D3D9/D3D9RenderSettings.hpp>
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 #include <KlayGE/OCTree/OCTree.hpp>
@@ -49,18 +48,18 @@ namespace
 #pragma pack(pop)
 
 
-	KlayGE::TexturePtr LoadTGA(KlayGE::VFile& file)
+	KlayGE::TexturePtr LoadTGA(std::istream& file)
 	{
 		try
 		{
-			file.Read(&TGAHeader, sizeof(TGAHeader));
-			file.Seek(TGAHeader.infoLength, VFile::SM_Current);
+			file.read(reinterpret_cast<char*>(&TGAHeader), sizeof(TGAHeader));
+			file.seekg(TGAHeader.infoLength, std::ios_base::cur);
 
 			KlayGE::TexturePtr texture(Context::Instance().RenderFactoryInstance().MakeTexture(TGAHeader.width,
 				TGAHeader.height, 0, PF_X8R8G8B8));
 
 			vector<U8> data(TGAHeader.width * TGAHeader.height * TGAHeader.pixelSize / 8);
-			file.Read(&data[0], data.size());
+			file.read(reinterpret_cast<char*>(&data[0]), data.size());
 
 			vector<U8> tgaData;
 			tgaData.reserve(TGAHeader.width * TGAHeader.height * 4);
@@ -101,9 +100,9 @@ namespace
 			: rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
 		{
 			effect_ = LoadRenderEffect("Parallax.fx");
-			*(effect_->ParameterByName("diffusemap")) = (LoadTGA(*(ResLocator::Instance().Locate("Diffuse.tga")->Load())));
-			*(effect_->ParameterByName("normalmap")) = (LoadTGA(*(ResLocator::Instance().Locate("Normal.tga")->Load())));
-			*(effect_->ParameterByName("heightmap")) = (LoadTGA(*(ResLocator::Instance().Locate("Height.tga")->Load())));
+			*(effect_->ParameterByName("diffusemap")) = (LoadTGA(*(ResLoader::Instance().Load("Diffuse.tga"))));
+			*(effect_->ParameterByName("normalmap")) = (LoadTGA(*(ResLoader::Instance().Load("Normal.tga"))));
+			*(effect_->ParameterByName("heightmap")) = (LoadTGA(*(ResLoader::Instance().Load("Height.tga"))));
 			effect_->SetTechnique("Parallax");
 
 			Vector3 xyzs[] =
@@ -217,8 +216,8 @@ int main()
 
 Parallax::Parallax()
 {
-	ResLocator::Instance().AddPath("../media");
-	ResLocator::Instance().AddPath("../media/Parallax");
+	ResLoader::Instance().AddPath("../media");
+	ResLoader::Instance().AddPath("../media/Parallax");
 }
 
 void Parallax::InitObjects()
