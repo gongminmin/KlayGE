@@ -31,6 +31,7 @@
 #include <d3dx9effect.h>
 
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/D3D9/D3D9Resource.hpp>
 
 #if defined(DEBUG) | defined(_DEBUG)
 	#pragma comment(lib, "KlayGE_RenderEngine_D3D9_d.lib")
@@ -48,7 +49,7 @@ namespace KlayGE
 
 	// äÖÈ¾Ð§¹û
 	//////////////////////////////////////////////////////////////////////////////////
-	class D3D9RenderEffect : public RenderEffect
+	class D3D9RenderEffect : public RenderEffect, public D3D9Resource
 	{
 	public:
 		D3D9RenderEffect(std::string const & srcData, uint32_t flags = 0);

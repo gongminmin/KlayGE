@@ -18,11 +18,13 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderFactory.hpp>
-#include <KlayGE/RenderBuffer.hpp>
 
 #include <d3d9.h>
 #include <d3dx9.h>
+#include <boost/weak_ptr.hpp>
 
+#include <KlayGE/D3D9/D3D9Resource.hpp>
+#include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 #include <KlayGE/D3D9/D3D9RenderTexture.hpp>
 #include <KlayGE/D3D9/D3D9RenderEffect.hpp>
@@ -61,11 +63,10 @@ namespace KlayGE
 		void OnResetDevice();
 
 	private:
-		std::vector<D3D9TexturePtr> texture_pool_;
-		std::vector<D3D9RenderTexturePtr> render_texture_pool_;
-		std::vector<D3D9RenderEffectPtr> render_effect_pool_;
-		std::vector<D3D9VertexStreamPtr> vertex_stream_pool_;
-		std::vector<D3D9IndexStreamPtr> index_stream_pool_;
+		std::vector<boost::weak_ptr<D3D9Resource> > texture_pool_;
+		std::vector<boost::weak_ptr<D3D9Resource> > render_effect_pool_;
+		std::vector<boost::weak_ptr<D3D9Resource> > vertex_stream_pool_;
+		std::vector<boost::weak_ptr<D3D9Resource> > index_stream_pool_;
 
 	private:
 		D3D9RenderFactory(D3D9RenderFactory const & rhs);

@@ -32,9 +32,6 @@ namespace KlayGE
 
 		bool RequiresTextureFlipping() const
 			{ return true; }
-
-		void OnLostDevice();
-		void OnResetDevice();
 	};
 
 	typedef boost::shared_ptr<D3D9RenderTexture> D3D9RenderTexturePtr;

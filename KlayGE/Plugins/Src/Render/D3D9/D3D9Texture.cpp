@@ -185,7 +185,7 @@ namespace KlayGE
 			height_	= desc.Height;
 			format_ = ConvertFormat(desc.Format);
 			bpp_	= PixelFormatBits(format_);
-			numMipMaps_ = d3dTexture_->GetLevelCount();
+			numMipMaps_ = static_cast<uint16_t>(d3dTexture_->GetLevelCount());
 		}
 		else
 		{
@@ -212,7 +212,7 @@ namespace KlayGE
 			height_	= desc.Height;
 			format_ = ConvertFormat(desc.Format);
 			bpp_	= PixelFormatBits(format_);
-			numMipMaps_ = d3dTexture_->GetLevelCount();
+			numMipMaps_ = static_cast<uint16_t>(d3dTexture_->GetLevelCount());
 
 			// Now get the format of the depth stencil surface.
 			d3dDevice_->GetDepthStencilSurface(&tempSurf);

@@ -21,8 +21,6 @@
 #include <KlayGE/D3D9/D3D9VertexStream.hpp>
 #include <KlayGE/D3D9/D3D9IndexStream.hpp>
 
-#include <boost/bind.hpp>
-
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
 namespace KlayGE
@@ -41,9 +39,7 @@ namespace KlayGE
 
 	RenderTexturePtr D3D9RenderFactory::MakeRenderTexture(uint32_t width, uint32_t height)
 	{
-		D3D9RenderTexturePtr ret(new D3D9RenderTexture(width, height));
-		render_texture_pool_.push_back(ret);
-		return ret;
+		return D3D9RenderTexturePtr(new D3D9RenderTexture(width, height));
 	}
 
 	RenderEffectPtr D3D9RenderFactory::MakeRenderEffect(std::string const & srcData, uint32_t flags)
@@ -94,7 +90,7 @@ namespace KlayGE
 			break;
 		}
 
-		vertex_stream_pool_.push_back(ret);
+		texture_pool_.push_back(ret);
 		return ret;
 	}
 
@@ -107,59 +103,115 @@ namespace KlayGE
 
 	void D3D9RenderFactory::OnLostDevice()
 	{
-		for (std::vector<D3D9TexturePtr>::iterator iter = texture_pool_.begin();
-			iter != texture_pool_.end(); ++ iter)
+		using namespace std;
+
+		for (std::vector<boost::weak_ptr<D3D9Resource> >::iterator iter = texture_pool_.begin();
+			iter != texture_pool_.end();)
 		{
-			(*iter)->OnLostDevice();
+			if (D3D9ResourcePtr ptr = iter->lock())
+			{
+				ptr->OnLostDevice();
+				++ iter;
+			}
+			else
+			{
+				iter = texture_pool_.erase(iter);
+			}
 		}
-		for (std::vector<D3D9RenderTexturePtr>::iterator iter = render_texture_pool_.begin();
-			iter != render_texture_pool_.end(); ++ iter)
+		for (std::vector<boost::weak_ptr<D3D9Resource> >::iterator iter = render_effect_pool_.begin();
+			iter != render_effect_pool_.end();)
 		{
-			(*iter)->OnLostDevice();
+			if (D3D9ResourcePtr ptr = iter->lock())
+			{
+				ptr->OnLostDevice();
+				++ iter;
+			}
+			else
+			{
+				iter = render_effect_pool_.erase(iter);
+			}
 		}
-		for (std::vector<D3D9RenderEffectPtr>::iterator iter = render_effect_pool_.begin();
-			iter != render_effect_pool_.end(); ++ iter)
+		for (std::vector<boost::weak_ptr<D3D9Resource> >::iterator iter = vertex_stream_pool_.begin();
+			iter != vertex_stream_pool_.end();)
 		{
-			(*iter)->OnLostDevice();
+			if (D3D9ResourcePtr ptr = iter->lock())
+			{
+				ptr->OnLostDevice();
+				++ iter;
+			}
+			else
+			{
+				iter = vertex_stream_pool_.erase(iter);
+			}
 		}
-		for (std::vector<D3D9VertexStreamPtr>::iterator iter = vertex_stream_pool_.begin();
-			iter != vertex_stream_pool_.end(); ++ iter)
+		for (std::vector<boost::weak_ptr<D3D9Resource> >::iterator iter = index_stream_pool_.begin();
+			iter != index_stream_pool_.end();)
 		{
-			(*iter)->OnLostDevice();
-		}
-		for (std::vector<D3D9IndexStreamPtr>::iterator iter = index_stream_pool_.begin();
-			iter != index_stream_pool_.end(); ++ iter)
-		{
-			(*iter)->OnLostDevice();
+			if (D3D9ResourcePtr ptr = iter->lock())
+			{
+				ptr->OnLostDevice();
+				++ iter;
+			}
+			else
+			{
+				iter = index_stream_pool_.erase(iter);
+			}
 		}
 	}
 
 	void D3D9RenderFactory::OnResetDevice()
 	{
-		for (std::vector<D3D9TexturePtr>::iterator iter = texture_pool_.begin();
-			iter != texture_pool_.end(); ++ iter)
+		for (std::vector<boost::weak_ptr<D3D9Resource> >::iterator iter = texture_pool_.begin();
+			iter != texture_pool_.end();)
 		{
-			(*iter)->OnResetDevice();
+			if (D3D9ResourcePtr ptr = iter->lock())
+			{
+				ptr->OnResetDevice();
+				++ iter;
+			}
+			else
+			{
+				iter = texture_pool_.erase(iter);
+			}
 		}
-		for (std::vector<D3D9RenderTexturePtr>::iterator iter = render_texture_pool_.begin();
-			iter != render_texture_pool_.end(); ++ iter)
+		for (std::vector<boost::weak_ptr<D3D9Resource> >::iterator iter = render_effect_pool_.begin();
+			iter != render_effect_pool_.end();)
 		{
-			(*iter)->OnResetDevice();
+			if (D3D9ResourcePtr ptr = iter->lock())
+			{
+				ptr->OnResetDevice();
+				++ iter;
+			}
+			else
+			{
+				iter = render_effect_pool_.erase(iter);
+			}
 		}
-		for (std::vector<D3D9RenderEffectPtr>::iterator iter = render_effect_pool_.begin();
-			iter != render_effect_pool_.end(); ++ iter)
+		for (std::vector<boost::weak_ptr<D3D9Resource> >::iterator iter = vertex_stream_pool_.begin();
+			iter != vertex_stream_pool_.end();)
 		{
-			(*iter)->OnResetDevice();
+			if (D3D9ResourcePtr ptr = iter->lock())
+			{
+				ptr->OnResetDevice();
+				++ iter;
+			}
+			else
+			{
+				iter = vertex_stream_pool_.erase(iter);
+			}
 		}
-		for (std::vector<D3D9VertexStreamPtr>::iterator iter = vertex_stream_pool_.begin();
-			iter != vertex_stream_pool_.end(); ++ iter)
+		for (std::vector<boost::weak_ptr<D3D9Resource> >::iterator iter = index_stream_pool_.begin();
+			iter != index_stream_pool_.end();)
 		{
-			(*iter)->OnResetDevice();
-		}
-		for (std::vector<D3D9IndexStreamPtr>::iterator iter = index_stream_pool_.begin();
-			iter != index_stream_pool_.end(); ++ iter)
-		{
-			(*iter)->OnResetDevice();
+			if (D3D9ResourcePtr ptr = iter->lock())
+			{
+				ptr->OnResetDevice();
+				++ iter;
+			}
+			else
+			{
+				iter = index_stream_pool_.erase(iter);
+			}
 		}
 	}
 

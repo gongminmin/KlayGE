@@ -18,6 +18,7 @@
 #include <d3d9.h>
 
 #include <KlayGE/RenderBuffer.hpp>
+#include <KlayGE/D3D9/D3D9Resource.hpp>
 
 #if defined(DEBUG) | defined(_DEBUG)
 	#pragma comment(lib, "KlayGE_RenderEngine_D3D9_d.lib")
@@ -27,7 +28,7 @@
 
 namespace KlayGE
 {
-	class D3D9IndexStream : public IndexStream
+	class D3D9IndexStream : public IndexStream, public D3D9Resource
 	{
 	public:
 		D3D9IndexStream(bool staticStream);

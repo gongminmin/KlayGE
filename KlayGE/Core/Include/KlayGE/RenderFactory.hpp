@@ -3,6 +3,7 @@
 
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderBuffer.hpp>
+#include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/Font.hpp>
 
 #include <boost/utility.hpp>

@@ -20,6 +20,7 @@
 #include <d3dx9.h>
 #include <dxerr9.h>
 
+#include <KlayGE/D3D9/D3D9Resource.hpp>
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 
 #if defined(DEBUG) | defined(_DEBUG)
@@ -30,7 +31,7 @@
 
 namespace KlayGE
 {
-	class D3D9Texture : public Texture
+	class D3D9Texture : public Texture, public D3D9Resource
 	{
 	public:
 		D3D9Texture(uint32_t width, uint32_t height, uint16_t numMipMaps, PixelFormat format, TextureUsage usage = TU_Default);

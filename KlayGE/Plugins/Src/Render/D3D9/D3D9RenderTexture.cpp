@@ -83,16 +83,4 @@ namespace KlayGE
 			return;
 		}
 	}
-
-	void D3D9RenderTexture::OnLostDevice()
-	{
-		D3D9Texture* tex(static_cast<D3D9Texture*>(privateTex_.get()));
-		tex->OnLostDevice();
-	}
-
-	void D3D9RenderTexture::OnResetDevice()
-	{
-		D3D9Texture* tex(static_cast<D3D9Texture*>(privateTex_.get()));
-		tex->OnResetDevice();
-	}
 }
