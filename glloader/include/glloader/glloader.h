@@ -49,6 +49,10 @@
 #ifndef _GLLOADER_H
 #define _GLLOADER_H
 
+#if defined(DEBUG) | defined(_DEBUG)
+#define GLLOADER_DEBUG
+#endif
+
 #if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
 #define ISWIN32
 #define GLLOADER_WGL

@@ -55,6 +55,7 @@
 #define GL_HINT_BIT										0x00008000
 #define GL_EVAL_BIT										0x00010000
 #define GL_LIST_BIT										0x00020000
+#define GL_TEXTURE_BIT									0x00040000
 #define GL_SCISSOR_BIT									0x00080000
 #define GL_ALL_ATTRIB_BITS								0x000FFFFF
 #define GL_POINTS										0x0000
@@ -455,24 +456,6 @@
 #define GL_TEXTURE_WRAP_T								0x2803
 #define GL_CLAMP										0x2900
 #define GL_REPEAT										0x2901
-#define GL_CLIENT_PIXEL_STORE_BIT						0x00000001
-#define GL_CLIENT_VERTEX_ARRAY_BIT						0x00000002
-#define GL_CLIENT_ALL_ATTRIB_BITS						0xFFFFFFFF
-#define GL_V2F											0x2A20
-#define GL_V3F											0x2A21
-#define GL_C4UB_V2F										0x2A22
-#define GL_C4UB_V3F										0x2A23
-#define GL_C3F_V3F										0x2A24
-#define GL_N3F_V3F										0x2A25
-#define GL_C4F_N3F_V3F									0x2A26
-#define GL_T2F_V3F										0x2A27
-#define GL_T4F_V4F										0x2A28
-#define GL_T2F_C4UB_V3F									0x2A29
-#define GL_T2F_C3F_V3F									0x2A2A
-#define GL_T2F_N3F_V3F									0x2A2B
-#define GL_T2F_C4F_N3F_V3F								0x2A2C
-#define GL_T4F_C4F_N3F_V4F								0x2A2D
-#define GL_TEXTURE_BIT									0x00040000
 
 #ifdef __cplusplus
 extern "C"
@@ -534,14 +517,11 @@ void APIENTRY glDepthFunc(GLenum func);
 void APIENTRY glDepthMask(GLboolean flag);
 void APIENTRY glDepthRange(GLclampd zNear, GLclampd zFar);
 void APIENTRY glDisable(GLenum cap);
-void APIENTRY glDisableClientState(GLenum array);
 void APIENTRY glDrawBuffer(GLenum mode);
-void APIENTRY glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices);
 void APIENTRY glDrawPixels(GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid* pixels);
 void APIENTRY glEdgeFlag(GLboolean flag);
 void APIENTRY glEdgeFlagv(const GLboolean* flag);
 void APIENTRY glEnable(GLenum cap);
-void APIENTRY glEnableClientState(GLenum array);
 void APIENTRY glEnd(void);
 void APIENTRY glEndList(void);
 void APIENTRY glEvalCoord1d(GLdouble u);
@@ -604,10 +584,7 @@ void APIENTRY glIndexi(GLint c);
 void APIENTRY glIndexiv(const GLint* c);
 void APIENTRY glIndexs(GLshort c);
 void APIENTRY glIndexsv(const GLshort* c);
-void APIENTRY glIndexub(GLubyte c);
-void APIENTRY glIndexubv(const GLubyte* c);
 void APIENTRY glInitNames(void);
-void APIENTRY glInterleavedArrays(GLenum format, GLsizei stride, const GLvoid* pointer);
 GLboolean APIENTRY glIsEnabled(GLenum cap);
 GLboolean APIENTRY glIsList(GLuint list);
 void APIENTRY glLightModelf(GLenum pname, GLfloat param);
@@ -666,11 +643,9 @@ void APIENTRY glPointSize(GLfloat size);
 void APIENTRY glPolygonMode(GLenum face, GLenum mode);
 void APIENTRY glPolygonStipple(const GLubyte* mask);
 void APIENTRY glPopAttrib(void);
-void APIENTRY glPopClientAttrib(void);
 void APIENTRY glPopMatrix(void);
 void APIENTRY glPopName(void);
 void APIENTRY glPushAttrib(GLbitfield mask);
-void APIENTRY glPushClientAttrib(GLbitfield mask);
 void APIENTRY glPushMatrix(void);
 void APIENTRY glPushName(GLuint name);
 void APIENTRY glRasterPos2d(GLdouble x, GLdouble y);

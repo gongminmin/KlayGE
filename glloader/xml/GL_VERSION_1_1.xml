@@ -29,6 +29,20 @@
 		<Token name="GL_INDEX_ARRAY_POINTER" value="0x8091"/>
 		<Token name="GL_TEXTURE_COORD_ARRAY_POINTER" value="0x8092"/>
 		<Token name="GL_EDGE_FLAG_ARRAY_POINTER" value="0x8093"/>
+		<Token name="GL_V2F" value="0x2A20"/>
+		<Token name="GL_V3F" value="0x2A21"/>
+		<Token name="GL_C4UB_V2F" value="0x2A22"/>
+		<Token name="GL_C4UB_V3F" value="0x2A23"/>
+		<Token name="GL_C3F_V3F" value="0x2A24"/>
+		<Token name="GL_N3F_V3F" value="0x2A25"/>
+		<Token name="GL_C4F_N3F_V3F" value="0x2A26"/>
+		<Token name="GL_T2F_V3F" value="0x2A27"/>
+		<Token name="GL_T4F_V4F" value="0x2A28"/>
+		<Token name="GL_T2F_C4UB_V3F" value="0x2A29"/>
+		<Token name="GL_T2F_C3F_V3F" value="0x2A2A"/>
+		<Token name="GL_T2F_N3F_V3F" value="0x2A2B"/>
+		<Token name="GL_T2F_C4F_N3F_V3F" value="0x2A2C"/>
+		<Token name="GL_T4F_C4F_N3F_V4F" value="0x2A2D"/>
 
 		<Token name="GL_POLYGON_OFFSET" value="0x8037"/>
 		<Token name="GL_POLYGON_OFFSET_FACTOR" value="0x8038"/>
@@ -84,6 +98,10 @@
 		<Token name="GL_TEXTURE_RESIDENT" value="0x8067"/>
 		<Token name="GL_TEXTURE_BINDING_1D" value="0x8068"/>
 		<Token name="GL_TEXTURE_BINDING_2D" value="0x8069"/>
+
+		<Token name="GL_CLIENT_PIXEL_STORE_BIT" value="0x00000001"/>
+		<Token name="GL_CLIENT_VERTEX_ARRAY_BIT" value="0x00000002"/>
+		<Token name="GL_CLIENT_ALL_ATTRIB_BITS" value="0xFFFFFFFF"/>
 	</Tokens>
 
 	<Functions>
@@ -220,6 +238,34 @@
 		<Function name="glIsTexture" return="GLboolean">
 			<Param type="GLuint" name="texture"/>
 		</Function>
+
+		<Function name="glEnableClientState" return="void">
+			<Param type="GLenum" name="array"/>
+		</Function>
+		<Function name="glDisableClientState" return="void">
+			<Param type="GLenum" name="array"/>
+		</Function>
+		<Function name="glDrawElements" return="void">
+			<Param type="GLenum" name="mode"/>
+			<Param type="GLsizei" name="count"/>
+			<Param type="GLenum" name="type"/>
+			<Param type="const GLvoid*" name="indices"/>
+		</Function>
+		<Function name="glIndexub" return="void">
+			<Param type="GLubyte" name="c"/>
+		</Function>
+		<Function name="glIndexubv" return="void">
+			<Param type="const GLubyte*" name="c"/>
+		</Function>
+		<Function name="glInterleavedArrays" return="void">
+			<Param type="GLenum" name="format"/>
+			<Param type="GLsizei" name="stride"/>
+			<Param type="const GLvoid*" name="pointer"/>
+		</Function>
+		<Function name="glPushClientAttrib" return="void">
+			<Param type="GLbitfield" name="mask"/>
+		</Function>
+		<Function name="glPopClientAttrib" return="void"/>
 	</Functions>
 
 	<Vendors>
@@ -246,6 +292,14 @@
 			<Name name="glPrioritizeTextures"/>
 			<Name name="glAreTexturesResident"/>
 			<Name name="glIsTexture"/>
+			<Name name="glEnableClientState"/>
+			<Name name="glDisableClientState"/>
+			<Name name="glDrawElements"/>
+			<Name name="glIndexub"/>
+			<Name name="glIndexubv"/>
+			<Name name="glInterleavedArrays"/>
+			<Name name="glPushClientAttrib"/>
+			<Name name="glPopClientAttrib"/>
 		</Vendor>
 	</Vendors>
 

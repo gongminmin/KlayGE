@@ -20,7 +20,11 @@
 #include <cassert>
 #include <algorithm>
 
-#include "Utils.hpp"
+#ifdef GLLOADER_DEBUG
+#include <iostream>
+#endif
+
+#include "utils.hpp"
 
 namespace
 {
@@ -185,6 +189,13 @@ void glloader::load_funcs(entries_t& entries, funcs_names_t const & names)
 	for (size_t i = 0; i < entries.size(); ++ i)
 	{
 		*entries[i] = ::glloader_get_gl_proc_address(names[i].c_str());
+
+#ifdef GLLOADER_DEBUG
+		if (NULL == *entries[i])
+		{
+			std::cerr << names[i] << " is missing!" << std::endl;
+		}
+#endif
 	}
 }
 
