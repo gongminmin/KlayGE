@@ -19,6 +19,7 @@
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <cassert>
+#include <algorithm>
 #include <cstring>
 
 #include <boost/bind.hpp>
@@ -58,7 +59,7 @@ namespace KlayGE
 		DSBUFFERDESC dsbd;
 		std::memset(&dsbd, 0, sizeof(dsbd));
 		dsbd.dwSize				= sizeof(dsbd);
-		dsbd.dwFlags			= DSBCAPS_CTRL3D | DSBCAPS_MUTE3DATMAXDISTANCE;
+		dsbd.dwFlags			= DSBCAPS_CTRLVOLUME | DSBCAPS_CTRL3D | DSBCAPS_MUTE3DATMAXDISTANCE;
 		dsbd.guid3DAlgorithm	= GUID_NULL;
 		dsbd.dwBufferBytes		= static_cast<U32>(dataSource->Size());
 		dsbd.lpwfxFormat		= &wfx;

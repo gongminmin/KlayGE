@@ -133,7 +133,7 @@ namespace KlayGE
 
 	// 读取Ogg数据
 	/////////////////////////////////////////////////////////////////////////////////
-	size_t OggSource::Read(U8* data, size_t size)
+	size_t OggSource::Read(void* data, size_t size)
 	{
 		assert(data != NULL);
 
@@ -207,7 +207,7 @@ namespace KlayGE
 
 								// 把解码后的数据放入缓冲区
 								size_t const length(sizeof(ogg_int16_t) * bout * vi_.channels);
-								std::memcpy(&data[cursize], &convbuffer[0], length);
+								std::memcpy(static_cast<U8*>(data) + cursize, &convbuffer[0], length);
 								cursize += length;
 							}
 						}

@@ -31,7 +31,7 @@ namespace KlayGE
 
 		size_t Size();
 
-		size_t Read(U8* data, size_t size);
+		size_t Read(void* data, size_t size);
 		void Reset();
 
 	private:

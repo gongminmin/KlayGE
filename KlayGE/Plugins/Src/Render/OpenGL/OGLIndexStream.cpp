@@ -15,7 +15,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 
-#include <cstring>
+#include <algorithm>
 
 #include <KlayGE/OpenGL/OGLIndexStream.hpp>
 
@@ -27,7 +27,7 @@ namespace KlayGE
 
 	void OGLIndexStream::Assign(void const * src, size_t numIndices)
 	{
-		buffer_.resize(numIndices);
-		std::memcpy(&buffer_[0], src, numIndices * sizeof(U16));
+		buffer_.assign(static_cast<U16 const *>(src),
+			static_cast<U16 const *>(src) + numIndices);
 	}
 }

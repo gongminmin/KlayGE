@@ -5,7 +5,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Util.hpp>
 
-#include <cstring>
+#include <algorithm>
 
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9VertexStream.hpp>
@@ -54,11 +54,11 @@ namespace KlayGE
 		TIF(buffer_->Lock(0, 0, &dest,
 			D3DLOCK_NOSYSLOCK | (this->IsStatic() ? 0 : D3DLOCK_DISCARD)));
 
+		U8* destPtr(static_cast<U8*>(dest));
+		U8 const * srcPtr(static_cast<U8 const *>(src));
+
 		if (stride != 0)
 		{
-			U8* destPtr(static_cast<U8*>(dest));
-			U8 const * srcPtr(static_cast<U8 const *>(static_cast<void const *>(src)));
-
 			for (size_t i = 0; i < numVertices; ++ i)
 			{
 				std::copy(srcPtr, srcPtr + vertexSize, destPtr);
@@ -69,7 +69,7 @@ namespace KlayGE
 		}
 		else
 		{
-			std::memcpy(dest, src, size);
+			std::copy(srcPtr, srcPtr + size, destPtr);
 		}
 
 		buffer_->Unlock();

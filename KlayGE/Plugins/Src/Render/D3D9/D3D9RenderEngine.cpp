@@ -53,7 +53,7 @@ namespace KlayGE
 	D3DMATRIX Convert(Matrix4 const & mat)
 	{
 		D3DMATRIX d3dMat;
-		std::memcpy(&d3dMat._11, &mat.begin()[0], sizeof(d3dMat));
+		std::copy(mat.begin(), mat.end(), &d3dMat._11);
 
 		return d3dMat;
 	}

@@ -21,7 +21,7 @@
 #include <cassert>
 #include <cctype>
 #include <string>
-#include <cstring>
+#include <algorithm>
 
 #include <KlayGE/MemFile/MemFile.hpp>
 #include <KlayGE/PackedFile/Pkt.hpp>
@@ -103,7 +103,7 @@ namespace KlayGE
 	void UnPkt::Decode(VFile& output, VFile& input)
 	{
 		U32 r(N - F);
-		std::memset(textBuf, ' ', r);
+		std::fill_n(textBuf, r, ' ');
 
 		U32 flags(0);
 		U8 c;

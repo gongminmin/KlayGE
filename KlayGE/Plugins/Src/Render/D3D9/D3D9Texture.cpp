@@ -494,10 +494,10 @@ namespace KlayGE
 		{
 			for (U32 y = 0; y < height; ++ y)
 			{
-				void* dst(pBits + y * destPitch);
+				U8* dst(pBits + y * destPitch);
 				pBuffer = static_cast<U8*>(pData) + y * srcPitch;
 
-				std::memcpy(dst, pBuffer, srcPitch);
+				std::copy(pBuffer, pBuffer + srcPitch, dst);
 			}
 		}
 		else

@@ -49,6 +49,7 @@ namespace KlayGE
 		DSBUFFERDESC dsbd;
 		std::memset(&dsbd, 0, sizeof(dsbd));
 		dsbd.dwSize = sizeof(dsbd);
+		dsbd.dwFlags = DSBCAPS_CTRLVOLUME;
 		if (mono)
 		{
 			dsbd.dwFlags |= DSBCAPS_CTRL3D | DSBCAPS_MUTE3DATMAXDISTANCE;

@@ -155,7 +155,7 @@ namespace KlayGE
 
 	// ¶ÁÈ¡WavÊý¾Ý
 	/////////////////////////////////////////////////////////////////////////////////
-	size_t WaveSource::Read(U8* data, size_t size)
+	size_t WaveSource::Read(void* data, size_t size)
 	{
 		assert(data != NULL);
 

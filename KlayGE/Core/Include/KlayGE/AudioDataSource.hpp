@@ -40,7 +40,7 @@ namespace KlayGE
 
 		virtual size_t Size() = 0;
 
-		virtual size_t Read(U8* data, size_t size) = 0;
+		virtual size_t Read(void* data, size_t size) = 0;
 		virtual void Reset() = 0;
 
 		virtual ~AudioDataSource();

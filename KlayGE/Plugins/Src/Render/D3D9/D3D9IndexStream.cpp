@@ -8,7 +8,7 @@
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9IndexStream.hpp>
 
-#include <cstring>
+#include <algorithm>
 
 #include <boost/smart_ptr.hpp>
 #include <boost/mem_fn.hpp>
@@ -43,7 +43,7 @@ namespace KlayGE
 
 		void* dest;
 		TIF(buffer_->Lock(0, 0, &dest, D3DLOCK_NOSYSLOCK | (this->IsStatic() ? 0 : D3DLOCK_DISCARD)));
-		std::memcpy(dest, src, size);
+		std::copy(static_cast<U8 const *>(src), static_cast<U8 const *>(src) + size, static_cast<U8*>(dest));
 		buffer_->Unlock();
 	}
 
