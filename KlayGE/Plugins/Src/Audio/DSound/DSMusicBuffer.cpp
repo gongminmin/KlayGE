@@ -94,12 +94,10 @@ namespace KlayGE
 	{
 		DSMusicBuffer* buffer(reinterpret_cast<DSMusicBuffer*>(dwUser));
 
-		if (timerID != buffer->timerID_)
+		if (timerID == buffer->timerID_)
 		{
-			return;
+			buffer->FillBuffer();
 		}
-
-		buffer->FillBuffer();
 	}
 
 	void DSMusicBuffer::FillBuffer()

@@ -347,9 +347,6 @@
 				<File
 					RelativePath=".\Src\Math\Math.cpp">
 				</File>
-				<File
-					RelativePath=".\Src\Math\Random.cpp">
-				</File>
 			</Filter>
 			<Filter
 				Name="头文件"
@@ -452,24 +449,6 @@
 				Filter="">
 				<File
 					RelativePath="Include\KlayGE\Show.hpp">
-				</File>
-			</Filter>
-		</Filter>
-		<Filter
-			Name="定时器"
-			Filter="">
-			<Filter
-				Name="源文件"
-				Filter="">
-				<File
-					RelativePath="Src\Timer\Timer.cpp">
-				</File>
-			</Filter>
-			<Filter
-				Name="头文件"
-				Filter="">
-				<File
-					RelativePath="Include\KlayGE\Timer.hpp">
 				</File>
 			</Filter>
 		</Filter>

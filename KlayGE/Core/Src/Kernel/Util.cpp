@@ -86,14 +86,17 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void Sleep(uint32_t ms)
 	{
+		int const MILLISECONDS_PER_SECOND = 1000;
+		int const NANOSECONDS_PER_MILLISECOND = 1000000;
+
 		boost::xtime xt;
 
 		boost::xtime_get(&xt, boost::TIME_UTC);
-		xt.sec += ms / 1000;
+		xt.sec += ms / MILLISECONDS_PER_SECOND;
 		boost::thread::sleep(xt);
 
 		boost::xtime_get(&xt, boost::TIME_UTC);
-		xt.nsec += (ms % 1000) * 1000000;
+		xt.nsec += (ms % MILLISECONDS_PER_SECOND) * NANOSECONDS_PER_MILLISECOND;
 		boost::thread::sleep(xt);
 	}
 

@@ -136,7 +136,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	std::wstring const & DSAudioEngine::Name() const
 	{
-		static const std::wstring name(L"DirectSound Audio Engine");
+		static std::wstring const name(L"DirectSound Audio Engine");
 		return name;
 	}
 

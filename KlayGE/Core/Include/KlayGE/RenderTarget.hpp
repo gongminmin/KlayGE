@@ -1,7 +1,20 @@
+// RenderTarget.hpp
+// KlayGE 渲染目标类 头文件
+// Ver 2.2.0
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.2.0
+// 改用boost::timer计时 (2004.11.1)
+//
+// 修改记录
+//////////////////////////////////////////////////////////////////////////////////
+
 #ifndef _RENDERTARGET_HPP
 #define _RENDERTARGET_HPP
 
 #include <KlayGE/Viewport.hpp>
+#include <boost/timer.hpp>
 
 #pragma comment(lib, "KlayGE_Core.lib")
 
@@ -52,6 +65,8 @@ namespace KlayGE
 		bool	active_;
 
 		Viewport viewport_;
+
+		boost::timer timer_;
 	};
 }
 

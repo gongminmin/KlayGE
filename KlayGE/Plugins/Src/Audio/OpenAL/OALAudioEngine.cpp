@@ -102,7 +102,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	std::wstring const & OALAudioEngine::Name() const
 	{
-		static const std::wstring name(L"OpenAL Audio Engine");
+		static std::wstring const name(L"OpenAL Audio Engine");
 		return name;
 	}
 

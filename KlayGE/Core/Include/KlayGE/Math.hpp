@@ -241,7 +241,7 @@ namespace KlayGE
 		inline float
 		Abs(float x)
 		{
-			return std::fabs(x);
+			return std::abs(x);
 		}
 		inline float
 		Sqrt(float x)
@@ -1339,13 +1339,13 @@ namespace KlayGE
 					// SLERP away
 					T const omega(ACos(cosom));
 					T const isinom(T(1) / Sin(omega));
-					scale0 = Sin((1 - slerp) * omega) * isinom;
+					scale0 = Sin((T(1) - slerp) * omega) * isinom;
 					scale1 = Sin(slerp * omega) * isinom;
 				}
 				else
 				{
 					// LERP is good enough at this distance
-					scale0 = 1 - slerp;
+					scale0 = T(1)- slerp;
 					scale1 = slerp;
 				}
 
@@ -1355,7 +1355,7 @@ namespace KlayGE
 			{
 				// SLERP towards a perpendicular quat
 				// Set slerp parameters
-				scale0 = Sin((1 - slerp) * PIdiv2);
+				scale0 = Sin((T(1) - slerp) * PIdiv2);
 				scale1 = Sin(slerp * PIdiv2);
 
 				q2.x() = -rhs.y() * scale1;
@@ -1440,7 +1440,7 @@ namespace KlayGE
 		IntersectLine(Vector_T<T, 3>& out, Plane_T<T> const & p,
 			Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir)
 		{
-			Vector_T<T, 3> vP(0, 0, 0);
+			Vector_T<T, 3> vP(Vector_T<T, 3>::Zero());
 
 			if (!Eq(p.a(), T(0)))
 			{
@@ -1618,29 +1618,6 @@ namespace KlayGE
 				MathLib::Normalize(*iter, *iter);
 			}
 		}		
-	};
-
-
-	class Random
-	{
-	public:
-		static Random& Instance();
-
-		// 任意随机数
-		int Next() const;
-
-		// 小于x的随机数
-		template <typename T>
-		T Next(T const & x)
-			{ return MathLib::Mod<T>(static_cast<T>(Random::Instance().Next()), x); }
-
-		// 在min和max之间的随机数
-		template <typename T>
-		T Next(T const & minv, T const & maxv)
-			{ return minv + Random::Instance().Next(maxv - minv); }
-
-	private:
-		Random();
 	};
 }
 

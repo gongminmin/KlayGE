@@ -11,11 +11,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Math.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <cassert>
 
+#include <boost/random.hpp>
 #include <boost/bind.hpp>
 
 #include <KlayGE/OpenAL/OALAudio.hpp>
@@ -85,8 +85,12 @@ namespace KlayGE
 
 		if (iter == sources_.end())
 		{
+			boost::lagged_fibonacci607 rng;
+			boost::uniform_int<> ui(0, sources_.size());
+			boost::variate_generator<boost::lagged_fibonacci607, boost::uniform_int<> > vg(rng, ui);
+
 			iter = sources_.begin();
-			std::advance(iter, Random::Instance().Next(sources_.size()));
+			std::advance(iter, vg());
 		}
 
 		return iter;
