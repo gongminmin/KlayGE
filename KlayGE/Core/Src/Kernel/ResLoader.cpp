@@ -1,5 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/PackedFile/Pkt.hpp>
+#include <KlayGE/LZSS/LZSS.hpp>
 
 #include <fstream>
 #include <sstream>

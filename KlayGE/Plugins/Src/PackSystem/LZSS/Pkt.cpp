@@ -32,7 +32,7 @@
 #include <sstream>
 #include <fstream>
 
-#include <KlayGE/PackedFile/Pkt.hpp>
+#include <KlayGE/LZSS/LZSS.hpp>
 
 using namespace std;
 

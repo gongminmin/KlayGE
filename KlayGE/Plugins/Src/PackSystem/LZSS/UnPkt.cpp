@@ -29,7 +29,7 @@
 
 #include <boost/crc.hpp>
 
-#include <KlayGE/PackedFile/Pkt.hpp>
+#include <KlayGE/LZSS/LZSS.hpp>
 
 namespace
 {
