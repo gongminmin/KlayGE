@@ -164,7 +164,11 @@ def create_header(prefix, extensions):
 		headerFile.write("#endif\n\n")
 
 	for extension in extensions:
-		headerFile.write("extern char glloader_%s;\n" % extension.name)
+		headerFile.write("typedef char (APIENTRY *glloader_%sFUNC)();\n" % extension.name)
+	headerFile.write("\n")
+
+	for extension in extensions:
+		headerFile.write("extern glloader_%sFUNC glloader_%s;\n" % (extension.name, extension.name))
 	headerFile.write("\n")
 
 	headerFile.write("#endif		/* _GLLOADER_%s_H */\n" % prefix.upper())
@@ -181,13 +185,32 @@ def create_source(prefix, extensions):
 
 	sourceFile.write("#ifdef GLLOADER_%s\n\n" % prefix.upper())
 
-	for extension in extensions:
-		sourceFile.write("char glloader_%s = 0;\n" % extension.name)
-	sourceFile.write("\n")
-
 	sourceFile.write("using glloader::load_funcs;\n\n")
 
+	sourceFile.write("namespace\n")
+	sourceFile.write("{\n")
 	for extension in extensions:
+		sourceFile.write("\tbool _%s = false;\n" % extension.name)
+	sourceFile.write("}\n\n")
+
+	for extension in extensions:
+		sourceFile.write("namespace\n")
+		sourceFile.write("{\n")
+		sourceFile.write("\tchar APIENTRY _glloader_%s()\n" % extension.name)
+		sourceFile.write("\t{\n")
+		sourceFile.write("\t\treturn _%s;\n" % extension.name)
+		sourceFile.write("\t}\n")
+		sourceFile.write("\n")
+
+		sourceFile.write("\tchar APIENTRY self_init_glloader_%s()\n" % extension.name)
+		sourceFile.write("\t{\n")
+		sourceFile.write("\t\tglloader_init();\n")
+		sourceFile.write("\t\treturn glloader_%s();\n" % extension.name)
+		sourceFile.write("\t}\n")
+		sourceFile.write("}\n\n")
+
+		sourceFile.write("glloader_%sFUNC glloader_%s = self_init_glloader_%s;\n\n" % (extension.name, extension.name, extension.name))
+
 		if (len(extension.functions) != 0):
 			sourceFile.write("#ifdef %s\n\n" % extension.name)
 
@@ -213,6 +236,8 @@ def create_source(prefix, extensions):
 		sourceFile.write("\tvoid init_%s()\n" % extension.name)
 		sourceFile.write("\t{\n")
 
+		sourceFile.write("\t\tglloader_%s = _glloader_%s;\n\n" % (extension.name, extension.name))
+
 		if (len(extension.functions) != 0):
 			sourceFile.write("\t\t{\n")
 
@@ -232,10 +257,9 @@ def create_source(prefix, extensions):
 
 		for ext in extension.exts:
 			sourceFile.write("\t\tif (glloader_is_supported(\"%s\"))\n" % ext.string)
-
 			sourceFile.write("\t\t{\n")
 
-			sourceFile.write("\t\t\tglloader_%s = 1;\n" % extension.name)
+			sourceFile.write("\t\t\t_%s = true;\n" % extension.name)
 
 			if (len(extension.functions) != 0):
 				sourceFile.write("\n\t\t\tfuncs_names_t names;\n\n")

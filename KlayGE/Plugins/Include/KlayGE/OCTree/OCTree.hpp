@@ -25,8 +25,6 @@
 #include <map>
 #include <string>
 
-#include <KlayGE/OCTree/OCTreeFrustum.hpp>
-
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_Scene_OCTree_d.lib")
 #else
@@ -41,12 +39,11 @@ namespace KlayGE
 		typedef std::string tree_id_t;
 
 	public:
-		OCTree(Box const & box);
-
-		void ClipScene(Camera const & camera);
-		void PushRenderable(RenderablePtr const & obj);
+		OCTree(Box const & box, uint32_t maxNumObjInANode);
 
 	private:
+		void ClipScene(Camera const & camera);
+
 		tree_id_t Child(tree_id_t const & id, int child_no);
 		Box AreaBox(tree_id_t const & id);
 		bool InsideChild(tree_id_t const & id, RenderablePtr const & renderable);
@@ -57,13 +54,12 @@ namespace KlayGE
 		OCTree& operator=(OCTree const & rhs);
 
 	private:
-		typedef std::map<tree_id_t, RenderablePtr> linear_octree_t;
-		linear_octree_t linear_octree_;
+		typedef std::vector<RenderablePtr> renderable_ptrs_t;
+		typedef std::map<tree_id_t, renderable_ptrs_t> linear_octree_t;
+		linear_octree_t octree_;
 		Box root_box_;
 
-		std::vector<RenderablePtr> uncullables_;
-
-		OCTreeFrustum frustum_;
+		uint32_t maxNumObjInANode_;
 	};
 }
 

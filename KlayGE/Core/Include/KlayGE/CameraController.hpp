@@ -56,11 +56,6 @@ namespace KlayGE
 		void Move(float x, float y, float z);
 		void Rotate(float yaw, float pitch, float roll);
 
-		Vector3 WorldRight() const;
-		Vector3 WorldUp() const;
-		Vector3 WorldAhead() const;
-        Vector3 EyePos() const;
-
 	private:
 		Matrix4		world_;				// World matrix of the camera (inverse of the view matrix)
 	};

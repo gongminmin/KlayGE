@@ -379,7 +379,7 @@ namespace KlayGE
 	void D3D9RenderWindow::WindowMovedOrResized()
 	{
 		::RECT rect;
-		::GetClientRect(hWnd_, &rect);
+		::GetWindowRect(hWnd_, &rect);
 
 		this->Reposition(rect.left, rect.top);
 		this->Resize(rect.right - rect.left, rect.bottom - rect.top);

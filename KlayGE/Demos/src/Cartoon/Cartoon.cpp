@@ -101,7 +101,7 @@ private:
 int main()
 {
 	Cartoon app;
-	OCTree sceneMgr(Box(Vector3(-10, -10, -10), Vector3(10, 10, 10)));
+	OCTree sceneMgr(Box(Vector3(-10, -10, -10), Vector3(10, 10, 10)), 3);
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
@@ -151,6 +151,8 @@ void Cartoon::InitObjects()
 	*(renderTorus->GetRenderEffect()->ParameterByName("proj")) = proj_;
 	*(renderTorus->GetRenderEffect()->ParameterByName("lightPos")) = Vector4(2, 2, -3, 1);
 	*(renderTorus->GetRenderEffect()->ParameterByName("eyePos")) = Vector4(0, 0, -6, 1);
+
+	renderTorus->AddToSceneManager();
 }
 
 void Cartoon::Update()
@@ -174,8 +176,6 @@ void Cartoon::Update()
 
 	std::wostringstream stream;
 	stream << (*renderEngine.ActiveRenderTarget())->FPS();
-
-	renderTorus->Render();
 
 	RenderWindow* rw = static_cast<RenderWindow*>(renderEngine.ActiveRenderTarget()->get());
 

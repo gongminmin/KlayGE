@@ -43,6 +43,8 @@ namespace KlayGE
 
 	void D3D9VertexStream::Assign(void const * src, size_t numVertices, size_t stride)
 	{
+		assert(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
+
 		numVertices_ = numVertices;
 
 		size_t const vertexSize(this->sizeElement() * this->ElementsPerVertex());
@@ -51,8 +53,6 @@ namespace KlayGE
 		if (currentSize_ < size)
 		{
 			currentSize_ = size;
-
-			assert(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
 
 			D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 			boost::shared_ptr<IDirect3DDevice9> d3dDevice = renderEngine.D3DDevice();
@@ -107,14 +107,12 @@ namespace KlayGE
 		TIF(d3dDevice->CreateVertexBuffer(static_cast<UINT>(size), 0, 0, D3DPOOL_SYSTEMMEM, &temp, NULL));
 		boost::shared_ptr<IDirect3DVertexBuffer9> buffer = MakeCOMPtr(temp);
 
-		void* src;
-		void* dest;
-		TIF(buffer_->Lock(0, 0, &src, D3DLOCK_NOSYSLOCK));
-		TIF(buffer->Lock(0, 0, &dest, D3DLOCK_NOSYSLOCK));
+		uint8_t* src;
+		uint8_t* dest;
+		TIF(buffer_->Lock(0, 0, reinterpret_cast<void**>(&src), D3DLOCK_NOSYSLOCK));
+		TIF(buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_NOSYSLOCK));
 
-		uint8_t* destPtr(static_cast<uint8_t*>(dest));
-		uint8_t const * srcPtr(static_cast<uint8_t const *>(src));
-		std::copy(srcPtr, srcPtr + size, destPtr);
+		std::copy(src, src + size, dest);
 
 		buffer->Unlock();
 		buffer_->Unlock();
@@ -138,14 +136,12 @@ namespace KlayGE
 				0, D3DPOOL_DEFAULT, &temp, NULL));
 		boost::shared_ptr<IDirect3DVertexBuffer9> buffer = MakeCOMPtr(temp);
 
-		void* src;
-		void* dest;
-		TIF(buffer_->Lock(0, 0, &src, D3DLOCK_NOSYSLOCK));
-		TIF(buffer->Lock(0, 0, &dest, D3DLOCK_NOSYSLOCK));
+		uint8_t* src;
+		uint8_t* dest;
+		TIF(buffer_->Lock(0, 0, reinterpret_cast<void**>(&src), D3DLOCK_NOSYSLOCK));
+		TIF(buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_NOSYSLOCK));
 
-		uint8_t* destPtr(static_cast<uint8_t*>(dest));
-		uint8_t const * srcPtr(static_cast<uint8_t const *>(src));
-		std::copy(srcPtr, srcPtr + size, destPtr);
+		std::copy(src, src + size, dest);
 
 		buffer->Unlock();
 		buffer_->Unlock();

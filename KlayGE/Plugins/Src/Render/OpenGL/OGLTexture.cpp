@@ -19,6 +19,7 @@
 #include <cstring>
 
 #include <GLLoader/GLLoader.h>
+#include <gl/glu.h>
 
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 
@@ -313,7 +314,7 @@ namespace KlayGE
 
 		for (int face = 0; face < 6; ++ face)
 		{
-			glBindTexture(GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB + face, texture_[face]);
+			glBindTexture(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, texture_[face]);
 
 			if (IsCompressedFormat(format_))
 			{
@@ -329,12 +330,12 @@ namespace KlayGE
 
 				GLsizei const image_size = ((width_ + 3) / 4) * ((height_ + 3) / 4) * block_size;
 
-				glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB + face, numMipMaps_, glinternalFormat,
+				glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, numMipMaps_, glinternalFormat,
 					width_, height_, 0, image_size, NULL);
 			}
 			else
 			{
-				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB + face, numMipMaps_, glinternalFormat,
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, numMipMaps_, glinternalFormat,
 					width_, height_, 0, glformat, GL_UNSIGNED_BYTE, NULL);
 			}
 		}
@@ -361,19 +362,58 @@ namespace KlayGE
 		return name;
 	}
 
-	/*void OGLTexture::CopyToTexture(Texture& target)
+	void OGLTexture::CopyToTexture(Texture& target)
 	{
+		GLint gl_internal_format;
+		GLenum gl_format;
+		Convert(gl_internal_format, gl_format, format_);
+		
+		GLint gl_target_internal_format;
+		GLenum gl_target_format;
+		Convert(gl_target_internal_format, gl_target_format, target.Format());
+
 		OGLTexture& other(static_cast<OGLTexture&>(target));
 
-		std::vector<uint8_t> data(width_ * height_ * PixelFormatBits(format_) / 8);
-		for (int i = 0; i < numMipMaps_; ++ i)
+		switch (type_)
 		{
-			this->CopyToMemory(i, &data[0]);
-			target.CopyMemoryToTexture2D(i, &data[0], format_, width_, height_, 0, 0);
+		case TT_2D:
+			{
+				std::vector<uint8_t> data_in(width_ * height_ * bpp_ / 8);
+				std::vector<uint8_t> data_out(target.Width() * target.Height() * target.Bpp() / 8);
+				for (int level = 0; level < numMipMaps_; ++ level)
+				{
+					this->CopyToMemory2D(level, &data_in[0]);
+
+					gluScaleImage(gl_format, width_ / (1UL << level), height_ / (1UL << level), GL_UNSIGNED_BYTE, &data_in[0],
+						target.Width(), target.Height(), GL_UNSIGNED_BYTE, &data_out[0]);
+
+					target.CopyMemoryToTexture2D(level, &data_out[0], format_,
+						target.Width() / (1UL << level), target.Height() / (1UL << level), 0, 0);
+				}
+			}
+			break;
 		}
 	}
 
-	void OGLTexture::CopyToMemory(int level, void* data)
+	void OGLTexture::CopyToMemory1D(int level, void* data)
+	{
+		GLint glinternalFormat;
+		GLenum glformat;
+		Convert(glinternalFormat, glformat, format_);
+
+		glBindTexture(GL_TEXTURE_1D, texture_[0]);
+
+		if (IsCompressedFormat(format_))
+		{
+			glGetCompressedTexImageARB(GL_TEXTURE_1D, level, data);
+		}
+		else
+		{
+			glGetTexImage(GL_TEXTURE_1D, level, glformat, GL_UNSIGNED_BYTE, data);
+		}
+	}
+
+	void OGLTexture::CopyToMemory2D(int level, void* data)
 	{
 		GLint glinternalFormat;
 		GLenum glformat;
@@ -389,7 +429,78 @@ namespace KlayGE
 		{
 			glGetTexImage(GL_TEXTURE_2D, level, glformat, GL_UNSIGNED_BYTE, data);
 		}
-	}*/
+	}
+
+	void OGLTexture::CopyToMemory3D(int level, void* data)
+	{
+		GLint glinternalFormat;
+		GLenum glformat;
+		Convert(glinternalFormat, glformat, format_);
+
+		glBindTexture(GL_TEXTURE_3D, texture_[0]);
+
+		if (IsCompressedFormat(format_))
+		{
+			glGetCompressedTexImageARB(GL_TEXTURE_3D, level, data);
+		}
+		else
+		{
+			glGetTexImage(GL_TEXTURE_3D, level, glformat, GL_UNSIGNED_BYTE, data);
+		}
+	}
+
+	void OGLTexture::CopyToMemoryCube(CubeFaces face, int level, void* data)
+	{
+		GLint glinternalFormat;
+		GLenum glformat;
+		Convert(glinternalFormat, glformat, format_);
+
+		glBindTexture(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, texture_[0]);
+
+		if (IsCompressedFormat(format_))
+		{
+			glGetCompressedTexImageARB(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, data);
+		}
+		else
+		{
+			glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glformat, GL_UNSIGNED_BYTE, data);
+		}
+	}
+
+	void OGLTexture::CopyMemoryToTexture1D(int level, void* data, PixelFormat pf,
+		uint32_t width, uint32_t xOffset)
+	{
+		assert(width != 0);
+
+		GLint glinternalFormat;
+		GLenum glformat;
+		Convert(glinternalFormat, glformat, pf);
+
+		glBindTexture(GL_TEXTURE_2D, texture_[0]);
+
+		if (IsCompressedFormat(format_))
+		{
+			int block_size;
+			if (PF_DXT1 == format_)
+			{
+				block_size = 8;
+			}
+			else
+			{
+				block_size = 16;
+			}
+
+			GLsizei const image_size = ((width + 3) / 4) * block_size;
+
+			glCompressedTexSubImage1D(GL_TEXTURE_1D, level, xOffset,
+				width, glformat, image_size, data);
+		}
+		else
+		{
+			glTexSubImage1D(GL_TEXTURE_1D, level, xOffset,
+				width, glformat, GL_UNSIGNED_BYTE, data);
+		}
+	}
 
 	void OGLTexture::CopyMemoryToTexture2D(int level, void* data, PixelFormat pf,
 		uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset)
@@ -427,6 +538,79 @@ namespace KlayGE
 		}
 	}
 
+	void OGLTexture::CopyMemoryToTexture3D(int level, void* data, PixelFormat pf,
+			uint32_t width, uint32_t height, uint32_t depth,
+			uint32_t xOffset, uint32_t yOffset, uint32_t zOffset)
+	{
+		assert(width != 0);
+		assert(height != 0);
+		assert(depth != 0);
+
+		GLint glinternalFormat;
+		GLenum glformat;
+		Convert(glinternalFormat, glformat, pf);
+
+		glBindTexture(GL_TEXTURE_3D, texture_[0]);
+
+		if (IsCompressedFormat(format_))
+		{
+			int block_size;
+			if (PF_DXT1 == format_)
+			{
+				block_size = 8;
+			}
+			else
+			{
+				block_size = 16;
+			}
+
+			GLsizei const image_size = ((width + 3) / 4) * ((height + 3) / 4) * ((depth + 3) / 4) * block_size;
+
+			glCompressedTexSubImage3D(GL_TEXTURE_3D, level, xOffset, yOffset, zOffset,
+				width, height, depth, glformat, image_size, data);
+		}
+		else
+		{
+			glTexSubImage3D(GL_TEXTURE_3D, level, xOffset, yOffset, zOffset,
+				width, height, depth, glformat, GL_UNSIGNED_BYTE, data);
+		}
+	}
+
+	void OGLTexture::CopyMemoryToTextureCube(CubeFaces face, int level, void* data, PixelFormat pf,
+			uint32_t size, uint32_t xOffset)
+	{
+		assert(size != 0);
+
+		GLint glinternalFormat;
+		GLenum glformat;
+		Convert(glinternalFormat, glformat, pf);
+
+		glBindTexture(GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB + face, texture_[0]);
+
+		if (IsCompressedFormat(format_))
+		{
+			int block_size;
+			if (PF_DXT1 == format_)
+			{
+				block_size = 8;
+			}
+			else
+			{
+				block_size = 16;
+			}
+
+			GLsizei const image_size = ((size + 3) / 4) * ((size + 3) / 4) * block_size;
+
+			glCompressedTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB + face, level, xOffset, xOffset,
+				size, size, glformat, image_size, data);
+		}
+		else
+		{
+			glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB + face, level, xOffset, xOffset,
+				size, size, glformat, GL_UNSIGNED_BYTE, data);
+		}
+	}
+
 	void OGLTexture::BuildMipSubLevels()
 	{
 	}
@@ -434,5 +618,31 @@ namespace KlayGE
 	void OGLTexture::CustomAttribute(std::string const & name, void* pData)
 	{
 		assert(false);
+	}
+
+	uint32_t OGLTexture::MaxWidth() const
+	{
+		GLint width;
+		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &width);
+		return width;
+	}
+	
+	uint32_t OGLTexture::MaxHeight() const
+	{
+		return this->MaxWidth();
+	}
+
+	uint32_t OGLTexture::MaxDepth() const
+	{
+		GLint depth;
+		glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &depth);
+		return depth;
+	}
+
+	uint32_t OGLTexture::MaxCubeSize() const
+	{
+		GLint depth;
+		glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &depth);
+		return depth;
 	}
 }

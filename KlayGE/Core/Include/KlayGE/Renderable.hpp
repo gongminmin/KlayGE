@@ -35,8 +35,9 @@ namespace KlayGE
 		virtual Box GetBound() const = 0;
 
 		virtual bool CanBeCulled() const;
+		virtual bool ShortAge() const;
 
-		virtual void Render();
+		virtual void AddToSceneManager();
 	};
 }
 

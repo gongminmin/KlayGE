@@ -40,8 +40,13 @@ namespace KlayGE
 		return true;
 	}
 
-	void Renderable::Render()
+	bool Renderable::ShortAge() const
 	{
-		Context::Instance().SceneManagerInstance().PushRenderable(this->shared_from_this());
+		return false;
+	}
+
+	void Renderable::AddToSceneManager()
+	{
+		Context::Instance().SceneManagerInstance().AddRenderable(this->shared_from_this());
 	}
 }

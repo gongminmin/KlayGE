@@ -41,9 +41,28 @@ namespace KlayGE
 	{
 	}
 
-	// 假如渲染物体
+	// 加入渲染物体
 	/////////////////////////////////////////////////////////////////////////////////
-	void SceneManager::PushRenderable(RenderablePtr const & obj)
+	void SceneManager::AddRenderable(RenderablePtr const & obj)
+	{
+		if (obj->CanBeCulled())
+		{
+			this->DoAddRenderable(obj);
+		}
+		else
+		{
+			this->AddToRenderQueue(obj);
+		}
+	}
+
+	void SceneManager::DoAddRenderable(RenderablePtr const & obj)
+	{
+		renderItems_.push_back(obj);
+	}
+
+	// 加入渲染队列
+	/////////////////////////////////////////////////////////////////////////////////
+	void SceneManager::AddToRenderQueue(RenderablePtr const & obj)
 	{
 		RenderEffectPtr const & effect(obj->GetRenderEffect());
 
@@ -109,16 +128,22 @@ namespace KlayGE
 		Context::Instance().AppInstance().RenderOver();
 	}
 
+	// 获取渲染的物体数量
+	/////////////////////////////////////////////////////////////////////////////////
 	size_t SceneManager::NumObjectsRendered() const
 	{
 		return numObjectsRendered_;
 	}
 
+	// 获取渲染的图元数量
+	/////////////////////////////////////////////////////////////////////////////////
 	size_t SceneManager::NumPrimitivesRendered() const
 	{
 		return numPrimitivesRendered_;
 	}
-	
+
+	// 获取渲染的顶点数量
+	/////////////////////////////////////////////////////////////////////////////////
 	size_t SceneManager::NumVerticesRendered() const
 	{
 		return numVerticesRendered_;

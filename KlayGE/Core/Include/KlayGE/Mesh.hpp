@@ -37,7 +37,7 @@ namespace KlayGE
 
 		std::wstring const & Name() const;
 
-		virtual void Render();
+		virtual void AddToSceneManager();
 
 		template <typename ForwardIterator>
 		void AssignXYZs(ForwardIterator first, ForwardIterator last)

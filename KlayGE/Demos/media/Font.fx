@@ -1,10 +1,10 @@
 texture texFont;
 int halfWidth;
 int halfHeight;
+float4 color;
 
 void FontVS(float4 position : POSITION,
 			float2 texCoord : TEXCOORD0,
-			float4 color : COLOR0,
 
 			out float4 oPosition : POSITION,
 			out float2 oTexCoord : TEXCOORD0,

@@ -59,6 +59,11 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
+		uint32_t MaxWidth() const;
+		uint32_t MaxHeight() const;
+		uint32_t MaxDepth() const;
+		uint32_t MaxCubeSize() const;
+
 		GLenum GLTexture() const
 			{ return texture_[0]; }
 		GLenum GLTextureFace(int face) const

@@ -278,6 +278,11 @@ namespace KlayGE
 
 		virtual void BuildMipSubLevels() = 0;
 
+		virtual uint32_t MaxWidth() const = 0;
+		virtual uint32_t MaxHeight() const = 0;
+		virtual uint32_t MaxDepth() const = 0;
+		virtual uint32_t MaxCubeSize() const = 0;
+
 	protected:
 		uint32_t		height_;
 		uint32_t		width_;

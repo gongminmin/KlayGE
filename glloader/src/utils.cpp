@@ -35,7 +35,7 @@ namespace
 	std::vector<std::string> split(std::string const & str)
 	{
 		std::vector<std::string> ret;
-		boost::algorithm::split(ret, std::string(str), boost::bind(std::equal_to<char>(), ' ', _1));
+		boost::algorithm::split(ret, str, boost::bind(std::equal_to<char>(), ' ', _1));
 
 		return ret;
 	}

@@ -21,62 +21,47 @@
 
 #include <set>
 
+#include <KlayGE/OCTree/OCTreeFrustum.hpp>
 #include <KlayGE/OCTree/OCTree.hpp>
 
 namespace KlayGE
 {
-	OCTree::OCTree(Box const & box)
-		: root_box_(box)
+	OCTree::OCTree(Box const & box, uint32_t maxNumObjInANode)
+		: root_box_(box), maxNumObjInANode_(maxNumObjInANode)
 	{
 	}
 
 	void OCTree::ClipScene(Camera const & camera)
 	{
-		frustum_.CalculateFrustum(camera.ViewMatrix() * camera.ProjMatrix());
-
-		std::set<RenderablePtr> renderables;
-		for (linear_octree_t::iterator iter = linear_octree_.begin(); iter != linear_octree_.end(); ++ iter)
+		for (RenderItemsType::iterator iter = renderItems_.begin(); iter != renderItems_.end(); ++ iter)
 		{
-			Box box = this->AreaBox(iter->first);
-
-			if (frustum_.Visiable(box, Matrix4::Identity()))
-			{
-				renderables.insert(iter->second);
-
-//#ifdef KLAYGE_DEBUG
-				renderables.insert(RenderablePtr(new RenderableBox(box)));
-//#endif
-			}
+			this->InsertRenderable("0", *iter);
 		}
 
-		renderQueue_.clear();
+		OCTreeFrustum frustum(camera.ViewMatrix() * camera.ProjMatrix());
 
-		for (std::vector<RenderablePtr>::iterator iter = uncullables_.begin();
-			iter != uncullables_.end(); ++ iter)
+		std::set<RenderablePtr> renderables;
+		for (linear_octree_t::iterator iter = octree_.begin(); iter != octree_.end(); ++ iter)
 		{
-			SceneManager::PushRenderable(*iter);
+			Box const & box = this->AreaBox(iter->first);
+
+			if (frustum.Visiable(box, Matrix4::Identity()))
+			{
+				renderables.insert(iter->second.begin(), iter->second.end());
+
+#ifdef KLAYGE_DEBUG
+				renderables.insert(RenderablePtr(new RenderableBox(box)));
+#endif
+			}
 		}
 
 		for (std::set<RenderablePtr>::iterator iter = renderables.begin();
 			iter != renderables.end(); ++ iter)
 		{
-			SceneManager::PushRenderable(*iter);
+			this->AddToRenderQueue(*iter);
 		}
 
-		uncullables_.clear();
-		linear_octree_.clear();
-	}
-
-	void OCTree::PushRenderable(RenderablePtr const & renderable)
-	{
-		if (!renderable->CanBeCulled())
-		{
-			uncullables_.push_back(renderable);
-		}
-		else
-		{
-			this->InsertRenderable("0", renderable);
-		}
+		octree_.clear();
 	}
 
 	OCTree::tree_id_t OCTree::Child(tree_id_t const & id, int child_no)
@@ -151,7 +136,7 @@ namespace KlayGE
 
 	bool OCTree::InsideChild(tree_id_t const & id, RenderablePtr const & renderable)
 	{
-		Box area_box = this->AreaBox(id);
+		Box const & area_box = this->AreaBox(id);
 		Box const & box(renderable->GetBound());
 
 		for (size_t i = 0; i < 8; ++ i)
@@ -170,27 +155,44 @@ namespace KlayGE
 	{
 		assert(this->InsideChild(id, renderable));
 
-		if (linear_octree_.find(id) == linear_octree_.end())
+		linear_octree_t::iterator node = octree_.find(id);
+
+		if (node == octree_.end())
 		{
-			linear_octree_[id] = renderable;
+			octree_.insert(std::make_pair(id, renderable_ptrs_t(1, renderable)));
+
+			assert(octree_[id].front() == renderable);
 		}
 		else
 		{
-			RenderablePtr old_renderable = linear_octree_[id];
-
-			for (int i = 0; i < 8; ++ i)
+			if (node->second.size() < maxNumObjInANode_)
 			{
-				tree_id_t const child_id = this->Child(id, i);
+				node->second.push_back(renderable);
+			}
+			else
+			{
+				renderable_ptrs_t const & old_renderables = node->second;
 
-				if (this->InsideChild(child_id, old_renderable))
+				for (renderable_ptrs_t::const_iterator iter = old_renderables.begin();
+					iter != old_renderables.end(); ++ iter)
 				{
-					this->InsertRenderable(child_id, old_renderable);
+					for (int i = 0; i < 8; ++ i)
+					{
+						tree_id_t const child_id = this->Child(id, i);
+
+						if (this->InsideChild(child_id, *iter))
+						{
+							this->InsertRenderable(child_id, *iter);
+						}
+
+						if (this->InsideChild(child_id, renderable))
+						{
+							this->InsertRenderable(child_id, renderable);
+						}
+					}
 				}
 
-				if (this->InsideChild(child_id, renderable))
-				{
-					this->InsertRenderable(child_id, renderable);
-				}
+				octree_.erase(node);
 			}
 		}
 	}

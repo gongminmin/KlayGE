@@ -40,8 +40,7 @@ namespace KlayGE
 		SceneManager();
 
 		virtual void ClipScene(Camera const & camera);
-
-		virtual void PushRenderable(RenderablePtr const & obj);
+		void AddRenderable(RenderablePtr const & obj);
 
 		void Update();
 		void Flush();
@@ -51,6 +50,14 @@ namespace KlayGE
 		size_t NumVerticesRendered() const;
 
 	protected:
+		void AddToRenderQueue(RenderablePtr const & obj);
+
+		virtual void DoAddRenderable(RenderablePtr const & obj);
+
+	protected:
+		RenderItemsType renderItems_;
+
+	private:
 		RenderQueueType renderQueue_;
 
 		size_t numObjectsRendered_;

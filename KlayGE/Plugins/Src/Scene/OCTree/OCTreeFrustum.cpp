@@ -17,7 +17,7 @@
 
 namespace KlayGE
 {
-	void OCTreeFrustum::CalculateFrustum(Matrix4 const & clip)
+	OCTreeFrustum::OCTreeFrustum(Matrix4 const & clip)
 	{
 		Vector4 column1(clip(0, 0), clip(1, 0), clip(2, 0), clip(3, 0));
 		Vector4 column2(clip(0, 1), clip(1, 1), clip(2, 1), clip(3, 1));
@@ -114,22 +114,6 @@ namespace KlayGE
 			MathLib::Minimize(min, boxVertices[i][0], boxVertices[i][2]);
 			Vector3 max;
 			MathLib::Maximize(max, boxVertices[i][0], boxVertices[i][2]);
-
-			if (MathLib::Eq(min.x(), max.x()))
-			{
-				min.x() -= 0.001f;
-				max.x() += 0.001f;
-			}
-			if (MathLib::Eq(min.y(), max.y()))
-			{
-				min.y() -= 0.001f;
-				max.y() += 0.001f;
-			}
-			if (MathLib::Eq(min.z(), max.z()))
-			{
-				min.z() -= 0.001f;
-				max.z() += 0.001f;
-			}
 
 			for (size_t j = 0; j < 4; ++ j)
 			{

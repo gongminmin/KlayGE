@@ -88,24 +88,4 @@ namespace KlayGE
 
 		this->Update();
 	}
-
-	Vector3 FirstPersonCameraController::WorldRight() const
-	{
-		return Vector3(world_(0, 0), world_(0, 1), world_(0, 2));
-	}
-
-	Vector3 FirstPersonCameraController::WorldUp() const
-	{
-		return Vector3(world_(1, 0), world_(1, 1), world_(1, 2));
-	}
-
-	Vector3 FirstPersonCameraController::WorldAhead() const
-	{
-		return Vector3(world_(2, 0), world_(2, 1), world_(2, 2));
-	}
-
-    Vector3 FirstPersonCameraController::EyePos() const
-	{
-		return Vector3(world_(3, 0), world_(3, 1), world_(3, 2));
-	}
 }

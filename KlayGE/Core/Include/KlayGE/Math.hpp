@@ -281,13 +281,7 @@ namespace KlayGE
 		inline float
 		RecipSqrt(float x)
 		{
-			float xhalf = 0.5f * x;
-			int n = *reinterpret_cast<int*>(&x);	// get bits for floating value
-			n = 0x5F3759DF - (n >> 1);				// gives initial guess y0
-			x = *reinterpret_cast<float*>(&n);		// convert bits back to float
-			x = x * (1.5f - xhalf * x * x);			// Newton step, repeating increases accuracy
-
-			return x;
+			return 1.0f / Sqrt(x);
 		}
 
 		inline float

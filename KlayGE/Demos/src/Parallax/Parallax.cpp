@@ -161,7 +161,7 @@ private:
 int main()
 {
 	Parallax app;
-	OCTree sceneMgr(Box(Vector3(-5, -5, -5), Vector3(5, 5, 5)));
+	OCTree sceneMgr(Box(Vector3(-5, -5, -5), Vector3(5, 5, 5)), 3);
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
@@ -207,6 +207,8 @@ void Parallax::InitObjects()
 	KlayGE::InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 	inputEngine.ActionMap(actionMap, true);
+
+	renderPolygon->AddToSceneManager();
 }
 
 void Parallax::Update()
@@ -282,7 +284,6 @@ void Parallax::Update()
 	std::wostringstream stream;
 	stream << (*renderEngine.ActiveRenderTarget())->FPS();
 
-	renderPolygon->Render();
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Parallax²âÊÔ");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());
 

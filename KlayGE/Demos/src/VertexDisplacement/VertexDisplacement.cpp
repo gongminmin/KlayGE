@@ -152,7 +152,7 @@ private:
 int main()
 {
 	VertexDisplacement app;
-	OCTree sceneMgr(Box(Vector3(-10, -10, -10), Vector3(10, 10, 10)));
+	OCTree sceneMgr(Box(Vector3(-10, -10, -10), Vector3(10, 10, 10)), 3);
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
@@ -201,6 +201,8 @@ void VertexDisplacement::InitObjects()
 	MathLib::Inverse(modelViewIT, modelViewIT);
 
 	*(flag->GetRenderEffect()->ParameterByName("modelviewIT")) = modelViewIT;
+
+	flag->AddToSceneManager();
 }
 
 void VertexDisplacement::Update()
@@ -213,7 +215,6 @@ void VertexDisplacement::Update()
 	std::wostringstream stream;
 	stream << (*renderEngine.ActiveRenderTarget())->FPS();
 
-	flag->Render();
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"¶¥µãÎ»ÒÆ");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());
 

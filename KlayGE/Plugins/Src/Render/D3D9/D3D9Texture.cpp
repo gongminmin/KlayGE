@@ -113,10 +113,11 @@ namespace
 
 		case PF_D24S8:
 			return D3DFMT_D24S8;
-		}
 
-		assert(false);
-		return D3DFMT_UNKNOWN;
+		default:
+			assert(false);
+			return D3DFMT_UNKNOWN;
+		}
 	}
 
 	KlayGE::PixelFormat ConvertFormat(D3DFORMAT format)
@@ -185,10 +186,11 @@ namespace
 
 		case D3DFMT_D24S8:
 			return PF_D24S8;
-		}
 
-		assert(false);
-		return PF_Unknown;
+		default:
+			assert(false);
+			return PF_Unknown;
+		}
 	}
 }
 
@@ -197,6 +199,7 @@ namespace KlayGE
 	D3D9Texture::D3D9Texture(uint32_t width, uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
 					: Texture(usage, TT_1D)
 	{
+		assert(TU_Default == usage);
 		assert(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
 
 		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
@@ -209,8 +212,6 @@ namespace KlayGE
 		depth_		= 1;
 
 		bpp_ = PixelFormatBits(format);
-
-		assert(TU_Default == usage_);
 
 		d3dTexture2D_ = this->CreateTexture2D(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 
@@ -257,6 +258,7 @@ namespace KlayGE
 								uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
 					: Texture(usage, TT_3D)
 	{
+		assert(TU_Default == usage);
 		assert(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
 
 		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
@@ -269,8 +271,6 @@ namespace KlayGE
 		depth_		= depth;
 
 		bpp_ = PixelFormatBits(format);
-
-		assert(TU_Default == usage_);
 
 		d3dTexture3D_ = this->CreateTexture3D(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 
@@ -342,18 +342,18 @@ namespace KlayGE
 			{
 				IDirect3DSurface9Ptr src, dst;
 
-				for (uint32_t i = 0; i < maxLevel; ++ i)
+				for (uint32_t level = 0; level < maxLevel; ++ level)
 				{
 					IDirect3DSurface9* temp;
 
-					TIF(d3dTexture2D_->GetSurfaceLevel(i, &temp));
+					TIF(d3dTexture2D_->GetSurfaceLevel(level, &temp));
 					src = MakeCOMPtr(temp);
 
-					TIF(other.d3dTexture2D_->GetSurfaceLevel(i, &temp));
+					TIF(other.d3dTexture2D_->GetSurfaceLevel(level, &temp));
 					dst = MakeCOMPtr(temp);
 
-					RECT srcRc = { 0, 0, this->Width(), this->Height() };
-					RECT dstRc = { 0, 0, target.Width(), target.Height() };
+					RECT srcRc = { 0, 0, this->Width() / (1UL << level), this->Height() / (1UL << level) };
+					RECT dstRc = { 0, 0, target.Width() / (1UL << level), target.Height() / (1UL << level) };
 
 					TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, &dstRc, src.get(), NULL, &srcRc, D3DX_DEFAULT, 0));
 				}
@@ -364,18 +364,18 @@ namespace KlayGE
 			{
 				IDirect3DVolume9Ptr src, dst;
 
-				for (uint32_t i = 0; i < maxLevel; ++ i)
+				for (uint32_t level = 0; level < maxLevel; ++ level)
 				{
 					IDirect3DVolume9* temp;
-					
-					TIF(d3dTexture3D_->GetVolumeLevel(i, &temp));
+
+					TIF(d3dTexture3D_->GetVolumeLevel(level, &temp));
 					src = MakeCOMPtr(temp);
 
-					TIF(other.d3dTexture3D_->GetVolumeLevel(i, &temp));
+					TIF(other.d3dTexture3D_->GetVolumeLevel(level, &temp));
 					dst = MakeCOMPtr(temp);
 
-					D3DBOX srcBox = { 0, 0, this->Width(), this->Height(), 0, this->Depth() };
-					D3DBOX dstBox = { 0, 0, target.Width(), target.Height(), 0, target.Depth() };
+					D3DBOX srcBox = { 0, 0, this->Width() / (1UL << level), this->Height() / (1UL << level), 0, this->Depth() / (1UL << level) };
+					D3DBOX dstBox = { 0, 0, target.Width() / (1UL << level), target.Height() / (1UL << level), 0, target.Depth() / (1UL << level) };
 
 					TIF(D3DXLoadVolumeFromVolume(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_DEFAULT, 0));
 				}
@@ -398,8 +398,8 @@ namespace KlayGE
 						TIF(other.d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &temp));
 						dst = MakeCOMPtr(temp);
 
-						RECT srcRc = { 0, 0, this->Width(), this->Height() };
-						RECT dstRc = { 0, 0, target.Width(), target.Height() };
+						RECT srcRc = { 0, 0, this->Width() / (1UL << level), this->Height() / (1UL << level) };
+						RECT dstRc = { 0, 0, target.Width() / (1UL << level), target.Height() / (1UL << level) };
 
 						TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, &dstRc, src.get(), NULL, &srcRc, D3DX_DEFAULT, 0));
 					}
@@ -436,9 +436,9 @@ namespace KlayGE
 		uint8_t* src = static_cast<uint8_t*>(d3d_rc.pBits);
 
 		uint32_t const srcPitch = d3d_rc.Pitch;
-		uint32_t const dstPitch = this->Width() * PixelFormatBits(format_) / 8;
+		uint32_t const dstPitch = this->Width() / (1UL << level) * bpp_ / 8;
 
-		for (uint32_t i = 0; i < this->Height(); ++ i)
+		for (uint32_t i = 0; i < this->Height() / (1UL << level); ++ i)
 		{
 			std::copy(src, src + dstPitch, dst);
 
@@ -460,13 +460,13 @@ namespace KlayGE
 		uint8_t* src = static_cast<uint8_t*>(d3d_box.pBits);
 
 		uint32_t const srcPitch = d3d_box.RowPitch;
-		uint32_t const dstPitch = this->Width() * PixelFormatBits(format_) / 8;
+		uint32_t const dstPitch = this->Width() / (1UL << level) * bpp_ / 8;
 
-		for (uint32_t j = 0; j < this->Depth(); ++ j)
+		for (uint32_t j = 0; j < this->Depth() / (1UL << level); ++ j)
 		{
 			src = static_cast<uint8_t*>(d3d_box.pBits) + j * d3d_box.SlicePitch;
 
-			for (uint32_t i = 0; i < this->Height(); ++ i)
+			for (uint32_t i = 0; i < this->Height() / (1UL << level); ++ i)
 			{
 				std::copy(src, src + dstPitch, dst);
 
@@ -490,9 +490,9 @@ namespace KlayGE
 		uint8_t* src = static_cast<uint8_t*>(d3d_rc.pBits);
 
 		uint32_t const srcPitch = d3d_rc.Pitch;
-		uint32_t const dstPitch = this->Width() * PixelFormatBits(format_) / 8;
+		uint32_t const dstPitch = this->Width() / (1UL << level) * bpp_ / 8;
 
-		for (uint32_t i = 0; i < this->Height(); ++ i)
+		for (uint32_t i = 0; i < this->Height() / (1UL << level); ++ i)
 		{
 			std::copy(src, src + dstPitch, dst);
 
@@ -625,6 +625,10 @@ namespace KlayGE
 				}
 			}
 			break;
+
+		default:
+			assert(false);
+			break;
 		}
 
 		TIF(D3DXFilterTexture(d3dBaseTexture.get(), NULL, D3DX_DEFAULT, D3DX_DEFAULT));
@@ -661,8 +665,6 @@ namespace KlayGE
 				tempTexture2D->AddDirtyRect(NULL);
 				d3dTexture2D_ = tempTexture2D;
 
-				this->QueryBaseTexture();
-
 				renderZBuffer_.reset();
 			}
 			break;
@@ -684,8 +686,6 @@ namespace KlayGE
 				}
 				tempTexture3D->AddDirtyBox(NULL);
 				d3dTexture3D_ = tempTexture3D;
-
-				this->QueryBaseTexture();
 			}
 			break;
 
@@ -712,12 +712,16 @@ namespace KlayGE
 				}
 				d3dTextureCube_ = tempTextureCube;
 
-				this->QueryBaseTexture();
-
 				renderZBuffer_.reset();
 			}
 			break;
+
+		default:
+			assert(false);
+			break;
 		}
+
+		this->QueryBaseTexture();
 	}
 
 	void D3D9Texture::DoOnResetDevice()
@@ -745,8 +749,6 @@ namespace KlayGE
 
 				d3dDevice_->UpdateTexture(d3dTexture2D_.get(), tempTexture2D.get());
 				d3dTexture2D_ = tempTexture2D;
-
-				this->QueryBaseTexture();
 			}
 			break;
 
@@ -757,8 +759,6 @@ namespace KlayGE
 
 				d3dDevice_->UpdateTexture(d3dTexture3D_.get(), tempTexture3D.get());
 				d3dTexture3D_ = tempTexture3D;
-
-				this->QueryBaseTexture();
 			}
 			break;
 
@@ -783,11 +783,15 @@ namespace KlayGE
 
 				d3dDevice_->UpdateTexture(d3dTextureCube_.get(), tempTextureCube.get());
 				d3dTextureCube_ = tempTextureCube;
-
-				this->QueryBaseTexture();
 			}
 			break;
+
+		default:
+			assert(false);
+			break;
 		}
+
+		this->QueryBaseTexture();
 	}
 
 	D3D9Texture::IDirect3DTexture9Ptr D3D9Texture::CreateTexture2D(uint32_t usage, D3DPOOL pool)
@@ -850,6 +854,10 @@ namespace KlayGE
 		case TT_Cube:
 			d3dTextureCube_->QueryInterface(IID_IDirect3DBaseTexture9, reinterpret_cast<void**>(&d3dBaseTexture));
 			break;
+
+		default:
+			assert(false);
+			break;
 		}
 
 		d3dBaseTexture_ = MakeCOMPtr(d3dBaseTexture);
@@ -897,6 +905,39 @@ namespace KlayGE
 				numMipMaps_ = static_cast<uint16_t>(d3dTextureCube_->GetLevelCount());
 			}
 			break;
+
+		default:
+			assert(false);
+			break;
 		}
+	}
+
+	uint32_t D3D9Texture::MaxWidth() const
+	{
+		D3DCAPS9 caps;
+		d3dDevice_->GetDeviceCaps(&caps);
+
+		return caps.MaxTextureWidth;
+	}
+
+	uint32_t D3D9Texture::MaxHeight() const
+	{
+		D3DCAPS9 caps;
+		d3dDevice_->GetDeviceCaps(&caps);
+
+		return caps.MaxTextureHeight;
+	}
+
+	uint32_t D3D9Texture::MaxDepth() const
+	{
+		D3DCAPS9 caps;
+		d3dDevice_->GetDeviceCaps(&caps);
+
+		return caps.MaxVolumeExtent;
+	}
+
+	uint32_t D3D9Texture::MaxCubeSize() const
+	{
+		return this->MaxWidth();
 	}
 }

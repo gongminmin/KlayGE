@@ -27,7 +27,8 @@ namespace KlayGE
 	class OCTreeFrustum
 	{
 	public:
-		void CalculateFrustum(Matrix4 const & clip);
+		explicit OCTreeFrustum(Matrix4 const & clip);
+
 		bool Visiable(Box const & box, Matrix4 const & model) const;
 		bool Visiable(Vector3 const & v) const;
 

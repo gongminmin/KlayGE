@@ -161,7 +161,7 @@ private:
 int main()
 {
 	DistanceMapping app;
-	OCTree sceneMgr(Box(Vector3(-20, -20, -20), Vector3(20, 20, 20)));
+	OCTree sceneMgr(Box(Vector3(-20, -20, -20), Vector3(20, 20, 20)), 3);
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
@@ -207,6 +207,8 @@ void DistanceMapping::InitObjects()
 	KlayGE::InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 	inputEngine.ActionMap(actionMap, true);
+
+	renderPolygon->AddToSceneManager();
 }
 
 void DistanceMapping::Update()
@@ -280,7 +282,6 @@ void DistanceMapping::Update()
 	std::wostringstream stream;
 	stream << (*renderEngine.ActiveRenderTarget())->FPS();
 
-	renderPolygon->Render();
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"DistanceMapping²âÊÔ");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());
 

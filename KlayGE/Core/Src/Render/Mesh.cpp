@@ -23,10 +23,10 @@ namespace KlayGE
 		return name;
 	}
 
-	void StaticMesh::Render()
+	void StaticMesh::AddToSceneManager()
 	{
-		std::for_each(children_.begin(), children_.end(), boost::mem_fn(&StaticMesh::Render));
-		Renderable::Render();
+		std::for_each(children_.begin(), children_.end(), boost::mem_fn(&StaticMesh::AddToSceneManager));
+		Renderable::AddToSceneManager();
 	}
 
 

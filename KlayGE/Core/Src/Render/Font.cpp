@@ -75,10 +75,16 @@ namespace
 		void OnRenderBegin()
 		{
 			fontVB_->GetVertexStream(VST_Positions)->Assign(&xyzs_[0], xyzs_.size() / 3);
-			fontVB_->GetVertexStream(VST_Diffuses)->Assign(&clrs_[0], clrs_.size());
 			fontVB_->GetVertexStream(VST_TextureCoords0)->Assign(&texs_[0], texs_.size() / 2);
 
 			fontVB_->GetIndexStream()->Assign(&indices_[0], indices_.size());
+
+			RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			Viewport const & viewport((*renderEngine.ActiveRenderTarget())->GetViewport());
+			*(fontEffect_->ParameterByName("halfWidth")) = viewport.width / 2;
+			*(fontEffect_->ParameterByName("halfHeight")) = viewport.height / 2;
+
+			*(fontEffect_->ParameterByName("color")) = Vector4(clr_.r(), clr_.g(), clr_.b(), clr_.a());
 		}
 
 		RenderEffectPtr GetRenderEffect() const
@@ -98,17 +104,33 @@ namespace
 
 		bool CanBeCulled() const
 		{
-			return false;
+			return canBeCulled_;
+		}
+
+		bool ShortAge() const
+		{
+			return true;
 		}
 
 		void RenderText(uint32_t fontHeight, Font::CharInfoMapType& charInfoMap, float sx, float sy, float sz,
-			float xScale, float yScale, uint32_t clr, std::wstring const & text, uint32_t flags)
+			float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t flags)
 		{
+			if (flags & Font::FA_CanBeCulled)
+			{
+				canBeCulled_ = true;
+			}
+			else
+			{
+				canBeCulled_ = false;
+			}
+
 			// …Ë÷√π˝¬À Ù–‘
 			if (flags & Font::FA_Filtered)
 			{
 				Context::Instance().RenderFactoryInstance().RenderEngineInstance().TextureFiltering(0, RenderEngine::TF_Bilinear);
 			}
+
+			clr_ = clr;
 
 			float const h(fontHeight * yScale);
 			size_t const maxSize(text.length() - std::count(text.begin(), text.end(), L'\n'));
@@ -190,8 +212,6 @@ namespace
 				}
 			}
 
-			clrs_.resize(xyzs_.size() / 3, clr);
-
 			box_ = Box(Vector3(sx, sy, sz), Vector3(maxx, maxy, sz + 0.1f));
 		}
 
@@ -200,11 +220,13 @@ namespace
 		VertexBufferPtr fontVB_;
 
 		std::vector<float>		xyzs_;
-		std::vector<uint32_t>	clrs_;
 		std::vector<float>		texs_;
 		std::vector<uint16_t>	indices_;
+		Color					clr_;
 
 		Box box_;
+
+		bool canBeCulled_;
 	};
 }
 
@@ -215,21 +237,17 @@ namespace KlayGE
 	Font::Font(std::string const & fontName, uint32_t height, uint32_t /*flags*/)
 				: curX_(0), curY_(0),
 					fontHeight_(height),
-					theTexture_(Context::Instance().RenderFactoryInstance().MakeTexture2D(1024, 1024, 1, TEX_FORMAT)),
 					vb_(new VertexBuffer(VertexBuffer::BT_TriangleList))
 	{
+		theTexture_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(2, 2, 1, TEX_FORMAT);
+		theTexture_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(theTexture_->MaxWidth(),
+			theTexture_->MaxHeight(), 1, TEX_FORMAT);
+
 		effect_ = LoadRenderEffect("Font.fx");
 		*(effect_->ParameterByName("texFont")) = theTexture_;
 		effect_->SetTechnique("fontTec");
 
-		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		Viewport const & viewport((*renderEngine.ActiveRenderTarget())->GetViewport());
-		*(effect_->ParameterByName("halfWidth")) = viewport.width / 2;
-		*(effect_->ParameterByName("halfHeight")) = viewport.height / 2;
-
-
 		vb_->AddVertexStream(VST_Positions, sizeof(float), 3);
-		vb_->AddVertexStream(VST_Diffuses, sizeof(uint32_t), 1);
 		vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2);
 
 		vb_->AddIndexStream();
@@ -373,14 +391,10 @@ namespace KlayGE
 		{
 			this->UpdateTexture(text);
 
-			uint8_t r, g, b, a;
-			clr.RGBA(r, g, b, a);
-			uint32_t const color((a << 24) + (r << 16) + (g << 8) + b);
-
 			boost::shared_ptr<FontRenderable> renderable(new FontRenderable(effect_, vb_));
 			renderable->RenderText(this->FontHeight(), charInfoMap_,
-				sx, sy, sz, xScale, yScale, color, text, flags);
-			Context::Instance().SceneManagerInstance().PushRenderable(renderable);
+				sx, sy, sz, xScale, yScale, clr, text, flags);
+			Context::Instance().SceneManagerInstance().AddRenderable(renderable);
 		}
 	}
 }

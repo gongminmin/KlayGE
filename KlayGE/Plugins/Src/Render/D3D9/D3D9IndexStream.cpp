@@ -35,6 +35,8 @@ namespace KlayGE
 
 	void D3D9IndexStream::Assign(void const * src, size_t numIndices)
 	{
+		assert(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
+
 		numIndices_ = numIndices;
 
 		size_t const size(sizeof(uint16_t) * numIndices);
@@ -86,14 +88,12 @@ namespace KlayGE
 				D3DFMT_INDEX16, D3DPOOL_SYSTEMMEM, &temp, NULL));
 		boost::shared_ptr<IDirect3DIndexBuffer9> buffer = MakeCOMPtr(temp);
 
-		void* src;
-		void* dest;
-		TIF(buffer_->Lock(0, 0, &src, D3DLOCK_NOSYSLOCK));
-		TIF(buffer->Lock(0, 0, &dest, D3DLOCK_NOSYSLOCK));
+		uint8_t* src;
+		uint8_t* dest;
+		TIF(buffer_->Lock(0, 0, reinterpret_cast<void**>(&src), D3DLOCK_NOSYSLOCK));
+		TIF(buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_NOSYSLOCK));
 
-		uint8_t* destPtr(static_cast<uint8_t*>(dest));
-		uint8_t const * srcPtr(static_cast<uint8_t const *>(src));
-		std::copy(srcPtr, srcPtr + size, destPtr);
+		std::copy(src, src + size, dest);
 
 		buffer->Unlock();
 		buffer_->Unlock();
@@ -116,14 +116,12 @@ namespace KlayGE
 				D3DFMT_INDEX16, D3DPOOL_DEFAULT, &temp, NULL));
 		boost::shared_ptr<IDirect3DIndexBuffer9> buffer = MakeCOMPtr(temp);
 
-		void* src;
-		void* dest;
-		TIF(buffer_->Lock(0, 0, &src, D3DLOCK_NOSYSLOCK));
-		TIF(buffer->Lock(0, 0, &dest, D3DLOCK_NOSYSLOCK));
+		uint8_t* src;
+		uint8_t* dest;
+		TIF(buffer_->Lock(0, 0, reinterpret_cast<void**>(&src), D3DLOCK_NOSYSLOCK));
+		TIF(buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_NOSYSLOCK));
 
-		uint8_t* destPtr(static_cast<uint8_t*>(dest));
-		uint8_t const * srcPtr(static_cast<uint8_t const *>(src));
-		std::copy(srcPtr, srcPtr + size, destPtr);
+		std::copy(src, src + size, dest);
 
 		buffer->Unlock();
 		buffer_->Unlock();
