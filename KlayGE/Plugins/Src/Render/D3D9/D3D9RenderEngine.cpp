@@ -502,8 +502,6 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::WorldMatrices(Matrix4* mats, size_t count)
 	{
-		RenderEngine::WorldMatrices(mats, count);
-
 		for (size_t i = 0; i < count; ++ i)
 		{
 			D3DMATRIX d3dmat(Convert(mats[i]));
