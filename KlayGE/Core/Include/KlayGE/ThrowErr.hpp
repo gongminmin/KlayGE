@@ -48,10 +48,6 @@ namespace KlayGE
 	};
 }
 
-#ifndef IID_PPV_ARG
-#define IID_PPV_ARG(Type, Expr)		IID_##Type,	reinterpret_cast<void**>(static_cast<Type**>(&Expr))
-#endif
-
 #ifdef NDEBUG
 
 // Å×³öHRESULT

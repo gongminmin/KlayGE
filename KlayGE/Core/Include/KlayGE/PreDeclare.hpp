@@ -1,21 +1,18 @@
-#ifndef _KLAYGEPREDECLARE_HPP
-#define _KLAYGEPREDECLARE_HPP
+#ifndef _PREDECLARE_HPP
+#define _PREDECLARE_HPP
 
 #include <boost/smart_ptr.hpp>
 
 namespace KlayGE
 {
 	class Context;
-	template <typename T>
-	class COMPtr;
-	template <typename T>
-	class bintree;
-	template <typename T>
-	class tree;
 	typedef boost::shared_ptr<std::istream> ResIdentifierPtr;
 	class ResLoader;
-
-	class Timer;
+	template <typename Key, typename Type, class Traits, class Allocator>
+	class MapVector;
+	template <typename Key, class Traits, class Allocator>
+	class SetVector;
+	class Exception;
 
 	template <typename T, int N>
 	class Vector_T;
@@ -94,7 +91,6 @@ namespace KlayGE
 	class MusicBuffer;
 	class AudioDataSource;
 	typedef boost::shared_ptr<AudioDataSource> AudioDataSourcePtr;
-	class CDAudio;
 	class AudioFactory;
 	typedef boost::shared_ptr<AudioFactory> AudioFactoryPtr;
 
@@ -104,11 +100,18 @@ namespace KlayGE
 	typedef boost::shared_ptr<InputEngine> InputEnginePtr;
 	class InputDevice;
 	typedef boost::shared_ptr<InputDevice> InputDevicePtr;
+	class InputKeyboard;
+	class InputMouse;
+	class InputJoystick;
 	class InputFactory;
 	typedef boost::shared_ptr<InputFactory> InputFactoryPtr;
 
 	class ShowEngine;
 	typedef boost::shared_ptr<ShowEngine> ShowEnginePtr;
+
+	class ScriptModule;
+	class RegisterModule;
+	class ScriptEngine;
 }
 
 #endif			// _PREDECLARE_HPP

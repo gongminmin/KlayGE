@@ -29,7 +29,7 @@ namespace KlayGE
 		// 建立 DirectInput 对象
 		IDirectInput8W* di;
 		DirectInput8Create(::GetModuleHandle(NULL), DIRECTINPUT_VERSION, 
-			IID_PPV_ARG(IDirectInput8W, di), NULL);
+			IID_IDirectInput8W, reinterpret_cast<void**>(&di), NULL);
 		dinput_ = MakeCOMPtr(di);
 	}
 
