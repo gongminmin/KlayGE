@@ -140,7 +140,7 @@ namespace KlayGE
 		template <typename InputIterator, typename T>
 		T Avg(InputIterator first, InputIterator last) const
 		{
-			return this->Sum() / (last - first);
+			return this->Sum(first, last) / (last - first);
 		}
 
 		// 限制 val 在 low 和 high 之间
