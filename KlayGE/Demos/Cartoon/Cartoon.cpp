@@ -5,6 +5,7 @@
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/Renderable.hpp>
+#include <KlayGE/RenderWindow.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/alloc.hpp>
@@ -74,7 +75,7 @@ int main()
 	settings.colorDepth = 32;
 	settings.fullScreen = false;
 
-	app.Create("Cartoon", settings);
+	app.Create("ø®Õ®‰÷»æ≤‚ ‘", settings);
 	app.Run();
 
 	return 0;
@@ -145,6 +146,7 @@ void Cartoon::Update()
 	stream << (*renderEngine.ActiveRenderTarget())->FPS();
 
 	Engine::SceneManagerInstance().PushRenderable(renderTorus);
+
 	Engine::SceneManagerInstance().PushRenderable(font_->RenderText(0, 0, Color(1, 1, 0, 1), L"ø®Õ®‰÷»æ≤‚ ‘"));
 	Engine::SceneManagerInstance().PushRenderable(font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str()));
 }

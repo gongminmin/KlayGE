@@ -49,21 +49,25 @@ namespace
 	class D3D9FontRenderable : public Renderable
 	{
 	public:
-		D3D9FontRenderable(const RenderEffectPtr& effect)
+		D3D9FontRenderable(const RenderEffectPtr& effect, const RenderBufferPtr& rb)
 			: fontEffect_(effect),
-				fontRB_(new RenderBuffer(RenderBuffer::BT_TriangleList))
+				fontRB_(rb)
 		{
-			fontRB_->AddVertexStream(VST_Positions, sizeof(float), 3);
-			fontRB_->AddVertexStream(VST_Diffuses, sizeof(D3DCOLOR), 1);
-			fontRB_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2);
-
-			fontRB_->AddIndexStream();
 		}
 
 		const WString& Name() const
 		{
 			static WString name_(L"Direct3D9 Font");
 			return name_;
+		}
+
+		void OnRenderBegin()
+		{
+			fontRB_->GetVertexStream(VST_Positions)->Assign(&xyzs_[0], xyzs_.size() / 3);
+			fontRB_->GetVertexStream(VST_Diffuses)->Assign(&clrs_[0], clrs_.size());
+			fontRB_->GetVertexStream(VST_TextureCoords0)->Assign(&texs_[0], texs_.size() / 2);
+
+			fontRB_->GetIndexStream()->Assign(&indices_[0], indices_.size());
 		}
 
 		RenderEffectPtr GetRenderEffect() const
@@ -85,15 +89,13 @@ namespace
 			const size_t maxSize(text.length() - std::count(text.begin(), text.end(), L'\n'));
 			float x(sx), y(sy);
 
-			std::vector<U32, alloc<U32> > clrs(maxSize * 4, clr);
+			xyzs_.clear();
+			texs_.clear();
+			indices_.clear();
 
-			std::vector<float, alloc<float> > xyzs;
-			std::vector<float, alloc<float> > texs;
-			std::vector<U16, alloc<U16> > indices;
-
-			xyzs.reserve(maxSize * 3 * 4);
-			texs.reserve(maxSize * 2 * 4);
-			indices.reserve(maxSize * 6);
+			xyzs_.reserve(maxSize * 3 * 4);
+			texs_.reserve(maxSize * 2 * 4);
+			indices_.reserve(maxSize * 6);
 
 			U16 lastIndex(0);
 			for (WString::const_iterator citer = text.begin(); citer != text.end(); ++ citer)
@@ -105,42 +107,42 @@ namespace
 				{
 					const Rect_T<float>& texRect(charInfoMap[ch].texRect);
 
-					xyzs.push_back(x);
-					xyzs.push_back(y);
-					xyzs.push_back(sz);
+					xyzs_.push_back(x);
+					xyzs_.push_back(y);
+					xyzs_.push_back(sz);
 
-					xyzs.push_back(x + w);
-					xyzs.push_back(y);
-					xyzs.push_back(sz);
+					xyzs_.push_back(x + w);
+					xyzs_.push_back(y);
+					xyzs_.push_back(sz);
 
-					xyzs.push_back(x + w);
-					xyzs.push_back(y + h);
-					xyzs.push_back(sz);
+					xyzs_.push_back(x + w);
+					xyzs_.push_back(y + h);
+					xyzs_.push_back(sz);
 
-					xyzs.push_back(x);
-					xyzs.push_back(y + h);
-					xyzs.push_back(sz);
-
-
-					texs.push_back(texRect.left());
-					texs.push_back(texRect.top());
-
-					texs.push_back(texRect.right());
-					texs.push_back(texRect.top());
-
-					texs.push_back(texRect.right());
-					texs.push_back(texRect.bottom());
-
-					texs.push_back(texRect.left());
-					texs.push_back(texRect.bottom());
+					xyzs_.push_back(x);
+					xyzs_.push_back(y + h);
+					xyzs_.push_back(sz);
 
 
-					indices.push_back(lastIndex + 0);
-					indices.push_back(lastIndex + 1);
-					indices.push_back(lastIndex + 2);
-					indices.push_back(lastIndex + 2);
-					indices.push_back(lastIndex + 3);
-					indices.push_back(lastIndex + 0);
+					texs_.push_back(texRect.left());
+					texs_.push_back(texRect.top());
+
+					texs_.push_back(texRect.right());
+					texs_.push_back(texRect.top());
+
+					texs_.push_back(texRect.right());
+					texs_.push_back(texRect.bottom());
+
+					texs_.push_back(texRect.left());
+					texs_.push_back(texRect.bottom());
+
+
+					indices_.push_back(lastIndex + 0);
+					indices_.push_back(lastIndex + 1);
+					indices_.push_back(lastIndex + 2);
+					indices_.push_back(lastIndex + 2);
+					indices_.push_back(lastIndex + 3);
+					indices_.push_back(lastIndex + 0);
 					lastIndex += 4;
 
 					x += w;
@@ -152,16 +154,17 @@ namespace
 				}
 			}
 
-			fontRB_->GetVertexStream(VST_Positions)->Assign(&xyzs[0], xyzs.size() / 3);
-			fontRB_->GetVertexStream(VST_Diffuses)->Assign(&clrs[0], clrs.size());
-			fontRB_->GetVertexStream(VST_TextureCoords0)->Assign(&texs[0], texs.size() / 2);
-
-			fontRB_->GetIndexStream()->Assign(&indices[0], indices.size());
+			clrs_.resize(xyzs_.size() / 3, clr);
 		}
 
 	private:
 		RenderEffectPtr fontEffect_;
 		RenderBufferPtr fontRB_;
+
+		std::vector<float, alloc<float> > xyzs_;
+		std::vector<U32, alloc<U32> > clrs_;
+		std::vector<float, alloc<float> > texs_;
+		std::vector<U16, alloc<U16> > indices_;
 	};
 }
 
@@ -171,7 +174,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D9Font::D3D9Font(const WString& fontName, U32 height, U32 flags)
 				: curX_(0), curY_(0),
-					theTexture_(Engine::RenderFactoryInstance().MakeTexture(1024, 1024, 1, PF_A4L4))
+					theTexture_(Engine::RenderFactoryInstance().MakeTexture(1024, 1024, 1, PF_A4L4)),
+					rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
 	{
 		effect_ = LoadRenderEffect(L"Font.fx");
 		effect_->SetTexture("texFont", theTexture_);
@@ -181,6 +185,14 @@ namespace KlayGE
 		const Viewport& viewport((*renderEngine.ActiveRenderTarget())->GetViewport());
 		effect_->SetInt("halfWidth", viewport.width / 2);
 		effect_->SetInt("halfHeight", viewport.height / 2);
+
+
+		rb_->AddVertexStream(VST_Positions, sizeof(float), 3);
+		rb_->AddVertexStream(VST_Diffuses, sizeof(D3DCOLOR), 1);
+		rb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2);
+
+		rb_->AddIndexStream();
+
 
 		logFont_.lfHeight			= height;
 		logFont_.lfWidth			= 0;
@@ -363,7 +375,7 @@ namespace KlayGE
 		U8 r, g, b, a;
 		clr.RGBA(r, g, b, a);
 
-		SharedPtr<D3D9FontRenderable> renderable(new D3D9FontRenderable(effect_));
+		SharedPtr<D3D9FontRenderable> renderable(new D3D9FontRenderable(effect_, rb_));
 		renderable->RenderText(this->FontHeight(), charInfoMap_,
 			sx, sy, sz, xScale, yScale, D3DCOLOR_ARGB(a, r, g, b), text, flags);
 		return renderable;

@@ -277,6 +277,7 @@ namespace KlayGE
 
 		typedef std::vector<std::pair<U32, WString> > BehaviorType;
 		BehaviorType behavior;
+		behavior.push_back(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_PUREDEVICE, WString(L"(pure hw vp)")));
 		behavior.push_back(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING, WString(L"(hw vp)")));
 		behavior.push_back(std::make_pair(D3DCREATE_MIXED_VERTEXPROCESSING, WString(L"(mix vp)")));
 		behavior.push_back(std::make_pair(D3DCREATE_SOFTWARE_VERTEXPROCESSING, WString(L"(sw vp)")));

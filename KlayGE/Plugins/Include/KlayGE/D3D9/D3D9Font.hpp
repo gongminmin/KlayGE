@@ -57,6 +57,7 @@ namespace KlayGE
 
 		LOGFONTW logFont_;
 
+		RenderBufferPtr rb_;
 		RenderEffectPtr	effect_;
 		TexturePtr		theTexture_;
 
