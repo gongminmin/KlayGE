@@ -1,14 +1,17 @@
 // D3D9RenderEngine.cpp
 // KlayGE D3D9渲染引擎类 实现文件
-// Ver 2.0.1
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.0.3
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
 //
-// 2.0.0
-// 初次建立 (2003.8.15)
+// 2.0.3
+// 优化了Render (2004.2.22)
 //
 // 2.0.1
 // 重构了Render (2003.10.10)
+//
+// 2.0.0
+// 初次建立 (2003.8.15)
 //
 // 修改记录
 //////////////////////////////////////////////////////////////////////////////////
@@ -583,7 +586,6 @@ namespace KlayGE
 
 		Viewport vp((*iter)->GetViewport());
 		D3DVIEWPORT9 d3dvp = { vp.left, vp.top, vp.width, vp.height, 0, 1 };
-
 		TIF(d3dDevice_->SetViewport(&d3dvp));
 	}
 
@@ -604,7 +606,8 @@ namespace KlayGE
 
 		if (vb.useIndices)
 		{
-			this->DrawIndexedPrimitive(vbConverter_.PrimType(), vb, vbConverter_.PrimCount());
+			d3dDevice_->SetIndices(ibConverter_.Update(vb).Get());
+			this->DrawIndexedPrimitive(vbConverter_.PrimType(), vb.numVertices, vbConverter_.PrimCount());
 		}
 		else
 		{
@@ -616,18 +619,10 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::DrawPrimitive(D3DPRIMITIVETYPE primType, U32 primCount)
 	{
-		if (!renderEffect_)
+		for (UINT i = 0; i < renderPasses_; ++ i)
 		{
+			renderEffect_->Pass(i);
 			this->DoDrawPrimitive(primType, primCount);
-		}
-		else
-		{
-			for (UINT i = 0; i < renderPasses_; ++ i)
-			{
-				renderEffect_->Pass(i);
-
-				this->DoDrawPrimitive(primType, primCount);
-			}
 		}
 	}
 
@@ -640,23 +635,12 @@ namespace KlayGE
 
 	// 画索引的多边形
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DrawIndexedPrimitive(D3DPRIMITIVETYPE primType,
-		 const VertexBuffer& vb, U32 primCount)
+	void D3D9RenderEngine::DrawIndexedPrimitive(D3DPRIMITIVETYPE primType, U32 vertexCount, U32 primCount)
 	{
-		d3dDevice_->SetIndices(ibConverter_.Update(vb).Get());
-
-		if (!renderEffect_)
+		for (UINT i = 0; i < renderPasses_; ++ i)
 		{
-			this->DoDrawIndexedPrimitive(primType, vb.numVertices, primCount);
-		}
-		else
-		{
-			for (UINT i = 0; i < renderPasses_; ++ i)
-			{
-				renderEffect_->Pass(i);
-
-				this->DoDrawIndexedPrimitive(primType, vb.numVertices, primCount);
-			}
+			renderEffect_->Pass(i);
+			this->DoDrawIndexedPrimitive(primType, vertexCount, primCount);
 		}
 	}
 

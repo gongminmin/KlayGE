@@ -128,6 +128,7 @@ namespace KlayGE
 		typedef RenderTargetList::iterator RenderTargetListIterator;
 
 	public:
+		RenderEngine();
 		virtual ~RenderEngine();
 
 		virtual const WString& Name() const = 0;

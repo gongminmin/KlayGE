@@ -26,6 +26,12 @@
 
 namespace KlayGE
 {
+	RenderEngine::RenderEngine()
+		: renderEffect_(NullRenderEffectInstance()),
+			renderPasses_(1)
+	{
+	}
+
 	// Îö¹¹º¯Êı
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderEngine::~RenderEngine()
@@ -79,12 +85,8 @@ namespace KlayGE
 	{
 		if (renderEffect_ != effect)
 		{
-			if (renderEffect_.Get() != NULL)
-			{
-				renderEffect_->End();
-			}
-
-			renderEffect_ = effect;
+			renderEffect_->End();
+			renderEffect_ = (!effect) ? NullRenderEffectInstance() : effect;
 			renderPasses_ = renderEffect_->Begin();
 		}
 	}

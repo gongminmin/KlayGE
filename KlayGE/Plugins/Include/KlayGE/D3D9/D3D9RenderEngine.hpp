@@ -116,7 +116,7 @@ namespace KlayGE
 
 		void DrawPrimitive(D3DPRIMITIVETYPE primType, U32 primCount);
 		void DoDrawPrimitive(D3DPRIMITIVETYPE primType, U32 primCount);
-		void DrawIndexedPrimitive(D3DPRIMITIVETYPE primType, const VertexBuffer& vb, U32 primCount);
+		void DrawIndexedPrimitive(D3DPRIMITIVETYPE primType, U32 vertexCount, U32 primCount);
 		void DoDrawIndexedPrimitive(D3DPRIMITIVETYPE primType, U32 vertexCount, U32 primCount);
 
 
