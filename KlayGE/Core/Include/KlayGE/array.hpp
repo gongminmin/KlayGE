@@ -21,7 +21,7 @@
 #include <iterator>
 #include <algorithm>
 
-namespace KlayGE
+namespace BettyGE
 {
 	template <typename T, std::size_t N, int lowerbound = 0>
 	class array
@@ -47,23 +47,23 @@ namespace KlayGE
 		array()
 			{ }
 		explicit array(const T& value)
-			{ assign(value); }
+			{ this->assign(value); }
 		template <typename InputIterator>
 		array(InputIterator first, InputIterator last)
-			{ assign(first, last); }
+			{ this->assign(first, last); }
 		array(const array<T, N>& x)
-			{ assign(x.begin(), x.end()); }
+			{ this->assign(x.begin(), x.end()); }
 		template <typename U>
 		array<T, N>& operator=(const array<U, N>& rhs)
 		{
-			std::copy(rhs.begin(),rhs.end(), begin());
+			std::copy(rhs.begin(), rhs.end(), this->begin());
 			return *this;
 		}
 		template <typename InputIterator>
 		void assign(InputIterator first, InputIterator last)
-			{ std::copy(first, last, begin()); }
+			{ std::copy(first, last, this->begin()); }
 		void assign(const T& value)
-			{ std::fill_n(begin(), size(), value); }
+			{ std::fill(this->begin(), this->end(), value); }
 
 		// 迭代器
 		iterator begin()
@@ -75,13 +75,13 @@ namespace KlayGE
 		const_iterator end() const
 			{ return _elems + N; }
 		reverse_iterator rbegin()
-			{ return reverse_iterator(end()); }
+			{ return reverse_iterator(this->end()); }
 		const_reverse_iterator rbegin() const
-			{ return const_reverse_iterator(end()); }
+			{ return const_reverse_iterator(this->end()); }
 		reverse_iterator rend()
-			{ return reverse_iterator(begin()); }
+			{ return reverse_iterator(this->begin()); }
 		const_reverse_iterator rend() const
-			{ return const_reverse_iterator(begin()); }
+			{ return const_reverse_iterator(this->begin()); }
 
 		// 容量
 		static size_type size()
@@ -100,12 +100,12 @@ namespace KlayGE
 			{ return _elems[n - lowerbound]; }
 		reference at(size_type n)
 		{
-			rangecheck(n);
+			this->rangecheck(n);
 			return _elems[n - lowerbound];
 		}
 		const_reference at(size_type n) const
 		{
-			rangecheck(n);
+			this->rangecheck(n);
 			return _elems[n - lowerbound];
 		}
 		reference front()
@@ -123,15 +123,15 @@ namespace KlayGE
 
 		// 变动函数
 		void swap(array<T, N>& rhs)
-			{ std::swap_ranges(begin(), end(), rhs.begin()); }
+			{ std::swap_ranges(this->begin(), this->end(), rhs.begin()); }
 
 	private:
 		// 范围检查
 		void rangecheck(size_type n)
 		{
-			if (n >= size() - lowerbound || n < lowerbound)
+			if ((n >= this->size() - lowerbound) || (n < lowerbound))
 			{
-				throw std::out_of_range("KlayGE::array");
+				throw std::out_of_range("BettyGE::array");
 			}
 		}
 
