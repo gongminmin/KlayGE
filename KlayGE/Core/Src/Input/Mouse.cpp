@@ -96,10 +96,8 @@ namespace KlayGE
 
 	// 更新鼠标动作
 	//////////////////////////////////////////////////////////////////////////////////
-	InputActionsType InputMouse::Update()
+	InputActionsType InputMouse::DoUpdate()
 	{
-		this->UpdateInputs();
-
 		InputActionsType ret;
 
 		if (this->X() != 0)

@@ -42,10 +42,8 @@ namespace KlayGE
 
 	// 更新键盘动作
 	//////////////////////////////////////////////////////////////////////////////////
-	InputActionsType InputKeyboard::Update()
+	InputActionsType InputKeyboard::DoUpdate()
 	{
-		this->UpdateInputs();
-
 		InputActionsType ret;
 
 		for (U16 i = 0; i < static_cast<U16>(keys_.size()); ++ i)

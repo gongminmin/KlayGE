@@ -310,7 +310,7 @@ namespace KlayGE
 
 		virtual std::wstring const & Name() const = 0;
 
-		virtual InputActionsType Update() = 0;
+		InputActionsType Update();
 		void ActionMap(InputActionMap const & iaf);
 
 		void Acquire();
@@ -319,6 +319,7 @@ namespace KlayGE
 	protected:
 		virtual void UpdateInputs() = 0;
 		virtual void DoActionMap(InputActionMap const & actionMap) = 0;
+		virtual InputActionsType DoUpdate() = 0;
 
 	protected:
 		InputActionMap actionMap_;
@@ -330,10 +331,10 @@ namespace KlayGE
 	{
 	public:
 		bool Key(size_t n) const;
-		InputActionsType Update();
 
-	protected:
+	private:
 		void DoActionMap(InputActionMap const & actionMap);
+		InputActionsType DoUpdate();
 
 	protected:
 		typedef boost::array<bool, 256> KeysType;
@@ -351,10 +352,9 @@ namespace KlayGE
 		bool MiddleButton() const;
 		bool Button(size_t index) const;
 
-		InputActionsType Update();
-
-	protected:
+	private:
 		void DoActionMap(InputActionMap const & actionMap);
+		InputActionsType DoUpdate();
 
 	protected:
 		Vector_T<long, 3> pos_;
@@ -377,10 +377,9 @@ namespace KlayGE
 		long Slider(size_t index) const;
 		bool Button(size_t index) const;
 
-		InputActionsType Update();
-
-	protected:
+	private:
 		void DoActionMap(InputActionMap const & actionMap);
+		InputActionsType DoUpdate();
 
 	protected:
 		Vector_T<long, 3> pos_;		// x, y, z axis position

@@ -131,10 +131,8 @@ namespace KlayGE
 
 	// 更新游戏杆动作
 	/////////////////////////////////////////////////////////////////////////////////
-	InputActionsType InputJoystick::Update()
+	InputActionsType InputJoystick::DoUpdate()
 	{
-		this->UpdateInputs();
-
 		InputActionsType ret;
 
 		actionMap_.UpdateInputActions(ret, JS_XPos, this->XPos());

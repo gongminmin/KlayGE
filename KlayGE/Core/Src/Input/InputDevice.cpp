@@ -45,4 +45,13 @@ namespace KlayGE
 	{
 		impl_->Unacquire();
 	}
+
+	// 更新动作
+	//////////////////////////////////////////////////////////////////////////////////
+	InputActionsType InputDevice::Update()
+	{
+		this->UpdateInputs();
+
+		return this->DoUpdate();
+	}
 }
