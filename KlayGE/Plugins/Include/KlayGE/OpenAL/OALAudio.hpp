@@ -111,6 +111,8 @@ namespace KlayGE
 		ALuint		source_;
 		Buffers		bufferQueue_;
 
+		bool		loop_;
+
 	private:
 		OALMusicBuffer(const OALMusicBuffer&);
 		OALMusicBuffer& operator=(const OALMusicBuffer&);

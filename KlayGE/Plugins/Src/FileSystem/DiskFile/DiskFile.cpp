@@ -1,8 +1,11 @@
 // DiskFile.cpp
 // KlayGE 磁盘文件类 实现文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.0.4
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.0.4
+// 修正了Read的bug (2004.3.22)
 //
 // 2.0.0
 // 初次建立 (2003.8.3)
@@ -153,6 +156,11 @@ namespace KlayGE
 	{
 		assert((file_.Get() != NULL) && file_->is_open());
 		assert(data != NULL);
+
+		if (this->Tell() + count > this->Length())
+		{
+			count = this->Length() - this->Tell();
+		}
 
 		file_->read(static_cast<char*>(data), count);
 

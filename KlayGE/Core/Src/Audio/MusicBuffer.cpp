@@ -84,6 +84,8 @@ namespace KlayGE
 			playThread_ = 0;
 		}
 
+		dataSource_->Reset();
+
 		this->DoStop();
 	}
 }
