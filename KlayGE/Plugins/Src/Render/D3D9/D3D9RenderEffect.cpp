@@ -96,6 +96,18 @@ namespace KlayGE
 		return Matrix4(mat);
 	}
 
+	void D3D9RenderEffect::SetMatrixArray(const String& name, const std::vector<Matrix4, alloc<Matrix4> >& matrices)
+	{
+		TIF(effect_->SetMatrixArray(effect_->GetParameterByName(NULL, name.c_str()),
+			reinterpret_cast<const D3DXMATRIX*>(&matrices[0]), matrices.size()));
+	}
+
+	void D3D9RenderEffect::GetMatrixArray(const String& name, std::vector<Matrix4, alloc<Matrix4> >& matrices)
+	{
+		TIF(effect_->GetMatrixArray(effect_->GetParameterByName(NULL, name.c_str()),
+			reinterpret_cast<D3DXMATRIX*>(&matrices[0]), matrices.size()));
+	}	
+
 	void D3D9RenderEffect::SetInt(const String& name, int value)
 	{
 		TIF(effect_->SetInt(effect_->GetParameterByName(NULL, name.c_str()), value));

@@ -569,7 +569,7 @@ namespace KlayGE
 
 	// ‰÷»æ
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::DoRender(const VertexBuffer& vb)
+	void OGLRenderEngine::Render(const VertexBuffer& vb)
 	{
 		{
 			glEnableClientState(GL_VERTEX_ARRAY);

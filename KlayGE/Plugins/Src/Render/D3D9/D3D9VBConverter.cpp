@@ -116,6 +116,32 @@ namespace KlayGE
 			}
 		}
 
+		// Blend Weights
+		if (vb.vertexOptions & VertexBuffer::VO_BlendWeights)
+		{
+			element.Stream		= shaderDecl.size();
+			element.Type		= D3DDECLTYPE_FLOAT4;
+			element.Usage		= D3DDECLUSAGE_BLENDWEIGHT;
+			element.UsageIndex	= 0;
+			shaderDecl.push_back(element);
+
+			this->UpdateAStream(element.Stream, blendWeights_,
+				sizeof(float) * 4, vb.numVertices);
+		}
+
+		// Blend Indices
+		if (vb.vertexOptions & VertexBuffer::VO_BlendIndices)
+		{
+			element.Stream		= shaderDecl.size();
+			element.Type		= D3DDECLTYPE_D3DCOLOR;
+			element.Usage		= D3DDECLUSAGE_BLENDINDICES;
+			element.UsageIndex	= 0;
+			shaderDecl.push_back(element);
+
+			this->UpdateAStream(element.Stream, blendIndices_,
+				sizeof(D3DCOLOR), vb.numVertices);
+		}
+
 		{
 			element.Stream		= 0xFF;
 			element.Type		= D3DDECLTYPE_UNUSED;
@@ -217,6 +243,18 @@ namespace KlayGE
 				this->CopyABuffer(textures_[i][vb.numTextureDimensions[i] - 1], vb.pTexCoords[i],
 					vb.numTextureDimensions[i] * sizeof(float), vb.numVertices, vb.texCoordStride[i]);
 			}
+		}
+
+		if (vb.vertexOptions & VertexBuffer::VO_BlendWeights)
+		{
+			this->CopyABuffer(blendWeights_, vb.pBlendWeights,
+				sizeof(float) * 4, vb.numVertices, vb.blendWeightsStride);
+		}
+
+		if (vb.vertexOptions & VertexBuffer::VO_BlendIndices)
+		{
+			this->CopyABuffer(blendIndices_, vb.pBlendIndices,
+				sizeof(D3DCOLOR), vb.numVertices, vb.blendIndicesStride);
 		}
 	}
 

@@ -37,9 +37,9 @@ namespace KlayGE
 		{
 			// vertex normals included (for lighting)
 			VO_Normals			= 1 << 0,
-			// Vertex colours - diffuse
+			// Vertex colors - diffuse
 			VO_Diffuses			= 1 << 1,
-			// Vertex colours - specular
+			// Vertex colors - specular
 			VO_Speculars		= 1 << 2,
 			// at least one set of texture coords (exact number specified in class)
 			VO_TextureCoords	= 1 << 3,
@@ -47,14 +47,6 @@ namespace KlayGE
 			VO_BlendWeights		= 1 << 4,
 			// Vertex blend indices
 			VO_BlendIndices		= 1 << 5,
-		};
-
-		// Vertex blend info
-		struct VertexBlendData
-		{
-			U32		weightCount;
-			U32		weightIndex;
-			float	blendWeight;
 		};
 
 		// true to use pIndexes to reference individual lines/triangles rather than embed. Allows vertex reuse.
@@ -75,28 +67,24 @@ namespace KlayGE
 		// The 'Stride' between sets of vertex data. 0 indicates data is packed with no gaps.
 		U16 vertexStride;
 
+
 		// Optional vertex normals for vertices (float {x, y, z} * numVertices).
 		float* pNormals;
 		// The 'Stride' between sets of normal data. 0 indicates data is packed with no gaps.
 		U16 normalStride;
 
-		// Optional pointer to a list of diffuse vertex colours (32-bit RGBA * numVertices).
+
+		// Optional pointer to a list of diffuse vertex colors (32-bit RGBA * numVertices).
 		U32* pDiffuses;
-		// The 'Stride' between sets of diffuse colour data. 0 indicates data is packed with no gaps.
+		// The 'Stride' between sets of diffuse color data. 0 indicates data is packed with no gaps.
 		U16 diffuseStride;
 
-		// Optional pointer to a list of specular vertex colours (32-bit RGBA * numVertices)
+
+		// Optional pointer to a list of specular vertex colors (32-bit RGBA * numVertices)
 		U32* pSpeculars;
-		// The 'Stride' between sets of specular colour data. 0 indicates data is packed with no gaps.
+		// The 'Stride' between sets of specular color data. 0 indicates data is packed with no gaps.
 		U16 specularStride;
 
-		// Optional texture coordinates for vertices (float {u, [v], [w]} * numVertices).
-		// @remarks
-		// There can be up to 8 sets of texture coordinates, and the number of components per
-		// vertex depends on the number of texture dimensions (2 is most common).
-		float* pTexCoords[8];
-		// The 'Stride' between each set of texture data. 0 indicates data is packed with no gaps.
-		U16 texCoordStride[8];
 
 		/// Number of groups of u,[v],[w].
 		U8 numTextureCoordSets;
@@ -106,13 +94,22 @@ namespace KlayGE
 		// There should be 1-4 dimensions on each set.
 		U8 numTextureDimensions[8];
 
-		// Optional pointer to a list of vertex blending details, organised in vertex order. 
-		// The number of weights per vertex is recorded in numBlendWeightsPerVertex - there must
-		// be this many for every vertex: set the weight to 0 for those vertices that don't 
-		// use all the entries (if some vertices have more than others)
-		VertexBlendData* pBlendingWeights;
-		// The 'Stride' between sets of specular colour data. 0 indicates data is packed with no gaps.
-		U16 blendingWeightsStride;
+		// Optional texture coordinates for vertices (float {u, [v], [w]} * numVertices).
+		// @remarks
+		// There can be up to 8 sets of texture coordinates, and the number of components per
+		// vertex depends on the number of texture dimensions (2 is most common).
+		float* pTexCoords[8];
+		// The 'Stride' between each set of texture data. 0 indicates data is packed with no gaps.
+		U16 texCoordStride[8];
+
+
+		float* pBlendWeights;
+		U16 blendWeightsStride;
+
+
+		U8* pBlendIndices;
+		U16 blendIndicesStride;
+
 
 		// Pointer to a list of vertex indexes describing faces (only used if useIndexes is true).
 		// @note
@@ -132,14 +129,15 @@ namespace KlayGE
 			useIndices = false;
 
 			// Initialise all things
-			vertexStride = normalStride = diffuseStride = specularStride = blendingWeightsStride = 0;
+			vertexStride = normalStride = diffuseStride = specularStride = blendWeightsStride = blendIndicesStride = 0;
 			vertexOptions = 0;
 
 			pVertices = NULL;
 			pNormals = NULL;
 			pDiffuses = NULL;
 			pSpeculars = NULL;
-			pBlendingWeights = NULL;
+			pBlendWeights = NULL;
+			pBlendIndices = NULL;
 
 			pIndices = NULL;
 

@@ -6,6 +6,7 @@
 //
 // 2.0.3
 // 修改了SetTexture的参数 (2004.3.6)
+// 增加了SetMatrixArray/GetMatrixArray (2004.3.11)
 //
 // 2.0.0
 // 初次建立 (2003.8.15)
@@ -18,6 +19,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/SharePtr.hpp>
+#include <vector>
 
 #pragma comment(lib, "KlayGE_Core.lib")
 
@@ -42,6 +44,8 @@ namespace KlayGE
 		virtual Vector4 GetVector(const String& name) const = 0;
 		virtual void SetMatrix(const String& name, const Matrix4& value) = 0;
 		virtual Matrix4 GetMatrix(const String& name) const = 0;
+		virtual void SetMatrixArray(const String& name, const std::vector<Matrix4, alloc<Matrix4> >& matrices) = 0;
+		virtual void GetMatrixArray(const String& name, std::vector<Matrix4, alloc<Matrix4> >& matrices) = 0;
 		virtual void SetInt(const String& name, int value) = 0;
 		virtual int GetInt(const String& name) const = 0;
 		virtual void SetBool(const String& name, bool value) = 0;

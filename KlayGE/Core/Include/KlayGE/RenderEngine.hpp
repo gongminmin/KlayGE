@@ -1,13 +1,16 @@
 // RenderEngine.hpp
 // KlayGE 渲染引擎类 实现文件
-// Ver 2.0.1
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.0.3
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
 //
-// 修改记录
+// 2.0.3
+// 去掉了SoftwareBlend (2004.3.10)
 //
 // 2.0.1
 // 去掉了TexBlendMode (2003.10.16)
+//
+// 修改记录
 //////////////////////////////////////////////////////////////////////////////////
 
 #ifndef _RENDERENGINE_HPP
@@ -140,7 +143,7 @@ namespace KlayGE
 			{ return renderEffect_; }
 
 		virtual void BeginFrame() = 0;
-		void Render(VertexBuffer& vb);
+		virtual void Render(const VertexBuffer& vb) = 0;
 		virtual void EndFrame() = 0;
 
 		virtual void ClearColor(const Color& clr) = 0;
@@ -161,7 +164,7 @@ namespace KlayGE
 		virtual Matrix4 WorldMatrix() const = 0;
 		virtual void WorldMatrix(const Matrix4& mat) = 0;
 		// Sets multiple world matrices (vertex blending)
-		virtual void WorldMatrices(Matrix4* mats, size_t count);
+		virtual void WorldMatrices(Matrix4* mats, size_t count) = 0;
 		virtual Matrix4 ViewMatrix() = 0;
 		virtual void ViewMatrix(const Matrix4 &m) = 0;
 		virtual Matrix4 ProjectionMatrix() = 0;
@@ -235,23 +238,11 @@ namespace KlayGE
 		virtual void StencilBufferPassOperation(StencilOperation op) = 0;
 
 	protected:
-		virtual void DoRender(const VertexBuffer& vb) = 0;
-
-	protected:
 		RenderTargetList renderTargetList_;
 		RenderTargetListIterator activeRenderTarget_;
 
 		RenderEffectPtr renderEffect_;
 		UINT renderPasses_;
-
-		void SoftwareVertexBlend(VertexBuffer& vb);
-
-		// Saved set of world matrices
-		std::vector<Matrix4, alloc<Matrix4> > worldMatrices;
-
-		// Temporary buffer for vertex blending in software
-		std::vector<float, alloc<float> > tempVertexBlendBuffer;
-		std::vector<float, alloc<float> > tempNormalBlendBuffer;
 	};
 }
 

@@ -601,7 +601,7 @@ namespace KlayGE
 
 	// ‰÷»æ
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DoRender(const VertexBuffer& vb)
+	void D3D9RenderEngine::Render(const VertexBuffer& vb)
 	{
 		vbConverter_.Update(vb);
 

@@ -55,6 +55,7 @@ namespace KlayGE
 		void StartRendering();
 
 		void BeginFrame();
+		void Render(const VertexBuffer& vb);
 		void EndFrame();
 
 		void DepthBufferDepthTest(bool depthTest);
@@ -96,8 +97,6 @@ namespace KlayGE
 
 	private:
 		OGLRenderEngine();
-
-		void DoRender(const VertexBuffer& vb);
 
 	private:
 		CullMode cullingMode_;

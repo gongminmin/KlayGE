@@ -64,6 +64,7 @@ namespace KlayGE
 		void StartRendering();
 
 		void BeginFrame();
+		void Render(const VertexBuffer& vb);
 		void EndFrame();
 
 		void DepthBufferDepthTest(bool depthTest);
@@ -106,8 +107,6 @@ namespace KlayGE
 	private:
 		const D3D9AdapterList& D3DAdapters() const;
 		const D3D9Adapter& ActiveAdapter() const;
-
-		void DoRender(const VertexBuffer& vb);
 
 		void DrawPrimitive(D3DPRIMITIVETYPE primType, U32 primCount);
 		void DoDrawPrimitive(D3DPRIMITIVETYPE primType, U32 primCount);

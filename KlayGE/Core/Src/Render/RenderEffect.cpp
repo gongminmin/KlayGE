@@ -44,6 +44,10 @@ namespace KlayGE
 			{ }
 		Matrix4 GetMatrix(const String& name) const
 			{ return Matrix4::Identity(); }
+		void SetMatrixArray(const String& name, const std::vector<Matrix4, alloc<Matrix4> >& matrices)
+			{ }
+		void GetMatrixArray(const String& name, std::vector<Matrix4, alloc<Matrix4> >& matrices)
+			{ }
 		void SetInt(const String& name, int value)
 			{ }
 		int GetInt(const String& name) const

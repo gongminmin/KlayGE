@@ -46,7 +46,9 @@ namespace KlayGE
 		HardwareVertexBuffer normalBuffer_;
 		HardwareVertexBuffer diffuseBuffer_;
 		HardwareVertexBuffer specularBuffer_;
-		HardwareVertexBuffer textures_[8][4];	// max 8 textures with max 4 units per texture
+		HardwareVertexBuffer textures_[8][4];		// max 8 textures with max 4 units per texture
+		HardwareVertexBuffer blendWeights_;
+		HardwareVertexBuffer blendIndices_;
 
 		COMPtr<IDirect3DDevice9>	d3dDevice_;
 
