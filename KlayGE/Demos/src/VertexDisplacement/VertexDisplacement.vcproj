@@ -70,7 +70,6 @@
 			WholeProgramOptimization="TRUE">
 			<Tool
 				Name="VCCLCompilerTool"
-				OptimizeForProcessor="3"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;STRICT"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="FALSE"

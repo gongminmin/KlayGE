@@ -1,8 +1,11 @@
 // Util.cpp
 // KlayGE 实用函数库 实现文件
-// Ver 2.2.0
+// Ver 2.3.0
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.3.0
+// 改用libc的函数实现了Convert (2004.11.24)
 //
 // 2.2.0
 // 用Boost重写了Sleep (2004.10.25)
@@ -28,6 +31,8 @@
 	#include <cerrno>
 #endif
 
+#include <cwchar>
+#include <clocale>
 #include <cassert>
 #include <vector>
 #include <algorithm>
@@ -36,23 +41,21 @@
 
 namespace KlayGE
 {
-	// 把一个WString转化为String
+	// 把一个wstring转化为string
 	/////////////////////////////////////////////////////////////////////////////////
 	std::string& Convert(std::string& dest, std::wstring const & src)
 	{
-#ifdef WIN32
-		std::vector<char> vecTemp(::WideCharToMultiByte(CP_ACP, 0, src.c_str(), -1,
-			NULL, 0, NULL, NULL) - 1);
-		::WideCharToMultiByte(CP_ACP, 0, src.c_str(), -1, &vecTemp[0],
-			static_cast<int>(vecTemp.size()), NULL, NULL);
+		std::setlocale(LC_CTYPE, "");
 
-		dest.assign(vecTemp.begin(), vecTemp.end());
+		std::vector<char> tmp(std::wcstombs(NULL, src.c_str(), src.size()) + 1);
+		std::wcstombs(&tmp[0], src.c_str(), src.size());
+
+		dest.assign(tmp.begin(), tmp.end() - 1);
 
 		return dest;
-#endif	// WIN32
 	}
 
-	// 把一个String转化为String
+	// 把一个string转化为string
 	/////////////////////////////////////////////////////////////////////////////////
 	std::string& Convert(std::string& dest, std::string const & src)
 	{
@@ -61,22 +64,21 @@ namespace KlayGE
 		return dest;
 	}
 
-	// 把一个String转化为WString
+	// 把一个string转化为wstring
 	/////////////////////////////////////////////////////////////////////////////////
 	std::wstring& Convert(std::wstring& dest, std::string const & src)
 	{
-#ifdef WIN32
-		std::vector<wchar_t> vecTemp(::MultiByteToWideChar(CP_ACP, 0, src.c_str(), -1, NULL, 0) - 1);
-		::MultiByteToWideChar(CP_ACP, 0, src.c_str(), -1, &vecTemp[0],
-			static_cast<int>(vecTemp.size()));
+		std::setlocale(LC_CTYPE, "");
 
-		dest.assign(vecTemp.begin(), vecTemp.end());
+		std::vector<wchar_t> tmp(std::mbstowcs(NULL, src.c_str(), src.size()) + 1);
+		std::mbstowcs(&tmp[0], src.c_str(), src.size());
+
+		dest.assign(tmp.begin(), tmp.end() - 1);
 
 		return dest;
-#endif		// WIN32
 	}
 
-	// 把一个WString转化为WString
+	// 把一个wstring转化为wstring
 	/////////////////////////////////////////////////////////////////////////////////
 	std::wstring& Convert(std::wstring& dest, std::wstring const & src)
 	{

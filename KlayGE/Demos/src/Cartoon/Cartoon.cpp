@@ -173,6 +173,9 @@ void Cartoon::Update()
 
 	sceneMgr.PushRenderable(renderTorus);
 
+	RenderWindow* rw = static_cast<RenderWindow*>(renderEngine.ActiveRenderTarget()->get());
+
 	sceneMgr.PushRenderable(font_->RenderText(0, 0, Color(1, 1, 0, 1), L"¿¨Í¨äÖÈ¾²âÊÔ"));
-	sceneMgr.PushRenderable(font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str()));
+	sceneMgr.PushRenderable(font_->RenderText(0, 18, Color(1, 1, 0, 1), rw->Description()));
+	sceneMgr.PushRenderable(font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str().c_str()));
 }
