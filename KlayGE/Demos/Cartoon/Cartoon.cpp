@@ -31,7 +31,7 @@ namespace
 		RenderTorus(const TexturePtr& texture)
 			: rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
 		{
-			effect_ = LoadRenderEffect(L"Cartoon.fx");
+			effect_ = LoadRenderEffect("Cartoon.fx");
 			effect_->SetTexture("cartoonTex", texture);
 			effect_->SetTechnique("cartoonTec");
 

@@ -54,19 +54,18 @@ namespace KlayGE
 
 	// 更新场景管理器
 	/////////////////////////////////////////////////////////////////////////////////
-	void SceneManager::Update(const ViewPointPtr& viewPoint)
+	void SceneManager::Update()
 	{
 		Engine::AppInstance().Update();
 
-		this->Flash(viewPoint);
+		this->Flash();
 	}
 
-	void SceneManager::Flash(const ViewPointPtr& viewPoint)
+	// 把渲染队列中的物体渲染出来
+	/////////////////////////////////////////////////////////////////////////////////
+	void SceneManager::Flash()
 	{
-		if (viewPoint.Get() != NULL)
-		{
-			this->ClipScene(*viewPoint);
-		}
+		this->ClipScene();
 
 		RenderEngine& renderEngine(Engine::RenderFactoryInstance().RenderEngineInstance());
 

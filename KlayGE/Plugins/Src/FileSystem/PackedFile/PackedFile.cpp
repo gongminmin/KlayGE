@@ -25,16 +25,16 @@ namespace KlayGE
 	{
 	}
 
-	PackedFile::PackedFile(const WString& pathName)
+	PackedFile::PackedFile(const String& pathName)
 	{
 		this->Open(pathName);
 	}
 
-	bool PackedFile::Open(const WString& pathName)
+	bool PackedFile::Open(const String& pathName)
 	{
-		const WString::size_type offset(pathName.rfind(L".pkt/"));
-		const WString pktName(pathName.substr(0, offset + 4));
-		const WString fileName(pathName.substr(offset + 5));
+		const String::size_type offset(pathName.rfind(".pkt/"));
+		const String pktName(pathName.substr(0, offset + 4));
+		const String fileName(pathName.substr(offset + 5));
 
 		SharedPtr<DiskFile> pktFile(new DiskFile);
 		if (!pktFile->Open(pktName, VFile::OM_Read))
@@ -54,7 +54,7 @@ namespace KlayGE
 
 			unPkt_.LocateFile(fileName);
 
-			file_ = VFilePtr(new MemFile(NULL, unPkt_.CurFileSize()));
+			file_ = VFilePtr(new MemFile);
 
 			std::vector<U8> data(unPkt_.CurFileSize());
 			unPkt_.ReadCurFile(&data[0]);

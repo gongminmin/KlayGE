@@ -49,11 +49,10 @@ namespace
 #pragma pack(pop)
 
 
-	KlayGE::TexturePtr LoadTGA(const KlayGE::WString& fileName)
+	KlayGE::TexturePtr LoadTGA(KlayGE::VFile& file)
 	{
 		try
 		{
-			DiskFile file(fileName, VFile::OM_Read);
 			file.Read(&TGAHeader, sizeof(TGAHeader));
 			file.Seek(TGAHeader.infoLength, VFile::SM_Current);
 
@@ -101,10 +100,10 @@ namespace
 		RenderPolygon()
 			: rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
 		{
-			effect_ = LoadRenderEffect(L"PerPixelLighting.fx");
-			effect_->SetTexture("diffusemap", LoadTGA(L"Diffuse.tga"));
-			effect_->SetTexture("normalmap", LoadTGA(L"Normal.tga"));
-			effect_->SetTexture("specularmap", LoadTGA(L"Specular.tga"));
+			effect_ = LoadRenderEffect("PerPixelLighting.fx");
+			effect_->SetTexture("diffusemap", LoadTGA(DiskFile("Diffuse.tga", VFile::OM_Read)));
+			effect_->SetTexture("normalmap", LoadTGA(DiskFile("Normal.tga", VFile::OM_Read)));
+			effect_->SetTexture("specularmap", LoadTGA(DiskFile("Specular.tga", VFile::OM_Read)));
 			effect_->SetTechnique("PerPixelLighting");
 
 			float xyzs[] =

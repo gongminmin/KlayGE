@@ -1,8 +1,11 @@
 // Unpkt.cpp
 // KlayGE 打包文件读取类 实现文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.0.6
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.0.6
+// 简化了目录表的表示法 (2004.4.14)
 //
 // 2.0.0
 // 初次建立 (2003.9.18)
@@ -24,8 +27,6 @@
 #include <KlayGE/MemFile/MemFile.hpp>
 #include <KlayGE/PackedFile/Pkt.hpp>
 
-using std::vector;
-
 namespace
 {
 	using namespace KlayGE;
@@ -42,7 +43,7 @@ namespace
 
 	// 忽略大小写比较字符串
 	/////////////////////////////////////////////////////////////////////////////////
-	bool IgnoreCaseCompare(const WString& lhs, const WString& rhs)
+	bool IgnoreCaseCompare(const String& lhs, const String& rhs)
 	{
 		if (lhs.length() != rhs.length())
 		{
@@ -66,44 +67,22 @@ namespace
 		return true;
 	}
 
-	// 把目录表转化成树型结构
+	// 读入目录表
 	/////////////////////////////////////////////////////////////////////////////////
-	void Translate(tree<KlayGE::FileDes>* pOut, VFile& In)
+	void ReadDirTable(DirTable& dirTable, VFile& input)
 	{
 		using namespace KlayGE;
 
-		String str;
-		FileDes fd;
-
-		U8 tag;
-		U8 len;
-		while (In.Tell() != In.Length())
+		while (input.Tell() != input.Length())
 		{
-			str.clear();
-			In.Read(&tag, sizeof(tag));
+			U32 len;
+			input.Read(&len, sizeof(len));
+			std::vector<char> str(len);
+			input.Read(&str[0], str.size());
 
-			switch (tag)
-			{
-			case DIT_File:
-			case DIT_Dir:
-				In.Read(&len, sizeof(len));
-				str.resize(len);
-				In.Read(&str[0], str.length());
-
-				Convert(fd.fileName, str);
-				In.Read(&fd.start, sizeof(U32) * 4 + sizeof(U8));
-				pOut->AddChild(fd);
-
-				if (DIT_Dir == tag)
-				{
-					pOut = (pOut->EndChild() - 1)->Get();
-				}
-				break;
-
-			case DIT_UnDir:
-				pOut = pOut->Parent();
-				break;
-			}
+			FileDes fd;
+			input.Read(&fd, sizeof(fd));
+			dirTable.insert(std::make_pair(String(str.begin(), str.end()), fd));
 		}
 	}
 }
@@ -113,9 +92,7 @@ namespace KlayGE
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	UnPkt::UnPkt()
-			: curFile_(NULL)
 	{
-		curDir_ = &dirTable_;
 	}
 
 	// 析构函数
@@ -127,7 +104,7 @@ namespace KlayGE
 
 	// LZSS解压
 	/////////////////////////////////////////////////////////////////////////////////
-	void UnPkt::Decode(VFile& Out, VFile& In)
+	void UnPkt::Decode(VFile& output, VFile& input)
 	{
 		U32 r(N - F);
 		Engine::MemoryInstance().Set(textBuf, ' ', r);
@@ -138,52 +115,52 @@ namespace KlayGE
 		{
 			if (0 == ((flags >>= 1) & 256))
 			{
-				if (In.Tell() >= In.Length())
+				if (input.Tell() >= input.Length())
 				{
 					break;
 				}
 
-				In.Read(&c, 1);
+				input.Read(&c, 1);
 
 				flags = c | 0xFF00;		// uses higher byte cleverly
 											// to count eight
 			}
 			if (flags & 1)
 			{
-				if (In.Tell() >= In.Length())
+				if (input.Tell() >= input.Length())
 				{
 					break;
 				}
 
-				In.Read(&c, 1);
+				input.Read(&c, 1);
 
-				Out.Write(&c, 1);
+				output.Write(&c, 1);
 				textBuf[r] = c;
 				++ r;
 				r &= (N - 1);
 			}
 			else
 			{
-				if (In.Tell() >= In.Length())
+				if (input.Tell() >= input.Length())
 				{
 					break;
 				}
-				In.Read(&c, 1);
-				U32 c1 = c;
+				input.Read(&c, 1);
+				U32 c1(c);
 
-				if (In.Tell() >= In.Length())
+				if (input.Tell() >= input.Length())
 				{
 					break;
 				}
-				In.Read(&c, 1);
-				U32 c2 = c;
+				input.Read(&c, 1);
+				U32 c2(c);
 
 				c1 |= ((c2 & 0xF0) << 4);
 				c2 = (c2 & 0x0F) + THRESHOLD;
 				for (U32 k = 0; k <= c2; ++ k)
 				{
 					c = textBuf[(c1 + k) & (N - 1)];
-					Out.Write(&c, 1);
+					output.Write(&c, 1);
 					textBuf[r] = c;
 					++ r;
 					r &= (N - 1);
@@ -191,7 +168,7 @@ namespace KlayGE
 			}
 		}
 
-		Out.Seek(0, VFile::SM_Begin);
+		output.Rewind();
 	}
 
 	// 打开打包文件
@@ -208,16 +185,15 @@ namespace KlayGE
 
 		file_->Seek(mag_.DTStart, VFile::SM_Begin);
 
-		MemFile DTCom;
-		DTCom.CopyFrom(*file_, mag_.DTLength);
+		MemFile dtCom;
+		dtCom.CopyFrom(*file_, mag_.DTLength);
 
-		MemFile DT;
-		DTCom.Seek(0, VFile::SM_Begin);
-		Decode(DT, DTCom);
+		MemFile dt;
+		dtCom.Rewind();
+		Decode(dt, dtCom);
 
-		DT.Seek(0, VFile::SM_Begin);
-		Translate(&dirTable_, DT);
-		curDir_ = &dirTable_;
+		dt.Rewind();
+		ReadDirTable(dirTable_, dt);
 	}
 
 	// 关闭打包文件
@@ -225,109 +201,20 @@ namespace KlayGE
 	void UnPkt::Close()
 	{
 		file_.Release();
-		curFile_ = NULL;
-	}
-
-	// 设置打包文件中的当前路径
-	/////////////////////////////////////////////////////////////////////////////////
-	void UnPkt::Dir(const WString& dirName)
-	{
-		WString theDirName;
-		TransPathName(theDirName, dirName);
-
-		// 识别路径
-		if (L'/' == theDirName[0])
-		{
-			curDir_ = &dirTable_;
-		}
-		if ((L'.' == theDirName[0]) && (L'/' == theDirName[1]))
-		{
-			theDirName = dirName.substr(2, dirName.length() - 2);
-		}
-		if ((L'.' == theDirName[0]) && (L'.' == theDirName[1]) && (L'/' == theDirName[2]))
-		{
-			if (curDir_ != NULL)
-			{
-				curDir_ = curDir_->Parent();
-			}
-		}
-
-		for (;;)
-		{
-			WString::size_type nPos = theDirName.find_first_of(L'/');
-			WString curDir;
-			if (nPos == WString::npos)
-			{
-				curDir = theDirName;
-				theDirName.clear();
-			}
-			else
-			{
-				curDir	= theDirName.substr(0, nPos);
-				theDirName = theDirName.substr(nPos + 1, theDirName.length());
-			}
-
-			if (curDir.empty())
-			{
-				break;
-			}
-
-			// 查找目录
-			FileIterator iter = curDir_->BeginChild();
-			while ((iter != curDir_->EndChild())
-						&& !IgnoreCaseCompare((*iter)->RootData().fileName, curDir))
-			{
-				++ iter;
-			}
-			if (iter == curDir_->EndChild())
-			{
-				THR(E_FAIL);
-			}
-			curDir_ = iter->Get();
-		}
 	}
 
 	// 在打包文件中定位文件
 	/////////////////////////////////////////////////////////////////////////////////
-	void UnPkt::LocateFile(const WString& pathName)
+	void UnPkt::LocateFile(const String& pathName)
 	{
-		WString thePathName;
-		TransPathName(thePathName, pathName);
-
-		WString::size_type nPos = thePathName.find_last_of(L'/');
-
-		WString dir(thePathName, 0, nPos == WString::npos ? 0 : nPos);
-		WString name(thePathName, nPos + 1, thePathName.length() - 1 - nPos);
-
-		this->Dir(dir);
-
-		// 查找文件
-		FileIterator iter = curDir_->BeginChild();
-		while ((iter != curDir_->EndChild())
-						&& !IgnoreCaseCompare((*iter)->RootData().fileName, name))
-		{
-			++ iter;
-		}
-		if (iter == curDir_->EndChild())
-		{
-			THR(E_FAIL);
-		}
-
-		this->LocateFile(iter);
-	}
-
-	void UnPkt::LocateFile(FileIterator iter)
-	{
-		curFile_ = &((*iter)->RootData());
+		curFile_ = dirTable_.find(pathName);
 	}
 
 	// 获取当前文件(解压过的)的字节数
 	/////////////////////////////////////////////////////////////////////////////////
 	size_t UnPkt::CurFileSize() const
 	{
-		assert(curFile_ != NULL);
-
-		return curFile_->DeComLength;
+		return curFile_->second.DeComLength;
 	}
 
 	// 读取当前文件(解压过的)
@@ -335,11 +222,10 @@ namespace KlayGE
 	bool UnPkt::ReadCurFile(void* data)
 	{
 		assert(data != NULL);
-		assert(curFile_ != NULL);
 
-		file_->Seek(mag_.FIStart + curFile_->start, VFile::SM_Begin);
+		file_->Seek(mag_.FIStart + curFile_->second.start, VFile::SM_Begin);
 
-		if (curFile_->attr & FA_UnCompressed)
+		if (curFile_->second.attr & FA_UnCompressed)
 		{
 			file_->Read(data, this->CurFileSize());
 		}
@@ -355,7 +241,8 @@ namespace KlayGE
 			out.Read(data, out.Length());
 		}
 
-		if (Crc32::CrcMem(static_cast<U8*>(data), this->CurFileSize()) != curFile_->crc32)
+		if (Crc32::CrcMem(static_cast<U8*>(data), this->CurFileSize())
+			!= curFile_->second.crc32)
 		{
 			return false;	// CRC32 错误
 		}
@@ -367,9 +254,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	size_t UnPkt::CurFileCompressedSize() const
 	{
-		assert(curFile_ != NULL);
-
-		return curFile_->length;
+		return curFile_->second.length;
 	}
 
 	// 读取当前文件(没解压过的)
@@ -377,23 +262,8 @@ namespace KlayGE
 	void UnPkt::ReadCurFileCompressed(void* data)
 	{
 		assert(data != NULL);
-		assert(curFile_ != NULL);
 
-		file_->Seek(mag_.FIStart + curFile_->start, VFile::SM_Begin);
+		file_->Seek(mag_.FIStart + curFile_->second.start, VFile::SM_Begin);
 		file_->Read(data, this->CurFileCompressedSize());
-	}
-
-	// 获取当前目录下的第一个文件的迭代子
-	/////////////////////////////////////////////////////////////////////////////////
-	UnPkt::FileIterator UnPkt::BeginFile()
-	{
-		return curDir_->BeginChild();
-	}
-
-	// 获取当前目录下的最后一个文件的下一个迭代子
-	/////////////////////////////////////////////////////////////////////////////////
-	UnPkt::FileIterator UnPkt::EndFile()
-	{
-		return curDir_->EndChild();
 	}
 }

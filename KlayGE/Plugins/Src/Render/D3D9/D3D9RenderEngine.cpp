@@ -417,11 +417,11 @@ namespace KlayGE
 			break;
 
 		case Cull_Clockwise:
-			d3dMode = (*activeRenderTarget_)->RequiresTextureFlipping() ? D3DCULL_CCW : D3DCULL_CW;
+			d3dMode = (*RenderEngine::ActiveRenderTarget())->RequiresTextureFlipping() ? D3DCULL_CCW : D3DCULL_CW;
 			break;
 
 		case Cull_AntiClockwise:
-			d3dMode = (*activeRenderTarget_)->RequiresTextureFlipping() ? D3DCULL_CW : D3DCULL_CCW;
+			d3dMode = (*RenderEngine::ActiveRenderTarget())->RequiresTextureFlipping() ? D3DCULL_CW : D3DCULL_CCW;
 			break;
 		}
 
@@ -561,7 +561,7 @@ namespace KlayGE
 	{
 		D3DPRIMITIVETYPE primType;
 		U32 primCount;
-		U32 vertexCount(static_cast<U32>(rb.UseIndices() ? rb.NumIndices() : rb.NumVertices()));
+		const U32 vertexCount(static_cast<U32>(rb.UseIndices() ? rb.NumIndices() : rb.NumVertices()));
 		switch (rb.Type())
 		{
 		case RenderBuffer::BT_PointList:

@@ -15,7 +15,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/Util.hpp>
 #include <KlayGE/alloc.hpp>
 
 #include <vector>
@@ -34,7 +33,7 @@ namespace KlayGE
 	{
 	}
 
-	DiskFile::DiskFile(const WString& fileName, OpenMode openMode)
+	DiskFile::DiskFile(const String& fileName, OpenMode openMode)
 			: openMode_(OM_Unknown)
 	{
 		this->Open(fileName, openMode);
@@ -49,7 +48,7 @@ namespace KlayGE
 
 	// 打开文件
 	/////////////////////////////////////////////////////////////////////////////////
-	bool DiskFile::Open(const WString& fileName, OpenMode openMode)
+	bool DiskFile::Open(const String& fileName, OpenMode openMode)
 	{
 		this->Close();
 
@@ -77,9 +76,7 @@ namespace KlayGE
 		fileName_ = fileName;
 		openMode_ = openMode;
 
-		String fn;
-		Convert(fn, fileName);
-		file_.open(fn.c_str(), mode);
+		file_.open(fileName.c_str(), mode);
 
 		return !file_.fail();
 	}

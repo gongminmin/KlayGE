@@ -177,7 +177,7 @@ namespace KlayGE
 					theTexture_(Engine::RenderFactoryInstance().MakeTexture(1024, 1024, 1, PF_A4L4)),
 					rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
 	{
-		effect_ = LoadRenderEffect(L"Font.fx");
+		effect_ = LoadRenderEffect("Font.fx");
 		effect_->SetTexture("texFont", theTexture_);
 		effect_->SetTechnique("fontTec");
 

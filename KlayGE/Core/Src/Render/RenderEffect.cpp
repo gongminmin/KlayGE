@@ -100,7 +100,7 @@ namespace KlayGE
 		return obj;
 	}
 
-	RenderEffectPtr LoadRenderEffect(const WString& effectName, bool fromPack)
+	RenderEffectPtr LoadRenderEffect(const String& effectName, bool fromPack)
 	{
 		VFilePtr file;
 		if (fromPack)
@@ -109,7 +109,7 @@ namespace KlayGE
 
 			if (!packedFile->Open(effectName))
 			{
-				if (!packedFile->Open(WString(_RENDERFXPATH_) + effectName))
+				if (!packedFile->Open(String(_RENDERFXPATH_) + effectName))
 				{
 					return RenderEffect::NullObject();
 				}
@@ -123,7 +123,7 @@ namespace KlayGE
 
 			if (!diskFile->Open(effectName, VFile::OM_Read))
 			{
-				if (!diskFile->Open(WString(_RENDERFXPATH_) + effectName, VFile::OM_Read))
+				if (!diskFile->Open(String(_RENDERFXPATH_) + effectName, VFile::OM_Read))
 				{
 					return RenderEffect::NullObject();
 				}

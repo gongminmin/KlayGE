@@ -15,14 +15,6 @@
 
 namespace KlayGE
 {
-	struct ViewPoint
-	{
-		Vector3		pos;
-		Quaternion	quat;
-	};
-
-	typedef SharedPtr<ViewPoint> ViewPointPtr;
-
 	class SceneManager
 	{
 	protected:
@@ -36,11 +28,11 @@ namespace KlayGE
 
 		void PushRenderable(const RenderablePtr& obj);
 
-		virtual void ClipScene(const ViewPoint& viewPoint)
+		virtual void ClipScene()
 			{ }
 
-		void Update(const ViewPointPtr& viewPoint = ViewPointPtr());
-		virtual void Flash(const ViewPointPtr& viewPoint = ViewPointPtr());
+		void Update();
+		virtual void Flash();
 
 	protected:
 		RenderQueueType renderQueue_;

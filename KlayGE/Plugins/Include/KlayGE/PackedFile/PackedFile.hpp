@@ -27,9 +27,9 @@ namespace KlayGE
 	{
 	public:
 		PackedFile();
-		PackedFile(const WString& pathName);
+		PackedFile(const String& pathName);
 
-		bool Open(const WString& pathName);
+		bool Open(const String& pathName);
 		void Close();
 
 		size_t Length();

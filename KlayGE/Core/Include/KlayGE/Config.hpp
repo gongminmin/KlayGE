@@ -11,6 +11,6 @@
 //#define _SSE_
 //#define _SSE2_
 
-#define _RENDERFXPATH_	L"D:/KlayGE/RenderFX/"
+#define _RENDERFXPATH_	"D:/KlayGE/RenderFX/"
 
 #endif		// _CONFIG_HPP

@@ -62,11 +62,11 @@ namespace KlayGE
 	void App3DFramework::LookAt(const Vector3& vEye, const Vector3& vLookAt,
 												const Vector3& vUp)
 	{
-		RenderEngine& RenderEngine(Engine::RenderFactoryInstance().RenderEngineInstance());
-		RenderTarget& activeRenderTarget(*(*RenderEngine.ActiveRenderTarget()));
+		RenderEngine& renderEngine(Engine::RenderFactoryInstance().RenderEngineInstance());
+		RenderTarget& activeRenderTarget(*(*renderEngine.ActiveRenderTarget()));
 
 		activeRenderTarget.GetViewport().camera.ViewParams(vEye, vLookAt, vUp);
-		RenderEngine.ViewMatrix(activeRenderTarget.GetViewport().camera.ViewMatrix());
+		renderEngine.ViewMatrix(activeRenderTarget.GetViewport().camera.ViewMatrix());
 	}
 
 	// …Ë÷√Õ∂…‰æÿ’Û

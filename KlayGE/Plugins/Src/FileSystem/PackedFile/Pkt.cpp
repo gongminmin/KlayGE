@@ -1,9 +1,12 @@
 // Pkt.cpp
 // KlayGE 文件打包类
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.0.6
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
 // LZSS压缩算法的作者是 Haruhiko Okumura
+//
+// 2.0.6
+// 简化了目录表的表示法 (2004.4.14)
 //
 // 2.0.0
 // 初次建立 (2003.9.18)
@@ -16,7 +19,6 @@
 #include <KlayGE/Crc32.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/VFile.hpp>
-#include <KlayGE/tree.hpp>
 #include <KlayGE/Memory.hpp>
 #include <KlayGE/Engine.hpp>
 
@@ -30,6 +32,9 @@
 #include <KlayGE/PackedFile/Pkt.hpp>
 
 using namespace std;
+
+#include <boost/filesystem/operations.hpp>
+using namespace boost::filesystem;
 
 namespace
 {
@@ -196,160 +201,97 @@ namespace
 		dad[p] = NIL;
 	}
 
-	// 把树型结构转化成目录表
+	// 输出目录表
 	/////////////////////////////////////////////////////////////////////////////////
-	void Translate(KlayGE::VFile& out, KlayGE::DirTable* pDT)
+	void WriteDirTable(KlayGE::VFile& out, const KlayGE::DirTable& dirTable)
 	{
 		using namespace KlayGE;
 
-		U8 temp;
-		for (Pkt::FileIterator iter = pDT->BeginChild(); iter != pDT->EndChild(); ++ iter)
+		for (DirTable::const_iterator iter = dirTable.begin(); iter != dirTable.end(); ++ iter)
 		{
-			FileDes& fd = (*iter)->RootData();
+			const FileDes& fd(iter->second);
 
-			String str;
-			Convert(str, fd.fileName);
-
-			if (fd.attr & FA_IsDir)
-			{
-				temp = DIT_Dir;
-				out.Write(&temp, sizeof(temp));
-
-				// 写入目录名
-				temp = static_cast<U8>(str.length()) & 0xFF;
-				out.Write(&temp, sizeof(temp));
-				out.Write(&str[0], temp);
-
-				U32 dw(0);
-				out.Write(&dw, 4);
-				out.Write(&dw, 4);
-				out.Write(&dw, 4);
-				out.Write(&dw, 4);
-
-				out.Write(&fd.attr, sizeof(fd.attr));
-				Translate(out, iter->Get());
-			}
-			else
-			{
-				temp = DIT_File;
-				out.Write(&temp, 1);
-
-				// 写入文件名
-				temp = static_cast<U8>(str.length()) & 0xFF;
-				out.Write(&temp, 1);
-				out.Write(&str[0], temp);
-
-				out.Write(&fd.start, sizeof(fd.start));
-				out.Write(&fd.length, sizeof(fd.length));
-				out.Write(&fd.DeComLength, sizeof(fd.DeComLength));
-				out.Write(&fd.crc32, sizeof(fd.crc32));
-
-				out.Write(&fd.attr, sizeof(fd.attr));
-			}
-		}
-
-		if (pDT->Parent() != NULL)
-		{
-			temp = DIT_UnDir;
+			const String& fileName(iter->first);
+			const U32 temp(static_cast<U32>(fileName.length()));
 			out.Write(&temp, sizeof(temp));
+			out.Write(&fileName[0], temp);
+
+			out.Write(&fd, sizeof(fd));
 		}
 	}
 
-
 	// 根据树型结构打包目录
 	/////////////////////////////////////////////////////////////////////////////////
-	void Compress(KlayGE::VFile& outFile, KlayGE::DirTable* pDT)
+	void Compress(KlayGE::VFile& outFile, DirTable& dirTable, const String& rootName,
+		const std::vector<String>& files)
 	{
 		using namespace KlayGE;
 
 		DiskFile openFile;
-		static U32 curPos(0);
+		U32 curPos(0);
 
-		for (Pkt::FileIterator iter = pDT->BeginChild(); iter != pDT->EndChild(); ++ iter)
+		for (std::vector<String>::const_iterator iter = files.begin(); iter != files.end(); ++ iter)
 		{
-			FileDes& fd = (*iter)->RootData();
-			if (fd.attr & FA_IsDir)
+			openFile.Open(rootName + '/' + *iter, VFile::OM_Read);
+
+			FileDes fd;
+			fd.DeComLength = static_cast<U32>(openFile.Length());
+
+			MemFile in;
+			in.CopyFrom(openFile, fd.DeComLength);
+
+			openFile.Close();
+
+			MemFile out;
+			in.Rewind();
+			Pkt::Encode(out, in);
+			if (out.Length() >= in.Length())
 			{
-				SetCurrentDirectoryW(fd.fileName.c_str());
-				Compress(outFile, iter->Get());
+				fd.attr = FA_UnCompressed;
+				out.CopyFrom(in, in.Length());
 			}
-			else
-			{
-				openFile.Open(fd.fileName, VFile::OM_Read);
 
-				fd.DeComLength = static_cast<U32>(openFile.Length());
-				MemFile in;
-				in.CopyFrom(openFile, fd.DeComLength);
+			fd.length	= static_cast<U32>(out.Length());
+			fd.start	= curPos;
+			curPos += fd.length;
 
-				openFile.Close();
+			dirTable.insert(std::make_pair(*iter, fd));
 
-				MemFile out;
-				in.Rewind();
-				Pkt::Encode(out, in);
-				if (out.Length() >= in.Length())
-				{
-					fd.attr |= FA_UnCompressed;
-					out.CopyFrom(in, in.Length());
-				}
-
-				fd.length	= static_cast<U32>(out.Length());
-				fd.start	= curPos;
-				curPos += fd.length;
-
-				out.Rewind();
-				outFile.CopyFrom(out, fd.length);
-			}
-		}
-		if (pDT->Parent() != NULL)
-		{
-			SetCurrentDirectoryW(L"../");
+			out.Rewind();
+			outFile.CopyFrom(out, fd.length);
 		}
 	}
 
 	// 遍历目录，得出树型结构
 	/////////////////////////////////////////////////////////////////////////////////
-	void Find(KlayGE::DirTable* pDT)
+	std::vector<String> FindFiles(const String& rootName, const String& pathName)
 	{
-		using namespace KlayGE;
+		std::vector<String> ret;
 
-		WIN32_FIND_DATAW FindFileData;
-		HANDLE hFind(FindFirstFileW(L"*.*", &FindFileData));
-
-		if (INVALID_HANDLE_VALUE == hFind)
+		path findPath((rootName + '/' + pathName).c_str(), native);
+		if (exists(findPath))
 		{
-			return;
-		}
-
-		do
-		{
-			if (FindFileData.cFileName[0] != L'.')
+			directory_iterator end_itr;
+			for (directory_iterator iter(findPath); iter != end_itr; ++ iter)
 			{
-				FileDes fd;
-				fd.fileName		= FindFileData.cFileName;
-				fd.start		= 0;
-				fd.length		= 0;
+				const String fileName(iter->leaf().c_str());
 
-				if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+				if (is_directory(*iter))
 				{
-					fd.attr = FA_IsDir;
+					std::vector<String> sub(FindFiles(rootName, pathName + fileName + '/'));
+					for (size_t i = 0; i < sub.size(); ++ i)
+					{
+						ret.push_back(sub[i]);
+					}
 				}
 				else
 				{
-					fd.attr = 0;
-					fd.crc32 = Crc32::CrcFile(DiskFile(fd.fileName, VFile::OM_Read));
-				}
-
-				pDT->AddChild(fd);
-				if (fd.attr & FA_IsDir)
-				{
-					SetCurrentDirectoryW(fd.fileName.c_str());
-					Find(pDT->Child(pDT->NumChild() - 1).Get());
+					ret.push_back(pathName + fileName);
 				}
 			}
-		} while (FindNextFileW(hFind, &FindFileData));
-		FindClose(hFind);
+		}
 
-		SetCurrentDirectoryW(L"../");
+		return ret;
 	}
 }
 
@@ -357,14 +299,14 @@ namespace KlayGE
 {
 	// 翻译路径名，把'\'转化成'/'
 	/////////////////////////////////////////////////////////////////////////////////
-	WString& TransPathName(WString& out, const WString& in)
+	String& TransPathName(String& out, const String& in)
 	{
 		out = in;
 		for (size_t i = 0; i < out.length(); ++ i)
 		{
-			if (L'\\' == out[i])
+			if ('\\' == out[i])
 			{
-				out[i] = L'/';
+				out[i] = '/';
 			}
 		}
 
@@ -391,15 +333,15 @@ namespace KlayGE
 		U8 codeBuf[17], mask;
 
 		InitTree();			// initialize trees
-		codeBuf[0] = 0;	// codeBuf[1..16] saves eight units of code, and
-		// codeBuf[0] works as eight flags, "1" representing that the unit
-		// is an unencoded letter (1 byte), "0" a position-and-length pair
-		// (2 bytes).  Thus, eight units require at most 16 bytes of code.
+		codeBuf[0] = 0;		// codeBuf[1..16] saves eight units of code, and
+							// codeBuf[0] works as eight flags, "1" representing that the unit
+							// is an unencoded letter (1 byte), "0" a position-and-length pair
+							// (2 bytes).  Thus, eight units require at most 16 bytes of code.
 		codeBufPtr = mask = 1;
 		U32 s(0);
 		U32 r(N - F);
 		Engine::MemoryInstance().Set(textBuf, ' ', r);	// Clear the buffer with
-		// any character that will appear often.
+														// any character that will appear often.
 		int len(0);
 		for (; (len < F) && (in.Tell() != in.Length()); ++ len)
 		{
@@ -409,37 +351,37 @@ namespace KlayGE
 		for (int i = 1; i <= F; ++ i)
 		{
 			InsertNode(r - i);  // Insert the F strings,
-			// each of which begins with one or more 'space' characters.  Note
-			// the order in which these strings are inserted.  This way,
-			// degenerate trees will be less likely to occur.
+								// each of which begins with one or more 'space' characters.  Note
+								// the order in which these strings are inserted.  This way,
+								// degenerate trees will be less likely to occur.
 		}
 		InsertNode(r);  // Finally, insert the whole string just read.  The
-		// global variables matchLength and matchPosition are set.
+						// global variables matchLength and matchPosition are set.
 		do
 		{
 			if (matchLength > len)
 			{
 				matchLength = len;  // matchLength
-				// may be spuriously long near the end of text.
+									// may be spuriously long near the end of text.
 			}
 			if (matchLength <= THRESHOLD)
 			{
-				matchLength = 1;  // Not long enough match.  Send one byte.
-				codeBuf[0] |= mask;  // 'send one byte' flag
+				matchLength = 1;		// Not long enough match.  Send one byte.
+				codeBuf[0] |= mask;		// 'send one byte' flag
 				codeBuf[codeBufPtr ++] = textBuf[r];  // Send uncoded.
 			}
 			else
 			{
 				codeBuf[codeBufPtr ++] = static_cast<U8>(matchPosition);
 				codeBuf[codeBufPtr ++] = static_cast<U8>(((matchPosition >> 4) & 0xF0)
-					| (matchLength - (THRESHOLD + 1)));  // Send position and
-				// length pair. Note matchLength > THRESHOLD.
+					| (matchLength - (THRESHOLD + 1)));		// Send position and
+															// length pair. Note matchLength > THRESHOLD.
 			}
 			if (0 == (mask <<= 1))
 			{
 				// Shift mask left one bit.
 				out.Write(codeBuf, codeBufPtr);	// Send at most 8 units of
-				// code together
+												// code together
 				codeBuf[0] = 0;
 				codeBufPtr = mask = 1;
 			}
@@ -450,12 +392,12 @@ namespace KlayGE
 			{
 				in.Read(&c, 1);
 				DeleteNode(s);		// Delete old strings and
-				textBuf[s] = c;	// read new bytes
+				textBuf[s] = c;		// read new bytes
 				if (s < F - 1)
 				{
-					textBuf[s + N] = c;  // If the position is
-					// near the end of buffer, extend the buffer to make
-					// string comparison easier.
+					textBuf[s + N] = c;		// If the position is
+											// near the end of buffer, extend the buffer to make
+											// string comparison easier.
 				}
 				s = (s + 1) & (N - 1);
 				r = (r + 1) & (N - 1);
@@ -485,51 +427,37 @@ namespace KlayGE
 
 	// 目录打包
 	/////////////////////////////////////////////////////////////////////////////////
-	void Pkt::Pack(const WString& dirName, VFile& pktFile)
+	void Pkt::Pack(const String& dirName, VFile& pktFile)
 	{
-		wchar_t curPath[MAX_PATH];
-		GetCurrentDirectoryW(MAX_PATH, curPath);
-		Verify(SetCurrentDirectoryW(dirName.c_str()) != FALSE);
+		String rootName;
+		TransPathName(rootName, dirName);
 
-		WString theDirName;
-		TransPathName(theDirName, dirName);
+		std::vector<String> files(FindFiles(rootName, ""));
 
-		FileDes fd;
-		WString::size_type nPos = theDirName.find_last_of(L'/');
-		fd.fileName		= theDirName.substr(nPos + 1, theDirName.length());
-		fd.start		= 0;
-		fd.length		= 0;
-		fd.attr			= FA_IsDir;
-
-		DirTable DirTable;
-		DirTable.AddChild(fd);
-		Find(DirTable.BeginChild()->Get());
-
+		DirTable dirTable;
 		MemFile tmpFile;
-		Compress(tmpFile, &DirTable);
+		Compress(tmpFile, dirTable, rootName, files);
 
-		MemFile DT;
-		Translate(DT, &DirTable);
+		MemFile dt;
+		WriteDirTable(dt, dirTable);
 
-		MemFile DTCom;
-		DT.Rewind();
-		Encode(DTCom, DT);
+		MemFile dtCom;
+		dt.Rewind();
+		Encode(dtCom, dt);
 
 		PktHeader mag;
 		mag.magic			= MakeFourCC<'p', 'k', 't', ' '>::value;
 		mag.ver				= 3;
 		mag.DTStart			= sizeof(mag);
-		mag.DTLength		= static_cast<U32>(DTCom.Length());
-		mag.DTDeComLength	= static_cast<U32>(DT.Length());
-		mag.FIStart			= sizeof(mag) + static_cast<U32>(DTCom.Length());
+		mag.DTLength		= static_cast<U32>(dtCom.Length());
+		mag.DTDeComLength	= static_cast<U32>(dt.Length());
+		mag.FIStart			= mag.DTStart + mag.DTLength;
 
 		pktFile.Rewind();
 		pktFile.Write(&mag, sizeof(mag));
-		DTCom.Rewind();
-		pktFile.CopyFrom(DTCom, DTCom.Length());
+		dtCom.Rewind();
+		pktFile.CopyFrom(dtCom, dtCom.Length());
 
-
-		SetCurrentDirectoryW(curPath);
 		tmpFile.Rewind();
 		pktFile.CopyFrom(tmpFile, tmpFile.Length());
 		tmpFile.Close();

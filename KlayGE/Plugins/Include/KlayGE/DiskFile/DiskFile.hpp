@@ -1,8 +1,11 @@
 // DiskFile.hpp
 // KlayGE 磁盘文件类 头文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.0.6
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.0.6
+// 文件名改用String来保存 (2004.4.14)
 //
 // 2.0.0
 // 初次建立 (2003.8.10)
@@ -27,10 +30,10 @@ namespace KlayGE
 	{
 	public:
 		DiskFile();
-		DiskFile(const WString& fileName, OpenMode openMode);
+		DiskFile(const String& fileName, OpenMode openMode);
 		~DiskFile();
 
-		bool Open(const WString& fileName, OpenMode openMode);
+		bool Open(const String& fileName, OpenMode openMode);
 		void Close();
 
 		size_t Length();
@@ -48,7 +51,7 @@ namespace KlayGE
 	private:
 		std::fstream file_;
 
-		WString		fileName_;
+		String		fileName_;
 		OpenMode	openMode_;
 
 		DiskFile(const DiskFile& rhs);
