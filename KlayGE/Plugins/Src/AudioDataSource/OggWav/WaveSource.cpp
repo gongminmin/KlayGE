@@ -165,17 +165,16 @@ namespace KlayGE
 	{
 		assert(data != NULL);
 
-		std::istream::pos_type offset = wavFile_->tellg();
 		wavFile_->read(static_cast<char*>(data), size);
-		wavFile_->clear();
 
-		return wavFile_->tellg() - offset;
+		return wavFile_->gcount();
 	}
 
 	// 数据源复位
 	/////////////////////////////////////////////////////////////////////////////////
 	void WaveSource::Reset()
 	{
+		wavFile_->clear();
 		wavFile_->seekg(dataOffset_);
 	}
 

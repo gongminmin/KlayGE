@@ -42,10 +42,8 @@ namespace KlayGE
 
 		// submit a 4k block to libvorbis' Ogg layer
 		char* buffer(ogg_sync_buffer(&oy_, READSIZE));
-		std::istream::pos_type offset = oggFile_->tellg();
 		oggFile_->read(buffer, READSIZE);
-		oggFile_->clear();
-		int bytes(oggFile_->tellg() - offset);
+		int bytes(oggFile_->gcount());
 		ogg_sync_wrote(&oy_, bytes);
 
 		// Get the first page
@@ -103,10 +101,8 @@ namespace KlayGE
 
 			// no harm in not checking before adding more
 			buffer = ogg_sync_buffer(&oy_, READSIZE);
-			offset = oggFile_->tellg();
 			oggFile_->read(buffer, READSIZE);
-			oggFile_->clear();
-			bytes = oggFile_->tellg() - offset;
+			bytes = oggFile_->gcount();
 			ogg_sync_wrote(&oy_, bytes);
 		}
 
@@ -117,6 +113,8 @@ namespace KlayGE
 		// proceed in parallel.  We could init
 		// multiple vorbis_block structures
 		// for vd here
+
+		dataOffset_ = oggFile_->tellg();
 
 		this->Reset();
 	}
@@ -224,15 +222,15 @@ namespace KlayGE
 			if (leftsamples > 0)
 			{
 				char* buffer(ogg_sync_buffer(&oy_, READSIZE));
-				std::istream::pos_type offset = oggFile_->tellg();
 				oggFile_->read(buffer, READSIZE);
-				
+				int bytes(oggFile_->gcount());
+
 				if (oggFile_->fail())
 				{
+					oggFile_->clear();
 					leftsamples = 0;
 				}
 
-				int bytes(oggFile_->tellg() - offset);
 				ogg_sync_wrote(&oy_, bytes);
 			}
 		}
@@ -251,6 +249,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OggSource::Reset()
 	{
-		oggFile_->seekg(0);
+		oggFile_->clear();
+		oggFile_->seekg(dataOffset_);
 	}
 }

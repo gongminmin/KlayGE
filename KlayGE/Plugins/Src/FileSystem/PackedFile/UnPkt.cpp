@@ -6,6 +6,7 @@
 //
 // 2.2.0
 // 统一使用istream作为资源标示符 (2004.10.26)
+// 使用boost::crc来计算crc32 (2004.10.28)
 //
 // 2.1.0
 // 简化了目录表的表示法 (2004.4.14)
@@ -19,13 +20,14 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
-#include <KlayGE/Crc32.hpp>
 
 #include <cassert>
 #include <cctype>
 #include <string>
 #include <algorithm>
 #include <sstream>
+
+#include <boost/crc.hpp>
 
 #include <KlayGE/PackedFile/Pkt.hpp>
 
@@ -282,8 +284,10 @@ namespace KlayGE
 				static_cast<char*>(data));
 		}
 
-		if (Crc32::CrcMem(static_cast<U8*>(data), this->CurFileSize())
-			!= curFile_->second.crc32)
+		boost::crc_32_type crc32;
+		crc32.process_bytes(data, this->CurFileSize());
+
+		if (crc32.checksum() != curFile_->second.crc32)
 		{
 			return false;	// CRC32 错误
 		}

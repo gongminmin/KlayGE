@@ -7,6 +7,7 @@
 //
 // 2.2.0
 // 统一使用istream作为资源标示符 (2004.10.26)
+// 使用boost::crc来计算crc32 (2004.10.28)
 //
 // 2.1.3
 // 修正了CRC错误的bug
@@ -22,7 +23,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/Crc32.hpp>
 #include <KlayGE/Util.hpp>
 
 #include <cassert>
@@ -36,8 +36,8 @@
 
 using namespace std;
 
+#include <boost/crc.hpp>
 #include <boost/filesystem/operations.hpp>
-using namespace boost::filesystem;
 
 namespace
 {
@@ -354,10 +354,21 @@ namespace
 
 		for (std::vector<std::string>::const_iterator iter = files.begin(); iter != files.end(); ++ iter)
 		{
+			boost::crc_32_type crc32;
+
 			std::ifstream in((rootName + '/' + *iter).c_str(), std::ios_base::binary);
+			assert(in);
+
+			do
+			{
+				char buf[1024];
+				in.read(buf, sizeof(buf));
+				crc32.process_bytes(buf, in.gcount());
+			} while (in);
+			in.clear();
 
 			FileDes fd;
-			fd.crc32 = Crc32::CrcStream(in);
+			fd.crc32 = crc32.checksum();
 			fd.DeComLength = static_cast<U32>(in.tellg());
 			in.seekg(0);
 
@@ -389,6 +400,8 @@ namespace
 	/////////////////////////////////////////////////////////////////////////////////
 	std::vector<std::string> FindFiles(std::string const & rootName, std::string const & pathName)
 	{
+		using namespace boost::filesystem;
+
 		std::vector<std::string> ret;
 
 		path findPath(rootName + '/' + pathName, native);

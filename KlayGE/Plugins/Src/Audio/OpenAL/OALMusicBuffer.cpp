@@ -95,7 +95,7 @@ namespace KlayGE
 			alGetSourcei(source_, AL_BUFFERS_PROCESSED, &processed);
 			if (processed > 0)
 			{
-				while (processed != 0)
+				while (processed > 0)
 				{
 					-- processed;
 

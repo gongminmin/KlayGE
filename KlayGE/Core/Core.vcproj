@@ -258,9 +258,6 @@
 				Name="Ô´ÎÄ¼þ"
 				Filter="">
 				<File
-					RelativePath=".\Src\Kernel\Crc32.cpp">
-				</File>
-				<File
 					RelativePath=".\Src\Kernel\ResLoader.cpp">
 				</File>
 				<File
@@ -278,9 +275,6 @@
 				</File>
 				<File
 					RelativePath=".\Include\KlayGE\Context.hpp">
-				</File>
-				<File
-					RelativePath="Include\KlayGE\Crc32.hpp">
 				</File>
 				<File
 					RelativePath="Include\KlayGE\icstring.hpp">

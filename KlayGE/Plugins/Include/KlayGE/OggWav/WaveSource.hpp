@@ -32,9 +32,9 @@ namespace KlayGE
 		void Reset();
 
 	private:
-		ResIdentifierPtr	wavFile_;
-		size_t		dataOffset_;
-		size_t		size_;
+		ResIdentifierPtr		wavFile_;
+		std::istream::off_type	dataOffset_;
+		size_t					size_;
 
 		void ReadMMIO();
 	};

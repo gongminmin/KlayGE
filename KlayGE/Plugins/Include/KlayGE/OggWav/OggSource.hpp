@@ -35,7 +35,8 @@ namespace KlayGE
 		void Reset();
 
 	private:
-		ResIdentifierPtr	oggFile_;
+		ResIdentifierPtr		oggFile_;
+		std::istream::off_type	dataOffset_;
 
 		ogg_sync_state   oy_;	// sync and verify incoming physical bitstream
 		ogg_stream_state os_;	// take physical pages, weld into a logical stream of packets
