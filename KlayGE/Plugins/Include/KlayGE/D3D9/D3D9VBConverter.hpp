@@ -3,9 +3,12 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/COMPtr.hpp>
+#include <KlayGE/array.hpp>
 
 #include <vector>
 #include <d3d9.h>
+
+#include <KlayGE/VertexBuffer.hpp>
 
 namespace KlayGE
 {
@@ -27,7 +30,6 @@ namespace KlayGE
 	class D3D9VBConverter
 	{
 	public:
-		void Attach(const COMPtr<IDirect3DDevice9>& d3dDevice);
 		void Update(const VertexBuffer& vb);
 
 		D3DPRIMITIVETYPE PrimType() const
@@ -41,16 +43,7 @@ namespace KlayGE
 		// Vertex buffers.  Currently for rendering we need to place all the data
 		// that we receive into one of the following vertex buffers (one for each 
 		// component type).
-		HardwareVertexBuffer xyzBuffer_;
-		HardwareVertexBuffer blendBuffer_;
-		HardwareVertexBuffer normalBuffer_;
-		HardwareVertexBuffer diffuseBuffer_;
-		HardwareVertexBuffer specularBuffer_;
-		HardwareVertexBuffer textures_[8][4];		// max 8 textures with max 4 units per texture
-		HardwareVertexBuffer blendWeights_;
-		HardwareVertexBuffer blendIndices_;
-
-		COMPtr<IDirect3DDevice9>	d3dDevice_;
+		array<HardwareVertexBuffer, 16> buffers_;
 
 		D3DPRIMITIVETYPE primType_;
 		U32 vertexCount_;
@@ -63,12 +56,9 @@ namespace KlayGE
 	private:
 		void UpdateStreams(const VertexBuffer& vb);
 		void UpdateAStream(U16 streamNo, HardwareVertexBuffer& buffer, size_t vertexSize, size_t vertexNum);
+		void CopyABuffer(HardwareVertexBuffer& buffer, VertexStream& src);
 
 		void VertexPrimFromVB(const VertexBuffer& vb);
-
-		void CopyAllBuffers(const VertexBuffer& vb);
-		void CopyABuffer(HardwareVertexBuffer& buffer, const void* srcData,
-			size_t vertexSize, size_t numVertices);
 	};
 }
 

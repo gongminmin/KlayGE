@@ -61,6 +61,10 @@ namespace KlayGE
 	typedef SharePtr<Texture> TexturePtr;
 	class RenderTexture;
 	typedef SharePtr<RenderTexture> RenderTexturePtr;
+	class VertexStream;
+	typedef SharePtr<VertexStream> VertexStreamPtr;
+	class IndexStream;
+	typedef SharePtr<IndexStream> IndexStreamPtr;
 	class VertexBuffer;
 	typedef SharePtr<VertexBuffer> VertexBufferPtr;
 	struct Viewport;

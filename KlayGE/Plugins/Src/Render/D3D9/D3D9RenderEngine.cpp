@@ -385,9 +385,6 @@ namespace KlayGE
 		d3dDevice_ = COMPtr<IDirect3DDevice9>(d3dDevice);
 		d3dDevice_->AddRef();
 
-		vbConverter_.Attach(d3dDevice_);
-		ibConverter_.Attach(d3dDevice_);
-
 		this->ActiveRenderTarget(this->AddRenderTarget(win));
 
 		this->DepthBufferDepthTest(settings.depthBuffer);

@@ -115,13 +115,14 @@ namespace
 	{
 	public:
 		D3D9FontRenderable(const RenderEffectPtr& effect)
-			: fontVB_(new VertexBuffer),
+			: fontVB_(new VertexBuffer(VertexBuffer::BT_TriangleList)),
 				fontEffect_(effect)
 		{
-			fontVB_->type = VertexBuffer::BT_TriangleList;
-			fontVB_->numTextureCoordSets = 1;
-			fontVB_->texCoordSets[0].first = 2;
-			fontVB_->vertexOptions = VertexBuffer::VO_Diffuses | VertexBuffer::VO_TextureCoords;
+			fontVB_->AddVertexStream(VST_Positions, sizeof(float), 3);
+			fontVB_->AddVertexStream(VST_Diffuses, sizeof(D3DCOLOR), 1);
+			fontVB_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2);
+
+			fontVB_->AddIndexStream();
 		}
 
 		const WString& Name() const
@@ -149,18 +150,12 @@ namespace
 			const size_t maxSize(text.length() - std::count(text.begin(), text.end(), L'\n'));
 			float x(sx), y(sy);
 
+			std::vector<U32, alloc<U32> > clrs(maxSize * 4, clr);
 
-			VertexBuffer::VerticesType& xyzs(fontVB_->vertices);
-			VertexBuffer::DiffusesType& clrs(fontVB_->diffuses);
-			VertexBuffer::TexCoordsType& texs(fontVB_->texCoordSets[0].second);
-			VertexBuffer::IndicesType& indices(fontVB_->indices);
+			std::vector<float, alloc<float> > xyzs;
+			std::vector<float, alloc<float> > texs;
+			std::vector<U16, alloc<U16> > indices;
 
-			clrs.clear();
-			clrs.resize(maxSize * 4, clr);
-
-			xyzs.clear();
-			texs.clear();
-			indices.clear();
 			xyzs.reserve(maxSize * 3 * 4);
 			texs.reserve(maxSize * 2 * 4);
 			indices.reserve(maxSize * 6);
@@ -221,6 +216,12 @@ namespace
 					x = sx;
 				}
 			}
+
+			fontVB_->GetVertexStream(VST_Positions)->Assign(&xyzs[0], xyzs.size() / 3);
+			fontVB_->GetVertexStream(VST_Diffuses)->Assign(&clrs[0], clrs.size());
+			fontVB_->GetVertexStream(VST_TextureCoords0)->Assign(&texs[0], texs.size() / 2);
+
+			fontVB_->GetIndexStream()->Assign(&indices[0], indices.size());
 		}
 
 	private:

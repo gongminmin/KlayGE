@@ -22,11 +22,149 @@
 
 #pragma comment(lib, "KlayGE_Core.lib")
 
+#include <KlayGE/PreDeclare.hpp>
+#include <KlayGE/SharePtr.hpp>
 #include <vector>
-#include <KlayGE/array.hpp>
 
 namespace KlayGE
 {
+	enum VertexStreamType
+	{
+		// vertex positions
+		VST_Positions = 1,
+		// vertex normals included (for lighting)
+		VST_Normals = 2,
+		// Vertex colors - diffuse
+		VST_Diffuses = 3,
+		// Vertex colors - specular
+		VST_Speculars = 4,
+		// Vertex blend weights
+		VST_BlendWeights = 5,
+		// Vertex blend indices
+		VST_BlendIndices = 6,
+		// at least one set of texture coords (exact number specified in class)
+		VST_TextureCoords0 = 7,
+		VST_TextureCoords1 = 8,
+		VST_TextureCoords2 = 9,
+		VST_TextureCoords3 = 10,
+		VST_TextureCoords4 = 11,
+		VST_TextureCoords5 = 12,
+		VST_TextureCoords6 = 13,
+		VST_TextureCoords7 = 14,
+	};
+
+	class VertexStream
+	{
+	public:
+		VertexStream(VertexStreamType type, U8 elementSize, U8 elementNum)
+			: type_(type),
+				elementSize_(elementSize), elementNum_(elementNum)
+			{ }
+
+		virtual ~VertexStream()
+			{ }
+
+		VertexStreamType Type() const
+			{ return type_; }
+
+		virtual bool IsStatic() const = 0;
+
+		virtual void Assign(const void* src, size_t vertexNum, size_t stride = 0) = 0;
+		virtual void CopyTo(void* dest, size_t vertexNum) const = 0;
+
+		virtual size_t VertexNum() const = 0;
+
+		size_t ElementSize() const
+			{ return elementSize_; }
+		size_t ElementNum() const
+			{ return elementNum_; }
+
+	protected:
+		U8 elementSize_;
+		U8 elementNum_;
+		VertexStreamType type_;
+	};
+
+	class DynamicVertexStream : public VertexStream
+	{
+	public:
+		DynamicVertexStream(VertexStreamType type, U8 elementSize, U8 elementNum)
+			: VertexStream(type, elementSize, elementNum)
+			{ }
+
+		bool IsStatic() const
+			{ return false; }
+
+		void Assign(const void* data, size_t vertexNum, size_t stride = 0)
+		{
+			const size_t vertexSize(this->ElementSize() * this->ElementNum());
+			vertices_.resize(vertexNum * vertexSize);
+
+			if (stride != 0)
+			{
+				U8* dest(&vertices_[0]);
+				const U8* src(static_cast<const U8*>(static_cast<const void*>(data)));
+				for (size_t i = 0; i < vertexNum; ++ i)
+				{
+					memcpy(dest, src, vertexSize);
+
+					dest += vertexSize;
+					src += vertexSize + stride;
+				}
+			}
+			else
+			{
+				memcpy(&vertices_[0], data, vertices_.size());
+			}
+		}
+
+		void CopyTo(void* dest, size_t vertexNum) const
+			{ memcpy(dest, &vertices_[0], vertexNum * this->ElementSize() * this->ElementNum()); }
+
+		size_t VertexNum() const
+			{ return vertices_.size() / (this->ElementSize() * this->ElementNum()); }
+
+	private:
+		std::vector<U8, alloc<U8> > vertices_;
+	};
+
+	class IndexStream
+	{
+	public:
+		virtual ~IndexStream()
+			{ }
+
+		virtual bool IsStatic() const = 0;
+
+		virtual void Assign(const void* src, size_t indexNum) = 0;
+		virtual void CopyTo(void* dest, size_t indexNum) const = 0;
+
+		virtual size_t IndexNum() const = 0;
+	};
+
+	class DynamicIndexStream : public IndexStream
+	{
+	public:
+		bool IsStatic() const
+			{ return false; }
+
+		void Assign(const void* src, size_t indexNum)
+		{
+			indices_.resize(indexNum);
+			memcpy(&indices_[0], src, indexNum * sizeof(U16));
+		}
+
+		void CopyTo(void* dest, size_t indexNum) const
+			{ memcpy(dest, &indices_[0], indexNum * sizeof(U16)); }
+
+		size_t IndexNum() const
+			{ return indices_.size(); }
+
+	private:
+		std::vector<U16, alloc<U16> > indices_;
+	};
+
+
 	class VertexBuffer
 	{
 	public:
@@ -39,101 +177,46 @@ namespace KlayGE
 			BT_TriangleStrip,
 			BT_TriangleFan
 		};
-		
-		enum VertexOptions
-		{
-			// vertex normals included (for lighting)
-			VO_Normals			= 1 << 0,
-			// Vertex colors - diffuse
-			VO_Diffuses			= 1 << 1,
-			// Vertex colors - specular
-			VO_Speculars		= 1 << 2,
-			// at least one set of texture coords (exact number specified in class)
-			VO_TextureCoords	= 1 << 3,
-			// Vertex blend weights
-			VO_BlendWeights		= 1 << 4,
-			// Vertex blend indices
-			VO_BlendIndices		= 1 << 5,
-		};
+
+		typedef std::vector<VertexStreamPtr, alloc<VertexStreamPtr> > VertexStreamsType;
+		typedef VertexStreamsType::iterator VertexStreamIterator;
+		typedef VertexStreamsType::const_iterator VertexStreamConstIterator;
+
+		VertexBuffer(BufferType type)
+			: type_(type)
+			{ }
+
+		BufferType Type() const
+			{ return type_; }
+
+		size_t NumVertices() const
+			{ return vertexStreams_.empty() ? 0 : vertexStreams_[0]->VertexNum(); }
+
+		void AddVertexStream(VertexStreamType type, U8 elementSize, U8 elementNum, bool staticStream = false);
+		VertexStreamPtr GetVertexStream(VertexStreamType type) const;
+
+		VertexStreamIterator VertexStreamBegin();
+		VertexStreamIterator VertexStreamEnd();
+		VertexStreamConstIterator VertexStreamBegin() const;
+		VertexStreamConstIterator VertexStreamEnd() const;
+
 
 		bool UseIndices() const
-			{ return !indices.empty(); }
-
-		// Number of vertices (applies to all components)
-		size_t NumVertices() const
-			{ return vertices.size() / 3; }
-
-		// No memory allocation here,
-		// assumed that all pointers are pointing
-		// elsewhere e.g. model class data
-
-		// Pointer to list of vertices (float {x, y, z} * numVertices).
-		// @remarks
-		// If useIndexes is false each group of 3 vertices describes a face (anticlockwise winding) in
-		// trianglelist mode.
-		typedef std::vector<float, alloc<float> > VerticesType;
-		VerticesType vertices;
-
-
-		// Optional vertex normals for vertices (float {x, y, z} * numVertices).
-		typedef std::vector<float, alloc<float> > NormalsType;
-		NormalsType normals;
-
-
-		// Optional pointer to a list of diffuse vertex colors (U32 {r, g, b, a} RGBA * numVertices).
-		typedef std::vector<U32, alloc<U32> > DiffusesType;
-		DiffusesType diffuses;
-
-
-		// Optional pointer to a list of specular vertex colors (U32 {r, g, b, a} RGBA * numVertices)
-		typedef std::vector<U32, alloc<U32> > SpecularsType;
-		SpecularsType speculars;
-
-
-		/// Number of groups of u,[v],[w].
-		U8 numTextureCoordSets;
-
-		// Number of dimensions in each corresponding texture coordinate set.
-		// @note
-		// There should be 1-4 dimensions on each set.
-
-		// Optional texture coordinates for vertices (float {u, [v], [w]} * numVertices).
-		// @remarks
-		// There can be up to 8 sets of texture coordinates, and the number of components per
-		// vertex depends on the number of texture dimensions (2 is most common).
-		typedef std::vector<float, alloc<float> > TexCoordsType;
-		typedef array<std::pair<U8, TexCoordsType>, 8> TexCoordSetsType;
-		TexCoordSetsType texCoordSets;
-
-
-		typedef std::vector<float, alloc<float> > BlendWeightsType;
-		BlendWeightsType blendWeights;
-
-
-		typedef std::vector<U8, alloc<U8> > BlendIndicesType;
-		BlendIndicesType blendIndices;
-
-
-		// Pointer to a list of vertex indexes describing faces (only used if useIndexes is true).
-		// @note
-		// Each group of 3 describes a face (anticlockwise winding order).
-		typedef std::vector<U16, alloc<U16> > IndicesType;
-		IndicesType indices;
-
-		// The number of vertex indexes
+			{ return this->NumIndices() != 0; }
 		size_t NumIndices() const
-			{ return indices.size(); }
+			{ return (NULL == indexStream_.Get()) ? 0 : indexStream_->IndexNum(); }
 
-		// The type of rendering operation.
-		BufferType type;
-		// Flags indicating vertex types
-		int vertexOptions;
+		void AddIndexStream(bool staticStream = false);
+		IndexStreamPtr GetIndexStream() const
+			{ return indexStream_; }
 
-		VertexBuffer()
-			: vertexOptions(0),
-				numTextureCoordSets(0),
-				texCoordSets(TexCoordSetsType::value_type(2, TexCoordsType()))
-			{ }
+
+	private:
+		VertexStreamsType vertexStreams_;
+
+		IndexStreamPtr indexStream_;
+
+		BufferType type_;
 	};
 }
 

@@ -187,6 +187,9 @@
 							ObjectFile="$(IntDir)/$(InputName)1.obj"/>
 					</FileConfiguration>
 				</File>
+				<File
+					RelativePath=".\Src\Render\VertexBuffer.cpp">
+				</File>
 			</Filter>
 			<Filter
 				Name="Í·ÎÄ¼þ"

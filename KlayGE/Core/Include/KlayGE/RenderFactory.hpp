@@ -1,6 +1,9 @@
 #ifndef _RENDERFACTORY_HPP
 #define _RENDERFACTORY_HPP
 
+#include <KlayGE/Texture.hpp>
+#include <KlayGE/VertexBuffer.hpp>
+
 namespace KlayGE
 {
 	class RenderFactory
@@ -19,6 +22,12 @@ namespace KlayGE
 		virtual FontPtr MakeFont(const WString& fontName, U32 fontHeight = 12, U32 flags = 0) = 0;
 
 		virtual RenderEffectPtr MakeRenderEffect(const String& srcData, UINT flags = 0) = 0;
+
+		// elementSize表示流中每个元素的大小，比如Position流是size(float)
+		// elementNum表示一个顶点有几个元素表示，比如Position流是由(x, y, z)组成，所以为3
+		virtual VertexStreamPtr MakeVertexStream(VertexStreamType type,
+			U8 elementSize, U8 elementNum, bool staticStream = false) = 0;
+		virtual IndexStreamPtr MakeIndexStream(bool staticStream = false) = 0;
 	};
 
 	template <typename RenderEngineType, typename TextureType, typename RenderTextureType,
@@ -28,6 +37,8 @@ namespace KlayGE
 	public:
 		ConcreteRenderFactory(const WString& name)
 				: name_(name)
+			{ }
+		virtual ~ConcreteRenderFactory()
 			{ }
 
 		const WString& Name() const

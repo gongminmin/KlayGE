@@ -27,13 +27,10 @@ namespace KlayGE
 	class D3D9IBConverter
 	{
 	public:
-		void Attach(const COMPtr<IDirect3DDevice9>& d3dDevice);
 		COMPtr<IDirect3DIndexBuffer9> Update(const VertexBuffer& vb);
 
 	private:
 		HardwareIndexBuffer indicies_;
-
-		COMPtr<IDirect3DDevice9>	d3dDevice_;
 	};
 }
 

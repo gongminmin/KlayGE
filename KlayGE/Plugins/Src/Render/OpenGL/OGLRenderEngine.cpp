@@ -571,33 +571,41 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::Render(const VertexBuffer& vb)
 	{
-		{
-			glEnableClientState(GL_VERTEX_ARRAY);
-			glVertexPointer(3, GL_FLOAT, 0, &vb.vertices[0]);
-		}
+		glDisableClientState(GL_VERTEX_ARRAY);
+		glDisableClientState(GL_NORMAL_ARRAY);
+		glDisableClientState(GL_COLOR_ARRAY);
 
-		if (vb.vertexOptions & VertexBuffer::VO_Normals)
+		for (VertexBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
+			iter != vb.VertexStreamEnd(); ++ iter)
 		{
-			glEnableClientState(GL_NORMAL_ARRAY);
-			glNormalPointer(GL_FLOAT, 0, &vb.normals[0]);
-		}
-		else
-		{
-			glDisableClientState(GL_NORMAL_ARRAY);
-		}
+			VertexStream& stream(*(*iter));
+			VertexStreamType type(stream.Type());
 
-		if (vb.vertexOptions & VertexBuffer::VO_Diffuses)
-		{
-			glEnableClientState(GL_COLOR_ARRAY);
-			glColorPointer(4, GL_UNSIGNED_BYTE, 0, &vb.diffuses[0]);
-		}
-		else
-		{
-			glDisableClientState(GL_COLOR_ARRAY);
+			std::vector<U8, alloc<U8> > data(stream.VertexNum() * stream.ElementSize() * stream.ElementNum());
+			stream.CopyTo(&data[0], stream.VertexNum());
+
+			switch (type)
+			{
+			// Vertex xyzs
+			case VST_Positions:
+				glEnableClientState(GL_VERTEX_ARRAY);
+				glVertexPointer(3, GL_FLOAT, 0, &data[0]);
+				break;
+		
+			case VST_Normals:
+				glEnableClientState(GL_NORMAL_ARRAY);
+				glNormalPointer(GL_FLOAT, 0, &data[0]);
+				break;
+
+			case VST_Diffuses:
+				glEnableClientState(GL_COLOR_ARRAY);
+				glColorPointer(4, GL_UNSIGNED_BYTE, 0, &data[0]);
+				break;
+			}
 		}
 
 		GLenum mode;
-		switch (vb.type)
+		switch (vb.Type())
 		{
 		case VertexBuffer::BT_PointList:
 			mode = GL_POINTS;
@@ -626,7 +634,11 @@ namespace KlayGE
 
 		if (vb.UseIndices())
 		{
-			glDrawElements(mode, vb.NumIndices(), GL_UNSIGNED_SHORT, &vb.indices[0]);
+			IndexStream& stream(*vb.GetIndexStream());
+			std::vector<U16, alloc<U16> > data(stream.IndexNum());
+			stream.CopyTo(&data[0], stream.IndexNum());
+
+			glDrawElements(mode, vb.NumIndices(), GL_UNSIGNED_SHORT, &data[0]);
 		}
 		else
 		{

@@ -127,7 +127,7 @@ namespace KlayGE
 			{ container_.clear(); }
 
 		bool empty() const
-			{ container_.empty(); }
+			{ return container_.empty(); }
 
 		size_type max_size() const
 			{ return container_.max_size(); }

@@ -134,6 +134,9 @@
 				RelativePath=".\D3D9VBConverter.cpp">
 			</File>
 			<File
+				RelativePath=".\D3D9VertexBuffer.cpp">
+			</File>
+			<File
 				RelativePath=".\D3D9VideoMode.cpp">
 			</File>
 		</Filter>
@@ -173,6 +176,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9VBConverter.hpp">
+			</File>
+			<File
+				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9VertexBuffer.hpp">
 			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9VideoMode.hpp">

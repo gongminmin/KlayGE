@@ -18,6 +18,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/VertexBuffer.hpp>
 
 #include <d3d9.h>
 #include <d3dx9.h>

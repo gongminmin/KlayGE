@@ -16,11 +16,13 @@
 #ifndef _RENDERENGINE_HPP
 #define _RENDERENGINE_HPP
 
+#include <KlayGE/KlayGE.hpp>
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderTarget.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/MathTypes.hpp>
 #include <KlayGE/SharePtr.hpp>
+
 #include <vector>
 #include <list>
 
