@@ -73,6 +73,9 @@ __________________________________________________________________
 
 发展历程
 
+2.3.0
+使用FreeType实现Font
+
 2.2.0 (2004.11.20)
 修正了DSound插件的音量问题
 去掉了ManagerBase、FileSystem、Crc32、alloc、Timer、Random

@@ -3,6 +3,7 @@
 
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderBuffer.hpp>
+#include <KlayGE/Font.hpp>
 
 #include <boost/utility.hpp>
 
@@ -21,7 +22,10 @@ namespace KlayGE
 			PixelFormat format, Texture::TextureUsage usage = Texture::TU_Default) = 0;
 		virtual RenderTexturePtr MakeRenderTexture(uint32_t width, uint32_t height) = 0;
 
-		virtual FontPtr MakeFont(std::string const & fontName, uint32_t fontHeight = 12, uint32_t flags = 0) = 0;
+		FontPtr MakeFont(std::string const & fontName, uint32_t fontHeight = 12, uint32_t flags = 0)
+		{
+			return FontPtr(new Font(fontName, fontHeight, flags));
+		}
 
 		virtual RenderEffectPtr MakeRenderEffect(std::string const & srcData, uint32_t flags = 0) = 0;
 
@@ -33,7 +37,7 @@ namespace KlayGE
 	};
 
 	template <typename RenderEngineType, typename TextureType, typename RenderTextureType,
-		typename FontType, typename RenderEffectType>
+		typename RenderEffectType>
 	class ConcreteRenderFactory : boost::noncopyable, public RenderFactory
 	{
 	public:
@@ -59,10 +63,7 @@ namespace KlayGE
 		RenderTexturePtr MakeRenderTexture(uint32_t width, uint32_t height)
 			{ return RenderTexturePtr(new RenderTextureType(width, height)); }
 
-		FontPtr MakeFont(std::string const & fontName, uint32_t fontHeight = 12, uint32_t flags = 0)
-			{ return FontPtr(new FontType(fontName, fontHeight, flags)); }
-
-		RenderEffectPtr MakeRenderEffect(std::string const & srcData, uint32_t flags = 0)
+		RenderEffectPtr MakeRenderEffect(std::string const & srcData, uint32_t flags)
 			{ return RenderEffectPtr(new RenderEffectType(srcData, flags)); }
 
 	private:

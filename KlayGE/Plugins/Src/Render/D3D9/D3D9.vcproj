@@ -108,9 +108,6 @@
 				RelativePath=".\D3D9AdapterList.cpp">
 			</File>
 			<File
-				RelativePath=".\D3D9Font.cpp">
-			</File>
-			<File
 				RelativePath=".\D3D9IndexStream.cpp">
 			</File>
 			<File
@@ -147,9 +144,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9AdapterList.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9Font.hpp">
 			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9IndexStream.hpp">

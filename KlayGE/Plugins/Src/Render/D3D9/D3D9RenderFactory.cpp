@@ -18,7 +18,6 @@
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 #include <KlayGE/D3D9/D3D9RenderTexture.hpp>
 #include <KlayGE/D3D9/D3D9RenderEffect.hpp>
-#include <KlayGE/D3D9/D3D9Font.hpp>
 #include <KlayGE/D3D9/D3D9VertexStream.hpp>
 #include <KlayGE/D3D9/D3D9IndexStream.hpp>
 
@@ -27,7 +26,7 @@
 namespace KlayGE
 {
 	typedef ConcreteRenderFactory<D3D9RenderEngine, D3D9Texture, D3D9RenderTexture,
-			D3D9Font, D3D9RenderEffect> D3D9RenderFactoryBase;
+			D3D9RenderEffect> D3D9RenderFactoryBase;
 
 	class D3D9RenderFactory : public D3D9RenderFactoryBase
 	{
@@ -37,7 +36,7 @@ namespace KlayGE
 			{ }
 			
 		VertexStreamPtr MakeVertexStream(VertexStreamType type,
-			uint8_t sizeElement, uint8_t numElement, bool staticStream = false)
+			uint8_t sizeElement, uint8_t numElement, bool staticStream)
 		{
 			VertexStreamPtr stream;
 
@@ -80,7 +79,7 @@ namespace KlayGE
 			return stream;
 		}
 
-		IndexStreamPtr MakeIndexStream(bool staticStream = false)
+		IndexStreamPtr MakeIndexStream(bool staticStream)
 		{
 			return IndexStreamPtr(new D3D9IndexStream(staticStream));
 		}

@@ -3,7 +3,6 @@
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 #include <KlayGE/OpenGL/OGLRenderTexture.hpp>
 #include <KlayGE/OpenGL/OGLRenderEffect.hpp>
-#include <KlayGE/OpenGL/OGLFont.hpp>
 
 #include <KlayGE/OpenGL/OGLVertexStream.hpp>
 #include <KlayGE/OpenGL/OGLIndexStream.hpp>
@@ -13,7 +12,8 @@
 namespace KlayGE
 {
 	typedef ConcreteRenderFactory<OGLRenderEngine, OGLTexture, OGLRenderTexture,
-				OGLFont, OGLRenderEffect> OGLRenderFactoryBase;
+				OGLRenderEffect> OGLRenderFactoryBase;
+
 	class OGLRenderFactory : public OGLRenderFactoryBase
 	{
 	public:
@@ -22,7 +22,7 @@ namespace KlayGE
 			{ }
 			
 		VertexStreamPtr MakeVertexStream(VertexStreamType type,
-			uint8_t sizeElement, uint8_t numElement, bool staticStream = false)
+			uint8_t sizeElement, uint8_t numElement, bool staticStream)
 		{
 			VertexStreamPtr stream;
 
@@ -65,7 +65,7 @@ namespace KlayGE
 			return stream;
 		}
 
-		IndexStreamPtr MakeIndexStream(bool staticStream = false)
+		IndexStreamPtr MakeIndexStream(bool staticStream)
 		{
 			return IndexStreamPtr(new OGLIndexStream);
 		}

@@ -119,6 +119,9 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath=".\Src\Render\Font.cpp">
+				</File>
+				<File
 					RelativePath=".\Src\Render\Light.cpp">
 					<FileConfiguration
 						Name="Debug|Win32">
