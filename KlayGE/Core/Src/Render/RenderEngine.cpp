@@ -58,6 +58,21 @@ namespace KlayGE
 		activeRenderTarget_ = iter;
 	}
 
+	// ÉèÖÃäÖÈ¾×´Ì¬
+	/////////////////////////////////////////////////////////////////////////////////
+	void RenderEngine::SetRenderEffect(const RenderEffectPtr& effect)
+	{
+		if (renderEffect_.Get() != NULL)
+		{
+			renderEffect_->End();
+		}
+
+		renderEffect_ = effect;
+		renderPasses_ = renderEffect_->Begin();
+	}
+
+	// äÖÈ¾¶¥µã»º³åÇø
+	/////////////////////////////////////////////////////////////////////////////////
 	void RenderEngine::Render(VertexBuffer& vb)
 	{
 		// Vertex blending: do software if required

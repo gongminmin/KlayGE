@@ -622,16 +622,12 @@ namespace KlayGE
 		}
 		else
 		{
-			UINT passes(renderEffect_->Begin());
-
-			for (UINT i = 0; i < passes; ++ i)
+			for (UINT i = 0; i < renderPasses_; ++ i)
 			{
 				renderEffect_->Pass(i);
 
 				this->DoDrawPrimitive(primType, primCount);
 			}
-
-			renderEffect_->End();
 		}
 	}
 
@@ -655,16 +651,12 @@ namespace KlayGE
 		}
 		else
 		{
-			UINT passes(renderEffect_->Begin());
-
-			for (UINT i = 0; i < passes; ++ i)
+			for (UINT i = 0; i < renderPasses_; ++ i)
 			{
 				renderEffect_->Pass(i);
 
 				this->DoDrawIndexedPrimitive(primType, vb.numVertices, primCount);
 			}
-
-			renderEffect_->End();				
 		}
 	}
 

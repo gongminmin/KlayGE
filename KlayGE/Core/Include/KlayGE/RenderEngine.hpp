@@ -134,8 +134,7 @@ namespace KlayGE
 
 		virtual void StartRendering() = 0;
 
-		void SetRenderEffect(const RenderEffectPtr& effect)
-			{ renderEffect_ = effect; }
+		void SetRenderEffect(const RenderEffectPtr& effect);
 		RenderEffectPtr GetRenderEffect() const
 			{ return renderEffect_; }
 
@@ -242,6 +241,7 @@ namespace KlayGE
 		RenderTargetListIterator activeRenderTarget_;
 
 		RenderEffectPtr renderEffect_;
+		UINT renderPasses_;
 
 		void SoftwareVertexBlend(VertexBuffer& vb);
 

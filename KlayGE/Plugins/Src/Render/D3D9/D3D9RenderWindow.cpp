@@ -1,30 +1,37 @@
+// D3D9RenderWindow.cpp
+// KlayGE D3D9渲染窗口类 实现文件
+// Ver 2.0.3
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.0.1
+// 修正了只能sw vp的bug (2005.2.15)
+//
+// 2.0.0
+// 初次建立 (2003.8.15)
+//
+// 修改记录
+//////////////////////////////////////////////////////////////////////////////////
+
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/CommFuncs.hpp>
 #include <KlayGE/Memory.hpp>
 #include <KlayGE/Engine.hpp>
 
-#include <map>
+#include <vector>
 #include <cassert>
 #include <d3d9.h>
 
 #include <KlayGE/D3D9/D3D9RenderWindow.hpp>
 
-namespace
-{
-	std::map<HWND, KlayGE::D3D9RenderWindow*> winMap;
-}
-
 namespace KlayGE
 {
-	// Window procedure callback
-	// This is a static member, so applies to all windows but we store the
-	// D3D9RenderWindow instance in the window data GetWindowLog/SetWindowLog
 	LRESULT D3D9RenderWindow::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
-		if (winMap.find(hWnd) != winMap.end())
+		if (uMsg != WM_CREATE)
 		{
-			D3D9RenderWindow* win(winMap[hWnd]);
+			D3D9RenderWindow* win(reinterpret_cast<D3D9RenderWindow*>(GetWindowLong(hWnd, 0)));
 			assert(win != NULL);
 
 			return win->MsgProc(hWnd, uMsg, wParam, lParam);
@@ -94,7 +101,7 @@ namespace KlayGE
 			break;
 
 		case WM_CLOSE:
-			::DestroyWindow(hWnd_);
+			this->Destroy();
 			closed_ = true;
 			::PostQuitMessage(0);
 			return 0;
@@ -135,7 +142,7 @@ namespace KlayGE
 		wc.style			= CS_HREDRAW | CS_VREDRAW;
 		wc.lpfnWndProc		= WndProc;
 		wc.cbClsExtra		= 0;
-		wc.cbWndExtra		= 0;
+		wc.cbWndExtra		= 4;
 		wc.hInstance		= hInst;
 		wc.hIcon			= NULL;
 		wc.hCursor			= ::LoadCursor(NULL, IDC_ARROW);
@@ -150,7 +157,7 @@ namespace KlayGE
 			WS_OVERLAPPEDWINDOW, settings.left, settings.top,
 			settings.width, settings.height, 0, 0, hInst, NULL);
 
-		winMap.insert(std::make_pair(hWnd_, this));
+		SetWindowLong(hWnd_, 0, reinterpret_cast<long>(this));
 
 		::ShowWindow(hWnd_, SW_SHOWNORMAL);
 		::UpdateWindow(hWnd_);
@@ -270,11 +277,11 @@ namespace KlayGE
 		Convert(description_, adapter_.Description());
 		description_ += L' ';
 
-		typedef std::map<U32, WString> BehaviorType;
+		typedef std::vector<std::pair<U32, WString> > BehaviorType;
 		BehaviorType behavior;
-		behavior.insert(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING, WString(L"(hw vp)")));
-		behavior.insert(std::make_pair(D3DCREATE_MIXED_VERTEXPROCESSING, WString(L"(mix vp)")));
-		behavior.insert(std::make_pair(D3DCREATE_SOFTWARE_VERTEXPROCESSING, WString(L"(sw vp)")));
+		behavior.push_back(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING, WString(L"(hw vp)")));
+		behavior.push_back(std::make_pair(D3DCREATE_MIXED_VERTEXPROCESSING, WString(L"(mix vp)")));
+		behavior.push_back(std::make_pair(D3DCREATE_SOFTWARE_VERTEXPROCESSING, WString(L"(sw vp)")));
 
 		IDirect3DDevice9* d3dDevice(NULL);
 		for (BehaviorType::iterator iter = behavior.begin(); iter != behavior.end(); ++ iter)
@@ -369,7 +376,6 @@ namespace KlayGE
 	{
 		if (hWnd_ != NULL)
 		{
-			winMap.erase(hWnd_);
 			::DestroyWindow(hWnd_);
 			hWnd_ = NULL;
 		}
