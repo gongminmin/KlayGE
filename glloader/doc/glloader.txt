@@ -1,0 +1,26 @@
+GLLoader v2.0.0
+
+The GLLoader is an OpenGL extension loading library. It supports OpenGL core 1.0 to 2.0, as well as WGL, GLX, and other GL extensions. There is a automatic code generater. All the things you want to do is to write a xml script if you have to support new extensions.
+The GLLoader's primary selling point is that it offers a initializing path of an extension. So if an extension has promoted into the core, and the loader will try to load it from the core. If failed, try the extension one.
+The GLLoader is licensed under LGPL. 
+
+
+The Interface
+
+int glloader_is_supported(const char* name);
+Find out if a particular feature is available on your platform. The parameter "name" is the name string. Returns non-zero means it's supported, or it'll return zero.
+Note: You can use name string "GL_VERSION_x_y" to determine if the x.y core version of OpenGL is supported.
+
+void* glloader_get_gl_proc_address(const char* name);
+Load a OpenGL function. The parameter "name" is the function's name. The return value is the address of the extension function.
+Note: When the function fails, there is not guarantee that the return value is NULL.
+
+
+Automatic Code Generater
+
+Because writting the loading code is very boring, I developed a automatic code generater to help writting the code. There are many xml files in the "./xml" directory. Each xml contains the typedefs, tokens, functions, and initializing path of an extension. Users can write their own xml scripts, the run "autogen.py". And it'll generate the loading code in src and include directories.
+Python 2.3 is required to run "autogen.py".
+
+
+CVS
+:pserver:anonymous@cvs.cosoft.org.cn:/sfroot/cvs/glloader co GLLoader

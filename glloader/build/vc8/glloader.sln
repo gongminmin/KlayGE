@@ -1,0 +1,19 @@
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual C++ Express 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "glloader", "glloader.vcproj", "{38EFA2F9-D01F-44B7-B37B-16D2584D6FAB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{38EFA2F9-D01F-44B7-B37B-16D2584D6FAB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{38EFA2F9-D01F-44B7-B37B-16D2584D6FAB}.Debug|Win32.Build.0 = Debug|Win32
+		{38EFA2F9-D01F-44B7-B37B-16D2584D6FAB}.Release|Win32.ActiveCfg = Release|Win32
+		{38EFA2F9-D01F-44B7-B37B-16D2584D6FAB}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

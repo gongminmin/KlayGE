@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<!ELEMENT GLExtension (Typedefs?, Tokens?, Functions?, Vendors, InitPath)>
+<!ATTLIST GLExtension
+	name CDATA #REQUIRED>
+
+<!ELEMENT Typedefs (Typedef*)>
+
+<!ELEMENT Typedef EMPTY>
+<!ATTLIST Typedef
+	type CDATA #REQUIRED
+	synonym CDATA #REQUIRED>
+
+<!ELEMENT Tokens (Token*)>
+
+<!ELEMENT Token EMPTY>
+<!ATTLIST Token
+	name CDATA #REQUIRED
+	value CDATA #REQUIRED>
+
+<!ELEMENT Functions (Function*)>
+
+<!ELEMENT Function (Param?)>
+<!ATTLIST Function
+	name CDATA #REQUIRED
+	return CDATA #REQUIRED>
+
+<!ELEMENT Param EMPTY>
+<!ATTLIST Param
+	type CDATA #REQUIRED
+	name CDATA #REQUIRED>
+
+<!ELEMENT Vendors (Vendor*)>
+
+<!ELEMENT Vendor (Name*)>
+<!ATTLIST Vendor
+	name ID #REQUIRED
+	string CDATA #REQUIRED>
+
+<!ELEMENT Name EMPTY>
+<!ATTLIST Name
+	name CDATA #REQUIRED>
+
+<!ELEMENT InitPath (Init*)>
+
+<!ELEMENT Init EMPTY>
+<!ATTLIST Init
+	name IDREF #REQUIRED>
