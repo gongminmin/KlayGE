@@ -21,7 +21,7 @@ namespace KlayGE
 		virtual ~AudioFactory()
 			{ }
 
-		virtual const WString& Name() const = 0;
+		virtual const std::wstring& Name() const = 0;
 
 		virtual AudioEngine& AudioEngineInstance() = 0;
 		virtual AudioBufferPtr MakeSoundBuffer(const AudioDataSourcePtr& dataSource, U32 numSource = 1) = 0;
@@ -32,11 +32,11 @@ namespace KlayGE
 	class ConcreteAudioFactory : public AudioFactory
 	{
 	public:
-		ConcreteAudioFactory(const WString& name)
+		ConcreteAudioFactory(const std::wstring& name)
 			: name_(name)
 			{ }
 
-		const WString& Name() const
+		const std::wstring& Name() const
 			{ return name_; }
 
 		AudioEngine& AudioEngineInstance()
@@ -58,7 +58,7 @@ namespace KlayGE
 		}
 
 	private:
-		const WString name_;
+		const std::wstring name_;
 	};
 }
 

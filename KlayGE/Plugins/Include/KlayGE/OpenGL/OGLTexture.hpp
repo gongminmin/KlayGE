@@ -18,9 +18,9 @@ namespace KlayGE
 		OGLTexture(U32 width, U32 height, U16 numMipMaps, PixelFormat format, TextureUsage usage = TU_Default);
 		~OGLTexture();
 
-		const WString& Name() const;
+		const std::wstring& Name() const;
 
-		void CustomAttribute(const String& name, void* pData);
+		void CustomAttribute(const std::string& name, void* pData);
 
 		void CopyToTexture(Texture& target);
 		void CopyMemoryToTexture(void* pData, PixelFormat pf,

@@ -23,7 +23,6 @@
 #include <cstddef>
 #include <vector>
 #include <KlayGE/SharedPtr.hpp>
-#include <KlayGE/alloc.hpp>
 
 namespace KlayGE
 {
@@ -39,9 +38,9 @@ namespace KlayGE
 		typedef std::size_t		size_type;
 		typedef std::ptrdiff_t	difference_type;
 
-		typedef SharedPtr<tree<T> >							ChildType;
-		typedef std::vector<ChildType, alloc<ChildType> >	ChildrenType;
-		typedef typename ChildrenType::iterator				ChildIterator;
+		typedef SharedPtr<tree<T> >					ChildType;
+		typedef std::vector<ChildType>				ChildrenType;
+		typedef typename ChildrenType::iterator		ChildIterator;
 
 	private:
 		T				m_Root;

@@ -47,9 +47,9 @@ namespace KlayGE
 
 	// Éè±¸Ãû³Æ
 	//////////////////////////////////////////////////////////////////////////////////
-	const WString& DInputMouse::Name() const
+	const std::wstring& DInputMouse::Name() const
 	{
-		static WString name(L"DirectInput Mouse");
+		static std::wstring name(L"DirectInput Mouse");
 		return name;
 	}
 

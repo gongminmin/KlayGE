@@ -15,7 +15,6 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Texture.hpp>
-#include <KlayGE/alloc.hpp>
 
 #include <vector>
 
@@ -48,7 +47,7 @@ namespace KlayGE
 
 	private:
 		KlayTXHeader header_;
-		std::vector<U8, alloc<U8> > data_;
+		std::vector<U8> data_;
 	};
 }
 

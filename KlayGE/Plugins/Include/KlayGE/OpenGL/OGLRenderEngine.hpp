@@ -1,8 +1,6 @@
 #ifndef _OGLRENDERENGINE_HPP
 #define _OGLRENDERENGINE_HPP
 
-#include <KlayGE/alloc.hpp>
-
 #include <vector>
 
 #define NOMINMAX
@@ -21,7 +19,7 @@ namespace KlayGE
 		OGLRenderEngine();
 		~OGLRenderEngine();
 
-		const WString& Name() const;
+		const std::wstring& Name() const;
 
 		void ClearColor(const Color& clr);
 
@@ -30,7 +28,7 @@ namespace KlayGE
 		void EnableLighting(bool enabled);
 		void AmbientLight(const Color& col);
 
-		RenderWindowPtr CreateRenderWindow(const String &name, const RenderSettings& settings);
+		RenderWindowPtr CreateRenderWindow(const std::string& name, const RenderSettings& settings);
 
 		void CullingMode(CullMode mode);
 

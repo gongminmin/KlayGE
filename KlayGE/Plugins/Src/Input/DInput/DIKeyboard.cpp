@@ -38,9 +38,9 @@ namespace KlayGE
 
 	// Éè±¸Ãû³Æ
 	//////////////////////////////////////////////////////////////////////////////////
-	const WString& DInputKeyboard::Name() const
+	const std::wstring& DInputKeyboard::Name() const
 	{
-		static WString name(L"DirectInput Keyboard");
+		static std::wstring name(L"DirectInput Keyboard");
 		return name;
 	}
 

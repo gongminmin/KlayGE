@@ -31,11 +31,11 @@ namespace KlayGE
 
 		void Assign(const void* src, size_t numVertices, size_t stride = 0);
 
-		const std::vector<U8, alloc<U8> >& OGLBuffer() const
+		const std::vector<U8>& OGLBuffer() const
 			{ return buffer_; }
 
 	protected:
-		std::vector<U8, alloc<U8> > buffer_;
+		std::vector<U8> buffer_;
 	};
 }
 

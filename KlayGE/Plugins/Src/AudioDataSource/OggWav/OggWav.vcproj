@@ -59,15 +59,11 @@
 			IntermediateDirectory="..\..\..\..\Release"
 			ConfigurationType="4"
 			CharacterSet="1"
-			WholeProgramOptimization="TRUE">
+			WholeProgramOptimization="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
-				GlobalOptimizations="TRUE"
-				InlineFunctionExpansion="1"
-				OmitFramePointers="TRUE"
 				OptimizeForProcessor="3"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;STRICT"
-				StringPooling="TRUE"
 				BufferSecurityCheck="FALSE"
 				TreatWChar_tAsBuiltInType="TRUE"
 				ForceConformanceInForLoopScope="TRUE"

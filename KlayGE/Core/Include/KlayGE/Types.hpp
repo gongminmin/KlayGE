@@ -13,9 +13,6 @@
 #ifndef _TYPES_HPP
 #define _TYPES_HPP
 
-#include <string>
-#include <KlayGE/alloc.hpp>
-
 namespace KlayGE
 {
 	#ifndef _WCHAR_T_DEFINED
@@ -33,9 +30,6 @@ namespace KlayGE
 	typedef int					S32;
 	typedef short				S16;
 	typedef char				S8;
-
-	typedef std::basic_string<char, std::char_traits<char>, alloc<char> > String;
-	typedef std::basic_string<wchar_t, std::char_traits<wchar_t>, alloc<wchar_t> > WString;
 
 	typedef U32 FourCC;
 

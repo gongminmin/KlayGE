@@ -1,9 +1,7 @@
 #ifndef _D3D9RENDERENGINE_HPP
 #define _D3D9RENDERENGINE_HPP
 
-#include <KlayGE/alloc.hpp>
 #include <KlayGE/COMPtr.hpp>
-#include <KlayGE/array.hpp>
 #include <KlayGE/D3D9/D3D9AdapterList.hpp>
 
 #define NOMINMAX
@@ -29,7 +27,7 @@ namespace KlayGE
 		D3D9RenderEngine();
 		~D3D9RenderEngine();
 
-		const WString& Name() const;
+		const std::wstring& Name() const;
 
 		const COMPtr<IDirect3D9>& D3D() const;
 		const COMPtr<IDirect3DDevice9>& D3DDevice() const;
@@ -41,7 +39,7 @@ namespace KlayGE
 		void EnableLighting(bool enabled);
 		void AmbientLight(const Color& col);
 
-		RenderWindowPtr CreateRenderWindow(const String &name, const RenderSettings& settings);
+		RenderWindowPtr CreateRenderWindow(const std::string& name, const RenderSettings& settings);
 
 		void CullingMode(CullMode mode);
 
@@ -119,7 +117,7 @@ namespace KlayGE
 		D3DCOLOR clearClr_;
 		U32 clearFlags_;
 
-		typedef std::vector<D3DVERTEXELEMENT9, alloc<D3DVERTEXELEMENT9> > VertexDeclType;
+		typedef std::vector<D3DVERTEXELEMENT9> VertexDeclType;
 		VertexDeclType currentDecl_;
 		COMPtr<IDirect3DVertexDeclaration9> currentVertexDecl_;
 	};

@@ -25,7 +25,7 @@ namespace KlayGE
 {
 	// 把一个WString转化为String
 	/////////////////////////////////////////////////////////////////////////////////
-	String& Convert(String& dest, const WString& src)
+	std::string& Convert(std::string& dest, const std::wstring& src)
 	{
 #ifdef WIN32
 		std::vector<char> vecTemp(::WideCharToMultiByte(CP_ACP, 0, src.c_str(), -1,
@@ -41,7 +41,7 @@ namespace KlayGE
 
 	// 把一个String转化为String
 	/////////////////////////////////////////////////////////////////////////////////
-	String& Convert(String& dest, const String& src)
+	std::string& Convert(std::string& dest, const std::string& src)
 	{
 		dest = src;
 
@@ -50,7 +50,7 @@ namespace KlayGE
 
 	// 把一个String转化为WString
 	/////////////////////////////////////////////////////////////////////////////////
-	WString& Convert(WString& dest, const String& src)
+	std::wstring& Convert(std::wstring& dest, const std::string& src)
 	{
 #ifdef WIN32
 		std::vector<wchar_t> vecTemp(::MultiByteToWideChar(CP_ACP, 0, src.c_str(), -1, NULL, 0) - 1);
@@ -65,7 +65,7 @@ namespace KlayGE
 
 	// 把一个WString转化为WString
 	/////////////////////////////////////////////////////////////////////////////////
-	WString& Convert(WString& dest, const WString& src)
+	std::wstring& Convert(std::wstring& dest, const std::wstring& src)
 	{
 		dest = src;
 

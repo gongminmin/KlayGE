@@ -119,7 +119,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	size_t MemFile::CopyFrom(VFile& src, size_t size)
 	{
-		vector<U8, alloc<U8> > data(size);
+		vector<U8> data(size);
 		size = src.Read(&data[0], data.size());
 		return this->Write(&data[0], size);
 	}

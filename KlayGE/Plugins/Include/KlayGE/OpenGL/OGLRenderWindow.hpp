@@ -1,6 +1,7 @@
 #ifndef _OGLRENDERWINDOW_HPP
 #define _OGLRENDERWINDOW_HPP
 
+#include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderWindow.hpp>
 
 #pragma comment(lib, "KlayGE_RenderEngine_OpenGL.lib")
@@ -12,7 +13,7 @@ namespace KlayGE
 	class OGLRenderWindow : public RenderWindow
 	{
 	public:
-		OGLRenderWindow(const String& name, const OGLRenderSettings& settings);
+		OGLRenderWindow(const std::string& name, const OGLRenderSettings& settings);
 		~OGLRenderWindow();
 
 		LRESULT MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -32,9 +33,9 @@ namespace KlayGE
 
 		HWND WindowHandle() const;
 
-		const WString& Description() const;
+		const std::wstring& Description() const;
 
-		void CustomAttribute(const String& name, void* pData);
+		void CustomAttribute(const std::string& name, void* pData);
 
 		bool RequiresTextureFlipping() const;
 
@@ -42,7 +43,7 @@ namespace KlayGE
 		void WindowMovedOrResized();
 
 	protected:
-		String	name_;
+		std::string	name_;
 
 		HWND	hWnd_;
 		HGLRC	hRC_;
@@ -55,7 +56,7 @@ namespace KlayGE
 		static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg,
 			WPARAM wParam, LPARAM lParam );
 
-		WString			description_;
+		std::wstring			description_;
 	};
 }
 

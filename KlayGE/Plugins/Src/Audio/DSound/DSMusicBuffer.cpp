@@ -105,7 +105,7 @@ namespace KlayGE
 		TIF(buffer_->Lock(fillSize_ * writePos_, fillSize_,
 			&lockedBuffer, &lockedBufferSize, NULL, NULL, 0));
 
-		std::vector<U8, alloc<U8> > data(fillSize_);
+		std::vector<U8> data(fillSize_);
 		data.resize(dataSource_->Read(&data[0], fillSize_));
 
 		if (data.size() > 0)
@@ -143,7 +143,7 @@ namespace KlayGE
 		TIF(buffer_->Lock(0, fillSize_ * fillCount_,
 			&lockedBuffer, &lockedBufferSize, NULL, NULL, 0));
 
-		std::vector<U8, alloc<U8> > data(fillSize_ * fillCount_);
+		std::vector<U8> data(fillSize_ * fillCount_);
 		data.resize(dataSource_->Read(&data[0], fillSize_ * fillCount_));
 
 		if (data.size() > 0)

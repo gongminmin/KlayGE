@@ -39,7 +39,7 @@ namespace KlayGE
 		App3DFramework();
 		virtual ~App3DFramework();
 
-		virtual void Create(const String& name, const RenderSettings& settings);
+		virtual void Create(const std::string& name, const RenderSettings& settings);
 
 		void Run();
 

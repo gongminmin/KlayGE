@@ -16,6 +16,8 @@ namespace KlayGE
 	class bintree;
 	template <typename T>
 	class tree;
+	class VFile;
+	typedef SharedPtr<VFile>	VFilePtr;
 
 	class Timer;
 
@@ -30,8 +32,12 @@ namespace KlayGE
 	template <typename T>
 	class Rect_T;
 	typedef Rect_T<float> Rect;
-	class Matrix4;
-	class Quaternion;
+	template <typename T>
+	class Matrix4_T;
+	typedef Matrix4_T<float> Matrix4;
+	template <typename T>
+	class Quaternion_T;
+	typedef Quaternion_T<float> Quaternion;
 	template <typename T>
 	class Plane_T;
 	typedef Plane_T<float> Plane;
@@ -90,16 +96,6 @@ namespace KlayGE
 	class CDAudio;
 	class AudioFactory;
 	typedef SharedPtr<AudioFactory> AudioFactoryPtr;
-
-	class CPUInfo;
-	class Crc32;
-	class Pkt;
-	class UnPkt;
-	class ResKeyManager;
-	class WaveFile;
-	typedef SharedPtr<WaveFile> WaveFilePtr;
-	class VFile;
-	typedef SharedPtr<VFile>	VFilePtr;
 
 	class App3DFramework;
 

@@ -13,7 +13,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/RenderFactory.hpp>
-#include <KlayGE/alloc.hpp>
 #include <KlayGE/OpenGL/OGLRenderEngine.hpp>
 
 #include <vector>
@@ -83,7 +82,7 @@ namespace KlayGE
 	}
 
 
-	OGLVertexShader::OGLVertexShader(const String& src, const String& functionName, const String& profile)
+	OGLVertexShader::OGLVertexShader(const std::string& src, const std::string& functionName, const std::string& profile)
 	{
 		vertexProgram_ = cgCreateProgram(GetCGcontext(),
 							CG_SOURCE, src.c_str(), CG_PROFILE_ARBVP1,
@@ -102,7 +101,7 @@ namespace KlayGE
 		cgGLBindProgram(vertexProgram_);
 	}
 
-	ShaderParameterPtr OGLVertexShader::GetNamedParameter(const String& name)
+	ShaderParameterPtr OGLVertexShader::GetNamedParameter(const std::string& name)
 	{
 		return ShaderParameterPtr(new OGLShaderParameter(cgGetNamedParameter(vertexProgram_, name.c_str())));
 	}
@@ -113,7 +112,7 @@ namespace KlayGE
 	}
 
 	
-	OGLPixelShader::OGLPixelShader(const String& src, const String& functionName, const String& profile)
+	OGLPixelShader::OGLPixelShader(const std::string& src, const std::string& functionName, const std::string& profile)
 	{
 		pixelProgram_ = cgCreateProgram(GetCGcontext(),
 							CG_SOURCE, src.c_str(), CG_PROFILE_ARBFP1,
@@ -132,7 +131,7 @@ namespace KlayGE
 		cgGLBindProgram(pixelProgram_);
 	}
 
-	ShaderParameterPtr OGLPixelShader::GetNamedParameter(const String& name)
+	ShaderParameterPtr OGLPixelShader::GetNamedParameter(const std::string& name)
 	{
 		return ShaderParameterPtr(new OGLShaderParameter(cgGetNamedParameter(pixelProgram_, name.c_str())));
 	}

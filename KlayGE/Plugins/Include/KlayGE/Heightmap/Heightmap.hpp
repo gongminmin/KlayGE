@@ -14,8 +14,7 @@
 #define _HEIGHTMAP_HPP
 
 #include <vector>
-#include <KlayGE/alloc.hpp>
-#include <KlayGE/MathTypes.hpp>
+#include <KlayGE/Vector3.hpp>
 
 namespace KlayGE
 {
@@ -26,7 +25,7 @@ namespace KlayGE
 	public:
 		template <typename HeightFunc>
 		void Terrain(float startX, float startY, float width, float height, float spanX, float spanY,
-			std::vector<Vector3, alloc<Vector3> >& vertices, std::vector<U16, alloc<U16> >& indices,
+			std::vector<Vector3>& vertices, std::vector<U16>& indices,
 			HeightFunc& Height)
 		{
 			vertices.clear();
@@ -38,7 +37,7 @@ namespace KlayGE
 				{
 					Vector3 vec(MakeVector(x, y, Height(x, y)));
 
-					std::vector<Vector3, alloc<Vector3> >::iterator iter(std::find(vertices.begin(), vertices.end(), vec));
+					std::vector<Vector3>::iterator iter(std::find(vertices.begin(), vertices.end(), vec));
 					if (iter == vertices.end())
 					{
 						indices.push_back(vertices.size());

@@ -5,7 +5,6 @@
 
 #include <KlayGE/COMPtr.hpp>
 #include <KlayGE/SharedPtr.hpp>
-#include <KlayGE/alloc.hpp>
 #include <KlayGE/D3D9/D3D9Adapter.hpp>
 
 #pragma comment(lib, "KlayGE_RenderEngine_D3D9.lib")
@@ -26,7 +25,7 @@ namespace KlayGE
 		void CurrentAdapterIndex(U32 index);
 
 	private:
-		std::vector<D3D9Adapter, alloc<D3D9Adapter> > adapters_;
+		std::vector<D3D9Adapter> adapters_;
 		U32			currentAdapter_;
 	};
 

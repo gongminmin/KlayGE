@@ -14,7 +14,7 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
-#include <KlayGE/D3D9/D3D9Texture.hpp>
+#include <KlayGE/OpenGL/OGLTexture.hpp>
 
 #include <cassert>
 
@@ -22,7 +22,7 @@
 
 namespace KlayGE
 {
-	OGLRenderEffect::OGLRenderEffect(const String& srcData, UINT flags)
+	OGLRenderEffect::OGLRenderEffect(const std::string& srcData, UINT flags)
 	{
 	}
 
@@ -39,90 +39,90 @@ namespace KlayGE
 	{
 	}
 
-	void OGLRenderEffect::SetValue(const String& name, const void* data, UINT bytes)
+	void OGLRenderEffect::SetValue(const std::string& name, const void* data, UINT bytes)
 	{
 	}
 
-	void* OGLRenderEffect::GetValue(const String& name, UINT bytes) const
+	void* OGLRenderEffect::GetValue(const std::string& name, UINT bytes) const
 	{
 		return NULL;
 	}
 
-	void OGLRenderEffect::SetFloat(const String& name, float value)
+	void OGLRenderEffect::SetFloat(const std::string& name, float value)
 	{
 	}
 
-	float OGLRenderEffect::GetFloat(const String& name) const
+	float OGLRenderEffect::GetFloat(const std::string& name) const
 	{
 		return 0;
 	}
 
-	void OGLRenderEffect::SetVector(const String& name, const Vector4& value)
+	void OGLRenderEffect::SetVector(const std::string& name, const Vector4& value)
 	{
 	}
 
-	Vector4 OGLRenderEffect::GetVector(const String& name) const
+	Vector4 OGLRenderEffect::GetVector(const std::string& name) const
 	{
 		return Vector4::Zero();
 	}
 
-	void OGLRenderEffect::SetMatrix(const String& name, const Matrix4& value)
+	void OGLRenderEffect::SetMatrix(const std::string& name, const Matrix4& value)
 	{
 	}
 
-	Matrix4 OGLRenderEffect::GetMatrix(const String& name) const
+	Matrix4 OGLRenderEffect::GetMatrix(const std::string& name) const
 	{
 		return Matrix4::Identity();
 	}
 
-	void OGLRenderEffect::SetMatrixArray(const String& name, const std::vector<Matrix4, alloc<Matrix4> >& matrices)
+	void OGLRenderEffect::SetMatrixArray(const std::string& name, const Matrix4* matrices, size_t count)
 	{
 	}
 
-	void OGLRenderEffect::GetMatrixArray(const String& name, std::vector<Matrix4, alloc<Matrix4> >& matrices)
+	void OGLRenderEffect::GetMatrixArray(const std::string& name, Matrix4* matrices, size_t count)
 	{
 	}	
 
-	void OGLRenderEffect::SetInt(const String& name, int value)
+	void OGLRenderEffect::SetInt(const std::string& name, int value)
 	{
 	}
 
-	int OGLRenderEffect::GetInt(const String& name) const
+	int OGLRenderEffect::GetInt(const std::string& name) const
 	{
 		return 0;
 	}
 
-	void OGLRenderEffect::SetBool(const String& name, bool value)
+	void OGLRenderEffect::SetBool(const std::string& name, bool value)
 	{
 	}
 
-	bool OGLRenderEffect::GetBool(const String& name) const
+	bool OGLRenderEffect::GetBool(const std::string& name) const
 	{
 		return false;
 	}
 
-	void OGLRenderEffect::SetString(const String& name, const String& value)
+	void OGLRenderEffect::SetString(const std::string& name, const std::string& value)
 	{
 	}
 
-	String OGLRenderEffect::GetString(const String& name) const
+	std::string OGLRenderEffect::GetString(const std::string& name) const
 	{
-		return String();
+		return std::string();
 	}
 
-	void OGLRenderEffect::SetTexture(const String& name, const TexturePtr& tex)
-	{
-	}
-
-	void OGLRenderEffect::SetVertexShader(const String& name, const VertexShaderPtr& vs)
+	void OGLRenderEffect::SetTexture(const std::string& name, const TexturePtr& tex)
 	{
 	}
 
-	void OGLRenderEffect::SetPixelShader(const String& name, const PixelShaderPtr& ps)
+	void OGLRenderEffect::SetVertexShader(const std::string& name, const VertexShaderPtr& vs)
 	{
 	}
 
-	void OGLRenderEffect::SetTechnique(const String& technique)
+	void OGLRenderEffect::SetPixelShader(const std::string& name, const PixelShaderPtr& ps)
+	{
+	}
+
+	void OGLRenderEffect::SetTechnique(const std::string& technique)
 	{
 	}
 

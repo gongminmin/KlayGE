@@ -13,6 +13,9 @@
 
 #include <python.h>
 #include <vector>
+#include <string>
+
+#include <boost/utility.hpp>
 
 #include <KlayGE/ResPtr.hpp>
 
@@ -71,19 +74,19 @@ namespace KlayGE
 	class ScriptModule
 	{
 	public:
-		ScriptModule(const String& name)
+		ScriptModule(const std::string& name)
 		{
 			module_	= PyObjectPtr(PyImport_Import(PyString_FromString(name.c_str())));
 			dict_	= PyObjectPtr(PyModule_GetDict(module_.Get()));
 		}
 
-		PyObjectPtr Value(const String& name)
+		PyObjectPtr Value(const std::string& name)
 		{
 			return PyObjectPtr(PyDict_GetItemString(dict_.Get(), name.c_str()));
 		}
 
 		template <typename ForwardIterator>
-		PyObjectPtr Call(const String& funcName, ForwardIterator first, ForwardIterator last)
+		PyObjectPtr Call(const std::string& funcName, ForwardIterator first, ForwardIterator last)
 		{
 			PyObjectPtr func(this->Value(funcName));
 			PyObjectPtr args(PyTuple_New(last - first));
@@ -117,38 +120,34 @@ namespace KlayGE
 	public:
 		typedef PyObject *(*PyCallback)(PyObject*, PyObject*);
 
-		RegisterModule(const String& name)
+		RegisterModule(const std::string& name)
 			: moduleName_(name)
 			{ }
 
-		const String& Name() const
+		const std::string& Name() const
 			{ return moduleName_;}
 
-		void AddMethod(const String& methodName, PyCallback method);
+		void AddMethod(const std::string& methodName, PyCallback method);
 		void Regiter();
 
 	protected:
-		String moduleName_;
+		std::string moduleName_;
 
-		std::vector<PyMethodDef, alloc<PyMethodDef> >	methods_;
-		std::vector<String, alloc<String> >				methodNames_;
+		std::vector<PyMethodDef>	methods_;
+		std::vector<std::string>	methodNames_;
 	};
 
 
 	// 实现脚本引擎的功能
 	/////////////////////////////////////////////////////////////////////////////////
-	class ScriptEngine
+	class ScriptEngine : boost::noncopyable
 	{
 	public:
 		ScriptEngine();
 		~ScriptEngine();
 
 		// 从字符串运行脚本
-		void ExecString(const String& script);
-
-	private:
-		ScriptEngine(const ScriptEngine&);
-		ScriptEngine& operator=(const ScriptEngine&);
+		void ExecString(const std::string& script);
 	};
 }
 

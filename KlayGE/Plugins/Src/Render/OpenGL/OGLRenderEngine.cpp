@@ -227,9 +227,9 @@ namespace KlayGE
 
 	// 返回渲染系统的名字
 	/////////////////////////////////////////////////////////////////////////////////
-	const WString& OGLRenderEngine::Name() const
+	const std::wstring& OGLRenderEngine::Name() const
 	{
-		static WString name(L"OpenGL Render System");
+		static std::wstring name(L"OpenGL Render System");
 		return name;
 	}
 
@@ -325,7 +325,7 @@ namespace KlayGE
 
 	// 建立渲染窗口
 	/////////////////////////////////////////////////////////////////////////////////
-	RenderWindowPtr OGLRenderEngine::CreateRenderWindow(const String& name,
+	RenderWindowPtr OGLRenderEngine::CreateRenderWindow(const std::string& name,
 		const RenderSettings& settings)
 	{
 		RenderWindowPtr win(new OGLRenderWindow(name,
@@ -532,7 +532,7 @@ namespace KlayGE
 			OGLVertexStream& stream(static_cast<OGLVertexStream&>(*(*iter)));
 			VertexStreamType type(stream.Type());
 
-			const std::vector<U8, alloc<U8> >& data(stream.OGLBuffer());
+			const std::vector<U8>& data(stream.OGLBuffer());
 
 			switch (type)
 			{
@@ -598,7 +598,7 @@ namespace KlayGE
 		if (vb.UseIndices())
 		{
 			OGLIndexStream& stream(static_cast<OGLIndexStream&>(*vb.GetIndexStream()));
-			const std::vector<U16, alloc<U16> >& data(stream.OGLBuffer());
+			const std::vector<U16>& data(stream.OGLBuffer());
 			glDrawElements(mode, static_cast<GLsizei>(vb.NumIndices()),
 				GL_UNSIGNED_SHORT, &data[0]);
 		}

@@ -40,7 +40,7 @@ namespace KlayGE
 		static VertexShaderPtr NullObject();
 
 		virtual void Active() = 0;
-		virtual ShaderParameterPtr GetNamedParameter(const String& name) = 0;
+		virtual ShaderParameterPtr GetNamedParameter(const std::string& name) = 0;
 	};
 
 	class PixelShader
@@ -52,14 +52,14 @@ namespace KlayGE
 		static PixelShaderPtr NullObject();
 
 		virtual void Active() = 0;
-		virtual ShaderParameterPtr GetNamedParameter(const String& name) = 0;
+		virtual ShaderParameterPtr GetNamedParameter(const std::string& name) = 0;
 	};
 
-	VertexShaderPtr LoadVertexShader(const String& shaderFileName,
-		const String& functionName, const String& profile,
+	VertexShaderPtr LoadVertexShader(const std::string& shaderFileName,
+		const std::string& functionName, const std::string& profile,
 		bool fromPack = false);
-	PixelShaderPtr LoadPixelShader(const String& shaderFileName,
-		const String& functionName, const String& profile,
+	PixelShaderPtr LoadPixelShader(const std::string& shaderFileName,
+		const std::string& functionName, const std::string& profile,
 		bool fromPack = false);
 }
 

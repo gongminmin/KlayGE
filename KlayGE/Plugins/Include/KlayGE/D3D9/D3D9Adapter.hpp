@@ -22,7 +22,7 @@ namespace KlayGE
 		void Enumerate(const COMPtr<IDirect3D9>& d3d);
 
 		// 访问设备描述字符串
-		const String Description() const;
+		const std::string Description() const;
 
 		U32 AdapterNo() const
 			{ return adapterNo_; }
@@ -45,7 +45,7 @@ namespace KlayGE
 		D3DDISPLAYMODE d3ddmDesktop_;		// 该适配器所用的桌面模式
 
 		// 显示模式列表
-		typedef std::vector<D3D9VideoMode, alloc<D3D9VideoMode> > ModeType;
+		typedef std::vector<D3D9VideoMode> ModeType;
 		ModeType modes_;
 	};
 }

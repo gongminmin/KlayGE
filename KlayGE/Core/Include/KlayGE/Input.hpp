@@ -19,11 +19,13 @@
 #include <KlayGE/PreDeclare.hpp>
 
 #include <KlayGE/SharedPtr.hpp>
-#include <KlayGE/array.hpp>
-#include <KlayGE/MathTypes.hpp>
+#include <KlayGE/Vector.hpp>
 #include <KlayGE/MapVector.hpp>
 
 #include <vector>
+#include <string>
+
+#include <boost/array.hpp>
 
 #pragma comment(lib, "KlayGE_Core.lib")
 
@@ -236,7 +238,7 @@ namespace KlayGE
 	};
 
 	typedef std::pair<U16, U16> InputAction;
-	typedef std::vector<std::pair<U16, long>, alloc<std::pair<U16, long> > > InputActionsType;
+	typedef std::vector<std::pair<U16, long> > InputActionsType;
 
 
 	// 输入动作格式
@@ -272,7 +274,7 @@ namespace KlayGE
 	public:
 		virtual ~InputEngine();
 
-		virtual const WString& Name() const = 0;
+		virtual const std::wstring& Name() const = 0;
 
 		virtual void EnumDevices() = 0;
 		void UnacquireDevices();
@@ -285,7 +287,7 @@ namespace KlayGE
 		InputDevicePtr Device(size_t index) const;
 
 	protected:
-		typedef std::vector<InputDevicePtr, alloc<InputDevicePtr> >	InputDevicesType;
+		typedef std::vector<InputDevicePtr>	InputDevicesType;
 		InputDevicesType	devices_;
 
 		InputActionMap		actionMap_;
@@ -296,7 +298,7 @@ namespace KlayGE
 	public:
 		virtual ~InputDevice();
 
-		virtual const WString& Name() const = 0;
+		virtual const std::wstring& Name() const = 0;
 
 		virtual InputActionsType Update() = 0;
 		void ActionMap(const InputActionMap& iaf);
@@ -323,7 +325,7 @@ namespace KlayGE
 		void DoActionMap(const InputActionMap& actionMap);
 
 	protected:
-		typedef array<bool, 256> KeysType;
+		typedef boost::array<bool, 256> KeysType;
 		KeysType keys_;
 	};
 
@@ -348,7 +350,7 @@ namespace KlayGE
 	protected:
 		Vector_T<long, 3> pos_;
 
-		typedef array<bool, 4> ButtonsType;
+		typedef boost::array<bool, 4> ButtonsType;
 		ButtonsType buttons_;
 	};
 
@@ -379,7 +381,7 @@ namespace KlayGE
 
 		Vector_T<long, 2> slider_;		// extra axes positions
 
-		typedef array<bool, 32> ButtonsType;
+		typedef boost::array<bool, 32> ButtonsType;
 		ButtonsType buttons_;	// 32 buttons
 	};
 }

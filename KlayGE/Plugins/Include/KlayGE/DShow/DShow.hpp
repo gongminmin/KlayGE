@@ -18,7 +18,10 @@
 #include <strmif.h>
 #include <control.h>
 #include <evcode.h>
+
 #include <string>
+
+#include <boost/utility.hpp>
 
 #pragma comment(lib, "KlayGE_ShowEngine_DShow.lib")
 
@@ -27,7 +30,7 @@ namespace KlayGE
 	const long OAFALSE = 0;
 	const long OATRUE  = -1;
 
-	class DShowEngine : public ShowEngine
+	class DShowEngine : boost::noncopyable, public ShowEngine
 	{
 	public:
 		DShowEngine();
@@ -35,7 +38,7 @@ namespace KlayGE
 
 		bool IsComplete();
 
-		void Load(const WString& fileName);
+		void Load(const std::wstring& fileName);
 
 		ShowState State(long msTimeout = -1);
 		void ToggleFullScreen();
@@ -58,10 +61,6 @@ namespace KlayGE
 		void DoPlay();
 		void DoStop();
 		void DoPause();
-
-	private:
-		DShowEngine(const DShowEngine& rhs);
-		DShowEngine& operator=(const DShowEngine& rhs);
 	};
 }
 

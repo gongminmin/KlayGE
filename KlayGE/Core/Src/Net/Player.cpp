@@ -138,7 +138,7 @@ namespace KlayGE
 			{
 				++ i;
 			}
-			lobbydes.Name = String(&buf[3], i);
+			lobbydes.Name = std::string(&buf[3], i);
 		}
 
 		return lobbydes;
@@ -146,7 +146,7 @@ namespace KlayGE
 
 	// ÉèÖÃÍæ¼ÒÃû×Ö
 	/////////////////////////////////////////////////////////////////////////////////
-	void Player::Name(const String& name)
+	void Player::Name(const std::string& name)
 	{
 		if (name.length() > 16)
 		{

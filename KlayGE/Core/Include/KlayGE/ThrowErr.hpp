@@ -13,6 +13,7 @@
 #ifndef _THROWERR_HPP
 #define _THROWERR_HPP
 
+#include <string>
 #include <exception>
 
 #define NOMINMAX
@@ -23,12 +24,12 @@ namespace KlayGE
 	class Exception : public std::exception
 	{
 	public:
-		Exception(const String& errFile, U32 errLine, U32 errCode, const String& msg) throw()
+		Exception(const std::string& errFile, U32 errLine, U32 errCode, const std::string& msg) throw()
 			: errFile_(errFile), errLine_(errLine),
 				errCode_(errCode), msg_(msg)
 			{ }
 
-		const String& ErrorFile() const throw()
+		const std::string& ErrorFile() const throw()
 			{ return errFile_; }
 		U32 ErrorLine() const throw()
 			{ return errLine_; }
@@ -39,11 +40,11 @@ namespace KlayGE
 			{ return msg_.c_str(); }
 
 	public:
-		String errFile_;
+		std::string errFile_;
 		U32 errLine_;
 
 		U32 errCode_;
-		String msg_;
+		std::string msg_;
 	};
 }
 

@@ -17,7 +17,7 @@
 #define _AUDIO_HPP
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/MathTypes.hpp>
+#include <KlayGE/Vector.hpp>
 
 #include <map>
 
@@ -114,7 +114,7 @@ namespace KlayGE
 
 		static AudioEnginePtr NullObject();
 
-		virtual const WString& Name() const = 0;
+		virtual const std::wstring& Name() const = 0;
 
 		void AddBuffer(size_t id, const AudioBufferPtr& buffer);
 

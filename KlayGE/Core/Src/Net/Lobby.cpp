@@ -52,7 +52,7 @@ namespace KlayGE
 
 	// 建立游戏大厅
 	/////////////////////////////////////////////////////////////////////////////////
-	void Lobby::Create(const String& Name, char maxPlayers, U16 port, const Processer& pro)
+	void Lobby::Create(const std::string& Name, char maxPlayers, U16 port, const Processer& pro)
 	{
 		this->LobbyName(Name);
 
@@ -122,7 +122,7 @@ namespace KlayGE
 
 	// 设置大厅名称
 	/////////////////////////////////////////////////////////////////////////////////
-	void Lobby::LobbyName(const String& name)
+	void Lobby::LobbyName(const std::string& name)
 	{
 		if (name.length() > 16)
 		{
@@ -136,7 +136,7 @@ namespace KlayGE
 
 	// 获取大厅名称
 	/////////////////////////////////////////////////////////////////////////////////
-	const String& Lobby::LobbyName() const
+	const std::string& Lobby::LobbyName() const
 	{
 		return this->name_;
 	}
@@ -201,7 +201,7 @@ namespace KlayGE
 				{
 					++ i;
 				}
-				String name(&revBuf[0], i);
+				std::string name(&revBuf[0], i);
 				iter->ID	= id;
 				iter->Name	= name;
 				iter->Addr	= from;

@@ -20,12 +20,12 @@
 #ifndef _RENDERENGINE_HPP
 #define _RENDERENGINE_HPP
 
-#include <KlayGE/KlayGE.hpp>
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderTarget.hpp>
 #include <KlayGE/Texture.hpp>
-#include <KlayGE/MathTypes.hpp>
+#include <KlayGE/Color.hpp>
 #include <KlayGE/SharedPtr.hpp>
+#include <KlayGE/Matrix.hpp>
 
 #include <vector>
 #include <list>
@@ -140,7 +140,7 @@ namespace KlayGE
 		RenderEngine();
 		virtual ~RenderEngine();
 
-		virtual const WString& Name() const = 0;
+		virtual const std::wstring& Name() const = 0;
 
 		virtual void StartRendering() = 0;
 
@@ -158,7 +158,7 @@ namespace KlayGE
 		virtual void EnableLighting(bool enabled) = 0;
 		virtual void AmbientLight(const Color& col) = 0;
 
-		virtual RenderWindowPtr CreateRenderWindow(const String &name, const RenderSettings& settings) = 0;
+		virtual RenderWindowPtr CreateRenderWindow(const std::string& name, const RenderSettings& settings) = 0;
 
 		virtual void CullingMode(CullMode mode) = 0;
 		virtual void SetMaterial(const Material& mat) = 0;

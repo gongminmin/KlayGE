@@ -66,9 +66,9 @@ namespace KlayGE
 
 	// Éè±¸Ãû³Æ
 	//////////////////////////////////////////////////////////////////////////////////
-	const WString& DInputJoystick::Name() const
+	const std::wstring& DInputJoystick::Name() const
 	{
-		static WString name(L"DirectInput Joystick");
+		static std::wstring name(L"DirectInput Joystick");
 		return name;
 	}
 

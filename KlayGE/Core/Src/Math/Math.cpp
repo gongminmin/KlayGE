@@ -1,24 +1,17 @@
 // Math.hpp
 // KlayGE 数学函数库 实现文件
-// Ver 1.4.8.5
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.1.0
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
 //
-// 1.3.8.2
-// 初次建立 (2003.1.2)
-//
-// 1.3.8.3
-// 优化了结构 (2003.1.7)
-//
-// 1.4.8.5
-// 增加了MathInterface (2003.4.20)
+// 2.1.0
+// 去掉了汇编代码 (2004.4.18)
 //
 // 修改记录
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
 
-#include <ctime>
 #include <cstdlib>
 
 #include <KlayGE/Math.hpp>
@@ -122,43 +115,6 @@ namespace KlayGE
 			return lhs.x() * rhs.y() - lhs.y() * rhs.x();
 		}
 
-		Vector2& BaryCentric(Vector2& out, const Vector2& v1,
-			const Vector2& v2, const Vector2& v3,
-			float f, float g)
-		{
-			out = v1 + f * (v2 - v1) + g * (v3 - v1);
-			return out;
-		}
-
-		Vector2& Normalize(Vector2& out, const Vector2& rhs)
-		{
-			out = rhs / Length(rhs);
-			return out;
-		}
-
-		Vector4& Transform(Vector4& out, const Vector2& v, const Matrix4& mat)
-		{
-			out = MakeVector(v.x() * mat(0, 0) + v.y() * mat(1, 0) + mat(3, 0),
-				v.x() * mat(0, 1) + v.y() * mat(1, 1) + mat(3, 1),
-				v.x() * mat(0, 2) + v.y() * mat(1, 2) + mat(3, 2),
-				v.x() * mat(0, 3) + v.y() * mat(1, 3) + mat(3, 3));
-			return out;
-		}
-
-		Vector2& TransformCoord(Vector2& out, const Vector2& v, const Matrix4& mat)
-		{
-			out = MakeVector(v.x() * mat(0, 0) + v.y() * mat(1, 0) + mat(3, 0),
-				v.x() * mat(0, 1) + v.y() * mat(1, 1) + mat(3, 1));
-			return out;
-		}
-
-		Vector2& TransformNormal(Vector2& out, const Vector2& v, const Matrix4& mat)
-		{
-			out = MakeVector(v.x() * mat(0, 0) + v.y() * mat(1, 0),
-				v.x() * mat(0, 1) + v.y() * mat(1, 1));
-			return out;
-		}
-
 
 		// 3D 向量
 		///////////////////////////////////////////////////////////////////////////////
@@ -166,53 +122,6 @@ namespace KlayGE
 		float Angle(const Vector3& lhs, const Vector3& rhs)
 		{
 			return ACos(Dot(lhs, rhs) / (Length(lhs) * Length(rhs)));
-		}
-
-		Vector3& BaryCentric(Vector3& out, const Vector3& v1,
-			const Vector3& v2, const Vector3& v3,
-			float f, float g)
-		{
-			out = v1 + f * (v2 - v1) + g * (v3 - v1);
-			return out;
-		}
-
-		Vector3& Normalize(Vector3& out, const Vector3& rhs)
-		{
-			out = rhs / Length(rhs);
-			return out;
-		}
-
-		Vector3& Cross(Vector3& out, const Vector3& lhs, const Vector3& rhs)
-		{
-			out = MakeVector(lhs.y() * rhs.z() - lhs.z() * rhs.y(),
-				lhs.z() * rhs.x() - lhs.x() * rhs.z(),
-				lhs.x() * rhs.y() - lhs.y() * rhs.x());
-			return out;
-		}
-
-		Vector4& Transform(Vector4& out, const Vector3& v, const Matrix4& mat)
-		{
-			out = MakeVector(v.x() * mat(0, 0) + v.y() * mat(1, 0) + v.z() * mat(2, 0) + mat(3, 0),
-				v.x() * mat(0, 1) + v.y() * mat(1, 1) + v.z() * mat(2, 1) + mat(3, 1),
-				v.x() * mat(0, 2) + v.y() * mat(1, 2) + v.z() * mat(2, 2) + mat(3, 2),
-				v.x() * mat(0, 3) + v.y() * mat(1, 3) + v.z() * mat(2, 3) + mat(3, 3));
-			return out;
-		}
-
-		Vector3& TransformCoord(Vector3& out, const Vector3& v, const Matrix4& mat)
-		{
-			out = MakeVector(v.x() * mat(0, 0) + v.y() * mat(1, 0) + v.z() * mat(2, 0) + mat(3, 0),
-				v.x() * mat(0, 1) + v.y() * mat(1, 1) + v.z() * mat(2, 1) + mat(3, 1),
-				v.x() * mat(0, 2) + v.y() * mat(1, 2) + v.z() * mat(2, 2) + mat(3, 2));
-			return out;
-		}
-
-		Vector3& TransformNormal(Vector3& out, const Vector3& v, const Matrix4& mat)
-		{
-			out = MakeVector(v.x() * mat(0, 0) + v.y() * mat(1, 0) + v.z() * mat(2, 0),
-				v.x() * mat(0, 1) + v.y() * mat(1, 1) + v.z() * mat(2, 1),
-				v.x() * mat(0, 2) + v.y() * mat(1, 2) + v.z() * mat(2, 2));
-			return out;
 		}
 
 		Vector3& TransQuat(Vector3& out, const Vector3& v, const Quaternion& q)
@@ -240,11 +149,13 @@ namespace KlayGE
 			const Matrix4& world, const Matrix4& view, const Matrix4& proj,
 			const int viewport[4], float nearPlane, float farPlane)
 		{
-			TransformCoord(out, objVec, world * view * proj);
+			Vector4 temp;
+			Transform<float, 3>(temp, objVec, world * view * proj);
+			temp /= temp.w();
 
-			out.x() = (out.x() + 1) * viewport[2] / 2 + viewport[0];
-			out.y() = (-out.y() + 1) * viewport[3] / 2 + viewport[1];
-			out.z() = (out.z() + 1) * (farPlane - nearPlane) / 2 + nearPlane;
+			out.x() = (temp.x() + 1) * viewport[2] / 2 + viewport[0];
+			out.y() = (-temp.y() + 1) * viewport[3] / 2 + viewport[1];
+			out.z() = (temp.z() + 1) * (farPlane - nearPlane) / 2 + nearPlane;
 
 			return out;
 		}
@@ -253,26 +164,24 @@ namespace KlayGE
 			const Matrix4& world, const Matrix4& view, const Matrix4& proj,
 			const int viewport[4], float nearPlane, float farPlane)
 		{
-			out.x() = 2 * (winVec.x() - viewport[0]) / viewport[2] - 1;
-			out.y() = -(2 * (winVec.y() - viewport[1]) / viewport[3] - 1);
-			out.z() = 2 * (winVec.z() - nearPlane) / (farPlane - nearPlane) - 1;
+			Vector4 temp;
+			temp.x() = 2 * (winVec.x() - viewport[0]) / viewport[2] - 1;
+			temp.y() = -(2 * (winVec.y() - viewport[1]) / viewport[3] - 1);
+			temp.z() = 2 * (winVec.z() - nearPlane) / (farPlane - nearPlane) - 1;
+			temp.w() = 1;
+
+			temp *= clipW;
 
 			Matrix4 mat;
 			Inverse(mat, world * view * proj);
-			return TransformCoord(out, out, mat);
+			Transform(temp, temp, mat);
+			out = MakeVector(temp.x() / temp.w(), temp.y() / temp.w(), temp.z() / temp.w());
+			return out;
 		}
 
 
 		// 4D 向量
 		///////////////////////////////////////////////////////////////////////////////
-
-		Vector4& BaryCentric(Vector4& out, const Vector4& v1,
-			const Vector4& v2, const Vector4& v3,
-			float f, float g)
-		{
-			out = v1 + f * (v2 - v1) + g * (v3 - v1);
-			return out;
-		}
 
 		Vector4& Cross(Vector4& out, const Vector4& v1, const Vector4& v2, const Vector4& v3)
 		{
@@ -287,21 +196,6 @@ namespace KlayGE
 				-(v1.x() * F) + (v1.z() * C) - (v1.w() * B),
 				(v1.x() * E) - (v1.y() * C) + (v1.w() * A),
 				-(v1.x() * D) + (v1.y() * B) - (v1.z() * A));
-			return out;
-		}
-
-		Vector4& Normalize(Vector4& out, const Vector4& rhs)
-		{
-			out = rhs / Length(rhs);
-			return out;
-		}
-
-		Vector4& Transform(Vector4& out, const Vector4& v, const Matrix4& mat)
-		{
-			out = MakeVector(v.x() * mat(0, 0) + v.y() * mat(1, 0) + v.z() * mat(2, 0) + v.w() * mat(3, 0),
-				v.x() * mat(0, 1) + v.y() * mat(1, 1) + v.z() * mat(2, 1) + v.w() * mat(3, 1),
-				v.x() * mat(0, 2) + v.y() * mat(1, 2) + v.z() * mat(2, 2) + v.w() * mat(3, 2),
-				v.x() * mat(0, 3) + v.y() * mat(1, 3) + v.z() * mat(2, 3) + v.w() * mat(3, 3));
 			return out;
 		}
 
@@ -416,32 +310,35 @@ namespace KlayGE
 
 			// 行列式的值
 			const float det(Determinant(rhs));
-			float invDet(1.0f);
 			if (!Eq(det, 0.0f))
 			{
-				invDet = 1.0f / det;
+				float invDet(1.0f / det);
+
+				out = Matrix4(
+					+invDet * (rhs(1, 1) * _3344_3443 - rhs(1, 2) * _3244_3442 + rhs(1, 3) * _3243_3342),
+					-invDet * (rhs(0, 1) * _3344_3443 - rhs(0, 2) * _3244_3442 + rhs(0, 3) * _3243_3342),
+					+invDet * (rhs(0, 1) * _2344_2443 - rhs(0, 2) * _2244_2442 + rhs(0, 3) * _2243_2342),
+					-invDet * (rhs(0, 1) * _2334_2433 - rhs(0, 2) * _2234_2432 + rhs(0, 3) * _2233_2332),
+
+					-invDet * (rhs(1, 0) * _3344_3443 - rhs(1, 2) * _3144_3441 + rhs(1, 3) * _3143_3341),
+					+invDet * (rhs(0, 0) * _3344_3443 - rhs(0, 2) * _3144_3441 + rhs(0, 3) * _3143_3341),
+					-invDet * (rhs(0, 0) * _2344_2443 - rhs(0, 2) * _2144_2441 + rhs(0, 3) * _2143_2341),
+					+invDet * (rhs(0, 0) * _2334_2433 - rhs(0, 2) * _2134_2431 + rhs(0, 3) * _2133_2331),
+
+					+invDet * (rhs(1, 0) * _3244_3442 - rhs(1, 1) * _3144_3441 + rhs(1, 3) * _3142_3241),
+					-invDet * (rhs(0, 0) * _3244_3442 - rhs(0, 1) * _3144_3441 + rhs(0, 3) * _3142_3241),
+					+invDet * (rhs(0, 0) * _2244_2442 - rhs(0, 1) * _2144_2441 + rhs(0, 3) * _2142_2241),
+					-invDet * (rhs(0, 0) * _2234_2432 - rhs(0, 1) * _2134_2431 + rhs(0, 3) * _2132_2231),
+
+					-invDet * (rhs(1, 0) * _3243_3342 - rhs(1, 1) * _3143_3341 + rhs(1, 2) * _3142_3241),
+					+invDet * (rhs(0, 0) * _3243_3342 - rhs(0, 1) * _3143_3341 + rhs(0, 2) * _3142_3241),
+					-invDet * (rhs(0, 0) * _2243_2342 - rhs(0, 1) * _2143_2341 + rhs(0, 2) * _2142_2241),
+					+invDet * (rhs(0, 0) * _2233_2332 - rhs(0, 1) * _2133_2331 + rhs(0, 2) * _2132_2231));
 			}
-
-			out = Matrix4(
-				+invDet * (rhs(1, 1) * _3344_3443 - rhs(1, 2) * _3244_3442 + rhs(1, 3) * _3243_3342),
-				-invDet * (rhs(0, 1) * _3344_3443 - rhs(0, 2) * _3244_3442 + rhs(0, 3) * _3243_3342),
-				+invDet * (rhs(0, 1) * _2344_2443 - rhs(0, 2) * _2244_2442 + rhs(0, 3) * _2243_2342),
-				-invDet * (rhs(0, 1) * _2334_2433 - rhs(0, 2) * _2234_2432 + rhs(0, 3) * _2233_2332),
-
-				-invDet * (rhs(1, 0) * _3344_3443 - rhs(1, 2) * _3144_3441 + rhs(1, 3) * _3143_3341),
-				+invDet * (rhs(0, 0) * _3344_3443 - rhs(0, 2) * _3144_3441 + rhs(0, 3) * _3143_3341),
-				-invDet * (rhs(0, 0) * _2344_2443 - rhs(0, 2) * _2144_2441 + rhs(0, 3) * _2143_2341),
-				+invDet * (rhs(0, 0) * _2334_2433 - rhs(0, 2) * _2134_2431 + rhs(0, 3) * _2133_2331),
-
-				+invDet * (rhs(1, 0) * _3244_3442 - rhs(1, 1) * _3144_3441 + rhs(1, 3) * _3142_3241),
-				-invDet * (rhs(0, 0) * _3244_3442 - rhs(0, 1) * _3144_3441 + rhs(0, 3) * _3142_3241),
-				+invDet * (rhs(0, 0) * _2244_2442 - rhs(0, 1) * _2144_2441 + rhs(0, 3) * _2142_2241),
-				-invDet * (rhs(0, 0) * _2234_2432 - rhs(0, 1) * _2134_2431 + rhs(0, 3) * _2132_2231),
-
-				-invDet * (rhs(1, 0) * _3243_3342 - rhs(1, 1) * _3143_3341 + rhs(1, 2) * _3142_3241),
-				+invDet * (rhs(0, 0) * _3243_3342 - rhs(0, 1) * _3143_3341 + rhs(0, 2) * _3142_3241),
-				-invDet * (rhs(0, 0) * _2243_2342 - rhs(0, 1) * _2143_2341 + rhs(0, 2) * _2142_2241),
-				+invDet * (rhs(0, 0) * _2233_2332 - rhs(0, 1) * _2133_2331 + rhs(0, 2) * _2132_2231));
+			else
+			{
+				out = rhs;
+			}
 
 			return det;
 		}
@@ -634,26 +531,6 @@ namespace KlayGE
 				rhs(0, 2), rhs(1, 2), rhs(2, 2), rhs(3, 2),
 				rhs(0, 3), rhs(1, 3), rhs(2, 3), rhs(3, 3));
 
-			return out;
-		}
-
-		Matrix4& AffineTransformation(Matrix4& out, float fScaling,
-			const Vector3& vRotationCenter,
-			const Quaternion& qRotation,
-			const Vector3& vTranslation)
-		{
-			Matrix4 Ms;
-			Scaling(Ms, fScaling, fScaling, fScaling);
-			Matrix4 Mrc;
-			Translation(Mrc, vRotationCenter.x(), vRotationCenter.y(), vRotationCenter.z());
-			Matrix4 InvMrc;
-			Inverse(InvMrc, Mrc);
-			Matrix4 Mr;
-			ToMatrix(Mr, qRotation);
-			Matrix4 Mt;
-			Translation(Mt, vTranslation.x(), vTranslation.y(), vTranslation.z());
-
-			out = Ms * InvMrc * Mr * Mrc * Mt;
 			return out;
 		}
 
@@ -901,12 +778,6 @@ namespace KlayGE
 			return out;
 		}
 
-		Quaternion& Normalize(Quaternion& out, const Quaternion& rhs)
-		{
-			out = rhs / Length(rhs);
-			return out;
-		}
-
 		Quaternion& Multiply(Quaternion& out, const Quaternion& lhs,
 			const Quaternion& rhs)
 		{
@@ -1017,6 +888,13 @@ namespace KlayGE
 			return lhs.a() * rhs.x() + lhs.b() * rhs.y() + lhs.c() * rhs.z();
 		}
 
+		Plane& Normalize(Plane& out, const Plane& rhs)
+		{
+			const float inv(1 / Length(rhs));
+			out = Plane(rhs.a() * inv, rhs.b() * inv, rhs.c() * inv, rhs.d() * inv);
+			return out;
+		}
+
 		// 从三个点生成平面
 		Plane& FromPoints(Plane& out, const Vector3& v0, 
 			const Vector3& v1, const Vector3& v2)
@@ -1082,14 +960,6 @@ namespace KlayGE
 				P.a() * mat(0, 1) + P.b() * mat(1, 1) + P.c() * mat(2, 1) + P.d() * mat(3, 1),
 				P.a() * mat(0, 2) + P.b() * mat(1, 2) + P.c() * mat(2, 2) + P.d() * mat(3, 2),
 				P.a() * mat(0, 3) + P.b() * mat(1, 3) + P.c() * mat(2, 3) + P.d() * mat(3, 3));
-			return out;
-		}
-
-		Plane& Normalize(Plane& out, const Plane& rhs)
-		{
-			const float inv(RecipSqrt(rhs.a() * rhs.a() + rhs.b() * rhs.b() + rhs.c() * rhs.c()));
-
-			out = Plane(rhs.a() * inv, rhs.b() * inv, rhs.c() * inv, rhs.d() * inv);
 			return out;
 		}
 
@@ -1165,22 +1035,5 @@ namespace KlayGE
 
 			return true;
 		}
-	}
-
-
-	Random& Random::Instance()
-	{
-		static Random random;
-		return random;
-	}
-
-	Random::Random()
-	{
-		std::srand(static_cast<unsigned int>(time(NULL)));
-	}
-
-	int Random::Next() const
-	{
-		return std::rand();
 	}
 }

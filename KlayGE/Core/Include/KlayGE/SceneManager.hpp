@@ -4,21 +4,21 @@
 #include <KlayGE/PreDeclare.hpp>
 
 #include <KlayGE/SharedPtr.hpp>
-#include <KlayGE/alloc.hpp>
 #include <KlayGE/Renderable.hpp>
-#include <KlayGE/MathTypes.hpp>
 #include <KlayGE/MapVector.hpp>
 
 #include <vector>
+
+#include <boost/utility.hpp>
 
 #pragma comment(lib, "KlayGE_Core.lib")
 
 namespace KlayGE
 {
-	class SceneManager
+	class SceneManager : boost::noncopyable
 	{
 	protected:
-		typedef std::vector<RenderablePtr, alloc<RenderablePtr> >	RenderItemsType;
+		typedef std::vector<RenderablePtr>	RenderItemsType;
 		typedef MapVector<RenderEffectPtr, RenderItemsType>			RenderQueueType;
 
 	public:
@@ -36,10 +36,6 @@ namespace KlayGE
 
 	protected:
 		RenderQueueType renderQueue_;
-
-	private:
-		SceneManager(const SceneManager&);
-		SceneManager& operator=(const SceneManager&);
 	};
 }
 

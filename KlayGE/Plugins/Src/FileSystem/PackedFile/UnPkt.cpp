@@ -42,7 +42,7 @@ namespace
 
 	// 忽略大小写比较字符串
 	/////////////////////////////////////////////////////////////////////////////////
-	bool IgnoreCaseCompare(const String& lhs, const String& rhs)
+	bool IgnoreCaseCompare(const std::string& lhs, const std::string& rhs)
 	{
 		if (lhs.length() != rhs.length())
 		{
@@ -78,7 +78,7 @@ namespace
 
 			FileDes fd;
 			input.Read(&fd, sizeof(fd));
-			dirTable.insert(std::make_pair(String(str.begin(), str.end()), fd));
+			dirTable.insert(std::make_pair(std::string(str.begin(), str.end()), fd));
 		}
 	}
 }
@@ -201,7 +201,7 @@ namespace KlayGE
 
 	// 在打包文件中定位文件
 	/////////////////////////////////////////////////////////////////////////////////
-	void UnPkt::LocateFile(const String& pathName)
+	void UnPkt::LocateFile(const std::string& pathName)
 	{
 		curFile_ = dirTable_.find(pathName);
 	}

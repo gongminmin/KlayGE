@@ -54,7 +54,7 @@ namespace KlayGE
 	public:
 		void Active()
 			{ }
-		ShaderParameterPtr GetNamedParameter(const String& /*name*/)
+		ShaderParameterPtr GetNamedParameter(const std::string& /*name*/)
 			{ return ShaderParameter::NullObject(); }
 	};
 
@@ -63,7 +63,7 @@ namespace KlayGE
 	public:
 		void Active()
 			{ }
-		ShaderParameterPtr GetNamedParameter(const String& /*name*/)
+		ShaderParameterPtr GetNamedParameter(const std::string& /*name*/)
 			{ return ShaderParameter::NullObject(); }
 	};
 
@@ -85,8 +85,8 @@ namespace KlayGE
 		return obj;
 	}
 
-	VertexShaderPtr LoadVertexShader(const String& shaderFileName,
-		const String& functionName, const String& profile,
+	VertexShaderPtr LoadVertexShader(const std::string& shaderFileName,
+		const std::string& functionName, const std::string& profile,
 		bool fromPack)
 	{
 		VFilePtr file;
@@ -96,7 +96,7 @@ namespace KlayGE
 
 			if (!packedFile->Open(shaderFileName))
 			{
-				if (!packedFile->Open(String(_RENDERFXPATH_) + shaderFileName))
+				if (!packedFile->Open(std::string(_RENDERFXPATH_) + shaderFileName))
 				{
 					return VertexShader::NullObject();
 				}
@@ -110,7 +110,7 @@ namespace KlayGE
 
 			if (!diskFile->Open(shaderFileName, VFile::OM_Read))
 			{
-				if (!diskFile->Open(String(_RENDERFXPATH_) + shaderFileName, VFile::OM_Read))
+				if (!diskFile->Open(std::string(_RENDERFXPATH_) + shaderFileName, VFile::OM_Read))
 				{
 					return VertexShader::NullObject();
 				}
@@ -119,14 +119,14 @@ namespace KlayGE
 			file = diskFile;
 		}
 
-		std::vector<char, alloc<char> > data(file->Length());
+		std::vector<char> data(file->Length());
 		file->Read(&data[0], data.size());
 
-		return Engine::RenderFactoryInstance().MakeVertexShader(String(&data[0], data.size()), functionName, profile);
+		return Engine::RenderFactoryInstance().MakeVertexShader(std::string(&data[0], data.size()), functionName, profile);
 	}
 
-	PixelShaderPtr LoadPixelShader(const String& shaderFileName,
-		const String& functionName, const String& profile,
+	PixelShaderPtr LoadPixelShader(const std::string& shaderFileName,
+		const std::string& functionName, const std::string& profile,
 		bool fromPack)
 	{
 		VFilePtr file;
@@ -136,7 +136,7 @@ namespace KlayGE
 
 			if (!packedFile->Open(shaderFileName))
 			{
-				if (!packedFile->Open(String(_RENDERFXPATH_) + shaderFileName))
+				if (!packedFile->Open(std::string(_RENDERFXPATH_) + shaderFileName))
 				{
 					return PixelShader::NullObject();
 				}
@@ -150,7 +150,7 @@ namespace KlayGE
 
 			if (!diskFile->Open(shaderFileName, VFile::OM_Read))
 			{
-				if (!diskFile->Open(String(_RENDERFXPATH_) + shaderFileName, VFile::OM_Read))
+				if (!diskFile->Open(std::string(_RENDERFXPATH_) + shaderFileName, VFile::OM_Read))
 				{
 					return PixelShader::NullObject();
 				}
@@ -159,9 +159,9 @@ namespace KlayGE
 			file = diskFile;
 		}
 
-		std::vector<char, alloc<char> > data(file->Length());
+		std::vector<char> data(file->Length());
 		file->Read(&data[0], data.size());
 
-		return Engine::RenderFactoryInstance().MakePixelShader(String(&data[0], data.size()), functionName, profile);
+		return Engine::RenderFactoryInstance().MakePixelShader(std::string(&data[0], data.size()), functionName, profile);
 	}
 }

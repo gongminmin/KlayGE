@@ -70,10 +70,10 @@ namespace KlayGE
 
 	// UNICODE函数, 用于String, WString之间的转化
 	/////////////////////////////////////////////////////////////////////////////////
-	String& Convert(String& strDest, const String& strSrc);
-	String& Convert(String& strDest, const WString& wstrSrc);
-	WString& Convert(WString& wstrDest, const String& strSrc);
-	WString& Convert(WString& wstrDest, const WString& wstrSrc);
+	std::string& Convert(std::string& strDest, const std::string& strSrc);
+	std::string& Convert(std::string& strDest, const std::wstring& wstrSrc);
+	std::wstring& Convert(std::wstring& wstrDest, const std::string& strSrc);
+	std::wstring& Convert(std::wstring& wstrDest, const std::wstring& wstrSrc);
 
 	// 暂停几毫秒
 	/////////////////////////////////////////////////////////////////////////////////

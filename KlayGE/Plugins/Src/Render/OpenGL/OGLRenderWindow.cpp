@@ -102,7 +102,7 @@ namespace KlayGE
 		return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 
-	OGLRenderWindow::OGLRenderWindow(const String& name, const OGLRenderSettings& settings)
+	OGLRenderWindow::OGLRenderWindow(const std::string& name, const OGLRenderSettings& settings)
 						: hWnd_(NULL),
 							active_(false), ready_(false), closed_(false)
 	{
@@ -121,7 +121,7 @@ namespace KlayGE
 			this->Destroy();
 		}
 
-		WString wname;
+		std::wstring wname;
 		Convert(wname, name);
 
 		// Register the window class
@@ -238,7 +238,7 @@ namespace KlayGE
 		return hWnd_;
 	}
 
-	const WString& OGLRenderWindow::Description() const
+	const std::wstring& OGLRenderWindow::Description() const
 	{
 		return description_;
 	}
@@ -293,7 +293,7 @@ namespace KlayGE
 		::SwapBuffers(hDC_);
 	}
 
-	void OGLRenderWindow::CustomAttribute(const String& name, void* pData)
+	void OGLRenderWindow::CustomAttribute(const std::string& name, void* pData)
 	{
 	}
 }

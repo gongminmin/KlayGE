@@ -17,17 +17,17 @@
 #define _CRC32_HPP
 
 #include <KlayGE/PreDeclare.hpp>
+#include <string>
 
 #pragma comment(lib, "KlayGE_Core.lib")
 
 namespace KlayGE
 {
-	class Crc32
+	namespace Crc32
 	{
-	public:
-		static U32 CrcMem(const U8* data, size_t len);
-		static U32 CrcString(const String& str);
-		static U32 CrcFile(VFile& file);
+		U32 CrcMem(const U8* data, size_t len);
+		U32 CrcString(const std::string& str);
+		U32 CrcFile(VFile& file);
 	};
 }
 

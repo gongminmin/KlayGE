@@ -36,7 +36,7 @@ namespace KlayGE
 	class D3D9RenderEffect : public RenderEffect
 	{
 	public:
-		D3D9RenderEffect(const String& srcData, UINT flags = 0);
+		D3D9RenderEffect(const std::string& srcData, UINT flags = 0);
 		D3D9RenderEffect(const D3D9RenderEffect& rhs);
 
 		const COMPtr<ID3DXEffect>& D3DXEffect() const
@@ -46,30 +46,30 @@ namespace KlayGE
 
 		void Desc(UINT& parameters, UINT& techniques, UINT& functions);
 
-		void SetValue(const String& name, const void* data, UINT bytes);
-		void* GetValue(const String& name, UINT bytes) const;
+		void SetValue(const std::string& name, const void* data, UINT bytes);
+		void* GetValue(const std::string& name, UINT bytes) const;
 
-		void SetFloat(const String& name, float value);
-		float GetFloat(const String& name) const;
-		void SetVector(const String& name, const Vector4& value);
-		Vector4 GetVector(const String& name) const;
-		void SetMatrix(const String& name, const Matrix4& value);
-		Matrix4 GetMatrix(const String& name) const;
-		void SetMatrixArray(const String& name, const std::vector<Matrix4, alloc<Matrix4> >& matrices);
-		void GetMatrixArray(const String& name, std::vector<Matrix4, alloc<Matrix4> >& matrices);
-		void SetInt(const String& name, int value);
-		int GetInt(const String& name) const;
-		void SetBool(const String& name, bool value);
-		bool GetBool(const String& name) const;
-		void SetString(const String& name, const String& value);
-		String GetString(const String& name) const;
+		void SetFloat(const std::string& name, float value);
+		float GetFloat(const std::string& name) const;
+		void SetVector(const std::string& name, const Vector4& value);
+		Vector4 GetVector(const std::string& name) const;
+		void SetMatrix(const std::string& name, const Matrix4& value);
+		Matrix4 GetMatrix(const std::string& name) const;
+		void SetMatrixArray(const std::string& name, const Matrix4* matrices, size_t count);
+		void GetMatrixArray(const std::string& name, Matrix4* matrices, size_t count);
+		void SetInt(const std::string& name, int value);
+		int GetInt(const std::string& name) const;
+		void SetBool(const std::string& name, bool value);
+		bool GetBool(const std::string& name) const;
+		void SetString(const std::string& name, const std::string& value);
+		std::string GetString(const std::string& name) const;
 
-		void SetTexture(const String& name, const TexturePtr& tex);
+		void SetTexture(const std::string& name, const TexturePtr& tex);
 
-		void SetVertexShader(const String& name, const VertexShaderPtr& vs);
-		void SetPixelShader(const String& name, const PixelShaderPtr& ps);
+		void SetVertexShader(const std::string& name, const VertexShaderPtr& vs);
+		void SetPixelShader(const std::string& name, const PixelShaderPtr& ps);
 
-		void SetTechnique(const String& technique);
+		void SetTechnique(const std::string& technique);
 		void SetTechnique(UINT technique);
 
 		bool Validate(D3DXHANDLE handle);

@@ -1,7 +1,7 @@
 #ifndef _LIGHT_HPP
 #define _LIGHT_HPP
 
-#include <KlayGE/MathTypes.hpp>
+#include <KlayGE/Vector.hpp>
 
 #pragma comment(lib, "KlayGE_Core.lib")
 

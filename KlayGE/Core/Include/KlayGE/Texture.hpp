@@ -1,6 +1,8 @@
 #ifndef _TEXTURE_HPP
 #define _TEXTURE_HPP
 
+#include <string>
+
 #pragma comment(lib, "KlayGE_Core.lib")
 
 namespace KlayGE
@@ -74,7 +76,7 @@ namespace KlayGE
 			{ }
 
 		// Gets the name of texture
-		virtual const WString& Name() const = 0;
+		virtual const std::wstring& Name() const = 0;
 
 		// Gets the number of mipmaps to be used for this texture.
 		U16 NumMipMaps() const 

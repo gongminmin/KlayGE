@@ -13,7 +13,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/Math.hpp>
-#include <KlayGE/alloc.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <cassert>
@@ -44,7 +43,7 @@ namespace KlayGE
 		alGenBuffers(1, &buffer_);
 
 		// 用整个waveFile填充缓冲区
-		std::vector<U8, alloc<U8> > data(dataSource_->Size());
+		std::vector<U8> data(dataSource_->Size());
         dataSource_->Read(&data[0], data.size());
 
 		alBufferData(buffer_, Convert(format_), &data[0], static_cast<ALsizei>(data.size()), freq_);

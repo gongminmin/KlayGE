@@ -86,7 +86,7 @@ namespace KlayGE
 		dataSource_->Reset();
 
 		// 用整个waveFile填充缓冲区
-		std::vector<U8, alloc<U8> > data(dataSource_->Size());
+		std::vector<U8> data(dataSource_->Size());
 		dataSource_->Read(&data[0], data.size());
 
 		if (0 == data.size())

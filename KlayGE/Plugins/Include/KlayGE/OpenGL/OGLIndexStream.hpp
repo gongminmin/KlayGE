@@ -32,11 +32,11 @@ namespace KlayGE
 		size_t NumIndices() const
 			{ return buffer_.size(); }
 
-		const std::vector<U16, alloc<U16> >& OGLBuffer() const
+		const std::vector<U16>& OGLBuffer() const
 			{ return buffer_; }
 
 	protected:
-		std::vector<U16, alloc<U16> > buffer_;
+		std::vector<U16> buffer_;
 	};
 }
 

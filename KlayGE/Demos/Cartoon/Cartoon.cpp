@@ -8,7 +8,6 @@
 #include <KlayGE/RenderWindow.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
-#include <KlayGE/alloc.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Engine.hpp>
 #include <KlayGE/Shader.hpp>
@@ -59,9 +58,9 @@ namespace
 			vs_->Active();
 		}
 
-		const WString& Name() const
+		const std::wstring& Name() const
 		{
-			static WString name(L"Torus");
+			static std::wstring name(L"Torus");
 			return name;
 		}
 

@@ -46,7 +46,7 @@ namespace KlayGE
 {
 	// 翻译网络地址
 	/////////////////////////////////////////////////////////////////////////////////
-	SOCKADDR_IN TransAddr(const String& address, U16 port)
+	SOCKADDR_IN TransAddr(const std::string& address, U16 port)
 	{
 		SOCKADDR_IN sockAddr_in;
 		MemoryLib::Zero(&sockAddr_in, sizeof(sockAddr_in));
@@ -80,10 +80,10 @@ namespace KlayGE
 		return sockAddr_in;
 	}
 
-	String TransAddr(const SOCKADDR_IN& sockAddr, U16& port)
+	std::string TransAddr(const SOCKADDR_IN& sockAddr, U16& port)
 	{
 		port = ntohs(sockAddr.sin_port);
-		return String(inet_ntoa(sockAddr.sin_addr));
+		return std::string(inet_ntoa(sockAddr.sin_addr));
 	}
 
 	// 获取主机地址

@@ -10,9 +10,9 @@ namespace KlayGE
 	{
 	}
 
-	const WString& Mesh::Name() const
+	const std::wstring& Mesh::Name() const
 	{
-		static WString name(L"Mesh");
+		static std::wstring name(L"Mesh");
 		return name;
 	}
 
@@ -28,7 +28,7 @@ namespace KlayGE
 			VertexStreamPtr vstream(rb_->GetVertexStream(VST_Positions));
 
 			IndexStreamPtr istream(rb_->GetIndexStream());
-			for (std::vector<U16, alloc<U16> >::iterator iter = indices_.begin(); iter != indices_.end(); iter += 3)
+			for (std::vector<U16>::iterator iter = indices_.begin(); iter != indices_.end(); iter += 3)
 			{
 				Vector3* v0(reinterpret_cast<Vector3*>(&vertices_[*(iter + 0) * 3]));
 				Vector3* v1(reinterpret_cast<Vector3*>(&vertices_[*(iter + 1) * 3]));
@@ -46,7 +46,7 @@ namespace KlayGE
 				*n2 += vec;
 			}
 
-			for (std::vector<float, alloc<float> >::iterator iter = normals_.begin(); iter != normals_.end(); iter += 3)
+			for (std::vector<float>::iterator iter = normals_.begin(); iter != normals_.end(); iter += 3)
 			{
 				Vector3* normal(reinterpret_cast<Vector3*>(&(*iter)));
 				MathLib::Normalize(*normal, *normal);

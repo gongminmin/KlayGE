@@ -7,7 +7,6 @@
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
-#include <KlayGE/alloc.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Engine.hpp>
 #include <KlayGE/DiskFile/DiskFile.hpp>
@@ -59,10 +58,10 @@ namespace
 			KlayGE::TexturePtr texture(Engine::RenderFactoryInstance().MakeTexture(TGAHeader.width,
 				TGAHeader.height, 0, PF_X8R8G8B8));
 
-			vector<U8, alloc<U8> > data(TGAHeader.width * TGAHeader.height * TGAHeader.pixelSize / 8);
+			vector<U8> data(TGAHeader.width * TGAHeader.height * TGAHeader.pixelSize / 8);
 			file.Read(&data[0], data.size());
 
-			vector<U8, alloc<U8> > tgaData;
+			vector<U8> tgaData;
 			tgaData.reserve(TGAHeader.width * TGAHeader.height * 4);
 			for (short y = 0; y < TGAHeader.height; ++ y)
 			{
@@ -150,9 +149,9 @@ namespace
 			return rb_;
 		}
 
-		const WString& Name() const
+		const std::wstring& Name() const
 		{
-			static WString name(L"Polygon");
+			static std::wstring name(L"Polygon");
 			return name;
 		}
 

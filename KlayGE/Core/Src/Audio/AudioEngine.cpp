@@ -24,9 +24,9 @@ namespace KlayGE
 	class NullAudioEngine : public AudioEngine
 	{
 	public:
-		const WString& Name() const
+		const std::wstring& Name() const
 		{
-			static WString name(L"Null Audio Engine");
+			static std::wstring name(L"Null Audio Engine");
 			return name;
 		}
 

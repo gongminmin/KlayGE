@@ -207,7 +207,7 @@ namespace
 		{
 			const FileDes& fd(iter->second);
 
-			const String& fileName(iter->first);
+			const std::string& fileName(iter->first);
 			const U32 temp(static_cast<U32>(fileName.length()));
 			out.Write(&temp, sizeof(temp));
 			out.Write(&fileName[0], temp);
@@ -218,15 +218,15 @@ namespace
 
 	// 根据树型结构打包目录
 	/////////////////////////////////////////////////////////////////////////////////
-	void Compress(KlayGE::VFile& outFile, DirTable& dirTable, const String& rootName,
-		const std::vector<String>& files)
+	void Compress(KlayGE::VFile& outFile, DirTable& dirTable, const std::string& rootName,
+		const std::vector<std::string>& files)
 	{
 		using namespace KlayGE;
 
 		DiskFile openFile;
 		U32 curPos(0);
 
-		for (std::vector<String>::const_iterator iter = files.begin(); iter != files.end(); ++ iter)
+		for (std::vector<std::string>::const_iterator iter = files.begin(); iter != files.end(); ++ iter)
 		{
 			openFile.Open(rootName + '/' + *iter, VFile::OM_Read);
 
@@ -260,21 +260,21 @@ namespace
 
 	// 遍历目录，得出树型结构
 	/////////////////////////////////////////////////////////////////////////////////
-	std::vector<String> FindFiles(const String& rootName, const String& pathName)
+	std::vector<std::string> FindFiles(const std::string& rootName, const std::string& pathName)
 	{
-		std::vector<String> ret;
+		std::vector<std::string> ret;
 
-		path findPath((rootName + '/' + pathName).c_str(), native);
+		path findPath(rootName + '/' + pathName, native);
 		if (exists(findPath))
 		{
 			directory_iterator end_itr;
 			for (directory_iterator iter(findPath); iter != end_itr; ++ iter)
 			{
-				const String fileName(iter->leaf().c_str());
+				const std::string& fileName(iter->leaf());
 
 				if (is_directory(*iter))
 				{
-					std::vector<String> sub(FindFiles(rootName, pathName + fileName + '/'));
+					std::vector<std::string> sub(FindFiles(rootName, pathName + fileName + '/'));
 					ret.insert(ret.end(), sub.begin(), sub.end());
 				}
 				else
@@ -292,7 +292,7 @@ namespace KlayGE
 {
 	// 翻译路径名，把'\'转化成'/'
 	/////////////////////////////////////////////////////////////////////////////////
-	String& TransPathName(String& out, const String& in)
+	std::string& TransPathName(std::string& out, const std::string& in)
 	{
 		out = in;
 		for (size_t i = 0; i < out.length(); ++ i)
@@ -420,12 +420,12 @@ namespace KlayGE
 
 	// 目录打包
 	/////////////////////////////////////////////////////////////////////////////////
-	void Pkt::Pack(const String& dirName, VFile& pktFile)
+	void Pkt::Pack(const std::string& dirName, VFile& pktFile)
 	{
-		String rootName;
+		std::string rootName;
 		TransPathName(rootName, dirName);
 
-		std::vector<String> files(FindFiles(rootName, ""));
+		std::vector<std::string> files(FindFiles(rootName, ""));
 
 		DirTable dirTable;
 		MemFile tmpFile;

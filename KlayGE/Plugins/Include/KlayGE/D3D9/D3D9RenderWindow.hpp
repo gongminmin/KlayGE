@@ -16,7 +16,7 @@ namespace KlayGE
 	{
 	public:
 		D3D9RenderWindow(const COMPtr<IDirect3D9>& d3d, const D3D9Adapter& adapter,
-			const String& name, const D3D9RenderSettings& settings);
+			const std::string& name, const D3D9RenderSettings& settings);
 		~D3D9RenderWindow();
 
 		LRESULT MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -36,12 +36,12 @@ namespace KlayGE
 
 		HWND WindowHandle() const;
 
-		const WString& Description() const;
+		const std::wstring& Description() const;
 
 		const D3D9Adapter& Adapter() const;
 		const COMPtr<IDirect3DDevice9>& D3DDevice() const;
 
-		void CustomAttribute(const String& name, void* pData);
+		void CustomAttribute(const std::string& name, void* pData);
 
 		bool RequiresTextureFlipping() const;
 
@@ -49,7 +49,7 @@ namespace KlayGE
 		void WindowMovedOrResized();
 
 	protected:
-		String	name_;
+		std::string	name_;
 
 		HWND	hWnd_;				// Win32 Window handle
 		bool	active_;			// Is active i.e. visible
@@ -75,7 +75,7 @@ namespace KlayGE
 		COMPtr<IDirect3DSurface9>	renderSurface_;
 		COMPtr<IDirect3DSurface9>	renderZBuffer_;
 
-		WString		description_;
+		std::wstring		description_;
 	};
 }
 

@@ -13,6 +13,8 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Memory.hpp>
 
+#include <memory.h>
+
 /*
 Ëã·¨:
 void* MemSet(void* pDest, int c, size_t Count)

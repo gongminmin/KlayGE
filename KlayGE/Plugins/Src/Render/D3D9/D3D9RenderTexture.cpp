@@ -25,7 +25,7 @@ namespace KlayGE
 		viewport_.height	= height_;
 	}
 
-	void D3D9RenderTexture::CustomAttribute(const String& name, void* pData)
+	void D3D9RenderTexture::CustomAttribute(const std::string& name, void* pData)
 	{
 		if ("DDBACKBUFFER" == name)
 		{

@@ -23,7 +23,8 @@
 #include <vector>
 #include <windows.h>
 
-#include <KlayGE/alloc.hpp>
+#include <boost/utility.hpp>
+
 #include <KlayGE/Audio.hpp>
 
 #pragma comment(lib, "KlayGE_AudioEngine_OpenAL.lib")
@@ -36,12 +37,12 @@ namespace KlayGE
 
 	// …˘“Ùª∫≥Â«¯
 	/////////////////////////////////////////////////////////////////////////////////
-	class OALSoundBuffer : public SoundBuffer
+	class OALSoundBuffer : boost::noncopyable, public SoundBuffer
 	{
 	private:
-		typedef std::vector<ALuint, alloc<ALuint> >	Sources;
-		typedef Sources::iterator					SourcesIter;
-		typedef Sources::const_iterator				SourcesConstIter;
+		typedef std::vector<ALuint>			Sources;
+		typedef Sources::iterator			SourcesIter;
+		typedef Sources::const_iterator		SourcesConstIter;
 
 	public:
 		OALSoundBuffer(const AudioDataSourcePtr& dataSource, U32 numSource, float volume);
@@ -72,20 +73,16 @@ namespace KlayGE
 		Vector3		pos_;
 		Vector3		vel_;
 		Vector3		dir_;
-
-	private:
-		OALSoundBuffer(const OALSoundBuffer&);
-		OALSoundBuffer& operator=(const OALSoundBuffer&);
 	};
 
 	// “Ù¿÷ª∫≥Â«¯
 	/////////////////////////////////////////////////////////////////////////////////
-	class OALMusicBuffer : public MusicBuffer
+	class OALMusicBuffer : boost::noncopyable, public MusicBuffer
 	{
 	private:
-		typedef std::vector<ALuint, alloc<ALuint> >	Buffers;
-		typedef Buffers::iterator					BuffersIter;
-		typedef Buffers::const_iterator				BuffersConstIter;
+		typedef std::vector<ALuint>		Buffers;
+		typedef Buffers::iterator		BuffersIter;
+		typedef Buffers::const_iterator	BuffersConstIter;
 
 	public:
 		OALMusicBuffer(const AudioDataSourcePtr& dataSource, U32 bufferSeconds, float volume);
@@ -118,21 +115,17 @@ namespace KlayGE
 		Buffers		bufferQueue_;
 
 		bool		loop_;
-
-	private:
-		OALMusicBuffer(const OALMusicBuffer&);
-		OALMusicBuffer& operator=(const OALMusicBuffer&);
 	};
 
 	// π‹¿Ì“Ù∆µ≤•∑≈
 	/////////////////////////////////////////////////////////////////////////////////
-	class OALAudioEngine : public AudioEngine
+	class OALAudioEngine : boost::noncopyable, public AudioEngine
 	{
 	public:
 		OALAudioEngine();
 		~OALAudioEngine();
 
-		const WString& Name() const;
+		const std::wstring& Name() const;
 
 		Vector3 GetListenerPos() const;
 		void SetListenerPos(const Vector3& v);
@@ -140,10 +133,6 @@ namespace KlayGE
 		void SetListenerVel(const Vector3& v);
 		void GetListenerOri(Vector3& face, Vector3& up) const;
 		void SetListenerOri(const Vector3& face, const Vector3& up);
-
-	private:
-		OALAudioEngine(const OALAudioEngine&);
-		OALAudioEngine& operator=(const OALAudioEngine&);
 	};
 }
 

@@ -55,9 +55,9 @@ namespace
 		{
 		}
 
-		const WString& Name() const
+		const std::wstring& Name() const
 		{
-			static WString name_(L"Direct3D9 Font");
+			static std::wstring name_(L"Direct3D9 Font");
 			return name_;
 		}
 
@@ -77,7 +77,7 @@ namespace
 			{ return fontRB_; }
 
 		void RenderText(U32 fontHeight, D3D9Font::CharInfoMapType& charInfoMap, float sx, float sy, float sz,
-			float xScale, float yScale, U32 clr, const WString& text, U32 flags)
+			float xScale, float yScale, U32 clr, const std::wstring& text, U32 flags)
 		{
 			// 设置过滤属性
 			if (flags & Font::FA_Filtered)
@@ -98,7 +98,7 @@ namespace
 			indices_.reserve(maxSize * 6);
 
 			U16 lastIndex(0);
-			for (WString::const_iterator citer = text.begin(); citer != text.end(); ++ citer)
+			for (std::wstring::const_iterator citer = text.begin(); citer != text.end(); ++ citer)
 			{
 				const wchar_t& ch(*citer);
 				const float w(charInfoMap[ch].width * xScale);
@@ -161,10 +161,10 @@ namespace
 		RenderEffectPtr fontEffect_;
 		RenderBufferPtr fontRB_;
 
-		std::vector<float, alloc<float> > xyzs_;
-		std::vector<U32, alloc<U32> > clrs_;
-		std::vector<float, alloc<float> > texs_;
-		std::vector<U16, alloc<U16> > indices_;
+		std::vector<float>	xyzs_;
+		std::vector<U32>	clrs_;
+		std::vector<float>	texs_;
+		std::vector<U16>	indices_;
 	};
 }
 
@@ -172,7 +172,7 @@ namespace KlayGE
 {
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
-	D3D9Font::D3D9Font(const WString& fontName, U32 height, U32 flags)
+	D3D9Font::D3D9Font(const std::wstring& fontName, U32 height, U32 flags)
 				: curX_(0), curY_(0),
 					theTexture_(Engine::RenderFactoryInstance().MakeTexture(1024, 1024, 1, PF_A4L4)),
 					rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
@@ -219,10 +219,10 @@ namespace KlayGE
 
 	// 更新纹理，使用LRU算法
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9Font::UpdateTexture(const WString& text)
+	void D3D9Font::UpdateTexture(const std::wstring& text)
 	{
 		::SIZE size;
-		for (WString::const_iterator citer = text.begin(); citer != text.end(); ++ citer)
+		for (std::wstring::const_iterator citer = text.begin(); citer != text.end(); ++ citer)
 		{
 			const wchar_t& ch(*citer);
 
@@ -326,7 +326,7 @@ namespace KlayGE
 						charRect.bottom	= charRect.top + this->FontHeight();
 					}
 
-					std::vector<U8, alloc<U8> > dst;
+					std::vector<U8> dst;
 					dst.reserve(this->FontHeight() * this->FontHeight());
 					// 锁定表面，把 alpha 值写入纹理
 					for (long y = charRect.top; y < charRect.bottom; ++ y)
@@ -354,7 +354,7 @@ namespace KlayGE
 	// 在指定位置画出文字
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderablePtr D3D9Font::RenderText(float sx, float sy, const Color& clr, 
-		const WString& text, U32 flags)
+		const std::wstring& text, U32 flags)
 	{
 		return this->RenderText(sx, sy, 0.5f, 1, 1, clr, text, flags);
 	}
@@ -363,7 +363,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderablePtr D3D9Font::RenderText(float sx, float sy, float sz,
 		float xScale, float yScale, const Color& clr,
-		const WString& text, U32 flags)
+		const std::wstring& text, U32 flags)
 	{
 		if (text.empty())
 		{

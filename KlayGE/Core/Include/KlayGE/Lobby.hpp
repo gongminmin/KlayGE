@@ -14,7 +14,6 @@
 #define _LOBBY_HPP
 
 #include <vector>
-#include <KlayGE/alloc.hpp>
 #include <KlayGE/Socket.hpp>
 
 #pragma comment(lib, "KlayGE_Core.lib")
@@ -39,7 +38,7 @@ namespace KlayGE
 	struct PlayerDes
 	{
 		char			ID;
-		String			Name;
+		std::string		Name;
 		SOCKADDR_IN		Addr;
 
 		U32				Time;
@@ -47,18 +46,18 @@ namespace KlayGE
 
 	class Lobby
 	{
-		typedef std::vector<PlayerDes, alloc<PlayerDes> >	PlayerAddrs;
-		typedef PlayerAddrs::iterator						PlayerAddrsIter;
+		typedef std::vector<PlayerDes>	PlayerAddrs;
+		typedef PlayerAddrs::iterator	PlayerAddrsIter;
 
 	public:
 		Lobby();
 		~Lobby();
 
-		void Create(const String& Name, char maxPlayers, U16 port, const Processer& pro);
+		void Create(const std::string& Name, char maxPlayers, U16 port, const Processer& pro);
 		void Close();
 
-		void LobbyName(const String& Name);
-		const String& LobbyName() const;
+		void LobbyName(const std::string& Name);
+		const std::string& LobbyName() const;
 
 		char NumPlayer() const;
 
@@ -91,7 +90,7 @@ namespace KlayGE
 
 		SOCKADDR_IN		sockAddr_;
 
-		String			name_;
+		std::string		name_;
 	};
 }
 

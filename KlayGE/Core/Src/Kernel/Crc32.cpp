@@ -155,7 +155,7 @@ namespace KlayGE
 
 	// ½¨Á¢×Ö·û´®µÄCrc32
 	/////////////////////////////////////////////////////////////////////////////////
-	U32 Crc32::CrcString(const String& str)
+	U32 Crc32::CrcString(const std::string& str)
 	{
 		return CrcMem(reinterpret_cast<const U8*>(str.data()), str.length());
 	}

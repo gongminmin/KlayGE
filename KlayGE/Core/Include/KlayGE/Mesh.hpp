@@ -3,7 +3,6 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Renderable.hpp>
-#include <KlayGE/MathTypes.hpp>
 #include <KlayGE/RenderBuffer.hpp>
 
 #include <vector>
@@ -22,7 +21,7 @@ namespace KlayGE
 
 		RenderBufferPtr GetRenderBuffer() const;
 
-		const WString& Name() const;
+		const std::wstring& Name() const;
 
 		template <typename ForwardIterator>
 		void AssignXYZs(ForwardIterator first, ForwardIterator last)
@@ -46,10 +45,10 @@ namespace KlayGE
 		RenderBufferPtr rb_;
 		RenderEffectPtr effect_;
 
-		std::vector<float, alloc<float> > vertices_;
-		std::vector<float, alloc<float> > normals_;
+		std::vector<float> vertices_;
+		std::vector<float> normals_;
 
-		std::vector<U16, alloc<U16> > indices_;
+		std::vector<U16> indices_;
 	};
 }
 

@@ -46,10 +46,10 @@ namespace KlayGE
 	class D3D9VertexShader : public VertexShader
 	{
 	public:
-		D3D9VertexShader(const String& src, const String& functionName, const String& profile);
+		D3D9VertexShader(const std::string& src, const std::string& functionName, const std::string& profile);
 
 		void Active();
-		ShaderParameterPtr GetNamedParameter(const String& name);
+		ShaderParameterPtr GetNamedParameter(const std::string& name);
 
 		COMPtr<IDirect3DVertexShader9> D3DVertexShader() const;
 
@@ -63,10 +63,10 @@ namespace KlayGE
 	class D3D9PixelShader : public PixelShader
 	{
 	public:
-		D3D9PixelShader(const String& src, const String& functionName, const String& profile);
+		D3D9PixelShader(const std::string& src, const std::string& functionName, const std::string& profile);
 
 		void Active();
-		ShaderParameterPtr GetNamedParameter(const String& name);
+		ShaderParameterPtr GetNamedParameter(const std::string& name);
 
 		COMPtr<IDirect3DPixelShader9> D3DPixelShader() const;
 

@@ -12,7 +12,7 @@ namespace KlayGE
 	public:
 		D3D9RenderTexture(U32 width, U32 height);
 
-		virtual void CustomAttribute(const String& name, void* pData);
+		virtual void CustomAttribute(const std::string& name, void* pData);
 
 		bool RequiresTextureFlipping() const
 			{ return true; }

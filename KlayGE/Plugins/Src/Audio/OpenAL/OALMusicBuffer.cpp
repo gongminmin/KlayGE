@@ -90,7 +90,7 @@ namespace KlayGE
 
 					alSourceUnqueueBuffers(source_, 1, &buf);
 
-					std::vector<U8, alloc<U8> > data(READSIZE);
+					std::vector<U8> data(READSIZE);
 					data.resize(dataSource_->Read(&data[0], data.size()));
 					if (data.size() > 0)
 					{

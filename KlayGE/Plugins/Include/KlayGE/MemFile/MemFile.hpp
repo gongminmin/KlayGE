@@ -16,11 +16,13 @@
 #include <sstream>
 #include <KlayGE/VFile.hpp>
 
+#include <boost/utility.hpp>
+
 #pragma comment(lib, "KlayGE_FileSystem_MemFile.lib")
 
 namespace KlayGE
 {
-	class MemFile : public VFile
+	class MemFile : boost::noncopyable, public VFile
 	{
 	public:
 		MemFile();
@@ -42,9 +44,6 @@ namespace KlayGE
 
 	private:
 		std::stringstream	chunkData_;
-
-		MemFile(const MemFile& rhs);
-		MemFile& operator=(const MemFile& rhs);
 	};
 }
 

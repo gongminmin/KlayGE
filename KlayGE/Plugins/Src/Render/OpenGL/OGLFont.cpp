@@ -39,28 +39,25 @@ namespace
 	class OGLFontRenderable : public Renderable
 	{
 	public:
-		OGLFontRenderable(const RenderEffectPtr& effect,
-			const RenderBufferPtr& buffer,
-			std::vector<RenderBufferPtr, alloc<RenderBufferPtr> >& buffers)
-			: fontEffect_(effect), fontRB_(buffer),
-				buffers_(buffers)
+		OGLFontRenderable(const RenderEffectPtr& effect, const RenderBufferPtr& rb)
+			: fontEffect_(effect),
+				fontRB_(rb)
 		{
-			fontRB_->AddVertexStream(VST_Positions, sizeof(float), 3);
-			fontRB_->AddVertexStream(VST_Diffuses, sizeof(U32), 1);
-			fontRB_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2);
-
-			fontRB_->AddIndexStream();
 		}
 
-		void OnRenderEnd()
+		const std::wstring& Name() const
 		{
-			buffers_.push_back(fontRB_);
-		}
-
-		const WString& Name() const
-		{
-			static WString name_(L"Direct3D9 Font");
+			static std::wstring name_(L"OpenGL Font");
 			return name_;
+		}
+
+		void OnRenderBegin()
+		{
+			fontRB_->GetVertexStream(VST_Positions)->Assign(&xyzs_[0], xyzs_.size() / 3);
+			fontRB_->GetVertexStream(VST_Diffuses)->Assign(&clrs_[0], clrs_.size());
+			fontRB_->GetVertexStream(VST_TextureCoords0)->Assign(&texs_[0], texs_.size() / 2);
+
+			fontRB_->GetIndexStream()->Assign(&indices_[0], indices_.size());
 		}
 
 		RenderEffectPtr GetRenderEffect() const
@@ -70,7 +67,7 @@ namespace
 			{ return fontRB_; }
 
 		void RenderText(U32 fontHeight, OGLFont::CharInfoMapType& charInfoMap, float sx, float sy, float sz,
-			float xScale, float yScale, U32 clr, const WString& text, U32 flags)
+			float xScale, float yScale, U32 clr, const std::wstring& text, U32 flags)
 		{
 			// 设置过滤属性
 			if (flags & Font::FA_Filtered)
@@ -82,18 +79,16 @@ namespace
 			const size_t maxSize(text.length() - std::count(text.begin(), text.end(), L'\n'));
 			float x(sx), y(sy);
 
-			std::vector<U32, alloc<U32> > clrs(maxSize * 4, clr);
+			xyzs_.clear();
+			texs_.clear();
+			indices_.clear();
 
-			std::vector<float, alloc<float> > xyzs;
-			std::vector<float, alloc<float> > texs;
-			std::vector<U16, alloc<U16> > indices;
-
-			xyzs.reserve(maxSize * 3 * 4);
-			texs.reserve(maxSize * 2 * 4);
-			indices.reserve(maxSize * 6);
+			xyzs_.reserve(maxSize * 3 * 4);
+			texs_.reserve(maxSize * 2 * 4);
+			indices_.reserve(maxSize * 6);
 
 			U16 lastIndex(0);
-			for (WString::const_iterator citer = text.begin(); citer != text.end(); ++ citer)
+			for (std::wstring::const_iterator citer = text.begin(); citer != text.end(); ++ citer)
 			{
 				const wchar_t& ch(*citer);
 				const float w(charInfoMap[ch].width * xScale);
@@ -102,42 +97,42 @@ namespace
 				{
 					const Rect_T<float>& texRect(charInfoMap[ch].texRect);
 
-					xyzs.push_back(x);
-					xyzs.push_back(y);
-					xyzs.push_back(sz);
+					xyzs_.push_back(x);
+					xyzs_.push_back(y);
+					xyzs_.push_back(sz);
 
-					xyzs.push_back(x + w);
-					xyzs.push_back(y);
-					xyzs.push_back(sz);
+					xyzs_.push_back(x + w);
+					xyzs_.push_back(y);
+					xyzs_.push_back(sz);
 
-					xyzs.push_back(x + w);
-					xyzs.push_back(y + h);
-					xyzs.push_back(sz);
+					xyzs_.push_back(x + w);
+					xyzs_.push_back(y + h);
+					xyzs_.push_back(sz);
 
-					xyzs.push_back(x);
-					xyzs.push_back(y + h);
-					xyzs.push_back(sz);
-
-
-					texs.push_back(texRect.left());
-					texs.push_back(texRect.top());
-
-					texs.push_back(texRect.right());
-					texs.push_back(texRect.top());
-
-					texs.push_back(texRect.right());
-					texs.push_back(texRect.bottom());
-
-					texs.push_back(texRect.left());
-					texs.push_back(texRect.bottom());
+					xyzs_.push_back(x);
+					xyzs_.push_back(y + h);
+					xyzs_.push_back(sz);
 
 
-					indices.push_back(lastIndex + 0);
-					indices.push_back(lastIndex + 1);
-					indices.push_back(lastIndex + 2);
-					indices.push_back(lastIndex + 2);
-					indices.push_back(lastIndex + 3);
-					indices.push_back(lastIndex + 0);
+					texs_.push_back(texRect.left());
+					texs_.push_back(texRect.top());
+
+					texs_.push_back(texRect.right());
+					texs_.push_back(texRect.top());
+
+					texs_.push_back(texRect.right());
+					texs_.push_back(texRect.bottom());
+
+					texs_.push_back(texRect.left());
+					texs_.push_back(texRect.bottom());
+
+
+					indices_.push_back(lastIndex + 0);
+					indices_.push_back(lastIndex + 1);
+					indices_.push_back(lastIndex + 2);
+					indices_.push_back(lastIndex + 2);
+					indices_.push_back(lastIndex + 3);
+					indices_.push_back(lastIndex + 0);
 					lastIndex += 4;
 
 					x += w;
@@ -149,18 +144,17 @@ namespace
 				}
 			}
 
-			fontRB_->GetVertexStream(VST_Positions)->Assign(&xyzs[0], xyzs.size() / 3);
-			fontRB_->GetVertexStream(VST_Diffuses)->Assign(&clrs[0], clrs.size());
-			fontRB_->GetVertexStream(VST_TextureCoords0)->Assign(&texs[0], texs.size() / 2);
-
-			fontRB_->GetIndexStream()->Assign(&indices[0], indices.size());
+			clrs_.resize(xyzs_.size() / 3, clr);
 		}
 
 	private:
 		RenderEffectPtr fontEffect_;
 		RenderBufferPtr fontRB_;
 
-		std::vector<RenderBufferPtr, alloc<RenderBufferPtr> >& buffers_;
+		std::vector<float>	xyzs_;
+		std::vector<U32>	clrs_;
+		std::vector<float>	texs_;
+		std::vector<U16>	indices_;
 	};
 }
 
@@ -168,9 +162,10 @@ namespace KlayGE
 {
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
-	OGLFont::OGLFont(const WString& fontName, U32 height, U32 flags)
+	OGLFont::OGLFont(const std::wstring& fontName, U32 height, U32 flags)
 				: curX_(0), curY_(0),
-					theTexture_(Engine::RenderFactoryInstance().MakeTexture(1024, 1024, 1, PF_A4L4))
+					theTexture_(Engine::RenderFactoryInstance().MakeTexture(1024, 1024, 1, PF_A4L4)),
+					rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
 	{
 		effect_ = LoadRenderEffect("Font.fx");
 		effect_->SetTexture("texFont", theTexture_);
@@ -180,6 +175,14 @@ namespace KlayGE
 		const Viewport& viewport((*renderEngine.ActiveRenderTarget())->GetViewport());
 		effect_->SetInt("halfWidth", viewport.width / 2);
 		effect_->SetInt("halfHeight", viewport.height / 2);
+
+
+		rb_->AddVertexStream(VST_Positions, sizeof(float), 3);
+		rb_->AddVertexStream(VST_Diffuses, sizeof(U32), 1);
+		rb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2);
+
+		rb_->AddIndexStream();
+
 
 		logFont_.lfHeight			= height;
 		logFont_.lfWidth			= 0;
@@ -206,10 +209,10 @@ namespace KlayGE
 
 	// 更新纹理，使用LRU算法
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLFont::UpdateTexture(const WString& text)
+	void OGLFont::UpdateTexture(const std::wstring& text)
 	{
 		::SIZE size;
-		for (WString::const_iterator citer = text.begin(); citer != text.end(); ++ citer)
+		for (std::wstring::const_iterator citer = text.begin(); citer != text.end(); ++ citer)
 		{
 			const wchar_t& ch(*citer);
 
@@ -313,7 +316,7 @@ namespace KlayGE
 						charRect.bottom	= charRect.top + this->FontHeight();
 					}
 
-					std::vector<U8, alloc<U8> > dst;
+					std::vector<U8> dst;
 					dst.reserve(this->FontHeight() * this->FontHeight());
 					// 锁定表面，把 alpha 值写入纹理
 					for (long y = charRect.top; y < charRect.bottom; ++ y)
@@ -341,7 +344,7 @@ namespace KlayGE
 	// 在指定位置画出文字
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderablePtr OGLFont::RenderText(float sx, float sy, const Color& clr, 
-		const WString& text, U32 flags)
+		const std::wstring& text, U32 flags)
 	{
 		return this->RenderText(sx, sy, 0.5f, 1, 1, clr, text, flags);
 	}
@@ -350,7 +353,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderablePtr OGLFont::RenderText(float sx, float sy, float sz,
 		float xScale, float yScale, const Color& clr,
-		const WString& text, U32 flags)
+		const std::wstring& text, U32 flags)
 	{
 		if (text.empty())
 		{
@@ -362,20 +365,10 @@ namespace KlayGE
 		U8 r, g, b, a;
 		clr.RGBA(r, g, b, a);
 
-		RenderBufferPtr buffer;
-		if (buffers_.empty())
-		{
-			buffer = RenderBufferPtr(new RenderBuffer(RenderBuffer::BT_TriangleList));
-		}
-		else
-		{
-			buffer = buffers_.back();
-			buffers_.pop_back();
-		}
-
-		SharedPtr<OGLFontRenderable> renderable(new OGLFontRenderable(effect_, buffer, buffers_));
+		SharedPtr<OGLFontRenderable> renderable(new OGLFontRenderable(effect_, rb_));
 		renderable->RenderText(this->FontHeight(), charInfoMap_,
-			sx, sy, sz, xScale, yScale, (a << 24) + (r << 16) + (g << 8) + b, text, flags);
+			sx, sy, sz, xScale, yScale, (a << 24) + (b << 16) + (g << 8) + (r), text, flags);
 		return renderable;
 	}
 }
+

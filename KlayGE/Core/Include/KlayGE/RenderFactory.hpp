@@ -12,21 +12,21 @@ namespace KlayGE
 		virtual ~RenderFactory()
 			{ }
 
-		virtual const WString& Name() const = 0;
+		virtual const std::wstring& Name() const = 0;
 
 		virtual RenderEngine& RenderEngineInstance() = 0;
 		virtual TexturePtr MakeTexture(U32 width, U32 height, U16 numMipMaps,
 			PixelFormat format, Texture::TextureUsage usage = Texture::TU_Default) = 0;
 		virtual RenderTexturePtr MakeRenderTexture(U32 width, U32 height) = 0;
 
-		virtual FontPtr MakeFont(const WString& fontName, U32 fontHeight = 12, U32 flags = 0) = 0;
+		virtual FontPtr MakeFont(const std::wstring& fontName, U32 fontHeight = 12, U32 flags = 0) = 0;
 
-		virtual RenderEffectPtr MakeRenderEffect(const String& srcData, UINT flags = 0) = 0;
+		virtual RenderEffectPtr MakeRenderEffect(const std::string& srcData, UINT flags = 0) = 0;
 
-		virtual VertexShaderPtr MakeVertexShader(const String& shaderName,
-			const String& functionName, const String& profile) = 0;
-		virtual PixelShaderPtr MakePixelShader(const String& shaderName,
-			const String& functionName, const String& profile) = 0;
+		virtual VertexShaderPtr MakeVertexShader(const std::string& shaderName,
+			const std::string& functionName, const std::string& profile) = 0;
+		virtual PixelShaderPtr MakePixelShader(const std::string& shaderName,
+			const std::string& functionName, const std::string& profile) = 0;
 
 		// sizeElement表示流中每个元素的大小，比如Position流是size(float)
 		// numElement表示一个顶点有几个元素表示，比如Position流是由(x, y, z)组成，所以为3
@@ -40,13 +40,13 @@ namespace KlayGE
 	class ConcreteRenderFactory : public RenderFactory
 	{
 	public:
-		ConcreteRenderFactory(const WString& name)
+		ConcreteRenderFactory(const std::wstring& name)
 				: name_(name)
 			{ }
 		virtual ~ConcreteRenderFactory()
 			{ }
 
-		const WString& Name() const
+		const std::wstring& Name() const
 			{ return name_; }
 
 		RenderEngine& RenderEngineInstance()
@@ -62,19 +62,19 @@ namespace KlayGE
 		RenderTexturePtr MakeRenderTexture(U32 width, U32 height)
 			{ return RenderTexturePtr(new RenderTextureType(width, height)); }
 
-		FontPtr MakeFont(const WString& fontName, U32 fontHeight = 12, U32 flags = 0)
+		FontPtr MakeFont(const std::wstring& fontName, U32 fontHeight = 12, U32 flags = 0)
 			{ return FontPtr(new FontType(fontName, fontHeight, flags)); }
 
-		RenderEffectPtr MakeRenderEffect(const String& srcData, UINT flags = 0)
+		RenderEffectPtr MakeRenderEffect(const std::string& srcData, UINT flags = 0)
 			{ return RenderEffectPtr(new RenderEffectType(srcData, flags)); }
 
-		VertexShaderPtr MakeVertexShader(const String& shaderName, const String& functionName, const String& profile)
+		VertexShaderPtr MakeVertexShader(const std::string& shaderName, const std::string& functionName, const std::string& profile)
 			{ return VertexShaderPtr(new VertexShaderType(shaderName, functionName, profile)); }
-		PixelShaderPtr MakePixelShader(const String& shaderName, const String& functionName, const String& profile)
+		PixelShaderPtr MakePixelShader(const std::string& shaderName, const std::string& functionName, const std::string& profile)
 			{ return PixelShaderPtr(new PixelShaderType(shaderName, functionName, profile)); }
 
 	private:
-		const WString name_;
+		const std::wstring name_;
 	};
 }
 

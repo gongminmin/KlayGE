@@ -56,7 +56,8 @@
 			OutputDirectory="..\..\..\..\lib"
 			IntermediateDirectory="..\..\..\..\Release"
 			ConfigurationType="4"
-			CharacterSet="1">
+			CharacterSet="1"
+			WholeProgramOptimization="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
 				GlobalOptimizations="TRUE"

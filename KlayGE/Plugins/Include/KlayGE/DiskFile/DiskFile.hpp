@@ -18,7 +18,10 @@
 
 #include <KlayGE/VFile.hpp>
 #include <KlayGE/SharedPtr.hpp>
+
 #include <fstream>
+
+#include <boost/utility.hpp>
 
 #pragma comment(lib, "KlayGE_FileSystem_DiskFile.lib")
 
@@ -26,14 +29,14 @@ namespace KlayGE
 {
 	// 管理磁盘文件读写
 	/////////////////////////////////////////////////////////////////////////////////
-	class DiskFile : public VFile
+	class DiskFile : boost::noncopyable, public VFile
 	{
 	public:
 		DiskFile();
-		DiskFile(const String& fileName, OpenMode openMode);
+		DiskFile(const std::string& fileName, OpenMode openMode);
 		~DiskFile();
 
-		bool Open(const String& fileName, OpenMode openMode);
+		bool Open(const std::string& fileName, OpenMode openMode);
 		void Close();
 
 		size_t Length();
@@ -49,13 +52,10 @@ namespace KlayGE
 		void Flush();
 
 	private:
-		std::fstream file_;
+		std::fstream	file_;
 
-		String		fileName_;
-		OpenMode	openMode_;
-
-		DiskFile(const DiskFile& rhs);
-		DiskFile& operator=(const DiskFile& rhs);
+		std::string		fileName_;
+		OpenMode		openMode_;
 	};
 }
 

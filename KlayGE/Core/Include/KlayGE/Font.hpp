@@ -14,7 +14,6 @@
 #define _FONT_HPP
 
 #include <KlayGE/SharedPtr.hpp>
-#include <KlayGE/MathTypes.hpp>
 
 #pragma comment(lib, "KlayGE_Core.lib")
 
@@ -43,10 +42,10 @@ namespace KlayGE
 
 	public:
 		virtual RenderablePtr RenderText(float x, float y, const Color& clr,
-			const WString& text, U32 flags = 0) = 0;
+			const std::wstring& text, U32 flags = 0) = 0;
 		virtual RenderablePtr RenderText(float x, float y, float z, float xScale, float yScale, const Color& clr, 
-			const WString& text, U32 flags = 0) = 0;
-		//RenderablePtr RenderText(const WString& text, U32 flags = 0);
+			const std::wstring& text, U32 flags = 0) = 0;
+		//RenderablePtr RenderText(const std::wstring& text, U32 flags = 0);
 
 		virtual U32 FontHeight() const = 0;
 

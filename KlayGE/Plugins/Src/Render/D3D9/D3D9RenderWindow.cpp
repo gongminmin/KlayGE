@@ -112,7 +112,7 @@ namespace KlayGE
 	}
 
 	D3D9RenderWindow::D3D9RenderWindow(const COMPtr<IDirect3D9>& d3d,
-										const D3D9Adapter& adapter, const String& name,
+										const D3D9Adapter& adapter, const std::string& name,
 										const D3D9RenderSettings& settings)
 						: d3d_(d3d),
 							adapter_(adapter),
@@ -143,7 +143,7 @@ namespace KlayGE
 			this->Destroy();
 		}
 
-		WString wname;
+		std::wstring wname;
 		Convert(wname, name);
 
 		// Register the window class
@@ -277,12 +277,12 @@ namespace KlayGE
 		Convert(description_, adapter_.Description());
 		description_ += L' ';
 
-		typedef std::vector<std::pair<U32, WString> > BehaviorType;
+		typedef std::vector<std::pair<U32, std::wstring> > BehaviorType;
 		BehaviorType behavior;
-		behavior.push_back(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_PUREDEVICE, WString(L"(pure hw vp)")));
-		behavior.push_back(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING, WString(L"(hw vp)")));
-		behavior.push_back(std::make_pair(D3DCREATE_MIXED_VERTEXPROCESSING, WString(L"(mix vp)")));
-		behavior.push_back(std::make_pair(D3DCREATE_SOFTWARE_VERTEXPROCESSING, WString(L"(sw vp)")));
+		behavior.push_back(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_PUREDEVICE, std::wstring(L"(pure hw vp)")));
+		behavior.push_back(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING, std::wstring(L"(hw vp)")));
+		behavior.push_back(std::make_pair(D3DCREATE_MIXED_VERTEXPROCESSING, std::wstring(L"(mix vp)")));
+		behavior.push_back(std::make_pair(D3DCREATE_SOFTWARE_VERTEXPROCESSING, std::wstring(L"(sw vp)")));
 
 		IDirect3DDevice9* d3dDevice(NULL);
 		for (BehaviorType::iterator iter = behavior.begin(); iter != behavior.end(); ++ iter)
@@ -349,7 +349,7 @@ namespace KlayGE
 		return hWnd_;
 	}
 
-	const WString& D3D9RenderWindow::Description() const
+	const std::wstring& D3D9RenderWindow::Description() const
 	{
 		return description_;
 	}
@@ -413,7 +413,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9RenderWindow::CustomAttribute(const String& name, void* pData)
+	void D3D9RenderWindow::CustomAttribute(const std::string& name, void* pData)
 	{
 		// Valid attributes and their equvalent native functions:
 		// D3DDEVICE			: D3DDevice

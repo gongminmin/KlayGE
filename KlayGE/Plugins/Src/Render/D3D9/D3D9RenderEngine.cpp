@@ -260,9 +260,9 @@ namespace KlayGE
 
 	// 返回渲染系统的名字
 	/////////////////////////////////////////////////////////////////////////////////
-	const WString& D3D9RenderEngine::Name() const
+	const std::wstring& D3D9RenderEngine::Name() const
 	{
-		static WString name(L"Direct3D9 Render System");
+		static std::wstring name(L"Direct3D9 Render System");
 		return name;
 	}
 
@@ -379,7 +379,7 @@ namespace KlayGE
 
 	// 建立渲染窗口
 	/////////////////////////////////////////////////////////////////////////////////
-	RenderWindowPtr D3D9RenderEngine::CreateRenderWindow(const String& name,
+	RenderWindowPtr D3D9RenderEngine::CreateRenderWindow(const std::string& name,
 		const RenderSettings& settings)
 	{
 		RenderWindowPtr win(new D3D9RenderWindow(d3d_, this->ActiveAdapter(), name,

@@ -111,7 +111,7 @@ namespace KlayGE
 
 	// ÔØÈëÎÄ¼þ
 	/////////////////////////////////////////////////////////////////////////////////
-	void DShowEngine::Load(const WString& fileName)
+	void DShowEngine::Load(const std::wstring& fileName)
 	{
 		this->Free();
 		this->Init();

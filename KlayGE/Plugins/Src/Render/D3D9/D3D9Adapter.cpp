@@ -29,9 +29,9 @@ namespace KlayGE
 
 	// 获取设备描述字符串
 	/////////////////////////////////////////////////////////////////////////////////
-	const String D3D9Adapter::Description() const
+	const std::string D3D9Adapter::Description() const
 	{
-		return String(this->AdapterIdentifier().Description);
+		return std::string(this->AdapterIdentifier().Description);
 	}
 
 	// 获取支持的显示模式数目
@@ -56,7 +56,7 @@ namespace KlayGE
 	{
 		using std::vector;
 
-		typedef vector<D3DFORMAT, alloc<D3DFORMAT> > FormatType;
+		typedef vector<D3DFORMAT> FormatType;
 		FormatType formats;
 		formats.push_back(D3DFMT_X8R8G8B8);
 		formats.push_back(D3DFMT_A8R8G8B8);

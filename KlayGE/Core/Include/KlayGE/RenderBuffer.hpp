@@ -101,7 +101,7 @@ namespace KlayGE
 			BT_TriangleFan
 		};
 
-		typedef std::vector<VertexStreamPtr, alloc<VertexStreamPtr> > VertexStreamsType;
+		typedef std::vector<VertexStreamPtr> VertexStreamsType;
 		typedef VertexStreamsType::iterator VertexStreamIterator;
 		typedef VertexStreamsType::const_iterator VertexStreamConstIterator;
 
@@ -125,7 +125,6 @@ namespace KlayGE
 
 		void AddIndexStream(bool staticStream = false);
 		IndexStreamPtr GetIndexStream() const;
-
 
 	private:
 		BufferType type_;

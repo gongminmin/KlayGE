@@ -21,19 +21,21 @@
 #include <KlayGE/Input.hpp>
 #include <KlayGE/COMPtr.hpp>
 
+#include <boost/utility.hpp>
+
 #pragma comment(lib, "KlayGE_InputEngine_DInput.lib")
 
 namespace KlayGE
 {
 	// 管理输入设备
 	/////////////////////////////////////////////////////////////////////////////////
-	class DInputEngine : public InputEngine
+	class DInputEngine : boost::noncopyable, public InputEngine
 	{
 	public:
 		DInputEngine();
 		~DInputEngine();
 
-		const WString& Name() const;
+		const std::wstring& Name() const;
 		void EnumDevices();
 
 		const COMPtr<IDirectInput8W>& DInput() const;
@@ -43,10 +45,6 @@ namespace KlayGE
 
 	private:
 		static BOOL CALLBACK EnumDevicesCB(LPCDIDEVICEINSTANCEW didi, void* pvRef);
-
-	private:
-		DInputEngine(const DInputEngine&);
-		DInputEngine& operator=(const DInputEngine&);
 	};
 
 	class DInputKeyboard : public InputKeyboard
@@ -55,7 +53,7 @@ namespace KlayGE
 		DInputKeyboard(REFGUID guid, InputEngine& inputEng);
 		~DInputKeyboard();
 
-		const WString& Name() const;
+		const std::wstring& Name() const;
 
 		void Acquire();
 		void Unacquire();
@@ -72,7 +70,7 @@ namespace KlayGE
 		DInputMouse(REFGUID guid, InputEngine& inputEng);
 		~DInputMouse();
 
-		const WString& Name() const;
+		const std::wstring& Name() const;
 
 		void Acquire();
 		void Unacquire();
@@ -89,7 +87,7 @@ namespace KlayGE
 		DInputJoystick(REFGUID guid, InputEngine& inputEng);
 		~DInputJoystick();
 
-		const WString& Name() const;
+		const std::wstring& Name() const;
 
 		void Acquire();
 		void Unacquire();

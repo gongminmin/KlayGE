@@ -37,52 +37,52 @@ namespace KlayGE
 		RenderEffectPtr Clone() const
 			{ return RenderEffect::NullObject(); }
 
-		void SetValue(const String& name, const void* data, UINT bytes)
+		void SetValue(const std::string& name, const void* data, UINT bytes)
 			{ }
-		void* GetValue(const String& name, UINT bytes) const
+		void* GetValue(const std::string& name, UINT bytes) const
 			{ return NULL; }
 
-		void SetFloat(const String& name, float value)
+		void SetFloat(const std::string& name, float value)
 			{ }
-		float GetFloat(const String& name) const
+		float GetFloat(const std::string& name) const
 			{ return 0; }
-		void SetVector(const String& name, const Vector4& value)
+		void SetVector(const std::string& name, const Vector4& value)
 			{ }
-		Vector4 GetVector(const String& name) const
+		Vector4 GetVector(const std::string& name) const
 			{ return Vector4::Zero(); }
-		void SetMatrix(const String& name, const Matrix4& value)
+		void SetMatrix(const std::string& name, const Matrix4& value)
 			{ }
-		Matrix4 GetMatrix(const String& name) const
+		Matrix4 GetMatrix(const std::string& name) const
 			{ return Matrix4::Identity(); }
-		void SetMatrixArray(const String& name, const std::vector<Matrix4, alloc<Matrix4> >& matrices)
+		void SetMatrixArray(const std::string& name, const Matrix4* matrices, size_t count)
 			{ }
-		void GetMatrixArray(const String& name, std::vector<Matrix4, alloc<Matrix4> >& matrices)
+		void GetMatrixArray(const std::string& name, Matrix4* matrices, size_t count)
 			{ }
-		void SetInt(const String& name, int value)
+		void SetInt(const std::string& name, int value)
 			{ }
-		int GetInt(const String& name) const
+		int GetInt(const std::string& name) const
 			{ return 0; }
-		void SetBool(const String& name, bool value)
+		void SetBool(const std::string& name, bool value)
 			{ }
-		bool GetBool(const String& name) const
+		bool GetBool(const std::string& name) const
 			{ return false; }
-		void SetString(const String& name, const String& value)
+		void SetString(const std::string& name, const std::string& value)
 			{ }
-		String GetString(const String& name) const
+		std::string GetString(const std::string& name) const
 		{
-			static String str;
+			static std::string str;
 			return str;
 		}
 
-		void SetTexture(const String& name, const TexturePtr& tex)
+		void SetTexture(const std::string& name, const TexturePtr& tex)
 			{ }
 
-		void SetVertexShader(const String& name, const VertexShaderPtr& vs)
+		void SetVertexShader(const std::string& name, const VertexShaderPtr& vs)
 			{ }
-		void SetPixelShader(const String& name, const PixelShaderPtr& ps)
+		void SetPixelShader(const std::string& name, const PixelShaderPtr& ps)
 			{ }
 
-		void SetTechnique(const String& techName)
+		void SetTechnique(const std::string& techName)
 			{ }
 		void SetTechnique(UINT tech)
 			{ }
@@ -101,7 +101,7 @@ namespace KlayGE
 		return obj;
 	}
 
-	RenderEffectPtr LoadRenderEffect(const String& effectName, bool fromPack)
+	RenderEffectPtr LoadRenderEffect(const std::string& effectName, bool fromPack)
 	{
 		VFilePtr file;
 		if (fromPack)
@@ -110,7 +110,7 @@ namespace KlayGE
 
 			if (!packedFile->Open(effectName))
 			{
-				if (!packedFile->Open(String(_RENDERFXPATH_) + effectName))
+				if (!packedFile->Open(std::string(_RENDERFXPATH_) + effectName))
 				{
 					return RenderEffect::NullObject();
 				}
@@ -124,7 +124,7 @@ namespace KlayGE
 
 			if (!diskFile->Open(effectName, VFile::OM_Read))
 			{
-				if (!diskFile->Open(String(_RENDERFXPATH_) + effectName, VFile::OM_Read))
+				if (!diskFile->Open(std::string(_RENDERFXPATH_) + effectName, VFile::OM_Read))
 				{
 					return RenderEffect::NullObject();
 				}
@@ -133,9 +133,9 @@ namespace KlayGE
 			file = diskFile;
 		}
 
-		std::vector<char, alloc<char> > data(file->Length());
+		std::vector<char> data(file->Length());
 		file->Read(&data[0], data.size());
 
-		return Engine::RenderFactoryInstance().MakeRenderEffect(String(&data[0], data.size()));
+		return Engine::RenderFactoryInstance().MakeRenderEffect(std::string(&data[0], data.size()));
 	}
 }

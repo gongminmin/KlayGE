@@ -28,7 +28,7 @@ namespace KlayGE
 		virtual float FPS() const;
 
 		// Gets a custom (maybe platform-specific) attribute.
-		virtual void CustomAttribute(const String& name, void* pData) = 0;
+		virtual void CustomAttribute(const std::string& name, void* pData) = 0;
 
 		virtual bool Active() const;
 		virtual void Active(bool state);

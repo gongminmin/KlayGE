@@ -1,8 +1,11 @@
 // Math.hpp
 // KlayGE 数学函数库 头文件
-// Ver 2.0.4
+// Ver 2.1.1
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.1.1
+// 修改了自定义类型 (2004.4.22)
 //
 // 2.0.4
 // 修改了Random的接口 (2004.3.29)
@@ -18,10 +21,9 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
-#include <KlayGE/MathTypes.hpp>
-
-#include <algorithm>
 #include <limits>
+
+#include <boost/static_assert.hpp>
 
 #pragma comment(lib, "KlayGE_Core.lib")
 
@@ -259,18 +261,29 @@ namespace KlayGE
 		float Tanh(float x);
 
 
+		template <typename T, int N>
+		struct DotHelper
+		{
+			static T Do(const T* lhs, const T* rhs)
+			{
+				return lhs[0] * rhs[0] + DotHelper<T, N - 1>::Do(lhs + 1, rhs + 1);
+			}
+		};
+		template <typename T>
+		struct DotHelper<T, 1>
+		{
+			static T Do(const T* lhs, const T* rhs)
+			{
+				return lhs[0] * rhs[0];
+			}
+		};
+
 		// 几种类型的Dot
 		template <typename T>
 		inline typename T::value_type
 		Dot(const T& lhs, const T& rhs)
 		{
-			T::value_type ret(0);
-			for (int i = 0; i < T::elem_num; ++ i)
-			{
-				ret += lhs[i] * rhs[i];
-			}
-
-			return ret;
+			return DotHelper<T::value_type, T::elem_num>::Do(&lhs[0], &rhs[0]);
 		}
 
 		// 几种类型的LengthSq
@@ -312,31 +325,133 @@ namespace KlayGE
 			return out;
 		}
 
+		template <typename T, int N>
+		struct TransformHelper
+		{
+			static void Do(Vector_T<T, 4>& out, const Vector_T<T, N>& v, const Matrix4& mat);
+		};
+		template <typename T>
+		struct TransformHelper<T, 4>
+		{
+			static void Do(Vector_T<T, 4>& out, const Vector_T<T, 4>& v, const Matrix4& mat)
+			{
+				out = MakeVector(v.x() * mat(0, 0) + v.y() * mat(1, 0) + v.z() * mat(2, 0) + v.w() * mat(3, 0),
+					v.x() * mat(0, 1) + v.y() * mat(1, 1) + v.z() * mat(2, 1) + v.w() * mat(3, 1),
+					v.x() * mat(0, 2) + v.y() * mat(1, 2) + v.z() * mat(2, 2) + v.w() * mat(3, 2),
+					v.x() * mat(0, 3) + v.y() * mat(1, 3) + v.z() * mat(2, 3) + v.w() * mat(3, 3));
+			}
+		};
+		template <typename T>
+		struct TransformHelper<T, 3>
+		{
+			static void Do(Vector_T<T, 4>& out, const Vector_T<T, 3>& v, const Matrix4& mat)
+			{
+				Vector_T<T, 4> temp(MakeVector(v.x(), v.y(), v.z(), T(1)));
+				TransformHelper<T, 4>::Do(out, temp, mat);
+			}
+		};
+		template <typename T>
+		struct TransformHelper<T, 2>
+		{
+			static void Do(Vector_T<T, 4>& out, const Vector_T<T, 2>& v, const Matrix4& mat)
+			{
+				Vector_T<T, 3> temp(MakeVector(v.x(), v.y(), T(0)));
+				TransformHelper<T, 3>::Do(out, temp, mat);
+			}
+		};
+
+		template <typename T, int N>
+		inline Vector_T<T, 4>&
+		Transform(Vector_T<T, 4>& out, const Vector_T<T, N>& v, const Matrix4& mat)
+		{
+			TransformHelper<T, N>::Do(out, v, mat);
+			return out;
+		}
+
+		template <typename T, int N>
+		inline Vector_T<T, N>&
+		TransformCoord(Vector_T<T, N>& out, const Vector_T<T, N>& v, const Matrix4& mat)
+		{
+			BOOST_STATIC_ASSERT(N < 4);
+
+			Vector_T<T, 4> temp;
+			TransformHelper<T, N>::Do(temp, v, mat);
+			out = Vector_T<T, N>(&temp[0]);
+			if (Eq(temp.w(), T(0)))
+			{
+				out = Vector_T<T, N>::Zero();
+			}
+			else
+			{
+				out /= temp.w();
+			}
+			return out;
+		}
+
+
+		template <typename T, int N>
+		struct TransformNormalHelper
+		{
+			static void Do(Vector_T<T, N>& out, const Vector_T<T, N>& v, const Matrix4& mat);
+		};
+		template <typename T>
+		struct TransformNormalHelper<T, 3>
+		{
+			static void Do(Vector_T<T, 3>& out, const Vector_T<T, 3>& v, const Matrix4& mat)
+			{
+				Vector_T<T, 4> temp(MakeVector(v.x(), v.y(), v.z(), T(0)));
+				TransformHelper<T, 4>::Do(temp, temp, mat);
+				out = Vector_T<T, 3>(&temp[0]);
+			}
+		};
+		template <typename T>
+		struct TransformNormalHelper<T, 2>
+		{
+			static void Do(Vector_T<T, 2>& out, const Vector_T<T, 2>& v, const Matrix4& mat)
+			{
+				Vector_T<T, 3> temp(MakeVector(v.x(), v.y(), T(0)));
+				TransformNormalHelper<T, 3>::Do(temp, temp, mat);
+				out = Vector_T<T, 2>(&temp[0]);
+			}
+		};
+
+		template <typename T, int N>
+		inline Vector_T<T, N>&
+		TransformNormal(Vector_T<T, N>& out, const Vector_T<T, N>& v, const Matrix4& mat)
+		{
+			BOOST_STATIC_ASSERT(N < 4);
+
+			TransformNormalHelper<T, N>::Do(out, v, mat);
+			return out;
+		}
+
+		template <typename T, int N>
+		inline Vector_T<T, N>&
+		BaryCentric(Vector_T<T, N>& out,
+			const Vector_T<T, N>& v1, const Vector_T<T, N>& v2, const Vector_T<T, N>& v3,
+			const T& f, const T& g)
+		{
+			out = v1 + f * (v2 - v1) + g * (v3 - v1);
+			return out;
+		}
+
+		template <typename T>
+		inline T&
+		Normalize(T& out, const T& rhs)
+		{
+			out = rhs / Length(rhs);
+			return out;
+		}
+
 
 		// 2D 向量
 		///////////////////////////////////////////////////////////////////////////////
 		float CCW(const Vector2& lhs, const Vector2& rhs);
 
-		Vector2& BaryCentric(Vector2& out,
-			const Vector2& v1, const Vector2& v2, const Vector2& v3,
-			float f, float g);
-		Vector2& Normalize(Vector2& out, const Vector2& rhs);
-		Vector4& Transform(Vector4& out, const Vector2& v, const Matrix4& mat);
-		Vector2& TransformCoord(Vector2& out, const Vector2& v, const Matrix4& mat);
-		Vector2& TransformNormal(Vector2& out, const Vector2& v, const Matrix4& mat);
-
 
 		// 3D 向量
 		///////////////////////////////////////////////////////////////////////////////
 		float Angle(const Vector3& lhs, const Vector3& rhs);
-		Vector3& BaryCentric(Vector3& out,
-			const Vector3& v1, const Vector3& v2, const Vector3& v3,
-			float f, float g);
-		Vector3& Normalize(Vector3& out, const Vector3& rhs);
-		Vector3& Cross(Vector3& out, const Vector3& lhs, const Vector3& rhs);
-		Vector4& Transform(Vector4& out, const Vector3& v, const Matrix4& mat);
-		Vector3& TransformCoord(Vector3& out, const Vector3& v, const Matrix4& mat);
-		Vector3& TransformNormal(Vector3& out, const Vector3& v, const Matrix4& mat);
 		Vector3& TransQuat(Vector3& out, const Vector3& v, const Quaternion& quat);
 		Vector3& Project(Vector3& out, const Vector3& vec,
 			const Matrix4& world, const Matrix4& view, const Matrix4& proj,
@@ -345,15 +460,20 @@ namespace KlayGE
 			const Matrix4& world, const Matrix4& view, const Matrix4& proj,
 			const int viewport[4], float near, float far);
 
+		template <typename T>
+		inline Vector_T<T, 3>&
+		Cross(Vector_T<T, 3>& out, const Vector_T<T, 3>& lhs, const Vector_T<T, 3>& rhs)
+		{
+			out = MakeVector(lhs.y() * rhs.z() - lhs.z() * rhs.y(),
+				lhs.z() * rhs.x() - lhs.x() * rhs.z(),
+				lhs.x() * rhs.y() - lhs.y() * rhs.x());
+			return out;
+		}
+
 
 		// 4D 向量
 		///////////////////////////////////////////////////////////////////////////////
-		Vector4& BaryCentric(Vector4& out,
-			const Vector4& v1, const Vector4& v2, const Vector4& v3,
-			float f, float g);
 		Vector4& Cross(Vector4& out, const Vector4& v1, const Vector4& v2, const Vector4& v3);
-		Vector4& Normalize(Vector4& out, const Vector4& rhs);
-		Vector4& Transform(Vector4& out, const Vector4& v, const Matrix4& mat);
 
 
 		// 4D 矩阵
@@ -379,10 +499,6 @@ namespace KlayGE
 		Matrix4& ToMatrix(Matrix4& out, const Quaternion& quat);
 		Matrix4& Translation(Matrix4& out, float x, float y, float z);
 		Matrix4& Transpose(Matrix4& out, const Matrix4& m);
-		Matrix4& AffineTransformation(Matrix4& out, float f,
-			const Vector3& vRotationCenter = Vector3::Zero(),
-			const Quaternion& qRotation = Quaternion(0, 0, 0, 1),
-			const Vector3& vTranslation = Vector3::Zero());
 
 		Matrix4& LHToRH(Matrix4& out, const Matrix4& rhs);
 
@@ -410,7 +526,6 @@ namespace KlayGE
 			const Quaternion& q3, float f, float g);
 		Quaternion& Exp(Quaternion& out, const Quaternion& rhs);
 		Quaternion& Inverse(Quaternion& out, const Quaternion& q);
-		Quaternion& Normalize(Quaternion& out, const Quaternion& q);
 		Quaternion& Ln(Quaternion& out, const Quaternion& rhs);
 		Quaternion& Multiply(Quaternion& out, const Quaternion& lhs, const Quaternion& rhs);
 		Quaternion& RotationYawPitchRoll(Quaternion& out, float fYaw, float fPitch, float fRoll);
@@ -429,7 +544,7 @@ namespace KlayGE
 		float DotCoord(const Plane& lhs, const Vector3& rhs);
 		float DotNormal(const Plane& lhs, const Vector3& rhs);
 
-		Plane& Normalize(Plane& out, const Plane& p);
+		Plane& Normalize(Plane& out, const Plane& rhs);
 		Plane& FromPointNormal(Plane& out, const Vector3& vPoint, const Vector3& vNor);
 		Plane& FromPoints(Plane& out, const Vector3& v1, const Vector3& v2, const Vector3& v3);
 		Plane& Transform(Plane& out, const Plane& p, const Matrix4& mat);
@@ -470,5 +585,14 @@ namespace KlayGE
 		Random();
 	};
 }
+
+#include <KlayGE/Vector.hpp>
+#include <KlayGE/Rect.hpp>
+#include <KlayGE/Size.hpp>
+#include <KlayGE/Matrix.hpp>
+#include <KlayGE/Quaternion.hpp>
+#include <KlayGE/Plane.hpp>
+#include <KlayGE/Color.hpp>
+#include <KlayGE/Box.hpp>
 
 #endif		// _MATH_HPP

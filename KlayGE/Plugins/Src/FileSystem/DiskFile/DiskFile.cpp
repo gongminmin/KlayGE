@@ -15,7 +15,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/alloc.hpp>
 
 #include <vector>
 #include <cassert>
@@ -33,7 +32,7 @@ namespace KlayGE
 	{
 	}
 
-	DiskFile::DiskFile(const String& fileName, OpenMode openMode)
+	DiskFile::DiskFile(const std::string& fileName, OpenMode openMode)
 			: openMode_(OM_Unknown)
 	{
 		this->Open(fileName, openMode);
@@ -48,7 +47,7 @@ namespace KlayGE
 
 	// 打开文件
 	/////////////////////////////////////////////////////////////////////////////////
-	bool DiskFile::Open(const String& fileName, OpenMode openMode)
+	bool DiskFile::Open(const std::string& fileName, OpenMode openMode)
 	{
 		this->Close();
 
@@ -152,7 +151,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	size_t DiskFile::CopyFrom(VFile& src, size_t size)
 	{
-		std::vector<U8, alloc<U8> > data(size);
+		std::vector<U8> data(size);
 		size = src.Read(&data[0], data.size());
 		return this->Write(&data[0], size);
 	}

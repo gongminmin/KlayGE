@@ -24,7 +24,7 @@ namespace KlayGE
 	{
 		char			NumPlayer;
 		char			MaxPlayers;
-		String			Name;
+		std::string		Name;
 		SOCKADDR_IN		Addr;
 	};
 
@@ -39,8 +39,8 @@ namespace KlayGE
 		void Destroy();
 		LobbyDes LobbyInfo();
 
-		void Name(const String& name);
-		const String& Name()
+		void Name(const std::string& name);
+		const std::string& Name()
 			{ return this->name_; }
 
 		int Receive(void* buf, int maxSize, SOCKADDR_IN& from);
@@ -50,7 +50,7 @@ namespace KlayGE
 		Socket		socket_;
 
 		char		playerID_;
-		String		name_;
+		std::string	name_;
 
 		pthread_t	receiveThread_;
 		bool		receiveLoop_;

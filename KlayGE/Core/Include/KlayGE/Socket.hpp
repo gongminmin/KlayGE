@@ -16,6 +16,8 @@
 #ifndef	_SOCKET_HPP
 #define	_SOCKET_HPP
 
+#include <string>
+
 #ifdef _WIN32
 	#define NOMINMAX
 	#ifndef _WINSOCKAPI_
@@ -31,8 +33,8 @@
 
 namespace KlayGE
 {
-	SOCKADDR_IN TransAddr(const String& address, U16 port);
-	String TransAddr(const SOCKADDR_IN& sockAddr, U16& port);
+	SOCKADDR_IN TransAddr(const std::string& address, U16 port);
+	std::string TransAddr(const SOCKADDR_IN& sockAddr, U16& port);
 	IN_ADDR Host();
 
 	// Í¬²½Ì×½Ó×Ö

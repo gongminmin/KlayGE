@@ -16,6 +16,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/SharedPtr.hpp>
+#include <KlayGE/Engine.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Viewport.hpp>
 #include <KlayGE/RenderTarget.hpp>
@@ -24,7 +25,6 @@
 #include <KlayGE/Renderable.hpp>
 
 #include <KlayGE/SceneManager.hpp>
-#include <KlayGE/Engine.hpp>
 
 namespace KlayGE
 {

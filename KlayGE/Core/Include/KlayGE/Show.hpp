@@ -13,6 +13,8 @@
 #ifndef _SHOW_HPP
 #define _SHOW_HPP
 
+#include <string>
+
 #pragma comment(lib, "KlayGE_Core.lib")
 
 namespace KlayGE
@@ -38,7 +40,7 @@ namespace KlayGE
 
 		virtual bool IsComplete() = 0;
 
-		virtual void Load(const WString& fileName) = 0;
+		virtual void Load(const std::wstring& fileName) = 0;
 
 		void Play();
 		void Stop();

@@ -25,16 +25,16 @@ namespace KlayGE
 	{
 	}
 
-	PackedFile::PackedFile(const String& pathName)
+	PackedFile::PackedFile(const std::string& pathName)
 	{
 		this->Open(pathName);
 	}
 
-	bool PackedFile::Open(const String& pathName)
+	bool PackedFile::Open(const std::string& pathName)
 	{
-		const String::size_type offset(pathName.rfind(".pkt/"));
-		const String pktName(pathName.substr(0, offset + 4));
-		const String fileName(pathName.substr(offset + 5));
+		const std::string::size_type offset(pathName.rfind(".pkt/"));
+		const std::string pktName(pathName.substr(0, offset + 4));
+		const std::string fileName(pathName.substr(offset + 5));
 
 		SharedPtr<DiskFile> pktFile(new DiskFile);
 		if (!pktFile->Open(pktName, VFile::OM_Read))

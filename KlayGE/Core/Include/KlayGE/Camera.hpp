@@ -13,7 +13,8 @@
 #ifndef _CAMERA_HPP
 #define _CAMERA_HPP
 
-#include <KlayGE/MathTypes.hpp>
+#include <KlayGE/Vector.hpp>
+#include <KlayGE/Matrix.hpp>
 
 #pragma comment(lib, "KlayGE_Core.lib")
 

@@ -28,7 +28,7 @@
 
 namespace KlayGE
 {
-	D3D9RenderEffect::D3D9RenderEffect(const String& srcData, UINT flags)
+	D3D9RenderEffect::D3D9RenderEffect(const std::string& srcData, UINT flags)
 	{
 		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()));
 
@@ -63,37 +63,37 @@ namespace KlayGE
 		functions = desc.Functions;
 	}
 
-	void D3D9RenderEffect::SetValue(const String& name, const void* data, UINT bytes)
+	void D3D9RenderEffect::SetValue(const std::string& name, const void* data, UINT bytes)
 	{
 		TIF(effect_->SetValue(effect_->GetParameterByName(NULL, name.c_str()), data, bytes));
 	}
 
-	void* D3D9RenderEffect::GetValue(const String& name, UINT bytes) const
+	void* D3D9RenderEffect::GetValue(const std::string& name, UINT bytes) const
 	{
 		void* data(NULL);
 		TIF(effect_->GetValue(effect_->GetParameterByName(NULL, name.c_str()), data, bytes));
 		return data;
 	}
 
-	void D3D9RenderEffect::SetFloat(const String& name, float value)
+	void D3D9RenderEffect::SetFloat(const std::string& name, float value)
 	{
 		TIF(effect_->SetFloat(effect_->GetParameterByName(NULL, name.c_str()), value));
 	}
 
-	float D3D9RenderEffect::GetFloat(const String& name) const
+	float D3D9RenderEffect::GetFloat(const std::string& name) const
 	{
 		float value;
 		TIF(effect_->GetFloat(effect_->GetParameterByName(NULL, name.c_str()), &value));
 		return value;
 	}
 
-	void D3D9RenderEffect::SetVector(const String& name, const Vector4& value)
+	void D3D9RenderEffect::SetVector(const std::string& name, const Vector4& value)
 	{
 		D3DXVECTOR4 vec(value.x(), value.y(), value.z(), value.w());
 		TIF(effect_->SetVector(effect_->GetParameterByName(NULL, name.c_str()), &vec));
 	}
 
-	Vector4 D3D9RenderEffect::GetVector(const String& name) const
+	Vector4 D3D9RenderEffect::GetVector(const std::string& name) const
 	{
 		D3DXVECTOR4 vec;
 		TIF(effect_->GetVector(effect_->GetParameterByName(NULL, name.c_str()), &vec));
@@ -101,68 +101,68 @@ namespace KlayGE
 		return MakeVector(vec.x, vec.y, vec.z, vec.w);
 	}
 
-	void D3D9RenderEffect::SetMatrix(const String& name, const Matrix4& value)
+	void D3D9RenderEffect::SetMatrix(const std::string& name, const Matrix4& value)
 	{
 		D3DXMATRIX mat(&(*value.begin()));
 		TIF(effect_->SetMatrix(effect_->GetParameterByName(NULL, name.c_str()), &mat));
 	}
 
-	Matrix4 D3D9RenderEffect::GetMatrix(const String& name) const
+	Matrix4 D3D9RenderEffect::GetMatrix(const std::string& name) const
 	{
 		D3DXMATRIX mat;
 		TIF(effect_->GetMatrix(effect_->GetParameterByName(NULL, name.c_str()), &mat));
 		return Matrix4(mat);
 	}
 
-	void D3D9RenderEffect::SetMatrixArray(const String& name, const std::vector<Matrix4, alloc<Matrix4> >& matrices)
+	void D3D9RenderEffect::SetMatrixArray(const std::string& name, const Matrix4* matrices, size_t count)
 	{
 		TIF(effect_->SetMatrixArray(effect_->GetParameterByName(NULL, name.c_str()),
-			reinterpret_cast<const D3DXMATRIX*>(&matrices[0]), static_cast<::UINT>(matrices.size())));
+			reinterpret_cast<const D3DXMATRIX*>(matrices), static_cast<::UINT>(count)));
 	}
 
-	void D3D9RenderEffect::GetMatrixArray(const String& name, std::vector<Matrix4, alloc<Matrix4> >& matrices)
+	void D3D9RenderEffect::GetMatrixArray(const std::string& name, Matrix4* matrices, size_t count)
 	{
 		TIF(effect_->GetMatrixArray(effect_->GetParameterByName(NULL, name.c_str()),
-			reinterpret_cast<D3DXMATRIX*>(&matrices[0]), static_cast<::UINT>(matrices.size())));
+			reinterpret_cast<D3DXMATRIX*>(matrices), static_cast<::UINT>(count)));
 	}	
 
-	void D3D9RenderEffect::SetInt(const String& name, int value)
+	void D3D9RenderEffect::SetInt(const std::string& name, int value)
 	{
 		TIF(effect_->SetInt(effect_->GetParameterByName(NULL, name.c_str()), value));
 	}
 
-	int D3D9RenderEffect::GetInt(const String& name) const
+	int D3D9RenderEffect::GetInt(const std::string& name) const
 	{
 		int value;
 		TIF(effect_->GetInt(effect_->GetParameterByName(NULL, name.c_str()), &value));
 		return value;
 	}
 
-	void D3D9RenderEffect::SetBool(const String& name, bool value)
+	void D3D9RenderEffect::SetBool(const std::string& name, bool value)
 	{
 		TIF(effect_->SetBool(effect_->GetParameterByName(NULL, name.c_str()), value));
 	}
 
-	bool D3D9RenderEffect::GetBool(const String& name) const
+	bool D3D9RenderEffect::GetBool(const std::string& name) const
 	{
 		BOOL value;
 		TIF(effect_->GetBool(effect_->GetParameterByName(NULL, name.c_str()), &value));
 		return value == TRUE;
 	}
 
-	void D3D9RenderEffect::SetString(const String& name, const String& value)
+	void D3D9RenderEffect::SetString(const std::string& name, const std::string& value)
 	{
 		TIF(effect_->SetString(effect_->GetParameterByName(NULL, name.c_str()), value.c_str()));
 	}
 
-	String D3D9RenderEffect::GetString(const String& name) const
+	std::string D3D9RenderEffect::GetString(const std::string& name) const
 	{
 		const char* value(NULL);
 		TIF(effect_->GetString(effect_->GetParameterByName(NULL, name.c_str()), &value));
-		return String(value);
+		return std::string(value);
 	}
 
-	void D3D9RenderEffect::SetTexture(const String& name, const TexturePtr& tex)
+	void D3D9RenderEffect::SetTexture(const std::string& name, const TexturePtr& tex)
 	{
 		IDirect3DTexture9* texture(NULL);
 		if (tex.Get() != NULL)
@@ -172,7 +172,7 @@ namespace KlayGE
 		TIF(effect_->SetTexture(effect_->GetParameterByName(NULL, name.c_str()), texture));
 	}
 
-	void D3D9RenderEffect::SetVertexShader(const String& name, const VertexShaderPtr& vs)
+	void D3D9RenderEffect::SetVertexShader(const std::string& name, const VertexShaderPtr& vs)
 	{
 		IDirect3DVertexShader9* d3dvs(NULL);
 		if (vs.Get() != NULL)
@@ -182,7 +182,7 @@ namespace KlayGE
 		TIF(effect_->SetVertexShader(effect_->GetParameterByName(NULL, name.c_str()), d3dvs));
 	}
 
-	void D3D9RenderEffect::SetPixelShader(const String& name, const PixelShaderPtr& ps)
+	void D3D9RenderEffect::SetPixelShader(const std::string& name, const PixelShaderPtr& ps)
 	{
 		IDirect3DPixelShader9* d3dps(NULL);
 		if (ps.Get() != NULL)
@@ -192,7 +192,7 @@ namespace KlayGE
 		TIF(effect_->SetPixelShader(effect_->GetParameterByName(NULL, name.c_str()), d3dps));
 	}
 
-	void D3D9RenderEffect::SetTechnique(const String& technique)
+	void D3D9RenderEffect::SetTechnique(const std::string& technique)
 	{
 		D3DXHANDLE handle(effect_->GetTechniqueByName(technique.c_str()));
 		if (this->Validate(handle))

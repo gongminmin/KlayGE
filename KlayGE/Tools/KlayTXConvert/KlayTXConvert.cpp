@@ -38,7 +38,7 @@ namespace
 #pragma pack(pop)
 
 
-	void LoadTGA(TGAHeader& tgaHeader, std::vector<U8>& tgaData, const KlayGE::String& fileName)
+	void LoadTGA(TGAHeader& tgaHeader, std::vector<U8>& tgaData, const std::string& fileName)
 	{
 		DiskFile file(fileName, VFile::OM_Read);
 		file.Read(&tgaHeader, sizeof(tgaHeader));

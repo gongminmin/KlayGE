@@ -426,9 +426,9 @@ namespace KlayGE
 	{
 	}
 
-	const WString& D3D9Texture::Name() const
+	const std::wstring& D3D9Texture::Name() const
 	{
-		static WString name(L"Direct3D9 Texture");
+		static std::wstring name(L"Direct3D9 Texture");
 		return name;
 	}
 
@@ -545,7 +545,7 @@ namespace KlayGE
 		TIF(d3dDevice_->UpdateTexture(d3dTempTexture_.Get(), d3dTexture_.Get()));
 	}
 
-	void D3D9Texture::CustomAttribute(const String& name, void* pData)
+	void D3D9Texture::CustomAttribute(const std::string& name, void* pData)
 	{
 		// Valid attributes and their equivalent native functions:
 		// D3DDEVICE            : D3DDeviceDriver

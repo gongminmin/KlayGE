@@ -58,15 +58,12 @@
 			OutputDirectory="..\lib"
 			IntermediateDirectory="..\Release"
 			ConfigurationType="4"
-			CharacterSet="1">
+			CharacterSet="1"
+			WholeProgramOptimization="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
-				GlobalOptimizations="TRUE"
-				InlineFunctionExpansion="1"
-				OmitFramePointers="TRUE"
 				OptimizeForProcessor="3"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;STRICT"
-				StringPooling="TRUE"
 				BufferSecurityCheck="FALSE"
 				TreatWChar_tAsBuiltInType="TRUE"
 				ForceConformanceInForLoopScope="TRUE"
@@ -193,6 +190,9 @@
 							ObjectFile="$(IntDir)/$(InputName)1.obj"/>
 					</FileConfiguration>
 				</File>
+				<File
+					RelativePath=".\Src\Render\Shader.cpp">
+				</File>
 			</Filter>
 			<Filter
 				Name="头文件"
@@ -243,6 +243,9 @@
 					RelativePath="Include\KlayGE\SceneManager.hpp">
 				</File>
 				<File
+					RelativePath=".\Include\KlayGE\Shader.hpp">
+				</File>
+				<File
 					RelativePath="Include\KlayGE\Texture.hpp">
 				</File>
 				<File
@@ -257,9 +260,6 @@
 				Name="源文件"
 				Filter="">
 				<File
-					RelativePath=".\Src\Kernel\Cpu.cpp">
-				</File>
-				<File
 					RelativePath=".\Src\Kernel\Crc32.cpp">
 				</File>
 				<File
@@ -267,9 +267,6 @@
 				</File>
 				<File
 					RelativePath="Src\Kernel\Memory.cpp">
-				</File>
-				<File
-					RelativePath="Src\Kernel\MemoryImpl.cpp">
 				</File>
 				<File
 					RelativePath=".\Src\Kernel\Util.cpp">
@@ -282,9 +279,6 @@
 					RelativePath="Include\KlayGE\alloc.hpp">
 				</File>
 				<File
-					RelativePath="Include\KlayGE\array.hpp">
-				</File>
-				<File
 					RelativePath="Include\KlayGE\bintree.hpp">
 				</File>
 				<File
@@ -292,9 +286,6 @@
 				</File>
 				<File
 					RelativePath=".\Include\KlayGE\Config.hpp">
-				</File>
-				<File
-					RelativePath="Include\KlayGE\Cpu.hpp">
 				</File>
 				<File
 					RelativePath="Include\KlayGE\Crc32.hpp">
@@ -395,35 +386,41 @@
 				Name="源文件"
 				Filter="">
 				<File
-					RelativePath="Src\Math\Box.cpp">
-				</File>
-				<File
 					RelativePath="Src\Math\Math.cpp">
 				</File>
 				<File
-					RelativePath="Src\Math\Math3DNowEx.cpp">
-				</File>
-				<File
-					RelativePath="Src\Math\MathStandard.cpp">
-				</File>
-				<File
-					RelativePath="Src\Math\Matrix4.cpp">
-				</File>
-				<File
-					RelativePath="Src\Math\Quaternion.cpp">
+					RelativePath=".\Src\Math\Random.cpp">
 				</File>
 			</Filter>
 			<Filter
 				Name="头文件"
 				Filter="">
 				<File
+					RelativePath=".\Include\KlayGE\Box.hpp">
+				</File>
+				<File
+					RelativePath=".\Include\KlayGE\Color.hpp">
+				</File>
+				<File
 					RelativePath="Include\KlayGE\Math.hpp">
 				</File>
 				<File
-					RelativePath="Src\Math\MathImpl.hpp">
+					RelativePath=".\Include\KlayGE\Matrix.hpp">
 				</File>
 				<File
-					RelativePath="Include\KlayGE\MathTypes.hpp">
+					RelativePath=".\Include\KlayGE\Plane.hpp">
+				</File>
+				<File
+					RelativePath=".\Include\KlayGE\Quaternion.hpp">
+				</File>
+				<File
+					RelativePath=".\Include\KlayGE\Rect.hpp">
+				</File>
+				<File
+					RelativePath=".\Include\KlayGE\Size.hpp">
+				</File>
+				<File
+					RelativePath=".\Include\KlayGE\Vector.hpp">
 				</File>
 			</Filter>
 		</Filter>

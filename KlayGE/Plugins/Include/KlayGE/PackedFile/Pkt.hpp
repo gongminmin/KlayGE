@@ -20,6 +20,8 @@
 #include <KlayGE/VFile.hpp>
 #include <KlayGE/MapVector.hpp>
 
+#include <boost/utility.hpp>
+
 #pragma comment(lib, "KlayGE_FileSystem_PackedFile.lib")
 
 namespace KlayGE
@@ -51,7 +53,7 @@ namespace KlayGE
 		#pragma pack(pop)
 	#endif
 
-	typedef MapVector<String, FileDes> DirTable;
+	typedef MapVector<std::string, FileDes> DirTable;
 
 	enum FileAttrib
 	{
@@ -60,28 +62,24 @@ namespace KlayGE
 
 	// 翻译路径名
 	/////////////////////////////////////////////////////////////////////////////////
-	String& TransPathName(String& out, const String& in);
+	std::string& TransPathName(std::string& out, const std::string& in);
 
 	// 文件打包
 	/////////////////////////////////////////////////////////////////////////////////
-	class Pkt
+	class Pkt : boost::noncopyable
 	{
 	public:
 		static void Encode(VFile& Out, VFile& In);
 
-		void Pack(const String& dirName, VFile& pktFile);
+		void Pack(const std::string& dirName, VFile& pktFile);
 
 		Pkt();
-
-	private:
-		Pkt(const Pkt& rhs);
-		Pkt& operator=(const Pkt& rhs);
 	};
 
 
 	// 打包文件读取
 	/////////////////////////////////////////////////////////////////////////////////
-	class UnPkt
+	class UnPkt : boost::noncopyable
 	{
 	public:
 		static void Decode(VFile& Out, VFile& In);
@@ -89,7 +87,7 @@ namespace KlayGE
 		void Open(const VFilePtr& pktFile);
 		void Close();
 		
-		void LocateFile(const String& pathName);
+		void LocateFile(const std::string& pathName);
 
 		size_t CurFileSize() const;
 		size_t CurFileCompressedSize() const;
@@ -107,9 +105,6 @@ namespace KlayGE
 		DirTable::iterator	curFile_;
 
 		PktHeader	mag_;
-
-		UnPkt(const UnPkt& rhs);
-		UnPkt& operator=(const UnPkt& rhs);
 	};
 }
 

@@ -19,8 +19,9 @@
 #include <windows.h>
 #include <dsound.h>
 
+#include <boost/utility.hpp>
+
 #include <KlayGE/COMPtr.hpp>
-#include <KlayGE/alloc.hpp>
 #include <KlayGE/Audio.hpp>
 
 #pragma comment(lib, "KlayGE_AudioEngine_DSound.lib")
@@ -34,12 +35,12 @@ namespace KlayGE
 
 	// …˘“Ùª∫≥Â«¯
 	/////////////////////////////////////////////////////////////////////////////////
-	class DSSoundBuffer : public SoundBuffer
+	class DSSoundBuffer : boost::noncopyable, public SoundBuffer
 	{
 	private:
-		typedef std::vector<DSBufferType, alloc<DSBufferType> >	Sources;
-		typedef Sources::iterator					SourcesIter;
-		typedef Sources::const_iterator				SourcesConstIter;
+		typedef std::vector<DSBufferType>	Sources;
+		typedef Sources::iterator			SourcesIter;
+		typedef Sources::const_iterator		SourcesConstIter;
 
 	public:
 		DSSoundBuffer(const AudioDataSourcePtr& dataSource, U32 numSource, float volume);
@@ -71,15 +72,11 @@ namespace KlayGE
 		Vector3		pos_;
 		Vector3		vel_;
 		Vector3		dir_;
-
-	private:
-		DSSoundBuffer(const DSSoundBuffer&);
-		DSSoundBuffer& operator=(const DSSoundBuffer&);
 	};
 
 	// “Ù¿÷ª∫≥Â«¯
 	/////////////////////////////////////////////////////////////////////////////////
-	class DSMusicBuffer : public MusicBuffer
+	class DSMusicBuffer : boost::noncopyable, public MusicBuffer
 	{
 	public:
 		DSMusicBuffer(const AudioDataSourcePtr& dataSource, U32 bufferSeconds, float volume);
@@ -116,15 +113,11 @@ namespace KlayGE
 		UINT timerID_;
 
 		void FillBuffer();
-
-	private:
-		DSMusicBuffer(const DSMusicBuffer&);
-		DSMusicBuffer& operator=(const DSMusicBuffer&);
 	};
 
 	// π‹¿Ì“Ù∆µ≤•∑≈
 	/////////////////////////////////////////////////////////////////////////////////
-	class DSAudioEngine : public AudioEngine
+	class DSAudioEngine : boost::noncopyable, public AudioEngine
 	{
 	public:
 		DSAudioEngine();
@@ -133,7 +126,7 @@ namespace KlayGE
 		const COMPtr<IDirectSound>& DSound() const
 			{ return dsound_; }
 
-		const WString& Name() const;
+		const std::wstring& Name() const;
 
 		Vector3 GetListenerPos() const;
 		void SetListenerPos(const Vector3& v);
@@ -145,10 +138,6 @@ namespace KlayGE
 	private:
 		COMPtr<IDirectSound>			dsound_;
 		COMPtr<IDirectSound3DListener>	ds3dListener_;
-
-	private:
-		DSAudioEngine(const DSAudioEngine&);
-		DSAudioEngine& operator=(const DSAudioEngine&);
 	};
 }
 

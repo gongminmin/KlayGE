@@ -16,6 +16,8 @@
 #include <KlayGE/VFile.hpp>
 #include <KlayGE/PackedFile/Pkt.hpp>
 
+#include <boost/utility.hpp>
+
 #pragma comment(lib, "KlayGE_FileSystem_PackedFile.lib")
 
 namespace KlayGE
@@ -23,13 +25,13 @@ namespace KlayGE
 	// 把打包文件当普通文件夹读取的适配器
 	//		只能读取
 	/////////////////////////////////////////////////////////////////////////////////
- 	class PackedFile : public VFile
+ 	class PackedFile : boost::noncopyable, public VFile
 	{
 	public:
 		PackedFile();
-		PackedFile(const String& pathName);
+		PackedFile(const std::string& pathName);
 
-		bool Open(const String& pathName);
+		bool Open(const std::string& pathName);
 		void Close();
 
 		size_t Length();
@@ -50,8 +52,6 @@ namespace KlayGE
 		VFilePtr	file_;
 
 		VFilePtr	pktFile_;
-
-		PackedFile(const PackedFile& rhs);
 		PackedFile& operator=(const PackedFile& rhs);
 	};
 }

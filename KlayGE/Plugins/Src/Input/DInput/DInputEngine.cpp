@@ -61,9 +61,9 @@ namespace KlayGE
 
 	// ÊäÈëÒıÇæÃû³Æ
 	/////////////////////////////////////////////////////////////////////////////////
-	const WString& DInputEngine::Name() const
+	const std::wstring& DInputEngine::Name() const
 	{
-		static WString name(L"DirectInput Input Engine");
+		static std::wstring name(L"DirectInput Input Engine");
 		return name;
 	}
 

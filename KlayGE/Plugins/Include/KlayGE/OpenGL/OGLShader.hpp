@@ -40,11 +40,11 @@ namespace KlayGE
 	class OGLVertexShader : public VertexShader
 	{
 	public:
-		OGLVertexShader(const String& src, const String& functionName, const String& profile);
+		OGLVertexShader(const std::string& src, const std::string& functionName, const std::string& profile);
 		~OGLVertexShader();
 
 		void Active();
-		ShaderParameterPtr GetNamedParameter(const String& name);
+		ShaderParameterPtr GetNamedParameter(const std::string& name);
 
 		CGprogram OGLVertexProgram() const;
 
@@ -55,11 +55,11 @@ namespace KlayGE
 	class OGLPixelShader : public PixelShader
 	{
 	public:
-		OGLPixelShader(const String& src, const String& functionName, const String& profile);
+		OGLPixelShader(const std::string& src, const std::string& functionName, const std::string& profile);
 		~OGLPixelShader();
 
 		void Active();
-		ShaderParameterPtr GetNamedParameter(const String& name);
+		ShaderParameterPtr GetNamedParameter(const std::string& name);
 
 		CGprogram OGLPixelProgram() const;
 

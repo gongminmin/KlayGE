@@ -14,7 +14,6 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Engine.hpp>
 #include <KlayGE/RenderFactory.hpp>
-#include <KlayGE/alloc.hpp>
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 
 #include <vector>
@@ -65,7 +64,7 @@ namespace KlayGE
 	}
 
 
-	D3D9VertexShader::D3D9VertexShader(const String& src, const String& functionName, const String& profile)
+	D3D9VertexShader::D3D9VertexShader(const std::string& src, const std::string& functionName, const std::string& profile)
 		: d3dDevice_(static_cast<const D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()).D3DDevice())
 	{
 		ID3DXBuffer* shaderBuffer;
@@ -86,7 +85,7 @@ namespace KlayGE
 		d3dDevice_->SetVertexShader(vertexShader_.Get());
 	}
 
-	ShaderParameterPtr D3D9VertexShader::GetNamedParameter(const String& name)
+	ShaderParameterPtr D3D9VertexShader::GetNamedParameter(const std::string& name)
 	{
 		D3DXHANDLE param(constantTable_->GetConstantByName(NULL, name.c_str()));
 		return ShaderParameterPtr(new D3D9ShaderParameter(constantTable_, param));
@@ -98,7 +97,7 @@ namespace KlayGE
 	}
 
 	
-	D3D9PixelShader::D3D9PixelShader(const String& src, const String& functionName, const String& profile)
+	D3D9PixelShader::D3D9PixelShader(const std::string& src, const std::string& functionName, const std::string& profile)
 		: d3dDevice_(static_cast<const D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()).D3DDevice())
 	{
 		ID3DXBuffer* shaderBuffer;
@@ -119,7 +118,7 @@ namespace KlayGE
 		d3dDevice_->SetPixelShader(pixelShader_.Get());
 	}
 
-	ShaderParameterPtr D3D9PixelShader::GetNamedParameter(const String& name)
+	ShaderParameterPtr D3D9PixelShader::GetNamedParameter(const std::string& name)
 	{
 		return ShaderParameterPtr(new D3D9ShaderParameter(constantTable_,
 			constantTable_->GetConstantByName(NULL, name.c_str())));

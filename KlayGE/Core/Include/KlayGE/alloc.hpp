@@ -13,6 +13,10 @@
 #ifndef _ALLOC_HPP
 #define _ALLOC_HPP
 
+#include <new>
+#include <cstdlib>
+#include <cstddef>
+
 namespace KlayGE
 {
 	class Malloc
