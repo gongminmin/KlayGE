@@ -1,8 +1,11 @@
-// D3D9Font.cpp
-// KlayGE D3D9Font类 实现文件
-// Ver 2.0.4
+// Font.cpp
+// KlayGE Font类 实现文件
+// Ver 2.3.0
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.3.0
+// 使用FreeType实现字体读取 (2004.12.26)
 //
 // 2.0.4
 // 纹理格式改为PF_A4L4 (2004.3.18)
@@ -39,9 +42,7 @@
 #include <vector>
 #include <cstring>
 
-#include <d3d9types.h>
-
-#include <KlayGE/D3D9/D3D9Font.hpp>
+#include <KlayGE/Font.hpp>
 
 #ifdef _DEBUG
 	#pragma comment(lib, "freetype219MT_D.lib")
@@ -53,10 +54,10 @@ namespace
 {
 	using namespace KlayGE;
 
-	class D3D9FontRenderable : public Renderable
+	class FontRenderable : public Renderable
 	{
 	public:
-		D3D9FontRenderable(RenderEffectPtr const & effect, RenderBufferPtr const & rb)
+		FontRenderable(RenderEffectPtr const & effect, RenderBufferPtr const & rb)
 			: fontEffect_(effect),
 				fontRB_(rb),
 				box_(Vector3(0, 0, 0), Vector3(0, 0, 0))
@@ -65,7 +66,7 @@ namespace
 
 		std::wstring const & Name() const
 		{
-			static const std::wstring name_(L"Direct3D9 Font");
+			static const std::wstring name_(L"Font");
 			return name_;
 		}
 
@@ -90,7 +91,7 @@ namespace
 		bool CanBeCulled() const
 			{ return false; }
 
-		void RenderText(uint32_t fontHeight, D3D9Font::CharInfoMapType& charInfoMap, float sx, float sy, float sz,
+		void RenderText(uint32_t fontHeight, Font::CharInfoMapType& charInfoMap, float sx, float sy, float sz,
 			float xScale, float yScale, uint32_t clr, std::wstring const & text, uint32_t flags)
 		{
 			// 设置过滤属性
@@ -188,9 +189,9 @@ namespace
 		RenderEffectPtr fontEffect_;
 		RenderBufferPtr fontRB_;
 
-		std::vector<float>	xyzs_;
+		std::vector<float>		xyzs_;
 		std::vector<uint32_t>	clrs_;
-		std::vector<float>	texs_;
+		std::vector<float>		texs_;
 		std::vector<uint16_t>	indices_;
 
 		Box box_;
@@ -201,7 +202,7 @@ namespace KlayGE
 {
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
-	D3D9Font::D3D9Font(std::string const & fontName, uint32_t height, uint32_t /*flags*/)
+	Font::Font(std::string const & fontName, uint32_t height, uint32_t /*flags*/)
 				: curX_(0), curY_(0),
 					fontHeight_(height),
 					theTexture_(Context::Instance().RenderFactoryInstance().MakeTexture(1024, 1024, 1, PF_A4L4)),
@@ -218,36 +219,36 @@ namespace KlayGE
 
 
 		rb_->AddVertexStream(VST_Positions, sizeof(float), 3);
-		rb_->AddVertexStream(VST_Diffuses, sizeof(D3DCOLOR), 1);
+		rb_->AddVertexStream(VST_Diffuses, sizeof(uint32_t), 1);
 		rb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2);
 
 		rb_->AddIndexStream();
 
-		FT_Init_FreeType(&ftLib_);
-		FT_New_Face(ftLib_, ResLoader::Instance().Locate(fontName).c_str(), 0, &face_);
-		FT_Set_Char_Size(face_, 0, height * 64, 72, 72);
-		FT_Select_Charmap(face_, FT_ENCODING_UNICODE);
+		::FT_Init_FreeType(&ftLib_);
+		::FT_New_Face(ftLib_, ResLoader::Instance().Locate(fontName).c_str(), 0, &face_);
+		::FT_Set_Pixel_Sizes(face_, 0, height);
+		::FT_Select_Charmap(face_, FT_ENCODING_UNICODE);
 		slot_ = face_->glyph;
 	}
 
 	// 析构函数
 	/////////////////////////////////////////////////////////////////////////////////
-	D3D9Font::~D3D9Font()
+	Font::~Font()
 	{
-		FT_Done_Face(face_);
-		FT_Done_FreeType(ftLib_);
+		::FT_Done_Face(face_);
+		::FT_Done_FreeType(ftLib_);
 	}
 
 	// 获取字体高度
 	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t D3D9Font::FontHeight() const
+	uint32_t Font::FontHeight() const
 	{
 		return fontHeight_;
 	}
 
 	// 更新纹理，使用LRU算法
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9Font::UpdateTexture(std::wstring const & text)
+	void Font::UpdateTexture(std::wstring const & text)
 	{
 		for (std::wstring::const_iterator citer = text.begin(); citer != text.end(); ++ citer)
 		{
@@ -270,7 +271,7 @@ namespace KlayGE
 				if (ch != L'\n')
 				{
 					// convert character code to glyph index
-					FT_Load_Char(face_, ch, FT_LOAD_RENDER);
+					::FT_Load_Char(face_, ch, FT_LOAD_RENDER);
 
 					uint32_t const width = (0 != slot_->bitmap.width) ? slot_->bitmap.width : this->FontHeight() / 2;
 
@@ -317,10 +318,12 @@ namespace KlayGE
 					}
 
 					std::vector<uint8_t> dest(this->FontHeight() * this->FontHeight(), 0);
-					for (uint32_t y = 0; y < static_cast<uint32_t>(slot_->bitmap.rows); ++ y)
+					uint32_t const rows(std::min<uint32_t>(slot_->bitmap.rows, this->FontHeight()));
+					uint32_t const cols(std::min<uint32_t>(slot_->bitmap.width, this->FontHeight()));
+					for (uint32_t y = 0; y < rows; ++ y)
 					{
 						uint32_t const y_offset = this->FontHeight() * 3 / 4 - slot_->bitmap_top + y;
-						for (uint32_t x = 0; x < static_cast<uint32_t>(slot_->bitmap.width); ++ x)
+						for (uint32_t x = 0; x < cols; ++ x)
 						{
 							if ((y < this->FontHeight()) && (x < this->FontHeight()))
 							{
@@ -341,7 +344,7 @@ namespace KlayGE
 
 	// 在指定位置画出文字
 	/////////////////////////////////////////////////////////////////////////////////
-	RenderablePtr D3D9Font::RenderText(float sx, float sy, Color const & clr, 
+	RenderablePtr Font::RenderText(float sx, float sy, Color const & clr, 
 		std::wstring const & text, uint32_t flags)
 	{
 		return this->RenderText(sx, sy, 0.5f, 1, 1, clr, text, flags);
@@ -349,7 +352,7 @@ namespace KlayGE
 
 	// 在指定位置画出放缩的文字
 	/////////////////////////////////////////////////////////////////////////////////
-	RenderablePtr D3D9Font::RenderText(float sx, float sy, float sz,
+	RenderablePtr Font::RenderText(float sx, float sy, float sz,
 		float xScale, float yScale, Color const & clr,
 		std::wstring const & text, uint32_t flags)
 	{
@@ -362,10 +365,11 @@ namespace KlayGE
 
 		uint8_t r, g, b, a;
 		clr.RGBA(r, g, b, a);
+		uint32_t const color((a << 24) + (r << 16) + (g << 8) + b);
 
-		boost::shared_ptr<D3D9FontRenderable> renderable(new D3D9FontRenderable(effect_, rb_));
+		boost::shared_ptr<FontRenderable> renderable(new FontRenderable(effect_, rb_));
 		renderable->RenderText(this->FontHeight(), charInfoMap_,
-			sx, sy, sz, xScale, yScale, D3DCOLOR_ARGB(a, r, g, b), text, flags);
+			sx, sy, sz, xScale, yScale, color, text, flags);
 		return renderable;
 	}
 }
