@@ -34,8 +34,6 @@
 
 #include <KlayGE/LZSS/LZSS.hpp>
 
-using namespace std;
-
 #include <boost/crc.hpp>
 #include <boost/filesystem/operations.hpp>
 
@@ -407,8 +405,7 @@ namespace
 		path findPath(rootName + '/' + pathName, native);
 		if (exists(findPath))
 		{
-			directory_iterator end_itr;
-			for (directory_iterator iter(findPath); iter != end_itr; ++ iter)
+			for (directory_iterator iter(findPath); iter != directory_iterator(); ++ iter)
 			{
 				std::string const & fileName(iter->leaf());
 

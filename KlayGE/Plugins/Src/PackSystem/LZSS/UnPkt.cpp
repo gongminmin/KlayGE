@@ -165,8 +165,6 @@ namespace
 	/////////////////////////////////////////////////////////////////////////////////
 	void ReadDirTable(DirTable& dirTable, std::istream& input)
 	{
-		using namespace KlayGE;
-
 		for (;;)
 		{
 			uint32_t len;

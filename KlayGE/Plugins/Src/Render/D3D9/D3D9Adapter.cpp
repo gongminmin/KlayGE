@@ -55,9 +55,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9Adapter::Enumerate(boost::shared_ptr<IDirect3D9> const & d3d)
 	{
-		using std::vector;
-
-		typedef vector<D3DFORMAT> FormatType;
+		typedef std::vector<D3DFORMAT> FormatType;
 		FormatType formats;
 		formats.push_back(D3DFMT_X8R8G8B8);
 		formats.push_back(D3DFMT_A8R8G8B8);

@@ -15,9 +15,6 @@
 
 #include <KlayGE/OCTree/OCTree.hpp>
 
-#include <iostream>
-using namespace std;
-
 namespace KlayGE
 {
 	OCTreeNode::OCTreeNode(Box const & box)

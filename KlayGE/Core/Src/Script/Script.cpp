@@ -22,8 +22,6 @@
 
 #pragma comment(lib, "python23.lib")
 
-using std::vector;
-
 namespace KlayGE
 {
 	// 向模块声明中添加一个方法
