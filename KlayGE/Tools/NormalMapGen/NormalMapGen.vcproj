@@ -81,7 +81,6 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/NormalMapGen.exe"
 				LinkIncremental="1"
-				GenerateDebugInformation="TRUE"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
