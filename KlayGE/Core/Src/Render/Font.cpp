@@ -337,7 +337,7 @@ namespace KlayGE
 							}
 						}
 					}
-					theTexture_->CopyMemoryToTexture(&dest[0], TEX_FORMAT,
+					theTexture_->CopyMemoryToTexture(0, &dest[0], TEX_FORMAT,
 							this->FontHeight(), this->FontHeight(), charRect.left, charRect.top);
 
 					charInfoMap_.insert(std::make_pair(ch, charInfo));

@@ -40,9 +40,11 @@ namespace KlayGE
 		void CustomAttribute(std::string const & name, void* pData);
 
 		void CopyToTexture(Texture& target);
-		void CopyToMemory(void* data);
-		void CopyMemoryToTexture(void* data, PixelFormat pf,
+		void CopyToMemory(int level, void* data);
+		void CopyMemoryToTexture(int level, void* data, PixelFormat pf,
 			uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset);
+
+		void GenerateMipSubLevels();
 
 		boost::shared_ptr<IDirect3DTexture9> const & D3DTexture() const
 			{ return this->d3dTexture_; }

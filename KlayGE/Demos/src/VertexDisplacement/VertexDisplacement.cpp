@@ -84,7 +84,8 @@ namespace
 				}
 			}
 
-			texture->CopyMemoryToTexture(&tgaData[0], PF_X8R8G8B8, texture->Width(), texture->Height(), 0, 0);
+			texture->CopyMemoryToTexture(0, &tgaData[0], PF_X8R8G8B8, texture->Width(), texture->Height(), 0, 0);
+			texture->GenerateMipSubLevels();
 
 			return texture;
 		}

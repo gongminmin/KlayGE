@@ -260,12 +260,12 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9Texture::CopyToMemory(void* data)
+	void D3D9Texture::CopyToMemory(int level, void* data)
 	{
 		assert(data != NULL);
 
 		D3DLOCKED_RECT d3d_rc;
-		d3dTextureShadow_->LockRect(0, &d3d_rc, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY);
+		d3dTextureShadow_->LockRect(level, &d3d_rc, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY);
 
 		uint8_t* dst = static_cast<uint8_t*>(data);
 		uint8_t* src = static_cast<uint8_t*>(d3d_rc.pBits);
@@ -284,18 +284,26 @@ namespace KlayGE
 		d3dTextureShadow_->UnlockRect(0);
 	}
 
-	void D3D9Texture::CopyMemoryToTexture(void* data, PixelFormat pf,
+	void D3D9Texture::CopyMemoryToTexture(int level, void* data, PixelFormat pf,
 		uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset)
 	{
 		IDirect3DSurface9* temp;
-		TIF(d3dTextureShadow_->GetSurfaceLevel(0, &temp));
-		boost::shared_ptr<IDirect3DSurface9> dst = MakeCOMPtr(temp);
+		TIF(d3dTextureShadow_->GetSurfaceLevel(level, &temp));
+		boost::shared_ptr<IDirect3DSurface9> shadow = MakeCOMPtr(temp);
 
 		RECT srcRc = { 0, 0, width, height };
 		RECT dstRc = { xOffset, yOffset, xOffset + width, yOffset + height };
-		TIF(D3DXLoadSurfaceFromMemory(dst.get(), NULL, &dstRc, data, ConvertFormat(pf),
+		TIF(D3DXLoadSurfaceFromMemory(shadow.get(), NULL, &dstRc, data, ConvertFormat(pf),
 			width * PixelFormatBits(pf) / 8, NULL, &srcRc, D3DX_DEFAULT, 0));
 
+		TIF(this->D3DTexture()->GetSurfaceLevel(level, &temp));
+		boost::shared_ptr<IDirect3DSurface9> texture = MakeCOMPtr(temp);
+
+		TIF(d3dDevice_->UpdateSurface(shadow.get(), NULL, texture.get(), NULL));
+	}
+
+	void D3D9Texture::GenerateMipSubLevels()
+	{
 		TIF(D3DXFilterTexture(d3dTextureShadow_.get(), NULL, D3DX_DEFAULT, D3DX_DEFAULT));
 		TIF(d3dDevice_->UpdateTexture(d3dTextureShadow_.get(), d3dTexture_.get()));
 	}

@@ -56,7 +56,7 @@ namespace
 			file.seekg(TGAHeader.infoLength, std::ios_base::cur);
 
 			KlayGE::TexturePtr texture(Context::Instance().RenderFactoryInstance().MakeTexture(TGAHeader.width,
-				TGAHeader.height, 0, PF_X8R8G8B8));
+				TGAHeader.height, 1, PF_X8R8G8B8));
 
 			vector<uint8_t> data(TGAHeader.width * TGAHeader.height * TGAHeader.pixelSize / 8);
 			file.read(reinterpret_cast<char*>(&data[0]), data.size());
@@ -83,7 +83,7 @@ namespace
 				}
 			}
 
-			texture->CopyMemoryToTexture(&tgaData[0], PF_X8R8G8B8, texture->Width(), texture->Height(), 0, 0);
+			texture->CopyMemoryToTexture(0, &tgaData[0], PF_X8R8G8B8, texture->Width(), texture->Height(), 0, 0);
 
 			return texture;
 		}

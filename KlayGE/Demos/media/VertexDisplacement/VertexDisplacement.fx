@@ -1,5 +1,6 @@
 float4x4 worldviewproj : WORLDVIEWPROJECTION;
 float currentAngle;
+float3 lightDir = float3(0, 0, 1);
 
 struct VS_INPUT
 {
@@ -20,8 +21,7 @@ VS_OUTPUT VertexDisplacementVS(VS_INPUT input,
 	VS_OUTPUT output;
 
 	float4 v = input.pos;
-	v.z = sin(input.pos.x + currentAngle);
-	v.z += cos(input.pos.y + currentAngle);
+	v.z = sin(input.pos.x + currentAngle) + cos(input.pos.y + currentAngle);
 	v.z *= (input.pos.x + 2) * 0.2f;
 
 	output.pos = mul(v, worldviewproj);
@@ -61,6 +61,22 @@ technique VertexDisplacement
 		ZWriteEnable = true;
 
 		VertexShader = compile vs_1_1 VertexDisplacementVS(worldviewproj, currentAngle);
-		PixelShader = compile ps_1_1 VertexDisplacementPS(flagSampler);
+		//PixelShader = compile ps_1_1 VertexDisplacementPS(flagSampler);
+		
+		// Set up texture stage 0
+		Texture[0] = <flag>; // Use the texture parameter defined above
+		ColorOp[0] = Modulate;
+		ColorArg1[0] = Texture;
+		ColorArg2[0] = Diffuse;
+		AlphaOp[0] = Modulate;
+		AlphaArg1[0] = Texture;
+		AlphaArg2[0] = Diffuse;
+		MinFilter[0] = Linear;
+		MagFilter[0] = Linear;
+		MipFilter[0] = Linear;
+
+		// Disable texture stage 1
+		ColorOp[1] = Disable;
+		AlphaOp[1] = Disable;
 	}
 }

@@ -152,9 +152,11 @@ namespace KlayGE
 
 		// Copies (and maybe scales to fit) the contents of this texture to another texture.
 		virtual void CopyToTexture(Texture& target) = 0;
-		virtual void CopyToMemory(void* data) = 0;
-		virtual void CopyMemoryToTexture(void* data, PixelFormat pf,
+		virtual void CopyToMemory(int level, void* data) = 0;
+		virtual void CopyMemoryToTexture(int level, void* data, PixelFormat pf,
 			uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset) = 0;
+
+		virtual void GenerateMipSubLevels() = 0;
 
 	protected:
 		uint32_t		height_;
