@@ -43,170 +43,295 @@ namespace
 {
 	using namespace KlayGE;
 
-	U32 const N(4096);			// size of ring buffer
-	U32 const F(18);			// upper limit for matchLength
-	U32 const THRESHOLD(2);		// encode string into position and length
-	U32 const NIL(N);			// index for root of binary search trees
-
-	unsigned char textBuf[N + F - 1];		// ring buffer of size N, 
-											// with extra F-1 bytes to facilitate string comparison
-	int matchPosition, matchLength;			// of longest match.  These are
-											// set by the InsertNode() procedure.
-	int lson[N + 1], rson[N + 257], dad[N + 1];  // left & right children &
-											// parents -- These constitute binary search trees.
-
-	void InitTree()  // initialize trees
+	class LZSS
 	{
-		// For i = 0 to N - 1, rson[i] and lson[i] will be the right and
-		// left children of node i.  These nodes need not be initialized.
-		// Also, dad[i] is the parent of node i.  These are initialized to
-		// NIL (= N), which stands for 'not used.'
-		// For i = 0 to 255, rson[N + i + 1] is the root of the tree
-		// for strings that begin with character i.  These are initialized
-		// to NIL.  Note there are 256 trees.
-
-		for (U32 i = N + 1; i <= N + 256; ++ i)
+	public:
+		void Encode(std::ostream& out, std::istream& in)
 		{
-			rson[i] = NIL;
-		}
+			std::istreambuf_iterator<char> inEnd;
+			std::istreambuf_iterator<char> inIter(in);
+			std::ostreambuf_iterator<char> outIter(out);
 
-		for (U32 i = 0; i < N; ++ i)
-		{
-			dad[i] = NIL;
-		}
-	}
+			int lastMatchLength;
+			U8 c;
+			std::vector<U8> codeBuf(17, 0);		// codeBuf[1..16] saves eight units of code, and
+												// codeBuf[0] works as eight flags, "1" representing that the unit
+												// is an unencoded letter (1 byte), "0" a position-and-length pair
+												// (2 bytes).  Thus, eight units require at most 16 bytes of code.
+			std::vector<U8>::iterator codeBufPtr = codeBuf.begin() + 1;
 
-	void InsertNode(U32 r)
-		// Inserts string of length F, textBuf[r..r+F-1], into one of the
-		// trees (textBuf[r]'th tree) and returns the longest-match position
-		// and length via the global variables matchPosition and matchLength.
-		// If matchLength = F, then removes the old node in favor of the new
-		// one, because the old one will be deleted sooner.
-		// Note r plays double role, as tree node and position in buffer.
-	{
-		U32 cmp(1);
-		U8* key(&textBuf[r]);
-		U32 p(N + 1 + key[0]);
-		rson[r] = lson[r] = NIL;
-		matchLength = 0;
+			U8 mask = 1;
 
-		for (;;)
-		{
-			if (cmp >= 0)
+			this->InitTree();					// initialize trees
+			U32 s(0);
+			U32 r(N - F);
+			std::fill_n(textBuf_, r, ' ');		// Clear the buffer with
+												// any character that will appear often.
+
+			for (int i = 1; i <= F; ++ i)
 			{
-				if (rson[p] != NIL)
+				this->InsertNode(r - i);	// Insert the F strings,
+											// each of which begins with one or more 'space' characters.  Note
+											// the order in which these strings are inserted.  This way,
+											// degenerate trees will be less likely to occur.
+			}
+			this->InsertNode(r);			// Finally, insert the whole string just read.  The
+											// global variables matchLength and matchPosition are set.
+
+			int len(0);
+			while ((inIter != inEnd) && (len < F))
+			{
+				c = *inIter;
+				++ inIter;
+
+				textBuf_[r + len] = c;			// Read F bytes into the last F bytes of the buffer
+
+				++ len;
+			}
+
+			do
+			{
+				if (matchLength_ > len)
 				{
-					p = rson[p];
+					matchLength_ = len;		// matchLength
+											// may be spuriously long near the end of text.
+				}
+
+				if (matchLength_ <= THRESHOLD)
+				{
+					matchLength_ = 1;				// Not long enough match.  Send one byte.
+					codeBuf[0] |= mask;				// 'send one byte' flag
+					*codeBufPtr = textBuf_[r];		// Send uncoded.
+					++ codeBufPtr;
 				}
 				else
 				{
-					rson[p] = r;
-					dad[r] = p;
-					return;
+					*codeBufPtr = static_cast<U8>(matchPosition_);
+					++ codeBufPtr;
+					*codeBufPtr = static_cast<U8>(((matchPosition_ >> 4) & 0xF0)
+						| (matchLength_ - (THRESHOLD + 1)));		// Send position and
+																	// length pair. Note matchLength > THRESHOLD.
+					++ codeBufPtr;
 				}
-			}
-			else
-			{
-				if (lson[p] != NIL)
+
+				mask <<= 1;
+				if (0 == mask)
 				{
-					p = lson[p];
+					// Shift mask left one bit.
+					std::copy(codeBuf.begin(), codeBufPtr, outIter);	// Send at most 8 units of
+																		// code together
+					codeBuf[0] = 0;
+					codeBufPtr = codeBuf.begin() + 1;
+					mask = 1;
 				}
-				else
+				lastMatchLength = matchLength_;
+
+				int i(0);
+				while ((inIter != inEnd) && (i < lastMatchLength))
 				{
-					lson[p] = r;
-					dad[r] = p;
-					return;
-				}
-			}
+					c = *inIter;
+					++ inIter;
 
-			int i(1);
-			while ((i < F) && ((cmp = key[i] - textBuf[p + i]) == 0))
-			{
-				++ i;
-			}
-			if (i > matchLength)
-			{
-				matchPosition = p;
-				if ((matchLength = i) >= F)
-				{
-					break;
-				}
-			}
-		}
-
-		dad[r]  = dad[p];
-		lson[r] = lson[p];
-		rson[r] = rson[p];
-		dad[lson[p]] = r;
-		dad[rson[p]] = r;
-		if (rson[dad[p]] == p)
-		{
-			rson[dad[p]] = r;
-		}
-		else
-		{
-			lson[dad[p]] = r;
-		}
-		dad[p] = NIL;  // remove p
-	}
-
-	void DeleteNode(U32 p)  // deletes node p from tree
-	{
-		U32 q;
-
-		if (NIL == dad[p])
-		{
-			return;  // not in tree
-		}
-		if (NIL == rson[p])
-		{
-			q = lson[p];
-		}
-		else
-		{
-			if (NIL == lson[p])
-			{
-				q = rson[p];
-			}
-			else
-			{
-				q = lson[p];
-				if (rson[q] != NIL)
-				{
-					do
+					this->DeleteNode(s);		// Delete old strings and
+					textBuf_[s] = c;			// read new bytes
+					if (s < F - 1)
 					{
-						q = rson[q];
-					} while (rson[q] != NIL);
+						textBuf_[s + N] = c;	// If the position is
+												// near the end of buffer, extend the buffer to make
+												// string comparison easier.
+					}
+					s = (s + 1) & (N - 1);
+					r = (r + 1) & (N - 1);
 
-					rson[dad[q]] = lson[q];
-					dad[lson[q]] = dad[q];
-					lson[q] = lson[p];
-					dad[lson[p]] = q;
+					// Since this is a ring buffer, increment the position
+					// modulo N.
+					this->InsertNode(r);	// Register the string in textBuf[r..r+F-1]
+
+					++ i;
 				}
-				
-				rson[q] = rson[p];
-				dad[rson[p]] = q;
+
+				while (i < lastMatchLength)
+				{
+					this->DeleteNode(s);
+					s = (s + 1) & (N - 1);
+					r = (r + 1) & (N - 1);
+					if (-- len)
+					{
+						this->InsertNode(r);		// buffer may not be empty.
+					}
+
+					++ i;
+				}
+			} while (len > 0);	// until length of string to be processed is zero
+
+			if (codeBufPtr - codeBuf.begin() > 1)
+			{
+				// Send remaining code
+				std::copy(codeBuf.begin(), codeBufPtr, outIter);
 			}
 		}
 
-		dad[q] = dad[p];
-		if (rson[dad[p]] == p)
+	private:
+		// initialize trees
+		void InitTree()
 		{
-			rson[dad[p]] = q;
+			// For i = 0 to N - 1, rson[i] and lson[i] will be the right and
+			// left children of node i.  These nodes need not be initialized.
+			// Also, dad[i] is the parent of node i.  These are initialized to
+			// NIL (= N), which stands for 'not used.'
+			// For i = 0 to 255, rson[N + i + 1] is the root of the tree
+			// for strings that begin with character i.  These are initialized
+			// to NIL.  Note there are 256 trees.
+
+			std::fill_n(rson_ + N + 1, 256, NIL);
+			std::fill_n(dad_, N, NIL);
 		}
-		else
+
+		void InsertNode(U32 r)
 		{
-			lson[dad[p]] = q;
+			// Inserts string of length F, textBuf[r..r+F-1], into one of the
+			// trees (textBuf[r]'th tree) and returns the longest-match position
+			// and length via the global variables matchPosition and matchLength.
+			// If matchLength = F, then removes the old node in favor of the new
+			// one, because the old one will be deleted sooner.
+			// Note r plays double role, as tree node and position in buffer.
+
+			U32 cmp(1);
+			U8* key(&textBuf_[r]);
+			U32 p(N + 1 + key[0]);
+			rson_[r] = lson_[r] = NIL;
+			matchLength_ = 0;
+
+			for (;;)
+			{
+				if (cmp >= 0)
+				{
+					if (rson_[p] != NIL)
+					{
+						p = rson_[p];
+					}
+					else
+					{
+						rson_[p] = r;
+						dad_[r] = p;
+						return;
+					}
+				}
+				else
+				{
+					if (lson_[p] != NIL)
+					{
+						p = lson_[p];
+					}
+					else
+					{
+						lson_[p] = r;
+						dad_[r] = p;
+						return;
+					}
+				}
+
+				int i(1);
+				while ((i < F) && (0 == (cmp = key[i] - textBuf_[p + i])))
+				{
+					++ i;
+				}
+				if (i > matchLength_)
+				{
+					matchPosition_ = p;
+					if ((matchLength_ = i) >= F)
+					{
+						break;
+					}
+				}
+			}
+
+			dad_[r]  = dad_[p];
+			lson_[r] = lson_[p];
+			rson_[r] = rson_[p];
+			dad_[lson_[p]] = r;
+			dad_[rson_[p]] = r;
+			if (rson_[dad_[p]] == p)
+			{
+				rson_[dad_[p]] = r;
+			}
+			else
+			{
+				lson_[dad_[p]] = r;
+			}
+			dad_[p] = NIL;  // remove p
 		}
-		dad[p] = NIL;
-	}
+
+		// deletes node p from tree
+		void DeleteNode(U32 p)
+		{
+			U32 q;
+
+			if (NIL == dad_[p])
+			{
+				return;  // not in tree
+			}
+			if (NIL == rson_[p])
+			{
+				q = lson_[p];
+			}
+			else
+			{
+				if (NIL == lson_[p])
+				{
+					q = rson_[p];
+				}
+				else
+				{
+					q = lson_[p];
+					if (rson_[q] != NIL)
+					{
+						do
+						{
+							q = rson_[q];
+						} while (rson_[q] != NIL);
+
+						rson_[dad_[q]] = lson_[q];
+						dad_[lson_[q]] = dad_[q];
+						lson_[q] = lson_[p];
+						dad_[lson_[p]] = q;
+					}
+					
+					rson_[q] = rson_[p];
+					dad_[rson_[p]] = q;
+				}
+			}
+
+			dad_[q] = dad_[p];
+			if (rson_[dad_[p]] == p)
+			{
+				rson_[dad_[p]] = q;
+			}
+			else
+			{
+				lson_[dad_[p]] = q;
+			}
+			dad_[p] = NIL;
+		}
+
+	private:
+		static int const N = 4096;			// size of ring buffer
+		static int const F = 18;			// upper limit for matchLength
+		static int const THRESHOLD = 2;		// encode string into position and length
+		static int const NIL = N;			// index for root of binary search trees
+
+		unsigned char textBuf_[N + F - 1];		// ring buffer of size N, 
+												// with extra F-1 bytes to facilitate string comparison
+		int matchPosition_, matchLength_;		// of longest match.  These are
+												// set by the InsertNode() procedure.
+		int lson_[N + 1], rson_[N + 257];		// left & right children &
+		int dad_[N + 1];						// parents -- These constitute binary search trees.
+	};
 
 	// 输出目录表
 	/////////////////////////////////////////////////////////////////////////////////
 	void WriteDirTable(std::ostream& out, KlayGE::DirTable const & dirTable)
 	{
-		using namespace KlayGE;
-
 		for (DirTable::const_iterator iter = dirTable.begin(); iter != dirTable.end(); ++ iter)
 		{
 			FileDes const & fd(iter->second);
@@ -225,8 +350,6 @@ namespace
 	void Compress(std::ostream& outFile, DirTable& dirTable, std::string const & rootName,
 		std::vector<std::string> const & files)
 	{
-		using namespace KlayGE;
-
 		U32 curPos(0);
 
 		for (std::vector<std::string>::const_iterator iter = files.begin(); iter != files.end(); ++ iter)
@@ -320,116 +443,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void Pkt::Encode(std::ostream& out, std::istream& in)
 	{
-		int lastMatchLength, codeBufPtr;
-		U8 c;
-		U8 codeBuf[17];
-		U8 mask;
-
-		InitTree();			// initialize trees
-		codeBuf[0] = 0;		// codeBuf[1..16] saves eight units of code, and
-							// codeBuf[0] works as eight flags, "1" representing that the unit
-							// is an unencoded letter (1 byte), "0" a position-and-length pair
-							// (2 bytes).  Thus, eight units require at most 16 bytes of code.
-		codeBufPtr = mask = 1;
-		U32 s(0);
-		U32 r(N - F);
-		std::fill_n(textBuf, r, ' ');	// Clear the buffer with
-										// any character that will appear often.
-		int len(0);
-		for (; (len < F); ++ len)
-		{
-			in.read(reinterpret_cast<char*>(&c), sizeof(c));
-
-			if (in.fail())
-			{
-				break;
-			}
-
-			textBuf[r + len] = c;  // Read F bytes into the last F bytes of the buffer
-		}
-		for (int i = 1; i <= F; ++ i)
-		{
-			InsertNode(r - i);  // Insert the F strings,
-								// each of which begins with one or more 'space' characters.  Note
-								// the order in which these strings are inserted.  This way,
-								// degenerate trees will be less likely to occur.
-		}
-		InsertNode(r);  // Finally, insert the whole string just read.  The
-						// global variables matchLength and matchPosition are set.
-		do
-		{
-			if (matchLength > len)
-			{
-				matchLength = len;  // matchLength
-									// may be spuriously long near the end of text.
-			}
-			if (matchLength <= THRESHOLD)
-			{
-				matchLength = 1;		// Not long enough match.  Send one byte.
-				codeBuf[0] |= mask;		// 'send one byte' flag
-				codeBuf[codeBufPtr ++] = textBuf[r];  // Send uncoded.
-			}
-			else
-			{
-				codeBuf[codeBufPtr ++] = static_cast<U8>(matchPosition);
-				codeBuf[codeBufPtr ++] = static_cast<U8>(((matchPosition >> 4) & 0xF0)
-					| (matchLength - (THRESHOLD + 1)));		// Send position and
-															// length pair. Note matchLength > THRESHOLD.
-			}
-			if (0 == (mask <<= 1))
-			{
-				// Shift mask left one bit.
-				out.write(reinterpret_cast<char*>(codeBuf), codeBufPtr);	// Send at most 8 units of
-												// code together
-				codeBuf[0] = 0;
-				codeBufPtr = mask = 1;
-			}
-			lastMatchLength = matchLength;
-
-			int i(0);
-			for (; (i < lastMatchLength); ++ i)
-			{
-				in.read(reinterpret_cast<char*>(&c), sizeof(c));
-				
-				if (in.fail())
-				{
-					break;
-				}
-
-				DeleteNode(s);		// Delete old strings and
-				textBuf[s] = c;		// read new bytes
-				if (s < F - 1)
-				{
-					textBuf[s + N] = c;		// If the position is
-											// near the end of buffer, extend the buffer to make
-											// string comparison easier.
-				}
-				s = (s + 1) & (N - 1);
-				r = (r + 1) & (N - 1);
-				// Since this is a ring buffer, increment the position
-				// modulo N.
-				InsertNode(r);	// Register the string in textBuf[r..r+F-1]
-			}
-			while (i ++ < lastMatchLength)
-			{
-				// After the end of text,
-				DeleteNode(s);					// no need to read, but
-				s = (s + 1) & (N - 1);
-				r = (r + 1) & (N - 1);
-				if (-- len)
-				{
-					InsertNode(r);		// buffer may not be empty.
-				}
-			}
-		} while (len > 0);	// until length of string to be processed is zero
-
-		if (codeBufPtr > 1)
-		{
-			// Send remaining code.
-			out.write(reinterpret_cast<char*>(codeBuf), codeBufPtr);
-		}
-
-		in.clear();
+		LZSS lzss;
+		lzss.Encode(out, in);
 	}
 
 	// 目录打包

@@ -60,7 +60,7 @@ namespace
 	using namespace KlayGE;
 
 	// 用上面那个函数建立好的静态 CRC 数据表
-	static const U32 crc32Table[256] =
+	static const U32 crc32Table[] =
 	{
 		0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA,
 		0x076DC419, 0x706AF48F, 0xE963A535, 0x9E6495A3,
@@ -170,10 +170,9 @@ namespace KlayGE
 
 		for (std::istreambuf_iterator<char> iter(stream); iter != std::istreambuf_iterator<char>(); ++ iter)
 		{
-			crc32 = (crc32 >> 8) ^ crc32Table[*iter ^ (crc32 & 0x000000FF)];
+			U8 const data = *iter;
+			crc32 = (crc32 >> 8) ^ crc32Table[data ^ (crc32 & 0x000000FF)];
 		}
-
-		stream.clear();
 
 		return ~crc32;
 	}

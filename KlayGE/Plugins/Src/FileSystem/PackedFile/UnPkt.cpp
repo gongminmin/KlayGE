@@ -33,15 +33,92 @@ namespace
 {
 	using namespace KlayGE;
 
-	U32 const N(4096);				// size of ring buffer
-	U32 const F(18);				// upper limit for match_length
-	U32 const THRESHOLD(2);			// encode string into position and length
-									//   if match_length is greater than this
-	U32 const NIL(N);				// index for root of binary search trees
+	class LZSS
+	{
+	public:
+		void Decode(std::ostream& out, std::istream& in)
+		{
+			std::ostreambuf_iterator<char> outIter(out);
+
+			U32 r(N - F);
+			std::fill_n(textBuf_, r, ' ');
+
+			U32 flags(0);
+			U8 c;
+			for (;;)
+			{
+				if (0 == ((flags >>= 1) & 256))
+				{
+					in.read(reinterpret_cast<char*>(&c), sizeof(c));
+					if (in.fail())
+					{
+						break;
+					}
+
+					flags = c | 0xFF00;		// uses higher byte cleverly
+											// to count eight
+				}
+				if (flags & 1)
+				{
+					in.read(reinterpret_cast<char*>(&c), sizeof(c));
+					if (in.fail())
+					{
+						break;
+					}
+
+					*outIter = c;
+					++ outIter;
+
+					textBuf_[r] = c;
+					++ r;
+					r &= (N - 1);
+				}
+				else
+				{
+					in.read(reinterpret_cast<char*>(&c), sizeof(c));
+					if (in.fail())
+					{
+						break;
+					}
+					U32 c1(c);
+
+					in.read(reinterpret_cast<char*>(&c), sizeof(c));
+					if (in.fail())
+					{
+						break;
+					}
+					U32 c2(c);
+
+					c1 |= ((c2 & 0xF0) << 4);
+					c2 = (c2 & 0x0F) + THRESHOLD;
+					for (U32 k = 0; k <= c2; ++ k)
+					{
+						c = textBuf_[(c1 + k) & (N - 1)];
+						
+						*outIter = c;
+						++ outIter;
+
+						textBuf_[r] = c;
+						++ r;
+						r &= (N - 1);
+					}
+				}
+			}
+
+			in.clear();
+		}
+
+	private:
+		static int const N = 4096;			// size of ring buffer
+		static int const F = 18;			// upper limit for match_length
+		static int const THRESHOLD = 2;		// encode string into position and length
+											// if match_length is greater than this
+		static int const NIL = N;			// index for root of binary search trees
 
 
-	U8 textBuf[N + F - 1];			// ring buffer of size N, 
-									// with extra F-1 bytes to facilitate string comparison
+		U8 textBuf_[N + F - 1];				// ring buffer of size N, 
+											// with extra F-1 bytes to facilitate string comparison
+	};
 
 	// 忽略大小写比较字符串
 	/////////////////////////////////////////////////////////////////////////////////
@@ -121,67 +198,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void UnPkt::Decode(std::ostream& out, std::istream& in)
 	{
-		U32 r(N - F);
-		std::fill_n(textBuf, r, ' ');
-
-		U32 flags(0);
-		U8 c;
-		for (;;)
-		{
-			if (0 == ((flags >>= 1) & 256))
-			{
-				in.read(reinterpret_cast<char*>(&c), sizeof(c));
-				if (in.fail())
-				{
-					break;
-				}
-
-				flags = c | 0xFF00;		// uses higher byte cleverly
-											// to count eight
-			}
-			if (flags & 1)
-			{
-				in.read(reinterpret_cast<char*>(&c), sizeof(c));
-				if (in.fail())
-				{
-					break;
-				}
-
-				out.write(reinterpret_cast<char*>(&c), sizeof(c));
-				textBuf[r] = c;
-				++ r;
-				r &= (N - 1);
-			}
-			else
-			{
-				in.read(reinterpret_cast<char*>(&c), sizeof(c));
-				if (in.fail())
-				{
-					break;
-				}
-				U32 c1(c);
-
-				in.read(reinterpret_cast<char*>(&c), sizeof(c));
-				if (in.fail())
-				{
-					break;
-				}
-				U32 c2(c);
-
-				c1 |= ((c2 & 0xF0) << 4);
-				c2 = (c2 & 0x0F) + THRESHOLD;
-				for (U32 k = 0; k <= c2; ++ k)
-				{
-					c = textBuf[(c1 + k) & (N - 1)];
-					out.write(reinterpret_cast<char*>(&c), sizeof(c));
-					textBuf[r] = c;
-					++ r;
-					r &= (N - 1);
-				}
-			}
-		}
-
-		in.clear();
+		LZSS lzss;
+		lzss.Decode(out, in);
 	}
 
 	// 打开打包文件
