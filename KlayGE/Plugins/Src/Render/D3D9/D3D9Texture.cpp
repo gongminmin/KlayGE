@@ -104,6 +104,15 @@ namespace
 
 		case PF_DXT5:
 			return D3DFMT_DXT5;
+
+		case PF_D16:
+			return D3DFMT_D16;
+
+		case PF_D24X8:
+			return D3DFMT_D24X8;
+
+		case PF_D24S8:
+			return D3DFMT_D24S8;
 		}
 
 		assert(false);
@@ -167,6 +176,15 @@ namespace
 
 		case D3DFMT_DXT5:
 			return PF_DXT5;
+
+		case D3DFMT_D16:
+			return PF_D16;
+
+		case D3DFMT_D24X8:
+			return PF_D24X8;
+
+		case D3DFMT_D24S8:
+			return PF_D24S8;
 		}
 
 		assert(false);
@@ -362,7 +380,7 @@ namespace KlayGE
 			{
 				IDirect3DSurface9Ptr src, dst;
 
-				for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face < D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
+				for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face <= D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
 				{
 					for (uint32_t level = 0; level < maxLevel; ++ level)
 					{
@@ -449,6 +467,7 @@ namespace KlayGE
 
 		d3dTexture3D_->UnlockBox(0);
 	}
+
 	void D3D9Texture::CopyToMemoryCube(CubeFaces face, int level, void* data)
 	{
 		assert(data != NULL);
@@ -583,7 +602,7 @@ namespace KlayGE
 				d3dTextureCube->QueryInterface(IID_IDirect3DBaseTexture9, reinterpret_cast<void**>(&base));
 				d3dBaseTexture = MakeCOMPtr(base);
 
-				for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face < D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
+				for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face <= D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
 				{
 					IDirect3DSurface9* temp;
 					TIF(d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), 0, &temp));
@@ -615,7 +634,6 @@ namespace KlayGE
 		{
 		case TT_1D:
 		case TT_2D:
-			if (TU_Default == usage_)
 			{
 				IDirect3DTexture9Ptr tempTexture2D = this->CreateTexture2D(0, D3DPOOL_SYSTEMMEM);
 
@@ -629,26 +647,6 @@ namespace KlayGE
 					IDirect3DSurface9Ptr dst = MakeCOMPtr(temp);
 
 					TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
-				}
-				tempTexture2D->AddDirtyRect(NULL);
-				d3dTexture2D_ = tempTexture2D;
-
-				this->QueryBaseTexture();
-			}
-			else
-			{
-				IDirect3DTexture9Ptr tempTexture2D = this->CreateTexture2D(0, D3DPOOL_SYSTEMMEM);
-
-				for (uint16_t i = 0; i < this->NumMipMaps(); ++ i)
-				{
-					IDirect3DSurface9* temp;
-					TIF(d3dTexture2D_->GetSurfaceLevel(i, &temp));
-					IDirect3DSurface9Ptr src = MakeCOMPtr(temp);
-
-					TIF(tempTexture2D->GetSurfaceLevel(i, &temp));
-					IDirect3DSurface9Ptr dst = MakeCOMPtr(temp);
-
-					TIF(d3dDevice_->GetRenderTargetData(src.get(), dst.get()));
 				}
 				tempTexture2D->AddDirtyRect(NULL);
 				d3dTexture2D_ = tempTexture2D;
@@ -682,36 +680,10 @@ namespace KlayGE
 			break;
 
 		case TT_Cube:
-			if (TU_Default == usage_)
 			{
 				IDirect3DCubeTexture9Ptr tempTextureCube = this->CreateTextureCube(0, D3DPOOL_SYSTEMMEM);
 
-				for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face < D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
-				{
-					for (uint16_t level = 0; level < this->NumMipMaps(); ++ level)
-					{
-					
-						IDirect3DSurface9* temp;
-						TIF(d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &temp));
-						IDirect3DSurface9Ptr src = MakeCOMPtr(temp);
-
-						TIF(tempTextureCube->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &temp));
-						IDirect3DSurface9Ptr dst = MakeCOMPtr(temp);
-
-						TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
-
-						tempTextureCube->AddDirtyRect(static_cast<D3DCUBEMAP_FACES>(face), NULL);
-					}
-				}
-				d3dTextureCube_ = tempTextureCube;
-
-				this->QueryBaseTexture();
-			}
-			else
-			{
-				IDirect3DCubeTexture9Ptr tempTextureCube = this->CreateTextureCube(0, D3DPOOL_SYSTEMMEM);
-
-				for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face < D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
+				for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face <= D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
 				{
 					for (uint16_t level = 0; level < this->NumMipMaps(); ++ level)
 					{
@@ -746,27 +718,25 @@ namespace KlayGE
 		{
 		case TT_1D:
 		case TT_2D:
-			if (TU_Default == usage_)
 			{
-				IDirect3DTexture9Ptr tempTexture2D = this->CreateTexture2D(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+				IDirect3DTexture9Ptr tempTexture2D;
+
+				if (TU_Default == usage_)
+				{
+					tempTexture2D = this->CreateTexture2D(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+				}
+				else
+				{
+					tempTexture2D = this->CreateTexture2D(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
+					this->CreateDepthStencilBuffer();
+				}
+
 				tempTexture2D->AddDirtyRect(NULL);
 
 				d3dDevice_->UpdateTexture(d3dTexture2D_.get(), tempTexture2D.get());
 				d3dTexture2D_ = tempTexture2D;
 
 				this->QueryBaseTexture();
-			}
-			else
-			{
-				IDirect3DTexture9Ptr tempTexture2D = this->CreateTexture2D(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
-				tempTexture2D->AddDirtyRect(NULL);
-
-				d3dDevice_->UpdateTexture(d3dTexture2D_.get(), tempTexture2D.get());
-				d3dTexture2D_ = tempTexture2D;
-
-				this->QueryBaseTexture();
-
-				this->CreateDepthStencilBuffer();
 			}
 			break;
 
@@ -783,10 +753,20 @@ namespace KlayGE
 			break;
 
 		case TT_Cube:
-			if (TU_Default == usage_)
 			{
-				IDirect3DCubeTexture9Ptr tempTextureCube = this->CreateTextureCube(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
-				for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face < D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
+				IDirect3DCubeTexture9Ptr tempTextureCube;
+
+				if (TU_Default == usage_)
+				{
+					tempTextureCube = this->CreateTextureCube(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+				}
+				else
+				{
+					tempTextureCube = this->CreateTextureCube(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
+					this->CreateDepthStencilBuffer();
+				}
+
+				for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face <= D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
 				{
 					tempTextureCube->AddDirtyRect(static_cast<D3DCUBEMAP_FACES>(face), NULL);
 				}
@@ -795,21 +775,6 @@ namespace KlayGE
 				d3dTextureCube_ = tempTextureCube;
 
 				this->QueryBaseTexture();
-			}
-			else
-			{
-				IDirect3DCubeTexture9Ptr tempTextureCube = this->CreateTextureCube(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
-				for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face < D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
-				{
-					tempTextureCube->AddDirtyRect(static_cast<D3DCUBEMAP_FACES>(face), NULL);
-				}
-
-				d3dDevice_->UpdateTexture(d3dTextureCube_.get(), tempTextureCube.get());
-				d3dTextureCube_ = tempTextureCube;
-
-				this->QueryBaseTexture();
-
-				this->CreateDepthStencilBuffer();
 			}
 			break;
 		}

@@ -1,0 +1,20 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_GREMEDY_string_marker">
+	<Functions>
+		<Function name="glStringMarkerGREMEDY" return="void">
+			<Param type="GLsizei" name="len"/>
+			<Param type="const void*" name="string"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_GREMEDY" string="GL_GREMEDY_string_marker">
+			<Name name="glStringMarkerGREMEDY"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_GREMEDY"/>
+	</InitPath>
+</GLExtension>
