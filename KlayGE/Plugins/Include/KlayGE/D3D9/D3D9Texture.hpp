@@ -78,9 +78,7 @@ namespace KlayGE
 		boost::shared_ptr<IDirect3DVolumeTexture9> CreateTexture3D(uint32_t usage, D3DPOOL pool);
 		boost::shared_ptr<IDirect3DCubeTexture9> CreateTextureCube(uint32_t usage, D3DPOOL pool);
 
-		void QueryBaseTextureFrom2D();
-		void QueryBaseTextureFrom3D();
-		void QueryBaseTextureFromCube();
+		void QueryBaseTexture();
 
 	private:
 		boost::shared_ptr<IDirect3DDevice9>			d3dDevice_;

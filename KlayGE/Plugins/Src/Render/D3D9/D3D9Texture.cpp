@@ -292,12 +292,7 @@ namespace KlayGE
 
 		assert(TU_Default == usage_);
 
-		IDirect3DVolumeTexture9* d3dTexture3D;
-		// Use D3DX to help us create the texture, this way it can adjust any relevant sizes
-		TIF(D3DXCreateVolumeTexture(d3dDevice_.get(), this->Width(), this->Height(), this->Depth(),
-			this->NumMipMaps(), D3DUSAGE_DYNAMIC, ConvertFormat(format),
-			D3DPOOL_DEFAULT, &d3dTexture3D));
-		d3dTexture3D_ = MakeCOMPtr(d3dTexture3D);
+		d3dTexture3D_ = this->CreateTexture3D(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 
 		this->QueryBaseTextureFrom3D();
 
@@ -330,12 +325,7 @@ namespace KlayGE
 
 		assert(TU_Default == usage_);
 
-		IDirect3DCubeTexture9* d3dTextureCube;
-		// Use D3DX to help us create the texture, this way it can adjust any relevant sizes
-		TIF(D3DXCreateCubeTexture(d3dDevice_.get(), this->Width(),
-			this->NumMipMaps(), D3DUSAGE_DYNAMIC, ConvertFormat(format),
-			D3DPOOL_DEFAULT, &d3dTextureCube));
-		d3dTextureCube_ = MakeCOMPtr(d3dTextureCube);
+		d3dTextureCube_ = this->CreateTextureCube(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 
 		this->QueryBaseTextureFromCube();
 
@@ -614,11 +604,7 @@ namespace KlayGE
 
 		case TT_3D:
 			{
-				IDirect3DVolumeTexture9* texture3D;
-				TIF(D3DXCreateVolumeTexture(d3dDevice_.get(), this->Width(), this->Height(), this->Depth(),
-					this->NumMipMaps(), 0, ConvertFormat(format_),
-					D3DPOOL_SYSTEMMEM, &texture3D));
-				boost::shared_ptr<IDirect3DVolumeTexture9> d3dTexture3D = MakeCOMPtr(texture3D);
+				boost::shared_ptr<IDirect3DVolumeTexture9> d3dTexture3D = this->CreateTexture3D(0, D3DPOOL_SYSTEMMEM);
 
 				IDirect3DBaseTexture9* base;
 				d3dTexture3D->QueryInterface(IID_IDirect3DBaseTexture9, reinterpret_cast<void**>(&base));
@@ -637,11 +623,7 @@ namespace KlayGE
 
 		case TT_Cube:
 			{
-				IDirect3DCubeTexture9* textureCube;
-				TIF(D3DXCreateCubeTexture(d3dDevice_.get(), this->Width(),
-					this->NumMipMaps(), 0, ConvertFormat(format_),
-					D3DPOOL_SYSTEMMEM, &textureCube));
-				boost::shared_ptr<IDirect3DCubeTexture9> d3dTextureCube = MakeCOMPtr(textureCube);
+				boost::shared_ptr<IDirect3DCubeTexture9> d3dTextureCube = this->CreateTextureCube(0, D3DPOOL_SYSTEMMEM);
 
 				IDirect3DBaseTexture9* base;
 				d3dTextureCube->QueryInterface(IID_IDirect3DBaseTexture9, reinterpret_cast<void**>(&base));
@@ -744,11 +726,7 @@ namespace KlayGE
 
 		case TT_3D:
 			{
-				IDirect3DVolumeTexture9* d3dTexture3D;
-				TIF(D3DXCreateVolumeTexture(d3dDevice_.get(), this->Width(), this->Height(), this->Depth(),
-					this->NumMipMaps(), 0, ConvertFormat(format_),
-					D3DPOOL_SYSTEMMEM, &d3dTexture3D));
-				boost::shared_ptr<IDirect3DVolumeTexture9> tempTexture3D = MakeCOMPtr(d3dTexture3D);
+				boost::shared_ptr<IDirect3DVolumeTexture9> tempTexture3D = this->CreateTexture3D(0, D3DPOOL_SYSTEMMEM);
 
 				for (uint16_t i = 0; i < this->NumMipMaps(); ++ i)
 				{
@@ -770,11 +748,7 @@ namespace KlayGE
 
 		case TT_Cube:
 			{
-				IDirect3DCubeTexture9* d3dTextureCube;
-				TIF(D3DXCreateCubeTexture(d3dDevice_.get(), this->Width(),
-					this->NumMipMaps(), 0, ConvertFormat(format_),
-					D3DPOOL_SYSTEMMEM, &d3dTextureCube));
-				boost::shared_ptr<IDirect3DCubeTexture9> tempTextureCube = MakeCOMPtr(d3dTextureCube);
+				boost::shared_ptr<IDirect3DCubeTexture9> tempTextureCube = this->CreateTextureCube(0, D3DPOOL_SYSTEMMEM);
 
 				for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face < D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
 				{
@@ -850,14 +824,11 @@ namespace KlayGE
 				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, renderZBuffer_.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
 				renderZBuffer_ = dst;
 			}
+			break;
 
 		case TT_3D:
 			{
-				IDirect3DVolumeTexture9* d3dTexture3D;
-				TIF(D3DXCreateVolumeTexture(d3dDevice_.get(), this->Width(), this->Height(), this->Depth(),
-					this->NumMipMaps(), D3DUSAGE_DYNAMIC, ConvertFormat(format_),
-					D3DPOOL_DEFAULT, &d3dTexture3D));
-				boost::shared_ptr<IDirect3DVolumeTexture9> tempTexture3D = MakeCOMPtr(d3dTexture3D);
+				boost::shared_ptr<IDirect3DVolumeTexture9> tempTexture3D = this->CreateTexture3D(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 				tempTexture3D->AddDirtyBox(NULL);
 
 				d3dDevice_->UpdateTexture(d3dTexture3D_.get(), tempTexture3D.get());
@@ -869,11 +840,7 @@ namespace KlayGE
 
 		case TT_Cube:
 			{
-				IDirect3DCubeTexture9* d3dTextureCube;
-				TIF(D3DXCreateCubeTexture(d3dDevice_.get(), this->Width(),
-					this->NumMipMaps(), D3DUSAGE_DYNAMIC, ConvertFormat(format_),
-					D3DPOOL_DEFAULT, &d3dTextureCube));
-				boost::shared_ptr<IDirect3DCubeTexture9> tempTextureCube = MakeCOMPtr(d3dTextureCube);
+				boost::shared_ptr<IDirect3DCubeTexture9> tempTextureCube = this->CreateTextureCube(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 				for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face < D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
 				{
 					tempTextureCube->AddDirtyRect(static_cast<D3DCUBEMAP_FACES>(face), NULL);
