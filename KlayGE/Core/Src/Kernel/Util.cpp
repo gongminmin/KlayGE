@@ -1,8 +1,11 @@
 // Util.cpp
 // KlayGE 实用函数库 实现文件
-// Ver 2.1.2
+// Ver 2.2.0
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.2.0
+// 用Boost重写了Sleep (2004.10.25)
 //
 // 2.1.2
 // 增加了本地和网络格式的转换函数 (2004.6.2)
@@ -80,16 +83,15 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void Sleep(U32 ms)
 	{
-#ifdef WIN32
-		::Sleep(ms);
-#else
-		timeval sleeper;
+		boost::xtime xt;
 
-		sleeper.tv_sec = ms / 1000;
-		sleeper.tv_usec = (ms % 1000) * 1000;
+		boost::xtime_get(&xt, boost::TIME_UTC);
+		xt.sec += ms / 1000;
+		boost::thread::sleep(xt);
 
-		select(0, NULL, NULL, NULL, &sleeper);
-#endif		// WIN32
+		boost::xtime_get(&xt, boost::TIME_UTC);
+		xt.nsec += (ms % 1000) * 1000000;
+		boost::thread::sleep(xt);
 	}
 
 	// U32本地格式到网络格式

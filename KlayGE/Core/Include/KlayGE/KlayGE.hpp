@@ -17,9 +17,9 @@
 #define _KLAYGE_HPP
 
 #define KLAYGEMAINVER		2
-#define KLAYGESECVER		1
-#define KLAYGERELEASEVER	2
-#define KLAYGEVERSTR		"KlayGE 2.1.2"
+#define KLAYGESECVER		2
+#define KLAYGERELEASEVER	0
+#define KLAYGEVERSTR		"KlayGE 2.2.0"
 
 namespace KlayGE
 {
