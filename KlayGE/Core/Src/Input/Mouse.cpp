@@ -1,8 +1,12 @@
 // Mouse.cpp
 // KlayGE 鼠标管理类 实现文件
-// Ver 2.0.4
-// 版权所有(C) 龚敏敏, 2003-2004
+// Ver 2.5.0
+// 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.5.0
+// 增加了Action map id (2005.4.3)
+//
 //
 // 2.0.0
 // 初次建立 (2003.8.29)
@@ -71,53 +75,53 @@ namespace KlayGE
 
 	// 实现动作映射
 	//////////////////////////////////////////////////////////////////////////////////
-	void InputMouse::DoActionMap(InputActionMap const & actionMap)
+	void InputMouse::DoActionMap(uint32_t id, InputActionMap const & actionMap)
 	{
 		if (actionMap.HasAction(MS_X))
 		{
-			actionMap_.AddAction(InputAction(actionMap.Action(MS_X), MS_X));
+			actionMaps_[id].AddAction(InputAction(actionMap.Action(MS_X), MS_X));
 		}
-		if (actionMap_.HasAction(MS_Y))
+		if (actionMap.HasAction(MS_Y))
 		{
-			actionMap_.AddAction(InputAction(actionMap.Action(MS_Y), MS_Y));
+			actionMaps_[id].AddAction(InputAction(actionMap.Action(MS_Y), MS_Y));
 		}
-		if (actionMap_.HasAction(MS_Z))
+		if (actionMap.HasAction(MS_Z))
 		{
-			actionMap_.AddAction(InputAction(actionMap.Action(MS_Z), MS_Z));
+			actionMaps_[id].AddAction(InputAction(actionMap.Action(MS_Z), MS_Z));
 		}
 		for (uint16_t i = 0; i < static_cast<uint16_t>(buttons_.size()); ++ i)
 		{
 			uint16_t const button(static_cast<uint16_t>(MS_Button0 + i));
-			if (actionMap_.HasAction(button))
+			if (actionMaps_[id].HasAction(button))
 			{
-				actionMap_.AddAction(InputAction(actionMap.Action(button), button));
+				actionMaps_[id].AddAction(InputAction(actionMap.Action(button), button));
 			}
 		}
 	}
 
 	// 更新鼠标动作
 	//////////////////////////////////////////////////////////////////////////////////
-	InputActionsType InputMouse::DoUpdate()
+	InputActionsType InputMouse::DoUpdate(uint32_t id)
 	{
 		InputActionsType ret;
 
 		if (this->X() != 0)
 		{
-			actionMap_.UpdateInputActions(ret, MS_X, this->X());
+			actionMaps_[id].UpdateInputActions(ret, MS_X, this->X());
 		}
 		if (this->Y() != 0)
 		{
-			actionMap_.UpdateInputActions(ret, MS_Y, this->Y());
+			actionMaps_[id].UpdateInputActions(ret, MS_Y, this->Y());
 		}
 		if (this->Z() != 0)
 		{
-			actionMap_.UpdateInputActions(ret, MS_Z, this->Z());
+			actionMaps_[id].UpdateInputActions(ret, MS_Z, this->Z());
 		}
 		for (uint16_t i = 0; i < static_cast<uint16_t>(buttons_.size()); ++ i)
 		{
 			if (this->Button(i))
 			{
-				actionMap_.UpdateInputActions(ret, static_cast<uint16_t>(MS_Button0 + i));
+				actionMaps_[id].UpdateInputActions(ret, static_cast<uint16_t>(MS_Button0 + i));
 			}
 		}
 

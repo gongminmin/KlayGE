@@ -1,8 +1,11 @@
 // InputEngine.cpp
 // KlayGE 输入引擎类 实现文件
-// Ver 2.1.3
-// 版权所有(C) 龚敏敏, 2003-2004
+// Ver 2.5.0
+// 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.5.0
+// 增加了Action map id (2005.4.3)
 //
 // 2.1.3
 // 用算法代替手写循环 (2004.10.16)
@@ -34,10 +37,16 @@ namespace KlayGE
 
 	// 设置动作格式
 	//////////////////////////////////////////////////////////////////////////////////
-	void InputEngine::ActionMap(InputActionMap const & actionMap, bool reenumerate)
+	uint32_t InputEngine::ActionMap(InputActionMap const & actionMap, bool reenumerate)
 	{
+		uint32_t id = 0;
+
 		// 保存新的动作格式
-		actionMap_ = actionMap;
+		if (!actionMaps_.empty())
+		{
+			id = actionMaps_.rbegin()->first + 1;
+		}
+		actionMaps_[id] = actionMap;
 
 		// 只有当调用时指定要重枚举才销毁并重枚举设备
 		// 设备列表有可能在循环中使用，如果这时枚举设备有可能造成问题
@@ -57,7 +66,9 @@ namespace KlayGE
 
 		// 对当前设备应用新的动作映射
 		std::for_each(devices_.begin(), devices_.end(),
-			boost::bind(&InputDevice::ActionMap, _1, actionMap_));
+			boost::bind(&InputDevice::ActionMap, _1, actionMaps_));
+
+		return id;
 	}
 
 	// 获取输入设备个数
@@ -69,7 +80,7 @@ namespace KlayGE
 
 	// 刷新输入状态
 	//////////////////////////////////////////////////////////////////////////////////
-	InputActionsType InputEngine::Update()
+	InputActionsType InputEngine::Update(uint32_t id)
 	{
 		typedef MapVector<uint16_t, long> ActionSetType;
 		ActionSetType actions;
@@ -77,7 +88,7 @@ namespace KlayGE
 		// 访问所有设备
 		for (InputDevicesType::iterator iter = devices_.begin(); iter != devices_.end(); ++ iter)
 		{
-			InputActionsType const theAction((*iter)->Update());
+			InputActionsType const theAction((*iter)->Update(id));
 
 			// 去掉重复的动作
 			for (InputActionsType::const_iterator i = theAction.begin(); i != theAction.end(); ++ i)

@@ -6,6 +6,7 @@
 //
 // 2.5.0
 // AttachCamera内增加了Update (2005.3.30)
+// 自动处理输入 (2005.4.3)
 //
 // 2.4.0
 // 初次建立 (2005.3.12)
@@ -14,6 +15,12 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Context.hpp>
+#include <KlayGE/Input.hpp>
+#include <KlayGE/InputFactory.hpp>
+
+#include <ctime>
+
 #include <KlayGE/CameraController.hpp>
 
 namespace KlayGE
@@ -51,6 +58,18 @@ namespace KlayGE
 
 	FirstPersonCameraController::FirstPersonCameraController()
 	{
+		std::vector<InputAction> actions;
+		actions.push_back(InputAction(TurnLeftRight, MS_X));
+		actions.push_back(InputAction(TurnUpDown, MS_Y));
+		actions.push_back(InputAction(Forward, KS_W));
+		actions.push_back(InputAction(Backward, KS_S));
+		actions.push_back(InputAction(MoveLeft, KS_A));
+		actions.push_back(InputAction(MoveRight, KS_D));
+
+		InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+		KlayGE::InputActionMap actionMap;
+		actionMap.AddActions(actions.begin(), actions.end());
+		action_map_id_ = inputEngine.ActionMap(actionMap, true);
 	}
 
 	void FirstPersonCameraController::Update()
@@ -58,6 +77,47 @@ namespace KlayGE
 		assert(camera_ != NULL);
 
 		MathLib::Inverse(world_, camera_->ViewMatrix());
+
+		static clock_t lastTime(std::clock());
+		clock_t curTime(std::clock());
+		if (curTime - lastTime > 20)
+		{
+			float scaler = (curTime - lastTime) / 100.0f;
+
+			lastTime = curTime;
+
+			InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+			InputActionsType actions(inputEngine.Update(action_map_id_));
+			for (InputActionsType::iterator iter = actions.begin(); iter != actions.end(); ++ iter)
+			{
+				switch (iter->first)
+				{
+				case TurnLeftRight:
+					this->Rotate(iter->second * scaler, 0, 0);
+					break;
+
+				case TurnUpDown:
+					this->Rotate(0, iter->second * scaler, 0);
+					break;
+
+				case Forward:
+					this->Move(0, 0, scaler);
+					break;
+
+				case Backward:
+					this->Move(0, 0, -scaler);
+					break;
+
+				case MoveLeft:
+					this->Move(-scaler, 0, 0);
+					break;
+
+				case MoveRight:
+					this->Move(scaler, 0, 0);
+					break;
+				}
+			}
+		}
 	}
 
 	void FirstPersonCameraController::Move(float x, float y, float z)

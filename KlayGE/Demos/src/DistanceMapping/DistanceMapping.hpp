@@ -18,6 +18,8 @@ private:
 	KlayGE::FontPtr font_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
+
+	KlayGE::uint32_t action_map_id_;
 };
 
 #endif		// _DISTANCEMAPPING_HPP

@@ -1,8 +1,11 @@
 // Keyboard.cpp
 // KlayGE 键盘管理类 实现文件
-// Ver 2.0.4
-// 版权所有(C) 龚敏敏, 2003-2004
+// Ver 2.5.0
+// 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.5.0
+// 增加了Action map id (2005.4.3)
 //
 // 2.0.0
 // 初次建立 (2003.8.29)
@@ -29,20 +32,20 @@ namespace KlayGE
 
 	// 实现动作映射
 	//////////////////////////////////////////////////////////////////////////////////
-	void InputKeyboard::DoActionMap(InputActionMap const & actionMap)
+	void InputKeyboard::DoActionMap(uint32_t id, InputActionMap const & actionMap)
 	{
 		for (uint16_t i = 0; i < static_cast<uint16_t>(keys_.size()); ++ i)
 		{
 			if (actionMap.HasAction(i))
 			{
-				actionMap_.AddAction(InputAction(actionMap.Action(i), i));
+				actionMaps_[id].AddAction(InputAction(actionMap.Action(i), i));
 			}
 		}
 	}
 
 	// 更新键盘动作
 	//////////////////////////////////////////////////////////////////////////////////
-	InputActionsType InputKeyboard::DoUpdate()
+	InputActionsType InputKeyboard::DoUpdate(uint32_t id)
 	{
 		InputActionsType ret;
 
@@ -50,7 +53,7 @@ namespace KlayGE
 		{
 			if (this->Key(i))
 			{
-				actionMap_.UpdateInputActions(ret, i);
+				actionMaps_[id].UpdateInputActions(ret, i);
 			}
 		}
 

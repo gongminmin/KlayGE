@@ -58,6 +58,19 @@ namespace KlayGE
 
 	private:
 		Matrix4		world_;				// World matrix of the camera (inverse of the view matrix)
+
+		enum
+		{
+			TurnLeftRight,
+			TurnUpDown,
+
+			Forward,
+			Backward,
+			MoveLeft,
+			MoveRight,
+		};
+
+		uint32_t action_map_id_;
 	};
 }
 

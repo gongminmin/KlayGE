@@ -1,8 +1,11 @@
 // Input.hpp
 // KlayGE 输入引擎类 头文件
-// Ver 2.0.4
-// 版权所有(C) 龚敏敏, 2003-2004
+// Ver 2.5.0
+// 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.5.0
+// 增加了Action map id (2005.4.3)
 //
 // 2.0.4
 // 改进了InputActionsType
@@ -269,6 +272,8 @@ namespace KlayGE
 		MapVector<uint16_t, uint16_t> actionMap_;
 	};
 
+	typedef MapVector<uint32_t, InputActionMap> action_maps_t;
+
 
 	// 输入引擎
 	/////////////////////////////////////////////////////////////////////////////////
@@ -282,9 +287,9 @@ namespace KlayGE
 		virtual void EnumDevices() = 0;
 		void UnacquireDevices();
 
-		InputActionsType Update();
+		InputActionsType Update(uint32_t id);
 
-		void ActionMap(InputActionMap const & actionMap, bool reenumerate = false);
+		uint32_t ActionMap(InputActionMap const & actionMap, bool reenumerate = false);
 
 		size_t NumDevice() const;
 		InputDevicePtr Device(size_t index) const;
@@ -293,7 +298,7 @@ namespace KlayGE
 		typedef std::vector<InputDevicePtr>	InputDevicesType;
 		InputDevicesType	devices_;
 
-		InputActionMap		actionMap_;
+		action_maps_t actionMaps_;
 	};
 
 	class InputDeviceImpl
@@ -314,19 +319,19 @@ namespace KlayGE
 
 		virtual std::wstring const & Name() const = 0;
 
-		InputActionsType Update();
-		void ActionMap(InputActionMap const & iaf);
+		InputActionsType Update(uint32_t id);
+		void ActionMap(action_maps_t const & ams);
 
 		void Acquire();
 		void Unacquire();
 
 	protected:
 		virtual void UpdateInputs() = 0;
-		virtual void DoActionMap(InputActionMap const & actionMap) = 0;
-		virtual InputActionsType DoUpdate() = 0;
+		virtual void DoActionMap(uint32_t id, InputActionMap const & actionMap) = 0;
+		virtual InputActionsType DoUpdate(uint32_t id) = 0;
 
 	protected:
-		InputActionMap actionMap_;
+		action_maps_t actionMaps_;
 
 		boost::shared_ptr<InputDeviceImpl> impl_;
 	};
@@ -337,8 +342,8 @@ namespace KlayGE
 		bool Key(size_t n) const;
 
 	private:
-		void DoActionMap(InputActionMap const & actionMap);
-		InputActionsType DoUpdate();
+		void DoActionMap(uint32_t id, InputActionMap const & actionMap);
+		InputActionsType DoUpdate(uint32_t id);
 
 	protected:
 		typedef boost::array<bool, 256> KeysType;
@@ -357,8 +362,8 @@ namespace KlayGE
 		bool Button(size_t index) const;
 
 	private:
-		void DoActionMap(InputActionMap const & actionMap);
-		InputActionsType DoUpdate();
+		void DoActionMap(uint32_t id, InputActionMap const & actionMap);
+		InputActionsType DoUpdate(uint32_t id);
 
 	protected:
 		Vector_T<long, 3> pos_;
@@ -382,8 +387,8 @@ namespace KlayGE
 		bool Button(size_t index) const;
 
 	private:
-		void DoActionMap(InputActionMap const & actionMap);
-		InputActionsType DoUpdate();
+		void DoActionMap(uint32_t id, InputActionMap const & actionMap);
+		InputActionsType DoUpdate(uint32_t id);
 
 	protected:
 		Vector_T<long, 3> pos_;		// x, y, z axis position

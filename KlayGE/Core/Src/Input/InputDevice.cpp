@@ -1,8 +1,11 @@
 // InputDevice.cpp
 // KlayGE 输入设备基类 实现文件
-// Ver 2.0.4
-// 版权所有(C) 龚敏敏, 2003-2004
+// Ver 2.5.0
+// 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.5.0
+// 增加了Action map id (2005.4.3)
 //
 // 2.0.0
 // 初次建立 (2003.8.29)
@@ -25,11 +28,15 @@ namespace KlayGE
 
 	// 设置动作映射
 	/////////////////////////////////////////////////////////////////////////////////
-	void InputDevice::ActionMap(InputActionMap const & actionMap)
+	void InputDevice::ActionMap(action_maps_t const & ams)
 	{
-		actionMap_ = actionMap;
+		actionMaps_ = ams;
 
-		this->DoActionMap(actionMap_);
+		for (action_maps_t::iterator iter = actionMaps_.begin();
+			iter != actionMaps_.end(); ++ iter)
+		{
+			this->DoActionMap(iter->first, iter->second);
+		}
 	}
 
 	// 获取设备
@@ -48,10 +55,10 @@ namespace KlayGE
 
 	// 更新动作
 	//////////////////////////////////////////////////////////////////////////////////
-	InputActionsType InputDevice::Update()
+	InputActionsType InputDevice::Update(uint32_t id)
 	{
 		this->UpdateInputs();
 
-		return this->DoUpdate();
+		return this->DoUpdate(id);
 	}
 }
