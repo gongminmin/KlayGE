@@ -4,6 +4,9 @@ The GLLoader is an OpenGL extension loading library. It supports OpenGL core 1.0
 The GLLoader's primary selling point is that it offers a initializing path of an extension. So if an extension has promoted into the core, the loader will try to load it from the core. If failed, try the extension one.
 The GLLoader is licensed under LGPL. 
 
+2.0.1 (2005.3.30)
+Use functions to get the support infomation.
+
 2.0.0 (2005.3.1)
 All function's names are lower case.
 
