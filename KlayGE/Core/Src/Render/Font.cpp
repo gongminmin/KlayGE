@@ -25,7 +25,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/RenderBuffer.hpp>
+#include <KlayGE/VertexBuffer.hpp>
 #include <KlayGE/Viewport.hpp>
 #include <KlayGE/RenderTarget.hpp>
 #include <KlayGE/Texture.hpp>
@@ -59,9 +59,9 @@ namespace
 	class FontRenderable : public Renderable
 	{
 	public:
-		FontRenderable(RenderEffectPtr const & effect, RenderBufferPtr const & rb)
+		FontRenderable(RenderEffectPtr const & effect, VertexBufferPtr const & vb)
 			: fontEffect_(effect),
-				fontRB_(rb),
+				fontVB_(vb),
 				box_(Vector3(0, 0, 0), Vector3(0, 0, 0))
 		{
 		}
@@ -74,18 +74,18 @@ namespace
 
 		void OnRenderBegin()
 		{
-			fontRB_->GetVertexStream(VST_Positions)->Assign(&xyzs_[0], xyzs_.size() / 3);
-			fontRB_->GetVertexStream(VST_Diffuses)->Assign(&clrs_[0], clrs_.size());
-			fontRB_->GetVertexStream(VST_TextureCoords0)->Assign(&texs_[0], texs_.size() / 2);
+			fontVB_->GetVertexStream(VST_Positions)->Assign(&xyzs_[0], xyzs_.size() / 3);
+			fontVB_->GetVertexStream(VST_Diffuses)->Assign(&clrs_[0], clrs_.size());
+			fontVB_->GetVertexStream(VST_TextureCoords0)->Assign(&texs_[0], texs_.size() / 2);
 
-			fontRB_->GetIndexStream()->Assign(&indices_[0], indices_.size());
+			fontVB_->GetIndexStream()->Assign(&indices_[0], indices_.size());
 		}
 
 		RenderEffectPtr GetRenderEffect() const
 			{ return fontEffect_; }
 
-		RenderBufferPtr GetRenderBuffer() const
-			{ return fontRB_; }
+		VertexBufferPtr GetVertexBuffer() const
+			{ return fontVB_; }
 
 		Box GetBound() const
 			{ return box_; }
@@ -189,7 +189,7 @@ namespace
 
 	private:
 		RenderEffectPtr fontEffect_;
-		RenderBufferPtr fontRB_;
+		VertexBufferPtr fontVB_;
 
 		std::vector<float>		xyzs_;
 		std::vector<uint32_t>	clrs_;
@@ -207,8 +207,8 @@ namespace KlayGE
 	Font::Font(std::string const & fontName, uint32_t height, uint32_t /*flags*/)
 				: curX_(0), curY_(0),
 					fontHeight_(height),
-					theTexture_(Context::Instance().RenderFactoryInstance().MakeTexture(1024, 1024, 1, TEX_FORMAT)),
-					rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
+					theTexture_(Context::Instance().RenderFactoryInstance().MakeTexture2D(1024, 1024, 1, TEX_FORMAT)),
+					vb_(new VertexBuffer(VertexBuffer::BT_TriangleList))
 	{
 		effect_ = LoadRenderEffect("Font.fx");
 		*(effect_->ParameterByName("texFont")) = theTexture_;
@@ -220,11 +220,11 @@ namespace KlayGE
 		*(effect_->ParameterByName("halfHeight")) = viewport.height / 2;
 
 
-		rb_->AddVertexStream(VST_Positions, sizeof(float), 3);
-		rb_->AddVertexStream(VST_Diffuses, sizeof(uint32_t), 1);
-		rb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2);
+		vb_->AddVertexStream(VST_Positions, sizeof(float), 3);
+		vb_->AddVertexStream(VST_Diffuses, sizeof(uint32_t), 1);
+		vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2);
 
-		rb_->AddIndexStream();
+		vb_->AddIndexStream();
 
 		::FT_Init_FreeType(&ftLib_);
 		::FT_New_Face(ftLib_, ResLoader::Instance().Locate(fontName).c_str(), 0, &face_);
@@ -337,7 +337,7 @@ namespace KlayGE
 							}
 						}
 					}
-					theTexture_->CopyMemoryToTexture(0, &dest[0], TEX_FORMAT,
+					theTexture_->CopyMemoryToTexture2D(0, &dest[0], TEX_FORMAT,
 							this->FontHeight(), this->FontHeight(), charRect.left, charRect.top);
 
 					charInfoMap_.insert(std::make_pair(ch, charInfo));
@@ -369,7 +369,7 @@ namespace KlayGE
 			clr.RGBA(r, g, b, a);
 			uint32_t const color((a << 24) + (r << 16) + (g << 8) + b);
 
-			boost::shared_ptr<FontRenderable> renderable(new FontRenderable(effect_, rb_));
+			boost::shared_ptr<FontRenderable> renderable(new FontRenderable(effect_, vb_));
 			renderable->RenderText(this->FontHeight(), charInfoMap_,
 				sx, sy, sz, xScale, yScale, color, text, flags);
 			Context::Instance().SceneManagerInstance().PushRenderable(renderable);

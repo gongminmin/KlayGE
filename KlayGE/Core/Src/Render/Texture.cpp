@@ -326,38 +326,141 @@ namespace KlayGE
 			}
 		}
 
-		KlayGE::TexturePtr texture(Context::Instance().RenderFactoryInstance().MakeTexture(desc.width,
-				desc.height, static_cast<uint16_t>(desc.mip_map_count), format));
+		KlayGE::TexturePtr texture;
 
-		for (uint32_t i = 0; i < desc.mip_map_count; ++ i)
+		if ((desc.dds_caps.caps2 & DDSCAPS2_CUBEMAP) != 0)
 		{
-			uint32_t image_size;
-			if (IsCompressedFormat(format))
+			texture = Context::Instance().RenderFactoryInstance().MakeTextureCube(desc.width,
+					static_cast<uint16_t>(desc.mip_map_count), format);
+		}
+		else
+		{
+			if ((desc.dds_caps.caps2 & DDSCAPS2_VOLUME) != 0)
 			{
-				int block_size;
-				if (PF_DXT1 == format)
-				{
-					block_size = 8;
-				}
-				else
-				{
-					block_size = 16;
-				}
-
-				image_size = ((desc.width / (1UL << i) + 3) / 4) * ((desc.height / (1UL << i) + 3) / 4) * block_size;
+				texture = Context::Instance().RenderFactoryInstance().MakeTexture3D(desc.width,
+					desc.height, desc.depth, static_cast<uint16_t>(desc.mip_map_count), format);
 			}
 			else
 			{
-				image_size = main_image_size / (1UL << (i * 2));
+				texture = Context::Instance().RenderFactoryInstance().MakeTexture2D(desc.width,
+					desc.height, static_cast<uint16_t>(desc.mip_map_count), format);
 			}
+		}
 
-			std::vector<uint8_t> data(image_size);
+		switch (texture->Type())
+		{
+		case Texture::TT_1D:
+		case Texture::TT_2D:
+			{
+				for (uint32_t i = 0; i < desc.mip_map_count; ++ i)
+				{
+					uint32_t image_size;
+					if (IsCompressedFormat(format))
+					{
+						int block_size;
+						if (PF_DXT1 == format)
+						{
+							block_size = 8;
+						}
+						else
+						{
+							block_size = 16;
+						}
 
-			file->read(reinterpret_cast<char*>(&data[0]), static_cast<std::streamsize>(data.size()));
-			assert(file->gcount() == data.size());
+						image_size = ((desc.width / (1UL << i) + 3) / 4) * ((desc.height / (1UL << i) + 3) / 4) * block_size;
+					}
+					else
+					{
+						image_size = main_image_size / (1UL << (i * 2));
+					}
 
-			texture->CopyMemoryToTexture(i, &data[0], format,
-				texture->Width() / (1UL << i), texture->Height() / (1UL << i), 0, 0);
+					std::vector<uint8_t> data(image_size);
+
+					file->read(reinterpret_cast<char*>(&data[0]), static_cast<std::streamsize>(data.size()));
+					assert(file->gcount() == data.size());
+
+					texture->CopyMemoryToTexture2D(i, &data[0], format,
+						texture->Width() / (1UL << i), texture->Height() / (1UL << i), 0, 0);
+				}
+			}
+			break;
+
+		case Texture::TT_3D:
+			{
+				for (uint32_t i = 0; i < desc.mip_map_count; ++ i)
+				{
+					uint32_t image_size;
+					if (IsCompressedFormat(format))
+					{
+						int block_size;
+						if (PF_DXT1 == format)
+						{
+							block_size = 8;
+						}
+						else
+						{
+							block_size = 16;
+						}
+
+						image_size = ((desc.width / (1UL << i) + 3) / 4) * ((desc.height / (1UL << i) + 3) / 4) * block_size;
+					}
+					else
+					{
+						image_size = main_image_size / (1UL << (i * 2));
+					}
+				
+					for (uint32_t slice = 0; slice < texture->Depth(); ++ slice)
+					{
+						std::vector<uint8_t> data(image_size);
+
+						file->read(reinterpret_cast<char*>(&data[0]), static_cast<std::streamsize>(data.size()));
+						assert(file->gcount() == data.size());
+
+						texture->CopyMemoryToTexture3D(i, &data[0], format,
+							texture->Width() / (1UL << i), texture->Height() / (1UL << i),
+							texture->Depth() / (1UL << i), 0, 0, slice);
+					}
+				}
+			}
+			break;
+
+		case Texture::TT_Cube:
+			{
+				for (uint32_t face = Texture::CF_Positive_X; face < Texture::CF_Negative_Z; ++ face)
+				{
+					for (uint32_t i = 0; i < desc.mip_map_count; ++ i)
+					{
+						uint32_t image_size;
+						if (IsCompressedFormat(format))
+						{
+							int block_size;
+							if (PF_DXT1 == format)
+							{
+								block_size = 8;
+							}
+							else
+							{
+								block_size = 16;
+							}
+
+							image_size = ((desc.width / (1UL << i) + 3) / 4) * ((desc.height / (1UL << i) + 3) / 4) * block_size;
+						}
+						else
+						{
+							image_size = main_image_size / (1UL << (i * 2));
+						}
+					
+						std::vector<uint8_t> data(image_size);
+
+						file->read(reinterpret_cast<char*>(&data[0]), static_cast<std::streamsize>(data.size()));
+						assert(file->gcount() == data.size());
+
+						texture->CopyMemoryToTextureCube(static_cast<Texture::CubeFaces>(face),
+							i, &data[0], format, texture->Width() / (1UL << i), 0);
+					}
+				}
+			}
+			break;
 		}
 
 		return texture;		

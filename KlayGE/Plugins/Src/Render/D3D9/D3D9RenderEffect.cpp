@@ -31,14 +31,14 @@
 
 namespace KlayGE
 {
-	D3D9RenderEffect::D3D9RenderEffect(std::string const & srcData, uint32_t flags)
+	D3D9RenderEffect::D3D9RenderEffect(std::string const & srcData)
 	{
 		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 
 		ID3DXEffect* effect;
 		D3DXCreateEffect(renderEngine.D3DDevice().get(), srcData.c_str(),
 			static_cast<UINT>(srcData.size()), NULL, NULL,
-			flags, NULL, &effect, NULL);
+			0, NULL, &effect, NULL);
 		effect_ = MakeCOMPtr(effect);
 	}
 
@@ -202,10 +202,13 @@ namespace KlayGE
 	{
 		texture_ = tex;
 
-		IDirect3DTexture9* texture(NULL);
+		IDirect3DBaseTexture9* texture(NULL);
 		if (tex)
 		{
-			texture = static_cast<D3D9Texture*>(tex.get())->D3DTexture().get();
+			assert(dynamic_cast<D3D9Texture*>(tex.get()) != NULL);
+
+			D3D9Texture const & d3d9Tex = static_cast<D3D9Texture const &>(*tex);
+			texture = d3d9Tex.D3DBaseTexture().get();
 		}
 		TIF(effect_->SetTexture(parameter_, texture));
 
@@ -298,9 +301,9 @@ namespace KlayGE
 	{
 		if (texture_)
 		{
-			D3D9Texture* texture = static_cast<D3D9Texture*>(texture_.get());
-			texture->OnResetDevice();
-			TIF(effect_->SetTexture(parameter_, texture->D3DTexture().get()));
+			D3D9Texture& texture = static_cast<D3D9Texture&>(*texture_);
+			texture.OnResetDevice();
+			TIF(effect_->SetTexture(parameter_, texture.D3DBaseTexture().get()));
 		}
 	}
 }

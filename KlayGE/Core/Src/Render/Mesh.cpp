@@ -9,7 +9,7 @@
 namespace KlayGE
 {
 	StaticMesh::StaticMesh()
-		: rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
+		: vb_(new VertexBuffer(VertexBuffer::BT_TriangleList))
 	{
 	}
 

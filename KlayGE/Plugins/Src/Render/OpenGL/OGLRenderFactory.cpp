@@ -21,10 +21,25 @@ namespace KlayGE
 			: OGLRenderFactoryBase(L"OpenGL Render Factory")
 			{ }
 
-		TexturePtr MakeTexture(uint32_t width, uint32_t height, uint16_t numMipMaps,
+		TexturePtr MakeTexture1D(uint32_t width, uint16_t numMipMaps,
+				PixelFormat format, Texture::TextureUsage usage)
+		{
+			return TexturePtr(new OGLTexture(width, numMipMaps, format, usage));
+		}
+		TexturePtr MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps,
 				PixelFormat format, Texture::TextureUsage usage)
 		{
 			return TexturePtr(new OGLTexture(width, height, numMipMaps, format, usage));
+		}
+		TexturePtr MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth,
+				uint16_t numMipMaps, PixelFormat format, Texture::TextureUsage usage)
+		{
+			return TexturePtr(new OGLTexture(width, height, depth, numMipMaps, format, usage));
+		}
+		TexturePtr MakeTextureCube(uint32_t size, uint16_t numMipMaps,
+				PixelFormat format, Texture::TextureUsage usage)
+		{
+			return TexturePtr(new OGLTexture(size, true, numMipMaps, format, usage));
 		}
 
 		RenderTexturePtr MakeRenderTexture(uint32_t width, uint32_t height)
@@ -32,9 +47,9 @@ namespace KlayGE
 			return RenderTexturePtr(new OGLRenderTexture(width, height));
 		}
 
-		RenderEffectPtr MakeRenderEffect(std::string const & srcData, uint32_t flags)
+		RenderEffectPtr MakeRenderEffect(std::string const & srcData)
 		{
-			return RenderEffectPtr(new OGLRenderEffect(srcData, flags));
+			return RenderEffectPtr(new OGLRenderEffect(srcData));
 		}
 			
 		VertexStreamPtr MakeVertexStream(VertexStreamType type,

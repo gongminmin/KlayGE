@@ -1,10 +1,22 @@
+// VertexBuffer.cpp
+// KlayGE 顶点缓冲区类 实现文件
+// Ver 2.4.0
+// 版权所有(C) 龚敏敏, 2003-2005
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.4.0
+// 改名为VertexBuffer (2005.3.7)
+//
+// 修改记录
+/////////////////////////////////////////////////////////////////////////////////
+
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
 
 #include <boost/bind.hpp>
 
-#include <KlayGE/RenderBuffer.hpp>
+#include <KlayGE/VertexBuffer.hpp>
 
 namespace KlayGE
 {
@@ -39,23 +51,23 @@ namespace KlayGE
 	}
 
 
-	RenderBuffer::RenderBuffer(BufferType type)
+	VertexBuffer::VertexBuffer(BufferType type)
 			: type_(type)
 	{
 		vertexStreams_.reserve(16);
 	}
 
-	RenderBuffer::BufferType RenderBuffer::Type() const
+	VertexBuffer::BufferType VertexBuffer::Type() const
 	{
 		return type_;
 	}
 
-	size_t RenderBuffer::NumVertices() const
+	size_t VertexBuffer::NumVertices() const
 	{
 		return vertexStreams_.empty() ? 0 : vertexStreams_[0]->NumVertices();
 	}
 
-	void RenderBuffer::AddVertexStream(VertexStreamType type, uint8_t sizeElement, uint8_t numElement, bool staticStream)
+	void VertexBuffer::AddVertexStream(VertexStreamType type, uint8_t sizeElement, uint8_t numElement, bool staticStream)
 	{
 		if (!this->GetVertexStream(type))
 		{
@@ -64,7 +76,7 @@ namespace KlayGE
 		}
 	}
 
-	VertexStreamPtr RenderBuffer::GetVertexStream(VertexStreamType type) const
+	VertexStreamPtr VertexBuffer::GetVertexStream(VertexStreamType type) const
 	{
 		VertexStreamConstIterator iter = std::find_if(this->VertexStreamBegin(), this->VertexStreamEnd(),
 			boost::bind(std::equal_to<VertexStreamType>(), boost::bind(&VertexStream::Type, _1), type));
@@ -75,42 +87,42 @@ namespace KlayGE
 		return VertexStreamPtr();
 	}
 
-	RenderBuffer::VertexStreamIterator RenderBuffer::VertexStreamBegin()
+	VertexBuffer::VertexStreamIterator VertexBuffer::VertexStreamBegin()
 	{
 		return vertexStreams_.begin();
 	}
 
-	RenderBuffer::VertexStreamIterator RenderBuffer::VertexStreamEnd()
+	VertexBuffer::VertexStreamIterator VertexBuffer::VertexStreamEnd()
 	{
 		return vertexStreams_.end();
 	}
 
-	RenderBuffer::VertexStreamConstIterator RenderBuffer::VertexStreamBegin() const
+	VertexBuffer::VertexStreamConstIterator VertexBuffer::VertexStreamBegin() const
 	{
 		return vertexStreams_.begin();
 	}
 
-	RenderBuffer::VertexStreamConstIterator RenderBuffer::VertexStreamEnd() const
+	VertexBuffer::VertexStreamConstIterator VertexBuffer::VertexStreamEnd() const
 	{
 		return vertexStreams_.end();
 	}
 
-	bool RenderBuffer::UseIndices() const
+	bool VertexBuffer::UseIndices() const
 	{
 		return this->NumIndices() != 0;
 	}
 
-	size_t RenderBuffer::NumIndices() const
+	size_t VertexBuffer::NumIndices() const
 	{
 		return (!indexStream_) ? 0 : indexStream_->NumIndices();
 	}
 
-	void RenderBuffer::AddIndexStream(bool staticStream)
+	void VertexBuffer::AddIndexStream(bool staticStream)
 	{
 		indexStream_ = Context::Instance().RenderFactoryInstance().MakeIndexStream(staticStream);
 	}
 
-	IndexStreamPtr RenderBuffer::GetIndexStream() const
+	IndexStreamPtr VertexBuffer::GetIndexStream() const
 	{
 		return indexStream_;
 	}

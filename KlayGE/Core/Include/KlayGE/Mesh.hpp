@@ -15,7 +15,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Renderable.hpp>
-#include <KlayGE/RenderBuffer.hpp>
+#include <KlayGE/VertexBuffer.hpp>
 
 #include <vector>
 
@@ -32,8 +32,8 @@ namespace KlayGE
 		void SetRenderEffect(RenderEffectPtr const & effect)
 			{ effect_ = effect; }
 
-		RenderBufferPtr GetRenderBuffer() const
-			{ return rb_; }
+		VertexBufferPtr GetVertexBuffer() const
+			{ return vb_; }
 
 		std::wstring const & Name() const;
 
@@ -52,7 +52,7 @@ namespace KlayGE
 			{ indices_.assign(first, last); }
 
 	protected:
-		RenderBufferPtr rb_;
+		VertexBufferPtr vb_;
 		RenderEffectPtr effect_;
 
 		typedef std::vector<Vector3> XYZsType;
@@ -97,8 +97,8 @@ namespace KlayGE
 
 		RenderEffectPtr GetRenderEffect() const
 			{ return staticMesh_->GetRenderEffect(); }
-		RenderBufferPtr GetRenderBuffer() const
-			{ return staticMesh_->GetRenderBuffer(); }
+		VertexBufferPtr GetVertexBuffer() const
+			{ return staticMesh_->GetVertexBuffer(); }
 
 		std::wstring const & Name() const;
 

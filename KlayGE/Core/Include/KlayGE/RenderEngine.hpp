@@ -150,7 +150,7 @@ namespace KlayGE
 		RenderEffectPtr GetRenderEffect() const;
 
 		virtual void BeginFrame() = 0;
-		virtual void Render(RenderBuffer const & vb) = 0;
+		virtual void Render(VertexBuffer const & vb) = 0;
 		virtual void EndFrame() = 0;
 
 		virtual void ClearColor(Color const & clr) = 0;

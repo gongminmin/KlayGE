@@ -55,7 +55,7 @@ namespace KlayGE
 	class D3D9RenderEffect : public RenderEffect, public D3D9Resource
 	{
 	public:
-		D3D9RenderEffect(std::string const & srcData, uint32_t flags = 0);
+		explicit D3D9RenderEffect(std::string const & srcData);
 		D3D9RenderEffect(D3D9RenderEffect const & rhs);
 
 		boost::shared_ptr<ID3DXEffect> const & D3DXEffect() const

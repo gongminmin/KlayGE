@@ -1,6 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/RenderBuffer.hpp>
+#include <KlayGE/VertexBuffer.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/Renderable.hpp>
@@ -13,7 +13,7 @@
 #include <KlayGE/D3D9/D3D9RenderSettings.hpp>
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
-#include <KlayGE/Frustum/Frustum.hpp>
+#include <KlayGE/OCTree/OCTree.hpp>
 
 #include <vector>
 #include <sstream>
@@ -29,7 +29,7 @@ namespace
 	{
 	public:
 		RenderPolygon()
-			: rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
+			: vb_(new VertexBuffer(VertexBuffer::BT_TriangleList))
 		{
 			effect_ = LoadRenderEffect("Parallax.fx");
 			*(effect_->ParameterByName("diffusemap")) = LoadTexture("Diffuse.dds");
@@ -65,17 +65,17 @@ namespace
 				indices, indices + sizeof(indices) / sizeof(indices[0]),
 				xyzs, xyzs + sizeof(xyzs) / sizeof(xyzs[0]), texs);
 
-			rb_->AddVertexStream(VST_Positions, sizeof(float), 3);
-			rb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2);
-			rb_->AddVertexStream(VST_TextureCoords1, sizeof(float), 3);
-			rb_->AddVertexStream(VST_TextureCoords2, sizeof(float), 3);
-			rb_->GetVertexStream(VST_Positions)->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
-			rb_->GetVertexStream(VST_TextureCoords0)->Assign(texs, sizeof(texs) / sizeof(texs[0]));
-			rb_->GetVertexStream(VST_TextureCoords1)->Assign(t, sizeof(t) / sizeof(t[0]));
-			rb_->GetVertexStream(VST_TextureCoords2)->Assign(b, sizeof(b) / sizeof(b[0]));
+			vb_->AddVertexStream(VST_Positions, sizeof(float), 3);
+			vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2);
+			vb_->AddVertexStream(VST_TextureCoords1, sizeof(float), 3);
+			vb_->AddVertexStream(VST_TextureCoords2, sizeof(float), 3);
+			vb_->GetVertexStream(VST_Positions)->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
+			vb_->GetVertexStream(VST_TextureCoords0)->Assign(texs, sizeof(texs) / sizeof(texs[0]));
+			vb_->GetVertexStream(VST_TextureCoords1)->Assign(t, sizeof(t) / sizeof(t[0]));
+			vb_->GetVertexStream(VST_TextureCoords2)->Assign(b, sizeof(b) / sizeof(b[0]));
 
-			rb_->AddIndexStream();
-			rb_->GetIndexStream()->Assign(indices, sizeof(indices) / sizeof(uint16_t));
+			vb_->AddIndexStream();
+			vb_->GetIndexStream()->Assign(indices, sizeof(indices) / sizeof(uint16_t));
 		}
 
 		RenderEffectPtr GetRenderEffect() const
@@ -83,9 +83,9 @@ namespace
 			return effect_;
 		}
 
-		RenderBufferPtr GetRenderBuffer() const
+		VertexBufferPtr GetVertexBuffer() const
 		{
-			return rb_;
+			return vb_;
 		}
 
 		Box GetBound() const
@@ -99,7 +99,7 @@ namespace
 			return name;
 		}
 
-		KlayGE::RenderBufferPtr rb_;
+		KlayGE::VertexBufferPtr vb_;
 		KlayGE::RenderEffectPtr effect_;
 
 		Box box_;
@@ -118,7 +118,7 @@ private:
 		{
 			return false;
 		}
-		if (caps.PixelShaderVersion < D3DPS_VERSION(1, 4))
+		if (caps.PixelShaderVersion < D3DPS_VERSION(2, 0))
 		{
 			return false;
 		}
@@ -129,7 +129,7 @@ private:
 int main()
 {
 	Parallax app;
-	Frustum sceneMgr;
+	OCTree sceneMgr(Box(Vector3(-10, -10, -10), Vector3(10, 10, 10)));
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);

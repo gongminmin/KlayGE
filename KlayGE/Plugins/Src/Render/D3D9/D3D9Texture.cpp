@@ -173,15 +173,50 @@ namespace
 
 namespace KlayGE
 {
+	D3D9Texture::D3D9Texture(uint32_t width, uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
+	{
+		type_	= TT_1D;
+
+		d3dDevice_ = static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
+
+		numMipMaps_ = numMipMaps;
+		format_		= format;
+		width_		= width;
+		height_		= 1;
+		depth_		= 1;
+
+		bpp_ = PixelFormatBits(format);
+
+		usage_ = usage;
+
+		assert(TU_Default == usage_);
+
+		d3dTexture2D_ = this->CreateTexture2D(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+
+		this->QueryBaseTextureFrom2D();
+
+		D3DSURFACE_DESC desc;
+		// Check the actual dimensions vs requested
+		TIF(d3dTexture2D_->GetLevelDesc(0, &desc));
+		width_	= desc.Width;
+		height_	= desc.Height;
+		format_ = ConvertFormat(desc.Format);
+		bpp_	= PixelFormatBits(format_);
+		numMipMaps_ = static_cast<uint16_t>(d3dTexture2D_->GetLevelCount());
+	}
+
 	D3D9Texture::D3D9Texture(uint32_t width, uint32_t height,
 								uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
 	{
+		type_	= TT_2D;
+
 		d3dDevice_ = static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
 
 		numMipMaps_ = numMipMaps;
 		format_		= format;
 		width_		= width;
 		height_		= height;
+		depth_		= 1;
 
 		bpp_ = PixelFormatBits(format);
 
@@ -189,21 +224,18 @@ namespace KlayGE
 
 		if (TU_Default == usage_)
 		{
-			IDirect3DTexture9* d3dTexture;
-			// Use D3DX to help us create the texture, this way it can adjust any relevant sizes
-			TIF(D3DXCreateTexture(d3dDevice_.get(), this->Width(), this->Height(),
-				this->NumMipMaps(), D3DUSAGE_DYNAMIC, ConvertFormat(format),
-				D3DPOOL_DEFAULT, &d3dTexture));
-			d3dTexture_ = MakeCOMPtr(d3dTexture);
+			d3dTexture2D_ = this->CreateTexture2D(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+
+			this->QueryBaseTextureFrom2D();
 
 			D3DSURFACE_DESC desc;
 			// Check the actual dimensions vs requested
-			TIF(d3dTexture_->GetLevelDesc(0, &desc));
+			TIF(d3dTexture2D_->GetLevelDesc(0, &desc));
 			width_	= desc.Width;
 			height_	= desc.Height;
 			format_ = ConvertFormat(desc.Format);
 			bpp_	= PixelFormatBits(format_);
-			numMipMaps_ = static_cast<uint16_t>(d3dTexture_->GetLevelCount());
+			numMipMaps_ = static_cast<uint16_t>(d3dTexture2D_->GetLevelCount());
 		}
 		else
 		{
@@ -216,21 +248,18 @@ namespace KlayGE
 			tempSurf->GetDesc(&tempDesc);
 			tempSurf->Release();
 
-			IDirect3DTexture9* d3dTexture;
-			// Now we create the texture.
-			TIF(D3DXCreateTexture(d3dDevice_.get(), this->Width(), this->Height(),
-				this->NumMipMaps(), D3DUSAGE_RENDERTARGET,
-				tempDesc.Format, D3DPOOL_DEFAULT, &d3dTexture));
-			d3dTexture_ = MakeCOMPtr(d3dTexture);
+			d3dTexture2D_ = this->CreateTexture2D(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
+
+			this->QueryBaseTextureFrom2D();
 
 			D3DSURFACE_DESC desc;
 			// Check the actual dimensions vs requested
-			TIF(d3dTexture_->GetLevelDesc(0, &desc));
+			TIF(d3dTexture2D_->GetLevelDesc(0, &desc));
 			width_	= desc.Width;
 			height_	= desc.Height;
 			format_ = ConvertFormat(desc.Format);
 			bpp_	= PixelFormatBits(format_);
-			numMipMaps_ = static_cast<uint16_t>(d3dTexture_->GetLevelCount());
+			numMipMaps_ = static_cast<uint16_t>(d3dTexture2D_->GetLevelCount());
 
 			// Now get the format of the depth stencil surface.
 			d3dDevice_->GetDepthStencilSurface(&tempSurf);
@@ -242,6 +271,82 @@ namespace KlayGE
 				FALSE, &tempSurf, NULL));
 			renderZBuffer_ = MakeCOMPtr(tempSurf);
 		}
+	}
+
+	D3D9Texture::D3D9Texture(uint32_t width, uint32_t height, uint32_t depth,
+								uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
+	{
+		type_	= TT_3D;
+
+		d3dDevice_ = static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
+
+		numMipMaps_ = numMipMaps;
+		format_		= format;
+		width_		= width;
+		height_		= height;
+		depth_		= depth;
+
+		bpp_ = PixelFormatBits(format);
+
+		usage_ = usage;
+
+		assert(TU_Default == usage_);
+
+		IDirect3DVolumeTexture9* d3dTexture3D;
+		// Use D3DX to help us create the texture, this way it can adjust any relevant sizes
+		TIF(D3DXCreateVolumeTexture(d3dDevice_.get(), this->Width(), this->Height(), this->Depth(),
+			this->NumMipMaps(), D3DUSAGE_DYNAMIC, ConvertFormat(format),
+			D3DPOOL_DEFAULT, &d3dTexture3D));
+		d3dTexture3D_ = MakeCOMPtr(d3dTexture3D);
+
+		this->QueryBaseTextureFrom3D();
+
+		D3DVOLUME_DESC desc;
+		// Check the actual dimensions vs requested
+		TIF(d3dTexture3D_->GetLevelDesc(0, &desc));
+		width_	= desc.Width;
+		height_	= desc.Height;
+		depth_	= desc.Depth;
+		format_ = ConvertFormat(desc.Format);
+		bpp_	= PixelFormatBits(format_);
+		numMipMaps_ = static_cast<uint16_t>(d3dTexture3D_->GetLevelCount());
+	}
+
+	D3D9Texture::D3D9Texture(uint32_t size, bool /*cube*/, uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
+	{
+		type_	= TT_Cube;
+
+		d3dDevice_ = static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
+
+		numMipMaps_ = numMipMaps;
+		format_		= format;
+		width_		= size;
+		height_		= size;
+		depth_		= 1;
+
+		bpp_ = PixelFormatBits(format);
+
+		usage_ = usage;
+
+		assert(TU_Default == usage_);
+
+		IDirect3DCubeTexture9* d3dTextureCube;
+		// Use D3DX to help us create the texture, this way it can adjust any relevant sizes
+		TIF(D3DXCreateCubeTexture(d3dDevice_.get(), this->Width(),
+			this->NumMipMaps(), D3DUSAGE_DYNAMIC, ConvertFormat(format),
+			D3DPOOL_DEFAULT, &d3dTextureCube));
+		d3dTextureCube_ = MakeCOMPtr(d3dTextureCube);
+
+		this->QueryBaseTextureFromCube();
+
+		D3DSURFACE_DESC desc;
+		// Check the actual dimensions vs requested
+		TIF(d3dTextureCube_->GetLevelDesc(0, &desc));
+		width_	= desc.Width;
+		height_	= desc.Height;
+		format_ = ConvertFormat(desc.Format);
+		bpp_	= PixelFormatBits(format_);
+		numMipMaps_ = static_cast<uint16_t>(d3dTexture2D_->GetLevelCount());
 	}
 
 	D3D9Texture::~D3D9Texture()
@@ -258,9 +363,10 @@ namespace KlayGE
 	{
 		D3D9Texture& other(static_cast<D3D9Texture&>(target));
 
-		RECT dstRC = { 0, 0, other.Width(), other.Height() };
-
-		boost::shared_ptr<IDirect3DSurface9> src, dst;
+		assert(target.Width() == width_);
+		assert(target.Height() == height_);
+		assert(target.Depth() == depth_);
+		assert(target.Type() == type_);
 
 		uint32_t maxLevel = 1;
 		if (this->NumMipMaps() == target.NumMipMaps())
@@ -268,16 +374,69 @@ namespace KlayGE
 			maxLevel = this->NumMipMaps();
 		}
 
-		for (uint32_t i = 0; i < maxLevel; ++ i)
+		switch (type_)
 		{
-			IDirect3DSurface9* temp;
-			TIF(this->D3DTexture()->GetSurfaceLevel(i, &temp));
-			src = MakeCOMPtr(temp);
+		case TT_1D:
+		case TT_2D:
+			{
+				boost::shared_ptr<IDirect3DSurface9> src, dst;
 
-			TIF(other.D3DTexture()->GetSurfaceLevel(i, &temp));
-			dst = MakeCOMPtr(temp);
+				for (uint32_t i = 0; i < maxLevel; ++ i)
+				{
+					IDirect3DSurface9* temp;
+					TIF(d3dTexture2D_->GetSurfaceLevel(i, &temp));
+					src = MakeCOMPtr(temp);
 
-			TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DTEXF_NONE, 0));
+					TIF(other.d3dTexture2D_->GetSurfaceLevel(i, &temp));
+					dst = MakeCOMPtr(temp);
+
+					TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DTEXF_NONE, 0));
+				}
+			}
+			break;
+
+		case TT_3D:
+			{
+				boost::shared_ptr<IDirect3DVolume9> src, dst;
+
+				for (uint32_t i = 0; i < maxLevel; ++ i)
+				{
+					IDirect3DVolume9* temp;
+					TIF(d3dTexture3D_->GetVolumeLevel(i, &temp));
+					src = MakeCOMPtr(temp);
+
+					TIF(other.d3dTexture3D_->GetVolumeLevel(i, &temp));
+					dst = MakeCOMPtr(temp);
+
+					TIF(D3DXLoadVolumeFromVolume(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DTEXF_NONE, 0));
+				}
+			}
+			break;
+
+		case TT_Cube:
+			{
+				boost::shared_ptr<IDirect3DSurface9> src, dst;
+
+				for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face < D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
+				{
+					for (uint32_t level = 0; level < maxLevel; ++ level)
+					{
+						IDirect3DSurface9* temp;
+						TIF(d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &temp));
+						src = MakeCOMPtr(temp);
+
+						TIF(other.d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &temp));
+						dst = MakeCOMPtr(temp);
+
+						TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DTEXF_NONE, 0));
+					}
+				}
+			}
+			break;
+
+		default:
+			assert(false);
+			break;
 		}
 
 		if (this->NumMipMaps() != target.NumMipMaps())
@@ -290,62 +449,228 @@ namespace KlayGE
 	{
 		assert(data != NULL);
 
-		D3DLOCKED_RECT d3d_rc;
-		d3dTexture_->LockRect(level, &d3d_rc, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY);
-
-		uint8_t* dst = static_cast<uint8_t*>(data);
-		uint8_t* src = static_cast<uint8_t*>(d3d_rc.pBits);
-
-		uint32_t const srcPitch = d3d_rc.Pitch;
-		uint32_t const dstPitch = this->Width() * PixelFormatBits(format_) / 8;
-
-		for (uint32_t i = 0; i < this->Height(); ++ i)
+		switch (type_)
 		{
-			std::copy(src, src + dstPitch, dst);
+		case TT_1D:
+		case TT_2D:
+			{
+				D3DLOCKED_RECT d3d_rc;
+				d3dTexture2D_->LockRect(level, &d3d_rc, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY);
 
-			src += srcPitch;
-			dst += dstPitch;
+				uint8_t* dst = static_cast<uint8_t*>(data);
+				uint8_t* src = static_cast<uint8_t*>(d3d_rc.pBits);
+
+				uint32_t const srcPitch = d3d_rc.Pitch;
+				uint32_t const dstPitch = this->Width() * PixelFormatBits(format_) / 8;
+
+				for (uint32_t i = 0; i < this->Height(); ++ i)
+				{
+					std::copy(src, src + dstPitch, dst);
+
+					src += srcPitch;
+					dst += dstPitch;
+				}
+
+				d3dTexture2D_->UnlockRect(0);
+			}
+			break;
+
+		case TT_3D:
+			{
+				D3DLOCKED_BOX d3d_box;
+				d3dTexture3D_->LockBox(level, &d3d_box, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY);
+
+				uint8_t* dst = static_cast<uint8_t*>(data);
+				uint8_t* src = static_cast<uint8_t*>(d3d_box.pBits);
+
+				uint32_t const srcPitch = d3d_box.RowPitch;
+				uint32_t const dstPitch = this->Width() * PixelFormatBits(format_) / 8;
+
+				for (uint32_t j = 0; j < this->Depth(); ++ j)
+				{
+					src = static_cast<uint8_t*>(d3d_box.pBits) + j * d3d_box.SlicePitch;
+
+					for (uint32_t i = 0; i < this->Height(); ++ i)
+					{
+						std::copy(src, src + dstPitch, dst);
+
+						src += srcPitch;
+						dst += dstPitch;
+					}
+				}
+
+				d3dTexture3D_->UnlockBox(0);
+			}
+			break;
+
+		case TT_Cube:
+			{
+				for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face < D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
+				{
+					D3DLOCKED_RECT d3d_rc;
+					d3dTextureCube_->LockRect(static_cast<D3DCUBEMAP_FACES>(face),
+						level, &d3d_rc, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY);
+
+					uint8_t* dst = static_cast<uint8_t*>(data);
+					uint8_t* src = static_cast<uint8_t*>(d3d_rc.pBits);
+
+					uint32_t const srcPitch = d3d_rc.Pitch;
+					uint32_t const dstPitch = this->Width() * PixelFormatBits(format_) / 8;
+
+					for (uint32_t i = 0; i < this->Height(); ++ i)
+					{
+						std::copy(src, src + dstPitch, dst);
+
+						src += srcPitch;
+						dst += dstPitch;
+					}
+
+					d3dTextureCube_->UnlockRect(static_cast<D3DCUBEMAP_FACES>(face), 0);
+				}
+			}
+			break;
+
+		default:
+			assert(false);
+			break;
 		}
-
-		d3dTexture_->UnlockRect(0);
 	}
 
-	void D3D9Texture::CopyMemoryToTexture(int level, void* data, PixelFormat pf,
+	void D3D9Texture::CopyMemoryToTexture1D(int level, void* data, PixelFormat pf,
+		uint32_t width, uint32_t xOffset)
+	{
+		this->CopyMemoryToTexture2D(level, data, pf, width, 1, xOffset, 0);
+	}
+
+	void D3D9Texture::CopyMemoryToTexture2D(int level, void* data, PixelFormat pf,
 		uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset)
 	{
 		IDirect3DSurface9* temp;
-		TIF(this->D3DTexture()->GetSurfaceLevel(level, &temp));
+		TIF(d3dTexture2D_->GetSurfaceLevel(level, &temp));
 		boost::shared_ptr<IDirect3DSurface9> shadow = MakeCOMPtr(temp);
 
 		RECT srcRc = { 0, 0, width, height };
 		RECT dstRc = { xOffset, yOffset, xOffset + srcRc.right, yOffset + srcRc.bottom };
 		TIF(D3DXLoadSurfaceFromMemory(shadow.get(), NULL, &dstRc, data, ConvertFormat(pf),
-			width * PixelFormatBits(pf) / 8, NULL, &srcRc, D3DX_FILTER_NONE, 0));
+				width * PixelFormatBits(pf) / 8, NULL, &srcRc, D3DX_FILTER_NONE, 0));
+	}
+
+	void D3D9Texture::CopyMemoryToTexture3D(int level, void* data, PixelFormat pf,
+			uint32_t width, uint32_t height, uint32_t depth,
+			uint32_t xOffset, uint32_t yOffset, uint32_t zOffset)
+	{
+		IDirect3DVolume9* temp;
+		TIF(d3dTexture3D_->GetVolumeLevel(level, &temp));
+		boost::shared_ptr<IDirect3DVolume9> shadow = MakeCOMPtr(temp);
+
+		uint32_t const srcRowPitch = width * PixelFormatBits(pf) / 8;
+		uint32_t const srcSlicePitch = srcRowPitch * height;
+
+		D3DBOX srcBox = { 0, 0, width, height, 0, depth };
+		D3DBOX dstBox = { xOffset, yOffset, xOffset + srcBox.Right, yOffset + srcBox.Bottom,
+			zOffset, zOffset + srcBox.Back };
+		TIF(D3DXLoadVolumeFromMemory(shadow.get(), NULL, &dstBox, data, ConvertFormat(pf),
+				srcRowPitch, srcSlicePitch, NULL, &srcBox, D3DX_FILTER_NONE, 0));
+	}
+
+	void D3D9Texture::CopyMemoryToTextureCube(CubeFaces face, int level, void* data, PixelFormat pf,
+			uint32_t size, uint32_t xOffset)
+	{
+		IDirect3DSurface9* temp;
+		TIF(d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &temp));
+		boost::shared_ptr<IDirect3DSurface9> shadow = MakeCOMPtr(temp);
+
+		RECT srcRc = { 0, 0, size, size };
+		RECT dstRc = { xOffset, xOffset, xOffset + srcRc.right, xOffset + srcRc.bottom };
+		TIF(D3DXLoadSurfaceFromMemory(shadow.get(), NULL, &dstRc, data, ConvertFormat(pf),
+				size * PixelFormatBits(pf) / 8, NULL, &srcRc, D3DX_FILTER_NONE, 0));
 	}
 
 	void D3D9Texture::BuildMipSubLevels()
 	{
-		boost::shared_ptr<IDirect3DTexture9> d3dTextureShadow;
-		IDirect3DTexture9* d3dTexture;
-		TIF(D3DXCreateTexture(d3dDevice_.get(), this->Width(), this->Height(),
-			this->NumMipMaps(), 0, ConvertFormat(format_),
-			D3DPOOL_SYSTEMMEM, &d3dTexture));
-		d3dTextureShadow = MakeCOMPtr(d3dTexture);
+		boost::shared_ptr<IDirect3DBaseTexture9> d3dBaseTexture;
 
-		IDirect3DSurface9* temp;
-		TIF(this->D3DTexture()->GetSurfaceLevel(0, &temp));
-		boost::shared_ptr<IDirect3DSurface9> src = MakeCOMPtr(temp);
+		switch (type_)
+		{
+		case TT_1D:
+		case TT_2D:
+			{
+				boost::shared_ptr<IDirect3DTexture9> d3dTexture2D = this->CreateTexture2D(0, D3DPOOL_SYSTEMMEM);
 
-		TIF(d3dTextureShadow->GetSurfaceLevel(0, &temp));
-		boost::shared_ptr<IDirect3DSurface9> dst = MakeCOMPtr(temp);
+				IDirect3DBaseTexture9* base;
+				d3dTexture2D->QueryInterface(IID_IDirect3DBaseTexture9, reinterpret_cast<void**>(&base));
+				d3dBaseTexture = MakeCOMPtr(base);
 
-		TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+				IDirect3DSurface9* temp;
+				TIF(d3dTexture2D_->GetSurfaceLevel(0, &temp));
+				boost::shared_ptr<IDirect3DSurface9> src = MakeCOMPtr(temp);
 
-		TIF(D3DXFilterTexture(d3dTextureShadow.get(), NULL, D3DX_DEFAULT, D3DX_DEFAULT));
-		TIF(d3dDevice_->UpdateTexture(d3dTextureShadow.get(), this->D3DTexture().get()));
+				TIF(d3dTexture2D->GetSurfaceLevel(0, &temp));
+				boost::shared_ptr<IDirect3DSurface9> dst = MakeCOMPtr(temp);
+
+				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+			}
+			break;
+
+		case TT_3D:
+			{
+				IDirect3DVolumeTexture9* texture3D;
+				TIF(D3DXCreateVolumeTexture(d3dDevice_.get(), this->Width(), this->Height(), this->Depth(),
+					this->NumMipMaps(), 0, ConvertFormat(format_),
+					D3DPOOL_SYSTEMMEM, &texture3D));
+				boost::shared_ptr<IDirect3DVolumeTexture9> d3dTexture3D = MakeCOMPtr(texture3D);
+
+				IDirect3DBaseTexture9* base;
+				d3dTexture3D->QueryInterface(IID_IDirect3DBaseTexture9, reinterpret_cast<void**>(&base));
+				d3dBaseTexture = MakeCOMPtr(base);
+
+				IDirect3DVolume9* temp;
+				TIF(d3dTexture3D_->GetVolumeLevel(0, &temp));
+				boost::shared_ptr<IDirect3DVolume9> src = MakeCOMPtr(temp);
+
+				TIF(d3dTexture3D->GetVolumeLevel(0, &temp));
+				boost::shared_ptr<IDirect3DVolume9> dst = MakeCOMPtr(temp);
+
+				TIF(D3DXLoadVolumeFromVolume(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+			}
+			break;
+
+		case TT_Cube:
+			{
+				IDirect3DCubeTexture9* textureCube;
+				TIF(D3DXCreateCubeTexture(d3dDevice_.get(), this->Width(),
+					this->NumMipMaps(), 0, ConvertFormat(format_),
+					D3DPOOL_SYSTEMMEM, &textureCube));
+				boost::shared_ptr<IDirect3DCubeTexture9> d3dTextureCube = MakeCOMPtr(textureCube);
+
+				IDirect3DBaseTexture9* base;
+				d3dTextureCube->QueryInterface(IID_IDirect3DBaseTexture9, reinterpret_cast<void**>(&base));
+				d3dBaseTexture = MakeCOMPtr(base);
+
+				for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face < D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
+				{
+					IDirect3DSurface9* temp;
+					TIF(d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), 0, &temp));
+					boost::shared_ptr<IDirect3DSurface9> src = MakeCOMPtr(temp);
+
+					TIF(d3dTextureCube->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), 0, &temp));
+					boost::shared_ptr<IDirect3DSurface9> dst = MakeCOMPtr(temp);
+
+					TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+				}
+			}
+			break;
+
+		default:
+			assert(false);
+			break;
+		}
+
+		TIF(D3DXFilterTexture(d3dBaseTexture.get(), NULL, D3DX_DEFAULT, D3DX_DEFAULT));
+		TIF(d3dDevice_->UpdateTexture(d3dBaseTexture.get(), d3dBaseTexture_.get()));
 	}
 
-	void D3D9Texture::CustomAttribute(std::string const & name, void* pData)
+	void D3D9Texture::CustomAttribute(std::string const & /*name*/, void* /*data*/)
 	{
 		assert(false);
 	}
@@ -354,64 +679,129 @@ namespace KlayGE
 	{
 		d3dDevice_ = static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
 
-		if (TU_Default == usage_)
+		switch (type_)
 		{
-			IDirect3DTexture9* d3dTexture;
-			TIF(D3DXCreateTexture(d3dDevice_.get(), this->Width(), this->Height(),
-				this->NumMipMaps(), 0, ConvertFormat(format_),
-				D3DPOOL_SYSTEMMEM, &d3dTexture));
-			boost::shared_ptr<IDirect3DTexture9> tempTexture = MakeCOMPtr(d3dTexture);
-
-			for (uint16_t i = 0; i < this->NumMipMaps(); ++ i)
+		case TT_1D:
+		case TT_2D:
+			if (TU_Default == usage_)
 			{
-				IDirect3DSurface9* temp;
-				TIF(this->D3DTexture()->GetSurfaceLevel(i, &temp));
-				boost::shared_ptr<IDirect3DSurface9> src = MakeCOMPtr(temp);
+				boost::shared_ptr<IDirect3DTexture9> tempTexture2D = this->CreateTexture2D(0, D3DPOOL_SYSTEMMEM);
 
-				TIF(tempTexture->GetSurfaceLevel(i, &temp));
-				boost::shared_ptr<IDirect3DSurface9> dst = MakeCOMPtr(temp);
+				for (uint16_t i = 0; i < this->NumMipMaps(); ++ i)
+				{
+					IDirect3DSurface9* temp;
+					TIF(d3dTexture2D_->GetSurfaceLevel(i, &temp));
+					boost::shared_ptr<IDirect3DSurface9> src = MakeCOMPtr(temp);
 
-				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+					TIF(tempTexture2D->GetSurfaceLevel(i, &temp));
+					boost::shared_ptr<IDirect3DSurface9> dst = MakeCOMPtr(temp);
+
+					TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+				}
+				tempTexture2D->AddDirtyRect(NULL);
+				d3dTexture2D_ = tempTexture2D;
+
+				this->QueryBaseTextureFrom2D();
 			}
-			tempTexture->AddDirtyRect(NULL);
-			d3dTexture_ = tempTexture;
-		}
-		else
-		{
-			IDirect3DSurface9* tempSurf;
-			D3DSURFACE_DESC tempDesc;
-
-			d3dDevice_->GetRenderTarget(0, &tempSurf);
-			tempSurf->GetDesc(&tempDesc);
-			tempSurf->Release();
-
-			IDirect3DTexture9* d3dTexture;
-			TIF(D3DXCreateTexture(d3dDevice_.get(), this->Width(), this->Height(),
-				this->NumMipMaps(), 0, tempDesc.Format, D3DPOOL_SYSTEMMEM, &d3dTexture));
-			boost::shared_ptr<IDirect3DTexture9> tempTexture = MakeCOMPtr(d3dTexture);
-			for (uint16_t i = 0; i < this->NumMipMaps(); ++ i)
+			else
 			{
-				IDirect3DSurface9* temp;
-				TIF(this->D3DTexture()->GetSurfaceLevel(i, &temp));
-				boost::shared_ptr<IDirect3DSurface9> src = MakeCOMPtr(temp);
+				IDirect3DSurface9* tempSurf;
+				D3DSURFACE_DESC tempDesc;
 
-				TIF(tempTexture->GetSurfaceLevel(i, &temp));
-				boost::shared_ptr<IDirect3DSurface9> dst = MakeCOMPtr(temp);
+				d3dDevice_->GetRenderTarget(0, &tempSurf);
+				tempSurf->GetDesc(&tempDesc);
+				tempSurf->Release();
 
-				TIF(d3dDevice_->GetRenderTargetData(src.get(), dst.get()));
+				boost::shared_ptr<IDirect3DTexture9> tempTexture2D = this->CreateTexture2D(0, D3DPOOL_SYSTEMMEM);
+
+				for (uint16_t i = 0; i < this->NumMipMaps(); ++ i)
+				{
+					IDirect3DSurface9* temp;
+					TIF(d3dTexture2D_->GetSurfaceLevel(i, &temp));
+					boost::shared_ptr<IDirect3DSurface9> src = MakeCOMPtr(temp);
+
+					TIF(tempTexture2D->GetSurfaceLevel(i, &temp));
+					boost::shared_ptr<IDirect3DSurface9> dst = MakeCOMPtr(temp);
+
+					TIF(d3dDevice_->GetRenderTargetData(src.get(), dst.get()));
+				}
+				tempTexture2D->AddDirtyRect(NULL);
+				d3dTexture2D_ = tempTexture2D;
+
+				this->QueryBaseTextureFrom2D();
+
+				d3dDevice_->GetDepthStencilSurface(&tempSurf);
+				tempSurf->GetDesc(&tempDesc);
+				tempSurf->Release();
+
+				TIF(d3dDevice_->CreateOffscreenPlainSurface(width_, height_, tempDesc.Format,
+					D3DPOOL_SYSTEMMEM, &tempSurf, NULL));
+				boost::shared_ptr<IDirect3DSurface9> dst = MakeCOMPtr(tempSurf);
+				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, renderZBuffer_.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+				renderZBuffer_ = dst;
 			}
-			tempTexture->AddDirtyRect(NULL);
-			d3dTexture_ = tempTexture;
+			break;
 
-			d3dDevice_->GetDepthStencilSurface(&tempSurf);
-			tempSurf->GetDesc(&tempDesc);
-			tempSurf->Release();
+		case TT_3D:
+			{
+				IDirect3DVolumeTexture9* d3dTexture3D;
+				TIF(D3DXCreateVolumeTexture(d3dDevice_.get(), this->Width(), this->Height(), this->Depth(),
+					this->NumMipMaps(), 0, ConvertFormat(format_),
+					D3DPOOL_SYSTEMMEM, &d3dTexture3D));
+				boost::shared_ptr<IDirect3DVolumeTexture9> tempTexture3D = MakeCOMPtr(d3dTexture3D);
 
-			TIF(d3dDevice_->CreateOffscreenPlainSurface(width_, height_, tempDesc.Format,
-				D3DPOOL_SYSTEMMEM, &tempSurf, NULL));
-			boost::shared_ptr<IDirect3DSurface9> dst = MakeCOMPtr(tempSurf);
-			TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, renderZBuffer_.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
-			renderZBuffer_ = dst;
+				for (uint16_t i = 0; i < this->NumMipMaps(); ++ i)
+				{
+					IDirect3DVolume9* temp;
+					TIF(d3dTexture3D_->GetVolumeLevel(i, &temp));
+					boost::shared_ptr<IDirect3DVolume9> src = MakeCOMPtr(temp);
+
+					TIF(tempTexture3D->GetVolumeLevel(i, &temp));
+					boost::shared_ptr<IDirect3DVolume9> dst = MakeCOMPtr(temp);
+
+					TIF(D3DXLoadVolumeFromVolume(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+				}
+				tempTexture3D->AddDirtyBox(NULL);
+				d3dTexture3D_ = tempTexture3D;
+
+				this->QueryBaseTextureFrom3D();
+			}
+			break;
+
+		case TT_Cube:
+			{
+				IDirect3DCubeTexture9* d3dTextureCube;
+				TIF(D3DXCreateCubeTexture(d3dDevice_.get(), this->Width(),
+					this->NumMipMaps(), 0, ConvertFormat(format_),
+					D3DPOOL_SYSTEMMEM, &d3dTextureCube));
+				boost::shared_ptr<IDirect3DCubeTexture9> tempTextureCube = MakeCOMPtr(d3dTextureCube);
+
+				for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face < D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
+				{
+					for (uint16_t level = 0; level < this->NumMipMaps(); ++ level)
+					{
+					
+						IDirect3DSurface9* temp;
+						TIF(d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &temp));
+						boost::shared_ptr<IDirect3DSurface9> src = MakeCOMPtr(temp);
+
+						TIF(tempTextureCube->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &temp));
+						boost::shared_ptr<IDirect3DSurface9> dst = MakeCOMPtr(temp);
+
+						TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+
+						tempTextureCube->AddDirtyRect(static_cast<D3DCUBEMAP_FACES>(face), NULL);
+					}
+				}
+				d3dTextureCube_ = tempTextureCube;
+
+				this->QueryBaseTextureFromCube();
+			}
+			break;
+
+		default:
+			assert(false);
+			break;
 		}
 	}
 
@@ -419,46 +809,135 @@ namespace KlayGE
 	{
 		d3dDevice_ = static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
 
-		if (TU_Default == usage_)
+		switch (type_)
 		{
-			IDirect3DTexture9* d3dTexture;
-			TIF(D3DXCreateTexture(d3dDevice_.get(), this->Width(), this->Height(),
-				this->NumMipMaps(), D3DUSAGE_DYNAMIC, ConvertFormat(format_),
-				D3DPOOL_DEFAULT, &d3dTexture));
-			boost::shared_ptr<IDirect3DTexture9> tempTexture = MakeCOMPtr(d3dTexture);
-			tempTexture->AddDirtyRect(NULL);
+		case TT_1D:
+		case TT_2D:
+			if (TU_Default == usage_)
+			{
+				boost::shared_ptr<IDirect3DTexture9> tempTexture2D = this->CreateTexture2D(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+				tempTexture2D->AddDirtyRect(NULL);
 
-			d3dDevice_->UpdateTexture(d3dTexture_.get(), tempTexture.get());
-			d3dTexture_ = tempTexture;
+				d3dDevice_->UpdateTexture(d3dTexture2D_.get(), tempTexture2D.get());
+				d3dTexture2D_ = tempTexture2D;
+
+				this->QueryBaseTextureFrom2D();
+			}
+			else
+			{
+				IDirect3DSurface9* tempSurf;
+				D3DSURFACE_DESC tempDesc;
+
+				d3dDevice_->GetRenderTarget(0, &tempSurf);
+				tempSurf->GetDesc(&tempDesc);
+				tempSurf->Release();
+
+				boost::shared_ptr<IDirect3DTexture9> tempTexture2D = this->CreateTexture2D(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
+				tempTexture2D->AddDirtyRect(NULL);
+
+				d3dDevice_->UpdateTexture(d3dTexture2D_.get(), tempTexture2D.get());
+				d3dTexture2D_ = tempTexture2D;
+
+				this->QueryBaseTextureFrom2D();
+
+				d3dDevice_->GetDepthStencilSurface(&tempSurf);
+				tempSurf->GetDesc(&tempDesc);
+				tempSurf->Release();
+
+				TIF(d3dDevice_->CreateDepthStencilSurface(width_, height_, tempDesc.Format, tempDesc.MultiSampleType, 0, 
+					FALSE, &tempSurf, NULL));
+				boost::shared_ptr<IDirect3DSurface9> dst = MakeCOMPtr(tempSurf);
+				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, renderZBuffer_.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+				renderZBuffer_ = dst;
+			}
+
+		case TT_3D:
+			{
+				IDirect3DVolumeTexture9* d3dTexture3D;
+				TIF(D3DXCreateVolumeTexture(d3dDevice_.get(), this->Width(), this->Height(), this->Depth(),
+					this->NumMipMaps(), D3DUSAGE_DYNAMIC, ConvertFormat(format_),
+					D3DPOOL_DEFAULT, &d3dTexture3D));
+				boost::shared_ptr<IDirect3DVolumeTexture9> tempTexture3D = MakeCOMPtr(d3dTexture3D);
+				tempTexture3D->AddDirtyBox(NULL);
+
+				d3dDevice_->UpdateTexture(d3dTexture3D_.get(), tempTexture3D.get());
+				d3dTexture3D_ = tempTexture3D;
+
+				this->QueryBaseTextureFrom3D();
+			}
+			break;
+
+		case TT_Cube:
+			{
+				IDirect3DCubeTexture9* d3dTextureCube;
+				TIF(D3DXCreateCubeTexture(d3dDevice_.get(), this->Width(),
+					this->NumMipMaps(), D3DUSAGE_DYNAMIC, ConvertFormat(format_),
+					D3DPOOL_DEFAULT, &d3dTextureCube));
+				boost::shared_ptr<IDirect3DCubeTexture9> tempTextureCube = MakeCOMPtr(d3dTextureCube);
+				for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face < D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
+				{
+					tempTextureCube->AddDirtyRect(static_cast<D3DCUBEMAP_FACES>(face), NULL);
+				}
+
+				d3dDevice_->UpdateTexture(d3dTextureCube_.get(), tempTextureCube.get());
+				d3dTextureCube_ = tempTextureCube;
+
+				this->QueryBaseTextureFromCube();
+			}
+			break;
+
+		default:
+			assert(false);
+			break;
 		}
-		else
-		{
-			IDirect3DSurface9* tempSurf;
-			D3DSURFACE_DESC tempDesc;
+	}
 
-			d3dDevice_->GetRenderTarget(0, &tempSurf);
-			tempSurf->GetDesc(&tempDesc);
-			tempSurf->Release();
+	boost::shared_ptr<IDirect3DTexture9> D3D9Texture::CreateTexture2D(uint32_t usage, D3DPOOL pool)
+	{
+		IDirect3DTexture9* d3dTexture2D;
+		// Use D3DX to help us create the texture, this way it can adjust any relevant sizes
+		TIF(D3DXCreateTexture(d3dDevice_.get(), this->Width(), this->Height(),
+			this->NumMipMaps(), usage, ConvertFormat(format_),
+			pool, &d3dTexture2D));
+		return MakeCOMPtr(d3dTexture2D);
+	}
 
-			IDirect3DTexture9* d3dTexture;
-			TIF(D3DXCreateTexture(d3dDevice_.get(), this->Width(), this->Height(),
-				this->NumMipMaps(), D3DUSAGE_RENDERTARGET,
-				tempDesc.Format, D3DPOOL_DEFAULT, &d3dTexture));
-			boost::shared_ptr<IDirect3DTexture9> tempTexture = MakeCOMPtr(d3dTexture);
-			tempTexture->AddDirtyRect(NULL);
+	boost::shared_ptr<IDirect3DVolumeTexture9> D3D9Texture::CreateTexture3D(uint32_t usage, D3DPOOL pool)
+	{
+		IDirect3DVolumeTexture9* d3dTexture3D;
+		TIF(D3DXCreateVolumeTexture(d3dDevice_.get(), this->Width(), this->Height(), this->Depth(),
+			this->NumMipMaps(), usage, ConvertFormat(format_),
+			pool, &d3dTexture3D));
+		return MakeCOMPtr(d3dTexture3D);
+	}
 
-			d3dDevice_->UpdateTexture(d3dTexture_.get(), tempTexture.get());
-			d3dTexture_ = tempTexture;
+	boost::shared_ptr<IDirect3DCubeTexture9> D3D9Texture::CreateTextureCube(uint32_t usage, D3DPOOL pool)
+	{
+		IDirect3DCubeTexture9* d3dTextureCube;
+		TIF(D3DXCreateCubeTexture(d3dDevice_.get(), this->Width(), 
+			this->NumMipMaps(), usage, ConvertFormat(format_),
+			pool, &d3dTextureCube));
+		return MakeCOMPtr(d3dTextureCube);
+	}
 
-			d3dDevice_->GetDepthStencilSurface(&tempSurf);
-			tempSurf->GetDesc(&tempDesc);
-			tempSurf->Release();
+	void D3D9Texture::QueryBaseTextureFrom2D()
+	{
+		IDirect3DBaseTexture9* d3dBaseTexture;
+		d3dTexture2D_->QueryInterface(IID_IDirect3DBaseTexture9, reinterpret_cast<void**>(&d3dBaseTexture));
+		d3dBaseTexture_ = MakeCOMPtr(d3dBaseTexture);
+	}
 
-			TIF(d3dDevice_->CreateDepthStencilSurface(width_, height_, tempDesc.Format, tempDesc.MultiSampleType, 0, 
-				FALSE, &tempSurf, NULL));
-			boost::shared_ptr<IDirect3DSurface9> dst = MakeCOMPtr(tempSurf);
-			TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, renderZBuffer_.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
-			renderZBuffer_ = dst;
-		}
+	void D3D9Texture::QueryBaseTextureFrom3D()
+	{
+		IDirect3DBaseTexture9* d3dBaseTexture;
+		d3dTexture3D_->QueryInterface(IID_IDirect3DBaseTexture9, reinterpret_cast<void**>(&d3dBaseTexture));
+		d3dBaseTexture_ = MakeCOMPtr(d3dBaseTexture);
+	}
+
+	void D3D9Texture::QueryBaseTextureFromCube()
+	{
+		IDirect3DBaseTexture9* d3dBaseTexture;
+		d3dTextureCube_->QueryInterface(IID_IDirect3DBaseTexture9, reinterpret_cast<void**>(&d3dBaseTexture));
+		d3dBaseTexture_ = MakeCOMPtr(d3dBaseTexture);
 	}
 }

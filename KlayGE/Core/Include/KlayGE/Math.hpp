@@ -1513,7 +1513,7 @@ namespace KlayGE
 		ComputeBoundingSphere(Sphere& out, Iterator first, Iterator last)
 		{
 			Box box;
-			ComputeBoundingBox(box, first, last)
+			ComputeBoundingBox(box, first, last);
 			float radius = std::max(Length(box.Min()), Length(box.Max()));
 			out = Sphere((box.Min() + box.Max()) / 2, radius);
 			return out;
@@ -1523,7 +1523,7 @@ namespace KlayGE
 		// 网格
 		///////////////////////////////////////////////////////////////////////////////
 
-		// 计算像素光照需要的TBN
+		// 计算凹凸贴图需要的TBN
 		template <typename TangentIterator, typename BinormIterator,
 			typename IndexIterator, typename PositionIterator, typename TexCoordIterator>
 		inline void
@@ -1544,22 +1544,22 @@ namespace KlayGE
 				uint16_t const v1Index = *(iter + 1);
 				uint16_t const v2Index = *(iter + 2);
 
-				Vector3 const & v1XYZ(*(xyzsBegin + v1Index));
 				Vector3 const & v0XYZ(*(xyzsBegin + v0Index));
+				Vector3 const & v1XYZ(*(xyzsBegin + v1Index));
 				Vector3 const & v2XYZ(*(xyzsBegin + v2Index));
 
-				Vector3 v1v0 = v2XYZ - v1XYZ;
-				Vector3 v2v0 = v0XYZ - v1XYZ;
+				Vector3 v1v0 = v1XYZ - v0XYZ;
+				Vector3 v2v0 = v2XYZ - v0XYZ;
 
-				Vector2 const & v2Tex(*(texsBegin + v2Index));
-				Vector2 const & v1Tex(*(texsBegin + v1Index));
 				Vector2 const & v0Tex(*(texsBegin + v0Index));
+				Vector2 const & v1Tex(*(texsBegin + v1Index));
+				Vector2 const & v2Tex(*(texsBegin + v2Index));
 
-				float s1 = v2Tex.x() - v1Tex.x();
-				float t1 = v2Tex.y() - v1Tex.y();
+				float s1 = v1Tex.x() - v0Tex.x();
+				float t1 = v1Tex.y() - v0Tex.y();
 
-				float s2 = v0Tex.x() - v1Tex.x();
-				float t2 = v0Tex.y() - v1Tex.y();
+				float s2 = v2Tex.x() - v0Tex.x();
+				float t2 = v2Tex.y() - v0Tex.y();
 
 				float denominator = s1 * t2 - s2 * t1;
 				Vector3 T, B;

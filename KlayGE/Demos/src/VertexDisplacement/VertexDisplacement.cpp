@@ -1,6 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/RenderBuffer.hpp>
+#include <KlayGE/VertexBuffer.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/Renderable.hpp>
@@ -9,7 +9,6 @@
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
-#include <KlayGE/Trace.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderSettings.hpp>
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
@@ -36,7 +35,7 @@ namespace
 	{
 	public:
 		Flag()
-			: rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
+			: vb_(new VertexBuffer(VertexBuffer::BT_TriangleList))
 		{
 			MathLib::Translation(model_, -WIDTH / 2.0f, HEIGHT / 2.0f, 0.0f);
 
@@ -80,13 +79,13 @@ namespace
 			*(effect_->ParameterByName("flag")) = LoadTexture("Flag.dds");
 			effect_->SetTechnique("VertexDisplacement");
 
-			rb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
-			rb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2, true);
-			rb_->GetVertexStream(VST_Positions)->Assign(&pos[0], pos.size() / 3);
-			rb_->GetVertexStream(VST_TextureCoords0)->Assign(&tex[0], tex.size() / 2);
+			vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
+			vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2, true);
+			vb_->GetVertexStream(VST_Positions)->Assign(&pos[0], pos.size() / 3);
+			vb_->GetVertexStream(VST_TextureCoords0)->Assign(&tex[0], tex.size() / 2);
 
-			rb_->AddIndexStream(true);
-			rb_->GetIndexStream()->Assign(&index[0], index.size());
+			vb_->AddIndexStream(true);
+			vb_->GetIndexStream()->Assign(&index[0], index.size());
 
 			box_ = Box(Vector3(0, 0, 0), Vector3(0, 0, 0));
 		}
@@ -96,9 +95,9 @@ namespace
 			return effect_;
 		}
 
-		RenderBufferPtr GetRenderBuffer() const
+		VertexBufferPtr GetVertexBuffer() const
 		{
-			return rb_;
+			return vb_;
 		}
 
 		Matrix4 GetWorld() const
@@ -117,8 +116,8 @@ namespace
 			return name;
 		}
 
-		KlayGE::RenderBufferPtr rb_;
-		KlayGE::RenderEffectPtr effect_;
+		VertexBufferPtr vb_;
+		RenderEffectPtr effect_;
 
 		Matrix4 model_;
 		Box box_;

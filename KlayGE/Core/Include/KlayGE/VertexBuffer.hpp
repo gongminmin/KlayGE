@@ -1,8 +1,11 @@
-// RenderBuffer.hpp
-// KlayGE 渲染缓冲区类 头文件
-// Ver 2.0.4
-// 版权所有(C) 龚敏敏, 2003-2004
+// VertexBuffer.hpp
+// KlayGE 顶点缓冲区类 头文件
+// Ver 2.4.0
+// 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.4.0
+// 改名为VertexBuffer (2005.3.7)
 //
 // 2.0.4
 // 修改了纹理坐标 (2004.3.16)
@@ -17,8 +20,8 @@
 // 修改记录
 /////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _RENDERBUFFER_HPP
-#define _RENDERBUFFER_HPP
+#ifndef _VERTEXBUFFER_HPP
+#define _VERTEXBUFFER_HPP
 
 #include <KlayGE/PreDeclare.hpp>
 #include <vector>
@@ -91,7 +94,7 @@ namespace KlayGE
 	};
 
 
-	class RenderBuffer
+	class VertexBuffer
 	{
 	public:
 		enum BufferType
@@ -108,7 +111,7 @@ namespace KlayGE
 		typedef VertexStreamsType::iterator VertexStreamIterator;
 		typedef VertexStreamsType::const_iterator VertexStreamConstIterator;
 
-		RenderBuffer(BufferType type);
+		VertexBuffer(BufferType type);
 
 		BufferType Type() const;
 
@@ -137,4 +140,4 @@ namespace KlayGE
 	};
 }
 
-#endif		// _RENDERBUFFER_HPP
+#endif		// _VERTEXBUFFER_HPP

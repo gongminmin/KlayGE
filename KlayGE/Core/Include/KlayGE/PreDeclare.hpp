@@ -69,8 +69,8 @@ namespace KlayGE
 	typedef boost::shared_ptr<VertexStream> VertexStreamPtr;
 	class IndexStream;
 	typedef boost::shared_ptr<IndexStream> IndexStreamPtr;
-	class RenderBuffer;
-	typedef boost::shared_ptr<RenderBuffer> RenderBufferPtr;
+	class VertexBuffer;
+	typedef boost::shared_ptr<VertexBuffer> VertexBufferPtr;
 	struct Viewport;
 	class RenderFactory;
 	typedef boost::shared_ptr<RenderFactory> RenderFactoryPtr;

@@ -6,6 +6,7 @@
 //
 // 2.4.0
 // 增加了DXTn的支持 (2005.3.6)
+// 增加了1D/2D/3D/cube的支持 (2005.3.8)
 //
 // 2.3.0
 // 增加了对浮点纹理格式的支持 (2005.1.25)
@@ -173,15 +174,13 @@ namespace KlayGE
 		return false;
 	}
 
-	/** Abstract class representing a Texture resource.
-	@remarks
-	The actual concrete subclass which will exist for a texture
-	is dependent on the rendering system in use (Direct3D, OpenGL etc).
-	This class represents the commonalities, and is the one 'used'
-	by programmers even though the real implementation could be
-	different in reality. Texture objects are created through
-	the 'create' method of the TextureManager concrete subclass.
-	*/
+	// Abstract class representing a Texture resource.
+	// @remarks
+	// The actual concrete subclass which will exist for a texture
+	// is dependent on the rendering system in use (Direct3D, OpenGL etc).
+	// This class represents the commonalities, and is the one 'used'
+	// by programmers even though the real implementation could be
+	// different in reality.
 	class Texture
 	{
 	public:
@@ -189,7 +188,30 @@ namespace KlayGE
 		enum TextureUsage
 		{
 			TU_Default		= 0,	// default usage
-			TU_RenderTarget = 1		// this texture will be a render target, ie. used as a target for render to texture
+			TU_RenderTarget = 1,	// this texture will be a render target, ie. used as a target for render to texture
+		};
+
+		// Enum identifying the texture type
+		enum TextureType
+		{
+			// 1D texture, used in combination with 1D texture coordinates
+			TT_1D,
+			// 2D texture, used in combination with 2D texture coordinates
+			TT_2D,
+			// 3D texture, used in combination with 3D texture coordinates
+			TT_3D,
+			// cube map, used in combination with 3D texture coordinates
+			TT_Cube,
+		};
+
+		enum CubeFaces
+		{
+			CF_Positive_X = 0,
+			CF_Negative_X = 1,
+			CF_Positive_Y = 2,
+			CF_Negative_Y = 3,
+			CF_Positive_Z = 4,
+			CF_Negative_Z = 5,
 		};
 
 	public:
@@ -207,45 +229,63 @@ namespace KlayGE
 		// @note
 		// Must be set before calling any 'load' method.
 		void NumMipMaps(uint16_t num)
-			{ this->numMipMaps_ = num; }
+			{ numMipMaps_ = num; }
 
 		// Returns the TextureUsage indentifier for this Texture
 		TextureUsage Usage() const
-			{ return this->usage_; }
+			{ return usage_; }
 
         // Returns the width of the texture.
 		uint32_t Width() const
-			{ return this->width_; }
+			{ return width_; }
 
 		// Returns the height of the texture.
 		uint32_t Height() const
-			{ return this->height_; }
+			{ return height_; }
+
+		// Returns the depth of the texture (only for 3D texture).
+		uint32_t Depth() const
+			{ return depth_; }
 
 		// Returns the bpp of the texture.
 		uint32_t Bpp() const
-			{ return this->bpp_; }
+			{ return bpp_; }
 
 		// Returns the pixel format for the texture surface.
-		virtual PixelFormat Format() const
-			{ return this->format_; }
+		PixelFormat Format() const
+			{ return format_; }
+
+		// Returns the texture type of the texture.
+		TextureType Type() const
+			{ return type_; }
 
 		// Copies (and maybe scales to fit) the contents of this texture to another texture.
 		virtual void CopyToTexture(Texture& target) = 0;
 		virtual void CopyToMemory(int level, void* data) = 0;
-		virtual void CopyMemoryToTexture(int level, void* data, PixelFormat pf,
+		virtual void CopyMemoryToTexture1D(int level, void* data, PixelFormat pf,
+			uint32_t width, uint32_t xOffset) = 0;
+		virtual void CopyMemoryToTexture2D(int level, void* data, PixelFormat pf,
 			uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset) = 0;
+		virtual void CopyMemoryToTexture3D(int level, void* data, PixelFormat pf,
+			uint32_t width, uint32_t height, uint32_t depth,
+			uint32_t xOffset, uint32_t yOffset, uint32_t zOffset) = 0;
+		virtual void CopyMemoryToTextureCube(CubeFaces face, int level, void* data, PixelFormat pf,
+			uint32_t size, uint32_t xOffset) = 0;
 
 		virtual void BuildMipSubLevels() = 0;
 
 	protected:
 		uint32_t		height_;
 		uint32_t		width_;
+		uint32_t		depth_;
+
 		uint32_t		bpp_;
 
 		uint16_t		numMipMaps_;
 
 		PixelFormat format_;
 		TextureUsage usage_;
+		TextureType type_;
 	};
 
 	TexturePtr LoadTexture(std::string const & tex_name);

@@ -55,10 +55,16 @@ namespace KlayGE
 	public:
 		D3D9RenderFactory();
 
-		TexturePtr MakeTexture(uint32_t width, uint32_t height, uint16_t numMipMaps,
-				PixelFormat format, Texture::TextureUsage usage = Texture::TU_Default);
+		TexturePtr MakeTexture1D(uint32_t width, uint16_t numMipMaps,
+			PixelFormat format, Texture::TextureUsage usage);
+		TexturePtr MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps,
+			PixelFormat format, Texture::TextureUsage usage);
+		TexturePtr MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps,
+			PixelFormat format, Texture::TextureUsage usage);
+		TexturePtr MakeTextureCube(uint32_t size, uint16_t numMipMaps,
+			PixelFormat format, Texture::TextureUsage usage);
 		RenderTexturePtr MakeRenderTexture(uint32_t width, uint32_t height);
-		RenderEffectPtr MakeRenderEffect(std::string const & srcData, uint32_t flags);
+		RenderEffectPtr MakeRenderEffect(std::string const & srcData);
 			
 		VertexStreamPtr MakeVertexStream(VertexStreamType type,
 			uint8_t sizeElement, uint8_t numElement, bool staticStream);

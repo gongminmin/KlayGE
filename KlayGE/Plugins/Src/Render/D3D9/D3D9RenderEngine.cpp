@@ -27,7 +27,7 @@
 #include <KlayGE/Light.hpp>
 #include <KlayGE/Material.hpp>
 #include <KlayGE/Viewport.hpp>
-#include <KlayGE/RenderBuffer.hpp>
+#include <KlayGE/VertexBuffer.hpp>
 #include <KlayGE/RenderTarget.hpp>
 #include <KlayGE/RenderEffect.hpp>
 
@@ -563,39 +563,39 @@ namespace KlayGE
 
 	// ‰÷»æ
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::Render(RenderBuffer const & rb)
+	void D3D9RenderEngine::Render(VertexBuffer const & rb)
 	{
 		D3DPRIMITIVETYPE primType = D3DPT_POINTLIST;
 		uint32_t primCount = 0;
 		uint32_t const vertexCount(static_cast<uint32_t>(rb.UseIndices() ? rb.NumIndices() : rb.NumVertices()));
 		switch (rb.Type())
 		{
-		case RenderBuffer::BT_PointList:
+		case VertexBuffer::BT_PointList:
 			primType = D3DPT_POINTLIST;
 			primCount = vertexCount;
 			break;
 
-		case RenderBuffer::BT_LineList:
+		case VertexBuffer::BT_LineList:
 			primType = D3DPT_LINELIST;
 			primCount = vertexCount / 2;
 			break;
 
-		case RenderBuffer::BT_LineStrip:
+		case VertexBuffer::BT_LineStrip:
 			primType = D3DPT_LINESTRIP;
 			primCount = vertexCount - 1;
 			break;
 
-		case RenderBuffer::BT_TriangleList:
+		case VertexBuffer::BT_TriangleList:
 			primType = D3DPT_TRIANGLELIST;
 			primCount = vertexCount / 3;
 			break;
 
-		case RenderBuffer::BT_TriangleStrip:
+		case VertexBuffer::BT_TriangleStrip:
 			primType = D3DPT_TRIANGLESTRIP;
 			primCount = vertexCount - 2;
 			break;
 
-		case RenderBuffer::BT_TriangleFan:
+		case VertexBuffer::BT_TriangleFan:
 			primType = D3DPT_TRIANGLEFAN;
 			primCount = vertexCount - 2;
 			break;
@@ -609,7 +609,7 @@ namespace KlayGE
 		element.Offset = 0;
 		element.Method = D3DDECLMETHOD_DEFAULT;
 
-		for (RenderBuffer::VertexStreamConstIterator iter = rb.VertexStreamBegin();
+		for (VertexBuffer::VertexStreamConstIterator iter = rb.VertexStreamBegin();
 			iter != rb.VertexStreamEnd(); ++ iter)
 		{
 			VertexStream& stream(*(*iter));
@@ -837,8 +837,10 @@ namespace KlayGE
 		}
 		else
 		{
-			TIF(d3dDevice_->SetTexture(stage,
-				D3D9TexturePtr(static_cast<D3D9Texture*>(texture.get()))->D3DTexture().get()));
+			assert(dynamic_cast<D3D9Texture*>(texture.get()) != NULL);
+
+			D3D9Texture const & d3d9Tex = static_cast<D3D9Texture const &>(*texture);
+			TIF(d3dDevice_->SetTexture(stage, d3d9Tex.D3DBaseTexture().get()));
 		}
 	}
 

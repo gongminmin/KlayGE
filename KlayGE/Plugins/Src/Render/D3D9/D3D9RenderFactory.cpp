@@ -29,10 +29,31 @@ namespace KlayGE
 		: D3D9RenderFactoryBase(L"Direct3D9 Render Factory")
 		{ }
 
-	TexturePtr D3D9RenderFactory::MakeTexture(uint32_t width, uint32_t height, uint16_t numMipMaps,
+	TexturePtr D3D9RenderFactory::MakeTexture1D(uint32_t width, uint16_t numMipMaps,
+			PixelFormat format, Texture::TextureUsage usage)
+	{
+		D3D9TexturePtr ret(new D3D9Texture(width, numMipMaps, format, usage));
+		resource_pool_.push_back(ret);
+		return ret;
+	}
+	TexturePtr D3D9RenderFactory::MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps,
 			PixelFormat format, Texture::TextureUsage usage)
 	{
 		D3D9TexturePtr ret(new D3D9Texture(width, height, numMipMaps, format, usage));
+		resource_pool_.push_back(ret);
+		return ret;
+	}
+	TexturePtr D3D9RenderFactory::MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth, 
+			uint16_t numMipMaps, PixelFormat format, Texture::TextureUsage usage)
+	{
+		D3D9TexturePtr ret(new D3D9Texture(width, height, depth, numMipMaps, format, usage));
+		resource_pool_.push_back(ret);
+		return ret;
+	}
+	TexturePtr D3D9RenderFactory::MakeTextureCube(uint32_t size, uint16_t numMipMaps,
+		PixelFormat format, Texture::TextureUsage usage)
+	{
+		D3D9TexturePtr ret(new D3D9Texture(size, true, numMipMaps, format, usage));
 		resource_pool_.push_back(ret);
 		return ret;
 	}
@@ -42,9 +63,9 @@ namespace KlayGE
 		return D3D9RenderTexturePtr(new D3D9RenderTexture(width, height));
 	}
 
-	RenderEffectPtr D3D9RenderFactory::MakeRenderEffect(std::string const & srcData, uint32_t flags)
+	RenderEffectPtr D3D9RenderFactory::MakeRenderEffect(std::string const & srcData)
 	{
-		D3D9RenderEffectPtr ret(new D3D9RenderEffect(srcData, flags));
+		D3D9RenderEffectPtr ret(new D3D9RenderEffect(srcData));
 		resource_pool_.push_back(ret);
 		return ret;
 	}

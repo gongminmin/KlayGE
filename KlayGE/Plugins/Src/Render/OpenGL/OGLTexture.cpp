@@ -98,6 +98,67 @@ namespace
 
 namespace KlayGE
 {
+	OGLTexture::OGLTexture(uint32_t width, uint16_t numMipMaps,
+								PixelFormat format, TextureUsage usage)
+								: texture_(0)
+	{
+		format_		= format;
+		width_		= width;
+		height_		= 1;
+		depth_		= 1;
+
+		if (0 == numMipMaps)
+		{
+			while (width > 1)
+			{
+				++ numMipMaps_;
+
+				width /= 2;
+			}
+		}
+		else
+		{
+			numMipMaps_ = numMipMaps;
+		}
+
+		bpp_ = PixelFormatBits(format_);
+
+		usage_ = usage;
+
+		GLint glinternalFormat;
+		GLenum glformat;
+		Convert(glinternalFormat, glformat, format_);
+
+		glGenTextures(1, &texture_);
+		glBindTexture(GL_TEXTURE_1D, texture_);
+
+		if (IsCompressedFormat(format_))
+		{
+			int block_size;
+			if (PF_DXT1 == format_)
+			{
+				block_size = 8;
+			}
+			else
+			{
+				block_size = 16;
+			}
+
+			GLsizei const image_size = ((width_ + 3) / 4) * ((height_ + 3) / 4) * block_size;
+
+			glCompressedTexImage1D(GL_TEXTURE_1D, numMipMaps_, glinternalFormat,
+				width_, 0, image_size, NULL);
+		}
+		else
+		{
+			glTexImage1D(GL_TEXTURE_1D, numMipMaps_, glinternalFormat,
+				width_, 0, glformat, GL_UNSIGNED_BYTE, NULL);
+		}
+
+		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	}
+
 	OGLTexture::OGLTexture(uint32_t width, uint32_t height,
 								uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
 								: texture_(0)
@@ -105,6 +166,7 @@ namespace KlayGE
 		format_		= format;
 		width_		= width;
 		height_		= height;
+		depth_		= 1;
 
 		if (0 == numMipMaps)
 		{
@@ -159,8 +221,133 @@ namespace KlayGE
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	}
 
+	OGLTexture::OGLTexture(uint32_t width, uint32_t height, uint32_t depth,
+								uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
+								: texture_(0)
+	{
+		format_		= format;
+		width_		= width;
+		height_		= height;
+		depth_		= depth;
+
+		if (0 == numMipMaps)
+		{
+			while ((width > 1) && (height > 1) && (depth > 1))
+			{
+				++ numMipMaps_;
+
+				width /= 2;
+				height /= 2;
+				depth /= 2;
+			}
+		}
+		else
+		{
+			numMipMaps_ = numMipMaps;
+		}
+
+		bpp_ = PixelFormatBits(format_);
+
+		usage_ = usage;
+
+		GLint glinternalFormat;
+		GLenum glformat;
+		Convert(glinternalFormat, glformat, format_);
+
+		glGenTextures(1, &texture_);
+		glBindTexture(GL_TEXTURE_3D, texture_);
+
+		if (IsCompressedFormat(format_))
+		{
+			int block_size;
+			if (PF_DXT1 == format_)
+			{
+				block_size = 8;
+			}
+			else
+			{
+				block_size = 16;
+			}
+
+			GLsizei const image_size = ((width_ + 3) / 4) * ((height_ + 3) / 4) * block_size;
+
+			glCompressedTexImage2D(GL_TEXTURE_3D, numMipMaps_, glinternalFormat,
+				width_, height_, 0, image_size, NULL);
+		}
+		else
+		{
+			glTexImage2D(GL_TEXTURE_3D, numMipMaps_, glinternalFormat,
+				width_, height_, 0, glformat, GL_UNSIGNED_BYTE, NULL);
+		}
+
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	}
+
+	OGLTexture::OGLTexture(uint32_t size, bool cube, uint16_t numMipMaps,
+								PixelFormat format, TextureUsage usage)
+								: texture_(0)
+	{
+		format_		= format;
+		width_		= size;
+		height_		= size;
+		depth_		= 1;
+
+		if (0 == numMipMaps)
+		{
+			while (size > 1)
+			{
+				++ numMipMaps_;
+
+				size /= 2;
+			}
+		}
+		else
+		{
+			numMipMaps_ = numMipMaps;
+		}
+
+		bpp_ = PixelFormatBits(format_);
+
+		usage_ = usage;
+
+		GLint glinternalFormat;
+		GLenum glformat;
+		Convert(glinternalFormat, glformat, format_);
+
+		glGenTextures(1, &texture_);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
+
+		if (IsCompressedFormat(format_))
+		{
+			int block_size;
+			if (PF_DXT1 == format_)
+			{
+				block_size = 8;
+			}
+			else
+			{
+				block_size = 16;
+			}
+
+			GLsizei const image_size = ((width_ + 3) / 4) * ((height_ + 3) / 4) * block_size;
+
+			glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP, numMipMaps_, glinternalFormat,
+				width_, height_, 0, image_size, NULL);
+		}
+		else
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP, numMipMaps_, glinternalFormat,
+				width_, height_, 0, glformat, GL_UNSIGNED_BYTE, NULL);
+		}
+
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	}
+
 	OGLTexture::~OGLTexture()
 	{
+		glDeleteTextures(1, &texture_);
 	}
 
 	std::wstring const & OGLTexture::Name() const
@@ -177,7 +364,7 @@ namespace KlayGE
 		for (int i = 0; i < numMipMaps_; ++ i)
 		{
 			this->CopyToMemory(i, &data[0]);
-			target.CopyMemoryToTexture(i, &data[0], format_, width_, height_, 0, 0);
+			target.CopyMemoryToTexture2D(i, &data[0], format_, width_, height_, 0, 0);
 		}
 	}
 
@@ -199,7 +386,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLTexture::CopyMemoryToTexture(int level, void* data, PixelFormat pf,
+	void OGLTexture::CopyMemoryToTexture2D(int level, void* data, PixelFormat pf,
 		uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset)
 	{
 		assert(width != 0);

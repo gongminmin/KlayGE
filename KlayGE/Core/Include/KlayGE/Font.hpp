@@ -82,7 +82,7 @@ namespace KlayGE
 	private:
 		void UpdateTexture(std::wstring const & text);
 
-		RenderBufferPtr		rb_;
+		VertexBufferPtr		vb_;
 		RenderEffectPtr		effect_;
 		TexturePtr			theTexture_;
 

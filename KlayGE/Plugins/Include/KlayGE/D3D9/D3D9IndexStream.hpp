@@ -20,7 +20,7 @@
 
 #include <d3d9.h>
 
-#include <KlayGE/RenderBuffer.hpp>
+#include <KlayGE/VertexBuffer.hpp>
 #include <KlayGE/D3D9/D3D9Resource.hpp>
 
 #ifdef KLAYGE_DEBUG

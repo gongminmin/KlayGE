@@ -29,7 +29,8 @@ namespace KlayGE
 	{
 		left_ = 0;
 		top_ = 0;
-		privateTex_ = Context::Instance().RenderFactoryInstance().MakeTexture(width, height, 0, PF_X8R8G8B8, Texture::TU_RenderTarget);
+		privateTex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height,
+			0, PF_X8R8G8B8, Texture::TU_RenderTarget);
 		width_ = privateTex_->Width();
 		height_ = privateTex_->Height();
 
@@ -43,7 +44,7 @@ namespace KlayGE
 	{
 		D3D9TexturePtr tex(static_cast<D3D9Texture*>(privateTex_.get()));
 		IDirect3DSurface9* surface;
-		tex->D3DTexture()->GetSurfaceLevel(0, &surface);
+		tex->D3DTexture2D()->GetSurfaceLevel(0, &surface);
 		return MakeCOMPtr(surface);
 	}
 	
@@ -75,7 +76,7 @@ namespace KlayGE
 		{
 			D3D9TexturePtr tex(static_cast<D3D9Texture*>(privateTex_.get()));
 			IDirect3DSurface9** pSurf = reinterpret_cast<IDirect3DSurface9**>(pData);
-			tex->D3DTexture()->GetSurfaceLevel(0, &(*pSurf));
+			tex->D3DTexture2D()->GetSurfaceLevel(0, &(*pSurf));
 
 			return;
 		}

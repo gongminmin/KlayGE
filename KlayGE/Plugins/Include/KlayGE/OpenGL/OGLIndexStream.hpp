@@ -15,7 +15,7 @@
 
 #include <vector>
 
-#include <KlayGE/RenderBuffer.hpp>
+#include <KlayGE/VertexBuffer.hpp>
 
 namespace KlayGE
 {

@@ -15,7 +15,7 @@ namespace KlayGE
 	{
 		left_ = 0;
 		top_ = 0;
-		privateTex_ = Context::Instance().RenderFactoryInstance().MakeTexture(width, height, 0, PF_X8R8G8B8, Texture::TU_RenderTarget);
+		privateTex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 0, PF_X8R8G8B8, Texture::TU_RenderTarget);
 		width_ = privateTex_->Width();
 		height_ = privateTex_->Height();
 	}

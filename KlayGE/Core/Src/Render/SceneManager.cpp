@@ -87,7 +87,7 @@ namespace KlayGE
 				Renderable& obj(*(*itemIter));
 
 				obj.OnRenderBegin();
-				renderEngine.Render(*obj.GetRenderBuffer());
+				renderEngine.Render(*obj.GetVertexBuffer());
 				obj.OnRenderEnd();
 			}
 		}

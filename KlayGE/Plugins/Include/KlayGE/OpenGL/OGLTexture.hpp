@@ -30,7 +30,10 @@ namespace KlayGE
 	class OGLTexture : public Texture
 	{
 	public:
-		OGLTexture(uint32_t width, uint32_t height, uint16_t numMipMaps, PixelFormat format, TextureUsage usage = TU_Default);
+		OGLTexture(uint32_t width, uint16_t numMipMaps, PixelFormat format, TextureUsage usage);
+		OGLTexture(uint32_t width, uint32_t height, uint16_t numMipMaps, PixelFormat format, TextureUsage usage);
+		OGLTexture(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps, PixelFormat format, TextureUsage usage);
+		OGLTexture(uint32_t size, bool cube, uint16_t numMipMaps, PixelFormat format, TextureUsage usage);
 		~OGLTexture();
 
 		std::wstring const & Name() const;
@@ -39,8 +42,15 @@ namespace KlayGE
 
 		void CopyToTexture(Texture& target);
 		void CopyToMemory(int level, void* data);
-		void CopyMemoryToTexture(int level, void* data, PixelFormat pf,
+		void CopyMemoryToTexture1D(int level, void* data, PixelFormat pf,
+			uint32_t width, uint32_t xOffset);
+		void CopyMemoryToTexture2D(int level, void* data, PixelFormat pf,
 			uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset);
+		void CopyMemoryToTexture3D(int level, void* data, PixelFormat pf,
+			uint32_t width, uint32_t height, uint32_t depth,
+			uint32_t xOffset, uint32_t yOffset, uint32_t zOffset);
+		void CopyMemoryToTextureCube(CubeFaces face, int level, void* data, PixelFormat pf,
+			uint32_t size, uint32_t xOffset);
 
 		void BuildMipSubLevels();
 

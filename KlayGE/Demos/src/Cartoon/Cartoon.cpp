@@ -1,6 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/RenderBuffer.hpp>
+#include <KlayGE/VertexBuffer.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/Renderable.hpp>
@@ -30,7 +30,7 @@ namespace
 	struct RenderTorus : public Renderable
 	{
 		RenderTorus(TexturePtr const & toonTex, TexturePtr const & edgeTex)
-			: rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
+			: vb_(new VertexBuffer(VertexBuffer::BT_TriangleList))
 		{
 			effect_ = LoadRenderEffect("Cartoon.fx");
 			*(effect_->ParameterByName("toon")) = toonTex;
@@ -40,21 +40,21 @@ namespace
 			MathLib::ComputeBoundingBox(box_, reinterpret_cast<Vector3*>(&Pos[0]),
 				reinterpret_cast<Vector3*>(&Pos[0] + sizeof(Pos) / sizeof(float)));
 
-			rb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
-			rb_->AddVertexStream(VST_Normals, sizeof(float), 3, true);
+			vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
+			vb_->AddVertexStream(VST_Normals, sizeof(float), 3, true);
 
-			rb_->GetVertexStream(VST_Positions)->Assign(Pos, sizeof(Pos) / sizeof(float) / 3);
-			rb_->GetVertexStream(VST_Normals)->Assign(Normal, sizeof(Normal) / sizeof(float) / 3);
+			vb_->GetVertexStream(VST_Positions)->Assign(Pos, sizeof(Pos) / sizeof(float) / 3);
+			vb_->GetVertexStream(VST_Normals)->Assign(Normal, sizeof(Normal) / sizeof(float) / 3);
 
-			rb_->AddIndexStream(true);
-			rb_->GetIndexStream()->Assign(Index, sizeof(Index) / sizeof(uint16_t));
+			vb_->AddIndexStream(true);
+			vb_->GetIndexStream()->Assign(Index, sizeof(Index) / sizeof(uint16_t));
 		}
 
 		RenderEffectPtr GetRenderEffect() const
 			{ return effect_; }
 
-		RenderBufferPtr GetRenderBuffer() const
-			{ return rb_; }
+		VertexBufferPtr GetVertexBuffer() const
+			{ return vb_; }
 
 		Box GetBound() const
 			{ return box_; }
@@ -65,8 +65,8 @@ namespace
 			return name;
 		}
 
-		KlayGE::RenderBufferPtr rb_;
-		KlayGE::RenderEffectPtr effect_;
+		VertexBufferPtr vb_;
+		RenderEffectPtr effect_;
 
 		Box box_;
 	};
@@ -124,12 +124,12 @@ void Cartoon::InitObjects()
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("SIMYOU.TTF", 16);
 
 	uint8_t toonData[16] = { 120, 120, 120, 120, 120, 160, 160, 160, 160, 160, 160, 255, 255, 255, 255, 255 };
-	TexturePtr toonTex = Context::Instance().RenderFactoryInstance().MakeTexture(sizeof(toonData) / sizeof(toonData[0]), 1, 0, PF_L8);
-	toonTex->CopyMemoryToTexture(0, toonData, PF_L8, 16, 1, 0, 0);
+	TexturePtr toonTex = Context::Instance().RenderFactoryInstance().MakeTexture1D(sizeof(toonData) / sizeof(toonData[0]), 0, PF_L8);
+	toonTex->CopyMemoryToTexture1D(0, toonData, PF_L8, 16, 0);
 
 	uint8_t edgeData[4] = { 0, 255, 255, 255 };
-	TexturePtr edgeTex = Context::Instance().RenderFactoryInstance().MakeTexture(sizeof(edgeData) / sizeof(edgeData[0]), 1, 0, PF_L8);
-	edgeTex->CopyMemoryToTexture(0, edgeData, PF_L8, 4, 1, 0, 0);
+	TexturePtr edgeTex = Context::Instance().RenderFactoryInstance().MakeTexture1D(sizeof(edgeData) / sizeof(edgeData[0]), 0, PF_L8);
+	edgeTex->CopyMemoryToTexture1D(0, edgeData, PF_L8, 4, 0);
 
 	renderTorus = boost::shared_ptr<RenderTorus>(new RenderTorus(toonTex, edgeTex));
 
