@@ -25,6 +25,7 @@
 #include <limits>
 #include <cstdlib>
 #include <cmath>
+#include <algorithm>
 
 #include <boost/static_assert.hpp>
 
@@ -1535,26 +1536,26 @@ namespace KlayGE
 
 			for (IndexIterator iter = indicesBegin; iter != indicesEnd; iter += 3)
 			{
-				U16 const previousIndex = *(iter + 0);
-				U16 const currentIndex = *(iter + 1);
-				U16 const nextIndex = *(iter + 2);
+				U16 const v0Index = *(iter + 0);
+				U16 const v1Index = *(iter + 1);
+				U16 const v2Index = *(iter + 2);
 
-				Vector3& const currentXYZ(*(xyzsBegin + currentIndex));
-				Vector3& const previousXYZ(*(xyzsBegin + previousIndex));
-				Vector3& const nextXYZ(*(xyzsBegin + nextIndex));
+				Vector3 const & v1XYZ(*(xyzsBegin + v1Index));
+				Vector3 const & v0XYZ(*(xyzsBegin + v0Index));
+				Vector3 const & v2XYZ(*(xyzsBegin + v2Index));
 
-				Vector3 v1v0 = nextXYZ - currentXYZ;
-				Vector3 v2v0 = previousXYZ - currentXYZ;
+				Vector3 v1v0 = v2XYZ - v1XYZ;
+				Vector3 v2v0 = v0XYZ - v1XYZ;
 
-				Vector2& const nextTex(*(texsBegin + nextIndex));
-				Vector2& const currentTex(*(texsBegin + currentIndex));
-				Vector2& const previousTex(*(texsBegin + previousIndex));
+				Vector2 const & v2Tex(*(texsBegin + v2Index));
+				Vector2 const & v1Tex(*(texsBegin + v1Index));
+				Vector2 const & v0Tex(*(texsBegin + v0Index));
 
-				float s1 = nextTex.x() - currentTex.x();
-				float t1 = nextTex.y() - currentTex.y();
+				float s1 = v2Tex.x() - v1Tex.x();
+				float t1 = v2Tex.y() - v1Tex.y();
 
-				float s2 = previousTex.x() - currentTex.x();
-				float t2 = previousTex.y() - currentTex.y();
+				float s2 = v0Tex.x() - v1Tex.x();
+				float t2 = v0Tex.y() - v1Tex.y();
 
 				float denominator = s1 * t2 - s2 * t1;
 				Vector3 T, B;
@@ -1568,14 +1569,15 @@ namespace KlayGE
 					T = (t2 * v1v0 - t1 * v2v0) / denominator;
 					B = (s1 * v2v0 - s2 * v1v0) / denominator;
 				}
-				*(targentBegin + previousIndex) += T;
-				*(binormBegin + previousIndex) += B;
 
-				*(targentBegin + currentIndex) += T;
-				*(binormBegin + currentIndex) += B;
+				*(targentBegin + v0Index) += T;
+				*(binormBegin + v0Index) += B;
 
-				*(targentBegin + nextIndex) += T;
-				*(binormBegin + nextIndex) += B;
+				*(targentBegin + v1Index) += T;
+				*(binormBegin + v1Index) += B;
+
+				*(targentBegin + v2Index) += T;
+				*(binormBegin + v2Index) += B;
 			}
 
 			for (int i = 0; i < xyzsEnd - xyzsBegin; ++ i)
@@ -1591,10 +1593,7 @@ namespace KlayGE
 								IndexIterator indicesBegin, IndexIterator indicesEnd,
 								PositionIterator xyzsBegin, PositionIterator xyzsEnd)
 		{
-			for (int i = 0; i < xyzsEnd - xyzsBegin; ++ i)
-			{
-				*(normalBegin + i) = Vector3::Zero();
-			}
+			std::fill(normalBegin, normalEnd, Vector3::Zero());
 
 			for (IndexIterator iter = indicesBegin; iter != indicesEnd; iter += 3)
 			{
@@ -1602,9 +1601,9 @@ namespace KlayGE
 				U16 const v1Index = *(iter + 1);
 				U16 const v2Index = *(iter + 2);
 
-				Vector3& const v0(*(xyzsBegin + v0Index));
-				Vector3& const v1(*(xyzsBegin + v1Index));
-				Vector3& const v2(*(xyzsBegin + v2Index));
+				Vector3 const & v0(*(xyzsBegin + v0Index));
+				Vector3 const & v1(*(xyzsBegin + v1Index));
+				Vector3 const & v2(*(xyzsBegin + v2Index));
 
 				Vector3 vec;
 				MathLib::Cross(vec, v1 - v0, v2 - v0);	
@@ -1614,9 +1613,9 @@ namespace KlayGE
 				*(normalBegin + v2Index) += vec;
 			}
 
-			for (int i = 0; i < xyzsEnd - xyzsBegin; ++ i)
+			for (NormalIterator iter = normalBegin; iter != normalEnd; ++ iter)
 			{
-				MathLib::Normalize(*(normalBegin + i), *(normalBegin + i));
+				MathLib::Normalize(*iter, *iter);
 			}
 		}		
 	};

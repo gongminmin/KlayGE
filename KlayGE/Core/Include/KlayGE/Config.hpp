@@ -2,5 +2,6 @@
 #define _CONFIG_HPP
 
 // 定义各种编译期选项
+// #define _SELECT1ST2ND_SUPPORT
 
 #endif		// _CONFIG_HPP

@@ -14,6 +14,7 @@
 #define _UTIL_HPP
 
 #include <string>
+#include <functional>
 
 #include <boost/smart_ptr.hpp>
 #define BOOST_MEM_FN_ENABLE_STDCALL
@@ -103,6 +104,26 @@ namespace KlayGE
 	{
 		return boost::shared_ptr<T>(p, boost::mem_fn(&T::Release));
 	}
+
+#ifndef _SELECT1ST2ND_SUPPORT
+	template <typename Pair>
+	struct select1st : public std::unary_function<Pair, typename Pair::first_type>
+	{
+		const typename Pair::first_type& operator()(const Pair& x) const
+		{
+			return x.first;
+		}
+	};
+
+	template <typename Pair>
+	struct select2nd : public std::unary_function<Pair, typename Pair::second_type>
+	{
+		const typename Pair::second_type& operator()(const Pair& x) const
+		{
+			return x.second;
+		}
+	};
+#endif		// _SELECT1ST2ND_SUPPORT
 }
 
 #endif		// _UTIL_HPP

@@ -2,6 +2,8 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
 
+#include <boost/bind.hpp>
+
 #include <KlayGE/RenderBuffer.hpp>
 
 namespace KlayGE
@@ -64,13 +66,11 @@ namespace KlayGE
 
 	VertexStreamPtr RenderBuffer::GetVertexStream(VertexStreamType type) const
 	{
-		for (VertexStreamConstIterator iter = this->VertexStreamBegin();
-			iter != this->VertexStreamEnd(); ++ iter)
+		VertexStreamConstIterator iter = std::find_if(this->VertexStreamBegin(), this->VertexStreamEnd(),
+			boost::bind(std::equal_to<VertexStreamType>(), boost::bind(&VertexStream::Type, _1), type));
+		if (iter != this->VertexStreamEnd())
 		{
-			if ((*iter)->Type() == type)
-			{
-				return *iter;
-			}
+			return *iter;
 		}
 		return VertexStreamPtr();
 	}

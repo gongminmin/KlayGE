@@ -12,9 +12,12 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <cassert>
+
+#include <boost/bind.hpp>
 
 #include <KlayGE/Audio.hpp>
 
@@ -99,20 +102,16 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void AudioEngine::PlayAll(bool loop)
 	{
-		for (AudioBufsIter iter = audioBufs_.begin(); iter != audioBufs_.end(); ++ iter)
-		{
-			iter->second->Play(loop);
-		}
+		std::for_each(audioBufs_.begin(), audioBufs_.end(),
+			boost::bind(&AudioBuffer::Play, boost::bind(select2nd<AudioBufs::value_type>(), _1), loop));
 	}
 
 	// 停止所有的声音
 	/////////////////////////////////////////////////////////////////////////////////
 	void AudioEngine::StopAll()
 	{
-		for (AudioBufsIter iter = audioBufs_.begin(); iter != audioBufs_.end(); ++ iter)
-		{
-			iter->second->Stop();
-		}
+		std::for_each(audioBufs_.begin(), audioBufs_.end(),
+			boost::bind(&AudioBuffer::Stop, boost::bind(select2nd<AudioBufs::value_type>(), _1)));
 	}
 
 	// 列表里缓冲区的数目

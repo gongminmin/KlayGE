@@ -80,10 +80,16 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void Sleep(U32 ms)
 	{
-		boost::xtime xt;
-		boost::xtime_get(&xt, boost::TIME_UTC);
-		xt.nsec += ms;
-		boost::thread::sleep(xt);
+#ifdef WIN32
+		::Sleep(ms);
+#else
+		timeval sleeper;
+
+		sleeper.tv_sec = ms / 1000;
+		sleeper.tv_usec = (ms % 1000) * 1000;
+
+		select(0, NULL, NULL, NULL, &sleeper);
+#endif		// WIN32
 	}
 
 	// U32本地格式到网络格式
