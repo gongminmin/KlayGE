@@ -15,12 +15,15 @@ namespace KlayGE
 	public:
 		Mesh();
 
-		RenderEffectPtr GetRenderEffect()
+		size_t NumSubs() const
+			{ return 1; }
+
+		RenderEffectPtr GetRenderEffect(size_t /*index*/)
 			{ return effect_; }
 		void SetRenderEffect(const RenderEffectPtr& effect)
 			{ effect_ = effect; }
 
-		VertexBufferPtr GetVertexBuffer();
+		VertexBufferPtr GetVertexBuffer(size_t /*index*/);
 
 		const WString& Name() const;
 
@@ -45,11 +48,6 @@ namespace KlayGE
 	private:
 		VertexBufferPtr vb_;
 		RenderEffectPtr effect_;
-
-		std::vector<float> xyzs_;
-		std::vector<float> normals_;
-		std::vector<float> textures_;
-		std::vector<U16> indices_;
 	};
 }
 

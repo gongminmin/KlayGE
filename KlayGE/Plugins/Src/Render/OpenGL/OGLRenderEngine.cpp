@@ -573,13 +573,13 @@ namespace KlayGE
 	{
 		{
 			glEnableClientState(GL_VERTEX_ARRAY);
-			glVertexPointer(3, GL_FLOAT, vb.vertexStride, vb.pVertices);
+			glVertexPointer(3, GL_FLOAT, 0, &vb.vertices[0]);
 		}
 
 		if (vb.vertexOptions & VertexBuffer::VO_Normals)
 		{
 			glEnableClientState(GL_NORMAL_ARRAY);
-			glNormalPointer(GL_FLOAT, vb.normalStride, vb.pNormals);
+			glNormalPointer(GL_FLOAT, 0, &vb.normals[0]);
 		}
 		else
 		{
@@ -589,7 +589,7 @@ namespace KlayGE
 		if (vb.vertexOptions & VertexBuffer::VO_Diffuses)
 		{
 			glEnableClientState(GL_COLOR_ARRAY);
-			glColorPointer(4, GL_UNSIGNED_BYTE, vb.diffuseStride, vb.pDiffuses);
+			glColorPointer(4, GL_UNSIGNED_BYTE, 0, &vb.diffuses[0]);
 		}
 		else
 		{
@@ -624,13 +624,13 @@ namespace KlayGE
 			break;
 		}
 
-		if (vb.useIndices)
+		if (vb.UseIndices())
 		{
-			glDrawElements(mode, vb.numIndices, GL_UNSIGNED_SHORT, vb.pIndices);
+			glDrawElements(mode, vb.NumIndices(), GL_UNSIGNED_SHORT, &vb.indices[0]);
 		}
 		else
 		{
-			glDrawArrays(mode, 0, vb.numVertices);
+			glDrawArrays(mode, 0, vb.NumVertices());
 		}
 	}
 

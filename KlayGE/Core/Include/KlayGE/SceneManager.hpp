@@ -26,7 +26,7 @@ namespace KlayGE
 	class SceneManager
 	{
 	protected:
-		typedef std::pair<RenderablePtr, Matrix4>					RenderItemType;
+		typedef std::pair<VertexBufferPtr, Matrix4>					RenderItemType;
 		typedef std::vector<RenderItemType, alloc<RenderItemType> >	RenderItemsType;
 		typedef MapVector<RenderEffectPtr, RenderItemsType>			RenderQueueType;
 

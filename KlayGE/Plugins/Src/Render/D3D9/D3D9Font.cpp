@@ -116,39 +116,26 @@ namespace
 			fontVB_->type = VertexBuffer::BT_TriangleList;
 			fontVB_->numTextureCoordSets = 1;
 			fontVB_->numTextureDimensions[0] = 2;
-			fontVB_->useIndices = true;
 			fontVB_->vertexOptions = (VertexBuffer::VO_Diffuses | VertexBuffer::VO_TextureCoords);
 		}
 
 		const WString& Name() const
 		{
-			static WString name(L"Direct3D9 Font");
-			return name;
+			static WString name_(L"Direct3D9 Font");
+			return name_;
 		}
 
-		RenderEffectPtr GetRenderEffect()
-		{
-			return fontEffect_;
-		}
+		size_t NumSubs() const
+			{ return 1; }
 
-		VertexBufferPtr GetVertexBuffer()
-		{
-			if (!xyzs_.empty())
-			{
-				fontVB_->numVertices	= xyzs_.size() / 3;
-				fontVB_->pVertices		= &xyzs_[0];
-				fontVB_->pDiffuses		= &clrs_[0];
-				fontVB_->pTexCoords[0]	= &texs_[0];
+		RenderEffectPtr GetRenderEffect(size_t /*index*/)
+			{ return fontEffect_; }
 
-				fontVB_->pIndices	= &indices_[0];
-				fontVB_->numIndices = indices_.size();
-			}
-
-			return fontVB_;
-		}
+		VertexBufferPtr GetVertexBuffer(size_t /*index*/)
+			{ return fontVB_; }
 
 		void RenderText(U32 fontHeight, D3D9Font::CharInfoMapType& charInfoMap, float sx, float sy, float sz,
-			float xScale, float yScale, U32 d3dclr, const WString& text, U32 flags)
+			float xScale, float yScale, const Color& clr, const WString& text, U32 flags)
 		{
 			// ÉèÖÃ¹ýÂËÊôÐÔ
 			if (flags & Font::FA_Filtered)
@@ -160,14 +147,20 @@ namespace
 			const size_t maxSize(text.length() - std::count(text.begin(), text.end(), L'\n'));
 			float x(sx), y(sy);
 
-			clrs_.resize(maxSize * 4, d3dclr);
 
-			xyzs_.clear();
-			texs_.clear();
-			indices_.clear();
-			xyzs_.reserve(maxSize * 3 * 4);
-			texs_.reserve(maxSize * 2 * 4);
-			indices_.reserve(maxSize * 6);
+			VertexBuffer::VerticesType& xyzs(fontVB_->vertices);
+			VertexBuffer::DiffusesType& clrs(fontVB_->diffuses);
+			VertexBuffer::TexCoordsType& texs(fontVB_->texCoords[0]);
+			VertexBuffer::IndicesType& indices(fontVB_->indices);
+
+			xyzs.clear();
+			clrs.clear();
+			texs.clear();
+			indices.clear();
+			xyzs.reserve(maxSize * 3 * 4);
+			clrs.reserve(maxSize * 4 * 4);
+			texs.reserve(maxSize * 2 * 4);
+			indices.reserve(maxSize * 6);
 
 			U16 lastIndex(0);
 			for (WString::const_iterator citer = text.begin(); citer != text.end(); ++ citer)
@@ -179,42 +172,63 @@ namespace
 				{
 					const Rect_T<float>& texRect(charInfoMap[ch].texRect);
 
-					xyzs_.push_back(x);
-					xyzs_.push_back(y);
-					xyzs_.push_back(sz);
+					xyzs.push_back(x);
+					xyzs.push_back(y);
+					xyzs.push_back(sz);
 
-					xyzs_.push_back(x + w);
-					xyzs_.push_back(y);
-					xyzs_.push_back(sz);
+					xyzs.push_back(x + w);
+					xyzs.push_back(y);
+					xyzs.push_back(sz);
 
-					xyzs_.push_back(x + w);
-					xyzs_.push_back(y + h);
-					xyzs_.push_back(sz);
+					xyzs.push_back(x + w);
+					xyzs.push_back(y + h);
+					xyzs.push_back(sz);
 
-					xyzs_.push_back(x);
-					xyzs_.push_back(y + h);
-					xyzs_.push_back(sz);
-
-
-					texs_.push_back(texRect.left());
-					texs_.push_back(texRect.top());
-
-					texs_.push_back(texRect.right());
-					texs_.push_back(texRect.top());
-
-					texs_.push_back(texRect.right());
-					texs_.push_back(texRect.bottom());
-
-					texs_.push_back(texRect.left());
-					texs_.push_back(texRect.bottom());
+					xyzs.push_back(x);
+					xyzs.push_back(y + h);
+					xyzs.push_back(sz);
 
 
-					indices_.push_back(lastIndex + 0);
-					indices_.push_back(lastIndex + 1);
-					indices_.push_back(lastIndex + 2);
-					indices_.push_back(lastIndex + 2);
-					indices_.push_back(lastIndex + 3);
-					indices_.push_back(lastIndex + 0);
+					clrs.push_back(clr.r());
+					clrs.push_back(clr.g());
+					clrs.push_back(clr.b());
+					clrs.push_back(clr.a());
+
+					clrs.push_back(clr.r());
+					clrs.push_back(clr.g());
+					clrs.push_back(clr.b());
+					clrs.push_back(clr.a());
+
+					clrs.push_back(clr.r());
+					clrs.push_back(clr.g());
+					clrs.push_back(clr.b());
+					clrs.push_back(clr.a());
+
+					clrs.push_back(clr.r());
+					clrs.push_back(clr.g());
+					clrs.push_back(clr.b());
+					clrs.push_back(clr.a());
+
+
+					texs.push_back(texRect.left());
+					texs.push_back(texRect.top());
+
+					texs.push_back(texRect.right());
+					texs.push_back(texRect.top());
+
+					texs.push_back(texRect.right());
+					texs.push_back(texRect.bottom());
+
+					texs.push_back(texRect.left());
+					texs.push_back(texRect.bottom());
+
+
+					indices.push_back(lastIndex + 0);
+					indices.push_back(lastIndex + 1);
+					indices.push_back(lastIndex + 2);
+					indices.push_back(lastIndex + 2);
+					indices.push_back(lastIndex + 3);
+					indices.push_back(lastIndex + 0);
 					lastIndex += 4;
 
 					x += w;
@@ -230,12 +244,6 @@ namespace
 	private:
 		RenderEffectPtr	fontEffect_;
 		VertexBufferPtr fontVB_;
-
-		std::vector<float, alloc<float> >	xyzs_;
-		std::vector<U32, alloc<U32> >		clrs_;
-		std::vector<float, alloc<float> >	texs_;
-
-		std::vector<U16, alloc<U16> >		indices_;
 	};
 }
 
@@ -437,12 +445,9 @@ namespace KlayGE
 
 		this->UpdateTexture(text);
 
-		U8 a, r, g, b;
-		clr.RGBA(r, g, b, a);
-
 		SharePtr<D3D9FontRenderable> ret(new D3D9FontRenderable(effect_));
 		ret->RenderText(this->FontHeight(), charInfoMap_, sx, sy, sz, xScale, yScale,
-			(a << 24) | (r << 16) | (g << 8) | b, text, flags);
+			clr, text, flags);
 		return ret;
 	}
 /*

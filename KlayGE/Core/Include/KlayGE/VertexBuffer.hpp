@@ -6,6 +6,7 @@
 //
 // 2.0.3
 // 去掉了VO_2D (2004.3.1)
+// 改用vector存放数据 (2004.3.13)
 //
 // 2.0.0
 // 初次建立 (2003.8.18)
@@ -17,6 +18,9 @@
 #define _VERTEXBUFFER_HPP
 
 #pragma comment(lib, "KlayGE_Core.lib")
+
+#include <vector>
+#include <KlayGE/array.hpp>
 
 namespace KlayGE
 {
@@ -49,11 +53,12 @@ namespace KlayGE
 			VO_BlendIndices		= 1 << 5,
 		};
 
-		// true to use pIndexes to reference individual lines/triangles rather than embed. Allows vertex reuse.
-		bool useIndices;
+		bool UseIndices() const
+			{ return !indices.empty(); }
 
 		// Number of vertices (applies to all components)
-		U32 numVertices;
+		U32 NumVertices() const
+			{ return vertices.size() / 3; }
 
 		// No memory allocation here,
 		// assumed that all pointers are pointing
@@ -63,27 +68,20 @@ namespace KlayGE
 		// @remarks
 		// If useIndexes is false each group of 3 vertices describes a face (anticlockwise winding) in
 		// trianglelist mode.
-		float* pVertices;
-		// The 'Stride' between sets of vertex data. 0 indicates data is packed with no gaps.
-		U16 vertexStride;
-
+		typedef std::vector<float, alloc<float> > VerticesType;
+		VerticesType vertices;
 
 		// Optional vertex normals for vertices (float {x, y, z} * numVertices).
-		float* pNormals;
-		// The 'Stride' between sets of normal data. 0 indicates data is packed with no gaps.
-		U16 normalStride;
+		typedef std::vector<float, alloc<float> > NormalsType;
+		NormalsType normals;
 
+		// Optional pointer to a list of diffuse vertex colors (float {r, g, b, a} * numVertices).
+		typedef std::vector<float, alloc<float> > DiffusesType;
+		DiffusesType diffuses;
 
-		// Optional pointer to a list of diffuse vertex colors (32-bit RGBA * numVertices).
-		U32* pDiffuses;
-		// The 'Stride' between sets of diffuse color data. 0 indicates data is packed with no gaps.
-		U16 diffuseStride;
-
-
-		// Optional pointer to a list of specular vertex colors (32-bit RGBA * numVertices)
-		U32* pSpeculars;
-		// The 'Stride' between sets of specular color data. 0 indicates data is packed with no gaps.
-		U16 specularStride;
+		// Optional pointer to a list of specular vertex colors (float {r, g, b, a} RGBA * numVertices)
+		typedef std::vector<float, alloc<float> > SpecularsType;
+		SpecularsType speculars;
 
 
 		/// Number of groups of u,[v],[w].
@@ -92,32 +90,33 @@ namespace KlayGE
 		// Number of dimensions in each corresponding texture coordinate set.
 		// @note
 		// There should be 1-4 dimensions on each set.
-		U8 numTextureDimensions[8];
+		array<U8, 8> numTextureDimensions;
 
 		// Optional texture coordinates for vertices (float {u, [v], [w]} * numVertices).
 		// @remarks
 		// There can be up to 8 sets of texture coordinates, and the number of components per
 		// vertex depends on the number of texture dimensions (2 is most common).
-		float* pTexCoords[8];
-		// The 'Stride' between each set of texture data. 0 indicates data is packed with no gaps.
-		U16 texCoordStride[8];
+		typedef std::vector<float, alloc<float> > TexCoordsType;
+		array<TexCoordsType, 8> texCoords;
 
 
-		float* pBlendWeights;
-		U16 blendWeightsStride;
+		typedef std::vector<float, alloc<float> > BlendWeightsType;
+		BlendWeightsType blendWeights;
 
 
-		U8* pBlendIndices;
-		U16 blendIndicesStride;
+		typedef std::vector<float, alloc<float> > BlendIndicesType;
+		BlendIndicesType blendIndices;
 
 
 		// Pointer to a list of vertex indexes describing faces (only used if useIndexes is true).
 		// @note
 		// Each group of 3 describes a face (anticlockwise winding order).
-		U16* pIndices;
+		typedef std::vector<U16, alloc<U16> > IndicesType;
+		IndicesType indices;
 
-		// The number of vertex indexes (must be a multiple of 3).
-		U32 numIndices;
+		// The number of vertex indexes
+		U32 NumIndices() const
+			{ return indices.size(); }
 
 		// The type of rendering operation.
 		BufferType type;
@@ -125,30 +124,10 @@ namespace KlayGE
 		int vertexOptions;
 
 		VertexBuffer()
-		{
-			useIndices = false;
-
-			// Initialise all things
-			vertexStride = normalStride = diffuseStride = specularStride = blendWeightsStride = blendIndicesStride = 0;
-			vertexOptions = 0;
-
-			pVertices = NULL;
-			pNormals = NULL;
-			pDiffuses = NULL;
-			pSpeculars = NULL;
-			pBlendWeights = NULL;
-			pBlendIndices = NULL;
-
-			pIndices = NULL;
-
-			numTextureCoordSets = 1;
-			for (size_t i = 0; i < 8; ++ i)
-			{
-				pTexCoords[i] = NULL;
-				texCoordStride[i] = 0;
-				numTextureDimensions[i] = 2;
-			}
-		}
+			: vertexOptions(0),
+				numTextureCoordSets(1),
+				numTextureDimensions(2)
+			{ }
 	};
 }
 

@@ -67,8 +67,8 @@ namespace KlayGE
 		void VertexPrimFromVB(const VertexBuffer& vb);
 
 		void CopyAllBuffers(const VertexBuffer& vb);
-		void CopyABuffer(HardwareVertexBuffer& buffer, void* srcData,
-			size_t vertexSize, size_t vertexNum, size_t vertexStride);
+		void CopyABuffer(HardwareVertexBuffer& buffer, const void* srcData,
+			size_t vertexSize, size_t vertexNum);
 	};
 }
 

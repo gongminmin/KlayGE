@@ -603,10 +603,10 @@ namespace KlayGE
 	{
 		vbConverter_.Update(vb);
 
-		if (vb.useIndices)
+		if (vb.UseIndices())
 		{
 			d3dDevice_->SetIndices(ibConverter_.Update(vb).Get());
-			this->DrawIndexedPrimitive(vbConverter_.PrimType(), vb.numVertices, vbConverter_.PrimCount());
+			this->DrawIndexedPrimitive(vbConverter_.PrimType(), vb.NumVertices(), vbConverter_.PrimCount());
 		}
 		else
 		{

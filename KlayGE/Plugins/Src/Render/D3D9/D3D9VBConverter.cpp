@@ -58,7 +58,7 @@ namespace KlayGE
 			shaderDecl.push_back(element);
 
 			this->UpdateAStream(element.Stream, xyzBuffer_,
-				sizeof(D3DVECTOR), vb.numVertices);
+				sizeof(D3DVECTOR), vb.NumVertices());
 		}
 
 		// Normal
@@ -71,33 +71,33 @@ namespace KlayGE
 			shaderDecl.push_back(element);
 
 			this->UpdateAStream(element.Stream, normalBuffer_,
-				sizeof(D3DVECTOR), vb.numVertices);
+				sizeof(D3DVECTOR), vb.NumVertices());
 		}
 
 		// Vertex colors
 		if (vb.vertexOptions & VertexBuffer::VO_Diffuses)
 		{
 			element.Stream		= shaderDecl.size();
-			element.Type		= D3DDECLTYPE_D3DCOLOR;
+			element.Type		= D3DDECLTYPE_FLOAT4;
 			element.Usage		= D3DDECLUSAGE_COLOR;
 			element.UsageIndex	= 0;
 			shaderDecl.push_back(element);
 
 			this->UpdateAStream(element.Stream, diffuseBuffer_,
-				sizeof(D3DCOLOR), vb.numVertices);
+				sizeof(float) * 4, vb.NumVertices());
 		}
 
 		// Vertex speculars
 		if (vb.vertexOptions & VertexBuffer::VO_Speculars)
 		{
 			element.Stream		= shaderDecl.size();
-			element.Type		= D3DDECLTYPE_D3DCOLOR;
+			element.Type		= D3DDECLTYPE_FLOAT4;
 			element.Usage		= D3DDECLUSAGE_COLOR;
 			element.UsageIndex	= 1;
 			shaderDecl.push_back(element);
 
 			this->UpdateAStream(element.Stream, specularBuffer_,
-				sizeof(D3DCOLOR), vb.numVertices);
+				sizeof(float) * 4, vb.NumVertices());
 		}
 
 		// Do texture coords
@@ -112,7 +112,7 @@ namespace KlayGE
 				shaderDecl.push_back(element);
 
 				this->UpdateAStream(element.Stream, textures_[i][vb.numTextureDimensions[i] - 1],
-					vb.numTextureDimensions[i] * sizeof(float), vb.numVertices);
+					vb.numTextureDimensions[i] * sizeof(float), vb.NumVertices());
 			}
 		}
 
@@ -126,20 +126,20 @@ namespace KlayGE
 			shaderDecl.push_back(element);
 
 			this->UpdateAStream(element.Stream, blendWeights_,
-				sizeof(float) * 4, vb.numVertices);
+				sizeof(float) * 4, vb.NumVertices());
 		}
 
 		// Blend Indices
 		if (vb.vertexOptions & VertexBuffer::VO_BlendIndices)
 		{
 			element.Stream		= shaderDecl.size();
-			element.Type		= D3DDECLTYPE_D3DCOLOR;
+			element.Type		= D3DDECLTYPE_FLOAT4;
 			element.Usage		= D3DDECLUSAGE_BLENDINDICES;
 			element.UsageIndex	= 0;
 			shaderDecl.push_back(element);
 
 			this->UpdateAStream(element.Stream, blendIndices_,
-				sizeof(D3DCOLOR), vb.numVertices);
+				sizeof(float) * 4, vb.NumVertices());
 		}
 
 		{
@@ -174,7 +174,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9VBConverter::VertexPrimFromVB(const VertexBuffer& vb)
 	{
-		vertexCount_ = vb.useIndices ? vb.numIndices : vb.numVertices;
+		vertexCount_ = vb.UseIndices() ? vb.NumIndices() : vb.NumVertices();
 		switch (vb.type)
 		{
 		case VertexBuffer::BT_PointList:
@@ -214,47 +214,48 @@ namespace KlayGE
 	void D3D9VBConverter::CopyAllBuffers(const VertexBuffer& vb)
 	{
 		{
-			this->CopyABuffer(xyzBuffer_, vb.pVertices,
-				sizeof(D3DVECTOR), vb.numVertices, vb.vertexStride);
+			this->CopyABuffer(xyzBuffer_, &vb.vertices[0],
+				sizeof(D3DVECTOR), vb.NumVertices());
 		}
 
 		if (vb.vertexOptions & VertexBuffer::VO_Normals)
 		{
-			this->CopyABuffer(normalBuffer_, vb.pNormals,
-				sizeof(D3DVECTOR), vb.numVertices, vb.normalStride);
+			this->CopyABuffer(normalBuffer_, &vb.normals[0],
+				sizeof(D3DVECTOR), vb.NumVertices());
 		}
 
 		if (vb.vertexOptions & VertexBuffer::VO_Diffuses)
 		{
-			this->CopyABuffer(diffuseBuffer_, vb.pDiffuses,
-				sizeof(D3DCOLOR), vb.numVertices, vb.diffuseStride);
+			this->CopyABuffer(diffuseBuffer_, &vb.diffuses[0],
+				sizeof(float) * 4, vb.NumVertices());
 		}
 
 		if (vb.vertexOptions & VertexBuffer::VO_Speculars)
 		{
-			this->CopyABuffer(specularBuffer_, vb.pSpeculars,
-				sizeof(D3DCOLOR), vb.numVertices, vb.specularStride);
+			this->CopyABuffer(specularBuffer_, &vb.speculars[0],
+				sizeof(float) * 4, vb.NumVertices());
 		}
 
 		if (vb.vertexOptions & VertexBuffer::VO_TextureCoords)
 		{
 			for (U32 i = 0; i < vb.numTextureCoordSets; ++ i)
 			{
-				this->CopyABuffer(textures_[i][vb.numTextureDimensions[i] - 1], vb.pTexCoords[i],
-					vb.numTextureDimensions[i] * sizeof(float), vb.numVertices, vb.texCoordStride[i]);
+				const VertexBuffer::TexCoordsType& texCoords(vb.texCoords[i]);
+				this->CopyABuffer(textures_[i][vb.numTextureDimensions[i] - 1], &texCoords[0],
+					vb.numTextureDimensions[i] * sizeof(float), vb.NumVertices());
 			}
 		}
 
 		if (vb.vertexOptions & VertexBuffer::VO_BlendWeights)
 		{
-			this->CopyABuffer(blendWeights_, vb.pBlendWeights,
-				sizeof(float) * 4, vb.numVertices, vb.blendWeightsStride);
+			this->CopyABuffer(blendWeights_, &vb.blendWeights[0],
+				sizeof(float) * 4, vb.NumVertices());
 		}
 
 		if (vb.vertexOptions & VertexBuffer::VO_BlendIndices)
 		{
-			this->CopyABuffer(blendIndices_, vb.pBlendIndices,
-				sizeof(D3DCOLOR), vb.numVertices, vb.blendIndicesStride);
+			this->CopyABuffer(blendIndices_, &vb.blendIndices[0],
+				sizeof(float) * 4, vb.NumVertices());
 		}
 	}
 
@@ -278,27 +279,15 @@ namespace KlayGE
 
 	// 拷贝一个缓冲区
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9VBConverter::CopyABuffer(HardwareVertexBuffer& buffer, void* srcData,
-		size_t vertexSize, size_t vertexNum, size_t vertexStride)
+	void D3D9VBConverter::CopyABuffer(HardwareVertexBuffer& buffer, const void* srcData,
+		size_t vertexSize, size_t vertexNum)
 	{
 		U8* dest;
 		TIF(buffer.buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_DISCARD));
-		U8* src(reinterpret_cast<U8*>(srcData));
+		const U8* src(reinterpret_cast<const U8*>(srcData));
 
 		// 如果有跨距，就把数据拷贝到一个块中
-		if (0 == vertexStride)
-		{
-			Engine::MemoryInstance().Cpy(dest, src, vertexSize * vertexNum);
-		}
-		else
-		{
-			for (U16 n = 0; n < vertexNum; ++ n)
-			{
-				memcpy(dest, src, vertexSize);
-				dest += vertexSize;
-				src += vertexStride + vertexSize;
-			}
-		}
+		Engine::MemoryInstance().Cpy(dest, src, vertexSize * vertexNum);
 
 		buffer.buffer->Unlock();
 	}

@@ -31,22 +31,22 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	COMPtr<IDirect3DIndexBuffer9> D3D9IBConverter::Update(const VertexBuffer& vb)
 	{
-		if (indicies_.count < vb.numIndices)
+		if (indicies_.count < vb.NumIndices())
 		{
 			d3dDevice_->SetIndices(NULL);
 
 			IDirect3DIndexBuffer9* buffer;
-			TIF(d3dDevice_->CreateIndexBuffer(vb.numIndices * sizeof(U16),
+			TIF(d3dDevice_->CreateIndexBuffer(vb.NumIndices() * sizeof(U16),
 				D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFMT_INDEX16,
 				D3DPOOL_DEFAULT, &buffer, NULL));
 
 			indicies_.buffer = COMPtr<IDirect3DIndexBuffer9>(buffer);
-			indicies_.count = vb.numIndices;
+			indicies_.count = vb.NumIndices();
 		}
 
 		void* data;
 		TIF(indicies_.buffer->Lock(0, 0, &data, D3DLOCK_DISCARD));
-		Engine::MemoryInstance().Cpy(data, vb.pIndices, vb.numIndices * sizeof(U16));
+		Engine::MemoryInstance().Cpy(data, &vb.indices[0], vb.NumIndices() * sizeof(U16));
 		indicies_.buffer->Unlock();
 
 		return indicies_.buffer;

@@ -38,16 +38,21 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::PushRenderable(const RenderablePtr& obj, const Matrix4& worldMat)
 	{
-		const RenderEffectPtr& effect(obj->GetRenderEffect());
+		for (size_t i = 0; i < obj->NumSubs(); ++ i)
+		{
+			const RenderEffectPtr& effect(obj->GetRenderEffect(i));
+			const VertexBufferPtr& vb(obj->GetVertexBuffer(i));
 
-		RenderQueueType::iterator iter(renderQueue_.find(effect));
-		if (iter != renderQueue_.end())
-		{
-			iter->second.push_back(std::make_pair(obj, worldMat));
-		}
-		else
-		{
-			renderQueue_.insert(std::make_pair(effect, RenderItemsType(1, std::make_pair(obj, worldMat))));
+			RenderQueueType::iterator iter(renderQueue_.find(effect));
+			if (iter != renderQueue_.end())
+			{
+				iter->second.push_back(RenderItemType(vb, worldMat));
+			}
+			else
+			{
+				renderQueue_.insert(RenderQueueType::value_type(effect,
+					RenderItemsType(1, RenderItemType(vb, worldMat))));
+			}
 		}
 	}
 
@@ -78,7 +83,7 @@ namespace KlayGE
 				const Matrix4 newWorld(oldWorld * itemIter->second);
 
 				renderEngine.WorldMatrix(newWorld);
-				renderEngine.Render(*(itemIter->first->GetVertexBuffer()));
+				renderEngine.Render(*(itemIter->first));
 				renderEngine.WorldMatrix(oldWorld);
 			}
 		}
