@@ -206,9 +206,10 @@ namespace KlayGE
 																	// actually consumed
 
 								// 把解码后的数据放入缓冲区
-								size_t const length(sizeof(ogg_int16_t) * bout * vi_.channels);
-								std::memcpy(static_cast<U8*>(data) + cursize, &convbuffer[0], length);
-								cursize += length;
+								size_t const size(bout * vi_.channels);
+								std::copy(convbuffer.begin(), convbuffer.begin() + size,
+									static_cast<ogg_int16_t*>(data) + cursize);
+								cursize += size;
 							}
 						}
 					}
@@ -228,7 +229,7 @@ namespace KlayGE
 			}
 		}
 
-		return cursize;
+		return cursize * sizeof(ogg_int16_t);
 	}
 
 	// 返回数据源大小。因为是流式结构，所以返回0

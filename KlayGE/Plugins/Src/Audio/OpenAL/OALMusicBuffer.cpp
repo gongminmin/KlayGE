@@ -1,8 +1,11 @@
 // OALMusicBuffer.cpp
 // KlayGE OpenAL音乐缓冲区类 实现文件
-// Ver 2.0.4
+// Ver 2.2.0
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.2.0
+// 修正了DoStop的死锁 (2004.10.22)
 //
 // 2.0.4
 // 增加了循环播放功能 (2004.3.22)
@@ -100,7 +103,7 @@ namespace KlayGE
 
 					std::vector<U8> data(READSIZE);
 					data.resize(dataSource_->Read(&data[0], data.size()));
-					if (data.size() > 0)
+					if (!data.empty())
 					{
 						alBufferData(buf, Convert(format_), &data[0],
 							static_cast<ALsizei>(data.size()), freq_);
@@ -172,7 +175,6 @@ namespace KlayGE
 	{
 		if (playThread_)
 		{
-			playThread_->join();
 			playThread_.reset();
 		}
 

@@ -88,7 +88,7 @@ namespace KlayGE
 				}
 				else
 				{
-					if (renderables_.size() > 0)
+					if (!renderables_.empty())
 					{
 						Vector3 center((box_.LeftBottomNear() + box_.RightTopFar()) / 2);
 

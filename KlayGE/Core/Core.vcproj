@@ -277,9 +277,6 @@
 					RelativePath="Include\KlayGE\alloc.hpp">
 				</File>
 				<File
-					RelativePath="Include\KlayGE\bintree.hpp">
-				</File>
-				<File
 					RelativePath=".\Include\KlayGE\Config.hpp">
 				</File>
 				<File
@@ -311,9 +308,6 @@
 				</File>
 				<File
 					RelativePath="Include\KlayGE\ThrowErr.hpp">
-				</File>
-				<File
-					RelativePath="Include\KlayGE\tree.hpp">
 				</File>
 				<File
 					RelativePath=".\Include\KlayGE\Types.hpp">
