@@ -81,7 +81,7 @@ namespace KlayGE
 		Convert(fn, fileName);
 		file_.open(fn.c_str(), mode);
 
-		return file_.is_open();
+		return !file_.fail();
 	}
 
 	// 关闭文件
@@ -92,6 +92,7 @@ namespace KlayGE
 		{
 			file_.close();
 		}
+		file_.clear();
 	}
 
 	// 获取文件长度
@@ -126,7 +127,8 @@ namespace KlayGE
 		assert(file_.is_open());
 		assert(data != NULL);
 
-		file_.write(static_cast<const char*>(data), count);
+		file_.write(static_cast<const char*>(data),
+			static_cast<std::streamsize>(count));
 
 		return count;
 	}
@@ -143,7 +145,8 @@ namespace KlayGE
 			count = this->Length() - this->Tell();
 		}
 
-		file_.read(static_cast<char*>(data), count);
+		file_.read(static_cast<char*>(data),
+			static_cast<std::streamsize>(count));
 
 		return count;
 	}
@@ -153,7 +156,8 @@ namespace KlayGE
 	size_t DiskFile::CopyFrom(VFile& src, size_t size)
 	{
 		std::vector<U8, alloc<U8> > data(size);
-		return this->Write(&data[0], src.Read(&data[0], data.size()));
+		size = src.Read(&data[0], data.size());
+		return this->Write(&data[0], size);
 	}
 
 	// 把文件指针移到指定位置
@@ -178,14 +182,8 @@ namespace KlayGE
 			break;
 		}
 
-		if (openMode_ & ios_base::in)
-		{
-			file_.seekg(offset, seekFrom);
-		}
-		else
-		{
-			file_.seekp(offset, seekFrom);
-		}
+		file_.seekg(static_cast<istream::off_type>(offset), seekFrom);
+		file_.seekp(static_cast<ostream::off_type>(offset), seekFrom);
 
 		return this->Tell();
 	}
@@ -195,8 +193,9 @@ namespace KlayGE
 	size_t DiskFile::Tell()
 	{
 		assert(file_.is_open());
+		assert(!file_.fail());
 
-		if (openMode_ & ios_base::in)
+		if (OM_Read == openMode_)
 		{
 			return file_.tellg();
 		}

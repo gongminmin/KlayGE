@@ -120,7 +120,8 @@ namespace KlayGE
 	size_t MemFile::CopyFrom(VFile& src, size_t size)
 	{
 		std::vector<U8> data(size);
-		return this->Write(&data[0], src.Read(&data[0], data.size()));
+		size = src.Read(&data[0], data.size());
+		return this->Write(&data[0], size);
 	}
 
 	// 把文件指针移到指定位置
