@@ -126,6 +126,6 @@ namespace KlayGE
 		file->seekg(0);
 		file->read(&data[0], static_cast<std::streamsize>(data.size()));
 
-		return Context::Instance().RenderFactoryInstance().MakeRenderEffect(std::string(&data[0], data.size()));
+		return Context::Instance().RenderFactoryInstance().MakeRenderEffect(std::string(data.begin(), data.end()));
 	}
 }

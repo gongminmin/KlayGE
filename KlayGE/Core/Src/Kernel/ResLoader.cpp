@@ -57,7 +57,8 @@ namespace KlayGE
 			}
 		}
 
-		throw;
+		assert(false);
+		return "";
 	}
 
 	ResIdentifierPtr ResLoader::Load(std::string const & name)
@@ -97,6 +98,7 @@ namespace KlayGE
 			}
 		}
 
-		throw;
+		assert(false);
+		return ResIdentifierPtr();
 	}
 }
