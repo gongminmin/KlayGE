@@ -92,6 +92,15 @@ namespace
 
 		case PF_A32B32G32R32F:
 			return D3DFMT_A32B32G32R32F;
+
+		case PF_DXT1:
+			return D3DFMT_DXT1;
+
+		case PF_DXT3:
+			return D3DFMT_DXT3;
+
+		case PF_DXT5:
+			return D3DFMT_DXT5;
 		}
 
 		assert(false);
@@ -146,6 +155,15 @@ namespace
 
 		case D3DFMT_A32B32G32R32F:
 			return PF_A32B32G32R32F;
+
+		case D3DFMT_DXT1:
+			return PF_DXT1;
+
+		case D3DFMT_DXT3:
+			return PF_DXT3;
+
+		case D3DFMT_DXT5:
+			return PF_DXT5;
 		}
 
 		assert(false);

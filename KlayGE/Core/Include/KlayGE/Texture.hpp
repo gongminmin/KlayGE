@@ -60,6 +60,13 @@ namespace KlayGE
 		PF_G32R32F,
 		// 128-bit pixel format, 32 bits floating-point for alpha, blue, green and red.
 		PF_A32B32G32R32F,
+
+		// DXT1 compression texture format 
+		PF_DXT1,
+		// DXT3 compression texture format
+		PF_DXT3,
+		// DXT5 compression texture format
+		PF_DXT5,
 	};
 
 	inline uint8_t
@@ -67,9 +74,14 @@ namespace KlayGE
 	{
 		switch (format)
 		{
+		case PF_DXT1:
+			return 4;
+
 		case PF_L8:
 		case PF_A8:
 		case PF_A4L4:
+		case PF_DXT3:
+		case PF_DXT5:
 			return 8;
 
 		case PF_R5G6B5:
@@ -110,6 +122,9 @@ namespace KlayGE
 		case PF_A8R8G8B8:
 		case PF_A2R10G10B10:
 		case PF_A16B16G16R16F:
+		case PF_DXT1:
+		case PF_DXT3:
+		case PF_DXT5:
 			return false;
 				
 		case PF_R16F:
@@ -121,7 +136,38 @@ namespace KlayGE
 		}
 
 		assert(false);
-		return 0;
+		return false;
+	}
+
+	inline bool
+	IsCompressedFormat(PixelFormat format)
+	{
+		switch (format)
+		{
+		case PF_DXT1:
+		case PF_DXT3:
+		case PF_DXT5:
+			return true;
+
+		case PF_L8:
+		case PF_A8:
+		case PF_A4L4:
+		case PF_R5G6B5:
+		case PF_A4R4G4B4:
+		case PF_X8R8G8B8:
+		case PF_A8R8G8B8:
+		case PF_A2R10G10B10:
+		case PF_A16B16G16R16F:
+		case PF_R16F:
+		case PF_G16R16F:
+		case PF_R32F:
+		case PF_G32R32F:
+		case PF_A32B32G32R32F:
+			return false;
+		}
+
+		assert(false);
+		return false;
 	}
 
 	/** Abstract class representing a Texture resource.
