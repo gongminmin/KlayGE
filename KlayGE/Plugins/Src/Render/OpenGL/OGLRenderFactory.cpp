@@ -20,6 +20,22 @@ namespace KlayGE
 		OGLRenderFactory()
 			: OGLRenderFactoryBase(L"OpenGL Render Factory")
 			{ }
+
+		TexturePtr MakeTexture(uint32_t width, uint32_t height, uint16_t numMipMaps,
+				PixelFormat format, Texture::TextureUsage usage)
+		{
+			return TexturePtr(new OGLTexture(width, height, numMipMaps, format, usage));
+		}
+
+		RenderTexturePtr MakeRenderTexture(uint32_t width, uint32_t height)
+		{
+			return RenderTexturePtr(new OGLRenderTexture(width, height));
+		}
+
+		RenderEffectPtr MakeRenderEffect(std::string const & srcData, uint32_t flags)
+		{
+			return RenderEffectPtr(new OGLRenderEffect(srcData, flags));
+		}
 			
 		VertexStreamPtr MakeVertexStream(VertexStreamType type,
 			uint8_t sizeElement, uint8_t numElement, bool staticStream)

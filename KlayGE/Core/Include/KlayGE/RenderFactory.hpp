@@ -56,16 +56,6 @@ namespace KlayGE
 			return renderEngine;
 		}
 
-		TexturePtr MakeTexture(uint32_t width, uint32_t height, uint16_t numMipMaps,
-				PixelFormat format, Texture::TextureUsage usage = Texture::TU_Default)
-			{ return TexturePtr(new TextureType(width, height, numMipMaps, format, usage)); }
-
-		RenderTexturePtr MakeRenderTexture(uint32_t width, uint32_t height)
-			{ return RenderTexturePtr(new RenderTextureType(width, height)); }
-
-		RenderEffectPtr MakeRenderEffect(std::string const & srcData, uint32_t flags)
-			{ return RenderEffectPtr(new RenderEffectType(srcData, flags)); }
-
 	private:
 		std::wstring const name_;
 	};

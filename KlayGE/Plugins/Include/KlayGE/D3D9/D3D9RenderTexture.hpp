@@ -1,3 +1,15 @@
+// D3D9RenderTexture.hpp
+// KlayGE D3D9渲染纹理类 头文件
+// Ver 2.3.0
+// 版权所有(C) 龚敏敏, 2003-2005
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.3.0
+// 增加了OnLostDevice和OnResetDevice (2005.2.23)
+//
+// 修改记录
+/////////////////////////////////////////////////////////////////////////////////
+
 #ifndef _D3D9RENDERTEXTURE_HPP
 #define _D3D9RENDERTEXTURE_HPP
 
@@ -20,6 +32,9 @@ namespace KlayGE
 
 		bool RequiresTextureFlipping() const
 			{ return true; }
+
+		void OnLostDevice();
+		void OnResetDevice();
 	};
 
 	typedef boost::shared_ptr<D3D9RenderTexture> D3D9RenderTexturePtr;

@@ -1,3 +1,15 @@
+// D3D9VertexStream.hpp
+// KlayGE D3D9索引流类 头文件
+// Ver 2.3.0
+// 版权所有(C) 龚敏敏, 2003-2005
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.3.0
+// 增加了OnLostDevice和OnResetDevice (2005.2.23)
+//
+// 修改记录
+/////////////////////////////////////////////////////////////////////////////////
+
 #ifndef _D3D9INDEXSTREAM_HPP
 #define _D3D9INDEXSTREAM_HPP
 
@@ -27,6 +39,9 @@ namespace KlayGE
 		boost::shared_ptr<IDirect3DIndexBuffer9> D3D9Buffer() const;
 		size_t NumIndices() const;
 
+		void OnLostDevice();
+		void OnResetDevice();
+
 	private:
 		boost::shared_ptr<IDirect3DIndexBuffer9> buffer_;
 		size_t currentSize_;
@@ -35,6 +50,8 @@ namespace KlayGE
 
 		bool staticStream_;
 	};
+
+	typedef boost::shared_ptr<D3D9IndexStream> D3D9IndexStreamPtr;
 }
 
 #endif			// _D3D9INDEXSTREAM_HPP

@@ -1,3 +1,15 @@
+// D3D9RenderTexture.hpp
+// KlayGE D3D9渲染纹理类 实现文件
+// Ver 2.3.0
+// 版权所有(C) 龚敏敏, 2003-2005
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.3.0
+// 增加了OnLostDevice和OnResetDevice (2005.2.23)
+//
+// 修改记录
+/////////////////////////////////////////////////////////////////////////////////
+
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Texture.hpp>
@@ -70,5 +82,17 @@ namespace KlayGE
 
 			return;
 		}
+	}
+
+	void D3D9RenderTexture::OnLostDevice()
+	{
+		D3D9Texture* tex(static_cast<D3D9Texture*>(privateTex_.get()));
+		tex->OnLostDevice();
+	}
+
+	void D3D9RenderTexture::OnResetDevice()
+	{
+		D3D9Texture* tex(static_cast<D3D9Texture*>(privateTex_.get()));
+		tex->OnResetDevice();
 	}
 }

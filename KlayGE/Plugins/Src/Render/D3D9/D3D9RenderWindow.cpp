@@ -19,6 +19,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/Context.hpp>
 
 #include <vector>
 #include <cassert>
@@ -27,6 +28,7 @@
 #include <d3d9.h>
 
 #include <KlayGE/D3D9/D3D9RenderSettings.hpp>
+#include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 #include <KlayGE/D3D9/D3D9RenderWindow.hpp>
 
 namespace KlayGE
@@ -84,10 +86,16 @@ namespace KlayGE
 			// active flag to match
 			if ((SIZE_MAXHIDE == wParam) || (SIZE_MINIMIZED == wParam))
 			{
+				D3D9RenderFactory& factory = static_cast<D3D9RenderFactory&>(Context::Instance().RenderFactoryInstance());
+				factory.OnLostDevice();
+
 				active_ = false;
 			}
 			else
 			{
+				D3D9RenderFactory& factory = static_cast<D3D9RenderFactory&>(Context::Instance().RenderFactoryInstance());
+				factory.OnResetDevice();
+
 				active_ = true;
 				if (this->Ready())
 				{

@@ -1,8 +1,11 @@
 // D3D9RenderEffect.cpp
 // KlayGE D3D9渲染效果类 实现文件
-// Ver 2.0.3
+// Ver 2.3.0
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.3.0
+// 增加了OnLostDevice和OnResetDevice (2005.2.23)
 //
 // 2.0.3
 // 修正了没有使用GetParameterByName的Bug (2004.3.1)
@@ -124,6 +127,16 @@ namespace KlayGE
 	void D3D9RenderEffect::End()
 	{
 		TIF(effect_->End());
+	}
+
+	void D3D9RenderEffect::OnLostDevice()
+	{
+		TIF(effect_->OnLostDevice());
+	}
+
+	void D3D9RenderEffect::OnResetDevice()
+	{
+		TIF(effect_->OnResetDevice());
 	}
 
 

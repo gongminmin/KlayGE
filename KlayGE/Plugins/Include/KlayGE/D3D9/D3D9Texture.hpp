@@ -6,6 +6,7 @@
 //
 // 2.3.0
 // 增加了CopyToMemory (2005.2.6)
+// 增加了OnLostDevice和OnResetDevice (2005.2.23)
 //
 // 修改记录
 /////////////////////////////////////////////////////////////////////////////////
@@ -50,6 +51,9 @@ namespace KlayGE
 			{ return this->d3dTexture_; }
 		boost::shared_ptr<IDirect3DSurface9> const & DepthStencil() const
 			{ return this->renderZBuffer_; }
+
+		void OnLostDevice();
+		void OnResetDevice();
 
 	private:
 		boost::shared_ptr<IDirect3DDevice9>		d3dDevice_;

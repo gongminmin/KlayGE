@@ -1,8 +1,11 @@
 // D3D9RenderEffect.hpp
 // KlayGE D3D9渲染效果类 头文件
-// Ver 2.0.4
-// 版权所有(C) 龚敏敏, 2003-2004
+// Ver 2.3.0
+// 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.3.0
+// 增加了OnLostDevice和OnResetDevice (2005.2.23)
 //
 // 2.0.4
 // 增加了D3D9RenderTechnique (2004.3.16)
@@ -64,6 +67,9 @@ namespace KlayGE
 		void EndPass();
 		void End();
 
+		void OnLostDevice();
+		void OnResetDevice();
+
 	private:
 		boost::shared_ptr<ID3DXEffect> effect_;
 	};
@@ -97,6 +103,8 @@ namespace KlayGE
 		boost::shared_ptr<ID3DXEffect> effect_;
 		D3DXHANDLE parameter_;
 	};
+
+	typedef boost::shared_ptr<D3D9RenderEffect> D3D9RenderEffectPtr;
 }
 
 #endif		// _D3D9RENDEREFFECT_HPP
