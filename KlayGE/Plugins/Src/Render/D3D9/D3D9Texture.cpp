@@ -262,42 +262,14 @@ namespace KlayGE
 	void D3D9Texture::CopyMemoryToTexture(void* data, PixelFormat pf,
 		uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset)
 	{
-		uint16_t bpp(PixelFormatBits(pf));
-
-		IDirect3DTexture9* d3dTexture;
-		// Use D3DX to help us create the texture, this way it can adjust any relevant sizes
-		TIF(D3DXCreateTexture(d3dDevice_.get(), width, height,
-			1, 0, ConvertFormat(pf),
-			D3DPOOL_SYSTEMMEM, &d3dTexture));
-		boost::shared_ptr<IDirect3DTexture9> d3dTempTexture = MakeCOMPtr(d3dTexture);
-
-		D3DLOCKED_RECT d3dlr;
-		d3dTempTexture->LockRect(0, &d3dlr, NULL, D3DLOCK_NOSYSLOCK);
-
-		uint32_t const srcPitch(width * bpp / 8);
-		uint16_t const destPitch(static_cast<uint16_t>(d3dlr.Pitch));
-		uint8_t* bits(static_cast<uint8_t*>(d3dlr.pBits));
-
-		for (uint32_t y = 0; y < height; ++ y)
-		{
-			uint8_t* dst(bits + y * destPitch);
-			uint8_t* buffer = static_cast<uint8_t*>(data) + y * srcPitch;
-
-			std::copy(buffer, buffer + srcPitch, dst);
-		}
-
-		d3dTempTexture->UnlockRect(0);
-
-
 		IDirect3DSurface9* temp;
-		TIF(d3dTempTexture->GetSurfaceLevel(0, &temp));
-		boost::shared_ptr<IDirect3DSurface9> src = MakeCOMPtr(temp);
-
 		TIF(d3dTempTexture_->GetSurfaceLevel(0, &temp));
 		boost::shared_ptr<IDirect3DSurface9> dst = MakeCOMPtr(temp);
 
+		RECT srcRc = { 0, 0, width, height };
 		RECT dstRc = { xOffset, yOffset, xOffset + width, yOffset + height };
-		TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, &dstRc, src.get(), NULL, NULL, D3DX_DEFAULT, 0));
+		TIF(D3DXLoadSurfaceFromMemory(dst.get(), NULL, &dstRc, data, ConvertFormat(pf),
+			width * PixelFormatBits(pf) / 8, NULL, &srcRc, D3DX_DEFAULT, 0));
 
 		TIF(D3DXFilterTexture(d3dTempTexture_.get(), NULL, D3DX_DEFAULT, D3DX_DEFAULT));
 		TIF(d3dDevice_->UpdateTexture(d3dTempTexture_.get(), d3dTexture_.get()));
