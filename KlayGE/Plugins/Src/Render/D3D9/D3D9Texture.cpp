@@ -1,8 +1,11 @@
 // D3D9Font.cpp
-// KlayGE D3D9Texture类 实现文件
-// Ver 2.0.5
-// 版权所有(C) 龚敏敏, 2003-2004
+// KlayGE D3D9纹理类 实现文件
+// Ver 2.3.0
+// 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.3.0
+// 增加了对浮点纹理格式的支持 (2005.1.25)
 //
 // 2.0.5
 // 改用GenerateMipSubLevels来生成mipmap (2004.4.8)
@@ -66,6 +69,23 @@ namespace
 
 		case PF_A2R10G10B10:
 			return D3DFMT_A2B10G10R10;
+
+		case PF_R16F:
+			return D3DFMT_R16F;
+
+		case PF_G16R16F:
+			return D3DFMT_G16R16F;
+		case PF_A16B16G16R16F:
+			return D3DFMT_A16B16G16R16F;
+
+		case PF_R32F:
+			return D3DFMT_R32F;
+
+		case PF_G32R32F:
+			return D3DFMT_G32R32F;
+
+		case PF_A32B32G32R32F:
+			return D3DFMT_A32B32G32R32F;
 		}
 
 		return D3DFMT_UNKNOWN;
@@ -98,6 +118,24 @@ namespace
 
 		case D3DFMT_A2B10G10R10:
 			return PF_A2R10G10B10;
+
+		case D3DFMT_R16F:
+			return PF_R16F;
+
+		case D3DFMT_G16R16F:
+			return PF_G16R16F;
+
+		case D3DFMT_A16B16G16R16F:
+			return PF_A16B16G16R16F;
+
+		case D3DFMT_R32F:
+			return PF_R32F;
+
+		case D3DFMT_G32R32F:
+			return PF_G32R32F;
+
+		case D3DFMT_A32B32G32R32F:
+			return PF_A32B32G32R32F;
 		}
 
 		return PF_Unknown;
