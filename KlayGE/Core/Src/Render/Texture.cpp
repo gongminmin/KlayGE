@@ -661,7 +661,6 @@ namespace KlayGE
 					texture->CopyToMemory(level, &data[0]);
 
 					file.write(reinterpret_cast<char*>(&data[0]), static_cast<std::streamsize>(data.size()));
-					assert(file.gcount() == data.size());
 				}
 			}
 			break;
@@ -697,7 +696,6 @@ namespace KlayGE
 					texture->CopyToMemory(level, &data[0]);
 
 					file.write(reinterpret_cast<char*>(&data[0]), static_cast<std::streamsize>(data.size()));
-					assert(file.gcount() == data.size());
 				}
 			}
 			break;
@@ -735,7 +733,6 @@ namespace KlayGE
 						texture->CopyToMemory(level, &data[0]);
 
 						file.write(reinterpret_cast<char*>(&data[face * image_size]), static_cast<std::streamsize>(image_size));
-						assert(file.gcount() == image_size);
 					}
 				}
 			}
