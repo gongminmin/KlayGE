@@ -80,12 +80,24 @@ namespace KlayGE
 	{
 	}
 
+	void OGLRenderEffectParameter::SetFloatArray(const float* value, size_t count)
+	{
+	}		
+
 	float OGLRenderEffectParameter::GetFloat() const
 	{
 		return 0;
 	}
 
+	void OGLRenderEffectParameter::GetFloatArray(float* value, size_t count)
+	{
+	}
+
 	void OGLRenderEffectParameter::SetVector(const Vector4& value)
+	{
+	}
+
+	void OGLRenderEffectParameter::SetVectorArray(const Vector4* value, size_t count)
 	{
 	}
 
@@ -94,17 +106,21 @@ namespace KlayGE
 		return Vector4::Zero();
 	}
 
+	void OGLRenderEffectParameter::GetVectorArray(Vector4* value, size_t count)
+	{
+	}
+
 	void OGLRenderEffectParameter::SetMatrix(const Matrix4& value)
+	{
+	}
+
+	void OGLRenderEffectParameter::SetMatrixArray(const Matrix4* matrices, size_t count)
 	{
 	}
 
 	Matrix4 OGLRenderEffectParameter::GetMatrix() const
 	{
 		return Matrix4::Identity();
-	}
-
-	void OGLRenderEffectParameter::SetMatrixArray(const Matrix4* matrices, size_t count)
-	{
 	}
 
 	void OGLRenderEffectParameter::GetMatrixArray(Matrix4* matrices, size_t count)
@@ -115,27 +131,17 @@ namespace KlayGE
 	{
 	}
 
+	void OGLRenderEffectParameter::SetIntArray(const int* value, size_t count)
+	{
+	}
+
 	int OGLRenderEffectParameter::GetInt() const
 	{
 		return 0;
 	}
 
-	void OGLRenderEffectParameter::SetBool(bool value)
+	void OGLRenderEffectParameter::GetIntArray(int* value, size_t count)
 	{
-	}
-
-	bool OGLRenderEffectParameter::GetBool() const
-	{
-		return false;
-	}
-
-	void OGLRenderEffectParameter::SetString(const std::string& value)
-	{
-	}
-
-	std::string OGLRenderEffectParameter::GetString() const
-	{
-		return std::string();
 	}
 
 	void OGLRenderEffectParameter::SetTexture(const TexturePtr& tex)

@@ -63,19 +63,24 @@ namespace KlayGE
 		static RenderEffectParameterPtr NullObject();
 
 		virtual void SetFloat(float value) = 0;
+		virtual void SetFloatArray(const float* value, size_t count) = 0;
 		virtual float GetFloat() const = 0;
+		virtual void GetFloatArray(float* value, size_t count) = 0;
+		
 		virtual void SetVector(const Vector4& value) = 0;
+		virtual void SetVectorArray(const Vector4* value, size_t count) = 0;
 		virtual Vector4 GetVector() const = 0;
+		virtual void GetVectorArray(Vector4* value, size_t count) = 0;
+		
 		virtual void SetMatrix(const Matrix4& value) = 0;
-		virtual Matrix4 GetMatrix() const = 0;
 		virtual void SetMatrixArray(const Matrix4* matrices, size_t count) = 0;
+		virtual Matrix4 GetMatrix() const = 0;
 		virtual void GetMatrixArray(Matrix4* matrices, size_t count) = 0;
+
 		virtual void SetInt(int value) = 0;
+		virtual void SetIntArray(const int* value, size_t count) = 0;
 		virtual int GetInt() const = 0;
-		virtual void SetBool(bool value) = 0;
-		virtual bool GetBool() const = 0;
-		virtual void SetString(const std::string& value) = 0;
-		virtual std::string GetString() const = 0;
+		virtual void GetIntArray(int* value, size_t count) = 0;
 
 		virtual void SetTexture(const TexturePtr& tex) = 0;
 	};

@@ -69,19 +69,24 @@ namespace KlayGE
 		D3D9RenderEffectParameter(COMPtr<ID3DXEffect> effect, D3DXHANDLE parameter);
 
 		void SetFloat(float value);
+		void SetFloatArray(const float* value, size_t count);
 		float GetFloat() const;
+		void GetFloatArray(float* value, size_t count);
+
 		void SetVector(const Vector4& value);
+		void SetVectorArray(const Vector4* value, size_t count);
 		Vector4 GetVector() const;
+		void GetVectorArray(Vector4* value, size_t count);
+
 		void SetMatrix(const Matrix4& value);
-		Matrix4 GetMatrix() const;
 		void SetMatrixArray(const Matrix4* matrices, size_t count);
+		Matrix4 GetMatrix() const;
 		void GetMatrixArray(Matrix4* matrices, size_t count);
+
 		void SetInt(int value);
+		void SetIntArray(const int* value, size_t count);
 		int GetInt() const;
-		void SetBool(bool value);
-		bool GetBool() const;
-		void SetString(const std::string& value);
-		std::string GetString() const;
+		void GetIntArray(int* value, size_t count);
 
 		void SetTexture(const TexturePtr& tex);
 

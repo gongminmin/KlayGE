@@ -72,35 +72,39 @@ namespace KlayGE
 	public:
 		void SetFloat(float value)
 			{ }
+		void SetFloatArray(const float* matrices, size_t count)
+			{ }
 		float GetFloat() const
 			{ return 0; }
+		void GetFloatArray(float* matrices, size_t count)
+			{ }
+
 		void SetVector(const Vector4& value)
+			{ }
+		void SetVectorArray(const Vector4* matrices, size_t count)
 			{ }
 		Vector4 GetVector() const
 			{ return Vector4::Zero(); }
+		void GetVectorArray(Vector4* matrices, size_t count)
+			{ }
+
 		void SetMatrix(const Matrix4& value)
+			{ }
+		void SetMatrixArray(const Matrix4* matrices, size_t count)
 			{ }
 		Matrix4 GetMatrix() const
 			{ return Matrix4::Identity(); }
-		void SetMatrixArray(const Matrix4* matrices, size_t count)
-			{ }
 		void GetMatrixArray(Matrix4* matrices, size_t count)
 			{ }
+
 		void SetInt(int value)
+			{ }
+		void SetIntArray(const int* matrices, size_t count)
 			{ }
 		int GetInt() const
 			{ return 0; }
-		void SetBool(bool value)
+		void GetIntArray(int* matrices, size_t count)
 			{ }
-		bool GetBool() const
-			{ return false; }
-		void SetString(const std::string& value)
-			{ }
-		std::string GetString() const
-		{
-			static std::string str;
-			return str;
-		}
 
 		void SetTexture(const TexturePtr& tex)
 			{ }
