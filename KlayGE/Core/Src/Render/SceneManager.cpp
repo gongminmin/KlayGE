@@ -39,6 +39,10 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::ClipScene(Camera const & /*camera*/)
 	{
+		for (RenderItemsType::iterator iter = renderItems_.begin(); iter != renderItems_.end(); ++ iter)
+		{
+			this->AddToRenderQueue(*iter);
+		}
 	}
 
 	// 加入渲染物体
@@ -76,6 +80,13 @@ namespace KlayGE
 			renderQueue_.insert(RenderQueueType::value_type(effect,
 				RenderItemsType(1, obj)));
 		}
+	}
+
+	// 清空场景管理器
+	/////////////////////////////////////////////////////////////////////////////////
+	void SceneManager::Clear()
+	{
+		renderItems_.clear();
 	}
 
 	// 更新场景管理器

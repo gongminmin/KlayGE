@@ -42,6 +42,8 @@ namespace KlayGE
 		virtual void ClipScene(Camera const & camera);
 		void AddRenderable(RenderablePtr const & obj);
 
+		virtual void Clear();
+
 		void Update();
 		void Flush();
 
