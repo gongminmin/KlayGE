@@ -1,0 +1,99 @@
+// Lobby.hpp
+// KlayGE 游戏大厅 头文件
+// Ver 1.4.8.3
+// 版权所有(C) 龚敏敏, 2003
+// Homepage: http://www.enginedev.com
+//
+// 1.4.8.3
+// 初次建立 (2003.3.8)
+//
+// 修改记录
+/////////////////////////////////////////////////////////////////////////////////
+
+#ifndef _LOBBY_HPP
+#define _LOBBY_HPP
+
+#include <vector>
+#include <KlayGE/alloc.hpp>
+#include <KlayGE/Socket.hpp>
+
+#pragma comment(lib, "KlayGE_Core.lib")
+
+namespace KlayGE
+{
+	const U32 Max_Buffer(64);
+
+	class Processer
+	{
+	public:
+		virtual void OnJoin(U32 /*ID*/) const
+			{ }
+		virtual void OnQuit(U32 /*ID*/) const
+			{ }
+		virtual void OnDefault(PVOID /*revBuf*/, int /*maxSize*/,
+			PVOID /*sendBuf*/, int& /*sendNum*/, SOCKADDR_IN& /*from*/) const
+			{ }
+	};
+
+	// 描述Player
+	struct PlayerDes
+	{
+		char			ID;
+		String			Name;
+		SOCKADDR_IN		Addr;
+
+		U32				Time;
+	};
+
+	class Lobby
+	{
+		typedef std::vector<PlayerDes, alloc<PlayerDes> >	PlayerAddrs;
+		typedef PlayerAddrs::iterator						PlayerAddrsIter;
+
+	public:
+		Lobby();
+		~Lobby();
+
+		void Create(const String& Name, char maxPlayers, U16 port, const Processer& pro);
+		void Close();
+
+		void LobbyName(const String& Name);
+		const String& LobbyName() const;
+
+		char PlayerNum() const;
+
+		void MaxPlayers(char maxPlayers);
+		char MaxPlayers() const;
+
+		int Receive(void* buf, int maxSize, SOCKADDR_IN& from);
+		int Send(const void* buf, int maxSize, const SOCKADDR_IN& to);
+
+		void TimeOut(U32 timeOut)
+			{ this->socket_.TimeOut(timeOut); }
+		U32 TimeOut()
+			{ return this->socket_.TimeOut(); }
+
+		const SOCKADDR_IN& SockAddr() const
+			{ return this->sockAddr_; }
+
+	private:
+		void OnJoin(char* revbuf, char* sendbuf, int& sendnum, SOCKADDR_IN& From, const Processer& pro);
+		void OnQuit(PlayerAddrsIter iter, char* sendbuf, int& sendnum, const Processer& pro);
+
+		void OnGetLobbyInfo(char* sendbuf, int& sendnum, const Processer& pro);
+		void OnNop(PlayerAddrsIter iter);
+
+		PlayerAddrsIter ID(const SOCKADDR_IN& Addr);
+
+	private:
+		Socket			socket_;
+		PlayerAddrs		players_;
+
+		SOCKADDR_IN		sockAddr_;
+
+		String			name_;
+	};
+}
+
+#endif			// _LOBBY_HPP
+
