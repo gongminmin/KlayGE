@@ -1,8 +1,11 @@
 // D3D9Font.cpp
 // KlayGE D3D9Font类 实现文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.0.3
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.0.3
+// 修正了RenderText的Bug (2004.2.18)
 //
 // 2.0.0
 // 初次建立 (2003.8.18)
@@ -135,12 +138,12 @@ namespace
 			const size_t maxSize(text.length() - std::count(text.begin(), text.end(), L'\n'));
 			float x(sx), y(sy);
 
+			clrs_.resize(maxSize * 4, d3dclr);
+
 			xyzs_.clear();
-			clrs_.clear();
 			texs_.clear();
 			indices_.clear();
 			xyzs_.reserve(maxSize * 3 * 4);
-			clrs_.reserve(maxSize * 4);
 			texs_.reserve(maxSize * 2 * 4);
 			indices_.reserve(maxSize * 6);
 
@@ -170,10 +173,6 @@ namespace
 					xyzs_.push_back(y + h);
 					xyzs_.push_back(sz);
 
-					clrs_.push_back(d3dclr);
-					clrs_.push_back(d3dclr);
-					clrs_.push_back(d3dclr);
-					clrs_.push_back(d3dclr);
 
 					texs_.push_back(texRect.left());
 					texs_.push_back(texRect.top());
@@ -186,6 +185,7 @@ namespace
 
 					texs_.push_back(texRect.left());
 					texs_.push_back(texRect.bottom());
+
 
 					indices_.push_back(lastIndex + 0);
 					indices_.push_back(lastIndex + 1);
@@ -302,8 +302,8 @@ namespace KlayGE
 					bmi.bmiHeader.biCompression = BI_RGB;
 
 					U32* pBitmapBits(NULL);
-					HBITMAP hBitmap = ::CreateDIBSection(hDC, &bmi, DIB_RGB_COLORS,
-						reinterpret_cast<PVOID*>(&pBitmapBits), NULL, 0);
+					HBITMAP hBitmap(::CreateDIBSection(hDC, &bmi, DIB_RGB_COLORS,
+						reinterpret_cast<PVOID*>(&pBitmapBits), NULL, 0));
 					if ((NULL == hBitmap) || (NULL == pBitmapBits))
 					{
 						::DeleteObject(::SelectObject(hDC, hOldFont));
@@ -373,7 +373,8 @@ namespace KlayGE
 						}
 					}
 					theTexture_->CopyMemoryToTexture(&dst[0], PF_A4R4G4B4, charRect.right - charRect.left,
-						charRect.bottom - charRect.top, charRect.bottom - charRect.top, charRect.left, charRect.top);
+						charRect.bottom - charRect.top, 0,
+						charRect.left, charRect.top);
 
 					// 已经更新了纹理，清除对象
 					::DeleteObject(::SelectObject(hDC, hOldBitmap));

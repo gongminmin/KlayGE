@@ -35,7 +35,7 @@ namespace KlayGE
 			const WString& text, U32 flags = 0);
 		RenderablePtr RenderText(float x, float y, float z, float xScale, float yScale, const Color& clr, 
 			const WString& text, U32 flags = 0);
-		RenderablePtr RenderText(const WString& text, U32 flags = 0);
+		//RenderablePtr RenderText(const WString& text, U32 flags = 0);
 
 		U32 FontHeight() const;
 
@@ -51,7 +51,7 @@ namespace KlayGE
 		typedef std::map<wchar_t, CharInfo, std::less<wchar_t>, alloc<std::pair<const wchar_t, CharInfo> > > CharInfoMapType;
 		typedef std::list<wchar_t, alloc<wchar_t> > CharLRUType;
 
-	private:
+	public:
 		void UpdateTexture(const WString& text);
 
 		LOGFONTW logFont_;
