@@ -155,7 +155,7 @@ namespace KlayGE
 		virtual void EnableLighting(bool enabled) = 0;
 		virtual void AmbientLight(const Color& col) = 0;
 
-		virtual RenderWindowPtr CreateRenderWindow(const String &name, const RenderWindowSettings& settings) = 0;
+		virtual RenderWindowPtr CreateRenderWindow(const String &name, const RenderSettings& settings) = 0;
 
 		virtual void CullingMode(CullMode mode) = 0;
 		virtual void SetMaterial(const Material& mat) = 0;

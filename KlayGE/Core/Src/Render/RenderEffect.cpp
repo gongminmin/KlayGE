@@ -12,7 +12,12 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Config.hpp>
 #include <KlayGE/Math.hpp>
+#include <KlayGE/Engine.hpp>
+#include <KlaygE/RenderFactory.hpp>
+#include <KlayGE/DiskFile/DiskFile.hpp>
+
 #include <KlayGE/RenderEffect.hpp>
 
 namespace KlayGE
@@ -91,5 +96,31 @@ namespace KlayGE
 	{
 		static RenderEffectPtr obj(new NullRenderEffect);
 		return obj;
+	}
+
+	RenderEffectPtr LoadRenderEffect(const WString& effectName)
+	{
+		DiskFile file;
+
+		try
+		{
+			file.Open(effectName, VFile::OM_Read);
+		}
+		catch (...)
+		{
+			try
+			{
+				file.Open(WString(_RENDERFXPATH_) + effectName, VFile::OM_Read);
+			}
+			catch (...)
+			{
+				return NullRenderEffectInstance();
+			}
+		}
+
+		std::vector<char, alloc<char> > data(file.Length());
+		file.Read(&data[0], data.size());
+
+		return Engine::RenderFactoryInstance().MakeRenderEffect(String(&data[0], data.size()));
 	}
 }

@@ -10,37 +10,13 @@
 
 namespace KlayGE
 {
-	// 建立渲染窗口的设置
-	/////////////////////////////////////////////////////////////////////////////////
-	struct D3D9RenderWindowSettings : public RenderWindowSettings
-	{
-		D3D9RenderWindowSettings()
-			: multiSample(0)
-			{ }
-		virtual ~D3D9RenderWindowSettings()
-			{ }
-
-		U32 multiSample;
-
-		bool ConfirmDevice(const D3DCAPS9& caps, U32 behavior, D3DFORMAT format) const
-		{
-			if (caps.VertexShaderVersion < D3DVS_VERSION(1, 1))
-			{
-				return false;
-			}
-			return this->DoConfirmDevice(caps, behavior, format);
-		}
-
-	private:
-		virtual bool DoConfirmDevice(const D3DCAPS9& /*caps*/, U32 /*behavior*/, D3DFORMAT /*format*/) const
-			{ return true; }
-	};
+	struct D3D9RenderSettings;
 
 	class D3D9RenderWindow : public RenderWindow
 	{
 	public:
 		D3D9RenderWindow(const COMPtr<IDirect3D9>& d3d, const D3D9Adapter& adapter,
-			const String& name, const D3D9RenderWindowSettings& settings);
+			const String& name, const D3D9RenderSettings& settings);
 		~D3D9RenderWindow();
 
 		LRESULT MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

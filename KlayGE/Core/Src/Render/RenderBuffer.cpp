@@ -6,6 +6,22 @@
 
 namespace KlayGE
 {
+	RenderBuffer::RenderBuffer(BufferType type)
+			: type_(type)
+	{
+		vertexStreams_.reserve(16);
+	}
+
+	RenderBuffer::BufferType RenderBuffer::Type() const
+	{
+		return type_;
+	}
+
+	size_t RenderBuffer::NumVertices() const
+	{
+		return vertexStreams_.empty() ? 0 : vertexStreams_[0]->NumVertices();
+	}
+
 	void RenderBuffer::AddVertexStream(VertexStreamType type, U8 elementSize, U8 elementNum, bool staticStream)
 	{
 		if (!this->GetVertexStream(type))
@@ -48,8 +64,23 @@ namespace KlayGE
 		return vertexStreams_.end();
 	}
 
+	bool RenderBuffer::UseIndices() const
+	{
+		return this->NumIndices() != 0;
+	}
+
+	size_t RenderBuffer::NumIndices() const
+	{
+		return (!indexStream_) ? 0 : indexStream_->NumIndices();
+	}
+
 	void RenderBuffer::AddIndexStream(bool staticStream)
 	{
 		indexStream_ = Engine::RenderFactoryInstance().MakeIndexStream(staticStream);
+	}
+
+	IndexStreamPtr RenderBuffer::GetIndexStream() const
+	{
+		return indexStream_;
 	}
 }

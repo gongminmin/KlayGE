@@ -7,20 +7,12 @@
 
 namespace KlayGE
 {
-	// 建立渲染窗口的设置
-	/////////////////////////////////////////////////////////////////////////////////
-	struct OGLRenderWindowSettings : public RenderWindowSettings
-	{
-		OGLRenderWindowSettings()
-			{ }
-		virtual ~OGLRenderWindowSettings()
-			{ }
-	};
+	struct OGLRenderSettings;
 
 	class OGLRenderWindow : public RenderWindow
 	{
 	public:
-		OGLRenderWindow(const String& name, const OGLRenderWindowSettings& settings);
+		OGLRenderWindow(const String& name, const OGLRenderSettings& settings);
 		~OGLRenderWindow();
 
 		LRESULT MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

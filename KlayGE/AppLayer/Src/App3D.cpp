@@ -43,7 +43,7 @@ namespace KlayGE
 
 	// 建立应用程序窗口和D3D接口
 	/////////////////////////////////////////////////////////////////////////////////
-	void App3DFramework::Create(const String& name, const RenderWindowSettings& settings)
+	void App3DFramework::Create(const String& name, const RenderSettings& settings)
 	{
 		Engine::RenderFactoryInstance().RenderEngineInstance().CreateRenderWindow(name, settings);
 

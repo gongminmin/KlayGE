@@ -13,8 +13,6 @@
 #ifndef _KLAYGE_HPP
 #define _KLAYGE_HPP
 
-#include <KlayGE/Config.hpp>
-
 #define KLAYGEMAINVER		2
 #define KLAYGESECVER		0
 #define KLAYGERELEASEVER	0

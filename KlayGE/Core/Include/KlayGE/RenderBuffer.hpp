@@ -114,15 +114,11 @@ namespace KlayGE
 		typedef VertexStreamsType::iterator VertexStreamIterator;
 		typedef VertexStreamsType::const_iterator VertexStreamConstIterator;
 
-		RenderBuffer(BufferType type)
-			: type_(type)
-			{ vertexStreams_.reserve(16); }
+		RenderBuffer(BufferType type);
 
-		BufferType Type() const
-			{ return type_; }
+		BufferType Type() const;
 
-		size_t NumVertices() const
-			{ return vertexStreams_.empty() ? 0 : vertexStreams_[0]->NumVertices(); }
+		size_t NumVertices() const;
 
 		void AddVertexStream(VertexStreamType type, U8 elementSize, U8 elementNum, bool staticStream = false);
 		VertexStreamPtr GetVertexStream(VertexStreamType type) const;
@@ -133,23 +129,18 @@ namespace KlayGE
 		VertexStreamConstIterator VertexStreamEnd() const;
 
 
-		bool UseIndices() const
-			{ return this->NumIndices() != 0; }
-
-		size_t NumIndices() const
-			{ return indexStream_->NumIndices(); }
+		bool UseIndices() const;
+		size_t NumIndices() const;
 
 		void AddIndexStream(bool staticStream = false);
-		IndexStreamPtr GetIndexStream() const
-			{ return indexStream_; }
+		IndexStreamPtr GetIndexStream() const;
 
 
 	private:
-		VertexStreamsType vertexStreams_;
-
-		IndexStreamPtr indexStream_;
-
 		BufferType type_;
+
+		VertexStreamsType vertexStreams_;
+		IndexStreamPtr indexStream_;
 	};
 }
 

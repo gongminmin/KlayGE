@@ -23,6 +23,7 @@
 #include <cassert>
 #include <d3d9.h>
 
+#include <KlayGE/D3D9/D3D9RenderSettings.hpp>
 #include <KlayGE/D3D9/D3D9RenderWindow.hpp>
 
 namespace KlayGE
@@ -110,7 +111,7 @@ namespace KlayGE
 
 	D3D9RenderWindow::D3D9RenderWindow(const COMPtr<IDirect3D9>& d3d,
 										const D3D9Adapter& adapter, const String& name,
-										const D3D9RenderWindowSettings& settings)
+										const D3D9RenderSettings& settings)
 						: d3d_(d3d),
 							adapter_(adapter),
 							hWnd_(NULL),

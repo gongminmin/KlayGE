@@ -40,7 +40,7 @@ namespace KlayGE
 		void EnableLighting(bool enabled);
 		void AmbientLight(const Color& col);
 
-		RenderWindowPtr CreateRenderWindow(const String &name, const RenderWindowSettings& settings);
+		RenderWindowPtr CreateRenderWindow(const String &name, const RenderSettings& settings);
 
 		void CullingMode(CullMode mode);
 

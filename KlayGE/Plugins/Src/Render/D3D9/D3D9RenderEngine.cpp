@@ -29,6 +29,7 @@
 #include <KlayGE/RenderBuffer.hpp>
 #include <KlayGE/RenderTarget.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/D3D9/D3D9RenderSettings.hpp>
 #include <KlayGE/D3D9/D3D9RenderWindow.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 #include <KlayGE/D3D9/D3D9VertexStream.hpp>
@@ -377,10 +378,10 @@ namespace KlayGE
 	// ½¨Á¢äÖÈ¾´°¿Ú
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderWindowPtr D3D9RenderEngine::CreateRenderWindow(const String& name,
-		const RenderWindowSettings& settings)
+		const RenderSettings& settings)
 	{
 		RenderWindowPtr win(new D3D9RenderWindow(d3d_, this->ActiveAdapter(), name,
-			static_cast<const D3D9RenderWindowSettings&>(settings)));
+			static_cast<const D3D9RenderSettings&>(settings)));
 
 		IDirect3DDevice9* d3dDevice;
 		win->CustomAttribute("D3DDEVICE", &d3dDevice);

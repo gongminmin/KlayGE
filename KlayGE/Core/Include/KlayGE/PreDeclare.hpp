@@ -49,7 +49,7 @@ namespace KlayGE
 	typedef SharedPtr<RenderEngine> RenderEnginePtr;
 	class RenderTarget;
 	typedef SharedPtr<RenderTarget> RenderTargetPtr;
-	class RenderWindowSettings;
+	class RenderSettings;
 	class RenderWindow;
 	typedef SharedPtr<RenderWindow> RenderWindowPtr;
 	class Renderable;

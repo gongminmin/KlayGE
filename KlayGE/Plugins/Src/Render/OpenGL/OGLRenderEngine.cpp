@@ -23,6 +23,7 @@
 #include <KlayGE/RenderBuffer.hpp>
 #include <KlayGE/RenderTarget.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/OpenGL/OGLRenderSettings.hpp>
 #include <KlayGE/OpenGL/OGLRenderWindow.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 
@@ -327,10 +328,10 @@ namespace KlayGE
 	// ½¨Á¢äÖÈ¾´°¿Ú
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderWindowPtr OGLRenderEngine::CreateRenderWindow(const String& name,
-		const RenderWindowSettings& settings)
+		const RenderSettings& settings)
 	{
 		RenderWindowPtr win(new OGLRenderWindow(name,
-			static_cast<const OGLRenderWindowSettings&>(settings)));
+			static_cast<const OGLRenderSettings&>(settings)));
 
 		this->ActiveRenderTarget(this->AddRenderTarget(win));
 

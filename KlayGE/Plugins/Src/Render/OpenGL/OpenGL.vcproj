@@ -124,6 +124,9 @@
 				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLRenderFactory.hpp">
 			</File>
 			<File
+				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLRenderSettings.hpp">
+			</File>
+			<File
 				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLRenderWindow.hpp">
 			</File>
 			<File

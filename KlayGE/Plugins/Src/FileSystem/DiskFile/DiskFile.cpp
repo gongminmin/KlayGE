@@ -16,6 +16,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/alloc.hpp>
 
 #include <vector>
 #include <cassert>
@@ -82,6 +83,7 @@ namespace KlayGE
 		String fn;
 		Convert(fn, fileName);
 		file_ = SharedPtr<fstream>(new fstream(fn.c_str(), mode));
+		Verify(file_.Get() != NULL);
 
 		fileName_ = fileName;
 		openMode_ = openMode;
@@ -171,7 +173,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	size_t DiskFile::CopyFrom(VFile& src, size_t size)
 	{
-		std::vector<U8> data(size);
+		std::vector<U8, alloc<U8> > data(size);
 		return this->Write(&data[0], src.Read(&data[0], data.size()));
 	}
 

@@ -6,6 +6,7 @@
 #include <cassert>
 #include <gl/gl.h>
 
+#include <KlayGE/OpenGL/OGLRenderSettings.hpp>
 #include <KlayGE/OpenGL/OGLRenderWindow.hpp>
 
 namespace
@@ -101,7 +102,7 @@ namespace KlayGE
 		return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 
-	OGLRenderWindow::OGLRenderWindow(const String& name, const OGLRenderWindowSettings& settings)
+	OGLRenderWindow::OGLRenderWindow(const String& name, const OGLRenderSettings& settings)
 						: hWnd_(NULL),
 							active_(false), ready_(false), closed_(false)
 	{

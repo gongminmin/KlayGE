@@ -7,27 +7,6 @@
 
 namespace KlayGE
 {
-	// 建立渲染窗口的设置
-	/////////////////////////////////////////////////////////////////////////////////
-	class RenderWindowSettings
-	{
-	public:
-		RenderWindowSettings()
-			: left(0), top(0),
-				depthBuffer(true)
-			{ }
-		virtual ~RenderWindowSettings()
-			{ }
-
-		int		width;
-		int		height;
-		int		colorDepth;
-		bool	fullScreen;
-		int		left;
-		int		top;
-		bool	depthBuffer;
-	};
-
 	class RenderWindow : public RenderTarget
 	{
 	public:

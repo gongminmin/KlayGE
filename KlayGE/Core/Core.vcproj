@@ -225,6 +225,9 @@
 					RelativePath=".\Include\KlayGE\RenderFactory.hpp">
 				</File>
 				<File
+					RelativePath=".\Include\KlayGE\RenderSettings.hpp">
+				</File>
+				<File
 					RelativePath="Include\KlayGE\RenderTarget.hpp">
 				</File>
 				<File
