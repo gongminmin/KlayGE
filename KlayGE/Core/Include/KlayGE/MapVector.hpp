@@ -35,20 +35,20 @@ namespace KlayGE
 			typedef typename Traits::first_argument_type					first_argument_type;
 
 		public:
-			CompareType(const Traits& rhs)
+			CompareType(Traits const & rhs)
 				: Traits(rhs)
 				{ }
 
-			bool operator()(const first_argument_type& lhs, const first_argument_type& rhs) const
+			bool operator()(first_argument_type const & lhs, first_argument_type const & rhs) const
 				{ return Traits::operator()(lhs, rhs); }
 
-			bool operator()(const Data& lhs, const Data& rhs) const
+			bool operator()(Data const & lhs, Data const & rhs) const
 				{ return this->operator()(lhs.first, rhs.first); }
 
-			bool operator()(const Data& lhs, const first_argument_type& rhs) const
+			bool operator()(Data const & lhs, first_argument_type const & rhs) const
 				{ return this->operator()(lhs.first, rhs); }
 
-			bool operator()(const first_argument_type& lhs, const Data& rhs) const
+			bool operator()(first_argument_type const & lhs, Data const & rhs) const
 				{ return this->operator()(lhs, rhs.first); }
 		};
 
@@ -83,34 +83,34 @@ namespace KlayGE
 				{ }
 
 		public:
-			bool operator()(const value_type& lhs, const value_type& rhs) const
+			bool operator()(value_type const & lhs, value_type const & rhs) const
 				{ return key_compare::operator()(lhs.first, rhs.first); }
 		};
 
 	public:
-		explicit MapVector(const key_compare& comp = key_compare(), 
-								const Allocator& alloc = Allocator())
+		explicit MapVector(key_compare const & comp = key_compare(), 
+								Allocator const & alloc = Allocator())
 					: container_(alloc), compare_(comp)
 			{ }
 
 		template <class InputIterator>
         MapVector(InputIterator first, InputIterator last, 
-						const key_compare& comp = key_compare(), 
-						const Allocator& alloc = Allocator())
+						key_compare const & comp = key_compare(), 
+						Allocator const & alloc = Allocator())
 					: container_(first, last, alloc), compare_(comp)
 			{ std::sort(this->begin(), this->end(), compare_); }
 
-		MapVector(const MapVector& rhs)
+		MapVector(MapVector const & rhs)
 			: container_(rhs.container_), compare_(rhs.compare_)
 			{ }
         
-        MapVector& operator=(const MapVector& rhs)
+        MapVector const & operator=(MapVector const & rhs)
         { 
             MapVector(rhs).swap(*this);
             return *this;
         }
 
-		mapped_type& operator[](const key_type& key)
+		mapped_type& operator[](key_type const & key)
 			{ return this->insert(value_type(key, mapped_type())).first->second; }
 
 		iterator begin()
@@ -135,19 +135,19 @@ namespace KlayGE
 		size_type size() const
 			{ return container_.size(); }
 
-		size_type count(const Key& key) const
+		size_type count(Key const & key) const
 			{ return find(key) != end() }
 
-		std::pair<iterator, iterator> equal_range(const Key& key)
+		std::pair<iterator, iterator> equal_range(Key const & key)
 			{ return std::equal_range(begin(), end(), k, compare_); }
-		std::pair<const_iterator, const_iterator> equal_range(const Key& key) const
+		std::pair<const_iterator, const_iterator> equal_range(Key const & key) const
 			{ return std::equal_range(begin(), end(), k, compare_); }
 
 		iterator erase(iterator where)
 			{ container_.erase(where); }
 		iterator erase(iterator first, iterator last)
 			{ container_.erase(first, last); }
-		size_type erase(const key_type& key)
+		size_type erase(key_type const & key)
 		{
 			iterator iter(this->find(key));
 			if (iter != this->end())
@@ -158,7 +158,7 @@ namespace KlayGE
 			return 0;
 		}
 
-		iterator find(const Key& key)
+		iterator find(Key const & key)
 		{
 			iterator iter(this->lower_bound(key));
 			if (iter != this->end() && compare_(key, iter->first))
@@ -167,7 +167,7 @@ namespace KlayGE
 			}
 			return iter;
 		}
-		const_iterator find(const Key& key) const
+		const_iterator find(Key const & key) const
 		{
 			const_iterator iter(this->lower_bound(key));
 			if (iter != this->end() && compare_(key, iter->first))
@@ -182,7 +182,7 @@ namespace KlayGE
 			return container_.get_allocator();
 		}
 
-		std::pair<iterator, bool> insert(const value_type& val)
+		std::pair<iterator, bool> insert(value_type const & val)
 		{
 			bool found(true);
 			iterator iter(this->lower_bound(val.first));
@@ -194,7 +194,7 @@ namespace KlayGE
 			}
 			return std::make_pair(iter, !found);
 		}
-		iterator insert(iterator where, const value_type& val)
+		iterator insert(iterator where, value_type const & val)
 		{
 			if (where != this->end() && compare_(*pos, val) &&
 				(where == this->end() - 1 ||
@@ -217,14 +217,14 @@ namespace KlayGE
 		key_compare key_comp() const
 			{ return compare_; }
 
-		iterator lower_bound(const Key& key)
+		iterator lower_bound(Key const & key)
 			{ return std::lower_bound(this->begin(), this->end(), key, compare_); }
-		const_iterator lower_bound(const Key& key) const
+		const_iterator lower_bound(Key const & key) const
 			{ return std::lower_bound(this->begin(), this->end(), key, compare_); }
 
-		iterator upper_bound(const Key& key)
+		iterator upper_bound(Key const & key)
 			{ return std::upper_bound(this->begin(), this->end(), key, compare_); }
-		const_iterator upper_bound(const Key& key) const
+		const_iterator upper_bound(Key const & key) const
 			{ return std::upper_bound(this->begin(), this->end(), key, compare_); }
 
 		reverse_iterator rbegin()
@@ -247,10 +247,10 @@ namespace KlayGE
 			{ return value_compare(compare_); }
 
 			
-		friend bool operator==(const MapVector& lhs, const MapVector& rhs)
+		friend bool operator==(MapVector const & lhs, MapVector const & rhs)
 			{ return lhs.container_ == rhs.container_; } 
 
-		friend bool operator<(const MapVector& lhs, const MapVector& rhs)
+		friend bool operator<(MapVector const & lhs, MapVector const & rhs)
 			{ return lhs.container_ < rhs.container_; } 
 
 	private:
@@ -267,32 +267,32 @@ namespace KlayGE
 
 	template <class Key, class Type, class Traits, class Allocator>
 	inline bool
-	operator!=(const MapVector<Key, Type, Traits, Allocator>& lhs,
-					const MapVector<Key, Type, Traits, Allocator>& rhs)
+	operator!=(MapVector<Key, Type, Traits, Allocator> const & lhs,
+					MapVector<Key, Type, Traits, Allocator> const & rhs)
 	{
 		return !(lhs == rhs);
 	}
 
 	template <class Key, class Type, class Traits, class Allocator>
 	inline bool
-	operator>(const MapVector<Key, Type, Traits, Allocator>& lhs,
-					const MapVector<Key, Type, Traits, Allocator>& rhs)
+	operator>(MapVector<Key, Type, Traits, Allocator> const & lhs,
+					MapVector<Key, Type, Traits, Allocator> const & rhs)
 	{
 		return rhs < lhs;
 	}
 
 	template <class Key, class Type, class Traits, class Allocator>
 	inline bool
-	operator>=(const MapVector<Key, Type, Traits, Allocator>& lhs,
-					const MapVector<Key, Type, Traits, Allocator>& rhs)
+	operator>=(MapVector<Key, Type, Traits, Allocator> const & lhs,
+					MapVector<Key, Type, Traits, Allocator> const & rhs)
 	{
 		return !(lhs < rhs);
 	}
 
 	template <class Key, class Type, class Traits, class Allocator>
 	inline bool
-	operator<=(const MapVector<Key, Type, Traits, Allocator>& lhs,
-					const MapVector<Key, Type, Traits, Allocator>& rhs)
+	operator<=(MapVector<Key, Type, Traits, Allocator> const & lhs,
+					MapVector<Key, Type, Traits, Allocator> const & rhs)
 	{
 		return !(rhs < lhs);
 	}

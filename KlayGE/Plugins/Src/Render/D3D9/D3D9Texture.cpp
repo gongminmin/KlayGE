@@ -23,6 +23,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Texture.hpp>
+#include <KlayGE/Util.hpp>
 
 #include <d3dx9.h>
 #include <d3dx9.h>
@@ -37,7 +38,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	D3DFORMAT Convert(KlayGE::PixelFormat format)
+	D3DFORMAT ConvertFormat(KlayGE::PixelFormat format)
 	{
 		switch (format)
 		{
@@ -69,7 +70,7 @@ namespace
 		return D3DFMT_UNKNOWN;
 	}
 
-	KlayGE::PixelFormat Convert(D3DFORMAT format)
+	KlayGE::PixelFormat ConvertFormat(D3DFORMAT format)
 	{
 		switch (format)
 		{
@@ -350,7 +351,7 @@ namespace KlayGE
 	D3D9Texture::D3D9Texture(U32 width, U32 height,
 								U16 numMipMaps, PixelFormat format, TextureUsage usage)
 	{
-		d3dDevice_ = static_cast<const D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
+		d3dDevice_ = static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
 
 		numMipMaps_ = numMipMaps;
 		format_		= format;
@@ -366,21 +367,21 @@ namespace KlayGE
 			IDirect3DTexture9* d3dTexture;
 			// Use D3DX to help us create the texture, this way it can adjust any relevant sizes
 			TIF(D3DXCreateTexture(d3dDevice_.get(), this->Width(), this->Height(),
-				this->NumMipMaps(), 0, Convert(format),
+				this->NumMipMaps(), 0, ConvertFormat(format),
 				D3DPOOL_SYSTEMMEM, &d3dTexture));
-			d3dTempTexture_ = COMPtr<IDirect3DTexture9>(d3dTexture);
+			d3dTempTexture_ = MakeCOMPtr(d3dTexture);
 
 			TIF(D3DXCreateTexture(d3dDevice_.get(), this->Width(), this->Height(),
-				this->NumMipMaps(), 0, Convert(format),
+				this->NumMipMaps(), 0, ConvertFormat(format),
 				D3DPOOL_DEFAULT, &d3dTexture));
-			d3dTexture_ = COMPtr<IDirect3DTexture9>(d3dTexture);
+			d3dTexture_ = MakeCOMPtr(d3dTexture);
 
 			D3DSURFACE_DESC desc;
 			// Check the actual dimensions vs requested
 			TIF(d3dTexture_->GetLevelDesc(0, &desc));
 			width_	= desc.Width;
 			height_	= desc.Height;
-			format_ = Convert(desc.Format);
+			format_ = ConvertFormat(desc.Format);
 			bpp_	= PixelFormatBits(format_);
 		}
 		else
@@ -400,14 +401,14 @@ namespace KlayGE
 			TIF(D3DXCreateTexture(d3dDevice_.get(), this->Width(), this->Height(),
 				this->NumMipMaps(), D3DUSAGE_RENDERTARGET,
 				d3dFmt, D3DPOOL_DEFAULT, &d3dTexture));
-			d3dTexture_ = COMPtr<IDirect3DTexture9>(d3dTexture);
+			d3dTexture_ = MakeCOMPtr(d3dTexture);
 
 			D3DSURFACE_DESC desc;
 			// Check the actual dimensions vs requested
 			TIF(d3dTexture_->GetLevelDesc(0, &desc));
 			width_	= desc.Width;
 			height_	= desc.Height;
-			format_ = Convert(desc.Format);
+			format_ = ConvertFormat(desc.Format);
 			bpp_	= PixelFormatBits(format_);
 
 			// Now get the format of the depth stencil surface.
@@ -416,9 +417,9 @@ namespace KlayGE
 			tempSurf->Release();
 
 			// We also create a depth buffer for our render target.
-			TIF(d3dDevice_->CreateDepthStencilSurface(width_, height_, tempDesc.Format, tempDesc.MultiSampleType, NULL, 
+			TIF(d3dDevice_->CreateDepthStencilSurface(width_, height_, tempDesc.Format, tempDesc.MultiSampleType, 0, 
 				FALSE, &tempSurf, NULL));
-			renderZBuffer_ = COMPtr<IDirect3DSurface9>(tempSurf);
+			renderZBuffer_ = MakeCOMPtr(tempSurf);
 		}
 	}
 
@@ -426,9 +427,9 @@ namespace KlayGE
 	{
 	}
 
-	const std::wstring& D3D9Texture::Name() const
+	std::wstring const & D3D9Texture::Name() const
 	{
-		static std::wstring name(L"Direct3D9 Texture");
+		static const std::wstring name(L"Direct3D9 Texture");
 		return name;
 	}
 
@@ -440,14 +441,14 @@ namespace KlayGE
 		{
 			RECT dstRC = { 0, 0, other.Width(), other.Height() };
 
-			COMPtr<IDirect3DSurface9> src, dst;
+			boost::shared_ptr<IDirect3DSurface9> src, dst;
 
 			IDirect3DSurface9* temp;
 			TIF(this->D3DTexture()->GetSurfaceLevel(0, &temp));
-			src = COMPtr<IDirect3DSurface9>(temp);
+			src = MakeCOMPtr(temp);
 
 			TIF(other.D3DTexture()->GetSurfaceLevel(0, &temp));
-			dst = COMPtr<IDirect3DSurface9>(temp);
+			dst = MakeCOMPtr(temp);
 
 			TIF(d3dDevice_->StretchRect(src.get(), NULL, dst.get(), &dstRC, D3DTEXF_NONE));
 		}
@@ -483,8 +484,8 @@ namespace KlayGE
 		D3DLOCKED_RECT d3dlr;
 		TIF(d3dTempTexture_->LockRect(0, &d3dlr, &rc, D3DLOCK_NOSYSLOCK));
 
-		const U32 srcPitch(width * bpp / 8);
-		const U16 destPitch(d3dlr.Pitch);
+		U32 const srcPitch(width * bpp / 8);
+		U16 const destPitch(d3dlr.Pitch);
 		U8* pBits(static_cast<U8*>(d3dlr.pBits));
 
 		if ((srcRed == destRed) && (srcGreen == destGreen)
@@ -500,15 +501,15 @@ namespace KlayGE
 		}
 		else
 		{
-			const U8 srcRedBitCount(NumberOfBits(srcRed));
-			const U8 srcGreenBitCount(NumberOfBits(srcGreen));
-			const U8 srcBlueBitCount(NumberOfBits(srcBlue));
-			const U8 srcAlphaBitCount(NumberOfBits(srcAlpha));
-
-			const U8 destRedBitCount(NumberOfBits(destRed));
-			const U8 destGreenBitCount(NumberOfBits(destGreen));
-			const U8 destBlueBitCount(NumberOfBits(destBlue));
-			const U8 destAlphaBitCount(NumberOfBits(destAlpha));
+			U8 const srcRedBitCount(NumberOfBits(srcRed));
+			U8 const srcGreenBitCount(NumberOfBits(srcGreen));
+			U8 const srcBlueBitCount(NumberOfBits(srcBlue));
+			U8 const srcAlphaBitCount(NumberOfBits(srcAlpha));
+			   
+			U8 const destRedBitCount(NumberOfBits(destRed));
+			U8 const destGreenBitCount(NumberOfBits(destGreen));
+			U8 const destBlueBitCount(NumberOfBits(destBlue));
+			U8 const destAlphaBitCount(NumberOfBits(destAlpha));
 
 			for (U32 y = 0; y < height; ++ y)
 			{
@@ -532,7 +533,7 @@ namespace KlayGE
 					blue	= blue >> (8 - destBlueBitCount) << destBlueOffset;
 					alpha	= alpha >> (8 - destAlphaBitCount) << destAlphaOffset;
 
-					const U32 destPixel(red | green | blue | alpha);
+					U32 const destPixel(red | green | blue | alpha);
 					MemoryLib::Copy(pDest, &destPixel, bpp_ / 8);
 					pDest += bpp_ / 8;
 				}
@@ -545,7 +546,7 @@ namespace KlayGE
 		TIF(d3dDevice_->UpdateTexture(d3dTempTexture_.get(), d3dTexture_.get()));
 	}
 
-	void D3D9Texture::CustomAttribute(const std::string& name, void* pData)
+	void D3D9Texture::CustomAttribute(std::string const & name, void* pData)
 	{
 		// Valid attributes and their equivalent native functions:
 		// D3DDEVICE            : D3DDeviceDriver

@@ -83,9 +83,9 @@ namespace KlayGE
 	{
 	}
 
-	const std::wstring& OGLTexture::Name() const
+	std::wstring const & OGLTexture::Name() const
 	{
-		static std::wstring name(L"OpenGL Texture");
+		static const std::wstring name(L"OpenGL Texture");
 		return name;
 	}
 
@@ -135,7 +135,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLTexture::CustomAttribute(const std::string& name, void* pData)
+	void OGLTexture::CustomAttribute(std::string const & name, void* pData)
 	{
 		if ("IsTexture" == name)
 		{

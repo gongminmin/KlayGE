@@ -14,7 +14,10 @@
 #define _UTIL_HPP
 
 #include <string>
-#include <KlayGE/KlayGE.hpp>
+
+#include <boost/smart_ptr.hpp>
+#define BOOST_MEM_FN_ENABLE_STDCALL
+#include <boost/mem_fn.hpp>
 
 #pragma comment(lib, "KlayGE_Core.lib")
 
@@ -79,10 +82,10 @@ namespace KlayGE
 	};
 
 	// Unicode函数, 用于string, wstring之间的转换
-	std::string& Convert(std::string& strDest, const std::string& strSrc);
-	std::string& Convert(std::string& strDest, const std::wstring& wstrSrc);
-	std::wstring& Convert(std::wstring& wstrDest, const std::string& strSrc);
-	std::wstring& Convert(std::wstring& wstrDest, const std::wstring& wstrSrc);
+	std::string& Convert(std::string& strDest, std::string const & strSrc);
+	std::string& Convert(std::string& strDest, std::wstring const & wstrSrc);
+	std::wstring& Convert(std::wstring& wstrDest, std::string const & strSrc);
+	std::wstring& Convert(std::wstring& wstrDest, std::wstring const & wstrSrc);
 
 	// 暂停几毫秒
 	void Sleep(U32 ms);
@@ -92,6 +95,14 @@ namespace KlayGE
 	U16 ToNet(U16 host);
 	U32 ToHost(U32 network);
 	U16 ToHost(U16 network);
+
+	// 得到COM对象的智能指针
+	template <typename T>
+	inline boost::shared_ptr<T>
+	MakeCOMPtr(T* p)
+	{
+		return boost::shared_ptr<T>(p, boost::mem_fn(&T::Release));
+	}
 }
 
 #endif		// _UTIL_HPP

@@ -16,57 +16,25 @@
 #include <string>
 
 #include <boost/utility.hpp>
-
-#include <KlayGE/ResPtr.hpp>
+#include <boost/shared_ptr.hpp>
 
 #pragma comment(lib, "KlayGE_Core.lib")
 
 namespace KlayGE
 {
-	// PyObject引用计数策略
-	/////////////////////////////////////////////////////////////////////////////////
-	template <typename T>
-	class PyObjectRefCountedOP
+	void PyObjDeleter(PyObject* p)
 	{
-	public:
-		PyObjectRefCountedOP()
-			{ }
-
-		static T Clone(const T& p)
+		if (p != 0)
 		{
-			if (p != 0)
-			{
-				Py_INCREF(p);
-			}
-			return p;
+			Py_DECREF(p);
 		}
-		static bool Release(const T& p)
-		{
-			if (p != 0)
-			{
-				Py_DECREF(p);
-			}
-			return false;
-		}
-
-		void Swap(PyObjectRefCountedOP& /*rhs*/)
-			{ }
-	};
+	}
 
 	// PyObject指针
 	/////////////////////////////////////////////////////////////////////////////////
-	class PyObjectPtr : public ResPtr<PyObject, PyObjectRefCountedOP>
+	boost::shared_ptr<PyObject> MakePyObjectPtr(PyObject* p)
 	{
-	public:
-		PyObjectPtr()
-			: ResPtr<PyObject, PyObjectRefCountedOP>()
-			{ }
-		explicit PyObjectPtr(PyObject* p)
-			: ResPtr<PyObject, PyObjectRefCountedOP>(p)
-			{ }
-		PyObjectPtr(const PyObjectPtr& rhs)
-			: ResPtr<PyObject, PyObjectRefCountedOP>(rhs)
-			{ }
+		return boost::shared_ptr<PyObject>(p, PyObjDeleter);
 	};
 
 	// 从一个.py载入模块
@@ -74,34 +42,34 @@ namespace KlayGE
 	class ScriptModule
 	{
 	public:
-		ScriptModule(const std::string& name)
+		ScriptModule(std::string const & name)
 		{
-			module_	= PyObjectPtr(PyImport_Import(PyString_FromString(name.c_str())));
-			dict_	= PyObjectPtr(PyModule_GetDict(module_.Get()));
+			module_	= MakePyObjectPtr(PyImport_Import(PyString_FromString(name.c_str())));
+			dict_	= MakePyObjectPtr(PyModule_GetDict(module_.get()));
 		}
 
-		PyObjectPtr Value(const std::string& name)
+		boost::shared_ptr<PyObject> Value(std::string const & name)
 		{
-			return PyObjectPtr(PyDict_GetItemString(dict_.Get(), name.c_str()));
+			return MakePyObjectPtr(PyDict_GetItemString(dict_.get(), name.c_str()));
 		}
 
 		template <typename ForwardIterator>
-		PyObjectPtr Call(const std::string& funcName, ForwardIterator first, ForwardIterator last)
+		boost::shared_ptr<PyObject> Call(std::string const & funcName, ForwardIterator first, ForwardIterator last)
 		{
-			PyObjectPtr func(this->Value(funcName));
-			PyObjectPtr args(PyTuple_New(last - first));
+			boost::shared_ptr<PyObject> func(MakePyObjectPtr(this->Value(funcName)));
+			boost::shared_ptr<PyObject> args(MakePyObjectPtr(PyTuple_New(last - first)));
 
 			for (ForwardIterator iter = first; iter != last; ++ iter)
 			{
-				PyTuple_SetItem(args.Get(), iter - first, iter->Get());
+				PyTuple_SetItem(args.get(), iter - first, iter->get());
 			}
 
-			return PyObjectPtr(PyObject_CallObject(func.Get(), args.Get()));
+			return MakePyObjectPtr(PyObject_CallObject(func.get(), args.get()));
 		}
 
 	private:
-		PyObjectPtr module_;
-		PyObjectPtr dict_;
+		boost::shared_ptr<PyObject> module_;
+		boost::shared_ptr<PyObject> dict_;
 	};
 
 	#define BEGIN_REG() 	methods.clear() 
@@ -120,14 +88,14 @@ namespace KlayGE
 	public:
 		typedef PyObject *(*PyCallback)(PyObject*, PyObject*);
 
-		RegisterModule(const std::string& name)
+		RegisterModule(std::string const & name)
 			: moduleName_(name)
 			{ }
 
-		const std::string& Name() const
+		std::string const & Name() const
 			{ return moduleName_;}
 
-		void AddMethod(const std::string& methodName, PyCallback method);
+		void AddMethod(std::string const & methodName, PyCallback method);
 		void Regiter();
 
 	protected:
@@ -147,7 +115,7 @@ namespace KlayGE
 		~ScriptEngine();
 
 		// 从字符串运行脚本
-		void ExecString(const std::string& script);
+		void ExecString(std::string const & script);
 	};
 }
 

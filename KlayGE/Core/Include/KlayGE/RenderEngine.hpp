@@ -138,38 +138,38 @@ namespace KlayGE
 		RenderEngine();
 		virtual ~RenderEngine();
 
-		virtual const std::wstring& Name() const = 0;
+		virtual std::wstring const & Name() const = 0;
 
 		virtual void StartRendering() = 0;
 
-		void SetRenderEffect(const RenderEffectPtr& effect);
+		void SetRenderEffect(RenderEffectPtr const & effect);
 		RenderEffectPtr GetRenderEffect() const;
 
 		virtual void BeginFrame() = 0;
-		virtual void Render(const RenderBuffer& vb) = 0;
+		virtual void Render(RenderBuffer const & vb) = 0;
 		virtual void EndFrame() = 0;
 
-		virtual void ClearColor(const Color& clr) = 0;
+		virtual void ClearColor(Color const & clr) = 0;
 
 		virtual void ShadingType(ShadeOptions so) = 0;
 
 		virtual void EnableLighting(bool enabled) = 0;
-		virtual void AmbientLight(const Color& col) = 0;
+		virtual void AmbientLight(Color const & col) = 0;
 
-		virtual RenderWindowPtr CreateRenderWindow(const std::string& name, const RenderSettings& settings) = 0;
+		virtual RenderWindowPtr CreateRenderWindow(std::string const & name, RenderSettings const & settings) = 0;
 
 		virtual void CullingMode(CullMode mode) = 0;
-		virtual void SetMaterial(const Material& mat) = 0;
+		virtual void SetMaterial(Material const & mat) = 0;
 
-		virtual void SetLight(U32 index, const Light& lt) = 0;
+		virtual void SetLight(U32 index, Light const & lt) = 0;
 		virtual void LightEnable(U32 index, bool enable) = 0;
 
 		Matrix4 WorldMatrix() const;
-		void WorldMatrix(const Matrix4& mat);
+		void WorldMatrix(Matrix4 const & mat);
 		Matrix4 ViewMatrix();
-		void ViewMatrix(const Matrix4& mat);
+		void ViewMatrix(Matrix4 const & mat);
 		Matrix4 ProjectionMatrix();
-		void ProjectionMatrix(const Matrix4& mat);
+		void ProjectionMatrix(Matrix4 const & mat);
 
 		virtual void DepthBufferDepthTest(bool depthTest) = 0;
 		virtual void DepthBufferDepthWrite(bool depthWrite) = 0;
@@ -177,11 +177,11 @@ namespace KlayGE
 		virtual void DepthBias(U16 bias) = 0;
 
 		virtual void Fog(FogMode mode = Fog_None,
-			const Color& color = Color(1, 1, 1, 1),
+			Color const & color = Color(1, 1, 1, 1),
 			float expDensity = 1, float linearStart = 0, float linearEnd = 1) = 0;
 
 		// Attaches the passed render target to the render system.
-		virtual RenderTargetListIterator AddRenderTarget(const RenderTargetPtr& target);
+		virtual RenderTargetListIterator AddRenderTarget(RenderTargetPtr const & target);
 		// Renders a iterator to the beginning of the RenderTargetList
 		virtual RenderTargetListIterator RenderTargetListBegin();
 		// Renders a iterator to the one the pass the last one of the RenderTargetList
@@ -189,9 +189,9 @@ namespace KlayGE
 		// Detaches the render target with the passed name from the render system and returns a pointer to it.
 		virtual RenderTargetPtr RemoveRenderTarget(RenderTargetListIterator iter);
 		virtual void ActiveRenderTarget(RenderTargetListIterator iter);
-		const RenderTargetListIterator& ActiveRenderTarget() const;
+		RenderTargetListIterator const & ActiveRenderTarget() const;
 
-		virtual void SetTexture(U32 stage, const TexturePtr& texture) = 0;
+		virtual void SetTexture(U32 stage, TexturePtr const & texture) = 0;
 
 		// Sets the texture coordinate set to use for a texture unit.
 		virtual void TextureCoordSet(U32 stage, int index) = 0;
@@ -206,7 +206,7 @@ namespace KlayGE
 		// Sets the texture addressing mode for a texture unit.
 		virtual void TextureAddressingMode(U32 stage, TexAddressingMode tam) = 0;
 		// Sets the texture coordinate transformation matrix for a texture unit.
-		virtual void TextureMatrix(U32 stage, const Matrix4& mat) = 0;
+		virtual void TextureMatrix(U32 stage, Matrix4 const & mat) = 0;
 		// Sets the texture filtering type for a texture unit.
 		virtual void TextureFiltering(U32 stage, TexFiltering texFiltering) = 0;
 		// Sets the maximal anisotropy for the specified texture unit.

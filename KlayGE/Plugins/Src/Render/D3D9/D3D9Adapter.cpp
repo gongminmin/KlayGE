@@ -1,6 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Memory.hpp>
-#include <KlayGE/COMPtr.hpp>
+#include <boost/smart_ptr.hpp>
 
 #include <cassert>
 #include <algorithm>
@@ -19,8 +19,8 @@ namespace KlayGE
 	}
 
 	D3D9Adapter::D3D9Adapter(U32 adapterNo,
-							   const D3DADAPTER_IDENTIFIER9& d3dadapterIdentifer,
-							   const D3DDISPLAYMODE& d3ddmDesktop)
+							   D3DADAPTER_IDENTIFIER9 const & d3dadapterIdentifer,
+							   D3DDISPLAYMODE const & d3ddmDesktop)
 					: adapterNo_(adapterNo),
 						d3dAdapterIdentifier_(d3dadapterIdentifer),
 						d3ddmDesktop_(d3ddmDesktop)
@@ -29,7 +29,7 @@ namespace KlayGE
 
 	// 获取设备描述字符串
 	/////////////////////////////////////////////////////////////////////////////////
-	const std::string D3D9Adapter::Description() const
+	std::string const D3D9Adapter::Description() const
 	{
 		return std::string(this->AdapterIdentifier().Description);
 	}
@@ -43,7 +43,7 @@ namespace KlayGE
 
 	// 获取显示模式
 	/////////////////////////////////////////////////////////////////////////////////
-	const D3D9VideoMode& D3D9Adapter::VideoMode(size_t index) const
+	D3D9VideoMode const & D3D9Adapter::VideoMode(size_t index) const
 	{
 		assert(index < modes_.size());
 
@@ -52,7 +52,7 @@ namespace KlayGE
 
 	// 枚举显示模式
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9Adapter::Enumerate(const COMPtr<IDirect3D9>& d3d)
+	void D3D9Adapter::Enumerate(boost::shared_ptr<IDirect3D9> const & d3d)
 	{
 		using std::vector;
 
@@ -67,7 +67,7 @@ namespace KlayGE
 
 		for (FormatType::iterator iter = formats.begin(); iter != formats.end(); ++ iter)
 		{
-			const U32 modeCount(d3d->GetAdapterModeCount(adapterNo_, *iter));
+			U32 const modeCount(d3d->GetAdapterModeCount(adapterNo_, *iter));
 			for (U32 i = 0; i < modeCount; ++ i)
 			{
 				// 获取显示模式属性
@@ -81,7 +81,7 @@ namespace KlayGE
 				}
 
 				// 忽略刷新率的不同
-				const D3D9VideoMode videoMode(d3dDisplayMode.Width, d3dDisplayMode.Height,
+				D3D9VideoMode const videoMode(d3dDisplayMode.Width, d3dDisplayMode.Height,
 						d3dDisplayMode.Format);
 
 				// 如果找到一个新模式, 加入模式列表

@@ -79,7 +79,7 @@ namespace KlayGE
 
 	// ¹¹Ôìº¯Êý
 	/////////////////////////////////////////////////////////////////////////////////
-	WaveSource::WaveSource(const VFilePtr& file)
+	WaveSource::WaveSource(VFilePtr const & file)
 	{
 		wavFile_ = file;
 

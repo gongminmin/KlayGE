@@ -1,7 +1,7 @@
 #ifndef _D3D9RENDERENGINE_HPP
 #define _D3D9RENDERENGINE_HPP
 
-#include <KlayGE/COMPtr.hpp>
+#include <boost/smart_ptr.hpp>
 #include <KlayGE/D3D9/D3D9AdapterList.hpp>
 
 #define NOMINMAX
@@ -27,25 +27,25 @@ namespace KlayGE
 		D3D9RenderEngine();
 		~D3D9RenderEngine();
 
-		const std::wstring& Name() const;
+		std::wstring const & Name() const;
 
-		const COMPtr<IDirect3D9>& D3D() const;
-		const COMPtr<IDirect3DDevice9>& D3DDevice() const;
+		boost::shared_ptr<IDirect3D9> const & D3D() const;
+		boost::shared_ptr<IDirect3DDevice9> const & D3DDevice() const;
 
-		void ClearColor(const Color& clr);
+		void ClearColor(Color const & clr);
 
 		void ShadingType(ShadeOptions so);
 
 		void EnableLighting(bool enabled);
-		void AmbientLight(const Color& col);
+		void AmbientLight(Color const & col);
 
-		RenderWindowPtr CreateRenderWindow(const std::string& name, const RenderSettings& settings);
+		RenderWindowPtr CreateRenderWindow(std::string const & name, RenderSettings const & settings);
 
 		void CullingMode(CullMode mode);
 
-		void SetMaterial(const Material& mat);
+		void SetMaterial(Material const & mat);
 
-		void SetLight(U32 index, const Light& lt);
+		void SetLight(U32 index, Light const & lt);
 		void LightEnable(U32 index, bool enable);
 
 		void ActiveRenderTarget(RenderTargetListIterator iter);
@@ -53,7 +53,7 @@ namespace KlayGE
 		void StartRendering();
 
 		void BeginFrame();
-		void Render(const RenderBuffer& rb);
+		void Render(RenderBuffer const & rb);
 		void EndFrame();
 
 		void DepthBufferDepthTest(bool depthTest);
@@ -62,10 +62,10 @@ namespace KlayGE
 		void DepthBias(U16 bias);
 
 		void Fog(FogMode mode = Fog_None,
-			const Color& color = Color(1, 1, 1, 1),
+			Color const & color = Color(1, 1, 1, 1),
 			float expDensity = 1, float linearStart = 0, float linearEnd = 1);
 
-		void SetTexture(U32 stage, const TexturePtr& texture);
+		void SetTexture(U32 stage, TexturePtr const & texture);
 
 		void TextureCoordSet(U32 stage, int index);
 
@@ -74,7 +74,7 @@ namespace KlayGE
 
 		void TextureCoordCalculation(U32 stage, TexCoordCalcMethod m);
 		void TextureAddressingMode(U32 stage, TexAddressingMode tam);
-		void TextureMatrix(U32 stage, const Matrix4& mat);
+		void TextureMatrix(U32 stage, Matrix4 const & mat);
 		void TextureFiltering(U32 stage, TexFiltering texFiltering);
 		void TextureAnisotropy(U32 stage, U32 maxAnisotropy);
 
@@ -99,13 +99,13 @@ namespace KlayGE
 		void DoProjectionMatrix();
 
 	private:
-		const D3D9AdapterList& D3DAdapters() const;
-		const D3D9Adapter& ActiveAdapter() const;
+		D3D9AdapterList const & D3DAdapters() const;
+		D3D9Adapter const & ActiveAdapter() const;
 
 		// Direct3D rendering device
 		// Only created after top-level window created
-		COMPtr<IDirect3D9>			d3d_;
-		COMPtr<IDirect3DDevice9>	d3dDevice_;
+		boost::shared_ptr<IDirect3D9>		d3d_;
+		boost::shared_ptr<IDirect3DDevice9>	d3dDevice_;
 
 		// List of D3D drivers installed (video cards)
 		// Enumerates itself
@@ -119,7 +119,7 @@ namespace KlayGE
 
 		typedef std::vector<D3DVERTEXELEMENT9> VertexDeclType;
 		VertexDeclType currentDecl_;
-		COMPtr<IDirect3DVertexDeclaration9> currentVertexDecl_;
+		boost::shared_ptr<IDirect3DVertexDeclaration9> currentVertexDecl_;
 	};
 
 	typedef boost::shared_ptr<D3D9RenderEngine> D3D9RenderEnginePtr;

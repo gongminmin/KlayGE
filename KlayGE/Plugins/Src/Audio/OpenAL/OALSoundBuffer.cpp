@@ -35,7 +35,7 @@ namespace KlayGE
 {
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
-	OALSoundBuffer::OALSoundBuffer(const AudioDataSourcePtr& dataSource, U32 numSource, float volume)
+	OALSoundBuffer::OALSoundBuffer(AudioDataSourcePtr const & dataSource, U32 numSource, float volume)
 						: SoundBuffer(dataSource),
 							sources_(numSource)
 	{
@@ -145,7 +145,7 @@ namespace KlayGE
 
 	// 设置声源位置
 	/////////////////////////////////////////////////////////////////////////////////
-	void OALSoundBuffer::Position(const Vector3& v)
+	void OALSoundBuffer::Position(Vector3 const & v)
 	{
 		pos_ = VecToALVec(v);
 	}
@@ -159,7 +159,7 @@ namespace KlayGE
 
 	// 设置声源速度
 	/////////////////////////////////////////////////////////////////////////////////
-	void OALSoundBuffer::Velocity(const Vector3& v)
+	void OALSoundBuffer::Velocity(Vector3 const & v)
 	{
 		vel_ = VecToALVec(v);
 	}
@@ -173,7 +173,7 @@ namespace KlayGE
 
 	// 设置声源方向
 	/////////////////////////////////////////////////////////////////////////////////
-	void OALSoundBuffer::Direction(const Vector3& v)
+	void OALSoundBuffer::Direction(Vector3 const & v)
 	{
 		dir_ = VecToALVec(v);
 	}

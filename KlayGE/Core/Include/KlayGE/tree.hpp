@@ -32,9 +32,9 @@ namespace KlayGE
 	public:
 		typedef T				value_type;
 		typedef T*				pointer;
-		typedef const T*		const_pointer;
+		typedef T const *		const_pointer;
 		typedef T&				reference;
-		typedef const T&		const_reference;
+		typedef T const &		const_reference;
 		typedef std::size_t		size_type;
 		typedef std::ptrdiff_t	difference_type;
 
@@ -49,7 +49,7 @@ namespace KlayGE
 		ChildrenType	m_Children;
 
 	public:
-		tree(const T& Root = T(), tree<T>* pPar = NULL)
+		tree(T const & Root = T(), tree<T>* pPar = NULL)
 			: m_Root(Root), m_pParent(pPar)
 			{ }
 
@@ -62,11 +62,11 @@ namespace KlayGE
 			{ ClearChildren(); }
 
 
-		void Parent(const tree<T>* pPar)
+		void Parent(tree<T> const * pPar)
 			{ m_pParent = pPar; }
 		tree<T>*& Parent()
 			{ return m_pParent; }
-		const tree<T>*& Parent() const
+		tree<T>* Parent() const
 			{ return m_pParent; }
 
 		void RootData(const_reference tData)
@@ -86,10 +86,10 @@ namespace KlayGE
 
 		ChildType& Child(size_type index)
 			{ return m_Children.at(index); }
-		const ChildType& Child(size_type index) const
+		ChildType const & Child(size_type index) const
 			{ return m_Children.at(index); }
 
-		void AddChild(const tree<T>& Child)
+		void AddChild(tree<T> const & Child)
 		{
 			ChildType pt(new tree<T>(Child));
 			pt->SetParent(this);
@@ -110,7 +110,7 @@ namespace KlayGE
 		}
 
 
-		void SetChild(ChildIterator iter, const tree<T>& Child)
+		void SetChild(ChildIterator iter, tree<T> const & Child)
 		{
 			ChildType pt(new tree<T>(Child));
 			pt->SetParent(this);

@@ -19,7 +19,7 @@
 #include <dinput.h>
 
 #include <KlayGE/Input.hpp>
-#include <KlayGE/COMPtr.hpp>
+#include <boost/smart_ptr.hpp>
 
 #include <boost/utility.hpp>
 
@@ -38,10 +38,10 @@ namespace KlayGE
 		const std::wstring& Name() const;
 		void EnumDevices();
 
-		const COMPtr<IDirectInput8W>& DInput() const;
+		const boost::shared_ptr<IDirectInput8W>& DInput() const;
 
 	private:
-		COMPtr<IDirectInput8W> dinput_;
+		boost::shared_ptr<IDirectInput8W> dinput_;
 
 	private:
 		static BOOL CALLBACK EnumDevicesCB(LPCDIDEVICEINSTANCEW didi, void* pvRef);
@@ -61,7 +61,7 @@ namespace KlayGE
 	private:
 		void UpdateKeys();
 
-		COMPtr<IDirectInputDevice8W> device_;
+		boost::shared_ptr<IDirectInputDevice8W> device_;
 	};
 
 	class DInputMouse : public InputMouse
@@ -78,7 +78,7 @@ namespace KlayGE
 	private:
 		void UpdateKeys();
 
-		COMPtr<IDirectInputDevice8W> device_;
+		boost::shared_ptr<IDirectInputDevice8W> device_;
 	};
 
 	class DInputJoystick : public InputJoystick
@@ -95,10 +95,10 @@ namespace KlayGE
 	private:
 		void UpdateKeys();
 
-		COMPtr<IDirectInputDevice8W> device_;
+		boost::shared_ptr<IDirectInputDevice8W> device_;
 	};
 
-	COMPtr<IDirectInputDevice8W> CreateDevice(REFGUID guid, InputEngine& inputEng);
+	boost::shared_ptr<IDirectInputDevice8W> CreateDevice(REFGUID guid, InputEngine& inputEng);
 }
 
 #endif		// _DINPUT_HPP

@@ -33,15 +33,15 @@ namespace KlayGE
 	class OCTreeNode : public SceneNode
 	{
 	public:
-		explicit OCTreeNode(const Box& box);
+		explicit OCTreeNode(Box const & box);
 		~OCTreeNode();
 
 		void Clear();
 
-		void AddRenderable(const RenderablePtr& renderable);
-		bool InsideNode(const RenderablePtr& renderable);
+		void AddRenderable(RenderablePtr const & renderable);
+		bool InsideNode(RenderablePtr const & renderable);
 
-		void Clip(const Frustum& frustum);
+		void Clip(Frustum const & frustum);
 
 		void GetRenderables(std::vector<RenderablePtr>& renderables);
 
@@ -55,10 +55,10 @@ namespace KlayGE
 	class OCTree : public SceneManager
 	{
 	public:
-		OCTree(const Box& box);
+		OCTree(Box const & box);
 
-		void ClipScene(const Camera& camera);
-		void PushRenderable(const RenderablePtr& obj);
+		void ClipScene(Camera const & camera);
+		void PushRenderable(RenderablePtr const & obj);
 
 	private:
 		OCTreeNode root_;

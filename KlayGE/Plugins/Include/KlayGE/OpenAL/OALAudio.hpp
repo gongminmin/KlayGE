@@ -18,12 +18,12 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 
-#include <pthread.h>
-
 #include <vector>
 #include <windows.h>
 
 #include <boost/utility.hpp>
+#include <boost/smart_ptr.hpp>
+#include <boost/thread/thread.hpp>
 
 #include <KlayGE/Audio.hpp>
 
@@ -32,8 +32,8 @@
 namespace KlayGE
 {
 	ALenum Convert(AudioFormat format);
-	Vector3 VecToALVec(const Vector3& v);
-	Vector3 ALVecToVec(const Vector3& v);
+	Vector3 VecToALVec(Vector3 const & v);
+	Vector3 ALVecToVec(Vector3 const & v);
 
 	// ÉùÒô»º³åÇø
 	/////////////////////////////////////////////////////////////////////////////////
@@ -45,7 +45,7 @@ namespace KlayGE
 		typedef Sources::const_iterator		SourcesConstIter;
 
 	public:
-		OALSoundBuffer(const AudioDataSourcePtr& dataSource, U32 numSource, float volume);
+		OALSoundBuffer(AudioDataSourcePtr const & dataSource, U32 numSource, float volume);
 		~OALSoundBuffer();
 
 		void Play(bool loop = false);
@@ -56,11 +56,11 @@ namespace KlayGE
 		bool IsPlaying() const;
 
 		Vector3 Position() const;
-		void Position(const Vector3& v);
+		void Position(Vector3 const & v);
 		Vector3 Velocity() const;
-		void Velocity(const Vector3& v);
+		void Velocity(Vector3 const & v);
 		Vector3 Direction() const;
-		void Direction(const Vector3& v);
+		void Direction(Vector3 const & v);
 
 	private:
 		void DoReset();
@@ -85,7 +85,7 @@ namespace KlayGE
 		typedef Buffers::const_iterator	BuffersConstIter;
 
 	public:
-		OALMusicBuffer(const AudioDataSourcePtr& dataSource, U32 bufferSeconds, float volume);
+		OALMusicBuffer(AudioDataSourcePtr const & dataSource, U32 bufferSeconds, float volume);
 		~OALMusicBuffer();
 
 		void Volume(float vol);
@@ -93,22 +93,21 @@ namespace KlayGE
 		bool IsPlaying() const;
 
 		Vector3 Position() const;
-		void Position(const Vector3& v);
+		void Position(Vector3 const & v);
 		Vector3 Velocity() const;
-		void Velocity(const Vector3& v);
+		void Velocity(Vector3 const & v);
 		Vector3 Direction() const;
-		void Direction(const Vector3& v);
+		void Direction(Vector3 const & v);
 
-	private:
 		void LoopUpdateBuffer();
 
+	private:
 		void DoReset();
 		void DoPlay(bool loop);
 		void DoStop();
 
 	private:
-		static void* PlayProc(void* arg);
-		pthread_t	playThread_;
+		boost::shared_ptr<boost::thread> playThread_;
 
 	private:
 		ALuint		source_;
@@ -125,14 +124,14 @@ namespace KlayGE
 		OALAudioEngine();
 		~OALAudioEngine();
 
-		const std::wstring& Name() const;
+		std::wstring const & Name() const;
 
 		Vector3 GetListenerPos() const;
-		void SetListenerPos(const Vector3& v);
+		void SetListenerPos(Vector3 const & v);
 		Vector3 GetListenerVel() const;
-		void SetListenerVel(const Vector3& v);
+		void SetListenerVel(Vector3 const & v);
 		void GetListenerOri(Vector3& face, Vector3& up) const;
-		void SetListenerOri(const Vector3& face, const Vector3& up);
+		void SetListenerOri(Vector3 const & face, Vector3 const & up);
 	};
 }
 

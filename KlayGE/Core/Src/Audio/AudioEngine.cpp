@@ -23,20 +23,20 @@ namespace KlayGE
 	class NullAudioEngine : public AudioEngine
 	{
 	public:
-		const std::wstring& Name() const
+		std::wstring const & Name() const
 		{
-			static std::wstring name(L"Null Audio Engine");
+			static const std::wstring name(L"Null Audio Engine");
 			return name;
 		}
 
-		void AddBuffer(size_t id, const AudioBufferPtr& buffer)
+		void AddBuffer(size_t id, AudioBufferPtr const & buffer)
 			{ }
 
 		size_t NumBuffer() const
 			{ return 0; }
 		AudioBufferPtr Buffer(size_t bufID)
 			{ return AudioBuffer::NullObject(); }
-		const AudioBufferPtr Buffer(size_t bufID) const
+		AudioBufferPtr const & Buffer(size_t bufID) const
 			{ return AudioBuffer::NullObject(); }
 
 		void Play(size_t bufID, bool loop = false)
@@ -60,18 +60,18 @@ namespace KlayGE
 
 		Vector3 GetListenerPos() const
 			{ return Vector3::Zero(); }
-		void SetListenerPos(const Vector3& v)
+		void SetListenerPos(Vector3 const & v)
 			{ }
 		Vector3 GetListenerVel() const
 			{ return Vector3::Zero(); }
-		void SetListenerVel(const Vector3& v)
+		void SetListenerVel(Vector3 const & v)
 			{ }
 		void GetListenerOri(Vector3& face, Vector3& up) const
 		{
 			face = Vector3::Zero();
 			up = Vector3::Zero();
 		}
-		void SetListenerOri(const Vector3& face, const Vector3& up)
+		void SetListenerOri(Vector3 const & face, Vector3 const & up)
 			{ }
 	};
 
@@ -99,7 +99,7 @@ namespace KlayGE
 
 	// 往列表里添加一个音频缓冲区
 	/////////////////////////////////////////////////////////////////////////////////
-	void AudioEngine::AddBuffer(size_t id, const AudioBufferPtr& buffer)
+	void AudioEngine::AddBuffer(size_t id, AudioBufferPtr const & buffer)
 	{
 		audioBufs_.insert(id, buffer);
 	}
@@ -157,7 +157,7 @@ namespace KlayGE
 		THR(E_FAIL);
 	}
 
-	const AudioBufferPtr AudioEngine::Buffer(size_t bufID) const
+	AudioBufferPtr const & AudioEngine::Buffer(size_t bufID) const
 	{
 		AudioBufsConstIter iter(audioBufs_.find(bufID));
 		if (iter != audioBufs_.end())

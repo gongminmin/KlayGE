@@ -25,11 +25,11 @@ namespace KlayGE
 	class Camera
 	{
 	public:
-		const Vector3& EyePos() const
+		Vector3 const & EyePos() const
 			{ return eyePos_; }
-		const Vector3& LookAt() const
+		Vector3 const & LookAt() const
 			{ return lookat_; }
-		const Vector3& UpVec() const
+		Vector3 const & UpVec() const
 			{ return upVec_; }
 
 		float FOV() const
@@ -41,14 +41,14 @@ namespace KlayGE
 		float FarPlane() const
 			{ return farPlane_; }
 
-		const Matrix4& ViewMatrix() const
+		Matrix4 const & ViewMatrix() const
 			{ return this->viewMat_; }
-		const Matrix4& BillboardMatrix();
-		const Matrix4& ProjMatrix() const
+		Matrix4 const & BillboardMatrix();
+		Matrix4 const & ProjMatrix() const
 			{ return this->projMat_; }
 
-		void ViewParams(const Vector3& eyePos, const Vector3& lookat,
-			const Vector3& upVec = Vector3(0, 1, 0));
+		void ViewParams(Vector3 const & eyePos, Vector3 const & lookat,
+			Vector3 const & upVec = Vector3(0, 1, 0));
 		void ProjParams(float FOV, float aspect, float nearPlane, float farPlane);
 
 		Camera();

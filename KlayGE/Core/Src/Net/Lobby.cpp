@@ -36,7 +36,7 @@ namespace KlayGE
 		Close();
 	}
 
-	Lobby::PlayerAddrsIter Lobby::ID(const SOCKADDR_IN& addr)
+	Lobby::PlayerAddrsIter Lobby::ID(SOCKADDR_IN const & addr)
 	{
 		for (PlayerAddrsIter iter = this->players_.begin(); iter != this->players_.end(); ++ iter)
 		{
@@ -51,7 +51,7 @@ namespace KlayGE
 
 	// 建立游戏大厅
 	/////////////////////////////////////////////////////////////////////////////////
-	void Lobby::Create(const std::string& Name, char maxPlayers, U16 port, const Processer& pro)
+	void Lobby::Create(std::string const & Name, char maxPlayers, U16 port, Processer const & pro)
 	{
 		this->LobbyName(Name);
 
@@ -148,7 +148,7 @@ namespace KlayGE
 
 	// 设置大厅名称
 	/////////////////////////////////////////////////////////////////////////////////
-	void Lobby::LobbyName(const std::string& name)
+	void Lobby::LobbyName(std::string const & name)
 	{
 		if (name.length() > 16)
 		{
@@ -162,7 +162,7 @@ namespace KlayGE
 
 	// 获取大厅名称
 	/////////////////////////////////////////////////////////////////////////////////
-	const std::string& Lobby::LobbyName() const
+	std::string const & Lobby::LobbyName() const
 	{
 		return this->name_;
 	}
@@ -204,14 +204,14 @@ namespace KlayGE
 
 	// 接收数据
 	/////////////////////////////////////////////////////////////////////////////////
-	int Lobby::Send(const void* buf, int maxSize, const SOCKADDR_IN& to)
+	int Lobby::Send(void const * buf, int maxSize, SOCKADDR_IN const & to)
 	{
 		return this->socket_.SendTo(buf, maxSize, to);
 	}
 
 
 	void Lobby::OnJoin(char* revBuf, char* sendBuf, int& numSend,
-							SOCKADDR_IN& from, const Processer& pro)
+							SOCKADDR_IN& from, Processer const & pro)
 	{
 		// 命令格式:
 		//			Player名字		16 字节
@@ -254,7 +254,7 @@ namespace KlayGE
 	}
 
 	void Lobby::OnQuit(PlayerAddrsIter iter, char* sendBuf,
-							int& numSend, const Processer& pro)
+							int& numSend, Processer const & pro)
 	{
 		if (iter != this->players_.end())
 		{
@@ -270,7 +270,7 @@ namespace KlayGE
 		numSend = 1;
 	}
 
-	void Lobby::OnGetLobbyInfo(char* sendBuf, int& numSend, const Processer& /*pro*/)
+	void Lobby::OnGetLobbyInfo(char* sendBuf, int& numSend, Processer const & /*pro*/)
 	{
 		// 返回格式:
 		//			当前Players数	1 字节

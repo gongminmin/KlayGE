@@ -21,7 +21,7 @@ namespace KlayGE
 		virtual ~InputFactory()
 			{ }
 
-		virtual const std::wstring& Name() const = 0;
+		virtual std::wstring const & Name() const = 0;
 		virtual InputEngine& InputEngineInstance() = 0;
 	};
 
@@ -29,11 +29,11 @@ namespace KlayGE
 	class ConcreteInputFactory : public InputFactory
 	{
 	public:
-		ConcreteInputFactory(const std::wstring& name)
+		ConcreteInputFactory(std::wstring const & name)
 				: name_(name)
 			{ }
 
-		const std::wstring& Name() const
+		std::wstring const & Name() const
 			{ return name_; }
 
 		InputEngine& InputEngineInstance()
@@ -43,7 +43,7 @@ namespace KlayGE
 		}
 
 	private:
-		const std::wstring name_;
+		std::wstring const name_;
 	};
 }
 

@@ -29,49 +29,49 @@ namespace KlayGE
 		Box()
 		{
 		}
-		Box(const Vector3& vMin, const Vector3& vMax)
+		Box(Vector3 const & vMin, Vector3 const & vMax)
 		{
 			MathLib::Minimize(min_, vMin, vMax);
 			MathLib::Maximize(max_, vMin, vMax);
 		}
 
 		// 赋值操作符
-		Box& operator+=(const Vector3& rhs)
+		Box const & operator+=(Vector3 const & rhs)
 		{
 			min_ += rhs;
 			max_ += rhs;
 			return *this;
 		}
-		Box& operator-=(const Vector3& rhs)
+		Box const & operator-=(Vector3 const & rhs)
 		{
 			min_ -= rhs;
 			max_ -= rhs;
 			return *this;
 		}
-		Box& operator*=(float rhs)
+		Box const & operator*=(float rhs)
 		{
 			this->Min() *= rhs;
 			this->Max() *= rhs;
 			return *this;
 		}
-		Box& operator/=(float rhs)
+		Box const & operator/=(float rhs)
 		{
 			return this->operator*=(1.0f / rhs);
 		}
-		Box& operator&=(const Box& rhs)
+		Box const & operator&=(Box const & rhs)
 		{
 			MathLib::Maximize(this->Min(), this->Min(), rhs.Min());
 			MathLib::Minimize(this->Max(), this->Max(), rhs.Max());
 			return *this;
 		}
-		Box& operator|=(const Box& rhs)
+		Box& operator|=(Box const & rhs)
 		{
 			MathLib::Minimize(this->Min(), this->Min(), rhs.Min());
 			MathLib::Maximize(this->Max(), this->Max(), rhs.Max());
 			return *this;
 		}
 
-		Box& operator=(const Box& rhs)
+		Box& operator=(Box const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -82,11 +82,11 @@ namespace KlayGE
 		}
 
 		// 一元操作符
-		const Box operator+() const
+		Box const operator+() const
 		{
 			return *this;
 		}
-		const Box operator-() const
+		Box const operator-() const
 		{
 			return Box(-this->Min(), -this->Max());
 		}
@@ -109,35 +109,35 @@ namespace KlayGE
 			return this->Min() == this->Max();
 		}
 
-		const Vector3 LeftBottomNear() const
+		Vector3 const LeftBottomNear() const
 		{
 			return this->Min();
 		}
-		const Vector3 LeftTopNear() const
+		Vector3 const LeftTopNear() const
 		{
 			return Vector3(this->Min().x(), this->Max().y(), this->Min().z());
 		}
-		const Vector3 RightBottomNear() const
+		Vector3 const RightBottomNear() const
 		{
 			return Vector3(this->Max().x(), this->Min().y(), this->Min().z());
 		}
-		const Vector3 RightTopNear() const
+		Vector3 const RightTopNear() const
 		{
 			return Vector3(this->Max().x(), this->Max().y(), this->Min().z());
 		}
-		const Vector3 LeftBottomFar() const
+		Vector3 const LeftBottomFar() const
 		{
 			return Vector3(this->Min().x(), this->Min().y(), this->Max().z());
 		}
-		const Vector3 LeftTopFar() const
+		Vector3 const LeftTopFar() const
 		{
 			return Vector3(this->Min().x(), this->Max().y(), this->Max().z());
 		}
-		const Vector3 RightBottomFar() const
+		Vector3 const RightBottomFar() const
 		{
 			return Vector3(this->Max().x(), this->Min().y(), this->Max().z());
 		}
-		const Vector3 RightTopFar() const
+		Vector3 const RightTopFar() const
 		{
 			return this->Max();
 		}
@@ -146,7 +146,7 @@ namespace KlayGE
 		{
 			return min_;
 		}
-		const Vector3& Min() const
+		Vector3 const & Min() const
 		{
 			return min_;
 		}
@@ -154,12 +154,12 @@ namespace KlayGE
 		{
 			return max_;
 		}
-		const Vector3& Max() const
+		Vector3 const & Max() const
 		{
 			return max_;
 		}
 
-		bool VecInBound(const Vector3& v) const
+		bool VecInBound(Vector3 const & v) const
 		{
 			return MathLib::VecInBox(*this, v);
 		}
@@ -173,12 +173,12 @@ namespace KlayGE
 	};
 
 	inline bool
-	operator==(const Box& lhs, const Box& rhs)
+	operator==(Box const & lhs, Box const & rhs)
 	{
 		return (lhs.Min() == rhs.Min()) && (lhs.Max() == rhs.Max());
 	}
 	inline bool
-	operator!=(const Box& lhs, const Box& rhs)
+	operator!=(Box const & lhs, Box const & rhs)
 	{
 		return !(lhs == rhs);
 	}

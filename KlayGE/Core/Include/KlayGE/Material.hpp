@@ -17,8 +17,8 @@ namespace KlayGE
 				shininess(0)
 			{ }
 
-		Material(const Color& diffuse, const Color& ambient,
-			const Color& specular, const Color& emissive, float shininess)
+		Material(Color const & diffuse, Color const & ambient,
+			Color const & specular, Color const & emissive, float shininess)
 			: diffuse(diffuse),
 				ambient(ambient),
 				specular(specular),
@@ -26,7 +26,7 @@ namespace KlayGE
 				shininess(shininess)
 			{ }
 
-		explicit Material(const Color& col)
+		explicit Material(Color const & col)
 			: diffuse(col),
 				ambient(col),
 				specular(0, 0, 0, 0),

@@ -21,16 +21,16 @@
 
 #include <boost/utility.hpp>
 
-#include <KlayGE/COMPtr.hpp>
+#include <boost/smart_ptr.hpp>
 #include <KlayGE/Audio.hpp>
 
 #pragma comment(lib, "KlayGE_AudioEngine_DSound.lib")
 
 namespace KlayGE
 {
-	typedef COMPtr<IDirectSoundBuffer> DSBufferType;
+	typedef boost::shared_ptr<IDirectSoundBuffer> DSBufferType;
 
-	WAVEFORMATEX WaveFormatEx(const AudioDataSourcePtr& dataSource);
+	WAVEFORMATEX WaveFormatEx(AudioDataSourcePtr const & dataSource);
 	long LinearGainToDB(float vol);
 
 	// ÉùÒô»º³åÇø
@@ -43,7 +43,7 @@ namespace KlayGE
 		typedef Sources::const_iterator		SourcesConstIter;
 
 	public:
-		DSSoundBuffer(const AudioDataSourcePtr& dataSource, U32 numSource, float volume);
+		DSSoundBuffer(AudioDataSourcePtr const & dataSource, U32 numSource, float volume);
 		~DSSoundBuffer();
 
 		void Play(bool loop = false);
@@ -54,14 +54,14 @@ namespace KlayGE
 		bool IsPlaying() const;
 
 		Vector3 Position() const;
-		void Position(const Vector3& v);
+		void Position(Vector3 const & v);
 		Vector3 Velocity() const;
-		void Velocity(const Vector3& v);
+		void Velocity(Vector3 const & v);
 		Vector3 Direction() const;
-		void Direction(const Vector3& v);
+		void Direction(Vector3 const & v);
 
 	private:
-		COMPtr<IDirectSound3DBuffer> Get3DBufferInterface(SourcesIter iter);
+		boost::shared_ptr<IDirectSound3DBuffer> Get3DBufferInterface(SourcesIter iter);
 
 		void DoReset();
 		SourcesIter FreeSource();
@@ -79,7 +79,7 @@ namespace KlayGE
 	class DSMusicBuffer : boost::noncopyable, public MusicBuffer
 	{
 	public:
-		DSMusicBuffer(const AudioDataSourcePtr& dataSource, U32 bufferSeconds, float volume);
+		DSMusicBuffer(AudioDataSourcePtr const & dataSource, U32 bufferSeconds, float volume);
 		~DSMusicBuffer();
 
 		void Volume(float vol);
@@ -87,11 +87,11 @@ namespace KlayGE
 		bool IsPlaying() const;
 
 		Vector3 Position() const;
-		void Position(const Vector3& v);
+		void Position(Vector3 const & v);
 		Vector3 Velocity() const;
-		void Velocity(const Vector3& v);
+		void Velocity(Vector3 const & v);
 		Vector3 Direction() const;
-		void Direction(const Vector3& v);
+		void Direction(Vector3 const & v);
 
 	private:
 		void LoopUpdateBuffer();
@@ -106,7 +106,7 @@ namespace KlayGE
 		U32				fillCount_;
 		U32				writePos_;
 
-		COMPtr<IDirectSound3DBuffer> ds3DBuffer_;
+		boost::shared_ptr<IDirectSound3DBuffer> ds3DBuffer_;
 
 		static void WINAPI TimerProc(UINT uTimerID, UINT uMsg,
 			DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2);
@@ -123,21 +123,21 @@ namespace KlayGE
 		DSAudioEngine();
 		~DSAudioEngine();
 
-		const COMPtr<IDirectSound>& DSound() const
+		boost::shared_ptr<IDirectSound> const & DSound() const
 			{ return dsound_; }
 
-		const std::wstring& Name() const;
+		std::wstring const & Name() const;
 
 		Vector3 GetListenerPos() const;
-		void SetListenerPos(const Vector3& v);
+		void SetListenerPos(Vector3 const & v);
 		Vector3 GetListenerVel() const;
-		void SetListenerVel(const Vector3& v);
+		void SetListenerVel(Vector3 const & v);
 		void GetListenerOri(Vector3& face, Vector3& up) const;
-		void SetListenerOri(const Vector3& face, const Vector3& up);
+		void SetListenerOri(Vector3 const & face, Vector3 const & up);
 
 	private:
-		COMPtr<IDirectSound>			dsound_;
-		COMPtr<IDirectSound3DListener>	ds3dListener_;
+		boost::shared_ptr<IDirectSound>				dsound_;
+		boost::shared_ptr<IDirectSound3DListener>	ds3dListener_;
 	};
 }
 

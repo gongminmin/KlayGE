@@ -33,7 +33,7 @@ namespace KlayGE
 	{
 	}
 
-	MemFile::MemFile(const void* data, size_t length)
+	MemFile::MemFile(void const * data, size_t length)
 	{
 		this->Open(data, length);
 	}
@@ -47,11 +47,11 @@ namespace KlayGE
 
 	// 打开文件
 	/////////////////////////////////////////////////////////////////////////////////
-	void MemFile::Open(const void* data, size_t length)
+	void MemFile::Open(void const * data, size_t length)
 	{
 		this->Close();
 
-		chunkData_.str(string(static_cast<const char*>(data)));
+		chunkData_.str(string(static_cast<char const *>(data)));
 	}
 
 	// 关闭文件
@@ -84,11 +84,11 @@ namespace KlayGE
 
 	// 把数据写入文件
 	/////////////////////////////////////////////////////////////////////////////////
-	size_t MemFile::Write(const void* data, size_t count)
+	size_t MemFile::Write(void const * data, size_t count)
 	{
 		assert(data != NULL);
 
-		chunkData_.write(static_cast<const char*>(data),
+		chunkData_.write(static_cast<char const *>(data),
 			static_cast<std::streamsize>(count));
 
 		chunkData_.seekg(static_cast<istream::off_type>(count), ios_base::cur);

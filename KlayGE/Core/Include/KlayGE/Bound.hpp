@@ -26,7 +26,7 @@ namespace KlayGE
 
 		virtual bool IsEmpty() const = 0;
 
-		virtual bool VecInBound(const Vector3& v) const = 0;
+		virtual bool VecInBound(Vector3 const & v) const = 0;
 		virtual float MaxRadiusSq() const = 0;
 	};
 }

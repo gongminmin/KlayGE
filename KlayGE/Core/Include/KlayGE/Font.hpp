@@ -41,11 +41,11 @@ namespace KlayGE
 		};
 
 	public:
-		virtual RenderablePtr RenderText(float x, float y, const Color& clr,
-			const std::wstring& text, U32 flags = 0) = 0;
-		virtual RenderablePtr RenderText(float x, float y, float z, float xScale, float yScale, const Color& clr, 
-			const std::wstring& text, U32 flags = 0) = 0;
-		//RenderablePtr RenderText(const std::wstring& text, U32 flags = 0);
+		virtual RenderablePtr RenderText(float x, float y, Color const & clr,
+			std::wstring const & text, U32 flags = 0) = 0;
+		virtual RenderablePtr RenderText(float x, float y, float z, float xScale, float yScale, Color const & clr, 
+			std::wstring const & text, U32 flags = 0) = 0;
+		//RenderablePtr RenderText(std::wstring const & text, U32 flags = 0);
 
 		virtual U32 FontHeight() const = 0;
 

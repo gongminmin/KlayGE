@@ -22,11 +22,11 @@
 
 namespace KlayGE
 {
-	OGLRenderEffect::OGLRenderEffect(const std::string& srcData, UINT flags)
+	OGLRenderEffect::OGLRenderEffect(std::string const & srcData, UINT flags)
 	{
 	}
 
-	OGLRenderEffect::OGLRenderEffect(const OGLRenderEffect& rhs)
+	OGLRenderEffect::OGLRenderEffect(OGLRenderEffect const & rhs)
 	{
 	}
 
@@ -44,17 +44,17 @@ namespace KlayGE
 		return RenderEffectParameterPtr();
 	}
 
-	RenderEffectParameterPtr OGLRenderEffect::ParameterByName(const std::string& name)
+	RenderEffectParameterPtr OGLRenderEffect::ParameterByName(std::string const & name)
 	{
 		return RenderEffectParameterPtr();
 	}
 
-	RenderEffectParameterPtr OGLRenderEffect::ParameterBySemantic(const std::string& semantic)
+	RenderEffectParameterPtr OGLRenderEffect::ParameterBySemantic(std::string const & semantic)
 	{
 		return RenderEffectParameterPtr();
 	}
 
-	void OGLRenderEffect::SetTechnique(const std::string& technique)
+	void OGLRenderEffect::SetTechnique(std::string const & technique)
 	{
 	}
 
@@ -80,27 +80,27 @@ namespace KlayGE
 	}
 
 
-	RenderEffectParameter& OGLRenderEffectParameter::operator=(float value)
+	RenderEffectParameter const & OGLRenderEffectParameter::operator=(float value)
 	{
 		return *this;
 	}
 	
-	RenderEffectParameter& OGLRenderEffectParameter::operator=(const Vector4& value)
+	RenderEffectParameter const & OGLRenderEffectParameter::operator=(Vector4 const & value)
 	{
 		return *this;
 	}
 
-	RenderEffectParameter& OGLRenderEffectParameter::operator=(const Matrix4& value)
+	RenderEffectParameter const & OGLRenderEffectParameter::operator=(Matrix4 const & value)
 	{
 		return *this;
 	}
 
-	RenderEffectParameter& OGLRenderEffectParameter::operator=(int value)
+	RenderEffectParameter const & OGLRenderEffectParameter::operator=(int value)
 	{
 		return *this;
 	}
 
-	RenderEffectParameter& OGLRenderEffectParameter::operator=(const TexturePtr& tex)
+	RenderEffectParameter const & OGLRenderEffectParameter::operator=(TexturePtr const & tex)
 	{
 		return *this;
 	}
@@ -125,7 +125,7 @@ namespace KlayGE
 		return 0;
 	}
 
-	void OGLRenderEffectParameter::SetFloatArray(const float* matrices, size_t count)
+	void OGLRenderEffectParameter::SetFloatArray(float const * matrices, size_t count)
 	{
 	}
 
@@ -133,7 +133,7 @@ namespace KlayGE
 	{
 	}
 
-	void OGLRenderEffectParameter::SetVectorArray(const Vector4* matrices, size_t count)
+	void OGLRenderEffectParameter::SetVectorArray(Vector4 const * matrices, size_t count)
 	{
 	}
 
@@ -141,7 +141,7 @@ namespace KlayGE
 	{
 	}
 
-	void OGLRenderEffectParameter::SetMatrixArray(const Matrix4* matrices, size_t count)
+	void OGLRenderEffectParameter::SetMatrixArray(Matrix4 const * matrices, size_t count)
 	{
 	}
 
@@ -149,7 +149,7 @@ namespace KlayGE
 	{
 	}
 
-	void SetIntArray(const int* matrices, size_t count)
+	void SetIntArray(int const * matrices, size_t count)
 	{
 	}
 

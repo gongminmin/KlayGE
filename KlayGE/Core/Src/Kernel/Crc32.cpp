@@ -131,7 +131,7 @@ namespace
 
 	// º∆À„Crc32
 	/////////////////////////////////////////////////////////////////////////////////
-	U32 CalcCrc32(const U8* data, size_t len, U32 crc32)
+	U32 CalcCrc32(U8 const * data, size_t len, U32 crc32)
 	{
 		for (size_t i = 0; i < len; ++ i, ++ data)
 		{

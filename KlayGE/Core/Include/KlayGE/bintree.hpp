@@ -41,7 +41,7 @@ namespace KlayGE
 		bintree<T>*				parent_;
 
 	public:
-		bintree(const T& root = T(),
+		bintree(T const & root = T(),
 					SharedPtr<bintree<T> > lChild = SharedPtr<bintree<T> >(),
 					SharedPtr<bintree<T> > rChild = SharedPtr<bintree<T> >(),
 					bintree<T>* parent = NULL)
@@ -72,7 +72,7 @@ namespace KlayGE
 			{ return this->rChild_; }
 		bintree<T>*& Parent()
 			{ return this->parent_; }
-		const bintree<T>* Parent() const
+		bintree<T>* Parent() const
 			{ return this->parent_; }
 
 		void LChild(const SharedPtr<bintree<T> >& lChild)

@@ -27,8 +27,8 @@ namespace KlayGE
 		U32		format_;
 	};
 
-	bool operator<(const D3D9VideoMode& lhs, const D3D9VideoMode& rhs);
-	bool operator==(const D3D9VideoMode& lhs, const D3D9VideoMode& rhs);
+	bool operator<(D3D9VideoMode const & lhs, D3D9VideoMode const & rhs);
+	bool operator==(D3D9VideoMode const & lhs, D3D9VideoMode const & rhs);
 }
 
 #endif			// _D3D9VIDEOMODE_HPP

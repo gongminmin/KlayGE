@@ -18,7 +18,8 @@
 
 #include <list>
 #include <vector>
-#include <pthread.h>
+#include <boost/smart_ptr.hpp>
+#include <boost/thread/thread.hpp>
 #include <KlayGE/Socket.hpp>
 
 #pragma comment(lib, "KlayGE_Core.lib")
@@ -39,17 +40,19 @@ namespace KlayGE
 		Player();
 		~Player();
 
-		bool Join(const SOCKADDR_IN& lobbyAddr);
+		bool Join(SOCKADDR_IN const & lobbyAddr);
 		void Quit();
 		void Destroy();
 		LobbyDes LobbyInfo();
 
-		void Name(const std::string& name);
-		const std::string& Name()
+		void Name(std::string const & name);
+		std::string const & Name()
 			{ return this->name_; }
 
 		int Receive(void* buf, int maxSize, SOCKADDR_IN& from);
-		int Send(const void* buf, int size);
+		int Send(void const * buf, int size);
+
+		void ReceiveFunc();
 
 	private:
 		Socket		socket_;
@@ -57,10 +60,8 @@ namespace KlayGE
 		char		playerID_;
 		std::string	name_;
 
-		pthread_t	receiveThread_;
+		boost::shared_ptr<boost::thread>	receiveThread_;
 		bool		receiveLoop_;
-
-		static void* ReceiveThread_Func(void* arg);
 
 		typedef std::list<std::vector<char> > SendQueueType;
 		SendQueueType	sendQueue_;

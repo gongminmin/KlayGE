@@ -16,25 +16,25 @@ namespace KlayGE
 	public:
 		D3D9Adapter();
 		D3D9Adapter(U32 adapterNo,
-			const D3DADAPTER_IDENTIFIER9& d3dadapterIdentifer,
-			const D3DDISPLAYMODE& d3ddmDesktop);
+			D3DADAPTER_IDENTIFIER9 const & d3dadapterIdentifer,
+			D3DDISPLAYMODE const & d3ddmDesktop);
 
-		void Enumerate(const COMPtr<IDirect3D9>& d3d);
+		void Enumerate(boost::shared_ptr<IDirect3D9> const & d3d);
 
 		// 访问设备描述字符串
-		const std::string Description() const;
+		std::string const Description() const;
 
 		U32 AdapterNo() const
 			{ return adapterNo_; }
 
-		const D3DADAPTER_IDENTIFIER9& AdapterIdentifier() const
+		D3DADAPTER_IDENTIFIER9 const & AdapterIdentifier() const
 			{ return d3dAdapterIdentifier_; }
 
-		const D3DDISPLAYMODE& DesktopMode() const
+		D3DDISPLAYMODE const & DesktopMode() const
 			{ return d3ddmDesktop_; }
 
 		size_t NumVideoMode() const;
-		const D3D9VideoMode& VideoMode(size_t index) const;
+		D3D9VideoMode const & VideoMode(size_t index) const;
 
 	private:
 		// 这是第几块适配器

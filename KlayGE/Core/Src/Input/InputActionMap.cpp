@@ -20,7 +20,7 @@ namespace KlayGE
 {
 	// 增加动作
 	//////////////////////////////////////////////////////////////////////////////////
-	void InputActionMap::AddAction(const InputAction& inputAction)
+	void InputActionMap::AddAction(InputAction const & inputAction)
 	{
 		actionMap_.insert(std::make_pair(inputAction.second, inputAction.first));
 	}

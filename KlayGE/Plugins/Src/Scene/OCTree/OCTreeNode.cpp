@@ -20,7 +20,7 @@ using namespace std;
 
 namespace KlayGE
 {
-	OCTreeNode::OCTreeNode(const Box& box)
+	OCTreeNode::OCTreeNode(Box const & box)
 		: box_(box)
 	{
 	}
@@ -38,7 +38,7 @@ namespace KlayGE
 		}
 	}
 
-	bool OCTreeNode::InsideNode(const RenderablePtr& renderable)
+	bool OCTreeNode::InsideNode(RenderablePtr const & renderable)
 	{
 		Box box(renderable->GetBound());
 
@@ -57,7 +57,7 @@ namespace KlayGE
 		return false;
 	}
 
-	void OCTreeNode::AddRenderable(const RenderablePtr& renderable)
+	void OCTreeNode::AddRenderable(RenderablePtr const & renderable)
 	{
 		if (!renderable->CanBeCulled())
 		{
@@ -134,7 +134,7 @@ namespace KlayGE
 		}
 	}
 
-	void OCTreeNode::Clip(const Frustum& frustum)
+	void OCTreeNode::Clip(Frustum const & frustum)
 	{
 		for (ChildrenType::iterator iter = children_.begin(); iter != children_.end(); ++ iter)
 		{

@@ -26,7 +26,7 @@ namespace KlayGE
 {
 	typedef std::list<std::vector<char> > SendQueueType;
 
-	const U32 Max_Buffer(64);
+	U32 const Max_Buffer(64);
 
 	class Processer
 	{
@@ -60,11 +60,11 @@ namespace KlayGE
 		Lobby();
 		~Lobby();
 
-		void Create(const std::string& Name, char maxPlayers, U16 port, const Processer& pro);
+		void Create(std::string const & Name, char maxPlayers, U16 port, Processer const & pro);
 		void Close();
 
-		void LobbyName(const std::string& Name);
-		const std::string& LobbyName() const;
+		void LobbyName(std::string const & Name);
+		std::string const & LobbyName() const;
 
 		char NumPlayer() const;
 
@@ -72,24 +72,24 @@ namespace KlayGE
 		char MaxPlayers() const;
 
 		int Receive(void* buf, int maxSize, SOCKADDR_IN& from);
-		int Send(const void* buf, int maxSize, const SOCKADDR_IN& to);
+		int Send(void const * buf, int maxSize, SOCKADDR_IN const & to);
 
 		void TimeOut(U32 timeOut)
 			{ this->socket_.TimeOut(timeOut); }
 		U32 TimeOut()
 			{ return this->socket_.TimeOut(); }
 
-		const SOCKADDR_IN& SockAddr() const
+		SOCKADDR_IN const & SockAddr() const
 			{ return this->sockAddr_; }
 
 	private:
-		void OnJoin(char* revbuf, char* sendbuf, int& sendnum, SOCKADDR_IN& From, const Processer& pro);
-		void OnQuit(PlayerAddrsIter iter, char* sendbuf, int& sendnum, const Processer& pro);
+		void OnJoin(char* revbuf, char* sendbuf, int& sendnum, SOCKADDR_IN& From, Processer const & pro);
+		void OnQuit(PlayerAddrsIter iter, char* sendbuf, int& sendnum, Processer const & pro);
 
-		void OnGetLobbyInfo(char* sendbuf, int& sendnum, const Processer& pro);
+		void OnGetLobbyInfo(char* sendbuf, int& sendnum, Processer const & pro);
 		void OnNop(PlayerAddrsIter iter);
 
-		PlayerAddrsIter ID(const SOCKADDR_IN& Addr);
+		PlayerAddrsIter ID(SOCKADDR_IN const & Addr);
 
 	private:
 		Socket			socket_;

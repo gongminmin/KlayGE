@@ -133,9 +133,9 @@ namespace KlayGE
 
 	// 返回渲染系统的名字
 	/////////////////////////////////////////////////////////////////////////////////
-	const std::wstring& OGLRenderEngine::Name() const
+	std::wstring const & OGLRenderEngine::Name() const
 	{
-		static std::wstring name(L"OpenGL Render System");
+		static const std::wstring name(L"OpenGL Render System");
 		return name;
 	}
 
@@ -179,7 +179,7 @@ namespace KlayGE
 
 	// 设置环境光
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::AmbientLight(const Color& col)
+	void OGLRenderEngine::AmbientLight(Color const & col)
 	{
 		GLfloat ambient[] = { col.r(), col.g(), col.b(), 1.0f };
 		glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
@@ -187,7 +187,7 @@ namespace KlayGE
 
 	// 设置清除颜色
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::ClearColor(const Color& col)
+	void OGLRenderEngine::ClearColor(Color const & col)
 	{
 		glClearColor(col.r(), col.g(), col.b(), col.a());
 	}
@@ -231,11 +231,11 @@ namespace KlayGE
 
 	// 建立渲染窗口
 	/////////////////////////////////////////////////////////////////////////////////
-	RenderWindowPtr OGLRenderEngine::CreateRenderWindow(const std::string& name,
-		const RenderSettings& settings)
+	RenderWindowPtr OGLRenderEngine::CreateRenderWindow(std::string const & name,
+		RenderSettings const & settings)
 	{
 		RenderWindowPtr win(new OGLRenderWindow(name,
-			static_cast<const OGLRenderSettings&>(settings)));
+			static_cast<OGLRenderSettings const &>(settings)));
 
 		this->ActiveRenderTarget(this->AddRenderTarget(win));
 
@@ -273,7 +273,7 @@ namespace KlayGE
 
 	// 设置光源
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::SetLight(U32 index, const Light& light)
+	void OGLRenderEngine::SetLight(U32 index, Light const & light)
 	{
 		GLint lightIndex(GL_LIGHT0 + index);
 
@@ -365,7 +365,7 @@ namespace KlayGE
 		oglViewMat(2, 2) = -oglViewMat(2, 2);
 		oglViewMat(3, 2) = -oglViewMat(3, 2);
 
-		const Matrix4 oglMat(worldMat_ * oglViewMat);
+		Matrix4 const oglMat(worldMat_ * oglViewMat);
 		glLoadMatrixf(&oglMat(0, 0));
 	}
 
@@ -390,7 +390,7 @@ namespace KlayGE
 
 	// 设置材质
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::SetMaterial(const Material& material)
+	void OGLRenderEngine::SetMaterial(Material const & material)
 	{
 		GLfloat ambient[4] = { material.ambient.r(), material.ambient.g(), material.ambient.b(), material.ambient.a() };
 		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient);
@@ -412,7 +412,7 @@ namespace KlayGE
 
 		this->CullingMode(cullingMode_);
 
-		const Viewport& vp((*iter)->GetViewport());
+		Viewport const & vp((*iter)->GetViewport());
 		glViewport(vp.left, vp.top, vp.width, vp.height);
 	}
 
@@ -425,7 +425,7 @@ namespace KlayGE
 
 	// 渲染
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::Render(const RenderBuffer& vb)
+	void OGLRenderEngine::Render(RenderBuffer const & vb)
 	{
 		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_NORMAL_ARRAY);
@@ -438,7 +438,7 @@ namespace KlayGE
 			OGLVertexStream& stream(static_cast<OGLVertexStream&>(*(*iter)));
 			VertexStreamType type(stream.Type());
 
-			const std::vector<U8>& data(stream.OGLBuffer());
+			std::vector<U8> const & data(stream.OGLBuffer());
 
 			switch (type)
 			{
@@ -504,7 +504,7 @@ namespace KlayGE
 		if (vb.UseIndices())
 		{
 			OGLIndexStream& stream(static_cast<OGLIndexStream&>(*vb.GetIndexStream()));
-			const std::vector<U16>& data(stream.OGLBuffer());
+			std::vector<U16> const & data(stream.OGLBuffer());
 			glDrawElements(mode, static_cast<GLsizei>(vb.NumIndices()),
 				GL_UNSIGNED_SHORT, &data[0]);
 		}
@@ -562,7 +562,7 @@ namespace KlayGE
 
 	// 设置雾化效果
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::Fog(FogMode mode, const Color& color,
+	void OGLRenderEngine::Fog(FogMode mode, Color const & color,
 		float expDensity, float linearStart, float linearEnd)
 	{
 		GLint fogMode;
@@ -597,7 +597,7 @@ namespace KlayGE
 
 	// 设置纹理
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::SetTexture(U32 stage, const TexturePtr& texture)
+	void OGLRenderEngine::SetTexture(U32 stage, TexturePtr const & texture)
 	{
 		if (!texture)
 		{
@@ -643,7 +643,7 @@ namespace KlayGE
 
 	// 设置纹理坐标
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::TextureMatrix(U32 stage, const Matrix4& mat)
+	void OGLRenderEngine::TextureMatrix(U32 stage, Matrix4 const & mat)
 	{
 	}
 

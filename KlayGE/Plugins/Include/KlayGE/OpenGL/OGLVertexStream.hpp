@@ -29,9 +29,9 @@ namespace KlayGE
 		size_t NumVertices() const
 			{ return buffer_.size() / this->sizeElement() / this->ElementsPerVertex(); }
 
-		void Assign(const void* src, size_t numVertices, size_t stride = 0);
+		void Assign(void const * src, size_t numVertices, size_t stride = 0);
 
-		const std::vector<U8>& OGLBuffer() const
+		std::vector<U8> const & OGLBuffer() const
 			{ return buffer_; }
 
 	protected:

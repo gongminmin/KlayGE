@@ -22,13 +22,13 @@ namespace KlayGE
 	{
 		// ÑÕÉ«
 		///////////////////////////////////////////////////////////////////////////////
-		Color& Negative(Color& out, const Color& rhs)
+		Color& Negative(Color& out, Color const & rhs)
 		{
 			out = Color(1 - rhs.r(), 1 - rhs.g(), 1 - rhs.b(), rhs.a());
 			return out;
 		}
 
-		Color& Modulate(Color& out, const Color& lhs, const Color& rhs)
+		Color& Modulate(Color& out, Color const & lhs, Color const & rhs)
 		{
 			out = Color(lhs.r() * rhs.r(), lhs.g() * rhs.g(), lhs.b() * rhs.b(), lhs.a() * rhs.a());
 			return out;
@@ -37,7 +37,7 @@ namespace KlayGE
 
 		// ·¶Î§
 		///////////////////////////////////////////////////////////////////////////////
-		bool VecInSphere(const Sphere& sphere, const Vector3& v)
+		bool VecInSphere(Sphere const & sphere, Vector3 const & v)
 		{
 			if (Length(v - sphere.Center()) < sphere.Radius())
 			{
@@ -46,11 +46,11 @@ namespace KlayGE
 			return false;
 		}
 
-		bool BoundProbe(const Sphere& sphere, const Vector3& orig, const Vector3& dir)
+		bool BoundProbe(Sphere const & sphere, Vector3 const & orig, Vector3 const & dir)
 		{
-			const float a = LengthSq(dir);
-			const float b = 2 * Dot(dir, orig - sphere.Center());
-			const float c = LengthSq(orig - sphere.Center()) - sphere.Radius() * sphere.Radius();
+			float const a = LengthSq(dir);
+			float const b = 2 * Dot(dir, orig - sphere.Center());
+			float const c = LengthSq(orig - sphere.Center()) - sphere.Radius() * sphere.Radius();
 
 			if (b * b - 4 * a * c < 0)
 			{
@@ -59,19 +59,19 @@ namespace KlayGE
 			return true;
 		}
 
-		bool VecInBox(const Box& box, const Vector3& v)
+		bool VecInBox(Box const & box, Vector3 const & v)
 		{
 			return (InBound(v.x(), box.Min().x(), box.Max().x()))
 				&& (InBound(v.y(), box.Min().y(), box.Max().y()))
 				&& (InBound(v.z(), box.Min().z(), box.Max().z()));
 		}
 
-		bool BoundProbe(const Box& box, const Vector3& orig, const Vector3& dir)
+		bool BoundProbe(Box const & box, Vector3 const & orig, Vector3 const & dir)
 		{
-			const Vector3 leftBottomNear(box.LeftBottomNear());
-			const Vector3 leftTopNear(box.LeftTopNear());
-			const Vector3 rightTopNear(box.RightTopNear());
-			const Vector3 leftTopFar(box.LeftTopFar());
+			Vector3 const leftBottomNear(box.LeftBottomNear());
+			Vector3 const leftTopNear(box.LeftTopNear());
+			Vector3 const rightTopNear(box.RightTopNear());
+			Vector3 const leftTopFar(box.LeftTopFar());
 
 			Plane pNear;
 			FromPoints(pNear, leftBottomNear, leftTopNear, rightTopNear);

@@ -1,7 +1,7 @@
 #ifndef _D3D9VERTEXSTREAM_HPP
 #define _D3D9VERTEXSTREAM_HPP
 
-#include <KlayGE/COMPtr.hpp>
+#include <boost/smart_ptr.hpp>
 
 #include <d3d9.h>
 
@@ -18,13 +18,13 @@ namespace KlayGE
 
 		bool IsStatic() const;
 
-		void Assign(const void* src, size_t numVertices, size_t stride = 0);
+		void Assign(void const * src, size_t numVertices, size_t stride = 0);
 
-		COMPtr<IDirect3DVertexBuffer9> D3D9Buffer() const;
+		boost::shared_ptr<IDirect3DVertexBuffer9> D3D9Buffer() const;
 		size_t NumVertices() const;
 
 	private:
-		COMPtr<IDirect3DVertexBuffer9> buffer_;
+		boost::shared_ptr<IDirect3DVertexBuffer9> buffer_;
 		size_t currentSize_;
 
 		size_t numVertices_;

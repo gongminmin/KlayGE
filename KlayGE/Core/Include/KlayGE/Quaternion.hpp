@@ -33,37 +33,37 @@ namespace KlayGE
 		typedef T					value_type;
 
 		typedef value_type*			pointer;
-		typedef const value_type*	const_pointer;
+		typedef value_type const *	const_pointer;
 
 		typedef value_type&			reference;
-		typedef const value_type&	const_reference;
+		typedef value_type const &	const_reference;
 
 		typedef value_type*			iterator;
-		typedef const value_type*	const_iterator;
+		typedef value_type const *	const_iterator;
 
 		enum { elem_num = 4 };
 
 	public:
 		Quaternion_T()
 			{ }
-		explicit Quaternion_T(const T* rhs)
+		explicit Quaternion_T(T const * rhs)
 			: quat_(rhs)
 			{ }
-		Quaternion_T(const Vector_T<T, 3>& vec, const T& s)
+		Quaternion_T(Vector_T<T, 3> const & vec, T const & s)
 		{
 			this->x() = vec.x();
 			this->y() = vec.y();
 			this->z() = vec.z();
 			this->w() = s;
 		}
-		Quaternion_T(const Quaternion_T& rhs)
+		Quaternion_T(Quaternion_T const & rhs)
 			: quat_(rhs.quat_)
 			{ }
 		template <typename U>
-		Quaternion_T(const Quaternion_T<U>& rhs)
+		Quaternion_T(Quaternion_T<U> const & rhs)
 			: quat_(reinterpret_cast<const Quaternion_T<T>(rhs).quat_)
 			{ }
-		Quaternion_T(const T& x, const T& y, const T& z, const T& w)
+		Quaternion_T(T const & x, T const & y, T const & z, T const & w)
 		{
 			this->x() = x;
 			this->y() = y;
@@ -73,7 +73,7 @@ namespace KlayGE
 
 		static const Quaternion_T& Identity()
 		{
-			static Quaternion_T out(0, 0, 0, 1);
+			static const Quaternion_T out(0, 0, 0, 1);
 			return out;
 		}
 
@@ -110,37 +110,37 @@ namespace KlayGE
 
 		// 赋值操作符
 		template <typename U>
-		Quaternion_T& operator+=(const Quaternion_T<U>& rhs)
+		Quaternion_T const & operator+=(Quaternion_T<U> const & rhs)
 		{
 			quat_ += rhs.quat_;
 			return *this;
 		}
 		template <typename U>
-		Quaternion_T& operator-=(const Quaternion_T<U>& rhs)
+		Quaternion_T const & operator-=(Quaternion_T<U> const & rhs)
 		{
 			quat_ -= rhs.quat_;
 			return *this;
 		}
 
 		template <typename U>
-		Quaternion_T& operator*=(const Quaternion_T<U>& rhs)
+		Quaternion_T const & operator*=(Quaternion_T<U> const & rhs)
 		{
 			return MathLib::Multiply(*this, *this, rhs);
 		}
 		template <typename U>
-		Quaternion_T& operator*=(const U& rhs)
+		Quaternion_T const & operator*=(U const & rhs)
 		{
 			quat_ *= rhs;
 			return *this;
 		}
 		template <typename U>
-		Quaternion_T& operator/=(const U& rhs)
+		Quaternion_T const & operator/=(U const & rhs)
 		{
 			quat_ /= rhs;
 			return *this;
 		}
 
-		Quaternion_T& operator=(const Quaternion_T& rhs)
+		Quaternion_T const & operator=(Quaternion_T const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -149,7 +149,7 @@ namespace KlayGE
 			return *this;
 		}
 		template <typename U>
-		Quaternion_T& operator=(const Quaternion_T<U>& rhs)
+		Quaternion_T const & operator=(Quaternion_T<U> const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -159,15 +159,15 @@ namespace KlayGE
 		}
 
 		// 一元操作符
-		const Quaternion_T operator+() const
+		Quaternion_T const operator+() const
 			{ return *this; }
-		const Quaternion_T operator-() const
+		Quaternion_T const operator-() const
 			{ return Quaternion_T(-this->x(), -this->y(), -this->z(), -this->w()); }
 
 		// 取方向向量
-		const Vector_T<T, 3> v() const
+		Vector_T<T, 3> const v() const
 			{ return Vector_T<T, 3>(this->x(), this->y(), this->z()); }
-		void v(const Vector_T<T, 3>& rhs)
+		void v(Vector_T<T, 3> const & rhs)
 		{
 			this->x() = rhs.x();
 			this->y() = rhs.y();
@@ -180,13 +180,13 @@ namespace KlayGE
 
 	template <typename T>
 	inline bool
-	operator==(const Quaternion_T<T>& lhs, const Quaternion_T<T>& rhs)
+	operator==(Quaternion_T<T> const & lhs, Quaternion_T<T> const & rhs)
 	{
 		return (lhs.x() == rhs.x()) && (lhs.y() == rhs.y()) && (lhs.z() == rhs.z()) && (lhs.w() == rhs.w());
 	}
 	template <typename T>
 	inline bool
-	operator!=(const Quaternion_T<T>& lhs, const Quaternion_T<T>& rhs)
+	operator!=(Quaternion_T<T> const & lhs, Quaternion_T<T> const & rhs)
 	{
 		return !(lhs == rhs);
 	}

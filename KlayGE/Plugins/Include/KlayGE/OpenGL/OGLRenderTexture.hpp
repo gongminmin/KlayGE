@@ -12,7 +12,7 @@ namespace KlayGE
 	public:
 		OGLRenderTexture(U32 width, U32 height);
 
-		virtual void CustomAttribute(const std::string& name, void* pData);
+		virtual void CustomAttribute(std::string const & name, void* pData);
 
 		bool RequiresTextureFlipping() const
 			{ return true; }

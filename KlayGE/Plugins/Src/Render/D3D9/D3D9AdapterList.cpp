@@ -24,7 +24,7 @@ namespace KlayGE
 
 	// 获取显卡
 	/////////////////////////////////////////////////////////////////////////////////
-	const D3D9Adapter& D3D9AdapterList::Adapter(size_t index) const
+	D3D9Adapter const & D3D9AdapterList::Adapter(size_t index) const
 	{
 		assert(index < adapters_.size());
 
@@ -47,7 +47,7 @@ namespace KlayGE
 
 	// 枚举系统显卡
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9AdapterList::Enumerate(const COMPtr<IDirect3D9>& d3d)
+	void D3D9AdapterList::Enumerate(boost::shared_ptr<IDirect3D9> const & d3d)
 	{
 		// 枚举系统中的适配器 (通常只有一个，除非有几块显卡)
 		for (U32 i = 0; i < d3d->GetAdapterCount(); ++ i)

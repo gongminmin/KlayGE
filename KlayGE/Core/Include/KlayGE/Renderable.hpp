@@ -16,7 +16,7 @@ namespace KlayGE
 
 		virtual RenderEffectPtr GetRenderEffect() const = 0;
 		virtual RenderBufferPtr GetRenderBuffer() const = 0;
-		virtual const std::wstring& Name() const = 0;
+		virtual std::wstring const & Name() const = 0;
 
 		virtual void OnRenderBegin()
 			{ }

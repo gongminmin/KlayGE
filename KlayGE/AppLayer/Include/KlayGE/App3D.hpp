@@ -39,12 +39,12 @@ namespace KlayGE
 		App3DFramework();
 		virtual ~App3DFramework();
 
-		virtual void Create(const std::string& name, const RenderSettings& settings);
+		virtual void Create(std::string const & name, RenderSettings const & settings);
 
 		void Run();
 
 	protected:
-		void LookAt(const Vector3& eye, const Vector3& lookAt, const Vector3& up = Vector3(0, 1, 0));
+		void LookAt(Vector3 const & eye, Vector3 const & lookAt, Vector3 const & up = Vector3(0, 1, 0));
 		void Proj(float nearPlane, float farPlane);
 
 	protected:

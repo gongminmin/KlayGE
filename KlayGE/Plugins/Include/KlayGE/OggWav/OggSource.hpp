@@ -26,7 +26,7 @@ namespace KlayGE
 	class OggSource : public AudioDataSource
 	{
 	public:
-		explicit OggSource(const VFilePtr& file);
+		explicit OggSource(VFilePtr const & file);
 		~OggSource();
 
 		size_t Size();

@@ -24,7 +24,7 @@ namespace KlayGE
 
 	// …Ë÷√∂Ø◊˜”≥…‰
 	/////////////////////////////////////////////////////////////////////////////////
-	void InputDevice::ActionMap(const InputActionMap& actionMap)
+	void InputDevice::ActionMap(InputActionMap const & actionMap)
 	{
 		actionMap_ = actionMap;
 

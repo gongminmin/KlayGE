@@ -25,7 +25,7 @@ namespace KlayGE
 	class WaveSource : public AudioDataSource
 	{
 	public:
-		explicit WaveSource(const VFilePtr& file);
+		explicit WaveSource(VFilePtr const & file);
 
 		size_t Size();
 

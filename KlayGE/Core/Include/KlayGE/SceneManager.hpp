@@ -23,9 +23,9 @@ namespace KlayGE
 	public:
 		SceneManager();
 
-		virtual void ClipScene(const Camera& camera);
+		virtual void ClipScene(Camera const & camera);
 
-		virtual void PushRenderable(const RenderablePtr& obj);
+		virtual void PushRenderable(RenderablePtr const & obj);
 
 		void Update();
 		void Flash();

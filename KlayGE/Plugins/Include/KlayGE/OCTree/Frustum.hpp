@@ -23,8 +23,8 @@ namespace KlayGE
 	class Frustum
 	{
 	public:
-		void CalculateFrustum(const Matrix4& view, const Matrix4& proj);
-		bool Visiable(const Vector3& v) const;
+		void CalculateFrustum(Matrix4 const & view, Matrix4 const & proj);
+		bool Visiable(Vector3 const & v) const;
 
 	private:
 		typedef boost::array<Plane, 6> PlanesType;

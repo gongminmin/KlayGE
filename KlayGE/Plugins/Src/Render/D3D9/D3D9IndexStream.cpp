@@ -1,4 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Memory.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -19,24 +20,24 @@ namespace KlayGE
 	{
 	}
 
-	void D3D9IndexStream::Assign(const void* src, size_t numIndices)
+	void D3D9IndexStream::Assign(void const * src, size_t numIndices)
 	{
 		numIndices_ = numIndices;
 
-		const size_t size(sizeof(U16) * numIndices);
+		size_t const size(sizeof(U16) * numIndices);
 
 		if (currentSize_ < size)
 		{
 			currentSize_ = size;
 
-			COMPtr<IDirect3DDevice9> d3dDevice(static_cast<const D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
+			boost::shared_ptr<IDirect3DDevice9> d3dDevice(static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
 
 			IDirect3DIndexBuffer9* buffer;
 			TIF(d3dDevice->CreateIndexBuffer(static_cast<::UINT>(size), 
 				D3DUSAGE_WRITEONLY | (this->IsStatic() ? 0 : D3DUSAGE_DYNAMIC),
 				D3DFMT_INDEX16, D3DPOOL_DEFAULT, &buffer, NULL));
 
-			buffer_ = COMPtr<IDirect3DIndexBuffer9>(buffer);
+			buffer_ = MakeCOMPtr(buffer);
 		}
 
 		void* dest;
@@ -50,7 +51,7 @@ namespace KlayGE
 		return numIndices_;
 	}
 
-	COMPtr<IDirect3DIndexBuffer9> D3D9IndexStream::D3D9Buffer() const
+	boost::shared_ptr<IDirect3DIndexBuffer9> D3D9IndexStream::D3D9Buffer() const
 	{
 		return buffer_;
 	}

@@ -13,7 +13,7 @@
 #ifndef _DSHOW_HPP
 #define _DSHOW_HPP
 
-#include <KlayGE/COMPtr.hpp>
+#include <boost/smart_ptr.hpp>
 #include <KlayGE/Show.hpp>
 #include <strmif.h>
 #include <control.h>
@@ -27,8 +27,8 @@
 
 namespace KlayGE
 {
-	const long OAFALSE = 0;
-	const long OATRUE  = -1;
+	long const OAFALSE = 0;
+	long const OATRUE  = -1;
 
 	class DShowEngine : boost::noncopyable, public ShowEngine
 	{
@@ -38,7 +38,7 @@ namespace KlayGE
 
 		bool IsComplete();
 
-		void Load(const std::wstring& fileName);
+		void Load(std::wstring const & fileName);
 
 		ShowState State(long msTimeout = -1);
 		void ToggleFullScreen();
@@ -47,10 +47,10 @@ namespace KlayGE
 		HWND		hWnd_;
 		bool		audioOnly_;
 
-		COMPtr<IGraphBuilder>	graph_;
-		COMPtr<IMediaControl>	mediaControl_;
-		COMPtr<IMediaEvent>		mediaEvent_;
-		COMPtr<IVideoWindow>	videoWnd_;
+		boost::shared_ptr<IGraphBuilder>	graph_;
+		boost::shared_ptr<IMediaControl>	mediaControl_;
+		boost::shared_ptr<IMediaEvent>		mediaEvent_;
+		boost::shared_ptr<IVideoWindow>		videoWnd_;
 
 	private:
 		void CheckVisibility();

@@ -19,22 +19,22 @@ namespace KlayGE
 		OGLRenderEngine();
 		~OGLRenderEngine();
 
-		const std::wstring& Name() const;
+		std::wstring const & Name() const;
 
-		void ClearColor(const Color& clr);
+		void ClearColor(Color const & clr);
 
 		void ShadingType(ShadeOptions so);
 
 		void EnableLighting(bool enabled);
-		void AmbientLight(const Color& col);
+		void AmbientLight(Color const & col);
 
-		RenderWindowPtr CreateRenderWindow(const std::string& name, const RenderSettings& settings);
+		RenderWindowPtr CreateRenderWindow(std::string const & name, RenderSettings const & settings);
 
 		void CullingMode(CullMode mode);
 
-		void SetMaterial(const Material& mat);
+		void SetMaterial(Material const & mat);
 
-		void SetLight(U32 index, const Light& lt);
+		void SetLight(U32 index, Light const & lt);
 		void LightEnable(U32 index, bool enable);
 
 		void ActiveRenderTarget(RenderTargetListIterator iter);
@@ -42,7 +42,7 @@ namespace KlayGE
 		void StartRendering();
 
 		void BeginFrame();
-		void Render(const RenderBuffer& vb);
+		void Render(RenderBuffer const & vb);
 		void EndFrame();
 
 		void DepthBufferDepthTest(bool depthTest);
@@ -51,10 +51,10 @@ namespace KlayGE
 		void DepthBias(U16 bias);
 
 		void Fog(FogMode mode = Fog_None,
-			const Color& color = Color(1, 1, 1, 1),
+			Color const & color = Color(1, 1, 1, 1),
 			float expDensity = 1, float linearStart = 0, float linearEnd = 1);
 
-		void SetTexture(U32 stage, const TexturePtr& texture);
+		void SetTexture(U32 stage, TexturePtr const & texture);
 
 		void TextureCoordSet(U32 stage, int index);
 
@@ -63,7 +63,7 @@ namespace KlayGE
 
 		void TextureCoordCalculation(U32 stage, TexCoordCalcMethod m);
 		void TextureAddressingMode(U32 stage, TexAddressingMode tam);
-		void TextureMatrix(U32 stage, const Matrix4& mat);
+		void TextureMatrix(U32 stage, Matrix4 const & mat);
 		void TextureFiltering(U32 stage, TexFiltering texFiltering);
 		void TextureAnisotropy(U32 stage, U32 maxAnisotropy);
 

@@ -25,16 +25,16 @@ namespace KlayGE
 	{
 	}
 
-	PackedFile::PackedFile(const std::string& pathName)
+	PackedFile::PackedFile(std::string const & pathName)
 	{
 		this->Open(pathName);
 	}
 
-	bool PackedFile::Open(const std::string& pathName)
+	bool PackedFile::Open(std::string const & pathName)
 	{
-		const std::string::size_type offset(pathName.rfind(".pkt/"));
-		const std::string pktName(pathName.substr(0, offset + 4));
-		const std::string fileName(pathName.substr(offset + 5));
+		std::string::size_type const offset(pathName.rfind(".pkt/"));
+		std::string const pktName(pathName.substr(0, offset + 4));
+		std::string const fileName(pathName.substr(offset + 5));
 
 		boost::shared_ptr<DiskFile> pktFile(new DiskFile);
 		if (!pktFile->Open(pktName, VFile::OM_Read))
@@ -100,7 +100,7 @@ namespace KlayGE
 	}
 
 
-	PackedFileResIdentifier::PackedFileResIdentifier(const std::string& fileName)
+	PackedFileResIdentifier::PackedFileResIdentifier(std::string const & fileName)
 		: fileName_(fileName)
 	{
 	}

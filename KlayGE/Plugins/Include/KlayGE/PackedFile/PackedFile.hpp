@@ -31,16 +31,16 @@ namespace KlayGE
 	{
 	public:
 		PackedFile();
-		PackedFile(const std::string& pathName);
+		PackedFile(std::string const & pathName);
 
-		bool Open(const std::string& pathName);
+		bool Open(std::string const & pathName);
 		void Close();
 
 		size_t Length();
 		void Length(size_t /*newLen*/)
 			{ }
 
-		size_t Write(const void* /*data*/, size_t /*count*/)
+		size_t Write(void const * /*data*/, size_t /*count*/)
 			{ return 0; }
 		size_t Read(void* data, size_t count);
 		size_t CopyFrom(VFile& /*src*/, size_t /*size*/)
@@ -54,13 +54,12 @@ namespace KlayGE
 		VFilePtr	file_;
 
 		VFilePtr	pktFile_;
-		PackedFile& operator=(const PackedFile& rhs);
 	};
 
 	class PackedFileResIdentifier : public ResIdentifier
 	{
 	public:
-		PackedFileResIdentifier(const std::string& fileName);
+		PackedFileResIdentifier(std::string const & fileName);
 
 		VFilePtr Load();
 

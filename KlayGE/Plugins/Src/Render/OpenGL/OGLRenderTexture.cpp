@@ -20,7 +20,7 @@ namespace KlayGE
 		height_ = privateTex_->Height();
 	}
 
-	void OGLRenderTexture::CustomAttribute(const std::string& name, void* pData)
+	void OGLRenderTexture::CustomAttribute(std::string const & name, void* pData)
 	{
 		if ("IsTexture" == name)
 		{

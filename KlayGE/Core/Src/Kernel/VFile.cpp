@@ -15,7 +15,7 @@ namespace KlayGE
 		void Length(size_t newLen)
 			{ }
 
-		size_t Write(const void* data, size_t count)
+		size_t Write(void const * data, size_t count)
 			{ return 0; }
 		size_t Read(void* data, size_t count)
 			{ return 0; }

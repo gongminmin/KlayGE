@@ -76,7 +76,7 @@ namespace
 
 				for (short x = 0; x < TGAHeader.width; ++ x)
 				{
-					const size_t offset((line * TGAHeader.width + x) * (TGAHeader.pixelSize / 8));
+					size_t const offset((line * TGAHeader.width + x) * (TGAHeader.pixelSize / 8));
 
 					tgaData.push_back(data[offset + 0]);
 					tgaData.push_back(data[offset + 1]);
@@ -112,6 +112,8 @@ namespace
 
 			rb_->AddIndexStream(true);
 			rb_->GetIndexStream()->Assign(Index, sizeof(Index) / sizeof(U16));
+
+			box_ = Box(Vector3(0, 0, 0), Vector3(0, 0, 0));
 		}
 
 		RenderEffectPtr GetRenderEffect() const
@@ -124,14 +126,21 @@ namespace
 			return rb_;
 		}
 
-		const std::wstring& Name() const
+		Box GetBound() const
 		{
-			static std::wstring name(L"Flag");
+			return box_; 
+		}
+
+		std::wstring const & Name() const
+		{
+			static const std::wstring name(L"Flag");
 			return name;
 		}
 
 		KlayGE::RenderBufferPtr rb_;
 		KlayGE::RenderEffectPtr effect_;
+
+		Box box_;
 	};
 
 	boost::shared_ptr<Flag> flag;

@@ -30,7 +30,7 @@ namespace KlayGE
 
 	// 设置动作格式
 	//////////////////////////////////////////////////////////////////////////////////
-	void InputEngine::ActionMap(const InputActionMap& actionMap, bool reenumerate)
+	void InputEngine::ActionMap(InputActionMap const & actionMap, bool reenumerate)
 	{
 		// 保存新的动作格式
 		actionMap_ = actionMap;

@@ -49,19 +49,19 @@ namespace KlayGE
 		typedef typename Allocator::const_reference			const_reference;
 
 	public:
-		explicit SetVector(const key_compare& comp = key_compare(), 
-								const Allocator& alloc = Allocator())
+		explicit SetVector(key_compare const & comp = key_compare(), 
+								Allocator const & alloc = Allocator())
 					: container_(alloc), compare_(comp)
 			{ }
 
 		template <class InputIterator>
         SetVector(InputIterator first, InputIterator last, 
-						const key_compare& comp = key_compare(), 
-						const Allocator& alloc = Allocator())
+						key_compare const & comp = key_compare(), 
+						Allocator const & alloc = Allocator())
 					: container_(first, last, alloc), compare_(comp)
 			{ std::sort(this->begin(), this->end(), compare_); }
         
-        SetVector& operator=(const SetVector& rhs)
+        SetVector const & operator=(SetVector const & rhs)
         { 
             SetVector(rhs).swap(*this); 
             return *this;
@@ -89,19 +89,19 @@ namespace KlayGE
 		size_type size() const
 			{ return container_.size(); }
 
-		size_type count(const Key& key) const
+		size_type count(Key const & key) const
 			{ return find(key) != end() }
 
-		std::pair<iterator, iterator> equal_range(const Key& key)
+		std::pair<iterator, iterator> equal_range(Key const & key)
 			{ return std::equal_range(begin(), end(), k, compare_); }
-		std::pair<const_iterator, const_iterator> equal_range(const Key& key) const
+		std::pair<const_iterator, const_iterator> equal_range(Key const & key) const
 			{ return std::equal_range(begin(), end(), k, compare_); }
 
 		iterator erase(iterator where)
 			{ container_.erase(where); }
 		iterator erase(iterator first, iterator last)
 			{ container_.erase(first, last); }
-		size_type erase(const key_type& key)
+		size_type erase(key_type const & key)
 		{
 			iterator iter(this->find(key));
 			if (iter != this->end())
@@ -112,7 +112,7 @@ namespace KlayGE
 			return 0;
 		}
 
-		iterator find(const Key& key)
+		iterator find(Key const & key)
 		{
 			iterator iter(this->lower_bound(key));
 			if (iter != this->end() && compare_(key, iter->first))
@@ -121,7 +121,7 @@ namespace KlayGE
 			}
 			return iter;
 		}
-		const_iterator find(const Key& key) const
+		const_iterator find(Key const & key) const
 		{
 			const_iterator iter(this->lower_bound(key));
 			if (iter != this->end() && compare_(key, iter->first))
@@ -136,7 +136,7 @@ namespace KlayGE
 			return container_.get_allocator();
 		}
 
-		std::pair<iterator, bool> insert(const value_type& val)
+		std::pair<iterator, bool> insert(value_type const & val)
 		{
 			bool found(true);
 			iterator iter(this->lower_bound(val.first));
@@ -148,7 +148,7 @@ namespace KlayGE
 			}
 			return std::make_pair(iter, !found);
 		}
-		iterator insert(iterator where, const value_type& val)
+		iterator insert(iterator where, value_type const & val)
 		{
 			if (where != this->end() && compare_(*pos, val) &&
 				(where == this->end() - 1 ||
@@ -171,14 +171,14 @@ namespace KlayGE
 		key_compare key_comp() const
 			{ return compare_; }
 
-		iterator lower_bound(const Key& key)
+		iterator lower_bound(Key const & key)
 			{ return std::lower_bound(this->begin(), this->end(), key, compare_); }
-		const_iterator lower_bound(const Key& key) const
+		const_iterator lower_bound(Key const & key) const
 			{ return std::lower_bound(this->begin(), this->end(), key, compare_); }
 
-		iterator upper_bound(const Key& key)
+		iterator upper_bound(Key const & key)
 			{ return std::upper_bound(this->begin(), this->end(), key, compare_); }
-		const_iterator upper_bound(const Key& key) const
+		const_iterator upper_bound(Key const & key) const
 			{ return std::upper_bound(this->begin(), this->end(), key, compare_); }
 
 		reverse_iterator rbegin()
@@ -201,10 +201,10 @@ namespace KlayGE
 			{ return value_compare(compare_); }
 
 			
-		friend bool operator==(const SetVector& lhs, const SetVector& rhs)
+		friend bool operator==(SetVector const & lhs, SetVector const & rhs)
 			{ return lhs.container_ == rhs.container_; } 
 
-		friend bool operator<(const SetVector& lhs, const SetVector& rhs)
+		friend bool operator<(SetVector const & lhs, SetVector const & rhs)
 			{ return lhs.container_ < rhs.container_; } 
 
 	private:
@@ -221,32 +221,32 @@ namespace KlayGE
 
 	template <class Key, class Type, class Traits, class Allocator>
 	inline bool
-	operator!=(const SetVector<Key, Type, Traits, Allocator>& lhs,
-					const SetVector<Key, Type, Traits, Allocator>& rhs)
+	operator!=(SetVector<Key, Type, Traits, Allocator> const & lhs,
+					SetVector<Key, Type, Traits, Allocator> const & rhs)
 	{
 		return !(lhs == rhs);
 	}
 
 	template <class Key, class Type, class Traits, class Allocator>
 	inline bool
-	operator>(const SetVector<Key, Type, Traits, Allocator>& lhs,
-					const SetVector<Key, Type, Traits, Allocator>& rhs)
+	operator>(SetVector<Key, Type, Traits, Allocator> const & lhs,
+					SetVector<Key, Type, Traits, Allocator> const & rhs)
 	{
 		return rhs < lhs;
 	}
 
 	template <class Key, class Type, class Traits, class Allocator>
 	inline bool
-	operator>=(const SetVector<Key, Type, Traits, Allocator>& lhs,
-					const SetVector<Key, Type, Traits, Allocator>& rhs)
+	operator>=(SetVector<Key, Type, Traits, Allocator> const & lhs,
+					SetVector<Key, Type, Traits, Allocator> const & rhs)
 	{
 		return !(lhs < rhs);
 	}
 
 	template <class Key, class Type, class Traits, class Allocator>
 	inline bool
-	operator<=(const SetVector<Key, Type, Traits, Allocator>& lhs,
-					const SetVector<Key, Type, Traits, Allocator>& rhs)
+	operator<=(SetVector<Key, Type, Traits, Allocator> const & lhs,
+					SetVector<Key, Type, Traits, Allocator> const & rhs)
 	{
 		return !(rhs < lhs);
 	}

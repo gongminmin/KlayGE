@@ -12,14 +12,11 @@
 
 #include <KlayGE/KlayGE.hpp>
 
+#include <boost/thread/xtime.hpp>
+#include <boost/thread/thread.hpp>
+
 #ifdef WIN32
 	#include <windows.h>
-	#include <winsock.h>
-
-	#pragma comment(lib, "WSock32.lib")
-#else
-	#include <sys/select.h>
-	#include <sys/socket.h>
 #endif
 
 #include <cassert>
@@ -32,7 +29,7 @@ namespace KlayGE
 {
 	// 把一个WString转化为String
 	/////////////////////////////////////////////////////////////////////////////////
-	std::string& Convert(std::string& dest, const std::wstring& src)
+	std::string& Convert(std::string& dest, std::wstring const & src)
 	{
 #ifdef WIN32
 		std::vector<char> vecTemp(::WideCharToMultiByte(CP_ACP, 0, src.c_str(), -1,
@@ -48,7 +45,7 @@ namespace KlayGE
 
 	// 把一个String转化为String
 	/////////////////////////////////////////////////////////////////////////////////
-	std::string& Convert(std::string& dest, const std::string& src)
+	std::string& Convert(std::string& dest, std::string const & src)
 	{
 		dest = src;
 
@@ -57,7 +54,7 @@ namespace KlayGE
 
 	// 把一个String转化为WString
 	/////////////////////////////////////////////////////////////////////////////////
-	std::wstring& Convert(std::wstring& dest, const std::string& src)
+	std::wstring& Convert(std::wstring& dest, std::string const & src)
 	{
 #ifdef WIN32
 		std::vector<wchar_t> vecTemp(::MultiByteToWideChar(CP_ACP, 0, src.c_str(), -1, NULL, 0) - 1);
@@ -72,7 +69,7 @@ namespace KlayGE
 
 	// 把一个WString转化为WString
 	/////////////////////////////////////////////////////////////////////////////////
-	std::wstring& Convert(std::wstring& dest, const std::wstring& src)
+	std::wstring& Convert(std::wstring& dest, std::wstring const & src)
 	{
 		dest = src;
 
@@ -83,43 +80,57 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void Sleep(U32 ms)
 	{
-#ifdef WIN32
-		::Sleep(ms);
-#else
-		timeval sleeper;
-
-		sleeper.tv_sec = ms / 1000;
-		sleeper.tv_usec = (ms % 1000) * 1000;
-
-		select(0, NULL, NULL, NULL, &sleeper);
-#endif		// WIN32
+		boost::xtime xt;
+		boost::xtime_get(&xt, boost::TIME_UTC);
+		xt.nsec += ms;
+		boost::thread::sleep(xt);
 	}
 
 	// U32本地格式到网络格式
 	/////////////////////////////////////////////////////////////////////////////////
 	U32 ToNet(U32 host)
 	{
-		return htonl(host);
+		union
+		{
+			U8 byte[sizeof(U32) / sizeof(U8)];
+			U32 net;
+		} ret;
+
+		ret.byte[0] = static_cast<U8>((host & 0xFF000000) >> 24);
+		ret.byte[1] = static_cast<U8>((host & 0x00FF0000) >> 16);
+		ret.byte[2] = static_cast<U8>((host & 0x0000FF00) >> 8);
+		ret.byte[3] = static_cast<U8>((host & 0x000000FF) >> 0);
+
+		return ret.net;
 	}
 
 	// U16本地格式到网络格式
 	/////////////////////////////////////////////////////////////////////////////////
 	U16 ToNet(U16 host)
 	{
-		return htons(host);
+		union
+		{
+			U8 byte[sizeof(U16) / sizeof(U8)];
+			U16 net;
+		} ret;
+
+		ret.byte[0] = static_cast<U8>((host & 0xFF00) >> 8);
+		ret.byte[1] = static_cast<U8>((host & 0x00FF) >> 0);
+
+		return ret.net;
 	}
 
 	// U32网络格式到本地格式
 	/////////////////////////////////////////////////////////////////////////////////
 	U32 ToHost(U32 net)
 	{
-		return ntohl(net);
+		return ToNet(net);
 	}
 
 	// U16网络格式到本地格式
 	/////////////////////////////////////////////////////////////////////////////////
 	U16 ToHost(U16 net)
 	{
-		return ntohs(net);
+		return ToNet(net);
 	}
 }

@@ -15,6 +15,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Memory.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/AudioFactory.hpp>
@@ -30,7 +31,7 @@ namespace KlayGE
 {
 	// 构造函数。建立一个可以用于流式播放的缓冲区
 	/////////////////////////////////////////////////////////////////////////////////
-	DSMusicBuffer::DSMusicBuffer(const AudioDataSourcePtr& dataSource, U32 bufferSeconds, float volume)
+	DSMusicBuffer::DSMusicBuffer(AudioDataSourcePtr const & dataSource, U32 bufferSeconds, float volume)
 					: MusicBuffer(dataSource),
 						writePos_(0)
 	{
@@ -40,7 +41,7 @@ namespace KlayGE
 
 		bool mono(1 == wfx.nChannels);
 
-		const COMPtr<IDirectSound>& dsound(static_cast<DSAudioEngine&>(Context::Instance().AudioFactoryInstance().AudioEngineInstance()).DSound());
+		boost::shared_ptr<IDirectSound> const & dsound(static_cast<DSAudioEngine&>(Context::Instance().AudioFactoryInstance().AudioEngineInstance()).DSound());
 
 		// 建立 DirectSound 缓冲区，要尽量减少使用建立标志，
 		// 因为使用太多不必要的标志会影响硬件加速性能
@@ -58,11 +59,14 @@ namespace KlayGE
 		// DirectSound只能播放PCM数据。其他格式可能不能工作。
 		IDirectSoundBuffer* buffer;
 		TIF(dsound->CreateSoundBuffer(&dsbd, &buffer, NULL));
-		buffer_ = COMPtr<IDirectSoundBuffer>(buffer);
+		buffer_ = MakeCOMPtr(buffer);
 
 		if (mono)
 		{
-			buffer_.QueryInterface<IID_IDirectSound3DBuffer>(ds3DBuffer_);
+			IDirectSound3DBuffer* ds3DBuffer;
+			buffer_->QueryInterface(IID_IDirectSound3DBuffer,
+				reinterpret_cast<void**>(&ds3DBuffer));
+			ds3DBuffer_ = MakeCOMPtr(ds3DBuffer);
 		}
 
 		this->Position(Vector3::Zero());
@@ -225,7 +229,7 @@ namespace KlayGE
 
 	// 设置声源位置
 	/////////////////////////////////////////////////////////////////////////////////
-	void DSMusicBuffer::Position(const Vector3& v)
+	void DSMusicBuffer::Position(Vector3 const & v)
 	{
 		if (ds3DBuffer_)
 		{
@@ -251,7 +255,7 @@ namespace KlayGE
 
 	// 设置声源速度
 	/////////////////////////////////////////////////////////////////////////////////
-	void DSMusicBuffer::Velocity(const Vector3& v)
+	void DSMusicBuffer::Velocity(Vector3 const & v)
 	{
 		if (ds3DBuffer_)
 		{
@@ -277,7 +281,7 @@ namespace KlayGE
 
 	// 设置声源方向
 	/////////////////////////////////////////////////////////////////////////////////
-	void DSMusicBuffer::Direction(const Vector3& v)
+	void DSMusicBuffer::Direction(Vector3 const & v)
 	{
 		if (ds3DBuffer_)
 		{

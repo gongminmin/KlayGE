@@ -27,12 +27,12 @@ namespace KlayGE
 		bool IsStatic() const
 			{ return false; }
 
-		void Assign(const void* src, size_t numIndices);
+		void Assign(void const * src, size_t numIndices);
 		
 		size_t NumIndices() const
 			{ return buffer_.size(); }
 
-		const std::vector<U16>& OGLBuffer() const
+		std::vector<U16> const & OGLBuffer() const
 			{ return buffer_; }
 
 	protected:

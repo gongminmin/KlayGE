@@ -111,9 +111,9 @@ namespace KlayGE
 		return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 
-	D3D9RenderWindow::D3D9RenderWindow(const COMPtr<IDirect3D9>& d3d,
-										const D3D9Adapter& adapter, const std::string& name,
-										const D3D9RenderSettings& settings)
+	D3D9RenderWindow::D3D9RenderWindow(boost::shared_ptr<IDirect3D9> const & d3d,
+										D3D9Adapter const & adapter, std::string const & name,
+										D3D9RenderSettings const & settings)
 						: d3d_(d3d),
 							adapter_(adapter),
 							hWnd_(NULL),
@@ -305,15 +305,15 @@ namespace KlayGE
 		}
 
 		Verify(d3dDevice != NULL);
-		d3dDevice_ = COMPtr<IDirect3DDevice9>(d3dDevice);
+		d3dDevice_ = MakeCOMPtr(d3dDevice);
 
 		IDirect3DSurface9* renderSurface;
 		d3dDevice_->GetRenderTarget(0, &renderSurface);
-		renderSurface_ = COMPtr<IDirect3DSurface9>(renderSurface);
+		renderSurface_ = MakeCOMPtr(renderSurface);
 
 		IDirect3DSurface9* renderZBuffer;
 		d3dDevice_->GetDepthStencilSurface(&renderZBuffer);
-		renderZBuffer_ = COMPtr<IDirect3DSurface9>(renderZBuffer);
+		renderZBuffer_ = MakeCOMPtr(renderZBuffer);
 
 		active_ = true;
 		ready_ = true;
@@ -349,17 +349,17 @@ namespace KlayGE
 		return hWnd_;
 	}
 
-	const std::wstring& D3D9RenderWindow::Description() const
+	std::wstring const & D3D9RenderWindow::Description() const
 	{
 		return description_;
 	}
 
-	const D3D9Adapter& D3D9RenderWindow::Adapter() const
+	D3D9Adapter const & D3D9RenderWindow::Adapter() const
 	{
 		return adapter_;
 	}
 
-	const COMPtr<IDirect3DDevice9>& D3D9RenderWindow::D3DDevice() const
+	boost::shared_ptr<IDirect3DDevice9> const & D3D9RenderWindow::D3DDevice() const
 	{
 		return d3dDevice_;
 	}
@@ -413,7 +413,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9RenderWindow::CustomAttribute(const std::string& name, void* pData)
+	void D3D9RenderWindow::CustomAttribute(std::string const & name, void* pData)
 	{
 		// Valid attributes and their equvalent native functions:
 		// D3DDEVICE			: D3DDevice

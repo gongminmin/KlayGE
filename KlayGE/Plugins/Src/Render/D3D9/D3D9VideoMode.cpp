@@ -50,7 +50,7 @@ namespace KlayGE
 		return colorDepth;
 	}
 
-	bool operator<(const D3D9VideoMode& lhs, const D3D9VideoMode& rhs)
+	bool operator<(D3D9VideoMode const & lhs, D3D9VideoMode const & rhs)
 	{
 		if (lhs.Width() < rhs.Width())
 		{
@@ -80,7 +80,7 @@ namespace KlayGE
 		return false;
 	}
 
-	bool operator==(const D3D9VideoMode& lhs, const D3D9VideoMode& rhs)
+	bool operator==(D3D9VideoMode const & lhs, D3D9VideoMode const & rhs)
 	{
 		return (lhs.Width() == rhs.Width())
 			&& (lhs.Height() == rhs.Height())

@@ -33,38 +33,38 @@ namespace KlayGE
 {
 	// 常量定义
 	/////////////////////////////////////////////////////////////////////////////////
-	const float PI		= 3.141592f;			// PI
-	const float PI2		= 6.283185f;			// PI * 2
-	const float PIdiv2	= 1.570796f;			// PI / 2
-
-	const float DEG90	= 1.570796f;			// 90 度
-	const float DEG270	= -1.570796f;			// 270 度
-	const float DEG45	= 0.7853981f;			// 45 度
-	const float DEG5	= 0.0872664f;			// 5 度
-	const float DEG10	= 0.1745329f;			// 10 度
-	const float DEG20	= 0.3490658f;			// 20 度 
-	const float DEG30	= 0.5235987f;			// 30 度
-	const float DEG60	= 1.047197f;			// 60 度
-	const float DEG120	= 2.094395f;			// 120 度
-
-	const float DEG40	= 0.6981317f;			// 40 度
-	const float DEG80	= 1.396263f;			// 80 度
-	const float DEG140	= 2.443460f;			// 140 度
-	const float DEG160	= 2.792526f;			// 160 度
-
-	const float SQRT2	= 1.414213f;			// 根2
-	const float SQRT_2	= 0.7071068f;			// 1 / SQRT2
-	const float SQRT3	= 1.732050f;			// 根3
-
-	const float DEG2RAD	= 0.01745329f;			// 角度化弧度因数
-	const float RAD2DEG	= 57.29577f;			// 弧度化角度因数
+	float const PI		= 3.141592f;			// PI
+	float const PI2		= 6.283185f;			// PI * 2
+	float const PIdiv2	= 1.570796f;			// PI / 2
+		  
+	float const DEG90	= 1.570796f;			// 90 度
+	float const DEG270	= -1.570796f;			// 270 度
+	float const DEG45	= 0.7853981f;			// 45 度
+	float const DEG5	= 0.0872664f;			// 5 度
+	float const DEG10	= 0.1745329f;			// 10 度
+	float const DEG20	= 0.3490658f;			// 20 度 
+	float const DEG30	= 0.5235987f;			// 30 度
+	float const DEG60	= 1.047197f;			// 60 度
+	float const DEG120	= 2.094395f;			// 120 度
+		  
+	float const DEG40	= 0.6981317f;			// 40 度
+	float const DEG80	= 1.396263f;			// 80 度
+	float const DEG140	= 2.443460f;			// 140 度
+	float const DEG160	= 2.792526f;			// 160 度
+		  
+	float const SQRT2	= 1.414213f;			// 根2
+	float const SQRT_2	= 0.7071068f;			// 1 / SQRT2
+	float const SQRT3	= 1.732050f;			// 根3
+		  
+	float const DEG2RAD	= 0.01745329f;			// 角度化弧度因数
+	float const RAD2DEG	= 57.29577f;			// 弧度化角度因数
 
 	namespace MathLib
 	{
 		// 求绝对值
 		template <typename T>
 		inline T
-		Abs(const T& x)
+		Abs(T const & x)
 		{
 			return x < T(0) ? -x : x;
 		}
@@ -72,7 +72,7 @@ namespace KlayGE
 		// 取符号
 		template <typename T>
 		inline T
-		Sgn(const T& x)
+		Sgn(T const & x)
 		{
 			return x < T(0) ? T(-1) : (x > T(0) ? T(1) : T(0));
 		}
@@ -80,14 +80,14 @@ namespace KlayGE
 		// 平方
 		template <typename T>
 		inline T
-		Sqr(const T& x)
+		Sqr(T const & x)
 		{
 			return x * x;
 		}
 		// 立方
 		template <typename T>
 		inline T
-		Cube(const T& x)
+		Cube(T const & x)
 		{
 			return Sqr(x) * x;
 		}
@@ -95,14 +95,14 @@ namespace KlayGE
 		// 角度化弧度
 		template <typename T>
 		inline T
-		Deg2Rad(const T& x)
+		Deg2Rad(T const & x)
 		{
 			return static_cast<T>(x * DEG2RAD);
 		}
 		// 弧度化角度
 		template <typename T>
 		inline T
-		Rad2Deg(const T& x)
+		Rad2Deg(T const & x)
 		{
 			return static_cast<T>(x * RAD2DEG);
 		}
@@ -110,7 +110,7 @@ namespace KlayGE
 		// 四舍五入
 		template <typename T>
 		inline T
-		Round(const T& x)
+		Round(T const & x)
 		{
 			return (x > 0) ? static_cast<T>(static_cast<int>(0.5f + x)) :
 					-static_cast<T>(static_cast<int>(0.5f - x));
@@ -118,22 +118,22 @@ namespace KlayGE
 		// 取整
 		template <typename T>
 		inline T
-		Trunc(const T& x)
+		Trunc(T const & x)
 		{
 			return static_cast<T>(static_cast<int>(x));
 		}
 
 		// 取三个中小的
 		template <typename T>
-		inline const T&
-		Min3(const T& a, const T& b, const T& c)
+		inline T const &
+		Min3(T const & a, T const & b, T const & c)
 		{
 			return std::min(std::min(a, b), c);
 		}
 		// 取三个中大的
 		template <typename T>
-		inline const T&
-		Max3(const T& a, const T& b, const T& c)
+		inline T const &
+		Max3(T const & a, T const & b, T const & c)
 		{
 			return std::max(std::max(a, b), c);
 		}
@@ -141,18 +141,20 @@ namespace KlayGE
 		// 余数
 		template <typename T>
 		inline T
-		Mod(const T& x, const T& y)
+		Mod(T const & x, T const & y)
 		{
 			return x % y;
 		}
 		// 浮点版本
+		template<>
 		inline float
-		Mod(const float& x, const float& y)
+		Mod(float const & x, float const & y)
 		{
 			return std::fmodf(x, y);
 		}
+		template <>
 		inline double
-		Mod(const double& x, const double& y)
+		Mod(double const & x, double const & y)
 		{
 			return std::fmod(x, y);
 		}
@@ -180,8 +182,8 @@ namespace KlayGE
 
 		// 限制 val 在 low 和 high 之间
 		template <typename T>
-		inline const T&
-		Limit(const T& val, const T& low, const T& high)
+		inline T const &
+		Limit(T const & val, T const & low, T const & high)
 		{
 			return std::max(low, std::min(high, val));
 		}
@@ -189,7 +191,7 @@ namespace KlayGE
 		// 环绕处理
 		template <typename T>
 		inline T
-		Surround(const T& val, const T& low, const T& high)
+		Surround(T const & val, T const & low, T const & high)
 		{
 			T ret(val);
 			T rang(high - low);
@@ -209,14 +211,14 @@ namespace KlayGE
 		// 奇数则返回true
 		template <typename T>
 		inline bool
-		IsOdd(const T& x)
+		IsOdd(T const & x)
 		{
 			return MathLib::Mod(x, 2) != 0;
 		}
 		// 偶数则返回true
 		template <typename T>
 		inline bool
-		IsEven(const T& x)
+		IsEven(T const & x)
 		{
 			return !MathLib::IsOdd(x);
 		}
@@ -224,7 +226,7 @@ namespace KlayGE
 		// 判断 val 是否在 low 和 high 之间
 		template <typename T>
 		inline bool
-		InBound(const T& val, const T& low, const T& high)
+		InBound(T const & val, T const & low, T const & high)
 		{
 			return ((val >= low) && (val <= high));
 		}
@@ -232,19 +234,21 @@ namespace KlayGE
 		// 判断两个数是否相等
 		template <typename T>
 		inline bool
-		Eq(const T& lhs, const T& rhs)
+		Eq(T const & lhs, T const & rhs)
 		{
 			return (lhs == rhs);
 		}
 		// 浮点版本
+		template <>
 		inline bool
-		Eq(float lhs, float rhs)
+		Eq(float const & lhs, float const & rhs)
 		{
 			return (MathLib::Abs<float>(lhs - rhs)
 				<= std::numeric_limits<float>::epsilon());
 		}
+		template <>
 		inline bool
-		Eq(double lhs, double rhs)
+		Eq(double const & lhs, double const & rhs)
 		{
 			return (MathLib::Abs<double>(lhs - rhs)
 				<= std::numeric_limits<double>::epsilon());
@@ -355,7 +359,7 @@ namespace KlayGE
 		template <typename T, int N>
 		struct DotHelper
 		{
-			static T Do(const T* lhs, const T* rhs)
+			static T Do(T const * lhs, T const * rhs)
 			{
 				return lhs[0] * rhs[0] + DotHelper<T, N - 1>::Do(lhs + 1, rhs + 1);
 			}
@@ -363,7 +367,7 @@ namespace KlayGE
 		template <typename T>
 		struct DotHelper<T, 1>
 		{
-			static T Do(const T* lhs, const T* rhs)
+			static T Do(T const * lhs, T const * rhs)
 			{
 				return lhs[0] * rhs[0];
 			}
@@ -372,7 +376,7 @@ namespace KlayGE
 		// 几种类型的Dot
 		template <typename T>
 		inline typename T::value_type
-		Dot(const T& lhs, const T& rhs)
+		Dot(T const & lhs, T const & rhs)
 		{
 			return DotHelper<T::value_type, T::elem_num>::Do(&lhs[0], &rhs[0]);
 		}
@@ -380,7 +384,7 @@ namespace KlayGE
 		// 几种类型的LengthSq
 		template <typename T>
 		inline typename T::value_type
-		LengthSq(const T& rhs)
+		LengthSq(T const & rhs)
 		{
 			return MathLib::Dot(rhs, rhs);
 		}
@@ -388,7 +392,7 @@ namespace KlayGE
 		// 几种类型的Length
 		template <typename T>
 		inline typename T::value_type
-		Length(const T& rhs)
+		Length(T const & rhs)
 		{
 			return MathLib::Sqrt(MathLib::LengthSq(rhs));
 		}
@@ -396,7 +400,7 @@ namespace KlayGE
 		// 几种类型的Lerp
 		template <typename T>
 		inline T&
-		Lerp(T& out, const T& lhs, const T& rhs, float s)
+		Lerp(T& out, T const & lhs, T const & rhs, float s)
 		{
 			out = lhs + (rhs - lhs) * s;
 			return out;
@@ -405,13 +409,13 @@ namespace KlayGE
 		template <typename T, int N>
 		struct MaxMinimizeHelper
 		{
-			static void DoMax(T out[N], const T lhs[N], const T rhs[N])
+			static void DoMax(T out[N], T const lhs[N], T const rhs[N])
 			{
 				out[0] = std::max(lhs[0], rhs[0]);
 				MaxMinimizeHelper<T, N - 1>::DoMax(out + 1, lhs + 1, rhs + 1);
 			}
 
-			static void DoMin(T out[N], const T lhs[N], const T rhs[N])
+			static void DoMin(T out[N], T const lhs[N], T const rhs[N])
 			{
 				out[0] = std::min(lhs[0], rhs[0]);
 				MaxMinimizeHelper<T, N - 1>::DoMin(out + 1, lhs + 1, rhs + 1);
@@ -420,12 +424,12 @@ namespace KlayGE
 		template <typename T>
 		struct MaxMinimizeHelper<T, 1>
 		{
-			static void DoMax(T out[1], const T lhs[1], const T rhs[1])
+			static void DoMax(T out[1], T const lhs[1], T const rhs[1])
 			{
 				out[0] = std::max(lhs[0], rhs[0]);
 			}
 
-			static void DoMin(T out[1], const T lhs[1], const T rhs[1])
+			static void DoMin(T out[1], T const lhs[1], T const rhs[1])
 			{
 				out[0] = std::min(lhs[0], rhs[0]);
 			}
@@ -434,7 +438,7 @@ namespace KlayGE
 		template <typename T, int N>
 		inline Vector_T<T, N>&
 		Maximize(Vector_T<T, N>& out,
-			const Vector_T<T, N>& lhs, const Vector_T<T, N>& rhs)
+			Vector_T<T, N> const & lhs, Vector_T<T, N> const & rhs)
 		{
 			MaxMinimizeHelper<T, N>::DoMax(&out[0], &lhs[0], &rhs[0]);
 			return out;
@@ -443,7 +447,7 @@ namespace KlayGE
 		template <typename T, int N>
 		inline Vector_T<T, N>&
 		Minimize(Vector_T<T, N>& out,
-			const Vector_T<T, N>& lhs, const Vector_T<T, N>& rhs)
+			Vector_T<T, N> const & lhs, Vector_T<T, N> const & rhs)
 		{
 			MaxMinimizeHelper<T, N>::DoMin(&out[0], &lhs[0], &rhs[0]);
 			return out;
@@ -452,12 +456,12 @@ namespace KlayGE
 		template <typename T, int N>
 		struct TransformHelper
 		{
-			static void Do(Vector_T<T, 4>& out, const Vector_T<T, N>& v, const Matrix4& mat);
+			static void Do(Vector_T<T, 4>& out, Vector_T<T, N> const & v, Matrix4 const & mat);
 		};
 		template <typename T>
 		struct TransformHelper<T, 4>
 		{
-			static void Do(Vector_T<T, 4>& out, const Vector_T<T, 4>& v, const Matrix4& mat)
+			static void Do(Vector_T<T, 4>& out, Vector_T<T, 4> const & v, Matrix4 const & mat)
 			{
 				out = Vector_T<T, 4>(v.x() * mat(0, 0) + v.y() * mat(1, 0) + v.z() * mat(2, 0) + v.w() * mat(3, 0),
 					v.x() * mat(0, 1) + v.y() * mat(1, 1) + v.z() * mat(2, 1) + v.w() * mat(3, 1),
@@ -468,7 +472,7 @@ namespace KlayGE
 		template <typename T>
 		struct TransformHelper<T, 3>
 		{
-			static void Do(Vector_T<T, 4>& out, const Vector_T<T, 3>& v, const Matrix4& mat)
+			static void Do(Vector_T<T, 4>& out, Vector_T<T, 3> const & v, Matrix4 const & mat)
 			{
 				out = Vector_T<T, 4>(v.x() * mat(0, 0) + v.y() * mat(1, 0) + v.z() * mat(2, 0) + mat(3, 0),
 					v.x() * mat(0, 1) + v.y() * mat(1, 1) + v.z() * mat(2, 1) + mat(3, 1),
@@ -479,7 +483,7 @@ namespace KlayGE
 		template <typename T>
 		struct TransformHelper<T, 2>
 		{
-			static void Do(Vector_T<T, 4>& out, const Vector_T<T, 2>& v, const Matrix4& mat)
+			static void Do(Vector_T<T, 4>& out, Vector_T<T, 2> const & v, Matrix4 const & mat)
 			{
 				out = Vector_T<T, 4>(v.x() * mat(0, 0) + v.y() * mat(1, 0) + mat(3, 0),
 					v.x() * mat(0, 1) + v.y() * mat(1, 1) + mat(3, 1),
@@ -490,7 +494,7 @@ namespace KlayGE
 
 		template <typename T, int N>
 		inline Vector_T<T, 4>&
-		Transform(Vector_T<T, 4>& out, const Vector_T<T, N>& v, const Matrix4& mat)
+		Transform(Vector_T<T, 4>& out, Vector_T<T, N> const & v, Matrix4 const & mat)
 		{
 			TransformHelper<T, N>::Do(out, v, mat);
 			return out;
@@ -498,7 +502,7 @@ namespace KlayGE
 
 		template <typename T, int N>
 		inline Vector_T<T, N>&
-		TransformCoord(Vector_T<T, N>& out, const Vector_T<T, N>& v, const Matrix4& mat)
+		TransformCoord(Vector_T<T, N>& out, Vector_T<T, N> const & v, Matrix4 const & mat)
 		{
 			BOOST_STATIC_ASSERT(N < 4);
 
@@ -520,12 +524,12 @@ namespace KlayGE
 		template <typename T, int N>
 		struct TransformNormalHelper
 		{
-			static void Do(Vector_T<T, N>& out, const Vector_T<T, N>& v, const Matrix4& mat);
+			static void Do(Vector_T<T, N>& out, Vector_T<T, N> const & v, Matrix4 const & mat);
 		};
 		template <typename T>
 		struct TransformNormalHelper<T, 3>
 		{
-			static void Do(Vector_T<T, 3>& out, const Vector_T<T, 3>& v, const Matrix4& mat)
+			static void Do(Vector_T<T, 3>& out, Vector_T<T, 3> const & v, Matrix4 const & mat)
 			{
 				Vector_T<T, 4> temp(v.x(), v.y(), v.z(), T(0));
 				TransformHelper<T, 4>::Do(temp, temp, mat);
@@ -535,7 +539,7 @@ namespace KlayGE
 		template <typename T>
 		struct TransformNormalHelper<T, 2>
 		{
-			static void Do(Vector_T<T, 2>& out, const Vector_T<T, 2>& v, const Matrix4& mat)
+			static void Do(Vector_T<T, 2>& out, Vector_T<T, 2> const & v, Matrix4 const & mat)
 			{
 				Vector_T<T, 3> temp(v.x(), v.y(), T(0));
 				TransformNormalHelper<T, 3>::Do(temp, temp, mat);
@@ -545,7 +549,7 @@ namespace KlayGE
 
 		template <typename T, int N>
 		inline Vector_T<T, N>&
-		TransformNormal(Vector_T<T, N>& out, const Vector_T<T, N>& v, const Matrix4& mat)
+		TransformNormal(Vector_T<T, N>& out, Vector_T<T, N> const & v, Matrix4 const & mat)
 		{
 			BOOST_STATIC_ASSERT(N < 4);
 
@@ -556,8 +560,8 @@ namespace KlayGE
 		template <typename T, int N>
 		inline Vector_T<T, N>&
 		BaryCentric(Vector_T<T, N>& out,
-			const Vector_T<T, N>& v1, const Vector_T<T, N>& v2, const Vector_T<T, N>& v3,
-			const T& f, const T& g)
+			Vector_T<T, N> const & v1, Vector_T<T, N> const & v2, Vector_T<T, N> const & v3,
+			T const & f, T const & g)
 		{
 			out = v1 + f * (v2 - v1) + g * (v3 - v1);
 			return out;
@@ -565,7 +569,7 @@ namespace KlayGE
 
 		template <typename T>
 		inline T&
-		Normalize(T& out, const T& rhs)
+		Normalize(T& out, T const & rhs)
 		{
 			out = rhs * RecipSqrt(LengthSq(rhs));
 			return out;
@@ -576,7 +580,7 @@ namespace KlayGE
 		///////////////////////////////////////////////////////////////////////////////
 		template <typename T>
 		inline T
-		CCW(const Vector_T<T, 2>& lhs, const Vector_T<T, 2>& rhs)
+		CCW(Vector_T<T, 2> const & lhs, Vector_T<T, 2> const & rhs)
 		{
 			return lhs.x() * rhs.y() - lhs.y() * rhs.x();
 		}
@@ -586,14 +590,14 @@ namespace KlayGE
 		///////////////////////////////////////////////////////////////////////////////
 		template <typename T>
 		inline T
-		Angle(const Vector_T<T, 3>& lhs, const Vector_T<T, 3>& rhs)
+		Angle(Vector_T<T, 3> const & lhs, Vector_T<T, 3> const & rhs)
 		{
 			return ACos(Dot(lhs, rhs) / (Length(lhs) * Length(rhs)));
 		}
 
 		template <typename T>
 		inline Vector_T<T, 3>&
-		Cross(Vector_T<T, 3>& out, const Vector_T<T, 3>& lhs, const Vector_T<T, 3>& rhs)
+		Cross(Vector_T<T, 3>& out, Vector_T<T, 3> const & lhs, Vector_T<T, 3> const & rhs)
 		{
 			out = Vector_T<T, 3>(lhs.y() * rhs.z() - lhs.z() * rhs.y(),
 				lhs.z() * rhs.x() - lhs.x() * rhs.z(),
@@ -603,16 +607,16 @@ namespace KlayGE
 
 		template <typename T>
 		inline Vector_T<T, 3>&
-		TransQuat(Vector_T<T, 3>& out, const Vector_T<T, 3>& v, const Quaternion_T<T>& quat)
+		TransQuat(Vector_T<T, 3>& out, Vector_T<T, 3> const & v, Quaternion_T<T> const & quat)
 		{
 			// result = av + bq + c(q.v CROSS v)
 			// where
 			//  a = q.w()^2 - (q.v DOT q.v)
 			//  b = 2 * (q.v DOT v)
 			//  c = 2q.w()
-			const T a(quat.w() * quat.w() - Dot(quat.v(), quat.v()));
-			const T b(2 * Dot(quat.v(), v));
-			const T c(quat.w() + quat.w());
+			T const a(quat.w() * quat.w() - Dot(quat.v(), quat.v()));
+			T const b(2 * Dot(quat.v(), v));
+			T const c(quat.w() + quat.w());
 
 			// Must store this, because result may alias v
 			Vector_T<T, 3> cross;
@@ -626,9 +630,9 @@ namespace KlayGE
 
 		template <typename T>
 		inline Vector_T<T, 3>&
-		Project(Vector_T<T, 3>& out, const Vector_T<T, 3>& vec,
-			const Matrix4_T<T>& world, const Matrix4_T<T>& view, const Matrix4_T<T>& proj,
-			const int viewport[4], const T& nearPlane, const T& farPlane)
+		Project(Vector_T<T, 3>& out, Vector_T<T, 3> const & vec,
+			Matrix4_T<T> const & world, Matrix4_T<T> const & view, Matrix4_T<T> const & proj,
+			int const viewport[4], T const & nearPlane, T const & farPlane)
 		{
 			Vector_T<T, 4> temp;
 			Transform(temp, objVec, world);
@@ -644,9 +648,9 @@ namespace KlayGE
 
 		template <typename T>
 		inline Vector_T<T, 3>&
-		UnProject(Vector_T<T, 3>& out, const Vector_T<T, 3>& winVec, const T& clipW,
-			const Matrix4_T<T>& world, const Matrix4_T<T>& view, const Matrix4_T<T>& proj,
-			const int viewport[4], const T& nearPlane, const T& farPlane)
+		UnProject(Vector_T<T, 3>& out, Vector_T<T, 3> const & winVec, const T& clipW,
+			Matrix4_T<T> const & world, Matrix4_T<T> const & view, Matrix4_T<T> const & proj,
+			int const viewport[4], T const & nearPlane, T const & farPlane)
 		{
 			Vector_T<T, 4> temp;
 			temp.x() = 2 * (winVec.x() - viewport[0]) / viewport[2] - 1;
@@ -667,14 +671,14 @@ namespace KlayGE
 		///////////////////////////////////////////////////////////////////////////////
 		template <typename T>
 		inline Vector_T<T, 4>&
-		Cross(Vector_T<T, 4>& out, const Vector_T<T, 4>& v1, const Vector_T<T, 4>& v2, const Vector_T<T, 4>& v3)
+		Cross(Vector_T<T, 4>& out, Vector_T<T, 4> const & v1, Vector_T<T, 4> const & v2, Vector_T<T, 4> const & v3)
 		{
-			const T A = (v2.x() * v3.y()) - (v2.y() * v3.x());
-			const T B = (v2.x() * v3.z()) - (v2.z() * v3.x());
-			const T C = (v2.x() * v3.w()) - (v2.w() * v3.x());
-			const T D = (v2.y() * v3.z()) - (v2.z() * v3.y());
-			const T E = (v2.y() * v3.w()) - (v2.w() * v3.y());
-			const T F = (v2.z() * v3.w()) - (v2.w() * v3.z());
+			T const A = (v2.x() * v3.y()) - (v2.y() * v3.x());
+			T const B = (v2.x() * v3.z()) - (v2.z() * v3.x());
+			T const C = (v2.x() * v3.w()) - (v2.w() * v3.x());
+			T const D = (v2.y() * v3.z()) - (v2.z() * v3.y());
+			T const E = (v2.y() * v3.w()) - (v2.w() * v3.y());
+			T const F = (v2.z() * v3.w()) - (v2.w() * v3.z());
 
 			out = Vector_T<T, 4>((v1.y() * F) - (v1.z() * E) + (v1.w() * D),
 				-(v1.x() * F) + (v1.z() * C) - (v1.w() * B),
@@ -688,7 +692,7 @@ namespace KlayGE
 		///////////////////////////////////////////////////////////////////////////////
 		template <typename T>
 		inline Matrix4_T<T>&
-		Multiply(Matrix4_T<T>& out, const Matrix4_T<T>& lhs, const Matrix4_T<T>& rhs)
+		Multiply(Matrix4_T<T>& out, Matrix4_T<T> const & lhs, Matrix4_T<T> const & rhs)
 		{
 			out = Matrix4_T<T>(
 				lhs(0, 0) * rhs(0, 0) + lhs(0, 1) * rhs(1, 0) + lhs(0, 2) * rhs(2, 0) + lhs(0, 3) * rhs(3, 0),
@@ -715,14 +719,14 @@ namespace KlayGE
 
 		template <typename T>
 		inline T
-		Determinant(const Matrix4_T<T>& rhs)
+		Determinant(Matrix4_T<T> const & rhs)
 		{
-			const T _3142_3241(rhs(2, 0) * rhs(3, 1) - rhs(2, 1) * rhs(3, 0));
-			const T _3143_3341(rhs(2, 0) * rhs(3, 2) - rhs(2, 2) * rhs(3, 0));
-			const T _3144_3441(rhs(2, 0) * rhs(3, 3) - rhs(2, 3) * rhs(3, 0));
-			const T _3243_3342(rhs(2, 1) * rhs(3, 2) - rhs(2, 2) * rhs(3, 1));
-			const T _3244_3442(rhs(2, 1) * rhs(3, 3) - rhs(2, 3) * rhs(3, 1));
-			const T _3344_3443(rhs(2, 2) * rhs(3, 3) - rhs(2, 3) * rhs(3, 2));
+			T const _3142_3241(rhs(2, 0) * rhs(3, 1) - rhs(2, 1) * rhs(3, 0));
+			T const _3143_3341(rhs(2, 0) * rhs(3, 2) - rhs(2, 2) * rhs(3, 0));
+			T const _3144_3441(rhs(2, 0) * rhs(3, 3) - rhs(2, 3) * rhs(3, 0));
+			T const _3243_3342(rhs(2, 1) * rhs(3, 2) - rhs(2, 2) * rhs(3, 1));
+			T const _3244_3442(rhs(2, 1) * rhs(3, 3) - rhs(2, 3) * rhs(3, 1));
+			T const _3344_3443(rhs(2, 2) * rhs(3, 3) - rhs(2, 3) * rhs(3, 2));
 
 			return rhs(0, 0) * (rhs(1, 1) * _3344_3443 - rhs(1, 2) * _3244_3442 + rhs(1, 3) * _3243_3342)
 				- rhs(0, 1) * (rhs(1, 0) * _3344_3443 - rhs(1, 2) * _3144_3441 + rhs(1, 3) * _3143_3341)
@@ -732,29 +736,29 @@ namespace KlayGE
 
 		template <typename T>
 		inline T
-		Inverse(Matrix4_T<T>& out, const Matrix4_T<T>& rhs)
+		Inverse(Matrix4_T<T>& out, Matrix4_T<T> const & rhs)
 		{
-			const T _2132_2231(rhs(1, 0) * rhs(2, 1) - rhs(1, 1) * rhs(2, 0));
-			const T _2133_2331(rhs(1, 0) * rhs(2, 2) - rhs(1, 2) * rhs(2, 0));
-			const T _2134_2431(rhs(1, 0) * rhs(2, 3) - rhs(1, 3) * rhs(2, 0));
-			const T _2142_2241(rhs(1, 0) * rhs(3, 1) - rhs(1, 1) * rhs(3, 0));
-			const T _2143_2341(rhs(1, 0) * rhs(3, 2) - rhs(1, 2) * rhs(3, 0));
-			const T _2144_2441(rhs(1, 0) * rhs(3, 3) - rhs(1, 3) * rhs(3, 0));
-			const T _2233_2332(rhs(1, 1) * rhs(2, 2) - rhs(1, 2) * rhs(2, 1));
-			const T _2234_2432(rhs(1, 1) * rhs(2, 3) - rhs(1, 3) * rhs(2, 1));
-			const T _2243_2342(rhs(1, 1) * rhs(3, 2) - rhs(1, 2) * rhs(3, 1));
-			const T _2244_2442(rhs(1, 1) * rhs(3, 3) - rhs(1, 3) * rhs(3, 1));
-			const T _2334_2433(rhs(1, 2) * rhs(2, 3) - rhs(1, 3) * rhs(2, 2));
-			const T _2344_2443(rhs(1, 2) * rhs(3, 3) - rhs(1, 3) * rhs(3, 2));
-			const T _3142_3241(rhs(2, 0) * rhs(3, 1) - rhs(2, 1) * rhs(3, 0));
-			const T _3143_3341(rhs(2, 0) * rhs(3, 2) - rhs(2, 2) * rhs(3, 0));
-			const T _3144_3441(rhs(2, 0) * rhs(3, 3) - rhs(2, 3) * rhs(3, 0));
-			const T _3243_3342(rhs(2, 1) * rhs(3, 2) - rhs(2, 2) * rhs(3, 1));
-			const T _3244_3442(rhs(2, 1) * rhs(3, 3) - rhs(2, 3) * rhs(3, 1));
-			const T _3344_3443(rhs(2, 2) * rhs(3, 3) - rhs(2, 3) * rhs(3, 2));
+			T const _2132_2231(rhs(1, 0) * rhs(2, 1) - rhs(1, 1) * rhs(2, 0));
+			T const _2133_2331(rhs(1, 0) * rhs(2, 2) - rhs(1, 2) * rhs(2, 0));
+			T const _2134_2431(rhs(1, 0) * rhs(2, 3) - rhs(1, 3) * rhs(2, 0));
+			T const _2142_2241(rhs(1, 0) * rhs(3, 1) - rhs(1, 1) * rhs(3, 0));
+			T const _2143_2341(rhs(1, 0) * rhs(3, 2) - rhs(1, 2) * rhs(3, 0));
+			T const _2144_2441(rhs(1, 0) * rhs(3, 3) - rhs(1, 3) * rhs(3, 0));
+			T const _2233_2332(rhs(1, 1) * rhs(2, 2) - rhs(1, 2) * rhs(2, 1));
+			T const _2234_2432(rhs(1, 1) * rhs(2, 3) - rhs(1, 3) * rhs(2, 1));
+			T const _2243_2342(rhs(1, 1) * rhs(3, 2) - rhs(1, 2) * rhs(3, 1));
+			T const _2244_2442(rhs(1, 1) * rhs(3, 3) - rhs(1, 3) * rhs(3, 1));
+			T const _2334_2433(rhs(1, 2) * rhs(2, 3) - rhs(1, 3) * rhs(2, 2));
+			T const _2344_2443(rhs(1, 2) * rhs(3, 3) - rhs(1, 3) * rhs(3, 2));
+			T const _3142_3241(rhs(2, 0) * rhs(3, 1) - rhs(2, 1) * rhs(3, 0));
+			T const _3143_3341(rhs(2, 0) * rhs(3, 2) - rhs(2, 2) * rhs(3, 0));
+			T const _3144_3441(rhs(2, 0) * rhs(3, 3) - rhs(2, 3) * rhs(3, 0));
+			T const _3243_3342(rhs(2, 1) * rhs(3, 2) - rhs(2, 2) * rhs(3, 1));
+			T const _3244_3442(rhs(2, 1) * rhs(3, 3) - rhs(2, 3) * rhs(3, 1));
+			T const _3344_3443(rhs(2, 2) * rhs(3, 3) - rhs(2, 3) * rhs(3, 2));
 
 			// 行列式的值
-			const T det(Determinant(rhs));
+			T const det(Determinant(rhs));
 			if (!Eq(det, 0.0f))
 			{
 				T invDet(1.0f / det);
@@ -790,8 +794,8 @@ namespace KlayGE
 
 		template <typename T>
 		inline Matrix4_T<T>&
-		LookAtLH(Matrix4_T<T>& out, const Vector_T<T, 3>& vEye, const Vector_T<T, 3>& vAt,
-			const Vector_T<T, 3>& vUp = Vector_T<T, 3>(0, 1, 0))
+		LookAtLH(Matrix4_T<T>& out, Vector_T<T, 3> const & vEye, Vector_T<T, 3> const & vAt,
+			Vector_T<T, 3> const & vUp = Vector_T<T, 3>(0, 1, 0))
 		{
 			Vector_T<T, 3> zAxis;
 			Normalize(zAxis, vAt - vEye);
@@ -811,8 +815,8 @@ namespace KlayGE
 
 		template <typename T>
 		inline Matrix4_T<T>&
-		LookAtRH(Matrix4_T<T>& out, const Vector_T<T, 3>& vEye, const Vector_T<T, 3>& vAt,
-			const Vector_T<T, 3>& vUp = Vector_T<T, 3>(0, 1, 0))
+		LookAtRH(Matrix4_T<T>& out, Vector_T<T, 3> const & vEye, Vector_T<T, 3> const & vAt,
+			Vector_T<T, 3> const & vUp = Vector_T<T, 3>(0, 1, 0))
 		{
 			Vector_T<T, 3> zAxis;
 			Normalize(zAxis, vEye - vAt);
@@ -832,20 +836,20 @@ namespace KlayGE
 
 		template <typename T>
 		inline Matrix4_T<T>&
-		OrthoLH(Matrix4_T<T>& out, const T& w, const T& h, const T& nearPlane, const T& farPlane)
+		OrthoLH(Matrix4_T<T>& out, T const & w, T const & h, T const & nearPlane, T const & farPlane)
 		{
-			const T w_2(w / 2);
-			const T h_2(h / 2);
+			T const w_2(w / 2);
+			T const h_2(h / 2);
 			return OrthoOffCenterLH(out, -w_2, w_2, -h_2, h_2, nearPlane, farPlane);
 		}
 		template <typename T>
 		inline Matrix4_T<T>&
-		OrthoOffCenterLH(Matrix4_T<T>& out, const T& left, const T& right, const T& bottom, const T& top,
-			const T& nearPlane, const T& farPlane)
+		OrthoOffCenterLH(Matrix4_T<T>& out, T const & left, T const & right, T const & bottom, T const & top,
+			T const & nearPlane, T const & farPlane)
 		{
-			const T q(T(1) / (farPlane - nearPlane));
-			const T invWidth(T(1) / (right - left));
-			const T invHeight(T(1) / (top - bottom));
+			T const q(T(1) / (farPlane - nearPlane));
+			T const invWidth(T(1) / (right - left));
+			T const invHeight(T(1) / (top - bottom));
 
 			out = Matrix4_T<T>(
 				invWidth + invWidth,		0,								0,					0,
@@ -857,10 +861,10 @@ namespace KlayGE
 
 		template <typename T>
 		inline Matrix4_T<T>&
-		PerspectiveLH(Matrix4_T<T>& out, const T& width, const T& height, const T& nearPlane, const T& farPlane)
+		PerspectiveLH(Matrix4_T<T>& out, T const & width, T const & height, T const & nearPlane, T const & farPlane)
 		{
-			const T q(farPlane / (farPlane - nearPlane));
-			const T near2(nearPlane + nearPlane);
+			T const q(farPlane / (farPlane - nearPlane));
+			T const near2(nearPlane + nearPlane);
 
 			out = Matrix4_T<T>(
 				near2 / width,	0,				0,				0,
@@ -871,11 +875,11 @@ namespace KlayGE
 		}
 		template <typename T>
 		inline Matrix4_T<T>&
-		PerspectiveFovLH(Matrix4_T<T>& out, const T& fov, const T& aspect, const T& nearPlane, const T& farPlane)
+		PerspectiveFovLH(Matrix4_T<T>& out, T const & fov, T const & aspect, T const & nearPlane, T const & farPlane)
 		{
-			const T h(T(1) / Tan(fov / 2));
-			const T w(h / aspect);
-			const T q(farPlane / (farPlane - nearPlane));
+			T const h(T(1) / Tan(fov / 2));
+			T const w(h / aspect);
+			T const q(farPlane / (farPlane - nearPlane));
 
 			out = Matrix4_T<T>(
 				w,		0,		0,				0,
@@ -886,13 +890,13 @@ namespace KlayGE
 		}
 		template <typename T>
 		inline Matrix4_T<T>&
-		PerspectiveOffCenterLH(Matrix4_T<T>& out, const T& left, const T& right, const T& bottom, const T& top,
-			const T& nearPlane, const T& farPlane)
+		PerspectiveOffCenterLH(Matrix4_T<T>& out, T const & left, T const & right, T const & bottom, T const & top,
+			T const & nearPlane, T const & farPlane)
 		{
-			const T q(farPlane / (farPlane - nearPlane));
-			const T near2(nearPlane + nearPlane);
-			const T invWidth(T(1) / (right - left));
-			const T invHeight(T(1) / (top - bottom));
+			T const q(farPlane / (farPlane - nearPlane));
+			T const near2(nearPlane + nearPlane);
+			T const invWidth(T(1) / (right - left));
+			T const invHeight(T(1) / (top - bottom));
 
 			out = Matrix4_T<T>(
 				near2 * invWidth,			0,								0,				0,
@@ -903,13 +907,13 @@ namespace KlayGE
 		}
 		template <typename T>
 		inline Matrix4_T<T>&
-		Reflect(Matrix4_T<T>& out, const Plane_T<T>& p)
+		Reflect(Matrix4_T<T>& out, Plane_T<T> const & p)
 		{
 			Plane_T<T> P;
 			Normalize(P, p);
-			const T aa2(-2 * P.a() * P.a()), ab2(-2 * P.a() * P.b()), ac2(-2 * P.a() * P.c()), ad2(-2 * P.a() * P.d());
-			const T bb2(-2 * P.b() * P.b()), bc2(-2 * P.b() * P.c()), bd2(-2 * P.a() * P.c());
-			const T cc2(-2 * P.c() * P.c()), cd2(-2 * P.c() * P.d());
+			T const aa2(-2 * P.a() * P.a()), ab2(-2 * P.a() * P.b()), ac2(-2 * P.a() * P.c()), ad2(-2 * P.a() * P.d());
+			T const bb2(-2 * P.b() * P.b()), bc2(-2 * P.b() * P.c()), bd2(-2 * P.a() * P.c());
+			T const cc2(-2 * P.c() * P.c()), cd2(-2 * P.c() * P.d());
 
 			out = Matrix4_T<T>(
 				aa2 + 1,	ab2,		ac2,		0,
@@ -921,7 +925,7 @@ namespace KlayGE
 
 		template <typename T>
 		inline Matrix4_T<T>&
-		RotationX(Matrix4_T<T>& out, const T& x)
+		RotationX(Matrix4_T<T>& out, T const & x)
 		{
 			float sx, cx;
 			SinCos(x, sx, cx);
@@ -935,7 +939,7 @@ namespace KlayGE
 		}
 		template <typename T>
 		inline Matrix4_T<T>&
-		RotationY(Matrix4_T<T>& out, const T& y)
+		RotationY(Matrix4_T<T>& out, T const & y)
 		{
 			float sy, cy;
 			SinCos(y, sy, cy);
@@ -949,7 +953,7 @@ namespace KlayGE
 		}
 		template <typename T>
 		inline Matrix4_T<T>&
-		RotationZ(Matrix4_T<T>& out, const T& z)
+		RotationZ(Matrix4_T<T>& out, T const & z)
 		{
 			float sz, cz;
 			SinCos(z, sz, cz);
@@ -963,7 +967,7 @@ namespace KlayGE
 		}
 		template <typename T>
 		inline Matrix4_T<T>&
-		Rotation(Matrix4_T<T>& out, const T& angle, const T& x, const T& y, const T& z)
+		Rotation(Matrix4_T<T>& out, T const & angle, T const & x, T const & y, T const & z)
 		{
 			Quaternion_T<T> quat;
 			RotationAxis(quat, Vector_T<T, 3>(x, y, z), angle);
@@ -972,7 +976,7 @@ namespace KlayGE
 
 		template <typename T>
 		inline Matrix4_T<T>&
-		Scaling(Matrix4_T<T>& out, const T& x, const T& y, const T& z)
+		Scaling(Matrix4_T<T>& out, T const & x, T const & y, T const & z)
 		{
 			out = Matrix4(
 				sx,	0,	0,	0,
@@ -984,12 +988,12 @@ namespace KlayGE
 
 		template <typename T>
 		inline Matrix4_T<T>&
-		Shadow(Matrix4_T<T>& out, const Vector_T<T, 4>& v, const Plane_T<T>& p)
+		Shadow(Matrix4_T<T>& out, Vector_T<T, 4> const & v, Plane_T<T> const & p)
 		{
-			const Vector_T<T, 4> v(-L);
+			Vector_T<T, 4> const v(-L);
 			Plane_T<T> P;
 			Normalize(P, p);
-			const T d(-Dot(P, v));
+			T const d(-Dot(P, v));
 
 			out = Matrix4_T<T>(
 				P.a() * v.x() + d,	P.a() * v.y(),		P.a() * v.z(),		P.a() * v.w(),
@@ -1001,16 +1005,16 @@ namespace KlayGE
 
 		template <typename T>
 		inline Matrix4_T<T>&
-		ToMatrix(Matrix4_T<T>& out, const Quaternion_T<T>& quat)
+		ToMatrix(Matrix4_T<T>& out, Quaternion_T<T> const & quat)
 		{
 			// calculate coefficients
-			const T x2(quat.x() + quat.x());
-			const T y2(quat.y() + quat.y());
-			const T z2(quat.z() + quat.z());
-
-			const T xx2(quat.x() * x2), xy2(quat.x() * y2), xz2(quat.x() * z2);
-			const T yy2(quat.y() * y2), yz2(quat.y() * z2), zz2(quat.z() * z2);
-			const T wx2(quat.w() * x2), wy2(quat.w() * y2), wz2(quat.w() * z2);
+			T const x2(quat.x() + quat.x());
+			T const y2(quat.y() + quat.y());
+			T const z2(quat.z() + quat.z());
+			  
+			T const xx2(quat.x() * x2), xy2(quat.x() * y2), xz2(quat.x() * z2);
+			T const yy2(quat.y() * y2), yz2(quat.y() * z2), zz2(quat.z() * z2);
+			T const wx2(quat.w() * x2), wy2(quat.w() * y2), wz2(quat.w() * z2);
 
 			out = Matrix4_T<T>(
 				1 - yy2 - zz2,	xy2 + wz2,		xz2 - wy2,		0,
@@ -1022,7 +1026,7 @@ namespace KlayGE
 
 		template <typename T>
 		inline Matrix4_T<T>&
-		Translation(Matrix4_T<T>& out, const T& x, const T& y, const T& z)
+		Translation(Matrix4_T<T>& out, T const & x, T const & y, T const & z)
 		{
 			out = Matrix4_T<T>(
 				1,	0,	0,	0,
@@ -1034,7 +1038,7 @@ namespace KlayGE
 
 		template <typename T>
 		inline Matrix4_T<T>&
-		Transpose(Matrix4_T<T>& out, const Matrix4_T<T>& rhs)
+		Transpose(Matrix4_T<T>& out, Matrix4_T<T> const & rhs)
 		{
 			out = Matrix4_T<T>(
 				rhs(0, 0), rhs(1, 0), rhs(2, 0), rhs(3, 0),
@@ -1046,7 +1050,7 @@ namespace KlayGE
 
 		template <typename T>
 		inline Matrix4_T<T>&
-		LHToRH(Matrix4_T<T>& out, const Matrix4_T<T>& rhs)
+		LHToRH(Matrix4_T<T>& out, Matrix4_T<T> const & rhs)
 		{
 			out = rhs;
 			out(2, 0) = -out(2, 0);
@@ -1058,51 +1062,51 @@ namespace KlayGE
 
 		template <typename T>
 		inline Matrix4_T<T>&
-		Scaling(Matrix4_T<T>& out, const Vector_T<T, 3>& vPos)
+		Scaling(Matrix4_T<T>& out, Vector_T<T, 3> const & vPos)
 		{
 			return Scaling(out, vPos.x(), vPos.y(), vPos.z());
 		}
 		template <typename T>
 		inline Matrix4_T<T>&
-		Translation(Matrix4_T<T>& out, const Vector_T<T, 3>& vPos)
+		Translation(Matrix4_T<T>& out, Vector_T<T, 3> const & vPos)
 		{
 			return Translation(out, vPos.x(), vPos.y(), vPos.z());
 		}
 		template <typename T>
 		inline Matrix4_T<T>&
-		OrthoRH(Matrix4_T<T>& out, const T& width, const T& height, const T& nearPlane, const T& farPlane)
+		OrthoRH(Matrix4_T<T>& out, T const & width, T const & height, T const & nearPlane, T const & farPlane)
 		{
 			OrthoLH(out, w, h, nearPlane, farPlane);
 			return LHToRH(out, out);
 		}
 		template <typename T>
 		inline Matrix4_T<T>&
-		OrthoOffCenterRH(Matrix4_T<T>& out, const T& left, const T& right, const T& bottom, const T& top, 
-			const T& nearPlane, const T& farPlane)
+		OrthoOffCenterRH(Matrix4_T<T>& out, T const & left, T const & right, T const & bottom, T const & top, 
+			T const & nearPlane, T const & farPlane)
 		{
 			OrthoOffCenterLH(out, left, right, bottom, top, nearPlane, farPlane);
 			return LHToRH(out, out);
 		}
 		template <typename T>
 		inline Matrix4_T<T>&
-		PerspectiveRH(Matrix4_T<T>& out, const T& width, const T& height,
-			const T& nearPlane, const T& farPlane)
+		PerspectiveRH(Matrix4_T<T>& out, T const & width, T const & height,
+			T const & nearPlane, T const & farPlane)
 		{
 			PerspectiveLH(out, w, h, nearPlane, farPlane);
 			return LHToRH(out, out);
 		}
 		template <typename T>
 		inline Matrix4_T<T>&
-		PerspectiveFovRH(Matrix4_T<T>& out, const T& fov, const T& aspect,
-			const T& nearPlane, const T& farPlane)
+		PerspectiveFovRH(Matrix4_T<T>& out, T const & fov, T const & aspect,
+			T const & nearPlane, T const & farPlane)
 		{
 			PerspectiveFovLH(out, fov, aspect, nearPlane, farPlane);
 			return LHToRH(out, out);
 		}
 		template <typename T>
 		inline Matrix4_T<T>&
-		PerspectiveOffCenterRH(Matrix4_T<T>& out, const T& left, const T& right, const T& bottom, const T& top, 
-			const T& nearPlane, const T& farPlane)
+		PerspectiveOffCenterRH(Matrix4_T<T>& out, T const & left, T const & right, T const & bottom, T const & top, 
+			T const & nearPlane, T const & farPlane)
 		{
 			PerspectiveOffCenterLH(out, left, right, bottom, top, nearPlane, farPlane);
 			return LHToRH(out, out);
@@ -1110,7 +1114,7 @@ namespace KlayGE
 
 		template <typename T>
 		inline Matrix4_T<T>&
-		RHToLH(Matrix4_T<T>& out, const Matrix4_T<T>& rhs)
+		RHToLH(Matrix4_T<T>& out, Matrix4_T<T> const & rhs)
 		{
 			return LHToRH(out, rhs);
 		}
@@ -1120,7 +1124,7 @@ namespace KlayGE
 		///////////////////////////////////////////////////////////////////////////////
 		template <typename T>
 		inline Quaternion_T<T>&
-		Conjugate(Quaternion_T<T>& out, const Quaternion_T<T>& rhs)
+		Conjugate(Quaternion_T<T>& out, Quaternion_T<T> const & rhs)
 		{
 			out = Quaternion_T<T>(-rhs.x(), -rhs.y(), -rhs.z(), rhs.w());
 			return out;
@@ -1128,7 +1132,7 @@ namespace KlayGE
 
 		template <typename T>
 		inline Quaternion_T<T>&
-		AxisToAxis(Quaternion_T<T>& out, const Vector_T<T, 3>& from, const Vector_T<T, 3>& to)
+		AxisToAxis(Quaternion_T<T>& out, Vector_T<T, 3> const & from, Vector_T<T, 3> const & to)
 		{
 			Vector_T<T, 3> a;
 			Normalize(a, from);
@@ -1142,7 +1146,7 @@ namespace KlayGE
 		}
 		template <typename T>
 		inline Quaternion_T<T>&
-		UnitAxisToUnitAxis(Quaternion_T<T>& out, const Vector_T<T, 3>& from, const Vector_T<T, 3>& to)
+		UnitAxisToUnitAxis(Quaternion_T<T>& out, Vector_T<T, 3> const & from, Vector_T<T, 3> const & to)
 		{
 			Vector_T<T, 3> axis;
 			Cross(axis, from, to);
@@ -1153,10 +1157,10 @@ namespace KlayGE
 
 		template <typename T>
 		inline Quaternion_T<T>&
-		BaryCentric(Quaternion_T<T>& out, const Quaternion_T<T>& q1, const Quaternion_T<T>& q2,
-			const Quaternion_T<T>& q3, const T& f, const T& g)
+		BaryCentric(Quaternion_T<T>& out, Quaternion_T<T> const & q1, Quaternion_T<T> const & q2,
+			Quaternion_T<T> const & q3, T const & f, T const & g)
 		{
-			const T temp(f + g);
+			T const temp(f + g);
 
 			Quaternion_T<T> qT1;
 			Slerp(qT1, q1, q2, temp);
@@ -1169,9 +1173,9 @@ namespace KlayGE
 
 		template <typename T>
 		inline Quaternion_T<T>&
-		Exp(Quaternion_T<T>& out, const Quaternion_T<T>& rhs)
+		Exp(Quaternion_T<T>& out, Quaternion_T<T> const & rhs)
 		{
-			const T theta(Length(rhs.v()));
+			T const theta(Length(rhs.v()));
 
 			Vector_T<T, 3> vec;
 			Normalize(vec, rhs.v());
@@ -1181,9 +1185,9 @@ namespace KlayGE
 		}
 		template <typename T>
 		inline Quaternion_T<T>&
-		Ln(Quaternion_T<T>& out, const Quaternion_T<T>& rhs)
+		Ln(Quaternion_T<T>& out, Quaternion_T<T> const & rhs)
 		{
-			const T theta_2(ACos(rhs.w()));
+			T const theta_2(ACos(rhs.w()));
 
 			Vector_T<T, 3> vec;
 			Normalize(vec, rhs.v() * (theta_2 + theta_2));
@@ -1194,16 +1198,16 @@ namespace KlayGE
 
 		template <typename T>
 		inline Quaternion_T<T>&
-		Inverse(Quaternion_T<T>& out, const Quaternion_T<T>& q)
+		Inverse(Quaternion_T<T>& out, Quaternion_T<T> const & q)
 		{
-			const T inv(T(1) / Length(rhs));
+			T const inv(T(1) / Length(rhs));
 			out = Quaternion(-rhs.x() * inv, -rhs.y() * inv, -rhs.z() * inv, rhs.w() * inv);
 			return out;
 		}
 
 		template <typename T>
 		inline Quaternion_T<T>&
-		Multiply(Quaternion_T<T>& out, const Quaternion_T<T>& lhs, const Quaternion_T<T>& rhs)
+		Multiply(Quaternion_T<T>& out, Quaternion_T<T> const & lhs, Quaternion_T<T> const & rhs)
 		{
 			out = Quaternion_T<T>(
 				lhs.x() * rhs.w() - lhs.y() * rhs.z() + lhs.z() * rhs.y() + lhs.w() * rhs.x(),
@@ -1215,9 +1219,9 @@ namespace KlayGE
 
 		template <typename T>
 		inline Quaternion_T<T>&
-		RotationYawPitchRoll(Quaternion_T<T>& out, const T& yaw, const T& pitch, const T& roll)
+		RotationYawPitchRoll(Quaternion_T<T>& out, T const & yaw, T const & pitch, T const & roll)
 		{
-			const T angX(pitch / 2), angY(yaw / 2), angZ(roll / 2);
+			T const angX(pitch / 2), angY(yaw / 2), angZ(roll / 2);
 			T sx, sy, sz;
 			T cx, cy, cz;
 			SinCos(angX, sx, cx);
@@ -1234,10 +1238,10 @@ namespace KlayGE
 
 		template <typename T>
 		inline void
-		ToAxisAngle(Vector_T<T, 3>& vec, T& ang, const Quaternion_T<T>& quat)
+		ToAxisAngle(Vector_T<T, 3>& vec, T& ang, Quaternion_T<T> const & quat)
 		{
-			const T tw(ACos(quat.w()));
-			const T scale(T(1) / Sin(tw));
+			T const tw(ACos(quat.w()));
+			T const scale(T(1) / Sin(tw));
 
 			ang = tw + tw;
 			vec.x() = quat.x() * scale, 
@@ -1247,11 +1251,11 @@ namespace KlayGE
 
 		template <typename T>
 		inline Quaternion_T<T>&
-		ToQuaternion(Quaternion_T<T>& out, const Matrix4_T<T>& mat)
+		ToQuaternion(Quaternion_T<T>& out, Matrix4_T<T> const & mat)
 		{
 			Quaternion_T<T> quat;
 			T s;
-			const T tr(mat(0, 0) + mat(1, 1) + mat(2, 2));
+			T const tr(mat(0, 0) + mat(1, 1) + mat(2, 2));
 
 			// check the diagonal
 			if (tr > 0)
@@ -1321,9 +1325,9 @@ namespace KlayGE
 
 		template <typename T>
         inline Quaternion_T<T>&
-		RotationAxis(Quaternion_T<T>& out, const Vector_T<T, 3>& v, const T& angle)
+		RotationAxis(Quaternion_T<T>& out, Vector_T<T, 3> const & v, T const & angle)
 		{
-			const T ang(angle * 0.5f);
+			T const ang(angle * 0.5f);
 			T sa, ca;
 			SinCos(ang, sa, ca);
 
@@ -1336,13 +1340,13 @@ namespace KlayGE
 
 		template <typename T>
         inline Quaternion_T<T>&
-		Slerp(Quaternion_T<T>& out, const Quaternion_T<T>& lhs, const Quaternion_T<T>& rhs, const T& slerp)
+		Slerp(Quaternion_T<T>& out, Quaternion_T<T> const & lhs, Quaternion_T<T> const & rhs, T const & slerp)
 		{
 			T scale0, scale1;
 			Quaternion_T<T> q2;
 
 			// DOT the quats to get the cosine of the angle between them
-			const T cosom(Dot(lhs, rhs));
+			T const cosom(Dot(lhs, rhs));
 
 			// Two special cases:
 			// Quats are exactly opposite, within DELTA?
@@ -1352,8 +1356,8 @@ namespace KlayGE
 				if (cosom < T(1) - std::numeric_limits<T>::epsilon())
 				{
 					// SLERP away
-					const T omega(ACos(cosom));
-					const T isinom(T(1) / Sin(omega));
+					T const omega(ACos(cosom));
+					T const isinom(T(1) / Sin(omega));
 					scale0 = Sin((1 - slerp) * omega) * isinom;
 					scale1 = Sin(slerp * omega) * isinom;
 				}
@@ -1386,7 +1390,7 @@ namespace KlayGE
 
 		template <typename T>
         inline Quaternion_T<T>&
-		RotationYawPitchRoll(Quaternion_T<T>& out, const Vector_T<T, 3>& ang)
+		RotationYawPitchRoll(Quaternion_T<T>& out, Vector_T<T, 3> const & ang)
 		{
 			return RotationYawPitchRoll(out, ang.x(), ang.y(), ang.z());
 		}
@@ -1396,41 +1400,41 @@ namespace KlayGE
 		///////////////////////////////////////////////////////////////////////////////
 		template <typename T>
 		inline T
-		Dot(const Plane_T<T>& lhs, const Vector_T<T, 4>& rhs)
+		Dot(Plane_T<T> const & lhs, Vector_T<T, 4> const & rhs)
 		{
 			return lhs.a() * rhs.x() + lhs.b() * rhs.y() + lhs.c() * rhs.z() + lhs.d() * rhs.w();
 		}
 		template <typename T>
 		inline T
-		DotCoord(const Plane_T<T>& lhs, const Vector_T<T, 3>& rhs)
+		DotCoord(Plane_T<T> const & lhs, Vector_T<T, 3> const & rhs)
 		{
 			return lhs.a() * rhs.x() + lhs.b() * rhs.y() + lhs.c() * rhs.z() + lhs.d();
 		}
 		template <typename T>
 		inline T
-		DotNormal(const Plane_T<T>& lhs, const Vector_T<T, 3>& rhs)
+		DotNormal(Plane_T<T> const & lhs, Vector_T<T, 3> const & rhs)
 		{
 			return lhs.a() * rhs.x() + lhs.b() * rhs.y() + lhs.c() * rhs.z();
 		}
 
 		template <typename T>
 		inline Plane_T<T>&
-		Normalize(Plane_T<T>& out, const Plane_T<T>& rhs)
+		Normalize(Plane_T<T>& out, Plane_T<T> const & rhs)
 		{
-			const T inv(T(1) / Length(rhs));
+			T const inv(T(1) / Length(rhs));
 			out = Plane(rhs.a() * inv, rhs.b() * inv, rhs.c() * inv, rhs.d() * inv);
 			return out;
 		}
 		template <typename T>
 		inline Plane_T<T>&
-		FromPointNormal(Plane_T<T>& out, const Vector_T<T, 3>& point, const Vector_T<T, 3>& normal)
+		FromPointNormal(Plane_T<T>& out, Vector_T<T, 3> const & point, Vector_T<T, 3> const & normal)
 		{
 			out = Plane(normal.x(), normal.y(), normal.z(), -Dot(point, normal));
 			return out;
 		}
 		template <typename T>
 		inline Plane_T<T>&
-		FromPoints(Plane_T<T>& out, const Vector_T<T, 3>& v0, const Vector_T<T, 3>& v1, const Vector_T<T, 3>& v2)
+		FromPoints(Plane_T<T>& out, Vector_T<T, 3> const & v0, Vector_T<T, 3> const & v1, Vector_T<T, 3> const & v2)
 		{
 			Vector_T<T, 3> vec;
 			Cross(vec, v1 - v0, v1 - v2);
@@ -1439,7 +1443,7 @@ namespace KlayGE
 		}
 		template <typename T>
 		inline Plane_T<T>&
-		Transform(Plane_T<T>& out, const Plane_T<T>& p, const Matrix4_T<T>& mat)
+		Transform(Plane_T<T>& out, Plane_T<T> const & p, Matrix4_T<T> const & mat)
 		{
 			out = Plane_T<T>(
 				p.a() * mat(0, 0) + p.b() * mat(1, 0) + p.c() * mat(2, 0) + p.d() * mat(3, 0),
@@ -1452,8 +1456,8 @@ namespace KlayGE
 		// 求直线和平面的交点，直线orig + t * dir，t的取值范围[0, 1]
 		template <typename T>
 		inline bool
-		IntersectLine(Vector_T<T, 3>& out, const Plane_T<T>& p,
-			const Vector_T<T, 3>& orig, const Vector_T<T, 3>& dir)
+		IntersectLine(Vector_T<T, 3>& out, Plane_T<T> const & p,
+			Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir)
 		{
 			Vector_T<T, 3> vP(0, 0, 0);
 
@@ -1476,13 +1480,13 @@ namespace KlayGE
 				}
 			}
 
-			const T deno(Dot(dir, p.Normal()));
+			T const deno(Dot(dir, p.Normal()));
 			if (!Eq(deno, T(0)))
 			{
 				return false;
 			}
 
-			const T t(Dot(vP - orig, p.Normal()) / deno);
+			T const t(Dot(vP - orig, p.Normal()) / deno);
 
 			out = orig + t * dir;
 
@@ -1492,16 +1496,16 @@ namespace KlayGE
 
 		// 颜色
 		///////////////////////////////////////////////////////////////////////////////
-		Color& Negative(Color& out, const Color& rhs);
-		Color& Modulate(Color& out, const Color& lhs, const Color& rhs);
+		Color& Negative(Color& out, Color const & rhs);
+		Color& Modulate(Color& out, Color const & lhs, Color const & rhs);
 
 
 		// 范围
 		///////////////////////////////////////////////////////////////////////////////
-		bool VecInSphere(const Sphere& sphere, const Vector3& v);
-		bool BoundProbe(const Sphere& sphere, const Vector3& pos, const Vector3& dir);
-		bool VecInBox(const Box& box, const Vector3& v);
-		bool BoundProbe(const Box& box, const Vector3& orig, const Vector3& dir);
+		bool VecInSphere(Sphere const & sphere, Vector3 const & v);
+		bool BoundProbe(Sphere const & sphere, Vector3 const & pos, Vector3 const & dir);
+		bool VecInBox(Box const & box, Vector3 const & v);
+		bool BoundProbe(Box const & box, Vector3 const & orig, Vector3 const & dir);
 
 		template <typename Iterator>
 		inline Box&
@@ -1551,20 +1555,20 @@ namespace KlayGE
 
 			for (IndexIterator iter = indicesBegin; iter != indicesEnd; iter += 3)
 			{
-				const U16 previousIndex = *(iter + 0);
-				const U16 currentIndex = *(iter + 1);
-				const U16 nextIndex = *(iter + 2);
+				U16 const previousIndex = *(iter + 0);
+				U16 const currentIndex = *(iter + 1);
+				U16 const nextIndex = *(iter + 2);
 
-				const Vector3& currentXYZ(*(xyzsBegin + currentIndex));
-				const Vector3& previousXYZ(*(xyzsBegin + previousIndex));
-				const Vector3& nextXYZ(*(xyzsBegin + nextIndex));
+				Vector3& const currentXYZ(*(xyzsBegin + currentIndex));
+				Vector3& const previousXYZ(*(xyzsBegin + previousIndex));
+				Vector3& const nextXYZ(*(xyzsBegin + nextIndex));
 
 				Vector3 v1v0 = nextXYZ - currentXYZ;
 				Vector3 v2v0 = previousXYZ - currentXYZ;
 
-				const Vector2& nextTex(*(texsBegin + nextIndex));
-				const Vector2& currentTex(*(texsBegin + currentIndex));
-				const Vector2& previousTex(*(texsBegin + previousIndex));
+				Vector2& const nextTex(*(texsBegin + nextIndex));
+				Vector2& const currentTex(*(texsBegin + currentIndex));
+				Vector2& const previousTex(*(texsBegin + previousIndex));
 
 				float s1 = nextTex.x() - currentTex.x();
 				float t1 = nextTex.y() - currentTex.y();
@@ -1614,13 +1618,13 @@ namespace KlayGE
 
 			for (IndexIterator iter = indicesBegin; iter != indicesEnd; iter += 3)
 			{
-				const U16 v0Index = *(iter + 0);
-				const U16 v1Index = *(iter + 1);
-				const U16 v2Index = *(iter + 2);
+				U16 const v0Index = *(iter + 0);
+				U16 const v1Index = *(iter + 1);
+				U16 const v2Index = *(iter + 2);
 
-				const Vector3& v0(*(xyzsBegin + v0Index));
-				const Vector3& v1(*(xyzsBegin + v1Index));
-				const Vector3& v2(*(xyzsBegin + v2Index));
+				Vector3& const v0(*(xyzsBegin + v0Index));
+				Vector3& const v1(*(xyzsBegin + v1Index));
+				Vector3& const v2(*(xyzsBegin + v2Index));
 
 				Vector3 vec;
 				MathLib::Cross(vec, v1 - v0, v2 - v0);	
@@ -1648,12 +1652,12 @@ namespace KlayGE
 
 		// 小于x的随机数
 		template <typename T>
-		T Next(const T& x)
+		T Next(T const & x)
 			{ return MathLib::Mod<T>(static_cast<T>(Random::Instance().Next()), x); }
 
 		// 在min和max之间的随机数
 		template <typename T>
-		T Next(const T& minv, const T& maxv)
+		T Next(T const & minv, T const & maxv)
 			{ return minv + Random::Instance().Next(maxv - minv); }
 
 	private:

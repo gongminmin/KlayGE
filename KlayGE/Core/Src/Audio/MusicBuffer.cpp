@@ -24,7 +24,7 @@ namespace KlayGE
 
 	// ¹¹Ôìº¯Êı
 	/////////////////////////////////////////////////////////////////////////////////
-	MusicBuffer::MusicBuffer(const AudioDataSourcePtr& dataSource)
+	MusicBuffer::MusicBuffer(AudioDataSourcePtr const & dataSource)
 					: AudioBuffer(dataSource)
 	{
 	}
@@ -67,8 +67,8 @@ namespace KlayGE
 	////////////////////////////////////////////////////////////////////////////////
 	void MusicBuffer::Stop()
 	{
-		dataSource_->Reset();
-
 		this->DoStop();
+
+		dataSource_->Reset();
 	}
 }

@@ -30,8 +30,8 @@ namespace KlayGE
 
 	// 设置摄像机的观察矩阵
 	//////////////////////////////////////////////////////////////////////////////////
-	void Camera::ViewParams(const Vector3& eyePos, const Vector3& lookat,
-										const Vector3& upVec)
+	void Camera::ViewParams(Vector3 const & eyePos, Vector3 const & lookat,
+										Vector3 const & upVec)
 	{
 		// 设置观察矩阵的参数
 		eyePos_		= eyePos;
@@ -60,7 +60,7 @@ namespace KlayGE
 
 	// 公告牌技术所需要的矩阵
 	//////////////////////////////////////////////////////////////////////////////////
-	const Matrix4& Camera::BillboardMatrix()
+	Matrix4 const & Camera::BillboardMatrix()
 	{
 		if (reEvalBillboard_)
 		{

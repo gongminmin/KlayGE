@@ -17,7 +17,7 @@
 
 namespace KlayGE
 {
-	void Frustum::CalculateFrustum(const Matrix4& view, const Matrix4& proj)
+	void Frustum::CalculateFrustum(Matrix4 const & view, Matrix4 const & proj)
 	{
 		// Create the clip.
 		Matrix4 clip(view * proj);
@@ -52,7 +52,7 @@ namespace KlayGE
 		}
 	}
 
-	bool Frustum::Visiable(const Vector3& v) const
+	bool Frustum::Visiable(Vector3 const & v) const
 	{
 		for (PlanesType::const_iterator iter = planes_.begin(); iter != planes_.end(); ++ iter)
 		{

@@ -12,6 +12,7 @@
 #include <KlayGE/DiskFile/DiskFile.hpp>
 #include <KlayGE/D3D9/D3D9RenderSettings.hpp>
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
+#include <KlayGE/OCTree/OCTree.hpp>
 
 #include <vector>
 #include <sstream>
@@ -74,7 +75,7 @@ namespace
 
 				for (short x = 0; x < TGAHeader.width; ++ x)
 				{
-					const size_t offset((line * TGAHeader.width + x) * (TGAHeader.pixelSize / 8));
+					size_t const offset((line * TGAHeader.width + x) * (TGAHeader.pixelSize / 8));
 
 					tgaData.push_back(data[offset + 0]);
 					tgaData.push_back(data[offset + 1]);
@@ -109,8 +110,8 @@ namespace
 			{
 				Vector3(-1, 1,  0),
 				Vector3(1,	1,	0),
-				Vector3(1,	-1,	0),
-				Vector3(-1, -1, 0),
+				Vector3(1,	-1,	1),
+				Vector3(-1, -1, 1),
 			};
 
 			Vector2 texs[] =
@@ -126,7 +127,7 @@ namespace
 				0, 1, 2, 2, 3, 0
 			};
 
-			box_ = Box(Vector3(-1, -1, 0), Vector3(1, 1, 0.1f));
+			MathLib::ComputeBoundingBox(box_, &xyzs[0], &xyzs[4]);
 
 			Vector3 t[4], b[4];
 			MathLib::ComputeTangent(t, b,
@@ -161,9 +162,9 @@ namespace
 			return box_;
 		}
 
-		const std::wstring& Name() const
+		std::wstring const & Name() const
 		{
-			static std::wstring name(L"Polygon");
+			static const std::wstring name(L"Polygon");
 			return name;
 		}
 
@@ -180,7 +181,7 @@ namespace
 class TheRenderSettings : public D3D9RenderSettings
 {
 private:
-	bool DoConfirmDevice(const D3DCAPS9& caps, U32 behavior, D3DFORMAT format) const
+	bool DoConfirmDevice(D3DCAPS9 const & caps, U32 behavior, D3DFORMAT format) const
 	{
 		if (caps.VertexShaderVersion < D3DVS_VERSION(1, 1))
 		{

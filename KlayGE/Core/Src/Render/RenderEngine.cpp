@@ -43,7 +43,7 @@ namespace KlayGE
 
 	// 增加渲染目标
 	/////////////////////////////////////////////////////////////////////////////////
-	RenderEngine::RenderTargetListIterator RenderEngine::AddRenderTarget(const RenderTargetPtr& target)
+	RenderEngine::RenderTargetListIterator RenderEngine::AddRenderTarget(RenderTargetPtr const & target)
 	{
 		renderTargetList_.push_back(target);
 		RenderTargetListIterator iter(renderTargetList_.end());
@@ -84,14 +84,14 @@ namespace KlayGE
 
 	// 获取当前渲染目标
 	/////////////////////////////////////////////////////////////////////////////////
-	const RenderEngine::RenderTargetListIterator& RenderEngine::ActiveRenderTarget() const
+	RenderEngine::RenderTargetListIterator const & RenderEngine::ActiveRenderTarget() const
 	{
 		return activeRenderTarget_;
 	}
 
 	// 设置渲染状态
 	/////////////////////////////////////////////////////////////////////////////////
-	void RenderEngine::SetRenderEffect(const RenderEffectPtr& effect)
+	void RenderEngine::SetRenderEffect(RenderEffectPtr const & effect)
 	{
 		if (renderEffect_ != effect)
 		{
@@ -126,7 +126,7 @@ namespace KlayGE
 
 	// 设置世界矩阵
 	/////////////////////////////////////////////////////////////////////////////////
-	void RenderEngine::WorldMatrix(const Matrix4& mat)
+	void RenderEngine::WorldMatrix(Matrix4 const & mat)
 	{
 		worldMat_ = mat;
 		this->DoWorldMatrix();
@@ -141,7 +141,7 @@ namespace KlayGE
 
 	// 设置观察矩阵
 	/////////////////////////////////////////////////////////////////////////////////
-	void RenderEngine::ViewMatrix(const Matrix4& mat)
+	void RenderEngine::ViewMatrix(Matrix4 const & mat)
 	{
 		viewMat_ = mat;
 		this->DoViewMatrix();
@@ -156,7 +156,7 @@ namespace KlayGE
 
 	// 设置投射矩阵
 	/////////////////////////////////////////////////////////////////////////////////
-	void RenderEngine::ProjectionMatrix(const Matrix4& mat)
+	void RenderEngine::ProjectionMatrix(Matrix4 const & mat)
 	{
 		projMat_ = mat;
 		this->DoProjectionMatrix();

@@ -23,6 +23,7 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Memory.hpp>
+#include <KlayGE/Util.hpp>
 
 #include <KlayGE/Light.hpp>
 #include <KlayGE/Material.hpp>
@@ -30,6 +31,7 @@
 #include <KlayGE/RenderBuffer.hpp>
 #include <KlayGE/RenderTarget.hpp>
 #include <KlayGE/RenderEffect.hpp>
+
 #include <KlayGE/D3D9/D3D9RenderSettings.hpp>
 #include <KlayGE/D3D9/D3D9RenderWindow.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
@@ -48,7 +50,7 @@ namespace KlayGE
 {
 	// 从KlayGE的Matrix4转换到D3DMATRIX
 	/////////////////////////////////////////////////////////////////////////////////
-	D3DMATRIX Convert(const Matrix4& mat)
+	D3DMATRIX Convert(Matrix4 const & mat)
 	{
 		D3DMATRIX d3dMat;
 		MemoryLib::Copy(&d3dMat._11, &mat.begin()[0], sizeof(d3dMat));
@@ -58,7 +60,7 @@ namespace KlayGE
 
 	// 从D3DMATRIX转换到KlayGE的Matrix4
 	/////////////////////////////////////////////////////////////////////////////////
-	Matrix4 Convert(const D3DMATRIX& mat)
+	Matrix4 Convert(D3DMATRIX const & mat)
 	{
 		return Matrix4(&mat.m[0][0]);
 	}
@@ -144,7 +146,7 @@ namespace KlayGE
 
 	// 从RenderEngine::TexFiltering转换到D3D的MagFilter标志
 	/////////////////////////////////////////////////////////////////////////////////
-	U32 MagFilter(const D3DCAPS9& caps, RenderEngine::TexFiltering tf)
+	U32 MagFilter(D3DCAPS9 const & caps, RenderEngine::TexFiltering tf)
 	{
 		// NOTE: Fall through if device doesn't support requested type
 		if ((RenderEngine::TF_Anisotropic == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFANISOTROPIC))
@@ -175,7 +177,7 @@ namespace KlayGE
 
 	// 从RenderEngine::TexFiltering转换到D3D的MinFilter标志
 	/////////////////////////////////////////////////////////////////////////////////
-	U32 MinFilter(const D3DCAPS9& caps, RenderEngine::TexFiltering tf)
+	U32 MinFilter(D3DCAPS9 const & caps, RenderEngine::TexFiltering tf)
 	{
 		// NOTE: Fall through if device doesn't support requested type
 		if ((RenderEngine::TF_Anisotropic == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFANISOTROPIC))
@@ -206,7 +208,7 @@ namespace KlayGE
 
 	// 从RenderEngine::TexFiltering转换到D3D的MipFilter标志
 	/////////////////////////////////////////////////////////////////////////////////
-	U32 MipFilter(const D3DCAPS9& caps, RenderEngine::TexFiltering tf)
+	U32 MipFilter(D3DCAPS9 const & caps, RenderEngine::TexFiltering tf)
 	{
 		// NOTE: Fall through if device doesn't support requested type
 		if ((RenderEngine::TF_Anisotropic == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR))
@@ -245,7 +247,7 @@ namespace KlayGE
 							clearFlags_(D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER)
 	{
 		// Create our Direct3D object
-		d3d_ = COMPtr<IDirect3D9>(Direct3DCreate9(D3D_SDK_VERSION));
+		d3d_ = MakeCOMPtr(Direct3DCreate9(D3D_SDK_VERSION));
 		Verify(d3d_.get() != NULL);
 
 		adapterList_.Enumerate(d3d_);
@@ -259,36 +261,36 @@ namespace KlayGE
 
 	// 返回渲染系统的名字
 	/////////////////////////////////////////////////////////////////////////////////
-	const std::wstring& D3D9RenderEngine::Name() const
+	std::wstring const & D3D9RenderEngine::Name() const
 	{
-		static std::wstring name(L"Direct3D9 Render System");
+		static const std::wstring name(L"Direct3D9 Render System");
 		return name;
 	}
 
 	// 获取D3D接口
 	/////////////////////////////////////////////////////////////////////////////////
-	const COMPtr<IDirect3D9>& D3D9RenderEngine::D3D() const
+	boost::shared_ptr<IDirect3D9> const & D3D9RenderEngine::D3D() const
 	{
 		return d3d_;
 	}
 
 	// 获取D3D Device接口
 	/////////////////////////////////////////////////////////////////////////////////
-	const COMPtr<IDirect3DDevice9>& D3D9RenderEngine::D3DDevice() const
+	boost::shared_ptr<IDirect3DDevice9> const & D3D9RenderEngine::D3DDevice() const
 	{
 		return d3dDevice_;
 	}
 
 	// 获取D3D适配器列表
 	/////////////////////////////////////////////////////////////////////////////////
-	const D3D9AdapterList& D3D9RenderEngine::D3DAdapters() const
+	D3D9AdapterList const & D3D9RenderEngine::D3DAdapters() const
 	{
 		return adapterList_;
 	}
 
 	// 获取当前适配器
 	/////////////////////////////////////////////////////////////////////////////////
-	const D3D9Adapter& D3D9RenderEngine::ActiveAdapter() const
+	D3D9Adapter const & D3D9RenderEngine::ActiveAdapter() const
 	{
 		return adapterList_.Adapter(adapterList_.CurrentAdapterIndex());
 	}
@@ -334,14 +336,14 @@ namespace KlayGE
 
 	// 设置环境光
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::AmbientLight(const Color& col)
+	void D3D9RenderEngine::AmbientLight(Color const & col)
 	{
 		TIF(d3dDevice_->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_COLORVALUE(col.r(), col.g(), col.b(), 1.0f)));
 	}
 
 	// 设置清除颜色
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::ClearColor(const Color& clr)
+	void D3D9RenderEngine::ClearColor(Color const & clr)
 	{
 		clearClr_ = D3DCOLOR_COLORVALUE(clr.r(), clr.g(), clr.b(), 1.0f);
 	}
@@ -378,15 +380,15 @@ namespace KlayGE
 
 	// 建立渲染窗口
 	/////////////////////////////////////////////////////////////////////////////////
-	RenderWindowPtr D3D9RenderEngine::CreateRenderWindow(const std::string& name,
-		const RenderSettings& settings)
+	RenderWindowPtr D3D9RenderEngine::CreateRenderWindow(std::string const & name,
+		RenderSettings const & settings)
 	{
 		RenderWindowPtr win(new D3D9RenderWindow(d3d_, this->ActiveAdapter(), name,
-			static_cast<const D3D9RenderSettings&>(settings)));
+			static_cast<D3D9RenderSettings const &>(settings)));
 
 		IDirect3DDevice9* d3dDevice;
 		win->CustomAttribute("D3DDEVICE", &d3dDevice);
-		d3dDevice_ = COMPtr<IDirect3DDevice9>(d3dDevice);
+		d3dDevice_ = MakeCOMPtr(d3dDevice);
 		d3dDevice_->AddRef();
 
 		this->ActiveRenderTarget(this->AddRenderTarget(win));
@@ -428,7 +430,7 @@ namespace KlayGE
 
 	// 设置光源
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::SetLight(U32 index, const Light& lt)
+	void D3D9RenderEngine::SetLight(U32 index, Light const & lt)
 	{
 		D3DLIGHT9 d3dLight;
 		MemoryLib::Zero(&d3dLight, sizeof(d3dLight));
@@ -511,7 +513,7 @@ namespace KlayGE
 
 	// 设置材质
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::SetMaterial(const Material& m)
+	void D3D9RenderEngine::SetMaterial(Material const & m)
 	{
 		D3DMATERIAL9 material;
 
@@ -533,13 +535,16 @@ namespace KlayGE
 		IDirect3DSurface9* back;
 		(*activeRenderTarget_)->CustomAttribute("DDBACKBUFFER", &back);
 		TIF(d3dDevice_->SetRenderTarget(0, back));
+		back->Release();
+
 		IDirect3DSurface9* zBuffer;
 		(*activeRenderTarget_)->CustomAttribute("D3DZBUFFER", &zBuffer);
 		TIF(d3dDevice_->SetDepthStencilSurface(zBuffer));
+		zBuffer->Release();
 
 		this->CullingMode(cullingMode_);
 
-		const Viewport& vp((*iter)->GetViewport());
+		Viewport const & vp((*iter)->GetViewport());
 		D3DVIEWPORT9 d3dvp = { vp.left, vp.top, vp.width, vp.height, 0, 1 };
 		TIF(d3dDevice_->SetViewport(&d3dvp));
 	}
@@ -555,11 +560,11 @@ namespace KlayGE
 
 	// 渲染
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::Render(const RenderBuffer& rb)
+	void D3D9RenderEngine::Render(RenderBuffer const & rb)
 	{
 		D3DPRIMITIVETYPE primType;
 		U32 primCount;
-		const U32 vertexCount(static_cast<U32>(rb.UseIndices() ? rb.NumIndices() : rb.NumVertices()));
+		U32 const vertexCount(static_cast<U32>(rb.UseIndices() ? rb.NumIndices() : rb.NumVertices()));
 		switch (rb.Type())
 		{
 		case RenderBuffer::BT_PointList:
@@ -700,7 +705,7 @@ namespace KlayGE
 
 			IDirect3DVertexDeclaration9* theVertexDecl;
 			d3dDevice_->CreateVertexDeclaration(&currentDecl_[0], &theVertexDecl);
-			currentVertexDecl_ = COMPtr<IDirect3DVertexDeclaration9>(theVertexDecl);
+			currentVertexDecl_ = MakeCOMPtr(theVertexDecl);
 		}
 
 		d3dDevice_->SetVertexDeclaration(currentVertexDecl_.get());
@@ -778,7 +783,7 @@ namespace KlayGE
 
 	// 设置雾化效果
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::Fog(FogMode mode, const Color& color,
+	void D3D9RenderEngine::Fog(FogMode mode, Color const & color,
 		float expDensity, float linearStart, float linearEnd)
 	{
 		if (Fog_None == mode)
@@ -821,7 +826,7 @@ namespace KlayGE
 
 	// 设置纹理
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::SetTexture(U32 stage, const TexturePtr& texture)
+	void D3D9RenderEngine::SetTexture(U32 stage, TexturePtr const & texture)
 	{
 		if (!texture)
 		{
@@ -928,7 +933,7 @@ namespace KlayGE
 
 	// 设置纹理坐标
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::TextureMatrix(U32 stage, const Matrix4& mat)
+	void D3D9RenderEngine::TextureMatrix(U32 stage, Matrix4 const & mat)
 	{
 		if (Matrix4::Identity() == mat)
 		{

@@ -24,14 +24,14 @@ namespace KlayGE
 	struct char_ignorecase_traits : public std::char_traits<charT>
 	{
 		// 忽略大小写的等于比较
-		static bool eq(const char_type& ch1, const char_type& ch2)
+		static bool eq(char_type const & ch1, char_type const & ch2)
 			{ return std::toupper(ch1, std::locale::classic()) == std::toupper(ch2, std::locale::classic()); }
 
 		// 忽略大小写的小于比较
-		static bool lt(const char_type& ch1, const char_type& ch2)
+		static bool lt(char_type const & ch1, char_type const & ch2)
 			{ return std::toupper(ch1, std::locale::classic()) < std::toupper(ch2, std::locale::classic()); }
 
-		static int compare(const char_type* str1, const char_type* str2, std::size_t n)
+		static int compare(char_type const * str1, char_type const * str2, std::size_t n)
 		{
 			for (std::size_t i = 0; i < n; ++ i)
 			{
@@ -44,7 +44,7 @@ namespace KlayGE
 			return 0;
 		}
 
-		static const char_type* find(const char_type* str, std::size_t n, const char_type& c)
+		static char_type const * find(char_type const * str, std::size_t n, char_type const & c)
 		{
 			for (std::size_t i = 0; i < n; ++ i)
 			{
@@ -64,7 +64,7 @@ namespace KlayGE
 	template <typename charT>
 	inline std::basic_ostream<charT>&
 	operator<<(std::basic_ostream<charT>& ostrm,
-					const std::basic_string<charT, char_ignorecase_traits<charT> >& str)
+					std::basic_string<charT, char_ignorecase_traits<charT> > const & str)
 		{ return ostrm << std::basic_string<charT>(str.data(), str.length()); }
 }
 

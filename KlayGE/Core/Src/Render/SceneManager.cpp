@@ -35,15 +35,15 @@ namespace KlayGE
 
 	// ¿ÕµÄ²Ã¼õÆ÷
 	/////////////////////////////////////////////////////////////////////////////////
-	void SceneManager::ClipScene(const Camera& camera)
+	void SceneManager::ClipScene(Camera const & camera)
 	{
 	}
 
 	// ¼ÙÈçäÖÈ¾ÎïÌå
 	/////////////////////////////////////////////////////////////////////////////////
-	void SceneManager::PushRenderable(const RenderablePtr& obj)
+	void SceneManager::PushRenderable(RenderablePtr const & obj)
 	{
-		const RenderEffectPtr& effect(obj->GetRenderEffect());
+		RenderEffectPtr const & effect(obj->GetRenderEffect());
 
 		RenderQueueType::iterator iter(renderQueue_.find(effect));
 		if (iter != renderQueue_.end())

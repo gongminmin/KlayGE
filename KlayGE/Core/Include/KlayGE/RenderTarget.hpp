@@ -21,14 +21,14 @@ namespace KlayGE
 
 		virtual void Update();
 
-		virtual const Viewport& GetViewport() const;
+		virtual Viewport const & GetViewport() const;
 		virtual Viewport& GetViewport();
-		virtual void SetViewport(const Viewport& viewport);
+		virtual void SetViewport(Viewport const & viewport);
 
 		virtual float FPS() const;
 
 		// Gets a custom (maybe platform-specific) attribute.
-		virtual void CustomAttribute(const std::string& name, void* pData) = 0;
+		virtual void CustomAttribute(std::string const & name, void* pData) = 0;
 
 		virtual bool Active() const;
 		virtual void Active(bool state);

@@ -42,20 +42,20 @@ namespace KlayGE
 
 		Vector3 Position() const
 			{ return Vector3::Zero(); }
-		void Position(const Vector3& v)
+		void Position(Vector3 const & v)
 			{ }
 		Vector3 Velocity() const
 			{ return Vector3::Zero(); }
-		void Velocity(const Vector3& v)
+		void Velocity(Vector3 const & v)
 			{ }
 		Vector3 Direction() const
 			{ return Vector3::Zero(); }
-		void Direction(const Vector3& v)
+		void Direction(Vector3 const & v)
 			{ }
 	};
 
 
-	AudioBuffer::AudioBuffer(const AudioDataSourcePtr& dataSource)
+	AudioBuffer::AudioBuffer(AudioDataSourcePtr const & dataSource)
 			: dataSource_(dataSource),
 				format_(dataSource->Format()),
 				freq_(dataSource->Freq())

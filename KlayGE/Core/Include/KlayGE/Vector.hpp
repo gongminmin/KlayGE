@@ -33,43 +33,43 @@ namespace KlayGE
 		struct Helper
 		{
 			template <typename U>
-			static void DoCopy(T out[N], const U rhs[N])
+			static void DoCopy(T out[N], U const rhs[N])
 			{
 				out[0] = rhs[0];
 				Helper<N - 1>::DoCopy<U>(out + 1, rhs + 1);
 			}
 
-			static void DoAssign(T out[N], const T& rhs)
+			static void DoAssign(T out[N], T const & rhs)
 			{
 				out[0] = rhs;
 				Helper<N - 1>::DoAssign(out + 1, rhs);
 			}
 
-			static void DoAdd(T out[N], const T lhs[N], const T rhs[N])
+			static void DoAdd(T out[N], T const lhs[N], T const rhs[N])
 			{
 				out[0] = lhs[0] + rhs[0];
 				Helper<N - 1>::DoAdd(out + 1, lhs + 1, rhs + 1);
 			}
 
-			static void DoSub(T out[N], const T lhs[N], const T rhs[N])
+			static void DoSub(T out[N], T const lhs[N], T const rhs[N])
 			{
 				out[0] = lhs[0] - rhs[0];
 				Helper<N - 1>::DoSub(out + 1, lhs + 1, rhs + 1);
 			}
 
-			static void DoMul(T out[N], const T lhs[N], const T& rhs)
+			static void DoMul(T out[N], T const lhs[N], T const & rhs)
 			{
 				out[0] = lhs[0] * rhs;
 				Helper<N - 1>::DoMul(out + 1, lhs + 1, rhs);
 			}
 
-			static void DoNegate(T out[N], const T rhs[N])
+			static void DoNegate(T out[N], T const rhs[N])
 			{
 				out[0] = -rhs[0];
 				Helper<N - 1>::DoNegate(out + 1, rhs + 1);
 			}
 
-			static bool DoEqual(const T lhs[N], const T rhs[N])
+			static bool DoEqual(T const lhs[N], T const rhs[N])
 			{
 				return Helper<1>::DoEqual(lhs, rhs) && Helper<N - 1>::DoEqual(lhs + 1, rhs + 1);
 			}
@@ -84,37 +84,37 @@ namespace KlayGE
 		struct Helper<1>
 		{
 			template <typename U>
-			static void DoCopy(T out[1], const U rhs[1])
+			static void DoCopy(T out[1], U const rhs[1])
 			{
 				out[0] = rhs[0];
 			}
 
-			static void DoAssign(T out[1], const T& rhs)
+			static void DoAssign(T out[1], T const & rhs)
 			{
 				out[0] = rhs;
 			}
 
-			static void DoAdd(T out[1], const T lhs[1], const T rhs[1])
+			static void DoAdd(T out[1], T const lhs[1], T const rhs[1])
 			{
 				out[0] = lhs[0] + rhs[0];
 			}
 
-			static void DoSub(T out[1], const T lhs[1], const T rhs[1])
+			static void DoSub(T out[1], T const lhs[1], T const rhs[1])
 			{
 				out[0] = lhs[0] - rhs[0];
 			}
 
-			static void DoMul(T out[1], const T lhs[1], const T& rhs)
+			static void DoMul(T out[1], T const lhs[1], T const & rhs)
 			{
 				out[0] = lhs[0] * rhs;
 			}
 
-			static void DoNegate(T out[1], const T rhs[1])
+			static void DoNegate(T out[1], T const rhs[1])
 			{
 				out[0] = -rhs[0];
 			}
 
-			static bool DoEqual(const T lhs[1], const T rhs[1])
+			static bool DoEqual(T const lhs[1], T const rhs[1])
 			{
 				return lhs[0] == rhs[0];
 			}
@@ -131,7 +131,7 @@ namespace KlayGE
 		typedef typename DetailType::value_type			value_type;
 
 		typedef value_type*								pointer;
-		typedef const value_type*						const_pointer;
+		typedef value_type const *						const_pointer;
 
 		typedef typename DetailType::reference			reference;
 		typedef typename DetailType::const_reference	const_reference;
@@ -148,36 +148,36 @@ namespace KlayGE
 		Vector_T()
 		{
 		}
-		explicit Vector_T(const T* rhs)
+		explicit Vector_T(T const * rhs)
 		{
 			Helper<N>::DoCopy(&vec_[0], rhs);
 		}
-		explicit Vector_T(const T& rhs)
+		explicit Vector_T(T const & rhs)
 		{
 			Helper<N>::DoAssign(&vec_[0], rhs);
 		}
-		Vector_T(const Vector_T& rhs)
+		Vector_T(Vector_T const & rhs)
 		{
 			Helper<N>::DoCopy(&vec_[0], &rhs[0]);
 		}
 		template <typename U>
-		Vector_T(const Vector_T<U, N>& rhs)
+		Vector_T(Vector_T<U, N> const & rhs)
 		{
 			Helper<N>::DoCopy<U>(&vec_[0], &rhs[0]);
 		}
 
-		Vector_T(const T& x, const T& y)
+		Vector_T(T const & x, T const & y)
 		{
 			this->x() = x;
 			this->y() = y;
 		}
-		Vector_T(const T& x, const T& y, const T& z)
+		Vector_T(T const & x, T const & y, T const & z)
 		{
 			this->x() = x;
 			this->y() = y;
 			this->z() = z;
 		}
-		Vector_T(const T& x, const T& y, const T& z, const T& w)
+		Vector_T(T const & x, T const & y, T const & z, T const & w)
 		{
 			this->x() = x;
 			this->y() = y;
@@ -190,7 +190,7 @@ namespace KlayGE
 			return elem_num;
 		}
 
-		static const Vector_T& Zero()
+		static Vector_T const & Zero()
 		{
 			static Vector_T<T, N> zero(T(0));
 			return zero;
@@ -268,30 +268,30 @@ namespace KlayGE
 
 		// 赋值操作符
 		template <typename U>
-		Vector_T& operator+=(const Vector_T<U, N>& rhs)
+		Vector_T const & operator+=(Vector_T<U, N> const & rhs)
 		{
 			Helper<N>::DoAdd(&vec_[0], &vec_[0], &rhs.vec_[0]);
 			return *this;
 		}
 		template <typename U>
-		Vector_T& operator-=(const Vector_T<U, N>& rhs)
+		Vector_T const & operator-=(Vector_T<U, N> const & rhs)
 		{
 			Helper<N>::DoSub(&vec_[0], &vec_[0], &rhs.vec_[0]);
 			return *this;
 		}
 		template <typename U>
-		Vector_T& operator*=(const U& rhs)
+		Vector_T const & operator*=(U const & rhs)
 		{
 			Helper<N>::DoMul(&vec_[0], &vec_[0], rhs);
 			return *this;
 		}
 		template <typename U>
-		Vector_T& operator/=(const U& rhs)
+		Vector_T const & operator/=(U const & rhs)
 		{
 			return this->operator*=(1.0f / rhs);
 		}
 
-		Vector_T& operator=(const Vector_T& rhs)
+		Vector_T const & operator=(Vector_T const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -300,7 +300,7 @@ namespace KlayGE
 			return *this;
 		}
 		template <typename U>
-		Vector_T& operator=(const Vector_T<U, N>& rhs)
+		Vector_T const & operator=(Vector_T<U, N> const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -310,9 +310,9 @@ namespace KlayGE
 		}
 
 		// 一元操作符
-		const Vector_T operator+() const
+		Vector_T const operator+() const
 			{ return *this; }
-		const Vector_T operator-() const
+		Vector_T const operator-() const
 		{
 			Vector_T temp(*this);
 			Helper<N>::DoNegate(&temp.vec_[0], &vec_[0]);
@@ -325,7 +325,7 @@ namespace KlayGE
         }
 
 		friend bool
-		operator==(const Vector_T& lhs, const Vector_T& rhs)
+		operator==(Vector_T const & lhs, Vector_T const & rhs)
 		{
 			return Helper<N>::DoEqual(&lhs[0], &rhs[0]);
 		}
@@ -336,7 +336,7 @@ namespace KlayGE
 
 	template <typename T, int N>
 	inline bool
-	operator!=(const Vector_T<T, N>& lhs, const Vector_T<T, N>& rhs)
+	operator!=(Vector_T<T, N> const & lhs, Vector_T<T, N> const & rhs)
 	{
 		return !(lhs == rhs);
 	}

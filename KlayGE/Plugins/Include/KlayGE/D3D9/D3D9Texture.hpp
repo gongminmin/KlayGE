@@ -1,7 +1,7 @@
 #ifndef _D3D9TEXTURE_HPP
 #define _D3D9TEXTURE_HPP
 
-#include <KlayGE/COMPtr.hpp>
+#include <boost/smart_ptr.hpp>
 
 #include <d3d9.h>
 #include <d3dx9.h>
@@ -19,25 +19,25 @@ namespace KlayGE
 		D3D9Texture(U32 width, U32 height, U16 numMipMaps, PixelFormat format, TextureUsage usage = TU_Default);
 		~D3D9Texture();
 
-		const std::wstring& Name() const;
+		std::wstring const & Name() const;
 
-		void CustomAttribute(const std::string& name, void* pData);
+		void CustomAttribute(std::string const & name, void* pData);
 
 		void CopyToTexture(Texture& target);
 		void CopyMemoryToTexture(void* pData, PixelFormat pf,
 			U32 width = 0, U32 height = 0, U32 xOffset = 0, U32 yOffset = 0);
 
-		const COMPtr<IDirect3DTexture9>& D3DTexture() const
+		boost::shared_ptr<IDirect3DTexture9> const & D3DTexture() const
 			{ return this->d3dTexture_; }
-		const COMPtr<IDirect3DSurface9>& DepthStencil() const
+		boost::shared_ptr<IDirect3DSurface9> const & DepthStencil() const
 			{ return this->renderZBuffer_; }
 
 	private:
-		COMPtr<IDirect3DDevice9>	d3dDevice_;
-		COMPtr<IDirect3DTexture9>	d3dTexture_;		// The actual texture surface
-		COMPtr<IDirect3DTexture9>	d3dTempTexture_;
+		boost::shared_ptr<IDirect3DDevice9>		d3dDevice_;
+		boost::shared_ptr<IDirect3DTexture9>	d3dTexture_;		// The actual texture surface
+		boost::shared_ptr<IDirect3DTexture9>	d3dTempTexture_;
 
-		COMPtr<IDirect3DSurface9>	renderZBuffer_;		// The z-buffer for the render surface.
+		boost::shared_ptr<IDirect3DSurface9>	renderZBuffer_;		// The z-buffer for the render surface.
 	};
 
 	typedef boost::shared_ptr<D3D9Texture> D3D9TexturePtr;

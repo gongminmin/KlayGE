@@ -35,30 +35,30 @@ namespace KlayGE
 		typedef T					value_type;
 
 		typedef value_type*			pointer;
-		typedef const value_type*	const_pointer;
+		typedef value_type const *	const_pointer;
 
 		typedef value_type&			reference;
-		typedef const value_type&	const_reference;
+		typedef value_type const &	const_reference;
 
 		typedef value_type*			iterator;
-		typedef const value_type*	const_iterator;
+		typedef value_type const *	const_iterator;
 
 		enum { elem_num = 4 };
 
 	public:
 		Rect_T()
 			{ }
-		explicit Rect_T(const T* rhs)
+		explicit Rect_T(T const * rhs)
 			: rect_(rhs)
 			{ }
-		Rect_T(const Rect_T& rhs)
+		Rect_T(Rect_T const & rhs)
 			: rect_(rhs.rect_)
 			{ }
 		template <typename U>
-		Rect_T(const Rect_T<U>& rhs)
+		Rect_T(Rect_T<U> const & rhs)
 			: rect_(rhs.rect_)
 			{ }
-		Rect_T(const T& left, const T& top, const T& right, const T& bottom)
+		Rect_T(T const & left, T const & top, T const & right, T const & bottom)
 		{
 			this->left()	= left;
 			this->top()		= top;
@@ -86,31 +86,31 @@ namespace KlayGE
 
 		// 赋值操作符
 		template <typename U>
-		Rect_T& operator+=(const Vector_T<U, 2>& rhs)
+		Rect_T const & operator+=(Vector_T<U, 2> const & rhs)
 		{
 			rect_ += rhs;
 			return *this;
 		}
 		template <typename U>
-		Rect_T& operator-=(const Vector_T<U, 2>& rhs)
+		Rect_T const & operator-=(Vector_T<U, 2> const & rhs)
 		{
 			rect_ -= rhs;
 			return *this;
 		}
 		template <typename U>
-		Rect_T& operator+=(const Rect_T<U>& rhs)
+		Rect_T const & operator+=(Rect_T<U> const & rhs)
 		{
 			rect_ += rhs.rect_;
 			return *this;
 		}
 		template <typename U>
-		Rect_T& operator-=(const Rect_T<U>& rhs)
+		Rect_T const & operator-=(Rect_T<U> const & rhs)
 		{
 			rect_ -= rhs.rect_;
 			return *this;
 		}
 		template <typename U>
-		Rect_T& operator&=(const Rect_T<U>& rhs)
+		Rect_T const & operator&=(Rect_T<U> const & rhs)
 		{
 			this->left()	= std::max(this->left(),	rhs.left());
 			this->top()		= std::max(this->top(),		rhs.top());
@@ -119,7 +119,7 @@ namespace KlayGE
 			return *this;
 		}
 		template <typename U>
-		Rect_T& operator|=(const Rect_T<U>& rhs)
+		Rect_T const & operator|=(Rect_T<U> const & rhs)
 		{
 			this->left()	= std::min(this->left(),	rhs.left());
 			this->top()		= std::min(this->top(),		rhs.top());
@@ -128,7 +128,7 @@ namespace KlayGE
 			return *this;
 		}
 
-		Rect_T& operator=(const Rect_T& rhs)
+		Rect_T const & operator=(Rect_T const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -137,7 +137,7 @@ namespace KlayGE
 			return *this;
 		}
 		template <typename U>
-		Rect_T& operator=(const Rect_T<U>& rhs)
+		Rect_T const & operator=(Rect_T<U> const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -147,9 +147,9 @@ namespace KlayGE
 		}
 
 		// 一元操作符
-		const Rect_T operator+() const
+		Rect_T const operator+() const
 			{ return *this; }
-		const Rect_T operator-() const
+		Rect_T const operator-() const
 			{ return Rect_T<T>(-this->left(), -this->top(), -this->right(), -this->bottom()); }
 
 		// 属性
@@ -157,7 +157,7 @@ namespace KlayGE
 			{ return this->right() - this->left(); }
 		T Height() const
 			{ return this->bottom() - this->top(); }
-		const Size_T<T> Size() const
+		Size_T<T> const Size() const
 			{ return Size_T<T>(this->Width(), this->Height()); }
 		bool IsEmpty() const
 			{ return (this->left() == this->right()) && (this->top() == this->bottom()); }
@@ -168,14 +168,14 @@ namespace KlayGE
 
 	template <typename T>
 	inline bool
-	operator==(const Rect_T<T>& lhs, const Rect_T<T>& rhs)
+	operator==(Rect_T<T> const & lhs, Rect_T<T> const & rhs)
 	{
 		return (lhs.left() == rhs.left()) && (lhs.top() == rhs.top())
 			&& (lhs.right() == rhs.right()) && (lhs.bottom() == rhs.bottom());
 	}
 	template <typename T>
 	inline bool
-	operator!=(const Rect_T<T>& lhs, const Rect_T<T>& rhs)
+	operator!=(Rect_T<T> const & lhs, Rect_T<T> const & rhs)
 	{
 		return !(lhs == rhs);
 	}

@@ -33,7 +33,7 @@ namespace KlayGE
 	{
 	}
 
-	DiskFile::DiskFile(const std::string& fileName, OpenMode openMode)
+	DiskFile::DiskFile(std::string const & fileName, OpenMode openMode)
 			: openMode_(OM_Unknown)
 	{
 		this->Open(fileName, openMode);
@@ -48,7 +48,7 @@ namespace KlayGE
 
 	// 打开文件
 	/////////////////////////////////////////////////////////////////////////////////
-	bool DiskFile::Open(const std::string& fileName, OpenMode openMode)
+	bool DiskFile::Open(std::string const & fileName, OpenMode openMode)
 	{
 		this->Close();
 
@@ -119,12 +119,12 @@ namespace KlayGE
 
 	// 把数据写入文件
 	/////////////////////////////////////////////////////////////////////////////////
-	size_t DiskFile::Write(const void* data, size_t count)
+	size_t DiskFile::Write(void const * data, size_t count)
 	{
 		assert(file_.is_open());
 		assert(data != NULL);
 
-		file_.write(static_cast<const char*>(data),
+		file_.write(static_cast<char const *>(data),
 			static_cast<std::streamsize>(count));
 
 		return count;
@@ -218,7 +218,7 @@ namespace KlayGE
 	}
 
 
-	DiskFileResIdentifier::DiskFileResIdentifier(const std::string& fileName)
+	DiskFileResIdentifier::DiskFileResIdentifier(std::string const & fileName)
 		: fileName_(fileName)
 	{
 	}

@@ -29,7 +29,7 @@ void* MemSet(void* pDest, int c, size_t Count)
 	return pDest;
 }
 
-bool MemCmp(const void* pBuf1, const void* pBuf2, size_t Count)
+bool MemCmp(void const * pBuf1, void const * pBuf2, size_t Count)
 {
 	while ((0 != Count) && (*pBuf1 == *pBuf2))
 	{
@@ -41,7 +41,7 @@ bool MemCmp(const void* pBuf1, const void* pBuf2, size_t Count)
 	return (0 == (*pBuf1 - *pBuf2));
 }
 
-void* MemCpy(void* pDest, const void* pSrc, size_t Count)
+void* MemCpy(void* pDest, void const * pSrc, size_t Count)
 {
 	while (0 != Count)
 	{
@@ -68,7 +68,7 @@ namespace KlayGE
 
 		// 把buf1和buf2的内容比较，相同返回true
 		/////////////////////////////////////////////////////////////////////
-		bool Compare(const void* dest, const void* src, size_t count)
+		bool Compare(void const * dest, void const * src, size_t count)
 		{
 			return (0 == memcmp(dest, src, count));
 		}

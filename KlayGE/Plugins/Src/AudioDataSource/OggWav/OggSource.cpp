@@ -25,13 +25,13 @@
 #pragma comment(lib, "ogg.lib")
 #pragma comment(lib, "vorbis.lib")
 
-const size_t READSIZE(4096);
+size_t const READSIZE(4096);
 
 namespace KlayGE
 {
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
-	OggSource::OggSource(const VFilePtr& file)
+	OggSource::OggSource(VFilePtr const & file)
 				: oggFile_(file)
 	{
 		ogg_sync_init(&oy_); // Now we can read pages
@@ -206,7 +206,7 @@ namespace KlayGE
 																	// actually consumed
 
 								// 把解码后的数据放入缓冲区
-								const size_t length(sizeof(ogg_int16_t) * bout * vi_.channels);
+								size_t const length(sizeof(ogg_int16_t) * bout * vi_.channels);
 								MemoryLib::Copy(&data[cursize], &convbuffer[0], length);
 								cursize += length;
 							}

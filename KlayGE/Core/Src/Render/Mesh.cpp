@@ -14,7 +14,7 @@ namespace KlayGE
 	{
 	}
 
-	const std::wstring& StaticMesh::Name() const
+	std::wstring const & StaticMesh::Name() const
 	{
 		static std::wstring name(L"Static Mesh");
 		return name;
@@ -25,7 +25,7 @@ namespace KlayGE
 	{
 	}
 
-	const std::wstring& BoneMesh::Name() const
+	std::wstring const & BoneMesh::Name() const
 	{
 		static std::wstring name(L"Bone Mesh");
 		return name;

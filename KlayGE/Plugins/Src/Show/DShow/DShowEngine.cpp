@@ -12,6 +12,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
+#include <KlayGE/Util.hpp>
 
 #include <cassert>
 #include <uuids.h>
@@ -111,21 +112,34 @@ namespace KlayGE
 
 	// 载入文件
 	/////////////////////////////////////////////////////////////////////////////////
-	void DShowEngine::Load(const std::wstring& fileName)
+	void DShowEngine::Load(std::wstring const & fileName)
 	{
 		this->Free();
 		this->Init();
 
-		graph_.CoCreateInstance<IID_IGraphBuilder>(CLSID_FilterGraph);
+		IGraphBuilder* graph;
+		::CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_ALL,
+			IID_IGraphBuilder, reinterpret_cast<void**>(&graph));
+		graph_ = MakeCOMPtr(graph);
 
 		TIF(graph_->RenderFile(fileName.c_str(), NULL));
 
 		// 获取 DirectShow 接口
-		TIF(graph_.QueryInterface<IID_IMediaControl>(mediaControl_));
-		TIF(graph_.QueryInterface<IID_IMediaEvent>(mediaEvent_));
-		
+		IMediaControl* mediaControl;
+		TIF(graph_->QueryInterface(IID_IMediaControl,
+			reinterpret_cast<void**>(&mediaControl)));
+		mediaControl_ = MakeCOMPtr(mediaControl);
+
+		IMediaEvent* mediaEvent;
+		TIF(graph_->QueryInterface(IID_IMediaEvent,
+			reinterpret_cast<void**>(&mediaEvent)));
+		mediaEvent_ = MakeCOMPtr(mediaEvent);
+
 		// 获取视频接口，如果是音频文件，这就没有用
-		TIF(graph_.QueryInterface<IID_IVideoWindow>(videoWnd_));
+		IVideoWindow* videoWnd;
+		TIF(graph_->QueryInterface(IID_IVideoWindow,
+			reinterpret_cast<void**>(&videoWnd)));
+		videoWnd_ = MakeCOMPtr(videoWnd);
 
 		this->CheckVisibility();
 

@@ -12,6 +12,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
+#include <KlayGE/Util.hpp>
 
 #include <cassert>
 
@@ -25,13 +26,13 @@ namespace KlayGE
 {
 	// 建立设备
 	/////////////////////////////////////////////////////////////////////////////////
-	COMPtr<IDirectInputDevice8W> CreateDevice(REFGUID guid, InputEngine& inputEng)
+	boost::shared_ptr<IDirectInputDevice8W> CreateDevice(REFGUID guid, InputEngine& inputEng)
 	{
 		DInputEngine& dinputEng(static_cast<DInputEngine&>(inputEng));
 
 		IDirectInputDevice8W* device;
 		dinputEng.DInput()->CreateDevice(guid, &device, NULL);
-		return COMPtr<IDirectInputDevice8W>(device);
+		return MakeCOMPtr(device);
 	}
 
 	// 构造函数
@@ -42,7 +43,7 @@ namespace KlayGE
 		IDirectInput8W* di;
 		DirectInput8Create(GetModuleHandle(NULL), DIRECTINPUT_VERSION, 
 			IID_PPV_ARG(IDirectInput8W, di), NULL);
-		dinput_ = COMPtr<IDirectInput8W>(di);
+		dinput_ = MakeCOMPtr(di);
 	}
 
 	// 析构函数
@@ -54,7 +55,7 @@ namespace KlayGE
 
 	// 获取DirectInput接口
 	/////////////////////////////////////////////////////////////////////////////////
-	const COMPtr<IDirectInput8W>& DInputEngine::DInput() const
+	const boost::shared_ptr<IDirectInput8W>& DInputEngine::DInput() const
 	{
 		return dinput_;
 	}

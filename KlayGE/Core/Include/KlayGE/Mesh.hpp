@@ -29,13 +29,13 @@ namespace KlayGE
 
 		RenderEffectPtr GetRenderEffect() const
 			{ return effect_; }
-		void SetRenderEffect(const RenderEffectPtr& effect)
+		void SetRenderEffect(RenderEffectPtr const & effect)
 			{ effect_ = effect; }
 
 		RenderBufferPtr GetRenderBuffer() const
 			{ return rb_; }
 
-		const std::wstring& Name() const;
+		std::wstring const & Name() const;
 
 		template <typename ForwardIterator>
 		void AssignXYZs(ForwardIterator first, ForwardIterator last)
@@ -95,7 +95,7 @@ namespace KlayGE
 		RenderBufferPtr GetRenderBuffer() const
 			{ return staticMesh_->GetRenderBuffer(); }
 
-		const std::wstring& Name() const;
+		std::wstring const & Name() const;
 
 		template <typename ForwardIterator>
 		void AssignBlendWeights(ForwardIterator first, ForwardIterator last)

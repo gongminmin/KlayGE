@@ -12,6 +12,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Memory.hpp>
 #include <KlayGE/Context.hpp>
@@ -45,7 +46,7 @@ namespace KlayGE
 {
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
-	DSSoundBuffer::DSSoundBuffer(const AudioDataSourcePtr& dataSource,
+	DSSoundBuffer::DSSoundBuffer(AudioDataSourcePtr const & dataSource,
 									U32 numSource, float volume)
 					: SoundBuffer(dataSource),
 						sources_(numSource)
@@ -62,7 +63,7 @@ namespace KlayGE
 		dsbd.dwBufferBytes		= static_cast<U32>(dataSource->Size());
 		dsbd.lpwfxFormat		= &wfx;
 
-		const COMPtr<IDirectSound>& dsound(static_cast<DSAudioEngine&>(Context::Instance().AudioFactoryInstance().AudioEngineInstance()).DSound());
+		boost::shared_ptr<IDirectSound> const & dsound(static_cast<DSAudioEngine&>(Context::Instance().AudioFactoryInstance().AudioEngineInstance()).DSound());
 
 		// DirectSound只能播放 PCM 数据。其他格式可能不能工作。
 		IDirectSoundBuffer* temp;
@@ -142,12 +143,12 @@ namespace KlayGE
 
 	// 返回3D缓冲区的接口
 	/////////////////////////////////////////////////////////////////////////////////
-	COMPtr<IDirectSound3DBuffer> DSSoundBuffer::Get3DBufferInterface(SourcesIter iter)
+	boost::shared_ptr<IDirectSound3DBuffer> DSSoundBuffer::Get3DBufferInterface(SourcesIter iter)
 	{
-		COMPtr<IDirectSound3DBuffer> ds3DBuffer;
-		iter->QueryInterface<IID_IDirectSound3DBuffer>(ds3DBuffer);
+		IDirectSound3DBuffer* ds3DBuffer;
+		(*iter)->QueryInterface(IID_IDirectSound3DBuffer, reinterpret_cast<void**>(&ds3DBuffer));
 
-		return ds3DBuffer;
+		return MakeCOMPtr(ds3DBuffer);
 	}
 
 	// 播放音源
@@ -156,7 +157,7 @@ namespace KlayGE
 	{
 		SourcesIter iter(this->FreeSource());
 
-		COMPtr<IDirectSound3DBuffer> ds3DBuf(this->Get3DBufferInterface(iter));
+		boost::shared_ptr<IDirectSound3DBuffer> ds3DBuf(this->Get3DBufferInterface(iter));
 		if (ds3DBuf)
 		{
 			ds3DBuf->SetPosition(pos_[0], pos_[1], pos_[2], DS3D_IMMEDIATE);
@@ -199,7 +200,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void DSSoundBuffer::Volume(float vol)
 	{
-		const long dB(LinearGainToDB(vol));
+		long const dB(LinearGainToDB(vol));
 		for (SourcesIter iter = sources_.begin(); iter != sources_.end(); ++ iter)
 		{
 			(*iter)->SetVolume(dB);
@@ -215,7 +216,7 @@ namespace KlayGE
 
 	// 设置声源位置
 	/////////////////////////////////////////////////////////////////////////////////
-	void DSSoundBuffer::Position(const Vector3& v)
+	void DSSoundBuffer::Position(Vector3 const & v)
 	{
 		pos_ = v;
 	}
@@ -229,7 +230,7 @@ namespace KlayGE
 
 	// 设置声源速度
 	/////////////////////////////////////////////////////////////////////////////////
-	void DSSoundBuffer::Velocity(const Vector3& v)
+	void DSSoundBuffer::Velocity(Vector3 const & v)
 	{
 		vel_ = v;
 	}
@@ -243,7 +244,7 @@ namespace KlayGE
 
 	// 设置声源方向
 	/////////////////////////////////////////////////////////////////////////////////
-	void DSSoundBuffer::Direction(const Vector3& v)
+	void DSSoundBuffer::Direction(Vector3 const & v)
 	{
 		dir_ = v;
 	}

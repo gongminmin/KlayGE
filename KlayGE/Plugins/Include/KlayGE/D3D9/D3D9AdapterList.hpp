@@ -2,7 +2,7 @@
 #define _D3D9ADAPTERLIST_HPP
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/COMPtr.hpp>
+#include <boost/smart_ptr.hpp>
 #include <KlayGE/D3D9/D3D9Adapter.hpp>
 
 #include <d3d9.h>
@@ -16,10 +16,10 @@ namespace KlayGE
 	public:
 		D3D9AdapterList();
 
-		void Enumerate(const COMPtr<IDirect3D9>& d3d);
+		void Enumerate(boost::shared_ptr<IDirect3D9> const & d3d);
 
 		size_t NumAdapter() const;
-		const D3D9Adapter& Adapter(size_t index) const;
+		D3D9Adapter const & Adapter(size_t index) const;
 
 		U32 CurrentAdapterIndex() const;
 		void CurrentAdapterIndex(U32 index);

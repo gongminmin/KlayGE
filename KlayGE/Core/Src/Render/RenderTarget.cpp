@@ -82,7 +82,7 @@ namespace KlayGE
 
 	// 获取视口
 	/////////////////////////////////////////////////////////////////////////////////
-	const Viewport& RenderTarget::GetViewport() const
+	Viewport const & RenderTarget::GetViewport() const
 	{
 		return viewport_;
 	}
@@ -94,7 +94,7 @@ namespace KlayGE
 
 	// 设置视口
 	/////////////////////////////////////////////////////////////////////////////////
-	void RenderTarget::SetViewport(const Viewport& viewport)
+	void RenderTarget::SetViewport(Viewport const & viewport)
 	{
 		viewport_ = viewport;
 	}

@@ -33,23 +33,23 @@ namespace KlayGE
 		typedef float				value_type;
 
 		typedef value_type*			pointer;
-		typedef const value_type*	const_pointer;
+		typedef value_type const *	const_pointer;
 
 		typedef value_type&			reference;
-		typedef const value_type&	const_reference;
+		typedef value_type const &	const_reference;
 
 		typedef value_type*			iterator;
-		typedef const value_type*	const_iterator;
+		typedef value_type const *	const_iterator;
 
 		enum { elem_num = 4 };
 
 	public:
 		Color()
 			{ }
-		explicit Color(const float* rhs)
+		explicit Color(float const * rhs)
 			: col_(rhs)
 			{ }
-		Color(const Color& rhs)
+		Color(Color const & rhs)
 			: col_(rhs.col_)
 			{ }
 		Color(float r, float g, float b, float a)
@@ -61,7 +61,7 @@ namespace KlayGE
 		}
 		explicit Color(U32 dw)
 		{
-			const float f(1 / 255.0f);
+			static float const f(1 / 255.0f);
 			this->a() = f * (static_cast<float>(static_cast<U8>(dw >> 24)));
 			this->r() = f * (static_cast<float>(static_cast<U8>(dw >> 16)));
 			this->g() = f * (static_cast<float>(static_cast<U8>(dw >>  8)));
@@ -108,32 +108,32 @@ namespace KlayGE
 		}
 
 		// 赋值操作符
-		Color& operator+=(const Color& rhs)
+		Color const & operator+=(Color const & rhs)
 		{
 			col_ += rhs.col_;
 			return *this;
 		}
-		Color& operator-=(const Color& rhs)
+		Color const & operator-=(Color const & rhs)
 		{
 			col_ -= rhs.col_;
 			return *this;
 		}
-		Color& operator*=(float rhs)
+		Color const & operator*=(float rhs)
 		{
 			col_ *= rhs;
 			return *this;
 		}
-		Color& operator*=(const Color& rhs)
+		Color const & operator*=(Color const & rhs)
 		{
 			return MathLib::Modulate(*this, *this, rhs);
 		}
-		Color& operator/=(float rhs)
+		Color const & operator/=(float rhs)
 		{
 			col_ /= rhs;
 			return *this;
 		}
 
-		Color& operator=(const Color& rhs)
+		Color const & operator=(Color const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -143,28 +143,28 @@ namespace KlayGE
 		}
 
 		// 一元操作符
-		const Color operator+() const
+		Color const operator+() const
 			{ return *this; }
-		const Color operator-() const
+		Color const operator-() const
 			{ return Color(-this->r(), -this->g(), -this->b(), -this->a()); }
 
 	private:
 		Vector_T<float, elem_num> col_;
 	};
 
-	inline const Color
-	operator*(const Color& lhs, const Color& rhs)
+	inline Color const
+	operator*(Color const & lhs, Color const & rhs)
 	{
 		return Color(lhs) *= rhs;
 	}
 
 	inline bool
-	operator==(const Color& lhs, const Color& rhs)
+	operator==(Color const & lhs, Color const & rhs)
 	{
 		return (lhs.r() == rhs.r()) && (lhs.g() == rhs.g()) && (lhs.b() == rhs.b()) && (lhs.a() == rhs.a());
 	}
 	inline bool
-	operator!=(const Color& lhs, const Color& rhs)
+	operator!=(Color const & lhs, Color const & rhs)
 	{
 		return !(lhs == rhs);
 	}

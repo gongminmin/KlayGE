@@ -117,7 +117,7 @@ namespace KlayGE
 				}
 				else
 				{
-					const size_t blockSize(RoundUp(n));
+					size_t const blockSize(RoundUp(n));
 					size_t numAlloc;
 
 					// 申请一个足够大的空间
@@ -179,7 +179,7 @@ namespace KlayGE
 	{
 	public:
 		typedef void*			pointer;
-		typedef const void*		const_pointer;
+		typedef void const *	const_pointer;
 
 		typedef void			value_type;
 
@@ -197,9 +197,9 @@ namespace KlayGE
 		typedef std::size_t		size_type;
 		typedef std::ptrdiff_t	difference_type;
 		typedef T*				pointer;
-		typedef const T*		const_pointer;
+		typedef T const *		const_pointer;
 		typedef T&				reference;
-		typedef const T&		const_reference;
+		typedef T const &		const_reference;
 		typedef T				value_type;
 
 		template <typename U>
@@ -210,10 +210,10 @@ namespace KlayGE
 
 		alloc() throw()
 			{ }
-		alloc(const alloc& /*rhs*/) throw()
+		alloc(alloc const & /*rhs*/) throw()
 			{ }
 		template <typename U>
-		alloc(const alloc<U>& /*rhs*/) throw()
+		alloc(alloc<U> const & /*rhs*/) throw()
 			{ }
 		~alloc() throw()
 			{ }
@@ -231,17 +231,17 @@ namespace KlayGE
 		size_type max_size() const
 			{ return size_t(-1) / sizeof(T); }
 
-		void construct(pointer p, const T& val)
+		void construct(pointer p, T const & val)
 			{ new(p) T(val); }
 		void destroy(pointer p)
 			{ p->~T(); }
 	};
 
 	template <typename T1, typename T2>
-	bool operator==(const alloc<T1>& /*lhs*/, const alloc<T2>& /*rhs*/) throw()
+	bool operator==(alloc<T1> const & /*lhs*/, alloc<T2> const & /*rhs*/) throw()
 		{ return true; }
 	template <typename T1, typename T2>
-	bool operator!=(const alloc<T1>& /*lhs*/, const alloc<T2>& /*rhs*/) throw()
+	bool operator!=(alloc<T1> const & /*lhs*/, alloc<T2> const & /*rhs*/) throw()
 		{ return false; }
 }
 

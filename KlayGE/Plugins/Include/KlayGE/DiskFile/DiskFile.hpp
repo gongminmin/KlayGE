@@ -34,16 +34,16 @@ namespace KlayGE
 	{
 	public:
 		DiskFile();
-		DiskFile(const std::string& fileName, OpenMode openMode);
+		DiskFile(std::string const & fileName, OpenMode openMode);
 		~DiskFile();
 
-		bool Open(const std::string& fileName, OpenMode openMode);
+		bool Open(std::string const & fileName, OpenMode openMode);
 		void Close();
 
 		size_t Length();
 		void Length(size_t newLen);
 
-		size_t Write(const void* data, size_t count);
+		size_t Write(void const * data, size_t count);
 		size_t Read(void* data, size_t count);
 		size_t CopyFrom(VFile& src, size_t size);
 
@@ -62,7 +62,7 @@ namespace KlayGE
 	class DiskFileResIdentifier : public ResIdentifier
 	{
 	public:
-		DiskFileResIdentifier(const std::string& fileName);
+		DiskFileResIdentifier(std::string const & fileName);
 
 		VFilePtr Load();
 

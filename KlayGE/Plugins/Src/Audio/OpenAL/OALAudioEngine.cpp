@@ -52,14 +52,14 @@ namespace KlayGE
 
 	// 从左手坐标系的Vector3转化为OpenAL的右手坐标系
 	/////////////////////////////////////////////////////////////////////////////////
-	Vector3 VecToALVec(const Vector3& v)
+	Vector3 VecToALVec(Vector3 const & v)
 	{
 		return Vector3(v.x(), v.y(), -v.z());
 	}
 
 	// 从OpenAL的右手坐标系转化为左手坐标系的Vector3
 	/////////////////////////////////////////////////////////////////////////////////
-	Vector3 ALVecToVec(const Vector3& v)
+	Vector3 ALVecToVec(Vector3 const & v)
 	{
 		return Vector3(v.x(), v.y(), -v.z());
 	}
@@ -100,9 +100,9 @@ namespace KlayGE
 
 	// 音频引擎名字
 	/////////////////////////////////////////////////////////////////////////////////
-	const std::wstring& OALAudioEngine::Name() const
+	std::wstring const & OALAudioEngine::Name() const
 	{
-		static std::wstring name(L"OpenAL Audio Engine");
+		static const std::wstring name(L"OpenAL Audio Engine");
 		return name;
 	}
 
@@ -117,7 +117,7 @@ namespace KlayGE
 
 	// 设置3D听者位置
 	/////////////////////////////////////////////////////////////////////////////////
-	void OALAudioEngine::SetListenerPos(const Vector3& v)
+	void OALAudioEngine::SetListenerPos(Vector3 const & v)
 	{
 		Vector3 alv(VecToALVec(v));
 		alListener3f(AL_POSITION, alv.x(), alv.y(), alv.z());
@@ -134,7 +134,7 @@ namespace KlayGE
 
 	// 设置3D听者速度
 	/////////////////////////////////////////////////////////////////////////////////
-	void OALAudioEngine::SetListenerVel(const Vector3& v)
+	void OALAudioEngine::SetListenerVel(Vector3 const & v)
 	{
 		Vector3 alv(VecToALVec(v));
 		alListener3f(AL_VELOCITY, alv.x(), alv.y(), alv.z());
@@ -152,7 +152,7 @@ namespace KlayGE
 
 	// 获取3D听者方向
 	/////////////////////////////////////////////////////////////////////////////////
-	void OALAudioEngine::SetListenerOri(const Vector3& face, const Vector3& up)
+	void OALAudioEngine::SetListenerOri(Vector3 const & face, Vector3 const & up)
 	{
 		Vector3 alface(VecToALVec(face));
 		Vector3 alup(VecToALVec(up));

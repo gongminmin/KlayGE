@@ -21,7 +21,7 @@
 #define _D3D9RENDEREFFECT_HPP
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/COMPtr.hpp>
+#include <boost/smart_ptr.hpp>
 
 #include <d3dx9effect.h>
 
@@ -36,10 +36,10 @@ namespace KlayGE
 	class D3D9RenderEffect : public RenderEffect
 	{
 	public:
-		D3D9RenderEffect(const std::string& srcData, UINT flags = 0);
-		D3D9RenderEffect(const D3D9RenderEffect& rhs);
+		D3D9RenderEffect(std::string const & srcData, UINT flags = 0);
+		D3D9RenderEffect(D3D9RenderEffect const & rhs);
 
-		const COMPtr<ID3DXEffect>& D3DXEffect() const
+		boost::shared_ptr<ID3DXEffect> const & D3DXEffect() const
 			{ return effect_; }
 
 		RenderEffectPtr Clone() const;
@@ -47,10 +47,10 @@ namespace KlayGE
 		void Desc(UINT& parameters, UINT& techniques, UINT& functions);
 
 		RenderEffectParameterPtr Parameter(UINT index);
-		RenderEffectParameterPtr ParameterByName(const std::string& name);
-		RenderEffectParameterPtr ParameterBySemantic(const std::string& semantic);
+		RenderEffectParameterPtr ParameterByName(std::string const & name);
+		RenderEffectParameterPtr ParameterBySemantic(std::string const & semantic);
 
-		void SetTechnique(const std::string& technique);
+		void SetTechnique(std::string const & technique);
 		void SetTechnique(UINT technique);
 
 		bool Validate(D3DXHANDLE handle);
@@ -61,36 +61,36 @@ namespace KlayGE
 		void End();
 
 	private:
-		COMPtr<ID3DXEffect> effect_;
+		boost::shared_ptr<ID3DXEffect> effect_;
 	};
 
 	class D3D9RenderEffectParameter : public RenderEffectParameter
 	{
 	public:
-		D3D9RenderEffectParameter(COMPtr<ID3DXEffect> effect, D3DXHANDLE parameter);
+		D3D9RenderEffectParameter(boost::shared_ptr<ID3DXEffect> const & effect, D3DXHANDLE parameter);
 
-		RenderEffectParameter& operator=(float value);
-		RenderEffectParameter& operator=(const Vector4& value);
-		RenderEffectParameter& operator=(const Matrix4& value);
-		RenderEffectParameter& operator=(int value);
-		RenderEffectParameter& operator=(const TexturePtr& tex);
+		RenderEffectParameter const & operator=(float value);
+		RenderEffectParameter const & operator=(Vector4 const & value);
+		RenderEffectParameter const & operator=(Matrix4 const & value);
+		RenderEffectParameter const & operator=(int value);
+		RenderEffectParameter const & operator=(TexturePtr const & tex);
 
 		operator float() const;
 		operator Vector4() const;
 		operator Matrix4() const;
 		operator int() const;
 
-		void SetFloatArray(const float* value, size_t count);
+		void SetFloatArray(float const * value, size_t count);
 		void GetFloatArray(float* value, size_t count);
-		void SetVectorArray(const Vector4* value, size_t count);
+		void SetVectorArray(Vector4 const * value, size_t count);
 		void GetVectorArray(Vector4* value, size_t count);
-		void SetMatrixArray(const Matrix4* matrices, size_t count);
+		void SetMatrixArray(Matrix4 const * matrices, size_t count);
 		void GetMatrixArray(Matrix4* matrices, size_t count);
-		void SetIntArray(const int* value, size_t count);
+		void SetIntArray(int const * value, size_t count);
 		void GetIntArray(int* value, size_t count);
 
 	private:
-		COMPtr<ID3DXEffect> effect_;
+		boost::shared_ptr<ID3DXEffect> effect_;
 		D3DXHANDLE parameter_;
 	};
 }

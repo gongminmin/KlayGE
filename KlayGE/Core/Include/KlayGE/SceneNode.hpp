@@ -12,7 +12,7 @@ namespace KlayGE
 		virtual ~SceneNode()
 			{ }
 
-		virtual void AddRenderable(const RenderablePtr& renderable)
+		virtual void AddRenderable(RenderablePtr const & renderable)
 			{ renderables_.push_back(renderable); }
 
 	protected:

@@ -19,12 +19,12 @@
 
 namespace KlayGE
 {
-	OCTree::OCTree(const Box& box)
+	OCTree::OCTree(Box const & box)
 		: root_(box)
 	{
 	}
 
-	void OCTree::ClipScene(const Camera& camera)
+	void OCTree::ClipScene(Camera const & camera)
 	{
 		frustum_.CalculateFrustum(camera.ViewMatrix(), camera.ProjMatrix());
 
@@ -44,7 +44,7 @@ namespace KlayGE
 		root_.Clear();
 	}
 
-	void OCTree::PushRenderable(const RenderablePtr& obj)
+	void OCTree::PushRenderable(RenderablePtr const & obj)
 	{
 		root_.AddRenderable(obj);
 	}

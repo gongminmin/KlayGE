@@ -22,6 +22,23 @@
 #include <KlayGE/NetMsg.hpp>
 #include <KlayGE/Player.hpp>
 
+namespace
+{
+	class ReceiveThreadFunc
+	{
+	public:
+		ReceiveThreadFunc(KlayGE::Player* player)
+			: player_(player)
+			{ }
+
+		void operator()()
+			{ player_->ReceiveFunc(); }
+
+	private:
+		KlayGE::Player* player_;
+	};
+}
+
 namespace KlayGE
 {
 	// 构造函数
@@ -37,9 +54,10 @@ namespace KlayGE
 		this->Destroy();
 	}
 
-	void* Player::ReceiveThread_Func(void* arg)
+	// 消息接受函数
+	/////////////////////////////////////////////////////////////////////////////////
+	void Player::ReceiveFunc()
 	{
-		Player* player(reinterpret_cast<Player*>(arg));
 		static time_t lastTime = std::time(NULL);
 
 		for (;;)
@@ -47,31 +65,31 @@ namespace KlayGE
 			if (std::time(NULL) - lastTime >= 10 * 1000)
 			{
 				char msg(MSG_NOP);
-				player->socket_.Send(&msg, sizeof(msg));
+				socket_.Send(&msg, sizeof(msg));
 				lastTime = std::time(NULL);
 			}
 
-			if (!player->sendQueue_.empty())
+			if (!sendQueue_.empty())
 			{
 				// 发送队列里的消息
-				for (SendQueueType::iterator iter = player->sendQueue_.begin();
-					iter != player->sendQueue_.end(); ++ iter)
+				for (SendQueueType::iterator iter = sendQueue_.begin();
+					iter != sendQueue_.end(); ++ iter)
 				{
 					std::vector<char>& msg = *iter;
-					player->socket_.Send(&msg[0], msg.size());
+					socket_.Send(&msg[0], msg.size());
 				}
 			}
 
 			char revBuf[Max_Buffer];
 			MemoryLib::Zero(revBuf, sizeof(revBuf));
-			if (player->socket_.Receive(revBuf, sizeof(revBuf)) != -1)
+			if (socket_.Receive(revBuf, sizeof(revBuf)) != -1)
 			{
 				U32 ID;
 				memcpy(&ID, &revBuf[1], 4);
 
 				// 删除已发送的信息
-				for (SendQueueType::iterator iter = player->sendQueue_.begin();
-					iter != player->sendQueue_.end();)
+				for (SendQueueType::iterator iter = sendQueue_.begin();
+					iter != sendQueue_.end();)
 				{
 					std::vector<char>& msg = *iter;
 
@@ -79,7 +97,7 @@ namespace KlayGE
 					memcpy(&sendID, &msg[1], 4);
 					if (sendID == ID)
 					{
-						iter = player->sendQueue_.erase(iter);
+						iter = sendQueue_.erase(iter);
 					}
 					else
 					{
@@ -93,13 +111,11 @@ namespace KlayGE
 				}
 			}
 		}
-
-		return NULL;
 	}
 
 	// 加入服务器
 	/////////////////////////////////////////////////////////////////////////////////
-	bool Player::Join(const SOCKADDR_IN& lobbyAddr)
+	bool Player::Join(SOCKADDR_IN const & lobbyAddr)
 	{
 		socket_.Close();
 		socket_.Create(SOCK_DGRAM);
@@ -122,7 +138,7 @@ namespace KlayGE
 		}
 
 		receiveLoop_ = true;
-		pthread_create(&receiveThread_, NULL, ReceiveThread_Func, this);
+		receiveThread_ = boost::shared_ptr<boost::thread>(new boost::thread(ReceiveThreadFunc(this)));
 
 		return true;
 	}
@@ -137,7 +153,8 @@ namespace KlayGE
 			socket_.Send(&msg, sizeof(msg));
 
 			receiveLoop_ = false;
-			pthread_join(receiveThread_, NULL);
+			receiveThread_->join();
+			receiveThread_.reset();
 		}
 	}
 
@@ -177,7 +194,7 @@ namespace KlayGE
 
 	// 设置玩家名字
 	/////////////////////////////////////////////////////////////////////////////////
-	void Player::Name(const std::string& name)
+	void Player::Name(std::string const & name)
 	{
 		if (name.length() > 16)
 		{
@@ -198,7 +215,7 @@ namespace KlayGE
 
 	// 发送数据
 	/////////////////////////////////////////////////////////////////////////////////
-	int Player::Send(const void* buf, int size)
+	int Player::Send(void const * buf, int size)
 	{
 		return socket_.Send(buf, size);
 	}

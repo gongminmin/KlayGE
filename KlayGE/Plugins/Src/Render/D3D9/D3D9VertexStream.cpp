@@ -4,6 +4,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
+#include <KlayGE/Util.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9VertexStream.hpp>
@@ -31,21 +32,21 @@ namespace KlayGE
 	{
 		numVertices_ = numVertices;
 
-		const size_t vertexSize(this->sizeElement() * this->ElementsPerVertex());
-		const size_t size(vertexSize * numVertices);
+		size_t const vertexSize(this->sizeElement() * this->ElementsPerVertex());
+		size_t const size(vertexSize * numVertices);
 
 		if (currentSize_ < size)
 		{
 			currentSize_ = size;
 
-			COMPtr<IDirect3DDevice9> d3dDevice(static_cast<const D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
+			boost::shared_ptr<IDirect3DDevice9> d3dDevice(static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
 
 			IDirect3DVertexBuffer9* theBuffer;
 			TIF(d3dDevice->CreateVertexBuffer(static_cast<::UINT>(size),
 				D3DUSAGE_WRITEONLY | (this->IsStatic() ? 0 : D3DUSAGE_DYNAMIC),
 				0, D3DPOOL_DEFAULT, &theBuffer, NULL));
 
-			buffer_ = COMPtr<IDirect3DVertexBuffer9>(theBuffer);
+			buffer_ = MakeCOMPtr(theBuffer);
 		}
 
 		void* dest;
@@ -54,7 +55,7 @@ namespace KlayGE
 		if (stride != 0)
 		{
 			U8* destPtr(static_cast<U8*>(dest));
-			const U8* srcPtr(static_cast<const U8*>(static_cast<const void*>(src)));
+			U8 const * srcPtr(static_cast<U8 const *>(static_cast<void const *>(src)));
 			for (size_t i = 0; i < numVertices; ++ i)
 			{
 				MemoryLib::Copy(destPtr, srcPtr, vertexSize);
@@ -70,7 +71,7 @@ namespace KlayGE
 		buffer_->Unlock();
 	}
 
-	COMPtr<IDirect3DVertexBuffer9> D3D9VertexStream::D3D9Buffer() const
+	boost::shared_ptr<IDirect3DVertexBuffer9> D3D9VertexStream::D3D9Buffer() const
 	{
 		return buffer_;
 	}

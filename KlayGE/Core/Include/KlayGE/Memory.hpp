@@ -22,8 +22,8 @@ namespace KlayGE
 	namespace MemoryLib
 	{
 		void* Set(void* dest, int c, size_t count);
-		bool Compare(const void* buf1, const void* buf2, size_t count);
-		void* Copy(void* dest, const void* src, size_t count);
+		bool Compare(void const * buf1, void const * buf2, size_t count);
+		void* Copy(void* dest, void const * src, size_t count);
 
 		inline void* Zero(void* dest, size_t count)
 			{ return Set(dest, 0, count); }

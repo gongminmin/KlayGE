@@ -29,7 +29,7 @@ namespace
 {
 	struct RenderTorus : public Renderable
 	{
-		RenderTorus(const TexturePtr& texture0, const TexturePtr& texture1)
+		RenderTorus(TexturePtr const & texture0, TexturePtr const & texture1)
 			: rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
 		{
 			effect_ = LoadRenderEffect("Cartoon.fx");
@@ -37,41 +37,8 @@ namespace
 			*(effect_->ParameterByName("edge")) = texture1;
 			effect_->SetTechnique("cartoonTec");
 
-			float minx(Pos[0]), miny(Pos[1]), minz(Pos[2]);
-			for (size_t i = 0; i < sizeof(Pos) / sizeof(float); i += 3)
-			{
-				if (Pos[i + 0] < minx)
-				{
-					minx = Pos[i + 0];
-				}
-				if (Pos[i + 1] < miny)
-				{
-					miny = Pos[i + 1];
-				}
-				if (Pos[i + 2] < minz)
-				{
-					minz = Pos[i + 2];
-				}
-			}
-
-			float maxx(Pos[0]), maxy(Pos[1]), maxz(Pos[2]);
-			for (size_t i = 0; i < sizeof(Pos) / sizeof(float); i += 3)
-			{
-				if (Pos[i + 0] > maxx)
-				{
-					maxx = Pos[i + 0];
-				}
-				if (Pos[i + 1] > maxy)
-				{
-					maxy = Pos[i + 1];
-				}
-				if (Pos[i + 2] > maxz)
-				{
-					maxz = Pos[i + 2];
-				}
-			}
-
-			box_ = Box(Vector3(minx, miny, minz), Vector3(maxx, maxy, maxz));
+			MathLib::ComputeBoundingBox(box_, reinterpret_cast<Vector3*>(&Pos[0]),
+				reinterpret_cast<Vector3*>(&Pos[0] + sizeof(Pos) / sizeof(float)));
 
 			rb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
 			rb_->AddVertexStream(VST_Normals, sizeof(float), 3, true);
@@ -92,9 +59,9 @@ namespace
 		Box GetBound() const
 			{ return box_; }
 
-		const std::wstring& Name() const
+		std::wstring const & Name() const
 		{
-			static std::wstring name(L"Torus");
+			static const std::wstring name(L"Torus");
 			return name;
 		}
 
@@ -111,6 +78,7 @@ namespace
 int main()
 {
 	Cartoon app;
+	//SceneManager sceneMgr;
 	OCTree sceneMgr(Box(Vector3(-20, -20, -20), Vector3(20, 20, 20)));
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
@@ -153,8 +121,11 @@ void Cartoon::InitObjects()
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	MathLib::LookAtLH(view_, Vector3(0, 0, -6), Vector3(0, 5, 0));
-	MathLib::PerspectiveFovLH(proj_, PI / 4, 800.0f / 600, 0.1f, 20.0f);
+	this->LookAt(Vector3(0, 0, -6), Vector3(0, 0, 0));
+	this->Proj(0.1f, 20.0f);
+
+	view_ = renderEngine.ViewMatrix();
+	proj_ = renderEngine.ProjectionMatrix();
 
 	*(renderTorus->GetRenderEffect()->ParameterByName("proj")) = proj_;
 	*(renderTorus->GetRenderEffect()->ParameterByName("lightPos")) = Vector4(2, 2, -3, 1);

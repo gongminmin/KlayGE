@@ -29,30 +29,30 @@ namespace KlayGE
 		typedef T					value_type;
 
 		typedef value_type*			pointer;
-		typedef const value_type*	const_pointer;
+		typedef value_type const *	const_pointer;
 
 		typedef value_type&			reference;
-		typedef const value_type&	const_reference;
+		typedef value_type const &	const_reference;
 
 		typedef value_type*			iterator;
-		typedef const value_type*	const_iterator;
+		typedef value_type const *	const_iterator;
 
 		enum { elem_num = 4 };
 
 	public:
 		Plane_T()
 			{ }
-		explicit Plane_T(const T* rhs)
+		explicit Plane_T(T const * rhs)
 			: plane_(rhs)
 			{ }
-		Plane_T(const Plane_T& rhs)
+		Plane_T(Plane_T const & rhs)
 			: plane_(rhs.plane_)
 			{ }
 		template <typename U>
-		Plane_T(const Plane_T<U>& rhs)
+		Plane_T(Plane_T<U> const & rhs)
 			: plane_(rhs.plane_)
 			{ }
-		Plane_T(const T& a, const T& b, const T& c, const T& d)
+		Plane_T(T const & a, T const & b, T const & c, T const & d)
 		{
 			this->a() = a;
 			this->b() = b;
@@ -92,7 +92,7 @@ namespace KlayGE
 			{ return plane_[3]; }
 
 		// 赋值操作符
-		Plane_T& operator=(const Plane_T& rhs)
+		Plane_T const & operator=(Plane_T const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -101,7 +101,7 @@ namespace KlayGE
 			return *this;
 		}
 		template <typename U>
-		Plane_T& operator=(const Plane_T<U>& rhs)
+		Plane_T const & operator=(Plane_T<U> const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -111,16 +111,16 @@ namespace KlayGE
 		}
 
 		// 一元操作符
-		const Plane_T operator+() const
+		Plane_T const operator+() const
 			{ return *this; }
-		const Plane_T operator-() const
+		Plane_T const operator-() const
 			{ return Plane_T<T>(-this->a(), -this->b(), -this->c(), -this->d()); }
 
 		// 取法向向量
-		const Vector_T<T, 3> Normal() const
+		Vector_T<T, 3> const Normal() const
 			{ return Vector_T<T, 3>(this->a(), this->b(), this->c()); }
 		template <typename U>
-		void Normal(const Vector_T<U, 3>& rhs)
+		void Normal(Vector_T<U, 3> const & rhs)
 		{
 			this->a() = rhs.x();
 			this->b() = rhs.y();
@@ -133,13 +133,13 @@ namespace KlayGE
 
 	template <typename T>
 	inline bool
-	operator==(const Plane_T<T>& lhs, const Plane_T<T>& rhs)
+	operator==(Plane_T<T> const & lhs, Plane_T<T> const & rhs)
 	{
 		return (lhs.a() == rhs.a()) && (lhs.b() == rhs.b()) && (lhs.c() == rhs.c()) && (lhs.d() == rhs.d());
 	}
 	template <typename T>
 	inline bool
-	operator!=(const Plane_T<T>& lhs, const Plane_T<T>& rhs)
+	operator!=(Plane_T<T> const & lhs, Plane_T<T> const & rhs)
 	{
 		return !(lhs == rhs);
 	}

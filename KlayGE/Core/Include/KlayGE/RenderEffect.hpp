@@ -42,10 +42,10 @@ namespace KlayGE
 		virtual void Desc(UINT& parameters, UINT& techniques, UINT& functions) = 0;
 
 		virtual RenderEffectParameterPtr Parameter(UINT index) = 0;
-		virtual RenderEffectParameterPtr ParameterByName(const std::string& name) = 0;
-		virtual RenderEffectParameterPtr ParameterBySemantic(const std::string& semantic) = 0;
+		virtual RenderEffectParameterPtr ParameterByName(std::string const & name) = 0;
+		virtual RenderEffectParameterPtr ParameterBySemantic(std::string const & semantic) = 0;
 
-		virtual void SetTechnique(const std::string& technique) = 0;
+		virtual void SetTechnique(std::string const & technique) = 0;
 		virtual void SetTechnique(UINT technique) = 0;
 
 		virtual UINT Begin(UINT flags = 0) = 0;
@@ -62,28 +62,28 @@ namespace KlayGE
 
 		static RenderEffectParameterPtr NullObject();
 
-		virtual RenderEffectParameter& operator=(float value) = 0;
-		virtual RenderEffectParameter& operator=(const Vector4& value) = 0;
-		virtual RenderEffectParameter& operator=(const Matrix4& value) = 0;
-		virtual RenderEffectParameter& operator=(int value) = 0;
-		virtual RenderEffectParameter& operator=(const TexturePtr& tex) = 0;
+		virtual RenderEffectParameter const & operator=(float value) = 0;
+		virtual RenderEffectParameter const & operator=(Vector4 const & value) = 0;
+		virtual RenderEffectParameter const & operator=(Matrix4 const & value) = 0;
+		virtual RenderEffectParameter const & operator=(int value) = 0;
+		virtual RenderEffectParameter const & operator=(TexturePtr const & tex) = 0;
 
 		virtual operator float() const = 0;
 		virtual operator Vector4() const = 0;
 		virtual operator Matrix4() const = 0;
 		virtual operator int() const = 0;
 
-		virtual void SetFloatArray(const float* value, size_t count) = 0;
+		virtual void SetFloatArray(float const * value, size_t count) = 0;
 		virtual void GetFloatArray(float* value, size_t count) = 0;
-		virtual void SetVectorArray(const Vector4* value, size_t count) = 0;
+		virtual void SetVectorArray(Vector4 const * value, size_t count) = 0;
 		virtual void GetVectorArray(Vector4* value, size_t count) = 0;
-		virtual void SetMatrixArray(const Matrix4* matrices, size_t count) = 0;
+		virtual void SetMatrixArray(Matrix4 const * matrices, size_t count) = 0;
 		virtual void GetMatrixArray(Matrix4* matrices, size_t count) = 0;
-		virtual void SetIntArray(const int* value, size_t count) = 0;
+		virtual void SetIntArray(int const * value, size_t count) = 0;
 		virtual void GetIntArray(int* value, size_t count) = 0;
 	};
 
-	RenderEffectPtr LoadRenderEffect(const std::string& effectName);
+	RenderEffectPtr LoadRenderEffect(std::string const & effectName);
 }
 
 #endif		// _RENDEREFFECT_HPP

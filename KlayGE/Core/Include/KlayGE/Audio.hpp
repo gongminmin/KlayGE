@@ -33,7 +33,7 @@ namespace KlayGE
 	class AudioBuffer
 	{
 	public:
-		AudioBuffer(const AudioDataSourcePtr& dataSource);
+		AudioBuffer(AudioDataSourcePtr const & dataSource);
 		virtual ~AudioBuffer();
 
 		static AudioBufferPtr NullObject();
@@ -48,11 +48,11 @@ namespace KlayGE
 		virtual bool IsSound() const = 0;
 
 		virtual Vector3 Position() const = 0;
-		virtual void Position(const Vector3& v) = 0;
+		virtual void Position(Vector3 const & v) = 0;
 		virtual Vector3 Velocity() const = 0;
-		virtual void Velocity(const Vector3& v) = 0;
+		virtual void Velocity(Vector3 const & v) = 0;
 		virtual Vector3 Direction() const = 0;
-		virtual void Direction(const Vector3& v) = 0;
+		virtual void Direction(Vector3 const & v) = 0;
 
 	protected:
 		AudioDataSourcePtr dataSource_;
@@ -66,7 +66,7 @@ namespace KlayGE
 	class SoundBuffer : public AudioBuffer
 	{
 	public:
-		SoundBuffer(const AudioDataSourcePtr& dataSource);
+		SoundBuffer(AudioDataSourcePtr const & dataSource);
 		virtual ~SoundBuffer();
 
 		virtual void Reset();
@@ -82,7 +82,7 @@ namespace KlayGE
 	class MusicBuffer : public AudioBuffer
 	{
 	public:
-		MusicBuffer(const AudioDataSourcePtr& dataSource);
+		MusicBuffer(AudioDataSourcePtr const & dataSource);
 		virtual ~MusicBuffer();
 
 		void Play(bool loop = false);
@@ -114,13 +114,13 @@ namespace KlayGE
 
 		static AudioEnginePtr NullObject();
 
-		virtual const std::wstring& Name() const = 0;
+		virtual std::wstring const & Name() const = 0;
 
-		void AddBuffer(size_t id, const AudioBufferPtr& buffer);
+		void AddBuffer(size_t id, AudioBufferPtr const & buffer);
 
 		size_t NumBuffer() const;
 		AudioBufferPtr Buffer(size_t bufID);
-		const AudioBufferPtr Buffer(size_t bufID) const;
+		AudioBufferPtr const & Buffer(size_t bufID) const;
 
 		void Play(size_t bufID, bool loop = false);
 		void Stop(size_t bufID);
@@ -134,11 +134,11 @@ namespace KlayGE
 		float MusicVolume() const;
 
 		virtual Vector3 GetListenerPos() const = 0;
-		virtual void SetListenerPos(const Vector3& v) = 0;
+		virtual void SetListenerPos(Vector3 const & v) = 0;
 		virtual Vector3 GetListenerVel() const = 0;
-		virtual void SetListenerVel(const Vector3& v) = 0;
+		virtual void SetListenerVel(Vector3 const & v) = 0;
 		virtual void GetListenerOri(Vector3& face, Vector3& up) const = 0;
-		virtual void SetListenerOri(const Vector3& face, const Vector3& up) = 0;
+		virtual void SetListenerOri(Vector3 const & face, Vector3 const & up) = 0;
 
 	protected:
 		AudioBufs	audioBufs_;

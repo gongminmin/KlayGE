@@ -30,19 +30,19 @@ namespace
 {
 	using namespace KlayGE;
 
-	const U32 N(4096);				// size of ring buffer
-	const U32 F(18);				// upper limit for match_length
-	const U32 THRESHOLD(2);		// encode string into position and length
+	U32 const N(4096);				// size of ring buffer
+	U32 const F(18);				// upper limit for match_length
+	U32 const THRESHOLD(2);			// encode string into position and length
 									//   if match_length is greater than this
-	const U32 NIL(N);				// index for root of binary search trees
+	U32 const NIL(N);				// index for root of binary search trees
 
 
-	static U8 textBuf[N + F - 1];	// ring buffer of size N, 
+	U8 textBuf[N + F - 1];			// ring buffer of size N, 
 									// with extra F-1 bytes to facilitate string comparison
 
 	// 忽略大小写比较字符串
 	/////////////////////////////////////////////////////////////////////////////////
-	bool IgnoreCaseCompare(const std::string& lhs, const std::string& rhs)
+	bool IgnoreCaseCompare(std::string const & lhs, std::string const & rhs)
 	{
 		if (lhs.length() != rhs.length())
 		{
@@ -169,7 +169,7 @@ namespace KlayGE
 
 	// 打开打包文件
 	/////////////////////////////////////////////////////////////////////////////////
-	void UnPkt::Open(const VFilePtr& pktFile)
+	void UnPkt::Open(VFilePtr const & pktFile)
 	{
 		Close();
 
@@ -201,7 +201,7 @@ namespace KlayGE
 
 	// 在打包文件中定位文件
 	/////////////////////////////////////////////////////////////////////////////////
-	void UnPkt::LocateFile(const std::string& pathName)
+	void UnPkt::LocateFile(std::string const & pathName)
 	{
 		curFile_ = dirTable_.find(pathName);
 	}

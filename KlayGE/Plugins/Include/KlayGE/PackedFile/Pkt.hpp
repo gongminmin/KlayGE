@@ -62,7 +62,7 @@ namespace KlayGE
 
 	// 翻译路径名
 	/////////////////////////////////////////////////////////////////////////////////
-	std::string& TransPathName(std::string& out, const std::string& in);
+	std::string& TransPathName(std::string& out, std::string const & in);
 
 	// 文件打包
 	/////////////////////////////////////////////////////////////////////////////////
@@ -71,7 +71,7 @@ namespace KlayGE
 	public:
 		static void Encode(VFile& Out, VFile& In);
 
-		void Pack(const std::string& dirName, VFile& pktFile);
+		void Pack(std::string const & dirName, VFile& pktFile);
 
 		Pkt();
 	};
@@ -84,10 +84,10 @@ namespace KlayGE
 	public:
 		static void Decode(VFile& Out, VFile& In);
 
-		void Open(const VFilePtr& pktFile);
+		void Open(VFilePtr const & pktFile);
 		void Close();
 		
-		void LocateFile(const std::string& pathName);
+		void LocateFile(std::string const & pathName);
 
 		size_t CurFileSize() const;
 		size_t CurFileCompressedSize() const;

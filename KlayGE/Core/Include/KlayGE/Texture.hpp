@@ -76,7 +76,7 @@ namespace KlayGE
 			{ }
 
 		// Gets the name of texture
-		virtual const std::wstring& Name() const = 0;
+		virtual std::wstring const & Name() const = 0;
 
 		// Gets the number of mipmaps to be used for this texture.
 		U16 NumMipMaps() const 

@@ -25,17 +25,17 @@ namespace KlayGE
 	{
 	}
 
-	void OGLVertexStream::Assign(const void* src, size_t numVertices, size_t stride)
+	void OGLVertexStream::Assign(void const * src, size_t numVertices, size_t stride)
 	{
-		const size_t vertexSize(this->sizeElement() * this->ElementsPerVertex());
-		const size_t size(vertexSize * numVertices);
+		size_t const vertexSize(this->sizeElement() * this->ElementsPerVertex());
+		size_t const size(vertexSize * numVertices);
 
 		buffer_.resize(size);
 
 		if (stride != 0)
 		{
 			U8* destPtr(&buffer_[0]);
-			const U8* srcPtr(static_cast<const U8*>(static_cast<const void*>(src)));
+			U8 const * srcPtr(static_cast<U8 const *>(static_cast<void const *>(src)));
 			for (size_t i = 0; i < numVertices; ++ i)
 			{
 				MemoryLib::Copy(destPtr, srcPtr, vertexSize);

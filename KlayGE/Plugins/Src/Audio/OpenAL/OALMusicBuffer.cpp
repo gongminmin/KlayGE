@@ -22,18 +22,37 @@
 
 #include <KlayGE/OpenAL/OALAudio.hpp>
 
-#pragma comment(lib, "libpthread.lib")
+size_t const READSIZE(88200);
 
-const size_t READSIZE(88200);
+namespace
+{
+	// 处理时间事件
+	/////////////////////////////////////////////////////////////////////////////////
+	class PlayProc
+	{
+	public:
+		PlayProc(KlayGE::OALMusicBuffer* streaming)
+					: streaming_(streaming)
+			{ }
+
+		void operator()()
+		{
+			// 更新缓冲区
+			streaming_->LoopUpdateBuffer();
+		}
+
+	private:
+		KlayGE::OALMusicBuffer* streaming_;
+	};
+}
 
 namespace KlayGE
 {
 	// 构造函数。建立一个可以用于流式播放的缓冲区
 	/////////////////////////////////////////////////////////////////////////////////
-	OALMusicBuffer::OALMusicBuffer(const AudioDataSourcePtr& dataSource, U32 bufferSeconds, float volume)
+	OALMusicBuffer::OALMusicBuffer(AudioDataSourcePtr const & dataSource, U32 bufferSeconds, float volume)
 							: MusicBuffer(dataSource),
-								bufferQueue_(bufferSeconds * PreSecond),
-								playThread_(0)
+								bufferQueue_(bufferSeconds * PreSecond)
 	{
 		alGenBuffers(static_cast<ALsizei>(bufferQueue_.size()), &bufferQueue_[0]);
 
@@ -57,18 +76,6 @@ namespace KlayGE
 
 		alDeleteBuffers(static_cast<ALsizei>(bufferQueue_.size()), &bufferQueue_[0]);
 		alDeleteSources(1, &source_);
-	}
-	
-	// 处理时间事件
-	/////////////////////////////////////////////////////////////////////////////////
-	void* OALMusicBuffer::PlayProc(void* arg)
-	{
-		OALMusicBuffer* streaming(reinterpret_cast<OALMusicBuffer*>(arg));
-
-		// 更新缓冲区
-		streaming->LoopUpdateBuffer();
-
-		return NULL;
 	}
 
 	// 更新缓冲区
@@ -132,7 +139,7 @@ namespace KlayGE
 	{
 		alSourceUnqueueBuffers(source_, static_cast<ALsizei>(bufferQueue_.size()), &bufferQueue_[0]);
 
-		const ALenum format(Convert(format_));
+		ALenum const format(Convert(format_));
 		std::vector<U8> data(READSIZE);
 
 		// 每个缓冲区中装1 / PreSecond秒的数据
@@ -151,7 +158,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OALMusicBuffer::DoPlay(bool loop)
 	{
-		pthread_create(&playThread_, NULL, PlayProc, this);
+		playThread_ = boost::shared_ptr<boost::thread>(new boost::thread(PlayProc(this)));
 
 		loop_ = loop;
 
@@ -163,10 +170,10 @@ namespace KlayGE
 	////////////////////////////////////////////////////////////////////////////////
 	void OALMusicBuffer::DoStop()
 	{
-		if (playThread_ != 0)
+		if (playThread_)
 		{
-			pthread_join(playThread_, NULL);
-			playThread_ = 0;
+			playThread_->join();
+			playThread_.reset();
 		}
 
 		alSourceStopv(1, &source_);
@@ -200,7 +207,7 @@ namespace KlayGE
 
 	// 设置声源位置
 	/////////////////////////////////////////////////////////////////////////////////
-	void OALMusicBuffer::Position(const Vector3& v)
+	void OALMusicBuffer::Position(Vector3 const & v)
 	{
 		Vector3 alv(VecToALVec(v));
 		alSourcefv(source_, AL_POSITION, &alv.x());
@@ -217,7 +224,7 @@ namespace KlayGE
 
 	// 设置声源速度
 	/////////////////////////////////////////////////////////////////////////////////
-	void OALMusicBuffer::Velocity(const Vector3& v)
+	void OALMusicBuffer::Velocity(Vector3 const & v)
 	{
 		Vector3 alv(VecToALVec(v));
 		alSourcefv(source_, AL_VELOCITY, &alv.x());
@@ -234,7 +241,7 @@ namespace KlayGE
 
 	// 设置声源方向
 	/////////////////////////////////////////////////////////////////////////////////
-	void OALMusicBuffer::Direction(const Vector3& v)
+	void OALMusicBuffer::Direction(Vector3 const & v)
 	{
 		Vector3 alv(VecToALVec(v));
 		alSourcefv(source_, AL_DIRECTION, &alv.x());

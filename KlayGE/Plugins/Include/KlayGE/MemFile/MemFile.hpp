@@ -26,16 +26,16 @@ namespace KlayGE
 	{
 	public:
 		MemFile();
-		MemFile(const void* data, size_t length);
+		MemFile(void const * data, size_t length);
 		~MemFile();
 
-		void Open(const void* data, size_t length);
+		void Open(void const * data, size_t length);
 		void Close();
 
 		size_t Length();
 		void Length(size_t newLen);
 
-		size_t Write(const void* data, size_t count);
+		size_t Write(void const * data, size_t count);
 		size_t Read(void* data, size_t count);
 		size_t CopyFrom(VFile& src, size_t size);
 

@@ -86,7 +86,7 @@ namespace KlayGE
 
 	// 实现动作映射
 	//////////////////////////////////////////////////////////////////////////////////
-	void InputJoystick::DoActionMap(const InputActionMap& actionMap)
+	void InputJoystick::DoActionMap(InputActionMap const & actionMap)
 	{
 		if (actionMap.HasAction(JS_XPos))
 		{

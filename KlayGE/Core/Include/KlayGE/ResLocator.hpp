@@ -22,9 +22,9 @@ namespace KlayGE
 	public:
 		static ResLocator& Instance();
 
-		void AddPath(const std::string& path);
+		void AddPath(std::string const & path);
 
-		ResIdentifierPtr Locate(const std::string& name);
+		ResIdentifierPtr Locate(std::string const & name);
 
 	private:
 		ResLocator();

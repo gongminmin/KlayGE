@@ -24,7 +24,7 @@ namespace KlayGE
 	{
 	}
 
-	void OGLIndexStream::Assign(const void* src, size_t numIndices)
+	void OGLIndexStream::Assign(void const * src, size_t numIndices)
 	{
 		buffer_.resize(numIndices);
 		MemoryLib::Copy(&buffer_[0], src, numIndices * sizeof(U16));

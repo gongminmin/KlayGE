@@ -33,8 +33,8 @@
 
 namespace KlayGE
 {
-	SOCKADDR_IN TransAddr(const std::string& address, U16 port);
-	std::string TransAddr(const SOCKADDR_IN& sockAddr, U16& port);
+	SOCKADDR_IN TransAddr(std::string const & address, U16 port);
+	std::string TransAddr(SOCKADDR_IN const & sockAddr, U16& port);
 	IN_ADDR Host();
 
 	// Í¬²½Ì×½Ó×Ö
@@ -50,18 +50,18 @@ namespace KlayGE
 
 		void Accept(Socket& connectedSocket);
 		void Accept(Socket& connectedSocket, SOCKADDR_IN& sockAddr);
-		void Bind(const SOCKADDR_IN& sockAddr);
+		void Bind(SOCKADDR_IN const & sockAddr);
 
-		void Connect(const SOCKADDR_IN& sockAddr);
+		void Connect(SOCKADDR_IN const & sockAddr);
 
 		void IOCtl(long command, U32* argument);
 		void Listen(int connectionBacklog = 5);
 
 		int Receive(void* buf, int len, int flags = 0);
-		int Send(const void* buf, int len, int flags = 0);
+		int Send(void const * buf, int len, int flags = 0);
 
 		int ReceiveFrom(void* buf, int len, SOCKADDR_IN& sockFrom, int flags = 0);
-		int SendTo(const void* buf, int len, const SOCKADDR_IN& sockTo, int flags = 0);
+		int SendTo(void const * buf, int len, SOCKADDR_IN const & sockTo, int flags = 0);
 
 		enum ShutDownMode
 		{
@@ -74,7 +74,7 @@ namespace KlayGE
 		void PeerName(SOCKADDR_IN& sockAddr, int& len);
 		void SockName(SOCKADDR_IN& sockAddr, int& len);
 
-		void SetSockOpt(int optionName, const void* optionValue,
+		void SetSockOpt(int optionName, void const * optionValue,
 			int optionLen, int level = SOL_SOCKET);
 		void GetSockOpt(int optionName, void* optionValue,
 			int& optionLen, int level = SOL_SOCKET);

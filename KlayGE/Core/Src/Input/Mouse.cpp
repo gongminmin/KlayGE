@@ -71,7 +71,7 @@ namespace KlayGE
 
 	// 实现动作映射
 	//////////////////////////////////////////////////////////////////////////////////
-	void InputMouse::DoActionMap(const InputActionMap& actionMap)
+	void InputMouse::DoActionMap(InputActionMap const & actionMap)
 	{
 		if (actionMap.HasAction(MS_X))
 		{

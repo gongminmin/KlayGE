@@ -19,7 +19,7 @@ namespace KlayGE
 	{
 	}
 
-	Light::Light(LightTypes type, const Vector3& pos)
+	Light::Light(LightTypes type, Vector3 const & pos)
 		: lightType(type),
 			position(pos),
 			diffuse(1, 1, 1, 1), specular(0, 0, 0, 0), ambient(0, 0, 0, 0),

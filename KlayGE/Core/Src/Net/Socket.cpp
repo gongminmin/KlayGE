@@ -45,7 +45,7 @@ namespace KlayGE
 {
 	// 翻译网络地址
 	/////////////////////////////////////////////////////////////////////////////////
-	SOCKADDR_IN TransAddr(const std::string& address, U16 port)
+	SOCKADDR_IN TransAddr(std::string const & address, U16 port)
 	{
 		SOCKADDR_IN sockAddr_in;
 		MemoryLib::Zero(&sockAddr_in, sizeof(sockAddr_in));
@@ -79,7 +79,7 @@ namespace KlayGE
 		return sockAddr_in;
 	}
 
-	std::string TransAddr(const SOCKADDR_IN& sockAddr, U16& port)
+	std::string TransAddr(SOCKADDR_IN const & sockAddr, U16& port)
 	{
 		port = ntohs(sockAddr.sin_port);
 		return std::string(inet_ntoa(sockAddr.sin_addr));
@@ -163,11 +163,11 @@ namespace KlayGE
 
 	// 绑定端口
 	/////////////////////////////////////////////////////////////////////////////////
-	void Socket::Bind(const SOCKADDR_IN& sockAddr)
+	void Socket::Bind(SOCKADDR_IN const & sockAddr)
 	{
 		assert(this->socket_ != INVALID_SOCKET);
 
-		Verify(bind(this->socket_, reinterpret_cast<const SOCKADDR*>(&sockAddr),
+		Verify(bind(this->socket_, reinterpret_cast<SOCKADDR const *>(&sockAddr),
 			sizeof(sockAddr)) != SOCKET_ERROR);
 	}
 
@@ -195,11 +195,11 @@ namespace KlayGE
 
 	// 有连接的情况下发送数据
 	/////////////////////////////////////////////////////////////////////////////////
-	int Socket::Send(const void* buf, int len, int flags)
+	int Socket::Send(void const * buf, int len, int flags)
 	{
 		assert(this->socket_ != INVALID_SOCKET);
 
-		return send(this->socket_, static_cast<const char*>(buf), len, flags);
+		return send(this->socket_, static_cast<char const *>(buf), len, flags);
 	}
 
 	// 有连接的情况下接收数据
@@ -242,12 +242,12 @@ namespace KlayGE
 
 	// 设置套接字参数
 	/////////////////////////////////////////////////////////////////////////////////
-	void Socket::SetSockOpt(int optionName, const void* optionValue, int optionLen, int level)
+	void Socket::SetSockOpt(int optionName, void const * optionValue, int optionLen, int level)
 	{
 		assert(this->socket_ != INVALID_SOCKET);
 
 		Verify(setsockopt(this->socket_, level, optionName,
-			static_cast<const char*>(optionValue), optionLen) != SOCKET_ERROR);
+			static_cast<char const *>(optionValue), optionLen) != SOCKET_ERROR);
 	}
 
 	// 获取套接字参数
@@ -273,22 +273,22 @@ namespace KlayGE
 
 	// 无连接情况下发送数据
 	/////////////////////////////////////////////////////////////////////////////////
-	int Socket::SendTo(const void* buf, int len, const SOCKADDR_IN& sockTo, int flags)
+	int Socket::SendTo(void const * buf, int len, SOCKADDR_IN const & sockTo, int flags)
 	{
 		assert(this->socket_ != INVALID_SOCKET);
 
-		return sendto(this->socket_, static_cast<const char*>(buf), len, flags,
-			reinterpret_cast<const SOCKADDR*>(&sockTo), sizeof(sockTo));
+		return sendto(this->socket_, static_cast<char const *>(buf), len, flags,
+			reinterpret_cast<SOCKADDR const *>(&sockTo), sizeof(sockTo));
 	}
 
 	// 连接服务端
 	/////////////////////////////////////////////////////////////////////////////////
-	void Socket::Connect(const SOCKADDR_IN& sockAddr)
+	void Socket::Connect(SOCKADDR_IN const & sockAddr)
 	{
 		assert(this->socket_ != INVALID_SOCKET);
 
 		Verify(connect(this->socket_,
-			reinterpret_cast<const SOCKADDR*>(&sockAddr), sizeof(sockAddr)) != SOCKET_ERROR);
+			reinterpret_cast<SOCKADDR const *>(&sockAddr), sizeof(sockAddr)) != SOCKET_ERROR);
 	}
 
 	// 设置超时时间

@@ -18,7 +18,7 @@ namespace KlayGE
 		};
 
 		Light();
-		Light(LightTypes type, const Vector3& pos);
+		Light(LightTypes type, Vector3 const & pos);
 
 		LightTypes	lightType;
 

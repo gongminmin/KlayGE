@@ -40,7 +40,7 @@ namespace KlayGE
 
 		virtual bool IsComplete() = 0;
 
-		virtual void Load(const std::wstring& fileName) = 0;
+		virtual void Load(std::wstring const & fileName) = 0;
 
 		void Play();
 		void Stop();

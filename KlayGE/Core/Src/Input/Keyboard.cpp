@@ -29,7 +29,7 @@ namespace KlayGE
 
 	// 实现动作映射
 	//////////////////////////////////////////////////////////////////////////////////
-	void InputKeyboard::DoActionMap(const InputActionMap& actionMap)
+	void InputKeyboard::DoActionMap(InputActionMap const & actionMap)
 	{
 		for (U16 i = 0; i < static_cast<U16>(keys_.size()); ++ i)
 		{

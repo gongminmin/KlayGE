@@ -2,7 +2,7 @@
 #define _D3D9RENDERWINDOW_HPP
 
 #include <d3d9.h>
-#include <KlayGE/COMPtr.hpp>
+#include <boost/smart_ptr.hpp>
 #include <KlayGE/RenderWindow.hpp>
 #include <KlayGE/D3D9/D3D9Adapter.hpp>
 
@@ -15,8 +15,8 @@ namespace KlayGE
 	class D3D9RenderWindow : public RenderWindow
 	{
 	public:
-		D3D9RenderWindow(const COMPtr<IDirect3D9>& d3d, const D3D9Adapter& adapter,
-			const std::string& name, const D3D9RenderSettings& settings);
+		D3D9RenderWindow(boost::shared_ptr<IDirect3D9> const & d3d, D3D9Adapter const & adapter,
+			std::string const & name, D3D9RenderSettings const & settings);
 		~D3D9RenderWindow();
 
 		LRESULT MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -36,12 +36,12 @@ namespace KlayGE
 
 		HWND WindowHandle() const;
 
-		const std::wstring& Description() const;
+		std::wstring const & Description() const;
 
-		const D3D9Adapter& Adapter() const;
-		const COMPtr<IDirect3DDevice9>& D3DDevice() const;
+		D3D9Adapter const & Adapter() const;
+		boost::shared_ptr<IDirect3DDevice9> const & D3DDevice() const;
 
-		void CustomAttribute(const std::string& name, void* pData);
+		void CustomAttribute(std::string const & name, void* pData);
 
 		bool RequiresTextureFlipping() const;
 
@@ -68,12 +68,12 @@ namespace KlayGE
 		D3D9Adapter					adapter_;
 
 		// Pointer to the 3D device specific for this window
-		COMPtr<IDirect3D9>			d3d_;
-		COMPtr<IDirect3DDevice9>	d3dDevice_;
-		D3DPRESENT_PARAMETERS		d3dpp_;
+		boost::shared_ptr<IDirect3D9>			d3d_;
+		boost::shared_ptr<IDirect3DDevice9>		d3dDevice_;
+		D3DPRESENT_PARAMETERS					d3dpp_;
 		
-		COMPtr<IDirect3DSurface9>	renderSurface_;
-		COMPtr<IDirect3DSurface9>	renderZBuffer_;
+		boost::shared_ptr<IDirect3DSurface9>	renderSurface_;
+		boost::shared_ptr<IDirect3DSurface9>	renderZBuffer_;
 
 		std::wstring		description_;
 	};

@@ -42,12 +42,12 @@ namespace KlayGE
 
 		RenderEffectParameterPtr Parameter(UINT index)
 			{ return RenderEffectParameter::NullObject(); }
-		RenderEffectParameterPtr ParameterByName(const std::string& name)
+		RenderEffectParameterPtr ParameterByName(std::string const & name)
 			{ return RenderEffectParameter::NullObject(); }
-		RenderEffectParameterPtr ParameterBySemantic(const std::string& semantic)
+		RenderEffectParameterPtr ParameterBySemantic(std::string const & semantic)
 			{ return RenderEffectParameter::NullObject(); }
 
-		void SetTechnique(const std::string& techName)
+		void SetTechnique(std::string const & techName)
 			{ }
 		void SetTechnique(UINT tech)
 			{ }
@@ -72,15 +72,15 @@ namespace KlayGE
 	class NullRenderEffectParameter : public RenderEffectParameter
 	{
 	public:
-		RenderEffectParameter& operator=(float value)
+		RenderEffectParameter const & operator=(float value)
 			{ return *this; }
-		RenderEffectParameter& operator=(const Vector4& value)
+		RenderEffectParameter const & operator=(Vector4 const & value)
 			{ return *this; }
-		RenderEffectParameter& operator=(const Matrix4& value)
+		RenderEffectParameter const & operator=(Matrix4 const & value)
 			{ return *this; }
-		RenderEffectParameter& operator=(int value)
+		RenderEffectParameter const & operator=(int value)
 			{ return *this; }
-		RenderEffectParameter& operator=(const TexturePtr& tex)
+		RenderEffectParameter const & operator=(TexturePtr const & tex)
 			{ return *this; }
 
 		operator float() const
@@ -92,19 +92,19 @@ namespace KlayGE
 		operator int() const
 			{ return 0; }
 
-		void SetFloatArray(const float* matrices, size_t count)
+		void SetFloatArray(float const * matrices, size_t count)
 			{ }
 		void GetFloatArray(float* matrices, size_t count)
 			{ }
-		void SetVectorArray(const Vector4* matrices, size_t count)
+		void SetVectorArray(Vector4 const * matrices, size_t count)
 			{ }
 		void GetVectorArray(Vector4* matrices, size_t count)
 			{ }
-		void SetMatrixArray(const Matrix4* matrices, size_t count)
+		void SetMatrixArray(Matrix4 const * matrices, size_t count)
 			{ }
 		void GetMatrixArray(Matrix4* matrices, size_t count)
 			{ }
-		void SetIntArray(const int* matrices, size_t count)
+		void SetIntArray(int const * matrices, size_t count)
 			{ }
 		void GetIntArray(int* matrices, size_t count)
 			{ }
@@ -117,7 +117,7 @@ namespace KlayGE
 	}
 
 
-	RenderEffectPtr LoadRenderEffect(const std::string& effectName)
+	RenderEffectPtr LoadRenderEffect(std::string const & effectName)
 	{
 		VFilePtr file(ResLocator::Instance().Locate(effectName)->Load());
 

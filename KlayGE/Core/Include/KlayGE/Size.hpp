@@ -30,30 +30,30 @@ namespace KlayGE
 		typedef T					value_type;
 
 		typedef value_type*			pointer;
-		typedef const value_type*	const_pointer;
+		typedef value_type const *	const_pointer;
 
 		typedef value_type&			reference;
-		typedef const value_type&	const_reference;
+		typedef value_type const &	const_reference;
 
 		typedef value_type*			iterator;
-		typedef const value_type*	const_iterator;
+		typedef value_type const *	const_iterator;
 
 		enum { elem_num = 2 };
 
 	public:
 		Size_T()
 			{ }
-		explicit Size_T(const T* rhs)
+		explicit Size_T(T const * rhs)
 			: size_(rhs)
 			{ }
 		Size_T(const Size_T& rhs)
 			: size_(rhs.size_)
 			{ }
 		template <typename U>
-		Size_T(const Size_T<U>& rhs)
+		Size_T(Size_T<U> const & rhs)
 			: size_(rhs.size_)
 			{ }
-		Size_T(const T& cx, const T& cy)
+		Size_T(T const & cx, T const & cy)
 		{
 			this->cx() = cx;
 			this->cy() = cy;
@@ -71,19 +71,19 @@ namespace KlayGE
 
 		// 赋值操作符
 		template <typename U>
-		Size_T& operator+=(const Size_T<U>& rhs)
+		Size_T const & operator+=(Size_T<U> const & rhs)
 		{
 			size_ += rhs.size_;
 			return *this;
 		}
 		template <typename U>
-		Size_T& operator-=(const Size_T<U>& rhs)
+		Size_T const & operator-=(Size_T<U> const & rhs)
 		{
 			size_ -= rhs.size_;
 			return *this;
 		}
 
-		Size_T& operator=(const Size_T& rhs)
+		Size_T const & operator=(const Size_T& rhs)
 		{
 			if (this != &rhs)
 			{
@@ -92,7 +92,7 @@ namespace KlayGE
 			return *this;
 		}
 		template <typename U>
-		Size_T& operator=(const Size_T<U>& rhs)
+		Size_T const & operator=(Size_T<U> const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -102,9 +102,9 @@ namespace KlayGE
 		}
 
 		// 一元操作符
-		const Size_T<T> operator+() const
+		Size_T<T> const operator+() const
 			{ return *this; }
-		const Size_T<T> operator-() const
+		Size_T<T> const operator-() const
 			{ return Size_T<T>(-this->cx(), -this->cy()); }
 
 	private:
@@ -113,13 +113,13 @@ namespace KlayGE
 
 	template <typename T>
 	inline bool
-	operator==(const Size_T<T>& lhs, const Size_T<T>& rhs)
+	operator==(Size_T<T> const & lhs, Size_T<T> const & rhs)
 	{
 		return (lhs.cx() == rhs.cx()) && (lhs.cy() == rhs.cy());
 	}
 	template <typename T>
 	inline bool
-	operator!=(const Size_T<T>& lhs, const Size_T<T>& rhs)
+	operator!=(Size_T<T> const & lhs, Size_T<T> const & rhs)
 	{
 		return !(lhs == rhs);
 	}

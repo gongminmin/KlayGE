@@ -39,10 +39,10 @@ namespace
 {
 	using namespace KlayGE;
 
-	const U32 N(4096);			// size of ring buffer
-	const U32 F(18);			// upper limit for matchLength
-	const U32 THRESHOLD(2);		// encode string into position and length
-	const U32 NIL(N);			// index for root of binary search trees
+	U32 const N(4096);			// size of ring buffer
+	U32 const F(18);			// upper limit for matchLength
+	U32 const THRESHOLD(2);		// encode string into position and length
+	U32 const NIL(N);			// index for root of binary search trees
 
 	unsigned char textBuf[N + F - 1];		// ring buffer of size N, 
 											// with extra F-1 bytes to facilitate string comparison
@@ -199,16 +199,16 @@ namespace
 
 	// 输出目录表
 	/////////////////////////////////////////////////////////////////////////////////
-	void WriteDirTable(KlayGE::VFile& out, const KlayGE::DirTable& dirTable)
+	void WriteDirTable(KlayGE::VFile& out, KlayGE::DirTable const & dirTable)
 	{
 		using namespace KlayGE;
 
 		for (DirTable::const_iterator iter = dirTable.begin(); iter != dirTable.end(); ++ iter)
 		{
-			const FileDes& fd(iter->second);
+			FileDes const & fd(iter->second);
 
-			const std::string& fileName(iter->first);
-			const U32 temp(static_cast<U32>(fileName.length()));
+			std::string const & fileName(iter->first);
+			U32 const temp(static_cast<U32>(fileName.length()));
 			out.Write(&temp, sizeof(temp));
 			out.Write(&fileName[0], temp);
 
@@ -218,8 +218,8 @@ namespace
 
 	// 根据树型结构打包目录
 	/////////////////////////////////////////////////////////////////////////////////
-	void Compress(KlayGE::VFile& outFile, DirTable& dirTable, const std::string& rootName,
-		const std::vector<std::string>& files)
+	void Compress(KlayGE::VFile& outFile, DirTable& dirTable, std::string const & rootName,
+		std::vector<std::string> const & files)
 	{
 		using namespace KlayGE;
 
@@ -260,7 +260,7 @@ namespace
 
 	// 遍历目录，得出树型结构
 	/////////////////////////////////////////////////////////////////////////////////
-	std::vector<std::string> FindFiles(const std::string& rootName, const std::string& pathName)
+	std::vector<std::string> FindFiles(std::string const & rootName, std::string const & pathName)
 	{
 		std::vector<std::string> ret;
 
@@ -270,7 +270,7 @@ namespace
 			directory_iterator end_itr;
 			for (directory_iterator iter(findPath); iter != end_itr; ++ iter)
 			{
-				const std::string& fileName(iter->leaf());
+				std::string const & fileName(iter->leaf());
 
 				if (is_directory(*iter))
 				{
@@ -292,7 +292,7 @@ namespace KlayGE
 {
 	// 翻译路径名，把'\'转化成'/'
 	/////////////////////////////////////////////////////////////////////////////////
-	std::string& TransPathName(std::string& out, const std::string& in)
+	std::string& TransPathName(std::string& out, std::string const & in)
 	{
 		out = in;
 		for (size_t i = 0; i < out.length(); ++ i)
@@ -420,7 +420,7 @@ namespace KlayGE
 
 	// 目录打包
 	/////////////////////////////////////////////////////////////////////////////////
-	void Pkt::Pack(const std::string& dirName, VFile& pktFile)
+	void Pkt::Pack(std::string const & dirName, VFile& pktFile)
 	{
 		std::string rootName;
 		TransPathName(rootName, dirName);

@@ -13,7 +13,7 @@ namespace KlayGE
 	class OGLRenderWindow : public RenderWindow
 	{
 	public:
-		OGLRenderWindow(const std::string& name, const OGLRenderSettings& settings);
+		OGLRenderWindow(std::string const & name, OGLRenderSettings const & settings);
 		~OGLRenderWindow();
 
 		LRESULT MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -33,9 +33,9 @@ namespace KlayGE
 
 		HWND WindowHandle() const;
 
-		const std::wstring& Description() const;
+		std::wstring const & Description() const;
 
-		void CustomAttribute(const std::string& name, void* pData);
+		void CustomAttribute(std::string const & name, void* pData);
 
 		bool RequiresTextureFlipping() const;
 

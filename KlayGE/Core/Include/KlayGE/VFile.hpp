@@ -51,7 +51,7 @@ namespace KlayGE
 		virtual size_t Length() = 0;
 		virtual void Length(size_t newLen) = 0;
 
-		virtual size_t Write(const void* data, size_t count) = 0;
+		virtual size_t Write(void const * data, size_t count) = 0;
 		virtual size_t Read(void* data, size_t count) = 0;
 		virtual size_t CopyFrom(VFile& src, size_t size) = 0;
 

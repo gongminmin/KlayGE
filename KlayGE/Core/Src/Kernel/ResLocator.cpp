@@ -28,10 +28,10 @@ namespace KlayGE
 
 	ResLocator::ResLocator()
 	{
-		pathes_.push_back("./");
+		pathes_.push_back("");
 	}
 
-	void ResLocator::AddPath(const std::string& path)
+	void ResLocator::AddPath(std::string const & path)
 	{
 		if (path[path.length() - 1] != '/')
 		{
@@ -43,7 +43,7 @@ namespace KlayGE
 		}
 	}
 
-	ResIdentifierPtr ResLocator::Locate(const std::string& name)
+	ResIdentifierPtr ResLocator::Locate(std::string const & name)
 	{
 		for (size_t i = 0; i < pathes_.size(); ++ i)
 		{

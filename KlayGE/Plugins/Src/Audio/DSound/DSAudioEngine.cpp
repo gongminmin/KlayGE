@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Memory.hpp>
 #include <KlayGE/AudioDataSource.hpp>
@@ -27,7 +28,7 @@ namespace KlayGE
 {
 	// 从AudioDataSource获取WAVEFORMATEX
 	/////////////////////////////////////////////////////////////////////////////////
-	WAVEFORMATEX WaveFormatEx(const AudioDataSourcePtr& dataSource)
+	WAVEFORMATEX WaveFormatEx(AudioDataSourcePtr const & dataSource)
 	{
 		WAVEFORMATEX wfx;
 
@@ -88,7 +89,7 @@ namespace KlayGE
 	{
 		IDirectSound* dsound(NULL);
 		TIF(DirectSoundCreate(&DSDEVID_DefaultPlayback, &dsound, NULL));
-		dsound_ = COMPtr<IDirectSound>(dsound);
+		dsound_ = MakeCOMPtr(dsound);
 
 		TIF(dsound_->SetCooperativeLevel(::GetForegroundWindow(), DSSCL_PRIORITY));
 
@@ -99,7 +100,6 @@ namespace KlayGE
 
 		IDirectSoundBuffer* pDSBPrimary(NULL);
 		TIF(dsound_->CreateSoundBuffer(&desc, &pDSBPrimary, NULL));
-		COMPtr<IDirectSoundBuffer> primaryBuffer(pDSBPrimary);
 
 		WAVEFORMATEX wfx;
 		MemoryLib::Zero(&wfx, sizeof(wfx));
@@ -112,12 +112,17 @@ namespace KlayGE
 
 		TIF(pDSBPrimary->SetFormat(&wfx));
 
-		TIF(primaryBuffer.QueryInterface<IID_IDirectSound3DListener>(ds3dListener_));
+		IDirectSound3DListener* ds3dListener;
+		TIF(pDSBPrimary->QueryInterface(IID_IDirectSound3DListener,
+			reinterpret_cast<void**>(&ds3dListener)));
+		ds3dListener_ = MakeCOMPtr(ds3dListener);
 
 
 		this->SetListenerPos(Vector3(0, 0, 0));
 		this->SetListenerVel(Vector3(0, 0, 0));
 		this->SetListenerOri(Vector3(0, 0, 1), Vector3(0, 1, 0));
+
+		pDSBPrimary->Release();
 	}
 
 	// 析构函数
@@ -129,9 +134,9 @@ namespace KlayGE
 
 	// 音频引擎名字
 	/////////////////////////////////////////////////////////////////////////////////
-	const std::wstring& DSAudioEngine::Name() const
+	std::wstring const & DSAudioEngine::Name() const
 	{
-		static std::wstring name(L"DirectSound Audio Engine");
+		static const std::wstring name(L"DirectSound Audio Engine");
 		return name;
 	}
 
@@ -146,7 +151,7 @@ namespace KlayGE
 
 	// 设置3D听者位置
 	/////////////////////////////////////////////////////////////////////////////////
-	void DSAudioEngine::SetListenerPos(const Vector3& v)
+	void DSAudioEngine::SetListenerPos(Vector3 const & v)
 	{
 		this->ds3dListener_->SetPosition(v.x(), v.y(), v.z(), DS3D_IMMEDIATE);
 	}
@@ -162,7 +167,7 @@ namespace KlayGE
 
 	// 设置3D听者速度
 	/////////////////////////////////////////////////////////////////////////////////
-	void DSAudioEngine::SetListenerVel(const Vector3& v)
+	void DSAudioEngine::SetListenerVel(Vector3 const & v)
 	{
 		this->ds3dListener_->SetVelocity(v.x(), v.y(), v.z(), DS3D_IMMEDIATE);
 	}
@@ -180,7 +185,7 @@ namespace KlayGE
 
 	// 获取3D听者方向
 	/////////////////////////////////////////////////////////////////////////////////
-	void DSAudioEngine::SetListenerOri(const Vector3& face, const Vector3& up)
+	void DSAudioEngine::SetListenerOri(Vector3 const & face, Vector3 const & up)
 	{
 		this->ds3dListener_->SetOrientation(face.x(), face.y(), face.z(),
 			up.x(), up.y(), up.z(), DS3D_IMMEDIATE);

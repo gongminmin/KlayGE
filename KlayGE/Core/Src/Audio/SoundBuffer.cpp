@@ -21,7 +21,7 @@ namespace KlayGE
 {
 	// ¹¹Ôìº¯Êý
 	/////////////////////////////////////////////////////////////////////////////////
-	SoundBuffer::SoundBuffer(const AudioDataSourcePtr& dataSource)
+	SoundBuffer::SoundBuffer(AudioDataSourcePtr const & dataSource)
 					: AudioBuffer(dataSource)
 	{
 	}

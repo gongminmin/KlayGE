@@ -42,7 +42,7 @@ namespace KlayGE
 
 	// 建立应用程序窗口和D3D接口
 	/////////////////////////////////////////////////////////////////////////////////
-	void App3DFramework::Create(const std::string& name, const RenderSettings& settings)
+	void App3DFramework::Create(std::string const & name, RenderSettings const & settings)
 	{
 		Context::Instance().RenderFactoryInstance().RenderEngineInstance().CreateRenderWindow(name, settings);
 
@@ -58,8 +58,8 @@ namespace KlayGE
 
 	// 设置观察矩阵
 	/////////////////////////////////////////////////////////////////////////////////
-	void App3DFramework::LookAt(const Vector3& vEye, const Vector3& vLookAt,
-												const Vector3& vUp)
+	void App3DFramework::LookAt(Vector3 const & vEye, Vector3 const & vLookAt,
+												Vector3 const & vUp)
 	{
 		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		RenderTarget& activeRenderTarget(*(*renderEngine.ActiveRenderTarget()));

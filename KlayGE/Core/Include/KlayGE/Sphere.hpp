@@ -29,34 +29,34 @@ namespace KlayGE
 		Sphere()
 		{
 		}
-		Sphere(const Vector3& center, float radius)
+		Sphere(Vector3 const & center, float radius)
 			: center_(center),
 				radius_(radius)
 		{
 		}
 
 		// 赋值操作符
-		Sphere& operator+=(const Vector3& rhs)
+		Sphere const & operator+=(Vector3 const & rhs)
 		{
 			this->Center() += rhs;
 			return *this;
 		}
-		Sphere& operator-=(const Vector3& rhs)
+		Sphere const & operator-=(Vector3 const & rhs)
 		{
 			this->Center() -= rhs;
 			return *this;
 		}
-		Sphere& operator*=(float rhs)
+		Sphere const & operator*=(float rhs)
 		{
 			this->Radius() *= rhs;
 			return *this;
 		}
-		Sphere& operator/=(float rhs)
+		Sphere const & operator/=(float rhs)
 		{
 			return this->operator*=(1.0f / rhs);
 		}
 
-		Sphere& operator=(const Sphere& rhs)
+		Sphere const & operator=(Sphere const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -67,11 +67,11 @@ namespace KlayGE
 		}
 
 		// 一元操作符
-		const Sphere& operator+() const
+		Sphere const & operator+() const
 		{
 			return *this;
 		}
-		const Sphere& operator-() const
+		Sphere const & operator-() const
 		{
 			return *this;
 		}
@@ -81,7 +81,7 @@ namespace KlayGE
 		{
 			return center_;
 		}
-		const Vector3& Center() const
+		Vector3 const & Center() const
 		{
 			return center_;
 		}
@@ -89,7 +89,7 @@ namespace KlayGE
 		{
 			return radius_;
 		}
-		const float& Radius() const
+		float Radius() const
 		{
 			return radius_;
 		}
@@ -99,7 +99,7 @@ namespace KlayGE
 			return MathLib::Eq(radius_, 0.0f);
 		}
 
-		bool VecInBound(const Vector3& v) const
+		bool VecInBound(Vector3 const & v) const
 		{
 			return MathLib::VecInSphere(*this, v);
 		}
@@ -114,12 +114,12 @@ namespace KlayGE
 	};
 
 	inline bool
-	operator==(const Sphere& lhs, const Sphere& rhs)
+	operator==(Sphere const & lhs, Sphere const & rhs)
 	{
 		return (lhs.Center() == rhs.Center()) && (lhs.Radius() == rhs.Radius());
 	}
 	inline bool
-	operator!=(const Sphere& lhs, const Sphere& rhs)
+	operator!=(Sphere const & lhs, Sphere const & rhs)
 	{
 		return !(lhs == rhs);
 	}

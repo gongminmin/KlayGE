@@ -49,12 +49,12 @@ namespace KlayGE
 		bool exist(size_t id) const
 			{ return (container_.count(id) != 0); }
 
-		const T& data(const_iterator iter) const
+		T const & data(const_iterator iter) const
 			{ return iter->second; }
 		T& data(iterator iter)
 			{ return iter->second; }
 
-		void insert(size_t id, const T& data)
+		void insert(size_t id, T const & data)
 			{ container_.insert(std::pair<size_t, T>(id, data)); }
 
 		size_type erase(size_t id)

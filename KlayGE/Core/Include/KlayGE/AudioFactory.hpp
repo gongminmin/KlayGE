@@ -21,22 +21,22 @@ namespace KlayGE
 		virtual ~AudioFactory()
 			{ }
 
-		virtual const std::wstring& Name() const = 0;
+		virtual std::wstring const & Name() const = 0;
 
 		virtual AudioEngine& AudioEngineInstance() = 0;
-		virtual AudioBufferPtr MakeSoundBuffer(const AudioDataSourcePtr& dataSource, U32 numSource = 1) = 0;
-		virtual AudioBufferPtr MakeMusicBuffer(const AudioDataSourcePtr& dataSource, U32 bufferSeconds = 2) = 0;
+		virtual AudioBufferPtr MakeSoundBuffer(AudioDataSourcePtr const & dataSource, U32 numSource = 1) = 0;
+		virtual AudioBufferPtr MakeMusicBuffer(AudioDataSourcePtr const & dataSource, U32 bufferSeconds = 2) = 0;
 	};
 
 	template <typename AudioEngineType, typename SoundBufferType, typename MusicBufferType>
 	class ConcreteAudioFactory : public AudioFactory
 	{
 	public:
-		ConcreteAudioFactory(const std::wstring& name)
+		ConcreteAudioFactory(std::wstring const & name)
 			: name_(name)
 			{ }
 
-		const std::wstring& Name() const
+		std::wstring const & Name() const
 			{ return name_; }
 
 		AudioEngine& AudioEngineInstance()
@@ -45,20 +45,20 @@ namespace KlayGE
 			return audioEngine;
 		}
 
-		AudioBufferPtr MakeSoundBuffer(const AudioDataSourcePtr& dataSource, U32 numSource = 1)
+		AudioBufferPtr MakeSoundBuffer(AudioDataSourcePtr const & dataSource, U32 numSource = 1)
 		{
 			return AudioBufferPtr(new SoundBufferType(dataSource, numSource,
 				this->AudioEngineInstance().SoundVolume()));
 		}
 
-		AudioBufferPtr MakeMusicBuffer(const AudioDataSourcePtr& dataSource, U32 bufferSeconds = 2)
+		AudioBufferPtr MakeMusicBuffer(AudioDataSourcePtr const & dataSource, U32 bufferSeconds = 2)
 		{
 			return AudioBufferPtr(new MusicBufferType(dataSource, bufferSeconds,
 				this->AudioEngineInstance().MusicVolume()));
 		}
 
 	private:
-		const std::wstring name_;
+		std::wstring const name_;
 	};
 }
 

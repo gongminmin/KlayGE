@@ -34,13 +34,13 @@ namespace KlayGE
 		typedef T					value_type;
 
 		typedef value_type*			pointer;
-		typedef const value_type*	const_pointer;
+		typedef value_type const *	const_pointer;
 
 		typedef value_type&			reference;
-		typedef const value_type&	const_reference;
+		typedef value_type const &	const_reference;
 
 		typedef value_type*			iterator;
-		typedef const value_type*	const_iterator;
+		typedef value_type const *	const_iterator;
 
 		enum { row_num = 4, col_num = 4 };
 		enum { elem_num = row_num * col_num };
@@ -48,7 +48,7 @@ namespace KlayGE
 	public:
 		Matrix4_T()
 			{ }
-		explicit Matrix4_T(const T* rhs)
+		explicit Matrix4_T(T const * rhs)
 		{
 			for (size_t i = 0; i < row_num; ++ i)
 			{
@@ -56,17 +56,17 @@ namespace KlayGE
 				rhs += col_num;
 			}
 		}
-		Matrix4_T(const Matrix4_T& rhs)
+		Matrix4_T(Matrix4_T const & rhs)
 			: m_(rhs.m_)
 			{ }
 		template <typename U>
-		Matrix4_T(const Matrix4_T<U>& rhs)
+		Matrix4_T(Matrix4_T<U> const & rhs)
 			: m_(rhs.m_)
 			{ }
-		Matrix4_T(const T& f11, const T& f12, const T& f13, const T& f14,
-			const T& f21, const T& f22, const T& f23, const T& f24,
-			const T& f31, const T& f32, const T& f33, const T& f34,
-			const T& f41, const T& f42, const T& f43, const T& f44)
+		Matrix4_T(T const & f11, T const & f12, T const & f13, T const & f14,
+			T const & f21, T const & f22, T const & f23, T const & f24,
+			T const & f31, T const & f32, T const & f33, T const & f34,
+			T const & f41, T const & f42, T const & f43, T const & f44)
 		{
 			m_[0][0] = f11;	m_[0][1] = f12;	m_[0][2] = f13;	m_[0][3] = f14;
 			m_[1][0] = f21;	m_[1][1] = f22;	m_[1][2] = f23;	m_[1][3] = f24;
@@ -114,18 +114,18 @@ namespace KlayGE
 		const_reference operator[](size_t index) const
 			{ return *(this->begin() + index); }
 
-		void Row(size_t index, const Vector_T<T, col_num>& rhs)
+		void Row(size_t index, Vector_T<T, col_num> const & rhs)
 			{ m_[index] = rhs; }
-		const Vector_T<T, col_num>& Row(size_t index) const
+		Vector_T<T, col_num> const & Row(size_t index) const
 			{ return m_[index]; }
-		void Col(size_t index, const Vector_T<T, row_num>& rhs)
+		void Col(size_t index, Vector_T<T, row_num> const & rhs)
 		{
 			for (size_t i = 0; i < row_num; ++ i)
 			{
 				m_[i][index] = rhs[i];
 			}
 		}
-		const Vector_T<T, row_num> Col(size_t index) const
+		Vector_T<T, row_num> const Col(size_t index) const
 		{
 			Vector_T<T, row_num> ret;
 			for (size_t i = 0; i < row_num; ++ i)
@@ -137,33 +137,33 @@ namespace KlayGE
 
 		// 赋值操作符
 		template <typename U>
-		Matrix4_T& operator+=(const Matrix4_T<U>& rhs)
+		Matrix4_T const & operator+=(Matrix4_T<U> const & rhs)
 		{
 			m_ += rhs.m_;
 			return *this;
 		}
 		template <typename U>
-		Matrix4_T& operator-=(const Matrix4_T<U>& rhs)
+		Matrix4_T const & operator-=(Matrix4_T<U> const & rhs)
 		{
 			m_ -= rhs.m_;
 			return *this;
 		}
 		template <typename U>
-		Matrix4_T& operator*=(const Matrix4_T<U>& rhs)
+		Matrix4_T const & operator*=(Matrix4_T<U> const & rhs)
 		{
 			return MathLib::Multiply(*this, *this, rhs);
 		}
 		template <typename U>
-		Matrix4_T& operator*=(const U& rhs)
+		Matrix4_T const & operator*=(U const & rhs)
 		{
 			m_ *= rhs;
 			return *this;
 		}
 		template <typename U>
-		Matrix4_T& operator/=(const U& rhs)
+		Matrix4_T const & operator/=(U const & rhs)
 			{ return this->operator*=(1.0f / rhs); }
 
-		Matrix4_T& operator=(const Matrix4_T& rhs)
+		Matrix4_T const & operator=(Matrix4_T const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -172,7 +172,7 @@ namespace KlayGE
 			return *this;
 		}
 		template <typename U>
-		Matrix4_T& operator=(const Matrix4_T<U>& rhs)
+		Matrix4_T const & operator=(Matrix4_T<U> const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -182,9 +182,9 @@ namespace KlayGE
 		}
 
 		// 一元操作符
-		const Matrix4_T operator+() const
+		Matrix4_T const operator+() const
 			{ return *this; }
-		const Matrix4_T operator-() const
+		Matrix4_T const operator-() const
 		{
 			Matrix4_T temp(*this);
 			temp.m_ = -m_;
@@ -192,7 +192,7 @@ namespace KlayGE
 		}
 
 		friend bool
-		operator==(const Matrix4_T& lhs, const Matrix4_T& rhs)
+		operator==(Matrix4_T const & lhs, Matrix4_T const & rhs)
 		{
 			return lhs.m_ == rhs.m_;
 		}
@@ -202,15 +202,15 @@ namespace KlayGE
 	};
 
 	template <typename T>
-	inline const Matrix4_T<T>
-	operator*(const Matrix4_T<T>& lhs, const Matrix4_T<T>& rhs)
+	inline Matrix4_T<T> const
+	operator*(Matrix4_T<T> const & lhs, Matrix4_T<T> const & rhs)
 	{
 		return Matrix4_T<T>(lhs) *= rhs;
 	}
 
 	template <typename T>
 	inline bool
-	operator!=(const Matrix4_T<T>& lhs, const Matrix4_T<T>& rhs)
+	operator!=(Matrix4_T<T> const & lhs, Matrix4_T<T> const & rhs)
 	{
 		return !(lhs == rhs);
 	}

@@ -28,7 +28,7 @@ namespace KlayGE
 {
 	// 向模块声明中添加一个方法
 	/////////////////////////////////////////////////////////////////////////////////
-	void RegisterModule::AddMethod(const std::string& methodName, PyCallback method)
+	void RegisterModule::AddMethod(std::string const & methodName, PyCallback method)
 	{
 		methodNames_.push_back(methodName);
 
@@ -59,7 +59,7 @@ namespace KlayGE
 	}
 
 	// 从字符串运行脚本
-	void ScriptEngine::ExecString(const std::string& script)
+	void ScriptEngine::ExecString(std::string const & script)
 	{
 		PyRun_SimpleString(script.c_str());
 	}

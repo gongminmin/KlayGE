@@ -245,7 +245,7 @@ namespace KlayGE
 	class InputActionMap
 	{
 	public:
-		void AddAction(const InputAction& inputAction);
+		void AddAction(InputAction const & inputAction);
 
 		template <typename ForwardIterator>
 		void AddActions(ForwardIterator first, ForwardIterator last)
@@ -273,14 +273,14 @@ namespace KlayGE
 	public:
 		virtual ~InputEngine();
 
-		virtual const std::wstring& Name() const = 0;
+		virtual std::wstring const & Name() const = 0;
 
 		virtual void EnumDevices() = 0;
 		void UnacquireDevices();
 
 		InputActionsType Update();
 
-		void ActionMap(const InputActionMap& actionMap, bool reenumerate = false);
+		void ActionMap(InputActionMap const & actionMap, bool reenumerate = false);
 
 		size_t NumDevice() const;
 		InputDevicePtr Device(size_t index) const;
@@ -297,16 +297,16 @@ namespace KlayGE
 	public:
 		virtual ~InputDevice();
 
-		virtual const std::wstring& Name() const = 0;
+		virtual std::wstring const & Name() const = 0;
 
 		virtual InputActionsType Update() = 0;
-		void ActionMap(const InputActionMap& iaf);
+		void ActionMap(InputActionMap const & iaf);
 
 		virtual void Acquire() = 0;
 		virtual void Unacquire() = 0;
 
 	protected:
-		virtual void DoActionMap(const InputActionMap& actionMap) = 0;
+		virtual void DoActionMap(InputActionMap const & actionMap) = 0;
 
 	protected:
 		InputActionMap actionMap_;
@@ -321,7 +321,7 @@ namespace KlayGE
 	protected:
 		virtual void UpdateKeys() = 0;
 
-		void DoActionMap(const InputActionMap& actionMap);
+		void DoActionMap(InputActionMap const & actionMap);
 
 	protected:
 		typedef boost::array<bool, 256> KeysType;
@@ -344,7 +344,7 @@ namespace KlayGE
 	protected:
 		virtual void UpdateKeys() = 0;
 
-		void DoActionMap(const InputActionMap& actionMap);
+		void DoActionMap(InputActionMap const & actionMap);
 
 	protected:
 		Vector_T<long, 3> pos_;
@@ -372,7 +372,7 @@ namespace KlayGE
 	protected:
 		virtual void UpdateKeys() = 0;
 
-		void DoActionMap(const InputActionMap& actionMap);
+		void DoActionMap(InputActionMap const & actionMap);
 
 	protected:
 		Vector_T<long, 3> pos_;		// x, y, z axis position
