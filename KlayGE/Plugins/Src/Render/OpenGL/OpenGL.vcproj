@@ -52,8 +52,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\..\lib"
-			IntermediateDirectory="..\..\..\Release"
+			OutputDirectory="..\..\..\..\lib"
+			IntermediateDirectory="..\..\..\..\Release"
 			ConfigurationType="4"
 			CharacterSet="1">
 			<Tool
