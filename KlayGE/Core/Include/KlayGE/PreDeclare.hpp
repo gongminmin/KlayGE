@@ -9,8 +9,6 @@ namespace KlayGE
 	template <typename T>
 	class COMPtr;
 	template <typename T>
-	class alloc;
-	template <typename T>
 	class bintree;
 	template <typename T>
 	class tree;

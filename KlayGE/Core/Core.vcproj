@@ -268,9 +268,6 @@
 				Name="Í·ÎÄ¼þ"
 				Filter="">
 				<File
-					RelativePath="Include\KlayGE\alloc.hpp">
-				</File>
-				<File
 					RelativePath=".\Include\KlayGE\Config.hpp">
 				</File>
 				<File

@@ -1,8 +1,11 @@
 // SetVector.hpp
 // KlayGE 集合向量容器模板 头文件
-// Ver 2.0.2
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://enginedev.home.g365.net
+// Ver 2.2.0
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.2.0
+// 默认分配器改用boost的 (2004.10.30)
 //
 // 2.0.2
 // 初次建立 (2003.12.15)
@@ -13,16 +16,25 @@
 #ifndef _SETVECTOR_HPP
 #define _SETVECTOR_HPP
 
-#include <KlayGE/alloc.hpp>
-
 #include <algorithm>
 #include <functional>
 #include <utility>
 #include <vector>
 
+// boost 1.31.0的pool/detail/mutex有bug，这里用这种方法避免了
+// 新版本boost会解决
+#ifdef _WIN32
+#ifndef __WIN32__
+#define __WIN32__
+#pragma warning(disable : 4800)
+#include <boost/pool/pool_alloc.hpp>
+#endif
+#endif
+
 namespace KlayGE
 {
-	template <typename Key, class Traits = std::less<Key>, class Allocator = alloc<Key> >
+	template <typename Key, class Traits = std::less<Key>,
+				class Allocator = boost::fast_pool_allocator<Key> >
 	class SetVector
 	{
 		typedef std::vector<Key, Allocator> ContainerType;

@@ -15,11 +15,14 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
-#include <AL/al.h>
-#include <AL/alc.h>
+#include <al.h>
+#include <alc.h>
 
 #include <vector>
 #include <windows.h>
+
+#pragma warning(disable : 4251)
+#pragma warning(disable : 4275)
 
 #include <boost/utility.hpp>
 #include <boost/smart_ptr.hpp>

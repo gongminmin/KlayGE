@@ -18,8 +18,13 @@
 
 #include <list>
 #include <vector>
+
+#pragma warning(disable : 4251)
+#pragma warning(disable : 4275)
+
 #include <boost/smart_ptr.hpp>
 #include <boost/thread/thread.hpp>
+
 #include <KlayGE/Socket.hpp>
 
 #pragma comment(lib, "KlayGE_Core.lib")

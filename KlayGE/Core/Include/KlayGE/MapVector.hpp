@@ -1,8 +1,11 @@
 // MapVector.hpp
 // KlayGE 关联向量容器模板 头文件
-// Ver 2.0.2
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://enginedev.home.g365.net
+// Ver 2.2.0
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.2.0
+// 默认分配器改用boost的 (2004.10.30)
 //
 // 2.0.2
 // 初次建立 (2003.12.11)
@@ -10,21 +13,29 @@
 // 修改记录
 /////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _ASSOCVECTOR_HPP
-#define _ASSOCVECTOR_HPP
-
-#include <KlayGE/alloc.hpp>
+#ifndef _MAPVECTOR_HPP
+#define _MAPVECTOR_HPP
 
 #include <algorithm>
 #include <functional>
 #include <utility>
 #include <vector>
 
+// boost 1.31.0的pool/detail/mutex有bug，这里用这种方法避免了
+// 新版本boost会解决
+#ifdef _WIN32
+#ifndef __WIN32__
+#define __WIN32__
+#pragma warning(disable : 4800)
+#include <boost/pool/pool_alloc.hpp>
+#endif
+#endif
+
 namespace KlayGE
 {
 	template <typename Key, typename Type, 
 				class Traits = std::less<Key>, 
-				class Allocator = alloc<std::pair<Key, Type> > >
+				class Allocator = boost::fast_pool_allocator<std::pair<Key, Type> > >
 	class MapVector
 	{
 		typedef std::vector<std::pair<Key, Type>, Allocator>	ContainerType;
@@ -199,7 +210,7 @@ namespace KlayGE
 			if (where != this->end() && compare_(*pos, val) &&
 				(where == this->end() - 1 ||
 					!compare_(val, where[1]) &&
-					compare_(where[1], val)))
+						compare_(where[1], val)))
 			{
 				return container_.insert(where, val);
 			}
@@ -298,4 +309,4 @@ namespace KlayGE
 	}
 }
 
-#endif			// _ASSOCVECTOR_HPP
+#endif			// _MAPVECTOR_HPP

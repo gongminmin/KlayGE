@@ -68,10 +68,10 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	OALAudioEngine::OALAudioEngine()
 	{
-		ALCdevice* Device(alcOpenDevice(NULL));
-		ALvoid* Context(alcCreateContext(Device, 0));
+		ALCdevice* device(alcOpenDevice(NULL));
+		ALCcontext* context(alcCreateContext(device, 0));
 
-		alcMakeContextCurrent(Context);
+		alcMakeContextCurrent(context);
 
 		this->SetListenerPos(Vector3(0, 0, 0));
 		this->SetListenerVel(Vector3(0, 0, 0));
@@ -89,8 +89,8 @@ namespace KlayGE
 	{
 		audioBufs_.clear();
 
-		ALvoid* context(alcGetCurrentContext());
-		ALCdevice* device(alcGetContextsDevice(static_cast<ALCcontext*>(context)));
+		ALCcontext* context(alcGetCurrentContext());
+		ALCdevice* device(alcGetContextsDevice(context));
 
 		alcMakeContextCurrent(0);
 

@@ -16,7 +16,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/MapVector.hpp>
-#include <KlayGE/alloc.hpp>
 
 #include <cassert>
 #include <vector>
