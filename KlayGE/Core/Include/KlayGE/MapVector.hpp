@@ -207,10 +207,10 @@ namespace KlayGE
 		}
 		iterator insert(iterator where, value_type const & val)
 		{
-			if (where != this->end() && compare_(*pos, val) &&
-				(where == this->end() - 1 ||
-					!compare_(val, where[1]) &&
-						compare_(where[1], val)))
+			if (where != this->end() && compare_(*pos, val)
+				&& (where == this->end() - 1
+					|| (!compare_(val, where + 1)
+						&& compare_(where + 1, val))))
 			{
 				return container_.insert(where, val);
 			}

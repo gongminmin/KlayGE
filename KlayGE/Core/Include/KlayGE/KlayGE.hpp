@@ -24,6 +24,7 @@
 #define KLAYGE_RELEASE		0
 #define KLAYGE_VER_STR		"KlayGE 2.2.0"
 
+#include <KlayGE/Config.hpp>
 #include <KlayGE/Types.hpp>
 
 #endif		// _KLAYGE_HPP

@@ -280,9 +280,6 @@
 					RelativePath=".\Include\KlayGE\MapVector.hpp">
 				</File>
 				<File
-					RelativePath=".\Include\KlayGE\MetaManip.hpp">
-				</File>
-				<File
 					RelativePath=".\Include\KlayGE\PreDeclare.hpp">
 				</File>
 				<File

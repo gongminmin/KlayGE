@@ -127,7 +127,7 @@ namespace KlayGE
 		iterator find(Key const & key)
 		{
 			iterator iter(this->lower_bound(key));
-			if (iter != this->end() && compare_(key, iter->first))
+			if (iter != this->end() && compare_(key, *iter))
 			{
 				iter = end();
 			}
@@ -136,7 +136,7 @@ namespace KlayGE
 		const_iterator find(Key const & key) const
 		{
 			const_iterator iter(this->lower_bound(key));
-			if (iter != this->end() && compare_(key, iter->first))
+			if (iter != this->end() && compare_(key, *iter))
 			{
 				iter = end();
 			}
@@ -151,9 +151,9 @@ namespace KlayGE
 		std::pair<iterator, bool> insert(value_type const & val)
 		{
 			bool found(true);
-			iterator iter(this->lower_bound(val.first));
+			iterator iter(this->lower_bound(val));
 
-			if ((iter == end()) || compare_(val.first, iter->first))
+			if ((iter == end()) || compare_(val, *iter))
 			{
 				iter = container_.insert(iter, val);
 				found = false;
@@ -162,14 +162,14 @@ namespace KlayGE
 		}
 		iterator insert(iterator where, value_type const & val)
 		{
-			if (where != this->end() && compare_(*pos, val) &&
-				(where == this->end() - 1 ||
-					!compare_(val, where[1]) &&
-					compare_(where[1], val)))
+			if (where != this->end() && compare_(*pos, val)
+				&& (where == this->end() - 1
+					|| (!compare_(val, where + 1)
+						&& compare_(where + 1, val))))
 			{
 				return container_.insert(where, val);
 			}
-			return this->insert(val).first;
+			return this->insert(val)->first;
 		}
 		template<class InputIterator>
 		void insert(InputIterator first, InputIterator last)
