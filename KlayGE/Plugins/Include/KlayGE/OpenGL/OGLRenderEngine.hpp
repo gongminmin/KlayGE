@@ -39,13 +39,6 @@ namespace KlayGE
 		void SetLight(U32 index, const Light& lt);
 		void LightEnable(U32 index, bool enable);
 
-		Matrix4 WorldMatrix() const;
-		void WorldMatrix(const Matrix4& mat);
-		Matrix4 ViewMatrix();
-		void ViewMatrix(const Matrix4& mat);
-		Matrix4 ProjectionMatrix();
-		void ProjectionMatrix(const Matrix4& mat);
-
 		void ActiveRenderTarget(RenderTargetListIterator iter);
 
 		void StartRendering();
@@ -92,11 +85,12 @@ namespace KlayGE
 		void StencilBufferPassOperation(StencilOperation op);
 
 	private:
-		CullMode cullingMode_;
+		void DoWorldMatrix(const Matrix4& mat);
+		void DoViewMatrix(const Matrix4& mat);
+		void DoProjectionMatrix(const Matrix4& mat);
 
-		Matrix4 worldMat_;
-		Matrix4 viewMat_;
-		Matrix4 projMat_;
+	private:
+		CullMode cullingMode_;
 	};
 
 	typedef SharedPtr<OGLRenderEngine> OGLRenderEnginePtr;

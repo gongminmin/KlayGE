@@ -216,10 +216,7 @@ namespace KlayGE
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	OGLRenderEngine::OGLRenderEngine()
-		: cullingMode_(RenderEngine::Cull_None),
-			worldMat_(Matrix4::Identity()),
-			viewMat_(Matrix4::Identity()),
-			projMat_(Matrix4::Identity())
+		: cullingMode_(RenderEngine::Cull_None)
 	{
 	}
 
@@ -450,19 +447,10 @@ namespace KlayGE
 		}
 	}
 
-	// 获取世界矩阵
+	// 实现设置世界矩阵
 	/////////////////////////////////////////////////////////////////////////////////
-	Matrix4 OGLRenderEngine::WorldMatrix() const
+	void OGLRenderEngine::DoWorldMatrix(const Matrix4& mat)
 	{
-		return worldMat_;
-	}
-
-	// 设置世界矩阵
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::WorldMatrix(const Matrix4& mat)
-	{
-		worldMat_ = mat;
-
 		glMatrixMode(GL_MODELVIEW);
 
 		Matrix4 oglWorldMat(worldMat_);
@@ -477,21 +465,12 @@ namespace KlayGE
 
 		Matrix4 oglMat(oglWorldMat * oglViewMat);
 		glLoadMatrixf(&oglMat(0, 0));
-	}
-
-	// 获取观察矩阵
-	/////////////////////////////////////////////////////////////////////////////////
-	Matrix4 OGLRenderEngine::ViewMatrix()
-	{
-		return viewMat_;
 	}
 
 	// 设置观察矩阵
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::ViewMatrix(const Matrix4& mat)
+	void OGLRenderEngine::DoViewMatrix(const Matrix4& mat)
 	{
-		viewMat_ = mat;
-
 		glMatrixMode(GL_MODELVIEW);
 
 		Matrix4 oglWorldMat(worldMat_);
@@ -508,19 +487,10 @@ namespace KlayGE
 		glLoadMatrixf(&oglMat(0, 0));
 	}
 
-	// 获取投射矩阵
+	// 实现设置投射矩阵
 	/////////////////////////////////////////////////////////////////////////////////
-	Matrix4 OGLRenderEngine::ProjectionMatrix()
+	void OGLRenderEngine::DoProjectionMatrix(const Matrix4& mat)
 	{
-		return projMat_;
-	}
-
-	// 设置投射矩阵
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::ProjectionMatrix(const Matrix4& mat)
-	{
-		projMat_ = mat;
-
 		Matrix4 oglMat;
 		Engine::MathInstance().LHToRH(oglMat, mat);
 

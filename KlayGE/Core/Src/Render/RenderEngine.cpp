@@ -30,7 +30,10 @@ namespace KlayGE
 {
 	RenderEngine::RenderEngine()
 		: renderEffect_(NullRenderEffectInstance()),
-			renderPasses_(1)
+			renderPasses_(1),
+			worldMat_(Matrix4::Identity()),
+			viewMat_(Matrix4::Identity()),
+			projMat_(Matrix4::Identity())
 	{
 	}
 
@@ -100,5 +103,38 @@ namespace KlayGE
 	{
 		// TODO: implement vertex blending support in DX8 & possibly GL_ARB_VERTEX_BLEND (in subclasses)
 		return 1;
+	}
+
+	Matrix4 RenderEngine::WorldMatrix() const
+	{
+		return worldMat_;
+	}
+
+	void RenderEngine::WorldMatrix(const Matrix4& mat)
+	{
+		worldMat_ = mat;
+		this->DoWorldMatrix(mat);
+	}
+
+	Matrix4 RenderEngine::ViewMatrix()
+	{
+		return viewMat_;
+	}
+
+	void RenderEngine::ViewMatrix(const Matrix4& mat)
+	{
+		viewMat_ = mat;
+		this->DoViewMatrix(mat);
+	}
+
+	Matrix4 RenderEngine::ProjectionMatrix()
+	{
+		return projMat_;
+	}
+
+	void RenderEngine::ProjectionMatrix(const Matrix4& mat)
+	{
+		projMat_ = mat;
+		this->DoProjectionMatrix(mat);
 	}
 }

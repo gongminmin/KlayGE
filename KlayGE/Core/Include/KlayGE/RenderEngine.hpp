@@ -166,12 +166,12 @@ namespace KlayGE
 		virtual void SetLight(U32 index, const Light& lt) = 0;
 		virtual void LightEnable(U32 index, bool enable) = 0;
 
-		virtual Matrix4 WorldMatrix() const = 0;
-		virtual void WorldMatrix(const Matrix4& mat) = 0;
-		virtual Matrix4 ViewMatrix() = 0;
-		virtual void ViewMatrix(const Matrix4 &m) = 0;
-		virtual Matrix4 ProjectionMatrix() = 0;
-		virtual void ProjectionMatrix(const Matrix4 &m) = 0;
+		Matrix4 WorldMatrix() const;
+		void WorldMatrix(const Matrix4& mat);
+		Matrix4 ViewMatrix();
+		void ViewMatrix(const Matrix4& mat);
+		Matrix4 ProjectionMatrix();
+		void ProjectionMatrix(const Matrix4& mat);
 
 		virtual void DepthBufferDepthTest(bool depthTest) = 0;
 		virtual void DepthBufferDepthWrite(bool depthWrite) = 0;
@@ -241,11 +241,18 @@ namespace KlayGE
 		virtual void StencilBufferPassOperation(StencilOperation op) = 0;
 
 	protected:
+		virtual void DoWorldMatrix(const Matrix4& mat) = 0;
+		virtual void DoViewMatrix(const Matrix4& mat) = 0;
+		virtual void DoProjectionMatrix(const Matrix4& mat) = 0;
+
+	protected:
 		RenderTargetList renderTargetList_;
 		RenderTargetListIterator activeRenderTarget_;
 
 		RenderEffectPtr renderEffect_;
 		UINT renderPasses_;
+
+		Matrix4 worldMat_, viewMat_, projMat_;
 	};
 }
 

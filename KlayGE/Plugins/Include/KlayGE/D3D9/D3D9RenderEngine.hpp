@@ -52,13 +52,6 @@ namespace KlayGE
 		void SetLight(U32 index, const Light& lt);
 		void LightEnable(U32 index, bool enable);
 
-		Matrix4 WorldMatrix() const;
-		void WorldMatrix(const Matrix4& mat);
-		Matrix4 ViewMatrix();
-		void ViewMatrix(const Matrix4& mat);
-		Matrix4 ProjectionMatrix();
-		void ProjectionMatrix(const Matrix4& mat);
-
 		void ActiveRenderTarget(RenderTargetListIterator iter);
 
 		void StartRendering();
@@ -103,6 +96,11 @@ namespace KlayGE
 		void StencilBufferFailOperation(StencilOperation op);
 		void StencilBufferDepthFailOperation(StencilOperation op);
 		void StencilBufferPassOperation(StencilOperation op);
+
+	private:
+		void DoWorldMatrix(const Matrix4& mat);
+		void DoViewMatrix(const Matrix4& mat);
+		void DoProjectionMatrix(const Matrix4& mat);
 
 	private:
 		const D3D9AdapterList& D3DAdapters() const;

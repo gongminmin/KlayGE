@@ -481,57 +481,25 @@ namespace KlayGE
 		TIF(d3dDevice_->LightEnable(index, enabled));
 	}
 
-	// 获取世界矩阵
+	// 实现设置世界矩阵
 	/////////////////////////////////////////////////////////////////////////////////
-	Matrix4 D3D9RenderEngine::WorldMatrix() const
-	{
-		D3DMATRIX d3dmat;
-		TIF(d3dDevice_->GetTransform(D3DTS_WORLD, &d3dmat));
-
-		return Convert(d3dmat);
-	}
-
-	// 设置世界矩阵
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::WorldMatrix(const Matrix4& mat)
+	void D3D9RenderEngine::DoWorldMatrix(const Matrix4& mat)
 	{
 		D3DMATRIX d3dmat(Convert(mat));
-
 		TIF(d3dDevice_->SetTransform(D3DTS_WORLD, &d3dmat));
 	}
 
-	// 获取观察矩阵
+	// 实现设置观察矩阵
 	/////////////////////////////////////////////////////////////////////////////////
-	Matrix4 D3D9RenderEngine::ViewMatrix()
-	{
-		D3DMATRIX d3dmat;
-		TIF(d3dDevice_->GetTransform(D3DTS_VIEW, &d3dmat));
-
-		return Convert(d3dmat);
-	}
-
-	// 设置观察矩阵
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::ViewMatrix(const Matrix4& mat)
+	void D3D9RenderEngine::DoViewMatrix(const Matrix4& mat)
 	{
 		D3DMATRIX d3dMat(Convert(mat));
-
 		TIF(d3dDevice_->SetTransform(D3DTS_VIEW, &d3dMat));
 	}
 
-	// 获取投射矩阵
+	// 实现设置投射矩阵
 	/////////////////////////////////////////////////////////////////////////////////
-	Matrix4 D3D9RenderEngine::ProjectionMatrix()
-	{
-		D3DMATRIX d3dmat;
-		TIF(d3dDevice_->GetTransform(D3DTS_PROJECTION, &d3dmat));
-
-		return Convert(d3dmat);
-	}
-
-	// 设置投射矩阵
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::ProjectionMatrix(const Matrix4& mat)
+	void D3D9RenderEngine::DoProjectionMatrix(const Matrix4& mat)
 	{
 		D3DMATRIX d3dMat(Convert(mat));
 
