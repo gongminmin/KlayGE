@@ -1,8 +1,11 @@
 // RenderEngine.hpp
 // KlayGE 渲染引擎类 实现文件
-// Ver 2.0.3
+// Ver 2.0.4
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.0.4
+// 去掉了WorldMatrices (2004.4.3)
 //
 // 2.0.3
 // 去掉了SoftwareBlend (2004.3.10)
@@ -165,8 +168,6 @@ namespace KlayGE
 
 		virtual Matrix4 WorldMatrix() const = 0;
 		virtual void WorldMatrix(const Matrix4& mat) = 0;
-		// Sets multiple world matrices (vertex blending)
-		virtual void WorldMatrices(Matrix4* mats, size_t count) = 0;
 		virtual Matrix4 ViewMatrix() = 0;
 		virtual void ViewMatrix(const Matrix4 &m) = 0;
 		virtual Matrix4 ProjectionMatrix() = 0;

@@ -1,8 +1,11 @@
 // D3D9RenderEngine.cpp
 // KlayGE D3D9渲染引擎类 实现文件
-// Ver 2.0.3
+// Ver 2.0.4
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.0.4
+// 去掉了WorldMatrices (2004.4.3)
 //
 // 2.0.3
 // 优化了Render (2004.2.22)
@@ -495,18 +498,6 @@ namespace KlayGE
 		D3DMATRIX d3dmat(Convert(mat));
 
 		TIF(d3dDevice_->SetTransform(D3DTS_WORLD, &d3dmat));
-	}
-
-	// 设置多个世界矩阵
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::WorldMatrices(Matrix4* mats, size_t count)
-	{
-		for (size_t i = 0; i < count; ++ i)
-		{
-			D3DMATRIX d3dmat(Convert(mats[i]));
-
-			TIF(d3dDevice_->SetTransform(D3DTS_WORLDMATRIX(i), &d3dmat));
-		}
 	}
 
 	// 获取观察矩阵

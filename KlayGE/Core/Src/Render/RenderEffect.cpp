@@ -102,18 +102,38 @@ namespace KlayGE
 
 	RenderEffectPtr LoadRenderEffect(const WString& effectName, bool fromPack)
 	{
-		DiskFile file;
-
-		if (!file.Open(effectName, VFile::OM_Read))
+		VFilePtr file;
+		if (fromPack)
 		{
-			if (!file.Open(WString(_RENDERFXPATH_) + effectName, VFile::OM_Read))
+			SharedPtr<PackedFile> packedFile(new PackedFile);
+
+			if (!packedFile->Open(effectName))
 			{
-				return NullRenderEffectInstance();
+				if (!packedFile->Open(WString(_RENDERFXPATH_) + effectName))
+				{
+					return NullRenderEffectInstance();
+				}
 			}
+
+			file = packedFile;
+		}
+		else
+		{
+			SharedPtr<DiskFile> diskFile(new DiskFile);
+
+			if (!diskFile->Open(effectName, VFile::OM_Read))
+			{
+				if (!diskFile->Open(WString(_RENDERFXPATH_) + effectName, VFile::OM_Read))
+				{
+					return NullRenderEffectInstance();
+				}
+			}
+
+			file = diskFile;
 		}
 
-		std::vector<char, alloc<char> > data(file.Length());
-		file.Read(&data[0], data.size());
+		std::vector<char, alloc<char> > data(file->Length());
+		file->Read(&data[0], data.size());
 
 		return Engine::RenderFactoryInstance().MakeRenderEffect(String(&data[0], data.size()));
 	}

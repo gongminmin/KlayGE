@@ -27,10 +27,10 @@ namespace KlayGE
 	{
 	public:
 		PackedFile();
-		PackedFile(const VFile& pktFile, const WString& fileName);
+		PackedFile(const WString& pathName);
 		PackedFile(const PackedFile& rhs);
 
-		void Open(const WString& fileName);
+		bool Open(const WString& pathName);
 		void Close();
 
 		VFilePtr Clone() const;

@@ -25,11 +25,9 @@ namespace KlayGE
 	{
 	}
 
-	PackedFile::PackedFile(const VFile& pktFile, const WString& fileName)
-				: pktFile_(pktFile.Clone())
+	PackedFile::PackedFile(const WString& pathName)
 	{
-		unPkt_.Open(*pktFile_);
-		this->Open(fileName);
+		this->Open(pathName);
 	}
 
 	PackedFile::PackedFile(const PackedFile& rhs)
@@ -39,18 +37,43 @@ namespace KlayGE
 		unPkt_.Open(*pktFile_);
 	}
 
-	void PackedFile::Open(const WString& fileName)
+	bool PackedFile::Open(const WString& pathName)
 	{
-		this->Close();
+		const WString::size_type offset(pathName.rfind(L".pkt/"));
+		const WString pktName(pathName.substr(0, offset + 4));
+		const WString fileName(pathName.substr(offset + 5));
 
-		unPkt_.LocateFile(fileName);
+		SharedPtr<DiskFile> pktFile(new DiskFile);
+		if (!pktFile->Open(pktName, VFile::OM_Read))
+		{
+			return false;
+		}
+		else
+		{
+			pktFile_ = pktFile;
+		}
 
-		file_ = VFilePtr(new MemFile(NULL, unPkt_.CurFileSize()));
+		try
+		{
+			unPkt_.Open(*pktFile_);
 
-		std::vector<U8> data(unPkt_.CurFileSize());
-		unPkt_.ReadCurFile(&data[0]);
-		file_->Write(&data[0], data.size());
-		file_->Rewind();
+			this->Close();
+
+			unPkt_.LocateFile(fileName);
+
+			file_ = VFilePtr(new MemFile(NULL, unPkt_.CurFileSize()));
+
+			std::vector<U8> data(unPkt_.CurFileSize());
+			unPkt_.ReadCurFile(&data[0]);
+			file_->Write(&data[0], data.size());
+			file_->Rewind();
+		}
+		catch (...)
+		{
+			return false;
+		}
+
+		return true;
 	}
 
 	void PackedFile::Close()

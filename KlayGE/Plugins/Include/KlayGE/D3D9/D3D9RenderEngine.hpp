@@ -51,7 +51,6 @@ namespace KlayGE
 
 		Matrix4 WorldMatrix() const;
 		void WorldMatrix(const Matrix4& mat);
-		void WorldMatrices(Matrix4* mats, size_t count);
 		Matrix4 ViewMatrix();
 		void ViewMatrix(const Matrix4& mat);
 		Matrix4 ProjectionMatrix();
