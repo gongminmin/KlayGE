@@ -34,27 +34,19 @@ namespace KlayGE
 	{
 		frustum_.CalculateFrustum(camera.ViewMatrix() * camera.ProjMatrix());
 
-#ifdef KLAYGE_DEBUG
-		std::vector<RenderablePtr> renderBoxes;
-#endif
-
 		std::set<RenderablePtr> renderables;
 		for (linear_octree_t::iterator iter = linear_octree_.begin(); iter != linear_octree_.end(); ++ iter)
 		{
 			Box box = this->AreaBox(iter->first);
 
-			for (size_t i = 0; i < 8; ++ i)
+			if (frustum_.Visiable(box, Matrix4::Identity()))
 			{
-				if (frustum_.Visiable(box[i]))
-				{
-					renderables.insert(iter->second);
-					break;
-				}
-			}
+				renderables.insert(iter->second);
 
-#ifdef KLAYGE_DEBUG
-			renderBoxes.push_back(RenderablePtr(new RenderableBox(box)));
-#endif
+//#ifdef KLAYGE_DEBUG
+				renderables.insert(RenderablePtr(new RenderableBox(box)));
+//#endif
+			}
 		}
 
 		renderQueue_.clear();
@@ -64,14 +56,6 @@ namespace KlayGE
 		{
 			SceneManager::PushRenderable(*iter);
 		}
-
-#ifdef KLAYGE_DEBUG
-		for (std::vector<RenderablePtr>::iterator iter = renderBoxes.begin();
-			iter != renderBoxes.end(); ++ iter)
-		{
-			SceneManager::PushRenderable(*iter);
-		}
-#endif
 
 		for (std::set<RenderablePtr>::iterator iter = renderables.begin();
 			iter != renderables.end(); ++ iter)
@@ -91,34 +75,7 @@ namespace KlayGE
 		}
 		else
 		{
-			std::vector<tree_id_t> ids;
-			ids.push_back("0");
-			for (linear_octree_t::iterator iter = linear_octree_.begin(); iter != linear_octree_.end(); ++ iter)
-			{
-				if (iter->first.length() >= ids[0].length())
-				{
-					if (iter->first.length() > ids[0].length())
-					{
-						ids.clear();
-					}
-
-					ids.push_back(iter->first);
-				}
-			}
-
-			for (std::vector<tree_id_t>::iterator iter = ids.begin(); iter != ids.end(); ++ iter)
-			{
-				for (int i = 0; i < 8; ++ i)
-				{
-					tree_id_t child_id = this->Child(*iter, i);
-					if (this->InsideChild(child_id, renderable))
-					{
-						assert(!linear_octree_[child_id]);
-
-						linear_octree_[child_id] = renderable;
-					}
-				}
-			}
+			this->InsertRenderable("0", renderable);
 		}
 	}
 
@@ -192,7 +149,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	bool OCTree::InsideChild(tree_id_t const & id, RenderablePtr renderable)
+	bool OCTree::InsideChild(tree_id_t const & id, RenderablePtr const & renderable)
 	{
 		Box area_box = this->AreaBox(id);
 		Box const & box(renderable->GetBound());
@@ -207,5 +164,34 @@ namespace KlayGE
 			}
 		}
 		return false;
+	}
+
+	void OCTree::InsertRenderable(tree_id_t const & id, RenderablePtr const & renderable)
+	{
+		assert(this->InsideChild(id, renderable));
+
+		if (linear_octree_.find(id) == linear_octree_.end())
+		{
+			linear_octree_[id] = renderable;
+		}
+		else
+		{
+			RenderablePtr old_renderable = linear_octree_[id];
+
+			for (int i = 0; i < 8; ++ i)
+			{
+				tree_id_t const child_id = this->Child(id, i);
+
+				if (this->InsideChild(child_id, old_renderable))
+				{
+					this->InsertRenderable(child_id, old_renderable);
+				}
+
+				if (this->InsideChild(child_id, renderable))
+				{
+					this->InsertRenderable(child_id, renderable);
+				}
+			}
+		}
 	}
 }

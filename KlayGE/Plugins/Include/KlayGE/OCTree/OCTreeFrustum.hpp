@@ -28,13 +28,15 @@ namespace KlayGE
 	{
 	public:
 		void CalculateFrustum(Matrix4 const & clip);
+		bool Visiable(Box const & box, Matrix4 const & model) const;
 		bool Visiable(Vector3 const & v) const;
 
 	private:
-		typedef boost::array<Plane, 6> PlanesType;
-		PlanesType planes_;
+		typedef boost::array<Plane, 6> planes_t;
+		planes_t planes_;
 
-		boost::array<int, 6> vertexLUT_;
+		typedef std::pair<Vector3, Vector3> line_t;
+		boost::array<line_t, 4> frustumLines_;
 	};
 }
 

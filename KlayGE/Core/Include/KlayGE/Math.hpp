@@ -1462,7 +1462,7 @@ namespace KlayGE
 		FromPoints(Plane_T<T>& out, Vector_T<T, 3> const & v0, Vector_T<T, 3> const & v1, Vector_T<T, 3> const & v2)
 		{
 			Vector_T<T, 3> vec;
-			Cross(vec, v1 - v0, v1 - v2);
+			Cross(vec, v1 - v0, v2 - v0);
 			Normalize(vec, vec);
 			return FromPointNormal(out, v0, vec);
 		}
@@ -1478,44 +1478,22 @@ namespace KlayGE
 			return out;
 		}
 		
-		// 求直线和平面的交点，直线orig + t * dir，t的取值范围[0, 1]
+		// 求直线和平面的交点，直线orig + t * dir
 		template <typename T>
-		inline bool
+		inline T
 		IntersectLine(Vector_T<T, 3>& out, Plane_T<T> const & p,
 			Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir)
 		{
-			Vector_T<T, 3> vP(Vector_T<T, 3>::Zero());
-
-			if (!Eq(p.a(), T(0)))
+			T deno(Dot(dir, p.Normal()));
+			if (Eq(deno, T(0)))
 			{
-				vP.x() = -p.d() / p.a();
-			}
-			else
-			{
-				if (!Eq(p.b(), T(0)))
-				{
-					vP.y() = -p.d() / p.b();
-				}
-				else
-				{
-					if (!Eq(p.c(), T(0)))
-					{
-						vP.z() = -p.d() / p.c();
-					}
-				}
+				deno = T(0.0001);
 			}
 
-			T const deno(Dot(dir, p.Normal()));
-			if (!Eq(deno, T(0)))
-			{
-				return false;
-			}
-
-			T const t(Dot(vP - orig, p.Normal()) / deno);
-
+			T const t(-DotCoord(p, orig) / deno);
 			out = orig + t * dir;
 
-			return true;
+			return t;
 		}
 
 

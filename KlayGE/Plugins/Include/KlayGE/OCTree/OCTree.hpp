@@ -49,7 +49,8 @@ namespace KlayGE
 	private:
 		tree_id_t Child(tree_id_t const & id, int child_no);
 		Box AreaBox(tree_id_t const & id);
-		bool InsideChild(tree_id_t const & id, RenderablePtr renderable);
+		bool InsideChild(tree_id_t const & id, RenderablePtr const & renderable);
+		void InsertRenderable(tree_id_t const & id, RenderablePtr const & renderable);
 
 	private:
 		OCTree(OCTree const & rhs);

@@ -89,7 +89,6 @@ namespace KlayGE
 			return *iter;
 		}
 
-		assert(false);
 		return VertexStreamPtr();
 	}
 

@@ -161,7 +161,7 @@ private:
 int main()
 {
 	Parallax app;
-	OCTree sceneMgr(Box(Vector3(-20, -20, -20), Vector3(20, 20, 20)));
+	OCTree sceneMgr(Box(Vector3(-5, -5, -5), Vector3(5, 5, 5)));
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
