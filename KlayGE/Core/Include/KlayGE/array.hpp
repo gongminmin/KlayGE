@@ -21,7 +21,7 @@
 #include <iterator>
 #include <algorithm>
 
-namespace BettyGE
+namespace KlayGE
 {
 	template <typename T, std::size_t N, int lowerbound = 0>
 	class array
