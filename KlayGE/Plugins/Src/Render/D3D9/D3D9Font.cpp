@@ -22,7 +22,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/Memory.hpp>
 #include <KlayGE/RenderBuffer.hpp>
 #include <KlayGE/Viewport.hpp>
 #include <KlayGE/RenderTarget.hpp>
@@ -37,6 +36,7 @@
 #include <cassert>
 #include <algorithm>
 #include <vector>
+#include <cstring>
 
 #include <d3d9types.h>
 
@@ -279,7 +279,7 @@ namespace KlayGE
 					::GetTextExtentPoint32W(hDC, &ch, 1, &size);
 
 					BITMAPINFO bmi;
-					MemoryLib::Zero(&bmi.bmiHeader, sizeof(bmi.bmiHeader));
+					std::memset(&bmi.bmiHeader, 0, sizeof(bmi.bmiHeader));
 					bmi.bmiHeader.biSize		= sizeof(bmi.bmiHeader);
 					bmi.bmiHeader.biWidth		= size.cx;
 					bmi.bmiHeader.biHeight		= -size.cy;

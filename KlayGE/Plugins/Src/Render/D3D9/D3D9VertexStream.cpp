@@ -1,10 +1,11 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/Memory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Util.hpp>
+
+#include <cstring>
 
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9VertexStream.hpp>
@@ -28,7 +29,7 @@ namespace KlayGE
 		return numVertices_;
 	}
 
-	void D3D9VertexStream::Assign(const void* src, size_t numVertices, size_t stride)
+	void D3D9VertexStream::Assign(void const * src, size_t numVertices, size_t stride)
 	{
 		numVertices_ = numVertices;
 
@@ -52,13 +53,15 @@ namespace KlayGE
 		void* dest;
 		TIF(buffer_->Lock(0, 0, &dest,
 			D3DLOCK_NOSYSLOCK | (this->IsStatic() ? 0 : D3DLOCK_DISCARD)));
+
 		if (stride != 0)
 		{
 			U8* destPtr(static_cast<U8*>(dest));
 			U8 const * srcPtr(static_cast<U8 const *>(static_cast<void const *>(src)));
+
 			for (size_t i = 0; i < numVertices; ++ i)
 			{
-				MemoryLib::Copy(destPtr, srcPtr, vertexSize);
+				std::copy(srcPtr, srcPtr + vertexSize, destPtr);
 
 				destPtr += vertexSize;
 				srcPtr += vertexSize + stride;
@@ -66,8 +69,9 @@ namespace KlayGE
 		}
 		else
 		{
-			MemoryLib::Copy(dest, src, size);
+			std::memcpy(dest, src, size);
 		}
+
 		buffer_->Unlock();
 	}
 

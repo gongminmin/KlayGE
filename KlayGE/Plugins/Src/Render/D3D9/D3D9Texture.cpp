@@ -18,12 +18,13 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/Memory.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/Util.hpp>
+
+#include <cstring>
 
 #include <d3dx9.h>
 #include <d3dx9.h>
@@ -496,7 +497,7 @@ namespace KlayGE
 				void* dst(pBits + y * destPitch);
 				pBuffer = static_cast<U8*>(pData) + y * srcPitch;
 
-				MemoryLib::Copy(dst, pBuffer, srcPitch);
+				std::memcpy(dst, pBuffer, srcPitch);
 			}
 		}
 		else
@@ -519,7 +520,7 @@ namespace KlayGE
 				for (U32 x = 0; x < width; ++ x)
 				{
 					U32 srcPixel(0);
-					MemoryLib::Copy(&srcPixel, pSrc, bpp / 8);
+					std::memcpy(&srcPixel, pSrc, bpp / 8);
 					pSrc += bpp / 8;
 
 					// ×ª»¯³ÉR8G8B8A8
@@ -534,7 +535,7 @@ namespace KlayGE
 					alpha	= alpha >> (8 - destAlphaBitCount) << destAlphaOffset;
 
 					U32 const destPixel(red | green | blue | alpha);
-					MemoryLib::Copy(pDest, &destPixel, bpp_ / 8);
+					std::memcpy(pDest, &destPixel, bpp_ / 8);
 					pDest += bpp_ / 8;
 				}
 			}

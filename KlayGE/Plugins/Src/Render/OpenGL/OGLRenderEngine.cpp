@@ -13,7 +13,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Math.hpp>
-#include <KlayGE/Memory.hpp>
 
 #include <KlayGE/Light.hpp>
 #include <KlayGE/Material.hpp>
@@ -29,6 +28,7 @@
 
 #include <cassert>
 #include <algorithm>
+#include <cstring>
 
 #include <KlayGE/OpenGL/OGLRenderEngine.hpp>
 

@@ -22,12 +22,12 @@
 #include <KlayGE/Crc32.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/VFile.hpp>
-#include <KlayGE/Memory.hpp>
 
 #include <cassert>
 #include <string>
 #include <algorithm>
 #include <vector>
+#include <cstring>
 
 #include <KlayGE/DiskFile/DiskFile.hpp>
 #include <KlayGE/MemFile/MemFile.hpp>
@@ -338,8 +338,8 @@ namespace KlayGE
 		codeBufPtr = mask = 1;
 		U32 s(0);
 		U32 r(N - F);
-		MemoryLib::Set(textBuf, ' ', r);	// Clear the buffer with
-														// any character that will appear often.
+		std::memset(textBuf, ' ', r);	// Clear the buffer with
+										// any character that will appear often.
 		int len(0);
 		for (; (len < F) && (in.Tell() != in.Length()); ++ len)
 		{

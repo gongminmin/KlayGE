@@ -19,10 +19,11 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
-#include <KlayGE/Memory.hpp>
 
 #include <vector>
 #include <cassert>
+#include <cstring>
+
 #include <d3d9.h>
 
 #include <KlayGE/D3D9/D3D9RenderSettings.hpp>
@@ -187,7 +188,7 @@ namespace KlayGE
 			left_ = settings.left;
 		}
 
-		MemoryLib::Zero(&d3dpp_, sizeof(d3dpp_));
+		std::memset(&d3dpp_, 0, sizeof(d3dpp_));
 		d3dpp_.Windowed					= !this->FullScreen();
 		d3dpp_.BackBufferCount			= 1;
 		d3dpp_.BackBufferWidth			= this->Width();

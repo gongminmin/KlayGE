@@ -15,9 +15,9 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/Memory.hpp>
 
 #include <cassert>
+#include <cstring>
 
 #include <KlayGE/Socket.hpp>
 
@@ -48,7 +48,7 @@ namespace KlayGE
 	SOCKADDR_IN TransAddr(std::string const & address, U16 port)
 	{
 		SOCKADDR_IN sockAddr_in;
-		MemoryLib::Zero(&sockAddr_in, sizeof(sockAddr_in));
+		std::memset(&sockAddr_in, 0, sizeof(sockAddr_in));
 
 		if (address.empty())
 		{
@@ -64,7 +64,7 @@ namespace KlayGE
 			LPHOSTENT pHostEnt = gethostbyname(address.c_str());
 			if (pHostEnt != NULL)
 			{
-				MemoryLib::Copy(&sockAddr_in.sin_addr.s_addr,
+				std::memcpy(&sockAddr_in.sin_addr.s_addr,
 					pHostEnt->h_addr_list[0], pHostEnt->h_length);
 			}
 			else
@@ -96,12 +96,11 @@ namespace KlayGE
 		if (0 == gethostname(host, sizeof(host)))
 		{
 			HOSTENT* pHostEnt = gethostbyname(host);
-			MemoryLib::Copy(&addr.S_un.S_addr, pHostEnt->h_addr_list[0], pHostEnt->h_length);
+			std::memcpy(&addr.S_un.S_addr, pHostEnt->h_addr_list[0], pHostEnt->h_length);
 		}
 
 		return addr;
 	}
-
 
 
 	// ¹¹Ôìº¯Êý

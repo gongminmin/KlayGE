@@ -14,12 +14,12 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
-#include <KlayGE/Memory.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/AudioFactory.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <cassert>
+#include <cstring>
 
 #include <boost/bind.hpp>
 
@@ -56,7 +56,7 @@ namespace KlayGE
 		// 建立 DirectSound 缓冲区，要尽量减少使用建立标志，
 		// 因为使用太多不必要的标志会影响硬件加速性能
 		DSBUFFERDESC dsbd;
-		MemoryLib::Zero(&dsbd, sizeof(dsbd));
+		std::memset(&dsbd, 0, sizeof(dsbd));
 		dsbd.dwSize				= sizeof(dsbd);
 		dsbd.dwFlags			= DSBCAPS_CTRL3D | DSBCAPS_MUTE3DATMAXDISTANCE;
 		dsbd.guid3DAlgorithm	= GUID_NULL;
@@ -78,9 +78,10 @@ namespace KlayGE
 		}
 
 		// 锁定缓冲区
-		void* lockedBuffer;			// 指向缓冲区锁定的内存的指针
-		U32   lockedBufferSize;		// 锁定的内存大小
-		TIF(sources_[0]->Lock(0, static_cast<DWORD>(dataSource_->Size()), &lockedBuffer, &lockedBufferSize, 
+		U8* lockedBuffer;			// 指向缓冲区锁定的内存的指针
+		U32 lockedBufferSize;		// 锁定的内存大小
+		TIF(sources_[0]->Lock(0, static_cast<DWORD>(dataSource_->Size()),
+			reinterpret_cast<void**>(&lockedBuffer), &lockedBufferSize, 
 			NULL, NULL, DSBLOCK_FROMWRITECURSOR));
 
 		dataSource_->Reset();
@@ -92,17 +93,16 @@ namespace KlayGE
 		if (data.empty())
 		{
 			// 如果wav空白，用静音填充
-			MemoryLib::Set(lockedBuffer, 128, lockedBufferSize);
+			std::fill_n(lockedBuffer, lockedBufferSize, 128);
 		}
 		else
 		{
 			if (data.size() <= lockedBufferSize)
 			{
-				MemoryLib::Copy(lockedBuffer, &data[0], data.size());
+				std::copy(data.begin(), data.end(), lockedBuffer);
 
 				// 如果音频数据源比缓冲区小，则用音频数据填充缓冲区
-				MemoryLib::Set(static_cast<U8*>(lockedBuffer) + data.size(), 
-					128, lockedBufferSize - data.size());
+				std::fill_n(lockedBuffer + data.size(), lockedBufferSize - data.size(), 128);
 			}
 		}
 

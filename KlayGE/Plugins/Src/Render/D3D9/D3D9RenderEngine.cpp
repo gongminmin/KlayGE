@@ -22,7 +22,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Math.hpp>
-#include <KlayGE/Memory.hpp>
 #include <KlayGE/Util.hpp>
 
 #include <KlayGE/Light.hpp>
@@ -40,6 +39,7 @@
 
 #include <cassert>
 #include <algorithm>
+#include <cstring>
 
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 
@@ -53,7 +53,7 @@ namespace KlayGE
 	D3DMATRIX Convert(Matrix4 const & mat)
 	{
 		D3DMATRIX d3dMat;
-		MemoryLib::Copy(&d3dMat._11, &mat.begin()[0], sizeof(d3dMat));
+		std::memcpy(&d3dMat._11, &mat.begin()[0], sizeof(d3dMat));
 
 		return d3dMat;
 	}
@@ -433,7 +433,7 @@ namespace KlayGE
 	void D3D9RenderEngine::SetLight(U32 index, Light const & lt)
 	{
 		D3DLIGHT9 d3dLight;
-		MemoryLib::Zero(&d3dLight, sizeof(d3dLight));
+		std::memset(&d3dLight, 0, sizeof(d3dLight));
 
 		switch (lt.lightType)
 		{
@@ -698,8 +698,8 @@ namespace KlayGE
 
 
 		if ((currentDecl_.size() != shaderDecl.size())
-			|| !MemoryLib::Compare(&currentDecl_[0], &shaderDecl[0],
-									sizeof(shaderDecl[0]) * shaderDecl.size()))
+			|| std::memcmp(&currentDecl_[0], &shaderDecl[0],
+								sizeof(shaderDecl[0]) * shaderDecl.size()) != 0)
 		{
 			currentDecl_ = shaderDecl;
 

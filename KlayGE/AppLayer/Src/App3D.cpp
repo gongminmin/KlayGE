@@ -14,7 +14,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/Memory.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderWindow.hpp>

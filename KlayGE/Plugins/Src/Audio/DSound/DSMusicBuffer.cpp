@@ -16,12 +16,13 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
-#include <KlayGE/Memory.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/AudioFactory.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <cassert>
+#include <algorithm>
+#include <cstring>
 
 #include <KlayGE/DSound/DSAudio.hpp>
 
@@ -39,15 +40,15 @@ namespace KlayGE
 		fillSize_	= wfx.nAvgBytesPerSec / PreSecond;
 		fillCount_	= bufferSeconds * PreSecond;
 
-		bool mono(1 == wfx.nChannels);
+		bool const mono(1 == wfx.nChannels);
 
 		boost::shared_ptr<IDirectSound> const & dsound(static_cast<DSAudioEngine&>(Context::Instance().AudioFactoryInstance().AudioEngineInstance()).DSound());
 
 		// 建立 DirectSound 缓冲区，要尽量减少使用建立标志，
 		// 因为使用太多不必要的标志会影响硬件加速性能
 		DSBUFFERDESC dsbd;
-		MemoryLib::Zero(&dsbd, sizeof(dsbd));
-		dsbd.dwSize				= sizeof(dsbd);
+		std::memset(&dsbd, 0, sizeof(dsbd));
+		dsbd.dwSize = sizeof(dsbd);
 		if (mono)
 		{
 			dsbd.dwFlags |= DSBCAPS_CTRL3D | DSBCAPS_MUTE3DATMAXDISTANCE;
@@ -103,25 +104,25 @@ namespace KlayGE
 	void DSMusicBuffer::FillBuffer()
 	{
 		// 锁定缓冲区
-		void* lockedBuffer;			// 指向缓冲区锁定的内存的指针
-		U32   lockedBufferSize;		// 锁定的内存大小
+		U8* lockedBuffer;			// 指向缓冲区锁定的内存的指针
+		U32 lockedBufferSize;		// 锁定的内存大小
 		TIF(buffer_->Lock(fillSize_ * writePos_, fillSize_,
-			&lockedBuffer, &lockedBufferSize, NULL, NULL, 0));
+			reinterpret_cast<void**>(&lockedBuffer), &lockedBufferSize,
+			NULL, NULL, 0));
 
 		std::vector<U8> data(fillSize_);
 		data.resize(dataSource_->Read(&data[0], fillSize_));
 
-		if (data.size() > 0)
+		if (data.empty())
 		{
-			MemoryLib::Copy(lockedBuffer, &data[0], data.size());
-
-			MemoryLib::Set(static_cast<U8*>(lockedBuffer) + data.size(), 
-				0, lockedBufferSize - data.size());
+			std::fill_n(lockedBuffer, lockedBufferSize, 0);
+			this->Stop();
 		}
 		else
 		{
-			MemoryLib::Set(lockedBuffer, 0, lockedBufferSize);
-			this->Stop();
+			std::copy(data.begin(), data.end(), lockedBuffer);
+
+			std::fill_n(lockedBuffer + data.size(), lockedBufferSize - data.size(), 0);
 		}
 
 		// 缓冲区解锁
@@ -141,27 +142,26 @@ namespace KlayGE
 		dataSource_->Reset();
 
 		// 锁定缓冲区
-		void* lockedBuffer;			// 指向缓冲区锁定的内存的指针
-		U32   lockedBufferSize;		// 锁定的内存大小
+		U8* lockedBuffer;			// 指向缓冲区锁定的内存的指针
+		U32 lockedBufferSize;		// 锁定的内存大小
 		TIF(buffer_->Lock(0, fillSize_ * fillCount_,
-			&lockedBuffer, &lockedBufferSize, NULL, NULL, 0));
+			reinterpret_cast<void**>(&lockedBuffer), &lockedBufferSize, NULL, NULL, 0));
 
 		std::vector<U8> data(fillSize_ * fillCount_);
 		data.resize(dataSource_->Read(&data[0], fillSize_ * fillCount_));
 
-		if (data.size() > 0)
+		if (data.empty())
 		{
-			// 如果数据源比缓冲区小，则用音频数据填充缓冲区
-			MemoryLib::Copy(lockedBuffer, &data[0], data.size());
-
-			// 剩下的区域用空白填充
-			MemoryLib::Set(static_cast<U8*>(lockedBuffer) + data.size(), 
-				0, lockedBufferSize - data.size());
+			// 如果音频数据空白，用静音填充
+			std::fill_n(lockedBuffer, lockedBufferSize, 0);
 		}
 		else
 		{
-			// 如果音频数据空白，用静音填充
-			MemoryLib::Set(lockedBuffer, 0, lockedBufferSize);
+			// 如果数据源比缓冲区小，则用音频数据填充缓冲区
+			std::copy(data.begin(), data.end(), lockedBuffer);
+
+			// 剩下的区域用空白填充
+			std::fill_n(lockedBuffer + data.size(), lockedBufferSize - data.size(), 0);
 		}
 
 		// 缓冲区解锁

@@ -15,9 +15,10 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Lobby.hpp>
-#include <KlayGE/Memory.hpp>
 
+#include <algorithm>
 #include <ctime>
+#include <cstring>
 
 #include <KlayGE/NetMsg.hpp>
 #include <KlayGE/Player.hpp>
@@ -81,11 +82,11 @@ namespace KlayGE
 			}
 
 			char revBuf[Max_Buffer];
-			MemoryLib::Zero(revBuf, sizeof(revBuf));
+			std::fill_n(revBuf, sizeof(revBuf), 0);
 			if (socket_.Receive(revBuf, sizeof(revBuf)) != -1)
 			{
 				U32 ID;
-				memcpy(&ID, &revBuf[1], 4);
+				std::memcpy(&ID, &revBuf[1], 4);
 
 				// 删除已发送的信息
 				for (SendQueueType::iterator iter = sendQueue_.begin();
@@ -94,7 +95,7 @@ namespace KlayGE
 					std::vector<char>& msg = *iter;
 
 					U32 sendID;
-					memcpy(&sendID, &msg[1], 4);
+					std::memcpy(&sendID, &msg[1], 4);
 					if (sendID == ID)
 					{
 						iter = sendQueue_.erase(iter);
@@ -124,7 +125,7 @@ namespace KlayGE
 		socket_.TimeOut(2000);
 
 		char buf[Max_Buffer];
-		MemoryLib::Zero(buf, sizeof(buf));
+		std::fill_n(buf, sizeof(buf), 0);
 
 		buf[0] = MSG_JOIN;
 		name_.copy(&buf[1], this->name_.length());

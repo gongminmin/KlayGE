@@ -12,10 +12,10 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Player.hpp>
-#include <KlayGE/Memory.hpp>
 
 #include <algorithm>
 #include <ctime>
+#include <cstring>
 
 #include <KlayGE/NetMsg.hpp>
 #include <KlayGE/Lobby.hpp>
@@ -40,7 +40,7 @@ namespace KlayGE
 	{
 		for (PlayerAddrsIter iter = this->players_.begin(); iter != this->players_.end(); ++ iter)
 		{
-			if (0 == MemoryLib::Compare(&addr, &(iter->second.addr), sizeof(addr)))
+			if (0 == std::memcmp(&addr, &(iter->second.addr), sizeof(addr)))
 			{
 				return iter;
 			}
@@ -277,10 +277,10 @@ namespace KlayGE
 		//			最大Players数	1 字节
 		//			Lobby名字		16 字节
 
-		MemoryLib::Zero(sendBuf, 18);
+		std::fill_n(sendBuf, 18, 0);
 		sendBuf[0] = this->NumPlayer();
 		sendBuf[1] = this->MaxPlayers();
-		MemoryLib::Copy(&sendBuf[2], this->LobbyName().c_str(), this->LobbyName().length());
+		this->LobbyName().copy(&sendBuf[2], this->LobbyName().length());
 		numSend = 18;
 	}
 

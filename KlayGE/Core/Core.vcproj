@@ -261,9 +261,6 @@
 					RelativePath=".\Src\Kernel\Crc32.cpp">
 				</File>
 				<File
-					RelativePath="Src\Kernel\Memory.cpp">
-				</File>
-				<File
 					RelativePath=".\Src\Kernel\ResLocator.cpp">
 				</File>
 				<File
@@ -299,9 +296,6 @@
 				</File>
 				<File
 					RelativePath=".\Include\KlayGE\MapVector.hpp">
-				</File>
-				<File
-					RelativePath="Include\KlayGE\Memory.hpp">
 				</File>
 				<File
 					RelativePath=".\Include\KlayGE\MetaManip.hpp">

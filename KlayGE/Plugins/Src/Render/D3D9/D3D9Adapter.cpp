@@ -1,9 +1,10 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Memory.hpp>
+
 #include <boost/smart_ptr.hpp>
 
 #include <cassert>
 #include <algorithm>
+#include <cstring>
 
 #include <KlayGE/D3D9/D3D9Adapter.hpp>
 
@@ -14,8 +15,8 @@ namespace KlayGE
 	D3D9Adapter::D3D9Adapter()
 					: adapterNo_(0)
 	{
-		MemoryLib::Zero(&d3dAdapterIdentifier_, sizeof(d3dAdapterIdentifier_));
-		MemoryLib::Zero(&d3ddmDesktop_, sizeof(d3ddmDesktop_));
+		std::memset(&d3dAdapterIdentifier_, 0, sizeof(d3dAdapterIdentifier_));
+		std::memset(&d3ddmDesktop_, 0, sizeof(d3ddmDesktop_));
 	}
 
 	D3D9Adapter::D3D9Adapter(U32 adapterNo,

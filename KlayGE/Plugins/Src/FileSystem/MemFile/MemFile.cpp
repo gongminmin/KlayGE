@@ -15,15 +15,12 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/Memory.hpp>
 
 #include <cassert>
 #include <string>
 #include <vector>
 
 #include <KlayGE/MemFile/MemFile.hpp>
-
-using namespace std;
 
 namespace KlayGE
 {
@@ -51,7 +48,7 @@ namespace KlayGE
 	{
 		this->Close();
 
-		chunkData_.str(string(static_cast<char const *>(data)));
+		chunkData_.str(std::string(static_cast<char const *>(data)));
 	}
 
 	// ¹Ø±ÕÎÄ¼þ
@@ -91,7 +88,7 @@ namespace KlayGE
 		chunkData_.write(static_cast<char const *>(data),
 			static_cast<std::streamsize>(count));
 
-		chunkData_.seekg(static_cast<istream::off_type>(count), ios_base::cur);
+		chunkData_.seekg(static_cast<std::istream::off_type>(count), std::ios_base::cur);
 
 		return count;
 	}
@@ -110,7 +107,7 @@ namespace KlayGE
 		chunkData_.read(static_cast<char*>(data),
 			static_cast<std::streamsize>(count));
 
-		chunkData_.seekp(static_cast<istream::off_type>(count), ios_base::cur);
+		chunkData_.seekp(static_cast<std::istream::off_type>(count), std::ios_base::cur);
 
 		return count;
 	}
@@ -119,7 +116,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	size_t MemFile::CopyFrom(VFile& src, size_t size)
 	{
-		vector<U8> data(size);
+		std::vector<U8> data(size);
 		size = src.Read(&data[0], data.size());
 		return this->Write(&data[0], size);
 	}
@@ -128,7 +125,10 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	size_t MemFile::Seek(size_t offset, SeekMode from)
 	{
-		ios_base::seekdir seekFrom(ios_base::beg);
+		using std::ios_base;
+		using std::istream;
+
+		ios_base::seekdir seekFrom(std::ios_base::beg);
 		switch (from)
 		{
 		case SM_Begin:

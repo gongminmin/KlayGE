@@ -13,11 +13,11 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/Memory.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <cassert>
 #include <cmath>
+#include <cstring>
 
 #include <KlayGE/DSound/DSAudio.hpp>
 
@@ -94,7 +94,7 @@ namespace KlayGE
 		TIF(dsound_->SetCooperativeLevel(::GetForegroundWindow(), DSSCL_PRIORITY));
 
 		DSBUFFERDESC desc;
-		MemoryLib::Zero(&desc, sizeof(desc));
+		std::memset(&desc, 0, sizeof(desc));
 		desc.dwSize  = sizeof(desc);
 		desc.dwFlags = DSBCAPS_CTRL3D | DSBCAPS_PRIMARYBUFFER;
 
@@ -102,7 +102,7 @@ namespace KlayGE
 		TIF(dsound_->CreateSoundBuffer(&desc, &pDSBPrimary, NULL));
 
 		WAVEFORMATEX wfx;
-		MemoryLib::Zero(&wfx, sizeof(wfx));
+		std::memset(&wfx, 0, sizeof(wfx));
 		wfx.wFormatTag		= WAVE_FORMAT_PCM; 
 		wfx.nChannels		= 2;
 		wfx.nSamplesPerSec	= 22050;

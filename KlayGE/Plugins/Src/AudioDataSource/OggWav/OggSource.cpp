@@ -13,12 +13,12 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Math.hpp>
-#include <KlayGE/Memory.hpp>
 #include <KlayGE/VFile.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <vector>
 #include <cassert>
+#include <cstring>
 
 #include <KlayGE/OggWav/OggSource.hpp>
 
@@ -207,7 +207,7 @@ namespace KlayGE
 
 								// 把解码后的数据放入缓冲区
 								size_t const length(sizeof(ogg_int16_t) * bout * vi_.channels);
-								MemoryLib::Copy(&data[cursize], &convbuffer[0], length);
+								std::memcpy(&data[cursize], &convbuffer[0], length);
 								cursize += length;
 							}
 						}

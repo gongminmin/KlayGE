@@ -12,9 +12,10 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/Memory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
+
+#include <cstring>
 
 #include <KlayGE/OpenGL/OGLIndexStream.hpp>
 
@@ -27,6 +28,6 @@ namespace KlayGE
 	void OGLIndexStream::Assign(void const * src, size_t numIndices)
 	{
 		buffer_.resize(numIndices);
-		MemoryLib::Copy(&buffer_[0], src, numIndices * sizeof(U16));
+		std::memcpy(&buffer_[0], src, numIndices * sizeof(U16));
 	}
 }

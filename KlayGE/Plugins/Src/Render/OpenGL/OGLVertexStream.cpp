@@ -12,9 +12,10 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/Memory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
+
+#include <cstring>
 
 #include <KlayGE/OpenGL/OGLVertexStream.hpp>
 
@@ -38,7 +39,7 @@ namespace KlayGE
 			U8 const * srcPtr(static_cast<U8 const *>(static_cast<void const *>(src)));
 			for (size_t i = 0; i < numVertices; ++ i)
 			{
-				MemoryLib::Copy(destPtr, srcPtr, vertexSize);
+				std::memcpy(destPtr, srcPtr, vertexSize);
 
 				destPtr += vertexSize;
 				srcPtr += vertexSize + stride;
@@ -46,7 +47,7 @@ namespace KlayGE
 		}
 		else
 		{
-			MemoryLib::Copy(&buffer_[0], src, size);
+			std::memcpy(&buffer_[0], src, size);
 		}
 	}
 }

@@ -16,12 +16,12 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
-#include <KlayGE/Memory.hpp>
 #include <KlayGE/Crc32.hpp>
 
 #include <cassert>
 #include <cctype>
 #include <string>
+#include <cstring>
 
 #include <KlayGE/MemFile/MemFile.hpp>
 #include <KlayGE/PackedFile/Pkt.hpp>
@@ -103,7 +103,7 @@ namespace KlayGE
 	void UnPkt::Decode(VFile& output, VFile& input)
 	{
 		U32 r(N - F);
-		MemoryLib::Set(textBuf, ' ', r);
+		std::memset(textBuf, ' ', r);
 
 		U32 flags(0);
 		U8 c;

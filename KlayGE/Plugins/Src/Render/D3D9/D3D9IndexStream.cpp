@@ -1,13 +1,14 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/Memory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9IndexStream.hpp>
+
+#include <cstring>
 
 #include <boost/smart_ptr.hpp>
 #include <boost/mem_fn.hpp>
@@ -42,7 +43,7 @@ namespace KlayGE
 
 		void* dest;
 		TIF(buffer_->Lock(0, 0, &dest, D3DLOCK_NOSYSLOCK | (this->IsStatic() ? 0 : D3DLOCK_DISCARD)));
-		MemoryLib::Copy(dest, src, size);
+		std::memcpy(dest, src, size);
 		buffer_->Unlock();
 	}
 
