@@ -16,6 +16,9 @@
 
 #include <KlayGE/OCTree/OCTree.hpp>
 
+#include <KlayGE/Input.hpp>
+#include <KlayGE/DInput/DInputFactory.hpp>
+
 #include <sstream>
 #include <ctime>
 
@@ -78,6 +81,33 @@ namespace
 	};
 
 	boost::shared_ptr<RenderTorus> renderTorus;
+
+
+	enum
+	{
+		TurnLeftRight,
+		TurnUpDown,
+
+		Forward,
+		Backward,
+		MoveLeft,
+		MoveRight,
+
+		Quit,
+	};
+
+	InputAction actions[] = 
+	{
+		InputAction(TurnLeftRight, MS_X),
+		InputAction(TurnUpDown, MS_Y),
+
+		InputAction(Forward, KS_W),
+		InputAction(Backward, KS_S),
+		InputAction(MoveLeft, KS_A),
+		InputAction(MoveRight, KS_D),
+
+		InputAction(Quit, KS_Escape),
+	};
 }
 
 
@@ -105,6 +135,8 @@ int main()
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
+
+	Context::Instance().InputFactoryInstance(DInputFactoryInstance());
 
 	TheRenderSettings settings;
 	settings.width = 800;
@@ -145,18 +177,76 @@ void Cartoon::InitObjects()
 	this->LookAt(Vector3(0, 0, -6), Vector3(0, 0, 0));
 	this->Proj(0.1f, 20.0f);
 
-	view_ = renderEngine.ViewMatrix();
-	proj_ = renderEngine.ProjectionMatrix();
-
-	*(renderTorus->GetRenderEffect()->ParameterByName("proj")) = proj_;
-	*(renderTorus->GetRenderEffect()->ParameterByName("lightPos")) = Vector4(2, 2, -3, 1);
-	*(renderTorus->GetRenderEffect()->ParameterByName("eyePos")) = Vector4(0, 0, -6, 1);
+	fpcController_.AttachCamera(this->ActiveCamera());
+	fpcController_.Scalers(0.005f, 0.1f);
 
 	renderTorus->AddToSceneManager();
+
+	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	KlayGE::InputActionMap actionMap;
+	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
+	inputEngine.ActionMap(actionMap, true);
 }
 
 void Cartoon::Update()
 {
+	static clock_t lastTime(std::clock());
+	clock_t curTime(std::clock());
+	if (curTime - lastTime > 20)
+	{
+		float scaler = (curTime - lastTime) / 100.0f;
+
+		lastTime = curTime;
+
+		InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+		InputActionsType actions(inputEngine.Update());
+		for (InputActionsType::iterator iter = actions.begin(); iter != actions.end(); ++ iter)
+		{
+			switch (iter->first)
+			{
+			case TurnLeftRight:
+				fpcController_.Rotate(iter->second * scaler, 0, 0);
+				break;
+
+			case TurnUpDown:
+				fpcController_.Rotate(0, iter->second * scaler, 0);
+				break;
+
+			case Forward:
+				fpcController_.Move(0, 0, scaler);
+				break;
+
+			case Backward:
+				fpcController_.Move(0, 0, -scaler);
+				break;
+
+			case MoveLeft:
+				fpcController_.Move(-scaler, 0, 0);
+				break;
+
+			case MoveRight:
+				fpcController_.Move(scaler, 0, 0);
+				break;
+
+			case Quit:
+				exit(0);
+				break;
+			}
+		}
+	}
+	else
+	{
+		fpcController_.Update();
+	}
+
+	Matrix4 view = this->ActiveCamera().ViewMatrix();
+	Matrix4 proj = this->ActiveCamera().ProjMatrix();
+	Vector3 eyePos = this->ActiveCamera().EyePos();
+
+	*(renderTorus->GetRenderEffect()->ParameterByName("proj")) = proj;
+	*(renderTorus->GetRenderEffect()->ParameterByName("lightPos")) = Vector4(2, 2, -3, 1);
+	*(renderTorus->GetRenderEffect()->ParameterByName("eyePos")) = Vector4(eyePos.x(), eyePos.y(), eyePos.z(), 1);
+
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 	float rotX(std::clock() / 700.0f);
@@ -166,7 +256,7 @@ void Cartoon::Update()
 	MathLib::RotationX(mat, rotX);
 	MathLib::RotationY(matY, rotY);
 	mat *= matY;
-	mat *= view_;
+	mat *= view;
 
 	*(renderTorus->GetRenderEffect()->ParameterByName("worldview")) = mat;
 

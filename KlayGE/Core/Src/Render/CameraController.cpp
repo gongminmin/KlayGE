@@ -1,8 +1,11 @@
 // CameraController.cpp
 // KlayGE 摄像机控制器类 实现文件
-// Ver 2.4.0
+// Ver 2.5.0
 // 版权所有(C) 龚敏敏, 2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.5.0
+// AttachCamera内增加了Update (2005.3.30)
 //
 // 2.4.0
 // 初次建立 (2005.3.12)
@@ -33,6 +36,7 @@ namespace KlayGE
 	void CameraController::AttachCamera(Camera& camera)
 	{
 		camera_ = &camera;
+		this->Update();
 	}
 
 	void CameraController::DeattachCamera()

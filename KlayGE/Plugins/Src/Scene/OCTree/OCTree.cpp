@@ -19,9 +19,10 @@
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 
+#include <functional>
 #include <set>
 
-#include <KlayGE/OCTree/OCTreeFrustum.hpp>
+#include <KlayGE/OCTree/Frustum.hpp>
 #include <KlayGE/OCTree/OCTree.hpp>
 
 namespace KlayGE
@@ -38,20 +39,54 @@ namespace KlayGE
 			this->InsertRenderable("0", *iter);
 		}
 
-		OCTreeFrustum frustum(camera.ViewMatrix() * camera.ProjMatrix());
+		Frustum frustum(camera.ViewMatrix() * camera.ProjMatrix());
 
+		std::set<tree_id_t> nodes;
 		std::set<RenderablePtr> renderables;
 		for (linear_octree_t::iterator iter = octree_.begin(); iter != octree_.end(); ++ iter)
 		{
-			Box const & box = this->AreaBox(iter->first);
-
-			if (frustum.Visiable(box, Matrix4::Identity()))
+			for (size_t i = 1; i <= iter->first.size(); ++ i)
 			{
-				renderables.insert(iter->second.begin(), iter->second.end());
+				tree_id_t id = iter->first.substr(0, i);
+
+				if (nodes.find(id) == nodes.end())
+				{
+					Box const & box = this->AreaBox(id);
+
+					Frustum::VIS const vis = frustum.Visiable(box);
+					if ((Frustum::VIS_YES == vis)
+						|| ((Frustum::VIS_PART == vis) && (i == iter->first.size())))
+					{
+						// 全部看见树或部分看见叶子
+
+						renderables.insert(iter->second.begin(), iter->second.end());
+						nodes.insert(id);
 
 #ifdef KLAYGE_DEBUG
-				renderables.insert(RenderablePtr(new RenderableBox(box)));
+						renderables.insert(RenderablePtr(new RenderableBox(box)));
 #endif
+					}
+					else
+					{
+						if (Frustum::VIS_NO == vis)
+						{
+							// 跳过此树下的所有子树
+
+							++ iter;
+							while ((iter != octree_.end()) && (iter->first.substr(0, i) == id))
+							{
+								++ iter;
+							}
+							-- iter;
+
+							break;
+						}
+					}
+				}
+				else
+				{
+					renderables.insert(iter->second.begin(), iter->second.end());
+				}
 			}
 		}
 

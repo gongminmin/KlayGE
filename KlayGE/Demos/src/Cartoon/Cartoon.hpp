@@ -3,6 +3,7 @@
 
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Font.hpp>
+#include <KlayGE/CameraController.hpp>
 
 class Cartoon : public KlayGE::App3DFramework
 {
@@ -15,7 +16,7 @@ private:
 
 	KlayGE::FontPtr font_;
 
-	KlayGE::Matrix4 view_, proj_;
+	KlayGE::FirstPersonCameraController fpcController_;
 };
 
 #endif		// _CARTOON_HPP

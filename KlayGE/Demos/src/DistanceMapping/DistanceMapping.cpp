@@ -197,11 +197,11 @@ void DistanceMapping::InitObjects()
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	fpcController_.AttachCamera(this->ActiveCamera());
-	fpcController_.Scalers(0.005f, 0.1f);
-
 	this->LookAt(Vector3(2, 0, -2), Vector3(0, 0, 0));
 	this->Proj(0.1f, 100);
+
+	fpcController_.AttachCamera(this->ActiveCamera());
+	fpcController_.Scalers(0.005f, 0.1f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	KlayGE::InputActionMap actionMap;
