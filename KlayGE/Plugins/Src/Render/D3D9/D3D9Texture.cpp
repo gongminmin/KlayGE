@@ -323,7 +323,7 @@ namespace KlayGE
 	D3D9Texture::D3D9Texture(U32 width, U32 height,
 								U16 mipMapsNum, PixelFormat format, TextureUsage usage)
 	{
-		d3dDevice_ = reinterpret_cast<const D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
+		d3dDevice_ = static_cast<const D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
 
 		mipMapsNum_ = (0 == mipMapsNum) ? mipMapsNum : 1;
 		format_		= format;
@@ -513,6 +513,24 @@ namespace KlayGE
 
 		// Finally we will use D3DX to create the mip map levels
 		TIF(D3DXFilterTexture(d3dTexture_.Get(), NULL, D3DX_DEFAULT, D3DX_DEFAULT));
+	}
+
+	void D3D9Texture::CopyToMemory(void* data)
+	{
+		U32 thePitch(width_ * bpp_ / 8);
+
+		D3DLOCKED_RECT d3dlr;
+		TIF(d3dTempTexture_->LockRect(0, &d3dlr, NULL, D3DLOCK_NOSYSLOCK));
+
+		const U16 pitch(d3dlr.Pitch);
+		U8* src(static_cast<U8*>(d3dlr.pBits));
+		U8* dest(static_cast<U8*>(data));
+
+		Engine::MemoryInstance().Cpy(dest, src, thePitch);
+		src += pitch;
+		dest += thePitch;
+
+		d3dTempTexture_->UnlockRect(0);
 	}
 
 	void D3D9Texture::CustomAttribute(const String& name, void* pData)

@@ -106,7 +106,7 @@ namespace KlayGE
 		Matrix4 projMat_;
 	};
 
-	typedef SharePtr<OGLRenderEngine> OGLRenderEnginePtr;
+	typedef SharedPtr<OGLRenderEngine> OGLRenderEnginePtr;
 }
 
 #endif			// _OGLRENDERENGINE_HPP

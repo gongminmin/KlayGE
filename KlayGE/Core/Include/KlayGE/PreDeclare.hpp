@@ -6,11 +6,11 @@ namespace KlayGE
 	class Engine;
 	class MemoryLib;
 	template <typename T>
-	class SharePtr;
+	class SharedPtr;
 	template <typename T>
 	class COMPtr;
 	template <typename T>
-	class SharePtr;
+	class SharedPtr;
 	template <typename T>
 	class alloc;
 	template <typename T>
@@ -42,50 +42,50 @@ namespace KlayGE
 
 	class Camera;
 	class Font;
-	typedef SharePtr<Font> FontPtr;
+	typedef SharedPtr<Font> FontPtr;
 	struct Light;
 	struct Material;
 	class RenderEngine;
-	typedef SharePtr<RenderEngine> RenderEnginePtr;
+	typedef SharedPtr<RenderEngine> RenderEnginePtr;
 	class RenderTarget;
-	typedef SharePtr<RenderTarget> RenderTargetPtr;
+	typedef SharedPtr<RenderTarget> RenderTargetPtr;
 	class RenderWindowSettings;
 	class RenderWindow;
-	typedef SharePtr<RenderWindow> RenderWindowPtr;
+	typedef SharedPtr<RenderWindow> RenderWindowPtr;
 	class Renderable;
-	typedef SharePtr<Renderable> RenderablePtr;
+	typedef SharedPtr<Renderable> RenderablePtr;
 	class RenderEffect;
-	typedef SharePtr<RenderEffect> RenderEffectPtr;
+	typedef SharedPtr<RenderEffect> RenderEffectPtr;
 	class SceneManager;
 	class Texture;
-	typedef SharePtr<Texture> TexturePtr;
+	typedef SharedPtr<Texture> TexturePtr;
 	class RenderTexture;
-	typedef SharePtr<RenderTexture> RenderTexturePtr;
+	typedef SharedPtr<RenderTexture> RenderTexturePtr;
 	class VertexStream;
-	typedef SharePtr<VertexStream> VertexStreamPtr;
+	typedef SharedPtr<VertexStream> VertexStreamPtr;
 	class IndexStream;
-	typedef SharePtr<IndexStream> IndexStreamPtr;
+	typedef SharedPtr<IndexStream> IndexStreamPtr;
 	class VertexBuffer;
-	typedef SharePtr<VertexBuffer> VertexBufferPtr;
+	typedef SharedPtr<VertexBuffer> VertexBufferPtr;
 	struct Viewport;
 	class RenderFactory;
-	typedef SharePtr<RenderFactory> RenderFactoryPtr;
+	typedef SharedPtr<RenderFactory> RenderFactoryPtr;
 
 	class Socket;
 	class Lobby;
 	class Player;
 
 	class AudioEngine;
-	typedef SharePtr<AudioEngine> AudioEnginePtr;
+	typedef SharedPtr<AudioEngine> AudioEnginePtr;
 	class AudioBuffer;
-	typedef SharePtr<AudioBuffer> AudioBufferPtr;
+	typedef SharedPtr<AudioBuffer> AudioBufferPtr;
 	class SoundBuffer;
 	class MusicBuffer;
 	class AudioDataSource;
-	typedef SharePtr<AudioDataSource> AudioDataSourcePtr;
+	typedef SharedPtr<AudioDataSource> AudioDataSourcePtr;
 	class CDAudio;
 	class AudioFactory;
-	typedef SharePtr<AudioFactory> AudioFactoryPtr;
+	typedef SharedPtr<AudioFactory> AudioFactoryPtr;
 
 	class CPUInfo;
 	class Crc32;
@@ -93,21 +93,21 @@ namespace KlayGE
 	class UnPkt;
 	class ResKeyManager;
 	class WaveFile;
-	typedef SharePtr<WaveFile> WaveFilePtr;
+	typedef SharedPtr<WaveFile> WaveFilePtr;
 	class VFile;
-	typedef SharePtr<VFile>	VFilePtr;
+	typedef SharedPtr<VFile>	VFilePtr;
 
 	class App3DFramework;
 
 	class InputEngine;
-	typedef SharePtr<InputEngine> InputEnginePtr;
+	typedef SharedPtr<InputEngine> InputEnginePtr;
 	class InputDevice;
-	typedef SharePtr<InputDevice> InputDevicePtr;
+	typedef SharedPtr<InputDevice> InputDevicePtr;
 	class InputFactory;
-	typedef SharePtr<InputFactory> InputFactoryPtr;
+	typedef SharedPtr<InputFactory> InputFactoryPtr;
 
 	class ShowEngine;
-	typedef SharePtr<ShowEngine> ShowEnginePtr;
+	typedef SharedPtr<ShowEngine> ShowEnginePtr;
 }
 
 #endif			// _PREDECLARE_HPP

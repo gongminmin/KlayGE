@@ -1,5 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/SharePtr.hpp>
+#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Timer.hpp>
 #include <KlayGE/Engine.hpp>

@@ -330,7 +330,7 @@
 					RelativePath=".\Include\KlayGE\SetVector.hpp">
 				</File>
 				<File
-					RelativePath="Include\KlayGE\SharePtr.hpp">
+					RelativePath=".\Include\KlayGE\SharedPtr.hpp">
 				</File>
 				<File
 					RelativePath="Include\KlayGE\ThrowErr.hpp">

@@ -1,7 +1,7 @@
 #ifndef _D3D9TEXTURE_HPP
 #define _D3D9TEXTURE_HPP
 
-#include <KlayGE/SharePtr.hpp>
+#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/COMPtr.hpp>
 
 #include <d3d9.h>
@@ -27,6 +27,7 @@ namespace KlayGE
 		void CopyToTexture(Texture& target);
 		void CopyMemoryToTexture(void* pData, PixelFormat pf,
 			U32 width = 0, U32 height = 0, U32 pitch = 0, U32 xOffset = 0, U32 yOffset = 0);
+		void CopyToMemory(void* data);
 
 		const COMPtr<IDirect3DTexture9>& D3DTexture() const
 			{ return this->d3dTexture_; }
@@ -41,7 +42,7 @@ namespace KlayGE
 		COMPtr<IDirect3DSurface9>	renderZBuffer_;		// The z-buffer for the render surface.
 	};
 
-	typedef SharePtr<D3D9Texture>		D3D9TexturePtr;
+	typedef SharedPtr<D3D9Texture>		D3D9TexturePtr;
 }
 
 #endif			// _D3D9TEXTURE_HPP

@@ -18,7 +18,7 @@
 #define _RENDEREFFECT_HPP
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/SharePtr.hpp>
+#include <KlayGE/SharedPtr.hpp>
 #include <vector>
 
 #pragma comment(lib, "KlayGE_Core.lib")

@@ -34,7 +34,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9VBConverter::UpdateStreams(const VertexBuffer& vb)
 	{
-		COMPtr<IDirect3DDevice9> d3dDevice(reinterpret_cast<const D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
+		COMPtr<IDirect3DDevice9> d3dDevice(static_cast<const D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
 
 		VertexDeclType shaderDecl;
 		shaderDecl.reserve(currentDecl_.size());
@@ -200,7 +200,7 @@ namespace KlayGE
 	void D3D9VBConverter::UpdateAStream(U16 streamNo, HardwareVertexBuffer& buffer,
 		size_t vertexSize, size_t numVertices)
 	{
-		COMPtr<IDirect3DDevice9> d3dDevice(reinterpret_cast<const D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
+		COMPtr<IDirect3DDevice9> d3dDevice(static_cast<const D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
 
 		if (buffer.count < numVertices)
 		{

@@ -15,7 +15,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
-#include <KlayGE/SharePtr.hpp>
+#include <KlayGE/SharedPtr.hpp>
 
 #pragma comment(lib, "KlayGE_Core.lib")
 

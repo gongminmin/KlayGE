@@ -48,7 +48,7 @@ namespace KlayGE
 				}
 				else
 				{
-					stream = VertexStreamPtr(new DynamicVertexStream(type, sizeof(float), 3));
+					stream = VertexStreamPtr(new DynamicVertexStream<float>(type, 3));
 				}
 				break;
 
@@ -59,7 +59,7 @@ namespace KlayGE
 				}
 				else
 				{
-					stream = VertexStreamPtr(new DynamicVertexStream(type, sizeof(float), 3));
+					stream = VertexStreamPtr(new DynamicVertexStream<float>(type, 3));
 				}
 				break;
 
@@ -70,7 +70,7 @@ namespace KlayGE
 				}
 				else
 				{
-					stream = VertexStreamPtr(new DynamicVertexStream(type, sizeof(D3DCOLOR), 1));
+					stream = VertexStreamPtr(new DynamicVertexStream<D3DCOLOR>(type, 1));
 				}
 				break;
 
@@ -81,7 +81,7 @@ namespace KlayGE
 				}
 				else
 				{
-					stream = VertexStreamPtr(new DynamicVertexStream(type, sizeof(D3DCOLOR), 1));
+					stream = VertexStreamPtr(new DynamicVertexStream<D3DCOLOR>(type, 1));
 				}
 				break;
 
@@ -92,7 +92,7 @@ namespace KlayGE
 				}
 				else
 				{
-					stream = VertexStreamPtr(new DynamicVertexStream(type, sizeof(float), 4));
+					stream = VertexStreamPtr(new DynamicVertexStream<float>(type, 4));
 				}
 				break;
 
@@ -103,7 +103,7 @@ namespace KlayGE
 				}
 				else
 				{
-					stream = VertexStreamPtr(new DynamicVertexStream(type, sizeof(U8), 4));
+					stream = VertexStreamPtr(new DynamicVertexStream<U8>(type, 4));
 				}
 				break;
 
@@ -114,7 +114,7 @@ namespace KlayGE
 				}
 				else
 				{
-					stream = VertexStreamPtr(new DynamicVertexStream(type, sizeof(float), elementNum));
+					stream = VertexStreamPtr(new DynamicVertexStream<float>(type, elementNum));
 				}
 				break;
 			}

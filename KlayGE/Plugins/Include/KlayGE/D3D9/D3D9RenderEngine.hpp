@@ -133,7 +133,7 @@ namespace KlayGE
 		D3D9IBConverter ibConverter_;
 	};
 
-	typedef SharePtr<D3D9RenderEngine> D3D9RenderEnginePtr;
+	typedef SharedPtr<D3D9RenderEngine> D3D9RenderEnginePtr;
 }
 
 #endif			// _D3D9RENDERENGINE_HPP

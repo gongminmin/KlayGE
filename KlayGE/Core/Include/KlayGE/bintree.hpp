@@ -17,7 +17,7 @@
 #define _BINTREE_HPP
 
 #include <cstddef>
-#include <KlayGE/SharePtr.hpp>
+#include <KlayGE/SharedPtr.hpp>
 
 namespace KlayGE
 {
@@ -36,14 +36,14 @@ namespace KlayGE
 	private:
 		T				root_;
 
-		SharePtr<bintree<T> >	lChild_;
-		SharePtr<bintree<T> >	rChild_;
+		SharedPtr<bintree<T> >	lChild_;
+		SharedPtr<bintree<T> >	rChild_;
 		bintree<T>*				parent_;
 
 	public:
 		bintree(const T& root = T(),
-					SharePtr<bintree<T> > lChild = SharePtr<bintree<T> >(),
-					SharePtr<bintree<T> > rChild = SharePtr<bintree<T> >(),
+					SharedPtr<bintree<T> > lChild = SharedPtr<bintree<T> >(),
+					SharedPtr<bintree<T> > rChild = SharedPtr<bintree<T> >(),
 					bintree<T>* parent = NULL)
 			: root_(root), 
 				lChild_(lChild), rChild_(rChild),
@@ -62,25 +62,25 @@ namespace KlayGE
 		const_reference RootData() const
 			{ return this->root_; }
 
-		SharePtr<bintree<T> >& LChild()
+		SharedPtr<bintree<T> >& LChild()
 			{ return this->lChild_; }
-		const SharePtr<bintree<T> >& LChild() const
+		const SharedPtr<bintree<T> >& LChild() const
 			{ return this->lChild_; }
-		SharePtr<bintree<T> >& RChild()
+		SharedPtr<bintree<T> >& RChild()
 			{ return this->rChild_; }
-		const SharePtr<bintree<T> >& RChild() const
+		const SharedPtr<bintree<T> >& RChild() const
 			{ return this->rChild_; }
 		bintree<T>*& Parent()
 			{ return this->parent_; }
 		const bintree<T>* Parent() const
 			{ return this->parent_; }
 
-		void LChild(const SharePtr<bintree<T> >& lChild)
+		void LChild(const SharedPtr<bintree<T> >& lChild)
 		{
 			this->lChild_ = lChild;
 			this->lChild_->parent_ = this;
 		}
-		void RChild(const SharePtr<bintree<T> >& rChild)
+		void RChild(const SharedPtr<bintree<T> >& rChild)
 		{
 			this->rChild_ = rChild;
 			this->rChild_->parent_ = this;
@@ -94,7 +94,7 @@ namespace KlayGE
 			}
 			else
 			{
-				this->LChild = SharePtr<bintree<T> >(new bintree<T>(data, NULL, NULL, this));
+				this->LChild = SharedPtr<bintree<T> >(new bintree<T>(data, NULL, NULL, this));
 			}
 		}
 		void RChildData(const_reference Data)
@@ -105,7 +105,7 @@ namespace KlayGE
 			}
 			else
 			{
-				this->RChild = SharePtr<bintree<T> >(new bintree<T>(data, NULL, NULL, this));
+				this->RChild = SharedPtr<bintree<T> >(new bintree<T>(data, NULL, NULL, this));
 			}
 		}
 

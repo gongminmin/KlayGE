@@ -13,7 +13,7 @@
 #ifndef _D3D9FONT_HPP
 #define _D3D9FONT_HPP
 
-#include <KlayGE/SharePtr.hpp>
+#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/MathTypes.hpp>
 
 #include <list>

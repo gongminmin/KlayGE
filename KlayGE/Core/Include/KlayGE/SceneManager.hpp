@@ -3,7 +3,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
-#include <KlayGE/SharePtr.hpp>
+#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/alloc.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/MathTypes.hpp>
@@ -21,7 +21,7 @@ namespace KlayGE
 		Quaternion	quat;
 	};
 
-	typedef SharePtr<ViewPoint> ViewPointPtr;
+	typedef SharedPtr<ViewPoint> ViewPointPtr;
 
 	class SceneManager
 	{

@@ -13,9 +13,10 @@ namespace KlayGE
 	void D3D9StaticVertexStream::Assign(const void* src, size_t vertexNum, size_t stride)
 	{
 		vertexNum_ = vertexNum;
-		const size_t size(this->ElementSize() * this->ElementNum() * vertexNum_);
+		const size_t vertexSize(this->ElementSize() * this->ElementNum());
+		const size_t size(vertexSize * vertexNum_);
 
-		COMPtr<IDirect3DDevice9> d3dDevice(reinterpret_cast<const D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
+		COMPtr<IDirect3DDevice9> d3dDevice(static_cast<const D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
 
 		IDirect3DVertexBuffer9* theBuffer;
 		TIF(d3dDevice->CreateVertexBuffer(size, D3DUSAGE_DYNAMIC, 0,
@@ -24,8 +25,23 @@ namespace KlayGE
 		buffer_ = COMPtr<IDirect3DVertexBuffer9>(theBuffer);
 
 		void* dest;
-		TIF(buffer_->Lock(0, 0, &dest, D3DLOCK_DISCARD));
-		Engine::MemoryInstance().Cpy(dest, src, size);
+ 		TIF(buffer_->Lock(0, 0, &dest, D3DLOCK_DISCARD));
+		if (stride != 0)
+		{
+			U8* destPtr(static_cast<U8*>(dest));
+			const U8* srcPtr(static_cast<const U8*>(static_cast<const void*>(src)));
+			for (size_t i = 0; i < vertexNum; ++ i)
+			{
+				memcpy(destPtr, srcPtr, vertexSize);
+
+				destPtr += vertexSize;
+				srcPtr += vertexSize + stride;
+			}
+		}
+		else
+		{
+			Engine::MemoryInstance().Cpy(dest, src, size);
+		}
 		buffer_->Unlock();
 	}
 
@@ -45,7 +61,7 @@ namespace KlayGE
 		indexNum_ = indexNum;
 		const size_t size(sizeof(U16) * indexNum_);
 
-		COMPtr<IDirect3DDevice9> d3dDevice(reinterpret_cast<const D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
+		COMPtr<IDirect3DDevice9> d3dDevice(static_cast<const D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
 
 		IDirect3DIndexBuffer9* buffer;
 		TIF(d3dDevice->CreateIndexBuffer(size, D3DUSAGE_DYNAMIC, D3DFMT_INDEX16,

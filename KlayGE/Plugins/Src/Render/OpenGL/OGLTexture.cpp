@@ -107,7 +107,7 @@ namespace KlayGE
 
 	void OGLTexture::CopyToTexture(Texture& target)
 	{
-		OGLTexture& other(reinterpret_cast<OGLTexture&>(target));
+		OGLTexture& other(static_cast<OGLTexture&>(target));
 		glCopyTexImage2D(other.GLTexture(), 0, 3, 0, 0, other.Width(), other.Height(), 0);
 	}
 
@@ -133,6 +133,10 @@ namespace KlayGE
 		GLenum glformat, gltype;
 		Convert(glinternalFormat, glformat, gltype, pf);
 		glTexSubImage2D(texture_, 0, xOffset, yOffset, width, height, glformat, gltype, pData);
+	}
+
+	void OGLTexture::CopyToMemory(void* data)
+	{
 	}
 
 	void OGLTexture::CustomAttribute(const String& name, void* pData)

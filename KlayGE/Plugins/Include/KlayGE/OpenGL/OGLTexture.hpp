@@ -1,7 +1,7 @@
 #ifndef _OGLTEXTURE_HPP
 #define _OGLTEXTURE_HPP
 
-#include <KlayGE/SharePtr.hpp>
+#include <KlayGE/SharedPtr.hpp>
 
 #include <KlayGE/OpenGL/OGLRenderEngine.hpp>
 
@@ -12,8 +12,8 @@ namespace KlayGE
 	class OGLTexture;
 	class OGLRenderTexture;
 
-	typedef SharePtr<OGLTexture>		D3D9TexturePtr;
-	typedef SharePtr<OGLRenderTexture> D3D9RenderTexturePtr;
+	typedef SharedPtr<OGLTexture>		D3D9TexturePtr;
+	typedef SharedPtr<OGLRenderTexture> D3D9RenderTexturePtr;
 
 	class OGLRenderFactory;
 
@@ -31,6 +31,7 @@ namespace KlayGE
 		void CopyToTexture(Texture& target);
 		void CopyMemoryToTexture(void* pData, PixelFormat pf,
 			U32 width = 0, U32 height = 0, U32 pitch = 0, U32 xOffset = 0, U32 yOffset = 0);
+		void CopyToMemory(void* data);
 
 		GLenum GLTexture() const
 			{ return texture_; }

@@ -21,7 +21,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	DInputKeyboard::DInputKeyboard(REFGUID guid, InputEngine& inputEng)
 	{
-		DInputEngine& dinputEng(reinterpret_cast<DInputEngine&>(inputEng));
+		DInputEngine& dinputEng(static_cast<DInputEngine&>(inputEng));
 
 		IDirectInputDevice8W* device;
 		dinputEng.DInput()->CreateDevice(guid, &device, NULL);

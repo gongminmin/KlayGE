@@ -21,7 +21,7 @@
 #include <KlayGE/RenderTarget.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/MathTypes.hpp>
-#include <KlayGE/SharePtr.hpp>
+#include <KlayGE/SharedPtr.hpp>
 
 #include <vector>
 #include <list>

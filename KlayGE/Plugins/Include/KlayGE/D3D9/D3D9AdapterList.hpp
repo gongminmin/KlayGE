@@ -4,7 +4,7 @@
 #include <d3d9.h>
 
 #include <KlayGE/COMPtr.hpp>
-#include <KlayGE/SharePtr.hpp>
+#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/alloc.hpp>
 #include <KlayGE/D3D9/D3D9Adapter.hpp>
 
@@ -30,7 +30,7 @@ namespace KlayGE
 		U32			currentAdapter_;
 	};
 
-	typedef SharePtr<D3D9AdapterList> D3D9AdapterListPtr;
+	typedef SharedPtr<D3D9AdapterList> D3D9AdapterListPtr;
 }
 
 #endif			// _D3D9ADAPTERLIST_HPP

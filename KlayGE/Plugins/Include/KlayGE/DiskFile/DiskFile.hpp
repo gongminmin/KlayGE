@@ -14,7 +14,7 @@
 #define _DISKFILE_HPP
 
 #include <KlayGE/VFile.hpp>
-#include <KlayGE/SharePtr.hpp>
+#include <KlayGE/SharedPtr.hpp>
 #include <fstream>
 
 #pragma comment(lib, "KlayGE_FileSystem_DiskFile.lib")
@@ -53,7 +53,7 @@ namespace KlayGE
 		void Swap(DiskFile& rhs);
 
 	private:
-		SharePtr<std::fstream> file_;
+		SharedPtr<std::fstream> file_;
 
 		WString		fileName_;
 		OpenMode	openMode_;

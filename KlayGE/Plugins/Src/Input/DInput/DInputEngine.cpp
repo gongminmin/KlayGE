@@ -61,27 +61,27 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	BOOL CALLBACK DInputEngine::EnumDevicesCB(LPCDIDEVICEINSTANCEW didi, void* pvRef)
 	{
-		DInputEngine* inputEng(reinterpret_cast<DInputEngine*>(pvRef));
+		DInputEngine& inputEng(*(reinterpret_cast<DInputEngine*>(pvRef)));
 
 		InputDevicePtr device;
 
 		switch (GET_DIDEVICE_TYPE(didi->dwDevType))
 		{
 		case DI8DEVTYPE_KEYBOARD:
-			device = InputDevicePtr(new DInputKeyboard(didi->guidInstance, *inputEng));
+			device = InputDevicePtr(new DInputKeyboard(didi->guidInstance, inputEng));
 			break;
 
 		case DI8DEVTYPE_MOUSE:
-			device = InputDevicePtr(new DInputMouse(didi->guidInstance, *inputEng));
+			device = InputDevicePtr(new DInputMouse(didi->guidInstance, inputEng));
 			break;
 
 		case DI8DEVTYPE_JOYSTICK:
-			device = InputDevicePtr(new DInputJoystick(didi->guidInstance, *inputEng));
+			device = InputDevicePtr(new DInputJoystick(didi->guidInstance, inputEng));
 			break;
 		}
 
 		device->Unacquire();
-		inputEng->devices_.push_back(device);
+		inputEng.devices_.push_back(device);
 
 		return DIENUM_CONTINUE;
 	}

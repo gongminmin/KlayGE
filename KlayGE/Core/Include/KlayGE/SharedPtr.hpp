@@ -1,4 +1,4 @@
-// SharePtr.hpp
+// SharedPtr.hpp
 // KlayGE 共享智能指针 头文件
 // Ver 2.0.0
 // 版权所有(C) 龚敏敏, 2003
@@ -10,8 +10,8 @@
 // 修改记录
 /////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _SHAREPTR_HPP
-#define _SHAREPTR_HPP
+#ifndef _SHAREDPTR_HPP
+#define _SHAREDPTR_HPP
 
 #include <KlayGE/ResPtr.hpp>
 
@@ -20,23 +20,23 @@ namespace KlayGE
 	// 引用计数指针
 	/////////////////////////////////////////////////////////////////////////////////
 	template <typename T>
-	class SharePtr : public ResPtr<T>
+	class SharedPtr : public ResPtr<T>
 	{
 	public:
-		SharePtr()
+		SharedPtr()
 			: ResPtr<T>()
 			{ }
-		explicit SharePtr(const stored_type& p)
+		explicit SharedPtr(const stored_type& p)
 			: ResPtr<T>(p)
 			{ }
-		SharePtr(const SharePtr& rhs)
+		SharedPtr(const SharedPtr& rhs)
 			: ResPtr<T>(rhs)
 			{ }
 		template <typename U>
-		SharePtr(const SharePtr<U>& rhs)
+		SharedPtr(const SharedPtr<U>& rhs)
 			: ResPtr<T>(rhs)
 			{ }
 	};
 }
 
-#endif			// _SHAREPTR_HPP
+#endif			// _SHAREDPTR_HPP

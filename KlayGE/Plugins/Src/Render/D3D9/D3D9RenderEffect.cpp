@@ -29,7 +29,7 @@ namespace KlayGE
 {
 	D3D9RenderEffect::D3D9RenderEffect(const String& srcData, UINT flags)
 	{
-		D3D9RenderEngine& renderEngine(reinterpret_cast<D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()));
+		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()));
 
 		ID3DXEffect* effect;
 		D3DXCreateEffect(renderEngine.D3DDevice().Get(), srcData.c_str(), srcData.size(),
@@ -39,7 +39,7 @@ namespace KlayGE
 
 	D3D9RenderEffect::D3D9RenderEffect(const D3D9RenderEffect& rhs)
 	{
-		D3D9RenderEngine& renderEngine(reinterpret_cast<D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()));
+		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()));
 
 		ID3DXEffect* effect;
 		rhs.effect_->CloneEffect(renderEngine.D3DDevice().Get(), &effect);

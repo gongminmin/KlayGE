@@ -81,7 +81,7 @@ namespace KlayGE
 
 		String fn;
 		Convert(fn, fileName);
-		file_ = SharePtr<fstream>(new fstream(fn.c_str(), mode));
+		file_ = SharedPtr<fstream>(new fstream(fn.c_str(), mode));
 
 		fileName_ = fileName;
 		openMode_ = openMode;
@@ -94,7 +94,7 @@ namespace KlayGE
 		if ((file_.Get() != NULL) && file_->is_open())
 		{
 			file_->close();
-			file_ = SharePtr<fstream>();
+			file_ = SharedPtr<fstream>();
 		}
 	}
 

@@ -2,7 +2,7 @@
 #define _RENDERABLE_HPP
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/SharePtr.hpp>
+#include <KlayGE/SharedPtr.hpp>
 
 namespace KlayGE
 {

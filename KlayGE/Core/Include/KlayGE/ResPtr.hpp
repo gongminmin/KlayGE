@@ -214,6 +214,8 @@ namespace KlayGE
 		}
 
 		// ÖØÔØ²Ù×÷·û
+		operator void*() const
+			{ return 0 != SP::Get(); }
 		bool operator!() const
 			{ return 0 == SP::Get(); }
 	};

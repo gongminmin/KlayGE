@@ -11,7 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/SharePtr.hpp>
+#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/DSound/DSAudio.hpp>
 
 #include <KlayGE/DSound/DSAudioFactory.hpp>

@@ -108,8 +108,9 @@ namespace KlayGE
 
 		// Copies (and maybe scales to fit) the contents of this texture to another texture.
 		virtual void CopyToTexture(Texture& target) = 0;
-		virtual void CopyMemoryToTexture(void* pData, PixelFormat pf,
+		virtual void CopyMemoryToTexture(void* data, PixelFormat pf,
 			U32 width = 0, U32 height = 0, U32 pitch = 0, U32 xOffset = 0, U32 yOffset = 0) = 0;
+		virtual void CopyToMemory(void* data) = 0;
 
 	protected:
 		U32		height_;

@@ -22,7 +22,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/SharePtr.hpp>
+#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/Memory.hpp>
 #include <KlayGE/VertexBuffer.hpp>
 #include <KlayGE/Viewport.hpp>
@@ -428,7 +428,7 @@ namespace KlayGE
 		U8 r, g, b, a;
 		clr.RGBA(r, g, b, a);
 
-		SharePtr<D3D9FontRenderable> renderable(new D3D9FontRenderable(effect_));
+		SharedPtr<D3D9FontRenderable> renderable(new D3D9FontRenderable(effect_));
 		renderable->RenderText(this->FontHeight(), charInfoMap_,
 			sx, sy, sz, xScale, yScale, D3DCOLOR_ARGB(a, r, g, b), text, flags);
 		return renderable;

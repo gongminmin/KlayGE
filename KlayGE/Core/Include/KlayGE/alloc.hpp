@@ -121,16 +121,16 @@ namespace KlayGE
 					ret = chuck;
 
 					chuck += blockSize;
-					theHead = reinterpret_cast<Obj*>(chuck);
+					theHead = static_cast<Obj*>(static_cast<void*>(chuck));
 
 					// 建立新的free list
 					Obj* curObj(0);
 					for (size_t i = 1; i < allocNum - 1; ++ i)
 					{
-						curObj = reinterpret_cast<Obj*>(chuck);
+						curObj = static_cast<Obj*>(static_cast<void*>(chuck));
 						chuck += blockSize;
 
-						curObj->next = reinterpret_cast<Obj*>(chuck);
+						curObj->next = static_cast<Obj*>(static_cast<void*>(chuck));
 					}
 					curObj->next = 0;
 				}

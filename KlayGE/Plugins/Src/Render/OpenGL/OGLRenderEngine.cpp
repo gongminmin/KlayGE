@@ -12,7 +12,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/SharePtr.hpp>
+#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Memory.hpp>
 #include <KlayGE/Engine.hpp>
@@ -731,7 +731,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::SetTexture(U32 stage, const Texture& texture)
 	{
-		const OGLTexture& oglTexture(reinterpret_cast<const OGLTexture&>(texture));
+		const OGLTexture& oglTexture(static_cast<const OGLTexture&>(texture));
 		glBindTexture(GL_TEXTURE_2D, oglTexture.GLTexture());
 	}
 

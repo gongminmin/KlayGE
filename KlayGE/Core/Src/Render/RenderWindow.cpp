@@ -1,5 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/SharePtr.hpp>
+#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/Viewport.hpp>
 #include <KlayGE/RenderTarget.hpp>
 

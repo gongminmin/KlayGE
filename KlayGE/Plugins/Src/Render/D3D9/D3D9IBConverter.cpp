@@ -27,7 +27,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	COMPtr<IDirect3DIndexBuffer9> D3D9IBConverter::Update(const VertexBuffer& vb)
 	{
-		COMPtr<IDirect3DDevice9> d3dDevice(reinterpret_cast<const D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
+		COMPtr<IDirect3DDevice9> d3dDevice(static_cast<const D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
 
 		if (indicies_.count < vb.NumIndices())
 		{

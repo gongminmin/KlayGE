@@ -23,7 +23,7 @@
 #pragma comment(lib, "KlayGE_Core.lib")
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/SharePtr.hpp>
+#include <KlayGE/SharedPtr.hpp>
 #include <vector>
 
 namespace KlayGE
@@ -85,11 +85,12 @@ namespace KlayGE
 		VertexStreamType type_;
 	};
 
+	template <typename elementType>
 	class DynamicVertexStream : public VertexStream
 	{
 	public:
-		DynamicVertexStream(VertexStreamType type, U8 elementSize, U8 elementNum)
-			: VertexStream(type, elementSize, elementNum)
+		DynamicVertexStream(VertexStreamType type, U8 elementNum)
+			: VertexStream(type, sizeof(elementType), elementNum)
 			{ }
 
 		bool IsStatic() const
@@ -184,7 +185,7 @@ namespace KlayGE
 
 		VertexBuffer(BufferType type)
 			: type_(type)
-			{ }
+			{ vertexStreams_.reserve(16); }
 
 		BufferType Type() const
 			{ return type_; }

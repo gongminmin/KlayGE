@@ -18,7 +18,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
-#include <KlayGE/SharePtr.hpp>
+#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/array.hpp>
 #include <KlayGE/MathTypes.hpp>
 #include <KlayGE/MapVector.hpp>
