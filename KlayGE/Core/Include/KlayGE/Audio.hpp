@@ -22,7 +22,6 @@
 #include <map>
 
 #include <KlayGE/AudioDataSource.hpp>
-#include <KlayGE/MgrBase.hpp>
 
 #pragma comment(lib, "KlayGE_Core.lib")
 
@@ -104,9 +103,9 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	class AudioEngine
 	{
-		typedef ManagerBase<AudioBufferPtr>		AudioBufs;
-		typedef AudioBufs::iterator				AudioBufsIter;
-		typedef AudioBufs::const_iterator		AudioBufsConstIter;
+		typedef std::map<size_t, AudioBufferPtr>	AudioBufs;
+		typedef AudioBufs::iterator					AudioBufsIter;
+		typedef AudioBufs::const_iterator			AudioBufsConstIter;
 
 	public:
 		AudioEngine();
@@ -116,11 +115,10 @@ namespace KlayGE
 
 		virtual std::wstring const & Name() const = 0;
 
-		void AddBuffer(size_t id, AudioBufferPtr const & buffer);
+		virtual void AddBuffer(size_t id, AudioBufferPtr const & buffer);
 
 		size_t NumBuffer() const;
-		AudioBufferPtr Buffer(size_t bufID);
-		AudioBufferPtr const & Buffer(size_t bufID) const;
+		virtual AudioBufferPtr Buffer(size_t bufID) const;
 
 		void Play(size_t bufID, bool loop = false);
 		void Stop(size_t bufID);
