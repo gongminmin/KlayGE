@@ -26,7 +26,7 @@
 				TreatWChar_tAsBuiltInType="TRUE"
 				ForceConformanceInForLoopScope="TRUE"
 				RuntimeTypeInfo="TRUE"
-				WarningLevel="3"
+				WarningLevel="4"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="4"/>
 			<Tool
@@ -61,7 +61,6 @@
 			CharacterSet="1">
 			<Tool
 				Name="VCCLCompilerTool"
-				OptimizeForProcessor="3"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;STRICT"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="FALSE"

@@ -26,6 +26,8 @@
 #include <vector>
 #include <sstream>
 
+#pragma warning(disable : 4800)
+#include <boost/pool/pool_alloc.hpp>
 #include <boost/crc.hpp>
 
 #include <KlayGE/LZSS/LZSS.hpp>
@@ -134,7 +136,7 @@ namespace
 				break;
 			}
 
-			std::vector<char> str(len);
+			std::vector<char, boost::pool_allocator<char> > str(len);
 			input.read(&str[0], str.size());
 			if (input.fail())
 			{
@@ -185,7 +187,7 @@ namespace KlayGE
 
 		std::stringstream dtCom;
 		{
-			std::vector<char> temp(mag_.DTLength);
+			std::vector<char, boost::pool_allocator<char> > temp(mag_.DTLength);
 			file_->read(&temp[0], temp.size());
 			dtCom.write(&temp[0], temp.size());
 		}
@@ -234,7 +236,7 @@ namespace KlayGE
 		{
 			std::stringstream chunk;
 			{
-				std::vector<char> temp(this->CurFileCompressedSize());
+				std::vector<char, boost::pool_allocator<char> > temp(this->CurFileCompressedSize());
 				file_->read(&temp[0], temp.size());
 				chunk.write(&temp[0], temp.size());
 			}

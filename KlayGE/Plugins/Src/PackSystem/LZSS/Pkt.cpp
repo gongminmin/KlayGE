@@ -52,11 +52,11 @@ namespace
 
 			int lastMatchLength;
 			uint8_t c;
-			std::vector<uint8_t> codeBuf(17, 0);		// codeBuf[1..16] saves eight units of code, and
+			std::vector<uint8_t, boost::pool_allocator<uint8_t> > codeBuf(17, 0);		// codeBuf[1..16] saves eight units of code, and
 												// codeBuf[0] works as eight flags, "1" representing that the unit
 												// is an unencoded letter (1 byte), "0" a position-and-length pair
 												// (2 bytes).  Thus, eight units require at most 16 bytes of code.
-			std::vector<uint8_t>::iterator codeBufPtr = codeBuf.begin() + 1;
+			std::vector<uint8_t, boost::pool_allocator<uint8_t> >::iterator codeBufPtr = codeBuf.begin() + 1;
 
 			uint8_t mask = 1;
 
@@ -346,11 +346,11 @@ namespace
 	// 根据树型结构打包目录
 	/////////////////////////////////////////////////////////////////////////////////
 	void Compress(std::ostream& outFile, DirTable& dirTable, std::string const & rootName,
-		std::vector<std::string> const & files)
+		std::vector<std::string, boost::pool_allocator<std::string> > const & files)
 	{
 		uint32_t curPos(0);
 
-		for (std::vector<std::string>::const_iterator iter = files.begin(); iter != files.end(); ++ iter)
+		for (std::vector<std::string, boost::pool_allocator<std::string> >::const_iterator iter = files.begin(); iter != files.end(); ++ iter)
 		{
 			boost::crc_32_type crc32;
 
@@ -388,7 +388,7 @@ namespace
 			dirTable.insert(std::make_pair(*iter, fd));
 
 			p->seekg(0);
-			std::vector<char> temp(fd.length);
+			std::vector<char, boost::pool_allocator<char> > temp(fd.length);
 			p->read(&temp[0], temp.size());
 			outFile.write(&temp[0], temp.size());
 		}
@@ -396,11 +396,11 @@ namespace
 
 	// 遍历目录，得出树型结构
 	/////////////////////////////////////////////////////////////////////////////////
-	std::vector<std::string> FindFiles(std::string const & rootName, std::string const & pathName)
+	std::vector<std::string, boost::pool_allocator<std::string> > FindFiles(std::string const & rootName, std::string const & pathName)
 	{
 		using namespace boost::filesystem;
 
-		std::vector<std::string> ret;
+		std::vector<std::string, boost::pool_allocator<std::string> > ret;
 
 		path findPath(rootName + '/' + pathName, native);
 		if (exists(findPath))
@@ -411,7 +411,7 @@ namespace
 
 				if (is_directory(*iter))
 				{
-					std::vector<std::string> sub(FindFiles(rootName, pathName + fileName + '/'));
+					std::vector<std::string, boost::pool_allocator<std::string> > sub(FindFiles(rootName, pathName + fileName + '/'));
 					ret.insert(ret.end(), sub.begin(), sub.end());
 				}
 				else
@@ -464,7 +464,7 @@ namespace KlayGE
 		std::string rootName;
 		TransPathName(rootName, dirName);
 
-		std::vector<std::string> files(FindFiles(rootName, ""));
+		std::vector<std::string, boost::pool_allocator<std::string> > files(FindFiles(rootName, ""));
 
 		DirTable dirTable;
 		std::stringstream tmpFile;
