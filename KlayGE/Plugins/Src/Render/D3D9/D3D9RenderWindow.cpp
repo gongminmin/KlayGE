@@ -310,13 +310,7 @@ namespace KlayGE
 		Verify(d3dDevice != NULL);
 		d3dDevice_ = MakeCOMPtr(d3dDevice);
 
-		IDirect3DSurface9* renderSurface;
-		d3dDevice_->GetRenderTarget(0, &renderSurface);
-		renderSurface_ = MakeCOMPtr(renderSurface);
-
-		IDirect3DSurface9* renderZBuffer;
-		d3dDevice_->GetDepthStencilSurface(&renderZBuffer);
-		renderZBuffer_ = MakeCOMPtr(renderZBuffer);
+		this->UpdateSurfacesPtrs();
 
 		active_ = true;
 		ready_ = true;
@@ -362,9 +356,19 @@ namespace KlayGE
 		return adapter_;
 	}
 
-	boost::shared_ptr<IDirect3DDevice9> const & D3D9RenderWindow::D3DDevice() const
+	boost::shared_ptr<IDirect3DDevice9> D3D9RenderWindow::D3DDevice() const
 	{
 		return d3dDevice_;
+	}
+
+	boost::shared_ptr<IDirect3DSurface9> D3D9RenderWindow::D3DRenderSurface() const
+	{
+		return renderSurface_;
+	}
+
+    boost::shared_ptr<IDirect3DSurface9> D3D9RenderWindow::D3DRenderZBuffer() const
+	{
+		return renderZBuffer_;
 	}
 
 	bool D3D9RenderWindow::RequiresTextureFlipping() const
@@ -397,8 +401,6 @@ namespace KlayGE
 
 	void D3D9RenderWindow::Reposition(int left, int top)
 	{
-		viewport_.left = left;
-		viewport_.top = top;
 	}
 
 	void D3D9RenderWindow::Resize(int width, int height)
@@ -424,17 +426,24 @@ namespace KlayGE
 				d3dpp_.BackBufferHeight = this->Height();
 				TIF(d3dDevice_->Reset(&d3dpp_));
 
-				IDirect3DSurface9* renderSurface;
-				d3dDevice_->GetRenderTarget(0, &renderSurface);
-				renderSurface_ = MakeCOMPtr(renderSurface);
+				this->UpdateSurfacesPtrs();
 
-				IDirect3DSurface9* renderZBuffer;
-				d3dDevice_->GetDepthStencilSurface(&renderZBuffer);
-				renderZBuffer_ = MakeCOMPtr(renderZBuffer);
+				factory.RenderEngineInstance().ActiveRenderTarget(factory.RenderEngineInstance().ActiveRenderTarget());
 
 				factory.OnResetDevice();
 			}
 		}
+	}
+
+	void D3D9RenderWindow::UpdateSurfacesPtrs()
+	{
+		IDirect3DSurface9* renderSurface;
+		d3dDevice_->GetRenderTarget(0, &renderSurface);
+		renderSurface_ = MakeCOMPtr(renderSurface);
+
+		IDirect3DSurface9* renderZBuffer;
+		d3dDevice_->GetDepthStencilSurface(&renderZBuffer);
+		renderZBuffer_ = MakeCOMPtr(renderZBuffer);
 	}
 
 	void D3D9RenderWindow::SwapBuffers()
@@ -448,33 +457,10 @@ namespace KlayGE
 	void D3D9RenderWindow::CustomAttribute(std::string const & name, void* pData)
 	{
 		// Valid attributes and their equvalent native functions:
-		// D3DDEVICE			: D3DDevice
-		// HWND					: WindowHandle
+		// D3DZBUFFER			: Z buffer surface
+		// DDBACKBUFFER			: Back buffer surface
+		// DDFRONTBUFFER		: Front buffer surface
 
-		if ("D3DDEVICE" == name)
-		{
-			IDirect3DDevice9** pDev = reinterpret_cast<IDirect3DDevice9**>(pData);
-			*pDev = d3dDevice_.get();
-
-			return;
-		}
-		
-		if ("HWND" == name)
-		{
-			HWND* phWnd = reinterpret_cast<HWND*>(pData);
-			*phWnd = hWnd_;
-
-			return;
-		}
-		
-		if ("IsTexture" == name)
-		{
-			bool* b = reinterpret_cast<bool*>(pData);
-			*b = false;
-
-			return;
-		}
-		
 		if ("D3DZBUFFER" == name)
 		{
 			IDirect3DSurface9** pSurf = reinterpret_cast<IDirect3DSurface9**>(pData);
@@ -498,5 +484,7 @@ namespace KlayGE
 
 			return;
 		}
+
+		assert(false);
 	}
 }

@@ -27,7 +27,7 @@ namespace KlayGE
 	class Frustum
 	{
 	public:
-		void CalculateFrustum(Matrix4 const & view, Matrix4 const & proj);
+		void CalculateFrustum(Matrix4 const & clip);
 		bool Visiable(Vector3 const & v) const;
 
 	private:

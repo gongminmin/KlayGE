@@ -17,33 +17,19 @@
 
 namespace KlayGE
 {
-	void Frustum::CalculateFrustum(Matrix4 const & view, Matrix4 const & proj)
+	void Frustum::CalculateFrustum(Matrix4 const & clip)
 	{
-		// Create the clip.
-		Matrix4 clip(view * proj);
+		Vector4 column1(clip(0, 0), clip(1, 0), clip(2, 0), clip(3, 0));
+		Vector4 column2(clip(0, 1), clip(1, 1), clip(2, 1), clip(3, 1));
+		Vector4 column3(clip(0, 2), clip(1, 2), clip(2, 2), clip(3, 2));
+		Vector4 column4(clip(0, 3), clip(1, 3), clip(2, 3), clip(3, 3));
 
-		// Calculate the left side of the frustum.
-		planes_[0] = Plane(clip(0, 3) + clip(0, 0), clip(1, 3) + clip(1, 0), clip(2, 3) + clip(2, 0),
-			clip(3, 3) + clip(3, 0));
-
-		// Calculate the right side of the frustum.
-		planes_[1] = Plane(clip(0, 3) - clip(0, 0), clip(1, 3) - clip(1, 0), clip(2, 3) - clip(2, 0),
-			clip(3, 3) - clip(3, 0));
-
-		// Calculate the bottom side of the frustum.
-		planes_[2] = Plane(clip(0, 3) + clip(0, 1), clip(1, 3) + clip(1, 1), clip(2, 3) + clip(2, 1),
-			clip(3, 3) + clip(3, 1));
-
-		// Calculate the top side of the frustum.
-		planes_[3] = Plane(clip(0, 3) - clip(0, 1), clip(1, 3) - clip(1, 1), clip(2, 3) - clip(2, 1),
-			clip(3, 3) - clip(3, 1));
-
-		// Calculate the far side of the frustum.
-		planes_[4] = Plane(clip(0, 3) - clip(0, 2), clip(1, 3) - clip(1, 2), clip(2, 3) - clip(2, 2),
-			clip(3, 3) - clip(3, 2));
-
-		// Calculate the near side of the frustum.
-		planes_[5] = Plane(clip(0, 2), clip(1, 2), clip(2, 2), clip(3, 2));
+		planes_[0] = column4 - column1;  // left
+		planes_[1] = column4 + column1;  // right
+		planes_[2] = column4 - column2;  // bottom
+		planes_[3] = column4 + column2;  // top
+		planes_[4] = column4 - column3;  // near
+		planes_[5] = column4 + column3;  // far
 
 		// Loop through each side of the frustum and normalize it.
 		for (PlanesType::iterator iter = planes_.begin(); iter != planes_.end(); ++ iter)
@@ -56,7 +42,7 @@ namespace KlayGE
 	{
 		for (PlanesType::const_iterator iter = planes_.begin(); iter != planes_.end(); ++ iter)
 		{
-			if (MathLib::Dot(*iter, Vector4(v.x(), v.y(), v.z(), 1)) < 0)
+			if (MathLib::DotCoord(*iter, v) < 0)
 			{
 				return false;
 			}

@@ -26,7 +26,7 @@ namespace KlayGE
 
 	void OCTree::ClipScene(Camera const & camera)
 	{
-		frustum_.CalculateFrustum(camera.ViewMatrix(), camera.ProjMatrix());
+		frustum_.CalculateFrustum(camera.ViewMatrix() * camera.ProjMatrix());
 
 		root_.Clip(frustum_);
 

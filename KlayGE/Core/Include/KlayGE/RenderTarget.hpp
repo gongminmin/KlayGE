@@ -1,8 +1,11 @@
 // RenderTarget.hpp
 // KlayGE 渲染目标类 头文件
-// Ver 2.2.0
-// 版权所有(C) 龚敏敏, 2003-2004
+// Ver 2.4.0
+// 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.4.0
+// 增加了IsTexture和SwapBuffers (2005.3.6)
 //
 // 2.2.0
 // 改用boost::timer计时 (2004.11.1)
@@ -51,6 +54,9 @@ namespace KlayGE
 		virtual void Active(bool state);
 
 		virtual bool RequiresTextureFlipping() const = 0;
+		virtual bool IsTexture() const = 0;
+
+		virtual void SwapBuffers() = 0;
 
 	protected:
 		void UpdateStats();

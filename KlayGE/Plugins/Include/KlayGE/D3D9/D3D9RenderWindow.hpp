@@ -43,7 +43,9 @@ namespace KlayGE
 		std::wstring const & Description() const;
 
 		D3D9Adapter const & Adapter() const;
-		boost::shared_ptr<IDirect3DDevice9> const & D3DDevice() const;
+		boost::shared_ptr<IDirect3DDevice9> D3DDevice() const;
+		boost::shared_ptr<IDirect3DSurface9> D3DRenderSurface() const;
+		boost::shared_ptr<IDirect3DSurface9> D3DRenderZBuffer() const;
 
 		void CustomAttribute(std::string const & name, void* pData);
 
@@ -52,7 +54,10 @@ namespace KlayGE
 		// Method for dealing with resize / move & 3d library
 		void WindowMovedOrResized();
 
-	protected:
+	private:
+		void UpdateSurfacesPtrs();
+
+	private:
 		std::string	name_;
 
 		HWND	hWnd_;				// Win32 Window handle
@@ -78,6 +83,8 @@ namespace KlayGE
 
 		std::wstring		description_;
 	};
+
+	typedef boost::shared_ptr<D3D9RenderWindow> D3D9RenderWindowPtr;
 }
 
 #endif			// _D3D9RENDERWINDOW_HPP

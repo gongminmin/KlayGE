@@ -1,8 +1,11 @@
 // Texture.hpp
 // KlayGE 纹理类 实现文件
-// Ver 2.3.0
+// Ver 2.4.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.4.0
+// 增加了DXTn的支持 (2005.3.6)
 //
 // 2.3.0
 // 增加了对浮点纹理格式的支持 (2005.1.25)

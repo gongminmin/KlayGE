@@ -1,3 +1,15 @@
+// RenderWindow.hpp
+// KlayGE 渲染窗口类 头文件
+// Ver 2.4.0
+// 版权所有(C) 龚敏敏, 2003-2005
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.4.0
+// 增加了IsTexture (2005.3.6)
+//
+// 修改记录
+//////////////////////////////////////////////////////////////////////////////////
+
 #ifndef _RENDERWINDOW_HPP
 #define _RENDERWINDOW_HPP
 
@@ -23,13 +35,15 @@ namespace KlayGE
 
 		virtual void Resize(int width, int height) = 0;
 		virtual void Reposition(int left, int top) = 0;
-		virtual void SwapBuffers() = 0;
 
 		virtual bool Closed() const = 0;
 
-		virtual void Update();
-
 		bool FullScreen() const;
+
+		bool IsTexture() const
+		{
+			return false;
+		}
 
 	protected:
 		bool isFullScreen_;

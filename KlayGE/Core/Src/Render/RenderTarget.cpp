@@ -79,6 +79,8 @@ namespace KlayGE
 		Context::Instance().SceneManagerInstance().Update();
 
 		this->UpdateStats();
+
+		this->SwapBuffers();
 	}
 
 	// 获取视口

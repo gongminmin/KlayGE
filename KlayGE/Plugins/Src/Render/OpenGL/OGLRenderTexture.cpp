@@ -22,12 +22,6 @@ namespace KlayGE
 
 	void OGLRenderTexture::CustomAttribute(std::string const & name, void* pData)
 	{
-		if ("IsTexture" == name)
-		{
-			bool* b = reinterpret_cast<bool*>(pData);
-			*b = true;
-
-			return;
-		}
+		assert(false);
 	}
 }

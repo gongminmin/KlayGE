@@ -102,12 +102,26 @@ namespace KlayGE
 								uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
 								: texture_(0)
 	{
-		numMipMaps_ = (0 == numMipMaps) ? 1 : numMipMaps;
 		format_		= format;
 		width_		= width;
 		height_		= height;
 
-		bpp_ = PixelFormatBits(format);
+		if (0 == numMipMaps)
+		{
+			while ((width > 1) && (height > 1))
+			{
+				++ numMipMaps_;
+
+				width /= 2;
+				height /= 2;
+			}
+		}
+		else
+		{
+			numMipMaps_ = numMipMaps;
+		}
+
+		bpp_ = PixelFormatBits(format_);
 
 		usage_ = usage;
 
@@ -130,19 +144,19 @@ namespace KlayGE
 				block_size = 16;
 			}
 
-			GLsizei const image_size = ((width + 3) / 4) * ((height + 3) / 4) * block_size;
+			GLsizei const image_size = ((width_ + 3) / 4) * ((height_ + 3) / 4) * block_size;
 
 			glCompressedTexImage2D(GL_TEXTURE_2D, numMipMaps_, glinternalFormat,
-				width, height, 0, image_size, NULL);
+				width_, height_, 0, image_size, NULL);
 		}
 		else
 		{
 			glTexImage2D(GL_TEXTURE_2D, numMipMaps_, glinternalFormat,
-				width, height, 0, glformat, GL_UNSIGNED_BYTE, NULL);
+				width_, height_, 0, glformat, GL_UNSIGNED_BYTE, NULL);
 		}
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	}
 
 	OGLTexture::~OGLTexture()
@@ -196,7 +210,29 @@ namespace KlayGE
 		Convert(glinternalFormat, glformat, pf);
 
 		glBindTexture(GL_TEXTURE_2D, texture_);
-		glTexSubImage2D(GL_TEXTURE_2D, level, xOffset, yOffset, width, height, glformat, GL_UNSIGNED_BYTE, data);
+
+		if (IsCompressedFormat(format_))
+		{
+			int block_size;
+			if (format_ == PF_DXT1)
+			{
+				block_size = 8;
+			}
+			else
+			{
+				block_size = 16;
+			}
+
+			GLsizei const image_size = ((width + 3) / 4) * ((height + 3) / 4) * block_size;
+
+			glCompressedTexSubImage2D(GL_TEXTURE_2D, level, xOffset, yOffset,
+				width, height, glformat, image_size, data);
+		}
+		else
+		{
+			glTexSubImage2D(GL_TEXTURE_2D, level, xOffset, yOffset,
+				width, height, glformat, GL_UNSIGNED_BYTE, data);
+		}
 	}
 
 	void OGLTexture::BuildMipSubLevels()
@@ -205,12 +241,6 @@ namespace KlayGE
 
 	void OGLTexture::CustomAttribute(std::string const & name, void* pData)
 	{
-		if ("IsTexture" == name)
-		{
-			bool* b = reinterpret_cast<bool*>(pData);
-			*b = true;
-
-			return;
-		}
+		assert(false);
 	}
 }

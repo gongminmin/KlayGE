@@ -1,10 +1,10 @@
 // D3D9Texture.hpp
 // KlayGE D3D9纹理类 头文件
-// Ver 2.3.1
+// Ver 2.4.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
 //
-// 2.3.1
+// 2.4.0
 // 改为派生自D3D9Resource (2005.3.3)
 //
 // 2.3.0

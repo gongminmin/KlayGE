@@ -295,5 +295,6 @@ namespace KlayGE
 
 	void OGLRenderWindow::CustomAttribute(std::string const & /*name*/, void* /*pData*/)
 	{
+		assert(false);
 	}
 }

@@ -24,15 +24,4 @@ namespace KlayGE
 	{
 		return isFullScreen_;
 	}
-
-	// ¸üÐÂäÖÈ¾´°¿Ú
-	/////////////////////////////////////////////////////////////////////////////////
-	void RenderWindow::Update()
-	{
-		// call superclass
-		RenderTarget::Update();
-
-		// Swap buffers
-		this->SwapBuffers();
-	}
 }

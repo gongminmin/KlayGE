@@ -15,6 +15,7 @@
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderTexture.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 
 #define NOMINMAX
@@ -38,22 +39,34 @@ namespace KlayGE
 		viewport_.height	= height_;
 	}
 
+	boost::shared_ptr<IDirect3DSurface9> D3D9RenderTexture::D3DRenderSurface() const
+	{
+		D3D9TexturePtr tex(static_cast<D3D9Texture*>(privateTex_.get()));
+		IDirect3DSurface9* surface;
+		tex->D3DTexture()->GetSurfaceLevel(0, &surface);
+		return MakeCOMPtr(surface);
+	}
+	
+	boost::shared_ptr<IDirect3DSurface9> D3D9RenderTexture::D3DRenderZBuffer() const
+	{
+		D3D9TexturePtr tex(static_cast<D3D9Texture*>(privateTex_.get()));
+		return tex->DepthStencil();
+	}
+
 	void D3D9RenderTexture::CustomAttribute(std::string const & name, void* pData)
 	{
 		if ("DDBACKBUFFER" == name)
 		{
-			D3D9TexturePtr tex(static_cast<D3D9Texture*>(privateTex_.get()));
 			IDirect3DSurface9** pSurf = reinterpret_cast<IDirect3DSurface9**>(pData);
-			tex->D3DTexture()->GetSurfaceLevel(0, pSurf);
+			*pSurf = this->D3DRenderSurface().get();
 
 			return;
 		}
 
 		if ("D3DZBUFFER" == name)
 		{
-			D3D9TexturePtr tex(static_cast<D3D9Texture*>(privateTex_.get()));
 			IDirect3DSurface9** pSurf = reinterpret_cast<IDirect3DSurface9**>(pData);
-			*pSurf = tex->DepthStencil().get();
+			*pSurf = this->D3DRenderZBuffer().get();
 
 			return;
 		}
@@ -75,12 +88,6 @@ namespace KlayGE
 			return;
 		}
 
-		if ("IsTexture" == name)
-		{
-			bool* b = reinterpret_cast<bool*>(pData);
-			*b = true;
-
-			return;
-		}
+		assert(false);
 	}
 }

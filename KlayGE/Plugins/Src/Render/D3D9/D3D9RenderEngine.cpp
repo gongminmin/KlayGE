@@ -391,13 +391,10 @@ namespace KlayGE
 	RenderWindowPtr D3D9RenderEngine::CreateRenderWindow(std::string const & name,
 		RenderSettings const & settings)
 	{
-		RenderWindowPtr win(new D3D9RenderWindow(d3d_, this->ActiveAdapter(), name,
+		D3D9RenderWindowPtr win(new D3D9RenderWindow(d3d_, this->ActiveAdapter(), name,
 			static_cast<D3D9RenderSettings const &>(settings)));
 
-		IDirect3DDevice9* d3dDevice;
-		win->CustomAttribute("D3DDEVICE", &d3dDevice);
-		d3dDevice_ = MakeCOMPtr(d3dDevice);
-		d3dDevice_->AddRef();
+		d3dDevice_ = win->D3DDevice();
 
 		this->ActiveRenderTarget(this->AddRenderTarget(win));
 

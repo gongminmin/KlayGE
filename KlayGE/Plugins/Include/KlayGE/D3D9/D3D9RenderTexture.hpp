@@ -1,10 +1,10 @@
 // D3D9RenderTexture.hpp
 // KlayGE D3D9渲染纹理类 头文件
-// Ver 2.3.1
+// Ver 2.4.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
 //
-// 2.3.1
+// 2.4.0
 // 去掉了OnLostDevice和OnResetDevice，改由texture管理 (2005.3.3)
 //
 // 2.3.0
@@ -31,7 +31,10 @@ namespace KlayGE
 	public:
 		D3D9RenderTexture(uint32_t width, uint32_t height);
 
-		virtual void CustomAttribute(std::string const & name, void* pData);
+		boost::shared_ptr<IDirect3DSurface9> D3DRenderSurface() const;
+		boost::shared_ptr<IDirect3DSurface9> D3DRenderZBuffer() const;
+
+		void CustomAttribute(std::string const & name, void* pData);
 
 		bool RequiresTextureFlipping() const
 			{ return true; }

@@ -348,33 +348,7 @@ namespace KlayGE
 
 	void D3D9Texture::CustomAttribute(std::string const & name, void* pData)
 	{
-		// Valid attributes and their equivalent native functions:
-		// D3DDEVICE            : D3DDeviceDriver
-		// HWND					: WindowHandle
-
-		if ("D3DDEVICE" == name)
-		{
-			IDirect3DDevice9** pDev = reinterpret_cast<IDirect3DDevice9**>(pData);
-			*pDev = d3dDevice_.get();
-
-			return;
-		}
-
-		if ("HWND" == name)
-		{
-			HWND *phWnd = reinterpret_cast<HWND*>(pData);
-			*phWnd = NULL;
-
-			return;
-		}
-
-		if ("IsTexture" == name)
-		{
-			bool* b = reinterpret_cast<bool*>(pData);
-			*b = true;
-
-			return;
-		}
+		assert(false);
 	}
 
 	void D3D9Texture::DoOnLostDevice()
