@@ -137,6 +137,9 @@
 					RelativePath=".\Src\Render\Mesh.cpp">
 				</File>
 				<File
+					RelativePath=".\Src\Render\RenderBuffer.cpp">
+				</File>
+				<File
 					RelativePath=".\Src\Render\RenderEffect.cpp">
 				</File>
 				<File
@@ -187,9 +190,6 @@
 							ObjectFile="$(IntDir)/$(InputName)1.obj"/>
 					</FileConfiguration>
 				</File>
-				<File
-					RelativePath=".\Src\Render\VertexBuffer.cpp">
-				</File>
 			</Filter>
 			<Filter
 				Name="Í·ÎÄ¼þ"
@@ -211,6 +211,9 @@
 				</File>
 				<File
 					RelativePath="Include\KlayGE\Renderable.hpp">
+				</File>
+				<File
+					RelativePath=".\Include\KlayGE\RenderBuffer.hpp">
 				</File>
 				<File
 					RelativePath=".\Include\KlayGE\RenderEffect.hpp">
@@ -235,9 +238,6 @@
 				</File>
 				<File
 					RelativePath="Include\KlayGE\Texture.hpp">
-				</File>
-				<File
-					RelativePath="Include\KlayGE\VertexBuffer.hpp">
 				</File>
 				<File
 					RelativePath="Include\KlayGE\Viewport.hpp">

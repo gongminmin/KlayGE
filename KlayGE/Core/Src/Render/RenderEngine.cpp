@@ -21,7 +21,7 @@
 #include <KlayGE/Engine.hpp>
 #include <KlayGE/Viewport.hpp>
 #include <KlayGE/RenderTarget.hpp>
-#include <KlayGE/VertexBuffer.hpp>
+#include <KlayGE/RenderBuffer.hpp>
 #include <KlayGE/RenderEffect.hpp>
 
 #include <KlayGE/RenderEngine.hpp>

@@ -114,8 +114,6 @@ namespace KlayGE
 		this->Direction(MakeVector(0.0f, 0.0f, 0.0f));
 
 		this->Reset();
-
-		Engine::MathInstance().Randomize();
 	}
 
 	// Îö¹¹º¯Êı

@@ -20,7 +20,7 @@
 #include <KlayGE/Light.hpp>
 #include <KlayGE/Material.hpp>
 #include <KlayGE/Viewport.hpp>
-#include <KlayGE/VertexBuffer.hpp>
+#include <KlayGE/RenderBuffer.hpp>
 #include <KlayGE/RenderTarget.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/OpenGL/OGLRenderWindow.hpp>
@@ -569,19 +569,19 @@ namespace KlayGE
 
 	// ‰÷»æ
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::Render(const VertexBuffer& vb)
+	void OGLRenderEngine::Render(const RenderBuffer& vb)
 	{
 		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_NORMAL_ARRAY);
 		glDisableClientState(GL_COLOR_ARRAY);
 
-		for (VertexBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
+		for (RenderBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
 			iter != vb.VertexStreamEnd(); ++ iter)
 		{
 			VertexStream& stream(*(*iter));
 			VertexStreamType type(stream.Type());
 
-			std::vector<U8, alloc<U8> > data(stream.VertexNum() * stream.ElementSize() * stream.ElementNum());
+			std::vector<U8, alloc<U8> > data(stream.NumVertices() * stream.ElementSize() * stream.ElementNum());
 			stream.CopyTo(&data[0], stream.VertexNum());
 
 			switch (type)
@@ -607,27 +607,27 @@ namespace KlayGE
 		GLenum mode;
 		switch (vb.Type())
 		{
-		case VertexBuffer::BT_PointList:
+		case RenderBuffer::BT_PointList:
 			mode = GL_POINTS;
 			break;
 
-		case VertexBuffer::BT_LineList:
+		case RenderBuffer::BT_LineList:
 			mode = GL_LINES;
 			break;
 
-		case VertexBuffer::BT_LineStrip:
+		case RenderBuffer::BT_LineStrip:
 			mode = GL_LINE_STRIP;
 			break;
 
-		case VertexBuffer::BT_TriangleList:
+		case RenderBuffer::BT_TriangleList:
 			mode = GL_TRIANGLES;
 			break;
 
-		case VertexBuffer::BT_TriangleStrip:
+		case RenderBuffer::BT_TriangleStrip:
 			mode = GL_TRIANGLE_STRIP;
 			break;
 
-		case VertexBuffer::BT_TriangleFan:
+		case RenderBuffer::BT_TriangleFan:
 			mode = GL_TRIANGLE_FAN;
 			break;
 		}

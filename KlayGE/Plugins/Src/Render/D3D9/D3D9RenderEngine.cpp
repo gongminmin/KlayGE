@@ -26,11 +26,13 @@
 #include <KlayGE/Light.hpp>
 #include <KlayGE/Material.hpp>
 #include <KlayGE/Viewport.hpp>
-#include <KlayGE/VertexBuffer.hpp>
+#include <KlayGE/RenderBuffer.hpp>
 #include <KlayGE/RenderTarget.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/D3D9/D3D9RenderWindow.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
+#include <KlayGE/D3D9/D3D9VertexStream.hpp>
+#include <KlayGE/D3D9/D3D9IndexStream.hpp>
 
 #include <cassert>
 #include <algorithm>
@@ -390,8 +392,6 @@ namespace KlayGE
 		this->DepthBufferDepthTest(settings.depthBuffer);
 		this->DepthBufferDepthWrite(settings.depthBuffer);
 
-		this->SetMaterial(Material(Color(1, 1, 1, 1)));
-
 		// get caps
 		d3d_->GetDeviceCaps(this->ActiveAdapter().AdapterNo(), D3DDEVTYPE_HAL, &caps_);
 
@@ -597,18 +597,167 @@ namespace KlayGE
 
 	// ‰÷»æ
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::Render(const VertexBuffer& vb)
+	void D3D9RenderEngine::Render(const RenderBuffer& vb)
 	{
-		vbConverter_.Update(vb);
+		D3DPRIMITIVETYPE primType;
+		U32 primCount;
+		U32 vertexCount(vb.UseIndices() ? vb.NumIndices() : vb.NumVertices());
+
+		switch (vb.Type())
+		{
+		case RenderBuffer::BT_PointList:
+			primType = D3DPT_POINTLIST;
+			primCount = vertexCount;
+			break;
+
+		case RenderBuffer::BT_LineList:
+			primType = D3DPT_LINELIST;
+			primCount = vertexCount / 2;
+			break;
+
+		case RenderBuffer::BT_LineStrip:
+			primType = D3DPT_LINESTRIP;
+			primCount = vertexCount - 1;
+			break;
+
+		case RenderBuffer::BT_TriangleList:
+			primType = D3DPT_TRIANGLELIST;
+			primCount = vertexCount / 3;
+			break;
+
+		case RenderBuffer::BT_TriangleStrip:
+			primType = D3DPT_TRIANGLESTRIP;
+			primCount = vertexCount - 2;
+			break;
+
+		case RenderBuffer::BT_TriangleFan:
+			primType = D3DPT_TRIANGLEFAN;
+			primCount = vertexCount - 2;
+			break;
+		}
+
+
+		VertexDeclType shaderDecl;
+		shaderDecl.reserve(currentDecl_.size());
+
+		D3DVERTEXELEMENT9 element;
+		element.Offset = 0;
+		element.Method = D3DDECLMETHOD_DEFAULT;
+
+		for (RenderBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
+			iter != vb.VertexStreamEnd(); ++ iter)
+		{
+			VertexStream& stream(*(*iter));
+			VertexStreamType type(stream.Type());
+
+			element.Stream = shaderDecl.size();
+
+			switch (type)
+			{
+			// Vertex xyzs
+			case VST_Positions:
+				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + stream.ElementNum();
+				element.Usage		= D3DDECLUSAGE_POSITION;
+				element.UsageIndex	= 0;
+				break;
+
+			// Normal
+			case VST_Normals:
+				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + stream.ElementNum();
+				element.Usage		= D3DDECLUSAGE_NORMAL;
+				element.UsageIndex	= 0;
+				break;
+
+			// Vertex colors
+			case VST_Diffuses:
+				element.Type		= D3DDECLTYPE_D3DCOLOR;
+				element.Usage		= D3DDECLUSAGE_COLOR;
+				element.UsageIndex	= 0;
+				break;
+
+			// Vertex speculars
+			case VST_Speculars:
+				element.Type		= D3DDECLTYPE_D3DCOLOR;
+				element.Usage		= D3DDECLUSAGE_COLOR;
+				element.UsageIndex	= 1;
+				break;
+			
+			// Blend Weights
+			case VST_BlendWeights:
+				element.Type		= D3DDECLTYPE_FLOAT4;
+				element.Usage		= D3DDECLUSAGE_BLENDWEIGHT;
+				element.UsageIndex	= 0;
+				break;
+
+			// Blend Indices
+			case VST_BlendIndices:
+				element.Type		= D3DDECLTYPE_D3DCOLOR;
+				element.Usage		= D3DDECLUSAGE_BLENDINDICES;
+				element.UsageIndex	= 0;
+				break;
+
+			// Do texture coords
+			case VST_TextureCoords0:
+			case VST_TextureCoords1:
+			case VST_TextureCoords2:
+			case VST_TextureCoords3:
+			case VST_TextureCoords4:
+			case VST_TextureCoords5:
+			case VST_TextureCoords6:
+			case VST_TextureCoords7:
+				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + stream.ElementNum();
+				element.Usage		= D3DDECLUSAGE_TEXCOORD;
+				element.UsageIndex	= type - VST_TextureCoords0;
+				break;
+			}
+
+			shaderDecl.push_back(element);
+
+
+			const size_t vertexSize(stream.ElementSize() * stream.ElementNum());
+			D3D9VertexStream& d3d9stream(static_cast<D3D9VertexStream&>(stream));
+			TIF(d3dDevice_->SetStreamSource(element.Stream,
+				d3d9stream.D3D9Buffer().Get(), 0, vertexSize));
+		}
+
+		{
+			element.Stream		= 0xFF;
+			element.Type		= D3DDECLTYPE_UNUSED;
+			element.Usage		= 0;
+			element.UsageIndex	= 0;
+			shaderDecl.push_back(element);
+		}
+
+		// Clear any previous steam sources
+		for (U32 i = shaderDecl.size() - 1; i < currentDecl_.size(); ++ i)
+		{
+			d3dDevice_->SetStreamSource(i, NULL, 0, 0);
+		}
+
+
+		if ((currentDecl_.size() != shaderDecl.size())
+			|| !Engine::MemoryInstance().Cmp(&currentDecl_[0], &shaderDecl[0],
+												sizeof(shaderDecl[0]) * shaderDecl.size()))
+		{
+			currentDecl_ = shaderDecl;
+
+			IDirect3DVertexDeclaration9* theVertexDecl;
+			d3dDevice_->CreateVertexDeclaration(&currentDecl_[0], &theVertexDecl);
+			currentVertexDecl_ = COMPtr<IDirect3DVertexDeclaration9>(theVertexDecl);
+		}
+
+		d3dDevice_->SetVertexDeclaration(currentVertexDecl_.Get());
+
 
 		if (vb.UseIndices())
 		{
-			d3dDevice_->SetIndices(ibConverter_.Update(vb).Get());
-			this->DrawIndexedPrimitive(vbConverter_.PrimType(), vb.NumVertices(), vbConverter_.PrimCount());
+			D3D9IndexStream& d3dis(static_cast<D3D9IndexStream&>(*vb.GetIndexStream()));
+			d3dDevice_->SetIndices(d3dis.D3D9Buffer().Get());
+			this->DrawIndexedPrimitive(primType, vb.NumVertices(), primCount);
 		}
 		else
 		{
-			this->DrawPrimitive(vbConverter_.PrimType(), vbConverter_.PrimCount());
+			this->DrawPrimitive(primType, primCount);
 		}
 	}
 
@@ -647,15 +796,7 @@ namespace KlayGE
 	{
 		if (depthTest)
 		{
-			// Use w-buffer if abialable
-			if (caps_.RasterCaps & D3DPRASTERCAPS_WBUFFER)
-			{
-				TIF(d3dDevice_->SetRenderState(D3DRS_ZENABLE, D3DZB_USEW));
-			}
-			else
-			{
-				TIF(d3dDevice_->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE));
-			}
+			TIF(d3dDevice_->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE));
 		}
 		else
 		{

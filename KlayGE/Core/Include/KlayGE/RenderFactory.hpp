@@ -2,7 +2,7 @@
 #define _RENDERFACTORY_HPP
 
 #include <KlayGE/Texture.hpp>
-#include <KlayGE/VertexBuffer.hpp>
+#include <KlayGE/RenderBuffer.hpp>
 
 namespace KlayGE
 {

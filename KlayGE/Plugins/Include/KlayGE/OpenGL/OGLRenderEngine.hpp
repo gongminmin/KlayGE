@@ -55,7 +55,7 @@ namespace KlayGE
 		void StartRendering();
 
 		void BeginFrame();
-		void Render(const VertexBuffer& vb);
+		void Render(const RenderBuffer& vb);
 		void EndFrame();
 
 		void DepthBufferDepthTest(bool depthTest);

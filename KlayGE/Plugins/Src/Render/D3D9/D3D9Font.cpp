@@ -24,7 +24,7 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/Memory.hpp>
-#include <KlayGE/VertexBuffer.hpp>
+#include <KlayGE/RenderBuffer.hpp>
 #include <KlayGE/Viewport.hpp>
 #include <KlayGE/RenderTarget.hpp>
 #include <KlayGE/Texture.hpp>
@@ -114,15 +114,22 @@ namespace
 	class D3D9FontRenderable : public Renderable
 	{
 	public:
-		D3D9FontRenderable(const RenderEffectPtr& effect)
-			: fontVB_(new VertexBuffer(VertexBuffer::BT_TriangleList)),
-				fontEffect_(effect)
+		D3D9FontRenderable(const RenderEffectPtr& effect,
+			const RenderBufferPtr& buffer,
+			std::vector<RenderBufferPtr, alloc<RenderBufferPtr> >& buffers)
+			: fontEffect_(effect), fontRB_(buffer),
+				buffers_(buffers)
 		{
-			fontVB_->AddVertexStream(VST_Positions, sizeof(float), 3);
-			fontVB_->AddVertexStream(VST_Diffuses, sizeof(D3DCOLOR), 1);
-			fontVB_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2);
+			fontRB_->AddVertexStream(VST_Positions, sizeof(float), 3);
+			fontRB_->AddVertexStream(VST_Diffuses, sizeof(D3DCOLOR), 1);
+			fontRB_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2);
 
-			fontVB_->AddIndexStream();
+			fontRB_->AddIndexStream();
+		}
+
+		void OnRenderEnd()
+		{
+			buffers_.push_back(fontRB_);
 		}
 
 		const WString& Name() const
@@ -131,11 +138,11 @@ namespace
 			return name_;
 		}
 
-		RenderEffectPtr GetRenderEffect()
+		RenderEffectPtr GetRenderEffect() const
 			{ return fontEffect_; }
 
-		VertexBufferPtr GetVertexBuffer()
-			{ return fontVB_; }
+		RenderBufferPtr GetRenderBuffer() const
+			{ return fontRB_; }
 
 		void RenderText(U32 fontHeight, D3D9Font::CharInfoMapType& charInfoMap, float sx, float sy, float sz,
 			float xScale, float yScale, U32 clr, const WString& text, U32 flags)
@@ -217,16 +224,18 @@ namespace
 				}
 			}
 
-			fontVB_->GetVertexStream(VST_Positions)->Assign(&xyzs[0], xyzs.size() / 3);
-			fontVB_->GetVertexStream(VST_Diffuses)->Assign(&clrs[0], clrs.size());
-			fontVB_->GetVertexStream(VST_TextureCoords0)->Assign(&texs[0], texs.size() / 2);
+			fontRB_->GetVertexStream(VST_Positions)->Assign(&xyzs[0], xyzs.size() / 3);
+			fontRB_->GetVertexStream(VST_Diffuses)->Assign(&clrs[0], clrs.size());
+			fontRB_->GetVertexStream(VST_TextureCoords0)->Assign(&texs[0], texs.size() / 2);
 
-			fontVB_->GetIndexStream()->Assign(&indices[0], indices.size());
+			fontRB_->GetIndexStream()->Assign(&indices[0], indices.size());
 		}
 
 	private:
-		RenderEffectPtr		fontEffect_;
-		VertexBufferPtr		fontVB_;
+		RenderEffectPtr fontEffect_;
+		RenderBufferPtr fontRB_;
+
+		std::vector<RenderBufferPtr, alloc<RenderBufferPtr> >& buffers_;
 	};
 }
 
@@ -428,7 +437,18 @@ namespace KlayGE
 		U8 r, g, b, a;
 		clr.RGBA(r, g, b, a);
 
-		SharedPtr<D3D9FontRenderable> renderable(new D3D9FontRenderable(effect_));
+		RenderBufferPtr buffer;
+		if (buffers_.empty())
+		{
+			buffer = RenderBufferPtr(new RenderBuffer(RenderBuffer::BT_TriangleList));
+		}
+		else
+		{
+			buffer = buffers_.back();
+			buffers_.pop_back();
+		}
+
+		SharedPtr<D3D9FontRenderable> renderable(new D3D9FontRenderable(effect_, buffer, buffers_));
 		renderable->RenderText(this->FontHeight(), charInfoMap_,
 			sx, sy, sz, xScale, yScale, D3DCOLOR_ARGB(a, r, g, b), text, flags);
 		return renderable;

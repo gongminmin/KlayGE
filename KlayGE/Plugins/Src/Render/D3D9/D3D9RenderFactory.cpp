@@ -19,7 +19,8 @@
 #include <KlayGE/D3D9/D3D9RenderTexture.hpp>
 #include <KlayGE/D3D9/D3D9RenderEffect.hpp>
 #include <KlayGE/D3D9/D3D9Font.hpp>
-#include <KlayGE/D3D9/D3D9VertexBuffer.hpp>
+#include <KlayGE/D3D9/D3D9VertexStream.hpp>
+#include <KlayGE/D3D9/D3D9IndexStream.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
@@ -42,80 +43,31 @@ namespace KlayGE
 			switch (type)
 			{
 			case VST_Positions:
-				if (staticStream)
-				{
-					stream = VertexStreamPtr(new D3D9StaticVertexStream(type, sizeof(float), 3));
-				}
-				else
-				{
-					stream = VertexStreamPtr(new DynamicVertexStream<float>(type, 3));
-				}
+				stream = VertexStreamPtr(new D3D9VertexStream(type, sizeof(float), 3, staticStream));
 				break;
 
 			case VST_Normals:
-				if (staticStream)
-				{
-					stream = VertexStreamPtr(new D3D9StaticVertexStream(type, sizeof(float), 3));
-				}
-				else
-				{
-					stream = VertexStreamPtr(new DynamicVertexStream<float>(type, 3));
-				}
+				stream = VertexStreamPtr(new D3D9VertexStream(type, sizeof(float), 3, staticStream));
 				break;
 
 			case VST_Diffuses:
-				if (staticStream)
-				{
-					stream = VertexStreamPtr(new D3D9StaticVertexStream(type, sizeof(D3DCOLOR), 1));
-				}
-				else
-				{
-					stream = VertexStreamPtr(new DynamicVertexStream<D3DCOLOR>(type, 1));
-				}
+				stream = VertexStreamPtr(new D3D9VertexStream(type, sizeof(D3DCOLOR), 1, staticStream));
 				break;
 
 			case VST_Speculars:
-				if (staticStream)
-				{
-					stream = VertexStreamPtr(new D3D9StaticVertexStream(type, sizeof(D3DCOLOR), 1));
-				}
-				else
-				{
-					stream = VertexStreamPtr(new DynamicVertexStream<D3DCOLOR>(type, 1));
-				}
+				stream = VertexStreamPtr(new D3D9VertexStream(type, sizeof(D3DCOLOR), 1, staticStream));
 				break;
 
 			case VST_BlendWeights:
-				if (staticStream)
-				{
-					stream = VertexStreamPtr(new D3D9StaticVertexStream(type, sizeof(float), 4));
-				}
-				else
-				{
-					stream = VertexStreamPtr(new DynamicVertexStream<float>(type, 4));
-				}
+				stream = VertexStreamPtr(new D3D9VertexStream(type, sizeof(float), 4, staticStream));
 				break;
 
 			case VST_BlendIndices:
-				if (staticStream)
-				{
-					stream = VertexStreamPtr(new D3D9StaticVertexStream(type, sizeof(U8), 4));
-				}
-				else
-				{
-					stream = VertexStreamPtr(new DynamicVertexStream<U8>(type, 4));
-				}
+				stream = VertexStreamPtr(new D3D9VertexStream(type, sizeof(U8), 4, staticStream));
 				break;
 
 			default:
-				if (staticStream)
-				{
-					stream = VertexStreamPtr(new D3D9StaticVertexStream(type, sizeof(float), elementNum));
-				}
-				else
-				{
-					stream = VertexStreamPtr(new DynamicVertexStream<float>(type, elementNum));
-				}
+				stream = VertexStreamPtr(new D3D9VertexStream(type, sizeof(float), elementNum, staticStream));
 				break;
 			}
 
@@ -124,14 +76,7 @@ namespace KlayGE
 
 		IndexStreamPtr MakeIndexStream(bool staticStream = false)
 		{
-			if (staticStream)
-			{
-				return IndexStreamPtr(new D3D9StaticIndexStream);
-			}
-			else
-			{
-				return IndexStreamPtr(new DynamicIndexStream);
-			}
+			return IndexStreamPtr(new D3D9IndexStream(staticStream));
 		}
 	};
 

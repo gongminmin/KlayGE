@@ -57,6 +57,7 @@ namespace KlayGE
 
 		LOGFONTW logFont_;
 
+		std::vector<RenderBufferPtr, alloc<RenderBufferPtr> > buffers_;
 		RenderEffectPtr	effect_;
 		TexturePtr		theTexture_;
 

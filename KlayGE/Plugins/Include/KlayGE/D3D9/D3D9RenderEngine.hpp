@@ -4,8 +4,6 @@
 #include <KlayGE/alloc.hpp>
 #include <KlayGE/COMPtr.hpp>
 #include <KlayGE/D3D9/D3D9AdapterList.hpp>
-#include <KlayGE/D3D9/D3D9VBConverter.hpp>
-#include <KlayGE/D3D9/D3D9IBConverter.hpp>
 
 #define NOMINMAX
 
@@ -64,7 +62,7 @@ namespace KlayGE
 		void StartRendering();
 
 		void BeginFrame();
-		void Render(const VertexBuffer& vb);
+		void Render(const RenderBuffer& vb);
 		void EndFrame();
 
 		void DepthBufferDepthTest(bool depthTest);
@@ -129,8 +127,9 @@ namespace KlayGE
 		D3DCOLOR clearClr_;
 		U32 clearFlags_;
 
-		D3D9VBConverter vbConverter_;
-		D3D9IBConverter ibConverter_;
+		typedef std::vector<D3DVERTEXELEMENT9, alloc<D3DVERTEXELEMENT9> > VertexDeclType;
+		VertexDeclType currentDecl_;
+		COMPtr<IDirect3DVertexDeclaration9> currentVertexDecl_;
 	};
 
 	typedef SharedPtr<D3D9RenderEngine> D3D9RenderEnginePtr;

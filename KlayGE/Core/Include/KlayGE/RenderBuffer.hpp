@@ -1,5 +1,5 @@
-// VertexBuffer.hpp
-// KlayGE VertexBuffer类 头文件
+// RenderBuffer.hpp
+// KlayGE 渲染缓冲区类 头文件
 // Ver 2.0.4
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
@@ -17,8 +17,8 @@
 // 修改记录
 /////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _VERTEXBUFFER_HPP
-#define _VERTEXBUFFER_HPP
+#ifndef _RENDERBUFFER_HPP
+#define _RENDERBUFFER_HPP
 
 #pragma comment(lib, "KlayGE_Core.lib")
 
@@ -70,9 +70,8 @@ namespace KlayGE
 		virtual bool IsStatic() const = 0;
 
 		virtual void Assign(const void* src, size_t vertexNum, size_t stride = 0) = 0;
-		virtual void CopyTo(void* dest, size_t vertexNum) const = 0;
 
-		virtual size_t VertexNum() const = 0;
+		virtual size_t NumVertices() const = 0;
 
 		size_t ElementSize() const
 			{ return elementSize_; }
@@ -85,88 +84,20 @@ namespace KlayGE
 		VertexStreamType type_;
 	};
 
-	template <typename elementType>
-	class DynamicVertexStream : public VertexStream
-	{
-	public:
-		DynamicVertexStream(VertexStreamType type, U8 elementNum)
-			: VertexStream(type, sizeof(elementType), elementNum)
-			{ }
-
-		bool IsStatic() const
-			{ return false; }
-
-		void Assign(const void* data, size_t vertexNum, size_t stride = 0)
-		{
-			const size_t vertexSize(this->ElementSize() * this->ElementNum());
-			vertices_.resize(vertexNum * vertexSize);
-
-			if (stride != 0)
-			{
-				U8* dest(&vertices_[0]);
-				const U8* src(static_cast<const U8*>(static_cast<const void*>(data)));
-				for (size_t i = 0; i < vertexNum; ++ i)
-				{
-					memcpy(dest, src, vertexSize);
-
-					dest += vertexSize;
-					src += vertexSize + stride;
-				}
-			}
-			else
-			{
-				memcpy(&vertices_[0], data, vertices_.size());
-			}
-		}
-
-		void CopyTo(void* dest, size_t vertexNum) const
-			{ memcpy(dest, &vertices_[0], vertexNum * this->ElementSize() * this->ElementNum()); }
-
-		size_t VertexNum() const
-			{ return vertices_.size() / (this->ElementSize() * this->ElementNum()); }
-
-	private:
-		std::vector<U8, alloc<U8> > vertices_;
-	};
-
 	class IndexStream
 	{
 	public:
 		virtual ~IndexStream()
 			{ }
 
+		virtual size_t NumIndices() const = 0;
+
 		virtual bool IsStatic() const = 0;
-
-		virtual void Assign(const void* src, size_t indexNum) = 0;
-		virtual void CopyTo(void* dest, size_t indexNum) const = 0;
-
-		virtual size_t IndexNum() const = 0;
-	};
-
-	class DynamicIndexStream : public IndexStream
-	{
-	public:
-		bool IsStatic() const
-			{ return false; }
-
-		void Assign(const void* src, size_t indexNum)
-		{
-			indices_.resize(indexNum);
-			memcpy(&indices_[0], src, indexNum * sizeof(U16));
-		}
-
-		void CopyTo(void* dest, size_t indexNum) const
-			{ memcpy(dest, &indices_[0], indexNum * sizeof(U16)); }
-
-		size_t IndexNum() const
-			{ return indices_.size(); }
-
-	private:
-		std::vector<U16, alloc<U16> > indices_;
+		virtual void Assign(const void* src, size_t numIndices) = 0;
 	};
 
 
-	class VertexBuffer
+	class RenderBuffer
 	{
 	public:
 		enum BufferType
@@ -183,7 +114,7 @@ namespace KlayGE
 		typedef VertexStreamsType::iterator VertexStreamIterator;
 		typedef VertexStreamsType::const_iterator VertexStreamConstIterator;
 
-		VertexBuffer(BufferType type)
+		RenderBuffer(BufferType type)
 			: type_(type)
 			{ vertexStreams_.reserve(16); }
 
@@ -191,7 +122,7 @@ namespace KlayGE
 			{ return type_; }
 
 		size_t NumVertices() const
-			{ return vertexStreams_.empty() ? 0 : vertexStreams_[0]->VertexNum(); }
+			{ return vertexStreams_.empty() ? 0 : vertexStreams_[0]->NumVertices(); }
 
 		void AddVertexStream(VertexStreamType type, U8 elementSize, U8 elementNum, bool staticStream = false);
 		VertexStreamPtr GetVertexStream(VertexStreamType type) const;
@@ -204,8 +135,9 @@ namespace KlayGE
 
 		bool UseIndices() const
 			{ return this->NumIndices() != 0; }
+
 		size_t NumIndices() const
-			{ return (NULL == indexStream_.Get()) ? 0 : indexStream_->IndexNum(); }
+			{ return indexStream_->NumIndices(); }
 
 		void AddIndexStream(bool staticStream = false);
 		IndexStreamPtr GetIndexStream() const
@@ -221,4 +153,4 @@ namespace KlayGE
 	};
 }
 
-#endif		// _VERTEXBUFFER_HPP
+#endif		// _RENDERBUFFER_HPP

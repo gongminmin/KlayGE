@@ -65,8 +65,8 @@ namespace KlayGE
 	typedef SharedPtr<VertexStream> VertexStreamPtr;
 	class IndexStream;
 	typedef SharedPtr<IndexStream> IndexStreamPtr;
-	class VertexBuffer;
-	typedef SharedPtr<VertexBuffer> VertexBufferPtr;
+	class RenderBuffer;
+	typedef SharedPtr<RenderBuffer> RenderBufferPtr;
 	struct Viewport;
 	class RenderFactory;
 	typedef SharedPtr<RenderFactory> RenderFactoryPtr;

@@ -76,8 +76,10 @@ namespace KlayGE
 				itemIter != queueIter->second.end(); ++ itemIter)
 			{
 				Renderable& obj(*(*itemIter));
-				obj.OnRender();
-				renderEngine.Render(*obj.GetVertexBuffer());
+
+				obj.OnRenderBegin();
+				renderEngine.Render(*obj.GetRenderBuffer());
+				obj.OnRenderEnd();
 			}
 		}
 		renderQueue_.clear();

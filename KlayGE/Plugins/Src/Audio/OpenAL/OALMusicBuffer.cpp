@@ -15,6 +15,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
@@ -73,7 +74,6 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OALMusicBuffer::LoopUpdateBuffer()
 	{
-		ALuint buffersReturned(0);
 		ALint processed;
 		bool finishedPlaying(false);
 		size_t buffersInQueue(bufferQueue_.size());
@@ -84,8 +84,6 @@ namespace KlayGE
 			alGetSourcei(source_, AL_BUFFERS_PROCESSED, &processed);
 			if (processed > 0)
 			{
-				buffersReturned += processed;
-
 				while (processed != 0)
 				{
 					-- processed;
@@ -119,6 +117,10 @@ namespace KlayGE
 						}
 					}
 				}
+			}
+			else
+			{
+				Sleep(500 / this->PreSecond);
 			}
 		}
 	}

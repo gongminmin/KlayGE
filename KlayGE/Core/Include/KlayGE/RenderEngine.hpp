@@ -145,7 +145,7 @@ namespace KlayGE
 			{ return renderEffect_; }
 
 		virtual void BeginFrame() = 0;
-		virtual void Render(const VertexBuffer& vb) = 0;
+		virtual void Render(const RenderBuffer& vb) = 0;
 		virtual void EndFrame() = 0;
 
 		virtual void ClearColor(const Color& clr) = 0;

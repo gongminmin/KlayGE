@@ -25,6 +25,8 @@ namespace KlayGE
 {
 	MathLib* MathLib::Create(CPUOptimal cpu)
 	{
+		std::srand(static_cast<unsigned int>(time(NULL)));
+
 		switch (cpu)
 		{
 		case CPU_Standard:

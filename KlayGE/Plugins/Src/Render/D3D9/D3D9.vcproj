@@ -110,7 +110,7 @@
 				RelativePath=".\D3D9Font.cpp">
 			</File>
 			<File
-				RelativePath=".\D3D9IBConverter.cpp">
+				RelativePath=".\D3D9IndexStream.cpp">
 			</File>
 			<File
 				RelativePath=".\D3D9RenderEffect.cpp">
@@ -131,10 +131,7 @@
 				RelativePath=".\D3D9Texture.cpp">
 			</File>
 			<File
-				RelativePath=".\D3D9VBConverter.cpp">
-			</File>
-			<File
-				RelativePath=".\D3D9VertexBuffer.cpp">
+				RelativePath=".\D3D9VertexStream.cpp">
 			</File>
 			<File
 				RelativePath=".\D3D9VideoMode.cpp">
@@ -154,7 +151,7 @@
 				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9Font.hpp">
 			</File>
 			<File
-				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9IBConverter.hpp">
+				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9IndexStream.hpp">
 			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9RenderEffect.hpp">
@@ -175,10 +172,7 @@
 				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9Texture.hpp">
 			</File>
 			<File
-				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9VBConverter.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9VertexBuffer.hpp">
+				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9VertexStream.hpp">
 			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9VideoMode.hpp">

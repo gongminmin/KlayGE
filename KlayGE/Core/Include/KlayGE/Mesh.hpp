@@ -4,7 +4,7 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/MathTypes.hpp>
-#include <KlayGE/VertexBuffer.hpp>
+#include <KlayGE/RenderBuffer.hpp>
 
 #include <vector>
 
@@ -15,12 +15,12 @@ namespace KlayGE
 	public:
 		Mesh();
 
-		RenderEffectPtr GetRenderEffect()
+		RenderEffectPtr GetRenderEffect() const
 			{ return effect_; }
 		void SetRenderEffect(const RenderEffectPtr& effect)
 			{ effect_ = effect; }
 
-		VertexBufferPtr GetVertexBuffer();
+		RenderBufferPtr GetRenderBuffer() const;
 
 		const WString& Name() const;
 
@@ -43,8 +43,13 @@ namespace KlayGE
 		void ComputeNormals();
 
 	private:
-		VertexBufferPtr vb_;
+		RenderBufferPtr rb_;
 		RenderEffectPtr effect_;
+
+		std::vector<float, alloc<float> > vertices_;
+		std::vector<float, alloc<float> > normals_;
+
+		std::vector<U16, alloc<U16> > indices_;
 	};
 }
 
