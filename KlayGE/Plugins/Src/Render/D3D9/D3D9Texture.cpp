@@ -1,3 +1,18 @@
+// D3D9Font.cpp
+// KlayGE D3D9Texture类 实现文件
+// Ver 2.0.4
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.0.4
+// 修正了当源和目标格式不同时CopyMemoryToTexture出错的Bug (2004.3.19)
+//
+// 2.0.0
+// 初次建立 (2003.8.18)
+//
+// 修改记录
+/////////////////////////////////////////////////////////////////////////////////
+
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Memory.hpp>
@@ -51,6 +66,38 @@ namespace
 		return D3DFMT_UNKNOWN;
 	}
 
+	KlayGE::PixelFormat Convert(D3DFORMAT format)
+	{
+		switch (format)
+		{
+		case D3DFMT_L8:
+			return PF_L8;
+
+		case D3DFMT_A8:
+			return PF_A8;
+
+		case D3DFMT_A4L4:
+			return PF_A4L4;
+
+		case D3DFMT_R5G6B5:
+			return PF_R5G6B5;
+
+		case D3DFMT_A4R4G4B4:
+			return PF_A4R4G4B4;
+
+		case D3DFMT_X8R8G8B8:
+			return PF_X8R8G8B8;
+
+		case D3DFMT_A8R8G8B8:
+			return PF_A8R8G8B8;
+
+		case D3DFMT_A2B10G10R10:
+			return PF_A2R10G10B10;
+		}
+
+		return PF_Unknown;
+	}
+
 	void ColorMasks(KlayGE::PixelFormat format, U32& red, U32& green, U32& blue, U32& alpha,
 		U8& redOffset, U8& greenOffset, U8& blueOffset, U8& alphaOffset)
 	{
@@ -66,6 +113,18 @@ namespace
 			greenOffset	= 0xFF;
 			blueOffset	= 0xFF;
 			alphaOffset	= 0;
+			break;
+
+		case PF_A4L4:
+			red			= 0x0000000F;
+			green		= 0x0000000F;
+			blue		= 0x0000000F;
+			alpha		= 0x000000F0;
+
+			redOffset	= 0;
+			greenOffset	= 0;
+			blueOffset	= 0;
+			alphaOffset	= 4;
 			break;
 
 		case PF_R5G6B5:
@@ -152,11 +211,23 @@ namespace
 			green		= 0x00000000;
 			blue		= 0x00000000;
 			alpha		= 0x000000FF;
-			
+
 			redOffset	= 0xFF;
 			greenOffset	= 0xFF;
 			blueOffset	= 0xFF;
 			alphaOffset	= 0;
+			break;
+
+		case D3DFMT_A4L4:
+			red			= 0x0000000F;
+			green		= 0x0000000F;
+			blue		= 0x0000000F;
+			alpha		= 0x000000F0;
+
+			redOffset	= 0;
+			greenOffset	= 0;
+			blueOffset	= 0;
+			alphaOffset	= 4;
 			break;
 
 		case D3DFMT_R5G6B5:
@@ -164,7 +235,7 @@ namespace
 			green		= 0x000007E0;
 			blue		= 0x0000001F;
 			alpha		= 0x00000000;
-			
+
 			redOffset	= 11;
 			greenOffset	= 5;
 			blueOffset	= 0;
@@ -176,7 +247,7 @@ namespace
 			green		= 0x000000F0;
 			blue		= 0x0000000F;
 			alpha		= 0x0000F000;
-			
+
 			redOffset	= 8;
 			greenOffset	= 4;
 			blueOffset	= 0;
@@ -189,7 +260,7 @@ namespace
 			green		= 0x0000FF00;
 			blue		= 0x000000FF;
 			alpha		= 0x00000000;
-			
+
 			redOffset	= 16;
 			greenOffset	= 8;
 			blueOffset	= 0;
@@ -201,7 +272,7 @@ namespace
 			green		= 0x0000FF00;
 			blue		= 0x000000FF;
 			alpha		= 0xFF000000;
-			
+
 			redOffset	= 16;
 			greenOffset	= 8;
 			blueOffset	= 0;
@@ -213,7 +284,7 @@ namespace
 			green		= 0x000FFC00;
 			blue		= 0x000003FF;
 			alpha		= 0xC0000000;
-			
+
 			redOffset	= 20;
 			greenOffset	= 10;
 			blueOffset	= 0;
@@ -225,7 +296,7 @@ namespace
 			green		= 0x00000000;
 			blue		= 0x00000000;
 			alpha		= 0x00000000;
-			
+
 			redOffset	= 0xFF;
 			greenOffset	= 0xFF;
 			blueOffset	= 0xFF;
@@ -280,6 +351,8 @@ namespace KlayGE
 			TIF(d3dTexture_->GetLevelDesc(0, &desc));
 			width_	= desc.Width;
 			height_	= desc.Height;
+			format_ = Convert(desc.Format);
+			bpp_	= PixelFormatBits(format_);
 		}
 		else
 		{
@@ -303,6 +376,8 @@ namespace KlayGE
 			TIF(d3dTexture_->GetLevelDesc(0, &desc));
 			width_	= desc.Width;
 			height_	= desc.Height;
+			format_ = Convert(desc.Format);
+			bpp_	= PixelFormatBits(format_);
 
 			// Now get the format of the depth stencil surface.
 			d3dDevice_->GetDepthStencilSurface(&tempSurf);
@@ -410,16 +485,15 @@ namespace KlayGE
 
 				for (U32 x = 0; x < width; ++ x)
 				{
-					U32 srcPixel;
-
-					memcpy(&srcPixel, pBuffer, sizeof(srcPixel));
-					pSrc += sizeof(srcPixel);
+					U32 srcPixel(0);
+					memcpy(&srcPixel, pSrc, bpp / 8);
+					pSrc += bpp / 8;
 
 					// 转化成R8G8B8A8
-					U8 red(static_cast<U8>((srcPixel & srcRed) >> srcRedOffset << (8 - srcRedBitCount)));
-					U8 green(static_cast<U8>((srcPixel & srcGreen) >> srcGreenOffset<< (8 - srcGreenBitCount)));
-					U8 blue(static_cast<U8>((srcPixel & srcBlue) >> srcBlueOffset<< (8 - srcBlueBitCount)));
-					U8 alpha(static_cast<U8>((srcPixel & srcAlpha) >> srcAlphaOffset<< (8 - srcAlphaBitCount)));
+					U32 red(static_cast<U8>((srcPixel & srcRed) >> srcRedOffset << (8 - srcRedBitCount)));
+					U32 green(static_cast<U8>((srcPixel & srcGreen) >> srcGreenOffset<< (8 - srcGreenBitCount)));
+					U32 blue(static_cast<U8>((srcPixel & srcBlue) >> srcBlueOffset<< (8 - srcBlueBitCount)));
+					U32 alpha(static_cast<U8>((srcPixel & srcAlpha) >> srcAlphaOffset<< (8 - srcAlphaBitCount)));
 
 					red		= red >> (8 - destRedBitCount) << destRedOffset;
 					green	= green >> (8 - destGreenBitCount) << destGreenOffset;
@@ -427,8 +501,8 @@ namespace KlayGE
 					alpha	= alpha >> (8 - destAlphaBitCount) << destAlphaOffset;
 
 					const U32 destPixel(red | green | blue | alpha);
-					memcpy(pDest, &destPixel, sizeof(destPixel));
-					pDest += sizeof(destPixel);
+					memcpy(pDest, &destPixel, bpp_ / 8);
+					pDest += bpp_ / 8;
 				}
 			}
 		}

@@ -80,13 +80,13 @@ namespace KlayGE
 		NormalsType normals;
 
 
-		// Optional pointer to a list of diffuse vertex colors (float {r, g, b, a} * numVertices).
-		typedef std::vector<float, alloc<float> > DiffusesType;
+		// Optional pointer to a list of diffuse vertex colors (U32 {r, g, b, a} RGBA * numVertices).
+		typedef std::vector<U32, alloc<U32> > DiffusesType;
 		DiffusesType diffuses;
 
 
-		// Optional pointer to a list of specular vertex colors (float {r, g, b, a} RGBA * numVertices)
-		typedef std::vector<float, alloc<float> > SpecularsType;
+		// Optional pointer to a list of specular vertex colors (U32 {r, g, b, a} RGBA * numVertices)
+		typedef std::vector<U32, alloc<U32> > SpecularsType;
 		SpecularsType speculars;
 
 
@@ -110,7 +110,7 @@ namespace KlayGE
 		BlendWeightsType blendWeights;
 
 
-		typedef std::vector<float, alloc<float> > BlendIndicesType;
+		typedef std::vector<U8, alloc<U8> > BlendIndicesType;
 		BlendIndicesType blendIndices;
 
 
@@ -131,7 +131,7 @@ namespace KlayGE
 
 		VertexBuffer()
 			: vertexOptions(0),
-				numTextureCoordSets(1),
+				numTextureCoordSets(0),
 				texCoordSets(TexCoordSetsType::value_type(2, TexCoordsType()))
 			{ }
 	};

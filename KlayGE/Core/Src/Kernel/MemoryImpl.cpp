@@ -1,14 +1,11 @@
 // MemoryImpl.cpp
 // KlayGE 内存函数库实现 实现文件
-// Ver 1.3.8.1
-// 版权所有(C) 龚敏敏, 2002
-// Homepage: http://www.enginedev.com
+// Ver 2.0.4
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
 //
-// 1.2.8.8
-// 优化了单字节操作 (2002.10.1)
-//
-// 1.3.8.1
-// 增加了正向和逆向拷贝函数 (2002.12.5)
+// 2.0.4
+// 优化了3DNowEx的Cpy
 //
 // 修改记录
 ///////////////////////////////////////////////////////////////////////////////
@@ -71,16 +68,16 @@ namespace KlayGE
 			{
 				_asm
 				{
-					mov			ebx, dstptr
+					mov			edi, dstptr
 
-					movq		[ebx],		mm0
-					movq		[ebx + 8],  mm1
-					movq		[ebx + 16], mm2
-					movq		[ebx + 24], mm3
-					movq		[ebx + 32], mm4
-					movq		[ebx + 40], mm5
-					movq		[ebx + 48], mm6
-					movq		[ebx + 56], mm7
+					movq		[edi],		mm0
+					movq		[edi + 8],  mm1
+					movq		[edi + 16], mm2
+					movq		[edi + 24], mm3
+					movq		[edi + 32], mm4
+					movq		[edi + 40], mm5
+					movq		[edi + 48], mm6
+					movq		[edi + 56], mm7
 				}
 
 				dstptr += 64;
@@ -106,18 +103,18 @@ namespace KlayGE
 			{
 				_asm
 				{
-					mov			ebx, buf1ptr
-					mov			ecx, buf2ptr
+					mov			esi, buf1ptr
+					mov			edi, buf2ptr
 
-					movq		mm0, [ebx]
-					movq		mm1, [ebx + 8]
-					movq		mm2, [ebx + 16]
-					movq		mm3, [ebx + 24]
+					movq		mm0, [esi]
+					movq		mm1, [esi + 8]
+					movq		mm2, [esi + 16]
+					movq		mm3, [esi + 24]
 
-					movq		mm4, [ecx]
-					movq		mm5, [ecx + 8]
-					movq		mm6, [ecx + 16]
-					movq		mm7, [ecx + 24]
+					movq		mm4, [edi]
+					movq		mm5, [edi + 8]
+					movq		mm6, [edi + 16]
+					movq		mm7, [edi + 24]
 
 					pcmpeqb		mm0, mm4
 					pcmpeqb		mm1, mm5
@@ -196,27 +193,23 @@ namespace KlayGE
 				mov			esi, src					// esi = src
 				mov			edi, dst					// edi = dst
 
-				lea			esi, [esi + ecx * 8]
-				lea			edi, [edi + ecx * 8]
-				neg			ecx
+				movq		mm0, [esi]
+				movq		mm1, [esi + 8]
+				movq		mm2, [esi + 16]
+				movq		mm3, [esi + 24]
+				movq		mm4, [esi + 32]
+				movq		mm5, [esi + 40]
+				movq		mm6, [esi + 48]
+				movq		mm7, [esi + 56]
 
-				movq		mm0, [esi + ecx * 8]
-				movq		mm1, [esi + ecx * 8 + 8]
-				movq		mm2, [esi + ecx * 8 + 16]
-				movq		mm3, [esi + ecx * 8 + 24]
-				movq		mm4, [esi + ecx * 8 + 32]
-				movq		mm5, [esi + ecx * 8 + 40]
-				movq		mm6, [esi + ecx * 8 + 48]
-				movq		mm7, [esi + ecx * 8 + 56]
-
-				movq		[edi + ecx * 8],	  mm0
-				movq		[edi + ecx * 8 + 8],  mm1
-				movq		[edi + ecx * 8 + 16], mm2
-				movq		[edi + ecx * 8 + 24], mm3
-				movq		[edi + ecx * 8 + 32], mm4
-				movq		[edi + ecx * 8 + 40], mm5
-				movq		[edi + ecx * 8 + 48], mm6
-				movq		[edi + ecx * 8 + 56], mm7
+				movq		[edi],		mm0
+				movq		[edi + 8],  mm1
+				movq		[edi + 16], mm2
+				movq		[edi + 24], mm3
+				movq		[edi + 32], mm4
+				movq		[edi + 40], mm5
+				movq		[edi + 48], mm6
+				movq		[edi + 56], mm7
 			}
 		}
 
@@ -244,16 +237,16 @@ namespace KlayGE
 			{
 				_asm
 				{
-					mov			ebx, dstptr
+					mov			edi, dstptr
 
-					movntq		[ebx],	    mm0
-					movntq		[ebx + 8],  mm1
-					movntq		[ebx + 16], mm2
-					movntq		[ebx + 24], mm3
-					movntq		[ebx + 32], mm4
-					movntq		[ebx + 40], mm5
-					movntq		[ebx + 48], mm6
-					movntq		[ebx + 56], mm7
+					movntq		[edi],	    mm0
+					movntq		[edi + 8],  mm1
+					movntq		[edi + 16], mm2
+					movntq		[edi + 24], mm3
+					movntq		[edi + 32], mm4
+					movntq		[edi + 40], mm5
+					movntq		[edi + 48], mm6
+					movntq		[edi + 56], mm7
 				}
 
 				dstptr += 64;
@@ -281,20 +274,20 @@ namespace KlayGE
 			{
 				_asm
 				{
-					mov			ebx, buf1ptr
-					mov			ecx, buf2ptr
+					mov			esi, buf1ptr
+					mov			edi, buf2ptr
 
-					prefetchnta	[ebx + 64]
-					movq		mm0, [ebx]
-					movq		mm1, [ebx + 8]
-					movq		mm2, [ebx + 16]
-					movq		mm3, [ebx + 24]
+					prefetchnta	[esi + 128]
+					movq		mm0, [esi]
+					movq		mm1, [esi + 8]
+					movq		mm2, [esi + 16]
+					movq		mm3, [esi + 24]
 
-					prefetchnta	[ecx + 64]
-					movq		mm4, [ecx]
-					movq		mm5, [ecx + 8]
-					movq		mm6, [ecx + 16]
-					movq		mm7, [ecx + 24]
+					prefetchnta	[edi + 128]
+					movq		mm4, [edi]
+					movq		mm5, [edi + 8]
+					movq		mm6, [edi + 16]
+					movq		mm7, [edi + 24]
 
 					pcmpeqb		mm0, mm4
 					pcmpeqb		mm1, mm5
@@ -367,28 +360,28 @@ namespace KlayGE
 		{
 			_asm
 			{
-				mov			ebx, src
-				mov			ecx, dst
+				mov			esi, src
+				mov			edi, dst
 
-				prefetchnta	[ebx + 128]
+				prefetchnta	[esi + 256]
 
-				movq		mm0, [ebx]
-				movq		mm1, [ebx + 8]
-				movq		mm2, [ebx + 16]
-				movq		mm3, [ebx + 24]
-				movq		mm4, [ebx + 32]
-				movq		mm5, [ebx + 40]
-				movq		mm6, [ebx + 48]
-				movq		mm7, [ebx + 56]
+				movq		mm0, [esi]
+				movq		mm1, [esi + 8]
+				movq		mm2, [esi + 16]
+				movq		mm3, [esi + 24]
+				movq		mm4, [esi + 32]
+				movq		mm5, [esi + 40]
+				movq		mm6, [esi + 48]
+				movq		mm7, [esi + 56]
 
-				movntq		[ecx],	    mm0
-				movntq		[ecx + 8],  mm1
-				movntq		[ecx + 16], mm2
-				movntq		[ecx + 24], mm3
-				movntq		[ecx + 32], mm4
-				movntq		[ecx + 40], mm5
-				movntq		[ecx + 48], mm6
-				movntq		[ecx + 56], mm7
+				movntq		[edi],	    mm0
+				movntq		[edi + 8],  mm1
+				movntq		[edi + 16], mm2
+				movntq		[edi + 24], mm3
+				movntq		[edi + 32], mm4
+				movntq		[edi + 40], mm5
+				movntq		[edi + 48], mm6
+				movntq		[edi + 56], mm7
 			}
 		}
 	}

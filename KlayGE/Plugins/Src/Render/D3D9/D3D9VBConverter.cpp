@@ -78,26 +78,26 @@ namespace KlayGE
 		if (vb.vertexOptions & VertexBuffer::VO_Diffuses)
 		{
 			element.Stream		= shaderDecl.size();
-			element.Type		= D3DDECLTYPE_FLOAT4;
+			element.Type		= D3DDECLTYPE_D3DCOLOR;
 			element.Usage		= D3DDECLUSAGE_COLOR;
 			element.UsageIndex	= 0;
 			shaderDecl.push_back(element);
 
 			this->UpdateAStream(element.Stream, diffuseBuffer_,
-				sizeof(float) * 4, vb.NumVertices());
+				sizeof(D3DCOLOR), vb.NumVertices());
 		}
 
 		// Vertex speculars
 		if (vb.vertexOptions & VertexBuffer::VO_Speculars)
 		{
 			element.Stream		= shaderDecl.size();
-			element.Type		= D3DDECLTYPE_FLOAT4;
+			element.Type		= D3DDECLTYPE_D3DCOLOR;
 			element.Usage		= D3DDECLUSAGE_COLOR;
 			element.UsageIndex	= 1;
 			shaderDecl.push_back(element);
 
 			this->UpdateAStream(element.Stream, specularBuffer_,
-				sizeof(float) * 4, vb.NumVertices());
+				sizeof(D3DCOLOR), vb.NumVertices());
 		}
 
 		// Do texture coords
@@ -135,13 +135,13 @@ namespace KlayGE
 		if (vb.vertexOptions & VertexBuffer::VO_BlendIndices)
 		{
 			element.Stream		= shaderDecl.size();
-			element.Type		= D3DDECLTYPE_FLOAT4;
+			element.Type		= D3DDECLTYPE_D3DCOLOR;
 			element.Usage		= D3DDECLUSAGE_BLENDINDICES;
 			element.UsageIndex	= 0;
 			shaderDecl.push_back(element);
 
 			this->UpdateAStream(element.Stream, blendIndices_,
-				sizeof(float) * 4, vb.NumVertices());
+				sizeof(D3DCOLOR), vb.NumVertices());
 		}
 
 		{
@@ -215,7 +215,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9VBConverter::CopyAllBuffers(const VertexBuffer& vb)
 	{
-		const size_t numVertices(vb.NumVertices());
+		const size_t& numVertices(vb.NumVertices());
 
 		{
 			this->CopyABuffer(xyzBuffer_, &vb.vertices[0],
@@ -231,13 +231,13 @@ namespace KlayGE
 		if (vb.vertexOptions & VertexBuffer::VO_Diffuses)
 		{
 			this->CopyABuffer(diffuseBuffer_, &vb.diffuses[0],
-				sizeof(float) * 4, numVertices);
+				sizeof(D3DCOLOR), numVertices);
 		}
 
 		if (vb.vertexOptions & VertexBuffer::VO_Speculars)
 		{
 			this->CopyABuffer(specularBuffer_, &vb.speculars[0],
-				sizeof(float) * 4, numVertices);
+				sizeof(D3DCOLOR), numVertices);
 		}
 
 		if (vb.vertexOptions & VertexBuffer::VO_TextureCoords)
@@ -259,7 +259,7 @@ namespace KlayGE
 		if (vb.vertexOptions & VertexBuffer::VO_BlendIndices)
 		{
 			this->CopyABuffer(blendIndices_, &vb.blendIndices[0],
-				sizeof(float) * 4, numVertices);
+				sizeof(D3DCOLOR), numVertices);
 		}
 	}
 
@@ -289,9 +289,6 @@ namespace KlayGE
 		U8* dest;
 		TIF(buffer.buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_DISCARD));
 		Engine::MemoryInstance().Cpy(dest, srcData, vertexSize * vertexNum);
-
-		const float* s = static_cast<const float*>(srcData);
-		float* d = reinterpret_cast<float*>(dest);
 		buffer.buffer->Unlock();
 	}
 }

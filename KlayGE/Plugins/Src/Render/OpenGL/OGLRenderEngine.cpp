@@ -571,6 +571,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::Render(const VertexBuffer& vb)
 	{
+		if (vb.vertexOptions & VertexBuffer::VO_Positions)
 		{
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(3, GL_FLOAT, 0, &vb.vertices[0]);

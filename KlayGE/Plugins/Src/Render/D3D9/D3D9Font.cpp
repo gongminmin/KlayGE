@@ -1,8 +1,11 @@
 // D3D9Font.cpp
 // KlayGE D3D9Font类 实现文件
-// Ver 2.0.3
+// Ver 2.0.4
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.0.4
+// 纹理格式改为PF_A4L4 (2004.3.18)
 //
 // 2.0.3
 // 修正了RenderText的Bug (2004.2.18)
@@ -34,6 +37,8 @@
 #include <cassert>
 #include <algorithm>
 #include <vector>
+
+#include <d3d9types.h>
 
 #include <KlayGE/D3D9/D3D9Font.hpp>
 
@@ -77,7 +82,7 @@ namespace
 		\
 				FillMode = Solid;\
 				CullMode = CCW;\
-				Stencilenable = false;\
+				StencilEnable = false;\
 				Clipping = true;\
 				ClipPlaneEnable = 0;\
 				VertexBlend = Disable;\
@@ -116,7 +121,7 @@ namespace
 			fontVB_->type = VertexBuffer::BT_TriangleList;
 			fontVB_->numTextureCoordSets = 1;
 			fontVB_->texCoordSets[0].first = 2;
-			fontVB_->vertexOptions = (VertexBuffer::VO_Diffuses | VertexBuffer::VO_TextureCoords);
+			fontVB_->vertexOptions = VertexBuffer::VO_Diffuses | VertexBuffer::VO_TextureCoords;
 		}
 
 		const WString& Name() const
@@ -135,7 +140,7 @@ namespace
 			{ return fontVB_; }
 
 		void RenderText(U32 fontHeight, D3D9Font::CharInfoMapType& charInfoMap, float sx, float sy, float sz,
-			float xScale, float yScale, const Color& clr, const WString& text, U32 flags)
+			float xScale, float yScale, U32 clr, const WString& text, U32 flags)
 		{
 			// 设置过滤属性
 			if (flags & Font::FA_Filtered)
@@ -153,12 +158,13 @@ namespace
 			VertexBuffer::TexCoordsType& texs(fontVB_->texCoordSets[0].second);
 			VertexBuffer::IndicesType& indices(fontVB_->indices);
 
-			xyzs.clear();
 			clrs.clear();
+			clrs.resize(maxSize * 4, clr);
+
+			xyzs.clear();
 			texs.clear();
 			indices.clear();
 			xyzs.reserve(maxSize * 3 * 4);
-			clrs.reserve(maxSize * 4 * 4);
 			texs.reserve(maxSize * 2 * 4);
 			indices.reserve(maxSize * 6);
 
@@ -187,27 +193,6 @@ namespace
 					xyzs.push_back(x);
 					xyzs.push_back(y + h);
 					xyzs.push_back(sz);
-
-
-					clrs.push_back(clr.r());
-					clrs.push_back(clr.g());
-					clrs.push_back(clr.b());
-					clrs.push_back(clr.a());
-
-					clrs.push_back(clr.r());
-					clrs.push_back(clr.g());
-					clrs.push_back(clr.b());
-					clrs.push_back(clr.a());
-
-					clrs.push_back(clr.r());
-					clrs.push_back(clr.g());
-					clrs.push_back(clr.b());
-					clrs.push_back(clr.a());
-
-					clrs.push_back(clr.r());
-					clrs.push_back(clr.g());
-					clrs.push_back(clr.b());
-					clrs.push_back(clr.a());
 
 
 					texs.push_back(texRect.left());
@@ -253,7 +238,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D9Font::D3D9Font(const WString& fontName, U32 height, U32 flags)
 				: curX_(0), curY_(0),
-					theTexture_(Engine::RenderFactoryInstance().MakeTexture(1024, 1024, 1, PF_A4R4G4B4))
+					theTexture_(Engine::RenderFactoryInstance().MakeTexture(1024, 1024, 1, PF_A4L4))
 	{
 		RenderEffectPtr effect(Engine::RenderFactoryInstance().MakeRenderEffect(fontEffectStr));
 		effect->SetTexture("texFont", theTexture_);
@@ -335,10 +320,10 @@ namespace KlayGE
 					bmi.bmiHeader.biBitCount	= 32;
 					bmi.bmiHeader.biCompression = BI_RGB;
 
-					U32* pBitmapBits(NULL);
+					U32* bitmapBits(NULL);
 					HBITMAP hBitmap(::CreateDIBSection(hDC, &bmi, DIB_RGB_COLORS,
-						reinterpret_cast<PVOID*>(&pBitmapBits), NULL, 0));
-					if ((NULL == hBitmap) || (NULL == pBitmapBits))
+						reinterpret_cast<void**>(&bitmapBits), NULL, 0));
+					if ((NULL == hBitmap) || (NULL == bitmapBits))
 					{
 						::DeleteObject(::SelectObject(hDC, hOldFont));
 						::DeleteDC(hDC);
@@ -396,17 +381,17 @@ namespace KlayGE
 						charRect.bottom	= charRect.top + this->FontHeight();
 					}
 
-					std::vector<U16, alloc<U16> > dst;
+					std::vector<U8, alloc<U8> > dst;
 					dst.reserve(this->FontHeight() * this->FontHeight());
 					// 锁定表面，把 alpha 值写入纹理
 					for (long y = charRect.top; y < charRect.bottom; ++ y)
 					{
-						for (long x = charRect.left; x < charRect.right; ++ x, ++ pBitmapBits)
+						for (long x = charRect.left; x < charRect.right; ++ x, ++ bitmapBits)
 						{
-							dst.push_back(static_cast<U16>(*pBitmapBits) & 0xF000 | 0x0FFF);
+							dst.push_back(static_cast<U8>(*bitmapBits) & 0xF0 | 0x0F);
 						}
 					}
-					theTexture_->CopyMemoryToTexture(&dst[0], PF_A4R4G4B4, charRect.right - charRect.left,
+					theTexture_->CopyMemoryToTexture(&dst[0], PF_A4L4, charRect.right - charRect.left,
 						charRect.bottom - charRect.top, 0,
 						charRect.left, charRect.top);
 
@@ -443,70 +428,12 @@ namespace KlayGE
 
 		this->UpdateTexture(text);
 
+		U8 r, g, b, a;
+		clr.RGBA(r, g, b, a);
+
 		SharePtr<D3D9FontRenderable> ret(new D3D9FontRenderable(technique_));
 		ret->RenderText(this->FontHeight(), charInfoMap_, sx, sy, sz, xScale, yScale,
-			clr, text, flags);
+			D3DCOLOR_ARGB(a, r, g, b), text, flags);
 		return ret;
 	}
-/*
-	// 用3D方式画出文字
-	/////////////////////////////////////////////////////////////////////////////////
-	void C3DFont::RenderText(const WString& text, U32 flags)
-	{
-		if (text.empty())
-		{
-			return;
-		}
-
-		this->UpdateCharMap(wstrText);
-
-
-		this->pd3dDevice_->CaptureStateBlock(this->SavedStateBlock_);
-		this->pd3dDevice_->ApplyStateBlock(this->DrawTextStateBlock_);
-
-		// 设置过滤属性
-		if (dwFlags & FONT_FILTERED)
-		{
-			this->pd3dDevice_->SetTextureStageState(0, D3DTSS_MINFILTER, D3DTEXF_LINEAR);
-			this->pd3dDevice_->SetTextureStageState(0, D3DTSS_MAGFILTER, D3DTEXF_LINEAR);
-		}
-
-		if (dwFlags & FONT_TWOSIDED)
-		{
-			this->pd3dDevice_->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-		}
-
-		const float h(static_cast<float>(this->GetFontHeight()));
-		float x(0), y(0);
-		vector<FONT3DVERTEX, alloc<FONT3DVERTEX> > Vert;
-		Vert.reserve((wstrText.length() - std::count(wstrText.begin(), wstrText.end(), L'\n')) * 6);
-		for (wstring::const_iterator iter = wstrText.begin(); iter != wstrText.end(); ++ iter)
-		{
-			const wchar_t& ch(*iter);
-			const float w(static_cast<float>(charMap_[ch].width));
-
-			if (ch != L'\n')
-			{
-				const Rect_T<float>& texRect(charMap_[ch].texRect);
-
-				Vert.push_back(FONT3DVERTEX(x,		y,		0.9f, 0, 0, 1, texRect.left(),	texRect.top()));
-				Vert.push_back(FONT3DVERTEX(x + w,	y,		0.9f, 0, 0, 1, texRect.right(),	texRect.top()));
-				Vert.push_back(FONT3DVERTEX(x + w,	y + h,	0.9f, 0, 0, 1, texRect.right(),	texRect.bottom()));
-				Vert.push_back(FONT3DVERTEX(x + w,	y + h,	0.9f, 0, 0, 1, texRect.right(),	texRect.bottom()));
-				Vert.push_back(FONT3DVERTEX(x,		y + h,	0.9f, 0, 0, 1, texRect.left(),	texRect.bottom()));
-				Vert.push_back(FONT3DVERTEX(x,		y,		0.9f, 0, 0, 1, texRect.left(),	texRect.top()));
-
-				x += w;
-			}
-			else
-			{
-				y += h;
-				x = 0;
-			}
-		}
-
-		DrawVertices(this->pd3dDevice_, this->pCharTexture_, Vert);
-
-		this->pd3dDevice_->ApplyStateBlock(this->SavedStateBlock_);
-	}*/
 }
