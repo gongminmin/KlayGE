@@ -19,10 +19,10 @@
 #ifndef _KLAYGE_HPP
 #define _KLAYGE_HPP
 
-#define KLAYGEMAINVER		2
-#define KLAYGESECVER		2
-#define KLAYGERELEASEVER	0
-#define KLAYGEVERSTR		"KlayGE 2.2.0"
+#define KLAYGE_MAJOR		2
+#define KLAYGE_MINOR		2
+#define KLAYGE_RELEASE		0
+#define KLAYGE_VER_STR		"KlayGE 2.2.0"
 
 #include <KlayGE/Types.hpp>
 
