@@ -557,8 +557,8 @@ namespace KlayGE
 				movq		mm4, [edx]		// cross.x | cross.y
 
 				pfmul		mm4, mm2		// c * cross.x | c * cross.y
-				pfadd		mm6, mm4		// a * v.x + b * q.x + c * cross.x | a * v.y + b * q.y + c * cross.y
 				pfmul		mm5, mm2		// c * cross.z
+				pfadd		mm6, mm4		// a * v.x + b * q.x + c * cross.x | a * v.y + b * q.y + c * cross.y
 				pfadd		mm7, mm5		// a * v.z + b * q.z + c * cross.z
 
 				mov			eax, vOut
