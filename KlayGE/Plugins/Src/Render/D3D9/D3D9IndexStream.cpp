@@ -38,7 +38,7 @@ namespace KlayGE
 
 		void* dest;
 		TIF(buffer_->Lock(0, 0, &dest, D3DLOCK_NOSYSLOCK | (this->IsStatic() ? 0 : D3DLOCK_DISCARD)));
-		Engine::MemoryInstance().Cpy(dest, src, size);
+		MemoryLib::Copy(dest, src, size);
 		buffer_->Unlock();
 	}
 

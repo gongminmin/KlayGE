@@ -12,7 +12,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Math.hpp>
-#include <KlayGE/Engine.hpp>
 
 #include <KlayGE/Camera.hpp>
 
@@ -39,8 +38,8 @@ namespace KlayGE
 		lookatPt_	= lookatPt;
 		upVec_		= upVec;
 		
-		Engine::MathInstance().Normalize(viewVec_, lookatPt_ - eyePt_);
-		Engine::MathInstance().LookAtLH(viewMat_, eyePt_, lookatPt_, upVec);
+		MathLib::Normalize(viewVec_, lookatPt_ - eyePt_);
+		MathLib::LookAtLH(viewMat_, eyePt_, lookatPt_, upVec);
 
 		reEvalBillboard_ = true;
 	}
@@ -56,7 +55,7 @@ namespace KlayGE
 		nearPlane_	= nearPlane;
 		farPlane_	= farPlane;
 
-		Engine::MathInstance().PerspectiveFovLH(projMat_, FOV, aspect, nearPlane, farPlane);
+		MathLib::PerspectiveFovLH(projMat_, FOV, aspect, nearPlane, farPlane);
 	}
 
 	// 公告牌技术所需要的矩阵
@@ -65,7 +64,7 @@ namespace KlayGE
 	{
 		if (reEvalBillboard_)
 		{
-			Engine::MathInstance().Inverse(billboardMat_, viewMat_);
+			MathLib::Inverse(billboardMat_, viewMat_);
 
 			billboardMat_(3, 0) = 0;
 			billboardMat_(3, 1) = 0;

@@ -33,12 +33,8 @@ int main(int argc, char* argv[])
 
 	cout << "ÕýÔÚÑ¹Ëõ£¬ÇëÉÔºò..." << endl;
 
-	WString argv2, argv3;
-	Convert(argv2, argv[2]);
-	Convert(argv3, argv[3]);
-
 	Pkt pkt;
-	pkt.Pack(argv2, DiskFile(argv3, VFile::OM_Write));
+	pkt.Pack(argv[2], DiskFile(argv[3], VFile::OM_Write));
 
 	cout << "Ñ¹Ëõ³É¹¦" << endl;
 

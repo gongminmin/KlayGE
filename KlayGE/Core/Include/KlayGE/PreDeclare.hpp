@@ -4,7 +4,6 @@
 namespace KlayGE
 {
 	class Engine;
-	class MemoryLib;
 	template <typename T>
 	class SharedPtr;
 	template <typename T>
@@ -20,7 +19,6 @@ namespace KlayGE
 
 	class Timer;
 
-	class MathLib;
 	template <typename T, int N>
 	class Vector_T;
 	typedef Vector_T<float, 2> Vector2;
@@ -70,6 +68,12 @@ namespace KlayGE
 	struct Viewport;
 	class RenderFactory;
 	typedef SharedPtr<RenderFactory> RenderFactoryPtr;
+	class ShaderParameter;
+	typedef SharedPtr<ShaderParameter> ShaderParameterPtr;
+	class VertexShader;
+	typedef SharedPtr<VertexShader> VertexShaderPtr;
+	class PixelShader;
+	typedef SharedPtr<PixelShader> PixelShaderPtr;
 
 	class Socket;
 	class Lobby;

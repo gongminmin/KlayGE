@@ -20,7 +20,6 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Memory.hpp>
-#include <KlayGE/Engine.hpp>
 
 #include <vector>
 #include <cassert>
@@ -188,7 +187,7 @@ namespace KlayGE
 			left_ = settings.left;
 		}
 
-		Engine::MemoryInstance().Zero(&d3dpp_, sizeof(d3dpp_));
+		MemoryLib::Zero(&d3dpp_, sizeof(d3dpp_));
 		d3dpp_.Windowed					= !this->FullScreen();
 		d3dpp_.BackBufferCount			= 1;
 		d3dpp_.BackBufferWidth			= this->Width();

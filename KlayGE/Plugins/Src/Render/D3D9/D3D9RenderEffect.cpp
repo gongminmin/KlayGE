@@ -20,6 +20,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
+#include <KlayGE/D3D9/D3D9Shader.hpp>
 
 #include <cassert>
 
@@ -171,16 +172,24 @@ namespace KlayGE
 		TIF(effect_->SetTexture(effect_->GetParameterByName(NULL, name.c_str()), texture));
 	}
 
-	void D3D9RenderEffect::SetVertexShader(const String& name, U32 vsHandle)
+	void D3D9RenderEffect::SetVertexShader(const String& name, const VertexShaderPtr& vs)
 	{
-		TIF(effect_->SetVertexShader(effect_->GetParameterByName(NULL, name.c_str()),
-			reinterpret_cast<IDirect3DVertexShader9*>(vsHandle)));
+		IDirect3DVertexShader9* d3dvs(NULL);
+		if (vs.Get() != NULL)
+		{
+			d3dvs = static_cast<D3D9VertexShader*>(vs.Get())->D3DVertexShader().Get();
+		}
+		TIF(effect_->SetVertexShader(effect_->GetParameterByName(NULL, name.c_str()), d3dvs));
 	}
 
-	void D3D9RenderEffect::SetPixelShader(const String& name, U32 psHandle)
+	void D3D9RenderEffect::SetPixelShader(const String& name, const PixelShaderPtr& ps)
 	{
-		TIF(effect_->SetPixelShader(effect_->GetParameterByName(NULL, name.c_str()),
-			reinterpret_cast<IDirect3DPixelShader9*>(psHandle)));
+		IDirect3DPixelShader9* d3dps(NULL);
+		if (ps.Get() != NULL)
+		{
+			d3dps = static_cast<D3D9PixelShader*>(ps.Get())->D3DPixelShader().Get();
+		}
+		TIF(effect_->SetPixelShader(effect_->GetParameterByName(NULL, name.c_str()), d3dps));
 	}
 
 	void D3D9RenderEffect::SetTechnique(const String& technique)

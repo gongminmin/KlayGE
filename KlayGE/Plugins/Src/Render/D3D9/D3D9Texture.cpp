@@ -366,12 +366,12 @@ namespace KlayGE
 			IDirect3DTexture9* d3dTexture;
 			// Use D3DX to help us create the texture, this way it can adjust any relevant sizes
 			TIF(D3DXCreateTexture(d3dDevice_.Get(), this->Width(), this->Height(),
-				this->NumMipMaps(), D3DUSAGE_DYNAMIC, Convert(format),
+				this->NumMipMaps(), 0, Convert(format),
 				D3DPOOL_SYSTEMMEM, &d3dTexture));
 			d3dTempTexture_ = COMPtr<IDirect3DTexture9>(d3dTexture);
-		
+
 			TIF(D3DXCreateTexture(d3dDevice_.Get(), this->Width(), this->Height(),
-				this->NumMipMaps(), D3DUSAGE_DYNAMIC, Convert(format),
+				this->NumMipMaps(), 0, Convert(format),
 				D3DPOOL_DEFAULT, &d3dTexture));
 			d3dTexture_ = COMPtr<IDirect3DTexture9>(d3dTexture);
 
@@ -385,8 +385,8 @@ namespace KlayGE
 		}
 		else
 		{
-			/* We need to set the pixel format of the render target texture to be the same as the
-			one of the front buffer. */
+			// We need to set the pixel format of the render target texture to be the same as the
+			// one of the front buffer.
 			IDirect3DSurface9* tempSurf;
 			D3DSURFACE_DESC tempDesc;
 
@@ -434,19 +434,23 @@ namespace KlayGE
 
 	void D3D9Texture::CopyToTexture(Texture& target)
 	{
-		D3D9Texture& other(reinterpret_cast<D3D9Texture&>(target));
-		RECT dstRC = { 0, 0, other.Width(), other.Height() };
+		D3D9Texture& other(static_cast<D3D9Texture&>(target));
 
-		COMPtr<IDirect3DSurface9> src, dst;
+		if (this->Usage() == other.Usage())
+		{
+			RECT dstRC = { 0, 0, other.Width(), other.Height() };
 
-		IDirect3DSurface9* temp;
-		TIF(this->D3DTexture()->GetSurfaceLevel(0, &temp));
-		src = COMPtr<IDirect3DSurface9>(temp);
+			COMPtr<IDirect3DSurface9> src, dst;
 
-		TIF(other.D3DTexture()->GetSurfaceLevel(0, &temp));
-		dst = COMPtr<IDirect3DSurface9>(temp);
+			IDirect3DSurface9* temp;
+			TIF(this->D3DTexture()->GetSurfaceLevel(0, &temp));
+			src = COMPtr<IDirect3DSurface9>(temp);
 
-		TIF(d3dDevice_->StretchRect(src.Get(), NULL, dst.Get(), &dstRC, D3DTEXF_NONE));
+			TIF(other.D3DTexture()->GetSurfaceLevel(0, &temp));
+			dst = COMPtr<IDirect3DSurface9>(temp);
+
+			TIF(d3dDevice_->StretchRect(src.Get(), NULL, dst.Get(), &dstRC, D3DTEXF_NONE));
+		}
 	}
 
 	void D3D9Texture::CopyMemoryToTexture(void* pData, PixelFormat pf,
@@ -491,7 +495,7 @@ namespace KlayGE
 				void* dst(pBits + y * destPitch);
 				pBuffer = static_cast<U8*>(pData) + y * srcPitch;
 
-				Engine::MemoryInstance().Cpy(dst, pBuffer, srcPitch);
+				MemoryLib::Copy(dst, pBuffer, srcPitch);
 			}
 		}
 		else
@@ -514,7 +518,7 @@ namespace KlayGE
 				for (U32 x = 0; x < width; ++ x)
 				{
 					U32 srcPixel(0);
-					memcpy(&srcPixel, pSrc, bpp / 8);
+					MemoryLib::Copy(&srcPixel, pSrc, bpp / 8);
 					pSrc += bpp / 8;
 
 					// ×ª»¯³ÉR8G8B8A8
@@ -529,7 +533,7 @@ namespace KlayGE
 					alpha	= alpha >> (8 - destAlphaBitCount) << destAlphaOffset;
 
 					const U32 destPixel(red | green | blue | alpha);
-					memcpy(pDest, &destPixel, bpp_ / 8);
+					MemoryLib::Copy(pDest, &destPixel, bpp_ / 8);
 					pDest += bpp_ / 8;
 				}
 			}
@@ -539,23 +543,6 @@ namespace KlayGE
 
 		TIF(D3DXFilterTexture(d3dTempTexture_.Get(), NULL, D3DX_DEFAULT, D3DX_DEFAULT));
 		TIF(d3dDevice_->UpdateTexture(d3dTempTexture_.Get(), d3dTexture_.Get()));
-	}
-
-	void D3D9Texture::CopyToMemory(void* data)
-	{
-		D3DLOCKED_RECT d3dlr;
-		TIF(d3dTexture_->LockRect(0, &d3dlr, NULL, D3DLOCK_NOSYSLOCK));
-
-		const U32 destPitch(width_ * bpp_ / 8);
-		const U16 srcPitch(d3dlr.Pitch);
-		U8* src(static_cast<U8*>(d3dlr.pBits));
-		U8* dest(static_cast<U8*>(data));
-
-		Engine::MemoryInstance().Cpy(dest, src, destPitch);
-		src += srcPitch;
-		dest += destPitch;
-
-		d3dTexture_->UnlockRect(0);
 	}
 
 	void D3D9Texture::CustomAttribute(const String& name, void* pData)

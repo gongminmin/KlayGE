@@ -110,7 +110,6 @@ namespace KlayGE
 		virtual void CopyToTexture(Texture& target) = 0;
 		virtual void CopyMemoryToTexture(void* data, PixelFormat pf,
 			U32 width = 0, U32 height = 0, U32 xOffset = 0, U32 yOffset = 0) = 0;
-		virtual void CopyToMemory(void* data) = 0;
 
 	protected:
 		U32		height_;

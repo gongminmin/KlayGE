@@ -1,11 +1,11 @@
 // Pkt.cpp
 // KlayGE 文件打包类
-// Ver 2.0.6
+// Ver 2.1.0
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
-// LZSS压缩算法的作者是 Haruhiko Okumura
+// LZSS压缩算法的作者是Haruhiko Okumura
 //
-// 2.0.6
+// 2.1.0
 // 简化了目录表的表示法 (2004.4.14)
 //
 // 2.0.0
@@ -20,7 +20,6 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/VFile.hpp>
 #include <KlayGE/Memory.hpp>
-#include <KlayGE/Engine.hpp>
 
 #include <cassert>
 #include <string>
@@ -117,12 +116,9 @@ namespace
 			}
 
 			int i(1);
-			for (; i < F; i++)
+			while ((i < F) && ((cmp = key[i] - textBuf[p + i]) == 0))
 			{
-				if ((cmp = key[i] - textBuf[p + i]) != 0)
-				{
-					break;
-				}
+				++ i;
 			}
 			if (i > matchLength)
 			{
@@ -279,10 +275,7 @@ namespace
 				if (is_directory(*iter))
 				{
 					std::vector<String> sub(FindFiles(rootName, pathName + fileName + '/'));
-					for (size_t i = 0; i < sub.size(); ++ i)
-					{
-						ret.push_back(sub[i]);
-					}
+					ret.insert(ret.end(), sub.begin(), sub.end());
 				}
 				else
 				{
@@ -340,7 +333,7 @@ namespace KlayGE
 		codeBufPtr = mask = 1;
 		U32 s(0);
 		U32 r(N - F);
-		Engine::MemoryInstance().Set(textBuf, ' ', r);	// Clear the buffer with
+		MemoryLib::Set(textBuf, ' ', r);	// Clear the buffer with
 														// any character that will appear often.
 		int len(0);
 		for (; (len < F) && (in.Tell() != in.Length()); ++ len)

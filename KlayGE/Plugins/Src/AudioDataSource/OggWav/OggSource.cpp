@@ -15,7 +15,6 @@
 #include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Memory.hpp>
-#include <KlayGE/Engine.hpp>
 #include <KlayGE/VFile.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
@@ -198,7 +197,7 @@ namespace KlayGE
 
 									for (int j = 0; j < bout; ++ j)
 									{
-										*ptr = Engine::MathInstance().Limit<int>(static_cast<int>(mono[j] * 32767.0f), -32768, 32767);
+										*ptr = MathLib::Limit<int>(static_cast<int>(mono[j] * 32767.0f), -32768, 32767);
 										ptr += vi_.channels;
 									}
 								}
@@ -209,7 +208,7 @@ namespace KlayGE
 
 								// 把解码后的数据放入缓冲区
 								const size_t length(sizeof(ogg_int16_t) * bout * vi_.channels);
-								Engine::MemoryInstance().Cpy(&data[cursize], &convbuffer[0], length);
+								MemoryLib::Copy(&data[cursize], &convbuffer[0], length);
 								cursize += length;
 							}
 						}

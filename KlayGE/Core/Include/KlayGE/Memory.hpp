@@ -19,20 +19,14 @@
 /////////////////////////////////////////////////////////////////////
 namespace KlayGE
 {
-	class MemoryLib
+	namespace MemoryLib
 	{
-	public:
-		static MemoryLib* Create(CPUOptimal cpu);
+		void* Set(void* dest, int c, size_t count);
+		bool Compare(const void* buf1, const void* buf2, size_t count);
+		void* Copy(void* dest, const void* src, size_t count);
 
-		virtual ~MemoryLib()
-			{ }
-
-		virtual void* Set(void* dest, int c, size_t count) const = 0;
-		virtual bool  Cmp(const void* buf1, const void* buf2, size_t count) const = 0;
-		virtual void* Cpy(void* dest, const void* src, size_t count) const = 0;
-
-		void* Zero(void* dest, size_t count) const
-			{ return this->Set(dest, 0, count); }
+		inline void* Zero(void* dest, size_t count)
+			{ return Set(dest, 0, count); }
 	};
 }
 

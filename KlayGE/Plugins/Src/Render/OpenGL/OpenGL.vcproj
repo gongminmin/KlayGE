@@ -58,7 +58,8 @@
 			OutputDirectory="..\..\..\..\lib"
 			IntermediateDirectory="..\..\..\..\Release"
 			ConfigurationType="4"
-			CharacterSet="1">
+			CharacterSet="1"
+			WholeProgramOptimization="TRUE">
 			<Tool
 				Name="VCCLCompilerTool"
 				GlobalOptimizations="TRUE"
@@ -126,6 +127,9 @@
 				RelativePath=".\OGLRenderWindow.cpp">
 			</File>
 			<File
+				RelativePath=".\OGLShader.cpp">
+			</File>
+			<File
 				RelativePath=".\OGLTexture.cpp">
 			</File>
 			<File
@@ -159,6 +163,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLRenderWindow.hpp">
+			</File>
+			<File
+				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLShader.hpp">
 			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLTexture.hpp">

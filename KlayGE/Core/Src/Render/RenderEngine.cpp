@@ -18,7 +18,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/Math.hpp>
-#include <KlayGE/Engine.hpp>
 #include <KlayGE/Viewport.hpp>
 #include <KlayGE/RenderTarget.hpp>
 #include <KlayGE/RenderBuffer.hpp>

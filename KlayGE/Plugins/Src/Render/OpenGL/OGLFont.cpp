@@ -244,7 +244,7 @@ namespace KlayGE
 					::GetTextExtentPoint32W(hDC, &ch, 1, &size);
 
 					BITMAPINFO bmi;
-					Engine::MemoryInstance().Zero(&bmi.bmiHeader, sizeof(bmi.bmiHeader));
+					MemoryLib::Zero(&bmi.bmiHeader, sizeof(bmi.bmiHeader));
 					bmi.bmiHeader.biSize		= sizeof(bmi.bmiHeader);
 					bmi.bmiHeader.biWidth		= size.cx;
 					bmi.bmiHeader.biHeight		= -size.cy;

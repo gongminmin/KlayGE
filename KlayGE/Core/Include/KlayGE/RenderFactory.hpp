@@ -23,6 +23,11 @@ namespace KlayGE
 
 		virtual RenderEffectPtr MakeRenderEffect(const String& srcData, UINT flags = 0) = 0;
 
+		virtual VertexShaderPtr MakeVertexShader(const String& shaderName,
+			const String& functionName, const String& profile) = 0;
+		virtual PixelShaderPtr MakePixelShader(const String& shaderName,
+			const String& functionName, const String& profile) = 0;
+
 		// sizeElement表示流中每个元素的大小，比如Position流是size(float)
 		// numElement表示一个顶点有几个元素表示，比如Position流是由(x, y, z)组成，所以为3
 		virtual VertexStreamPtr MakeVertexStream(VertexStreamType type,
@@ -31,7 +36,7 @@ namespace KlayGE
 	};
 
 	template <typename RenderEngineType, typename TextureType, typename RenderTextureType,
-		typename FontType, typename RenderEffectType>
+		typename FontType, typename RenderEffectType, typename VertexShaderType, typename PixelShaderType>
 	class ConcreteRenderFactory : public RenderFactory
 	{
 	public:
@@ -62,6 +67,11 @@ namespace KlayGE
 
 		RenderEffectPtr MakeRenderEffect(const String& srcData, UINT flags = 0)
 			{ return RenderEffectPtr(new RenderEffectType(srcData, flags)); }
+
+		VertexShaderPtr MakeVertexShader(const String& shaderName, const String& functionName, const String& profile)
+			{ return VertexShaderPtr(new VertexShaderType(shaderName, functionName, profile)); }
+		PixelShaderPtr MakePixelShader(const String& shaderName, const String& functionName, const String& profile)
+			{ return PixelShaderPtr(new PixelShaderType(shaderName, functionName, profile)); }
 
 	private:
 		const WString name_;

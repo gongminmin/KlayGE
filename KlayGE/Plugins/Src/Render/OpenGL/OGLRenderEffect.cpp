@@ -12,7 +12,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/Engine.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
@@ -115,11 +114,11 @@ namespace KlayGE
 	{
 	}
 
-	void OGLRenderEffect::SetVertexShader(const String& name, U32 vsHandle)
+	void OGLRenderEffect::SetVertexShader(const String& name, const VertexShaderPtr& vs)
 	{
 	}
 
-	void OGLRenderEffect::SetPixelShader(const String& name, U32 psHandle)
+	void OGLRenderEffect::SetPixelShader(const String& name, const PixelShaderPtr& ps)
 	{
 	}
 

@@ -15,7 +15,6 @@
 #include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Memory.hpp>
-#include <KlayGE/Engine.hpp>
 
 #include <KlayGE/Light.hpp>
 #include <KlayGE/Material.hpp>
@@ -476,7 +475,7 @@ namespace KlayGE
 	void OGLRenderEngine::DoProjectionMatrix()
 	{
 		Matrix4 oglMat;
-		Engine::MathInstance().LHToRH(oglMat, projMat_);
+		MathLib::LHToRH(oglMat, projMat_);
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadMatrixf(&oglMat(0, 0));

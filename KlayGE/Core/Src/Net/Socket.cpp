@@ -17,7 +17,6 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/Memory.hpp>
-#include <KlayGE/Engine.hpp>
 
 #include <cassert>
 
@@ -50,7 +49,7 @@ namespace KlayGE
 	SOCKADDR_IN TransAddr(const String& address, U16 port)
 	{
 		SOCKADDR_IN sockAddr_in;
-		Engine::MemoryInstance().Zero(&sockAddr_in, sizeof(sockAddr_in));
+		MemoryLib::Zero(&sockAddr_in, sizeof(sockAddr_in));
 
 		if (address.empty())
 		{
@@ -66,7 +65,7 @@ namespace KlayGE
 			LPHOSTENT pHostEnt = gethostbyname(address.c_str());
 			if (pHostEnt != NULL)
 			{
-				Engine::MemoryInstance().Cpy(&sockAddr_in.sin_addr.s_addr,
+				MemoryLib::Copy(&sockAddr_in.sin_addr.s_addr,
 					pHostEnt->h_addr_list[0], pHostEnt->h_length);
 			}
 			else
@@ -98,7 +97,7 @@ namespace KlayGE
 		if (0 == gethostname(host, sizeof(host)))
 		{
 			HOSTENT* pHostEnt = gethostbyname(host);
-			Engine::MemoryInstance().Cpy(&addr.S_un.S_addr, pHostEnt->h_addr_list[0], pHostEnt->h_length);
+			MemoryLib::Copy(&addr.S_un.S_addr, pHostEnt->h_addr_list[0], pHostEnt->h_length);
 		}
 
 		return addr;

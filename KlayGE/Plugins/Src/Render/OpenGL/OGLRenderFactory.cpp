@@ -4,6 +4,7 @@
 #include <KlayGE/OpenGL/OGLRenderTexture.hpp>
 #include <KlayGE/OpenGL/OGLRenderEffect.hpp>
 #include <KlayGE/OpenGL/OGLFont.hpp>
+#include <KlayGE/OpenGL/OGLShader.hpp>
 
 #include <KlayGE/OpenGL/OGLVertexStream.hpp>
 #include <KlayGE/OpenGL/OGLIndexStream.hpp>
@@ -12,13 +13,13 @@
 
 namespace KlayGE
 {
-	class OGLRenderFactory : public ConcreteRenderFactory<OGLRenderEngine, OGLTexture, OGLRenderTexture,
-			OGLFont, OGLRenderEffect>
+	typedef ConcreteRenderFactory<OGLRenderEngine, OGLTexture, OGLRenderTexture,
+				OGLFont, OGLRenderEffect, OGLVertexShader, OGLPixelShader> OGLRenderFactoryBase;
+	class OGLRenderFactory : public OGLRenderFactoryBase
 	{
 	public:
 		OGLRenderFactory()
-			: ConcreteRenderFactory<OGLRenderEngine, OGLTexture, OGLRenderTexture,
-				OGLFont, OGLRenderEffect>(L"OpenGL Render Factory")
+			: OGLRenderFactoryBase(L"OpenGL Render Factory")
 			{ }
 			
 		VertexStreamPtr MakeVertexStream(VertexStreamType type,

@@ -58,7 +58,8 @@
 			OutputDirectory="..\..\..\..\lib"
 			IntermediateDirectory="..\..\..\..\Release"
 			ConfigurationType="4"
-			CharacterSet="1">
+			CharacterSet="1"
+			WholeProgramOptimization="TRUE">
 			<Tool
 				Name="VCCLCompilerTool"
 				GlobalOptimizations="TRUE"
@@ -132,6 +133,9 @@
 				RelativePath=".\D3D9RenderWindow.cpp">
 			</File>
 			<File
+				RelativePath=".\D3D9Shader.cpp">
+			</File>
+			<File
 				RelativePath=".\D3D9Texture.cpp">
 			</File>
 			<File
@@ -174,6 +178,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9RenderWindow.hpp">
+			</File>
+			<File
+				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9Shader.hpp">
 			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9Texture.hpp">

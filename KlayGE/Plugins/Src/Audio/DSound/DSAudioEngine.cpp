@@ -14,7 +14,6 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/Memory.hpp>
-#include <KlayGE/Engine.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <cassert>
@@ -95,7 +94,7 @@ namespace KlayGE
 		TIF(dsound_->SetCooperativeLevel(::GetForegroundWindow(), DSSCL_PRIORITY));
 
 		DSBUFFERDESC desc;
-		Engine::MemoryInstance().Zero(&desc, sizeof(desc));
+		MemoryLib::Zero(&desc, sizeof(desc));
 		desc.dwSize  = sizeof(desc);
 		desc.dwFlags = DSBCAPS_CTRL3D | DSBCAPS_PRIMARYBUFFER;
 
@@ -104,7 +103,7 @@ namespace KlayGE
 		COMPtr<IDirectSoundBuffer> primaryBuffer(pDSBPrimary);
 
 		WAVEFORMATEX wfx;
-		Engine::MemoryInstance().Zero(&wfx, sizeof(wfx));
+		MemoryLib::Zero(&wfx, sizeof(wfx));
 		wfx.wFormatTag		= WAVE_FORMAT_PCM; 
 		wfx.nChannels		= 2;
 		wfx.nSamplesPerSec	= 22050;

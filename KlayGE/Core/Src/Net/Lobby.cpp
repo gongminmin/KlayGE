@@ -14,7 +14,6 @@
 #include <KlayGE/Player.hpp>
 #include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/Memory.hpp>
-#include <KlayGE/Engine.hpp>
 
 #include <algorithm>
 #include <ctime>
@@ -42,7 +41,7 @@ namespace KlayGE
 	{
 		for (PlayerAddrsIter iter = this->players_.begin(); iter != this->players_.end(); ++ iter)
 		{
-			if (0 == Engine::MemoryInstance().Cmp(&addr, &(iter->Addr), sizeof(addr)))
+			if (0 == MemoryLib::Compare(&addr, &(iter->Addr), sizeof(addr)))
 			{
 				return iter;
 			}
@@ -252,10 +251,10 @@ namespace KlayGE
 		//			最大Players数	1 字节
 		//			Lobby名字		16 字节
 
-		Engine::MemoryInstance().Zero(sendBuf, 18);
+		MemoryLib::Zero(sendBuf, 18);
 		sendBuf[0] = this->NumPlayer();
 		sendBuf[1] = this->MaxPlayers();
-		Engine::MemoryInstance().Cpy(&sendBuf[2], this->LobbyName().c_str(), this->LobbyName().length());
+		MemoryLib::Copy(&sendBuf[2], this->LobbyName().c_str(), this->LobbyName().length());
 		numSend = 18;
 	}
 

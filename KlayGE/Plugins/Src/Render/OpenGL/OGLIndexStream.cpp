@@ -15,7 +15,6 @@
 #include <KlayGE/Memory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
-#include <KlayGE/Engine.hpp>
 
 #include <KlayGE/OpenGL/OGLIndexStream.hpp>
 
@@ -28,6 +27,6 @@ namespace KlayGE
 	void OGLIndexStream::Assign(const void* src, size_t numIndices)
 	{
 		buffer_.resize(numIndices);
-		Engine::MemoryInstance().Cpy(&buffer_[0], src, numIndices * sizeof(U16));
+		MemoryLib::Copy(&buffer_[0], src, numIndices * sizeof(U16));
 	}
 }

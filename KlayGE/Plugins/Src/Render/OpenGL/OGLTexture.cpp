@@ -1,7 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Memory.hpp>
-#include <KlayGE/Engine.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Texture.hpp>
@@ -134,10 +133,6 @@ namespace KlayGE
 			glBindTexture(GL_TEXTURE_2D, texture_);
 			glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, width, height, glformat, GL_UNSIGNED_BYTE, data);
 		}
-	}
-
-	void OGLTexture::CopyToMemory(void* data)
-	{
 	}
 
 	void OGLTexture::CustomAttribute(const String& name, void* pData)

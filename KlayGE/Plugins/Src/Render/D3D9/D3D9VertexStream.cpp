@@ -57,7 +57,7 @@ namespace KlayGE
 			const U8* srcPtr(static_cast<const U8*>(static_cast<const void*>(src)));
 			for (size_t i = 0; i < numVertices; ++ i)
 			{
-				memcpy(destPtr, srcPtr, vertexSize);
+				MemoryLib::Copy(destPtr, srcPtr, vertexSize);
 
 				destPtr += vertexSize;
 				srcPtr += vertexSize + stride;
@@ -65,7 +65,7 @@ namespace KlayGE
 		}
 		else
 		{
-			Engine::MemoryInstance().Cpy(dest, src, size);
+			MemoryLib::Copy(dest, src, size);
 		}
 		buffer_->Unlock();
 	}

@@ -1,11 +1,11 @@
 // Pkt.hpp
 // KlayGE 打包文件读取类 头文件
-// Ver 2.0.6
+// Ver 2.1.0
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
 // LZSS压缩算法的作者是 Haruhiko Okumura
 //
-// 2.0.6
+// 2.1.0
 // 简化了目录表的表示法 (2004.4.14)
 //
 // 2.0.0

@@ -23,12 +23,6 @@
 #include <d3d9.h>
 #include <d3dx9.h>
 
-#include <KlayGE/D3D9/D3D9RenderEngine.hpp>
-#include <KlayGE/D3D9/D3D9Texture.hpp>
-#include <KlayGE/D3D9/D3D9RenderTexture.hpp>
-#include <KlayGE/D3D9/D3D9Font.hpp>
-#include <KlayGE/D3D9/D3D9RenderEffect.hpp>
-
 #pragma comment(lib, "KlayGE_RenderEngine_D3D9.lib")
 
 namespace KlayGE

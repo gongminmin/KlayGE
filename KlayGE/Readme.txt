@@ -1,13 +1,13 @@
-粘土游戏引擎(KlayGE) 2.0.5
+粘土游戏引擎(KlayGE) 2.1.0
 
-Homepage: http://home.g365.net/enginedev
+Homepage: http://klayge.sourceforge.net
 E-Mail:	  enginedev@163.com
 OICQ:     33611210
 
-欢迎使用粘土游戏引擎 2.0.5
+欢迎使用粘土游戏引擎 2.1.0
 包含的组件：KlayGE头文件，KlayGE源代码，KlayGE的VS.NET 2003工程文件
 
-KlayGE是一个插件结构的游戏引擎。
+KlayGE是一个跨平台、插件结构的游戏引擎。
 
 __________________________________________________________________
 
@@ -50,7 +50,7 @@ __________________________________________________________________
 
 编译
 
-编译KlayGE内核需要一些第三方库：PThread、Python，分别在http://sources.redhat.com/pthreads-win32和http://www.python.org下载
+编译KlayGE内核需要一些第三方库：PThread、Python、Boost，分别在http://sources.redhat.com/pthreads-win32、http://www.python.org和http://boost.sourceforge.net下载
 编译OggWav插件需要Vorbis SDK，在http://www.vorbis.com下载
 编译OpenAL插件需要OpenAL SDK，在http://www.openal.org下载，并把它的Include目录下建一个AL目录，把.h拷进去
 除了Python以外的几个SDK的精简版本都能在我的网站找到。
@@ -72,6 +72,12 @@ __________________________________________________________________
 
 
 发展历程
+
+2.1.0 (2004.4.20)
+增强了OpenGL
+去掉了汇编代码
+直接支持单独的Shader
+简化了大包文件目录表的表示法
 
 2.0.5 (2004.4.13)
 增强了OpenGL

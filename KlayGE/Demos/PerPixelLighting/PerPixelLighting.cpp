@@ -204,20 +204,19 @@ void PerPixelLighting::InitObjects()
 void PerPixelLighting::Update()
 {
 	RenderEngine& renderEngine(Engine::RenderFactoryInstance().RenderEngineInstance());
-	MathLib& math(Engine::MathInstance());
 	SceneManager& sceneMgr(Engine::SceneManagerInstance());
 
 	static float degree(0);
 	Vector3 lightPos(MakeVector(0.0f, 1.0f, 1.0f));
 	Matrix4 matRot;
-	math.RotationZ(matRot, degree);
-	math.TransformNormal(lightPos, lightPos, matRot);
-	math.Normalize(lightPos, lightPos);
+	MathLib::RotationZ(matRot, degree);
+	MathLib::TransformNormal(lightPos, lightPos, matRot);
+	MathLib::Normalize(lightPos, lightPos);
 	renderPolygon->effect_->SetVector("lightPos",
 		MakeVector(lightPos.x(), lightPos.y(), lightPos.z(), 1.0f));
 
 	Vector3 halfway(lightPos + MakeVector(0.0f, 0.0f, 1.0f));
-	math.Normalize(halfway, halfway);
+	MathLib::Normalize(halfway, halfway);
 	renderPolygon->effect_->SetVector("halfway",
 		MakeVector(halfway.x(), halfway.y(), halfway.z(), 1.0f));
 

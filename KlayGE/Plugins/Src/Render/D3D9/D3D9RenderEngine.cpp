@@ -24,7 +24,6 @@
 #include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Memory.hpp>
-#include <KlayGE/Engine.hpp>
 
 #include <KlayGE/Light.hpp>
 #include <KlayGE/Material.hpp>
@@ -53,7 +52,7 @@ namespace KlayGE
 	D3DMATRIX Convert(const Matrix4& mat)
 	{
 		D3DMATRIX d3dMat;
-		memcpy(&d3dMat._11, &mat.begin()[0], sizeof(d3dMat));
+		MemoryLib::Copy(&d3dMat._11, &mat.begin()[0], sizeof(d3dMat));
 
 		return d3dMat;
 	}
@@ -433,7 +432,7 @@ namespace KlayGE
 	void D3D9RenderEngine::SetLight(U32 index, const Light& lt)
 	{
 		D3DLIGHT9 d3dLight;
-		Engine::MemoryInstance().Zero(&d3dLight, sizeof(d3dLight));
+		MemoryLib::Zero(&d3dLight, sizeof(d3dLight));
 
 		switch (lt.lightType)
 		{
@@ -695,8 +694,8 @@ namespace KlayGE
 
 
 		if ((currentDecl_.size() != shaderDecl.size())
-			|| !Engine::MemoryInstance().Cmp(&currentDecl_[0], &shaderDecl[0],
-												sizeof(shaderDecl[0]) * shaderDecl.size()))
+			|| !MemoryLib::Compare(&currentDecl_[0], &shaderDecl[0],
+									sizeof(shaderDecl[0]) * shaderDecl.size()))
 		{
 			currentDecl_ = shaderDecl;
 

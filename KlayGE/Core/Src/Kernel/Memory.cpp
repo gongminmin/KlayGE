@@ -1,26 +1,17 @@
 // Memory.cpp
 // KlayGE 内存函数库 实现文件
-// Ver 1.4.8.5
-// 版权所有(C) 龚敏敏, 2001--2003
-// Homepage: http://www.enginedev.com
+// Ver 2.1.0
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
 //
-// 1.2.8.10
-// 改进了MemFuncsInstance (2002.10.24)
-//
-// 1.3.8.2
-// 改变了初始化方法 (2002.12.28)
-//
-// 1.4.8.5
-// 增加了MemoryInterface (2003.4.20)
+// 2.1.0
+// 去掉了汇编代码 (2004.4.20)
 //
 // 修改记录
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Cpu.hpp>
 #include <KlayGE/Memory.hpp>
-
-#include "MemoryImpl.hpp"
 
 /*
 算法:
@@ -64,20 +55,27 @@ void* MemCpy(void* pDest, const void* pSrc, size_t Count)
 
 namespace KlayGE
 {
-	MemoryLib* MemoryLib::Create(CPUOptimal cpu)
+	namespace MemoryLib
 	{
-		switch (cpu)
+		// 把dest指向的大小为count的内存填充为c
+		/////////////////////////////////////////////////////////////////////
+		void* Set(void* dest, int c, size_t count)
 		{
-		case CPU_Standard:
-			return new KlayGEImpl::MemStandardLib;
-
-		case CPU_MMX:
-			return new KlayGEImpl::MemMMXLib;
-
-		case CPU_AMD3DNowEx:
-			return new KlayGEImpl::Mem3DNowExLib;
+			return memset(dest, c, count);
 		}
 
-		return NULL;
+		// 把buf1和buf2的内容比较，相同返回true
+		/////////////////////////////////////////////////////////////////////
+		bool Compare(const void* dest, const void* src, size_t count)
+		{
+			return (0 == memcmp(dest, src, count));
+		}
+
+		// 把src指向的大小为count的内存拷贝到dest
+		//////////////////////////////////////////////////////////////////////////
+		void* Copy(void* dest, const void* src, size_t count)
+		{
+			return memcpy(dest, src, count);
+		}
 	}
 };

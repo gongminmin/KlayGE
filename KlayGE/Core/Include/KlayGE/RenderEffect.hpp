@@ -58,8 +58,9 @@ namespace KlayGE
 		virtual String GetString(const String& name) const = 0;
 
 		virtual void SetTexture(const String& name, const TexturePtr& tex) = 0;
-		virtual void SetVertexShader(const String& name, U32 vsHandle) = 0;
-		virtual void SetPixelShader(const String& name, U32 psHandle) = 0;
+
+		virtual void SetVertexShader(const String& name, const VertexShaderPtr& vs) = 0;
+		virtual void SetPixelShader(const String& name, const PixelShaderPtr& ps) = 0;
 
 		virtual void SetTechnique(const String& technique) = 0;
 		virtual void SetTechnique(UINT technique) = 0;

@@ -38,7 +38,7 @@ namespace
 #pragma pack(pop)
 
 
-	void LoadTGA(TGAHeader& tgaHeader, std::vector<U8>& tgaData, const KlayGE::WString& fileName)
+	void LoadTGA(TGAHeader& tgaHeader, std::vector<U8>& tgaData, const KlayGE::String& fileName)
 	{
 		DiskFile file(fileName, VFile::OM_Read);
 		file.Read(&tgaHeader, sizeof(tgaHeader));
@@ -92,12 +92,9 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	WString tgaFileName;
-	Convert(tgaFileName, argv[1]);
-
 	TGAHeader tgaHeader;
 	std::vector<U8> tgaData;
-	LoadTGA(tgaHeader, tgaData, tgaFileName);
+	LoadTGA(tgaHeader, tgaData, argv[1]);
 
 	KlayTXHeader txHeader;
 	txHeader.id = MakeFourCC<'K', 'l', 'T', 'X'>::value;
@@ -115,9 +112,7 @@ int main(int argc, char* argv[])
 	}
 	txHeader.offset = 0;
 
-	WString txFileName;
-	Convert(txFileName, argv[2]);
-	DiskFile file(txFileName, VFile::OM_Create);
+	DiskFile file(argv[2], VFile::OM_Create);
 	file.Write(&txHeader, sizeof(txHeader));
 	file.Write(&tgaData[0], tgaData.size());
 

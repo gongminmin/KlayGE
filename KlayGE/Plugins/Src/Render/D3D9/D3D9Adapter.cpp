@@ -1,6 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Memory.hpp>
-#include <KlayGE/Engine.hpp>
 #include <KlayGE/COMPtr.hpp>
 
 #include <cassert>
@@ -15,8 +14,8 @@ namespace KlayGE
 	D3D9Adapter::D3D9Adapter()
 					: adapterNo_(0)
 	{
-		Engine::MemoryInstance().Zero(&d3dAdapterIdentifier_, sizeof(d3dAdapterIdentifier_));
-		Engine::MemoryInstance().Zero(&d3ddmDesktop_, sizeof(d3ddmDesktop_));
+		MemoryLib::Zero(&d3dAdapterIdentifier_, sizeof(d3dAdapterIdentifier_));
+		MemoryLib::Zero(&d3ddmDesktop_, sizeof(d3ddmDesktop_));
 	}
 
 	D3D9Adapter::D3D9Adapter(U32 adapterNo,
@@ -32,7 +31,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	const String D3D9Adapter::Description() const
 	{
-		return String(AdapterIdentifier().Description);
+		return String(this->AdapterIdentifier().Description);
 	}
 
 	// 获取支持的显示模式数目
@@ -68,7 +67,8 @@ namespace KlayGE
 
 		for (FormatType::iterator iter = formats.begin(); iter != formats.end(); ++ iter)
 		{
-			for (U32 i = 0; i < d3d->GetAdapterModeCount(adapterNo_, *iter); ++ i)
+			const U32 modeCount(d3d->GetAdapterModeCount(adapterNo_, *iter));
+			for (U32 i = 0; i < modeCount; ++ i)
 			{
 				// 获取显示模式属性
 				D3DDISPLAYMODE d3dDisplayMode;
@@ -80,23 +80,14 @@ namespace KlayGE
 					continue;
 				}
 
-				// 检查该模式的分辨率是否被枚举过 (忽略刷新率的不同)
-				ModeType::iterator m(modes_.begin());
-				for (; m != modes_.end(); ++ m)
-				{
-					if ((m->Width() == d3dDisplayMode.Width)
-						&& (m->Height() == d3dDisplayMode.Height)
-						&& (m->Format() == d3dDisplayMode.Format))
-					{
-						break;
-					}
-				}
+				// 忽略刷新率的不同
+				const D3D9VideoMode videoMode(d3dDisplayMode.Width, d3dDisplayMode.Height,
+						d3dDisplayMode.Format);
 
 				// 如果找到一个新模式, 加入模式列表
-				if (m == modes_.end())
+				if (std::find(modes_.begin(), modes_.end(), videoMode) == modes_.end())
 				{
-					modes_.push_back(D3D9VideoMode(d3dDisplayMode.Width, d3dDisplayMode.Height,
-						d3dDisplayMode.Format));
+					modes_.push_back(videoMode);
 				}
 			}
 		}

@@ -13,7 +13,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/Math.hpp>
-#include <KlayGE/Engine.hpp>
 #include <KlayGE/alloc.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
@@ -87,7 +86,7 @@ namespace KlayGE
 		if (iter == sources_.end())
 		{
 			iter = sources_.begin();
-			std::advance(iter, Engine::MathInstance().Random(sources_.size()));
+			std::advance(iter, Random::Instance().Next(sources_.size()));
 		}
 
 		return iter;

@@ -76,9 +76,10 @@ namespace KlayGE
 
 		void SetTexture(const String& name, const TexturePtr& tex)
 			{ }
-		void SetVertexShader(const String& name, U32 vsHandle)
+
+		void SetVertexShader(const String& name, const VertexShaderPtr& vs)
 			{ }
-		void SetPixelShader(const String& name, U32 psHandle)
+		void SetPixelShader(const String& name, const PixelShaderPtr& ps)
 			{ }
 
 		void SetTechnique(const String& techName)

@@ -11,6 +11,7 @@
 #include <KlayGE/alloc.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Engine.hpp>
+#include <KlayGE/Shader.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderSettings.hpp>
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
@@ -31,6 +32,8 @@ namespace
 		RenderTorus(const TexturePtr& texture)
 			: rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
 		{
+			vs_ = LoadVertexShader("Cartoon.vsh", "ToonVS", "vs_1_1");
+
 			effect_ = LoadRenderEffect("Cartoon.fx");
 			effect_->SetTexture("cartoonTex", texture);
 			effect_->SetTechnique("cartoonTec");
@@ -51,6 +54,11 @@ namespace
 		RenderBufferPtr GetRenderBuffer() const
 			{ return rb_; }
 
+		void OnRenderBegin()
+		{
+			vs_->Active();
+		}
+
 		const WString& Name() const
 		{
 			static WString name(L"Torus");
@@ -59,6 +67,8 @@ namespace
 
 		KlayGE::RenderBufferPtr rb_;
 		KlayGE::RenderEffectPtr effect_;
+
+		KlayGE::VertexShaderPtr vs_;
 	};
 
 	SharedPtr<RenderTorus> renderTorus;
@@ -105,23 +115,22 @@ void Cartoon::InitObjects()
 	this->LookAt(MakeVector(0.0f, 0.0f, -6.0f), MakeVector(0.0f, 0.0f, 0.0f));
 	this->Proj(0.1f, 20.0f);
 
-	renderTorus->GetRenderEffect()->SetMatrix("proj", renderEngine.ProjectionMatrix());
+	renderTorus->vs_->GetNamedParameter("proj")->SetMatrix(renderEngine.ProjectionMatrix());
 }
 
 void Cartoon::Update()
 {
 	RenderEngine& renderEngine(Engine::RenderFactoryInstance().RenderEngineInstance());
-	MathLib& math(Engine::MathInstance());
 
 	rotX += 0.003f;
 	rotY += 0.003f;
 
 	Matrix4 mat, matY;
-	math.RotationX(mat, rotX);
-	math.RotationY(matY, rotY);
+	MathLib::RotationX(mat, rotX);
+	MathLib::RotationY(matY, rotY);
 	mat *= matY;
 
-	renderTorus->GetRenderEffect()->SetMatrix("worldview", mat * renderEngine.ViewMatrix());
+	renderTorus->vs_->GetNamedParameter("worldview")->SetMatrix(mat * renderEngine.ViewMatrix());
 
 	std::wostringstream stream;
 	stream << (*renderEngine.ActiveRenderTarget())->FPS();

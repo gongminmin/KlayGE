@@ -56,7 +56,7 @@ namespace KlayGE
 		// 建立 DirectSound 缓冲区，要尽量减少使用建立标志，
 		// 因为使用太多不必要的标志会影响硬件加速性能
 		DSBUFFERDESC dsbd;
-		Engine::MemoryInstance().Zero(&dsbd, sizeof(dsbd));
+		MemoryLib::Zero(&dsbd, sizeof(dsbd));
 		dsbd.dwSize				= sizeof(dsbd);
 		dsbd.dwFlags			= DSBCAPS_CTRL3D | DSBCAPS_MUTE3DATMAXDISTANCE;
 		dsbd.guid3DAlgorithm	= GUID_NULL;
@@ -92,16 +92,16 @@ namespace KlayGE
 		if (0 == data.size())
 		{
 			// 如果wav空白，用静音填充
-			Engine::MemoryInstance().Set(lockedBuffer, 128, lockedBufferSize);
+			MemoryLib::Set(lockedBuffer, 128, lockedBufferSize);
 		}
 		else
 		{
 			if (data.size() <= lockedBufferSize)
 			{
-				Engine::MemoryInstance().Cpy(lockedBuffer, &data[0], data.size());
+				MemoryLib::Copy(lockedBuffer, &data[0], data.size());
 
 				// 如果音频数据源比缓冲区小，则用音频数据填充缓冲区
-				Engine::MemoryInstance().Set(static_cast<U8*>(lockedBuffer) + data.size(), 
+				MemoryLib::Set(static_cast<U8*>(lockedBuffer) + data.size(), 
 					128, lockedBufferSize - data.size());
 			}
 		}
@@ -135,7 +135,7 @@ namespace KlayGE
 		if (iter == sources_.end())
 		{
 			iter = sources_.begin();
-			std::advance(iter, Engine::MathInstance().Random(sources_.size()));
+			std::advance(iter, Random::Instance().Next(sources_.size()));
 		}
 
 		return iter;

@@ -1,10 +1,10 @@
 // Unpkt.cpp
 // KlayGE 打包文件读取类 实现文件
-// Ver 2.0.6
+// Ver 2.1.0
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
 //
-// 2.0.6
+// 2.1.0
 // 简化了目录表的表示法 (2004.4.14)
 //
 // 2.0.0
@@ -17,7 +17,6 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Memory.hpp>
-#include <KlayGE/Engine.hpp>
 #include <KlayGE/Crc32.hpp>
 
 #include <cassert>
@@ -51,12 +50,9 @@ namespace
 		}
 
 		U32 i(0);
-		for (; i < lhs.length(); ++ i)
+		while ((i < lhs.length()) && (std::toupper(lhs[i]) == std::toupper(rhs[i])))
 		{
-			if (std::toupper(lhs[i]) != std::toupper(rhs[i]))
-			{
-				break;
-			}
+			++ i;
 		}
 
 		if (i != lhs.length())
@@ -107,7 +103,7 @@ namespace KlayGE
 	void UnPkt::Decode(VFile& output, VFile& input)
 	{
 		U32 r(N - F);
-		Engine::MemoryInstance().Set(textBuf, ' ', r);
+		MemoryLib::Set(textBuf, ' ', r);
 
 		U32 flags(0);
 		U8 c;

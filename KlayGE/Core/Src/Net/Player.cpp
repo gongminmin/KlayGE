@@ -17,7 +17,6 @@
 #include <KlayGE/Lobby.hpp>
 #include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/Memory.hpp>
-#include <KlayGE/Engine.hpp>
 
 #include <ctime>
 
@@ -54,7 +53,7 @@ namespace KlayGE
 			}
 
 			char revBuf[Max_Buffer];
-			Engine::MemoryInstance().Zero(revBuf, sizeof(revBuf));
+			MemoryLib::Zero(revBuf, sizeof(revBuf));
 			if (player->socket_.Receive(revBuf, sizeof(revBuf)) != -1)
 			{
 				if (MSG_QUIT == revBuf[0])
@@ -71,27 +70,27 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	bool Player::Join(const SOCKADDR_IN& lobbyAddr)
 	{
-		this->socket_.Close();
-		this->socket_.Create(SOCK_DGRAM);
-		this->socket_.Connect(lobbyAddr);
+		socket_.Close();
+		socket_.Create(SOCK_DGRAM);
+		socket_.Connect(lobbyAddr);
 
-		this->socket_.TimeOut(2000);
+		socket_.TimeOut(2000);
 
 		char buf[Max_Buffer];
-		Engine::MemoryInstance().Zero(buf, sizeof(buf));
+		MemoryLib::Zero(buf, sizeof(buf));
 
 		buf[0] = MSG_JOIN;
-		this->name_.copy(&buf[1], this->name_.length());
+		name_.copy(&buf[1], this->name_.length());
 
-		this->socket_.Send(buf, sizeof(buf));
+		socket_.Send(buf, sizeof(buf));
 
-		this->socket_.Receive(&this->playerID_, sizeof(this->playerID_));
-		if (0 == this->playerID_)
+		socket_.Receive(&playerID_, sizeof(playerID_));
+		if (0 == playerID_)
 		{
 			return false;
 		}
 
-		this->receiveLoop_ = true;
+		receiveLoop_ = true;
 		pthread_create(&receiveThread_, NULL, ReceiveThread_Func, this);
 
 		return true;
@@ -101,13 +100,13 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void Player::Quit()
 	{
-		if (this->receiveLoop_)
+		if (receiveLoop_)
 		{
 			char msg(MSG_QUIT);
-			this->socket_.Send(&msg, sizeof(msg));
+			socket_.Send(&msg, sizeof(msg));
 
-			this->receiveLoop_ = false;
-			pthread_join(this->receiveThread_, NULL);
+			receiveLoop_ = false;
+			pthread_join(receiveThread_, NULL);
 		}
 	}
 
@@ -116,7 +115,7 @@ namespace KlayGE
 	void Player::Destroy()
 	{
 		this->Quit();
-		this->socket_.Close();
+		socket_.Close();
 	}
 
 	LobbyDes Player::LobbyInfo()
@@ -126,10 +125,10 @@ namespace KlayGE
 		lobbydes.MaxPlayers = 0;
 
 		char msg(MSG_GETLOBBYINFO);
-		this->socket_.Send(&msg, sizeof(msg));
+		socket_.Send(&msg, sizeof(msg));
 
 		char buf[18];
-		this->socket_.Receive(buf, sizeof(buf));
+		socket_.Receive(buf, sizeof(buf));
 		if (MSG_GETLOBBYINFO == buf[0])
 		{
 			lobbydes.NumPlayer = buf[1];
@@ -151,11 +150,11 @@ namespace KlayGE
 	{
 		if (name.length() > 16)
 		{
-			this->name_ = name.substr(0, 16);
+			name_ = name.substr(0, 16);
 		}
 		else
 		{
-			this->name_ = name;
+			name_ = name;
 		}
 	}
 
@@ -163,13 +162,13 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	int Player::Receive(void* buf, int maxSize, SOCKADDR_IN& from)
 	{
-		return this->socket_.ReceiveFrom(buf, maxSize, from);
+		return socket_.ReceiveFrom(buf, maxSize, from);
 	}
 
 	// ·¢ËÍÊý¾Ý
 	/////////////////////////////////////////////////////////////////////////////////
 	int Player::Send(const void* buf, int size)
 	{
-		return this->socket_.Send(buf, size);
+		return socket_.Send(buf, size);
 	}
 }

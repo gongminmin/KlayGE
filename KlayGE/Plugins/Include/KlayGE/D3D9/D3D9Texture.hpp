@@ -27,7 +27,6 @@ namespace KlayGE
 		void CopyToTexture(Texture& target);
 		void CopyMemoryToTexture(void* pData, PixelFormat pf,
 			U32 width = 0, U32 height = 0, U32 xOffset = 0, U32 yOffset = 0);
-		void CopyToMemory(void* data);
 
 		const COMPtr<IDirect3DTexture9>& D3DTexture() const
 			{ return this->d3dTexture_; }

@@ -21,18 +21,20 @@
 #include <KlayGE/D3D9/D3D9Font.hpp>
 #include <KlayGE/D3D9/D3D9VertexStream.hpp>
 #include <KlayGE/D3D9/D3D9IndexStream.hpp>
+#include <KlayGE/D3D9/D3D9Shader.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
 namespace KlayGE
 {
-	class D3D9RenderFactory : public ConcreteRenderFactory<D3D9RenderEngine, D3D9Texture, D3D9RenderTexture,
-			D3D9Font, D3D9RenderEffect>
+	typedef ConcreteRenderFactory<D3D9RenderEngine, D3D9Texture, D3D9RenderTexture,
+			D3D9Font, D3D9RenderEffect, D3D9VertexShader, D3D9PixelShader> D3D9RenderFactoryBase;
+
+	class D3D9RenderFactory : public D3D9RenderFactoryBase
 	{
 	public:
 		D3D9RenderFactory()
-			: ConcreteRenderFactory<D3D9RenderEngine, D3D9Texture, D3D9RenderTexture,
-				D3D9Font, D3D9RenderEffect>(L"Direct3D9 Render Factory")
+			: D3D9RenderFactoryBase(L"Direct3D9 Render Factory")
 			{ }
 			
 		VertexStreamPtr MakeVertexStream(VertexStreamType type,

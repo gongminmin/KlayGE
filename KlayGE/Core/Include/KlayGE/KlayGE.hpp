@@ -1,8 +1,11 @@
 // KlayGE.hpp
 // KlayGE 头文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.1.0
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.1.0
+// 去掉了汇编代码 (2004.4.20)
 //
 // 2.0.0
 // 初次建立 (2003.8.10)
@@ -14,11 +17,9 @@
 #define _KLAYGE_HPP
 
 #define KLAYGEMAINVER		2
-#define KLAYGESECVER		0
+#define KLAYGESECVER		1
 #define KLAYGERELEASEVER	0
-#define KLAYGEVERSTR		"KLAYGE 2.0.0"
-
-#define CREATOR(p)	friend class p
+#define KLAYGEVERSTR		"KLAYGE 2.1.0"
 
 namespace KlayGE
 {
@@ -54,13 +55,6 @@ namespace KlayGE
 			p = 0;
 		}
 	}
-
-	enum CPUOptimal
-	{
-		CPU_Standard,
-		CPU_MMX,
-		CPU_AMD3DNowEx,
-	};
 }
 
 #include <KlayGE/Types.hpp>

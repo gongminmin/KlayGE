@@ -15,7 +15,6 @@
 #include <KlayGE/Memory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
-#include <KlayGE/Engine.hpp>
 
 #include <KlayGE/OpenGL/OGLVertexStream.hpp>
 
@@ -39,7 +38,7 @@ namespace KlayGE
 			const U8* srcPtr(static_cast<const U8*>(static_cast<const void*>(src)));
 			for (size_t i = 0; i < numVertices; ++ i)
 			{
-				memcpy(destPtr, srcPtr, vertexSize);
+				MemoryLib::Copy(destPtr, srcPtr, vertexSize);
 
 				destPtr += vertexSize;
 				srcPtr += vertexSize + stride;
@@ -47,7 +46,7 @@ namespace KlayGE
 		}
 		else
 		{
-			Engine::MemoryInstance().Cpy(&buffer_[0], src, size);
+			MemoryLib::Copy(&buffer_[0], src, size);
 		}
 	}
 }

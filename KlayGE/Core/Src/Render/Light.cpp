@@ -1,7 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/Math.hpp>
-#include <KlayGE/Engine.hpp>
 
 #include <cassert>
 
@@ -29,6 +28,6 @@ namespace KlayGE
 			attenuationConst(1), attenuationLinear(0), attenuationQuad(0),
 			spotOuter(0), spotInner(0), spotFalloff(0)
 	{
-		Engine::MathInstance().Normalize(direction, pos);
+		MathLib::Normalize(direction, pos);
 	}
 }

@@ -1,6 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Math.hpp>
-#include <KlayGE/Engine.hpp>
 
 #include <KlayGE/MathTypes.hpp>
 
@@ -14,6 +13,6 @@ namespace KlayGE
 	
 	Quaternion& Quaternion::operator*=(const Quaternion& rhs)
 	{
-		return Engine::MathInstance().Multiply(*this, *this, rhs);
+		return MathLib::Multiply(*this, *this, rhs);
 	}
 }

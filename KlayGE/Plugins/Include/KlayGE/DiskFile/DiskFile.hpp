@@ -1,10 +1,10 @@
 // DiskFile.hpp
 // KlayGE 磁盘文件类 头文件
-// Ver 2.0.6
+// Ver 2.1.0
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
 //
-// 2.0.6
+// 2.1.0
 // 文件名改用String来保存 (2004.4.14)
 //
 // 2.0.0

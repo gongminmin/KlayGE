@@ -27,11 +27,6 @@ namespace KlayGE
 		Engine();
 		~Engine();
 
-		static MathLib& MathInstance()
-			{ return *math_; }
-		static MemoryLib& MemoryInstance()
-			{ return *memory_; }
-
 		static void AppInstance(App3DFramework& app)
 			{ app_ = &app; }
 		static App3DFramework& AppInstance()
@@ -55,9 +50,6 @@ namespace KlayGE
 			{ return *inputFactory_; }
 
 	private:
-		static MathLib*	math_;
-		static MemoryLib*	memory_;
-
 		static App3DFramework* app_;
 		static SceneManager*	sceneManager_;
 

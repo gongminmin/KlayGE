@@ -10,10 +10,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Math.hpp>
-#include <KlayGE/Engine.hpp>
-
-#include <algorithm>
-#include <functional>
+#include <KlayGE/Memory.hpp>
 
 #include <KlayGE/MathTypes.hpp>
 
@@ -31,11 +28,11 @@ namespace KlayGE
 
 	Matrix4& Matrix4::operator*=(const Matrix4& rhs)
 	{
-		return Engine::MathInstance().Multiply(*this, *this, rhs);
+		return MathLib::Multiply(*this, *this, rhs);
 	}
 
 	bool operator==(const Matrix4& lhs, const Matrix4& rhs)
 	{
-		return 0 == memcmp(rhs.begin(), lhs.begin(), Matrix4::elem_num * sizeof(Matrix4::value_type));
+		return 0 == MemoryLib::Compare(rhs.begin(), lhs.begin(), Matrix4::elem_num * sizeof(Matrix4::value_type));
 	}
 }

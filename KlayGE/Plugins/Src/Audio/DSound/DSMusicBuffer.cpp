@@ -46,7 +46,7 @@ namespace KlayGE
 		// 建立 DirectSound 缓冲区，要尽量减少使用建立标志，
 		// 因为使用太多不必要的标志会影响硬件加速性能
 		DSBUFFERDESC dsbd;
-		Engine::MemoryInstance().Zero(&dsbd, sizeof(dsbd));
+		MemoryLib::Zero(&dsbd, sizeof(dsbd));
 		dsbd.dwSize				= sizeof(dsbd);
 		if (mono)
 		{
@@ -110,14 +110,14 @@ namespace KlayGE
 
 		if (data.size() > 0)
 		{
-			Engine::MemoryInstance().Cpy(lockedBuffer, &data[0], data.size());
+			MemoryLib::Copy(lockedBuffer, &data[0], data.size());
 
-			Engine::MemoryInstance().Set(static_cast<U8*>(lockedBuffer) + data.size(), 
+			MemoryLib::Set(static_cast<U8*>(lockedBuffer) + data.size(), 
 				0, lockedBufferSize - data.size());
 		}
 		else
 		{
-			Engine::MemoryInstance().Set(lockedBuffer, 0, lockedBufferSize);
+			MemoryLib::Set(lockedBuffer, 0, lockedBufferSize);
 			this->Stop();
 		}
 
@@ -149,16 +149,16 @@ namespace KlayGE
 		if (data.size() > 0)
 		{
 			// 如果数据源比缓冲区小，则用音频数据填充缓冲区
-			Engine::MemoryInstance().Cpy(lockedBuffer, &data[0], data.size());
+			MemoryLib::Copy(lockedBuffer, &data[0], data.size());
 
 			// 剩下的区域用空白填充
-			Engine::MemoryInstance().Set(static_cast<U8*>(lockedBuffer) + data.size(), 
+			MemoryLib::Set(static_cast<U8*>(lockedBuffer) + data.size(), 
 				0, lockedBufferSize - data.size());
 		}
 		else
 		{
 			// 如果音频数据空白，用静音填充
-			Engine::MemoryInstance().Set(lockedBuffer, 0, lockedBufferSize);
+			MemoryLib::Set(lockedBuffer, 0, lockedBufferSize);
 		}
 
 		// 缓冲区解锁
