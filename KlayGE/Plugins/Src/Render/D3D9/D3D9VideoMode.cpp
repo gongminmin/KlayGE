@@ -11,31 +11,31 @@ namespace KlayGE
 	{
 	}
 
-	D3D9VideoMode::D3D9VideoMode(U32 width, U32 height, U32 format)
+	D3D9VideoMode::D3D9VideoMode(uint32 width, uint32 height, uint32 format)
 				: width_(width),
 					height_(height),
 					format_(format)
 	{
 	}
 
-	U32 D3D9VideoMode::Width() const
+	uint32 D3D9VideoMode::Width() const
 	{
 		return width_;
 	}
 
-	U32 D3D9VideoMode::Height() const
+	uint32 D3D9VideoMode::Height() const
 	{
 		return height_;
 	}
 
-	U32 D3D9VideoMode::Format() const
+	uint32 D3D9VideoMode::Format() const
 	{
 		return format_;
 	}
 
-	U32 D3D9VideoMode::ColorDepth() const
+	uint32 D3D9VideoMode::ColorDepth() const
 	{
-		U32 colorDepth;
+		uint32 colorDepth;
 		if ((Format() == D3DFMT_X8R8G8B8)
 			|| (Format() == D3DFMT_A8R8G8B8)
 			|| (Format() == D3DFMT_R8G8B8))

@@ -83,8 +83,8 @@ namespace
 		bool CanBeCulled() const
 			{ return false; }
 
-		void RenderText(U32 fontHeight, D3D9Font::CharInfoMapType& charInfoMap, float sx, float sy, float sz,
-			float xScale, float yScale, U32 clr, std::wstring const & text, U32 flags)
+		void RenderText(uint32 fontHeight, D3D9Font::CharInfoMapType& charInfoMap, float sx, float sy, float sz,
+			float xScale, float yScale, uint32 clr, std::wstring const & text, uint32 flags)
 		{
 			// 设置过滤属性
 			if (flags & Font::FA_Filtered)
@@ -105,7 +105,7 @@ namespace
 			texs_.reserve(maxSize * 2 * 4);
 			indices_.reserve(maxSize * 6);
 
-			U16 lastIndex(0);
+			uint16 lastIndex(0);
 			for (std::wstring::const_iterator citer = text.begin(); citer != text.end(); ++ citer)
 			{
 				wchar_t const & ch(*citer);
@@ -182,9 +182,9 @@ namespace
 		RenderBufferPtr fontRB_;
 
 		std::vector<float>	xyzs_;
-		std::vector<U32>	clrs_;
+		std::vector<uint32>	clrs_;
 		std::vector<float>	texs_;
-		std::vector<U16>	indices_;
+		std::vector<uint16>	indices_;
 
 		Box box_;
 	};
@@ -194,7 +194,7 @@ namespace KlayGE
 {
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
-	D3D9Font::D3D9Font(std::wstring const & fontName, U32 height, U32 flags)
+	D3D9Font::D3D9Font(std::wstring const & fontName, uint32 height, uint32 flags)
 				: curX_(0), curY_(0),
 					theTexture_(Context::Instance().RenderFactoryInstance().MakeTexture(1024, 1024, 1, PF_A4L4)),
 					rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
@@ -234,7 +234,7 @@ namespace KlayGE
 
 	// 获取字体高度
 	/////////////////////////////////////////////////////////////////////////////////
-	U32 D3D9Font::FontHeight() const
+	uint32 D3D9Font::FontHeight() const
 	{
 		return logFont_.lfHeight;
 	}
@@ -287,7 +287,7 @@ namespace KlayGE
 					bmi.bmiHeader.biBitCount	= 32;
 					bmi.bmiHeader.biCompression = BI_RGB;
 
-					U32* bitmapBits(NULL);
+					uint32* bitmapBits(NULL);
 					HBITMAP hBitmap(::CreateDIBSection(hDC, &bmi, DIB_RGB_COLORS,
 						reinterpret_cast<void**>(&bitmapBits), NULL, 0));
 					if ((NULL == hBitmap) || (NULL == bitmapBits))
@@ -348,14 +348,14 @@ namespace KlayGE
 						charRect.bottom	= charRect.top + this->FontHeight();
 					}
 
-					std::vector<U8> dst;
+					std::vector<uint8> dst;
 					dst.reserve(this->FontHeight() * this->FontHeight());
 					// 锁定表面，把 alpha 值写入纹理
 					for (long y = charRect.top; y < charRect.bottom; ++ y)
 					{
 						for (long x = charRect.left; x < charRect.right; ++ x, ++ bitmapBits)
 						{
-							dst.push_back(static_cast<U8>(*bitmapBits) & 0xF0 | 0x0F);
+							dst.push_back(static_cast<uint8>(*bitmapBits) & 0xF0 | 0x0F);
 						}
 					}
 					theTexture_->CopyMemoryToTexture(&dst[0], PF_A4L4, charRect.right - charRect.left,
@@ -376,7 +376,7 @@ namespace KlayGE
 	// 在指定位置画出文字
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderablePtr D3D9Font::RenderText(float sx, float sy, Color const & clr, 
-		std::wstring const & text, U32 flags)
+		std::wstring const & text, uint32 flags)
 	{
 		return this->RenderText(sx, sy, 0.5f, 1, 1, clr, text, flags);
 	}
@@ -385,7 +385,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderablePtr D3D9Font::RenderText(float sx, float sy, float sz,
 		float xScale, float yScale, Color const & clr,
-		std::wstring const & text, U32 flags)
+		std::wstring const & text, uint32 flags)
 	{
 		if (text.empty())
 		{
@@ -394,7 +394,7 @@ namespace KlayGE
 
 		this->UpdateTexture(text);
 
-		U8 r, g, b, a;
+		uint8 r, g, b, a;
 		clr.RGBA(r, g, b, a);
 
 		boost::shared_ptr<D3D9FontRenderable> renderable(new D3D9FontRenderable(effect_, rb_));

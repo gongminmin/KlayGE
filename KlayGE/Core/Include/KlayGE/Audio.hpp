@@ -57,7 +57,7 @@ namespace KlayGE
 		AudioDataSourcePtr dataSource_;
 
 		AudioFormat	format_;
-		U32			freq_;
+		uint32			freq_;
 	};
 
 	// 声音缓冲区
@@ -96,7 +96,7 @@ namespace KlayGE
 		virtual void DoStop() = 0;
 
 		// 每秒读取的次数
-		static U32	PreSecond;
+		static uint32	PreSecond;
 	};
 
 	// 管理音频播放

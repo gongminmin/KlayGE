@@ -22,7 +22,7 @@
 
 namespace KlayGE
 {
-	OGLRenderEffect::OGLRenderEffect(std::string const & srcData, UINT flags)
+	OGLRenderEffect::OGLRenderEffect(std::string const & srcData, uint32 flags)
 	{
 	}
 
@@ -35,11 +35,11 @@ namespace KlayGE
 		return RenderEffectPtr(new OGLRenderEffect(*this));
 	}
 
-	void OGLRenderEffect::Desc(UINT& parameters, UINT& techniques, UINT& functions)
+	void OGLRenderEffect::Desc(uint32& parameters, uint32& techniques, uint32& functions)
 	{
 	}
 
-	RenderEffectParameterPtr OGLRenderEffect::Parameter(UINT index)
+	RenderEffectParameterPtr OGLRenderEffect::Parameter(uint32 index)
 	{
 		return RenderEffectParameterPtr();
 	}
@@ -58,16 +58,16 @@ namespace KlayGE
 	{
 	}
 
-	void OGLRenderEffect::SetTechnique(UINT technique)
+	void OGLRenderEffect::SetTechnique(uint32 technique)
 	{
 	}
 
-	UINT OGLRenderEffect::Begin(UINT flags)
+	uint32 OGLRenderEffect::Begin(uint32 flags)
 	{
 		return 1;
 	}
 
-	void OGLRenderEffect::BeginPass(UINT passNum)
+	void OGLRenderEffect::BeginPass(uint32 passNum)
 	{
 	}
 

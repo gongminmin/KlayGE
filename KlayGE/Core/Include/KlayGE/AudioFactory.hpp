@@ -24,8 +24,8 @@ namespace KlayGE
 		virtual std::wstring const & Name() const = 0;
 
 		virtual AudioEngine& AudioEngineInstance() = 0;
-		virtual AudioBufferPtr MakeSoundBuffer(AudioDataSourcePtr const & dataSource, U32 numSource = 1) = 0;
-		virtual AudioBufferPtr MakeMusicBuffer(AudioDataSourcePtr const & dataSource, U32 bufferSeconds = 2) = 0;
+		virtual AudioBufferPtr MakeSoundBuffer(AudioDataSourcePtr const & dataSource, uint32 numSource = 1) = 0;
+		virtual AudioBufferPtr MakeMusicBuffer(AudioDataSourcePtr const & dataSource, uint32 bufferSeconds = 2) = 0;
 	};
 
 	template <typename AudioEngineType, typename SoundBufferType, typename MusicBufferType>
@@ -45,13 +45,13 @@ namespace KlayGE
 			return audioEngine;
 		}
 
-		AudioBufferPtr MakeSoundBuffer(AudioDataSourcePtr const & dataSource, U32 numSource = 1)
+		AudioBufferPtr MakeSoundBuffer(AudioDataSourcePtr const & dataSource, uint32 numSource = 1)
 		{
 			return AudioBufferPtr(new SoundBufferType(dataSource, numSource,
 				this->AudioEngineInstance().SoundVolume()));
 		}
 
-		AudioBufferPtr MakeMusicBuffer(AudioDataSourcePtr const & dataSource, U32 bufferSeconds = 2)
+		AudioBufferPtr MakeMusicBuffer(AudioDataSourcePtr const & dataSource, uint32 bufferSeconds = 2)
 		{
 			return AudioBufferPtr(new MusicBufferType(dataSource, bufferSeconds,
 				this->AudioEngineInstance().MusicVolume()));

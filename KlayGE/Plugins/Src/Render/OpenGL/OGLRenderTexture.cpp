@@ -11,7 +11,7 @@
 
 namespace KlayGE
 {
-	OGLRenderTexture::OGLRenderTexture(U32 width, U32 height)
+	OGLRenderTexture::OGLRenderTexture(uint32 width, uint32 height)
 	{
 		left_ = 0;
 		top_ = 0;

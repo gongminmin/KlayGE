@@ -33,8 +33,8 @@
 
 namespace KlayGE
 {
-	SOCKADDR_IN TransAddr(std::string const & address, U16 port);
-	std::string TransAddr(SOCKADDR_IN const & sockAddr, U16& port);
+	SOCKADDR_IN TransAddr(std::string const & address, uint16 port);
+	std::string TransAddr(SOCKADDR_IN const & sockAddr, uint16& port);
 	IN_ADDR Host();
 
 	// Í¬²½Ì×½Ó×Ö
@@ -54,7 +54,7 @@ namespace KlayGE
 
 		void Connect(SOCKADDR_IN const & sockAddr);
 
-		void IOCtl(long command, U32* argument);
+		void IOCtl(long command, uint32* argument);
 		void Listen(int connectionBacklog = 5);
 
 		int Receive(void* buf, int len, int flags = 0);
@@ -81,12 +81,12 @@ namespace KlayGE
 
 		void NonBlock(bool nonBlock)
 		{
-			U32 on(nonBlock);
+			uint32 on(nonBlock);
 			this->IOCtl(FIONBIO, &on);
 		}
 
-		void TimeOut(U32 microSecs);
-		U32 TimeOut();
+		void TimeOut(uint32 microSecs);
+		uint32 TimeOut();
 
 	private:
 		SOCKET		socket_;

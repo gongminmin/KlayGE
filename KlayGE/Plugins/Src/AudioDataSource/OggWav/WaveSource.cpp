@@ -42,7 +42,7 @@ namespace KlayGE
 	struct WAVChunkHdr
 	{
 		FourCC		id;
-		U32			size;
+		uint32			size;
 	};
 
 	struct WAVFileHdr
@@ -53,24 +53,24 @@ namespace KlayGE
 
 	struct WaveFmt
 	{
-		U16			formatTag;
-		U16			channels;
-		U32			samplesPerSec;
-		U32			avgBytesPerSec;
-		U16			blockAlign;
+		uint16			formatTag;
+		uint16			channels;
+		uint32			samplesPerSec;
+		uint32			avgBytesPerSec;
+		uint16			blockAlign;
 	};
 
 	struct PCMWaveFmt
 	{
 		WaveFmt		wf;
-		U16			bitsPerSample;
+		uint16			bitsPerSample;
 	};
 
 	struct WaveFmtEx
 	{
 		WaveFmt		wf;
-		U16			bitsPerSample;
-		U16			extraSize;
+		uint16			bitsPerSample;
+		uint16			extraSize;
 	};
 
 	#ifdef _MSC_VER

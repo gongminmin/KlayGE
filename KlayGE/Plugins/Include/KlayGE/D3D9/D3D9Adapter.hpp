@@ -16,7 +16,7 @@ namespace KlayGE
 	{
 	public:
 		D3D9Adapter();
-		D3D9Adapter(U32 adapterNo,
+		D3D9Adapter(uint32 adapterNo,
 			D3DADAPTER_IDENTIFIER9 const & d3dadapterIdentifer,
 			D3DDISPLAYMODE const & d3ddmDesktop);
 
@@ -25,7 +25,7 @@ namespace KlayGE
 		// 访问设备描述字符串
 		std::string const Description() const;
 
-		U32 AdapterNo() const
+		uint32 AdapterNo() const
 			{ return adapterNo_; }
 
 		D3DADAPTER_IDENTIFIER9 const & AdapterIdentifier() const
@@ -39,7 +39,7 @@ namespace KlayGE
 
 	private:
 		// 这是第几块适配器
-		U32			adapterNo_;
+		uint32			adapterNo_;
 
 		// 适配器信息
 		D3DADAPTER_IDENTIFIER9 d3dAdapterIdentifier_;

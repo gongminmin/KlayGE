@@ -52,7 +52,7 @@ namespace KlayGE
 	{
 		assert(dynamic_cast<DInputDeviceImpl*>(impl_.get()) != NULL);
 
-		boost::array<U8, 256> keys;
+		boost::array<uint8, 256> keys;
 		static_cast<DInputDeviceImpl*>(impl_.get())->DeviceState(&keys[0], keys.size());
 
 		std::transform(keys.begin(), keys.end(), keys_.begin(),

@@ -25,7 +25,7 @@ namespace KlayGE
 	{
 		numIndices_ = numIndices;
 
-		size_t const size(sizeof(U16) * numIndices);
+		size_t const size(sizeof(uint16) * numIndices);
 
 		if (currentSize_ < size)
 		{
@@ -43,7 +43,7 @@ namespace KlayGE
 
 		void* dest;
 		TIF(buffer_->Lock(0, 0, &dest, D3DLOCK_NOSYSLOCK | (this->IsStatic() ? 0 : D3DLOCK_DISCARD)));
-		std::copy(static_cast<U8 const *>(src), static_cast<U8 const *>(src) + size, static_cast<U8*>(dest));
+		std::copy(static_cast<uint8 const *>(src), static_cast<uint8 const *>(src) + size, static_cast<uint8*>(dest));
 		buffer_->Unlock();
 	}
 

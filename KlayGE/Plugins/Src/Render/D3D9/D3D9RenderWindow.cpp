@@ -278,7 +278,7 @@ namespace KlayGE
 		Convert(description_, adapter_.Description());
 		description_ += L' ';
 
-		typedef std::vector<std::pair<U32, std::wstring> > BehaviorType;
+		typedef std::vector<std::pair<uint32, std::wstring> > BehaviorType;
 		BehaviorType behavior;
 		behavior.push_back(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_PUREDEVICE, std::wstring(L"(pure hw vp)")));
 		behavior.push_back(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING, std::wstring(L"(hw vp)")));

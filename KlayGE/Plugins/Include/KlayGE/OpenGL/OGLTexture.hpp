@@ -14,7 +14,7 @@ namespace KlayGE
 	class OGLTexture : public Texture
 	{
 	public:
-		OGLTexture(U32 width, U32 height, U16 numMipMaps, PixelFormat format, TextureUsage usage = TU_Default);
+		OGLTexture(uint32 width, uint32 height, uint16 numMipMaps, PixelFormat format, TextureUsage usage = TU_Default);
 		~OGLTexture();
 
 		std::wstring const & Name() const;
@@ -23,7 +23,7 @@ namespace KlayGE
 
 		void CopyToTexture(Texture& target);
 		void CopyMemoryToTexture(void* pData, PixelFormat pf,
-			U32 width = 0, U32 height = 0, U32 xOffset = 0, U32 yOffset = 0);
+			uint32 width = 0, uint32 height = 0, uint32 xOffset = 0, uint32 yOffset = 0);
 
 		GLenum GLTexture() const
 			{ return texture_; }

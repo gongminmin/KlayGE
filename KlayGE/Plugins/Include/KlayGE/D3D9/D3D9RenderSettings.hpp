@@ -18,9 +18,9 @@ namespace KlayGE
 		virtual ~D3D9RenderSettings()
 			{ }
 
-		U32 multiSample;
+		uint32 multiSample;
 
-		bool ConfirmDevice(D3DCAPS9 const & caps, U32 behavior, D3DFORMAT format) const
+		bool ConfirmDevice(D3DCAPS9 const & caps, uint32 behavior, D3DFORMAT format) const
 		{
 			if (caps.VertexShaderVersion < D3DVS_VERSION(1, 1))
 			{
@@ -30,7 +30,7 @@ namespace KlayGE
 		}
 
 	private:
-		virtual bool DoConfirmDevice(D3DCAPS9 const & /*caps*/, U32 /*behavior*/, D3DFORMAT /*format*/) const
+		virtual bool DoConfirmDevice(D3DCAPS9 const & /*caps*/, uint32 /*behavior*/, D3DFORMAT /*format*/) const
 			{ return true; }
 	};
 }

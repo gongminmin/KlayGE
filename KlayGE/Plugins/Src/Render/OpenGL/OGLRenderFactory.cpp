@@ -22,7 +22,7 @@ namespace KlayGE
 			{ }
 			
 		VertexStreamPtr MakeVertexStream(VertexStreamType type,
-			U8 sizeElement, U8 numElement, bool staticStream = false)
+			uint8 sizeElement, uint8 numElement, bool staticStream = false)
 		{
 			VertexStreamPtr stream;
 
@@ -35,7 +35,7 @@ namespace KlayGE
 
 			case VST_Diffuses:
 			case VST_Speculars:
-				stream = VertexStreamPtr(new OGLVertexStream(type, sizeof(U32), 1));
+				stream = VertexStreamPtr(new OGLVertexStream(type, sizeof(uint32), 1));
 				break;
 
 			case VST_BlendWeights:
@@ -43,7 +43,7 @@ namespace KlayGE
 				break;
 
 			case VST_BlendIndices:
-				stream = VertexStreamPtr(new OGLVertexStream(type, sizeof(U8), 4));
+				stream = VertexStreamPtr(new OGLVertexStream(type, sizeof(uint8), 4));
 				break;
 
 			case VST_TextureCoords0:

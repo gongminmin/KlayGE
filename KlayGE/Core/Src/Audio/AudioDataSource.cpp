@@ -21,7 +21,7 @@ namespace KlayGE
 	public:
 		AudioFormat Format() const
 			{ return AF_Unknown; }
-		U32 Freq() const
+		uint32 Freq() const
 			{ return 0; }
 
 		size_t Size()
@@ -48,7 +48,7 @@ namespace KlayGE
 		return this->format_;
 	}
 
-	U32 AudioDataSource::Freq() const
+	uint32 AudioDataSource::Freq() const
 	{
 		return this->freq_;
 	}

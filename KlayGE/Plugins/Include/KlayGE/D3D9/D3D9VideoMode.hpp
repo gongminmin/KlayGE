@@ -14,17 +14,17 @@ namespace KlayGE
 	{
 	public:
 		D3D9VideoMode();
-		D3D9VideoMode(U32 width, U32 height, U32 format);
+		D3D9VideoMode(uint32 width, uint32 height, uint32 format);
 
-		U32 Width() const;
-		U32 Height() const;
-		U32 Format() const;
-		U32 ColorDepth() const;
+		uint32 Width() const;
+		uint32 Height() const;
+		uint32 Format() const;
+		uint32 ColorDepth() const;
 
 	private:
-		U32		width_;
-		U32		height_;
-		U32		format_;
+		uint32		width_;
+		uint32		height_;
+		uint32		format_;
 	};
 
 	bool operator<(D3D9VideoMode const & lhs, D3D9VideoMode const & rhs);

@@ -59,7 +59,7 @@ namespace KlayGE
 		typedef std::vector<Vector2> TexsType;
 		TexsType texs_;
 
-		typedef std::vector<U16> IndicesType;
+		typedef std::vector<uint16> IndicesType;
 		IndicesType indices_;
 	};
 
@@ -74,7 +74,7 @@ namespace KlayGE
 		Matrix4 originMat;
 		Matrix4 inverseOriginMat;
 
-		S16 parent;
+		int16 parent;
 
 		boost::array<float, 6> attribute;
 	};
@@ -113,7 +113,7 @@ namespace KlayGE
 		typedef std::vector<float> BlendWeightsType;
 		BlendWeightsType blendWeights_;
 
-		typedef std::vector<KlayGE::U8> BlendIndicesType;
+		typedef std::vector<KlayGE::uint8> BlendIndicesType;
 		BlendIndicesType blendIndices_;
 	};
 }

@@ -32,7 +32,7 @@ namespace KlayGE
 {
 	// 构造函数。建立一个可以用于流式播放的缓冲区
 	/////////////////////////////////////////////////////////////////////////////////
-	DSMusicBuffer::DSMusicBuffer(AudioDataSourcePtr const & dataSource, U32 bufferSeconds, float volume)
+	DSMusicBuffer::DSMusicBuffer(AudioDataSourcePtr const & dataSource, uint32 bufferSeconds, float volume)
 					: MusicBuffer(dataSource),
 						writePos_(0)
 	{
@@ -89,7 +89,7 @@ namespace KlayGE
 
 	// 更新缓冲区
 	/////////////////////////////////////////////////////////////////////////////////
-	void DSMusicBuffer::TimerProc(::UINT timerID, ::UINT /*uMsg*/,
+	void DSMusicBuffer::TimerProc(UINT timerID, UINT /*uMsg*/,
 										DWORD_PTR dwUser, DWORD_PTR /*dw1*/, DWORD_PTR /*dw2*/)
 	{
 		DSMusicBuffer* buffer(reinterpret_cast<DSMusicBuffer*>(dwUser));
@@ -105,13 +105,13 @@ namespace KlayGE
 	void DSMusicBuffer::FillBuffer()
 	{
 		// 锁定缓冲区
-		U8* lockedBuffer;			// 指向缓冲区锁定的内存的指针
-		U32 lockedBufferSize;		// 锁定的内存大小
+		uint8* lockedBuffer;			// 指向缓冲区锁定的内存的指针
+		uint32 lockedBufferSize;		// 锁定的内存大小
 		TIF(buffer_->Lock(fillSize_ * writePos_, fillSize_,
 			reinterpret_cast<void**>(&lockedBuffer), &lockedBufferSize,
 			NULL, NULL, 0));
 
-		std::vector<U8> data(fillSize_);
+		std::vector<uint8> data(fillSize_);
 		data.resize(dataSource_->Read(&data[0], fillSize_));
 
 		if (data.empty())
@@ -143,12 +143,12 @@ namespace KlayGE
 		dataSource_->Reset();
 
 		// 锁定缓冲区
-		U8* lockedBuffer;			// 指向缓冲区锁定的内存的指针
-		U32 lockedBufferSize;		// 锁定的内存大小
+		uint8* lockedBuffer;			// 指向缓冲区锁定的内存的指针
+		uint32 lockedBufferSize;		// 锁定的内存大小
 		TIF(buffer_->Lock(0, fillSize_ * fillCount_,
 			reinterpret_cast<void**>(&lockedBuffer), &lockedBufferSize, NULL, NULL, 0));
 
-		std::vector<U8> data(fillSize_ * fillCount_);
+		std::vector<uint8> data(fillSize_ * fillCount_);
 		data.resize(dataSource_->Read(&data[0], fillSize_ * fillCount_));
 
 		if (data.empty())
@@ -196,7 +196,7 @@ namespace KlayGE
 	{
 		if (buffer_)
 		{
-			U32 status;
+			uint32 status;
 			buffer_->GetStatus(&status);
 			return ((status & DSBSTATUS_PLAYING) != 0);
 		}

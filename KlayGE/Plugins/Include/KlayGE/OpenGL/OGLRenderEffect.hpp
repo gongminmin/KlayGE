@@ -25,22 +25,22 @@ namespace KlayGE
 	class OGLRenderEffect : public RenderEffect
 	{
 	public:
-		OGLRenderEffect(std::string const & srcData, UINT flags = 0);
+		OGLRenderEffect(std::string const & srcData, uint32 flags = 0);
 		OGLRenderEffect(OGLRenderEffect const & rhs);
 
 		RenderEffectPtr Clone() const;
 
-		void Desc(UINT& parameters, UINT& techniques, UINT& functions);
+		void Desc(uint32& parameters, uint32& techniques, uint32& functions);
 
-		RenderEffectParameterPtr Parameter(UINT index);
+		RenderEffectParameterPtr Parameter(uint32 index);
 		RenderEffectParameterPtr ParameterByName(std::string const & name);
 		RenderEffectParameterPtr ParameterBySemantic(std::string const & semantic);
 
 		void SetTechnique(std::string const & technique);
-		void SetTechnique(UINT technique);
+		void SetTechnique(uint32 technique);
 
-		UINT Begin(UINT flags = 0);
-		void BeginPass(UINT passNum);
+		uint32 Begin(uint32 flags = 0);
+		void BeginPass(uint32 passNum);
 		void EndPass();
 		void End();
 	};

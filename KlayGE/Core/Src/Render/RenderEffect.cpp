@@ -31,7 +31,7 @@ namespace KlayGE
 	class NullRenderEffect : public RenderEffect
 	{
 	public:
-		void Desc(UINT& parameters, UINT& techniques, UINT& functions)
+		void Desc(uint32& parameters, uint32& techniques, uint32& functions)
 		{
 			parameters = 0;
 			techniques = 0;
@@ -41,7 +41,7 @@ namespace KlayGE
 		RenderEffectPtr Clone() const
 			{ return RenderEffect::NullObject(); }
 
-		RenderEffectParameterPtr Parameter(UINT index)
+		RenderEffectParameterPtr Parameter(uint32 index)
 			{ return RenderEffectParameter::NullObject(); }
 		RenderEffectParameterPtr ParameterByName(std::string const & name)
 			{ return RenderEffectParameter::NullObject(); }
@@ -50,12 +50,12 @@ namespace KlayGE
 
 		void SetTechnique(std::string const & techName)
 			{ }
-		void SetTechnique(UINT tech)
+		void SetTechnique(uint32 tech)
 			{ }
 
-		UINT Begin(UINT flags = 0)
+		uint32 Begin(uint32 flags = 0)
 			{ return 1; }
-		void BeginPass(UINT passNum)
+		void BeginPass(uint32 passNum)
 			{ }
 		void EndPass()
 			{ }

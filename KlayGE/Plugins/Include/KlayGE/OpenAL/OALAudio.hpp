@@ -48,7 +48,7 @@ namespace KlayGE
 		typedef Sources::const_iterator		SourcesConstIter;
 
 	public:
-		OALSoundBuffer(AudioDataSourcePtr const & dataSource, U32 numSource, float volume);
+		OALSoundBuffer(AudioDataSourcePtr const & dataSource, uint32 numSource, float volume);
 		~OALSoundBuffer();
 
 		void Play(bool loop = false);
@@ -88,7 +88,7 @@ namespace KlayGE
 		typedef Buffers::const_iterator	BuffersConstIter;
 
 	public:
-		OALMusicBuffer(AudioDataSourcePtr const & dataSource, U32 bufferSeconds, float volume);
+		OALMusicBuffer(AudioDataSourcePtr const & dataSource, uint32 bufferSeconds, float volume);
 		~OALMusicBuffer();
 
 		void Volume(float vol);

@@ -31,20 +31,20 @@ namespace KlayGE
 	public:
 		// 2D & 3D 画出文字的函数
 		RenderablePtr RenderText(float x, float y, Color const & clr,
-			std::wstring const & text, U32 flags = 0);
+			std::wstring const & text, uint32 flags = 0);
 		RenderablePtr RenderText(float x, float y, float z, float xScale, float yScale,
-			Color const & clr, std::wstring const & text, U32 flags = 0);
-		//RenderablePtr RenderText(std::wstring const & text, U32 flags = 0);
+			Color const & clr, std::wstring const & text, uint32 flags = 0);
+		//RenderablePtr RenderText(std::wstring const & text, uint32 flags = 0);
 
-		U32 FontHeight() const;
+		uint32 FontHeight() const;
 
-		OGLFont(std::wstring const & fontName, U32 fontHeight = 12, U32 flags = 0);
+		OGLFont(std::wstring const & fontName, uint32 fontHeight = 12, uint32 flags = 0);
 
 	public:
 		struct CharInfo
 		{
 			Rect_T<float>	texRect;
-			U32				width;
+			uint32				width;
 		};
 
 		typedef std::map<wchar_t, CharInfo> CharInfoMapType;
@@ -62,7 +62,7 @@ namespace KlayGE
 		CharInfoMapType charInfoMap_;
 		CharLRUType charLRU_;
 
-		U32		curX_, curY_;
+		uint32		curX_, curY_;
 	};
 }
 

@@ -26,14 +26,14 @@ namespace KlayGE
 {
 	typedef std::list<std::vector<char> > SendQueueType;
 
-	U32 const Max_Buffer(64);
+	uint32 const Max_Buffer(64);
 
 	class Processer
 	{
 	public:
-		virtual void OnJoin(U32 /*ID*/) const
+		virtual void OnJoin(uint32 /*ID*/) const
 			{ }
-		virtual void OnQuit(U32 /*ID*/) const
+		virtual void OnQuit(uint32 /*ID*/) const
 			{ }
 		virtual void OnDefault(PVOID /*revBuf*/, int /*maxSize*/,
 			PVOID /*sendBuf*/, int& /*numSend*/, SOCKADDR_IN& /*from*/) const
@@ -46,21 +46,21 @@ namespace KlayGE
 		std::string		name;
 		SOCKADDR_IN		addr;
 
-		U32				time;
+		uint32				time;
 
 		SendQueueType	msgs;
 	};
 
 	class Lobby
 	{
-		typedef std::vector<std::pair<U32, PlayerDes> >	PlayerAddrs;
+		typedef std::vector<std::pair<uint32, PlayerDes> >	PlayerAddrs;
 		typedef PlayerAddrs::iterator		PlayerAddrsIter;
 
 	public:
 		Lobby();
 		~Lobby();
 
-		void Create(std::string const & Name, char maxPlayers, U16 port, Processer const & pro);
+		void Create(std::string const & Name, char maxPlayers, uint16 port, Processer const & pro);
 		void Close();
 
 		void LobbyName(std::string const & Name);
@@ -74,9 +74,9 @@ namespace KlayGE
 		int Receive(void* buf, int maxSize, SOCKADDR_IN& from);
 		int Send(void const * buf, int maxSize, SOCKADDR_IN const & to);
 
-		void TimeOut(U32 timeOut)
+		void TimeOut(uint32 timeOut)
 			{ this->socket_.TimeOut(timeOut); }
-		U32 TimeOut()
+		uint32 TimeOut()
 			{ return this->socket_.TimeOut(); }
 
 		SOCKADDR_IN const & SockAddr() const

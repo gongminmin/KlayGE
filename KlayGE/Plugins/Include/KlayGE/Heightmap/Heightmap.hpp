@@ -25,7 +25,7 @@ namespace KlayGE
 	public:
 		template <typename HeightFunc>
 		void Terrain(float startX, float startY, float width, float height, float spanX, float spanY,
-			std::vector<Vector3>& vertices, std::vector<U16>& indices,
+			std::vector<Vector3>& vertices, std::vector<uint16>& indices,
 			HeightFunc& Height)
 		{
 			vertices.clear();

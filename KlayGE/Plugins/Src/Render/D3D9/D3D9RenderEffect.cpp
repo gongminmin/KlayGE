@@ -28,7 +28,7 @@
 
 namespace KlayGE
 {
-	D3D9RenderEffect::D3D9RenderEffect(std::string const & srcData, UINT flags)
+	D3D9RenderEffect::D3D9RenderEffect(std::string const & srcData, uint32 flags)
 	{
 		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 
@@ -53,7 +53,7 @@ namespace KlayGE
 		return RenderEffectPtr(new D3D9RenderEffect(*this));
 	}
 
-	void D3D9RenderEffect::Desc(UINT& parameters, UINT& techniques, UINT& functions)
+	void D3D9RenderEffect::Desc(uint32& parameters, uint32& techniques, uint32& functions)
 	{
 		D3DXEFFECT_DESC desc;
 		TIF(effect_->GetDesc(&desc));
@@ -63,7 +63,7 @@ namespace KlayGE
 		functions = desc.Functions;
 	}
 
-	RenderEffectParameterPtr D3D9RenderEffect::Parameter(UINT index)
+	RenderEffectParameterPtr D3D9RenderEffect::Parameter(uint32 index)
 	{
 		return RenderEffectParameterPtr(new D3D9RenderEffectParameter(effect_,
 			effect_->GetParameter(NULL, index)));
@@ -90,7 +90,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9RenderEffect::SetTechnique(UINT technique)
+	void D3D9RenderEffect::SetTechnique(uint32 technique)
 	{
 		D3DXHANDLE handle(effect_->GetTechnique(technique));
 		if (this->Validate(handle))
@@ -104,14 +104,14 @@ namespace KlayGE
 		return SUCCEEDED(effect_->ValidateTechnique(handle));
 	}
 
-	UINT D3D9RenderEffect::Begin(UINT flags)
+	uint32 D3D9RenderEffect::Begin(uint32 flags)
 	{
 		UINT passes;
 		TIF(effect_->Begin(&passes, flags));
 		return passes;
 	}
 
-	void D3D9RenderEffect::BeginPass(UINT passNum)
+	void D3D9RenderEffect::BeginPass(uint32 passNum)
 	{
 		TIF(effect_->BeginPass(passNum));
 	}

@@ -39,17 +39,17 @@ namespace KlayGE
 
 		virtual RenderEffectPtr Clone() const = 0;
 
-		virtual void Desc(UINT& parameters, UINT& techniques, UINT& functions) = 0;
+		virtual void Desc(uint32& parameters, uint32& techniques, uint32& functions) = 0;
 
-		virtual RenderEffectParameterPtr Parameter(UINT index) = 0;
+		virtual RenderEffectParameterPtr Parameter(uint32 index) = 0;
 		virtual RenderEffectParameterPtr ParameterByName(std::string const & name) = 0;
 		virtual RenderEffectParameterPtr ParameterBySemantic(std::string const & semantic) = 0;
 
 		virtual void SetTechnique(std::string const & technique) = 0;
-		virtual void SetTechnique(UINT technique) = 0;
+		virtual void SetTechnique(uint32 technique) = 0;
 
-		virtual UINT Begin(UINT flags = 0) = 0;
-		virtual void BeginPass(UINT passNum) = 0;
+		virtual uint32 Begin(uint32 flags = 0) = 0;
+		virtual void BeginPass(uint32 passNum) = 0;
 		virtual void EndPass() = 0;
 		virtual void End() = 0;
 	};

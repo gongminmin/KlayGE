@@ -161,8 +161,8 @@ namespace KlayGE
 		virtual void CullingMode(CullMode mode) = 0;
 		virtual void SetMaterial(Material const & mat) = 0;
 
-		virtual void SetLight(U32 index, Light const & lt) = 0;
-		virtual void LightEnable(U32 index, bool enable) = 0;
+		virtual void SetLight(uint32 index, Light const & lt) = 0;
+		virtual void LightEnable(uint32 index, bool enable) = 0;
 
 		Matrix4 WorldMatrix() const;
 		void WorldMatrix(Matrix4 const & mat);
@@ -174,7 +174,7 @@ namespace KlayGE
 		virtual void DepthBufferDepthTest(bool depthTest) = 0;
 		virtual void DepthBufferDepthWrite(bool depthWrite) = 0;
 		virtual void DepthBufferFunction(CompareFunction depthFunction) = 0;
-		virtual void DepthBias(U16 bias) = 0;
+		virtual void DepthBias(uint16 bias) = 0;
 
 		virtual void Fog(FogMode mode = Fog_None,
 			Color const & color = Color(1, 1, 1, 1),
@@ -191,26 +191,26 @@ namespace KlayGE
 		virtual void ActiveRenderTarget(RenderTargetListIterator iter);
 		RenderTargetListIterator const & ActiveRenderTarget() const;
 
-		virtual void SetTexture(U32 stage, TexturePtr const & texture) = 0;
+		virtual void SetTexture(uint32 stage, TexturePtr const & texture) = 0;
 
 		// Sets the texture coordinate set to use for a texture unit.
-		virtual void TextureCoordSet(U32 stage, int index) = 0;
+		virtual void TextureCoordSet(uint32 stage, int index) = 0;
 
 		// Returns the number of texture units the current output hardware supports.
-		virtual U32 MaxTextureStages() = 0;
+		virtual uint32 MaxTextureStages() = 0;
 		// Turns off a texture unit.
-		virtual void DisableTextureStage(U32 stage) = 0;
+		virtual void DisableTextureStage(uint32 stage) = 0;
 
 		// Sets a method for automatically calculating texture coordinates for a stage.
-		virtual void TextureCoordCalculation(U32 stage, TexCoordCalcMethod m) = 0;
+		virtual void TextureCoordCalculation(uint32 stage, TexCoordCalcMethod m) = 0;
 		// Sets the texture addressing mode for a texture unit.
-		virtual void TextureAddressingMode(U32 stage, TexAddressingMode tam) = 0;
+		virtual void TextureAddressingMode(uint32 stage, TexAddressingMode tam) = 0;
 		// Sets the texture coordinate transformation matrix for a texture unit.
-		virtual void TextureMatrix(U32 stage, Matrix4 const & mat) = 0;
+		virtual void TextureMatrix(uint32 stage, Matrix4 const & mat) = 0;
 		// Sets the texture filtering type for a texture unit.
-		virtual void TextureFiltering(U32 stage, TexFiltering texFiltering) = 0;
+		virtual void TextureFiltering(uint32 stage, TexFiltering texFiltering) = 0;
 		// Sets the maximal anisotropy for the specified texture unit.
-		virtual void TextureAnisotropy(U32 stage, U32 maxAnisotropy) = 0;
+		virtual void TextureAnisotropy(uint32 stage, uint32 maxAnisotropy) = 0;
 
 		// Turns stencil buffer checking on or off. 
 		virtual void StencilCheckEnabled(bool enabled) = 0;
@@ -218,14 +218,14 @@ namespace KlayGE
 		virtual bool HasHardwareStencil() = 0;
 
 		// Determines the bit depth of the hardware accelerated stencil buffer, if supported.
-		virtual U16 StencilBufferBitDepth() = 0;
+		virtual uint16 StencilBufferBitDepth() = 0;
 
 		// Sets the stencil test function.
 		virtual void StencilBufferFunction(CompareFunction func) = 0;
 		// Sets the stencil buffer reference value.
-		virtual void StencilBufferReferenceValue(U32 refValue) = 0;
+		virtual void StencilBufferReferenceValue(uint32 refValue) = 0;
 		// Sets the stencil buffer mask value.
-		virtual void StencilBufferMask(U32 mask) = 0;
+		virtual void StencilBufferMask(uint32 mask) = 0;
 		// Sets the action to perform if the stencil test fails.
 		virtual void StencilBufferFailOperation(StencilOperation op) = 0;
 		// Sets the action to perform if the stencil test passes, but the depth buffer test fails.
@@ -243,7 +243,7 @@ namespace KlayGE
 		RenderTargetListIterator activeRenderTarget_;
 
 		RenderEffectPtr renderEffect_;
-		UINT renderPasses_;
+		uint32 renderPasses_;
 
 		Matrix4 worldMat_, viewMat_, projMat_;
 	};

@@ -48,7 +48,7 @@ namespace KlayGE
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	DSSoundBuffer::DSSoundBuffer(AudioDataSourcePtr const & dataSource,
-									U32 numSource, float volume)
+									uint32 numSource, float volume)
 					: SoundBuffer(dataSource),
 						sources_(numSource)
 	{
@@ -61,7 +61,7 @@ namespace KlayGE
 		dsbd.dwSize				= sizeof(dsbd);
 		dsbd.dwFlags			= DSBCAPS_CTRLVOLUME | DSBCAPS_CTRL3D | DSBCAPS_MUTE3DATMAXDISTANCE;
 		dsbd.guid3DAlgorithm	= GUID_NULL;
-		dsbd.dwBufferBytes		= static_cast<U32>(dataSource->Size());
+		dsbd.dwBufferBytes		= static_cast<uint32>(dataSource->Size());
 		dsbd.lpwfxFormat		= &wfx;
 
 		boost::shared_ptr<IDirectSound> const & dsound(static_cast<DSAudioEngine&>(Context::Instance().AudioFactoryInstance().AudioEngineInstance()).DSound());
@@ -79,8 +79,8 @@ namespace KlayGE
 		}
 
 		// 锁定缓冲区
-		U8* lockedBuffer;			// 指向缓冲区锁定的内存的指针
-		U32 lockedBufferSize;		// 锁定的内存大小
+		uint8* lockedBuffer;			// 指向缓冲区锁定的内存的指针
+		uint32 lockedBufferSize;		// 锁定的内存大小
 		TIF(sources_[0]->Lock(0, static_cast<DWORD>(dataSource_->Size()),
 			reinterpret_cast<void**>(&lockedBuffer), &lockedBufferSize, 
 			NULL, NULL, DSBLOCK_FROMWRITECURSOR));
@@ -88,7 +88,7 @@ namespace KlayGE
 		dataSource_->Reset();
 
 		// 用整个waveFile填充缓冲区
-		std::vector<U8> data(dataSource_->Size());
+		std::vector<uint8> data(dataSource_->Size());
 		dataSource_->Read(&data[0], data.size());
 
 		if (data.empty())

@@ -273,7 +273,7 @@ namespace KlayGE
 
 	// 设置光源
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::SetLight(U32 index, Light const & light)
+	void OGLRenderEngine::SetLight(uint32 index, Light const & light)
 	{
 		GLint lightIndex(GL_LIGHT0 + index);
 
@@ -340,7 +340,7 @@ namespace KlayGE
 
 	// 打开/关闭某个光源
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::LightEnable(U32 index, bool enabled)
+	void OGLRenderEngine::LightEnable(uint32 index, bool enabled)
 	{
 		if (enabled)
 		{
@@ -438,7 +438,7 @@ namespace KlayGE
 			OGLVertexStream& stream(static_cast<OGLVertexStream&>(*(*iter)));
 			VertexStreamType type(stream.Type());
 
-			std::vector<U8> const & data(stream.OGLBuffer());
+			std::vector<uint8> const & data(stream.OGLBuffer());
 
 			switch (type)
 			{
@@ -504,7 +504,7 @@ namespace KlayGE
 		if (vb.UseIndices())
 		{
 			OGLIndexStream& stream(static_cast<OGLIndexStream&>(*vb.GetIndexStream()));
-			std::vector<U16> const & data(stream.OGLBuffer());
+			std::vector<uint16> const & data(stream.OGLBuffer());
 			glDrawElements(mode, static_cast<GLsizei>(vb.NumIndices()),
 				GL_UNSIGNED_SHORT, &data[0]);
 		}
@@ -551,7 +551,7 @@ namespace KlayGE
 
 	// 设置深度偏移
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::DepthBias(U16 bias)
+	void OGLRenderEngine::DepthBias(uint16 bias)
 	{
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glEnable(GL_POLYGON_OFFSET_POINT);
@@ -597,7 +597,7 @@ namespace KlayGE
 
 	// 设置纹理
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::SetTexture(U32 stage, TexturePtr const & texture)
+	void OGLRenderEngine::SetTexture(uint32 stage, TexturePtr const & texture)
 	{
 		if (!texture)
 		{
@@ -612,50 +612,50 @@ namespace KlayGE
 
 	// 设置纹理坐标集
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::TextureCoordSet(U32 stage, int index)
+	void OGLRenderEngine::TextureCoordSet(uint32 stage, int index)
 	{
 	}
 
 	// 获取最大纹理阶段数
 	/////////////////////////////////////////////////////////////////////////////////
-	U32 OGLRenderEngine::MaxTextureStages()
+	uint32 OGLRenderEngine::MaxTextureStages()
 	{
 		return 1;
 	}
 
 	// 关闭某个纹理阶段
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::DisableTextureStage(U32 stage)
+	void OGLRenderEngine::DisableTextureStage(uint32 stage)
 	{
 	}
 
 	// 计算纹理坐标
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::TextureCoordCalculation(U32 stage, TexCoordCalcMethod m)
+	void OGLRenderEngine::TextureCoordCalculation(uint32 stage, TexCoordCalcMethod m)
 	{
 	}
 
 	// 设置纹理寻址模式
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::TextureAddressingMode(U32 stage, TexAddressingMode tam)
+	void OGLRenderEngine::TextureAddressingMode(uint32 stage, TexAddressingMode tam)
 	{
 	}
 
 	// 设置纹理坐标
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::TextureMatrix(U32 stage, Matrix4 const & mat)
+	void OGLRenderEngine::TextureMatrix(uint32 stage, Matrix4 const & mat)
 	{
 	}
 
 	// 设置纹理过滤模式
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::TextureFiltering(U32 stage, TexFiltering texFiltering)
+	void OGLRenderEngine::TextureFiltering(uint32 stage, TexFiltering texFiltering)
 	{
 	}
 
 	// 设置纹理异性过滤
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::TextureAnisotropy(U32 stage, U32 maxAnisotropy)
+	void OGLRenderEngine::TextureAnisotropy(uint32 stage, uint32 maxAnisotropy)
 	{
 	}
 
@@ -682,7 +682,7 @@ namespace KlayGE
 
 	// 设置模板位数
 	/////////////////////////////////////////////////////////////////////////////////
-	U16 OGLRenderEngine::StencilBufferBitDepth()
+	uint16 OGLRenderEngine::StencilBufferBitDepth()
 	{
 		return 8;
 	}
@@ -695,13 +695,13 @@ namespace KlayGE
 
 	// 设置模板缓冲区参考值
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::StencilBufferReferenceValue(U32 refValue)
+	void OGLRenderEngine::StencilBufferReferenceValue(uint32 refValue)
 	{
 	}
 
 	// 设置模板缓冲区掩码
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::StencilBufferMask(U32 mask)
+	void OGLRenderEngine::StencilBufferMask(uint32 mask)
 	{
 	}
 

@@ -53,18 +53,18 @@ namespace
 			std::ostreambuf_iterator<char> outIter(out);
 
 			int lastMatchLength;
-			U8 c;
-			std::vector<U8> codeBuf(17, 0);		// codeBuf[1..16] saves eight units of code, and
+			uint8 c;
+			std::vector<uint8> codeBuf(17, 0);		// codeBuf[1..16] saves eight units of code, and
 												// codeBuf[0] works as eight flags, "1" representing that the unit
 												// is an unencoded letter (1 byte), "0" a position-and-length pair
 												// (2 bytes).  Thus, eight units require at most 16 bytes of code.
-			std::vector<U8>::iterator codeBufPtr = codeBuf.begin() + 1;
+			std::vector<uint8>::iterator codeBufPtr = codeBuf.begin() + 1;
 
-			U8 mask = 1;
+			uint8 mask = 1;
 
 			this->InitTree();					// initialize trees
-			U32 s(0);
-			U32 r(N - F);
+			uint32 s(0);
+			uint32 r(N - F);
 			std::fill_n(textBuf_, r, ' ');		// Clear the buffer with
 												// any character that will appear often.
 
@@ -106,9 +106,9 @@ namespace
 				}
 				else
 				{
-					*codeBufPtr = static_cast<U8>(matchPosition_);
+					*codeBufPtr = static_cast<uint8>(matchPosition_);
 					++ codeBufPtr;
-					*codeBufPtr = static_cast<U8>(((matchPosition_ >> 4) & 0xF0)
+					*codeBufPtr = static_cast<uint8>(((matchPosition_ >> 4) & 0xF0)
 						| (matchLength_ - (THRESHOLD + 1)));		// Send position and
 																	// length pair. Note matchLength > THRESHOLD.
 					++ codeBufPtr;
@@ -187,7 +187,7 @@ namespace
 			std::fill_n(dad_, N, NIL);
 		}
 
-		void InsertNode(U32 r)
+		void InsertNode(uint32 r)
 		{
 			// Inserts string of length F, textBuf[r..r+F-1], into one of the
 			// trees (textBuf[r]'th tree) and returns the longest-match position
@@ -196,9 +196,9 @@ namespace
 			// one, because the old one will be deleted sooner.
 			// Note r plays double role, as tree node and position in buffer.
 
-			U32 cmp(1);
-			U8* key(&textBuf_[r]);
-			U32 p(N + 1 + key[0]);
+			uint32 cmp(1);
+			uint8* key(&textBuf_[r]);
+			uint32 p(N + 1 + key[0]);
 			rson_[r] = lson_[r] = NIL;
 			matchLength_ = 0;
 
@@ -263,9 +263,9 @@ namespace
 		}
 
 		// deletes node p from tree
-		void DeleteNode(U32 p)
+		void DeleteNode(uint32 p)
 		{
-			U32 q;
+			uint32 q;
 
 			if (NIL == dad_[p])
 			{
@@ -337,7 +337,7 @@ namespace
 			FileDes const & fd(iter->second);
 
 			std::string const & fileName(iter->first);
-			U32 const temp(static_cast<U32>(fileName.length()));
+			uint32 const temp(static_cast<uint32>(fileName.length()));
 			out.write(reinterpret_cast<const char*>(&temp), sizeof(temp));
 			out.write(&fileName[0], temp);
 
@@ -350,7 +350,7 @@ namespace
 	void Compress(std::ostream& outFile, DirTable& dirTable, std::string const & rootName,
 		std::vector<std::string> const & files)
 	{
-		U32 curPos(0);
+		uint32 curPos(0);
 
 		for (std::vector<std::string>::const_iterator iter = files.begin(); iter != files.end(); ++ iter)
 		{
@@ -369,7 +369,7 @@ namespace
 
 			FileDes fd;
 			fd.crc32 = crc32.checksum();
-			fd.DeComLength = static_cast<U32>(in.tellg());
+			fd.DeComLength = static_cast<uint32>(in.tellg());
 			in.seekg(0);
 
 			std::stringstream out;
@@ -383,7 +383,7 @@ namespace
 			}
 
 			p->seekg(0, std::ios_base::end);
-			fd.length	= static_cast<U32>(p->tellg());
+			fd.length	= static_cast<uint32>(p->tellg());
 			fd.start	= curPos;
 			curPos += fd.length;
 
@@ -484,8 +484,8 @@ namespace KlayGE
 		mag.magic			= MakeFourCC<'p', 'k', 't', ' '>::value;
 		mag.ver				= 3;
 		mag.DTStart			= sizeof(mag);
-		mag.DTLength		= static_cast<U32>(dtCom.tellp());
-		mag.DTDeComLength	= static_cast<U32>(dt.tellg());
+		mag.DTLength		= static_cast<uint32>(dtCom.tellp());
+		mag.DTDeComLength	= static_cast<uint32>(dt.tellg());
 		mag.FIStart			= mag.DTStart + mag.DTLength;
 
 		pktFile.seekp(0);

@@ -15,6 +15,9 @@
 
 #include <KlayGE/KlayGE.hpp>
 
+#pragma warning(disable : 4251)
+#pragma warning(disable : 4275)
+
 #include <boost/thread/xtime.hpp>
 #include <boost/thread/thread.hpp>
 
@@ -81,7 +84,7 @@ namespace KlayGE
 
 	// 暂停几毫秒
 	/////////////////////////////////////////////////////////////////////////////////
-	void Sleep(U32 ms)
+	void Sleep(uint32 ms)
 	{
 		boost::xtime xt;
 
@@ -94,50 +97,50 @@ namespace KlayGE
 		boost::thread::sleep(xt);
 	}
 
-	// U32本地格式到网络格式
+	// uint32本地格式到网络格式
 	/////////////////////////////////////////////////////////////////////////////////
-	U32 ToNet(U32 host)
+	uint32 ToNet(uint32 host)
 	{
 		union
 		{
-			U8 byte[sizeof(U32) / sizeof(U8)];
-			U32 net;
+			uint8 byte[sizeof(uint32) / sizeof(uint8)];
+			uint32 net;
 		} ret;
 
-		ret.byte[0] = static_cast<U8>((host & 0xFF000000) >> 24);
-		ret.byte[1] = static_cast<U8>((host & 0x00FF0000) >> 16);
-		ret.byte[2] = static_cast<U8>((host & 0x0000FF00) >> 8);
-		ret.byte[3] = static_cast<U8>((host & 0x000000FF) >> 0);
+		ret.byte[0] = static_cast<uint8>((host & 0xFF000000) >> 24);
+		ret.byte[1] = static_cast<uint8>((host & 0x00FF0000) >> 16);
+		ret.byte[2] = static_cast<uint8>((host & 0x0000FF00) >> 8);
+		ret.byte[3] = static_cast<uint8>((host & 0x000000FF) >> 0);
 
 		return ret.net;
 	}
 
-	// U16本地格式到网络格式
+	// uint16本地格式到网络格式
 	/////////////////////////////////////////////////////////////////////////////////
-	U16 ToNet(U16 host)
+	uint16 ToNet(uint16 host)
 	{
 		union
 		{
-			U8 byte[sizeof(U16) / sizeof(U8)];
-			U16 net;
+			uint8 byte[sizeof(uint16) / sizeof(uint8)];
+			uint16 net;
 		} ret;
 
-		ret.byte[0] = static_cast<U8>((host & 0xFF00) >> 8);
-		ret.byte[1] = static_cast<U8>((host & 0x00FF) >> 0);
+		ret.byte[0] = static_cast<uint8>((host & 0xFF00) >> 8);
+		ret.byte[1] = static_cast<uint8>((host & 0x00FF) >> 0);
 
 		return ret.net;
 	}
 
-	// U32网络格式到本地格式
+	// uint32网络格式到本地格式
 	/////////////////////////////////////////////////////////////////////////////////
-	U32 ToHost(U32 net)
+	uint32 ToHost(uint32 net)
 	{
 		return ToNet(net);
 	}
 
-	// U16网络格式到本地格式
+	// uint16网络格式到本地格式
 	/////////////////////////////////////////////////////////////////////////////////
-	U16 ToHost(U16 net)
+	uint16 ToHost(uint16 net)
 	{
 		return ToNet(net);
 	}

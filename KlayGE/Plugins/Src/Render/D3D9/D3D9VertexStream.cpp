@@ -12,7 +12,7 @@
 
 namespace KlayGE
 {
-	D3D9VertexStream::D3D9VertexStream(VertexStreamType type, U8 sizeElement, U8 ElementsPerVertex, bool staticStream)
+	D3D9VertexStream::D3D9VertexStream(VertexStreamType type, uint8 sizeElement, uint8 ElementsPerVertex, bool staticStream)
 			: VertexStream(type, sizeElement, ElementsPerVertex),
 				currentSize_(0), numVertices_(0), 
 				staticStream_(staticStream)
@@ -54,8 +54,8 @@ namespace KlayGE
 		TIF(buffer_->Lock(0, 0, &dest,
 			D3DLOCK_NOSYSLOCK | (this->IsStatic() ? 0 : D3DLOCK_DISCARD)));
 
-		U8* destPtr(static_cast<U8*>(dest));
-		U8 const * srcPtr(static_cast<U8 const *>(src));
+		uint8* destPtr(static_cast<uint8*>(dest));
+		uint8 const * srcPtr(static_cast<uint8 const *>(src));
 
 		if (stride != 0)
 		{

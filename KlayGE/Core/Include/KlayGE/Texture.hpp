@@ -29,7 +29,7 @@ namespace KlayGE
 		PF_A2R10G10B10,
 	};
 
-	inline U8
+	inline uint8
 	PixelFormatBits(PixelFormat format)
 	{
 		switch (format)
@@ -79,13 +79,13 @@ namespace KlayGE
 		virtual std::wstring const & Name() const = 0;
 
 		// Gets the number of mipmaps to be used for this texture.
-		U16 NumMipMaps() const 
+		uint16 NumMipMaps() const 
 			{ return this->numMipMaps_; }
 
 		// Sets the number of mipmaps to be used for this texture.
 		// @note
 		// Must be set before calling any 'load' method.
-		void NumMipMaps(U16 num)
+		void NumMipMaps(uint16 num)
 			{ this->numMipMaps_ = num; }
 
 		// Returns the TextureUsage indentifier for this Texture
@@ -93,15 +93,15 @@ namespace KlayGE
 			{ return this->usage_; }
 
         // Returns the width of the texture.
-		U32 Width() const
+		uint32 Width() const
 			{ return this->width_; }
 
 		// Returns the height of the texture.
-		U32 Height() const
+		uint32 Height() const
 			{ return this->height_; }
 
 		// Returns the bpp of the texture.
-		U32 Bpp() const
+		uint32 Bpp() const
 			{ return this->bpp_; }
 
 		// Returns the pixel format for the texture surface.
@@ -111,14 +111,14 @@ namespace KlayGE
 		// Copies (and maybe scales to fit) the contents of this texture to another texture.
 		virtual void CopyToTexture(Texture& target) = 0;
 		virtual void CopyMemoryToTexture(void* data, PixelFormat pf,
-			U32 width = 0, U32 height = 0, U32 xOffset = 0, U32 yOffset = 0) = 0;
+			uint32 width = 0, uint32 height = 0, uint32 xOffset = 0, uint32 yOffset = 0) = 0;
 
 	protected:
-		U32		height_;
-		U32		width_;
-		U32		bpp_;
+		uint32		height_;
+		uint32		width_;
+		uint32		bpp_;
 
-		U16		numMipMaps_;
+		uint16		numMipMaps_;
 
 		PixelFormat format_;
 		TextureUsage usage_;

@@ -10,7 +10,7 @@ namespace KlayGE
 	class D3D9RenderTexture : public RenderTexture
 	{
 	public:
-		D3D9RenderTexture(U32 width, U32 height);
+		D3D9RenderTexture(uint32 width, uint32 height);
 
 		virtual void CustomAttribute(std::string const & name, void* pData);
 

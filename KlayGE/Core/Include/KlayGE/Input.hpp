@@ -238,8 +238,8 @@ namespace KlayGE
 		JS_Button31			= 0x227,
 	};
 
-	typedef std::pair<U16, U16> InputAction;
-	typedef std::vector<std::pair<U16, long> > InputActionsType;
+	typedef std::pair<uint16, uint16> InputAction;
+	typedef std::vector<std::pair<uint16, long> > InputActionsType;
 
 
 	// 输入动作格式
@@ -256,13 +256,13 @@ namespace KlayGE
 				boost::lambda::bind(&InputActionMap::AddAction, this, boost::lambda::_1));
 		}
 
-		void UpdateInputActions(InputActionsType& actions, U16 key, long value = 0);
+		void UpdateInputActions(InputActionsType& actions, uint16 key, long value = 0);
 
-		bool HasAction(U16 key) const;
-		U16 Action(U16 key) const;
+		bool HasAction(uint16 key) const;
+		uint16 Action(uint16 key) const;
 
 	private:
-		MapVector<U16, U16> actionMap_;
+		MapVector<uint16, uint16> actionMap_;
 	};
 
 

@@ -24,26 +24,26 @@ namespace KlayGE
 	class Exception : public std::exception
 	{
 	public:
-		Exception(std::string const & errFile, U32 errLine, U32 errCode, std::string const & msg) throw()
+		Exception(std::string const & errFile, uint32 errLine, uint32 errCode, std::string const & msg) throw()
 			: errFile_(errFile), errLine_(errLine),
 				errCode_(errCode), msg_(msg)
 			{ }
 
 		std::string const & ErrorFile() const throw()
 			{ return errFile_; }
-		U32 ErrorLine() const throw()
+		uint32 ErrorLine() const throw()
 			{ return errLine_; }
 
-		U32 ErrorCode() const throw()
+		uint32 ErrorCode() const throw()
 			{ return errCode_; }
 		const char* what() const throw()
 			{ return msg_.c_str(); }
 
 	public:
 		std::string errFile_;
-		U32 errLine_;
+		uint32 errLine_;
 
-		U32 errCode_;
+		uint32 errCode_;
 		std::string msg_;
 	};
 }

@@ -43,7 +43,7 @@ namespace KlayGE
 		typedef Sources::const_iterator		SourcesConstIter;
 
 	public:
-		DSSoundBuffer(AudioDataSourcePtr const & dataSource, U32 numSource, float volume);
+		DSSoundBuffer(AudioDataSourcePtr const & dataSource, uint32 numSource, float volume);
 		~DSSoundBuffer();
 
 		void Play(bool loop = false);
@@ -79,7 +79,7 @@ namespace KlayGE
 	class DSMusicBuffer : boost::noncopyable, public MusicBuffer
 	{
 	public:
-		DSMusicBuffer(AudioDataSourcePtr const & dataSource, U32 bufferSeconds, float volume);
+		DSMusicBuffer(AudioDataSourcePtr const & dataSource, uint32 bufferSeconds, float volume);
 		~DSMusicBuffer();
 
 		void Volume(float vol);
@@ -102,9 +102,9 @@ namespace KlayGE
 
 	private:
 		DSBufferType	buffer_;
-		U32				fillSize_;
-		U32				fillCount_;
-		U32				writePos_;
+		uint32				fillSize_;
+		uint32				fillCount_;
+		uint32				writePos_;
 
 		boost::shared_ptr<IDirectSound3DBuffer> ds3DBuffer_;
 
