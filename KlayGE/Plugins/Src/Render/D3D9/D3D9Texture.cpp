@@ -431,7 +431,7 @@ namespace KlayGE
 				D3DPOOL_DEFAULT, &d3dTexture));
 			boost::shared_ptr<IDirect3DTexture9> tempTexture = MakeCOMPtr(d3dTexture);
 
-			TIF(d3dDevice_->UpdateTexture(d3dTexture_.get(), tempTexture.get()));
+			d3dDevice_->UpdateTexture(d3dTexture_.get(), tempTexture.get());
 			d3dTexture_ = tempTexture;
 		}
 		else

@@ -122,6 +122,16 @@ namespace KlayGE
 		{
 			(*iter)->OnLostDevice();
 		}
+		for (std::vector<D3D9VertexStreamPtr>::iterator iter = vertex_stream_pool_.begin();
+			iter != vertex_stream_pool_.end(); ++ iter)
+		{
+			(*iter)->OnLostDevice();
+		}
+		for (std::vector<D3D9IndexStreamPtr>::iterator iter = index_stream_pool_.begin();
+			iter != index_stream_pool_.end(); ++ iter)
+		{
+			(*iter)->OnLostDevice();
+		}
 	}
 
 	void D3D9RenderFactory::OnResetDevice()
