@@ -35,10 +35,11 @@ namespace
 		RenderPolygon()
 			: vb_(new VertexBuffer(VertexBuffer::BT_TriangleList))
 		{
-			effect_ = LoadRenderEffect("Parallax.fx");
-			*(effect_->ParameterByName("diffusemap")) = LoadTexture("Diffuse.dds");
-			*(effect_->ParameterByName("normalmap")) = LoadTexture("Normal.dds");
-			*(effect_->ParameterByName("heightmap")) = LoadTexture("Height.dds");
+			effect_ = LoadRenderEffect("parallax.fx");
+			*(effect_->ParameterByName("diffusemap")) = LoadTexture("diffuse.dds");
+			*(effect_->ParameterByName("normalmap")) = LoadTexture("normal.dds");
+			*(effect_->ParameterByName("heightmap")) = LoadTexture("height.dds");
+			*(effect_->ParameterByName("normalizermap")) = LoadTexture("normalizer.dds");
 			effect_->SetTechnique("Parallax");
 
 			Vector3 xyzs[] =
@@ -206,13 +207,13 @@ void Parallax::InitObjects()
 
 void Parallax::Update()
 {
-	fpcController_.Update();
-
-	static clock_t startTime(std::clock());
+	static clock_t lastTime(std::clock());
 	clock_t curTime(std::clock());
-	if (curTime - startTime > 20)
+	if (curTime - lastTime > 20)
 	{
-		startTime = curTime;
+		float scaler = (curTime - lastTime) / 100.0f;
+
+		lastTime = curTime;
 
 		InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 		InputActionsType actions(inputEngine.Update());
@@ -221,30 +222,34 @@ void Parallax::Update()
 			switch (iter->first)
 			{
 			case TurnLeftRight:
-				fpcController_.Rotate(iter->second, 0, 0);
+				fpcController_.Rotate(iter->second * scaler, 0, 0);
 				break;
 
 			case TurnUpDown:
-				fpcController_.Rotate(0, iter->second, 0);
+				fpcController_.Rotate(0, iter->second * scaler, 0);
 				break;
 
 			case Forward:
-				fpcController_.Move(0, 0, 1);
+				fpcController_.Move(0, 0, scaler);
 				break;
 
 			case Backward:
-				fpcController_.Move(0, 0, -1);
+				fpcController_.Move(0, 0, -scaler);
 				break;
 
 			case MoveLeft:
-				fpcController_.Move(-1, 0, 0);
+				fpcController_.Move(-scaler, 0, 0);
 				break;
 
 			case MoveRight:
-				fpcController_.Move(1, 0, 0);
+				fpcController_.Move(scaler, 0, 0);
 				break;
 			}
 		}
+	}
+	else
+	{
+		fpcController_.Update();
 	}
 
 	Matrix4 view = this->ActiveCamera().ViewMatrix();

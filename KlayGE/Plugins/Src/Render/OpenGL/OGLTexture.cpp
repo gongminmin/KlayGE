@@ -100,8 +100,7 @@ namespace KlayGE
 {
 	OGLTexture::OGLTexture(uint32_t width, uint16_t numMipMaps,
 								PixelFormat format, TextureUsage usage)
-					: Texture(usage, TT_1D),
-						texture_(0)
+					: Texture(usage, TT_1D)
 	{
 		format_		= format;
 		width_		= width;
@@ -128,8 +127,8 @@ namespace KlayGE
 		GLenum glformat;
 		Convert(glinternalFormat, glformat, format_);
 
-		glGenTextures(1, &texture_);
-		glBindTexture(GL_TEXTURE_1D, texture_);
+		glGenTextures(1, &texture_[0]);
+		glBindTexture(GL_TEXTURE_1D, texture_[0]);
 
 		if (IsCompressedFormat(format_))
 		{
@@ -160,8 +159,7 @@ namespace KlayGE
 
 	OGLTexture::OGLTexture(uint32_t width, uint32_t height,
 								uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
-						: Texture(usage, TT_2D),
-							texture_(0)
+						: Texture(usage, TT_2D)
 	{
 		format_		= format;
 		width_		= width;
@@ -189,8 +187,8 @@ namespace KlayGE
 		GLenum glformat;
 		Convert(glinternalFormat, glformat, format_);
 
-		glGenTextures(1, &texture_);
-		glBindTexture(GL_TEXTURE_2D, texture_);
+		glGenTextures(1, &texture_[0]);
+		glBindTexture(GL_TEXTURE_2D, texture_[0]);
 
 		if (IsCompressedFormat(format_))
 		{
@@ -221,8 +219,7 @@ namespace KlayGE
 
 	OGLTexture::OGLTexture(uint32_t width, uint32_t height, uint32_t depth,
 								uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
-							: Texture(usage, TT_3D),
-								texture_(0)
+							: Texture(usage, TT_3D)
 	{
 		format_		= format;
 		width_		= width;
@@ -251,8 +248,8 @@ namespace KlayGE
 		GLenum glformat;
 		Convert(glinternalFormat, glformat, format_);
 
-		glGenTextures(1, &texture_);
-		glBindTexture(GL_TEXTURE_3D, texture_);
+		glGenTextures(1, &texture_[0]);
+		glBindTexture(GL_TEXTURE_3D, texture_[0]);
 
 		if (IsCompressedFormat(format_))
 		{
@@ -283,8 +280,7 @@ namespace KlayGE
 
 	OGLTexture::OGLTexture(uint32_t size, bool /*cube*/, uint16_t numMipMaps,
 								PixelFormat format, TextureUsage usage)
-							: Texture(usage, TT_Cube),
-								texture_(0)
+							: Texture(usage, TT_Cube)
 	{
 		format_		= format;
 		width_		= size;
@@ -313,30 +309,34 @@ namespace KlayGE
 		GLenum glformat;
 		Convert(glinternalFormat, glformat, format_);
 
-		glGenTextures(1, &texture_);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
+		glGenTextures(6, &texture_[0]);
 
-		if (IsCompressedFormat(format_))
+		for (int face = 0; face < 6; ++ face)
 		{
-			int block_size;
-			if (PF_DXT1 == format_)
+			glBindTexture(GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB + face, texture_[face]);
+
+			if (IsCompressedFormat(format_))
 			{
-				block_size = 8;
+				int block_size;
+				if (PF_DXT1 == format_)
+				{
+					block_size = 8;
+				}
+				else
+				{
+					block_size = 16;
+				}
+
+				GLsizei const image_size = ((width_ + 3) / 4) * ((height_ + 3) / 4) * block_size;
+
+				glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB + face, numMipMaps_, glinternalFormat,
+					width_, height_, 0, image_size, NULL);
 			}
 			else
 			{
-				block_size = 16;
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB + face, numMipMaps_, glinternalFormat,
+					width_, height_, 0, glformat, GL_UNSIGNED_BYTE, NULL);
 			}
-
-			GLsizei const image_size = ((width_ + 3) / 4) * ((height_ + 3) / 4) * block_size;
-
-			glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP, numMipMaps_, glinternalFormat,
-				width_, height_, 0, image_size, NULL);
-		}
-		else
-		{
-			glTexImage2D(GL_TEXTURE_CUBE_MAP, numMipMaps_, glinternalFormat,
-				width_, height_, 0, glformat, GL_UNSIGNED_BYTE, NULL);
 		}
 
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -345,7 +345,14 @@ namespace KlayGE
 
 	OGLTexture::~OGLTexture()
 	{
-		glDeleteTextures(1, &texture_);
+		if (TT_Cube == type_)
+		{
+			glDeleteTextures(6, &texture_[0]);
+		}
+		else
+		{
+			glDeleteTextures(1, &texture_[0]);
+		}
 	}
 
 	std::wstring const & OGLTexture::Name() const
@@ -372,7 +379,7 @@ namespace KlayGE
 		GLenum glformat;
 		Convert(glinternalFormat, glformat, format_);
 
-		glBindTexture(GL_TEXTURE_2D, texture_);
+		glBindTexture(GL_TEXTURE_2D, texture_[0]);
 
 		if (IsCompressedFormat(format_))
 		{
@@ -394,7 +401,7 @@ namespace KlayGE
 		GLenum glformat;
 		Convert(glinternalFormat, glformat, pf);
 
-		glBindTexture(GL_TEXTURE_2D, texture_);
+		glBindTexture(GL_TEXTURE_2D, texture_[0]);
 
 		if (IsCompressedFormat(format_))
 		{

@@ -961,7 +961,7 @@ namespace KlayGE
 
 		template <typename T>
 		inline Matrix4_T<T>&
-		Scaling(Matrix4_T<T>& out, T const & x, T const & y, T const & z)
+		Scaling(Matrix4_T<T>& out, T const & sx, T const & sy, T const & sz)
 		{
 			out = Matrix4(
 				sx,	0,	0,	0,

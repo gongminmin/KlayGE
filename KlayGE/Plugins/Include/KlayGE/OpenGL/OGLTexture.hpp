@@ -55,10 +55,12 @@ namespace KlayGE
 		void BuildMipSubLevels();
 
 		GLenum GLTexture() const
-			{ return texture_; }
+			{ return texture_[0]; }
+		GLenum GLTextureFace(int face) const
+			{ return texture_[face]; }
 
 	private:
-		GLenum texture_;
+		GLenum texture_[6];
 	};
 
 	typedef boost::shared_ptr<OGLTexture> OGLTexturePtr;

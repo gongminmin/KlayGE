@@ -272,6 +272,7 @@ namespace KlayGE
 	};
 
 	TexturePtr LoadTexture(std::string const & tex_name);
+	void SaveToFile(TexturePtr texture, std::string const & tex_name);
 }
 
 #endif			// _TEXTURE_HPP

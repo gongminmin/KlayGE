@@ -229,20 +229,16 @@ namespace KlayGE
 			tempSurf->GetDesc(&tempDesc);
 			tempSurf->Release();
 
+			width_ = tempDesc.Width;
+			height_ = tempDesc.Height;
+			format_ = ConvertFormat(tempDesc.Format);
+
 			d3dTexture2D_ = this->CreateTexture2D(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
 
 			this->QueryBaseTexture();
 			this->UpdateParams();
 
-			// Now get the format of the depth stencil surface.
-			d3dDevice_->GetDepthStencilSurface(&tempSurf);
-			tempSurf->GetDesc(&tempDesc);
-			tempSurf->Release();
-
-			// We also create a depth buffer for our render target.
-			TIF(d3dDevice_->CreateDepthStencilSurface(width_, height_, tempDesc.Format, tempDesc.MultiSampleType, 0, 
-				FALSE, &tempSurf, NULL));
-			renderZBuffer_ = MakeCOMPtr(tempSurf);
+			this->CreateDepthStencilBuffer(D3DPOOL_DEFAULT);
 		}
 	}
 
@@ -639,13 +635,6 @@ namespace KlayGE
 			}
 			else
 			{
-				IDirect3DSurface9* tempSurf;
-				D3DSURFACE_DESC tempDesc;
-
-				d3dDevice_->GetRenderTarget(0, &tempSurf);
-				tempSurf->GetDesc(&tempDesc);
-				tempSurf->Release();
-
 				IDirect3DTexture9Ptr tempTexture2D = this->CreateTexture2D(0, D3DPOOL_SYSTEMMEM);
 
 				for (uint16_t i = 0; i < this->NumMipMaps(); ++ i)
@@ -664,15 +653,7 @@ namespace KlayGE
 
 				this->QueryBaseTexture();
 
-				d3dDevice_->GetDepthStencilSurface(&tempSurf);
-				tempSurf->GetDesc(&tempDesc);
-				tempSurf->Release();
-
-				TIF(d3dDevice_->CreateOffscreenPlainSurface(width_, height_, tempDesc.Format,
-					D3DPOOL_SYSTEMMEM, &tempSurf, NULL));
-				IDirect3DSurface9Ptr dst = MakeCOMPtr(tempSurf);
-				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, renderZBuffer_.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
-				renderZBuffer_ = dst;
+				this->CreateDepthStencilBuffer(D3DPOOL_SYSTEMMEM);
 			}
 			break;
 
@@ -762,15 +743,7 @@ namespace KlayGE
 
 				this->QueryBaseTexture();
 
-				d3dDevice_->GetDepthStencilSurface(&tempSurf);
-				tempSurf->GetDesc(&tempDesc);
-				tempSurf->Release();
-
-				TIF(d3dDevice_->CreateDepthStencilSurface(width_, height_, tempDesc.Format, tempDesc.MultiSampleType, 0, 
-					FALSE, &tempSurf, NULL));
-				IDirect3DSurface9Ptr dst = MakeCOMPtr(tempSurf);
-				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, renderZBuffer_.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
-				renderZBuffer_ = dst;
+				this->CreateDepthStencilBuffer(D3DPOOL_DEFAULT);
 			}
 			break;
 
@@ -829,6 +802,32 @@ namespace KlayGE
 			this->NumMipMaps(), usage, ConvertFormat(format_),
 			pool, &d3dTextureCube));
 		return MakeCOMPtr(d3dTextureCube);
+	}
+
+	void D3D9Texture::CreateDepthStencilBuffer(D3DPOOL pool)
+	{
+		IDirect3DSurface9* tempSurf;
+		D3DSURFACE_DESC tempDesc;
+
+		// Get the format of the depth stencil surface.
+		d3dDevice_->GetDepthStencilSurface(&tempSurf);
+		tempSurf->GetDesc(&tempDesc);
+		tempSurf->Release();
+
+		if (D3DPOOL_SYSTEMMEM == pool)
+		{
+			TIF(d3dDevice_->CreateOffscreenPlainSurface(width_, height_, tempDesc.Format,
+				D3DPOOL_SYSTEMMEM, &tempSurf, NULL));
+			IDirect3DSurface9Ptr dst = MakeCOMPtr(tempSurf);
+			TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, renderZBuffer_.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+			renderZBuffer_ = dst;
+		}
+		else
+		{
+			TIF(d3dDevice_->CreateDepthStencilSurface(width_, height_, tempDesc.Format, tempDesc.MultiSampleType, 0, 
+				FALSE, &tempSurf, NULL));
+			renderZBuffer_ = MakeCOMPtr(tempSurf);
+		}
 	}
 
 	void D3D9Texture::QueryBaseTexture()

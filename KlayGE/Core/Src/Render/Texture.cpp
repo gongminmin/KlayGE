@@ -16,6 +16,8 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Util.hpp>
 
+#include <fstream>
+
 #include <KlayGE/Texture.hpp>
 
 namespace
@@ -466,6 +468,279 @@ namespace KlayGE
 		}
 
 		return texture;		
+	}
+
+	// 把纹理保存入DDS文件
+	void SaveToFile(TexturePtr texture, std::string const & tex_name)
+	{
+		std::ofstream file(tex_name.c_str(), std::ios_base::binary);
+
+		uint32_t magic = MakeFourCC<'D', 'D', 'S', ' '>::value;
+		file.write(reinterpret_cast<char*>(&magic), sizeof(magic));
+
+		DDSSURFACEDESC2 desc;
+		std::memset(&desc, 0, sizeof(desc));
+
+		desc.flags |= DDSD_CAPS;
+		desc.flags |= DDSD_PIXELFORMAT;
+		desc.flags |= DDSD_WIDTH;
+		desc.flags |= DDSD_HEIGHT;
+
+		if (texture->NumMipMaps() != 0)
+		{
+			desc.flags |= DDSD_MIPMAPCOUNT;
+			desc.mip_map_count = texture->NumMipMaps();
+		}
+
+		if (IsFloatFormat(texture->Format()) || IsCompressedFormat(texture->Format()))
+		{
+			desc.pixel_format.flags |= DDSPF_FOURCC;
+
+			switch (texture->Format())
+			{
+			case PF_R16F:
+				desc.pixel_format.four_cc = 111;
+				break;
+
+			case PF_G16R16F:
+				desc.pixel_format.four_cc = 112;
+				break;
+
+			case PF_A16B16G16R16F:
+				desc.pixel_format.four_cc = 113;
+				break;
+
+			case PF_R32F:
+				desc.pixel_format.four_cc = 114;
+				break;
+
+			case PF_G32R32F:
+				desc.pixel_format.four_cc = 115;
+				break;
+
+			case PF_A32B32G32R32F:
+				desc.pixel_format.four_cc = 116;
+				break;
+
+			case PF_DXT1:
+				desc.pixel_format.four_cc = MakeFourCC<'D', 'X', 'T', '1'>::value;
+				break;
+
+			case PF_DXT3:
+				desc.pixel_format.four_cc = MakeFourCC<'D', 'X', 'T', '3'>::value;
+				break;
+
+			case PF_DXT5:
+				desc.pixel_format.four_cc = MakeFourCC<'D', 'X', 'T', '5'>::value;
+				break;
+			}
+		}
+		else
+		{
+			switch (texture->Format())
+			{
+			case PF_R5G6B5:
+				desc.pixel_format.flags |= DDSPF_RGB;
+				desc.pixel_format.rgb_bit_count = 16;
+
+				desc.pixel_format.rgb_alpha_bit_mask = 0;
+				desc.pixel_format.r_bit_mask = 0xF800;
+				desc.pixel_format.g_bit_mask = 0x7E0;
+				desc.pixel_format.b_bit_mask = 0x1F;
+				break;
+
+			case PF_A4R4G4B4:
+				desc.pixel_format.flags |= DDSPF_RGB;
+				desc.pixel_format.rgb_bit_count = 16;
+
+				desc.pixel_format.rgb_alpha_bit_mask = 0xF000;
+				desc.pixel_format.r_bit_mask = 0xF800;
+				desc.pixel_format.g_bit_mask = 0x7E0;
+				desc.pixel_format.b_bit_mask = 0x1F;
+				break;
+
+			case PF_A8R8G8B8:
+				desc.pixel_format.flags |= DDSPF_RGB;
+				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
+				desc.pixel_format.rgb_bit_count = 32;
+
+				desc.pixel_format.rgb_alpha_bit_mask = 0xFF000000;
+				desc.pixel_format.r_bit_mask = 0x00FF0000;
+				desc.pixel_format.g_bit_mask = 0x0000FF00;
+				desc.pixel_format.b_bit_mask = 0x000000FF;
+				break;
+
+			case PF_X8R8G8B8:
+				desc.pixel_format.flags |= DDSPF_RGB;
+				desc.pixel_format.rgb_bit_count = 32;
+
+				desc.pixel_format.rgb_alpha_bit_mask = 0xF000;
+				desc.pixel_format.r_bit_mask = 0x00FF0000;
+				desc.pixel_format.g_bit_mask = 0x0000FF00;
+				desc.pixel_format.b_bit_mask = 0x000000FF;
+				break;
+
+			case PF_A2R10G10B10:
+				desc.pixel_format.flags |= DDSPF_RGB;
+				desc.pixel_format.rgb_bit_count = 32;
+
+				desc.pixel_format.rgb_alpha_bit_mask = 0xC0000000;
+				desc.pixel_format.r_bit_mask = 0x3FF00000;
+				desc.pixel_format.g_bit_mask = 0x000FFC00;
+				desc.pixel_format.b_bit_mask = 0x000003FF;
+				break;
+
+			case PF_A4L4:
+				desc.pixel_format.flags |= DDSPF_LUMINANCE;
+				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
+				desc.pixel_format.rgb_bit_count = 8;
+				break;
+
+			case PF_L8:
+				desc.pixel_format.flags |= DDSPF_LUMINANCE;
+				desc.pixel_format.rgb_bit_count = 8;
+				break;
+
+			case PF_A8L8:
+				desc.pixel_format.flags |= DDSPF_LUMINANCE;
+				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
+				desc.pixel_format.rgb_bit_count = 16;
+				break;
+
+			case PF_A8:
+				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
+				break;
+			}
+		}
+		
+		uint32_t main_image_size = texture->Width() * texture->Height() * PixelFormatBits(texture->Format()) / 8;
+		if (IsCompressedFormat(texture->Format()))
+		{
+			if (PF_DXT1 == texture->Format())
+			{
+				main_image_size = texture->Width() * texture->Height() / 2;
+			}
+			else
+			{
+				main_image_size = texture->Width() * texture->Height();
+			}
+
+			desc.flags |= DDSD_LINEARSIZE;
+			desc.linear_size = main_image_size;
+		}
+
+		switch (texture->Type())
+		{
+		case Texture::TT_1D:
+		case Texture::TT_2D:
+			{
+				for (uint32_t level = 0; level < desc.mip_map_count; ++ level)
+				{
+					uint32_t image_size;
+					if (IsCompressedFormat(texture->Format()))
+					{
+						int block_size;
+						if (PF_DXT1 == texture->Format())
+						{
+							block_size = 8;
+						}
+						else
+						{
+							block_size = 16;
+						}
+
+						image_size = ((desc.width / (1UL << level) + 3) / 4) * ((desc.height / (1UL << level) + 3) / 4) * block_size;
+					}
+					else
+					{
+						image_size = main_image_size / (1UL << (level * 2));
+					}
+
+					std::vector<uint8_t> data(image_size);
+
+					texture->CopyToMemory(level, &data[0]);
+
+					file.write(reinterpret_cast<char*>(&data[0]), static_cast<std::streamsize>(data.size()));
+					assert(file.gcount() == data.size());
+				}
+			}
+			break;
+
+		case Texture::TT_3D:
+			desc.dds_caps.caps2 |= DDSCAPS2_VOLUME;
+
+			{
+				for (uint32_t level = 0; level < desc.mip_map_count; ++ level)
+				{
+					uint32_t image_size;
+					if (IsCompressedFormat(texture->Format()))
+					{
+						int block_size;
+						if (PF_DXT1 == texture->Format())
+						{
+							block_size = 8;
+						}
+						else
+						{
+							block_size = 16;
+						}
+
+						image_size = ((desc.width / (1UL << level) + 3) / 4) * ((desc.height / (1UL << level) + 3) / 4) * block_size;
+					}
+					else
+					{
+						image_size = main_image_size / (1UL << (level * 2));
+					}
+				
+					std::vector<uint8_t> data(image_size * texture->Depth());
+
+					texture->CopyToMemory(level, &data[0]);
+
+					file.write(reinterpret_cast<char*>(&data[0]), static_cast<std::streamsize>(data.size()));
+					assert(file.gcount() == data.size());
+				}
+			}
+			break;
+
+		case Texture::TT_Cube:
+			desc.dds_caps.caps2 |= DDSCAPS2_CUBEMAP;
+
+			{
+				for (uint32_t face = Texture::CF_Positive_X; face < Texture::CF_Negative_Z; ++ face)
+				{
+					for (uint32_t level = 0; level < desc.mip_map_count; ++ level)
+					{
+						uint32_t image_size;
+						if (IsCompressedFormat(texture->Format()))
+						{
+							int block_size;
+							if (PF_DXT1 == texture->Format())
+							{
+								block_size = 8;
+							}
+							else
+							{
+								block_size = 16;
+							}
+
+							image_size = ((desc.width / (1UL << level) + 3) / 4) * ((desc.height / (1UL << level) + 3) / 4) * block_size;
+						}
+						else
+						{
+							image_size = main_image_size / (1UL << (level * 2));
+						}
+					
+						std::vector<uint8_t> data(image_size * 6);
+
+						texture->CopyToMemory(level, &data[0]);
+
+						file.write(reinterpret_cast<char*>(&data[face * image_size]), static_cast<std::streamsize>(image_size));
+						assert(file.gcount() == image_size);
+					}
+				}
+			}
+			break;
+		}
 	}
 
 

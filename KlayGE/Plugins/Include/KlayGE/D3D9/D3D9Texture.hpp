@@ -73,6 +73,10 @@ namespace KlayGE
 
 		boost::shared_ptr<IDirect3DTexture9> D3DTexture2D() const
 			{ return d3dTexture2D_; }
+		boost::shared_ptr<IDirect3DVolumeTexture9> D3DTexture3D() const
+			{ return d3dTexture3D_; }
+		boost::shared_ptr<IDirect3DCubeTexture9> D3DTextureCube() const
+			{ return d3dTextureCube_; }
 		boost::shared_ptr<IDirect3DBaseTexture9> D3DBaseTexture() const
 			{ return d3dBaseTexture_; }
 		boost::shared_ptr<IDirect3DSurface9> DepthStencil() const
@@ -85,6 +89,8 @@ namespace KlayGE
 		IDirect3DTexture9Ptr CreateTexture2D(uint32_t usage, D3DPOOL pool);
 		IDirect3DVolumeTexture9Ptr CreateTexture3D(uint32_t usage, D3DPOOL pool);
 		IDirect3DCubeTexture9Ptr CreateTextureCube(uint32_t usage, D3DPOOL pool);
+
+		void CreateDepthStencilBuffer(D3DPOOL pool);
 
 		void QueryBaseTexture();
 		void UpdateParams();

@@ -79,17 +79,17 @@ namespace KlayGE
 		assert(camera_ != NULL);
 
 		Vector3 eyePos = this->EyePos();
-		Vector3 viewVec = this->WorldAhead();
 		Vector3 upVec = this->WorldUp();
 
 		Quaternion rot;
-		MathLib::RotationYawPitchRoll(rot, -yaw * rotationScaler_, -pitch * rotationScaler_, -roll * rotationScaler_);
+		MathLib::RotationYawPitchRoll(rot, yaw * rotationScaler_, pitch * rotationScaler_, roll * rotationScaler_);
 
 		Matrix4 rotMatrix;
 		MathLib::ToMatrix(rotMatrix, rot);
 
-		rotMatrix = world_ * rotMatrix;
+		Vector3 viewVec;
 		MathLib::TransformCoord(viewVec, Vector3(0, 0, 1), rotMatrix);
+		MathLib::TransformCoord(viewVec, viewVec, world_);
 
 		camera_->ViewParams(eyePos, viewVec, upVec);
 

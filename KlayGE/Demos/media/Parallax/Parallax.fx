@@ -4,7 +4,7 @@ float4 eyePos;
 
 struct VS_INPUT
 {
-	float3 pos			: POSITION;
+	float4 pos			: POSITION;
 	float2 texcoord0	: TEXCOORD0;
 	float3 T			: TEXCOORD1;	// in object space
 	float3 B			: TEXCOORD2;	// in object space
@@ -15,8 +15,8 @@ struct VS_OUTPUT
 	float4 pos			: POSITION;
 	float2 texcoord0	: TEXCOORD0;
 
-	float3 L			: TEXCOORD1;	// in tangent space
-	float3 V			: TEXCOORD2;	// in tangent space
+	float4 L			: TEXCOORD1;	// in tangent space
+	float4 V			: TEXCOORD2;	// in tangent space
 };
 
 VS_OUTPUT ParallaxVS(VS_INPUT input,
@@ -26,7 +26,7 @@ VS_OUTPUT ParallaxVS(VS_INPUT input,
 {
 	VS_OUTPUT output;
 
-	output.pos = mul(float4(input.pos, 1), worldviewproj);
+	output.pos = mul(input.pos, worldviewproj);
 	output.texcoord0 = input.texcoord0;
 
 	float3x3 objToTangentSpace;
@@ -34,11 +34,11 @@ VS_OUTPUT ParallaxVS(VS_INPUT input,
 	objToTangentSpace[1] = input.B;
 	objToTangentSpace[2] = cross(input.T, input.B);
 
-	float3 lightVec = normalize(lightPos.xyz - input.pos);
-	float3 viewVec = normalize(eyePos.xyz - input.pos);
+	float3 lightVec = lightPos.xyz - input.pos;
+	float3 viewVec = eyePos.xyz - input.pos;
 
-	output.L = normalize(mul(objToTangentSpace, lightVec)) * 0.5 + 0.5;
-	output.V = normalize(mul(objToTangentSpace, viewVec)) * 0.5 + 0.5;
+	output.L = float4(mul(objToTangentSpace, lightVec), 1);
+	output.V = float4(mul(objToTangentSpace, viewVec), 1);
 
 	return output;
 }
@@ -47,6 +47,7 @@ VS_OUTPUT ParallaxVS(VS_INPUT input,
 texture diffusemap;
 texture normalmap;
 texture heightmap;
+texture normalizermap;
 
 sampler2D diffuseMapSampler = sampler_state
 {
@@ -78,23 +79,36 @@ sampler2D heightMapSampler = sampler_state
 	AddressV  = Wrap;
 };
 
+samplerCUBE normalizerMapSampler = sampler_state
+{
+	Texture = <normalizermap>;
+	MinFilter = Linear;
+	MagFilter = Linear;
+	MipFilter = Linear;
+	AddressU  = Wrap;
+	AddressV  = Wrap;
+	AddressW  = Wrap;
+};
+
 float4 ParallaxPS(float2 texCoord0	: TEXCOORD0,
 					float3 L		: TEXCOORD1,
 					float3 V		: TEXCOORD2,
 
 					uniform sampler2D diffuseMap,
 					uniform sampler2D normalMap,
-					uniform sampler2D heightMap) : COLOR
+					uniform sampler2D heightMap,
+					uniform samplerCUBE normalizerMap) : COLOR
 {
-	float height = 2 * tex2D(heightMap, texCoord0).r - 1;
-	float2 texUV = texCoord0 + ((2 * V - 1).xy * (height * 0.04));
+	V = 2 * texCUBE(normalizerMap, V) - 1;
+	
+	float height = tex2D(heightMap, texCoord0);
+	float2 texUV = texCoord0 + (V.xy * (height * 0.04 - 0.02));
 
 	float3 diffuse = tex2D(diffuseMap, texUV);
 
-	float3 bumpNormal = 2 * tex2D(normalMap, texUV) - 1;
-	float3 lightVec = 2 * L - 1;
-	float diffuseFactor = dot(lightVec, bumpNormal)
-							* rsqrt(dot(lightVec, lightVec) * dot(bumpNormal, bumpNormal));
+	float3 bumpNormal = 2 * texCUBE(normalizerMap, 2 * tex2D(normalMap, texUV) - 1) - 1;
+	float3 lightVec = 2 * texCUBE(normalizerMap, L) - 1;
+	float diffuseFactor = dot(lightVec, bumpNormal);
 
 	return float4(diffuse * diffuseFactor, 1);
 }
@@ -105,6 +119,7 @@ technique Parallax
 	{
 		VertexShader = compile vs_1_1 ParallaxVS(worldviewproj, lightPos, eyePos);
 		PixelShader = compile ps_2_0 ParallaxPS(diffuseMapSampler,
-										normalMapSampler, heightMapSampler);
+										normalMapSampler, heightMapSampler,
+										normalizerMapSampler);
 	}
 }
