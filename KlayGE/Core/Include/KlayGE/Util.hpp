@@ -75,7 +75,7 @@ namespace KlayGE
 		{ return (1UL << (dw + 1)) - 1; }
 
 	// 产生FourCC常量
-	template <char ch0, char ch1, char ch2, char ch3>
+	template <unsigned char ch0, unsigned char ch1, unsigned char ch2, unsigned char ch3>
 	struct MakeFourCC
 	{
 		enum { value = (ch0 << 0) + (ch1 << 8) + (ch2 << 16) + (ch3 << 24) };

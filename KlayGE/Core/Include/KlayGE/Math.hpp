@@ -148,13 +148,13 @@ namespace KlayGE
 		// 浮点版本
 		template<>
 		inline float
-		Mod(float const & x, float const & y)
+		Mod<float>(float const & x, float const & y)
 		{
 			return std::fmodf(x, y);
 		}
 		template <>
 		inline double
-		Mod(double const & x, double const & y)
+		Mod<double>(double const & x, double const & y)
 		{
 			return std::fmod(x, y);
 		}
@@ -241,14 +241,14 @@ namespace KlayGE
 		// 浮点版本
 		template <>
 		inline bool
-		Eq(float const & lhs, float const & rhs)
+		Eq<float>(float const & lhs, float const & rhs)
 		{
 			return (MathLib::Abs<float>(lhs - rhs)
 				<= std::numeric_limits<float>::epsilon());
 		}
 		template <>
 		inline bool
-		Eq(double const & lhs, double const & rhs)
+		Eq<double>(double const & lhs, double const & rhs)
 		{
 			return (MathLib::Abs<double>(lhs - rhs)
 				<= std::numeric_limits<double>::epsilon());
