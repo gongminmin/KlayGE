@@ -3,15 +3,15 @@
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderTexture.hpp>
-#include <KlayGE/D3D9/D3D9Texture.hpp>
+#include <KlayGE/OpenGL/OGLTexture.hpp>
 
-#include <d3d9.h>
+#include <gl/gl.h>
 
-#include <KlayGE/D3D9/D3D9RenderTexture.hpp>
+#include <KlayGE/OpenGL/OGLRenderTexture.hpp>
 
 namespace KlayGE
 {
-	D3D9RenderTexture::D3D9RenderTexture(U32 width, U32 height)
+	OGLRenderTexture::OGLRenderTexture(U32 width, U32 height)
 	{
 		left_ = 0;
 		top_ = 0;
@@ -20,45 +20,8 @@ namespace KlayGE
 		height_ = privateTex_->Height();
 	}
 
-	void D3D9RenderTexture::CustomAttribute(const String& name, void* pData)
+	void OGLRenderTexture::CustomAttribute(const String& name, void* pData)
 	{
-		if ("DDBACKBUFFER" == name)
-		{
-			D3D9TexturePtr tex(privateTex_);
-			IDirect3DSurface9** pSurf = reinterpret_cast<IDirect3DSurface9**>(pData);
-			tex->D3DTexture()->GetSurfaceLevel(0, &(*pSurf));
-			(*pSurf)->Release();
-
-			return;
-		}
-
-		if ("D3DZBUFFER" == name)
-		{
-			D3D9TexturePtr tex(privateTex_);
-			IDirect3DSurface9** pSurf = reinterpret_cast<IDirect3DSurface9**>(pData);
-			*pSurf = tex->DepthStencil().Get();
-
-			return;
-		}
-
-		if ("DDFRONTBUFFER" == name)
-		{
-			D3D9TexturePtr tex(privateTex_);
-			IDirect3DSurface9** pSurf = reinterpret_cast<IDirect3DSurface9**>(pData);
-			tex->D3DTexture()->GetSurfaceLevel(0, &(*pSurf));
-			(*pSurf)->Release();
-
-			return;
-		}
-
-		if ("HWND" == name)
-		{
-			HWND* pHwnd = reinterpret_cast<HWND*>(pData);
-			*pHwnd = NULL;
-
-			return;
-		}
-
 		if ("IsTexture" == name)
 		{
 			bool* b = reinterpret_cast<bool*>(pData);

@@ -21,9 +21,8 @@
 
 namespace KlayGE
 {
-	OGLVertexStream::OGLVertexStream(VertexStreamType type, U8 elementSize, U8 elementNum, bool staticStream)
-			: VertexStream(type, elementSize, elementNum),
-				staticStream_(staticStream)
+	OGLVertexStream::OGLVertexStream(VertexStreamType type, U8 elementSize, U8 elementNum)
+			: VertexStream(type, elementSize, elementNum)
 	{
 	}
 

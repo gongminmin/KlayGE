@@ -15,13 +15,10 @@
 
 namespace KlayGE
 {
-	class OGLRenderFactory;
-
 	class OGLRenderEngine : public RenderEngine
 	{
-		friend class OGLRenderFactory;
-
 	public:
+		OGLRenderEngine();
 		~OGLRenderEngine();
 
 		const WString& Name() const;
@@ -93,9 +90,6 @@ namespace KlayGE
 		void StencilBufferFailOperation(StencilOperation op);
 		void StencilBufferDepthFailOperation(StencilOperation op);
 		void StencilBufferPassOperation(StencilOperation op);
-
-	private:
-		OGLRenderEngine();
 
 	private:
 		CullMode cullingMode_;

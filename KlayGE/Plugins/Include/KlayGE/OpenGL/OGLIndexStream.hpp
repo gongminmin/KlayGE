@@ -22,10 +22,10 @@ namespace KlayGE
 	class OGLIndexStream : public IndexStream
 	{
 	public:
-		OGLIndexStream(bool staticStream);
+		OGLIndexStream();
 
 		bool IsStatic() const
-			{ return staticStream_; }
+			{ return false; }
 
 		void Assign(const void* src, size_t numIndices);
 		
@@ -37,8 +37,6 @@ namespace KlayGE
 
 	protected:
 		std::vector<U16, alloc<U16> > buffer_;
-
-		bool staticStream_;
 	};
 }
 

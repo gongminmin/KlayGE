@@ -1,27 +1,20 @@
 #ifndef _OGLTEXTURE_HPP
 #define _OGLTEXTURE_HPP
 
-#include <KlayGE/SharedPtr.hpp>
+#include <KlayGE/Texture.hpp>
 
-#include <KlayGE/OpenGL/OGLRenderEngine.hpp>
+#define NOMINMAX
+#include <windows.h>
+#include <gl/gl.h>
 
 #pragma comment(lib, "KlayGE_RenderEngine_OpenGL.lib")
 
 namespace KlayGE
 {
-	class OGLTexture;
-	class OGLRenderTexture;
-
-	typedef SharedPtr<OGLTexture>		D3D9TexturePtr;
-	typedef SharedPtr<OGLRenderTexture> D3D9RenderTexturePtr;
-
-	class OGLRenderFactory;
-
 	class OGLTexture : public Texture
 	{
-		friend class OGLRenderFactory;
-
 	public:
+		OGLTexture(U32 width, U32 height, U16 mipMapsNum, PixelFormat format, TextureUsage usage = TU_Default);
 		~OGLTexture();
 
 		const WString& Name() const;
@@ -37,8 +30,6 @@ namespace KlayGE
 			{ return texture_; }
 
 	private:
-		OGLTexture(U32 width, U32 height, U16 mipMapsNum, PixelFormat format, TextureUsage usage = TU_Default);
-
 		GLenum texture_;
 	};
 }

@@ -1,27 +1,24 @@
-#ifndef _D3D9RENDERTEXTURE_HPP
-#define _D3D9RENDERTEXTURE_HPP
+#ifndef _OGLRENDERTEXTURE_HPP
+#define _OGLRENDERTEXTURE_HPP
 
 #include <KlayGE/RenderTexture.hpp>
 
-#pragma comment(lib, "KlayGE_RenderEngine_D3D9.lib")
+#pragma comment(lib, "KlayGE_RenderEngine_OpenGL.lib")
 
 namespace KlayGE
 {
-	class D3D9RenderFactory;
-
-	class D3D9RenderTexture : public RenderTexture
+	class OGLRenderTexture : public RenderTexture
 	{
-		friend class D3D9RenderFactory;
-
 	public:
+		OGLRenderTexture(U32 width, U32 height);
+
 		virtual void CustomAttribute(const String& name, void* pData);
 
 		bool RequiresTextureFlipping() const
 			{ return true; }
-
-	protected:
-		D3D9RenderTexture(U32 width, U32 height);
 	};
+
+	typedef SharedPtr<OGLRenderTexture> OGLRenderTexturePtr;
 }
 
-#endif			// _D3D9RENDERTEXTURE_HPP
+#endif			// _OGLRENDERTEXTURE_HPP

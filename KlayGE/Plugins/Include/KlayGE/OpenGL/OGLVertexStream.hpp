@@ -22,10 +22,10 @@ namespace KlayGE
 	class OGLVertexStream : public VertexStream
 	{
 	public:
-		OGLVertexStream(VertexStreamType type, U8 elementSize, U8 elementNum, bool staticStream);
+		OGLVertexStream(VertexStreamType type, U8 elementSize, U8 elementNum);
 
 		bool IsStatic() const
-			{ return staticStream_; }
+			{ return false; }
 		size_t NumVertices() const
 			{ return buffer_.size() / this->ElementSize() / this->ElementNum(); }
 
@@ -36,8 +36,6 @@ namespace KlayGE
 
 	protected:
 		std::vector<U8, alloc<U8> > buffer_;
-
-		bool staticStream_;
 	};
 }
 

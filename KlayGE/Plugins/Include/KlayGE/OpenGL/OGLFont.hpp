@@ -1,17 +1,17 @@
-// D3D9Font.hpp
-// KlayGE D3D9Font类 头文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// OGLFont.hpp
+// KlayGE OGLFont类 头文件
+// Ver 2.0.4
+// 版权所有(C) 龚敏敏, 2004
+// Homepage: http://klayge.sourceforge.net
 //
-// 2.0.0
-// 初次建立 (2003.9.4)
+// 2.0.4
+// 初次建立 (2004.4.4)
 //
 // 修改记录
 /////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _D3D9FONT_HPP
-#define _D3D9FONT_HPP
+#ifndef _OGLFONT_HPP
+#define _OGLFONT_HPP
 
 #include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/MathTypes.hpp>
@@ -21,13 +21,13 @@
 
 #include <KlayGE/Font.hpp>
 
-#pragma comment(lib, "KlayGE_RenderEngine_D3D9.lib")
+#pragma comment(lib, "KlayGE_RenderEngine_OpenGL.lib")
 
 namespace KlayGE
 {
 	// 在3D环境中画出文字
 	/////////////////////////////////////////////////////////////////////////////////
-	class D3D9Font : public Font
+	class OGLFont : public Font
 	{
 	public:
 		// 2D & 3D 画出文字的函数
@@ -39,7 +39,7 @@ namespace KlayGE
 
 		U32 FontHeight() const;
 
-		D3D9Font(const WString& fontName, U32 fontHeight = 12, U32 flags = 0);
+		OGLFont(const WString& fontName, U32 fontHeight = 12, U32 flags = 0);
 
 	public:
 		struct CharInfo
@@ -57,6 +57,7 @@ namespace KlayGE
 
 		LOGFONTW logFont_;
 
+		std::vector<RenderBufferPtr, alloc<RenderBufferPtr> > buffers_;
 		RenderEffectPtr	effect_;
 		TexturePtr		theTexture_;
 
@@ -67,4 +68,4 @@ namespace KlayGE
 	};
 }
 
-#endif		// _D3D9FONT_HPP
+#endif		// _OGLFONT_HPP

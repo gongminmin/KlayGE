@@ -1,19 +1,11 @@
-// D3D9Font.cpp
-// KlayGE D3D9Font类 实现文件
+// OGLFont.cpp
+// KlayGE OGLFont类 实现文件
 // Ver 2.0.4
-// 版权所有(C) 龚敏敏, 2003-2004
+// 版权所有(C) 龚敏敏, 2004
 // Homepage: http://klayge.sourceforge.net
 //
 // 2.0.4
-// 纹理格式改为PF_A4L4 (2004.3.18)
-//
-// 2.0.3
-// 修正了RenderText的Bug (2004.2.18)
-// 改用VertexShader完成2D变换 (2004.3.1)
-//
-// 2.0.0
-// 初次建立 (2003.8.18)
-// 使用LRU算法 (2003.9.26)
+// 初次建立 (2004.4.4)
 //
 // 修改记录
 /////////////////////////////////////////////////////////////////////////////////
@@ -38,26 +30,31 @@
 #include <algorithm>
 #include <vector>
 
-#include <d3d9types.h>
-
-#include <KlayGE/D3D9/D3D9Font.hpp>
+#include <KlayGE/OpenGL/OGLFont.hpp>
 
 namespace
 {
 	using namespace KlayGE;
 
-	class D3D9FontRenderable : public Renderable
+	class OGLFontRenderable : public Renderable
 	{
 	public:
-		D3D9FontRenderable(const RenderEffectPtr& effect)
-			: fontEffect_(effect),
-				fontRB_(new RenderBuffer(RenderBuffer::BT_TriangleList))
+		OGLFontRenderable(const RenderEffectPtr& effect,
+			const RenderBufferPtr& buffer,
+			std::vector<RenderBufferPtr, alloc<RenderBufferPtr> >& buffers)
+			: fontEffect_(effect), fontRB_(buffer),
+				buffers_(buffers)
 		{
 			fontRB_->AddVertexStream(VST_Positions, sizeof(float), 3);
-			fontRB_->AddVertexStream(VST_Diffuses, sizeof(D3DCOLOR), 1);
+			fontRB_->AddVertexStream(VST_Diffuses, sizeof(U32), 1);
 			fontRB_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2);
 
 			fontRB_->AddIndexStream();
+		}
+
+		void OnRenderEnd()
+		{
+			buffers_.push_back(fontRB_);
 		}
 
 		const WString& Name() const
@@ -72,7 +69,7 @@ namespace
 		RenderBufferPtr GetRenderBuffer() const
 			{ return fontRB_; }
 
-		void RenderText(U32 fontHeight, D3D9Font::CharInfoMapType& charInfoMap, float sx, float sy, float sz,
+		void RenderText(U32 fontHeight, OGLFont::CharInfoMapType& charInfoMap, float sx, float sy, float sz,
 			float xScale, float yScale, U32 clr, const WString& text, U32 flags)
 		{
 			// 设置过滤属性
@@ -162,6 +159,8 @@ namespace
 	private:
 		RenderEffectPtr fontEffect_;
 		RenderBufferPtr fontRB_;
+
+		std::vector<RenderBufferPtr, alloc<RenderBufferPtr> >& buffers_;
 	};
 }
 
@@ -169,7 +168,7 @@ namespace KlayGE
 {
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
-	D3D9Font::D3D9Font(const WString& fontName, U32 height, U32 flags)
+	OGLFont::OGLFont(const WString& fontName, U32 height, U32 flags)
 				: curX_(0), curY_(0),
 					theTexture_(Engine::RenderFactoryInstance().MakeTexture(1024, 1024, 1, PF_A4L4))
 	{
@@ -200,14 +199,14 @@ namespace KlayGE
 
 	// 获取字体高度
 	/////////////////////////////////////////////////////////////////////////////////
-	U32 D3D9Font::FontHeight() const
+	U32 OGLFont::FontHeight() const
 	{
 		return logFont_.lfHeight;
 	}
 
 	// 更新纹理，使用LRU算法
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9Font::UpdateTexture(const WString& text)
+	void OGLFont::UpdateTexture(const WString& text)
 	{
 		::SIZE size;
 		for (WString::const_iterator citer = text.begin(); citer != text.end(); ++ citer)
@@ -341,7 +340,7 @@ namespace KlayGE
 
 	// 在指定位置画出文字
 	/////////////////////////////////////////////////////////////////////////////////
-	RenderablePtr D3D9Font::RenderText(float sx, float sy, const Color& clr, 
+	RenderablePtr OGLFont::RenderText(float sx, float sy, const Color& clr, 
 		const WString& text, U32 flags)
 	{
 		return this->RenderText(sx, sy, 0.5f, 1, 1, clr, text, flags);
@@ -349,7 +348,7 @@ namespace KlayGE
 
 	// 在指定位置画出放缩的文字
 	/////////////////////////////////////////////////////////////////////////////////
-	RenderablePtr D3D9Font::RenderText(float sx, float sy, float sz,
+	RenderablePtr OGLFont::RenderText(float sx, float sy, float sz,
 		float xScale, float yScale, const Color& clr,
 		const WString& text, U32 flags)
 	{
@@ -363,9 +362,20 @@ namespace KlayGE
 		U8 r, g, b, a;
 		clr.RGBA(r, g, b, a);
 
-		SharedPtr<D3D9FontRenderable> renderable(new D3D9FontRenderable(effect_));
+		RenderBufferPtr buffer;
+		if (buffers_.empty())
+		{
+			buffer = RenderBufferPtr(new RenderBuffer(RenderBuffer::BT_TriangleList));
+		}
+		else
+		{
+			buffer = buffers_.back();
+			buffers_.pop_back();
+		}
+
+		SharedPtr<OGLFontRenderable> renderable(new OGLFontRenderable(effect_, buffer, buffers_));
 		renderable->RenderText(this->FontHeight(), charInfoMap_,
-			sx, sy, sz, xScale, yScale, D3DCOLOR_ARGB(a, r, g, b), text, flags);
+			sx, sy, sz, xScale, yScale, (a << 24) + (r << 16) + (g << 8) + b, text, flags);
 		return renderable;
 	}
 }

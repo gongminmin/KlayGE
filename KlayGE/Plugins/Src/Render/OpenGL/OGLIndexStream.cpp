@@ -21,8 +21,7 @@
 
 namespace KlayGE
 {
-	OGLIndexStream::OGLIndexStream(bool staticStream)
-						: staticStream_(staticStream)
+	OGLIndexStream::OGLIndexStream()
 	{
 	}
 
