@@ -54,6 +54,11 @@ namespace KlayGE
 		Plane_T(Plane_T<U> const & rhs)
 			: plane_(rhs.plane_)
 			{ }
+		template <typename U>
+		Plane_T(Vector_T<U, elem_num> const & rhs)
+		{
+			plane_ = rhs;
+		}
 		Plane_T(T const & a, T const & b, T const & c, T const & d)
 		{
 			this->a() = a;
@@ -109,6 +114,12 @@ namespace KlayGE
 			{
 				plane_ = rhs.plane_;
 			}
+			return *this;
+		}
+		template <typename U>
+		Plane_T& operator=(Vector_T<U, elem_num> const & rhs)
+		{
+			plane_ = rhs;
 			return *this;
 		}
 

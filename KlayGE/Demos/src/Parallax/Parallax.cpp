@@ -9,9 +9,11 @@
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
+
 #include <KlayGE/D3D9/D3D9RenderSettings.hpp>
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
-#include <KlayGE/OCTree/OCTree.hpp>
+
+#include <KlayGE/Frustum/Frustum.hpp>
 
 #include <vector>
 #include <sstream>
@@ -197,7 +199,7 @@ private:
 int main()
 {
 	Parallax app;
-	SceneManager sceneMgr;
+	Frustum sceneMgr;
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
@@ -231,11 +233,13 @@ void Parallax::InitObjects()
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	Matrix4 matView, matProj;
-	MathLib::LookAtLH(matView, Vector3(2, 0, -2), Vector3(0, 0, 0));
-	MathLib::PerspectiveFovLH(matProj, PI / 4, 800.0f / 600, 0.1f, 20.0f);
+	this->LookAt(Vector3(2, 0, -2), Vector3(0, 0, 0));
+	this->Proj(0.1f, 20.0f);
 
-	*(renderPolygon->effect_->ParameterByName("worldviewproj")) = matView * matProj;
+	Matrix4 view = renderEngine.ViewMatrix();
+	Matrix4 proj = renderEngine.ProjectionMatrix();
+
+	*(renderPolygon->effect_->ParameterByName("worldviewproj")) = view * proj;
 	*(renderPolygon->effect_->ParameterByName("eyePos")) = Vector4(2, 0, -2, 1) - Vector4(0, 0, 0, 0);
 }
 

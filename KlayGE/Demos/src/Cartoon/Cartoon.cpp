@@ -14,7 +14,7 @@
 #include <KlayGE/D3D9/D3D9RenderSettings.hpp>
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
-#include <KlayGE/OCTree/OCTree.hpp>
+#include <KlayGE/Frustum/Frustum.hpp>
 
 #include <iostream>
 #include <sstream>
@@ -95,7 +95,7 @@ private:
 int main()
 {
 	Cartoon app;
-	OCTree sceneMgr(Box(Vector3(-20, -20, -20), Vector3(20, 20, 20)));
+	Frustum sceneMgr;
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);

@@ -37,21 +37,27 @@ namespace KlayGE
 
 	bool OCTreeNode::InsideNode(RenderablePtr const & renderable)
 	{
-		Box box(renderable->GetBound());
+		Box const & box(renderable->GetBound());
 
-		if (MathLib::VecInBox(box_, box.LeftBottomNear())
-			&& MathLib::VecInBox(box_, box.LeftTopNear())
-			&& MathLib::VecInBox(box_, box.RightBottomNear())
-			&& MathLib::VecInBox(box_, box.RightTopNear())
-			&& MathLib::VecInBox(box_, box.LeftBottomFar())
-			&& MathLib::VecInBox(box_, box.LeftTopFar())
-			&& MathLib::VecInBox(box_, box.RightBottomFar())
-			&& MathLib::VecInBox(box_, box.RightTopFar()))
+		boost::array<Vector3, 8> vecs;
+		vecs[0] = box.LeftBottomNear();
+		vecs[1] = box.LeftTopNear();
+		vecs[2] = box.RightBottomNear();
+		vecs[3] = box.RightTopNear();
+		vecs[4] = box.LeftBottomFar();
+		vecs[5] = box.LeftTopFar();
+		vecs[6] = box.RightBottomFar();
+		vecs[7] = box.RightTopFar();
+
+		for (size_t i = 0; i < vecs.size(); ++ i)
 		{
-			return true;
+			MathLib::TransformCoord(vecs[i], vecs[i], renderable->GetWorld());
+			if (!MathLib::VecInBox(box_, vecs[i]))
+			{
+				return false;
+			}
 		}
-
-		return false;
+		return true;
 	}
 
 	void OCTreeNode::AddRenderable(RenderablePtr const & renderable)

@@ -13,6 +13,8 @@
 #include <KlayGE/D3D9/D3D9RenderSettings.hpp>
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
+#include <KlayGE/Frustum/Frustum.hpp>
+
 #include <vector>
 #include <sstream>
 
@@ -106,6 +108,8 @@ namespace
 		Flag()
 			: rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
 		{
+			MathLib::Translation(model_, -WIDTH / 2.0f, HEIGHT / 2.0f, 0.0f);
+
 			std::vector<float> pos;
 			for (int y = 0; y < MAX_Y * 2 + 1; ++ y)
 			{
@@ -167,6 +171,11 @@ namespace
 			return rb_;
 		}
 
+		Matrix4 GetWorld() const
+		{
+			return model_;
+		}
+
 		Box GetBound() const
 		{
 			return box_; 
@@ -181,6 +190,7 @@ namespace
 		KlayGE::RenderBufferPtr rb_;
 		KlayGE::RenderEffectPtr effect_;
 
+		Matrix4 model_;
 		Box box_;
 	};
 
@@ -204,7 +214,7 @@ private:
 int main()
 {
 	VertexDisplacement app;
-	SceneManager sceneMgr;
+	Frustum sceneMgr;
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
@@ -237,25 +247,22 @@ void VertexDisplacement::InitObjects()
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	Matrix4 matModel;
-	MathLib::Translation(matModel, -WIDTH / 2.0f, HEIGHT / 2.0f, 0.0f);
+	this->LookAt(Vector3(0, 0, -10), Vector3(0, 0, 0));
+	this->Proj(0.1f, 20.0f);
 
-	Matrix4 matView;
-	MathLib::LookAtLH(matView, Vector3(0, 0, -10), Vector3(0, 0, 0));
+	Matrix4 view = renderEngine.ViewMatrix();
+	Matrix4 proj = renderEngine.ProjectionMatrix();
 
-	Matrix4 matModelView = matModel * matView;
+	Matrix4 modelView = flag->GetWorld() * view;
 
-	Matrix4 matProj;
-	MathLib::PerspectiveFovLH(matProj, PI / 4, 800.0f / 600, 0.1f, 20.0f);
+	*(flag->GetRenderEffect()->ParameterByName("modelview")) = modelView;
+	*(flag->GetRenderEffect()->ParameterByName("proj")) = proj;
 
-	*(flag->GetRenderEffect()->ParameterByName("modelview")) = matModelView;
-	*(flag->GetRenderEffect()->ParameterByName("proj")) = matProj;
+	Matrix4 modelViewIT;
+	MathLib::Transpose(modelViewIT, modelView);
+	MathLib::Inverse(modelViewIT, modelViewIT);
 
-	Matrix4 matModelViewIT;
-	MathLib::Transpose(matModelViewIT, matModelView);
-	MathLib::Inverse(matModelViewIT, matModelViewIT);
-
-	*(flag->GetRenderEffect()->ParameterByName("modelviewIT")) = matModelViewIT;
+	*(flag->GetRenderEffect()->ParameterByName("modelviewIT")) = modelViewIT;
 }
 
 void VertexDisplacement::Update()
