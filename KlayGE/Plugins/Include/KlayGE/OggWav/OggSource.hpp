@@ -19,7 +19,7 @@
 
 #include <vorbis/codec.h>
 
-#ifdef _DEBUG
+#if defined(DEBUG) | defined(_DEBUG)
 	#pragma comment(lib, "KlayGE_AudioDataSource_OggWav_d.lib")
 #else
 	#pragma comment(lib, "KlayGE_AudioDataSource_OggWav.lib")

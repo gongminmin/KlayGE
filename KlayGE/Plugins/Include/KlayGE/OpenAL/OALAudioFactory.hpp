@@ -20,7 +20,7 @@
 #include <KlayGE/AudioFactory.hpp>
 #include <KlayGE/OpenAL/OALAudio.hpp>
 
-#ifdef _DEBUG
+#if defined(DEBUG) | defined(_DEBUG)
 	#pragma comment(lib, "KlayGE_AudioEngine_OpenAL_d.lib")
 #else
 	#pragma comment(lib, "KlayGE_AudioEngine_OpenAL.lib")

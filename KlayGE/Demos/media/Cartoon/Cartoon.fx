@@ -70,9 +70,6 @@ technique cartoonTec
 {
 	pass p0
 	{
-		Lighting = false;
-		SpecularEnable = false;
-
 		FillMode = Solid;
 		CullMode = CCW;
 		Stencilenable = false;

@@ -16,7 +16,7 @@
 #include <KlayGE/Math.hpp>
 #include <boost/array.hpp>
 
-#ifdef _DEBUG
+#if defined(DEBUG) | defined(_DEBUG)
 	#pragma comment(lib, "KlayGE_Scene_OCTree_d.lib")
 #else
 	#pragma comment(lib, "KlayGE_Scene_OCTree.lib")

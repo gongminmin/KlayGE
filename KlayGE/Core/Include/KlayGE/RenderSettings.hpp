@@ -1,7 +1,7 @@
 #ifndef _RENDERSETTINGS_HPP
 #define _RENDERSETTINGS_HPP
 
-#ifdef _DEBUG
+#if defined(DEBUG) | defined(_DEBUG)
 	#pragma comment(lib, "KlayGE_Core_d.lib")
 #else
 	#pragma comment(lib, "KlayGE_Core.lib")

@@ -29,12 +29,12 @@ namespace
 {
 	struct RenderTorus : public Renderable
 	{
-		RenderTorus(TexturePtr const & texture0, TexturePtr const & texture1)
+		RenderTorus(TexturePtr const & toonTex, TexturePtr const & edgeTex)
 			: rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
 		{
 			effect_ = LoadRenderEffect("Cartoon.fx");
-			*(effect_->ParameterByName("toon")) = texture0;
-			*(effect_->ParameterByName("edge")) = texture1;
+			*(effect_->ParameterByName("toon")) = toonTex;
+			*(effect_->ParameterByName("edge")) = edgeTex;
 			effect_->SetTechnique("cartoonTec");
 
 			MathLib::ComputeBoundingBox(box_, reinterpret_cast<Vector3*>(&Pos[0]),
@@ -123,15 +123,15 @@ void Cartoon::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("SIMYOU.TTF", 16);
 
-	uint8_t cartoolShadeData0[16] = { 120, 120, 120, 120, 120, 160, 160, 160, 160, 160, 160, 255, 255, 255, 255, 255 };
-	TexturePtr texture0 = Context::Instance().RenderFactoryInstance().MakeTexture(sizeof(cartoolShadeData0) / sizeof(cartoolShadeData0[0]), 1, 0, PF_L8);
-	texture0->CopyMemoryToTexture(cartoolShadeData0, PF_L8);
+	uint8_t toonData[16] = { 120, 120, 120, 120, 120, 160, 160, 160, 160, 160, 160, 255, 255, 255, 255, 255 };
+	TexturePtr toonTex = Context::Instance().RenderFactoryInstance().MakeTexture(sizeof(toonData) / sizeof(toonData[0]), 1, 0, PF_L8);
+	toonTex->CopyMemoryToTexture(toonData, PF_L8);
 
-	uint8_t cartoolShadeData1[4] = { 0, 255, 255, 255 };
-	TexturePtr texture1 = Context::Instance().RenderFactoryInstance().MakeTexture(sizeof(cartoolShadeData1) / sizeof(cartoolShadeData1[0]), 1, 0, PF_L8);
-	texture1->CopyMemoryToTexture(cartoolShadeData1, PF_L8);
+	uint8_t edgeData[4] = { 0, 255, 255, 255 };
+	TexturePtr edgeTex = Context::Instance().RenderFactoryInstance().MakeTexture(sizeof(edgeData) / sizeof(edgeData[0]), 1, 0, PF_L8);
+	edgeTex->CopyMemoryToTexture(edgeData, PF_L8);
 
-	renderTorus = boost::shared_ptr<RenderTorus>(new RenderTorus(texture0, texture1));
+	renderTorus = boost::shared_ptr<RenderTorus>(new RenderTorus(toonTex, edgeTex));
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
@@ -151,7 +151,6 @@ void Cartoon::InitObjects()
 void Cartoon::Update()
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 
 	rotX += 0.003f;
 	rotY += 0.003f;
@@ -171,11 +170,11 @@ void Cartoon::Update()
 	std::wostringstream stream;
 	stream << (*renderEngine.ActiveRenderTarget())->FPS();
 
-	sceneMgr.PushRenderable(renderTorus);
+	renderTorus->Render();
 
 	RenderWindow* rw = static_cast<RenderWindow*>(renderEngine.ActiveRenderTarget()->get());
 
-	sceneMgr.PushRenderable(font_->RenderText(0, 0, Color(1, 1, 0, 1), L"¿¨Í¨äÖÈ¾²âÊÔ"));
-	sceneMgr.PushRenderable(font_->RenderText(0, 18, Color(1, 1, 0, 1), rw->Description()));
-	sceneMgr.PushRenderable(font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str().c_str()));
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"¿¨Í¨äÖÈ¾²âÊÔ");
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), rw->Description());
+	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str().c_str());
 }

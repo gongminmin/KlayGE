@@ -19,7 +19,7 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/InputFactory.hpp>
 
-#ifdef _DEBUG
+#if defined(DEBUG) | defined(_DEBUG)
 	#pragma comment(lib, "KlayGE_InputEngine_DInput_d.lib")
 #else
 	#pragma comment(lib, "KlayGE_InputEngine_DInput.lib")

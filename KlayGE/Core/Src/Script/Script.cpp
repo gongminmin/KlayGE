@@ -20,7 +20,7 @@
 
 #include <KlayGE/Script.hpp>
 
-#ifdef _DEBUG
+#if defined(DEBUG) | defined(_DEBUG)
 	#pragma comment(lib, "python24d.lib")
 #else
 	#pragma comment(lib, "python24.lib")

@@ -207,7 +207,6 @@ void VertexDisplacement::InitObjects()
 void VertexDisplacement::Update()
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 
 	static float currentAngle = 0;
 	*(flag->GetRenderEffect()->ParameterByName("currentAngle")) = currentAngle;
@@ -220,7 +219,7 @@ void VertexDisplacement::Update()
 	std::wostringstream stream;
 	stream << (*renderEngine.ActiveRenderTarget())->FPS();
 
-	sceneMgr.PushRenderable(flag);
-	sceneMgr.PushRenderable(font_->RenderText(0, 0, Color(1, 1, 0, 1), L"顶点位移"));
-	sceneMgr.PushRenderable(font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str()));
+	flag->Render();
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"顶点位移");
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());
 }

@@ -380,6 +380,11 @@ namespace KlayGE
 
 	void D3D9RenderWindow::Destroy()
 	{
+		renderZBuffer_.reset();
+		renderSurface_.reset();
+		d3dDevice_.reset();
+		d3d_.reset();
+
 		if (hWnd_ != NULL)
 		{
 			::DestroyWindow(hWnd_);

@@ -42,7 +42,6 @@ namespace KlayGE
 			D3D9TexturePtr tex(static_cast<D3D9Texture*>(privateTex_.get()));
 			IDirect3DSurface9** pSurf = reinterpret_cast<IDirect3DSurface9**>(pData);
 			*pSurf = tex->DepthStencil().get();
-			(*pSurf)->AddRef();
 
 			return;
 		}
@@ -52,7 +51,6 @@ namespace KlayGE
 			D3D9TexturePtr tex(static_cast<D3D9Texture*>(privateTex_.get()));
 			IDirect3DSurface9** pSurf = reinterpret_cast<IDirect3DSurface9**>(pData);
 			tex->D3DTexture()->GetSurfaceLevel(0, &(*pSurf));
-			(*pSurf)->Release();
 
 			return;
 		}

@@ -1,8 +1,6 @@
 float4x4 worldviewproj : WORLDVIEWPROJECTION;
 float currentAngle;
 
-texture flag;
-
 struct VS_INPUT
 {
 	float4 pos			: POSITION;
@@ -32,6 +30,24 @@ VS_OUTPUT VertexDisplacementVS(VS_INPUT input,
 	return output;
 }
 
+texture flag;
+
+sampler2D flagSampler = sampler_state
+{
+	Texture = <flag>;
+	MinFilter = Point;
+	MagFilter = Point;
+	MipFilter = Point;
+	AddressU  = Clamp;
+	AddressV  = Clamp;
+};
+
+float4 VertexDisplacementPS(float2 texCoord : TEXCOORD0,
+		uniform sampler2D flagSampler) : COLOR0
+{
+	return tex2D(flagSampler, texCoord);
+}
+
 technique VertexDisplacement
 {
 	pass p0
@@ -44,20 +60,7 @@ technique VertexDisplacement
 		ZEnable      = true;
 		ZWriteEnable = true;
 
-		Texture[0] = <flag>;
-		ColorOp[0] = SelectArg1;
-		ColorArg1[0] = Texture;
-		AlphaOp[0] = Disable;
-		MinFilter[0] = Point;
-		MagFilter[0] = Point;
-		MipFilter[0] = Point;
-
-		ColorOp[1] = Disable;
-		AlphaOp[1] = Disable;
-
-		AddressU[0] = Clamp;
-		AddressV[0] = Clamp;
-
 		VertexShader = compile vs_1_1 VertexDisplacementVS(worldviewproj, currentAngle);
+		PixelShader = compile ps_1_1 VertexDisplacementPS(flagSampler);
 	}
 }

@@ -140,6 +140,9 @@
 					RelativePath=".\Src\Render\Mesh.cpp">
 				</File>
 				<File
+					RelativePath=".\Src\Render\Renderable.cpp">
+				</File>
+				<File
 					RelativePath=".\Src\Render\RenderBuffer.cpp">
 				</File>
 				<File

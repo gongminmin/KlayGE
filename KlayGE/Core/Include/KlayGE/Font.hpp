@@ -28,7 +28,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-#ifdef _DEBUG
+#if defined(DEBUG) | defined(_DEBUG)
 	#pragma comment(lib, "KlayGE_Core_d.lib")
 #else
 	#pragma comment(lib, "KlayGE_Core.lib")
@@ -61,11 +61,11 @@ namespace KlayGE
 		Font(std::string const & fontName, uint32_t fontHeight = 12, uint32_t flags = 0);
 		~Font();
 
-		RenderablePtr RenderText(float x, float y, Color const & clr,
+		void RenderText(float x, float y, Color const & clr,
 			std::wstring const & text, uint32_t flags = 0);
-		RenderablePtr RenderText(float x, float y, float z, float xScale, float yScale, Color const & clr, 
+		void RenderText(float x, float y, float z, float xScale, float yScale, Color const & clr, 
 			std::wstring const & text, uint32_t flags = 0);
-		//RenderablePtr RenderText(std::wstring const & text, uint32_t flags = 0);
+		//void RenderText(std::wstring const & text, uint32_t flags = 0);
 
 		uint32_t FontHeight() const;
 

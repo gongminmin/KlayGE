@@ -44,7 +44,7 @@
 
 #include <KlayGE/Font.hpp>
 
-#ifdef _DEBUG
+#if defined(DEBUG) | defined(_DEBUG)
 	#pragma comment(lib, "freetype219MT_D.lib")
 #else
 	#pragma comment(lib, "freetype219MT.lib")
@@ -273,7 +273,8 @@ namespace KlayGE
 					// convert character code to glyph index
 					::FT_Load_Char(face_, ch, FT_LOAD_RENDER);
 
-					uint32_t const width = (0 != slot_->bitmap.width) ? slot_->bitmap.width : this->FontHeight() / 2;
+					uint32_t const width = std::min<uint32_t>(this->FontHeight(),
+						(0 != slot_->bitmap.width) ? slot_->bitmap.width : this->FontHeight() / 2);
 
 					::RECT charRect;
 					CharInfo charInfo;
@@ -318,17 +319,19 @@ namespace KlayGE
 					}
 
 					std::vector<uint8_t> dest(this->FontHeight() * this->FontHeight(), 0);
-					uint32_t const rows(std::min<uint32_t>(slot_->bitmap.rows, this->FontHeight()));
-					uint32_t const cols(std::min<uint32_t>(slot_->bitmap.width, this->FontHeight()));
-					for (uint32_t y = 0; y < rows; ++ y)
+					int const rows(std::min<int>(slot_->bitmap.rows, this->FontHeight()));
+					int const cols(std::min<int>(slot_->bitmap.width, this->FontHeight()));
+					int const y_start = std::max<int>(this->FontHeight() * 3 / 4 - slot_->bitmap_top, 0);
+					for (int y = 0; y < rows; ++ y)
 					{
-						uint32_t const y_offset = this->FontHeight() * 3 / 4 - slot_->bitmap_top + y;
-						for (uint32_t x = 0; x < cols; ++ x)
+						int const y_offset = y_start + y;
+						for (int x = 0; x < cols; ++ x)
 						{
-							if ((y < this->FontHeight()) && (x < this->FontHeight()))
+							int const max_xy = static_cast<int>(this->FontHeight());
+							if ((y < max_xy) && (x < max_xy))
 							{
 								dest[y_offset * this->FontHeight() + x]
-										= (slot_->bitmap.buffer[y * slot_->bitmap.width + x] > 128) ? 0xFF : 0;
+									= (slot_->bitmap.buffer[y * slot_->bitmap.width + x] > 128 ? 0xFF : 0);
 							}
 						}
 					}
@@ -344,32 +347,30 @@ namespace KlayGE
 
 	// 在指定位置画出文字
 	/////////////////////////////////////////////////////////////////////////////////
-	RenderablePtr Font::RenderText(float sx, float sy, Color const & clr, 
+	void Font::RenderText(float sx, float sy, Color const & clr, 
 		std::wstring const & text, uint32_t flags)
 	{
-		return this->RenderText(sx, sy, 0.5f, 1, 1, clr, text, flags);
+		this->RenderText(sx, sy, 0.5f, 1, 1, clr, text, flags);
 	}
 
 	// 在指定位置画出放缩的文字
 	/////////////////////////////////////////////////////////////////////////////////
-	RenderablePtr Font::RenderText(float sx, float sy, float sz,
+	void Font::RenderText(float sx, float sy, float sz,
 		float xScale, float yScale, Color const & clr,
 		std::wstring const & text, uint32_t flags)
 	{
-		if (text.empty())
+		if (!text.empty())
 		{
-			return RenderablePtr();
+			this->UpdateTexture(text);
+
+			uint8_t r, g, b, a;
+			clr.RGBA(r, g, b, a);
+			uint32_t const color((a << 24) + (r << 16) + (g << 8) + b);
+
+			boost::shared_ptr<FontRenderable> renderable(new FontRenderable(effect_, rb_));
+			renderable->RenderText(this->FontHeight(), charInfoMap_,
+				sx, sy, sz, xScale, yScale, color, text, flags);
+			Context::Instance().SceneManagerInstance().PushRenderable(renderable);
 		}
-
-		this->UpdateTexture(text);
-
-		uint8_t r, g, b, a;
-		clr.RGBA(r, g, b, a);
-		uint32_t const color((a << 24) + (r << 16) + (g << 8) + b);
-
-		boost::shared_ptr<FontRenderable> renderable(new FontRenderable(effect_, rb_));
-		renderable->RenderText(this->FontHeight(), charInfoMap_,
-			sx, sy, sz, xScale, yScale, color, text, flags);
-		return renderable;
 	}
 }

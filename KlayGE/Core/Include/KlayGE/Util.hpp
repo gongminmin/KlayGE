@@ -20,7 +20,7 @@
 #define BOOST_MEM_FN_ENABLE_STDCALL
 #include <boost/mem_fn.hpp>
 
-#ifdef _DEBUG
+#if defined(DEBUG) | defined(_DEBUG)
 	#pragma comment(lib, "KlayGE_Core_d.lib")
 #else
 	#pragma comment(lib, "KlayGE_Core.lib")

@@ -9,7 +9,7 @@
 #include <gl/gl.h>
 #include <gl/glu.h>
 
-#ifdef _DEBUG
+#if defined(DEBUG) | defined(_DEBUG)
 	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL_d.lib")
 #else
 	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL.lib")

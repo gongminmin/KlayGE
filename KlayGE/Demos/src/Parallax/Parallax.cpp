@@ -242,7 +242,6 @@ void Parallax::InitObjects()
 void Parallax::Update()
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 
 	static float degree(0);
 	Vector3 lightPos(2, 0, -2);
@@ -255,7 +254,7 @@ void Parallax::Update()
 	std::wostringstream stream;
 	stream << (*renderEngine.ActiveRenderTarget())->FPS();
 
-	sceneMgr.PushRenderable(renderPolygon);
-	sceneMgr.PushRenderable(font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Parallax²âÊÔ"));
-	sceneMgr.PushRenderable(font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str()));
+	renderPolygon->Render();
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Parallax²âÊÔ");
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());
 }

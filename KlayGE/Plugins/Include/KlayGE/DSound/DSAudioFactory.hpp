@@ -19,7 +19,7 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/AudioFactory.hpp>
 
-#ifdef _DEBUG
+#if defined(DEBUG) | defined(_DEBUG)
 	#pragma comment(lib, "KlayGE_AudioEngine_DSound_d.lib")
 #else
 	#pragma comment(lib, "KlayGE_AudioEngine_DSound.lib")

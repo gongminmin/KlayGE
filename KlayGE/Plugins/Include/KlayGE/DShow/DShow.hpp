@@ -23,7 +23,7 @@
 
 #include <boost/utility.hpp>
 
-#ifdef _DEBUG
+#if defined(DEBUG) | defined(_DEBUG)
 	#pragma comment(lib, "KlayGE_ShowEngine_DShow_d.lib")
 #else
 	#pragma comment(lib, "KlayGE_ShowEngine_DShow.lib")

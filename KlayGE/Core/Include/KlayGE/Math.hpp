@@ -29,7 +29,7 @@
 
 #include <boost/static_assert.hpp>
 
-#ifdef _DEBUG
+#if defined(DEBUG) | defined(_DEBUG)
 	#pragma comment(lib, "KlayGE_Core_d.lib")
 #else
 	#pragma comment(lib, "KlayGE_Core.lib")
@@ -257,7 +257,7 @@ namespace KlayGE
 		{
 			float xhalf = 0.5f * x;
 			int n = *reinterpret_cast<int*>(&x);	// get bits for floating value
-			n = 0x5f3759df - (n >> 1);				// gives initial guess y0
+			n = 0x5F3759DF - (n >> 1);				// gives initial guess y0
 			x = *reinterpret_cast<float*>(&n);		// convert bits back to float
 			x = x * (1.5f - xhalf * x * x);			// Newton step, repeating increases accuracy
 

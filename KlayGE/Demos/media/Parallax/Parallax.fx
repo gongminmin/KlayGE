@@ -89,11 +89,11 @@ float4 ParallaxPS(float2 texCoord0	: TEXCOORD0,
 	float height = 2 * tex2D(heightMap, texCoord0).r - 1;
 	float2 texUV = texCoord0 + ((2 * V - 1).xy * (height * 0.04));
 
-	float3 bumpNormal = 2 * tex2D(normalMap, texUV) - 1;
 	float3 diffuse = tex2D(diffuseMap, texUV);
 
+	float3 bumpNormal = 2 * tex2D(normalMap, texUV) - 1;
 	float3 lightVec = 2 * L - 1;
-	float diffuseFactor = saturate(dot(lightVec, bumpNormal));
+	float diffuseFactor = dot(lightVec, bumpNormal) * rsqrt(dot(lightVec, lightVec) * dot(bumpNormal, bumpNormal));
 
 	return float4(diffuse * diffuseFactor, 1);
 }
@@ -103,7 +103,7 @@ technique Parallax
 	pass p0
 	{
 		VertexShader = compile vs_1_1 ParallaxVS(worldviewproj, lightPos, eyePos);
-		PixelShader = compile ps_1_4 ParallaxPS(diffuseMapSampler,
+		PixelShader = compile ps_2_0 ParallaxPS(diffuseMapSampler,
 										normalMapSampler, heightMapSampler);
 	}
 }

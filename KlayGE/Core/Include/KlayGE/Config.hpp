@@ -4,4 +4,8 @@
 // 定义各种编译期选项
 // #define _SELECT1ST2ND_SUPPORT
 
+#if defined(DEBUG) | defined(_DEBUG)
+#define D3D_DEBUG_INFO
+#endif
+
 #endif		// _CONFIG_HPP

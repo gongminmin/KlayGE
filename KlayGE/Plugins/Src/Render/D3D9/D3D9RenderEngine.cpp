@@ -258,6 +258,13 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D9RenderEngine::~D3D9RenderEngine()
 	{
+		renderEffect_.reset();
+		renderTargetList_.clear();
+
+		currentVertexDecl_.reset();
+
+		d3dDevice_.reset();
+		d3d_.reset();
 	}
 
 	// 返回渲染系统的名字
@@ -533,15 +540,13 @@ namespace KlayGE
 	{
 		RenderEngine::ActiveRenderTarget(iter);
 
-		IDirect3DSurface9* back;
-		(*activeRenderTarget_)->CustomAttribute("DDBACKBUFFER", &back);
-		TIF(d3dDevice_->SetRenderTarget(0, back));
-		back->Release();
+		IDirect3DSurface9* backBuffer;
+		(*activeRenderTarget_)->CustomAttribute("DDBACKBUFFER", &backBuffer);
+		TIF(d3dDevice_->SetRenderTarget(0, backBuffer));
 
 		IDirect3DSurface9* zBuffer;
 		(*activeRenderTarget_)->CustomAttribute("D3DZBUFFER", &zBuffer);
 		TIF(d3dDevice_->SetDepthStencilSurface(zBuffer));
-		zBuffer->Release();
 
 		this->CullingMode(cullingMode_);
 

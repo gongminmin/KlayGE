@@ -29,7 +29,7 @@
 #pragma warning(disable : 4512)
 #include <boost/algorithm/string/case_conv.hpp>
 
-#ifdef _DEBUG
+#if defined(DEBUG) | defined(_DEBUG)
 	#pragma comment(lib, "KlayGE_FileSystem_PackedFile_d.lib")
 #else
 	#pragma comment(lib, "KlayGE_FileSystem_PackedFile.lib")
