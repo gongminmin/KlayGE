@@ -47,27 +47,25 @@ namespace KlayGE
 	class OGLRenderEffectParameter : public RenderEffectParameter
 	{
 	public:
-		void SetFloat(float value);
+		RenderEffectParameter& operator=(float value);
+		RenderEffectParameter& operator=(const Vector4& value);
+		RenderEffectParameter& operator=(const Matrix4& value);
+		RenderEffectParameter& operator=(int value);
+		RenderEffectParameter& operator=(const TexturePtr& tex);
+
+		operator float() const;
+		operator Vector4() const;
+		operator Matrix4() const;
+		operator int() const;
+
 		void SetFloatArray(const float* value, size_t count);
-		float GetFloat() const;
 		void GetFloatArray(float* value, size_t count);
-
-		void SetVector(const Vector4& value);
 		void SetVectorArray(const Vector4* value, size_t count);
-		Vector4 GetVector() const;
 		void GetVectorArray(Vector4* value, size_t count);
-
-		void SetMatrix(const Matrix4& value);
 		void SetMatrixArray(const Matrix4* matrices, size_t count);
-		Matrix4 GetMatrix() const;
 		void GetMatrixArray(Matrix4* matrices, size_t count);
-
-		void SetInt(int value);
 		void SetIntArray(const int* value, size_t count);
-		int GetInt() const;
 		void GetIntArray(int* value, size_t count);
-
-		void SetTexture(const TexturePtr& tex);
 	};
 }
 

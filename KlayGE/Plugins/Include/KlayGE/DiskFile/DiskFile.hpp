@@ -18,7 +18,6 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/VFile.hpp>
-#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/ResLocator.hpp>
 
 #include <fstream>

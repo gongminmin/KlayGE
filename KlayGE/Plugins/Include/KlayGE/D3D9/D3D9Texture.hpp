@@ -1,7 +1,6 @@
 #ifndef _D3D9TEXTURE_HPP
 #define _D3D9TEXTURE_HPP
 
-#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/COMPtr.hpp>
 
 #include <d3d9.h>
@@ -41,7 +40,7 @@ namespace KlayGE
 		COMPtr<IDirect3DSurface9>	renderZBuffer_;		// The z-buffer for the render surface.
 	};
 
-	typedef SharedPtr<D3D9Texture>		D3D9TexturePtr;
+	typedef boost::shared_ptr<D3D9Texture> D3D9TexturePtr;
 }
 
 #endif			// _D3D9TEXTURE_HPP

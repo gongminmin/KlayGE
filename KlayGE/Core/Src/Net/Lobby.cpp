@@ -12,7 +12,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Player.hpp>
-#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/Memory.hpp>
 
 #include <algorithm>

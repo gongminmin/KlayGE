@@ -14,7 +14,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/Memory.hpp>
 #include <KlayGE/RenderBuffer.hpp>
 #include <KlayGE/Viewport.hpp>
@@ -25,6 +24,7 @@
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/Context.hpp>
+#include <KlayGE/Box.hpp>
 
 #include <cassert>
 #include <algorithm>
@@ -66,6 +66,12 @@ namespace
 		RenderBufferPtr GetRenderBuffer() const
 			{ return fontRB_; }
 
+		Box GetBound() const
+			{ return box_; }
+
+		bool CanBeCulled() const
+			{ return false; }
+
 		void RenderText(U32 fontHeight, OGLFont::CharInfoMapType& charInfoMap, float sx, float sy, float sz,
 			float xScale, float yScale, U32 clr, const std::wstring& text, U32 flags)
 		{
@@ -78,6 +84,7 @@ namespace
 			const float h(fontHeight * yScale);
 			const size_t maxSize(text.length() - std::count(text.begin(), text.end(), L'\n'));
 			float x(sx), y(sy);
+			float maxx(sx), maxy(sy);
 
 			xyzs_.clear();
 			texs_.clear();
@@ -136,15 +143,27 @@ namespace
 					lastIndex += 4;
 
 					x += w;
+
+					if (x > maxx)
+					{
+						maxx = x;
+					}
 				}
 				else
 				{
 					y += h;
 					x = sx;
+
+					if (y > maxy)
+					{
+						maxy = y;
+					}
 				}
 			}
 
 			clrs_.resize(xyzs_.size() / 3, clr);
+
+			box_ = Box(Vector3(sx, sy, sz), Vector3(maxx, maxy, sz + 0.1f));
 		}
 
 	private:
@@ -155,6 +174,8 @@ namespace
 		std::vector<U32>	clrs_;
 		std::vector<float>	texs_;
 		std::vector<U16>	indices_;
+
+		Box box_;
 	};
 }
 
@@ -168,13 +189,13 @@ namespace KlayGE
 					rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
 	{
 		effect_ = LoadRenderEffect("Font.fx");
-		effect_->ParameterByName("texFont")->SetTexture(theTexture_);
+		*(effect_->ParameterByName("texFont")) = theTexture_;
 		effect_->SetTechnique("fontTec");
 
 		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		const Viewport& viewport((*renderEngine.ActiveRenderTarget())->GetViewport());
-		effect_->ParameterByName("halfWidth")->SetInt(viewport.width / 2);
-		effect_->ParameterByName("halfHeight")->SetInt(viewport.height / 2);
+		*(effect_->ParameterByName("halfWidth")) = viewport.width / 2;
+		*(effect_->ParameterByName("halfHeight")) = viewport.height / 2;
 
 
 		rb_->AddVertexStream(VST_Positions, sizeof(float), 3);
@@ -357,7 +378,7 @@ namespace KlayGE
 	{
 		if (text.empty())
 		{
-			return RenderablePtr(NULL);
+			return RenderablePtr();
 		}
 
 		this->UpdateTexture(text);
@@ -365,7 +386,7 @@ namespace KlayGE
 		U8 r, g, b, a;
 		clr.RGBA(r, g, b, a);
 
-		SharedPtr<OGLFontRenderable> renderable(new OGLFontRenderable(effect_, rb_));
+		boost::shared_ptr<OGLFontRenderable> renderable(new OGLFontRenderable(effect_, rb_));
 		renderable->RenderText(this->FontHeight(), charInfoMap_,
 			sx, sy, sz, xScale, yScale, (a << 24) + (b << 16) + (g << 8) + (r), text, flags);
 		return renderable;

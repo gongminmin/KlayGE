@@ -122,7 +122,7 @@ namespace KlayGE
 		COMPtr<IDirect3DVertexDeclaration9> currentVertexDecl_;
 	};
 
-	typedef SharedPtr<D3D9RenderEngine> D3D9RenderEnginePtr;
+	typedef boost::shared_ptr<D3D9RenderEngine> D3D9RenderEnginePtr;
 }
 
 #endif			// _D3D9RENDERENGINE_HPP

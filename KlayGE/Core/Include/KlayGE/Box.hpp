@@ -14,7 +14,7 @@
 #define _BOX_HPP
 
 #include <boost/operators.hpp>
-
+#include <KlayGE/Math.hpp>
 #include <KlayGE/Bound.hpp>
 
 namespace KlayGE

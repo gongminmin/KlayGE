@@ -21,7 +21,6 @@
 #define _RENDEREFFECT_HPP
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/SharedPtr.hpp>
 #include <vector>
 
 #pragma comment(lib, "KlayGE_Core.lib")
@@ -62,27 +61,25 @@ namespace KlayGE
 
 		static RenderEffectParameterPtr NullObject();
 
-		virtual void SetFloat(float value) = 0;
+		virtual RenderEffectParameter& operator=(float value) = 0;
+		virtual RenderEffectParameter& operator=(const Vector4& value) = 0;
+		virtual RenderEffectParameter& operator=(const Matrix4& value) = 0;
+		virtual RenderEffectParameter& operator=(int value) = 0;
+		virtual RenderEffectParameter& operator=(const TexturePtr& tex) = 0;
+
+		virtual operator float() const = 0;
+		virtual operator Vector4() const = 0;
+		virtual operator Matrix4() const = 0;
+		virtual operator int() const = 0;
+
 		virtual void SetFloatArray(const float* value, size_t count) = 0;
-		virtual float GetFloat() const = 0;
 		virtual void GetFloatArray(float* value, size_t count) = 0;
-		
-		virtual void SetVector(const Vector4& value) = 0;
 		virtual void SetVectorArray(const Vector4* value, size_t count) = 0;
-		virtual Vector4 GetVector() const = 0;
 		virtual void GetVectorArray(Vector4* value, size_t count) = 0;
-		
-		virtual void SetMatrix(const Matrix4& value) = 0;
 		virtual void SetMatrixArray(const Matrix4* matrices, size_t count) = 0;
-		virtual Matrix4 GetMatrix() const = 0;
 		virtual void GetMatrixArray(Matrix4* matrices, size_t count) = 0;
-
-		virtual void SetInt(int value) = 0;
 		virtual void SetIntArray(const int* value, size_t count) = 0;
-		virtual int GetInt() const = 0;
 		virtual void GetIntArray(int* value, size_t count) = 0;
-
-		virtual void SetTexture(const TexturePtr& tex) = 0;
 	};
 
 	RenderEffectPtr LoadRenderEffect(const std::string& effectName);

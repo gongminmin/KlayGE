@@ -23,7 +23,6 @@
 #pragma comment(lib, "KlayGE_Core.lib")
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/SharedPtr.hpp>
 #include <vector>
 
 namespace KlayGE

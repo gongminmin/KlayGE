@@ -1,15 +1,13 @@
 #ifndef _KLAYGEPREDECLARE_HPP
 #define _KLAYGEPREDECLARE_HPP
 
+#include <boost/smart_ptr.hpp>
+
 namespace KlayGE
 {
 	class Context;
 	template <typename T>
-	class SharedPtr;
-	template <typename T>
 	class COMPtr;
-	template <typename T>
-	class SharedPtr;
 	template <typename T>
 	class alloc;
 	template <typename T>
@@ -17,9 +15,9 @@ namespace KlayGE
 	template <typename T>
 	class tree;
 	class VFile;
-	typedef SharedPtr<VFile> VFilePtr;
+	typedef boost::shared_ptr<VFile> VFilePtr;
 	class ResIdentifier;
-	typedef SharedPtr<ResIdentifier> ResIdentifierPtr;
+	typedef boost::shared_ptr<ResIdentifier> ResIdentifierPtr;
 	class ResLocator;
 
 	class Timer;
@@ -51,70 +49,71 @@ namespace KlayGE
 
 	class Camera;
 	class Font;
-	typedef SharedPtr<Font> FontPtr;
+	typedef boost::shared_ptr<Font> FontPtr;
 	struct Light;
 	struct Material;
 	class RenderEngine;
-	typedef SharedPtr<RenderEngine> RenderEnginePtr;
+	typedef boost::shared_ptr<RenderEngine> RenderEnginePtr;
 	class RenderTarget;
-	typedef SharedPtr<RenderTarget> RenderTargetPtr;
+	typedef boost::shared_ptr<RenderTarget> RenderTargetPtr;
 	class RenderSettings;
 	class RenderWindow;
-	typedef SharedPtr<RenderWindow> RenderWindowPtr;
+	typedef boost::shared_ptr<RenderWindow> RenderWindowPtr;
 	class Renderable;
-	typedef SharedPtr<Renderable> RenderablePtr;
+	typedef boost::shared_ptr<Renderable> RenderablePtr;
 	class RenderEffect;
-	typedef SharedPtr<RenderEffect> RenderEffectPtr;
+	typedef boost::shared_ptr<RenderEffect> RenderEffectPtr;
 	class RenderEffectParameter;
-	typedef SharedPtr<RenderEffectParameter> RenderEffectParameterPtr;
-	class Clipper;
-	typedef SharedPtr<Clipper> ClipperPtr;
+	typedef boost::shared_ptr<RenderEffectParameter> RenderEffectParameterPtr;
 	class SceneManager;
+	typedef boost::shared_ptr<SceneManager> SceneManagerPtr;
+	class SceneNode;
+	typedef boost::shared_ptr<SceneNode> SceneNodePtr;
 	class Texture;
-	typedef SharedPtr<Texture> TexturePtr;
+	typedef boost::shared_ptr<Texture> TexturePtr;
 	class RenderTexture;
-	typedef SharedPtr<RenderTexture> RenderTexturePtr;
+	typedef boost::shared_ptr<RenderTexture> RenderTexturePtr;
 	class VertexStream;
-	typedef SharedPtr<VertexStream> VertexStreamPtr;
+	typedef boost::shared_ptr<VertexStream> VertexStreamPtr;
 	class IndexStream;
-	typedef SharedPtr<IndexStream> IndexStreamPtr;
+	typedef boost::shared_ptr<IndexStream> IndexStreamPtr;
 	class RenderBuffer;
-	typedef SharedPtr<RenderBuffer> RenderBufferPtr;
+	typedef boost::shared_ptr<RenderBuffer> RenderBufferPtr;
 	struct Viewport;
 	class RenderFactory;
-	typedef SharedPtr<RenderFactory> RenderFactoryPtr;
+	typedef boost::shared_ptr<RenderFactory> RenderFactoryPtr;
 	class StaticMesh;
-	typedef SharedPtr<StaticMesh> StaticMeshPtr;
+	typedef boost::shared_ptr<StaticMesh> StaticMeshPtr;
 	class BoneMesh;
-	typedef SharedPtr<BoneMesh> BoneMeshPtr;
+	typedef boost::shared_ptr<BoneMesh> BoneMeshPtr;
 
 	class Socket;
 	class Lobby;
 	class Player;
 
 	class AudioEngine;
-	typedef SharedPtr<AudioEngine> AudioEnginePtr;
+	typedef boost::shared_ptr<AudioEngine> AudioEnginePtr;
 	class AudioBuffer;
-	typedef SharedPtr<AudioBuffer> AudioBufferPtr;
+	typedef boost::shared_ptr<AudioBuffer> AudioBufferPtr;
 	class SoundBuffer;
 	class MusicBuffer;
 	class AudioDataSource;
-	typedef SharedPtr<AudioDataSource> AudioDataSourcePtr;
+	typedef boost::shared_ptr<AudioDataSource> AudioDataSourcePtr;
 	class CDAudio;
 	class AudioFactory;
-	typedef SharedPtr<AudioFactory> AudioFactoryPtr;
+	typedef boost::shared_ptr<AudioFactory> AudioFactoryPtr;
 
 	class App3DFramework;
 
 	class InputEngine;
-	typedef SharedPtr<InputEngine> InputEnginePtr;
+	typedef boost::shared_ptr<InputEngine> InputEnginePtr;
 	class InputDevice;
-	typedef SharedPtr<InputDevice> InputDevicePtr;
+	typedef boost::shared_ptr<InputDevice> InputDevicePtr;
 	class InputFactory;
-	typedef SharedPtr<InputFactory> InputFactoryPtr;
+	typedef boost::shared_ptr<InputFactory> InputFactoryPtr;
 
 	class ShowEngine;
-	typedef SharedPtr<ShowEngine> ShowEnginePtr;
+	typedef boost::shared_ptr<ShowEngine> ShowEnginePtr;
 }
 
 #endif			// _PREDECLARE_HPP

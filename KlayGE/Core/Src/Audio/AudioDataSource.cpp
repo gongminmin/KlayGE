@@ -11,7 +11,6 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/SharedPtr.hpp>
 
 #include <KlayGE/AudioDataSource.hpp>
 

@@ -71,6 +71,13 @@ namespace KlayGE
 	MakeMask(U32 dw)
 		{ return (1UL << (dw + 1)) - 1; }
 
+	// 产生FourCC常量
+	template <char ch0, char ch1, char ch2, char ch3>
+	struct MakeFourCC
+	{
+		enum { value = (ch0 << 0) + (ch1 << 8) + (ch2 << 16) + (ch3 << 24) };
+	};
+
 	// Unicode函数, 用于string, wstring之间的转换
 	std::string& Convert(std::string& strDest, const std::string& strSrc);
 	std::string& Convert(std::string& strDest, const std::wstring& wstrSrc);

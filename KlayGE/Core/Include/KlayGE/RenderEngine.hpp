@@ -23,9 +23,7 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderTarget.hpp>
 #include <KlayGE/Texture.hpp>
-#include <KlayGE/Color.hpp>
-#include <KlayGE/SharedPtr.hpp>
-#include <KlayGE/Matrix.hpp>
+#include <KlayGE/Math.hpp>
 
 #include <vector>
 #include <list>
@@ -133,7 +131,7 @@ namespace KlayGE
 		};
 
 	public:
-		typedef std::list<RenderTargetPtr, alloc<RenderTargetPtr> > RenderTargetList;
+		typedef std::list<RenderTargetPtr> RenderTargetList;
 		typedef RenderTargetList::iterator RenderTargetListIterator;
 
 	public:

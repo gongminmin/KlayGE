@@ -18,7 +18,7 @@ namespace KlayGE
 			{ return true; }
 	};
 
-	typedef SharedPtr<D3D9RenderTexture> D3D9RenderTexturePtr;
+	typedef boost::shared_ptr<D3D9RenderTexture> D3D9RenderTexturePtr;
 }
 
 #endif			// _D3D9RENDERTEXTURE_HPP

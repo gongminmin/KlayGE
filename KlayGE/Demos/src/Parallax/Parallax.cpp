@@ -1,6 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/RenderBuffer.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -101,9 +100,9 @@ namespace
 			: rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
 		{
 			effect_ = LoadRenderEffect("Parallax.fx");
-			effect_->ParameterByName("diffusemap")->SetTexture(LoadTGA(*(ResLocator::Instance().Locate("Diffuse.tga")->Load())));
-			effect_->ParameterByName("normalmap")->SetTexture(LoadTGA(*(ResLocator::Instance().Locate("Normal.tga")->Load())));
-			effect_->ParameterByName("heightmap")->SetTexture(LoadTGA(*(ResLocator::Instance().Locate("Height.tga")->Load())));
+			*(effect_->ParameterByName("diffusemap")) = (LoadTGA(*(ResLocator::Instance().Locate("Diffuse.tga")->Load())));
+			*(effect_->ParameterByName("normalmap")) = (LoadTGA(*(ResLocator::Instance().Locate("Normal.tga")->Load())));
+			*(effect_->ParameterByName("heightmap")) = (LoadTGA(*(ResLocator::Instance().Locate("Height.tga")->Load())));
 			effect_->SetTechnique("Parallax");
 
 			Vector3 xyzs[] =
@@ -126,6 +125,8 @@ namespace
 			{
 				0, 1, 2, 2, 3, 0
 			};
+
+			box_ = Box(Vector3(-1, -1, 0), Vector3(1, 1, 0.1f));
 
 			Vector3 t[4], b[4];
 			MathLib::ComputeTangent(t, b,
@@ -155,6 +156,11 @@ namespace
 			return rb_;
 		}
 
+		Box GetBound() const
+		{
+			return box_;
+		}
+
 		const std::wstring& Name() const
 		{
 			static std::wstring name(L"Polygon");
@@ -163,9 +169,11 @@ namespace
 
 		KlayGE::RenderBufferPtr rb_;
 		KlayGE::RenderEffectPtr effect_;
+
+		Box box_;
 	};
 
-	SharedPtr<RenderPolygon> renderPolygon;
+	boost::shared_ptr<RenderPolygon> renderPolygon;
 }
 
 
@@ -189,8 +197,10 @@ private:
 int main()
 {
 	Parallax app;
+	SceneManager sceneMgr;
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
+	Context::Instance().SceneManagerInstance(sceneMgr);
 
 	TheRenderSettings settings;
 	settings.width = 800;
@@ -215,7 +225,7 @@ void Parallax::InitObjects()
 	// 建立字体
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont(L"宋体", 16);
 
-	renderPolygon = SharedPtr<RenderPolygon>(new RenderPolygon);
+	renderPolygon = boost::shared_ptr<RenderPolygon>(new RenderPolygon);
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
@@ -225,21 +235,21 @@ void Parallax::InitObjects()
 	MathLib::LookAtLH(matView, Vector3(2, 0, -2), Vector3(0, 0, 0));
 	MathLib::PerspectiveFovLH(matProj, PI / 4, 800.0f / 600, 0.1f, 20.0f);
 
-	renderPolygon->effect_->ParameterByName("worldviewproj")->SetMatrix(matView * matProj);
-	renderPolygon->effect_->ParameterByName("eyePos")->SetVector(Vector4(2, 0, -2, 1) - Vector4(0, 0, 0, 0));
+	*(renderPolygon->effect_->ParameterByName("worldviewproj")) = matView * matProj;
+	*(renderPolygon->effect_->ParameterByName("eyePos")) = Vector4(2, 0, -2, 1) - Vector4(0, 0, 0, 0);
 }
 
 void Parallax::Update()
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-	SceneManager& sceneMgr(SceneManager::Instance());
+	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 
 	static float degree(0);
 	Vector3 lightPos(2, 0, -2);
 	Matrix4 matRot;
 	MathLib::RotationZ(matRot, degree);
 	MathLib::TransformCoord(lightPos, lightPos, matRot);
-	renderPolygon->effect_->ParameterByName("lightPos")->SetVector(Vector4(lightPos.x(), lightPos.y(), lightPos.z(), 1));
+	*(renderPolygon->effect_->ParameterByName("lightPos")) = Vector4(lightPos.x(), lightPos.y(), lightPos.z(), 1);
 	degree += 0.01f;
 
 	std::wostringstream stream;

@@ -3,7 +3,6 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
-#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/MapVector.hpp>
 
@@ -15,39 +14,24 @@
 
 namespace KlayGE
 {
-	class Clipper
-	{
-	public:
-		virtual ~Clipper()
-			{ }
-
-		static ClipperPtr NullObject();
-		virtual void ClipScene(const Camera& camera) = 0;
-	};
-
 	class SceneManager : boost::noncopyable
 	{
 	protected:
-		typedef std::vector<RenderablePtr>	RenderItemsType;
-		typedef MapVector<RenderEffectPtr, RenderItemsType>			RenderQueueType;
+		typedef std::vector<RenderablePtr> RenderItemsType;
+		typedef MapVector<RenderEffectPtr, RenderItemsType> RenderQueueType;
 
 	public:
-		static SceneManager& Instance();
+		SceneManager();
 
-		void AttachClipper(const SharedPtr<Clipper>& clipper);
+		virtual void ClipScene(const Camera& camera);
 
-		void PushRenderable(const RenderablePtr& obj);
+		virtual void PushRenderable(const RenderablePtr& obj);
 
 		void Update();
 		void Flash();
 
-	private:
-		SceneManager();
-
-	private:
+	protected:
 		RenderQueueType renderQueue_;
-
-		SharedPtr<Clipper> clipper_;
 	};
 }
 

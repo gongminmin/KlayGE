@@ -55,6 +55,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "‰÷»æ“˝«Ê-OpenGL", "Plugins\
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "∞À≤Ê ˜≥°æ∞π‹¿Ì-OCTree", "Plugins\Src\Scene\OCTree\OCTree.vcproj", "{6D03BA3A-EDF0-47EF-A008-23A87502AD55}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -117,6 +121,10 @@ Global
 		{31837598-9F20-4A23-A9B6-9B590B43321B}.Debug.Build.0 = Debug|Win32
 		{31837598-9F20-4A23-A9B6-9B590B43321B}.Release.ActiveCfg = Release|Win32
 		{31837598-9F20-4A23-A9B6-9B590B43321B}.Release.Build.0 = Release|Win32
+		{6D03BA3A-EDF0-47EF-A008-23A87502AD55}.Debug.ActiveCfg = Debug|Win32
+		{6D03BA3A-EDF0-47EF-A008-23A87502AD55}.Debug.Build.0 = Debug|Win32
+		{6D03BA3A-EDF0-47EF-A008-23A87502AD55}.Release.ActiveCfg = Release|Win32
+		{6D03BA3A-EDF0-47EF-A008-23A87502AD55}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection

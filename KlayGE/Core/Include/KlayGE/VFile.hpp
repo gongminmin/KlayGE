@@ -13,15 +13,12 @@
 #ifndef _VFILE_HPP
 #define _VFILE_HPP
 
-#include <KlayGE/SharedPtr.hpp>
+#include <KlayGE/PreDeclare.hpp>
 
 #pragma comment(lib, "KlayGE_Core.lib")
 
 namespace KlayGE
 {
-	class VFile;
-	typedef SharedPtr<VFile> VFilePtr;
-
 	// 虚拟文件基类
 	/////////////////////////////////////////////////////////////////////////////////
 	class VFile

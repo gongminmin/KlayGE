@@ -1,11 +1,11 @@
 #ifndef _D3D9ADAPTERLIST_HPP
 #define _D3D9ADAPTERLIST_HPP
 
-#include <d3d9.h>
-
+#include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/COMPtr.hpp>
-#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/D3D9/D3D9Adapter.hpp>
+
+#include <d3d9.h>
 
 #pragma comment(lib, "KlayGE_RenderEngine_D3D9.lib")
 
@@ -29,7 +29,7 @@ namespace KlayGE
 		U32			currentAdapter_;
 	};
 
-	typedef SharedPtr<D3D9AdapterList> D3D9AdapterListPtr;
+	typedef boost::shared_ptr<D3D9AdapterList> D3D9AdapterListPtr;
 }
 
 #endif			// _D3D9ADAPTERLIST_HPP

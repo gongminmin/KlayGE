@@ -29,7 +29,7 @@ namespace KlayGE
 	{
 		if ("DDBACKBUFFER" == name)
 		{
-			D3D9TexturePtr tex(privateTex_);
+			D3D9TexturePtr tex(static_cast<D3D9Texture*>(privateTex_.get()));
 			IDirect3DSurface9** pSurf = reinterpret_cast<IDirect3DSurface9**>(pData);
 			tex->D3DTexture()->GetSurfaceLevel(0, &(*pSurf));
 			(*pSurf)->Release();
@@ -39,7 +39,7 @@ namespace KlayGE
 
 		if ("D3DZBUFFER" == name)
 		{
-			D3D9TexturePtr tex(privateTex_);
+			D3D9TexturePtr tex(static_cast<D3D9Texture*>(privateTex_.get()));
 			IDirect3DSurface9** pSurf = reinterpret_cast<IDirect3DSurface9**>(pData);
 			*pSurf = tex->DepthStencil().Get();
 
@@ -48,7 +48,7 @@ namespace KlayGE
 
 		if ("DDFRONTBUFFER" == name)
 		{
-			D3D9TexturePtr tex(privateTex_);
+			D3D9TexturePtr tex(static_cast<D3D9Texture*>(privateTex_.get()));
 			IDirect3DSurface9** pSurf = reinterpret_cast<IDirect3DSurface9**>(pData);
 			tex->D3DTexture()->GetSurfaceLevel(0, &(*pSurf));
 			(*pSurf)->Release();

@@ -17,7 +17,6 @@
 #define _CONTEXT_HPP
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/SceneManager.hpp>
 
 #pragma comment(lib, "KlayGE_Core.lib")
@@ -37,6 +36,11 @@ namespace KlayGE
 			{ app_ = &app; }
 		App3DFramework& AppInstance()
 			{ return *app_; }
+
+		void SceneManagerInstance(SceneManager& mgr)
+			{ sceneMgr_ = &mgr; }
+		SceneManager& SceneManagerInstance()
+			{ return *sceneMgr_; }
 
 		void RenderFactoryInstance(RenderFactory& factory)
 			{ renderFactory_ = &factory; }
@@ -58,6 +62,8 @@ namespace KlayGE
 			{ }
 
 		App3DFramework* app_;
+
+		SceneManager* sceneMgr_;
 
 		RenderFactory*	renderFactory_;
 		AudioFactory*	audioFactory_;

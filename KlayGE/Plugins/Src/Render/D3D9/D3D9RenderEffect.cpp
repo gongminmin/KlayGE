@@ -126,39 +126,51 @@ namespace KlayGE
 	{
 	}
 	
-	void D3D9RenderEffectParameter::SetFloat(float value)
+	RenderEffectParameter& D3D9RenderEffectParameter::operator=(float value)
 	{
 		TIF(effect_->SetFloat(parameter_, value));
+		return *this;
 	}
 
-	void D3D9RenderEffectParameter::SetFloatArray(const float* value, size_t count)
+	RenderEffectParameter& D3D9RenderEffectParameter::operator=(const Vector4& value)
 	{
-		TIF(effect_->SetFloatArray(parameter_, value, count));
+		TIF(effect_->SetVector(parameter_, reinterpret_cast<const D3DXVECTOR4*>(&value)));
+		
+		return *this;
 	}
 
-	float D3D9RenderEffectParameter::GetFloat() const
+	RenderEffectParameter& D3D9RenderEffectParameter::operator=(const Matrix4& value)
+	{
+		TIF(effect_->SetMatrix(parameter_, reinterpret_cast<const D3DXMATRIX*>(&value)));
+		return *this;
+	}
+
+	RenderEffectParameter& D3D9RenderEffectParameter::operator=(int value)
+	{
+		TIF(effect_->SetInt(parameter_, value));
+		return *this;
+	}
+
+	RenderEffectParameter& D3D9RenderEffectParameter::operator=(const TexturePtr& tex)
+	{
+		IDirect3DTexture9* texture(NULL);
+		if (tex)
+		{
+			texture = static_cast<D3D9Texture*>(tex.get())->D3DTexture().Get();
+		}
+		TIF(effect_->SetTexture(parameter_, texture));
+
+		return *this;
+	}
+
+	D3D9RenderEffectParameter::operator float() const
 	{
 		float value;
 		TIF(effect_->GetFloat(parameter_, &value));
 		return value;
 	}
 
-	void D3D9RenderEffectParameter::GetFloatArray(float* value, size_t count)
-	{
-		TIF(effect_->GetFloatArray(parameter_, value, count));
-	}
-
-	void D3D9RenderEffectParameter::SetVector(const Vector4& value)
-	{
-		TIF(effect_->SetVector(parameter_, reinterpret_cast<const D3DXVECTOR4*>(&value)));
-	}
-
-	void D3D9RenderEffectParameter::SetVectorArray(const Vector4* value, size_t count)
-	{
-		TIF(effect_->SetVectorArray(parameter_, reinterpret_cast<const D3DXVECTOR4*>(value), count));
-	}
-
-	Vector4 D3D9RenderEffectParameter::GetVector() const
+	D3D9RenderEffectParameter::operator Vector4() const
 	{
 		D3DXVECTOR4 vec;
 		TIF(effect_->GetVector(parameter_, &vec));
@@ -166,14 +178,38 @@ namespace KlayGE
 		return Vector4(vec.x, vec.y, vec.z, vec.w);
 	}
 
+	D3D9RenderEffectParameter::operator Matrix4() const
+	{
+		D3DXMATRIX mat;
+		TIF(effect_->GetMatrix(parameter_, &mat));
+		return Matrix4(mat);
+	}
+
+	D3D9RenderEffectParameter::operator int() const
+	{
+		int value;
+		TIF(effect_->GetInt(parameter_, &value));
+		return value;
+	}
+
+	void D3D9RenderEffectParameter::SetFloatArray(const float* value, size_t count)
+	{
+		TIF(effect_->SetFloatArray(parameter_, value, count));
+	}
+
+	void D3D9RenderEffectParameter::GetFloatArray(float* value, size_t count)
+	{
+		TIF(effect_->GetFloatArray(parameter_, value, count));
+	}
+
+	void D3D9RenderEffectParameter::SetVectorArray(const Vector4* value, size_t count)
+	{
+		TIF(effect_->SetVectorArray(parameter_, reinterpret_cast<const D3DXVECTOR4*>(value), count));
+	}
+
 	void D3D9RenderEffectParameter::GetVectorArray(Vector4* value, size_t count)
 	{
 		TIF(effect_->GetVectorArray(parameter_, reinterpret_cast<D3DXVECTOR4*>(value), count));
-	}
-
-	void D3D9RenderEffectParameter::SetMatrix(const Matrix4& value)
-	{
-		TIF(effect_->SetMatrix(parameter_, reinterpret_cast<const D3DXMATRIX*>(&value)));
 	}
 
 	void D3D9RenderEffectParameter::SetMatrixArray(const Matrix4* matrices, size_t count)
@@ -182,22 +218,10 @@ namespace KlayGE
 			reinterpret_cast<const D3DXMATRIX*>(matrices), static_cast<::UINT>(count)));
 	}
 
-	Matrix4 D3D9RenderEffectParameter::GetMatrix() const
-	{
-		D3DXMATRIX mat;
-		TIF(effect_->GetMatrix(parameter_, &mat));
-		return Matrix4(mat);
-	}
-
 	void D3D9RenderEffectParameter::GetMatrixArray(Matrix4* matrices, size_t count)
 	{
 		TIF(effect_->GetMatrixArray(parameter_,
 			reinterpret_cast<D3DXMATRIX*>(matrices), static_cast<::UINT>(count)));
-	}	
-
-	void D3D9RenderEffectParameter::SetInt(int value)
-	{
-		TIF(effect_->SetInt(parameter_, value));
 	}
 
 	void D3D9RenderEffectParameter::SetIntArray(const int* value, size_t count)
@@ -205,25 +229,8 @@ namespace KlayGE
 		TIF(effect_->SetIntArray(parameter_, value, count));
 	}
 
-	int D3D9RenderEffectParameter::GetInt() const
-	{
-		int value;
-		TIF(effect_->GetInt(parameter_, &value));
-		return value;
-	}
-
-    void D3D9RenderEffectParameter::GetIntArray(int* value, size_t count)
+	void D3D9RenderEffectParameter::GetIntArray(int* value, size_t count)
 	{
 		TIF(effect_->GetIntArray(parameter_, value, count));
-	}
-
-	void D3D9RenderEffectParameter::SetTexture(const TexturePtr& tex)
-	{
-		IDirect3DTexture9* texture(NULL);
-		if (tex.Get() != NULL)
-		{
-			texture = static_cast<D3D9Texture*>(tex.Get())->D3DTexture().Get();
-		}
-		TIF(effect_->SetTexture(parameter_, texture));
 	}
 }

@@ -76,41 +76,64 @@ namespace KlayGE
 	}
 
 
-	void OGLRenderEffectParameter::SetFloat(float value)
+	RenderEffectParameter& OGLRenderEffectParameter::operator=(float value)
 	{
+		return *this;
+	}
+	
+	RenderEffectParameter& OGLRenderEffectParameter::operator=(const Vector4& value)
+	{
+		return *this;
 	}
 
-	void OGLRenderEffectParameter::SetFloatArray(const float* value, size_t count)
+	RenderEffectParameter& OGLRenderEffectParameter::operator=(const Matrix4& value)
 	{
-	}		
+		return *this;
+	}
 
-	float OGLRenderEffectParameter::GetFloat() const
+	RenderEffectParameter& OGLRenderEffectParameter::operator=(int value)
+	{
+		return *this;
+	}
+
+	RenderEffectParameter& OGLRenderEffectParameter::operator=(const TexturePtr& tex)
+	{
+		return *this;
+	}
+
+	OGLRenderEffectParameter::operator float() const
 	{
 		return 0;
 	}
 
-	void OGLRenderEffectParameter::GetFloatArray(float* value, size_t count)
-	{
-	}
-
-	void OGLRenderEffectParameter::SetVector(const Vector4& value)
-	{
-	}
-
-	void OGLRenderEffectParameter::SetVectorArray(const Vector4* value, size_t count)
-	{
-	}
-
-	Vector4 OGLRenderEffectParameter::GetVector() const
+	OGLRenderEffectParameter::operator Vector4() const
 	{
 		return Vector4::Zero();
 	}
 
-	void OGLRenderEffectParameter::GetVectorArray(Vector4* value, size_t count)
+	OGLRenderEffectParameter::operator Matrix4() const
+	{
+		return Matrix4::Identity();
+	}
+
+	OGLRenderEffectParameter::operator int() const
+	{
+		return 0;
+	}
+
+	void OGLRenderEffectParameter::SetFloatArray(const float* matrices, size_t count)
 	{
 	}
 
-	void OGLRenderEffectParameter::SetMatrix(const Matrix4& value)
+	void OGLRenderEffectParameter::GetFloatArray(float* matrices, size_t count)
+	{
+	}
+
+	void OGLRenderEffectParameter::SetVectorArray(const Vector4* matrices, size_t count)
+	{
+	}
+
+	void OGLRenderEffectParameter::GetVectorArray(Vector4* matrices, size_t count)
 	{
 	}
 
@@ -118,33 +141,15 @@ namespace KlayGE
 	{
 	}
 
-	Matrix4 OGLRenderEffectParameter::GetMatrix() const
-	{
-		return Matrix4::Identity();
-	}
-
 	void OGLRenderEffectParameter::GetMatrixArray(Matrix4* matrices, size_t count)
 	{
-	}	
+	}
 
-	void OGLRenderEffectParameter::SetInt(int value)
+	void SetIntArray(const int* matrices, size_t count)
 	{
 	}
 
-	void OGLRenderEffectParameter::SetIntArray(const int* value, size_t count)
-	{
-	}
-
-	int OGLRenderEffectParameter::GetInt() const
-	{
-		return 0;
-	}
-
-	void OGLRenderEffectParameter::GetIntArray(int* value, size_t count)
-	{
-	}
-
-	void OGLRenderEffectParameter::SetTexture(const TexturePtr& tex)
+	void GetIntArray(int* matrices, size_t count)
 	{
 	}
 }

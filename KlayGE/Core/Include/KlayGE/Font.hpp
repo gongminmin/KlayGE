@@ -13,7 +13,7 @@
 #ifndef _FONT_HPP
 #define _FONT_HPP
 
-#include <KlayGE/SharedPtr.hpp>
+#include <KlayGE/PreDeclare.hpp>
 
 #pragma comment(lib, "KlayGE_Core.lib")
 

@@ -240,6 +240,9 @@
 					RelativePath="Include\KlayGE\SceneManager.hpp">
 				</File>
 				<File
+					RelativePath=".\Include\KlayGE\SceneNode.hpp">
+				</File>
+				<File
 					RelativePath="Include\KlayGE\Texture.hpp">
 				</File>
 				<File
@@ -319,9 +322,6 @@
 				</File>
 				<File
 					RelativePath=".\Include\KlayGE\SetVector.hpp">
-				</File>
-				<File
-					RelativePath=".\Include\KlayGE\SharedPtr.hpp">
 				</File>
 				<File
 					RelativePath="Include\KlayGE\ThrowErr.hpp">

@@ -82,7 +82,7 @@ namespace KlayGE
 	class BoneMesh : public Renderable
 	{
 	public:
-		typedef SharedPtr<std::vector<Bone> > BonesType;
+		typedef boost::shared_ptr<std::vector<Bone> > BonesType;
 
 	public:
 		virtual ~BoneMesh();

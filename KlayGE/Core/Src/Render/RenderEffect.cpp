@@ -70,43 +70,41 @@ namespace KlayGE
 	class NullRenderEffectParameter : public RenderEffectParameter
 	{
 	public:
-		void SetFloat(float value)
-			{ }
+		RenderEffectParameter& operator=(float value)
+			{ return *this; }
+		RenderEffectParameter& operator=(const Vector4& value)
+			{ return *this; }
+		RenderEffectParameter& operator=(const Matrix4& value)
+			{ return *this; }
+		RenderEffectParameter& operator=(int value)
+			{ return *this; }
+		RenderEffectParameter& operator=(const TexturePtr& tex)
+			{ return *this; }
+
+		operator float() const
+			{ return 0; }
+		operator Vector4() const
+			{ return Vector4::Zero(); }
+		operator Matrix4() const
+			{ return Matrix4::Identity(); }
+		operator int() const
+			{ return 0; }
+
 		void SetFloatArray(const float* matrices, size_t count)
 			{ }
-		float GetFloat() const
-			{ return 0; }
 		void GetFloatArray(float* matrices, size_t count)
-			{ }
-
-		void SetVector(const Vector4& value)
 			{ }
 		void SetVectorArray(const Vector4* matrices, size_t count)
 			{ }
-		Vector4 GetVector() const
-			{ return Vector4::Zero(); }
 		void GetVectorArray(Vector4* matrices, size_t count)
-			{ }
-
-		void SetMatrix(const Matrix4& value)
 			{ }
 		void SetMatrixArray(const Matrix4* matrices, size_t count)
 			{ }
-		Matrix4 GetMatrix() const
-			{ return Matrix4::Identity(); }
 		void GetMatrixArray(Matrix4* matrices, size_t count)
-			{ }
-
-		void SetInt(int value)
 			{ }
 		void SetIntArray(const int* matrices, size_t count)
 			{ }
-		int GetInt() const
-			{ return 0; }
 		void GetIntArray(int* matrices, size_t count)
-			{ }
-
-		void SetTexture(const TexturePtr& tex)
 			{ }
 	};
 

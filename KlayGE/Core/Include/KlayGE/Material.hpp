@@ -1,7 +1,7 @@
 #ifndef _MATERIAL_HPP
 #define _MATERIAL_HPP
 
-#include <KlayGE/Color.hpp>
+#include <KlayGE/Math.hpp>
 
 #pragma comment(lib, "KlayGE_Core.lib")
 

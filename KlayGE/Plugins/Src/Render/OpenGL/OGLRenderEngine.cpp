@@ -12,7 +12,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Memory.hpp>
 
@@ -607,7 +606,7 @@ namespace KlayGE
 		else
 		{
 			glEnable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, OGLTexturePtr(texture)->GLTexture());
+			glBindTexture(GL_TEXTURE_2D, OGLTexturePtr(static_cast<OGLTexture*>(texture.get()))->GLTexture());
 		}
 	}
 

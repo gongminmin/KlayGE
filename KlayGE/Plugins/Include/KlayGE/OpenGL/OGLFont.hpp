@@ -13,7 +13,6 @@
 #ifndef _OGLFONT_HPP
 #define _OGLFONT_HPP
 
-#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/Rect.hpp>
 
 #include <list>
@@ -48,9 +47,8 @@ namespace KlayGE
 			U32				width;
 		};
 
-		typedef std::map<wchar_t, CharInfo, std::less<wchar_t>,
-			alloc<std::pair<const wchar_t, CharInfo> > > CharInfoMapType;
-		typedef std::list<wchar_t, alloc<wchar_t> > CharLRUType;
+		typedef std::map<wchar_t, CharInfo> CharInfoMapType;
+		typedef std::list<wchar_t> CharLRUType;
 
 	public:
 		void UpdateTexture(const std::wstring& text);

@@ -2,7 +2,7 @@
 #define _RENDERABLE_HPP
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/SharedPtr.hpp>
+#include <KlayGE/Matrix.hpp>
 #include <string>
 
 namespace KlayGE
@@ -23,9 +23,13 @@ namespace KlayGE
 		virtual void OnRenderEnd()
 			{ }
 
-		virtual SharedPtr<Box> GetBound() const
-			{ return SharedPtr<Box>(); }
+		virtual Matrix4 GetWorld() const
+			{ return Matrix4::Identity(); }
+		virtual Box GetBound() const = 0;
+
+		virtual bool CanBeCulled() const
+			{ return true; }
 	};
 }
 
-#endif //__Renderable_H__
+#endif		//_RENDERABLE_HPP

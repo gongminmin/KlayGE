@@ -49,7 +49,7 @@ namespace KlayGE
 		{
 			const std::string resName(pathes_[i] + name);
 
-			SharedPtr<DiskFile> diskFile(new DiskFile);
+			boost::shared_ptr<DiskFile> diskFile(new DiskFile);
 
 			if (diskFile->Open(resName, VFile::OM_Read))
 			{
@@ -57,7 +57,7 @@ namespace KlayGE
 			}
 			else
 			{
-				SharedPtr<PackedFile> packedFile(new PackedFile);
+				boost::shared_ptr<PackedFile> packedFile(new PackedFile);
 
 				if (packedFile->Open(resName))
 				{

@@ -1,8 +1,11 @@
 // Color.hpp
 // KlayGE 颜色 头文件
-// Ver 2.1.1
+// Ver 2.1.3
 // 版权所有(C) 龚敏敏, 2004
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.1.3
+// 增加了operator* (2004.6.18)
 //
 // 2.1.1
 // 初次建立 (2004.4.22)
@@ -120,6 +123,10 @@ namespace KlayGE
 			col_ *= rhs;
 			return *this;
 		}
+		Color& operator*=(const Color& rhs)
+		{
+			return MathLib::Modulate(*this, *this, rhs);
+		}
 		Color& operator/=(float rhs)
 		{
 			col_ /= rhs;
@@ -144,6 +151,12 @@ namespace KlayGE
 	private:
 		Vector_T<float, elem_num> col_;
 	};
+
+	inline const Color
+	operator*(const Color& lhs, const Color& rhs)
+	{
+		return Color(lhs) *= rhs;
+	}
 
 	inline bool
 	operator==(const Color& lhs, const Color& rhs)

@@ -91,7 +91,7 @@ namespace KlayGE
 		CullMode cullingMode_;
 	};
 
-	typedef SharedPtr<OGLRenderEngine> OGLRenderEnginePtr;
+	typedef boost::shared_ptr<OGLRenderEngine> OGLRenderEnginePtr;
 }
 
 #endif			// _OGLRENDERENGINE_HPP

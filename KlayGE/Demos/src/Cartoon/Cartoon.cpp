@@ -1,6 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/RenderBuffer.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -14,6 +13,8 @@
 
 #include <KlayGE/D3D9/D3D9RenderSettings.hpp>
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
+
+#include <KlayGE/OCTree/OCTree.hpp>
 
 #include <iostream>
 #include <sstream>
@@ -32,9 +33,45 @@ namespace
 			: rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
 		{
 			effect_ = LoadRenderEffect("Cartoon.fx");
-			effect_->ParameterByName("toon")->SetTexture(texture0);
-			effect_->ParameterByName("edge")->SetTexture(texture1);
+			*(effect_->ParameterByName("toon")) = texture0;
+			*(effect_->ParameterByName("edge")) = texture1;
 			effect_->SetTechnique("cartoonTec");
+
+			float minx(Pos[0]), miny(Pos[1]), minz(Pos[2]);
+			for (size_t i = 0; i < sizeof(Pos) / sizeof(float); i += 3)
+			{
+				if (Pos[i + 0] < minx)
+				{
+					minx = Pos[i + 0];
+				}
+				if (Pos[i + 1] < miny)
+				{
+					miny = Pos[i + 1];
+				}
+				if (Pos[i + 2] < minz)
+				{
+					minz = Pos[i + 2];
+				}
+			}
+
+			float maxx(Pos[0]), maxy(Pos[1]), maxz(Pos[2]);
+			for (size_t i = 0; i < sizeof(Pos) / sizeof(float); i += 3)
+			{
+				if (Pos[i + 0] > maxx)
+				{
+					maxx = Pos[i + 0];
+				}
+				if (Pos[i + 1] > maxy)
+				{
+					maxy = Pos[i + 1];
+				}
+				if (Pos[i + 2] > maxz)
+				{
+					maxz = Pos[i + 2];
+				}
+			}
+
+			box_ = Box(Vector3(minx, miny, minz), Vector3(maxx, maxy, maxz));
 
 			rb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
 			rb_->AddVertexStream(VST_Normals, sizeof(float), 3, true);
@@ -52,6 +89,9 @@ namespace
 		RenderBufferPtr GetRenderBuffer() const
 			{ return rb_; }
 
+		Box GetBound() const
+			{ return box_; }
+
 		const std::wstring& Name() const
 		{
 			static std::wstring name(L"Torus");
@@ -60,17 +100,21 @@ namespace
 
 		KlayGE::RenderBufferPtr rb_;
 		KlayGE::RenderEffectPtr effect_;
+
+		Box box_;
 	};
 
-	SharedPtr<RenderTorus> renderTorus;
+	boost::shared_ptr<RenderTorus> renderTorus;
 }
 
 
 int main()
 {
 	Cartoon app;
+	OCTree sceneMgr(Box(Vector3(-20, -20, -20), Vector3(20, 20, 20)));
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
+	Context::Instance().SceneManagerInstance(sceneMgr);
 
 	D3D9RenderSettings settings;
 	settings.width = 800;
@@ -103,24 +147,24 @@ void Cartoon::InitObjects()
 	TexturePtr texture1 = Context::Instance().RenderFactoryInstance().MakeTexture(sizeof(cartoolShadeData1) / sizeof(cartoolShadeData1[0]), 1, 0, PF_L8);
 	texture1->CopyMemoryToTexture(cartoolShadeData1, PF_L8);
 
-	renderTorus = SharedPtr<RenderTorus>(new RenderTorus(texture0, texture1));
+	renderTorus = boost::shared_ptr<RenderTorus>(new RenderTorus(texture0, texture1));
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	MathLib::LookAtLH(view_, Vector3(0, 0, -6), Vector3(0, 0, 0));
+	MathLib::LookAtLH(view_, Vector3(0, 0, -6), Vector3(0, 5, 0));
 	MathLib::PerspectiveFovLH(proj_, PI / 4, 800.0f / 600, 0.1f, 20.0f);
 
-	renderTorus->effect_->ParameterByName("proj")->SetMatrix(proj_);
-	renderTorus->effect_->ParameterByName("lightPos")->SetVector(Vector4(2, 2, -3, 1));
-	renderTorus->effect_->ParameterByName("eyePos")->SetVector(Vector4(0, 0, -6, 1));
+	*(renderTorus->GetRenderEffect()->ParameterByName("proj")) = proj_;
+	*(renderTorus->GetRenderEffect()->ParameterByName("lightPos")) = Vector4(2, 2, -3, 1);
+	*(renderTorus->GetRenderEffect()->ParameterByName("eyePos")) = Vector4(0, 0, -6, 1);
 }
 
 void Cartoon::Update()
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-	SceneManager& sceneMgr(SceneManager::Instance());
+	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 
 	rotX += 0.003f;
 	rotY += 0.003f;
@@ -131,11 +175,11 @@ void Cartoon::Update()
 	mat *= matY;
 	mat *= view_;
 
-	renderTorus->effect_->ParameterByName("worldview")->SetMatrix(mat);
+	*(renderTorus->GetRenderEffect()->ParameterByName("worldview")) = mat;
 
 	MathLib::Transpose(mat, mat);
 	MathLib::Inverse(mat, mat);
-	renderTorus->effect_->ParameterByName("worldviewIT")->SetMatrix(mat);
+	*(renderTorus->GetRenderEffect()->ParameterByName("worldviewIT")) = mat;
 
 	std::wostringstream stream;
 	stream << (*renderEngine.ActiveRenderTarget())->FPS();

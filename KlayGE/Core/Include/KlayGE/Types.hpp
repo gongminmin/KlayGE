@@ -32,13 +32,6 @@ namespace KlayGE
 	typedef char				S8;
 
 	typedef U32 FourCC;
-
-	// ²úÉúFourCC
-	template <char ch0, char ch1, char ch2, char ch3>
-	struct MakeFourCC
-	{
-		enum { value = (ch0 << 0) + (ch1 << 8) + (ch2 << 16) + (ch3 << 24) };
-	};
 }
 
 #endif		// _TYPES_HPP

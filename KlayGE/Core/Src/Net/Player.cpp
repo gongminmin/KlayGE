@@ -15,7 +15,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Lobby.hpp>
-#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/Memory.hpp>
 
 #include <ctime>

@@ -1,9 +1,9 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Timer.hpp>
 #include <KlayGE/Viewport.hpp>
 #include <KlayGE/SceneManager.hpp>
+#include <KlayGE/Context.hpp>
 
 #include <KlayGE/RenderTarget.hpp>
 
@@ -62,7 +62,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void RenderTarget::Update()
 	{
-		SceneManager::Instance().Update();
+		Context::Instance().SceneManagerInstance().Update();
 
 		this->UpdateStats();
 	}

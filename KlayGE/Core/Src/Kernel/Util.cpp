@@ -15,6 +15,8 @@
 #ifdef WIN32
 	#include <windows.h>
 	#include <winsock.h>
+
+	#pragma comment(lib, "WSock32.lib")
 #else
 	#include <sys/select.h>
 	#include <sys/socket.h>

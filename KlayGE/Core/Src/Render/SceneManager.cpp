@@ -15,7 +15,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Viewport.hpp>
@@ -28,33 +27,16 @@
 
 namespace KlayGE
 {
-	// 空场景剪裁器
-	class NullClipper : public Clipper
-	{
-	public:
-		void ClipScene(const Camera& camera)
-			{ }
-	};
-
-	ClipperPtr Clipper::NullObject()
-	{
-		static ClipperPtr obj(new NullClipper);
-		return obj;
-	}
-
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	SceneManager::SceneManager()
-		: clipper_(Clipper::NullObject())
 	{
 	}
 
-	// 单件实例
+	// 空的裁减器
 	/////////////////////////////////////////////////////////////////////////////////
-	SceneManager& SceneManager::Instance()
+	void SceneManager::ClipScene(const Camera& camera)
 	{
-		static SceneManager sceneMgr;
-		return sceneMgr;
 	}
 
 	// 假如渲染物体
@@ -90,7 +72,7 @@ namespace KlayGE
 	{
 		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-		clipper_->ClipScene((*renderEngine.ActiveRenderTarget())->GetViewport().camera);
+		this->ClipScene((*renderEngine.ActiveRenderTarget())->GetViewport().camera);
 
 		renderEngine.BeginFrame();
 
@@ -114,19 +96,5 @@ namespace KlayGE
 		renderEngine.EndFrame();
 
 		Context::Instance().AppInstance().RenderOver();
-	}
-
-	// 连接场景剪裁器
-	/////////////////////////////////////////////////////////////////////////////////
-	void SceneManager::AttachClipper(const SharedPtr<Clipper>& clipper)
-	{
-		if (!clipper)
-		{
-			clipper_ = Clipper::NullObject();
-		}
-		else
-		{
-			clipper_ = clipper;
-		}
 	}
 }

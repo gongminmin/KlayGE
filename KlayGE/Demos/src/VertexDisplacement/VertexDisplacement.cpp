@@ -1,6 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/RenderBuffer.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -103,7 +102,7 @@ namespace
 			: rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
 		{
 			effect_ = LoadRenderEffect("VertexDisplacement.fx");
-			effect_->ParameterByName("flag")->SetTexture(LoadTGA(*(ResLocator::Instance().Locate("Flag.tga")->Load())));
+			*(effect_->ParameterByName("flag")) = LoadTGA(*(ResLocator::Instance().Locate("Flag.tga")->Load()));
 			effect_->SetTechnique("VertexDisplacement");
 
 			rb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
@@ -135,15 +134,17 @@ namespace
 		KlayGE::RenderEffectPtr effect_;
 	};
 
-	SharedPtr<Flag> flag;
+	boost::shared_ptr<Flag> flag;
 }
 
 
 int main()
 {
 	VertexDisplacement app;
+	SceneManager sceneMgr;
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
+	Context::Instance().SceneManagerInstance(sceneMgr);
 
 	D3D9RenderSettings settings;
 	settings.width = 800;
@@ -167,7 +168,7 @@ void VertexDisplacement::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont(L"ËÎÌו", 16);
 
-	flag = SharedPtr<Flag>(new Flag);
+	flag = boost::shared_ptr<Flag>(new Flag);
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
@@ -179,16 +180,16 @@ void VertexDisplacement::InitObjects()
 	Matrix4 matProj;
 	MathLib::PerspectiveFovLH(matProj, PI / 4, 800.0f / 600, 0.1f, 20.0f);
 
-	flag->effect_->ParameterByName("worldviewproj")->SetMatrix(matView * matProj);
+	*(flag->GetRenderEffect()->ParameterByName("worldviewproj")) = matView * matProj;
 }
 
 void VertexDisplacement::Update()
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-	SceneManager& sceneMgr(SceneManager::Instance());
+	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 
 	static float currentAngle = 0;
-	flag->effect_->ParameterByName("currentAngle")->SetFloat(currentAngle);
+	*(flag->GetRenderEffect()->ParameterByName("currentAngle")) = currentAngle;
 	currentAngle += 0.01f;
 	if (currentAngle > 2 * PI)
 	{

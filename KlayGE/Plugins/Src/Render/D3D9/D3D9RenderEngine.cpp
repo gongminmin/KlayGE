@@ -21,7 +21,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Memory.hpp>
 
@@ -825,7 +824,7 @@ namespace KlayGE
 		else
 		{
 			TIF(d3dDevice_->SetTexture(stage,
-				D3D9TexturePtr(texture)->D3DTexture().Get()));
+				D3D9TexturePtr(static_cast<D3D9Texture*>(texture.get()))->D3DTexture().Get()));
 		}
 	}
 

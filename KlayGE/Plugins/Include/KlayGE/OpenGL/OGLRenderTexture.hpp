@@ -18,7 +18,7 @@ namespace KlayGE
 			{ return true; }
 	};
 
-	typedef SharedPtr<OGLRenderTexture> OGLRenderTexturePtr;
+	typedef boost::shared_ptr<OGLRenderTexture> OGLRenderTexturePtr;
 }
 
 #endif			// _OGLRENDERTEXTURE_HPP

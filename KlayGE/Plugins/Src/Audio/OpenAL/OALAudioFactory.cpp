@@ -14,7 +14,6 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/OpenAL/OALAudio.hpp>
 
 #include <KlayGE/OpenAL/OALAudioFactory.hpp>

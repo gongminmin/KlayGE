@@ -36,7 +36,7 @@ namespace KlayGE
 		const std::string pktName(pathName.substr(0, offset + 4));
 		const std::string fileName(pathName.substr(offset + 5));
 
-		SharedPtr<DiskFile> pktFile(new DiskFile);
+		boost::shared_ptr<DiskFile> pktFile(new DiskFile);
 		if (!pktFile->Open(pktName, VFile::OM_Read))
 		{
 			return false;
@@ -71,7 +71,7 @@ namespace KlayGE
 
 	void PackedFile::Close()
 	{
-		if (file_.Get() != NULL)
+		if (file_)
 		{
 			file_->Close();
 		}

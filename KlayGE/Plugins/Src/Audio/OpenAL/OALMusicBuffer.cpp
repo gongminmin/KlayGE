@@ -16,7 +16,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
-#include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <cassert>
