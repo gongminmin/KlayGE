@@ -77,24 +77,13 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	void InputMouse::DoActionMap(uint32_t id, InputActionMap const & actionMap)
 	{
-		if (actionMap.HasAction(MS_X))
+		InputActionMap& iam = actionMaps_[id];
+
+		for (uint16_t i = MS_X; i < MS_Button3; ++ i)
 		{
-			actionMaps_[id].AddAction(InputAction(actionMap.Action(MS_X), MS_X));
-		}
-		if (actionMap.HasAction(MS_Y))
-		{
-			actionMaps_[id].AddAction(InputAction(actionMap.Action(MS_Y), MS_Y));
-		}
-		if (actionMap.HasAction(MS_Z))
-		{
-			actionMaps_[id].AddAction(InputAction(actionMap.Action(MS_Z), MS_Z));
-		}
-		for (uint16_t i = 0; i < static_cast<uint16_t>(buttons_.size()); ++ i)
-		{
-			uint16_t const button(static_cast<uint16_t>(MS_Button0 + i));
-			if (actionMaps_[id].HasAction(button))
+			if (actionMap.HasAction(i))
 			{
-				actionMaps_[id].AddAction(InputAction(actionMap.Action(button), button));
+				iam.AddAction(InputAction(actionMap.Action(i), i));
 			}
 		}
 	}
@@ -105,23 +94,25 @@ namespace KlayGE
 	{
 		InputActionsType ret;
 
+		InputActionMap& iam = actionMaps_[id];
+
 		if (this->X() != 0)
 		{
-			actionMaps_[id].UpdateInputActions(ret, MS_X, this->X());
+			iam.UpdateInputActions(ret, MS_X, this->X());
 		}
 		if (this->Y() != 0)
 		{
-			actionMaps_[id].UpdateInputActions(ret, MS_Y, this->Y());
+			iam.UpdateInputActions(ret, MS_Y, this->Y());
 		}
 		if (this->Z() != 0)
 		{
-			actionMaps_[id].UpdateInputActions(ret, MS_Z, this->Z());
+			iam.UpdateInputActions(ret, MS_Z, this->Z());
 		}
 		for (uint16_t i = 0; i < static_cast<uint16_t>(buttons_.size()); ++ i)
 		{
 			if (this->Button(i))
 			{
-				actionMaps_[id].UpdateInputActions(ret, static_cast<uint16_t>(MS_Button0 + i));
+				iam.UpdateInputActions(ret, static_cast<uint16_t>(MS_Button0 + i));
 			}
 		}
 

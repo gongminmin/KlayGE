@@ -34,11 +34,13 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	void InputKeyboard::DoActionMap(uint32_t id, InputActionMap const & actionMap)
 	{
+		InputActionMap& iam = actionMaps_[id];
+
 		for (uint16_t i = 0; i < static_cast<uint16_t>(keys_.size()); ++ i)
 		{
 			if (actionMap.HasAction(i))
 			{
-				actionMaps_[id].AddAction(InputAction(actionMap.Action(i), i));
+				iam.AddAction(InputAction(actionMap.Action(i), i));
 			}
 		}
 	}
@@ -49,11 +51,13 @@ namespace KlayGE
 	{
 		InputActionsType ret;
 
+		InputActionMap& iam = actionMaps_[id];
+
 		for (uint16_t i = 0; i < static_cast<uint16_t>(keys_.size()); ++ i)
 		{
 			if (this->Key(i))
 			{
-				actionMaps_[id].UpdateInputActions(ret, i);
+				iam.UpdateInputActions(ret, i);
 			}
 		}
 

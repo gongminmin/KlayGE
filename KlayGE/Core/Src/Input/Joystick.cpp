@@ -91,45 +91,13 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	void InputJoystick::DoActionMap(uint32_t id, InputActionMap const & actionMap)
 	{
-		if (actionMap.HasAction(JS_XPos))
-		{
-			actionMaps_[id].AddAction(InputAction(actionMap.Action(JS_XPos), JS_XPos));
-		}
-		if (actionMap.HasAction(JS_XPos))
-		{
-			actionMaps_[id].AddAction(InputAction(actionMap.Action(JS_YPos), JS_YPos));
-		}
-		if (actionMap.HasAction(JS_ZPos))
-		{
-			actionMaps_[id].AddAction(InputAction(actionMap.Action(JS_ZPos), JS_ZPos));
-		}
-		if (actionMap.HasAction(JS_XRot))
-		{
-			actionMaps_[id].AddAction(InputAction(actionMap.Action(JS_XRot), JS_XRot));
-		}
-		if (actionMap.HasAction(JS_XRot))
-		{
-			actionMaps_[id].AddAction(InputAction(actionMap.Action(JS_YRot), JS_YRot));
-		}
-		if (actionMap.HasAction(JS_ZRot))
-		{
-			actionMaps_[id].AddAction(InputAction(actionMap.Action(JS_ZRot), JS_ZRot));
-		}
+		InputActionMap& iam = actionMaps_[id];
 
-		for (uint16_t i = 0; i < static_cast<uint16_t>(slider_.size()); ++ i)
+		for (uint16_t i = JS_XPos; i < JS_Button31; ++ i)
 		{
-			uint16_t const slider(static_cast<uint16_t>(JS_Slider0 + i));
-			if (actionMap.HasAction(slider))
+			if (actionMap.HasAction(i))
 			{
-				actionMaps_[id].AddAction(InputAction(actionMap.Action(slider), slider));
-			}
-		}
-		for (uint16_t i = 0; i < static_cast<uint16_t>(buttons_.size()); ++ i)
-		{
-			uint16_t const button(static_cast<uint16_t>(JS_Button0 + i));
-			if (actionMap.HasAction(button))
-			{
-				actionMaps_[id].AddAction(InputAction(actionMap.Action(button), button));
+				iam.AddAction(InputAction(actionMap.Action(i), i));
 			}
 		}
 	}
