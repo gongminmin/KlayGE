@@ -24,6 +24,8 @@
 #ifdef WIN32
 	#define NOMINMAX
 	#include <windows.h>
+#else
+	#include <cerrno>
 #endif
 
 #include <cassert>
@@ -147,5 +149,16 @@ namespace KlayGE
 	uint16_t ToHost(uint16_t net)
 	{
 		return ToNet(net);
+	}
+
+	// 获取上一个错误代码
+	/////////////////////////////////////////////////////////////////////////////////
+	uint32_t LastError()
+	{
+#ifdef WIN32
+		return ::GetLastError();
+#else
+		return errno;
+#endif
 	}
 }

@@ -105,6 +105,8 @@ namespace KlayGE
 		return boost::shared_ptr<T>(p, boost::mem_fn(&T::Release));
 	}
 
+	uint32_t LastError();
+
 #ifndef _SELECT1ST2ND_SUPPORT
 	template <typename Pair>
 	struct select1st : public std::unary_function<Pair, typename Pair::first_type>
