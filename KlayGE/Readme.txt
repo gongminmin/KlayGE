@@ -76,6 +76,7 @@ __________________________________________________________________
 2.2.0
 修正了DSound插件的音量问题 (2004.10.20)
 去掉了ManagerBase、FileSystem、Crc32、alloc、Timer、Random (2004.10.30)
+使用boost 1.32.0 (2004.11.7)
 
 2.1.3 (2004.10.19)
 增加了以boost::tuple为参数的ScriptEngine::Call

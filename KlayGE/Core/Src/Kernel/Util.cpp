@@ -22,6 +22,7 @@
 #include <boost/thread/thread.hpp>
 
 #ifdef WIN32
+	#define NOMINMAX
 	#include <windows.h>
 #endif
 

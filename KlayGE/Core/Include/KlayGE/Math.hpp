@@ -392,13 +392,13 @@ namespace KlayGE
 		{
 			static void DoMax(T out[N], T const lhs[N], T const rhs[N])
 			{
-				out[0] = std::max(lhs[0], rhs[0]);
+				out[0] = std::max<T>(lhs[0], rhs[0]);
 				MaxMinimizeHelper<T, N - 1>::DoMax(out + 1, lhs + 1, rhs + 1);
 			}
 
 			static void DoMin(T out[N], T const lhs[N], T const rhs[N])
 			{
-				out[0] = std::min(lhs[0], rhs[0]);
+				out[0] = std::min<T>(lhs[0], rhs[0]);
 				MaxMinimizeHelper<T, N - 1>::DoMin(out + 1, lhs + 1, rhs + 1);
 			}
 		};
@@ -407,12 +407,12 @@ namespace KlayGE
 		{
 			static void DoMax(T out[1], T const lhs[1], T const rhs[1])
 			{
-				out[0] = std::max(lhs[0], rhs[0]);
+				out[0] = std::max<T>(lhs[0], rhs[0]);
 			}
 
 			static void DoMin(T out[1], T const lhs[1], T const rhs[1])
 			{
-				out[0] = std::min(lhs[0], rhs[0]);
+				out[0] = std::min<T>(lhs[0], rhs[0]);
 			}
 		};
 

@@ -19,6 +19,7 @@
 #include <alc.h>
 
 #include <vector>
+#define NOMINMAX
 #include <windows.h>
 
 #pragma warning(disable : 4251)

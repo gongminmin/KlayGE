@@ -5,6 +5,7 @@
 #include <KlayGE/RenderTexture.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 
+#define NOMINMAX
 #include <d3d9.h>
 
 #include <KlayGE/D3D9/D3D9RenderTexture.hpp>

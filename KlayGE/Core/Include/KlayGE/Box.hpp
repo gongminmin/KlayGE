@@ -13,9 +13,9 @@
 #ifndef _BOX_HPP
 #define _BOX_HPP
 
-#include <boost/operators.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Bound.hpp>
+#include <boost/operators.hpp>
 
 namespace KlayGE
 {
@@ -165,7 +165,7 @@ namespace KlayGE
 		}
 		float MaxRadiusSq() const
 		{
-			return std::max(MathLib::LengthSq(this->Max()), MathLib::LengthSq(this->Min()));
+			return std::max<float>(MathLib::LengthSq(this->Max()), MathLib::LengthSq(this->Min()));
 		}
 
 	private:

@@ -16,6 +16,7 @@
 #include <KlayGE/PreDeclare.hpp>
 
 #include <vector>
+#define NOMINMAX
 #include <windows.h>
 #include <dsound.h>
 
@@ -102,9 +103,9 @@ namespace KlayGE
 
 	private:
 		DSBufferType	buffer_;
-		uint32_t				fillSize_;
-		uint32_t				fillCount_;
-		uint32_t				writePos_;
+		uint32_t		fillSize_;
+		uint32_t		fillCount_;
+		uint32_t		writePos_;
 
 		boost::shared_ptr<IDirectSound3DBuffer> ds3DBuffer_;
 

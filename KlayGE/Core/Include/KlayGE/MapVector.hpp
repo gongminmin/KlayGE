@@ -21,15 +21,8 @@
 #include <utility>
 #include <vector>
 
-// boost 1.31.0的pool/detail/mutex有bug，这里用这种方法避免了
-// 新版本boost会解决
-#ifdef _WIN32
-#ifndef __WIN32__
-#define __WIN32__
 #pragma warning(disable : 4800)
 #include <boost/pool/pool_alloc.hpp>
-#endif
-#endif
 
 namespace KlayGE
 {

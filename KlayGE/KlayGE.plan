@@ -1,2 +1,3 @@
 KlayGE 2.2的内核将大大减小，功能用Boost等库来代替
+KlayGE 2.3将采用FreeType读取字体
 准备在KlayGE 3.0中去掉固定管道，尤其是顶点流水线的
