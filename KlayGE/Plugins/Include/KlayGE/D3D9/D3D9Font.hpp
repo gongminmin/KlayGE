@@ -20,6 +20,9 @@
 
 #include <KlayGE/Font.hpp>
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 #pragma comment(lib, "KlayGE_RenderEngine_D3D9.lib")
 
 namespace KlayGE
@@ -38,7 +41,7 @@ namespace KlayGE
 
 		uint32_t FontHeight() const;
 
-		D3D9Font(std::wstring const & fontName, uint32_t fontHeight = 12, uint32_t flags = 0);
+		D3D9Font(std::string const & fontName, uint32_t fontHeight = 12, uint32_t flags = 0);
 
 	public:
 		struct CharInfo
@@ -50,10 +53,8 @@ namespace KlayGE
 		typedef std::map<wchar_t, CharInfo> CharInfoMapType;
 		typedef std::list<wchar_t> CharLRUType;
 
-	public:
+	private:
 		void UpdateTexture(std::wstring const & text);
-
-		LOGFONTW logFont_;
 
 		RenderBufferPtr rb_;
 		RenderEffectPtr	effect_;
@@ -62,7 +63,12 @@ namespace KlayGE
 		CharInfoMapType charInfoMap_;
 		CharLRUType charLRU_;
 
-		uint32_t		curX_, curY_;
+		uint32_t curX_, curY_;
+		uint32_t fontHeight_;
+
+		FT_Library ftLib_;
+		FT_Face face_;
+		FT_GlyphSlot slot_;
 	};
 }
 

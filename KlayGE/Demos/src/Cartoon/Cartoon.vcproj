@@ -75,13 +75,15 @@
 				TreatWChar_tAsBuiltInType="TRUE"
 				ForceConformanceInForLoopScope="TRUE"
 				RuntimeTypeInfo="TRUE"
-				WarningLevel="3"/>
+				WarningLevel="3"
+				DebugInformationFormat="3"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/Cartoon.exe"
 				LinkIncremental="1"
+				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/Cartoon.pdb"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -121,6 +123,21 @@
 			</File>
 			<File
 				RelativePath="..\..\media\Cartoon\Cartoon.fx">
+			</File>
+			<File
+				RelativePath="..\..\..\Plugins\Src\Render\D3d9\D3D9Font.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\Plugins\Src\Render\D3d9\D3D9RenderEffect.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\Core\Src\Render\RenderEffect.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\Core\Src\Kernel\ResLoader.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\Core\Src\Kernel\Util.cpp">
 			</File>
 		</Filter>
 		<Filter

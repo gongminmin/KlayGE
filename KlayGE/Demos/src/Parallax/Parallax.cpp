@@ -223,7 +223,7 @@ Parallax::Parallax()
 void Parallax::InitObjects()
 {
 	// 建立字体
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont(L"宋体", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("SIMYOU.TTF", 16);
 
 	renderPolygon = boost::shared_ptr<RenderPolygon>(new RenderPolygon);
 

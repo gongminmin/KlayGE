@@ -32,6 +32,7 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Box.hpp>
+#include <KlayGE/ResLoader.hpp>
 
 #include <cassert>
 #include <algorithm>
@@ -41,6 +42,12 @@
 #include <d3d9types.h>
 
 #include <KlayGE/D3D9/D3D9Font.hpp>
+
+#ifdef DEBUG
+	#pragma comment(lib, "freetype219MT_D.lib")
+#else
+	#pragma comment(lib, "freetype219MT.lib")
+#endif
 
 namespace
 {
@@ -194,8 +201,9 @@ namespace KlayGE
 {
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
-	D3D9Font::D3D9Font(std::wstring const & fontName, uint32_t height, uint32_t flags)
+	D3D9Font::D3D9Font(std::string const & fontName, uint32_t height, uint32_t flags)
 				: curX_(0), curY_(0),
+					fontHeight_(height),
 					theTexture_(Context::Instance().RenderFactoryInstance().MakeTexture(1024, 1024, 1, PF_A4L4)),
 					rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
 	{
@@ -215,35 +223,24 @@ namespace KlayGE
 
 		rb_->AddIndexStream();
 
-
-		logFont_.lfHeight			= height;
-		logFont_.lfWidth			= 0;
-		logFont_.lfEscapement		= 0;
-		logFont_.lfOrientation		= 0;
-		logFont_.lfWeight			= flags & Font::FS_Bold ? FW_BOLD : FW_NORMAL;
-		logFont_.lfItalic			= flags & Font::FS_Italic ? TRUE : FALSE;
-		logFont_.lfUnderline		= flags & Font::FS_Underline ? TRUE : FALSE;
-		logFont_.lfStrikeOut		= flags & Font::FS_Strikeout ? TRUE : FALSE;
-		logFont_.lfCharSet			= DEFAULT_CHARSET;
-		logFont_.lfOutPrecision		= OUT_DEFAULT_PRECIS; 
-		logFont_.lfClipPrecision	= CLIP_DEFAULT_PRECIS; 
-		logFont_.lfQuality			= ANTIALIASED_QUALITY;
-		logFont_.lfPitchAndFamily	= VARIABLE_PITCH;
-		fontName.copy(logFont_.lfFaceName, fontName.length());
+		FT_Init_FreeType(&ftLib_);
+		FT_New_Face(ftLib_, ResLoader::Instance().Locate(fontName).c_str(), 0, &face_);
+		FT_Set_Char_Size(face_, 0, height * 64, 72, 72);
+		FT_Select_Charmap(face_, FT_ENCODING_UNICODE);
+		slot_ = face_->glyph;
 	}
 
 	// 获取字体高度
 	/////////////////////////////////////////////////////////////////////////////////
 	uint32_t D3D9Font::FontHeight() const
 	{
-		return logFont_.lfHeight;
+		return fontHeight_;
 	}
 
 	// 更新纹理，使用LRU算法
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9Font::UpdateTexture(std::wstring const & text)
 	{
-		::SIZE size;
 		for (std::wstring::const_iterator citer = text.begin(); citer != text.end(); ++ citer)
 		{
 			wchar_t const & ch(*citer);
@@ -264,47 +261,11 @@ namespace KlayGE
 
 				if (ch != L'\n')
 				{
-					// 为字体建立 DC 和 bitmap
-					HDC hDC(::CreateCompatibleDC(NULL));
+					// convert character code to glyph index
+					FT_Load_Char(face_, ch, FT_LOAD_RENDER);
 
-					// 建立字体
-					HFONT hFont(::CreateFontIndirectW(&logFont_));
-					if (NULL == hFont)
-					{
-						::DeleteDC(hDC);
-						THR(E_FAIL);
-					}
-					HGDIOBJ hOldFont(::SelectObject(hDC, hFont));
-
-					::GetTextExtentPoint32W(hDC, &ch, 1, &size);
-
-					BITMAPINFO bmi;
-					std::memset(&bmi.bmiHeader, 0, sizeof(bmi.bmiHeader));
-					bmi.bmiHeader.biSize		= sizeof(bmi.bmiHeader);
-					bmi.bmiHeader.biWidth		= size.cx;
-					bmi.bmiHeader.biHeight		= -size.cy;
-					bmi.bmiHeader.biPlanes		= 1;
-					bmi.bmiHeader.biBitCount	= 32;
-					bmi.bmiHeader.biCompression = BI_RGB;
-
-					uint32_t* bitmapBits(NULL);
-					HBITMAP hBitmap(::CreateDIBSection(hDC, &bmi, DIB_RGB_COLORS,
-						reinterpret_cast<void**>(&bitmapBits), NULL, 0));
-					if ((NULL == hBitmap) || (NULL == bitmapBits))
-					{
-						::DeleteObject(::SelectObject(hDC, hOldFont));
-						::DeleteDC(hDC);
-						THR(E_FAIL);
-					}
-
-					HGDIOBJ hOldBitmap(::SelectObject(hDC, hBitmap));
-
-					// 设置文字属性
-					::SetTextColor(hDC, RGB(255, 255, 255));
-					::SetBkColor(hDC, RGB(0, 0, 0));
-					::SetTextAlign(hDC, TA_TOP);
-
-					::TextOutW(hDC, 0, 0, &ch, 1);
+					int const width = (0 != slot_->bitmap.width) ? slot_->bitmap.width : this->FontHeight() / 2;
+					int const height = (0 != slot_->bitmap.rows) ? slot_->bitmap.rows : this->FontHeight();
 
 					::RECT charRect;
 					CharInfo charInfo;
@@ -313,17 +274,17 @@ namespace KlayGE
 						// 纹理还有空间
 						charRect.left	= curX_;
 						charRect.top	= curY_;
-						charRect.right	= curX_ + size.cx;
-						charRect.bottom = curY_ + size.cy;
+						charRect.right	= curX_ + width;
+						charRect.bottom = curY_ + this->FontHeight();
 
 						charInfo.texRect.left()		= static_cast<float>(charRect.left) / theTexture_->Width();
 						charInfo.texRect.top()		= static_cast<float>(charRect.top) / theTexture_->Height();
 						charInfo.texRect.right()	= static_cast<float>(charRect.right) / theTexture_->Width();
 						charInfo.texRect.bottom()	= static_cast<float>(charRect.bottom) / theTexture_->Height();
-						charInfo.width				= size.cx;
+						charInfo.width				= width;
 
-						curX_ += this->FontHeight();
-						if (curX_ >= theTexture_->Width())
+						curX_ += width;
+						if (curX_ >= width)
 						{
 							curX_ = 0;
 							curY_ += this->FontHeight();
@@ -337,34 +298,32 @@ namespace KlayGE
 
 						// 用当前字符替换
 						charInfo.texRect	= iter->second.texRect;
-						charInfo.width		= size.cx;
+						charInfo.width		= width;
 
 						charLRU_.pop_back();
 						charInfoMap_.erase(iter);
 
 						charRect.left	= static_cast<long>(charInfo.texRect.left() * theTexture_->Width());
 						charRect.top	= static_cast<long>(charInfo.texRect.top() * theTexture_->Height());
-						charRect.right	= charRect.left + this->FontHeight();
+						charRect.right	= charRect.left + width;
 						charRect.bottom	= charRect.top + this->FontHeight();
 					}
 
-					std::vector<uint8_t> dst;
-					dst.reserve(this->FontHeight() * this->FontHeight());
-					// 锁定表面，把 alpha 值写入纹理
-					for (long y = charRect.top; y < charRect.bottom; ++ y)
+					std::vector<uint8_t> dest(this->FontHeight() * this->FontHeight(), 0);
+					for (int y = 0; y < slot_->bitmap.rows; ++ y)
 					{
-						for (long x = charRect.left; x < charRect.right; ++ x, ++ bitmapBits)
+						int const y_offset = this->FontHeight() * 3 / 4 - slot_->bitmap_top + y;
+						for (int x = 0; x < slot_->bitmap.width; ++ x)
 						{
-							dst.push_back(static_cast<uint8_t>(*bitmapBits) & 0xF0 | 0x0F);
+							if ((y < this->FontHeight()) && (x < this->FontHeight()))
+							{
+								dest[y_offset * this->FontHeight() + x]
+										= (slot_->bitmap.buffer[y * slot_->bitmap.width + x] > 128) ? 0xFF : 0;
+							}
 						}
 					}
-					theTexture_->CopyMemoryToTexture(&dst[0], PF_A4L4, charRect.right - charRect.left,
-						charRect.bottom - charRect.top, charRect.left, charRect.top);
-
-					// 已经更新了纹理，清除对象
-					::DeleteObject(::SelectObject(hDC, hOldBitmap));
-					::DeleteObject(::SelectObject(hDC, hOldFont));
-					::DeleteDC(hDC);
+					theTexture_->CopyMemoryToTexture(&dest[0], PF_A4L4,
+							this->FontHeight(), this->FontHeight(), charRect.left, charRect.top);
 
 					charInfoMap_.insert(std::make_pair(ch, charInfo));
 					charLRU_.push_front(ch);

@@ -31,6 +31,35 @@ namespace KlayGE
 		}
 	}
 
+	std::string ResLoader::Locate(std::string const & name)
+	{
+		for (std::vector<std::string>::iterator iter = pathes_.begin(); iter != pathes_.end(); ++ iter)
+		{
+			std::string const resName(*iter + name);
+
+			std::ifstream ifs(resName.c_str(), std::ios_base::binary);
+
+			if (!ifs.fail())
+			{
+				return resName;
+			}
+			else
+			{
+				std::string::size_type const offset(resName.rfind(".pkt/"));
+				std::string const pktName(resName.substr(0, offset + 4));
+				std::string const fileName(resName.substr(offset + 5));
+
+				boost::shared_ptr<std::istream> pktFile(new std::ifstream(pktName.c_str(), std::ios_base::binary));
+				if (!pktFile->fail())
+				{
+					return resName;
+				}
+			}
+		}
+
+		throw;
+	}
+
 	ResIdentifierPtr ResLoader::Load(std::string const & name)
 	{
 		for (std::vector<std::string>::iterator iter = pathes_.begin(); iter != pathes_.end(); ++ iter)

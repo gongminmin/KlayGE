@@ -19,7 +19,7 @@ namespace KlayGE
 			PixelFormat format, Texture::TextureUsage usage = Texture::TU_Default) = 0;
 		virtual RenderTexturePtr MakeRenderTexture(uint32_t width, uint32_t height) = 0;
 
-		virtual FontPtr MakeFont(std::wstring const & fontName, uint32_t fontHeight = 12, uint32_t flags = 0) = 0;
+		virtual FontPtr MakeFont(std::string const & fontName, uint32_t fontHeight = 12, uint32_t flags = 0) = 0;
 
 		virtual RenderEffectPtr MakeRenderEffect(std::string const & srcData, uint32_t flags = 0) = 0;
 
@@ -57,7 +57,7 @@ namespace KlayGE
 		RenderTexturePtr MakeRenderTexture(uint32_t width, uint32_t height)
 			{ return RenderTexturePtr(new RenderTextureType(width, height)); }
 
-		FontPtr MakeFont(std::wstring const & fontName, uint32_t fontHeight = 12, uint32_t flags = 0)
+		FontPtr MakeFont(std::string const & fontName, uint32_t fontHeight = 12, uint32_t flags = 0)
 			{ return FontPtr(new FontType(fontName, fontHeight, flags)); }
 
 		RenderEffectPtr MakeRenderEffect(std::string const & srcData, uint32_t flags = 0)

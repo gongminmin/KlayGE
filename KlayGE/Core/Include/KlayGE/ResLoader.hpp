@@ -27,6 +27,7 @@ namespace KlayGE
 		void AddPath(std::string const & path);
 
 		ResIdentifierPtr Load(std::string const & name);
+		std::string Locate(std::string const & name);
 
 	private:
 		ResLoader();

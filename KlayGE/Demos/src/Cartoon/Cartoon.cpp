@@ -121,7 +121,7 @@ Cartoon::Cartoon()
 
 void Cartoon::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont(L"ËÎÌו", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("SIMYOU.TTF", 16);
 
 	uint8_t cartoolShadeData0[16] = { 120, 120, 120, 120, 120, 160, 160, 160, 160, 160, 160, 255, 255, 255, 255, 255 };
 	TexturePtr texture0 = Context::Instance().RenderFactoryInstance().MakeTexture(sizeof(cartoolShadeData0) / sizeof(cartoolShadeData0[0]), 1, 0, PF_L8);

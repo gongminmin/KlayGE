@@ -187,7 +187,7 @@ VertexDisplacement::VertexDisplacement()
 
 void VertexDisplacement::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont(L"ËÎÌו", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("SIMYOU.TTF", 16);
 
 	flag = boost::shared_ptr<Flag>(new Flag);
 
