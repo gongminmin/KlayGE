@@ -41,10 +41,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "纹理格式-KlayTX", "Plugins\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "文件打包工具-Pkt", "Tools\Pkt\Pkt.vcproj", "{5E60B2D1-9F1E-4983-AC26-A54DF51876E9}"
 	ProjectSection(ProjectDependencies) = postProject
+		{8C58A2C1-E1CD-4840-A964-48F3485F2004} = {8C58A2C1-E1CD-4840-A964-48F3485F2004}
+		{8C58A2C1-E1CD-4840-A964-48F3485F2004} = {8C58A2C1-E1CD-4840-A964-48F3485F2004}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "纹理格式转换工具-KlayTXConvert", "Tools\KlayTXConvert\KlayTXConvert.vcproj", "{5E60B2D1-9F1E-4983-AC26-A54DF51876E9}"
 	ProjectSection(ProjectDependencies) = postProject
+		{8C58A2C1-E1CD-4840-A964-48F3485F2004} = {8C58A2C1-E1CD-4840-A964-48F3485F2004}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "音频引擎-DSound", "Plugins\Src\Audio\DSound\DSound.vcproj", "{2C79C4F4-7C71-4B60-967B-80FF158E160E}"
