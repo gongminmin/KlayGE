@@ -26,7 +26,7 @@
 #include <algorithm>
 
 #include <boost/array.hpp>
-#include <boost/lambda/bind.hpp>
+#include <boost/bind.hpp>
 
 #pragma comment(lib, "KlayGE_Core.lib")
 
@@ -253,7 +253,7 @@ namespace KlayGE
 		void AddActions(ForwardIterator first, ForwardIterator last)
 		{
 			std::for_each(first, last,
-				boost::lambda::bind(&InputActionMap::AddAction, this, boost::lambda::_1));
+				boost::bind(&InputActionMap::AddAction, this, _1));
 		}
 
 		void UpdateInputActions(InputActionsType& actions, uint16_t key, long value = 0);

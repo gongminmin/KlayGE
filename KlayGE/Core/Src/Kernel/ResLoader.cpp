@@ -33,9 +33,9 @@ namespace KlayGE
 
 	ResIdentifierPtr ResLoader::Load(std::string const & name)
 	{
-		for (size_t i = 0; i < pathes_.size(); ++ i)
+		for (std::vector<std::string>::iterator iter = pathes_.begin(); iter != pathes_.end(); ++ iter)
 		{
-			std::string const resName(pathes_[i] + name);
+			std::string const resName(*iter + name);
 
 			ResIdentifierPtr ret(new std::ifstream(resName.c_str(), std::ios_base::binary));
 

@@ -123,6 +123,9 @@ namespace KlayGE
 			return x.second;
 		}
 	};
+#else
+	using std::select1st;
+	using std::select2nd;
 #endif		// _SELECT1ST2ND_SUPPORT
 }
 

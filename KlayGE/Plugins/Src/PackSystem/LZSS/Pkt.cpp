@@ -435,11 +435,11 @@ namespace KlayGE
 	std::string& TransPathName(std::string& out, std::string const & in)
 	{
 		out = in;
-		for (size_t i = 0; i < out.length(); ++ i)
+		for (std::string::iterator iter = out.begin(); iter != out.end(); ++ iter)
 		{
-			if ('\\' == out[i])
+			if ('\\' == *iter)
 			{
-				out[i] = '/';
+				*iter = '/';
 			}
 		}
 

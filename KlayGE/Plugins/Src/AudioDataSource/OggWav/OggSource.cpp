@@ -195,11 +195,11 @@ namespace KlayGE
 								for (int i = 0; i < vi_.channels; ++ i)
 								{
 									ogg_int16_t* ptr(&convbuffer[i]);
-									float* mono(pcm[i]);
+									float const * mono(pcm[i]);
 
 									for (int j = 0; j < bout; ++ j)
 									{
-										*ptr = MathLib::Limit<int>(static_cast<int>(mono[j] * 32767.0f), -32768, 32767);
+										*ptr = MathLib::Limit<ogg_int16_t>(static_cast<ogg_int16_t>(mono[j] * 32767.0f), -32768, 32767);
 										ptr += vi_.channels;
 									}
 								}

@@ -50,7 +50,7 @@ __________________________________________________________________
 
 编译
 
-编译KlayGE内核需要一些第三方库：Python、Boost，分别在http://www.python.org和http://boost.sourceforge.net下载
+编译KlayGE内核需要一些第三方库：Python 2.3.4、Boost 1.31.0，分别在http://www.python.org和http://boost.sourceforge.net下载
 编译OggWav插件需要Vorbis SDK，在http://www.vorbis.com下载
 编译OpenAL插件需要OpenAL SDK，在http://www.openal.org下载，并把它的Include目录下建一个AL目录，把.h拷进去
 除了Python以外的几个SDK的精简版本都能在我的网站找到。
