@@ -1,9 +1,12 @@
 // Pkt.cpp
 // KlayGE 文件打包类
-// Ver 2.1.0
+// Ver 2.1.3
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
 // LZSS压缩算法的作者是Haruhiko Okumura
+//
+// 2.1.3
+// 修正了CRC错误的bug
 //
 // 2.1.0
 // 简化了目录表的表示法 (2004.4.14)
@@ -232,6 +235,8 @@ namespace
 
 			FileDes fd;
 			fd.DeComLength = static_cast<U32>(openFile.Length());
+			fd.crc32 = Crc32::CrcFile(openFile);
+			openFile.Rewind();
 
 			MemFile in;
 			in.CopyFrom(openFile, fd.DeComLength);

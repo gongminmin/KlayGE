@@ -15,10 +15,11 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
+#include <KlayGE/MapVector.hpp>
 #include <KlayGE/alloc.hpp>
 
 #include <cassert>
-#include <set>
+#include <vector>
 
 #include <boost/bind.hpp>
 
@@ -72,7 +73,7 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	InputActionsType InputEngine::Update()
 	{
-		typedef std::vector<std::pair<U16, long> > ActionSetType;
+		typedef MapVector<U16, long> ActionSetType;
 		ActionSetType actions;
 
 		// 访问所有设备
@@ -80,7 +81,14 @@ namespace KlayGE
 		{
 			InputActionsType const theAction((*iter)->Update());
 
-			actions.insert(actions.end(), theAction.begin(), theAction.end());
+			// 去掉重复的动作
+			for (InputActionsType::const_iterator i = theAction.begin(); i != theAction.end(); ++ i)
+			{
+				if (actions.find(i->first) == actions.end())
+				{
+					actions.insert(*i);
+				}
+			}
 		}
 
 		// 添加到动作列表

@@ -171,7 +171,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void UnPkt::Open(VFilePtr const & pktFile)
 	{
-		Close();
+		this->Close();
 
 		file_ = pktFile;
 
@@ -210,6 +210,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	size_t UnPkt::CurFileSize() const
 	{
+		assert(curFile_ != dirTable_.end());
+
 		return curFile_->second.DeComLength;
 	}
 
@@ -218,6 +220,7 @@ namespace KlayGE
 	bool UnPkt::ReadCurFile(void* data)
 	{
 		assert(data != NULL);
+		assert(curFile_ != dirTable_.end());
 
 		file_->Seek(mag_.FIStart + curFile_->second.start, VFile::SM_Begin);
 

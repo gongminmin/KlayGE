@@ -326,7 +326,7 @@ namespace KlayGE
 		boost::shared_ptr<InputDeviceImpl> impl_;
 	};
 
-	class InputKeyboard : virtual public InputDevice
+	class InputKeyboard : public InputDevice
 	{
 	public:
 		bool Key(size_t n) const;
@@ -340,7 +340,7 @@ namespace KlayGE
 		KeysType keys_;
 	};
 
-	class InputMouse : virtual public InputDevice
+	class InputMouse : public InputDevice
 	{
 	public:
 		long X() const;
@@ -363,7 +363,7 @@ namespace KlayGE
 		ButtonsType buttons_;
 	};
 
-	class InputJoystick : virtual public InputDevice
+	class InputJoystick : public InputDevice
 	{
 	public:
 		virtual ~InputJoystick();
