@@ -237,16 +237,25 @@ void VertexDisplacement::InitObjects()
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	Matrix4 matWorld;
-	MathLib::Translation(matWorld, -WIDTH / 2.0f, HEIGHT / 2.0f, 0.0f);
+	Matrix4 matModel;
+	MathLib::Translation(matModel, -WIDTH / 2.0f, HEIGHT / 2.0f, 0.0f);
 
 	Matrix4 matView;
 	MathLib::LookAtLH(matView, Vector3(0, 0, -10), Vector3(0, 0, 0));
 
+	Matrix4 matModelView = matModel * matView;
+
 	Matrix4 matProj;
 	MathLib::PerspectiveFovLH(matProj, PI / 4, 800.0f / 600, 0.1f, 20.0f);
 
-	*(flag->GetRenderEffect()->ParameterByName("worldviewproj")) = matWorld * matView * matProj;
+	*(flag->GetRenderEffect()->ParameterByName("modelview")) = matModelView;
+	*(flag->GetRenderEffect()->ParameterByName("proj")) = matProj;
+
+	Matrix4 matModelViewIT;
+	MathLib::Transpose(matModelViewIT, matModelView);
+	MathLib::Inverse(matModelViewIT, matModelViewIT);
+
+	*(flag->GetRenderEffect()->ParameterByName("modelviewIT")) = matModelViewIT;
 }
 
 void VertexDisplacement::Update()

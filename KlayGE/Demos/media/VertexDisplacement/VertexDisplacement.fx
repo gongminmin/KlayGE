@@ -1,4 +1,6 @@
-float4x4 worldviewproj : WORLDVIEWPROJECTION;
+float4x4 modelview : WORLDVIEW;
+float4x4 proj : PROJECTION;
+float4x4 modelviewIT;
 float currentAngle;
 float3 lightDir = float3(0, 0, 1);
 
@@ -11,20 +13,27 @@ struct VS_INPUT
 struct VS_OUTPUT
 {
 	float4 pos			: POSITION;
+	float4 clr			: COLOR0;
 	float2 texcoord0	: TEXCOORD0;
 };
 
 VS_OUTPUT VertexDisplacementVS(VS_INPUT input,
-					uniform float4x4 worldviewproj,
+					uniform float4x4 modelview,
+					uniform float4x4 modelviewIT,
+					uniform float4x4 proj,
 					uniform float currentAngle)
 {
 	VS_OUTPUT output;
 
 	float4 v = input.pos;
-	v.z = cos(input.pos.x + currentAngle) + sin(input.pos.y + currentAngle);
-	v.z *= input.pos.x * 0.2f;
+	v.z = (cos(input.pos.x + currentAngle) + sin(input.pos.y + currentAngle)) * input.pos.x * 0.2f;
 
-	output.pos = mul(v, worldviewproj);
+	float3 x_dir = float3(1, 0, -sin(input.pos.x + currentAngle) * 0.2f);
+	float3 y_dir = float3(0, 1, cos(input.pos.y + currentAngle) * input.pos.x * 0.2f);
+	float3 normal = mul(normalize(cross(x_dir, y_dir)), (float3x3)modelviewIT);
+
+	output.pos = mul(mul(v, modelview), proj);
+	output.clr = float4(max(0, dot(lightDir, normal)).xxx, 1);
 	output.texcoord0 = input.texcoord0;
 
 	return output;
@@ -42,10 +51,11 @@ sampler2D flagSampler = sampler_state
 	AddressV  = Clamp;
 };
 
-float4 VertexDisplacementPS(float2 texCoord : TEXCOORD0,
+float4 VertexDisplacementPS(float4 clr : COLOR0,
+							float2 texCoord : TEXCOORD0,
 		uniform sampler2D flagSampler) : COLOR0
 {
-	return tex2D(flagSampler, texCoord);
+	return clr * tex2D(flagSampler, texCoord);
 }
 
 technique VertexDisplacement
@@ -60,9 +70,9 @@ technique VertexDisplacement
 		ZEnable      = true;
 		ZWriteEnable = true;
 
-		VertexShader = compile vs_1_1 VertexDisplacementVS(worldviewproj, currentAngle);
+		VertexShader = compile vs_1_1 VertexDisplacementVS(modelview, modelviewIT, proj, currentAngle);
 		//PixelShader = compile ps_1_1 VertexDisplacementPS(flagSampler);
-		
+
 		// Set up texture stage 0
 		Texture[0] = <flag>; // Use the texture parameter defined above
 		ColorOp[0] = Modulate;
