@@ -48,10 +48,10 @@ namespace KlayGE
 		std::setlocale(LC_CTYPE, "");
 
 		size_t const mbs_len = std::wcstombs(NULL, src.c_str(), src.size());
-		std::vector<char> tmp(mbs_len + 1);
-		std::wcstombs(&tmp[0], src.c_str(), src.size());
+		std::vector<char> tmp(mbs_len);
+		std::wcstombs(&tmp[0], src.c_str(), tmp.size());
 
-		dest.assign(tmp.begin(), tmp.end() - 1);
+		dest.assign(tmp.begin(), tmp.end());
 
 		return dest;
 	}
@@ -72,10 +72,10 @@ namespace KlayGE
 		std::setlocale(LC_CTYPE, "");
 
 		size_t const wcs_len = std::mbstowcs(NULL, src.c_str(), src.size());
-		std::vector<wchar_t> tmp(wcs_len + 1);
+		std::vector<wchar_t> tmp(wcs_len);
 		std::mbstowcs(&tmp[0], src.c_str(), src.size());
 
-		dest.assign(tmp.begin(), tmp.end() - 1);
+		dest.assign(tmp.begin(), tmp.end());
 
 		return dest;
 	}
