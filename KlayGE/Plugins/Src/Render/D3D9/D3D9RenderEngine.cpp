@@ -47,7 +47,7 @@ namespace KlayGE
 	D3DMATRIX Convert(const Matrix4& mat)
 	{
 		D3DMATRIX d3dMat;
-		memcpy(&d3dMat._11, mat.Begin(), sizeof(d3dMat));
+		memcpy(&d3dMat._11, &mat.Begin()[0], sizeof(d3dMat));
 
 		return d3dMat;
 	}
@@ -297,17 +297,18 @@ namespace KlayGE
 
 		::PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
 
+		RenderTarget& renderTarget(**RenderEngine::ActiveRenderTarget());
 		while (WM_QUIT != msg.message)
 		{
 			// 如果窗口是激活的，用 PeekMessage()以便我们可以用空闲时间渲染场景
 			// 不然, 用 GetMessage() 减少 CPU 占用率
-			if ((*RenderEngine::ActiveRenderTarget())->Active())
+			if (renderTarget.Active())
 			{
-				gotMsg = ::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) ? true : false;
+				gotMsg = (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) != 0);
 			}
 			else
 			{
-				gotMsg = ::GetMessage(&msg, NULL, 0, 0) ? true : false;
+				gotMsg = (::GetMessage(&msg, NULL, 0, 0) != 0);
 			}
 
 			if (gotMsg)
@@ -318,9 +319,9 @@ namespace KlayGE
 			else
 			{
 				// 在空余时间渲染帧 (没有等待的消息)
-				if ((*RenderEngine::ActiveRenderTarget())->Active())
+				if (renderTarget.Active())
 				{
-					(*RenderEngine::ActiveRenderTarget())->Update();
+					renderTarget.Update();
 				}
 			}
 		}

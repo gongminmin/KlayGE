@@ -6,6 +6,7 @@
 //
 // 2.0.3
 // 优化了RenderEffect的设置 (2004.2.16)
+// 去掉了VO_2D (2004.3.1)
 //
 // 2.0.0
 // 初次建立(2003.10.1)
@@ -105,42 +106,7 @@ namespace KlayGE
 			vb.vertexOptions &= ~VertexBuffer::VO_BlendWeights;
 		}
 
-		static Matrix4 matOldWorld, matOldProj, matOldView;
-		if (vb.vertexOptions & VertexBuffer::VO_2D)
-		{
-			Matrix4 matWorld;
-			Engine::MathInstance().Translation(matWorld, static_cast<float>(-(*activeRenderTarget_)->Width() / 2),
-				static_cast<float>((*activeRenderTarget_)->Height() / 2), 0);
-			matOldWorld = this->WorldMatrix();
-			this->WorldMatrix(matWorld);
-
-			Matrix4 matProj;
-			Engine::MathInstance().OrthoLH(matProj, static_cast<float>((*activeRenderTarget_)->Width()),
-				static_cast<float>((*activeRenderTarget_)->Height()), 0, 1);
-			matOldProj = this->ProjectionMatrix();
-			this->ProjectionMatrix(matProj);
-
-			matOldView = this->ViewMatrix();
-			this->ViewMatrix(Matrix4::Identity());
-
-			float* vertices(vb.pVertices);
-			for (U32 i = 0; i < vb.numVertices; ++ i)
-			{
-				vertices[1] = -vertices[1];
-
-				vertices += 3;
-				vertices = reinterpret_cast<float*>(reinterpret_cast<U8*>(vertices) + vb.vertexStride);
-			}
-		}
-
 		this->DoRender(vb);
-
-		if (vb.vertexOptions & VertexBuffer::VO_2D)
-		{
-			this->WorldMatrix(matOldWorld);
-			this->ProjectionMatrix(matOldProj);
-			this->ViewMatrix(matOldView);
-		}
 	}
 
 	// 获取最大坐标数

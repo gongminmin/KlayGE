@@ -29,11 +29,9 @@ namespace KlayGE
 {
 	LRESULT D3D9RenderWindow::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
-		if (uMsg != WM_CREATE)
+		D3D9RenderWindow* win(reinterpret_cast<D3D9RenderWindow*>(::GetWindowLong(hWnd, 0)));
+		if (win != NULL)
 		{
-			D3D9RenderWindow* win(reinterpret_cast<D3D9RenderWindow*>(GetWindowLong(hWnd, 0)));
-			assert(win != NULL);
-
 			return win->MsgProc(hWnd, uMsg, wParam, lParam);
 		}
 		else
@@ -370,6 +368,11 @@ namespace KlayGE
 
 	void D3D9RenderWindow::WindowMovedOrResized()
 	{
+		::RECT rect;
+		::GetWindowRect(hWnd_, &rect);
+
+		this->Reposition(rect.left, rect.top);
+		this->Resize(rect.right - rect.left, rect.bottom - rect.top);
 	}
 
 	void D3D9RenderWindow::Destroy()
@@ -395,7 +398,9 @@ namespace KlayGE
 		// Notify viewports of resize
 		viewport_.width = width;
 		viewport_.height = height;
-		// TODO - resize window
+
+		D3DVIEWPORT9 d3dvp = { viewport_.left, viewport_.top, viewport_.width, viewport_.height, 0, 1 };
+		TIF(d3dDevice_->SetViewport(&d3dvp));
 	}
 
 	void D3D9RenderWindow::SwapBuffers()

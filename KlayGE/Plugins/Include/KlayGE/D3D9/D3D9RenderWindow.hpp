@@ -22,7 +22,17 @@ namespace KlayGE
 
 		U32 multiSampleQuality;
 
-		virtual bool ConfirmDevice(const D3DCAPS9& /*caps*/, U32 /*behavior*/, D3DFORMAT /*format*/) const
+		bool ConfirmDevice(const D3DCAPS9& caps, U32 behavior, D3DFORMAT format) const
+		{
+			if (caps.VertexShaderVersion < D3DVS_VERSION(1, 1))
+			{
+				return false;
+			}
+			return this->DoConfirmDevice(caps, behavior, format);
+		}
+
+	private:
+		virtual bool DoConfirmDevice(const D3DCAPS9& /*caps*/, U32 /*behavior*/, D3DFORMAT /*format*/) const
 			{ return true; }
 	};
 

@@ -1,3 +1,18 @@
+// D3D9RenderFactory.hpp
+// KlayGE D3D9渲染引擎抽象工厂 头文件
+// Ver 2.0.3
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.0.3
+// 改为template实现 (2004.3.4)
+//
+// 2.0.0
+// 初次建立 (2003.8.30)
+//
+// 修改记录
+/////////////////////////////////////////////////////////////////////////////////
+
 #ifndef _D3D9RENDERFACTORY_HPP
 #define _D3D9RENDERFACTORY_HPP
 
@@ -7,25 +22,22 @@
 #include <d3d9.h>
 #include <d3dx9.h>
 
+#include <KlayGE/D3D9/D3D9RenderEngine.hpp>
+#include <KlayGE/D3D9/D3D9Texture.hpp>
+#include <KlayGE/D3D9/D3D9RenderTexture.hpp>
+#include <KlayGE/D3D9/D3D9Font.hpp>
+#include <KlayGE/D3D9/D3D9RenderEffect.hpp>
+
 #pragma comment(lib, "KlayGE_RenderEngine_D3D9.lib")
 
 namespace KlayGE
 {
-	class D3D9RenderFactory : public RenderFactory
+	RenderFactory& D3D9RenderFactoryInstance()
 	{
-	public:
-		const WString& Name() const;
-
-		RenderEngine& RenderEngineInstance();
-
-		TexturePtr MakeTexture(U32 width, U32 height, U16 mipMapsNum,
-			PixelFormat format, Texture::TextureUsage usage = Texture::TU_Default);
-		RenderTexturePtr MakeRenderTexture(U32 width, U32 height);
-
-		FontPtr MakeFont(const WString& fontName, U32 fontHeight = 12, U32 flags = 0);
-
-		RenderEffectPtr MakeRenderEffect(const String& srcData, UINT flags = 0);
-	};
+		static ConcreteRenderFactory<D3D9RenderEngine, D3D9Texture, D3D9RenderTexture,
+			D3D9Font, D3D9RenderEffect> renderFactory(L"Direct3D9 Render Factory");
+		return renderFactory;
+	}
 }
 
 #endif			// _D3D9RENDERFACTORY_HPP

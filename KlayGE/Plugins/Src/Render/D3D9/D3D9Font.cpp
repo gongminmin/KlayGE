@@ -6,6 +6,7 @@
 //
 // 2.0.3
 // 修正了RenderText的Bug (2004.2.18)
+// 改用VertexShader完成2D变换 (2004.3.1)
 //
 // 2.0.0
 // 初次建立 (2003.8.18)
@@ -42,6 +43,25 @@ namespace
 
 	String fontEffectStr("\
 		texture texFont;\
+		int halfWidth;\
+		int halfHeight;\
+		\
+		void FontVS(float4 position : POSITION,\
+			float2 texCoord : TEXCOORD0,\
+			float4 color : DIFFUSE,\
+		\
+			out float4 oPosition : POSITION,\
+			out float2 oTexCoord : TEXCOORD0,\
+			out float4 oColor : COLOR)\
+		{\
+			oPosition.x = (position.x - halfWidth) / halfWidth;\
+			oPosition.y = (halfHeight - position.y) / halfHeight;\
+			oPosition.zw = position.zw;\
+		\
+			oColor = color;\
+			oTexCoord = texCoord;\
+		}\
+		\
 		technique fontTec\
 		{\
 			pass p0\
@@ -79,6 +99,8 @@ namespace
 		\
 				ColorOp[1] = Disable;\
 				AlphaOp[1] = Disable;\
+		\
+				VertexShader = compile vs_1_1 FontVS();\
 			}\
 		}\
 		");
@@ -95,7 +117,7 @@ namespace
 			fontVB_->numTextureCoordSets = 1;
 			fontVB_->numTextureDimensions[0] = 2;
 			fontVB_->useIndices = true;
-			fontVB_->vertexOptions = (VertexBuffer::VO_2D | VertexBuffer::VO_Diffuses | VertexBuffer::VO_TextureCoords);
+			fontVB_->vertexOptions = (VertexBuffer::VO_Diffuses | VertexBuffer::VO_TextureCoords);
 		}
 
 		const WString& Name() const
@@ -227,6 +249,12 @@ namespace KlayGE
 					effect_(Engine::RenderFactoryInstance().MakeRenderEffect(fontEffectStr))
 	{
 		effect_->SetTexture("texFont", *theTexture_);
+
+		RenderEngine& renderEngine(Engine::RenderFactoryInstance().RenderEngineInstance());
+		Viewport viewport((*renderEngine.ActiveRenderTarget())->GetViewport());
+		effect_->SetInt("halfWidth", viewport.width / 2);
+		effect_->SetInt("halfHeight", viewport.height / 2);
+
 		effect_->Technique("fontTec");
 		effect_->Validate();
 

@@ -64,8 +64,6 @@ namespace KlayGE
 		{
 			_asm
 			{
-				femms
-
 				movd		mm0, x
 				movd		eax, mm0
 				movq		mm1, mm0
@@ -206,8 +204,6 @@ namespace KlayGE
 		{
 			_asm
 			{
-				femms
-
 				mov			eax, vOut
 				mov			ecx, rhs
 
@@ -236,8 +232,6 @@ namespace KlayGE
 		{
 			_asm
 			{
-				femms
-
 				mov			eax, vOut
 				mov			ecx, v
 				mov			edx, mat
@@ -273,8 +267,6 @@ namespace KlayGE
 		{
 			_asm
 			{
-				femms
-
 				mov			eax, vOut
 				mov			ecx, v
 				mov			edx, mat
@@ -299,8 +291,6 @@ namespace KlayGE
 		{
 			_asm
 			{
-				femms
-
 				mov			eax, vOut
 				mov			ecx, v
 				mov			edx, mat
@@ -328,8 +318,6 @@ namespace KlayGE
 		{
 			_asm
 			{
-				femms
-
 				mov			eax, vOut
 				mov			ecx, lhs
 				mov			edx, rhs
@@ -360,8 +348,6 @@ namespace KlayGE
 		{
 			_asm
 			{
-				femms
-
 				mov			eax, vOut
 				mov			ecx, rhs
 
@@ -396,8 +382,6 @@ namespace KlayGE
 		{
 			_asm
 			{
-				femms
-
 				mov			eax, vOut
 				mov			ecx, v
 				mov			edx, mat
@@ -443,8 +427,6 @@ namespace KlayGE
 		{
 			_asm
 			{
-				femms
-
 				mov			eax, vOut
 				mov			ecx, v
 				mov			edx, mat
@@ -489,8 +471,6 @@ namespace KlayGE
 		{
 			_asm
 			{
-				femms
-
 				mov			eax, vOut
 				mov			ecx, v
 				mov			edx, mat
@@ -535,10 +515,10 @@ namespace KlayGE
 			// where
 			//  a = q.w^2 - (q.v DOT q.v)
 			//  b = 2 * (q.v DOT v)
-			//  c = 2q.w
-			const float a = q.w() * q.w() - this->Dot(q.v(), q.v());
-			const float b = 2 * this->Dot(q.v(), v);
-			const float c = q.w() + q.w();
+			//  c = 2 * q.w
+			const float arg[] = { q.w() * q.w() - this->Dot(q.v(), q.v()),
+									2 * this->Dot(q.v(), v),
+									q.w() + q.w() };
 
 			// Must store this, because result may alias v
 			Vector3 cross;
@@ -546,42 +526,42 @@ namespace KlayGE
 
 			_asm
 			{
-				femms
-
-				mov			eax, vOut
+				lea			eax, arg
 				mov			ebx, v
 				mov			ecx, q
 				lea			edx, cross
 
-				movd		mm0, a			// a
+				movq		mm3, [eax]		// a | b
+
+				movq		mm0, mm3		// a | a
 				punpckldq	mm0, mm0		// a | a
 
-				movd		mm1, b			// b
-				punpckldq	mm1, mm1		// b | b
+				movq		mm1, mm3		// a | b
+				punpckhdq	mm1, mm1		// b | b
 
-				movd		mm2, c			// c
+				movd		mm2, [eax + 8]	// c
 				punpckldq	mm2, mm2		// c | c
 
-				movd		mm5, [ebx + 8]	// v.z
+				movd		mm7, [ebx + 8]	// v.z
+				punpckldq	mm7, [ecx + 8]	// v.z | q.z
 				movq		mm4, [ebx]		// v.x | v.y
-				movd		mm7, [ecx + 8]	// q.z
 				movq		mm6, [ecx]		// q.x | q.y
 
 				pfmul		mm4, mm0		// a * v.x | a * v.y
-				pfmul		mm5, mm0		// a * v.z
+				pfmul		mm7, mm3		// a * v.z | b * q.z
 				pfmul		mm6, mm1		// b * q.x | b * q.y
 				pfadd		mm6, mm4		// a * v.x + b * q.x | a * v.y + b * q.y
-				pfmul		mm7, mm1		// b * q.z
-				pfadd		mm7, mm5		// a * v.z + b * q.z
+				pfacc		mm7, mm7		// a * v.z + b * q.z
 
-				movd		mm5, [edx + 8]	// vCross.z
-				movq		mm4, [edx]		// vCross.x | vCross.y
+				movd		mm5, [edx + 8]	// cross.z
+				movq		mm4, [edx]		// cross.x | cross.y
 
-				pfmul		mm4, mm2		// c * vCross.x | c * vCross.y
-				pfadd		mm6, mm4		// a * v.x + b * q.x + c * vCross.x | a * v.y + b * q.y + c * vCross.y
-				pfmul		mm5, mm2		// c * vCross.z
-				pfadd		mm7, mm5		// a * v.z + b * q.z + c * vCross.z
+				pfmul		mm4, mm2		// c * cross.x | c * cross.y
+				pfadd		mm6, mm4		// a * v.x + b * q.x + c * cross.x | a * v.y + b * q.y + c * cross.y
+				pfmul		mm5, mm2		// c * cross.z
+				pfadd		mm7, mm5		// a * v.z + b * q.z + c * cross.z
 
+				mov			eax, vOut
 				movq		[eax], mm6
 				movd		[eax + 8], mm7
 
@@ -599,8 +579,6 @@ namespace KlayGE
 
 			_asm
 			{
-				femms
-
 				mov         eax, vOut
 				mov			ebx, v1
 				mov			ecx, v2
@@ -701,8 +679,6 @@ namespace KlayGE
 		{
 			_asm
 			{
-				femms
-
 				mov			eax, vOut
 				mov			ecx, rhs
 
@@ -738,8 +714,6 @@ namespace KlayGE
 		{
 			_asm
 			{
-				femms
-
 				mov			eax, vOut
 				mov			ecx, v
 				mov			edx, mat
@@ -915,8 +889,6 @@ namespace KlayGE
 
 			_asm
 			{
-				femms
-
 				mov			eax, mOut
 				lea			ecx, v
 				lea			edx, P
@@ -1087,8 +1059,6 @@ namespace KlayGE
 		{
 			_asm
 			{
-				femms
-
 				mov			eax, qOut
 				mov			ecx, rhs
 
@@ -1177,8 +1147,6 @@ namespace KlayGE
 		{
 			_asm
 			{
-				femms
-
 				mov			eax, pOut
 				mov			ecx, rhs
 

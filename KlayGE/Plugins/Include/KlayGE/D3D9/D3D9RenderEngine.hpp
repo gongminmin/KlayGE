@@ -24,13 +24,10 @@ namespace KlayGE
 	class D3D9AdapterList;
 	class D3D9Adapter;
 
-	class D3D9RenderFactory;
-
 	class D3D9RenderEngine : public RenderEngine
 	{
-		friend class D3D9RenderFactory;
-
 	public:
+		D3D9RenderEngine();
 		~D3D9RenderEngine();
 
 		const WString& Name() const;
@@ -107,8 +104,6 @@ namespace KlayGE
 		void StencilBufferPassOperation(StencilOperation op);
 
 	private:
-		D3D9RenderEngine();
-
 		const D3D9AdapterList& D3DAdapters() const;
 		const D3D9Adapter& ActiveAdapter() const;
 

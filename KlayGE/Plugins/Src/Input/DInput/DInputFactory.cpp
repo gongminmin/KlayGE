@@ -1,8 +1,11 @@
 // DInputFactory.cpp
 // KlayGE DirectInput输入引擎抽象工厂 实现文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.0.3
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.0.3
+// 改为template实现 (2004.3.4)
 //
 // 2.0.0
 // 初次建立 (2003.8.30)
@@ -17,19 +20,9 @@
 
 namespace KlayGE
 {
-	// 输入工厂的名字
-	/////////////////////////////////////////////////////////////////////////////////
-	const WString& DInputFactory::Name() const
+	InputFactory& DInputFactoryInstance()
 	{
-		static WString name(L"DirectInput Input Factory");
-		return name;
-	}
-
-	// 获取输入引擎实例
-	//////////////////////////////////////////////////////////////////////////////////
-	InputEngine& DInputFactory::InputEngineInstance()
-	{
-		static DInputEngine inputEngine;
-		return inputEngine;
+		static ConcreteInputFactory<DInputEngine> inputFactory(L"DirectInput Input Factory");
+		return inputFactory;
 	}
 }

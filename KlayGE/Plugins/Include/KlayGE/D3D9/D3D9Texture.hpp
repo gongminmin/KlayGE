@@ -20,13 +20,10 @@ namespace KlayGE
 	typedef SharePtr<D3D9Texture>		D3D9TexturePtr;
 	typedef SharePtr<D3D9RenderTexture> D3D9RenderTexturePtr;
 
-	class D3D9RenderFactory;
-
 	class D3D9Texture : public Texture
 	{
-		friend class D3D9RenderFactory;
-
 	public:
+		D3D9Texture(U32 width, U32 height, U16 mipMapsNum, PixelFormat format, TextureUsage usage = TU_Default);
 		~D3D9Texture();
 
 		const WString& Name() const;
@@ -43,8 +40,6 @@ namespace KlayGE
 			{ return this->renderZBuffer_; }
 
 	private:
-		D3D9Texture(U32 width, U32 height, U16 mipMapsNum, PixelFormat format, TextureUsage usage = TU_Default);
-
 		COMPtr<IDirect3DDevice9>	d3dDevice_;
 		COMPtr<IDirect3DTexture9>	d3dTexture_;		// The actual texture surface
 		COMPtr<IDirect3DTexture9>	d3dTempTexture_;

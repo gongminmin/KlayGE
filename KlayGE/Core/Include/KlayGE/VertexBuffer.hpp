@@ -1,3 +1,18 @@
+// VertexBuffer.hpp
+// KlayGE VertexBuffer类 头文件
+// Ver 2.0.3
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.0.3
+// 去掉了VO_2D (2004.3.1)
+//
+// 2.0.0
+// 初次建立 (2003.8.18)
+//
+// 修改记录
+/////////////////////////////////////////////////////////////////////////////////
+
 #ifndef _VERTEXBUFFER_HPP
 #define _VERTEXBUFFER_HPP
 
@@ -20,19 +35,18 @@ namespace KlayGE
 		
 		enum VertexOptions
 		{
-			VO_2D				= 1 << 0,
 			// vertex normals included (for lighting)
-			VO_Normals			= 1 << 1,
+			VO_Normals			= 1 << 0,
 			// Vertex colours - diffuse
-			VO_Diffuses			= 1 << 2,
+			VO_Diffuses			= 1 << 1,
 			// Vertex colours - specular
-			VO_Speculars		= 1 << 3,
+			VO_Speculars		= 1 << 2,
 			// at least one set of texture coords (exact number specified in class)
-			VO_TextureCoords	= 1 << 4,
+			VO_TextureCoords	= 1 << 3,
 			// Vertex blend weights
-			VO_BlendWeights		= 1 << 5,
+			VO_BlendWeights		= 1 << 4,
 			// Vertex blend indices
-			VO_BlendIndices		= 1 << 6,
+			VO_BlendIndices		= 1 << 5,
 		};
 
 		// Vertex blend info

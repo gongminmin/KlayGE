@@ -7,20 +7,15 @@
 
 namespace KlayGE
 {
-	class D3D9RenderFactory;
-
 	class D3D9RenderTexture : public RenderTexture
 	{
-		friend class D3D9RenderFactory;
-
 	public:
+		D3D9RenderTexture(U32 width, U32 height);
+
 		virtual void CustomAttribute(const String& name, void* pData);
 
 		bool RequiresTextureFlipping() const
 			{ return true; }
-
-	protected:
-		D3D9RenderTexture(U32 width, U32 height);
 	};
 }
 

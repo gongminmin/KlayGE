@@ -24,6 +24,27 @@ namespace KlayGE
 		virtual const WString& Name() const = 0;
 		virtual InputEngine& InputEngineInstance() = 0;
 	};
+
+	template <typename InputEngineType>
+	class ConcreteInputFactory : public InputFactory
+	{
+	public:
+		ConcreteInputFactory(const WString& name)
+				: name_(name)
+			{ }
+
+		const WString& Name() const
+			{ return name_; }
+
+		InputEngine& InputEngineInstance()
+		{
+			static InputEngineType inputEngine;
+			return inputEngine;
+		}
+
+	private:
+		const WString name_;
+	};
 }
 
 #endif			// _INPUTFACTORY_HPP
