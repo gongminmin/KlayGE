@@ -110,6 +110,9 @@
 				RelativePath=".\D3D9Font.cpp">
 			</File>
 			<File
+				RelativePath=".\D3D9IBConverter.cpp">
+			</File>
+			<File
 				RelativePath=".\D3D9IndexStream.cpp">
 			</File>
 			<File
@@ -131,6 +134,9 @@
 				RelativePath=".\D3D9Texture.cpp">
 			</File>
 			<File
+				RelativePath=".\D3D9VBConverter.cpp">
+			</File>
+			<File
 				RelativePath=".\D3D9VertexStream.cpp">
 			</File>
 			<File
@@ -149,6 +155,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9Font.hpp">
+			</File>
+			<File
+				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9IBConverter.hpp">
 			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9IndexStream.hpp">
@@ -173,6 +182,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9Texture.hpp">
+			</File>
+			<File
+				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9VBConverter.hpp">
 			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9VertexStream.hpp">

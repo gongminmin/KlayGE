@@ -56,16 +56,10 @@ namespace KlayGE
 	class VertexStream
 	{
 	public:
-		VertexStream(VertexStreamType type, U8 elementSize, U8 elementNum)
-			: type_(type),
-				elementSize_(elementSize), elementNum_(elementNum)
-			{ }
+		VertexStream(VertexStreamType type, U8 elementSize, U8 elementNum);
+		virtual ~VertexStream();
 
-		virtual ~VertexStream()
-			{ }
-
-		VertexStreamType Type() const
-			{ return type_; }
+		VertexStreamType Type() const;
 
 		virtual bool IsStatic() const = 0;
 
@@ -73,10 +67,8 @@ namespace KlayGE
 
 		virtual size_t NumVertices() const = 0;
 
-		size_t ElementSize() const
-			{ return elementSize_; }
-		size_t ElementNum() const
-			{ return elementNum_; }
+		size_t ElementSize() const;
+		size_t ElementNum() const;
 
 	protected:
 		U8 elementSize_;
@@ -87,8 +79,7 @@ namespace KlayGE
 	class IndexStream
 	{
 	public:
-		virtual ~IndexStream()
-			{ }
+		virtual ~IndexStream();
 
 		virtual size_t NumIndices() const = 0;
 

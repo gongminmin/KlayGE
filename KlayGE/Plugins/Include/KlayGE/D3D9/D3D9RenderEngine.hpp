@@ -3,7 +3,10 @@
 
 #include <KlayGE/alloc.hpp>
 #include <KlayGE/COMPtr.hpp>
+#include <KlayGE/array.hpp>
 #include <KlayGE/D3D9/D3D9AdapterList.hpp>
+#include <KlayGE/D3D9/D3D9VBConverter.hpp>
+#include <KlayGE/D3D9/D3D9IBConverter.hpp>
 
 #define NOMINMAX
 
@@ -61,7 +64,7 @@ namespace KlayGE
 		void StartRendering();
 
 		void BeginFrame();
-		void Render(const RenderBuffer& vb);
+		void Render(const RenderBuffer& rb);
 		void EndFrame();
 
 		void DepthBufferDepthTest(bool depthTest);
@@ -105,12 +108,6 @@ namespace KlayGE
 		const D3D9AdapterList& D3DAdapters() const;
 		const D3D9Adapter& ActiveAdapter() const;
 
-		void DrawPrimitive(D3DPRIMITIVETYPE primType, U32 primCount);
-		void DoDrawPrimitive(D3DPRIMITIVETYPE primType, U32 primCount);
-		void DrawIndexedPrimitive(D3DPRIMITIVETYPE primType, U32 vertexCount, U32 primCount);
-		void DoDrawIndexedPrimitive(D3DPRIMITIVETYPE primType, U32 vertexCount, U32 primCount);
-
-
 		// Direct3D rendering device
 		// Only created after top-level window created
 		COMPtr<IDirect3D9>			d3d_;
@@ -126,9 +123,8 @@ namespace KlayGE
 		D3DCOLOR clearClr_;
 		U32 clearFlags_;
 
-		typedef std::vector<D3DVERTEXELEMENT9, alloc<D3DVERTEXELEMENT9> > VertexDeclType;
-		VertexDeclType currentDecl_;
-		COMPtr<IDirect3DVertexDeclaration9> currentVertexDecl_;
+		D3D9VBConverter vbConverter_;
+		D3D9IBConverter ibConverter_;
 	};
 
 	typedef SharedPtr<D3D9RenderEngine> D3D9RenderEnginePtr;

@@ -6,6 +6,37 @@
 
 namespace KlayGE
 {
+	VertexStream::VertexStream(VertexStreamType type, U8 elementSize, U8 elementNum)
+			: type_(type),
+				elementSize_(elementSize), elementNum_(elementNum)
+	{
+	}
+
+	VertexStream::~VertexStream()
+	{
+	}
+
+	VertexStreamType VertexStream::Type() const
+	{
+		return type_;
+	}
+
+	size_t VertexStream::ElementSize() const
+	{
+		return elementSize_;
+	}
+
+	size_t VertexStream::ElementNum() const
+	{
+		return elementNum_;
+	}
+
+
+	IndexStream::~IndexStream()
+	{
+	}
+
+
 	RenderBuffer::RenderBuffer(BufferType type)
 			: type_(type)
 	{

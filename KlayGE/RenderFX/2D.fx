@@ -1,7 +1,5 @@
-int halfWidth;
-int halfHeight;
+void Transform2D(float4 position : POSITION, int halfWidth, int halfHeight,
 
-void Transform2D(float4 position : POSITION,
 			out float4 oPosition : POSITION)
 {
 	oPosition.x = (position.x - halfWidth) / halfWidth;

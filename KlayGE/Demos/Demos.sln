@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ø®Õ®‰÷»æ", "Cartoon\Cartoon.vcproj", "{DA5E7FC0-CC85-45A7-8D1E-E80A813F2705}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "œÒÀÿπ‚’’", "PerPixelLighting\PerPixelLighting.vcproj", "{D5D972AB-D79C-43D4-B3A0-1CC49CE83E0A}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{DA5E7FC0-CC85-45A7-8D1E-E80A813F2705}.Debug.ActiveCfg = Debug|Win32
+		{DA5E7FC0-CC85-45A7-8D1E-E80A813F2705}.Debug.Build.0 = Debug|Win32
+		{DA5E7FC0-CC85-45A7-8D1E-E80A813F2705}.Release.ActiveCfg = Release|Win32
+		{DA5E7FC0-CC85-45A7-8D1E-E80A813F2705}.Release.Build.0 = Release|Win32
+		{D5D972AB-D79C-43D4-B3A0-1CC49CE83E0A}.Debug.ActiveCfg = Debug|Win32
+		{D5D972AB-D79C-43D4-B3A0-1CC49CE83E0A}.Debug.Build.0 = Debug|Win32
+		{D5D972AB-D79C-43D4-B3A0-1CC49CE83E0A}.Release.ActiveCfg = Release|Win32
+		{D5D972AB-D79C-43D4-B3A0-1CC49CE83E0A}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal
