@@ -56,7 +56,7 @@ namespace KlayGE
 			const Color& color = Color(1, 1, 1, 1),
 			float expDensity = 1, float linearStart = 0, float linearEnd = 1);
 
-		void SetTexture(U32 stage, const Texture& texture);
+		void SetTexture(U32 stage, const TexturePtr& texture);
 
 		void TextureCoordSet(U32 stage, int index);
 
@@ -85,9 +85,9 @@ namespace KlayGE
 		void StencilBufferPassOperation(StencilOperation op);
 
 	private:
-		void DoWorldMatrix(const Matrix4& mat);
-		void DoViewMatrix(const Matrix4& mat);
-		void DoProjectionMatrix(const Matrix4& mat);
+		void DoWorldMatrix();
+		void DoViewMatrix();
+		void DoProjectionMatrix();
 
 	private:
 		CullMode cullingMode_;

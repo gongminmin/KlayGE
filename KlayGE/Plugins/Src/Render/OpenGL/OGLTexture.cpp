@@ -17,56 +17,48 @@ namespace
 {
 	using namespace KlayGE;
 
-	void Convert(GLint& intenalFormat, GLenum& glformat, GLenum& gltype, KlayGE::PixelFormat pf)
+	void Convert(GLint& intenalFormat, GLenum& glformat, KlayGE::PixelFormat pf)
 	{
 		switch (pf)
 		{
 		case PF_L8:
 			intenalFormat = GL_LUMINANCE8;
 			glformat = GL_LUMINANCE;
-			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case PF_A8:
 			intenalFormat = GL_ALPHA8;
 			glformat = GL_ALPHA;
-			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case PF_A4L4:
 			intenalFormat = GL_LUMINANCE4_ALPHA4;
 			glformat = GL_LUMINANCE_ALPHA;
-			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case PF_R5G6B5:
 			intenalFormat = GL_RGB5;
-			glformat = GL_RGB;
-			gltype = GL_UNSIGNED_SHORT;
+			glformat = GL_BGR_EXT;
 			break;
 
 		case PF_A4R4G4B4:
 			intenalFormat = GL_RGBA4;
-			glformat = GL_RGBA;
-			gltype = GL_UNSIGNED_SHORT;
+			glformat = GL_BGRA_EXT;
 			break;
 
 		case PF_X8R8G8B8:
 			intenalFormat = GL_RGB8;
-			glformat = GL_RGB;
-			gltype = GL_UNSIGNED_BYTE;
+			glformat = GL_BGR_EXT;
 			break;
 
 		case PF_A8R8G8B8:
 			intenalFormat = GL_RGBA8;
-			glformat = GL_RGBA;
-			gltype = GL_UNSIGNED_INT;
+			glformat = GL_BGRA_EXT;
 			break;
 
 		case PF_A2R10G10B10:
 			intenalFormat = GL_RGB10_A2;
-			glformat = GL_RGBA;
-			gltype = GL_UNSIGNED_INT;
+			glformat = GL_BGRA_EXT;
 			break;
 		}
 	}
@@ -76,8 +68,9 @@ namespace KlayGE
 {
 	OGLTexture::OGLTexture(U32 width, U32 height,
 								U16 mipMapsNum, PixelFormat format, TextureUsage usage)
+								: texture_(0)
 	{
-		mipMapsNum_ = (0 == mipMapsNum) ? mipMapsNum : 1;
+		mipMapsNum_ = mipMapsNum;
 		format_		= format;
 		width_		= width;
 		height_		= height;
@@ -85,14 +78,6 @@ namespace KlayGE
 		bpp_ = PixelFormatBits(format);
 
 		usage_ = usage;
-
-		glGenTextures(1, &texture_);
-		glBindTexture(GL_TEXTURE_2D, texture_);
-
-		GLint glinternalFormat;
-		GLenum glformat, gltype;
-		Convert(glinternalFormat, glformat, gltype, format);
-		glTexImage2D(GL_TEXTURE_2D, 0, glformat, width_, height_, 0, glformat, gltype, NULL);
 	}
 
 	OGLTexture::~OGLTexture()
@@ -111,7 +96,7 @@ namespace KlayGE
 		glCopyTexImage2D(other.GLTexture(), 0, 3, 0, 0, other.Width(), other.Height(), 0);
 	}
 
-	void OGLTexture::CopyMemoryToTexture(void* pData, PixelFormat pf,
+	void OGLTexture::CopyMemoryToTexture(void* data, PixelFormat pf,
 		U32 width, U32 height, U32 pitch, U32 xOffset, U32 yOffset)
 	{
 		U16 bpp(PixelFormatBits(pf));
@@ -124,15 +109,31 @@ namespace KlayGE
 		{
 			height = height_;
 		}
-		if (0 == pitch)
-		{
-			pitch = width * bpp / 8;
-		}
 
 		GLint glinternalFormat;
-		GLenum glformat, gltype;
-		Convert(glinternalFormat, glformat, gltype, pf);
-		glTexSubImage2D(texture_, 0, xOffset, yOffset, width, height, glformat, gltype, pData);
+		GLenum glformat;
+		Convert(glinternalFormat, glformat, pf);
+
+		if ((0 == texture_) || (width > width_) || (height > height_) || (pf != format_))
+		{
+			if (texture_ != 0)
+			{
+				glDeleteTextures(1, &texture_);
+			}
+
+			glGenTextures(1, &texture_);
+			glBindTexture(GL_TEXTURE_2D, texture_);
+
+			glTexImage2D(GL_TEXTURE_2D, 0, glinternalFormat, width, height, 0, glformat, GL_UNSIGNED_BYTE, data);
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		}
+		else
+		{
+			glBindTexture(GL_TEXTURE_2D, texture_);
+			glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, width, height, glformat, GL_UNSIGNED_BYTE, data);
+		}
 	}
 
 	void OGLTexture::CopyToMemory(void* data)

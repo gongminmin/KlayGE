@@ -1,4 +1,4 @@
-粘土游戏引擎(KlayGE) 2.0.4
+粘土游戏引擎(KlayGE) 2.0.5
 
 Homepage: http://home.g365.net/enginedev
 E-Mail:	  enginedev@163.com
@@ -73,14 +73,17 @@ __________________________________________________________________
 
 发展历程
 
-2.0.4
+2.0.5
+增强了OpenGL
+
+2.0.4 (2004.4.7)
 修正了OALMusicBuffer无法loop的bug
 DSMusicBuffer改用timeSetEvent实现
 改进了VertexBuffer
 Audio部分增加了NullObject
 增加了Demo
 
-2.0.3 (2003.3.12)
+2.0.3 (2004.3.12)
 简化了VertexBuffer
 去掉了软件顶点混合
 

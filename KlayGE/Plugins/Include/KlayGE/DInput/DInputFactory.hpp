@@ -19,17 +19,11 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/InputFactory.hpp>
 
-#include <KlayGE/DInput/DInput.hpp>
-
 #pragma comment(lib, "KlayGE_InputEngine_DInput.lib")
 
 namespace KlayGE
 {
-	InputFactory& DInputFactoryInstance()
-	{
-		static ConcreteInputFactory<DInputEngine> inputFactory(L"DirectInput Input Factory");
-		return inputFactory;
-	}
+	InputFactory& DInputFactoryInstance();
 }
 
 #endif			// _DINPUTFACTORY_HPP

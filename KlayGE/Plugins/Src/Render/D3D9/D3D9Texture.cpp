@@ -1,8 +1,11 @@
 // D3D9Font.cpp
 // KlayGE D3D9Texture类 实现文件
-// Ver 2.0.4
+// Ver 2.0.5
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.0.5
+// 改用GenerateMipSubLevels来生成mipmap (2004.4.8)
 //
 // 2.0.4
 // 修正了当源和目标格式不同时CopyMemoryToTexture出错的Bug (2004.3.19)
@@ -103,6 +106,18 @@ namespace
 	{
 		switch (format)
 		{
+		case PF_L8:
+			red			= 0x000000FF;
+			green		= 0x000000FF;
+			blue		= 0x000000FF;
+			alpha		= 0x00000000;
+
+			redOffset	= 0;
+			greenOffset	= 0;
+			blueOffset	= 0;
+			alphaOffset	= 0;
+			break;
+
 		case PF_A8:
 			red			= 0x00000000;
 			green		= 0x00000000;
@@ -206,6 +221,18 @@ namespace
 	{
 		switch (format)
 		{
+		case D3DFMT_L8:
+			red			= 0x000000FF;
+			green		= 0x000000FF;
+			blue		= 0x000000FF;
+			alpha		= 0x00000000;
+
+			redOffset	= 0;
+			greenOffset	= 0;
+			blueOffset	= 0;
+			alphaOffset	= 0;
+			break;
+
 		case D3DFMT_A8:
 			red			= 0x00000000;
 			green		= 0x00000000;
@@ -325,7 +352,7 @@ namespace KlayGE
 	{
 		d3dDevice_ = static_cast<const D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
 
-		mipMapsNum_ = (0 == mipMapsNum) ? mipMapsNum : 1;
+		mipMapsNum_ = mipMapsNum;
 		format_		= format;
 		width_		= width;
 		height_		= height;
@@ -389,6 +416,9 @@ namespace KlayGE
 				FALSE, &tempSurf, NULL));
 			renderZBuffer_ = COMPtr<IDirect3DSurface9>(tempSurf);
 		}
+
+		d3dTexture->SetAutoGenFilterType(D3DTEXF_LINEAR);
+		d3dTexture_->SetLOD(this->MipMapsNum());
 	}
 
 	D3D9Texture::~D3D9Texture()
@@ -510,9 +540,7 @@ namespace KlayGE
 		d3dTempTexture_->UnlockRect(0);
 
 		TIF(d3dDevice_->UpdateTexture(d3dTempTexture_.Get(), d3dTexture_.Get()));
-
-		// Finally we will use D3DX to create the mip map levels
-		TIF(D3DXFilterTexture(d3dTexture_.Get(), NULL, D3DX_DEFAULT, D3DX_DEFAULT));
+		d3dTexture_->GenerateMipSubLevels();
 	}
 
 	void D3D9Texture::CopyToMemory(void* data)

@@ -112,6 +112,9 @@
 			<File
 				RelativePath=".\DInputEngine.cpp">
 			</File>
+			<File
+				RelativePath=".\DInputFactory.cpp">
+			</File>
 		</Filter>
 		<Filter
 			Name="Í·ÎÄ¼þ"

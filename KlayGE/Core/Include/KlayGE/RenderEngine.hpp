@@ -193,7 +193,7 @@ namespace KlayGE
 		virtual void ActiveRenderTarget(RenderTargetListIterator iter);
 		const RenderTargetListIterator& ActiveRenderTarget() const;
 
-		virtual void SetTexture(U32 stage, const Texture& texture) = 0;
+		virtual void SetTexture(U32 stage, const TexturePtr& texture) = 0;
 
 		// Sets the texture coordinate set to use for a texture unit.
 		virtual void TextureCoordSet(U32 stage, int index) = 0;
@@ -240,9 +240,9 @@ namespace KlayGE
 		virtual void StencilBufferPassOperation(StencilOperation op) = 0;
 
 	protected:
-		virtual void DoWorldMatrix(const Matrix4& mat) = 0;
-		virtual void DoViewMatrix(const Matrix4& mat) = 0;
-		virtual void DoProjectionMatrix(const Matrix4& mat) = 0;
+		virtual void DoWorldMatrix() = 0;
+		virtual void DoViewMatrix() = 0;
+		virtual void DoProjectionMatrix() = 0;
 
 	protected:
 		RenderTargetList renderTargetList_;

@@ -15,11 +15,13 @@
 #include <KlayGE/D3D9/D3D9RenderSettings.hpp>
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
+#include <iostream>
 #include <sstream>
 
 #include "Torus.hpp"
 #include "Cartoon.hpp"
 
+using namespace std;
 using namespace KlayGE;
 
 namespace
@@ -90,30 +92,9 @@ void Cartoon::InitObjects()
 {
 	font_ = Engine::RenderFactoryInstance().MakeFont(L"ËÎÌו", 16);
 
-	TexturePtr texture = Engine::RenderFactoryInstance().MakeTexture(16, 1, 0, PF_X8R8G8B8);
-	U32 cartoolShadeData[16] = {
-		(255 << 24) + (0 << 16) + (0 << 8) + 0, 
-		(255 << 24) + (0 << 16) + (0 << 8) + 0, 
-		(255 << 24) + (0 << 16) + (0 << 8) + 0, 
-
-		(255 << 24) + (120 << 16) + (120 << 8) + 120, 
-		(255 << 24) + (120 << 16) + (120 << 8) + 120, 
-		(255 << 24) + (120 << 16) + (120 << 8) + 120, 
-
-		(255 << 24) + (160 << 16) + (160 << 8) + 160, 
-		(255 << 24) + (160 << 16) + (160 << 8) + 160, 
-		(255 << 24) + (160 << 16) + (160 << 8) + 160,
-		(255 << 24) + (160 << 16) + (160 << 8) + 160,
-		(255 << 24) + (160 << 16) + (160 << 8) + 160,
-		(255 << 24) + (160 << 16) + (160 << 8) + 160,
-
-		(255 << 24) + (255 << 16) + (255 << 8) + 255,
-		(255 << 24) + (255 << 16) + (255 << 8) + 255,
-		(255 << 24) + (255 << 16) + (255 << 8) + 255,
-		(255 << 24) + (255 << 16) + (255 << 8) + 255,
-	};
-	texture->CopyMemoryToTexture(cartoolShadeData, PF_X8R8G8B8);
-
+	TexturePtr texture = Engine::RenderFactoryInstance().MakeTexture(16, 1, 0, PF_L8);
+	U8 cartoolShadeData[16] = { 0, 0, 0, 120, 120, 120, 160, 160, 160, 160, 160, 160, 255, 255, 255, 255 };
+	texture->CopyMemoryToTexture(cartoolShadeData, PF_L8);
 
 	renderTorus = SharedPtr<RenderTorus>(new RenderTorus(texture));
 

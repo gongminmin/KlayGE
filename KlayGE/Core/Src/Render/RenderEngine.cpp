@@ -131,7 +131,7 @@ namespace KlayGE
 	void RenderEngine::WorldMatrix(const Matrix4& mat)
 	{
 		worldMat_ = mat;
-		this->DoWorldMatrix(mat);
+		this->DoWorldMatrix();
 	}
 
 	// 获取观察矩阵
@@ -146,7 +146,7 @@ namespace KlayGE
 	void RenderEngine::ViewMatrix(const Matrix4& mat)
 	{
 		viewMat_ = mat;
-		this->DoViewMatrix(mat);
+		this->DoViewMatrix();
 	}
 
 	// 获取投射矩阵
@@ -161,6 +161,6 @@ namespace KlayGE
 	void RenderEngine::ProjectionMatrix(const Matrix4& mat)
 	{
 		projMat_ = mat;
-		this->DoProjectionMatrix(mat);
+		this->DoProjectionMatrix();
 	}
 }

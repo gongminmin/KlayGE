@@ -449,50 +449,34 @@ namespace KlayGE
 
 	// 实现设置世界矩阵
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::DoWorldMatrix(const Matrix4& mat)
+	void OGLRenderEngine::DoWorldMatrix()
 	{
 		glMatrixMode(GL_MODELVIEW);
 
-		Matrix4 oglWorldMat(worldMat_);
-		oglWorldMat(3, 0) = -oglWorldMat(3, 0);
-
 		Matrix4 oglViewMat(viewMat_);
-		for (size_t i = 0; i < 4; ++ i)
-		{
-			oglViewMat(i, 0) = -oglViewMat(i, 0);
-			oglViewMat(i, 2) = -oglViewMat(i, 2);
-		}
 
-		Matrix4 oglMat(oglWorldMat * oglViewMat);
+		oglViewMat(0, 2) = -oglViewMat(0, 2);
+		oglViewMat(1, 2) = -oglViewMat(1, 2);
+		oglViewMat(2, 2) = -oglViewMat(2, 2);
+		oglViewMat(3, 2) = -oglViewMat(3, 2);
+
+		const Matrix4 oglMat(worldMat_ * oglViewMat);
 		glLoadMatrixf(&oglMat(0, 0));
 	}
 
 	// 设置观察矩阵
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::DoViewMatrix(const Matrix4& mat)
+	void OGLRenderEngine::DoViewMatrix()
 	{
-		glMatrixMode(GL_MODELVIEW);
-
-		Matrix4 oglWorldMat(worldMat_);
-		oglWorldMat(3, 0) = -oglWorldMat(3, 0);
-
-		Matrix4 oglViewMat(viewMat_);
-		for (size_t i = 0; i < 4; ++ i)
-		{
-			oglViewMat(i, 0) = -oglViewMat(i, 0);
-			oglViewMat(i, 2) = -oglViewMat(i, 2);
-		}
-
-		Matrix4 oglMat(oglWorldMat * oglViewMat);
-		glLoadMatrixf(&oglMat(0, 0));
+		this->DoWorldMatrix();
 	}
 
 	// 实现设置投射矩阵
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::DoProjectionMatrix(const Matrix4& mat)
+	void OGLRenderEngine::DoProjectionMatrix()
 	{
 		Matrix4 oglMat;
-		Engine::MathInstance().LHToRH(oglMat, mat);
+		Engine::MathInstance().LHToRH(oglMat, projMat_);
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadMatrixf(&oglMat(0, 0));
@@ -541,6 +525,7 @@ namespace KlayGE
 		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_NORMAL_ARRAY);
 		glDisableClientState(GL_COLOR_ARRAY);
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
 		for (RenderBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
 			iter != vb.VertexStreamEnd(); ++ iter)
@@ -566,6 +551,18 @@ namespace KlayGE
 			case VST_Diffuses:
 				glEnableClientState(GL_COLOR_ARRAY);
 				glColorPointer(4, GL_UNSIGNED_BYTE, 0, &data[0]);
+				break;
+
+			case VST_TextureCoords0:
+			case VST_TextureCoords1:
+			case VST_TextureCoords2:
+			case VST_TextureCoords3:
+			case VST_TextureCoords4:
+			case VST_TextureCoords5:
+			case VST_TextureCoords6:
+			case VST_TextureCoords7:
+				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+				glTexCoordPointer(stream.ElementsPerVertex(), GL_FLOAT, 0, &data[0]);
 				break;
 			}
 		}
@@ -693,10 +690,17 @@ namespace KlayGE
 
 	// 设置纹理
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::SetTexture(U32 stage, const Texture& texture)
+	void OGLRenderEngine::SetTexture(U32 stage, const TexturePtr& texture)
 	{
-		const OGLTexture& oglTexture(static_cast<const OGLTexture&>(texture));
-		glBindTexture(GL_TEXTURE_2D, oglTexture.GLTexture());
+		if (!texture)
+		{
+			glDisable(GL_TEXTURE_2D);
+		}
+		else
+		{
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, OGLTexturePtr(texture)->GLTexture());
+		}
 	}
 
 	// 设置纹理坐标集

@@ -7,6 +7,8 @@
 
 #include <KlayGE/RenderBuffer.hpp>
 
+#pragma comment(lib, "KlayGE_RenderEngine_D3D9.lib")
+
 namespace KlayGE
 {
 	class D3D9IndexStream : public IndexStream

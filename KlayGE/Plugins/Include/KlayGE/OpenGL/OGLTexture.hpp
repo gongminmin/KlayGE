@@ -2,6 +2,7 @@
 #define _OGLTEXTURE_HPP
 
 #include <KlayGE/Texture.hpp>
+#include <KlayGE/SharedPtr.hpp>
 
 #define NOMINMAX
 #include <windows.h>
@@ -32,6 +33,8 @@ namespace KlayGE
 	private:
 		GLenum texture_;
 	};
+
+	typedef SharedPtr<OGLTexture> OGLTexturePtr;
 }
 
 #endif			// _OGLTEXTURE_HPP

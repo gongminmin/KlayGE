@@ -483,25 +483,25 @@ namespace KlayGE
 
 	// 实现设置世界矩阵
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DoWorldMatrix(const Matrix4& mat)
+	void D3D9RenderEngine::DoWorldMatrix()
 	{
-		D3DMATRIX d3dmat(Convert(mat));
+		D3DMATRIX d3dmat(Convert(worldMat_));
 		TIF(d3dDevice_->SetTransform(D3DTS_WORLD, &d3dmat));
 	}
 
 	// 实现设置观察矩阵
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DoViewMatrix(const Matrix4& mat)
+	void D3D9RenderEngine::DoViewMatrix()
 	{
-		D3DMATRIX d3dMat(Convert(mat));
+		D3DMATRIX d3dMat(Convert(viewMat_));
 		TIF(d3dDevice_->SetTransform(D3DTS_VIEW, &d3dMat));
 	}
 
 	// 实现设置投射矩阵
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DoProjectionMatrix(const Matrix4& mat)
+	void D3D9RenderEngine::DoProjectionMatrix()
 	{
-		D3DMATRIX d3dMat(Convert(mat));
+		D3DMATRIX d3dMat(Convert(projMat_));
 
 		if ((*activeRenderTarget_)->RequiresTextureFlipping())
 		{
@@ -816,11 +816,17 @@ namespace KlayGE
 
 	// 设置纹理
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::SetTexture(U32 stage, const Texture& texture)
+	void D3D9RenderEngine::SetTexture(U32 stage, const TexturePtr& texture)
 	{
-		const D3D9Texture& d3d9Texture(reinterpret_cast<const D3D9Texture&>(texture));
-
-		TIF(d3dDevice_->SetTexture(stage, d3d9Texture.D3DTexture().Get()));
+		if (!texture)
+		{
+			TIF(d3dDevice_->SetTexture(stage, NULL));
+		}
+		else
+		{
+			TIF(d3dDevice_->SetTexture(stage,
+				D3D9TexturePtr(texture)->D3DTexture().Get()));
+		}
 	}
 
 	// 设置纹理坐标集
