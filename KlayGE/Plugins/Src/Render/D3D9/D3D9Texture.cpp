@@ -193,7 +193,7 @@ namespace KlayGE
 
 		d3dTexture2D_ = this->CreateTexture2D(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 
-		this->QueryBaseTextureFrom2D();
+		this->QueryBaseTexture();
 
 		D3DSURFACE_DESC desc;
 		// Check the actual dimensions vs requested
@@ -226,7 +226,7 @@ namespace KlayGE
 		{
 			d3dTexture2D_ = this->CreateTexture2D(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 
-			this->QueryBaseTextureFrom2D();
+			this->QueryBaseTexture();
 
 			D3DSURFACE_DESC desc;
 			// Check the actual dimensions vs requested
@@ -250,7 +250,7 @@ namespace KlayGE
 
 			d3dTexture2D_ = this->CreateTexture2D(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
 
-			this->QueryBaseTextureFrom2D();
+			this->QueryBaseTexture();
 
 			D3DSURFACE_DESC desc;
 			// Check the actual dimensions vs requested
@@ -294,7 +294,7 @@ namespace KlayGE
 
 		d3dTexture3D_ = this->CreateTexture3D(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 
-		this->QueryBaseTextureFrom3D();
+		this->QueryBaseTexture();
 
 		D3DVOLUME_DESC desc;
 		// Check the actual dimensions vs requested
@@ -327,7 +327,7 @@ namespace KlayGE
 
 		d3dTextureCube_ = this->CreateTextureCube(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 
-		this->QueryBaseTextureFromCube();
+		this->QueryBaseTexture();
 
 		D3DSURFACE_DESC desc;
 		// Check the actual dimensions vs requested
@@ -535,6 +535,8 @@ namespace KlayGE
 	void D3D9Texture::CopyMemoryToTexture2D(int level, void* data, PixelFormat pf,
 		uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset)
 	{
+		assert((TT_1D == type_) || (TT_2D == type_));
+
 		IDirect3DSurface9* temp;
 		TIF(d3dTexture2D_->GetSurfaceLevel(level, &temp));
 		boost::shared_ptr<IDirect3DSurface9> shadow = MakeCOMPtr(temp);
@@ -549,6 +551,8 @@ namespace KlayGE
 			uint32_t width, uint32_t height, uint32_t depth,
 			uint32_t xOffset, uint32_t yOffset, uint32_t zOffset)
 	{
+		assert(TT_3D == type_);
+
 		IDirect3DVolume9* temp;
 		TIF(d3dTexture3D_->GetVolumeLevel(level, &temp));
 		boost::shared_ptr<IDirect3DVolume9> shadow = MakeCOMPtr(temp);
@@ -566,6 +570,8 @@ namespace KlayGE
 	void D3D9Texture::CopyMemoryToTextureCube(CubeFaces face, int level, void* data, PixelFormat pf,
 			uint32_t size, uint32_t xOffset)
 	{
+		assert(TT_Cube == type_);
+
 		IDirect3DSurface9* temp;
 		TIF(d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &temp));
 		boost::shared_ptr<IDirect3DSurface9> shadow = MakeCOMPtr(temp);
@@ -683,7 +689,7 @@ namespace KlayGE
 				tempTexture2D->AddDirtyRect(NULL);
 				d3dTexture2D_ = tempTexture2D;
 
-				this->QueryBaseTextureFrom2D();
+				this->QueryBaseTexture();
 			}
 			else
 			{
@@ -710,7 +716,7 @@ namespace KlayGE
 				tempTexture2D->AddDirtyRect(NULL);
 				d3dTexture2D_ = tempTexture2D;
 
-				this->QueryBaseTextureFrom2D();
+				this->QueryBaseTexture();
 
 				d3dDevice_->GetDepthStencilSurface(&tempSurf);
 				tempSurf->GetDesc(&tempDesc);
@@ -742,7 +748,7 @@ namespace KlayGE
 				tempTexture3D->AddDirtyBox(NULL);
 				d3dTexture3D_ = tempTexture3D;
 
-				this->QueryBaseTextureFrom3D();
+				this->QueryBaseTexture();
 			}
 			break;
 
@@ -769,7 +775,7 @@ namespace KlayGE
 				}
 				d3dTextureCube_ = tempTextureCube;
 
-				this->QueryBaseTextureFromCube();
+				this->QueryBaseTexture();
 			}
 			break;
 
@@ -795,7 +801,7 @@ namespace KlayGE
 				d3dDevice_->UpdateTexture(d3dTexture2D_.get(), tempTexture2D.get());
 				d3dTexture2D_ = tempTexture2D;
 
-				this->QueryBaseTextureFrom2D();
+				this->QueryBaseTexture();
 			}
 			else
 			{
@@ -812,7 +818,7 @@ namespace KlayGE
 				d3dDevice_->UpdateTexture(d3dTexture2D_.get(), tempTexture2D.get());
 				d3dTexture2D_ = tempTexture2D;
 
-				this->QueryBaseTextureFrom2D();
+				this->QueryBaseTexture();
 
 				d3dDevice_->GetDepthStencilSurface(&tempSurf);
 				tempSurf->GetDesc(&tempDesc);
@@ -834,7 +840,7 @@ namespace KlayGE
 				d3dDevice_->UpdateTexture(d3dTexture3D_.get(), tempTexture3D.get());
 				d3dTexture3D_ = tempTexture3D;
 
-				this->QueryBaseTextureFrom3D();
+				this->QueryBaseTexture();
 			}
 			break;
 
@@ -849,7 +855,7 @@ namespace KlayGE
 				d3dDevice_->UpdateTexture(d3dTextureCube_.get(), tempTextureCube.get());
 				d3dTextureCube_ = tempTextureCube;
 
-				this->QueryBaseTextureFromCube();
+				this->QueryBaseTexture();
 			}
 			break;
 
@@ -887,24 +893,25 @@ namespace KlayGE
 		return MakeCOMPtr(d3dTextureCube);
 	}
 
-	void D3D9Texture::QueryBaseTextureFrom2D()
+	void D3D9Texture::QueryBaseTexture()
 	{
 		IDirect3DBaseTexture9* d3dBaseTexture;
-		d3dTexture2D_->QueryInterface(IID_IDirect3DBaseTexture9, reinterpret_cast<void**>(&d3dBaseTexture));
-		d3dBaseTexture_ = MakeCOMPtr(d3dBaseTexture);
-	}
+		switch (type_)
+		{
+		case TT_1D:
+		case TT_2D:
+            d3dTexture2D_->QueryInterface(IID_IDirect3DBaseTexture9, reinterpret_cast<void**>(&d3dBaseTexture));
+			break;
 
-	void D3D9Texture::QueryBaseTextureFrom3D()
-	{
-		IDirect3DBaseTexture9* d3dBaseTexture;
-		d3dTexture3D_->QueryInterface(IID_IDirect3DBaseTexture9, reinterpret_cast<void**>(&d3dBaseTexture));
-		d3dBaseTexture_ = MakeCOMPtr(d3dBaseTexture);
-	}
+		case TT_3D:
+			d3dTexture3D_->QueryInterface(IID_IDirect3DBaseTexture9, reinterpret_cast<void**>(&d3dBaseTexture));
+			break;
 
-	void D3D9Texture::QueryBaseTextureFromCube()
-	{
-		IDirect3DBaseTexture9* d3dBaseTexture;
-		d3dTextureCube_->QueryInterface(IID_IDirect3DBaseTexture9, reinterpret_cast<void**>(&d3dBaseTexture));
+		case TT_Cube:
+			d3dTextureCube_->QueryInterface(IID_IDirect3DBaseTexture9, reinterpret_cast<void**>(&d3dBaseTexture));
+			break;
+		}
+
 		d3dBaseTexture_ = MakeCOMPtr(d3dBaseTexture);
 	}
 }
