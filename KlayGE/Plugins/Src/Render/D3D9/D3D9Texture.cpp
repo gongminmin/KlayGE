@@ -185,6 +185,7 @@ namespace KlayGE
 			height_	= desc.Height;
 			format_ = ConvertFormat(desc.Format);
 			bpp_	= PixelFormatBits(format_);
+			numMipMaps_ = d3dTexture_->GetLevelCount();
 		}
 		else
 		{
@@ -211,6 +212,7 @@ namespace KlayGE
 			height_	= desc.Height;
 			format_ = ConvertFormat(desc.Format);
 			bpp_	= PixelFormatBits(format_);
+			numMipMaps_ = d3dTexture_->GetLevelCount();
 
 			// Now get the format of the depth stencil surface.
 			d3dDevice_->GetDepthStencilSurface(&tempSurf);
@@ -359,6 +361,10 @@ namespace KlayGE
 
 	void D3D9Texture::OnLostDevice()
 	{
+		using namespace std;
+
+		d3dDevice_ = static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
+
 		if (TU_Default == usage_)
 		{
 			IDirect3DTexture9* d3dTexture;
@@ -378,7 +384,7 @@ namespace KlayGE
 
 				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
 			}
-
+			tempTexture->AddDirtyRect(NULL);
 			d3dTexture_ = tempTexture;
 		}
 		else
@@ -403,8 +409,9 @@ namespace KlayGE
 				TIF(tempTexture->GetSurfaceLevel(i, &temp));
 				boost::shared_ptr<IDirect3DSurface9> dst = MakeCOMPtr(temp);
 
-				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+				TIF(d3dDevice_->GetRenderTargetData(src.get(), dst.get()));
 			}
+			tempTexture->AddDirtyRect(NULL);
 			d3dTexture_ = tempTexture;
 
 			d3dDevice_->GetDepthStencilSurface(&tempSurf);
@@ -430,6 +437,7 @@ namespace KlayGE
 				this->NumMipMaps(), D3DUSAGE_DYNAMIC, ConvertFormat(format_),
 				D3DPOOL_DEFAULT, &d3dTexture));
 			boost::shared_ptr<IDirect3DTexture9> tempTexture = MakeCOMPtr(d3dTexture);
+			tempTexture->AddDirtyRect(NULL);
 
 			d3dDevice_->UpdateTexture(d3dTexture_.get(), tempTexture.get());
 			d3dTexture_ = tempTexture;
@@ -448,18 +456,10 @@ namespace KlayGE
 				this->NumMipMaps(), D3DUSAGE_RENDERTARGET,
 				tempDesc.Format, D3DPOOL_DEFAULT, &d3dTexture));
 			boost::shared_ptr<IDirect3DTexture9> tempTexture = MakeCOMPtr(d3dTexture);
-			for (uint16_t i = 0; i < this->NumMipMaps(); ++ i)
-			{
-				IDirect3DSurface9* temp;
-				TIF(this->D3DTexture()->GetSurfaceLevel(i, &temp));
-				boost::shared_ptr<IDirect3DSurface9> src = MakeCOMPtr(temp);
+			tempTexture->AddDirtyRect(NULL);
 
-				TIF(tempTexture->GetSurfaceLevel(i, &temp));
-				boost::shared_ptr<IDirect3DSurface9> dst = MakeCOMPtr(temp);
-
-				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
-			}
-			d3dTexture_ = MakeCOMPtr(d3dTexture);
+			d3dDevice_->UpdateTexture(d3dTexture_.get(), tempTexture.get());
+			d3dTexture_ = tempTexture;
 
 			d3dDevice_->GetDepthStencilSurface(&tempSurf);
 			tempSurf->GetDesc(&tempDesc);

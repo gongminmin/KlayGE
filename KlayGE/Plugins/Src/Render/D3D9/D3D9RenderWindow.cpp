@@ -94,28 +94,6 @@ namespace KlayGE
 				if (this->Ready())
 				{
 					this->WindowMovedOrResized();
-
-					D3D9RenderFactory& factory = static_cast<D3D9RenderFactory&>(Context::Instance().RenderFactoryInstance());
-					factory.OnLostDevice();
-					if (d3dDevice_)
-					{
-						renderSurface_.reset();
-						renderZBuffer_.reset();
-
-						d3dpp_.Windowed				= !this->FullScreen();
-						d3dpp_.BackBufferWidth		= this->Width();
-						d3dpp_.BackBufferHeight		= this->Height();
-						d3dDevice_->Reset(&d3dpp_);
-
-						IDirect3DSurface9* renderSurface;
-						d3dDevice_->GetRenderTarget(0, &renderSurface);
-						renderSurface_ = MakeCOMPtr(renderSurface);
-
-						IDirect3DSurface9* renderZBuffer;
-						d3dDevice_->GetDepthStencilSurface(&renderZBuffer);
-						renderZBuffer_ = MakeCOMPtr(renderZBuffer);
-					}
-					factory.OnResetDevice();
 				}
 			}
 			break;
@@ -401,6 +379,27 @@ namespace KlayGE
 
 		this->Reposition(rect.left, rect.top);
 		this->Resize(rect.right - rect.left, rect.bottom - rect.top);
+
+		D3D9RenderFactory& factory = static_cast<D3D9RenderFactory&>(Context::Instance().RenderFactoryInstance());
+		factory.OnLostDevice();
+		if (d3dDevice_)
+		{
+			renderSurface_.reset();
+			renderZBuffer_.reset();
+
+			d3dpp_.BackBufferWidth  = this->Width();
+			d3dpp_.BackBufferHeight = this->Height();
+			TIF(d3dDevice_->Reset(&d3dpp_));
+
+			IDirect3DSurface9* renderSurface;
+			d3dDevice_->GetRenderTarget(0, &renderSurface);
+			renderSurface_ = MakeCOMPtr(renderSurface);
+
+			IDirect3DSurface9* renderZBuffer;
+			d3dDevice_->GetDepthStencilSurface(&renderZBuffer);
+			renderZBuffer_ = MakeCOMPtr(renderZBuffer);
+		}
+		factory.OnResetDevice();
 	}
 
 	void D3D9RenderWindow::Destroy()

@@ -26,6 +26,8 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <boost/smart_ptr.hpp>
 
+#include <set>
+
 #include <d3dx9effect.h>
 
 #include <KlayGE/RenderEffect.hpp>
@@ -38,6 +40,12 @@
 
 namespace KlayGE
 {
+	class D3D9RenderEffect;
+	class D3D9RenderEffectParameter;
+
+	typedef boost::shared_ptr<D3D9RenderEffect> D3D9RenderEffectPtr;
+	typedef boost::shared_ptr<D3D9RenderEffectParameter> D3D9RenderEffectParameterPtr;
+
 	// äÖÈ¾Ð§¹û
 	//////////////////////////////////////////////////////////////////////////////////
 	class D3D9RenderEffect : public RenderEffect
@@ -72,6 +80,8 @@ namespace KlayGE
 
 	private:
 		boost::shared_ptr<ID3DXEffect> effect_;
+
+		std::set<D3D9RenderEffectParameterPtr> params_;
 	};
 
 	class D3D9RenderEffectParameter : public RenderEffectParameter
@@ -99,12 +109,15 @@ namespace KlayGE
 		void SetIntArray(int const * value, size_t count);
 		void GetIntArray(int* value, size_t count);
 
+		void OnLostDevice();
+		void OnResetDevice();
+
 	private:
 		boost::shared_ptr<ID3DXEffect> effect_;
 		D3DXHANDLE parameter_;
-	};
 
-	typedef boost::shared_ptr<D3D9RenderEffect> D3D9RenderEffectPtr;
+		TexturePtr texture_;
+	};
 }
 
 #endif		// _D3D9RENDEREFFECT_HPP

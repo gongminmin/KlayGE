@@ -216,7 +216,7 @@ namespace KlayGE
 
 		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		Viewport const & viewport((*renderEngine.ActiveRenderTarget())->GetViewport());
-		*(effect_->ParameterByName("halfWidth")) = static_cast<int>(viewport.width / 2);
+		*(effect_->ParameterByName("halfWidth")) = viewport.width / 2;
 		*(effect_->ParameterByName("halfHeight")) = viewport.height / 2;
 
 

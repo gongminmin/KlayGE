@@ -114,6 +114,7 @@ namespace KlayGE
 		buffer_->Unlock();
 
 		buffer_ = buffer;
+		currentSize_ = size;
 	}
 	
 	void D3D9VertexStream::OnResetDevice()
@@ -141,5 +142,6 @@ namespace KlayGE
 		buffer_->Unlock();
 
 		buffer_ = buffer;
+		currentSize_ = size;
 	}
 }

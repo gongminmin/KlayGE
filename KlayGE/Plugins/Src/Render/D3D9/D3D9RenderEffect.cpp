@@ -68,20 +68,29 @@ namespace KlayGE
 
 	RenderEffectParameterPtr D3D9RenderEffect::Parameter(uint32_t index)
 	{
-		return RenderEffectParameterPtr(new D3D9RenderEffectParameter(effect_,
+		D3D9RenderEffectParameterPtr ret(new D3D9RenderEffectParameter(effect_,
 			effect_->GetParameter(NULL, index)));
+		params_.insert(ret);
+
+		return ret;
 	}
 
 	RenderEffectParameterPtr D3D9RenderEffect::ParameterByName(std::string const & name)
 	{
-		return RenderEffectParameterPtr(new D3D9RenderEffectParameter(effect_,
+		D3D9RenderEffectParameterPtr ret(new D3D9RenderEffectParameter(effect_,
 			effect_->GetParameterByName(NULL, name.c_str())));
+		params_.insert(ret);
+
+		return ret;
 	}
 
 	RenderEffectParameterPtr D3D9RenderEffect::ParameterBySemantic(std::string const & semantic)
 	{
-		return RenderEffectParameterPtr(new D3D9RenderEffectParameter(effect_,
+		D3D9RenderEffectParameterPtr ret(new D3D9RenderEffectParameter(effect_,
 			effect_->GetParameterBySemantic(NULL, semantic.c_str())));
+		params_.insert(ret);
+
+		return ret;
 	}
 
 	void D3D9RenderEffect::SetTechnique(std::string const & technique)
@@ -131,12 +140,26 @@ namespace KlayGE
 
 	void D3D9RenderEffect::OnLostDevice()
 	{
+		for (std::set<D3D9RenderEffectParameterPtr>::iterator iter = params_.begin();
+			iter != params_.end(); ++ iter)
+		{
+			(*iter)->OnLostDevice();
+		}
+
 		TIF(effect_->OnLostDevice());
 	}
 
 	void D3D9RenderEffect::OnResetDevice()
 	{
+		using namespace std;
+
 		TIF(effect_->OnResetDevice());
+
+		for (std::set<D3D9RenderEffectParameterPtr>::iterator iter = params_.begin();
+			iter != params_.end(); ++ iter)
+		{
+			(*iter)->OnResetDevice();
+		}
 	}
 
 
@@ -147,31 +170,40 @@ namespace KlayGE
 	
 	RenderEffectParameter& D3D9RenderEffectParameter::operator=(float value)
 	{
+		texture_.reset();
+
 		TIF(effect_->SetFloat(parameter_, value));
 		return *this;
 	}
 
 	RenderEffectParameter& D3D9RenderEffectParameter::operator=(Vector4 const & value)
 	{
+		texture_.reset();
+
 		TIF(effect_->SetVector(parameter_, reinterpret_cast<D3DXVECTOR4 const *>(&value)));
-		
 		return *this;
 	}
 
 	RenderEffectParameter& D3D9RenderEffectParameter::operator=(Matrix4 const & value)
 	{
+		texture_.reset();
+
 		TIF(effect_->SetMatrix(parameter_, reinterpret_cast<D3DXMATRIX const *>(&value)));
 		return *this;
 	}
 
 	RenderEffectParameter& D3D9RenderEffectParameter::operator=(int value)
 	{
+		texture_.reset();
+
 		TIF(effect_->SetInt(parameter_, value));
 		return *this;
 	}
 
 	RenderEffectParameter& D3D9RenderEffectParameter::operator=(TexturePtr const & tex)
 	{
+		texture_ = tex;
+
 		IDirect3DTexture9* texture(NULL);
 		if (tex)
 		{
@@ -253,5 +285,20 @@ namespace KlayGE
 	void D3D9RenderEffectParameter::GetIntArray(int* value, size_t count)
 	{
 		TIF(effect_->GetIntArray(parameter_, value, static_cast<UINT>(count)));
+	}
+
+	void D3D9RenderEffectParameter::OnLostDevice()
+	{
+	}
+
+	void D3D9RenderEffectParameter::OnResetDevice()
+	{
+		using namespace std;
+
+		if (texture_)
+		{
+			IDirect3DTexture9* texture = static_cast<D3D9Texture*>(texture_.get())->D3DTexture().get();
+			TIF(effect_->SetTexture(parameter_, texture));
+		}
 	}
 }

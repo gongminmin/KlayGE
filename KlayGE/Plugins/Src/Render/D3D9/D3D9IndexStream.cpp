@@ -21,6 +21,7 @@
 #include <KlayGE/D3D9/D3D9IndexStream.hpp>
 
 #include <algorithm>
+#include <iostream>
 
 #include <boost/smart_ptr.hpp>
 #include <boost/mem_fn.hpp>
@@ -49,7 +50,6 @@ namespace KlayGE
 			TIF(d3dDevice->CreateIndexBuffer(static_cast<UINT>(size), 
 				this->IsStatic() ? 0 : D3DUSAGE_DYNAMIC,
 				D3DFMT_INDEX16, D3DPOOL_DEFAULT, &buffer, NULL));
-
 			buffer_ = MakeCOMPtr(buffer);
 		}
 
@@ -97,8 +97,9 @@ namespace KlayGE
 		buffer_->Unlock();
 
 		buffer_ = buffer;
+		currentSize_ = size;
 	}
-	
+
 	void D3D9IndexStream::OnResetDevice()
 	{
 		boost::shared_ptr<IDirect3DDevice9> d3dDevice(static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
@@ -123,5 +124,6 @@ namespace KlayGE
 		buffer_->Unlock();
 
 		buffer_ = buffer;
+		currentSize_ = size;
 	}
 }
