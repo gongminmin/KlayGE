@@ -32,7 +32,7 @@ namespace KlayGE
 		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 
 		ID3DXEffect* effect;
-		D3DXCreateEffect(renderEngine.D3DDevice().Get(), srcData.c_str(),
+		D3DXCreateEffect(renderEngine.D3DDevice().get(), srcData.c_str(),
 			static_cast<::UINT>(srcData.size()), NULL, NULL,
 			flags, NULL, &effect, NULL);
 		effect_ = COMPtr<ID3DXEffect>(effect);
@@ -43,7 +43,7 @@ namespace KlayGE
 		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 
 		ID3DXEffect* effect;
-		rhs.effect_->CloneEffect(renderEngine.D3DDevice().Get(), &effect);
+		rhs.effect_->CloneEffect(renderEngine.D3DDevice().get(), &effect);
 		effect_ = COMPtr<ID3DXEffect>(effect);
 	}
 
@@ -110,9 +110,14 @@ namespace KlayGE
 		return passes;
 	}
 
-	void D3D9RenderEffect::Pass(UINT passNum)
+	void D3D9RenderEffect::BeginPass(UINT passNum)
 	{
-		TIF(effect_->Pass(passNum));
+		TIF(effect_->BeginPass(passNum));
+	}
+
+	void D3D9RenderEffect::EndPass()
+	{
+		TIF(effect_->EndPass());
 	}
 
 	void D3D9RenderEffect::End()
@@ -156,7 +161,7 @@ namespace KlayGE
 		IDirect3DTexture9* texture(NULL);
 		if (tex)
 		{
-			texture = static_cast<D3D9Texture*>(tex.get())->D3DTexture().Get();
+			texture = static_cast<D3D9Texture*>(tex.get())->D3DTexture().get();
 		}
 		TIF(effect_->SetTexture(parameter_, texture));
 

@@ -56,7 +56,8 @@ namespace KlayGE
 		bool Validate(D3DXHANDLE handle);
 
 		UINT Begin(UINT flags = 0);
-		void Pass(UINT passNum);
+		void BeginPass(UINT passNum);
+		void EndPass();
 		void End();
 
 	private:

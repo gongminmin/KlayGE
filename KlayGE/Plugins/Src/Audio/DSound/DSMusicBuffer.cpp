@@ -189,7 +189,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	bool DSMusicBuffer::IsPlaying() const
 	{
-		if (buffer_.Get() != NULL)
+		if (buffer_)
 		{
 			U32 status;
 			buffer_->GetStatus(&status);
@@ -213,7 +213,7 @@ namespace KlayGE
 	{
 		Vector3 ret(Vector3::Zero());
 
-		if (ds3DBuffer_.Get() != NULL)
+		if (ds3DBuffer_)
 		{
 			D3DVECTOR v;
 			ds3DBuffer_->GetPosition(&v);
@@ -227,7 +227,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void DSMusicBuffer::Position(const Vector3& v)
 	{
-		if (ds3DBuffer_.Get() != NULL)
+		if (ds3DBuffer_)
 		{
 			ds3DBuffer_->SetPosition(v.x(), v.y(), v.z(), DS3D_IMMEDIATE);
 		}
@@ -239,7 +239,7 @@ namespace KlayGE
 	{
 		Vector3 ret(Vector3::Zero());
 
-		if (ds3DBuffer_.Get() != NULL)
+		if (ds3DBuffer_)
 		{
 			D3DVECTOR v;
 			ds3DBuffer_->GetVelocity(&v);
@@ -253,7 +253,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void DSMusicBuffer::Velocity(const Vector3& v)
 	{
-		if (ds3DBuffer_.Get() != NULL)
+		if (ds3DBuffer_)
 		{
 			ds3DBuffer_->SetVelocity(v.x(), v.y(), v.z(), DS3D_IMMEDIATE);
 		}
@@ -265,7 +265,7 @@ namespace KlayGE
 	{
 		Vector3 ret(Vector3::Zero());
 
-		if (ds3DBuffer_.Get() != NULL)
+		if (ds3DBuffer_)
 		{
 			D3DVECTOR v;
 			ds3DBuffer_->GetConeOrientation(&v);
@@ -279,7 +279,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void DSMusicBuffer::Direction(const Vector3& v)
 	{
-		if (ds3DBuffer_.Get() != NULL)
+		if (ds3DBuffer_)
 		{
 			ds3DBuffer_->SetConeOrientation(v.x(), v.y(), v.z(), DS3D_IMMEDIATE);
 		}

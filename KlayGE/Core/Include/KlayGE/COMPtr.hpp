@@ -1,8 +1,11 @@
 // COMPtr.hpp
 // KlayGE COM智能指针 头文件
-// Ver 2.0.0
+// Ver 2.1.2
 // 版权所有(C) 龚敏敏, 2003
 // Homepage: http://www.enginedev.com
+//
+// 2.1.2
+// 改用Boost::shared_ptr实现 (2004.8.11)
 //
 // 2.0.0
 // 初次建立 (2003.7.7)
@@ -15,69 +18,91 @@
 
 #define NOMINMAX
 #include <windows.h>
-#include <KlayGE/ResPtr.hpp>
+
+#include <boost/smart_ptr.hpp>
+#define BOOST_MEM_FN_ENABLE_STDCALL
+#include <boost/mem_fn.hpp>
 
 namespace KlayGE
 {
-	// COM引用计数策略
-	/////////////////////////////////////////////////////////////////////////////////
-	template <typename T>
-	class COMRefCountedOP
-	{
-	public:
-		COMRefCountedOP()
-			{ }
-
-		template <class U>
-		COMRefCountedOP(const COMRefCountedOP<U>&)
-			{ }
-
-		static T Clone(const T& p)
-		{
-			if (p != 0)
-			{
-				p->AddRef();
-			}
-			return p;
-		}
-		static bool Release(const T& p)
-		{
-			if (p != 0)
-			{
-				p->Release();
-			}
-			return false;
-		}
-
-		void Swap(COMRefCountedOP& /*rhs*/)
-			{ }
-	};
-
 	// COM指针
 	/////////////////////////////////////////////////////////////////////////////////
 	template <typename T>
-	class COMPtr : public ResPtr<T, COMRefCountedOP>
+	class COMPtr
 	{
 	public:
+		typedef T element_type;
+
 		COMPtr()
-			: ResPtr<T, COMRefCountedOP>()
 			{ }
-		explicit COMPtr(const stored_type& p)
-			: ResPtr<T, COMRefCountedOP>(p)
+		template<class Y>
+		explicit COMPtr(Y* p)
+			: p_(p, boost::mem_fn(&Y::Release))
 			{ }
-		COMPtr(const COMPtr& rhs)
-			: ResPtr<T, COMRefCountedOP>(rhs)
+
+		COMPtr(const COMPtr& r)
+			: p_(r.p_)
 			{ }
-		template <typename U>
-		COMPtr(const COMPtr<U>& rhs)
-			: ResPtr<T, COMRefCountedOP>(rhs)
+		template <typename Y>
+		COMPtr(const COMPtr<Y>& r)
+			: p_(r.p_)
 			{ }
+		template <typename Y>
+		explicit COMPtr(const boost::weak_ptr<Y>& r)
+			: p_(r)
+			{ }
+
+		COMPtr& operator=(const COMPtr& r)
+		{
+			p_ = r.p_;
+			return *this;
+		}
+		template <typename Y>
+		COMPtr& operator=(const COMPtr<Y>& r)
+		{
+			p_ = r.p_;
+			return *this;
+		}
+
+		void reset()
+		{
+			p_.reset();
+		}
+		template <typename Y>
+		void reset(Y* p)
+		{
+			p_.reset(p, boost::mem_fn(&Y::Release));
+		}
+
+		T& operator*() const
+			{ return p_.operator*(); }
+		T* operator->() const
+			{ return p_.operator->(); }
+		T* get() const
+			{ return p_.get(); }
+
+		bool unique() const
+			{ return p_.unique(); }
+		long use_count() const
+			{ return p_.use_count(); }
+
+		operator bool() const
+			{ return bool(p_); }
+
+		void swap(COMPtr& rhs)
+			{ return p_.swap(rhs.p_); }
+
 
 		template <REFIID iid>
 		HRESULT CoCreateInstance(REFCLSID rclsid, U32 clsContext = CLSCTX_ALL, IUnknown* pUnkOuter = NULL)
 		{
-			this->Release();
-			return ::CoCreateInstance(rclsid, pUnkOuter, clsContext, iid, reinterpret_cast<void**>(&(this->GetRef())));
+			this->reset();
+
+			T* ref;
+			HRESULT hr = ::CoCreateInstance(rclsid, pUnkOuter, clsContext, iid, reinterpret_cast<void**>(&ref));
+			this->reset(ref);
+
+			return hr;
 		}
 
 		template <REFIID iid, typename U>
@@ -85,7 +110,7 @@ namespace KlayGE
 		{
 			U* p(0);
 
-			HRESULT hr(this->Get()->QueryInterface(iid, reinterpret_cast<void**>(&p)));
+			HRESULT hr(this->get()->QueryInterface(iid, reinterpret_cast<void**>(&p)));
 			if (SUCCEEDED(hr))
 			{
 				u = COMPtr<U>(p);
@@ -93,6 +118,9 @@ namespace KlayGE
 
 			return hr;
 		}
+
+	private:
+		boost::shared_ptr<T> p_;
 	};
 }
 

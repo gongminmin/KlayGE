@@ -22,6 +22,8 @@
 
 #include <KlayGE/OpenAL/OALAudio.hpp>
 
+#pragma comment(lib, "libpthread.lib")
+
 const size_t READSIZE(88200);
 
 namespace KlayGE

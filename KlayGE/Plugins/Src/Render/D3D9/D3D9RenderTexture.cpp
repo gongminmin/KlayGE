@@ -41,7 +41,7 @@ namespace KlayGE
 		{
 			D3D9TexturePtr tex(static_cast<D3D9Texture*>(privateTex_.get()));
 			IDirect3DSurface9** pSurf = reinterpret_cast<IDirect3DSurface9**>(pData);
-			*pSurf = tex->DepthStencil().Get();
+			*pSurf = tex->DepthStencil().get();
 
 			return;
 		}

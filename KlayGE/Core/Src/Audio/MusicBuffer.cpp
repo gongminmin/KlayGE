@@ -18,8 +18,6 @@
 
 #include <KlayGE/Audio.hpp>
 
-#pragma comment(lib, "libpthread.lib") 
-
 namespace KlayGE
 {
 	U32 MusicBuffer::PreSecond = 2;

@@ -49,7 +49,8 @@ namespace KlayGE
 		virtual void SetTechnique(UINT technique) = 0;
 
 		virtual UINT Begin(UINT flags = 0) = 0;
-		virtual void Pass(UINT passNum) = 0;
+		virtual void BeginPass(UINT passNum) = 0;
+		virtual void EndPass() = 0;
 		virtual void End() = 0;
 	};
 

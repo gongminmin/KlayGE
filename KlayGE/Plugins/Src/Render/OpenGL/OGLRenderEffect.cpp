@@ -67,7 +67,11 @@ namespace KlayGE
 		return 1;
 	}
 
-	void OGLRenderEffect::Pass(UINT passNum)
+	void OGLRenderEffect::BeginPass(UINT passNum)
+	{
+	}
+
+	void OGLRenderEffect::EndPass()
 	{
 	}
 

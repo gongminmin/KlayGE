@@ -114,29 +114,26 @@ namespace KlayGE
 				wavFile_->Seek(chunkHdr.size - sizeof(pcmWaveFmt), VFile::SM_Current);
 
 				freq_ = pcmWaveFmt.wf.samplesPerSec;
-				if (1 == pcmWaveFmt.wf.formatTag)
+				if (1 == pcmWaveFmt.wf.channels)
 				{
-					if (1 == pcmWaveFmt.wf.channels)
+					if (8 == pcmWaveFmt.bitsPerSample)
 					{
-						if (8 == pcmWaveFmt.bitsPerSample)
-						{
-							format_ = AF_Mono8;
-						}
-						else
-						{
-							format_ = AF_Mono16;
-						}
+						format_ = AF_Mono8;
 					}
 					else
 					{
-						if (8 == pcmWaveFmt.bitsPerSample)
-						{
-							format_ = AF_Stereo8;
-						}
-						else
-						{
-							format_ = AF_Stereo16;
-						}
+						format_ = AF_Mono16;
+					}
+				}
+				else
+				{
+					if (8 == pcmWaveFmt.bitsPerSample)
+					{
+						format_ = AF_Stereo8;
+					}
+					else
+					{
+						format_ = AF_Stereo16;
 					}
 				}
 				break;

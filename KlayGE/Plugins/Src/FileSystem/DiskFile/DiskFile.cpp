@@ -1,8 +1,11 @@
 // DiskFile.cpp
 // KlayGE 磁盘文件类 实现文件
-// Ver 2.0.4
+// Ver 2.1.2
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.1.2
+// 修正了Seek的bug (2004.8.11)
 //
 // 2.0.4
 // 修正了Read的bug (2004.3.22)
@@ -20,8 +23,6 @@
 #include <cassert>
 
 #include <KlayGE/DiskFile/DiskFile.hpp>
-
-using namespace std;
 
 namespace KlayGE
 {
@@ -51,24 +52,24 @@ namespace KlayGE
 	{
 		this->Close();
 
-		ios_base::openmode mode(ios_base::binary);
+		std::ios_base::openmode mode(std::ios_base::binary);
 
 		switch (openMode)
 		{
 		case OM_Read:
-			mode |= ios_base::in;
+			mode |= std::ios_base::in;
 			break;
 
 		case OM_Write:
-			mode |= ios_base::out;
+			mode |= std::ios_base::out;
 			break;
 
 		case OM_ReadWrite:
-			mode |= ios_base::in | ios_base::out;
+			mode |= std::ios_base::in | std::ios_base::out;
 			break;
 			
 		case OM_Create:
-			mode |= ios_base::out | ios_base::trunc;
+			mode |= std::ios_base::out | std::ios_base::trunc;
 			break;
 		}
 
@@ -162,24 +163,30 @@ namespace KlayGE
 	{
 		assert(file_.is_open());
 
-		ios_base::seekdir seekFrom(ios_base::beg);
+		std::ios_base::seekdir seekFrom(std::ios_base::beg);
 		switch (from)
 		{
 		case SM_Begin:
-			seekFrom = ios_base::beg;
+			seekFrom = std::ios_base::beg;
 			break;
 
 		case SM_End:
-			seekFrom = ios_base::end;
+			seekFrom = std::ios_base::end;
 			break;
 
 		case SM_Current:
-			seekFrom = ios_base::cur;
+			seekFrom = std::ios_base::cur;
 			break;
 		}
 
-		file_.seekg(static_cast<istream::off_type>(offset), seekFrom);
-		file_.seekp(static_cast<ostream::off_type>(offset), seekFrom);
+		if (OM_Read == openMode_)
+		{
+			file_.seekg(static_cast<std::istream::off_type>(offset), seekFrom);
+		}
+		else
+		{
+			file_.seekp(static_cast<std::ostream::off_type>(offset), seekFrom);
+		}
 
 		return this->Tell();
 	}

@@ -318,9 +318,6 @@
 					RelativePath=".\Include\KlayGE\ResLocator.hpp">
 				</File>
 				<File
-					RelativePath=".\Include\KlayGE\ResPtr.hpp">
-				</File>
-				<File
 					RelativePath=".\Include\KlayGE\SetVector.hpp">
 				</File>
 				<File

@@ -30,7 +30,7 @@ namespace
 	/////////////////////////////////////////////////////////////////////////////////
 	bool IsSourceFree(DSBufferType pDSB)
 	{
-		if (pDSB.Get() != NULL)
+		if (pDSB)
 		{
 			U32 status;
 			pDSB->GetStatus(&status);
@@ -72,7 +72,7 @@ namespace KlayGE
 		// 复制缓冲区，使所有缓冲区使用同一段数据
 		for (SourcesIter iter = sources_.begin() + 1; iter != sources_.end(); ++ iter)
 		{
-			TIF(dsound->DuplicateSoundBuffer(sources_[0].Get(), &temp));
+			TIF(dsound->DuplicateSoundBuffer(sources_[0].get(), &temp));
 			*iter = DSBufferType(temp);
 		}
 
@@ -157,7 +157,7 @@ namespace KlayGE
 		SourcesIter iter(this->FreeSource());
 
 		COMPtr<IDirectSound3DBuffer> ds3DBuf(this->Get3DBufferInterface(iter));
-		if (ds3DBuf.Get() != NULL)
+		if (ds3DBuf)
 		{
 			ds3DBuf->SetPosition(pos_[0], pos_[1], pos_[2], DS3D_IMMEDIATE);
 			ds3DBuf->SetVelocity(vel_[0], vel_[1], vel_[2], DS3D_IMMEDIATE);

@@ -1,3 +1,15 @@
+// RenderTarget.cpp
+// KlayGE 渲染目标类 实现文件
+// Ver 2.1.2
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.1.2
+// 简化了UpdateStats (2004.7.19)
+//
+// 修改记录
+//////////////////////////////////////////////////////////////////////////////////
+
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Timer.hpp>
@@ -15,6 +27,7 @@ namespace KlayGE
 					: active_(true),
 						FPS_(0)
 	{
+		Timer::Instance().Reset();
 	}
 
 	// 析构函数
@@ -97,40 +110,21 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void RenderTarget::UpdateStats()
 	{
-		static float lastSecond = 0; // in second
-		static float lastTime = 0; 
+		static float lastSecond = 0; 
 		static long numFrames  = 0;
-		static bool firstRun = true ;
-		bool needUpdate;
+		
+		// measure statistics
+		++ numFrames;
+		float thisTime(Timer::Instance().AppTime());
 
-		if (firstRun)
+		// check if new second
+		if (thisTime - lastSecond > 1)
 		{ 
-			firstRun = false;
-			needUpdate = true;
+			// new second - not 100% precise
+			FPS_ = static_cast<float>(numFrames) / (thisTime - lastSecond);
 
-			Timer::Instance().Reset();
-		}
-		else
-		{ 
-			// measure statistics
-			needUpdate = false;
-			++ numFrames;
-			float thisTime(Timer::Instance().AppTime());
-
-			// check frame time
-			float frameTime(thisTime - lastTime);
-			lastTime = thisTime;
-
-			// check if new second
-			if (thisTime - lastSecond > 1)
-			{ 
-				// new second - not 100% precise
-				needUpdate = true ;
-				FPS_ = static_cast<float>(numFrames) / (thisTime - lastSecond);
-
-				lastSecond = thisTime;
-				numFrames  = 0;
-			}
+			lastSecond = thisTime;
+			numFrames  = 0;
 		}
 	}
 

@@ -1503,6 +1503,33 @@ namespace KlayGE
 		bool VecInBox(const Box& box, const Vector3& v);
 		bool BoundProbe(const Box& box, const Vector3& orig, const Vector3& dir);
 
+		template <typename Iterator>
+		inline Box&
+		ComputeBoundingBox(Box& out, Iterator first, Iterator last)
+		{
+			Vector3 minVec(*first), maxVec(*first);
+			Iterator iter = first;
+			++ iter;
+			for (; iter != last; ++ iter)
+			{
+				Minimize(minVec, minVec, *iter);
+				Maximize(maxVec, maxVec, *iter);
+			}
+			out = Box(minVec, maxVec);
+			return out;
+		}
+
+		template <typename Iterator>
+		inline Sphere&
+		ComputeBoundingSphere(Sphere& out, Iterator first, Iterator last)
+		{
+			Box box;
+			ComputeBoundingBox(box, first, last)
+			float radius = std::max(Length(box.Min()), Length(box.Max()));
+			out = Sphere((box.Min() + box.Max()) / 2, radius);
+			return out;
+		}
+
 
 		// 网格
 		///////////////////////////////////////////////////////////////////////////////
@@ -1510,7 +1537,8 @@ namespace KlayGE
 		// 计算像素光照需要的TBN
 		template <typename TangentIterator, typename BinormIterator,
 			typename IndexIterator, typename PositionIterator, typename TexCoordIterator>
-		void ComputeTangent(TangentIterator targentBegin, BinormIterator binormBegin,
+		inline void
+		ComputeTangent(TangentIterator targentBegin, BinormIterator binormBegin,
 								IndexIterator indicesBegin, IndexIterator indicesEnd,
 								PositionIterator xyzsBegin, PositionIterator xyzsEnd,
 								TexCoordIterator texsBegin)
@@ -1574,7 +1602,8 @@ namespace KlayGE
 		}
 
 		template <typename NormalIterator, typename IndexIterator, typename PositionIterator>
-		void ComputeNormal(NormalIterator normalBegin,
+		inline void
+		ComputeNormal(NormalIterator normalBegin,
 								IndexIterator indicesBegin, IndexIterator indicesEnd,
 								PositionIterator xyzsBegin, PositionIterator xyzsEnd)
 		{

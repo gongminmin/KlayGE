@@ -407,7 +407,7 @@ namespace KlayGE
 
 	void D3D9RenderWindow::SwapBuffers()
 	{
-		if (d3dDevice_.Get() != NULL)
+		if (d3dDevice_)
 		{
 			d3dDevice_->Present(NULL, NULL, NULL, NULL);
 		}
@@ -422,7 +422,7 @@ namespace KlayGE
 		if ("D3DDEVICE" == name)
 		{
 			IDirect3DDevice9** pDev = reinterpret_cast<IDirect3DDevice9**>(pData);
-			*pDev = d3dDevice_.Get();
+			*pDev = d3dDevice_.get();
 
 			return;
 		}
@@ -446,7 +446,7 @@ namespace KlayGE
 		if ("D3DZBUFFER" == name)
 		{
 			IDirect3DSurface9** pSurf = reinterpret_cast<IDirect3DSurface9**>(pData);
-			*pSurf = renderZBuffer_.Get();
+			*pSurf = renderZBuffer_.get();
 
 			return;
 		}
@@ -454,7 +454,7 @@ namespace KlayGE
 		if ("DDBACKBUFFER" == name)
 		{
 			IDirect3DSurface9** pSurf = reinterpret_cast<IDirect3DSurface9**>(pData);
-			*pSurf = renderSurface_.Get();
+			*pSurf = renderSurface_.get();
 
 			return;
 		}
@@ -462,7 +462,7 @@ namespace KlayGE
 		if ("DDFRONTBUFFER" == name)
 		{
 			IDirect3DSurface9** pSurf = reinterpret_cast<IDirect3DSurface9**>(pData);
-			*pSurf = renderSurface_.Get();
+			*pSurf = renderSurface_.get();
 
 			return;
 		}

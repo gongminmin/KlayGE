@@ -8,6 +8,9 @@
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9IndexStream.hpp>
 
+#include <boost/smart_ptr.hpp>
+#include <boost/mem_fn.hpp>
+
 namespace KlayGE
 {
 	D3D9IndexStream::D3D9IndexStream(bool staticStream)

@@ -365,12 +365,12 @@ namespace KlayGE
 		{
 			IDirect3DTexture9* d3dTexture;
 			// Use D3DX to help us create the texture, this way it can adjust any relevant sizes
-			TIF(D3DXCreateTexture(d3dDevice_.Get(), this->Width(), this->Height(),
+			TIF(D3DXCreateTexture(d3dDevice_.get(), this->Width(), this->Height(),
 				this->NumMipMaps(), 0, Convert(format),
 				D3DPOOL_SYSTEMMEM, &d3dTexture));
 			d3dTempTexture_ = COMPtr<IDirect3DTexture9>(d3dTexture);
 
-			TIF(D3DXCreateTexture(d3dDevice_.Get(), this->Width(), this->Height(),
+			TIF(D3DXCreateTexture(d3dDevice_.get(), this->Width(), this->Height(),
 				this->NumMipMaps(), 0, Convert(format),
 				D3DPOOL_DEFAULT, &d3dTexture));
 			d3dTexture_ = COMPtr<IDirect3DTexture9>(d3dTexture);
@@ -397,7 +397,7 @@ namespace KlayGE
 
 			IDirect3DTexture9* d3dTexture;
 			// Now we create the texture.
-			TIF(D3DXCreateTexture(d3dDevice_.Get(), this->Width(), this->Height(),
+			TIF(D3DXCreateTexture(d3dDevice_.get(), this->Width(), this->Height(),
 				this->NumMipMaps(), D3DUSAGE_RENDERTARGET,
 				d3dFmt, D3DPOOL_DEFAULT, &d3dTexture));
 			d3dTexture_ = COMPtr<IDirect3DTexture9>(d3dTexture);
@@ -449,7 +449,7 @@ namespace KlayGE
 			TIF(other.D3DTexture()->GetSurfaceLevel(0, &temp));
 			dst = COMPtr<IDirect3DSurface9>(temp);
 
-			TIF(d3dDevice_->StretchRect(src.Get(), NULL, dst.Get(), &dstRC, D3DTEXF_NONE));
+			TIF(d3dDevice_->StretchRect(src.get(), NULL, dst.get(), &dstRC, D3DTEXF_NONE));
 		}
 	}
 
@@ -541,8 +541,8 @@ namespace KlayGE
 
 		d3dTempTexture_->UnlockRect(0);
 
-		TIF(D3DXFilterTexture(d3dTempTexture_.Get(), NULL, D3DX_DEFAULT, D3DX_DEFAULT));
-		TIF(d3dDevice_->UpdateTexture(d3dTempTexture_.Get(), d3dTexture_.Get()));
+		TIF(D3DXFilterTexture(d3dTempTexture_.get(), NULL, D3DX_DEFAULT, D3DX_DEFAULT));
+		TIF(d3dDevice_->UpdateTexture(d3dTempTexture_.get(), d3dTexture_.get()));
 	}
 
 	void D3D9Texture::CustomAttribute(const std::string& name, void* pData)
@@ -554,7 +554,7 @@ namespace KlayGE
 		if ("D3DDEVICE" == name)
 		{
 			IDirect3DDevice9** pDev = reinterpret_cast<IDirect3DDevice9**>(pData);
-			*pDev = d3dDevice_.Get();
+			*pDev = d3dDevice_.get();
 
 			return;
 		}

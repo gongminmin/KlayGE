@@ -54,7 +54,9 @@ namespace KlayGE
 
 		UINT Begin(UINT flags = 0)
 			{ return 1; }
-		void Pass(UINT passNum)
+		void BeginPass(UINT passNum)
+			{ }
+		void EndPass()
 			{ }
 		void End()
 			{ }

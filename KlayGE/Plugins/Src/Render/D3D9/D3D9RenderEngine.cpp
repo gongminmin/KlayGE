@@ -246,7 +246,7 @@ namespace KlayGE
 	{
 		// Create our Direct3D object
 		d3d_ = COMPtr<IDirect3D9>(Direct3DCreate9(D3D_SDK_VERSION));
-		Verify(d3d_.Get() != NULL);
+		Verify(d3d_.get() != NULL);
 
 		adapterList_.Enumerate(d3d_);
 	}
@@ -673,7 +673,7 @@ namespace KlayGE
 
 			D3D9VertexStream& d3d9vs(static_cast<D3D9VertexStream&>(stream));
 			TIF(d3dDevice_->SetStreamSource(element.Stream,
-				d3d9vs.D3D9Buffer().Get(), 0,
+				d3d9vs.D3D9Buffer().get(), 0,
 				static_cast<::UINT>(stream.sizeElement() * stream.ElementsPerVertex())));
 		}
 
@@ -703,27 +703,33 @@ namespace KlayGE
 			currentVertexDecl_ = COMPtr<IDirect3DVertexDeclaration9>(theVertexDecl);
 		}
 
-		d3dDevice_->SetVertexDeclaration(currentVertexDecl_.Get());
+		d3dDevice_->SetVertexDeclaration(currentVertexDecl_.get());
 
 
 		if (rb.UseIndices())
 		{
 			D3D9IndexStream& d3dis(static_cast<D3D9IndexStream&>(*rb.GetIndexStream()));
-			d3dDevice_->SetIndices(d3dis.D3D9Buffer().Get());
+			d3dDevice_->SetIndices(d3dis.D3D9Buffer().get());
 
 			for (UINT i = 0; i < renderPasses_; ++ i)
 			{
-				renderEffect_->Pass(i);
+				renderEffect_->BeginPass(i);
+
 				TIF(d3dDevice_->DrawIndexedPrimitive(primType, 0, 0,
 					static_cast<UINT>(rb.NumVertices()), 0, primCount));
+
+				renderEffect_->EndPass();
 			}
 		}
 		else
 		{
 			for (UINT i = 0; i < renderPasses_; ++ i)
 			{
-				renderEffect_->Pass(i);
+				renderEffect_->BeginPass(i);
+
 				TIF(d3dDevice_->DrawPrimitive(primType, 0, primCount));
+
+				renderEffect_->EndPass();
 			}
 		}
 	}
@@ -824,7 +830,7 @@ namespace KlayGE
 		else
 		{
 			TIF(d3dDevice_->SetTexture(stage,
-				D3D9TexturePtr(static_cast<D3D9Texture*>(texture.get()))->D3DTexture().Get()));
+				D3D9TexturePtr(static_cast<D3D9Texture*>(texture.get()))->D3DTexture().get()));
 		}
 	}
 

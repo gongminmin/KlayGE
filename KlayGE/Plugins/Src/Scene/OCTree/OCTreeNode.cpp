@@ -1,7 +1,22 @@
+// OCTreeNode.cpp
+// KlayGE 八叉树结点类 实现文件
+// Ver 2.1.2
+// 版权所有(C) 龚敏敏, 2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.1.2
+// 初次建立 (2004.6.15)
+//
+// 修改记录
+//////////////////////////////////////////////////////////////////////////////////
+
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Math.hpp>
 
 #include <KlayGE/OCTree/OCTree.hpp>
+
+#include <iostream>
+using namespace std;
 
 namespace KlayGE
 {
@@ -10,12 +25,16 @@ namespace KlayGE
 	{
 	}
 
+	OCTreeNode::~OCTreeNode()
+	{
+	}
+
 	void OCTreeNode::Clear()
 	{
 		renderables_.clear();
-		for (int i = 0; i < 8; ++ i)
+		for (ChildrenType::iterator iter = children_.begin(); iter != children_.end(); ++ iter)
 		{
-			children_[i].reset();
+			iter->reset();
 		}
 	}
 
@@ -48,25 +67,14 @@ namespace KlayGE
 		{
 			if (this->InsideNode(renderable))
 			{
-				if (renderables_.size() > 1)
+				if (children_[0])
 				{
-					Vector3 center((box_.LeftBottomNear() + box_.RightTopFar()) / 2);
-
-					children_[0] = OCTreeNodePtr(new OCTreeNode(Box(box_.LeftBottomNear(), center)));
-					children_[1] = OCTreeNodePtr(new OCTreeNode(Box(box_.LeftTopNear(), center)));
-					children_[2] = OCTreeNodePtr(new OCTreeNode(Box(box_.RightBottomNear(), center)));
-					children_[3] = OCTreeNodePtr(new OCTreeNode(Box(box_.RightTopNear(), center)));
-					children_[4] = OCTreeNodePtr(new OCTreeNode(Box(box_.LeftBottomFar(), center)));
-					children_[5] = OCTreeNodePtr(new OCTreeNode(Box(box_.LeftTopFar(), center)));
-					children_[6] = OCTreeNodePtr(new OCTreeNode(Box(box_.RightBottomFar(), center)));
-					children_[7] = OCTreeNodePtr(new OCTreeNode(Box(box_.RightTopFar(), center)));
-
 					bool inserted(false);
-					for (int i = 0; i < 8; ++ i)
+					for (ChildrenType::iterator iter = children_.begin(); iter != children_.end(); ++ iter)
 					{
-						if (children_[i]->InsideNode(renderable))
+						if ((*iter)->InsideNode(renderable))
 						{
-							children_[i]->AddRenderable(renderable);
+							(*iter)->AddRenderable(renderable);
 							inserted = true;
 
 							break;
@@ -80,7 +88,47 @@ namespace KlayGE
 				}
 				else
 				{
-					SceneNode::AddRenderable(renderable);
+					if (renderables_.size() > 0)
+					{
+						Vector3 center((box_.LeftBottomNear() + box_.RightTopFar()) / 2);
+
+						children_[0] = OCTreeNodePtr(new OCTreeNode(Box(box_.LeftBottomNear(), center)));
+						children_[1] = OCTreeNodePtr(new OCTreeNode(Box(box_.LeftTopNear(), center)));
+						children_[2] = OCTreeNodePtr(new OCTreeNode(Box(box_.RightBottomNear(), center)));
+						children_[3] = OCTreeNodePtr(new OCTreeNode(Box(box_.RightTopNear(), center)));
+						children_[4] = OCTreeNodePtr(new OCTreeNode(Box(box_.LeftBottomFar(), center)));
+						children_[5] = OCTreeNodePtr(new OCTreeNode(Box(box_.LeftTopFar(), center)));
+						children_[6] = OCTreeNodePtr(new OCTreeNode(Box(box_.RightBottomFar(), center)));
+						children_[7] = OCTreeNodePtr(new OCTreeNode(Box(box_.RightTopFar(), center)));
+
+						for (RenderablesType::iterator i = renderables_.begin(); i != renderables_.end();)
+						{
+							bool inserted(false);
+							for (ChildrenType::iterator iter = children_.begin(); iter != children_.end(); ++ iter)
+							{
+								if ((*iter)->InsideNode(*i))
+								{
+									(*iter)->AddRenderable(*i);
+									inserted = true;
+
+									break;
+								}
+							}
+
+							if (inserted)
+							{
+								i = renderables_.erase(i);
+							}
+							else
+							{
+								++ i;
+							}
+						}
+					}
+					else
+					{
+						SceneNode::AddRenderable(renderable);
+					}
 				}
 			}
 		}
@@ -88,40 +136,27 @@ namespace KlayGE
 
 	void OCTreeNode::Clip(const Frustum& frustum)
 	{
-		for (RenderablesType::iterator iter = renderables_.begin();
-			iter != renderables_.end();)
+		for (ChildrenType::iterator iter = children_.begin(); iter != children_.end(); ++ iter)
 		{
-			if ((*iter)->CanBeCulled())
-			{
-				Box box((*iter)->GetBound());
-				if (!frustum.Visiable(box.LeftBottomNear())
-						|| !frustum.Visiable(box.RightTopFar()))
-				{
-					iter = renderables_.erase(iter);
-				}
-				else
-				{
-					++ iter;
-				}
-			}
-			else
-			{
-				++ iter;
-			}
-		}
+			OCTreeNodePtr& child(*iter);
 
-		for (int i = 0; i < 8; ++ i)
-		{
-			if ((children_[i].get() != NULL) && (!children_[i]->renderables_.empty()))
+			if (child && (!child->renderables_.empty()))
 			{
-				if (frustum.Visiable(children_[i]->box_.LeftBottomNear())
-					&& frustum.Visiable(children_[i]->box_.RightTopFar()))
+				Box& box(child->box_);
+				if (frustum.Visiable(box.LeftBottomNear())
+						|| frustum.Visiable(box.LeftTopNear())
+						|| frustum.Visiable(box.RightBottomNear())
+						|| frustum.Visiable(box.RightTopNear())
+						|| frustum.Visiable(box.LeftBottomFar())
+						|| frustum.Visiable(box.LeftTopFar())
+						|| frustum.Visiable(box.RightBottomFar())
+						|| frustum.Visiable(box.RightTopFar()))
 				{
-					children_[i] = OCTreeNodePtr();
+					child->Clip(frustum);
 				}
 				else
 				{
-					children_[i]->Clip(frustum);
+					child.reset();
 				}
 			}
 		}
@@ -130,12 +165,12 @@ namespace KlayGE
 	void OCTreeNode::GetRenderables(std::vector<RenderablePtr>& renderables)
 	{
 		renderables.insert(renderables.end(), renderables_.begin(), renderables_.end());
-		for (int i = 0; i < 8; ++ i)
+
+		for (ChildrenType::iterator iter = children_.begin(); iter != children_.end(); ++ iter)
 		{
-			if (children_[i].get() != NULL)
+			if (*iter)
 			{
-				renderables.insert(renderables.end(),
-					children_[i]->renderables_.begin(), children_[i]->renderables_.end());
+				(*iter)->GetRenderables(renderables);
 			}
 		}
 	}

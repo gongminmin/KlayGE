@@ -76,6 +76,8 @@ __________________________________________________________________
 2.1.2
 增加了BoneMesh
 增加了RenderEffectParameter
+支持DX 9.0c SDK
+修正了DiskFile::Seek的Bug
 
 2.1.1
 大量使用boost

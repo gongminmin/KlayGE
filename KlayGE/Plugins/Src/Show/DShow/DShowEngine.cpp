@@ -56,10 +56,10 @@ namespace KlayGE
 	{
 		this->Stop();
 
-		videoWnd_.Release();
-		mediaEvent_.Release();
-		mediaControl_.Release();
-		graph_.Release();
+		videoWnd_.reset();
+		mediaEvent_.reset();
+		mediaControl_.reset();
+		graph_.reset();
 	}
 
 	// 检查是否包含视频流

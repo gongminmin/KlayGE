@@ -144,8 +144,8 @@ namespace KlayGE
 			break;
 		}
 
+		chunkData_.seekp(static_cast<istream::off_type>(offset), seekFrom);
 		chunkData_.seekg(static_cast<istream::off_type>(offset), seekFrom);
-		chunkData_.seekp(static_cast<ostream::off_type>(offset), seekFrom);
 
 		return this->Tell();
 	}

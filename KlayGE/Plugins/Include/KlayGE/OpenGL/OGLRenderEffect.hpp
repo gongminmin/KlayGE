@@ -40,7 +40,8 @@ namespace KlayGE
 		void SetTechnique(UINT technique);
 
 		UINT Begin(UINT flags = 0);
-		void Pass(UINT passNum);
+		void BeginPass(UINT passNum);
+		void EndPass();
 		void End();
 	};
 
