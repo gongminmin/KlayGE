@@ -53,7 +53,7 @@ __________________________________________________________________
 编译KlayGE内核需要一些第三方库：Python 2.3.4、Boost 1.31.0，分别在http://www.python.org和http://boost.sourceforge.net下载
 编译OggWav插件需要Vorbis SDK，在http://www.vorbis.com下载
 编译OpenAL插件需要OpenAL SDK，在http://www.openal.org下载
-编译OpenGL查检需要我的另一个作品GLLoader，在http://cosoft.org.cn/projects/glloader下载
+编译OpenGL插件需要我的另一个作品GLLoader，在http://cosoft.org.cn/projects/glloader下载
 
 
 __________________________________________________________________
@@ -77,6 +77,7 @@ __________________________________________________________________
 修正了DSound插件的音量问题 (2004.10.20)
 去掉了ManagerBase、FileSystem、Crc32、alloc、Timer、Random (2004.10.30)
 使用boost 1.32.0 (2004.11.7)
+增加了Trace (2004.11.9)
 
 2.1.3 (2004.10.19)
 增加了以boost::tuple为参数的ScriptEngine::Call

@@ -292,6 +292,9 @@
 					RelativePath="Include\KlayGE\ThrowErr.hpp">
 				</File>
 				<File
+					RelativePath=".\Include\KlayGE\Trace.hpp">
+				</File>
+				<File
 					RelativePath=".\Include\KlayGE\Types.hpp">
 				</File>
 				<File
