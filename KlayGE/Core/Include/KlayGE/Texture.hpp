@@ -6,6 +6,7 @@
 //
 // 2.3.0
 // 增加了对浮点纹理格式的支持 (2005.1.25)
+// 增加了CopyToMemory (2005.2.6)
 //
 // 修改记录
 //////////////////////////////////////////////////////////////////////////////////
@@ -151,6 +152,7 @@ namespace KlayGE
 
 		// Copies (and maybe scales to fit) the contents of this texture to another texture.
 		virtual void CopyToTexture(Texture& target) = 0;
+		virtual void CopyToMemory(void* data) = 0;
 		virtual void CopyMemoryToTexture(void* data, PixelFormat pf,
 			uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset) = 0;
 

@@ -1,3 +1,15 @@
+// D3D9Texture.hpp
+// KlayGE D3D9纹理类 头文件
+// Ver 2.3.0
+// 版权所有(C) 龚敏敏, 2003-2005
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.3.0
+// 增加了CopyToMemory (2005.2.6)
+//
+// 修改记录
+/////////////////////////////////////////////////////////////////////////////////
+
 #ifndef _D3D9TEXTURE_HPP
 #define _D3D9TEXTURE_HPP
 
@@ -28,8 +40,9 @@ namespace KlayGE
 		void CustomAttribute(std::string const & name, void* pData);
 
 		void CopyToTexture(Texture& target);
+		void CopyToMemory(void* data);
 		void CopyMemoryToTexture(void* data, PixelFormat pf,
-			uint32_t width = 0, uint32_t height = 0, uint32_t xOffset = 0, uint32_t yOffset = 0);
+			uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset);
 
 		boost::shared_ptr<IDirect3DTexture9> const & D3DTexture() const
 			{ return this->d3dTexture_; }
@@ -39,7 +52,7 @@ namespace KlayGE
 	private:
 		boost::shared_ptr<IDirect3DDevice9>		d3dDevice_;
 		boost::shared_ptr<IDirect3DTexture9>	d3dTexture_;		// The actual texture surface
-		boost::shared_ptr<IDirect3DTexture9>	d3dTempTexture_;
+		boost::shared_ptr<IDirect3DTexture9>	d3dTextureShadow_;
 
 		boost::shared_ptr<IDirect3DSurface9>	renderZBuffer_;		// The z-buffer for the render surface.
 	};

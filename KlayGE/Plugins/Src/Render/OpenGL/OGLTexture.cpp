@@ -1,3 +1,15 @@
+// OGLTexture.hpp
+// KlayGE OpenGL纹理类 实现文件
+// Ver 2.3.0
+// 版权所有(C) 龚敏敏, 2003-2005
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.3.0
+// 增加了CopyToMemory (2005.2.6)
+//
+// 修改记录
+/////////////////////////////////////////////////////////////////////////////////
+
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -99,6 +111,15 @@ namespace KlayGE
 	{
 		OGLTexture& other(static_cast<OGLTexture&>(target));
 		glCopyTexImage2D(other.GLTexture(), 0, 3, 0, 0, other.Width(), other.Height(), 0);
+	}
+
+	void OGLTexture::CopyToMemory(void* data)
+	{
+		GLint glinternalFormat;
+		GLenum glformat;
+		Convert(glinternalFormat, glformat, format_);
+
+		glGetTexImage(texture_, 0, glformat, GL_UNSIGNED_BYTE, data);
 	}
 
 	void OGLTexture::CopyMemoryToTexture(void* data, PixelFormat pf,

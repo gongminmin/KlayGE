@@ -1,4 +1,4 @@
-// D3D9Font.cpp
+// D3D9Texture.cpp
 // KlayGE D3D9纹理类 实现文件
 // Ver 2.3.0
 // 版权所有(C) 龚敏敏, 2003-2005
@@ -7,6 +7,7 @@
 // 2.3.0
 // 增加了对浮点纹理格式的支持 (2005.1.25)
 // 改进了CopyMemoryToTexture (2005.2.1)
+// 增加了CopyToMemory (2005.2.6)
 //
 // 2.0.5
 // 改用GenerateMipSubLevels来生成mipmap (2004.4.8)
@@ -174,7 +175,7 @@ namespace KlayGE
 			TIF(D3DXCreateTexture(d3dDevice_.get(), this->Width(), this->Height(),
 				this->NumMipMaps(), 0, ConvertFormat(format),
 				D3DPOOL_SYSTEMMEM, &d3dTexture));
-			d3dTempTexture_ = MakeCOMPtr(d3dTexture);
+			d3dTextureShadow_ = MakeCOMPtr(d3dTexture);
 
 			TIF(D3DXCreateTexture(d3dDevice_.get(), this->Width(), this->Height(),
 				this->NumMipMaps(), 0, ConvertFormat(format),
@@ -259,11 +260,35 @@ namespace KlayGE
 		}
 	}
 
+	void D3D9Texture::CopyToMemory(void* data)
+	{
+		assert(data != NULL);
+
+		D3DLOCKED_RECT d3d_rc;
+		d3dTextureShadow_->LockRect(0, &d3d_rc, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY);
+
+		uint8_t* dst = static_cast<uint8_t*>(data);
+		uint8_t* src = static_cast<uint8_t*>(d3d_rc.pBits);
+
+		uint32_t const srcPitch = d3d_rc.Pitch;
+		uint32_t const dstPitch = this->Width() * PixelFormatBits(format_) / 8;
+
+		for (uint32_t i = 0; i < this->Height(); ++ i)
+		{
+			std::copy(src, src + dstPitch, dst);
+
+			src += srcPitch;
+			dst += dstPitch;
+		}
+
+		d3dTextureShadow_->UnlockRect(0);
+	}
+
 	void D3D9Texture::CopyMemoryToTexture(void* data, PixelFormat pf,
 		uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset)
 	{
 		IDirect3DSurface9* temp;
-		TIF(d3dTempTexture_->GetSurfaceLevel(0, &temp));
+		TIF(d3dTextureShadow_->GetSurfaceLevel(0, &temp));
 		boost::shared_ptr<IDirect3DSurface9> dst = MakeCOMPtr(temp);
 
 		RECT srcRc = { 0, 0, width, height };
@@ -271,8 +296,8 @@ namespace KlayGE
 		TIF(D3DXLoadSurfaceFromMemory(dst.get(), NULL, &dstRc, data, ConvertFormat(pf),
 			width * PixelFormatBits(pf) / 8, NULL, &srcRc, D3DX_DEFAULT, 0));
 
-		TIF(D3DXFilterTexture(d3dTempTexture_.get(), NULL, D3DX_DEFAULT, D3DX_DEFAULT));
-		TIF(d3dDevice_->UpdateTexture(d3dTempTexture_.get(), d3dTexture_.get()));
+		TIF(D3DXFilterTexture(d3dTextureShadow_.get(), NULL, D3DX_DEFAULT, D3DX_DEFAULT));
+		TIF(d3dDevice_->UpdateTexture(d3dTextureShadow_.get(), d3dTexture_.get()));
 	}
 
 	void D3D9Texture::CustomAttribute(std::string const & name, void* pData)

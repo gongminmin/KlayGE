@@ -1,3 +1,15 @@
+// OGLTexture.hpp
+// KlayGE OpenGL纹理类 头文件
+// Ver 2.3.0
+// 版权所有(C) 龚敏敏, 2003-2005
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.3.0
+// 增加了CopyToMemory (2005.2.6)
+//
+// 修改记录
+/////////////////////////////////////////////////////////////////////////////////
+
 #ifndef _OGLTEXTURE_HPP
 #define _OGLTEXTURE_HPP
 
@@ -26,8 +38,9 @@ namespace KlayGE
 		void CustomAttribute(std::string const & name, void* pData);
 
 		void CopyToTexture(Texture& target);
+		void CopyToMemory(void* data);
 		void CopyMemoryToTexture(void* data, PixelFormat pf,
-			uint32_t width = 0, uint32_t height = 0, uint32_t xOffset = 0, uint32_t yOffset = 0);
+			uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset);
 
 		GLenum GLTexture() const
 			{ return texture_; }
