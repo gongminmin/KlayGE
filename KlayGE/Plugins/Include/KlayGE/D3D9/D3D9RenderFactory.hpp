@@ -1,8 +1,14 @@
 // D3D9RenderFactory.hpp
 // KlayGE D3D9渲染引擎抽象工厂 头文件
-// Ver 2.0.3
-// 版权所有(C) 龚敏敏, 2003-2004
+// Ver 2.3.1
+// 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.3.1
+// 增加了resource_pool_成员 (2005.3.3)
+//
+// 2.3.0
+// 增加了OnLostDevice和OnResetDevice (2005.2.23)
 //
 // 2.0.3
 // 改为template实现 (2004.3.4)
@@ -63,10 +69,7 @@ namespace KlayGE
 		void OnResetDevice();
 
 	private:
-		std::vector<boost::weak_ptr<D3D9Resource> > texture_pool_;
-		std::vector<boost::weak_ptr<D3D9Resource> > render_effect_pool_;
-		std::vector<boost::weak_ptr<D3D9Resource> > vertex_stream_pool_;
-		std::vector<boost::weak_ptr<D3D9Resource> > index_stream_pool_;
+		std::vector<boost::weak_ptr<D3D9Resource> > resource_pool_;
 
 	private:
 		D3D9RenderFactory(D3D9RenderFactory const & rhs);

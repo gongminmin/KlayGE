@@ -1,8 +1,8 @@
 # Makefile
 
 CXXC=g++
-OBJS=GLLoader_GL.o GLLoader_WGL.o GLLoader_GLX.o GLLoader.o Utils.o
-LIBFILE=libGLLoader.a
+OBJS=glloader_gl.o glloader_wgl.o glloader_glx.o utils.o
+LIBFILE=libglloader.a
 INCDIR=./include
 PREFIX=/usr
 

@@ -151,8 +151,6 @@ namespace KlayGE
 
 	void D3D9RenderEffect::OnResetDevice()
 	{
-		using namespace std;
-
 		TIF(effect_->OnResetDevice());
 
 		for (std::set<D3D9RenderEffectParameterPtr>::iterator iter = params_.begin();
@@ -289,16 +287,20 @@ namespace KlayGE
 
 	void D3D9RenderEffectParameter::OnLostDevice()
 	{
+		if (texture_)
+		{
+			D3D9Texture* texture = static_cast<D3D9Texture*>(texture_.get());
+			texture->OnLostDevice();
+		}
 	}
 
 	void D3D9RenderEffectParameter::OnResetDevice()
 	{
-		using namespace std;
-
 		if (texture_)
 		{
-			IDirect3DTexture9* texture = static_cast<D3D9Texture*>(texture_.get())->D3DTexture().get();
-			TIF(effect_->SetTexture(parameter_, texture));
+			D3D9Texture* texture = static_cast<D3D9Texture*>(texture_.get());
+			texture->OnResetDevice();
+			TIF(effect_->SetTexture(parameter_, texture->D3DTexture().get()));
 		}
 	}
 }

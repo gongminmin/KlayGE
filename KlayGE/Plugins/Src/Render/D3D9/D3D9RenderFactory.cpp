@@ -33,7 +33,7 @@ namespace KlayGE
 			PixelFormat format, Texture::TextureUsage usage)
 	{
 		D3D9TexturePtr ret(new D3D9Texture(width, height, numMipMaps, format, usage));
-		texture_pool_.push_back(ret);
+		resource_pool_.push_back(ret);
 		return ret;
 	}
 
@@ -45,7 +45,7 @@ namespace KlayGE
 	RenderEffectPtr D3D9RenderFactory::MakeRenderEffect(std::string const & srcData, uint32_t flags)
 	{
 		D3D9RenderEffectPtr ret(new D3D9RenderEffect(srcData, flags));
-		render_effect_pool_.push_back(ret);
+		resource_pool_.push_back(ret);
 		return ret;
 	}
 		
@@ -90,23 +90,21 @@ namespace KlayGE
 			break;
 		}
 
-		texture_pool_.push_back(ret);
+		resource_pool_.push_back(ret);
 		return ret;
 	}
 
 	IndexStreamPtr D3D9RenderFactory::MakeIndexStream(bool staticStream)
 	{
 		D3D9IndexStreamPtr ret(new D3D9IndexStream(staticStream));
-		index_stream_pool_.push_back(ret);
+		resource_pool_.push_back(ret);
 		return ret;
 	}
 
 	void D3D9RenderFactory::OnLostDevice()
 	{
-		using namespace std;
-
-		for (std::vector<boost::weak_ptr<D3D9Resource> >::iterator iter = texture_pool_.begin();
-			iter != texture_pool_.end();)
+		for (std::vector<boost::weak_ptr<D3D9Resource> >::iterator iter = resource_pool_.begin();
+			iter != resource_pool_.end();)
 		{
 			if (D3D9ResourcePtr ptr = iter->lock())
 			{
@@ -115,54 +113,15 @@ namespace KlayGE
 			}
 			else
 			{
-				iter = texture_pool_.erase(iter);
-			}
-		}
-		for (std::vector<boost::weak_ptr<D3D9Resource> >::iterator iter = render_effect_pool_.begin();
-			iter != render_effect_pool_.end();)
-		{
-			if (D3D9ResourcePtr ptr = iter->lock())
-			{
-				ptr->OnLostDevice();
-				++ iter;
-			}
-			else
-			{
-				iter = render_effect_pool_.erase(iter);
-			}
-		}
-		for (std::vector<boost::weak_ptr<D3D9Resource> >::iterator iter = vertex_stream_pool_.begin();
-			iter != vertex_stream_pool_.end();)
-		{
-			if (D3D9ResourcePtr ptr = iter->lock())
-			{
-				ptr->OnLostDevice();
-				++ iter;
-			}
-			else
-			{
-				iter = vertex_stream_pool_.erase(iter);
-			}
-		}
-		for (std::vector<boost::weak_ptr<D3D9Resource> >::iterator iter = index_stream_pool_.begin();
-			iter != index_stream_pool_.end();)
-		{
-			if (D3D9ResourcePtr ptr = iter->lock())
-			{
-				ptr->OnLostDevice();
-				++ iter;
-			}
-			else
-			{
-				iter = index_stream_pool_.erase(iter);
+				iter = resource_pool_.erase(iter);
 			}
 		}
 	}
 
 	void D3D9RenderFactory::OnResetDevice()
 	{
-		for (std::vector<boost::weak_ptr<D3D9Resource> >::iterator iter = texture_pool_.begin();
-			iter != texture_pool_.end();)
+		for (std::vector<boost::weak_ptr<D3D9Resource> >::iterator iter = resource_pool_.begin();
+			iter != resource_pool_.end();)
 		{
 			if (D3D9ResourcePtr ptr = iter->lock())
 			{
@@ -171,46 +130,7 @@ namespace KlayGE
 			}
 			else
 			{
-				iter = texture_pool_.erase(iter);
-			}
-		}
-		for (std::vector<boost::weak_ptr<D3D9Resource> >::iterator iter = render_effect_pool_.begin();
-			iter != render_effect_pool_.end();)
-		{
-			if (D3D9ResourcePtr ptr = iter->lock())
-			{
-				ptr->OnResetDevice();
-				++ iter;
-			}
-			else
-			{
-				iter = render_effect_pool_.erase(iter);
-			}
-		}
-		for (std::vector<boost::weak_ptr<D3D9Resource> >::iterator iter = vertex_stream_pool_.begin();
-			iter != vertex_stream_pool_.end();)
-		{
-			if (D3D9ResourcePtr ptr = iter->lock())
-			{
-				ptr->OnResetDevice();
-				++ iter;
-			}
-			else
-			{
-				iter = vertex_stream_pool_.erase(iter);
-			}
-		}
-		for (std::vector<boost::weak_ptr<D3D9Resource> >::iterator iter = index_stream_pool_.begin();
-			iter != index_stream_pool_.end();)
-		{
-			if (D3D9ResourcePtr ptr = iter->lock())
-			{
-				ptr->OnResetDevice();
-				++ iter;
-			}
-			else
-			{
-				iter = index_stream_pool_.erase(iter);
+				iter = resource_pool_.erase(iter);
 			}
 		}
 	}

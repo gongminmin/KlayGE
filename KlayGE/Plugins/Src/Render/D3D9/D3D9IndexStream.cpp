@@ -21,7 +21,6 @@
 #include <KlayGE/D3D9/D3D9IndexStream.hpp>
 
 #include <algorithm>
-#include <iostream>
 
 #include <boost/smart_ptr.hpp>
 #include <boost/mem_fn.hpp>
@@ -30,7 +29,8 @@ namespace KlayGE
 {
 	D3D9IndexStream::D3D9IndexStream(bool staticStream)
 						: staticStream_(staticStream),
-							currentSize_(0), numIndices_(0)
+							currentSize_(0), numIndices_(0),
+							reseted_(true)
 	{
 	}
 
@@ -76,54 +76,64 @@ namespace KlayGE
 
 	void D3D9IndexStream::OnLostDevice()
 	{
-		boost::shared_ptr<IDirect3DDevice9> d3dDevice(static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
-		size_t const size(sizeof(uint16_t) * numIndices_);
+		if (reseted_)
+		{
+			boost::shared_ptr<IDirect3DDevice9> d3dDevice(static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
+			size_t const size(sizeof(uint16_t) * numIndices_);
 
-		IDirect3DIndexBuffer9* temp;
-		TIF(d3dDevice->CreateIndexBuffer(static_cast<UINT>(size), 0,
-				D3DFMT_INDEX16, D3DPOOL_SYSTEMMEM, &temp, NULL));
-		boost::shared_ptr<IDirect3DIndexBuffer9> buffer = MakeCOMPtr(temp);
+			IDirect3DIndexBuffer9* temp;
+			TIF(d3dDevice->CreateIndexBuffer(static_cast<UINT>(size), 0,
+					D3DFMT_INDEX16, D3DPOOL_SYSTEMMEM, &temp, NULL));
+			boost::shared_ptr<IDirect3DIndexBuffer9> buffer = MakeCOMPtr(temp);
 
-		void* src;
-		void* dest;
-		TIF(buffer_->Lock(0, 0, &src, D3DLOCK_NOSYSLOCK));
-		TIF(buffer->Lock(0, 0, &dest, D3DLOCK_NOSYSLOCK));
+			void* src;
+			void* dest;
+			TIF(buffer_->Lock(0, 0, &src, D3DLOCK_NOSYSLOCK));
+			TIF(buffer->Lock(0, 0, &dest, D3DLOCK_NOSYSLOCK));
 
-		uint8_t* destPtr(static_cast<uint8_t*>(dest));
-		uint8_t const * srcPtr(static_cast<uint8_t const *>(src));
-		std::copy(srcPtr, srcPtr + size, destPtr);
+			uint8_t* destPtr(static_cast<uint8_t*>(dest));
+			uint8_t const * srcPtr(static_cast<uint8_t const *>(src));
+			std::copy(srcPtr, srcPtr + size, destPtr);
 
-		buffer->Unlock();
-		buffer_->Unlock();
+			buffer->Unlock();
+			buffer_->Unlock();
 
-		buffer_ = buffer;
-		currentSize_ = size;
+			buffer_ = buffer;
+			currentSize_ = size;
+
+			reseted_ = false;
+		}
 	}
 
 	void D3D9IndexStream::OnResetDevice()
 	{
-		boost::shared_ptr<IDirect3DDevice9> d3dDevice(static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
-		size_t const size(sizeof(uint16_t) * numIndices_);
+		if (!reseted_)
+		{
+			boost::shared_ptr<IDirect3DDevice9> d3dDevice(static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
+			size_t const size(sizeof(uint16_t) * numIndices_);
 
-		IDirect3DIndexBuffer9* temp;
-		TIF(d3dDevice->CreateIndexBuffer(static_cast<UINT>(size), 
-				this->IsStatic() ? 0 : D3DUSAGE_DYNAMIC,
-				D3DFMT_INDEX16, D3DPOOL_DEFAULT, &temp, NULL));
-		boost::shared_ptr<IDirect3DIndexBuffer9> buffer = MakeCOMPtr(temp);
+			IDirect3DIndexBuffer9* temp;
+			TIF(d3dDevice->CreateIndexBuffer(static_cast<UINT>(size), 
+					this->IsStatic() ? 0 : D3DUSAGE_DYNAMIC,
+					D3DFMT_INDEX16, D3DPOOL_DEFAULT, &temp, NULL));
+			boost::shared_ptr<IDirect3DIndexBuffer9> buffer = MakeCOMPtr(temp);
 
-		void* src;
-		void* dest;
-		TIF(buffer_->Lock(0, 0, &src, D3DLOCK_NOSYSLOCK));
-		TIF(buffer->Lock(0, 0, &dest, D3DLOCK_NOSYSLOCK));
+			void* src;
+			void* dest;
+			TIF(buffer_->Lock(0, 0, &src, D3DLOCK_NOSYSLOCK));
+			TIF(buffer->Lock(0, 0, &dest, D3DLOCK_NOSYSLOCK));
 
-		uint8_t* destPtr(static_cast<uint8_t*>(dest));
-		uint8_t const * srcPtr(static_cast<uint8_t const *>(src));
-		std::copy(srcPtr, srcPtr + size, destPtr);
+			uint8_t* destPtr(static_cast<uint8_t*>(dest));
+			uint8_t const * srcPtr(static_cast<uint8_t const *>(src));
+			std::copy(srcPtr, srcPtr + size, destPtr);
 
-		buffer->Unlock();
-		buffer_->Unlock();
+			buffer->Unlock();
+			buffer_->Unlock();
 
-		buffer_ = buffer;
-		currentSize_ = size;
+			buffer_ = buffer;
+			currentSize_ = size;
+
+			reseted_ = true;
+		}
 	}
 }

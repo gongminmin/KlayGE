@@ -1,8 +1,11 @@
 // D3D9RenderEffect.hpp
 // KlayGE D3D9渲染效果类 头文件
-// Ver 2.3.0
+// Ver 2.3.1
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.3.1
+// 改为派生自D3D9Resource (2005.3.3)
 //
 // 2.3.0
 // 增加了OnLostDevice和OnResetDevice (2005.2.23)

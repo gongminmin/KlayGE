@@ -1,8 +1,11 @@
 // D3D9Texture.hpp
 // KlayGE D3D9纹理类 头文件
-// Ver 2.3.0
+// Ver 2.3.1
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.3.1
+// 改为派生自D3D9Resource (2005.3.3)
 //
 // 2.3.0
 // 增加了CopyToMemory (2005.2.6)
@@ -61,6 +64,8 @@ namespace KlayGE
 		boost::shared_ptr<IDirect3DTexture9>	d3dTexture_;
 
 		boost::shared_ptr<IDirect3DSurface9>	renderZBuffer_;		// The z-buffer for the render surface.
+
+		bool reseted_;
 	};
 
 	typedef boost::shared_ptr<D3D9Texture> D3D9TexturePtr;
