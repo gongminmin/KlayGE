@@ -26,7 +26,8 @@ namespace KlayGE
 						boost::subtractable<Rect_T<T>,
 						boost::subtractable2<Rect_T<T>, Vector_T<T, 2>,
 						boost::andable<Rect_T<T>,
-						boost::orable<Rect_T<T> > > > > > >
+						boost::orable<Rect_T<T>,
+						boost::equality_comparable<Rect_T<T> > > > > > > >
 	{
 		template <typename U>
 		friend class Rect_T;
@@ -128,7 +129,7 @@ namespace KlayGE
 			return *this;
 		}
 
-		Rect_T const & operator=(Rect_T const & rhs)
+		Rect_T& operator=(Rect_T const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -137,7 +138,7 @@ namespace KlayGE
 			return *this;
 		}
 		template <typename U>
-		Rect_T const & operator=(Rect_T<U> const & rhs)
+		Rect_T& operator=(Rect_T<U> const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -162,23 +163,14 @@ namespace KlayGE
 		bool IsEmpty() const
 			{ return (this->left() == this->right()) && (this->top() == this->bottom()); }
 
+		bool operator==(Rect_T<T> const & rhs)
+		{
+			return rect_ == rhs.rect_;
+		}
+
 	private:
 		Vector_T<T, elem_num> rect_;
 	};
-
-	template <typename T>
-	inline bool
-	operator==(Rect_T<T> const & lhs, Rect_T<T> const & rhs)
-	{
-		return (lhs.left() == rhs.left()) && (lhs.top() == rhs.top())
-			&& (lhs.right() == rhs.right()) && (lhs.bottom() == rhs.bottom());
-	}
-	template <typename T>
-	inline bool
-	operator!=(Rect_T<T> const & lhs, Rect_T<T> const & rhs)
-	{
-		return !(lhs == rhs);
-	}
 
 	typedef Rect_T<float> Rect;
 }

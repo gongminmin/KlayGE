@@ -69,11 +69,11 @@ namespace KlayGE
 	public:
 		D3D9RenderEffectParameter(boost::shared_ptr<ID3DXEffect> const & effect, D3DXHANDLE parameter);
 
-		RenderEffectParameter const & operator=(float value);
-		RenderEffectParameter const & operator=(Vector4 const & value);
-		RenderEffectParameter const & operator=(Matrix4 const & value);
-		RenderEffectParameter const & operator=(int value);
-		RenderEffectParameter const & operator=(TexturePtr const & tex);
+		RenderEffectParameter& operator=(float value);
+		RenderEffectParameter& operator=(Vector4 const & value);
+		RenderEffectParameter& operator=(Matrix4 const & value);
+		RenderEffectParameter& operator=(int value);
+		RenderEffectParameter& operator=(TexturePtr const & tex);
 
 		operator float() const;
 		operator Vector4() const;

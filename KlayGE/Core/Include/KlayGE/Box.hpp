@@ -22,7 +22,8 @@ namespace KlayGE
 	class Box : boost::addable2<Box, Vector3, 
 						boost::subtractable2<Box, Vector3,
 						boost::andable<Box,
-						boost::orable<Box > > > >,
+						boost::orable<Box,
+						boost::equality_comparable<Box> > > > >,
 				public Bound
 	{
 	public:
@@ -36,29 +37,29 @@ namespace KlayGE
 		}
 
 		// 赋值操作符
-		Box const & operator+=(Vector3 const & rhs)
+		Box& operator+=(Vector3 const & rhs)
 		{
 			min_ += rhs;
 			max_ += rhs;
 			return *this;
 		}
-		Box const & operator-=(Vector3 const & rhs)
+		Box& operator-=(Vector3 const & rhs)
 		{
 			min_ -= rhs;
 			max_ -= rhs;
 			return *this;
 		}
-		Box const & operator*=(float rhs)
+		Box& operator*=(float rhs)
 		{
 			this->Min() *= rhs;
 			this->Max() *= rhs;
 			return *this;
 		}
-		Box const & operator/=(float rhs)
+		Box& operator/=(float rhs)
 		{
 			return this->operator*=(1.0f / rhs);
 		}
-		Box const & operator&=(Box const & rhs)
+		Box& operator&=(Box const & rhs)
 		{
 			MathLib::Maximize(this->Min(), this->Min(), rhs.Min());
 			MathLib::Minimize(this->Max(), this->Max(), rhs.Max());
@@ -79,6 +80,11 @@ namespace KlayGE
 				this->Max() = rhs.Max();
 			}
 			return *this;
+		}
+
+		bool operator==(Box const & rhs)
+		{
+			return (this->Min() == rhs.Min()) && (this->Max() == rhs.Max());
 		}
 
 		// 一元操作符
@@ -171,17 +177,6 @@ namespace KlayGE
 	private:
 		Vector3 min_, max_;
 	};
-
-	inline bool
-	operator==(Box const & lhs, Box const & rhs)
-	{
-		return (lhs.Min() == rhs.Min()) && (lhs.Max() == rhs.Max());
-	}
-	inline bool
-	operator!=(Box const & lhs, Box const & rhs)
-	{
-		return !(lhs == rhs);
-	}
 }
 
 #endif			// _BOX_HPP

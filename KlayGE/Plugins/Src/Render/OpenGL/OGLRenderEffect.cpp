@@ -80,27 +80,27 @@ namespace KlayGE
 	}
 
 
-	RenderEffectParameter const & OGLRenderEffectParameter::operator=(float value)
+	RenderEffectParameter& OGLRenderEffectParameter::operator=(float value)
 	{
 		return *this;
 	}
 	
-	RenderEffectParameter const & OGLRenderEffectParameter::operator=(Vector4 const & value)
+	RenderEffectParameter& OGLRenderEffectParameter::operator=(Vector4 const & value)
 	{
 		return *this;
 	}
 
-	RenderEffectParameter const & OGLRenderEffectParameter::operator=(Matrix4 const & value)
+	RenderEffectParameter& OGLRenderEffectParameter::operator=(Matrix4 const & value)
 	{
 		return *this;
 	}
 
-	RenderEffectParameter const & OGLRenderEffectParameter::operator=(int value)
+	RenderEffectParameter& OGLRenderEffectParameter::operator=(int value)
 	{
 		return *this;
 	}
 
-	RenderEffectParameter const & OGLRenderEffectParameter::operator=(TexturePtr const & tex)
+	RenderEffectParameter& OGLRenderEffectParameter::operator=(TexturePtr const & tex)
 	{
 		return *this;
 	}

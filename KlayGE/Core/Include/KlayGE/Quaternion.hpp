@@ -24,7 +24,8 @@ namespace KlayGE
 						boost::subtractable<Quaternion_T<T>,
 						boost::dividable2<Quaternion_T<T>, T,
 						boost::multipliable<Quaternion_T<T>,
-						boost::multipliable2<Quaternion_T<T>, T> > > > >
+						boost::multipliable2<Quaternion_T<T>, T,
+						boost::equality_comparable<Quaternion_T<T> > > > > > >
 	{
 		template <typename U>
 		friend class Quaternion_T;
@@ -140,7 +141,7 @@ namespace KlayGE
 			return *this;
 		}
 
-		Quaternion_T const & operator=(Quaternion_T const & rhs)
+		Quaternion_T& operator=(Quaternion_T const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -149,7 +150,7 @@ namespace KlayGE
 			return *this;
 		}
 		template <typename U>
-		Quaternion_T const & operator=(Quaternion_T<U> const & rhs)
+		Quaternion_T& operator=(Quaternion_T<U> const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -174,22 +175,14 @@ namespace KlayGE
 			this->z() = rhs.z();
 		}
 
+		bool operator==(Quaternion_T<T> const & rhs)
+		{
+			return quat_ == rhs.quat_;
+		}
+
 	private:
 		Vector_T<T, elem_num> quat_;
 	};
-
-	template <typename T>
-	inline bool
-	operator==(Quaternion_T<T> const & lhs, Quaternion_T<T> const & rhs)
-	{
-		return (lhs.x() == rhs.x()) && (lhs.y() == rhs.y()) && (lhs.z() == rhs.z()) && (lhs.w() == rhs.w());
-	}
-	template <typename T>
-	inline bool
-	operator!=(Quaternion_T<T> const & lhs, Quaternion_T<T> const & rhs)
-	{
-		return !(lhs == rhs);
-	}
 
 	typedef Quaternion_T<float> Quaternion;
 }

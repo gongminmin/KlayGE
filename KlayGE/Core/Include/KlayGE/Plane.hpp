@@ -13,6 +13,8 @@
 #ifndef _PLANE_HPP
 #define _PLANE_HPP
 
+#include <boost/operators.hpp>
+
 #include <KlayGE/Vector.hpp>
 
 namespace KlayGE
@@ -20,7 +22,7 @@ namespace KlayGE
 	// 描述一个平面 ax + by + cz + d = 0
 	///////////////////////////////////////////////////////////////////////////////
 	template <typename T>
-	class Plane_T
+	class Plane_T : boost::equality_comparable<Plane_T<T> >
 	{
 		template <typename U>
 		friend class Plane_T;
@@ -92,7 +94,7 @@ namespace KlayGE
 			{ return plane_[3]; }
 
 		// 赋值操作符
-		Plane_T const & operator=(Plane_T const & rhs)
+		Plane_T& operator=(Plane_T const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -101,7 +103,7 @@ namespace KlayGE
 			return *this;
 		}
 		template <typename U>
-		Plane_T const & operator=(Plane_T<U> const & rhs)
+		Plane_T& operator=(Plane_T<U> const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -127,22 +129,14 @@ namespace KlayGE
 			this->c() = rhs.z();
 		}
 
+		bool operator==(Plane_T<T> const & rhs)
+		{
+			return plane_ == rhs.plane_;
+		}
+
 	private:
 		Vector_T<T, elem_num> plane_;
 	};
-
-	template <typename T>
-	inline bool
-	operator==(Plane_T<T> const & lhs, Plane_T<T> const & rhs)
-	{
-		return (lhs.a() == rhs.a()) && (lhs.b() == rhs.b()) && (lhs.c() == rhs.c()) && (lhs.d() == rhs.d());
-	}
-	template <typename T>
-	inline bool
-	operator!=(Plane_T<T> const & lhs, Plane_T<T> const & rhs)
-	{
-		return !(lhs == rhs);
-	}
 
 	typedef Plane_T<float> Plane;
 }

@@ -132,32 +132,32 @@ namespace KlayGE
 	{
 	}
 	
-	RenderEffectParameter const & D3D9RenderEffectParameter::operator=(float value)
+	RenderEffectParameter& D3D9RenderEffectParameter::operator=(float value)
 	{
 		TIF(effect_->SetFloat(parameter_, value));
 		return *this;
 	}
 
-	RenderEffectParameter const & D3D9RenderEffectParameter::operator=(Vector4 const & value)
+	RenderEffectParameter& D3D9RenderEffectParameter::operator=(Vector4 const & value)
 	{
 		TIF(effect_->SetVector(parameter_, reinterpret_cast<D3DXVECTOR4 const *>(&value)));
 		
 		return *this;
 	}
 
-	RenderEffectParameter const & D3D9RenderEffectParameter::operator=(Matrix4 const & value)
+	RenderEffectParameter& D3D9RenderEffectParameter::operator=(Matrix4 const & value)
 	{
 		TIF(effect_->SetMatrix(parameter_, reinterpret_cast<D3DXMATRIX const *>(&value)));
 		return *this;
 	}
 
-	RenderEffectParameter const & D3D9RenderEffectParameter::operator=(int value)
+	RenderEffectParameter& D3D9RenderEffectParameter::operator=(int value)
 	{
 		TIF(effect_->SetInt(parameter_, value));
 		return *this;
 	}
 
-	RenderEffectParameter const & D3D9RenderEffectParameter::operator=(TexturePtr const & tex)
+	RenderEffectParameter& D3D9RenderEffectParameter::operator=(TexturePtr const & tex)
 	{
 		IDirect3DTexture9* texture(NULL);
 		if (tex)

@@ -66,7 +66,7 @@ namespace KlayGE
 					: container_(first, last, alloc), compare_(comp)
 			{ std::sort(this->begin(), this->end(), compare_); }
         
-        SetVector const & operator=(SetVector const & rhs)
+        SetVector& operator=(SetVector const & rhs)
         { 
             SetVector(rhs).swap(*this); 
             return *this;

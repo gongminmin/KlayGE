@@ -21,7 +21,8 @@ namespace KlayGE
 {
 	template <typename T>
 	class Size_T : boost::addable<Size_T<T>,
-						boost::subtractable<Size_T<T> > >
+						boost::subtractable<Size_T<T>,
+						boost::equality_comparable<Size_T<T> > > >
 	{
 		template <typename U>
 		friend class Size_T;
@@ -83,7 +84,7 @@ namespace KlayGE
 			return *this;
 		}
 
-		Size_T const & operator=(const Size_T& rhs)
+		Size_T& operator=(const Size_T& rhs)
 		{
 			if (this != &rhs)
 			{
@@ -92,7 +93,7 @@ namespace KlayGE
 			return *this;
 		}
 		template <typename U>
-		Size_T const & operator=(Size_T<U> const & rhs)
+		Size_T& operator=(Size_T<U> const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -107,22 +108,14 @@ namespace KlayGE
 		Size_T<T> const operator-() const
 			{ return Size_T<T>(-this->cx(), -this->cy()); }
 
+		bool operator==(Size_T<T> const & rhs)
+		{
+			return size_ == rhs.size_;
+		}
+
 	private:
 		Vector_T<T, elem_num> size_;
 	};
-
-	template <typename T>
-	inline bool
-	operator==(Size_T<T> const & lhs, Size_T<T> const & rhs)
-	{
-		return (lhs.cx() == rhs.cx()) && (lhs.cy() == rhs.cy());
-	}
-	template <typename T>
-	inline bool
-	operator!=(Size_T<T> const & lhs, Size_T<T> const & rhs)
-	{
-		return !(lhs == rhs);
-	}
 
 	typedef Size_T<float> Size;
 }

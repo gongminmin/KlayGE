@@ -108,7 +108,7 @@ namespace KlayGE
 			: container_(rhs.container_), compare_(rhs.compare_)
 			{ }
         
-        MapVector const & operator=(MapVector const & rhs)
+        MapVector& operator=(MapVector const & rhs)
         { 
             MapVector(rhs).swap(*this);
             return *this;

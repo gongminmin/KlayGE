@@ -22,7 +22,8 @@ namespace KlayGE
 	class Sphere : boost::addable2<Sphere, Vector3, 
 						boost::subtractable2<Sphere, Vector3,
 						boost::andable<Sphere,
-						boost::orable<Sphere > > > >,
+						boost::orable<Sphere,
+						boost::equality_comparable<Sphere> > > > >,
 				public Bound
 	{
 	public:
@@ -36,27 +37,27 @@ namespace KlayGE
 		}
 
 		// ¸³Öµ²Ù×÷·û
-		Sphere const & operator+=(Vector3 const & rhs)
+		Sphere& operator+=(Vector3 const & rhs)
 		{
 			this->Center() += rhs;
 			return *this;
 		}
-		Sphere const & operator-=(Vector3 const & rhs)
+		Sphere& operator-=(Vector3 const & rhs)
 		{
 			this->Center() -= rhs;
 			return *this;
 		}
-		Sphere const & operator*=(float rhs)
+		Sphere& operator*=(float rhs)
 		{
 			this->Radius() *= rhs;
 			return *this;
 		}
-		Sphere const & operator/=(float rhs)
+		Sphere& operator/=(float rhs)
 		{
 			return this->operator*=(1.0f / rhs);
 		}
 
-		Sphere const & operator=(Sphere const & rhs)
+		Sphere& operator=(Sphere const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -108,21 +109,15 @@ namespace KlayGE
 			return this->Radius() * this->Radius();
 		}
 
+		bool operator==(Sphere const & rhs)
+		{
+			return (center_ == rhs.center_) && (radius_ == rhs.radius_);
+		}
+
 	private:
 		Vector3 center_;
 		float radius_;
 	};
-
-	inline bool
-	operator==(Sphere const & lhs, Sphere const & rhs)
-	{
-		return (lhs.Center() == rhs.Center()) && (lhs.Radius() == rhs.Radius());
-	}
-	inline bool
-	operator!=(Sphere const & lhs, Sphere const & rhs)
-	{
-		return !(lhs == rhs);
-	}
 }
 
 #endif			// _SPHERE_HPP

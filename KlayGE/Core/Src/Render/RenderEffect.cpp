@@ -72,15 +72,15 @@ namespace KlayGE
 	class NullRenderEffectParameter : public RenderEffectParameter
 	{
 	public:
-		RenderEffectParameter const & operator=(float value)
+		RenderEffectParameter& operator=(float value)
 			{ return *this; }
-		RenderEffectParameter const & operator=(Vector4 const & value)
+		RenderEffectParameter& operator=(Vector4 const & value)
 			{ return *this; }
-		RenderEffectParameter const & operator=(Matrix4 const & value)
+		RenderEffectParameter& operator=(Matrix4 const & value)
 			{ return *this; }
-		RenderEffectParameter const & operator=(int value)
+		RenderEffectParameter& operator=(int value)
 			{ return *this; }
-		RenderEffectParameter const & operator=(TexturePtr const & tex)
+		RenderEffectParameter& operator=(TexturePtr const & tex)
 			{ return *this; }
 
 		operator float() const

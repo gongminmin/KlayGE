@@ -25,7 +25,8 @@ namespace KlayGE
 	class Matrix4_T : boost::addable<Matrix4_T<T>,
 						boost::subtractable<Matrix4_T<T>,
 						boost::dividable2<Matrix4_T<T>, T,
-						boost::multipliable2<Matrix4_T<T>, T> > > >
+						boost::multipliable2<Matrix4_T<T>, T,
+						boost::equality_comparable<Matrix4_T<T> > > > > >
 	{
 		template <typename U>
 		friend class Matrix4_T;
@@ -137,33 +138,33 @@ namespace KlayGE
 
 		// ¸³Öµ²Ù×÷·û
 		template <typename U>
-		Matrix4_T const & operator+=(Matrix4_T<U> const & rhs)
+		Matrix4_T& operator+=(Matrix4_T<U> const & rhs)
 		{
 			m_ += rhs.m_;
 			return *this;
 		}
 		template <typename U>
-		Matrix4_T const & operator-=(Matrix4_T<U> const & rhs)
+		Matrix4_T& operator-=(Matrix4_T<U> const & rhs)
 		{
 			m_ -= rhs.m_;
 			return *this;
 		}
 		template <typename U>
-		Matrix4_T const & operator*=(Matrix4_T<U> const & rhs)
+		Matrix4_T& operator*=(Matrix4_T<U> const & rhs)
 		{
 			return MathLib::Multiply(*this, *this, rhs);
 		}
 		template <typename U>
-		Matrix4_T const & operator*=(U const & rhs)
+		Matrix4_T& operator*=(U const & rhs)
 		{
 			m_ *= rhs;
 			return *this;
 		}
 		template <typename U>
-		Matrix4_T const & operator/=(U const & rhs)
+		Matrix4_T& operator/=(U const & rhs)
 			{ return this->operator*=(1.0f / rhs); }
 
-		Matrix4_T const & operator=(Matrix4_T const & rhs)
+		Matrix4_T& operator=(Matrix4_T const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -172,7 +173,7 @@ namespace KlayGE
 			return *this;
 		}
 		template <typename U>
-		Matrix4_T const & operator=(Matrix4_T<U> const & rhs)
+		Matrix4_T& operator=(Matrix4_T<U> const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -191,10 +192,9 @@ namespace KlayGE
 			return temp;
 		}
 
-		friend bool
-		operator==(Matrix4_T const & lhs, Matrix4_T const & rhs)
+		bool operator==(Matrix4_T const & rhs)
 		{
-			return lhs.m_ == rhs.m_;
+			return m_ == rhs.m_;
 		}
 
 	private:
@@ -206,13 +206,6 @@ namespace KlayGE
 	operator*(Matrix4_T<T> const & lhs, Matrix4_T<T> const & rhs)
 	{
 		return Matrix4_T<T>(lhs) *= rhs;
-	}
-
-	template <typename T>
-	inline bool
-	operator!=(Matrix4_T<T> const & lhs, Matrix4_T<T> const & rhs)
-	{
-		return !(lhs == rhs);
 	}
 
 	typedef Matrix4_T<float> Matrix4;

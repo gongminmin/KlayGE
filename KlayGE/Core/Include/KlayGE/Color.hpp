@@ -27,7 +27,9 @@ namespace KlayGE
 	class Color : boost::addable<Color,
 						boost::subtractable<Color,
 						boost::dividable2<Color, float,
-						boost::multipliable2<Color, float> > > >
+						boost::multipliable<Color,
+						boost::multipliable2<Color, float,
+						boost::equality_comparable<Color > > > > > >
 	{
 	public:
 		typedef float				value_type;
@@ -108,38 +110,43 @@ namespace KlayGE
 		}
 
 		// 赋值操作符
-		Color const & operator+=(Color const & rhs)
+		Color& operator+=(Color const & rhs)
 		{
 			col_ += rhs.col_;
 			return *this;
 		}
-		Color const & operator-=(Color const & rhs)
+		Color& operator-=(Color const & rhs)
 		{
 			col_ -= rhs.col_;
 			return *this;
 		}
-		Color const & operator*=(float rhs)
+		Color& operator*=(float rhs)
 		{
 			col_ *= rhs;
 			return *this;
 		}
-		Color const & operator*=(Color const & rhs)
+		Color& operator*=(Color const & rhs)
 		{
 			return MathLib::Modulate(*this, *this, rhs);
 		}
-		Color const & operator/=(float rhs)
+		Color& operator/=(float rhs)
 		{
 			col_ /= rhs;
 			return *this;
 		}
 
-		Color const & operator=(Color const & rhs)
+		Color& operator=(Color const & rhs)
 		{
 			if (this != &rhs)
 			{
 				col_ = rhs.col_;
 			}
 			return *this;
+		}
+
+		bool operator==(Color const & rhs)
+		{
+			return col_ == rhs.col_;
 		}
 
 		// 一元操作符
@@ -151,23 +158,6 @@ namespace KlayGE
 	private:
 		Vector_T<float, elem_num> col_;
 	};
-
-	inline Color const
-	operator*(Color const & lhs, Color const & rhs)
-	{
-		return Color(lhs) *= rhs;
-	}
-
-	inline bool
-	operator==(Color const & lhs, Color const & rhs)
-	{
-		return (lhs.r() == rhs.r()) && (lhs.g() == rhs.g()) && (lhs.b() == rhs.b()) && (lhs.a() == rhs.a());
-	}
-	inline bool
-	operator!=(Color const & lhs, Color const & rhs)
-	{
-		return !(lhs == rhs);
-	}
 }
 
 #endif			// _COLOR_HPP

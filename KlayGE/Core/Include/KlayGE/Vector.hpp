@@ -297,7 +297,7 @@ namespace KlayGE
 			return this->operator*=(1.0f / rhs);
 		}
 
-		Vector_T const & operator=(Vector_T const & rhs)
+		Vector_T& operator=(Vector_T const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -306,7 +306,7 @@ namespace KlayGE
 			return *this;
 		}
 		template <typename U>
-		Vector_T const & operator=(Vector_T<U, N> const & rhs)
+		Vector_T& operator=(Vector_T<U, N> const & rhs)
 		{
 			if (this != &rhs)
 			{

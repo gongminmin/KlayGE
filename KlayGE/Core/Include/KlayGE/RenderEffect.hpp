@@ -62,11 +62,11 @@ namespace KlayGE
 
 		static RenderEffectParameterPtr NullObject();
 
-		virtual RenderEffectParameter const & operator=(float value) = 0;
-		virtual RenderEffectParameter const & operator=(Vector4 const & value) = 0;
-		virtual RenderEffectParameter const & operator=(Matrix4 const & value) = 0;
-		virtual RenderEffectParameter const & operator=(int value) = 0;
-		virtual RenderEffectParameter const & operator=(TexturePtr const & tex) = 0;
+		virtual RenderEffectParameter& operator=(float value) = 0;
+		virtual RenderEffectParameter& operator=(Vector4 const & value) = 0;
+		virtual RenderEffectParameter& operator=(Matrix4 const & value) = 0;
+		virtual RenderEffectParameter& operator=(int value) = 0;
+		virtual RenderEffectParameter& operator=(TexturePtr const & tex) = 0;
 
 		virtual operator float() const = 0;
 		virtual operator Vector4() const = 0;
