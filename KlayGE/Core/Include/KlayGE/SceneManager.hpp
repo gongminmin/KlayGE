@@ -39,7 +39,8 @@ namespace KlayGE
 		virtual void ClipScene(const ViewPoint& viewPoint)
 			{ }
 
-		virtual void Update(const ViewPointPtr& viewPoint = ViewPointPtr());
+		void Update(const ViewPointPtr& viewPoint = ViewPointPtr());
+		virtual void Flash(const ViewPointPtr& viewPoint = ViewPointPtr());
 
 	protected:
 		RenderQueueType renderQueue_;

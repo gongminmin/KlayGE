@@ -58,6 +58,11 @@ namespace KlayGE
 	{
 		Engine::AppInstance().Update();
 
+		this->Flash(viewPoint);
+	}
+
+	void SceneManager::Flash(const ViewPointPtr& viewPoint)
+	{
 		if (viewPoint.Get() != NULL)
 		{
 			this->ClipScene(*viewPoint);

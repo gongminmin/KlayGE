@@ -18,6 +18,11 @@ namespace KlayGE
 		privateTex_ = Engine::RenderFactoryInstance().MakeTexture(width, height, 0, PF_X8R8G8B8, Texture::TU_RenderTarget);
 		width_ = privateTex_->Width();
 		height_ = privateTex_->Height();
+
+		viewport_.left		= left_;
+		viewport_.top		= top_;
+		viewport_.width		= width_;
+		viewport_.height	= height_;
 	}
 
 	void D3D9RenderTexture::CustomAttribute(const String& name, void* pData)

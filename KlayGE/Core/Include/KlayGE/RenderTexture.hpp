@@ -11,10 +11,10 @@ namespace KlayGE
 	class RenderTexture : public RenderTarget
 	{
 	public:
-		const Texture& GetTexture() const
-			{ return *privateTex_; }
-		Texture& GetTexture()
-			{ return *privateTex_; }
+		const TexturePtr& GetTexture() const
+			{ return privateTex_; }
+		TexturePtr& GetTexture()
+			{ return privateTex_; }
 
 	protected:
 		TexturePtr privateTex_;
