@@ -53,7 +53,6 @@ VS_OUTPUT DisplacementVS(VS_INPUT input,
 texture diffusemap;
 texture normalmap;
 texture distancemap;
-texture normalizermap;
 
 sampler2D diffuseMapSampler = sampler_state
 {
@@ -94,7 +93,7 @@ float4 DisplacementPS(float3 texCoord0	: TEXCOORD0,
 					uniform sampler2D normalMap,
 					uniform sampler3D distanceMap) : COLOR
 {
-	float3 view = normalize(V) * 0.5;
+	float3 view = normalize(V) * 0.3;
 
 	float3 texUV = texCoord0;
 	for (int i = 0; i < 8; ++ i)

@@ -82,12 +82,12 @@ sampler2D heightMapSampler = sampler_state
 samplerCUBE normalizerMapSampler = sampler_state
 {
 	Texture = <normalizermap>;
-	MinFilter = Linear;
-	MagFilter = Linear;
-	MipFilter = Linear;
-	AddressU  = Wrap;
-	AddressV  = Wrap;
-	AddressW  = Wrap;
+	MinFilter = Point;
+	MagFilter = Point;
+	MipFilter = Point;
+	AddressU  = Clamp;
+	AddressV  = Clamp;
+	AddressW  = Clamp;
 };
 
 float4 ParallaxPS(float2 texCoord0	: TEXCOORD0,
