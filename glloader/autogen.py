@@ -185,7 +185,6 @@ def create_source(prefix, extensions):
 		sourceFile.write("char glloader_%s = 0;\n" % extension.name)
 	sourceFile.write("\n")
 
-	sourceFile.write("using glloader::init_all;\n")
 	sourceFile.write("using glloader::load_funcs;\n\n")
 
 	for extension in extensions:
@@ -197,7 +196,7 @@ def create_source(prefix, extensions):
 			for function in extension.functions:
 				sourceFile.write("\t%s APIENTRY self_init_%s(%s)\n" % (function.return_type, function.name, function.params_str()))
 				sourceFile.write("\t{\n")
-				sourceFile.write("\t\tinit_all();\n")
+				sourceFile.write("\t\tglloader_init();\n")
 				sourceFile.write("\t\treturn %s(%s);\n" % (function.name, function.param_names_str()))
 				sourceFile.write("\t}\n")
 			sourceFile.write("}\n\n")

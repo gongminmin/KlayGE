@@ -137,7 +137,13 @@ extern "C"
 {
 #endif
 
+/* Initiate GLLoader */
+void glloader_init();
+
+/* Check if a feature is supported, including the core and the extensions */
 int glloader_is_supported(const char* name);
+
+/* Get the address of OpenGL extension functions, given the function name */
 void* glloader_get_gl_proc_address(const char* name);
 
 #ifdef __cplusplus

@@ -20,6 +20,9 @@
 #include <cassert>
 #include <algorithm>
 
+#include <boost/bind.hpp>
+#include <boost/algorithm/string/split.hpp>
+
 #ifdef GLLOADER_DEBUG
 #include <iostream>
 #endif
@@ -32,27 +35,21 @@ namespace
 	std::vector<std::string> split(std::string const & str)
 	{
 		std::vector<std::string> ret;
-
-		for (std::string::size_type offset = 0; offset != str.length();)
-		{
-			std::string::size_type const pos = str.find(' ', offset);
-			ret.push_back(str.substr(offset, pos - offset));
-
-			offset = pos + 1;
-		}
+		boost::algorithm::split(ret, std::string(str), boost::bind(std::equal_to<char>(), ' ', _1));
 
 		return ret;
 	}
 
 	// Return the version of OpenGL in current system
-	int gl_version()
+	void gl_version(int& major, int& minor)
 	{
 		GLubyte const * str = ::glGetString(GL_VERSION);
 
 		std::string const ver(reinterpret_cast<char const *>(str));
 		std::string::size_type const pos(ver.find("."));
 
-		return (ver[pos - 1] - '0') * 10 + (ver[pos + 1] - '0');
+		major = ver[pos - 1] - '0';
+		minor = ver[pos + 1] - '0';
 	}
 
 	std::vector<std::string> gl_features()
@@ -61,7 +58,10 @@ namespace
 
 		std::vector<std::string> ret = split(reinterpret_cast<char const *>(str));
 
-		int const ver_code = gl_version();
+		int major, minor;
+		gl_version(major, minor);
+
+		int const ver_code = major * 10 + minor;
 		if (ver_code >= 10)
 		{
 			ret.push_back("GL_VERSION_1_0");
@@ -155,22 +155,46 @@ namespace
 		return ret;
 	}
 #endif		// GLLOADER_GLX
+
+	std::vector<std::string> const & all_features()
+	{
+		static std::vector<std::string> features;
+
+		if (features.empty())
+		{
+			std::vector<std::string> gl = gl_features();
+			features.insert(features.end(), gl.begin(), gl.end());
+
+	#ifdef GLLOADER_WGL
+			std::vector<std::string> wgl = wgl_features();
+			features.insert(features.end(), wgl.begin(), wgl.end());
+	#endif
+
+	#ifdef GLLOADER_GLX
+			std::vector<std::string> glx = glx_features();
+			features.insert(features.end(), glx.begin(), glx.end());
+	#endif
+
+			std::sort(features.begin(), features.end());
+		}
+
+		return features;
+	}
 }
 
-void glloader::init_all()
+void glloader_init()
 {
-	gl_init();
+	glloader::gl_init();
 
 #ifdef GLLOADER_WGL
-	wgl_init();
+	glloader::wgl_init();
 #endif
 
 #ifdef GLLOADER_GLX
-	glx_init();
+	glloader::glx_init();
 #endif
 }
 
-// Gets the address of OpenGL extension functions, given the function name
 void* glloader_get_gl_proc_address(const char* name)
 {
 #ifdef ISWIN32
@@ -199,28 +223,8 @@ void glloader::load_funcs(entries_t& entries, funcs_names_t const & names)
 	}
 }
 
-// Check if a feature is supported, including the core and the extensions
 int glloader_is_supported(const char* name)
 {
-	static std::vector<std::string> features;
-
-	if (features.empty())
-	{
-		std::vector<std::string> gl = gl_features();
-		features.insert(features.end(), gl.begin(), gl.end());
-
-#ifdef GLLOADER_WGL
-		std::vector<std::string> wgl = wgl_features();
-		features.insert(features.end(), wgl.begin(), wgl.end());
-#endif
-
-#ifdef GLLOADER_GLX
-		std::vector<std::string> glx = glx_features();
-		features.insert(features.end(), glx.begin(), glx.end());
-#endif
-
-		std::sort(features.begin(), features.end());
-	}
-
+	std::vector<std::string> const & features = all_features();
 	return std::binary_search(features.begin(), features.end(), std::string(name));
 }

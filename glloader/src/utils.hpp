@@ -28,8 +28,6 @@ namespace glloader
 {
 	void load_funcs(entries_t& entries, funcs_names_t const & names);
 
-	void init_all();
-
 	void gl_init();
 	void wgl_init();
 	void glx_init();
