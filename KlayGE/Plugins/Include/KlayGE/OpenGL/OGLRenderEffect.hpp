@@ -16,7 +16,7 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderEffect.hpp>
 
-#if defined(DEBUG) | defined(_DEBUG)
+#ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL_d.lib")
 #else
 	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL.lib")

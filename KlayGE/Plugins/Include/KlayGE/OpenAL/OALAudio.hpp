@@ -31,7 +31,7 @@
 
 #include <KlayGE/Audio.hpp>
 
-#if defined(DEBUG) | defined(_DEBUG)
+#ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_AudioEngine_OpenAL_d.lib")
 #else
 	#pragma comment(lib, "KlayGE_AudioEngine_OpenAL.lib")

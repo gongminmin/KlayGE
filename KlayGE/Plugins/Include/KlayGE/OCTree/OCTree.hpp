@@ -23,7 +23,7 @@
 
 #include <KlayGE/OCTree/Frustum.hpp>
 
-#if defined(DEBUG) | defined(_DEBUG)
+#ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_Scene_OCTree_d.lib")
 #else
 	#pragma comment(lib, "KlayGE_Scene_OCTree.lib")

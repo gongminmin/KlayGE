@@ -27,8 +27,7 @@ namespace KlayGE
 	D3D9VertexStream::D3D9VertexStream(VertexStreamType type, uint8_t sizeElement, uint8_t ElementsPerVertex, bool staticStream)
 			: VertexStream(type, sizeElement, ElementsPerVertex),
 				currentSize_(0), numVertices_(0), 
-				staticStream_(staticStream),
-				reseted_(true)
+				staticStream_(staticStream)
 	{
 	}
 
@@ -92,67 +91,57 @@ namespace KlayGE
 		return buffer_;
 	}
 
-	void D3D9VertexStream::OnLostDevice()
+	void D3D9VertexStream::DoOnLostDevice()
 	{
-		if (reseted_)
-		{
-			boost::shared_ptr<IDirect3DDevice9> d3dDevice(static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
-			size_t const vertexSize(this->sizeElement() * this->ElementsPerVertex());
-			size_t const size(vertexSize * numVertices_);
+		boost::shared_ptr<IDirect3DDevice9> d3dDevice(static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
+		size_t const vertexSize(this->sizeElement() * this->ElementsPerVertex());
+		size_t const size(vertexSize * numVertices_);
 
-			IDirect3DVertexBuffer9* temp;
-			TIF(d3dDevice->CreateVertexBuffer(static_cast<UINT>(size), 0, 0, D3DPOOL_SYSTEMMEM, &temp, NULL));
-			boost::shared_ptr<IDirect3DVertexBuffer9> buffer = MakeCOMPtr(temp);
+		IDirect3DVertexBuffer9* temp;
+		TIF(d3dDevice->CreateVertexBuffer(static_cast<UINT>(size), 0, 0, D3DPOOL_SYSTEMMEM, &temp, NULL));
+		boost::shared_ptr<IDirect3DVertexBuffer9> buffer = MakeCOMPtr(temp);
 
-			void* src;
-			void* dest;
-			TIF(buffer_->Lock(0, 0, &src, D3DLOCK_NOSYSLOCK));
-			TIF(buffer->Lock(0, 0, &dest, D3DLOCK_NOSYSLOCK));
+		void* src;
+		void* dest;
+		TIF(buffer_->Lock(0, 0, &src, D3DLOCK_NOSYSLOCK));
+		TIF(buffer->Lock(0, 0, &dest, D3DLOCK_NOSYSLOCK));
 
-			uint8_t* destPtr(static_cast<uint8_t*>(dest));
-			uint8_t const * srcPtr(static_cast<uint8_t const *>(src));
-			std::copy(srcPtr, srcPtr + size, destPtr);
+		uint8_t* destPtr(static_cast<uint8_t*>(dest));
+		uint8_t const * srcPtr(static_cast<uint8_t const *>(src));
+		std::copy(srcPtr, srcPtr + size, destPtr);
 
-			buffer->Unlock();
-			buffer_->Unlock();
+		buffer->Unlock();
+		buffer_->Unlock();
 
-			buffer_ = buffer;
-			currentSize_ = size;
-
-			reseted_ = false;
-		}
+		buffer_ = buffer;
+		currentSize_ = size;
 	}
 	
-	void D3D9VertexStream::OnResetDevice()
+	void D3D9VertexStream::DoOnResetDevice()
 	{
-		if (!reseted_)
-		{
-			boost::shared_ptr<IDirect3DDevice9> d3dDevice(static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
-			size_t const vertexSize(this->sizeElement() * this->ElementsPerVertex());
-			size_t const size(vertexSize * numVertices_);
+		boost::shared_ptr<IDirect3DDevice9> d3dDevice(static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
+		size_t const vertexSize(this->sizeElement() * this->ElementsPerVertex());
+		size_t const size(vertexSize * numVertices_);
 
-			IDirect3DVertexBuffer9* temp;
-			TIF(d3dDevice->CreateVertexBuffer(static_cast<UINT>(size),
-					this->IsStatic() ? 0 : D3DUSAGE_DYNAMIC,
-					0, D3DPOOL_DEFAULT, &temp, NULL));
-			boost::shared_ptr<IDirect3DVertexBuffer9> buffer = MakeCOMPtr(temp);
+		IDirect3DVertexBuffer9* temp;
+		TIF(d3dDevice->CreateVertexBuffer(static_cast<UINT>(size),
+				this->IsStatic() ? 0 : D3DUSAGE_DYNAMIC,
+				0, D3DPOOL_DEFAULT, &temp, NULL));
+		boost::shared_ptr<IDirect3DVertexBuffer9> buffer = MakeCOMPtr(temp);
 
-			void* src;
-			void* dest;
-			TIF(buffer_->Lock(0, 0, &src, D3DLOCK_NOSYSLOCK));
-			TIF(buffer->Lock(0, 0, &dest, D3DLOCK_NOSYSLOCK));
+		void* src;
+		void* dest;
+		TIF(buffer_->Lock(0, 0, &src, D3DLOCK_NOSYSLOCK));
+		TIF(buffer->Lock(0, 0, &dest, D3DLOCK_NOSYSLOCK));
 
-			uint8_t* destPtr(static_cast<uint8_t*>(dest));
-			uint8_t const * srcPtr(static_cast<uint8_t const *>(src));
-			std::copy(srcPtr, srcPtr + size, destPtr);
+		uint8_t* destPtr(static_cast<uint8_t*>(dest));
+		uint8_t const * srcPtr(static_cast<uint8_t const *>(src));
+		std::copy(srcPtr, srcPtr + size, destPtr);
 
-			buffer->Unlock();
-			buffer_->Unlock();
+		buffer->Unlock();
+		buffer_->Unlock();
 
-			buffer_ = buffer;
-			currentSize_ = size;
-
-			reseted_ = true;
-		}
+		buffer_ = buffer;
+		currentSize_ = size;
 	}
 }

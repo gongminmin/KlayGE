@@ -25,14 +25,14 @@ namespace KlayGE
 		Trace(char* const func, int line = 0, char* const file = NULL)
 			: func_(func), line_(line), file_(file)
 		{
-#if defined(DEBUG) | defined(_DEBUG)
+#ifdef KLAYGE_DEBUG
 			std::clog << "Calling " << func_ << " in file " << file_ << " on line " << line_ << std::endl;
 #endif
 		}
 
 		~Trace()
 		{
-#if defined(DEBUG) | defined(_DEBUG)
+#ifdef KLAYGE_DEBUG
 			std::clog << "Leaving " << func_ << " in file " << file_ << " on line " << line_ << std::endl;
 #endif
 		}

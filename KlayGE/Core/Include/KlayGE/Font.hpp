@@ -28,7 +28,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-#if defined(DEBUG) | defined(_DEBUG)
+#ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_Core_d.lib")
 #else
 	#pragma comment(lib, "KlayGE_Core.lib")

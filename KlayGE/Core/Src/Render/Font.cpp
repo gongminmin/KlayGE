@@ -44,7 +44,7 @@
 
 #include <KlayGE/Font.hpp>
 
-#if defined(DEBUG) | defined(_DEBUG)
+#ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "freetype219MT_D.lib")
 #else
 	#pragma comment(lib, "freetype219MT.lib")

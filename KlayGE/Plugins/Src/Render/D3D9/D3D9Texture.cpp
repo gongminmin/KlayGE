@@ -157,7 +157,6 @@ namespace KlayGE
 {
 	D3D9Texture::D3D9Texture(uint32_t width, uint32_t height,
 								uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
-							: reseted_(true)
 	{
 		d3dDevice_ = static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
 
@@ -360,125 +359,115 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9Texture::OnLostDevice()
+	void D3D9Texture::DoOnLostDevice()
 	{
-		if (reseted_)
+		d3dDevice_ = static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
+
+		if (TU_Default == usage_)
 		{
-			d3dDevice_ = static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
+			IDirect3DTexture9* d3dTexture;
+			TIF(D3DXCreateTexture(d3dDevice_.get(), this->Width(), this->Height(),
+				this->NumMipMaps(), 0, ConvertFormat(format_),
+				D3DPOOL_SYSTEMMEM, &d3dTexture));
+			boost::shared_ptr<IDirect3DTexture9> tempTexture = MakeCOMPtr(d3dTexture);
 
-			if (TU_Default == usage_)
+			for (uint16_t i = 0; i < this->NumMipMaps(); ++ i)
 			{
-				IDirect3DTexture9* d3dTexture;
-				TIF(D3DXCreateTexture(d3dDevice_.get(), this->Width(), this->Height(),
-					this->NumMipMaps(), 0, ConvertFormat(format_),
-					D3DPOOL_SYSTEMMEM, &d3dTexture));
-				boost::shared_ptr<IDirect3DTexture9> tempTexture = MakeCOMPtr(d3dTexture);
+				IDirect3DSurface9* temp;
+				TIF(this->D3DTexture()->GetSurfaceLevel(i, &temp));
+				boost::shared_ptr<IDirect3DSurface9> src = MakeCOMPtr(temp);
 
-				for (uint16_t i = 0; i < this->NumMipMaps(); ++ i)
-				{
-					IDirect3DSurface9* temp;
-					TIF(this->D3DTexture()->GetSurfaceLevel(i, &temp));
-					boost::shared_ptr<IDirect3DSurface9> src = MakeCOMPtr(temp);
+				TIF(tempTexture->GetSurfaceLevel(i, &temp));
+				boost::shared_ptr<IDirect3DSurface9> dst = MakeCOMPtr(temp);
 
-					TIF(tempTexture->GetSurfaceLevel(i, &temp));
-					boost::shared_ptr<IDirect3DSurface9> dst = MakeCOMPtr(temp);
-
-					TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
-				}
-				tempTexture->AddDirtyRect(NULL);
-				d3dTexture_ = tempTexture;
+				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
 			}
-			else
+			tempTexture->AddDirtyRect(NULL);
+			d3dTexture_ = tempTexture;
+		}
+		else
+		{
+			IDirect3DSurface9* tempSurf;
+			D3DSURFACE_DESC tempDesc;
+
+			d3dDevice_->GetRenderTarget(0, &tempSurf);
+			tempSurf->GetDesc(&tempDesc);
+			tempSurf->Release();
+
+			IDirect3DTexture9* d3dTexture;
+			TIF(D3DXCreateTexture(d3dDevice_.get(), this->Width(), this->Height(),
+				this->NumMipMaps(), 0, tempDesc.Format, D3DPOOL_SYSTEMMEM, &d3dTexture));
+			boost::shared_ptr<IDirect3DTexture9> tempTexture = MakeCOMPtr(d3dTexture);
+			for (uint16_t i = 0; i < this->NumMipMaps(); ++ i)
 			{
-				IDirect3DSurface9* tempSurf;
-				D3DSURFACE_DESC tempDesc;
+				IDirect3DSurface9* temp;
+				TIF(this->D3DTexture()->GetSurfaceLevel(i, &temp));
+				boost::shared_ptr<IDirect3DSurface9> src = MakeCOMPtr(temp);
 
-				d3dDevice_->GetRenderTarget(0, &tempSurf);
-				tempSurf->GetDesc(&tempDesc);
-				tempSurf->Release();
+				TIF(tempTexture->GetSurfaceLevel(i, &temp));
+				boost::shared_ptr<IDirect3DSurface9> dst = MakeCOMPtr(temp);
 
-				IDirect3DTexture9* d3dTexture;
-				TIF(D3DXCreateTexture(d3dDevice_.get(), this->Width(), this->Height(),
-					this->NumMipMaps(), 0, tempDesc.Format, D3DPOOL_SYSTEMMEM, &d3dTexture));
-				boost::shared_ptr<IDirect3DTexture9> tempTexture = MakeCOMPtr(d3dTexture);
-				for (uint16_t i = 0; i < this->NumMipMaps(); ++ i)
-				{
-					IDirect3DSurface9* temp;
-					TIF(this->D3DTexture()->GetSurfaceLevel(i, &temp));
-					boost::shared_ptr<IDirect3DSurface9> src = MakeCOMPtr(temp);
-
-					TIF(tempTexture->GetSurfaceLevel(i, &temp));
-					boost::shared_ptr<IDirect3DSurface9> dst = MakeCOMPtr(temp);
-
-					TIF(d3dDevice_->GetRenderTargetData(src.get(), dst.get()));
-				}
-				tempTexture->AddDirtyRect(NULL);
-				d3dTexture_ = tempTexture;
-
-				d3dDevice_->GetDepthStencilSurface(&tempSurf);
-				tempSurf->GetDesc(&tempDesc);
-				tempSurf->Release();
-
-				TIF(d3dDevice_->CreateOffscreenPlainSurface(width_, height_, tempDesc.Format,
-					D3DPOOL_SYSTEMMEM, &tempSurf, NULL));
-				boost::shared_ptr<IDirect3DSurface9> dst = MakeCOMPtr(tempSurf);
-				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, renderZBuffer_.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
-				renderZBuffer_ = dst;
+				TIF(d3dDevice_->GetRenderTargetData(src.get(), dst.get()));
 			}
+			tempTexture->AddDirtyRect(NULL);
+			d3dTexture_ = tempTexture;
 
-			reseted_ = false;
+			d3dDevice_->GetDepthStencilSurface(&tempSurf);
+			tempSurf->GetDesc(&tempDesc);
+			tempSurf->Release();
+
+			TIF(d3dDevice_->CreateOffscreenPlainSurface(width_, height_, tempDesc.Format,
+				D3DPOOL_SYSTEMMEM, &tempSurf, NULL));
+			boost::shared_ptr<IDirect3DSurface9> dst = MakeCOMPtr(tempSurf);
+			TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, renderZBuffer_.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+			renderZBuffer_ = dst;
 		}
 	}
 
-	void D3D9Texture::OnResetDevice()
+	void D3D9Texture::DoOnResetDevice()
 	{
-		if (!reseted_)
+		d3dDevice_ = static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
+
+		if (TU_Default == usage_)
 		{
-			d3dDevice_ = static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
+			IDirect3DTexture9* d3dTexture;
+			TIF(D3DXCreateTexture(d3dDevice_.get(), this->Width(), this->Height(),
+				this->NumMipMaps(), D3DUSAGE_DYNAMIC, ConvertFormat(format_),
+				D3DPOOL_DEFAULT, &d3dTexture));
+			boost::shared_ptr<IDirect3DTexture9> tempTexture = MakeCOMPtr(d3dTexture);
+			tempTexture->AddDirtyRect(NULL);
 
-			if (TU_Default == usage_)
-			{
-				IDirect3DTexture9* d3dTexture;
-				TIF(D3DXCreateTexture(d3dDevice_.get(), this->Width(), this->Height(),
-					this->NumMipMaps(), D3DUSAGE_DYNAMIC, ConvertFormat(format_),
-					D3DPOOL_DEFAULT, &d3dTexture));
-				boost::shared_ptr<IDirect3DTexture9> tempTexture = MakeCOMPtr(d3dTexture);
-				tempTexture->AddDirtyRect(NULL);
+			d3dDevice_->UpdateTexture(d3dTexture_.get(), tempTexture.get());
+			d3dTexture_ = tempTexture;
+		}
+		else
+		{
+			IDirect3DSurface9* tempSurf;
+			D3DSURFACE_DESC tempDesc;
 
-				d3dDevice_->UpdateTexture(d3dTexture_.get(), tempTexture.get());
-				d3dTexture_ = tempTexture;
-			}
-			else
-			{
-				IDirect3DSurface9* tempSurf;
-				D3DSURFACE_DESC tempDesc;
+			d3dDevice_->GetRenderTarget(0, &tempSurf);
+			tempSurf->GetDesc(&tempDesc);
+			tempSurf->Release();
 
-				d3dDevice_->GetRenderTarget(0, &tempSurf);
-				tempSurf->GetDesc(&tempDesc);
-				tempSurf->Release();
+			IDirect3DTexture9* d3dTexture;
+			TIF(D3DXCreateTexture(d3dDevice_.get(), this->Width(), this->Height(),
+				this->NumMipMaps(), D3DUSAGE_RENDERTARGET,
+				tempDesc.Format, D3DPOOL_DEFAULT, &d3dTexture));
+			boost::shared_ptr<IDirect3DTexture9> tempTexture = MakeCOMPtr(d3dTexture);
+			tempTexture->AddDirtyRect(NULL);
 
-				IDirect3DTexture9* d3dTexture;
-				TIF(D3DXCreateTexture(d3dDevice_.get(), this->Width(), this->Height(),
-					this->NumMipMaps(), D3DUSAGE_RENDERTARGET,
-					tempDesc.Format, D3DPOOL_DEFAULT, &d3dTexture));
-				boost::shared_ptr<IDirect3DTexture9> tempTexture = MakeCOMPtr(d3dTexture);
-				tempTexture->AddDirtyRect(NULL);
+			d3dDevice_->UpdateTexture(d3dTexture_.get(), tempTexture.get());
+			d3dTexture_ = tempTexture;
 
-				d3dDevice_->UpdateTexture(d3dTexture_.get(), tempTexture.get());
-				d3dTexture_ = tempTexture;
+			d3dDevice_->GetDepthStencilSurface(&tempSurf);
+			tempSurf->GetDesc(&tempDesc);
+			tempSurf->Release();
 
-				d3dDevice_->GetDepthStencilSurface(&tempSurf);
-				tempSurf->GetDesc(&tempDesc);
-				tempSurf->Release();
-
-				TIF(d3dDevice_->CreateDepthStencilSurface(width_, height_, tempDesc.Format, tempDesc.MultiSampleType, 0, 
-					FALSE, &tempSurf, NULL));
-				boost::shared_ptr<IDirect3DSurface9> dst = MakeCOMPtr(tempSurf);
-				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, renderZBuffer_.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
-				renderZBuffer_ = dst;
-			}
-
-			reseted_ = true;
+			TIF(d3dDevice_->CreateDepthStencilSurface(width_, height_, tempDesc.Format, tempDesc.MultiSampleType, 0, 
+				FALSE, &tempSurf, NULL));
+			boost::shared_ptr<IDirect3DSurface9> dst = MakeCOMPtr(tempSurf);
+			TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, renderZBuffer_.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+			renderZBuffer_ = dst;
 		}
 	}
 }

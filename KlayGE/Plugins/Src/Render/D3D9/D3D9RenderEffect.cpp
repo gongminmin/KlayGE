@@ -138,7 +138,7 @@ namespace KlayGE
 		TIF(effect_->End());
 	}
 
-	void D3D9RenderEffect::OnLostDevice()
+	void D3D9RenderEffect::DoOnLostDevice()
 	{
 		for (std::set<D3D9RenderEffectParameterPtr>::iterator iter = params_.begin();
 			iter != params_.end(); ++ iter)
@@ -149,7 +149,7 @@ namespace KlayGE
 		TIF(effect_->OnLostDevice());
 	}
 
-	void D3D9RenderEffect::OnResetDevice()
+	void D3D9RenderEffect::DoOnResetDevice()
 	{
 		TIF(effect_->OnResetDevice());
 
@@ -285,7 +285,7 @@ namespace KlayGE
 		TIF(effect_->GetIntArray(parameter_, value, static_cast<UINT>(count)));
 	}
 
-	void D3D9RenderEffectParameter::OnLostDevice()
+	void D3D9RenderEffectParameter::DoOnLostDevice()
 	{
 		if (texture_)
 		{
@@ -294,7 +294,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9RenderEffectParameter::OnResetDevice()
+	void D3D9RenderEffectParameter::DoOnResetDevice()
 	{
 		if (texture_)
 		{

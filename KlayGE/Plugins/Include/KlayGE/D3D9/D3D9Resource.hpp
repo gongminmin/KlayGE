@@ -15,7 +15,7 @@
 
 #include <boost/smart_ptr.hpp>
 
-#if defined(DEBUG) | defined(_DEBUG)
+#ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_RenderEngine_D3D9_d.lib")
 #else
 	#pragma comment(lib, "KlayGE_RenderEngine_D3D9.lib")
@@ -26,12 +26,38 @@ namespace KlayGE
 	class D3D9Resource
 	{
 	public:
+		D3D9Resource()
+			: reseted_(true)
+		{
+		}
+
 		virtual ~D3D9Resource()
 		{
 		}
 
-		virtual void OnLostDevice() = 0;
-		virtual void OnResetDevice() = 0;
+		void OnLostDevice()
+		{
+			if (reseted_)
+			{
+				this->DoOnLostDevice();
+				reseted_ = false;
+			}
+		}
+		void OnResetDevice()
+		{
+			if (!reseted_)
+			{
+				this->DoOnResetDevice();
+				reseted_ = true;
+			}
+		}
+
+	private:
+		virtual void DoOnLostDevice() = 0;
+		virtual void DoOnResetDevice() = 0;
+
+	private:
+		bool reseted_;
 	};
 
 	typedef boost::shared_ptr<D3D9Resource> D3D9ResourcePtr;

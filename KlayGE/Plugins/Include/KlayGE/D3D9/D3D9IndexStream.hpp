@@ -23,7 +23,7 @@
 #include <KlayGE/RenderBuffer.hpp>
 #include <KlayGE/D3D9/D3D9Resource.hpp>
 
-#if defined(DEBUG) | defined(_DEBUG)
+#ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_RenderEngine_D3D9_d.lib")
 #else
 	#pragma comment(lib, "KlayGE_RenderEngine_D3D9.lib")
@@ -43,8 +43,9 @@ namespace KlayGE
 		boost::shared_ptr<IDirect3DIndexBuffer9> D3D9Buffer() const;
 		size_t NumIndices() const;
 
-		void OnLostDevice();
-		void OnResetDevice();
+	private:
+		void DoOnLostDevice();
+		void DoOnResetDevice();
 
 	private:
 		boost::shared_ptr<IDirect3DIndexBuffer9> buffer_;
@@ -53,8 +54,6 @@ namespace KlayGE
 		size_t numIndices_;
 
 		bool staticStream_;
-
-		bool reseted_;
 	};
 
 	typedef boost::shared_ptr<D3D9IndexStream> D3D9IndexStreamPtr;

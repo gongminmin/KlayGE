@@ -20,7 +20,7 @@
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/RenderEngine.hpp>
 
-#if defined(DEBUG) | defined(_DEBUG)
+#ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_AppLayer_d.lib")
 #else
 	#pragma comment(lib, "KlayGE_AppLayer.lib")

@@ -21,7 +21,7 @@
 #include <KlayGE/Input.hpp>
 #include <boost/smart_ptr.hpp>
 
-#if defined(DEBUG) | defined(_DEBUG)
+#ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_InputEngine_DInput_d.lib")
 #else
 	#pragma comment(lib, "KlayGE_InputEngine_DInput.lib")

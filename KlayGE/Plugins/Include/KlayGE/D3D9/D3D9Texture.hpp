@@ -26,7 +26,7 @@
 #include <KlayGE/D3D9/D3D9Resource.hpp>
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 
-#if defined(DEBUG) | defined(_DEBUG)
+#ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_RenderEngine_D3D9_d.lib")
 #else
 	#pragma comment(lib, "KlayGE_RenderEngine_D3D9.lib")
@@ -56,16 +56,15 @@ namespace KlayGE
 		boost::shared_ptr<IDirect3DSurface9> const & DepthStencil() const
 			{ return this->renderZBuffer_; }
 
-		void OnLostDevice();
-		void OnResetDevice();
+	private:
+		void DoOnLostDevice();
+		void DoOnResetDevice();
 
 	private:
 		boost::shared_ptr<IDirect3DDevice9>		d3dDevice_;
 		boost::shared_ptr<IDirect3DTexture9>	d3dTexture_;
 
 		boost::shared_ptr<IDirect3DSurface9>	renderZBuffer_;		// The z-buffer for the render surface.
-
-		bool reseted_;
 	};
 
 	typedef boost::shared_ptr<D3D9Texture> D3D9TexturePtr;

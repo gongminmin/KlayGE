@@ -36,7 +36,7 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/D3D9/D3D9Resource.hpp>
 
-#if defined(DEBUG) | defined(_DEBUG)
+#ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_RenderEngine_D3D9_d.lib")
 #else
 	#pragma comment(lib, "KlayGE_RenderEngine_D3D9.lib")
@@ -79,8 +79,9 @@ namespace KlayGE
 		void EndPass();
 		void End();
 
-		void OnLostDevice();
-		void OnResetDevice();
+	private:
+		void DoOnLostDevice();
+		void DoOnResetDevice();
 
 	private:
 		boost::shared_ptr<ID3DXEffect> effect_;
@@ -88,7 +89,7 @@ namespace KlayGE
 		std::set<D3D9RenderEffectParameterPtr> params_;
 	};
 
-	class D3D9RenderEffectParameter : public RenderEffectParameter
+	class D3D9RenderEffectParameter : public RenderEffectParameter, public D3D9Resource
 	{
 	public:
 		D3D9RenderEffectParameter(boost::shared_ptr<ID3DXEffect> const & effect, D3DXHANDLE parameter);
@@ -113,8 +114,9 @@ namespace KlayGE
 		void SetIntArray(int const * value, size_t count);
 		void GetIntArray(int* value, size_t count);
 
-		void OnLostDevice();
-		void OnResetDevice();
+	private:
+		void DoOnLostDevice();
+		void DoOnResetDevice();
 
 	private:
 		boost::shared_ptr<ID3DXEffect> effect_;
