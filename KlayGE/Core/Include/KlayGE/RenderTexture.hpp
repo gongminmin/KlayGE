@@ -47,6 +47,7 @@ namespace KlayGE
 
 	protected:
 		TexturePtr privateTex_;
+		Texture::CubeFaces face_;
 	};
 }
 

@@ -24,7 +24,7 @@ namespace KlayGE
 	{
 		assert(n < keys_.size());
 
-		return (keys_[n]);
+		return keys_[n];
 	}
 
 	// 实现动作映射

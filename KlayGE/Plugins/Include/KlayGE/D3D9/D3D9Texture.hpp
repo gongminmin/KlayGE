@@ -58,7 +58,12 @@ namespace KlayGE
 		void CustomAttribute(std::string const & name, void* pData);
 
 		void CopyToTexture(Texture& target);
-		void CopyToMemory(int level, void* data);
+		
+		void CopyToMemory1D(int level, void* data);
+		void CopyToMemory2D(int level, void* data);
+		void CopyToMemory3D(int level, void* data);
+		void CopyToMemoryCube(CubeFaces face, int level, void* data);
+
 		void CopyMemoryToTexture1D(int level, void* data, PixelFormat pf,
 			uint32_t width, uint32_t xOffset);
 		void CopyMemoryToTexture2D(int level, void* data, PixelFormat pf,
@@ -90,7 +95,7 @@ namespace KlayGE
 		IDirect3DVolumeTexture9Ptr CreateTexture3D(uint32_t usage, D3DPOOL pool);
 		IDirect3DCubeTexture9Ptr CreateTextureCube(uint32_t usage, D3DPOOL pool);
 
-		void CreateDepthStencilBuffer(D3DPOOL pool);
+		void CreateDepthStencilBuffer();
 
 		void QueryBaseTexture();
 		void UpdateParams();

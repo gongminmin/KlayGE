@@ -47,11 +47,11 @@ namespace KlayGE
 		viewport_.width		= width_;
 		viewport_.height	= height_;
 
-		D3D9TexturePtr tex(static_cast<D3D9Texture*>(privateTex_.get()));
+		D3D9Texture const & tex(static_cast<D3D9Texture&>(*privateTex_));
 		IDirect3DSurface9* surface;
-		tex->D3DTexture2D()->GetSurfaceLevel(0, &surface);
+		tex.D3DTexture2D()->GetSurfaceLevel(0, &surface);
 		renderSurface_ = MakeCOMPtr(surface);
-		depthStencilSurface_ = tex->DepthStencil();
+		depthStencilSurface_ = tex.DepthStencil();
 	}
 
 	void D3D9RenderTexture::AttachTextureCube(TexturePtr textureCube, Texture::CubeFaces face)
@@ -60,6 +60,7 @@ namespace KlayGE
 		assert(Texture::TT_Cube == textureCube->Type());
 		assert(dynamic_cast<D3D9Texture*>(textureCube.get()) != NULL);
 
+		face_ = face;
 		privateTex_ = textureCube;
 		width_ = privateTex_->Width();
 		height_ = privateTex_->Height();
@@ -67,11 +68,11 @@ namespace KlayGE
 		viewport_.width		= width_;
 		viewport_.height	= height_;
 
-		D3D9TexturePtr tex(static_cast<D3D9Texture*>(privateTex_.get()));
+		D3D9Texture const & tex(static_cast<D3D9Texture&>(*privateTex_));
 		IDirect3DSurface9* surface;
-		tex->D3DTextureCube()->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), 0, &surface);
+		tex.D3DTextureCube()->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), 0, &surface);
 		renderSurface_ = MakeCOMPtr(surface);
-		depthStencilSurface_ = tex->DepthStencil();
+		depthStencilSurface_ = tex.DepthStencil();
 	}
 
 	void D3D9RenderTexture::DeattachTexture()
@@ -124,5 +125,38 @@ namespace KlayGE
 		}
 
 		assert(false);
+	}
+
+	void D3D9RenderTexture::DoOnLostDevice()
+	{
+		renderSurface_.reset();
+		depthStencilSurface_.reset();
+	}
+	
+	void D3D9RenderTexture::DoOnResetDevice()
+	{
+		if (privateTex_)
+		{
+			D3D9Texture const & tex(static_cast<D3D9Texture&>(*privateTex_));
+			IDirect3DSurface9* surface = NULL;
+
+			switch (privateTex_->Type())
+			{
+			case Texture::TT_2D:
+				tex.D3DTexture2D()->GetSurfaceLevel(0, &surface);
+				break;
+
+			case Texture::TT_Cube:
+				tex.D3DTextureCube()->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face_), 0, &surface);
+				break;
+
+			default:
+				assert(false);
+				break;
+			}
+
+			renderSurface_ = MakeCOMPtr(surface);
+			depthStencilSurface_ = tex.DepthStencil();
+		}
 	}
 }

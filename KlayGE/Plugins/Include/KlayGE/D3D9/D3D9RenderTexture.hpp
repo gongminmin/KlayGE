@@ -17,6 +17,7 @@
 #define _D3D9RENDERTEXTURE_HPP
 
 #include <KlayGE/RenderTexture.hpp>
+#include <KlayGE/D3D9/D3D9Resource.hpp>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_RenderEngine_D3D9_d.lib")
@@ -26,7 +27,7 @@
 
 namespace KlayGE
 {
-	class D3D9RenderTexture : public RenderTexture
+	class D3D9RenderTexture : public RenderTexture, public D3D9Resource
 	{
 	public:
 		D3D9RenderTexture();
@@ -42,6 +43,10 @@ namespace KlayGE
 
 		bool RequiresTextureFlipping() const
 			{ return true; }
+
+	private:
+		void DoOnLostDevice();
+		void DoOnResetDevice();
 
 	private:
 		boost::shared_ptr<IDirect3DSurface9> renderSurface_;

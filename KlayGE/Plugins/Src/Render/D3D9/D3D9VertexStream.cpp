@@ -52,7 +52,10 @@ namespace KlayGE
 		{
 			currentSize_ = size;
 
-			boost::shared_ptr<IDirect3DDevice9> d3dDevice(static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
+			assert(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
+
+			D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+			boost::shared_ptr<IDirect3DDevice9> d3dDevice = renderEngine.D3DDevice();
 
 			IDirect3DVertexBuffer9* theBuffer;
 			TIF(d3dDevice->CreateVertexBuffer(static_cast<UINT>(size),
@@ -93,7 +96,10 @@ namespace KlayGE
 
 	void D3D9VertexStream::DoOnLostDevice()
 	{
-		boost::shared_ptr<IDirect3DDevice9> d3dDevice(static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
+		assert(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
+
+		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		boost::shared_ptr<IDirect3DDevice9> d3dDevice = renderEngine.D3DDevice();
 		size_t const vertexSize(this->sizeElement() * this->ElementsPerVertex());
 		size_t const size(vertexSize * numVertices_);
 
@@ -119,7 +125,10 @@ namespace KlayGE
 	
 	void D3D9VertexStream::DoOnResetDevice()
 	{
-		boost::shared_ptr<IDirect3DDevice9> d3dDevice(static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
+		assert(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
+
+		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		boost::shared_ptr<IDirect3DDevice9> d3dDevice = renderEngine.D3DDevice();
 		size_t const vertexSize(this->sizeElement() * this->ElementsPerVertex());
 		size_t const size(vertexSize * numVertices_);
 

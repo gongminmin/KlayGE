@@ -361,7 +361,7 @@ namespace KlayGE
 		return name;
 	}
 
-	void OGLTexture::CopyToTexture(Texture& target)
+	/*void OGLTexture::CopyToTexture(Texture& target)
 	{
 		OGLTexture& other(static_cast<OGLTexture&>(target));
 
@@ -389,7 +389,7 @@ namespace KlayGE
 		{
 			glGetTexImage(GL_TEXTURE_2D, level, glformat, GL_UNSIGNED_BYTE, data);
 		}
-	}
+	}*/
 
 	void OGLTexture::CopyMemoryToTexture2D(int level, void* data, PixelFormat pf,
 		uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset)

@@ -83,8 +83,8 @@ namespace KlayGE
 			Vector3 vec;
 			if (IntersectLine(vec, pNear, orig, dir))
 			{
-				if ((!InBound(vec.x(), leftBottomNear.x(), rightTopNear.x()))
-					|| (!InBound(vec.y(), leftBottomNear.y(), leftTopNear.y())))
+				if (!(InBound(vec.x(), leftBottomNear.x(), rightTopNear.x())
+					&& InBound(vec.y(), leftBottomNear.y(), leftTopNear.y())))
 				{
 					return false;
 				}
@@ -92,8 +92,8 @@ namespace KlayGE
 
 			if (IntersectLine(vec, pTop, orig, dir))
 			{
-				if ((!InBound(vec.x(), leftTopNear.x(), rightTopNear.x()))
-					|| (!InBound(vec.z(), leftTopNear.z(), leftTopFar.z())))
+				if (!(InBound(vec.x(), leftTopNear.x(), rightTopNear.x())
+					&& InBound(vec.z(), leftTopNear.z(), leftTopFar.z())))
 				{
 					return false;
 				}
@@ -101,8 +101,8 @@ namespace KlayGE
 
 			if (IntersectLine(vec, pLeft, orig, dir))
 			{
-				if ((!InBound(vec.y(), leftBottomNear.y(), leftTopNear.y()))
-					|| (!InBound(vec.z(), leftBottomNear.z(), leftTopFar.z())))
+				if (!(InBound(vec.y(), leftBottomNear.y(), leftTopNear.y())
+					&& InBound(vec.z(), leftBottomNear.z(), leftTopFar.z())))
 				{
 					return false;
 				}

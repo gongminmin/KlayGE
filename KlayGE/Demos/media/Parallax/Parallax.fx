@@ -99,15 +99,15 @@ float4 ParallaxPS(float2 texCoord0	: TEXCOORD0,
 					uniform sampler2D heightMap,
 					uniform samplerCUBE normalizerMap) : COLOR
 {
-	V = 2 * texCUBE(normalizerMap, V) - 1;
-	
-	float height = tex2D(heightMap, texCoord0);
-	float2 texUV = texCoord0 + (V.xy * (height * 0.06 - 0.02));
+	float3 view = texCUBE(normalizerMap, V) * 2 - 1;
+
+	float height = tex2D(heightMap, texCoord0) * 0.06 - 0.02;
+	float2 texUV = texCoord0 + (view.xy * height);
 
 	float3 diffuse = tex2D(diffuseMap, texUV);
 
-	float3 bumpNormal = 2 * texCUBE(normalizerMap, 2 * tex2D(normalMap, texUV) - 1) - 1;
-	float3 lightVec = 2 * texCUBE(normalizerMap, L) - 1;
+	float3 bumpNormal = texCUBE(normalizerMap, tex2D(normalMap, texUV) * 2 - 1) * 2 - 1;
+	float3 lightVec = texCUBE(normalizerMap, L) * 2 - 1;
 	float diffuseFactor = dot(lightVec, bumpNormal);
 
 	return float4(diffuse * diffuseFactor, 1);

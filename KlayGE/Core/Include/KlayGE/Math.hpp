@@ -118,8 +118,8 @@ namespace KlayGE
 		inline T
 		Round(T const & x)
 		{
-			return (x > 0) ? static_cast<T>(static_cast<int>(0.5f + x)) :
-					-static_cast<T>(static_cast<int>(0.5f - x));
+			return (x > 0) ? static_cast<T>(static_cast<int>(T(0.5) + x)) :
+					-static_cast<T>(static_cast<int>(T(0.5) - x));
 		}
 		// 取整
 		template <typename T>
@@ -176,7 +176,7 @@ namespace KlayGE
 		// 环绕处理
 		template <typename T>
 		inline T
-		Surround(T const & val, T const & low, T const & high)
+		Wrap(T const & val, T const & low, T const & high)
 		{
 			T ret(val);
 			T rang(high - low);
@@ -188,6 +188,32 @@ namespace KlayGE
 			while (ret < low)
 			{
 				ret += rang;
+			}
+
+			return ret;
+		}
+
+		// 镜像处理
+		template <typename T>
+		inline T
+		Mirror(T const & val, T const & low, T const & high)
+		{
+			T ret(val);
+			T rang(high - low);
+
+			while ((ret > high) || (ret < low))
+			{
+				if (ret > high)
+				{
+					ret = 2 * high - val;
+				}
+				else
+				{
+					if (ret < low)
+					{
+						ret = 2 * low - val;
+					}
+				}
 			}
 
 			return ret;
@@ -744,9 +770,9 @@ namespace KlayGE
 
 			// 行列式的值
 			T const det(Determinant(rhs));
-			if (!Eq(det, 0.0f))
+			if (!Eq<T>(det, 0))
 			{
-				T invDet(1.0f / det);
+				T invDet(T(1) / det);
 
 				out = Matrix4(
 					+invDet * (rhs(1, 1) * _3344_3443 - rhs(1, 2) * _3244_3442 + rhs(1, 3) * _3243_3342),
@@ -1272,11 +1298,11 @@ namespace KlayGE
 				{
 					s = Sqrt((mat(1, 1) - (mat(2, 2) + mat(0, 0))) + 1);
 
-					quat.y() = s * 0.5f;
+					quat.y() = s * T(0.5);
 
-					if (!Eq(s, 0.0f))
+					if (!Eq<T>(s, 0))
 					{
-						s = 0.5f / s;
+						s = T(0.5) / s;
 					}
 
 					quat.w() = (mat(2, 0) - mat(0, 2)) * s;
@@ -1289,11 +1315,11 @@ namespace KlayGE
 					{
 						s = Sqrt((mat(2, 2) - (mat(0, 0) + mat(1, 1))) + 1);
 
-						quat.z() = s * 0.5f;
+						quat.z() = s * T(0.5);
 
-						if (!Eq(s, 0.0f))
+						if (!Eq<T>(s, 0))
 						{
-							s = 0.5f / s;
+							s = T(0.5) / s;
 						}
 
 						quat.w() = (mat(0, 1) - mat(1, 0)) * s;
@@ -1304,11 +1330,11 @@ namespace KlayGE
 					{
 						s = Sqrt((mat(0, 0) - (mat(1, 1) + mat(2, 2))) + 1);
 
-						quat.x() = s * 0.5f;
+						quat.x() = s * T(0.5);
 
-						if (!Eq(s, 0.0f))
+						if (!Eq<T>(s, 0))
 						{
-							s = 0.5f / s;
+							s = T(0.5) / s;
 						}
 
 						quat.w() = (mat(1, 2) - mat(2, 1)) * s;
@@ -1326,7 +1352,7 @@ namespace KlayGE
         inline Quaternion_T<T>&
 		RotationAxis(Quaternion_T<T>& out, Vector_T<T, 3> const & v, T const & angle)
 		{
-			T const ang(angle * 0.5f);
+			T const ang(angle * T(0.5));
 			T sa, ca;
 			SinCos(ang, sa, ca);
 

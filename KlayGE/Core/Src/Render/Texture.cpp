@@ -101,7 +101,7 @@ namespace
 
 	struct DDSCAPS2
 	{
-		uint32_t	caps;			// capabilities of surface wanted
+		uint32_t	caps1;			// capabilities of surface wanted
 		uint32_t	caps2;
 		uint32_t	reserved[2];
 	};
@@ -354,9 +354,44 @@ namespace KlayGE
 			}
 		}
 
+		std::vector<uint8_t> data;
 		switch (texture->Type())
 		{
 		case Texture::TT_1D:
+			{
+				for (uint32_t level = 0; level < desc.mip_map_count; ++ level)
+				{
+					uint32_t image_size;
+					if (IsCompressedFormat(format))
+					{
+						int block_size;
+						if (PF_DXT1 == format)
+						{
+							block_size = 8;
+						}
+						else
+						{
+							block_size = 16;
+						}
+
+						image_size = ((desc.width / (1UL << level) + 3) / 4) * block_size;
+					}
+					else
+					{
+						image_size = main_image_size / (1UL << (level * 2));
+					}
+
+					data.resize(image_size);
+
+					file->read(reinterpret_cast<char*>(&data[0]), static_cast<std::streamsize>(data.size()));
+					assert(file->gcount() == static_cast<int>(data.size()));
+
+					texture->CopyMemoryToTexture2D(level, &data[0], format,
+						texture->Width() / (1UL << level), texture->Height() / (1UL << level), 0, 0);
+				}
+			}
+			break;
+
 		case Texture::TT_2D:
 			{
 				for (uint32_t level = 0; level < desc.mip_map_count; ++ level)
@@ -381,10 +416,10 @@ namespace KlayGE
 						image_size = main_image_size / (1UL << (level * 2));
 					}
 
-					std::vector<uint8_t> data(image_size);
+					data.resize(image_size);
 
 					file->read(reinterpret_cast<char*>(&data[0]), static_cast<std::streamsize>(data.size()));
-					assert(file->gcount() == data.size());
+					assert(file->gcount() == static_cast<int>(data.size()));
 
 					texture->CopyMemoryToTexture2D(level, &data[0], format,
 						texture->Width() / (1UL << level), texture->Height() / (1UL << level), 0, 0);
@@ -409,17 +444,17 @@ namespace KlayGE
 							block_size = 16;
 						}
 
-						image_size = ((desc.width / (1UL << level) + 3) / 4) * ((desc.height / (1UL << level) + 3) / 4) * block_size;
+						image_size = ((desc.width / (1UL << level) + 3) / 4) * ((desc.height / (1UL << level) + 3) / 4) * (desc.depth / (1UL << level)) * block_size;
 					}
 					else
 					{
-						image_size = main_image_size / (1UL << (level * 2));
+						image_size = main_image_size / (1UL << (level * 2)) * (desc.depth / (1UL << level));
 					}
 				
-					std::vector<uint8_t> data(image_size * texture->Depth());
+					data.resize(image_size);
 
 					file->read(reinterpret_cast<char*>(&data[0]), static_cast<std::streamsize>(data.size()));
-					assert(file->gcount() == data.size());
+					assert(file->gcount() == static_cast<int>(data.size()));
 
 					texture->CopyMemoryToTexture3D(level, &data[0], format,
 						texture->Width() / (1UL << level), texture->Height() / (1UL << level),
@@ -430,7 +465,7 @@ namespace KlayGE
 
 		case Texture::TT_Cube:
 			{
-				for (uint32_t face = Texture::CF_Positive_X; face < Texture::CF_Negative_Z; ++ face)
+				for (uint32_t face = Texture::CF_Positive_X; face <= Texture::CF_Negative_Z; ++ face)
 				{
 					for (uint32_t level = 0; level < desc.mip_map_count; ++ level)
 					{
@@ -453,11 +488,11 @@ namespace KlayGE
 						{
 							image_size = main_image_size / (1UL << (level * 2));
 						}
-					
-						std::vector<uint8_t> data(image_size);
+
+						data.resize(image_size);
 
 						file->read(reinterpret_cast<char*>(&data[0]), static_cast<std::streamsize>(data.size()));
-						assert(file->gcount() == data.size());
+						assert(file->gcount() == static_cast<int>(data.size()));
 
 						texture->CopyMemoryToTextureCube(static_cast<Texture::CubeFaces>(face),
 							level, &data[0], format, texture->Width() / (1UL << level), 0);
@@ -481,16 +516,23 @@ namespace KlayGE
 		DDSSURFACEDESC2 desc;
 		std::memset(&desc, 0, sizeof(desc));
 
+		desc.size = sizeof(desc);
+
 		desc.flags |= DDSD_CAPS;
 		desc.flags |= DDSD_PIXELFORMAT;
 		desc.flags |= DDSD_WIDTH;
 		desc.flags |= DDSD_HEIGHT;
+
+		desc.width = texture->Width();
+		desc.height = texture->Height();
 
 		if (texture->NumMipMaps() != 0)
 		{
 			desc.flags |= DDSD_MIPMAPCOUNT;
 			desc.mip_map_count = texture->NumMipMaps();
 		}
+
+		desc.pixel_format.size = sizeof(desc.pixel_format);
 
 		if (IsFloatFormat(texture->Format()) || IsCompressedFormat(texture->Format()))
 		{
@@ -574,7 +616,7 @@ namespace KlayGE
 				desc.pixel_format.flags |= DDSPF_RGB;
 				desc.pixel_format.rgb_bit_count = 32;
 
-				desc.pixel_format.rgb_alpha_bit_mask = 0xF000;
+				desc.pixel_format.rgb_alpha_bit_mask = 0x00000000;
 				desc.pixel_format.r_bit_mask = 0x00FF0000;
 				desc.pixel_format.g_bit_mask = 0x0000FF00;
 				desc.pixel_format.b_bit_mask = 0x000000FF;
@@ -612,7 +654,32 @@ namespace KlayGE
 				break;
 			}
 		}
-		
+
+		desc.dds_caps.caps1 = DDSCAPS_TEXTURE;
+		if (texture->NumMipMaps() != 1)
+		{
+			desc.dds_caps.caps1 |= DDSCAPS_MIPMAP;
+			desc.dds_caps.caps1 |= DDSCAPS_COMPLEX;
+		}
+		if (Texture::TT_3D == texture->Type())
+		{
+			desc.dds_caps.caps1 |= DDSCAPS_COMPLEX;
+			desc.dds_caps.caps2 |= DDSCAPS2_VOLUME;
+			desc.flags |= DDSD_DEPTH;
+			desc.depth = texture->Depth();
+		}
+		if (Texture::TT_Cube == texture->Type())
+		{
+			desc.dds_caps.caps1 |= DDSCAPS_COMPLEX;
+			desc.dds_caps.caps2 |= DDSCAPS2_CUBEMAP;
+			desc.dds_caps.caps2 |= DDSCAPS2_CUBEMAP_POSITIVEX;
+			desc.dds_caps.caps2 |= DDSCAPS2_CUBEMAP_NEGATIVEX;
+			desc.dds_caps.caps2 |= DDSCAPS2_CUBEMAP_POSITIVEY;
+			desc.dds_caps.caps2 |= DDSCAPS2_CUBEMAP_NEGATIVEY;
+			desc.dds_caps.caps2 |= DDSCAPS2_CUBEMAP_POSITIVEZ;
+			desc.dds_caps.caps2 |= DDSCAPS2_CUBEMAP_NEGATIVEZ;
+		}
+
 		uint32_t main_image_size = texture->Width() * texture->Height() * PixelFormatBits(texture->Format()) / 8;
 		if (IsCompressedFormat(texture->Format()))
 		{
@@ -629,9 +696,43 @@ namespace KlayGE
 			desc.linear_size = main_image_size;
 		}
 
+		file.write(reinterpret_cast<char*>(&desc), sizeof(desc));
+
+		std::vector<uint8_t> data;
 		switch (texture->Type())
 		{
 		case Texture::TT_1D:
+			{
+				for (uint32_t level = 0; level < desc.mip_map_count; ++ level)
+				{
+					uint32_t image_size;
+					if (IsCompressedFormat(texture->Format()))
+					{
+						int block_size;
+						if (PF_DXT1 == texture->Format())
+						{
+							block_size = 8;
+						}
+						else
+						{
+							block_size = 16;
+						}
+
+						image_size = ((desc.width / (1UL << level) + 3) / 4) * block_size;
+					}
+					else
+					{
+						image_size = main_image_size / (1UL << (level * 2));
+					}
+
+					data.resize(image_size);
+					texture->CopyToMemory1D(level, &data[0]);
+
+					file.write(reinterpret_cast<char*>(&data[0]), static_cast<std::streamsize>(data.size()));
+				}
+			}
+			break;
+
 		case Texture::TT_2D:
 			{
 				for (uint32_t level = 0; level < desc.mip_map_count; ++ level)
@@ -656,9 +757,8 @@ namespace KlayGE
 						image_size = main_image_size / (1UL << (level * 2));
 					}
 
-					std::vector<uint8_t> data(image_size);
-
-					texture->CopyToMemory(level, &data[0]);
+					data.resize(image_size);
+					texture->CopyToMemory2D(level, &data[0]);
 
 					file.write(reinterpret_cast<char*>(&data[0]), static_cast<std::streamsize>(data.size()));
 				}
@@ -666,8 +766,6 @@ namespace KlayGE
 			break;
 
 		case Texture::TT_3D:
-			desc.dds_caps.caps2 |= DDSCAPS2_VOLUME;
-
 			{
 				for (uint32_t level = 0; level < desc.mip_map_count; ++ level)
 				{
@@ -684,16 +782,15 @@ namespace KlayGE
 							block_size = 16;
 						}
 
-						image_size = ((desc.width / (1UL << level) + 3) / 4) * ((desc.height / (1UL << level) + 3) / 4) * block_size;
+						image_size = ((desc.width / (1UL << level) + 3) / 4) * ((desc.height / (1UL << level) + 3) / 4) * (desc.depth / (1UL << level)) * block_size;
 					}
 					else
 					{
-						image_size = main_image_size / (1UL << (level * 2));
+						image_size = main_image_size / (1UL << (level * 2)) * (desc.depth / (1UL << (level * 2)));
 					}
-				
-					std::vector<uint8_t> data(image_size * texture->Depth());
 
-					texture->CopyToMemory(level, &data[0]);
+					data.resize(image_size);
+					texture->CopyToMemory3D(level, &data[0]);
 
 					file.write(reinterpret_cast<char*>(&data[0]), static_cast<std::streamsize>(data.size()));
 				}
@@ -701,10 +798,8 @@ namespace KlayGE
 			break;
 
 		case Texture::TT_Cube:
-			desc.dds_caps.caps2 |= DDSCAPS2_CUBEMAP;
-
 			{
-				for (uint32_t face = Texture::CF_Positive_X; face < Texture::CF_Negative_Z; ++ face)
+				for (uint32_t face = Texture::CF_Positive_X; face <= Texture::CF_Negative_Z; ++ face)
 				{
 					for (uint32_t level = 0; level < desc.mip_map_count; ++ level)
 					{
@@ -728,11 +823,10 @@ namespace KlayGE
 							image_size = main_image_size / (1UL << (level * 2));
 						}
 					
-						std::vector<uint8_t> data(image_size * 6);
+						data.resize(image_size);
+						texture->CopyToMemoryCube(static_cast<Texture::CubeFaces>(face), level, &data[0]);
 
-						texture->CopyToMemory(level, &data[0]);
-
-						file.write(reinterpret_cast<char*>(&data[face * image_size]), static_cast<std::streamsize>(image_size));
+						file.write(reinterpret_cast<char*>(&data[0]), static_cast<std::streamsize>(data.size()));
 					}
 				}
 			}

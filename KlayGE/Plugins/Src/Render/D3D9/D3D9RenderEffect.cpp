@@ -33,6 +33,8 @@ namespace KlayGE
 {
 	D3D9RenderEffect::D3D9RenderEffect(std::string const & srcData)
 	{
+		assert(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
+
 		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 
 		ID3DXEffect* effect;
@@ -44,6 +46,8 @@ namespace KlayGE
 
 	D3D9RenderEffect::D3D9RenderEffect(D3D9RenderEffect const & rhs)
 	{
+		assert(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
+
 		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 
 		ID3DXEffect* effect;
@@ -292,8 +296,10 @@ namespace KlayGE
 	{
 		if (texture_)
 		{
-			D3D9Texture* texture = static_cast<D3D9Texture*>(texture_.get());
-			texture->OnLostDevice();
+			assert(dynamic_cast<D3D9Texture*>(texture_.get()) != NULL);
+
+			D3D9Texture& texture = static_cast<D3D9Texture&>(*texture_);
+			texture.OnLostDevice();
 		}
 	}
 
@@ -301,6 +307,8 @@ namespace KlayGE
 	{
 		if (texture_)
 		{
+			assert(dynamic_cast<D3D9Texture*>(texture_.get()) != NULL);
+
 			D3D9Texture& texture = static_cast<D3D9Texture&>(*texture_);
 			texture.OnResetDevice();
 			TIF(effect_->SetTexture(parameter_, texture.D3DBaseTexture().get()));

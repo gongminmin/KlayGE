@@ -50,6 +50,7 @@ VS_OUTPUT DisplacementVS(VS_INPUT input,
 texture diffusemap;
 texture normalmap;
 texture distancemap;
+texture normalizermap;
 
 sampler2D diffuseMapSampler = sampler_state
 {
@@ -82,15 +83,27 @@ sampler3D distanceMapSampler = sampler_state
 	AddressW  = Clamp;
 };
 
+samplerCUBE normalizerMapSampler = sampler_state
+{
+	Texture = <normalizermap>;
+	MinFilter = Point;
+	MagFilter = Point;
+	MipFilter = Point;
+	AddressU  = Clamp;
+	AddressV  = Clamp;
+	AddressW  = Clamp;
+};
+
 float4 DisplacementPS(float3 texCoord0	: TEXCOORD0,
 						float3 L		: TEXCOORD1,
 						float3 V		: TEXCOORD2,
 
 					uniform sampler2D diffuseMap,
 					uniform sampler2D normalMap,
-					uniform sampler3D distanceMap) : COLOR
+					uniform sampler3D distanceMap,
+					uniform samplerCUBE normalizerMap) : COLOR
 {
-	float3 view = normalize(V) * float3(1, 1, 16) * -0.03;
+	float3 view = (texCUBE(normalizerMap, V) * 2 - 1) * float3(1, 1, 16) * -0.03;
 
 	float3 texUV = texCoord0;
 	for (int i = 0; i < 8; ++ i)
@@ -104,10 +117,9 @@ float4 DisplacementPS(float3 texCoord0	: TEXCOORD0,
 
 	float3 diffuse = tex2D(diffuseMap, texUV.xy, dx, dy);
 
-	float3 bumpNormal = 2 * tex2D(normalMap, texUV.xy, dx, dy) - 1;
-	float3 lightVec = L;
-	float diffuseFactor = dot(lightVec, bumpNormal)
-							* rsqrt(dot(lightVec, lightVec) * dot(bumpNormal, bumpNormal));
+	float3 bumpNormal = texCUBE(normalizerMap, tex2D(normalMap, texUV.xy, dx, dy) * 2 - 1) * 2 - 1;
+	float3 lightVec = texCUBE(normalizerMap, L) * 2 - 1;
+	float diffuseFactor = dot(lightVec, bumpNormal);
 
 	return float4(diffuse * diffuseFactor, 1);
 }
@@ -118,6 +130,7 @@ technique Displacement
 	{
 		VertexShader = compile vs_1_1 DisplacementVS(worldviewproj, lightPos, eyePos);
 		PixelShader = compile ps_2_a DisplacementPS(diffuseMapSampler,
-										normalMapSampler, distanceMapSampler);
+										normalMapSampler, distanceMapSampler,
+										normalizerMapSampler);
 	}
 }

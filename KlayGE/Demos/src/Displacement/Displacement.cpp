@@ -39,6 +39,7 @@ namespace
 			*(effect_->ParameterByName("diffusemap")) = LoadTexture("diffuse.dds");
 			*(effect_->ParameterByName("normalmap")) = LoadTexture("normal.dds");
 			*(effect_->ParameterByName("distancemap")) = LoadTexture("distance.dds");
+			*(effect_->ParameterByName("normalizermap")) = LoadTexture("normalizer.dds");
 			effect_->SetTechnique("Displacement");
 
 			Vector3 xyzs[] =
@@ -121,6 +122,8 @@ namespace
 		Backward,
 		MoveLeft,
 		MoveRight,
+
+		Quit,
 	};
 
 	InputAction actions[] = 
@@ -132,6 +135,8 @@ namespace
 		InputAction(Backward, KS_S),
 		InputAction(MoveLeft, KS_A),
 		InputAction(MoveRight, KS_D),
+
+		InputAction(Quit, KS_Escape),
 	};
 }
 
@@ -242,6 +247,10 @@ void Displacement::Update()
 
 			case MoveRight:
 				fpcController_.Move(scaler, 0, 0);
+				break;
+
+			case Quit:
+				exit(0);
 				break;
 			}
 		}

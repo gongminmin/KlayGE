@@ -73,6 +73,13 @@ namespace KlayGE
 		PF_DXT3,
 		// DXT5 compression texture format
 		PF_DXT5,
+
+		// 16-bit pixel format, 16 bits depth
+		PF_D16,
+		// 32-bit pixel format, 24 bits depth
+		PF_D24X8,
+		// 32-bit pixel format, 24 bits depth and 8 bits stencil
+		PF_D24S8,
 	};
 
 	inline uint8_t
@@ -89,6 +96,7 @@ namespace KlayGE
 		case PF_A4R4G4B4:
 		case PF_R16F:
 		case PF_DXT1:
+		case PF_D16:
 			return 16;
 				
 		case PF_X8R8G8B8:
@@ -98,6 +106,8 @@ namespace KlayGE
 		case PF_R32F:
 		case PF_DXT3:
 		case PF_DXT5:
+		case PF_D24X8:
+		case PF_D24S8:
 			return 32;
 
 		case PF_A16B16G16R16F:
@@ -129,6 +139,9 @@ namespace KlayGE
 		case PF_DXT1:
 		case PF_DXT3:
 		case PF_DXT5:
+		case PF_D16:
+		case PF_D24X8:
+		case PF_D24S8:
 			return false;
 				
 		case PF_R16F:
@@ -167,6 +180,9 @@ namespace KlayGE
 		case PF_R32F:
 		case PF_G32R32F:
 		case PF_A32B32G32R32F:
+		case PF_D16:
+		case PF_D24X8:
+		case PF_D24S8:
 			return false;
 		}
 
@@ -244,7 +260,12 @@ namespace KlayGE
 
 		// Copies (and maybe scales to fit) the contents of this texture to another texture.
 		virtual void CopyToTexture(Texture& target) = 0;
-		virtual void CopyToMemory(int level, void* data) = 0;
+
+		virtual void CopyToMemory1D(int level, void* data) = 0;
+		virtual void CopyToMemory2D(int level, void* data) = 0;
+		virtual void CopyToMemory3D(int level, void* data) = 0;
+		virtual void CopyToMemoryCube(CubeFaces face, int level, void* data) = 0;
+
 		virtual void CopyMemoryToTexture1D(int level, void* data, PixelFormat pf,
 			uint32_t width, uint32_t xOffset) = 0;
 		virtual void CopyMemoryToTexture2D(int level, void* data, PixelFormat pf,

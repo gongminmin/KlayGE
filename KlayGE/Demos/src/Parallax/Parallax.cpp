@@ -122,6 +122,8 @@ namespace
 		Backward,
 		MoveLeft,
 		MoveRight,
+
+		Quit,
 	};
 
 	InputAction actions[] = 
@@ -133,6 +135,8 @@ namespace
 		InputAction(Backward, KS_S),
 		InputAction(MoveLeft, KS_A),
 		InputAction(MoveRight, KS_D),
+
+		InputAction(Quit, KS_Escape),
 	};
 }
 
@@ -243,6 +247,10 @@ void Parallax::Update()
 
 			case MoveRight:
 				fpcController_.Move(scaler, 0, 0);
+				break;
+
+			case Quit:
+				exit(0);
 				break;
 			}
 		}

@@ -391,6 +391,8 @@ namespace KlayGE
 	RenderWindowPtr D3D9RenderEngine::CreateRenderWindow(std::string const & name,
 		RenderSettings const & settings)
 	{
+		assert(dynamic_cast<D3D9RenderSettings const *>(&settings) != NULL);
+
 		D3D9RenderWindowPtr win(new D3D9RenderWindow(d3d_, this->ActiveAdapter(), name,
 			static_cast<D3D9RenderSettings const &>(settings)));
 
