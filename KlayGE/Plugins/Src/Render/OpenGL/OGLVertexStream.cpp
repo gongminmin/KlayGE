@@ -28,7 +28,7 @@ namespace KlayGE
 
 	void OGLVertexStream::Assign(const void* src, size_t numVertices, size_t stride)
 	{
-		const size_t vertexSize(this->ElementSize() * this->ElementNum());
+		const size_t vertexSize(this->ElementSize() * this->ElementsPerVertex());
 		const size_t size(vertexSize * numVertices);
 
 		buffer_.resize(size);

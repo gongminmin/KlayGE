@@ -27,7 +27,7 @@ namespace KlayGE
 		bool IsStatic() const
 			{ return false; }
 		size_t NumVertices() const
-			{ return buffer_.size() / this->ElementSize() / this->ElementNum(); }
+			{ return buffer_.size() / this->ElementSize() / this->ElementsPerVertex(); }
 
 		void Assign(const void* src, size_t numVertices, size_t stride = 0);
 

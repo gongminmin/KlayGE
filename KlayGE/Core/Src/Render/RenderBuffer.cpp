@@ -6,9 +6,9 @@
 
 namespace KlayGE
 {
-	VertexStream::VertexStream(VertexStreamType type, U8 elementSize, U8 elementNum)
+	VertexStream::VertexStream(VertexStreamType type, U8 elementSize, U8 ElementsPerVertex)
 			: type_(type),
-				elementSize_(elementSize), elementNum_(elementNum)
+				elementSize_(elementSize), elementPerVertex_(ElementsPerVertex)
 	{
 	}
 
@@ -26,9 +26,9 @@ namespace KlayGE
 		return elementSize_;
 	}
 
-	size_t VertexStream::ElementNum() const
+	size_t VertexStream::ElementsPerVertex() const
 	{
-		return elementNum_;
+		return elementPerVertex_;
 	}
 
 
