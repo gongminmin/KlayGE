@@ -58,9 +58,9 @@ namespace KlayGE
 		return ret;
 	}
 
-	RenderTexturePtr D3D9RenderFactory::MakeRenderTexture(uint32_t width, uint32_t height)
+	RenderTexturePtr D3D9RenderFactory::MakeRenderTexture()
 	{
-		return D3D9RenderTexturePtr(new D3D9RenderTexture(width, height));
+		return D3D9RenderTexturePtr(new D3D9RenderTexture);
 	}
 
 	RenderEffectPtr D3D9RenderFactory::MakeRenderEffect(std::string const & srcData)

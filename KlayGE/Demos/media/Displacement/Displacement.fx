@@ -39,9 +39,6 @@ VS_OUTPUT DisplacementVS(VS_INPUT input,
 
 	float3 vTanLight = mul(matObjToTangentSpace, vLight);
 	float3 vTanView = mul(matObjToTangentSpace, vView);
-	vTanView.x = -vTanView.x;
-	vTanView.y = -vTanView.y;
-	vTanView.z *= -16;
 
 	output.L = vTanLight;
 	output.V = vTanView;
@@ -86,14 +83,14 @@ sampler3D distanceMapSampler = sampler_state
 };
 
 float4 DisplacementPS(float3 texCoord0	: TEXCOORD0,
-					float3 L		: TEXCOORD1,
-					float3 V		: TEXCOORD2,
+						float3 L		: TEXCOORD1,
+						float3 V		: TEXCOORD2,
 
 					uniform sampler2D diffuseMap,
 					uniform sampler2D normalMap,
 					uniform sampler3D distanceMap) : COLOR
 {
-	float3 view = normalize(V) * 0.3;
+	float3 view = normalize(V) * float3(1, 1, 16) * -0.03;
 
 	float3 texUV = texCoord0;
 	for (int i = 0; i < 8; ++ i)

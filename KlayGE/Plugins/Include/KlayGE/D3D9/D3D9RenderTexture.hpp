@@ -29,7 +29,11 @@ namespace KlayGE
 	class D3D9RenderTexture : public RenderTexture
 	{
 	public:
-		D3D9RenderTexture(uint32_t width, uint32_t height);
+		D3D9RenderTexture();
+
+		void AttachTexture2D(TexturePtr texture2D);
+		void AttachTextureCube(TexturePtr textureCube, Texture::CubeFaces face);
+		void DeattachTexture();
 
 		boost::shared_ptr<IDirect3DSurface9> D3DRenderSurface() const;
 		boost::shared_ptr<IDirect3DSurface9> D3DRenderZBuffer() const;
@@ -38,6 +42,10 @@ namespace KlayGE
 
 		bool RequiresTextureFlipping() const
 			{ return true; }
+
+	private:
+		boost::shared_ptr<IDirect3DSurface9> renderSurface_;
+		boost::shared_ptr<IDirect3DSurface9> depthStencilSurface_;
 	};
 
 	typedef boost::shared_ptr<D3D9RenderTexture> D3D9RenderTexturePtr;

@@ -11,13 +11,10 @@
 
 namespace KlayGE
 {
-	OGLRenderTexture::OGLRenderTexture(uint32_t width, uint32_t height)
+	OGLRenderTexture::OGLRenderTexture()
 	{
 		left_ = 0;
 		top_ = 0;
-		privateTex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 0, PF_X8R8G8B8, Texture::TU_RenderTarget);
-		width_ = privateTex_->Width();
-		height_ = privateTex_->Height();
 	}
 
 	void OGLRenderTexture::CustomAttribute(std::string const & name, void* pData)

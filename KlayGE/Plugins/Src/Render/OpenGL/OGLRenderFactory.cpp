@@ -42,9 +42,9 @@ namespace KlayGE
 			return TexturePtr(new OGLTexture(size, true, numMipMaps, format, usage));
 		}
 
-		RenderTexturePtr MakeRenderTexture(uint32_t width, uint32_t height)
+		RenderTexturePtr MakeRenderTexture()
 		{
-			return RenderTexturePtr(new OGLRenderTexture(width, height));
+			return RenderTexturePtr(new OGLRenderTexture);
 		}
 
 		RenderEffectPtr MakeRenderEffect(std::string const & srcData)

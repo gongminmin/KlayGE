@@ -229,8 +229,6 @@ namespace KlayGE
 			tempSurf->GetDesc(&tempDesc);
 			tempSurf->Release();
 
-			width_ = tempDesc.Width;
-			height_ = tempDesc.Height;
 			format_ = ConvertFormat(tempDesc.Format);
 
 			d3dTexture2D_ = this->CreateTexture2D(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
@@ -277,12 +275,31 @@ namespace KlayGE
 
 		bpp_ = PixelFormatBits(format);
 
-		assert(TU_Default == usage_);
+		if (TU_Default == usage_)
+		{
+			d3dTextureCube_ = this->CreateTextureCube(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 
-		d3dTextureCube_ = this->CreateTextureCube(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+			this->QueryBaseTexture();
+			this->UpdateParams();
+		}
+		else
+		{
+			IDirect3DSurface9* tempSurf;
+			D3DSURFACE_DESC tempDesc;
 
-		this->QueryBaseTexture();
-		this->UpdateParams();
+			d3dDevice_->GetRenderTarget(0, &tempSurf);
+			tempSurf->GetDesc(&tempDesc);
+			tempSurf->Release();
+
+			format_ = ConvertFormat(tempDesc.Format);
+
+			d3dTextureCube_ = this->CreateTextureCube(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
+
+			this->QueryBaseTexture();
+			this->UpdateParams();
+
+			this->CreateDepthStencilBuffer(D3DPOOL_DEFAULT);
+		}
 	}
 
 	D3D9Texture::~D3D9Texture()

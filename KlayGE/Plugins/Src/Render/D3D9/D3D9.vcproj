@@ -188,6 +188,9 @@
 			<File
 				RelativePath="..\..\..\..\RenderFX\Font.fx">
 			</File>
+			<File
+				RelativePath="..\..\..\..\RenderFX\TNL.fx">
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

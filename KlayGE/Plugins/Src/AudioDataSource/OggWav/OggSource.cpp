@@ -199,7 +199,7 @@ namespace KlayGE
 
 									for (int j = 0; j < bout; ++ j)
 									{
-										*ptr = MathLib::Limit<ogg_int16_t>(static_cast<ogg_int16_t>(mono[j] * 32767.0f), -32768, 32767);
+										*ptr = MathLib::Clamp<ogg_int16_t>(static_cast<ogg_int16_t>(mono[j] * 32767.0f), -32768, 32767);
 										ptr += vi_.channels;
 									}
 								}

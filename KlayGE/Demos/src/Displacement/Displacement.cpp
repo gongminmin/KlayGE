@@ -208,7 +208,7 @@ void Displacement::Update()
 {
 	static clock_t lastTime(std::clock());
 	clock_t curTime(std::clock());
-	if (curTime - lastTime > 10)
+	if (curTime - lastTime > 5)
 	{
 		float scaler = (curTime - lastTime) / 100.0f;
 

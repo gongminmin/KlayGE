@@ -14,7 +14,11 @@ namespace KlayGE
 	class OGLRenderTexture : public RenderTexture
 	{
 	public:
-		OGLRenderTexture(uint32_t width, uint32_t height);
+		OGLRenderTexture();
+
+		void AttachTexture2D(TexturePtr texture2D);
+		void AttachTextureCube(TexturePtr textureCube, Texture::CubeFaces face);
+		void DeattachTexture();
 
 		virtual void CustomAttribute(std::string const & name, void* pData);
 

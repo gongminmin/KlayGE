@@ -25,33 +25,68 @@
 
 namespace KlayGE
 {
-	D3D9RenderTexture::D3D9RenderTexture(uint32_t width, uint32_t height)
+	D3D9RenderTexture::D3D9RenderTexture()
 	{
 		left_ = 0;
 		top_ = 0;
-		privateTex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height,
-			0, PF_X8R8G8B8, Texture::TU_RenderTarget);
-		width_ = privateTex_->Width();
-		height_ = privateTex_->Height();
 
 		viewport_.left		= left_;
 		viewport_.top		= top_;
+	}
+
+	void D3D9RenderTexture::AttachTexture2D(TexturePtr texture2D)
+	{
+		assert(Texture::TU_RenderTarget == texture2D->Usage());
+		assert(Texture::TT_2D == texture2D->Type());
+		assert(dynamic_cast<D3D9Texture*>(texture2D.get()) != NULL);
+
+		privateTex_ = texture2D;
+		width_ = privateTex_->Width();
+		height_ = privateTex_->Height();
+
 		viewport_.width		= width_;
 		viewport_.height	= height_;
+
+		D3D9TexturePtr tex(static_cast<D3D9Texture*>(privateTex_.get()));
+		IDirect3DSurface9* surface;
+		tex->D3DTexture2D()->GetSurfaceLevel(0, &surface);
+		renderSurface_ = MakeCOMPtr(surface);
+		depthStencilSurface_ = tex->DepthStencil();
+	}
+
+	void D3D9RenderTexture::AttachTextureCube(TexturePtr textureCube, Texture::CubeFaces face)
+	{
+		assert(Texture::TU_RenderTarget == textureCube->Usage());
+		assert(Texture::TT_Cube == textureCube->Type());
+		assert(dynamic_cast<D3D9Texture*>(textureCube.get()) != NULL);
+
+		privateTex_ = textureCube;
+		width_ = privateTex_->Width();
+		height_ = privateTex_->Height();
+
+		viewport_.width		= width_;
+		viewport_.height	= height_;
+
+		D3D9TexturePtr tex(static_cast<D3D9Texture*>(privateTex_.get()));
+		IDirect3DSurface9* surface;
+		tex->D3DTextureCube()->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), 0, &surface);
+		renderSurface_ = MakeCOMPtr(surface);
+		depthStencilSurface_ = tex->DepthStencil();
+	}
+
+	void D3D9RenderTexture::DeattachTexture()
+	{
+		privateTex_.reset();
 	}
 
 	boost::shared_ptr<IDirect3DSurface9> D3D9RenderTexture::D3DRenderSurface() const
 	{
-		D3D9TexturePtr tex(static_cast<D3D9Texture*>(privateTex_.get()));
-		IDirect3DSurface9* surface;
-		tex->D3DTexture2D()->GetSurfaceLevel(0, &surface);
-		return MakeCOMPtr(surface);
+		return renderSurface_;
 	}
 	
 	boost::shared_ptr<IDirect3DSurface9> D3D9RenderTexture::D3DRenderZBuffer() const
 	{
-		D3D9TexturePtr tex(static_cast<D3D9Texture*>(privateTex_.get()));
-		return tex->DepthStencil();
+		return depthStencilSurface_;
 	}
 
 	void D3D9RenderTexture::CustomAttribute(std::string const & name, void* pData)
@@ -74,9 +109,8 @@ namespace KlayGE
 
 		if ("DDFRONTBUFFER" == name)
 		{
-			D3D9TexturePtr tex(static_cast<D3D9Texture*>(privateTex_.get()));
 			IDirect3DSurface9** pSurf = reinterpret_cast<IDirect3DSurface9**>(pData);
-			tex->D3DTexture2D()->GetSurfaceLevel(0, &(*pSurf));
+			*pSurf = this->D3DRenderSurface().get();
 
 			return;
 		}

@@ -168,7 +168,7 @@ namespace KlayGE
 		// 限制 val 在 low 和 high 之间
 		template <typename T>
 		inline T const &
-		Limit(T const & val, T const & low, T const & high)
+		Clamp(T const & val, T const & low, T const & high)
 		{
 			return std::max(low, std::min(high, val));
 		}
@@ -957,6 +957,20 @@ namespace KlayGE
 			Quaternion_T<T> quat;
 			RotationAxis(quat, Vector_T<T, 3>(x, y, z), angle);
 			return ToMatrix(out, quat);
+		}
+		template <typename T>
+		inline Matrix4_T<T>&
+		RotationYawPitchRoll(Matrix4_T<T>& out, T const & yaw, T const & pitch, T const & roll)
+		{
+			Matrix4 rotX;
+			MathLib::RotationX(rotX, pitch);
+			Matrix4 rotY;
+			MathLib::RotationY(rotY, yaw);
+			Matrix4 rotZ;
+			MathLib::RotationZ(rotZ, roll);
+
+			out = rotZ * rotX * rotY;
+			return out;
 		}
 
 		template <typename T>

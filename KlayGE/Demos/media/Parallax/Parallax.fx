@@ -102,7 +102,7 @@ float4 ParallaxPS(float2 texCoord0	: TEXCOORD0,
 	V = 2 * texCUBE(normalizerMap, V) - 1;
 	
 	float height = tex2D(heightMap, texCoord0);
-	float2 texUV = texCoord0 + (V.xy * (height * 0.04 - 0.02));
+	float2 texUV = texCoord0 + (V.xy * (height * 0.06 - 0.02));
 
 	float3 diffuse = tex2D(diffuseMap, texUV);
 

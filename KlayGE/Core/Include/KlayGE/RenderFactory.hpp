@@ -39,7 +39,7 @@ namespace KlayGE
 			PixelFormat format, Texture::TextureUsage usage = Texture::TU_Default) = 0;
 		virtual TexturePtr MakeTextureCube(uint32_t size, uint16_t numMipMaps,
 			PixelFormat format, Texture::TextureUsage usage = Texture::TU_Default) = 0;
-		virtual RenderTexturePtr MakeRenderTexture(uint32_t width, uint32_t height) = 0;
+		virtual RenderTexturePtr MakeRenderTexture() = 0;
 
 		FontPtr MakeFont(std::string const & fontName, uint32_t fontHeight = 12, uint32_t flags = 0)
 		{

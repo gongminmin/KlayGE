@@ -63,7 +63,7 @@ namespace KlayGE
 			PixelFormat format, Texture::TextureUsage usage);
 		TexturePtr MakeTextureCube(uint32_t size, uint16_t numMipMaps,
 			PixelFormat format, Texture::TextureUsage usage);
-		RenderTexturePtr MakeRenderTexture(uint32_t width, uint32_t height);
+		RenderTexturePtr MakeRenderTexture();
 		RenderEffectPtr MakeRenderEffect(std::string const & srcData);
 			
 		VertexStreamPtr MakeVertexStream(VertexStreamType type,
