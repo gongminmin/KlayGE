@@ -396,6 +396,9 @@
 				Name="Í·ÎÄ¼þ"
 				Filter="">
 				<File
+					RelativePath=".\Include\KlayGE\Bound.hpp">
+				</File>
+				<File
 					RelativePath=".\Include\KlayGE\Box.hpp">
 				</File>
 				<File
@@ -418,6 +421,9 @@
 				</File>
 				<File
 					RelativePath=".\Include\KlayGE\Size.hpp">
+				</File>
+				<File
+					RelativePath=".\Include\KlayGE\Sphere.hpp">
 				</File>
 				<File
 					RelativePath=".\Include\KlayGE\Vector.hpp">

@@ -21,6 +21,9 @@ namespace KlayGE
 			{ }
 		virtual void OnRenderEnd()
 			{ }
+
+		virtual SharedPtr<Box> GetBound() const
+			{ return SharedPtr<Box>(); }
 	};
 }
 

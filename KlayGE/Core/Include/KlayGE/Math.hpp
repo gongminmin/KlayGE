@@ -63,35 +63,47 @@ namespace KlayGE
 		template <typename T>
 		inline T
 		Abs(const T& x)
-			{ return x < T(0) ? -x : x; }
+		{
+			return x < T(0) ? -x : x;
+		}
 
 		// 取符号
 		template <typename T>
 		inline T
 		Sgn(const T& x)
-			{ return x < T(0) ? T(-1) : (x > T(0) ? T(1) : T(0)); }
+		{
+			return x < T(0) ? T(-1) : (x > T(0) ? T(1) : T(0));
+		}
 		
 		// 平方
 		template <typename T>
 		inline T
 		Sqr(const T& x)
-			{ return x * x; }
+		{
+			return x * x;
+		}
 		// 立方
 		template <typename T>
 		inline T
 		Cube(const T& x)
-			{ return Sqr(x) * x; }
+		{
+			return Sqr(x) * x;
+		}
 
 		// 角度化弧度
 		template <typename T>
 		inline T
 		Deg2Rad(const T& x)
-			{ return static_cast<T>(x * DEG2RAD); }
+		{
+			return static_cast<T>(x * DEG2RAD);
+		}
 		// 弧度化角度
 		template <typename T>
 		inline T
 		Rad2Deg(const T& x)
-			{ return static_cast<T>(x * RAD2DEG); }
+		{
+			return static_cast<T>(x * RAD2DEG);
+		}
 
 		// 四舍五入
 		template <typename T>
@@ -105,33 +117,43 @@ namespace KlayGE
 		template <typename T>
 		inline T
 		Trunc(const T& x)
-			{ return static_cast<T>(static_cast<int>(x)); }
+		{
+			return static_cast<T>(static_cast<int>(x));
+		}
 
 		// 取三个中小的
 		template <typename T>
 		inline const T&
 		Min3(const T& a, const T& b, const T& c)
-			{ return std::min(std::min(a, b), c); }
+		{
+			return std::min(std::min(a, b), c);
+		}
 		// 取三个中大的
 		template <typename T>
 		inline const T&
 		Max3(const T& a, const T& b, const T& c)
-			{ return std::max(std::max(a, b), c); }
+		{
+			return std::max(std::max(a, b), c);
+		}
 
 		// 余数
 		template <typename T>
 		inline T
 		Mod(const T& x, const T& y)
-			{ return x % y; }
+		{
+			return x % y;
+		}
 		// 浮点版本
-		template <>
 		inline float
-		Mod<float>(const float& x, const float& y)
-			{ return std::fmodf(x, y); }
-		template <>
+		Mod(float x, float y)
+		{
+			return std::fmodf(x, y);
+		}
 		inline double
-		Mod<double>(const double& x, const double& y)
-			{ return std::fmod(x, y); }
+		Mod(double x, double y)
+		{
+			return std::fmod(x, y);
+		}
 
 		// 求和
 		template <typename InputIterator, typename T>
@@ -159,21 +181,7 @@ namespace KlayGE
 		inline const T&
 		Limit(const T& val, const T& low, const T& high)
 		{
-			if (val < low)
-			{
-				return low;
-			}
-			else
-			{
-				if (val > high)
-				{
-					return high;
-				}
-				else
-				{
-					return val;
-				}
-			}
+			return std::max(low, std::min(high, val));
 		}
 
 		// 环绕处理
@@ -200,35 +208,41 @@ namespace KlayGE
 		template <typename T>
 		inline bool
 		IsOdd(const T& x)
-			{ return MathLib::Mod(x, 2) != 0; }
+		{
+			return MathLib::Mod(x, 2) != 0;
+		}
 		// 偶数则返回true
 		template <typename T>
 		inline bool
 		IsEven(const T& x)
-			{ return !MathLib::IsOdd(x); }
+		{
+			return !MathLib::IsOdd(x);
+		}
 
 		// 判断 val 是否在 low 和 high 之间
 		template <typename T>
 		inline bool
 		InBound(const T& val, const T& low, const T& high)
-			{ return ((val >= low) && (val <= high)); }
+		{
+			return ((val >= low) && (val <= high));
+		}
 		
 		// 判断两个数是否相等
 		template <typename T>
 		inline bool
 		Eq(const T& lhs, const T& rhs)
-			{ return (lhs == rhs); }
+		{
+			return (lhs == rhs);
+		}
 		// 浮点版本
-		template <>
 		inline bool
-		Eq(const float& lhs, const float& rhs)
+		Eq(float lhs, float rhs)
 		{
 			return (MathLib::Abs<float>(lhs - rhs)
 				<= std::numeric_limits<float>::epsilon());
 		}
-		template <>
 		inline bool
-		Eq(const double& lhs, const double& rhs)
+		Eq(double lhs, double rhs)
 		{
 			return (MathLib::Abs<double>(lhs - rhs)
 				<= std::numeric_limits<double>::epsilon());
@@ -290,13 +304,17 @@ namespace KlayGE
 		template <typename T>
 		inline typename T::value_type
 		LengthSq(const T& rhs)
-			{ return MathLib::Dot(rhs, rhs); }
+		{
+			return MathLib::Dot(rhs, rhs);
+		}
 
 		// 几种类型的Length
 		template <typename T>
 		inline typename T::value_type
 		Length(const T& rhs)
-			{ return MathLib::Sqrt(MathLib::LengthSq(rhs)); }
+		{
+			return MathLib::Sqrt(MathLib::LengthSq(rhs));
+		}
 
 		// 几种类型的Lerp
 		template <typename T>
@@ -479,19 +497,22 @@ namespace KlayGE
 
 		// 2D 向量
 		///////////////////////////////////////////////////////////////////////////////
-		float CCW(const Vector2& lhs, const Vector2& rhs);
+		template <typename T>
+		inline T
+		CCW(const Vector_T<T, 2>& lhs, const Vector_T<T, 2>& rhs)
+		{
+			return lhs.x() * rhs.y() - lhs.y() * rhs.x();
+		}
 
 
 		// 3D 向量
 		///////////////////////////////////////////////////////////////////////////////
-		float Angle(const Vector3& lhs, const Vector3& rhs);
-		Vector3& TransQuat(Vector3& out, const Vector3& v, const Quaternion& quat);
-		Vector3& Project(Vector3& out, const Vector3& vec,
-			const Matrix4& world, const Matrix4& view, const Matrix4& proj,
-			const int viewport[4], float near, float far);
-		Vector3& UnProject(Vector3& out, const Vector3& winVec, float clipW,
-			const Matrix4& world, const Matrix4& view, const Matrix4& proj,
-			const int viewport[4], float near, float far);
+		template <typename T>
+		inline T
+		Angle(const Vector_T<T, 3>& lhs, const Vector_T<T, 3>& rhs)
+		{
+			return ACos(Dot(lhs, rhs) / (Length(lhs) * Length(rhs)));
+		}
 
 		template <typename T>
 		inline Vector_T<T, 3>&
@@ -503,85 +524,893 @@ namespace KlayGE
 			return out;
 		}
 
+		template <typename T>
+		inline Vector_T<T, 3>&
+		TransQuat(Vector_T<T, 3>& out, const Vector_T<T, 3>& v, const Quaternion_T<T>& quat)
+		{
+			// result = av + bq + c(q.v CROSS v)
+			// where
+			//  a = q.w()^2 - (q.v DOT q.v)
+			//  b = 2 * (q.v DOT v)
+			//  c = 2q.w()
+			const T a(q.w() * q.w() - Dot(q.v(), q.v()));
+			const T b(2 * Dot(q.v(), v));
+			const T c(q.w() + q.w());
+
+			// Must store this, because result may alias v
+			Vector_T<T, 3> cross;
+			Cross(cross, q.v(), v);		// q.v CROSS v
+
+			out = Vector_T<T, 3>(a * v.x() + b * q.x() + c * cross.x(),
+				a * v.y() + b * q.y() + c * cross.y(),
+				a * v.z() + b * q.z() + c * cross.z());
+			return out;
+		}
+
+		template <typename T>
+		inline Vector_T<T, 3>&
+		Project(Vector_T<T, 3>& out, const Vector_T<T, 3>& vec,
+			const Matrix4_T<T>& world, const Matrix4_T<T>& view, const Matrix4_T<T>& proj,
+			const int viewport[4], const T& nearPlane, const T& farPlane)
+		{
+			Vector_T<T, 4> temp;
+			Transform(temp, objVec, world);
+			Transform(temp, temp, view);
+			Transform(temp, temp, proj);
+			temp /= temp.w();
+
+			out.x() = (temp.x() + 1) * viewport[2] / 2 + viewport[0];
+			out.y() = (-temp.y() + 1) * viewport[3] / 2 + viewport[1];
+			out.z() = (temp.z() + 1) * (farPlane - nearPlane) / 2 + nearPlane;
+			return out;
+		}
+
+		template <typename T>
+		inline Vector_T<T, 3>&
+		UnProject(Vector_T<T, 3>& out, const Vector_T<T, 3>& winVec, const T& clipW,
+			const Matrix4_T<T>& world, const Matrix4_T<T>& view, const Matrix4_T<T>& proj,
+			const int viewport[4], const T& nearPlane, const T& farPlane)
+		{
+			Vector_T<T, 4> temp;
+			temp.x() = 2 * (winVec.x() - viewport[0]) / viewport[2] - 1;
+			temp.y() = -(2 * (winVec.y() - viewport[1]) / viewport[3] - 1);
+			temp.z() = 2 * (winVec.z() - nearPlane) / (farPlane - nearPlane) - 1;
+			temp.w() = clipW;
+
+			Matrix4_T<T> mat;
+			Inverse(mat, world * view * proj);
+			Transform(temp, temp, mat);
+			out = Vector_T<T, 3>(temp.x(), temp.y(), temp.z());
+			out /= temp.w();
+			return out;
+		}
+
 
 		// 4D 向量
 		///////////////////////////////////////////////////////////////////////////////
-		Vector4& Cross(Vector4& out, const Vector4& v1, const Vector4& v2, const Vector4& v3);
+		template <typename T>
+		inline Vector_T<T, 4>&
+		Cross(Vector_T<T, 4>& out, const Vector_T<T, 4>& v1, const Vector_T<T, 4>& v2, const Vector_T<T, 4>& v3)
+		{
+			const T A = (v2.x() * v3.y()) - (v2.y() * v3.x());
+			const T B = (v2.x() * v3.z()) - (v2.z() * v3.x());
+			const T C = (v2.x() * v3.w()) - (v2.w() * v3.x());
+			const T D = (v2.y() * v3.z()) - (v2.z() * v3.y());
+			const T E = (v2.y() * v3.w()) - (v2.w() * v3.y());
+			const T F = (v2.z() * v3.w()) - (v2.w() * v3.z());
+
+			out = Vector_T<T, 4>((v1.y() * F) - (v1.z() * E) + (v1.w() * D),
+				-(v1.x() * F) + (v1.z() * C) - (v1.w() * B),
+				(v1.x() * E) - (v1.y() * C) + (v1.w() * A),
+				-(v1.x() * D) + (v1.y() * B) - (v1.z() * A));
+			return out;
+		}
 
 
 		// 4D 矩阵
 		///////////////////////////////////////////////////////////////////////////////
-		Matrix4& Multiply(Matrix4& out, const Matrix4& lhs, const Matrix4& rhs);
-		float Determinant(const Matrix4& m);
-		float Inverse(Matrix4& out, const Matrix4& m);
-		Matrix4& LookAtLH(Matrix4& out, const Vector3& vEye, const Vector3& vAt, const Vector3& vUp);
-		Matrix4& LookAtRH(Matrix4& out, const Vector3& vEye, const Vector3& vAt, const Vector3& vUp);
-		Matrix4& OrthoLH(Matrix4& out, float w, float h, float fNear, float fFar);
-		Matrix4& OrthoOffCenterLH(Matrix4& out, float l, float r, float b, float t, float fNear, float fFar);
-		Matrix4& PerspectiveLH(Matrix4& out, float w, float h, float fNear, float fFar);
-		Matrix4& PerspectiveFovLH(Matrix4& out, float fFOV, float fAspect, float fNear, float fFar);
-		Matrix4& PerspectiveOffCenterLH(Matrix4& out, float l, float r, float b, float t,
-			float fNear, float fFar);
-		Matrix4& Reflect(Matrix4& out, const Plane& p);
-		Matrix4& RotationX(Matrix4& out, float x);
-		Matrix4& RotationY(Matrix4& out, float y);
-		Matrix4& RotationZ(Matrix4& out, float z);
-		Matrix4& Rotation(Matrix4& out, float angle, float x, float y, float z);
-		Matrix4& Scaling(Matrix4& out, float x, float y, float z);
-		Matrix4& Shadow(Matrix4& out, const Vector4& v, const Plane& p);
-		Matrix4& ToMatrix(Matrix4& out, const Quaternion& quat);
-		Matrix4& Translation(Matrix4& out, float x, float y, float z);
-		Matrix4& Transpose(Matrix4& out, const Matrix4& m);
+		template <typename T>
+		inline Matrix4_T<T>&
+		Multiply(Matrix4_T<T>& out, const Matrix4_T<T>& lhs, const Matrix4_T<T>& rhs)
+		{
+			out = Matrix4_T<T>(
+				lhs(0, 0) * rhs(0, 0) + lhs(0, 1) * rhs(1, 0) + lhs(0, 2) * rhs(2, 0) + lhs(0, 3) * rhs(3, 0),
+				lhs(0, 0) * rhs(0, 1) + lhs(0, 1) * rhs(1, 1) + lhs(0, 2) * rhs(2, 1) + lhs(0, 3) * rhs(3, 1),
+				lhs(0, 0) * rhs(0, 2) + lhs(0, 1) * rhs(1, 2) + lhs(0, 2) * rhs(2, 2) + lhs(0, 3) * rhs(3, 2),
+				lhs(0, 0) * rhs(0, 3) + lhs(0, 1) * rhs(1, 3) + lhs(0, 2) * rhs(2, 3) + lhs(0, 3) * rhs(3, 3),
 
-		Matrix4& LHToRH(Matrix4& out, const Matrix4& rhs);
+				lhs(1, 0) * rhs(0, 0) + lhs(1, 1) * rhs(1, 0) + lhs(1, 2) * rhs(2, 0) + lhs(1, 3) * rhs(3, 0),
+				lhs(1, 0) * rhs(0, 1) + lhs(1, 1) * rhs(1, 1) + lhs(1, 2) * rhs(2, 1) + lhs(1, 3) * rhs(3, 1),
+				lhs(1, 0) * rhs(0, 2) + lhs(1, 1) * rhs(1, 2) + lhs(1, 2) * rhs(2, 2) + lhs(1, 3) * rhs(3, 2),
+				lhs(1, 0) * rhs(0, 3) + lhs(1, 1) * rhs(1, 3) + lhs(1, 2) * rhs(2, 3) + lhs(1, 3) * rhs(3, 3),
 
-		Matrix4& Scaling(Matrix4& out, const Vector3& vPos);
-		Matrix4& Translation(Matrix4& out, const Vector3& vPos);
-		Matrix4& LookAtLH(Matrix4& out, const Vector3& vEye, const Vector3& vAt);
-		Matrix4& LookAtRH(Matrix4& out, const Vector3& vEye, const Vector3& vAt);
-		Matrix4& OrthoRH(Matrix4& out, float w, float h, float fNear, float fFar);
-		Matrix4& OrthoOffCenterRH(Matrix4& out, float l, float r, float b, float t, 
-			float fNear, float fFar);
-		Matrix4& PerspectiveRH(Matrix4& out, float w, float h, float fNear, float fFar);
-		Matrix4& PerspectiveFovRH(Matrix4& out, float fFOV, float fAspect, float fNear, float fFar);
-		Matrix4& PerspectiveOffCenterRH(Matrix4& out, float l, float r, float b, float t, 
-			float fNear, float fFar);
+				lhs(2, 0) * rhs(0, 0) + lhs(2, 1) * rhs(1, 0) + lhs(2, 2) * rhs(2, 0) + lhs(2, 3) * rhs(3, 0),
+				lhs(2, 0) * rhs(0, 1) + lhs(2, 1) * rhs(1, 1) + lhs(2, 2) * rhs(2, 1) + lhs(2, 3) * rhs(3, 1),
+				lhs(2, 0) * rhs(0, 2) + lhs(2, 1) * rhs(1, 2) + lhs(2, 2) * rhs(2, 2) + lhs(2, 3) * rhs(3, 2),
+				lhs(2, 0) * rhs(0, 3) + lhs(2, 1) * rhs(1, 3) + lhs(2, 2) * rhs(2, 3) + lhs(2, 3) * rhs(3, 3),
 
-		Matrix4& RHToLH(Matrix4& out, const Matrix4& rhs);
+				lhs(3, 0) * rhs(0, 0) + lhs(3, 1) * rhs(1, 0) + lhs(3, 2) * rhs(2, 0) + lhs(3, 3) * rhs(3, 0),
+				lhs(3, 0) * rhs(0, 1) + lhs(3, 1) * rhs(1, 1) + lhs(3, 2) * rhs(2, 1) + lhs(3, 3) * rhs(3, 1),
+				lhs(3, 0) * rhs(0, 2) + lhs(3, 1) * rhs(1, 2) + lhs(3, 2) * rhs(2, 2) + lhs(3, 3) * rhs(3, 2),
+				lhs(3, 0) * rhs(0, 3) + lhs(3, 1) * rhs(1, 3) + lhs(3, 2) * rhs(2, 3) + lhs(3, 3) * rhs(3, 3));
+			return out;
+		}
+
+		template <typename T>
+		inline T
+		Determinant(const Matrix4_T<T>& rhs)
+		{
+			const T _3142_3241(rhs(2, 0) * rhs(3, 1) - rhs(2, 1) * rhs(3, 0));
+			const T _3143_3341(rhs(2, 0) * rhs(3, 2) - rhs(2, 2) * rhs(3, 0));
+			const T _3144_3441(rhs(2, 0) * rhs(3, 3) - rhs(2, 3) * rhs(3, 0));
+			const T _3243_3342(rhs(2, 1) * rhs(3, 2) - rhs(2, 2) * rhs(3, 1));
+			const T _3244_3442(rhs(2, 1) * rhs(3, 3) - rhs(2, 3) * rhs(3, 1));
+			const T _3344_3443(rhs(2, 2) * rhs(3, 3) - rhs(2, 3) * rhs(3, 2));
+
+			return rhs(0, 0) * (rhs(1, 1) * _3344_3443 - rhs(1, 2) * _3244_3442 + rhs(1, 3) * _3243_3342)
+				- rhs(0, 1) * (rhs(1, 0) * _3344_3443 - rhs(1, 2) * _3144_3441 + rhs(1, 3) * _3143_3341)
+				+ rhs(0, 2) * (rhs(1, 0) * _3244_3442 - rhs(1, 1) * _3144_3441 + rhs(1, 3) * _3142_3241)
+				- rhs(0, 3) * (rhs(1, 0) * _3243_3342 - rhs(1, 1) * _3143_3341 + rhs(1, 2) * _3142_3241);
+		}
+
+		template <typename T>
+		inline T
+		Inverse(Matrix4_T<T>& out, const Matrix4_T<T>& rhs)
+		{
+			const T _2132_2231(rhs(1, 0) * rhs(2, 1) - rhs(1, 1) * rhs(2, 0));
+			const T _2133_2331(rhs(1, 0) * rhs(2, 2) - rhs(1, 2) * rhs(2, 0));
+			const T _2134_2431(rhs(1, 0) * rhs(2, 3) - rhs(1, 3) * rhs(2, 0));
+			const T _2142_2241(rhs(1, 0) * rhs(3, 1) - rhs(1, 1) * rhs(3, 0));
+			const T _2143_2341(rhs(1, 0) * rhs(3, 2) - rhs(1, 2) * rhs(3, 0));
+			const T _2144_2441(rhs(1, 0) * rhs(3, 3) - rhs(1, 3) * rhs(3, 0));
+			const T _2233_2332(rhs(1, 1) * rhs(2, 2) - rhs(1, 2) * rhs(2, 1));
+			const T _2234_2432(rhs(1, 1) * rhs(2, 3) - rhs(1, 3) * rhs(2, 1));
+			const T _2243_2342(rhs(1, 1) * rhs(3, 2) - rhs(1, 2) * rhs(3, 1));
+			const T _2244_2442(rhs(1, 1) * rhs(3, 3) - rhs(1, 3) * rhs(3, 1));
+			const T _2334_2433(rhs(1, 2) * rhs(2, 3) - rhs(1, 3) * rhs(2, 2));
+			const T _2344_2443(rhs(1, 2) * rhs(3, 3) - rhs(1, 3) * rhs(3, 2));
+			const T _3142_3241(rhs(2, 0) * rhs(3, 1) - rhs(2, 1) * rhs(3, 0));
+			const T _3143_3341(rhs(2, 0) * rhs(3, 2) - rhs(2, 2) * rhs(3, 0));
+			const T _3144_3441(rhs(2, 0) * rhs(3, 3) - rhs(2, 3) * rhs(3, 0));
+			const T _3243_3342(rhs(2, 1) * rhs(3, 2) - rhs(2, 2) * rhs(3, 1));
+			const T _3244_3442(rhs(2, 1) * rhs(3, 3) - rhs(2, 3) * rhs(3, 1));
+			const T _3344_3443(rhs(2, 2) * rhs(3, 3) - rhs(2, 3) * rhs(3, 2));
+
+			// 行列式的值
+			const T det(Determinant(rhs));
+			if (!Eq(det, 0.0f))
+			{
+				T invDet(1.0f / det);
+
+				out = Matrix4(
+					+invDet * (rhs(1, 1) * _3344_3443 - rhs(1, 2) * _3244_3442 + rhs(1, 3) * _3243_3342),
+					-invDet * (rhs(0, 1) * _3344_3443 - rhs(0, 2) * _3244_3442 + rhs(0, 3) * _3243_3342),
+					+invDet * (rhs(0, 1) * _2344_2443 - rhs(0, 2) * _2244_2442 + rhs(0, 3) * _2243_2342),
+					-invDet * (rhs(0, 1) * _2334_2433 - rhs(0, 2) * _2234_2432 + rhs(0, 3) * _2233_2332),
+
+					-invDet * (rhs(1, 0) * _3344_3443 - rhs(1, 2) * _3144_3441 + rhs(1, 3) * _3143_3341),
+					+invDet * (rhs(0, 0) * _3344_3443 - rhs(0, 2) * _3144_3441 + rhs(0, 3) * _3143_3341),
+					-invDet * (rhs(0, 0) * _2344_2443 - rhs(0, 2) * _2144_2441 + rhs(0, 3) * _2143_2341),
+					+invDet * (rhs(0, 0) * _2334_2433 - rhs(0, 2) * _2134_2431 + rhs(0, 3) * _2133_2331),
+
+					+invDet * (rhs(1, 0) * _3244_3442 - rhs(1, 1) * _3144_3441 + rhs(1, 3) * _3142_3241),
+					-invDet * (rhs(0, 0) * _3244_3442 - rhs(0, 1) * _3144_3441 + rhs(0, 3) * _3142_3241),
+					+invDet * (rhs(0, 0) * _2244_2442 - rhs(0, 1) * _2144_2441 + rhs(0, 3) * _2142_2241),
+					-invDet * (rhs(0, 0) * _2234_2432 - rhs(0, 1) * _2134_2431 + rhs(0, 3) * _2132_2231),
+
+					-invDet * (rhs(1, 0) * _3243_3342 - rhs(1, 1) * _3143_3341 + rhs(1, 2) * _3142_3241),
+					+invDet * (rhs(0, 0) * _3243_3342 - rhs(0, 1) * _3143_3341 + rhs(0, 2) * _3142_3241),
+					-invDet * (rhs(0, 0) * _2243_2342 - rhs(0, 1) * _2143_2341 + rhs(0, 2) * _2142_2241),
+					+invDet * (rhs(0, 0) * _2233_2332 - rhs(0, 1) * _2133_2331 + rhs(0, 2) * _2132_2231));
+			}
+			else
+			{
+				out = rhs;
+			}
+
+			return det;
+		}
+
+		template <typename T>
+		inline Matrix4_T<T>&
+		LookAtLH(Matrix4_T<T>& out, const Vector_T<T, 3>& vEye, const Vector_T<T, 3>& vAt,
+			const Vector_T<T, 3>& vUp = Vector_T<T, 3>(0, 1, 0))
+		{
+			Vector_T<T, 3> zAxis;
+			Normalize(zAxis, vAt - vEye);
+			Vector_T<T, 3> xAxis;
+			Cross(xAxis, vUp, zAxis);
+			Normalize(xAxis, xAxis);
+			Vector_T<T, 3> yAxis;
+			Cross(yAxis, zAxis, xAxis);
+
+			out = Matrix4_T<T>(
+				xAxis.x(),			yAxis.x(),			zAxis.x(),			0,
+				xAxis.y(),			yAxis.y(),			zAxis.y(),			0,
+				xAxis.z(),			yAxis.z(),			zAxis.z(),			0,
+				-Dot(xAxis, vEye),	-Dot(yAxis, vEye),	-Dot(zAxis, vEye),	1);
+			return out;
+		}
+
+		template <typename T>
+		inline Matrix4_T<T>&
+		LookAtRH(Matrix4_T<T>& out, const Vector_T<T, 3>& vEye, const Vector_T<T, 3>& vAt,
+			const Vector_T<T, 3>& vUp = Vector_T<T, 3>(0, 1, 0))
+		{
+			Vector_T<T, 3> zAxis;
+			Normalize(zAxis, vEye - vAt);
+			Vector_T<T, 3> xAxis;
+			Cross(xAxis, vUp, zAxis);
+			Normalize(xAxis, xAxis);
+			Vector_T<T, 3> yAxis;
+			Cross(yAxis, zAxis, xAxis);
+
+			out = Matrix4_T<T>(
+				xAxis.x(),			yAxis.x(),			zAxis.x(),			0,
+				xAxis.y(),			yAxis.y(),			zAxis.y(),			0,
+				xAxis.z(),			yAxis.z(),			zAxis.z(),			0,
+				-Dot(xAxis, vEye),	-Dot(yAxis, vEye),	-Dot(zAxis, vEye),	1);
+			return out;
+		}
+
+		template <typename T>
+		inline Matrix4_T<T>&
+		OrthoLH(Matrix4_T<T>& out, const T& w, const T& h, const T& nearPlane, const T& farPlane)
+		{
+			const T w_2(w / 2);
+			const T h_2(h / 2);
+			return OrthoOffCenterLH(out, -w_2, w_2, -h_2, h_2, nearPlane, farPlane);
+		}
+		template <typename T>
+		inline Matrix4_T<T>&
+		OrthoOffCenterLH(Matrix4_T<T>& out, const T& left, const T& right, const T& bottom, const T& top,
+			const T& nearPlane, const T& farPlane)
+		{
+			const T q(T(1) / (farPlane - nearPlane));
+			const T invWidth(T(1) / (right - left));
+			const T invHeight(T(1) / (top - bottom));
+
+			out = Matrix4_T<T>(
+				invWidth + invWidth,		0,								0,					0,
+				0,							invHeight + invHeight,			0,					0,
+				0,							0,								q,					0,
+				-(left + right) * invWidth,	-(top + bottom) * invHeight,	-nearPlane * q,		1);
+			return out;
+		}
+
+		template <typename T>
+		inline Matrix4_T<T>&
+		PerspectiveLH(Matrix4_T<T>& out, const T& width, const T& height, const T& nearPlane, const T& farPlane)
+		{
+			const T q(farPlane / (farPlane - nearPlane));
+			const T near2(nearPlane + nearPlane);
+
+			out = Matrix4_T<T>(
+				near2 / width,	0,				0,				0,
+				0,				near2 / height,	0,				0,
+				0,				0,				q,				1,
+				0,				0,				-nearPlane * q, 0);
+			return out;
+		}
+		template <typename T>
+		inline Matrix4_T<T>&
+		PerspectiveFovLH(Matrix4_T<T>& out, const T& fov, const T& aspect, const T& nearPlane, const T& farPlane)
+		{
+			const T h(T(1) / Tan(fov / 2));
+			const T w(h / aspect);
+			const T q(farPlane / (farPlane - nearPlane));
+
+			out = Matrix4_T<T>(
+				w,		0,		0,				0,
+				0,		h,		0,				0,
+				0,		0,		q,				1,
+				0,		0,		-nearPlane * q, 0);
+			return out;
+		}
+		template <typename T>
+		inline Matrix4_T<T>&
+		PerspectiveOffCenterLH(Matrix4_T<T>& out, const T& left, const T& right, const T& bottom, const T& top,
+			const T& nearPlane, const T& farPlane)
+		{
+			const T q(farPlane / (farPlane - nearPlane));
+			const T near2(nearPlane + nearPlane);
+			const T invWidth(T(1) / (right - left));
+			const T invHeight(T(1) / (top - bottom));
+
+			out = Matrix4_T<T>(
+				near2 * invWidth,			0,								0,				0,
+				0,							near2 * invHeight,				0,				0,
+				-(left + right)* invWidth,	-(top + bottom) * invHeight,	q,				1,
+				0,							0,								-nearPlane * q, 0);
+			return out;
+		}
+		template <typename T>
+		inline Matrix4_T<T>&
+		Reflect(Matrix4_T<T>& out, const Plane_T<T>& p)
+		{
+			Plane_T<T> P;
+			Normalize(P, p);
+			const T aa2(-2 * P.a() * P.a()), ab2(-2 * P.a() * P.b()), ac2(-2 * P.a() * P.c()), ad2(-2 * P.a() * P.d());
+			const T bb2(-2 * P.b() * P.b()), bc2(-2 * P.b() * P.c()), bd2(-2 * P.a() * P.c());
+			const T cc2(-2 * P.c() * P.c()), cd2(-2 * P.c() * P.d());
+
+			out = Matrix4_T<T>(
+				aa2 + 1,	ab2,		ac2,		0,
+				ab2,		bb2 + 1,	bc2,		0,
+				ac2,		bc2,		cc2 + 1,	0,
+				ad2,		bd2,		cd2,		1);
+			return out;
+		}
+
+		template <typename T>
+		inline Matrix4_T<T>&
+		RotationX(Matrix4_T<T>& out, const T& x)
+		{
+			float sx, cx;
+			SinCos(x, sx, cx);
+
+			out = Matrix4_T<T>(
+				1,	0,		0,		0,
+				0,	cx,		sx,		0,
+				0,	-sx,	cx,		0,
+				0,	0,		0,		1);
+			return out;
+		}
+		template <typename T>
+		inline Matrix4_T<T>&
+		RotationY(Matrix4_T<T>& out, const T& y)
+		{
+			float sy, cy;
+			SinCos(y, sy, cy);
+
+			out = Matrix4_T<T>(
+				cy,		0,		-sy,	0,
+				0,		1,		0,		0,
+				sy,		0,		cy,		0,
+				0,		0,		0,		1);
+			return out;
+		}
+		template <typename T>
+		inline Matrix4_T<T>&
+		RotationZ(Matrix4_T<T>& out, const T& z)
+		{
+			float sz, cz;
+			SinCos(z, sz, cz);
+
+			out = Matrix4_T<T>(
+				cz,		sz,		0,		0,
+				-sz,	cz,		0,		0,
+				0,		0,		1,		0,
+				0,		0,		0,		1);
+			return out;
+		}
+		template <typename T>
+		inline Matrix4_T<T>&
+		Rotation(Matrix4_T<T>& out, const T& angle, const T& x, const T& y, const T& z)
+		{
+			Quaternion_T<T> quat;
+			RotationAxis(quat, Vector_T<T, 3>(x, y, z), angle);
+			return ToMatrix(out, quat);
+		}
+
+		template <typename T>
+		inline Matrix4_T<T>&
+		Scaling(Matrix4_T<T>& out, const T& x, const T& y, const T& z)
+		{
+			out = Matrix4(
+				sx,	0,	0,	0,
+				0,	sy,	0,	0,
+				0,	0,	sz,	0,
+				0,	0,	0,	1);
+			return out;
+		}
+
+		template <typename T>
+		inline Matrix4_T<T>&
+		Shadow(Matrix4_T<T>& out, const Vector_T<T, 4>& v, const Plane_T<T>& p)
+		{
+			const Vector_T<T, 4> v(-L);
+			Plane_T<T> P;
+			Normalize(P, p);
+			const T d(-Dot(P, v));
+
+			out = Matrix4_T<T>(
+				P.a() * v.x() + d,	P.a() * v.y(),		P.a() * v.z(),		P.a() * v.w(),
+				P.b() * v.x(),		P.b() * v.y() + d,	P.b() * v.z(),		P.b() * v.w(),
+				P.c() * v.x(),		P.c() * v.y(),		P.c() * v.z() + d,	P.c() * v.w(),
+				P.d() * v.x(),		P.d() * v.y(),		P.d() * v.z(),		P.d() * v.w() + d);
+			return out;
+		}
+
+		template <typename T>
+		inline Matrix4_T<T>&
+		ToMatrix(Matrix4_T<T>& out, const Quaternion_T<T>& quat)
+		{
+			// calculate coefficients
+			const T x2(quat.x() + quat.x());
+			const T y2(quat.y() + quat.y());
+			const T z2(quat.z() + quat.z());
+
+			const T xx2(quat.x() * x2), xy2(quat.x() * y2), xz2(quat.x() * z2);
+			const T yy2(quat.y() * y2), yz2(quat.y() * z2), zz2(quat.z() * z2);
+			const T wx2(quat.w() * x2), wy2(quat.w() * y2), wz2(quat.w() * z2);
+
+			out = Matrix4_T<T>(
+				1 - yy2 - zz2,	xy2 + wz2,		xz2 - wy2,		0,
+				xy2 - wz2,		1 - xx2 - zz2,	yz2 + wx2,		0,
+				xz2 + wy2,		yz2 - wx2,		1 - xx2 - yy2,	0,
+				0,				0,				0,				1);
+			return out;
+		}
+
+		template <typename T>
+		inline Matrix4_T<T>&
+		Translation(Matrix4_T<T>& out, const T& x, const T& y, const T& z)
+		{
+			out = Matrix4_T<T>(
+				1,	0,	0,	0,
+				0,	1,	0,	0,
+				0,	0,	1,	0,
+				x,	y,	z,	1);
+			return out;
+		}
+
+		template <typename T>
+		inline Matrix4_T<T>&
+		Transpose(Matrix4_T<T>& out, const Matrix4_T<T>& rhs)
+		{
+			out = Matrix4_T<T>(
+				rhs(0, 0), rhs(1, 0), rhs(2, 0), rhs(3, 0),
+				rhs(0, 1), rhs(1, 1), rhs(2, 1), rhs(3, 1),
+				rhs(0, 2), rhs(1, 2), rhs(2, 2), rhs(3, 2),
+				rhs(0, 3), rhs(1, 3), rhs(2, 3), rhs(3, 3));
+			return out;
+		}
+
+		template <typename T>
+		inline Matrix4_T<T>&
+		LHToRH(Matrix4_T<T>& out, const Matrix4_T<T>& rhs)
+		{
+			out = rhs;
+			out(2, 0) = -out(2, 0);
+			out(2, 1) = -out(2, 1);
+			out(2, 2) = -out(2, 2);
+			out(2, 3) = -out(2, 3);
+			return out;
+		}
+
+		template <typename T>
+		inline Matrix4_T<T>&
+		Scaling(Matrix4_T<T>& out, const Vector_T<T, 3>& vPos)
+		{
+			return Scaling(out, vPos.x(), vPos.y(), vPos.z());
+		}
+		template <typename T>
+		inline Matrix4_T<T>&
+		Translation(Matrix4_T<T>& out, const Vector_T<T, 3>& vPos)
+		{
+			return Translation(out, vPos.x(), vPos.y(), vPos.z());
+		}
+		template <typename T>
+		inline Matrix4_T<T>&
+		OrthoRH(Matrix4_T<T>& out, const T& width, const T& height, const T& nearPlane, const T& farPlane)
+		{
+			OrthoLH(out, w, h, nearPlane, farPlane);
+			return LHToRH(out, out);
+		}
+		template <typename T>
+		inline Matrix4_T<T>&
+		OrthoOffCenterRH(Matrix4_T<T>& out, const T& left, const T& right, const T& bottom, const T& top, 
+			const T& nearPlane, const T& farPlane)
+		{
+			OrthoOffCenterLH(out, left, right, bottom, top, nearPlane, farPlane);
+			return LHToRH(out, out);
+		}
+		template <typename T>
+		inline Matrix4_T<T>&
+		PerspectiveRH(Matrix4_T<T>& out, const T& width, const T& height,
+			const T& nearPlane, const T& farPlane)
+		{
+			PerspectiveLH(out, w, h, nearPlane, farPlane);
+			return LHToRH(out, out);
+		}
+		template <typename T>
+		inline Matrix4_T<T>&
+		PerspectiveFovRH(Matrix4_T<T>& out, const T& fov, const T& aspect,
+			const T& nearPlane, const T& farPlane)
+		{
+			PerspectiveFovLH(out, fov, aspect, nearPlane, farPlane);
+			return LHToRH(out, out);
+		}
+		template <typename T>
+		inline Matrix4_T<T>&
+		PerspectiveOffCenterRH(Matrix4_T<T>& out, const T& left, const T& right, const T& bottom, const T& top, 
+			const T& nearPlane, const T& farPlane)
+		{
+			PerspectiveOffCenterLH(out, left, right, bottom, top, nearPlane, farPlane);
+			return LHToRH(out, out);
+		}
+
+		template <typename T>
+		inline Matrix4_T<T>&
+		RHToLH(Matrix4_T<T>& out, const Matrix4_T<T>& rhs)
+		{
+			return LHToRH(out, rhs);
+		}
 
 
 		// 四元数
 		///////////////////////////////////////////////////////////////////////////////
-		Quaternion& Conjugate(Quaternion& out, const Quaternion& rhs);
+		template <typename T>
+		inline Quaternion_T<T>&
+		Conjugate(Quaternion_T<T>& out, const Quaternion_T<T>& rhs)
+		{
+			out = Quaternion_T<T>(-rhs.x(), -rhs.y(), -rhs.z(), rhs.w());
+			return out;
+		}
 
-		Quaternion& AxisToAxis(Quaternion& out, const Vector3& vFrom, const Vector3& vTo);
-		Quaternion& BaryCentric(Quaternion& out, const Quaternion& q1, const Quaternion& q2,
-			const Quaternion& q3, float f, float g);
-		Quaternion& Exp(Quaternion& out, const Quaternion& rhs);
-		Quaternion& Inverse(Quaternion& out, const Quaternion& q);
-		Quaternion& Ln(Quaternion& out, const Quaternion& rhs);
-		Quaternion& Multiply(Quaternion& out, const Quaternion& lhs, const Quaternion& rhs);
-		Quaternion& RotationYawPitchRoll(Quaternion& out, float fYaw, float fPitch, float fRoll);
-		void ToAxisAngle(Vector3& vec, float& ang, const Quaternion& quat);
-		Quaternion& ToQuaternion(Quaternion& out, const Matrix4& m);
-		Quaternion& RotationAxis(Quaternion& out, const Vector3& v, float s);
-		Quaternion& Slerp(Quaternion& out, const Quaternion& lhs, const Quaternion& rhs, float s);
-		Quaternion& UnitAxisToUnitAxis2(Quaternion& out, const Vector3& vFrom, const Vector3& vTo);
+		template <typename T>
+		inline Quaternion_T<T>&
+		AxisToAxis(Quaternion_T<T>& out, const Vector_T<T, 3>& from, const Vector_T<T, 3>& to)
+		{
+			Vector_T<T, 3> a;
+			Normalize(a, from);
+			Vector_T<T, 3> b;
+			Normalize(b, to);
+			Vector_T<T, 3> half;
+			Normalize(half, a + b);
 
-		Quaternion& RotationYawPitchRoll(Quaternion& out, const Vector3& vAng);
+			out = UnitAxisToUnitAxis2(out, a, half);
+			return out;
+		}
+		template <typename T>
+		inline Quaternion_T<T>&
+		UnitAxisToUnitAxis2(Quaternion_T<T>& out, const Vector_T<T, 3>& from, const Vector_T<T, 3>& to)
+		{
+			Vector_T<T, 3> axis;
+			Cross(axis, from, to);
+
+			out = Quaternion_T<T>(axis, Dot(from, to));
+			return out;
+		}
+
+		template <typename T>
+		inline Quaternion_T<T>&
+		BaryCentric(Quaternion_T<T>& out, const Quaternion_T<T>& q1, const Quaternion_T<T>& q2,
+			const Quaternion_T<T>& q3, const T& f, const T& g)
+		{
+			const T temp(f + g);
+
+			Quaternion_T<T> qT1;
+			Slerp(qT1, q1, q2, temp);
+			Quaternion_T<T> qT2;
+			Slerp(qT2, q1, q3, temp);
+
+			out = Slerp(out, qT1, qT2, g / temp);
+			return out;
+		}
+
+		template <typename T>
+		inline Quaternion_T<T>&
+		Exp(Quaternion_T<T>& out, const Quaternion_T<T>& rhs)
+		{
+			const T theta(Length(rhs.v()));
+
+			Vector_T<T, 3> vec;
+			Normalize(vec, rhs.v());
+
+			out = Quaternion_T<T>(vec * Sin(theta), Cos(theta));
+			return out;
+		}
+		template <typename T>
+		inline Quaternion_T<T>&
+		Ln(Quaternion_T<T>& out, const Quaternion_T<T>& rhs)
+		{
+			const T theta_2(ACos(rhs.w()));
+
+			Vector_T<T, 3> vec;
+			Normalize(vec, rhs.v() * (theta_2 + theta_2));
+
+			out = Quaternion_T<T>(vec, 0);
+			return out;
+		}
+
+		template <typename T>
+		inline Quaternion_T<T>&
+		Inverse(Quaternion_T<T>& out, const Quaternion_T<T>& q)
+		{
+			const T inv(T(1) / Length(rhs));
+			out = Quaternion(-rhs.x() * inv, -rhs.y() * inv, -rhs.z() * inv, rhs.w() * inv);
+			return out;
+		}
+
+		template <typename T>
+		inline Quaternion_T<T>&
+		Multiply(Quaternion_T<T>& out, const Quaternion_T<T>& lhs, const Quaternion_T<T>& rhs)
+		{
+			out = Quaternion_T<T>(
+				lhs.x() * rhs.w() - lhs.y() * rhs.z() + lhs.z() * rhs.y() + lhs.w() * rhs.x(),
+				lhs.x() * rhs.z() + lhs.y() * rhs.w() - lhs.z() * rhs.x() + lhs.w() * rhs.y(),
+				lhs.y() * rhs.x() - lhs.x() * rhs.y() + lhs.z() * rhs.w() + lhs.w() * rhs.z(),
+				lhs.w() * rhs.w() - lhs.x() * rhs.x() - lhs.y() * rhs.y() - lhs.z() * rhs.z());
+			return out;
+		}
+
+		template <typename T>
+		inline Quaternion_T<T>&
+		RotationYawPitchRoll(Quaternion_T<T>& out, const T& yaw, const T& pitch, const T& roll)
+		{
+			const T angX(pitch / 2), angY(yaw / 2), angZ(roll / 2);
+			T sx, sy, sz;
+			T cx, cy, cz;
+			SinCos(angX, sx, cx);
+			SinCos(angY, sy, cy);
+			SinCos(angZ, sz, cz);
+
+			out = Quaternion_T<T>(
+				sx * cy * cz + cx * sy * sz,
+				cx * sy * cz - sx * cy * sz,
+				cx * cy * sz - sx * sy * cz,
+				sx * sy * sz + cx * cy * cz);
+			return out;
+		}
+
+		template <typename T>
+		inline void
+		ToAxisAngle(Vector_T<T, 3>& vec, T& ang, const Quaternion_T<T>& quat)
+		{
+			const T tw(ACos(quat.w()));
+			const T scale(T(1) / Sin(tw));
+
+			ang = tw + tw;
+			vec.x() = quat.x() * scale, 
+				vec.y() = quat.y() * scale;
+			vec.z() = quat.z() * scale;
+		}
+
+		template <typename T>
+		inline Quaternion_T<T>&
+		ToQuaternion(Quaternion_T<T>& out, const Matrix4_T<T>& mat)
+		{
+			Quaternion_T<T> quat;
+			T s;
+			const T tr(mat(0, 0) + mat(1, 1) + mat(2, 2));
+
+			// check the diagonal
+			if (tr > 0)
+			{
+				s = Sqrt(tr + 1);
+				quat.w() = s * 0.5f;
+				s = 0.5f / s;
+				quat.x() = (mat(1, 2) - mat(2, 1)) * s;
+				quat.y() = (mat(2, 0) - mat(0, 2)) * s;
+				quat.z() = (mat(0, 1) - mat(1, 0)) * s;
+			}
+			else
+			{
+				if ((mat(1, 1) > mat(0, 0)) && (mat(2, 2) <= mat(1, 1)))
+				{
+					s = Sqrt((mat(1, 1) - (mat(2, 2) + mat(0, 0))) + 1);
+
+					quat.y() = s * 0.5f;
+
+					if (!Eq(s, 0.0f))
+					{
+						s = 0.5f / s;
+					}
+
+					quat.w() = (mat(2, 0) - mat(0, 2)) * s;
+					quat.z() = (mat(2, 1) + mat(1, 2)) * s;
+					quat.x() = (mat(0, 1) + mat(1, 0)) * s;
+				}
+				else
+				{
+					if ((mat(1, 1) <= mat(0, 0) && mat(2, 2) > mat(0, 0)) || (mat(2, 2) > mat(1, 1)))
+					{
+						s = Sqrt((mat(2, 2) - (mat(0, 0) + mat(1, 1))) + 1);
+
+						quat.z() = s * 0.5f;
+
+						if (!Eq(s, 0.0f))
+						{
+							s = 0.5f / s;
+						}
+
+						quat.w() = (mat(0, 1) - mat(1, 0)) * s;
+						quat.x() = (mat(0, 2) + mat(2, 0)) * s;
+						quat.y() = (mat(1, 2) + mat(2, 1)) * s;
+					}
+					else
+					{
+						s = Sqrt((mat(0, 0) - (mat(1, 1) + mat(2, 2))) + 1);
+
+						quat.x() = s * 0.5f;
+
+						if (!Eq(s, 0.0f))
+						{
+							s = 0.5f / s;
+						}
+
+						quat.w() = (mat(1, 2) - mat(2, 1)) * s;
+						quat.y() = (mat(1, 0) + mat(0, 1)) * s;
+						quat.z() = (mat(2, 0) + mat(0, 2)) * s;
+					}
+				}
+			}
+
+			out = quat;
+			return out;
+		}
+
+		template <typename T>
+        inline Quaternion_T<T>&
+		RotationAxis(Quaternion_T<T>& out, const Vector_T<T, 3>& v, const T& angle)
+		{
+			const T ang(angle * 0.5f);
+			T sa, ca;
+			SinCos(ang, sa, ca);
+
+			Vector_T<T, 3> vec;
+			Normalize(vec, v);
+
+			out = Quaternion_T<T>(sa * vec, ca);
+			return out;
+		}
+
+		template <typename T>
+        inline Quaternion_T<T>&
+		Slerp(Quaternion_T<T>& out, const Quaternion_T<T>& lhs, const Quaternion_T<T>& rhs, const T& slerp)
+		{
+			T scale0, scale1;
+			Quaternion_T<T> q2;
+
+			// DOT the quats to get the cosine of the angle between them
+			const T cosom(Dot(lhs, rhs));
+
+			// Two special cases:
+			// Quats are exactly opposite, within DELTA?
+			if (cosom > std::numeric_limits<T>::epsilon() - T(1))
+			{
+				// make sure they are different enough to avoid a divide by 0
+				if (cosom < T(1) - std::numeric_limits<T>::epsilon())
+				{
+					// SLERP away
+					const T omega(ACos(cosom));
+					const T isinom(T(1) / Sin(omega));
+					scale0 = Sin((1 - slerp) * omega) * isinom;
+					scale1 = Sin(slerp * omega) * isinom;
+				}
+				else
+				{
+					// LERP is good enough at this distance
+					scale0 = 1 - slerp;
+					scale1 = slerp;
+				}
+
+				q2 = rhs * scale1;
+			}
+			else
+			{
+				// SLERP towards a perpendicular quat
+				// Set slerp parameters
+				scale0 = Sin((1 - slerp) * PIdiv2);
+				scale1 = Sin(slerp * PIdiv2);
+
+				q2.x() = -rhs.y() * scale1;
+				q2.y() = +rhs.x() * scale1;
+				q2.z() = -rhs.w() * scale1;
+				q2.w() = +rhs.z() * scale1;
+			}
+
+			// Compute the result
+			out = scale0 * lhs + q2;
+			return out;
+		}
+
+		template <typename T>
+        inline Quaternion_T<T>&
+		RotationYawPitchRoll(Quaternion_T<T>& out, const Vector_T<T, 3>& ang)
+		{
+			return RotationYawPitchRoll(out, ang.x(), ang.y(), ang.z());
+		}
 
 
 		// 平面
 		///////////////////////////////////////////////////////////////////////////////
-		float Dot(const Plane& lhs, const Vector4& rhs);
-		float DotCoord(const Plane& lhs, const Vector3& rhs);
-		float DotNormal(const Plane& lhs, const Vector3& rhs);
+		template <typename T>
+		inline T
+		Dot(const Plane_T<T>& lhs, const Vector_T<T, 4>& rhs)
+		{
+			return lhs.a() * rhs.x() + lhs.b() * rhs.y() + lhs.c() * rhs.z() + lhs.d() * rhs.w();
+		}
+		template <typename T>
+		inline T
+		DotCoord(const Plane_T<T>& lhs, const Vector_T<T, 3>& rhs)
+		{
+			return lhs.a() * rhs.x() + lhs.b() * rhs.y() + lhs.c() * rhs.z() + lhs.d();
+		}
+		template <typename T>
+		inline T
+		DotNormal(const Plane_T<T>& lhs, const Vector_T<T, 3>& rhs)
+		{
+			return lhs.a() * rhs.x() + lhs.b() * rhs.y() + lhs.c() * rhs.z();
+		}
 
-		Plane& Normalize(Plane& out, const Plane& rhs);
-		Plane& FromPointNormal(Plane& out, const Vector3& vPoint, const Vector3& vNor);
-		Plane& FromPoints(Plane& out, const Vector3& v1, const Vector3& v2, const Vector3& v3);
-		Plane& Transform(Plane& out, const Plane& p, const Matrix4& mat);
-		bool IntersectLine(Vector3& out, const Plane& p, const Vector3& vStart, const Vector3& vEnd);
+		template <typename T>
+		inline Plane_T<T>&
+		Normalize(Plane_T<T>& out, const Plane_T<T>& rhs)
+		{
+			const T inv(T(1) / Length(rhs));
+			out = Plane(rhs.a() * inv, rhs.b() * inv, rhs.c() * inv, rhs.d() * inv);
+			return out;
+		}
+		template <typename T>
+		inline Plane_T<T>&
+		FromPointNormal(Plane_T<T>& out, const Vector_T<T, 3>& point, const Vector_T<T, 3>& normal)
+		{
+			out = Plane(normal.x(), normal.y(), normal.z(), -Dot(point, normal));
+			return out;
+		}
+		template <typename T>
+		inline Plane_T<T>&
+		FromPoints(Plane_T<T>& out, const Vector_T<T, 3>& v0, const Vector_T<T, 3>& v1, const Vector_T<T, 3>& v2)
+		{
+			Vector_T<T, 3> vec;
+			Cross(vec, v1 - v0, v1 - v2);
+			Normalize(vec, vec);
+			return FromPointNormal(out, v0, vec);
+		}
+		template <typename T>
+		inline Plane_T<T>&
+		Transform(Plane_T<T>& out, const Plane_T<T>& p, const Matrix4_T<T>& mat)
+		{
+			out = Plane_T<T>(
+				p.a() * mat(0, 0) + p.b() * mat(1, 0) + p.c() * mat(2, 0) + p.d() * mat(3, 0),
+				p.a() * mat(0, 1) + p.b() * mat(1, 1) + p.c() * mat(2, 1) + p.d() * mat(3, 1),
+				p.a() * mat(0, 2) + p.b() * mat(1, 2) + p.c() * mat(2, 2) + p.d() * mat(3, 2),
+				p.a() * mat(0, 3) + p.b() * mat(1, 3) + p.c() * mat(2, 3) + p.d() * mat(3, 3));
+			return out;
+		}
+		
+		// 求直线和平面的交点，直线orig + t * dir，t的取值范围[0, 1]
+		template <typename T>
+		inline bool
+		IntersectLine(Vector_T<T, 3>& out, const Plane_T<T>& p,
+			const Vector_T<T, 3>& orig, const Vector_T<T, 3>& dir)
+		{
+			Vector_T<T, 3> vP(0, 0, 0);
+
+			if (!Eq(p.a(), T(0)))
+			{
+				vP.x() = -p.d() / p.a();
+			}
+			else
+			{
+				if (!Eq(p.b(), T(0)))
+				{
+					vP.y() = -p.d() / p.b();
+				}
+				else
+				{
+					if (!Eq(p.c(), T(0)))
+					{
+						vP.z() = -p.d() / p.c();
+					}
+				}
+			}
+
+			const T deno(Dot(dir, p.Normal()));
+			if (!Eq(deno, T(0)))
+			{
+				return false;
+			}
+
+			const T t(Dot(vP - orig, p.Normal()) / deno);
+
+			out = orig + t * dir;
+
+			return true;
+		}
 
 
 		// 颜色
@@ -591,8 +1420,10 @@ namespace KlayGE
 
 		// 范围
 		///////////////////////////////////////////////////////////////////////////////
+		bool VecInSphere(const Sphere& sphere, const Vector3& v);
+		bool BoundProbe(const Sphere& sphere, const Vector3& pos, const Vector3& dir);
 		bool VecInBox(const Box& box, const Vector3& v);
-		bool BoundProbe(const Box& box, const Vector3& vPos, const Vector3& vDir);
+		bool BoundProbe(const Box& box, const Vector3& orig, const Vector3& dir);
 	};
 
 
@@ -626,6 +1457,8 @@ namespace KlayGE
 #include <KlayGE/Quaternion.hpp>
 #include <KlayGE/Plane.hpp>
 #include <KlayGE/Color.hpp>
+#include <KlayGE/Bound.hpp>
+#include <KlayGE/Sphere.hpp>
 #include <KlayGE/Box.hpp>
 
 #endif		// _MATH_HPP

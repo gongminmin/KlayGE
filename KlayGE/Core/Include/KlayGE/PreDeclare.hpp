@@ -42,6 +42,8 @@ namespace KlayGE
 	class Plane_T;
 	typedef Plane_T<float> Plane;
 	class Color;
+	class Bound;
+	class Sphere;
 	class Box;
 
 	class Camera;

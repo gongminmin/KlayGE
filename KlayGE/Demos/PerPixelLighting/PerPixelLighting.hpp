@@ -1,5 +1,5 @@
-#ifndef _TESTAPP3D_HPP
-#define _TESTAPP3D_HPP
+#ifndef _PERPIXELLIGHTING_HPP
+#define _PERPIXELLIGHTING_HPP
 
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Font.hpp>
@@ -17,4 +17,4 @@ private:
 	KlayGE::FontPtr font_;
 };
 
-#endif		// _TESTAPP3D_HPP
+#endif		// _PERPIXELLIGHTING_HPP

@@ -1,5 +1,5 @@
 // Box.hpp
-// KlayGE 边框 头文件
+// KlayGE 边框盒 头文件
 // Ver 2.1.1
 // 版权所有(C) 龚敏敏, 2004
 // Homepage: http://klayge.sourceforge.net
@@ -15,18 +15,20 @@
 
 #include <boost/operators.hpp>
 
-#include <KlayGE/Math.hpp>
+#include <KlayGE/Bound.hpp>
 
 namespace KlayGE
 {
 	class Box : boost::addable2<Box, Vector3, 
 						boost::subtractable2<Box, Vector3,
 						boost::andable<Box,
-						boost::orable<Box > > > >
+						boost::orable<Box > > > >,
+				public Bound
 	{
 	public:
 		Box()
-			{ }
+		{
+		}
 		Box(const Vector3& vMin, const Vector3& vMax)
 		{
 			MathLib::Minimize(min_, vMin, vMax);
@@ -53,7 +55,9 @@ namespace KlayGE
 			return *this;
 		}
 		Box& operator/=(float rhs)
-			{ return operator*=(1.0f / rhs); }
+		{
+			return operator*=(1.0f / rhs);
+		}
 		Box& operator&=(const Box& rhs)
 		{
 			MathLib::Maximize(this->Min(), this->Min(), rhs.Min());
@@ -79,53 +83,85 @@ namespace KlayGE
 
 		// 一元操作符
 		const Box operator+() const
-			{ return *this; }
+		{
+			return *this;
+		}
 		const Box operator-() const
-			{ return Box(-this->Min(), -this->Max()); }
+		{
+			return Box(-this->Min(), -this->Max());
+		}
 
 		// 属性
 		float Width() const
-			{ return this->Max().x() - this->Min().x(); }
+		{
+			return this->Max().x() - this->Min().x();
+		}
 		float Height() const
-			{ return this->Max().y() - this->Min().y(); }
+		{
+			return this->Max().y() - this->Min().y();
+		}
 		float Depth() const
-			{ return this->Max().z() - this->Min().z(); }
+		{
+			return this->Max().z() - this->Min().z();
+		}
 		bool IsEmpty() const
-			{ return this->Min() == this->Max(); }
+		{
+			return this->Min() == this->Max();
+		}
 
 		const Vector3 LeftBottomNear() const
-			{ return this->Min(); }
+		{
+			return this->Min();
+		}
 		const Vector3 LeftTopNear() const
-			{ return Vector3(this->Min().x(), this->Max().y(), this->Min().z()); }
+		{
+			return Vector3(this->Min().x(), this->Max().y(), this->Min().z());
+		}
 		const Vector3 RightBottomNear() const
-			{ return Vector3(this->Max().x(), this->Min().y(), this->Min().z()); }
+		{
+			return Vector3(this->Max().x(), this->Min().y(), this->Min().z());
+		}
 		const Vector3 RightTopNear() const
-			{ return Vector3(this->Max().x(), this->Max().y(), this->Min().z()); }
+		{
+			return Vector3(this->Max().x(), this->Max().y(), this->Min().z());
+		}
 		const Vector3 LeftBottomFar() const
-			{ return Vector3(this->Min().x(), this->Min().y(), this->Max().z()); }
+		{
+			return Vector3(this->Min().x(), this->Min().y(), this->Max().z());
+		}
 		const Vector3 LeftTopFar() const
-			{ return Vector3(this->Min().x(), this->Max().y(), this->Max().z()); }
+		{
+			return Vector3(this->Min().x(), this->Max().y(), this->Max().z());
+		}
 		const Vector3 RightBottomFar() const
-			{ return Vector3(this->Max().x(), this->Min().y(), this->Max().z()); }
+		{
+			return Vector3(this->Max().x(), this->Min().y(), this->Max().z());
+		}
 		const Vector3 RightTopFar() const
-			{ return this->Max(); }
+		{
+			return this->Max();
+		}
 
 		Vector3& Min()
-			{ return min_; }
+		{
+			return min_;
+		}
 		const Vector3& Min() const
-			{ return min_; }
+		{
+			return min_;
+		}
 		Vector3& Max()
-			{ return max_; }
+		{
+			return max_;
+		}
 		const Vector3& Max() const
-			{ return max_; }
+		{
+			return max_;
+		}
 
 		bool VecInBound(const Vector3& v) const
 		{
 			return MathLib::VecInBox(*this, v);
-		}
-		bool IsHit(const Box& box) const
-		{
-			return (MathLib::VecInBox(box, this->Min())) || (MathLib::VecInBox(box, this->Max()));
 		}
 		float MaxRadiusSq() const
 		{
@@ -135,28 +171,6 @@ namespace KlayGE
 	private:
 		Vector3 min_, max_;
 	};
-
-	inline const Box
-	operator+(const Box& lhs, const Vector3& rhs)
-	{
-		return Box(lhs.Min() + rhs, lhs.Max() + rhs);
-	}
-	inline const Box
-	operator-(const Box& lhs, const Vector3& rhs)
-	{
-		return Box(lhs.Min() - rhs, lhs.Max() - rhs);
-	}
-
-	inline const Box
-	operator&(const Box& lhs, const Box& rhs)
-	{
-		return Box(lhs) &= rhs;
-	}
-	inline const Box
-	operator|(const Box& lhs, const Box& rhs)
-	{
-		return Box(lhs) |= rhs;
-	}
 
 	inline bool
 	operator==(const Box& lhs, const Box& rhs)

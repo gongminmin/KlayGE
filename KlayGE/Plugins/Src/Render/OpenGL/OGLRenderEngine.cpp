@@ -115,99 +115,6 @@ namespace KlayGE
 
 		return ret;
 	}
-
-/*	// 从RenderEngine::TexFiltering转换到D3D的MagFilter标志
-	/////////////////////////////////////////////////////////////////////////////////
-	U32 MagFilter(const D3DCAPS9& caps, RenderEngine::TexFiltering tf)
-	{
-		// NOTE: Fall through if device doesn't support requested type
-		if ((RenderEngine::TF_Anisotropic == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFANISOTROPIC))
-		{
-			return D3DTEXF_ANISOTROPIC;
-		}
-		else
-		{
-			tf = RenderEngine::TF_Trilinear;
-		}
-
-		if ((RenderEngine::TF_Trilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFLINEAR))
-		{
-			return D3DTEXF_LINEAR;
-		}
-		else
-		{
-			tf = RenderEngine::TF_Bilinear;
-		}
-
-		if ((RenderEngine::TF_Bilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFLINEAR))
-		{
-			return D3DTEXF_LINEAR;
-		}
-
-		return D3DTEXF_POINT;
-	}
-
-	// 从RenderEngine::TexFiltering转换到D3D的MinFilter标志
-	/////////////////////////////////////////////////////////////////////////////////
-	U32 MinFilter(const D3DCAPS9& caps, RenderEngine::TexFiltering tf)
-	{
-		// NOTE: Fall through if device doesn't support requested type
-		if ((RenderEngine::TF_Anisotropic == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFANISOTROPIC))
-		{
-			return D3DTEXF_ANISOTROPIC;
-		}
-		else
-		{
-			tf = RenderEngine::TF_Trilinear;
-		}
-
-		if ((RenderEngine::TF_Trilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFLINEAR))
-		{
-			return D3DTEXF_LINEAR;
-		}
-		else
-		{
-			tf = RenderEngine::TF_Bilinear;
-		}
-
-		if ((RenderEngine::TF_Bilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFLINEAR))
-		{
-			return D3DTEXF_LINEAR;
-		}
-
-		return D3DTEXF_POINT;
-	}
-
-	// 从RenderEngine::TexFiltering转换到D3D的MipFilter标志
-	/////////////////////////////////////////////////////////////////////////////////
-	U32 MipFilter(const D3DCAPS9& caps, RenderEngine::TexFiltering tf)
-	{
-		// NOTE: Fall through if device doesn't support requested type
-		if ((RenderEngine::TF_Anisotropic == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR))
-		{
-			return D3DTEXF_LINEAR;
-		}
-		else
-		{
-			tf = RenderEngine::TF_Trilinear;
-		}
-
-		if ((RenderEngine::TF_Trilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR))
-		{
-			return D3DTEXF_LINEAR;
-		}
-		else
-		{
-			tf = RenderEngine::TF_Bilinear;
-		}
-
-		if ((RenderEngine::TF_Bilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR))
-		{
-			return D3DTEXF_POINT;
-		}
-
-		return D3DTEXF_NONE;
-	}*/
 }
 
 namespace KlayGE
@@ -778,7 +685,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	bool OGLRenderEngine::HasHardwareStencil()
 	{
-		return false;
+		return true;
 	}
 
 	// 设置模板位数
