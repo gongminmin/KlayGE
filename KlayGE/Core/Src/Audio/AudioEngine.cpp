@@ -33,7 +33,7 @@ namespace KlayGE
 		void AddBuffer(size_t id, const AudioBufferPtr& buffer)
 			{ }
 
-		size_t BufferNum() const
+		size_t NumBuffer() const
 			{ return 0; }
 		AudioBufferPtr Buffer(size_t bufID)
 			{ return AudioBuffer::NullObject(); }
@@ -141,7 +141,7 @@ namespace KlayGE
 
 	// 列表里缓冲区的数目
 	/////////////////////////////////////////////////////////////////////////////////
-	size_t AudioEngine::BufferNum() const
+	size_t AudioEngine::NumBuffer() const
 	{
 		return audioBufs_.size();
 	}

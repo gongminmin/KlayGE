@@ -22,7 +22,7 @@ namespace KlayGE
 			{ }
 			
 		VertexStreamPtr MakeVertexStream(VertexStreamType type,
-			U8 elementSize, U8 elementNum, bool staticStream = false)
+			U8 sizeElement, U8 numElement, bool staticStream = false)
 		{
 			VertexStreamPtr stream;
 
@@ -54,11 +54,11 @@ namespace KlayGE
 			case VST_TextureCoords5:
 			case VST_TextureCoords6:
 			case VST_TextureCoords7:
-				stream = VertexStreamPtr(new OGLVertexStream(type, sizeof(float), elementNum));
+				stream = VertexStreamPtr(new OGLVertexStream(type, sizeof(float), numElement));
 				break;
 
 			default:
-				stream = VertexStreamPtr(new OGLVertexStream(type, elementSize, elementNum));
+				stream = VertexStreamPtr(new OGLVertexStream(type, sizeElement, numElement));
 				break;
 			}
 

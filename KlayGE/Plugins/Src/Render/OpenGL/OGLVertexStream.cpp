@@ -21,14 +21,14 @@
 
 namespace KlayGE
 {
-	OGLVertexStream::OGLVertexStream(VertexStreamType type, U8 elementSize, U8 elementNum)
-			: VertexStream(type, elementSize, elementNum)
+	OGLVertexStream::OGLVertexStream(VertexStreamType type, U8 sizeElement, U8 numElement)
+			: VertexStream(type, sizeElement, numElement)
 	{
 	}
 
 	void OGLVertexStream::Assign(const void* src, size_t numVertices, size_t stride)
 	{
-		const size_t vertexSize(this->ElementSize() * this->ElementsPerVertex());
+		const size_t vertexSize(this->sizeElement() * this->ElementsPerVertex());
 		const size_t size(vertexSize * numVertices);
 
 		buffer_.resize(size);

@@ -47,9 +47,9 @@ namespace KlayGE
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	DSSoundBuffer::DSSoundBuffer(const AudioDataSourcePtr& dataSource,
-									U32 sourceNum, float volume)
+									U32 numSource, float volume)
 					: SoundBuffer(dataSource),
-						sources_(sourceNum)
+						sources_(numSource)
 	{
 		WAVEFORMATEX wfx(WaveFormatEx(dataSource));
 
@@ -80,7 +80,7 @@ namespace KlayGE
 		// 锁定缓冲区
 		PVOID lockedBuffer;			// 指向缓冲区锁定的内存的指针
 		U32   lockedBufferSize;		// 锁定的内存大小
-		TIF(sources_[0]->Lock(0, dataSource_->Size(), &lockedBuffer, &lockedBufferSize, 
+		TIF(sources_[0]->Lock(0, static_cast<DWORD>(dataSource_->Size()), &lockedBuffer, &lockedBufferSize, 
 			NULL, NULL, DSBLOCK_FROMWRITECURSOR));
 
 		dataSource_->Reset();

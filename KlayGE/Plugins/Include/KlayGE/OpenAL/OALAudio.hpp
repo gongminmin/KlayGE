@@ -44,7 +44,7 @@ namespace KlayGE
 		typedef Sources::const_iterator				SourcesConstIter;
 
 	public:
-		OALSoundBuffer(const AudioDataSourcePtr& dataSource, U32 sourceNum, float volume);
+		OALSoundBuffer(const AudioDataSourcePtr& dataSource, U32 numSource, float volume);
 		~OALSoundBuffer();
 
 		void Play(bool loop = false);

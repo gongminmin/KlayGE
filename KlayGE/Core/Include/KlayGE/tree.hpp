@@ -77,7 +77,7 @@ namespace KlayGE
 		reference RootData()
 			{ return m_Root; }
 
-		size_type ChildNum()
+		size_type NumChild()
 			{ return m_Children.size(); }
 
 		ChildIterator BeginChild()

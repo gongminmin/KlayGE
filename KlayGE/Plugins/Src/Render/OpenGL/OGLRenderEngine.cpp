@@ -562,7 +562,8 @@ namespace KlayGE
 			case VST_TextureCoords6:
 			case VST_TextureCoords7:
 				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-				glTexCoordPointer(stream.ElementsPerVertex(), GL_FLOAT, 0, &data[0]);
+				glTexCoordPointer(static_cast<GLint>(stream.ElementsPerVertex()),
+					GL_FLOAT, 0, &data[0]);
 				break;
 			}
 		}
@@ -599,11 +600,12 @@ namespace KlayGE
 		{
 			OGLIndexStream& stream(static_cast<OGLIndexStream&>(*vb.GetIndexStream()));
 			const std::vector<U16, alloc<U16> >& data(stream.OGLBuffer());
-			glDrawElements(mode, vb.NumIndices(), GL_UNSIGNED_SHORT, &data[0]);
+			glDrawElements(mode, static_cast<GLsizei>(vb.NumIndices()),
+				GL_UNSIGNED_SHORT, &data[0]);
 		}
 		else
 		{
-			glDrawArrays(mode, 0, vb.NumVertices());
+			glDrawArrays(mode, 0, static_cast<GLsizei>(vb.NumVertices()));
 		}
 	}
 

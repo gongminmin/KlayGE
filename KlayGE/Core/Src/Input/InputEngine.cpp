@@ -58,6 +58,13 @@ namespace KlayGE
 		}
 	}
 
+	// 获取输入设备个数
+	//////////////////////////////////////////////////////////////////////////////////
+	size_t InputEngine::NumDevice() const
+	{
+		return devices_.size();
+	}
+
 	// 刷新输入状态
 	//////////////////////////////////////////////////////////////////////////////////
 	InputActionsType InputEngine::Update()
@@ -95,7 +102,7 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	InputDevicePtr InputEngine::Device(size_t index) const
 	{
-		assert(index < this->DeviceNum());
+		assert(index < this->NumDevice());
 
 		return devices_[index];
 	}

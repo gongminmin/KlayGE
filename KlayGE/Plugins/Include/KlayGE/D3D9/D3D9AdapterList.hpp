@@ -19,7 +19,7 @@ namespace KlayGE
 
 		void Enumerate(const COMPtr<IDirect3D9>& d3d);
 
-		size_t AdapterNum() const;
+		size_t NumAdapter() const;
 		const D3D9Adapter& Adapter(size_t index) const;
 
 		U32 CurrentAdapterIndex() const;

@@ -42,7 +42,7 @@ namespace KlayGE
 		typedef Sources::const_iterator				SourcesConstIter;
 
 	public:
-		DSSoundBuffer(const AudioDataSourcePtr& dataSource, U32 sourceNum, float volume);
+		DSSoundBuffer(const AudioDataSourcePtr& dataSource, U32 numSource, float volume);
 		~DSSoundBuffer();
 
 		void Play(bool loop = false);

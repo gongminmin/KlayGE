@@ -348,11 +348,11 @@ namespace
 namespace KlayGE
 {
 	D3D9Texture::D3D9Texture(U32 width, U32 height,
-								U16 mipMapsNum, PixelFormat format, TextureUsage usage)
+								U16 numMipMaps, PixelFormat format, TextureUsage usage)
 	{
 		d3dDevice_ = static_cast<const D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
 
-		mipMapsNum_ = mipMapsNum;
+		numMipMaps_ = numMipMaps;
 		format_		= format;
 		width_		= width;
 		height_		= height;
@@ -363,14 +363,14 @@ namespace KlayGE
 
 		IDirect3DTexture9* d3dTexture;
 		// Use D3DX to help us create the texture, this way it can adjust any relevant sizes
-		TIF(D3DXCreateTexture(d3dDevice_.Get(), width_, height_, mipMapsNum_,
-			0, Convert(format), D3DPOOL_SYSTEMMEM, &d3dTexture));
+		TIF(D3DXCreateTexture(d3dDevice_.Get(), this->Width(), this->Height(),
+			this->NumMipMaps(), 0, Convert(format), D3DPOOL_SYSTEMMEM, &d3dTexture));
 		d3dTempTexture_ = COMPtr<IDirect3DTexture9>(d3dTexture);
 
 		if (TU_Default == usage_)
 		{
-			TIF(D3DXCreateTexture(d3dDevice_.Get(), width_, height_, mipMapsNum_, 0, Convert(format),
-				D3DPOOL_DEFAULT, &d3dTexture));
+			TIF(D3DXCreateTexture(d3dDevice_.Get(), this->Width(), this->Height(),
+				this->NumMipMaps(), 0, Convert(format), D3DPOOL_DEFAULT, &d3dTexture));
 			d3dTexture_ = COMPtr<IDirect3DTexture9>(d3dTexture);
 
 			D3DSURFACE_DESC desc;
@@ -394,8 +394,8 @@ namespace KlayGE
 			tempSurf->Release();
 
 			// Now we create the texture.
-			TIF(D3DXCreateTexture(d3dDevice_.Get(), width_, height_, mipMapsNum_,
-				D3DUSAGE_RENDERTARGET, d3dFmt, D3DPOOL_DEFAULT, &d3dTexture));
+			TIF(D3DXCreateTexture(d3dDevice_.Get(), this->Width(), this->Height(),
+				this->NumMipMaps(), D3DUSAGE_RENDERTARGET, d3dFmt, D3DPOOL_DEFAULT, &d3dTexture));
 			d3dTexture_ = COMPtr<IDirect3DTexture9>(d3dTexture);
 
 			D3DSURFACE_DESC desc;
@@ -418,7 +418,7 @@ namespace KlayGE
 		}
 
 		d3dTexture->SetAutoGenFilterType(D3DTEXF_LINEAR);
-		d3dTexture_->SetLOD(this->MipMapsNum());
+		d3dTexture_->SetLOD(this->NumMipMaps());
 	}
 
 	D3D9Texture::~D3D9Texture()
@@ -449,7 +449,7 @@ namespace KlayGE
 	}
 
 	void D3D9Texture::CopyMemoryToTexture(void* pData, PixelFormat pf,
-		U32 width, U32 height, U32 pitch, U32 xOffset, U32 yOffset)
+		U32 width, U32 height, U32 xOffset, U32 yOffset)
 	{
 		U16 bpp(PixelFormatBits(pf));
 
@@ -460,10 +460,6 @@ namespace KlayGE
 		if (0 == height)
 		{
 			height = height_;
-		}
-		if (0 == pitch)
-		{
-			pitch = width * bpp / 8;
 		}
 
 		U8* pBuffer(static_cast<U8*>(pData));
@@ -491,7 +487,7 @@ namespace KlayGE
 			for (U32 y = 0; y < height; ++ y)
 			{
 				void* dst(pBits + y * destPitch);
-				pBuffer = static_cast<U8*>(pData) + y * pitch;
+				pBuffer = static_cast<U8*>(pData) + y * width * bpp / 8;
 
 				Engine::MemoryInstance().Cpy(dst, pBuffer, width * bpp / 8);
 			}
@@ -511,7 +507,7 @@ namespace KlayGE
 			for (U32 y = 0; y < height; ++ y)
 			{
 				U8* pDest(pBits + y * destPitch);
-				U8* pSrc(pBuffer + y * pitch);
+				U8* pSrc(pBuffer + y * width);
 
 				for (U32 x = 0; x < width; ++ x)
 				{

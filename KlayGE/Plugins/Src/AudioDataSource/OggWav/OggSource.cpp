@@ -45,7 +45,7 @@ namespace KlayGE
 
 		// submit a 4k block to libvorbis' Ogg layer
 		char* buffer(ogg_sync_buffer(&oy_, READSIZE));
-		int bytes(oggFile_->Read(buffer, READSIZE));
+		int bytes(static_cast<int>(oggFile_->Read(buffer, READSIZE)));
 		ogg_sync_wrote(&oy_, bytes);
 
 		// Get the first page
@@ -103,7 +103,7 @@ namespace KlayGE
 
 			// no harm in not checking before adding more
 			buffer = ogg_sync_buffer(&oy_, 4096);
-			bytes = oggFile_->Read(buffer, 4096);
+			bytes = static_cast<int>(oggFile_->Read(buffer, 4096));
 			ogg_sync_wrote(&oy_, bytes);
 		}
 
@@ -140,7 +140,7 @@ namespace KlayGE
 		assert(data != NULL);
 
 		std::vector<ogg_int16_t> convbuffer(size / sizeof(ogg_int16_t));
-		int leftsamples(convbuffer.size() / vi_.channels);
+		int leftsamples(static_cast<int>(convbuffer.size() / vi_.channels));
 
 		size_t cursize(0);
 
@@ -220,7 +220,7 @@ namespace KlayGE
 			if (leftsamples > 0)
 			{
 				char* buffer(ogg_sync_buffer(&oy_, READSIZE));
-				int bytes(oggFile_->Read(buffer, READSIZE));
+				int bytes(static_cast<int>(oggFile_->Read(buffer, READSIZE)));
 				ogg_sync_wrote(&oy_, bytes);
 
 				if (0 == bytes)

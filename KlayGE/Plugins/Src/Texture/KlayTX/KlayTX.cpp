@@ -29,7 +29,7 @@ namespace KlayGE
 
 	// ÔØÈëÎÆÀí
 	//////////////////////////////////////////////////////////////////////////////////
-	TexturePtr KlayTX::Load(VFile& file, U16 mipmapsNum)
+	TexturePtr KlayTX::Load(VFile& file, U16 numMipMaps)
 	{
 		file.Rewind();
 		file.Read(&header_, sizeof(header_));
@@ -40,7 +40,7 @@ namespace KlayGE
 		data_.resize(this->Width() * this->Height() * PixelFormatBits(this->Format()) / 8);
 		file.Read(&data_[0], data_.size());
 
-		TexturePtr tex(Engine::RenderFactoryInstance().MakeTexture(this->Width(), this->Height(), mipmapsNum,
+		TexturePtr tex(Engine::RenderFactoryInstance().MakeTexture(this->Width(), this->Height(), numMipMaps,
 			this->Format(), Texture::TU_Default));
 
 		tex->CopyMemoryToTexture(&data_[0], this->Format());

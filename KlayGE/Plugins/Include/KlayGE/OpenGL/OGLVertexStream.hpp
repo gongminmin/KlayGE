@@ -22,12 +22,12 @@ namespace KlayGE
 	class OGLVertexStream : public VertexStream
 	{
 	public:
-		OGLVertexStream(VertexStreamType type, U8 elementSize, U8 elementNum);
+		OGLVertexStream(VertexStreamType type, U8 sizeElement, U8 numElement);
 
 		bool IsStatic() const
 			{ return false; }
 		size_t NumVertices() const
-			{ return buffer_.size() / this->ElementSize() / this->ElementsPerVertex(); }
+			{ return buffer_.size() / this->sizeElement() / this->ElementsPerVertex(); }
 
 		void Assign(const void* src, size_t numVertices, size_t stride = 0);
 

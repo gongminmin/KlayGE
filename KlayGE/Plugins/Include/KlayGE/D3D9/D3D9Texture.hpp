@@ -17,7 +17,7 @@ namespace KlayGE
 	class D3D9Texture : public Texture
 	{
 	public:
-		D3D9Texture(U32 width, U32 height, U16 mipMapsNum, PixelFormat format, TextureUsage usage = TU_Default);
+		D3D9Texture(U32 width, U32 height, U16 numMipMaps, PixelFormat format, TextureUsage usage = TU_Default);
 		~D3D9Texture();
 
 		const WString& Name() const;
@@ -26,7 +26,7 @@ namespace KlayGE
 
 		void CopyToTexture(Texture& target);
 		void CopyMemoryToTexture(void* pData, PixelFormat pf,
-			U32 width = 0, U32 height = 0, U32 pitch = 0, U32 xOffset = 0, U32 yOffset = 0);
+			U32 width = 0, U32 height = 0, U32 xOffset = 0, U32 yOffset = 0);
 		void CopyToMemory(void* data);
 
 		const COMPtr<IDirect3DTexture9>& D3DTexture() const

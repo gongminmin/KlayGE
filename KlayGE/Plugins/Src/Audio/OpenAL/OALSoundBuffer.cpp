@@ -38,9 +38,9 @@ namespace KlayGE
 {
 	// ¹¹Ôìº¯Êý
 	/////////////////////////////////////////////////////////////////////////////////
-	OALSoundBuffer::OALSoundBuffer(const AudioDataSourcePtr& dataSource, U32 sourceNum, float volume)
+	OALSoundBuffer::OALSoundBuffer(const AudioDataSourcePtr& dataSource, U32 numSource, float volume)
 						: SoundBuffer(dataSource),
-							sources_(sourceNum)
+							sources_(numSource)
 	{
 		alGenBuffers(1, &buffer_);
 
@@ -50,7 +50,7 @@ namespace KlayGE
 
 		alBufferData(buffer_, Convert(format_), &data[0], static_cast<ALsizei>(data.size()), freq_);
 
-		alGenSources(sourceNum, &sources_[0]);
+		alGenSources(static_cast<ALsizei>(sources_.size()), &sources_[0]);
 
 		for (SourcesIter iter = sources_.begin(); iter != sources_.end(); ++ iter)
 		{

@@ -31,7 +31,7 @@ namespace KlayGE
 		virtual void OnQuit(U32 /*ID*/) const
 			{ }
 		virtual void OnDefault(PVOID /*revBuf*/, int /*maxSize*/,
-			PVOID /*sendBuf*/, int& /*sendNum*/, SOCKADDR_IN& /*from*/) const
+			PVOID /*sendBuf*/, int& /*numSend*/, SOCKADDR_IN& /*from*/) const
 			{ }
 	};
 
@@ -60,7 +60,7 @@ namespace KlayGE
 		void LobbyName(const String& Name);
 		const String& LobbyName() const;
 
-		char PlayerNum() const;
+		char NumPlayer() const;
 
 		void MaxPlayers(char maxPlayers);
 		char MaxPlayers() const;

@@ -32,8 +32,9 @@ namespace KlayGE
 		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()));
 
 		ID3DXEffect* effect;
-		D3DXCreateEffect(renderEngine.D3DDevice().Get(), srcData.c_str(), srcData.size(),
-			NULL, NULL, flags, NULL, &effect, NULL);
+		D3DXCreateEffect(renderEngine.D3DDevice().Get(), srcData.c_str(),
+			static_cast<::UINT>(srcData.size()), NULL, NULL,
+			flags, NULL, &effect, NULL);
 		effect_ = COMPtr<ID3DXEffect>(effect);
 	}
 
@@ -115,13 +116,13 @@ namespace KlayGE
 	void D3D9RenderEffect::SetMatrixArray(const String& name, const std::vector<Matrix4, alloc<Matrix4> >& matrices)
 	{
 		TIF(effect_->SetMatrixArray(effect_->GetParameterByName(NULL, name.c_str()),
-			reinterpret_cast<const D3DXMATRIX*>(&matrices[0]), matrices.size()));
+			reinterpret_cast<const D3DXMATRIX*>(&matrices[0]), static_cast<::UINT>(matrices.size())));
 	}
 
 	void D3D9RenderEffect::GetMatrixArray(const String& name, std::vector<Matrix4, alloc<Matrix4> >& matrices)
 	{
 		TIF(effect_->GetMatrixArray(effect_->GetParameterByName(NULL, name.c_str()),
-			reinterpret_cast<D3DXMATRIX*>(&matrices[0]), matrices.size()));
+			reinterpret_cast<D3DXMATRIX*>(&matrices[0]), static_cast<::UINT>(matrices.size())));
 	}	
 
 	void D3D9RenderEffect::SetInt(const String& name, int value)

@@ -47,14 +47,14 @@ namespace KlayGE
 
 		// 申请一块内存
 		// allocNum表示真实申请到的内存块数
-		static void* ChunkAlloc(size_t blockSize, size_t blockNum, size_t& allocNum)
+		static void* ChunkAlloc(size_t blockSize, size_t numBlock, size_t& numAlloc)
 		{
 			void* ret(0);
 
 			// 自动缩减需要的大小
-			for (allocNum = blockNum; (allocNum > 1) && (0 == ret); allocNum /= 2)
+			for (numAlloc = numBlock; (numAlloc > 1) && (0 == ret); numAlloc /= 2)
 			{
-				ret = Allocator::Allocate(blockSize * allocNum);
+				ret = Allocator::Allocate(blockSize * numAlloc);
 			}
 
 			if (0 == ret)
@@ -69,7 +69,7 @@ namespace KlayGE
 						ret	= theHead;
 						theHead = theHead->next;
 
-						allocNum = i;
+						numAlloc = i;
 
 						break;
 					}
@@ -114,10 +114,10 @@ namespace KlayGE
 				else
 				{
 					const size_t blockSize(RoundUp(n));
-					size_t allocNum;
+					size_t numAlloc;
 
 					// 申请一个足够大的空间
-					char* chuck(static_cast<char*>(ChunkAlloc(blockSize, 256, allocNum)));
+					char* chuck(static_cast<char*>(ChunkAlloc(blockSize, 256, numAlloc)));
 					ret = chuck;
 
 					chuck += blockSize;
@@ -125,7 +125,7 @@ namespace KlayGE
 
 					// 建立新的free list
 					Obj* curObj(0);
-					for (size_t i = 1; i < allocNum - 1; ++ i)
+					for (size_t i = 1; i < numAlloc - 1; ++ i)
 					{
 						curObj = static_cast<Obj*>(static_cast<void*>(chuck));
 						chuck += blockSize;

@@ -118,7 +118,7 @@ namespace KlayGE
 
 		void AddBuffer(size_t id, const AudioBufferPtr& buffer);
 
-		size_t BufferNum() const;
+		size_t NumBuffer() const;
 		AudioBufferPtr Buffer(size_t bufID);
 		const AudioBufferPtr Buffer(size_t bufID) const;
 

@@ -13,7 +13,7 @@
 #ifndef _MEMFILE_HPP
 #define _MEMFILE_HPP
 
-#include <vector>
+#include <sstream>
 #include <KlayGE/VFile.hpp>
 
 #pragma comment(lib, "KlayGE_FileSystem_MemFile.lib")
@@ -41,8 +41,7 @@ namespace KlayGE
 		size_t Tell();
 
 	private:
-		std::vector<U8>		chunkData_;
-		size_t				curPos_;
+		std::stringstream	chunkData_;
 
 		MemFile(const MemFile& rhs);
 		MemFile& operator=(const MemFile& rhs);

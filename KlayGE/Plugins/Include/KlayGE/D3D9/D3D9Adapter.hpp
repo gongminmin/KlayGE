@@ -33,7 +33,7 @@ namespace KlayGE
 		const D3DDISPLAYMODE& DesktopMode() const
 			{ return d3ddmDesktop_; }
 
-		size_t VideoModeNum() const;
+		size_t NumVideoMode() const;
 		const D3D9VideoMode& VideoMode(size_t index) const;
 
 	private:

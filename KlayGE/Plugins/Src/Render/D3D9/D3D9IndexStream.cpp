@@ -29,7 +29,7 @@ namespace KlayGE
 			COMPtr<IDirect3DDevice9> d3dDevice(static_cast<const D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
 
 			IDirect3DIndexBuffer9* buffer;
-			TIF(d3dDevice->CreateIndexBuffer(size, 
+			TIF(d3dDevice->CreateIndexBuffer(static_cast<::UINT>(size), 
 				D3DUSAGE_WRITEONLY | (this->IsStatic() ? 0 : D3DUSAGE_DYNAMIC),
 				D3DFMT_INDEX16, D3DPOOL_DEFAULT, &buffer, NULL));
 

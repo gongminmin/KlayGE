@@ -324,7 +324,7 @@ namespace KlayGE
 						}
 					}
 					theTexture_->CopyMemoryToTexture(&dst[0], PF_A4L4, charRect.right - charRect.left,
-						charRect.bottom - charRect.top, 0, charRect.left, charRect.top);
+						charRect.bottom - charRect.top, charRect.left, charRect.top);
 
 					// 已经更新了纹理，清除对象
 					::DeleteObject(::SelectObject(hDC, hOldBitmap));

@@ -65,14 +65,14 @@ namespace KlayGE
 			actionMap_.AddAction(InputAction(actionMap.Action(JS_ZRot), JS_ZRot));
 		}
 
-		for (size_t i = 0; i < slider_.size(); ++ i)
+		for (U16 i = 0; i < static_cast<U16>(slider_.size()); ++ i)
 		{
 			if (actionMap_.HasAction(JS_Slider0 + i))
 			{
 				actionMap_.AddAction(InputAction(actionMap.Action(JS_Slider0 + i), JS_Slider0 + i));
 			}
 		}
-		for (size_t i = 0; i < buttons_.size(); ++ i)
+		for (U16 i = 0; i < static_cast<U16>(buttons_.size()); ++ i)
 		{
 			if (actionMap_.HasAction(JS_Button0 + i))
 			{
@@ -96,11 +96,11 @@ namespace KlayGE
 		actionMap_.UpdateInputActions(ret, JS_YRot, this->YRot());
 		actionMap_.UpdateInputActions(ret, JS_ZRot, this->ZRot());
 
-		for (size_t i = 0; i < slider_.size(); ++ i)
+		for (U16 i = 0; i < static_cast<U16>(slider_.size()); ++ i)
 		{
 			actionMap_.UpdateInputActions(ret, JS_Slider0 + i, this->Slider(i));
 		}
-		for (size_t i = 0; i < buttons_.size(); ++ i)
+		for (U16 i = 0; i < static_cast<U16>(buttons_.size()); ++ i)
 		{
 			if (this->Button(i))
 			{

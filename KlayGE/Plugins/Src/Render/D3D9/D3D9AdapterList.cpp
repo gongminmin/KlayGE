@@ -17,7 +17,7 @@ namespace KlayGE
 
 	// 获取系统显卡数目
 	/////////////////////////////////////////////////////////////////////////////////
-	size_t D3D9AdapterList::AdapterNum() const
+	size_t D3D9AdapterList::NumAdapter() const
 	{
 		return adapters_.size();
 	}
@@ -63,7 +63,7 @@ namespace KlayGE
 			adapter.Enumerate(d3d);
 
 			// 如果发现有效的设备则使用该适配器
-			if (adapter.VideoModeNum() != 0)
+			if (adapter.NumVideoMode() != 0)
 			{
 				adapters_.push_back(adapter);
 			}

@@ -138,7 +138,7 @@ namespace KlayGE
 		for (BuffersIter iter = bufferQueue_.begin(); iter != bufferQueue_.end(); ++ iter)
 		{
 			dataSource_->Read(&data[0], data.size());
-			alBufferData(*iter, format, &data[0], static_cast<ALsizei>(data.size()), freq_);
+			alBufferData(*iter, format, &data[0], static_cast<ALuint>(data.size()), freq_);
 		}
 
 		alSourceQueueBuffers(source_, static_cast<ALsizei>(bufferQueue_.size()), &bufferQueue_[0]);

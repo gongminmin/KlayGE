@@ -37,7 +37,7 @@ namespace KlayGE
 
 	// 获取支持的显示模式数目
 	/////////////////////////////////////////////////////////////////////////////////
-	size_t D3D9Adapter::VideoModeNum() const
+	size_t D3D9Adapter::NumVideoMode() const
 	{
 		return modes_.size();
 	}

@@ -275,7 +275,7 @@ namespace
 			{
 				openFile.Open(fd.fileName, VFile::OM_Read);
 
-				fd.DeComLength = openFile.Length();
+				fd.DeComLength = static_cast<U32>(openFile.Length());
 				MemFile in;
 				in.CopyFrom(openFile, fd.DeComLength);
 
@@ -290,7 +290,7 @@ namespace
 					out.CopyFrom(in, in.Length());
 				}
 
-				fd.length	= out.Length();
+				fd.length	= static_cast<U32>(out.Length());
 				fd.start	= curPos;
 				curPos += fd.length;
 
@@ -341,7 +341,7 @@ namespace
 				if (fd.attr & FA_IsDir)
 				{
 					SetCurrentDirectoryW(fd.fileName.c_str());
-					Find(pDT->Child(pDT->ChildNum() - 1).Get());
+					Find(pDT->Child(pDT->NumChild() - 1).Get());
 				}
 			}
 		} while (FindNextFileW(hFind, &FindFileData));
@@ -514,9 +514,9 @@ namespace KlayGE
 		mag.magic			= MakeFourCC<'p', 'k', 't', ' '>::value;
 		mag.ver				= 3;
 		mag.DTStart			= sizeof(mag);
-		mag.DTLength		= DTCom.Length();
-		mag.DTDeComLength	= DT.Length();
-		mag.FIStart			= sizeof(mag) + DTCom.Length();
+		mag.DTLength		= static_cast<U32>(DTCom.Length());
+		mag.DTDeComLength	= static_cast<U32>(DT.Length());
+		mag.FIStart			= sizeof(mag) + static_cast<U32>(DTCom.Length());
 
 		pktFile.Rewind();
 		pktFile.Write(&mag, sizeof(mag));

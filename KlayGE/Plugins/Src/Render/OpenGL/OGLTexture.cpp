@@ -67,10 +67,10 @@ namespace
 namespace KlayGE
 {
 	OGLTexture::OGLTexture(U32 width, U32 height,
-								U16 mipMapsNum, PixelFormat format, TextureUsage usage)
+								U16 numMipMaps, PixelFormat format, TextureUsage usage)
 								: texture_(0)
 	{
-		mipMapsNum_ = mipMapsNum;
+		numMipMaps_ = numMipMaps;
 		format_		= format;
 		width_		= width;
 		height_		= height;
@@ -97,7 +97,7 @@ namespace KlayGE
 	}
 
 	void OGLTexture::CopyMemoryToTexture(void* data, PixelFormat pf,
-		U32 width, U32 height, U32 pitch, U32 xOffset, U32 yOffset)
+		U32 width, U32 height, U32 xOffset, U32 yOffset)
 	{
 		U16 bpp(PixelFormatBits(pf));
 

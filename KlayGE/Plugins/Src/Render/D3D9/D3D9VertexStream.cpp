@@ -10,8 +10,8 @@
 
 namespace KlayGE
 {
-	D3D9VertexStream::D3D9VertexStream(VertexStreamType type, U8 elementSize, U8 ElementsPerVertex, bool staticStream)
-			: VertexStream(type, elementSize, ElementsPerVertex),
+	D3D9VertexStream::D3D9VertexStream(VertexStreamType type, U8 sizeElement, U8 ElementsPerVertex, bool staticStream)
+			: VertexStream(type, sizeElement, ElementsPerVertex),
 				currentSize_(0), numVertices_(0), 
 				staticStream_(staticStream)
 	{
@@ -31,7 +31,7 @@ namespace KlayGE
 	{
 		numVertices_ = numVertices;
 
-		const size_t vertexSize(this->ElementSize() * this->ElementsPerVertex());
+		const size_t vertexSize(this->sizeElement() * this->ElementsPerVertex());
 		const size_t size(vertexSize * numVertices);
 
 		if (currentSize_ < size)
@@ -41,7 +41,7 @@ namespace KlayGE
 			COMPtr<IDirect3DDevice9> d3dDevice(static_cast<const D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
 
 			IDirect3DVertexBuffer9* theBuffer;
-			TIF(d3dDevice->CreateVertexBuffer(size,
+			TIF(d3dDevice->CreateVertexBuffer(static_cast<::UINT>(size),
 				D3DUSAGE_WRITEONLY | (this->IsStatic() ? 0 : D3DUSAGE_DYNAMIC),
 				0, D3DPOOL_DEFAULT, &theBuffer, NULL));
 

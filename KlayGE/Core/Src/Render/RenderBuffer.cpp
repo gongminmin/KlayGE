@@ -6,9 +6,9 @@
 
 namespace KlayGE
 {
-	VertexStream::VertexStream(VertexStreamType type, U8 elementSize, U8 ElementsPerVertex)
+	VertexStream::VertexStream(VertexStreamType type, U8 sizeElement, U8 ElementsPerVertex)
 			: type_(type),
-				elementSize_(elementSize), elementPerVertex_(ElementsPerVertex)
+				sizeElement_(sizeElement), elementPerVertex_(ElementsPerVertex)
 	{
 	}
 
@@ -21,9 +21,9 @@ namespace KlayGE
 		return type_;
 	}
 
-	size_t VertexStream::ElementSize() const
+	size_t VertexStream::sizeElement() const
 	{
-		return elementSize_;
+		return sizeElement_;
 	}
 
 	size_t VertexStream::ElementsPerVertex() const
@@ -53,12 +53,12 @@ namespace KlayGE
 		return vertexStreams_.empty() ? 0 : vertexStreams_[0]->NumVertices();
 	}
 
-	void RenderBuffer::AddVertexStream(VertexStreamType type, U8 elementSize, U8 elementNum, bool staticStream)
+	void RenderBuffer::AddVertexStream(VertexStreamType type, U8 sizeElement, U8 numElement, bool staticStream)
 	{
 		if (!this->GetVertexStream(type))
 		{
 			vertexStreams_.push_back(Engine::RenderFactoryInstance().MakeVertexStream(type,
-				elementSize, elementNum, staticStream));
+				sizeElement, numElement, staticStream));
 		}
 	}
 

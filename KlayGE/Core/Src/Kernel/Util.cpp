@@ -31,7 +31,7 @@ namespace KlayGE
 		std::vector<char> vecTemp(::WideCharToMultiByte(CP_ACP, 0, src.c_str(), -1,
 			NULL, 0, NULL, NULL) - 1);
 		::WideCharToMultiByte(CP_ACP, 0, src.c_str(), -1, &vecTemp[0],
-			vecTemp.size(), NULL, NULL);
+			static_cast<int>(vecTemp.size()), NULL, NULL);
 
 		dest.assign(vecTemp.begin(), vecTemp.end());
 
@@ -55,7 +55,7 @@ namespace KlayGE
 #ifdef WIN32
 		std::vector<wchar_t> vecTemp(::MultiByteToWideChar(CP_ACP, 0, src.c_str(), -1, NULL, 0) - 1);
 		::MultiByteToWideChar(CP_ACP, 0, src.c_str(), -1, &vecTemp[0],
-			vecTemp.size());
+			static_cast<int>(vecTemp.size()));
 
 		dest.assign(vecTemp.begin(), vecTemp.end());
 

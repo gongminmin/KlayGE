@@ -122,7 +122,7 @@ namespace KlayGE
 	LobbyDes Player::LobbyInfo()
 	{
 		LobbyDes lobbydes;
-		lobbydes.PlayerNum = 0;
+		lobbydes.NumPlayer = 0;
 		lobbydes.MaxPlayers = 0;
 
 		char msg(MSG_GETLOBBYINFO);
@@ -132,7 +132,7 @@ namespace KlayGE
 		this->socket_.Receive(buf, sizeof(buf));
 		if (MSG_GETLOBBYINFO == buf[0])
 		{
-			lobbydes.PlayerNum = buf[1];
+			lobbydes.NumPlayer = buf[1];
 			lobbydes.MaxPlayers = buf[2];
 			size_t i(0);
 			while (buf[3 + i] != 0)

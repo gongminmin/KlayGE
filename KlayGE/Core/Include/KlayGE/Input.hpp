@@ -290,8 +290,7 @@ namespace KlayGE
 
 		void ActionMap(const InputActionMap& actionMap, bool reenumerate = false);
 
-		size_t DeviceNum() const
-			{ return devices_.size(); }
+		size_t NumDevice() const;
 		InputDevicePtr Device(size_t index) const;
 
 	protected:

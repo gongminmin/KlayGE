@@ -64,7 +64,7 @@ namespace KlayGE
 		SOCKADDR_IN from;
 		char revBuf[Max_Buffer];
 		char sendBuf[Max_Buffer];
-		int sendNum = 0;
+		int numSend = 0;
 		for (;;)
 		{
 			this->Receive(revBuf, sizeof(revBuf), from);
@@ -77,15 +77,15 @@ namespace KlayGE
 			switch (revBuf[0])
 			{
 			case MSG_JOIN:
-				this->OnJoin(revPtr, sendPtr, sendNum, from, pro);
+				this->OnJoin(revPtr, sendPtr, numSend, from, pro);
 				break;
 
 			case MSG_QUIT:
-				this->OnQuit(this->ID(from), sendPtr, sendNum, pro);
+				this->OnQuit(this->ID(from), sendPtr, numSend, pro);
 				break;
 
 			case MSG_GETLOBBYINFO:
-				this->OnGetLobbyInfo(sendPtr, sendNum, pro);
+				this->OnGetLobbyInfo(sendPtr, numSend, pro);
 				break;
 
 			case MSG_NOP:
@@ -93,20 +93,20 @@ namespace KlayGE
 				break;
 
 			default:
-				pro.OnDefault(revBuf, sizeof(revBuf), sendBuf, sendNum, from);
+				pro.OnDefault(revBuf, sizeof(revBuf), sendBuf, numSend, from);
 				break;
 			}
 
-			if (sendNum != 0)
+			if (numSend != 0)
 			{
-				this->Send(sendBuf, sendNum + 1, from);
+				this->Send(sendBuf, numSend + 1, from);
 			}
 		}
 	}
 
 	// 设置最大人数
 	/////////////////////////////////////////////////////////////////////////////////
-	char Lobby::PlayerNum() const
+	char Lobby::NumPlayer() const
 	{
 		char n = 0;
 		for (PlayerAddrs::const_iterator iter = this->players_.begin();
@@ -185,7 +185,7 @@ namespace KlayGE
 	}
 
 
-	void Lobby::OnJoin(char* revBuf, char* sendBuf, int& sendNum,
+	void Lobby::OnJoin(char* revBuf, char* sendBuf, int& numSend,
 							SOCKADDR_IN& from, const Processer& pro)
 	{
 		// 命令格式:
@@ -225,11 +225,11 @@ namespace KlayGE
 			sendBuf[0] = 0;
 		}
 
-		sendNum = 1;
+		numSend = 1;
 	}
 
 	void Lobby::OnQuit(PlayerAddrsIter iter, char* sendBuf,
-							int& sendNum, const Processer& pro)
+							int& numSend, const Processer& pro)
 	{
 		if (iter != this->players_.end())
 		{
@@ -242,10 +242,10 @@ namespace KlayGE
 			sendBuf[0] = 1;
 		}
 
-		sendNum = 1;
+		numSend = 1;
 	}
 
-	void Lobby::OnGetLobbyInfo(char* sendBuf, int& sendNum, const Processer& /*pro*/)
+	void Lobby::OnGetLobbyInfo(char* sendBuf, int& numSend, const Processer& /*pro*/)
 	{
 		// 返回格式:
 		//			当前Players数	1 字节
@@ -253,10 +253,10 @@ namespace KlayGE
 		//			Lobby名字		16 字节
 
 		Engine::MemoryInstance().Zero(sendBuf, 18);
-		sendBuf[0] = this->PlayerNum();
+		sendBuf[0] = this->NumPlayer();
 		sendBuf[1] = this->MaxPlayers();
 		Engine::MemoryInstance().Cpy(&sendBuf[2], this->LobbyName().c_str(), this->LobbyName().length());
-		sendNum = 18;
+		numSend = 18;
 	}
 
 	void Lobby::OnNop(PlayerAddrsIter iter)

@@ -45,7 +45,7 @@ namespace KlayGE
 		/////////////////////////////////////////////////////////////////////
 		void* MemMMXLib::Set(void* dest, int c, size_t count) const
 		{
-			const size_t ali64Num(count >> 6);
+			const size_t numAli64(count >> 6);
 			U8* dstptr(static_cast<U8*>(dest));
 
 			_asm
@@ -64,7 +64,7 @@ namespace KlayGE
 				movq		mm7, mm0
 			}
 
-			for (size_t i = 0; i < ali64Num; ++ i)
+			for (size_t i = 0; i < numAli64; ++ i)
 			{
 				_asm
 				{
@@ -93,13 +93,13 @@ namespace KlayGE
 		/////////////////////////////////////////////////////////////////////
 		bool MemMMXLib::Cmp(const void* buf1, const void* buf2, size_t count) const
 		{
-			const size_t ali32Num(count >> 5);
+			const size_t numAli32(count >> 5);
 
 			U8* buf1ptr(static_cast<U8*>(const_cast<void*>(buf1)));
 			U8* buf2ptr(static_cast<U8*>(const_cast<void*>(buf2)));
 
 			U32 reg(0);
-			for (size_t i = 0; i < ali32Num; ++ i)
+			for (size_t i = 0; i < numAli32; ++ i)
 			{
 				_asm
 				{
@@ -151,7 +151,7 @@ namespace KlayGE
 		//////////////////////////////////////////////////////////////////////////
 		void* MemMMXLib::Cpy(void* dest, const void* src, size_t count) const
 		{
-			const size_t ali64Num(count >> 6);
+			const size_t numAli64(count >> 6);
 
 			U8* dstptr(static_cast<U8*>(dest));
 			U8* srcptr(static_cast<U8*>(const_cast<void*>(src)));
@@ -160,7 +160,7 @@ namespace KlayGE
 			{
 				dstptr += count;
 				srcptr += count;
-				for (size_t i = 0; i < ali64Num; ++ i)
+				for (size_t i = 0; i < numAli64; ++ i)
 				{
 					dstptr -= 64;
 					srcptr -= 64;
@@ -169,7 +169,7 @@ namespace KlayGE
 			}
 			else
 			{
-				for (size_t i = 0; i < ali64Num; ++ i)
+				for (size_t i = 0; i < numAli64; ++ i)
 				{
 					this->Cpy64(dstptr, srcptr);
 					dstptr += 64;
@@ -215,7 +215,7 @@ namespace KlayGE
 
 		void* Mem3DNowExLib::Set(void* dest, int c, size_t count) const
 		{
-			const size_t ali64Num(count >> 6);
+			const size_t numAli64(count >> 6);
 			U8* dstptr(static_cast<U8*>(dest));
 
 			_asm
@@ -233,7 +233,7 @@ namespace KlayGE
 				movq		mm7, mm0
 			}
 
-			for (size_t i = 0; i < ali64Num; ++ i)
+			for (size_t i = 0; i < numAli64; ++ i)
 			{
 				_asm
 				{
@@ -264,13 +264,13 @@ namespace KlayGE
 
 		bool Mem3DNowExLib::Cmp(const void* buf1, const void* buf2, size_t count) const
 		{
-			const size_t ali32Num(count >> 5);
+			const size_t numAli32(count >> 5);
 
 			U8* buf1ptr(static_cast<U8*>(const_cast<void*>(buf1)));
 			U8* buf2ptr(static_cast<U8*>(const_cast<void*>(buf2)));
 
 			U32 reg(0);
-			for (size_t i = 0; i < ali32Num; ++ i)
+			for (size_t i = 0; i < numAli32; ++ i)
 			{
 				_asm
 				{
@@ -319,7 +319,7 @@ namespace KlayGE
 
 		void* Mem3DNowExLib::Cpy(void* dest, const void* src, size_t count) const
 		{
-			const size_t ali64Num(count >> 6);
+			const size_t numAli64(count >> 6);
 
 			U8* dstptr(static_cast<U8*>(dest));
 			U8* srcptr(static_cast<U8*>(const_cast<void*>(src)));
@@ -328,7 +328,7 @@ namespace KlayGE
 			{
 				dstptr += count;
 				srcptr += count;
-				for (size_t i = 0; i < ali64Num; ++ i)
+				for (size_t i = 0; i < numAli64; ++ i)
 				{
 					dstptr -= 64;
 					srcptr -= 64;
@@ -337,7 +337,7 @@ namespace KlayGE
 			}
 			else
 			{
-				for (size_t i = 0; i < ali64Num; ++ i)
+				for (size_t i = 0; i < numAli64; ++ i)
 				{
 					this->Cpy64(dstptr, srcptr);
 					dstptr += 64;

@@ -43,7 +43,7 @@ namespace KlayGE
 		{
 			actionMap_.AddAction(InputAction(actionMap.Action(MS_Z), MS_Z));
 		}
-		for (size_t i = 0; i < buttons_.size(); ++ i)
+		for (U16 i = 0; i < static_cast<U16>(buttons_.size()); ++ i)
 		{
 			if (actionMap_.HasAction(MS_Button0 + i))
 			{
@@ -72,7 +72,7 @@ namespace KlayGE
 		{
 			actionMap_.UpdateInputActions(ret, MS_Z, this->Z());
 		}
-		for (size_t i = 0; i < buttons_.size(); ++ i)
+		for (U16 i = 0; i < static_cast<U16>(buttons_.size()); ++ i)
 		{
 			if (this->Button(i))
 			{

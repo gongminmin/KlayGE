@@ -24,7 +24,7 @@ namespace KlayGE
 		virtual const WString& Name() const = 0;
 
 		virtual AudioEngine& AudioEngineInstance() = 0;
-		virtual AudioBufferPtr MakeSoundBuffer(const AudioDataSourcePtr& dataSource, U32 sourceNum = 1) = 0;
+		virtual AudioBufferPtr MakeSoundBuffer(const AudioDataSourcePtr& dataSource, U32 numSource = 1) = 0;
 		virtual AudioBufferPtr MakeMusicBuffer(const AudioDataSourcePtr& dataSource, U32 bufferSeconds = 2) = 0;
 	};
 
@@ -45,9 +45,9 @@ namespace KlayGE
 			return audioEngine;
 		}
 
-		AudioBufferPtr MakeSoundBuffer(const AudioDataSourcePtr& dataSource, U32 sourceNum = 1)
+		AudioBufferPtr MakeSoundBuffer(const AudioDataSourcePtr& dataSource, U32 numSource = 1)
 		{
-			return AudioBufferPtr(new SoundBufferType(dataSource, sourceNum,
+			return AudioBufferPtr(new SoundBufferType(dataSource, numSource,
 				this->AudioEngineInstance().SoundVolume()));
 		}
 

@@ -1,11 +1,14 @@
 // D3D9RenderWindow.cpp
 // KlayGE D3D9渲染窗口类 实现文件
-// Ver 2.0.3
+// Ver 2.0.5
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
 //
+// 2.0.5
+// 修正了WindowMovedOrResized的bug (2004.4.9)
+//
 // 2.0.1
-// 修正了只能sw vp的bug (2005.2.15)
+// 修正了只能sw vp的bug (2004.2.15)
 //
 // 2.0.0
 // 初次建立 (2003.8.15)
@@ -372,7 +375,6 @@ namespace KlayGE
 		::RECT rect;
 		::GetWindowRect(hWnd_, &rect);
 
-		this->Reposition(rect.left, rect.top);
 		this->Resize(rect.right - rect.left, rect.bottom - rect.top);
 	}
 

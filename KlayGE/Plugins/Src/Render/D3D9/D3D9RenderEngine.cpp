@@ -561,7 +561,7 @@ namespace KlayGE
 	{
 		D3DPRIMITIVETYPE primType;
 		U32 primCount;
-		U32 vertexCount(rb.UseIndices() ? rb.NumIndices() : rb.NumVertices());
+		U32 vertexCount(static_cast<U32>(rb.UseIndices() ? rb.NumIndices() : rb.NumVertices()));
 		switch (rb.Type())
 		{
 		case RenderBuffer::BT_PointList:
@@ -609,20 +609,20 @@ namespace KlayGE
 			VertexStream& stream(*(*iter));
 			VertexStreamType type(stream.Type());
 
-			element.Stream = shaderDecl.size();
+			element.Stream = static_cast<WORD>(shaderDecl.size());
 
 			switch (type)
 			{
 			// Vertex xyzs
 			case VST_Positions:
-				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + stream.ElementsPerVertex();
+				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + static_cast<BYTE>(stream.ElementsPerVertex());
 				element.Usage		= D3DDECLUSAGE_POSITION;
 				element.UsageIndex	= 0;
 				break;
 
 			// Normal
 			case VST_Normals:
-				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + stream.ElementsPerVertex();
+				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + static_cast<BYTE>(stream.ElementsPerVertex());
 				element.Usage		= D3DDECLUSAGE_NORMAL;
 				element.UsageIndex	= 0;
 				break;
@@ -664,7 +664,7 @@ namespace KlayGE
 			case VST_TextureCoords5:
 			case VST_TextureCoords6:
 			case VST_TextureCoords7:
-				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + stream.ElementsPerVertex();
+				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + static_cast<BYTE>(stream.ElementsPerVertex());
 				element.Usage		= D3DDECLUSAGE_TEXCOORD;
 				element.UsageIndex	= type - VST_TextureCoords0;
 				break;
@@ -675,7 +675,8 @@ namespace KlayGE
 
 			D3D9VertexStream& d3d9vs(static_cast<D3D9VertexStream&>(stream));
 			TIF(d3dDevice_->SetStreamSource(element.Stream,
-				d3d9vs.D3D9Buffer().Get(), 0, stream.ElementSize() * stream.ElementsPerVertex()));
+				d3d9vs.D3D9Buffer().Get(), 0,
+				static_cast<::UINT>(stream.sizeElement() * stream.ElementsPerVertex())));
 		}
 
 		{
@@ -687,9 +688,9 @@ namespace KlayGE
 		}
 
 		// Clear any previous steam sources
-		for (U32 i = shaderDecl.size() - 1; i < currentDecl_.size(); ++ i)
+		for (size_t i = shaderDecl.size() - 1; i < currentDecl_.size(); ++ i)
 		{
-			d3dDevice_->SetStreamSource(i, NULL, 0, 0);
+			d3dDevice_->SetStreamSource(static_cast<U32>(i), NULL, 0, 0);
 		}
 
 
@@ -716,7 +717,7 @@ namespace KlayGE
 			{
 				renderEffect_->Pass(i);
 				TIF(d3dDevice_->DrawIndexedPrimitive(primType, 0, 0,
-					rb.NumVertices(), 0, primCount));
+					static_cast<UINT>(rb.NumVertices()), 0, primCount));
 			}
 		}
 		else

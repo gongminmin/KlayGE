@@ -40,7 +40,7 @@ namespace KlayGE
 	public:
 		KlayTX();
 
-		TexturePtr Load(VFile& file, U16 mipmapsNum = 1);
+		TexturePtr Load(VFile& file, U16 numMipmaps = 0);
 
 		U32 Width() const;
 		U32 Height() const;

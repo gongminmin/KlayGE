@@ -22,7 +22,7 @@ namespace KlayGE
 {
 	struct LobbyDes
 	{
-		char			PlayerNum;
+		char			NumPlayer;
 		char			MaxPlayers;
 		String			Name;
 		SOCKADDR_IN		Addr;

@@ -31,7 +31,7 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	void InputKeyboard::DoActionMap(const InputActionMap& actionMap)
 	{
-		for (size_t i = 0; i < keys_.size(); ++ i)
+		for (U16 i = 0; i < static_cast<U16>(keys_.size()); ++ i)
 		{
 			if (actionMap.HasAction(i))
 			{
@@ -48,7 +48,7 @@ namespace KlayGE
 
 		InputActionsType ret;
 
-		for (size_t i = 0; i < keys_.size(); ++ i)
+		for (U16 i = 0; i < static_cast<U16>(keys_.size()); ++ i)
 		{
 			if (this->Key(i))
 			{

@@ -14,7 +14,7 @@ namespace KlayGE
 	class D3D9VertexStream : public VertexStream
 	{
 	public:
-		D3D9VertexStream(VertexStreamType type, U8 elementSize, U8 ElementsPerVertex, bool staticStream);
+		D3D9VertexStream(VertexStreamType type, U8 sizeElement, U8 ElementsPerVertex, bool staticStream);
 
 		bool IsStatic() const;
 
