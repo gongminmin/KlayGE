@@ -33,8 +33,8 @@ namespace KlayGE
 		// 2D & 3D 画出文字的函数
 		RenderablePtr RenderText(float x, float y, const Color& clr,
 			const WString& text, U32 flags = 0);
-		RenderablePtr RenderText(float x, float y, float z, float xScale, float yScale, const Color& clr, 
-			const WString& text, U32 flags = 0);
+		RenderablePtr RenderText(float x, float y, float z, float xScale, float yScale,
+			const Color& clr, const WString& text, U32 flags = 0);
 		//RenderablePtr RenderText(const WString& text, U32 flags = 0);
 
 		U32 FontHeight() const;
@@ -48,7 +48,8 @@ namespace KlayGE
 			U32				width;
 		};
 
-		typedef std::map<wchar_t, CharInfo, std::less<wchar_t>, alloc<std::pair<const wchar_t, CharInfo> > > CharInfoMapType;
+		typedef std::map<wchar_t, CharInfo, std::less<wchar_t>,
+			alloc<std::pair<const wchar_t, CharInfo> > > CharInfoMapType;
 		typedef std::list<wchar_t, alloc<wchar_t> > CharLRUType;
 
 	public:
@@ -56,8 +57,8 @@ namespace KlayGE
 
 		LOGFONTW logFont_;
 
-		RenderTechniquePtr	technique_;
-		TexturePtr			theTexture_;
+		RenderEffectPtr	effect_;
+		TexturePtr		theTexture_;
 
 		CharInfoMapType charInfoMap_;
 		CharLRUType charLRU_;

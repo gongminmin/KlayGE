@@ -37,9 +37,12 @@ namespace KlayGE
 	{
 	public:
 		D3D9RenderEffect(const String& srcData, UINT flags = 0);
+		D3D9RenderEffect(const D3D9RenderEffect& rhs);
 
 		const COMPtr<ID3DXEffect>& D3DXEffect() const
 			{ return effect_; }
+
+		RenderEffectPtr Clone() const;
 
 		void Desc(UINT& parameters, UINT& techniques, UINT& functions);
 
@@ -65,33 +68,17 @@ namespace KlayGE
 		void SetVertexShader(const String& name, U32 vsHandle);
 		void SetPixelShader(const String& name, U32 psHandle);
 
-		RenderTechniquePtr GetTechnique(const RenderEffectPtr& effect, const String& technique);
-		RenderTechniquePtr GetTechnique(const RenderEffectPtr& effect, UINT technique);
+		void SetTechnique(const String& technique);
+		void SetTechnique(UINT technique);
 
-		bool Validate(const RenderTechniquePtr& technique);
-
-	private:
-		COMPtr<ID3DXEffect> effect_;
-	};
-
-	class D3D9RenderTechnique : public RenderTechnique
-	{
-	public:
-		D3D9RenderTechnique(D3DXHANDLE tech, const RenderEffectPtr& effect)
-			: d3dxTechnique_(tech)
-			{ effect_ = effect; }
-
-		D3DXHANDLE D3DXHandle() const
-			{ return d3dxTechnique_; }
-
-		void SetAsCurrent();
+		bool Validate(D3DXHANDLE handle);
 
 		UINT Begin(UINT flags = 0);
 		void Pass(UINT passNum);
 		void End();
 
 	private:
-		D3DXHANDLE d3dxTechnique_;
+		COMPtr<ID3DXEffect> effect_;
 	};
 }
 

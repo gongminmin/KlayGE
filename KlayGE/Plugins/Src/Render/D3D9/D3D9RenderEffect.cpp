@@ -37,6 +37,20 @@ namespace KlayGE
 		effect_ = COMPtr<ID3DXEffect>(effect);
 	}
 
+	D3D9RenderEffect::D3D9RenderEffect(const D3D9RenderEffect& rhs)
+	{
+		D3D9RenderEngine& renderEngine(reinterpret_cast<D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()));
+
+		ID3DXEffect* effect;
+		rhs.effect_->CloneEffect(renderEngine.D3DDevice().Get(), &effect);
+		effect_ = COMPtr<ID3DXEffect>(effect);
+	}
+
+	RenderEffectPtr D3D9RenderEffect::Clone() const
+	{
+		return RenderEffectPtr(new D3D9RenderEffect(*this));
+	}
+
 	void D3D9RenderEffect::Desc(UINT& parameters, UINT& techniques, UINT& functions)
 	{
 		D3DXEFFECT_DESC desc;
@@ -168,45 +182,43 @@ namespace KlayGE
 			reinterpret_cast<IDirect3DPixelShader9*>(psHandle)));
 	}
 
-	RenderTechniquePtr D3D9RenderEffect::GetTechnique(const RenderEffectPtr& effect, const String& technique)
+	void D3D9RenderEffect::SetTechnique(const String& technique)
 	{
-		assert(this == effect.Get());
-		RenderTechniquePtr ret(new D3D9RenderTechnique(this->D3DXEffect()->GetTechniqueByName(technique.c_str()), effect));
-		return this->Validate(ret) ? ret : NullRenderTechniqueInstance();
+		D3DXHANDLE handle(effect_->GetTechniqueByName(technique.c_str()));
+		if (this->Validate(handle))
+		{
+			effect_->SetTechnique(handle);
+		}
 	}
 
-	RenderTechniquePtr D3D9RenderEffect::GetTechnique(const RenderEffectPtr& effect, UINT technique)
+	void D3D9RenderEffect::SetTechnique(UINT technique)
 	{
-		assert(this == effect.Get());
-		RenderTechniquePtr ret(new D3D9RenderTechnique(this->D3DXEffect()->GetTechnique(technique), effect));
-		return this->Validate(ret) ? ret : NullRenderTechniqueInstance();
+		D3DXHANDLE handle(effect_->GetTechnique(technique));
+		if (this->Validate(handle))
+		{
+			effect_->SetTechnique(handle);
+		}
 	}
 
-	bool D3D9RenderEffect::Validate(const RenderTechniquePtr& technique)
+	bool D3D9RenderEffect::Validate(D3DXHANDLE handle)
 	{
-		return SUCCEEDED(effect_->ValidateTechnique(SharePtr<D3D9RenderTechnique>(technique)->D3DXHandle()));
+		return SUCCEEDED(effect_->ValidateTechnique(handle));
 	}
 
-
-	void D3D9RenderTechnique::SetAsCurrent()
-	{
-		TIF(SharePtr<D3D9RenderEffect>(effect_)->D3DXEffect()->SetTechnique(this->D3DXHandle()));
-	}
-
-	UINT D3D9RenderTechnique::Begin(UINT flags)
+	UINT D3D9RenderEffect::Begin(UINT flags)
 	{
 		UINT passes;
-		TIF(SharePtr<D3D9RenderEffect>(effect_)->D3DXEffect()->Begin(&passes, flags));
+		TIF(effect_->Begin(&passes, flags));
 		return passes;
 	}
 
-	void D3D9RenderTechnique::Pass(UINT passNum)
+	void D3D9RenderEffect::Pass(UINT passNum)
 	{
-		TIF(SharePtr<D3D9RenderEffect>(effect_)->D3DXEffect()->Pass(passNum));
+		TIF(effect_->Pass(passNum));
 	}
 
-	void D3D9RenderTechnique::End()
+	void D3D9RenderEffect::End()
 	{
-		TIF(SharePtr<D3D9RenderEffect>(effect_)->D3DXEffect()->End());
+		TIF(effect_->End());
 	}
 }

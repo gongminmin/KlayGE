@@ -26,16 +26,15 @@ namespace KlayGE
 	class SceneManager
 	{
 	protected:
-		typedef std::pair<VertexBufferPtr, Matrix4>					RenderItemType;
-		typedef std::vector<RenderItemType, alloc<RenderItemType> >	RenderItemsType;
-		typedef MapVector<RenderTechniquePtr, RenderItemsType>		RenderQueueType;
+		typedef std::vector<RenderablePtr, alloc<RenderablePtr> >	RenderItemsType;
+		typedef MapVector<RenderEffectPtr, RenderItemsType>			RenderQueueType;
 
 	public:
 		SceneManager();
 		virtual ~SceneManager()
 			{ }
 
-		void PushRenderable(const RenderablePtr& obj, const Matrix4& worldMat = Matrix4::Identity());
+		void PushRenderable(const RenderablePtr& obj);
 
 		virtual void ClipScene(const ViewPoint& viewPoint)
 			{ }

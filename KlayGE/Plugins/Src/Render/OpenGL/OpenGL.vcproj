@@ -64,6 +64,7 @@
 				OptimizeForProcessor="3"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;STRICT"
 				StringPooling="TRUE"
+				RuntimeLibrary="0"
 				BufferSecurityCheck="FALSE"
 				TreatWChar_tAsBuiltInType="TRUE"
 				WarningLevel="3"/>

@@ -36,23 +36,19 @@ namespace KlayGE
 
 	// ¼ÙÈçäÖÈ¾ÎïÌå
 	/////////////////////////////////////////////////////////////////////////////////
-	void SceneManager::PushRenderable(const RenderablePtr& obj, const Matrix4& worldMat)
+	void SceneManager::PushRenderable(const RenderablePtr& obj)
 	{
-		for (size_t i = 0; i < obj->NumSubs(); ++ i)
-		{
-			const RenderTechniquePtr& tech(obj->GetRenderTechnique(i));
-			const VertexBufferPtr& vb(obj->GetVertexBuffer(i));
+		const RenderEffectPtr& effect(obj->GetRenderEffect());
 
-			RenderQueueType::iterator iter(renderQueue_.find(tech));
-			if (iter != renderQueue_.end())
-			{
-				iter->second.push_back(RenderItemType(vb, worldMat));
-			}
-			else
-			{
-				renderQueue_.insert(RenderQueueType::value_type(tech,
-					RenderItemsType(1, RenderItemType(vb, worldMat))));
-			}
+		RenderQueueType::iterator iter(renderQueue_.find(effect));
+		if (iter != renderQueue_.end())
+		{
+			iter->second.push_back(obj);
+		}
+		else
+		{
+			renderQueue_.insert(RenderQueueType::value_type(effect,
+				RenderItemsType(1, obj)));
 		}
 	}
 
@@ -74,13 +70,14 @@ namespace KlayGE
 		for (RenderQueueType::iterator queueIter = renderQueue_.begin();
 			queueIter != renderQueue_.end(); ++ queueIter)
 		{
-			renderEngine.SetRenderTechnique(queueIter->first);
+			renderEngine.SetRenderEffect(queueIter->first);
 
 			for (RenderItemsType::iterator itemIter = queueIter->second.begin();
 				itemIter != queueIter->second.end(); ++ itemIter)
 			{
-				renderEngine.WorldMatrix(itemIter->second);
-				renderEngine.Render(*(itemIter->first));
+				Renderable& obj(*(*itemIter));
+				obj.OnRender();
+				renderEngine.Render(*obj.GetVertexBuffer());
 			}
 		}
 		renderQueue_.clear();

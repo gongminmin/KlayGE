@@ -4,9 +4,6 @@
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
 //
-// 2.0.4
-// 增加了RenderTechnique (2004.3.16)
-//
 // 2.0.3
 // 修改了SetTexture的参数 (2004.3.6)
 // 增加了SetMatrixArray/GetMatrixArray (2004.3.11)
@@ -36,6 +33,8 @@ namespace KlayGE
 		virtual ~RenderEffect()
 			{ }
 
+		virtual RenderEffectPtr Clone() const = 0;
+
 		virtual void Desc(UINT& parameters, UINT& techniques, UINT& functions) = 0;
 
 		virtual void SetValue(const String& name, const void* data, UINT bytes) = 0;
@@ -60,34 +59,15 @@ namespace KlayGE
 		virtual void SetVertexShader(const String& name, U32 vsHandle) = 0;
 		virtual void SetPixelShader(const String& name, U32 psHandle) = 0;
 
-		// 这里的设计比较古怪，但我没有更好的主意了
-		virtual RenderTechniquePtr GetTechnique(const RenderEffectPtr& effect, const String& technique) = 0;
-		virtual RenderTechniquePtr GetTechnique(const RenderEffectPtr& effect, UINT technique) = 0;
-	};
-
-	RenderEffectPtr NullRenderEffectInstance();
-
-
-	class RenderTechnique
-	{
-	public:
-		virtual ~RenderTechnique()
-			{ }
-
-		RenderEffectPtr GetRenderEffect() const
-			{ return effect_; }
-
-		virtual void SetAsCurrent() = 0;
+		virtual void SetTechnique(const String& technique) = 0;
+		virtual void SetTechnique(UINT technique) = 0;
 
 		virtual UINT Begin(UINT flags = 0) = 0;
 		virtual void Pass(UINT passNum) = 0;
 		virtual void End() = 0;
-
-	protected:
-		RenderEffectPtr effect_;
 	};
 
-	RenderTechniquePtr NullRenderTechniqueInstance();
+	RenderEffectPtr NullRenderEffectInstance();
 }
 
 #endif		// _RENDEREFFECT_HPP

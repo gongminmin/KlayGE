@@ -621,7 +621,7 @@ namespace KlayGE
 	{
 		for (UINT i = 0; i < renderPasses_; ++ i)
 		{
-			renderTechnique_->Pass(i);
+			renderEffect_->Pass(i);
 			TIF(d3dDevice_->DrawPrimitive(primType, 0, primCount));
 		}
 	}
@@ -632,7 +632,7 @@ namespace KlayGE
 	{
 		for (UINT i = 0; i < renderPasses_; ++ i)
 		{
-			renderTechnique_->Pass(i);
+			renderEffect_->Pass(i);
 			TIF(d3dDevice_->DrawIndexedPrimitive(primType, 0, 0, vertexCount, 0, primCount));
 		}
 	}

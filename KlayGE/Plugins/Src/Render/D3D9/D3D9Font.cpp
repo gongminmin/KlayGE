@@ -114,9 +114,9 @@ namespace
 	class D3D9FontRenderable : public Renderable
 	{
 	public:
-		D3D9FontRenderable(const RenderTechniquePtr& tech)
+		D3D9FontRenderable(const RenderEffectPtr& effect)
 			: fontVB_(new VertexBuffer),
-				fontTech_(tech)
+				fontEffect_(effect)
 		{
 			fontVB_->type = VertexBuffer::BT_TriangleList;
 			fontVB_->numTextureCoordSets = 1;
@@ -130,13 +130,10 @@ namespace
 			return name_;
 		}
 
-		size_t NumSubs() const
-			{ return 1; }
+		RenderEffectPtr GetRenderEffect()
+			{ return fontEffect_; }
 
-		RenderTechniquePtr GetRenderTechnique(size_t /*index*/)
-			{ return fontTech_; }
-
-		VertexBufferPtr GetVertexBuffer(size_t /*index*/)
+		VertexBufferPtr GetVertexBuffer()
 			{ return fontVB_; }
 
 		void RenderText(U32 fontHeight, D3D9Font::CharInfoMapType& charInfoMap, float sx, float sy, float sz,
@@ -227,7 +224,7 @@ namespace
 		}
 
 	private:
-		RenderTechniquePtr	fontTech_;
+		RenderEffectPtr		fontEffect_;
 		VertexBufferPtr		fontVB_;
 	};
 }
@@ -240,14 +237,14 @@ namespace KlayGE
 				: curX_(0), curY_(0),
 					theTexture_(Engine::RenderFactoryInstance().MakeTexture(1024, 1024, 1, PF_A4L4))
 	{
-		RenderEffectPtr effect(Engine::RenderFactoryInstance().MakeRenderEffect(fontEffectStr));
-		effect->SetTexture("texFont", theTexture_);
-		technique_ = effect->GetTechnique(effect, "fontTec");
+		effect_ = Engine::RenderFactoryInstance().MakeRenderEffect(fontEffectStr);
+		effect_->SetTexture("texFont", theTexture_);
+		effect_->SetTechnique("fontTec");
 
 		RenderEngine& renderEngine(Engine::RenderFactoryInstance().RenderEngineInstance());
 		const Viewport& viewport((*renderEngine.ActiveRenderTarget())->GetViewport());
-		effect->SetInt("halfWidth", viewport.width / 2);
-		effect->SetInt("halfHeight", viewport.height / 2);
+		effect_->SetInt("halfWidth", viewport.width / 2);
+		effect_->SetInt("halfHeight", viewport.height / 2);
 
 		logFont_.lfHeight			= height;
 		logFont_.lfWidth			= 0;
@@ -392,8 +389,7 @@ namespace KlayGE
 						}
 					}
 					theTexture_->CopyMemoryToTexture(&dst[0], PF_A4L4, charRect.right - charRect.left,
-						charRect.bottom - charRect.top, 0,
-						charRect.left, charRect.top);
+						charRect.bottom - charRect.top, 0, charRect.left, charRect.top);
 
 					// 已经更新了纹理，清除对象
 					::DeleteObject(::SelectObject(hDC, hOldBitmap));
@@ -431,9 +427,9 @@ namespace KlayGE
 		U8 r, g, b, a;
 		clr.RGBA(r, g, b, a);
 
-		SharePtr<D3D9FontRenderable> ret(new D3D9FontRenderable(technique_));
-		ret->RenderText(this->FontHeight(), charInfoMap_, sx, sy, sz, xScale, yScale,
-			D3DCOLOR_ARGB(a, r, g, b), text, flags);
-		return ret;
+		SharePtr<D3D9FontRenderable> renderable(new D3D9FontRenderable(effect_));
+		renderable->RenderText(this->FontHeight(), charInfoMap_,
+			sx, sy, sz, xScale, yScale, D3DCOLOR_ARGB(a, r, g, b), text, flags);
+		return renderable;
 	}
 }

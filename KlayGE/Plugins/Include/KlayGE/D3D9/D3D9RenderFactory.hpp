@@ -32,12 +32,7 @@
 
 namespace KlayGE
 {
-	RenderFactory& D3D9RenderFactoryInstance()
-	{
-		static ConcreteRenderFactory<D3D9RenderEngine, D3D9Texture, D3D9RenderTexture,
-			D3D9Font, D3D9RenderEffect> renderFactory(L"Direct3D9 Render Factory");
-		return renderFactory;
-	}
+	RenderFactory& D3D9RenderFactoryInstance();
 }
 
 #endif			// _D3D9RENDERFACTORY_HPP

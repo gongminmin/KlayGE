@@ -13,10 +13,12 @@ namespace KlayGE
 		virtual ~Renderable()
 			{ }
 
-		virtual size_t NumSubs() const = 0;
-		virtual RenderTechniquePtr GetRenderTechnique(size_t index) = 0;
-		virtual VertexBufferPtr GetVertexBuffer(size_t index) = 0;
+		virtual RenderEffectPtr GetRenderEffect() = 0;
+		virtual VertexBufferPtr GetVertexBuffer() = 0;
 		virtual const WString& Name() const = 0;
+
+		virtual void OnRender()
+			{ }
 	};
 }
 

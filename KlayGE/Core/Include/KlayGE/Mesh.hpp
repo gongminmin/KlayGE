@@ -15,15 +15,12 @@ namespace KlayGE
 	public:
 		Mesh();
 
-		size_t NumSubs() const
-			{ return 1; }
-
-		RenderEffectPtr GetRenderEffect(size_t /*index*/)
+		RenderEffectPtr GetRenderEffect()
 			{ return effect_; }
 		void SetRenderEffect(const RenderEffectPtr& effect)
 			{ effect_ = effect; }
 
-		VertexBufferPtr GetVertexBuffer(size_t /*index*/);
+		VertexBufferPtr GetVertexBuffer();
 
 		const WString& Name() const;
 

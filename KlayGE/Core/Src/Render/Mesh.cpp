@@ -21,7 +21,7 @@ namespace KlayGE
 		return name;
 	}
 
-	VertexBufferPtr Mesh::GetVertexBuffer(size_t /*index*/)
+	VertexBufferPtr Mesh::GetVertexBuffer()
 	{
 		return vb_;
 	}

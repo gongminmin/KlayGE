@@ -56,8 +56,6 @@ namespace KlayGE
 	typedef SharePtr<Renderable> RenderablePtr;
 	class RenderEffect;
 	typedef SharePtr<RenderEffect> RenderEffectPtr;
-	class RenderTechnique;
-	typedef SharePtr<RenderTechnique> RenderTechniquePtr;
 	class SceneManager;
 	class Texture;
 	typedef SharePtr<Texture> TexturePtr;
