@@ -4,6 +4,8 @@
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderBuffer.hpp>
 
+#include <boost/utility.hpp>
+
 namespace KlayGE
 {
 	class RenderFactory
@@ -32,7 +34,7 @@ namespace KlayGE
 
 	template <typename RenderEngineType, typename TextureType, typename RenderTextureType,
 		typename FontType, typename RenderEffectType>
-	class ConcreteRenderFactory : public RenderFactory
+	class ConcreteRenderFactory : boost::noncopyable, public RenderFactory
 	{
 	public:
 		ConcreteRenderFactory(std::wstring const & name)

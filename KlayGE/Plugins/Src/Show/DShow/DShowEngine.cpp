@@ -229,7 +229,7 @@ namespace KlayGE
 			return;
 		}
 
-		assert(videoWnd_.Get() != NULL);
+		assert(videoWnd_);
 
 		// 获取当前状态
 		long mode;

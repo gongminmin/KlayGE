@@ -27,7 +27,7 @@ namespace KlayGE
 		size_t Size()
 			{ return 0; }
 
-		size_t Read(void* data, size_t size)
+		size_t Read(void* /*data*/, size_t /*size*/)
 			{ return 0; }
 		void Reset()
 			{ }

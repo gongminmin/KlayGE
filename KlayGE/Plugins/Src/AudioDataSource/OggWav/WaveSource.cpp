@@ -165,7 +165,7 @@ namespace KlayGE
 	{
 		assert(data != NULL);
 
-		wavFile_->read(static_cast<char*>(data), size);
+		wavFile_->read(static_cast<char*>(data), static_cast<std::streamsize>(size));
 
 		return wavFile_->gcount();
 	}

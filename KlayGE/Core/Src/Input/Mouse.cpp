@@ -87,9 +87,10 @@ namespace KlayGE
 		}
 		for (uint16_t i = 0; i < static_cast<uint16_t>(buttons_.size()); ++ i)
 		{
-			if (actionMap_.HasAction(MS_Button0 + i))
+			uint16_t const button(static_cast<uint16_t>(MS_Button0 + i));
+			if (actionMap_.HasAction(button))
 			{
-				actionMap_.AddAction(InputAction(actionMap.Action(MS_Button0 + i), MS_Button0 + i));
+				actionMap_.AddAction(InputAction(actionMap.Action(button), button));
 			}
 		}
 	}
@@ -116,7 +117,7 @@ namespace KlayGE
 		{
 			if (this->Button(i))
 			{
-				actionMap_.UpdateInputActions(ret, MS_Button0 + i);
+				actionMap_.UpdateInputActions(ret, static_cast<uint16_t>(MS_Button0 + i));
 			}
 		}
 

@@ -35,6 +35,8 @@ namespace KlayGE
 		wfx.wFormatTag		= WAVE_FORMAT_PCM;
 		wfx.nSamplesPerSec	= dataSource->Freq();
 		wfx.cbSize			= 0;
+		wfx.wBitsPerSample	= 8;
+		wfx.nChannels		= 1;
 
 		switch (dataSource->Format())
 		{

@@ -34,6 +34,8 @@
 
 #include <KlayGE/LZSS/LZSS.hpp>
 
+#pragma warning(disable : 4244)
+#pragma warning(disable : 4245)
 #include <boost/crc.hpp>
 #include <boost/filesystem/operations.hpp>
 
@@ -185,7 +187,7 @@ namespace
 			std::fill_n(dad_, N, NIL);
 		}
 
-		void InsertNode(uint32_t r)
+		void InsertNode(int r)
 		{
 			// Inserts string of length F, textBuf[r..r+F-1], into one of the
 			// trees (textBuf[r]'th tree) and returns the longest-match position
@@ -196,7 +198,7 @@ namespace
 
 			uint32_t cmp(1);
 			uint8_t* key(&textBuf_[r]);
-			uint32_t p(N + 1 + key[0]);
+			int p(N + 1 + key[0]);
 			rson_[r] = lson_[r] = NIL;
 			matchLength_ = 0;
 
@@ -261,7 +263,7 @@ namespace
 		}
 
 		// deletes node p from tree
-		void DeleteNode(uint32_t p)
+		void DeleteNode(int p)
 		{
 			uint32_t q;
 
@@ -389,8 +391,8 @@ namespace
 
 			p->seekg(0);
 			std::vector<char, boost::pool_allocator<char> > temp(fd.length);
-			p->read(&temp[0], temp.size());
-			outFile.write(&temp[0], temp.size());
+			p->read(&temp[0], static_cast<std::streamsize>(temp.size()));
+			outFile.write(&temp[0], static_cast<std::streamsize>(temp.size()));
 		}
 	}
 

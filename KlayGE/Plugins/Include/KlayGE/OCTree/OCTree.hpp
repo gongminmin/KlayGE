@@ -23,14 +23,18 @@
 
 #include <KlayGE/OCTree/Frustum.hpp>
 
-#pragma comment(lib, "KlayGE_Scene_OCTree.lib")
+#ifdef _DEBUG
+	#pragma comment(lib, "KlayGE_Scene_OCTree_d.lib")
+#else
+	#pragma comment(lib, "KlayGE_Scene_OCTree.lib")
+#endif
 
 namespace KlayGE
 {
 	class OCTreeNode;
 	typedef boost::shared_ptr<OCTreeNode> OCTreeNodePtr;
 
-	class OCTreeNode : public SceneNode
+	class OCTreeNode : boost::noncopyable, public SceneNode
 	{
 	public:
 		explicit OCTreeNode(Box const & box);
@@ -59,6 +63,10 @@ namespace KlayGE
 
 		void ClipScene(Camera const & camera);
 		void PushRenderable(RenderablePtr const & obj);
+
+	private:
+		OCTree(OCTree const & rhs);
+		OCTree& operator=(OCTree const & rhs);
 
 	private:
 		OCTreeNode root_;

@@ -486,7 +486,7 @@ namespace KlayGE
 		TIF(d3dTempTexture_->LockRect(0, &d3dlr, &rc, D3DLOCK_NOSYSLOCK));
 
 		uint32_t const srcPitch(width * bpp / 8);
-		uint16_t const destPitch(d3dlr.Pitch);
+		uint16_t const destPitch(static_cast<uint16_t>(d3dlr.Pitch));
 		uint8_t* pBits(static_cast<uint8_t*>(d3dlr.pBits));
 
 		if ((srcRed == destRed) && (srcGreen == destGreen)

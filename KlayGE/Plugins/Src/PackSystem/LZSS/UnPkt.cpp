@@ -26,8 +26,11 @@
 #include <vector>
 #include <sstream>
 
+#pragma warning(disable : 4127)
 #pragma warning(disable : 4800)
 #include <boost/pool/pool_alloc.hpp>
+#pragma warning(disable : 4244)
+#pragma warning(disable : 4245)
 #include <boost/crc.hpp>
 
 #include <KlayGE/LZSS/LZSS.hpp>
@@ -137,7 +140,7 @@ namespace
 			}
 
 			std::vector<char, boost::pool_allocator<char> > str(len);
-			input.read(&str[0], str.size());
+			input.read(&str[0], static_cast<std::streamsize>(str.size()));
 			if (input.fail())
 			{
 				break;
@@ -188,8 +191,8 @@ namespace KlayGE
 		std::stringstream dtCom;
 		{
 			std::vector<char, boost::pool_allocator<char> > temp(mag_.DTLength);
-			file_->read(&temp[0], temp.size());
-			dtCom.write(&temp[0], temp.size());
+			file_->read(&temp[0], static_cast<std::streamsize>(temp.size()));
+			dtCom.write(&temp[0], static_cast<std::streamsize>(temp.size()));
 		}
 
 		std::stringstream dt;
@@ -230,15 +233,15 @@ namespace KlayGE
 
 		if (curFile_->second.attr & FA_UnCompressed)
 		{
-			file_->read(static_cast<char*>(data), this->CurFileSize());
+			file_->read(static_cast<char*>(data), static_cast<std::streamsize>(this->CurFileSize()));
 		}
 		else
 		{
 			std::stringstream chunk;
 			{
 				std::vector<char, boost::pool_allocator<char> > temp(this->CurFileCompressedSize());
-				file_->read(&temp[0], temp.size());
-				chunk.write(&temp[0], temp.size());
+				file_->read(&temp[0], static_cast<std::streamsize>(temp.size()));
+				chunk.write(&temp[0], static_cast<std::streamsize>(temp.size()));
 			}
 
 			std::stringstream out;
@@ -277,6 +280,6 @@ namespace KlayGE
 		assert(curFile_ != dirTable_.end());
 
 		file_->seekg(mag_.FIStart + curFile_->second.start);
-		file_->read(static_cast<char*>(data), this->CurFileCompressedSize());
+		file_->read(static_cast<char*>(data), static_cast<std::streamsize>(this->CurFileCompressedSize()));
 	}
 }

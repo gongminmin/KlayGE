@@ -17,6 +17,7 @@
 
 #include <cassert>
 
+#pragma warning(disable : 4239)
 #include <boost/bind.hpp>
 
 #include <KlayGE/Audio.hpp>
@@ -32,26 +33,26 @@ namespace KlayGE
 			return name;
 		}
 
-		void AddBuffer(size_t id, AudioBufferPtr const & buffer)
+		void AddBuffer(size_t /*id*/, AudioBufferPtr const & /*buffer*/)
 			{ }
 
-		AudioBufferPtr Buffer(size_t bufID) const
+		AudioBufferPtr Buffer(size_t /*bufID*/) const
 			{ return AudioBuffer::NullObject(); }
 
 		Vector3 GetListenerPos() const
 			{ return Vector3::Zero(); }
-		void SetListenerPos(Vector3 const & v)
+		void SetListenerPos(Vector3 const & /*v*/)
 			{ }
 		Vector3 GetListenerVel() const
 			{ return Vector3::Zero(); }
-		void SetListenerVel(Vector3 const & v)
+		void SetListenerVel(Vector3 const & /*v*/)
 			{ }
 		void GetListenerOri(Vector3& face, Vector3& up) const
 		{
 			face = Vector3::Zero();
 			up = Vector3::Zero();
 		}
-		void SetListenerOri(Vector3 const & face, Vector3 const & up)
+		void SetListenerOri(Vector3 const & /*face*/, Vector3 const & /*up*/)
 			{ }
 	};
 

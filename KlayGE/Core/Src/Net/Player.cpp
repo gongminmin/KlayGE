@@ -77,7 +77,7 @@ namespace KlayGE
 					iter != sendQueue_.end(); ++ iter)
 				{
 					std::vector<char>& msg = *iter;
-					socket_.Send(&msg[0], msg.size());
+					socket_.Send(&msg[0], static_cast<int>(msg.size()));
 				}
 			}
 

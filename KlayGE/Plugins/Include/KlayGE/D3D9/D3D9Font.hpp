@@ -23,7 +23,11 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-#pragma comment(lib, "KlayGE_RenderEngine_D3D9.lib")
+#ifdef _DEBUG
+	#pragma comment(lib, "KlayGE_RenderEngine_D3D9_d.lib")
+#else
+	#pragma comment(lib, "KlayGE_RenderEngine_D3D9.lib")
+#endif
 
 namespace KlayGE
 {
@@ -32,6 +36,9 @@ namespace KlayGE
 	class D3D9Font : public Font
 	{
 	public:
+		D3D9Font(std::string const & fontName, uint32_t fontHeight = 12, uint32_t flags = 0);
+		~D3D9Font();
+
 		// 2D & 3D 画出文字的函数
 		RenderablePtr RenderText(float x, float y, Color const & clr,
 			std::wstring const & text, uint32_t flags = 0);
@@ -40,8 +47,6 @@ namespace KlayGE
 		//RenderablePtr RenderText(std::wstring const & text, uint32_t flags = 0);
 
 		uint32_t FontHeight() const;
-
-		D3D9Font(std::string const & fontName, uint32_t fontHeight = 12, uint32_t flags = 0);
 
 	public:
 		struct CharInfo

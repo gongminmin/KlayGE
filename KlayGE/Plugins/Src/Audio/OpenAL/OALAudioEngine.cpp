@@ -26,7 +26,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	ALenum Convert(AudioFormat format)
 	{
-		ALenum out;
+		ALenum out = AL_FORMAT_MONO8;
 
 		switch (format)
 		{

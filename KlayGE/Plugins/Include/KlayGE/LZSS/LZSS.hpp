@@ -26,9 +26,14 @@
 
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
+#pragma warning(disable : 4512)
 #include <boost/algorithm/string/case_conv.hpp>
 
-#pragma comment(lib, "KlayGE_FileSystem_PackedFile.lib")
+#ifdef _DEBUG
+	#pragma comment(lib, "KlayGE_FileSystem_PackedFile_d.lib")
+#else
+	#pragma comment(lib, "KlayGE_FileSystem_PackedFile.lib")
+#endif
 
 namespace KlayGE
 {

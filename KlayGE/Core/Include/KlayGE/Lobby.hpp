@@ -20,7 +20,11 @@
 #include <list>
 #include <KlayGE/Socket.hpp>
 
-#pragma comment(lib, "KlayGE_Core.lib")
+#ifdef _DEBUG
+	#pragma comment(lib, "KlayGE_Core_d.lib")
+#else
+	#pragma comment(lib, "KlayGE_Core.lib")
+#endif
 
 namespace KlayGE
 {

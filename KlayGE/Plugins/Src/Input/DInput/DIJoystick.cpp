@@ -13,6 +13,7 @@
 #include <KlayGE/KlayGE.hpp>
 
 #include <algorithm>
+#pragma warning(disable : 4512)
 #include <boost/lambda/lambda.hpp>
 
 #include <KlayGE/DInput/DInput.hpp>

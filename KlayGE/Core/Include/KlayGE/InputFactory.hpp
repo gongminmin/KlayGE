@@ -13,6 +13,8 @@
 #ifndef _INPUTFACTORY_HPP
 #define _INPUTFACTORY_HPP
 
+#include <boost/utility.hpp>
+
 namespace KlayGE
 {
 	class InputFactory
@@ -26,7 +28,7 @@ namespace KlayGE
 	};
 
 	template <typename InputEngineType>
-	class ConcreteInputFactory : public InputFactory
+	class ConcreteInputFactory : boost::noncopyable, public InputFactory
 	{
 	public:
 		ConcreteInputFactory(std::wstring const & name)

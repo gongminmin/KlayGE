@@ -23,7 +23,11 @@
 
 #include <boost/utility.hpp>
 
-#pragma comment(lib, "KlayGE_ShowEngine_DShow.lib")
+#ifdef _DEBUG
+	#pragma comment(lib, "KlayGE_ShowEngine_DShow_d.lib")
+#else
+	#pragma comment(lib, "KlayGE_ShowEngine_DShow.lib")
+#endif
 
 namespace KlayGE
 {

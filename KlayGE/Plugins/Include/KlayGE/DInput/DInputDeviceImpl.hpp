@@ -21,7 +21,11 @@
 #include <KlayGE/Input.hpp>
 #include <boost/smart_ptr.hpp>
 
-#pragma comment(lib, "KlayGE_InputEngine_DInput.lib")
+#ifdef _DEBUG
+	#pragma comment(lib, "KlayGE_InputEngine_DInput_d.lib")
+#else
+	#pragma comment(lib, "KlayGE_InputEngine_DInput.lib")
+#endif
 
 namespace KlayGE
 {

@@ -25,14 +25,14 @@ namespace KlayGE
 		{
 		}
 
-		void Play(bool loop = false)
+		void Play(bool /*loop*/)
 			{ }
 		void Reset()
 			{ }
 		void Stop()
 			{ }
 
-		void Volume(float vol)
+		void Volume(float /*vol*/)
 			{ }
 
 		bool IsPlaying() const
@@ -42,15 +42,15 @@ namespace KlayGE
 
 		Vector3 Position() const
 			{ return Vector3::Zero(); }
-		void Position(Vector3 const & v)
+		void Position(Vector3 const & /*v*/)
 			{ }
 		Vector3 Velocity() const
 			{ return Vector3::Zero(); }
-		void Velocity(Vector3 const & v)
+		void Velocity(Vector3 const & /*v*/)
 			{ }
 		Vector3 Direction() const
 			{ return Vector3::Zero(); }
-		void Direction(Vector3 const & v)
+		void Direction(Vector3 const & /*v*/)
 			{ }
 	};
 

@@ -9,7 +9,11 @@
 
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 
-#pragma comment(lib, "KlayGE_RenderEngine_D3D9.lib")
+#ifdef _DEBUG
+	#pragma comment(lib, "KlayGE_RenderEngine_D3D9_d.lib")
+#else
+	#pragma comment(lib, "KlayGE_RenderEngine_D3D9.lib")
+#endif
 
 namespace KlayGE
 {

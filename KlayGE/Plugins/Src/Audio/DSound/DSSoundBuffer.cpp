@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <cstring>
 
+#pragma warning(disable : 4512)
 #include <boost/random.hpp>
 #include <boost/bind.hpp>
 
@@ -115,6 +116,8 @@ namespace KlayGE
 		this->Direction(Vector3(0, 0, 0));
 
 		this->Reset();
+
+		this->Volume(volume);
 	}
 
 	// Îö¹¹º¯Êý
@@ -138,7 +141,7 @@ namespace KlayGE
 			iter = sources_.begin();
 			std::advance(iter,
 				boost::variate_generator<boost::lagged_fibonacci607, boost::uniform_int<> >(boost::lagged_fibonacci607(),
-					boost::uniform_int<>(0, sources_.size()))());
+					boost::uniform_int<>(0, static_cast<int>(sources_.size())))());
 		}
 
 		return iter;

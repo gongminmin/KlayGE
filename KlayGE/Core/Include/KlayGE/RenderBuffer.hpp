@@ -20,10 +20,14 @@
 #ifndef _RENDERBUFFER_HPP
 #define _RENDERBUFFER_HPP
 
-#pragma comment(lib, "KlayGE_Core.lib")
-
 #include <KlayGE/PreDeclare.hpp>
 #include <vector>
+
+#ifdef _DEBUG
+	#pragma comment(lib, "KlayGE_Core_d.lib")
+#else
+	#pragma comment(lib, "KlayGE_Core.lib")
+#endif
 
 namespace KlayGE
 {

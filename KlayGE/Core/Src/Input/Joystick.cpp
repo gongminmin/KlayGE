@@ -115,16 +115,18 @@ namespace KlayGE
 
 		for (uint16_t i = 0; i < static_cast<uint16_t>(slider_.size()); ++ i)
 		{
-			if (actionMap_.HasAction(JS_Slider0 + i))
+			uint16_t const slider(static_cast<uint16_t>(JS_Slider0 + i));
+			if (actionMap_.HasAction(slider))
 			{
-				actionMap_.AddAction(InputAction(actionMap.Action(JS_Slider0 + i), JS_Slider0 + i));
+				actionMap_.AddAction(InputAction(actionMap.Action(slider), slider));
 			}
 		}
 		for (uint16_t i = 0; i < static_cast<uint16_t>(buttons_.size()); ++ i)
 		{
-			if (actionMap_.HasAction(JS_Button0 + i))
+			uint16_t const button(static_cast<uint16_t>(JS_Button0 + i));
+			if (actionMap_.HasAction(button))
 			{
-				actionMap_.AddAction(InputAction(actionMap.Action(JS_Button0 + i), JS_Button0 + i));
+				actionMap_.AddAction(InputAction(actionMap.Action(button), button));
 			}
 		}
 	}
@@ -144,13 +146,13 @@ namespace KlayGE
 
 		for (uint16_t i = 0; i < static_cast<uint16_t>(slider_.size()); ++ i)
 		{
-			actionMap_.UpdateInputActions(ret, JS_Slider0 + i, this->Slider(i));
+			actionMap_.UpdateInputActions(ret, static_cast<uint16_t>(JS_Slider0 + i), this->Slider(i));
 		}
 		for (uint16_t i = 0; i < static_cast<uint16_t>(buttons_.size()); ++ i)
 		{
 			if (this->Button(i))
 			{
-				actionMap_.UpdateInputActions(ret, JS_Button0 + i);
+				actionMap_.UpdateInputActions(ret, static_cast<uint16_t>(JS_Button0 + i));
 			}
 		}
 

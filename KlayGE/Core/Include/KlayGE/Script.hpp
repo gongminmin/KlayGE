@@ -21,7 +21,11 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 
-#pragma comment(lib, "KlayGE_Core.lib")
+#ifdef _DEBUG
+	#pragma comment(lib, "KlayGE_Core_d.lib")
+#else
+	#pragma comment(lib, "KlayGE_Core.lib")
+#endif
 
 namespace KlayGE
 {
@@ -43,7 +47,7 @@ namespace KlayGE
 	};
 
 	template <typename TupleType>
-	std::vector<PyObjectPtr> Tuple2Vector(const TupleType& t)
+	std::vector<PyObjectPtr> Tuple2Vector(TupleType const & t)
 	{
 		std::vector<PyObjectPtr> ret;
 		ret.push_back(boost::tuples::get<0>(t));
@@ -55,7 +59,7 @@ namespace KlayGE
 	}
 
 	template <>
-	std::vector<PyObjectPtr> Tuple2Vector<boost::tuples::null_type>(const boost::tuples::null_type& t)
+	std::vector<PyObjectPtr> Tuple2Vector<boost::tuples::null_type>(boost::tuples::null_type const & /*t*/)
 	{
 		return std::vector<PyObjectPtr>();
 	}

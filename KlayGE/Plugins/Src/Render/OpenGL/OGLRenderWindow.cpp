@@ -182,7 +182,7 @@ namespace KlayGE
 		pfd.nVersion	= 1;
 		pfd.dwFlags		= PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
 		pfd.iPixelType	= PFD_TYPE_RGBA;
-		pfd.cColorBits	= colorDepth_;
+		pfd.cColorBits	= static_cast<BYTE>(colorDepth_);
 		pfd.cDepthBits	= 16;
 		pfd.iLayerType	= PFD_MAIN_PLANE;
 
@@ -293,7 +293,7 @@ namespace KlayGE
 		::SwapBuffers(hDC_);
 	}
 
-	void OGLRenderWindow::CustomAttribute(std::string const & name, void* pData)
+	void OGLRenderWindow::CustomAttribute(std::string const & /*name*/, void* /*pData*/)
 	{
 	}
 }

@@ -82,7 +82,7 @@ namespace KlayGE
 	{
 		for (;;)
 		{
-			HRESULT hr = device_->GetDeviceState(size, data);
+			HRESULT hr = device_->GetDeviceState(static_cast<DWORD>(size), data);
 			if ((DIERR_INPUTLOST == hr) || (DIERR_NOTACQUIRED == hr))
 			{
 				this->Acquire();

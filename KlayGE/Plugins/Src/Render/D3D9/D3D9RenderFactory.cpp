@@ -84,6 +84,10 @@ namespace KlayGE
 		{
 			return IndexStreamPtr(new D3D9IndexStream(staticStream));
 		}
+
+	private:
+		D3D9RenderFactory(D3D9RenderFactory const & rhs);
+		D3D9RenderFactory& operator=(D3D9RenderFactory const & rhs);
 	};
 
 	RenderFactory& D3D9RenderFactoryInstance()

@@ -43,7 +43,7 @@
 
 #include <KlayGE/D3D9/D3D9Font.hpp>
 
-#ifdef DEBUG
+#ifdef _DEBUG
 	#pragma comment(lib, "freetype219MT_D.lib")
 #else
 	#pragma comment(lib, "freetype219MT.lib")
@@ -201,7 +201,7 @@ namespace KlayGE
 {
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
-	D3D9Font::D3D9Font(std::string const & fontName, uint32_t height, uint32_t flags)
+	D3D9Font::D3D9Font(std::string const & fontName, uint32_t height, uint32_t /*flags*/)
 				: curX_(0), curY_(0),
 					fontHeight_(height),
 					theTexture_(Context::Instance().RenderFactoryInstance().MakeTexture(1024, 1024, 1, PF_A4L4)),
@@ -228,6 +228,14 @@ namespace KlayGE
 		FT_Set_Char_Size(face_, 0, height * 64, 72, 72);
 		FT_Select_Charmap(face_, FT_ENCODING_UNICODE);
 		slot_ = face_->glyph;
+	}
+
+	// 析构函数
+	/////////////////////////////////////////////////////////////////////////////////
+	D3D9Font::~D3D9Font()
+	{
+		FT_Done_Face(face_);
+		FT_Done_FreeType(ftLib_);
 	}
 
 	// 获取字体高度
@@ -264,8 +272,7 @@ namespace KlayGE
 					// convert character code to glyph index
 					FT_Load_Char(face_, ch, FT_LOAD_RENDER);
 
-					int const width = (0 != slot_->bitmap.width) ? slot_->bitmap.width : this->FontHeight() / 2;
-					int const height = (0 != slot_->bitmap.rows) ? slot_->bitmap.rows : this->FontHeight();
+					uint32_t const width = (0 != slot_->bitmap.width) ? slot_->bitmap.width : this->FontHeight() / 2;
 
 					::RECT charRect;
 					CharInfo charInfo;
@@ -310,10 +317,10 @@ namespace KlayGE
 					}
 
 					std::vector<uint8_t> dest(this->FontHeight() * this->FontHeight(), 0);
-					for (int y = 0; y < slot_->bitmap.rows; ++ y)
+					for (uint32_t y = 0; y < static_cast<uint32_t>(slot_->bitmap.rows); ++ y)
 					{
-						int const y_offset = this->FontHeight() * 3 / 4 - slot_->bitmap_top + y;
-						for (int x = 0; x < slot_->bitmap.width; ++ x)
+						uint32_t const y_offset = this->FontHeight() * 3 / 4 - slot_->bitmap_top + y;
+						for (uint32_t x = 0; x < static_cast<uint32_t>(slot_->bitmap.width); ++ x)
 						{
 							if ((y < this->FontHeight()) && (x < this->FontHeight()))
 							{

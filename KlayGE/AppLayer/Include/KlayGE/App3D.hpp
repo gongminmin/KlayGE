@@ -20,7 +20,11 @@
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/RenderEngine.hpp>
 
-#pragma comment(lib, "KlayGE_AppLayer.lib")
+#ifdef _DEBUG
+	#pragma comment(lib, "KlayGE_AppLayer_d.lib")
+#else
+	#pragma comment(lib, "KlayGE_AppLayer.lib")
+#endif
 
 namespace KlayGE
 {

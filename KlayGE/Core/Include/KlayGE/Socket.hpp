@@ -27,8 +27,10 @@
 	#include <sys/socket.h>
 #endif
 
-#ifdef _MSC_VER
-#pragma comment(lib, "KlayGE_Core.lib")
+#ifdef _DEBUG
+	#pragma comment(lib, "KlayGE_Core_d.lib")
+#else
+	#pragma comment(lib, "KlayGE_Core.lib")
 #endif
 
 namespace KlayGE

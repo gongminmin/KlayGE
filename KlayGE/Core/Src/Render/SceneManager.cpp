@@ -35,7 +35,7 @@ namespace KlayGE
 
 	// ¿ÕµÄ²Ã¼õÆ÷
 	/////////////////////////////////////////////////////////////////////////////////
-	void SceneManager::ClipScene(Camera const & camera)
+	void SceneManager::ClipScene(Camera const & /*camera*/)
 	{
 	}
 

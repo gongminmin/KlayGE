@@ -20,7 +20,11 @@
 
 #include <KlayGE/Script.hpp>
 
-#pragma comment(lib, "python23.lib")
+#ifdef _DEBUG
+	#pragma comment(lib, "python24d.lib")
+#else
+	#pragma comment(lib, "python24.lib")
+#endif
 
 namespace KlayGE
 {

@@ -17,7 +17,11 @@
 
 #include <KlayGE/AudioDataSource.hpp>
 
-#pragma comment(lib, "KlayGE_AudioDataSource_OggWav.lib")
+#ifdef _DEBUG
+	#pragma comment(lib, "KlayGE_AudioDataSource_OggWav_d.lib")
+#else
+	#pragma comment(lib, "KlayGE_AudioDataSource_OggWav.lib")
+#endif
 
 namespace KlayGE
 {

@@ -69,7 +69,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	D3DCMPFUNC Convert(RenderEngine::CompareFunction func)
 	{
-		D3DCMPFUNC ret;
+		D3DCMPFUNC ret = D3DCMP_NEVER;
+
 		switch (func)
 		{
 		case RenderEngine::CF_AlwaysFail:
@@ -112,7 +113,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	D3DSTENCILOP Convert(RenderEngine::StencilOperation op)
 	{
-		D3DSTENCILOP ret;
+		D3DSTENCILOP ret = D3DSTENCILOP_KEEP;
 
 		switch (op)
 		{
@@ -352,7 +353,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::ShadingType(ShadeOptions so)
 	{
-		D3DSHADEMODE shadeMode;
+		D3DSHADEMODE shadeMode = D3DSHADE_FLAT;
 		switch (so)
 		{
 		case SO_Flat:
@@ -406,7 +407,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::CullingMode(CullMode mode)
 	{
-		uint32_t d3dMode;
+		uint32_t d3dMode = D3DCULL_NONE;
 
 		cullingMode_ = mode;
 
@@ -562,8 +563,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::Render(RenderBuffer const & rb)
 	{
-		D3DPRIMITIVETYPE primType;
-		uint32_t primCount;
+		D3DPRIMITIVETYPE primType = D3DPT_POINTLIST;
+		uint32_t primCount = 0;
 		uint32_t const vertexCount(static_cast<uint32_t>(rb.UseIndices() ? rb.NumIndices() : rb.NumVertices()));
 		switch (rb.Type())
 		{
@@ -669,7 +670,7 @@ namespace KlayGE
 			case VST_TextureCoords7:
 				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + static_cast<BYTE>(stream.ElementsPerVertex());
 				element.Usage		= D3DDECLUSAGE_TEXCOORD;
-				element.UsageIndex	= type - VST_TextureCoords0;
+				element.UsageIndex	= static_cast<BYTE>(type - VST_TextureCoords0);
 				break;
 			}
 
@@ -798,19 +799,19 @@ namespace KlayGE
 			d3dDevice_->SetRenderState(D3DRS_FOGENABLE, TRUE);
 
 			// Set pixel fog mode
-			D3DFOGMODE d3dFogMode;
+			D3DFOGMODE d3dFogMode = D3DFOG_LINEAR;
 			switch (mode)
 			{
+			case Fog_Linear:
+				d3dFogMode = D3DFOG_LINEAR;
+				break;
+
 			case Fog_Exp:
 				d3dFogMode = D3DFOG_EXP;
 				break;
 
 			case Fog_Exp2:
 				d3dFogMode = D3DFOG_EXP2;
-				break;
-
-			case Fog_Linear:
-				d3dFogMode = D3DFOG_LINEAR;
 				break;
 			}
 
@@ -911,19 +912,19 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::TextureAddressingMode(uint32_t stage, TexAddressingMode tam)
 	{
-		D3DTEXTUREADDRESS d3dType;
+		D3DTEXTUREADDRESS d3dType = D3DTADDRESS_CLAMP;
 		switch (tam)
 		{
+		case TAM_Clamp:
+			d3dType = D3DTADDRESS_CLAMP;
+			break;
+
 		case TAM_Wrap:
 			d3dType = D3DTADDRESS_WRAP;
 			break;
 
 		case TAM_Mirror:
 			d3dType = D3DTADDRESS_MIRROR;
-			break;
-
-		case TAM_Clamp:
-			d3dType = D3DTADDRESS_CLAMP;
 			break;
 		}
 

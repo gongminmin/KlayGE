@@ -88,7 +88,7 @@ namespace KlayGE
 			iter = sources_.begin();
 			std::advance(iter,
 				boost::variate_generator<boost::lagged_fibonacci607, boost::uniform_int<> >(boost::lagged_fibonacci607(),
-					boost::uniform_int<>(0, sources_.size()))());
+					boost::uniform_int<>(0, static_cast<int>(sources_.size())))());
 		}
 
 		return iter;

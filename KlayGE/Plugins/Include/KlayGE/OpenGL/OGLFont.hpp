@@ -20,7 +20,11 @@
 
 #include <KlayGE/Font.hpp>
 
-#pragma comment(lib, "KlayGE_RenderEngine_OpenGL.lib")
+#ifdef _DEBUG
+	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL_d.lib")
+#else
+	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL.lib")
+#endif
 
 namespace KlayGE
 {

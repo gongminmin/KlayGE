@@ -109,7 +109,7 @@ namespace KlayGE
 				{
 					std::vector<char>& msg = *msgiter;
 
-					socket_.SendTo(&msg[0], msg.size(), iter->second.addr);
+					socket_.SendTo(&msg[0], static_cast<int>(msg.size()), iter->second.addr);
 				}
 			}
 

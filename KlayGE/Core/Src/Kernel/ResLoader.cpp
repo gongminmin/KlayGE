@@ -90,7 +90,7 @@ namespace KlayGE
 					unPkt.ReadCurFile(&data[0]);
 
 					boost::shared_ptr<std::iostream> packetFile(new std::stringstream);
-					packetFile->write(&data[0], data.size());
+					packetFile->write(&data[0], static_cast<std::streamsize>(data.size()));
 
 					return packetFile;
 				}

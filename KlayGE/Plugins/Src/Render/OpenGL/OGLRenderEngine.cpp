@@ -41,7 +41,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	GLint Convert(RenderEngine::CompareFunction func)
 	{
-		GLint ret;
+		GLint ret = GL_NEVER;
+
 		switch (func)
 		{
 		case RenderEngine::CF_AlwaysFail:
@@ -84,7 +85,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	GLint Convert(RenderEngine::StencilOperation op)
 	{
-		GLint ret;
+		GLint ret = GL_KEEP;
+
 		switch (op)
 		{
 		case RenderEngine::SOP_Keep:
@@ -196,7 +198,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::ShadingType(ShadeOptions so)
 	{
-		GLenum shadeMode;
+		GLenum shadeMode = GL_FLAT;
+
 		switch (so)
 		{
 		case SO_Flat:
@@ -473,7 +476,7 @@ namespace KlayGE
 			}
 		}
 
-		GLenum mode;
+		GLenum mode = GL_POINTS;
 		switch (vb.Type())
 		{
 		case RenderBuffer::BT_PointList:

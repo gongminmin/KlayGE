@@ -200,22 +200,24 @@ namespace KlayGE
 
 	void D3D9RenderEffectParameter::SetFloatArray(float const * value, size_t count)
 	{
-		TIF(effect_->SetFloatArray(parameter_, value, count));
+		TIF(effect_->SetFloatArray(parameter_, value, static_cast<UINT>(count)));
 	}
 
 	void D3D9RenderEffectParameter::GetFloatArray(float* value, size_t count)
 	{
-		TIF(effect_->GetFloatArray(parameter_, value, count));
+		TIF(effect_->GetFloatArray(parameter_, value, static_cast<UINT>(count)));
 	}
 
 	void D3D9RenderEffectParameter::SetVectorArray(Vector4 const * value, size_t count)
 	{
-		TIF(effect_->SetVectorArray(parameter_, reinterpret_cast<D3DXVECTOR4 const *>(value), count));
+		TIF(effect_->SetVectorArray(parameter_, reinterpret_cast<D3DXVECTOR4 const *>(value),
+			static_cast<UINT>(count)));
 	}
 
 	void D3D9RenderEffectParameter::GetVectorArray(Vector4* value, size_t count)
 	{
-		TIF(effect_->GetVectorArray(parameter_, reinterpret_cast<D3DXVECTOR4*>(value), count));
+		TIF(effect_->GetVectorArray(parameter_, reinterpret_cast<D3DXVECTOR4*>(value),
+			static_cast<UINT>(count)));
 	}
 
 	void D3D9RenderEffectParameter::SetMatrixArray(Matrix4 const * matrices, size_t count)
@@ -232,11 +234,11 @@ namespace KlayGE
 
 	void D3D9RenderEffectParameter::SetIntArray(int const * value, size_t count)
 	{
-		TIF(effect_->SetIntArray(parameter_, value, count));
+		TIF(effect_->SetIntArray(parameter_, value, static_cast<UINT>(count)));
 	}
 
 	void D3D9RenderEffectParameter::GetIntArray(int* value, size_t count)
 	{
-		TIF(effect_->GetIntArray(parameter_, value, count));
+		TIF(effect_->GetIntArray(parameter_, value, static_cast<UINT>(count)));
 	}
 }

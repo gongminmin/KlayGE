@@ -13,6 +13,8 @@
 #ifndef _AUDIOFACTORY_HPP
 #define _AUDIOFACTORY_HPP
 
+#include <boost/utility.hpp>
+
 namespace KlayGE
 {
 	class AudioFactory
@@ -29,7 +31,7 @@ namespace KlayGE
 	};
 
 	template <typename AudioEngineType, typename SoundBufferType, typename MusicBufferType>
-	class ConcreteAudioFactory : public AudioFactory
+	class ConcreteAudioFactory : boost::noncopyable, public AudioFactory
 	{
 	public:
 		ConcreteAudioFactory(std::wstring const & name)

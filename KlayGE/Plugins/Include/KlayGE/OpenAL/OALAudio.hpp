@@ -31,7 +31,11 @@
 
 #include <KlayGE/Audio.hpp>
 
-#pragma comment(lib, "KlayGE_AudioEngine_OpenAL.lib")
+#ifdef _DEBUG
+	#pragma comment(lib, "KlayGE_AudioEngine_OpenAL_d.lib")
+#else
+	#pragma comment(lib, "KlayGE_AudioEngine_OpenAL.lib")
+#endif
 
 namespace KlayGE
 {

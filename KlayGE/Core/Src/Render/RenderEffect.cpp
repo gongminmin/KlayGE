@@ -40,21 +40,21 @@ namespace KlayGE
 		RenderEffectPtr Clone() const
 			{ return RenderEffect::NullObject(); }
 
-		RenderEffectParameterPtr Parameter(uint32_t index)
+		RenderEffectParameterPtr Parameter(uint32_t /*index*/)
 			{ return RenderEffectParameter::NullObject(); }
-		RenderEffectParameterPtr ParameterByName(std::string const & name)
+		RenderEffectParameterPtr ParameterByName(std::string const & /*name*/)
 			{ return RenderEffectParameter::NullObject(); }
-		RenderEffectParameterPtr ParameterBySemantic(std::string const & semantic)
+		RenderEffectParameterPtr ParameterBySemantic(std::string const & /*semantic*/)
 			{ return RenderEffectParameter::NullObject(); }
 
-		void SetTechnique(std::string const & techName)
+		void SetTechnique(std::string const & /*techName*/)
 			{ }
-		void SetTechnique(uint32_t tech)
+		void SetTechnique(uint32_t /*tech*/)
 			{ }
 
-		uint32_t Begin(uint32_t flags = 0)
+		uint32_t Begin(uint32_t /*flags*/)
 			{ return 1; }
-		void BeginPass(uint32_t passNum)
+		void BeginPass(uint32_t /*passNum*/)
 			{ }
 		void EndPass()
 			{ }
@@ -72,15 +72,15 @@ namespace KlayGE
 	class NullRenderEffectParameter : public RenderEffectParameter
 	{
 	public:
-		RenderEffectParameter& operator=(float value)
+		RenderEffectParameter& operator=(float /*value*/)
 			{ return *this; }
-		RenderEffectParameter& operator=(Vector4 const & value)
+		RenderEffectParameter& operator=(Vector4 const & /*value*/)
 			{ return *this; }
-		RenderEffectParameter& operator=(Matrix4 const & value)
+		RenderEffectParameter& operator=(Matrix4 const & /*value*/)
 			{ return *this; }
-		RenderEffectParameter& operator=(int value)
+		RenderEffectParameter& operator=(int /*value*/)
 			{ return *this; }
-		RenderEffectParameter& operator=(TexturePtr const & tex)
+		RenderEffectParameter& operator=(TexturePtr const & /*value*/)
 			{ return *this; }
 
 		operator float() const
@@ -92,21 +92,21 @@ namespace KlayGE
 		operator int() const
 			{ return 0; }
 
-		void SetFloatArray(float const * matrices, size_t count)
+		void SetFloatArray(float const * /*floats*/, size_t /*count*/)
 			{ }
-		void GetFloatArray(float* matrices, size_t count)
+		void GetFloatArray(float* /*floats*/, size_t /*count*/)
 			{ }
-		void SetVectorArray(Vector4 const * matrices, size_t count)
+		void SetVectorArray(Vector4 const * /*vectors*/, size_t /*count*/)
 			{ }
-		void GetVectorArray(Vector4* matrices, size_t count)
+		void GetVectorArray(Vector4* /*vectors*/, size_t /*count*/)
 			{ }
-		void SetMatrixArray(Matrix4 const * matrices, size_t count)
+		void SetMatrixArray(Matrix4 const * /*matrices*/, size_t /*count*/)
 			{ }
-		void GetMatrixArray(Matrix4* matrices, size_t count)
+		void GetMatrixArray(Matrix4* /*matrices*/, size_t /*count*/)
 			{ }
-		void SetIntArray(int const * matrices, size_t count)
+		void SetIntArray(int const * /*ints*/, size_t /*count*/)
 			{ }
-		void GetIntArray(int* matrices, size_t count)
+		void GetIntArray(int* /*ints*/, size_t /*count*/)
 			{ }
 	};
 
@@ -124,7 +124,7 @@ namespace KlayGE
 		file->seekg(0, std::ios_base::end);
 		std::vector<char> data(file->tellg());
 		file->seekg(0);
-		file->read(&data[0], data.size());
+		file->read(&data[0], static_cast<std::streamsize>(data.size()));
 
 		return Context::Instance().RenderFactoryInstance().MakeRenderEffect(std::string(&data[0], data.size()));
 	}
