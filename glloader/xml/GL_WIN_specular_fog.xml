@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_WIN_specular_fog">
+	<Tokens>
+		<Token name="GL_FOG_SPECULAR_TEXTURE_WIN" value="0x80EC"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_WIN" string="GL_WIN_specular_fog"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_WIN"/>
+	</InitPath>
+</GLExtension>

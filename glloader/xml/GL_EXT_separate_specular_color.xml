@@ -1,0 +1,18 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_separate_specular_color">
+	<Tokens>
+		<Token name="GL_LIGHT_MODEL_COLOR_CONTROL_EXT" value="0x81F8"/>
+		<Token name="GL_SINGLE_COLOR_EXT" value="0x81F9"/>
+		<Token name="GL_SEPARATE_SPECULAR_COLOR_EXT" value="0x81FA"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_separate_specular_color"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>
+

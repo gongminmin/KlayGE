@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+
+<GLExtension name="WGL_ARB_multisample">
+	<Tokens>
+		<Token name="WGL_SAMPLE_BUFFERS_ARB" value="0x2041"/>
+		<Token name="WGL_SAMPLES_ARB" value="0x2042"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="WGL_ARB" string="WGL_ARB_multisample"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="WGL_ARB"/>
+	</InitPath>
+</GLExtension>

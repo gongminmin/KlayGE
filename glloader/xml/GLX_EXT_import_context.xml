@@ -1,0 +1,44 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GLX_EXT_import_context">
+	<Tokens>
+		<Token name="GLX_SHARE_CONTEXT_EXT" value="0x800A"/>
+		<Token name="GLX_VISUAL_ID_EXT" value="0x800B"/>
+		<Token name="GLX_SCREEN_EXT" value="0x800C"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glXGetCurrentDisplayEXT" return="Display*"/>
+		<Function name="glXQueryContextInfoEXT" return="int">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXContext" name="context"/>
+			<Param type="int" name="attribute"/>
+			<Param type="int*" name="value"/>
+		</Function>
+		<Function name="glXGetContextIDEXT" return="GLXContextID">
+			<Param type="const GLXContext" name="context"/>
+		</Function>
+		<Function name="glXImportContextEXT" return="GLXContext">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXContextID" name="contextID"/>
+		</Function>
+		<Function name="glXFreeContextEXT" return="void">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXContext" name="context"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GLX_EXT" string="GLX_EXT_import_context">
+			<Name name="glXGetCurrentDisplayEXT"/>
+			<Name name="glXQueryContextInfoEXT"/>
+			<Name name="glXGetContextIDEXT"/>
+			<Name name="glXImportContextEXT"/>
+			<Name name="glXFreeContextEXT"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GLX_EXT"/>
+	</InitPath>
+</GLExtension>

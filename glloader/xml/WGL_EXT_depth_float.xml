@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+
+<GLExtension name="WGL_EXT_depth_float">
+	<Tokens>
+		<Token name="WGL_DEPTH_FLOAT_EXT" value="0x2040"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="EXT" string="WGL_EXT_depth_float"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="EXT"/>
+	</InitPath>
+</GLExtension>

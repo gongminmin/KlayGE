@@ -1,0 +1,82 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_SGI_color_table">
+	<Tokens>
+		<Token name="GL_COLOR_TABLE_SGI" value="0x80D0"/>
+		<Token name="GL_POST_CONVOLUTION_COLOR_TABLE_SGI" value="0x80D1"/>
+		<Token name="GL_POST_COLOR_MATRIX_COLOR_TABLE_SGI" value="0x80D2"/>
+		<Token name="GL_PROXY_COLOR_TABLE_SGI" value="0x80D3"/>
+		<Token name="GL_PROXY_POST_CONVOLUTION_COLOR_TABLE_SGI" value="0x80D4"/>
+		<Token name="GL_PROXY_POST_COLOR_MATRIX_COLOR_TABLE_SGI" value="0x80D5"/>
+		<Token name="GL_COLOR_TABLE_SCALE_SGI" value="0x80D6"/>
+		<Token name="GL_COLOR_TABLE_BIAS_SGI" value="0x80D7"/>
+		<Token name="GL_COLOR_TABLE_FORMAT_SGI" value="0x80D8"/>
+		<Token name="GL_COLOR_TABLE_WIDTH_SGI" value="0x80D9"/>
+		<Token name="GL_COLOR_TABLE_RED_SIZE_SGI" value="0x80DA"/>
+		<Token name="GL_COLOR_TABLE_GREEN_SIZE_SGI" value="0x80DB"/>
+		<Token name="GL_COLOR_TABLE_BLUE_SIZE_SGI" value="0x80DC"/>
+		<Token name="GL_COLOR_TABLE_ALPHA_SIZE_SGI" value="0x80DD"/>
+		<Token name="GL_COLOR_TABLE_LUMINANCE_SIZE_SGI" value="0x80DE"/>
+		<Token name="GL_COLOR_TABLE_INTENSITY_SIZE_SGI" value="0x80DF"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glColorTableSGI" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="internalformat"/>
+			<Param type="GLsizei" name="width"/>
+			<Param type="GLenum" name="format"/>
+			<Param type="GLenum" name="type"/>
+			<Param type="const GLvoid*" name="table"/>
+		</Function>
+		<Function name="glCopyColorTableSGI" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="internalformat"/>
+			<Param type="GLint" name="x"/>
+			<Param type="GLint" name="y"/>
+			<Param type="GLsizei" name="width"/>
+		</Function>
+		<Function name="glColorTableParameterivSGI" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="const GLint*" name="params"/>
+		</Function>
+		<Function name="glColorTableParameterfvSGI" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="const GLfloat*" name="params"/>
+		</Function>
+		<Function name="glGetColorTableSGI" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="format"/>
+			<Param type="GLenum" name="type"/>
+			<Param type="GLvoid*" name="table"/>
+		</Function>
+		<Function name="glGetColorTableParameterfvSGI" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLfloat*" name="params"/>
+		</Function>
+		<Function name="glGetColorTableParameterivSGI" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLint*" name="params"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_SGI" string="GL_SGI_color_table">
+			<Name name="glColorTableSGI"/>
+			<Name name="glCopyColorTableSGI"/>
+			<Name name="glColorTableParameterivSGI"/>
+			<Name name="glColorTableParameterfvSGI"/>
+			<Name name="glGetColorTableSGI"/>
+			<Name name="glGetColorTableParameterfvSGI"/>
+			<Name name="glGetColorTableParameterivSGI"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_SGI"/>
+	</InitPath>
+</GLExtension>

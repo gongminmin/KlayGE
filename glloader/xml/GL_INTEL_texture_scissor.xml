@@ -1,0 +1,11 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_INTEL_texture_scissor">
+	<Vendors>
+		<Vendor name="GL_INTEL" string="GL_INTEL_texture_scissor"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_INTEL"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,17 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GLX_EXT_visual_rating">
+	<Tokens>
+		<Token name="GLX_VISUAL_CAVEAT_EXT" value="0x20"/>
+		<Token name="GLX_SLOW_VISUAL_EXT" value="0x8001"/>
+		<Token name="GLX_NON_CONFORMANT_VISUAL_EXT" value="0x800D"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GLX_EXT" string="GLX_EXT_visual_rating"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GLX_EXT"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,26 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_NV_primitive_restart">
+	<Tokens>
+		<Token name="GL_PRIMITIVE_RESTART_NV" value="0x8558"/>
+		<Token name="GL_PRIMITIVE_RESTART_INDEX_NV" value="0x8559"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glPrimitiveRestartNV" return="void"/>
+		<Function name="glPrimitiveRestartIndexNV" return="void">
+			<Param type="GLuint" name="index"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_NV" string="GL_NV_primitive_restart">
+			<Name name="glPrimitiveRestartNV"/>
+			<Name name="glPrimitiveRestartIndexNV"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_NV"/>
+	</InitPath>
+</GLExtension>

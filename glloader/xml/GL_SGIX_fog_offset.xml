@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_SGIX_fog_offset">
+	<Tokens>
+		<Token name="GL_FOG_OFFSET_SGIX" value="0x8198"/>
+		<Token name="GL_FOG_OFFSET_VALUE_SGIX" value="0x8199"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_SGIX" string="GL_SGIX_fog_offset"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_SGIX"/>
+	</InitPath>
+</GLExtension>

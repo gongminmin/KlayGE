@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GLX_SGIX_visual_select_group">
+	<Tokens>
+		<Token name="GLX_VISUAL_SELECT_GROUP_SGIX" value="0x8028"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GLX_SGIS" string="GLX_SGIX_visual_select_group"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GLX_SGIS"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,48 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_fog_coord">
+	<Tokens>
+		<Token name="GL_FOG_COORD_SOURCE_EXT" value="0x8450"/>
+		<Token name="GL_FOG_COORD_EXT" value="0x8451"/>
+		<Token name="GL_FRAGMENT_DEPTH_EXT" value="0x8452"/>
+		<Token name="GL_CURRENT_FOG_COORD_EXT" value="0x8453"/>
+		<Token name="GL_FOG_COORD_ARRAY_TYPE_EXT" value="0x8454"/>
+		<Token name="GL_FOG_COORD_ARRAY_STRIDE_EXT" value="0x8455"/>
+		<Token name="GL_FOG_COORD_ARRAY_POINTER_EXT" value="0x8456"/>
+		<Token name="GL_FOG_COORD_ARRAY_EXT" value="0x8457"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glFogCoordfEXT" return="void">
+			<Param type="GLfloat" name="coord"/>
+		</Function>
+		<Function name="glFogCoordfvEXT" return="void">
+			<Param type="const GLfloat*" name="coord"/>
+		</Function>
+		<Function name="glFogCoorddEXT" return="void">
+			<Param type="GLdouble" name="coord"/>
+		</Function>
+		<Function name="glFogCoorddvEXT" return="void">
+			<Param type="const GLdouble*" name="coord"/>
+		</Function>
+		<Function name="glFogCoordPointerEXT" return="void">
+			<Param type="GLenum" name="type"/>
+			<Param type="GLsizei" name="stride"/>
+			<Param type="const GLvoid*" name="pointer"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_fog_coord">
+			<Name name="glFogCoordfEXT"/>
+			<Name name="glFogCoordfvEXT"/>
+			<Name name="glFogCoorddEXT"/>
+			<Name name="glFogCoorddvEXT"/>
+			<Name name="glFogCoordPointerEXT"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,27 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_packed_pixels">
+	<Tokens>
+		<Token name="GL_UNSIGNED_BYTE_3_3_2_EXT" value="0x8032"/>
+		<Token name="GL_UNSIGNED_BYTE_2_3_3_REV_EXT" value="0x8362"/>
+		<Token name="GL_UNSIGNED_SHORT_5_6_5_EXT" value="0x8363"/>
+		<Token name="GL_UNSIGNED_SHORT_5_6_5_REV_EXT" value="0x8364"/>
+		<Token name="GL_UNSIGNED_SHORT_4_4_4_4_EXT" value="0x8033"/>
+		<Token name="GL_UNSIGNED_SHORT_4_4_4_4_REV_EXT" value="0x8365"/>
+		<Token name="GL_UNSIGNED_SHORT_5_5_5_1_EXT" value="0x8034"/>
+		<Token name="GL_UNSIGNED_SHORT_1_5_5_5_REV_EXT" value="0x8366"/>
+		<Token name="GL_UNSIGNED_INT_8_8_8_8_EXT" value="0x8035"/>
+		<Token name="GL_UNSIGNED_INT_8_8_8_8_REV_EXT" value="0x8367"/>
+		<Token name="GL_UNSIGNED_INT_10_10_10_2_EXT" value="0x8036"/>
+		<Token name="GL_UNSIGNED_INT_2_10_10_10_REV_EXT" value="0x8368"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_packed_pixels"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>
+

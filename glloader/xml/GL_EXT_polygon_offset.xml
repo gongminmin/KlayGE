@@ -1,0 +1,29 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_polygon_offset">
+	<Tokens>
+		<Token name="GL_POLYGON_OFFSET_EXT" value="0x8037"/>
+		<Token name="GL_POLYGON_OFFSET_FACTOR_EXT" value="0x8038"/>
+		<Token name="GL_POLYGON_OFFSET_UNITS_EXT" value="0x2A00"/>
+		<Token name="GL_POLYGON_OFFSET_POINT_EXT" value="0x2A01"/>
+		<Token name="GL_POLYGON_OFFSET_LINE_EXT" value="0x2A02"/>
+		<Token name="GL_POLYGON_OFFSET_FILL_EXT" value="0x8037"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glPolygonOffsetEXT" return="void">
+			<Param type="GLfloat" name="factor"/>
+			<Param type="GLfloat" name="units"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_polygon_offset">
+			<Name name="glPolygonOffsetEXT"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>

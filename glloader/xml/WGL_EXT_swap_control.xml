@@ -1,0 +1,21 @@
+<?xml version='1.0'?>
+
+<GLExtension name="WGL_EXT_swap_control">
+	<Functions>
+		<Function name="wglSwapIntervalEXT" return="BOOL">
+			<Param type="int" name="interval"/>
+		</Function>
+		<Function name="wglGetSwapIntervalEXT" return="int"/>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="WGL_EXT" string="WGL_EXT_swap_control">
+			<Name name="wglSwapIntervalEXT"/>
+			<Name name="wglGetSwapIntervalEXT"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="WGL_EXT"/>
+	</InitPath>
+</GLExtension>

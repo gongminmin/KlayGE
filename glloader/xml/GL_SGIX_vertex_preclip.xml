@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_SGIX_vertex_preclip">
+	<Tokens>
+		<Token name="GL_VERTEX_PRECLIP_SGIX" value="0x83EE"/>
+		<Token name="GL_VERTEX_PRECLIP_HINT_SGIX" value="0x83EF"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_SGIX" string="GL_SGIX_vertex_preclip"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_SGIX"/>
+	</InitPath>
+</GLExtension>

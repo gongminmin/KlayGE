@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_SGIX_texture_multi_buffer">
+	<Tokens>
+		<Token name="GL_TEXTURE_MULTI_BUFFER_HINT_SGIX" value="0x812E"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_SGIX" string="GL_SGIX_texture_multi_buffer"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_SGIX"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_shared_texture_palette">
+	<Tokens>
+		<Token name="GL_SHARED_TEXTURE_PALETTE_EXT" value="0x81FB"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_shared_texture_palette"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>

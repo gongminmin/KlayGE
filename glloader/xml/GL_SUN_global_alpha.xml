@@ -1,0 +1,52 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_SUN_global_alpha">
+	<Tokens>
+		<Token name="GL_GLOBAL_ALPHA_SUN" value="0x81D9"/>
+		<Token name="GL_GLOBAL_ALPHA_FACTOR_SUN" value="0x81DA"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glGlobalAlphaFactorbSUN" return="void">
+			<Param type="GLbyte" name="factor"/>
+		</Function>
+		<Function name="glGlobalAlphaFactorsSUN" return="void">
+			<Param type="GLshort" name="factor"/>
+		</Function>
+		<Function name="glGlobalAlphaFactoriSUN" return="void">
+			<Param type="GLint" name="factor"/>
+		</Function>
+		<Function name="glGlobalAlphaFactorfSUN" return="void">
+			<Param type="GLfloat" name="factor"/>
+		</Function>
+		<Function name="glGlobalAlphaFactordSUN" return="void">
+			<Param type="GLdouble" name="factor"/>
+		</Function>
+		<Function name="glGlobalAlphaFactorubSUN" return="void">
+			<Param type="GLubyte" name="factor"/>
+		</Function>
+		<Function name="glGlobalAlphaFactorusSUN" return="void">
+			<Param type="GLushort" name="factor"/>
+		</Function>
+		<Function name="glGlobalAlphaFactoruiSUN" return="void">
+			<Param type="GLuint" name="factor"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_SUN" string="GL_SUN_global_alpha">
+			<Name name="glGlobalAlphaFactorbSUN"/>
+			<Name name="glGlobalAlphaFactorsSUN"/>
+			<Name name="glGlobalAlphaFactoriSUN"/>
+			<Name name="glGlobalAlphaFactorfSUN"/>
+			<Name name="glGlobalAlphaFactordSUN"/>
+			<Name name="glGlobalAlphaFactorubSUN"/>
+			<Name name="glGlobalAlphaFactorusSUN"/>
+			<Name name="glGlobalAlphaFactoruiSUN"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_SUN"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,20 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_ARB_pixel_buffer_object">
+	<Tokens>
+		<Token name="GL_PIXEL_PACK_BUFFER_ARB" value="0x88EB"/>
+		<Token name="GL_PIXEL_UNPACK_BUFFER_ARB" value="0x88EC"/>
+		<Token name="GL_PIXEL_PACK_BUFFER_BINDING_ARB" value="0x88ED"/>
+		<Token name="GL_PIXEL_UNPACK_BUFFER_BINDING_ARB" value="0x88EF"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_ARB" string="GL_ARB_pixel_buffer_object"/>
+		<Vendor name="GL_EXT" string="GL_EXT_pixel_buffer_object"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_ARB"/>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>

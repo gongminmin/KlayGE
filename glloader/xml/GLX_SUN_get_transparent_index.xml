@@ -1,0 +1,22 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GLX_SUN_get_transparent_index">
+	<Functions>
+		<Function name="glXGetTransparentIndexSUN" return="Status">
+			<Param type="Display*" name="dpy"/>
+			<Param type="Window" name="overlay"/>
+			<Param type="Window" name="underlay"/>
+			<Param type="long*" name="pTransparentIndex"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GLX_SUN" string="GLX_SUN_get_transparent_index">
+			<Name name="glXGetTransparentIndexSUN"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GLX_SUN"/>
+	</InitPath>
+</GLExtension>

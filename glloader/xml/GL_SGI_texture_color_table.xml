@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_SGI_texture_color_table">
+	<Tokens>
+		<Token name="GL_TEXTURE_COLOR_TABLE_SGI" value="0x80BC"/>
+		<Token name="GL_PROXY_TEXTURE_COLOR_TABLE_SGI" value="0x80BD"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_SGI" string="GL_SGI_texture_color_table"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_SGI"/>
+	</InitPath>
+</GLExtension>

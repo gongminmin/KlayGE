@@ -1,0 +1,29 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_blend_func_separate">
+	<Tokens>
+		<Token name="GL_BLEND_DST_RGB_EXT" value="0x80C8"/>
+		<Token name="GL_BLEND_SRC_RGB_EXT" value="0x80C9"/>
+		<Token name="GL_BLEND_DST_ALPHA_EXT" value="0x80CA"/>
+		<Token name="GL_BLEND_SRC_ALPHA_EXT" value="0x80CB"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glBlendFuncSeparateEXT" return="void">
+			<Param type="GLenum" name="sfactorRGB"/>
+			<Param type="GLenum" name="dfactorRGB"/>
+			<Param type="GLenum" name="sfactorAlpha"/>
+			<Param type="GLenum" name="dfactorAlpha"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_blend_func_separate">
+			<Name name="glBlendFuncSeparateEXT"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,17 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_ARB_texture_env_dot3">
+	<Tokens>
+		<Token name="GL_DOT3_RGB_ARB" value="0x86AE"/>
+		<Token name="GL_DOT3_RGBA_ARB" value="0x86AF"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_ARB" string="GL_ARB_texture_env_dot3"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_ARB"/>
+	</InitPath>
+</GLExtension>
+

@@ -1,0 +1,34 @@
+<?xml version='1.0'?>
+
+<GLExtension name="WGL_I3D_digital_video_control">
+	<Tokens>
+		<Token name="WGL_DIGITAL_VIDEO_CURSOR_ALPHA_FRAMEBUFFER_I3D" value="0x2050"/>
+		<Token name="WGL_DIGITAL_VIDEO_CURSOR_ALPHA_VALUE_I3D" value="0x2051"/>
+		<Token name="WGL_DIGITAL_VIDEO_CURSOR_INCLUDED_I3D" value="0x2052"/>
+		<Token name="WGL_DIGITAL_VIDEO_GAMMA_CORRECTED_I3D" value="0x2053"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="wglGetDigitalVideoParametersI3D" return="BOOL">
+			<Param type="HDC" name="hDC"/>
+			<Param type="int" name="iAttribute"/>
+			<Param type="int*" name="piValue"/>
+		</Function>
+		<Function name="wglSetDigitalVideoParametersI3D" return="BOOL">
+			<Param type="HDC" name="hDC"/>
+			<Param type="int" name="iAttribute"/>
+			<Param type="const int*" name="piValue"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="WGL_I3D" string="WGL_I3D_digital_video_control">
+			<Name name="wglGetDigitalVideoParametersI3D"/>
+			<Name name="wglSetDigitalVideoParametersI3D"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="WGL_I3D"/>
+	</InitPath>
+</GLExtension>

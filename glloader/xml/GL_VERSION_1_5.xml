@@ -1,0 +1,156 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_VERSION_1_5">
+	<Tokens>
+		<Token name="GL_BUFFER_SIZE" value="0x8764"/>
+		<Token name="GL_BUFFER_USAGE" value="0x8765"/>
+		<Token name="GL_QUERY_COUNTER_BITS" value="0x8864"/>
+		<Token name="GL_CURRENT_QUERY" value="0x8865"/>
+		<Token name="GL_QUERY_RESULT" value="0x8866"/>
+		<Token name="GL_QUERY_RESULT_AVAILABLE" value="0x8867"/>
+		<Token name="GL_ARRAY_BUFFER" value="0x8892"/>
+		<Token name="GL_ELEMENT_ARRAY_BUFFER" value="0x8893"/>
+		<Token name="GL_ARRAY_BUFFER_BINDING" value="0x8894"/>
+		<Token name="GL_ELEMENT_ARRAY_BUFFER_BINDING" value="0x8895"/>
+		<Token name="GL_VERTEX_ARRAY_BUFFER_BINDING" value="0x8896"/>
+		<Token name="GL_NORMAL_ARRAY_BUFFER_BINDING" value="0x8897"/>
+		<Token name="GL_COLOR_ARRAY_BUFFER_BINDING" value="0x8898"/>
+		<Token name="GL_INDEX_ARRAY_BUFFER_BINDING" value="0x8899"/>
+		<Token name="GL_TEXTURE_COORD_ARRAY_BUFFER_BINDING" value="0x889A"/>
+		<Token name="GL_EDGE_FLAG_ARRAY_BUFFER_BINDING" value="0x889B"/>
+		<Token name="GL_SECONDARY_COLOR_ARRAY_BUFFER_BINDING" value="0x889C"/>
+		<Token name="GL_FOG_COORD_ARRAY_BUFFER_BINDING" value="0x889D"/>
+		<Token name="GL_WEIGHT_ARRAY_BUFFER_BINDING" value="0x889E"/>
+		<Token name="GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING" value="0x889F"/>
+		<Token name="GL_READ_ONLY" value="0x88B8"/>
+		<Token name="GL_WRITE_ONLY" value="0x88B9"/>
+		<Token name="GL_READ_WRITE" value="0x88BA"/>
+		<Token name="GL_BUFFER_ACCESS" value="0x88BB"/>
+		<Token name="GL_BUFFER_MAPPED" value="0x88BC"/>
+		<Token name="GL_BUFFER_MAP_POINTER" value="0x88BD"/>
+		<Token name="GL_STREAM_DRAW" value="0x88E0"/>
+		<Token name="GL_STREAM_READ" value="0x88E1"/>
+		<Token name="GL_STREAM_COPY" value="0x88E2"/>
+		<Token name="GL_STATIC_DRAW" value="0x88E4"/>
+		<Token name="GL_STATIC_READ" value="0x88E5"/>
+		<Token name="GL_STATIC_COPY" value="0x88E6"/>
+		<Token name="GL_DYNAMIC_DRAW" value="0x88E8"/>
+		<Token name="GL_DYNAMIC_READ" value="0x88E9"/>
+		<Token name="GL_DYNAMIC_COPY" value="0x88EA"/>
+		<Token name="GL_SAMPLES_PASSED" value="0x8914"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glGenQueries" return="void">
+			<Param type="GLsizei" name="n"/>
+			<Param type="GLuint*" name="ids"/>
+		</Function>
+		<Function name="glDeleteQueries" return="void">
+			<Param type="GLsizei" name="n"/>
+			<Param type="const GLuint*" name="ids"/>
+		</Function>
+		<Function name="glIsQuery" return="GLboolean">
+			<Param type="GLuint" name="id"/>
+		</Function>
+		<Function name="glBeginQuery" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLuint" name="id"/>
+		</Function>
+		<Function name="glEndQuery" return="void">
+			<Param type="GLenum" name="target"/>
+		</Function>
+		<Function name="glGetQueryiv" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLint*" name="param"/>
+		</Function>
+		<Function name="glGetQueryObjectiv" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLint*" name="params"/>
+		</Function>
+		<Function name="glGetQueryObjectuiv" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLuint*" name="params"/>
+		</Function>
+		<Function name="glBindBuffer" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLuint" name="buffer"/>
+		</Function>
+		<Function name="glDeleteBuffers" return="void">
+			<Param type="GLsizei" name="n"/>
+			<Param type="const GLuint*" name="buffers"/>
+		</Function>
+		<Function name="glGenBuffers" return="void">
+			<Param type="GLsizei" name="n"/>
+			<Param type="GLuint*" name="buffers"/>
+		</Function>
+		<Function name="glIsBuffer" return="GLboolean">
+			<Param type="GLuint" name="buffer"/>
+		</Function>
+		<Function name="glBufferData" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLsizeiptr" name="size"/>
+			<Param type="const GLvoid*" name="data"/>
+			<Param type="GLenum" name="usage"/>
+		</Function>
+		<Function name="glBufferSubData" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLintptr" name="offset"/>
+			<Param type="GLsizeiptr" name="size"/>
+			<Param type="const GLvoid*" name="data"/>
+		</Function>
+		<Function name="glGetBufferSubData" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLintptr" name="offset"/>
+			<Param type="GLsizeiptr" name="size"/>
+			<Param type="GLvoid*" name="data"/>
+		</Function>
+		<Function name="glMapBuffer" return="GLvoid*">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="access"/>
+		</Function>
+		<Function name="glUnmapBuffer" return="GLboolean">
+			<Param type="GLenum" name="target"/>
+		</Function>
+		<Function name="glGetBufferParameteriv" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLint*" name="params"/>
+		</Function>
+		<Function name="glGetBufferPointerv" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLvoid**" name="params"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_CORE" string="GL_VERSION_1_5">
+			<Name name="glGenQueries"/>
+			<Name name="glDeleteQueries"/>
+			<Name name="glIsQuery"/>
+			<Name name="glBeginQuery"/>
+			<Name name="glEndQuery"/>
+			<Name name="glGetQueryiv"/>
+			<Name name="glGetQueryObjectiv"/>
+			<Name name="glGetQueryObjectuiv"/>
+			<Name name="glBindBuffer"/>
+			<Name name="glDeleteBuffers"/>
+			<Name name="glGenBuffers"/>
+			<Name name="glIsBuffer"/>
+			<Name name="glBufferData"/>
+			<Name name="glBufferSubData"/>
+			<Name name="glGetBufferSubData"/>
+			<Name name="glMapBuffer"/>
+			<Name name="glUnmapBuffer"/>
+			<Name name="glGetBufferParameteriv"/>
+			<Name name="glGetBufferPointerv"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_CORE"/>
+	</InitPath>
+</GLExtension>

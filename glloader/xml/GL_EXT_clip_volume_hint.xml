@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_clip_volume_hint">
+	<Tokens>
+		<Token name="CLIP_VOLUME_CLIPPING_HINT_EXT" value="0x80F0"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_clip_volume_hint"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>

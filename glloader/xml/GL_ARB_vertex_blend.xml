@@ -1,0 +1,111 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_ARB_vertex_blend">
+	<Tokens>
+		<Token name="GL_MAX_VERTEX_UNITS_ARB" value="0x86A4"/>
+		<Token name="GL_ACTIVE_VERTEX_UNITS_ARB" value="0x86A5"/>
+		<Token name="GL_WEIGHT_SUM_UNITY_ARB" value="0x86A6"/>
+		<Token name="GL_VERTEX_BLEND_ARB" value="0x86A7"/>
+		<Token name="GL_CURRENT_WEIGHT_ARB" value="0x86A8"/>
+		<Token name="GL_WEIGHT_ARRAY_TYPE_ARB" value="0x86A9"/>
+		<Token name="GL_WEIGHT_ARRAY_STRIDE_ARB" value="0x86AA"/>
+		<Token name="GL_WEIGHT_ARRAY_SIZE_ARB" value="0x86AB"/>
+		<Token name="GL_WEIGHT_ARRAY_POINTER_ARB" value="0x86AC"/>
+		<Token name="GL_WEIGHT_ARRAY_ARB" value="0x86AD"/>
+		<Token name="GL_MODELVIEW0_ARB" value="0x1700"/>
+		<Token name="GL_MODELVIEW1_ARB" value="0x850A"/>
+		<Token name="GL_MODELVIEW2_ARB" value="0x8722"/>
+		<Token name="GL_MODELVIEW3_ARB" value="0x8723"/>
+		<Token name="GL_MODELVIEW4_ARB" value="0x8724"/>
+		<Token name="GL_MODELVIEW5_ARB" value="0x8725"/>
+		<Token name="GL_MODELVIEW6_ARB" value="0x8726"/>
+		<Token name="GL_MODELVIEW7_ARB" value="0x8727"/>
+		<Token name="GL_MODELVIEW8_ARB" value="0x8728"/>
+		<Token name="GL_MODELVIEW9_ARB" value="0x8729"/>
+		<Token name="GL_MODELVIEW10_ARB" value="0x872A"/>
+		<Token name="GL_MODELVIEW11_ARB" value="0x872B"/>
+		<Token name="GL_MODELVIEW12_ARB" value="0x872C"/>
+		<Token name="GL_MODELVIEW13_ARB" value="0x872D"/>
+		<Token name="GL_MODELVIEW14_ARB" value="0x872E"/>
+		<Token name="GL_MODELVIEW15_ARB" value="0x872F"/>
+		<Token name="GL_MODELVIEW16_ARB" value="0x8730"/>
+		<Token name="GL_MODELVIEW17_ARB" value="0x8731"/>
+		<Token name="GL_MODELVIEW18_ARB" value="0x8732"/>
+		<Token name="GL_MODELVIEW19_ARB" value="0x8733"/>
+		<Token name="GL_MODELVIEW20_ARB" value="0x8734"/>
+		<Token name="GL_MODELVIEW21_ARB" value="0x8735"/>
+		<Token name="GL_MODELVIEW22_ARB" value="0x8736"/>
+		<Token name="GL_MODELVIEW23_ARB" value="0x8737"/>
+		<Token name="GL_MODELVIEW24_ARB" value="0x8738"/>
+		<Token name="GL_MODELVIEW25_ARB" value="0x8739"/>
+		<Token name="GL_MODELVIEW26_ARB" value="0x873A"/>
+		<Token name="GL_MODELVIEW27_ARB" value="0x873B"/>
+		<Token name="GL_MODELVIEW28_ARB" value="0x873C"/>
+		<Token name="GL_MODELVIEW29_ARB" value="0x873D"/>
+		<Token name="GL_MODELVIEW30_ARB" value="0x873E"/>
+		<Token name="GL_MODELVIEW31_ARB" value="0x873F"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glWeightbvARB" return="void">
+			<Param type="GLint" name="size"/>
+			<Param type="GLbyte*" name="weights"/>
+		</Function>
+		<Function name="glWeightsvARB" return="void">
+			<Param type="GLint" name="size"/>
+			<Param type="GLshort*" name="weights"/>
+		</Function>
+		<Function name="glWeightivARB" return="void">
+			<Param type="GLint" name="size"/>
+			<Param type="GLint*" name="weights"/>
+		</Function>
+		<Function name="glWeightfvARB" return="void">
+			<Param type="GLint" name="size"/>
+			<Param type="GLfloat*" name="weights"/>
+		</Function>
+		<Function name="glWeightdvARB" return="void">
+			<Param type="GLint" name="size"/>
+			<Param type="GLdouble*" name="weights"/>
+		</Function>
+		<Function name="glWeightubvARB" return="void">
+			<Param type="GLint" name="size"/>
+			<Param type="GLubyte*" name="weights"/>
+		</Function>
+		<Function name="glWeightusvARB" return="void">
+			<Param type="GLint" name="size"/>
+			<Param type="GLushort*" name="weights"/>
+		</Function>
+		<Function name="glWeightuivARB" return="void">
+			<Param type="GLint" name="size"/>
+			<Param type="GLuint*" name="weights"/>
+		</Function>
+		<Function name="glWeightPointerARB" return="void">
+			<Param type="GLint" name="size"/>
+			<Param type="GLenum" name="type"/>
+			<Param type="GLsizei" name="stride"/>
+			<Param type="GLvoid*" name="pointer"/>
+		</Function>
+		<Function name="glVertexBlendARB" return="void">
+			<Param type="GLint" name="count"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_ARB" string="GL_ARB_vertex_blend">
+			<Name name="glWeightbvARB"/>
+			<Name name="glWeightsvARB"/>
+			<Name name="glWeightivARB"/>
+			<Name name="glWeightfvARB"/>
+			<Name name="glWeightdvARB"/>
+			<Name name="glWeightubvARB"/>
+			<Name name="glWeightusvARB"/>
+			<Name name="glWeightuivARB"/>
+			<Name name="glWeightPointerARB"/>
+			<Name name="glVertexBlendARB"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_ARB"/>
+	</InitPath>
+</GLExtension>

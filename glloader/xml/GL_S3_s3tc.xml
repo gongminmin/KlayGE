@@ -1,0 +1,18 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_S3_s3tc">
+	<Tokens>
+		<Token name="GL_RGB_S3TC" value="0x83A0"/>
+		<Token name="GL_RGB4_S3TC" value="0x83A1"/>
+		<Token name="GL_RGBA_S3TC" value="0x83A2"/>
+		<Token name="GL_RGBA4_S3TC" value="0x83A3"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_S3" string="GL_S3_s3tc"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_S3"/>
+	</InitPath>
+</GLExtension>

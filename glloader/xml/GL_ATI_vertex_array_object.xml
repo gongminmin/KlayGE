@@ -1,0 +1,101 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_ATI_vertex_array_object">
+	<Tokens>
+		<Token name="GL_STATIC_ATI" value="0x8760"/>
+		<Token name="GL_DYNAMIC_ATI" value="0x8761"/>
+		<Token name="GL_PRESERVE_ATI" value="0x8762"/>
+		<Token name="GL_DISCARD_ATI" value="0x8763"/>
+		<Token name="GL_OBJECT_BUFFER_SIZE_ATI" value="0x8764"/>
+		<Token name="GL_OBJECT_BUFFER_USAGE_ATI" value="0x8765"/>
+		<Token name="GL_ARRAY_OBJECT_BUFFER_ATI" value="0x8766"/>
+		<Token name="GL_ARRAY_OBJECT_OFFSET_ATI" value="0x8767"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glNewObjectBufferATI" return="GLuint">
+			<Param type="GLsizei" name="size"/>
+			<Param type="const GLvoid*" name="pointer"/>
+			<Param type="GLenum" name="usage"/>
+		</Function>
+		<Function name="glIsObjectBufferATI" return="GLboolean">
+			<Param type="GLuint" name="buffer"/>
+		</Function>
+		<Function name="glUpdateObjectBufferATI" return="void">
+			<Param type="GLuint" name="buffer"/>
+			<Param type="GLuint" name="offset"/>
+			<Param type="GLsizei" name="size"/>
+			<Param type="const GLvoid*" name="pointer"/>
+			<Param type="GLenum" name="preserve"/>
+		</Function>
+		<Function name="glGetObjectBufferfvATI" return="void">
+			<Param type="GLuint" name="buffer"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLfloat*" name="params"/>
+		</Function>
+		<Function name="glGetObjectBufferivATI" return="void">
+			<Param type="GLuint" name="buffer"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLint*" name="params"/>
+		</Function>
+		<Function name="glFreeObjectBufferATI" return="void">
+			<Param type="GLuint" name="buffer"/>
+		</Function>
+		<Function name="glArrayObjectATI" return="void">
+			<Param type="GLenum" name="array"/>
+			<Param type="GLint" name="size"/>
+			<Param type="GLenum" name="type"/>
+			<Param type="GLsizei" name="stride"/>
+			<Param type="GLuint" name="buffer"/>
+			<Param type="GLuint" name="offset"/>
+		</Function>
+		<Function name="glGetArrayObjectfvATI" return="void">
+			<Param type="GLenum" name="array"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLfloat*" name="params"/>
+		</Function>
+		<Function name="glGetArrayObjectivATI" return="void">
+			<Param type="GLenum" name="array"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLint*" name="params"/>
+		</Function>
+		<Function name="glVariantArrayObjectATI" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLenum" name="type"/>
+			<Param type="GLsizei" name="stride"/>
+			<Param type="GLuint" name="buffer"/>
+			<Param type="GLuint" name="offset"/>
+		</Function>
+		<Function name="glGetVariantArrayObjectfvATI" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLfloat*" name="params"/>
+		</Function>
+		<Function name="glGetVariantArrayObjectivATI" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLint*" name="params"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_ATI" string="GL_ATI_vertex_array_object">
+			<Name name="glNewObjectBufferATI"/>
+			<Name name="glIsObjectBufferATI"/>
+			<Name name="glUpdateObjectBufferATI"/>
+			<Name name="glGetObjectBufferfvATI"/>
+			<Name name="glGetObjectBufferivATI"/>
+			<Name name="glFreeObjectBufferATI"/>
+			<Name name="glArrayObjectATI"/>
+			<Name name="glGetArrayObjectfvATI"/>
+			<Name name="glGetArrayObjectivATI"/>
+			<Name name="glVariantArrayObjectATI"/>
+			<Name name="glGetVariantArrayObjectfvATI"/>
+			<Name name="glGetVariantArrayObjectivATI"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_ATI"/>
+	</InitPath>
+</GLExtension>

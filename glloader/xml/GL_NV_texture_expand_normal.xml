@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_NV_texture_expand_normal">
+	<Tokens>
+		<Token name="GL_TEXTURE_UNSIGNED_REMAP_MODE_NV" value="0x888F"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_NV" string="GL_NV_texture_expand_normal"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_NV"/>
+	</InitPath>
+</GLExtension>

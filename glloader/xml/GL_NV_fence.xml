@@ -1,0 +1,54 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_NV_fence">
+	<Tokens>
+		<Token name="GL_ALL_COMPLETED_NV" value="0x84F2"/>
+		<Token name="GL_FENCE_STATUS_NV" value="0x84F3"/>
+		<Token name="GL_FENCE_CONDITION_NV" value="0x84F4"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glDeleteFencesNV" return="void">
+			<Param type="GLsizei" name="n"/>
+			<Param type="const GLuint*" name="fences"/>
+		</Function>
+		<Function name="glGenFencesNV" return="void">
+			<Param type="GLsizei" name="n"/>
+			<Param type="GLuint*" name="fences"/>
+		</Function>
+		<Function name="glIsFenceNV" return="GLboolean">
+			<Param type="GLuint" name="fence"/>
+		</Function>
+		<Function name="glTestFenceNV" return="GLboolean">
+			<Param type="GLuint" name="fence"/>
+		</Function>
+		<Function name="glGetFenceivNV" return="void">
+			<Param type="GLuint" name="fence"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLint*" name="params"/>
+		</Function>
+		<Function name="glFinishFenceNV" return="void">
+			<Param type="GLuint" name="fence"/>
+		</Function>
+		<Function name="glSetFenceNV" return="void">
+			<Param type="GLuint" name="fence"/>
+			<Param type="GLenum" name="condition"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_NV" string="GL_NV_fence">
+			<Name name="glDeleteFencesNV"/>
+			<Name name="glGenFencesNV"/>
+			<Name name="glIsFenceNV"/>
+			<Name name="glTestFenceNV"/>
+			<Name name="glGetFenceivNV"/>
+			<Name name="glFinishFenceNV"/>
+			<Name name="glSetFenceNV"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_NV"/>
+	</InitPath>
+</GLExtension>

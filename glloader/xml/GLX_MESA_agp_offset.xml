@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GLX_MESA_agp_offset">
+	<Functions>
+		<Function name="glXGetAGPOffsetMESA" return="unsigned int">
+			<Param type="const void*" name="pointer"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GLX_MESA" string="GLX_MESA_agp_offset">
+			<Name name="glXGetAGPOffsetMESA"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GLX_MESA"/>
+	</InitPath>
+</GLExtension>

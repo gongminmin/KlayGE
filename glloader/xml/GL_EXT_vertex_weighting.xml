@@ -1,0 +1,46 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_vertex_weighting">
+	<Tokens>
+		<Token name="GL_MODELVIEW0_STACK_DEPTH_EXT" value="GL_MODELVIEW_STACK_DEPTH"/>
+		<Token name="GL_MODELVIEW1_STACK_DEPTH_EXT" value="0x8502"/>
+		<Token name="GL_MODELVIEW0_MATRIX_EXT" value="GL_MODELVIEW_MATRIX"/>
+		<Token name="GL_MODELVIEW1_MATRIX_EXT" value="0x8506"/>
+		<Token name="GL_VERTEX_WEIGHTING_EXT" value="0x8509"/>
+		<Token name="GL_MODELVIEW0_EXT" value="GL_MODELVIEW"/>
+		<Token name="GL_MODELVIEW1_EXT" value="0x850A"/>
+		<Token name="GL_CURRENT_VERTEX_WEIGHT_EXT" value="0x850B"/>
+		<Token name="GL_VERTEX_WEIGHT_ARRAY_EXT" value="0x850C"/>
+		<Token name="GL_VERTEX_WEIGHT_ARRAY_SIZE_EXT" value="0x850D"/>
+		<Token name="GL_VERTEX_WEIGHT_ARRAY_TYPE_EXT" value="0x850E"/>
+		<Token name="GL_VERTEX_WEIGHT_ARRAY_STRIDE_EXT" value="0x850F"/>
+		<Token name="GL_VERTEX_WEIGHT_ARRAY_POINTER_EXT" value="0x8510"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glVertexWeightfEXT" return="void">
+			<Param type="GLfloat" name="weight"/>
+		</Function>
+		<Function name="glVertexWeightfvEXT" return="void">
+			<Param type="const GLfloat*" name="weight"/>
+		</Function>
+		<Function name="glVertexWeightPointerEXT" return="void">
+			<Param type="GLsizei" name="size"/>
+			<Param type="GLenum" name="type"/>
+			<Param type="GLsizei" name="stride"/>
+			<Param type="const GLvoid*" name="pointer"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_vertex_weighting">
+			<Name name="glVertexWeightfEXT"/>
+			<Name name="glVertexWeightfvEXT"/>
+			<Name name="glVertexWeightPointerEXT"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>

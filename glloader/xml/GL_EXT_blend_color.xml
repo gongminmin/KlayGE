@@ -1,0 +1,30 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_blend_color">
+	<Tokens>
+		<Token name="GL_BLEND_COLOR_EXT" value="0x8005"/>
+		<Token name="GL_CONSTANT_COLOR_EXT" value="0x8001"/>
+		<Token name="GL_ONE_MINUS_CONSTANT_COLOR_EXT" value="0x8002"/>
+		<Token name="GL_CONSTANT_ALPHA_EXT" value="0x8003"/>
+		<Token name="GL_ONE_MINUS_CONSTANT_ALPHA_EXT" value="0x8004"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glBlendColorEXT" return="void">
+			<Param type="GLclampf" name="red"/>
+			<Param type="GLclampf" name="green"/>
+			<Param type="GLclampf" name="blue"/>
+			<Param type="GLclampf" name="alpha"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_blend_color">
+			<Name name="glBlendColorEXT"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>

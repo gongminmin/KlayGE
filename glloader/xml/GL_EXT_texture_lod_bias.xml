@@ -1,0 +1,18 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_texture_lod_bias">
+	<Tokens>
+		<Token name="GL_TEXTURE_FILTER_CONTROL_EXT" value="0x8500"/>
+		<Token name="GL_TEXTURE_LOD_BIAS_EXT" value="0x8501"/>
+		<Token name="GL_MAX_TEXTURE_LOD_BIAS_EXT" value="0x84FD"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_texture_lod_bias"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>
+

@@ -1,0 +1,403 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_VERSION_1_3">
+	<Tokens>
+		<Token name="GL_TEXTURE0" value="0x84C0"/>
+		<Token name="GL_TEXTURE1" value="0x84C1"/>
+		<Token name="GL_TEXTURE2" value="0x84C2"/>
+		<Token name="GL_TEXTURE3" value="0x84C3"/>
+		<Token name="GL_TEXTURE4" value="0x84C4"/>
+		<Token name="GL_TEXTURE5" value="0x84C5"/>
+		<Token name="GL_TEXTURE6" value="0x84C6"/>
+		<Token name="GL_TEXTURE7" value="0x84C7"/>
+		<Token name="GL_TEXTURE8" value="0x84C8"/>
+		<Token name="GL_TEXTURE9" value="0x84C9"/>
+		<Token name="GL_TEXTURE10" value="0x84CA"/>
+		<Token name="GL_TEXTURE11" value="0x84CB"/>
+		<Token name="GL_TEXTURE12" value="0x84CC"/>
+		<Token name="GL_TEXTURE13" value="0x84CD"/>
+		<Token name="GL_TEXTURE14" value="0x84CE"/>
+		<Token name="GL_TEXTURE15" value="0x84CF"/>
+		<Token name="GL_TEXTURE16" value="0x84D0"/>
+		<Token name="GL_TEXTURE17" value="0x84D1"/>
+		<Token name="GL_TEXTURE18" value="0x84D2"/>
+		<Token name="GL_TEXTURE19" value="0x84D3"/>
+		<Token name="GL_TEXTURE20" value="0x84D4"/>
+		<Token name="GL_TEXTURE21" value="0x84D5"/>
+		<Token name="GL_TEXTURE22" value="0x84D6"/>
+		<Token name="GL_TEXTURE23" value="0x84D7"/>
+		<Token name="GL_TEXTURE24" value="0x84D8"/>
+		<Token name="GL_TEXTURE25" value="0x84D9"/>
+		<Token name="GL_TEXTURE26" value="0x84DA"/>
+		<Token name="GL_TEXTURE27" value="0x84DB"/>
+		<Token name="GL_TEXTURE28" value="0x84DC"/>
+		<Token name="GL_TEXTURE29" value="0x84DD"/>
+		<Token name="GL_TEXTURE30" value="0x84DE"/>
+		<Token name="GL_TEXTURE31" value="0x84DF"/>
+		<Token name="GL_ACTIVE_TEXTURE" value="0x84E0"/>
+		<Token name="GL_CLIENT_ACTIVE_TEXTURE" value="0x84E1"/>
+		<Token name="GL_MAX_TEXTURE_UNITS" value="0x84E2"/>
+		<Token name="GL_TRANSPOSE_MODELVIEW_MATRIX" value="0x84E3"/>
+		<Token name="GL_TRANSPOSE_PROJECTION_MATRIX" value="0x84E4"/>
+		<Token name="GL_TRANSPOSE_TEXTURE_MATRIX" value="0x84E5"/>
+		<Token name="GL_TRANSPOSE_COLOR_MATRIX" value="0x84E6"/>
+		<Token name="GL_MULTISAMPLE" value="0x809D"/>
+		<Token name="GL_SAMPLE_ALPHA_TO_COVERAGE" value="0x809E"/>
+		<Token name="GL_SAMPLE_ALPHA_TO_ONE" value="0x809F"/>
+		<Token name="GL_SAMPLE_COVERAGE" value="0x80A0"/>
+		<Token name="GL_SAMPLE_BUFFERS" value="0x80A8"/>
+		<Token name="GL_SAMPLES" value="0x80A9"/>
+		<Token name="GL_SAMPLE_COVERAGE_VALUE" value="0x80AA"/>
+		<Token name="GL_SAMPLE_COVERAGE_INVERT" value="0x80AB"/>
+		<Token name="GL_MULTISAMPLE_BIT" value="0x20000000"/>
+		<Token name="GL_NORMAL_MAP" value="0x8511"/>
+		<Token name="GL_REFLECTION_MAP" value="0x8512"/>
+		<Token name="GL_TEXTURE_CUBE_MAP" value="0x8513"/>
+		<Token name="GL_TEXTURE_BINDING_CUBE_MAP" value="0x8514"/>
+		<Token name="GL_TEXTURE_CUBE_MAP_POSITIVE_X" value="0x8515"/>
+		<Token name="GL_TEXTURE_CUBE_MAP_NEGATIVE_X" value="0x8516"/>
+		<Token name="GL_TEXTURE_CUBE_MAP_POSITIVE_Y" value="0x8517"/>
+		<Token name="GL_TEXTURE_CUBE_MAP_NEGATIVE_Y" value="0x8518"/>
+		<Token name="GL_TEXTURE_CUBE_MAP_POSITIVE_Z" value="0x8519"/>
+		<Token name="GL_TEXTURE_CUBE_MAP_NEGATIVE_Z" value="0x851A"/>
+		<Token name="GL_PROXY_TEXTURE_CUBE_MAP" value="0x851B"/>
+		<Token name="GL_MAX_CUBE_MAP_TEXTURE_SIZE" value="0x851C"/>
+		<Token name="GL_COMPRESSED_ALPHA" value="0x84E9"/>
+		<Token name="GL_COMPRESSED_LUMINANCE" value="0x84EA"/>
+		<Token name="GL_COMPRESSED_LUMINANCE_ALPHA" value="0x84EB"/>
+		<Token name="GL_COMPRESSED_INTENSITY" value="0x84EC"/>
+		<Token name="GL_COMPRESSED_RGB" value="0x84ED"/>
+		<Token name="GL_COMPRESSED_RGBA" value="0x84EE"/>
+		<Token name="GL_TEXTURE_COMPRESSION_HINT" value="0x84EF"/>
+		<Token name="GL_TEXTURE_COMPRESSED_IMAGE_SIZE" value="0x86A0"/>
+		<Token name="GL_TEXTURE_COMPRESSED" value="0x86A1"/>
+		<Token name="GL_NUM_COMPRESSED_TEXTURE_FORMATS" value="0x86A2"/>
+		<Token name="GL_COMPRESSED_TEXTURE_FORMATS" value="0x86A3"/>
+		<Token name="GL_CLAMP_TO_BORDER" value="0x812D"/>
+		<Token name="GL_COMBINE" value="0x8570"/>
+		<Token name="GL_COMBINE_RGB" value="0x8571"/>
+		<Token name="GL_COMBINE_ALPHA" value="0x8572"/>
+		<Token name="GL_SRC0_RGB" value="0x8580"/>
+		<Token name="GL_SRC1_RGB" value="0x8581"/>
+		<Token name="GL_SRC2_RGB" value="0x8582"/>
+		<Token name="GL_SRC0_ALPHA" value="0x8588"/>
+		<Token name="GL_SRC1_ALPHA" value="0x8589"/>
+		<Token name="GL_SRC2_ALPHA" value="0x858A"/>
+		<Token name="GL_OPERAND0_RGB" value="0x8590"/>
+		<Token name="GL_OPERAND1_RGB" value="0x8591"/>
+		<Token name="GL_OPERAND2_RGB" value="0x8592"/>
+		<Token name="GL_OPERAND0_ALPHA" value="0x8598"/>
+		<Token name="GL_OPERAND1_ALPHA" value="0x8599"/>
+		<Token name="GL_OPERAND2_ALPHA" value="0x859A"/>
+		<Token name="GL_RGB_SCALE" value="0x8573"/>
+		<Token name="GL_ADD_SIGNED" value="0x8574"/>
+		<Token name="GL_INTERPOLATE" value="0x8575"/>
+		<Token name="GL_SUBTRACT" value="0x84E7"/>
+		<Token name="GL_CONSTANT" value="0x8576"/>
+		<Token name="GL_PRIMARY_COLOR" value="0x8577"/>
+		<Token name="GL_PREVIOUS" value="0x8578"/>
+		<Token name="GL_DOT3_RGB" value="0x86AE"/>
+		<Token name="GL_DOT3_RGBA" value="0x86AF"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glActiveTexture" return="void">
+			<Param type="GLenum" name="texture"/>
+		</Function>
+		<Function name="glClientActiveTexture" return="void">
+			<Param type="GLenum" name="texture"/>
+		</Function>
+		<Function name="glMultiTexCoord1d" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLdouble" name="s"/>
+		</Function>
+		<Function name="glMultiTexCoord1dv" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLdouble*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord1f" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLfloat" name="s"/>
+		</Function>
+		<Function name="glMultiTexCoord1fv" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLfloat*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord1i" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLint" name="s"/>
+		</Function>
+		<Function name="glMultiTexCoord1iv" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLint*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord1s" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLshort" name="s"/>
+		</Function>
+		<Function name="glMultiTexCoord1sv" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLshort*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord2d" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLdouble" name="s"/>
+			<Param type="GLdouble" name="t"/>
+		</Function>
+		<Function name="glMultiTexCoord2dv" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLdouble*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord2f" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLfloat" name="s"/>
+			<Param type="GLfloat" name="t"/>
+		</Function>
+		<Function name="glMultiTexCoord2fv" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLfloat*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord2i" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLint" name="s"/>
+			<Param type="GLint" name="t"/>
+		</Function>
+		<Function name="glMultiTexCoord2iv" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLint*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord2s" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLshort" name="s"/>
+			<Param type="GLshort" name="t"/>
+		</Function>
+		<Function name="glMultiTexCoord2sv" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLshort*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord3d" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLdouble" name="s"/>
+			<Param type="GLdouble" name="t"/>
+			<Param type="GLdouble" name="r"/>
+		</Function>
+		<Function name="glMultiTexCoord3dv" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLdouble*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord3f" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLfloat" name="s"/>
+			<Param type="GLfloat" name="t"/>
+			<Param type="GLfloat" name="r"/>
+		</Function>
+		<Function name="glMultiTexCoord3fv" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLfloat*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord3i" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLint" name="s"/>
+			<Param type="GLint" name="t"/>
+			<Param type="GLint" name="r"/>
+		</Function>
+		<Function name="glMultiTexCoord3iv" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLint*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord3s" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLshort" name="s"/>
+			<Param type="GLshort" name="t"/>
+			<Param type="GLshort" name="r"/>
+		</Function>
+		<Function name="glMultiTexCoord3sv" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLshort*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord4d" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLdouble" name="s"/>
+			<Param type="GLdouble" name="t"/>
+			<Param type="GLdouble" name="r"/>
+			<Param type="GLdouble" name="q"/>
+		</Function>
+		<Function name="glMultiTexCoord4dv" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLdouble*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord4f" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLfloat" name="s"/>
+			<Param type="GLfloat" name="t"/>
+			<Param type="GLfloat" name="r"/>
+			<Param type="GLfloat" name="q"/>
+		</Function>
+		<Function name="glMultiTexCoord4fv" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLfloat*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord4i" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLint" name="s"/>
+			<Param type="GLint" name="t"/>
+			<Param type="GLint" name="r"/>
+			<Param type="GLint" name="q"/>
+		</Function>
+		<Function name="glMultiTexCoord4iv" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLint*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord4s" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLshort" name="s"/>
+			<Param type="GLshort" name="t"/>
+			<Param type="GLshort" name="r"/>
+			<Param type="GLshort" name="q"/>
+		</Function>
+		<Function name="glMultiTexCoord4sv" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLshort*" name="v"/>
+		</Function>
+		<Function name="glLoadTransposeMatrixf" return="void">
+			<Param type="const GLfloat*" name="m"/>
+		</Function>
+		<Function name="glLoadTransposeMatrixd" return="void">
+			<Param type="const GLdouble*" name="m"/>
+		</Function>
+		<Function name="glMultTransposeMatrixf" return="void">
+			<Param type="const GLfloat*" name="m"/>
+		</Function>
+		<Function name="glMultTransposeMatrixd" return="void">
+			<Param type="const GLdouble*" name="m"/>
+		</Function>
+		<Function name="glSampleCoverage" return="void">
+			<Param type="GLclampf" name="value"/>
+			<Param type="GLboolean" name="invert"/>
+		</Function>
+		<Function name="glCompressedTexImage3D" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLint" name="level"/>
+			<Param type="GLenum" name="internalFormat"/>
+			<Param type="GLsizei" name="width"/>
+			<Param type="GLsizei" name="height"/>
+			<Param type="GLsizei" name="depth"/>
+			<Param type="GLint" name="border"/>
+			<Param type="GLsizei" name="imageSize"/>
+			<Param type="const GLvoid*" name="data"/>
+		</Function>
+		<Function name="glCompressedTexImage2D" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLint" name="level"/>
+			<Param type="GLenum" name="internalFormat"/>
+			<Param type="GLsizei" name="width"/>
+			<Param type="GLsizei" name="height"/>
+			<Param type="GLint" name="border"/>
+			<Param type="GLsizei" name="imageSize"/>
+			<Param type="const GLvoid*" name="data"/>
+		</Function>
+		<Function name="glCompressedTexImage1D" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLint" name="level"/>
+			<Param type="GLenum" name="internalFormat"/>
+			<Param type="GLsizei" name="width"/>
+			<Param type="GLint" name="border"/>
+			<Param type="GLsizei" name="imageSize"/>
+			<Param type="const GLvoid*" name="data"/>
+		</Function>
+
+		<Function name="glCompressedTexSubImage3D" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLint" name="level"/>
+			<Param type="GLint" name="xoffset"/>
+			<Param type="GLint" name="yoffset"/>
+			<Param type="GLint" name="zoffset"/>
+			<Param type="GLsizei" name="width"/>
+			<Param type="GLsizei" name="height"/>
+			<Param type="GLsizei" name="depth"/>
+			<Param type="GLenum" name="format"/>
+			<Param type="GLsizei" name="imageSize"/>
+			<Param type="const GLvoid*" name="data"/>
+		</Function>
+		<Function name="glCompressedTexSubImage2D" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLint" name="level"/>
+			<Param type="GLint" name="xoffset"/>
+			<Param type="GLint" name="yoffset"/>
+			<Param type="GLsizei" name="width"/>
+			<Param type="GLsizei" name="height"/>
+			<Param type="GLenum" name="format"/>
+			<Param type="GLsizei" name="imageSize"/>
+			<Param type="const GLvoid*" name="data"/>
+		</Function>
+		<Function name="glCompressedTexSubImage1D" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLint" name="level"/>
+			<Param type="GLint" name="xoffset"/>
+			<Param type="GLsizei" name="width"/>
+			<Param type="GLenum" name="format"/>
+			<Param type="GLsizei" name="imageSize"/>
+			<Param type="const GLvoid*" name="data"/>
+		</Function>
+		<Function name="glGetCompressedTexImage" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLint" name="lod"/>
+			<Param type="GLvoid*" name="img"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_CORE" string="GL_VERSION_1_3">
+			<Name name="glActiveTexture"/>
+			<Name name="glClientActiveTexture"/>
+			<Name name="glMultiTexCoord1d"/>
+			<Name name="glMultiTexCoord1dv"/>
+			<Name name="glMultiTexCoord1f"/>
+			<Name name="glMultiTexCoord1fv"/>
+			<Name name="glMultiTexCoord1i"/>
+			<Name name="glMultiTexCoord1iv"/>
+			<Name name="glMultiTexCoord1s"/>
+			<Name name="glMultiTexCoord1sv"/>
+			<Name name="glMultiTexCoord2d"/>
+			<Name name="glMultiTexCoord2dv"/>
+			<Name name="glMultiTexCoord2f"/>
+			<Name name="glMultiTexCoord2fv"/>
+			<Name name="glMultiTexCoord2i"/>
+			<Name name="glMultiTexCoord2iv"/>
+			<Name name="glMultiTexCoord2s"/>
+			<Name name="glMultiTexCoord2sv"/>
+			<Name name="glMultiTexCoord3d"/>
+			<Name name="glMultiTexCoord3dv"/>
+			<Name name="glMultiTexCoord3f"/>
+			<Name name="glMultiTexCoord3fv"/>
+			<Name name="glMultiTexCoord3i"/>
+			<Name name="glMultiTexCoord3iv"/>
+			<Name name="glMultiTexCoord3s"/>
+			<Name name="glMultiTexCoord3sv"/>
+			<Name name="glMultiTexCoord4d"/>
+			<Name name="glMultiTexCoord4dv"/>
+			<Name name="glMultiTexCoord4f"/>
+			<Name name="glMultiTexCoord4fv"/>
+			<Name name="glMultiTexCoord4i"/>
+			<Name name="glMultiTexCoord4iv"/>
+			<Name name="glMultiTexCoord4s"/>
+			<Name name="glMultiTexCoord4sv"/>
+			<Name name="glLoadTransposeMatrixf"/>
+			<Name name="glLoadTransposeMatrixd"/>
+			<Name name="glMultTransposeMatrixf"/>
+			<Name name="glMultTransposeMatrixd"/>
+			<Name name="glSampleCoverage"/>
+			<Name name="glCompressedTexImage3D"/>
+			<Name name="glCompressedTexImage2D"/>
+			<Name name="glCompressedTexImage1D"/>
+			<Name name="glCompressedTexSubImage3D"/>
+			<Name name="glCompressedTexSubImage2D"/>
+			<Name name="glCompressedTexSubImage1D"/>
+			<Name name="glGetCompressedTexImage"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_CORE"/>
+	</InitPath>
+</GLExtension>

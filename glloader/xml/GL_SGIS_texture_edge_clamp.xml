@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_SGIS_texture_edge_clamp">
+	<Tokens>
+		<Token name="GL_CLAMP_TO_EDGE_SGIS" value="0x812F"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_SGIS" string="GL_SGIS_texture_edge_clamp"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_SGIS"/>
+	</InitPath>
+</GLExtension>
+

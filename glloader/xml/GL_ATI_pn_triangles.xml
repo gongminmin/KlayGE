@@ -1,0 +1,37 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_ATI_pn_triangles">
+	<Tokens>
+		<Token name="GL_PN_TRIANGLES_ATI" value="0x87F0"/>
+		<Token name="GL_MAX_PN_TRIANGLES_TESSELATION_LEVEL_ATI" value="0x87F1"/>
+		<Token name="GL_PN_TRIANGLES_POINT_MODE_ATI" value="0x87F2"/>
+		<Token name="GL_PN_TRIANGLES_NORMAL_MODE_ATI" value="0x87F3"/>
+		<Token name="GL_PN_TRIANGLES_TESSELATION_LEVEL_ATI" value="0x87F4"/>
+		<Token name="GL_PN_TRIANGLES_POINT_MODE_LINEAR_ATI" value="0x87F5"/>
+		<Token name="GL_PN_TRIANGLES_POINT_MODE_CUBIC_ATI" value="0x87F6"/>
+		<Token name="GL_PN_TRIANGLES_NORMAL_MODE_LINEAR_ATI" value="0x87F7"/>
+		<Token name="GL_PN_TRIANGLES_NORMAL_MODE_QUADRATIC_ATI" value="0x87F8"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glPNTrianglesiATI" return="void">
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLint" name="param"/>
+		</Function>
+		<Function name="glPNTrianglesfATI" return="void">
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLfloat" name="param"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_ATI" string="GL_ATI_pn_triangles">
+			<Name name="glPNTrianglesiATI"/>
+			<Name name="glPNTrianglesfATI"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_ATI"/>
+	</InitPath>
+</GLExtension>

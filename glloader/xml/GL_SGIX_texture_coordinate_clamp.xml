@@ -1,0 +1,17 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_SGIX_texture_coordinate_clamp">
+	<Tokens>
+		<Token name="GL_TEXTURE_MAX_CLAMP_S_SGIX" value="0x8369"/>
+		<Token name="GL_TEXTURE_MAX_CLAMP_T_SGIX" value="0x836A"/>
+		<Token name="GL_TEXTURE_MAX_CLAMP_R_SGIX" value="0x836B"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_SGIX" string="GL_SGIX_texture_coordinate_clamp"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_SGIX"/>
+	</InitPath>
+</GLExtension>

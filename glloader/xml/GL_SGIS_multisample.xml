@@ -1,0 +1,43 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_SGIS_multisample">
+	<Tokens>
+		<Token name="GL_MULTISAMPLE_SGIS" value="0x809D"/>
+		<Token name="GL_SAMPLE_ALPHA_TO_MASK_SGIS" value="0x809E"/>
+		<Token name="GL_SAMPLE_ALPHA_TO_ONE_SGIS" value="0x809F"/>
+		<Token name="GL_SAMPLE_MASK_SGIS" value="0x80A0"/>
+		<Token name="GL_1PASS_SGIS" value="0x80A1"/>
+		<Token name="GL_2PASS_0_SGIS" value="0x80A2"/>
+		<Token name="GL_2PASS_1_SGIS" value="0x80A3"/>
+		<Token name="GL_4PASS_0_SGIS" value="0x80A4"/>
+		<Token name="GL_4PASS_1_SGIS" value="0x80A5"/>
+		<Token name="GL_4PASS_2_SGIS" value="0x80A6"/>
+		<Token name="GL_4PASS_3_SGIS" value="0x80A7"/>
+		<Token name="GL_SAMPLE_BUFFERS_SGIS" value="0x80A8"/>
+		<Token name="GL_SAMPLES_SGIS" value="0x80A9"/>
+		<Token name="GL_SAMPLE_MASK_VALUE_SGIS" value="0x80AA"/>
+		<Token name="GL_SAMPLE_MASK_INVERT_SGIS" value="0x80AB"/>
+		<Token name="GL_SAMPLE_PATTERN_SGIS" value="0x80AC"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glSampleMaskSGIS" return="void">
+			<Param type="GLclampf" name="value"/>
+			<Param type="GLboolean" name="invert"/>
+		</Function>
+		<Function name="glSamplePatternSGIS" return="void">
+			<Param type="GLenum" name="pattern"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_SGIS" string="GL_SGIS_multisample">
+			<Name name="glSampleMaskSGIS"/>
+			<Name name="glSamplePatternSGIS"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_SGIS"/>
+	</InitPath>
+</GLExtension>

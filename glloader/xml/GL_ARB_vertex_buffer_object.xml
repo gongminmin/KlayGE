@@ -1,0 +1,110 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_ARB_vertex_buffer_object">
+	<Tokens>
+		<Token name="GL_ARRAY_BUFFER_ARB" value="0x8892"/>
+		<Token name="GL_ELEMENT_ARRAY_BUFFER_ARB" value="0x8893"/>
+		<Token name="GL_ARRAY_BUFFER_BINDING_ARB" value="0x8894"/>
+		<Token name="GL_ELEMENT_ARRAY_BUFFER_BINDING_ARB" value="0x8895"/>
+		<Token name="GL_VERTEX_ARRAY_BUFFER_BINDING_ARB" value="0x8896"/>
+		<Token name="GL_NORMAL_ARRAY_BUFFER_BINDING_ARB" value="0x8897"/>
+		<Token name="GL_COLOR_ARRAY_BUFFER_BINDING_ARB" value="0x8898"/>
+		<Token name="GL_INDEX_ARRAY_BUFFER_BINDING_ARB" value="0x8899"/>
+		<Token name="GL_TEXTURE_COORD_ARRAY_BUFFER_BINDING_ARB" value="0x889A"/>
+		<Token name="GL_EDGE_FLAG_ARRAY_BUFFER_BINDING_ARB" value="0x889B"/>
+		<Token name="GL_SECONDARY_COLOR_ARRAY_BUFFER_BINDING_ARB" value="0x889C"/>
+		<Token name="GL_FOG_COORD_ARRAY_BUFFER_BINDING_ARB" value="0x889D"/>
+		<Token name="GL_WEIGHT_ARRAY_BUFFER_BINDING_ARB" value="0x889E"/>
+		<Token name="GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_ARB" value="0x889F"/>
+		<Token name="GL_BUFFER_SIZE_ARB" value="0x8764"/>
+		<Token name="GL_BUFFER_USAGE_ARB" value="0x8765"/>
+		<Token name="GL_READ_ONLY_ARB" value="0x88B8"/>
+		<Token name="GL_WRITE_ONLY_ARB" value="0x88B9"/>
+		<Token name="GL_READ_WRITE_ARB" value="0x88BA"/>
+		<Token name="GL_BUFFER_ACCESS_ARB" value="0x88BB"/>
+		<Token name="GL_BUFFER_MAPPED_ARB" value="0x88BC"/>
+		<Token name="GL_BUFFER_MAP_POINTER_ARB" value="0x88BD"/>
+		<Token name="GL_STREAM_DRAW_ARB" value="0x88E0"/>
+		<Token name="GL_STREAM_READ_ARB" value="0x88E1"/>
+		<Token name="GL_STREAM_COPY_ARB" value="0x88E2"/>
+		<Token name="GL_STATIC_DRAW_ARB" value="0x88E4"/>
+		<Token name="GL_STATIC_READ_ARB" value="0x88E5"/>
+		<Token name="GL_STATIC_COPY_ARB" value="0x88E6"/>
+		<Token name="GL_DYNAMIC_DRAW_ARB" value="0x88E8"/>
+		<Token name="GL_DYNAMIC_READ_ARB" value="0x88E9"/>
+		<Token name="GL_DYNAMIC_COPY_ARB" value="0x88EA"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glBindBufferARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLuint" name="buffer"/>
+		</Function>
+		<Function name="glBufferDataARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLsizeiptr" name="size"/>
+			<Param type="const GLvoid*" name="data"/>
+			<Param type="GLenum" name="usage"/>
+		</Function>
+		<Function name="glBufferSubDataARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLintptr" name="offset"/>
+			<Param type="GLsizeiptr" name="size"/>
+			<Param type="const GLvoid*" name="data"/>
+		</Function>
+		<Function name="glDeleteBuffersARB" return="void">
+			<Param type="GLsizei" name="n"/>
+			<Param type="const GLuint*" name="buffers"/>
+		</Function>
+		<Function name="glGenBuffersARB" return="void">
+			<Param type="GLsizei" name="n"/>
+			<Param type="GLuint*" name="buffers"/>
+		</Function>
+		<Function name="glGetBufferParameterivARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLint*" name="params"/>
+		</Function>
+		<Function name="glGetBufferPointervARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLvoid**" name="params"/>
+		</Function>
+		<Function name="glGetBufferSubDataARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLintptr" name="offset"/>
+			<Param type="GLsizeiptr" name="size"/>
+			<Param type="GLvoid*" name="data"/>
+		</Function>
+		<Function name="glIsBufferARB" return="GLboolean">
+			<Param type="GLuint" name="buffer"/>
+		</Function>
+		<Function name="glMapBufferARB" return="GLvoid*">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="access"/>
+		</Function>
+		<Function name="glUnmapBufferARB" return="GLboolean">
+			<Param type="GLenum" name="target"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_ARB" string="GL_ARB_vertex_buffer_object">
+			<Name name="glBindBufferARB"/>
+			<Name name="glBufferDataARB"/>
+			<Name name="glBufferSubDataARB"/>
+			<Name name="glDeleteBuffersARB"/>
+			<Name name="glGenBuffersARB"/>
+			<Name name="glGetBufferParameterivARB"/>
+			<Name name="glGetBufferPointervARB"/>
+			<Name name="glGetBufferSubDataARB"/>
+			<Name name="glIsBufferARB"/>
+			<Name name="glMapBufferARB"/>
+			<Name name="glUnmapBufferARB"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_ARB"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,58 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GLX_OML_sync_control">
+	<Functions>
+		<Function name="glXGetSyncValuesOML" return="Bool">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXDrawable" name="drawable"/>
+			<Param type="int64_t*" name="ust"/>
+			<Param type="int64_t*" name="msc"/>
+			<Param type="int64_t*" name="sbc"/>
+		</Function>
+		<Function name="glXGetMscRateOML" return="Bool">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXDrawable" name="drawable"/>
+			<Param type="int32_t*" name="numerator"/>
+			<Param type="int32_t*" name="denominator"/>
+		</Function>
+		<Function name="glXSwapBuffersMscOML" return="int64_t">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXDrawable" name="drawable"/>
+			<Param type="int64_t" name="target_msc"/>
+			<Param type="int64_t" name="divisor"/>
+			<Param type="int64_t" name="remainder"/>
+		</Function>
+		<Function name="glXWaitForMscOML" return="Bool">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXDrawable" name="drawable"/>
+			<Param type="int64_t" name="target_msc"/>
+			<Param type="int64_t" name="divisor"/>
+			<Param type="int64_t" name="remainder"/>
+			<Param type="int64_t*" name="ust"/>
+			<Param type="int64_t*" name="msc"/>
+			<Param type="int64_t*" name="sbc"/>
+		</Function>
+		<Function name="glXWaitForSbcOML" return="Bool">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXDrawable" name="drawable"/>
+			<Param type="int64_t" name="target_sbc"/>
+			<Param type="int64_t*" name="ust"/>
+			<Param type="int64_t*" name="msc"/>
+			<Param type="int64_t*" name="sbc"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GLX_OML" string="GLX_OML_sync_control">
+			<Name name="glXGetSyncValuesOML"/>
+			<Name name="glXGetMscRateOML"/>
+			<Name name="glXSwapBuffersMscOML"/>
+			<Name name="glXWaitForMscOML"/>
+			<Name name="glXWaitForSbcOML"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GLX_OML"/>
+	</InitPath>
+</GLExtension>

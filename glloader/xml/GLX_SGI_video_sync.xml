@@ -1,0 +1,25 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GLX_SGI_video_sync">
+	<Functions>
+		<Function name="glXGetVideoSyncSGI" return="int">
+			<Param type="unsigned int*" name="count"/>
+		</Function>
+		<Function name="glXWaitVideoSyncSGI" return="int">
+			<Param type="int" name="divisor"/>
+			<Param type="int" name="remainder"/>
+			<Param type="unsigned int*" name="count"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GLX_SGI" string="GLX_SGI_video_sync">
+			<Name name="glXGetVideoSyncSGI"/>
+			<Name name="glXWaitVideoSyncSGI"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GLX_SGI"/>
+	</InitPath>
+</GLExtension>

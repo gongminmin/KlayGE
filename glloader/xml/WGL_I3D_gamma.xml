@@ -1,0 +1,48 @@
+<?xml version='1.0'?>
+
+<GLExtension name="WGL_I3D_gamma">
+	<Tokens>
+		<Token name="WGL_GAMMA_TABLE_SIZE_I3D" value="0x204E"/>
+		<Token name="WGL_GAMMA_EXCLUDE_DESKTOP_I3D" value="0x204F"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="wglGetGammaTableParametersI3D" return="BOOL">
+			<Param type="HDC" name="hDC"/>
+			<Param type="int" name="iAttribute"/>
+			<Param type="int*" name="piValue"/>
+		</Function>
+		<Function name="wglSetGammaTableParametersI3D" return="BOOL">
+			<Param type="HDC" name="hDC"/>
+			<Param type="int" name="iAttribute"/>
+			<Param type="const int*" name="piValue"/>
+		</Function>
+		<Function name="wglGetGammaTableI3D" return="BOOL">
+			<Param type="HDC" name="hDC"/>
+			<Param type="int" name="iEntries"/>
+			<Param type="USHORT*" name="puRed"/>
+			<Param type="USHORT*" name="puGreen"/>
+			<Param type="USHORT*" name="puBlue"/>
+		</Function>
+		<Function name="wglSetGammaTableI3D" return="BOOL">
+			<Param type="HDC" name="hDC"/>
+			<Param type="int" name="iEntries"/>
+			<Param type="const USHORT*" name="puRed"/>
+			<Param type="const USHORT*" name="puGreen"/>
+			<Param type="const USHORT*" name="puBlue"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="WGL_I3D" string="WGL_I3D_gamma">
+			<Name name="wglGetGammaTableParametersI3D"/>
+			<Name name="wglSetGammaTableParametersI3D"/>
+			<Name name="wglGetGammaTableI3D"/>
+			<Name name="wglSetGammaTableI3D"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="WGL_I3D"/>
+	</InitPath>
+</GLExtension>

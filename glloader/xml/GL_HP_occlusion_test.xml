@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_HP_occlusion_test">
+	<Tokens>
+		<Token name="GL_OCCLUSION_TEST_HP" value="0x8165"/>
+		<Token name="GL_OCCLUSION_TEST_RESULT_HP" value="0x8166"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_HP" string="GL_HP_occlusion_test"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_HP"/>
+	</InitPath>
+</GLExtension>

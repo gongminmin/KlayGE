@@ -1,0 +1,17 @@
+<?xml version='1.0'?>
+
+<GLExtension name="WGL_EXT_extensions_string">
+	<Functions>
+		<Function name="wglGetExtensionsStringEXT" return="const char*"/>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="WGL_EXT" string="WGL_EXT_extensions_string">
+			<Name name="wglGetExtensionsStringEXT"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="WGL_EXT"/>
+	</InitPath>
+</GLExtension>

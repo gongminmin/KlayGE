@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_texture_filter_anisotropic">
+	<Tokens>
+		<Token name="GL_TEXTURE_MAX_ANISOTROPY_EXT" value="0x84FE"/>
+		<Token name="GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT" value="0x84FF"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_texture_filter_anisotropic"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>

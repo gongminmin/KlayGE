@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_ATI_text_fragment_shader">
+	<Tokens>
+		<Token name="GL_TEXT_FRAGMENT_SHADER_ATI" value="0x8200"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_ATI" string="GL_ATI_text_fragment_shader"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_ATI"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,102 @@
+<?xml version='1.0'?>
+
+<GLExtension name="WGL_ARB_pixel_format">
+	<Tokens>
+		<Token name="WGL_NUMBER_PIXEL_FORMATS_ARB" value="0x2000"/>
+		<Token name="WGL_DRAW_TO_WINDOW_ARB" value="0x2001"/>
+		<Token name="WGL_DRAW_TO_BITMAP_ARB" value="0x2002"/>
+		<Token name="WGL_ACCELERATION_ARB" value="0x2003"/>
+		<Token name="WGL_NEED_PALETTE_ARB" value="0x2004"/>
+		<Token name="WGL_NEED_SYSTEM_PALETTE_ARB" value="0x2005"/>
+		<Token name="WGL_SWAP_LAYER_BUFFERS_ARB" value="0x2006"/>
+		<Token name="WGL_SWAP_METHOD_ARB" value="0x2007"/>
+		<Token name="WGL_NUMBER_OVERLAYS_ARB" value="0x2008"/>
+		<Token name="WGL_NUMBER_UNDERLAYS_ARB" value="0x2009"/>
+		<Token name="WGL_TRANSPARENT_ARB" value="0x200A"/>
+		<Token name="WGL_TRANSPARENT_VALUE_ARB" value="0x200B"/>
+		<Token name="WGL_TRANSPARENT_RED_VALUE_ARB" value="0x2037"/>
+		<Token name="WGL_TRANSPARENT_GREEN_VALUE_ARB" value="0x2038"/>
+		<Token name="WGL_TRANSPARENT_BLUE_VALUE_ARB" value="0x2039"/>
+		<Token name="WGL_TRANSPARENT_ALPHA_VALUE_ARB" value="0x203A"/>
+		<Token name="WGL_TRANSPARENT_INDEX_VALUE_ARB" value="0x203B"/>
+		<Token name="WGL_SHARE_DEPTH_ARB" value="0x200C"/>
+		<Token name="WGL_SHARE_STENCIL_ARB" value="0x200D"/>
+		<Token name="WGL_SHARE_ACCUM_ARB" value="0x200E"/>
+		<Token name="WGL_SUPPORT_GDI_ARB" value="0x200F"/>
+		<Token name="WGL_SUPPORT_OPENGL_ARB" value="0x2010"/>
+		<Token name="WGL_DOUBLE_BUFFER_ARB" value="0x2011"/>
+		<Token name="WGL_STEREO_ARB" value="0x2012"/>
+		<Token name="WGL_PIXEL_TYPE_ARB" value="0x2013"/>
+		<Token name="WGL_COLOR_BITS_ARB" value="0x2014"/>
+		<Token name="WGL_RED_BITS_ARB" value="0x2015"/>
+		<Token name="WGL_RED_SHIFT_ARB" value="0x2016"/>
+		<Token name="WGL_GREEN_BITS_ARB" value="0x2017"/>
+		<Token name="WGL_GREEN_SHIFT_ARB" value="0x2018"/>
+		<Token name="WGL_BLUE_BITS_ARB" value="0x2019"/>
+		<Token name="WGL_BLUE_SHIFT_ARB" value="0x201A"/>
+		<Token name="WGL_ALPHA_BITS_ARB" value="0x201B"/>
+		<Token name="WGL_ALPHA_SHIFT_ARB" value="0x201C"/>
+		<Token name="WGL_ACCUM_BITS_ARB" value="0x201D"/>
+		<Token name="WGL_ACCUM_RED_BITS_ARB" value="0x201E"/>
+		<Token name="WGL_ACCUM_GREEN_BITS_ARB" value="0x201F"/>
+		<Token name="WGL_ACCUM_BLUE_BITS_ARB" value="0x2020"/>
+		<Token name="WGL_ACCUM_ALPHA_BITS_ARB" value="0x2021"/>
+		<Token name="WGL_DEPTH_BITS_ARB" value="0x2022"/>
+		<Token name="WGL_STENCIL_BITS_ARB" value="0x2023"/>
+		<Token name="WGL_AUX_BUFFERS_ARB" value="0x2024"/>
+		<Token name="WGL_NO_ACCELERATION_ARB" value="0x2025"/>
+		<Token name="WGL_GENERIC_ACCELERATION_ARB" value="0x2026"/>
+		<Token name="WGL_FULL_ACCELERATION_ARB" value="0x2027"/>
+		<Token name="WGL_SWAP_EXCHANGE_ARB" value="0x2028"/>
+		<Token name="WGL_SWAP_COPY_ARB" value="0x2029"/>
+		<Token name="WGL_SWAP_UNDEFINED_ARB" value="0x202A"/>
+		<Token name="WGL_TYPE_RGBA_ARB" value="0x202B"/>
+		<Token name="WGL_TYPE_COLORINDEX_ARB" value="0x202C"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="wglGetPixelFormatAttribivARB" return="BOOL">
+			<Param type="HDC" name="hdc"/>
+			<Param type="int" name="iPixelFormat"/>
+			<Param type="int" name="iLayerPlane"/>
+			<Param type="UINT" name="nAttributes"/>
+			<Param type="const int*" name="piAttributes"/>
+			<Param type="int*" name="piValues"/>
+		</Function>
+		<Function name="wglGetPixelFormatAttribfvARB" return="BOOL">
+			<Param type="HDC" name="hdc"/>
+			<Param type="int" name="iPixelFormat"/>
+			<Param type="int" name="iLayerPlane"/>
+			<Param type="UINT" name="nAttributes"/>
+			<Param type="const int*" name="piAttributes"/>
+			<Param type="FLOAT*" name="pfValues"/>
+		</Function>
+		<Function name="wglChoosePixelFormatARB" return="BOOL">
+			<Param type="HDC" name="hdc"/>
+			<Param type="const int*" name="piAttribIList"/>
+			<Param type="const FLOAT*" name="pfAttribFList"/>
+			<Param type="UINT" name="nMaxFormats"/>
+			<Param type="int*" name="piFormats"/>
+			<Param type="UINT*" name="nNumFormats"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="WGL_ARB" string="WGL_ARB_pixel_format">
+			<Name name="wglGetPixelFormatAttribivARB"/>
+			<Name name="wglGetPixelFormatAttribfvARB"/>
+			<Name name="wglChoosePixelFormatARB"/>
+		</Vendor>
+
+		<Vendor name="WGL_EXT" string="WGL_EXT_pixel_format">
+			<Name name="wglGetPixelFormatAttribivEXT"/>
+			<Name name="wglGetPixelFormatAttribfvEXT"/>
+			<Name name="wglChoosePixelFormatEXT"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="WGL_ARB"/>
+		<Init name="WGL_EXT"/>
+	</InitPath>
+</GLExtension>

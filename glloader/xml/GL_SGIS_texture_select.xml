@@ -1,0 +1,36 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_SGIS_texture_select">
+	<Tokens>
+		<Token name="GL_DUAL_ALPHA4_SGIS" value="0x8110"/>
+		<Token name="GL_DUAL_ALPHA8_SGIS" value="0x8111"/>
+		<Token name="GL_DUAL_ALPHA12_SGIS" value="0x8112"/>
+		<Token name="GL_DUAL_ALPHA16_SGIS" value="0x8113"/>
+		<Token name="GL_DUAL_LUMINANCE4_SGIS" value="0x8114"/>
+		<Token name="GL_DUAL_LUMINANCE8_SGIS" value="0x8115"/>
+		<Token name="GL_DUAL_LUMINANCE12_SGIS" value="0x8116"/>
+		<Token name="GL_DUAL_LUMINANCE16_SGIS" value="0x8117"/>
+		<Token name="GL_DUAL_INTENSITY4_SGIS" value="0x8118"/>
+		<Token name="GL_DUAL_INTENSITY8_SGIS" value="0x8119"/>
+		<Token name="GL_DUAL_INTENSITY12_SGIS" value="0x811A"/>
+		<Token name="GL_DUAL_INTENSITY16_SGIS" value="0x811B"/>
+		<Token name="GL_DUAL_LUMINANCE_ALPHA4_SGIS" value="0x811C"/>
+		<Token name="GL_DUAL_LUMINANCE_ALPHA8_SGIS" value="0x811D"/>
+		<Token name="GL_QUAD_ALPHA4_SGIS" value="0x811E"/>
+		<Token name="GL_QUAD_ALPHA8_SGIS" value="0x811F"/>
+		<Token name="GL_QUAD_LUMINANCE4_SGIS" value="0x8120"/>
+		<Token name="GL_QUAD_LUMINANCE8_SGIS" value="0x8121"/>
+		<Token name="GL_QUAD_INTENSITY4_SGIS" value="0x8122"/>
+		<Token name="GL_QUAD_INTENSITY8_SGIS" value="0x8123"/>
+		<Token name="GL_DUAL_TEXTURE_SELECT_SGIS" value="0x8124"/>
+		<Token name="GL_QUAD_TEXTURE_SELECT_SGIS" value="0x8125"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_SGIS" string="GL_SGIS_texture_select"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_SGIS"/>
+	</InitPath>
+</GLExtension>

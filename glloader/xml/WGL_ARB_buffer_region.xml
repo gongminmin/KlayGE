@@ -1,0 +1,50 @@
+<?xml version='1.0'?>
+
+<GLExtension name="WGL_ARB_buffer_region">
+	<Tokens>
+		<Token name="WGL_FRONT_COLOR_BUFFER_BIT_ARB" value="0x00000001"/>
+		<Token name="WGL_BACK_COLOR_BUFFER_BIT_ARB" value="0x00000002"/>
+		<Token name="WGL_DEPTH_BUFFER_BIT_ARB" value="0x00000004"/>
+		<Token name="WGL_STENCIL_BUFFER_BIT_ARB" value="0x00000008"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="wglCreateBufferRegionARB" return="HANDLE">
+			<Param type="HDC" name="hDC"/>
+			<Param type="int" name="iLayerPlane"/>
+			<Param type="UINT" name="uType"/>
+		</Function>
+		<Function name="wglDeleteBufferRegionARB" return="VOID">
+			<Param type="HANDLE" name="hRegion"/>
+		</Function>
+		<Function name="wglSaveBufferRegionARB" return="BOOL">
+			<Param type="HANDLE" name="hRegion"/>
+			<Param type="int" name="x"/>
+			<Param type="int" name="y"/>
+			<Param type="int" name="width"/>
+			<Param type="int" name="height"/>
+		</Function>
+		<Function name="wglRestoreBufferRegionARB" return="BOOL">
+			<Param type="HANDLE" name="hRegion"/>
+			<Param type="int" name="x"/>
+			<Param type="int" name="y"/>
+			<Param type="int" name="width"/>
+			<Param type="int" name="height"/>
+			<Param type="int" name="xSrc"/>
+			<Param type="int" name="ySrc"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="WGL_ARB" string="WGL_ARB_buffer_region">
+			<Name name="wglCreateBufferRegionARB"/>
+			<Name name="wglDeleteBufferRegionARB"/>
+			<Name name="wglSaveBufferRegionARB"/>
+			<Name name="wglRestoreBufferRegionARB"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="WGL_ARB"/>
+	</InitPath>
+</GLExtension>

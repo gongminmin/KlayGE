@@ -1,0 +1,31 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_cull_vertex">
+	<Tokens>
+		<Token name="GL_CULL_VERTEX_EXT" value="0x81AA"/>
+		<Token name="GL_CULL_VERTEX_EYE_POSITION_EXT" value="0x81AB"/>
+		<Token name="GL_CULL_VERTEX_OBJECT_POSITION_EXT" value="0x81AC"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glCullParameterfvEXT" return="void">
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLfloat*" name="params"/>
+		</Function>
+		<Function name="glCullParameterdvEXT" return="void">
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLdouble*" name="params"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_cull_vertex">
+			<Name name="glCullParameterfvEXT"/>
+			<Name name="glCullParameterdvEXT"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,17 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_SGIX_tag_sample_buffer">
+	<Functions>
+		<Function name="glTagSampleBufferSGIX" return="void"/>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_SGIX" string="GL_SGIX_tag_sample_buffer">
+			<Name name="glTagSampleBufferSGIX"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_SGIX"/>
+	</InitPath>
+</GLExtension>

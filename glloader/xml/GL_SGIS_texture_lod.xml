@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_SGIS_texture_lod">
+	<Tokens>
+		<Token name="GL_TEXTURE_MIN_LOD_SGIS" value="0x813A"/>
+		<Token name="GL_TEXTURE_MAX_LOD_SGIS" value="0x813B"/>
+		<Token name="GL_TEXTURE_BASE_LEVEL_SGIS" value="0x813C"/>
+		<Token name="GL_TEXTURE_MAX_LEVEL_SGIS" value="0x813D"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_SGIS" string="GL_SGIS_texture_lod"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_SGIS"/>
+	</InitPath>
+</GLExtension>
+

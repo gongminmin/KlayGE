@@ -1,0 +1,56 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_texture">
+	<Tokens>
+		<Token name="GL_ALPHA4_EXT" value="0x803B"/>
+		<Token name="GL_ALPHA8_EXT" value="0x803C"/>
+		<Token name="GL_ALPHA12_EXT" value="0x803D"/>
+		<Token name="GL_ALPHA16_EXT" value="0x803E"/>
+		<Token name="GL_LUMINANCE4_EXT" value="0x803F"/>
+		<Token name="GL_LUMINANCE8_EXT" value="0x8040"/>
+		<Token name="GL_LUMINANCE12_EXT" value="0x8041"/>
+		<Token name="GL_LUMINANCE16_EXT" value="0x8042"/>
+		<Token name="GL_LUMINANCE4_ALPHA4_EXT" value="0x8043"/>
+		<Token name="GL_LUMINANCE6_ALPHA2_EXT" value="0x8044"/>
+		<Token name="GL_LUMINANCE8_ALPHA8_EXT" value="0x8045"/>
+		<Token name="GL_LUMINANCE12_ALPHA4_EXT" value="0x8046"/>
+		<Token name="GL_LUMINANCE12_ALPHA12_EXT" value="0x8047"/>
+		<Token name="GL_LUMINANCE16_ALPHA16_EXT" value="0x8048"/>
+		<Token name="GL_INTENSITY_EXT" value="0x8049"/>
+		<Token name="GL_INTENSITY4_EXT" value="0x804A"/>
+		<Token name="GL_INTENSITY8_EXT" value="0x804B"/>
+		<Token name="GL_INTENSITY12_EXT" value="0x804C"/>
+		<Token name="GL_INTENSITY16_EXT" value="0x804D"/>
+		<Token name="GL_R3_G3_B2_EXT" value="0x2A10"/>
+		<Token name="GL_RGB4_EXT" value="0x804F"/>
+		<Token name="GL_RGB5_EXT" value="0x8050"/>
+		<Token name="GL_RGB8_EXT" value="0x8051"/>
+		<Token name="GL_RGB10_EXT" value="0x8052"/>
+		<Token name="GL_RGB12_EXT" value="0x8053"/>
+		<Token name="GL_RGB16_EXT" value="0x8054"/>
+		<Token name="GL_RGBA2_EXT" value="0x8055"/>
+		<Token name="GL_RGBA4_EXT" value="0x8056"/>
+		<Token name="GL_RGB5_A1_EXT" value="0x8057"/>
+		<Token name="GL_RGBA8_EXT" value="0x8058"/>
+		<Token name="GL_RGB10_A2_EXT" value="0x8059"/>
+		<Token name="GL_RGBA12_EXT" value="0x805A"/>
+		<Token name="GL_RGBA16_EXT" value="0x805B"/>
+		<Token name="GL_TEXTURE_RED_SIZE_EXT" value="0x805C"/>
+		<Token name="GL_TEXTURE_GREEN_SIZE_EXT" value="0x805D"/>
+		<Token name="GL_TEXTURE_BLUE_SIZE_EXT" value="0x805E"/>
+		<Token name="GL_TEXTURE_ALPHA_SIZE_EXT" value="0x805F"/>
+		<Token name="GL_TEXTURE_LUMINANCE_SIZE_EXT" value="0x8060"/>
+		<Token name="GL_TEXTURE_INTENSITY_SIZE_EXT" value="0x8061"/>
+		<Token name="GL_PROXY_TEXTURE_1D_EXT" value="0x8063"/>
+		<Token name="GL_PROXY_TEXTURE_2D_EXT" value="0x8064"/>
+		<Token name="GL_TEXTURE_TOO_LARGE_EXT" value="0x8065"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_texture"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>

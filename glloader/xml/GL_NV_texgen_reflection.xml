@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_NV_texgen_reflection">
+	<Tokens>
+		<Token name="GL_NORMAL_MAP_NV" value="0x8511"/>
+		<Token name="GL_REFLECTION_MAP_NV" value="0x8512"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_NV" string="GL_NV_texgen_reflection"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_NV"/>
+	</InitPath>
+</GLExtension>

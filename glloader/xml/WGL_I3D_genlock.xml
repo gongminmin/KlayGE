@@ -1,0 +1,86 @@
+<?xml version='1.0'?>
+
+<GLExtension name="WGL_I3D_genlock">
+	<Tokens>
+		<Token name="WGL_GENLOCK_SOURCE_MULTIVIEW_I3D" value="0x2044"/>
+		<Token name="WGL_GENLOCK_SOURCE_EXTENAL_SYNC_I3D" value="0x2045"/>
+		<Token name="WGL_GENLOCK_SOURCE_EXTENAL_FIELD_I3D" value="0x2046"/>
+		<Token name="WGL_GENLOCK_SOURCE_EXTENAL_TTL_I3D" value="0x2047"/>
+		<Token name="WGL_GENLOCK_SOURCE_DIGITAL_SYNC_I3D" value="0x2048"/>
+		<Token name="WGL_GENLOCK_SOURCE_DIGITAL_FIELD_I3D" value="0x2049"/>
+		<Token name="WGL_GENLOCK_SOURCE_EDGE_FALLING_I3D" value="0x204A"/>
+		<Token name="WGL_GENLOCK_SOURCE_EDGE_RISING_I3D" value="0x204B"/>
+		<Token name="WGL_GENLOCK_SOURCE_EDGE_BOTH_I3D" value="0x204C"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="wglEnableGenlockI3D" return="BOOL">
+			<Param type="HDC" name="hDC"/>
+		</Function>
+		<Function name="wglDisableGenlockI3D" return="BOOL">
+			<Param type="HDC" name="hDC"/>
+		</Function>
+		<Function name="wglIsEnabledGenlockI3D" return="BOOL">
+			<Param type="HDC" name="hDC"/>
+			<Param type="BOOL*" name="pFlag"/>
+		</Function>
+		<Function name="wglGenlockSourceI3D" return="BOOL">
+			<Param type="HDC" name="hDC"/>
+			<Param type="UINT" name="uSource"/>
+		</Function>
+		<Function name="wglGetGenlockSourceI3D" return="BOOL">
+			<Param type="HDC" name="hDC"/>
+			<Param type="UINT*" name="uSource"/>
+		</Function>
+		<Function name="wglGenlockSourceEdgeI3D" return="BOOL">
+			<Param type="HDC" name="hDC"/>
+			<Param type="UINT" name="uEdge"/>
+		</Function>
+		<Function name="wglGetGenlockSourceEdgeI3D" return="BOOL">
+			<Param type="HDC" name="hDC"/>
+			<Param type="UINT*" name="uEdge"/>
+		</Function>
+		<Function name="wglGenlockSampleRateI3D" return="BOOL">
+			<Param type="HDC" name="hDC"/>
+			<Param type="UINT" name="uRate"/>
+		</Function>
+		<Function name="wglGetGenlockSampleRateI3D" return="BOOL">
+			<Param type="HDC" name="hDC"/>
+			<Param type="UINT*" name="uRate"/>
+		</Function>
+		<Function name="wglGenlockSourceDelayI3D" return="BOOL">
+			<Param type="HDC" name="hDC"/>
+			<Param type="UINT" name="uDelay"/>
+		</Function>
+		<Function name="wglGetGenlockSourceDelayI3D" return="BOOL">
+			<Param type="HDC" name="hDC"/>
+			<Param type="UINT*" name="uDelay"/>
+		</Function>
+		<Function name="wglQueryGenlockMaxSourceDelayI3D" return="BOOL">
+			<Param type="HDC" name="hDC"/>
+			<Param type="UINT*" name="uMaxLineDelay"/>
+			<Param type="UINT*" name="uMaxPixelDelay"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="WGL_I3D" string="WGL_I3D_genlock">
+			<Name name="wglEnableGenlockI3D"/>
+			<Name name="wglDisableGenlockI3D"/>
+			<Name name="wglIsEnabledGenlockI3D"/>
+			<Name name="wglGenlockSourceI3D"/>
+			<Name name="wglGetGenlockSourceI3D"/>
+			<Name name="wglGenlockSourceEdgeI3D"/>
+			<Name name="wglGetGenlockSourceEdgeI3D"/>
+			<Name name="wglGenlockSampleRateI3D"/>
+			<Name name="wglGetGenlockSampleRateI3D"/>
+			<Name name="wglGenlockSourceDelayI3D"/>
+			<Name name="wglGetGenlockSourceDelayI3D"/>
+			<Name name="wglQueryGenlockMaxSourceDelayI3D"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="WGL_I3D"/>
+	</InitPath>
+</GLExtension>

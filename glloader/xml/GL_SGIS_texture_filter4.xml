@@ -1,0 +1,33 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_SGIS_texture_filter4">
+	<Tokens>
+		<Token name="GL_FILTER4_SGIS" value="0x8146"/>
+		<Token name="GL_TEXTURE_FILTER4_SIZE_SGIS" value="0x8147"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glGetTexFilterFuncSGIS" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="filter"/>
+			<Param type="GLfloat*" name="weights"/>
+		</Function>
+		<Function name="glTexFilterFuncSGIS" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="filter"/>
+			<Param type="GLsizei" name="n"/>
+			<Param type="const GLfloat*" name="weights"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_SGIS" string="GL_SGIS_texture_filter4">
+			<Name name="glGetTexFilterFuncSGIS"/>
+			<Name name="glTexFilterFuncSGIS"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_SGIS"/>
+	</InitPath>
+</GLExtension>

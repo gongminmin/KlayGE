@@ -1,0 +1,45 @@
+<?xml version='1.0'?>
+
+<GLExtension name="WGL_I3D_image_buffer">
+	<Tokens>
+		<Token name="WGL_IMAGE_BUFFER_MIN_ACCESS_I3D" value="0x00000001"/>
+		<Token name="WGL_IMAGE_BUFFER_LOCK_I3D" value="0x00000002"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="wglCreateImageBufferI3D" return="LPVOID">
+			<Param type="HDC" name="hDC"/>
+			<Param type="DWORD" name="dwSize"/>
+			<Param type="UINT" name="uFlags"/>
+		</Function>
+		<Function name="wglDestroyImageBufferI3D" return="BOOL">
+			<Param type="HDC" name="hDC"/>
+			<Param type="LPVOID" name="pAddress"/>
+		</Function>
+		<Function name="wglAssociateImageBufferEventsI3D" return="BOOL">
+			<Param type="HDC" name="hDC"/>
+			<Param type="const HANDLE*" name="pEvent"/>
+			<Param type="const LPVOID*" name="pAddress"/>
+			<Param type="const DWORD*" name="pSize"/>
+			<Param type="UINT" name="count"/>
+		</Function>
+		<Function name="wglReleaseImageBufferEventsI3D" return="BOOL">
+			<Param type="HDC" name="hDC"/>
+			<Param type="const LPVOID*" name="pAddress"/>
+			<Param type="UINT" name="count"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="WGL_I3D" string="WGL_I3D_image_buffer">
+			<Name name="wglCreateImageBufferI3D"/>
+			<Name name="wglDestroyImageBufferI3D"/>
+			<Name name="wglAssociateImageBufferEventsI3D"/>
+			<Name name="wglReleaseImageBufferEventsI3D"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="WGL_I3D"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,41 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_light_texture">
+	<Tokens>
+		<Token name="GL_FRAGMENT_MATERIAL_EXT" value="0x8349"/>
+		<Token name="GL_FRAGMENT_NORMAL_EXT" value="0x834A"/>
+		<Token name="GL_FRAGMENT_COLOR_EXT" value="0x834C"/>
+		<Token name="GL_ATTENUATION_EXT" value="0x834D"/>
+		<Token name="GL_SHADOW_ATTENUATION_EXT" value="0x834E"/>
+		<Token name="GL_TEXTURE_APPLICATION_MODE_EXT" value="0x834F"/>
+		<Token name="GL_TEXTURE_LIGHT_EXT" value="0x8350"/>
+		<Token name="GL_TEXTURE_MATERIAL_FACE_EXT" value="0x8351"/>
+		<Token name="GL_TEXTURE_MATERIAL_PARAMETER_EXT" value="0x8352"/>
+		<Token name="GL_FRAGMENT_DEPTH_EXT" value="0x8452"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glApplyTextureEXT" return="void">
+			<Param type="GLenum" name="mode"/>
+		</Function>
+		<Function name="glTextureLightEXT" return="void">
+			<Param type="GLenum" name="pname"/>
+		</Function>
+		<Function name="glTextureMaterialEXT" return="void">
+			<Param type="GLenum" name="face"/>
+			<Param type="GLenum" name="mode"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_light_texture">
+			<Name name="glApplyTextureEXT"/>
+			<Name name="glTextureLightEXT"/>
+			<Name name="glTextureMaterialEXT"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>

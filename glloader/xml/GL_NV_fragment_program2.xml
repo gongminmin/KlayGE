@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_NV_fragment_program2">
+	<Tokens>
+		<Token name="GL_MAX_PROGRAM_EXEC_INSTRUCTIONS_NV" value="0x88F4"/>
+		<Token name="GL_MAX_PROGRAM_CALL_DEPTH_NV" value="0x88F5"/>
+		<Token name="GL_MAX_PROGRAM_IF_DEPTH_NV" value="0x88F6"/>
+		<Token name="GL_MAX_PROGRAM_LOOP_DEPTH_NV" value="0x88F7"/>
+		<Token name="GL_MAX_PROGRAM_LOOP_COUNT_NV" value="0x88F8"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_NV" string="GL_NV_fragment_program2"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_NV"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,29 @@
+<?xml version='1.0'?>
+
+<GLExtension name="WGL_EXT_multisample">
+	<Tokens>
+		<Token name="WGL_SAMPLE_BUFFERS_EXT" value="0x2041"/>
+		<Token name="WGL_SAMPLES_EXT" value="0x2042"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="wglSampleMaskEXT" return="void">
+			<Param type="GLclampf" name="value"/>
+			<Param type="GLboolean" name="invert"/>
+		</Function>
+		<Function name="wglSamplePatternEXT" return="void">
+			<Param type="GLenum" name="pattern"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="WGL_EXT" string="WGL_EXT_multisample">
+			<Name name="wglSampleMaskEXT"/>
+			<Name name="wglSamplePatternEXT"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="WGL_EXT"/>
+	</InitPath>
+</GLExtension>

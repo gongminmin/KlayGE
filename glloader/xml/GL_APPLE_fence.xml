@@ -1,0 +1,56 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_APPLE_fence">
+	<Tokens>
+		<Token name="GL_DRAW_PIXELS_APPLE" value="0x8A0A"/>
+		<Token name="GL_FENCE_APPLE" value="0x8A0B"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glGenFencesAPPLE" return="void">
+			<Param type="GLsizei" name="n"/>
+			<Param type="GLuint*" name="fences"/>
+		</Function>
+		<Function name="glDeleteFencesAPPLE" return="void">
+			<Param type="GLsizei" name="n"/>
+			<Param type="const GLuint*" name="fences"/>
+		</Function>
+		<Function name="glSetFenceAPPLE" return="void">
+			<Param type="GLuint" name="fence"/>
+		</Function>
+		<Function name="glIsFenceAPPLE" return="GLboolean">
+			<Param type="GLuint" name="fence"/>
+		</Function>
+		<Function name="glTestFenceAPPLE" return="GLboolean">
+			<Param type="GLuint" name="fence"/>
+		</Function>
+		<Function name="glFinishFenceAPPLE" return="void">
+			<Param type="GLuint" name="fence"/>
+		</Function>
+		<Function name="glTestObjectAPPLE" return="GLboolean">
+			<Param type="GLenum" name="object"/>
+			<Param type="GLuint" name="name"/>
+		</Function>
+		<Function name="glFinishObjectAPPLE" return="void">
+			<Param type="GLenum" name="object"/>
+			<Param type="GLint" name="name"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_APPLE" string="GL_APPLE_fence">
+			<Name name="glGenFencesAPPLE"/>
+			<Name name="glDeleteFencesAPPLE"/>
+			<Name name="glSetFenceAPPLE"/>
+			<Name name="glIsFenceAPPLE"/>
+			<Name name="glTestFenceAPPLE"/>
+			<Name name="glFinishFenceAPPLE"/>
+			<Name name="glTestObjectAPPLE"/>
+			<Name name="glFinishObjectAPPLE"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_APPLE"/>
+	</InitPath>
+</GLExtension>

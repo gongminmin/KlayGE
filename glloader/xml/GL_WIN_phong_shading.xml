@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_WIN_phong_shading">
+	<Tokens>
+		<Token name="GL_PHONG_WIN" value="0x80EA"/>
+		<Token name="GL_PHONG_HINT_WIN" value="0x80EB"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_WIN" string="GL_WIN_phong_shading"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_WIN"/>
+	</InitPath>
+</GLExtension>

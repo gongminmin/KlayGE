@@ -1,0 +1,30 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_SGIS_fog_function">
+	<Tokens>
+		<Token name="GL_FOG_FUNC_SGIS" value="0x812A"/>
+		<Token name="GL_FOG_FUNC_POINTS_SGIS" value="0x812B"/>
+		<Token name="GL_MAX_FOG_FUNC_POINTS_SGIS" value="0x812C"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glFogFuncSGIS" return="void">
+			<Param type="GLsizei" name="n"/>
+			<Param type="const GLfloat*" name="points"/>
+		</Function>
+		<Function name="glGetFogFuncSGIS" return="void">
+			<Param type="GLfloat*" name="points"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_SGIS" string="GL_SGIS_fog_function">
+			<Name name="glFogFuncSGIS"/>
+			<Name name="glGetFogFuncSGIS"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_SGIS"/>
+	</InitPath>
+</GLExtension>

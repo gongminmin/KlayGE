@@ -1,0 +1,26 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_SGIX_clipmap">
+	<Tokens>
+		<Token name="GL_LINEAR_CLIPMAP_LINEAR_SGIX" value="0x8170"/>
+		<Token name="GL_TEXTURE_CLIPMAP_CENTER_SGIX" value="0x8171"/>
+		<Token name="GL_TEXTURE_CLIPMAP_FRAME_SGIX" value="0x8172"/>
+		<Token name="GL_TEXTURE_CLIPMAP_OFFSET_SGIX" value="0x8173"/>
+		<Token name="GL_TEXTURE_CLIPMAP_VIRTUAL_DEPTH_SGIX" value="0x8174"/>
+		<Token name="GL_TEXTURE_CLIPMAP_LOD_OFFSET_SGIX" value="0x8175"/>
+		<Token name="GL_TEXTURE_CLIPMAP_DEPTH_SGIX" value="0x8176"/>
+		<Token name="GL_MAX_CLIPMAP_DEPTH_SGIX" value="0x8177"/>
+		<Token name="GL_MAX_CLIPMAP_VIRTUAL_DEPTH_SGIX" value="0x8178"/>
+		<Token name="GL_NEAREST_CLIPMAP_NEAREST_SGIX" value="0x844D"/>
+		<Token name="GL_NEAREST_CLIPMAP_LINEAR_SGIX" value="0x844E"/>
+		<Token name="GL_LINEAR_CLIPMAP_NEAREST_SGIX" value="0x844F"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_SGIX" string="GL_SGIX_clipmap"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_SGIX"/>
+	</InitPath>
+</GLExtension>

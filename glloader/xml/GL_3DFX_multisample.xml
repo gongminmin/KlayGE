@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_3DFX_multisample">
+	<Tokens>
+		<Token name="GL_MULTISAMPLE_3DFX" value="0x86B2"/>
+		<Token name="GL_SAMPLE_BUFFERS_3DFX" value="0x86B3"/>
+		<Token name="GL_SAMPLES_3DFX" value="0x86B4"/>
+		<Token name="GL_MULTISAMPLE_BIT_3DFX" value="0x20000000"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_3DFX" string="GL_3DFX_multisample"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_3DFX"/>
+	</InitPath>
+</GLExtension>
+

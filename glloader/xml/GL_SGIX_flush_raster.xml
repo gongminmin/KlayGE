@@ -1,0 +1,17 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_SGIX_flush_raster">
+	<Functions>
+		<Function name="glFlushRasterSGIX" return="void"/>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_SGIX" string="GL_SGIX_flush_raster">
+			<Name name="glFlushRasterSGIX"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_SGIX"/>
+	</InitPath>
+</GLExtension>

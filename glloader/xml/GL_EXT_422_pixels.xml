@@ -1,0 +1,18 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_422_pixels">
+	<Tokens>
+		<Token name="GL_422_EXT" value="0x80CC"/>
+		<Token name="GL_422_REV_EXT" value="0x80CD"/>
+		<Token name="GL_422_AVERAGE_EXT" value="0x80CE"/>
+		<Token name="GL_422_REV_AVERAGE_EXT" value="0x80CF"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_422_pixels"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>

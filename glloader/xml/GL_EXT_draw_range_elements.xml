@@ -1,0 +1,29 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_draw_range_elements">
+	<Tokens>
+		<Token name="GL_MAX_ELEMENTS_VERTICES_EXT" value="0x80E8"/>
+		<Token name="GL_MAX_ELEMENTS_INDICES_EXT" value="0x80E9"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glDrawRangeElementsEXT" return="void">
+			<Param type="GLenum" name="mode"/>
+			<Param type="GLuint" name="start"/>
+			<Param type="GLuint" name="end"/>
+			<Param type="GLsizei" name="count"/>
+			<Param type="GLenum" name="type"/>
+			<Param type="const GLvoid*" name="indices"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_draw_range_elements">
+			<Name name="glDrawRangeElementsEXT"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,272 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_ARB_shader_objects">
+	<Tokens>
+		<Token name="GL_PROGRAM_OBJECT_ARB" value="0x8B40"/>
+		<Token name="GL_SHADER_OBJECT_ARB" value="0x8B48"/>
+		<Token name="GL_OBJECT_TYPE_ARB" value="0x8B4E"/>
+		<Token name="GL_OBJECT_SUBTYPE_ARB" value="0x8B4F"/>
+		<Token name="GL_FLOAT_VEC2_ARB" value="0x8B50"/>
+		<Token name="GL_FLOAT_VEC3_ARB" value="0x8B51"/>
+		<Token name="GL_FLOAT_VEC4_ARB" value="0x8B52"/>
+		<Token name="GL_INT_VEC2_ARB" value="0x8B53"/>
+		<Token name="GL_INT_VEC3_ARB" value="0x8B54"/>
+		<Token name="GL_INT_VEC4_ARB" value="0x8B55"/>
+		<Token name="GL_BOOL_ARB" value="0x8B56"/>
+		<Token name="GL_BOOL_VEC2_ARB" value="0x8B57"/>
+		<Token name="GL_BOOL_VEC3_ARB" value="0x8B58"/>
+		<Token name="GL_BOOL_VEC4_ARB" value="0x8B59"/>
+		<Token name="GL_FLOAT_MAT2_ARB" value="0x8B5A"/>
+		<Token name="GL_FLOAT_MAT3_ARB" value="0x8B5B"/>
+		<Token name="GL_FLOAT_MAT4_ARB" value="0x8B5C"/>
+		<Token name="GL_OBJECT_DELETE_STATUS_ARB" value="0x8B80"/>
+		<Token name="GL_OBJECT_COMPILE_STATUS_ARB" value="0x8B81"/>
+		<Token name="GL_OBJECT_LINK_STATUS_ARB" value="0x8B82"/>
+		<Token name="GL_OBJECT_VALIDATE_STATUS_ARB" value="0x8B83"/>
+		<Token name="GL_OBJECT_INFO_LOG_LENGTH_ARB" value="0x8B84"/>
+		<Token name="GL_OBJECT_ATTACHED_OBJECTS_ARB" value="0x8B85"/>
+		<Token name="GL_OBJECT_ACTIVE_UNIFORMS_ARB" value="0x8B86"/>
+		<Token name="GL_OBJECT_ACTIVE_UNIFORM_MAX_LENGTH_ARB" value="0x8B87"/>
+		<Token name="GL_OBJECT_SHADER_SOURCE_LENGTH_ARB" value="0x8B88"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glDeleteObjectARB" return="void">
+			<Param type="GLuint" name="obj"/>
+		</Function>
+		<Function name="glGetHandleARB" return="GLuint">
+			<Param type="GLenum" name="pname"/>
+		</Function>
+		<Function name="glDetachObjectARB" return="void">
+			<Param type="GLuint" name="containerObj"/>
+			<Param type="GLuint" name="attachedObj"/>
+		</Function>
+		<Function name="glCreateShaderObjectARB" return="GLuint">
+			<Param type="GLenum" name="shaderType"/>
+		</Function>
+		<Function name="glShaderSourceARB" return="void">
+			<Param type="GLuint" name="shaderObj"/>
+			<Param type="GLsizei" name="count"/>
+			<Param type="const GLchar**" name="string"/>
+			<Param type="const GLint*" name="length"/>
+		</Function>
+		<Function name="glCompileShaderARB" return="void">
+			<Param type="GLuint" name="shaderObj"/>
+		</Function>
+		<Function name="glCreateProgramObjectARB" return="GLuint"/>
+		<Function name="glAttachObjectARB" return="void">
+			<Param type="GLuint" name="containerObj"/>
+			<Param type="GLuint" name="obj"/>
+		</Function>
+		<Function name="glLinkProgramARB" return="void">
+			<Param type="GLuint" name="programObj"/>
+		</Function>
+		<Function name="glUseProgramObjectARB" return="void">
+			<Param type="GLuint" name="programObj"/>
+		</Function>
+		<Function name="glValidateProgramARB" return="void">
+			<Param type="GLuint" name="programObj"/>
+		</Function>
+		<Function name="glUniform1fARB" return="void">
+			<Param type="GLint" name="location"/>
+			<Param type="GLfloat" name="v0"/>
+		</Function>
+		<Function name="glUniform2fARB" return="void">
+			<Param type="GLint" name="location"/>
+			<Param type="GLfloat" name="v0"/>
+			<Param type="GLfloat" name="v1"/>
+		</Function>
+		<Function name="glUniform3fARB" return="void">
+			<Param type="GLint" name="location"/>
+			<Param type="GLfloat" name="v0"/>
+			<Param type="GLfloat" name="v1"/>
+			<Param type="GLfloat" name="v2"/>
+		</Function>
+		<Function name="glUniform4fARB" return="void">
+			<Param type="GLint" name="location"/>
+			<Param type="GLfloat" name="v0"/>
+			<Param type="GLfloat" name="v1"/>
+			<Param type="GLfloat" name="v2"/>
+			<Param type="GLfloat" name="v3"/>
+		</Function>
+		<Function name="glUniform1iARB" return="void">
+			<Param type="GLint" name="location"/>
+			<Param type="GLint" name="v0"/>
+		</Function>
+		<Function name="glUniform2iARB" return="void">
+			<Param type="GLint" name="location"/>
+			<Param type="GLint" name="v0"/>
+			<Param type="GLint" name="v1"/>
+		</Function>
+		<Function name="glUniform3iARB" return="void">
+			<Param type="GLint" name="location"/>
+			<Param type="GLint" name="v0"/>
+			<Param type="GLint" name="v1"/>
+			<Param type="GLint" name="v2"/>
+		</Function>
+		<Function name="glUniform4iARB" return="void">
+			<Param type="GLint" name="location"/>
+			<Param type="GLint" name="v0"/>
+			<Param type="GLint" name="v1"/>
+			<Param type="GLint" name="v2"/>
+			<Param type="GLint" name="v3"/>
+		</Function>
+		<Function name="glUniform1fvARB" return="void">
+			<Param type="GLint" name="location"/>
+			<Param type="GLsizei" name="count"/>
+			<Param type="const GLfloat*" name="value"/>
+		</Function>
+		<Function name="glUniform2fvARB" return="void">
+			<Param type="GLint" name="location"/>
+			<Param type="GLsizei" name="count"/>
+			<Param type="const GLfloat*" name="value"/>
+		</Function>
+		<Function name="glUniform3fvARB" return="void">
+			<Param type="GLint" name="location"/>
+			<Param type="GLsizei" name="count"/>
+			<Param type="const GLfloat*" name="value"/>
+		</Function>
+		<Function name="glUniform4fvARB" return="void">
+			<Param type="GLint" name="location"/>
+			<Param type="GLsizei" name="count"/>
+			<Param type="const GLfloat*" name="value"/>
+		</Function>
+		<Function name="glUniform1ivARB" return="void">
+			<Param type="GLint" name="location"/>
+			<Param type="GLsizei" name="count"/>
+			<Param type="const GLint*" name="value"/>
+		</Function>
+		<Function name="glUniform2ivARB" return="void">
+			<Param type="GLint" name="location"/>
+			<Param type="GLsizei" name="count"/>
+			<Param type="const GLint*" name="value"/>
+		</Function>
+		<Function name="glUniform3ivARB" return="void">
+			<Param type="GLint" name="location"/>
+			<Param type="GLsizei" name="count"/>
+			<Param type="const GLint*" name="value"/>
+		</Function>
+		<Function name="glUniform4ivARB" return="void">
+			<Param type="GLint" name="location"/>
+			<Param type="GLsizei" name="count"/>
+			<Param type="const GLint*" name="value"/>
+		</Function>
+		<Function name="glUniformMatrix2fvARB" return="void">
+			<Param type="GLint" name="location"/>
+			<Param type="GLsizei" name="count"/>
+			<Param type="GLboolean" name="transpose"/>
+			<Param type="const GLfloat*" name="value"/>
+		</Function>
+		<Function name="glUniformMatrix3fvARB" return="void">
+			<Param type="GLint" name="location"/>
+			<Param type="GLsizei" name="count"/>
+			<Param type="GLboolean" name="transpose"/>
+			<Param type="const GLfloat*" name="value"/>
+		</Function>
+		<Function name="glUniformMatrix4fvARB" return="void">
+			<Param type="GLint" name="location"/>
+			<Param type="GLsizei" name="count"/>
+			<Param type="GLboolean" name="transpose"/>
+			<Param type="const GLfloat*" name="value"/>
+		</Function>
+		<Function name="glGetObjectParameterfvARB" return="void">
+			<Param type="GLuint" name="obj"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLfloat*" name="params"/>
+		</Function>
+		<Function name="glGetObjectParameterivARB" return="void">
+			<Param type="GLuint" name="obj"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLint*" name="params"/>
+		</Function>
+		<Function name="glGetInfoLogARB" return="void">
+			<Param type="GLuint" name="obj"/>
+			<Param type="GLsizei" name="maxLength"/>
+			<Param type="GLsizei*" name="length"/>
+			<Param type="GLchar*" name="infoLog"/>
+		</Function>
+		<Function name="glGetAttachedObjectsARB" return="void">
+			<Param type="GLuint" name="containerObj"/>
+			<Param type="GLsizei" name="maxCount"/>
+			<Param type="GLsizei*" name="count"/>
+			<Param type="GLuint*" name="obj"/>
+		</Function>
+		<Function name="glGetUniformLocationARB" return="GLint">
+			<Param type="GLuint" name="programObj"/>
+			<Param type="const GLchar*" name="name"/>
+		</Function>
+		<Function name="glGetActiveUniformARB" return="void">
+			<Param type="GLuint" name="programObj"/>
+			<Param type="GLuint" name="index"/>
+			<Param type="GLsizei" name="maxLength"/>
+			<Param type="GLsizei*" name="length"/>
+			<Param type="GLint*" name="size"/>
+			<Param type="GLenum*" name="type"/>
+			<Param type="GLchar*" name="name"/>
+		</Function>
+		<Function name="glGetUniformfvARB" return="void">
+			<Param type="GLuint" name="programObj"/>
+			<Param type="GLint" name="location"/>
+			<Param type="GLfloat*" name="params"/>
+		</Function>
+		<Function name="glGetUniformivARB" return="void">
+			<Param type="GLuint" name="programObj"/>
+			<Param type="GLint" name="location"/>
+			<Param type="GLint*" name="params"/>
+		</Function>
+		<Function name="glGetShaderSourceARB" return="void">
+			<Param type="GLuint" name="obj"/>
+			<Param type="GLsizei" name="maxLength"/>
+			<Param type="GLsizei*" name="length"/>
+			<Param type="GLchar*" name="source"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_ARB" string="GL_ARB_shader_objects">
+			<Name name="glDeleteObjectARB"/>
+			<Name name="glGetHandleARB"/>
+			<Name name="glDetachObjectARB"/>
+			<Name name="glCreateShaderObjectARB"/>
+			<Name name="glShaderSourceARB"/>
+			<Name name="glCompileShaderARB"/>
+			<Name name="glCreateProgramObjectARB"/>
+			<Name name="glAttachObjectARB"/>
+			<Name name="glLinkProgramARB"/>
+			<Name name="glUseProgramObjectARB"/>
+			<Name name="glValidateProgramARB"/>
+			<Name name="glUniform1fARB"/>
+			<Name name="glUniform2fARB"/>
+			<Name name="glUniform3fARB"/>
+			<Name name="glUniform4fARB"/>
+			<Name name="glUniform1iARB"/>
+			<Name name="glUniform2iARB"/>
+			<Name name="glUniform3iARB"/>
+			<Name name="glUniform4iARB"/>
+			<Name name="glUniform1fvARB"/>
+			<Name name="glUniform2fvARB"/>
+			<Name name="glUniform3fvARB"/>
+			<Name name="glUniform4fvARB"/>
+			<Name name="glUniform1ivARB"/>
+			<Name name="glUniform2ivARB"/>
+			<Name name="glUniform3ivARB"/>
+			<Name name="glUniform4ivARB"/>
+			<Name name="glUniformMatrix2fvARB"/>
+			<Name name="glUniformMatrix3fvARB"/>
+			<Name name="glUniformMatrix4fvARB"/>
+			<Name name="glGetObjectParameterfvARB"/>
+			<Name name="glGetObjectParameterivARB"/>
+			<Name name="glGetInfoLogARB"/>
+			<Name name="glGetAttachedObjectsARB"/>
+			<Name name="glGetUniformLocationARB"/>
+			<Name name="glGetActiveUniformARB"/>
+			<Name name="glGetUniformfvARB"/>
+			<Name name="glGetUniformivARB"/>
+			<Name name="glGetShaderSourceARB"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_ARB"/>
+	</InitPath>
+</GLExtension>

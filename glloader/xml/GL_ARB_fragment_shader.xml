@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_ARB_fragment_shader">
+	<Tokens>
+		<Token name="GL_FRAGMENT_SHADER_ARB" value="0x8B30"/>
+		<Token name="GL_MAX_FRAGMENT_UNIFORM_COMPONENTS_ARB" value="0x8B49"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_ARB" string="GL_ARB_fragment_shader"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_ARB"/>
+	</InitPath>
+</GLExtension>

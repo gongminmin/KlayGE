@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_IBM_rasterpos_clip">
+	<Tokens>
+		<Token name="GL_RASTER_POSITION_UNCLIPPED_IBM" value="0x19262"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_IBM" string="GL_IBM_rasterpos_clip"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_IBM"/>
+	</InitPath>
+</GLExtension>

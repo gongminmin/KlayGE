@@ -1,0 +1,11 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_NV_vertex_program1_1">
+	<Vendors>
+		<Vendor name="GL_NV" string="GL_NV_vertex_program1_1"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_NV"/>
+	</InitPath>
+</GLExtension>

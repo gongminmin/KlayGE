@@ -1,0 +1,46 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_INTEL_parallel_arrays">
+	<Tokens>
+		<Token name="GL_PARALLEL_ARRAYS_INTEL" value="0x83F4"/>
+		<Token name="GL_VERTEX_ARRAY_PARALLEL_POINTERS_INTEL" value="0x83F5"/>
+		<Token name="GL_NORMAL_ARRAY_PARALLEL_POINTERS_INTEL" value="0x83F6"/>
+		<Token name="GL_COLOR_ARRAY_PARALLEL_POINTERS_INTEL" value="0x83F7"/>
+		<Token name="GL_TEXTURE_COORD_ARRAY_PARALLEL_POINTERS_INTEL" value="0x83F8"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glVertexPointervINTEL" return="void">
+			<Param type="GLint" name="size"/>
+			<Param type="GLenum" name="type"/>
+			<Param type="const GLvoid**" name="pointer"/>
+		</Function>
+		<Function name="glNormalPointervINTEL" return="void">
+			<Param type="GLenum" name="type"/>
+			<Param type="const GLvoid**" name="pointer"/>
+		</Function>
+		<Function name="glColorPointervINTEL" return="void">
+			<Param type="GLint" name="size"/>
+			<Param type="GLenum" name="type"/>
+			<Param type="const GLvoid**" name="pointer"/>
+		</Function>
+		<Function name="glTexCoordPointervINTEL" return="void">
+			<Param type="GLint" name="size"/>
+			<Param type="GLenum" name="type"/>
+			<Param type="const GLvoid**" name="pointer"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_INTEL" string="GL_INTEL_parallel_arrays">
+			<Name name="glVertexPointervINTEL"/>
+			<Name name="glNormalPointervINTEL"/>
+			<Name name="glColorPointervINTEL"/>
+			<Name name="glTexCoordPointervINTEL"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_INTEL"/>
+	</InitPath>
+</GLExtension>

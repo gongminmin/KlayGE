@@ -1,0 +1,22 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_INGR_color_clamp">
+	<Tokens>
+		<Token name="GL_RED_MIN_CLAMP_INGR" value="0x8560"/>
+		<Token name="GL_GREEN_MIN_CLAMP_INGR" value="0x8561"/>
+		<Token name="GL_BLUE_MIN_CLAMP_INGR" value="0x8562"/>
+		<Token name="GL_ALPHA_MIN_CLAMP_INGR" value="0x8563"/>
+		<Token name="GL_RED_MAX_CLAMP_INGR" value="0x8564"/>
+		<Token name="GL_GREEN_MAX_CLAMP_INGR" value="0x8565"/>
+		<Token name="GL_BLUE_MAX_CLAMP_INGR" value="0x8566"/>
+		<Token name="GL_ALPHA_MAX_CLAMP_INGR" value="0x8567"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_INGR" string="GL_INGR_color_clamp"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_INGR"/>
+	</InitPath>
+</GLExtension>

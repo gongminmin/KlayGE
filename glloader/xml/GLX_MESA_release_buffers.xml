@@ -1,0 +1,20 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GLX_MESA_release_buffers">
+	<Functions>
+		<Function name="glXReleaseBuffersMESA" return="Bool">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXDrawable" name="drawable"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GLX_MESA" string="GLX_MESA_release_buffers">
+			<Name name="glXReleaseBuffersMESA"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GLX_MESA"/>
+	</InitPath>
+</GLExtension>

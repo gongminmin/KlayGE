@@ -1,0 +1,45 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_ARB_draw_buffers">
+	<Tokens>
+		<Token name="GL_MAX_DRAW_BUFFERS_ARB" value="0x8824"/>
+		<Token name="GL_DRAW_BUFFER0_ARB" value="0x8825"/>
+		<Token name="GL_DRAW_BUFFER1_ARB" value="0x8826"/>
+		<Token name="GL_DRAW_BUFFER2_ARB" value="0x8827"/>
+		<Token name="GL_DRAW_BUFFER3_ARB" value="0x8828"/>
+		<Token name="GL_DRAW_BUFFER4_ARB" value="0x8829"/>
+		<Token name="GL_DRAW_BUFFER5_ARB" value="0x882A"/>
+		<Token name="GL_DRAW_BUFFER6_ARB" value="0x882B"/>
+		<Token name="GL_DRAW_BUFFER7_ARB" value="0x882C"/>
+		<Token name="GL_DRAW_BUFFER8_ARB" value="0x882D"/>
+		<Token name="GL_DRAW_BUFFER9_ARB" value="0x882E"/>
+		<Token name="GL_DRAW_BUFFER10_ARB" value="0x882F"/>
+		<Token name="GL_DRAW_BUFFER11_ARB" value="0x8830"/>
+		<Token name="GL_DRAW_BUFFER12_ARB" value="0x8831"/>
+		<Token name="GL_DRAW_BUFFER13_ARB" value="0x8832"/>
+		<Token name="GL_DRAW_BUFFER14_ARB" value="0x8833"/>
+		<Token name="GL_DRAW_BUFFER15_ARB" value="0x8834"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glDrawBuffersARB" return="void">
+			<Param type="GLsizei" name="n"/>
+			<Param type="const GLenum*" name="bufs"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_ARB" string="GL_ARB_draw_buffers">
+			<Name name="glDrawBuffersARB"/>
+		</Vendor>
+
+		<Vendor name="GL_ATI" string="GL_ATI_draw_buffers">
+			<Name name="glDrawBuffersATI"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_ARB"/>
+		<Init name="GL_ATI"/>
+	</InitPath>
+</GLExtension>

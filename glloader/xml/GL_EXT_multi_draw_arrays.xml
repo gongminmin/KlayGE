@@ -1,0 +1,37 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_multi_draw_arrays">
+	<Tokens>
+		<Token name="GL_POINT_SIZE_MIN_EXT" value="0x8126"/>
+		<Token name="GL_POINT_SIZE_MAX_EXT" value="0x8127"/>
+		<Token name="GL_POINT_FADE_THRESHOLD_SIZE_EXT" value="0x8128"/>
+		<Token name="GL_POINT_DISTANCE_ATTENUATION_EXT" value="0x8129"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glMultiDrawArraysEXT" return="void">
+			<Param type="GLenum" name="mode"/>
+			<Param type="GLint*" name="first"/>
+			<Param type="GLsizei*" name="count"/>
+			<Param type="GLsizei" name="primcount"/>
+		</Function>
+		<Function name="glMultiDrawElementsEXT" return="void">
+			<Param type="GLenum" name="mode"/>
+			<Param type="GLsizei*" name="count"/>
+			<Param type="GLenum" name="type"/>
+			<Param type="const GLvoid**" name="indices"/>
+			<Param type="GLsizei" name="primcount"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_multi_draw_arrays">
+			<Name name="glMultiDrawArraysEXT"/>
+			<Name name="glMultiDrawElementsEXT"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>

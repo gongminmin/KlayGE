@@ -1,0 +1,26 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_index_material">
+	<Tokens>
+		<Token name="GL_INDEX_MATERIAL_EXT" value="0x81B8"/>
+		<Token name="GL_INDEX_MATERIAL_PARAMETER_EXT" value="0x81B9"/>
+		<Token name="GL_INDEX_MATERIAL_FACE_EXT" value="0x81BA"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glIndexMaterialEXT" return="void">
+			<Param type="GLenum" name="face"/>
+			<Param type="GLenum" name="mode"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_index_material">
+			<Name name="glIndexMaterialEXT"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>

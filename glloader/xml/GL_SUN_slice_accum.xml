@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_SUN_slice_accum">
+	<Tokens>
+		<Token name="GL_SLICE_ACCUM_SUN" value="0x85CC"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_SUN" string="GL_SUN_slice_accum"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_SUN"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,185 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GLX_VERSION_1_3">
+	<Typedefs>
+		<Typedef type="XID" synonym="GLXWindow"/>
+		<Typedef type="XID" synonym="GLXPbuffer"/>
+		<Typedef type="XID" synonym="GLXFBConfigID"/>
+		<Typedef type="struct __GLXFBConfigRec*" synonym="GLXFBConfig"/>
+		<Typedef type="struct { int event_type; int draw_type; unsigned long serial; Bool send_event; Display* display; GLXDrawable drawable; unsigned int buffer_mask; unsigned int aux_buffer; int x, y; int width, height; int count; }" synonym="GLXPbufferClobberEvent"/>
+	</Typedefs>
+
+	<Tokens>
+		<Token name="GLX_WINDOW_BIT" value="0x00000001"/>
+		<Token name="GLX_PIXMAP_BIT" value="0x00000002"/>
+		<Token name="GLX_PBUFFER_BIT" value="0x00000004"/>
+		<Token name="GLX_RGBA_BIT" value="0x00000001"/>
+		<Token name="GLX_COLOR_INDEX_BIT" value="0x00000002"/>
+		<Token name="GLX_PBUFFER_CLOBBER_MASK" value="0x08000000"/>
+		<Token name="GLX_FRONT_LEFT_BUFFER_BIT" value="0x00000001"/>
+		<Token name="GLX_FRONT_RIGHT_BUFFER_BIT" value="0x00000002"/>
+		<Token name="GLX_BACK_LEFT_BUFFER_BIT" value="0x00000004"/>
+		<Token name="GLX_BACK_RIGHT_BUFFER_BIT" value="0x00000008"/>
+		<Token name="GLX_AUX_BUFFERS_BIT" value="0x00000010"/>
+		<Token name="GLX_DEPTH_BUFFER_BIT" value="0x00000020"/>
+		<Token name="GLX_STENCIL_BUFFER_BIT" value="0x00000040"/>
+		<Token name="GLX_ACCUM_BUFFER_BIT" value="0x00000080"/>
+		<Token name="GLX_CONFIG_CAVEAT" value="0x20"/>
+		<Token name="GLX_X_VISUAL_TYPE" value="0x22"/>
+		<Token name="GLX_TRANSPARENT_TYPE" value="0x23"/>
+		<Token name="GLX_TRANSPARENT_INDEX_VALUE" value="0x24"/>
+		<Token name="GLX_TRANSPARENT_RED_VALUE" value="0x25"/>
+		<Token name="GLX_TRANSPARENT_GREEN_VALUE" value="0x26"/>
+		<Token name="GLX_TRANSPARENT_BLUE_VALUE" value="0x27"/>
+		<Token name="GLX_TRANSPARENT_ALPHA_VALUE" value="0x28"/>
+		<Token name="GLX_DONT_CARE" value="0xFFFFFFFF"/>
+		<Token name="GLX_NONE" value="0x8000"/>
+		<Token name="GLX_SLOW_CONFIG" value="0x8001"/>
+		<Token name="GLX_TRUE_COLOR" value="0x8002"/>
+		<Token name="GLX_DIRECT_COLOR" value="0x8003"/>
+		<Token name="GLX_PSEUDO_COLOR" value="0x8004"/>
+		<Token name="GLX_STATIC_COLOR" value="0x8005"/>
+		<Token name="GLX_GRAY_SCALE" value="0x8006"/>
+		<Token name="GLX_STATIC_GRAY" value="0x8007"/>
+		<Token name="GLX_TRANSPARENT_RGB" value="0x8008"/>
+		<Token name="GLX_TRANSPARENT_INDEX" value="0x8009"/>
+		<Token name="GLX_VISUAL_ID" value="0x800B"/>
+		<Token name="GLX_SCREEN" value="0x800C"/>
+		<Token name="GLX_NON_CONFORMANT_CONFIG" value="0x800D"/>
+		<Token name="GLX_DRAWABLE_TYPE" value="0x8010"/>
+		<Token name="GLX_RENDER_TYPE" value="0x8011"/>
+		<Token name="GLX_X_RENDERABLE" value="0x8012"/>
+		<Token name="GLX_FBCONFIG_ID" value="0x8013"/>
+		<Token name="GLX_RGBA_TYPE" value="0x8014"/>
+		<Token name="GLX_COLOR_INDEX_TYPE" value="0x8015"/>
+		<Token name="GLX_MAX_PBUFFER_WIDTH" value="0x8016"/>
+		<Token name="GLX_MAX_PBUFFER_HEIGHT" value="0x8017"/>
+		<Token name="GLX_MAX_PBUFFER_PIXELS" value="0x8018"/>
+		<Token name="GLX_PRESERVED_CONTENTS" value="0x801B"/>
+		<Token name="GLX_LARGEST_PBUFFER" value="0x801C"/>
+		<Token name="GLX_WIDTH" value="0x801D"/>
+		<Token name="GLX_HEIGHT" value="0x801E"/>
+		<Token name="GLX_EVENT_MASK" value="0x801F"/>
+		<Token name="GLX_DAMAGED" value="0x8020"/>
+		<Token name="GLX_SAVED" value="0x8021"/>
+		<Token name="GLX_WINDOW" value="0x8022"/>
+		<Token name="GLX_PBUFFER" value="0x8023"/>
+		<Token name="GLX_PBUFFER_HEIGHT" value="0x8040"/>
+		<Token name="GLX_PBUFFER_WIDTH" value="0x8041"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glXChooseFBConfig" return="GLXFBConfig*">
+			<Param type="Display*" name="dpy"/>
+			<Param type="int" name="screen"/>
+			<Param type="const int*" name="attrib_list"/>
+			<Param type="int*" name="nelements"/>
+		</Function>
+		<Function name="glXGetFBConfigs" return="GLXFBConfig*">
+			<Param type="Display*" name="dpy"/>
+			<Param type="int" name="screen"/>
+			<Param type="int*" name="nelements"/>
+		</Function>
+		<Function name="glXGetVisualFromFBConfig" return="XVisualInfo*">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXFBConfig" name="config"/>
+		</Function>
+		<Function name="glXGetFBConfigAttrib" return="int">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXFBConfig" name="config"/>
+			<Param type="int" name="attribute"/>
+			<Param type="int*" name="value"/>
+		</Function>
+		<Function name="glXCreateWindow" return="GLXWindow">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXFBConfig" name="config"/>
+			<Param type="Window" name="win"/>
+			<Param type="const int*" name="attrib_list"/>
+		</Function>
+		<Function name="glXDestroyWindow" return="void">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXWindow" name="win"/>
+		</Function>
+		<Function name="glXCreatePixmap" return="GLXPixmap">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXFBConfig" name="config"/>
+			<Param type="Pixmap" name="pixmap"/>
+			<Param type="const int*" name="attrib_list"/>
+		</Function>
+		<Function name="glXDestroyPixmap" return="void">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXPixmap" name="pixmap"/>
+		</Function>
+		<Function name="glXCreatePbuffer" return="GLXPbuffer">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXFBConfig" name="config"/>
+			<Param type="const int*" name="attrib_list"/>
+		</Function>
+		<Function name="glXDestroyPbuffer" return="void">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXPbuffer" name="pbuf"/>
+		</Function>
+		<Function name="glXQueryDrawable" return="void">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXDrawable" name="draw"/>
+			<Param type="int" name="attribute"/>
+			<Param type="unsigned int*" name="value"/>
+		</Function>
+		<Function name="glXCreateNewContext" return="GLXContext">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXFBConfig" name="config"/>
+			<Param type="int" name="render_type"/>
+			<Param type="GLXContext" name="share_list"/>
+			<Param type="Bool" name="direct"/>
+		</Function>
+		<Function name="glXMakeContextCurrent" return="Bool">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXDrawable" name="draw"/>
+			<Param type="GLXDrawable" name="read"/>
+			<Param type="GLXContext" name="ctx"/>
+		</Function>
+		<Function name="glXGetCurrentReadDrawable" return="GLXDrawable"/>
+		<Function name="glXQueryContext" return="int">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXContext" name="ctx"/>
+			<Param type="int" name="attribute"/>
+			<Param type="int*" name="value"/>
+		</Function>
+		<Function name="glXSelectEvent" return="void">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXDrawable" name="draw"/>
+			<Param type="unsigned long" name="event_mask"/>
+		</Function>
+		<Function name="glXGetSelectedEvent" return="void">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXDrawable" name="draw"/>
+			<Param type="unsigned long*" name="event_mask"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GLX_CORE" string="GLX_VERSION_1_3">
+			<Name name="glXChooseFBConfig"/>
+			<Name name="glXGetFBConfigs"/>
+			<Name name="glXGetVisualFromFBConfig"/>
+			<Name name="glXGetFBConfigAttrib"/>
+			<Name name="glXCreateWindow"/>
+			<Name name="glXDestroyWindow"/>
+			<Name name="glXCreatePixmap"/>
+			<Name name="glXDestroyPixmap"/>
+			<Name name="glXCreatePbuffer"/>
+			<Name name="glXDestroyPbuffer"/>
+			<Name name="glXQueryDrawable"/>
+			<Name name="glXCreateNewContext"/>
+			<Name name="glXMakeContextCurrent"/>
+			<Name name="glXGetCurrentReadDrawable"/>
+			<Name name="glXQueryContext"/>
+			<Name name="glXSelectEvent"/>
+			<Name name="glXGetSelectedEvent"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GLX_CORE"/>
+	</InitPath>
+</GLExtension>

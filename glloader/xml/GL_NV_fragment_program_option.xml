@@ -1,0 +1,11 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_NV_fragment_program_option">
+	<Vendors>
+		<Vendor name="GL_NV" string="GL_NV_fragment_program_option"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_NV"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,24 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_stencil_two_side">
+	<Tokens>
+		<Token name="GL_STENCIL_TEST_TWO_SIDE_EXT" value="0x8910"/>
+		<Token name="GL_ACTIVE_STENCIL_FACE_EXT" value="0x8911"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glActiveStencilFaceEXT" return="void">
+			<Param type="GLenum" name="face"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_stencil_two_side">
+			<Name name="glActiveStencilFaceEXT"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>

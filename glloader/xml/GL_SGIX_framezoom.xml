@@ -1,0 +1,25 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_SGIX_framezoom">
+	<Tokens>
+		<Token name="GL_FRAMEZOOM_SGIX" value="0x818B"/>
+		<Token name="GL_FRAMEZOOM_FACTOR_SGIX" value="0x818C"/>
+		<Token name="GL_MAX_FRAMEZOOM_FACTOR_SGIX" value="0x818D"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glFrameZoomSGIX" return="void">
+			<Param type="GLint" name="factor"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_SGIX" string="GL_SGIX_framezoom">
+			<Name name="glFrameZoomSGIX"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_SGIX"/>
+	</InitPath>
+</GLExtension>

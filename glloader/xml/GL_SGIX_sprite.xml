@@ -1,0 +1,45 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_SGIX_sprite">
+	<Tokens>
+		<Token name="GL_SPRITE_SGIX" value="0x8148"/>
+		<Token name="GL_SPRITE_MODE_SGIX" value="0x8149"/>
+		<Token name="GL_SPRITE_AXIS_SGIX" value="0x814A"/>
+		<Token name="GL_SPRITE_TRANSLATION_SGIX" value="0x814B"/>
+		<Token name="GL_SPRITE_AXIAL_SGIX" value="0x814C"/>
+		<Token name="GL_SPRITE_OBJECT_ALIGNED_SGIX" value="0x814D"/>
+		<Token name="GL_SPRITE_EYE_ALIGNED_SGIX" value="0x814E"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glSpriteParameterfSGIX" return="void">
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLfloat" name="param"/>
+		</Function>
+		<Function name="glSpriteParameterfvSGIX" return="void">
+			<Param type="GLenum" name="pname"/>
+			<Param type="const GLfloat*" name="params"/>
+		</Function>
+		<Function name="glSpriteParameteriSGIX" return="void">
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLint" name="param"/>
+		</Function>
+		<Function name="glSpriteParameterivSGIX" return="void">
+			<Param type="GLenum" name="pname"/>
+			<Param type="const GLint*" name="params"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_SGIX" string="GL_SGIX_sprite">
+			<Name name="glSpriteParameterfSGIX"/>
+			<Name name="glSpriteParameterfvSGIX"/>
+			<Name name="glSpriteParameteriSGIX"/>
+			<Name name="glSpriteParameterivSGIX"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_SGIX"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,22 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GLX_MESA_pixmap_colormap">
+	<Functions>
+		<Function name="glXCreateGLXPixmapMESA" return="GLXPixmap">
+			<Param type="Display*" name="dpy"/>
+			<Param type="XVisualInfo*" name="visual"/>
+			<Param type="Pixmap" name="pixmap"/>
+			<Param type="Colormap" name="cmap"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GLX_MESA" string="GLX_MESA_pixmap_colormap">
+			<Name name="glXCreateGLXPixmapMESA"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GLX_MESA"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,38 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_ARB_transpose_matrix">
+	<Tokens>
+		<Token name="GL_TRANSPOSE_MODELVIEW_MATRIX_ARB" value="0x84E3"/>
+		<Token name="GL_TRANSPOSE_PROJECTION_MATRIX_ARB" value="0x84E4"/>
+		<Token name="GL_TRANSPOSE_TEXTURE_MATRIX_ARB" value="0x84E5"/>
+		<Token name="GL_TRANSPOSE_COLOR_MATRIX_ARB" value="0x84E6"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glLoadTransposeMatrixdARB" return="void">
+			<Param type="const GLdouble*" name="m"/>
+		</Function>
+		<Function name="glLoadTransposeMatrixfARB" return="void">
+			<Param type="const GLfloat*" name="m"/>
+		</Function>
+		<Function name="glMultTransposeMatrixdARB" return="void">
+			<Param type="const GLdouble*" name="m"/>
+		</Function>
+		<Function name="glMultTransposeMatrixfARB" return="void">
+			<Param type="const GLfloat*" name="m"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_ARB" string="GL_ARB_transpose_matrix">
+			<Name name="glLoadTransposeMatrixdARB"/>
+			<Name name="glLoadTransposeMatrixfARB"/>
+			<Name name="glMultTransposeMatrixdARB"/>
+			<Name name="glMultTransposeMatrixfARB"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_ARB"/>
+	</InitPath>
+</GLExtension>

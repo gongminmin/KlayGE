@@ -1,0 +1,359 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_vertex_shader">
+	<Tokens>
+		<Token name="GL_VERTEX_SHADER_EXT" value="0x8780"/>
+		<Token name="GL_VERTEX_SHADER_BINDING_EXT" value="0x8781"/>
+		<Token name="GL_OP_INDEX_EXT" value="0x8782"/>
+		<Token name="GL_OP_NEGATE_EXT" value="0x8783"/>
+		<Token name="GL_OP_DOT3_EXT" value="0x8784"/>
+		<Token name="GL_OP_DOT4_EXT" value="0x8785"/>
+		<Token name="GL_OP_MUL_EXT" value="0x8786"/>
+		<Token name="GL_OP_ADD_EXT" value="0x8787"/>
+		<Token name="GL_OP_MADD_EXT" value="0x8788"/>
+		<Token name="GL_OP_FRAC_EXT" value="0x8789"/>
+		<Token name="GL_OP_MAX_EXT" value="0x878A"/>
+		<Token name="GL_OP_MIN_EXT" value="0x878B"/>
+		<Token name="GL_OP_SET_GE_EXT" value="0x878C"/>
+		<Token name="GL_OP_SET_LT_EXT" value="0x878D"/>
+		<Token name="GL_OP_CLAMP_EXT" value="0x878E"/>
+		<Token name="GL_OP_FLOOR_EXT" value="0x878F"/>
+		<Token name="GL_OP_ROUND_EXT" value="0x8790"/>
+		<Token name="GL_OP_EXP_BASE_2_EXT" value="0x8791"/>
+		<Token name="GL_OP_LOG_BASE_2_EXT" value="0x8792"/>
+		<Token name="GL_OP_POWER_EXT" value="0x8793"/>
+		<Token name="GL_OP_RECIP_EXT" value="0x8794"/>
+		<Token name="GL_OP_RECIP_SQRT_EXT" value="0x8795"/>
+		<Token name="GL_OP_SUB_EXT" value="0x8796"/>
+		<Token name="GL_OP_CROSS_PRODUCT_EXT" value="0x8797"/>
+		<Token name="GL_OP_MULTIPLY_MATRIX_EXT" value="0x8798"/>
+		<Token name="GL_OP_MOV_EXT" value="0x8799"/>
+		<Token name="GL_OUTPUT_VERTEX_EXT" value="0x879A"/>
+		<Token name="GL_OUTPUT_COLOR0_EXT" value="0x879B"/>
+		<Token name="GL_OUTPUT_COLOR1_EXT" value="0x879C"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD0_EXT" value="0x879D"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD1_EXT" value="0x879E"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD2_EXT" value="0x879F"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD3_EXT" value="0x87A0"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD4_EXT" value="0x87A1"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD5_EXT" value="0x87A2"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD6_EXT" value="0x87A3"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD7_EXT" value="0x87A4"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD8_EXT" value="0x87A5"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD9_EXT" value="0x87A6"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD10_EXT" value="0x87A7"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD11_EXT" value="0x87A8"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD12_EXT" value="0x87A9"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD13_EXT" value="0x87AA"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD14_EXT" value="0x87AB"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD15_EXT" value="0x87AC"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD16_EXT" value="0x87AD"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD17_EXT" value="0x87AE"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD18_EXT" value="0x87AF"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD19_EXT" value="0x87B0"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD20_EXT" value="0x87B1"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD21_EXT" value="0x87B2"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD22_EXT" value="0x87B3"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD23_EXT" value="0x87B4"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD24_EXT" value="0x87B5"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD25_EXT" value="0x87B6"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD26_EXT" value="0x87B7"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD27_EXT" value="0x87B8"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD28_EXT" value="0x87B9"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD29_EXT" value="0x87BA"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD30_EXT" value="0x87BB"/>
+		<Token name="GL_OUTPUT_TEXTURE_COORD31_EXT" value="0x87BC"/>
+		<Token name="GL_OUTPUT_FOG_EXT" value="0x87BD"/>
+		<Token name="GL_SCALAR_EXT" value="0x87BE"/>
+		<Token name="GL_VECTOR_EXT" value="0x87BF"/>
+		<Token name="GL_MATRIX_EXT" value="0x87C0"/>
+		<Token name="GL_VARIANT_EXT" value="0x87C1"/>
+		<Token name="GL_INVARIANT_EXT" value="0x87C2"/>
+		<Token name="GL_LOCAL_CONSTANT_EXT" value="0x87C3"/>
+		<Token name="GL_LOCAL_EXT" value="0x87C4"/>
+		<Token name="GL_MAX_VERTEX_SHADER_INSTRUCTIONS_EXT" value="0x87C5"/>
+		<Token name="GL_MAX_VERTEX_SHADER_VARIANTS_EXT" value="0x87C6"/>
+		<Token name="GL_MAX_VERTEX_SHADER_INVARIANTS_EXT" value="0x87C7"/>
+		<Token name="GL_MAX_VERTEX_SHADER_LOCAL_CONSTANTS_EXT" value="0x87C8"/>
+		<Token name="GL_MAX_VERTEX_SHADER_LOCALS_EXT" value="0x87C9"/>
+		<Token name="GL_MAX_OPTIMIZED_VERTEX_SHADER_INSTRUCTIONS_EXT" value="0x87CA"/>
+		<Token name="GL_MAX_OPTIMIZED_VERTEX_SHADER_VARIANTS_EXT" value="0x87CB"/>
+		<Token name="GL_MAX_OPTIMIZED_VERTEX_SHADER_INVARIANTS_EXT" value="0x87CC"/>
+		<Token name="GL_MAX_OPTIMIZED_VERTEX_SHADER_LOCAL_CONSTANTS_EXT" value="0x87CD"/>
+		<Token name="GL_MAX_OPTIMIZED_VERTEX_SHADER_LOCALS_EXT" value="0x87CE"/>
+		<Token name="GL_VERTEX_SHADER_INSTRUCTIONS_EXT" value="0x87CF"/>
+		<Token name="GL_VERTEX_SHADER_VARIANTS_EXT" value="0x87D0"/>
+		<Token name="GL_VERTEX_SHADER_INVARIANTS_EXT" value="0x87D1"/>
+		<Token name="GL_VERTEX_SHADER_LOCAL_CONSTANTS_EXT0x87D2"/>
+		<Token name="GL_VERTEX_SHADER_LOCALS_EXT" value="0x87D3"/>
+		<Token name="GL_VERTEX_SHADER_OPTIMIZED_EXT" value="0x87D4"/>
+		<Token name="GL_X_EXT" value="0x87D5"/>
+		<Token name="GL_Y_EXT" value="0x87D6"/>
+		<Token name="GL_Z_EXT" value="0x87D7"/>
+		<Token name="GL_W_EXT" value="0x87D8"/>
+		<Token name="GL_NEGATIVE_X_EXT" value="0x87D9"/>
+		<Token name="GL_NEGATIVE_Y_EXT" value="0x87DA"/>
+		<Token name="GL_NEGATIVE_Z_EXT" value="0x87DB"/>
+		<Token name="GL_NEGATIVE_W_EXT" value="0x87DC"/>
+		<Token name="GL_ZERO_EXT" value="0x87DD"/>
+		<Token name="GL_ONE_EXT" value="0x87DE"/>
+		<Token name="GL_NEGATIVE_ONE_EXT" value="0x87DF"/>
+		<Token name="GL_NORMALIZED_RANGE_EXT" value="0x87E0"/>
+		<Token name="GL_FULL_RANGE_EXT" value="0x87E1"/>
+		<Token name="GL_CURRENT_VERTEX_EXT" value="0x87E2"/>
+		<Token name="GL_MVP_MATRIX_EXT" value="0x87E3"/>
+		<Token name="GL_VARIANT_VALUE_EXT" value="0x87E4"/>
+		<Token name="GL_VARIANT_DATATYPE_EXT" value="0x87E5"/>
+		<Token name="GL_VARIANT_ARRAY_STRIDE_EXT" value="0x87E6"/>
+		<Token name="GL_VARIANT_ARRAY_TYPE_EXT" value="0x87E7"/>
+		<Token name="GL_VARIANT_ARRAY_EXT" value="0x87E8"/>
+		<Token name="GL_VARIANT_ARRAY_POINTER_EXT" value="0x87E9"/>
+		<Token name="GL_INVARIANT_VALUE_EXT" value="0x87EA"/>
+		<Token name="GL_INVARIANT_DATATYPE_EXT" value="0x87EB"/>
+		<Token name="GL_LOCAL_CONSTANT_VALUE_EXT" value="0x87EC"/>
+		<Token name="GL_LOCAL_CONSTANT_DATATYPE_EXT" value="0x87ED"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glBeginVertexShaderEXT" return="void"/>
+		<Function name="glEndVertexShaderEXT" return="void"/>
+		<Function name="glBindVertexShaderEXT" return="void">
+			<Param type="GLuint" name="id"/>
+		</Function>
+		<Function name="glGenVertexShadersEXT" return="GLuint">
+			<Param type="GLuint" name="range"/>
+		</Function>
+		<Function name="glDeleteVertexShaderEXT" return="void">
+			<Param type="GLuint" name="id"/>
+		</Function>
+		<Function name="glShaderOp1EXT" return="void">
+			<Param type="GLenum" name="op"/>
+			<Param type="GLuint" name="res"/>
+			<Param type="GLuint" name="arg1"/>
+		</Function>
+		<Function name="glShaderOp2EXT" return="void">
+			<Param type="GLenum" name="op"/>
+			<Param type="GLuint" name="res"/>
+			<Param type="GLuint" name="arg1"/>
+			<Param type="GLuint" name="arg2"/>
+		</Function>
+		<Function name="glShaderOp3EXT" return="void">
+			<Param type="GLenum" name="op"/>
+			<Param type="GLuint" name="res"/>
+			<Param type="GLuint" name="arg1"/>
+			<Param type="GLuint" name="arg2"/>
+			<Param type="GLuint" name="arg3"/>
+		</Function>
+		<Function name="glSwizzleEXT" return="void">
+			<Param type="GLuint" name="res"/>
+			<Param type="GLuint" name="in"/>
+			<Param type="GLenum" name="outX"/>
+			<Param type="GLenum" name="outY"/>
+			<Param type="GLenum" name="outZ"/>
+			<Param type="GLenum" name="outW"/>
+		</Function>
+		<Function name="glWriteMaskEXT" return="void">
+			<Param type="GLuint" name="res"/>
+			<Param type="GLuint" name="in"/>
+			<Param type="GLenum" name="outX"/>
+			<Param type="GLenum" name="outY"/>
+			<Param type="GLenum" name="outZ"/>
+			<Param type="GLenum" name="outW"/>
+		</Function>
+		<Function name="glInsertComponentEXT" return="void">
+			<Param type="GLuint" name="res"/>
+			<Param type="GLuint" name="src"/>
+			<Param type="GLuint" name="num"/>
+		</Function>
+		<Function name="glExtractComponentEXT" return="void">
+			<Param type="GLuint" name="res"/>
+			<Param type="GLuint" name="src"/>
+			<Param type="GLuint" name="num"/>
+		</Function>
+		<Function name="glGenSymbolsEXT" return="GLuint">
+			<Param type="GLenum" name="dataType"/>
+			<Param type="GLenum" name="storageType"/>
+			<Param type="GLenum" name="range"/>
+			<Param type="GLuint" name="components"/>
+		</Function>
+		<Function name="glSetInvariantEXT" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLenum" name="type"/>
+			<Param type="GLvoid*" name="addr"/>
+		</Function>
+		<Function name="glSetLocalConstantEXT" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLenum" name="type"/>
+			<Param type="GLvoid*" name="addr"/>
+		</Function>
+		<Function name="glVariantbvEXT" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLbyte*" name="addr"/>
+		</Function>
+		<Function name="glVariantsvEXT" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLshort*" name="addr"/>
+		</Function>
+		<Function name="glVariantivEXT" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLint*" name="addr"/>
+		</Function>
+		<Function name="glVariantfvEXT" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLfloat*" name="addr"/>
+		</Function>
+		<Function name="glVariantdvEXT" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLdouble*" name="addr"/>
+		</Function>
+		<Function name="glVariantubvEXT" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLubyte*" name="addr"/>
+		</Function>
+		<Function name="glVariantusvEXT" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLushort*" name="addr"/>
+		</Function>
+		<Function name="glVariantuivEXT" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLuint*" name="addr"/>
+		</Function>
+		<Function name="glVariantPointerEXT" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLenum" name="type"/>
+			<Param type="GLuint" name="stride"/>
+			<Param type="GLvoid*" name="addr"/>
+		</Function>
+		<Function name="glEnableVariantClientStateEXT" return="void">
+			<Param type="GLuint" name="id"/>
+		</Function>
+		<Function name="glDisableVariantClientStateEXT" return="void">
+			<Param type="GLuint" name="id"/>
+		</Function>
+		<Function name="glBindLightParameterEXT" return="GLuint">
+			<Param type="GLenum" name="light"/>
+			<Param type="GLenum" name="value"/>
+		</Function>
+		<Function name="glBindMaterialParameterEXT" return="GLuint">
+			<Param type="GLenum" name="face"/>
+			<Param type="GLenum" name="value"/>
+		</Function>
+		<Function name="glBindTexGenParameterEXT" return="GLuint">
+			<Param type="GLenum" name="unit"/>
+			<Param type="GLenum" name="coord"/>
+			<Param type="GLenum" name="value"/>
+		</Function>
+		<Function name="glBindTextureUnitParameterEXT" return="GLuint">
+			<Param type="GLenum" name="unit"/>
+			<Param type="GLenum" name="value"/>
+		</Function>
+		<Function name="glBindParameterEXT" return="GLuint">
+			<Param type="GLenum" name="value"/>
+		</Function>
+		<Function name="glIsVariantEnabledEXT" return="GLboolean">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLenum" name="cap"/>
+		</Function>
+		<Function name="glGetVariantBooleanvEXT" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLenum" name="value"/>
+			<Param type="GLboolean*" name="data"/>
+		</Function>
+		<Function name="glGetVariantIntegervEXT" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLenum" name="value"/>
+			<Param type="GLint*" name="data"/>
+		</Function>
+		<Function name="glGetVariantFloatvEXT" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLenum" name="value"/>
+			<Param type="GLfloat*" name="data"/>
+		</Function>
+		<Function name="glGetVariantPointervEXT" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLenum" name="value"/>
+			<Param type="GLvoid**" name="data"/>
+		</Function>
+		<Function name="glGetInvariantBooleanvEXT" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLenum" name="value"/>
+			<Param type="GLboolean*" name="data"/>
+		</Function>
+		<Function name="glGetInvariantIntegervEXT" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLenum" name="value"/>
+			<Param type="GLint*" name="data"/>
+		</Function>
+		<Function name="glGetInvariantFloatvEXT" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLenum" name="value"/>
+			<Param type="GLfloat*" name="data"/>
+		</Function>
+		<Function name="glGetLocalConstantBooleanvEXT" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLenum" name="value"/>
+			<Param type="GLboolean*" name="data"/>
+		</Function>
+		<Function name="glGetLocalConstantIntegervEXT" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLenum" name="value"/>
+			<Param type="GLint*" name="data"/>
+		</Function>
+		<Function name="glGetLocalConstantFloatvEXT" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLenum" name="value"/>
+			<Param type="GLfloat*" name="data"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_vertex_shader">
+			<Name name="glBeginVertexShaderEXT"/>
+			<Name name="glEndVertexShaderEXT"/>
+			<Name name="glBindVertexShaderEXT"/>
+			<Name name="glGenVertexShadersEXT"/>
+			<Name name="glDeleteVertexShaderEXT"/>
+			<Name name="glShaderOp1EXT"/>
+			<Name name="glShaderOp2EXT"/>
+			<Name name="glShaderOp3EXT"/>
+			<Name name="glSwizzleEXT"/>
+			<Name name="glWriteMaskEXT"/>
+			<Name name="glInsertComponentEXT"/>
+			<Name name="glExtractComponentEXT"/>
+			<Name name="glGenSymbolsEXT"/>
+			<Name name="glSetInvariantEXT"/>
+			<Name name="glSetLocalConstantEXT"/>
+			<Name name="glVariantbvEXT"/>
+			<Name name="glVariantsvEXT"/>
+			<Name name="glVariantivEXT"/>
+			<Name name="glVariantfvEXT"/>
+			<Name name="glVariantdvEXT"/>
+			<Name name="glVariantubvEXT"/>
+			<Name name="glVariantusvEXT"/>
+			<Name name="glVariantuivEXT"/>
+			<Name name="glVariantPointerEXT"/>
+			<Name name="glEnableVariantClientStateEXT"/>
+			<Name name="glDisableVariantClientStateEXT"/>
+			<Name name="glBindLightParameterEXT"/>
+			<Name name="glBindMaterialParameterEXT"/>
+			<Name name="glBindTexGenParameterEXT"/>
+			<Name name="glBindTextureUnitParameterEXT"/>
+			<Name name="glBindParameterEXT"/>
+			<Name name="glIsVariantEnabledEXT"/>
+			<Name name="glGetVariantBooleanvEXT"/>
+			<Name name="glGetVariantIntegervEXT"/>
+			<Name name="glGetVariantFloatvEXT"/>
+			<Name name="glGetVariantPointervEXT"/>
+			<Name name="glGetInvariantBooleanvEXT"/>
+			<Name name="glGetInvariantIntegervEXT"/>
+			<Name name="glGetInvariantFloatvEXT"/>
+			<Name name="glGetLocalConstantBooleanvEXT"/>
+			<Name name="glGetLocalConstantIntegervEXT"/>
+			<Name name="glGetLocalConstantFloatvEXT"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>

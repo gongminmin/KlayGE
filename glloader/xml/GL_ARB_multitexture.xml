@@ -1,0 +1,245 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_ARB_multitexture">
+	<Tokens>
+		<Token name="GL_TEXTURE0_ARB" value="0x84C0"/>
+		<Token name="GL_TEXTURE1_ARB" value="0x84C1"/>
+		<Token name="GL_TEXTURE2_ARB" value="0x84C2"/>
+		<Token name="GL_TEXTURE3_ARB" value="0x84C3"/>
+		<Token name="GL_TEXTURE4_ARB" value="0x84C4"/>
+		<Token name="GL_TEXTURE5_ARB" value="0x84C5"/>
+		<Token name="GL_TEXTURE6_ARB" value="0x84C6"/>
+		<Token name="GL_TEXTURE7_ARB" value="0x84C7"/>
+		<Token name="GL_TEXTURE8_ARB" value="0x84C8"/>
+		<Token name="GL_TEXTURE9_ARB" value="0x84C9"/>
+		<Token name="GL_TEXTURE10_ARB" value="0x84CA"/>
+		<Token name="GL_TEXTURE11_ARB" value="0x84CB"/>
+		<Token name="GL_TEXTURE12_ARB" value="0x84CC"/>
+		<Token name="GL_TEXTURE13_ARB" value="0x84CD"/>
+		<Token name="GL_TEXTURE14_ARB" value="0x84CE"/>
+		<Token name="GL_TEXTURE15_ARB" value="0x84CF"/>
+		<Token name="GL_TEXTURE16_ARB" value="0x84D0"/>
+		<Token name="GL_TEXTURE17_ARB" value="0x84D1"/>
+		<Token name="GL_TEXTURE18_ARB" value="0x84D2"/>
+		<Token name="GL_TEXTURE19_ARB" value="0x84D3"/>
+		<Token name="GL_TEXTURE20_ARB" value="0x84D4"/>
+		<Token name="GL_TEXTURE21_ARB" value="0x84D5"/>
+		<Token name="GL_TEXTURE22_ARB" value="0x84D6"/>
+		<Token name="GL_TEXTURE23_ARB" value="0x84D7"/>
+		<Token name="GL_TEXTURE24_ARB" value="0x84D8"/>
+		<Token name="GL_TEXTURE25_ARB" value="0x84D9"/>
+		<Token name="GL_TEXTURE26_ARB" value="0x84DA"/>
+		<Token name="GL_TEXTURE27_ARB" value="0x84DB"/>
+		<Token name="GL_TEXTURE28_ARB" value="0x84DC"/>
+		<Token name="GL_TEXTURE29_ARB" value="0x84DD"/>
+		<Token name="GL_TEXTURE30_ARB" value="0x84DE"/>
+		<Token name="GL_TEXTURE31_ARB" value="0x84DF"/>
+		<Token name="GL_ACTIVE_TEXTURE_ARB" value="0x84E0"/>
+		<Token name="GL_CLIENT_ACTIVE_TEXTURE_ARB" value="0x84E1"/>
+		<Token name="GL_MAX_TEXTURE_UNITS_ARB" value="0x84E2"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glActiveTextureARB" return="void">
+			<Param type="GLenum" name="texture"/>
+		</Function>
+		<Function name="glClientActiveTextureARB" return="void">
+			<Param type="GLenum" name="texture"/>
+		</Function>
+		<Function name="glMultiTexCoord1dARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLdouble" name="s"/>
+		</Function>
+		<Function name="glMultiTexCoord1dvARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLdouble*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord1fARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLfloat" name="s"/>
+		</Function>
+		<Function name="glMultiTexCoord1fvARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLfloat*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord1iARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLint" name="s"/>
+		</Function>
+		<Function name="glMultiTexCoord1ivARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLint*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord1sARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLshort" name="s"/>
+		</Function>
+		<Function name="glMultiTexCoord1svARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLshort*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord2dARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLdouble" name="s"/>
+			<Param type="GLdouble" name="t"/>
+		</Function>
+		<Function name="glMultiTexCoord2dvARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLdouble*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord2fARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLfloat" name="s"/>
+			<Param type="GLfloat" name="t"/>
+		</Function>
+		<Function name="glMultiTexCoord2fvARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLfloat*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord2iARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLint" name="s"/>
+			<Param type="GLint" name="t"/>
+		</Function>
+		<Function name="glMultiTexCoord2ivARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLint*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord2sARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLshort" name="s"/>
+			<Param type="GLshort" name="t"/>
+		</Function>
+		<Function name="glMultiTexCoord2svARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLshort*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord3dARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLdouble" name="s"/>
+			<Param type="GLdouble" name="t"/>
+			<Param type="GLdouble" name="r"/>
+		</Function>
+		<Function name="glMultiTexCoord3dvARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLdouble*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord3fARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLfloat" name="s"/>
+			<Param type="GLfloat" name="t"/>
+			<Param type="GLfloat" name="r"/>
+		</Function>
+		<Function name="glMultiTexCoord3fvARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLfloat*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord3iARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLint" name="s"/>
+			<Param type="GLint" name="t"/>
+			<Param type="GLint" name="r"/>
+		</Function>
+		<Function name="glMultiTexCoord3ivARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLint*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord3sARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLshort" name="s"/>
+			<Param type="GLshort" name="t"/>
+			<Param type="GLshort" name="r"/>
+		</Function>
+		<Function name="glMultiTexCoord3svARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLshort*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord4dARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLdouble" name="s"/>
+			<Param type="GLdouble" name="t"/>
+			<Param type="GLdouble" name="r"/>
+			<Param type="GLdouble" name="q"/>
+		</Function>
+		<Function name="glMultiTexCoord4dvARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLdouble*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord4fARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLfloat" name="s"/>
+			<Param type="GLfloat" name="t"/>
+			<Param type="GLfloat" name="r"/>
+			<Param type="GLfloat" name="q"/>
+		</Function>
+		<Function name="glMultiTexCoord4fvARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLfloat*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord4iARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLint" name="s"/>
+			<Param type="GLint" name="t"/>
+			<Param type="GLint" name="r"/>
+			<Param type="GLint" name="q"/>
+		</Function>
+		<Function name="glMultiTexCoord4ivARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLint*" name="v"/>
+		</Function>
+		<Function name="glMultiTexCoord4sARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLshort" name="s"/>
+			<Param type="GLshort" name="t"/>
+			<Param type="GLshort" name="r"/>
+			<Param type="GLshort" name="q"/>
+		</Function>
+		<Function name="glMultiTexCoord4svARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="const GLshort*" name="v"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_ARB" string="GL_ARB_multitexture">
+			<Name name="glActiveTextureARB"/>
+			<Name name="glClientActiveTextureARB"/>
+			<Name name="glMultiTexCoord1dARB"/>
+			<Name name="glMultiTexCoord1dvARB"/>
+			<Name name="glMultiTexCoord1fARB"/>
+			<Name name="glMultiTexCoord1fvARB"/>
+			<Name name="glMultiTexCoord1iARB"/>
+			<Name name="glMultiTexCoord1ivARB"/>
+			<Name name="glMultiTexCoord1sARB"/>
+			<Name name="glMultiTexCoord1svARB"/>
+			<Name name="glMultiTexCoord2dARB"/>
+			<Name name="glMultiTexCoord2dvARB"/>
+			<Name name="glMultiTexCoord2fARB"/>
+			<Name name="glMultiTexCoord2fvARB"/>
+			<Name name="glMultiTexCoord2iARB"/>
+			<Name name="glMultiTexCoord2ivARB"/>
+			<Name name="glMultiTexCoord2sARB"/>
+			<Name name="glMultiTexCoord2svARB"/>
+			<Name name="glMultiTexCoord3dARB"/>
+			<Name name="glMultiTexCoord3dvARB"/>
+			<Name name="glMultiTexCoord3fARB"/>
+			<Name name="glMultiTexCoord3fvARB"/>
+			<Name name="glMultiTexCoord3iARB"/>
+			<Name name="glMultiTexCoord3ivARB"/>
+			<Name name="glMultiTexCoord3sARB"/>
+			<Name name="glMultiTexCoord3svARB"/>
+			<Name name="glMultiTexCoord4dARB"/>
+			<Name name="glMultiTexCoord4dvARB"/>
+			<Name name="glMultiTexCoord4fARB"/>
+			<Name name="glMultiTexCoord4fvARB"/>
+			<Name name="glMultiTexCoord4iARB"/>
+			<Name name="glMultiTexCoord4ivARB"/>
+			<Name name="glMultiTexCoord4sARB"/>
+			<Name name="glMultiTexCoord4svARB"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_ARB"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,135 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_MESA_window_pos">
+	<Functions>
+		<Function name="glWindowPos2dMESA" return="void">
+			<Param type="GLdouble" name="x"/>
+			<Param type="GLdouble" name="y"/>
+		</Function>
+		<Function name="glWindowPos2dvMESA" return="void">
+			<Param type="const GLdouble*" name="p"/>
+		</Function>
+		<Function name="glWindowPos2fMESA" return="void">
+			<Param type="GLfloat" name="x"/>
+			<Param type="GLfloat" name="y"/>
+		</Function>
+		<Function name="glWindowPos2fvMESA" return="void">
+			<Param type="const GLfloat*" name="p"/>
+		</Function>
+		<Function name="glWindowPos2iMESA">
+			<Param type="GLint" name="x"/>
+			<Param type="GLint" name="y"/>
+		</Function>
+		<Function name="glWindowPos2ivMESA" return="void">
+			<Param type="const GLint*" name="p"/>
+		</Function>
+		<Function name="glWindowPos2sMESA">
+			<Param type="GLshort" name="x"/>
+			<Param type="GLshort" name="y"/>
+		</Function>
+		<Function name="glWindowPos2svMESA" return="void">
+			<Param type="const GLshort*" name="p"/>
+		</Function>
+		<Function name="glWindowPos3dMESA">
+			<Param type="GLdouble" name="x"/>
+			<Param type="GLdouble" name="y"/>
+			<Param type="GLdouble" name="z"/>
+		</Function>
+		<Function name="glWindowPos3dvMESA" return="void">
+			<Param type="const GLdouble*" name="p"/>
+		</Function>
+		<Function name="glWindowPos3fMESA">
+			<Param type="GLfloat" name="x"/>
+			<Param type="GLfloat" name="y"/>
+			<Param type="GLfloat" name="z"/>
+		</Function>
+		<Function name="glWindowPos3fvMESA" return="void">
+			<Param type="const GLfloat*" name="p"/>
+		</Function>
+		<Function name="glWindowPos3iMESA">
+			<Param type="GLint" name="x"/>
+			<Param type="GLint" name="y"/>
+			<Param type="GLint" name="z"/>
+		</Function>
+		<Function name="glWindowPos3ivMESA" return="void">
+			<Param type="const GLint*" name="p"/>
+		</Function>
+		<Function name="glWindowPos3sMESA" return="void">
+			<Param type="GLshort" name="x"/>
+			<Param type="GLshort" name="y"/>
+			<Param type="GLshort" name="z"/>
+		</Function>
+		<Function name="glWindowPos3svMESA" return="void">
+			<Param type="const GLshort*" name="p"/>
+		</Function>
+		<Function name="glWindowPos4dMESA" return="void">
+			<Param type="GLdouble" name="x"/>
+			<Param type="GLdouble" name="y"/>
+			<Param type="GLdouble" name="z"/>
+			<Param type="GLdouble" name="w"/>
+		</Function>
+		<Function name="glWindowPos4dvMESA" return="void">
+			<Param type="const GLdouble*" name="p"/>
+		</Function>
+		<Function name="glWindowPos4fMESA" return="void">
+			<Param type="GLfloat" name="x"/>
+			<Param type="GLfloat" name="y"/>
+			<Param type="GLfloat" name="z"/>
+			<Param type="GLfloat" name="w"/>
+		</Function>
+		<Function name="glWindowPos4fvMESA" return="void">
+			<Param type="const GLfloat*" name="p"/>
+		</Function>
+		<Function name="glWindowPos4iMESA" return="void">
+			<Param type="GLint" name="x"/>
+			<Param type="GLint" name="y"/>
+			<Param type="GLint" name="z"/>
+			<Param type="GLint" name="w"/>
+		</Function>
+		<Function name="glWindowPos4ivMESA" return="void">
+			<Param type="const GLint*" name="p"/>
+		</Function>
+		<Function name="glWindowPos4sMESA" return="void">
+			<Param type="GLshort" name="x"/>
+			<Param type="GLshort" name="y"/>
+			<Param type="GLshort" name="z"/>
+			<Param type="GLshort" name="w"/>
+		</Function>
+		<Function name="glWindowPos4svMESA" return="void">
+			<Param type="const GLshort*" name="p"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_MESA" string="GL_MESA_window_pos">
+			<Name name="glWindowPos2d"/>
+			<Name name="glWindowPos2dv"/>
+			<Name name="glWindowPos2f"/>
+			<Name name="glWindowPos2fv"/>
+			<Name name="glWindowPos2i"/>
+			<Name name="glWindowPos2iv"/>
+			<Name name="glWindowPos2s"/>
+			<Name name="glWindowPos2sv"/>
+			<Name name="glWindowPos3d"/>
+			<Name name="glWindowPos3dv"/>
+			<Name name="glWindowPos3f"/>
+			<Name name="glWindowPos3fv"/>
+			<Name name="glWindowPos3i"/>
+			<Name name="glWindowPos3iv"/>
+			<Name name="glWindowPos3s"/>
+			<Name name="glWindowPos3sv"/>
+			<Name name="glWindowPos4d"/>
+			<Name name="glWindowPos4dv"/>
+			<Name name="glWindowPos4f"/>
+			<Name name="glWindowPos4fv"/>
+			<Name name="glWindowPos4i"/>
+			<Name name="glWindowPos4iv"/>
+			<Name name="glWindowPos4s"/>
+			<Name name="glWindowPos4sv"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_MESA"/>
+	</InitPath>
+</GLExtension>

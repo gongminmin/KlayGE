@@ -1,0 +1,89 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_ARB_imaging">
+	<Tokens>
+		<Token name="GL_CONSTANT_COLOR" value="0x8001"/>
+		<Token name="GL_ONE_MINUS_CONSTANT_COLOR" value="0x8002"/>
+		<Token name="GL_CONSTANT_ALPHA" value="0x8003"/>
+		<Token name="GL_ONE_MINUS_CONSTANT_ALPHA" value="0x8004"/>
+		<Token name="GL_BLEND_COLOR" value="0x8005"/>
+		<Token name="GL_FUNC_ADD" value="0x8006"/>
+		<Token name="GL_MIN" value="0x8007"/>
+		<Token name="GL_MAX" value="0x8008"/>
+		<Token name="GL_BLEND_EQUATION" value="0x8009"/>
+		<Token name="GL_FUNC_SUBTRACT" value="0x800A"/>
+		<Token name="GL_FUNC_REVERSE_SUBTRACT" value="0x800B"/>
+		<Token name="GL_CONVOLUTION_1D" value="0x8010"/>
+		<Token name="GL_CONVOLUTION_2D" value="0x8011"/>
+		<Token name="GL_SEPARABLE_2D" value="0x8012"/>
+		<Token name="GL_CONVOLUTION_BORDER_MODE" value="0x8013"/>
+		<Token name="GL_CONVOLUTION_FILTER_SCALE" value="0x8014"/>
+		<Token name="GL_CONVOLUTION_FILTER_BIAS" value="0x8015"/>
+		<Token name="GL_REDUCE" value="0x8016"/>
+		<Token name="GL_CONVOLUTION_FORMAT" value="0x8017"/>
+		<Token name="GL_CONVOLUTION_WIDTH" value="0x8018"/>
+		<Token name="GL_CONVOLUTION_HEIGHT" value="0x8019"/>
+		<Token name="GL_MAX_CONVOLUTION_WIDTH" value="0x801A"/>
+		<Token name="GL_MAX_CONVOLUTION_HEIGHT" value="0x801B"/>
+		<Token name="GL_POST_CONVOLUTION_RED_SCALE" value="0x801C"/>
+		<Token name="GL_POST_CONVOLUTION_GREEN_SCALE" value="0x801D"/>
+		<Token name="GL_POST_CONVOLUTION_BLUE_SCALE" value="0x801E"/>
+		<Token name="GL_POST_CONVOLUTION_ALPHA_SCALE" value="0x801F"/>
+		<Token name="GL_POST_CONVOLUTION_RED_BIAS" value="0x8020"/>
+		<Token name="GL_POST_CONVOLUTION_GREEN_BIAS" value="0x8021"/>
+		<Token name="GL_POST_CONVOLUTION_BLUE_BIAS" value="0x8022"/>
+		<Token name="GL_POST_CONVOLUTION_ALPHA_BIAS" value="0x8023"/>
+		<Token name="GL_HISTOGRAM" value="0x8024"/>
+		<Token name="GL_PROXY_HISTOGRAM" value="0x8025"/>
+		<Token name="GL_HISTOGRAM_WIDTH" value="0x8026"/>
+		<Token name="GL_HISTOGRAM_FORMAT" value="0x8027"/>
+		<Token name="GL_HISTOGRAM_RED_SIZE" value="0x8028"/>
+		<Token name="GL_HISTOGRAM_GREEN_SIZE" value="0x8029"/>
+		<Token name="GL_HISTOGRAM_BLUE_SIZE" value="0x802A"/>
+		<Token name="GL_HISTOGRAM_ALPHA_SIZE" value="0x802B"/>
+		<Token name="GL_HISTOGRAM_LUMINANCE_SIZE" value="0x802C"/>
+		<Token name="GL_HISTOGRAM_SINK" value="0x802D"/>
+		<Token name="GL_MINMAX" value="0x802E"/>
+		<Token name="GL_MINMAX_FORMAT" value="0x802F"/>
+		<Token name="GL_MINMAX_SINK" value="0x8030"/>
+		<Token name="GL_TABLE_TOO_LARGE" value="0x8031"/>
+		<Token name="GL_COLOR_MATRIX" value="0x80B1"/>
+		<Token name="GL_COLOR_MATRIX_STACK_DEPTH" value="0x80B2"/>
+		<Token name="GL_MAX_COLOR_MATRIX_STACK_DEPTH" value="0x80B3"/>
+		<Token name="GL_POST_COLOR_MATRIX_RED_SCALE" value="0x80B4"/>
+		<Token name="GL_POST_COLOR_MATRIX_GREEN_SCALE" value="0x80B5"/>
+		<Token name="GL_POST_COLOR_MATRIX_BLUE_SCALE" value="0x80B6"/>
+		<Token name="GL_POST_COLOR_MATRIX_ALPHA_SCALE" value="0x80B7"/>
+		<Token name="GL_POST_COLOR_MATRIX_RED_BIAS" value="0x80B8"/>
+		<Token name="GL_POST_COLOR_MATRIX_GREEN_BIAS" value="0x80B9"/>
+		<Token name="GL_POST_COLOR_MATRIX_BLUE_BIAS" value="0x80BA"/>
+		<Token name="GL_POST_COLOR_MATRIX_ALPHA_BIAS" value="0x80BB"/>
+		<Token name="GL_COLOR_TABLE" value="0x80D0"/>
+		<Token name="GL_POST_CONVOLUTION_COLOR_TABLE" value="0x80D1"/>
+		<Token name="GL_POST_COLOR_MATRIX_COLOR_TABLE" value="0x80D2"/>
+		<Token name="GL_PROXY_COLOR_TABLE" value="0x80D3"/>
+		<Token name="GL_PROXY_POST_CONVOLUTION_COLOR_TABLE" value="0x80D4"/>
+		<Token name="GL_PROXY_POST_COLOR_MATRIX_COLOR_TABLE" value="0x80D5"/>
+		<Token name="GL_COLOR_TABLE_SCALE" value="0x80D6"/>
+		<Token name="GL_COLOR_TABLE_BIAS" value="0x80D7"/>
+		<Token name="GL_COLOR_TABLE_FORMAT" value="0x80D8"/>
+		<Token name="GL_COLOR_TABLE_WIDTH" value="0x80D9"/>
+		<Token name="GL_COLOR_TABLE_RED_SIZE" value="0x80DA"/>
+		<Token name="GL_COLOR_TABLE_GREEN_SIZE" value="0x80DB"/>
+		<Token name="GL_COLOR_TABLE_BLUE_SIZE" value="0x80DC"/>
+		<Token name="GL_COLOR_TABLE_ALPHA_SIZE" value="0x80DD"/>
+		<Token name="GL_COLOR_TABLE_LUMINANCE_SIZE" value="0x80DE"/>
+		<Token name="GL_COLOR_TABLE_INTENSITY_SIZE" value="0x80DF"/>
+		<Token name="GL_CONSTANT_BORDER" value="0x8151"/>
+		<Token name="GL_REPLICATE_BORDER" value="0x8153"/>
+		<Token name="GL_CONVOLUTION_BORDER_COLOR" value="0x8154"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_ARB" string="GL_ARB_imaging"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_ARB"/>
+	</InitPath>
+</GLExtension>

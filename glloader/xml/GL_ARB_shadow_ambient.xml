@@ -1,0 +1,17 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_ARB_shadow_ambient">
+	<Tokens>
+		<Token name="GL_TEXTURE_COMPARE_FAIL_VALUE_ARB" value="0x80BF"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_ARB" string="GL_ARB_shadow_ambient"/>
+		<Vendor name="GL_SGIX" string="GL_SGIX_shadow_ambient"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_ARB"/>
+		<Init name="GL_SGIX"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,64 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_ARB_occlusion_query">
+	<Tokens>
+		<Token name="GL_SAMPLES_PASSED_ARB" value="0x8914"/>
+		<Token name="GL_QUERY_COUNTER_BITS_ARB" value="0x8864"/>
+		<Token name="GL_CURRENT_QUERY_ARB" value="0x8865"/>
+		<Token name="GL_QUERY_RESULT_ARB" value="0x8866"/>
+		<Token name="GL_QUERY_RESULT_AVAILABLE_ARB" value="0x8867"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glBeginQueryARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLuint" name="id"/>
+		</Function>
+		<Function name="glDeleteQueriesARB" return="void">
+			<Param type="GLsizei" name="n"/>
+			<Param type="const GLuint*" name="ids"/>
+		</Function>
+		<Function name="glEndQueryARB" return="void">
+			<Param type="GLenum" name="target"/>
+		</Function>
+		<Function name="glGenQueriesARB" return="void">
+			<Param type="GLsizei" name="n"/>
+			<Param type="GLuint*" name="ids"/>
+		</Function>
+		<Function name="glGetQueryObjectivARB" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLint*" name="params"/>
+		</Function>
+		<Function name="glGetQueryObjectuivARB" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLuint*" name="params"/>
+		</Function>
+		<Function name="glGetQueryivARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLint*" name="param"/>
+		</Function>
+		<Function name="glIsQueryARB" return="GLboolean">
+			<Param type="GLuint" name="id"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_ARB" string="GL_ARB_occlusion_query">
+			<Name name="glBeginQueryARB"/>
+			<Name name="glDeleteQueriesARB"/>
+			<Name name="glEndQueryARB"/>
+			<Name name="glGenQueriesARB"/>
+			<Name name="glGetQueryObjectivARB"/>
+			<Name name="glGetQueryObjectuivARB"/>
+			<Name name="glGetQueryivARB"/>
+			<Name name="glIsQueryARB"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_ARB"/>
+	</InitPath>
+</GLExtension>

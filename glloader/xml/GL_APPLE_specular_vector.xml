@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_APPLE_specular_vector">
+	<Tokens>
+		<Token name="GL_LIGHT_MODEL_SPECULAR_VECTOR_APPLE" value="0x85B0"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_APPLE" string="GL_APPLE_specular_vector"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_APPLE"/>
+	</InitPath>
+</GLExtension>
+

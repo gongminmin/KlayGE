@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_APPLE_client_storage">
+	<Tokens>
+		<Token name="GL_UNPACK_CLIENT_STORAGE_APPLE" value="0x85B2"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_APPLE" string="GL_APPLE_client_storage"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_APPLE"/>
+	</InitPath>
+</GLExtension>
+

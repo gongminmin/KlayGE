@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_SGIX_blend_alpha_minmax">
+	<Tokens>
+		<Token name="GL_ALPHA_MIN_SGIX" value="0x8320"/>
+		<Token name="GL_ALPHA_MAX_SGIX" value="0x8321"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_SGIX" string="GL_SGIX_blend_alpha_minmax"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_SGIX"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,37 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_subtexture">
+	<Functions>
+		<Function name="glTexSubImage1DEXT" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLint" name="level"/>
+			<Param type="GLint" name="xoffset"/>
+			<Param type="GLsizei" name="width"/>
+			<Param type="GLenum" name="format"/>
+			<Param type="GLenum" name="type"/>
+			<Param type="const GLvoid*" name="pixels"/>
+		</Function>
+		<Function name="glTexSubImage2DEXT" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLint" name="level"/>
+			<Param type="GLint" name="xoffset"/>
+			<Param type="GLint" name="yoffset"/>
+			<Param type="GLsizei" name="width"/>
+			<Param type="GLsizei" name="height"/>
+			<Param type="GLenum" name="format"/>
+			<Param type="GLenum" name="type"/>
+			<Param type="const GLvoid*" name="pixels"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_subtexture">
+			<Name name="glTexSubImage1DEXT"/>
+			<Name name="glTexSubImage2DEXT"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>

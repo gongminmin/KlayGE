@@ -1,0 +1,18 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_APPLE_ycbcr_422">
+	<Tokens>
+		<Token name="GL_YCBCR_422_APPLE" value="0x85B9"/>
+		<Token name="GL_UNSIGNED_SHORT_8_8_APPLE" value="0x85BA"/>
+		<Token name="GL_UNSIGNED_SHORT_8_8_REV_APPLE" value="0x85BB"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_APPLE" string="GL_APPLE_ycbcr_422"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_APPLE"/>
+	</InitPath>
+</GLExtension>
+

@@ -1,0 +1,52 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_SGIS_pixel_texture">
+	<Tokens>
+		<Token name="GL_PIXEL_TEXTURE_SGIS" value="0x8353"/>
+		<Token name="GL_PIXEL_FRAGMENT_RGB_SOURCE_SGIS" value="0x8354"/>
+		<Token name="GL_PIXEL_FRAGMENT_ALPHA_SOURCE_SGIS" value="0x8355"/>
+		<Token name="GL_PIXEL_GROUP_COLOR_SGIS" value="0x8356"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glPixelTexGenParameteriSGIS" return="void">
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLint" name="param"/>
+		</Function>
+		<Function name="glPixelTexGenParameterivSGIS" return="void">
+			<Param type="GLenum" name="pname"/>
+			<Param type="const GLint*" name="params"/>
+		</Function>
+		<Function name="glPixelTexGenParameterfSGIS" return="void">
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLfloat" name="param"/>
+		</Function>
+		<Function name="glPixelTexGenParameterfvSGIS" return="void">
+			<Param type="GLenum" name="pname"/>
+			<Param type="const GLfloat*" name="params"/>
+		</Function>
+		<Function name="glGetPixelTexGenParameterivSGIS" return="void">
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLint*" name="params"/>
+		</Function>
+		<Function name="glGetPixelTexGenParameterfvSGIS" return="void">
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLfloat*" name="params"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_SGIS" string="GL_SGIS_pixel_texture">
+			<Name name="glPixelTexGenParameteriSGIS"/>
+			<Name name="glPixelTexGenParameterivSGIS"/>
+			<Name name="glPixelTexGenParameterfSGIS"/>
+			<Name name="glPixelTexGenParameterfvSGIS"/>
+			<Name name="glGetPixelTexGenParameterivSGIS"/>
+			<Name name="glGetPixelTexGenParameterfvSGIS"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_SGIS"/>
+	</InitPath>
+</GLExtension>

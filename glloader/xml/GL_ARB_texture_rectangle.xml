@@ -1,0 +1,22 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_ARB_texture_rectangle">
+	<Tokens>
+		<Token name="GL_TEXTURE_RECTANGLE_ARB" value="0x84F5"/>
+		<Token name="GL_TEXTURE_BINDING_RECTANGLE_ARB" value="0x84F6"/>
+		<Token name="GL_PROXY_TEXTURE_RECTANGLE_ARB" value="0x84F7"/>
+		<Token name="GL_MAX_RECTANGLE_TEXTURE_SIZE_ARB" value="0x84F8"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_ARB" string="GL_ARB_texture_rectangle"/>
+		<Vendor name="GL_EXT" string="GL_EXT_texture_rectangle"/>
+		<Vendor name="GL_NV" string="GL_NV_texture_rectangle"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_ARB"/>
+		<Init name="GL_EXT"/>
+		<Init name="GL_NV"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_IBM_cull_vertex">
+	<Tokens>
+		<Token name="GL_CULL_VERTEX_IBM" value="103050"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_IBM" string="GL_IBM_cull_vertex"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_IBM"/>
+	</InitPath>
+</GLExtension>

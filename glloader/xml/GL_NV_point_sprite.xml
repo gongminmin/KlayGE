@@ -1,0 +1,32 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_NV_point_sprite">
+	<Tokens>
+		<Token name="GL_POINT_SPRITE_NV" value="0x8861"/>
+		<Token name="GL_COORD_REPLACE_NV" value="0x8862"/>
+		<Token name="GL_POINT_SPRITE_R_MODE_NV" value="0x8863"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glPointParameteriNV" return="void">
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLint" name="param"/>
+		</Function>
+		<Function name="glPointParameterivNV" return="void">
+			<Param type="GLenum" name="pname"/>
+			<Param type="const GLint*" name="params"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_NV" string="GL_NV_point_sprite">
+			<Name name="glPointParameteriNV"/>
+			<Name name="glPointParameterivNV"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_NV"/>
+	</InitPath>
+</GLExtension>
+

@@ -1,0 +1,41 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_SGIX_instruments">
+	<Tokens>
+		<Token name="GL_INSTRUMENT_BUFFER_POINTER_SGIX" value="0x8180"/>
+		<Token name="GL_INSTRUMENT_MEASUREMENTS_SGIX" value="0x8181"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glGetInstrumentsSGIX" return="GLint"/>
+		<Function name="glInstrumentsBufferSGIX" return="void">
+			<Param type="GLsizei" name="size"/>
+			<Param type="GLint*" name="buffer"/>
+		</Function>
+		<Function name="glPollInstrumentsSGIX" return="GLint">
+			<Param type="GLint*" name="marker_p"/>
+		</Function>
+		<Function name="glReadInstrumentsSGIX" return="void">
+			<Param type="GLint" name="marker"/>
+		</Function>
+		<Function name="glStartInstrumentsSGIX" return="void"/>
+		<Function name="glStopInstrumentsSGIX" return="void">
+			<Param type="GLint" name="marker"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_SGIX" string="GL_SGIX_instruments">
+			<Name name="glGetInstrumentsSGIX"/>
+			<Name name="glInstrumentsBufferSGIX"/>
+			<Name name="glPollInstrumentsSGIX"/>
+			<Name name="glReadInstrumentsSGIX"/>
+			<Name name="glStartInstrumentsSGIX"/>
+			<Name name="glStopInstrumentsSGIX"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_SGIX"/>
+	</InitPath>
+</GLExtension>

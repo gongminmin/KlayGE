@@ -1,0 +1,104 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_ARB_texture_compression">
+	<Tokens>
+		<Token name="GL_COMPRESSED_ALPHA_ARB" value="0x84E9"/>
+		<Token name="GL_COMPRESSED_LUMINANCE_ARB" value="0x84EA"/>
+		<Token name="GL_COMPRESSED_LUMINANCE_ALPHA_ARB" value="0x84EB"/>
+		<Token name="GL_COMPRESSED_INTENSITY_ARB" value="0x84EC"/>
+		<Token name="GL_COMPRESSED_RGB_ARB" value="0x84ED"/>
+		<Token name="GL_COMPRESSED_RGBA_ARB" value="0x84EE"/>
+		<Token name="GL_TEXTURE_COMPRESSION_HINT_ARB" value="0x84EF"/>
+		<Token name="GL_TEXTURE_COMPRESSED_IMAGE_SIZE_ARB" value="0x86A0"/>
+		<Token name="GL_TEXTURE_COMPRESSED_ARB" value="0x86A1"/>
+		<Token name="GL_NUM_COMPRESSED_TEXTURE_FORMATS_ARB" value="0x86A2"/>
+		<Token name="GL_COMPRESSED_TEXTURE_FORMATS_ARB" value="0x86A3"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glCompressedTexImage1DARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLint" name="level"/>
+			<Param type="GLenum" name="internalFormat"/>
+			<Param type="GLsizei" name="width"/>
+			<Param type="GLint" name="border"/>
+			<Param type="GLsizei" name="imageSize"/>
+			<Param type="const GLvoid*" name="data"/>
+		</Function>
+		<Function name="glCompressedTexImage2DARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLint" name="level"/>
+			<Param type="GLenum" name="internalFormat"/>
+			<Param type="GLsizei" name="width"/>
+			<Param type="GLsizei" name="height"/>
+			<Param type="GLint" name="border"/>
+			<Param type="GLsizei" name="imageSize"/>
+			<Param type="const GLvoid*" name="data"/>
+		</Function>
+		<Function name="glCompressedTexImage3DARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLint" name="level"/>
+			<Param type="GLenum" name="internalFormat"/>
+			<Param type="GLsizei" name="width"/>
+			<Param type="GLsizei" name="height"/>
+			<Param type="GLsizei" name="depth"/>
+			<Param type="GLint" name="border"/>
+			<Param type="GLsizei" name="imageSize"/>
+			<Param type="const GLvoid*" name="data"/>
+		</Function>
+		<Function name="glCompressedTexSubImage1DARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLint" name="level"/>
+			<Param type="GLint" name="xoffset"/>
+			<Param type="GLsizei" name="width"/>
+			<Param type="GLenum" name="format"/>
+			<Param type="GLsizei" name="imageSize"/>
+			<Param type="const GLvoid*" name="data"/>
+		</Function>
+		<Function name="glCompressedTexSubImage2DARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLint" name="level"/>
+			<Param type="GLint" name="xoffset"/>
+			<Param type="GLint" name="yoffset"/>
+			<Param type="GLsizei" name="width"/>
+			<Param type="GLsizei" name="height"/>
+			<Param type="GLenum" name="format"/>
+			<Param type="GLsizei" name="imageSize"/>
+			<Param type="const GLvoid*" name="data"/>
+		</Function>
+		<Function name="glCompressedTexSubImage3DARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLint" name="level"/>
+			<Param type="GLint" name="xoffset"/>
+			<Param type="GLint" name="yoffset"/>
+			<Param type="GLint" name="zoffset"/>
+			<Param type="GLsizei" name="width"/>
+			<Param type="GLsizei" name="height"/>
+			<Param type="GLsizei" name="depth"/>
+			<Param type="GLenum" name="format"/>
+			<Param type="GLsizei" name="imageSize"/>
+			<Param type="const GLvoid*" name="data"/>
+		</Function>
+		<Function name="glGetCompressedTexImageARB" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLint" name="lod"/>
+			<Param type="GLvoid*" name="img"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_ARB" string="GL_ARB_texture_compression">
+			<Name name="glCompressedTexImage1DARB"/>
+			<Name name="glCompressedTexImage2DARB"/>
+			<Name name="glCompressedTexImage3DARB"/>
+			<Name name="glCompressedTexSubImage1DARB"/>
+			<Name name="glCompressedTexSubImage2DARB"/>
+			<Name name="glCompressedTexSubImage3DARB"/>
+			<Name name="glGetCompressedTexImageARB"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_ARB"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_ATI_texture_mirror_once">
+	<Tokens>
+		<Token name="GL_MIRROR_CLAMP_ATI" value="0x8742"/>
+		<Token name="GL_MIRROR_CLAMP_TO_EDGE_ATI" value="0x8743"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_ATI" string="GL_ATI_texture_mirror_once"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_ATI"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+
+<GLExtension name="WGL_NV_render_depth_texture">
+	<Tokens>
+		<Token name="WGL_BIND_TO_TEXTURE_DEPTH_NV" value="0x20A3"/>
+		<Token name="WGL_BIND_TO_TEXTURE_RECTANGLE_DEPTH_NV" value="0x20A4"/>
+		<Token name="WGL_DEPTH_TEXTURE_FORMAT_NV" value="0x20A5"/>
+		<Token name="WGL_TEXTURE_DEPTH_COMPONENT_NV" value="0x20A6"/>
+		<Token name="WGL_DEPTH_COMPONENT_NV" value="0x20A7"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="WGL_NV" string="WGL_NV_render_depth_texture"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="WGL_NV"/>
+	</InitPath>
+</GLExtension>

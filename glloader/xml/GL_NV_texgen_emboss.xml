@@ -1,0 +1,17 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_NV_texgen_emboss">
+	<Tokens>
+		<Token name="GL_EMBOSS_LIGHT_NV" value="0x855D"/>
+		<Token name="GL_EMBOSS_CONSTANT_NV" value="0x855E"/>
+		<Token name="GL_EMBOSS_MAP_NV" value="0x855F"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_NV" string="GL_NV_texgen_emboss"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_NV"/>
+	</InitPath>
+</GLExtension>

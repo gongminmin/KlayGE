@@ -1,0 +1,17 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_ATI_texture_env_combine3">
+	<Tokens>
+		<Token name="GL_MODULATE_ADD_ATI" value="0x8744"/>
+		<Token name="GL_MODULATE_SIGNED_ADD_ATI" value="0x8745"/>
+		<Token name="GL_MODULATE_SUBTRACT_ATI" value="0x8746"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_ATI" string="GL_ATI_texture_env_combine3"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_ATI"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,18 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GLX_OML_swap_method">
+	<Tokens>
+		<Token name="GLX_SWAP_METHOD_OML" value="0x8060"/>
+		<Token name="GLX_SWAP_EXCHANGE_OML" value="0x8061"/>
+		<Token name="GLX_SWAP_COPY_OML" value="0x8062"/>
+		<Token name="GLX_SWAP_UNDEFINED_OML" value="0x8063"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GLX_OML" string="GLX_OML_swap_method"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GLX_OML"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,32 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_IBM_multimode_draw_arrays">
+	<Functions>
+		<Function name="glMultiModeDrawArraysIBM" return="void">
+			<Param type="const GLenum*" name="mode"/>
+			<Param type="const GLint*" name="first"/>
+			<Param type="const GLsizei*" name="count"/>
+			<Param type="GLsizei" name="primcount"/>
+			<Param type="GLint" name="modestride"/>
+		</Function>
+		<Function name="glMultiModeDrawElementsIBM" return="void">
+			<Param type="const GLenum*" name="mode"/>
+			<Param type="const GLsizei*" name="count"/>
+			<Param type="GLenum" name="type"/>
+			<Param type="const GLvoid* const*" name="indices"/>
+			<Param type="GLsizei" name="primcount"/>
+			<Param type="GLint" name="modestride"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_IBM" string="GL_IBM_multimode_draw_arrays">
+			<Name name="glMultiModeDrawArraysIBM"/>
+			<Name name="glMultiModeDrawElementsIBM"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_IBM"/>
+	</InitPath>
+</GLExtension>

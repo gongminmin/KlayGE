@@ -1,0 +1,44 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_SGIX_async">
+	<Tokens>
+		<Token name="GL_ASYNC_MARKER_SGIX" value="0x8329"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glAsyncMarkerSGIX" return="void">
+			<Param type="GLuint" name="marker"/>
+		</Function>
+		<Function name="glFinishAsyncSGIX" return="GLint">
+			<Param type="GLuint*" name="markerp"/>
+		</Function>
+		<Function name="glPollAsyncSGIX" return="GLint">
+			<Param type="GLuint*" name="markerp"/>
+		</Function>
+		<Function name="glGenAsyncMarkersSGIX" return="GLuint">
+			<Param type="GLsizei" name="range"/>
+		</Function>
+		<Function name="glDeleteAsyncMarkersSGIX" return="void">
+			<Param type="GLuint" name="marker"/>
+			<Param type="GLsizei" name="range"/>
+		</Function>
+		<Function name="glIsAsyncMarkerSGIX" return="GLboolean">
+			<Param type="GLuint" name="marker"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_SGIX" string="GL_SGIX_async">
+			<Name name="glAsyncMarkerSGIX"/>
+			<Name name="glFinishAsyncSGIX"/>
+			<Name name="glPollAsyncSGIX"/>
+			<Name name="glGenAsyncMarkersSGIX"/>
+			<Name name="glDeleteAsyncMarkersSGIX"/>
+			<Name name="glIsAsyncMarkerSGIX"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_SGIX"/>
+	</InitPath>
+</GLExtension>

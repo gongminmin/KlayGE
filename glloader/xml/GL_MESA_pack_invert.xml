@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_MESA_pack_invert">
+	<Tokens>
+		<Token name="GL_PACK_INVERT_MESA" value="0x8758"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_MESA" string="GL_MESA_pack_invert"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_MESA"/>
+	</InitPath>
+</GLExtension>

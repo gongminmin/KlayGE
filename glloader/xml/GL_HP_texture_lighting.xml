@@ -1,0 +1,17 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_HP_texture_lighting">
+	<Tokens>
+		<Token name="GL_TEXTURE_LIGHTING_MODE_HP" value="0x8167"/>
+		<Token name="GL_TEXTURE_POST_SPECULAR_HP" value="0x8168"/>
+		<Token name="GL_TEXTURE_PRE_SPECULAR_HP" value="0x8169"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_HP" string="GL_HP_texture_lighting"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_HP"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,14 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_ARB_texture_env_add">
+	<Vendors>
+		<Vendor name="GL_ARB" string="GL_ARB_texture_env_add"/>
+		<Vendor name="GL_EXT" string="GL_EXT_texture_env_add"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_ARB"/>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>
+

@@ -1,0 +1,17 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_texture_mirror_clamp">
+	<Tokens>
+		<Token name="MIRROR_CLAMP_EXT" value="0x8742"/>
+		<Token name="MIRROR_CLAMP_TO_EDGE_EXT" value="0x8743"/>
+		<Token name="MIRROR_CLAMP_TO_BORDER_EXT" value="0x8912"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_texture_mirror_clamp"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,63 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_pixel_transform">
+	<Tokens>
+		<Token name="GL_PIXEL_MAG_FILTER_EXT" value="0x8331"/>
+		<Token name="GL_PIXEL_MIN_FILTER_EXT" value="0x8332"/>
+		<Token name="GL_PIXEL_CUBIC_WEIGHT_EXT" value="0x8333"/>
+		<Token name="GL_CUBIC_EXT" value="0x8334"/>
+		<Token name="GL_AVERAGE_EXT" value="0x8335"/>
+		<Token name="GL_PIXEL_TRANSFORM_2D_EXT" value="0x8330"/>
+		<Token name="GL_PIXEL_TRANSFORM_2D_STACK_DEPTH_EXT" value="0x8336"/>
+		<Token name="GL_MAX_PIXEL_TRANSFORM_2D_STACK_DEPTH_EXT" value="0x8337"/>
+		<Token name="GL_PIXEL_TRANSFORM_2D_MATRIX_EXT" value="0x8338"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glPixelTransformParameteriEXT" return="void">
+			<Params type="GLenum" name="target"/>
+			<Params type="GLenum" name="pname"/>
+			<Params type="const GLint" name="param"/>
+		</Function>
+		<Function name="glPixelTransformParameterfEXT" return="void">
+			<Params type="GLenum" name="target"/>
+			<Params type="GLenum" name="pname"/>
+			<Params type="const GLfloat" name="param"/>
+		</Function>
+		<Function name="glPixelTransformParameterivEXT" return="void">
+			<Params type="GLenum" name="target"/>
+			<Params type="GLenum" name="pname"/>
+			<Params type="const GLint*" name="params"/>
+		</Function>
+		<Function name="glPixelTransformParameterfvEXT" return="void">
+			<Params type="GLenum" name="target"/>
+			<Params type="GLenum" name="pname"/>
+			<Params type="const GLfloat*" name="params"/>
+		</Function>
+		<Function name="glGetPixelTransformParameterivEXT" return="void">
+			<Params type="GLenum" name="target"/>
+			<Params type="GLenum" name="pname"/>
+			<Params type="const GLint*" name="params"/>
+		</Function>
+		<Function name="glGetPixelTransformParameterfvEXT" return="void">
+			<Params type="GLenum" name="target"/>
+			<Params type="GLenum" name="pname"/>
+			<Params type="const GLfloat*" name="params"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_pixel_transform">
+			<Name name="glPixelTransformParameteriEXT"/>
+			<Name name="glPixelTransformParameterfEXT"/>
+			<Name name="glPixelTransformParameterivEXT"/>
+			<Name name="glPixelTransformParameterfvEXT"/>
+			<Name name="glGetPixelTransformParameterivEXT"/>
+			<Name name="glGetPixelTransformParameterfvEXT"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,37 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_SGIS_detail_texture">
+	<Tokens>
+		<Token name="GL_DETAIL_TEXTURE_2D_SGIS" value="0x8095"/>
+		<Token name="GL_DETAIL_TEXTURE_2D_BINDING_SGIS" value="0x8096"/>
+		<Token name="GL_LINEAR_DETAIL_SGIS" value="0x8097"/>
+		<Token name="GL_LINEAR_DETAIL_ALPHA_SGIS" value="0x8098"/>
+		<Token name="GL_LINEAR_DETAIL_COLOR_SGIS" value="0x8099"/>
+		<Token name="GL_DETAIL_TEXTURE_LEVEL_SGIS" value="0x809A"/>
+		<Token name="GL_DETAIL_TEXTURE_MODE_SGIS" value="0x809B"/>
+		<Token name="GL_DETAIL_TEXTURE_FUNC_POINTS_SGIS" value="0x809C"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glDetailTexFuncSGIS" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLsizei" name="n"/>
+			<Param type="const GLfloat*" name="points"/>
+		</Function>
+		<Function name="glGetDetailTexFuncSGIS" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLfloat*" name="points"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_SGIS" string="GL_SGIS_detail_texture">
+			<Name name="glDetailTexFuncSGIS"/>
+			<Name name="glGetDetailTexFuncSGIS"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_SGIS"/>
+	</InitPath>
+</GLExtension>

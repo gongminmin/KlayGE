@@ -1,0 +1,39 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_APPLE_vertex_array_range">
+	<Tokens>
+		<Token name="GL_VERTEX_ARRAY_RANGE_APPLE" value="0x851D"/>
+		<Token name="GL_VERTEX_ARRAY_RANGE_LENGTH_APPLE" value="0x851E"/>
+		<Token name="GL_VERTEX_ARRAY_STORAGE_HINT_APPLE" value="0x851F"/>
+		<Token name="GL_VERTEX_ARRAY_RANGE_POINTER_APPLE" value="0x8521"/>
+		<Token name="GL_STORAGE_CACHED_APPLE" value="0x85BE"/>
+		<Token name="GL_STORAGE_SHARED_APPLE" value="0x85BF"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glVertexArrayRangeAPPLE" return="void">
+			<Param type="GLsizei" name="length"/>
+			<Param type="GLvoid*" name="pointer"/>
+		</Function>
+		<Function name="glFlushVertexArrayRangeAPPLE" return="void">
+			<Param type="GLsizei" name="length"/>
+			<Param type="GLvoid*" name="pointer"/>
+		</Function>
+		<Function name="glVertexArrayParameteriAPPLE" return="void">
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLint" name="param"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_APPLE" string="GL_APPLE_vertex_array_range">
+			<Name name="glVertexArrayRangeAPPLE"/>
+			<Name name="glFlushVertexArrayRangeAPPLE"/>
+			<Name name="glVertexArrayParameteriAPPLE"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_APPLE"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_SGIX_ycrcb">
+	<Tokens>
+		<Token name="GL_YCRCB_422_SGIX" value="0x81BB"/>
+		<Token name="GL_YCRCB_444_SGIX" value="0x81BC"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_SGIX" string="GL_SGIX_ycrcb"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_SGIX"/>
+	</InitPath>
+</GLExtension>

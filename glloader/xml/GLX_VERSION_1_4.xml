@@ -1,0 +1,28 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GLX_VERSION_1_4">
+	<Typedefs>
+		<Typedef type="void" synonym="(*__GLXextFuncPtr)(void)"/>
+	</Typedefs>
+
+	<Tokens>
+		<Token name="GLX_SAMPLE_BUFFERS" value="100000"/>
+		<Token name="GLX_SAMPLES" value="100001"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glXGetProcAddress" return="__GLXextFuncPtr">
+			<Param type="const GLubyte*" name="procName"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GLX_CORE" string="GLX_VERSION_1_4">
+			<Name name="glXGetProcAddress"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GLX_CORE"/>
+	</InitPath>
+</GLExtension>

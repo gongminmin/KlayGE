@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_3DFX_tbuffer">
+	<Functions>
+		<Function name="glTbufferMask3DFX" return="void">
+			<Param type="GLuint" name="mask"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_3DFX" string="GL_3DFX_tbuffer">
+			<Name name="glTbufferMask3DFX"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_3DFX"/>
+	</InitPath>
+</GLExtension>

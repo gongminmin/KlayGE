@@ -1,0 +1,26 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_index_func">
+	<Tokens>
+		<Token name="GL_INDEX_TEST_EXT" value="0x81B5"/>
+		<Token name="GL_INDEX_TEST_FUNC_EXT" value="0x81B6"/>
+		<Token name="GL_INDEX_TEST_REF_EXT" value="0x81B7"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glIndexFuncEXT" return="void">
+			<Param type="GLenum" name="func"/>
+			<Param type="GLclampf" name="ref"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_index_func">
+			<Name name="glIndexFuncEXT"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>

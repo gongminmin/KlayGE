@@ -1,0 +1,27 @@
+<?xml version='1.0'?>
+
+<GLExtension name="WGL_I3D_swap_frame_lock">
+	<Functions>
+		<Function name="wglEnableFrameLockI3D" return="BOOL"/>
+		<Function name="wglDisableFrameLockI3D" return="BOOL"/>
+		<Function name="wglIsEnabledFrameLockI3D" return="BOOL">
+			<Param type="BOOL*" name="pFlag"/>
+		</Function>
+		<Function name="wglQueryFrameLockMasterI3D" return="BOOL">
+			<Param type="BOOL*" name="pFlag"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="WGL_I3D" string="WGL_I3D_swap_frame_lock">
+			<Name name="wglEnableFrameLockI3D"/>
+			<Name name="wglDisableFrameLockI3D"/>
+			<Name name="wglIsEnabledFrameLockI3D"/>
+			<Name name="wglQueryFrameLockMasterI3D"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="WGL_I3D"/>
+	</InitPath>
+</GLExtension>
