@@ -39,7 +39,7 @@ namespace KlayGE
 		}
 
 		void* dest;
-		TIF(buffer->Lock(0, 0, &dest, D3DLOCK_DISCARD));
+		TIF(buffer->Lock(0, 0, &dest, D3DLOCK_NOSYSLOCK | D3DLOCK_DISCARD));
 		Engine::MemoryInstance().Cpy(dest, &data_[0], size);
 		buffer->Unlock();
 	}
@@ -68,7 +68,7 @@ namespace KlayGE
 		}
 
 		void* dest;
-		TIF(buffer_->Lock(0, 0, &dest, 0));
+		TIF(buffer_->Lock(0, 0, &dest, D3DLOCK_NOSYSLOCK));
 		Engine::MemoryInstance().Cpy(dest, src, size);
 		buffer_->Unlock();
 	}
