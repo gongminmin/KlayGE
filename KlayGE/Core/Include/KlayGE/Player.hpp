@@ -1,8 +1,11 @@
 // Player.cpp
-// KlayGE 套接字 头文件
-// Ver 1.4.8.3
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// KlayGE 游戏者 头文件
+// Ver 2.1.2
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.1.2
+// 增加了发送队列 (2004.5.28)
 //
 // 1.4.8.3
 // 初次建立 (2003.3.8)
@@ -13,6 +16,8 @@
 #ifndef _PLAYER_HPP
 #define _PLAYER_HPP
 
+#include <list>
+#include <vector>
 #include <pthread.h>
 #include <KlayGE/Socket.hpp>
 
@@ -22,10 +27,10 @@ namespace KlayGE
 {
 	struct LobbyDes
 	{
-		char			NumPlayer;
-		char			MaxPlayers;
-		std::string		Name;
-		SOCKADDR_IN		Addr;
+		char			numPlayer;
+		char			maxPlayers;
+		std::string		name;
+		SOCKADDR_IN		addr;
 	};
 
 	class Player
@@ -56,6 +61,9 @@ namespace KlayGE
 		bool		receiveLoop_;
 
 		static void* ReceiveThread_Func(void* arg);
+
+		typedef std::list<std::vector<char> > SendQueueType;
+		SendQueueType	sendQueue_;
 	};
 }
 

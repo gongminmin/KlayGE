@@ -41,7 +41,7 @@ namespace KlayGE
 	{
 		for (PlayerAddrsIter iter = this->players_.begin(); iter != this->players_.end(); ++ iter)
 		{
-			if (0 == MemoryLib::Compare(&addr, &(iter->Addr), sizeof(addr)))
+			if (0 == MemoryLib::Compare(&addr, &(iter->second.addr), sizeof(addr)))
 			{
 				return iter;
 			}
@@ -100,6 +100,33 @@ namespace KlayGE
 			{
 				this->Send(sendBuf, numSend + 1, from);
 			}
+
+			// 发送信息
+			for (PlayerAddrs::iterator iter = players_.begin(); iter != players_.end(); ++ iter)
+			{
+				SendQueueType& msgs = iter->second.msgs;
+				for (SendQueueType::iterator msgiter = msgs.begin();
+					msgiter != msgs.end(); ++ msgiter)
+				{
+					std::vector<char>& msg = *msgiter;
+
+					socket_.SendTo(&msg[0], msg.size(), iter->second.addr);
+				}
+			}
+
+			// 检查是否有在线用户超时
+			for (PlayerAddrs::iterator iter = players_.begin(); iter != players_.end();)
+			{
+				// 大于20秒
+				if (std::time(NULL) - iter->second.time >= 20 * 1000)
+				{
+					iter = players_.erase(iter);
+				}
+				else
+				{
+					++ iter;
+				}
+			}
 		}
 	}
 
@@ -111,7 +138,7 @@ namespace KlayGE
 		for (PlayerAddrs::const_iterator iter = this->players_.begin();
 			iter != this->players_.end(); ++ iter)
 		{
-			if (iter->ID != 0)
+			if (iter->first != 0)
 			{
 				++ n;
 			}
@@ -151,7 +178,7 @@ namespace KlayGE
 		for (PlayerAddrsIter iter = this->players_.begin();
 						iter != this->players_.end(); ++ iter)
 		{
-			iter->ID = 0;
+			iter->first = 0;
 		}
 	}
 
@@ -194,7 +221,7 @@ namespace KlayGE
 		PlayerAddrsIter iter(this->players_.begin());
 		for (; iter != this->players_.end(); ++ iter, ++ id)
 		{
-			if (0 == iter->ID)
+			if (0 == iter->first)
 			{
 				size_t i(0);
 				while (revBuf[i] != 0)
@@ -202,11 +229,11 @@ namespace KlayGE
 					++ i;
 				}
 				std::string name(&revBuf[0], i);
-				iter->ID	= id;
-				iter->Name	= name;
-				iter->Addr	= from;
+				iter->first			= id;
+				iter->second.name	= name;
+				iter->second.addr	= from;
 
-				pro.OnJoin(iter->ID);
+				pro.OnJoin(iter->first);
 				break;
 			}
 		}
@@ -232,9 +259,9 @@ namespace KlayGE
 	{
 		if (iter != this->players_.end())
 		{
-			this->players_[iter->ID].ID = 0;
+			pro.OnQuit(iter->first);
+			iter->first = 0;
 			sendBuf[0] = 0;
-			pro.OnQuit(iter->ID);
 		}
 		else
 		{
@@ -262,7 +289,7 @@ namespace KlayGE
 	{
 		if (iter != this->players_.end())
 		{
-			iter->Time = static_cast<U32>(std::time(NULL));
+			iter->second.time = static_cast<U32>(std::time(NULL));
 		}
 	}
 }

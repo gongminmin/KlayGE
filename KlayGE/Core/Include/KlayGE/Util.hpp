@@ -1,8 +1,11 @@
 // Util.hpp
 // KlayGE 实用函数库 头文件
-// Ver 2.0.4
+// Ver 2.1.2
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.1.2
+// 增加了本地和网络格式的转换函数 (2004.6.2)
 //
 // 修改记录
 ///////////////////////////////////////////////////////////////////////////////
@@ -68,16 +71,20 @@ namespace KlayGE
 	MakeMask(U32 dw)
 		{ return (1UL << (dw + 1)) - 1; }
 
-	// UNICODE函数, 用于String, WString之间的转化
-	/////////////////////////////////////////////////////////////////////////////////
+	// Unicode函数, 用于string, wstring之间的转换
 	std::string& Convert(std::string& strDest, const std::string& strSrc);
 	std::string& Convert(std::string& strDest, const std::wstring& wstrSrc);
 	std::wstring& Convert(std::wstring& wstrDest, const std::string& strSrc);
 	std::wstring& Convert(std::wstring& wstrDest, const std::wstring& wstrSrc);
 
 	// 暂停几毫秒
-	/////////////////////////////////////////////////////////////////////////////////
 	void Sleep(U32 ms);
+
+	// 网络格式和本地格式之间转换
+	U32 ToNet(U32 host);
+	U16 ToNet(U16 host);
+	U32 ToHost(U32 network);
+	U16 ToHost(U16 network);
 }
 
 #endif		// _UTIL_HPP

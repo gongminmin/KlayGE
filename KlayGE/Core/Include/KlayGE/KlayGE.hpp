@@ -1,6 +1,6 @@
 // KlayGE.hpp
 // KlayGE 头文件
-// Ver 2.1.0
+// Ver 2.1.2
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
 //
@@ -18,8 +18,8 @@
 
 #define KLAYGEMAINVER		2
 #define KLAYGESECVER		1
-#define KLAYGERELEASEVER	0
-#define KLAYGEVERSTR		"KLAYGE 2.1.0"
+#define KLAYGERELEASEVER	2
+#define KLAYGEVERSTR		"KlayGE 2.1.2"
 
 namespace KlayGE
 {

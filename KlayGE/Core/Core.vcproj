@@ -303,9 +303,6 @@
 					RelativePath="Include\KlayGE\Memory.hpp">
 				</File>
 				<File
-					RelativePath="Src\Kernel\MemoryImpl.hpp">
-				</File>
-				<File
 					RelativePath=".\Include\KlayGE\MetaManip.hpp">
 				</File>
 				<File

@@ -52,10 +52,42 @@ namespace KlayGE
 				lastTime = std::time(NULL);
 			}
 
+			if (!player->sendQueue_.empty())
+			{
+				// 发送队列里的消息
+				for (SendQueueType::iterator iter = player->sendQueue_.begin();
+					iter != player->sendQueue_.end(); ++ iter)
+				{
+					std::vector<char>& msg = *iter;
+					player->socket_.Send(&msg[0], msg.size());
+				}
+			}
+
 			char revBuf[Max_Buffer];
 			MemoryLib::Zero(revBuf, sizeof(revBuf));
 			if (player->socket_.Receive(revBuf, sizeof(revBuf)) != -1)
 			{
+				U32 ID;
+				memcpy(&ID, &revBuf[1], 4);
+
+				// 删除已发送的信息
+				for (SendQueueType::iterator iter = player->sendQueue_.begin();
+					iter != player->sendQueue_.end();)
+				{
+					std::vector<char>& msg = *iter;
+
+					U32 sendID;
+					memcpy(&sendID, &msg[1], 4);
+					if (sendID == ID)
+					{
+						iter = player->sendQueue_.erase(iter);
+					}
+					else
+					{
+						++ iter;
+					}
+				}
+
 				if (MSG_QUIT == revBuf[0])
 				{
 					break;
@@ -121,8 +153,8 @@ namespace KlayGE
 	LobbyDes Player::LobbyInfo()
 	{
 		LobbyDes lobbydes;
-		lobbydes.NumPlayer = 0;
-		lobbydes.MaxPlayers = 0;
+		lobbydes.numPlayer = 0;
+		lobbydes.maxPlayers = 0;
 
 		char msg(MSG_GETLOBBYINFO);
 		socket_.Send(&msg, sizeof(msg));
@@ -131,14 +163,14 @@ namespace KlayGE
 		socket_.Receive(buf, sizeof(buf));
 		if (MSG_GETLOBBYINFO == buf[0])
 		{
-			lobbydes.NumPlayer = buf[1];
-			lobbydes.MaxPlayers = buf[2];
+			lobbydes.numPlayer = buf[1];
+			lobbydes.maxPlayers = buf[2];
 			size_t i(0);
 			while (buf[3 + i] != 0)
 			{
 				++ i;
 			}
-			lobbydes.Name = std::string(&buf[3], i);
+			lobbydes.name = std::string(&buf[3], i);
 		}
 
 		return lobbydes;

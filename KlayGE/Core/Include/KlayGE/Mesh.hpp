@@ -82,7 +82,13 @@ namespace KlayGE
 	class BoneMesh : public Renderable
 	{
 	public:
+		typedef SharedPtr<std::vector<Bone> > BonesType;
+
+	public:
 		virtual ~BoneMesh();
+
+		void SetBones(BonesType& bones)
+			{ bones_ = bones; }
 
 		RenderEffectPtr GetRenderEffect() const
 			{ return staticMesh_->GetRenderEffect(); }
@@ -101,6 +107,8 @@ namespace KlayGE
 
 	protected:
 		StaticMeshPtr staticMesh_;
+
+		BonesType bones_;
 
 		typedef std::vector<float> BlendWeightsType;
 		BlendWeightsType blendWeights_;

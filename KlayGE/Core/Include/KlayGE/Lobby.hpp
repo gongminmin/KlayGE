@@ -1,8 +1,11 @@
 // Lobby.hpp
 // KlayGE 游戏大厅 头文件
-// Ver 1.4.8.3
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.1.2
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.1.2
+// 增加了发送队列 (2004.5.28)
 //
 // 1.4.8.3
 // 初次建立 (2003.3.8)
@@ -14,12 +17,15 @@
 #define _LOBBY_HPP
 
 #include <vector>
+#include <list>
 #include <KlayGE/Socket.hpp>
 
 #pragma comment(lib, "KlayGE_Core.lib")
 
 namespace KlayGE
 {
+	typedef std::list<std::vector<char> > SendQueueType;
+
 	const U32 Max_Buffer(64);
 
 	class Processer
@@ -37,17 +43,18 @@ namespace KlayGE
 	// 描述Player
 	struct PlayerDes
 	{
-		char			ID;
-		std::string		Name;
-		SOCKADDR_IN		Addr;
+		std::string		name;
+		SOCKADDR_IN		addr;
 
-		U32				Time;
+		U32				time;
+
+		SendQueueType	msgs;
 	};
 
 	class Lobby
 	{
-		typedef std::vector<PlayerDes>	PlayerAddrs;
-		typedef PlayerAddrs::iterator	PlayerAddrsIter;
+		typedef std::vector<std::pair<U32, PlayerDes> >	PlayerAddrs;
+		typedef PlayerAddrs::iterator		PlayerAddrsIter;
 
 	public:
 		Lobby();
