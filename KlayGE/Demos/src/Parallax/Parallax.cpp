@@ -101,9 +101,9 @@ namespace
 			: rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
 		{
 			effect_ = LoadRenderEffect("Parallax.fx");
-			effect_->SetTexture("diffusemap", LoadTGA(*(ResLocator::Instance().Locate("Diffuse.tga")->Load())));
-			effect_->SetTexture("normalmap", LoadTGA(*(ResLocator::Instance().Locate("Normal.tga")->Load())));
-			effect_->SetTexture("heightmap", LoadTGA(*(ResLocator::Instance().Locate("Height.tga")->Load())));
+			effect_->ParameterByName("diffusemap")->SetTexture(LoadTGA(*(ResLocator::Instance().Locate("Diffuse.tga")->Load())));
+			effect_->ParameterByName("normalmap")->SetTexture(LoadTGA(*(ResLocator::Instance().Locate("Normal.tga")->Load())));
+			effect_->ParameterByName("heightmap")->SetTexture(LoadTGA(*(ResLocator::Instance().Locate("Height.tga")->Load())));
 			effect_->SetTechnique("Parallax");
 
 			Vector3 xyzs[] =
@@ -225,8 +225,8 @@ void Parallax::InitObjects()
 	MathLib::LookAtLH(matView, Vector3(2, 0, -2), Vector3(0, 0, 0));
 	MathLib::PerspectiveFovLH(matProj, PI / 4, 800.0f / 600, 0.1f, 20.0f);
 
-	renderPolygon->effect_->SetMatrix("worldviewproj", matView * matProj);
-	renderPolygon->effect_->SetVector("eyePos", Vector4(2, 0, -2, 1) - Vector4(0, 0, 0, 0));
+	renderPolygon->effect_->ParameterByName("worldviewproj")->SetMatrix(matView * matProj);
+	renderPolygon->effect_->ParameterByName("eyePos")->SetVector(Vector4(2, 0, -2, 1) - Vector4(0, 0, 0, 0));
 }
 
 void Parallax::Update()
@@ -239,8 +239,7 @@ void Parallax::Update()
 	Matrix4 matRot;
 	MathLib::RotationZ(matRot, degree);
 	MathLib::TransformCoord(lightPos, lightPos, matRot);
-	renderPolygon->effect_->SetVector("lightPos",
-		Vector4(lightPos.x(), lightPos.y(), lightPos.z(), 1));
+	renderPolygon->effect_->ParameterByName("lightPos")->SetVector(Vector4(lightPos.x(), lightPos.y(), lightPos.z(), 1));
 	degree += 0.01f;
 
 	std::wostringstream stream;

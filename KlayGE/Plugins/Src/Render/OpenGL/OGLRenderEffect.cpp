@@ -39,79 +39,19 @@ namespace KlayGE
 	{
 	}
 
-	void OGLRenderEffect::SetValue(const std::string& name, const void* data, UINT bytes)
+	RenderEffectParameterPtr OGLRenderEffect::Parameter(UINT index)
 	{
+		return RenderEffectParameterPtr();
 	}
 
-	void* OGLRenderEffect::GetValue(const std::string& name, UINT bytes) const
+	RenderEffectParameterPtr OGLRenderEffect::ParameterByName(const std::string& name)
 	{
-		return NULL;
+		return RenderEffectParameterPtr();
 	}
 
-	void OGLRenderEffect::SetFloat(const std::string& name, float value)
+	RenderEffectParameterPtr OGLRenderEffect::ParameterBySemantic(const std::string& semantic)
 	{
-	}
-
-	float OGLRenderEffect::GetFloat(const std::string& name) const
-	{
-		return 0;
-	}
-
-	void OGLRenderEffect::SetVector(const std::string& name, const Vector4& value)
-	{
-	}
-
-	Vector4 OGLRenderEffect::GetVector(const std::string& name) const
-	{
-		return Vector4::Zero();
-	}
-
-	void OGLRenderEffect::SetMatrix(const std::string& name, const Matrix4& value)
-	{
-	}
-
-	Matrix4 OGLRenderEffect::GetMatrix(const std::string& name) const
-	{
-		return Matrix4::Identity();
-	}
-
-	void OGLRenderEffect::SetMatrixArray(const std::string& name, const Matrix4* matrices, size_t count)
-	{
-	}
-
-	void OGLRenderEffect::GetMatrixArray(const std::string& name, Matrix4* matrices, size_t count)
-	{
-	}	
-
-	void OGLRenderEffect::SetInt(const std::string& name, int value)
-	{
-	}
-
-	int OGLRenderEffect::GetInt(const std::string& name) const
-	{
-		return 0;
-	}
-
-	void OGLRenderEffect::SetBool(const std::string& name, bool value)
-	{
-	}
-
-	bool OGLRenderEffect::GetBool(const std::string& name) const
-	{
-		return false;
-	}
-
-	void OGLRenderEffect::SetString(const std::string& name, const std::string& value)
-	{
-	}
-
-	std::string OGLRenderEffect::GetString(const std::string& name) const
-	{
-		return std::string();
-	}
-
-	void OGLRenderEffect::SetTexture(const std::string& name, const TexturePtr& tex)
-	{
+		return RenderEffectParameterPtr();
 	}
 
 	void OGLRenderEffect::SetTechnique(const std::string& technique)
@@ -132,6 +72,73 @@ namespace KlayGE
 	}
 
 	void OGLRenderEffect::End()
+	{
+	}
+
+
+	void OGLRenderEffectParameter::SetFloat(float value)
+	{
+	}
+
+	float OGLRenderEffectParameter::GetFloat() const
+	{
+		return 0;
+	}
+
+	void OGLRenderEffectParameter::SetVector(const Vector4& value)
+	{
+	}
+
+	Vector4 OGLRenderEffectParameter::GetVector() const
+	{
+		return Vector4::Zero();
+	}
+
+	void OGLRenderEffectParameter::SetMatrix(const Matrix4& value)
+	{
+	}
+
+	Matrix4 OGLRenderEffectParameter::GetMatrix() const
+	{
+		return Matrix4::Identity();
+	}
+
+	void OGLRenderEffectParameter::SetMatrixArray(const Matrix4* matrices, size_t count)
+	{
+	}
+
+	void OGLRenderEffectParameter::GetMatrixArray(Matrix4* matrices, size_t count)
+	{
+	}	
+
+	void OGLRenderEffectParameter::SetInt(int value)
+	{
+	}
+
+	int OGLRenderEffectParameter::GetInt() const
+	{
+		return 0;
+	}
+
+	void OGLRenderEffectParameter::SetBool(bool value)
+	{
+	}
+
+	bool OGLRenderEffectParameter::GetBool() const
+	{
+		return false;
+	}
+
+	void OGLRenderEffectParameter::SetString(const std::string& value)
+	{
+	}
+
+	std::string OGLRenderEffectParameter::GetString() const
+	{
+		return std::string();
+	}
+
+	void OGLRenderEffectParameter::SetTexture(const TexturePtr& tex)
 	{
 	}
 }

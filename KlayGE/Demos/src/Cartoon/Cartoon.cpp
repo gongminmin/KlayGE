@@ -32,8 +32,8 @@ namespace
 			: rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
 		{
 			effect_ = LoadRenderEffect("Cartoon.fx");
-			effect_->SetTexture("toon", texture0);
-			effect_->SetTexture("edge", texture1);
+			effect_->ParameterByName("toon")->SetTexture(texture0);
+			effect_->ParameterByName("edge")->SetTexture(texture1);
 			effect_->SetTechnique("cartoonTec");
 
 			rb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
@@ -112,9 +112,9 @@ void Cartoon::InitObjects()
 	MathLib::LookAtLH(view_, Vector3(0, 0, -6), Vector3(0, 0, 0));
 	MathLib::PerspectiveFovLH(proj_, PI / 4, 800.0f / 600, 0.1f, 20.0f);
 
-	renderTorus->effect_->SetMatrix("proj", proj_);
-	renderTorus->effect_->SetVector("lightPos", Vector4(2, 2, -3, 1));
-	renderTorus->effect_->SetVector("eyePos", Vector4(0, 0, -6, 1));
+	renderTorus->effect_->ParameterByName("proj")->SetMatrix(proj_);
+	renderTorus->effect_->ParameterByName("lightPos")->SetVector(Vector4(2, 2, -3, 1));
+	renderTorus->effect_->ParameterByName("eyePos")->SetVector(Vector4(0, 0, -6, 1));
 }
 
 void Cartoon::Update()
@@ -131,11 +131,11 @@ void Cartoon::Update()
 	mat *= matY;
 	mat *= view_;
 
-	renderTorus->effect_->SetMatrix("worldview", mat);
+	renderTorus->effect_->ParameterByName("worldview")->SetMatrix(mat);
 
 	MathLib::Transpose(mat, mat);
 	MathLib::Inverse(mat, mat);
-	renderTorus->effect_->SetMatrix("worldviewIT", mat);
+	renderTorus->effect_->ParameterByName("worldviewIT")->SetMatrix(mat);
 
 	std::wostringstream stream;
 	stream << (*renderEngine.ActiveRenderTarget())->FPS();

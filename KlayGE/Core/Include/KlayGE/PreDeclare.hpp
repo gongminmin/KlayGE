@@ -65,6 +65,8 @@ namespace KlayGE
 	typedef SharedPtr<Renderable> RenderablePtr;
 	class RenderEffect;
 	typedef SharedPtr<RenderEffect> RenderEffectPtr;
+	class RenderEffectParameter;
+	typedef SharedPtr<RenderEffectParameter> RenderEffectParameterPtr;
 	class Clipper;
 	typedef SharedPtr<Clipper> ClipperPtr;
 	class SceneManager;
@@ -81,6 +83,10 @@ namespace KlayGE
 	struct Viewport;
 	class RenderFactory;
 	typedef SharedPtr<RenderFactory> RenderFactoryPtr;
+	class StaticMesh;
+	typedef SharedPtr<StaticMesh> StaticMeshPtr;
+	class BoneMesh;
+	typedef SharedPtr<BoneMesh> BoneMeshPtr;
 
 	class Socket;
 	class Lobby;

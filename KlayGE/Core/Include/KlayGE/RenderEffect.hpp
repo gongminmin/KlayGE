@@ -1,8 +1,11 @@
 // RenderEffect.hpp
 // KlayGE 渲染效果类 头文件
-// Ver 2.0.4
+// Ver 2.1.2
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.1.2
+// 增加了Parameter (2004.5.26)
 //
 // 2.0.3
 // 修改了SetTexture的参数 (2004.3.6)
@@ -39,25 +42,9 @@ namespace KlayGE
 
 		virtual void Desc(UINT& parameters, UINT& techniques, UINT& functions) = 0;
 
-		virtual void SetValue(const std::string& name, const void* data, UINT bytes) = 0;
-		virtual void* GetValue(const std::string& name, UINT bytes) const = 0;
-
-		virtual void SetFloat(const std::string& name, float value) = 0;
-		virtual float GetFloat(const std::string& name) const = 0;
-		virtual void SetVector(const std::string& name, const Vector4& value) = 0;
-		virtual Vector4 GetVector(const std::string& name) const = 0;
-		virtual void SetMatrix(const std::string& name, const Matrix4& value) = 0;
-		virtual Matrix4 GetMatrix(const std::string& name) const = 0;
-		virtual void SetMatrixArray(const std::string& name, const Matrix4* matrices, size_t count) = 0;
-		virtual void GetMatrixArray(const std::string& name, Matrix4* matrices, size_t count) = 0;
-		virtual void SetInt(const std::string& name, int value) = 0;
-		virtual int GetInt(const std::string& name) const = 0;
-		virtual void SetBool(const std::string& name, bool value) = 0;
-		virtual bool GetBool(const std::string& name) const = 0;
-		virtual void SetString(const std::string& name, const std::string& value) = 0;
-		virtual std::string GetString(const std::string& name) const = 0;
-
-		virtual void SetTexture(const std::string& name, const TexturePtr& tex) = 0;
+		virtual RenderEffectParameterPtr Parameter(UINT index) = 0;
+		virtual RenderEffectParameterPtr ParameterByName(const std::string& name) = 0;
+		virtual RenderEffectParameterPtr ParameterBySemantic(const std::string& semantic) = 0;
 
 		virtual void SetTechnique(const std::string& technique) = 0;
 		virtual void SetTechnique(UINT technique) = 0;
@@ -65,6 +52,32 @@ namespace KlayGE
 		virtual UINT Begin(UINT flags = 0) = 0;
 		virtual void Pass(UINT passNum) = 0;
 		virtual void End() = 0;
+	};
+
+	class RenderEffectParameter
+	{
+	public:
+		virtual ~RenderEffectParameter()
+			{ }
+
+		static RenderEffectParameterPtr NullObject();
+
+		virtual void SetFloat(float value) = 0;
+		virtual float GetFloat() const = 0;
+		virtual void SetVector(const Vector4& value) = 0;
+		virtual Vector4 GetVector() const = 0;
+		virtual void SetMatrix(const Matrix4& value) = 0;
+		virtual Matrix4 GetMatrix() const = 0;
+		virtual void SetMatrixArray(const Matrix4* matrices, size_t count) = 0;
+		virtual void GetMatrixArray(Matrix4* matrices, size_t count) = 0;
+		virtual void SetInt(int value) = 0;
+		virtual int GetInt() const = 0;
+		virtual void SetBool(bool value) = 0;
+		virtual bool GetBool() const = 0;
+		virtual void SetString(const std::string& value) = 0;
+		virtual std::string GetString() const = 0;
+
+		virtual void SetTexture(const TexturePtr& tex) = 0;
 	};
 
 	RenderEffectPtr LoadRenderEffect(const std::string& effectName);

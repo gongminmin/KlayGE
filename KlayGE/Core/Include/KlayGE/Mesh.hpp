@@ -1,3 +1,15 @@
+// Mesh.hpp
+// KlayGE Mesh类 头文件
+// Ver 2.1.2
+// 版权所有(C) 龚敏敏, 2003
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.1.2
+// 初次建立 (2004.5.26)
+//
+// 修改记录
+//////////////////////////////////////////////////////////////////////////////////
+
 #ifndef _MESH_HPP
 #define _MESH_HPP
 
@@ -9,17 +21,19 @@
 
 namespace KlayGE
 {
-	class Mesh : public Renderable
+	class StaticMesh : public Renderable
 	{
 	public:
-		Mesh();
+		StaticMesh();
+		virtual ~StaticMesh();
 
 		RenderEffectPtr GetRenderEffect() const
 			{ return effect_; }
 		void SetRenderEffect(const RenderEffectPtr& effect)
 			{ effect_ = effect; }
 
-		RenderBufferPtr GetRenderBuffer() const;
+		RenderBufferPtr GetRenderBuffer() const
+			{ return rb_; }
 
 		const std::wstring& Name() const;
 
@@ -28,27 +42,71 @@ namespace KlayGE
 			{ xyzs_.assign(first, last); }
 
 		template <typename ForwardIterator>
-		void AssignNormals(ForwardIterator first, ForwardIterator last)
-			{ normals_.assign(first, last); }
-
-		template <typename ForwardIterator>
-		void AssignTextures(ForwardIterator first, ForwardIterator last)
-			{ textures_.assign(first, last); }
+		void AssignTexs(ForwardIterator first, ForwardIterator last)
+			{ texs_.assign(first, last); }
 
 		template <typename ForwardIterator>
 		void AssignIndices(ForwardIterator first, ForwardIterator last)
 			{ indices_.assign(first, last); }
 
-		void ComputeNormals();
-
-	private:
+	protected:
 		RenderBufferPtr rb_;
 		RenderEffectPtr effect_;
 
-		std::vector<float> vertices_;
-		std::vector<float> normals_;
+		typedef std::vector<Vector3> XYZsType;
+		XYZsType xyzs_;
 
-		std::vector<U16> indices_;
+		typedef std::vector<Vector2> TexsType;
+		TexsType texs_;
+
+		typedef std::vector<U16> IndicesType;
+		IndicesType indices_;
+	};
+
+
+	struct Bone
+	{
+		std::string name;
+
+		Vector3 bindpos;
+		Matrix4 bindmat;
+
+		Matrix4 originMat;
+		Matrix4 inverseOriginMat;
+
+		S16 parent;
+
+		boost::array<float, 6> attribute;
+	};
+
+	class BoneMesh : public Renderable
+	{
+	public:
+		virtual ~BoneMesh();
+
+		RenderEffectPtr GetRenderEffect() const
+			{ return staticMesh_->GetRenderEffect(); }
+		RenderBufferPtr GetRenderBuffer() const
+			{ return staticMesh_->GetRenderBuffer(); }
+
+		const std::wstring& Name() const;
+
+		template <typename ForwardIterator>
+		void AssignBlendWeights(ForwardIterator first, ForwardIterator last)
+			{ blendWeights_.assign(first, last); }
+
+		template <typename ForwardIterator>
+		void AssignBlendIndices(ForwardIterator first, ForwardIterator last)
+			{ blendIndices_.assign(first, last); }
+
+	protected:
+		StaticMeshPtr staticMesh_;
+
+		typedef std::vector<float> BlendWeightsType;
+		BlendWeightsType blendWeights_;
+
+		typedef std::vector<KlayGE::U8> BlendIndicesType;
+		BlendIndicesType blendIndices_;
 	};
 }
 

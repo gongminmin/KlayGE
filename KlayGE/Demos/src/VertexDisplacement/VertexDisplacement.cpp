@@ -103,7 +103,7 @@ namespace
 			: rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
 		{
 			effect_ = LoadRenderEffect("VertexDisplacement.fx");
-			effect_->SetTexture("flag", LoadTGA(*(ResLocator::Instance().Locate("Flag.tga")->Load())));
+			effect_->ParameterByName("flag")->SetTexture(LoadTGA(*(ResLocator::Instance().Locate("Flag.tga")->Load())));
 			effect_->SetTechnique("VertexDisplacement");
 
 			rb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
@@ -179,7 +179,7 @@ void VertexDisplacement::InitObjects()
 	Matrix4 matProj;
 	MathLib::PerspectiveFovLH(matProj, PI / 4, 800.0f / 600, 0.1f, 20.0f);
 
-	flag->effect_->SetMatrix("worldviewproj", matView * matProj);
+	flag->effect_->ParameterByName("worldviewproj")->SetMatrix(matView * matProj);
 }
 
 void VertexDisplacement::Update()
@@ -188,7 +188,7 @@ void VertexDisplacement::Update()
 	SceneManager& sceneMgr(SceneManager::Instance());
 
 	static float currentAngle = 0;
-	flag->effect_->SetFloat("currentAngle", currentAngle);
+	flag->effect_->ParameterByName("currentAngle")->SetFloat(currentAngle);
 	currentAngle += 0.01f;
 	if (currentAngle > 2 * PI)
 	{

@@ -1,10 +1,10 @@
-粘土游戏引擎(KlayGE) 2.1.1
+粘土游戏引擎(KlayGE) 2.1.2
 
 Homepage: http://klayge.sourceforge.net
 E-Mail:	  enginedev@163.com
 OICQ:     33611210
 
-欢迎使用粘土游戏引擎 2.1.1
+欢迎使用粘土游戏引擎 2.1.2
 包含的组件：KlayGE头文件，KlayGE源代码，KlayGE的VS.NET 2003工程文件
 
 KlayGE是一个跨平台、插件结构的游戏引擎。
@@ -72,6 +72,10 @@ __________________________________________________________________
 
 
 发展历程
+
+2.1.2
+增加了BoneMesh
+增加了RenderEffectParameter
 
 2.1.1
 大量使用boost

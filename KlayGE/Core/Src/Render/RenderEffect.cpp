@@ -1,8 +1,11 @@
-// RenderEffect.hpp
-// KlayGE 渲染效果类 头文件
-// Ver 2.0.3
+// RenderEffect.cpp
+// KlayGE 渲染效果类 实现文件
+// Ver 2.1.2
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.1.2
+// 增加了Parameter (2004.5.26)
 //
 // 2.0.3
 // 初次建立 (2003.3.2)
@@ -37,45 +40,12 @@ namespace KlayGE
 		RenderEffectPtr Clone() const
 			{ return RenderEffect::NullObject(); }
 
-		void SetValue(const std::string& name, const void* data, UINT bytes)
-			{ }
-		void* GetValue(const std::string& name, UINT bytes) const
-			{ return NULL; }
-
-		void SetFloat(const std::string& name, float value)
-			{ }
-		float GetFloat(const std::string& name) const
-			{ return 0; }
-		void SetVector(const std::string& name, const Vector4& value)
-			{ }
-		Vector4 GetVector(const std::string& name) const
-			{ return Vector4::Zero(); }
-		void SetMatrix(const std::string& name, const Matrix4& value)
-			{ }
-		Matrix4 GetMatrix(const std::string& name) const
-			{ return Matrix4::Identity(); }
-		void SetMatrixArray(const std::string& name, const Matrix4* matrices, size_t count)
-			{ }
-		void GetMatrixArray(const std::string& name, Matrix4* matrices, size_t count)
-			{ }
-		void SetInt(const std::string& name, int value)
-			{ }
-		int GetInt(const std::string& name) const
-			{ return 0; }
-		void SetBool(const std::string& name, bool value)
-			{ }
-		bool GetBool(const std::string& name) const
-			{ return false; }
-		void SetString(const std::string& name, const std::string& value)
-			{ }
-		std::string GetString(const std::string& name) const
-		{
-			static std::string str;
-			return str;
-		}
-
-		void SetTexture(const std::string& name, const TexturePtr& tex)
-			{ }
+		RenderEffectParameterPtr Parameter(UINT index)
+			{ return RenderEffectParameter::NullObject(); }
+		RenderEffectParameterPtr ParameterByName(const std::string& name)
+			{ return RenderEffectParameter::NullObject(); }
+		RenderEffectParameterPtr ParameterBySemantic(const std::string& semantic)
+			{ return RenderEffectParameter::NullObject(); }
 
 		void SetTechnique(const std::string& techName)
 			{ }
@@ -95,6 +65,53 @@ namespace KlayGE
 		static RenderEffectPtr obj(new NullRenderEffect);
 		return obj;
 	}
+
+
+	class NullRenderEffectParameter : public RenderEffectParameter
+	{
+	public:
+		void SetFloat(float value)
+			{ }
+		float GetFloat() const
+			{ return 0; }
+		void SetVector(const Vector4& value)
+			{ }
+		Vector4 GetVector() const
+			{ return Vector4::Zero(); }
+		void SetMatrix(const Matrix4& value)
+			{ }
+		Matrix4 GetMatrix() const
+			{ return Matrix4::Identity(); }
+		void SetMatrixArray(const Matrix4* matrices, size_t count)
+			{ }
+		void GetMatrixArray(Matrix4* matrices, size_t count)
+			{ }
+		void SetInt(int value)
+			{ }
+		int GetInt() const
+			{ return 0; }
+		void SetBool(bool value)
+			{ }
+		bool GetBool() const
+			{ return false; }
+		void SetString(const std::string& value)
+			{ }
+		std::string GetString() const
+		{
+			static std::string str;
+			return str;
+		}
+
+		void SetTexture(const TexturePtr& tex)
+			{ }
+	};
+
+	RenderEffectParameterPtr RenderEffectParameter::NullObject()
+	{
+		static RenderEffectParameterPtr obj(new NullRenderEffectParameter);
+		return obj;
+	}
+
 
 	RenderEffectPtr LoadRenderEffect(const std::string& effectName)
 	{

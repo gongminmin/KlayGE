@@ -168,13 +168,13 @@ namespace KlayGE
 					rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
 	{
 		effect_ = LoadRenderEffect("Font.fx");
-		effect_->SetTexture("texFont", theTexture_);
+		effect_->ParameterByName("texFont")->SetTexture(theTexture_);
 		effect_->SetTechnique("fontTec");
 
 		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		const Viewport& viewport((*renderEngine.ActiveRenderTarget())->GetViewport());
-		effect_->SetInt("halfWidth", viewport.width / 2);
-		effect_->SetInt("halfHeight", viewport.height / 2);
+		effect_->ParameterByName("halfWidth")->SetInt(viewport.width / 2);
+		effect_->ParameterByName("halfHeight")->SetInt(viewport.height / 2);
 
 
 		rb_->AddVertexStream(VST_Positions, sizeof(float), 3);

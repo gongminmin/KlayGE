@@ -190,9 +190,6 @@
 							ObjectFile="$(IntDir)/$(InputName)1.obj"/>
 					</FileConfiguration>
 				</File>
-				<File
-					RelativePath=".\Src\Render\Shader.cpp">
-				</File>
 			</Filter>
 			<Filter
 				Name="头文件"
@@ -243,9 +240,6 @@
 					RelativePath="Include\KlayGE\SceneManager.hpp">
 				</File>
 				<File
-					RelativePath=".\Include\KlayGE\Shader.hpp">
-				</File>
-				<File
 					RelativePath="Include\KlayGE\Texture.hpp">
 				</File>
 				<File
@@ -263,13 +257,16 @@
 					RelativePath=".\Src\Kernel\Crc32.cpp">
 				</File>
 				<File
-					RelativePath="Src\Kernel\Engine.cpp">
-				</File>
-				<File
 					RelativePath="Src\Kernel\Memory.cpp">
 				</File>
 				<File
+					RelativePath=".\Src\Kernel\ResLocator.cpp">
+				</File>
+				<File
 					RelativePath=".\Src\Kernel\Util.cpp">
+				</File>
+				<File
+					RelativePath=".\Src\Kernel\VFile.cpp">
 				</File>
 			</Filter>
 			<Filter
@@ -288,10 +285,10 @@
 					RelativePath=".\Include\KlayGE\Config.hpp">
 				</File>
 				<File
-					RelativePath="Include\KlayGE\Crc32.hpp">
+					RelativePath=".\Include\KlayGE\Context.hpp">
 				</File>
 				<File
-					RelativePath="Include\KlayGE\Engine.hpp">
+					RelativePath="Include\KlayGE\Crc32.hpp">
 				</File>
 				<File
 					RelativePath="Include\KlayGE\icstring.hpp">
@@ -316,6 +313,9 @@
 				</File>
 				<File
 					RelativePath=".\Include\KlayGE\PreDeclare.hpp">
+				</File>
+				<File
+					RelativePath=".\Include\KlayGE\ResLocator.hpp">
 				</File>
 				<File
 					RelativePath=".\Include\KlayGE\ResPtr.hpp">
@@ -386,7 +386,7 @@
 				Name="源文件"
 				Filter="">
 				<File
-					RelativePath="Src\Math\Math.cpp">
+					RelativePath=".\Src\Math\Math.cpp">
 				</File>
 				<File
 					RelativePath=".\Src\Math\Random.cpp">

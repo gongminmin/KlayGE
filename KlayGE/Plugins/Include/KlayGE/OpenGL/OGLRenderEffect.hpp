@@ -32,25 +32,9 @@ namespace KlayGE
 
 		void Desc(UINT& parameters, UINT& techniques, UINT& functions);
 
-		void SetValue(const std::string& name, const void* data, UINT bytes);
-		void* GetValue(const std::string& name, UINT bytes) const;
-
-		void SetFloat(const std::string& name, float value);
-		float GetFloat(const std::string& name) const;
-		void SetVector(const std::string& name, const Vector4& value);
-		Vector4 GetVector(const std::string& name) const;
-		void SetMatrix(const std::string& name, const Matrix4& value);
-		Matrix4 GetMatrix(const std::string& name) const;
-		void SetMatrixArray(const std::string& name, const Matrix4* matrices, size_t count);
-		void GetMatrixArray(const std::string& name, Matrix4* matrices, size_t count);
-		void SetInt(const std::string& name, int value);
-		int GetInt(const std::string& name) const;
-		void SetBool(const std::string& name, bool value);
-		bool GetBool(const std::string& name) const;
-		void SetString(const std::string& name, const std::string& value);
-		std::string GetString(const std::string& name) const;
-
-		void SetTexture(const std::string& name, const TexturePtr& tex);
+		RenderEffectParameterPtr Parameter(UINT index);
+		RenderEffectParameterPtr ParameterByName(const std::string& name);
+		RenderEffectParameterPtr ParameterBySemantic(const std::string& semantic);
 
 		void SetTechnique(const std::string& technique);
 		void SetTechnique(UINT technique);
@@ -58,6 +42,27 @@ namespace KlayGE
 		UINT Begin(UINT flags = 0);
 		void Pass(UINT passNum);
 		void End();
+	};
+
+	class OGLRenderEffectParameter : public RenderEffectParameter
+	{
+	public:
+		void SetFloat(float value);
+		float GetFloat() const;
+		void SetVector(const Vector4& value);
+		Vector4 GetVector() const;
+		void SetMatrix(const Matrix4& value);
+		Matrix4 GetMatrix() const;
+		void SetMatrixArray(const Matrix4* matrices, size_t count);
+		void GetMatrixArray(Matrix4* matrices, size_t count);
+		void SetInt(int value);
+		int GetInt() const;
+		void SetBool(bool value);
+		bool GetBool() const;
+		void SetString(const std::string& value);
+		std::string GetString() const;
+
+		void SetTexture(const TexturePtr& tex);
 	};
 }
 
