@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="gb2312" ?>
+<?xml-stylesheet type="text/xsl" href="../common/xsl/index.xsl" ?>
+
+<说明>
+	<标题>App3DFramework</标题>
+	<描述>
+		App3DFramework是一个用于创建应用程序框架的基类。要建立一个应用程序只要继承这个类，然后重载InitObjects()，Update(), DelObjects()就可以构建一个应用程序。
+	</描述>
+	<函数>
+		<名称>App3DFramework</名称>
+		<锚点>#App3DFramework</锚点>
+		<原型>App3DFramework();</原型>
+		<描述>构造函数。</描述>
+	</函数>
+	<函数>
+		<名称>~App3DFramework</名称>
+		<锚点>#~App3DFramework</锚点>
+		<原型>virtual ~App3DFramework();</原型>
+		<描述>析构函数。</描述>
+	</函数>
+	<函数>
+		<名称>Create</名称>
+		<锚点>#Create</锚点>
+		<原型>virtual void Create(const String&amp; name, int width, int height,
+			int colorDepth, bool fullScreen, int left = 0, int top = 0, bool depthBuffer = true);</原型>
+		<描述>建立应用程序窗口。</描述>
+		<返回>无。</返回>
+		<参数描述>
+			<参数>
+				<类型>in</类型>
+				<名称>name</名称>
+				<描述>窗口标题。</描述>
+			</参数>
+			<参数>
+				<类型>in</类型>
+				<名称>width</名称>
+				<描述>窗口宽度。</描述>
+			</参数>
+			<参数>
+				<类型>in</类型>
+				<名称>height</名称>
+				<描述>窗口高度。</描述>
+			</参数>
+			<参数>
+				<类型>in</类型>
+				<名称>colorDepth</名称>
+				<描述>颜色位数。</描述>
+			</参数>
+			<参数>
+				<类型>in</类型>
+				<名称>fullScreen</名称>
+				<描述>是否全屏。</描述>
+			</参数>
+			<参数>
+				<类型>in</类型>
+				<名称>left</名称>
+				<描述>左坐标。</描述>
+			</参数>
+			<参数>
+				<类型>in</类型>
+				<名称>top</名称>
+				<描述>顶坐标。</描述>
+			</参数>
+			<参数>
+				<类型>in</类型>
+				<名称>depthBuffer</名称>
+				<描述>是否使用深度缓存。</描述>
+			</参数>
+		</参数描述>
+	</函数>
+	<函数>
+		<名称>Run</名称>
+		<锚点>#Run</锚点>
+		<原型>void Run();</原型>
+		<描述>消息循环。</描述>
+		<返回>无。</返回>
+	</函数>
+	<函数>
+		<名称>LookAt</名称>
+		<锚点>#LookAt</锚点>
+		<原型>void LookAt(const Vector3&amp; eye, const Vector3&amp; lookAt, const Vector3&amp; up = MakeVector(0.0f, 1.0f, 0.0f));</原型>
+		<描述>设置观察矩阵。</描述>
+		<返回>无。</返回>
+		<参数描述>
+			<参数>
+				<类型>in</类型>
+				<名称>eye</名称>
+				<描述>眼睛位置。</描述>
+			</参数>
+			<参数>
+				<类型>in</类型>
+				<名称>lookAt</名称>
+				<描述>视点位置。</描述>
+			</参数>
+			<参数>
+				<类型>in</类型>
+				<名称>up</名称>
+				<描述>上矢量。</描述>
+			</参数>
+		</参数描述>
+	</函数>
+	<函数>
+		<名称>Proj</名称>
+		<锚点>#Proj</锚点>
+		<原型>void Proj(float fNear, float fFar);</原型>
+		<描述>设置投射矩阵。</描述>
+		<返回>无。</返回>
+		<参数描述>
+			<参数>
+				<类型>in</类型>
+				<名称>fNear</名称>
+				<描述>近平面。</描述>
+			</参数>
+			<参数>
+				<类型>in</类型>
+				<名称>fFar</名称>
+				<描述>远平面。</描述>
+			</参数>
+		</参数描述>
+	</函数>
+	<函数>
+		<名称>InitObjects</名称>
+		<锚点>#InitObjects</锚点>
+		<原型>virtual void InitObjects();</原型>
+		<描述>初始化设备。</描述>
+		<返回>无。</返回>
+	</函数>
+	<函数>
+		<名称>Update</名称>
+		<锚点>#Update</锚点>
+		<原型>virtual void Update();</原型>
+		<描述>刷新。</描述>
+		<返回>无。</返回>
+	</函数>
+	<函数>
+		<名称>DelObjects</名称>
+		<锚点>#DelObjects</锚点>
+		<原型>virtual void DelObjects();</原型>
+		<描述>删除设备。</描述>
+		<返回>无。</返回>
+	</函数>
+</说明>
