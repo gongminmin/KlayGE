@@ -1,4 +1,4 @@
-// Pkt.hpp
+// LZSS.hpp
 // KlayGE 打包文件读取类 头文件
 // Ver 2.2.0
 // 版权所有(C) 龚敏敏, 2003-2004
@@ -17,13 +17,16 @@
 // 修改记录
 /////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _PKT_HPP
-#define _PKT_HPP
+#ifndef _LZSS_HPP
+#define _LZSS_HPP
+
+#include <functional>
 
 #include <KlayGE/MapVector.hpp>
 
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 
 #pragma comment(lib, "KlayGE_FileSystem_PackedFile.lib")
 
@@ -56,7 +59,23 @@ namespace KlayGE
 		#pragma pack(pop)
 	#endif
 
-	typedef MapVector<std::string, FileDes> DirTable;
+	// 忽略大小写比较字符串
+	/////////////////////////////////////////////////////////////////////////////////
+	class IgnoreCaseLessThan : public std::binary_function<std::string, std::string, bool>
+	{
+	public:
+		IgnoreCaseLessThan()
+		{
+		}
+
+		bool operator()(std::string const & lhs, std::string const & rhs) const
+		{
+			using boost::algorithm::to_upper_copy;
+			return to_upper_copy(lhs) < to_upper_copy(rhs);
+		}
+	};
+
+	typedef MapVector<std::string, FileDes, IgnoreCaseLessThan> DirTable;
 
 	enum FileAttrib
 	{
@@ -109,4 +128,4 @@ namespace KlayGE
 	};
 }
 
-#endif		// _UNPKT_HPP
+#endif		// _LZSS_HPP

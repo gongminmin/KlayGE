@@ -143,9 +143,9 @@ namespace KlayGE
 			{ return find(key) != end() }
 
 		std::pair<iterator, iterator> equal_range(Key const & key)
-			{ return std::equal_range(begin(), end(), k, compare_); }
+			{ return std::equal_range(begin(), end(), key, compare_); }
 		std::pair<const_iterator, const_iterator> equal_range(Key const & key) const
-			{ return std::equal_range(begin(), end(), k, compare_); }
+			{ return std::equal_range(begin(), end(), key, compare_); }
 
 		iterator erase(iterator where)
 			{ container_.erase(where); }

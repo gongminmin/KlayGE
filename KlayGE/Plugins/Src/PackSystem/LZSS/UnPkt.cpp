@@ -22,9 +22,8 @@
 #include <KlayGE/Util.hpp>
 
 #include <cassert>
-#include <cctype>
 #include <string>
-#include <algorithm>
+#include <vector>
 #include <sstream>
 
 #include <boost/crc.hpp>
@@ -122,45 +121,6 @@ namespace
 											// with extra F-1 bytes to facilitate string comparison
 	};
 
-	// 忽略大小写比较字符串
-	/////////////////////////////////////////////////////////////////////////////////
-	class IgnoreCaseCompare : public std::binary_function<std::string, std::string, bool>
-	{
-	public:
-		bool operator()(DirTable::value_type const & lhs, std::string const & rhs)
-		{
-			return this->Compare(lhs.first, rhs);
-		}
-
-		bool operator()(std::string const & lhs, DirTable::value_type const & rhs)
-		{
-			return this->Compare(lhs, rhs.first);
-		}
-
-	private:
-		static bool Compare(std::string const & lhs, std::string const & rhs)
-		{
-			if (lhs.length() != rhs.length())
-			{
-				return false;
-			}
-
-			uint32_t i(0);
-			while ((i < lhs.length())
-				&& (std::toupper(lhs[i]) == std::toupper(rhs[i])))
-			{
-				++ i;
-			}
-
-			if (i != lhs.length())
-			{
-				return false;
-			}
-
-			return true;
-		}
-	};
-
 	// 读入目录表
 	/////////////////////////////////////////////////////////////////////////////////
 	void ReadDirTable(DirTable& dirTable, std::istream& input)
@@ -242,16 +202,10 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void UnPkt::LocateFile(std::string const & pathName)
 	{
-		std::pair<DirTable::iterator, DirTable::iterator> iters = std::equal_range(dirTable_.begin(), dirTable_.end(),
-			pathName, IgnoreCaseCompare());
-		if (iters.first != iters.second)
-		{
-			curFile_ = iters.first;
-		}
-		else
-		{
-			assert(false);
-		}
+		DirTable::iterator iter = dirTable_.find(pathName);
+		assert(iter != dirTable_.end());
+
+		curFile_ = iter;
 	}
 
 	// 获取当前文件(解压过的)的字节数
