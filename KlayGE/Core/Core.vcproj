@@ -277,9 +277,6 @@
 					RelativePath=".\Include\KlayGE\Context.hpp">
 				</File>
 				<File
-					RelativePath="Include\KlayGE\icstring.hpp">
-				</File>
-				<File
 					RelativePath="Include\KlayGE\KlayGE.hpp">
 				</File>
 				<File

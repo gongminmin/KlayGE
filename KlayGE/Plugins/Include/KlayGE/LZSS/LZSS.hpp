@@ -72,11 +72,11 @@ namespace KlayGE
 	class Pkt : boost::noncopyable
 	{
 	public:
+		Pkt();
+
 		static void Encode(std::ostream& out, std::istream& in);
 
 		void Pack(std::string const & dirName, std::ostream& pktFile);
-
-		Pkt();
 	};
 
 
@@ -85,10 +85,11 @@ namespace KlayGE
 	class UnPkt : boost::noncopyable
 	{
 	public:
+		UnPkt();
+
 		static void UnPkt::Decode(std::ostream& out, std::istream& in);
 
 		void Open(boost::shared_ptr<std::istream> const & pktFile);
-		void Close();
 		
 		void LocateFile(std::string const & pathName);
 
@@ -97,9 +98,6 @@ namespace KlayGE
 
 		bool ReadCurFile(void* data);
 		void ReadCurFileCompressed(void* data);
-
-		UnPkt();
-		~UnPkt();
 
 	private:
 		boost::shared_ptr<std::istream>	file_;

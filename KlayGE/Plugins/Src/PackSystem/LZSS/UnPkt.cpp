@@ -124,26 +124,42 @@ namespace
 
 	// 忽略大小写比较字符串
 	/////////////////////////////////////////////////////////////////////////////////
-	bool IgnoreCaseCompare(std::string const & lhs, std::string const & rhs)
+	class IgnoreCaseCompare : public std::binary_function<std::string, std::string, bool>
 	{
-		if (lhs.length() != rhs.length())
+	public:
+		bool operator()(DirTable::value_type const & lhs, std::string const & rhs)
 		{
-			return false;
+			return this->Compare(lhs.first, rhs);
 		}
 
-		U32 i(0);
-		while ((i < lhs.length()) && (std::toupper(lhs[i]) == std::toupper(rhs[i])))
+		bool operator()(std::string const & lhs, DirTable::value_type const & rhs)
 		{
-			++ i;
+			return this->Compare(lhs, rhs.first);
 		}
 
-		if (i != lhs.length())
+	private:
+		static bool Compare(std::string const & lhs, std::string const & rhs)
 		{
-			return false;
-		}
+			if (lhs.length() != rhs.length())
+			{
+				return false;
+			}
 
-		return true;
-	}
+			U32 i(0);
+			while ((i < lhs.length())
+				&& (std::toupper(lhs[i]) == std::toupper(rhs[i])))
+			{
+				++ i;
+			}
+
+			if (i != lhs.length())
+			{
+				return false;
+			}
+
+			return true;
+		}
+	};
 
 	// 读入目录表
 	/////////////////////////////////////////////////////////////////////////////////
@@ -189,13 +205,6 @@ namespace KlayGE
 	{
 	}
 
-	// 析构函数
-	/////////////////////////////////////////////////////////////////////////////////
-	UnPkt::~UnPkt()
-	{
-		this->Close();
-	}
-
 	// LZSS解压
 	/////////////////////////////////////////////////////////////////////////////////
 	void UnPkt::Decode(std::ostream& out, std::istream& in)
@@ -231,18 +240,20 @@ namespace KlayGE
 		ReadDirTable(dirTable_, dt);
 	}
 
-	// 关闭打包文件
-	/////////////////////////////////////////////////////////////////////////////////
-	void UnPkt::Close()
-	{
-		file_.reset();
-	}
-
 	// 在打包文件中定位文件
 	/////////////////////////////////////////////////////////////////////////////////
 	void UnPkt::LocateFile(std::string const & pathName)
 	{
-		curFile_ = dirTable_.find(pathName);
+		std::pair<DirTable::iterator, DirTable::iterator> iters = std::equal_range(dirTable_.begin(), dirTable_.end(),
+			pathName, IgnoreCaseCompare());
+		if (iters.first != iters.second)
+		{
+			curFile_ = iters.first;
+		}
+		else
+		{
+			assert(false);
+		}
 	}
 
 	// 获取当前文件(解压过的)的字节数
@@ -299,6 +310,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	size_t UnPkt::CurFileCompressedSize() const
 	{
+		assert(curFile_ != dirTable_.end());
+
 		return curFile_->second.length;
 	}
 
@@ -307,6 +320,7 @@ namespace KlayGE
 	void UnPkt::ReadCurFileCompressed(void* data)
 	{
 		assert(data != NULL);
+		assert(curFile_ != dirTable_.end());
 
 		file_->seekg(mag_.FIStart + curFile_->second.start);
 		file_->read(static_cast<char*>(data), this->CurFileCompressedSize());
