@@ -20,6 +20,8 @@
 #include <string>
 #include <cassert>
 
+#include <KlayGE/PreDeclare.hpp>
+
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_Core_d.lib")
 #else
@@ -77,19 +79,15 @@ namespace KlayGE
 	{
 		switch (format)
 		{
-		case PF_DXT1:
-			return 4;
-
 		case PF_L8:
 		case PF_A8:
 		case PF_A4L4:
-		case PF_DXT3:
-		case PF_DXT5:
 			return 8;
 
 		case PF_R5G6B5:
 		case PF_A4R4G4B4:
 		case PF_R16F:
+		case PF_DXT1:
 			return 16;
 				
 		case PF_X8R8G8B8:
@@ -97,6 +95,8 @@ namespace KlayGE
 		case PF_A2R10G10B10:
 		case PF_G16R16F:
 		case PF_R32F:
+		case PF_DXT3:
+		case PF_DXT5:
 			return 32;
 
 		case PF_A16B16G16R16F:
@@ -247,6 +247,8 @@ namespace KlayGE
 		PixelFormat format_;
 		TextureUsage usage_;
 	};
+
+	TexturePtr LoadTexture(std::string const & tex_name);
 }
 
 #endif			// _TEXTURE_HPP

@@ -32,77 +32,6 @@ namespace
 	int const MAX_X = 8;
 	int const MAX_Y = 6;
 
-#pragma pack(push, 1)
-
-	struct
-	{
-		uint8_t		infoLength;
-		uint8_t		colorMapType;
-		uint8_t		imageTypeCode;
-
-		int16_t		colorMapEntry;
-		int16_t		colorMapLength;
-		uint8_t		colorMapBits;
-
-		int16_t		leftbottomX;
-		int16_t		leftbottomY;
-
-		int16_t		width;
-		int16_t		height;
-
-		uint8_t		pixelSize;
-		uint8_t		imageDescriptor;
-	} TGAHeader;
-
-#pragma pack(pop)
-
-
-	KlayGE::TexturePtr LoadTGA(std::istream& file)
-	{
-		try
-		{
-			file.read(reinterpret_cast<char*>(&TGAHeader), sizeof(TGAHeader));
-			file.seekg(TGAHeader.infoLength, std::ios_base::cur);
-
-			KlayGE::TexturePtr texture(Context::Instance().RenderFactoryInstance().MakeTexture(TGAHeader.width,
-				TGAHeader.height, 0, PF_X8R8G8B8));
-
-			vector<uint8_t> data(TGAHeader.width * TGAHeader.height * TGAHeader.pixelSize / 8);
-			file.read(reinterpret_cast<char*>(&data[0]), data.size());
-
-			vector<uint8_t> tgaData;
-			tgaData.reserve(TGAHeader.width * TGAHeader.height * 4);
-			for (short y = 0; y < TGAHeader.height; ++ y)
-			{
-				short line(y);
-				if (0 == (TGAHeader.imageDescriptor & 0x20))
-				{
-					// 图像从下到上
-					line = TGAHeader.height - y - 1;
-				}
-
-				for (short x = 0; x < TGAHeader.width; ++ x)
-				{
-					size_t const offset((line * TGAHeader.width + x) * (TGAHeader.pixelSize / 8));
-
-					tgaData.push_back(data[offset + 0]);
-					tgaData.push_back(data[offset + 1]);
-					tgaData.push_back(data[offset + 2]);
-					tgaData.push_back(0xFF);
-				}
-			}
-
-			texture->CopyMemoryToTexture(0, &tgaData[0], PF_X8R8G8B8, texture->Width(), texture->Height(), 0, 0);
-			texture->BuildMipSubLevels();
-
-			return texture;
-		}
-		catch (...)
-		{
-			return KlayGE::TexturePtr();
-		}
-	}
-
 	class Flag : public Renderable
 	{
 	public:
@@ -148,7 +77,7 @@ namespace
 			}
 
 			effect_ = LoadRenderEffect("VertexDisplacement.fx");
-			*(effect_->ParameterByName("flag")) = LoadTGA(*(ResLoader::Instance().Load("Flag.tga")));
+			*(effect_->ParameterByName("flag")) = LoadTexture("Flag.dds");
 			effect_->SetTechnique("VertexDisplacement");
 
 			rb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);

@@ -318,10 +318,9 @@ namespace KlayGE
 		boost::shared_ptr<IDirect3DSurface9> shadow = MakeCOMPtr(temp);
 
 		RECT srcRc = { 0, 0, width, height };
-		RECT dstRc = { xOffset, yOffset, xOffset + width, yOffset + height };
+		RECT dstRc = { xOffset, yOffset, xOffset + srcRc.right, yOffset + srcRc.bottom };
 		TIF(D3DXLoadSurfaceFromMemory(shadow.get(), NULL, &dstRc, data, ConvertFormat(pf),
 			width * PixelFormatBits(pf) / 8, NULL, &srcRc, D3DX_FILTER_NONE, 0));
-		TIF(this->D3DTexture()->AddDirtyRect(&dstRc));
 	}
 
 	void D3D9Texture::BuildMipSubLevels()

@@ -135,7 +135,7 @@ namespace KlayGE
 		if (IsCompressedFormat(format_))
 		{
 			int block_size;
-			if (format_ == PF_DXT1)
+			if (PF_DXT1 == format_)
 			{
 				block_size = 8;
 			}
@@ -214,7 +214,7 @@ namespace KlayGE
 		if (IsCompressedFormat(format_))
 		{
 			int block_size;
-			if (format_ == PF_DXT1)
+			if (PF_DXT1 == format_)
 			{
 				block_size = 8;
 			}
