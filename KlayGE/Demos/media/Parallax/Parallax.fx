@@ -93,7 +93,8 @@ float4 ParallaxPS(float2 texCoord0	: TEXCOORD0,
 
 	float3 bumpNormal = 2 * tex2D(normalMap, texUV) - 1;
 	float3 lightVec = 2 * L - 1;
-	float diffuseFactor = dot(lightVec, bumpNormal) * rsqrt(dot(lightVec, lightVec) * dot(bumpNormal, bumpNormal));
+	float diffuseFactor = dot(lightVec, bumpNormal)
+							* rsqrt(dot(lightVec, lightVec) * dot(bumpNormal, bumpNormal));
 
 	return float4(diffuse * diffuseFactor, 1);
 }
