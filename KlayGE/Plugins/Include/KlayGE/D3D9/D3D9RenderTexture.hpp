@@ -17,6 +17,8 @@ namespace KlayGE
 		bool RequiresTextureFlipping() const
 			{ return true; }
 	};
+
+	typedef SharePtr<D3D9RenderTexture> D3D9RenderTexturePtr;
 }
 
 #endif			// _D3D9RENDERTEXTURE_HPP

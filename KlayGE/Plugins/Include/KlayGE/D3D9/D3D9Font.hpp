@@ -56,8 +56,8 @@ namespace KlayGE
 
 		LOGFONTW logFont_;
 
-		RenderEffectPtr effect_;
-		TexturePtr		theTexture_;
+		RenderTechniquePtr	technique_;
+		TexturePtr			theTexture_;
 
 		CharInfoMapType charInfoMap_;
 		CharLRUType charLRU_;

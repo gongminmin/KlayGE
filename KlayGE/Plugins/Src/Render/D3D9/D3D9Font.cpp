@@ -109,13 +109,13 @@ namespace
 	class D3D9FontRenderable : public Renderable
 	{
 	public:
-		D3D9FontRenderable(const RenderEffectPtr& effect)
+		D3D9FontRenderable(const RenderTechniquePtr& tech)
 			: fontVB_(new VertexBuffer),
-				fontEffect_(effect)
+				fontTech_(tech)
 		{
 			fontVB_->type = VertexBuffer::BT_TriangleList;
 			fontVB_->numTextureCoordSets = 1;
-			fontVB_->numTextureDimensions[0] = 2;
+			fontVB_->texCoordSets[0].first = 2;
 			fontVB_->vertexOptions = (VertexBuffer::VO_Diffuses | VertexBuffer::VO_TextureCoords);
 		}
 
@@ -128,8 +128,8 @@ namespace
 		size_t NumSubs() const
 			{ return 1; }
 
-		RenderEffectPtr GetRenderEffect(size_t /*index*/)
-			{ return fontEffect_; }
+		RenderTechniquePtr GetRenderTechnique(size_t /*index*/)
+			{ return fontTech_; }
 
 		VertexBufferPtr GetVertexBuffer(size_t /*index*/)
 			{ return fontVB_; }
@@ -150,7 +150,7 @@ namespace
 
 			VertexBuffer::VerticesType& xyzs(fontVB_->vertices);
 			VertexBuffer::DiffusesType& clrs(fontVB_->diffuses);
-			VertexBuffer::TexCoordsType& texs(fontVB_->texCoords[0]);
+			VertexBuffer::TexCoordsType& texs(fontVB_->texCoordSets[0].second);
 			VertexBuffer::IndicesType& indices(fontVB_->indices);
 
 			xyzs.clear();
@@ -242,8 +242,8 @@ namespace
 		}
 
 	private:
-		RenderEffectPtr	fontEffect_;
-		VertexBufferPtr fontVB_;
+		RenderTechniquePtr	fontTech_;
+		VertexBufferPtr		fontVB_;
 	};
 }
 
@@ -253,18 +253,16 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D9Font::D3D9Font(const WString& fontName, U32 height, U32 flags)
 				: curX_(0), curY_(0),
-					theTexture_(Engine::RenderFactoryInstance().MakeTexture(1024, 1024, 1, PF_A4R4G4B4)),
-					effect_(Engine::RenderFactoryInstance().MakeRenderEffect(fontEffectStr))
+					theTexture_(Engine::RenderFactoryInstance().MakeTexture(1024, 1024, 1, PF_A4R4G4B4))
 	{
-		effect_->SetTexture("texFont", theTexture_);
+		RenderEffectPtr effect(Engine::RenderFactoryInstance().MakeRenderEffect(fontEffectStr));
+		effect->SetTexture("texFont", theTexture_);
+		technique_ = effect->GetTechnique(effect, "fontTec");
 
 		RenderEngine& renderEngine(Engine::RenderFactoryInstance().RenderEngineInstance());
 		const Viewport& viewport((*renderEngine.ActiveRenderTarget())->GetViewport());
-		effect_->SetInt("halfWidth", viewport.width / 2);
-		effect_->SetInt("halfHeight", viewport.height / 2);
-
-		effect_->Technique("fontTec");
-		effect_->Validate();
+		effect->SetInt("halfWidth", viewport.width / 2);
+		effect->SetInt("halfHeight", viewport.height / 2);
 
 		logFont_.lfHeight			= height;
 		logFont_.lfWidth			= 0;
@@ -445,7 +443,7 @@ namespace KlayGE
 
 		this->UpdateTexture(text);
 
-		SharePtr<D3D9FontRenderable> ret(new D3D9FontRenderable(effect_));
+		SharePtr<D3D9FontRenderable> ret(new D3D9FontRenderable(technique_));
 		ret->RenderText(this->FontHeight(), charInfoMap_, sx, sy, sz, xScale, yScale,
 			clr, text, flags);
 		return ret;

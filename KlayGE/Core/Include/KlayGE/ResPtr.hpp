@@ -141,7 +141,7 @@ namespace KlayGE
 					public OwnershipPolicy<typename StoragePolicy<T>::pointer>
 	{
 		typedef typename StoragePolicy<T>		SP;
-		typedef typename OwnershipPolicy<typename StoragePolicy<T>::pointer>	OP;
+		typedef typename OwnershipPolicy<typename SP::pointer>	OP;
 
 		template <typename U,
 			template <class> class OwnershipPolicy2, template <class> class StoragePolicy2>
@@ -170,7 +170,7 @@ namespace KlayGE
 		template <typename U>
 		ResPtr(const ResPtr<U, OwnershipPolicy, StoragePolicy>& rhs)
 			: SP(rhs), OP(rhs)
-			{ SP::GetRef() = OP::Clone(reinterpret_cast<const ResPtr<T, OwnershipPolicy, StoragePolicy>&>(rhs).Get()); }
+			{ SP::GetRef() = OP::Clone(static_cast<typename SP::pointer>(rhs.Get())); }
 
 		~ResPtr()
 			{ this->Release(); }

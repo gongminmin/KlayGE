@@ -28,7 +28,7 @@ namespace KlayGE
 	protected:
 		typedef std::pair<VertexBufferPtr, Matrix4>					RenderItemType;
 		typedef std::vector<RenderItemType, alloc<RenderItemType> >	RenderItemsType;
-		typedef MapVector<RenderEffectPtr, RenderItemsType>			RenderQueueType;
+		typedef MapVector<RenderTechniquePtr, RenderItemsType>		RenderQueueType;
 
 	public:
 		SceneManager();

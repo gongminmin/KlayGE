@@ -29,7 +29,7 @@
 namespace KlayGE
 {
 	RenderEngine::RenderEngine()
-		: renderEffect_(NullRenderEffectInstance()),
+		: renderTechnique_(NullRenderTechniqueInstance()),
 			renderPasses_(1)
 	{
 	}
@@ -83,13 +83,14 @@ namespace KlayGE
 
 	// ÉèÖÃäÖÈ¾×´Ì¬
 	/////////////////////////////////////////////////////////////////////////////////
-	void RenderEngine::SetRenderEffect(const RenderEffectPtr& effect)
+	void RenderEngine::SetRenderTechnique(const RenderTechniquePtr& tech)
 	{
-		if (renderEffect_ != effect)
+		if (renderTechnique_ != tech)
 		{
-			renderEffect_->End();
-			renderEffect_ = (!effect) ? NullRenderEffectInstance() : effect;
-			renderPasses_ = renderEffect_->Begin();
+			renderTechnique_->End();
+			renderTechnique_ = (!tech) ? NullRenderTechniqueInstance() : tech;
+			renderTechnique_->SetAsCurrent();
+			renderPasses_ = renderTechnique_->Begin();
 		}
 	}
 	

@@ -71,11 +71,26 @@ namespace KlayGE
 		void SetPixelShader(const String& name, U32 psHandle)
 			{ }
 
-		void Technique(const String& technique)
-			{ }
-		void Technique(UINT technique)
-			{ }
-		void Validate()
+		RenderTechniquePtr GetTechnique(const RenderEffectPtr& effect, const String& techName)
+			{ return NullRenderTechniqueInstance(); }
+		RenderTechniquePtr GetTechnique(const RenderEffectPtr& effect, UINT tech)
+			{ return NullRenderTechniqueInstance(); }
+	};
+
+	RenderEffectPtr NullRenderEffectInstance()
+	{
+		static RenderEffectPtr obj(new NullRenderEffect);
+		return obj;
+	}
+
+
+	class NullRenderTechnique : public RenderTechnique
+	{
+	public:
+		NullRenderTechnique()
+			{ effect_ = NullRenderEffectInstance(); }
+
+		void SetAsCurrent()
 			{ }
 
 		UINT Begin(UINT flags = 0)
@@ -86,9 +101,10 @@ namespace KlayGE
 			{ }
 	};
 
-	RenderEffectPtr NullRenderEffectInstance()
+	RenderTechniquePtr NullRenderTechniqueInstance()
 	{
-		static RenderEffectPtr obj(new NullRenderEffect);
+		static RenderTechniquePtr obj(new NullRenderTechnique);
 		return obj;
 	}
+\
 }

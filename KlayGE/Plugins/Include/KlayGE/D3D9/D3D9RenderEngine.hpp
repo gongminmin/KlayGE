@@ -127,6 +127,7 @@ namespace KlayGE
 
 		CullMode cullingMode_;
 		D3DCOLOR clearClr_;
+		U32 clearFlags_;
 
 		D3D9VBConverter vbConverter_;
 		D3D9IBConverter ibConverter_;

@@ -119,6 +119,9 @@
 				RelativePath=".\D3D9RenderEngine.cpp">
 			</File>
 			<File
+				RelativePath=".\D3D9RenderFactory.cpp">
+			</File>
+			<File
 				RelativePath=".\D3D9RenderTexture.cpp">
 			</File>
 			<File

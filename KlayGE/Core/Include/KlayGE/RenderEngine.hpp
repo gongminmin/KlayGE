@@ -138,9 +138,9 @@ namespace KlayGE
 
 		virtual void StartRendering() = 0;
 
-		void SetRenderEffect(const RenderEffectPtr& effect);
-		RenderEffectPtr GetRenderEffect() const
-			{ return renderEffect_; }
+		void SetRenderTechnique(const RenderTechniquePtr& tech);
+		RenderTechniquePtr GetRenderTechnique() const
+			{ return renderTechnique_; }
 
 		virtual void BeginFrame() = 0;
 		virtual void Render(const VertexBuffer& vb) = 0;
@@ -241,7 +241,7 @@ namespace KlayGE
 		RenderTargetList renderTargetList_;
 		RenderTargetListIterator activeRenderTarget_;
 
-		RenderEffectPtr renderEffect_;
+		RenderTechniquePtr renderTechnique_;
 		UINT renderPasses_;
 	};
 }

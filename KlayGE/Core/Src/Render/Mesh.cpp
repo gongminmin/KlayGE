@@ -9,6 +9,10 @@ namespace KlayGE
 	Mesh::Mesh()
 		: vb_(new VertexBuffer)
 	{
+		vb_->type					= VertexBuffer::BT_TriangleList;
+		vb_->vertexOptions			= VertexBuffer::VO_Normals | VertexBuffer::VO_TextureCoords;
+		vb_->numTextureCoordSets	= 1;
+		vb_->texCoordSets[0].first	= 2;
 	}
 
 	const WString& Mesh::Name() const
@@ -19,11 +23,6 @@ namespace KlayGE
 
 	VertexBufferPtr Mesh::GetVertexBuffer(size_t /*index*/)
 	{
-		vb_->type					= VertexBuffer::BT_TriangleList;
-		vb_->vertexOptions			= VertexBuffer::VO_Normals | VertexBuffer::VO_TextureCoords;
-		vb_->numTextureCoordSets	= 1;
-		vb_->numTextureDimensions[0] = 2;
-
 		return vb_;
 	}
 

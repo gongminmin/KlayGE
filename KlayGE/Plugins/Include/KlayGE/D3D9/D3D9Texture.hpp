@@ -14,12 +14,6 @@
 
 namespace KlayGE
 {
-	class D3D9Texture;
-	class D3D9RenderTexture;
-
-	typedef SharePtr<D3D9Texture>		D3D9TexturePtr;
-	typedef SharePtr<D3D9RenderTexture> D3D9RenderTexturePtr;
-
 	class D3D9Texture : public Texture
 	{
 	public:
@@ -46,6 +40,8 @@ namespace KlayGE
 
 		COMPtr<IDirect3DSurface9>	renderZBuffer_;		// The z-buffer for the render surface.
 	};
+
+	typedef SharePtr<D3D9Texture>		D3D9TexturePtr;
 }
 
 #endif			// _D3D9TEXTURE_HPP

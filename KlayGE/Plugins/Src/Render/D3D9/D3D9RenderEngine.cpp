@@ -237,7 +237,8 @@ namespace KlayGE
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D9RenderEngine::D3D9RenderEngine()
-						: cullingMode_(RenderEngine::Cull_None)
+						: cullingMode_(RenderEngine::Cull_None),
+							clearFlags_(D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER)
 	{
 		// Create our Direct3D object
 		d3d_ = COMPtr<IDirect3D9>(Direct3DCreate9(D3D_SDK_VERSION));
@@ -592,7 +593,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::BeginFrame()
 	{
-		TIF(d3dDevice_->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, clearClr_, 1, 0));
+		TIF(d3dDevice_->Clear(0, NULL, clearFlags_, clearClr_, 1, 0));
 
 		TIF(d3dDevice_->BeginScene());
 	}
@@ -620,7 +621,7 @@ namespace KlayGE
 	{
 		for (UINT i = 0; i < renderPasses_; ++ i)
 		{
-			renderEffect_->Pass(i);
+			renderTechnique_->Pass(i);
 			TIF(d3dDevice_->DrawPrimitive(primType, 0, primCount));
 		}
 	}
@@ -631,7 +632,7 @@ namespace KlayGE
 	{
 		for (UINT i = 0; i < renderPasses_; ++ i)
 		{
-			renderEffect_->Pass(i);
+			renderTechnique_->Pass(i);
 			TIF(d3dDevice_->DrawIndexedPrimitive(primType, 0, 0, vertexCount, 0, primCount));
 		}
 	}
@@ -876,13 +877,22 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	U32 D3D9RenderEngine::MaxVertexBlendMatrices()
 	{
-		return 1;//caps_.MaxVertexBlendMatrices;
+		return caps_.MaxVertexBlendMatrices;
 	}
 
 	// 打开模板缓冲区
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::StencilCheckEnabled(bool enabled)
 	{
+		if (enabled)
+		{
+			clearFlags_ |= D3DCLEAR_STENCIL;
+		}
+		else
+		{
+			clearFlags_ &= ~D3DCLEAR_STENCIL;
+		}
+
 		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILENABLE, enabled));
 	}
 

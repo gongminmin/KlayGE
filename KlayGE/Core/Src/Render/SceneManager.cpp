@@ -40,17 +40,17 @@ namespace KlayGE
 	{
 		for (size_t i = 0; i < obj->NumSubs(); ++ i)
 		{
-			const RenderEffectPtr& effect(obj->GetRenderEffect(i));
+			const RenderTechniquePtr& tech(obj->GetRenderTechnique(i));
 			const VertexBufferPtr& vb(obj->GetVertexBuffer(i));
 
-			RenderQueueType::iterator iter(renderQueue_.find(effect));
+			RenderQueueType::iterator iter(renderQueue_.find(tech));
 			if (iter != renderQueue_.end())
 			{
 				iter->second.push_back(RenderItemType(vb, worldMat));
 			}
 			else
 			{
-				renderQueue_.insert(RenderQueueType::value_type(effect,
+				renderQueue_.insert(RenderQueueType::value_type(tech,
 					RenderItemsType(1, RenderItemType(vb, worldMat))));
 			}
 		}
@@ -74,24 +74,13 @@ namespace KlayGE
 		for (RenderQueueType::iterator queueIter = renderQueue_.begin();
 			queueIter != renderQueue_.end(); ++ queueIter)
 		{
-			renderEngine.SetRenderEffect(queueIter->first);
+			renderEngine.SetRenderTechnique(queueIter->first);
 
 			for (RenderItemsType::iterator itemIter = queueIter->second.begin();
 				itemIter != queueIter->second.end(); ++ itemIter)
 			{
-				if (itemIter->second != Matrix4::Identity())
-				{
-					const Matrix4 oldWorld(renderEngine.WorldMatrix());
-					const Matrix4 newWorld(oldWorld * itemIter->second);
-
-					renderEngine.WorldMatrix(newWorld);
-					renderEngine.Render(*(itemIter->first));
-					renderEngine.WorldMatrix(oldWorld);
-				}
-				else
-				{
-					renderEngine.Render(*(itemIter->first));
-				}
+				renderEngine.WorldMatrix(itemIter->second);
+				renderEngine.Render(*(itemIter->first));
 			}
 		}
 		renderQueue_.clear();

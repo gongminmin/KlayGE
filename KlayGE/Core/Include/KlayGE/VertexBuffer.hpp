@@ -1,8 +1,11 @@
 // VertexBuffer.hpp
 // KlayGE VertexBuffer类 头文件
-// Ver 2.0.3
+// Ver 2.0.4
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.0.4
+// 修改了纹理坐标 (2004.3.16)
 //
 // 2.0.3
 // 去掉了VO_2D (2004.3.1)
@@ -71,13 +74,16 @@ namespace KlayGE
 		typedef std::vector<float, alloc<float> > VerticesType;
 		VerticesType vertices;
 
+
 		// Optional vertex normals for vertices (float {x, y, z} * numVertices).
 		typedef std::vector<float, alloc<float> > NormalsType;
 		NormalsType normals;
 
+
 		// Optional pointer to a list of diffuse vertex colors (float {r, g, b, a} * numVertices).
 		typedef std::vector<float, alloc<float> > DiffusesType;
 		DiffusesType diffuses;
+
 
 		// Optional pointer to a list of specular vertex colors (float {r, g, b, a} RGBA * numVertices)
 		typedef std::vector<float, alloc<float> > SpecularsType;
@@ -90,14 +96,14 @@ namespace KlayGE
 		// Number of dimensions in each corresponding texture coordinate set.
 		// @note
 		// There should be 1-4 dimensions on each set.
-		array<U8, 8> numTextureDimensions;
 
 		// Optional texture coordinates for vertices (float {u, [v], [w]} * numVertices).
 		// @remarks
 		// There can be up to 8 sets of texture coordinates, and the number of components per
 		// vertex depends on the number of texture dimensions (2 is most common).
 		typedef std::vector<float, alloc<float> > TexCoordsType;
-		array<TexCoordsType, 8> texCoords;
+		typedef array<std::pair<U8, TexCoordsType>, 8> TexCoordSetsType;
+		TexCoordSetsType texCoordSets;
 
 
 		typedef std::vector<float, alloc<float> > BlendWeightsType;
@@ -126,7 +132,7 @@ namespace KlayGE
 		VertexBuffer()
 			: vertexOptions(0),
 				numTextureCoordSets(1),
-				numTextureDimensions(2)
+				texCoordSets(TexCoordSetsType::value_type(2, TexCoordsType()))
 			{ }
 	};
 }

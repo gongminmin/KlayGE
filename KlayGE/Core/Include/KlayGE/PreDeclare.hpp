@@ -56,6 +56,8 @@ namespace KlayGE
 	typedef SharePtr<Renderable> RenderablePtr;
 	class RenderEffect;
 	typedef SharePtr<RenderEffect> RenderEffectPtr;
+	class RenderTechnique;
+	typedef SharePtr<RenderTechnique> RenderTechniquePtr;
 	class SceneManager;
 	class Texture;
 	typedef SharePtr<Texture> TexturePtr;
@@ -92,9 +94,6 @@ namespace KlayGE
 	typedef SharePtr<WaveFile> WaveFilePtr;
 	class VFile;
 	typedef SharePtr<VFile>	VFilePtr;
-	class DiskFile;
-	class MemFile;
-	class PackedFile;
 
 	class App3DFramework;
 
@@ -109,4 +108,4 @@ namespace KlayGE
 	typedef SharePtr<ShowEngine> ShowEnginePtr;
 }
 
-#endif			// _KLAYGEPREDECLARE_HPP
+#endif			// _PREDECLARE_HPP

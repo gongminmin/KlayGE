@@ -21,6 +21,8 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 
+#include <cassert>
+
 #include <KlayGE/D3D9/D3D9RenderEffect.hpp>
 
 namespace KlayGE
@@ -166,35 +168,45 @@ namespace KlayGE
 			reinterpret_cast<IDirect3DPixelShader9*>(psHandle)));
 	}
 
-	void D3D9RenderEffect::Technique(const String& technique)
+	RenderTechniquePtr D3D9RenderEffect::GetTechnique(const RenderEffectPtr& effect, const String& technique)
 	{
-		TIF(effect_->SetTechnique(effect_->GetTechniqueByName(technique.c_str())));
+		assert(this == effect.Get());
+		RenderTechniquePtr ret(new D3D9RenderTechnique(this->D3DXEffect()->GetTechniqueByName(technique.c_str()), effect));
+		return this->Validate(ret) ? ret : NullRenderTechniqueInstance();
 	}
 
-	void D3D9RenderEffect::Technique(UINT technique)
+	RenderTechniquePtr D3D9RenderEffect::GetTechnique(const RenderEffectPtr& effect, UINT technique)
 	{
-		TIF(effect_->SetTechnique(effect_->GetTechnique(technique)));
+		assert(this == effect.Get());
+		RenderTechniquePtr ret(new D3D9RenderTechnique(this->D3DXEffect()->GetTechnique(technique), effect));
+		return this->Validate(ret) ? ret : NullRenderTechniqueInstance();
 	}
 
-	void D3D9RenderEffect::Validate()
+	bool D3D9RenderEffect::Validate(const RenderTechniquePtr& technique)
 	{
-		TIF(effect_->ValidateTechnique(effect_->GetCurrentTechnique()));
+		return SUCCEEDED(effect_->ValidateTechnique(SharePtr<D3D9RenderTechnique>(technique)->D3DXHandle()));
 	}
 
-	UINT D3D9RenderEffect::Begin(UINT flags)
+
+	void D3D9RenderTechnique::SetAsCurrent()
+	{
+		TIF(SharePtr<D3D9RenderEffect>(effect_)->D3DXEffect()->SetTechnique(this->D3DXHandle()));
+	}
+
+	UINT D3D9RenderTechnique::Begin(UINT flags)
 	{
 		UINT passes;
-		TIF(effect_->Begin(&passes, flags));
+		TIF(SharePtr<D3D9RenderEffect>(effect_)->D3DXEffect()->Begin(&passes, flags));
 		return passes;
 	}
 
-	void D3D9RenderEffect::Pass(UINT passNum)
+	void D3D9RenderTechnique::Pass(UINT passNum)
 	{
-		TIF(effect_->Pass(passNum));
+		TIF(SharePtr<D3D9RenderEffect>(effect_)->D3DXEffect()->Pass(passNum));
 	}
 
-	void D3D9RenderEffect::End()
+	void D3D9RenderTechnique::End()
 	{
-		TIF(effect_->End());
+		TIF(SharePtr<D3D9RenderEffect>(effect_)->D3DXEffect()->End());
 	}
 }

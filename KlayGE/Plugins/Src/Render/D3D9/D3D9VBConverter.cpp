@@ -105,14 +105,16 @@ namespace KlayGE
 		{
 			for (U8 i = 0; i < vb.numTextureCoordSets; ++ i)
 			{
+				const std::pair<U8, VertexBuffer::TexCoordsType>& texCoord(vb.texCoordSets[i]);
+
 				element.Stream		= shaderDecl.size();
-				element.Type		= D3DDECLTYPE_FLOAT1 + vb.numTextureDimensions[i] - 1;
+				element.Type		= D3DDECLTYPE_FLOAT1 + texCoord.first - 1;
 				element.Usage		= D3DDECLUSAGE_TEXCOORD;
 				element.UsageIndex	= i;
 				shaderDecl.push_back(element);
 
-				this->UpdateAStream(element.Stream, textures_[i][vb.numTextureDimensions[i] - 1],
-					vb.numTextureDimensions[i] * sizeof(float), vb.NumVertices());
+				this->UpdateAStream(element.Stream, textures_[i][texCoord.first - 1],
+					texCoord.first * sizeof(float), vb.NumVertices());
 			}
 		}
 
@@ -240,11 +242,11 @@ namespace KlayGE
 
 		if (vb.vertexOptions & VertexBuffer::VO_TextureCoords)
 		{
-			for (U32 i = 0; i < vb.numTextureCoordSets; ++ i)
+			for (U8 i = 0; i < vb.numTextureCoordSets; ++ i)
 			{
-				const VertexBuffer::TexCoordsType& texCoords(vb.texCoords[i]);
-				this->CopyABuffer(textures_[i][vb.numTextureDimensions[i] - 1], &texCoords[0],
-					vb.numTextureDimensions[i] * sizeof(float), numVertices);
+				const std::pair<U8, VertexBuffer::TexCoordsType>& texCoord(vb.texCoordSets[i]);
+				this->CopyABuffer(textures_[i][texCoord.first - 1],
+					&(texCoord.second[0]), texCoord.first * sizeof(float), numVertices);
 			}
 		}
 
@@ -287,6 +289,9 @@ namespace KlayGE
 		U8* dest;
 		TIF(buffer.buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_DISCARD));
 		Engine::MemoryInstance().Cpy(dest, srcData, vertexSize * vertexNum);
+
+		const float* s = static_cast<const float*>(srcData);
+		float* d = reinterpret_cast<float*>(dest);
 		buffer.buffer->Unlock();
 	}
 }

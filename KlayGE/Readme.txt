@@ -1,10 +1,10 @@
-粘土游戏引擎(KlayGE) 2.0.3
+粘土游戏引擎(KlayGE) 2.0.4
 
 Homepage: http://home.g365.net/enginedev
 E-Mail:	  enginedev@163.com
 OICQ:     33611210
 
-欢迎使用粘土游戏引擎 2.0.2
+欢迎使用粘土游戏引擎 2.0.4
 包含的组件：KlayGE头文件，KlayGE源代码，KlayGE的VS.NET 2003工程文件
 
 KlayGE是一个插件结构的游戏引擎。
@@ -60,6 +60,9 @@ __________________________________________________________________
 
 
 发展历程
+
+2.0.4
+增加了RenderTechnique
 
 2.0.3 (2003.3.12)
 简化了VertexBuffer
