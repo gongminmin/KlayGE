@@ -1,8 +1,11 @@
 // RenderEffect.cpp
 // KlayGE 渲染效果类 实现文件
-// Ver 2.1.2
+// Ver 2.2.0
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.2.0
+// 统一使用istream作为资源标示符 (2004.10.26)
 //
 // 2.1.2
 // 增加了Parameter (2004.5.26)
@@ -18,10 +21,8 @@
 #include <KlayGE/Config.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlaygE/RenderFactory.hpp>
-
-#include <KlayGE/PackedFile/PackedFile.hpp>
-#include <KlayGE/DiskFile/DiskFile.hpp>
+#include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/ResLoader.hpp>
 
 #include <KlayGE/RenderEffect.hpp>
 
@@ -119,10 +120,12 @@ namespace KlayGE
 
 	RenderEffectPtr LoadRenderEffect(std::string const & effectName)
 	{
-		VFilePtr file(ResLocator::Instance().Locate(effectName)->Load());
+		boost::shared_ptr<std::istream> file(ResLoader::Instance().Load(effectName));
 
-		std::vector<char> data(file->Length());
-		file->Read(&data[0], data.size());
+		file->seekg(0, std::ios_base::end);
+		std::vector<char> data(file->tellg());
+		file->seekg(0);
+		file->read(&data[0], data.size());
 
 		return Context::Instance().RenderFactoryInstance().MakeRenderEffect(std::string(&data[0], data.size()));
 	}

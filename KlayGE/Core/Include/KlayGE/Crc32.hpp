@@ -27,7 +27,8 @@ namespace KlayGE
 	{
 		U32 CrcMem(U8 const * data, size_t len);
 		U32 CrcString(const std::string& str);
-		U32 CrcFile(VFile& file);
+
+		U32 CrcStream(std::istream& stream);
 	};
 }
 

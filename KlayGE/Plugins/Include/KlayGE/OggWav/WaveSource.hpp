@@ -16,7 +16,6 @@
 #include <KlayGE/PreDeclare.hpp>
 
 #include <KlayGE/AudioDataSource.hpp>
-#include <KlayGE/VFile.hpp>
 
 #pragma comment(lib, "KlayGE_AudioDataSource_OggWav.lib")
 
@@ -25,7 +24,7 @@ namespace KlayGE
 	class WaveSource : public AudioDataSource
 	{
 	public:
-		explicit WaveSource(VFilePtr const & file);
+		explicit WaveSource(ResIdentifierPtr const & file);
 
 		size_t Size();
 
@@ -33,7 +32,7 @@ namespace KlayGE
 		void Reset();
 
 	private:
-		VFilePtr	wavFile_;
+		ResIdentifierPtr	wavFile_;
 		size_t		dataOffset_;
 		size_t		size_;
 

@@ -1,9 +1,12 @@
 // Pkt.hpp
 // KlayGE 打包文件读取类 头文件
-// Ver 2.1.0
+// Ver 2.2.0
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
 // LZSS压缩算法的作者是 Haruhiko Okumura
+//
+// 2.2.0
+// 统一使用istream作为资源标示符 (2004.10.26)
 //
 // 2.1.0
 // 简化了目录表的表示法 (2004.4.14)
@@ -17,10 +20,10 @@
 #ifndef _PKT_HPP
 #define _PKT_HPP
 
-#include <KlayGE/VFile.hpp>
 #include <KlayGE/MapVector.hpp>
 
 #include <boost/utility.hpp>
+#include <boost/shared_ptr.hpp>
 
 #pragma comment(lib, "KlayGE_FileSystem_PackedFile.lib")
 
@@ -69,9 +72,9 @@ namespace KlayGE
 	class Pkt : boost::noncopyable
 	{
 	public:
-		static void Encode(VFile& Out, VFile& In);
+		static void Encode(std::ostream& out, std::istream& in);
 
-		void Pack(std::string const & dirName, VFile& pktFile);
+		void Pack(std::string const & dirName, std::ostream& pktFile);
 
 		Pkt();
 	};
@@ -82,9 +85,9 @@ namespace KlayGE
 	class UnPkt : boost::noncopyable
 	{
 	public:
-		static void Decode(VFile& Out, VFile& In);
+		static void UnPkt::Decode(std::ostream& out, std::istream& in);
 
-		void Open(VFilePtr const & pktFile);
+		void Open(boost::shared_ptr<std::istream> const & pktFile);
 		void Close();
 		
 		void LocateFile(std::string const & pathName);
@@ -99,7 +102,7 @@ namespace KlayGE
 		~UnPkt();
 
 	private:
-		VFilePtr	file_;
+		boost::shared_ptr<std::istream>	file_;
 
 		DirTable	dirTable_;
 		DirTable::iterator	curFile_;

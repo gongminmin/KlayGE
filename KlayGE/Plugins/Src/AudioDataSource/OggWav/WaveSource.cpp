@@ -79,7 +79,7 @@ namespace KlayGE
 
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
-	WaveSource::WaveSource(VFilePtr const & file)
+	WaveSource::WaveSource(ResIdentifierPtr const & file)
 	{
 		wavFile_ = file;
 
@@ -91,10 +91,10 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void WaveSource::ReadMMIO()
 	{
-		wavFile_->Seek(0, VFile::SM_Begin);
+		wavFile_->seekg(0);
 
 		WAVFileHdr fileHdr;
-		wavFile_->Read(&fileHdr, sizeof(fileHdr));
+		wavFile_->read(reinterpret_cast<char*>(&fileHdr), sizeof(fileHdr));
 
 		// 检查是否是一个有效的 Wave 文件
 		assert(frRIFF == fileHdr.chuck.id);
@@ -102,16 +102,22 @@ namespace KlayGE
 
 		PCMWaveFmt	pcmWaveFmt;
 		WAVChunkHdr chunkHdr;
-		while (wavFile_->Tell() != wavFile_->Length())
+		for (;;)
 		{
-			wavFile_->Read(&chunkHdr, sizeof(chunkHdr));
+			wavFile_->read(reinterpret_cast<char*>(&chunkHdr), sizeof(chunkHdr));
+
+			if (wavFile_->fail())
+			{
+				wavFile_->clear();
+				break;
+			}
 
 			switch (chunkHdr.id)
 			{
 			case frFmt:
-				wavFile_->Read(&pcmWaveFmt, sizeof(pcmWaveFmt));
+				wavFile_->read(reinterpret_cast<char*>(&pcmWaveFmt), sizeof(pcmWaveFmt));
 				assert(WaveFmt_PCM == pcmWaveFmt.wf.formatTag);
-				wavFile_->Seek(chunkHdr.size - sizeof(pcmWaveFmt), VFile::SM_Current);
+				wavFile_->seekg(chunkHdr.size - sizeof(pcmWaveFmt), std::ios_base::cur);
 
 				freq_ = pcmWaveFmt.wf.samplesPerSec;
 				if (1 == pcmWaveFmt.wf.channels)
@@ -139,17 +145,17 @@ namespace KlayGE
 				break;
 
 			case frData:
-				dataOffset_ = wavFile_->Tell();
+				dataOffset_ = wavFile_->tellg();
 				size_ = chunkHdr.size;
-				wavFile_->Seek(chunkHdr.size, VFile::SM_Current);
+				wavFile_->seekg(chunkHdr.size, std::ios_base::cur);
 				break;
 
 			default:
-				wavFile_->Seek(chunkHdr.size, VFile::SM_Current);
+				wavFile_->seekg(chunkHdr.size, std::ios_base::cur);
 				break;
 			}
 
-			wavFile_->Seek(chunkHdr.size & 1, VFile::SM_Current);
+			wavFile_->seekg(chunkHdr.size & 1, std::ios_base::cur);
 		}
 	}
 
@@ -159,14 +165,18 @@ namespace KlayGE
 	{
 		assert(data != NULL);
 
-		return wavFile_->Read(data, size);
+		std::istream::pos_type offset = wavFile_->tellg();
+		wavFile_->read(static_cast<char*>(data), size);
+		wavFile_->clear();
+
+		return wavFile_->tellg() - offset;
 	}
 
 	// 数据源复位
 	/////////////////////////////////////////////////////////////////////////////////
 	void WaveSource::Reset()
 	{
-		wavFile_->Seek(dataOffset_, VFile::SM_Begin);
+		wavFile_->seekg(dataOffset_);
 	}
 
 	// 返回数据源大小

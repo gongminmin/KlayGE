@@ -13,7 +13,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Math.hpp>
-#include <KlayGE/VFile.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <vector>
@@ -31,7 +30,7 @@ namespace KlayGE
 {
 	// ¹¹Ôìº¯Êý
 	/////////////////////////////////////////////////////////////////////////////////
-	OggSource::OggSource(VFilePtr const & file)
+	OggSource::OggSource(ResIdentifierPtr const & file)
 				: oggFile_(file)
 	{
 		ogg_sync_init(&oy_); // Now we can read pages
@@ -43,7 +42,10 @@ namespace KlayGE
 
 		// submit a 4k block to libvorbis' Ogg layer
 		char* buffer(ogg_sync_buffer(&oy_, READSIZE));
-		int bytes(static_cast<int>(oggFile_->Read(buffer, READSIZE)));
+		std::istream::pos_type offset = oggFile_->tellg();
+		oggFile_->read(buffer, READSIZE);
+		oggFile_->clear();
+		int bytes(oggFile_->tellg() - offset);
 		ogg_sync_wrote(&oy_, bytes);
 
 		// Get the first page
@@ -100,8 +102,11 @@ namespace KlayGE
 			}
 
 			// no harm in not checking before adding more
-			buffer = ogg_sync_buffer(&oy_, 4096);
-			bytes = static_cast<int>(oggFile_->Read(buffer, 4096));
+			buffer = ogg_sync_buffer(&oy_, READSIZE);
+			offset = oggFile_->tellg();
+			oggFile_->read(buffer, READSIZE);
+			oggFile_->clear();
+			bytes = oggFile_->tellg() - offset;
 			ogg_sync_wrote(&oy_, bytes);
 		}
 
@@ -219,13 +224,16 @@ namespace KlayGE
 			if (leftsamples > 0)
 			{
 				char* buffer(ogg_sync_buffer(&oy_, READSIZE));
-				int bytes(static_cast<int>(oggFile_->Read(buffer, READSIZE)));
-				ogg_sync_wrote(&oy_, bytes);
-
-				if (0 == bytes)
+				std::istream::pos_type offset = oggFile_->tellg();
+				oggFile_->read(buffer, READSIZE);
+				
+				if (oggFile_->fail())
 				{
 					leftsamples = 0;
 				}
+
+				int bytes(oggFile_->tellg() - offset);
+				ogg_sync_wrote(&oy_, bytes);
 			}
 		}
 
@@ -243,6 +251,6 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OggSource::Reset()
 	{
-		oggFile_->Rewind();
+		oggFile_->seekg(0);
 	}
 }

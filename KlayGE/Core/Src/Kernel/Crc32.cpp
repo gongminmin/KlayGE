@@ -1,8 +1,11 @@
 // Crc32.cpp
 // KlayGE CRC32 实现文件
-// Ver 1.2.8.10
-// 版权所有(C) 龚敏敏, 2002
-// Homepage: http://www.enginedev.com
+// Ver 2.2.0
+// 版权所有(C) 龚敏敏, 2002-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.2.0
+// 去掉了CrcFile，增加了CrcStream
 //
 // 1.2.8.10
 // 用string代替字符串指针 (2002.10.27)
@@ -14,7 +17,6 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/VFile.hpp>
 
 #include <cassert>
 
@@ -160,23 +162,18 @@ namespace KlayGE
 		return CrcMem(reinterpret_cast<const U8*>(str.data()), str.length());
 	}
 
-	// 建立文件的Crc32
+	// 建立输入流的Crc32
 	/////////////////////////////////////////////////////////////////////////////////
-	U32 Crc32::CrcFile(VFile& file)
+	U32 Crc32::CrcStream(std::istream& stream)
 	{
-		// 读取文件的缓冲区大小
-		const U32 MAX_BUFFER_SIZE(4096);
-
 		U32 crc32(0xFFFFFFFF);
 
-		U8 buf[MAX_BUFFER_SIZE];
-		size_t count(file.Read(buf, sizeof(buf)));
-		while (0 != count)
+		for (std::istreambuf_iterator<char> iter(stream); iter != std::istreambuf_iterator<char>(); ++ iter)
 		{
-			crc32 = CalcCrc32(buf, count, crc32);
-
-			count = file.Read(buf, sizeof(buf));
+			crc32 = (crc32 >> 8) ^ crc32Table[*iter ^ (crc32 & 0x000000FF)];
 		}
+
+		stream.clear();
 
 		return ~crc32;
 	}

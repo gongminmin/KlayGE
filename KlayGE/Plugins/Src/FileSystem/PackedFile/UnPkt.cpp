@@ -1,8 +1,11 @@
 // Unpkt.cpp
 // KlayGE 打包文件读取类 实现文件
-// Ver 2.1.0
+// Ver 2.2.0
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.2.0
+// 统一使用istream作为资源标示符 (2004.10.26)
 //
 // 2.1.0
 // 简化了目录表的表示法 (2004.4.14)
@@ -22,8 +25,8 @@
 #include <cctype>
 #include <string>
 #include <algorithm>
+#include <sstream>
 
-#include <KlayGE/MemFile/MemFile.hpp>
 #include <KlayGE/PackedFile/Pkt.hpp>
 
 namespace
@@ -65,21 +68,37 @@ namespace
 
 	// 读入目录表
 	/////////////////////////////////////////////////////////////////////////////////
-	void ReadDirTable(DirTable& dirTable, VFile& input)
+	void ReadDirTable(DirTable& dirTable, std::istream& input)
 	{
 		using namespace KlayGE;
 
-		while (input.Tell() != input.Length())
+		for (;;)
 		{
 			U32 len;
-			input.Read(&len, sizeof(len));
+			input.read(reinterpret_cast<char*>(&len), sizeof(len));
+			if (input.fail())
+			{
+				break;
+			}
+
 			std::vector<char> str(len);
-			input.Read(&str[0], str.size());
+			input.read(&str[0], str.size());
+			if (input.fail())
+			{
+				break;
+			}
 
 			FileDes fd;
-			input.Read(&fd, sizeof(fd));
+			input.read(reinterpret_cast<char*>(&fd), sizeof(fd));
+			if (input.fail())
+			{
+				break;
+			}
+
 			dirTable.insert(std::make_pair(std::string(str.begin(), str.end()), fd));
 		}
+
+		input.clear();
 	}
 }
 
@@ -100,7 +119,7 @@ namespace KlayGE
 
 	// LZSS解压
 	/////////////////////////////////////////////////////////////////////////////////
-	void UnPkt::Decode(VFile& output, VFile& input)
+	void UnPkt::Decode(std::ostream& out, std::istream& in)
 	{
 		U32 r(N - F);
 		std::fill_n(textBuf, r, ' ');
@@ -111,44 +130,42 @@ namespace KlayGE
 		{
 			if (0 == ((flags >>= 1) & 256))
 			{
-				if (input.Tell() >= input.Length())
+				in.read(reinterpret_cast<char*>(&c), sizeof(c));
+				if (in.fail())
 				{
 					break;
 				}
-
-				input.Read(&c, 1);
 
 				flags = c | 0xFF00;		// uses higher byte cleverly
 											// to count eight
 			}
 			if (flags & 1)
 			{
-				if (input.Tell() >= input.Length())
+				in.read(reinterpret_cast<char*>(&c), sizeof(c));
+				if (in.fail())
 				{
 					break;
 				}
 
-				input.Read(&c, 1);
-
-				output.Write(&c, 1);
+				out.write(reinterpret_cast<char*>(&c), sizeof(c));
 				textBuf[r] = c;
 				++ r;
 				r &= (N - 1);
 			}
 			else
 			{
-				if (input.Tell() >= input.Length())
+				in.read(reinterpret_cast<char*>(&c), sizeof(c));
+				if (in.fail())
 				{
 					break;
 				}
-				input.Read(&c, 1);
 				U32 c1(c);
 
-				if (input.Tell() >= input.Length())
+				in.read(reinterpret_cast<char*>(&c), sizeof(c));
+				if (in.fail())
 				{
 					break;
 				}
-				input.Read(&c, 1);
 				U32 c2(c);
 
 				c1 |= ((c2 & 0xF0) << 4);
@@ -156,7 +173,7 @@ namespace KlayGE
 				for (U32 k = 0; k <= c2; ++ k)
 				{
 					c = textBuf[(c1 + k) & (N - 1)];
-					output.Write(&c, 1);
+					out.write(reinterpret_cast<char*>(&c), sizeof(c));
 					textBuf[r] = c;
 					++ r;
 					r &= (N - 1);
@@ -164,31 +181,33 @@ namespace KlayGE
 			}
 		}
 
-		output.Rewind();
+		in.clear();
 	}
 
 	// 打开打包文件
 	/////////////////////////////////////////////////////////////////////////////////
-	void UnPkt::Open(VFilePtr const & pktFile)
+	void UnPkt::Open(boost::shared_ptr<std::istream> const & pktFile)
 	{
-		this->Close();
-
 		file_ = pktFile;
 
-		file_->Read(&mag_, sizeof(mag_));
+		file_->read(reinterpret_cast<char*>(&mag_), sizeof(mag_));
 		Verify(MakeFourCC<'p', 'k', 't', ' '>::value == mag_.magic);
 		Verify(3 == mag_.ver);
 
-		file_->Seek(mag_.DTStart, VFile::SM_Begin);
+		file_->seekg(mag_.DTStart);
 
-		MemFile dtCom;
-		dtCom.CopyFrom(*file_, mag_.DTLength);
+		std::stringstream dtCom;
+		{
+			std::vector<char> temp(mag_.DTLength);
+			file_->read(&temp[0], temp.size());
+			dtCom.write(&temp[0], temp.size());
+		}
 
-		MemFile dt;
-		dtCom.Rewind();
+		std::stringstream dt;
+		dtCom.seekp(0);
 		Decode(dt, dtCom);
 
-		dt.Rewind();
+		dt.seekp(0);
 		ReadDirTable(dirTable_, dt);
 	}
 
@@ -196,7 +215,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void UnPkt::Close()
 	{
-		file_ = VFilePtr();
+		file_.reset();
 	}
 
 	// 在打包文件中定位文件
@@ -222,22 +241,27 @@ namespace KlayGE
 		assert(data != NULL);
 		assert(curFile_ != dirTable_.end());
 
-		file_->Seek(mag_.FIStart + curFile_->second.start, VFile::SM_Begin);
+		file_->seekg(mag_.FIStart + curFile_->second.start);
 
 		if (curFile_->second.attr & FA_UnCompressed)
 		{
-			file_->Read(data, this->CurFileSize());
+			file_->read(static_cast<char*>(data), this->CurFileSize());
 		}
 		else
 		{
-			MemFile chunk;
-			chunk.CopyFrom(*file_, this->CurFileCompressedSize());
+			std::stringstream chunk;
+			{
+				std::vector<char> temp(this->CurFileCompressedSize());
+				file_->read(&temp[0], temp.size());
+				chunk.write(&temp[0], temp.size());
+			}
 
-			MemFile out;
-			chunk.Rewind();
+			std::stringstream out;
+			chunk.seekp(0);
 			Decode(out, chunk);
 
-			out.Read(data, out.Length());
+			std::copy(std::istreambuf_iterator<char>(out), std::istreambuf_iterator<char>(),
+				static_cast<char*>(data));
 		}
 
 		if (Crc32::CrcMem(static_cast<U8*>(data), this->CurFileSize())
@@ -262,7 +286,7 @@ namespace KlayGE
 	{
 		assert(data != NULL);
 
-		file_->Seek(mag_.FIStart + curFile_->second.start, VFile::SM_Begin);
-		file_->Read(data, this->CurFileCompressedSize());
+		file_->seekg(mag_.FIStart + curFile_->second.start);
+		file_->read(static_cast<char*>(data), this->CurFileCompressedSize());
 	}
 }

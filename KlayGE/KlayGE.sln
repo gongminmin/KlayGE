@@ -19,23 +19,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "音频数据源-Ogg Wav", "Plugi
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "文件系统-DiskFile", "Plugins\Src\FileSystem\DiskFile\DiskFile.vcproj", "{8C58A2C1-E1CD-4840-A964-48F3485F2004}"
-	ProjectSection(ProjectDependencies) = postProject
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "文件系统-MemFile", "Plugins\Src\FileSystem\MemFile\MemFile.vcproj", "{8C58A2C1-E1CD-4840-A964-48F3485F2004}"
-	ProjectSection(ProjectDependencies) = postProject
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "文件系统-PackedFile", "Plugins\Src\FileSystem\PackedFile\PackedFile.vcproj", "{8C58A2C1-E1CD-4840-A964-48F3485F2004}"
-	ProjectSection(ProjectDependencies) = postProject
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "应用程序层", "AppLayer\AppLayer.vcproj", "{E76027F9-0E7B-4B3D-80C9-50E64E0BC5AD}"
-	ProjectSection(ProjectDependencies) = postProject
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "纹理格式-KlayTX", "Plugins\Src\Texture\KlayTX\KlayTX.vcproj", "{88AE3603-38C0-48D1-BCC2-34ABC261788E}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
@@ -56,6 +40,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "渲染引擎-OpenGL", "Plugins\
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "八叉树场景管理-OCTree", "Plugins\Src\Scene\OCTree\OCTree.vcproj", "{6D03BA3A-EDF0-47EF-A008-23A87502AD55}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "文件系统-PackedFile", "Plugins\Src\FileSystem\PackedFile\PackedFile.vcproj", "{8C58A2C1-E1CD-4840-A964-48F3485F2004}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
@@ -85,26 +73,10 @@ Global
 		{166D9F36-D985-45FA-B467-8E19554F6A94}.Debug.Build.0 = Debug|Win32
 		{166D9F36-D985-45FA-B467-8E19554F6A94}.Release.ActiveCfg = Release|Win32
 		{166D9F36-D985-45FA-B467-8E19554F6A94}.Release.Build.0 = Release|Win32
-		{8C58A2C1-E1CD-4840-A964-48F3485F2004}.Debug.ActiveCfg = Debug|Win32
-		{8C58A2C1-E1CD-4840-A964-48F3485F2004}.Debug.Build.0 = Debug|Win32
-		{8C58A2C1-E1CD-4840-A964-48F3485F2004}.Release.ActiveCfg = Release|Win32
-		{8C58A2C1-E1CD-4840-A964-48F3485F2004}.Release.Build.0 = Release|Win32
-		{8C58A2C1-E1CD-4840-A964-48F3485F2004}.Debug.ActiveCfg = Debug|Win32
-		{8C58A2C1-E1CD-4840-A964-48F3485F2004}.Debug.Build.0 = Debug|Win32
-		{8C58A2C1-E1CD-4840-A964-48F3485F2004}.Release.ActiveCfg = Release|Win32
-		{8C58A2C1-E1CD-4840-A964-48F3485F2004}.Release.Build.0 = Release|Win32
-		{8C58A2C1-E1CD-4840-A964-48F3485F2004}.Debug.ActiveCfg = Debug|Win32
-		{8C58A2C1-E1CD-4840-A964-48F3485F2004}.Debug.Build.0 = Debug|Win32
-		{8C58A2C1-E1CD-4840-A964-48F3485F2004}.Release.ActiveCfg = Release|Win32
-		{8C58A2C1-E1CD-4840-A964-48F3485F2004}.Release.Build.0 = Release|Win32
 		{E76027F9-0E7B-4B3D-80C9-50E64E0BC5AD}.Debug.ActiveCfg = Debug|Win32
 		{E76027F9-0E7B-4B3D-80C9-50E64E0BC5AD}.Debug.Build.0 = Debug|Win32
 		{E76027F9-0E7B-4B3D-80C9-50E64E0BC5AD}.Release.ActiveCfg = Release|Win32
 		{E76027F9-0E7B-4B3D-80C9-50E64E0BC5AD}.Release.Build.0 = Release|Win32
-		{88AE3603-38C0-48D1-BCC2-34ABC261788E}.Debug.ActiveCfg = Debug|Win32
-		{88AE3603-38C0-48D1-BCC2-34ABC261788E}.Debug.Build.0 = Debug|Win32
-		{88AE3603-38C0-48D1-BCC2-34ABC261788E}.Release.ActiveCfg = Release|Win32
-		{88AE3603-38C0-48D1-BCC2-34ABC261788E}.Release.Build.0 = Release|Win32
 		{2C79C4F4-7C71-4B60-967B-80FF158E160E}.Debug.ActiveCfg = Debug|Win32
 		{2C79C4F4-7C71-4B60-967B-80FF158E160E}.Debug.Build.0 = Debug|Win32
 		{2C79C4F4-7C71-4B60-967B-80FF158E160E}.Release.ActiveCfg = Release|Win32
@@ -125,6 +97,10 @@ Global
 		{6D03BA3A-EDF0-47EF-A008-23A87502AD55}.Debug.Build.0 = Debug|Win32
 		{6D03BA3A-EDF0-47EF-A008-23A87502AD55}.Release.ActiveCfg = Release|Win32
 		{6D03BA3A-EDF0-47EF-A008-23A87502AD55}.Release.Build.0 = Release|Win32
+		{8C58A2C1-E1CD-4840-A964-48F3485F2004}.Debug.ActiveCfg = Debug|Win32
+		{8C58A2C1-E1CD-4840-A964-48F3485F2004}.Debug.Build.0 = Debug|Win32
+		{8C58A2C1-E1CD-4840-A964-48F3485F2004}.Release.ActiveCfg = Release|Win32
+		{8C58A2C1-E1CD-4840-A964-48F3485F2004}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection

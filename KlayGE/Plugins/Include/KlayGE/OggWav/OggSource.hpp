@@ -26,7 +26,7 @@ namespace KlayGE
 	class OggSource : public AudioDataSource
 	{
 	public:
-		explicit OggSource(VFilePtr const & file);
+		explicit OggSource(ResIdentifierPtr const & file);
 		~OggSource();
 
 		size_t Size();
@@ -35,7 +35,7 @@ namespace KlayGE
 		void Reset();
 
 	private:
-		VFilePtr	oggFile_;
+		ResIdentifierPtr	oggFile_;
 
 		ogg_sync_state   oy_;	// sync and verify incoming physical bitstream
 		ogg_stream_state os_;	// take physical pages, weld into a logical stream of packets

@@ -261,13 +261,10 @@
 					RelativePath=".\Src\Kernel\Crc32.cpp">
 				</File>
 				<File
-					RelativePath=".\Src\Kernel\ResLocator.cpp">
+					RelativePath=".\Src\Kernel\ResLoader.cpp">
 				</File>
 				<File
 					RelativePath=".\Src\Kernel\Util.cpp">
-				</File>
-				<File
-					RelativePath=".\Src\Kernel\VFile.cpp">
 				</File>
 			</Filter>
 			<Filter
@@ -301,7 +298,7 @@
 					RelativePath=".\Include\KlayGE\PreDeclare.hpp">
 				</File>
 				<File
-					RelativePath=".\Include\KlayGE\ResLocator.hpp">
+					RelativePath=".\Include\KlayGE\ResLoader.hpp">
 				</File>
 				<File
 					RelativePath=".\Include\KlayGE\SetVector.hpp">
@@ -314,9 +311,6 @@
 				</File>
 				<File
 					RelativePath=".\Include\KlayGE\Util.hpp">
-				</File>
-				<File
-					RelativePath="Include\KlayGE\VFile.hpp">
 				</File>
 			</Filter>
 		</Filter>

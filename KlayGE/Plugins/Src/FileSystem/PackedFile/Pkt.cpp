@@ -1,9 +1,12 @@
 // Pkt.cpp
 // KlayGE 文件打包类
-// Ver 2.1.3
+// Ver 2.2.0
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
 // LZSS压缩算法的作者是Haruhiko Okumura
+//
+// 2.2.0
+// 统一使用istream作为资源标示符 (2004.10.26)
 //
 // 2.1.3
 // 修正了CRC错误的bug
@@ -21,15 +24,14 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Crc32.hpp>
 #include <KlayGE/Util.hpp>
-#include <KlayGE/VFile.hpp>
 
 #include <cassert>
 #include <string>
 #include <algorithm>
 #include <vector>
+#include <sstream>
+#include <fstream>
 
-#include <KlayGE/DiskFile/DiskFile.hpp>
-#include <KlayGE/MemFile/MemFile.hpp>
 #include <KlayGE/PackedFile/Pkt.hpp>
 
 using namespace std;
@@ -201,7 +203,7 @@ namespace
 
 	// 输出目录表
 	/////////////////////////////////////////////////////////////////////////////////
-	void WriteDirTable(KlayGE::VFile& out, KlayGE::DirTable const & dirTable)
+	void WriteDirTable(std::ostream& out, KlayGE::DirTable const & dirTable)
 	{
 		using namespace KlayGE;
 
@@ -211,16 +213,16 @@ namespace
 
 			std::string const & fileName(iter->first);
 			U32 const temp(static_cast<U32>(fileName.length()));
-			out.Write(&temp, sizeof(temp));
-			out.Write(&fileName[0], temp);
+			out.write(reinterpret_cast<const char*>(&temp), sizeof(temp));
+			out.write(&fileName[0], temp);
 
-			out.Write(&fd, sizeof(fd));
+			out.write(reinterpret_cast<const char*>(&fd), sizeof(fd));
 		}
 	}
 
 	// 根据树型结构打包目录
 	/////////////////////////////////////////////////////////////////////////////////
-	void Compress(KlayGE::VFile& outFile, DirTable& dirTable, std::string const & rootName,
+	void Compress(std::ostream& outFile, DirTable& dirTable, std::string const & rootName,
 		std::vector<std::string> const & files)
 	{
 		using namespace KlayGE;
@@ -229,35 +231,34 @@ namespace
 
 		for (std::vector<std::string>::const_iterator iter = files.begin(); iter != files.end(); ++ iter)
 		{
-			DiskFile openFile(rootName + '/' + *iter, VFile::OM_Read);
+			std::ifstream in((rootName + '/' + *iter).c_str(), std::ios_base::binary);
 
 			FileDes fd;
-			fd.DeComLength = static_cast<U32>(openFile.Length());
-			fd.crc32 = Crc32::CrcFile(openFile);
-			openFile.Rewind();
+			fd.crc32 = Crc32::CrcStream(in);
+			fd.DeComLength = static_cast<U32>(in.tellg());
+			in.seekg(0);
 
-			MemFile in;
-			in.CopyFrom(openFile, fd.DeComLength);
-
-			openFile.Close();
-
-			MemFile out;
-			in.Rewind();
+			std::stringstream out;
 			Pkt::Encode(out, in);
-			if (out.Length() >= in.Length())
+			
+			std::istream* p = &out;
+			if (out.tellp() >= in.tellg())
 			{
 				fd.attr = FA_UnCompressed;
-				out.CopyFrom(in, in.Length());
+				p = &in;
 			}
 
-			fd.length	= static_cast<U32>(out.Length());
+			p->seekg(0, std::ios_base::end);
+			fd.length	= static_cast<U32>(p->tellg());
 			fd.start	= curPos;
 			curPos += fd.length;
 
 			dirTable.insert(std::make_pair(*iter, fd));
 
-			out.Rewind();
-			outFile.CopyFrom(out, fd.length);
+			p->seekg(0);
+			std::vector<char> temp(fd.length);
+			p->read(&temp[0], temp.size());
+			outFile.write(&temp[0], temp.size());
 		}
 	}
 
@@ -317,16 +318,12 @@ namespace KlayGE
 
 	// 用LZSS编码
 	/////////////////////////////////////////////////////////////////////////////////
-	void Pkt::Encode(VFile& out, VFile& in)
+	void Pkt::Encode(std::ostream& out, std::istream& in)
 	{
-		if (0 == in.Length())
-		{
-			return;  // text of size zero
-		}
-
 		int lastMatchLength, codeBufPtr;
 		U8 c;
-		U8 codeBuf[17], mask;
+		U8 codeBuf[17];
+		U8 mask;
 
 		InitTree();			// initialize trees
 		codeBuf[0] = 0;		// codeBuf[1..16] saves eight units of code, and
@@ -339,9 +336,15 @@ namespace KlayGE
 		std::fill_n(textBuf, r, ' ');	// Clear the buffer with
 										// any character that will appear often.
 		int len(0);
-		for (; (len < F) && (in.Tell() != in.Length()); ++ len)
+		for (; (len < F); ++ len)
 		{
-			in.Read(&c, 1);
+			in.read(reinterpret_cast<char*>(&c), sizeof(c));
+
+			if (in.fail())
+			{
+				break;
+			}
+
 			textBuf[r + len] = c;  // Read F bytes into the last F bytes of the buffer
 		}
 		for (int i = 1; i <= F; ++ i)
@@ -376,7 +379,7 @@ namespace KlayGE
 			if (0 == (mask <<= 1))
 			{
 				// Shift mask left one bit.
-				out.Write(codeBuf, codeBufPtr);	// Send at most 8 units of
+				out.write(reinterpret_cast<char*>(codeBuf), codeBufPtr);	// Send at most 8 units of
 												// code together
 				codeBuf[0] = 0;
 				codeBufPtr = mask = 1;
@@ -384,9 +387,15 @@ namespace KlayGE
 			lastMatchLength = matchLength;
 
 			int i(0);
-			for (; (i < lastMatchLength) && (in.Tell() != in.Length()); ++ i)
+			for (; (i < lastMatchLength); ++ i)
 			{
-				in.Read(&c, 1);
+				in.read(reinterpret_cast<char*>(&c), sizeof(c));
+				
+				if (in.fail())
+				{
+					break;
+				}
+
 				DeleteNode(s);		// Delete old strings and
 				textBuf[s] = c;		// read new bytes
 				if (s < F - 1)
@@ -417,13 +426,15 @@ namespace KlayGE
 		if (codeBufPtr > 1)
 		{
 			// Send remaining code.
-			out.Write(codeBuf, codeBufPtr);
+			out.write(reinterpret_cast<char*>(codeBuf), codeBufPtr);
 		}
+
+		in.clear();
 	}
 
 	// 目录打包
 	/////////////////////////////////////////////////////////////////////////////////
-	void Pkt::Pack(std::string const & dirName, VFile& pktFile)
+	void Pkt::Pack(std::string const & dirName, std::ostream& pktFile)
 	{
 		std::string rootName;
 		TransPathName(rootName, dirName);
@@ -431,31 +442,30 @@ namespace KlayGE
 		std::vector<std::string> files(FindFiles(rootName, ""));
 
 		DirTable dirTable;
-		MemFile tmpFile;
+		std::stringstream tmpFile;
 		Compress(tmpFile, dirTable, rootName, files);
 
-		MemFile dt;
+		std::stringstream dt;
 		WriteDirTable(dt, dirTable);
 
-		MemFile dtCom;
-		dt.Rewind();
+		std::stringstream dtCom;
+		dt.seekg(0);
 		Encode(dtCom, dt);
 
 		PktHeader mag;
 		mag.magic			= MakeFourCC<'p', 'k', 't', ' '>::value;
 		mag.ver				= 3;
 		mag.DTStart			= sizeof(mag);
-		mag.DTLength		= static_cast<U32>(dtCom.Length());
-		mag.DTDeComLength	= static_cast<U32>(dt.Length());
+		mag.DTLength		= static_cast<U32>(dtCom.tellp());
+		mag.DTDeComLength	= static_cast<U32>(dt.tellg());
 		mag.FIStart			= mag.DTStart + mag.DTLength;
 
-		pktFile.Rewind();
-		pktFile.Write(&mag, sizeof(mag));
-		dtCom.Rewind();
-		pktFile.CopyFrom(dtCom, dtCom.Length());
+		pktFile.seekp(0);
+		pktFile.write(reinterpret_cast<char*>(&mag), sizeof(mag));
 
-		tmpFile.Rewind();
-		pktFile.CopyFrom(tmpFile, tmpFile.Length());
-		tmpFile.Close();
+		std::copy(std::istreambuf_iterator<char>(dtCom), std::istreambuf_iterator<char>(),
+			std::ostreambuf_iterator<char>(pktFile));
+		std::copy(std::istreambuf_iterator<char>(tmpFile), std::istreambuf_iterator<char>(),
+			std::ostreambuf_iterator<char>(pktFile));
 	}
 }

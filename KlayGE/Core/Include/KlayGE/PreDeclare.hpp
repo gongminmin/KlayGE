@@ -14,11 +14,8 @@ namespace KlayGE
 	class bintree;
 	template <typename T>
 	class tree;
-	class VFile;
-	typedef boost::shared_ptr<VFile> VFilePtr;
-	class ResIdentifier;
-	typedef boost::shared_ptr<ResIdentifier> ResIdentifierPtr;
-	class ResLocator;
+	typedef boost::shared_ptr<std::istream> ResIdentifierPtr;
+	class ResLoader;
 
 	class Timer;
 
