@@ -27,7 +27,7 @@ namespace KlayGE
 
 	void OGLIndexStream::Assign(void const * src, size_t numIndices)
 	{
-		buffer_.assign(static_cast<uint16 const *>(src),
-			static_cast<uint16 const *>(src) + numIndices);
+		buffer_.assign(static_cast<uint16_t const *>(src),
+			static_cast<uint16_t const *>(src) + numIndices);
 	}
 }

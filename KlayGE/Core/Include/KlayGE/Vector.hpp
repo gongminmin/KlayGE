@@ -168,17 +168,23 @@ namespace KlayGE
 
 		Vector_T(T const & x, T const & y)
 		{
+			BOOST_STATIC_ASSERT(2 == elem_num);
+
 			this->x() = x;
 			this->y() = y;
 		}
 		Vector_T(T const & x, T const & y, T const & z)
 		{
+			BOOST_STATIC_ASSERT(3 == elem_num);
+
 			this->x() = x;
 			this->y() = y;
 			this->z() = z;
 		}
 		Vector_T(T const & x, T const & y, T const & z, T const & w)
 		{
+			BOOST_STATIC_ASSERT(4 == elem_num);
+
 			this->x() = x;
 			this->y() = y;
 			this->z() = z;

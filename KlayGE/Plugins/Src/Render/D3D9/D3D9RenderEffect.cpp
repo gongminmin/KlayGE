@@ -28,13 +28,13 @@
 
 namespace KlayGE
 {
-	D3D9RenderEffect::D3D9RenderEffect(std::string const & srcData, uint32 flags)
+	D3D9RenderEffect::D3D9RenderEffect(std::string const & srcData, uint32_t flags)
 	{
 		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 
 		ID3DXEffect* effect;
 		D3DXCreateEffect(renderEngine.D3DDevice().get(), srcData.c_str(),
-			static_cast<::UINT>(srcData.size()), NULL, NULL,
+			static_cast<UINT>(srcData.size()), NULL, NULL,
 			flags, NULL, &effect, NULL);
 		effect_ = MakeCOMPtr(effect);
 	}
@@ -53,7 +53,7 @@ namespace KlayGE
 		return RenderEffectPtr(new D3D9RenderEffect(*this));
 	}
 
-	void D3D9RenderEffect::Desc(uint32& parameters, uint32& techniques, uint32& functions)
+	void D3D9RenderEffect::Desc(uint32_t& parameters, uint32_t& techniques, uint32_t& functions)
 	{
 		D3DXEFFECT_DESC desc;
 		TIF(effect_->GetDesc(&desc));
@@ -63,7 +63,7 @@ namespace KlayGE
 		functions = desc.Functions;
 	}
 
-	RenderEffectParameterPtr D3D9RenderEffect::Parameter(uint32 index)
+	RenderEffectParameterPtr D3D9RenderEffect::Parameter(uint32_t index)
 	{
 		return RenderEffectParameterPtr(new D3D9RenderEffectParameter(effect_,
 			effect_->GetParameter(NULL, index)));
@@ -90,7 +90,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9RenderEffect::SetTechnique(uint32 technique)
+	void D3D9RenderEffect::SetTechnique(uint32_t technique)
 	{
 		D3DXHANDLE handle(effect_->GetTechnique(technique));
 		if (this->Validate(handle))
@@ -104,14 +104,14 @@ namespace KlayGE
 		return SUCCEEDED(effect_->ValidateTechnique(handle));
 	}
 
-	uint32 D3D9RenderEffect::Begin(uint32 flags)
+	uint32_t D3D9RenderEffect::Begin(uint32_t flags)
 	{
 		UINT passes;
 		TIF(effect_->Begin(&passes, flags));
 		return passes;
 	}
 
-	void D3D9RenderEffect::BeginPass(uint32 passNum)
+	void D3D9RenderEffect::BeginPass(uint32_t passNum)
 	{
 		TIF(effect_->BeginPass(passNum));
 	}
@@ -221,13 +221,13 @@ namespace KlayGE
 	void D3D9RenderEffectParameter::SetMatrixArray(Matrix4 const * matrices, size_t count)
 	{
 		TIF(effect_->SetMatrixArray(parameter_,
-			reinterpret_cast<D3DXMATRIX const *>(matrices), static_cast<::UINT>(count)));
+			reinterpret_cast<D3DXMATRIX const *>(matrices), static_cast<UINT>(count)));
 	}
 
 	void D3D9RenderEffectParameter::GetMatrixArray(Matrix4* matrices, size_t count)
 	{
 		TIF(effect_->GetMatrixArray(parameter_,
-			reinterpret_cast<D3DXMATRIX*>(matrices), static_cast<::UINT>(count)));
+			reinterpret_cast<D3DXMATRIX*>(matrices), static_cast<UINT>(count)));
 	}
 
 	void D3D9RenderEffectParameter::SetIntArray(int const * value, size_t count)

@@ -36,7 +36,7 @@ namespace KlayGE
 	class D3D9RenderEffect : public RenderEffect
 	{
 	public:
-		D3D9RenderEffect(std::string const & srcData, uint32 flags = 0);
+		D3D9RenderEffect(std::string const & srcData, uint32_t flags = 0);
 		D3D9RenderEffect(D3D9RenderEffect const & rhs);
 
 		boost::shared_ptr<ID3DXEffect> const & D3DXEffect() const
@@ -44,19 +44,19 @@ namespace KlayGE
 
 		RenderEffectPtr Clone() const;
 
-		void Desc(uint32& parameters, uint32& techniques, uint32& functions);
+		void Desc(uint32_t& parameters, uint32_t& techniques, uint32_t& functions);
 
-		RenderEffectParameterPtr Parameter(uint32 index);
+		RenderEffectParameterPtr Parameter(uint32_t index);
 		RenderEffectParameterPtr ParameterByName(std::string const & name);
 		RenderEffectParameterPtr ParameterBySemantic(std::string const & semantic);
 
 		void SetTechnique(std::string const & technique);
-		void SetTechnique(uint32 technique);
+		void SetTechnique(uint32_t technique);
 
 		bool Validate(D3DXHANDLE handle);
 
-		uint32 Begin(uint32 flags = 0);
-		void BeginPass(uint32 passNum);
+		uint32_t Begin(uint32_t flags = 0);
+		void BeginPass(uint32_t passNum);
 		void EndPass();
 		void End();
 

@@ -103,8 +103,8 @@ namespace
 		return PF_Unknown;
 	}
 
-	void ColorMasks(KlayGE::PixelFormat format, uint32& red, uint32& green, uint32& blue, uint32& alpha,
-		uint8& redOffset, uint8& greenOffset, uint8& blueOffset, uint8& alphaOffset)
+	void ColorMasks(KlayGE::PixelFormat format, uint32_t& red, uint32_t& green, uint32_t& blue, uint32_t& alpha,
+		uint8_t& redOffset, uint8_t& greenOffset, uint8_t& blueOffset, uint8_t& alphaOffset)
 	{
 		switch (format)
 		{
@@ -218,8 +218,8 @@ namespace
 		}
 	}
 
-	void ColorMasks(D3DFORMAT format, uint32& red, uint32& green, uint32& blue, uint32& alpha,
-		uint8& redOffset, uint8& greenOffset, uint8& blueOffset, uint8& alphaOffset)
+	void ColorMasks(D3DFORMAT format, uint32_t& red, uint32_t& green, uint32_t& blue, uint32_t& alpha,
+		uint8_t& redOffset, uint8_t& greenOffset, uint8_t& blueOffset, uint8_t& alphaOffset)
 	{
 		switch (format)
 		{
@@ -334,9 +334,9 @@ namespace
 		}
 	}
 
-	uint8 NumberOfBits(uint32 mask)
+	uint8_t NumberOfBits(uint32_t mask)
 	{
-		uint8 bits(0);
+		uint8_t bits(0);
 		while (mask)
 		{
 			mask = mask & (mask - 1);
@@ -349,8 +349,8 @@ namespace
 
 namespace KlayGE
 {
-	D3D9Texture::D3D9Texture(uint32 width, uint32 height,
-								uint16 numMipMaps, PixelFormat format, TextureUsage usage)
+	D3D9Texture::D3D9Texture(uint32_t width, uint32_t height,
+								uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
 	{
 		d3dDevice_ = static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
 
@@ -456,9 +456,9 @@ namespace KlayGE
 	}
 
 	void D3D9Texture::CopyMemoryToTexture(void* pData, PixelFormat pf,
-		uint32 width, uint32 height, uint32 xOffset, uint32 yOffset)
+		uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset)
 	{
-		uint16 bpp(PixelFormatBits(pf));
+		uint16_t bpp(PixelFormatBits(pf));
 
 		if (0 == width)
 		{
@@ -469,15 +469,15 @@ namespace KlayGE
 			height = height_;
 		}
 
-		uint8* pBuffer(static_cast<uint8*>(pData));
+		uint8_t* pBuffer(static_cast<uint8_t*>(pData));
 
-		uint32 srcRed, srcGreen, srcBlue, srcAlpha;
-		uint8 srcRedOffset, srcGreenOffset, srcBlueOffset, srcAlphaOffset;
+		uint32_t srcRed, srcGreen, srcBlue, srcAlpha;
+		uint8_t srcRedOffset, srcGreenOffset, srcBlueOffset, srcAlphaOffset;
 		ColorMasks(pf, srcRed, srcGreen, srcBlue, srcAlpha,
 			srcRedOffset, srcGreenOffset, srcBlueOffset, srcAlphaOffset);
 
-		uint32 destRed, destGreen, destBlue, destAlpha;
-		uint8 destRedOffset, destGreenOffset, destBlueOffset, destAlphaOffset;
+		uint32_t destRed, destGreen, destBlue, destAlpha;
+		uint8_t destRedOffset, destGreenOffset, destBlueOffset, destAlphaOffset;
 		ColorMasks(this->Format(), destRed, destGreen, destBlue, destAlpha,
 			destRedOffset, destGreenOffset, destBlueOffset, destAlphaOffset);
 
@@ -485,56 +485,56 @@ namespace KlayGE
 		D3DLOCKED_RECT d3dlr;
 		TIF(d3dTempTexture_->LockRect(0, &d3dlr, &rc, D3DLOCK_NOSYSLOCK));
 
-		uint32 const srcPitch(width * bpp / 8);
-		uint16 const destPitch(d3dlr.Pitch);
-		uint8* pBits(static_cast<uint8*>(d3dlr.pBits));
+		uint32_t const srcPitch(width * bpp / 8);
+		uint16_t const destPitch(d3dlr.Pitch);
+		uint8_t* pBits(static_cast<uint8_t*>(d3dlr.pBits));
 
 		if ((srcRed == destRed) && (srcGreen == destGreen)
 			&& (srcBlue == destBlue) && (srcAlpha == destAlpha))
 		{
-			for (uint32 y = 0; y < height; ++ y)
+			for (uint32_t y = 0; y < height; ++ y)
 			{
-				uint8* dst(pBits + y * destPitch);
-				pBuffer = static_cast<uint8*>(pData) + y * srcPitch;
+				uint8_t* dst(pBits + y * destPitch);
+				pBuffer = static_cast<uint8_t*>(pData) + y * srcPitch;
 
 				std::copy(pBuffer, pBuffer + srcPitch, dst);
 			}
 		}
 		else
 		{
-			uint8 const srcRedBitCount(NumberOfBits(srcRed));
-			uint8 const srcGreenBitCount(NumberOfBits(srcGreen));
-			uint8 const srcBlueBitCount(NumberOfBits(srcBlue));
-			uint8 const srcAlphaBitCount(NumberOfBits(srcAlpha));
+			uint8_t const srcRedBitCount(NumberOfBits(srcRed));
+			uint8_t const srcGreenBitCount(NumberOfBits(srcGreen));
+			uint8_t const srcBlueBitCount(NumberOfBits(srcBlue));
+			uint8_t const srcAlphaBitCount(NumberOfBits(srcAlpha));
 			   
-			uint8 const destRedBitCount(NumberOfBits(destRed));
-			uint8 const destGreenBitCount(NumberOfBits(destGreen));
-			uint8 const destBlueBitCount(NumberOfBits(destBlue));
-			uint8 const destAlphaBitCount(NumberOfBits(destAlpha));
+			uint8_t const destRedBitCount(NumberOfBits(destRed));
+			uint8_t const destGreenBitCount(NumberOfBits(destGreen));
+			uint8_t const destBlueBitCount(NumberOfBits(destBlue));
+			uint8_t const destAlphaBitCount(NumberOfBits(destAlpha));
 
-			for (uint32 y = 0; y < height; ++ y)
+			for (uint32_t y = 0; y < height; ++ y)
 			{
-				uint8* pDest(pBits + y * destPitch);
-				uint8* pSrc(pBuffer + y * width);
+				uint8_t* pDest(pBits + y * destPitch);
+				uint8_t* pSrc(pBuffer + y * width);
 
-				for (uint32 x = 0; x < width; ++ x)
+				for (uint32_t x = 0; x < width; ++ x)
 				{
-					uint32 srcPixel(0);
+					uint32_t srcPixel(0);
 					std::memcpy(&srcPixel, pSrc, bpp / 8);
 					pSrc += bpp / 8;
 
 					// ×ª»¯³ÉR8G8B8A8
-					uint32 red(static_cast<uint8>((srcPixel & srcRed) >> srcRedOffset << (8 - srcRedBitCount)));
-					uint32 green(static_cast<uint8>((srcPixel & srcGreen) >> srcGreenOffset<< (8 - srcGreenBitCount)));
-					uint32 blue(static_cast<uint8>((srcPixel & srcBlue) >> srcBlueOffset<< (8 - srcBlueBitCount)));
-					uint32 alpha(static_cast<uint8>((srcPixel & srcAlpha) >> srcAlphaOffset<< (8 - srcAlphaBitCount)));
+					uint32_t red(static_cast<uint8_t>((srcPixel & srcRed) >> srcRedOffset << (8 - srcRedBitCount)));
+					uint32_t green(static_cast<uint8_t>((srcPixel & srcGreen) >> srcGreenOffset<< (8 - srcGreenBitCount)));
+					uint32_t blue(static_cast<uint8_t>((srcPixel & srcBlue) >> srcBlueOffset<< (8 - srcBlueBitCount)));
+					uint32_t alpha(static_cast<uint8_t>((srcPixel & srcAlpha) >> srcAlphaOffset<< (8 - srcAlphaBitCount)));
 
 					red		= red >> (8 - destRedBitCount) << destRedOffset;
 					green	= green >> (8 - destGreenBitCount) << destGreenOffset;
 					blue	= blue >> (8 - destBlueBitCount) << destBlueOffset;
 					alpha	= alpha >> (8 - destAlphaBitCount) << destAlphaOffset;
 
-					uint32 const destPixel(red | green | blue | alpha);
+					uint32_t const destPixel(red | green | blue | alpha);
 					std::memcpy(pDest, &destPixel, bpp_ / 8);
 					pDest += bpp_ / 8;
 				}

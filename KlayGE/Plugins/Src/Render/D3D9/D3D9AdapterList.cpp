@@ -33,14 +33,14 @@ namespace KlayGE
 
 	// 获取当前显卡索引
 	/////////////////////////////////////////////////////////////////////////////////
-	uint32 D3D9AdapterList::CurrentAdapterIndex() const
+	uint32_t D3D9AdapterList::CurrentAdapterIndex() const
 	{
 		return currentAdapter_;
 	}
 
 	// 设置当前显卡索引
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9AdapterList::CurrentAdapterIndex(uint32 index)
+	void D3D9AdapterList::CurrentAdapterIndex(uint32_t index)
 	{
 		currentAdapter_ = index;
 	}
@@ -50,7 +50,7 @@ namespace KlayGE
 	void D3D9AdapterList::Enumerate(boost::shared_ptr<IDirect3D9> const & d3d)
 	{
 		// 枚举系统中的适配器 (通常只有一个，除非有几块显卡)
-		for (uint32 i = 0; i < d3d->GetAdapterCount(); ++ i)
+		for (uint32_t i = 0; i < d3d->GetAdapterCount(); ++ i)
 		{
 			D3DADAPTER_IDENTIFIER9 d3dAdapterIdentifier;
 			D3DDISPLAYMODE d3ddmDesktop;

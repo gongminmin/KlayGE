@@ -21,12 +21,12 @@ namespace KlayGE
 		size_t NumAdapter() const;
 		D3D9Adapter const & Adapter(size_t index) const;
 
-		uint32 CurrentAdapterIndex() const;
-		void CurrentAdapterIndex(uint32 index);
+		uint32_t CurrentAdapterIndex() const;
+		void CurrentAdapterIndex(uint32_t index);
 
 	private:
 		std::vector<D3D9Adapter> adapters_;
-		uint32			currentAdapter_;
+		uint32_t			currentAdapter_;
 	};
 
 	typedef boost::shared_ptr<D3D9AdapterList> D3D9AdapterListPtr;

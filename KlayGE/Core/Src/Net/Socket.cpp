@@ -45,7 +45,7 @@ namespace KlayGE
 {
 	// 翻译网络地址
 	/////////////////////////////////////////////////////////////////////////////////
-	SOCKADDR_IN TransAddr(std::string const & address, uint16 port)
+	SOCKADDR_IN TransAddr(std::string const & address, uint16_t port)
 	{
 		SOCKADDR_IN sockAddr_in;
 		std::memset(&sockAddr_in, 0, sizeof(sockAddr_in));
@@ -79,7 +79,7 @@ namespace KlayGE
 		return sockAddr_in;
 	}
 
-	std::string TransAddr(SOCKADDR_IN const & sockAddr, uint16& port)
+	std::string TransAddr(SOCKADDR_IN const & sockAddr, uint16_t& port)
 	{
 		port = ntohs(sockAddr.sin_port);
 		return std::string(inet_ntoa(sockAddr.sin_addr));
@@ -172,7 +172,7 @@ namespace KlayGE
 
 	// 套接字IO控制
 	/////////////////////////////////////////////////////////////////////////////////
-	void Socket::IOCtl(long command, uint32* argument)
+	void Socket::IOCtl(long command, uint32_t* argument)
 	{
 		assert(this->socket_ != INVALID_SOCKET);
 
@@ -292,7 +292,7 @@ namespace KlayGE
 
 	// 设置超时时间
 	/////////////////////////////////////////////////////////////////////////////////
-	void Socket::TimeOut(uint32 MicroSecs)
+	void Socket::TimeOut(uint32_t MicroSecs)
 	{
 		timeval timeOut;
 
@@ -305,7 +305,7 @@ namespace KlayGE
 
 	// 获取超时时间
 	/////////////////////////////////////////////////////////////////////////////////
-	uint32 Socket::TimeOut()
+	uint32_t Socket::TimeOut()
 	{
 		timeval timeOut;
 		int len(sizeof(timeOut));

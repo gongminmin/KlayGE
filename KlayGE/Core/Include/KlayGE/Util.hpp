@@ -25,54 +25,54 @@
 namespace KlayGE
 {
 	// 设第n bit为1
-	inline uint32
-	SetMask(uint32 n)
+	inline uint32_t
+	SetMask(uint32_t n)
 		{ return 1UL << n; }
-	template <uint32 n>
+	template <uint32_t n>
 	struct Mask
 	{
 		enum { value = 1UL << n };
 	};
 
 	// 取数中的第 n bit
-	inline uint32
-	GetBit(uint32 x, uint32 n)
+	inline uint32_t
+	GetBit(uint32_t x, uint32_t n)
 		{ return (x >> n) & 1; }
 	// 置数中的第 n bit为1
-	inline uint32
-	SetBit(uint32 x, uint32 n)
+	inline uint32_t
+	SetBit(uint32_t x, uint32_t n)
 		{ return x & SetMask(n); }
 
 	// 取低字节
-	inline uint16
-	LO_U8(uint16 x)
+	inline uint16_t
+	LO_U8(uint16_t x)
 		{ return x & 0xFF; }
 	// 取高字节
-	inline uint16
-	HI_U8(uint16 x)
+	inline uint16_t
+	HI_U8(uint16_t x)
 		{ return (x & 0xFF) >> 8; }
 
 	// 取低字
-	inline uint32
-	LO_U16(uint32 x)
+	inline uint32_t
+	LO_U16(uint32_t x)
 		{ return x & 0xFFFF; }
 	// 取高字
-	inline uint32
-	HI_U16(uint32 x)
+	inline uint32_t
+	HI_U16(uint32_t x)
 		{ return (x & 0xFFFF) >> 16; }
 
 	// 高低字节交换
-	inline uint16
-	HI_LO_SwapU8(uint16 x)
+	inline uint16_t
+	HI_LO_SwapU8(uint16_t x)
 		{ return (LO_U8(x) << 8) | HI_U8(x); }
 	// 高低字交换
-	inline uint32
-	HI_LO_SwapU16(uint32 x)
+	inline uint32_t
+	HI_LO_SwapU16(uint32_t x)
 		{ return (LO_U16(x) << 16) | HI_U16(x); }
 
 	// 获得某一位是1的掩码
-	inline uint32
-	MakeMask(uint32 dw)
+	inline uint32_t
+	MakeMask(uint32_t dw)
 		{ return (1UL << (dw + 1)) - 1; }
 
 	// 产生FourCC常量
@@ -89,13 +89,13 @@ namespace KlayGE
 	std::wstring& Convert(std::wstring& wstrDest, std::wstring const & wstrSrc);
 
 	// 暂停几毫秒
-	void Sleep(uint32 ms);
+	void Sleep(uint32_t ms);
 
 	// 网络格式和本地格式之间转换
-	uint32 ToNet(uint32 host);
-	uint16 ToNet(uint16 host);
-	uint32 ToHost(uint32 network);
-	uint16 ToHost(uint16 network);
+	uint32_t ToNet(uint32_t host);
+	uint16_t ToNet(uint16_t host);
+	uint32_t ToHost(uint32_t network);
+	uint16_t ToHost(uint16_t network);
 
 	// 得到COM对象的智能指针
 	template <typename T>

@@ -42,11 +42,11 @@ namespace
 		{
 			std::ostreambuf_iterator<char> outIter(out);
 
-			uint32 r(N - F);
+			uint32_t r(N - F);
 			std::fill_n(textBuf_, r, ' ');
 
-			uint32 flags(0);
-			uint8 c;
+			uint32_t flags(0);
+			uint8_t c;
 			for (;;)
 			{
 				if (0 == ((flags >>= 1) & 256))
@@ -82,18 +82,18 @@ namespace
 					{
 						break;
 					}
-					uint32 c1(c);
+					uint32_t c1(c);
 
 					in.read(reinterpret_cast<char*>(&c), sizeof(c));
 					if (in.fail())
 					{
 						break;
 					}
-					uint32 c2(c);
+					uint32_t c2(c);
 
 					c1 |= ((c2 & 0xF0) << 4);
 					c2 = (c2 & 0x0F) + THRESHOLD;
-					for (uint32 k = 0; k <= c2; ++ k)
+					for (uint32_t k = 0; k <= c2; ++ k)
 					{
 						c = textBuf_[(c1 + k) & (N - 1)];
 						
@@ -118,7 +118,7 @@ namespace
 		static int const NIL = N;			// index for root of binary search trees
 
 
-		uint8 textBuf_[N + F - 1];				// ring buffer of size N, 
+		uint8_t textBuf_[N + F - 1];				// ring buffer of size N, 
 											// with extra F-1 bytes to facilitate string comparison
 	};
 
@@ -145,7 +145,7 @@ namespace
 				return false;
 			}
 
-			uint32 i(0);
+			uint32_t i(0);
 			while ((i < lhs.length())
 				&& (std::toupper(lhs[i]) == std::toupper(rhs[i])))
 			{
@@ -169,7 +169,7 @@ namespace
 
 		for (;;)
 		{
-			uint32 len;
+			uint32_t len;
 			input.read(reinterpret_cast<char*>(&len), sizeof(len));
 			if (input.fail())
 			{

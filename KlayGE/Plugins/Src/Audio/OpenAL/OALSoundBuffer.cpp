@@ -37,14 +37,14 @@ namespace KlayGE
 {
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
-	OALSoundBuffer::OALSoundBuffer(AudioDataSourcePtr const & dataSource, uint32 numSource, float volume)
+	OALSoundBuffer::OALSoundBuffer(AudioDataSourcePtr const & dataSource, uint32_t numSource, float volume)
 						: SoundBuffer(dataSource),
 							sources_(numSource)
 	{
 		alGenBuffers(1, &buffer_);
 
 		// 用整个waveFile填充缓冲区
-		std::vector<uint8> data(dataSource_->Size());
+		std::vector<uint8_t> data(dataSource_->Size());
         dataSource_->Read(&data[0], data.size());
 
 		alBufferData(buffer_, Convert(format_), &data[0], static_cast<ALsizei>(data.size()), freq_);

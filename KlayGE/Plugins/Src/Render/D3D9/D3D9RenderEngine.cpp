@@ -146,7 +146,7 @@ namespace KlayGE
 
 	// 从RenderEngine::TexFiltering转换到D3D的MagFilter标志
 	/////////////////////////////////////////////////////////////////////////////////
-	uint32 MagFilter(D3DCAPS9 const & caps, RenderEngine::TexFiltering tf)
+	uint32_t MagFilter(D3DCAPS9 const & caps, RenderEngine::TexFiltering tf)
 	{
 		// NOTE: Fall through if device doesn't support requested type
 		if ((RenderEngine::TF_Anisotropic == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFANISOTROPIC))
@@ -177,7 +177,7 @@ namespace KlayGE
 
 	// 从RenderEngine::TexFiltering转换到D3D的MinFilter标志
 	/////////////////////////////////////////////////////////////////////////////////
-	uint32 MinFilter(D3DCAPS9 const & caps, RenderEngine::TexFiltering tf)
+	uint32_t MinFilter(D3DCAPS9 const & caps, RenderEngine::TexFiltering tf)
 	{
 		// NOTE: Fall through if device doesn't support requested type
 		if ((RenderEngine::TF_Anisotropic == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFANISOTROPIC))
@@ -208,7 +208,7 @@ namespace KlayGE
 
 	// 从RenderEngine::TexFiltering转换到D3D的MipFilter标志
 	/////////////////////////////////////////////////////////////////////////////////
-	uint32 MipFilter(D3DCAPS9 const & caps, RenderEngine::TexFiltering tf)
+	uint32_t MipFilter(D3DCAPS9 const & caps, RenderEngine::TexFiltering tf)
 	{
 		// NOTE: Fall through if device doesn't support requested type
 		if ((RenderEngine::TF_Anisotropic == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR))
@@ -406,7 +406,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::CullingMode(CullMode mode)
 	{
-		uint32 d3dMode;
+		uint32_t d3dMode;
 
 		cullingMode_ = mode;
 
@@ -430,7 +430,7 @@ namespace KlayGE
 
 	// 设置光源
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::SetLight(uint32 index, Light const & lt)
+	void D3D9RenderEngine::SetLight(uint32_t index, Light const & lt)
 	{
 		D3DLIGHT9 d3dLight;
 		std::memset(&d3dLight, 0, sizeof(d3dLight));
@@ -476,7 +476,7 @@ namespace KlayGE
 
 	// 打开/关闭某个光源
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::LightEnable(uint32 index, bool enabled)
+	void D3D9RenderEngine::LightEnable(uint32_t index, bool enabled)
 	{
 		TIF(d3dDevice_->LightEnable(index, enabled));
 	}
@@ -563,8 +563,8 @@ namespace KlayGE
 	void D3D9RenderEngine::Render(RenderBuffer const & rb)
 	{
 		D3DPRIMITIVETYPE primType;
-		uint32 primCount;
-		uint32 const vertexCount(static_cast<uint32>(rb.UseIndices() ? rb.NumIndices() : rb.NumVertices()));
+		uint32_t primCount;
+		uint32_t const vertexCount(static_cast<uint32_t>(rb.UseIndices() ? rb.NumIndices() : rb.NumVertices()));
 		switch (rb.Type())
 		{
 		case RenderBuffer::BT_PointList:
@@ -679,7 +679,7 @@ namespace KlayGE
 			D3D9VertexStream& d3d9vs(static_cast<D3D9VertexStream&>(stream));
 			TIF(d3dDevice_->SetStreamSource(element.Stream,
 				d3d9vs.D3D9Buffer().get(), 0,
-				static_cast<::UINT>(stream.sizeElement() * stream.ElementsPerVertex())));
+				static_cast<UINT>(stream.sizeElement() * stream.ElementsPerVertex())));
 		}
 
 		{
@@ -693,7 +693,7 @@ namespace KlayGE
 		// Clear any previous steam sources
 		for (size_t i = shaderDecl.size() - 1; i < currentDecl_.size(); ++ i)
 		{
-			d3dDevice_->SetStreamSource(static_cast<uint32>(i), NULL, 0, 0);
+			d3dDevice_->SetStreamSource(static_cast<uint32_t>(i), NULL, 0, 0);
 		}
 
 
@@ -716,7 +716,7 @@ namespace KlayGE
 			D3D9IndexStream& d3dis(static_cast<D3D9IndexStream&>(*rb.GetIndexStream()));
 			d3dDevice_->SetIndices(d3dis.D3D9Buffer().get());
 
-			for (uint32 i = 0; i < renderPasses_; ++ i)
+			for (uint32_t i = 0; i < renderPasses_; ++ i)
 			{
 				renderEffect_->BeginPass(i);
 
@@ -728,7 +728,7 @@ namespace KlayGE
 		}
 		else
 		{
-			for (uint32 i = 0; i < renderPasses_; ++ i)
+			for (uint32_t i = 0; i < renderPasses_; ++ i)
 			{
 				renderEffect_->BeginPass(i);
 
@@ -776,7 +776,7 @@ namespace KlayGE
 
 	// 设置深度偏移
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DepthBias(uint16 bias)
+	void D3D9RenderEngine::DepthBias(uint16_t bias)
 	{
 		TIF(d3dDevice_->SetRenderState(D3DRS_DEPTHBIAS, bias));
 	}
@@ -818,15 +818,15 @@ namespace KlayGE
 			d3dDevice_->SetRenderState(D3DRS_FOGTABLEMODE, d3dFogMode);
 
 			d3dDevice_->SetRenderState(D3DRS_FOGCOLOR, D3DCOLOR_COLORVALUE(color.r(), color.g(), color.b(), color.a()));
-			d3dDevice_->SetRenderState(D3DRS_FOGSTART, *reinterpret_cast<uint32*>(&linearStart));
-			d3dDevice_->SetRenderState(D3DRS_FOGEND, *reinterpret_cast<uint32*>(&linearEnd));
-			d3dDevice_->SetRenderState(D3DRS_FOGDENSITY, *reinterpret_cast<uint32*>(&expDensity));
+			d3dDevice_->SetRenderState(D3DRS_FOGSTART, *reinterpret_cast<uint32_t*>(&linearStart));
+			d3dDevice_->SetRenderState(D3DRS_FOGEND, *reinterpret_cast<uint32_t*>(&linearEnd));
+			d3dDevice_->SetRenderState(D3DRS_FOGDENSITY, *reinterpret_cast<uint32_t*>(&expDensity));
 		}
 	}
 
 	// 设置纹理
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::SetTexture(uint32 stage, TexturePtr const & texture)
+	void D3D9RenderEngine::SetTexture(uint32_t stage, TexturePtr const & texture)
 	{
 		if (!texture)
 		{
@@ -841,21 +841,21 @@ namespace KlayGE
 
 	// 设置纹理坐标集
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::TextureCoordSet(uint32 stage, int index)
+	void D3D9RenderEngine::TextureCoordSet(uint32_t stage, int index)
 	{
 		TIF(d3dDevice_->SetTextureStageState(stage, D3DTSS_TEXCOORDINDEX, index));
 	}
 
 	// 获取最大纹理阶段数
 	/////////////////////////////////////////////////////////////////////////////////
-	uint32 D3D9RenderEngine::MaxTextureStages()
+	uint32_t D3D9RenderEngine::MaxTextureStages()
 	{
 		return caps_.MaxSimultaneousTextures;
 	}
 
 	// 关闭某个纹理阶段
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DisableTextureStage(uint32 stage)
+	void D3D9RenderEngine::DisableTextureStage(uint32_t stage)
 	{
 		TIF(d3dDevice_->SetTexture(stage, NULL));
 		TIF(d3dDevice_->SetTextureStageState(stage, D3DTSS_COLOROP, D3DTOP_DISABLE));
@@ -863,7 +863,7 @@ namespace KlayGE
 
 	// 计算纹理坐标
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::TextureCoordCalculation(uint32 stage, TexCoordCalcMethod m)
+	void D3D9RenderEngine::TextureCoordCalculation(uint32_t stage, TexCoordCalcMethod m)
 	{
 		HRESULT hr = S_OK;
 		D3DXMATRIX matTrans;
@@ -909,7 +909,7 @@ namespace KlayGE
 
 	// 设置纹理寻址模式
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::TextureAddressingMode(uint32 stage, TexAddressingMode tam)
+	void D3D9RenderEngine::TextureAddressingMode(uint32_t stage, TexAddressingMode tam)
 	{
 		D3DTEXTUREADDRESS d3dType;
 		switch (tam)
@@ -933,7 +933,7 @@ namespace KlayGE
 
 	// 设置纹理坐标
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::TextureMatrix(uint32 stage, Matrix4 const & mat)
+	void D3D9RenderEngine::TextureMatrix(uint32_t stage, Matrix4 const & mat)
 	{
 		if (Matrix4::Identity() == mat)
 		{
@@ -952,7 +952,7 @@ namespace KlayGE
 
 	// 设置纹理过滤模式
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::TextureFiltering(uint32 stage, TexFiltering texFiltering)
+	void D3D9RenderEngine::TextureFiltering(uint32_t stage, TexFiltering texFiltering)
 	{
 		d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, MagFilter(caps_, texFiltering));
 		d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, MinFilter(caps_, texFiltering));
@@ -961,11 +961,11 @@ namespace KlayGE
 
 	// 设置纹理异性过滤
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::TextureAnisotropy(uint32 stage, uint32 maxAnisotropy)
+	void D3D9RenderEngine::TextureAnisotropy(uint32_t stage, uint32_t maxAnisotropy)
 	{
 		maxAnisotropy = std::min(maxAnisotropy, caps_.MaxAnisotropy);
 
-		uint32 curAnisotropy;
+		uint32_t curAnisotropy;
 		d3dDevice_->GetSamplerState(stage, D3DSAMP_MAXANISOTROPY, &curAnisotropy);
 		if (maxAnisotropy != curAnisotropy)
 		{
@@ -1010,7 +1010,7 @@ namespace KlayGE
 
 	// 设置模板位数
 	/////////////////////////////////////////////////////////////////////////////////
-	uint16 D3D9RenderEngine::StencilBufferBitDepth()
+	uint16_t D3D9RenderEngine::StencilBufferBitDepth()
 	{
 		return 8;
 	}
@@ -1024,14 +1024,14 @@ namespace KlayGE
 
 	// 设置模板缓冲区参考值
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::StencilBufferReferenceValue(uint32 refValue)
+	void D3D9RenderEngine::StencilBufferReferenceValue(uint32_t refValue)
 	{
 		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILREF, refValue));
 	}
 
 	// 设置模板缓冲区掩码
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::StencilBufferMask(uint32 mask)
+	void D3D9RenderEngine::StencilBufferMask(uint32_t mask)
 	{
 		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILMASK, mask));
 	}

@@ -51,7 +51,7 @@ namespace KlayGE
 
 	// 建立游戏大厅
 	/////////////////////////////////////////////////////////////////////////////////
-	void Lobby::Create(std::string const & Name, char maxPlayers, uint16 port, Processer const & pro)
+	void Lobby::Create(std::string const & Name, char maxPlayers, uint16_t port, Processer const & pro)
 	{
 		this->LobbyName(Name);
 
@@ -288,7 +288,7 @@ namespace KlayGE
 	{
 		if (iter != this->players_.end())
 		{
-			iter->second.time = static_cast<uint32>(std::time(NULL));
+			iter->second.time = static_cast<uint32_t>(std::time(NULL));
 		}
 	}
 }

@@ -20,7 +20,7 @@
 
 namespace KlayGE
 {
-	uint32 MusicBuffer::PreSecond = 2;
+	uint32_t MusicBuffer::PreSecond = 2;
 
 	// ¹¹Ôìº¯Êý
 	/////////////////////////////////////////////////////////////////////////////////

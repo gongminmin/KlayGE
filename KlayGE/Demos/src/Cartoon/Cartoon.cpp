@@ -47,7 +47,7 @@ namespace
 			rb_->GetVertexStream(VST_Normals)->Assign(Normal, sizeof(Normal) / sizeof(float) / 3);
 
 			rb_->AddIndexStream(true);
-			rb_->GetIndexStream()->Assign(Index, sizeof(Index) / sizeof(U16));
+			rb_->GetIndexStream()->Assign(Index, sizeof(Index) / sizeof(uint16_t));
 		}
 
 		RenderEffectPtr GetRenderEffect() const
@@ -75,16 +75,32 @@ namespace
 }
 
 
+class TheRenderSettings : public D3D9RenderSettings
+{
+private:
+	bool DoConfirmDevice(D3DCAPS9 const & caps, uint32_t behavior, D3DFORMAT format) const
+	{
+		if (caps.VertexShaderVersion < D3DVS_VERSION(1, 1))
+		{
+			return false;
+		}
+		if (caps.PixelShaderVersion < D3DPS_VERSION(1, 1))
+		{
+			return false;
+		}
+		return true;
+	}
+};
+
 int main()
 {
 	Cartoon app;
-	//SceneManager sceneMgr;
 	OCTree sceneMgr(Box(Vector3(-20, -20, -20), Vector3(20, 20, 20)));
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
 
-	D3D9RenderSettings settings;
+	TheRenderSettings settings;
 	settings.width = 800;
 	settings.height = 600;
 	settings.colorDepth = 32;
@@ -107,11 +123,11 @@ void Cartoon::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont(L"ËÎÌו", 16);
 
-	U8 cartoolShadeData0[16] = { 120, 120, 120, 120, 120, 160, 160, 160, 160, 160, 160, 255, 255, 255, 255, 255 };
+	uint8_t cartoolShadeData0[16] = { 120, 120, 120, 120, 120, 160, 160, 160, 160, 160, 160, 255, 255, 255, 255, 255 };
 	TexturePtr texture0 = Context::Instance().RenderFactoryInstance().MakeTexture(sizeof(cartoolShadeData0) / sizeof(cartoolShadeData0[0]), 1, 0, PF_L8);
 	texture0->CopyMemoryToTexture(cartoolShadeData0, PF_L8);
 
-	U8 cartoolShadeData1[4] = { 0, 255, 255, 255 };
+	uint8_t cartoolShadeData1[4] = { 0, 255, 255, 255 };
 	TexturePtr texture1 = Context::Instance().RenderFactoryInstance().MakeTexture(sizeof(cartoolShadeData1) / sizeof(cartoolShadeData1[0]), 1, 0, PF_L8);
 	texture1->CopyMemoryToTexture(cartoolShadeData1, PF_L8);
 

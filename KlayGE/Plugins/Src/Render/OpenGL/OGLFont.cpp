@@ -72,8 +72,8 @@ namespace
 		bool CanBeCulled() const
 			{ return false; }
 
-		void RenderText(uint32 fontHeight, OGLFont::CharInfoMapType& charInfoMap, float sx, float sy, float sz,
-			float xScale, float yScale, uint32 clr, std::wstring const & text, uint32 flags)
+		void RenderText(uint32_t fontHeight, OGLFont::CharInfoMapType& charInfoMap, float sx, float sy, float sz,
+			float xScale, float yScale, uint32_t clr, std::wstring const & text, uint32_t flags)
 		{
 			// 设置过滤属性
 			if (flags & Font::FA_Filtered)
@@ -94,7 +94,7 @@ namespace
 			texs_.reserve(maxSize * 2 * 4);
 			indices_.reserve(maxSize * 6);
 
-			uint16 lastIndex(0);
+			uint16_t lastIndex(0);
 			for (std::wstring::const_iterator citer = text.begin(); citer != text.end(); ++ citer)
 			{
 				wchar_t const & ch(*citer);
@@ -171,9 +171,9 @@ namespace
 		RenderBufferPtr fontRB_;
 
 		std::vector<float>	xyzs_;
-		std::vector<uint32>	clrs_;
+		std::vector<uint32_t>	clrs_;
 		std::vector<float>	texs_;
-		std::vector<uint16>	indices_;
+		std::vector<uint16_t>	indices_;
 
 		Box box_;
 	};
@@ -183,7 +183,7 @@ namespace KlayGE
 {
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
-	OGLFont::OGLFont(std::wstring const & fontName, uint32 height, uint32 flags)
+	OGLFont::OGLFont(std::wstring const & fontName, uint32_t height, uint32_t flags)
 				: curX_(0), curY_(0),
 					theTexture_(Context::Instance().RenderFactoryInstance().MakeTexture(1024, 1024, 1, PF_A4L4)),
 					rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
@@ -199,7 +199,7 @@ namespace KlayGE
 
 
 		rb_->AddVertexStream(VST_Positions, sizeof(float), 3);
-		rb_->AddVertexStream(VST_Diffuses, sizeof(uint32), 1);
+		rb_->AddVertexStream(VST_Diffuses, sizeof(uint32_t), 1);
 		rb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2);
 
 		rb_->AddIndexStream();
@@ -223,7 +223,7 @@ namespace KlayGE
 
 	// 获取字体高度
 	/////////////////////////////////////////////////////////////////////////////////
-	uint32 OGLFont::FontHeight() const
+	uint32_t OGLFont::FontHeight() const
 	{
 		return logFont_.lfHeight;
 	}
@@ -276,7 +276,7 @@ namespace KlayGE
 					bmi.bmiHeader.biBitCount	= 32;
 					bmi.bmiHeader.biCompression = BI_RGB;
 
-					uint32* bitmapBits(NULL);
+					uint32_t* bitmapBits(NULL);
 					HBITMAP hBitmap(::CreateDIBSection(hDC, &bmi, DIB_RGB_COLORS,
 						reinterpret_cast<void**>(&bitmapBits), NULL, 0));
 					if ((NULL == hBitmap) || (NULL == bitmapBits))
@@ -337,14 +337,14 @@ namespace KlayGE
 						charRect.bottom	= charRect.top + this->FontHeight();
 					}
 
-					std::vector<uint8> dst;
+					std::vector<uint8_t> dst;
 					dst.reserve(this->FontHeight() * this->FontHeight());
 					// 锁定表面，把 alpha 值写入纹理
 					for (long y = charRect.top; y < charRect.bottom; ++ y)
 					{
 						for (long x = charRect.left; x < charRect.right; ++ x, ++ bitmapBits)
 						{
-							dst.push_back(static_cast<uint8>(*bitmapBits) & 0xF0 | 0x0F);
+							dst.push_back(static_cast<uint8_t>(*bitmapBits) & 0xF0 | 0x0F);
 						}
 					}
 					theTexture_->CopyMemoryToTexture(&dst[0], PF_A4L4, charRect.right - charRect.left,
@@ -365,7 +365,7 @@ namespace KlayGE
 	// 在指定位置画出文字
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderablePtr OGLFont::RenderText(float sx, float sy, Color const & clr, 
-		std::wstring const & text, uint32 flags)
+		std::wstring const & text, uint32_t flags)
 	{
 		return this->RenderText(sx, sy, 0.5f, 1, 1, clr, text, flags);
 	}
@@ -374,7 +374,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderablePtr OGLFont::RenderText(float sx, float sy, float sz,
 		float xScale, float yScale, Color const & clr,
-		std::wstring const & text, uint32 flags)
+		std::wstring const & text, uint32_t flags)
 	{
 		if (text.empty())
 		{
@@ -383,7 +383,7 @@ namespace KlayGE
 
 		this->UpdateTexture(text);
 
-		uint8 r, g, b, a;
+		uint8_t r, g, b, a;
 		clr.RGBA(r, g, b, a);
 
 		boost::shared_ptr<OGLFontRenderable> renderable(new OGLFontRenderable(effect_, rb_));

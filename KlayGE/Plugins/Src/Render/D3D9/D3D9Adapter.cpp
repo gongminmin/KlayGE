@@ -19,7 +19,7 @@ namespace KlayGE
 		std::memset(&d3ddmDesktop_, 0, sizeof(d3ddmDesktop_));
 	}
 
-	D3D9Adapter::D3D9Adapter(uint32 adapterNo,
+	D3D9Adapter::D3D9Adapter(uint32_t adapterNo,
 							   D3DADAPTER_IDENTIFIER9 const & d3dadapterIdentifer,
 							   D3DDISPLAYMODE const & d3ddmDesktop)
 					: adapterNo_(adapterNo),
@@ -68,8 +68,8 @@ namespace KlayGE
 
 		for (FormatType::iterator iter = formats.begin(); iter != formats.end(); ++ iter)
 		{
-			uint32 const modeCount(d3d->GetAdapterModeCount(adapterNo_, *iter));
-			for (uint32 i = 0; i < modeCount; ++ i)
+			uint32_t const modeCount(d3d->GetAdapterModeCount(adapterNo_, *iter));
+			for (uint32_t i = 0; i < modeCount; ++ i)
 			{
 				// 获取显示模式属性
 				D3DDISPLAYMODE d3dDisplayMode;

@@ -37,7 +37,7 @@ namespace KlayGE
 			{ }
 			
 		VertexStreamPtr MakeVertexStream(VertexStreamType type,
-			uint8 sizeElement, uint8 numElement, bool staticStream = false)
+			uint8_t sizeElement, uint8_t numElement, bool staticStream = false)
 		{
 			VertexStreamPtr stream;
 
@@ -58,7 +58,7 @@ namespace KlayGE
 				break;
 
 			case VST_BlendIndices:
-				stream = VertexStreamPtr(new D3D9VertexStream(type, sizeof(uint8), 4, staticStream));
+				stream = VertexStreamPtr(new D3D9VertexStream(type, sizeof(uint8_t), 4, staticStream));
 				break;
 
 			case VST_TextureCoords0:

@@ -36,7 +36,7 @@ namespace KlayGE
 		static AudioDataSourcePtr NullObject();
 
 		AudioFormat Format() const;
-		uint32 Freq() const;
+		uint32_t Freq() const;
 
 		virtual size_t Size() = 0;
 
@@ -47,7 +47,7 @@ namespace KlayGE
 
 	protected:
 		AudioFormat		format_;
-		uint32				freq_;
+		uint32_t				freq_;
 	};
 }
 

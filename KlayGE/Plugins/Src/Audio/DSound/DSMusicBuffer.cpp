@@ -32,7 +32,7 @@ namespace KlayGE
 {
 	// 构造函数。建立一个可以用于流式播放的缓冲区
 	/////////////////////////////////////////////////////////////////////////////////
-	DSMusicBuffer::DSMusicBuffer(AudioDataSourcePtr const & dataSource, uint32 bufferSeconds, float volume)
+	DSMusicBuffer::DSMusicBuffer(AudioDataSourcePtr const & dataSource, uint32_t bufferSeconds, float volume)
 					: MusicBuffer(dataSource),
 						writePos_(0)
 	{
@@ -105,13 +105,13 @@ namespace KlayGE
 	void DSMusicBuffer::FillBuffer()
 	{
 		// 锁定缓冲区
-		uint8* lockedBuffer;			// 指向缓冲区锁定的内存的指针
-		uint32 lockedBufferSize;		// 锁定的内存大小
+		uint8_t* lockedBuffer;			// 指向缓冲区锁定的内存的指针
+		uint32_t lockedBufferSize;		// 锁定的内存大小
 		TIF(buffer_->Lock(fillSize_ * writePos_, fillSize_,
 			reinterpret_cast<void**>(&lockedBuffer), &lockedBufferSize,
 			NULL, NULL, 0));
 
-		std::vector<uint8> data(fillSize_);
+		std::vector<uint8_t> data(fillSize_);
 		data.resize(dataSource_->Read(&data[0], fillSize_));
 
 		if (data.empty())
@@ -143,12 +143,12 @@ namespace KlayGE
 		dataSource_->Reset();
 
 		// 锁定缓冲区
-		uint8* lockedBuffer;			// 指向缓冲区锁定的内存的指针
-		uint32 lockedBufferSize;		// 锁定的内存大小
+		uint8_t* lockedBuffer;			// 指向缓冲区锁定的内存的指针
+		uint32_t lockedBufferSize;		// 锁定的内存大小
 		TIF(buffer_->Lock(0, fillSize_ * fillCount_,
 			reinterpret_cast<void**>(&lockedBuffer), &lockedBufferSize, NULL, NULL, 0));
 
-		std::vector<uint8> data(fillSize_ * fillCount_);
+		std::vector<uint8_t> data(fillSize_ * fillCount_);
 		data.resize(dataSource_->Read(&data[0], fillSize_ * fillCount_));
 
 		if (data.empty())
@@ -196,7 +196,7 @@ namespace KlayGE
 	{
 		if (buffer_)
 		{
-			uint32 status;
+			uint32_t status;
 			buffer_->GetStatus(&status);
 			return ((status & DSBSTATUS_PLAYING) != 0);
 		}

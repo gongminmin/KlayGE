@@ -27,17 +27,17 @@ namespace KlayGE
 	#endif		// _WCHAR_T_DEFINED
 #endif
 
-	typedef boost::uint64_t		uint64;
-	typedef boost::uint32_t		uint32;
-	typedef boost::uint16_t		uint16;
-	typedef boost::uint8_t		uint8;
+	using boost::uint64_t;
+	using boost::uint32_t;
+	using boost::uint16_t;
+	using boost::uint8_t;
 
-	typedef boost::int64_t		int64;
-	typedef boost::int32_t		int32;
-	typedef boost::int16_t		int16;
-	typedef boost::int8_t		int8;
+	using boost::int64_t;
+	using boost::int32_t;
+	using boost::int16_t;
+	using boost::int8_t;
 
-	typedef uint32 FourCC;
+	typedef uint32_t FourCC;
 }
 
 #endif		// _TYPES_HPP

@@ -55,7 +55,7 @@ namespace KlayGE
 	class VertexStream
 	{
 	public:
-		VertexStream(VertexStreamType type, uint8 sizeElement, uint8 ElementsPerVertex);
+		VertexStream(VertexStreamType type, uint8_t sizeElement, uint8_t ElementsPerVertex);
 		virtual ~VertexStream();
 
 		VertexStreamType Type() const;
@@ -70,8 +70,8 @@ namespace KlayGE
 		size_t ElementsPerVertex() const;
 
 	protected:
-		uint8 sizeElement_;
-		uint8 elementPerVertex_;
+		uint8_t sizeElement_;
+		uint8_t elementPerVertex_;
 		VertexStreamType type_;
 	};
 
@@ -110,7 +110,7 @@ namespace KlayGE
 
 		size_t NumVertices() const;
 
-		void AddVertexStream(VertexStreamType type, uint8 sizeElement, uint8 numElement, bool staticStream = false);
+		void AddVertexStream(VertexStreamType type, uint8_t sizeElement, uint8_t numElement, bool staticStream = false);
 		VertexStreamPtr GetVertexStream(VertexStreamType type) const;
 
 		VertexStreamIterator VertexStreamBegin();

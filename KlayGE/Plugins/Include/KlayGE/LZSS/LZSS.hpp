@@ -35,21 +35,21 @@ namespace KlayGE
 
 	struct FileDes
 	{
-		uint32			start;
-		uint32			length;
-		uint32			DeComLength;
-		uint32			crc32;
-		uint8			attr;
+		uint32_t			start;
+		uint32_t			length;
+		uint32_t			DeComLength;
+		uint32_t			crc32;
+		uint8_t			attr;
 	};
 
 	struct PktHeader
 	{
-		uint32		magic;
-		uint32		ver;
-		uint32		DTStart;
-		uint32		DTLength;
-		uint32		DTDeComLength;
-		uint32		FIStart;
+		uint32_t		magic;
+		uint32_t		ver;
+		uint32_t		DTStart;
+		uint32_t		DTLength;
+		uint32_t		DTDeComLength;
+		uint32_t		FIStart;
 	};
 
 	#ifdef _MSC_VER

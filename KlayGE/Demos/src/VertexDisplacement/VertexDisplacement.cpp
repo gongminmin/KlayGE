@@ -28,22 +28,22 @@ namespace
 
 	struct
 	{
-		U8		infoLength;
-		U8		colorMapType;
-		U8		imageTypeCode;
+		uint8_t		infoLength;
+		uint8_t		colorMapType;
+		uint8_t		imageTypeCode;
 
-		short	colorMapEntry;
-		short	colorMapLength;
-		U8		colorMapBits;
+		int16_t		colorMapEntry;
+		int16_t		colorMapLength;
+		uint8_t		colorMapBits;
 
-		short	leftbottomX;
-		short	leftbottomY;
+		int16_t		leftbottomX;
+		int16_t		leftbottomY;
 
-		short	width;
-		short	height;
+		int16_t		width;
+		int16_t		height;
 
-		U8		pixelSize;
-		U8		imageDescriptor;
+		uint8_t		pixelSize;
+		uint8_t		imageDescriptor;
 	} TGAHeader;
 
 #pragma pack(pop)
@@ -59,10 +59,10 @@ namespace
 			KlayGE::TexturePtr texture(Context::Instance().RenderFactoryInstance().MakeTexture(TGAHeader.width,
 				TGAHeader.height, 0, PF_X8R8G8B8));
 
-			vector<U8> data(TGAHeader.width * TGAHeader.height * TGAHeader.pixelSize / 8);
+			vector<uint8_t> data(TGAHeader.width * TGAHeader.height * TGAHeader.pixelSize / 8);
 			file.read(reinterpret_cast<char*>(&data[0]), data.size());
 
-			vector<U8> tgaData;
+			vector<uint8_t> tgaData;
 			tgaData.reserve(TGAHeader.width * TGAHeader.height * 4);
 			for (short y = 0; y < TGAHeader.height; ++ y)
 			{
@@ -110,7 +110,7 @@ namespace
 			rb_->GetVertexStream(VST_TextureCoords0)->Assign(Tex, sizeof(Tex) / sizeof(float) / 2);
 
 			rb_->AddIndexStream(true);
-			rb_->GetIndexStream()->Assign(Index, sizeof(Index) / sizeof(U16));
+			rb_->GetIndexStream()->Assign(Index, sizeof(Index) / sizeof(uint16_t));
 
 			box_ = Box(Vector3(0, 0, 0), Vector3(0, 0, 0));
 		}
@@ -146,6 +146,19 @@ namespace
 }
 
 
+class TheRenderSettings : public D3D9RenderSettings
+{
+private:
+	bool DoConfirmDevice(D3DCAPS9 const & caps, uint32_t behavior, D3DFORMAT format) const
+	{
+		if (caps.VertexShaderVersion < D3DVS_VERSION(1, 1))
+		{
+			return false;
+		}
+		return true;
+	}
+};
+
 int main()
 {
 	VertexDisplacement app;
@@ -154,7 +167,7 @@ int main()
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
 
-	D3D9RenderSettings settings;
+	TheRenderSettings settings;
 	settings.width = 800;
 	settings.height = 600;
 	settings.colorDepth = 32;

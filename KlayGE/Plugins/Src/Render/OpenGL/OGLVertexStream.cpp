@@ -21,7 +21,7 @@
 
 namespace KlayGE
 {
-	OGLVertexStream::OGLVertexStream(VertexStreamType type, uint8 sizeElement, uint8 numElement)
+	OGLVertexStream::OGLVertexStream(VertexStreamType type, uint8_t sizeElement, uint8_t numElement)
 			: VertexStream(type, sizeElement, numElement)
 	{
 	}
@@ -33,8 +33,8 @@ namespace KlayGE
 
 		buffer_.resize(size);
 
-		uint8* destPtr(&buffer_[0]);
-		uint8 const * srcPtr(static_cast<uint8 const *>(src));
+		uint8_t* destPtr(&buffer_[0]);
+		uint8_t const * srcPtr(static_cast<uint8_t const *>(src));
 
 		if (stride != 0)
 		{

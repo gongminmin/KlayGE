@@ -12,7 +12,7 @@
 
 namespace KlayGE
 {
-	D3D9VertexStream::D3D9VertexStream(VertexStreamType type, uint8 sizeElement, uint8 ElementsPerVertex, bool staticStream)
+	D3D9VertexStream::D3D9VertexStream(VertexStreamType type, uint8_t sizeElement, uint8_t ElementsPerVertex, bool staticStream)
 			: VertexStream(type, sizeElement, ElementsPerVertex),
 				currentSize_(0), numVertices_(0), 
 				staticStream_(staticStream)
@@ -43,7 +43,7 @@ namespace KlayGE
 			boost::shared_ptr<IDirect3DDevice9> d3dDevice(static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
 
 			IDirect3DVertexBuffer9* theBuffer;
-			TIF(d3dDevice->CreateVertexBuffer(static_cast<::UINT>(size),
+			TIF(d3dDevice->CreateVertexBuffer(static_cast<UINT>(size),
 				D3DUSAGE_WRITEONLY | (this->IsStatic() ? 0 : D3DUSAGE_DYNAMIC),
 				0, D3DPOOL_DEFAULT, &theBuffer, NULL));
 
@@ -54,8 +54,8 @@ namespace KlayGE
 		TIF(buffer_->Lock(0, 0, &dest,
 			D3DLOCK_NOSYSLOCK | (this->IsStatic() ? 0 : D3DLOCK_DISCARD)));
 
-		uint8* destPtr(static_cast<uint8*>(dest));
-		uint8 const * srcPtr(static_cast<uint8 const *>(src));
+		uint8_t* destPtr(static_cast<uint8_t*>(dest));
+		uint8_t const * srcPtr(static_cast<uint8_t const *>(src));
 
 		if (stride != 0)
 		{

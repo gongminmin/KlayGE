@@ -1536,9 +1536,9 @@ namespace KlayGE
 
 			for (IndexIterator iter = indicesBegin; iter != indicesEnd; iter += 3)
 			{
-				uint16 const v0Index = *(iter + 0);
-				uint16 const v1Index = *(iter + 1);
-				uint16 const v2Index = *(iter + 2);
+				uint16_t const v0Index = *(iter + 0);
+				uint16_t const v1Index = *(iter + 1);
+				uint16_t const v2Index = *(iter + 2);
 
 				Vector3 const & v1XYZ(*(xyzsBegin + v1Index));
 				Vector3 const & v0XYZ(*(xyzsBegin + v0Index));
@@ -1597,9 +1597,9 @@ namespace KlayGE
 
 			for (IndexIterator iter = indicesBegin; iter != indicesEnd; iter += 3)
 			{
-				uint16 const v0Index = *(iter + 0);
-				uint16 const v1Index = *(iter + 1);
-				uint16 const v2Index = *(iter + 2);
+				uint16_t const v0Index = *(iter + 0);
+				uint16_t const v1Index = *(iter + 1);
+				uint16_t const v2Index = *(iter + 2);
 
 				Vector3 const & v0(*(xyzsBegin + v0Index));
 				Vector3 const & v1(*(xyzsBegin + v1Index));

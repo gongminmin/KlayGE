@@ -34,8 +34,8 @@ namespace KlayGE
 
 		void SetMaterial(Material const & mat);
 
-		void SetLight(uint32 index, Light const & lt);
-		void LightEnable(uint32 index, bool enable);
+		void SetLight(uint32_t index, Light const & lt);
+		void LightEnable(uint32_t index, bool enable);
 
 		void ActiveRenderTarget(RenderTargetListIterator iter);
 
@@ -48,33 +48,33 @@ namespace KlayGE
 		void DepthBufferDepthTest(bool depthTest);
 		void DepthBufferDepthWrite(bool depthWrite);
 		void DepthBufferFunction(CompareFunction depthFunction);
-		void DepthBias(uint16 bias);
+		void DepthBias(uint16_t bias);
 
 		void Fog(FogMode mode = Fog_None,
 			Color const & color = Color(1, 1, 1, 1),
 			float expDensity = 1, float linearStart = 0, float linearEnd = 1);
 
-		void SetTexture(uint32 stage, TexturePtr const & texture);
+		void SetTexture(uint32_t stage, TexturePtr const & texture);
 
-		void TextureCoordSet(uint32 stage, int index);
+		void TextureCoordSet(uint32_t stage, int index);
 
-		uint32 MaxTextureStages();
-		void DisableTextureStage(uint32 stage);
+		uint32_t MaxTextureStages();
+		void DisableTextureStage(uint32_t stage);
 
-		void TextureCoordCalculation(uint32 stage, TexCoordCalcMethod m);
-		void TextureAddressingMode(uint32 stage, TexAddressingMode tam);
-		void TextureMatrix(uint32 stage, Matrix4 const & mat);
-		void TextureFiltering(uint32 stage, TexFiltering texFiltering);
-		void TextureAnisotropy(uint32 stage, uint32 maxAnisotropy);
+		void TextureCoordCalculation(uint32_t stage, TexCoordCalcMethod m);
+		void TextureAddressingMode(uint32_t stage, TexAddressingMode tam);
+		void TextureMatrix(uint32_t stage, Matrix4 const & mat);
+		void TextureFiltering(uint32_t stage, TexFiltering texFiltering);
+		void TextureAnisotropy(uint32_t stage, uint32_t maxAnisotropy);
 
 		void StencilCheckEnabled(bool enabled);
 		bool HasHardwareStencil();
 
-		uint16 StencilBufferBitDepth();
+		uint16_t StencilBufferBitDepth();
 
 		void StencilBufferFunction(CompareFunction func);
-		void StencilBufferReferenceValue(uint32 refValue);
-		void StencilBufferMask(uint32 mask);
+		void StencilBufferReferenceValue(uint32_t refValue);
+		void StencilBufferMask(uint32_t mask);
 		void StencilBufferFailOperation(StencilOperation op);
 		void StencilBufferDepthFailOperation(StencilOperation op);
 		void StencilBufferPassOperation(StencilOperation op);

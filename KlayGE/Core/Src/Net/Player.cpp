@@ -85,7 +85,7 @@ namespace KlayGE
 			std::fill_n(revBuf, sizeof(revBuf), 0);
 			if (socket_.Receive(revBuf, sizeof(revBuf)) != -1)
 			{
-				uint32 ID;
+				uint32_t ID;
 				std::memcpy(&ID, &revBuf[1], 4);
 
 				// 删除已发送的信息
@@ -94,7 +94,7 @@ namespace KlayGE
 				{
 					std::vector<char>& msg = *iter;
 
-					uint32 sendID;
+					uint32_t sendID;
 					std::memcpy(&sendID, &msg[1], 4);
 					if (sendID == ID)
 					{

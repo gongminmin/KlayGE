@@ -25,7 +25,7 @@ namespace KlayGE
 	{
 		numIndices_ = numIndices;
 
-		size_t const size(sizeof(uint16) * numIndices);
+		size_t const size(sizeof(uint16_t) * numIndices);
 
 		if (currentSize_ < size)
 		{
@@ -34,7 +34,7 @@ namespace KlayGE
 			boost::shared_ptr<IDirect3DDevice9> d3dDevice(static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
 
 			IDirect3DIndexBuffer9* buffer;
-			TIF(d3dDevice->CreateIndexBuffer(static_cast<::UINT>(size), 
+			TIF(d3dDevice->CreateIndexBuffer(static_cast<UINT>(size), 
 				D3DUSAGE_WRITEONLY | (this->IsStatic() ? 0 : D3DUSAGE_DYNAMIC),
 				D3DFMT_INDEX16, D3DPOOL_DEFAULT, &buffer, NULL));
 
@@ -43,7 +43,7 @@ namespace KlayGE
 
 		void* dest;
 		TIF(buffer_->Lock(0, 0, &dest, D3DLOCK_NOSYSLOCK | (this->IsStatic() ? 0 : D3DLOCK_DISCARD)));
-		std::copy(static_cast<uint8 const *>(src), static_cast<uint8 const *>(src) + size, static_cast<uint8*>(dest));
+		std::copy(static_cast<uint8_t const *>(src), static_cast<uint8_t const *>(src) + size, static_cast<uint8_t*>(dest));
 		buffer_->Unlock();
 	}
 

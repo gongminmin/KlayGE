@@ -72,7 +72,7 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	InputActionsType InputEngine::Update()
 	{
-		typedef MapVector<uint16, long> ActionSetType;
+		typedef MapVector<uint16_t, long> ActionSetType;
 		ActionSetType actions;
 
 		// 访问所有设备

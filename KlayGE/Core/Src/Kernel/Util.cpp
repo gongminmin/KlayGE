@@ -84,7 +84,7 @@ namespace KlayGE
 
 	// 暂停几毫秒
 	/////////////////////////////////////////////////////////////////////////////////
-	void Sleep(uint32 ms)
+	void Sleep(uint32_t ms)
 	{
 		boost::xtime xt;
 
@@ -97,50 +97,50 @@ namespace KlayGE
 		boost::thread::sleep(xt);
 	}
 
-	// uint32本地格式到网络格式
+	// uint32_t本地格式到网络格式
 	/////////////////////////////////////////////////////////////////////////////////
-	uint32 ToNet(uint32 host)
+	uint32_t ToNet(uint32_t host)
 	{
 		union
 		{
-			uint8 byte[sizeof(uint32) / sizeof(uint8)];
-			uint32 net;
+			uint8_t byte[sizeof(uint32_t) / sizeof(uint8_t)];
+			uint32_t net;
 		} ret;
 
-		ret.byte[0] = static_cast<uint8>((host & 0xFF000000) >> 24);
-		ret.byte[1] = static_cast<uint8>((host & 0x00FF0000) >> 16);
-		ret.byte[2] = static_cast<uint8>((host & 0x0000FF00) >> 8);
-		ret.byte[3] = static_cast<uint8>((host & 0x000000FF) >> 0);
+		ret.byte[0] = static_cast<uint8_t>((host & 0xFF000000) >> 24);
+		ret.byte[1] = static_cast<uint8_t>((host & 0x00FF0000) >> 16);
+		ret.byte[2] = static_cast<uint8_t>((host & 0x0000FF00) >> 8);
+		ret.byte[3] = static_cast<uint8_t>((host & 0x000000FF) >> 0);
 
 		return ret.net;
 	}
 
-	// uint16本地格式到网络格式
+	// uint16_t本地格式到网络格式
 	/////////////////////////////////////////////////////////////////////////////////
-	uint16 ToNet(uint16 host)
+	uint16_t ToNet(uint16_t host)
 	{
 		union
 		{
-			uint8 byte[sizeof(uint16) / sizeof(uint8)];
-			uint16 net;
+			uint8_t byte[sizeof(uint16_t) / sizeof(uint8_t)];
+			uint16_t net;
 		} ret;
 
-		ret.byte[0] = static_cast<uint8>((host & 0xFF00) >> 8);
-		ret.byte[1] = static_cast<uint8>((host & 0x00FF) >> 0);
+		ret.byte[0] = static_cast<uint8_t>((host & 0xFF00) >> 8);
+		ret.byte[1] = static_cast<uint8_t>((host & 0x00FF) >> 0);
 
 		return ret.net;
 	}
 
-	// uint32网络格式到本地格式
+	// uint32_t网络格式到本地格式
 	/////////////////////////////////////////////////////////////////////////////////
-	uint32 ToHost(uint32 net)
+	uint32_t ToHost(uint32_t net)
 	{
 		return ToNet(net);
 	}
 
-	// uint16网络格式到本地格式
+	// uint16_t网络格式到本地格式
 	/////////////////////////////////////////////////////////////////////////////////
-	uint16 ToHost(uint16 net)
+	uint16_t ToHost(uint16_t net)
 	{
 		return ToNet(net);
 	}

@@ -11,7 +11,7 @@
 
 namespace KlayGE
 {
-	D3D9RenderTexture::D3D9RenderTexture(uint32 width, uint32 height)
+	D3D9RenderTexture::D3D9RenderTexture(uint32_t width, uint32_t height)
 	{
 		left_ = 0;
 		top_ = 0;

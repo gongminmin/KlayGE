@@ -53,7 +53,7 @@ namespace KlayGE
 {
 	// 构造函数。建立一个可以用于流式播放的缓冲区
 	/////////////////////////////////////////////////////////////////////////////////
-	OALMusicBuffer::OALMusicBuffer(AudioDataSourcePtr const & dataSource, uint32 bufferSeconds, float volume)
+	OALMusicBuffer::OALMusicBuffer(AudioDataSourcePtr const & dataSource, uint32_t bufferSeconds, float volume)
 							: MusicBuffer(dataSource),
 								bufferQueue_(bufferSeconds * PreSecond)
 	{
@@ -101,7 +101,7 @@ namespace KlayGE
 
 					alSourceUnqueueBuffers(source_, 1, &buf);
 
-					std::vector<uint8> data(READSIZE);
+					std::vector<uint8_t> data(READSIZE);
 					data.resize(dataSource_->Read(&data[0], data.size()));
 					if (!data.empty())
 					{
@@ -143,7 +143,7 @@ namespace KlayGE
 		alSourceUnqueueBuffers(source_, static_cast<ALsizei>(bufferQueue_.size()), &bufferQueue_[0]);
 
 		ALenum const format(Convert(format_));
-		std::vector<uint8> data(READSIZE);
+		std::vector<uint8_t> data(READSIZE);
 
 		// 每个缓冲区中装1 / PreSecond秒的数据
 		for (BuffersIter iter = bufferQueue_.begin(); iter != bufferQueue_.end(); ++ iter)

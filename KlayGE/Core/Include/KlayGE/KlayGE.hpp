@@ -1,8 +1,11 @@
 // KlayGE.hpp
 // KlayGE 头文件
-// Ver 2.1.2
+// Ver 2.2.0
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.2.0
+// 去掉了Safe*函数 (2004.10.31)
 //
 // 2.1.0
 // 去掉了汇编代码 (2004.4.20)
@@ -20,42 +23,6 @@
 #define KLAYGESECVER		2
 #define KLAYGERELEASEVER	0
 #define KLAYGEVERSTR		"KlayGE 2.2.0"
-
-namespace KlayGE
-{
-	template <typename T>
-	inline void
-	SafeRelease(T& p)
-	{
-		if (p != 0)
-		{
-			p->Release();
-			p = 0;
-		}
-	}
-
-	template <typename T>
-	inline void
-	SafeDelete(T& p)
-	{
-		if (p != 0)
-		{
-			delete p;
-			p = 0;
-		}
-	}
-
-	template <typename T>
-	inline void
-	SafeDeleteArray(T& p)
-	{
-		if (p != 0)
-		{
-			delete[] p;
-			p = 0;
-		}
-	}
-}
 
 #include <KlayGE/Types.hpp>
 

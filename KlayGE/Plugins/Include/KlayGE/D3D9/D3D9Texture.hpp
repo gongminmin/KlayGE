@@ -16,7 +16,7 @@ namespace KlayGE
 	class D3D9Texture : public Texture
 	{
 	public:
-		D3D9Texture(uint32 width, uint32 height, uint16 numMipMaps, PixelFormat format, TextureUsage usage = TU_Default);
+		D3D9Texture(uint32_t width, uint32_t height, uint16_t numMipMaps, PixelFormat format, TextureUsage usage = TU_Default);
 		~D3D9Texture();
 
 		std::wstring const & Name() const;
@@ -25,7 +25,7 @@ namespace KlayGE
 
 		void CopyToTexture(Texture& target);
 		void CopyMemoryToTexture(void* pData, PixelFormat pf,
-			uint32 width = 0, uint32 height = 0, uint32 xOffset = 0, uint32 yOffset = 0);
+			uint32_t width = 0, uint32_t height = 0, uint32_t xOffset = 0, uint32_t yOffset = 0);
 
 		boost::shared_ptr<IDirect3DTexture9> const & D3DTexture() const
 			{ return this->d3dTexture_; }

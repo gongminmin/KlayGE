@@ -27,7 +27,7 @@ namespace KlayGE
 
 	// 更新输入动作
 	//////////////////////////////////////////////////////////////////////////////////
-	void InputActionMap::UpdateInputActions(InputActionsType& actions, uint16 key, long value)
+	void InputActionMap::UpdateInputActions(InputActionsType& actions, uint16_t key, long value)
 	{
 		if (this->HasAction(key))
 		{
@@ -37,14 +37,14 @@ namespace KlayGE
 
 	// 映射中存在这个key
 	//////////////////////////////////////////////////////////////////////////////////
-	bool InputActionMap::HasAction(uint16 key) const
+	bool InputActionMap::HasAction(uint16_t key) const
 	{
 		return (actionMap_.find(key) != actionMap_.end());
 	}
 
 	// 从key获取动作
 	//////////////////////////////////////////////////////////////////////////////////
-	uint16 InputActionMap::Action(uint16 key) const
+	uint16_t InputActionMap::Action(uint16_t key) const
 	{
 		return actionMap_.find(key)->second;
 	}
