@@ -42,7 +42,7 @@ namespace KlayGE
 		void CopyMemoryToTexture(int level, void* data, PixelFormat pf,
 			uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset);
 
-		void GenerateMipSubLevels();
+		void BuildMipSubLevels();
 
 		GLenum GLTexture() const
 			{ return texture_; }

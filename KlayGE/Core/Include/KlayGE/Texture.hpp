@@ -15,6 +15,7 @@
 #define _TEXTURE_HPP
 
 #include <string>
+#include <cassert>
 
 #if defined(DEBUG) | defined(_DEBUG)
 	#pragma comment(lib, "KlayGE_Core_d.lib")
@@ -91,6 +92,35 @@ namespace KlayGE
 			return 128;
 		}
 
+		assert(false);
+		return 0;
+	}
+
+	inline bool
+	IsFloatFormat(PixelFormat format)
+	{
+		switch (format)
+		{
+		case PF_L8:
+		case PF_A8:
+		case PF_A4L4:
+		case PF_R5G6B5:
+		case PF_A4R4G4B4:
+		case PF_X8R8G8B8:
+		case PF_A8R8G8B8:
+		case PF_A2R10G10B10:
+		case PF_A16B16G16R16F:
+			return false;
+				
+		case PF_R16F:
+		case PF_G16R16F:
+		case PF_R32F:
+		case PF_G32R32F:
+		case PF_A32B32G32R32F:
+			return true;
+		}
+
+		assert(false);
 		return 0;
 	}
 
@@ -156,7 +186,7 @@ namespace KlayGE
 		virtual void CopyMemoryToTexture(int level, void* data, PixelFormat pf,
 			uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset) = 0;
 
-		virtual void GenerateMipSubLevels() = 0;
+		virtual void BuildMipSubLevels() = 0;
 
 	protected:
 		uint32_t		height_;

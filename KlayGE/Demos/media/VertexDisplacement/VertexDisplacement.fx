@@ -21,8 +21,8 @@ VS_OUTPUT VertexDisplacementVS(VS_INPUT input,
 	VS_OUTPUT output;
 
 	float4 v = input.pos;
-	v.z = sin(input.pos.x + currentAngle) + cos(input.pos.y + currentAngle);
-	v.z *= (input.pos.x + 2) * 0.2f;
+	v.z = cos(input.pos.x + currentAngle) + sin(input.pos.y + currentAngle);
+	v.z *= input.pos.x * 0.2f;
 
 	output.pos = mul(v, worldviewproj);
 	output.texcoord0 = input.texcoord0;

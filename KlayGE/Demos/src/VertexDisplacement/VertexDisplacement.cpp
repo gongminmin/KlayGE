@@ -17,13 +17,18 @@
 #include <sstream>
 
 #include "VertexDisplacement.hpp"
-#include "Flag.hpp"
 
 using namespace std;
 using namespace KlayGE;
 
 namespace
 {
+	int const WIDTH = 4;
+	int const HEIGHT = 3;
+
+	int const MAX_X = 8;
+	int const MAX_Y = 6;
+
 #pragma pack(push, 1)
 
 	struct
@@ -85,7 +90,7 @@ namespace
 			}
 
 			texture->CopyMemoryToTexture(0, &tgaData[0], PF_X8R8G8B8, texture->Width(), texture->Height(), 0, 0);
-			texture->GenerateMipSubLevels();
+			texture->BuildMipSubLevels();
 
 			return texture;
 		}
@@ -101,17 +106,53 @@ namespace
 		Flag()
 			: rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
 		{
+			std::vector<float> pos;
+			for (int y = 0; y < MAX_Y * 2 + 1; ++ y)
+			{
+				for (int x = 0; x < MAX_X * 2 + 1; ++ x)
+				{
+					pos.push_back(+x * (0.5f * WIDTH / MAX_X));
+					pos.push_back(-y * (0.5f * HEIGHT / MAX_Y));
+					pos.push_back(0.0f);
+				}
+			}
+
+			std::vector<float> tex;
+			for (int y = 0; y < MAX_Y * 2 + 1; ++ y)
+			{
+				for (int x = 0; x < MAX_X * 2 + 1; ++ x)
+				{
+					tex.push_back(x / (MAX_X * 2.0f));
+					tex.push_back(y / (MAX_Y * 2.0f));
+				}
+			}
+
+			std::vector<uint16_t> index;
+			for (int y = 0; y < MAX_Y * 2; ++ y)
+			{
+				for (int x = 0; x < MAX_X * 2; ++ x)
+				{
+					index.push_back((y + 0) * (MAX_X * 2 + 1) + (x + 0));
+					index.push_back((y + 0) * (MAX_X * 2 + 1) + (x + 1));
+					index.push_back((y + 1) * (MAX_X * 2 + 1) + (x + 1));
+
+					index.push_back((y + 1) * (MAX_X * 2 + 1) + (x + 1));
+					index.push_back((y + 1) * (MAX_X * 2 + 1) + (x + 0));
+					index.push_back((y + 0) * (MAX_X * 2 + 1) + (x + 0));
+				}
+			}
+
 			effect_ = LoadRenderEffect("VertexDisplacement.fx");
 			*(effect_->ParameterByName("flag")) = LoadTGA(*(ResLoader::Instance().Load("Flag.tga")));
 			effect_->SetTechnique("VertexDisplacement");
 
 			rb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
 			rb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2, true);
-			rb_->GetVertexStream(VST_Positions)->Assign(Pos, sizeof(Pos) / sizeof(float) / 3);
-			rb_->GetVertexStream(VST_TextureCoords0)->Assign(Tex, sizeof(Tex) / sizeof(float) / 2);
+			rb_->GetVertexStream(VST_Positions)->Assign(&pos[0], pos.size() / 3);
+			rb_->GetVertexStream(VST_TextureCoords0)->Assign(&tex[0], tex.size() / 2);
 
 			rb_->AddIndexStream(true);
-			rb_->GetIndexStream()->Assign(Index, sizeof(Index) / sizeof(uint16_t));
+			rb_->GetIndexStream()->Assign(&index[0], index.size());
 
 			box_ = Box(Vector3(0, 0, 0), Vector3(0, 0, 0));
 		}
@@ -196,13 +237,16 @@ void VertexDisplacement::InitObjects()
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
+	Matrix4 matWorld;
+	MathLib::Translation(matWorld, -WIDTH / 2.0f, HEIGHT / 2.0f, 0.0f);
+
 	Matrix4 matView;
 	MathLib::LookAtLH(matView, Vector3(0, 0, -10), Vector3(0, 0, 0));
 
 	Matrix4 matProj;
 	MathLib::PerspectiveFovLH(matProj, PI / 4, 800.0f / 600, 0.1f, 20.0f);
 
-	*(flag->GetRenderEffect()->ParameterByName("worldviewproj")) = matView * matProj;
+	*(flag->GetRenderEffect()->ParameterByName("worldviewproj")) = matWorld * matView * matProj;
 }
 
 void VertexDisplacement::Update()

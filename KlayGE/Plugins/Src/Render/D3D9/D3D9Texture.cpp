@@ -173,12 +173,7 @@ namespace KlayGE
 			IDirect3DTexture9* d3dTexture;
 			// Use D3DX to help us create the texture, this way it can adjust any relevant sizes
 			TIF(D3DXCreateTexture(d3dDevice_.get(), this->Width(), this->Height(),
-				this->NumMipMaps(), 0, ConvertFormat(format),
-				D3DPOOL_SYSTEMMEM, &d3dTexture));
-			d3dTextureShadow_ = MakeCOMPtr(d3dTexture);
-
-			TIF(D3DXCreateTexture(d3dDevice_.get(), this->Width(), this->Height(),
-				this->NumMipMaps(), 0, ConvertFormat(format),
+				this->NumMipMaps(), D3DUSAGE_DYNAMIC, ConvertFormat(format),
 				D3DPOOL_DEFAULT, &d3dTexture));
 			d3dTexture_ = MakeCOMPtr(d3dTexture);
 
@@ -243,21 +238,32 @@ namespace KlayGE
 	{
 		D3D9Texture& other(static_cast<D3D9Texture&>(target));
 
-		if (this->Usage() == other.Usage())
+		RECT dstRC = { 0, 0, other.Width(), other.Height() };
+
+		boost::shared_ptr<IDirect3DSurface9> src, dst;
+
+		uint32_t maxLevel = 1;
+		if (this->NumMipMaps() == target.NumMipMaps())
 		{
-			RECT dstRC = { 0, 0, other.Width(), other.Height() };
+			maxLevel = this->NumMipMaps();
+		}
 
-			boost::shared_ptr<IDirect3DSurface9> src, dst;
-
+		for (uint32_t i = 0; i < maxLevel; ++ i)
+		{
 			IDirect3DSurface9* temp;
-			TIF(this->D3DTexture()->GetSurfaceLevel(0, &temp));
+			TIF(this->D3DTexture()->GetSurfaceLevel(i, &temp));
 			src = MakeCOMPtr(temp);
 
-			TIF(other.D3DTexture()->GetSurfaceLevel(0, &temp));
+			TIF(other.D3DTexture()->GetSurfaceLevel(i, &temp));
 			dst = MakeCOMPtr(temp);
 
-			TIF(d3dDevice_->StretchRect(src.get(), NULL, dst.get(), &dstRC, D3DTEXF_NONE));
+			TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DTEXF_NONE, 0));
 		}
+
+		if (this->NumMipMaps() != target.NumMipMaps())
+		{
+			target.BuildMipSubLevels();
+		}		
 	}
 
 	void D3D9Texture::CopyToMemory(int level, void* data)
@@ -265,7 +271,7 @@ namespace KlayGE
 		assert(data != NULL);
 
 		D3DLOCKED_RECT d3d_rc;
-		d3dTextureShadow_->LockRect(level, &d3d_rc, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY);
+		d3dTexture_->LockRect(level, &d3d_rc, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY);
 
 		uint8_t* dst = static_cast<uint8_t*>(data);
 		uint8_t* src = static_cast<uint8_t*>(d3d_rc.pBits);
@@ -281,31 +287,43 @@ namespace KlayGE
 			dst += dstPitch;
 		}
 
-		d3dTextureShadow_->UnlockRect(0);
+		d3dTexture_->UnlockRect(0);
 	}
 
 	void D3D9Texture::CopyMemoryToTexture(int level, void* data, PixelFormat pf,
 		uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset)
 	{
 		IDirect3DSurface9* temp;
-		TIF(d3dTextureShadow_->GetSurfaceLevel(level, &temp));
+		TIF(this->D3DTexture()->GetSurfaceLevel(level, &temp));
 		boost::shared_ptr<IDirect3DSurface9> shadow = MakeCOMPtr(temp);
 
 		RECT srcRc = { 0, 0, width, height };
 		RECT dstRc = { xOffset, yOffset, xOffset + width, yOffset + height };
 		TIF(D3DXLoadSurfaceFromMemory(shadow.get(), NULL, &dstRc, data, ConvertFormat(pf),
-			width * PixelFormatBits(pf) / 8, NULL, &srcRc, D3DX_DEFAULT, 0));
-
-		TIF(this->D3DTexture()->GetSurfaceLevel(level, &temp));
-		boost::shared_ptr<IDirect3DSurface9> texture = MakeCOMPtr(temp);
-
-		TIF(d3dDevice_->UpdateSurface(shadow.get(), NULL, texture.get(), NULL));
+			width * PixelFormatBits(pf) / 8, NULL, &srcRc, D3DX_FILTER_NONE, 0));
+		TIF(this->D3DTexture()->AddDirtyRect(&dstRc));
 	}
 
-	void D3D9Texture::GenerateMipSubLevels()
+	void D3D9Texture::BuildMipSubLevels()
 	{
-		TIF(D3DXFilterTexture(d3dTextureShadow_.get(), NULL, D3DX_DEFAULT, D3DX_DEFAULT));
-		TIF(d3dDevice_->UpdateTexture(d3dTextureShadow_.get(), d3dTexture_.get()));
+		boost::shared_ptr<IDirect3DTexture9> d3dTextureShadow;
+		IDirect3DTexture9* d3dTexture;
+		TIF(D3DXCreateTexture(d3dDevice_.get(), this->Width(), this->Height(),
+			this->NumMipMaps(), 0, ConvertFormat(format_),
+			D3DPOOL_SYSTEMMEM, &d3dTexture));
+		d3dTextureShadow = MakeCOMPtr(d3dTexture);
+
+		IDirect3DSurface9* temp;
+		TIF(this->D3DTexture()->GetSurfaceLevel(0, &temp));
+		boost::shared_ptr<IDirect3DSurface9> src = MakeCOMPtr(temp);
+
+		TIF(d3dTextureShadow->GetSurfaceLevel(0, &temp));
+		boost::shared_ptr<IDirect3DSurface9> dst = MakeCOMPtr(temp);
+
+		TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+
+		TIF(D3DXFilterTexture(d3dTextureShadow.get(), NULL, D3DX_DEFAULT, D3DX_DEFAULT));
+		TIF(d3dDevice_->UpdateTexture(d3dTextureShadow.get(), this->D3DTexture().get()));
 	}
 
 	void D3D9Texture::CustomAttribute(std::string const & name, void* pData)

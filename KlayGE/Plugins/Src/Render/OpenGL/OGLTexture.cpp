@@ -95,6 +95,18 @@ namespace KlayGE
 		bpp_ = PixelFormatBits(format);
 
 		usage_ = usage;
+
+		GLint glinternalFormat;
+		GLenum glformat;
+		Convert(glinternalFormat, glformat, format_);
+
+		glGenTextures(1, &texture_);
+		glBindTexture(GL_TEXTURE_2D, texture_);
+
+		glTexImage2D(GL_TEXTURE_2D, numMipMaps_, glinternalFormat, width, height, 0, glformat, GL_UNSIGNED_BYTE, NULL);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	}
 
 	OGLTexture::~OGLTexture()
@@ -125,42 +137,18 @@ namespace KlayGE
 	void OGLTexture::CopyMemoryToTexture(int level, void* data, PixelFormat pf,
 		uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset)
 	{
-		if (0 == width)
-		{
-			width = width_;
-		}
-		if (0 == height)
-		{
-			height = height_;
-		}
+		assert(width != 0);
+		assert(height != 0);
 
 		GLint glinternalFormat;
 		GLenum glformat;
 		Convert(glinternalFormat, glformat, pf);
 
-		if ((0 == texture_) || (width > width_) || (height > height_) || (pf != format_))
-		{
-			if (texture_ != 0)
-			{
-				glDeleteTextures(1, &texture_);
-			}
-
-			glGenTextures(1, &texture_);
-			glBindTexture(GL_TEXTURE_2D, texture_);
-
-			glTexImage2D(GL_TEXTURE_2D, level, glinternalFormat, width, height, 0, glformat, GL_UNSIGNED_BYTE, data);
-
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		}
-		else
-		{
-			glBindTexture(GL_TEXTURE_2D, texture_);
-			glTexSubImage2D(GL_TEXTURE_2D, level, xOffset, yOffset, width, height, glformat, GL_UNSIGNED_BYTE, data);
-		}
+		glBindTexture(GL_TEXTURE_2D, texture_);
+		glTexSubImage2D(GL_TEXTURE_2D, level, xOffset, yOffset, width, height, glformat, GL_UNSIGNED_BYTE, data);
 	}
 
-	void OGLTexture::GenerateMipSubLevels()
+	void OGLTexture::BuildMipSubLevels()
 	{
 	}
 

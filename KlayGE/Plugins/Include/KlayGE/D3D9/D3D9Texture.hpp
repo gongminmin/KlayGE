@@ -44,7 +44,7 @@ namespace KlayGE
 		void CopyMemoryToTexture(int level, void* data, PixelFormat pf,
 			uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset);
 
-		void GenerateMipSubLevels();
+		void BuildMipSubLevels();
 
 		boost::shared_ptr<IDirect3DTexture9> const & D3DTexture() const
 			{ return this->d3dTexture_; }
@@ -53,8 +53,7 @@ namespace KlayGE
 
 	private:
 		boost::shared_ptr<IDirect3DDevice9>		d3dDevice_;
-		boost::shared_ptr<IDirect3DTexture9>	d3dTexture_;		// The actual texture surface
-		boost::shared_ptr<IDirect3DTexture9>	d3dTextureShadow_;
+		boost::shared_ptr<IDirect3DTexture9>	d3dTexture_;
 
 		boost::shared_ptr<IDirect3DSurface9>	renderZBuffer_;		// The z-buffer for the render surface.
 	};
