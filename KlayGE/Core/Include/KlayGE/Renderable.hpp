@@ -16,6 +16,12 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Matrix.hpp>
 
+#ifdef KLAYGE_DEBUG
+	#pragma comment(lib, "KlayGE_Core_d.lib")
+#else
+	#pragma comment(lib, "KlayGE_Core.lib")
+#endif
+
 namespace KlayGE
 {
 	// Abstract class defining the interface all renderable objects must implement.

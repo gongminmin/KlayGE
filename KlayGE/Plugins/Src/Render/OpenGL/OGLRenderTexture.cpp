@@ -21,4 +21,19 @@ namespace KlayGE
 	{
 		assert(false);
 	}
+
+	void OGLRenderTexture::AttachTexture2D(TexturePtr texture2D)
+	{
+		assert(false);
+	}
+	
+	void OGLRenderTexture::AttachTextureCube(TexturePtr textureCube, Texture::CubeFaces face)
+	{
+		assert(false);
+	}
+
+	void OGLRenderTexture::DeattachTexture()
+	{
+		assert(false);
+	}
 }

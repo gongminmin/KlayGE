@@ -4,7 +4,11 @@
 #include <KlayGE/Vector.hpp>
 #include <KlayGE/Color.hpp>
 
-#pragma comment(lib, "KlayGE_Core.lib")
+#ifdef KLAYGE_DEBUG
+	#pragma comment(lib, "KlayGE_Core_d.lib")
+#else
+	#pragma comment(lib, "KlayGE_Core.lib")
+#endif
 
 namespace KlayGE
 {

@@ -46,13 +46,16 @@ namespace KlayGE
 			else
 			{
 				std::string::size_type const offset(resName.rfind(".pkt/"));
-				std::string const pktName(resName.substr(0, offset + 4));
-				std::string const fileName(resName.substr(offset + 5));
-
-				boost::shared_ptr<std::istream> pktFile(new std::ifstream(pktName.c_str(), std::ios_base::binary));
-				if (!pktFile->fail())
+				if (offset != std::string::npos)
 				{
-					return resName;
+					std::string const pktName(resName.substr(0, offset + 4));
+					std::string const fileName(resName.substr(offset + 5));
+
+					boost::shared_ptr<std::istream> pktFile(new std::ifstream(pktName.c_str(), std::ios_base::binary));
+					if (!pktFile->fail())
+					{
+						return resName;
+					}
 				}
 			}
 		}
@@ -76,24 +79,27 @@ namespace KlayGE
 			else
 			{
 				std::string::size_type const offset(resName.rfind(".pkt/"));
-				std::string const pktName(resName.substr(0, offset + 4));
-				std::string const fileName(resName.substr(offset + 5));
-
-				boost::shared_ptr<std::istream> pktFile(new std::ifstream(pktName.c_str(), std::ios_base::binary));
-				if (!pktFile->fail())
+				if (offset != std::string::npos)
 				{
-					UnPkt unPkt;
-					unPkt.Open(pktFile);
+					std::string const pktName(resName.substr(0, offset + 4));
+					std::string const fileName(resName.substr(offset + 5));
 
-					unPkt.LocateFile(fileName);
+					boost::shared_ptr<std::istream> pktFile(new std::ifstream(pktName.c_str(), std::ios_base::binary));
+					if (!pktFile->fail())
+					{
+						UnPkt unPkt;
+						unPkt.Open(pktFile);
 
-					std::vector<char> data(unPkt.CurFileSize());
-					unPkt.ReadCurFile(&data[0]);
+						unPkt.LocateFile(fileName);
 
-					boost::shared_ptr<std::iostream> packetFile(new std::stringstream);
-					packetFile->write(&data[0], static_cast<std::streamsize>(data.size()));
+						std::vector<char> data(unPkt.CurFileSize());
+						unPkt.ReadCurFile(&data[0]);
 
-					return packetFile;
+						boost::shared_ptr<std::iostream> packetFile(new std::stringstream);
+						packetFile->write(&data[0], static_cast<std::streamsize>(data.size()));
+
+						return packetFile;
+					}
 				}
 			}
 		}

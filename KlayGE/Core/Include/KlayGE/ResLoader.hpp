@@ -17,6 +17,12 @@
 #include <vector>
 #include <string>
 
+#ifdef KLAYGE_DEBUG
+	#pragma comment(lib, "KlayGE_Core_d.lib")
+#else
+	#pragma comment(lib, "KlayGE_Core.lib")
+#endif
+
 namespace KlayGE
 {
 	class ResLoader

@@ -33,7 +33,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_RenderSystem_OpenGL_d.lib"/>
+				OutputFile="$(OutDir)/KlayGE_RenderEngine_OpenGL_d.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool

@@ -42,7 +42,11 @@
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 
 #pragma comment(lib, "d3d9.lib")
-#pragma comment(lib, "d3dx9.lib")
+#ifdef KLAYGE_DEBUG
+	#pragma comment(lib, "d3dx9d.lib")
+#else
+	#pragma comment(lib, "d3dx9.lib")
+#endif
 
 namespace
 {
