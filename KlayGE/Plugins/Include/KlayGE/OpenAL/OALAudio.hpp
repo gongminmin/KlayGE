@@ -32,20 +32,19 @@ namespace KlayGE
 	Vector3 VecToALVec(const Vector3& v);
 	Vector3 ALVecToVec(const Vector3& v);
 
-	class OALAudioFactory;
-
 	// ÉùÒô»º³åÇø
 	/////////////////////////////////////////////////////////////////////////////////
 	class OALSoundBuffer : public SoundBuffer
 	{
-		friend class OALAudioFactory;
-
 	private:
 		typedef std::vector<ALuint, alloc<ALuint> >	Sources;
 		typedef Sources::iterator					SourcesIter;
 		typedef Sources::const_iterator				SourcesConstIter;
 
 	public:
+		OALSoundBuffer(const AudioDataSourcePtr& dataSource, U32 sourceNum, float volume);
+		~OALSoundBuffer();
+
 		void Play(bool loop = false);
 		void Stop();
 
@@ -60,12 +59,7 @@ namespace KlayGE
 		Vector3 Direction() const;
 		void Direction(const Vector3& v);
 
-	public:
-		~OALSoundBuffer();
-
 	private:
-		OALSoundBuffer(const AudioDataSourcePtr& dataSource, U32 sourceNum, float volume);
-
 		void DoReset();
 		SourcesIter FreeSource();
 
@@ -86,14 +80,15 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	class OALMusicBuffer : public MusicBuffer
 	{
-		friend class OALAudioFactory;
-
 	private:
 		typedef std::vector<ALuint, alloc<ALuint> >	Buffers;
 		typedef Buffers::iterator					BuffersIter;
 		typedef Buffers::const_iterator				BuffersConstIter;
 
 	public:
+		OALMusicBuffer(const AudioDataSourcePtr& dataSource, U32 bufferSeconds, float volume);
+		~OALMusicBuffer();
+
 		void Volume(float vol);
 
 		bool IsPlaying() const;
@@ -105,17 +100,12 @@ namespace KlayGE
 		Vector3 Direction() const;
 		void Direction(const Vector3& v);
 
-	public:
-		virtual ~OALMusicBuffer();
-
 	private:
-		OALMusicBuffer(const AudioDataSourcePtr& dataSource, U32 bufferSeconds, float volume);
+		void LoopUpdateBuffer();
 
-		virtual void LoopUpdateBuffer();
-
-		virtual void DoReset();
-		virtual void DoPlay(bool loop);
-		virtual void DoStop();
+		void DoReset();
+		void DoPlay(bool loop);
+		void DoStop();
 
 	private:
 		ALuint		source_;
@@ -130,9 +120,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	class OALAudioEngine : public AudioEngine
 	{
-		friend class OALAudioFactory;
-
 	public:
+		OALAudioEngine();
 		~OALAudioEngine();
 
 		const WString& Name() const;
@@ -143,9 +132,6 @@ namespace KlayGE
 		void ListenerVel(const Vector3& v);
 		void ListenerOri(Vector3& face, Vector3& up) const;
 		void ListenerOri(const Vector3& face, const Vector3& up);
-
-	private:
-		OALAudioEngine();
 
 	private:
 		OALAudioEngine(const OALAudioEngine&);

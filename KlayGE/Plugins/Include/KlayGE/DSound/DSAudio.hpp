@@ -27,8 +27,6 @@
 
 namespace KlayGE
 {
-	class DSAudioFactory;
-
 	typedef COMPtr<IDirectSoundBuffer> DSBufferType;
 
 	WAVEFORMATEX WaveFormatEx(const AudioDataSourcePtr& dataSource);
@@ -38,14 +36,15 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	class DSSoundBuffer : public SoundBuffer
 	{
-		friend class DSAudioFactory;
-
 	private:
 		typedef std::vector<DSBufferType, alloc<DSBufferType> >	Sources;
 		typedef Sources::iterator					SourcesIter;
 		typedef Sources::const_iterator				SourcesConstIter;
 
 	public:
+		DSSoundBuffer(const AudioDataSourcePtr& dataSource, U32 sourceNum, float volume);
+		~DSSoundBuffer();
+
 		void Play(bool loop = false);
 		void Stop();
 
@@ -60,12 +59,7 @@ namespace KlayGE
 		Vector3 Direction() const;
 		void Direction(const Vector3& v);
 
-	public:
-		~DSSoundBuffer();
-
 	private:
-		DSSoundBuffer(const AudioDataSourcePtr& dataSource, U32 sourceNum, float volume);
-
 		COMPtr<IDirectSound3DBuffer> Get3DBufferInterface(SourcesIter iter);
 
 		void DoReset();
@@ -87,9 +81,10 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	class DSMusicBuffer : public MusicBuffer
 	{
-		friend class DSAudioFactory;
-
 	public:
+		DSMusicBuffer(const AudioDataSourcePtr& dataSource, U32 bufferSeconds, float volume);
+		~DSMusicBuffer();
+
 		void Volume(float vol);
 
 		bool IsPlaying() const;
@@ -101,17 +96,12 @@ namespace KlayGE
 		Vector3 Direction() const;
 		void Direction(const Vector3& v);
 
-	public:
-		virtual ~DSMusicBuffer();
-
 	private:
-		DSMusicBuffer(const AudioDataSourcePtr& dataSource, U32 bufferSeconds, float volume);
+		void LoopUpdateBuffer();
 
-		virtual void LoopUpdateBuffer();
-
-		virtual void DoReset();
-		virtual void DoPlay(bool loop);
-		virtual void DoStop();
+		void DoReset();
+		void DoPlay(bool loop);
+		void DoStop();
 
 	private:
 		DSBufferType	buffer_;
@@ -132,9 +122,10 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	class DSAudioEngine : public AudioEngine
 	{
-		friend class DSAudioFactory;
-
 	public:
+		DSAudioEngine();
+		~DSAudioEngine();
+
 		const COMPtr<IDirectSound>& DSound() const
 			{ return dsound_; }
 
@@ -146,10 +137,6 @@ namespace KlayGE
 		void ListenerVel(const Vector3& v);
 		void ListenerOri(Vector3& face, Vector3& up) const;
 		void ListenerOri(const Vector3& face, const Vector3& up);
-
-	private:
-		DSAudioEngine();
-		~DSAudioEngine();
 
 	private:
 		COMPtr<IDirectSound>			dsound_;

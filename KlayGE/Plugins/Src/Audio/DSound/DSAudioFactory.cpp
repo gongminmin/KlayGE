@@ -18,35 +18,10 @@
 
 namespace KlayGE
 {
-	// 音频工厂的名字
-	/////////////////////////////////////////////////////////////////////////////////
-	const WString& DSAudioFactory::Name() const
+	AudioFactory& DSAudioFactoryInstance()
 	{
-		static WString name(L"DirectSound Audio Factory");
-		return name;
-	}
-
-	// 获取音频引擎实例
-	/////////////////////////////////////////////////////////////////////////////////
-	AudioEngine& DSAudioFactory::AudioEngineInstance()
-	{
-		static DSAudioEngine audioEngine;
-		return audioEngine;
-	}
-
-	// 建立声音缓冲区
-	/////////////////////////////////////////////////////////////////////////////////
-	AudioBufferPtr DSAudioFactory::MakeSoundBuffer(const AudioDataSourcePtr& dataSource, U32 sourceNum)
-	{
-		return AudioBufferPtr(new DSSoundBuffer(dataSource, sourceNum,
-			this->AudioEngineInstance().SoundVolume()));
-	}
-
-	// 建立音乐缓冲区
-	/////////////////////////////////////////////////////////////////////////////////
-	AudioBufferPtr DSAudioFactory::MakeMusicBuffer(const AudioDataSourcePtr& dataSource, U32 bufferSeconds)
-	{
-		return AudioBufferPtr(new DSMusicBuffer(dataSource, bufferSeconds,
-			this->AudioEngineInstance().MusicVolume()));
-	}
+		static ConcreteAudioFactory<DSAudioEngine,
+			DSSoundBuffer, DSMusicBuffer> audioFactory(L"DirectSound Audio Factory");
+		return audioFactory;
+	}	
 }

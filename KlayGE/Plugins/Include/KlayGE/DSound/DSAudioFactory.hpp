@@ -1,8 +1,11 @@
 // DSAudioFactory.hpp
 // KlayGE DirectSound声音引擎抽象工厂类 头文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.0.3
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.0.3
+// 改为template实现 (2004.3.4)
 //
 // 2.0.0
 // 初次建立 (2003.10.4)
@@ -20,16 +23,10 @@
 
 namespace KlayGE
 {
-	class DSAudioFactory : public AudioFactory
+	namespace KlayGE
 	{
-	public:
-		const WString& Name() const;
-
-		AudioEngine& AudioEngineInstance();
-
-		AudioBufferPtr MakeSoundBuffer(const AudioDataSourcePtr& dataSource, U32 sourceNum = 1);
-		AudioBufferPtr MakeMusicBuffer(const AudioDataSourcePtr& dataSource, U32 bufferSeconds = 2);
-	};
+		AudioFactory& DSAudioFactoryInstance();
+	}
 }
 
 #endif			// _DSAUDIOFACTORY_HPP

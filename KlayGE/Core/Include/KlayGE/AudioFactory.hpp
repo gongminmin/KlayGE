@@ -27,6 +27,39 @@ namespace KlayGE
 		virtual AudioBufferPtr MakeSoundBuffer(const AudioDataSourcePtr& dataSource, U32 sourceNum = 1) = 0;
 		virtual AudioBufferPtr MakeMusicBuffer(const AudioDataSourcePtr& dataSource, U32 bufferSeconds = 2) = 0;
 	};
+
+	template <typename AudioEngineType, typename SoundBufferType, typename MusicBufferType>
+	class ConcreteAudioFactory : public AudioFactory
+	{
+	public:
+		ConcreteAudioFactory(const WString& name)
+			: name_(name)
+			{ }
+
+		const WString& Name() const
+			{ return name_; }
+
+		AudioEngine& AudioEngineInstance()
+		{
+			static AudioEngineType audioEngine;
+			return audioEngine;
+		}
+
+		AudioBufferPtr MakeSoundBuffer(const AudioDataSourcePtr& dataSource, U32 sourceNum = 1)
+		{
+			return AudioBufferPtr(new SoundBufferType(dataSource, sourceNum,
+				this->AudioEngineInstance().SoundVolume()));
+		}
+
+		AudioBufferPtr MakeMusicBuffer(const AudioDataSourcePtr& dataSource, U32 bufferSeconds = 2)
+		{
+			return AudioBufferPtr(new MusicBufferType(dataSource, bufferSeconds,
+				this->AudioEngineInstance().MusicVolume()));
+		}
+
+	private:
+		const WString name_;
+	};
 }
 
 #endif			// _AUDIOFACTORY_HPP
