@@ -259,7 +259,7 @@ namespace KlayGE
 		effect_->SetTexture("texFont", theTexture_);
 
 		RenderEngine& renderEngine(Engine::RenderFactoryInstance().RenderEngineInstance());
-		Viewport viewport((*renderEngine.ActiveRenderTarget())->GetViewport());
+		const Viewport& viewport((*renderEngine.ActiveRenderTarget())->GetViewport());
 		effect_->SetInt("halfWidth", viewport.width / 2);
 		effect_->SetInt("halfHeight", viewport.height / 2);
 

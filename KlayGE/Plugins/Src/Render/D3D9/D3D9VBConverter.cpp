@@ -213,27 +213,29 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9VBConverter::CopyAllBuffers(const VertexBuffer& vb)
 	{
+		const size_t numVertices(vb.NumVertices());
+
 		{
 			this->CopyABuffer(xyzBuffer_, &vb.vertices[0],
-				sizeof(D3DVECTOR), vb.NumVertices());
+				sizeof(D3DVECTOR), numVertices);
 		}
 
 		if (vb.vertexOptions & VertexBuffer::VO_Normals)
 		{
 			this->CopyABuffer(normalBuffer_, &vb.normals[0],
-				sizeof(D3DVECTOR), vb.NumVertices());
+				sizeof(D3DVECTOR), numVertices);
 		}
 
 		if (vb.vertexOptions & VertexBuffer::VO_Diffuses)
 		{
 			this->CopyABuffer(diffuseBuffer_, &vb.diffuses[0],
-				sizeof(float) * 4, vb.NumVertices());
+				sizeof(float) * 4, numVertices);
 		}
 
 		if (vb.vertexOptions & VertexBuffer::VO_Speculars)
 		{
 			this->CopyABuffer(specularBuffer_, &vb.speculars[0],
-				sizeof(float) * 4, vb.NumVertices());
+				sizeof(float) * 4, numVertices);
 		}
 
 		if (vb.vertexOptions & VertexBuffer::VO_TextureCoords)
@@ -242,36 +244,36 @@ namespace KlayGE
 			{
 				const VertexBuffer::TexCoordsType& texCoords(vb.texCoords[i]);
 				this->CopyABuffer(textures_[i][vb.numTextureDimensions[i] - 1], &texCoords[0],
-					vb.numTextureDimensions[i] * sizeof(float), vb.NumVertices());
+					vb.numTextureDimensions[i] * sizeof(float), numVertices);
 			}
 		}
 
 		if (vb.vertexOptions & VertexBuffer::VO_BlendWeights)
 		{
 			this->CopyABuffer(blendWeights_, &vb.blendWeights[0],
-				sizeof(float) * 4, vb.NumVertices());
+				sizeof(float) * 4, numVertices);
 		}
 
 		if (vb.vertexOptions & VertexBuffer::VO_BlendIndices)
 		{
 			this->CopyABuffer(blendIndices_, &vb.blendIndices[0],
-				sizeof(float) * 4, vb.NumVertices());
+				sizeof(float) * 4, numVertices);
 		}
 	}
 
 	// 更新一个流
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9VBConverter::UpdateAStream(U16 streamNo, HardwareVertexBuffer& buffer,
-		size_t vertexSize, size_t vertexNum)
+		size_t vertexSize, size_t numVertices)
 	{
-		if (buffer.count < vertexNum)
+		if (buffer.count < numVertices)
 		{
 			IDirect3DVertexBuffer9* theBuffer;
-			TIF(d3dDevice_->CreateVertexBuffer(vertexSize * vertexNum, 
+			TIF(d3dDevice_->CreateVertexBuffer(vertexSize * numVertices, 
 				D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, 0, D3DPOOL_DEFAULT, &theBuffer, NULL));
 
 			buffer.buffer = COMPtr<IDirect3DVertexBuffer9>(theBuffer);
-			buffer.count = vertexNum;
+			buffer.count = numVertices;
 		}
 
 		TIF(d3dDevice_->SetStreamSource(streamNo, buffer.buffer.Get(), 0, vertexSize));
@@ -284,11 +286,7 @@ namespace KlayGE
 	{
 		U8* dest;
 		TIF(buffer.buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_DISCARD));
-		const U8* src(reinterpret_cast<const U8*>(srcData));
-
-		// 如果有跨距，就把数据拷贝到一个块中
-		Engine::MemoryInstance().Cpy(dest, src, vertexSize * vertexNum);
-
+		Engine::MemoryInstance().Cpy(dest, srcData, vertexSize * vertexNum);
 		buffer.buffer->Unlock();
 	}
 }

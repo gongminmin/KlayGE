@@ -15,12 +15,12 @@ namespace KlayGE
 	struct D3D9RenderWindowSettings : public RenderWindowSettings
 	{
 		D3D9RenderWindowSettings()
-			: multiSampleQuality(0)
+			: multiSample(0)
 			{ }
 		virtual ~D3D9RenderWindowSettings()
 			{ }
 
-		U32 multiSampleQuality;
+		U32 multiSample;
 
 		bool ConfirmDevice(const D3DCAPS9& caps, U32 behavior, D3DFORMAT format) const
 		{
@@ -80,7 +80,7 @@ namespace KlayGE
 		bool	ready_;				// Is ready i.e. available for update
 		bool	closed_;
 
-		U32		multiSampleQuality_;
+		D3DMULTISAMPLE_TYPE multiSample_;
 
 		static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg,
 			WPARAM wParam, LPARAM lParam );

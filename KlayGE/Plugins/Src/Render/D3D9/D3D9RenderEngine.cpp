@@ -574,16 +574,16 @@ namespace KlayGE
 	{
 		RenderEngine::ActiveRenderTarget(iter);
 
-		IDirect3DSurface9* pBack;
-		(*activeRenderTarget_)->CustomAttribute("DDBACKBUFFER", &pBack);
-		TIF(d3dDevice_->SetRenderTarget(0, pBack));
-		IDirect3DSurface9* pZBuffer;
-		(*activeRenderTarget_)->CustomAttribute("D3DZBUFFER", &pZBuffer);
-		TIF(d3dDevice_->SetDepthStencilSurface(pZBuffer));
+		IDirect3DSurface9* back;
+		(*activeRenderTarget_)->CustomAttribute("DDBACKBUFFER", &back);
+		TIF(d3dDevice_->SetRenderTarget(0, back));
+		IDirect3DSurface9* zBuffer;
+		(*activeRenderTarget_)->CustomAttribute("D3DZBUFFER", &zBuffer);
+		TIF(d3dDevice_->SetDepthStencilSurface(zBuffer));
 
 		this->CullingMode(cullingMode_);
 
-		Viewport vp((*iter)->GetViewport());
+		const Viewport& vp((*iter)->GetViewport());
 		D3DVIEWPORT9 d3dvp = { vp.left, vp.top, vp.width, vp.height, 0, 1 };
 		TIF(d3dDevice_->SetViewport(&d3dvp));
 	}
@@ -621,15 +621,8 @@ namespace KlayGE
 		for (UINT i = 0; i < renderPasses_; ++ i)
 		{
 			renderEffect_->Pass(i);
-			this->DoDrawPrimitive(primType, primCount);
+			TIF(d3dDevice_->DrawPrimitive(primType, 0, primCount));
 		}
-	}
-
-	// 实现画多边形
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DoDrawPrimitive(D3DPRIMITIVETYPE primType, U32 primCount)
-	{
-		TIF(d3dDevice_->DrawPrimitive(primType, 0, primCount));
 	}
 
 	// 画索引的多边形
@@ -639,15 +632,8 @@ namespace KlayGE
 		for (UINT i = 0; i < renderPasses_; ++ i)
 		{
 			renderEffect_->Pass(i);
-			this->DoDrawIndexedPrimitive(primType, vertexCount, primCount);
+			TIF(d3dDevice_->DrawIndexedPrimitive(primType, 0, 0, vertexCount, 0, primCount));
 		}
-	}
-
-	// 实现画索引的多边形
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DoDrawIndexedPrimitive(D3DPRIMITIVETYPE primType, U32 vertexCount, U32 primCount)
-	{
-		TIF(d3dDevice_->DrawIndexedPrimitive(primType, 0, 0, vertexCount, 0, primCount));
 	}
 
 	// 结束一帧
@@ -664,14 +650,14 @@ namespace KlayGE
 		if (depthTest)
 		{
 			// Use w-buffer if abialable
-			//if (caps_.RasterCaps & D3DPRASTERCAPS_WBUFFER)
-			//{
-			//	TIF(d3dDevice_->SetRenderState(D3DRS_ZENABLE, D3DZB_USEW));
-			//}
-			//else
-			//{
+			if (caps_.RasterCaps & D3DPRASTERCAPS_WBUFFER)
+			{
+				TIF(d3dDevice_->SetRenderState(D3DRS_ZENABLE, D3DZB_USEW));
+			}
+			else
+			{
 				TIF(d3dDevice_->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE));
-			//}
+			}
 		}
 		else
 		{

@@ -79,12 +79,19 @@ namespace KlayGE
 			for (RenderItemsType::iterator itemIter = queueIter->second.begin();
 				itemIter != queueIter->second.end(); ++ itemIter)
 			{
-				const Matrix4 oldWorld(renderEngine.WorldMatrix());
-				const Matrix4 newWorld(oldWorld * itemIter->second);
+				if (itemIter->second != Matrix4::Identity())
+				{
+					const Matrix4 oldWorld(renderEngine.WorldMatrix());
+					const Matrix4 newWorld(oldWorld * itemIter->second);
 
-				renderEngine.WorldMatrix(newWorld);
-				renderEngine.Render(*(itemIter->first));
-				renderEngine.WorldMatrix(oldWorld);
+					renderEngine.WorldMatrix(newWorld);
+					renderEngine.Render(*(itemIter->first));
+					renderEngine.WorldMatrix(oldWorld);
+				}
+				else
+				{
+					renderEngine.Render(*(itemIter->first));
+				}
 			}
 		}
 		renderQueue_.clear();

@@ -27,7 +27,7 @@ namespace KlayGE
 		d3dDevice_ = d3dDevice;
 	}
 
-	// 更新D3D9的VertexBuffer
+	// 更新D3D9的IndexBuffer
 	/////////////////////////////////////////////////////////////////////////////////
 	COMPtr<IDirect3DIndexBuffer9> D3D9IBConverter::Update(const VertexBuffer& vb)
 	{

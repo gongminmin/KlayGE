@@ -114,9 +114,17 @@ namespace KlayGE
 						: d3d_(d3d),
 							adapter_(adapter),
 							hWnd_(NULL),
-							active_(false), ready_(false), closed_(false),
-							multiSampleQuality_(settings.multiSampleQuality)
+							active_(false), ready_(false), closed_(false)
 	{
+		if (settings.multiSample > 16)
+		{
+			multiSample_ = D3DMULTISAMPLE_16_SAMPLES;
+		}
+		else
+		{
+			multiSample_ = D3DMULTISAMPLE_TYPE(settings.multiSample);
+		}
+
 		// Store info
 		name_				= name;
 		width_				= settings.width;
@@ -244,21 +252,12 @@ namespace KlayGE
 			d3dpp_.AutoDepthStencilFormat = D3DFMT_D16;
 		}
 
-		if (multiSampleQuality_ < 2) // NONE
+		if ((multiSample_ != 0) && SUCCEEDED(d3d_->CheckDeviceMultiSampleType(this->adapter_.AdapterNo(), 
+			D3DDEVTYPE_HAL, d3dpp_.BackBufferFormat, !isFullScreen_,
+			multiSample_, NULL)))
 		{
-			multiSampleQuality_ = 0;
-		}
-		if (multiSampleQuality_ > 16) // MAX
-		{
-			multiSampleQuality_ = 16;
-		}
-
-		if ((multiSampleQuality_ != 0) && SUCCEEDED(d3d_->CheckDeviceMultiSampleType(this->adapter_.AdapterNo(), 
-			D3DDEVTYPE_HAL, d3dpp_.BackBufferFormat, isFullScreen_,
-			D3DMULTISAMPLE_NONMASKABLE, &multiSampleQuality_)))
-		{
-			d3dpp_.MultiSampleType		= D3DMULTISAMPLE_NONMASKABLE;
-			d3dpp_.MultiSampleQuality	= multiSampleQuality_;
+			d3dpp_.MultiSampleType		= multiSample_;
+			d3dpp_.MultiSampleQuality	= 0;
 		}
 		else
 		{

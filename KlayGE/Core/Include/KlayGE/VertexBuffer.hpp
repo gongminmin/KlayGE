@@ -57,7 +57,7 @@ namespace KlayGE
 			{ return !indices.empty(); }
 
 		// Number of vertices (applies to all components)
-		U32 NumVertices() const
+		size_t NumVertices() const
 			{ return vertices.size() / 3; }
 
 		// No memory allocation here,
@@ -115,7 +115,7 @@ namespace KlayGE
 		IndicesType indices;
 
 		// The number of vertex indexes
-		U32 NumIndices() const
+		size_t NumIndices() const
 			{ return indices.size(); }
 
 		// The type of rendering operation.
