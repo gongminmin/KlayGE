@@ -38,6 +38,14 @@ namespace KlayGE
 {
 	class D3D9Texture : public Texture, public D3D9Resource
 	{
+		typedef boost::shared_ptr<IDirect3DDevice9>			IDirect3DDevice9Ptr;
+		typedef boost::shared_ptr<IDirect3DTexture9>		IDirect3DTexture9Ptr;
+		typedef boost::shared_ptr<IDirect3DVolumeTexture9>	IDirect3DVolumeTexture9Ptr;
+		typedef boost::shared_ptr<IDirect3DCubeTexture9>	IDirect3DCubeTexture9Ptr;
+		typedef boost::shared_ptr<IDirect3DBaseTexture9>	IDirect3DBaseTexture9Ptr;
+		typedef boost::shared_ptr<IDirect3DSurface9>		IDirect3DSurface9Ptr;
+		typedef boost::shared_ptr<IDirect3DVolume9>			IDirect3DVolume9Ptr;
+
 	public:
 		D3D9Texture(uint32_t width, uint16_t numMipMaps, PixelFormat format, TextureUsage usage);
 		D3D9Texture(uint32_t width, uint32_t height, uint16_t numMipMaps, PixelFormat format, TextureUsage usage);
@@ -74,22 +82,23 @@ namespace KlayGE
 		void DoOnLostDevice();
 		void DoOnResetDevice();
 
-		boost::shared_ptr<IDirect3DTexture9> CreateTexture2D(uint32_t usage, D3DPOOL pool);
-		boost::shared_ptr<IDirect3DVolumeTexture9> CreateTexture3D(uint32_t usage, D3DPOOL pool);
-		boost::shared_ptr<IDirect3DCubeTexture9> CreateTextureCube(uint32_t usage, D3DPOOL pool);
+		IDirect3DTexture9Ptr CreateTexture2D(uint32_t usage, D3DPOOL pool);
+		IDirect3DVolumeTexture9Ptr CreateTexture3D(uint32_t usage, D3DPOOL pool);
+		IDirect3DCubeTexture9Ptr CreateTextureCube(uint32_t usage, D3DPOOL pool);
 
 		void QueryBaseTexture();
+		void UpdateParams();
 
 	private:
-		boost::shared_ptr<IDirect3DDevice9>			d3dDevice_;
+		IDirect3DDevice9Ptr			d3dDevice_;
 
-		boost::shared_ptr<IDirect3DTexture9>		d3dTexture2D_;
-		boost::shared_ptr<IDirect3DVolumeTexture9>	d3dTexture3D_;
-		boost::shared_ptr<IDirect3DCubeTexture9>	d3dTextureCube_;
+		IDirect3DTexture9Ptr		d3dTexture2D_;
+		IDirect3DVolumeTexture9Ptr	d3dTexture3D_;
+		IDirect3DCubeTexture9Ptr	d3dTextureCube_;
 
-		boost::shared_ptr<IDirect3DBaseTexture9>	d3dBaseTexture_;
+		IDirect3DBaseTexture9Ptr	d3dBaseTexture_;
 
-		boost::shared_ptr<IDirect3DSurface9>	renderZBuffer_;		// The z-buffer for the render surface.
+		IDirect3DSurface9Ptr		renderZBuffer_;		// The z-buffer for the render surface.
 	};
 
 	typedef boost::shared_ptr<D3D9Texture> D3D9TexturePtr;

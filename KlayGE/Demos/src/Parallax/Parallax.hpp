@@ -3,6 +3,7 @@
 
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Font.hpp>
+#include <KlayGE/CameraController.hpp>
 
 class Parallax : public KlayGE::App3DFramework
 {
@@ -15,6 +16,8 @@ private:
 	void Update();
 
 	KlayGE::FontPtr font_;
+
+	KlayGE::FirstPersonCameraController fpcController_;
 };
 
 #endif		// _PARALLAX_HPP

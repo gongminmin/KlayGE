@@ -291,7 +291,7 @@ namespace KlayGE
 		for (BehaviorType::iterator iter = behavior.begin(); iter != behavior.end(); ++ iter)
 		{
 			if (SUCCEEDED(d3d_->CreateDevice(adapter_.AdapterNo(), D3DDEVTYPE_HAL, hWnd_,
-				iter->first, &d3dpp_, &d3dDevice)))
+				D3DCREATE_MULTITHREADED | iter->first, &d3dpp_, &d3dDevice)))
 			{
 				D3DCAPS9 caps;
 				d3dDevice->GetDeviceCaps(&caps);

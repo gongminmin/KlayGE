@@ -18,8 +18,10 @@
 
 #include <KlayGE/Texture.hpp>
 
-namespace KlayGE
+namespace
 {
+	using namespace KlayGE;
+
 #pragma pack(push, 1)
 
 	enum
@@ -134,7 +136,10 @@ namespace KlayGE
 	};
 
 #pragma pack(pop)
+}
 
+namespace KlayGE
+{
 	// 载入DDS格式文件
 	TexturePtr LoadTexture(std::string const & tex_name)
 	{
@@ -157,7 +162,7 @@ namespace KlayGE
 			desc.mip_map_count = 1;
 		}
 
-		PixelFormat format;
+		PixelFormat format = PF_A8R8G8B8;
 		if ((desc.pixel_format.flags & DDSPF_FOURCC) != 0)
 		{
 			switch (desc.pixel_format.four_cc)
@@ -302,7 +307,7 @@ namespace KlayGE
 			}
 		}
 		
-		size_t main_image_size;
+		uint32_t main_image_size;
 		if ((desc.flags & DDSD_LINEARSIZE) != 0)
 		{
 			main_image_size = desc.linear_size;
@@ -352,7 +357,7 @@ namespace KlayGE
 		case Texture::TT_1D:
 		case Texture::TT_2D:
 			{
-				for (uint32_t i = 0; i < desc.mip_map_count; ++ i)
+				for (uint32_t level = 0; level < desc.mip_map_count; ++ level)
 				{
 					uint32_t image_size;
 					if (IsCompressedFormat(format))
@@ -367,11 +372,11 @@ namespace KlayGE
 							block_size = 16;
 						}
 
-						image_size = ((desc.width / (1UL << i) + 3) / 4) * ((desc.height / (1UL << i) + 3) / 4) * block_size;
+						image_size = ((desc.width / (1UL << level) + 3) / 4) * ((desc.height / (1UL << level) + 3) / 4) * block_size;
 					}
 					else
 					{
-						image_size = main_image_size / (1UL << (i * 2));
+						image_size = main_image_size / (1UL << (level * 2));
 					}
 
 					std::vector<uint8_t> data(image_size);
@@ -379,15 +384,15 @@ namespace KlayGE
 					file->read(reinterpret_cast<char*>(&data[0]), static_cast<std::streamsize>(data.size()));
 					assert(file->gcount() == data.size());
 
-					texture->CopyMemoryToTexture2D(i, &data[0], format,
-						texture->Width() / (1UL << i), texture->Height() / (1UL << i), 0, 0);
+					texture->CopyMemoryToTexture2D(level, &data[0], format,
+						texture->Width() / (1UL << level), texture->Height() / (1UL << level), 0, 0);
 				}
 			}
 			break;
 
 		case Texture::TT_3D:
 			{
-				for (uint32_t i = 0; i < desc.mip_map_count; ++ i)
+				for (uint32_t level = 0; level < desc.mip_map_count; ++ level)
 				{
 					uint32_t image_size;
 					if (IsCompressedFormat(format))
@@ -402,24 +407,21 @@ namespace KlayGE
 							block_size = 16;
 						}
 
-						image_size = ((desc.width / (1UL << i) + 3) / 4) * ((desc.height / (1UL << i) + 3) / 4) * block_size;
+						image_size = ((desc.width / (1UL << level) + 3) / 4) * ((desc.height / (1UL << level) + 3) / 4) * block_size;
 					}
 					else
 					{
-						image_size = main_image_size / (1UL << (i * 2));
+						image_size = main_image_size / (1UL << (level * 2));
 					}
 				
-					for (uint32_t slice = 0; slice < texture->Depth(); ++ slice)
-					{
-						std::vector<uint8_t> data(image_size);
+					std::vector<uint8_t> data(image_size * texture->Depth());
 
-						file->read(reinterpret_cast<char*>(&data[0]), static_cast<std::streamsize>(data.size()));
-						assert(file->gcount() == data.size());
+					file->read(reinterpret_cast<char*>(&data[0]), static_cast<std::streamsize>(data.size()));
+					assert(file->gcount() == data.size());
 
-						texture->CopyMemoryToTexture3D(i, &data[0], format,
-							texture->Width() / (1UL << i), texture->Height() / (1UL << i),
-							texture->Depth() / (1UL << i), 0, 0, slice);
-					}
+					texture->CopyMemoryToTexture3D(level, &data[0], format,
+						texture->Width() / (1UL << level), texture->Height() / (1UL << level),
+						texture->Depth() / (1UL << level), 0, 0, 0);
 				}
 			}
 			break;
@@ -428,7 +430,7 @@ namespace KlayGE
 			{
 				for (uint32_t face = Texture::CF_Positive_X; face < Texture::CF_Negative_Z; ++ face)
 				{
-					for (uint32_t i = 0; i < desc.mip_map_count; ++ i)
+					for (uint32_t level = 0; level < desc.mip_map_count; ++ level)
 					{
 						uint32_t image_size;
 						if (IsCompressedFormat(format))
@@ -443,11 +445,11 @@ namespace KlayGE
 								block_size = 16;
 							}
 
-							image_size = ((desc.width / (1UL << i) + 3) / 4) * ((desc.height / (1UL << i) + 3) / 4) * block_size;
+							image_size = ((desc.width / (1UL << level) + 3) / 4) * ((desc.height / (1UL << level) + 3) / 4) * block_size;
 						}
 						else
 						{
-							image_size = main_image_size / (1UL << (i * 2));
+							image_size = main_image_size / (1UL << (level * 2));
 						}
 					
 						std::vector<uint8_t> data(image_size);
@@ -456,7 +458,7 @@ namespace KlayGE
 						assert(file->gcount() == data.size());
 
 						texture->CopyMemoryToTextureCube(static_cast<Texture::CubeFaces>(face),
-							i, &data[0], format, texture->Width() / (1UL << i), 0);
+							level, &data[0], format, texture->Width() / (1UL << level), 0);
 					}
 				}
 			}
@@ -464,5 +466,55 @@ namespace KlayGE
 		}
 
 		return texture;		
+	}
+
+
+	Texture::Texture(Texture::TextureUsage usage, Texture::TextureType type)
+			: usage_(usage), type_(type)
+	{
+	}
+
+	Texture::~Texture()
+	{
+	}
+
+	uint16_t Texture::NumMipMaps() const
+	{
+		return numMipMaps_;
+	}
+
+	Texture::TextureUsage Texture::Usage() const
+	{
+		return usage_;
+	}
+
+	uint32_t Texture::Width() const
+	{
+		return width_;
+	}
+
+	uint32_t Texture::Height() const
+	{
+		return height_;
+	}
+
+	uint32_t Texture::Depth() const
+	{
+		return depth_;
+	}
+
+	uint32_t Texture::Bpp() const
+	{
+		return bpp_;
+	}
+
+	PixelFormat Texture::Format() const
+	{
+		return format_;
+	}
+
+	Texture::TextureType Texture::Type() const
+	{
+		return type_;
 	}
 }

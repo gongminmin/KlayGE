@@ -14,10 +14,10 @@
 #include <KlayGE/D3D9/D3D9RenderSettings.hpp>
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
-#include <KlayGE/Frustum/Frustum.hpp>
+#include <KlayGE/OCTree/OCTree.hpp>
 
-#include <iostream>
 #include <sstream>
+#include <ctime>
 
 #include "Torus.hpp"
 #include "Cartoon.hpp"
@@ -95,7 +95,7 @@ private:
 int main()
 {
 	Cartoon app;
-	Frustum sceneMgr;
+	OCTree sceneMgr(Box(Vector3(-10, -10, -10), Vector3(10, 10, 10)));
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
@@ -113,7 +113,6 @@ int main()
 }
 
 Cartoon::Cartoon()
-			: rotX(0), rotY(0)
 {
 	ResLoader::Instance().AddPath("../media");
 	ResLoader::Instance().AddPath("../media/Cartoon");
@@ -152,8 +151,8 @@ void Cartoon::Update()
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-	rotX += 0.003f;
-	rotY += 0.003f;
+	float rotX(std::clock() / 700.0f);
+	float rotY(std::clock() / 700.0f);
 
 	Matrix4 mat, matY;
 	MathLib::RotationX(mat, rotX);

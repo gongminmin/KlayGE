@@ -119,6 +119,9 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath=".\Src\Render\CameraController.cpp">
+				</File>
+				<File
 					RelativePath=".\Src\Render\Font.cpp">
 				</File>
 				<File
@@ -205,6 +208,9 @@
 				Filter="">
 				<File
 					RelativePath="Include\KlayGE\Camera.hpp">
+				</File>
+				<File
+					RelativePath=".\Include\KlayGE\CameraController.hpp">
 				</File>
 				<File
 					RelativePath="Include\KlayGE\Font.hpp">

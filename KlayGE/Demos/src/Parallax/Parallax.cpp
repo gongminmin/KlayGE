@@ -17,6 +17,7 @@
 
 #include <vector>
 #include <sstream>
+#include <ctime>
 
 #include "Parallax.hpp"
 
@@ -163,6 +164,8 @@ void Parallax::InitObjects()
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
+	fpcController_.AttachCamera(this->ActiveCamera());
+
 	this->LookAt(Vector3(2, 0, -2), Vector3(0, 0, 0));
 	this->Proj(0.1f, 20.0f);
 
@@ -175,15 +178,16 @@ void Parallax::InitObjects()
 
 void Parallax::Update()
 {
+	fpcController_.Update();
+
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-	static float degree(0);
+	float degree(std::clock() / 700.0f);
 	Vector3 lightPos(2, 0, -2);
 	Matrix4 matRot;
 	MathLib::RotationZ(matRot, degree);
 	MathLib::TransformCoord(lightPos, lightPos, matRot);
 	*(renderPolygon->effect_->ParameterByName("lightPos")) = Vector4(lightPos.x(), lightPos.y(), lightPos.z(), 1);
-	degree += 0.01f;
 
 	std::wostringstream stream;
 	stream << (*renderEngine.ActiveRenderTarget())->FPS();

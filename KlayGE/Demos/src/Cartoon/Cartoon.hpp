@@ -14,7 +14,6 @@ private:
 	void Update();
 
 	KlayGE::FontPtr font_;
-	float rotX, rotY;
 
 	KlayGE::Matrix4 view_, proj_;
 };

@@ -40,6 +40,7 @@ namespace KlayGE
 	class Box;
 
 	class Camera;
+	class FirstPersonCameraController;
 	class Font;
 	typedef boost::shared_ptr<Font> FontPtr;
 	struct Light;

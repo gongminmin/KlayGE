@@ -35,6 +35,8 @@ namespace KlayGE
 			{ return lookat_; }
 		Vector3 const & UpVec() const
 			{ return upVec_; }
+		Vector3 const & ViewVec() const
+			{ return viewVec_; }
 
 		float FOV() const
 			{ return FOV_; }

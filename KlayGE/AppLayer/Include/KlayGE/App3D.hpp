@@ -48,6 +48,8 @@ namespace KlayGE
 		void Run();
 
 	protected:
+		Camera& ActiveCamera();
+
 		void LookAt(Vector3 const & eye, Vector3 const & lookAt, Vector3 const & up = Vector3(0, 1, 0));
 		void Proj(float nearPlane, float farPlane);
 

@@ -13,10 +13,11 @@
 #include <KlayGE/D3D9/D3D9RenderSettings.hpp>
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
-#include <KlayGE/Frustum/Frustum.hpp>
+#include <KlayGE/OCTree/OCTree.hpp>
 
 #include <vector>
 #include <sstream>
+#include <ctime>
 
 #include "VertexDisplacement.hpp"
 
@@ -143,7 +144,7 @@ private:
 int main()
 {
 	VertexDisplacement app;
-	Frustum sceneMgr;
+	OCTree sceneMgr(Box(Vector3(-10, -10, -10), Vector3(10, 10, 10)));
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
@@ -198,13 +199,8 @@ void VertexDisplacement::Update()
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-	static float currentAngle = 0;
+	float currentAngle(clock() / 400.0f);
 	*(flag->GetRenderEffect()->ParameterByName("currentAngle")) = currentAngle;
-	currentAngle += 0.01f;
-	if (currentAngle > 2 * PI)
-	{
-		currentAngle = 0;
-	}
 
 	std::wostringstream stream;
 	stream << (*renderEngine.ActiveRenderTarget())->FPS();

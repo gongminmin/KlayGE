@@ -215,49 +215,32 @@ namespace KlayGE
 		};
 
 	public:
-		virtual ~Texture()
-			{ }
+		Texture(TextureUsage usage, TextureType type);
+		virtual ~Texture();
 
 		// Gets the name of texture
 		virtual std::wstring const & Name() const = 0;
 
 		// Gets the number of mipmaps to be used for this texture.
-		uint16_t NumMipMaps() const 
-			{ return this->numMipMaps_; }
-
-		// Sets the number of mipmaps to be used for this texture.
-		// @note
-		// Must be set before calling any 'load' method.
-		void NumMipMaps(uint16_t num)
-			{ numMipMaps_ = num; }
+		uint16_t NumMipMaps() const;
 
 		// Returns the TextureUsage indentifier for this Texture
-		TextureUsage Usage() const
-			{ return usage_; }
+		TextureUsage Usage() const;
 
         // Returns the width of the texture.
-		uint32_t Width() const
-			{ return width_; }
-
+		uint32_t Width() const;
 		// Returns the height of the texture.
-		uint32_t Height() const
-			{ return height_; }
-
+		uint32_t Height() const;
 		// Returns the depth of the texture (only for 3D texture).
-		uint32_t Depth() const
-			{ return depth_; }
+		uint32_t Depth() const;
 
 		// Returns the bpp of the texture.
-		uint32_t Bpp() const
-			{ return bpp_; }
-
+		uint32_t Bpp() const;
 		// Returns the pixel format for the texture surface.
-		PixelFormat Format() const
-			{ return format_; }
+		PixelFormat Format() const;
 
 		// Returns the texture type of the texture.
-		TextureType Type() const
-			{ return type_; }
+		TextureType Type() const;
 
 		// Copies (and maybe scales to fit) the contents of this texture to another texture.
 		virtual void CopyToTexture(Texture& target) = 0;
@@ -283,9 +266,9 @@ namespace KlayGE
 
 		uint16_t		numMipMaps_;
 
-		PixelFormat format_;
-		TextureUsage usage_;
-		TextureType type_;
+		PixelFormat		format_;
+		TextureUsage	usage_;
+		TextureType		type_;
 	};
 
 	TexturePtr LoadTexture(std::string const & tex_name);
