@@ -65,7 +65,7 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	const std::wstring& DInputJoystick::Name() const
 	{
-		static const std::wstring name(L"DirectInput Joystick");
+		static std::wstring const name(L"DirectInput Joystick");
 		return name;
 	}
 
@@ -73,6 +73,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void DInputJoystick::UpdateInputs()
 	{
+		assert(dynamic_cast<DInputDeviceImpl*>(impl_.get()) != NULL);
+
 		DInputDeviceImpl* didImpl = static_cast<DInputDeviceImpl*>(impl_.get());
 
 		didImpl->Poll();

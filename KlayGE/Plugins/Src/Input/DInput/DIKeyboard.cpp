@@ -15,6 +15,8 @@
 
 #include <KlayGE/KlayGE.hpp>
 
+#include <cassert>
+
 #include <boost/array.hpp>
 #include <boost/lambda/lambda.hpp>
 
@@ -38,9 +40,9 @@ namespace KlayGE
 
 	// Éè±¸Ãû³Æ
 	//////////////////////////////////////////////////////////////////////////////////
-	const std::wstring& DInputKeyboard::Name() const
+	std::wstring const & DInputKeyboard::Name() const
 	{
-		static const std::wstring name(L"DirectInput Keyboard");
+		static std::wstring const name(L"DirectInput Keyboard");
 		return name;
 	}
 
@@ -48,13 +50,12 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	void DInputKeyboard::UpdateInputs()
 	{
+		assert(dynamic_cast<DInputDeviceImpl*>(impl_.get()) != NULL);
+
 		boost::array<U8, 256> keys;
 		static_cast<DInputDeviceImpl*>(impl_.get())->DeviceState(&keys[0], keys.size());
 
-		std::transform(keys.begin(), keys.end(), keys_.begin(), (boost::lambda::_1 & 0x80) != 0);
-		/*for (size_t i = 0; i < keys.size(); ++ i)
-		{
-			keys_[i] = ((keys[i] & 0x80) != 0);
-		}*/
+		std::transform(keys.begin(), keys.end(), keys_.begin(),
+			(boost::lambda::_1 & 0x80) != 0);
 	}
 }

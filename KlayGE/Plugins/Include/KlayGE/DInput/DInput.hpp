@@ -35,10 +35,10 @@ namespace KlayGE
 		DInputEngine();
 		~DInputEngine();
 
-		const std::wstring& Name() const;
+		std::wstring const & Name() const;
 		void EnumDevices();
 
-		const boost::shared_ptr<IDirectInput8W>& DInput() const;
+		boost::shared_ptr<IDirectInput8W> const & DInput() const;
 
 	private:
 		boost::shared_ptr<IDirectInput8W> dinput_;
@@ -52,7 +52,7 @@ namespace KlayGE
 	public:
 		DInputKeyboard(REFGUID guid, InputEngine& inputEng);
 
-		const std::wstring& Name() const;
+		std::wstring const & Name() const;
 
 	private:
 		void UpdateInputs();
@@ -63,7 +63,7 @@ namespace KlayGE
 	public:
 		DInputMouse(REFGUID guid, InputEngine& inputEng);
 
-		const std::wstring& Name() const;
+		std::wstring const & Name() const;
 
 	private:
 		void UpdateInputs();
@@ -74,7 +74,7 @@ namespace KlayGE
 	public:
 		DInputJoystick(REFGUID guid, InputEngine& inputEng);
 
-		const std::wstring& Name() const;
+		std::wstring const & Name() const;
 
 	private:
 		void UpdateInputs();

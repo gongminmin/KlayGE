@@ -33,9 +33,9 @@ namespace KlayGE
 		void Acquire();
 		void Unacquire();
 
-		void DataFormat(const DIDATAFORMAT& df);
+		void DataFormat(DIDATAFORMAT const & df);
 		void CooperativeLevel(HWND hwnd, DWORD flags);
-		void Property(REFGUID rguidProp, const DIPROPHEADER& diph);
+		void Property(REFGUID rguidProp, DIPROPHEADER const & diph);
 
 		void Poll();
 		void DeviceState(void* data, size_t size);

@@ -14,6 +14,8 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
 
+#include <cassert>
+
 #include <KlayGE/DInput/DInput.hpp>
 #include <KlayGE/DInput/DInputDeviceImpl.hpp>
 
@@ -23,6 +25,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	DInputDeviceImpl::DInputDeviceImpl(REFGUID guid, InputEngine& inputEng)
 	{
+		assert(dynamic_cast<DInputEngine*>(&inputEng) != NULL);
+
 		DInputEngine& dinputEng(static_cast<DInputEngine&>(inputEng));
 
 		IDirectInputDevice8W* device;
@@ -76,19 +80,17 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	void DInputDeviceImpl::DeviceState(void* data, size_t size)
 	{
-		bool done;
-		do
+		for (;;)
 		{
 			HRESULT hr = device_->GetDeviceState(size, data);
 			if ((DIERR_INPUTLOST == hr) || (DIERR_NOTACQUIRED == hr))
 			{
 				this->Acquire();
-				done = false;
 			}
 			else
 			{
-				done = true;
+				break;
 			}
-		} while (!done);
+		}
 	}
 }

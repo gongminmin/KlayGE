@@ -48,9 +48,9 @@ namespace KlayGE
 
 	// Éè±¸Ãû³Æ
 	//////////////////////////////////////////////////////////////////////////////////
-	const std::wstring& DInputMouse::Name() const
+	std::wstring const & DInputMouse::Name() const
 	{
-		static const std::wstring name(L"DirectInput Mouse");
+		static std::wstring const name(L"DirectInput Mouse");
 		return name;
 	}
 
@@ -58,6 +58,8 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	void DInputMouse::UpdateInputs()
 	{
+		assert(dynamic_cast<DInputDeviceImpl*>(impl_.get()) != NULL);
+
 		DIMOUSESTATE diMouseState;
 		static_cast<DInputDeviceImpl*>(impl_.get())->DeviceState(&diMouseState, sizeof(diMouseState));
 

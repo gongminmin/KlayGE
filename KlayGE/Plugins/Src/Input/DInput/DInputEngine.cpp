@@ -42,16 +42,16 @@ namespace KlayGE
 
 	// 获取DirectInput接口
 	/////////////////////////////////////////////////////////////////////////////////
-	const boost::shared_ptr<IDirectInput8W>& DInputEngine::DInput() const
+	boost::shared_ptr<IDirectInput8W> const & DInputEngine::DInput() const
 	{
 		return dinput_;
 	}
 
 	// 输入引擎名称
 	/////////////////////////////////////////////////////////////////////////////////
-	const std::wstring& DInputEngine::Name() const
+	std::wstring const & DInputEngine::Name() const
 	{
-		static const std::wstring name(L"DirectInput Input Engine");
+		static std::wstring const name(L"DirectInput Input Engine");
 		return name;
 	}
 
