@@ -11,7 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/CommFuncs.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/VFile.hpp>
 #include <KlayGE/DiskFile/DiskFile.hpp>
 #include <KlayGE/PackedFile/Pkt.hpp>

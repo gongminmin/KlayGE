@@ -11,7 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/CommFuncs.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Timer.hpp>
 #include <KlayGE/Engine.hpp>
 

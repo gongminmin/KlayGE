@@ -251,9 +251,6 @@
 				Name="源文件"
 				Filter="">
 				<File
-					RelativePath="Src\Kernel\CommFuncs.cpp">
-				</File>
-				<File
 					RelativePath=".\Src\Kernel\Cpu.cpp">
 				</File>
 				<File
@@ -268,6 +265,9 @@
 				<File
 					RelativePath="Src\Kernel\MemoryImpl.cpp">
 				</File>
+				<File
+					RelativePath=".\Src\Kernel\Util.cpp">
+				</File>
 			</Filter>
 			<Filter
 				Name="头文件"
@@ -280,9 +280,6 @@
 				</File>
 				<File
 					RelativePath="Include\KlayGE\bintree.hpp">
-				</File>
-				<File
-					RelativePath="Include\KlayGE\CommFuncs.hpp">
 				</File>
 				<File
 					RelativePath="Include\KlayGE\COMPtr.hpp">
@@ -340,6 +337,9 @@
 				</File>
 				<File
 					RelativePath=".\Include\KlayGE\Types.hpp">
+				</File>
+				<File
+					RelativePath=".\Include\KlayGE\Util.hpp">
 				</File>
 				<File
 					RelativePath="Include\KlayGE\VFile.hpp">

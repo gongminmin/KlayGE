@@ -15,7 +15,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/CommFuncs.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Memory.hpp>
 #include <KlayGE/Engine.hpp>
 

@@ -1,5 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/CommFuncs.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/DiskFile/DiskFile.hpp>
 
