@@ -24,6 +24,7 @@
 
 #include <limits>
 #include <cstdlib>
+#include <cmath>
 
 #include <boost/static_assert.hpp>
 
@@ -150,7 +151,7 @@ namespace KlayGE
 		inline float
 		Mod<float>(float const & x, float const & y)
 		{
-			return std::fmodf(x, y);
+			return std::fmod(x, y);
 		}
 		template <>
 		inline double
@@ -260,12 +261,12 @@ namespace KlayGE
 		inline float
 		Abs(float x)
 		{
-			return std::fabsf(x);
+			return std::fabs(x);
 		}
 		inline float
 		Sqrt(float x)
 		{
-			return std::sqrtf(x);
+			return std::sqrt(x);
 		}
 		inline float
 		RecipSqrt(float x)
@@ -282,29 +283,29 @@ namespace KlayGE
 		inline float
 		Pow(float x, float y)
 		{
-			return std::powf(x, y);
+			return std::pow(x, y);
 		}
 		inline float
 		Exp(float x)
 		{
-			return std::expf(x);
+			return std::exp(x);
 		}
 
 		inline float
 		Log(float x)
 		{
-			return std::logf(x);
+			return std::log(x);
 		}
 		inline float
 		Log10(float x)
 		{
-			return std::log10f(x);
+			return std::log10(x);
 		}
 
 		inline float
 		Sin(float x)
 		{
-			return std::sinf(x);
+			return std::sin(x);
 		}
 		inline float
 		Cos(float x)
@@ -320,39 +321,39 @@ namespace KlayGE
 		inline float
 		Tan(float x)
 		{
-			return std::tanf(x);
+			return std::tan(x);
 		}
 
 		inline float
 		ASin(float x)
 		{
-			return std::asinf(x);
+			return std::asin(x);
 		}
 		inline float
 		ACos(float x)
 		{
-			return std::acosf(x);
+			return std::acos(x);
 		}
 		inline float
 		ATan(float x)
 		{
-			return std::atanf(x);
+			return std::atan(x);
 		}
 
 		inline float
 		Sinh(float x)
 		{
-			return std::sinhf(x);
+			return std::sinh(x);
 		}
 		inline float
 		Cosh(float x)
 		{
-			return std::coshf(x);
+			return std::cosh(x);
 		}
 		inline float
 		Tanh(float x)
 		{
-			return std::tanhf(x);
+			return std::tanh(x);
 		}
 
 

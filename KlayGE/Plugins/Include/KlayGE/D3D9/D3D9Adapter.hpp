@@ -3,6 +3,7 @@
 
 #include <d3d9.h>
 #include <vector>
+#include <string>
 #include <KlayGE/D3D9/D3D9VideoMode.hpp>
 
 #pragma comment(lib, "KlayGE_RenderEngine_D3D9.lib")

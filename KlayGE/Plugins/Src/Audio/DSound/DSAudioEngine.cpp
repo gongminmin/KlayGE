@@ -72,7 +72,7 @@ namespace KlayGE
 		long dB;
 		if (vol > 0)
 		{
-			dB = static_cast<long>(2000 * std::log10f(vol));
+			dB = static_cast<long>(2000 * std::log10(vol));
 		}
 		else
 		{
