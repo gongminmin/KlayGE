@@ -322,7 +322,7 @@ namespace KlayGE
 		void swap(Vector_T& rhs)
 		{
 			Helper<N>::DoSwap(&vec_[0], &rhs.vec_[0]);
-        }
+		}
 
 		friend bool
 		operator==(Vector_T const & lhs, Vector_T const & rhs)
@@ -342,10 +342,10 @@ namespace KlayGE
 	}
 
 	template <typename T, int N>
-    inline void swap(Vector_T<T, N>& lhs, Vector_T<T, N>& rhs)
+	inline void swap(Vector_T<T, N>& lhs, Vector_T<T, N>& rhs)
 	{
 		lhs.swap(rhs);
-    }
+	}
 
 	typedef Vector_T<float, 2> Vector2;
 	typedef Vector_T<float, 3> Vector3;
