@@ -244,8 +244,7 @@ namespace KlayGE
 	class InputActionMap
 	{
 	public:
-		void AddAction(const InputAction& inputAction)
-			{ actionMap_.insert(std::make_pair(inputAction.second, inputAction.first)); }
+		void AddAction(const InputAction& inputAction);
 
 		template <typename ForwardIterator>
 		void AddActions(ForwardIterator first, ForwardIterator last)
@@ -256,18 +255,10 @@ namespace KlayGE
 			}
 		}
 
-		void UpdateInputActions(InputActionsType& actions, U16 key, long value = 0)
-		{
-			if (this->HasAction(key))
-			{
-				actions.push_back(std::make_pair(this->Action(key), value));
-			}
-		}
+		void UpdateInputActions(InputActionsType& actions, U16 key, long value = 0);
 
-		bool HasAction(U16 key) const
-			{ return (actionMap_.find(key) != actionMap_.end()); }
-		U16 Action(U16 key) const
-			{ return actionMap_.find(key)->second; }
+		bool HasAction(U16 key) const;
+		U16 Action(U16 key) const;
 
 	private:
 		MapVector<U16, U16> actionMap_;
@@ -339,18 +330,12 @@ namespace KlayGE
 	class InputMouse : virtual public InputDevice
 	{
 	public:
-		long X() const
-			{ return pos_.x(); }
-		long Y() const
-			{ return pos_.y(); }
-		long Z() const
-			{ return pos_.z(); }
-		bool LeftButton() const
-			{ return this->Button(0); }
-		bool RightButton() const
-			{ return this->Button(1); }
-		bool MiddleButton() const
-			{ return this->Button(2); }
+		long X() const;
+		long Y() const;
+		long Z() const;
+		bool LeftButton() const;
+		bool RightButton() const;
+		bool MiddleButton() const;
 		bool Button(size_t index) const;
 
 		InputActionsType Update();
@@ -370,21 +355,14 @@ namespace KlayGE
 	class InputJoystick : virtual public InputDevice
 	{
 	public:
-		virtual ~InputJoystick()
-			{ }
+		virtual ~InputJoystick();
 
-		long XPos() const
-			{ return pos_.x(); }
-		long YPos() const
-			{ return pos_.y(); }
-		long ZPos() const
-			{ return pos_.z(); }
-		long XRot() const
-			{ return rot_.x(); }
-		long YRot() const
-			{ return rot_.y(); }
-		long ZRot() const
-			{ return rot_.z(); }
+		long XPos() const;
+		long YPos() const;
+		long ZPos() const;
+		long XRot() const;
+		long YRot() const;
+		long ZRot() const;
 		long Slider(size_t index) const;
 		bool Button(size_t index) const;
 

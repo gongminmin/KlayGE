@@ -24,6 +24,17 @@
 
 namespace KlayGE
 {
+	// 建立设备
+	/////////////////////////////////////////////////////////////////////////////////
+	COMPtr<IDirectInputDevice8W> CreateDevice(REFGUID guid, InputEngine& inputEng)
+	{
+		DInputEngine& dinputEng(static_cast<DInputEngine&>(inputEng));
+
+		IDirectInputDevice8W* device;
+		dinputEng.DInput()->CreateDevice(guid, &device, NULL);
+		return COMPtr<IDirectInputDevice8W>(device);
+	}
+
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	DInputEngine::DInputEngine()
@@ -40,6 +51,13 @@ namespace KlayGE
 	DInputEngine::~DInputEngine()
 	{
 		devices_.clear();
+	}
+
+	// 获取DirectInput接口
+	/////////////////////////////////////////////////////////////////////////////////
+	const COMPtr<IDirectInput8W>& DInputEngine::DInput() const
+	{
+		return dinput_;
 	}
 
 	// 输入引擎名称

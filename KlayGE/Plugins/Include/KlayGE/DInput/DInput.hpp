@@ -36,8 +36,7 @@ namespace KlayGE
 		const WString& Name() const;
 		void EnumDevices();
 
-		const COMPtr<IDirectInput8W>& DInput() const
-			{ return dinput_; }
+		const COMPtr<IDirectInput8W>& DInput() const;
 
 	private:
 		COMPtr<IDirectInput8W> dinput_;
@@ -100,6 +99,8 @@ namespace KlayGE
 
 		COMPtr<IDirectInputDevice8W> device_;
 	};
+
+	COMPtr<IDirectInputDevice8W> CreateDevice(REFGUID guid, InputEngine& inputEng);
 }
 
 #endif		// _DINPUT_HPP

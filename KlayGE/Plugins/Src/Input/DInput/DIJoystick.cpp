@@ -21,11 +21,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	DInputJoystick::DInputJoystick(REFGUID guid, InputEngine& inputEng)
 	{
-		DInputEngine& dinputEng(static_cast<DInputEngine&>(inputEng));
-
-		IDirectInputDevice8W* device;
-		dinputEng.DInput()->CreateDevice(guid, &device, NULL);
-		device_ = COMPtr<IDirectInputDevice8W>(device);
+		device_ = CreateDevice(guid, inputEng);
 
 		device_->SetDataFormat(&c_dfDIJoystick);
 		device_->SetCooperativeLevel(::GetForegroundWindow(), DISCL_EXCLUSIVE | DISCL_BACKGROUND);
@@ -38,13 +34,12 @@ namespace KlayGE
 		diprg.diph.dwHow = DIPH_BYOFFSET;
 		diprg.lMin = -1000;
 		diprg.lMax = +1000;
-
 		TIF(device_->SetProperty(DIPROP_RANGE, &diprg.diph));
 
 		// And again for Y-axis range
 		diprg.diph.dwObj = DIJOFS_Y;
-
 		TIF(device_->SetProperty(DIPROP_RANGE, &diprg.diph));
+
 
 		// Set X axis dead zone to 10%
 		DIPROPDWORD dipdw;
@@ -53,12 +48,10 @@ namespace KlayGE
 		dipdw.diph.dwObj = DIJOFS_X;
 		dipdw.diph.dwHow = DIPH_BYOFFSET;
 		dipdw.dwData = 1000;
-
 		TIF(device_->SetProperty(DIPROP_DEADZONE, &dipdw.diph));
 
-		dipdw.diph.dwObj = DIJOFS_Y;
-
 		// Set Y axis dead zone to 10%
+		dipdw.diph.dwObj = DIJOFS_Y;
 		TIF(device_->SetProperty(DIPROP_DEADZONE, &dipdw.diph));
 
 		this->Acquire();

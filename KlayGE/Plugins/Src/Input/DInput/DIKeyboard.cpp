@@ -21,11 +21,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	DInputKeyboard::DInputKeyboard(REFGUID guid, InputEngine& inputEng)
 	{
-		DInputEngine& dinputEng(static_cast<DInputEngine&>(inputEng));
-
-		IDirectInputDevice8W* device;
-		dinputEng.DInput()->CreateDevice(guid, &device, NULL);
-		device_ = COMPtr<IDirectInputDevice8W>(device);
+		device_ = CreateDevice(guid, inputEng);
 
 		device_->SetDataFormat(&c_dfDIKeyboard);
 		device_->SetCooperativeLevel(::GetActiveWindow(), DISCL_NONEXCLUSIVE | DISCL_BACKGROUND);

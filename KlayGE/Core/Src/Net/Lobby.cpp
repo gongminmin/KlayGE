@@ -192,8 +192,8 @@ namespace KlayGE
 		//			PlayerÃû×Ö		16 ×Ö½Ú
 
 		char id(1);
-		for (PlayerAddrsIter iter = this->players_.begin();
-			iter != this->players_.end(); ++ iter, ++ id)
+		PlayerAddrsIter iter(this->players_.begin());
+		for (; iter != this->players_.end(); ++ iter, ++ id)
 		{
 			if (0 == iter->ID)
 			{

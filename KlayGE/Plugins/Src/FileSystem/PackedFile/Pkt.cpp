@@ -62,7 +62,7 @@ namespace
 			rson[i] = NIL;
 		}
 
-		for (i = 0; i < N; ++ i)
+		for (U32 i = 0; i < N; ++ i)
 		{
 			dad[i] = NIL;
 		}
@@ -110,7 +110,9 @@ namespace
 					return;
 				}
 			}
-			for (int i = 1; i < F; i++)
+
+			int i(1);
+			for (; i < F; i++)
 			{
 				if ((cmp = key[i] - textBuf[p + i]) != 0)
 				{
@@ -398,7 +400,8 @@ namespace KlayGE
 		U32 r(N - F);
 		Engine::MemoryInstance().Set(textBuf, ' ', r);	// Clear the buffer with
 		// any character that will appear often.
-		for (int len = 0; (len < F) && (in.Tell() != in.Length()); ++ len)
+		int len(0);
+		for (; (len < F) && (in.Tell() != in.Length()); ++ len)
 		{
 			in.Read(&c, 1);
 			textBuf[r + len] = c;  // Read F bytes into the last F bytes of the buffer
@@ -441,7 +444,9 @@ namespace KlayGE
 				codeBufPtr = mask = 1;
 			}
 			lastMatchLength = matchLength;
-			for (i = 0; (i < lastMatchLength) && (in.Tell() != in.Length()); ++ i)
+
+			int i(0);
+			for (; (i < lastMatchLength) && (in.Tell() != in.Length()); ++ i)
 			{
 				in.Read(&c, 1);
 				DeleteNode(s);		// Delete old strings and

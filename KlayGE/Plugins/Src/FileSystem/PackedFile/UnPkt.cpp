@@ -49,7 +49,8 @@ namespace
 			return false;
 		}
 
-		for (U32 i = 0; i < lhs.length(); ++ i)
+		U32 i(0);
+		for (; i < lhs.length(); ++ i)
 		{
 			if (std::toupper(lhs[i]) != std::toupper(rhs[i]))
 			{

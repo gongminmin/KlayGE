@@ -81,7 +81,8 @@ namespace KlayGE
 				}
 
 				// 检查该模式的分辨率是否被枚举过 (忽略刷新率的不同)
-				for (ModeType::iterator m = modes_.begin(); m != modes_.end(); ++ m)
+				ModeType::iterator m(modes_.begin());
+				for (; m != modes_.end(); ++ m)
 				{
 					if ((m->Width() == d3dDisplayMode.Width)
 						&& (m->Height() == d3dDisplayMode.Height)

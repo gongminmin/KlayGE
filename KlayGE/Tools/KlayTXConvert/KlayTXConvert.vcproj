@@ -30,6 +30,8 @@
 				StringPooling="TRUE"
 				BufferSecurityCheck="FALSE"
 				TreatWChar_tAsBuiltInType="TRUE"
+				ForceConformanceInForLoopScope="TRUE"
+				RuntimeTypeInfo="TRUE"
 				PrecompiledHeaderFile=""
 				WarningLevel="3"/>
 			<Tool
@@ -82,6 +84,8 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
 				TreatWChar_tAsBuiltInType="TRUE"
+				ForceConformanceInForLoopScope="TRUE"
+				RuntimeTypeInfo="TRUE"
 				PrecompiledHeaderFile=""
 				AssemblerListingLocation=""
 				WarningLevel="3"

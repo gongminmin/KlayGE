@@ -24,6 +24,8 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
 				TreatWChar_tAsBuiltInType="TRUE"
+				ForceConformanceInForLoopScope="TRUE"
+				RuntimeTypeInfo="TRUE"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="4"/>
@@ -67,6 +69,8 @@
 				StringPooling="TRUE"
 				BufferSecurityCheck="FALSE"
 				TreatWChar_tAsBuiltInType="TRUE"
+				ForceConformanceInForLoopScope="TRUE"
+				RuntimeTypeInfo="TRUE"
 				WarningLevel="3"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -513,6 +517,9 @@
 			<Filter
 				Name="Ô´ÎÄ¼þ"
 				Filter="">
+				<File
+					RelativePath=".\Src\Input\InputActionMap.cpp">
+				</File>
 				<File
 					RelativePath=".\Src\Input\InputDevice.cpp">
 				</File>
