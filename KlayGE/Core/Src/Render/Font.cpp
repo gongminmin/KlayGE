@@ -54,6 +54,8 @@ namespace
 {
 	using namespace KlayGE;
 
+	PixelFormat TEX_FORMAT = PF_A4R4G4B4;
+
 	class FontRenderable : public Renderable
 	{
 	public:
@@ -205,7 +207,7 @@ namespace KlayGE
 	Font::Font(std::string const & fontName, uint32_t height, uint32_t /*flags*/)
 				: curX_(0), curY_(0),
 					fontHeight_(height),
-					theTexture_(Context::Instance().RenderFactoryInstance().MakeTexture(1024, 1024, 1, PF_A4L4)),
+					theTexture_(Context::Instance().RenderFactoryInstance().MakeTexture(1024, 1024, 1, TEX_FORMAT)),
 					rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
 	{
 		effect_ = LoadRenderEffect("Font.fx");
@@ -318,7 +320,7 @@ namespace KlayGE
 						charRect.bottom	= charRect.top + this->FontHeight();
 					}
 
-					std::vector<uint8_t> dest(this->FontHeight() * this->FontHeight(), 0);
+					std::vector<uint16_t> dest(this->FontHeight() * this->FontHeight(), 0);
 					int const rows(std::min<int>(slot_->bitmap.rows, this->FontHeight()));
 					int const cols(std::min<int>(slot_->bitmap.width, this->FontHeight()));
 					int const y_start = std::max<int>(this->FontHeight() * 3 / 4 - slot_->bitmap_top, 0);
@@ -331,11 +333,11 @@ namespace KlayGE
 							if ((y < max_xy) && (x < max_xy))
 							{
 								dest[y_offset * this->FontHeight() + x]
-									= (slot_->bitmap.buffer[y * slot_->bitmap.width + x] > 128 ? 0xFF : 0);
+									= (slot_->bitmap.buffer[y * slot_->bitmap.width + x] > 128 ? 0xFFFF : 0);
 							}
 						}
 					}
-					theTexture_->CopyMemoryToTexture(&dest[0], PF_A4L4,
+					theTexture_->CopyMemoryToTexture(&dest[0], TEX_FORMAT,
 							this->FontHeight(), this->FontHeight(), charRect.left, charRect.top);
 
 					charInfoMap_.insert(std::make_pair(ch, charInfo));

@@ -6,6 +6,7 @@
 //
 // 2.3.0
 // 增加了对浮点纹理格式的支持 (2005.1.25)
+// 改进了CopyMemoryToTexture (2005.2.1)
 //
 // 2.0.5
 // 改用GenerateMipSubLevels来生成mipmap (2004.4.8)
@@ -55,6 +56,9 @@ namespace
 		case PF_A4L4:
 			return D3DFMT_A4L4;
 
+		case PF_A8L8:
+			return D3DFMT_A8L8;
+
 		case PF_R5G6B5:
 			return D3DFMT_R5G6B5;
 
@@ -88,6 +92,7 @@ namespace
 			return D3DFMT_A32B32G32R32F;
 		}
 
+		assert(false);
 		return D3DFMT_UNKNOWN;
 	}
 
@@ -103,6 +108,9 @@ namespace
 
 		case D3DFMT_A4L4:
 			return PF_A4L4;
+
+		case D3DFMT_A8L8:
+			return PF_A8L8;
 
 		case D3DFMT_R5G6B5:
 			return PF_R5G6B5;
@@ -138,250 +146,8 @@ namespace
 			return PF_A32B32G32R32F;
 		}
 
+		assert(false);
 		return PF_Unknown;
-	}
-
-	void ColorMasks(KlayGE::PixelFormat format, uint32_t& red, uint32_t& green, uint32_t& blue, uint32_t& alpha,
-		uint8_t& redOffset, uint8_t& greenOffset, uint8_t& blueOffset, uint8_t& alphaOffset)
-	{
-		switch (format)
-		{
-		case PF_L8:
-			red			= 0x000000FF;
-			green		= 0x000000FF;
-			blue		= 0x000000FF;
-			alpha		= 0x00000000;
-
-			redOffset	= 0;
-			greenOffset	= 0;
-			blueOffset	= 0;
-			alphaOffset	= 0;
-			break;
-
-		case PF_A8:
-			red			= 0x00000000;
-			green		= 0x00000000;
-			blue		= 0x00000000;
-			alpha		= 0x000000FF;
-
-			redOffset	= 0xFF;
-			greenOffset	= 0xFF;
-			blueOffset	= 0xFF;
-			alphaOffset	= 0;
-			break;
-
-		case PF_A4L4:
-			red			= 0x0000000F;
-			green		= 0x0000000F;
-			blue		= 0x0000000F;
-			alpha		= 0x000000F0;
-
-			redOffset	= 0;
-			greenOffset	= 0;
-			blueOffset	= 0;
-			alphaOffset	= 4;
-			break;
-
-		case PF_R5G6B5:
-			red			= 0x0000F800;
-			green		= 0x000007E0;
-			blue		= 0x0000001F;
-			alpha		= 0x00000000;
-
-			redOffset	= 11;
-			greenOffset	= 5;
-			blueOffset	= 0;
-			alphaOffset	= 0xFF;
-			break;
-
-		case PF_A4R4G4B4:
-			red			= 0x00000F00;
-			green		= 0x000000F0;
-			blue		= 0x0000000F;
-			alpha		= 0x0000F000;
-
-			redOffset	= 8;
-			greenOffset	= 4;
-			blueOffset	= 0;
-			alphaOffset	= 12;
-			break;
-
-		case PF_X8R8G8B8:
-			red			= 0x00FF0000;
-			green		= 0x0000FF00;
-			blue		= 0x000000FF;
-			alpha		= 0x00000000;
-
-			redOffset	= 16;
-			greenOffset	= 8;
-			blueOffset	= 0;
-			alphaOffset	= 0xFF;
-			break;
-
-		case PF_A8R8G8B8:
-			red			= 0x00FF0000;
-			green		= 0x0000FF00;
-			blue		= 0x000000FF;
-			alpha		= 0xFF000000;
-
-			redOffset	= 16;
-			greenOffset	= 8;
-			blueOffset	= 0;
-			alphaOffset	= 24;
-			break;
-
-		case PF_A2R10G10B10:
-			red			= 0x3FF00000;
-			green		= 0x000FFC00;
-			blue		= 0x000003FF;
-			alpha		= 0xC0000000;
-
-			redOffset	= 20;
-			greenOffset	= 10;
-			blueOffset	= 0;
-			alphaOffset	= 30;
-			break;
-
-		default:
-			red			= 0x00000000;
-			green		= 0x00000000;
-			blue		= 0x00000000;
-			alpha		= 0x00000000;
-			
-			redOffset	= 0xFF;
-			greenOffset	= 0xFF;
-			blueOffset	= 0xFF;
-			alphaOffset	= 0xFF;
-			break;
-		}
-	}
-
-	void ColorMasks(D3DFORMAT format, uint32_t& red, uint32_t& green, uint32_t& blue, uint32_t& alpha,
-		uint8_t& redOffset, uint8_t& greenOffset, uint8_t& blueOffset, uint8_t& alphaOffset)
-	{
-		switch (format)
-		{
-		case D3DFMT_L8:
-			red			= 0x000000FF;
-			green		= 0x000000FF;
-			blue		= 0x000000FF;
-			alpha		= 0x00000000;
-
-			redOffset	= 0;
-			greenOffset	= 0;
-			blueOffset	= 0;
-			alphaOffset	= 0;
-			break;
-
-		case D3DFMT_A8:
-			red			= 0x00000000;
-			green		= 0x00000000;
-			blue		= 0x00000000;
-			alpha		= 0x000000FF;
-
-			redOffset	= 0xFF;
-			greenOffset	= 0xFF;
-			blueOffset	= 0xFF;
-			alphaOffset	= 0;
-			break;
-
-		case D3DFMT_A4L4:
-			red			= 0x0000000F;
-			green		= 0x0000000F;
-			blue		= 0x0000000F;
-			alpha		= 0x000000F0;
-
-			redOffset	= 0;
-			greenOffset	= 0;
-			blueOffset	= 0;
-			alphaOffset	= 4;
-			break;
-
-		case D3DFMT_R5G6B5:
-			red			= 0x0000F800;
-			green		= 0x000007E0;
-			blue		= 0x0000001F;
-			alpha		= 0x00000000;
-
-			redOffset	= 11;
-			greenOffset	= 5;
-			blueOffset	= 0;
-			alphaOffset	= 0xFF;
-			break;
-
-		case D3DFMT_A4R4G4B4:
-			red			= 0x00000F00;
-			green		= 0x000000F0;
-			blue		= 0x0000000F;
-			alpha		= 0x0000F000;
-
-			redOffset	= 8;
-			greenOffset	= 4;
-			blueOffset	= 0;
-			alphaOffset	= 12;
-			break;
-
-		case D3DFMT_R8G8B8:
-		case D3DFMT_X8R8G8B8:
-			red			= 0x00FF0000;
-			green		= 0x0000FF00;
-			blue		= 0x000000FF;
-			alpha		= 0x00000000;
-
-			redOffset	= 16;
-			greenOffset	= 8;
-			blueOffset	= 0;
-			alphaOffset	= 0xFF;
-			break;
-
-		case D3DFMT_A8R8G8B8:
-			red			= 0x00FF0000;
-			green		= 0x0000FF00;
-			blue		= 0x000000FF;
-			alpha		= 0xFF000000;
-
-			redOffset	= 16;
-			greenOffset	= 8;
-			blueOffset	= 0;
-			alphaOffset	= 24;
-			break;
-
-		case D3DFMT_A2B10G10R10:
-			red			= 0x3FF00000;
-			green		= 0x000FFC00;
-			blue		= 0x000003FF;
-			alpha		= 0xC0000000;
-
-			redOffset	= 20;
-			greenOffset	= 10;
-			blueOffset	= 0;
-			alphaOffset	= 30;
-			break;
-
-		default:
-			red			= 0x00000000;
-			green		= 0x00000000;
-			blue		= 0x00000000;
-			alpha		= 0x00000000;
-
-			redOffset	= 0xFF;
-			greenOffset	= 0xFF;
-			blueOffset	= 0xFF;
-			alphaOffset	= 0xFF;
-			break;
-		}
-	}
-
-	uint8_t NumberOfBits(uint32_t mask)
-	{
-		uint8_t bits(0);
-		while (mask)
-		{
-			mask = mask & (mask - 1);
-			++ bits;
-		}
-
-		return bits;
 	}
 }
 
@@ -493,93 +259,45 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9Texture::CopyMemoryToTexture(void* pData, PixelFormat pf,
+	void D3D9Texture::CopyMemoryToTexture(void* data, PixelFormat pf,
 		uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset)
 	{
 		uint16_t bpp(PixelFormatBits(pf));
 
-		if (0 == width)
-		{
-			width = width_;
-		}
-		if (0 == height)
-		{
-			height = height_;
-		}
+		IDirect3DTexture9* d3dTexture;
+		// Use D3DX to help us create the texture, this way it can adjust any relevant sizes
+		TIF(D3DXCreateTexture(d3dDevice_.get(), width, height,
+			1, 0, ConvertFormat(pf),
+			D3DPOOL_SYSTEMMEM, &d3dTexture));
+		boost::shared_ptr<IDirect3DTexture9> d3dTempTexture = MakeCOMPtr(d3dTexture);
 
-		uint8_t* pBuffer(static_cast<uint8_t*>(pData));
-
-		uint32_t srcRed, srcGreen, srcBlue, srcAlpha;
-		uint8_t srcRedOffset, srcGreenOffset, srcBlueOffset, srcAlphaOffset;
-		ColorMasks(pf, srcRed, srcGreen, srcBlue, srcAlpha,
-			srcRedOffset, srcGreenOffset, srcBlueOffset, srcAlphaOffset);
-
-		uint32_t destRed, destGreen, destBlue, destAlpha;
-		uint8_t destRedOffset, destGreenOffset, destBlueOffset, destAlphaOffset;
-		ColorMasks(this->Format(), destRed, destGreen, destBlue, destAlpha,
-			destRedOffset, destGreenOffset, destBlueOffset, destAlphaOffset);
-
-		RECT rc = { xOffset, yOffset, xOffset + width, yOffset + height };
 		D3DLOCKED_RECT d3dlr;
-		TIF(d3dTempTexture_->LockRect(0, &d3dlr, &rc, D3DLOCK_NOSYSLOCK));
+		d3dTempTexture->LockRect(0, &d3dlr, NULL, D3DLOCK_NOSYSLOCK);
 
 		uint32_t const srcPitch(width * bpp / 8);
 		uint16_t const destPitch(static_cast<uint16_t>(d3dlr.Pitch));
-		uint8_t* pBits(static_cast<uint8_t*>(d3dlr.pBits));
+		uint8_t* bits(static_cast<uint8_t*>(d3dlr.pBits));
 
-		if ((srcRed == destRed) && (srcGreen == destGreen)
-			&& (srcBlue == destBlue) && (srcAlpha == destAlpha))
+		for (uint32_t y = 0; y < height; ++ y)
 		{
-			for (uint32_t y = 0; y < height; ++ y)
-			{
-				uint8_t* dst(pBits + y * destPitch);
-				pBuffer = static_cast<uint8_t*>(pData) + y * srcPitch;
+			uint8_t* dst(bits + y * destPitch);
+			uint8_t* buffer = static_cast<uint8_t*>(data) + y * srcPitch;
 
-				std::copy(pBuffer, pBuffer + srcPitch, dst);
-			}
-		}
-		else
-		{
-			uint8_t const srcRedBitCount(NumberOfBits(srcRed));
-			uint8_t const srcGreenBitCount(NumberOfBits(srcGreen));
-			uint8_t const srcBlueBitCount(NumberOfBits(srcBlue));
-			uint8_t const srcAlphaBitCount(NumberOfBits(srcAlpha));
-			   
-			uint8_t const destRedBitCount(NumberOfBits(destRed));
-			uint8_t const destGreenBitCount(NumberOfBits(destGreen));
-			uint8_t const destBlueBitCount(NumberOfBits(destBlue));
-			uint8_t const destAlphaBitCount(NumberOfBits(destAlpha));
-
-			for (uint32_t y = 0; y < height; ++ y)
-			{
-				uint8_t* pDest(pBits + y * destPitch);
-				uint8_t* pSrc(pBuffer + y * width);
-
-				for (uint32_t x = 0; x < width; ++ x)
-				{
-					uint32_t srcPixel(0);
-					std::memcpy(&srcPixel, pSrc, bpp / 8);
-					pSrc += bpp / 8;
-
-					// 转化成R8G8B8A8
-					uint32_t red(static_cast<uint8_t>((srcPixel & srcRed) >> srcRedOffset << (8 - srcRedBitCount)));
-					uint32_t green(static_cast<uint8_t>((srcPixel & srcGreen) >> srcGreenOffset<< (8 - srcGreenBitCount)));
-					uint32_t blue(static_cast<uint8_t>((srcPixel & srcBlue) >> srcBlueOffset<< (8 - srcBlueBitCount)));
-					uint32_t alpha(static_cast<uint8_t>((srcPixel & srcAlpha) >> srcAlphaOffset<< (8 - srcAlphaBitCount)));
-
-					red		= red >> (8 - destRedBitCount) << destRedOffset;
-					green	= green >> (8 - destGreenBitCount) << destGreenOffset;
-					blue	= blue >> (8 - destBlueBitCount) << destBlueOffset;
-					alpha	= alpha >> (8 - destAlphaBitCount) << destAlphaOffset;
-
-					uint32_t const destPixel(red | green | blue | alpha);
-					std::memcpy(pDest, &destPixel, bpp_ / 8);
-					pDest += bpp_ / 8;
-				}
-			}
+			std::copy(buffer, buffer + srcPitch, dst);
 		}
 
-		d3dTempTexture_->UnlockRect(0);
+		d3dTempTexture->UnlockRect(0);
+
+
+		IDirect3DSurface9* temp;
+		TIF(d3dTempTexture->GetSurfaceLevel(0, &temp));
+		boost::shared_ptr<IDirect3DSurface9> src = MakeCOMPtr(temp);
+
+		TIF(d3dTempTexture_->GetSurfaceLevel(0, &temp));
+		boost::shared_ptr<IDirect3DSurface9> dst = MakeCOMPtr(temp);
+
+		RECT dstRc = { xOffset, yOffset, xOffset + width, yOffset + height };
+		TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, &dstRc, src.get(), NULL, NULL, D3DX_DEFAULT, 0));
 
 		TIF(D3DXFilterTexture(d3dTempTexture_.get(), NULL, D3DX_DEFAULT, D3DX_DEFAULT));
 		TIF(d3dDevice_->UpdateTexture(d3dTempTexture_.get(), d3dTexture_.get()));

@@ -83,7 +83,7 @@ namespace
 				}
 			}
 
-			texture->CopyMemoryToTexture(&tgaData[0], PF_X8R8G8B8);
+			texture->CopyMemoryToTexture(&tgaData[0], PF_X8R8G8B8, texture->Width(), texture->Height(), 0, 0);
 
 			return texture;
 		}

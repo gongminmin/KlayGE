@@ -17,47 +17,52 @@ namespace
 {
 	using namespace KlayGE;
 
-	void Convert(GLint& intenalFormat, GLenum& glformat, KlayGE::PixelFormat pf)
+	void Convert(GLint& internalFormat, GLenum& glformat, KlayGE::PixelFormat pf)
 	{
 		switch (pf)
 		{
 		case PF_L8:
-			intenalFormat = GL_LUMINANCE8;
+			internalFormat = GL_LUMINANCE8;
 			glformat = GL_LUMINANCE;
 			break;
 
 		case PF_A8:
-			intenalFormat = GL_ALPHA8;
+			internalFormat = GL_ALPHA8;
 			glformat = GL_ALPHA;
 			break;
 
 		case PF_A4L4:
-			intenalFormat = GL_LUMINANCE4_ALPHA4;
+			internalFormat = GL_LUMINANCE4_ALPHA4;
+			glformat = GL_LUMINANCE_ALPHA;
+			break;
+
+		case PF_A8L8:
+			internalFormat = GL_LUMINANCE8_ALPHA8;
 			glformat = GL_LUMINANCE_ALPHA;
 			break;
 
 		case PF_R5G6B5:
-			intenalFormat = GL_RGB5;
+			internalFormat = GL_RGB5;
 			glformat = GL_BGR;
 			break;
 
 		case PF_A4R4G4B4:
-			intenalFormat = GL_RGBA4;
+			internalFormat = GL_RGBA4;
 			glformat = GL_BGRA;
 			break;
 
 		case PF_X8R8G8B8:
-			intenalFormat = GL_RGB8;
+			internalFormat = GL_RGB8;
 			glformat = GL_BGR;
 			break;
 
 		case PF_A8R8G8B8:
-			intenalFormat = GL_RGBA8;
+			internalFormat = GL_RGBA8;
 			glformat = GL_BGRA;
 			break;
 
 		case PF_A2R10G10B10:
-			intenalFormat = GL_RGB10_A2;
+			internalFormat = GL_RGB10_A2;
 			glformat = GL_BGRA;
 			break;
 		}

@@ -13,8 +13,8 @@ struct VS_INPUT
 struct VS_OUTPUT
 {
 	float4 pos			: POSITION;
-	float1 texcoord0	: TEXCOORD0;
-	float1 texcoord1	: TEXCOORD1;
+	float2 texcoord0	: TEXCOORD0;
+	float2 texcoord1	: TEXCOORD1;
 };
 
 VS_OUTPUT ToonVS(VS_INPUT input)
@@ -27,8 +27,8 @@ VS_OUTPUT ToonVS(VS_INPUT input)
 
 	VS_OUTPUT output;
 	output.pos = mul(pos, proj);
-	output.texcoord0.x = max(dot(normal, L), 0);
-	output.texcoord1.x = max(dot(normal, V), 0);
+	output.texcoord0 = float2(max(dot(normal, L), 0), 0);
+	output.texcoord1 = float2(max(dot(normal, V), 0), 0);
 
 	return output;
 }

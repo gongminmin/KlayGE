@@ -33,6 +33,8 @@ namespace KlayGE
 		PF_A8,
 		// 8-bit pixel format, 4 bits alpha, 4 bits luminace.
 		PF_A4L4,
+		// 16-bit pixel format, 8 bits alpha, 8 bits luminace.
+		PF_A8L8,
 		// 16-bit pixel format, 5 bits red, 6 bits green, 5 bits blue.
 		PF_R5G6B5,
 		// 16-bit pixel format, 4 bits for alpha, red, green and blue.
@@ -150,7 +152,7 @@ namespace KlayGE
 		// Copies (and maybe scales to fit) the contents of this texture to another texture.
 		virtual void CopyToTexture(Texture& target) = 0;
 		virtual void CopyMemoryToTexture(void* data, PixelFormat pf,
-			uint32_t width = 0, uint32_t height = 0, uint32_t xOffset = 0, uint32_t yOffset = 0) = 0;
+			uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset) = 0;
 
 	protected:
 		uint32_t		height_;
