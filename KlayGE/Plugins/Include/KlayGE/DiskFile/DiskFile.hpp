@@ -16,8 +16,10 @@
 #ifndef _DISKFILE_HPP
 #define _DISKFILE_HPP
 
+#include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/VFile.hpp>
 #include <KlayGE/SharedPtr.hpp>
+#include <KlayGE/ResLocator.hpp>
 
 #include <fstream>
 
@@ -56,6 +58,17 @@ namespace KlayGE
 
 		std::string		fileName_;
 		OpenMode		openMode_;
+	};
+
+	class DiskFileResIdentifier : public ResIdentifier
+	{
+	public:
+		DiskFileResIdentifier(const std::string& fileName);
+
+		VFilePtr Load();
+
+	private:
+		std::string fileName_;
 	};
 }
 

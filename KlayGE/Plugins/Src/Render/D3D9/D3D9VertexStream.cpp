@@ -3,7 +3,7 @@
 #include <KlayGE/Memory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
-#include <KlayGE/Engine.hpp>
+#include <KlayGE/Context.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9VertexStream.hpp>
@@ -38,7 +38,7 @@ namespace KlayGE
 		{
 			currentSize_ = size;
 
-			COMPtr<IDirect3DDevice9> d3dDevice(static_cast<const D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
+			COMPtr<IDirect3DDevice9> d3dDevice(static_cast<const D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice());
 
 			IDirect3DVertexBuffer9* theBuffer;
 			TIF(d3dDevice->CreateVertexBuffer(static_cast<::UINT>(size),

@@ -4,7 +4,6 @@
 #include <KlayGE/OpenGL/OGLRenderTexture.hpp>
 #include <KlayGE/OpenGL/OGLRenderEffect.hpp>
 #include <KlayGE/OpenGL/OGLFont.hpp>
-#include <KlayGE/OpenGL/OGLShader.hpp>
 
 #include <KlayGE/OpenGL/OGLVertexStream.hpp>
 #include <KlayGE/OpenGL/OGLIndexStream.hpp>
@@ -14,7 +13,7 @@
 namespace KlayGE
 {
 	typedef ConcreteRenderFactory<OGLRenderEngine, OGLTexture, OGLRenderTexture,
-				OGLFont, OGLRenderEffect, OGLVertexShader, OGLPixelShader> OGLRenderFactoryBase;
+				OGLFont, OGLRenderEffect> OGLRenderFactoryBase;
 	class OGLRenderFactory : public OGLRenderFactoryBase
 	{
 	public:

@@ -15,7 +15,7 @@
 #include <KlayGE/VFile.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
-#include <KlayGE/Engine.hpp>
+#include <KlayGE/Context.hpp>
 
 #include <KlayGE/KlayTX/KlayTX.hpp>
 
@@ -37,13 +37,14 @@ namespace KlayGE
 
 		file.Seek(header_.offset, VFile::SM_Current);
 
-		data_.resize(this->Width() * this->Height() * PixelFormatBits(this->Format()) / 8);
-		file.Read(&data_[0], data_.size());
+		std::vector<U8> data;
+		data.resize(this->Width() * this->Height() * PixelFormatBits(this->Format()) / 8);
+		file.Read(&data[0], data.size());
 
-		TexturePtr tex(Engine::RenderFactoryInstance().MakeTexture(this->Width(), this->Height(), numMipMaps,
+		TexturePtr tex(Context::Instance().RenderFactoryInstance().MakeTexture(this->Width(), this->Height(), numMipMaps,
 			this->Format(), Texture::TU_Default));
 
-		tex->CopyMemoryToTexture(&data_[0], this->Format());
+		tex->CopyMemoryToTexture(&data[0], this->Format());
 
 		return tex;
 	}

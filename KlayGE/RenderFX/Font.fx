@@ -25,8 +25,8 @@ technique fontTec
 		Lighting = false;
 
 		AlphaBlendEnable = true;
-		SrcBlend = SrcColor;
-		DestBlend = DestColor;
+		SrcBlend = SrcAlpha;
+		DestBlend = InvSrcAlpha;
 		AlphaTestEnable = true;
 		AlphaRef = 0x08;
 		AlphaFunc = GreaterEqual;

@@ -52,9 +52,6 @@ namespace KlayGE
 
 		void SetTexture(const std::string& name, const TexturePtr& tex);
 
-		void SetVertexShader(const std::string& name, const VertexShaderPtr& vs);
-		void SetPixelShader(const std::string& name, const PixelShaderPtr& ps);
-
 		void SetTechnique(const std::string& technique);
 		void SetTechnique(UINT technique);
 

@@ -19,7 +19,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Memory.hpp>
-#include <KlayGE/Engine.hpp>
+#include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Texture.hpp>
@@ -350,7 +350,7 @@ namespace KlayGE
 	D3D9Texture::D3D9Texture(U32 width, U32 height,
 								U16 numMipMaps, PixelFormat format, TextureUsage usage)
 	{
-		d3dDevice_ = static_cast<const D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
+		d3dDevice_ = static_cast<const D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
 
 		numMipMaps_ = numMipMaps;
 		format_		= format;

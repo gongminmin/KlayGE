@@ -209,4 +209,15 @@ namespace KlayGE
 
 		file_.flush();
 	}
+
+
+	DiskFileResIdentifier::DiskFileResIdentifier(const std::string& fileName)
+		: fileName_(fileName)
+	{
+	}
+
+	VFilePtr DiskFileResIdentifier::Load()
+	{
+		return VFilePtr(new DiskFile(fileName_, VFile::OM_Read));
+	};
 }

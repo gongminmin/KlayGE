@@ -16,11 +16,10 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/Engine.hpp>
+#include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
-#include <KlayGE/D3D9/D3D9Shader.hpp>
 
 #include <cassert>
 
@@ -30,7 +29,7 @@ namespace KlayGE
 {
 	D3D9RenderEffect::D3D9RenderEffect(const std::string& srcData, UINT flags)
 	{
-		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()));
+		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 
 		ID3DXEffect* effect;
 		D3DXCreateEffect(renderEngine.D3DDevice().Get(), srcData.c_str(),
@@ -41,7 +40,7 @@ namespace KlayGE
 
 	D3D9RenderEffect::D3D9RenderEffect(const D3D9RenderEffect& rhs)
 	{
-		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Engine::RenderFactoryInstance().RenderEngineInstance()));
+		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 
 		ID3DXEffect* effect;
 		rhs.effect_->CloneEffect(renderEngine.D3DDevice().Get(), &effect);
@@ -170,26 +169,6 @@ namespace KlayGE
 			texture = static_cast<D3D9Texture*>(tex.Get())->D3DTexture().Get();
 		}
 		TIF(effect_->SetTexture(effect_->GetParameterByName(NULL, name.c_str()), texture));
-	}
-
-	void D3D9RenderEffect::SetVertexShader(const std::string& name, const VertexShaderPtr& vs)
-	{
-		IDirect3DVertexShader9* d3dvs(NULL);
-		if (vs.Get() != NULL)
-		{
-			d3dvs = static_cast<D3D9VertexShader*>(vs.Get())->D3DVertexShader().Get();
-		}
-		TIF(effect_->SetVertexShader(effect_->GetParameterByName(NULL, name.c_str()), d3dvs));
-	}
-
-	void D3D9RenderEffect::SetPixelShader(const std::string& name, const PixelShaderPtr& ps)
-	{
-		IDirect3DPixelShader9* d3dps(NULL);
-		if (ps.Get() != NULL)
-		{
-			d3dps = static_cast<D3D9PixelShader*>(ps.Get())->D3DPixelShader().Get();
-		}
-		TIF(effect_->SetPixelShader(effect_->GetParameterByName(NULL, name.c_str()), d3dps));
 	}
 
 	void D3D9RenderEffect::SetTechnique(const std::string& technique)

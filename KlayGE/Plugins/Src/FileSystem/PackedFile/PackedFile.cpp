@@ -98,4 +98,15 @@ namespace KlayGE
 	{
 		return file_->Tell();
 	}
+
+
+	PackedFileResIdentifier::PackedFileResIdentifier(const std::string& fileName)
+		: fileName_(fileName)
+	{
+	}
+
+	VFilePtr PackedFileResIdentifier::Load()
+	{
+		return VFilePtr(new PackedFile(fileName_));
+	};
 }

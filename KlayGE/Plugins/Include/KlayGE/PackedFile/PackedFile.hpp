@@ -13,8 +13,10 @@
 #ifndef _PACKEDFILE_HPP
 #define _PACKEDFILE_HPP
 
+#include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/VFile.hpp>
 #include <KlayGE/PackedFile/Pkt.hpp>
+#include <KlayGE/ResLocator.hpp>
 
 #include <boost/utility.hpp>
 
@@ -53,6 +55,17 @@ namespace KlayGE
 
 		VFilePtr	pktFile_;
 		PackedFile& operator=(const PackedFile& rhs);
+	};
+
+	class PackedFileResIdentifier : public ResIdentifier
+	{
+	public:
+		PackedFileResIdentifier(const std::string& fileName);
+
+		VFilePtr Load();
+
+	private:
+		std::string fileName_;
 	};
 }
 

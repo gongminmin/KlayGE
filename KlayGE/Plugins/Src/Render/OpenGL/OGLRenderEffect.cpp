@@ -114,14 +114,6 @@ namespace KlayGE
 	{
 	}
 
-	void OGLRenderEffect::SetVertexShader(const std::string& name, const VertexShaderPtr& vs)
-	{
-	}
-
-	void OGLRenderEffect::SetPixelShader(const std::string& name, const PixelShaderPtr& ps)
-	{
-	}
-
 	void OGLRenderEffect::SetTechnique(const std::string& technique)
 	{
 	}

@@ -32,7 +32,7 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderEffect.hpp>
-#include <KlayGE/Engine.hpp>
+#include <KlayGE/Context.hpp>
 
 #include <cassert>
 #include <algorithm>
@@ -82,7 +82,7 @@ namespace
 			// ÉèÖÃ¹ýÂËÊôÐÔ
 			if (flags & Font::FA_Filtered)
 			{
-				Engine::RenderFactoryInstance().RenderEngineInstance().TextureFiltering(0, RenderEngine::TF_Bilinear);
+				Context::Instance().RenderFactoryInstance().RenderEngineInstance().TextureFiltering(0, RenderEngine::TF_Bilinear);
 			}
 
 			const float h(fontHeight * yScale);
@@ -174,14 +174,14 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D9Font::D3D9Font(const std::wstring& fontName, U32 height, U32 flags)
 				: curX_(0), curY_(0),
-					theTexture_(Engine::RenderFactoryInstance().MakeTexture(1024, 1024, 1, PF_A4L4)),
+					theTexture_(Context::Instance().RenderFactoryInstance().MakeTexture(1024, 1024, 1, PF_A4L4)),
 					rb_(new RenderBuffer(RenderBuffer::BT_TriangleList))
 	{
 		effect_ = LoadRenderEffect("Font.fx");
 		effect_->SetTexture("texFont", theTexture_);
 		effect_->SetTechnique("fontTec");
 
-		RenderEngine& renderEngine(Engine::RenderFactoryInstance().RenderEngineInstance());
+		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		const Viewport& viewport((*renderEngine.ActiveRenderTarget())->GetViewport());
 		effect_->SetInt("halfWidth", viewport.width / 2);
 		effect_->SetInt("halfHeight", viewport.height / 2);

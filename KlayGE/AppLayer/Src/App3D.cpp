@@ -17,7 +17,7 @@
 #include <KlayGE/SharedPtr.hpp>
 #include <KlayGE/Memory.hpp>
 #include <KlayGE/Math.hpp>
-#include <KlayGE/Engine.hpp>
+#include <KlayGE/Context.hpp>
 #include <KlayGE/RenderWindow.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -33,7 +33,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	App3DFramework::App3DFramework()
 	{
-		Engine::AppInstance(*this);
+		Context::Instance().AppInstance(*this);
 	}
 
 	App3DFramework::~App3DFramework()
@@ -45,14 +45,14 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void App3DFramework::Create(const std::string& name, const RenderSettings& settings)
 	{
-		Engine::RenderFactoryInstance().RenderEngineInstance().CreateRenderWindow(name, settings);
+		Context::Instance().RenderFactoryInstance().RenderEngineInstance().CreateRenderWindow(name, settings);
 
 		this->InitObjects();
 	}
 
 	void App3DFramework::Run()
 	{
-		Engine::RenderFactoryInstance().RenderEngineInstance().StartRendering();
+		Context::Instance().RenderFactoryInstance().RenderEngineInstance().StartRendering();
 
 		this->DelObjects();
 	}
@@ -62,7 +62,7 @@ namespace KlayGE
 	void App3DFramework::LookAt(const Vector3& vEye, const Vector3& vLookAt,
 												const Vector3& vUp)
 	{
-		RenderEngine& renderEngine(Engine::RenderFactoryInstance().RenderEngineInstance());
+		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		RenderTarget& activeRenderTarget(*(*renderEngine.ActiveRenderTarget()));
 
 		activeRenderTarget.GetViewport().camera.ViewParams(vEye, vLookAt, vUp);
@@ -77,7 +77,7 @@ namespace KlayGE
 		assert(farPlane != 0);
 		assert(farPlane > nearPlane);
 
-		RenderEngine& renderEngine(Engine::RenderFactoryInstance().RenderEngineInstance());
+		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		RenderTarget& activeRenderTarget(*(*renderEngine.ActiveRenderTarget()));
 		Camera& camera(activeRenderTarget.GetViewport().camera);
 

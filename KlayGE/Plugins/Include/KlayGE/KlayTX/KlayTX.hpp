@@ -47,7 +47,6 @@ namespace KlayGE
 
 	private:
 		KlayTXHeader header_;
-		std::vector<U8> data_;
 	};
 }
 
