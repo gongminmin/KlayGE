@@ -77,6 +77,21 @@ namespace
 			internalFormat = GL_RGB10_A2;
 			glformat = GL_BGRA;
 			break;
+
+		case PF_DXT1:
+			internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+			glformat = GL_BGR;
+			break;
+
+		case PF_DXT3:
+			internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+			glformat = GL_BGRA;
+			break;
+
+		case PF_DXT5:
+			internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+			glformat = GL_BGRA;
+			break;
 		}
 	}
 }
@@ -87,7 +102,7 @@ namespace KlayGE
 								uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
 								: texture_(0)
 	{
-		numMipMaps_ = numMipMaps;
+		numMipMaps_ = (0 == numMipMaps) ? 1 : numMipMaps;
 		format_		= format;
 		width_		= width;
 		height_		= height;
@@ -103,7 +118,28 @@ namespace KlayGE
 		glGenTextures(1, &texture_);
 		glBindTexture(GL_TEXTURE_2D, texture_);
 
-		glTexImage2D(GL_TEXTURE_2D, numMipMaps_, glinternalFormat, width, height, 0, glformat, GL_UNSIGNED_BYTE, NULL);
+		if (IsCompressedFormat(format_))
+		{
+			int block_size;
+			if (format_ == PF_DXT1)
+			{
+				block_size = 8;
+			}
+			else
+			{
+				block_size = 16;
+			}
+
+			GLsizei const image_size = ((width + 3) / 4) * ((height + 3) / 4) * block_size;
+
+			glCompressedTexImage2D(GL_TEXTURE_2D, numMipMaps_, glinternalFormat,
+				width, height, 0, image_size, NULL);
+		}
+		else
+		{
+			glTexImage2D(GL_TEXTURE_2D, numMipMaps_, glinternalFormat,
+				width, height, 0, glformat, GL_UNSIGNED_BYTE, NULL);
+		}
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -122,7 +158,13 @@ namespace KlayGE
 	void OGLTexture::CopyToTexture(Texture& target)
 	{
 		OGLTexture& other(static_cast<OGLTexture&>(target));
-		glCopyTexImage2D(other.GLTexture(), 0, 3, 0, 0, other.Width(), other.Height(), 0);
+
+		std::vector<uint8_t> data(width_ * height_ * PixelFormatBits(format_) / 8);
+		for (int i = 0; i < numMipMaps_; ++ i)
+		{
+			this->CopyToMemory(i, &data[0]);
+			target.CopyMemoryToTexture(i, &data[0], format_, width_, height_, 0, 0);
+		}
 	}
 
 	void OGLTexture::CopyToMemory(int level, void* data)
@@ -131,7 +173,16 @@ namespace KlayGE
 		GLenum glformat;
 		Convert(glinternalFormat, glformat, format_);
 
-		glGetTexImage(texture_, level, glformat, GL_UNSIGNED_BYTE, data);
+		glBindTexture(GL_TEXTURE_2D, texture_);
+
+		if (IsCompressedFormat(format_))
+		{
+			glGetCompressedTexImageARB(GL_TEXTURE_2D, level, data);
+		}
+		else
+		{
+			glGetTexImage(GL_TEXTURE_2D, level, glformat, GL_UNSIGNED_BYTE, data);
+		}
 	}
 
 	void OGLTexture::CopyMemoryToTexture(int level, void* data, PixelFormat pf,
