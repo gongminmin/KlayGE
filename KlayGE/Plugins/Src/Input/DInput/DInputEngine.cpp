@@ -14,8 +14,6 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
 
-#include <cassert>
-
 #include <KlayGE/DInput/DInput.hpp>
 
 #pragma comment(lib, "dxguid.lib")
@@ -24,24 +22,13 @@
 
 namespace KlayGE
 {
-	// 建立设备
-	/////////////////////////////////////////////////////////////////////////////////
-	boost::shared_ptr<IDirectInputDevice8W> CreateDevice(REFGUID guid, InputEngine& inputEng)
-	{
-		DInputEngine& dinputEng(static_cast<DInputEngine&>(inputEng));
-
-		IDirectInputDevice8W* device;
-		dinputEng.DInput()->CreateDevice(guid, &device, NULL);
-		return MakeCOMPtr(device);
-	}
-
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	DInputEngine::DInputEngine()
 	{
 		// 建立 DirectInput 对象
 		IDirectInput8W* di;
-		DirectInput8Create(GetModuleHandle(NULL), DIRECTINPUT_VERSION, 
+		DirectInput8Create(::GetModuleHandle(NULL), DIRECTINPUT_VERSION, 
 			IID_PPV_ARG(IDirectInput8W, di), NULL);
 		dinput_ = MakeCOMPtr(di);
 	}
@@ -64,7 +51,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	const std::wstring& DInputEngine::Name() const
 	{
-		static std::wstring name(L"DirectInput Input Engine");
+		static const std::wstring name(L"DirectInput Input Engine");
 		return name;
 	}
 

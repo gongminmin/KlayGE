@@ -79,6 +79,7 @@ __________________________________________________________________
 支持DX 9.0c SDK
 修正了DiskFile::Seek的Bug
 把const T&改为更规则的T const &
+InputEngine改用Bridge实现
 
 2.1.1
 大量使用boost

@@ -133,7 +133,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	InputActionsType InputJoystick::Update()
 	{
-		this->UpdateKeys();
+		this->UpdateInputs();
 
 		InputActionsType ret;
 

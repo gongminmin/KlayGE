@@ -51,54 +51,34 @@ namespace KlayGE
 	{
 	public:
 		DInputKeyboard(REFGUID guid, InputEngine& inputEng);
-		~DInputKeyboard();
 
 		const std::wstring& Name() const;
 
-		void Acquire();
-		void Unacquire();
-
 	private:
-		void UpdateKeys();
-
-		boost::shared_ptr<IDirectInputDevice8W> device_;
+		void UpdateInputs();
 	};
 
 	class DInputMouse : public InputMouse
 	{
 	public:
 		DInputMouse(REFGUID guid, InputEngine& inputEng);
-		~DInputMouse();
 
 		const std::wstring& Name() const;
 
-		void Acquire();
-		void Unacquire();
-
 	private:
-		void UpdateKeys();
-
-		boost::shared_ptr<IDirectInputDevice8W> device_;
+		void UpdateInputs();
 	};
 
 	class DInputJoystick : public InputJoystick
 	{
 	public:
 		DInputJoystick(REFGUID guid, InputEngine& inputEng);
-		~DInputJoystick();
 
 		const std::wstring& Name() const;
 
-		void Acquire();
-		void Unacquire();
-
 	private:
-		void UpdateKeys();
-
-		boost::shared_ptr<IDirectInputDevice8W> device_;
+		void UpdateInputs();
 	};
-
-	boost::shared_ptr<IDirectInputDevice8W> CreateDevice(REFGUID guid, InputEngine& inputEng);
 }
 
 #endif		// _DINPUT_HPP

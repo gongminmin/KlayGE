@@ -11,9 +11,9 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/ThrowErr.hpp>
 
 #include <KlayGE/DInput/DInput.hpp>
+#include <KlayGE/DInput/DInputDeviceImpl.hpp>
 
 namespace KlayGE
 {
@@ -21,10 +21,11 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	DInputJoystick::DInputJoystick(REFGUID guid, InputEngine& inputEng)
 	{
-		device_ = CreateDevice(guid, inputEng);
+		boost::shared_ptr<DInputDeviceImpl> didImpl(new DInputDeviceImpl(guid, inputEng));
+		impl_ = didImpl;
 
-		device_->SetDataFormat(&c_dfDIJoystick);
-		device_->SetCooperativeLevel(::GetForegroundWindow(), DISCL_EXCLUSIVE | DISCL_BACKGROUND);
+		didImpl->DataFormat(c_dfDIJoystick);
+		didImpl->CooperativeLevel(::GetForegroundWindow(), DISCL_EXCLUSIVE | DISCL_BACKGROUND);
 
 		// Set the X-axis range (-1000 to +1000)
 		DIPROPRANGE diprg;
@@ -34,11 +35,11 @@ namespace KlayGE
 		diprg.diph.dwHow = DIPH_BYOFFSET;
 		diprg.lMin = -1000;
 		diprg.lMax = +1000;
-		TIF(device_->SetProperty(DIPROP_RANGE, &diprg.diph));
+		didImpl->Property(DIPROP_RANGE, diprg.diph);
 
 		// And again for Y-axis range
 		diprg.diph.dwObj = DIJOFS_Y;
-		TIF(device_->SetProperty(DIPROP_RANGE, &diprg.diph));
+		didImpl->Property(DIPROP_RANGE, diprg.diph);
 
 
 		// Set X axis dead zone to 10%
@@ -48,65 +49,33 @@ namespace KlayGE
 		dipdw.diph.dwObj = DIJOFS_X;
 		dipdw.diph.dwHow = DIPH_BYOFFSET;
 		dipdw.dwData = 1000;
-		TIF(device_->SetProperty(DIPROP_DEADZONE, &dipdw.diph));
+		didImpl->Property(DIPROP_DEADZONE, dipdw.diph);
 
 		// Set Y axis dead zone to 10%
 		dipdw.diph.dwObj = DIJOFS_Y;
-		TIF(device_->SetProperty(DIPROP_DEADZONE, &dipdw.diph));
+		didImpl->Property(DIPROP_DEADZONE, dipdw.diph);
 
 		this->Acquire();
-	}
-
-	// 析构函数
-	/////////////////////////////////////////////////////////////////////////////////
-	DInputJoystick::~DInputJoystick()
-	{
-		this->Unacquire();
 	}
 
 	// 设备名称
 	//////////////////////////////////////////////////////////////////////////////////
 	const std::wstring& DInputJoystick::Name() const
 	{
-		static std::wstring name(L"DirectInput Joystick");
+		static const std::wstring name(L"DirectInput Joystick");
 		return name;
-	}
-
-	// 获取设备
-	/////////////////////////////////////////////////////////////////////////////////
-	void DInputJoystick::Acquire()
-	{
-		TIF(device_->Acquire());
-	}
-
-	// 释放设备
-	//////////////////////////////////////////////////////////////////////////////////
-	void DInputJoystick::Unacquire()
-	{
-		TIF(device_->Unacquire());
 	}
 
 	// 更新游戏杆状态
 	/////////////////////////////////////////////////////////////////////////////////
-	void DInputJoystick::UpdateKeys()
+	void DInputJoystick::UpdateInputs()
 	{
-		device_->Poll();
+		DInputDeviceImpl* didImpl = static_cast<DInputDeviceImpl*>(impl_.get());
+
+		didImpl->Poll();
 
 		DIJOYSTATE diJoyState;
-		bool done;
-		do
-		{
-			HRESULT hr(device_->GetDeviceState(sizeof(diJoyState), &diJoyState));
-			if ((DIERR_INPUTLOST == hr) || (DIERR_NOTACQUIRED == hr))
-			{
-				this->Acquire();
-				done = false;
-			}
-			else
-			{
-				done = true;
-			}
-		} while (!done);
+		didImpl->DeviceState(&diJoyState, sizeof(diJoyState));
 
 		pos_ = Vector_T<long, 3>(diJoyState.lX, diJoyState.lY, diJoyState.lZ);
 		rot_ = Vector_T<long, 3>(diJoyState.lRx, diJoyState.lRy, diJoyState.lRz);

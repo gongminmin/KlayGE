@@ -292,6 +292,17 @@ namespace KlayGE
 		InputActionMap		actionMap_;
 	};
 
+	class InputDeviceImpl
+	{
+	public:
+		virtual ~InputDeviceImpl()
+		{
+		}
+
+		virtual void Acquire() = 0;
+		virtual void Unacquire() = 0;
+	};
+
 	class InputDevice
 	{
 	public:
@@ -302,14 +313,17 @@ namespace KlayGE
 		virtual InputActionsType Update() = 0;
 		void ActionMap(InputActionMap const & iaf);
 
-		virtual void Acquire() = 0;
-		virtual void Unacquire() = 0;
+		void Acquire();
+		void Unacquire();
 
 	protected:
+		virtual void UpdateInputs() = 0;
 		virtual void DoActionMap(InputActionMap const & actionMap) = 0;
 
 	protected:
 		InputActionMap actionMap_;
+
+		boost::shared_ptr<InputDeviceImpl> impl_;
 	};
 
 	class InputKeyboard : virtual public InputDevice
@@ -319,8 +333,6 @@ namespace KlayGE
 		InputActionsType Update();
 
 	protected:
-		virtual void UpdateKeys() = 0;
-
 		void DoActionMap(InputActionMap const & actionMap);
 
 	protected:
@@ -342,8 +354,6 @@ namespace KlayGE
 		InputActionsType Update();
 
 	protected:
-		virtual void UpdateKeys() = 0;
-
 		void DoActionMap(InputActionMap const & actionMap);
 
 	protected:
@@ -370,8 +380,6 @@ namespace KlayGE
 		InputActionsType Update();
 
 	protected:
-		virtual void UpdateKeys() = 0;
-
 		void DoActionMap(InputActionMap const & actionMap);
 
 	protected:

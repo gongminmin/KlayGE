@@ -78,9 +78,6 @@ namespace KlayGE
 		void TextureFiltering(U32 stage, TexFiltering texFiltering);
 		void TextureAnisotropy(U32 stage, U32 maxAnisotropy);
 
-		U32 MaxVertexBlendMatrices();
-
-
 		void StencilCheckEnabled(bool enabled);
 		bool HasHardwareStencil();
 

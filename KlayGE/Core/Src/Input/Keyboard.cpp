@@ -44,7 +44,7 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	InputActionsType InputKeyboard::Update()
 	{
-		this->UpdateKeys();
+		this->UpdateInputs();
 
 		InputActionsType ret;
 

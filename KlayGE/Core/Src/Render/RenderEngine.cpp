@@ -108,15 +108,6 @@ namespace KlayGE
 		return renderEffect_;
 	}
 	
-
-	// 获取最大坐标数
-	/////////////////////////////////////////////////////////////////////////////////
-	U32 RenderEngine::MaxVertexBlendMatrices()
-	{
-		// TODO: implement vertex blending support in DX8 & possibly GL_ARB_VERTEX_BLEND (in subclasses)
-		return 1;
-	}
-
 	// 获取世界矩阵
 	/////////////////////////////////////////////////////////////////////////////////
 	Matrix4 RenderEngine::WorldMatrix() const

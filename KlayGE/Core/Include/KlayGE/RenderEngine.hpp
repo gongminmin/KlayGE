@@ -212,10 +212,6 @@ namespace KlayGE
 		// Sets the maximal anisotropy for the specified texture unit.
 		virtual void TextureAnisotropy(U32 stage, U32 maxAnisotropy) = 0;
 
-		// Returns the number of matrices available to hardware vertex blending for this rendering system
-		virtual U32 MaxVertexBlendMatrices();
-
-
 		// Turns stencil buffer checking on or off. 
 		virtual void StencilCheckEnabled(bool enabled) = 0;
 		// Determines if this system supports hardware accelerated stencil buffer. 

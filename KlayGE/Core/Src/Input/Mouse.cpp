@@ -98,7 +98,7 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	InputActionsType InputMouse::Update()
 	{
-		this->UpdateKeys();
+		this->UpdateInputs();
 
 		InputActionsType ret;
 
