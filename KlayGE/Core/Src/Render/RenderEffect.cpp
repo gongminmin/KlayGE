@@ -1,3 +1,16 @@
+// RenderEffect.hpp
+// KlayGE 渲染效果类 头文件
+// Ver 2.0.3
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.0.3
+// 初次建立 (2003.3.2)
+// 修改了SetTexture的参数 (2004.3.6)
+//
+// 修改记录
+//////////////////////////////////////////////////////////////////////////////////
+
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/RenderEffect.hpp>
@@ -47,7 +60,7 @@ namespace KlayGE
 			return str;
 		}
 
-		void SetTexture(const String& name, const Texture& tex)
+		void SetTexture(const String& name, const TexturePtr& tex)
 			{ }
 		void SetVertexShader(const String& name, U32 vsHandle)
 			{ }

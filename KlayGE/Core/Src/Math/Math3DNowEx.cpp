@@ -324,17 +324,19 @@ namespace KlayGE
 
 				movq		mm0, [ecx + 4]	// l.y | l.z
 				movd		mm1, [edx + 8]	// r.z
-				punpckldq	mm1, [edx]		// r.z | r.x
 				movd		mm2, [ecx + 8]	// l.z
+				punpckldq	mm1, [edx]		// r.z | r.x
 				punpckldq	mm2, [ecx]		// l.z | l.x
 				movq		mm3, [edx + 4]	// r.y | r.z
-				pfmul		mm0, mm1		// l.y * r.z | l.z * r.x
-				pfmul		mm2, mm3		// l.z * r.y | l.x * r.z
-				pfsub		mm0, mm2		// l.y * r.z - l.z * r.y | l.z * r.x - l.x * r.z
 
 				movq		mm4, [ecx]		// l.x | l.y
 				pswapd		mm5, [edx]		// r.y | r.x
+				
+				pfmul		mm0, mm1		// l.y * r.z | l.z * r.x
+				pfmul		mm2, mm3		// l.z * r.y | l.x * r.z
 				pfmul		mm4, mm5		// l.x * r.y | l.y * r.x
+				pfsub		mm0, mm2		// l.y * r.z - l.z * r.y | l.z * r.x - l.x * r.z
+
 				pfnacc		mm4, mm4		// l.x * r.y - l.y * r.x
 
 				movq		[eax], mm0

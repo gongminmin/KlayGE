@@ -6,6 +6,7 @@
 //
 // 2.0.3
 // 修正了没有使用GetParameterByName的Bug (2004.3.1)
+// 修改了SetTexture的参数 (2004.3.6)
 //
 // 2.0.0
 // 初次建立 (2003.8.15)
@@ -131,12 +132,14 @@ namespace KlayGE
 		return String(value);
 	}
 
-	void D3D9RenderEffect::SetTexture(const String& name, const Texture& tex)
+	void D3D9RenderEffect::SetTexture(const String& name, const TexturePtr& tex)
 	{
-		const D3D9Texture& d3d9Texture(reinterpret_cast<const D3D9Texture&>(tex));
-
-		TIF(effect_->SetTexture(effect_->GetParameterByName(NULL, name.c_str()),
-			d3d9Texture.D3DTexture().Get()));
+		IDirect3DTexture9* texture(NULL);
+		if (tex.Get() != NULL)
+		{
+			texture = static_cast<D3D9Texture*>(tex.Get())->D3DTexture().Get();
+		}
+		TIF(effect_->SetTexture(effect_->GetParameterByName(NULL, name.c_str()), texture));
 	}
 
 	void D3D9RenderEffect::SetVertexShader(const String& name, U32 vsHandle)

@@ -248,7 +248,7 @@ namespace KlayGE
 					theTexture_(Engine::RenderFactoryInstance().MakeTexture(1024, 1024, 1, PF_A4R4G4B4)),
 					effect_(Engine::RenderFactoryInstance().MakeRenderEffect(fontEffectStr))
 	{
-		effect_->SetTexture("texFont", *theTexture_);
+		effect_->SetTexture("texFont", theTexture_);
 
 		RenderEngine& renderEngine(Engine::RenderFactoryInstance().RenderEngineInstance());
 		Viewport viewport((*renderEngine.ActiveRenderTarget())->GetViewport());

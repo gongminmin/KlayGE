@@ -1,8 +1,11 @@
 // D3D9RenderEffect.hpp
 // KlayGE D3D9渲染效果类 头文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.0.3
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.0.3
+// 修改了SetTexture的参数 (2004.3.6)
 //
 // 2.0.0
 // 初次建立 (2003.8.15)
@@ -49,7 +52,7 @@ namespace KlayGE
 		void SetString(const String& name, const String& value);
 		String GetString(const String& name) const;
 
-		void SetTexture(const String& name, const Texture& tex);
+		void SetTexture(const String& name, const TexturePtr& tex);
 		void SetVertexShader(const String& name, U32 vsHandle);
 		void SetPixelShader(const String& name, U32 psHandle);
 
