@@ -87,7 +87,7 @@ namespace KlayGE
 
 	void D3D9RenderEffect::SetMatrix(const String& name, const Matrix4& value)
 	{
-		D3DXMATRIX mat(&(*value.Begin()));
+		D3DXMATRIX mat(&(*value.begin()));
 		TIF(effect_->SetMatrix(effect_->GetParameterByName(NULL, name.c_str()), &mat));
 	}
 

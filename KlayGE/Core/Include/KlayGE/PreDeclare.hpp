@@ -21,11 +21,11 @@ namespace KlayGE
 	class Timer;
 
 	class MathLib;
-	template <int N, typename T>
+	template <typename T, int N>
 	class Vector_T;
-	typedef Vector_T<2, float> Vector2;
-	typedef Vector_T<3, float> Vector3;
-	typedef Vector_T<4, float> Vector4;
+	typedef Vector_T<float, 2> Vector2;
+	typedef Vector_T<float, 3> Vector3;
+	typedef Vector_T<float, 4> Vector4;
 	template <typename T>
 	class Size_T;
 	typedef Size_T<float> Size;

@@ -36,6 +36,6 @@ namespace KlayGE
 
 	bool operator==(const Matrix4& lhs, const Matrix4& rhs)
 	{
-		return 0 == memcmp(rhs.Begin(), lhs.Begin(), Matrix4::elem_num * sizeof(Matrix4::value_type));
+		return 0 == memcmp(rhs.begin(), lhs.begin(), Matrix4::elem_num * sizeof(Matrix4::value_type));
 	}
 }

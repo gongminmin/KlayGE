@@ -91,9 +91,7 @@ namespace KlayGE
 			}
 		} while (!done);
 
-		x_ = diMouseState.lX;
-		y_ = diMouseState.lY;
-		z_ = diMouseState.lZ;
+		pos_ = MakeVector(diMouseState.lX, diMouseState.lY, diMouseState.lZ);
 
 		for (size_t i = 0; i < buttons_.size(); ++ i)
 		{

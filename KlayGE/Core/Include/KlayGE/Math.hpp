@@ -271,7 +271,7 @@ namespace KlayGE
 		typename T::value_type Dot(const T& lhs, const T& rhs) const
 		{
 			T::value_type ret(0);
-			for (int i = 0; i < lhs.End() - lhs.Begin(); ++ i)
+			for (int i = 0; i < T::elem_num; ++ i)
 			{
 				ret += lhs[i] * rhs[i];
 			}
@@ -284,7 +284,7 @@ namespace KlayGE
 		typename T::value_type LengthSq(const T& rhs) const
 		{
 			T::value_type ret(0);
-			for (T::const_iterator citer = rhs.Begin(); citer != rhs.End(); ++ citer)
+			for (T::const_iterator citer = rhs.begin(); citer != rhs.end(); ++ citer)
 			{
 				ret += (*citer) * (*citer);
 			}
@@ -307,8 +307,8 @@ namespace KlayGE
 			return out;
 		}
 
-		template <int N, typename T>
-		Vector_T<N, T>& Maximize(Vector_T<N, T>& out, const Vector_T<N, T>& lhs, const Vector_T<N, T>& rhs) const
+		template <typename T, int N>
+		Vector_T<T, N>& Maximize(Vector_T<T, N>& out, const Vector_T<T, N>& lhs, const Vector_T<T, N>& rhs) const
 		{
 			for (int i = 0; i < N; ++ i)
 			{
@@ -318,8 +318,8 @@ namespace KlayGE
 			return out;
 		}
 
-		template <int N, typename T>
-		Vector_T<N, T>& Minimize(Vector_T<N, T>& out, const Vector_T<N, T>& lhs, const Vector_T<N, T>& rhs) const
+		template <typename T, int N>
+		Vector_T<T, N>& Minimize(Vector_T<T, N>& out, const Vector_T<T, N>& lhs, const Vector_T<T, N>& rhs) const
 		{
 			for (int i = 0; i < N; ++ i)
 			{

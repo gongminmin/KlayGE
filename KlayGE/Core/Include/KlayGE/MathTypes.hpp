@@ -1,9 +1,11 @@
 // MathTypes.hpp
 // KlayGE 数学函数库 自定义类型 头文件
-// Ver 2.0.3
+// Ver 2.0.4
 // 版权所有(C) 龚敏敏, 2003--2004
 // Homepage: http://klayge.sourceforge.net
 //
+// 2.0.4
+// 更改了函数名 (2004.3.16)
 //
 // 修改记录
 ///////////////////////////////////////////////////////////////////////////////
@@ -24,7 +26,7 @@ namespace KlayGE
 {
 	// 向量
 	///////////////////////////////////////////////////////////////////////////////
-	template <int N, typename T>
+	template <typename T, int N>
 	class Vector_T
 	{
 	public:
@@ -45,42 +47,42 @@ namespace KlayGE
 		Vector_T()
 			{ }
 		explicit Vector_T(const T* rhs)
-			{ std::copy(rhs, rhs + elem_num, this->Begin()); }
+			{ std::copy(rhs, rhs + elem_num, this->begin()); }
 		Vector_T(const Vector_T& rhs)
-			{ std::copy(rhs.Begin(), rhs.End(), this->Begin()); }
+			{ std::copy(rhs.begin(), rhs.end(), this->begin()); }
 		template <typename U>
-		Vector_T(const Vector_T<N, U>& rhs)
-			{ std::copy(rhs.Begin(), rhs.End(), this->Begin()); }
+		Vector_T(const Vector_T<U, N>& rhs)
+			{ std::copy(rhs.begin(), rhs.end(), this->begin()); }
 
-		static size_t Size()
+		static size_t size()
 			{ return elem_num; }
 
 		static const Vector_T& Zero()
 		{
-			static Vector_T<N, T> zero;
-			std::fill(zero.Begin(), zero.End(), T(0));
+			static Vector_T<T, N> zero;
+			std::fill(zero.begin(), zero.end(), T(0));
 			return zero;
 		}
 
 		// 取向量
-		iterator Begin()
+		iterator begin()
 			{ return &vec_[0]; }
-		const_iterator Begin() const
+		const_iterator begin() const
 			{ return &vec_[0]; }
-		iterator End()
-			{ return this->Begin() + elem_num; }
-		const_iterator End() const
-			{ return this->Begin() + elem_num; }
+		iterator end()
+			{ return this->begin() + elem_num; }
+		const_iterator end() const
+			{ return this->begin() + elem_num; }
 		reference operator[](size_t index)
-			{ return *(this->Begin() + index); }
+			{ return *(this->begin() + index); }
 		const_reference operator[](size_t index) const
-			{ return *(this->Begin() + index); }
+			{ return *(this->begin() + index); }
+
 		reference x()
 		{
 			StaticAssert<elem_num >= 1>();
 			return this->operator[](0);
 		}
-
 		const_reference x() const
 		{
 			StaticAssert<elem_num >= 1>();
@@ -92,7 +94,6 @@ namespace KlayGE
 			StaticAssert<elem_num >= 2>();
 			return this->operator[](1);
 		}
-
 		const_reference y() const
 		{
 			StaticAssert<elem_num >= 2>();
@@ -104,7 +105,6 @@ namespace KlayGE
 			StaticAssert<elem_num >= 3>();
 			return this->operator[](2);
 		}
-
 		const_reference z() const
 		{
 			StaticAssert<elem_num >= 3>();
@@ -116,7 +116,6 @@ namespace KlayGE
 			StaticAssert<elem_num >= 4>();
 			return this->operator[](3);
 		}
-
 		const_reference w() const
 		{
 			StaticAssert<elem_num >= 4>();
@@ -125,21 +124,21 @@ namespace KlayGE
 
 		// 赋值操作符
 		template <typename U>
-		Vector_T& operator+=(const Vector_T<N, U>& rhs)
+		Vector_T& operator+=(const Vector_T<U, N>& rhs)
 		{
-			std::transform(this->Begin(), this->End(), rhs.Begin(), this->Begin(), std::plus<T>());
+			std::transform(this->begin(), this->end(), rhs.begin(), this->begin(), std::plus<T>());
 			return *this;
 		}
 		template <typename U>
-		Vector_T& operator-=(const Vector_T<N, U>& rhs)
+		Vector_T& operator-=(const Vector_T<U, N>& rhs)
 		{
-			std::transform(this->Begin(), this->End(), rhs.Begin(), this->Begin(), std::minus<T>());
+			std::transform(this->begin(), this->end(), rhs.begin(), this->begin(), std::minus<T>());
 			return *this;
 		}
 		template <typename U>
 		Vector_T& operator*=(const U& rhs)
 		{
-			std::transform(this->Begin(), this->End(), this->Begin(), std::bind2nd(std::multiplies<T>(), rhs));
+			std::transform(this->begin(), this->end(), this->begin(), std::bind2nd(std::multiplies<T>(), rhs));
 			return *this;
 		}
 		template <typename U>
@@ -152,16 +151,16 @@ namespace KlayGE
 		{
 			if (this != &rhs)
 			{
-				std::copy(rhs.Begin(), rhs.End(), this->Begin());
+				std::copy(rhs.begin(), rhs.end(), this->begin());
 			}
 			return *this;
 		}
 		template <typename U>
-		Vector_T& operator=(const Vector_T<N, U>& rhs)
+		Vector_T& operator=(const Vector_T<U, N>& rhs)
 		{
 			if (this != &rhs)
 			{
-				std::copy(rhs.Begin(), rhs.End(), this->Begin());
+				std::copy(rhs.begin(), rhs.end(), this->begin());
 			}
 			return *this;
 		}
@@ -172,7 +171,7 @@ namespace KlayGE
 		const Vector_T operator-() const
 		{
 			Vector_T temp;
-			std::transform(this->Begin(), this->End(), temp.Begin(), std::negate<T>());
+			std::transform(this->begin(), this->end(), temp.begin(), std::negate<T>());
 			return temp;
 		}
 
@@ -180,40 +179,40 @@ namespace KlayGE
 		T vec_[elem_num];
 	};
 
-	template <int N, typename T>
-	inline const Vector_T<N, T>
-	operator+(const Vector_T<N, T>& lhs, const Vector_T<N, T>& rhs)
+	template <typename T, int N>
+	inline const Vector_T<T, N>
+	operator+(const Vector_T<T, N>& lhs, const Vector_T<T, N>& rhs)
 	{
-		return Vector_T<N, T>(lhs) += rhs;
+		return Vector_T<T, N>(lhs) += rhs;
 	}
-	template <int N, typename T>
-	inline const Vector_T<N, T>
-	operator-(const Vector_T<N, T>& lhs, const Vector_T<N, T>& rhs)
+	template <typename T, int N>
+	inline const Vector_T<T, N>
+	operator-(const Vector_T<T, N>& lhs, const Vector_T<T, N>& rhs)
 	{
-		return Vector_T<N, T>(lhs) -= rhs;
+		return Vector_T<T, N>(lhs) -= rhs;
 	}
-	template <int N, typename T>
-	inline const Vector_T<N, T>
-	operator*(const Vector_T<N, T>& lhs, const T& rhs)
+	template <typename T, int N>
+	inline const Vector_T<T, N>
+	operator*(const Vector_T<T, N>& lhs, const T& rhs)
 	{
-		return Vector_T<N, T>(lhs) *= rhs;
+		return Vector_T<T, N>(lhs) *= rhs;
 	}
-	template <int N, typename T>
-	inline const Vector_T<N, T>
-	operator*(const T& lhs, const Vector_T<N, T>& rhs)
+	template <typename T, int N>
+	inline const Vector_T<T, N>
+	operator*(const T& lhs, const Vector_T<T, N>& rhs)
 	{
 		return rhs * lhs;
 	}
-	template <int N, typename T>
-	inline const Vector_T<N, T>
-	operator/(const Vector_T<N, T>& lhs, const T& rhs)
+	template <typename T, int N>
+	inline const Vector_T<T, N>
+	operator/(const Vector_T<T, N>& lhs, const T& rhs)
 	{
 		return lhs * (1.0f / rhs);
 	}
 
-	template <int N, typename T>
+	template <typename T, int N>
 	inline bool
-	operator==(const Vector_T<N, T>& lhs, const Vector_T<N, T>& rhs)
+	operator==(const Vector_T<T, N>& lhs, const Vector_T<T, N>& rhs)
 	{
 		for (int i = 0; i < N; ++ i)
 		{
@@ -224,36 +223,36 @@ namespace KlayGE
 		}
 		return true;
 	}
-	template <int N, typename T>
+	template <typename T, int N>
 	inline bool
-	operator!=(const Vector_T<N, T>& lhs, const Vector_T<N, T>& rhs)
+	operator!=(const Vector_T<T, N>& lhs, const Vector_T<T, N>& rhs)
 	{
 		return !(lhs == rhs);
 	}
 
-	typedef Vector_T<2, float> Vector2;
-	typedef Vector_T<3, float> Vector3;
-	typedef Vector_T<4, float> Vector4;
+	typedef Vector_T<float, 2> Vector2;
+	typedef Vector_T<float, 3> Vector3;
+	typedef Vector_T<float, 4> Vector4;
 
 	template <typename T>
-	Vector_T<2, T> MakeVector(const T& x, const T& y)
+	Vector_T<T, 2> MakeVector(const T& x, const T& y)
 	{
 		T data[2] = { x, y };
-		return Vector_T<2, T>(data);
+		return Vector_T<T, 2>(data);
 	}
 
 	template <typename T>
-	Vector_T<3, T> MakeVector(const T& x, const T& y, const T& z)
+	Vector_T<T, 3> MakeVector(const T& x, const T& y, const T& z)
 	{
 		T data[3] = { x, y, z };
-		return Vector_T<3, T>(data);
+		return Vector_T<T, 3>(data);
 	}
 
 	template <typename T>
-	Vector_T<4, T> MakeVector(const T& x, const T& y, const T& z, const T& w)
+	Vector_T<T, 4> MakeVector(const T& x, const T& y, const T& z, const T& w)
 	{
 		T data[4] = { x, y, z, w };
-		return Vector_T<4, T>(data);
+		return Vector_T<T, 4>(data);
 	}
 
 
@@ -456,7 +455,7 @@ namespace KlayGE
 
 		// 赋值操作符
 		template <typename U>
-		Rect_T& operator+=(const Vector_T<2, U>& rhs)
+		Rect_T& operator+=(const Vector_T<U, 2>& rhs)
 		{
 			this->left()	+= rhs.x();
 			this->top()		+= rhs.y();
@@ -465,7 +464,7 @@ namespace KlayGE
 			return *this;
 		}
 		template <typename U>
-		Rect_T& operator-=(const Vector_T<2, U>& rhs)
+		Rect_T& operator-=(const Vector_T<U, 2>& rhs)
 		{
 			this->left()	-= rhs.x();
 			this->top()		-= rhs.y();
@@ -550,14 +549,14 @@ namespace KlayGE
 
 	template <typename T>
 	inline const Rect_T<T>
-	operator+(const Rect_T<T>& lhs, const Vector_T<2, T>& rhs)
+	operator+(const Rect_T<T>& lhs, const Vector_T<T, 2>& rhs)
 	{
 		return Rect_T<T>(lhs.left() + rhs.x(), lhs.top() + rhs.y(),
 			lhs.right() + rhs.x(), lhs.bottom() + rhs.y());
 	}
 	template <typename T>
 	inline const Rect_T<T>
-	operator-(const Rect_T<T>& lhs, const Vector_T<2, T>& rhs)
+	operator-(const Rect_T<T>& lhs, const Vector_T<T, 2>& rhs)
 	{
 		return Rect_T<T>(lhs.left() - rhs.x(), lhs.top() - rhs.y(),
 			lhs.right() - rhs.x(), lhs.bottom() - rhs.y());
@@ -635,9 +634,9 @@ namespace KlayGE
 		Matrix4()
 			{ }
 		explicit Matrix4(const float* rhs)
-			{ std::copy(rhs, rhs + elem_num, this->Begin()); }
+			{ std::copy(rhs, rhs + elem_num, this->begin()); }
 		Matrix4(const Matrix4& rhs)
-			{ std::copy(rhs.Begin(), rhs.End(), this->Begin()); }
+			{ std::copy(rhs.begin(), rhs.end(), this->begin()); }
 		Matrix4(float f11, float f12, float f13, float f14,
 			float f21, float f22, float f23, float f24,
 			float f31, float f32, float f33, float f34,
@@ -655,30 +654,30 @@ namespace KlayGE
 			{ return m_[row][col]; }
 		const_reference operator()(size_t row, size_t col) const
 			{ return m_[row][col]; }
-		iterator Begin()
+		iterator begin()
 			{ return &m_[0][0]; }
-		const_iterator Begin() const
+		const_iterator begin() const
 			{ return &m_[0][0]; }
-		iterator End()
-			{ return this->Begin() + elem_num; }
-		const_iterator End() const
-			{ return this->Begin() + elem_num; }
+		iterator end()
+			{ return this->begin() + elem_num; }
+		const_iterator end() const
+			{ return this->begin() + elem_num; }
 
 		// 赋值操作符
 		Matrix4& operator*=(const Matrix4& rhs);
 		Matrix4& operator+=(const Matrix4& rhs)
 		{
-			std::transform(this->Begin(), this->End(), rhs.Begin(), this->Begin(), std::plus<float>());
+			std::transform(this->begin(), this->end(), rhs.begin(), this->begin(), std::plus<float>());
 			return *this;
 		}
 		Matrix4& operator-=(const Matrix4& rhs)
 		{
-			std::transform(this->Begin(), this->End(), rhs.Begin(), this->Begin(), std::minus<float>());
+			std::transform(this->begin(), this->end(), rhs.begin(), this->begin(), std::minus<float>());
 			return *this;
 		}
 		Matrix4& operator*=(float rhs)
 		{
-			std::transform(this->Begin(), this->End(), this->Begin(), std::bind2nd(std::multiplies<float>(), rhs));
+			std::transform(this->begin(), this->end(), this->begin(), std::bind2nd(std::multiplies<float>(), rhs));
 			return *this;
 		}
 		Matrix4& operator/=(float rhs)
@@ -688,7 +687,7 @@ namespace KlayGE
 		{
 			if (this != &rhs)
 			{
-				std::copy(rhs.Begin(), rhs.End(), this->Begin());
+				std::copy(rhs.begin(), rhs.end(), this->begin());
 			}
 			return *this;
 		}
@@ -699,7 +698,7 @@ namespace KlayGE
 		const Matrix4 operator-() const
 		{
 			Matrix4 temp(*this);
-			std::transform(temp.Begin(), temp.End(), temp.Begin(), std::negate<float>());
+			std::transform(temp.begin(), temp.end(), temp.begin(), std::negate<float>());
 			return temp;
 		}
 
@@ -768,7 +767,7 @@ namespace KlayGE
 		Quaternion()
 			{ }
 		explicit Quaternion(const float* rhs)
-			{ std::copy(rhs, rhs + elem_num, this->Begin()); }
+			{ std::copy(rhs, rhs + elem_num, this->begin()); }
 		Quaternion(const Vector3& vec, float s)
 		{
 			this->x() = vec.x();
@@ -777,7 +776,7 @@ namespace KlayGE
 			this->w() = s;
 		}
 		Quaternion(const Quaternion& rhs)
-			{ std::copy(rhs.Begin(), rhs.End(), this->Begin()); }
+			{ std::copy(rhs.begin(), rhs.end(), this->begin()); }
 		Quaternion(float _x, float _y, float _z, float _w)
 		{
 			this->x() = _x;
@@ -789,18 +788,19 @@ namespace KlayGE
 		static const Quaternion& Identity();
 
 		// 取向量
-		iterator Begin()
+		iterator begin()
 			{ return &quat_[0]; }
-		const_iterator Begin() const
+		const_iterator begin() const
 			{ return &quat_[0]; }
-		iterator End()
-			{ return this->Begin() + elem_num; }
-		const_iterator End() const
-			{ return this->Begin() + elem_num; }
+		iterator end()
+			{ return this->begin() + elem_num; }
+		const_iterator end() const
+			{ return this->begin() + elem_num; }
 		reference operator[](size_t index)
-			{ return *(this->Begin() + index); }
+			{ return *(this->begin() + index); }
 		const_reference operator[](size_t index) const
-			{ return *(this->Begin() + index); }
+			{ return *(this->begin() + index); }
+
 		reference x()
 			{ return this->operator[](0); }
 		const_reference x() const
@@ -821,19 +821,19 @@ namespace KlayGE
 		// 赋值操作符
 		Quaternion& operator+=(const Quaternion& rhs)
 		{
-			std::transform(this->Begin(), this->End(), rhs.Begin(), this->Begin(), std::plus<float>());
+			std::transform(this->begin(), this->end(), rhs.begin(), this->begin(), std::plus<float>());
 			return *this;
 		}
 		Quaternion& operator-=(const Quaternion& rhs)
 		{
-			std::transform(this->Begin(), this->End(), rhs.Begin(), this->Begin(), std::minus<float>());
+			std::transform(this->begin(), this->end(), rhs.begin(), this->begin(), std::minus<float>());
 			return *this;
 		}
 
 		Quaternion& operator*=(const Quaternion& rhs);
 		Quaternion& operator*=(float rhs)
 		{
-			std::transform(this->Begin(), this->End(), this->Begin(), std::bind2nd(std::multiplies<float>(), rhs));
+			std::transform(this->begin(), this->end(), this->begin(), std::bind2nd(std::multiplies<float>(), rhs));
 			return *this;
 		}
 		Quaternion& operator/=(float rhs)
@@ -845,7 +845,7 @@ namespace KlayGE
 		{
 			if (this != &rhs)
 			{
-				std::copy(rhs.Begin(), rhs.End(), this->Begin());
+				std::copy(rhs.begin(), rhs.end(), this->begin());
 			}
 			return *this;
 		}
@@ -966,18 +966,19 @@ namespace KlayGE
 		}
 
 		// 取向量
-		iterator Begin()
+		iterator begin()
 			{ return &plane_[0]; }
-		const_iterator Begin() const
+		const_iterator begin() const
 			{ return &plane_[0]; }
-		iterator End()
-			{ return this->Begin() + elem_num; }
-		const_iterator End() const
-			{ return this->Begin() + elem_num; }
+		iterator end()
+			{ return this->begin() + elem_num; }
+		const_iterator end() const
+			{ return this->begin() + elem_num; }
 		reference operator[](size_t index)
-			{ return *(this->Begin() + index); }
+			{ return *(this->begin() + index); }
 		const_reference operator[](size_t index) const
-			{ return *(this->Begin() + index); }
+			{ return *(this->begin() + index); }
+
 		reference a()
 			{ return this->operator[](0); }
 		const_reference a() const
@@ -1000,7 +1001,7 @@ namespace KlayGE
 		{
 			if (this != &rhs)
 			{
-				std::copy(rhs.Begin(), rhs.End(), this->Begin());
+				std::copy(rhs.begin(), rhs.end(), this->begin());
 			}
 			return *this;
 		}
@@ -1009,7 +1010,7 @@ namespace KlayGE
 		{
 			if (this != &rhs)
 			{
-				std::copy(rhs.Begin(), rhs.End(), this->Begin());
+				std::copy(rhs.begin(), rhs.end(), this->begin());
 			}
 			return *this;
 		}
@@ -1021,10 +1022,10 @@ namespace KlayGE
 			{ return Plane_T<T>(-this->a(), -this->b(), -this->c(), -this->d()); }
 
 		// 取法向向量
-		const Vector_T<3, T> Normal() const
+		const Vector_T<T, 3> Normal() const
 			{ return MakeVector<T>(this->a(), this->b(), this->c()); }
 		template <typename U>
-		void Normal(const Vector_T<3, U>& rhs)
+		void Normal(const Vector_T<U, 3>& rhs)
 		{
 			this->a() = rhs.x();
 			this->b() = rhs.y();
@@ -1103,18 +1104,19 @@ namespace KlayGE
 		}
 
 		// 取颜色
-		iterator Begin()
+		iterator begin()
 			{ return &col_[0]; }
-		const_iterator Begin() const
+		const_iterator begin() const
 			{ return &col_[0]; }
-		iterator End()
-			{ return this->Begin() + elem_num; }
-		const_iterator End() const
-			{ return this->Begin() + elem_num; }
+		iterator end()
+			{ return this->begin() + elem_num; }
+		const_iterator end() const
+			{ return this->begin() + elem_num; }
 		reference operator[](size_t index)
-			{ return *(this->Begin() + index); }
+			{ return *(this->begin() + index); }
 		const_reference operator[](size_t index) const
-			{ return *(this->Begin() + index); }
+			{ return *(this->begin() + index); }
+
 		reference r()
 			{ return this->operator[](0); }
 		const_reference r() const
@@ -1143,17 +1145,17 @@ namespace KlayGE
 		// 赋值操作符
 		Color& operator+=(const Color& rhs)
 		{
-			std::transform(this->Begin(), this->End(), rhs.Begin(), this->Begin(), std::plus<float>());
+			std::transform(this->begin(), this->end(), rhs.begin(), this->begin(), std::plus<float>());
 			return *this;
 		}
 		Color& operator-=(const Color& rhs)
 		{
-			std::transform(this->Begin(), this->End(), rhs.Begin(), this->Begin(), std::minus<float>());
+			std::transform(this->begin(), this->end(), rhs.begin(), this->begin(), std::minus<float>());
 			return *this;
 		}
 		Color& operator*=(float rhs)
 		{
-			std::transform(this->Begin(), this->End(), this->Begin(), std::bind2nd(std::multiplies<float>(), rhs));
+			std::transform(this->begin(), this->end(), this->begin(), std::bind2nd(std::multiplies<float>(), rhs));
 			return *this;
 		}
 		Color& operator/=(float rhs)
@@ -1165,7 +1167,7 @@ namespace KlayGE
 		{
 			if (this != &rhs)
 			{
-				std::copy(rhs.Begin(), rhs.End(), this->Begin());
+				std::copy(rhs.begin(), rhs.end(), this->begin());
 			}
 			return *this;
 		}

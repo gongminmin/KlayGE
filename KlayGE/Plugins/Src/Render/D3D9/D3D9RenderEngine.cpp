@@ -47,7 +47,7 @@ namespace KlayGE
 	D3DMATRIX Convert(const Matrix4& mat)
 	{
 		D3DMATRIX d3dMat;
-		memcpy(&d3dMat._11, &mat.Begin()[0], sizeof(d3dMat));
+		memcpy(&d3dMat._11, &mat.begin()[0], sizeof(d3dMat));
 
 		return d3dMat;
 	}

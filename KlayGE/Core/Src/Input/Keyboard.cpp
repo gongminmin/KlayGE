@@ -1,8 +1,8 @@
 // Keyboard.cpp
 // KlayGE 键盘管理类 实现文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.0.4
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
 //
 // 2.0.0
 // 初次建立 (2003.8.29)
@@ -52,10 +52,7 @@ namespace KlayGE
 		{
 			if (this->Key(i))
 			{
-				if (actionMap_.HasAction(i))
-				{
-					ret.push_back(actionMap_.Action(i));
-				}
+				actionMap_.UpdateInputActions(ret, i);
 			}
 		}
 

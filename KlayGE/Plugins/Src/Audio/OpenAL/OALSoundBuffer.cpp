@@ -25,16 +25,13 @@ namespace
 {
 	// 检查一个音频缓冲区是否空闲
 	/////////////////////////////////////////////////////////////////////////////////
-	struct IsSourceFree : public std::unary_function<ALuint, bool>
+	bool IsSourceFree(ALuint source)
 	{
-		result_type operator()(argument_type source) const
-		{
-			ALint value;
-			alGetSourcei(source, AL_SOURCE_STATE, &value);
+		ALint value;
+		alGetSourcei(source, AL_SOURCE_STATE, &value);
 
-			return (AL_PLAYING != (value & AL_PLAYING));
-		}
-	};
+		return (AL_PLAYING != (value & AL_PLAYING));
+	}
 }
 
 namespace KlayGE
@@ -87,7 +84,7 @@ namespace KlayGE
 	{
 		assert(!sources_.empty());
 
-		SourcesIter iter(std::find_if(sources_.begin(), sources_.end(), IsSourceFree()));
+		SourcesIter iter(std::find_if(sources_.begin(), sources_.end(), IsSourceFree));
 
 		if (iter == sources_.end())
 		{
@@ -131,7 +128,7 @@ namespace KlayGE
 	bool OALSoundBuffer::IsPlaying() const
 	{
 		return (std::find_if(sources_.begin(), sources_.end(),
-			std::not1(IsSourceFree())) != sources_.end());
+			std::not1(std::ptr_fun(IsSourceFree))) != sources_.end());
 	}
 
 	// 设置音量

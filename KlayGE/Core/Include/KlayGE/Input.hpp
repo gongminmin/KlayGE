@@ -1,8 +1,11 @@
 // Input.hpp
 // KlayGE 输入引擎类 头文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.0.4
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.0.4
+// 改进了InputActionsType
 //
 // 2.0.0
 // 初次建立 (2003.8.29)
@@ -17,6 +20,7 @@
 
 #include <KlayGE/SharePtr.hpp>
 #include <KlayGE/array.hpp>
+#include <KlayGE/MathTypes.hpp>
 #include <KlayGE/MapVector.hpp>
 
 #include <vector>
@@ -231,15 +235,9 @@ namespace KlayGE
 		JS_Button31			= 0x227,
 	};
 
-	struct InputAction
-	{
-		U32 action;
-		U16 key;
+	typedef std::pair<U16, U16> InputAction;
+	typedef std::vector<std::pair<U16, long>, alloc<std::pair<U16, long> > > InputActionsType;
 
-		InputAction(U32 ac, U16 k)
-				: action(ac), key(k)
-			{ }
-	};
 
 	// 输入动作格式
 	/////////////////////////////////////////////////////////////////////////////////
@@ -247,7 +245,7 @@ namespace KlayGE
 	{
 	public:
 		void AddAction(const InputAction& inputAction)
-			{ actions_.insert(std::make_pair(inputAction.key, inputAction.action)); }
+			{ actionMap_.insert(std::make_pair(inputAction.second, inputAction.first)); }
 
 		template <typename ForwardIterator>
 		void AddActions(ForwardIterator first, ForwardIterator last)
@@ -258,22 +256,31 @@ namespace KlayGE
 			}
 		}
 
+		void UpdateInputActions(InputActionsType& actions, U16 key, long value = 0)
+		{
+			if (this->HasAction(key))
+			{
+				actions.push_back(std::make_pair(this->Action(key), value));
+			}
+		}
+
 		bool HasAction(U16 key) const
-			{ return (actions_.find(key) != actions_.end()); }
-		U32 Action(U16 key) const
-			{ return actions_.find(key)->second; }
+			{ return (actionMap_.find(key) != actionMap_.end()); }
+		U16 Action(U16 key) const
+			{ return actionMap_.find(key)->second; }
 
 	private:
-		MapVector<U16, U32> actions_;
+		MapVector<U16, U16> actionMap_;
 	};
 
-	typedef std::vector<U32, alloc<U32> >	InputActionsType;
 
 	// 输入引擎
 	/////////////////////////////////////////////////////////////////////////////////
 	class InputEngine
 	{
 	public:
+		virtual ~InputEngine();
+
 		virtual const WString& Name() const = 0;
 
 		virtual void EnumDevices() = 0;
@@ -287,11 +294,8 @@ namespace KlayGE
 			{ return devices_.size(); }
 		InputDevicePtr Device(size_t index) const;
 
-		virtual ~InputEngine();
-
 	protected:
 		typedef std::vector<InputDevicePtr, alloc<InputDevicePtr> >	InputDevicesType;
-
 		InputDevicesType	devices_;
 
 		InputActionMap		actionMap_;
@@ -313,8 +317,6 @@ namespace KlayGE
 	protected:
 		virtual void DoActionMap(const InputActionMap& actionMap) = 0;
 
-		U32 MakeAction(U16 key, long value);
-
 	protected:
 		InputActionMap actionMap_;
 	};
@@ -331,18 +333,19 @@ namespace KlayGE
 		void DoActionMap(const InputActionMap& actionMap);
 
 	protected:
-		array<bool, 256>	keys_;
+		typedef array<bool, 256> KeysType;
+		KeysType keys_;
 	};
 
 	class InputMouse : virtual public InputDevice
 	{
 	public:
 		long X() const
-			{ return x_; }
+			{ return pos_.x(); }
 		long Y() const
-			{ return y_; }
+			{ return pos_.y(); }
 		long Z() const
-			{ return z_; }
+			{ return pos_.z(); }
 		bool LeftButton() const
 			{ return this->Button(0); }
 		bool RightButton() const
@@ -359,10 +362,10 @@ namespace KlayGE
 		void DoActionMap(const InputActionMap& actionMap);
 
 	protected:
-		long			x_;
-		long			y_;
-		long			z_;
-		array<bool, 4>	buttons_;
+		Vector_T<long, 3> pos_;
+
+		typedef array<bool, 4> ButtonsType;
+		ButtonsType buttons_;
 	};
 
 	class InputJoystick : virtual public InputDevice
@@ -372,17 +375,17 @@ namespace KlayGE
 			{ }
 
 		long XPos() const
-			{ return xPos_; }
+			{ return pos_.x(); }
 		long YPos() const
-			{ return yPos_; }
+			{ return pos_.y(); }
 		long ZPos() const
-			{ return zPos_; }
+			{ return pos_.z(); }
 		long XRot() const
-			{ return xRot_; }
+			{ return rot_.x(); }
 		long YRot() const
-			{ return yRot_; }
+			{ return rot_.y(); }
 		long ZRot() const
-			{ return zRot_; }
+			{ return rot_.z(); }
 		long Slider(size_t index) const;
 		bool Button(size_t index) const;
 
@@ -394,17 +397,14 @@ namespace KlayGE
 		void DoActionMap(const InputActionMap& actionMap);
 
 	protected:
-		long    xPos_;				// x-axis position
-		long    yPos_;				// y-axis position
-		long    zPos_;				// z-axis position
-		long    xRot_;				// x-axis rotation
-		long    yRot_;				// y-axis rotation
-		long    zRot_;				// z-axis rotation
+		Vector_T<long, 3> pos_;		// x, y, z axis position
+		Vector_T<long, 3> rot_;		// x, y, z axis rotation
 
-		array<long, 2>		slider_;	// extra axes positions
-		array<bool, 32>		buttons_;	// 32 buttons
+		Vector_T<long, 2> slider_;		// extra axes positions
+
+		typedef array<bool, 32> ButtonsType;
+		ButtonsType buttons_;	// 32 buttons
 	};
 }
 
 #endif		// _INPUT_HPP
-

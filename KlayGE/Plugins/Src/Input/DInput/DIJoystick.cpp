@@ -115,12 +115,8 @@ namespace KlayGE
 			}
 		} while (!done);
 
-		xPos_ = diJoyState.lX;
-		yPos_ = diJoyState.lY;
-		zPos_ = diJoyState.lZ;
-		xRot_ = diJoyState.lRx;
-		yRot_ = diJoyState.lRy;
-		zRot_ = diJoyState.lRz;
+		pos_ = MakeVector(diJoyState.lX, diJoyState.lY, diJoyState.lZ);
+		rot_ = MakeVector(diJoyState.lRx, diJoyState.lRy, diJoyState.lRz);
 
 		for (size_t i = 0; i < slider_.size(); ++ i)
 		{

@@ -1,8 +1,8 @@
 // Joystick.cpp
 // KlayGE 游戏杆管理类 实现文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.0.4
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
 //
 // 2.0.0
 // 初次建立 (2003.8.29)
@@ -89,46 +89,22 @@ namespace KlayGE
 
 		InputActionsType ret;
 
-		if (actionMap_.HasAction(JS_XPos))
-		{
-			ret.push_back(this->MakeAction(JS_XPos, this->XPos()));
-		}
-		if (actionMap_.HasAction(JS_YPos))
-		{
-			ret.push_back(this->MakeAction(JS_YPos, this->YPos()));
-		}
-		if (actionMap_.HasAction(JS_ZPos))
-		{
-			ret.push_back(this->MakeAction(JS_ZPos, this->ZPos()));
-		}
-		if (actionMap_.HasAction(JS_XRot))
-		{
-			ret.push_back(this->MakeAction(JS_XRot, this->XRot()));
-		}
-		if (actionMap_.HasAction(JS_YRot))
-		{
-			ret.push_back(this->MakeAction(JS_YRot, this->YRot()));
-		}
-		if (actionMap_.HasAction(JS_ZRot))
-		{
-			ret.push_back(this->MakeAction(JS_ZRot, this->ZRot()));
-		}
+		actionMap_.UpdateInputActions(ret, JS_XPos, this->XPos());
+		actionMap_.UpdateInputActions(ret, JS_YPos, this->YPos());
+		actionMap_.UpdateInputActions(ret, JS_ZPos, this->ZPos());
+		actionMap_.UpdateInputActions(ret, JS_XRot, this->XRot());
+		actionMap_.UpdateInputActions(ret, JS_YRot, this->YRot());
+		actionMap_.UpdateInputActions(ret, JS_ZRot, this->ZRot());
 
 		for (size_t i = 0; i < slider_.size(); ++ i)
 		{
-			if (actionMap_.HasAction(JS_Slider0 + i))
-			{
-				ret.push_back(this->MakeAction(JS_Slider0 + i, this->Slider(i)));
-			}
+			actionMap_.UpdateInputActions(ret, JS_Slider0 + i, this->Slider(i));
 		}
 		for (size_t i = 0; i < buttons_.size(); ++ i)
 		{
-			if (actionMap_.HasAction(JS_Button0 + i))
+			if (this->Button(i))
 			{
-				if (this->Button(i))
-				{
-					ret.push_back(this->actionMap_.Action(JS_Button0 + i));
-				}
+				actionMap_.UpdateInputActions(ret, JS_Button0 + i);
 			}
 		}
 

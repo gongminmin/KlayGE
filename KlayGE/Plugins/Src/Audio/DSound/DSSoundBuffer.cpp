@@ -29,20 +29,17 @@ namespace
 
 	// 检查一个音频缓冲区是否空闲
 	/////////////////////////////////////////////////////////////////////////////////
-	struct IsSourceFree : public std::unary_function<DSBufferType, bool>
+	bool IsSourceFree(DSBufferType pDSB)
 	{
-		result_type operator()(argument_type pDSB) const
+		if (pDSB.Get() != NULL)
 		{
-			if (pDSB.Get() != NULL)
-			{
-				U32 status;
-				pDSB->GetStatus(&status);
-				return (0 == (status & DSBSTATUS_PLAYING));
-			}
-
-			return false;
+			U32 status;
+			pDSB->GetStatus(&status);
+			return (0 == (status & DSBSTATUS_PLAYING));
 		}
-	};
+
+		return false;
+	}
 }
 
 namespace KlayGE
@@ -135,7 +132,7 @@ namespace KlayGE
 	{
 		assert(!sources_.empty());
 
-		SourcesIter iter(std::find_if(sources_.begin(), sources_.end(), IsSourceFree()));
+		SourcesIter iter(std::find_if(sources_.begin(), sources_.end(), IsSourceFree));
 
 		if (iter == sources_.end())
 		{
@@ -198,7 +195,7 @@ namespace KlayGE
 	bool DSSoundBuffer::IsPlaying() const
 	{
 		return (std::find_if(sources_.begin(), sources_.end(),
-			std::not1(IsSourceFree())) != sources_.end());
+			std::not1(std::ptr_fun(IsSourceFree))) != sources_.end());
 	}
 
 	// 设置音量

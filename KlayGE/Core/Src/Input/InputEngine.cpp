@@ -1,8 +1,8 @@
 // InputEngine.cpp
 // KlayGE 输入引擎类 实现文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.0.4
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
 //
 // 2.0.0
 // 初次建立 (2003.8.29)
@@ -62,7 +62,8 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	InputActionsType InputEngine::Update()
 	{
-		typedef std::set<U32, std::less<U32>, alloc<U32> > ActionSetType;
+		typedef std::set<std::pair<U16, long>, std::less<std::pair<U16, long> >,
+			alloc<std::pair<U16, long> > > ActionSetType;
 		ActionSetType actions;
 
 		// 访问所有设备
