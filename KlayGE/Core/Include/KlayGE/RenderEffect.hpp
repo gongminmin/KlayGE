@@ -69,7 +69,7 @@ namespace KlayGE
 
 	RenderEffectPtr NullRenderEffectInstance();
 
-	RenderEffectPtr LoadRenderEffect(const WString& effectName);
+	RenderEffectPtr LoadRenderEffect(const WString& effectName, bool fromPack = false);
 }
 
 #endif		// _RENDEREFFECT_HPP

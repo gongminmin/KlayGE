@@ -26,6 +26,8 @@
 #include <KlayGE/OpenGL/OGLRenderSettings.hpp>
 #include <KlayGE/OpenGL/OGLRenderWindow.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>
+#include <KlayGE/OpenGL/OGLVertexStream.hpp>
+#include <KlayGE/OpenGL/OGLIndexStream.hpp>
 
 #include <cassert>
 #include <algorithm>
@@ -579,11 +581,10 @@ namespace KlayGE
 		for (RenderBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
 			iter != vb.VertexStreamEnd(); ++ iter)
 		{
-			VertexStream& stream(*(*iter));
+			OGLVertexStream& stream(static_cast<OGLVertexStream&>(*(*iter)));
 			VertexStreamType type(stream.Type());
 
-			std::vector<U8, alloc<U8> > data(stream.NumVertices() * stream.ElementSize() * stream.ElementNum());
-			stream.CopyTo(&data[0], stream.VertexNum());
+			const std::vector<U8, alloc<U8> >& data(stream.OGLBuffer());
 
 			switch (type)
 			{
@@ -635,10 +636,8 @@ namespace KlayGE
 
 		if (vb.UseIndices())
 		{
-			IndexStream& stream(*vb.GetIndexStream());
-			std::vector<U16, alloc<U16> > data(stream.IndexNum());
-			stream.CopyTo(&data[0], stream.IndexNum());
-
+			OGLIndexStream& stream(static_cast<OGLIndexStream&>(*vb.GetIndexStream()));
+			const std::vector<U16, alloc<U16> >& data(stream.OGLBuffer());
 			glDrawElements(mode, vb.NumIndices(), GL_UNSIGNED_SHORT, &data[0]);
 		}
 		else

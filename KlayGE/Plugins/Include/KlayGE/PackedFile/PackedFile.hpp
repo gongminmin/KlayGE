@@ -26,6 +26,7 @@ namespace KlayGE
  	class PackedFile : public VFile
 	{
 	public:
+		PackedFile();
 		PackedFile(const VFile& pktFile, const WString& fileName);
 		PackedFile(const PackedFile& rhs);
 

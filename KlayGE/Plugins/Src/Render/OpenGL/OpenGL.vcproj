@@ -101,6 +101,9 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
+				RelativePath=".\OGLIndexStream.cpp">
+			</File>
+			<File
 				RelativePath=".\OGLRenderEngine.cpp">
 			</File>
 			<File
@@ -112,11 +115,17 @@
 			<File
 				RelativePath=".\OGLTexture.cpp">
 			</File>
+			<File
+				RelativePath=".\OGLVertexStream.cpp">
+			</File>
 		</Filter>
 		<Filter
 			Name="Í·ÎÄ¼þ"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			<File
+				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLIndexStream.hpp">
+			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLRenderEngine.hpp">
 			</File>
@@ -131,6 +140,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLTexture.hpp">
+			</File>
+			<File
+				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLVertexStream.hpp">
 			</File>
 		</Filter>
 	</Files>

@@ -33,7 +33,7 @@ namespace KlayGE
 
 		DiskFile& operator=(const DiskFile& rhs);
 
-		void Open(const WString& fileName, OpenMode openMode);
+		bool Open(const WString& fileName, OpenMode openMode);
 		void Close();
 
 		VFilePtr Clone() const;

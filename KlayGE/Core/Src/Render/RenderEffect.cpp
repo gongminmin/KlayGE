@@ -16,6 +16,8 @@
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Engine.hpp>
 #include <KlaygE/RenderFactory.hpp>
+
+#include <KlayGE/PackedFile/PackedFile.hpp>
 #include <KlayGE/DiskFile/DiskFile.hpp>
 
 #include <KlayGE/RenderEffect.hpp>
@@ -98,21 +100,13 @@ namespace KlayGE
 		return obj;
 	}
 
-	RenderEffectPtr LoadRenderEffect(const WString& effectName)
+	RenderEffectPtr LoadRenderEffect(const WString& effectName, bool fromPack)
 	{
 		DiskFile file;
 
-		try
+		if (!file.Open(effectName, VFile::OM_Read))
 		{
-			file.Open(effectName, VFile::OM_Read);
-		}
-		catch (...)
-		{
-			try
-			{
-				file.Open(WString(_RENDERFXPATH_) + effectName, VFile::OM_Read);
-			}
-			catch (...)
+			if (!file.Open(WString(_RENDERFXPATH_) + effectName, VFile::OM_Read))
 			{
 				return NullRenderEffectInstance();
 			}

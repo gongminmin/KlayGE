@@ -55,7 +55,7 @@ namespace KlayGE
 
 	// 打开文件
 	/////////////////////////////////////////////////////////////////////////////////
-	void DiskFile::Open(const WString& fileName, OpenMode openMode)
+	bool DiskFile::Open(const WString& fileName, OpenMode openMode)
 	{
 		this->Close();
 
@@ -80,13 +80,14 @@ namespace KlayGE
 			break;
 		}
 
+		fileName_ = fileName;
+		openMode_ = openMode;
+
 		String fn;
 		Convert(fn, fileName);
 		file_ = SharedPtr<fstream>(new fstream(fn.c_str(), mode));
-		Verify(file_.Get() != NULL);
 
-		fileName_ = fileName;
-		openMode_ = openMode;
+		return file_->is_open();
 	}
 
 	// 关闭文件

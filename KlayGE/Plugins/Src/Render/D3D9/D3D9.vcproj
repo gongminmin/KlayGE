@@ -181,6 +181,16 @@
 				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9VideoMode.hpp">
 			</File>
 		</Filter>
+		<Filter
+			Name="特效脚本文件"
+			Filter="">
+			<File
+				RelativePath="..\..\..\..\RenderFX\2D.fx">
+			</File>
+			<File
+				RelativePath="..\..\..\..\RenderFX\Font.fx">
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

@@ -21,6 +21,10 @@
 
 namespace KlayGE
 {
+	PackedFile::PackedFile()
+	{
+	}
+
 	PackedFile::PackedFile(const VFile& pktFile, const WString& fileName)
 				: pktFile_(pktFile.Clone())
 	{
