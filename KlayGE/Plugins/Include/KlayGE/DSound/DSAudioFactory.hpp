@@ -23,10 +23,7 @@
 
 namespace KlayGE
 {
-	namespace KlayGE
-	{
-		AudioFactory& DSAudioFactoryInstance();
-	}
+	AudioFactory& DSAudioFactoryInstance();
 }
 
 #endif			// _DSAUDIOFACTORY_HPP

@@ -1,8 +1,11 @@
 // DSMusicBuffer.cpp
 // KlayGE DirectSound音乐缓冲区类 实现文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.0.4
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.0.4
+// 改用timeSetEvent实现 (2004.3.28)
 //
 // 2.0.0
 // 初次建立 (2003.10.4)
@@ -22,6 +25,8 @@
 
 #include <KlayGE/DSound/DSAudio.hpp>
 
+#pragma comment(lib, "winmm.lib")
+
 namespace KlayGE
 {
 	// 构造函数。建立一个可以用于流式播放的缓冲区
@@ -31,8 +36,8 @@ namespace KlayGE
 						writePos_(0)
 	{
 		WAVEFORMATEX wfx(WaveFormatEx(dataSource));
-		notifySize_		= wfx.nAvgBytesPerSec / PreSecond;
-		notifyCount_	= bufferSeconds * PreSecond;
+		fillSize_	= wfx.nAvgBytesPerSec / PreSecond;
+		fillCount_	= bufferSeconds * PreSecond;
 
 		bool mono(1 == wfx.nChannels);
 
@@ -43,13 +48,12 @@ namespace KlayGE
 		DSBUFFERDESC dsbd;
 		Engine::MemoryInstance().Zero(&dsbd, sizeof(dsbd));
 		dsbd.dwSize				= sizeof(dsbd);
-		dsbd.dwFlags			= DSBCAPS_CTRLPOSITIONNOTIFY;
 		if (mono)
 		{
 			dsbd.dwFlags |= DSBCAPS_CTRL3D | DSBCAPS_MUTE3DATMAXDISTANCE;
 			dsbd.guid3DAlgorithm	= GUID_NULL;
 		}
-		dsbd.dwBufferBytes		= notifySize_ * notifyCount_;
+		dsbd.dwBufferBytes		= fillSize_ * fillCount_;
 		dsbd.lpwfxFormat		= &wfx;
 
 		// DirectSound只能播放PCM数据。其他格式可能不能工作。
@@ -61,23 +65,6 @@ namespace KlayGE
 		{
 			buffer_.QueryInterface<IID_IDirectSound3DBuffer>(ds3DBuffer_);
 		}
-
-		notifyEvent_ = ::CreateEventW(NULL, FALSE, FALSE, NULL);
-
-		COMPtr<IDirectSoundNotify> dsNotify;
-		TIF(buffer_.QueryInterface<IID_IDirectSoundNotify>(dsNotify));
-
-		std::vector<DSBPOSITIONNOTIFY> posNotify(notifyCount_);
-		for (std::vector<DSBPOSITIONNOTIFY>::iterator iter = posNotify.begin(); iter != posNotify.end(); ++ iter)
-		{
-			iter->dwOffset     = (notifySize_ * std::distance(posNotify.begin(), iter)) + notifySize_ - 1;
-			iter->hEventNotify = notifyEvent_;
-		}
-
-		// Tell DirectSound when to notify us. The notification will come in the from 
-		// of signaled events that are handled in WinMain()
-		TIF(dsNotify->SetNotificationPositions(notifyCount_, &posNotify[0]));
-
 
 		this->Position(Vector3::Zero());
 		this->Velocity(Vector3::Zero());
@@ -93,50 +80,53 @@ namespace KlayGE
 	DSMusicBuffer::~DSMusicBuffer()
 	{
 		this->Stop();
-		::CloseHandle(notifyEvent_);
 	}
 
 	// 更新缓冲区
 	/////////////////////////////////////////////////////////////////////////////////
-	void DSMusicBuffer::LoopUpdateBuffer()
+	void DSMusicBuffer::TimerProc(::UINT timerID, ::UINT /*uMsg*/,
+										DWORD_PTR dwUser, DWORD_PTR /*dw1*/, DWORD_PTR /*dw2*/)
 	{
-		bool finished(false);
+		DSMusicBuffer* buffer(reinterpret_cast<DSMusicBuffer*>(dwUser));
 
-		for (; !finished;)
+		if (timerID != buffer->timerID_)
 		{
-			if (WAIT_OBJECT_0 == ::WaitForMultipleObjects(1, &notifyEvent_, FALSE, INFINITE))
-			{
-				// 锁定缓冲区
-				void* lockedBuffer;			// 指向缓冲区锁定的内存的指针
-				U32   lockedBufferSize;		// 锁定的内存大小
-				TIF(buffer_->Lock(notifySize_ * writePos_, notifySize_,
-					&lockedBuffer, &lockedBufferSize, NULL, NULL, 0));
-
-				std::vector<U8, alloc<U8> > data(notifySize_);
-				data.resize(dataSource_->Read(&data[0], notifySize_));
-
-				if (data.size() > 0)
-				{
-					Engine::MemoryInstance().Cpy(lockedBuffer, &data[0], data.size());
-
-					Engine::MemoryInstance().Set(static_cast<U8*>(lockedBuffer) + data.size(), 
-						0, lockedBufferSize - data.size());
-				}
-				else
-				{
-					Engine::MemoryInstance().Set(lockedBuffer, 0, lockedBufferSize);
-					finished = true;
-					this->Stop();
-				}
-
-				// 缓冲区解锁
-				buffer_->Unlock(lockedBuffer, lockedBufferSize, NULL, 0);
-
-				// 形成环形缓冲区
-				++ writePos_;
-				writePos_ %= notifyCount_;
-			}
+			return;
 		}
+
+		buffer->FillBuffer();
+	}
+
+	void DSMusicBuffer::FillBuffer()
+	{
+		// 锁定缓冲区
+		void* lockedBuffer;			// 指向缓冲区锁定的内存的指针
+		U32   lockedBufferSize;		// 锁定的内存大小
+		TIF(buffer_->Lock(fillSize_ * writePos_, fillSize_,
+			&lockedBuffer, &lockedBufferSize, NULL, NULL, 0));
+
+		std::vector<U8, alloc<U8> > data(fillSize_);
+		data.resize(dataSource_->Read(&data[0], fillSize_));
+
+		if (data.size() > 0)
+		{
+			Engine::MemoryInstance().Cpy(lockedBuffer, &data[0], data.size());
+
+			Engine::MemoryInstance().Set(static_cast<U8*>(lockedBuffer) + data.size(), 
+				0, lockedBufferSize - data.size());
+		}
+		else
+		{
+			Engine::MemoryInstance().Set(lockedBuffer, 0, lockedBufferSize);
+			this->Stop();
+		}
+
+		// 缓冲区解锁
+		buffer_->Unlock(lockedBuffer, lockedBufferSize, NULL, 0);
+
+		// 形成环形缓冲区
+		++ writePos_;
+		writePos_ %= fillCount_;
 	}
 
 	// 缓冲区复位以便于从头播放
@@ -150,11 +140,11 @@ namespace KlayGE
 		// 锁定缓冲区
 		void* lockedBuffer;			// 指向缓冲区锁定的内存的指针
 		U32   lockedBufferSize;		// 锁定的内存大小
-		TIF(buffer_->Lock(0, notifySize_ * notifyCount_,
+		TIF(buffer_->Lock(0, fillSize_ * fillCount_,
 			&lockedBuffer, &lockedBufferSize, NULL, NULL, 0));
 
-		std::vector<U8, alloc<U8> > data(notifySize_ * notifyCount_);
-		data.resize(dataSource_->Read(&data[0], notifySize_ * notifyCount_));
+		std::vector<U8, alloc<U8> > data(fillSize_ * fillCount_);
+		data.resize(dataSource_->Read(&data[0], fillSize_ * fillCount_));
 
 		if (data.size() > 0)
 		{
@@ -182,12 +172,17 @@ namespace KlayGE
 	void DSMusicBuffer::DoPlay(bool /*loop*/)
 	{
 		buffer_->Play(0, 0, DSBPLAY_LOOPING);
+
+		timerID_ = timeSetEvent(1000 / this->PreSecond, 0, TimerProc,
+								reinterpret_cast<DWORD_PTR>(this), TIME_PERIODIC);
 	}
 
 	// 停止播放音频流
 	////////////////////////////////////////////////////////////////////////////////
 	void DSMusicBuffer::DoStop()
 	{
+		timeKillEvent(timerID_);
+
 		buffer_->Stop();
 	}
 

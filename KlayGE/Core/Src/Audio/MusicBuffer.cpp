@@ -28,8 +28,7 @@ namespace KlayGE
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	MusicBuffer::MusicBuffer(const AudioDataSourcePtr& dataSource)
-					: AudioBuffer(dataSource),
-						playThread_(0)
+					: AudioBuffer(dataSource)
 	{
 	}
 
@@ -37,18 +36,6 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	MusicBuffer::~MusicBuffer()
 	{
-	}
-
-	// 处理时间事件
-	/////////////////////////////////////////////////////////////////////////////////
-	void* MusicBuffer::PlayProc(void* arg)
-	{
-		MusicBuffer* streaming(reinterpret_cast<MusicBuffer*>(arg));
-
-		// 更新缓冲区
-		streaming->LoopUpdateBuffer();
-
-		return NULL;
 	}
 
 	// 缓冲区复位以便于从头播放
@@ -69,8 +56,6 @@ namespace KlayGE
 			this->Stop();
 		}
 
-		pthread_create(&playThread_, NULL, PlayProc, this);
-
 		this->DoPlay(loop);
 	}
 
@@ -78,12 +63,6 @@ namespace KlayGE
 	////////////////////////////////////////////////////////////////////////////////
 	void MusicBuffer::Stop()
 	{
-		if (playThread_ != 0)
-		{
-			pthread_join(playThread_, NULL);
-			playThread_ = 0;
-		}
-
 		dataSource_->Reset();
 
 		this->DoStop();

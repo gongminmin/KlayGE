@@ -18,6 +18,8 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 
+#include <pthread.h>
+
 #include <vector>
 #include <windows.h>
 
@@ -106,6 +108,10 @@ namespace KlayGE
 		void DoReset();
 		void DoPlay(bool loop);
 		void DoStop();
+
+	private:
+		static void* PlayProc(void* arg);
+		pthread_t	playThread_;
 
 	private:
 		ALuint		source_;

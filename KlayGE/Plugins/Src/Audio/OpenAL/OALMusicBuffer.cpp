@@ -30,7 +30,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	OALMusicBuffer::OALMusicBuffer(const AudioDataSourcePtr& dataSource, U32 bufferSeconds, float volume)
 							: MusicBuffer(dataSource),
-								bufferQueue_(bufferSeconds * PreSecond)
+								bufferQueue_(bufferSeconds * PreSecond),
+								playThread_(0)
 	{
 		alGenBuffers(static_cast<ALsizei>(bufferQueue_.size()), &bufferQueue_[0]);
 
@@ -54,6 +55,18 @@ namespace KlayGE
 
 		alDeleteBuffers(static_cast<ALsizei>(bufferQueue_.size()), &bufferQueue_[0]);
 		alDeleteSources(1, &source_);
+	}
+	
+	// 处理时间事件
+	/////////////////////////////////////////////////////////////////////////////////
+	void* OALMusicBuffer::PlayProc(void* arg)
+	{
+		OALMusicBuffer* streaming(reinterpret_cast<OALMusicBuffer*>(arg));
+
+		// 更新缓冲区
+		streaming->LoopUpdateBuffer();
+
+		return NULL;
 	}
 
 	// 更新缓冲区
@@ -135,6 +148,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OALMusicBuffer::DoPlay(bool loop)
 	{
+		pthread_create(&playThread_, NULL, PlayProc, this);
+
 		loop_ = loop;
 
 		alSourcei(source_, AL_LOOPING, false);
@@ -145,6 +160,12 @@ namespace KlayGE
 	////////////////////////////////////////////////////////////////////////////////
 	void OALMusicBuffer::DoStop()
 	{
+		if (playThread_ != 0)
+		{
+			pthread_join(playThread_, NULL);
+			playThread_ = 0;
+		}
+
 		alSourceStopv(1, &source_);
 	}
 

@@ -62,7 +62,9 @@ __________________________________________________________________
 发展历程
 
 2.0.4
-增加了RenderTechnique
+修正了OALMusicBuffer无法loop的bug
+DSMusicBuffer改用timeSetEvent实现
+改进了VertexBuffer
 
 2.0.3 (2003.3.12)
 简化了VertexBuffer

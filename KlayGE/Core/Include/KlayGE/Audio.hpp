@@ -16,7 +16,6 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/MathTypes.hpp>
 
-#include <pthread.h>
 #include <map>
 
 #include <KlayGE/AudioDataSource.hpp>
@@ -101,16 +100,9 @@ namespace KlayGE
 		virtual ~MusicBuffer();
 
 	protected:
-		virtual void LoopUpdateBuffer() = 0;
-
 		virtual void DoReset() = 0;
 		virtual void DoPlay(bool loop) = 0;
 		virtual void DoStop() = 0;
-
-		static void* PlayProc(void* arg);
-
-	protected:
-		pthread_t	playThread_;
 
 		// 每秒读取的次数
 		static U32	PreSecond;

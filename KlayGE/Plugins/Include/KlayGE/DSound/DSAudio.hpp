@@ -105,13 +105,17 @@ namespace KlayGE
 
 	private:
 		DSBufferType	buffer_;
-		U32				notifySize_;
-		U32				notifyCount_;
+		U32				fillSize_;
+		U32				fillCount_;
 		U32				writePos_;
 
 		COMPtr<IDirectSound3DBuffer> ds3DBuffer_;
 
-		HANDLE			notifyEvent_;
+		static void WINAPI TimerProc(UINT uTimerID, UINT uMsg,
+			DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2);
+		UINT timerID_;
+
+		void FillBuffer();
 
 	private:
 		DSMusicBuffer(const DSMusicBuffer&);
