@@ -161,7 +161,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OALMusicBuffer::DoPlay(bool loop)
 	{
-		playThread_ = boost::shared_ptr<boost::thread>(new boost::thread(PlayProc(this)));
+		playThread_.reset(new boost::thread(PlayProc(this)));
 
 		loop_ = loop;
 

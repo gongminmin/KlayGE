@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="文件系统-PackedFile"
+	Name="打包系统-LZSS"
 	ProjectGUID="{8C58A2C1-E1CD-4840-A964-48F3485F2004}"
 	Keyword="Win32Proj">
 	<Platforms>

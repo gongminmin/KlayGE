@@ -139,7 +139,7 @@ namespace KlayGE
 		}
 
 		receiveLoop_ = true;
-		receiveThread_ = boost::shared_ptr<boost::thread>(new boost::thread(ReceiveThreadFunc(this)));
+		receiveThread_.reset(new boost::thread(ReceiveThreadFunc(this)));
 
 		return true;
 	}
