@@ -39,7 +39,7 @@ namespace KlayGE
 			{ return this->projMat_; }
 
 		void ViewParams(const Vector3& eyePt, const Vector3& lookatPt,
-			const Vector3& upVec = MakeVector(0.0f, 1.0f, 0.0f));
+			const Vector3& upVec = Vector3(0, 1, 0));
 		void ProjParams(float FOV, float aspect, float nearPlane, float farPlane);
 
 		Camera();

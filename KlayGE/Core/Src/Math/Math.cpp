@@ -139,7 +139,7 @@ namespace KlayGE
 			Vector3 cross;
 			Cross(cross, q.v(), v);		// q.v CROSS v
 
-			out = MakeVector(a * v.x() + b * q.x() + c * cross.x(),
+			out = Vector3(a * v.x() + b * q.x() + c * cross.x(),
 				a * v.y() + b * q.y() + c * cross.y(),
 				a * v.z() + b * q.z() + c * cross.z());
 			return out;
@@ -150,13 +150,13 @@ namespace KlayGE
 			const int viewport[4], float nearPlane, float farPlane)
 		{
 			Vector4 temp;
-			Transform<float, 3>(temp, objVec, world * view * proj);
-			temp /= temp.w();
+			Transform(temp, objVec, world);
+			Transform(temp, temp, view);
+			Transform(temp, temp, proj);
 
-			out.x() = (temp.x() + 1) * viewport[2] / 2 + viewport[0];
-			out.y() = (-temp.y() + 1) * viewport[3] / 2 + viewport[1];
-			out.z() = (temp.z() + 1) * (farPlane - nearPlane) / 2 + nearPlane;
-
+			out.x() = (temp.x() / temp.w() + 1) * viewport[2] / 2 + viewport[0];
+			out.y() = (-temp.y() / temp.w() + 1) * viewport[3] / 2 + viewport[1];
+			out.z() = (temp.z() / temp.w() + 1) * (farPlane - nearPlane) / 2 + nearPlane;
 			return out;
 		}
 
@@ -168,14 +168,12 @@ namespace KlayGE
 			temp.x() = 2 * (winVec.x() - viewport[0]) / viewport[2] - 1;
 			temp.y() = -(2 * (winVec.y() - viewport[1]) / viewport[3] - 1);
 			temp.z() = 2 * (winVec.z() - nearPlane) / (farPlane - nearPlane) - 1;
-			temp.w() = 1;
-
-			temp *= clipW;
+			temp.w() = clipW;
 
 			Matrix4 mat;
 			Inverse(mat, world * view * proj);
 			Transform(temp, temp, mat);
-			out = MakeVector(temp.x() / temp.w(), temp.y() / temp.w(), temp.z() / temp.w());
+			out = Vector3(temp.x() / temp.w(), temp.y() / temp.w(), temp.z() / temp.w());
 			return out;
 		}
 
@@ -192,7 +190,7 @@ namespace KlayGE
 			const float E = (v2.y() * v3.w()) - (v2.w() * v3.y());
 			const float F = (v2.z() * v3.w()) - (v2.w() * v3.z());
 
-			out = MakeVector((v1.y() * F) - (v1.z() * E) + (v1.w() * D),
+			out = Vector4((v1.y() * F) - (v1.z() * E) + (v1.w() * D),
 				-(v1.x() * F) + (v1.z() * C) - (v1.w() * B),
 				(v1.x() * E) - (v1.y() * C) + (v1.w() * A),
 				-(v1.x() * D) + (v1.y() * B) - (v1.z() * A));
@@ -268,7 +266,7 @@ namespace KlayGE
 		Matrix4& Rotation(Matrix4& out, float angle, float x, float y, float z)
 		{
 			Quaternion quat;
-			RotationAxis(quat, MakeVector(x, y, z), angle);
+			RotationAxis(quat, Vector3(x, y, z), angle);
 			return ToMatrix(out, quat);
 		}
 
@@ -558,12 +556,12 @@ namespace KlayGE
 
 		Matrix4& LookAtLH(Matrix4& out, const Vector3& vEye, const Vector3& vAt)
 		{
-			return LookAtLH(out, vEye, vAt, MakeVector(0.0f, 1.0f, 0.0f));
+			return LookAtLH(out, vEye, vAt, Vector3(0, 1, 0));
 		}
 
 		Matrix4& LookAtRH(Matrix4& out, const Vector3& vEye, const Vector3& vAt)
 		{
-			return LookAtRH(out, vEye, vAt, MakeVector(0.0f, 1.0f, 0.0f));
+			return LookAtRH(out, vEye, vAt, Vector3(0, 1, 0));
 		}
 
 		Matrix4& OrthoRH(Matrix4& out, float w, float h, float fNear, float fFar)
@@ -916,7 +914,7 @@ namespace KlayGE
 		bool IntersectLine(Vector3& out, const Plane& P, const Vector3& vStart,
 			const Vector3& vEnd)
 		{
-			Vector3 vP(MakeVector(0.0f, 0.0f, 0.0f));
+			Vector3 vP(0, 0, 0);
 
 			if (!Eq(P.a(), 0.0f))
 			{

@@ -35,7 +35,7 @@ namespace KlayGE
 			{
 				for (float x = startX; x < startX + width; x += spanX)
 				{
-					Vector3 vec(MakeVector(x, y, Height(x, y)));
+					Vector3 vec(x, y, Height(x, y));
 
 					std::vector<Vector3>::iterator iter(std::find(vertices.begin(), vertices.end(), vec));
 					if (iter == vertices.end())

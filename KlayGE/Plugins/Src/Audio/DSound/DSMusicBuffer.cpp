@@ -218,7 +218,7 @@ namespace KlayGE
 		{
 			D3DVECTOR v;
 			ds3DBuffer_->GetPosition(&v);
-			ret = MakeVector(v.x, v.y, v.z);
+			ret = Vector3(v.x, v.y, v.z);
 		}
 
 		return ret;
@@ -244,7 +244,7 @@ namespace KlayGE
 		{
 			D3DVECTOR v;
 			ds3DBuffer_->GetVelocity(&v);
-			ret = MakeVector(v.x, v.y, v.z);
+			ret = Vector3(v.x, v.y, v.z);
 		}
 
 		return ret;
@@ -270,7 +270,7 @@ namespace KlayGE
 		{
 			D3DVECTOR v;
 			ds3DBuffer_->GetConeOrientation(&v);
-			ret = MakeVector(v.x, v.y, v.z);
+			ret = Vector3(v.x, v.y, v.z);
 		}
 
 		return ret;

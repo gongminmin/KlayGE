@@ -22,7 +22,7 @@ namespace KlayGE
 	Camera::Camera()
 	{
 		// 设置观察矩阵的参数
-		this->ViewParams(MakeVector(0.0f, 0.0f, 0.0f), MakeVector(0.0f, 0.0f, 1.0f), MakeVector(0.0f, 1.0f, 0.0f));
+		this->ViewParams(Vector3(0, 0, 0), Vector3(0, 0, 1), Vector3(0, 1, 0));
 
 		// 设置投射矩阵的参数
 		this->ProjParams(PI / 4, 1, 1, 1000);

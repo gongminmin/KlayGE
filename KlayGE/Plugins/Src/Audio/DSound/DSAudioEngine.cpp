@@ -116,9 +116,9 @@ namespace KlayGE
 		TIF(primaryBuffer.QueryInterface<IID_IDirectSound3DListener>(ds3dListener_));
 
 
-		this->SetListenerPos(MakeVector(0.0f, 0.0f, 0.0f));
-		this->SetListenerVel(MakeVector(0.0f, 0.0f, 0.0f));
-		this->SetListenerOri(MakeVector(0.0f, 0.0f, 1.0f), MakeVector(0.0f, 1.0f, 0.0f));
+		this->SetListenerPos(Vector3(0, 0, 0));
+		this->SetListenerVel(Vector3(0, 0, 0));
+		this->SetListenerOri(Vector3(0, 0, 1), Vector3(0, 1, 0));
 	}
 
 	// 析构函数
@@ -142,7 +142,7 @@ namespace KlayGE
 	{
 		D3DVECTOR vec;
 		this->ds3dListener_->GetPosition(&vec);
-		return MakeVector(vec.x, vec.y, vec.z);
+		return Vector3(vec.x, vec.y, vec.z);
 	}
 
 	// 设置3D听者位置
@@ -158,7 +158,7 @@ namespace KlayGE
 	{
 		D3DVECTOR vec;
 		this->ds3dListener_->GetVelocity(&vec);
-		return MakeVector(vec.x, vec.y, vec.z);
+		return Vector3(vec.x, vec.y, vec.z);
 	}
 
 	// 设置3D听者速度
@@ -175,8 +175,8 @@ namespace KlayGE
 		D3DVECTOR d3dFace, d3dUp;
 		this->ds3dListener_->GetOrientation(&d3dFace, &d3dUp);
 
-		face = MakeVector(d3dFace.x, d3dFace.y, d3dFace.z);
-		up = MakeVector(d3dUp.x, d3dUp.y, d3dUp.z);
+		face = Vector3(d3dFace.x, d3dFace.y, d3dFace.z);
+		up = Vector3(d3dUp.x, d3dUp.y, d3dUp.z);
 	}
 
 	// 获取3D听者方向

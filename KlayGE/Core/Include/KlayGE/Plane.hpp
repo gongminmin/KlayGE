@@ -118,7 +118,7 @@ namespace KlayGE
 
 		// 取法向向量
 		const Vector_T<T, 3> Normal() const
-			{ return MakeVector<T>(this->a(), this->b(), this->c()); }
+			{ return Vector_T<T, 3>(this->a(), this->b(), this->c()); }
 		template <typename U>
 		void Normal(const Vector_T<U, 3>& rhs)
 		{

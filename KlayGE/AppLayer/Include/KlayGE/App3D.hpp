@@ -44,7 +44,7 @@ namespace KlayGE
 		void Run();
 
 	protected:
-		void LookAt(const Vector3& eye, const Vector3& lookAt, const Vector3& up = MakeVector(0.0f, 1.0f, 0.0f));
+		void LookAt(const Vector3& eye, const Vector3& lookAt, const Vector3& up = Vector3(0, 1, 0));
 		void Proj(float nearPlane, float farPlane);
 
 	protected:

@@ -55,14 +55,14 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	Vector3 VecToALVec(const Vector3& v)
 	{
-		return MakeVector(v.x(), v.y(), -v.z());
+		return Vector3(v.x(), v.y(), -v.z());
 	}
 
 	// 从OpenAL的右手坐标系转化为左手坐标系的Vector3
 	/////////////////////////////////////////////////////////////////////////////////
 	Vector3 ALVecToVec(const Vector3& v)
 	{
-		return MakeVector(v.x(), v.y(), -v.z());
+		return Vector3(v.x(), v.y(), -v.z());
 	}
 
 	// 构造函数
@@ -74,9 +74,9 @@ namespace KlayGE
 
 		alcMakeContextCurrent(Context);
 
-		this->SetListenerPos(MakeVector(0.0f, 0.0f, 0.0f));
-		this->SetListenerVel(MakeVector(0.0f, 0.0f, 0.0f));
-		this->SetListenerOri(MakeVector(0.0f, 0.0f, 1.0f), MakeVector(0.0f, 1.0f, 0.0f));
+		this->SetListenerPos(Vector3(0, 0, 0));
+		this->SetListenerVel(Vector3(0, 0, 0));
+		this->SetListenerOri(Vector3(0, 0, 1), Vector3(0, 1, 0));
 
 		alDistanceModel(AL_INVERSE_DISTANCE);
 

@@ -96,17 +96,17 @@ namespace KlayGE
 		const Vector3 LeftBottomNear() const
 			{ return this->Min(); }
 		const Vector3 LeftTopNear() const
-			{ return MakeVector(this->Min().x(), this->Max().y(), this->Min().z()); }
+			{ return Vector3(this->Min().x(), this->Max().y(), this->Min().z()); }
 		const Vector3 RightBottomNear() const
-			{ return MakeVector(this->Max().x(), this->Min().y(), this->Min().z()); }
+			{ return Vector3(this->Max().x(), this->Min().y(), this->Min().z()); }
 		const Vector3 RightTopNear() const
-			{ return MakeVector(this->Max().x(), this->Max().y(), this->Min().z()); }
+			{ return Vector3(this->Max().x(), this->Max().y(), this->Min().z()); }
 		const Vector3 LeftBottomFar() const
-			{ return MakeVector(this->Min().x(), this->Min().y(), this->Max().z()); }
+			{ return Vector3(this->Min().x(), this->Min().y(), this->Max().z()); }
 		const Vector3 LeftTopFar() const
-			{ return MakeVector(this->Min().x(), this->Max().y(), this->Max().z()); }
+			{ return Vector3(this->Min().x(), this->Max().y(), this->Max().z()); }
 		const Vector3 RightBottomFar() const
-			{ return MakeVector(this->Max().x(), this->Min().y(), this->Max().z()); }
+			{ return Vector3(this->Max().x(), this->Min().y(), this->Max().z()); }
 		const Vector3 RightTopFar() const
 			{ return this->Max(); }
 

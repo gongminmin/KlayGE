@@ -109,9 +109,9 @@ namespace KlayGE
 		// »º³åÇø½âËø
 		sources_[0]->Unlock(lockedBuffer, lockedBufferSize, NULL, 0);
 
-		this->Position(MakeVector(0.0f, 0.0f, 0.0f));
-		this->Velocity(MakeVector(0.0f, 0.0f, 0.0f));
-		this->Direction(MakeVector(0.0f, 0.0f, 0.0f));
+		this->Position(Vector3(0, 0, 0));
+		this->Velocity(Vector3(0, 0, 0));
+		this->Direction(Vector3(0, 0, 0));
 
 		this->Reset();
 	}

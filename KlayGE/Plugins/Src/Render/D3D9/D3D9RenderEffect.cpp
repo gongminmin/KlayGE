@@ -98,7 +98,7 @@ namespace KlayGE
 		D3DXVECTOR4 vec;
 		TIF(effect_->GetVector(effect_->GetParameterByName(NULL, name.c_str()), &vec));
 
-		return MakeVector(vec.x, vec.y, vec.z, vec.w);
+		return Vector4(vec.x, vec.y, vec.z, vec.w);
 	}
 
 	void D3D9RenderEffect::SetMatrix(const std::string& name, const Matrix4& value)

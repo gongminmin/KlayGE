@@ -79,21 +79,11 @@ namespace KlayGE
 
 		static Matrix4_T Identity()
 		{
-			Matrix4_T out;
-			for (size_t y = 0; y < row_num; ++ y)
-			{
-				for (size_t x = 0; x < col_num; ++ x)
-				{
-					if (x == y)
-					{
-						out.m_[y][x] = 1;
-					}
-					else
-					{
-						out.m_[y][x] = 0;
-					}
-				}
-			}
+			static Matrix4_T out(
+				1, 0, 0, 0,
+				0, 1, 0, 0,
+				0, 0, 1, 0,
+				0, 0, 0, 1);
 			return out;
 		}
 
@@ -118,6 +108,22 @@ namespace KlayGE
 			{ return m_[index]; }
 		const Vector_T<T, col_num>& Row(size_t index) const
 			{ return m_[index]; }
+		void Col(size_t index, const Vector_T<T, row_num>& rhs)
+		{
+			for (size_t i = 0; i < row_num; ++ i)
+			{
+				m_[i][index] = rhs[i];
+			}
+		}
+		const Vector_T<T, row_num> Col(size_t index) const
+		{
+			Vector_T<T, row_num> ret
+			for (size_t i = 0; i < row_num; ++ i)
+			{
+				ret[i] = m_[i][index];
+			}
+			return ret;
+		}
 
 		// ¸³Öµ²Ù×÷·û
 		template <typename U>
@@ -175,6 +181,12 @@ namespace KlayGE
 			return temp;
 		}
 
+		friend bool
+		operator==(const Matrix4_T& lhs, const Matrix4_T& rhs)
+		{
+			return lhs.m_ == rhs.m_;
+		}
+
 	private:
 		Vector_T<Vector_T<T, col_num>, row_num> m_;
 	};
@@ -186,12 +198,6 @@ namespace KlayGE
 		return Matrix4_T<T>(lhs) *= rhs;
 	}
 
-	template <typename T>
-	inline bool
-	operator==(const Matrix4_T<T>& lhs, const Matrix4_T<T>& rhs)
-	{
-		return std::equal(rhs.begin(), rhs.end(), lhs.begin());
-	}
 	template <typename T>
 	inline bool
 	operator!=(const Matrix4_T<T>& lhs, const Matrix4_T<T>& rhs)

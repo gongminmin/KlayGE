@@ -111,7 +111,7 @@ void Cartoon::InitObjects()
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	this->LookAt(MakeVector(0.0f, 0.0f, -6.0f), MakeVector(0.0f, 0.0f, 0.0f));
+	this->LookAt(Vector3(0, 0, -6), Vector3(0, 0, 0));
 	this->Proj(0.1f, 20.0f);
 
 	renderTorus->vs_->GetNamedParameter("proj")->SetMatrix(renderEngine.ProjectionMatrix());

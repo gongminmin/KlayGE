@@ -63,12 +63,12 @@ namespace KlayGE
 		Quaternion_T(const Quaternion_T<U>& rhs)
 			: quat_(reinterpret_cast<const Quaternion_T<T>(rhs).quat_)
 			{ }
-		Quaternion_T(const T& _x, const T& _y, const T& _z, const T& _w)
+		Quaternion_T(const T& x, const T& y, const T& z, const T& w)
 		{
-			this->x() = _x;
-			this->y() = _y;
-			this->z() = _z;
-			this->w() = _w;
+			this->x() = x;
+			this->y() = y;
+			this->z() = z;
+			this->w() = w;
 		}
 
 		static const Quaternion_T& Identity()
@@ -166,7 +166,7 @@ namespace KlayGE
 
 		// 取方向向量
 		const Vector_T<T, 3> v() const
-			{ return MakeVector(this->x(), this->y(), this->z()); }
+			{ return Vector_T<T, 3>(this->x(), this->y(), this->z()); }
 		void v(const Vector_T<T, 3>& rhs)
 		{
 			this->x() = rhs.x();

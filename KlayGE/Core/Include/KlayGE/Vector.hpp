@@ -13,9 +13,6 @@
 #ifndef _VECTOR_HPP
 #define _VECTOR_HPP
 
-#include <algorithm>
-#include <functional>
-
 #include <boost/static_assert.hpp>
 #include <boost/array.hpp>
 #include <boost/operators.hpp>
@@ -30,6 +27,81 @@ namespace KlayGE
 	{
 		template <typename U, int M>
 		friend class Vector_T;
+
+
+		template <int N>
+		struct Helper
+		{
+			template <typename U>
+			static void DoCopy(T out[N], const U rhs[N])
+			{
+				out[0] = rhs[0];
+				Helper<N - 1>::DoCopy<U>(out + 1, rhs + 1);
+			}
+
+			static void DoAdd(T out[N], const T lhs[N], const T rhs[N])
+			{
+				out[0] = lhs[0] + rhs[0];
+				Helper<N - 1>::DoAdd(out + 1, lhs + 1, rhs + 1);
+			}
+
+			static void DoSub(T out[N], const T lhs[N], const T rhs[N])
+			{
+				out[0] = lhs[0] - rhs[0];
+				Helper<N - 1>::DoSub(out + 1, lhs + 1, rhs + 1);
+			}
+
+			static void DoMul(T out[N], const T lhs[N], const T& rhs)
+			{
+				out[0] = lhs[0] * rhs;
+				Helper<N - 1>::DoMul(out + 1, lhs + 1, rhs);
+			}
+
+			static void DoNegate(T out[N], const T rhs[N])
+			{
+				out[0] = -rhs[0];
+				Helper<N - 1>::DoNegate(out + 1, rhs + 1);
+			}
+
+			static bool DoEqual(const T lhs[N], const T rhs[N])
+			{
+				return Helper<1>::DoEqual(lhs, rhs) && Helper<N - 1>::DoEqual(lhs + 1, rhs + 1);
+			}
+		};
+		template <>
+		struct Helper<1>
+		{
+			template <typename U>
+			static void DoCopy(T out[1], const U rhs[1])
+			{
+				out[0] = rhs[0];
+			}
+
+			static void DoAdd(T out[1], const T lhs[1], const T rhs[1])
+			{
+				out[0] = lhs[0] + rhs[0];
+			}
+
+			static void DoSub(T out[1], const T lhs[1], const T rhs[1])
+			{
+				out[0] = lhs[0] - rhs[0];
+			}
+
+			static void DoMul(T out[1], const T lhs[1], const T& rhs)
+			{
+				out[0] = lhs[0] * rhs;
+			}
+
+			static void DoNegate(T out[1], const T rhs[1])
+			{
+				out[0] = -rhs[0];
+			}
+
+			static bool DoEqual(const T lhs[1], const T rhs[1])
+			{
+				return lhs[0] == rhs[0];
+			}
+		};
 
 	public:
 		typedef T					value_type;
@@ -49,14 +121,31 @@ namespace KlayGE
 		Vector_T()
 			{ }
 		explicit Vector_T(const T* rhs)
-			{ std::copy(rhs, rhs + N, this->begin()); }
+			{ Helper<N>::DoCopy(&vec_[0], rhs); }
 		Vector_T(const Vector_T& rhs)
-			: vec_(rhs.vec_)
-			{ }
+			{ Helper<N>::DoCopy(&vec_[0], &rhs[0]); }
 		template <typename U>
 		Vector_T(const Vector_T<U, N>& rhs)
-			: vec_(rhs.vec_)
-			{ }
+			{ Helper<N>::DoCopy<U>(&vec_[0], &rhs[0]); }
+
+		Vector_T(const T& x, const T& y)
+		{
+			this->x() = x;
+			this->y() = y;
+		}
+		Vector_T(const T& x, const T& y, const T& z)
+		{
+			this->x() = x;
+			this->y() = y;
+			this->z() = z;
+		}
+		Vector_T(const T& x, const T& y, const T& z, const T& w)
+		{
+			this->x() = x;
+			this->y() = y;
+			this->z() = z;
+			this->w() = w;
+		}
 
 		static size_t size()
 			{ return elem_num; }
@@ -130,19 +219,19 @@ namespace KlayGE
 		template <typename U>
 		Vector_T& operator+=(const Vector_T<U, N>& rhs)
 		{
-			std::transform(this->begin(), this->end(), rhs.begin(), this->begin(), std::plus<T>());
+			Helper<N>::DoAdd(&vec_[0], &vec_[0], &rhs.vec_[0]);
 			return *this;
 		}
 		template <typename U>
 		Vector_T& operator-=(const Vector_T<U, N>& rhs)
 		{
-			std::transform(this->begin(), this->end(), rhs.begin(), this->begin(), std::minus<T>());
+			Helper<N>::DoSub(&vec_[0], &vec_[0], &rhs.vec_[0]);
 			return *this;
 		}
 		template <typename U>
 		Vector_T& operator*=(const U& rhs)
 		{
-			std::transform(this->begin(), this->end(), this->begin(), std::bind2nd(std::multiplies<T>(), rhs));
+			Helper<N>::DoMul(&vec_[0], &vec_[0], rhs);
 			return *this;
 		}
 		template <typename U>
@@ -175,20 +264,20 @@ namespace KlayGE
 		const Vector_T operator-() const
 		{
 			Vector_T temp(*this);
-			std::transform(temp.begin(), temp.end(), temp.begin(), std::negate<T>());
+			Helper<N>::DoNegate(&temp.vec_[0], &vec_[0]);
 			return temp;
+		}
+
+		friend bool
+		operator==(const Vector_T& lhs, const Vector_T& rhs)
+		{
+			return Helper<N>::DoEqual(&lhs[0], &rhs[0]);
 		}
 
 	private:
 		boost::array<T, N> vec_;
 	};
 
-	template <typename T, int N>
-	inline bool
-	operator==(const Vector_T<T, N>& lhs, const Vector_T<T, N>& rhs)
-	{
-		return std::equal(lhs.begin(), lhs.end(), rhs.begin());
-	}
 	template <typename T, int N>
 	inline bool
 	operator!=(const Vector_T<T, N>& lhs, const Vector_T<T, N>& rhs)
@@ -199,27 +288,6 @@ namespace KlayGE
 	typedef Vector_T<float, 2> Vector2;
 	typedef Vector_T<float, 3> Vector3;
 	typedef Vector_T<float, 4> Vector4;
-
-	template <typename T>
-	Vector_T<T, 2> MakeVector(const T& x, const T& y)
-	{
-		T data[2] = { x, y };
-		return Vector_T<T, 2>(data);
-	}
-
-	template <typename T>
-	Vector_T<T, 3> MakeVector(const T& x, const T& y, const T& z)
-	{
-		T data[3] = { x, y, z };
-		return Vector_T<T, 3>(data);
-	}
-
-	template <typename T>
-	Vector_T<T, 4> MakeVector(const T& x, const T& y, const T& z, const T& w)
-	{
-		T data[4] = { x, y, z, w };
-		return Vector_T<T, 4>(data);
-	}
 }
 
 #endif			// _VECTOR_HPP

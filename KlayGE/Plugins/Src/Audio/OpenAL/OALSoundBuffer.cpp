@@ -57,9 +57,9 @@ namespace KlayGE
 			alSourcei(*iter, AL_BUFFER, buffer_);
 		}
 
-		this->Position(MakeVector(0.0f, 0.0f, 0.1f));
-		this->Velocity(MakeVector(0.0f, 0.0f, 0.0f));
-		this->Direction(MakeVector(0.0f, 0.0f, 0.0f));
+		this->Position(Vector3(0, 0, 0.1f));
+		this->Velocity(Vector3(0, 0, 0));
+		this->Direction(Vector3(0, 0, 0));
 
 		this->Reset();
 	}

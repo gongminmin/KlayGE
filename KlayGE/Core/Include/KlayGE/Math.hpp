@@ -308,11 +308,40 @@ namespace KlayGE
 		}
 
 		template <typename T, int N>
+		struct MaxMinimizeHelper
+		{
+			static void DoMax(T out[N], const T lhs[N], const T rhs[N])
+			{
+				out[0] = std::max(lhs[0], rhs[0]);
+				MaxMinimizeHelper<T, N - 1>::DoMax(out + 1, lhs + 1, rhs + 1);
+			}
+
+			static void DoMin(T out[N], const T lhs[N], const T rhs[N])
+			{
+				out[0] = std::min(lhs[0], rhs[0]);
+				MaxMinimizeHelper<T, N - 1>::DoMin(out + 1, lhs + 1, rhs + 1);
+			}
+		};
+		template <typename T>
+		struct MaxMinimizeHelper<T, 1>
+		{
+			static void DoMax(T out[1], const T lhs[1], const T rhs[1])
+			{
+				out[0] = std::max(lhs[0], rhs[0]);
+			}
+
+			static void DoMin(T out[1], const T lhs[1], const T rhs[1])
+			{
+				out[0] = std::min(lhs[0], rhs[0]);
+			}
+		};
+
+		template <typename T, int N>
 		inline Vector_T<T, N>&
 		Maximize(Vector_T<T, N>& out,
 			const Vector_T<T, N>& lhs, const Vector_T<T, N>& rhs)
 		{
-			std::transform(lhs.begin(), lhs.end(), rhs.begin(), out.begin(), std::max<T>);
+			MaxMinimizeHelper<T, N>::DoMax(&out[0], &lhs[0], &rhs[0]);
 			return out;
 		}
 
@@ -321,7 +350,7 @@ namespace KlayGE
 		Minimize(Vector_T<T, N>& out,
 			const Vector_T<T, N>& lhs, const Vector_T<T, N>& rhs)
 		{
-			std::transform(lhs.begin(), lhs.end(), rhs.begin(), out.begin(), std::min<T>);
+			MaxMinimizeHelper<T, N>::DoMin(&out[0], &lhs[0], &rhs[0]);
 			return out;
 		}
 
@@ -335,7 +364,7 @@ namespace KlayGE
 		{
 			static void Do(Vector_T<T, 4>& out, const Vector_T<T, 4>& v, const Matrix4& mat)
 			{
-				out = MakeVector(v.x() * mat(0, 0) + v.y() * mat(1, 0) + v.z() * mat(2, 0) + v.w() * mat(3, 0),
+				out = Vector_T<T, 4>(v.x() * mat(0, 0) + v.y() * mat(1, 0) + v.z() * mat(2, 0) + v.w() * mat(3, 0),
 					v.x() * mat(0, 1) + v.y() * mat(1, 1) + v.z() * mat(2, 1) + v.w() * mat(3, 1),
 					v.x() * mat(0, 2) + v.y() * mat(1, 2) + v.z() * mat(2, 2) + v.w() * mat(3, 2),
 					v.x() * mat(0, 3) + v.y() * mat(1, 3) + v.z() * mat(2, 3) + v.w() * mat(3, 3));
@@ -346,8 +375,10 @@ namespace KlayGE
 		{
 			static void Do(Vector_T<T, 4>& out, const Vector_T<T, 3>& v, const Matrix4& mat)
 			{
-				Vector_T<T, 4> temp(MakeVector(v.x(), v.y(), v.z(), T(1)));
-				TransformHelper<T, 4>::Do(out, temp, mat);
+				out = Vector_T<T, 4>(v.x() * mat(0, 0) + v.y() * mat(1, 0) + v.z() * mat(2, 0) + mat(3, 0),
+					v.x() * mat(0, 1) + v.y() * mat(1, 1) + v.z() * mat(2, 1) + mat(3, 1),
+					v.x() * mat(0, 2) + v.y() * mat(1, 2) + v.z() * mat(2, 2) + mat(3, 2),
+					v.x() * mat(0, 3) + v.y() * mat(1, 3) + v.z() * mat(2, 3) + mat(3, 3));
 			}
 		};
 		template <typename T>
@@ -355,8 +386,10 @@ namespace KlayGE
 		{
 			static void Do(Vector_T<T, 4>& out, const Vector_T<T, 2>& v, const Matrix4& mat)
 			{
-				Vector_T<T, 3> temp(MakeVector(v.x(), v.y(), T(0)));
-				TransformHelper<T, 3>::Do(out, temp, mat);
+				out = Vector_T<T, 4>(v.x() * mat(0, 0) + v.y() * mat(1, 0) + mat(3, 0),
+					v.x() * mat(0, 1) + v.y() * mat(1, 1) + mat(3, 1),
+					v.x() * mat(0, 2) + v.y() * mat(1, 2) + mat(3, 2),
+					v.x() * mat(0, 3) + v.y() * mat(1, 3) + mat(3, 3));
 			}
 		};
 
@@ -399,7 +432,7 @@ namespace KlayGE
 		{
 			static void Do(Vector_T<T, 3>& out, const Vector_T<T, 3>& v, const Matrix4& mat)
 			{
-				Vector_T<T, 4> temp(MakeVector(v.x(), v.y(), v.z(), T(0)));
+				Vector_T<T, 4> temp(v.x(), v.y(), v.z(), T(0));
 				TransformHelper<T, 4>::Do(temp, temp, mat);
 				out = Vector_T<T, 3>(&temp[0]);
 			}
@@ -409,7 +442,7 @@ namespace KlayGE
 		{
 			static void Do(Vector_T<T, 2>& out, const Vector_T<T, 2>& v, const Matrix4& mat)
 			{
-				Vector_T<T, 3> temp(MakeVector(v.x(), v.y(), T(0)));
+				Vector_T<T, 3> temp(v.x(), v.y(), T(0));
 				TransformNormalHelper<T, 3>::Do(temp, temp, mat);
 				out = Vector_T<T, 2>(&temp[0]);
 			}
@@ -464,7 +497,7 @@ namespace KlayGE
 		inline Vector_T<T, 3>&
 		Cross(Vector_T<T, 3>& out, const Vector_T<T, 3>& lhs, const Vector_T<T, 3>& rhs)
 		{
-			out = MakeVector(lhs.y() * rhs.z() - lhs.z() * rhs.y(),
+			out = Vector_T<T, 3>(lhs.y() * rhs.z() - lhs.z() * rhs.y(),
 				lhs.z() * rhs.x() - lhs.x() * rhs.z(),
 				lhs.x() * rhs.y() - lhs.y() * rhs.x());
 			return out;

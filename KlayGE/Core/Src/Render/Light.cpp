@@ -12,7 +12,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	Light::Light()
 		: lightType(LT_Point),
-			position(MakeVector(0.0f, 0.0f, 0.0f)), direction(MakeVector(0.0f, 0.0f, 1.0f)),
+			position(0, 0, 0), direction(0, 0, 1),
 			diffuse(1, 1, 1, 1), specular(0, 0, 0, 0), ambient(0, 0, 0, 0),
 			range(1000),
 			attenuationConst(1), attenuationLinear(0), attenuationQuad(0),

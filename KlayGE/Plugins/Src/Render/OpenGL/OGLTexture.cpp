@@ -37,27 +37,27 @@ namespace
 
 		case PF_R5G6B5:
 			intenalFormat = GL_RGB5;
-			glformat = GL_BGR_EXT;
+			glformat = GL_BGR;
 			break;
 
 		case PF_A4R4G4B4:
 			intenalFormat = GL_RGBA4;
-			glformat = GL_BGRA_EXT;
+			glformat = GL_BGRA;
 			break;
 
 		case PF_X8R8G8B8:
 			intenalFormat = GL_RGB8;
-			glformat = GL_BGR_EXT;
+			glformat = GL_BGR;
 			break;
 
 		case PF_A8R8G8B8:
 			intenalFormat = GL_RGBA8;
-			glformat = GL_BGRA_EXT;
+			glformat = GL_BGRA;
 			break;
 
 		case PF_A2R10G10B10:
 			intenalFormat = GL_RGB10_A2;
-			glformat = GL_BGRA_EXT;
+			glformat = GL_BGRA;
 			break;
 		}
 	}

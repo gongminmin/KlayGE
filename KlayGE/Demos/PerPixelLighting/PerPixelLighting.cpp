@@ -196,7 +196,7 @@ void PerPixelLighting::InitObjects()
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	this->LookAt(MakeVector(0.0f, 0.0f, -3.0f), MakeVector(0.0f, 0.0f, 0.0f));
+	this->LookAt(Vector3(0, 0, -3), Vector3(0, 0, 0));
 	this->Proj(0.1f, 20.0f);
 }
 
@@ -206,18 +206,18 @@ void PerPixelLighting::Update()
 	SceneManager& sceneMgr(Engine::SceneManagerInstance());
 
 	static float degree(0);
-	Vector3 lightPos(MakeVector(0.0f, 1.0f, 1.0f));
+	Vector3 lightPos(0, 1, 1);
 	Matrix4 matRot;
 	MathLib::RotationZ(matRot, degree);
 	MathLib::TransformNormal(lightPos, lightPos, matRot);
 	MathLib::Normalize(lightPos, lightPos);
 	renderPolygon->effect_->SetVector("lightPos",
-		MakeVector(lightPos.x(), lightPos.y(), lightPos.z(), 1.0f));
+		Vector4(lightPos.x(), lightPos.y(), lightPos.z(), 1));
 
-	Vector3 halfway(lightPos + MakeVector(0.0f, 0.0f, 1.0f));
+	Vector3 halfway(lightPos + Vector3(0, 0, 1));
 	MathLib::Normalize(halfway, halfway);
 	renderPolygon->effect_->SetVector("halfway",
-		MakeVector(halfway.x(), halfway.y(), halfway.z(), 1.0f));
+		Vector4(halfway.x(), halfway.y(), halfway.z(), 1));
 
 	degree += 0.01f;
 

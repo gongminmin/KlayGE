@@ -39,9 +39,9 @@ namespace KlayGE
 		alGenSources(1, &source_);
 		alSourcef(source_, AL_PITCH, 1);
 
-		this->Position(MakeVector(0.0f, 0.0f, 0.1f));
-		this->Velocity(MakeVector(0.0f, 0.0f, 0.0f));
-		this->Direction(MakeVector(0.0f, 0.0f, 0.0f));
+		this->Position(Vector3(0, 0, 0.1f));
+		this->Velocity(Vector3(0, 0, 0));
+		this->Direction(Vector3(0, 0, 0));
 
 		this->Volume(volume);
 
@@ -194,7 +194,7 @@ namespace KlayGE
 	{
 		float pos[3];
 		alGetSourcefv(source_, AL_POSITION, pos);
-		return ALVecToVec(MakeVector(pos[0], pos[1], pos[2]));
+		return ALVecToVec(Vector3(pos[0], pos[1], pos[2]));
 	}
 
 	// 设置声源位置
@@ -211,7 +211,7 @@ namespace KlayGE
 	{
 		float vel[3];
 		alGetSourcefv(source_, AL_VELOCITY, vel);
-		return ALVecToVec(MakeVector(vel[0], vel[1], vel[2]));
+		return ALVecToVec(Vector3(vel[0], vel[1], vel[2]));
 	}
 
 	// 设置声源速度
@@ -228,7 +228,7 @@ namespace KlayGE
 	{
 		float dir[3];
 		alGetSourcefv(source_, AL_DIRECTION, dir);
-		return ALVecToVec(MakeVector(dir[0], dir[1], dir[2]));
+		return ALVecToVec(Vector3(dir[0], dir[1], dir[2]));
 	}
 
 	// 设置声源方向
