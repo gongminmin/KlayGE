@@ -1,8 +1,8 @@
 // DSSoundBuffer.cpp
 // KlayGE DirectSound声音缓冲区类 实现文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.1.3
+// 版权所有(C) 龚敏敏, 2003-2004
+// Homepage: http://klayge.sourceforge.net
 //
 // 2.0.0
 // 初次建立 (2003.10.4)
@@ -21,19 +21,19 @@
 
 #include <cassert>
 
+#include <boost/bind.hpp>
+
 #include <KlayGE/DSound/DSAudio.hpp>
 
 namespace
 {
-	using namespace KlayGE;
-
 	// 检查一个音频缓冲区是否空闲
 	/////////////////////////////////////////////////////////////////////////////////
-	bool IsSourceFree(DSBufferType pDSB)
+	bool IsSourceFree(KlayGE::DSBufferType pDSB)
 	{
 		if (pDSB)
 		{
-			U32 status;
+			DWORD status;
 			pDSB->GetStatus(&status);
 			return (0 == (status & DSBSTATUS_PLAYING));
 		}
@@ -78,7 +78,7 @@ namespace KlayGE
 		}
 
 		// 锁定缓冲区
-		PVOID lockedBuffer;			// 指向缓冲区锁定的内存的指针
+		void* lockedBuffer;			// 指向缓冲区锁定的内存的指针
 		U32   lockedBufferSize;		// 锁定的内存大小
 		TIF(sources_[0]->Lock(0, static_cast<DWORD>(dataSource_->Size()), &lockedBuffer, &lockedBufferSize, 
 			NULL, NULL, DSBLOCK_FROMWRITECURSOR));
@@ -89,7 +89,7 @@ namespace KlayGE
 		std::vector<U8> data(dataSource_->Size());
 		dataSource_->Read(&data[0], data.size());
 
-		if (0 == data.size())
+		if (data.empty())
 		{
 			// 如果wav空白，用静音填充
 			MemoryLib::Set(lockedBuffer, 128, lockedBufferSize);
@@ -172,20 +172,16 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void DSSoundBuffer::Stop()
 	{
-		for (SourcesIter iter = sources_.begin(); iter != sources_.end(); ++ iter)
-		{
-			(*iter)->Stop();
-		}
+		std::for_each(sources_.begin(), sources_.end(),
+			boost::bind(&IDirectSoundBuffer::Stop, _1));
 	}
 
 	// 声音缓冲区复位
 	/////////////////////////////////////////////////////////////////////////////////
 	void DSSoundBuffer::DoReset()
 	{
-		for (SourcesIter iter = sources_.begin(); iter != sources_.end(); ++ iter)
-		{
-			(*iter)->SetCurrentPosition(0);
-		}
+		std::for_each(sources_.begin(), sources_.end(),
+			boost::bind(&IDirectSoundBuffer::SetCurrentPosition, _1, 0));
 	}
 
 	// 检查缓冲区是否在播放
@@ -201,10 +197,8 @@ namespace KlayGE
 	void DSSoundBuffer::Volume(float vol)
 	{
 		long const dB(LinearGainToDB(vol));
-		for (SourcesIter iter = sources_.begin(); iter != sources_.end(); ++ iter)
-		{
-			(*iter)->SetVolume(dB);
-		}
+		std::for_each(sources_.begin(), sources_.end(),
+			boost::bind(&IDirectSoundBuffer::SetVolume, _1, dB));
 	}
 
 	// 获取声源位置

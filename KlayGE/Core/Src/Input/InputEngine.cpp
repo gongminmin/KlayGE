@@ -1,8 +1,11 @@
 // InputEngine.cpp
 // KlayGE 输入引擎类 实现文件
-// Ver 2.0.4
+// Ver 2.1.3
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.1.3
+// 用算法代替手写循环 (2004.10.16)
 //
 // 2.0.0
 // 初次建立 (2003.8.29)
@@ -69,17 +72,15 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	InputActionsType InputEngine::Update()
 	{
-		typedef std::set<std::pair<U16, long>, std::less<std::pair<U16, long> >,
-			alloc<std::pair<U16, long> > > ActionSetType;
+		typedef std::vector<std::pair<U16, long> > ActionSetType;
 		ActionSetType actions;
 
 		// 访问所有设备
 		for (InputDevicesType::iterator iter = devices_.begin(); iter != devices_.end(); ++ iter)
 		{
-			InputActionsType theAction((*iter)->Update());
+			InputActionsType const theAction((*iter)->Update());
 
-			std::for_each(theAction.begin(), theAction.end(), 
-				boost::bind(&ActionSetType::insert, &actions, _1));
+			actions.insert(actions.end(), theAction.begin(), theAction.end());
 		}
 
 		// 添加到动作列表

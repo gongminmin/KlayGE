@@ -12,6 +12,9 @@
 
 #include <KlayGE/KlayGE.hpp>
 
+#include <algorithm>
+#include <boost/lambda/lambda.hpp>
+
 #include <KlayGE/DInput/DInput.hpp>
 #include <KlayGE/DInput/DInputDeviceImpl.hpp>
 
@@ -80,14 +83,8 @@ namespace KlayGE
 		pos_ = Vector_T<long, 3>(diJoyState.lX, diJoyState.lY, diJoyState.lZ);
 		rot_ = Vector_T<long, 3>(diJoyState.lRx, diJoyState.lRy, diJoyState.lRz);
 
-		for (size_t i = 0; i < slider_.size(); ++ i)
-		{
-			slider_[i] = diJoyState.rglSlider[i];
-		}
-
-		for (size_t i = 0; i < buttons_.size(); ++ i)
-		{
-			buttons_[i] = (diJoyState.rgbButtons[i] != 0);
-		}
+		std::copy(diJoyState.rglSlider, diJoyState.rglSlider + slider_.size(), slider_.begin());
+		std::transform(diJoyState.rgbButtons, diJoyState.rgbButtons + buttons_.size(),
+			buttons_.begin(), boost::lambda::_1 != 0);
 	}
 }

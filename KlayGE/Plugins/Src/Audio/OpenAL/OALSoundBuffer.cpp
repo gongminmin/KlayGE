@@ -16,6 +16,8 @@
 
 #include <cassert>
 
+#include <boost/bind.hpp>
+
 #include <KlayGE/OpenAL/OALAudio.hpp>
 
 namespace
@@ -130,10 +132,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OALSoundBuffer::Volume(float vol)
 	{
-		for (SourcesIter iter = sources_.begin(); iter != sources_.end(); ++ iter)
-		{
-			alSourcef(*iter, AL_GAIN, vol);
-		}
+		std::for_each(sources_.begin(), sources_.end(),
+			boost::bind(alSourcef, _1, AL_GAIN, vol));
 	}
 
 	// 获取声源位置

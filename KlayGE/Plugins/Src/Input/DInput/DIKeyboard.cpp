@@ -16,6 +16,7 @@
 #include <KlayGE/KlayGE.hpp>
 
 #include <boost/array.hpp>
+#include <boost/lambda/lambda.hpp>
 
 #include <KlayGE/DInput/DInput.hpp>
 #include <KlayGE/DInput/DInputDeviceImpl.hpp>
@@ -50,9 +51,10 @@ namespace KlayGE
 		boost::array<U8, 256> keys;
 		static_cast<DInputDeviceImpl*>(impl_.get())->DeviceState(&keys[0], keys.size());
 
-		for (size_t i = 0; i < keys.size(); ++ i)
+		std::transform(keys.begin(), keys.end(), keys_.begin(), (boost::lambda::_1 & 0x80) != 0);
+		/*for (size_t i = 0; i < keys.size(); ++ i)
 		{
 			keys_[i] = ((keys[i] & 0x80) != 0);
-		}
+		}*/
 	}
 }

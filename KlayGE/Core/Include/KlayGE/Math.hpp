@@ -160,27 +160,6 @@ namespace KlayGE
 			return std::fmod(x, y);
 		}
 
-		// 求和
-		template <typename InputIterator, typename T>
-		inline T
-		Sum(InputIterator first, InputIterator last)
-		{
-			T sum(0);
-			for (InputIterator i = first; i != last; ++ i)
-			{
-				sum += (*i);
-			}
-			return sum;
-		}
-
-		// 平均数
-		template <typename InputIterator, typename T>
-		inline T
-		Avg(InputIterator first, InputIterator last)
-		{
-			return MathLib::Sum(first, last) / (last - first);
-		}
-
 		// 限制 val 在 low 和 high 之间
 		template <typename T>
 		inline T const &

@@ -16,6 +16,9 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 
+#include <algorithm>
+#include <boost/lambda/lambda.hpp>
+
 #include <KlayGE/DInput/DInput.hpp>
 #include <KlayGE/DInput/DInputDeviceImpl.hpp>
 
@@ -60,9 +63,7 @@ namespace KlayGE
 
 		pos_ = Vector_T<long, 3>(diMouseState.lX, diMouseState.lY, diMouseState.lZ);
 
-		for (size_t i = 0; i < buttons_.size(); ++ i)
-		{
-			buttons_[i] = (diMouseState.rgbButtons[i] != 0);
-		}
+		std::transform(diMouseState.rgbButtons, diMouseState.rgbButtons + buttons_.size(),
+			buttons_.begin(), boost::lambda::_1 != 0);
 	}
 }
