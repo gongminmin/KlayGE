@@ -268,13 +268,13 @@ namespace KlayGE
 
 			GLsizei const image_size = ((width_ + 3) / 4) * ((height_ + 3) / 4) * block_size;
 
-			glCompressedTexImage2D(GL_TEXTURE_3D, numMipMaps_, glinternalFormat,
-				width_, height_, 0, image_size, NULL);
+			glCompressedTexImage3D(GL_TEXTURE_3D, numMipMaps_, glinternalFormat,
+				width_, height_, depth_, 0, image_size, NULL);
 		}
 		else
 		{
-			glTexImage2D(GL_TEXTURE_3D, numMipMaps_, glinternalFormat,
-				width_, height_, 0, glformat, GL_UNSIGNED_BYTE, NULL);
+			glTexImage3D(GL_TEXTURE_3D, numMipMaps_, glinternalFormat,
+				width_, height_, depth_, 0, glformat, GL_UNSIGNED_BYTE, NULL);
 		}
 
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
