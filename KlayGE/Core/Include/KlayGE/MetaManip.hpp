@@ -1,5 +1,5 @@
 // MetaManip.hpp
-// KlayGE 源编程库 头文件
+// KlayGE 元编程库 头文件
 // Ver 2.0.0
 // 版权所有(C) 龚敏敏, 2003
 // Homepage: http://www.enginedev.com

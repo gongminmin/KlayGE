@@ -143,51 +143,6 @@ namespace KlayGE
 			return this->Sum() / (last - first);
 		}
 
-		// 中值
-		template <typename InputIterator, typename T>
-		T Median(InputIterator first, InputIterator last) const
-		{
-			size_t countBelow, coundAbove;
-
-			for (InputIterator i = first; i != last; ++ i)
-			{
-				countBelow = countAbove = 0;
-
-				for (InputIterator j = first; j != last; ++ j)
-				{
-					if (j == i)
-					{
-						continue;
-					}
-					if (*i <= *j)
-					{
-						++ countAbove;
-					}
-					if (*i >= *j)
-					{
-						++ countBelow;
-					}
-				}
-
-				if (this->IsOdd(last - first))
-				{
-					if (countBelow == countAbove)
-					{
-						return *i;
-					}
-				}
-				else
-				{
-					if ((countBelow + 1 >= countAbove) && (countBelow <= countAbove + 1))
-					{
-						return *i;
-					}
-				}
-			}
-
-			return *first;
-		}
-
 		// 限制 val 在 low 和 high 之间
 		template <typename T>
 		const T& Limit(const T& val, const T& low, const T& high) const
@@ -261,46 +216,25 @@ namespace KlayGE
 		template <typename T>
 		bool InBound(const T& val, const T& low, const T& high) const
 		{
-			if ((val >= low) && (val <= high))
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
+			return ((val >= low) && (val <= high));
 		}
 		
 		// 判断两个数是否相等
 		template <typename T>
 		bool Eq(const T& lhs, const T& rhs) const
 		{
-			return lhs == rhs;
+			return (lhs == rhs);
 		}
 		// 浮点版本
 		template <>
 		bool Eq(const float& lhs, const float& rhs) const
 		{
-			if (this->Abs(lhs - rhs) <= std::numeric_limits<float>::epsilon())
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
+			return (this->Abs(lhs - rhs) <= std::numeric_limits<float>::epsilon());
 		}
 		template <>
 		bool Eq(const double& lhs, const double& rhs) const
 		{
-			if (this->Abs(lhs - rhs) <= std::numeric_limits<double>::epsilon())
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
+			return (this->Abs(lhs - rhs) <= std::numeric_limits<double>::epsilon());
 		}
 
 	public:
