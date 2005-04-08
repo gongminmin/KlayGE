@@ -399,7 +399,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9RenderWindow::Reposition(int left, int top)
+	void D3D9RenderWindow::Reposition(int /*left*/, int /*top*/)
 	{
 	}
 

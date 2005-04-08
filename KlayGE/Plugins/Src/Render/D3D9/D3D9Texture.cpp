@@ -381,7 +381,7 @@ namespace KlayGE
 					D3DBOX srcBox = { 0, 0, this->Width() / (1UL << level), this->Height() / (1UL << level), 0, this->Depth() / (1UL << level) };
 					D3DBOX dstBox = { 0, 0, target.Width() / (1UL << level), target.Height() / (1UL << level), 0, target.Depth() / (1UL << level) };
 
-					TIF(D3DXLoadVolumeFromVolume(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_DEFAULT, 0));
+					TIF(D3DXLoadVolumeFromVolume(dst.get(), NULL, &dstBox, src.get(), NULL, &srcBox, D3DX_DEFAULT, 0));
 				}
 			}
 			break;

@@ -1633,7 +1633,70 @@ namespace KlayGE
 			{
 				MathLib::Normalize(*iter, *iter);
 			}
-		}		
+		}
+
+		template <typename T>
+		inline void
+		Intersect(Vector_T<T, 3> const & v0, Vector_T<T, 3> const & v1, Vector_T<T, 3> const & v2,
+						Vector_T<T, 3> const & ray_orig, Vector_T<T, 3> const & ray_dir,
+						T& t, T& u, T& v)
+		{
+			// Find vectors for two edges sharing vert0
+			Vector_T<T, 3> edge1 = v1 - v0;
+			Vector_T<T, 3> edge2 = v2 - v0;
+
+			// Begin calculating determinant - also used to calculate U parameter
+			Vector_T<T, 3> pvec;
+			MathLib::Cross(pvec, ray_dir, edge2);
+
+			// If determinant is near zero, ray lies in plane of triangle
+			T det = MathLib::Dot(edge1, pvec);
+
+			Vector_T<T, 3> tvec;
+			if (det > 0)
+			{
+				tvec = ray_orig - v0;
+			}
+			else
+			{
+				tvec = v0 - ray_orig;
+				det = -det;
+			}
+
+			// Calculate U parameter
+			u = MathLib::Dot(tvec, pvec);
+
+			// Prepare to test V parameter
+			Vector_T<T, 3> qvec;
+			MathLib::Cross(qvec, tvec, edge1);
+
+			// Calculate V parameter
+			v = MathLib::Dot(ray_dir, qvec);
+
+			// Calculate t, scale parameters, ray intersects triangle
+			t = MathLib::Dot(edge2, qvec);
+
+			T const inv_det = T(1) / det;
+			v *= inv_det;
+			u *= inv_det;
+			t *= inv_det;
+		}
+
+		template <typename T>
+		inline bool
+		PointInTriangle(T const & t, T const & u, T const & v)
+		{
+			// test bounds
+			if ((u < 0) || (u > 1))
+			{
+				return false;
+			}
+			if ((v < 0) || (u + v > 1))
+			{
+				return false;
+			}
+			return ((t > T(0.001)) && (t < 1));
+		}
 	};
 }
 

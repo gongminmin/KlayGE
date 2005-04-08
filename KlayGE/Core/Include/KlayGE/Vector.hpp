@@ -22,8 +22,10 @@ namespace KlayGE
 	template <typename T, int N>
 	class Vector_T : boost::addable<Vector_T<T, N>,
 						boost::subtractable<Vector_T<T, N>,
+						boost::multipliable<Vector_T<T, N>,
+						boost::dividable<Vector_T<T, N>,
 						boost::dividable2<Vector_T<T, N>, T,
-						boost::multipliable2<Vector_T<T, N>, T> > > >
+						boost::multipliable2<Vector_T<T, N>, T> > > > > >
 	{
 		template <typename U, int M>
 		friend class Vector_T;
@@ -57,10 +59,22 @@ namespace KlayGE
 				Helper<N - 1>::DoSub(out + 1, lhs + 1, rhs + 1);
 			}
 
-			static void DoMul(T out[N], T const lhs[N], T const & rhs)
+			static void DoMul(T out[N], T const lhs[N], T const rhs[N])
+			{
+				out[0] = lhs[0] * rhs[0];
+				Helper<N - 1>::DoMul(out + 1, lhs + 1, rhs + 1);
+			}
+
+			static void DoScale(T out[N], T const lhs[N], T const & rhs)
 			{
 				out[0] = lhs[0] * rhs;
-				Helper<N - 1>::DoMul(out + 1, lhs + 1, rhs);
+				Helper<N - 1>::DoScale(out + 1, lhs + 1, rhs);
+			}
+
+			static void DoDiv(T out[N], T const lhs[N], T const rhs[N])
+			{
+				out[0] = lhs[0] / rhs[0];
+				Helper<N - 1>::DoMul(out + 1, lhs + 1, rhs + 1);
 			}
 
 			static void DoNegate(T out[N], T const rhs[N])
@@ -104,9 +118,19 @@ namespace KlayGE
 				out[0] = lhs[0] - rhs[0];
 			}
 
-			static void DoMul(T out[1], T const lhs[1], T const & rhs)
+			static void DoMul(T out[1], T const lhs[1], T const rhs[1])
+			{
+				out[0] = lhs[0] * rhs[0];
+			}
+
+			static void DoScale(T out[1], T const lhs[1], T const & rhs)
 			{
 				out[0] = lhs[0] * rhs;
+			}
+
+			static void DoDiv(T out[1], T const lhs[1], T const rhs[1])
+			{
+				out[0] = lhs[0] / rhs[0];
 			}
 
 			static void DoNegate(T out[1], T const rhs[1])
@@ -286,9 +310,21 @@ namespace KlayGE
 			return *this;
 		}
 		template <typename U>
+		Vector_T const & operator*=(Vector_T<U, N> const & rhs)
+		{
+			Helper<N>::DoMul(&vec_[0], &vec_[0], &rhs[0]);
+			return *this;
+		}
+		template <typename U>
 		Vector_T const & operator*=(U const & rhs)
 		{
-			Helper<N>::DoMul(&vec_[0], &vec_[0], rhs);
+			Helper<N>::DoScale(&vec_[0], &vec_[0], rhs);
+			return *this;
+		}
+		template <typename U>
+		Vector_T const & operator/=(Vector_T<U, N> const & rhs)
+		{
+			Helper<N>::DoDiv(&vec_[0], &vec_[0], &rhs[0]);
 			return *this;
 		}
 		template <typename U>

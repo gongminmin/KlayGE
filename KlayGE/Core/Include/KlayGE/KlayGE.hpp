@@ -20,11 +20,13 @@
 #define _KLAYGE_HPP
 
 #define KLAYGE_MAJOR		2
-#define KLAYGE_MINOR		4
+#define KLAYGE_MINOR		5
 #define KLAYGE_RELEASE		0
-#define KLAYGE_VER_STR		"KlayGE 2.4.0"
+#define KLAYGE_VER_STR		"KlayGE 2.5.0"
 
 #include <KlayGE/Config.hpp>
 #include <KlayGE/Types.hpp>
+
+#include <boost/config/requires_threads.hpp>
 
 #endif		// _KLAYGE_HPP
