@@ -1408,6 +1408,24 @@ namespace KlayGE
 		}
 
 		template <typename T>
+		inline Vector_T<T, 3>&
+		RotationByQuat(Vector_T<T, 3>& out, Vector_T<T, 3> const & v, Quaternion_T<T> const & quat)
+		{
+			Quaternion_T<T> c_quat;
+			Conjugate(c_quat, quat);
+
+			Quaternion vq(v.x(), v.y(), v.z(), 1);
+			MathLib::Normalize(vq, vq);
+
+			vq = kquat2 * vq * kquat;
+			out.x() = vq.x() / vq.w();
+			out.y() = vq.y() / vq.w();
+			out.z() = vq.z() / vq.w();
+
+			return out;
+		}
+
+		template <typename T>
         inline Quaternion_T<T>&
 		RotationYawPitchRoll(Quaternion_T<T>& out, Vector_T<T, 3> const & ang)
 		{
