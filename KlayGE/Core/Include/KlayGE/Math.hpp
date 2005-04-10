@@ -1217,7 +1217,7 @@ namespace KlayGE
 
 		template <typename T>
 		inline Quaternion_T<T>&
-		Inverse(Quaternion_T<T>& out, Quaternion_T<T> const & q)
+		Inverse(Quaternion_T<T>& out, Quaternion_T<T> const & rhs)
 		{
 			T const inv(T(1) / Length(rhs));
 			out = Quaternion(-rhs.x() * inv, -rhs.y() * inv, -rhs.z() * inv, rhs.w() * inv);
