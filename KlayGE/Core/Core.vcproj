@@ -387,6 +387,9 @@
 					RelativePath=".\Include\KlayGE\Matrix.hpp">
 				</File>
 				<File
+					RelativePath=".\Include\KlayGE\PerlinNoise.hpp">
+				</File>
+				<File
 					RelativePath=".\Include\KlayGE\Plane.hpp">
 				</File>
 				<File
