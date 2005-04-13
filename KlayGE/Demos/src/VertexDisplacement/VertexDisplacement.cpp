@@ -40,10 +40,9 @@ namespace
 	public:
 		Flag()
 			: vb_(new VertexBuffer(VertexBuffer::BT_TriangleList)),
-				numFaces_(0), numVertices_(0)
+				numFaces_(0), numVertices_(0),
+				model_(MathLib::Translation(-WIDTH / 2.0f, HEIGHT / 2.0f, 0.0f))
 		{
-			MathLib::Translation(model_, -WIDTH / 2.0f, HEIGHT / 2.0f, 0.0f);
-
 			std::vector<float> pos;
 			for (int y = 0; y < MAX_Y * 2 + 1; ++ y)
 			{
@@ -195,7 +194,7 @@ void VertexDisplacement::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("SIMYOU.TTF", 16);
 
-	flag = boost::shared_ptr<Flag>(new Flag);
+	flag.reset(new Flag);
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
@@ -240,11 +239,7 @@ void VertexDisplacement::Update()
 	*(flag->GetRenderEffect()->ParameterByName("modelview")) = modelView;
 	*(flag->GetRenderEffect()->ParameterByName("proj")) = proj;
 
-	Matrix4 modelViewIT;
-	MathLib::Transpose(modelViewIT, modelView);
-	MathLib::Inverse(modelViewIT, modelViewIT);
-
-	*(flag->GetRenderEffect()->ParameterByName("modelviewIT")) = modelViewIT;
+	*(flag->GetRenderEffect()->ParameterByName("modelviewIT")) = MathLib::Transpose(MathLib::Inverse(modelView));
 
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());

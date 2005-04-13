@@ -1,8 +1,11 @@
 // RenderableHelper.cpp
 // KlayGE 一些常用的可渲染对象 实现文件
-// Ver 2.4.0
+// Ver 2.5.0
 // 版权所有(C) 龚敏敏, 2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.5.0
+// 增加了RenderablePoint，RenderableLine和RenderableTriangle (2005.4.13)
 //
 // 2.4.0
 // 初次建立 (2005.3.22)
@@ -19,12 +22,124 @@
 
 namespace KlayGE
 {
+	RenderablePoint::RenderablePoint(Vector3 const & v)
+		: vb_(new VertexBuffer(VertexBuffer::BT_PointList))
+	{
+		effect_ = LoadRenderEffect("RenderableHelper.fx");
+		effect_->SetTechnique("PointTec");
+
+		vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
+		vb_->GetVertexStream(VST_Positions)->Assign(&v, 1);
+
+		box_ = MathLib::ComputeBoundingBox<float>(&v, &v + 1);
+	}
+
+	RenderEffectPtr RenderablePoint::GetRenderEffect() const
+	{
+		return effect_;
+	}
+
+	VertexBufferPtr RenderablePoint::GetVertexBuffer() const
+	{
+		return vb_;
+	}
+
+	std::wstring const & RenderablePoint::Name() const
+	{
+		static std::wstring const name(L"Point");
+		return name;
+	}
+
+	Box RenderablePoint::GetBound() const
+	{
+		return box_;
+	}
+
+
+	RenderableLine::RenderableLine(Vector3 const & v0, Vector3 const & v1)
+		: vb_(new VertexBuffer(VertexBuffer::BT_LineList))
+	{
+		effect_ = LoadRenderEffect("RenderableHelper.fx");
+		effect_->SetTechnique("LineTec");
+
+		Vector3 xyzs[] =
+		{
+			v0, v1
+		};
+
+		vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
+		vb_->GetVertexStream(VST_Positions)->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
+
+		box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
+	}
+
+	RenderEffectPtr RenderableLine::GetRenderEffect() const
+	{
+		return effect_;
+	}
+
+	VertexBufferPtr RenderableLine::GetVertexBuffer() const
+	{
+		return vb_;
+	}
+
+	std::wstring const & RenderableLine::Name() const
+	{
+		static std::wstring const name(L"Line");
+		return name;
+	}
+
+	Box RenderableLine::GetBound() const
+	{
+		return box_;
+	}
+
+
+	RenderableTriangle::RenderableTriangle(Vector3 const & v0, Vector3 const & v1, Vector3 const & v2)
+		: vb_(new VertexBuffer(VertexBuffer::BT_TriangleList))
+	{
+		effect_ = LoadRenderEffect("RenderableHelper.fx");
+		effect_->SetTechnique("TriangleTec");
+
+		Vector3 xyzs[] =
+		{
+			v0, v1, v2
+		};
+
+		vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
+		vb_->GetVertexStream(VST_Positions)->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
+
+		box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
+	}
+
+	RenderEffectPtr RenderableTriangle::GetRenderEffect() const
+	{
+		return effect_;
+	}
+
+	VertexBufferPtr RenderableTriangle::GetVertexBuffer() const
+	{
+		return vb_;
+	}
+
+	std::wstring const & RenderableTriangle::Name() const
+	{
+		static std::wstring const name(L"Triangle");
+		return name;
+	}
+
+	Box RenderableTriangle::GetBound() const
+	{
+		return box_;
+	}
+
+
 	RenderableBox::RenderableBox(Box const & box)
 		: box_(box),
 			vb_(new VertexBuffer(VertexBuffer::BT_TriangleList))
 	{
-		effect_ = LoadRenderEffect("Box.fx");
-		effect_->SetTechnique("tec0");
+		effect_ = LoadRenderEffect("RenderableHelper.fx");
+		effect_->SetTechnique("BoxTec");
 
 		Vector3 xyzs[] =
 		{
@@ -60,7 +175,7 @@ namespace KlayGE
 
 	std::wstring const & RenderableBox::Name() const
 	{
-		static std::wstring name(L"Box");
+		static std::wstring const name(L"Box");
 		return name;
 	}
 

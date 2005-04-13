@@ -40,7 +40,7 @@ namespace
 			*(effect_->ParameterByName("edge")) = edgeTex;
 			effect_->SetTechnique("cartoonTec");
 
-			MathLib::ComputeBoundingBox(box_, reinterpret_cast<Vector3*>(&Pos[0]),
+			box_ = MathLib::ComputeBoundingBox<float>(reinterpret_cast<Vector3*>(&Pos[0]),
 				reinterpret_cast<Vector3*>(&Pos[0] + sizeof(Pos) / sizeof(float)));
 
 			vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
@@ -152,7 +152,7 @@ void Cartoon::InitObjects()
 	TexturePtr edgeTex = Context::Instance().RenderFactoryInstance().MakeTexture1D(sizeof(edgeData) / sizeof(edgeData[0]), 0, PF_L8);
 	edgeTex->CopyMemoryToTexture1D(0, edgeData, PF_L8, 4, 0);
 
-	renderTorus = boost::shared_ptr<RenderTorus>(new RenderTorus(toonTex, edgeTex));
+	renderTorus.reset(new RenderTorus(toonTex, edgeTex));
 	renderTorus->AddToSceneManager();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -200,17 +200,13 @@ void Cartoon::Update()
 	float rotX(std::clock() / 700.0f);
 	float rotY(std::clock() / 700.0f);
 
-	Matrix4 mat, matY;
-	MathLib::RotationX(mat, rotX);
-	MathLib::RotationY(matY, rotY);
+	Matrix4 mat(MathLib::RotationX(rotX));
+	Matrix4 matY(MathLib::RotationY(rotY));
 	mat *= matY;
 	mat *= view;
 
 	*(renderTorus->GetRenderEffect()->ParameterByName("worldview")) = mat;
-
-	MathLib::Transpose(mat, mat);
-	MathLib::Inverse(mat, mat);
-	*(renderTorus->GetRenderEffect()->ParameterByName("worldviewIT")) = mat;
+	*(renderTorus->GetRenderEffect()->ParameterByName("worldviewIT")) = MathLib::Transpose(MathLib::Inverse(mat));
 
 	std::wostringstream stream;
 	stream << (*renderEngine.ActiveRenderTarget())->FPS();

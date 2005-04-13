@@ -418,8 +418,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::DoProjectionMatrix()
 	{
-		Matrix4 oglMat;
-		MathLib::LHToRH(oglMat, projMat_);
+		Matrix4 oglMat(MathLib::LHToRH(projMat_));
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadMatrixf(&oglMat(0, 0));

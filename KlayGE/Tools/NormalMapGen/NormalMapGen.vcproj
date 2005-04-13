@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="法线图生成器"
+	Name="NormalMapGen"
 	ProjectGUID="{7526CFD8-84DB-4A4C-AA3C-D9FC7FF32DCF}"
 	Keyword="Win32Proj">
 	<Platforms>

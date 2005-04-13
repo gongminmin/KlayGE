@@ -22,16 +22,14 @@ namespace KlayGE
 	{
 		// ÑÕÉ«
 		///////////////////////////////////////////////////////////////////////////////
-		Color& Negative(Color& out, Color const & rhs)
+		Color Negative(Color const & rhs)
 		{
-			out = Color(1 - rhs.r(), 1 - rhs.g(), 1 - rhs.b(), rhs.a());
-			return out;
+			return Color(1 - rhs.r(), 1 - rhs.g(), 1 - rhs.b(), rhs.a());
 		}
 
-		Color& Modulate(Color& out, Color const & lhs, Color const & rhs)
+		Color Modulate(Color const & lhs, Color const & rhs)
 		{
-			out = Color(lhs.r() * rhs.r(), lhs.g() * rhs.g(), lhs.b() * rhs.b(), lhs.a() * rhs.a());
-			return out;
+			return Color(lhs.r() * rhs.r(), lhs.g() * rhs.g(), lhs.b() * rhs.b(), lhs.a() * rhs.a());
 		}
 
 
@@ -73,16 +71,14 @@ namespace KlayGE
 			Vector3 const rightTopNear(box.RightTopNear());
 			Vector3 const leftTopFar(box.LeftTopFar());
 
-			Plane pNear;
-			FromPoints(pNear, leftBottomNear, leftTopNear, rightTopNear);
-			Plane pTop;
-			FromPoints(pTop, leftTopNear, leftTopFar, rightTopNear);
-			Plane pLeft;
-			FromPoints(pLeft, leftTopFar, leftTopNear, leftBottomNear);
+			Plane pNear(FromPoints(leftBottomNear, leftTopNear, rightTopNear));
+			Plane pTop(FromPoints(leftTopNear, leftTopFar, rightTopNear));
+			Plane pLeft(FromPoints(leftTopFar, leftTopNear, leftBottomNear));
 
-			Vector3 vec;
-			if (IntersectLine(vec, pNear, orig, dir) >= 0)
+			float t = IntersectLine(pNear, orig, dir);
+			if (t >= 0)
 			{
+				Vector3 vec = orig + t * dir;
 				if (!(InBound(vec.x(), leftBottomNear.x(), rightTopNear.x())
 					&& InBound(vec.y(), leftBottomNear.y(), leftTopNear.y())))
 				{
@@ -90,8 +86,10 @@ namespace KlayGE
 				}
 			}
 
-			if (IntersectLine(vec, pTop, orig, dir) >= 0)
+			t = IntersectLine(pTop, orig, dir);
+			if (t >= 0)
 			{
+				Vector3 vec = orig + t * dir;
 				if (!(InBound(vec.x(), leftTopNear.x(), rightTopNear.x())
 					&& InBound(vec.z(), leftTopNear.z(), leftTopFar.z())))
 				{
@@ -99,8 +97,10 @@ namespace KlayGE
 				}
 			}
 
-			if (IntersectLine(vec, pLeft, orig, dir) >= 0)
+			t = IntersectLine(pLeft, orig, dir);
+			if (t >= 0)
 			{
+				Vector3 vec = orig + t * dir;
 				if (!(InBound(vec.y(), leftBottomNear.y(), leftTopNear.y())
 					&& InBound(vec.z(), leftBottomNear.z(), leftTopFar.z())))
 				{

@@ -51,7 +51,7 @@ namespace KlayGE
 				float u = rx.x() * g1_[i].x();
 				float v = rx.y() * g1_[j].x();
 
-				return lerp(sx, u, v);
+				return Lerp(u, v, sx);
 			}
 
 			T noise(T const & x, T const & y)
@@ -77,15 +77,15 @@ namespace KlayGE
 				{
 					T u = Dot(g2_[b00], Vector2(rx.x(), ry.x()));
 					T v = Dot(g2_[b10], Vector2(rx.y(), ry.x()));
-					a = lerp(sx, u, v);
+					a = Lerp(u, v, sx);
 				}
 				{
 					T u = Dot(g2_[b01], Vector2(rx.x(), ry.y()));
 					T v = Dot(g2_[b11], Vector2(rx.y(), ry.y()));
-					b = lerp(sx, u, v);
+					b = Lerp(u, v, sx);
 				}
 
-				return lerp(sy, a, b);
+				return Lerp(a, b, sy);
 			}
 
 			T noise(T const & x, T const & y, T const & z)
@@ -124,31 +124,31 @@ namespace KlayGE
 					{
 						T u = Dot(g3_[b000], Vector3(rx.x(), ry.x(), rz.x()));
 						T v = Dot(g3_[b100], Vector3(rx.y(), ry.x(), rz.x()));
-						a = lerp(sx, u, v);
+						a = Lerp(u, v, sx);
 					}
 					{
 						T u = Dot(g3_[b010], Vector3(rx.x(), ry.y(), rz.x()));
 						T v = Dot(g3_[b110], Vector3(rx.y(), ry.y(), rz.x()));
-						b = lerp(sx, u, v);
+						b = Lerp(u, v, sx);
 					}
-					c = lerp(sy, a, b);
+					c = Lerp(a, b, sy);
 				}
 				{
 					T a, b;
 					{
 						T u = Dot(g3_[b001], Vector3(rx.x(), ry.x(), rz.y()));
 						T v = Dot(g3_[b101], Vector3(rx.y(), ry.x(), rz.y()));
-						a = lerp(sx, u, v);
+						a = Lerp(u, v, sx);
 					}
 					{
 						T u = Dot(g3_[b011], Vector3(rx.x(), ry.y(), rz.y()));
 						T v = Dot(g3_[b111], Vector3(rx.y(), ry.y(), rz.y()));
-						b = lerp(sx, u, v);
+						b = Lerp(u, v, sx);
 					}
-					d = lerp(sy, a, b);
+					d = Lerp(a, b, sy);
 				}
 
-				return lerp(sz, c, d);
+				return Lerp(c, d, sz);
 			}
 
 			T turbulence(T const & x, T const & y, T freq)
@@ -253,13 +253,13 @@ namespace KlayGE
 					{
 						g2_[i][j] = static_cast<T>((std::rand() % (B + B)) - B) / B;
 					}
-					Normalize(g2_[i], g2_[i]);
+					g2_[i] = Normalize(g2_[i]);
 
 					for (int j = 0; j < 3; ++ j)
 					{
 						g3_[i][j] = static_cast<T>((std::rand() % (B + B)) - B) / B;
 					}
-					Normalize(g3_[i], g3_[i]);
+					g3_[i] = Normalize(g3_[i]);
 				}
 
 				for (int i = B - 1; i > 0; -- i)
@@ -291,11 +291,6 @@ namespace KlayGE
 			T curve(T const & t)
 			{
 				return t * t * (3 - 2 * t);
-			}
-
-			T lerp(T const & t, T const & a, T const & b)
-			{
-				return a + t * (b - a);
 			}
 
 		private:

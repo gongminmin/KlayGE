@@ -37,9 +37,9 @@ namespace
 			int const XSIZE = 128;
             int const YSIZE = 32;
 			int const ZSIZE = 32;
-			float const XSCALE = 0.08f;
-			float const YSCALE = 0.16f;
-			float const ZSCALE = 0.16f;
+			float const XSCALE = 0.04f;
+			float const YSCALE = 0.08f;
+			float const ZSCALE = 0.08f;
 
 			std::vector<unsigned char> turbBuffer;
 			turbBuffer.reserve(XSIZE * YSIZE * ZSIZE);
@@ -50,7 +50,9 @@ namespace
 				{
 					for (int x = 0; x < XSIZE; ++ x)
 					{
-						unsigned char t = static_cast<unsigned char>(127.5f * (1 + pn.tileable_turbulence(XSCALE * x, YSCALE * y, ZSCALE * z, XSIZE * XSCALE, YSIZE * YSCALE, ZSIZE * ZSCALE, 16)));
+						unsigned char t = static_cast<unsigned char>(127 * (1
+							+ pn.tileable_turbulence(XSCALE * x, YSCALE * y, ZSCALE * z,
+								XSIZE * XSCALE, YSIZE * YSCALE, ZSIZE * ZSCALE, 16)));
 						if (t > max)
 						{
 							max = t;
@@ -81,45 +83,29 @@ namespace
 			{
 				Vector3(-0.8f, 0.8f, 1),
 				Vector3(0.8f, 0.8f, 1),
-				Vector3(-0.8f, 0, 1),
-				Vector3(0.8f, 0, 1),
 				Vector3(-0.8f, -0.8f, 1),
 				Vector3(0.8f, -0.8f, 1),
 			};
 
-			Vector3 tex0s[] =
+			Vector3 texs[] =
 			{
-				Vector3(-1, -1, 0),
-				Vector3(1, -1, 0),
 				Vector3(-1, 0, 0),
 				Vector3(1, 0, 0),
 				Vector3(-1, -1, 0),
 				Vector3(1, -1, 0),
 			};
 
-			Vector2 tex1s[] =
-			{
-				Vector2(1, -0.4f),
-				Vector2(1, 0.4f),
-				Vector2(0, -0.4f),
-				Vector2(0, 0.4f),
-				Vector2(-1, -0.4f),
-				Vector2(-1, 0.4f),
-			};
-
 			uint16_t indices[] = 
 			{
-				0, 1, 3, 3, 2, 0, 2, 3, 5, 5, 4, 2
+				0, 1, 3, 3, 2, 0,
 			};
 
-			MathLib::ComputeBoundingBox(box_, &xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
+			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 
 			vb_->AddVertexStream(VST_Positions, sizeof(float), 3);
 			vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 3);
-			vb_->AddVertexStream(VST_TextureCoords1, sizeof(float), 2);
 			vb_->GetVertexStream(VST_Positions)->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
-			vb_->GetVertexStream(VST_TextureCoords0)->Assign(tex0s, sizeof(tex0s) / sizeof(tex0s[0]));
-			vb_->GetVertexStream(VST_TextureCoords1)->Assign(tex1s, sizeof(tex1s) / sizeof(tex1s[0]));
+			vb_->GetVertexStream(VST_TextureCoords0)->Assign(texs, sizeof(texs) / sizeof(texs[0]));
 
 			vb_->AddIndexStream();
 			vb_->GetIndexStream()->Assign(indices, sizeof(indices) / sizeof(uint16_t));
@@ -127,7 +113,7 @@ namespace
 
 		void OnRenderBegin()
 		{
-			float t = std::clock() * 0.0002f;
+			float const t = std::clock() * 0.0002f;
 
 			*(effect_->ParameterByName("y")) = t * 2;
 			*(effect_->ParameterByName("z")) = t;
@@ -210,7 +196,7 @@ void Electro::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("SIMYOU.TTF", 16);
 
-	renderElectro = boost::shared_ptr<RenderElectro>(new RenderElectro);
+	renderElectro.reset(new RenderElectro);
 	renderElectro->AddToSceneManager();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -220,9 +206,10 @@ void Electro::InitObjects()
 void Electro::Update()
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
 	std::wostringstream stream;
 	stream << (*renderEngine.ActiveRenderTarget())->FPS();
 
-	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Electro测试");
-	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"电流效果");
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());
 }

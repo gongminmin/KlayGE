@@ -136,6 +136,19 @@ namespace KlayGE
 
 		renderEngine.EndFrame();
 
+		for (RenderItemsType::iterator iter = renderItems_.begin();
+			iter != renderItems_.end();)
+		{
+			if ((*iter)->ShortAge())
+			{
+				iter = renderItems_.erase(iter);
+			}
+			else
+			{
+				++ iter;
+			}
+		}
+
 		Context::Instance().AppInstance().RenderOver();
 	}
 

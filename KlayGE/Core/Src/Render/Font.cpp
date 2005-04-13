@@ -298,11 +298,14 @@ namespace KlayGE
 
 				if (ch != L'\n')
 				{
+					int max_width, max_height;
+					max_width = max_height = this->FontHeight();
+
 					// convert character code to glyph index
 					::FT_Load_Char(face_, ch, FT_LOAD_RENDER);
 
-					uint32_t const width = std::min<uint32_t>(this->FontHeight(),
-						(0 != slot_->bitmap.width) ? slot_->bitmap.width : this->FontHeight() / 2);
+					uint32_t const width = std::min<uint32_t>(max_width,
+						(0 != slot_->bitmap.width) ? slot_->bitmap.width : max_width / 2);
 
 					::RECT charRect;
 					CharInfo charInfo;
@@ -312,7 +315,7 @@ namespace KlayGE
 						charRect.left	= curX_;
 						charRect.top	= curY_;
 						charRect.right	= curX_ + width;
-						charRect.bottom = curY_ + this->FontHeight();
+						charRect.bottom = curY_ + max_height;
 
 						charInfo.texRect.left()		= static_cast<float>(charRect.left) / theTexture_->Width();
 						charInfo.texRect.top()		= static_cast<float>(charRect.top) / theTexture_->Height();
@@ -324,7 +327,7 @@ namespace KlayGE
 						if (curX_ >= width)
 						{
 							curX_ = 0;
-							curY_ += this->FontHeight();
+							curY_ += max_height;
 						}
 					}
 					else
@@ -346,25 +349,24 @@ namespace KlayGE
 						charRect.bottom	= charRect.top + this->FontHeight();
 					}
 
-					std::vector<uint16_t> dest(this->FontHeight() * this->FontHeight(), 0);
-					int const rows(std::min<int>(slot_->bitmap.rows, this->FontHeight()));
-					int const cols(std::min<int>(slot_->bitmap.width, this->FontHeight()));
-					int const y_start = std::max<int>(this->FontHeight() * 3 / 4 - slot_->bitmap_top, 0);
+					std::vector<uint16_t> dest(max_width * max_height, 0);
+					int const rows(std::min<int>(slot_->bitmap.rows, max_height));
+					int const cols(std::min<int>(slot_->bitmap.width, max_width));
+					int const y_start = std::max<int>(max_height * 3 / 4 - slot_->bitmap_top, 0);
 					for (int y = 0; y < rows; ++ y)
 					{
 						int const y_offset = y_start + y;
 						for (int x = 0; x < cols; ++ x)
 						{
-							int const max_xy = static_cast<int>(this->FontHeight());
-							if ((y < max_xy) && (x < max_xy))
+							if ((y < max_height) && (x < max_width))
 							{
-								dest[y_offset * this->FontHeight() + x]
+								dest[y_offset * max_width + x]
 									= (slot_->bitmap.buffer[y * slot_->bitmap.width + x] > 128 ? 0xFFFF : 0);
 							}
 						}
 					}
 					theTexture_->CopyMemoryToTexture2D(0, &dest[0], TEX_FORMAT,
-							this->FontHeight(), this->FontHeight(), charRect.left, charRect.top);
+							max_width, max_height, charRect.left, charRect.top);
 
 					charInfoMap_.insert(std::make_pair(ch, charInfo));
 					charLRU_.push_front(ch);

@@ -152,7 +152,8 @@ namespace KlayGE
 		template <typename U>
 		Matrix4_T& operator*=(Matrix4_T<U> const & rhs)
 		{
-			return MathLib::Multiply(*this, *this, rhs);
+			*this = MathLib::Multiply(*this, rhs);
+			return *this;
 		}
 		template <typename U>
 		Matrix4_T& operator*=(U const & rhs)

@@ -63,10 +63,10 @@ namespace
 				0, 1, 2, 2, 3, 0
 			};
 
-			MathLib::ComputeBoundingBox(box_, &xyzs[0], &xyzs[4]);
+			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[4]);
 
 			Vector3 t[4], b[4];
-			MathLib::ComputeTangent(t, b,
+			MathLib::ComputeTangent<float>(t, b,
 				indices, indices + sizeof(indices) / sizeof(indices[0]),
 				xyzs, xyzs + sizeof(xyzs) / sizeof(xyzs[0]), texs);
 
@@ -174,7 +174,7 @@ void Parallax::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("SIMYOU.TTF", 16);
 
-	renderPolygon = boost::shared_ptr<RenderPolygon>(new RenderPolygon);
+	renderPolygon.reset(new RenderPolygon);
 	renderPolygon->AddToSceneManager();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -223,9 +223,8 @@ void Parallax::Update()
 
 	float degree(std::clock() / 700.0f);
 	Vector3 lightPos(2, 0, -2);
-	Matrix4 matRot;
-	MathLib::RotationZ(matRot, degree);
-	MathLib::TransformCoord(lightPos, lightPos, matRot);
+	Matrix4 matRot(MathLib::RotationZ(degree));
+	lightPos = MathLib::TransformCoord(lightPos, matRot);
 	*(renderPolygon->effect_->ParameterByName("lightPos")) = Vector4(lightPos.x(), lightPos.y(), lightPos.z(), 1);
 
 	std::wostringstream stream;

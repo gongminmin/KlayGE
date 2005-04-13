@@ -38,8 +38,8 @@ namespace KlayGE
 		lookat_		= lookat;
 		upVec_		= upVec;
 		
-		MathLib::Normalize(viewVec_, lookat_ - eyePos_);
-		MathLib::LookAtLH(viewMat_, eyePos_, lookat_, upVec);
+		viewVec_ = MathLib::Normalize(lookat_ - eyePos_);
+		viewMat_ = MathLib::LookAtLH(eyePos_, lookat_, upVec);
 
 		reEvalBillboard_ = true;
 	}
@@ -55,7 +55,7 @@ namespace KlayGE
 		nearPlane_	= nearPlane;
 		farPlane_	= farPlane;
 
-		MathLib::PerspectiveFovLH(projMat_, FOV, aspect, nearPlane, farPlane);
+		projMat_ = MathLib::PerspectiveFovLH(FOV, aspect, nearPlane, farPlane);
 	}
 
 	// 公告牌技术所需要的矩阵
@@ -64,7 +64,7 @@ namespace KlayGE
 	{
 		if (reEvalBillboard_)
 		{
-			MathLib::Inverse(billboardMat_, viewMat_);
+			billboardMat_ = MathLib::Inverse(viewMat_);
 
 			billboardMat_(3, 0) = 0;
 			billboardMat_(3, 1) = 0;

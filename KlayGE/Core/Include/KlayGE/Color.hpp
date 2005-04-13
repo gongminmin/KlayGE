@@ -127,7 +127,8 @@ namespace KlayGE
 		}
 		Color& operator*=(Color const & rhs)
 		{
-			return MathLib::Modulate(*this, *this, rhs);
+			*this = MathLib::Modulate(*this, rhs);
+			return *this;
 		}
 		Color& operator/=(float rhs)
 		{

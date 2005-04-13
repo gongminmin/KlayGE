@@ -35,9 +35,15 @@ namespace KlayGE
 	class Plane_T;
 	typedef Plane_T<float> Plane;
 	class Color;
-	class Bound;
-	class Sphere;
-	class Box;
+	template <typename T>
+	class Bound_T;
+	typedef Bound_T<float> Bound;
+	template <typename T>
+	class Sphere_T;
+	typedef Sphere_T<float> Sphere;
+	template <typename T>
+	class Box_T;
+	typedef Box_T<float> Box;
 
 	class Camera;
 	class FirstPersonCameraController;

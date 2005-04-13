@@ -21,6 +21,11 @@
 
 #include <ctime>
 
+#pragma warning(disable: 4512)
+
+#include <boost/assign.hpp>
+#include <boost/assign/std/vector.hpp>
+
 #include <KlayGE/CameraController.hpp>
 
 namespace KlayGE
@@ -58,13 +63,19 @@ namespace KlayGE
 
 	FirstPersonCameraController::FirstPersonCameraController()
 	{
+		using namespace boost::assign;
+
 		std::vector<InputAction> actions;
-		actions.push_back(InputAction(TurnLeftRight, MS_X));
-		actions.push_back(InputAction(TurnUpDown, MS_Y));
-		actions.push_back(InputAction(Forward, KS_W));
-		actions.push_back(InputAction(Backward, KS_S));
-		actions.push_back(InputAction(MoveLeft, KS_A));
-		actions.push_back(InputAction(MoveRight, KS_D));
+		actions += InputAction(TurnLeftRight, MS_X),
+					InputAction(TurnUpDown, MS_Y),
+					InputAction(Forward, KS_W),
+					InputAction(Backward, KS_S),
+					InputAction(MoveLeft, KS_A),
+					InputAction(MoveRight, KS_D),
+					InputAction(Forward, KS_UpArrow),
+					InputAction(Backward, KS_DownArrow),
+					InputAction(MoveLeft, KS_LeftArrow),
+					InputAction(MoveRight, KS_RightArrow);
 
 		InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 		KlayGE::InputActionMap actionMap;
@@ -76,13 +87,13 @@ namespace KlayGE
 	{
 		assert(camera_ != NULL);
 
-		MathLib::Inverse(world_, camera_->ViewMatrix());
+		world_ = MathLib::Inverse(camera_->ViewMatrix());
 
 		static clock_t lastTime(std::clock());
 		clock_t curTime(std::clock());
 		if (curTime - lastTime > 20)
 		{
-			float scaler = (curTime - lastTime) / 100.0f;
+			float const scaler = (curTime - lastTime) / 100.0f;
 
 			lastTime = curTime;
 
@@ -130,7 +141,7 @@ namespace KlayGE
 		Vector3 eyePos = camera_->EyePos();
 		Vector3 viewVec = camera_->ViewVec();
 
-		MathLib::TransformCoord(eyePos, movement, world_);
+		eyePos = MathLib::TransformCoord(movement, world_);
 
 		camera_->ViewParams(eyePos, eyePos + viewVec, camera_->UpVec());
 
@@ -141,12 +152,11 @@ namespace KlayGE
 	{
 		assert(camera_ != NULL);
 
-		Matrix4 rot;
-		MathLib::RotationYawPitchRoll(rot, yaw * rotationScaler_, pitch * rotationScaler_, roll * rotationScaler_);
+		Matrix4 rot(MathLib::RotationMatrixYawPitchRoll(yaw * rotationScaler_,
+			pitch * rotationScaler_, roll * rotationScaler_));
 
-		Vector3 viewVec;
-		MathLib::TransformCoord(viewVec, Vector3(0, 0, 1), rot);
-		MathLib::TransformCoord(viewVec, viewVec, world_);
+		Vector3 viewVec = MathLib::TransformCoord(Vector3(0, 0, 1), rot);
+		viewVec = MathLib::TransformCoord(viewVec, world_);
 
 		camera_->ViewParams(camera_->EyePos(), viewVec, camera_->UpVec());
 

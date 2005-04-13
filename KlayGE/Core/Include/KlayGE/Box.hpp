@@ -1,8 +1,11 @@
 // Box.hpp
 // KlayGE AABB边框盒 头文件
-// Ver 2.4.0
+// Ver 2.5.0
 // 版权所有(C) 龚敏敏, 2004-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.5.0
+// 改为模板 (2005.4.12)
 //
 // 2.4.0
 // 增加了Center和operator[] (2005.3.20)
@@ -22,60 +25,61 @@
 
 namespace KlayGE
 {
-	class Box : boost::addable2<Box, Vector3, 
-						boost::subtractable2<Box, Vector3,
-						boost::andable<Box,
-						boost::orable<Box,
-						boost::equality_comparable<Box> > > > >,
-				public Bound
+	template <typename T>
+	class Box_T : boost::addable2<Box_T<T>, Vector_T<T, 3>, 
+						boost::subtractable2<Box, Vector_T<T, 3>,
+						boost::andable<Box_T<T>,
+						boost::orable<Box_T<T>,
+						boost::equality_comparable<Box_T<T> > > > > >,
+				public Bound_T<T>
 	{
 	public:
-		Box()
+		Box_T()
 		{
 		}
-		Box(Vector3 const & vMin, Vector3 const & vMax)
+		Box_T(Vector_T<T, 3> const & vMin, Vector_T<T, 3> const & vMax)
 		{
-			MathLib::Minimize(min_, vMin, vMax);
-			MathLib::Maximize(max_, vMin, vMax);
+			min_ = MathLib::Minimize(vMin, vMax);
+			max_ = MathLib::Maximize(vMin, vMax);
 		}
 
 		// 赋值操作符
-		Box& operator+=(Vector3 const & rhs)
+		Box_T& operator+=(Vector_T<T, 3> const & rhs)
 		{
 			min_ += rhs;
 			max_ += rhs;
 			return *this;
 		}
-		Box& operator-=(Vector3 const & rhs)
+		Box_T& operator-=(Vector_T<T, 3> const & rhs)
 		{
 			min_ -= rhs;
 			max_ -= rhs;
 			return *this;
 		}
-		Box& operator*=(float rhs)
+		Box_T& operator*=(T const & rhs)
 		{
 			this->Min() *= rhs;
 			this->Max() *= rhs;
 			return *this;
 		}
-		Box& operator/=(float rhs)
+		Box_T& operator/=(T const & rhs)
 		{
 			return this->operator*=(1.0f / rhs);
 		}
-		Box& operator&=(Box const & rhs)
+		Box_T& operator&=(Box_T const & rhs)
 		{
-			MathLib::Maximize(this->Min(), this->Min(), rhs.Min());
-			MathLib::Minimize(this->Max(), this->Max(), rhs.Max());
+			min_ = MathLib::Maximize(this->Min(), rhs.Min());
+			max_ = MathLib::Minimize(this->Max(), rhs.Max());
 			return *this;
 		}
-		Box& operator|=(Box const & rhs)
+		Box_T& operator|=(Box_T const & rhs)
 		{
-			MathLib::Minimize(this->Min(), this->Min(), rhs.Min());
-			MathLib::Maximize(this->Max(), this->Max(), rhs.Max());
+			min_ = MathLib::Minimize(this->Min(), rhs.Min());
+			max_ = MathLib::Maximize(this->Max(), rhs.Max());
 			return *this;
 		}
 
-		Box& operator=(Box const & rhs)
+		Box_T& operator=(Box_T const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -85,22 +89,22 @@ namespace KlayGE
 			return *this;
 		}
 
-		bool operator==(Box const & rhs)
+		bool operator==(Box_T const & rhs)
 		{
 			return (this->Min() == rhs.Min()) && (this->Max() == rhs.Max());
 		}
 
 		// 一元操作符
-		Box const operator+() const
+		Box_T const operator+() const
 		{
 			return *this;
 		}
-		Box const operator-() const
+		Box_T const operator-() const
 		{
-			return Box(-this->Min(), -this->Max());
+			return Box_T(-this->Min(), -this->Max());
 		}
 
-		Vector3 operator[](size_t i) const
+		Vector_T<T, 3> operator[](size_t i) const
 		{
 			switch (i)
 			{
@@ -130,20 +134,20 @@ namespace KlayGE
 
 			default:
 				assert(false);
-				return Vector3::Zero();
+				return Vector_T<T, 3>::Zero();
 			}
 		}
 
 		// 属性
-		float Width() const
+		T const & Width() const
 		{
 			return this->Max().x() - this->Min().x();
 		}
-		float Height() const
+		T const & Height() const
 		{
 			return this->Max().y() - this->Min().y();
 		}
-		float Depth() const
+		T const & Depth() const
 		{
 			return this->Max().z() - this->Min().z();
 		}
@@ -152,72 +156,74 @@ namespace KlayGE
 			return this->Min() == this->Max();
 		}
 
-		Vector3 const LeftBottomNear() const
+		Vector_T<T, 3> const LeftBottomNear() const
 		{
 			return this->Min();
 		}
-		Vector3 const LeftTopNear() const
+		Vector_T<T, 3> const LeftTopNear() const
 		{
-			return Vector3(this->Min().x(), this->Max().y(), this->Min().z());
+			return Vector_T<T, 3>(this->Min().x(), this->Max().y(), this->Min().z());
 		}
-		Vector3 const RightBottomNear() const
+		Vector_T<T, 3> const RightBottomNear() const
 		{
-			return Vector3(this->Max().x(), this->Min().y(), this->Min().z());
+			return Vector_T<T, 3>(this->Max().x(), this->Min().y(), this->Min().z());
 		}
-		Vector3 const RightTopNear() const
+		Vector_T<T, 3> const RightTopNear() const
 		{
-			return Vector3(this->Max().x(), this->Max().y(), this->Min().z());
+			return Vector_T<T, 3>(this->Max().x(), this->Max().y(), this->Min().z());
 		}
-		Vector3 const LeftBottomFar() const
+		Vector_T<T, 3> const LeftBottomFar() const
 		{
-			return Vector3(this->Min().x(), this->Min().y(), this->Max().z());
+			return Vector_T<T, 3>(this->Min().x(), this->Min().y(), this->Max().z());
 		}
-		Vector3 const LeftTopFar() const
+		Vector_T<T, 3> const LeftTopFar() const
 		{
-			return Vector3(this->Min().x(), this->Max().y(), this->Max().z());
+			return Vector_T<T, 3>(this->Min().x(), this->Max().y(), this->Max().z());
 		}
-		Vector3 const RightBottomFar() const
+		Vector_T<T, 3> const RightBottomFar() const
 		{
-			return Vector3(this->Max().x(), this->Min().y(), this->Max().z());
+			return Vector_T<T, 3>(this->Max().x(), this->Min().y(), this->Max().z());
 		}
-		Vector3 const RightTopFar() const
+		Vector_T<T, 3> const RightTopFar() const
 		{
 			return this->Max();
 		}
 
-		Vector3& Min()
+		Vector_T<T, 3>& Min()
 		{
 			return min_;
 		}
-		Vector3 const & Min() const
+		Vector_T<T, 3> const & Min() const
 		{
 			return min_;
 		}
-		Vector3& Max()
+		Vector_T<T, 3>& Max()
 		{
 			return max_;
 		}
-		Vector3 const & Max() const
+		Vector_T<T, 3> const & Max() const
 		{
 			return max_;
 		}
-		Vector3 Center() const
+		Vector_T<T, 3> Center() const
 		{
 			return (min_ + max_) / 2;
 		}
 
-		bool VecInBound(Vector3 const & v) const
+		bool VecInBound(Vector_T<T, 3> const & v) const
 		{
 			return MathLib::VecInBox(*this, v);
 		}
-		float MaxRadiusSq() const
+		T MaxRadiusSq() const
 		{
-			return std::max<float>(MathLib::LengthSq(this->Max()), MathLib::LengthSq(this->Min()));
+			return std::max<T>(MathLib::LengthSq(this->Max()), MathLib::LengthSq(this->Min()));
 		}
 
 	private:
-		Vector3 min_, max_;
+		Vector_T<T, 3> min_, max_;
 	};
+
+	typedef Box_T<float> Box;
 }
 
 #endif			// _BOX_HPP
