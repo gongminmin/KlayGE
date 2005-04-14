@@ -238,7 +238,7 @@ namespace KlayGE
 
 			PerlinNoise()
 			{
-				std::srand(std::time(NULL));
+				std::srand(static_cast<unsigned int>(std::time(NULL)));
 
 				for (int i = 0; i < B; ++ i)
 				{
