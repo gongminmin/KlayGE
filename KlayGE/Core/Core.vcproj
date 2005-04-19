@@ -364,9 +364,6 @@
 			<Filter
 				Name="源文件"
 				Filter="">
-				<File
-					RelativePath=".\Src\Math\Math.cpp">
-				</File>
 			</Filter>
 			<Filter
 				Name="头文件"

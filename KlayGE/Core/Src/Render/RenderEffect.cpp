@@ -36,9 +36,6 @@ namespace KlayGE
 			functions = 0;
 		}
 
-		RenderEffectPtr Clone() const
-			{ return RenderEffect::NullObject(); }
-
 		RenderEffectParameterPtr Parameter(uint32_t /*index*/)
 			{ return RenderEffectParameter::NullObject(); }
 		RenderEffectParameterPtr ParameterByName(std::string const & /*name*/)

@@ -446,18 +446,18 @@ namespace KlayGE
 		inline Vector_T<T, N>
 		Maximize(Vector_T<T, N> const & lhs, Vector_T<T, N> const & rhs)
 		{
-			Vector_T<T, N> out;
-			MaxMinimizeHelper<T, N>::DoMax(&out[0], &lhs[0], &rhs[0]);
-			return out;
+			Vector_T<T, N> ret;
+			MaxMinimizeHelper<T, N>::DoMax(&ret[0], &lhs[0], &rhs[0]);
+			return ret;
 		}
 
 		template <typename T, int N>
 		inline Vector_T<T, N>
 		Minimize(Vector_T<T, N> const & lhs, Vector_T<T, N> const & rhs)
 		{
-			Vector_T<T, N> out;
-			MaxMinimizeHelper<T, N>::DoMin(&out[0], &lhs[0], &rhs[0]);
-			return out;
+			Vector_T<T, N> ret;
+			MaxMinimizeHelper<T, N>::DoMin(&ret[0], &lhs[0], &rhs[0]);
+			return ret;
 		}
 
 		template <typename T, int N>
@@ -513,16 +513,16 @@ namespace KlayGE
 			BOOST_STATIC_ASSERT(N < 4);
 
 			Vector_T<T, 4> temp(TransformHelper<T, N>::Do(v, mat));
-			Vector_T<T, N> out = Vector_T<T, N>(&temp[0]);
+			Vector_T<T, N> ret = Vector_T<T, N>(&temp[0]);
 			if (Eq(temp.w(), T(0)))
 			{
-				out = Vector_T<T, N>::Zero();
+				ret = Vector_T<T, N>::Zero();
 			}
 			else
 			{
-				out /= temp.w();
+				ret /= temp.w();
 			}
-			return out;
+			return ret;
 		}
 
 
@@ -637,11 +637,11 @@ namespace KlayGE
 			temp = Transform(temp, proj);
 			temp /= temp.w();
 
-			Vector_T<T, 3> out;
-			out.x() = (temp.x() + 1) * viewport[2] / 2 + viewport[0];
-			out.y() = (-temp.y() + 1) * viewport[3] / 2 + viewport[1];
-			out.z() = (temp.z() + 1) * (farPlane - nearPlane) / 2 + nearPlane;
-			return out;
+			Vector_T<T, 3> ret;
+			ret.x() = (temp.x() + 1) * viewport[2] / 2 + viewport[0];
+			ret.y() = (-temp.y() + 1) * viewport[3] / 2 + viewport[1];
+			ret.z() = (temp.z() + 1) * (farPlane - nearPlane) / 2 + nearPlane;
+			return ret;
 		}
 
 		template <typename T>
@@ -1027,12 +1027,12 @@ namespace KlayGE
 		inline Matrix4_T<T>
 		LHToRH(Matrix4_T<T> const & rhs)
 		{
-			Matrix4_T<T> out = rhs;
-			out(2, 0) = -out(2, 0);
-			out(2, 1) = -out(2, 1);
-			out(2, 2) = -out(2, 2);
-			out(2, 3) = -out(2, 3);
-			return out;
+			Matrix4_T<T> ret = rhs;
+			ret(2, 0) = -ret(2, 0);
+			ret(2, 1) = -ret(2, 1);
+			ret(2, 2) = -ret(2, 2);
+			ret(2, 3) = -ret(2, 3);
+			return ret;
 		}
 
 		template <typename T>
@@ -1072,14 +1072,14 @@ namespace KlayGE
 		PerspectiveFovRH(T const & fov, T const & aspect,
 			T const & nearPlane, T const & farPlane)
 		{
-			return LHToRH(PerspectiveFovLH(out, fov, aspect, nearPlane, farPlane));
+			return LHToRH(PerspectiveFovLH(fov, aspect, nearPlane, farPlane));
 		}
 		template <typename T>
 		inline Matrix4_T<T>
 		PerspectiveOffCenterRH(T const & left, T const & right, T const & bottom, T const & top, 
 			T const & nearPlane, T const & farPlane)
 		{
-			return LHToRH(PerspectiveOffCenterLH(out, left, right, bottom, top, nearPlane, farPlane));
+			return LHToRH(PerspectiveOffCenterLH(left, right, bottom, top, nearPlane, farPlane));
 		}
 
 		template <typename T>
@@ -1093,7 +1093,7 @@ namespace KlayGE
         inline Matrix4_T<T>
 		RotationMatrixYawPitchRoll(Vector_T<T, 3> const & ang)
 		{
-			return RotationMatrixYawPitchRoll(out, ang.x(), ang.y(), ang.z());
+			return RotationMatrixYawPitchRoll(ang.x(), ang.y(), ang.z());
 		}
 
 
@@ -1334,20 +1334,10 @@ namespace KlayGE
 		}
 
 		template <typename T>
-		inline Vector_T<T, 3>
-		RotationByQuat(Vector_T<T, 3> const & v, Quaternion_T<T> const & quat)
-		{
-			Quaternion vq(Normalize(Quaternion(v.x(), v.y(), v.z(), 1)));
-
-			vq = Conjugate(quat) * vq * quat;
-			return Vector_T<T, 3>(vq.x(), vq.y(), vq.z) / vq.w();
-		}
-
-		template <typename T>
         inline Quaternion_T<T>
 		RotationQuatYawPitchRoll(Vector_T<T, 3> const & ang)
 		{
-			return RotationQuatYawPitchRoll(out, ang.x(), ang.y(), ang.z());
+			return RotationQuatYawPitchRoll(ang.x(), ang.y(), ang.z());
 		}
 
 
@@ -1421,16 +1411,105 @@ namespace KlayGE
 
 		// ÑÕÉ«
 		///////////////////////////////////////////////////////////////////////////////
-		Color Negative(Color const & rhs);
-		Color Modulate(Color const & lhs, Color const & rhs);
+		template <typename T>
+		inline Color_T<T>
+		Negative(Color_T<T> const & rhs)
+		{
+			return Color_T<T>(1 - rhs.r(), 1 - rhs.g(), 1 - rhs.b(), rhs.a());
+		}
+		template <typename T>
+		inline Color_T<T>
+		Modulate(Color_T<T> const & lhs, Color_T<T> const & rhs)
+		{
+			return Color_T<T>(lhs.r() * rhs.r(), lhs.g() * rhs.g(), lhs.b() * rhs.b(), lhs.a() * rhs.a());
+		}
 
 
 		// ·¶Î§
 		///////////////////////////////////////////////////////////////////////////////
-		bool VecInSphere(Sphere const & sphere, Vector3 const & v);
-		bool BoundProbe(Sphere const & sphere, Vector3 const & pos, Vector3 const & dir);
-		bool VecInBox(Box const & box, Vector3 const & v);
-		bool BoundProbe(Box const & box, Vector3 const & orig, Vector3 const & dir);
+		template <typename T>
+		inline bool
+		VecInSphere(Sphere_T<T> const & sphere, Vector_T<T, 3> const & v)
+		{
+			if (Length(v - sphere.Center()) < sphere.Radius())
+			{
+				return true;
+			}
+			return false;
+		}
+
+		template <typename T>
+		inline bool
+		BoundProbe(Sphere_T<T> const & sphere, Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir)
+		{
+			T const a = LengthSq(dir);
+			T const b = 2 * Dot(dir, orig - sphere.Center());
+			T const c = LengthSq(orig - sphere.Center()) - sphere.Radius() * sphere.Radius();
+
+			if (b * b - 4 * a * c < 0)
+			{
+				return false;
+			}
+			return true;
+		}
+
+		template <typename T>
+		inline bool
+		VecInBox(Box_T<T> const & box, Vector_T<T, 3> const & v)
+		{
+			return (InBound(v.x(), box.Min().x(), box.Max().x()))
+				&& (InBound(v.y(), box.Min().y(), box.Max().y()))
+				&& (InBound(v.z(), box.Min().z(), box.Max().z()));
+		}
+
+		template <typename T>
+		inline bool
+		BoundProbe(Box_T<T> const & box, Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir)
+		{
+			Vector_T<T, 3> const leftBottomNear(box.LeftBottomNear());
+			Vector_T<T, 3> const leftTopNear(box.LeftTopNear());
+			Vector_T<T, 3> const rightTopNear(box.RightTopNear());
+			Vector_T<T, 3> const leftTopFar(box.LeftTopFar());
+
+			Plane_T<T> pNear(FromPoints(leftBottomNear, leftTopNear, rightTopNear));
+			Plane_T<T> pTop(FromPoints(leftTopNear, leftTopFar, rightTopNear));
+			Plane_T<T> pLeft(FromPoints(leftTopFar, leftTopNear, leftBottomNear));
+
+			T t = IntersectLine(pNear, orig, dir);
+			if (t >= 0)
+			{
+				Vector_T<T, 3> vec = orig + t * dir;
+				if (!(InBound(vec.x(), leftBottomNear.x(), rightTopNear.x())
+					&& InBound(vec.y(), leftBottomNear.y(), leftTopNear.y())))
+				{
+					return false;
+				}
+			}
+
+			t = IntersectLine(pTop, orig, dir);
+			if (t >= 0)
+			{
+				Vector_T<T, 3> vec = orig + t * dir;
+				if (!(InBound(vec.x(), leftTopNear.x(), rightTopNear.x())
+					&& InBound(vec.z(), leftTopNear.z(), leftTopFar.z())))
+				{
+					return false;
+				}
+			}
+
+			t = IntersectLine(pLeft, orig, dir);
+			if (t >= 0)
+			{
+				Vector_T<T, 3> vec = orig + t * dir;
+				if (!(InBound(vec.y(), leftBottomNear.y(), leftTopNear.y())
+					&& InBound(vec.z(), leftBottomNear.z(), leftTopFar.z())))
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
 
 		template <typename T, typename Iterator>
 		inline Box_T<T>

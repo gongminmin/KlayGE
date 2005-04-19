@@ -34,7 +34,9 @@ namespace KlayGE
 	template <typename T>
 	class Plane_T;
 	typedef Plane_T<float> Plane;
-	class Color;
+	template <typename T>
+	class Color_T;
+	typedef Color_T<float> Color;
 	template <typename T>
 	class Bound_T;
 	typedef Bound_T<float> Bound;

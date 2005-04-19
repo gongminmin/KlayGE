@@ -44,22 +44,6 @@ namespace KlayGE
 		effect_ = MakeCOMPtr(effect);
 	}
 
-	D3D9RenderEffect::D3D9RenderEffect(D3D9RenderEffect const & rhs)
-	{
-		assert(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
-
-		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-
-		ID3DXEffect* effect;
-		rhs.effect_->CloneEffect(renderEngine.D3DDevice().get(), &effect);
-		effect_ = MakeCOMPtr(effect);
-	}
-
-	RenderEffectPtr D3D9RenderEffect::Clone() const
-	{
-		return RenderEffectPtr(new D3D9RenderEffect(*this));
-	}
-
 	void D3D9RenderEffect::Desc(uint32_t& parameters, uint32_t& techniques, uint32_t& functions)
 	{
 		D3DXEFFECT_DESC desc;
@@ -70,31 +54,34 @@ namespace KlayGE
 		functions = desc.Functions;
 	}
 
+	RenderEffectParameterPtr D3D9RenderEffect::DoParameter(D3DXHANDLE handle)
+	{
+		params_t::iterator iter = params_.find(handle);
+		if (iter != params_.end())
+		{
+			return iter->second;
+		}
+		else
+		{
+			D3D9RenderEffectParameterPtr ret(new D3D9RenderEffectParameter(effect_, handle));
+			params_.insert(std::make_pair(handle, ret));
+			return ret;
+		}
+	}
+
 	RenderEffectParameterPtr D3D9RenderEffect::Parameter(uint32_t index)
 	{
-		D3D9RenderEffectParameterPtr ret(new D3D9RenderEffectParameter(effect_,
-			effect_->GetParameter(NULL, index)));
-		params_.insert(ret);
-
-		return ret;
+		return this->DoParameter(effect_->GetParameter(NULL, index));
 	}
 
 	RenderEffectParameterPtr D3D9RenderEffect::ParameterByName(std::string const & name)
 	{
-		D3D9RenderEffectParameterPtr ret(new D3D9RenderEffectParameter(effect_,
-			effect_->GetParameterByName(NULL, name.c_str())));
-		params_.insert(ret);
-
-		return ret;
+		return this->DoParameter(effect_->GetParameterByName(NULL, name.c_str()));
 	}
 
 	RenderEffectParameterPtr D3D9RenderEffect::ParameterBySemantic(std::string const & semantic)
 	{
-		D3D9RenderEffectParameterPtr ret(new D3D9RenderEffectParameter(effect_,
-			effect_->GetParameterBySemantic(NULL, semantic.c_str())));
-		params_.insert(ret);
-
-		return ret;
+		return this->DoParameter(effect_->GetParameterBySemantic(NULL, semantic.c_str()));
 	}
 
 	void D3D9RenderEffect::SetTechnique(std::string const & technique)
@@ -144,10 +131,9 @@ namespace KlayGE
 
 	void D3D9RenderEffect::DoOnLostDevice()
 	{
-		for (std::set<D3D9RenderEffectParameterPtr>::iterator iter = params_.begin();
-			iter != params_.end(); ++ iter)
+		for (params_t::iterator iter = params_.begin(); iter != params_.end(); ++ iter)
 		{
-			(*iter)->OnLostDevice();
+			iter->second->OnLostDevice();
 		}
 
 		TIF(effect_->OnLostDevice());
@@ -157,10 +143,9 @@ namespace KlayGE
 	{
 		TIF(effect_->OnResetDevice());
 
-		for (std::set<D3D9RenderEffectParameterPtr>::iterator iter = params_.begin();
-			iter != params_.end(); ++ iter)
+		for (params_t::iterator iter = params_.begin(); iter != params_.end(); ++ iter)
 		{
-			(*iter)->OnResetDevice();
+			iter->second->OnResetDevice();
 		}
 	}
 

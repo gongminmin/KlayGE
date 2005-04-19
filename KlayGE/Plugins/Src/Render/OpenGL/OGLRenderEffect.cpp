@@ -26,15 +26,6 @@ namespace KlayGE
 	{
 	}
 
-	OGLRenderEffect::OGLRenderEffect(OGLRenderEffect const & rhs)
-	{
-	}
-
-	RenderEffectPtr OGLRenderEffect::Clone() const
-	{
-		return RenderEffectPtr(new OGLRenderEffect(*this));
-	}
-
 	void OGLRenderEffect::Desc(uint32_t& parameters, uint32_t& techniques, uint32_t& functions)
 	{
 	}

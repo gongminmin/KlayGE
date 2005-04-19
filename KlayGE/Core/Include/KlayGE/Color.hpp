@@ -1,8 +1,11 @@
 // Color.hpp
 // KlayGE 颜色 头文件
-// Ver 2.1.3
-// 版权所有(C) 龚敏敏, 2004
+// Ver 2.5.0
+// 版权所有(C) 龚敏敏, 2004-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.5.0
+// 改为模板实现 (2005.4.18)
 //
 // 2.1.3
 // 增加了operator* (2004.6.18)
@@ -24,15 +27,16 @@ namespace KlayGE
 {
 	// RGBA，用4个浮点数表示r, g, b, a
 	///////////////////////////////////////////////////////////////////////////////
-	class Color : boost::addable<Color,
-						boost::subtractable<Color,
-						boost::dividable2<Color, float,
-						boost::multipliable<Color,
-						boost::multipliable2<Color, float,
-						boost::equality_comparable<Color > > > > > >
+	template <typename T>
+	class Color_T : boost::addable<Color_T<T>,
+						boost::subtractable<Color_T<T>,
+						boost::dividable2<Color_T<T>, T,
+						boost::multipliable<Color_T<T>,
+						boost::multipliable2<Color_T<T>, T,
+						boost::equality_comparable<Color_T<T> > > > > > >
 	{
 	public:
-		typedef float				value_type;
+		typedef T					value_type;
 
 		typedef value_type*			pointer;
 		typedef value_type const *	const_pointer;
@@ -46,24 +50,24 @@ namespace KlayGE
 		enum { elem_num = 4 };
 
 	public:
-		Color()
+		Color_T()
 			{ }
-		explicit Color(float const * rhs)
+		explicit Color_T(T const * rhs)
 			: col_(rhs)
 			{ }
-		Color(Color const & rhs)
+		Color_T(Color_T const & rhs)
 			: col_(rhs.col_)
 			{ }
-		Color(float r, float g, float b, float a)
+		Color_T(T const & r, T const & g, T const & b, T const & a)
 		{
 			this->r() = r;
 			this->g() = g;
 			this->b() = b;
 			this->a() = a;
 		}
-		explicit Color(uint32_t dw)
+		explicit Color_T(uint32_t dw)
 		{
-			static float const f(1 / 255.0f);
+			static T const f(1 / T(255));
 			this->a() = f * (static_cast<float>(static_cast<uint8_t>(dw >> 24)));
 			this->r() = f * (static_cast<float>(static_cast<uint8_t>(dw >> 16)));
 			this->g() = f * (static_cast<float>(static_cast<uint8_t>(dw >>  8)));
@@ -110,33 +114,33 @@ namespace KlayGE
 		}
 
 		// 赋值操作符
-		Color& operator+=(Color const & rhs)
+		Color_T& operator+=(Color_T const & rhs)
 		{
 			col_ += rhs.col_;
 			return *this;
 		}
-		Color& operator-=(Color const & rhs)
+		Color_T& operator-=(Color_T const & rhs)
 		{
 			col_ -= rhs.col_;
 			return *this;
 		}
-		Color& operator*=(float rhs)
+		Color_T& operator*=(T const & rhs)
 		{
 			col_ *= rhs;
 			return *this;
 		}
-		Color& operator*=(Color const & rhs)
+		Color_T& operator*=(Color_T const & rhs)
 		{
 			*this = MathLib::Modulate(*this, rhs);
 			return *this;
 		}
-		Color& operator/=(float rhs)
+		Color_T& operator/=(T const & rhs)
 		{
 			col_ /= rhs;
 			return *this;
 		}
 
-		Color& operator=(Color const & rhs)
+		Color_T& operator=(Color_T const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -145,20 +149,22 @@ namespace KlayGE
 			return *this;
 		}
 
-		bool operator==(Color const & rhs)
+		bool operator==(Color_T const & rhs)
 		{
 			return col_ == rhs.col_;
 		}
 
 		// 一元操作符
-		Color const operator+() const
+		Color_T const operator+() const
 			{ return *this; }
-		Color const operator-() const
-			{ return Color(-this->r(), -this->g(), -this->b(), -this->a()); }
+		Color_T const operator-() const
+			{ return Color_T(-this->r(), -this->g(), -this->b(), -this->a()); }
 
 	private:
-		Vector_T<float, elem_num> col_;
+		Vector_T<T, elem_num> col_;
 	};
+
+	typedef Color_T<float> Color;
 }
 
 #endif			// _COLOR_HPP

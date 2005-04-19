@@ -1,8 +1,11 @@
 // D3D9RenderEffect.hpp
 // KlayGE D3D9渲染效果类 头文件
-// Ver 2.4.0
+// Ver 2.5.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.5.0
+// 去掉了Clone (2005.4.16)
 //
 // 2.4.0
 // 改为派生自D3D9Resource (2005.3.3)
@@ -29,7 +32,7 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <boost/smart_ptr.hpp>
 
-#include <set>
+#include <map>
 
 #include <d3dx9effect.h>
 
@@ -56,12 +59,9 @@ namespace KlayGE
 	{
 	public:
 		explicit D3D9RenderEffect(std::string const & srcData);
-		D3D9RenderEffect(D3D9RenderEffect const & rhs);
 
 		boost::shared_ptr<ID3DXEffect> const & D3DXEffect() const
 			{ return effect_; }
-
-		RenderEffectPtr Clone() const;
 
 		void Desc(uint32_t& parameters, uint32_t& techniques, uint32_t& functions);
 
@@ -83,10 +83,13 @@ namespace KlayGE
 		void DoOnLostDevice();
 		void DoOnResetDevice();
 
+		RenderEffectParameterPtr DoParameter(D3DXHANDLE handle);
+
 	private:
 		boost::shared_ptr<ID3DXEffect> effect_;
 
-		std::set<D3D9RenderEffectParameterPtr> params_;
+		typedef std::map<D3DXHANDLE, D3D9RenderEffectParameterPtr> params_t;
+		params_t params_;
 	};
 
 	class D3D9RenderEffectParameter : public RenderEffectParameter, public D3D9Resource
