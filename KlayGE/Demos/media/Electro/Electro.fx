@@ -42,7 +42,7 @@ float4 ElectroPS(float3 texCoord0	: TEXCOORD0,
 					uniform sampler3D electroMap) : COLOR
 {
 	float turb = tex3D(electroMap, texCoord0) * 2 - 1;
-	float4 grow = (1 - pow(turb, 0.2)) * float4(1.70, 1.48, 1.78, 0);
+	float4 grow = (1 - pow(turb, 0.2)) * float4(1.70, 1.48, 1.78, 1);
 	return pow(grow, 4);
 }
 
