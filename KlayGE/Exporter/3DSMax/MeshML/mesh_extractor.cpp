@@ -17,7 +17,7 @@ namespace
 	struct vertex_index_t
 	{
 		int pos_index;
-		int tex_index;
+		std::vector<int> tex_indices;
 
 		std::vector<size_t> ref_triangle;
 	};
@@ -36,7 +36,7 @@ namespace
 			}
 			else
 			{
-				if (lhs.tex_index < rhs.tex_index)
+				if (lhs.tex_indices < rhs.tex_indices)
 				{
 					return true;
 				}
@@ -46,11 +46,6 @@ namespace
 				}
 			}
 		}
-	}
-
-	bool weight_cmp(std::pair<std::string, float> const & lhs, std::pair<std::string, float> const & rhs)
-	{
-		return lhs.second < rhs.second;
 	}
 }
 
@@ -87,10 +82,10 @@ void meshml_extractor::extract_object(INode* node)
 		is_mirrored = true;
 	}
 
-	std::vector<std::pair<Point3, binds_t> > pos_list;
-	std::vector<Point2> tex_list;
-	std::vector<int> pos_index_list;
-	std::vector<int> tex_index_list;
+	std::vector<Point3> positions;
+	std::map<int, std::vector<Point2> > texs;
+	std::vector<int> pos_indices;
+	std::map<int, std::vector<int> > tex_indices;
 
 	Matrix2 uv_trans(TRUE);
 	Mtl* mtl = node->GetMtl();
@@ -136,24 +131,44 @@ void meshml_extractor::extract_object(INode* node)
 		Mesh& mesh = tri->GetMesh();
 
 		obj_info.triangles.resize(mesh.getNumFaces());
-
-		for (size_t i = 0; i < mesh.getNumFaces(); ++ i)
+		for (size_t i = 0; i < obj_info.triangles.size(); ++ i)
 		{
 			for (int j = 2; j >= 0; -- j)
 			{
-				pos_index_list.push_back(mesh.faces[i].v[j]);
-				tex_index_list.push_back(mesh.tvFace[i].t[j]);
+				pos_indices.push_back(mesh.faces[i].v[j]);
 			}
 		}
-
 		for (size_t i = 0; i < mesh.getNumVerts(); ++ i)
 		{
-			pos_list.push_back(std::make_pair(mesh.verts[i], binds_t()));
+			positions.push_back(mesh.verts[i]);
 		}
-		for (size_t i = 0; i < mesh.getNumTVerts(); ++ i)
+
+		for (int channel = 1; channel < MAX_MESHMAPS; channel ++)
 		{
-			UVVert const tex = mesh.tVerts[i];
-			tex_list.push_back(Point2(tex.x, tex.y));
+			if (mesh.mapSupport(channel))
+			{
+				const int num_map_verts = mesh.getNumMapVerts(channel);
+				if (num_map_verts > 0)
+				{
+					texs[channel].resize(num_map_verts);
+
+					UVVert* uv_verts = mesh.mapVerts(channel);
+					for (size_t i = 0; i < texs[channel].size(); ++ i)
+					{
+						texs[channel][i].x = uv_verts[i].x;
+						texs[channel][i].y = uv_verts[i].y;
+					}
+
+					TVFace* tv_faces = mesh.mapFaces(channel);
+					for (size_t i = 0; i < obj_info.triangles.size(); ++ i)
+					{
+						for (int j = 2; j >= 0; -- j)
+						{
+							tex_indices[channel].push_back(tv_faces[i].t[j]);
+						}
+					}
+				}
+			}
 		}
 
 		if (need_delete)
@@ -179,8 +194,12 @@ void meshml_extractor::extract_object(INode* node)
 				offset = i * 3 + (2 - j);
 			}
 
-			vertex_index.pos_index = pos_index_list[offset];
-			vertex_index.tex_index = tex_index_list[offset];
+			vertex_index.pos_index = pos_indices[offset];
+			for (std::map<int, std::vector<int> >::iterator iter = tex_indices.begin();
+				iter != tex_indices.end(); ++ iter)
+			{
+				vertex_index.tex_indices.push_back(iter->second[offset]);
+			}
 
 			std::set<vertex_index_t>::iterator iter = vertex_indices.find(vertex_index);
 			if (iter != vertex_indices.end())
@@ -195,28 +214,27 @@ void meshml_extractor::extract_object(INode* node)
 		}
 	}
 
-	Matrix3 tm = node->GetNodeTM(0);
-	tm.Invert();
-	tm = obj_matrix * tm;
 	obj_info.vertices.resize(vertex_indices.size());
-	int VIndex = 0;
+	int ver_index = 0;
 	for (std::set<vertex_index_t>::iterator iter = vertex_indices.begin();
-		iter != vertex_indices.end(); ++ iter, ++ VIndex)
+		iter != vertex_indices.end(); ++ iter, ++ ver_index)
 	{
-		Point3 pos = pos_list[iter->pos_index].first * tm;
-		obj_info.vertices[VIndex].pos.x = pos.x;
-		obj_info.vertices[VIndex].pos.y = pos.z;
-		obj_info.vertices[VIndex].pos.z = pos.y;
+		Point3 pos = positions[iter->pos_index] * obj_matrix;
+		obj_info.vertices[ver_index].pos.x = pos.x;
+		obj_info.vertices[ver_index].pos.y = pos.z;
+		obj_info.vertices[ver_index].pos.z = pos.y;
 
-		Point2 tex = tex_list[iter->tex_index] * uv_trans;
-		obj_info.vertices[VIndex].tex.x = tex.x;
-		obj_info.vertices[VIndex].tex.y = 1 - tex.y;
-
-		obj_info.vertices[VIndex].binds = pos_list[iter->pos_index].second;
+		int uv_layer = 0;
+		for (std::map<int, std::vector<Point2> >::iterator uv_iter = texs.begin();
+			uv_iter != texs.end(); ++ uv_iter, ++ uv_layer)
+		{
+			Point2 tex = uv_iter->second[iter->tex_indices[uv_layer]] * uv_trans;
+			obj_info.vertices[ver_index].tex.push_back(Point2(tex.x, 1 - tex.y));
+		}
 
 		for (size_t i = 0; i < iter->ref_triangle.size(); ++ i)
 		{
-			obj_info.triangles[iter->ref_triangle[i] / 3].vertex_index[iter->ref_triangle[i] % 3] = VIndex;
+			obj_info.triangles[iter->ref_triangle[i] / 3].vertex_index[iter->ref_triangle[i] % 3] = ver_index;
 		}
 	}
 
@@ -257,9 +275,16 @@ void meshml_extractor::write_xml(std::basic_string<TCHAR> const & file_name)
 		{
 			ofs << "\t\t\t\t<vertex x=\'" << v_iter->pos.x
 				<< "\' y=\'" << v_iter->pos.y
-				<< "\' z=\'" << v_iter->pos.z
-				<< "\' u=\'" << v_iter->tex.x
-				<< "\' v=\'" << v_iter->tex.y << "\'/>" << endl;
+				<< "\' z=\'" << v_iter->pos.z << "\'>" << endl;
+
+			for (std::vector<Point2>::const_iterator t_iter = v_iter->tex.begin();
+				t_iter != v_iter->tex.end(); ++ t_iter)
+			{
+				ofs << "\t\t\t\t\t<tex_coord u=\'" << t_iter->x
+					<< "\' v=\'" << t_iter->y << "\'/>" << endl;
+			}
+
+			ofs << "\t\t\t\t</vertex>" << endl;
 		}
 		ofs << "\t\t\t</vertices_chunk>" << endl << endl;
 

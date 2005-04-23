@@ -8,14 +8,10 @@
 
 #include "meshml.hpp"
 
-typedef std::map<std::string, float> binds_t;
-
 struct vertex_t
 {
 	Point3 pos;
-	Point2 tex;
-
-	binds_t binds;
+	std::vector<Point2> tex;
 };
 
 typedef std::vector<vertex_t> vertices_t;
@@ -26,16 +22,6 @@ struct triangle_t
 };
 
 typedef std::vector<triangle_t> triangles_t;
-
-struct bind_bone_t
-{
-	Point3 bind_pos;
-	Quat bind_quat;
-
-	std::string parent_name;
-};
-
-typedef std::map<std::string, bind_bone_t> bones_t;
 
 typedef std::pair<std::string, std::string> texture_slot_t;
 typedef std::vector<texture_slot_t> texture_slots_t;
