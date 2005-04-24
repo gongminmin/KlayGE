@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 8.00
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ø®Õ®‰÷»æ", "src\Cartoon\Cartoon.vcproj", "{DA5E7FC0-CC85-45A7-8D1E-E80A813F2705}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Cartoon", "src\Cartoon\Cartoon.vcproj", "{DA5E7FC0-CC85-45A7-8D1E-E80A813F2705}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
@@ -7,7 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Parallax", "src\Parallax\Pa
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "∂•µ„Œª“∆", "src\VertexDisplacement\VertexDisplacement.vcproj", "{63128457-8C79-4C9F-ACB7-506537BBC4BE}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Vertex Displacement", "src\VertexDisplacement\VertexDisplacement.vcproj", "{63128457-8C79-4C9F-ACB7-506537BBC4BE}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
@@ -16,6 +16,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Distance Mapping", "src\Dis
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Electro", "src\Electro\Electro.vcproj", "{32EBA7EF-137A-4C06-8E1B-383F27A0E0C1}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Fractal", "src\Fractal\Fractal.vcproj", "{32EBA7EF-137A-4C06-8E1B-383F27A0E0C1}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
@@ -37,6 +41,10 @@ Global
 		{63128457-8C79-4C9F-ACB7-506537BBC4BE}.Debug.Build.0 = Debug|Win32
 		{63128457-8C79-4C9F-ACB7-506537BBC4BE}.Release.ActiveCfg = Release|Win32
 		{63128457-8C79-4C9F-ACB7-506537BBC4BE}.Release.Build.0 = Release|Win32
+		{32EBA7EF-137A-4C06-8E1B-383F27A0E0C1}.Debug.ActiveCfg = Debug|Win32
+		{32EBA7EF-137A-4C06-8E1B-383F27A0E0C1}.Debug.Build.0 = Debug|Win32
+		{32EBA7EF-137A-4C06-8E1B-383F27A0E0C1}.Release.ActiveCfg = Release|Win32
+		{32EBA7EF-137A-4C06-8E1B-383F27A0E0C1}.Release.Build.0 = Release|Win32
 		{32EBA7EF-137A-4C06-8E1B-383F27A0E0C1}.Debug.ActiveCfg = Debug|Win32
 		{32EBA7EF-137A-4C06-8E1B-383F27A0E0C1}.Debug.Build.0 = Debug|Win32
 		{32EBA7EF-137A-4C06-8E1B-383F27A0E0C1}.Release.ActiveCfg = Release|Win32

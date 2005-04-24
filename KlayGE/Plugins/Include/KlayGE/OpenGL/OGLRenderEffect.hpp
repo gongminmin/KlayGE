@@ -40,8 +40,8 @@ namespace KlayGE
 		RenderEffectParameterPtr ParameterByName(std::string const & name);
 		RenderEffectParameterPtr ParameterBySemantic(std::string const & semantic);
 
-		void SetTechnique(std::string const & technique);
-		void SetTechnique(uint32_t technique);
+		bool SetTechnique(std::string const & technique);
+		bool SetTechnique(uint32_t technique);
 
 		uint32_t Begin(uint32_t flags = 0);
 		void BeginPass(uint32_t passNum);

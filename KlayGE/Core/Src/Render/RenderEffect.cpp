@@ -43,10 +43,14 @@ namespace KlayGE
 		RenderEffectParameterPtr ParameterBySemantic(std::string const & /*semantic*/)
 			{ return RenderEffectParameter::NullObject(); }
 
-		void SetTechnique(std::string const & /*techName*/)
-			{ }
-		void SetTechnique(uint32_t /*tech*/)
-			{ }
+		bool SetTechnique(std::string const & /*techName*/)
+		{
+			return false;
+		}
+		bool SetTechnique(uint32_t /*tech*/)
+		{
+			return false;
+		}
 
 		uint32_t Begin(uint32_t /*flags*/)
 			{ return 1; }

@@ -1,11 +1,12 @@
 // RenderEffect.hpp
-// KlayGE 渲染效果类 头文件
+// KlayGE 渲染效果脚本类 头文件
 // Ver 2.5.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
 //
 // 2.5.0
 // 去掉了Clone (2005.4.16)
+// SetTechnique的返回类型改为bool (2005.4.25)
 //
 // 2.1.2
 // 增加了Parameter (2004.5.26)
@@ -50,8 +51,8 @@ namespace KlayGE
 		virtual RenderEffectParameterPtr ParameterByName(std::string const & name) = 0;
 		virtual RenderEffectParameterPtr ParameterBySemantic(std::string const & semantic) = 0;
 
-		virtual void SetTechnique(std::string const & technique) = 0;
-		virtual void SetTechnique(uint32_t technique) = 0;
+		virtual bool SetTechnique(std::string const & technique) = 0;
+		virtual bool SetTechnique(uint32_t technique) = 0;
 
 		virtual uint32_t Begin(uint32_t flags = 0) = 0;
 		virtual void BeginPass(uint32_t passNum) = 0;

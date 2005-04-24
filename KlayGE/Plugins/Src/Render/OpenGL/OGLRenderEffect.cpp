@@ -45,12 +45,14 @@ namespace KlayGE
 		return RenderEffectParameterPtr();
 	}
 
-	void OGLRenderEffect::SetTechnique(std::string const & technique)
+	bool OGLRenderEffect::SetTechnique(std::string const & technique)
 	{
+		return false;
 	}
 
-	void OGLRenderEffect::SetTechnique(uint32_t technique)
+	bool OGLRenderEffect::SetTechnique(uint32_t technique)
 	{
+		return false;
 	}
 
 	uint32_t OGLRenderEffect::Begin(uint32_t flags)

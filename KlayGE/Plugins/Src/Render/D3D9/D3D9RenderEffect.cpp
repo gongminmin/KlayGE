@@ -84,22 +84,27 @@ namespace KlayGE
 		return this->DoParameter(effect_->GetParameterBySemantic(NULL, semantic.c_str()));
 	}
 
-	void D3D9RenderEffect::SetTechnique(std::string const & technique)
+	bool D3D9RenderEffect::DoSetTechnique(D3DXHANDLE handle)
 	{
-		D3DXHANDLE handle(effect_->GetTechniqueByName(technique.c_str()));
 		if (this->Validate(handle))
 		{
-			effect_->SetTechnique(handle);
+			TIF(effect_->SetTechnique(handle));
+			return true;
+		}
+		else
+		{
+			return false;
 		}
 	}
 
-	void D3D9RenderEffect::SetTechnique(uint32_t technique)
+	bool D3D9RenderEffect::SetTechnique(std::string const & technique)
 	{
-		D3DXHANDLE handle(effect_->GetTechnique(technique));
-		if (this->Validate(handle))
-		{
-			effect_->SetTechnique(handle);
-		}
+		return this->DoSetTechnique(effect_->GetTechniqueByName(technique.c_str()));
+	}
+
+	bool D3D9RenderEffect::SetTechnique(uint32_t technique)
+	{
+		return this->DoSetTechnique(effect_->GetTechnique(technique));
 	}
 
 	bool D3D9RenderEffect::Validate(D3DXHANDLE handle)
