@@ -31,7 +31,7 @@ float4 FractalPS(float2 texCoord0 : TEXCOORD0,
 		z = float2(z.x * z.x - z.y * z.y, z.x * z.y + z.y * z.x) + c;
 	}
 
-	return float4(length(z) / 2, z.x * 2, z.y * 2, 1);
+	return float4(0, 0, length(z) / 2, 1);
 }
 
 technique FractalPS30
