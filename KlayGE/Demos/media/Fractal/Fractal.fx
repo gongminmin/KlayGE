@@ -39,7 +39,7 @@ technique FractalPS30
 	pass p0
 	{
 		VertexShader = compile vs_3_0 FractalVS();
-		PixelShader = compile ps_3_0 FractalPS(40);
+		PixelShader = compile ps_3_0 FractalPS(50);
 	}
 }
 
@@ -48,7 +48,7 @@ technique FractalPS2a
 	pass p0
 	{
 		VertexShader = compile vs_1_1 FractalVS();
-		PixelShader = compile ps_2_a FractalPS(20);
+		PixelShader = compile ps_2_a FractalPS(30);
 	}
 }
 
