@@ -1,9 +1,21 @@
+// export_main.cpp
+// KlayGE 3DSMax导出接口类 实现文件
+// Ver 2.5.0
+// 版权所有(C) 龚敏敏, 2005
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.5.0
+// 初次建立 (2005.5.1)
+//
+// 修改记录
+/////////////////////////////////////////////////////////////////////////////////
+
 #include <max.h>
 
 #include "meshml.hpp"
 #include "export_main.hpp"
 
-MeshML_ClassDesc meshml_class_desc;
+KlayGE::meshml_class_desc mcd;
 
 HINSTANCE dll_instance;
 
@@ -23,7 +35,7 @@ extern "C" ClassDesc* LibClassDesc(int i)
 	switch (i)
 	{
 	case 0:
-		return &meshml_class_desc;
+		return &mcd;
 
 	default:
 		return 0;
