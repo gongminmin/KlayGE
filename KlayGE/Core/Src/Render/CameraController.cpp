@@ -91,7 +91,7 @@ namespace KlayGE
 
 		static clock_t lastTime(std::clock());
 		clock_t curTime(std::clock());
-		if (curTime - lastTime > 50)
+		if (curTime - lastTime > 10)
 		{
 			float const scaler = (curTime - lastTime) / 100.0f;
 

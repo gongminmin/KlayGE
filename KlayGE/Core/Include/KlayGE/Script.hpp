@@ -69,16 +69,9 @@ namespace KlayGE
 	class ScriptModule
 	{
 	public:
-		ScriptModule(std::string const & name)
-		{
-			module_	= MakePyObjectPtr(PyImport_Import(PyString_FromString(name.c_str())));
-			dict_	= MakePyObjectPtr(PyModule_GetDict(module_.get()));
-		}
+		explicit ScriptModule(std::string const & name);
 
-		boost::shared_ptr<PyObject> Value(std::string const & name)
-		{
-			return MakePyObjectPtr(PyDict_GetItemString(dict_.get(), name.c_str()));
-		}
+		boost::shared_ptr<PyObject> Value(std::string const & name);
 
 		template <typename TupleType>
 		PyObjectPtr Call(std::string const & funcName, const TupleType& t)

@@ -28,6 +28,19 @@
 
 namespace KlayGE
 {
+	ScriptModule::ScriptModule(std::string const & name)
+	{
+		module_	= MakePyObjectPtr(PyImport_Import(PyString_FromString(name.c_str())));
+		dict_	= MakePyObjectPtr(PyModule_GetDict(module_.get()));
+	}
+
+	boost::shared_ptr<PyObject> ScriptModule::Value(std::string const & name)
+	{
+		std::vector<char> temp(name.begin(), name.end());
+		temp.push_back(0);
+		return MakePyObjectPtr(PyDict_GetItemString(dict_.get(), &temp[0]));
+	}
+
 	// 向模块声明中添加一个方法
 	/////////////////////////////////////////////////////////////////////////////////
 	void RegisterModule::AddMethod(std::string const & methodName, PyCallback method)
