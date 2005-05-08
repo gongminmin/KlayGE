@@ -192,7 +192,7 @@ VertexDisplacement::VertexDisplacement()
 
 void VertexDisplacement::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("SIMYOU.TTF", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gbsn00lp.ttf", 16);
 
 	flag.reset(new Flag);
 

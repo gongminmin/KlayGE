@@ -148,7 +148,7 @@ Fractal::Fractal()
 
 void Fractal::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("SIMYOU.TTF", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gbsn00lp.ttf", 16);
 
 	renderFractal.reset(new RenderFractal);
 	renderFractal->AddToSceneManager();

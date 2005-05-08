@@ -194,7 +194,7 @@ Electro::Electro()
 
 void Electro::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("SIMYOU.TTF", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gbsn00lp.ttf", 16);
 
 	renderElectro.reset(new RenderElectro);
 	renderElectro->AddToSceneManager();
