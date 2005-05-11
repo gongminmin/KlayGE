@@ -522,10 +522,13 @@ namespace KlayGE
 		TIF(d3dTexture2D_->GetSurfaceLevel(level, &temp));
 		IDirect3DSurface9Ptr surface = MakeCOMPtr(temp);
 
-		RECT srcRc = { 0, 0, width, height };
-		RECT dstRc = { xOffset, yOffset, xOffset + srcRc.right, yOffset + srcRc.bottom };
-		TIF(D3DXLoadSurfaceFromMemory(surface.get(), NULL, &dstRc, data, ConvertFormat(pf),
-				width * PixelFormatBits(pf) / 8, NULL, &srcRc, D3DX_FILTER_NONE, 0));
+		if (surface)
+		{
+			RECT srcRc = { 0, 0, width, height };
+			RECT dstRc = { xOffset, yOffset, xOffset + srcRc.right, yOffset + srcRc.bottom };
+			TIF(D3DXLoadSurfaceFromMemory(surface.get(), NULL, &dstRc, data, ConvertFormat(pf),
+					width * PixelFormatBits(pf) / 8, NULL, &srcRc, D3DX_FILTER_NONE, 0));
+		}
 	}
 
 	void D3D9Texture::CopyMemoryToTexture3D(int level, void* data, PixelFormat pf,
@@ -538,14 +541,17 @@ namespace KlayGE
 		TIF(d3dTexture3D_->GetVolumeLevel(level, &temp));
 		IDirect3DVolume9Ptr volume = MakeCOMPtr(temp);
 
-		uint32_t const srcRowPitch = width * PixelFormatBits(pf) / 8;
-		uint32_t const srcSlicePitch = srcRowPitch * height;
+		if (volume)
+		{
+			uint32_t const srcRowPitch = width * PixelFormatBits(pf) / 8;
+			uint32_t const srcSlicePitch = srcRowPitch * height;
 
-		D3DBOX srcBox = { 0, 0, width, height, 0, depth };
-		D3DBOX dstBox = { xOffset, yOffset, xOffset + srcBox.Right, yOffset + srcBox.Bottom,
-			zOffset, zOffset + srcBox.Back };
-		TIF(D3DXLoadVolumeFromMemory(volume.get(), NULL, &dstBox, data, ConvertFormat(pf),
-				srcRowPitch, srcSlicePitch, NULL, &srcBox, D3DX_FILTER_NONE, 0));
+			D3DBOX srcBox = { 0, 0, width, height, 0, depth };
+			D3DBOX dstBox = { xOffset, yOffset, xOffset + srcBox.Right, yOffset + srcBox.Bottom,
+				zOffset, zOffset + srcBox.Back };
+			TIF(D3DXLoadVolumeFromMemory(volume.get(), NULL, &dstBox, data, ConvertFormat(pf),
+					srcRowPitch, srcSlicePitch, NULL, &srcBox, D3DX_FILTER_NONE, 0));
+		}
 	}
 
 	void D3D9Texture::CopyMemoryToTextureCube(CubeFaces face, int level, void* data, PixelFormat pf,
@@ -557,10 +563,13 @@ namespace KlayGE
 		TIF(d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &temp));
 		IDirect3DSurface9Ptr surface = MakeCOMPtr(temp);
 
-		RECT srcRc = { 0, 0, size, size };
-		RECT dstRc = { xOffset, xOffset, xOffset + srcRc.right, xOffset + srcRc.bottom };
-		TIF(D3DXLoadSurfaceFromMemory(surface.get(), NULL, &dstRc, data, ConvertFormat(pf),
-				size * PixelFormatBits(pf) / 8, NULL, &srcRc, D3DX_FILTER_NONE, 0));
+		if (surface)
+		{
+			RECT srcRc = { 0, 0, size, size };
+			RECT dstRc = { xOffset, xOffset, xOffset + srcRc.right, xOffset + srcRc.bottom };
+			TIF(D3DXLoadSurfaceFromMemory(surface.get(), NULL, &dstRc, data, ConvertFormat(pf),
+					size * PixelFormatBits(pf) / 8, NULL, &srcRc, D3DX_FILTER_NONE, 0));
+		}
 	}
 
 	void D3D9Texture::BuildMipSubLevels()
