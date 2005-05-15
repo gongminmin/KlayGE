@@ -1,6 +1,6 @@
 // Types.hpp
 // KlayGE 类型定义头文件
-// Ver 2.2.0
+// Ver 2.5.1
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
 //

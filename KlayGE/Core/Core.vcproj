@@ -378,6 +378,9 @@
 					RelativePath=".\Include\KlayGE\Color.hpp">
 				</File>
 				<File
+					RelativePath=".\Include\KlayGE\half.hpp">
+				</File>
+				<File
 					RelativePath="Include\KlayGE\Math.hpp">
 				</File>
 				<File
