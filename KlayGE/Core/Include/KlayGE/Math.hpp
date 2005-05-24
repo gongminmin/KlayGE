@@ -1,8 +1,11 @@
 // Math.hpp
 // KlayGE 数学函数库 头文件
-// Ver 2.5.0
+// Ver 2.5.1
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.5.1
+// 改进了ComputeBoundingSphere (2005.5.23)
 //
 // 2.5.0
 // 改为通过返回值返回结果 (2005.4.12)
@@ -1511,6 +1514,7 @@ namespace KlayGE
 			return true;
 		}
 
+		// from Graphics Gems I p301
 		template <typename T, typename Iterator>
 		inline Box_T<T>
 		ComputeBoundingBox(Iterator first, Iterator last)
@@ -1530,9 +1534,86 @@ namespace KlayGE
 		inline Sphere_T<T>
 		ComputeBoundingSphere(Iterator first, Iterator last)
 		{
-			Box_T<T> box(ComputeBoundingBox(first, last));
-			float const radius = std::max(Length(box.Min()), Length(box.Max()));
-			return Sphere_T<T>(box.Center(), radius);
+			T const min_float = std::numeric_limits<T>::min();
+			T const max_float = std::numeric_limits<T>::max();
+			Vector_T<T, 3> min_x(max_float, max_float, max_float);
+			Vector_T<T, 3> min_y(max_float, max_float, max_float);
+			Vector_T<T, 3> min_z(max_float, max_float, max_float);
+			Vector_T<T, 3> max_x(min_float, min_float, min_float);
+			Vector_T<T, 3> max_y(min_float, min_float, min_float);
+			Vector_T<T, 3> max_z(min_float, min_float, min_float);
+			for (Iterator iter = first; iter != last; ++ iter)
+			{
+				if (min_x.x() > iter->x())
+				{
+					min_x = *iter;
+				}
+				if (min_y.y() > iter->y())
+				{
+					min_y = *iter;
+				}
+				if (min_z.z() > iter->z())
+				{
+					min_z = *iter;
+				}
+
+				if (max_x.x() < iter->x())
+				{
+					max_x = *iter;
+				}
+				if (max_y.y() < iter->y())
+				{
+					max_y = *iter;
+				}
+				if (max_z.z() < iter->z())
+				{
+					max_z = *iter;
+				}
+			}
+
+			Vector_T<T, 3> dis(max_x.x() - min_x.x(), max_y.y() - min_y.y(), max_z.z() - min_z.z());
+
+			T r;
+			Vector_T<T, 3> center;
+			if (dis.x() > dis.y())
+			{
+				if (dis.x() > dis.z())
+				{
+					center = (max_x + min_x) / 2;
+					r = Length(max_x - min_x) / 2;
+				}
+				else
+				{
+					center = (max_z + min_z) / 2;
+					r = Length(max_z - min_z) / 2;
+				}
+			}
+			else
+			{
+				if (dis.y() > dis.z())
+				{
+					center = (max_y + min_y) / 2;
+					r = Length(max_y - min_y) / 2;
+				}
+				else
+				{
+					center = (max_z + min_z) / 2;
+					r = Length(max_z - min_z) / 2;
+				}
+			}
+
+			for (Iterator iter = first; iter != last; ++ iter)
+			{
+				T d = Length(*iter - center);
+
+				if (d > r)
+				{
+					r = (d + r) / 2;
+					center = (r * center + (d - r) * (*iter)) / d;
+				}
+			}
+
+			return Sphere_T<T>(center, r);
 		}
 
 
