@@ -1536,71 +1536,63 @@ namespace KlayGE
 		{
 			T const min_float = std::numeric_limits<T>::min();
 			T const max_float = std::numeric_limits<T>::max();
-			Vector_T<T, 3> min_x(max_float, max_float, max_float);
-			Vector_T<T, 3> min_y(max_float, max_float, max_float);
-			Vector_T<T, 3> min_z(max_float, max_float, max_float);
-			Vector_T<T, 3> max_x(min_float, min_float, min_float);
-			Vector_T<T, 3> max_y(min_float, min_float, min_float);
-			Vector_T<T, 3> max_z(min_float, min_float, min_float);
+			Vector_T<T, 3> x_min(max_float, max_float, max_float);
+			Vector_T<T, 3> y_min(max_float, max_float, max_float);
+			Vector_T<T, 3> z_min(max_float, max_float, max_float);
+			Vector_T<T, 3> x_max(min_float, min_float, min_float);
+			Vector_T<T, 3> y_max(min_float, min_float, min_float);
+			Vector_T<T, 3> z_max(min_float, min_float, min_float);
 			for (Iterator iter = first; iter != last; ++ iter)
 			{
-				if (min_x.x() > iter->x())
-				{
-					min_x = *iter;
-				}
-				if (min_y.y() > iter->y())
-				{
-					min_y = *iter;
-				}
-				if (min_z.z() > iter->z())
-				{
-					min_z = *iter;
+				if (x_min.x() > iter->x())
+				{	
+					x_min = *iter;
+				}	
+				if (y_min.y() > iter->y())
+				{	
+					y_min = *iter;
+				}	
+				if (z_min.z() > iter->z())
+				{	
+					z_min = *iter;
 				}
 
-				if (max_x.x() < iter->x())
-				{
-					max_x = *iter;
-				}
-				if (max_y.y() < iter->y())
-				{
-					max_y = *iter;
-				}
-				if (max_z.z() < iter->z())
-				{
-					max_z = *iter;
+				if (x_max.x() < iter->x())
+				{	
+					x_max = *iter;
+				}	
+				if (y_max.y() < iter->y())
+				{	
+					y_max = *iter;
+				}	
+				if (z_max.z() < iter->z())
+				{	
+					z_max = *iter;
 				}
 			}
 
-			Vector_T<T, 3> dis(max_x.x() - min_x.x(), max_y.y() - min_y.y(), max_z.z() - min_z.z());
+			T x_span = LengthSq(x_max - x_min);
+			T y_span = LengthSq(y_max - y_min);
+			T z_span = LengthSq(z_max - z_min);
 
-			T r;
-			Vector_T<T, 3> center;
-			if (dis.x() > dis.y())
+			Vector_T<T, 3> dia1 = x_min;
+			Vector_T<T, 3> dia2 = x_max;
+			T max_span = x_span;
+			if (y_span > max_span)
 			{
-				if (dis.x() > dis.z())
-				{
-					center = (max_x + min_x) / 2;
-					r = Length(max_x - min_x) / 2;
-				}
-				else
-				{
-					center = (max_z + min_z) / 2;
-					r = Length(max_z - min_z) / 2;
-				}
+				max_span = y_span;
+				dia1 = y_min;
+				dia2 = y_max;
 			}
-			else
+			if (z_span > max_span)
 			{
-				if (dis.y() > dis.z())
-				{
-					center = (max_y + min_y) / 2;
-					r = Length(max_y - min_y) / 2;
-				}
-				else
-				{
-					center = (max_z + min_z) / 2;
-					r = Length(max_z - min_z) / 2;
-				}
+				max_span = z_span;
+				dia1 = z_min;
+				dia2 = z_max;
 			}
+
+			Vector_T<T, 3> center((dia1 + dia2) / 2);
+			T r = Length(dia2 - center);
 
 			for (Iterator iter = first; iter != last; ++ iter)
 			{

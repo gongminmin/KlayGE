@@ -13,10 +13,10 @@
 #ifndef _D3D9RENDERENGINE_HPP
 #define _D3D9RENDERENGINE_HPP
 
+#define NOMINMAX
+
 #include <boost/smart_ptr.hpp>
 #include <KlayGE/D3D9/D3D9AdapterList.hpp>
-
-#define NOMINMAX
 
 #include <d3d9.h>
 #include <d3dx9.h>

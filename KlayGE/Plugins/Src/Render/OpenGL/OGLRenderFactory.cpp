@@ -100,6 +100,10 @@ namespace KlayGE
 		{
 			return IndexStreamPtr(new OGLIndexStream);
 		}
+
+	private:
+		OGLRenderFactory(OGLRenderFactory const &);
+		OGLRenderFactory& operator=(OGLRenderFactory const &);
 	};
 
 	RenderFactory& OGLRenderFactoryInstance()
