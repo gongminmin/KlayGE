@@ -1,8 +1,11 @@
 // RenderableHelper.hpp
 // KlayGE 一些常用的可渲染对象 头文件
-// Ver 2.5.0
+// Ver 2.5.1
 // 版权所有(C) 龚敏敏, 2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.5.1
+// 增加了RenderableSkyBox (2005.5.26)
 //
 // 2.5.0
 // 增加了RenderablePoint，RenderableLine和RenderableTriangle (2005.4.13)
@@ -92,6 +95,33 @@ namespace KlayGE
 
 		VertexBufferPtr vb_;
 		RenderEffectPtr effect_;
+	};
+
+	class RenderableSkyBox : public Renderable
+	{
+	public:
+		RenderableSkyBox();
+
+		void CubeMap(TexturePtr const & cube);
+		void MVPMatrix(Matrix4 const & mvp);
+
+		void OnRenderBegin();
+		bool CanBeCulled() const;
+
+		RenderEffectPtr GetRenderEffect() const;
+		VertexBufferPtr GetVertexBuffer() const;
+
+		Box GetBound() const;
+
+		std::wstring const & Name() const;
+
+	private:
+		Box box_;
+
+		VertexBufferPtr vb_;
+		RenderEffectPtr effect_;
+
+		Matrix4 inv_mvp_;
 	};
 }
 

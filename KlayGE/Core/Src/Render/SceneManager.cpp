@@ -1,8 +1,11 @@
 // SceneManager.cpp
 // KlayGE 场景管理器类 实现文件
-// Ver 2.4.0
+// Ver 2.5.1
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.5.1
+// 修正了CanBeCulled的bug (2005.5.26)
 //
 // 2.4.0
 // 增加了NumObjectsRendered，NumPrimitivesRendered和NumVerticesRendered (2005.3.20)
@@ -49,14 +52,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::AddRenderable(RenderablePtr const & obj)
 	{
-		if (obj->CanBeCulled())
-		{
-			this->DoAddRenderable(obj);
-		}
-		else
-		{
-			this->AddToRenderQueue(obj);
-		}
+		this->DoAddRenderable(obj);
 	}
 
 	void SceneManager::DoAddRenderable(RenderablePtr const & obj)

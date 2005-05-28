@@ -1,8 +1,11 @@
 // OCTree.cpp
 // KlayGE 八叉树类 实现文件
-// Ver 2.4.0
+// Ver 2.5.1
 // 版权所有(C) 龚敏敏, 2004-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.5.1
+// 修正了CanBeCulled的bug (2005.5.26)
 //
 // 2.4.0
 // 改用线性八叉树 (2005.3.20)
@@ -36,7 +39,14 @@ namespace KlayGE
 	{
 		for (RenderItemsType::iterator iter = renderItems_.begin(); iter != renderItems_.end(); ++ iter)
 		{
-			this->InsertRenderable("0", *iter);
+			if ((*iter)->CanBeCulled())
+			{
+				this->InsertRenderable("0", *iter);
+			}
+			else
+			{
+				this->AddToRenderQueue(*iter);				
+			}
 		}
 
 		Frustum frustum(camera.ViewMatrix() * camera.ProjMatrix());
