@@ -1686,7 +1686,8 @@ namespace KlayGE
 								IndexIterator indicesBegin, IndexIterator indicesEnd,
 								PositionIterator xyzsBegin, PositionIterator xyzsEnd)
 		{
-			NormalIterator normalEnd = normalBegin + (xyzsEnd - xyzsBegin);
+			NormalIterator normalEnd = normalBegin;
+			std::advance(normalEnd, std::distance(xyzsBegin, xyzsEnd));
 			std::fill(normalBegin, normalEnd, Vector_T<T, 3>::Zero());
 
 			for (IndexIterator iter = indicesBegin; iter != indicesEnd; iter += 3)
