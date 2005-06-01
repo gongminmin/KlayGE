@@ -1,10 +1,10 @@
 // SceneManager.cpp
 // KlayGE 场景管理器类 实现文件
-// Ver 2.5.1
+// Ver 2.6.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
 //
-// 2.5.1
+// 2.6.0
 // 修正了CanBeCulled的bug (2005.5.26)
 //
 // 2.4.0

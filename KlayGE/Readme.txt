@@ -1,10 +1,10 @@
-粘土游戏引擎(KlayGE) 2.5.0
+粘土游戏引擎(KlayGE) 2.6.0
 
 Homepage: http://klayge.sourceforge.net
 E-Mail:	  enginedev@163.com
 OICQ:     33611210
 
-欢迎使用粘土游戏引擎 2.5.0
+欢迎使用粘土游戏引擎 2.6.0
 包含的组件：KlayGE头文件，KlayGE源代码，KlayGE的VS.NET 2003工程文件
 
 KlayGE是一个开放，跨平台，插件结构的游戏引擎。
@@ -72,9 +72,12 @@ __________________________________________________________________
 
 发展历程
 
-2.5.1
-修正了一些bug
+2.6.0 (2005.6.2)
+修正了SceneManager类CanBeCulled的bug
 增加了half类型
+D3D9Texture增加了对surface的检查
+增加了RenderableSkyBox
+支持HDR
 
 2.5.0 (2005.5.2)
 增加了3DSMax导出插件

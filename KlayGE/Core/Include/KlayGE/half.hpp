@@ -1,10 +1,10 @@
 // half.hpp
 // KlayGE 半精度浮点类型头文件
-// Ver 2.5.1
+// Ver 2.6.0
 // 版权所有(C) 龚敏敏, 2005
 // Homepage: http://klayge.sourceforge.net
 //
-// 2.5.1
+// 2.6.0
 // 初次建立 (2005.5.15)
 //
 // 修改记录

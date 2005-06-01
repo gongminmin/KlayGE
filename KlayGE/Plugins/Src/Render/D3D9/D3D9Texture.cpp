@@ -1,10 +1,10 @@
 // D3D9Texture.cpp
 // KlayGE D3D9纹理类 实现文件
-// Ver 2.5.1
+// Ver 2.6.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
 //
-// 2.5.1
+// 2.6.0
 // 增加了对surface的检查 (2005.5.15)
 //
 // 2.4.0
