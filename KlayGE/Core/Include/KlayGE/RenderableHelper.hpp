@@ -103,7 +103,7 @@ namespace KlayGE
 		RenderableSkyBox();
 
 		void CubeMap(TexturePtr const & cube);
-		void MVPMatrix(Matrix4 const & mvp);
+		void MVPMatrix(Matrix4 const & model, Matrix4 const & view, Matrix4 const & proj);
 
 		void OnRenderBegin();
 		bool CanBeCulled() const;

@@ -221,9 +221,13 @@ namespace KlayGE
 		*(effect_->ParameterByName("skybox_cubemap")) = cube;
 	}
 
-	void RenderableSkyBox::MVPMatrix(Matrix4 const & mvp)
+	void RenderableSkyBox::MVPMatrix(Matrix4 const & /*model*/, Matrix4 const & view, Matrix4 const & proj)
 	{
-		inv_mvp_ = MathLib::Inverse(mvp);
+		Matrix4 rot_view = view;
+		rot_view(3, 0) = 0;
+		rot_view(3, 1) = 0;
+		rot_view(3, 2) = 0;
+		inv_mvp_ = MathLib::Inverse(rot_view * proj);
 	}
 
 	void RenderableSkyBox::OnRenderBegin()
