@@ -1,4 +1,4 @@
-GLLoader v1.5.0
+GLLoader v2.1.0
 
 GLLoader是一个OpenGL扩展载入库，可以载入OpenGL1.0-2.0，以及WGL、GLX等OpenGL扩展，只要编写xml脚本就能自动生成扩展载入代码。
 GLLoader的特点是按照功能划分扩展，而不像其他同类产品是通过版本和扩展名称载入。
@@ -23,4 +23,4 @@ void* glloader_get_gl_proc_address(const char* name);
 
 
 CVS
-:pserver:anonymous@cvs.cosoft.org.cn:/sfroot/cvs/glloader co GLLoader
+:pserver:anonymous@cvs.sourceforge.net:/cvsroot/klayge co glloader

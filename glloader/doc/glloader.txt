@@ -1,4 +1,4 @@
-GLLoader v2.0.0
+GLLoader v2.1.0
 
 The GLLoader is an OpenGL extension loading library. It supports OpenGL core 1.0 to 2.0, as well as WGL, GLX, and other GL extensions. There is a automatic code generater. All the things you want to do is to write a xml script if you have to support new extensions.
 The GLLoader's primary selling point is that it offers a initializing path of an extension. So if an extension has promoted into the core, and the loader will try to load it from the core. If failed, try the extension one.
@@ -23,4 +23,4 @@ Python 2.3 is required to run "autogen.py".
 
 
 CVS
-:pserver:anonymous@cvs.cosoft.org.cn:/sfroot/cvs/glloader co GLLoader
+:pserver:anonymous@cvs.sourceforge.net:/cvsroot/klayge co glloader
