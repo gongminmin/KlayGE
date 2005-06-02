@@ -5,7 +5,7 @@ The GLLoader's primary selling point is that it offers a initializing path of an
 The GLLoader is licensed under LGPL. 
 
 2.1.0 (2005.6.2)
-Change OpenGL 1.1 to static link.
+OpenGL 1.1 is changed to static link.
 
 2.0.1 (2005.3.30)
 Use functions to get the support infomation.
