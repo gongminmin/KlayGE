@@ -1621,7 +1621,9 @@ namespace KlayGE
 								PositionIterator xyzsBegin, PositionIterator xyzsEnd,
 								TexCoordIterator texsBegin)
 		{
-			for (int i = 0; i < xyzsEnd - xyzsBegin; ++ i)
+			int const num = std::distance(xyzsBegin, xyzsEnd);
+
+			for (int i = 0; i < num; ++ i)
 			{
 				*(targentBegin + i) = Vector3::Zero();
 				*(binormBegin + i) = Vector3::Zero();
@@ -1673,7 +1675,7 @@ namespace KlayGE
 				*(binormBegin + v2Index) += binormal;
 			}
 
-			for (int i = 0; i < xyzsEnd - xyzsBegin; ++ i)
+			for (int i = 0; i < num; ++ i)
 			{
 				*(targentBegin + i) = Normalize(*(targentBegin + i));
 				*(binormBegin + i) = Normalize(*(binormBegin + i));
@@ -1760,7 +1762,7 @@ namespace KlayGE
 
 		template <typename T>
 		inline bool
-		PointInTriangle(T const & t, T const & u, T const & v)
+		BaryCentricInTriangle(T const & u, T const & v)
 		{
 			// test bounds
 			if ((u < 0) || (u > 1))
@@ -1771,7 +1773,7 @@ namespace KlayGE
 			{
 				return false;
 			}
-			return ((t > T(0.001)) && (t < 1));
+			return true;
 		}
 	};
 }
