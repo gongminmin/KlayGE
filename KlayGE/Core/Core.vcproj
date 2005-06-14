@@ -294,6 +294,9 @@
 					RelativePath=".\Include\KlayGE\Context.hpp">
 				</File>
 				<File
+					RelativePath=".\Include\KlayGE\Event.hpp">
+				</File>
+				<File
 					RelativePath="Include\KlayGE\KlayGE.hpp">
 				</File>
 				<File

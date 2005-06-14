@@ -13,7 +13,10 @@ namespace KlayGE
 	template <typename Key, class Traits, class Allocator>
 	class SetVector;
 	class Exception;
+	template <typename Sender, typename EventArg>
+	class Event;
 
+	class half;
 	template <typename T, int N>
 	class Vector_T;
 	typedef Vector_T<float, 2> Vector2;
