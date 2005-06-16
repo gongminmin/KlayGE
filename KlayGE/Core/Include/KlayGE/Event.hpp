@@ -24,21 +24,28 @@ namespace KlayGE
 	public:
 		typedef boost::function<void (Sender&, EventArg&)>, EventHandler;
 
+	public:
+		Event(Sender& sender)
+			: sender_(&sender)
+		{
+		}
+
 		void operator+=(EventHandler const & handler)
 		{
 			handlers_.push_back(handler);
 		}
 
-		void operator()(Sender& sender, EventArg& arg)
+		void operator()(EventArg& arg)
 		{
 			for (std::list<EventHandler>::iterator iter = handlers_.begin();
 				iter != handlers_.end(); ++ iter)
 			{
-				(*iter)(sender, arg);
+				(*iter)(*sender, arg);
 			}
 		}
 
 	private:
+		Sender* sender_;
 		std::list<EventHandler> handlers_;
 	};
 }
