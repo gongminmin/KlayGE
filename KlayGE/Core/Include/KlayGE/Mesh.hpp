@@ -1,8 +1,11 @@
 // Mesh.hpp
 // KlayGE Mesh类 头文件
-// Ver 2.1.2
-// 版权所有(C) 龚敏敏, 2003
+// Ver 2.7.0
+// 版权所有(C) 龚敏敏, 2004-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.7.0
+// 改进了StaticMesh (2005.6.16)
 //
 // 2.1.2
 // 初次建立 (2004.5.26)
@@ -24,6 +27,13 @@ namespace KlayGE
 	class StaticMesh : public Renderable
 	{
 	public:
+		typedef std::vector<Vector3> XYZsType;
+		typedef std::vector<Vector2> TexCoordsType;
+		typedef std::vector<TexCoordsType> MultiTexCoordsType;
+		typedef std::vector<Vector3> NormalsType;
+		typedef std::vector<uint16_t> IndicesType;
+
+	public:
 		StaticMesh();
 		virtual ~StaticMesh();
 
@@ -39,29 +49,50 @@ namespace KlayGE
 
 		virtual void AddToSceneManager();
 
-		template <typename ForwardIterator>
-		void AssignXYZs(ForwardIterator first, ForwardIterator last)
-			{ xyzs_.assign(first, last); }
+		void ComputeNormal();
 
 		template <typename ForwardIterator>
-		void AssignTexs(ForwardIterator first, ForwardIterator last)
-			{ texs_.assign(first, last); }
+		void AssignXYZs(ForwardIterator first, ForwardIterator last)
+		{
+			xyzs_.assign(first, last);
+			beBuilt_ = false;
+		}
+
+		template <typename ForwardIterator>
+		void AssignMultiTexs(ForwardIterator first, ForwardIterator last)
+		{
+			multi_tex_coords_.assign(first, last);
+			beBuilt_ = false;
+		}
+
+		template <typename ForwardIterator>
+		void AssignNormals(ForwardIterator first, ForwardIterator last)
+		{
+			normals_.assign(first, last);
+			beBuilt_ = false;
+		}
 
 		template <typename ForwardIterator>
 		void AssignIndices(ForwardIterator first, ForwardIterator last)
-			{ indices_.assign(first, last); }
+		{
+			indices_.assign(first, last);
+			beBuilt_ = false;
+		}
 
 	protected:
+		virtual void BuildRenderable();
+
+	protected:
+		std::wstring name_;
+
 		VertexBufferPtr vb_;
 		RenderEffectPtr effect_;
 
-		typedef std::vector<Vector3> XYZsType;
+		bool beBuilt_;
+
 		XYZsType xyzs_;
-
-		typedef std::vector<Vector2> TexsType;
-		TexsType texs_;
-
-		typedef std::vector<uint16_t> IndicesType;
+		NormalsType normals_;
+		MultiTexCoordsType multi_tex_coords_;
 		IndicesType indices_;
 
 		typedef std::vector<StaticMeshPtr> StaticMeshesPtrType;
