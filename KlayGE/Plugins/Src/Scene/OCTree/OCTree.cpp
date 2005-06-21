@@ -186,7 +186,7 @@ namespace KlayGE
 
 		for (size_t i = 0; i < 8; ++ i)
 		{
-			Vector3 vec(MathLib::TransformCoord(box[i], renderable->GetWorld()));
+			Vector3 vec(MathLib::TransformCoord(box[i], renderable->GetModelMatrix()));
 			if (MathLib::VecInBox(area_box, vec))
 			{
 				return true;

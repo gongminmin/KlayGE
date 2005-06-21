@@ -57,6 +57,10 @@ namespace KlayGE
 
 		void CustomAttribute(std::string const & name, void* pData);
 
+		uint32_t Width(int level) const;
+		uint32_t Height(int level) const;
+		uint32_t Depth(int level) const;
+
 		void CopyToTexture(Texture& target);
 		
 		void CopyToMemory1D(int level, void* data);
@@ -105,6 +109,8 @@ namespace KlayGE
 		void QueryBaseTexture();
 		void UpdateParams();
 
+		void CopySurfaceToMemory(boost::shared_ptr<IDirect3DSurface9> const & surface, void* data);
+
 	private:
 		IDirect3DDevice9Ptr			d3dDevice_;
 
@@ -115,6 +121,10 @@ namespace KlayGE
 		IDirect3DBaseTexture9Ptr	d3dBaseTexture_;
 
 		IDirect3DSurface9Ptr		renderZBuffer_;		// The z-buffer for the render surface.
+
+		std::vector<uint32_t>	widths_;
+		std::vector<uint32_t>	heights_;
+		std::vector<uint32_t>	depths_;
 	};
 
 	typedef boost::shared_ptr<D3D9Texture> D3D9TexturePtr;

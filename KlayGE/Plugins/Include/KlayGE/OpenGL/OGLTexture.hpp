@@ -17,7 +17,7 @@
 
 #define NOMINMAX
 #include <windows.h>
-#include <gl/gl.h>
+#include <GLLoader/GLLoader.h>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL_d.lib")
@@ -38,7 +38,11 @@ namespace KlayGE
 
 		std::wstring const & Name() const;
 
-		void CustomAttribute(std::string const & name, void* pData);
+		void CustomAttribute(std::string const & name, void* data);
+
+		uint32_t Width(int level) const;
+		uint32_t Height(int level) const;
+		uint32_t Depth(int level) const;
 
 		void CopyToTexture(Texture& target);
 		
@@ -70,7 +74,14 @@ namespace KlayGE
 			{ return texture_[face]; }
 
 	private:
+		void UpdateParams();
+
+	private:
 		GLenum texture_[6];
+
+		std::vector<uint32_t> widths_;
+		std::vector<uint32_t> heights_;
+		std::vector<uint32_t> depths_;
 	};
 
 	typedef boost::shared_ptr<OGLTexture> OGLTexturePtr;

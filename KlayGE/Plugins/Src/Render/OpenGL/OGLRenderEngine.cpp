@@ -1,8 +1,11 @@
 // OGLRenderEngine.cpp
 // KlayGE OpenGL渲染引擎类 实现文件
-// Ver 2.4.0
-// 版权所有(C) 龚敏敏, 2003-2005
+// Ver 2.7.0
+// 版权所有(C) 龚敏敏, 2004-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.7.0
+// 支持vertex_buffer_object (2005.6.19)
 //
 // 2.4.0
 // 增加了PolygonMode (2005.3.20)
@@ -469,6 +472,18 @@ namespace KlayGE
 		glDisableClientState(GL_COLOR_ARRAY);
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
+		bool use_vbo = false;
+		for (VertexBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
+			iter != vb.VertexStreamEnd(); ++ iter)
+		{
+			OGLVertexStream& stream(static_cast<OGLVertexStream&>(*(*iter)));
+			if (stream.UseVBO())
+			{
+				use_vbo = true;
+				break;
+			}
+		}
+
 		for (VertexBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
 			iter != vb.VertexStreamEnd(); ++ iter)
 		{
@@ -482,17 +497,41 @@ namespace KlayGE
 			// Vertex xyzs
 			case VST_Positions:
 				glEnableClientState(GL_VERTEX_ARRAY);
-				glVertexPointer(3, GL_FLOAT, 0, &data[0]);
+				if (use_vbo)
+				{
+					stream.Active();
+					glVertexPointer(3, GL_FLOAT, 0, NULL);
+				}
+				else
+				{
+					glVertexPointer(3, GL_FLOAT, 0, &data[0]);
+				}
 				break;
 		
 			case VST_Normals:
 				glEnableClientState(GL_NORMAL_ARRAY);
-				glNormalPointer(GL_FLOAT, 0, &data[0]);
+				if (use_vbo)
+				{
+					stream.Active();
+					glNormalPointer(GL_FLOAT, 0, NULL);
+				}
+				else
+				{
+					glNormalPointer(GL_FLOAT, 0, &data[0]);
+				}
 				break;
 
 			case VST_Diffuses:
 				glEnableClientState(GL_COLOR_ARRAY);
-				glColorPointer(4, GL_UNSIGNED_BYTE, 0, &data[0]);
+				if (use_vbo)
+				{
+					stream.Active();
+					glColorPointer(4, GL_UNSIGNED_BYTE, 0, NULL);
+				}
+				else
+				{
+					glColorPointer(4, GL_UNSIGNED_BYTE, 0, &data[0]);
+				}
 				break;
 
 			case VST_TextureCoords0:
@@ -504,8 +543,17 @@ namespace KlayGE
 			case VST_TextureCoords6:
 			case VST_TextureCoords7:
 				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-				glTexCoordPointer(static_cast<GLint>(stream.ElementsPerVertex()),
-					GL_FLOAT, 0, &data[0]);
+				if (use_vbo)
+				{
+					stream.Active();
+					glTexCoordPointer(static_cast<GLint>(stream.ElementsPerVertex()),
+						GL_FLOAT, 0, NULL);
+				}
+				else
+				{
+					glTexCoordPointer(static_cast<GLint>(stream.ElementsPerVertex()),
+						GL_FLOAT, 0, &data[0]);
+				}
 				break;
 			}
 		}
@@ -556,9 +604,19 @@ namespace KlayGE
 		if (vb.UseIndices())
 		{
 			OGLIndexStream& stream(static_cast<OGLIndexStream&>(*vb.GetIndexStream()));
-			std::vector<uint16_t> const & data(stream.OGLBuffer());
-			glDrawElements(mode, static_cast<GLsizei>(vb.NumIndices()),
-				GL_UNSIGNED_SHORT, &data[0]);
+
+			if (use_vbo)
+			{
+				stream.Active();
+				glDrawElements(mode, static_cast<GLsizei>(vb.NumIndices()),
+					GL_UNSIGNED_SHORT, 0);
+			}
+			else
+			{
+				std::vector<uint16_t> const & data(stream.OGLBuffer());
+				glDrawElements(mode, static_cast<GLsizei>(vb.NumIndices()),
+					GL_UNSIGNED_SHORT, &data[0]);
+			}
 		}
 		else
 		{
@@ -649,7 +707,7 @@ namespace KlayGE
 
 	// 设置纹理
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::SetTexture(uint32_t stage, TexturePtr const & texture)
+	void OGLRenderEngine::SetTexture(uint32_t /*stage*/, TexturePtr const & texture)
 	{
 		if (!texture)
 		{
@@ -664,7 +722,7 @@ namespace KlayGE
 
 	// 设置纹理坐标集
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::TextureCoordSet(uint32_t stage, int index)
+	void OGLRenderEngine::TextureCoordSet(uint32_t /*stage*/, int /*index*/)
 	{
 	}
 
@@ -677,37 +735,37 @@ namespace KlayGE
 
 	// 关闭某个纹理阶段
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::DisableTextureStage(uint32_t stage)
+	void OGLRenderEngine::DisableTextureStage(uint32_t /*stage*/)
 	{
 	}
 
 	// 计算纹理坐标
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::TextureCoordCalculation(uint32_t stage, TexCoordCalcMethod m)
+	void OGLRenderEngine::TextureCoordCalculation(uint32_t /*stage*/, TexCoordCalcMethod /*m*/)
 	{
 	}
 
 	// 设置纹理寻址模式
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::TextureAddressingMode(uint32_t stage, TexAddressingMode tam)
+	void OGLRenderEngine::TextureAddressingMode(uint32_t /*stage*/, TexAddressingMode /*tam*/)
 	{
 	}
 
 	// 设置纹理坐标
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::TextureMatrix(uint32_t stage, Matrix4 const & mat)
+	void OGLRenderEngine::TextureMatrix(uint32_t /*stage*/, Matrix4 const & /*mat*/)
 	{
 	}
 
 	// 设置纹理过滤模式
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::TextureFiltering(uint32_t stage, TexFiltering texFiltering)
+	void OGLRenderEngine::TextureFiltering(uint32_t /*stage*/, TexFiltering /*texFiltering*/)
 	{
 	}
 
 	// 设置纹理异性过滤
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::TextureAnisotropy(uint32_t stage, uint32_t maxAnisotropy)
+	void OGLRenderEngine::TextureAnisotropy(uint32_t /*stage*/, uint32_t /*maxAnisotropy*/)
 	{
 	}
 
@@ -741,37 +799,37 @@ namespace KlayGE
 
 	// 设置模板比较函数
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::StencilBufferFunction(CompareFunction func)
+	void OGLRenderEngine::StencilBufferFunction(CompareFunction /*func*/)
 	{
 	}
 
 	// 设置模板缓冲区参考值
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::StencilBufferReferenceValue(uint32_t refValue)
+	void OGLRenderEngine::StencilBufferReferenceValue(uint32_t /*refValue*/)
 	{
 	}
 
 	// 设置模板缓冲区掩码
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::StencilBufferMask(uint32_t mask)
+	void OGLRenderEngine::StencilBufferMask(uint32_t /*mask*/)
 	{
 	}
 
 	// 设置模板缓冲区测试失败后的操作
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::StencilBufferFailOperation(StencilOperation op)
+	void OGLRenderEngine::StencilBufferFailOperation(StencilOperation /*op*/)
 	{
 	}
 
 	// 设置模板缓冲区深度测试失败后的操作
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::StencilBufferDepthFailOperation(StencilOperation op)
+	void OGLRenderEngine::StencilBufferDepthFailOperation(StencilOperation /*op*/)
 	{
 	}
 
 	// 设置模板缓冲区通过后的操作
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::StencilBufferPassOperation(StencilOperation op)
+	void OGLRenderEngine::StencilBufferPassOperation(StencilOperation /*op*/)
 	{
 	}
 }

@@ -102,14 +102,12 @@ namespace
 			return box_;
 		}
 
-		Box box_;
-
+	private:
 		VertexBufferPtr vb_;
 		RenderEffectPtr effect_;
-	};
 
-	boost::shared_ptr<RenderBox> renderBox;
-	boost::shared_ptr<RenderableSkyBox> renderSkyBox;
+		Box box_;
+	};
 
 
 	enum
@@ -173,13 +171,13 @@ void Refract::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gbsn00lp.ttf", 16);
 
-	renderBox.reset(new RenderBox(Box(Vector3(-1, -1, -1), Vector3(1, 1, 1))));
-	renderBox->CubeMap(LoadTexture("Glacier2.dds"));
-	renderBox->AddToSceneManager();
+	renderBox_.reset(new RenderBox(Box(Vector3(-1, -1, -1), Vector3(1, 1, 1))));
+	static_cast<RenderBox*>(renderBox_.get())->CubeMap(LoadTexture("Glacier2.dds"));
+	renderBox_->AddToSceneManager();
 
-	renderSkyBox.reset(new RenderableSkyBox);
-	renderSkyBox->CubeMap(LoadTexture("Glacier2.dds"));
-	renderSkyBox->AddToSceneManager();
+	renderSkyBox_.reset(new RenderableSkyBox);
+	static_cast<RenderableSkyBox*>(renderSkyBox_.get())->CubeMap(LoadTexture("Glacier2.dds"));
+	renderSkyBox_->AddToSceneManager();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
@@ -215,10 +213,10 @@ void Refract::Update()
 
 	Matrix4 view = this->ActiveCamera().ViewMatrix();
 	Matrix4 proj = this->ActiveCamera().ProjMatrix();
-	renderSkyBox->MVPMatrix(Matrix4::Identity(), view, proj);
-	renderBox->MVPMatrix(Matrix4::Identity(), view, proj);
+	static_cast<RenderableSkyBox*>(renderSkyBox_.get())->MVPMatrix(Matrix4::Identity(), view, proj);
+	static_cast<RenderBox*>(renderBox_.get())->MVPMatrix(Matrix4::Identity(), view, proj);
 
-	*(renderBox->effect_->ParameterByName("eyePos"))
+	*(renderBox_->GetRenderEffect()->ParameterByName("eyePos"))
 		= Vector4(this->ActiveCamera().EyePos().x(), this->ActiveCamera().EyePos().y(),
 			this->ActiveCamera().EyePos().z(), 1);
 

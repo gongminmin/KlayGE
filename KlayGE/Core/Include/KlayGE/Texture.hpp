@@ -1,8 +1,11 @@
 // Texture.hpp
 // KlayGE 纹理类 实现文件
-// Ver 2.4.0
+// Ver 2.7.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.7.0
+// 可以获取Mipmap中每层的宽高深 (2005.6.8)
 //
 // 2.4.0
 // 增加了DXTn的支持 (2005.3.6)
@@ -244,11 +247,11 @@ namespace KlayGE
 		TextureUsage Usage() const;
 
         // Returns the width of the texture.
-		uint32_t Width() const;
+		virtual uint32_t Width(int level) const = 0;
 		// Returns the height of the texture.
-		uint32_t Height() const;
+		virtual uint32_t Height(int level) const = 0;
 		// Returns the depth of the texture (only for 3D texture).
-		uint32_t Depth() const;
+		virtual uint32_t Depth(int level) const = 0;
 
 		// Returns the bpp of the texture.
 		uint32_t Bpp() const;

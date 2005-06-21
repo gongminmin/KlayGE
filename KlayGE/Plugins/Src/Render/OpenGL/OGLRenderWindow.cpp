@@ -4,7 +4,8 @@
 
 #include <map>
 #include <cassert>
-#include <gl/gl.h>
+
+#include <GLLoader/GLLoader.h>
 
 #include <KlayGE/OpenGL/OGLRenderSettings.hpp>
 #include <KlayGE/OpenGL/OGLRenderWindow.hpp>

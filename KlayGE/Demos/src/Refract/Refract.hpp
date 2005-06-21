@@ -16,6 +16,8 @@ private:
 	void Update();
 
 	KlayGE::FontPtr font_;
+	boost::shared_ptr<KlayGE::Renderable> renderBox_;
+	boost::shared_ptr<KlayGE::Renderable> renderSkyBox_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 

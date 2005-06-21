@@ -19,8 +19,15 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/VertexBuffer.hpp>
+#include <KlayGE/Math.hpp>
 
 #include <vector>
+
+#ifdef KLAYGE_DEBUG
+	#pragma comment(lib, "KlayGE_Core_d.lib")
+#else
+	#pragma comment(lib, "KlayGE_Core.lib")
+#endif
 
 namespace KlayGE
 {
@@ -34,20 +41,46 @@ namespace KlayGE
 		typedef std::vector<uint16_t> IndicesType;
 
 	public:
-		StaticMesh();
+		StaticMesh(std::wstring const & name);
 		virtual ~StaticMesh();
 
 		RenderEffectPtr GetRenderEffect() const
-			{ return effect_; }
+		{
+			return effect_;
+		}
 		void SetRenderEffect(RenderEffectPtr const & effect)
-			{ effect_ = effect; }
+		{
+			effect_ = effect;
+		}
 
 		VertexBufferPtr GetVertexBuffer() const
-			{ return vb_; }
+		{
+			return vb_;
+		}
 
-		std::wstring const & Name() const;
+		StaticMeshPtr Children(size_t id)
+		{
+			return children_[id];
+		}
+		StaticMeshPtr Children(size_t id) const
+		{
+			return children_[id];
+		}
+		size_t NumChildren() const
+		{
+			return children_.size();
+		}
+
+		virtual void OnRenderBegin();
+		virtual void OnRenderEnd();
+
+		virtual Box GetBound() const;
+
+		virtual std::wstring const & Name() const;
 
 		virtual void AddToSceneManager();
+
+		void SetModelMatrix(Matrix4 const & mat);
 
 		void ComputeNormal();
 
@@ -79,6 +112,13 @@ namespace KlayGE
 			beBuilt_ = false;
 		}
 
+		template <typename ForwardIterator>
+		void AssignChildren(ForwardIterator first, ForwardIterator last)
+		{
+			children_.assign(first, last);
+			beBuilt_ = false;
+		}
+
 	protected:
 		virtual void BuildRenderable();
 
@@ -87,6 +127,10 @@ namespace KlayGE
 
 		VertexBufferPtr vb_;
 		RenderEffectPtr effect_;
+
+		Box box_;
+
+		Matrix4 model_;
 
 		bool beBuilt_;
 

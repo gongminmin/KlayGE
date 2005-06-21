@@ -1621,7 +1621,7 @@ namespace KlayGE
 								PositionIterator xyzsBegin, PositionIterator xyzsEnd,
 								TexCoordIterator texsBegin)
 		{
-			int const num = std::distance(xyzsBegin, xyzsEnd);
+			int const num = static_cast<int>(std::distance(xyzsBegin, xyzsEnd));
 
 			for (int i = 0; i < num; ++ i)
 			{

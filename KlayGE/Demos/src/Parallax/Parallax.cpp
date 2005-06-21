@@ -104,13 +104,12 @@ namespace
 			return name;
 		}
 
-		KlayGE::VertexBufferPtr vb_;
-		KlayGE::RenderEffectPtr effect_;
+	private:
+		VertexBufferPtr vb_;
+		RenderEffectPtr effect_;
 
 		Box box_;
 	};
-
-	boost::shared_ptr<RenderPolygon> renderPolygon;
 
 
 	enum
@@ -174,8 +173,8 @@ void Parallax::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gbsn00lp.ttf", 16);
 
-	renderPolygon.reset(new RenderPolygon);
-	renderPolygon->AddToSceneManager();
+	renderPolygon_.reset(new RenderPolygon);
+	renderPolygon_->AddToSceneManager();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
@@ -213,8 +212,8 @@ void Parallax::Update()
 	Matrix4 proj = this->ActiveCamera().ProjMatrix();
 	Vector3 eyePos = this->ActiveCamera().EyePos();
 
-	*(renderPolygon->effect_->ParameterByName("worldviewproj")) = view * proj;
-	*(renderPolygon->effect_->ParameterByName("eyePos")) = Vector4(eyePos.x(), eyePos.y(), eyePos.z(), 1);
+	*(renderPolygon_->GetRenderEffect()->ParameterByName("worldviewproj")) = view * proj;
+	*(renderPolygon_->GetRenderEffect()->ParameterByName("eyePos")) = Vector4(eyePos.x(), eyePos.y(), eyePos.z(), 1);
 
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -225,7 +224,7 @@ void Parallax::Update()
 	Vector3 lightPos(2, 0, -2);
 	Matrix4 matRot(MathLib::RotationZ(degree));
 	lightPos = MathLib::TransformCoord(lightPos, matRot);
-	*(renderPolygon->effect_->ParameterByName("lightPos")) = Vector4(lightPos.x(), lightPos.y(), lightPos.z(), 1);
+	*(renderPolygon_->GetRenderEffect()->ParameterByName("lightPos")) = Vector4(lightPos.x(), lightPos.y(), lightPos.z(), 1);
 
 	std::wostringstream stream;
 	stream << (*renderEngine.ActiveRenderTarget())->FPS();

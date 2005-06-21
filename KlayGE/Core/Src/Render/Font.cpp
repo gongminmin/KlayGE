@@ -309,7 +309,7 @@ namespace KlayGE
 
 					::RECT charRect;
 					CharInfo charInfo;
-					if ((curX_ < theTexture_->Width()) && (curY_ < theTexture_->Height()))
+					if ((curX_ < theTexture_->Width(0)) && (curY_ < theTexture_->Height(0)))
 					{
 						// 纹理还有空间
 						charRect.left	= curX_;
@@ -317,14 +317,14 @@ namespace KlayGE
 						charRect.right	= curX_ + width;
 						charRect.bottom = curY_ + max_height;
 
-						charInfo.texRect.left()		= static_cast<float>(charRect.left) / theTexture_->Width();
-						charInfo.texRect.top()		= static_cast<float>(charRect.top) / theTexture_->Height();
-						charInfo.texRect.right()	= static_cast<float>(charRect.right) / theTexture_->Width();
-						charInfo.texRect.bottom()	= static_cast<float>(charRect.bottom) / theTexture_->Height();
+						charInfo.texRect.left()		= static_cast<float>(charRect.left) / theTexture_->Width(0);
+						charInfo.texRect.top()		= static_cast<float>(charRect.top) / theTexture_->Height(0);
+						charInfo.texRect.right()	= static_cast<float>(charRect.right) / theTexture_->Width(0);
+						charInfo.texRect.bottom()	= static_cast<float>(charRect.bottom) / theTexture_->Height(0);
 						charInfo.width				= width;
 
 						curX_ += width;
-						if (curX_ >= width)
+						if (curX_ >= theTexture_->Width(0))
 						{
 							curX_ = 0;
 							curY_ += max_height;
@@ -343,8 +343,8 @@ namespace KlayGE
 						charLRU_.pop_back();
 						charInfoMap_.erase(iter);
 
-						charRect.left	= static_cast<long>(charInfo.texRect.left() * theTexture_->Width());
-						charRect.top	= static_cast<long>(charInfo.texRect.top() * theTexture_->Height());
+						charRect.left	= static_cast<long>(charInfo.texRect.left() * theTexture_->Width(0));
+						charRect.top	= static_cast<long>(charInfo.texRect.top() * theTexture_->Height(0));
 						charRect.right	= charRect.left + width;
 						charRect.bottom	= charRect.top + this->FontHeight();
 					}
@@ -356,12 +356,15 @@ namespace KlayGE
 					for (int y = 0; y < rows; ++ y)
 					{
 						int const y_offset = y_start + y;
-						for (int x = 0; x < cols; ++ x)
+						if (y_offset < max_height)
 						{
-							if ((y < max_height) && (x < max_width))
+							for (int x = 0; x < cols; ++ x)
 							{
-								dest[y_offset * max_width + x]
-									= (slot_->bitmap.buffer[y * slot_->bitmap.width + x] > 128 ? 0xFFFF : 0);
+								if ((y < max_height) && (x < max_width))
+								{
+									dest[y_offset * max_width + x]
+										= (slot_->bitmap.buffer[y * slot_->bitmap.width + x] > 128 ? 0xFFFF : 0);
+								}
 							}
 						}
 					}

@@ -74,13 +74,12 @@ namespace
 			return name;
 		}
 
+	private:
 		VertexBufferPtr vb_;
 		RenderEffectPtr effect_;
 
 		Box box_;
 	};
-
-	boost::shared_ptr<RenderTorus> renderTorus;
 
 
 	enum
@@ -152,8 +151,8 @@ void Cartoon::InitObjects()
 	TexturePtr edgeTex = Context::Instance().RenderFactoryInstance().MakeTexture1D(sizeof(edgeData) / sizeof(edgeData[0]), 0, PF_L8);
 	edgeTex->CopyMemoryToTexture1D(0, edgeData, PF_L8, 4, 0);
 
-	renderTorus.reset(new RenderTorus(toonTex, edgeTex));
-	renderTorus->AddToSceneManager();
+	renderTorus_.reset(new RenderTorus(toonTex, edgeTex));
+	renderTorus_->AddToSceneManager();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
@@ -191,9 +190,9 @@ void Cartoon::Update()
 	Matrix4 proj = this->ActiveCamera().ProjMatrix();
 	Vector3 eyePos = this->ActiveCamera().EyePos();
 
-	*(renderTorus->GetRenderEffect()->ParameterByName("proj")) = proj;
-	*(renderTorus->GetRenderEffect()->ParameterByName("lightPos")) = Vector4(2, 2, -3, 1);
-	*(renderTorus->GetRenderEffect()->ParameterByName("eyePos")) = Vector4(eyePos.x(), eyePos.y(), eyePos.z(), 1);
+	*(renderTorus_->GetRenderEffect()->ParameterByName("proj")) = proj;
+	*(renderTorus_->GetRenderEffect()->ParameterByName("lightPos")) = Vector4(2, 2, -3, 1);
+	*(renderTorus_->GetRenderEffect()->ParameterByName("eyePos")) = Vector4(eyePos.x(), eyePos.y(), eyePos.z(), 1);
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
@@ -205,8 +204,8 @@ void Cartoon::Update()
 	mat *= matY;
 	mat *= view;
 
-	*(renderTorus->GetRenderEffect()->ParameterByName("worldview")) = mat;
-	*(renderTorus->GetRenderEffect()->ParameterByName("worldviewIT")) = MathLib::Transpose(MathLib::Inverse(mat));
+	*(renderTorus_->GetRenderEffect()->ParameterByName("worldview")) = mat;
+	*(renderTorus_->GetRenderEffect()->ParameterByName("worldviewIT")) = MathLib::Transpose(MathLib::Inverse(mat));
 
 	std::wostringstream stream;
 	stream << (*renderEngine.ActiveRenderTarget())->FPS();

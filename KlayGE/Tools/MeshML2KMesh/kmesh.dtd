@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<!ELEMENT model (meshes_chunk)>
+<!ATTLIST model
+	version CDATA #REQUIRED>
+
+<!ELEMENT meshes_chunk (mesh*)>
+
+<!ELEMENT mesh (textures_chunk?, vertices_chunk, triangles_chunk)>
+<!ATTLIST mesh>
+
+<!ELEMENT textures_chunk (texture*)>
+
+<!ELEMENT texture>
+<!ATTLIST texture
+	name CDATA #REQUIRED>
+
+<!ELEMENT vertices_chunk (vertex*)>
+
+<!ELEMENT vertex (weight*)>
+<!ATTLIST vertex
+	x CDATA #REQUIRED
+	y CDATA #REQUIRED
+	z CDATA #REQUIRED
+	u CDATA #REQUIRED
+	v CDATA #REQUIRED>
+
+<!ELEMENT triangles_chunk (triangle*)>
+
+<!ELEMENT triangle EMPTY>
+<!ATTLIST triangle
+	a CDATA #REQUIRED
+	b CDATA #REQUIRED
+	c CDATA #REQUIRED>

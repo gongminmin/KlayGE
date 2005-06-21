@@ -156,6 +156,8 @@ namespace KlayGE
 
 		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+		this->UpdateParams();
 	}
 
 	OGLTexture::OGLTexture(uint32_t width, uint32_t height,
@@ -216,6 +218,8 @@ namespace KlayGE
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+		this->UpdateParams();
 	}
 
 	OGLTexture::OGLTexture(uint32_t width, uint32_t height, uint32_t depth,
@@ -277,6 +281,8 @@ namespace KlayGE
 
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+		this->UpdateParams();
 	}
 
 	OGLTexture::OGLTexture(uint32_t size, bool /*cube*/, uint16_t numMipMaps,
@@ -342,6 +348,8 @@ namespace KlayGE
 
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+		this->UpdateParams();
 	}
 
 	OGLTexture::~OGLTexture()
@@ -362,8 +370,25 @@ namespace KlayGE
 		return name;
 	}
 
+	uint32_t OGLTexture::Width(int level) const
+	{
+		return static_cast<GLint>(widths_[level]);
+	}
+	
+	uint32_t OGLTexture::Height(int level) const
+	{
+		return static_cast<GLint>(heights_[level]);
+	}
+
+	uint32_t OGLTexture::Depth(int level) const
+	{
+		return static_cast<GLint>(depths_[level]);
+	}
+
 	void OGLTexture::CopyToTexture(Texture& target)
 	{
+		assert(dynamic_cast<OGLTexture*>(&target) != NULL);
+
 		GLint gl_internal_format;
 		GLenum gl_format;
 		Convert(gl_internal_format, gl_format, format_);
@@ -372,23 +397,21 @@ namespace KlayGE
 		GLenum gl_target_format;
 		Convert(gl_target_internal_format, gl_target_format, target.Format());
 
-		OGLTexture& other(static_cast<OGLTexture&>(target));
-
 		switch (type_)
 		{
 		case TT_2D:
 			{
 				std::vector<uint8_t> data_in(width_ * height_ * bpp_ / 8);
-				std::vector<uint8_t> data_out(target.Width() * target.Height() * target.Bpp() / 8);
+				std::vector<uint8_t> data_out(target.Width(0) * target.Height(0) * target.Bpp() / 8);
 				for (int level = 0; level < numMipMaps_; ++ level)
 				{
 					this->CopyToMemory2D(level, &data_in[0]);
 
-					gluScaleImage(gl_format, width_ / (1UL << level), height_ / (1UL << level), GL_UNSIGNED_BYTE, &data_in[0],
-						target.Width(), target.Height(), GL_UNSIGNED_BYTE, &data_out[0]);
+					gluScaleImage(gl_format, this->Width(level), this->Height(level), GL_UNSIGNED_BYTE, &data_in[0],
+						target.Width(0), target.Height(0), GL_UNSIGNED_BYTE, &data_out[0]);
 
 					target.CopyMemoryToTexture2D(level, &data_out[0], format_,
-						target.Width() / (1UL << level), target.Height() / (1UL << level), 0, 0);
+						target.Width(level), target.Height(level), 0, 0);
 				}
 			}
 			break;
@@ -615,7 +638,7 @@ namespace KlayGE
 	{
 	}
 
-	void OGLTexture::CustomAttribute(std::string const & name, void* pData)
+	void OGLTexture::CustomAttribute(std::string const & /*name*/, void* /*data*/)
 	{
 		assert(false);
 	}
@@ -644,5 +667,84 @@ namespace KlayGE
 		GLint depth;
 		glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &depth);
 		return depth;
+	}
+
+	void OGLTexture::UpdateParams()
+	{
+		GLint w, h, d;
+
+		widths_.resize(numMipMaps_);
+		heights_.resize(numMipMaps_);
+		depths_.resize(numMipMaps_);
+		switch (type_)
+		{
+		case TT_1D:
+			glBindTexture(GL_TEXTURE_1D, texture_[0]);
+			for (uint16_t level = 0; level < numMipMaps_; ++ level)
+			{
+				glGetTexLevelParameteriv(GL_TEXTURE_1D, level, GL_TEXTURE_WIDTH, &w);
+				widths_[level] = w;
+
+				glGetTexLevelParameteriv(GL_TEXTURE_1D, level, GL_TEXTURE_HEIGHT, &h);
+				heights_[level] = h;
+
+				glGetTexLevelParameteriv(GL_TEXTURE_1D, level, GL_TEXTURE_DEPTH, &d);
+				depths_[level] = d;
+			}
+			break;
+
+		case TT_2D:
+			glBindTexture(GL_TEXTURE_2D, texture_[0]);
+			for (uint16_t level = 0; level < numMipMaps_; ++ level)
+			{
+				glGetTexLevelParameteriv(GL_TEXTURE_2D, level, GL_TEXTURE_WIDTH, &w);
+				widths_[level] = w;
+
+				glGetTexLevelParameteriv(GL_TEXTURE_2D, level, GL_TEXTURE_HEIGHT, &h);
+				heights_[level] = h;
+
+				glGetTexLevelParameteriv(GL_TEXTURE_2D, level, GL_TEXTURE_DEPTH, &d);
+				depths_[level] = d;
+			}
+			break;
+
+		case TT_3D:
+			glBindTexture(GL_TEXTURE_3D, texture_[0]);
+			for (uint16_t level = 0; level < numMipMaps_; ++ level)
+			{
+				glGetTexLevelParameteriv(GL_TEXTURE_3D, level, GL_TEXTURE_WIDTH, &w);
+				widths_[level] = w;
+
+				glGetTexLevelParameteriv(GL_TEXTURE_3D, level, GL_TEXTURE_HEIGHT, &h);
+				heights_[level] = h;
+
+				glGetTexLevelParameteriv(GL_TEXTURE_3D, level, GL_TEXTURE_DEPTH, &d);
+				depths_[level] = d;
+			}
+			break;
+
+		case TT_Cube:
+			glBindTexture(GL_TEXTURE_CUBE_MAP_POSITIVE_X, texture_[0]);
+			for (uint16_t level = 0; level < numMipMaps_; ++ level)
+			{
+				glGetTexLevelParameteriv(GL_TEXTURE_CUBE_MAP, level, GL_TEXTURE_WIDTH, &w);
+				widths_[level] = w;
+
+				glGetTexLevelParameteriv(GL_TEXTURE_CUBE_MAP, level, GL_TEXTURE_HEIGHT, &h);
+				heights_[level] = h;
+
+				glGetTexLevelParameteriv(GL_TEXTURE_CUBE_MAP, level, GL_TEXTURE_DEPTH, &d);
+				depths_[level] = d;
+			}
+			break;
+
+		default:
+			assert(false);
+			break;
+		}
+
+		width_ = widths_[0];
+		height_ = heights_[0];
+		depth_ = depths_[0];
 	}
 }

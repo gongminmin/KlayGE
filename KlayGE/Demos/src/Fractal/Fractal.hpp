@@ -16,6 +16,7 @@ private:
 	void Update();
 
 	KlayGE::FontPtr font_;
+	boost::shared_ptr<KlayGE::Renderable> renderFractal_;
 
 	KlayGE::uint32_t action_map_id_;
 };

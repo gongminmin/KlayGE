@@ -1,8 +1,11 @@
 // Renderable.hpp
 // KlayGE 可渲染对象类 头文件
-// Ver 2.4.0
+// Ver 2.7.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.7.0
+// GetWorld改名为GetModelMatrix (2005.6.17)
 //
 // 2.3.0
 // 增加了Render (2005.1.15)
@@ -37,7 +40,7 @@ namespace KlayGE
 		virtual void OnRenderBegin();
 		virtual void OnRenderEnd();
 
-		virtual Matrix4 GetWorld() const;
+		virtual Matrix4 GetModelMatrix() const;
 		virtual Box GetBound() const = 0;
 
 		virtual bool CanBeCulled() const;

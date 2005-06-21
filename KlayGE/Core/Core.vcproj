@@ -125,6 +125,9 @@
 					RelativePath=".\Src\Render\Font.cpp">
 				</File>
 				<File
+					RelativePath=".\Src\Render\KMesh.cpp">
+				</File>
+				<File
 					RelativePath=".\Src\Render\Light.cpp">
 					<FileConfiguration
 						Name="Debug|Win32">
@@ -217,6 +220,9 @@
 				</File>
 				<File
 					RelativePath="Include\KlayGE\Font.hpp">
+				</File>
+				<File
+					RelativePath=".\Include\KlayGE\KMesh.hpp">
 				</File>
 				<File
 					RelativePath="Include\KlayGE\Light.hpp">

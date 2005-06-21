@@ -374,7 +374,7 @@ namespace KlayGE
 							block_size = 16;
 						}
 
-						image_size = ((desc.width / (1UL << level) + 3) / 4) * block_size;
+						image_size = ((texture->Width(level) + 3) / 4) * block_size;
 					}
 					else
 					{
@@ -387,7 +387,7 @@ namespace KlayGE
 					assert(file->gcount() == static_cast<int>(data.size()));
 
 					texture->CopyMemoryToTexture2D(level, &data[0], format,
-						texture->Width() / (1UL << level), texture->Height() / (1UL << level), 0, 0);
+						texture->Width(level), texture->Height(level), 0, 0);
 				}
 			}
 			break;
@@ -409,7 +409,7 @@ namespace KlayGE
 							block_size = 16;
 						}
 
-						image_size = ((desc.width / (1UL << level) + 3) / 4) * ((desc.height / (1UL << level) + 3) / 4) * block_size;
+						image_size = ((texture->Width(level) + 3) / 4) * ((texture->Height(level) + 3) / 4) * block_size;
 					}
 					else
 					{
@@ -422,7 +422,7 @@ namespace KlayGE
 					assert(file->gcount() == static_cast<int>(data.size()));
 
 					texture->CopyMemoryToTexture2D(level, &data[0], format,
-						texture->Width() / (1UL << level), texture->Height() / (1UL << level), 0, 0);
+						texture->Width(level), texture->Height(level), 0, 0);
 				}
 			}
 			break;
@@ -444,11 +444,11 @@ namespace KlayGE
 							block_size = 16;
 						}
 
-						image_size = ((desc.width / (1UL << level) + 3) / 4) * ((desc.height / (1UL << level) + 3) / 4) * (desc.depth / (1UL << level)) * block_size;
+						image_size = ((texture->Width(level) + 3) / 4) * ((texture->Height(level) + 3) / 4) * texture->Height(level) * block_size;
 					}
 					else
 					{
-						image_size = main_image_size / (1UL << (level * 2)) * (desc.depth / (1UL << level));
+						image_size = main_image_size / (1UL << (level * 2)) * texture->Depth(level);
 					}
 				
 					data.resize(image_size);
@@ -457,8 +457,8 @@ namespace KlayGE
 					assert(file->gcount() == static_cast<int>(data.size()));
 
 					texture->CopyMemoryToTexture3D(level, &data[0], format,
-						texture->Width() / (1UL << level), texture->Height() / (1UL << level),
-						texture->Depth() / (1UL << level), 0, 0, 0);
+						texture->Width(level), texture->Height(level),
+						texture->Depth(level), 0, 0, 0);
 				}
 			}
 			break;
@@ -482,7 +482,7 @@ namespace KlayGE
 								block_size = 16;
 							}
 
-							image_size = ((desc.width / (1UL << level) + 3) / 4) * ((desc.height / (1UL << level) + 3) / 4) * block_size;
+							image_size = ((texture->Width(level) + 3) / 4) * ((texture->Height(level) + 3) / 4) * block_size;
 						}
 						else
 						{
@@ -495,7 +495,7 @@ namespace KlayGE
 						assert(file->gcount() == static_cast<int>(data.size()));
 
 						texture->CopyMemoryToTextureCube(static_cast<Texture::CubeFaces>(face),
-							level, &data[0], format, texture->Width() / (1UL << level), 0);
+							level, &data[0], format, texture->Width(level), 0);
 					}
 				}
 			}
@@ -523,8 +523,8 @@ namespace KlayGE
 		desc.flags |= DDSD_WIDTH;
 		desc.flags |= DDSD_HEIGHT;
 
-		desc.width = texture->Width();
-		desc.height = texture->Height();
+		desc.width = texture->Width(0);
+		desc.height = texture->Height(0);
 
 		if (texture->NumMipMaps() != 0)
 		{
@@ -687,7 +687,7 @@ namespace KlayGE
 			desc.dds_caps.caps1 |= DDSCAPS_COMPLEX;
 			desc.dds_caps.caps2 |= DDSCAPS2_VOLUME;
 			desc.flags |= DDSD_DEPTH;
-			desc.depth = texture->Depth();
+			desc.depth = texture->Depth(0);
 		}
 		if (Texture::TT_Cube == texture->Type())
 		{
@@ -701,16 +701,16 @@ namespace KlayGE
 			desc.dds_caps.caps2 |= DDSCAPS2_CUBEMAP_NEGATIVEZ;
 		}
 
-		uint32_t main_image_size = texture->Width() * texture->Height() * PixelFormatBits(texture->Format()) / 8;
+		uint32_t main_image_size = texture->Width(0) * texture->Height(0) * PixelFormatBits(texture->Format()) / 8;
 		if (IsCompressedFormat(texture->Format()))
 		{
 			if (PF_DXT1 == texture->Format())
 			{
-				main_image_size = texture->Width() * texture->Height() / 2;
+				main_image_size = texture->Width(0) * texture->Height(0) / 2;
 			}
 			else
 			{
-				main_image_size = texture->Width() * texture->Height();
+				main_image_size = texture->Width(0) * texture->Height(0);
 			}
 
 			desc.flags |= DDSD_LINEARSIZE;
@@ -739,7 +739,7 @@ namespace KlayGE
 							block_size = 16;
 						}
 
-						image_size = ((desc.width / (1UL << level) + 3) / 4) * block_size;
+						image_size = ((texture->Width(level) + 3) / 4) * block_size;
 					}
 					else
 					{
@@ -771,7 +771,7 @@ namespace KlayGE
 							block_size = 16;
 						}
 
-						image_size = ((desc.width / (1UL << level) + 3) / 4) * ((desc.height / (1UL << level) + 3) / 4) * block_size;
+						image_size = ((texture->Width(level) + 3) / 4) * ((texture->Height(level) + 3) / 4) * block_size;
 					}
 					else
 					{
@@ -803,11 +803,11 @@ namespace KlayGE
 							block_size = 16;
 						}
 
-						image_size = ((desc.width / (1UL << level) + 3) / 4) * ((desc.height / (1UL << level) + 3) / 4) * (desc.depth / (1UL << level)) * block_size;
+						image_size = ((texture->Width(level) + 3) / 4) * ((texture->Height(level) + 3) / 4) * texture->Depth(level) * block_size;
 					}
 					else
 					{
-						image_size = main_image_size / (1UL << (level * 2)) * (desc.depth / (1UL << (level * 2)));
+						image_size = main_image_size / (1UL << (level * 2)) * texture->Depth(level);
 					}
 
 					data.resize(image_size);
@@ -837,7 +837,7 @@ namespace KlayGE
 								block_size = 16;
 							}
 
-							image_size = ((desc.width / (1UL << level) + 3) / 4) * ((desc.height / (1UL << level) + 3) / 4) * block_size;
+							image_size = ((texture->Width(level) + 3) / 4) * ((texture->Height(level) + 3) / 4) * block_size;
 						}
 						else
 						{
@@ -873,21 +873,6 @@ namespace KlayGE
 	Texture::TextureUsage Texture::Usage() const
 	{
 		return usage_;
-	}
-
-	uint32_t Texture::Width() const
-	{
-		return width_;
-	}
-
-	uint32_t Texture::Height() const
-	{
-		return height_;
-	}
-
-	uint32_t Texture::Depth() const
-	{
-		return depth_;
 	}
 
 	uint32_t Texture::Bpp() const

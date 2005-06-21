@@ -1,4 +1,4 @@
-// OGLRenderEngine.cpp
+// OGLRenderEngine.hpp
 // KlayGE OpenGL渲染引擎类 头文件
 // Ver 2.4.0
 // 版权所有(C) 龚敏敏, 2003-2005
@@ -17,7 +17,7 @@
 
 #define NOMINMAX
 #include <windows.h>
-#include <gl/gl.h>
+#include <GLLoader/GLLoader.h>
 
 #include <KlayGE/RenderEngine.hpp>
 

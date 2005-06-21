@@ -119,7 +119,7 @@ namespace KlayGE
 
 	RenderEffectPtr LoadRenderEffect(std::string const & effectName)
 	{
-		boost::shared_ptr<std::istream> file(ResLoader::Instance().Load(effectName));
+		ResIdentifierPtr file(ResLoader::Instance().Load(effectName));
 
 		file->seekg(0, std::ios_base::end);
 		std::vector<char> data(file->tellg());

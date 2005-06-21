@@ -32,70 +32,60 @@ namespace
 	int const WIDTH = 4;
 	int const HEIGHT = 3;
 
-	int const MAX_X = 8;
-	int const MAX_Y = 6;
-
 	class Flag : public Renderable
 	{
 	public:
-		Flag()
+		Flag(int width, int height)
 			: vb_(new VertexBuffer(VertexBuffer::BT_TriangleList)),
-				numFaces_(0), numVertices_(0),
 				model_(MathLib::Translation(-WIDTH / 2.0f, HEIGHT / 2.0f, 0.0f))
 		{
-			std::vector<float> pos;
-			for (int y = 0; y < MAX_Y * 2 + 1; ++ y)
+			std::vector<Vector3> pos;
+			for (int y = 0; y < height + 1; ++ y)
 			{
-				for (int x = 0; x < MAX_X * 2 + 1; ++ x)
+				for (int x = 0; x < width + 1; ++ x)
 				{
-					pos.push_back(+x * (0.5f * WIDTH / MAX_X));
-					pos.push_back(-y * (0.5f * HEIGHT / MAX_Y));
-					pos.push_back(0.0f);
-
-					++ numVertices_;
+					pos.push_back(Vector3(+x * (static_cast<float>(WIDTH) / width),
+						-y * (static_cast<float>(HEIGHT) / height), 0.0f));
 				}
 			}
 
-			std::vector<float> tex;
-			for (int y = 0; y < MAX_Y * 2 + 1; ++ y)
+			std::vector<Vector2> tex;
+			for (int y = 0; y < height + 1; ++ y)
 			{
-				for (int x = 0; x < MAX_X * 2 + 1; ++ x)
+				for (int x = 0; x < width + 1; ++ x)
 				{
-					tex.push_back(x / (MAX_X * 2.0f));
-					tex.push_back(y / (MAX_Y * 2.0f));
+					tex.push_back(Vector2(static_cast<float>(x) / width, static_cast<float>(y) / height));
 				}
 			}
 
 			std::vector<uint16_t> index;
-			for (int y = 0; y < MAX_Y * 2; ++ y)
+			for (int y = 0; y < height; ++ y)
 			{
-				for (int x = 0; x < MAX_X * 2; ++ x)
+				for (int x = 0; x < width; ++ x)
 				{
-					index.push_back((y + 0) * (MAX_X * 2 + 1) + (x + 0));
-					index.push_back((y + 0) * (MAX_X * 2 + 1) + (x + 1));
-					index.push_back((y + 1) * (MAX_X * 2 + 1) + (x + 1));
+					index.push_back((y + 0) * (width + 1) + (x + 0));
+					index.push_back((y + 0) * (width + 1) + (x + 1));
+					index.push_back((y + 1) * (width + 1) + (x + 1));
 
-					index.push_back((y + 1) * (MAX_X * 2 + 1) + (x + 1));
-					index.push_back((y + 1) * (MAX_X * 2 + 1) + (x + 0));
-					index.push_back((y + 0) * (MAX_X * 2 + 1) + (x + 0));
-
-					numFaces_ += 2;
+					index.push_back((y + 1) * (width + 1) + (x + 1));
+					index.push_back((y + 1) * (width + 1) + (x + 0));
+					index.push_back((y + 0) * (width + 1) + (x + 0));
 				}
 			}
 
-			effect_ = LoadRenderEffect("VertexDisplacement.fx");
-			*(effect_->ParameterByName("flag")) = LoadTexture("Flag.dds");
-			effect_->SetTechnique("VertexDisplacement");
-
 			vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
 			vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2, true);
-			vb_->GetVertexStream(VST_Positions)->Assign(&pos[0], pos.size() / 3);
-			vb_->GetVertexStream(VST_TextureCoords0)->Assign(&tex[0], tex.size() / 2);
+			vb_->GetVertexStream(VST_Positions)->Assign(&pos[0], pos.size());
+			vb_->GetVertexStream(VST_TextureCoords0)->Assign(&tex[0], tex.size());
 
 			vb_->AddIndexStream(true);
 			vb_->GetIndexStream()->Assign(&index[0], index.size());
 
-			box_ = Box(Vector3(0, 0, 0), Vector3(0, 0, 0));
+			box_ = MathLib::ComputeBoundingBox<float>(pos.begin(), pos.end());
+
+			effect_ = LoadRenderEffect("VertexDisplacement.fx");
+			*(effect_->ParameterByName("flag")) = LoadTexture("Flag.dds");
+			effect_->SetTechnique("VertexDisplacement");
 		}
 
 		RenderEffectPtr GetRenderEffect() const
@@ -108,7 +98,7 @@ namespace
 			return vb_;
 		}
 
-		Matrix4 GetWorld() const
+		Matrix4 GetModelMatrix() const
 		{
 			return model_;
 		}
@@ -124,17 +114,13 @@ namespace
 			return name;
 		}
 
+	private:
 		VertexBufferPtr vb_;
 		RenderEffectPtr effect_;
-
-		size_t numFaces_;
-		size_t numVertices_;
 
 		Matrix4 model_;
 		Box box_;
 	};
-
-	boost::shared_ptr<Flag> flag;
 
 
 	enum
@@ -194,7 +180,8 @@ void VertexDisplacement::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gbsn00lp.ttf", 16);
 
-	flag.reset(new Flag);
+	flag_.reset(new Flag(8 * 2, 6 * 2));
+	flag_->AddToSceneManager();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
@@ -205,8 +192,6 @@ void VertexDisplacement::InitObjects()
 
 	fpcController_.AttachCamera(this->ActiveCamera());
 	fpcController_.Scalers(0.005f, 0.1f);
-
-	flag->AddToSceneManager();
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	KlayGE::InputActionMap actionMap;
@@ -234,18 +219,18 @@ void VertexDisplacement::Update()
 	Matrix4 proj = this->ActiveCamera().ProjMatrix();
 	Vector3 eyePos = this->ActiveCamera().EyePos();
 
-	Matrix4 modelView = flag->GetWorld() * view;
+	Matrix4 modelView = flag_->GetModelMatrix() * view;
 
-	*(flag->GetRenderEffect()->ParameterByName("modelview")) = modelView;
-	*(flag->GetRenderEffect()->ParameterByName("proj")) = proj;
+	*(flag_->GetRenderEffect()->ParameterByName("modelview")) = modelView;
+	*(flag_->GetRenderEffect()->ParameterByName("proj")) = proj;
 
-	*(flag->GetRenderEffect()->ParameterByName("modelviewIT")) = MathLib::Transpose(MathLib::Inverse(modelView));
+	*(flag_->GetRenderEffect()->ParameterByName("modelviewIT")) = MathLib::Transpose(MathLib::Inverse(modelView));
 
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 	float currentAngle(clock() / 400.0f);
-	*(flag->GetRenderEffect()->ParameterByName("currentAngle")) = currentAngle;
+	*(flag_->GetRenderEffect()->ParameterByName("currentAngle")) = currentAngle;
 
 	std::wostringstream stream;
 	stream << (*renderEngine.ActiveRenderTarget())->FPS();

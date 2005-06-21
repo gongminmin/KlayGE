@@ -1,8 +1,11 @@
 // Renderable.cpp
 // KlayGE 可渲染对象类 实现文件
-// Ver 2.3.0
+// Ver 2.7.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.7.0
+// GetWorld改名为GetModelMatrix (2005.6.17)
 //
 // 2.3.0
 // 增加了Render (2005.1.15)
@@ -30,7 +33,7 @@ namespace KlayGE
 	{
 	}
 
-	Matrix4 Renderable::GetWorld() const
+	Matrix4 Renderable::GetModelMatrix() const
 	{
 		return Matrix4::Identity();
 	}

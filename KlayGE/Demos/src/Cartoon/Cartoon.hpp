@@ -15,6 +15,7 @@ private:
 	void Update();
 
 	KlayGE::FontPtr font_;
+	boost::shared_ptr<KlayGE::Renderable> renderTorus_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 

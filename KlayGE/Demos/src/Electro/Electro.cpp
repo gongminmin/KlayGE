@@ -140,13 +140,12 @@ namespace
 			return name;
 		}
 
-		KlayGE::VertexBufferPtr vb_;
-		KlayGE::RenderEffectPtr effect_;
+	private:
+		VertexBufferPtr vb_;
+		RenderEffectPtr effect_;
 
 		Box box_;
 	};
-
-	boost::shared_ptr<RenderElectro> renderElectro;
 }
 
 
@@ -196,8 +195,8 @@ void Electro::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gbsn00lp.ttf", 16);
 
-	renderElectro.reset(new RenderElectro);
-	renderElectro->AddToSceneManager();
+	renderElectro_.reset(new RenderElectro);
+	renderElectro_->AddToSceneManager();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));

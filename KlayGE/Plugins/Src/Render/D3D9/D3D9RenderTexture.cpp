@@ -41,8 +41,8 @@ namespace KlayGE
 		assert(dynamic_cast<D3D9Texture*>(texture2D.get()) != NULL);
 
 		privateTex_ = texture2D;
-		width_ = privateTex_->Width();
-		height_ = privateTex_->Height();
+		width_ = privateTex_->Width(0);
+		height_ = privateTex_->Height(0);
 
 		viewport_.width		= width_;
 		viewport_.height	= height_;
@@ -62,8 +62,8 @@ namespace KlayGE
 
 		face_ = face;
 		privateTex_ = textureCube;
-		width_ = privateTex_->Width();
-		height_ = privateTex_->Height();
+		width_ = privateTex_->Width(0);
+		height_ = privateTex_->Height(0);
 
 		viewport_.width		= width_;
 		viewport_.height	= height_;

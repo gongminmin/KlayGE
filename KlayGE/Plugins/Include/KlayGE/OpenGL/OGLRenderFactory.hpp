@@ -1,3 +1,15 @@
+// OGLRenderFactory.h
+// KlayGE OpenGL渲染工厂类 头文件
+// Ver 2.7.0
+// 版权所有(C) 龚敏敏, 2004-2005
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.7.0
+// 支持vertex_buffer_object (2005.6.19)
+//
+// 修改记录
+//////////////////////////////////////////////////////////////////////////////////
+
 #ifndef _OGLRENDERFACTORY_HPP
 #define _OGLRENDERFACTORY_HPP
 
@@ -6,7 +18,7 @@
 
 #define NOMINMAX
 #include <windows.h>
-#include <gl/gl.h>
+#include <GLLoader/GLLoader.h>
 #include <gl/glu.h>
 
 #ifdef KLAYGE_DEBUG
