@@ -96,11 +96,9 @@ namespace
 			box_ = MathLib::ComputeBoundingBox<float>(pos.begin(), pos.end());
 		}
 
-		void SetTexture(TexturePtr const & scene_tex, TexturePtr const & ascii_tex, TexturePtr const & lums_tex)
+		void SetTexture(TexturePtr const & scene_tex)
 		{
 			*(effect_->ParameterByName("scene_tex")) = scene_tex;
-			*(effect_->ParameterByName("ascii_tex")) = ascii_tex;
-			*(effect_->ParameterByName("lums_tex")) = lums_tex;
 		}
 
 		RenderEffectPtr GetRenderEffect() const
@@ -421,15 +419,15 @@ void AsciiArts::Update()
 		mesh_->AddToSceneManager();
 		sceneMgr.Flush();
 
-		// 第二遍，降采样，匹配
+		// 第二遍，降采样
 		renderEngine.ActiveRenderTarget(downsample_iter_);
 
-		static_cast<RenderMatch*>(renderMatch_.get())->SetTexture(rendered_tex_, ascii_tex_, ascii_lums_tex_);
+		static_cast<RenderMatch*>(renderMatch_.get())->SetTexture(rendered_tex_);
 		sceneMgr.Clear();
 		renderMatch_->AddToSceneManager();
 		sceneMgr.Flush();
 
-		// 第三遍，最终渲染
+		// 第三遍，匹配，最终渲染
 		renderEngine.ActiveRenderTarget(screen_iter_);
 
 		static_cast<RenderQuad*>(renderTile_.get())->SetTexture(downsample_tex_, ascii_tex_, ascii_lums_tex_);
