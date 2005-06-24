@@ -43,90 +43,6 @@ int const CHAR_HEIGHT = 16;
 
 namespace
 {
-	class RenderMatch : public Renderable
-	{
-	public:
-		RenderMatch()
-			: vb_(new VertexBuffer(VertexBuffer::BT_TriangleList))
-		{
-			std::vector<Vector3> pos;
-			for (int y = 0; y < 2; ++ y)
-			{
-				for (int x = 0; x < 2; ++ x)
-				{
-					pos.push_back(Vector3(+x * 2.0f - 1, -y * 2.0f + 1, 0.0f));
-				}
-			}
-
-			std::vector<Vector2> tex;
-			for (int y = 0; y < 2; ++ y)
-			{
-				for (int x = 0; x < 2; ++ x)
-				{
-					tex.push_back(Vector2(x, y));
-				}
-			}
-
-			std::vector<uint16_t> index;
-			for (int y = 0; y < 1; ++ y)
-			{
-				for (int x = 0; x < 1; ++ x)
-				{
-					index.push_back((y + 0) * (1 + 1) + (x + 0));
-					index.push_back((y + 0) * (1 + 1) + (x + 1));
-					index.push_back((y + 1) * (1 + 1) + (x + 1));
-
-					index.push_back((y + 1) * (1 + 1) + (x + 1));
-					index.push_back((y + 1) * (1 + 1) + (x + 0));
-					index.push_back((y + 0) * (1 + 1) + (x + 0));
-				}
-			}
-
-			effect_ = LoadRenderEffect("AsciiArts.fx");
-			effect_->SetTechnique("Downsample");
-
-			vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
-			vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2, true);
-			vb_->GetVertexStream(VST_Positions)->Assign(&pos[0], pos.size());
-			vb_->GetVertexStream(VST_TextureCoords0)->Assign(&tex[0], tex.size());
-
-			vb_->AddIndexStream(true);
-			vb_->GetIndexStream()->Assign(&index[0], index.size());
-
-			box_ = MathLib::ComputeBoundingBox<float>(pos.begin(), pos.end());
-		}
-
-		void SetTexture(TexturePtr const & scene_tex)
-		{
-			*(effect_->ParameterByName("scene_tex")) = scene_tex;
-		}
-
-		RenderEffectPtr GetRenderEffect() const
-		{
-			return effect_;
-		}
-
-		VertexBufferPtr GetVertexBuffer() const
-		{
-			return vb_;
-		}
-
-		Box GetBound() const
-		{
-			return box_;
-		}
-
-		const std::wstring& Name() const
-		{
-			static std::wstring name(L"Match");
-			return name;
-		}
-
-		Box box_;
-		VertexBufferPtr vb_;
-		RenderEffectPtr effect_;
-	};
-
 	class RenderQuad : public Renderable
 	{
 	public:
@@ -168,7 +84,7 @@ namespace
 			}
 
 			effect_ = LoadRenderEffect("AsciiArts.fx");
-			effect_->SetTechnique("ShowAscii");
+			effect_->SetTechnique("AsciiArts");
 
 			vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
 			vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2, true);
@@ -366,15 +282,11 @@ void AsciiArts::InitObjects()
 	render_buffer_->AttachTexture2D(rendered_tex_);
 
 	downsample_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(WIDTH / CELL_WIDTH, HEIGHT / CELL_HEIGHT, 1, PF_A8R8G8B8, Texture::TU_RenderTarget);
-	downsample_buffer_ = Context::Instance().RenderFactoryInstance().MakeRenderTexture();
-	downsample_buffer_->AttachTexture2D(downsample_tex_);
 
 	screen_iter_ = renderEngine.ActiveRenderTarget();
 	render_buffer_iter_ = renderEngine.AddRenderTarget(render_buffer_);
-	downsample_iter_ = renderEngine.AddRenderTarget(downsample_buffer_);
 
-	renderMatch_.reset(new RenderMatch);
-	renderTile_.reset(new RenderQuad(1, 1));
+	renderQuad_.reset(new RenderQuad(1, 1));
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	KlayGE::InputActionMap actionMap;
@@ -419,27 +331,22 @@ void AsciiArts::Update()
 		mesh_->AddToSceneManager();
 		sceneMgr.Flush();
 
-		// 第二遍，降采样
-		renderEngine.ActiveRenderTarget(downsample_iter_);
+		// 降采样
+		rendered_tex_->CopyToTexture(*downsample_tex_);
 
-		static_cast<RenderMatch*>(renderMatch_.get())->SetTexture(rendered_tex_);
-		sceneMgr.Clear();
-		renderMatch_->AddToSceneManager();
-		sceneMgr.Flush();
-
-		// 第三遍，匹配，最终渲染
+		// 第二遍，匹配，最终渲染
 		renderEngine.ActiveRenderTarget(screen_iter_);
 
-		static_cast<RenderQuad*>(renderTile_.get())->SetTexture(downsample_tex_, ascii_tex_, ascii_lums_tex_);
+		static_cast<RenderQuad*>(renderQuad_.get())->SetTexture(downsample_tex_, ascii_tex_, ascii_lums_tex_);
 		sceneMgr.Clear();
-		renderTile_->AddToSceneManager();
+		renderQuad_->AddToSceneManager();
 	}
 	else
 	{
+		renderEngine.ActiveRenderTarget(screen_iter_);
 		renderEngine.ViewMatrix(camera.ViewMatrix());
 		renderEngine.ProjectionMatrix(camera.ProjMatrix());
 
-		renderEngine.ActiveRenderTarget(screen_iter_);
 		sceneMgr.Clear();
 		mesh_->AddToSceneManager();
 	}

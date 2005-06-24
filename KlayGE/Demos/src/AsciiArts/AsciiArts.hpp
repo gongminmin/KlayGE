@@ -26,15 +26,12 @@ private:
 	KlayGE::RenderTexturePtr render_buffer_;
 	KlayGE::TexturePtr rendered_tex_;
 
-	KlayGE::RenderTexturePtr downsample_buffer_;
 	KlayGE::TexturePtr downsample_tex_;
 
 	KlayGE::RenderEngine::RenderTargetListIterator screen_iter_;
 	KlayGE::RenderEngine::RenderTargetListIterator render_buffer_iter_;
-	KlayGE::RenderEngine::RenderTargetListIterator downsample_iter_;
 
-	boost::shared_ptr<KlayGE::Renderable> renderMatch_;
-	boost::shared_ptr<KlayGE::Renderable> renderTile_;
+	boost::shared_ptr<KlayGE::Renderable> renderQuad_;
 
 	KlayGE::uint32_t action_map_id_;
 

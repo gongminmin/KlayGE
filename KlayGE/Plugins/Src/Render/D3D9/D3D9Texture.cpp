@@ -6,6 +6,7 @@
 //
 // 2.7.0
 // 可以读取RenderTarget (2005.6.18)
+// 加速了拷贝到RenderTarget (2005.6.22)
 //
 // 2.6.0
 // 增加了对surface的检查 (2005.5.15)
@@ -383,10 +384,14 @@ namespace KlayGE
 					TIF(other.d3dTexture2D_->GetSurfaceLevel(level, &temp));
 					dst = MakeCOMPtr(temp);
 
-					RECT srcRc = { 0, 0, this->Width(level), this->Height(level) };
-					RECT dstRc = { 0, 0, target.Width(level), target.Height(level) };
-
-					TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, &dstRc, src.get(), NULL, &srcRc, D3DX_DEFAULT, 0));
+					if (Texture::TU_RenderTarget == target.Usage())
+					{
+						TIF(d3dDevice_->StretchRect(src.get(), NULL, dst.get(), NULL, D3DTEXF_LINEAR));
+					}
+					else
+					{
+						TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_LINEAR, 0));
+					}
 				}
 			}
 			break;
@@ -405,10 +410,7 @@ namespace KlayGE
 					TIF(other.d3dTexture3D_->GetVolumeLevel(level, &temp));
 					dst = MakeCOMPtr(temp);
 
-					D3DBOX srcBox = { 0, 0, this->Width(level), this->Height(level), 0, this->Depth(level) };
-					D3DBOX dstBox = { 0, 0, target.Width(level), target.Height(level), 0, this->Depth(level) };
-
-					TIF(D3DXLoadVolumeFromVolume(dst.get(), NULL, &dstBox, src.get(), NULL, &srcBox, D3DX_DEFAULT, 0));
+					TIF(D3DXLoadVolumeFromVolume(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_DEFAULT, 0));
 				}
 			}
 			break;
@@ -429,10 +431,14 @@ namespace KlayGE
 						TIF(other.d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &temp));
 						dst = MakeCOMPtr(temp);
 
-						RECT srcRc = { 0, 0, this->Width(level), this->Height(level) };
-						RECT dstRc = { 0, 0, target.Width(level), target.Height(level) };
-
-						TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, &dstRc, src.get(), NULL, &srcRc, D3DX_DEFAULT, 0));
+						if (Texture::TU_RenderTarget == target.Usage())
+						{
+							TIF(d3dDevice_->StretchRect(src.get(), NULL, dst.get(), NULL, D3DTEXF_LINEAR));
+						}
+						else
+						{
+							TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_LINEAR, 0));
+						}
 					}
 				}
 			}
@@ -497,8 +503,7 @@ namespace KlayGE
 			d3dDevice_->CreateOffscreenPlainSurface(this->Width(level), this->Height(level),
 				ConvertFormat(format_), D3DPOOL_SYSTEMMEM, &tmp_surface, NULL);
 
-			RECT rc = { 0, 0, this->Width(level), this->Height(level) };
-			TIF(D3DXLoadSurfaceFromSurface(tmp_surface, NULL, &rc, surface.get(), NULL, &rc, D3DX_DEFAULT, 0));
+			TIF(D3DXLoadSurfaceFromSurface(tmp_surface, NULL, NULL, surface.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
 
 			surface = MakeCOMPtr(tmp_surface);
 		}
@@ -551,8 +556,7 @@ namespace KlayGE
 			d3dDevice_->CreateOffscreenPlainSurface(this->Width(level), this->Height(level),
 				ConvertFormat(format_), D3DPOOL_SYSTEMMEM, &tmp_surface, NULL);
 
-			RECT rc = { 0, 0, this->Width(level), this->Height(level) };
-			TIF(D3DXLoadSurfaceFromSurface(tmp_surface, NULL, &rc, surface.get(), NULL, &rc, D3DX_DEFAULT, 0));
+			TIF(D3DXLoadSurfaceFromSurface(tmp_surface, NULL, NULL, surface.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
 
 			surface = MakeCOMPtr(tmp_surface);
 		}
