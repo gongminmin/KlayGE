@@ -17,7 +17,7 @@
 #define _OGLVERTEXSTREAM_HPP
 
 #include <vector>
-#include <GLLoader/GLLoader.h>
+#include <glloader/glloader.h>
 
 #include <KlayGE/VertexBuffer.hpp>
 

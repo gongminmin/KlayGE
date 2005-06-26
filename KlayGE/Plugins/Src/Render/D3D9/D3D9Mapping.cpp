@@ -134,28 +134,28 @@ namespace KlayGE
 
 	// 从RenderEngine::TexFiltering转换到D3D的MagFilter标志
 	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t D3D9Mapping::MappingToMagFilter(D3DCAPS9 const & caps, RenderEngine::TexFiltering tf)
+	uint32_t D3D9Mapping::MappingToMagFilter(D3DCAPS9 const & caps, RenderEngine::TexFilterOp tf)
 	{
 		// NOTE: Fall through if device doesn't support requested type
-		if ((RenderEngine::TF_Anisotropic == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFANISOTROPIC))
+		if ((RenderEngine::TFO_Anisotropic == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFANISOTROPIC))
 		{
 			return D3DTEXF_ANISOTROPIC;
 		}
 		else
 		{
-			tf = RenderEngine::TF_Trilinear;
+			tf = RenderEngine::TFO_Trilinear;
 		}
 
-		if ((RenderEngine::TF_Trilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFLINEAR))
+		if ((RenderEngine::TFO_Trilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFLINEAR))
 		{
 			return D3DTEXF_LINEAR;
 		}
 		else
 		{
-			tf = RenderEngine::TF_Bilinear;
+			tf = RenderEngine::TFO_Bilinear;
 		}
 
-		if ((RenderEngine::TF_Bilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFLINEAR))
+		if ((RenderEngine::TFO_Bilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFLINEAR))
 		{
 			return D3DTEXF_LINEAR;
 		}
@@ -165,28 +165,28 @@ namespace KlayGE
 
 	// 从RenderEngine::TexFiltering转换到D3D的MinFilter标志
 	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t D3D9Mapping::MappingToMinFilter(D3DCAPS9 const & caps, RenderEngine::TexFiltering tf)
+	uint32_t D3D9Mapping::MappingToMinFilter(D3DCAPS9 const & caps, RenderEngine::TexFilterOp tf)
 	{
 		// NOTE: Fall through if device doesn't support requested type
-		if ((RenderEngine::TF_Anisotropic == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFANISOTROPIC))
+		if ((RenderEngine::TFO_Anisotropic == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFANISOTROPIC))
 		{
 			return D3DTEXF_ANISOTROPIC;
 		}
 		else
 		{
-			tf = RenderEngine::TF_Trilinear;
+			tf = RenderEngine::TFO_Trilinear;
 		}
 
-		if ((RenderEngine::TF_Trilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFLINEAR))
+		if ((RenderEngine::TFO_Trilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFLINEAR))
 		{
 			return D3DTEXF_LINEAR;
 		}
 		else
 		{
-			tf = RenderEngine::TF_Bilinear;
+			tf = RenderEngine::TFO_Bilinear;
 		}
 
-		if ((RenderEngine::TF_Bilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFLINEAR))
+		if ((RenderEngine::TFO_Bilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFLINEAR))
 		{
 			return D3DTEXF_LINEAR;
 		}
@@ -196,28 +196,28 @@ namespace KlayGE
 
 	// 从RenderEngine::TexFiltering转换到D3D的MipFilter标志
 	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t D3D9Mapping::MappingToMipFilter(D3DCAPS9 const & caps, RenderEngine::TexFiltering tf)
+	uint32_t D3D9Mapping::MappingToMipFilter(D3DCAPS9 const & caps, RenderEngine::TexFilterOp tf)
 	{
 		// NOTE: Fall through if device doesn't support requested type
-		if ((RenderEngine::TF_Anisotropic == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR))
+		if ((RenderEngine::TFO_Anisotropic == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR))
 		{
 			return D3DTEXF_LINEAR;
 		}
 		else
 		{
-			tf = RenderEngine::TF_Trilinear;
+			tf = RenderEngine::TFO_Trilinear;
 		}
 
-		if ((RenderEngine::TF_Trilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR))
+		if ((RenderEngine::TFO_Trilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR))
 		{
 			return D3DTEXF_LINEAR;
 		}
 		else
 		{
-			tf = RenderEngine::TF_Bilinear;
+			tf = RenderEngine::TFO_Bilinear;
 		}
 
-		if ((RenderEngine::TF_Bilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR))
+		if ((RenderEngine::TFO_Bilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR))
 		{
 			return D3DTEXF_POINT;
 		}

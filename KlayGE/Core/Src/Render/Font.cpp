@@ -127,7 +127,10 @@ namespace
 			// …Ë÷√π˝¬À Ù–‘
 			if (flags & Font::FA_Filtered)
 			{
-				Context::Instance().RenderFactoryInstance().RenderEngineInstance().TextureFiltering(0, RenderEngine::TF_Bilinear);
+				Context::Instance().RenderFactoryInstance().RenderEngineInstance().TextureFiltering(0,
+					RenderEngine::TFT_Min, RenderEngine::TFO_Bilinear);
+				Context::Instance().RenderFactoryInstance().RenderEngineInstance().TextureFiltering(0,
+					RenderEngine::TFT_Mag, RenderEngine::TFO_Bilinear);
 			}
 
 			clr_ = clr;

@@ -36,9 +36,9 @@ namespace KlayGE
 
 		static D3DSTENCILOP Mapping(RenderEngine::StencilOperation op);
 
-		static uint32_t MappingToMagFilter(D3DCAPS9 const & caps, RenderEngine::TexFiltering tf);
-		static uint32_t MappingToMinFilter(D3DCAPS9 const & caps, RenderEngine::TexFiltering tf);
-		static uint32_t MappingToMipFilter(D3DCAPS9 const & caps, RenderEngine::TexFiltering tf);
+		static uint32_t MappingToMagFilter(D3DCAPS9 const & caps, RenderEngine::TexFilterOp tf);
+		static uint32_t MappingToMinFilter(D3DCAPS9 const & caps, RenderEngine::TexFilterOp tf);
+		static uint32_t MappingToMipFilter(D3DCAPS9 const & caps, RenderEngine::TexFilterOp tf);
 
 		static D3DLIGHTTYPE Mapping(Light::LightTypes type);
 

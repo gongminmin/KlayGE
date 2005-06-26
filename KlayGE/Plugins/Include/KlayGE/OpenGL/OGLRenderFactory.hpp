@@ -18,7 +18,7 @@
 
 #define NOMINMAX
 #include <windows.h>
-#include <GLLoader/GLLoader.h>
+#include <glloader/glloader.h>
 #include <gl/glu.h>
 
 #ifdef KLAYGE_DEBUG

@@ -5,7 +5,7 @@
 #include <KlayGE/RenderTexture.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 
-#include <GLLoader/GLLoader.h>
+#include <glloader/glloader.h>
 
 #include <KlayGE/OpenGL/OGLRenderTexture.hpp>
 

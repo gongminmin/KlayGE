@@ -17,7 +17,7 @@
 
 #define NOMINMAX
 #include <windows.h>
-#include <GLLoader/GLLoader.h>
+#include <glloader/glloader.h>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL_d.lib")

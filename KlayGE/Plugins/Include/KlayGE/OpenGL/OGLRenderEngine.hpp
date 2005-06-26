@@ -5,7 +5,7 @@
 // Homepage: http://klayge.sourceforge.net
 //
 // 2.7.0
-// 去掉了TextureCoordSet (2005.6.26)
+// 去掉了TextureCoordSet和DisableTextureStage (2005.6.26)
 //
 // 2.4.0
 // 增加了PolygonMode (2005.3.20)
@@ -17,10 +17,11 @@
 #define _OGLRENDERENGINE_HPP
 
 #include <vector>
+#include <map>
 
 #define NOMINMAX
 #include <windows.h>
-#include <GLLoader/GLLoader.h>
+#include <glloader/glloader.h>
 
 #include <KlayGE/RenderEngine.hpp>
 
@@ -77,12 +78,11 @@ namespace KlayGE
 		void SetTexture(uint32_t stage, TexturePtr const & texture);
 
 		uint32_t MaxTextureStages();
-		void DisableTextureStage(uint32_t stage);
 
 		void TextureCoordCalculation(uint32_t stage, TexCoordCalcMethod m);
 		void TextureAddressingMode(uint32_t stage, TexAddressingMode tam);
 		void TextureMatrix(uint32_t stage, Matrix4 const & mat);
-		void TextureFiltering(uint32_t stage, TexFiltering texFiltering);
+		void TextureFiltering(uint32_t stage, TexFilterType type, TexFilterOp op);
 		void TextureAnisotropy(uint32_t stage, uint32_t maxAnisotropy);
 
 		void StencilCheckEnabled(bool enabled);
@@ -105,8 +105,12 @@ namespace KlayGE
 	private:
 		CullMode cullingMode_;
 
+		std::map<uint32_t, GLenum> tex_stage_type_;
+		std::map<uint32_t, GLenum> tex_stage_mip_filter_;
+
 	private:
 		glActiveTextureFUNC glActiveTexture_;
+		glClientActiveTextureFUNC glClientActiveTexture_;
 	};
 
 	typedef boost::shared_ptr<OGLRenderEngine> OGLRenderEnginePtr;

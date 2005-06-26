@@ -18,7 +18,7 @@
 
 #include <cstring>
 
-#include <GLLoader/GLLoader.h>
+#include <glloader/glloader.h>
 #include <gl/glu.h>
 
 #include <KlayGE/OpenGL/OGLTexture.hpp>

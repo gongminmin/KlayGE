@@ -6,7 +6,7 @@
 //
 // 2.7.0
 // 改进了Render (2005.6.16)
-// 去掉了TextureCoordSet (2005.6.26)
+// 去掉了TextureCoordSet和DisableTextureStage (2005.6.26)
 //
 // 2.4.0
 // 增加了PolygonMode (2005.3.20)
@@ -541,14 +541,6 @@ namespace KlayGE
 		return caps_.MaxSimultaneousTextures;
 	}
 
-	// 关闭某个纹理阶段
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DisableTextureStage(uint32_t stage)
-	{
-		TIF(d3dDevice_->SetTexture(stage, NULL));
-		TIF(d3dDevice_->SetTextureStageState(stage, D3DTSS_COLOROP, D3DTOP_DISABLE));
-	}
-
 	// 计算纹理坐标
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::TextureCoordCalculation(uint32_t stage, TexCoordCalcMethod m)
@@ -626,11 +618,26 @@ namespace KlayGE
 
 	// 设置纹理过滤模式
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::TextureFiltering(uint32_t stage, TexFiltering texFiltering)
+	void D3D9RenderEngine::TextureFiltering(uint32_t stage, TexFilterType type, TexFilterOp op)
 	{
-		d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3D9Mapping::MappingToMagFilter(caps_, texFiltering));
-		d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3D9Mapping::MappingToMinFilter(caps_, texFiltering));
-		d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3D9Mapping::MappingToMipFilter(caps_, texFiltering));
+		switch (type)
+		{
+		case TFT_Min:
+			d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3D9Mapping::MappingToMinFilter(caps_, op));
+			break;
+
+		case TFT_Mag:
+			d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3D9Mapping::MappingToMagFilter(caps_, op));
+			break;
+
+		case TFT_Mip:
+			d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3D9Mapping::MappingToMipFilter(caps_, op));
+			break;
+
+		default:
+			assert(false);
+			break;
+		}
 	}
 
 	// 设置纹理异性过滤
