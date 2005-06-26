@@ -37,7 +37,7 @@ int const WIDTH = 800;
 int const HEIGHT = 600;
 int const CELL_WIDTH = 8;
 int const CELL_HEIGHT = 8;
-int const ASCII_TEX_WIDTH = 2048;
+int const NUM_ASCII = 128;
 int const CHAR_WIDTH = 16;
 int const CHAR_HEIGHT = 16;
 
@@ -97,10 +97,9 @@ namespace
 			box_ = MathLib::ComputeBoundingBox<float>(pos.begin(), pos.end());
 		}
 
-		void SetTexture(TexturePtr const & scene_tex, TexturePtr const & ascii_tex, TexturePtr const & lums_tex)
+		void SetTexture(TexturePtr const & scene_tex, TexturePtr const & lums_tex)
 		{
 			*(effect_->ParameterByName("scene_tex")) = scene_tex;
-			*(effect_->ParameterByName("ascii_tex")) = ascii_tex;
 			*(effect_->ParameterByName("lums_tex")) = lums_tex;
 		}
 
@@ -110,7 +109,7 @@ namespace
 
 			*(effect_->ParameterByName("cell_per_row")) = static_cast<float>(CELL_WIDTH) / (*renderEngine.ActiveRenderTarget())->Width();
 			*(effect_->ParameterByName("cell_per_line")) = static_cast<float>(CELL_HEIGHT) / (*renderEngine.ActiveRenderTarget())->Height();
-			*(effect_->ParameterByName("char_per_row")) = ASCII_TEX_WIDTH / CHAR_WIDTH;
+			*(effect_->ParameterByName("num_ascii")) = NUM_ASCII;
 		}
 
 		RenderEffectPtr GetRenderEffect() const
@@ -161,35 +160,33 @@ namespace
 	void BuildAsciiLums(TexturePtr ascii_tex, TexturePtr ascii_lums_tex)
 	{
 		std::vector<float> lums(128, 0);
+		std::vector<uint8_t> ascii_data(NUM_ASCII * CHAR_WIDTH * CHAR_HEIGHT);
+		ascii_tex->CopyToMemory2D(0, &ascii_data[0]);
+		for (int x = 0; x < NUM_ASCII; ++ x)
 		{
-			std::vector<unsigned char> data(ASCII_TEX_WIDTH * CHAR_HEIGHT);
-			ascii_tex->CopyToMemory2D(0, &data[0]);
-			for (int x = 0; x < ASCII_TEX_WIDTH / CHAR_WIDTH; ++ x)
+			for (int yc = 0; yc < CHAR_HEIGHT; ++ yc)
 			{
-				for (int yc = 0; yc < CHAR_HEIGHT; ++ yc)
+				for (int xc = 0; xc < CHAR_WIDTH; ++ xc)
 				{
-					for (int xc = 0; xc < CHAR_WIDTH; ++ xc)
-					{
-						lums[x] += data[yc * ASCII_TEX_WIDTH + (x * CHAR_WIDTH + xc)] / 256.0f;
-					}
+					lums[x] += ascii_data[yc * NUM_ASCII * CHAR_WIDTH + (x * CHAR_WIDTH + xc)] / 256.0f;
 				}
 			}
 		}
 
-		std::multimap<float, unsigned char> lum_to_char;
+		std::multimap<float, uint8_t> lum_to_char;
 		float max_lun = *std::max_element(lums.begin(), lums.end());
 		for (size_t i = 0; i < lums.size(); ++ i)
 		{
-			lum_to_char.insert(std::make_pair(lums[i] / max_lun * 32, static_cast<unsigned char>(i)));
+			lum_to_char.insert(std::make_pair(lums[i] / max_lun * 32, static_cast<uint8_t>(i)));
 		}
-		std::vector<std::pair<float, std::multimap<float, unsigned char>::iterator> > diff_lum_to_iter;
-		for (std::multimap<float, unsigned char>::iterator iter = lum_to_char.begin(); iter != lum_to_char.end(); ++ iter)
+		std::vector<std::pair<float, std::multimap<float, uint8_t>::iterator> > diff_lum_to_iter;
+		for (std::multimap<float, uint8_t>::iterator iter = lum_to_char.begin(); iter != lum_to_char.end(); ++ iter)
 		{
 			float diff_lum;
 
 			if (iter != lum_to_char.begin())
 			{
-				std::multimap<float, unsigned char>::iterator prev_iter = iter;
+				std::multimap<float, uint8_t>::iterator prev_iter = iter;
 				-- prev_iter;
 				diff_lum = iter->first - prev_iter->first;
 			}
@@ -206,25 +203,58 @@ namespace
 			diff_lum_to_iter.pop_back();
 		}
 		assert(32 == diff_lum_to_iter.size());
-		std::map<float, unsigned char> final_lum_to_char;
+		std::map<float, uint8_t> final_lum_to_char;
 		for (size_t i = 0; i < diff_lum_to_iter.size(); ++ i)
 		{
 			final_lum_to_char.insert(*diff_lum_to_iter[i].second);
 		}
 		assert(32 == final_lum_to_char.size());
-		std::vector<unsigned char> lums_map(256);
-		for (std::map<float, unsigned char>::iterator iter = final_lum_to_char.begin();
+		std::vector<uint8_t> lums_map(8 * 32 * CHAR_WIDTH * CHAR_HEIGHT);
+		for (std::map<float, uint8_t>::iterator iter = final_lum_to_char.begin();
 			iter != final_lum_to_char.end(); ++ iter)
 		{
-			lums_map[std::distance(final_lum_to_char.begin(), iter)] = iter->second;
+			int lum = std::distance(final_lum_to_char.begin(), iter);
+
+			for (int y = 0; y < CHAR_HEIGHT; ++ y)
+			{
+				for (int x = 0; x < CHAR_WIDTH; ++ x)
+				{
+					lums_map[y * 8 * 32 * CHAR_WIDTH + (lum * CHAR_WIDTH + x)]
+						= ascii_data[y * NUM_ASCII * CHAR_WIDTH + (iter->second * CHAR_WIDTH + x)];
+				}
+			}
 		}
-		for (int i = 1; i < 8; ++ i)
+		for (int i = 7; i >= 0; -- i)
 		{
-			std::copy(lums_map.begin(), lums_map.begin() + 32, lums_map.begin() + i * 32);
+			for (int y = 0; y < CHAR_HEIGHT; ++ y)
+			{
+				for (int x = 0; x < 32 * CHAR_WIDTH; ++ x)
+				{
+					lums_map[y * 8 * 32 * CHAR_WIDTH + (i * 32 * CHAR_WIDTH + x)]
+						= lums_map[y * 8 * 32 * CHAR_WIDTH + x] / 8 * (i + 1);
+				}
+			}
 		}
 
-		ascii_lums_tex->CopyMemoryToTexture1D(0, &lums_map[0], PF_L8, lums_map.size() * sizeof(lums_map[0]), 0);
+		ascii_lums_tex->CopyMemoryToTexture2D(0, &lums_map[0], PF_L8, 8 * 32 * CHAR_WIDTH, CHAR_HEIGHT, 0, 0);
 	}
+
+	class TheRenderSettings : public D3D9RenderSettings
+	{
+	private:
+		bool DoConfirmDevice(D3DCAPS9 const & caps, uint32_t behavior, D3DFORMAT format) const
+		{
+			if (caps.VertexShaderVersion < D3DVS_VERSION(1, 1))
+			{
+				return false;
+			}
+			if (caps.PixelShaderVersion < D3DPS_VERSION(2, 0))
+			{
+				return false;
+			}
+			return true;
+		}
+	};
 }
 
 int main()
@@ -236,7 +266,7 @@ int main()
 
 	Context::Instance().InputFactoryInstance(DInputFactoryInstance());
 
-	D3D9RenderSettings settings;
+	TheRenderSettings settings;
 	settings.width = WIDTH;
 	settings.height = HEIGHT;
 	settings.colorDepth = 32;
@@ -273,9 +303,9 @@ void AsciiArts::InitObjects()
 	mesh_ = LoadKMesh("bunny.kmesh");
 	mesh_->AddToSceneManager();
 
-	ascii_tex_ = LoadTexture("font.dds");
-	ascii_lums_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture1D(256, 1, PF_L8);
-	BuildAsciiLums(ascii_tex_, ascii_lums_tex_);
+	KlayGE::TexturePtr ascii_tex = LoadTexture("font.dds");
+	ascii_lums_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(8 * 32 * CHAR_WIDTH, CHAR_HEIGHT, 1, PF_L8);
+	BuildAsciiLums(ascii_tex, ascii_lums_tex_);
 
 	rendered_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(WIDTH, HEIGHT, 1, PF_A8R8G8B8, Texture::TU_RenderTarget);
 	render_buffer_ = Context::Instance().RenderFactoryInstance().MakeRenderTexture();
@@ -337,7 +367,7 @@ void AsciiArts::Update()
 		// µÚ¶þ±é£¬Æ¥Åä£¬×îÖÕäÖÈ¾
 		renderEngine.ActiveRenderTarget(screen_iter_);
 
-		static_cast<RenderQuad*>(renderQuad_.get())->SetTexture(downsample_tex_, ascii_tex_, ascii_lums_tex_);
+		static_cast<RenderQuad*>(renderQuad_.get())->SetTexture(downsample_tex_, ascii_lums_tex_);
 		sceneMgr.Clear();
 		renderQuad_->AddToSceneManager();
 	}

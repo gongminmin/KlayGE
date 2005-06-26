@@ -121,25 +121,25 @@ namespace
 	{
 		InputAction(Quit, KS_Escape),
 	};
+
+	class TheRenderSettings : public D3D9RenderSettings
+	{
+	private:
+		bool DoConfirmDevice(D3DCAPS9 const & caps, uint32_t behavior, D3DFORMAT format) const
+		{
+			if (caps.VertexShaderVersion < D3DVS_VERSION(1, 1))
+			{
+				return false;
+			}
+			if (caps.PixelShaderVersion < D3DPS_VERSION(2, 0))
+			{
+				return false;
+			}
+			return true;
+		}
+	};
 }
 
-
-class TheRenderSettings : public D3D9RenderSettings
-{
-private:
-	bool DoConfirmDevice(D3DCAPS9 const & caps, uint32_t behavior, D3DFORMAT format) const
-	{
-		if (caps.VertexShaderVersion < D3DVS_VERSION(1, 1))
-		{
-			return false;
-		}
-		if (caps.PixelShaderVersion < D3DPS_VERSION(2, 0))
-		{
-			return false;
-		}
-		return true;
-	}
-};
 
 int main()
 {

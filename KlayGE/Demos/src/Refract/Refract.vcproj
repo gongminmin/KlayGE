@@ -13,7 +13,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="../../bin"
-			IntermediateDirectory="Debug"
+			IntermediateDirectory="../../Debug"
 			ConfigurationType="1"
 			CharacterSet="1">
 			<Tool
@@ -63,7 +63,7 @@
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="../../bin"
-			IntermediateDirectory="Release"
+			IntermediateDirectory="../../Release"
 			ConfigurationType="1"
 			CharacterSet="1"
 			WholeProgramOptimization="TRUE">

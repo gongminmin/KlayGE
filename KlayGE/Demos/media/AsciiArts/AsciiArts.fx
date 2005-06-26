@@ -1,5 +1,5 @@
 float cell_per_row, cell_per_line;
-float char_per_row;
+float num_ascii;
 
 struct VS_INPUT
 {
@@ -34,47 +34,27 @@ sampler2D scene_sampler = sampler_state
 	AddressV  = Wrap;
 };
 
-texture ascii_tex;
-sampler2D ascii_sampler = sampler_state
-{
-	Texture = <ascii_tex>;
-	MinFilter = Linear;
-	MagFilter = Linear;
-	MipFilter = Linear;
-	AddressU  = Wrap;
-	AddressV  = Wrap;
-};
-
 texture lums_tex;
-sampler1D lums_sampler = sampler_state
+sampler2D lums_sampler = sampler_state
 {
 	Texture = <lums_tex>;
-	MinFilter = Point;
-	MagFilter = Point;
-	MipFilter = Point;
+	MinFilter = Linear;
+	MagFilter = Linear;
+	MipFilter = None;
 	AddressU  = Clamp;
 	AddressV  = Clamp;
 };
 
 float4 AsciiArtsPS(float2 tex_coord0	: TEXCOORD0,
 					uniform sampler2D scene_sampler,
-					uniform sampler2D ascii_sampler,
-					uniform sampler1D lums_sampler,
+					uniform sampler2D lums_sampler,
 					uniform float3 arg) : COLOR
 {
-	const float3 l_weight = float3(0.299, 0.587, 0.114);
+	const float3 rgb_to_lum = float3(0.299, 0.587, 0.114);
 
-	float lum = dot(tex2D(scene_sampler, tex_coord0).rgb, l_weight);
-
-	float ascii = round(tex1D(lums_sampler, lum).r * 256);
-	float level = round(lum * 8) / 8;
-
-	float2 t;
-	t.y = floor(ascii / arg.z);
-	t.x = ascii - t.y * arg.z;
-	t = (t + frac(tex_coord0 / arg.xy)) / float2(arg.z, 1);
-
-	return float4(level * tex2D(ascii_sampler, t).rgb, 1);
+	float lum = dot(tex2D(scene_sampler, tex_coord0).rgb, rgb_to_lum);
+	float2 t = (float2(floor(lum * 255), 0) + frac(tex_coord0 / arg.xy)) / float2(256, 1);
+	return float4(tex2D(lums_sampler, t).rgb, 1);
 }
 
 technique AsciiArts
@@ -82,6 +62,6 @@ technique AsciiArts
 	pass p0
 	{
 		VertexShader = compile vs_1_1 AsciiArtsVS();
-		PixelShader = compile ps_2_0 AsciiArtsPS(scene_sampler, ascii_sampler, lums_sampler, float3(cell_per_row, cell_per_line, char_per_row));
+		PixelShader = compile ps_2_0 AsciiArtsPS(scene_sampler, lums_sampler, float3(cell_per_row, cell_per_line, num_ascii));
 	}
 }

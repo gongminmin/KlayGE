@@ -20,7 +20,6 @@ private:
 	KlayGE::FirstPersonCameraController fpcController_;
 	boost::shared_ptr<KlayGE::StaticMesh> mesh_;
 
-	KlayGE::TexturePtr ascii_tex_;
 	KlayGE::TexturePtr ascii_lums_tex_;
 
 	KlayGE::RenderTexturePtr render_buffer_;
