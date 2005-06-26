@@ -6,6 +6,8 @@
 //
 // 2.7.0
 // 支持vertex_buffer_object (2005.6.19)
+// 支持OpenGL 1.3多纹理 (2005.6.26)
+// 去掉了TextureCoordSet (2005.6.26)
 //
 // 2.4.0
 // 增加了PolygonMode (2005.3.20)
@@ -19,7 +21,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Math.hpp>
-
 #include <KlayGE/Light.hpp>
 #include <KlayGE/Material.hpp>
 #include <KlayGE/Viewport.hpp>
@@ -31,6 +32,8 @@
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 #include <KlayGE/OpenGL/OGLVertexStream.hpp>
 #include <KlayGE/OpenGL/OGLIndexStream.hpp>
+
+#include <glloader/glloader.h>
 
 #include <cassert>
 #include <algorithm>
@@ -135,6 +138,21 @@ namespace KlayGE
 	OGLRenderEngine::OGLRenderEngine()
 		: cullingMode_(RenderEngine::CM_None)
 	{
+		if (glloader_is_supported("GL_VERSION_1_3"))
+		{
+			glActiveTexture_ = glActiveTexture;
+		}
+		else
+		{
+			if (glloader_is_supported("GL_ARB_multitexture"))
+			{
+				glActiveTexture_ = glActiveTexture;
+			}
+			else
+			{
+				glActiveTexture_ = NULL;
+			}
+		}
 	}
 
 	// 析构函数
@@ -542,6 +560,10 @@ namespace KlayGE
 			case VST_TextureCoords5:
 			case VST_TextureCoords6:
 			case VST_TextureCoords7:
+				if (glActiveTexture_ != NULL)
+				{
+					glActiveTexture_(type - VST_TextureCoords0);
+				}
 				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 				if (use_vbo)
 				{
@@ -720,17 +742,13 @@ namespace KlayGE
 		}
 	}
 
-	// 设置纹理坐标集
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::TextureCoordSet(uint32_t /*stage*/, int /*index*/)
-	{
-	}
-
 	// 获取最大纹理阶段数
 	/////////////////////////////////////////////////////////////////////////////////
 	uint32_t OGLRenderEngine::MaxTextureStages()
 	{
-		return 1;
+		GLint ret;
+		glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &ret);
+		return static_cast<uint32_t>(ret);
 	}
 
 	// 关闭某个纹理阶段

@@ -6,6 +6,7 @@
 //
 // 2.7.0
 // 改进了Render (2005.6.16)
+// 去掉了TextureCoordSet (2005.6.26)
 //
 // 2.4.0
 // 增加了PolygonMode (2005.3.20)
@@ -531,13 +532,6 @@ namespace KlayGE
 			D3D9Texture const & d3d9Tex = static_cast<D3D9Texture const &>(*texture);
 			TIF(d3dDevice_->SetTexture(stage, d3d9Tex.D3DBaseTexture().get()));
 		}
-	}
-
-	// 设置纹理坐标集
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::TextureCoordSet(uint32_t stage, int index)
-	{
-		TIF(d3dDevice_->SetTextureStageState(stage, D3DTSS_TEXCOORDINDEX, index));
 	}
 
 	// 获取最大纹理阶段数

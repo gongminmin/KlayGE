@@ -1,8 +1,11 @@
 // RenderEngine.hpp
 // KlayGE 渲染引擎类 实现文件
-// Ver 2.4.0
+// Ver 2.7.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.7.0
+// 去掉了TextureCoordSet (2005.6.26)
 //
 // 2.4.0
 // 增加了NumFacesJustRendered和NumVerticesJustRendered (2005.3.21)
@@ -212,9 +215,6 @@ namespace KlayGE
 		RenderTargetListIterator const & ActiveRenderTarget() const;
 
 		virtual void SetTexture(uint32_t stage, TexturePtr const & texture) = 0;
-
-		// Sets the texture coordinate set to use for a texture unit.
-		virtual void TextureCoordSet(uint32_t stage, int index) = 0;
 
 		// Returns the number of texture units the current output hardware supports.
 		virtual uint32_t MaxTextureStages() = 0;
