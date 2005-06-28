@@ -18,7 +18,6 @@ private:
 	KlayGE::FontPtr font_;
 	boost::shared_ptr<KlayGE::Renderable> renderBox_;
 	boost::shared_ptr<KlayGE::Renderable> renderSkyBox_;
-	boost::shared_ptr<KlayGE::StaticMesh> mesh_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
