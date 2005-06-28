@@ -955,7 +955,16 @@ namespace KlayGE
 
 	void OGLTexture::TextureAnisotropy(uint32_t maxAnisotropy)
 	{
-		tex_anisotropy_ = maxAnisotropy;
+		if (glloader_is_supported("GL_EXT_texture_filter_anisotropic"))
+		{
+			this->GLBindTexture();
+
+			GLint max_aniso;
+			glGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_aniso);
+
+			tex_anisotropy_ = std::min(max_aniso, static_cast<GLint>(maxAnisotropy));
+			glTexParameteri(this->GLType(), GL_TEXTURE_MAX_ANISOTROPY_EXT, tex_anisotropy_);
+		}
 	}
 
 	uint32_t OGLTexture::TextureAnisotropy() const

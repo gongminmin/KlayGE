@@ -99,7 +99,7 @@ namespace KlayGE
 
 		TexAddressingMode tex_addr_mode_u_, tex_addr_mode_v_, tex_addr_mode_w_;
 		TexFilterOp tex_min_filter_, tex_mag_filter_, tex_mip_filter_;
-		uint32_t tex_anisotropy_;
+		GLint tex_anisotropy_;
 	};
 
 	typedef boost::shared_ptr<OGLTexture> OGLTexturePtr;
