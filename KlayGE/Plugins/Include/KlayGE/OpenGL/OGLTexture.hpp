@@ -1,8 +1,11 @@
 // OGLTexture.hpp
 // KlayGE OpenGL纹理类 头文件
-// Ver 2.3.0
+// Ver 2.7.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.7.0
+// 增加了TextureAddressingMode, extureFiltering和TextureAnisotropy (2005.6.27)
 //
 // 2.3.0
 // 增加了CopyToMemory (2005.2.6)
@@ -68,10 +71,21 @@ namespace KlayGE
 		uint32_t MaxDepth() const;
 		uint32_t MaxCubeSize() const;
 
+		void TextureAddressingMode(TexAddressingType type, TexAddressingMode tam);
+		void TextureFiltering(TexFilterType type, TexFilterOp op);
+		void TextureAnisotropy(uint32_t maxAnisotropy);
+
+		TexAddressingMode TextureAddressingMode(TexAddressingType type) const;
+		TexFilterOp TextureFiltering(TexFilterType type) const;
+		uint32_t TextureAnisotropy() const;
+
 		GLenum GLTexture() const
 			{ return texture_[0]; }
 		GLenum GLTextureFace(int face) const
 			{ return texture_[face]; }
+
+		void GLBindTexture();
+		GLenum GLType() const;
 
 	private:
 		void UpdateParams();
@@ -82,6 +96,10 @@ namespace KlayGE
 		std::vector<uint32_t> widths_;
 		std::vector<uint32_t> heights_;
 		std::vector<uint32_t> depths_;
+
+		TexAddressingMode tex_addr_mode_u_, tex_addr_mode_v_, tex_addr_mode_w_;
+		TexFilterOp tex_min_filter_, tex_mag_filter_, tex_mip_filter_;
+		uint32_t tex_anisotropy_;
 	};
 
 	typedef boost::shared_ptr<OGLTexture> OGLTexturePtr;

@@ -6,6 +6,7 @@
 //
 // 2.7.0
 // 去掉了TextureCoordSet和DisableTextureStage (2005.6.26)
+// TextureAddressingMode, extureFiltering和TextureAnisotropy移到Texture中 (2005.6.27)
 //
 // 2.4.0
 // 增加了NumFacesJustRendered和NumVerticesJustRendered (2005.3.21)
@@ -104,34 +105,6 @@ namespace KlayGE
 			TCC_EnvironmentMapNormal,
 		};
 
-		enum TexFilterType
-		{
-			TFT_Min,
-			TFT_Mag,
-			TFT_Mip,
-		};
-
-		enum TexFilterOp
-		{
-			TFO_None,
-			TFO_Point,
-			TFO_Bilinear,
-			TFO_Trilinear,
-			TFO_Anisotropic,
-		};
-
-		// Texture addressing modes - default is TAM_Wrap.
-		enum TexAddressingMode
-		{
-			// Texture wraps at values over 1.0
-			TAM_Wrap,
-			// Texture mirrors (flips) at joins over 1.0
-			TAM_Mirror,
-			// Texture clamps at 1.0
-			TAM_Clamp
-		};
-
-
 		// Type of texture blend mode.
 		enum TexBlendType
 		{
@@ -229,14 +202,8 @@ namespace KlayGE
 
 		// Sets a method for automatically calculating texture coordinates for a stage.
 		virtual void TextureCoordCalculation(uint32_t stage, TexCoordCalcMethod m) = 0;
-		// Sets the texture addressing mode for a texture unit.
-		virtual void TextureAddressingMode(uint32_t stage, TexAddressingMode tam) = 0;
 		// Sets the texture coordinate transformation matrix for a texture unit.
 		virtual void TextureMatrix(uint32_t stage, Matrix4 const & mat) = 0;
-		// Sets the texture filtering type for a texture unit.
-		virtual void TextureFiltering(uint32_t stage, TexFilterType type, TexFilterOp op) = 0;
-		// Sets the maximal anisotropy for the specified texture unit.
-		virtual void TextureAnisotropy(uint32_t stage, uint32_t maxAnisotropy) = 0;
 
 		// Turns stencil buffer checking on or off. 
 		virtual void StencilCheckEnabled(bool enabled) = 0;

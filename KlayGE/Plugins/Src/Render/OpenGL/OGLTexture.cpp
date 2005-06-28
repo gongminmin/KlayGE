@@ -1,8 +1,11 @@
 // OGLTexture.hpp
 // KlayGE OpenGL纹理类 实现文件
-// Ver 2.3.0
+// Ver 2.7.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.7.0
+// 增加了TextureAddressingMode, extureFiltering和TextureAnisotropy (2005.6.27)
 //
 // 2.3.0
 // 增加了CopyToMemory (2005.2.6)
@@ -101,7 +104,10 @@ namespace KlayGE
 {
 	OGLTexture::OGLTexture(uint32_t width, uint16_t numMipMaps,
 								PixelFormat format, TextureUsage usage)
-					: Texture(usage, TT_1D)
+					: Texture(usage, TT_1D),
+						tex_addr_mode_u_(TAM_Wrap), tex_addr_mode_v_(TAM_Wrap), tex_addr_mode_w_(TAM_Wrap),
+						tex_min_filter_(TFO_Point), tex_mag_filter_(TFO_Point), tex_mip_filter_(TFO_Point),
+						tex_anisotropy_(0)
 	{
 		format_		= format;
 		width_		= width;
@@ -162,7 +168,10 @@ namespace KlayGE
 
 	OGLTexture::OGLTexture(uint32_t width, uint32_t height,
 								uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
-						: Texture(usage, TT_2D)
+					: Texture(usage, TT_2D),
+						tex_addr_mode_u_(TAM_Wrap), tex_addr_mode_v_(TAM_Wrap), tex_addr_mode_w_(TAM_Wrap),
+						tex_min_filter_(TFO_Point), tex_mag_filter_(TFO_Point), tex_mip_filter_(TFO_Point),
+						tex_anisotropy_(0)
 	{
 		format_		= format;
 		width_		= width;
@@ -224,7 +233,10 @@ namespace KlayGE
 
 	OGLTexture::OGLTexture(uint32_t width, uint32_t height, uint32_t depth,
 								uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
-							: Texture(usage, TT_3D)
+					: Texture(usage, TT_3D),
+						tex_addr_mode_u_(TAM_Wrap), tex_addr_mode_v_(TAM_Wrap), tex_addr_mode_w_(TAM_Wrap),
+						tex_min_filter_(TFO_Point), tex_mag_filter_(TFO_Point), tex_mip_filter_(TFO_Point),
+						tex_anisotropy_(0)
 	{
 		format_		= format;
 		width_		= width;
@@ -287,7 +299,10 @@ namespace KlayGE
 
 	OGLTexture::OGLTexture(uint32_t size, bool /*cube*/, uint16_t numMipMaps,
 								PixelFormat format, TextureUsage usage)
-							: Texture(usage, TT_Cube)
+					: Texture(usage, TT_Cube),
+						tex_addr_mode_u_(TAM_Wrap), tex_addr_mode_v_(TAM_Wrap), tex_addr_mode_w_(TAM_Wrap),
+						tex_min_filter_(TFO_Point), tex_mag_filter_(TFO_Point), tex_mip_filter_(TFO_Point),
+						tex_anisotropy_(0)
 	{
 		format_		= format;
 		width_		= size;
@@ -746,5 +761,256 @@ namespace KlayGE
 		width_ = widths_[0];
 		height_ = heights_[0];
 		depth_ = depths_[0];
+	}
+
+	void OGLTexture::TextureAddressingMode(TexAddressingType type, TexAddressingMode tam)
+	{
+		this->GLBindTexture();
+
+		GLint mode = GL_REPEAT;
+		switch (tam)
+		{
+		case TAM_Wrap:
+			mode = GL_REPEAT;
+			break;
+
+		case TAM_Mirror:
+			mode = GL_MIRRORED_REPEAT;
+			break;
+
+		case TAM_Clamp:
+			mode = GL_CLAMP;
+			break;
+
+		default:
+			assert(false);
+			break;
+		}
+
+		switch (type)
+		{
+		case TAT_Addr_U:
+			tex_addr_mode_u_ = tam;
+			glTexParameteri(this->GLType(), GL_TEXTURE_WRAP_S, mode);
+			break;
+
+		case TAT_Addr_V:
+			tex_addr_mode_v_ = tam;
+			glTexParameteri(this->GLType(), GL_TEXTURE_WRAP_T, mode);
+			break;
+
+		case TAT_Addr_W:
+			tex_addr_mode_w_ = tam;
+			glTexParameteri(this->GLType(), GL_TEXTURE_WRAP_R, mode);
+			break;
+
+		default:
+			assert(false);
+			break;
+		}
+	}
+
+	Texture::TexAddressingMode OGLTexture::TextureAddressingMode(TexAddressingType type) const
+	{
+		switch (type)
+		{
+		case TAT_Addr_U:
+			return tex_addr_mode_u_;
+
+		case TAT_Addr_V:
+			return tex_addr_mode_v_;
+
+		case TAT_Addr_W:
+			return tex_addr_mode_w_;
+
+		default:
+			assert(false);
+			return tex_addr_mode_u_;
+		}
+	}
+
+	void OGLTexture::TextureFiltering(TexFilterType type, TexFilterOp op)
+	{
+		this->GLBindTexture();
+
+		GLint mode = GL_NEAREST;
+		if (type != TFT_Min)
+		{
+			switch (op)
+			{
+			case TFO_None:
+			case TFO_Point:
+				mode = GL_NEAREST;
+				break;
+
+			case TFO_Bilinear:
+			case TFO_Trilinear:
+			case TFO_Anisotropic:
+				mode = GL_LINEAR;
+				break;
+
+			default:
+				assert(false);
+				break;
+			}
+		}
+		else
+		{
+			switch (op)
+			{
+			case TFO_None:
+			case TFO_Point:
+				switch (tex_mip_filter_)
+				{
+				case TFO_None:
+					// nearest min, no mip
+					mode = GL_NEAREST;
+					break;
+
+				case TFO_Point:
+					// nearest min, nearest mip
+					mode = GL_NEAREST_MIPMAP_NEAREST;
+					break;
+
+				case TFO_Bilinear:
+				case TFO_Trilinear:
+				case TFO_Anisotropic:
+					// nearest min, linear mip
+					mode = GL_NEAREST_MIPMAP_LINEAR;
+					break;
+				}
+				break;
+
+			case TFO_Bilinear:
+			case TFO_Trilinear:
+			case TFO_Anisotropic:
+				switch (tex_mip_filter_)
+				{
+				case TFO_None:
+					// linear min, no mip
+					mode = GL_LINEAR;
+					break;
+
+				case TFO_Point:
+					// linear min, point mip
+					mode = GL_LINEAR_MIPMAP_NEAREST;
+					break;
+
+				case TFO_Bilinear:
+				case TFO_Trilinear:
+				case TFO_Anisotropic:
+					// linear min, linear mip
+					mode = GL_LINEAR_MIPMAP_LINEAR;
+					break;
+				}
+				break;
+
+			default:
+				assert(false);
+				break;
+			}
+		}
+
+		switch (type)
+		{
+		case TFT_Min:
+			tex_min_filter_ = op;
+			glTexParameteri(this->GLType(), GL_TEXTURE_MIN_FILTER, mode);
+			break;
+
+		case TFT_Mag:
+			tex_mag_filter_ = op;
+			glTexParameteri(this->GLType(), GL_TEXTURE_MAG_FILTER, mode);
+			break;
+
+		case TFT_Mip:
+			tex_mip_filter_ = op;
+			glTexParameteri(this->GLType(), GL_TEXTURE_MIN_FILTER, mode);
+			break;
+
+		default:
+			assert(false);
+			break;
+		}
+	}
+
+	Texture::TexFilterOp OGLTexture::TextureFiltering(TexFilterType type) const
+	{
+		switch (type)
+		{
+		case TFT_Min:
+			return tex_min_filter_;
+
+		case TFT_Mag:
+			return tex_mag_filter_;
+
+		case TFT_Mip:
+			return tex_mip_filter_;
+
+		default:
+			assert(false);
+			return tex_min_filter_;
+		}
+	}
+
+	void OGLTexture::TextureAnisotropy(uint32_t maxAnisotropy)
+	{
+		tex_anisotropy_ = maxAnisotropy;
+	}
+
+	uint32_t OGLTexture::TextureAnisotropy() const
+	{
+		return tex_anisotropy_;
+	}
+
+	void OGLTexture::GLBindTexture()
+	{
+		switch (type_)
+		{
+		case TT_1D:
+			glBindTexture(GL_TEXTURE_1D, texture_[0]);
+			break;
+
+		case TT_2D:
+			glBindTexture(GL_TEXTURE_2D, texture_[0]);
+			break;
+
+		case TT_3D:
+			glBindTexture(GL_TEXTURE_3D, texture_[0]);
+			break;
+
+		case TT_Cube:
+			for (int face = 0; face < 6; ++ face)
+			{
+				glBindTexture(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, texture_[face]);
+			}
+			break;
+
+		default:
+			assert(false);
+			break;
+		}
+	}
+
+	GLenum OGLTexture::GLType() const
+	{
+		switch (type_)
+		{
+		case TT_1D:
+			return GL_TEXTURE_1D;
+
+		case TT_2D:
+			return GL_TEXTURE_2D;
+
+		case TT_3D:
+			return GL_TEXTURE_3D;
+
+		case TT_Cube:
+			return GL_TEXTURE_CUBE_MAP;
+
+		default:
+			assert(false);
+			return GL_TEXTURE_1D;
+		}
 	}
 }

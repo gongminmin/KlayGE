@@ -8,6 +8,7 @@
 // 支持vertex_buffer_object (2005.6.19)
 // 支持OpenGL 1.3多纹理 (2005.6.26)
 // 去掉了TextureCoordSet和DisableTextureStage (2005.6.26)
+// TextureAddressingMode, extureFiltering和TextureAnisotropy移到Texture中 (2005.6.27)
 //
 // 2.4.0
 // 增加了PolygonMode (2005.3.20)
@@ -734,42 +735,22 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::SetTexture(uint32_t stage, TexturePtr const & texture)
 	{
+		assert(dynamic_cast<OGLTexture const *>(texture.get()) != NULL);
+
 		if (glActiveTexture_ != NULL)
 		{
 			glActiveTexture_(GL_TEXTURE0 + stage);
 		}
 
+		OGLTexture& gl_tex = *static_cast<OGLTexture*>(texture.get());
 		if (!texture)
 		{
-			if (tex_stage_type_.find(stage) != tex_stage_type_.end())
-			{
-				glDisable(tex_stage_type_[stage]);
-				tex_stage_type_.erase(stage);
-			}
+			glDisable(gl_tex.GLType());
 		}
 		else
 		{
-			switch (texture->Type())
-			{
-			case Texture::TT_1D:
-				tex_stage_type_[stage] = GL_TEXTURE_1D;
-				break;
-
-			case Texture::TT_2D:
-				tex_stage_type_[stage] = GL_TEXTURE_2D;
-				break;
-
-			case Texture::TT_3D:
-				tex_stage_type_[stage] = GL_TEXTURE_3D;
-				break;
-
-			case Texture::TT_Cube:
-				tex_stage_type_[stage] = GL_TEXTURE_CUBE_MAP;
-				break;
-			}
-
-			glEnable(tex_stage_type_[stage]);
-			glBindTexture(tex_stage_type_[stage], OGLTexturePtr(static_cast<OGLTexture*>(texture.get()))->GLTexture());
+			glEnable(gl_tex.GLType());
+			gl_tex.GLBindTexture();
 		}
 	}
 
@@ -788,40 +769,6 @@ namespace KlayGE
 	{
 	}
 
-	// 设置纹理寻址模式
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::TextureAddressingMode(uint32_t stage, TexAddressingMode tam)
-	{
-		if (glActiveTexture_ != NULL)
-		{
-			glActiveTexture_(GL_TEXTURE0 + stage);
-		}
-
-		GLint mode;
-		switch (tam)
-		{
-		case TAM_Wrap:
-			mode = GL_REPEAT;
-			break;
-
-		case TAM_Mirror:
-			mode = GL_MIRRORED_REPEAT;
-			break;
-
-		case TAM_Clamp:
-			mode = GL_CLAMP;
-			break;
-
-		default:
-			assert(false);
-			break;
-		}
-
-		glTexParameteri(tex_stage_type_[stage], GL_TEXTURE_WRAP_S, mode);
-		glTexParameteri(tex_stage_type_[stage], GL_TEXTURE_WRAP_T, mode);
-		glTexParameteri(tex_stage_type_[stage], GL_TEXTURE_WRAP_R, mode);
-	}
-
 	// 设置纹理坐标
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::TextureMatrix(uint32_t stage, Matrix4 const & mat)
@@ -831,125 +778,11 @@ namespace KlayGE
 			glActiveTexture_(GL_TEXTURE0 + stage);
 		}
 
-		Matrix4 oglMat(MathLib::LHToRH(projMat_));
+		Matrix4 oglMat(MathLib::LHToRH(mat));
 
 		glMatrixMode(GL_TEXTURE);
 		glLoadMatrixf(&oglMat(0, 0));
 		glMatrixMode(GL_MODELVIEW);
-	}
-
-	// 设置纹理过滤模式
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::TextureFiltering(uint32_t stage, TexFilterType type, TexFilterOp op)
-	{
-		if (glActiveTexture_ != NULL)
-		{
-			glActiveTexture_(GL_TEXTURE0 + stage);
-		}
-
-		GLint mode;
-		if (type != TFT_Min)
-		{
-			switch (op)
-			{
-			case TFO_None:
-			case TFO_Point:
-				mode = GL_NEAREST;
-				break;
-
-			case TFO_Bilinear:
-			case TFO_Trilinear:
-			case TFO_Anisotropic:
-				mode = GL_LINEAR;
-				break;
-
-			default:
-				assert(false);
-				break;
-			}
-		}
-		else
-		{
-			switch (op)
-			{
-			case TFO_None:
-			case TFO_Point:
-				switch (tex_stage_mip_filter_[stage])
-				{
-				case TFO_None:
-					// nearest min, no mip
-					mode = GL_NEAREST;
-					break;
-
-				case TFO_Point:
-					// nearest min, nearest mip
-					mode = GL_NEAREST_MIPMAP_NEAREST;
-					break;
-
-				case TFO_Bilinear:
-				case TFO_Trilinear:
-				case TFO_Anisotropic:
-					// nearest min, linear mip
-					mode = GL_NEAREST_MIPMAP_LINEAR;
-					break;
-				}
-				break;
-
-			case TFO_Bilinear:
-			case TFO_Trilinear:
-			case TFO_Anisotropic:
-				switch (tex_stage_mip_filter_[stage])
-				{
-				case TFO_None:
-					// linear min, no mip
-					mode = GL_LINEAR;
-					break;
-
-				case TFO_Point:
-					// linear min, point mip
-					mode = GL_LINEAR_MIPMAP_NEAREST;
-					break;
-
-				case TFO_Bilinear:
-				case TFO_Trilinear:
-				case TFO_Anisotropic:
-					// linear min, linear mip
-					mode = GL_LINEAR_MIPMAP_LINEAR;
-					break;
-				}
-				break;
-
-			default:
-				assert(false);
-				break;
-			}
-		}
-
-		switch (type)
-		{
-		case TFT_Min:
-			glTexParameteri(tex_stage_type_[stage], GL_TEXTURE_MIN_FILTER, mode);
-			break;
-
-		case TFT_Mag:
-			glTexParameteri(tex_stage_type_[stage], GL_TEXTURE_MAG_FILTER, mode);
-			break;
-
-		case TFT_Mip:
-			tex_stage_mip_filter_[stage] = op;
-			glTexParameteri(tex_stage_type_[stage], GL_TEXTURE_MIN_FILTER, mode);
-			break;
-
-		default:
-			assert(false);
-			break;
-		}
-	}
-
-	// 设置纹理异性过滤
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::TextureAnisotropy(uint32_t /*stage*/, uint32_t /*maxAnisotropy*/)
-	{
 	}
 
 	// 打开模板缓冲区

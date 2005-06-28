@@ -7,6 +7,7 @@
 // 2.7.0
 // 可以读取RenderTarget (2005.6.18)
 // 加速了拷贝到RenderTarget (2005.6.22)
+// 增加了TextureAddressingMode, extureFiltering和TextureAnisotropy (2005.6.27)
 //
 // 2.6.0
 // 增加了对surface的检查 (2005.5.15)
@@ -208,7 +209,10 @@ namespace
 namespace KlayGE
 {
 	D3D9Texture::D3D9Texture(uint32_t width, uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
-					: Texture(usage, TT_1D)
+					: Texture(usage, TT_1D),
+						tex_addr_mode_u_(TAM_Wrap), tex_addr_mode_v_(TAM_Wrap), tex_addr_mode_w_(TAM_Wrap),
+						tex_min_filter_(TFO_Point), tex_mag_filter_(TFO_Point), tex_mip_filter_(TFO_Point),
+						tex_anisotropy_(0)
 	{
 		assert(TU_Default == usage);
 		assert(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
@@ -232,7 +236,10 @@ namespace KlayGE
 
 	D3D9Texture::D3D9Texture(uint32_t width, uint32_t height,
 								uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
-					: Texture(usage, TT_2D)
+					: Texture(usage, TT_2D),
+						tex_addr_mode_u_(TAM_Wrap), tex_addr_mode_v_(TAM_Wrap), tex_addr_mode_w_(TAM_Wrap),
+						tex_min_filter_(TFO_Point), tex_mag_filter_(TFO_Point), tex_mip_filter_(TFO_Point),
+						tex_anisotropy_(0)
 	{
 		assert(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
 
@@ -267,7 +274,10 @@ namespace KlayGE
 
 	D3D9Texture::D3D9Texture(uint32_t width, uint32_t height, uint32_t depth,
 								uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
-					: Texture(usage, TT_3D)
+					: Texture(usage, TT_3D),
+						tex_addr_mode_u_(TAM_Wrap), tex_addr_mode_v_(TAM_Wrap), tex_addr_mode_w_(TAM_Wrap),
+						tex_min_filter_(TFO_Point), tex_mag_filter_(TFO_Point), tex_mip_filter_(TFO_Point),
+						tex_anisotropy_(0)
 	{
 		assert(TU_Default == usage);
 		assert(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
@@ -290,7 +300,10 @@ namespace KlayGE
 	}
 
 	D3D9Texture::D3D9Texture(uint32_t size, bool /*cube*/, uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
-					: Texture(usage, TT_Cube)
+					: Texture(usage, TT_Cube),
+						tex_addr_mode_u_(TAM_Wrap), tex_addr_mode_v_(TAM_Wrap), tex_addr_mode_w_(TAM_Wrap),
+						tex_min_filter_(TFO_Point), tex_mag_filter_(TFO_Point), tex_mip_filter_(TFO_Point),
+						tex_anisotropy_(0)
 	{
 		assert(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
 
@@ -1047,5 +1060,105 @@ namespace KlayGE
 	uint32_t D3D9Texture::MaxCubeSize() const
 	{
 		return this->MaxWidth();
+	}
+
+	// 设置纹理寻址模式
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9Texture::TextureAddressingMode(TexAddressingType type, TexAddressingMode tam)
+	{
+		switch (type)
+		{
+		case TAT_Addr_U:
+			tex_addr_mode_u_ = tam;
+			break;
+
+		case TAT_Addr_V:
+			tex_addr_mode_v_ = tam;
+			break;
+
+		case TAT_Addr_W:
+			tex_addr_mode_w_ = tam;
+			break;
+		}
+	}
+
+	// 获取纹理寻址模式
+	/////////////////////////////////////////////////////////////////////////////////
+	Texture::TexAddressingMode D3D9Texture::TextureAddressingMode(TexAddressingType type) const
+	{
+		switch (type)
+		{
+		case TAT_Addr_U:
+			return tex_addr_mode_u_;
+
+		case TAT_Addr_V:
+			return tex_addr_mode_v_;
+
+		case TAT_Addr_W:
+			return tex_addr_mode_w_;
+
+		default:
+			assert(false);
+			return tex_addr_mode_u_;
+		}
+	}
+	
+	// 设置纹理过滤模式
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9Texture::TextureFiltering(TexFilterType type, TexFilterOp op)
+	{
+		switch (type)
+		{
+		case TFT_Min:
+			tex_min_filter_ = op;
+			break;
+
+		case TFT_Mag:
+			tex_mag_filter_ = op;
+			break;
+
+		case TFT_Mip:
+			tex_mip_filter_ = op;
+			break;
+
+		default:
+			assert(false);
+			break;
+		}
+	}
+
+	// 获取纹理过滤模式
+	/////////////////////////////////////////////////////////////////////////////////
+	Texture::TexFilterOp D3D9Texture::TextureFiltering(TexFilterType type) const
+	{
+		switch (type)
+		{
+		case TFT_Min:
+			return tex_min_filter_;
+
+		case TFT_Mag:
+			return tex_mag_filter_;
+
+		case TFT_Mip:
+			return tex_mip_filter_;
+
+		default:
+			assert(false);
+			return tex_min_filter_;
+		}
+	}
+
+	// 设置纹理异性过滤
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9Texture::TextureAnisotropy(uint32_t maxAnisotropy)
+	{
+		tex_anisotropy_ = maxAnisotropy;
+	}
+
+	// 获取纹理异性过滤
+	/////////////////////////////////////////////////////////////////////////////////
+	uint32_t D3D9Texture::TextureAnisotropy() const
+	{
+		return tex_anisotropy_;
 	}
 }

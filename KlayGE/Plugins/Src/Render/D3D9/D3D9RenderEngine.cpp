@@ -7,6 +7,7 @@
 // 2.7.0
 // 改进了Render (2005.6.16)
 // 去掉了TextureCoordSet和DisableTextureStage (2005.6.26)
+// TextureAddressingMode, extureFiltering和TextureAnisotropy移到Texture中 (2005.6.27)
 //
 // 2.4.0
 // 增加了PolygonMode (2005.3.20)
@@ -531,6 +532,26 @@ namespace KlayGE
 
 			D3D9Texture const & d3d9Tex = static_cast<D3D9Texture const &>(*texture);
 			TIF(d3dDevice_->SetTexture(stage, d3d9Tex.D3DBaseTexture().get()));
+
+			// Set addressing mode
+			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSU,
+				D3D9Mapping::Mapping(texture->TextureAddressingMode(Texture::TAT_Addr_U))));
+			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSV,
+				D3D9Mapping::Mapping(texture->TextureAddressingMode(Texture::TAT_Addr_V))));
+			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSW,
+				D3D9Mapping::Mapping(texture->TextureAddressingMode(Texture::TAT_Addr_W))));
+
+			// Set filter
+			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER,
+				D3D9Mapping::MappingToMinFilter(caps_, texture->TextureFiltering(Texture::TFT_Min))));
+			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER,
+				D3D9Mapping::MappingToMagFilter(caps_, texture->TextureFiltering(Texture::TFT_Mag))));
+			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER,
+				D3D9Mapping::MappingToMipFilter(caps_, texture->TextureFiltering(Texture::TFT_Mip))));
+
+			// Set anisotropy
+			uint32_t max_anisotropy_ = std::min(texture->TextureAnisotropy(), caps_.MaxAnisotropy);
+			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, max_anisotropy_));
 		}
 	}
 
@@ -587,17 +608,7 @@ namespace KlayGE
 		TIF(hr);
 	}
 
-	// 设置纹理寻址模式
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::TextureAddressingMode(uint32_t stage, TexAddressingMode tam)
-	{
-		uint32_t const d3dType = D3D9Mapping::Mapping(tam);
-
-		TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSU, d3dType));
-		TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSV, d3dType));
-	}
-
-	// 设置纹理坐标
+	// 设置纹理矩阵
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::TextureMatrix(uint32_t stage, Matrix4 const & mat)
 	{
@@ -613,44 +624,6 @@ namespace KlayGE
 
 			D3DMATRIX d3dMat(D3D9Mapping::Mapping(mat));
 			TIF(d3dDevice_->SetTransform(static_cast<D3DTRANSFORMSTATETYPE>(D3DTS_TEXTURE0 + stage), &d3dMat));
-		}
-	}
-
-	// 设置纹理过滤模式
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::TextureFiltering(uint32_t stage, TexFilterType type, TexFilterOp op)
-	{
-		switch (type)
-		{
-		case TFT_Min:
-			d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3D9Mapping::MappingToMinFilter(caps_, op));
-			break;
-
-		case TFT_Mag:
-			d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3D9Mapping::MappingToMagFilter(caps_, op));
-			break;
-
-		case TFT_Mip:
-			d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3D9Mapping::MappingToMipFilter(caps_, op));
-			break;
-
-		default:
-			assert(false);
-			break;
-		}
-	}
-
-	// 设置纹理异性过滤
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::TextureAnisotropy(uint32_t stage, uint32_t maxAnisotropy)
-	{
-		maxAnisotropy = std::min(maxAnisotropy, caps_.MaxAnisotropy);
-
-		uint32_t curAnisotropy;
-		d3dDevice_->GetSamplerState(stage, D3DSAMP_MAXANISOTROPY, &curAnisotropy);
-		if (maxAnisotropy != curAnisotropy)
-		{
-			d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, maxAnisotropy);
 		}
 	}
 

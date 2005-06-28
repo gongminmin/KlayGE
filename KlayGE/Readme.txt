@@ -1,10 +1,10 @@
-粘土游戏引擎(KlayGE) 2.6.0
+粘土游戏引擎(KlayGE) 2.7.0
 
 Homepage: http://klayge.sourceforge.net
 E-Mail:	  enginedev@163.com
 OICQ:     33611210
 
-欢迎使用粘土游戏引擎 2.6.0
+欢迎使用粘土游戏引擎 2.7.0
 包含的组件：KlayGE头文件，KlayGE源代码，KlayGE的VS.NET 2003工程文件
 
 KlayGE是一个开放，跨平台，插件结构的游戏引擎。
@@ -71,6 +71,11 @@ __________________________________________________________________
 
 
 发展历程
+
+2.7.0
+增加了KMesh
+TextureAddressingMode, extureFiltering和TextureAnisotropy从RenderEngine移到Texture中
+支持OpenGL 2.0
 
 2.6.0 (2005.6.2)
 修正了SceneManager类CanBeCulled的bug

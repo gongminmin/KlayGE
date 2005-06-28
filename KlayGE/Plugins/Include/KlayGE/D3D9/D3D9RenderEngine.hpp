@@ -6,6 +6,7 @@
 //
 // 2.7.0
 // 去掉了TextureCoordSet和DisableTextureStage (2005.6.26)
+// TextureAddressingMode, extureFiltering和TextureAnisotropy移到Texture中 (2005.6.27)
 //
 // 2.4.0
 // 增加了PolygonMode (2005.3.20)
@@ -90,10 +91,7 @@ namespace KlayGE
 		uint32_t MaxTextureStages();
 
 		void TextureCoordCalculation(uint32_t stage, TexCoordCalcMethod m);
-		void TextureAddressingMode(uint32_t stage, TexAddressingMode tam);
 		void TextureMatrix(uint32_t stage, Matrix4 const & mat);
-		void TextureFiltering(uint32_t stage, TexFilterType type, TexFilterOp op);
-		void TextureAnisotropy(uint32_t stage, uint32_t maxAnisotropy);
 
 		void StencilCheckEnabled(bool enabled);
 		bool HasHardwareStencil();

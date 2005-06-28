@@ -134,28 +134,28 @@ namespace KlayGE
 
 	// 从RenderEngine::TexFiltering转换到D3D的MagFilter标志
 	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t D3D9Mapping::MappingToMagFilter(D3DCAPS9 const & caps, RenderEngine::TexFilterOp tf)
+	uint32_t D3D9Mapping::MappingToMagFilter(D3DCAPS9 const & caps, Texture::TexFilterOp tf)
 	{
 		// NOTE: Fall through if device doesn't support requested type
-		if ((RenderEngine::TFO_Anisotropic == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFANISOTROPIC))
+		if ((Texture::TFO_Anisotropic == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFANISOTROPIC))
 		{
 			return D3DTEXF_ANISOTROPIC;
 		}
 		else
 		{
-			tf = RenderEngine::TFO_Trilinear;
+			tf = Texture::TFO_Trilinear;
 		}
 
-		if ((RenderEngine::TFO_Trilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFLINEAR))
+		if ((Texture::TFO_Trilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFLINEAR))
 		{
 			return D3DTEXF_LINEAR;
 		}
 		else
 		{
-			tf = RenderEngine::TFO_Bilinear;
+			tf = Texture::TFO_Bilinear;
 		}
 
-		if ((RenderEngine::TFO_Bilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFLINEAR))
+		if ((Texture::TFO_Bilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFLINEAR))
 		{
 			return D3DTEXF_LINEAR;
 		}
@@ -165,28 +165,28 @@ namespace KlayGE
 
 	// 从RenderEngine::TexFiltering转换到D3D的MinFilter标志
 	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t D3D9Mapping::MappingToMinFilter(D3DCAPS9 const & caps, RenderEngine::TexFilterOp tf)
+	uint32_t D3D9Mapping::MappingToMinFilter(D3DCAPS9 const & caps, Texture::TexFilterOp tf)
 	{
 		// NOTE: Fall through if device doesn't support requested type
-		if ((RenderEngine::TFO_Anisotropic == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFANISOTROPIC))
+		if ((Texture::TFO_Anisotropic == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFANISOTROPIC))
 		{
 			return D3DTEXF_ANISOTROPIC;
 		}
 		else
 		{
-			tf = RenderEngine::TFO_Trilinear;
+			tf = Texture::TFO_Trilinear;
 		}
 
-		if ((RenderEngine::TFO_Trilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFLINEAR))
+		if ((Texture::TFO_Trilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFLINEAR))
 		{
 			return D3DTEXF_LINEAR;
 		}
 		else
 		{
-			tf = RenderEngine::TFO_Bilinear;
+			tf = Texture::TFO_Bilinear;
 		}
 
-		if ((RenderEngine::TFO_Bilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFLINEAR))
+		if ((Texture::TFO_Bilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFLINEAR))
 		{
 			return D3DTEXF_LINEAR;
 		}
@@ -196,28 +196,28 @@ namespace KlayGE
 
 	// 从RenderEngine::TexFiltering转换到D3D的MipFilter标志
 	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t D3D9Mapping::MappingToMipFilter(D3DCAPS9 const & caps, RenderEngine::TexFilterOp tf)
+	uint32_t D3D9Mapping::MappingToMipFilter(D3DCAPS9 const & caps, Texture::TexFilterOp tf)
 	{
 		// NOTE: Fall through if device doesn't support requested type
-		if ((RenderEngine::TFO_Anisotropic == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR))
+		if ((Texture::TFO_Anisotropic == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR))
 		{
 			return D3DTEXF_LINEAR;
 		}
 		else
 		{
-			tf = RenderEngine::TFO_Trilinear;
+			tf = Texture::TFO_Trilinear;
 		}
 
-		if ((RenderEngine::TFO_Trilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR))
+		if ((Texture::TFO_Trilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR))
 		{
 			return D3DTEXF_LINEAR;
 		}
 		else
 		{
-			tf = RenderEngine::TFO_Bilinear;
+			tf = Texture::TFO_Bilinear;
 		}
 
-		if ((RenderEngine::TFO_Bilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR))
+		if ((Texture::TFO_Bilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR))
 		{
 			return D3DTEXF_POINT;
 		}
@@ -320,17 +320,17 @@ namespace KlayGE
 		}
 	}
 
-	uint32_t D3D9Mapping::Mapping(RenderEngine::TexAddressingMode mode)
+	uint32_t D3D9Mapping::Mapping(Texture::TexAddressingMode mode)
 	{
 		switch (mode)
 		{
-		case RenderEngine::TAM_Clamp:
+		case Texture::TAM_Clamp:
 			return D3DTADDRESS_CLAMP;
 
-		case RenderEngine::TAM_Wrap:
+		case Texture::TAM_Wrap:
 			return D3DTADDRESS_WRAP;
 
-		case RenderEngine::TAM_Mirror:
+		case Texture::TAM_Mirror:
 			return D3DTADDRESS_MIRROR;
 
 		default:

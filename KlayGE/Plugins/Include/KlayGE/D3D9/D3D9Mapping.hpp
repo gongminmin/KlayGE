@@ -36,9 +36,9 @@ namespace KlayGE
 
 		static D3DSTENCILOP Mapping(RenderEngine::StencilOperation op);
 
-		static uint32_t MappingToMagFilter(D3DCAPS9 const & caps, RenderEngine::TexFilterOp tf);
-		static uint32_t MappingToMinFilter(D3DCAPS9 const & caps, RenderEngine::TexFilterOp tf);
-		static uint32_t MappingToMipFilter(D3DCAPS9 const & caps, RenderEngine::TexFilterOp tf);
+		static uint32_t MappingToMagFilter(D3DCAPS9 const & caps, Texture::TexFilterOp tf);
+		static uint32_t MappingToMinFilter(D3DCAPS9 const & caps, Texture::TexFilterOp tf);
+		static uint32_t MappingToMipFilter(D3DCAPS9 const & caps, Texture::TexFilterOp tf);
 
 		static D3DLIGHTTYPE Mapping(Light::LightTypes type);
 
@@ -46,7 +46,7 @@ namespace KlayGE
 		static uint32_t Mapping(RenderEngine::FillMode mode);
 		static uint32_t Mapping(RenderEngine::ShadeOptions so);
 		static uint32_t Mapping(RenderEngine::FogMode mode);
-		static uint32_t Mapping(RenderEngine::TexAddressingMode mode);
+		static uint32_t Mapping(Texture::TexAddressingMode mode);
 
 		static void Mapping(D3DPRIMITIVETYPE& primType, uint32_t& primCount, VertexBuffer const & vb);
 		static void Mapping(D3DVERTEXELEMENT9& element, size_t stream, VertexStream const & vs);

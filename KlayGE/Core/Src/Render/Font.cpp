@@ -124,15 +124,6 @@ namespace
 				canBeCulled_ = false;
 			}
 
-			// 设置过滤属性
-			if (flags & Font::FA_Filtered)
-			{
-				Context::Instance().RenderFactoryInstance().RenderEngineInstance().TextureFiltering(0,
-					RenderEngine::TFT_Min, RenderEngine::TFO_Bilinear);
-				Context::Instance().RenderFactoryInstance().RenderEngineInstance().TextureFiltering(0,
-					RenderEngine::TFT_Mag, RenderEngine::TFO_Bilinear);
-			}
-
 			clr_ = clr;
 
 			float const h(fontHeight * yScale);
@@ -397,6 +388,20 @@ namespace KlayGE
 	{
 		if (!text.empty())
 		{
+			// 设置过滤属性
+			if (flags & Font::FA_Filtered)
+			{
+				theTexture_->TextureFiltering(Texture::TFT_Min, Texture::TFO_Bilinear);
+				theTexture_->TextureFiltering(Texture::TFT_Mag, Texture::TFO_Bilinear);
+				theTexture_->TextureFiltering(Texture::TFT_Mip, Texture::TFO_None);
+			}
+			else
+			{
+				theTexture_->TextureFiltering(Texture::TFT_Min, Texture::TFO_Point);
+				theTexture_->TextureFiltering(Texture::TFT_Mag, Texture::TFO_Point);
+				theTexture_->TextureFiltering(Texture::TFT_Mip, Texture::TFO_None);
+			}
+
 			this->UpdateTexture(text);
 
 			boost::shared_ptr<FontRenderable> renderable(new FontRenderable(effect_, vb_));

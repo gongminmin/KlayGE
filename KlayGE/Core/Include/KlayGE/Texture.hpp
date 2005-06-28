@@ -6,6 +6,7 @@
 //
 // 2.7.0
 // 可以获取Mipmap中每层的宽高深 (2005.6.8)
+// 增加了TextureAddressingMode, extureFiltering和TextureAnisotropy (2005.6.27)
 //
 // 2.4.0
 // 增加了DXTn的支持 (2005.3.6)
@@ -233,6 +234,40 @@ namespace KlayGE
 			CF_Negative_Z = 5,
 		};
 
+		enum TexFilterType
+		{
+			TFT_Min,
+			TFT_Mag,
+			TFT_Mip,
+		};
+
+		enum TexFilterOp
+		{
+			TFO_None,
+			TFO_Point,
+			TFO_Bilinear,
+			TFO_Trilinear,
+			TFO_Anisotropic,
+		};
+
+		enum TexAddressingType
+		{
+			TAT_Addr_U,
+			TAT_Addr_V,
+			TAT_Addr_W,
+		};
+
+		// Texture addressing modes - default is TAM_Wrap.
+		enum TexAddressingMode
+		{
+			// Texture wraps at values over 1.0
+			TAM_Wrap,
+			// Texture mirrors (flips) at joins over 1.0
+			TAM_Mirror,
+			// Texture clamps at 1.0
+			TAM_Clamp,
+		};
+
 	public:
 		Texture(TextureUsage usage, TextureType type);
 		virtual ~Texture();
@@ -285,6 +320,17 @@ namespace KlayGE
 		virtual uint32_t MaxHeight() const = 0;
 		virtual uint32_t MaxDepth() const = 0;
 		virtual uint32_t MaxCubeSize() const = 0;
+
+		// Sets the texture addressing mode for a texture unit.
+		virtual void TextureAddressingMode(TexAddressingType type, TexAddressingMode tam) = 0;
+		// Sets the texture filtering type for a texture unit.
+		virtual void TextureFiltering(TexFilterType type, TexFilterOp op) = 0;
+		// Sets the maximal anisotropy for the specified texture unit.
+		virtual void TextureAnisotropy(uint32_t maxAnisotropy) = 0;
+
+		virtual TexAddressingMode TextureAddressingMode(TexAddressingType type) const = 0;
+		virtual TexFilterOp TextureFiltering(TexFilterType type) const = 0;
+		virtual uint32_t TextureAnisotropy() const = 0;
 
 	protected:
 		uint32_t		height_;
