@@ -7,7 +7,7 @@
 // 2.7.0
 // 改进了Render (2005.6.16)
 // 去掉了TextureCoordSet和DisableTextureStage (2005.6.26)
-// TextureAddressingMode, extureFiltering和TextureAnisotropy移到Texture中 (2005.6.27)
+// TextureAddressingMode, TextureFiltering和TextureAnisotropy移到Texture中 (2005.6.27)
 //
 // 2.4.0
 // 增加了PolygonMode (2005.3.20)
@@ -535,23 +535,30 @@ namespace KlayGE
 
 			// Set addressing mode
 			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSU,
-				D3D9Mapping::Mapping(texture->TextureAddressingMode(Texture::TAT_Addr_U))));
+				D3D9Mapping::Mapping(texture->AddressingMode(Texture::TAT_Addr_U))));
 			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSV,
-				D3D9Mapping::Mapping(texture->TextureAddressingMode(Texture::TAT_Addr_V))));
+				D3D9Mapping::Mapping(texture->AddressingMode(Texture::TAT_Addr_V))));
 			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSW,
-				D3D9Mapping::Mapping(texture->TextureAddressingMode(Texture::TAT_Addr_W))));
+				D3D9Mapping::Mapping(texture->AddressingMode(Texture::TAT_Addr_W))));
 
 			// Set filter
 			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER,
-				D3D9Mapping::MappingToMinFilter(caps_, texture->TextureFiltering(Texture::TFT_Min))));
+				D3D9Mapping::MappingToMinFilter(caps_, texture->Filtering(Texture::TFT_Min))));
 			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER,
-				D3D9Mapping::MappingToMagFilter(caps_, texture->TextureFiltering(Texture::TFT_Mag))));
+				D3D9Mapping::MappingToMagFilter(caps_, texture->Filtering(Texture::TFT_Mag))));
 			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER,
-				D3D9Mapping::MappingToMipFilter(caps_, texture->TextureFiltering(Texture::TFT_Mip))));
+				D3D9Mapping::MappingToMipFilter(caps_, texture->Filtering(Texture::TFT_Mip))));
 
 			// Set anisotropy
-			uint32_t max_anisotropy_ = std::min(texture->TextureAnisotropy(), caps_.MaxAnisotropy);
-			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, max_anisotropy_));
+			uint32_t max_anisotropy = std::min(texture->Anisotropy(), caps_.MaxAnisotropy);
+			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, max_anisotropy));
+
+			// Set max mip level
+			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXMIPLEVEL, texture->MaxMipLevel()));
+
+			// Set mip map lod bias
+			float bias = texture->MipMapLodBias();
+			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPMAPLODBIAS, *reinterpret_cast<DWORD*>(&bias)));
 		}
 	}
 

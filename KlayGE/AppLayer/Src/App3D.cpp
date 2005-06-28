@@ -1,8 +1,11 @@
-// 3DApp.cpp
-// KlayGE 3DApp类 实现文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// App3D.cpp
+// KlayGE App3D类 实现文件
+// Ver 2.7.0
+// 版权所有(C) 龚敏敏, 2003--2005
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.7.0
+// 增加了Quit (2005.6.28)
 //
 // 2.0.0
 // 初次建立 (2003.7.10)
@@ -92,4 +95,13 @@ namespace KlayGE
 			nearPlane, farPlane);
 		renderEngine.ProjectionMatrix(camera.ProjMatrix());
  	}
+
+	void App3DFramework::Quit()
+	{
+#ifdef WIN32
+		::PostQuitMessage(0);
+#else
+		exit(0);
+#endif
+	}
 }

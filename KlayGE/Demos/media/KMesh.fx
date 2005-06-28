@@ -1,4 +1,4 @@
-float4x4 modelviewporj : WORLDVIEWPROJECTION;
+float4x4 modelviewproj : WORLDVIEWPROJECTION;
 float4x4 modelIT;
 float3 light = float3(-1, 0, -1);
 
@@ -20,7 +20,7 @@ VS_OUT MeshVS(VS_IN input)
 {
 	VS_OUT output;
 	
-	output.pos = mul(input.pos, modelviewporj);
+	output.pos = mul(input.pos, modelviewproj);
 	output.tex0 = input.tex0;
 	
 	float3 normal = mul(input.normal, (float3x3)modelIT);

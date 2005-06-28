@@ -141,13 +141,13 @@ namespace
 	enum
 	{
 		Switch,
-		Quit,
+		Exit,
 	};
 
 	InputAction actions[] = 
 	{
 		InputAction(Switch, KS_Space),
-		InputAction(Quit, KS_Escape),
+		InputAction(Exit, KS_Escape),
 	};
 
 
@@ -341,8 +341,8 @@ void AsciiArts::Update()
 			KlayGE::Sleep(150);
 			break;
 
-		case Quit:
-			exit(0);
+		case Exit:
+			this->Quit();
 			break;
 		}
 	}

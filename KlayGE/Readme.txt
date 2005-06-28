@@ -74,7 +74,9 @@ __________________________________________________________________
 
 2.7.0
 增加了KMesh
-TextureAddressingMode, extureFiltering和TextureAnisotropy从RenderEngine移到Texture中
+AddressingMode, Filtering和Anisotropy从RenderEngine移到Texture中
+Texture增加了MaxMipLevel和MipMapLodBias
+App3D增加了Quit
 支持OpenGL 2.0
 
 2.6.0 (2005.6.2)

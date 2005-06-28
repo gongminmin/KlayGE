@@ -5,7 +5,8 @@
 // Homepage: http://klayge.sourceforge.net
 //
 // 2.7.0
-// 增加了TextureAddressingMode, extureFiltering和TextureAnisotropy (2005.6.27)
+// 增加了AddressingMode, Filtering和Anisotropy (2005.6.27)
+// 增加了MaxMipLevel和MipMapLodBias (2005.6.28)
 //
 // 2.4.0
 // 改为派生自D3D9Resource (2005.3.3)
@@ -99,15 +100,23 @@ namespace KlayGE
 		uint32_t MaxDepth() const;
 		uint32_t MaxCubeSize() const;
 
-		void TextureAddressingMode(TexAddressingType type, TexAddressingMode tam);
-		void TextureFiltering(TexFilterType type, TexFilterOp op);
-		void TextureAnisotropy(uint32_t maxAnisotropy);
+		void AddressingMode(TexAddressingType type, TexAddressingMode tam);
+		void Filtering(TexFilterType type, TexFilterOp op);
+		void Anisotropy(uint32_t maxAnisotropy);
 
-		TexAddressingMode TextureAddressingMode(TexAddressingType type) const;
-		TexFilterOp TextureFiltering(TexFilterType type) const;
-		uint32_t TextureAnisotropy() const;
+		TexAddressingMode AddressingMode(TexAddressingType type) const;
+		TexFilterOp Filtering(TexFilterType type) const;
+		uint32_t Anisotropy() const;
+
+		void MaxMipLevel(uint32_t level);
+		uint32_t MaxMipLevel() const;
+
+		void MipMapLodBias(float bias);
+		float MipMapLodBias() const;
 
 	private:
+		void InitParams();
+
 		void DoOnLostDevice();
 		void DoOnResetDevice();
 
@@ -137,9 +146,11 @@ namespace KlayGE
 		std::vector<uint32_t>	heights_;
 		std::vector<uint32_t>	depths_;
 
-		TexAddressingMode tex_addr_mode_u_, tex_addr_mode_v_, tex_addr_mode_w_;
-		TexFilterOp tex_min_filter_, tex_mag_filter_, tex_mip_filter_;
-		uint32_t tex_anisotropy_;
+		TexAddressingMode addr_mode_u_, addr_mode_v_, addr_mode_w_;
+		TexFilterOp min_filter_, mag_filter_, mip_filter_;
+		uint32_t anisotropy_;
+		uint32_t max_mip_level_;
+		float mip_map_lod_bias_;
 	};
 
 	typedef boost::shared_ptr<D3D9Texture> D3D9TexturePtr;

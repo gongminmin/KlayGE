@@ -6,7 +6,7 @@
 //
 // 2.7.0
 // 去掉了TextureCoordSet和DisableTextureStage (2005.6.26)
-// TextureAddressingMode, extureFiltering和TextureAnisotropy移到Texture中 (2005.6.27)
+// TextureAddressingMode, TextureFiltering和TextureAnisotropy移到Texture中 (2005.6.27)
 //
 // 2.4.0
 // 增加了PolygonMode (2005.3.20)

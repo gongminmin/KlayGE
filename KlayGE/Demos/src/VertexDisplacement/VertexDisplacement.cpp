@@ -125,12 +125,12 @@ namespace
 
 	enum
 	{
-		Quit,
+		Exit,
 	};
 
 	InputAction actions[] = 
 	{
-		InputAction(Quit, KS_Escape),
+		InputAction(Exit, KS_Escape),
 	};
 
 	class TheRenderSettings : public D3D9RenderSettings
@@ -208,8 +208,8 @@ void VertexDisplacement::Update()
 	{
 		switch (iter->first)
 		{
-		case Quit:
-			exit(0);
+		case Exit:
+			this->Quit();
 			break;
 		}
 	}

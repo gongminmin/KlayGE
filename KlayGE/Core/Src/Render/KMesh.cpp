@@ -40,7 +40,7 @@ namespace KlayGE
 		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		Matrix4 model = model_ * renderEngine.WorldMatrix();
-		*(effect_->ParameterByName("modelviewporj")) = model * renderEngine.ViewMatrix() * renderEngine.ProjectionMatrix();
+		*(effect_->ParameterByName("modelviewproj")) = model * renderEngine.ViewMatrix() * renderEngine.ProjectionMatrix();
 		*(effect_->ParameterByName("modelIT")) = MathLib::Transpose(MathLib::Inverse(model));
 
 		*(effect_->ParameterByName("tex")) = tex_;

@@ -6,7 +6,8 @@
 //
 // 2.7.0
 // 可以获取Mipmap中每层的宽高深 (2005.6.8)
-// 增加了TextureAddressingMode, extureFiltering和TextureAnisotropy (2005.6.27)
+// 增加了AddressingMode, Filtering和Anisotropy (2005.6.27)
+// 增加了MaxMipLevel和MipMapLodBias (2005.6.28)
 //
 // 2.4.0
 // 增加了DXTn的支持 (2005.3.6)
@@ -322,15 +323,21 @@ namespace KlayGE
 		virtual uint32_t MaxCubeSize() const = 0;
 
 		// Sets the texture addressing mode for a texture unit.
-		virtual void TextureAddressingMode(TexAddressingType type, TexAddressingMode tam) = 0;
+		virtual void AddressingMode(TexAddressingType type, TexAddressingMode tam) = 0;
 		// Sets the texture filtering type for a texture unit.
-		virtual void TextureFiltering(TexFilterType type, TexFilterOp op) = 0;
+		virtual void Filtering(TexFilterType type, TexFilterOp op) = 0;
 		// Sets the maximal anisotropy for the specified texture unit.
-		virtual void TextureAnisotropy(uint32_t maxAnisotropy) = 0;
+		virtual void Anisotropy(uint32_t maxAnisotropy) = 0;
 
-		virtual TexAddressingMode TextureAddressingMode(TexAddressingType type) const = 0;
-		virtual TexFilterOp TextureFiltering(TexFilterType type) const = 0;
-		virtual uint32_t TextureAnisotropy() const = 0;
+		virtual TexAddressingMode AddressingMode(TexAddressingType type) const = 0;
+		virtual TexFilterOp Filtering(TexFilterType type) const = 0;
+		virtual uint32_t Anisotropy() const = 0;
+
+		virtual void MaxMipLevel(uint32_t level) = 0;
+		virtual uint32_t MaxMipLevel() const = 0;
+
+		virtual void MipMapLodBias(float bias) = 0;
+		virtual float MipMapLodBias() const = 0;
 
 	protected:
 		uint32_t		height_;

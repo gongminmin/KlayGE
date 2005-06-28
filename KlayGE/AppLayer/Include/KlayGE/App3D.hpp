@@ -1,15 +1,14 @@
-// 3DApp.hpp
-// KlayGE 3DApp类 头文件
-// Ver 1.2.8.11
-// 版权所有(C) 龚敏敏, 2001--2002
-// Homepage: http://www.enginedev.com
+// App3Dp.hpp
+// KlayGE App3D类 头文件
+// Ver 2.7.0
+// 版权所有(C) 龚敏敏, 2003--2005
+// Homepage: http://klayge.sourceforge.net
 //
-// 1.2.8.8
-// 把inline放入类声明 (2002.9.24)
+// 2.7.0
+// 增加了Quit (2005.6.28)
 //
-// 1.2.8.11
-// 抽出了基类 CAppFramework (2002.11.7)
-// 改用UNICODE核心 (2002.11.18)
+// 2.0.0
+// 初次建立 (2003.7.10)
 //
 // 修改记录
 /////////////////////////////////////////////////////////////////////////////////
@@ -46,6 +45,7 @@ namespace KlayGE
 		virtual void Create(std::string const & name, RenderSettings const & settings);
 
 		void Run();
+		void Quit();
 
 	protected:
 		Camera& ActiveCamera();

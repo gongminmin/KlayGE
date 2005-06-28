@@ -45,9 +45,9 @@
 #include <KlayGE/Font.hpp>
 
 #ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "freetype219MT_D.lib")
+	#pragma comment(lib, "freetype2110MT_D.lib")
 #else
-	#pragma comment(lib, "freetype219MT.lib")
+	#pragma comment(lib, "freetype2110MT.lib")
 #endif
 
 namespace
@@ -391,15 +391,15 @@ namespace KlayGE
 			// ÉèÖÃ¹ýÂËÊôÐÔ
 			if (flags & Font::FA_Filtered)
 			{
-				theTexture_->TextureFiltering(Texture::TFT_Min, Texture::TFO_Bilinear);
-				theTexture_->TextureFiltering(Texture::TFT_Mag, Texture::TFO_Bilinear);
-				theTexture_->TextureFiltering(Texture::TFT_Mip, Texture::TFO_None);
+				theTexture_->Filtering(Texture::TFT_Min, Texture::TFO_Bilinear);
+				theTexture_->Filtering(Texture::TFT_Mag, Texture::TFO_Bilinear);
+				theTexture_->Filtering(Texture::TFT_Mip, Texture::TFO_None);
 			}
 			else
 			{
-				theTexture_->TextureFiltering(Texture::TFT_Min, Texture::TFO_Point);
-				theTexture_->TextureFiltering(Texture::TFT_Mag, Texture::TFO_Point);
-				theTexture_->TextureFiltering(Texture::TFT_Mip, Texture::TFO_None);
+				theTexture_->Filtering(Texture::TFT_Min, Texture::TFO_Point);
+				theTexture_->Filtering(Texture::TFT_Mag, Texture::TFO_Point);
+				theTexture_->Filtering(Texture::TFT_Mip, Texture::TFO_None);
 			}
 
 			this->UpdateTexture(text);
