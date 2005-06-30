@@ -35,6 +35,10 @@ namespace KlayGE
 		}
 	}
 
+	KMesh::~KMesh()
+	{
+	}
+
 	void KMesh::OnRenderBegin()
 	{
 		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -46,9 +50,9 @@ namespace KlayGE
 		*(effect_->ParameterByName("tex")) = tex_;
 	}
 
-	boost::shared_ptr<KlayGE::StaticMesh> LoadKMesh(const std::string& kmeshName)
+	StaticMeshPtr LoadKMesh(const std::string& kmeshName)
 	{
-		typedef std::vector<boost::shared_ptr<StaticMesh> > MeshesType;
+		typedef std::vector<StaticMeshPtr> MeshesType;
 		MeshesType meshes;
 
 		ResIdentifierPtr file(ResLoader::Instance().Load(kmeshName));
@@ -90,7 +94,7 @@ namespace KlayGE
 				file->read(&texture_name[0], static_cast<std::streamsize>(texture_name.size()));
 			}
 
-			boost::shared_ptr<StaticMesh> mesh(new KMesh(wname, texture_slots[0].second));
+			StaticMeshPtr mesh(new KMesh(wname, texture_slots[0].second));
 
 			uint32_t num_vertices;
 			file->read(reinterpret_cast<char*>(&num_vertices), sizeof(num_vertices));
@@ -134,9 +138,8 @@ namespace KlayGE
 			meshes.push_back(mesh);
 		}
 
-		boost::shared_ptr<KlayGE::StaticMesh> ret(new StaticMesh(L"KMesh"));
+		StaticMeshPtr ret(new StaticMesh(L"KMesh"));
 		ret->AssignChildren(meshes.begin(), meshes.end());
-
 		return ret;
 	}
 }

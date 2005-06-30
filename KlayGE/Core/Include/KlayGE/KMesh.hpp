@@ -28,14 +28,15 @@ namespace KlayGE
 	{
 	public:
 		explicit KMesh(std::wstring const & name, std::string const & tex_name);
+		~KMesh();
 
-		void OnRenderBegin();
+		virtual void OnRenderBegin();
 
 	private:
 		TexturePtr tex_;
 	};
 
-	boost::shared_ptr<StaticMesh> LoadKMesh(std::string const & kmeshName);
+	StaticMeshPtr LoadKMesh(std::string const & kmeshName);
 }
 
 #endif			// _KMESH_HPP
