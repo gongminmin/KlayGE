@@ -27,7 +27,9 @@ __________________________________________________________________
 
 使用协议
 
-KlayGE遵循LGPL协议，版权归龚敏敏所有。您可以修改它，但请告诉我您的修改。如果您再开发过程中发现Bug，请麻烦您告诉我。
+KlayGE版权归龚敏敏所有，从2.7.0开始遵循GPL协议。您任意地使用它，
+但必须保证使用KlayGE的项目也遵循GPL协议。如果您再开发过程中发现Bug，
+请麻烦您告诉我。
 
 __________________________________________________________________
 
@@ -50,7 +52,8 @@ __________________________________________________________________
 
 编译
 
-编译KlayGE内核需要一些第三方库：Python 2.4.1、Boost 1.32.0、FreeType 2.1.9，分别在http://www.python.org、http://boost.sourceforge.net和http://freetype.sourceforge.net下载
+编译KlayGE内核需要一些第三方库：Python 2.4.1、Boost 1.32.0、FreeType 2.1.10，分别在http://www.python.org、http://boost.sourceforge.net和http://freetype.sourceforge.net下载
+编译DX相关插件需要DirectX 9.0 SDK June 2005，在http://msdn.microsoft.com/directx下载
 编译OggWav插件需要Vorbis SDK，在http://www.vorbis.com下载
 编译OpenAL插件需要OpenAL SDK，在http://www.openal.org下载
 
@@ -197,20 +200,14 @@ __________________________________________________________________
 			输入引擎内核的源文件
 		\Kernel
 			核心源文件
-		\Math
-			数学库源文件
 		\Net
 			网络引擎的源文件
 		\Render
 			渲染系统内核的源文件
-		\Res
-			资源引擎的源文件
 		\Script
 			脚本引擎的源文件
 		\Show
 			播放引擎内核的源文件
-		\Timer
-			定时器的源文件
 
 \Demos
 	演示
@@ -242,10 +239,16 @@ __________________________________________________________________
 			音频数据源插件的源文件
 		\Input
 			输入引擎插件的源文件
+		\PackSystem
+			文件打包系统的源文件
 		\Render
 			渲染系统插件的源文件
+		\Scene
+			场景管理器插件的源文件
 		\Show
 			播放引擎插件的源文件
+		\Terrain
+			地形插件的源文件
 
 \RenderFX
 	渲染特效脚本
@@ -255,6 +258,12 @@ __________________________________________________________________
 
 	\Bin
 		编译生成的工具文件
+	\DistanceMapCreator
+		从height map建立distance map的工具
+	\MeshML2KMesh
+		从.MeshML编译为.KMesh
+	\NormalizerCubeMap
+		生成归一化Cube map的工具
 	\Pkt
 		文件打包工具源文件
 	\KlayTXConvert
