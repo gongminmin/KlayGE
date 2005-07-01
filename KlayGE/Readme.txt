@@ -72,7 +72,8 @@ __________________________________________________________________
 
 发展历程
 
-2.7.0
+2.7.0 (2005.7.2)
+改成GPL协议
 增加了KMesh
 AddressingMode, Filtering和Anisotropy从RenderEngine移到Texture中
 Texture增加了MaxMipLevel和MipMapLodBias
