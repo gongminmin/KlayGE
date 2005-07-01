@@ -5,7 +5,7 @@
 // Homepage: http://klayge.sourceforge.net
 //
 // 2.7.0
-// 去掉了TextureCoordSet和DisableTextureStage (2005.6.26)
+// 去掉了TextureCoordSet (2005.6.26)
 // TextureAddressingMode, TextureFiltering和TextureAnisotropy移到Texture中 (2005.6.27)
 //
 // 2.4.0
@@ -199,6 +199,8 @@ namespace KlayGE
 
 		// Returns the number of texture units the current output hardware supports.
 		virtual uint32_t MaxTextureStages() = 0;
+		// Turns off a texture unit.
+		virtual void DisableTextureStage(uint32_t stage) = 0;
 
 		// Sets a method for automatically calculating texture coordinates for a stage.
 		virtual void TextureCoordCalculation(uint32_t stage, TexCoordCalcMethod m) = 0;

@@ -5,7 +5,7 @@
 // Homepage: http://klayge.sourceforge.net
 //
 // 2.7.0
-// 去掉了TextureCoordSet和DisableTextureStage (2005.6.26)
+// 去掉了TextureCoordSet (2005.6.26)
 // TextureAddressingMode, TextureFiltering和TextureAnisotropy移到Texture中 (2005.6.27)
 //
 // 2.4.0
@@ -79,6 +79,7 @@ namespace KlayGE
 		void SetTexture(uint32_t stage, TexturePtr const & texture);
 
 		uint32_t MaxTextureStages();
+		void DisableTextureStage(uint32_t stage);
 
 		void TextureCoordCalculation(uint32_t stage, TexCoordCalcMethod m);
 		void TextureMatrix(uint32_t stage, Matrix4 const & mat);

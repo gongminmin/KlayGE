@@ -78,9 +78,11 @@ __________________________________________________________________
 2.7.0 (2005.7.2)
 改成GPL协议
 增加了KMesh
+去掉了RenderEngine::TextureCoordSet
 AddressingMode, Filtering和Anisotropy从RenderEngine移到Texture中
 Texture增加了MaxMipLevel和MipMapLodBias
 App3D增加了Quit
+支持OpenGL 1.5
 
 2.6.0 (2005.6.2)
 修正了SceneManager类CanBeCulled的bug

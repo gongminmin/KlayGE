@@ -1,3 +1,15 @@
+// D3D9RenderWindow.hpp
+// KlayGE D3D9渲染窗口类 头文件
+// Ver 2.7.0
+// 版权所有(C) 龚敏敏, 2003-2005
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.7.0
+// 增加了ResetDevice (2005.7.1)
+//
+// 修改记录
+//////////////////////////////////////////////////////////////////////////////////
+
 #ifndef _D3D9RENDERWINDOW_HPP
 #define _D3D9RENDERWINDOW_HPP
 
@@ -56,6 +68,7 @@ namespace KlayGE
 
 	private:
 		void UpdateSurfacesPtrs();
+		void ResetDevice();
 
 	private:
 		std::string	name_;

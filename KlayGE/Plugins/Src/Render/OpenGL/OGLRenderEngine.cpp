@@ -7,7 +7,7 @@
 // 2.7.0
 // 支持vertex_buffer_object (2005.6.19)
 // 支持OpenGL 1.3多纹理 (2005.6.26)
-// 去掉了TextureCoordSet和DisableTextureStage (2005.6.26)
+// 去掉了TextureCoordSet (2005.6.26)
 // TextureAddressingMode, TextureFiltering和TextureAnisotropy移到Texture中 (2005.6.27)
 //
 // 2.4.0
@@ -761,6 +761,20 @@ namespace KlayGE
 		GLint ret;
 		glGetIntegerv(GL_MAX_TEXTURE_UNITS, &ret);
 		return static_cast<uint32_t>(ret);
+	}
+
+	// 关闭某个纹理阶段
+	/////////////////////////////////////////////////////////////////////////////////
+	void OGLRenderEngine::DisableTextureStage(uint32_t stage)
+	{
+		if (glActiveTexture_ != NULL)
+		{
+			glActiveTexture_(GL_TEXTURE0 + stage);
+			glDisable(GL_TEXTURE_1D);
+			glDisable(GL_TEXTURE_2D);
+			glDisable(GL_TEXTURE_3D);
+			glDisable(GL_TEXTURE_CUBE_MAP);
+		}
 	}
 
 	// 计算纹理坐标

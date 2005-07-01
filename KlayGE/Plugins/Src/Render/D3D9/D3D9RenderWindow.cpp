@@ -1,8 +1,11 @@
 // D3D9RenderWindow.cpp
 // KlayGE D3D9渲染窗口类 实现文件
-// Ver 2.0.5
-// 版权所有(C) 龚敏敏, 2003-2004
+// Ver 2.7.0
+// 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.7.0
+// 增加了ResetDevice (2005.7.1)
 //
 // 2.0.5
 // 修正了WindowMovedOrResized的bug (2004.4.9)
@@ -414,24 +417,7 @@ namespace KlayGE
 			viewport_.width = width;
 			viewport_.height = height;
 
-			if (d3dDevice_)
-			{
-				D3D9RenderFactory& factory = static_cast<D3D9RenderFactory&>(Context::Instance().RenderFactoryInstance());
-				factory.OnLostDevice();
-
-				renderSurface_.reset();
-				renderZBuffer_.reset();
-
-				d3dpp_.BackBufferWidth  = this->Width();
-				d3dpp_.BackBufferHeight = this->Height();
-				TIF(d3dDevice_->Reset(&d3dpp_));
-
-				this->UpdateSurfacesPtrs();
-
-				factory.RenderEngineInstance().ActiveRenderTarget(factory.RenderEngineInstance().ActiveRenderTarget());
-
-				factory.OnResetDevice();
-			}
+			this->ResetDevice();
 		}
 	}
 
@@ -444,6 +430,28 @@ namespace KlayGE
 		IDirect3DSurface9* renderZBuffer;
 		d3dDevice_->GetDepthStencilSurface(&renderZBuffer);
 		renderZBuffer_ = MakeCOMPtr(renderZBuffer);
+	}
+
+	void D3D9RenderWindow::ResetDevice()
+	{
+		if (d3dDevice_)
+		{
+			D3D9RenderFactory& factory = static_cast<D3D9RenderFactory&>(Context::Instance().RenderFactoryInstance());
+			factory.OnLostDevice();
+
+			renderSurface_.reset();
+			renderZBuffer_.reset();
+
+			d3dpp_.BackBufferWidth  = this->Width();
+			d3dpp_.BackBufferHeight = this->Height();
+			TIF(d3dDevice_->Reset(&d3dpp_));
+
+			this->UpdateSurfacesPtrs();
+
+			factory.RenderEngineInstance().ActiveRenderTarget(factory.RenderEngineInstance().ActiveRenderTarget());
+
+			factory.OnResetDevice();
+		}
 	}
 
 	void D3D9RenderWindow::SwapBuffers()

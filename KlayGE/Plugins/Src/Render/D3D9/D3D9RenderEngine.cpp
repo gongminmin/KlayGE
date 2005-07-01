@@ -6,7 +6,7 @@
 //
 // 2.7.0
 // 改进了Render (2005.6.16)
-// 去掉了TextureCoordSet和DisableTextureStage (2005.6.26)
+// 去掉了TextureCoordSet (2005.6.26)
 // TextureAddressingMode, TextureFiltering和TextureAnisotropy移到Texture中 (2005.6.27)
 //
 // 2.4.0
@@ -567,6 +567,14 @@ namespace KlayGE
 	uint32_t D3D9RenderEngine::MaxTextureStages()
 	{
 		return caps_.MaxSimultaneousTextures;
+	}
+
+	// 关闭某个纹理阶段
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9RenderEngine::DisableTextureStage(uint32_t stage)
+	{
+		TIF(d3dDevice_->SetTexture(stage, NULL));
+		TIF(d3dDevice_->SetTextureStageState(stage, D3DTSS_COLOROP, D3DTOP_DISABLE));
 	}
 
 	// 计算纹理坐标
