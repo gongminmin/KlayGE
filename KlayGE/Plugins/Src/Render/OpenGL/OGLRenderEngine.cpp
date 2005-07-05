@@ -139,24 +139,6 @@ namespace KlayGE
 	OGLRenderEngine::OGLRenderEngine()
 		: cullingMode_(RenderEngine::CM_None)
 	{
-		if (glloader_is_supported("GL_VERSION_1_3"))
-		{
-			glActiveTexture_ = glActiveTexture;
-			glClientActiveTexture_ = glClientActiveTexture;
-		}
-		else
-		{
-			if (glloader_is_supported("GL_ARB_multitexture"))
-			{
-				glActiveTexture_ = glActiveTextureARB;
-				glClientActiveTexture_ = glClientActiveTextureARB;
-			}
-			else
-			{
-				glActiveTexture_ = NULL;
-				glClientActiveTexture_ = NULL;
-			}
-		}
 	}
 
 	// Îö¹¹º¯Êý
@@ -271,6 +253,25 @@ namespace KlayGE
 	{
 		RenderWindowPtr win(new OGLRenderWindow(name,
 			static_cast<OGLRenderSettings const &>(settings)));
+
+		if (glloader_is_supported("GL_VERSION_1_3"))
+		{
+			glActiveTexture_ = glActiveTexture;
+			glClientActiveTexture_ = glClientActiveTexture;
+		}
+		else
+		{
+			if (glloader_is_supported("GL_ARB_multitexture"))
+			{
+				glActiveTexture_ = glActiveTextureARB;
+				glClientActiveTexture_ = glClientActiveTextureARB;
+			}
+			else
+			{
+				glActiveTexture_ = NULL;
+				glClientActiveTexture_ = NULL;
+			}
+		}
 
 		this->ActiveRenderTarget(this->AddRenderTarget(win));
 
