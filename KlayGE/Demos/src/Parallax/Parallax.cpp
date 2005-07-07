@@ -171,7 +171,7 @@ Parallax::Parallax()
 void Parallax::InitObjects()
 {
 	// ½¨Á¢×ÖÌå
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gbsn00lp.ttf", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
 	renderPolygon_.reset(new RenderPolygon);
 	renderPolygon_->AddToSceneManager();

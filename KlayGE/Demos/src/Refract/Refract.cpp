@@ -168,7 +168,7 @@ Refract::Refract()
 void Refract::InitObjects()
 {
 	// ½¨Á¢×ÖÌå
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gbsn00lp.ttf", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
 	renderBox_.reset(new RenderBox(Box(Vector3(-1, -1, -1), Vector3(1, 1, 1))));
 	static_cast<RenderBox*>(renderBox_.get())->CubeMap(LoadTexture("Glacier2.dds"));

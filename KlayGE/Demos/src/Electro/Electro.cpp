@@ -192,7 +192,7 @@ Electro::Electro()
 
 void Electro::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gbsn00lp.ttf", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
 	renderElectro_.reset(new RenderElectro);
 	renderElectro_->AddToSceneManager();

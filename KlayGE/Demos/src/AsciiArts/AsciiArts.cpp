@@ -288,7 +288,7 @@ AsciiArts::AsciiArts()
 
 void AsciiArts::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gbsn00lp.ttf", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
 	this->LookAt(Vector3(0.0f, 0.3f, -0.2f), Vector3(0.0f, 0.1f, 0.0f));
 	this->Proj(0.1f, 100.0f);
