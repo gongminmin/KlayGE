@@ -1,8 +1,11 @@
 // Font.cpp
 // KlayGE Font类 实现文件
-// Ver 2.3.0
-// 版权所有(C) 龚敏敏, 2003-2004
+// Ver 2.8.0
+// 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.8.0
+// 美化了字体显示效果 (2005.7.7)
 //
 // 2.3.0
 // 使用FreeType实现字体读取 (2004.12.26)
@@ -357,7 +360,7 @@ namespace KlayGE
 								if ((y < max_height) && (x < max_width))
 								{
 									dest[y_offset * max_width + x]
-										= (slot_->bitmap.buffer[y * slot_->bitmap.width + x] > 128 ? 0xFFFF : 0);
+										= ((slot_->bitmap.buffer[y * slot_->bitmap.width + x] & 0xF0) << 8) | 0x0FFF;
 								}
 							}
 						}
@@ -407,7 +410,7 @@ namespace KlayGE
 			boost::shared_ptr<FontRenderable> renderable(new FontRenderable(effect_, vb_));
 			renderable->RenderText(this->FontHeight(), charInfoMap_,
 				sx, sy, sz, xScale, yScale, clr, text, flags);
-			Context::Instance().SceneManagerInstance().AddRenderable(renderable);
+			renderable->AddToSceneManager();
 		}
 	}
 }

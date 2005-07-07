@@ -1,4 +1,5 @@
+KlayGE 2.8将支持Render to vertex buffer
 准备在KlayGE 3.0中去掉固定管道，尤其是顶点流水线的
 KlayGE 3.0的变量命名规则将变为全部字母小写，单词之间用下划线分隔的方式
 KlayGE 3.0将改用右手坐标系
-KlayGE 3.0将支持HDR
+KlayGE 3.0将完全支持HDR
