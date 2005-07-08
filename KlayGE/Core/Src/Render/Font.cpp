@@ -1,10 +1,10 @@
 // Font.cpp
 // KlayGE Font类 实现文件
-// Ver 2.8.0
+// Ver 2.7.1
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
 //
-// 2.8.0
+// 2.7.1
 // 美化了字体显示效果 (2005.7.7)
 //
 // 2.3.0
