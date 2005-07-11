@@ -1,8 +1,11 @@
 // RenderEngine.hpp
 // KlayGE 渲染引擎类 实现文件
-// Ver 2.7.0
+// Ver 2.7.1
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.7.1
+// ViewMatrix和ProjectionMatrix改为const (2005.7.10)
 //
 // 2.7.0
 // 去掉了TextureCoordSet (2005.6.26)
@@ -170,9 +173,9 @@ namespace KlayGE
 
 		Matrix4 WorldMatrix() const;
 		void WorldMatrix(Matrix4 const & mat);
-		Matrix4 ViewMatrix();
+		Matrix4 ViewMatrix() const;
 		void ViewMatrix(Matrix4 const & mat);
-		Matrix4 ProjectionMatrix();
+		Matrix4 ProjectionMatrix() const;
 		void ProjectionMatrix(Matrix4 const & mat);
 
 		virtual void DepthBufferDepthTest(bool depthTest) = 0;

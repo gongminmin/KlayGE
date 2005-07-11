@@ -1,8 +1,11 @@
 // RenderEngine.cpp
 // KlayGE 渲染引擎类 实现文件
-// Ver 2.4.0
+// Ver 2.7.1
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.7.1
+// ViewMatrix和ProjectionMatrix改为const (2005.7.10)
 //
 // 2.4.0
 // 增加了NumPrimitivesJustRendered和NumVerticesJustRendered (2005.3.21)
@@ -128,7 +131,7 @@ namespace KlayGE
 
 	// 获取观察矩阵
 	/////////////////////////////////////////////////////////////////////////////////
-	Matrix4 RenderEngine::ViewMatrix()
+	Matrix4 RenderEngine::ViewMatrix() const
 	{
 		return viewMat_;
 	}
@@ -143,7 +146,7 @@ namespace KlayGE
 
 	// 获取投射矩阵
 	/////////////////////////////////////////////////////////////////////////////////
-	Matrix4 RenderEngine::ProjectionMatrix()
+	Matrix4 RenderEngine::ProjectionMatrix() const
 	{
 		return projMat_;
 	}

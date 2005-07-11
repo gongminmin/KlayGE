@@ -28,6 +28,7 @@
 #include <iostream>
 #include <map>
 
+#include "ascii_lums_builder.hpp"
 #include "AsciiArts.hpp"
 
 using namespace KlayGE;
@@ -37,9 +38,12 @@ int const WIDTH = 800;
 int const HEIGHT = 600;
 int const CELL_WIDTH = 8;
 int const CELL_HEIGHT = 8;
-int const NUM_ASCII = 128;
-int const CHAR_WIDTH = 16;
-int const CHAR_HEIGHT = 16;
+int const INPUT_NUM_ASCII = 128;
+int const ASCII_WIDTH = 16;
+int const ASCII_HEIGHT = 16;
+
+int const OUTPUT_NUM_ASCII = 32;
+int const LUM_LEVEL = 8;
 
 namespace
 {
@@ -105,11 +109,11 @@ namespace
 
 		void OnRenderBegin()
 		{
-			RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			RenderEngine const & renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			RenderTarget const & renderTarget(*(*renderEngine.ActiveRenderTarget()));
 
-			*(effect_->ParameterByName("cell_per_row")) = static_cast<float>(CELL_WIDTH) / (*renderEngine.ActiveRenderTarget())->Width();
-			*(effect_->ParameterByName("cell_per_line")) = static_cast<float>(CELL_HEIGHT) / (*renderEngine.ActiveRenderTarget())->Height();
-			*(effect_->ParameterByName("num_ascii")) = NUM_ASCII;
+			*(effect_->ParameterByName("cell_per_row")) = static_cast<float>(CELL_WIDTH) / renderTarget.Width();
+			*(effect_->ParameterByName("cell_per_line")) = static_cast<float>(CELL_HEIGHT) / renderTarget.Height();
 		}
 
 		RenderEffectPtr GetRenderEffect() const
@@ -149,95 +153,6 @@ namespace
 		InputAction(Switch, KS_Space),
 		InputAction(Exit, KS_Escape),
 	};
-
-
-	bool cmp_diff_lum_to_iter(std::pair<float, std::multimap<float, unsigned char>::iterator> const & lhs,
-							std::pair<float, std::multimap<float, unsigned char>::iterator> const & rhs)
-	{
-		return lhs.first > rhs.first;
-	}
-
-	void BuildAsciiLums(TexturePtr ascii_tex, TexturePtr ascii_lums_tex)
-	{
-		std::vector<float> lums(128, 0);
-		std::vector<uint8_t> ascii_data(NUM_ASCII * CHAR_WIDTH * CHAR_HEIGHT);
-		ascii_tex->CopyToMemory2D(0, &ascii_data[0]);
-		for (int x = 0; x < NUM_ASCII; ++ x)
-		{
-			for (int yc = 0; yc < CHAR_HEIGHT; ++ yc)
-			{
-				for (int xc = 0; xc < CHAR_WIDTH; ++ xc)
-				{
-					lums[x] += ascii_data[yc * NUM_ASCII * CHAR_WIDTH + (x * CHAR_WIDTH + xc)] / 256.0f;
-				}
-			}
-		}
-
-		std::multimap<float, uint8_t> lum_to_char;
-		float max_lun = *std::max_element(lums.begin(), lums.end());
-		for (size_t i = 0; i < lums.size(); ++ i)
-		{
-			lum_to_char.insert(std::make_pair(lums[i] / max_lun * 32, static_cast<uint8_t>(i)));
-		}
-		std::vector<std::pair<float, std::multimap<float, uint8_t>::iterator> > diff_lum_to_iter;
-		for (std::multimap<float, uint8_t>::iterator iter = lum_to_char.begin(); iter != lum_to_char.end(); ++ iter)
-		{
-			float diff_lum;
-
-			if (iter != lum_to_char.begin())
-			{
-				std::multimap<float, uint8_t>::iterator prev_iter = iter;
-				-- prev_iter;
-				diff_lum = iter->first - prev_iter->first;
-			}
-			else
-			{
-				diff_lum = iter->first;
-			}
-
-			diff_lum_to_iter.push_back(std::make_pair(diff_lum, iter));
-		}
-		std::sort(diff_lum_to_iter.begin(), diff_lum_to_iter.end(), cmp_diff_lum_to_iter);
-		while (diff_lum_to_iter.size() > 32)
-		{
-			diff_lum_to_iter.pop_back();
-		}
-		assert(32 == diff_lum_to_iter.size());
-		std::map<float, uint8_t> final_lum_to_char;
-		for (size_t i = 0; i < diff_lum_to_iter.size(); ++ i)
-		{
-			final_lum_to_char.insert(*diff_lum_to_iter[i].second);
-		}
-		assert(32 == final_lum_to_char.size());
-		std::vector<uint8_t> lums_map(8 * 32 * CHAR_WIDTH * CHAR_HEIGHT);
-		for (std::map<float, uint8_t>::iterator iter = final_lum_to_char.begin();
-			iter != final_lum_to_char.end(); ++ iter)
-		{
-			int lum = std::distance(final_lum_to_char.begin(), iter);
-
-			for (int y = 0; y < CHAR_HEIGHT; ++ y)
-			{
-				for (int x = 0; x < CHAR_WIDTH; ++ x)
-				{
-					lums_map[y * 8 * 32 * CHAR_WIDTH + (lum * CHAR_WIDTH + x)]
-						= ascii_data[y * NUM_ASCII * CHAR_WIDTH + (iter->second * CHAR_WIDTH + x)];
-				}
-			}
-		}
-		for (int i = 7; i >= 0; -- i)
-		{
-			for (int y = 0; y < CHAR_HEIGHT; ++ y)
-			{
-				for (int x = 0; x < 32 * CHAR_WIDTH; ++ x)
-				{
-					lums_map[y * 8 * 32 * CHAR_WIDTH + (i * 32 * CHAR_WIDTH + x)]
-						= lums_map[y * 8 * 32 * CHAR_WIDTH + x] / 8 * (i + 1);
-				}
-			}
-		}
-
-		ascii_lums_tex->CopyMemoryToTexture2D(0, &lums_map[0], PF_L8, 8 * 32 * CHAR_WIDTH, CHAR_HEIGHT, 0, 0);
-	}
 
 	class TheRenderSettings : public D3D9RenderSettings
 	{
@@ -286,6 +201,42 @@ AsciiArts::AsciiArts()
 	ResLoader::Instance().AddPath("../media/AsciiArts");
 }
 
+void AsciiArts::BuildAsciiLumsTex()
+{
+	KlayGE::TexturePtr ascii_tex = LoadTexture("font.dds");
+	ascii_lums_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(LUM_LEVEL * OUTPUT_NUM_ASCII * ASCII_WIDTH,
+		ASCII_HEIGHT, 1, PF_L8);
+
+	std::vector<uint8_t> ascii_tex_data(INPUT_NUM_ASCII * ASCII_WIDTH * ASCII_HEIGHT);
+	ascii_tex->CopyToMemory2D(0, &ascii_tex_data[0]);
+
+	std::vector<ascii_tile_type> ascii_data(INPUT_NUM_ASCII);
+	for (size_t i = 0; i < ascii_data.size(); ++ i)
+	{
+		ascii_data[i].resize(ASCII_WIDTH * ASCII_HEIGHT);
+		for (int y = 0; y < ASCII_HEIGHT; ++ y)
+		{
+			for (int x = 0; x < ASCII_WIDTH; ++ x)
+			{
+				ascii_data[i][y * ASCII_WIDTH + x]
+				= ascii_tex_data[y * INPUT_NUM_ASCII * ASCII_WIDTH + (i * ASCII_WIDTH + x)];
+			}
+		}
+	}
+
+	ascii_lums_builder builder(INPUT_NUM_ASCII, OUTPUT_NUM_ASCII, LUM_LEVEL, ASCII_WIDTH, ASCII_HEIGHT);
+	std::vector<ascii_tiles_type> ascii_lums = builder.build(ascii_data);
+
+	for (size_t i = 0; i < ascii_lums.size(); ++ i)
+	{
+		for (size_t j = 0; j < ascii_lums[i].size(); ++ j)
+		{
+			ascii_lums_tex_->CopyMemoryToTexture2D(0, &ascii_lums[i][j][0],
+				PF_L8, ASCII_WIDTH, ASCII_HEIGHT, (i * ascii_lums[i].size() + j) * ASCII_WIDTH, 0);
+		}
+	}
+}
+
 void AsciiArts::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
@@ -303,9 +254,7 @@ void AsciiArts::InitObjects()
 	mesh_ = LoadKMesh("bunny.kmesh");
 	mesh_->AddToSceneManager();
 
-	KlayGE::TexturePtr ascii_tex = LoadTexture("font.dds");
-	ascii_lums_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(8 * 32 * CHAR_WIDTH, CHAR_HEIGHT, 1, PF_L8);
-	BuildAsciiLums(ascii_tex, ascii_lums_tex_);
+	this->BuildAsciiLumsTex();
 
 	rendered_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(WIDTH, HEIGHT, 1, PF_A8R8G8B8, Texture::TU_RenderTarget);
 	render_buffer_ = Context::Instance().RenderFactoryInstance().MakeRenderTexture();

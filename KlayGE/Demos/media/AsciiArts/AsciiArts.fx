@@ -1,5 +1,4 @@
 float cell_per_row, cell_per_line;
-float num_ascii;
 
 struct VS_INPUT
 {
@@ -48,7 +47,7 @@ sampler2D lums_sampler = sampler_state
 float4 AsciiArtsPS(float2 tex_coord0	: TEXCOORD0,
 					uniform sampler2D scene_sampler,
 					uniform sampler2D lums_sampler,
-					uniform float3 arg) : COLOR
+					uniform float2 arg) : COLOR
 {
 	const float3 rgb_to_lum = float3(0.299, 0.587, 0.114);
 
@@ -62,6 +61,6 @@ technique AsciiArts
 	pass p0
 	{
 		VertexShader = compile vs_1_1 AsciiArtsVS();
-		PixelShader = compile ps_2_0 AsciiArtsPS(scene_sampler, lums_sampler, float3(cell_per_row, cell_per_line, num_ascii));
+		PixelShader = compile ps_2_0 AsciiArtsPS(scene_sampler, lums_sampler, float2(cell_per_row, cell_per_line));
 	}
 }

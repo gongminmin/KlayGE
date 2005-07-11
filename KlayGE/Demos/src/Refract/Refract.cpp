@@ -212,7 +212,7 @@ void Refract::Update()
 
 	Matrix4 view = this->ActiveCamera().ViewMatrix();
 	Matrix4 proj = this->ActiveCamera().ProjMatrix();
-	static_cast<RenderableSkyBox*>(renderSkyBox_.get())->MVPMatrix(Matrix4::Identity(), view, proj);
+
 	static_cast<RenderBox*>(renderBox_.get())->MVPMatrix(Matrix4::Identity(), view, proj);
 
 	*(renderBox_->GetRenderEffect()->ParameterByName("eyePos"))

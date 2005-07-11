@@ -1,8 +1,11 @@
 // RenderableHelper.hpp
 // KlayGE 一些常用的可渲染对象 头文件
-// Ver 2.6.0
+// Ver 2.7.1
 // 版权所有(C) 龚敏敏, 2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.7.1
+// 增加了RenderableHelper基类 (2005.7.10)
 //
 // 2.6.0
 // 增加了RenderableSkyBox (2005.5.26)
@@ -25,104 +28,84 @@
 
 namespace KlayGE
 {
-	class RenderablePoint : public Renderable
+	class RenderableHelper : public Renderable
+	{
+	public:
+		virtual ~RenderableHelper()
+		{
+		}
+
+		virtual RenderEffectPtr GetRenderEffect() const;
+		virtual VertexBufferPtr GetVertexBuffer() const;
+
+		virtual Box GetBound() const;
+
+	protected:
+		Box box_;
+
+		VertexBufferPtr vb_;
+		RenderEffectPtr effect_;
+	};
+
+	class RenderablePoint : public RenderableHelper
 	{
 	public:
 		explicit RenderablePoint(Vector3 const & v);
+		virtual ~RenderablePoint()
+		{
+		}
 
-		RenderEffectPtr GetRenderEffect() const;
-		VertexBufferPtr GetVertexBuffer() const;
 		std::wstring const & Name() const;
-
-		Box GetBound() const;
-
-	private:
-		Box box_;
-
-		VertexBufferPtr vb_;
-		RenderEffectPtr effect_;
 	};
 
-	class RenderableLine : public Renderable
+	class RenderableLine : public RenderableHelper
 	{
 	public:
 		explicit RenderableLine(Vector3 const & v0, Vector3 const & v1);
+		virtual ~RenderableLine()
+		{
+		}
 
-		RenderEffectPtr GetRenderEffect() const;
-		VertexBufferPtr GetVertexBuffer() const;
 		std::wstring const & Name() const;
-
-		Box GetBound() const;
-
-	private:
-		Box box_;
-
-		VertexBufferPtr vb_;
-		RenderEffectPtr effect_;
 	};
 
-	class RenderableTriangle : public Renderable
+	class RenderableTriangle : public RenderableHelper
 	{
 	public:
 		RenderableTriangle(Vector3 const & v0, Vector3 const & v1, Vector3 const & v2);
+		virtual ~RenderableTriangle()
+		{
+		}
 
-		RenderEffectPtr GetRenderEffect() const;
-		VertexBufferPtr GetVertexBuffer() const;
 		std::wstring const & Name() const;
-
-		Box GetBound() const;
-
-	private:
-		Box box_;
-
-		VertexBufferPtr vb_;
-		RenderEffectPtr effect_;
 	};
 
-	class RenderableBox : public Renderable
+	class RenderableBox : public RenderableHelper
 	{
 	public:
 		explicit RenderableBox(Box const & box);
+		virtual ~RenderableBox()
+		{
+		}
 
-		RenderEffectPtr GetRenderEffect() const;
-		VertexBufferPtr GetVertexBuffer() const;
 		std::wstring const & Name() const;
-
-		Box GetBound() const;
-
-	private:
-		Box box_;
-
-		VertexBufferPtr vb_;
-		RenderEffectPtr effect_;
 	};
 
-	class RenderableSkyBox : public Renderable
+	class RenderableSkyBox : public RenderableHelper
 	{
 	public:
 		RenderableSkyBox();
+		virtual ~RenderableSkyBox()
+		{
+		}
 
 		void CubeMap(TexturePtr const & cube);
-		void MVPMatrix(Matrix4 const & model, Matrix4 const & view, Matrix4 const & proj);
 
 		void OnRenderBegin();
 		bool CanBeCulled() const;
 
-		RenderEffectPtr GetRenderEffect() const;
-		VertexBufferPtr GetVertexBuffer() const;
-
-		Box GetBound() const;
-
 		std::wstring const & Name() const;
-
-	private:
-		Box box_;
-
-		VertexBufferPtr vb_;
-		RenderEffectPtr effect_;
-
-		Matrix4 inv_mvp_;
 	};
 }
 
-#endif		//_RENDERABLEHELPER_HPP
+#endif		// _RENDERABLEHELPER_HPP

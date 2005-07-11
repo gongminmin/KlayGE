@@ -116,6 +116,9 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
+				RelativePath=".\ascii_lums_builder.cpp">
+			</File>
+			<File
 				RelativePath=".\AsciiArts.cpp">
 			</File>
 			<File
@@ -126,6 +129,9 @@
 			Name="Í·ÎÄ¼þ"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			<File
+				RelativePath=".\ascii_lums_builder.hpp">
+			</File>
 			<File
 				RelativePath=".\AsciiArts.hpp">
 			</File>

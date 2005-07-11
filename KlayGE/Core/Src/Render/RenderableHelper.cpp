@@ -1,8 +1,11 @@
 // RenderableHelper.cpp
 // KlayGE 一些常用的可渲染对象 实现文件
-// Ver 2.6.0
+// Ver 2.7.1
 // 版权所有(C) 龚敏敏, 2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.7.1
+// 增加了RenderableHelper基类 (2005.7.10)
 //
 // 2.6.0
 // 增加了RenderableSkyBox (2005.5.26)
@@ -20,31 +23,40 @@
 #include <KlayGE/Math.hpp>
 #include <KlayGE/VertexBuffer.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/Context.hpp>
+#include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/RenderEngine.hpp>
 
 #include <KlayGE/RenderableHelper.hpp>
 
 namespace KlayGE
 {
-	RenderablePoint::RenderablePoint(Vector3 const & v)
-		: vb_(new VertexBuffer(VertexBuffer::BT_PointList))
-	{
-		effect_ = LoadRenderEffect("RenderableHelper.fx");
-		effect_->SetTechnique("PointTec");
-
-		vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
-		vb_->GetVertexStream(VST_Positions)->Assign(&v, 1);
-
-		box_ = MathLib::ComputeBoundingBox<float>(&v, &v + 1);
-	}
-
-	RenderEffectPtr RenderablePoint::GetRenderEffect() const
+	RenderEffectPtr RenderableHelper::GetRenderEffect() const
 	{
 		return effect_;
 	}
 
-	VertexBufferPtr RenderablePoint::GetVertexBuffer() const
+	VertexBufferPtr RenderableHelper::GetVertexBuffer() const
 	{
 		return vb_;
+	}
+
+	Box RenderableHelper::GetBound() const
+	{
+		return box_;
+	}
+
+
+	RenderablePoint::RenderablePoint(Vector3 const & v)
+	{
+		effect_ = LoadRenderEffect("RenderableHelper.fx");
+		effect_->SetTechnique("PointTec");
+
+		vb_.reset(new VertexBuffer(VertexBuffer::BT_PointList));
+		vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
+		vb_->GetVertexStream(VST_Positions)->Assign(&v, 1);
+
+		box_ = MathLib::ComputeBoundingBox<float>(&v, &v + 1);
 	}
 
 	std::wstring const & RenderablePoint::Name() const
@@ -53,14 +65,8 @@ namespace KlayGE
 		return name;
 	}
 
-	Box RenderablePoint::GetBound() const
-	{
-		return box_;
-	}
-
 
 	RenderableLine::RenderableLine(Vector3 const & v0, Vector3 const & v1)
-		: vb_(new VertexBuffer(VertexBuffer::BT_LineList))
 	{
 		effect_ = LoadRenderEffect("RenderableHelper.fx");
 		effect_->SetTechnique("LineTec");
@@ -70,20 +76,11 @@ namespace KlayGE
 			v0, v1
 		};
 
+		vb_.reset(new VertexBuffer(VertexBuffer::BT_LineList));
 		vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
 		vb_->GetVertexStream(VST_Positions)->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
 
 		box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
-	}
-
-	RenderEffectPtr RenderableLine::GetRenderEffect() const
-	{
-		return effect_;
-	}
-
-	VertexBufferPtr RenderableLine::GetVertexBuffer() const
-	{
-		return vb_;
 	}
 
 	std::wstring const & RenderableLine::Name() const
@@ -92,14 +89,8 @@ namespace KlayGE
 		return name;
 	}
 
-	Box RenderableLine::GetBound() const
-	{
-		return box_;
-	}
-
 
 	RenderableTriangle::RenderableTriangle(Vector3 const & v0, Vector3 const & v1, Vector3 const & v2)
-		: vb_(new VertexBuffer(VertexBuffer::BT_TriangleList))
 	{
 		effect_ = LoadRenderEffect("RenderableHelper.fx");
 		effect_->SetTechnique("TriangleTec");
@@ -109,20 +100,11 @@ namespace KlayGE
 			v0, v1, v2
 		};
 
+		vb_.reset(new VertexBuffer(VertexBuffer::BT_TriangleList));
 		vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
 		vb_->GetVertexStream(VST_Positions)->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
 
 		box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
-	}
-
-	RenderEffectPtr RenderableTriangle::GetRenderEffect() const
-	{
-		return effect_;
-	}
-
-	VertexBufferPtr RenderableTriangle::GetVertexBuffer() const
-	{
-		return vb_;
 	}
 
 	std::wstring const & RenderableTriangle::Name() const
@@ -131,16 +113,11 @@ namespace KlayGE
 		return name;
 	}
 
-	Box RenderableTriangle::GetBound() const
-	{
-		return box_;
-	}
-
 
 	RenderableBox::RenderableBox(Box const & box)
-		: box_(box),
-			vb_(new VertexBuffer(VertexBuffer::BT_TriangleList))
 	{
+		box_ = box;
+
 		effect_ = LoadRenderEffect("RenderableHelper.fx");
 		effect_->SetTechnique("BoxTec");
 
@@ -159,21 +136,12 @@ namespace KlayGE
 			3, 2, 6, 6, 7, 3,
 		};
 
+		vb_.reset(new VertexBuffer(VertexBuffer::BT_TriangleList));
 		vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
 		vb_->GetVertexStream(VST_Positions)->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
 		
-		vb_->AddIndexStream();
+		vb_->AddIndexStream(true);
 		vb_->GetIndexStream()->Assign(indices, sizeof(indices) / sizeof(indices[0]));
-	}
-
-	RenderEffectPtr RenderableBox::GetRenderEffect() const
-	{
-		return effect_;
-	}
-
-	VertexBufferPtr RenderableBox::GetVertexBuffer() const
-	{
-		return vb_;
 	}
 
 	std::wstring const & RenderableBox::Name() const
@@ -182,14 +150,8 @@ namespace KlayGE
 		return name;
 	}
 
-	Box RenderableBox::GetBound() const
-	{
-		return box_;
-	}
-
 
 	RenderableSkyBox::RenderableSkyBox()
-		: vb_(new VertexBuffer(VertexBuffer::BT_TriangleList))
 	{
 		effect_ = LoadRenderEffect("RenderableHelper.fx");
 		effect_->SetTechnique("SkyBoxTec");
@@ -207,13 +169,14 @@ namespace KlayGE
 			0, 1, 2, 2, 3, 0,
 		};
 
-		box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[4]);
-
-		vb_->AddVertexStream(VST_Positions, sizeof(float), 3);
+		vb_.reset(new VertexBuffer(VertexBuffer::BT_TriangleList));
+		vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
 		vb_->GetVertexStream(VST_Positions)->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
 
-		vb_->AddIndexStream();
+		vb_->AddIndexStream(true);
 		vb_->GetIndexStream()->Assign(indices, sizeof(indices) / sizeof(uint16_t));
+
+		box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[4]);
 	}
 
 	void RenderableSkyBox::CubeMap(TexturePtr const & cube)
@@ -221,38 +184,20 @@ namespace KlayGE
 		*(effect_->ParameterByName("skybox_cubemap")) = cube;
 	}
 
-	void RenderableSkyBox::MVPMatrix(Matrix4 const & /*model*/, Matrix4 const & view, Matrix4 const & proj)
+	void RenderableSkyBox::OnRenderBegin()
 	{
-		Matrix4 rot_view = view;
+		RenderEngine const & render_engine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+		Matrix4 rot_view = render_engine.ViewMatrix();
 		rot_view(3, 0) = 0;
 		rot_view(3, 1) = 0;
 		rot_view(3, 2) = 0;
-		inv_mvp_ = MathLib::Inverse(rot_view * proj);
-	}
-
-	void RenderableSkyBox::OnRenderBegin()
-	{
-		*(effect_->ParameterByName("inv_mvp")) = inv_mvp_;
+		*(effect_->ParameterByName("inv_mvp")) = MathLib::Inverse(rot_view * render_engine.ProjectionMatrix());
 	}
 
 	bool RenderableSkyBox::CanBeCulled() const
 	{
 		return false;
-	}
-
-	RenderEffectPtr RenderableSkyBox::GetRenderEffect() const
-	{
-		return effect_;
-	}
-
-	VertexBufferPtr RenderableSkyBox::GetVertexBuffer() const
-	{
-		return vb_;
-	}
-
-	Box RenderableSkyBox::GetBound() const
-	{
-		return box_;
 	}
 
 	std::wstring const & RenderableSkyBox::Name() const

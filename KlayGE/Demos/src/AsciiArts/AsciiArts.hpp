@@ -12,9 +12,11 @@ public:
 
 private:
 	void InitObjects();
-
 	void Update();
 
+	void BuildAsciiLumsTex();
+
+private:
 	KlayGE::FontPtr font_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
