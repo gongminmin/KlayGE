@@ -4,6 +4,7 @@
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/Renderable.hpp>
+#include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/SceneManager.hpp>
@@ -26,11 +27,10 @@ using namespace KlayGE;
 
 namespace
 {
-	class RenderElectro : public Renderable
+	class RenderElectro : public RenderableHelper
 	{
 	public:
 		RenderElectro()
-			: vb_(new VertexBuffer(VertexBuffer::BT_TriangleList))
 		{
 			MathLib::PerlinNoise<float>& pn = MathLib::PerlinNoise<float>::Instance();
 
@@ -100,8 +100,7 @@ namespace
 				0, 1, 3, 3, 2, 0,
 			};
 
-			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
-
+			vb_.reset(new VertexBuffer(VertexBuffer::BT_TriangleList));
 			vb_->AddVertexStream(VST_Positions, sizeof(float), 3);
 			vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 3);
 			vb_->GetVertexStream(VST_Positions)->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
@@ -109,6 +108,8 @@ namespace
 
 			vb_->AddIndexStream();
 			vb_->GetIndexStream()->Assign(indices, sizeof(indices) / sizeof(uint16_t));
+
+			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 		}
 
 		void OnRenderBegin()
@@ -119,32 +120,11 @@ namespace
 			*(effect_->ParameterByName("z")) = t;
 		}
 
-		RenderEffectPtr GetRenderEffect() const
-		{
-			return effect_;
-		}
-
-		VertexBufferPtr GetVertexBuffer() const
-		{
-			return vb_;
-		}
-
-		Box GetBound() const
-		{
-			return box_;
-		}
-
 		std::wstring const & Name() const
 		{
 			static const std::wstring name(L"Electro");
 			return name;
 		}
-
-	private:
-		VertexBufferPtr vb_;
-		RenderEffectPtr effect_;
-
-		Box box_;
 	};
 
 	class TheRenderSettings : public D3D9RenderSettings

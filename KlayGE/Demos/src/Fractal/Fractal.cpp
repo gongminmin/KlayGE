@@ -4,6 +4,7 @@
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/Renderable.hpp>
+#include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/SceneManager.hpp>
@@ -25,11 +26,10 @@ using namespace KlayGE;
 
 namespace
 {
-	class RenderFractal : public Renderable
+	class RenderFractal : public RenderableHelper
 	{
 	public:
 		RenderFractal()
-			: vb_(new VertexBuffer(VertexBuffer::BT_TriangleList))
 		{
 			effect_ = LoadRenderEffect("Fractal.fx");
 
@@ -62,7 +62,7 @@ namespace
 				0, 1, 2, 2, 3, 0,
 			};
 
-			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
+			vb_.reset(new VertexBuffer(VertexBuffer::BT_TriangleList));
 
 			vb_->AddVertexStream(VST_Positions, sizeof(float), 3);
 			vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2);
@@ -71,21 +71,8 @@ namespace
 
 			vb_->AddIndexStream();
 			vb_->GetIndexStream()->Assign(indices, sizeof(indices) / sizeof(uint16_t));
-		}
 
-		RenderEffectPtr GetRenderEffect() const
-		{
-			return effect_;
-		}
-
-		VertexBufferPtr GetVertexBuffer() const
-		{
-			return vb_;
-		}
-
-		Box GetBound() const
-		{
-			return box_;
+			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 		}
 
 		std::wstring const & Name() const
@@ -93,12 +80,6 @@ namespace
 			static const std::wstring name(L"Fractal");
 			return name;
 		}
-
-	private:
-		KlayGE::VertexBufferPtr vb_;
-		KlayGE::RenderEffectPtr effect_;
-
-		Box box_;
 	};
 
 	class TheRenderSettings : public D3D9RenderSettings

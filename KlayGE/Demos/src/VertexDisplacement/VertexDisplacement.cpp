@@ -4,6 +4,7 @@
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/Renderable.hpp>
+#include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/SceneManager.hpp>
@@ -32,12 +33,11 @@ namespace
 	int const WIDTH = 4;
 	int const HEIGHT = 3;
 
-	class Flag : public Renderable
+	class Flag : public RenderableHelper
 	{
 	public:
 		Flag(int width, int height)
-			: vb_(new VertexBuffer(VertexBuffer::BT_TriangleList)),
-				model_(MathLib::Translation(-WIDTH / 2.0f, HEIGHT / 2.0f, 0.0f))
+			: model_(MathLib::Translation(-WIDTH / 2.0f, HEIGHT / 2.0f, 0.0f))
 		{
 			std::vector<Vector3> pos;
 			for (int y = 0; y < height + 1; ++ y)
@@ -73,6 +73,7 @@ namespace
 				}
 			}
 
+			vb_.reset(new VertexBuffer(VertexBuffer::BT_TriangleList));
 			vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
 			vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2, true);
 			vb_->GetVertexStream(VST_Positions)->Assign(&pos[0], pos.size());
@@ -88,24 +89,9 @@ namespace
 			effect_->SetTechnique("VertexDisplacement");
 		}
 
-		RenderEffectPtr GetRenderEffect() const
-		{
-			return effect_;
-		}
-
-		VertexBufferPtr GetVertexBuffer() const
-		{
-			return vb_;
-		}
-
 		Matrix4 GetModelMatrix() const
 		{
 			return model_;
-		}
-
-		Box GetBound() const
-		{
-			return box_; 
 		}
 
 		std::wstring const & Name() const
@@ -115,11 +101,7 @@ namespace
 		}
 
 	private:
-		VertexBufferPtr vb_;
-		RenderEffectPtr effect_;
-
 		Matrix4 model_;
-		Box box_;
 	};
 
 

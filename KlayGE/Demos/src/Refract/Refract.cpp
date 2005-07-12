@@ -31,13 +31,13 @@ using namespace KlayGE;
 
 namespace
 {
-	class RenderBox : public Renderable
+	class RenderBox : public RenderableHelper
 	{
 	public:
 		RenderBox(Box const & box)
-			: box_(box),
-				vb_(new VertexBuffer(VertexBuffer::BT_TriangleList))
 		{
+			box_ = box;
+
 			effect_ = LoadRenderEffect("Refract.fx");
 			effect_->SetTechnique("Refract");
 
@@ -60,6 +60,7 @@ namespace
 			MathLib::ComputeNormal<float>(nors, indices, indices + sizeof(indices) / sizeof(indices[0]),
 				xyzs, xyzs + sizeof(xyzs) / sizeof(xyzs[0]));
 
+			vb_.reset(new VertexBuffer(VertexBuffer::BT_TriangleList));
 			vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
 			vb_->GetVertexStream(VST_Positions)->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
 			vb_->AddVertexStream(VST_Normals, sizeof(float), 3, true);
@@ -81,32 +82,11 @@ namespace
 			*(effect_->ParameterByName("mvp")) = model * view * proj;
 		}
 
-		RenderEffectPtr GetRenderEffect() const
-		{
-			return effect_;
-		}
-
-		VertexBufferPtr GetVertexBuffer() const
-		{
-			return vb_;
-		}
-
 		std::wstring const & Name() const
 		{
 			static std::wstring const name(L"Box");
 			return name;
 		}
-
-		Box GetBound() const
-		{
-			return box_;
-		}
-
-	private:
-		VertexBufferPtr vb_;
-		RenderEffectPtr effect_;
-
-		Box box_;
 	};
 
 
@@ -213,13 +193,16 @@ void Refract::Update()
 	Matrix4 view = this->ActiveCamera().ViewMatrix();
 	Matrix4 proj = this->ActiveCamera().ProjMatrix();
 
+	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+	renderEngine.ViewMatrix(view);
+	renderEngine.ProjectionMatrix(proj);
+
 	static_cast<RenderBox*>(renderBox_.get())->MVPMatrix(Matrix4::Identity(), view, proj);
 
 	*(renderBox_->GetRenderEffect()->ParameterByName("eyePos"))
 		= Vector4(this->ActiveCamera().EyePos().x(), this->ActiveCamera().EyePos().y(),
 			this->ActiveCamera().EyePos().z(), 1);
 
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	std::wostringstream stream;
 	stream << (*renderEngine.ActiveRenderTarget())->FPS();
 

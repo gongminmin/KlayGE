@@ -4,6 +4,7 @@
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/Renderable.hpp>
+#include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/SceneManager.hpp>
@@ -29,11 +30,10 @@ using namespace KlayGE;
 
 namespace
 {
-	class RenderPolygon : public Renderable
+	class RenderPolygon : public RenderableHelper
 	{
 	public:
 		RenderPolygon()
-			: vb_(new VertexBuffer(VertexBuffer::BT_TriangleList))
 		{
 			effect_ = LoadRenderEffect("parallax.fx");
 			*(effect_->ParameterByName("diffusemap")) = LoadTexture("diffuse.dds");
@@ -63,12 +63,12 @@ namespace
 				0, 1, 2, 2, 3, 0
 			};
 
-			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[4]);
-
 			Vector3 t[4], b[4];
 			MathLib::ComputeTangent<float>(t, b,
 				indices, indices + sizeof(indices) / sizeof(indices[0]),
 				xyzs, xyzs + sizeof(xyzs) / sizeof(xyzs[0]), texs);
+
+			vb_.reset(new VertexBuffer(VertexBuffer::BT_TriangleList));
 
 			vb_->AddVertexStream(VST_Positions, sizeof(float), 3);
 			vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2);
@@ -81,21 +81,8 @@ namespace
 
 			vb_->AddIndexStream();
 			vb_->GetIndexStream()->Assign(indices, sizeof(indices) / sizeof(uint16_t));
-		}
 
-		RenderEffectPtr GetRenderEffect() const
-		{
-			return effect_;
-		}
-
-		VertexBufferPtr GetVertexBuffer() const
-		{
-			return vb_;
-		}
-
-		Box GetBound() const
-		{
-			return box_;
+			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[4]);
 		}
 
 		std::wstring const & Name() const
@@ -103,12 +90,6 @@ namespace
 			static const std::wstring name(L"Polygon");
 			return name;
 		}
-
-	private:
-		VertexBufferPtr vb_;
-		RenderEffectPtr effect_;
-
-		Box box_;
 	};
 
 

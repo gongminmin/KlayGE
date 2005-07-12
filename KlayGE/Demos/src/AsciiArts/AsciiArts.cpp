@@ -25,8 +25,6 @@
 
 #include <numeric>
 #include <sstream>
-#include <iostream>
-#include <map>
 
 #include "ascii_lums_builder.hpp"
 #include "AsciiArts.hpp"
@@ -47,11 +45,10 @@ int const LUM_LEVEL = 8;
 
 namespace
 {
-	class RenderQuad : public Renderable
+	class RenderQuad : public RenderableHelper
 	{
 	public:
 		RenderQuad(int width, int height)
-			: vb_(new VertexBuffer(VertexBuffer::BT_TriangleList))
 		{
 			std::vector<Vector3> pos;
 			for (int y = 0; y < height + 1; ++ y)
@@ -90,6 +87,8 @@ namespace
 			effect_ = LoadRenderEffect("AsciiArts.fx");
 			effect_->SetTechnique("AsciiArts");
 
+			vb_.reset(new VertexBuffer(VertexBuffer::BT_TriangleList));
+
 			vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
 			vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2, true);
 			vb_->GetVertexStream(VST_Positions)->Assign(&pos[0], pos.size());
@@ -116,31 +115,63 @@ namespace
 			*(effect_->ParameterByName("cell_per_line")) = static_cast<float>(CELL_HEIGHT) / renderTarget.Height();
 		}
 
-		RenderEffectPtr GetRenderEffect() const
-		{
-			return effect_;
-		}
-
-		VertexBufferPtr GetVertexBuffer() const
-		{
-			return vb_;
-		}
-
-		Box GetBound() const
-		{
-			return box_;
-		}
-
 		const std::wstring& Name() const
 		{
 			static std::wstring name(L"Quad");
 			return name;
 		}
-
-		Box box_;
-		VertexBufferPtr vb_;
-		RenderEffectPtr effect_;
 	};
+
+	std::vector<ascii_tile_type> LoadFromTexture(std::string const & tex_name)
+	{
+		KlayGE::TexturePtr ascii_tex = LoadTexture(tex_name);
+
+		std::vector<ascii_tile_type> ret(INPUT_NUM_ASCII);
+
+		std::vector<uint8_t> ascii_tex_data(INPUT_NUM_ASCII * ASCII_WIDTH * ASCII_HEIGHT);
+		ascii_tex->CopyToMemory2D(0, &ascii_tex_data[0]);
+
+		for (size_t i = 0; i < ret.size(); ++ i)
+		{
+			ret[i].resize(ASCII_WIDTH * ASCII_HEIGHT);
+			for (int y = 0; y < ASCII_HEIGHT; ++ y)
+			{
+				for (int x = 0; x < ASCII_WIDTH; ++ x)
+				{
+					ret[i][y * ASCII_WIDTH + x]
+						= ascii_tex_data[y * INPUT_NUM_ASCII * ASCII_WIDTH + (i * ASCII_WIDTH + x)];
+				}
+			}
+		}
+
+		return ret;
+	}
+
+	KlayGE::TexturePtr FillTexture(std::vector<ascii_tiles_type> const & ascii_lums)
+	{
+		std::vector<uint8_t> temp_data(LUM_LEVEL * OUTPUT_NUM_ASCII * ASCII_WIDTH * ASCII_HEIGHT);
+
+		for (size_t i = 0; i < ascii_lums.size(); ++ i)
+		{
+			for (size_t j = 0; j < ascii_lums[i].size(); ++ j)
+			{
+				for (size_t y = 0; y < ASCII_HEIGHT; ++ y)
+				{
+					for (size_t x = 0; x < ASCII_WIDTH; ++ x)
+					{
+						temp_data[y * LUM_LEVEL * OUTPUT_NUM_ASCII * ASCII_WIDTH + (i * ascii_lums[i].size() + j) * ASCII_WIDTH + x]
+							= ascii_lums[i][j][y * ASCII_WIDTH + x];
+					}
+				}
+			}
+		}
+
+		KlayGE::TexturePtr ret = Context::Instance().RenderFactoryInstance().MakeTexture2D(LUM_LEVEL * OUTPUT_NUM_ASCII * ASCII_WIDTH,
+			ASCII_HEIGHT, 1, PF_L8);
+		ret->CopyMemoryToTexture2D(0, &temp_data[0],
+					PF_L8, LUM_LEVEL * OUTPUT_NUM_ASCII * ASCII_WIDTH, ASCII_HEIGHT, 0, 0);
+		return ret;
+	}
 
 	enum
 	{
@@ -203,38 +234,8 @@ AsciiArts::AsciiArts()
 
 void AsciiArts::BuildAsciiLumsTex()
 {
-	KlayGE::TexturePtr ascii_tex = LoadTexture("font.dds");
-	ascii_lums_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(LUM_LEVEL * OUTPUT_NUM_ASCII * ASCII_WIDTH,
-		ASCII_HEIGHT, 1, PF_L8);
-
-	std::vector<uint8_t> ascii_tex_data(INPUT_NUM_ASCII * ASCII_WIDTH * ASCII_HEIGHT);
-	ascii_tex->CopyToMemory2D(0, &ascii_tex_data[0]);
-
-	std::vector<ascii_tile_type> ascii_data(INPUT_NUM_ASCII);
-	for (size_t i = 0; i < ascii_data.size(); ++ i)
-	{
-		ascii_data[i].resize(ASCII_WIDTH * ASCII_HEIGHT);
-		for (int y = 0; y < ASCII_HEIGHT; ++ y)
-		{
-			for (int x = 0; x < ASCII_WIDTH; ++ x)
-			{
-				ascii_data[i][y * ASCII_WIDTH + x]
-				= ascii_tex_data[y * INPUT_NUM_ASCII * ASCII_WIDTH + (i * ASCII_WIDTH + x)];
-			}
-		}
-	}
-
 	ascii_lums_builder builder(INPUT_NUM_ASCII, OUTPUT_NUM_ASCII, LUM_LEVEL, ASCII_WIDTH, ASCII_HEIGHT);
-	std::vector<ascii_tiles_type> ascii_lums = builder.build(ascii_data);
-
-	for (size_t i = 0; i < ascii_lums.size(); ++ i)
-	{
-		for (size_t j = 0; j < ascii_lums[i].size(); ++ j)
-		{
-			ascii_lums_tex_->CopyMemoryToTexture2D(0, &ascii_lums[i][j][0],
-				PF_L8, ASCII_WIDTH, ASCII_HEIGHT, (i * ascii_lums[i].size() + j) * ASCII_WIDTH, 0);
-		}
-	}
+	ascii_lums_tex_ = FillTexture(builder.build(LoadFromTexture("font.dds")));
 }
 
 void AsciiArts::InitObjects()

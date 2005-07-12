@@ -4,6 +4,7 @@
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/Renderable.hpp>
+#include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderWindow.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
@@ -30,10 +31,9 @@ using namespace KlayGE;
 
 namespace
 {
-	struct RenderTorus : public Renderable
+	struct RenderTorus : public RenderableHelper
 	{
 		RenderTorus(TexturePtr const & toonTex, TexturePtr const & edgeTex)
-			: vb_(new VertexBuffer(VertexBuffer::BT_TriangleList))
 		{
 			effect_ = LoadRenderEffect("Cartoon.fx");
 			*(effect_->ParameterByName("toon")) = toonTex;
@@ -42,6 +42,8 @@ namespace
 
 			box_ = MathLib::ComputeBoundingBox<float>(reinterpret_cast<Vector3*>(&Pos[0]),
 				reinterpret_cast<Vector3*>(&Pos[0] + sizeof(Pos) / sizeof(float)));
+
+			vb_.reset(new VertexBuffer(VertexBuffer::BT_TriangleList));
 
 			vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
 			vb_->AddVertexStream(VST_Normals, sizeof(float), 3, true);
@@ -53,32 +55,11 @@ namespace
 			vb_->GetIndexStream()->Assign(Index, sizeof(Index) / sizeof(uint16_t));
 		}
 
-		RenderEffectPtr GetRenderEffect() const
-		{
-			return effect_;
-		}
-
-		VertexBufferPtr GetVertexBuffer() const
-		{
-			return vb_;
-		}
-
-		Box GetBound() const
-		{
-			return box_;
-		}
-
 		std::wstring const & Name() const
 		{
 			static const std::wstring name(L"Torus");
 			return name;
 		}
-
-	private:
-		VertexBufferPtr vb_;
-		RenderEffectPtr effect_;
-
-		Box box_;
 	};
 
 
