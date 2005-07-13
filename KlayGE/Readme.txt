@@ -75,6 +75,12 @@ __________________________________________________________________
 
 发展历程
 
+2.7.1
+美化了字体显示效果
+LoadKMesh可以使用自定义类
+增加了RenderableHelper基类
+RenderEngine::ViewMatrix和ProjectionMatrix改为const
+
 2.7.0 (2005.7.2)
 改成GPL协议
 增加了KMesh
