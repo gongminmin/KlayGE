@@ -22,7 +22,7 @@ namespace KlayGE
 	class Event
 	{
 	public:
-		typedef boost::function<void (Sender&, EventArg&)>, EventHandler;
+		typedef boost::function<void (Sender&, EventArg&)> EventHandler;
 
 	public:
 		Event(Sender& sender)

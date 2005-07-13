@@ -16,12 +16,14 @@ private:
 	void Update();
 
 	KlayGE::FontPtr font_;
-	boost::shared_ptr<KlayGE::Renderable> renderBox_;
+	boost::shared_ptr<KlayGE::StaticMesh> refractor_;
 	boost::shared_ptr<KlayGE::Renderable> renderSkyBox_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
 	KlayGE::uint32_t action_map_id_;
+
+	KlayGE::TexturePtr cube_map_;
 };
 
 #endif		// _REFRACT_HPP

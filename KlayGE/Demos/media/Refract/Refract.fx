@@ -55,14 +55,16 @@ float4 TestCubePS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : COLO
 {
 	normal = normalize(normal);
 	incident = normalize(incident);
-	return texCUBE(cubeMapSampler, refract(incident, normal, 1 / 1.1));
+	return texCUBE(cubeMapSampler, refract(incident, normal, 1 / 1.2));
 }
 
 technique Refract
 {
 	pass p0
 	{
+		ShadeMode = Gouraud;
 		CullMode = CCW;
+
 		VertexShader = compile vs_1_1 TestCubeVS();
 		PixelShader = compile ps_2_0 TestCubePS();
 	}

@@ -1,8 +1,11 @@
 // KMesh.hpp
 // KlayGE KMesh类 头文件
-// Ver 2.7.0
+// Ver 2.7.1
 // 版权所有(C) 龚敏敏, 2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.7.1
+// LoadKMesh可以使用自定义类 (2005.7.13)
 //
 // 2.7.0
 // 初次建立 (2005.6.17)
@@ -16,6 +19,8 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Mesh.hpp>
 
+#include <boost/function.hpp>
+
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_Core_d.lib")
 #else
@@ -27,8 +32,8 @@ namespace KlayGE
 	class KMesh : public StaticMesh
 	{
 	public:
-		explicit KMesh(std::wstring const & name, std::string const & tex_name);
-		~KMesh();
+		KMesh(std::wstring const & name, TexturePtr tex);
+		virtual ~KMesh();
 
 		virtual void OnRenderBegin();
 
@@ -36,7 +41,14 @@ namespace KlayGE
 		TexturePtr tex_;
 	};
 
-	StaticMeshPtr LoadKMesh(std::string const & kmeshName);
+	template <typename T>
+	KMeshPtr CreateFactory(std::wstring const & name, TexturePtr tex)
+	{
+		return KMeshPtr(new T(name, tex));
+	}
+
+	StaticMeshPtr LoadKMesh(std::string const & kmeshName,
+		boost::function<KMeshPtr (std::wstring const &, TexturePtr)> CreateFactoryFunc = CreateFactory<KMesh>);
 }
 
 #endif			// _KMESH_HPP

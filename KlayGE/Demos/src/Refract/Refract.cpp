@@ -11,6 +11,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderableHelper.hpp>
+#include <KlayGE/KMesh.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderSettings.hpp>
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
@@ -31,43 +32,14 @@ using namespace KlayGE;
 
 namespace
 {
-	class RenderBox : public RenderableHelper
+	class Refractor : public KMesh
 	{
 	public:
-		RenderBox(Box const & box)
+		Refractor(std::wstring const & /*name*/, TexturePtr tex)
+			: KMesh(L"Refractor", tex)
 		{
-			box_ = box;
-
 			effect_ = LoadRenderEffect("Refract.fx");
 			effect_->SetTechnique("Refract");
-
-			Vector3 xyzs[] =
-			{
-				box[0], box[1], box[2], box[3], box[4], box[5], box[6], box[7]
-			};
-
-			uint16_t indices[] =
-			{
-				0, 1, 2, 2, 3, 0,
-				7, 6, 5, 5, 4, 7,
-				4, 0, 3, 3, 7, 4,
-				4, 5, 1, 1, 0, 4,
-				1, 5, 6, 6, 2, 1,
-				3, 2, 6, 6, 7, 3,
-			};
-
-			Vector3 nors[sizeof(xyzs) / sizeof(xyzs[0])];
-			MathLib::ComputeNormal<float>(nors, indices, indices + sizeof(indices) / sizeof(indices[0]),
-				xyzs, xyzs + sizeof(xyzs) / sizeof(xyzs[0]));
-
-			vb_.reset(new VertexBuffer(VertexBuffer::BT_TriangleList));
-			vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
-			vb_->GetVertexStream(VST_Positions)->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
-			vb_->AddVertexStream(VST_Normals, sizeof(float), 3, true);
-			vb_->GetVertexStream(VST_Normals)->Assign(nors, sizeof(nors) / sizeof(nors[0]));
-			
-			vb_->AddIndexStream();
-			vb_->GetIndexStream()->Assign(indices, sizeof(indices) / sizeof(indices[0]));
 		}
 
 		void CubeMap(TexturePtr const & texture)
@@ -75,17 +47,17 @@ namespace
 			*(effect_->ParameterByName("cubemap")) = texture;	
 		}
 
-		void MVPMatrix(Matrix4 const & model, Matrix4 const & view, Matrix4 const & proj)
+		void OnRenderBegin()
 		{
+			RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+			Matrix4 const & model = renderEngine.WorldMatrix();
+			Matrix4 const & view = renderEngine.ViewMatrix();
+			Matrix4 const & proj = renderEngine.ProjectionMatrix();
+
 			*(effect_->ParameterByName("model")) = model;
 			*(effect_->ParameterByName("modelit")) = MathLib::Transpose(MathLib::Inverse(model));
 			*(effect_->ParameterByName("mvp")) = model * view * proj;
-		}
-
-		std::wstring const & Name() const
-		{
-			static std::wstring const name(L"Box");
-			return name;
 		}
 	};
 
@@ -150,23 +122,25 @@ void Refract::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
-	renderBox_.reset(new RenderBox(Box(Vector3(-1, -1, -1), Vector3(1, 1, 1))));
-	static_cast<RenderBox*>(renderBox_.get())->CubeMap(LoadTexture("Glacier2.dds"));
-	renderBox_->AddToSceneManager();
+	cube_map_ = LoadTexture("Glacier2.dds");
+
+	refractor_ = LoadKMesh("bunny.kmesh", CreateFactory<Refractor>);
+	static_cast<Refractor*>(refractor_->Children(0).get())->CubeMap(cube_map_);
+	refractor_->AddToSceneManager();
 
 	renderSkyBox_.reset(new RenderableSkyBox);
-	static_cast<RenderableSkyBox*>(renderSkyBox_.get())->CubeMap(LoadTexture("Glacier2.dds"));
+	static_cast<RenderableSkyBox*>(renderSkyBox_.get())->CubeMap(cube_map_);
 	renderSkyBox_->AddToSceneManager();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	this->LookAt(Vector3(4, 0, -4), Vector3(0, 0, 0));
+	this->LookAt(Vector3(-0.05f, -0.01f, -0.5f), Vector3(0, 0.05f, 0));
 	this->Proj(0.1f, 100);
 
 	fpcController_.AttachCamera(this->ActiveCamera());
-	fpcController_.Scalers(0.05f, 1);
+	fpcController_.Scalers(0.01f, 0.1f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	KlayGE::InputActionMap actionMap;
@@ -190,16 +164,11 @@ void Refract::Update()
 		}
 	}
 
-	Matrix4 view = this->ActiveCamera().ViewMatrix();
-	Matrix4 proj = this->ActiveCamera().ProjMatrix();
-
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-	renderEngine.ViewMatrix(view);
-	renderEngine.ProjectionMatrix(proj);
+	renderEngine.ViewMatrix(this->ActiveCamera().ViewMatrix());
+	renderEngine.ProjectionMatrix(this->ActiveCamera().ProjMatrix());
 
-	static_cast<RenderBox*>(renderBox_.get())->MVPMatrix(Matrix4::Identity(), view, proj);
-
-	*(renderBox_->GetRenderEffect()->ParameterByName("eyePos"))
+	*(refractor_->Children(0)->GetRenderEffect()->ParameterByName("eyePos"))
 		= Vector4(this->ActiveCamera().EyePos().x(), this->ActiveCamera().EyePos().y(),
 			this->ActiveCamera().EyePos().z(), 1);
 

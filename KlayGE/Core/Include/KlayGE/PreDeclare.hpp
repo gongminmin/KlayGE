@@ -90,6 +90,8 @@ namespace KlayGE
 	typedef boost::shared_ptr<StaticMesh> StaticMeshPtr;
 	class BoneMesh;
 	typedef boost::shared_ptr<BoneMesh> BoneMeshPtr;
+	class KMesh;
+	typedef boost::shared_ptr<KMesh> KMeshPtr;
 
 	class Socket;
 	class Lobby;

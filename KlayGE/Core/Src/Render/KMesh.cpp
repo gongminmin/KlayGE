@@ -1,8 +1,11 @@
 // KMesh.cpp
 // KlayGE KMesh类 实现文件
-// Ver 2.7.0
+// Ver 2.7.1
 // 版权所有(C) 龚敏敏, 2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.7.1
+// LoadKMesh可以使用自定义类 (2005.7.13)
 //
 // 2.7.0
 // 初次建立 (2005.6.17)
@@ -26,13 +29,13 @@
 
 namespace KlayGE
 {
-	KMesh::KMesh(std::wstring const & name, std::string const & tex_name)
-						: StaticMesh(name)
+	KMesh::KMesh(std::wstring const & name, TexturePtr tex)
+						: StaticMesh(name),
+							tex_(tex)
 	{
-		if (!tex_name.empty())
-		{
-			tex_ = LoadTexture(tex_name);
-		}
+		// 载入fx
+		effect_ = LoadRenderEffect("KMesh.fx");
+		effect_->SetTechnique("KMeshTec");
 	}
 
 	KMesh::~KMesh()
@@ -50,8 +53,11 @@ namespace KlayGE
 		*(effect_->ParameterByName("tex")) = tex_;
 	}
 
-	StaticMeshPtr LoadKMesh(const std::string& kmeshName)
+	StaticMeshPtr LoadKMesh(const std::string& kmeshName,
+		boost::function<KMeshPtr (std::wstring const &, TexturePtr)> CreateFactoryFunc)
 	{
+		assert(CreateFactoryFunc);
+
 		typedef std::vector<StaticMeshPtr> MeshesType;
 		MeshesType meshes;
 
@@ -94,7 +100,13 @@ namespace KlayGE
 				file->read(&texture_name[0], static_cast<std::streamsize>(texture_name.size()));
 			}
 
-			StaticMeshPtr mesh(new KMesh(wname, texture_slots[0].second));
+			TexturePtr texture;
+			if (!texture_slots[0].second.empty())
+			{
+				texture = LoadTexture(texture_slots[0].second);
+			}
+
+			StaticMeshPtr mesh = CreateFactoryFunc(wname, texture);
 
 			uint32_t num_vertices;
 			file->read(reinterpret_cast<char*>(&num_vertices), sizeof(num_vertices));
@@ -129,11 +141,6 @@ namespace KlayGE
 			mesh->AssignIndices(indices.begin(), indices.end());
 
 			mesh->ComputeNormal();
-
-			// 载入fx
-			RenderEffectPtr effect = LoadRenderEffect("KMesh.fx");
-			effect->SetTechnique("KMeshTec");
-			mesh->SetRenderEffect(effect);
 
 			meshes.push_back(mesh);
 		}
