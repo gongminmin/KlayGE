@@ -62,7 +62,6 @@ technique Refract
 {
 	pass p0
 	{
-		ShadeMode = Gouraud;
 		CullMode = CCW;
 
 		VertexShader = compile vs_1_1 TestCubeVS();
