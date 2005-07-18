@@ -1,13 +1,13 @@
-粘土游戏引擎(KlayGE) 2.7.1
+粘土游戏引擎(KlayGE) 2.8.0
 
 Homepage: http://klayge.sourceforge.net
 E-Mail:	  enginedev@163.com
 OICQ:     33611210
 
-欢迎使用粘土游戏引擎 2.7.1
+欢迎使用粘土游戏引擎 2.8.0
 包含的组件：KlayGE头文件，KlayGE源代码，KlayGE的VS.NET 2003工程文件
 
-KlayGE是一个开放，跨平台，插件结构的游戏引擎。
+KlayGE是一个开放源代码的，跨平台的，基于插件结构的游戏引擎。
 
 __________________________________________________________________
 
@@ -74,6 +74,9 @@ __________________________________________________________________
 
 
 发展历程
+
+2.8.1
+增加了RenderDeviceCaps
 
 2.7.1 (2005.7.15)
 美化了字体显示效果
@@ -269,13 +272,13 @@ __________________________________________________________________
 	\DistanceMapCreator
 		从height map建立distance map的工具
 	\MeshML2KMesh
-		从.MeshML编译为.KMesh
+		从.MeshML编译为.KMesh的工具
 	\NormalizerCubeMap
 		生成归一化Cube map的工具
+	\NormalMapGen
+		从height map建立normal map的工具
 	\Pkt
-		文件打包工具源文件
-	\KlayTXConvert
-		把tga转换成KlayGE支持的.klaytx格式的工具源文件
+		文件打包工具
 
 \Lib
 		存放编译后的静态连接库
@@ -287,9 +290,7 @@ __________________________________________________________________
 
 编译器支持
 
-- 推荐使用Visual Studio.NET 2003 编译
-
-- KlayGE是用Visual Studio.NET 2003 开发和编译的，还提供了Visual Studio.NET 2003 的 sln 文件。
-
-- KlayGE从不能保证在 Visual Studio.NET 以前的版本中编译通过。
+- 推荐使用Visual Studio.NET 2003编译
+- KlayGE是用Visual Studio.NET 2003开发和编译的，还提供了Visual Studio.NET 2003的sln文件。
+- KlayGE不保证能在Visual Studio.NET以前的版本中编译通过。
 

@@ -1,8 +1,11 @@
 // OGLRenderEngine.hpp
 // KlayGE OpenGL渲染引擎类 头文件
-// Ver 2.7.0
+// Ver 2.8.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.8.0
+// 增加了RenderDeviceCaps (2005.7.17)
 //
 // 2.7.0
 // 去掉了TextureCoordSet (2005.6.26)
@@ -78,7 +81,6 @@ namespace KlayGE
 
 		void SetTexture(uint32_t stage, TexturePtr const & texture);
 
-		uint32_t MaxTextureStages();
 		void DisableTextureStage(uint32_t stage);
 
 		void TextureCoordCalculation(uint32_t stage, TexCoordCalcMethod m);
@@ -100,6 +102,8 @@ namespace KlayGE
 		void DoWorldMatrix();
 		void DoViewMatrix();
 		void DoProjectionMatrix();
+
+		void FillRenderDeviceCaps();
 
 	private:
 		CullMode cullingMode_;

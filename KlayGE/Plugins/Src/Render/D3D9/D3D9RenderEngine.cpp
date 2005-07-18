@@ -1,8 +1,11 @@
 // D3D9RenderEngine.cpp
 // KlayGE D3D9渲染引擎类 实现文件
-// Ver 2.7.0
+// Ver 2.8.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.8.0
+// 增加了RenderDeviceCaps (2005.7.17)
 //
 // 2.7.0
 // 改进了Render (2005.6.16)
@@ -38,8 +41,8 @@
 #include <KlayGE/VertexBuffer.hpp>
 #include <KlayGE/RenderTarget.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/RenderSettings.hpp>
 
-#include <KlayGE/D3D9/D3D9RenderSettings.hpp>
 #include <KlayGE/D3D9/D3D9RenderWindow.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 #include <KlayGE/D3D9/D3D9VertexStream.hpp>
@@ -191,10 +194,8 @@ namespace KlayGE
 	RenderWindowPtr D3D9RenderEngine::CreateRenderWindow(std::string const & name,
 		RenderSettings const & settings)
 	{
-		assert(dynamic_cast<D3D9RenderSettings const *>(&settings) != NULL);
-
-		D3D9RenderWindowPtr win(new D3D9RenderWindow(d3d_, this->ActiveAdapter(), name,
-			static_cast<D3D9RenderSettings const &>(settings)));
+		D3D9RenderWindowPtr win(new D3D9RenderWindow(d3d_, this->ActiveAdapter(),
+			name, settings));
 
 		d3dDevice_ = win->D3DDevice();
 
@@ -203,8 +204,7 @@ namespace KlayGE
 		this->DepthBufferDepthTest(settings.depthBuffer);
 		this->DepthBufferDepthWrite(settings.depthBuffer);
 
-		// get caps
-		d3d_->GetDeviceCaps(this->ActiveAdapter().AdapterNo(), D3DDEVTYPE_HAL, &caps_);
+		this->FillRenderDeviceCaps();
 
 		return win;
 	}
@@ -533,6 +533,31 @@ namespace KlayGE
 			D3D9Texture const & d3d9Tex = static_cast<D3D9Texture const &>(*texture);
 			TIF(d3dDevice_->SetTexture(stage, d3d9Tex.D3DBaseTexture().get()));
 
+			uint32_t tfc;
+			switch (texture->Type())
+			{
+			case Texture::TT_1D:
+				tfc = caps_.texture_1d_filter_caps;
+				break;
+
+			case Texture::TT_2D:
+				tfc = caps_.texture_2d_filter_caps;
+				break;
+
+			case Texture::TT_3D:
+				tfc = caps_.texture_3d_filter_caps;
+				break;
+
+			case Texture::TT_Cube:
+				tfc = caps_.texture_cube_filter_caps;
+				break;
+
+			default:
+				assert(false);
+				tfc = 0;
+				break;
+			}
+
 			// Set addressing mode
 			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSU,
 				D3D9Mapping::Mapping(texture->AddressingMode(Texture::TAT_Addr_U))));
@@ -543,15 +568,15 @@ namespace KlayGE
 
 			// Set filter
 			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER,
-				D3D9Mapping::MappingToMinFilter(caps_, texture->Filtering(Texture::TFT_Min))));
+				D3D9Mapping::Mapping(tfc, texture->Filtering(Texture::TFT_Min))));
 			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER,
-				D3D9Mapping::MappingToMagFilter(caps_, texture->Filtering(Texture::TFT_Mag))));
+				D3D9Mapping::Mapping(tfc, texture->Filtering(Texture::TFT_Mag))));
 			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER,
-				D3D9Mapping::MappingToMipFilter(caps_, texture->Filtering(Texture::TFT_Mip))));
+				D3D9Mapping::Mapping(tfc, texture->Filtering(Texture::TFT_Mip))));
 
 			// Set anisotropy
-			uint32_t max_anisotropy = std::min(texture->Anisotropy(), caps_.MaxAnisotropy);
-			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, max_anisotropy));
+			assert(texture->Anisotropy() < caps_.max_texture_anisotropy);
+			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, texture->Anisotropy()));
 
 			// Set max mip level
 			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXMIPLEVEL, texture->MaxMipLevel()));
@@ -560,13 +585,6 @@ namespace KlayGE
 			float bias = texture->MipMapLodBias();
 			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPMAPLODBIAS, *reinterpret_cast<DWORD*>(&bias)));
 		}
-	}
-
-	// 获取最大纹理阶段数
-	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t D3D9RenderEngine::MaxTextureStages()
-	{
-		return caps_.MaxSimultaneousTextures;
 	}
 
 	// 关闭某个纹理阶段
@@ -725,5 +743,15 @@ namespace KlayGE
 	void D3D9RenderEngine::StencilBufferPassOperation(StencilOperation op)
 	{
 		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILPASS, D3D9Mapping::Mapping(op)));
+	}
+
+	// 填充设备能力
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9RenderEngine::FillRenderDeviceCaps()
+	{
+		D3DCAPS9 d3d_caps;
+		d3d_->GetDeviceCaps(this->ActiveAdapter().AdapterNo(), D3DDEVTYPE_HAL, &d3d_caps);
+
+		caps_ = D3D9Mapping::Mapping(d3d_caps);
 	}
 }

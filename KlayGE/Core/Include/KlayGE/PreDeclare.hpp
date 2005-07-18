@@ -60,7 +60,7 @@ namespace KlayGE
 	typedef boost::shared_ptr<RenderEngine> RenderEnginePtr;
 	class RenderTarget;
 	typedef boost::shared_ptr<RenderTarget> RenderTargetPtr;
-	class RenderSettings;
+	struct RenderSettings;
 	class RenderWindow;
 	typedef boost::shared_ptr<RenderWindow> RenderWindowPtr;
 	class Renderable;
@@ -92,6 +92,7 @@ namespace KlayGE
 	typedef boost::shared_ptr<BoneMesh> BoneMeshPtr;
 	class KMesh;
 	typedef boost::shared_ptr<KMesh> KMeshPtr;
+	struct RenderDeviceCaps;
 
 	class Socket;
 	class Lobby;

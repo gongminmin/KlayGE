@@ -236,9 +236,10 @@ namespace KlayGE
 					fontHeight_(height),
 					vb_(new VertexBuffer(VertexBuffer::BT_TriangleList))
 	{
-		theTexture_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(2, 2, 1, TEX_FORMAT);
-		theTexture_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(theTexture_->MaxWidth(),
-			theTexture_->MaxHeight(), 1, TEX_FORMAT);
+		RenderEngine const & renderEngine = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		RenderDeviceCaps const & caps = renderEngine.DeviceCaps();
+		theTexture_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(caps.max_texture_width,
+			caps.max_texture_height, 1, TEX_FORMAT);
 
 		effect_ = LoadRenderEffect("Font.fx");
 		*(effect_->ParameterByName("texFont")) = theTexture_;

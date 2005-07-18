@@ -484,7 +484,7 @@ namespace KlayGE
 	void D3D9Texture::CopySurfaceToMemory(boost::shared_ptr<IDirect3DSurface9> const & surface, void* data)
 	{
 		D3DLOCKED_RECT d3d_rc;
-		surface->LockRect(&d3d_rc, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY);
+		TIF(surface->LockRect(&d3d_rc, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
 
 		uint8_t* dst = static_cast<uint8_t*>(data);
 		uint8_t* src = static_cast<uint8_t*>(d3d_rc.pBits);
@@ -520,14 +520,14 @@ namespace KlayGE
 		boost::shared_ptr<IDirect3DSurface9> surface;
 		{
 			IDirect3DSurface9* tmp_surface;
-			d3dTexture2D_->GetSurfaceLevel(level, &tmp_surface);
+			TIF(d3dTexture2D_->GetSurfaceLevel(level, &tmp_surface));
 			surface = MakeCOMPtr(tmp_surface);
 		}
 		if (TU_RenderTarget == usage_)
 		{
 			IDirect3DSurface9* tmp_surface;
-			d3dDevice_->CreateOffscreenPlainSurface(this->Width(level), this->Height(level),
-				ConvertFormat(format_), D3DPOOL_SYSTEMMEM, &tmp_surface, NULL);
+			TIF(d3dDevice_->CreateOffscreenPlainSurface(this->Width(level), this->Height(level),
+				ConvertFormat(format_), D3DPOOL_SYSTEMMEM, &tmp_surface, NULL));
 
 			TIF(D3DXLoadSurfaceFromSurface(tmp_surface, NULL, NULL, surface.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
 
@@ -1044,35 +1044,6 @@ namespace KlayGE
 		width_	= widths_[0];
 		height_	= heights_[0];
 		depth_ = depths_[0];
-	}
-
-	uint32_t D3D9Texture::MaxWidth() const
-	{
-		D3DCAPS9 caps;
-		d3dDevice_->GetDeviceCaps(&caps);
-
-		return caps.MaxTextureWidth;
-	}
-
-	uint32_t D3D9Texture::MaxHeight() const
-	{
-		D3DCAPS9 caps;
-		d3dDevice_->GetDeviceCaps(&caps);
-
-		return caps.MaxTextureHeight;
-	}
-
-	uint32_t D3D9Texture::MaxDepth() const
-	{
-		D3DCAPS9 caps;
-		d3dDevice_->GetDeviceCaps(&caps);
-
-		return caps.MaxVolumeExtent;
-	}
-
-	uint32_t D3D9Texture::MaxCubeSize() const
-	{
-		return this->MaxWidth();
 	}
 
 	// 设置纹理寻址模式

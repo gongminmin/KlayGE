@@ -1,13 +1,13 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/RenderSettings.hpp>
 
 #include <map>
 #include <cassert>
 
 #include <glloader/glloader.h>
 
-#include <KlayGE/OpenGL/OGLRenderSettings.hpp>
 #include <KlayGE/OpenGL/OGLRenderWindow.hpp>
 
 namespace
@@ -103,7 +103,7 @@ namespace KlayGE
 		return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 
-	OGLRenderWindow::OGLRenderWindow(std::string const & name, OGLRenderSettings const & settings)
+	OGLRenderWindow::OGLRenderWindow(std::string const & name, RenderSettings const & settings)
 						: hWnd_(NULL),
 							active_(false), ready_(false), closed_(false)
 	{

@@ -14,6 +14,8 @@
 #define _D3D9MAPPING_HPP
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KlayGE/Light.hpp>
+#include <KlayGE/RenderEngine.hpp>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_RenderEngine_D3D9_d.lib")
@@ -36,9 +38,7 @@ namespace KlayGE
 
 		static D3DSTENCILOP Mapping(RenderEngine::StencilOperation op);
 
-		static uint32_t MappingToMagFilter(D3DCAPS9 const & caps, Texture::TexFilterOp tf);
-		static uint32_t MappingToMinFilter(D3DCAPS9 const & caps, Texture::TexFilterOp tf);
-		static uint32_t MappingToMipFilter(D3DCAPS9 const & caps, Texture::TexFilterOp tf);
+		static uint32_t Mapping(uint32_t tfc, Texture::TexFilterOp tf);
 
 		static D3DLIGHTTYPE Mapping(Light::LightTypes type);
 
@@ -50,6 +50,8 @@ namespace KlayGE
 
 		static void Mapping(D3DPRIMITIVETYPE& primType, uint32_t& primCount, VertexBuffer const & vb);
 		static void Mapping(D3DVERTEXELEMENT9& element, size_t stream, VertexStream const & vs);
+
+		static RenderDeviceCaps Mapping(D3DCAPS9 const & d3d_caps);
 	};
 }
 

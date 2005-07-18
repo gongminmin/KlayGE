@@ -23,6 +23,7 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Context.hpp>
+#include <KlayGE/RenderSettings.hpp>
 
 #include <vector>
 #include <cassert>
@@ -30,7 +31,7 @@
 
 #include <d3d9.h>
 
-#include <KlayGE/D3D9/D3D9RenderSettings.hpp>
+#include <KlayGE/D3D9/D3D9Mapping.hpp>
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 #include <KlayGE/D3D9/D3D9RenderWindow.hpp>
 
@@ -119,7 +120,7 @@ namespace KlayGE
 
 	D3D9RenderWindow::D3D9RenderWindow(boost::shared_ptr<IDirect3D9> const & d3d,
 										D3D9Adapter const & adapter, std::string const & name,
-										D3D9RenderSettings const & settings)
+										RenderSettings const & settings)
 						: d3d_(d3d),
 							adapter_(adapter),
 							hWnd_(NULL),
@@ -296,9 +297,9 @@ namespace KlayGE
 			if (SUCCEEDED(d3d_->CreateDevice(adapter_.AdapterNo(), D3DDEVTYPE_HAL, hWnd_,
 				D3DCREATE_MULTITHREADED | iter->first, &d3dpp_, &d3dDevice)))
 			{
-				D3DCAPS9 caps;
-				d3dDevice->GetDeviceCaps(&caps);
-				if (settings.ConfirmDevice(caps, iter->first, d3dpp_.BackBufferFormat))
+				D3DCAPS9 d3d_caps;
+				d3dDevice->GetDeviceCaps(&d3d_caps);
+				if (settings.ConfirmDevice(D3D9Mapping::Mapping(d3d_caps)))
 				{
 					description_ += iter->second;
 					break;

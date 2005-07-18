@@ -176,4 +176,11 @@ namespace KlayGE
 		numVerticesJustRendered_ = 0;
 		return ret;
 	}
+
+	// 获取渲染设备能力
+	/////////////////////////////////////////////////////////////////////////////////
+	RenderDeviceCaps const & RenderEngine::DeviceCaps() const
+	{
+		return caps_;
+	}
 }

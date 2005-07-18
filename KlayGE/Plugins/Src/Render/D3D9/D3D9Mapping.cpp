@@ -20,6 +20,7 @@
 
 #include <cassert>
 
+#define NOMINMAX
 #include <d3dx9.h>
 #include <d3dx9.h>
 #include <dxerr9.h>
@@ -134,10 +135,10 @@ namespace KlayGE
 
 	// 从RenderEngine::TexFiltering转换到D3D的MagFilter标志
 	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t D3D9Mapping::MappingToMagFilter(D3DCAPS9 const & caps, Texture::TexFilterOp tf)
+	uint32_t D3D9Mapping::Mapping(uint32_t tfc, Texture::TexFilterOp tf)
 	{
 		// NOTE: Fall through if device doesn't support requested type
-		if ((Texture::TFO_Anisotropic == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFANISOTROPIC))
+		if ((Texture::TFO_Anisotropic == tf) && (tfc & TFC_Anisotropic))
 		{
 			return D3DTEXF_ANISOTROPIC;
 		}
@@ -146,7 +147,7 @@ namespace KlayGE
 			tf = Texture::TFO_Trilinear;
 		}
 
-		if ((Texture::TFO_Trilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFLINEAR))
+		if ((Texture::TFO_Trilinear == tf) && (tfc & TFC_Trilinear))
 		{
 			return D3DTEXF_LINEAR;
 		}
@@ -155,69 +156,16 @@ namespace KlayGE
 			tf = Texture::TFO_Bilinear;
 		}
 
-		if ((Texture::TFO_Bilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFLINEAR))
-		{
-			return D3DTEXF_LINEAR;
-		}
-
-		return D3DTEXF_POINT;
-	}
-
-	// 从RenderEngine::TexFiltering转换到D3D的MinFilter标志
-	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t D3D9Mapping::MappingToMinFilter(D3DCAPS9 const & caps, Texture::TexFilterOp tf)
-	{
-		// NOTE: Fall through if device doesn't support requested type
-		if ((Texture::TFO_Anisotropic == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFANISOTROPIC))
-		{
-			return D3DTEXF_ANISOTROPIC;
-		}
-		else
-		{
-			tf = Texture::TFO_Trilinear;
-		}
-
-		if ((Texture::TFO_Trilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFLINEAR))
+		if ((Texture::TFO_Bilinear == tf) && (tfc & TFC_Bilinear))
 		{
 			return D3DTEXF_LINEAR;
 		}
 		else
 		{
-			tf = Texture::TFO_Bilinear;
+			tf = Texture::TFO_Point;
 		}
 
-		if ((Texture::TFO_Bilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFLINEAR))
-		{
-			return D3DTEXF_LINEAR;
-		}
-
-		return D3DTEXF_POINT;
-	}
-
-	// 从RenderEngine::TexFiltering转换到D3D的MipFilter标志
-	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t D3D9Mapping::MappingToMipFilter(D3DCAPS9 const & caps, Texture::TexFilterOp tf)
-	{
-		// NOTE: Fall through if device doesn't support requested type
-		if ((Texture::TFO_Anisotropic == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR))
-		{
-			return D3DTEXF_LINEAR;
-		}
-		else
-		{
-			tf = Texture::TFO_Trilinear;
-		}
-
-		if ((Texture::TFO_Trilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR))
-		{
-			return D3DTEXF_LINEAR;
-		}
-		else
-		{
-			tf = Texture::TFO_Bilinear;
-		}
-
-		if ((Texture::TFO_Bilinear == tf) && (caps.TextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR))
+		if ((Texture::TFO_Point == tf) && (tfc & TFC_Point))
 		{
 			return D3DTEXF_POINT;
 		}
@@ -446,5 +394,85 @@ namespace KlayGE
 			element.UsageIndex	= static_cast<BYTE>(type - VST_TextureCoords0);
 			break;
 		}
+	}
+
+	RenderDeviceCaps D3D9Mapping::Mapping(D3DCAPS9 const & d3d_caps)
+	{
+		RenderDeviceCaps ret;
+
+		ret.max_shader_model		= std::min((d3d_caps.VertexShaderVersion & 0xFF00) >> 8,
+													(d3d_caps.PixelShaderVersion & 0xFF00) >> 8);
+
+		ret.max_texture_width		= d3d_caps.MaxTextureWidth;
+		ret.max_texture_height		= d3d_caps.MaxTextureHeight;
+		ret.max_texture_depth		= d3d_caps.MaxVolumeExtent;
+		ret.max_texture_cube_size	= d3d_caps.MaxTextureWidth;
+		ret.max_textures_units		= d3d_caps.MaxSimultaneousTextures;
+		ret.max_texture_anisotropy	= d3d_caps.MaxAnisotropy;
+		ret.max_vertex_texture_units = 4;
+
+		ret.max_user_clip_planes	= d3d_caps.MaxUserClipPlanes;
+
+		ret.max_simultaneous_rts	= d3d_caps.NumSimultaneousRTs;
+
+		ret.texture_2d_filter_caps = 0;
+		if (((d3d_caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFPOINT) != 0)
+			|| ((d3d_caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFPOINT) != 0)
+			|| ((d3d_caps.TextureFilterCaps & D3DPTFILTERCAPS_MIPFPOINT) != 0))
+		{
+			ret.texture_2d_filter_caps |= TFC_Point;
+		}
+		if (((d3d_caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFLINEAR) != 0)
+			|| ((d3d_caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFLINEAR) != 0)
+			|| ((d3d_caps.TextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR) != 0))
+		{
+			ret.texture_2d_filter_caps |= TFC_Bilinear;
+			ret.texture_2d_filter_caps |= TFC_Trilinear;
+		}
+		if ((d3d_caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFANISOTROPIC) != 0)
+		{
+			ret.texture_2d_filter_caps |= TFC_Anisotropic;
+		}
+		ret.texture_1d_filter_caps = ret.texture_2d_filter_caps;
+
+		ret.texture_3d_filter_caps = 0;
+		if (((d3d_caps.VolumeTextureFilterCaps & D3DPTFILTERCAPS_MINFPOINT) != 0)
+			|| ((d3d_caps.VolumeTextureFilterCaps & D3DPTFILTERCAPS_MAGFPOINT) != 0)
+			|| ((d3d_caps.VolumeTextureFilterCaps & D3DPTFILTERCAPS_MIPFPOINT) != 0))
+		{
+			ret.texture_3d_filter_caps |= TFC_Point;
+		}
+		if (((d3d_caps.VolumeTextureFilterCaps & D3DPTFILTERCAPS_MINFLINEAR) != 0)
+			|| ((d3d_caps.VolumeTextureFilterCaps & D3DPTFILTERCAPS_MAGFLINEAR) != 0)
+			|| ((d3d_caps.VolumeTextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR) != 0))
+		{
+			ret.texture_3d_filter_caps |= TFC_Bilinear;
+			ret.texture_3d_filter_caps |= TFC_Trilinear;
+		}
+		if ((d3d_caps.VolumeTextureFilterCaps & D3DPTFILTERCAPS_MAGFANISOTROPIC) != 0)
+		{
+			ret.texture_3d_filter_caps |= TFC_Anisotropic;
+		}
+
+		ret.texture_cube_filter_caps = 0;
+		if (((d3d_caps.CubeTextureFilterCaps & D3DPTFILTERCAPS_MINFPOINT) != 0)
+			|| ((d3d_caps.CubeTextureFilterCaps & D3DPTFILTERCAPS_MAGFPOINT) != 0)
+			|| ((d3d_caps.CubeTextureFilterCaps & D3DPTFILTERCAPS_MIPFPOINT) != 0))
+		{
+			ret.texture_cube_filter_caps |= TFC_Point;
+		}
+		if (((d3d_caps.CubeTextureFilterCaps & D3DPTFILTERCAPS_MINFLINEAR) != 0)
+			|| ((d3d_caps.CubeTextureFilterCaps & D3DPTFILTERCAPS_MAGFLINEAR) != 0)
+			|| ((d3d_caps.CubeTextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR) != 0))
+		{
+			ret.texture_cube_filter_caps |= TFC_Bilinear;
+			ret.texture_cube_filter_caps |= TFC_Trilinear;
+		}
+		if ((d3d_caps.CubeTextureFilterCaps & D3DPTFILTERCAPS_MAGFANISOTROPIC) != 0)
+		{
+			ret.texture_cube_filter_caps |= TFC_Anisotropic;
+		}
+
+		return ret;
 	}
 }

@@ -95,11 +95,6 @@ namespace KlayGE
 		boost::shared_ptr<IDirect3DSurface9> DepthStencil() const
 			{ return renderZBuffer_; }
 
-		uint32_t MaxWidth() const;
-		uint32_t MaxHeight() const;
-		uint32_t MaxDepth() const;
-		uint32_t MaxCubeSize() const;
-
 		void AddressingMode(TexAddressingType type, TexAddressingMode tam);
 		void Filtering(TexFilterType type, TexFilterOp op);
 		void Anisotropy(uint32_t maxAnisotropy);

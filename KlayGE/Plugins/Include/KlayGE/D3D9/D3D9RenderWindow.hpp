@@ -26,13 +26,13 @@
 
 namespace KlayGE
 {
-	struct D3D9RenderSettings;
+	struct RenderSettings;
 
 	class D3D9RenderWindow : public RenderWindow
 	{
 	public:
 		D3D9RenderWindow(boost::shared_ptr<IDirect3D9> const & d3d, D3D9Adapter const & adapter,
-			std::string const & name, D3D9RenderSettings const & settings);
+			std::string const & name, RenderSettings const & settings);
 		~D3D9RenderWindow();
 
 		LRESULT MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

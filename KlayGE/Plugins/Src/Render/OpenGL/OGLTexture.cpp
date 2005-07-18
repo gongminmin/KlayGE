@@ -671,32 +671,6 @@ namespace KlayGE
 		assert(false);
 	}
 
-	uint32_t OGLTexture::MaxWidth() const
-	{
-		GLint width;
-		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &width);
-		return width;
-	}
-	
-	uint32_t OGLTexture::MaxHeight() const
-	{
-		return this->MaxWidth();
-	}
-
-	uint32_t OGLTexture::MaxDepth() const
-	{
-		GLint depth;
-		glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &depth);
-		return depth;
-	}
-
-	uint32_t OGLTexture::MaxCubeSize() const
-	{
-		GLint depth;
-		glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &depth);
-		return depth;
-	}
-
 	void OGLTexture::UpdateParams()
 	{
 		GLint w, h, d;

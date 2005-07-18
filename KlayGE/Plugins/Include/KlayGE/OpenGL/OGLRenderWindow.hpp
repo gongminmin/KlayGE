@@ -12,12 +12,12 @@
 
 namespace KlayGE
 {
-	struct OGLRenderSettings;
+	struct RenderSettings;
 
 	class OGLRenderWindow : public RenderWindow
 	{
 	public:
-		OGLRenderWindow(std::string const & name, OGLRenderSettings const & settings);
+		OGLRenderWindow(std::string const & name, RenderSettings const & settings);
 		~OGLRenderWindow();
 
 		LRESULT MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

@@ -35,6 +35,7 @@
 #include <KlayGE/RenderTarget.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/Math.hpp>
+#include <KlayGE/RenderDeviceCaps.hpp>
 
 #include <vector>
 #include <list>
@@ -200,8 +201,6 @@ namespace KlayGE
 
 		virtual void SetTexture(uint32_t stage, TexturePtr const & texture) = 0;
 
-		// Returns the number of texture units the current output hardware supports.
-		virtual uint32_t MaxTextureStages() = 0;
 		// Turns off a texture unit.
 		virtual void DisableTextureStage(uint32_t stage) = 0;
 
@@ -231,10 +230,15 @@ namespace KlayGE
 		// Sets the action to perform if both the stencil test and the depth buffer test passes.
 		virtual void StencilBufferPassOperation(StencilOperation op) = 0;
 
+		// Get render device capabilities
+		RenderDeviceCaps const & DeviceCaps() const;
+
 	protected:
 		virtual void DoWorldMatrix() = 0;
 		virtual void DoViewMatrix() = 0;
 		virtual void DoProjectionMatrix() = 0;
+
+		virtual void FillRenderDeviceCaps() = 0;
 
 	protected:
 		RenderTargetList renderTargetList_;
@@ -247,6 +251,8 @@ namespace KlayGE
 
 		size_t numPrimitivesJustRendered_;
 		size_t numVerticesJustRendered_;
+
+		RenderDeviceCaps caps_;
 	};
 }
 

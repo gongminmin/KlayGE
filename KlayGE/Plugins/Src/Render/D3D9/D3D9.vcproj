@@ -164,9 +164,6 @@
 				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9RenderFactory.hpp">
 			</File>
 			<File
-				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9RenderSettings.hpp">
-			</File>
-			<File
 				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9RenderTexture.hpp">
 			</File>
 			<File

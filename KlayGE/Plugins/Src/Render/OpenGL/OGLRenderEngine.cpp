@@ -1,8 +1,11 @@
 // OGLRenderEngine.cpp
 // KlayGE OpenGL渲染引擎类 实现文件
-// Ver 2.7.0
+// Ver 2.8.0
 // 版权所有(C) 龚敏敏, 2004-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.8.0
+// 增加了RenderDeviceCaps (2005.7.17)
 //
 // 2.7.0
 // 支持vertex_buffer_object (2005.6.19)
@@ -28,11 +31,7 @@
 #include <KlayGE/VertexBuffer.hpp>
 #include <KlayGE/RenderTarget.hpp>
 #include <KlayGE/RenderEffect.hpp>
-#include <KlayGE/OpenGL/OGLRenderSettings.hpp>
-#include <KlayGE/OpenGL/OGLRenderWindow.hpp>
-#include <KlayGE/OpenGL/OGLTexture.hpp>
-#include <KlayGE/OpenGL/OGLVertexStream.hpp>
-#include <KlayGE/OpenGL/OGLIndexStream.hpp>
+#include <KlayGE/RenderSettings.hpp>
 
 #include <glloader/glloader.h>
 
@@ -40,6 +39,10 @@
 #include <algorithm>
 #include <cstring>
 
+#include <KlayGE/OpenGL/OGLRenderWindow.hpp>
+#include <KlayGE/OpenGL/OGLTexture.hpp>
+#include <KlayGE/OpenGL/OGLVertexStream.hpp>
+#include <KlayGE/OpenGL/OGLIndexStream.hpp>
 #include <KlayGE/OpenGL/OGLRenderEngine.hpp>
 
 #ifdef KLAYGE_DEBUG
@@ -251,8 +254,7 @@ namespace KlayGE
 	RenderWindowPtr OGLRenderEngine::CreateRenderWindow(std::string const & name,
 		RenderSettings const & settings)
 	{
-		RenderWindowPtr win(new OGLRenderWindow(name,
-			static_cast<OGLRenderSettings const &>(settings)));
+		RenderWindowPtr win(new OGLRenderWindow(name, settings));
 
 		if (glloader_is_supported("GL_VERSION_1_3"))
 		{
@@ -279,6 +281,8 @@ namespace KlayGE
 		this->DepthBufferDepthWrite(settings.depthBuffer);
 
 		this->SetMaterial(Material(Color(1, 1, 1, 1)));
+
+		this->FillRenderDeviceCaps();
 
 		return win;
 	}
@@ -755,15 +759,6 @@ namespace KlayGE
 		}
 	}
 
-	// 获取最大纹理阶段数
-	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t OGLRenderEngine::MaxTextureStages()
-	{
-		GLint ret;
-		glGetIntegerv(GL_MAX_TEXTURE_UNITS, &ret);
-		return static_cast<uint32_t>(ret);
-	}
-
 	// 关闭某个纹理阶段
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::DisableTextureStage(uint32_t stage)
@@ -862,5 +857,81 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::StencilBufferPassOperation(StencilOperation /*op*/)
 	{
+	}
+
+	// 填充设备能力
+	/////////////////////////////////////////////////////////////////////////////////
+	void OGLRenderEngine::FillRenderDeviceCaps()
+	{
+		GLint temp;
+
+		if (glloader_is_supported("GL_VERSION_2_0") || glloader_is_supported("GL_ARB_vertex_shader"))
+		{
+			glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &temp);
+			caps_.max_vertex_texture_units = temp;
+		}
+		else
+		{
+			caps_.max_vertex_texture_units = 0;
+		}
+
+		if (glloader_is_supported("GL_VERSION_2_0")
+			|| (glloader_is_supported("GL_ARB_vertex_shader") && glloader_is_supported("GL_ARB_fragment_shader")))
+		{
+			if (caps_.max_vertex_texture_units != 0)
+			{
+				caps_.max_shader_model = 3;
+			}
+			else
+			{
+				caps_.max_shader_model = 2;
+			}
+		}
+		else
+		{
+			if (glloader_is_supported("GL_ARB_vertex_program") && glloader_is_supported("GL_ARB_fragment_program"))
+			{
+				caps_.max_shader_model = 1;
+			}
+			else
+			{
+				caps_.max_shader_model = 0;
+			}
+		}
+
+		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &temp);
+		caps_.max_texture_height = caps_.max_texture_width = temp;
+		glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &temp);
+		caps_.max_texture_depth = temp;
+		glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &temp);
+		caps_.max_texture_cube_size = temp;
+		glGetIntegerv(GL_MAX_TEXTURE_UNITS, &temp);
+		caps_.max_textures_units = temp;
+		if (glloader_is_supported("GL_EXT_texture_filter_anisotropic"))
+		{
+			glGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &temp);
+			caps_.max_texture_anisotropy = temp;
+		}
+		else
+		{
+			caps_.max_texture_anisotropy = 0;
+		}
+
+		caps_.max_user_clip_planes = 6;
+
+		if (glloader_is_supported("GL_VERSION_2_0") || glloader_is_supported("GL_ARB_draw_buffers"))
+		{
+			glGetIntegerv(GL_MAX_DRAW_BUFFERS, &temp);
+			caps_.max_simultaneous_rts	= temp;
+		}
+		else
+		{
+			caps_.max_simultaneous_rts	= 1;
+		}
+
+		caps_.texture_2d_filter_caps = TFC_Point | TFC_Bilinear | TFC_Anisotropic;
+		caps_.texture_1d_filter_caps = caps_.texture_2d_filter_caps;
+		caps_.texture_3d_filter_caps = caps_.texture_2d_filter_caps;
+		caps_.texture_cube_filter_caps = caps_.texture_2d_filter_caps;
 	}
 }

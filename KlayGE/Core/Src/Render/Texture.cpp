@@ -334,23 +334,25 @@ namespace KlayGE
 		}
 
 		KlayGE::TexturePtr texture;
-
-		if ((desc.dds_caps.caps2 & DDSCAPS2_CUBEMAP) != 0)
 		{
-			texture = Context::Instance().RenderFactoryInstance().MakeTextureCube(desc.width,
-					static_cast<uint16_t>(desc.mip_map_count), format);
-		}
-		else
-		{
-			if ((desc.dds_caps.caps2 & DDSCAPS2_VOLUME) != 0)
+			RenderFactory& renderFactory = Context::Instance().RenderFactoryInstance();
+			if ((desc.dds_caps.caps2 & DDSCAPS2_CUBEMAP) != 0)
 			{
-				texture = Context::Instance().RenderFactoryInstance().MakeTexture3D(desc.width,
-					desc.height, desc.depth, static_cast<uint16_t>(desc.mip_map_count), format);
+				texture = renderFactory.MakeTextureCube(desc.width,
+						static_cast<uint16_t>(desc.mip_map_count), format);
 			}
 			else
 			{
-				texture = Context::Instance().RenderFactoryInstance().MakeTexture2D(desc.width,
-					desc.height, static_cast<uint16_t>(desc.mip_map_count), format);
+				if ((desc.dds_caps.caps2 & DDSCAPS2_VOLUME) != 0)
+				{
+					texture = renderFactory.MakeTexture3D(desc.width,
+						desc.height, desc.depth, static_cast<uint16_t>(desc.mip_map_count), format);
+				}
+				else
+				{
+					texture = renderFactory.MakeTexture2D(desc.width,
+						desc.height, static_cast<uint16_t>(desc.mip_map_count), format);
+				}
 			}
 		}
 

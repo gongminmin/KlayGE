@@ -11,9 +11,9 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderableHelper.hpp>
+#include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/KMesh.hpp>
 
-#include <KlayGE/D3D9/D3D9RenderSettings.hpp>
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
 #include <KlayGE/OCTree/OCTree.hpp>
@@ -72,16 +72,11 @@ namespace
 		InputAction(Exit, KS_Escape),
 	};
 
-	class TheRenderSettings : public D3D9RenderSettings
+	struct TheRenderSettings : public RenderSettings
 	{
-	private:
-		bool DoConfirmDevice(D3DCAPS9 const & caps, uint32_t behavior, D3DFORMAT format) const
+		bool ConfirmDevice(RenderDeviceCaps const & caps) const
 		{
-			if (caps.VertexShaderVersion < D3DVS_VERSION(1, 1))
-			{
-				return false;
-			}
-			if (caps.PixelShaderVersion < D3DPS_VERSION(2, 0))
+			if (caps.max_shader_model < 2)
 			{
 				return false;
 			}

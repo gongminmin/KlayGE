@@ -14,8 +14,8 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/KMesh.hpp>
+#include <KlayGE/RenderSettings.hpp>
 
-#include <KlayGE/D3D9/D3D9RenderSettings.hpp>
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
 #include <KlayGE/Input.hpp>
@@ -25,6 +25,7 @@
 
 #include <numeric>
 #include <sstream>
+#include <iostream>
 
 #include "ascii_lums_builder.hpp"
 #include "AsciiArts.hpp"
@@ -124,13 +125,18 @@ namespace
 
 	std::vector<ascii_tile_type> LoadFromTexture(std::string const & tex_name)
 	{
+		int const ASCII_IN_A_ROW = 16;
+
+		cout << "Loading " << tex_name << endl;
 		KlayGE::TexturePtr ascii_tex = LoadTexture(tex_name);
 
 		std::vector<ascii_tile_type> ret(INPUT_NUM_ASCII);
 
 		std::vector<uint8_t> ascii_tex_data(INPUT_NUM_ASCII * ASCII_WIDTH * ASCII_HEIGHT);
+		cout << "Copy to memory" << endl;
 		ascii_tex->CopyToMemory2D(0, &ascii_tex_data[0]);
 
+		cout << "Spliting chars" << endl;
 		for (size_t i = 0; i < ret.size(); ++ i)
 		{
 			ret[i].resize(ASCII_WIDTH * ASCII_HEIGHT);
@@ -139,7 +145,8 @@ namespace
 				for (int x = 0; x < ASCII_WIDTH; ++ x)
 				{
 					ret[i][y * ASCII_WIDTH + x]
-						= ascii_tex_data[y * INPUT_NUM_ASCII * ASCII_WIDTH + (i * ASCII_WIDTH + x)];
+						= ascii_tex_data[((i / ASCII_IN_A_ROW) * ASCII_HEIGHT + y) * ASCII_IN_A_ROW * ASCII_WIDTH
+							+ (i % ASCII_IN_A_ROW) * ASCII_WIDTH + x];
 				}
 			}
 		}
@@ -185,16 +192,11 @@ namespace
 		InputAction(Exit, KS_Escape),
 	};
 
-	class TheRenderSettings : public D3D9RenderSettings
+	struct TheRenderSettings : public RenderSettings
 	{
-	private:
-		bool DoConfirmDevice(D3DCAPS9 const & caps, uint32_t behavior, D3DFORMAT format) const
+		bool ConfirmDevice(RenderDeviceCaps const & caps) const
 		{
-			if (caps.VertexShaderVersion < D3DVS_VERSION(1, 1))
-			{
-				return false;
-			}
-			if (caps.PixelShaderVersion < D3DPS_VERSION(2, 0))
+			if (caps.max_shader_model < 2)
 			{
 				return false;
 			}

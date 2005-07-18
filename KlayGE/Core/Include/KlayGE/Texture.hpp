@@ -317,11 +317,6 @@ namespace KlayGE
 
 		virtual void BuildMipSubLevels() = 0;
 
-		virtual uint32_t MaxWidth() const = 0;
-		virtual uint32_t MaxHeight() const = 0;
-		virtual uint32_t MaxDepth() const = 0;
-		virtual uint32_t MaxCubeSize() const = 0;
-
 		// Sets the texture addressing mode for a texture unit.
 		virtual void AddressingMode(TexAddressingType type, TexAddressingMode tam) = 0;
 		// Sets the texture filtering type for a texture unit.

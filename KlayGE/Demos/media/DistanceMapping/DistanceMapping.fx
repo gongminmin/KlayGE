@@ -108,7 +108,7 @@ float4 DistanceMappingPS(float3 texCoord0	: TEXCOORD0,
 	float3 texUV = texCoord0;
 	for (int i = 0; i < 8; ++ i)
 	{
-		float dist = tex3D(distanceMap, texUV);
+		float dist = tex3D(distanceMap, texUV).r;
 		texUV += view * dist;
 	}
 
@@ -124,7 +124,18 @@ float4 DistanceMappingPS(float3 texCoord0	: TEXCOORD0,
 	return float4(diffuse * diffuseFactor, 1);
 }
 
-technique DistanceMapping
+technique DistanceMapping30
+{
+	pass p0
+	{
+		VertexShader = compile vs_3_0 DistanceMappingVS(worldviewproj, lightPos, eyePos);
+		PixelShader = compile ps_3_0 DistanceMappingPS(diffuseMapSampler,
+										normalMapSampler, distanceMapSampler,
+										normalizerMapSampler);
+	}
+}
+
+technique DistanceMapping20
 {
 	pass p0
 	{

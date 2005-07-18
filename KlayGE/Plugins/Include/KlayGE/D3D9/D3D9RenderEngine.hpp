@@ -1,8 +1,11 @@
 // D3D9RenderEngine.hpp
 // KlayGE D3D9渲染引擎类 头文件
-// Ver 2.7.0
+// Ver 2.8.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.8.0
+// 增加了RenderDeviceCaps (2005.7.17)
 //
 // 2.7.0
 // 去掉了TextureCoordSet (2005.6.26)
@@ -111,6 +114,8 @@ namespace KlayGE
 		void DoViewMatrix();
 		void DoProjectionMatrix();
 
+		void FillRenderDeviceCaps();
+
 	private:
 		D3D9AdapterList const & D3DAdapters() const;
 		D3D9Adapter const & ActiveAdapter() const;
@@ -123,8 +128,6 @@ namespace KlayGE
 		// List of D3D drivers installed (video cards)
 		// Enumerates itself
 		D3D9AdapterList adapterList_;
-
-		D3DCAPS9 caps_;
 
 		CullMode cullingMode_;
 		D3DCOLOR clearClr_;
