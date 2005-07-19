@@ -82,7 +82,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::Clear()
 	{
-		renderItems_.clear();
+		renderItems_.resize(0);
 	}
 
 	// 更新场景管理器

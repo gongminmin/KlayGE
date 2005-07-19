@@ -10,9 +10,9 @@ using namespace std;
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
+#include <KlayGE/RenderSettings.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
-#include <KlayGE/D3D9/D3D9RenderSettings.hpp>
 using namespace KlayGE;
 
 //-----------------------------------------------------------------------------
@@ -71,9 +71,9 @@ void ComputeDistanceMap(std::vector<unsigned char>& distances, int width, int he
 						}
 					}
 
-					float const dist = std::max(0.0f,
-						std::min(255.0f, std::sqrt(static_cast<float>(dis_sq)) / (depth / 256.0f) + 0.5f));
-					distances[(z * height + y) * width + x] = static_cast<unsigned char>(dist);
+					float const dist = MathLib::Clamp(std::sqrt(static_cast<float>(dis_sq)) / (depth / 256.0f),
+						0.0f, 255.0f);
+					distances[(z * height + y) * width + x] = static_cast<unsigned char>(dist + 0.5f);
 				}
 				else
 				{
@@ -86,10 +86,6 @@ void ComputeDistanceMap(std::vector<unsigned char>& distances, int width, int he
 	cout << clock() - start << endl;
 }
 
-//-----------------------------------------------------------------------------
-// Name: WinMain()
-// Desc: The application's entry point
-//-----------------------------------------------------------------------------
 int main(int argc, char* argv[])
 {
 	int width = 256, height = 256, depth = 16;
@@ -126,7 +122,7 @@ int main(int argc, char* argv[])
 	RenderFactory& render_factory(D3D9RenderFactoryInstance());
 	Context::Instance().RenderFactoryInstance(render_factory);
 
-	D3D9RenderSettings settings;
+	RenderSettings settings;
 	settings.width = 800;
 	settings.height = 600;
 	settings.colorDepth = 32;

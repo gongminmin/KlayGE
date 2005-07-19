@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="DistanceMapCreator"
-	ProjectGUID="{A7A4F2AC-4B47-4685-8D7F-7675F246A87C}"
+	Name="GLCompatibility"
+	ProjectGUID="{A004459D-F259-44EE-960B-CF6EEDCECC08}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -23,9 +23,6 @@
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				TreatWChar_tAsBuiltInType="TRUE"
-				ForceConformanceInForLoopScope="TRUE"
-				RuntimeTypeInfo="TRUE"
 				WarningLevel="4"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="4"/>
@@ -33,10 +30,10 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/DistanceMapCreator_d.exe"
+				OutputFile="$(OutDir)/GLCompatibility_d.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/DistanceMapCreator.pdb"
+				ProgramDatabaseFile="$(OutDir)/GLCompatibility.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
@@ -79,7 +76,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/DistanceMapCreator.exe"
+				OutputFile="$(OutDir)/GLCompatibility.exe"
 				LinkIncremental="1"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -115,13 +112,21 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath=".\DistanceMapCreator.cpp">
+				RelativePath=".\GLCompatibility.cpp">
 			</File>
 		</Filter>
 		<Filter
 			Name="头文件"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+		</Filter>
+		<Filter
+			Name="资源文件"
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}">
+			<File
+				RelativePath=".\report.xsl">
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

@@ -13,31 +13,24 @@ namespace KlayGE
 	ascii_lums_builder::ascii_lums_builder(size_t input_num_ascii, size_t output_num_ascii, size_t lum_level,
 			size_t ascii_width, size_t ascii_height)
 				: input_num_ascii_(input_num_ascii),
-					output_num_ascii_(output_num_ascii), lum_level_(lum_level),
+					output_num_ascii_(output_num_ascii),
 					ascii_width_(ascii_width), ascii_height_(ascii_height)
 	{
 	}
 
-	std::vector<ascii_tiles_type> ascii_lums_builder::build(ascii_tiles_type const & ascii_data)
+	ascii_tiles_type ascii_lums_builder::build(ascii_tiles_type const & ascii_data)
 	{
 		assert(ascii_data.size() == input_num_ascii_);
 
 		lum_to_char_type lum_to_char = this->cal_lum_to_char_map(ascii_data);
 		std::vector<uint8_t> final_chars = get_final_asciis(lum_to_char);
 
-		std::vector<ascii_tiles_type> ret(lum_level_);
-		for (size_t i = 0; i < lum_level_; ++ i)
+		ascii_tiles_type ret(output_num_ascii_);
+		for (size_t i = 0; i < output_num_ascii_; ++ i)
 		{
-			ret[i].resize(output_num_ascii_);
-			for (size_t j = 0; j < output_num_ascii_; ++ j)
-			{
-				assert(ascii_data[final_chars[j]].size() == ascii_width_ * ascii_height_);
+			assert(ascii_data[final_chars[i]].size() == ascii_width_ * ascii_height_);
 
-				ret[i][j].resize(ascii_width_ * ascii_height_);
-				std::transform(ascii_data[final_chars[j]].begin(), ascii_data[final_chars[j]].end(),
-					ret[i][j].begin(),
-					boost::bind(std::multiplies<uint8_t>(), boost::bind(std::divides<uint8_t>(), _1, lum_level_), i + 1));
-			}
+			ret[i] = ascii_data[final_chars[i]];
 		}
 
 		return ret;

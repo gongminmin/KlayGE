@@ -19,7 +19,7 @@ namespace KlayGE
 		ascii_lums_builder(size_t input_num_ascii, size_t output_num_ascii, size_t lum_level,
 			size_t ascii_width, size_t ascii_height);
 
-		std::vector<ascii_tiles_type> build(ascii_tiles_type const & ascii_data);
+		ascii_tiles_type build(ascii_tiles_type const & ascii_data);
 
 	private:
 		std::vector<float> cal_lums(ascii_tiles_type const & ascii_data);
@@ -33,7 +33,7 @@ namespace KlayGE
 
 	private:
 		size_t input_num_ascii_;
-		size_t output_num_ascii_, lum_level_;
+		size_t output_num_ascii_;
 		size_t ascii_width_, ascii_height_;
 	};
 }

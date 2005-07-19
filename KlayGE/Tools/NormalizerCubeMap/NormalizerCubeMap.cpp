@@ -10,9 +10,9 @@ using namespace std;
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
+#include <KlayGE/RenderSettings.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
-#include <KlayGE/D3D9/D3D9RenderSettings.hpp>
 using namespace KlayGE;
 
 D3DXVECTOR3 CubeVector(int face, int cube_size, int x, int y)
@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 
-	D3D9RenderSettings settings;
+	RenderSettings settings;
 	settings.width = 800;
 	settings.height = 600;
 	settings.colorDepth = 32;

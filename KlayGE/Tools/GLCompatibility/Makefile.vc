@@ -1,0 +1,9 @@
+# Makefile
+
+CC=cl /EHsc /Zc:wchar_t /Zc:forScope /O2
+
+all:
+	$(CC) GLCompatibility.cpp glut32.lib opengl32.lib
+
+clean:
+	cl /c

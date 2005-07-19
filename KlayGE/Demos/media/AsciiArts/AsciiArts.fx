@@ -52,8 +52,8 @@ float4 AsciiArtsPS(float2 tex_coord0	: TEXCOORD0,
 	const float3 rgb_to_lum = float3(0.299, 0.587, 0.114);
 
 	float lum = dot(tex2D(scene_sampler, tex_coord0).rgb, rgb_to_lum);
-	float2 t = (float2(floor(lum * 255), 0) + frac(tex_coord0 / arg)) / float2(256, 1);
-	return tex2D(lums_sampler, t);
+	float2 t = float2(frac(floor(lum * 255) / 32), 0) + frac(tex_coord0 / arg) / float2(32, 1);
+	return lum * tex2D(lums_sampler, t);
 }
 
 technique AsciiArts

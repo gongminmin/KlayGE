@@ -3,7 +3,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "文件打包工具-Pkt", "Pkt\Pkt
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "法线图生成器", "NormalMapGen\NormalMapGen.vcproj", "{7526CFD8-84DB-4A4C-AA3C-D9FC7FF32DCF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NormalMapGen", "NormalMapGen\NormalMapGen.vcproj", "{7526CFD8-84DB-4A4C-AA3C-D9FC7FF32DCF}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
@@ -12,6 +12,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DistanceMapCreator", "Dista
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NormalizerCubeMap", "NormalizerCubeMap\NormalizerCubeMap.vcproj", "{9C678BF0-CABD-41C5-BDD5-49BD0C9F3DDF}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GLCompatibility", "GLCompatibility\GLCompatibility.vcproj", "{A004459D-F259-44EE-960B-CF6EEDCECC08}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
@@ -37,6 +41,10 @@ Global
 		{9C678BF0-CABD-41C5-BDD5-49BD0C9F3DDF}.Debug.Build.0 = Debug|Win32
 		{9C678BF0-CABD-41C5-BDD5-49BD0C9F3DDF}.Release.ActiveCfg = Release|Win32
 		{9C678BF0-CABD-41C5-BDD5-49BD0C9F3DDF}.Release.Build.0 = Release|Win32
+		{A004459D-F259-44EE-960B-CF6EEDCECC08}.Debug.ActiveCfg = Debug|Win32
+		{A004459D-F259-44EE-960B-CF6EEDCECC08}.Debug.Build.0 = Debug|Win32
+		{A004459D-F259-44EE-960B-CF6EEDCECC08}.Release.ActiveCfg = Release|Win32
+		{A004459D-F259-44EE-960B-CF6EEDCECC08}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection

@@ -108,7 +108,7 @@ int main()
 
 Refract::Refract()
 {
-	ResLoader::Instance().AddPath("../media");
+	ResLoader::Instance().AddPath("../media/Common");
 	ResLoader::Instance().AddPath("../media/Refract");
 }
 

@@ -22,7 +22,6 @@
 			WholeProgramOptimization="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
-				OptimizeForProcessor="3"
 				PreprocessorDefinitions="WIN32,NDEBUG,_CONSOLE;STRICT"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="FALSE"
@@ -85,7 +84,7 @@
 				RuntimeTypeInfo="TRUE"
 				PrecompiledHeaderFile=""
 				AssemblerListingLocation=""
-				WarningLevel="3"
+				WarningLevel="4"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="4"/>
 			<Tool
@@ -94,7 +93,7 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="odbc32.lib odbccp32.lib"
-				OutputFile="$(OutDir)/pkt.exe"
+				OutputFile="$(OutDir)/pkt_d.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				SubSystem="1"/>

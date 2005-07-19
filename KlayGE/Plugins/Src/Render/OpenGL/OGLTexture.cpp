@@ -19,6 +19,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Texture.hpp>
+#include <KlayGE/Context.hpp>
 
 #include <cstring>
 
@@ -942,14 +943,12 @@ namespace KlayGE
 
 	void OGLTexture::Anisotropy(uint32_t maxAnisotropy)
 	{
-		if (glloader_is_supported("GL_EXT_texture_filter_anisotropic"))
+		RenderEngine const & renderEngine = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		uint32_t max_texture_anisotropy = renderEngine.DeviceCaps().max_texture_anisotropy;
+
+		if (max_texture_anisotropy != 0)
 		{
-			this->GLBindTexture();
-
-			GLint max_aniso;
-			glGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_aniso);
-
-			anisotropy_ = std::min(max_aniso, static_cast<GLint>(maxAnisotropy));
+			anisotropy_ = std::min(max_texture_anisotropy, maxAnisotropy);
 			glTexParameteri(this->GLType(), GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy_);
 		}
 	}

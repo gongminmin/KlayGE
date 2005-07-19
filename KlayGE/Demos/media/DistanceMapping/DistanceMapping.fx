@@ -124,6 +124,33 @@ float4 DistanceMappingPS(float3 texCoord0	: TEXCOORD0,
 	return float4(diffuse * diffuseFactor, 1);
 }
 
+float4 DistanceMappingPS_20(float3 texCoord0	: TEXCOORD0,
+						float3 L		: TEXCOORD1,
+						float3 V		: TEXCOORD2,
+
+					uniform sampler2D diffuseMap,
+					uniform sampler2D normalMap,
+					uniform sampler3D distanceMap,
+					uniform samplerCUBE normalizerMap) : COLOR
+{
+	float3 view = (texCUBE(normalizerMap, V) * 2 - 1) * float3(1, 1, 16) * -0.06;
+
+	float3 texUV = texCoord0;
+	for (int i = 0; i < 2; ++ i)
+	{
+		float dist = tex3D(distanceMap, texUV).r;
+		texUV += view * dist;
+	}
+
+	float3 diffuse = tex2D(diffuseMap, texUV.xy);
+
+	float3 bumpNormal = texCUBE(normalizerMap, tex2D(normalMap, texUV.xy) * 2 - 1) * 2 - 1;
+	float3 lightVec = texCUBE(normalizerMap, L) * 2 - 1;
+	float diffuseFactor = dot(lightVec, bumpNormal);
+
+	return float4(diffuse * diffuseFactor, 1);
+}
+
 technique DistanceMapping30
 {
 	pass p0
@@ -135,12 +162,23 @@ technique DistanceMapping30
 	}
 }
 
-technique DistanceMapping20
+technique DistanceMapping2a
 {
 	pass p0
 	{
 		VertexShader = compile vs_1_1 DistanceMappingVS(worldviewproj, lightPos, eyePos);
 		PixelShader = compile ps_2_a DistanceMappingPS(diffuseMapSampler,
+										normalMapSampler, distanceMapSampler,
+										normalizerMapSampler);
+	}
+}
+
+technique DistanceMapping20
+{
+	pass p0
+	{
+		VertexShader = compile vs_1_1 DistanceMappingVS(worldviewproj, lightPos, eyePos);
+		PixelShader = compile ps_2_0 DistanceMappingPS_20(diffuseMapSampler,
 										normalMapSampler, distanceMapSampler,
 										normalizerMapSampler);
 	}

@@ -26,14 +26,14 @@
 				TreatWChar_tAsBuiltInType="TRUE"
 				ForceConformanceInForLoopScope="TRUE"
 				RuntimeTypeInfo="TRUE"
-				WarningLevel="3"
+				WarningLevel="4"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="4"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/NormalMapGen.exe"
+				OutputFile="$(OutDir)/NormalMapGen_d.exe"
 				LinkIncremental="2"
 				ProgramDatabaseFile="$(OutDir)/NormalMapGen.pdb"
 				SubSystem="1"

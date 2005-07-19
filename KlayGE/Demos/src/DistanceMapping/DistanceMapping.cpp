@@ -40,9 +40,13 @@ namespace
 			*(effect_->ParameterByName("normalmap")) = LoadTexture("normal.dds");
 			*(effect_->ParameterByName("distancemap")) = LoadTexture("distance.dds");
 			*(effect_->ParameterByName("normalizermap")) = LoadTexture("normalizer.dds");
+
 			if (!effect_->SetTechnique("DistanceMapping30"))
 			{
-				effect_->SetTechnique("DistanceMapping20");
+				if (!effect_->SetTechnique("DistanceMapping2a"))
+				{
+					effect_->SetTechnique("DistanceMapping20");
+				}
 			}
 
 			Vector3 xyzs[] =
@@ -143,7 +147,7 @@ int main()
 
 DistanceMapping::DistanceMapping()
 {
-	ResLoader::Instance().AddPath("../media");
+	ResLoader::Instance().AddPath("../media/Common");
 	ResLoader::Instance().AddPath("../media/DistanceMapping");
 }
 

@@ -12,10 +12,10 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="Debug"
-			IntermediateDirectory="Debug"
+			OutputDirectory="..\bin"
+			IntermediateDirectory="..\Debug"
 			ConfigurationType="1"
-			CharacterSet="2">
+			CharacterSet="1">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
@@ -26,14 +26,14 @@
 				TreatWChar_tAsBuiltInType="TRUE"
 				ForceConformanceInForLoopScope="TRUE"
 				RuntimeTypeInfo="TRUE"
-				WarningLevel="3"
+				WarningLevel="4"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="4"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/NormalizerCubeMap.exe"
+				OutputFile="$(OutDir)/NormalizerCubeMap_d.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/NormalizerCubeMap.pdb"

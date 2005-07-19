@@ -25,7 +25,6 @@
 
 #include <numeric>
 #include <sstream>
-#include <iostream>
 
 #include "ascii_lums_builder.hpp"
 #include "AsciiArts.hpp"
@@ -127,16 +126,14 @@ namespace
 	{
 		int const ASCII_IN_A_ROW = 16;
 
-		cout << "Loading " << tex_name << endl;
 		KlayGE::TexturePtr ascii_tex = LoadTexture(tex_name);
+		assert(PF_L8 == ascii_tex->Format());
 
 		std::vector<ascii_tile_type> ret(INPUT_NUM_ASCII);
 
 		std::vector<uint8_t> ascii_tex_data(INPUT_NUM_ASCII * ASCII_WIDTH * ASCII_HEIGHT);
-		cout << "Copy to memory" << endl;
 		ascii_tex->CopyToMemory2D(0, &ascii_tex_data[0]);
 
-		cout << "Spliting chars" << endl;
 		for (size_t i = 0; i < ret.size(); ++ i)
 		{
 			ret[i].resize(ASCII_WIDTH * ASCII_HEIGHT);
@@ -154,29 +151,27 @@ namespace
 		return ret;
 	}
 
-	KlayGE::TexturePtr FillTexture(std::vector<ascii_tiles_type> const & ascii_lums)
+	KlayGE::TexturePtr FillTexture(ascii_tiles_type const & ascii_lums)
 	{
-		std::vector<uint8_t> temp_data(LUM_LEVEL * OUTPUT_NUM_ASCII * ASCII_WIDTH * ASCII_HEIGHT);
+		assert(OUTPUT_NUM_ASCII == ascii_lums.size());
 
-		for (size_t i = 0; i < ascii_lums.size(); ++ i)
+		std::vector<uint8_t> temp_data(OUTPUT_NUM_ASCII * ASCII_WIDTH * ASCII_HEIGHT);
+
+		for (size_t i = 0; i < OUTPUT_NUM_ASCII; ++ i)
 		{
-			for (size_t j = 0; j < ascii_lums[i].size(); ++ j)
+			for (size_t y = 0; y < ASCII_HEIGHT; ++ y)
 			{
-				for (size_t y = 0; y < ASCII_HEIGHT; ++ y)
+				for (size_t x = 0; x < ASCII_WIDTH; ++ x)
 				{
-					for (size_t x = 0; x < ASCII_WIDTH; ++ x)
-					{
-						temp_data[y * LUM_LEVEL * OUTPUT_NUM_ASCII * ASCII_WIDTH + (i * ascii_lums[i].size() + j) * ASCII_WIDTH + x]
-							= ascii_lums[i][j][y * ASCII_WIDTH + x];
-					}
+					temp_data[y * OUTPUT_NUM_ASCII * ASCII_WIDTH + i * ASCII_WIDTH + x]
+						= ascii_lums[i][y * ASCII_WIDTH + x];
 				}
 			}
 		}
 
-		KlayGE::TexturePtr ret = Context::Instance().RenderFactoryInstance().MakeTexture2D(LUM_LEVEL * OUTPUT_NUM_ASCII * ASCII_WIDTH,
+		KlayGE::TexturePtr ret = Context::Instance().RenderFactoryInstance().MakeTexture2D(OUTPUT_NUM_ASCII * ASCII_WIDTH,
 			ASCII_HEIGHT, 1, PF_L8);
-		ret->CopyMemoryToTexture2D(0, &temp_data[0],
-					PF_L8, LUM_LEVEL * OUTPUT_NUM_ASCII * ASCII_WIDTH, ASCII_HEIGHT, 0, 0);
+		ret->CopyMemoryToTexture2D(0, &temp_data[0], PF_L8, OUTPUT_NUM_ASCII * ASCII_WIDTH, ASCII_HEIGHT, 0, 0);
 		return ret;
 	}
 
@@ -230,7 +225,7 @@ int main()
 AsciiArts::AsciiArts()
 			: show_ascii_(true)
 {
-	ResLoader::Instance().AddPath("../media");
+	ResLoader::Instance().AddPath("../media/Common");
 	ResLoader::Instance().AddPath("../media/AsciiArts");
 }
 
@@ -259,11 +254,13 @@ void AsciiArts::InitObjects()
 
 	this->BuildAsciiLumsTex();
 
-	rendered_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(WIDTH, HEIGHT, 1, PF_A8R8G8B8, Texture::TU_RenderTarget);
+	rendered_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(WIDTH, HEIGHT, 1,
+		PF_A8R8G8B8, Texture::TU_RenderTarget);
 	render_buffer_ = Context::Instance().RenderFactoryInstance().MakeRenderTexture();
 	render_buffer_->AttachTexture2D(rendered_tex_);
 
-	downsample_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(WIDTH / CELL_WIDTH, HEIGHT / CELL_HEIGHT, 1, PF_A8R8G8B8, Texture::TU_RenderTarget);
+	downsample_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(WIDTH / CELL_WIDTH, HEIGHT / CELL_HEIGHT,
+		1, PF_A8R8G8B8, Texture::TU_RenderTarget);
 
 	screen_iter_ = renderEngine.ActiveRenderTarget();
 	render_buffer_iter_ = renderEngine.AddRenderTarget(render_buffer_);

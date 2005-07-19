@@ -161,7 +161,7 @@ int main()
 
 Electro::Electro()
 {
-	ResLoader::Instance().AddPath("../media");
+	ResLoader::Instance().AddPath("../media/Common");
 	ResLoader::Instance().AddPath("../media/Electro");
 }
 

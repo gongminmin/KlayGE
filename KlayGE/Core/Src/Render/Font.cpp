@@ -35,6 +35,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Renderable.hpp>
+#include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Box.hpp>
@@ -59,14 +60,14 @@ namespace
 
 	PixelFormat TEX_FORMAT = PF_A4R4G4B4;
 
-	class FontRenderable : public Renderable
+	class FontRenderable : public RenderableHelper
 	{
 	public:
 		FontRenderable(RenderEffectPtr const & effect, VertexBufferPtr const & vb)
-			: fontEffect_(effect),
-				fontVB_(vb),
-				box_(Vector3(0, 0, 0), Vector3(0, 0, 0))
 		{
+			effect_ = effect;
+			vb_ = vb;
+			box_ = Box(Vector3(0, 0, 0), Vector3(0, 0, 0));
 		}
 
 		std::wstring const & Name() const
@@ -77,32 +78,12 @@ namespace
 
 		void OnRenderBegin()
 		{
-			fontVB_->GetVertexStream(VST_Positions)->Assign(&xyzs_[0], xyzs_.size() / 3);
-			fontVB_->GetVertexStream(VST_TextureCoords0)->Assign(&texs_[0], texs_.size() / 2);
+			vb_->GetVertexStream(VST_Positions)->Assign(&xyzs_[0], xyzs_.size() / 3);
+			vb_->GetVertexStream(VST_TextureCoords0)->Assign(&texs_[0], texs_.size() / 2);
 
-			fontVB_->GetIndexStream()->Assign(&indices_[0], indices_.size());
+			vb_->GetIndexStream()->Assign(&indices_[0], indices_.size());
 
-			RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			Viewport const & viewport((*renderEngine.ActiveRenderTarget())->GetViewport());
-			*(fontEffect_->ParameterByName("halfWidth")) = viewport.width / 2;
-			*(fontEffect_->ParameterByName("halfHeight")) = viewport.height / 2;
-
-			*(fontEffect_->ParameterByName("color")) = Vector4(clr_.r(), clr_.g(), clr_.b(), clr_.a());
-		}
-
-		RenderEffectPtr GetRenderEffect() const
-		{
-			return fontEffect_;
-		}
-
-		VertexBufferPtr GetVertexBuffer() const
-		{
-			return fontVB_;
-		}
-
-		Box GetBound() const
-		{
-			return box_;
+			*(effect_->ParameterByName("color")) = Vector4(clr_.r(), clr_.g(), clr_.b(), clr_.a());
 		}
 
 		bool CanBeCulled() const
@@ -134,9 +115,9 @@ namespace
 			float x(sx), y(sy);
 			float maxx(sx), maxy(sy);
 
-			xyzs_.clear();
-			texs_.clear();
-			indices_.clear();
+			xyzs_.resize(0);
+			texs_.resize(0);
+			indices_.resize(0);
 
 			xyzs_.reserve(maxSize * 3 * 4);
 			texs_.reserve(maxSize * 2 * 4);
@@ -213,15 +194,10 @@ namespace
 		}
 
 	private:
-		RenderEffectPtr fontEffect_;
-		VertexBufferPtr fontVB_;
-
 		std::vector<float>		xyzs_;
 		std::vector<float>		texs_;
 		std::vector<uint16_t>	indices_;
 		Color					clr_;
-
-		Box box_;
 
 		bool canBeCulled_;
 	};
@@ -407,6 +383,11 @@ namespace KlayGE
 			}
 
 			this->UpdateTexture(text);
+
+			RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			Viewport const & viewport((*renderEngine.ActiveRenderTarget())->GetViewport());
+			*(effect_->ParameterByName("halfWidth")) = viewport.width / 2;
+			*(effect_->ParameterByName("halfHeight")) = viewport.height / 2;
 
 			boost::shared_ptr<FontRenderable> renderable(new FontRenderable(effect_, vb_));
 			renderable->RenderText(this->FontHeight(), charInfoMap_,

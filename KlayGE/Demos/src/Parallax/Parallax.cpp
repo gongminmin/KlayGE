@@ -140,7 +140,7 @@ int main()
 
 Parallax::Parallax()
 {
-	ResLoader::Instance().AddPath("../media");
+	ResLoader::Instance().AddPath("../media/Common");
 	ResLoader::Instance().AddPath("../media/Parallax");
 }
 
