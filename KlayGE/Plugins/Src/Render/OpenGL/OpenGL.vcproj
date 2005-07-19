@@ -105,6 +105,9 @@
 				RelativePath=".\OGLIndexStream.cpp">
 			</File>
 			<File
+				RelativePath=".\OGLMapping.cpp">
+			</File>
+			<File
 				RelativePath=".\OGLRenderEffect.cpp">
 			</File>
 			<File
@@ -132,6 +135,9 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
 				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLIndexStream.hpp">
+			</File>
+			<File
+				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLMapping.hpp">
 			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLRenderEffect.hpp">

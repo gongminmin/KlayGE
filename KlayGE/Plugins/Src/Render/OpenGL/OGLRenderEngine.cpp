@@ -39,6 +39,7 @@
 #include <algorithm>
 #include <cstring>
 
+#include <KlayGE/OpenGL/OGLMapping.hpp>
 #include <KlayGE/OpenGL/OGLRenderWindow.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 #include <KlayGE/OpenGL/OGLVertexStream.hpp>
@@ -51,89 +52,6 @@
 	#pragma comment(lib, "glloader.lib")
 #endif
 #pragma comment(lib, "glu32.lib")
-
-namespace KlayGE
-{
-	// 从RenderEngine::CompareFunction转换到D3DCMPFUNC
-	/////////////////////////////////////////////////////////////////////////////////
-	GLint Convert(RenderEngine::CompareFunction func)
-	{
-		GLint ret = GL_NEVER;
-
-		switch (func)
-		{
-		case RenderEngine::CF_AlwaysFail:
-			ret = GL_NEVER;
-			break;
-
-		case RenderEngine::CF_AlwaysPass:
-			ret = GL_ALWAYS;
-			break;
-
-		case RenderEngine::CF_Less:
-			ret = GL_LESS;
-			break;
-
-		case RenderEngine::CF_LessEqual:
-			ret = GL_LEQUAL;
-			break;
-
-		case RenderEngine::CF_Equal:
-			ret = GL_EQUAL;
-			break;
-
-		case RenderEngine::CF_NotEqual:
-			ret = GL_NOTEQUAL;
-			break;
-
-		case RenderEngine::CF_GreaterEqual:
-			ret = GL_GEQUAL;
-			break;
-
-		case RenderEngine::CF_Greater:
-			ret = GL_GREATER;
-			break;
-		};
-
-		return ret;
-	}
-
-	// 从RenderEngine::StencilOperation转换到D3DSTENCILOP
-	/////////////////////////////////////////////////////////////////////////////////
-	GLint Convert(RenderEngine::StencilOperation op)
-	{
-		GLint ret = GL_KEEP;
-
-		switch (op)
-		{
-		case RenderEngine::SOP_Keep:
-			ret = GL_KEEP;
-			break;
-
-		case RenderEngine::SOP_Zero:
-			ret = GL_ZERO;
-			break;
-
-		case RenderEngine::SOP_Replace:
-			ret = GL_REPLACE;
-			break;
-
-		case RenderEngine::SOP_Increment:
-			ret = GL_INCR;
-			break;
-
-		case RenderEngine::SOP_Decrement:
-			ret = GL_DECR;
-			break;
-
-		case RenderEngine::SOP_Invert:
-			ret = GL_INVERT;
-			break;
-		};
-
-		return ret;
-	}
-}
 
 namespace KlayGE
 {
@@ -154,7 +72,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	std::wstring const & OGLRenderEngine::Name() const
 	{
-		static const std::wstring name(L"OpenGL Render System");
+		static const std::wstring name(L"OpenGL Render Engine");
 		return name;
 	}
 
@@ -215,24 +133,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::ShadingType(ShadeOptions so)
 	{
-		GLenum shadeMode = GL_FLAT;
-
-		switch (so)
-		{
-		case SO_Flat:
-			shadeMode = GL_FLAT;
-			break;
-
-		case SO_Gouraud:
-			shadeMode = GL_SMOOTH;
-			break;
-
-		case SO_Phong:
-			shadeMode = GL_SMOOTH;
-			break;
-		}
-
-		glShadeModel(shadeMode);
+		glShadeModel(OGLMapping::Mapping(so));
 	}
 
 	// 打开/关闭光源
@@ -315,28 +216,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::PolygonMode(FillMode mode)
 	{
-		GLenum oglMode = GL_FILL;
-
-		switch (mode)
-		{
-		case FM_Point:
-			oglMode = GL_POINT;
-			break;
-
-		case FM_Line:
-			oglMode = GL_LINE;
-			break;
-
-		case FM_Fill:
-			oglMode = GL_FILL;
-			break;
-
-		default:
-			assert(false);
-			break;
-		}
-
-		glPolygonMode(GL_FRONT_AND_BACK, oglMode);
+		glPolygonMode(GL_FRONT_AND_BACK, OGLMapping::Mapping(mode));
 	}
 
 	// 设置光源
@@ -356,13 +236,16 @@ namespace KlayGE
 			break;
 		}
 
-		GLfloat ambient[4] = { light.ambient.r(), light.ambient.g(), light.ambient.b(), light.ambient.a() };
+		GLfloat ambient[4];
+		OGLMapping::Mapping(ambient, light.ambient);
 		glLightfv(lightIndex, GL_AMBIENT, ambient);
 
-		GLfloat diffuse[4] = { light.diffuse.r(), light.diffuse.g(), light.diffuse.b(), light.diffuse.a() };
+		GLfloat diffuse[4];
+		OGLMapping::Mapping(diffuse, light.diffuse);
 		glLightfv(lightIndex, GL_DIFFUSE, diffuse);
 
-		GLfloat specular[4] = { light.specular.r(), light.specular.g(), light.specular.b(), light.specular.a() };
+		GLfloat specular[4];
+		OGLMapping::Mapping(specular, light.specular);
 		glLightfv(lightIndex, GL_SPECULAR, specular);
 
 		// Set position / direction
@@ -459,13 +342,16 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::SetMaterial(Material const & material)
 	{
-		GLfloat ambient[4] = { material.ambient.r(), material.ambient.g(), material.ambient.b(), material.ambient.a() };
+		GLfloat ambient[4];
+		OGLMapping::Mapping(ambient, material.ambient);
 		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient);
 
-		GLfloat diffuse[4] = { material.diffuse.r(), material.diffuse.g(), material.diffuse.b(), material.diffuse.a() };
+		GLfloat diffuse[4];
+		OGLMapping::Mapping(diffuse, material.diffuse);
 		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse);
 
-		GLfloat specular[4] = { material.specular.r(), material.specular.g(), material.specular.b(), material.specular.a() };
+		GLfloat specular[4];
+		OGLMapping::Mapping(specular, material.specular);
 		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
 
 		glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, material.shininess);
@@ -590,44 +476,9 @@ namespace KlayGE
 		}
 
 		size_t const vertexCount = vb.UseIndices() ? vb.NumIndices() : vb.NumVertices();
-		GLenum mode = GL_POINTS;
-		size_t primCount = vertexCount;
-		switch (vb.Type())
-		{
-		case VertexBuffer::BT_PointList:
-			mode = GL_POINTS;
-			primCount = vertexCount;
-			break;
-
-		case VertexBuffer::BT_LineList:
-			mode = GL_LINES;
-			primCount = vertexCount / 2;
-			break;
-
-		case VertexBuffer::BT_LineStrip:
-			mode = GL_LINE_STRIP;
-			primCount = vertexCount - 1;
-			break;
-
-		case VertexBuffer::BT_TriangleList:
-			mode = GL_TRIANGLES;
-			primCount = vertexCount / 3;
-			break;
-
-		case VertexBuffer::BT_TriangleStrip:
-			mode = GL_TRIANGLE_STRIP;
-			primCount = vertexCount - 2;
-			break;
-
-		case VertexBuffer::BT_TriangleFan:
-			mode = GL_TRIANGLE_FAN;
-			primCount = vertexCount - 2;
-			break;
-
-		default:
-			assert(false);
-			break;
-		}
+		GLenum mode;
+		uint32_t primCount;
+		OGLMapping::Mapping(mode, primCount, vb);
 
 		numPrimitivesJustRendered_ += primCount;
 		numVerticesJustRendered_ += vertexCount;
@@ -687,7 +538,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::DepthBufferFunction(CompareFunction func)
 	{
-		glDepthFunc(Convert(func));
+		glDepthFunc(OGLMapping::Mapping(func));
 	}
 
 	// 设置深度偏移
@@ -706,34 +557,23 @@ namespace KlayGE
 	void OGLRenderEngine::Fog(FogMode mode, Color const & color,
 		float expDensity, float linearStart, float linearEnd)
 	{
-		GLint fogMode;
-		switch (mode)
+		if (Fog_None == mode)
 		{
-		case Fog_Exp:
-			fogMode = GL_EXP;
-			break;
-
-		case Fog_Exp2:
-			fogMode = GL_EXP2;
-			break;
-
-		case Fog_Linear:
-			fogMode = GL_LINEAR;
-			break;
-
-		default:
-			// Give up on it
 			glDisable(GL_FOG);
-			return;
 		}
+		else
+		{
+			glEnable(GL_FOG);
+			glFogi(GL_FOG_MODE, OGLMapping::Mapping(mode));
 
-		glEnable(GL_FOG);
-		glFogi(GL_FOG_MODE, fogMode);
-		GLfloat fogColor[4] = { color.r(), color.g(), color.b(), color.a() };
-		glFogfv(GL_FOG_COLOR, fogColor);
-		glFogf(GL_FOG_DENSITY, expDensity);
-		glFogf(GL_FOG_START, linearStart);
-		glFogf(GL_FOG_END, linearEnd);
+			GLfloat fogColor[4];
+			OGLMapping::Mapping(fogColor, color);
+			glFogfv(GL_FOG_COLOR, fogColor);
+
+			glFogf(GL_FOG_DENSITY, expDensity);
+			glFogf(GL_FOG_START, linearStart);
+			glFogf(GL_FOG_END, linearEnd);
+		}
 	}
 
 	// 设置纹理
@@ -823,40 +663,19 @@ namespace KlayGE
 		return 8;
 	}
 
-	// 设置模板比较函数
+		// 设置模板比较函数，参考值和掩码
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::StencilBufferFunction(CompareFunction /*func*/)
+	void OGLRenderEngine::StencilBufferFunction(CompareFunction func, uint32_t refValue, uint32_t mask)
 	{
+		glStencilFunc(OGLMapping::Mapping(func), refValue, mask);
 	}
 
-	// 设置模板缓冲区参考值
+	// 设置模板缓冲区模板测试失败，深度测试失败和通过后的操作
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::StencilBufferReferenceValue(uint32_t /*refValue*/)
+	void OGLRenderEngine::StencilBufferOperation(StencilOperation fail,
+		StencilOperation depth_fail, StencilOperation pass)
 	{
-	}
-
-	// 设置模板缓冲区掩码
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::StencilBufferMask(uint32_t /*mask*/)
-	{
-	}
-
-	// 设置模板缓冲区测试失败后的操作
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::StencilBufferFailOperation(StencilOperation /*op*/)
-	{
-	}
-
-	// 设置模板缓冲区深度测试失败后的操作
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::StencilBufferDepthFailOperation(StencilOperation /*op*/)
-	{
-	}
-
-	// 设置模板缓冲区通过后的操作
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::StencilBufferPassOperation(StencilOperation /*op*/)
-	{
+		glStencilOp(OGLMapping::Mapping(fail), OGLMapping::Mapping(depth_fail), OGLMapping::Mapping(pass));
 	}
 
 	// 填充设备能力
@@ -901,12 +720,33 @@ namespace KlayGE
 
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &temp);
 		caps_.max_texture_height = caps_.max_texture_width = temp;
-		glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &temp);
-		caps_.max_texture_depth = temp;
-		glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &temp);
-		caps_.max_texture_cube_size = temp;
-		glGetIntegerv(GL_MAX_TEXTURE_UNITS, &temp);
-		caps_.max_textures_units = temp;
+		if (glloader_is_supported("GL_VERSION_1_2") || glloader_is_supported("GL_EXT_texture3D"))
+		{
+			glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &temp);
+			caps_.max_texture_depth = temp;
+		}
+		else
+		{
+			caps_.max_texture_depth = 0;
+		}
+		if (glloader_is_supported("GL_VERSION_1_3") || glloader_is_supported("GL_ARB_texture_cube_map"))
+		{
+			glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &temp);
+			caps_.max_texture_cube_size = temp;
+		}
+		else
+		{
+			caps_.max_texture_cube_size = 0;
+		}
+		if (glloader_is_supported("GL_VERSION_1_3") || glloader_is_supported("GL_ARB_multitexture"))
+		{
+			glGetIntegerv(GL_MAX_TEXTURE_UNITS, &temp);
+			caps_.max_textures_units = temp;
+		}
+		else
+		{
+			caps_.max_textures_units = 1;
+		}
 		if (glloader_is_supported("GL_EXT_texture_filter_anisotropic"))
 		{
 			glGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &temp);

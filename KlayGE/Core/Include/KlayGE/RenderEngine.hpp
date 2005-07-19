@@ -217,18 +217,12 @@ namespace KlayGE
 		// Determines the bit depth of the hardware accelerated stencil buffer, if supported.
 		virtual uint16_t StencilBufferBitDepth() = 0;
 
-		// Sets the stencil test function.
-		virtual void StencilBufferFunction(CompareFunction func) = 0;
-		// Sets the stencil buffer reference value.
-		virtual void StencilBufferReferenceValue(uint32_t refValue) = 0;
-		// Sets the stencil buffer mask value.
-		virtual void StencilBufferMask(uint32_t mask) = 0;
-		// Sets the action to perform if the stencil test fails.
-		virtual void StencilBufferFailOperation(StencilOperation op) = 0;
-		// Sets the action to perform if the stencil test passes, but the depth buffer test fails.
-		virtual void StencilBufferDepthFailOperation(StencilOperation op) = 0;
-		// Sets the action to perform if both the stencil test and the depth buffer test passes.
-		virtual void StencilBufferPassOperation(StencilOperation op) = 0;
+		// Sets the stencil test function, reference value and mask value.
+		virtual void StencilBufferFunction(CompareFunction func, uint32_t refValue, uint32_t mask) = 0;
+		// Sets the action to perform if the stencil test fails,
+		// if the stencil test passes, but the depth buffer test fails, and
+		// if both the stencil test and the depth buffer test passes.
+		virtual void StencilBufferOperation(StencilOperation fail, StencilOperation depth_fail, StencilOperation pass) = 0;
 
 		// Get render device capabilities
 		RenderDeviceCaps const & DeviceCaps() const;

@@ -1,8 +1,11 @@
 // D3D9Mapping.hpp
 // KlayGE RenderEngine和D3D9本地之间的映射 头文件
-// Ver 2.4.0
+// Ver 2.8.0
 // 版权所有(C) 龚敏敏, 2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.8.0
+// 增加了RenderDeviceCaps (2005.7.19)
 //
 // 2.4.0
 // 初次建立 (2005.3.20)

@@ -102,12 +102,8 @@ namespace KlayGE
 
 		uint16_t StencilBufferBitDepth();
 
-		void StencilBufferFunction(CompareFunction func);
-		void StencilBufferReferenceValue(uint32_t refValue);
-		void StencilBufferMask(uint32_t mask);
-		void StencilBufferFailOperation(StencilOperation op);
-		void StencilBufferDepthFailOperation(StencilOperation op);
-		void StencilBufferPassOperation(StencilOperation op);
+		void StencilBufferFunction(CompareFunction func, uint32_t refValue, uint32_t mask);
+		void StencilBufferOperation(StencilOperation fail, StencilOperation depth_fail, StencilOperation pass);
 
 	private:
 		void DoWorldMatrix();

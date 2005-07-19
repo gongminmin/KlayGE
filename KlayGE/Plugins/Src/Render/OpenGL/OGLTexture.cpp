@@ -26,6 +26,7 @@
 #include <glloader/glloader.h>
 #include <gl/glu.h>
 
+#include <KlayGE/OpenGL/OGLMapping.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 
 #pragma comment(lib, "OpenGL32.lib")
@@ -755,25 +756,7 @@ namespace KlayGE
 	{
 		this->GLBindTexture();
 
-		GLint mode = GL_REPEAT;
-		switch (tam)
-		{
-		case TAM_Wrap:
-			mode = GL_REPEAT;
-			break;
-
-		case TAM_Mirror:
-			mode = GL_MIRRORED_REPEAT;
-			break;
-
-		case TAM_Clamp:
-			mode = GL_CLAMP;
-			break;
-
-		default:
-			assert(false);
-			break;
-		}
+		GLint mode = OGLMapping::Mapping(tam);
 
 		switch (type)
 		{

@@ -90,7 +90,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	std::wstring const & D3D9RenderEngine::Name() const
 	{
-		static const std::wstring name(L"Direct3D9 Render System");
+		static const std::wstring name(L"Direct3D9 Render Engine");
 		return name;
 	}
 
@@ -703,46 +703,23 @@ namespace KlayGE
 		return 8;
 	}
 
-	// 设置模板比较函数
+	// 设置模板比较函数，参考值和掩码
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::StencilBufferFunction(CompareFunction func)
+	void D3D9RenderEngine::StencilBufferFunction(CompareFunction func, uint32_t refValue, uint32_t mask)
 	{
 		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILFUNC, D3D9Mapping::Mapping(func)));
-	}
-
-	// 设置模板缓冲区参考值
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::StencilBufferReferenceValue(uint32_t refValue)
-	{
 		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILREF, refValue));
-	}
-
-	// 设置模板缓冲区掩码
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::StencilBufferMask(uint32_t mask)
-	{
 		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILMASK, mask));
 	}
 
-	// 设置模板缓冲区测试失败后的操作
+	// 设置模板缓冲区模板测试失败，深度测试失败和通过后的操作
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::StencilBufferFailOperation(StencilOperation op)
+	void D3D9RenderEngine::StencilBufferOperation(StencilOperation fail,
+		StencilOperation depth_fail, StencilOperation pass)
 	{
-		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILFAIL, D3D9Mapping::Mapping(op)));
-	}
-
-	// 设置模板缓冲区深度测试失败后的操作
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::StencilBufferDepthFailOperation(StencilOperation op)
-	{
-		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILZFAIL, D3D9Mapping::Mapping(op)));
-	}
-
-	// 设置模板缓冲区通过后的操作
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::StencilBufferPassOperation(StencilOperation op)
-	{
-		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILPASS, D3D9Mapping::Mapping(op)));
+		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILFAIL, D3D9Mapping::Mapping(fail)));
+		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILZFAIL, D3D9Mapping::Mapping(depth_fail)));
+		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILPASS, D3D9Mapping::Mapping(pass)));
 	}
 
 	// 填充设备能力

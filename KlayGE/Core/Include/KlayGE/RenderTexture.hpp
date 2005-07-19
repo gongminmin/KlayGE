@@ -1,8 +1,11 @@
 // RenderTexture.hpp
-// KlayGE 渲染纹理类 头文件
-// Ver 2.4.0
+// KlayGE 渲染到纹理类 头文件
+// Ver 2.8.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.8.0
+// 去掉了GetTexture (2005.7.19)
 //
 // 2.4.0
 // 增加了IsTexture和SwapBuffers (2005.3.6)
@@ -27,11 +30,6 @@ namespace KlayGE
 	class RenderTexture : public RenderTarget
 	{
 	public:
-		TexturePtr const & GetTexture() const
-			{ return privateTex_; }
-		TexturePtr& GetTexture()
-			{ return privateTex_; }
-
 		virtual void AttachTexture2D(TexturePtr texture2D) = 0;
 		virtual void AttachTextureCube(TexturePtr textureCube, Texture::CubeFaces face) = 0;
 		virtual void DeattachTexture() = 0;

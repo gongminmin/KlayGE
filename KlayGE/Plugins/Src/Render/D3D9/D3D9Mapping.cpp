@@ -1,8 +1,11 @@
 // D3D9Mapping.hpp
 // KlayGE RenderEngine和D3D9本地之间的映射 实现文件
-// Ver 2.4.0
+// Ver 2.8.0
 // 版权所有(C) 龚敏敏, 2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.8.0
+// 增加了RenderDeviceCaps (2005.7.19)
 //
 // 2.4.0
 // 初次建立 (2005.3.20)
@@ -119,10 +122,10 @@ namespace KlayGE
 			return D3DSTENCILOP_REPLACE;
 
 		case RenderEngine::SOP_Increment:
-			return D3DSTENCILOP_INCRSAT;
+			return D3DSTENCILOP_INCR;
 
 		case RenderEngine::SOP_Decrement:
-			return D3DSTENCILOP_DECRSAT;
+			return D3DSTENCILOP_DECR;
 
 		case RenderEngine::SOP_Invert:
 			return D3DSTENCILOP_INVERT;
@@ -133,7 +136,7 @@ namespace KlayGE
 		};
 	}
 
-	// 从RenderEngine::TexFiltering转换到D3D的MagFilter标志
+	// 从RenderEngine::TexFiltering转换到D3D的Filter标志
 	/////////////////////////////////////////////////////////////////////////////////
 	uint32_t D3D9Mapping::Mapping(uint32_t tfc, Texture::TexFilterOp tf)
 	{

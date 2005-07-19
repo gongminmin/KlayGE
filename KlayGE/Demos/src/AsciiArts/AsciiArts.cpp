@@ -172,6 +172,7 @@ namespace
 		KlayGE::TexturePtr ret = Context::Instance().RenderFactoryInstance().MakeTexture2D(OUTPUT_NUM_ASCII * ASCII_WIDTH,
 			ASCII_HEIGHT, 1, PF_L8);
 		ret->CopyMemoryToTexture2D(0, &temp_data[0], PF_L8, OUTPUT_NUM_ASCII * ASCII_WIDTH, ASCII_HEIGHT, 0, 0);
+		SaveToFile(ret, "lums.dds");
 		return ret;
 	}
 
