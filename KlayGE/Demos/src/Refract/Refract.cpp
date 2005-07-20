@@ -132,7 +132,7 @@ void Refract::InitObjects()
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
 	this->LookAt(Vector3(-0.05f, -0.01f, -0.5f), Vector3(0, 0.05f, 0));
-	this->Proj(0.1f, 100);
+	this->Proj(0.05f, 100);
 
 	fpcController_.AttachCamera(this->ActiveCamera());
 	fpcController_.Scalers(0.01f, 0.1f);

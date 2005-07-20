@@ -16,7 +16,7 @@ struct VS_OUTPUT
 	float3 incident		: TEXCOORD1;
 };
 
-VS_OUTPUT TestCubeVS(VS_INPUT input)
+VS_OUTPUT RefractVS(VS_INPUT input)
 {
 	VS_OUTPUT output;
 	
@@ -51,7 +51,7 @@ float3 my_refract(float3 i, float3 n, float eta)
     return t * (cost2 > 0.0);
 }
 
-float4 TestCubePS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : COLOR
+float4 RefractPS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : COLOR
 {
 	normal = normalize(normal);
 	incident = normalize(incident);
@@ -64,7 +64,7 @@ technique Refract
 	{
 		CullMode = CCW;
 
-		VertexShader = compile vs_1_1 TestCubeVS();
-		PixelShader = compile ps_2_0 TestCubePS();
+		VertexShader = compile vs_1_1 RefractVS();
+		PixelShader = compile ps_2_0 RefractPS();
 	}
 }

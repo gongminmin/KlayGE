@@ -195,6 +195,21 @@ namespace KlayGE
 		return false;
 	}
 
+	inline bool
+	IsDepthFormat(PixelFormat format)
+	{
+		switch (format)
+		{
+		case PF_D16:
+		case PF_D24X8:
+		case PF_D24S8:
+			return true;
+
+		default:
+			return false;
+		}
+	}
+
 	// Abstract class representing a Texture resource.
 	// @remarks
 	// The actual concrete subclass which will exist for a texture

@@ -47,6 +47,11 @@ float4 MeshPS(float4 clr : COLOR0, float2 uv : TEXCOORD0,
 	return clr * tex2D(texSampler, uv);
 }
 
+float4 MeshNoTexPS(float4 clr : COLOR0) : COLOR
+{
+	return clr;
+}
+
 technique KMeshTec
 {
 	pass p0
@@ -66,3 +71,24 @@ technique KMeshTec
 		PixelShader = compile ps_1_1 MeshPS(texSampler);
 	}
 }
+
+technique KMeshNoTexTec
+{
+	pass p0
+	{
+		Lighting = false;
+		SpecularEnable = false;
+
+		FillMode = Solid;
+		CullMode = CCW;
+		Stencilenable = false;
+		Clipping = true;
+
+		ZEnable      = true;
+		ZWriteEnable = true;
+
+		VertexShader = compile vs_1_1 MeshVS();
+		PixelShader = compile ps_1_1 MeshNoTexPS();
+	}
+}
+

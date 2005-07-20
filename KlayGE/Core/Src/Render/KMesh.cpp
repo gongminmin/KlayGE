@@ -35,7 +35,15 @@ namespace KlayGE
 	{
 		// ÔØÈëfx
 		effect_ = LoadRenderEffect("KMesh.fx");
-		effect_->SetTechnique("KMeshTec");
+
+		if (tex_)
+		{
+			effect_->SetTechnique("KMeshTec");
+		}
+		else
+		{
+			effect_->SetTechnique("KMeshNoTexTec");
+		}
 	}
 
 	KMesh::~KMesh()

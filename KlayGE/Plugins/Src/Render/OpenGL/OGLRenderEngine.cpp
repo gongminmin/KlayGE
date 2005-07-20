@@ -6,6 +6,7 @@
 //
 // 2.8.0
 // 增加了RenderDeviceCaps (2005.7.17)
+// 简化了StencilBuffer相关操作 (2005.7.20)
 //
 // 2.7.0
 // 支持vertex_buffer_object (2005.6.19)

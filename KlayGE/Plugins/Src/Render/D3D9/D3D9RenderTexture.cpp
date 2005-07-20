@@ -92,7 +92,7 @@ namespace KlayGE
 
 	void D3D9RenderTexture::CustomAttribute(std::string const & name, void* pData)
 	{
-		if ("DDBACKBUFFER" == name)
+		if (("DDBACKBUFFER" == name) || ("DDFRONTBUFFER" == name))
 		{
 			IDirect3DSurface9** pSurf = reinterpret_cast<IDirect3DSurface9**>(pData);
 			*pSurf = this->D3DRenderSurface().get();
@@ -104,14 +104,6 @@ namespace KlayGE
 		{
 			IDirect3DSurface9** pSurf = reinterpret_cast<IDirect3DSurface9**>(pData);
 			*pSurf = this->D3DRenderZBuffer().get();
-
-			return;
-		}
-
-		if ("DDFRONTBUFFER" == name)
-		{
-			IDirect3DSurface9** pSurf = reinterpret_cast<IDirect3DSurface9**>(pData);
-			*pSurf = this->D3DRenderSurface().get();
 
 			return;
 		}

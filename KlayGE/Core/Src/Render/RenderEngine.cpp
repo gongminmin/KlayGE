@@ -1,8 +1,11 @@
 // RenderEngine.cpp
 // KlayGE 渲染引擎类 实现文件
-// Ver 2.7.1
+// Ver 2.8.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.8.0
+// 简化了StencilBuffer相关操作 (2005.7.20)
 //
 // 2.7.1
 // ViewMatrix和ProjectionMatrix改为const (2005.7.10)

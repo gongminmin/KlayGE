@@ -6,6 +6,7 @@
 //
 // 2.8.0
 // 增加了RenderDeviceCaps (2005.7.17)
+// 简化了StencilBuffer相关操作 (2005.7.20)
 //
 // 2.7.0
 // 改进了Render (2005.6.16)
@@ -341,7 +342,15 @@ namespace KlayGE
 
 		IDirect3DSurface9* zBuffer;
 		(*activeRenderTarget_)->CustomAttribute("D3DZBUFFER", &zBuffer);
-		TIF(d3dDevice_->SetDepthStencilSurface(zBuffer));
+		if (zBuffer)
+		{
+			this->DepthBufferDepthTest(true);
+			TIF(d3dDevice_->SetDepthStencilSurface(zBuffer));
+		}
+		else
+		{
+			this->DepthBufferDepthTest(false);
+		}
 
 		this->CullingMode(cullingMode_);
 
