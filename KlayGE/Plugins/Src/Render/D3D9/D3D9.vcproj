@@ -126,6 +126,9 @@
 				RelativePath=".\D3D9RenderTexture.cpp">
 			</File>
 			<File
+				RelativePath=".\D3D9RenderVertexStream.cpp">
+			</File>
+			<File
 				RelativePath=".\D3D9RenderWindow.cpp">
 			</File>
 			<File
@@ -165,6 +168,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9RenderTexture.hpp">
+			</File>
+			<File
+				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9RenderVertexStream.hpp">
 			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9RenderWindow.hpp">

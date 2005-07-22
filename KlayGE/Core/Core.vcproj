@@ -261,7 +261,7 @@
 					RelativePath="Include\KlayGE\RenderTexture.hpp">
 				</File>
 				<File
-					RelativePath=".\Include\KlayGE\RenderVertexBuffer.hpp">
+					RelativePath=".\Include\KlayGE\RenderVertexStream.hpp">
 				</File>
 				<File
 					RelativePath="Include\KlayGE\RenderWindow.hpp">

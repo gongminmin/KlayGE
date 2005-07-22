@@ -120,6 +120,9 @@
 				RelativePath=".\OGLRenderTexture.cpp">
 			</File>
 			<File
+				RelativePath=".\OGLRenderVertexStream.cpp">
+			</File>
+			<File
 				RelativePath=".\OGLRenderWindow.cpp">
 			</File>
 			<File
@@ -150,6 +153,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLRenderTexture.hpp">
+			</File>
+			<File
+				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLRenderVertexStream.hpp">
 			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLRenderWindow.hpp">

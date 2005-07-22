@@ -35,7 +35,7 @@ namespace KlayGE
 		void Scalers(float rotationScaler, float moveScaler);
 
 		void AttachCamera(Camera& camera);
-		void DeattachCamera();
+		void DetachCamera();
 
 		virtual void Update();
 

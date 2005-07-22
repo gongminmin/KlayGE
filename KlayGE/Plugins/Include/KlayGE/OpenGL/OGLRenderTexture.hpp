@@ -18,7 +18,7 @@ namespace KlayGE
 
 		void AttachTexture2D(TexturePtr texture2D);
 		void AttachTextureCube(TexturePtr textureCube, Texture::CubeFaces face);
-		void DeattachTexture();
+		void DetachTexture();
 
 		virtual void CustomAttribute(std::string const & name, void* pData);
 

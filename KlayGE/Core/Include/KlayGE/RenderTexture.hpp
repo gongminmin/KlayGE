@@ -32,7 +32,7 @@ namespace KlayGE
 	public:
 		virtual void AttachTexture2D(TexturePtr texture2D) = 0;
 		virtual void AttachTextureCube(TexturePtr textureCube, Texture::CubeFaces face) = 0;
-		virtual void DeattachTexture() = 0;
+		virtual void DetachTexture() = 0;
 
 		void SwapBuffers()
 		{

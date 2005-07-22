@@ -35,7 +35,7 @@ namespace KlayGE
 		return type_;
 	}
 
-	size_t VertexStream::sizeElement() const
+	size_t VertexStream::SizeElement() const
 	{
 		return sizeElement_;
 	}

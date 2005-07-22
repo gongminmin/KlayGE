@@ -80,7 +80,7 @@ namespace KlayGE
 
 	void OGLVertexStream::Assign(void const * src, size_t numVertices, size_t stride)
 	{
-		size_t const vertexSize(this->sizeElement() * this->ElementsPerVertex());
+		size_t const vertexSize(this->SizeElement() * this->ElementsPerVertex());
 		size_t const size(vertexSize * numVertices);
 
 		if (use_vbo_)

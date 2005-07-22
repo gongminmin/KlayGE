@@ -124,6 +124,13 @@ namespace KlayGE
 		return ret;
 	}
 
+	RenderVertexStreamPtr D3D9RenderFactory::MakeRenderVertexStream()
+	{
+		D3D9RenderVertexStreamPtr ret(new D3D9RenderVertexStream);
+		resource_pool_.push_back(ret);
+		return ret;
+	}
+
 	void D3D9RenderFactory::OnLostDevice()
 	{
 		for (std::vector<boost::weak_ptr<D3D9Resource> >::iterator iter = resource_pool_.begin();

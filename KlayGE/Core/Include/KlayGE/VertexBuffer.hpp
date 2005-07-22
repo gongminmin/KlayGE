@@ -73,7 +73,7 @@ namespace KlayGE
 
 		virtual size_t NumVertices() const = 0;
 
-		size_t sizeElement() const;
+		size_t SizeElement() const;
 		size_t ElementsPerVertex() const;
 
 	protected:

@@ -15,16 +15,16 @@
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 #include <KlayGE/OpenGL/OGLRenderTexture.hpp>
 #include <KlayGE/OpenGL/OGLRenderEffect.hpp>
-
 #include <KlayGE/OpenGL/OGLVertexStream.hpp>
 #include <KlayGE/OpenGL/OGLIndexStream.hpp>
+#include <KlayGE/OpenGL/OGLRenderVertexStream.hpp>
 
 #include <KlayGE/OpenGL/OGLRenderFactory.hpp>
 
 namespace KlayGE
 {
 	typedef ConcreteRenderFactory<OGLRenderEngine, OGLTexture, OGLRenderTexture,
-				OGLRenderEffect> OGLRenderFactoryBase;
+				OGLRenderEffect, OGLRenderVertexStream> OGLRenderFactoryBase;
 
 	class OGLRenderFactory : public OGLRenderFactoryBase
 	{
@@ -111,6 +111,11 @@ namespace KlayGE
 		IndexStreamPtr MakeIndexStream(bool staticStream)
 		{
 			return IndexStreamPtr(new OGLIndexStream(staticStream));
+		}
+
+		RenderVertexStreamPtr MakeRenderVertexStream()
+		{
+			return RenderVertexStreamPtr(new OGLRenderVertexStream);
 		}
 
 	private:

@@ -1,9 +1,12 @@
 // LZSS.hpp
 // KlayGE 打包文件读取类 头文件
-// Ver 2.2.0
+// Ver 2.8.0
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
 // LZSS压缩算法的作者是 Haruhiko Okumura
+//
+// 2.8.0
+// 支持locale (2005.7.21)
 //
 // 2.2.0
 // 统一使用istream作为资源标示符 (2004.10.26)
@@ -37,16 +40,16 @@
 
 namespace KlayGE
 {
-	#ifdef _MSC_VER
-		#pragma pack(push, 1)
-	#endif
+#ifdef _MSC_VER
+	#pragma pack(push, 1)
+#endif
 
 	struct FileDes
 	{
-		uint32_t			start;
-		uint32_t			length;
-		uint32_t			DeComLength;
-		uint32_t			crc32;
+		uint32_t		start;
+		uint32_t		length;
+		uint32_t		DeComLength;
+		uint32_t		crc32;
 		uint8_t			attr;
 	};
 
@@ -60,9 +63,9 @@ namespace KlayGE
 		uint32_t		FIStart;
 	};
 
-	#ifdef _MSC_VER
-		#pragma pack(pop)
-	#endif
+#ifdef _MSC_VER
+	#pragma pack(pop)
+#endif
 
 	// 忽略大小写比较字符串
 	/////////////////////////////////////////////////////////////////////////////////
@@ -70,14 +73,18 @@ namespace KlayGE
 	{
 	public:
 		IgnoreCaseLessThan()
+			: cur_locale_("")
 		{
 		}
 
 		bool operator()(std::string const & lhs, std::string const & rhs) const
 		{
 			using boost::algorithm::to_upper_copy;
-			return to_upper_copy(lhs) < to_upper_copy(rhs);
+			return to_upper_copy(lhs, cur_locale_) < to_upper_copy(rhs, cur_locale_);
 		}
+
+	private:
+		std::locale cur_locale_;
 	};
 
 	typedef MapVector<std::string, FileDes, IgnoreCaseLessThan> DirTable;

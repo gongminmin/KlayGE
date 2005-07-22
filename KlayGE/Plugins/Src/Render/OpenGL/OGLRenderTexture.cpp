@@ -32,7 +32,7 @@ namespace KlayGE
 		assert(false);
 	}
 
-	void OGLRenderTexture::DeattachTexture()
+	void OGLRenderTexture::DetachTexture()
 	{
 		assert(false);
 	}

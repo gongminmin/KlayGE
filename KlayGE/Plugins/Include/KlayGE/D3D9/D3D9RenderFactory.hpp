@@ -38,6 +38,7 @@
 #include <KlayGE/D3D9/D3D9RenderEffect.hpp>
 #include <KlayGE/D3D9/D3D9VertexStream.hpp>
 #include <KlayGE/D3D9/D3D9IndexStream.hpp>
+#include <KlayGE/D3D9/D3D9RenderVertexStream.hpp>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_RenderEngine_D3D9_d.lib")
@@ -50,7 +51,7 @@ namespace KlayGE
 	RenderFactory& D3D9RenderFactoryInstance();
 
 	typedef ConcreteRenderFactory<D3D9RenderEngine, D3D9Texture, D3D9RenderTexture,
-			D3D9RenderEffect> D3D9RenderFactoryBase;
+			D3D9RenderEffect, D3D9RenderVertexStream> D3D9RenderFactoryBase;
 
 	class D3D9RenderFactory : public D3D9RenderFactoryBase
 	{
@@ -72,6 +73,8 @@ namespace KlayGE
 			uint8_t sizeElement, uint8_t numElement, bool staticStream);
 
 		IndexStreamPtr MakeIndexStream(bool staticStream);
+
+		RenderVertexStreamPtr MakeRenderVertexStream();
 
 		void OnLostDevice();
 		void OnResetDevice();

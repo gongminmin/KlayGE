@@ -48,6 +48,8 @@ namespace KlayGE
 		void DoOnResetDevice();
 
 	private:
+		boost::shared_ptr<IDirect3DDevice9> d3d_device_;
+
 		boost::shared_ptr<IDirect3DVertexBuffer9> buffer_;
 		size_t currentSize_;
 

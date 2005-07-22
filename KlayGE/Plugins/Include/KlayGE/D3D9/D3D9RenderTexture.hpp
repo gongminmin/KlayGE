@@ -34,7 +34,7 @@ namespace KlayGE
 
 		void AttachTexture2D(TexturePtr texture2D);
 		void AttachTextureCube(TexturePtr textureCube, Texture::CubeFaces face);
-		void DeattachTexture();
+		void DetachTexture();
 
 		boost::shared_ptr<IDirect3DSurface9> D3DRenderSurface() const;
 		boost::shared_ptr<IDirect3DSurface9> D3DRenderZBuffer() const;

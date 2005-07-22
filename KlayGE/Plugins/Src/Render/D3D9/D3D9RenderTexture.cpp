@@ -52,6 +52,9 @@ namespace KlayGE
 		tex.D3DTexture2D()->GetSurfaceLevel(0, &surface);
 		renderSurface_ = MakeCOMPtr(surface);
 		depthStencilSurface_ = tex.DepthStencil();
+
+		colorDepth_ = privateTex_->Bpp();
+		isDepthBuffered_ = depthStencilSurface_;
 	}
 
 	void D3D9RenderTexture::AttachTextureCube(TexturePtr textureCube, Texture::CubeFaces face)
@@ -75,7 +78,7 @@ namespace KlayGE
 		depthStencilSurface_ = tex.DepthStencil();
 	}
 
-	void D3D9RenderTexture::DeattachTexture()
+	void D3D9RenderTexture::DetachTexture()
 	{
 		privateTex_.reset();
 	}

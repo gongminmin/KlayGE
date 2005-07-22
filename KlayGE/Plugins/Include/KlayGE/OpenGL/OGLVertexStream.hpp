@@ -35,7 +35,7 @@ namespace KlayGE
 		}
 		size_t NumVertices() const
 		{
-			return buffer_.size() / this->sizeElement() / this->ElementsPerVertex();
+			return buffer_.size() / this->SizeElement() / this->ElementsPerVertex();
 		}
 		bool UseVBO() const
 		{

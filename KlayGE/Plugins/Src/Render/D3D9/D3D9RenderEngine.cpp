@@ -69,7 +69,7 @@ namespace KlayGE
 	{
 		// Create our Direct3D object
 		d3d_ = MakeCOMPtr(Direct3DCreate9(D3D_SDK_VERSION));
-		Verify(d3d_.get() != NULL);
+		Verify(d3d_);
 
 		adapterList_.Enumerate(d3d_);
 	}
@@ -91,7 +91,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	std::wstring const & D3D9RenderEngine::Name() const
 	{
-		static const std::wstring name(L"Direct3D9 Render Engine");
+		static std::wstring const name(L"Direct3D9 Render Engine");
 		return name;
 	}
 
@@ -166,6 +166,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::AmbientLight(Color const & col)
 	{
+		assert(d3dDevice_);
+
 		TIF(d3dDevice_->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_COLORVALUE(col.r(), col.g(), col.b(), 1.0f)));
 	}
 
@@ -180,6 +182,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::ShadingType(ShadeOptions so)
 	{
+		assert(d3dDevice_);
+
 		TIF(d3dDevice_->SetRenderState(D3DRS_SHADEMODE, D3D9Mapping::Mapping(so)));
 	}
 
@@ -187,6 +191,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::EnableLighting(bool enabled)
 	{
+		assert(d3dDevice_);
+
 		TIF(d3dDevice_->SetRenderState(D3DRS_LIGHTING, enabled));
 	}
 
@@ -199,6 +205,7 @@ namespace KlayGE
 			name, settings));
 
 		d3dDevice_ = win->D3DDevice();
+		Verify(d3dDevice_);
 
 		this->ActiveRenderTarget(this->AddRenderTarget(win));
 
@@ -214,6 +221,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::CullingMode(CullMode mode)
 	{
+		assert(d3dDevice_);
+
 		cullingMode_ = mode;
 
 		if ((*RenderEngine::ActiveRenderTarget())->RequiresTextureFlipping())
@@ -238,6 +247,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::PolygonMode(FillMode mode)
 	{
+		assert(d3dDevice_);
+
 		TIF(d3dDevice_->SetRenderState(D3DRS_FILLMODE, D3D9Mapping::Mapping(mode)));
 	}
 
@@ -245,6 +256,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::SetLight(uint32_t index, Light const & lt)
 	{
+		assert(d3dDevice_);
+
 		D3DLIGHT9 d3dLight;
 		std::memset(&d3dLight, 0, sizeof(d3dLight));
 
@@ -282,6 +295,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::LightEnable(uint32_t index, bool enabled)
 	{
+		assert(d3dDevice_);
+
 		TIF(d3dDevice_->LightEnable(index, enabled));
 	}
 
@@ -289,6 +304,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::DoWorldMatrix()
 	{
+		assert(d3dDevice_);
+
 		D3DMATRIX d3dmat(D3D9Mapping::Mapping(worldMat_));
 		TIF(d3dDevice_->SetTransform(D3DTS_WORLD, &d3dmat));
 	}
@@ -297,6 +314,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::DoViewMatrix()
 	{
+		assert(d3dDevice_);
+
 		D3DMATRIX d3dMat(D3D9Mapping::Mapping(viewMat_));
 		TIF(d3dDevice_->SetTransform(D3DTS_VIEW, &d3dMat));
 	}
@@ -305,6 +324,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::DoProjectionMatrix()
 	{
+		assert(d3dDevice_);
+
 		D3DMATRIX d3dMat(D3D9Mapping::Mapping(projMat_));
 
 		if ((*activeRenderTarget_)->RequiresTextureFlipping())
@@ -319,6 +340,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::SetMaterial(Material const & m)
 	{
+		assert(d3dDevice_);
+
 		D3DMATERIAL9 material;
 
 		material.Diffuse	= D3D9Mapping::MappingToFloat4Color(m.diffuse);
@@ -334,6 +357,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::ActiveRenderTarget(RenderTargetListIterator iter)
 	{
+		assert(d3dDevice_);
+
 		RenderEngine::ActiveRenderTarget(iter);
 
 		IDirect3DSurface9* backBuffer;
@@ -363,6 +388,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::BeginFrame()
 	{
+		assert(d3dDevice_);
+
 		TIF(d3dDevice_->Clear(0, NULL, clearFlags_, clearClr_, 1, 0));
 
 		TIF(d3dDevice_->BeginScene());
@@ -372,6 +399,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::Render(VertexBuffer const & vb)
 	{
+		assert(d3dDevice_);
 		assert(vb.VertexStreamEnd() - vb.VertexStreamBegin() != 0);
 
 		D3DPRIMITIVETYPE primType;
@@ -398,7 +426,7 @@ namespace KlayGE
 			D3D9VertexStream& d3d9vs(static_cast<D3D9VertexStream&>(stream));
 			TIF(d3dDevice_->SetStreamSource(element.Stream,
 				d3d9vs.D3D9Buffer().get(), 0,
-				static_cast<UINT>(stream.sizeElement() * stream.ElementsPerVertex())));
+				static_cast<UINT>(stream.SizeElement() * stream.ElementsPerVertex())));
 		}
 
 		{
@@ -462,6 +490,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::EndFrame()
 	{
+		assert(d3dDevice_);
+
 		TIF(d3dDevice_->EndScene());
 	}
 
@@ -469,20 +499,17 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::DepthBufferDepthTest(bool depthTest)
 	{
-		if (depthTest)
-		{
-			TIF(d3dDevice_->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE));
-		}
-		else
-		{
-			TIF(d3dDevice_->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE));
-		}
+		assert(d3dDevice_);
+
+		TIF(d3dDevice_->SetRenderState(D3DRS_ZENABLE, depthTest ? D3DZB_TRUE : D3DZB_FALSE));
 	}
 
 	// 打开/关闭深度缓存
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::DepthBufferDepthWrite(bool depthWrite)
 	{
+		assert(d3dDevice_);
+
 		TIF(d3dDevice_->SetRenderState(D3DRS_ZWRITEENABLE, depthWrite));
 	}
 
@@ -490,6 +517,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::DepthBufferFunction(CompareFunction depthFunction)
 	{
+		assert(d3dDevice_);
+
 		TIF(d3dDevice_->SetRenderState(D3DRS_ZFUNC, D3D9Mapping::Mapping(depthFunction)));
 	}
 
@@ -497,6 +526,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::DepthBias(uint16_t bias)
 	{
+		assert(d3dDevice_);
+
 		TIF(d3dDevice_->SetRenderState(D3DRS_DEPTHBIAS, bias));
 	}
 
@@ -505,6 +536,8 @@ namespace KlayGE
 	void D3D9RenderEngine::Fog(FogMode mode, Color const & color,
 		float expDensity, float linearStart, float linearEnd)
 	{
+		assert(d3dDevice_);
+
 		if (Fog_None == mode)
 		{
 			// just disable
@@ -531,6 +564,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::SetTexture(uint32_t stage, TexturePtr const & texture)
 	{
+		assert(d3dDevice_);
+
 		if (!texture)
 		{
 			TIF(d3dDevice_->SetTexture(stage, NULL));
@@ -600,6 +635,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::DisableTextureStage(uint32_t stage)
 	{
+		assert(d3dDevice_);
+
 		TIF(d3dDevice_->SetTexture(stage, NULL));
 		TIF(d3dDevice_->SetTextureStageState(stage, D3DTSS_COLOROP, D3DTOP_DISABLE));
 	}
@@ -608,6 +645,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::TextureCoordCalculation(uint32_t stage, TexCoordCalcMethod m)
 	{
+		assert(d3dDevice_);
+
 		HRESULT hr = S_OK;
 		D3DXMATRIX matTrans;
 		switch (m)
@@ -654,6 +693,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::TextureMatrix(uint32_t stage, Matrix4 const & mat)
 	{
+		assert(d3dDevice_);
+
 		if (Matrix4::Identity() == mat)
 		{
 			TIF(d3dDevice_->SetTextureStageState(stage, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE));
@@ -689,6 +730,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	bool D3D9RenderEngine::HasHardwareStencil()
 	{
+		assert(d3dDevice_);
+
 		IDirect3DSurface9* surf;
 		D3DSURFACE_DESC surfDesc;
 		d3dDevice_->GetDepthStencilSurface(&surf);
@@ -716,6 +759,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::StencilBufferFunction(CompareFunction func, uint32_t refValue, uint32_t mask)
 	{
+		assert(d3dDevice_);
+
 		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILFUNC, D3D9Mapping::Mapping(func)));
 		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILREF, refValue));
 		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILMASK, mask));
@@ -726,6 +771,8 @@ namespace KlayGE
 	void D3D9RenderEngine::StencilBufferOperation(StencilOperation fail,
 		StencilOperation depth_fail, StencilOperation pass)
 	{
+		assert(d3dDevice_);
+
 		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILFAIL, D3D9Mapping::Mapping(fail)));
 		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILZFAIL, D3D9Mapping::Mapping(depth_fail)));
 		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILPASS, D3D9Mapping::Mapping(pass)));
@@ -735,8 +782,10 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::FillRenderDeviceCaps()
 	{
+		assert(d3dDevice_);
+
 		D3DCAPS9 d3d_caps;
-		d3d_->GetDeviceCaps(this->ActiveAdapter().AdapterNo(), D3DDEVTYPE_HAL, &d3d_caps);
+		d3dDevice_->GetDeviceCaps(&d3d_caps);
 
 		caps_ = D3D9Mapping::Mapping(d3d_caps);
 	}

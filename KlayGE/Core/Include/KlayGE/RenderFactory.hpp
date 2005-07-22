@@ -53,10 +53,12 @@ namespace KlayGE
 		virtual VertexStreamPtr MakeVertexStream(VertexStreamType type,
 			uint8_t sizeElement, uint8_t numElement, bool staticStream = false) = 0;
 		virtual IndexStreamPtr MakeIndexStream(bool staticStream = false) = 0;
+
+		virtual RenderVertexStreamPtr MakeRenderVertexStream() = 0;
 	};
 
 	template <typename RenderEngineType, typename TextureType, typename RenderTextureType,
-		typename RenderEffectType>
+		typename RenderEffectType, typename RenderVertexStreamType>
 	class ConcreteRenderFactory : boost::noncopyable, public RenderFactory
 	{
 	public:

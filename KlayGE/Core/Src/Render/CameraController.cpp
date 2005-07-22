@@ -51,7 +51,7 @@ namespace KlayGE
 		this->Update();
 	}
 
-	void CameraController::DeattachCamera()
+	void CameraController::DetachCamera()
 	{
 		camera_ = NULL;
 	}
