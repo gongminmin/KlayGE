@@ -1,8 +1,12 @@
 // RenderEffect.hpp
 // KlayGE 渲染效果脚本类 头文件
-// Ver 2.5.0
+// Ver 2.8.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.8.0
+// 增加了Do*函数，使用模板方法模式 (2005.7.24)
+// 使用新的自动更新参数的方法 (2005.7.25)
 //
 // 2.5.0
 // 去掉了Clone (2005.4.16)
@@ -26,6 +30,15 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <vector>
+#include <map>
+
+#pragma warning(disable : 4100)
+#pragma warning(disable : 4512)
+#include <boost/variant.hpp>
+#include <boost/utility.hpp>
+#include <boost/operators.hpp>
+
+#include <KlayGE/Math.hpp>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_Core_d.lib")
@@ -37,7 +50,7 @@ namespace KlayGE
 {
 	// 渲染效果
 	//////////////////////////////////////////////////////////////////////////////////
-	class RenderEffect
+	class RenderEffect : boost::equality_comparable<RenderEffect>
 	{
 	public:
 		virtual ~RenderEffect()
@@ -45,48 +58,109 @@ namespace KlayGE
 
 		static RenderEffectPtr NullObject();
 
+		virtual uint32_t HashCode() const = 0;
+
 		virtual void Desc(uint32_t& parameters, uint32_t& techniques, uint32_t& functions) = 0;
 
-		virtual RenderEffectParameterPtr Parameter(uint32_t index) = 0;
-		virtual RenderEffectParameterPtr ParameterByName(std::string const & name) = 0;
-		virtual RenderEffectParameterPtr ParameterBySemantic(std::string const & semantic) = 0;
+		RenderEffectParameterPtr ParameterByName(std::string const & name);
+		RenderEffectParameterPtr ParameterBySemantic(std::string const & semantic);
 
 		virtual bool SetTechnique(std::string const & technique) = 0;
 		virtual bool SetTechnique(uint32_t technique) = 0;
 
+		void FlushParams();
+
 		virtual uint32_t Begin(uint32_t flags = 0) = 0;
+		virtual void End() = 0;
 		virtual void BeginPass(uint32_t passNum) = 0;
 		virtual void EndPass() = 0;
-		virtual void End() = 0;
+
+		void DirtyParam(std::string const& name);
+
+		friend bool
+		operator==(RenderEffect const & lhs, RenderEffect const & rhs)
+		{
+			return lhs.HashCode() == rhs.HashCode();
+		}
+
+	private:
+		virtual std::string DoNameBySemantic(std::string const & semantic) = 0;
+		virtual RenderEffectParameterPtr DoParameterByName(std::string const & name) = 0;
+
+	protected:
+		typedef std::map<std::string, std::pair<RenderEffectParameterPtr, bool> > params_type;
+		params_type params_;
 	};
 
-	class RenderEffectParameter
+	enum RenderEffectParameterType
+	{
+		REPT_float,
+		REPT_Vector4,
+		REPT_Matrix4,
+		REPT_int,
+		REPT_Texture,
+
+		REPT_float_array,
+		REPT_Vector4_array,
+		REPT_Matrix4_array,
+		REPT_int_array,
+
+		REPT_Unknown,
+	};
+
+	class RenderEffectParameter : boost::noncopyable
 	{
 	public:
+		RenderEffectParameter(RenderEffect& effect, std::string const & name);
 		virtual ~RenderEffectParameter()
 			{ }
 
 		static RenderEffectParameterPtr NullObject();
 
-		virtual RenderEffectParameter& operator=(float value) = 0;
-		virtual RenderEffectParameter& operator=(Vector4 const & value) = 0;
-		virtual RenderEffectParameter& operator=(Matrix4 const & value) = 0;
-		virtual RenderEffectParameter& operator=(int value) = 0;
-		virtual RenderEffectParameter& operator=(TexturePtr const & tex) = 0;
+		RenderEffectParameter& operator=(float value);
+		RenderEffectParameter& operator=(Vector4 const & value);
+		RenderEffectParameter& operator=(Matrix4 const & value);
+		RenderEffectParameter& operator=(int value);
+		RenderEffectParameter& operator=(TexturePtr const & tex);
 
-		virtual operator float() const = 0;
-		virtual operator Vector4() const = 0;
-		virtual operator Matrix4() const = 0;
-		virtual operator int() const = 0;
+		float ToFloat() const;
+		Vector4 const & ToVector4() const;
+		Matrix4 const & ToMatrix4() const;
+		int ToInt() const;
+		TexturePtr const & ToTexture() const;
 
-		virtual void SetFloatArray(float const * value, size_t count) = 0;
-		virtual void GetFloatArray(float* value, size_t count) = 0;
-		virtual void SetVectorArray(Vector4 const * value, size_t count) = 0;
-		virtual void GetVectorArray(Vector4* value, size_t count) = 0;
-		virtual void SetMatrixArray(Matrix4 const * matrices, size_t count) = 0;
-		virtual void GetMatrixArray(Matrix4* matrices, size_t count) = 0;
-		virtual void SetIntArray(int const * value, size_t count) = 0;
-		virtual void GetIntArray(int* value, size_t count) = 0;
+		void SetFloatArray(float const * value, size_t count);
+		void GetFloatArray(float* value, size_t count);
+		void SetVector4Array(Vector4 const * value, size_t count);
+		void GetVector4Array(Vector4* value, size_t count);
+		void SetMatrix4Array(Matrix4 const * matrices, size_t count);
+		void GetMatrix4Array(Matrix4* matrices, size_t count);
+		void SetIntArray(int const * value, size_t count);
+		void GetIntArray(int* value, size_t count);
+
+		void DoFlush();
+
+	private:
+		virtual bool DoTestType(RenderEffectParameterType type) = 0;
+
+		virtual void DoFloat(float value) = 0;
+		virtual void DoVector4(Vector4 const & value) = 0;
+		virtual void DoMatrix4(Matrix4 const & value) = 0;
+		virtual void DoInt(int value) = 0;
+		virtual void DoTexture(TexturePtr const & value) = 0;
+
+		virtual void DoSetFloatArray(float const * value, size_t count) = 0;
+		virtual void DoSetVector4Array(Vector4 const * value, size_t count) = 0;
+		virtual void DoSetMatrix4Array(Matrix4 const * matrices, size_t count) = 0;
+		virtual void DoSetIntArray(int const * value, size_t count) = 0;
+
+	protected:
+		RenderEffect& effect_;
+
+		std::string name_;
+		RenderEffectParameterType type_;
+		boost::variant<float, Vector4, Matrix4, int, TexturePtr,
+			std::vector<float>, std::vector<Vector4>, std::vector<Matrix4>, std::vector<int> > val_;
 	};
 
 	RenderEffectPtr LoadRenderEffect(std::string const & effectName);

@@ -29,12 +29,12 @@ sampler2D scene_sampler = sampler_state
 	MinFilter = Point;
 	MagFilter = Point;
 	MipFilter = Point;
-	AddressU  = Wrap;
-	AddressV  = Wrap;
+	AddressU  = Clamp;
+	AddressV  = Clamp;
 };
 
 texture lums_tex;
-sampler2D lums_sampler = sampler_state
+sampler3D lums_sampler = sampler_state
 {
 	Texture = <lums_tex>;
 	MinFilter = Linear;
@@ -42,18 +42,19 @@ sampler2D lums_sampler = sampler_state
 	MipFilter = None;
 	AddressU  = Clamp;
 	AddressV  = Clamp;
+	AddressW  = Clamp;
 };
 
 float4 AsciiArtsPS(float2 tex_coord0	: TEXCOORD0,
 					uniform sampler2D scene_sampler,
-					uniform sampler2D lums_sampler,
+					uniform sampler3D lums_sampler,
 					uniform float2 arg) : COLOR
 {
 	const float3 rgb_to_lum = float3(0.299, 0.587, 0.114);
 
 	float lum = dot(tex2D(scene_sampler, tex_coord0).rgb, rgb_to_lum);
 	float2 t = float2(frac(floor(lum * 255) / 32), 0) + frac(tex_coord0 / arg) / float2(32, 1);
-	return lum * tex2D(lums_sampler, t);
+	return tex3D(lums_sampler, float3(t, lum));
 }
 
 technique AsciiArts

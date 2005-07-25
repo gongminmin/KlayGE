@@ -115,17 +115,14 @@ namespace
 		InputAction(Exit, KS_Escape),
 	};
 
-	struct TheRenderSettings : public RenderSettings
+	bool ConfirmDevice(RenderDeviceCaps const & caps)
 	{
-		bool ConfirmDevice(RenderDeviceCaps const & caps) const
+		if (caps.max_shader_model < 1)
 		{
-			if (caps.max_shader_model < 1)
-			{
-				return false;
-			}
-			return true;
+			return false;
 		}
-	};
+		return true;
+	}
 }
 
 int main()
@@ -137,11 +134,12 @@ int main()
 
 	Context::Instance().InputFactoryInstance(DInputFactoryInstance());
 
-	TheRenderSettings settings;
+	RenderSettings settings;
 	settings.width = 800;
 	settings.height = 600;
 	settings.colorDepth = 32;
 	settings.fullScreen = false;
+	settings.ConfirmDevice = ConfirmDevice;
 
 	VertexDisplacement app;
 	app.Create("VertexDisplacement", settings);

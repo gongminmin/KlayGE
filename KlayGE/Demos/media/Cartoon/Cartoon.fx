@@ -60,8 +60,8 @@ float4 ToonPS(float2 toonTex	: TEXCOORD0,
 				uniform sampler1D toonMap,
 				uniform sampler1D edgeMap) : COLOR
 {
-	float3 toon = tex1D(toonMap, toonTex);
-	float3 edge = tex1D(edgeMap, edgeTex);
+	float3 toon = tex1D(toonMap, toonTex.x);
+	float3 edge = tex1D(edgeMap, edgeTex.x);
 
 	return float4(toon * edge, 1);
 }

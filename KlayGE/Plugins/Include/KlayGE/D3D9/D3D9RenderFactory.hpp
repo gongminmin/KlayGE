@@ -74,7 +74,7 @@ namespace KlayGE
 
 		IndexStreamPtr MakeIndexStream(bool staticStream);
 
-		RenderVertexStreamPtr MakeRenderVertexStream();
+		RenderVertexStreamPtr MakeRenderVertexStream(uint32_t width, uint32_t height);
 
 		void OnLostDevice();
 		void OnResetDevice();

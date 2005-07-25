@@ -1,8 +1,11 @@
 // D3D9IndexStream.cpp
 // KlayGE D3D9索引流类 实现文件
-// Ver 2.3.0
+// Ver 2.8.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.8.0
+// 增加了CopyToMemory (2005.7.24)
 //
 // 2.3.0
 // 增加了OnLostDevice和OnResetDevice (2005.2.23)
@@ -58,6 +61,21 @@ namespace KlayGE
 		void* dest;
 		TIF(buffer_->Lock(0, 0, &dest, D3DLOCK_NOSYSLOCK | (this->IsStatic() ? 0 : D3DLOCK_DISCARD)));
 		std::copy(static_cast<uint8_t const *>(src), static_cast<uint8_t const *>(src) + size, static_cast<uint8_t*>(dest));
+		buffer_->Unlock();
+	}
+
+	void D3D9IndexStream::CopyToMemory(void* data)
+	{
+		size_t const size(sizeof(uint16_t) * numIndices_);
+
+		void* src;
+		TIF(buffer_->Lock(0, 0, &src, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
+
+		uint8_t* destPtr(static_cast<uint8_t*>(data));
+		uint8_t const * srcPtr(static_cast<uint8_t const *>(src));
+
+		std::copy(srcPtr, srcPtr + size, destPtr);
+
 		buffer_->Unlock();
 	}
 

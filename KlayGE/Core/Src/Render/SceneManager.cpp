@@ -27,6 +27,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Renderable.hpp>
+#include <KlayGE/RenderEffect.hpp>
 
 #include <KlayGE/SceneManager.hpp>
 
@@ -64,16 +65,16 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::AddToRenderQueue(RenderablePtr const & obj)
 	{
-		RenderEffectPtr const & effect(obj->GetRenderEffect());
+		uint32_t const hash_code = obj->GetRenderEffect()->HashCode();
 
-		RenderQueueType::iterator iter(renderQueue_.find(effect));
+		RenderQueueType::iterator iter(renderQueue_.find(hash_code));
 		if (iter != renderQueue_.end())
 		{
 			iter->second.push_back(obj);
 		}
 		else
 		{
-			renderQueue_.insert(RenderQueueType::value_type(effect,
+			renderQueue_.insert(RenderQueueType::value_type(hash_code,
 				RenderItemsType(1, obj)));
 		}
 	}
@@ -111,7 +112,7 @@ namespace KlayGE
 		for (RenderQueueType::iterator queueIter = renderQueue_.begin();
 			queueIter != renderQueue_.end(); ++ queueIter)
 		{
-			renderEngine.SetRenderEffect(queueIter->first);
+			renderEngine.SetRenderEffect(queueIter->second[0]->GetRenderEffect());
 
 			for (RenderItemsType::iterator itemIter = queueIter->second.begin();
 				itemIter != queueIter->second.end(); ++ itemIter)

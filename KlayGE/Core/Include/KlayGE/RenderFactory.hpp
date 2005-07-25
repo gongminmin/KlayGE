@@ -13,9 +13,9 @@
 #ifndef _RENDERFACTORY_HPP
 #define _RENDERFACTORY_HPP
 
+#include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/VertexBuffer.hpp>
-#include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/Font.hpp>
 
 #include <boost/utility.hpp>
@@ -54,7 +54,7 @@ namespace KlayGE
 			uint8_t sizeElement, uint8_t numElement, bool staticStream = false) = 0;
 		virtual IndexStreamPtr MakeIndexStream(bool staticStream = false) = 0;
 
-		virtual RenderVertexStreamPtr MakeRenderVertexStream() = 0;
+		virtual RenderVertexStreamPtr MakeRenderVertexStream(uint32_t width, uint32_t height) = 0;
 	};
 
 	template <typename RenderEngineType, typename TextureType, typename RenderTextureType,

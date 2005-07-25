@@ -1,8 +1,11 @@
 // OGLVertexStream.hpp
 // KlayGE OpenGL顶点数据流类 头文件
-// Ver 2.7.0
-// 版权所有(C) 龚敏敏, 2004-2005
+// Ver 2.8.0
+// 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.8.0
+// 增加了CopyToMemory (2005.7.24)
 //
 // 2.7.0
 // 支持vertex_buffer_object (2005.6.19)
@@ -35,7 +38,7 @@ namespace KlayGE
 		}
 		size_t NumVertices() const
 		{
-			return buffer_.size() / this->SizeElement() / this->ElementsPerVertex();
+			return numVertices_;
 		}
 		bool UseVBO() const
 		{
@@ -43,6 +46,8 @@ namespace KlayGE
 		}
 
 		void Assign(void const * src, size_t numVertices, size_t stride);
+		void CopyToMemory(void* data);
+
 		void Active();
 
 		std::vector<uint8_t> const & OGLBuffer() const
@@ -56,6 +61,8 @@ namespace KlayGE
 
 	protected:
 		std::vector<uint8_t> buffer_;
+
+		size_t numVertices_;
 
 		bool use_vbo_;
 		bool static_stream_;

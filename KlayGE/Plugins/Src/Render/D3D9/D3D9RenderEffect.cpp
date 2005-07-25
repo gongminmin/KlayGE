@@ -26,6 +26,9 @@
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 
 #include <cassert>
+#pragma warning(disable : 4244)
+#pragma warning(disable : 4245)
+#include <boost/crc.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderEffect.hpp>
 
@@ -35,6 +38,10 @@ namespace KlayGE
 	{
 		assert(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
 
+		boost::crc_32_type crc32;
+		crc32.process_bytes(&srcData[0], srcData.size());
+		crc32_ = crc32.checksum();
+
 		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 
 		ID3DXEffect* effect;
@@ -42,6 +49,11 @@ namespace KlayGE
 			static_cast<UINT>(srcData.size()), NULL, NULL,
 			0, NULL, &effect, NULL);
 		effect_ = MakeCOMPtr(effect);
+	}
+
+	uint32_t D3D9RenderEffect::HashCode() const
+	{
+		return crc32_;
 	}
 
 	void D3D9RenderEffect::Desc(uint32_t& parameters, uint32_t& techniques, uint32_t& functions)
@@ -54,34 +66,14 @@ namespace KlayGE
 		functions = desc.Functions;
 	}
 
-	RenderEffectParameterPtr D3D9RenderEffect::DoParameter(D3DXHANDLE handle)
+	std::string D3D9RenderEffect::DoNameBySemantic(std::string const & semantic)
 	{
-		params_t::iterator iter = params_.find(handle);
-		if (iter != params_.end())
-		{
-			return iter->second;
-		}
-		else
-		{
-			D3D9RenderEffectParameterPtr ret(new D3D9RenderEffectParameter(effect_, handle));
-			params_.insert(std::make_pair(handle, ret));
-			return ret;
-		}
+		return effect_->GetParameterBySemantic(NULL, semantic.c_str());
 	}
 
-	RenderEffectParameterPtr D3D9RenderEffect::Parameter(uint32_t index)
+	RenderEffectParameterPtr D3D9RenderEffect::DoParameterByName(std::string const & name)
 	{
-		return this->DoParameter(effect_->GetParameter(NULL, index));
-	}
-
-	RenderEffectParameterPtr D3D9RenderEffect::ParameterByName(std::string const & name)
-	{
-		return this->DoParameter(effect_->GetParameterByName(NULL, name.c_str()));
-	}
-
-	RenderEffectParameterPtr D3D9RenderEffect::ParameterBySemantic(std::string const & semantic)
-	{
-		return this->DoParameter(effect_->GetParameterBySemantic(NULL, semantic.c_str()));
+		return D3D9RenderEffectParameterPtr(new D3D9RenderEffectParameter(*this, name));
 	}
 
 	bool D3D9RenderEffect::DoSetTechnique(D3DXHANDLE handle)
@@ -119,6 +111,11 @@ namespace KlayGE
 		return passes;
 	}
 
+	void D3D9RenderEffect::End()
+	{
+		TIF(effect_->End());
+	}
+
 	void D3D9RenderEffect::BeginPass(uint32_t passNum)
 	{
 		TIF(effect_->BeginPass(passNum));
@@ -129,16 +126,12 @@ namespace KlayGE
 		TIF(effect_->EndPass());
 	}
 
-	void D3D9RenderEffect::End()
-	{
-		TIF(effect_->End());
-	}
-
 	void D3D9RenderEffect::DoOnLostDevice()
 	{
-		for (params_t::iterator iter = params_.begin(); iter != params_.end(); ++ iter)
+		for (params_type::iterator iter = params_.begin(); iter != params_.end(); ++ iter)
 		{
-			iter->second->OnLostDevice();
+			static_cast<D3D9RenderEffectParameter*>(iter->second.first.get())->OnLostDevice();
+			iter->second.second = true;
 		}
 
 		TIF(effect_->OnLostDevice());
@@ -148,53 +141,100 @@ namespace KlayGE
 	{
 		TIF(effect_->OnResetDevice());
 
-		for (params_t::iterator iter = params_.begin(); iter != params_.end(); ++ iter)
+		for (params_type::iterator iter = params_.begin(); iter != params_.end(); ++ iter)
 		{
-			iter->second->OnResetDevice();
+			static_cast<D3D9RenderEffectParameter*>(iter->second.first.get())->OnResetDevice();
+			iter->second.second = true;
 		}
 	}
 
 
-	D3D9RenderEffectParameter::D3D9RenderEffectParameter(boost::shared_ptr<ID3DXEffect> const & effect, D3DXHANDLE parameter)
-		: effect_(effect), parameter_(parameter)
+	D3D9RenderEffectParameter::D3D9RenderEffectParameter(RenderEffect& effect, std::string const & name)
+									: RenderEffectParameter(effect, name)
 	{
+	}
+
+	bool D3D9RenderEffectParameter::DoTestType(RenderEffectParameterType type)
+	{
+		assert(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
+
+		boost::shared_ptr<ID3DXEffect> d3dx_effect = static_cast<D3D9RenderEffect&>(effect_).D3DXEffect();
+
+		D3DXPARAMETER_DESC desc;
+		d3dx_effect->GetParameterDesc(name_.c_str(), &desc);
+
+		switch (type)
+		{
+		case REPT_float:
+			return (D3DXPC_SCALAR == desc.Class) && (D3DXPT_FLOAT == desc.Type);
+
+		case REPT_Vector4:
+			return (D3DXPC_VECTOR == desc.Class) && (D3DXPT_FLOAT == desc.Type) && (1 == desc.Rows) && (4 == desc.Columns);
+
+		case REPT_Matrix4:
+			return (D3DXPC_MATRIX_ROWS == desc.Class) && (D3DXPT_FLOAT == desc.Type) && (4 == desc.Rows) && (4 == desc.Columns);
+
+		case REPT_int:
+			return (D3DXPC_SCALAR == desc.Class) && (D3DXPT_INT == desc.Type);
+
+		case REPT_Texture:
+			return (D3DXPC_OBJECT == desc.Class)
+				&& ((D3DXPT_TEXTURE == desc.Type) || (D3DXPT_TEXTURE1D == desc.Type) || (D3DXPT_TEXTURE2D == desc.Type)
+					|| (D3DXPT_TEXTURE3D == desc.Type) || (D3DXPT_TEXTURECUBE == desc.Type));
+
+		case REPT_float_array:
+			return (D3DXPT_FLOAT == desc.Type) && (desc.Elements != 1);
+
+		case REPT_Vector4_array:
+			return (D3DXPC_VECTOR == desc.Class) && (D3DXPT_FLOAT == desc.Type) && (desc.Elements != 1);
+
+		case REPT_Matrix4_array:
+			return (D3DXPC_MATRIX_ROWS == desc.Class) && (D3DXPT_FLOAT == desc.Type) && (4 == desc.Rows) && (4 == desc.Columns) && (desc.Elements != 1);
+
+		case REPT_int_array:
+			return (D3DXPC_SCALAR == desc.Class) && (D3DXPT_INT == desc.Type) && (desc.Elements != 1);
+
+		default:
+			assert(false);
+			return false;
+		}
 	}
 	
-	RenderEffectParameter& D3D9RenderEffectParameter::operator=(float value)
+	void D3D9RenderEffectParameter::DoFloat(float value)
 	{
-		texture_.reset();
+		assert(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
 
-		TIF(effect_->SetFloat(parameter_, value));
-		return *this;
+		boost::shared_ptr<ID3DXEffect> d3dx_effect = static_cast<D3D9RenderEffect&>(effect_).D3DXEffect();
+		TIF(d3dx_effect->SetFloat(name_.c_str(), value));
 	}
 
-	RenderEffectParameter& D3D9RenderEffectParameter::operator=(Vector4 const & value)
+	void D3D9RenderEffectParameter::DoVector4(Vector4 const & value)
 	{
-		texture_.reset();
+		assert(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
 
-		TIF(effect_->SetVector(parameter_, reinterpret_cast<D3DXVECTOR4 const *>(&value)));
-		return *this;
+		boost::shared_ptr<ID3DXEffect> d3dx_effect = static_cast<D3D9RenderEffect&>(effect_).D3DXEffect();
+		TIF(d3dx_effect->SetVector(name_.c_str(), reinterpret_cast<D3DXVECTOR4 const *>(&value)));
 	}
 
-	RenderEffectParameter& D3D9RenderEffectParameter::operator=(Matrix4 const & value)
+	void D3D9RenderEffectParameter::DoMatrix4(Matrix4 const & value)
 	{
-		texture_.reset();
+		assert(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
 
-		TIF(effect_->SetMatrix(parameter_, reinterpret_cast<D3DXMATRIX const *>(&value)));
-		return *this;
+		boost::shared_ptr<ID3DXEffect> d3dx_effect = static_cast<D3D9RenderEffect&>(effect_).D3DXEffect();
+		TIF(d3dx_effect->SetMatrix(name_.c_str(), reinterpret_cast<D3DXMATRIX const *>(&value)));
 	}
 
-	RenderEffectParameter& D3D9RenderEffectParameter::operator=(int value)
+	void D3D9RenderEffectParameter::DoInt(int value)
 	{
-		texture_.reset();
+		assert(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
 
-		TIF(effect_->SetInt(parameter_, value));
-		return *this;
+		boost::shared_ptr<ID3DXEffect> d3dx_effect = static_cast<D3D9RenderEffect&>(effect_).D3DXEffect();
+		TIF(d3dx_effect->SetInt(name_.c_str(), value));
 	}
 
-	RenderEffectParameter& D3D9RenderEffectParameter::operator=(TexturePtr const & tex)
+	void D3D9RenderEffectParameter::DoTexture(TexturePtr const & tex)
 	{
-		texture_ = tex;
+		assert(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
 
 		IDirect3DBaseTexture9* texture(NULL);
 		if (tex)
@@ -204,104 +244,70 @@ namespace KlayGE
 			D3D9Texture const & d3d9Tex = static_cast<D3D9Texture const &>(*tex);
 			texture = d3d9Tex.D3DBaseTexture().get();
 		}
-		TIF(effect_->SetTexture(parameter_, texture));
 
-		return *this;
+		boost::shared_ptr<ID3DXEffect> d3dx_effect = static_cast<D3D9RenderEffect&>(effect_).D3DXEffect();
+		TIF(d3dx_effect->SetTexture(name_.c_str(), texture));
 	}
 
-	D3D9RenderEffectParameter::operator float() const
+	void D3D9RenderEffectParameter::DoSetFloatArray(float const * value, size_t count)
 	{
-		float value;
-		TIF(effect_->GetFloat(parameter_, &value));
-		return value;
+		assert(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
+
+		boost::shared_ptr<ID3DXEffect> d3dx_effect = static_cast<D3D9RenderEffect&>(effect_).D3DXEffect();
+		TIF(d3dx_effect->SetFloatArray(name_.c_str(), value, static_cast<UINT>(count)));
 	}
 
-	D3D9RenderEffectParameter::operator Vector4() const
+	void D3D9RenderEffectParameter::DoSetVector4Array(Vector4 const * value, size_t count)
 	{
-		D3DXVECTOR4 vec;
-		TIF(effect_->GetVector(parameter_, &vec));
+		assert(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
 
-		return Vector4(vec.x, vec.y, vec.z, vec.w);
-	}
-
-	D3D9RenderEffectParameter::operator Matrix4() const
-	{
-		D3DXMATRIX mat;
-		TIF(effect_->GetMatrix(parameter_, &mat));
-		return Matrix4(mat);
-	}
-
-	D3D9RenderEffectParameter::operator int() const
-	{
-		int value;
-		TIF(effect_->GetInt(parameter_, &value));
-		return value;
-	}
-
-	void D3D9RenderEffectParameter::SetFloatArray(float const * value, size_t count)
-	{
-		TIF(effect_->SetFloatArray(parameter_, value, static_cast<UINT>(count)));
-	}
-
-	void D3D9RenderEffectParameter::GetFloatArray(float* value, size_t count)
-	{
-		TIF(effect_->GetFloatArray(parameter_, value, static_cast<UINT>(count)));
-	}
-
-	void D3D9RenderEffectParameter::SetVectorArray(Vector4 const * value, size_t count)
-	{
-		TIF(effect_->SetVectorArray(parameter_, reinterpret_cast<D3DXVECTOR4 const *>(value),
+		boost::shared_ptr<ID3DXEffect> d3dx_effect = static_cast<D3D9RenderEffect&>(effect_).D3DXEffect();
+		TIF(d3dx_effect->SetVectorArray(name_.c_str(), reinterpret_cast<D3DXVECTOR4 const *>(value),
 			static_cast<UINT>(count)));
 	}
 
-	void D3D9RenderEffectParameter::GetVectorArray(Vector4* value, size_t count)
+	void D3D9RenderEffectParameter::DoSetMatrix4Array(Matrix4 const * matrices, size_t count)
 	{
-		TIF(effect_->GetVectorArray(parameter_, reinterpret_cast<D3DXVECTOR4*>(value),
-			static_cast<UINT>(count)));
-	}
+		assert(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
 
-	void D3D9RenderEffectParameter::SetMatrixArray(Matrix4 const * matrices, size_t count)
-	{
-		TIF(effect_->SetMatrixArray(parameter_,
+		boost::shared_ptr<ID3DXEffect> d3dx_effect = static_cast<D3D9RenderEffect&>(effect_).D3DXEffect();
+		TIF(d3dx_effect->SetMatrixArray(name_.c_str(),
 			reinterpret_cast<D3DXMATRIX const *>(matrices), static_cast<UINT>(count)));
 	}
 
-	void D3D9RenderEffectParameter::GetMatrixArray(Matrix4* matrices, size_t count)
+	void D3D9RenderEffectParameter::DoSetIntArray(int const * value, size_t count)
 	{
-		TIF(effect_->GetMatrixArray(parameter_,
-			reinterpret_cast<D3DXMATRIX*>(matrices), static_cast<UINT>(count)));
-	}
+		assert(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
 
-	void D3D9RenderEffectParameter::SetIntArray(int const * value, size_t count)
-	{
-		TIF(effect_->SetIntArray(parameter_, value, static_cast<UINT>(count)));
-	}
-
-	void D3D9RenderEffectParameter::GetIntArray(int* value, size_t count)
-	{
-		TIF(effect_->GetIntArray(parameter_, value, static_cast<UINT>(count)));
+		boost::shared_ptr<ID3DXEffect> d3dx_effect = static_cast<D3D9RenderEffect&>(effect_).D3DXEffect();
+		TIF(d3dx_effect->SetIntArray(name_.c_str(), value, static_cast<UINT>(count)));
 	}
 
 	void D3D9RenderEffectParameter::DoOnLostDevice()
 	{
-		if (texture_)
+		if (REPT_Texture == type_)
 		{
-			assert(dynamic_cast<D3D9Texture*>(texture_.get()) != NULL);
+			assert(dynamic_cast<D3D9Texture*>(boost::get<TexturePtr>(val_).get()) != NULL);
 
-			D3D9Texture& texture = static_cast<D3D9Texture&>(*texture_);
+			D3D9Texture& texture = static_cast<D3D9Texture&>(*boost::get<TexturePtr>(val_));
 			texture.OnLostDevice();
 		}
 	}
 
 	void D3D9RenderEffectParameter::DoOnResetDevice()
 	{
-		if (texture_)
+		if (REPT_Texture == type_)
 		{
-			assert(dynamic_cast<D3D9Texture*>(texture_.get()) != NULL);
+			if (boost::get<TexturePtr>(val_))
+			{
+				assert(dynamic_cast<D3D9Texture*>(boost::get<TexturePtr>(val_).get()) != NULL);
 
-			D3D9Texture& texture = static_cast<D3D9Texture&>(*texture_);
-			texture.OnResetDevice();
-			TIF(effect_->SetTexture(parameter_, texture.D3DBaseTexture().get()));
+				D3D9Texture& texture = static_cast<D3D9Texture&>(*boost::get<TexturePtr>(val_));
+				texture.OnResetDevice();
+
+				boost::shared_ptr<ID3DXEffect> d3dx_effect = static_cast<D3D9RenderEffect&>(effect_).D3DXEffect();
+				TIF(d3dx_effect->SetTexture(name_.c_str(), texture.D3DBaseTexture().get()));
+			}
 		}
 	}
 }

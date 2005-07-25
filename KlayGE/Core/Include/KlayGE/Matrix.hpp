@@ -193,9 +193,10 @@ namespace KlayGE
 			return temp;
 		}
 
-		bool operator==(Matrix4_T const & rhs)
+		friend bool
+		operator==(Matrix4_T const & lhs, Matrix4_T const & rhs)
 		{
-			return m_ == rhs.m_;
+			return lhs.m_ == rhs.m_;
 		}
 
 	private:

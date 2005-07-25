@@ -397,7 +397,7 @@ namespace KlayGE
 
 	// ‰÷»æ
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::Render(VertexBuffer const & vb)
+	void D3D9RenderEngine::DoRender(VertexBuffer const & vb)
 	{
 		assert(d3dDevice_);
 		assert(vb.VertexStreamEnd() - vb.VertexStreamBegin() != 0);
@@ -426,7 +426,7 @@ namespace KlayGE
 			D3D9VertexStream& d3d9vs(static_cast<D3D9VertexStream&>(stream));
 			TIF(d3dDevice_->SetStreamSource(element.Stream,
 				d3d9vs.D3D9Buffer().get(), 0,
-				static_cast<UINT>(stream.SizeElement() * stream.ElementsPerVertex())));
+				static_cast<UINT>(stream.SizeOfElement() * stream.ElementsPerVertex())));
 		}
 
 		{

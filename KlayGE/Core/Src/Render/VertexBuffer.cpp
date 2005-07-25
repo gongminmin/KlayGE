@@ -35,7 +35,7 @@ namespace KlayGE
 		return type_;
 	}
 
-	size_t VertexStream::SizeElement() const
+	size_t VertexStream::SizeOfElement() const
 	{
 		return sizeElement_;
 	}
@@ -69,15 +69,17 @@ namespace KlayGE
 
 	void VertexBuffer::AddVertexStream(VertexStreamType type, uint8_t sizeElement, uint8_t numElement, bool staticStream)
 	{
-		if (!this->GetVertexStream(type))
-		{
-			vertexStreams_.push_back(Context::Instance().RenderFactoryInstance().MakeVertexStream(type,
-				sizeElement, numElement, staticStream));
-		}
-		else
-		{
-			assert(false);
-		}
+		assert(!this->GetVertexStream(type));
+		
+		vertexStreams_.push_back(Context::Instance().RenderFactoryInstance().MakeVertexStream(type,
+			sizeElement, numElement, staticStream));
+	}
+
+	void VertexBuffer::AddVertexStream(VertexStreamPtr vstream)
+	{
+		assert(!this->GetVertexStream(vstream->Type()));
+
+		vertexStreams_.push_back(vstream);
 	}
 
 	VertexStreamPtr VertexBuffer::GetVertexStream(VertexStreamType type) const
@@ -86,7 +88,7 @@ namespace KlayGE
 			boost::bind(std::equal_to<VertexStreamType>(), boost::bind(&VertexStream::Type, _1), type));
 		if (iter != this->VertexStreamEnd())
 		{
-			return *iter;
+            return *iter;
 		}
 
 		return VertexStreamPtr();

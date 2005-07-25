@@ -22,10 +22,12 @@
 
 namespace KlayGE
 {
-	OGLRenderVertexStream::OGLRenderVertexStream()
+	OGLRenderVertexStream::OGLRenderVertexStream(uint32_t width, uint32_t height)
 	{
 		left_ = 0;
 		top_ = 0;
+		width_ = width;
+		height_ = height;
 	}
 
 	void OGLRenderVertexStream::CustomAttribute(std::string const & /*name*/, void* /*data*/)

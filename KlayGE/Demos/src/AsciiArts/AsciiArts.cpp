@@ -155,23 +155,26 @@ namespace
 	{
 		assert(OUTPUT_NUM_ASCII == ascii_lums.size());
 
-		std::vector<uint8_t> temp_data(OUTPUT_NUM_ASCII * ASCII_WIDTH * ASCII_HEIGHT);
+		std::vector<uint8_t> temp_data(LUM_LEVEL * OUTPUT_NUM_ASCII * ASCII_WIDTH * ASCII_HEIGHT);
 
-		for (size_t i = 0; i < OUTPUT_NUM_ASCII; ++ i)
+		for (size_t j = 0; j < LUM_LEVEL; ++ j)
 		{
-			for (size_t y = 0; y < ASCII_HEIGHT; ++ y)
+			for (size_t i = 0; i < OUTPUT_NUM_ASCII; ++ i)
 			{
-				for (size_t x = 0; x < ASCII_WIDTH; ++ x)
+				for (size_t y = 0; y < ASCII_HEIGHT; ++ y)
 				{
-					temp_data[y * OUTPUT_NUM_ASCII * ASCII_WIDTH + i * ASCII_WIDTH + x]
-						= ascii_lums[i][y * ASCII_WIDTH + x];
+					for (size_t x = 0; x < ASCII_WIDTH; ++ x)
+					{
+						temp_data[j * OUTPUT_NUM_ASCII * ASCII_WIDTH * ASCII_HEIGHT + y * OUTPUT_NUM_ASCII * ASCII_WIDTH + i * ASCII_WIDTH + x]
+							= ascii_lums[i][y * ASCII_WIDTH + x] * (j + 1) / LUM_LEVEL;
+					}
 				}
 			}
 		}
 
-		KlayGE::TexturePtr ret = Context::Instance().RenderFactoryInstance().MakeTexture2D(OUTPUT_NUM_ASCII * ASCII_WIDTH,
-			ASCII_HEIGHT, 1, PF_L8);
-		ret->CopyMemoryToTexture2D(0, &temp_data[0], PF_L8, OUTPUT_NUM_ASCII * ASCII_WIDTH, ASCII_HEIGHT, 0, 0);
+		KlayGE::TexturePtr ret = Context::Instance().RenderFactoryInstance().MakeTexture3D(OUTPUT_NUM_ASCII * ASCII_WIDTH,
+			ASCII_HEIGHT, LUM_LEVEL, 1, PF_L8);
+		ret->CopyMemoryToTexture3D(0, &temp_data[0], PF_L8, OUTPUT_NUM_ASCII * ASCII_WIDTH, ASCII_HEIGHT, LUM_LEVEL, 0, 0, 0);
 		return ret;
 	}
 
@@ -187,17 +190,14 @@ namespace
 		InputAction(Exit, KS_Escape),
 	};
 
-	struct TheRenderSettings : public RenderSettings
+	bool ConfirmDevice(RenderDeviceCaps const & caps)
 	{
-		bool ConfirmDevice(RenderDeviceCaps const & caps) const
+		if (caps.max_shader_model < 2)
 		{
-			if (caps.max_shader_model < 2)
-			{
-				return false;
-			}
-			return true;
+			return false;
 		}
-	};
+		return true;
+	}
 }
 
 int main()
@@ -209,11 +209,12 @@ int main()
 
 	Context::Instance().InputFactoryInstance(DInputFactoryInstance());
 
-	TheRenderSettings settings;
+	RenderSettings settings;
 	settings.width = WIDTH;
 	settings.height = HEIGHT;
 	settings.colorDepth = 32;
 	settings.fullScreen = false;
+	settings.ConfirmDevice = ConfirmDevice;
 
 	AsciiArts app;
 	app.Create("ASCII Arts", settings);

@@ -162,6 +162,15 @@ namespace KlayGE
 		this->DoProjectionMatrix();
 	}
 
+	// 渲染一个vb
+	/////////////////////////////////////////////////////////////////////////////////
+	void RenderEngine::Render(VertexBuffer const & vb)
+	{
+		renderEffect_->FlushParams();
+
+		this->DoRender(vb);
+	}
+
 	// 上次Render()所渲染的图元数
 	/////////////////////////////////////////////////////////////////////////////////
 	size_t RenderEngine::NumPrimitivesJustRendered()

@@ -32,45 +32,49 @@ namespace KlayGE
 	class OGLRenderEffect : public RenderEffect
 	{
 	public:
-		OGLRenderEffect(std::string const & srcData, uint32_t flags = 0);
+		explicit OGLRenderEffect(std::string const & srcData);
+
+		uint32_t HashCode() const;
 
 		void Desc(uint32_t& parameters, uint32_t& techniques, uint32_t& functions);
-
-		RenderEffectParameterPtr Parameter(uint32_t index);
-		RenderEffectParameterPtr ParameterByName(std::string const & name);
-		RenderEffectParameterPtr ParameterBySemantic(std::string const & semantic);
 
 		bool SetTechnique(std::string const & technique);
 		bool SetTechnique(uint32_t technique);
 
-		uint32_t Begin(uint32_t flags = 0);
+		uint32_t Begin(uint32_t flags);
+		void End();
 		void BeginPass(uint32_t passNum);
 		void EndPass();
-		void End();
+
+	private:
+		std::string DoNameBySemantic(std::string const & semantic);
+		RenderEffectParameterPtr DoParameterByName(std::string const & name);
+
+	private:
+		uint32_t crc32_;
 	};
 
 	class OGLRenderEffectParameter : public RenderEffectParameter
 	{
 	public:
-		RenderEffectParameter& operator=(float value);
-		RenderEffectParameter& operator=(Vector4 const & value);
-		RenderEffectParameter& operator=(Matrix4 const & value);
-		RenderEffectParameter& operator=(int value);
-		RenderEffectParameter& operator=(TexturePtr const & tex);
 
-		operator float() const;
-		operator Vector4() const;
-		operator Matrix4() const;
-		operator int() const;
+	private:
+		bool DoTestType(RenderEffectParameterType type);
 
-		void SetFloatArray(float const * value, size_t count);
-		void GetFloatArray(float* value, size_t count);
-		void SetVectorArray(Vector4 const * value, size_t count);
-		void GetVectorArray(Vector4* value, size_t count);
-		void SetMatrixArray(Matrix4 const * matrices, size_t count);
-		void GetMatrixArray(Matrix4* matrices, size_t count);
-		void SetIntArray(int const * value, size_t count);
-		void GetIntArray(int* value, size_t count);
+		void DoFloat(float value);
+		void DoVector4(Vector4 const & value);
+		void DoMatrix4(Matrix4 const & value);
+		void DoInt(int value);
+		void DoTexture(TexturePtr const & value);
+
+		void DoSetFloatArray(float const * value, size_t count);
+		void DoSetVector4Array(Vector4 const * value, size_t count);
+		void DoSetMatrix4Array(Matrix4 const * matrices, size_t count);
+		void DoSetIntArray(int const * value, size_t count);
+
+	private:
+		OGLRenderEffectParameter(OGLRenderEffectParameter const & rhs);
+		OGLRenderEffectParameter& operator=(OGLRenderEffectParameter const & rhs);
 	};
 }
 

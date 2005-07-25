@@ -73,12 +73,12 @@ namespace KlayGE
 		void SetLight(uint32_t index, Light const & lt);
 		void LightEnable(uint32_t index, bool enable);
 
+		using RenderEngine::ActiveRenderTarget;
 		void ActiveRenderTarget(RenderTargetListIterator iter);
 
 		void StartRendering();
 
 		void BeginFrame();
-		void Render(VertexBuffer const & rb);
 		void EndFrame();
 
 		void DepthBufferDepthTest(bool depthTest);
@@ -110,6 +110,8 @@ namespace KlayGE
 		void DoWorldMatrix();
 		void DoViewMatrix();
 		void DoProjectionMatrix();
+
+		void DoRender(VertexBuffer const & vb);
 
 		void FillRenderDeviceCaps();
 

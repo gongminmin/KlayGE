@@ -113,9 +113,9 @@ namespace KlayGE
 			return IndexStreamPtr(new OGLIndexStream(staticStream));
 		}
 
-		RenderVertexStreamPtr MakeRenderVertexStream()
+		RenderVertexStreamPtr MakeRenderVertexStream(uint32_t width, uint32_t height)
 		{
-			return RenderVertexStreamPtr(new OGLRenderVertexStream);
+			return RenderVertexStreamPtr(new OGLRenderVertexStream(width, height));
 		}
 
 	private:

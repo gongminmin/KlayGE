@@ -29,6 +29,7 @@
 #include <cassert>
 #include <cstring>
 
+#define NOMINMAX
 #include <d3d9.h>
 
 #include <KlayGE/D3D9/D3D9Mapping.hpp>
@@ -299,14 +300,14 @@ namespace KlayGE
 			{
 				D3DCAPS9 d3d_caps;
 				d3dDevice->GetDeviceCaps(&d3d_caps);
-				if (settings.ConfirmDevice(D3D9Mapping::Mapping(d3d_caps)))
+				if (settings.ConfirmDevice && !settings.ConfirmDevice(D3D9Mapping::Mapping(d3d_caps)))
 				{
-					description_ += iter->second;
-					break;
+					d3dDevice->Release();
 				}
 				else
 				{
-					d3dDevice->Release();
+					description_ += iter->second;
+					break;
 				}
 			}
 		}
@@ -440,6 +441,8 @@ namespace KlayGE
 			D3D9RenderFactory& factory = static_cast<D3D9RenderFactory&>(Context::Instance().RenderFactoryInstance());
 			factory.OnLostDevice();
 
+			D3D9RenderEngine& engine = static_cast<D3D9RenderEngine&>(factory.RenderEngineInstance());
+
 			renderSurface_.reset();
 			renderZBuffer_.reset();
 
@@ -449,7 +452,7 @@ namespace KlayGE
 
 			this->UpdateSurfacesPtrs();
 
-			factory.RenderEngineInstance().ActiveRenderTarget(factory.RenderEngineInstance().ActiveRenderTarget());
+			engine.ActiveRenderTarget(engine.ActiveRenderTarget());
 
 			factory.OnResetDevice();
 		}

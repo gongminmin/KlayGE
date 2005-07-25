@@ -152,7 +152,7 @@ namespace KlayGE
 		RenderEffectPtr GetRenderEffect() const;
 
 		virtual void BeginFrame() = 0;
-		virtual void Render(VertexBuffer const & vb) = 0;
+		void Render(VertexBuffer const & vb);
 		virtual void EndFrame() = 0;
 
 		size_t NumPrimitivesJustRendered();
@@ -234,6 +234,8 @@ namespace KlayGE
 		virtual void DoWorldMatrix() = 0;
 		virtual void DoViewMatrix() = 0;
 		virtual void DoProjectionMatrix() = 0;
+
+		virtual void DoRender(VertexBuffer const & vb) = 0;
 
 		virtual void FillRenderDeviceCaps() = 0;
 

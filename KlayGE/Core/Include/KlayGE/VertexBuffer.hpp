@@ -1,8 +1,11 @@
 // VertexBuffer.hpp
 // KlayGE 顶点缓冲区类 头文件
-// Ver 2.4.0
+// Ver 2.8.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.8.0
+// 增加了CopyToMemory (2005.7.24)
 //
 // 2.4.0
 // 改名为VertexBuffer (2005.3.7)
@@ -70,10 +73,11 @@ namespace KlayGE
 		virtual bool IsStatic() const = 0;
 
 		virtual void Assign(void const * src, size_t numVertex, size_t stride = 0) = 0;
+		virtual void CopyToMemory(void* data) = 0;
 
 		virtual size_t NumVertices() const = 0;
 
-		size_t SizeElement() const;
+		size_t SizeOfElement() const;
 		size_t ElementsPerVertex() const;
 
 	protected:
@@ -91,6 +95,7 @@ namespace KlayGE
 
 		virtual bool IsStatic() const = 0;
 		virtual void Assign(void const * src, size_t numIndices) = 0;
+		virtual void CopyToMemory(void* data) = 0;
 	};
 
 
@@ -118,6 +123,7 @@ namespace KlayGE
 		size_t NumVertices() const;
 
 		void AddVertexStream(VertexStreamType type, uint8_t sizeElement, uint8_t numElement, bool staticStream = false);
+		void AddVertexStream(VertexStreamPtr vstream);
 		VertexStreamPtr GetVertexStream(VertexStreamType type) const;
 
 		VertexStreamIterator VertexStreamBegin();

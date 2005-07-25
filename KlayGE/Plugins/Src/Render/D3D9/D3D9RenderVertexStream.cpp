@@ -25,19 +25,23 @@
 
 namespace KlayGE
 {
-	D3D9RenderVertexStream::D3D9RenderVertexStream()
+	D3D9RenderVertexStream::D3D9RenderVertexStream(uint32_t width, uint32_t height)
 	{
 		left_ = 0;
 		top_ = 0;
+		width_ = width;
+		height_ = height;
 
 		viewport_.left		= left_;
 		viewport_.top		= top_;
+		viewport_.width		= width_;
+		viewport_.height	= height_;
 	}
 
 	void D3D9RenderVertexStream::Attach(VertexStreamPtr vs)
 	{
 		assert(!vs->IsStatic());
-		assert(vs->ElementsPerVertex() <= 4);
+		assert((3 == vs->ElementsPerVertex()) || (4 == vs->ElementsPerVertex()));
 		assert(dynamic_cast<D3D9VertexStream*>(vs.get()) != NULL);
 
 		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
@@ -45,59 +49,24 @@ namespace KlayGE
 
 		d3d_device_ = static_cast<D3D9RenderEngine const &>(render_eng).D3DDevice();
 
-		RenderDeviceCaps const & caps = render_eng.DeviceCaps();
-		assert(vs->NumVertices() < caps.max_texture_width * caps.max_texture_height);
-
-		int const buf_size = static_cast<int>(vs_->NumVertices());
-		int const sqrt_buf_size = static_cast<int>(std::sqrt(static_cast<float>(buf_size)));
-
 		vs_ = vs;
-		width_ = buf_size;
-		height_ = 1;
-		while (width_ > sqrt_buf_size)
-		{
-			width_ /= 2;
-			height_ *= 2;
-		}
-		assert(width_ * height_ == buf_size);
 
 		isDepthBuffered_ = false;
 
-		viewport_.width		= width_;
-		viewport_.height	= height_;
-
-		switch (vs_->Type())
+		if (sizeof(float) == vs_->SizeOfElement())
 		{
-		case VST_Positions:
-		case VST_Normals:
 			fmt_ = D3DFMT_A32B32G32R32F;
 			colorDepth_ = 128;
-			break;
+		}
+		else
+		{
+			assert(sizeof(uint8_t) == vs_->SizeOfElement());
 
-		case VST_Diffuses:
-		case VST_Speculars:
 			fmt_ = D3DFMT_A8R8G8B8;
 			colorDepth_ = 32;
-			break;
-		
-		case VST_TextureCoords0:
-		case VST_TextureCoords1:
-		case VST_TextureCoords2:
-		case VST_TextureCoords3:
-		case VST_TextureCoords4:
-		case VST_TextureCoords5:
-		case VST_TextureCoords6:
-		case VST_TextureCoords7:
-			fmt_ = D3DFMT_A32B32G32R32F;
-			colorDepth_ = 128;
-			break;
-
-		default:
-			assert(false);
-			break;
 		}
 
-		this->CreateSurface(D3DPOOL_DEFAULT);
+		render_surf_ = this->CreateSurface(D3DPOOL_DEFAULT);
 	}
 
 	void D3D9RenderVertexStream::Detach()
@@ -177,8 +146,17 @@ namespace KlayGE
 
 	D3D9RenderVertexStream::IDirect3DSurface9Ptr D3D9RenderVertexStream::CreateSurface(D3DPOOL pool)
 	{
-		IDirect3DSurface9* surface;
-		TIF(d3d_device_->CreateOffscreenPlainSurface(width_, height_, fmt_, pool, &surface, NULL));
+		IDirect3DSurface9* surface = NULL;
+
+		if (D3DPOOL_SYSTEMMEM == pool)
+		{
+			TIF(d3d_device_->CreateOffscreenPlainSurface(width_, height_, fmt_, pool, &surface, NULL));
+		}
+		else
+		{
+			TIF(d3d_device_->CreateRenderTarget(width_, height_, fmt_, D3DMULTISAMPLE_NONE, 0, true, &surface, NULL));
+		}
+
 		return MakeCOMPtr(surface);
 	}
 
@@ -187,39 +165,51 @@ namespace KlayGE
 		D3DLOCKED_RECT locked_rect;
 		TIF(render_surf_->LockRect(&locked_rect, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
 
+		size_t const elems_per_vert = vs_->ElementsPerVertex();
+
 		if (D3DFMT_A8R8G8B8 == fmt_)
 		{
-			std::vector<uint32_t> vertices(vs_->NumVertices());
+			std::vector<uint8_t> vertices(width_ * height_ * elems_per_vert);
 
-			uint32_t* src = static_cast<uint32_t*>(locked_rect.pBits);
-			std::vector<uint32_t>::iterator dst = vertices.begin();
+			uint8_t* src = static_cast<uint8_t*>(locked_rect.pBits);
+			std::vector<uint8_t>::iterator dst = vertices.begin();
 			for (int i = 0; i < height_; ++ i)
 			{
-				std::copy(src, src + width_, dst);
+				for (int j = 0; j < width_; ++ j)
+				{
+					dst[j * elems_per_vert + 0] = src[j * 4 + 0];
+					dst[j * elems_per_vert + 1] = src[j * 4 + 1];
+					dst[j * elems_per_vert + 2] = src[j * 4 + 2];
+				}
 
-				src += locked_rect.Pitch / sizeof(uint32_t);
-				dst += width_;
+				src += locked_rect.Pitch;
+				dst += width_ * elems_per_vert;
 			}
 
-			vs_->Assign(&vertices[0], vs_->NumVertices());
+			vs_->Assign(&vertices[0], width_ * height_);
 		}
 		else
 		{
 			assert(D3DFMT_A32B32G32R32F == fmt_);
 
-			std::vector<float> vertices(vs_->NumVertices());
+			std::vector<float> vertices(width_ * height_ * elems_per_vert);
 
 			float* src = static_cast<float*>(locked_rect.pBits);
 			std::vector<float>::iterator dst = vertices.begin();
 			for (int i = 0; i < height_; ++ i)
 			{
-				std::copy(src, src + width_ * 4, dst);
+				for (int j = 0; j < width_; ++ j)
+				{
+					dst[j * elems_per_vert + 0] = src[j * 4 + 0];
+					dst[j * elems_per_vert + 1] = src[j * 4 + 1];
+					dst[j * elems_per_vert + 2] = src[j * 4 + 2];
+				}
 
 				src += locked_rect.Pitch / sizeof(float);
-				dst += width_ * 4;
+				dst += width_ * elems_per_vert;
 			}
 
-			vs_->Assign(&vertices[0], vs_->NumVertices());
+			vs_->Assign(&vertices[0], width_ * height_);
 		}
 
 		render_surf_->UnlockRect();

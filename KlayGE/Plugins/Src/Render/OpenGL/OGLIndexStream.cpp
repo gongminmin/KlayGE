@@ -1,8 +1,11 @@
 // OGLIndexStream.cpp
 // KlayGE OpenGL索引数据流类 实现文件
-// Ver 2.7.0
-// 版权所有(C) 龚敏敏, 2004-2005
+// Ver 2.8.0
+// 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.8.0
+// 增加了CopyToMemory (2005.7.24)
 //
 // 2.7.0
 // 支持vertex_buffer_object (2005.6.19)
@@ -27,7 +30,7 @@ namespace KlayGE
 	OGLIndexStream::OGLIndexStream(bool staticStream)
 		: use_vbo_(false), static_stream_(staticStream)
 	{
-		if (glloader_is_supported("GL_VERSION_1_5"))
+		if (glloader_GL_VERSION_1_5())
 		{
 			glBindBuffer_			= glBindBuffer;
 			glBufferData_			= glBufferData;
@@ -45,7 +48,7 @@ namespace KlayGE
 		}
 		else
 		{
-			if (glloader_is_supported("GL_ARB_vertex_buffer_object"))
+			if (glloader_GL_ARB_vertex_buffer_object())
 			{
 				glBindBuffer_			= glBindBufferARB;
 				glBufferData_			= glBufferDataARB;
@@ -79,17 +82,40 @@ namespace KlayGE
 
 	void OGLIndexStream::Assign(void const * src, size_t numIndices)
 	{
+		numIndices_ = numIndices;
+
 		if (use_vbo_)
 		{
 			glBindBuffer_(GL_ELEMENT_ARRAY_BUFFER, ib_);
 			glBufferData_(GL_ELEMENT_ARRAY_BUFFER,
 				reinterpret_cast<GLsizeiptr>(numIndices * sizeof(uint16_t)), src,
-				static_stream_ ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+				this->IsStatic() ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
 		}
 		else
 		{
 			buffer_.assign(static_cast<uint16_t const *>(src),
 				static_cast<uint16_t const *>(src) + numIndices);
+		}
+	}
+
+	void OGLIndexStream::CopyToMemory(void* data)
+	{
+		uint16_t* destPtr = static_cast<uint16_t*>(data);
+
+		if (use_vbo_)
+		{
+			glBindBuffer_(GL_ELEMENT_ARRAY_BUFFER, ib_);
+
+			uint16_t* srcPtr = static_cast<uint16_t*>(glMapBuffer_(GL_ELEMENT_ARRAY_BUFFER,
+				this->IsStatic() ? GL_STATIC_READ : GL_DYNAMIC_READ));
+
+			std::copy(srcPtr, srcPtr + this->NumIndices(), destPtr);
+
+			glUnmapBuffer(GL_ARRAY_BUFFER);
+		}
+		else
+		{
+			std::copy(buffer_.begin(), buffer_.end(), destPtr);
 		}
 	}
 

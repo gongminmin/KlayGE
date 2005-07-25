@@ -17,32 +17,28 @@
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 
 #include <cassert>
+#pragma warning(disable : 4244)
+#pragma warning(disable : 4245)
+#include <boost/crc.hpp>
 
 #include <KlayGE/OpenGL/OGLRenderEffect.hpp>
 
 namespace KlayGE
 {
-	OGLRenderEffect::OGLRenderEffect(std::string const & srcData, uint32_t flags)
+	OGLRenderEffect::OGLRenderEffect(std::string const & srcData)
 	{
+		boost::crc_32_type crc32;
+		crc32.process_bytes(&srcData[0], srcData.size());
+		crc32_ = crc32.checksum();
+	}
+
+	uint32_t OGLRenderEffect::HashCode() const
+	{
+		return crc32_;
 	}
 
 	void OGLRenderEffect::Desc(uint32_t& parameters, uint32_t& techniques, uint32_t& functions)
 	{
-	}
-
-	RenderEffectParameterPtr OGLRenderEffect::Parameter(uint32_t index)
-	{
-		return RenderEffectParameterPtr();
-	}
-
-	RenderEffectParameterPtr OGLRenderEffect::ParameterByName(std::string const & name)
-	{
-		return RenderEffectParameterPtr();
-	}
-
-	RenderEffectParameterPtr OGLRenderEffect::ParameterBySemantic(std::string const & semantic)
-	{
-		return RenderEffectParameterPtr();
 	}
 
 	bool OGLRenderEffect::SetTechnique(std::string const & technique)
@@ -55,9 +51,23 @@ namespace KlayGE
 		return false;
 	}
 
+	std::string OGLRenderEffect::DoNameBySemantic(std::string const & semantic)
+	{
+		return "";
+	}
+
+	RenderEffectParameterPtr OGLRenderEffect::DoParameterByName(std::string const & name)
+	{
+		return RenderEffectParameterPtr();
+	}
+
 	uint32_t OGLRenderEffect::Begin(uint32_t flags)
 	{
-		return 1;
+		return 0;
+	}
+
+	void OGLRenderEffect::End()
+	{
 	}
 
 	void OGLRenderEffect::BeginPass(uint32_t passNum)
@@ -68,85 +78,45 @@ namespace KlayGE
 	{
 	}
 
-	void OGLRenderEffect::End()
+
+	bool OGLRenderEffectParameter::DoTestType(RenderEffectParameterType type)
 	{
+		return true;
 	}
 
-
-	RenderEffectParameter& OGLRenderEffectParameter::operator=(float value)
+	void OGLRenderEffectParameter::DoFloat(float value)
 	{
-		return *this;
 	}
 	
-	RenderEffectParameter& OGLRenderEffectParameter::operator=(Vector4 const & value)
-	{
-		return *this;
-	}
-
-	RenderEffectParameter& OGLRenderEffectParameter::operator=(Matrix4 const & value)
-	{
-		return *this;
-	}
-
-	RenderEffectParameter& OGLRenderEffectParameter::operator=(int value)
-	{
-		return *this;
-	}
-
-	RenderEffectParameter& OGLRenderEffectParameter::operator=(TexturePtr const & tex)
-	{
-		return *this;
-	}
-
-	OGLRenderEffectParameter::operator float() const
-	{
-		return 0;
-	}
-
-	OGLRenderEffectParameter::operator Vector4() const
-	{
-		return Vector4::Zero();
-	}
-
-	OGLRenderEffectParameter::operator Matrix4() const
-	{
-		return Matrix4::Identity();
-	}
-
-	OGLRenderEffectParameter::operator int() const
-	{
-		return 0;
-	}
-
-	void OGLRenderEffectParameter::SetFloatArray(float const * matrices, size_t count)
+	void OGLRenderEffectParameter::DoVector4(Vector4 const & value)
 	{
 	}
 
-	void OGLRenderEffectParameter::GetFloatArray(float* matrices, size_t count)
+	void OGLRenderEffectParameter::DoMatrix4(Matrix4 const & value)
 	{
 	}
 
-	void OGLRenderEffectParameter::SetVectorArray(Vector4 const * matrices, size_t count)
+	void OGLRenderEffectParameter::DoInt(int value)
 	{
 	}
 
-	void OGLRenderEffectParameter::GetVectorArray(Vector4* matrices, size_t count)
+	void OGLRenderEffectParameter::DoTexture(TexturePtr const & tex)
 	{
 	}
 
-	void OGLRenderEffectParameter::SetMatrixArray(Matrix4 const * matrices, size_t count)
+	void OGLRenderEffectParameter::DoSetFloatArray(float const * matrices, size_t count)
 	{
 	}
 
-	void OGLRenderEffectParameter::GetMatrixArray(Matrix4* matrices, size_t count)
+	void OGLRenderEffectParameter::DoSetVector4Array(Vector4 const * matrices, size_t count)
 	{
 	}
 
-	void SetIntArray(int const * matrices, size_t count)
+	void OGLRenderEffectParameter::DoSetMatrix4Array(Matrix4 const * matrices, size_t count)
 	{
 	}
 
-	void GetIntArray(int* matrices, size_t count)
+	void OGLRenderEffectParameter::DoSetIntArray(int const * matrices, size_t count)
 	{
 	}
 }

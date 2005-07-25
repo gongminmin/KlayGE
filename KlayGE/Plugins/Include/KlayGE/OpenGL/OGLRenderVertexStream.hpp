@@ -26,7 +26,7 @@ namespace KlayGE
 	class OGLRenderVertexStream : public RenderVertexStream
 	{
 	public:
-		OGLRenderVertexStream();
+		OGLRenderVertexStream(uint32_t width, uint32_t height);
 
 		void Attach(VertexStreamPtr vs);
 		void Detach();

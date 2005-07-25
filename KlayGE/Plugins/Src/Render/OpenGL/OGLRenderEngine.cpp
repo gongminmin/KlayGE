@@ -158,14 +158,14 @@ namespace KlayGE
 	{
 		RenderWindowPtr win(new OGLRenderWindow(name, settings));
 
-		if (glloader_is_supported("GL_VERSION_1_3"))
+		if (glloader_GL_VERSION_1_3())
 		{
 			glActiveTexture_ = glActiveTexture;
 			glClientActiveTexture_ = glClientActiveTexture;
 		}
 		else
 		{
-			if (glloader_is_supported("GL_ARB_multitexture"))
+			if (glloader_GL_ARB_multitexture())
 			{
 				glActiveTexture_ = glActiveTextureARB;
 				glClientActiveTexture_ = glClientActiveTextureARB;
@@ -379,7 +379,7 @@ namespace KlayGE
 
 	// ‰÷»æ
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::Render(VertexBuffer const & vb)
+	void OGLRenderEngine::DoRender(VertexBuffer const & vb)
 	{
 		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_NORMAL_ARRAY);
@@ -685,7 +685,7 @@ namespace KlayGE
 	{
 		GLint temp;
 
-		if (glloader_is_supported("GL_VERSION_2_0") || glloader_is_supported("GL_ARB_vertex_shader"))
+		if (glloader_GL_VERSION_2_0() || glloader_GL_ARB_vertex_shader())
 		{
 			glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &temp);
 			caps_.max_vertex_texture_units = temp;
@@ -695,8 +695,8 @@ namespace KlayGE
 			caps_.max_vertex_texture_units = 0;
 		}
 
-		if (glloader_is_supported("GL_VERSION_2_0")
-			|| (glloader_is_supported("GL_ARB_vertex_shader") && glloader_is_supported("GL_ARB_fragment_shader")))
+		if (glloader_GL_VERSION_2_0()
+			|| (glloader_GL_ARB_vertex_shader() && glloader_GL_ARB_fragment_shader()))
 		{
 			if (caps_.max_vertex_texture_units != 0)
 			{
@@ -709,7 +709,7 @@ namespace KlayGE
 		}
 		else
 		{
-			if (glloader_is_supported("GL_ARB_vertex_program") && glloader_is_supported("GL_ARB_fragment_program"))
+			if (glloader_GL_ARB_vertex_program() && glloader_GL_ARB_fragment_program())
 			{
 				caps_.max_shader_model = 1;
 			}
@@ -721,7 +721,7 @@ namespace KlayGE
 
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &temp);
 		caps_.max_texture_height = caps_.max_texture_width = temp;
-		if (glloader_is_supported("GL_VERSION_1_2") || glloader_is_supported("GL_EXT_texture3D"))
+		if (glloader_GL_VERSION_1_2() || glloader_GL_EXT_texture3D())
 		{
 			glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &temp);
 			caps_.max_texture_depth = temp;
@@ -730,7 +730,7 @@ namespace KlayGE
 		{
 			caps_.max_texture_depth = 0;
 		}
-		if (glloader_is_supported("GL_VERSION_1_3") || glloader_is_supported("GL_ARB_texture_cube_map"))
+		if (glloader_GL_VERSION_1_3() || glloader_GL_ARB_texture_cube_map())
 		{
 			glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &temp);
 			caps_.max_texture_cube_size = temp;
@@ -739,7 +739,7 @@ namespace KlayGE
 		{
 			caps_.max_texture_cube_size = 0;
 		}
-		if (glloader_is_supported("GL_VERSION_1_3") || glloader_is_supported("GL_ARB_multitexture"))
+		if (glloader_GL_VERSION_1_3() || glloader_GL_ARB_multitexture())
 		{
 			glGetIntegerv(GL_MAX_TEXTURE_UNITS, &temp);
 			caps_.max_textures_units = temp;
@@ -748,7 +748,7 @@ namespace KlayGE
 		{
 			caps_.max_textures_units = 1;
 		}
-		if (glloader_is_supported("GL_EXT_texture_filter_anisotropic"))
+		if (glloader_GL_EXT_texture_filter_anisotropic())
 		{
 			glGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &temp);
 			caps_.max_texture_anisotropy = temp;
@@ -760,7 +760,7 @@ namespace KlayGE
 
 		caps_.max_user_clip_planes = 6;
 
-		if (glloader_is_supported("GL_VERSION_2_0") || glloader_is_supported("GL_ARB_draw_buffers"))
+		if (glloader_GL_VERSION_2_0() || glloader_GL_ARB_draw_buffers())
 		{
 			glGetIntegerv(GL_MAX_DRAW_BUFFERS, &temp);
 			caps_.max_simultaneous_rts	= temp;

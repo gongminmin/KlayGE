@@ -1,8 +1,11 @@
 // D3D9VertexStream.cpp
 // KlayGE D3D9顶点流类 实现文件
-// Ver 2.3.0
+// Ver 2.8.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.8.0
+// 增加了CopyToMemory (2005.7.24)
 //
 // 2.3.0
 // 增加了OnLostDevice和OnResetDevice (2005.2.23)
@@ -47,7 +50,7 @@ namespace KlayGE
 
 		numVertices_ = numVertices;
 
-		size_t const vertexSize(this->SizeElement() * this->ElementsPerVertex());
+		size_t const vertexSize(this->SizeOfElement() * this->ElementsPerVertex());
 		size_t const size(vertexSize * numVertices);
 
 		if (currentSize_ < size)
@@ -89,6 +92,21 @@ namespace KlayGE
 		buffer_->Unlock();
 	}
 
+	void D3D9VertexStream::CopyToMemory(void* data)
+	{
+		size_t const size(this->SizeOfElement() * this->ElementsPerVertex() * numVertices_);
+
+		void* src;
+		TIF(buffer_->Lock(0, 0, &src, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
+
+		uint8_t* destPtr(static_cast<uint8_t*>(data));
+		uint8_t const * srcPtr(static_cast<uint8_t const *>(src));
+
+		std::copy(srcPtr, srcPtr + size, destPtr);
+
+		buffer_->Unlock();
+	}
+
 	boost::shared_ptr<IDirect3DVertexBuffer9> D3D9VertexStream::D3D9Buffer() const
 	{
 		return buffer_;
@@ -96,7 +114,7 @@ namespace KlayGE
 
 	void D3D9VertexStream::DoOnLostDevice()
 	{
-		size_t const vertexSize(this->SizeElement() * this->ElementsPerVertex());
+		size_t const vertexSize(this->SizeOfElement() * this->ElementsPerVertex());
 		size_t const size(vertexSize * numVertices_);
 
 		IDirect3DVertexBuffer9* temp;
@@ -124,7 +142,7 @@ namespace KlayGE
 		D3D9RenderEngine const & renderEngine(static_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3d_device_ = renderEngine.D3DDevice();
 
-		size_t const vertexSize(this->SizeElement() * this->ElementsPerVertex());
+		size_t const vertexSize(this->SizeOfElement() * this->ElementsPerVertex());
 		size_t const size(vertexSize * numVertices_);
 
 		IDirect3DVertexBuffer9* temp;

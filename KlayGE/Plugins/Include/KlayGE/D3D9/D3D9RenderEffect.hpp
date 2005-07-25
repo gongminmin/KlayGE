@@ -63,19 +63,17 @@ namespace KlayGE
 		boost::shared_ptr<ID3DXEffect> const & D3DXEffect() const
 			{ return effect_; }
 
-		void Desc(uint32_t& parameters, uint32_t& techniques, uint32_t& functions);
+		uint32_t HashCode() const;
 
-		RenderEffectParameterPtr Parameter(uint32_t index);
-		RenderEffectParameterPtr ParameterByName(std::string const & name);
-		RenderEffectParameterPtr ParameterBySemantic(std::string const & semantic);
+		void Desc(uint32_t& parameters, uint32_t& techniques, uint32_t& functions);
 
 		bool SetTechnique(std::string const & technique);
 		bool SetTechnique(uint32_t technique);
 
-		uint32_t Begin(uint32_t flags = 0);
+		uint32_t Begin(uint32_t flags);
+		void End();
 		void BeginPass(uint32_t passNum);
 		void EndPass();
-		void End();
 
 	private:
 		bool Validate(D3DXHANDLE handle);
@@ -83,50 +81,43 @@ namespace KlayGE
 		void DoOnLostDevice();
 		void DoOnResetDevice();
 
-		RenderEffectParameterPtr DoParameter(D3DXHANDLE handle);
+		std::string DoNameBySemantic(std::string const & semantic);
+		RenderEffectParameterPtr DoParameterByName(std::string const & name);
+
 		bool DoSetTechnique(D3DXHANDLE handle);
 
 	private:
 		boost::shared_ptr<ID3DXEffect> effect_;
 
-		typedef std::map<D3DXHANDLE, D3D9RenderEffectParameterPtr> params_t;
-		params_t params_;
+		uint32_t crc32_;
 	};
 
 	class D3D9RenderEffectParameter : public RenderEffectParameter, public D3D9Resource
 	{
 	public:
-		D3D9RenderEffectParameter(boost::shared_ptr<ID3DXEffect> const & effect, D3DXHANDLE parameter);
+		D3D9RenderEffectParameter(RenderEffect& effect, std::string const & name);
 
-		RenderEffectParameter& operator=(float value);
-		RenderEffectParameter& operator=(Vector4 const & value);
-		RenderEffectParameter& operator=(Matrix4 const & value);
-		RenderEffectParameter& operator=(int value);
-		RenderEffectParameter& operator=(TexturePtr const & tex);
+	private:
+		bool DoTestType(RenderEffectParameterType type);
 
-		operator float() const;
-		operator Vector4() const;
-		operator Matrix4() const;
-		operator int() const;
+		void DoFloat(float value);
+		void DoVector4(Vector4 const & value);
+		void DoMatrix4(Matrix4 const & value);
+		void DoInt(int value);
+		void DoTexture(TexturePtr const & value);
 
-		void SetFloatArray(float const * value, size_t count);
-		void GetFloatArray(float* value, size_t count);
-		void SetVectorArray(Vector4 const * value, size_t count);
-		void GetVectorArray(Vector4* value, size_t count);
-		void SetMatrixArray(Matrix4 const * matrices, size_t count);
-		void GetMatrixArray(Matrix4* matrices, size_t count);
-		void SetIntArray(int const * value, size_t count);
-		void GetIntArray(int* value, size_t count);
+		void DoSetFloatArray(float const * value, size_t count);
+		void DoSetVector4Array(Vector4 const * value, size_t count);
+		void DoSetMatrix4Array(Matrix4 const * matrices, size_t count);
+		void DoSetIntArray(int const * value, size_t count);
 
 	private:
 		void DoOnLostDevice();
 		void DoOnResetDevice();
 
 	private:
-		boost::shared_ptr<ID3DXEffect> effect_;
-		D3DXHANDLE parameter_;
-
-		TexturePtr texture_;
+		D3D9RenderEffectParameter(D3D9RenderEffectParameter const & rhs);
+		D3D9RenderEffectParameter& operator=(D3D9RenderEffectParameter const & rhs);
 	};
 }
 

@@ -1,8 +1,11 @@
 // D3D9VertexStream.hpp
 // KlayGE D3D9顶点流类 头文件
-// Ver 2.4.0
+// Ver 2.8.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.8.0
+// 增加了CopyToMemory (2005.7.24)
 //
 // 2.4.0
 // 改为派生自D3D9Resource (2005.3.3)
@@ -38,7 +41,8 @@ namespace KlayGE
 
 		bool IsStatic() const;
 
-		void Assign(void const * src, size_t numVertices, size_t stride = 0);
+		void Assign(void const * src, size_t numVertices, size_t stride);
+		void CopyToMemory(void* data);
 
 		boost::shared_ptr<IDirect3DVertexBuffer9> D3D9Buffer() const;
 		size_t NumVertices() const;

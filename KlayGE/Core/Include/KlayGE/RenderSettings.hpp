@@ -13,6 +13,7 @@
 #ifndef _RENDERSETTINGS_HPP
 #define _RENDERSETTINGS_HPP
 
+#include <boost/function.hpp>
 #include <KlayGE/RenderDeviceCaps.hpp>
 
 #ifdef KLAYGE_DEBUG
@@ -33,14 +34,8 @@ namespace KlayGE
 				multiSample(0)
 		{
 		}
-		virtual ~RenderSettings()
-		{
-		}
 
-		virtual bool ConfirmDevice(RenderDeviceCaps const & /*caps*/) const
-		{
-			return true;
-		}
+		boost::function<bool (RenderDeviceCaps const &)> ConfirmDevice;
 
 		int		width;
 		int		height;

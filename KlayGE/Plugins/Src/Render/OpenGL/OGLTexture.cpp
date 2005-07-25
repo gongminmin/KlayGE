@@ -945,8 +945,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLTexture::MaxMipLevel(uint32_t level)
 	{
-		if (glloader_is_supported("GL_VERSION_1_2")
-			|| glloader_is_supported("GL_SGIS_texture_lod"))
+		if (glloader_GL_VERSION_1_2() || glloader_GL_SGIS_texture_lod())
 		{
 			this->GLBindTexture();
 
@@ -968,8 +967,7 @@ namespace KlayGE
 	{
 		this->GLBindTexture();
 
-		if (glloader_is_supported("GL_VERSION_1_4")
-			|| glloader_is_supported("GL_EXT_texture_lod_bias"))
+		if (glloader_GL_VERSION_1_4() || glloader_GL_EXT_texture_lod_bias())
 		{
 			GLfloat max_bias;
 			glGetFloatv(GL_MAX_TEXTURE_LOD_BIAS, &max_bias);
@@ -978,7 +976,7 @@ namespace KlayGE
 		}
 		else
 		{
-			if (glloader_is_supported("GL_SGIX_texture_lod_bias"))
+			if (glloader_GL_SGIX_texture_lod_bias())
 			{
 				mip_map_lod_bias_ = bias;
 				glTexParameterf(this->GLType(), GL_TEXTURE_LOD_BIAS_S_SGIX, mip_map_lod_bias_);
