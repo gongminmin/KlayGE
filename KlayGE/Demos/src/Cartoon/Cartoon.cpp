@@ -35,7 +35,7 @@ namespace
 	{
 		RenderTorus(TexturePtr const & toonTex, TexturePtr const & edgeTex)
 		{
-			effect_ = LoadRenderEffect("Cartoon.fx");
+			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("Cartoon.fx");
 			*(effect_->ParameterByName("toon")) = toonTex;
 			*(effect_->ParameterByName("edge")) = edgeTex;
 			effect_->SetTechnique("cartoonTec");
@@ -176,9 +176,9 @@ void Cartoon::Update()
 	*(renderTorus_->GetRenderEffect()->ParameterByName("worldviewIT")) = MathLib::Transpose(MathLib::Inverse(mat));
 
 	std::wostringstream stream;
-	stream << (*renderEngine.ActiveRenderTarget())->FPS();
+	stream << renderEngine.ActiveRenderTarget(0)->FPS();
 
-	RenderWindow* rw = static_cast<RenderWindow*>(renderEngine.ActiveRenderTarget()->get());
+	RenderWindow* rw = static_cast<RenderWindow*>(renderEngine.ActiveRenderTarget(0).get());
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"¿¨Í¨äÖÈ¾²âÊÔ");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), rw->Description());

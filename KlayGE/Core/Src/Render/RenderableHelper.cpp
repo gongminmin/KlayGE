@@ -49,7 +49,7 @@ namespace KlayGE
 
 	RenderablePoint::RenderablePoint(Vector3 const & v)
 	{
-		effect_ = LoadRenderEffect("RenderableHelper.fx");
+		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("RenderableHelper.fx");
 		effect_->SetTechnique("PointTec");
 
 		vb_.reset(new VertexBuffer(VertexBuffer::BT_PointList));
@@ -68,7 +68,7 @@ namespace KlayGE
 
 	RenderableLine::RenderableLine(Vector3 const & v0, Vector3 const & v1)
 	{
-		effect_ = LoadRenderEffect("RenderableHelper.fx");
+		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("RenderableHelper.fx");
 		effect_->SetTechnique("LineTec");
 
 		Vector3 xyzs[] =
@@ -92,7 +92,7 @@ namespace KlayGE
 
 	RenderableTriangle::RenderableTriangle(Vector3 const & v0, Vector3 const & v1, Vector3 const & v2)
 	{
-		effect_ = LoadRenderEffect("RenderableHelper.fx");
+		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("RenderableHelper.fx");
 		effect_->SetTechnique("TriangleTec");
 
 		Vector3 xyzs[] =
@@ -118,7 +118,7 @@ namespace KlayGE
 	{
 		box_ = box;
 
-		effect_ = LoadRenderEffect("RenderableHelper.fx");
+		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("RenderableHelper.fx");
 		effect_->SetTechnique("BoxTec");
 
 		Vector3 xyzs[] =
@@ -153,7 +153,7 @@ namespace KlayGE
 
 	RenderableSkyBox::RenderableSkyBox()
 	{
-		effect_ = LoadRenderEffect("RenderableHelper.fx");
+		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("RenderableHelper.fx");
 		effect_->SetTechnique("SkyBoxTec");
 
 		Vector3 xyzs[] =

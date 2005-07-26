@@ -314,6 +314,7 @@ namespace KlayGE
 
 		Verify(d3dDevice != NULL);
 		d3dDevice_ = MakeCOMPtr(d3dDevice);
+		d3dDevice_->ShowCursor(true);
 
 		this->UpdateSurfacesPtrs();
 
@@ -441,8 +442,6 @@ namespace KlayGE
 			D3D9RenderFactory& factory = static_cast<D3D9RenderFactory&>(Context::Instance().RenderFactoryInstance());
 			factory.OnLostDevice();
 
-			D3D9RenderEngine& engine = static_cast<D3D9RenderEngine&>(factory.RenderEngineInstance());
-
 			renderSurface_.reset();
 			renderZBuffer_.reset();
 
@@ -451,8 +450,6 @@ namespace KlayGE
 			TIF(d3dDevice_->Reset(&d3dpp_));
 
 			this->UpdateSurfacesPtrs();
-
-			engine.ActiveRenderTarget(engine.ActiveRenderTarget());
 
 			factory.OnResetDevice();
 		}

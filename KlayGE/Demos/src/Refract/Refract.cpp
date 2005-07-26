@@ -38,7 +38,7 @@ namespace
 		Refractor(std::wstring const & /*name*/, TexturePtr tex)
 			: KMesh(L"Refractor", tex)
 		{
-			effect_ = LoadRenderEffect("Refract.fx");
+			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("Refract.fx");
 			effect_->SetTechnique("Refract");
 		}
 
@@ -166,7 +166,7 @@ void Refract::Update()
 			this->ActiveCamera().EyePos().z(), 1);
 
 	std::wostringstream stream;
-	stream << (*renderEngine.ActiveRenderTarget())->FPS();
+	stream << renderEngine.ActiveRenderTarget(0)->FPS();
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Refract");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());

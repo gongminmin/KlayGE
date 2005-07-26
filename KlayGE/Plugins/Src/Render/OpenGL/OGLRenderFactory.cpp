@@ -59,7 +59,7 @@ namespace KlayGE
 			return RenderTexturePtr(new OGLRenderTexture);
 		}
 
-		RenderEffectPtr MakeRenderEffect(std::string const & srcData)
+		RenderEffectPtr DoMakeRenderEffect(std::string const & srcData)
 		{
 			return RenderEffectPtr(new OGLRenderEffect(srcData));
 		}

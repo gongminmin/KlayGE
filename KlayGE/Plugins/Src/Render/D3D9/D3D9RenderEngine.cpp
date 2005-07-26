@@ -79,7 +79,7 @@ namespace KlayGE
 	D3D9RenderEngine::~D3D9RenderEngine()
 	{
 		renderEffect_.reset();
-		renderTargetList_.clear();
+		renderTargets_.clear();
 
 		currentVertexDecl_.reset();
 
@@ -132,7 +132,7 @@ namespace KlayGE
 
 		::PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
 
-		RenderTarget& renderTarget(**RenderEngine::ActiveRenderTarget());
+		RenderTarget& renderTarget(*this->ActiveRenderTarget(0));
 		while (WM_QUIT != msg.message)
 		{
 			// 如果窗口是激活的，用 PeekMessage()以便我们可以用空闲时间渲染场景
@@ -207,12 +207,13 @@ namespace KlayGE
 		d3dDevice_ = win->D3DDevice();
 		Verify(d3dDevice_);
 
-		this->ActiveRenderTarget(this->AddRenderTarget(win));
+		this->FillRenderDeviceCaps();
+		renderTargets_.resize(caps_.max_simultaneous_rts);
+
+		this->ActiveRenderTarget(0, win);
 
 		this->DepthBufferDepthTest(settings.depthBuffer);
 		this->DepthBufferDepthWrite(settings.depthBuffer);
-
-		this->FillRenderDeviceCaps();
 
 		return win;
 	}
@@ -225,7 +226,7 @@ namespace KlayGE
 
 		cullingMode_ = mode;
 
-		if ((*RenderEngine::ActiveRenderTarget())->RequiresTextureFlipping())
+		if (this->ActiveRenderTarget(0)->RequiresTextureFlipping())
 		{
 			if (CM_Clockwise == mode)
 			{
@@ -328,7 +329,7 @@ namespace KlayGE
 
 		D3DMATRIX d3dMat(D3D9Mapping::Mapping(projMat_));
 
-		if ((*activeRenderTarget_)->RequiresTextureFlipping())
+		if (this->ActiveRenderTarget(0)->RequiresTextureFlipping())
 		{
 			d3dMat._22 = -d3dMat._22;
 		}
@@ -355,18 +356,16 @@ namespace KlayGE
 
 	// 设置当前渲染目标，该渲染目标必须已经在列表中
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::ActiveRenderTarget(RenderTargetListIterator iter)
+	void D3D9RenderEngine::DoActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget)
 	{
 		assert(d3dDevice_);
 
-		RenderEngine::ActiveRenderTarget(iter);
-
 		IDirect3DSurface9* backBuffer;
-		(*activeRenderTarget_)->CustomAttribute("DDBACKBUFFER", &backBuffer);
-		TIF(d3dDevice_->SetRenderTarget(0, backBuffer));
+		renderTarget->CustomAttribute("DDBACKBUFFER", &backBuffer);
+		TIF(d3dDevice_->SetRenderTarget(n, backBuffer));
 
 		IDirect3DSurface9* zBuffer;
-		(*activeRenderTarget_)->CustomAttribute("D3DZBUFFER", &zBuffer);
+		renderTarget->CustomAttribute("D3DZBUFFER", &zBuffer);
 		if (zBuffer)
 		{
 			this->DepthBufferDepthTest(true);
@@ -379,7 +378,7 @@ namespace KlayGE
 
 		this->CullingMode(cullingMode_);
 
-		Viewport const & vp((*iter)->GetViewport());
+		Viewport const & vp(renderTarget->GetViewport());
 		D3DVIEWPORT9 d3dvp = { vp.left, vp.top, vp.width, vp.height, 0, 1 };
 		TIF(d3dDevice_->SetViewport(&d3dvp));
 	}
@@ -788,5 +787,21 @@ namespace KlayGE
 		d3dDevice_->GetDeviceCaps(&d3d_caps);
 
 		caps_ = D3D9Mapping::Mapping(d3d_caps);
+	}
+
+	// 响应设备丢失
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9RenderEngine::OnLostDevice()
+	{
+	}
+	
+	// 响应设备复位
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9RenderEngine::OnResetDevice()
+	{
+		for (uint32_t i = 0; i < renderTargets_.size(); ++ i)
+		{
+			this->ActiveRenderTarget(i, renderTargets_[i]);
+		}
 	}
 }

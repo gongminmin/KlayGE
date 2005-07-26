@@ -84,7 +84,7 @@ namespace
 				}
 			}
 
-			effect_ = LoadRenderEffect("AsciiArts.fx");
+			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArts.fx");
 			effect_->SetTechnique("AsciiArts");
 
 			vb_.reset(new VertexBuffer(VertexBuffer::BT_TriangleList));
@@ -109,7 +109,7 @@ namespace
 		void OnRenderBegin()
 		{
 			RenderEngine const & renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			RenderTarget const & renderTarget(*(*renderEngine.ActiveRenderTarget()));
+			RenderTarget const & renderTarget(*renderEngine.ActiveRenderTarget(0));
 
 			*(effect_->ParameterByName("cell_per_row")) = static_cast<float>(CELL_WIDTH) / renderTarget.Width();
 			*(effect_->ParameterByName("cell_per_line")) = static_cast<float>(CELL_HEIGHT) / renderTarget.Height();
@@ -263,8 +263,7 @@ void AsciiArts::InitObjects()
 	downsample_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(WIDTH / CELL_WIDTH, HEIGHT / CELL_HEIGHT,
 		1, PF_A8R8G8B8, Texture::TU_RenderTarget);
 
-	screen_iter_ = renderEngine.ActiveRenderTarget();
-	render_buffer_iter_ = renderEngine.AddRenderTarget(render_buffer_);
+	screen_buffer_ = renderEngine.ActiveRenderTarget(0);
 
 	renderQuad_.reset(new RenderQuad(1, 1));
 
@@ -303,7 +302,7 @@ void AsciiArts::Update()
 	if (show_ascii_)
 	{	
 		// 第一遍，正常渲染
-		renderEngine.ActiveRenderTarget(render_buffer_iter_);
+		renderEngine.ActiveRenderTarget(0, render_buffer_);
 		renderEngine.ViewMatrix(camera.ViewMatrix());
 		renderEngine.ProjectionMatrix(camera.ProjMatrix());
 
@@ -315,7 +314,7 @@ void AsciiArts::Update()
 		rendered_tex_->CopyToTexture(*downsample_tex_);
 
 		// 第二遍，匹配，最终渲染
-		renderEngine.ActiveRenderTarget(screen_iter_);
+		renderEngine.ActiveRenderTarget(0, screen_buffer_);
 
 		static_cast<RenderQuad*>(renderQuad_.get())->SetTexture(downsample_tex_, ascii_lums_tex_);
 		sceneMgr.Clear();
@@ -323,7 +322,7 @@ void AsciiArts::Update()
 	}
 	else
 	{
-		renderEngine.ActiveRenderTarget(screen_iter_);
+		renderEngine.ActiveRenderTarget(0, screen_buffer_);
 		renderEngine.ViewMatrix(camera.ViewMatrix());
 		renderEngine.ProjectionMatrix(camera.ProjMatrix());
 
@@ -332,7 +331,7 @@ void AsciiArts::Update()
 	}
 
 	std::wostringstream stream;
-	stream << (*renderEngine.ActiveRenderTarget())->FPS();
+	stream << renderEngine.ActiveRenderTarget(0)->FPS();
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"ASCII艺术");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());

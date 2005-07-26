@@ -22,9 +22,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Context.hpp>
-#include <KlayGE/RenderFactory.hpp>
-#include <KlayGE/ResLoader.hpp>
 
 #include <KlayGE/RenderEffect.hpp>
 
@@ -33,11 +30,6 @@ namespace KlayGE
 	class NullRenderEffect : public RenderEffect
 	{
 	private:
-		uint32_t HashCode() const
-		{
-			return 0;
-		}
-
 		void Desc(uint32_t& parameters, uint32_t& techniques, uint32_t& functions)
 		{
 			parameters = 0;
@@ -50,13 +42,12 @@ namespace KlayGE
 		RenderEffectParameterPtr DoParameterByName(std::string const & /*name*/)
 			{ return RenderEffectParameter::NullObject(); }
 
-		bool SetTechnique(std::string const & /*techName*/)
+		bool Validate(std::string const & /*techName*/)
 		{
 			return false;
 		}
-		bool SetTechnique(uint32_t /*tech*/)
+		void SetTechnique(std::string const & /*techName*/)
 		{
-			return false;
 		}
 
 		uint32_t Begin(uint32_t /*flags*/)
@@ -526,18 +517,5 @@ namespace KlayGE
 			assert(false);
 			break;
 		}
-	}
-
-
-	RenderEffectPtr LoadRenderEffect(std::string const & effectName)
-	{
-		ResIdentifierPtr file(ResLoader::Instance().Load(effectName));
-
-		file->seekg(0, std::ios_base::end);
-		std::vector<char> data(file->tellg());
-		file->seekg(0);
-		file->read(&data[0], static_cast<std::streamsize>(data.size()));
-
-		return Context::Instance().RenderFactoryInstance().MakeRenderEffect(std::string(data.begin(), data.end()));
 	}
 }

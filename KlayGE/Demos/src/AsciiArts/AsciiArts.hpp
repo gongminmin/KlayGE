@@ -24,13 +24,12 @@ private:
 
 	KlayGE::TexturePtr ascii_lums_tex_;
 
+	KlayGE::RenderTargetPtr screen_buffer_;
+
 	KlayGE::RenderTexturePtr render_buffer_;
 	KlayGE::TexturePtr rendered_tex_;
 
 	KlayGE::TexturePtr downsample_tex_;
-
-	KlayGE::RenderEngine::RenderTargetListIterator screen_iter_;
-	KlayGE::RenderEngine::RenderTargetListIterator render_buffer_iter_;
 
 	boost::shared_ptr<KlayGE::Renderable> renderQuad_;
 

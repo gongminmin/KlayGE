@@ -63,9 +63,6 @@ namespace KlayGE
 		void SetLight(uint32_t index, Light const & lt);
 		void LightEnable(uint32_t index, bool enable);
 
-		using RenderEngine::ActiveRenderTarget;
-		void ActiveRenderTarget(RenderTargetListIterator iter);
-
 		void StartRendering();
 
 		void BeginFrame();
@@ -96,6 +93,8 @@ namespace KlayGE
 		void StencilBufferOperation(StencilOperation fail, StencilOperation depth_fail, StencilOperation pass);
 
 	private:
+		void DoActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget);
+
 		void DoWorldMatrix();
 		void DoViewMatrix();
 		void DoProjectionMatrix();

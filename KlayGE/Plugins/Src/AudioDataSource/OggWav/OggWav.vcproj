@@ -68,7 +68,7 @@
 				TreatWChar_tAsBuiltInType="TRUE"
 				ForceConformanceInForLoopScope="TRUE"
 				RuntimeTypeInfo="TRUE"
-				WarningLevel="4"/>
+				WarningLevel="3"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool

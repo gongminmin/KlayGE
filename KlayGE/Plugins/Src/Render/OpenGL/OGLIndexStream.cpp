@@ -89,7 +89,7 @@ namespace KlayGE
 			glBindBuffer_(GL_ELEMENT_ARRAY_BUFFER, ib_);
 			glBufferData_(GL_ELEMENT_ARRAY_BUFFER,
 				reinterpret_cast<GLsizeiptr>(numIndices * sizeof(uint16_t)), src,
-				this->IsStatic() ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+				GL_READ_ONLY | (this->IsStatic() ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW));
 		}
 		else
 		{

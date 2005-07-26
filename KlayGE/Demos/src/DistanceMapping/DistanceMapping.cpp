@@ -35,18 +35,26 @@ namespace
 	public:
 		RenderPolygon()
 		{
-			effect_ = LoadRenderEffect("DistanceMapping.fx");
+			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("DistanceMapping.fx");
 			*(effect_->ParameterByName("diffusemap")) = LoadTexture("diffuse.dds");
 			*(effect_->ParameterByName("normalmap")) = LoadTexture("normal.dds");
 			*(effect_->ParameterByName("distancemap")) = LoadTexture("distance.dds");
 			*(effect_->ParameterByName("normalizermap")) = LoadTexture("normalizer.dds");
 
-			if (!effect_->SetTechnique("DistanceMapping30"))
+			if (!effect_->Validate("DistanceMapping30"))
 			{
-				if (!effect_->SetTechnique("DistanceMapping2a"))
+				if (!effect_->Validate("DistanceMapping2a"))
 				{
 					effect_->SetTechnique("DistanceMapping20");
 				}
+				else
+				{
+					effect_->SetTechnique("DistanceMapping2a");
+				}
+			}
+			else
+			{
+				effect_->SetTechnique("DistanceMapping30");
 			}
 
 			Vector3 xyzs[] =
@@ -207,7 +215,7 @@ void DistanceMapping::Update()
 	*(renderPolygon_->GetRenderEffect()->ParameterByName("lightPos")) = Vector4(lightPos.x(), lightPos.y(), lightPos.z(), 1);
 
 	std::wostringstream stream;
-	stream << (*renderEngine.ActiveRenderTarget())->FPS();
+	stream << renderEngine.ActiveRenderTarget(0)->FPS();
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"DistanceMapping²âÊÔ");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());

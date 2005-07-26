@@ -84,7 +84,7 @@ namespace
 
 			box_ = MathLib::ComputeBoundingBox<float>(pos.begin(), pos.end());
 
-			effect_ = LoadRenderEffect("VertexDisplacement.fx");
+			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("VertexDisplacement.fx");
 			*(effect_->ParameterByName("flag")) = LoadTexture("Flag.dds");
 			effect_->SetTechnique("VertexDisplacement");
 		}
@@ -211,7 +211,7 @@ void VertexDisplacement::Update()
 	*(flag_->GetRenderEffect()->ParameterByName("currentAngle")) = currentAngle;
 
 	std::wostringstream stream;
-	stream << (*renderEngine.ActiveRenderTarget())->FPS();
+	stream << renderEngine.ActiveRenderTarget(0)->FPS();
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"¶¥µãÎ»ÒÆ");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());

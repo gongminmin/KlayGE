@@ -128,7 +128,7 @@ namespace KlayGE
 			glBindBuffer_(GL_ARRAY_BUFFER, vb_);
 
 			uint8_t* srcPtr = static_cast<uint8_t*>(glMapBuffer_(GL_ARRAY_BUFFER,
-				this->IsStatic() ? GL_STATIC_READ : GL_DYNAMIC_READ));
+				GL_READ_ONLY | (this->IsStatic() ? GL_STATIC_READ : GL_DYNAMIC_READ)));
 
 			std::copy(srcPtr, srcPtr + size, destPtr);
 

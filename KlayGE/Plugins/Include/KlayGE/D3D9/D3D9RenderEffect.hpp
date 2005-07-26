@@ -63,12 +63,10 @@ namespace KlayGE
 		boost::shared_ptr<ID3DXEffect> const & D3DXEffect() const
 			{ return effect_; }
 
-		uint32_t HashCode() const;
-
 		void Desc(uint32_t& parameters, uint32_t& techniques, uint32_t& functions);
 
-		bool SetTechnique(std::string const & technique);
-		bool SetTechnique(uint32_t technique);
+		bool Validate(std::string const & technique);
+		void SetTechnique(std::string const & technique);
 
 		uint32_t Begin(uint32_t flags);
 		void End();
@@ -76,8 +74,6 @@ namespace KlayGE
 		void EndPass();
 
 	private:
-		bool Validate(D3DXHANDLE handle);
-
 		void DoOnLostDevice();
 		void DoOnResetDevice();
 
@@ -88,8 +84,6 @@ namespace KlayGE
 
 	private:
 		boost::shared_ptr<ID3DXEffect> effect_;
-
-		uint32_t crc32_;
 	};
 
 	class D3D9RenderEffectParameter : public RenderEffectParameter, public D3D9Resource

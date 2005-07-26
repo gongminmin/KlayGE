@@ -75,7 +75,7 @@ namespace
 			TexturePtr texture = renderFactory.MakeTexture3D(XSIZE, YSIZE, ZSIZE, 1, PF_L8);
 			texture->CopyMemoryToTexture3D(0, &turbBuffer[0], PF_L8, XSIZE, YSIZE, ZSIZE, 0, 0, 0);
 
-			effect_ = LoadRenderEffect("Electro.fx");
+			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("Electro.fx");
 			*(effect_->ParameterByName("electroMap")) = texture;
 			effect_->SetTechnique("Electro");
 
@@ -179,7 +179,7 @@ void Electro::Update()
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 	std::wostringstream stream;
-	stream << (*renderEngine.ActiveRenderTarget())->FPS();
+	stream << renderEngine.ActiveRenderTarget(0)->FPS();
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"电流效果");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());

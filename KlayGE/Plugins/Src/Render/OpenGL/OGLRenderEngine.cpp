@@ -86,11 +86,12 @@ namespace KlayGE
 
 		::PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
 
+		RenderTarget& renderTarget = *this->ActiveRenderTarget(0);
 		while (WM_QUIT != msg.message)
 		{
 			// 如果窗口是激活的，用 PeekMessage()以便我们可以用空闲时间渲染场景
 			// 不然, 用 GetMessage() 减少 CPU 占用率
-			if ((*RenderEngine::ActiveRenderTarget())->Active())
+			if (renderTarget.Active())
 			{
 				gotMsg = ::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) ? true : false;
 			}
@@ -107,9 +108,9 @@ namespace KlayGE
 			else
 			{
 				// 在空余时间渲染帧 (没有等待的消息)
-				if ((*RenderEngine::ActiveRenderTarget())->Active())
+				if (renderTarget.Active())
 				{
-					(*RenderEngine::ActiveRenderTarget())->Update();
+					renderTarget.Update();
 				}
 			}
 		}
@@ -177,14 +178,15 @@ namespace KlayGE
 			}
 		}
 
-		this->ActiveRenderTarget(this->AddRenderTarget(win));
+		this->FillRenderDeviceCaps();
+		renderTargets_.resize(caps_.max_simultaneous_rts);
+
+		this->ActiveRenderTarget(0, win);
 
 		this->DepthBufferDepthTest(settings.depthBuffer);
 		this->DepthBufferDepthWrite(settings.depthBuffer);
 
 		this->SetMaterial(Material(Color(1, 1, 1, 1)));
-
-		this->FillRenderDeviceCaps();
 
 		return win;
 	}
@@ -358,15 +360,13 @@ namespace KlayGE
 		glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, material.shininess);
 	}
 
-	// 设置当前渲染目标，该渲染目标必须已经在列表中
+	// 设置当前渲染目标
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::ActiveRenderTarget(RenderTargetListIterator iter)
+	void OGLRenderEngine::DoActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget)
 	{
-		RenderEngine::ActiveRenderTarget(iter);
-
 		this->CullingMode(cullingMode_);
 
-		Viewport const & vp((*iter)->GetViewport());
+		Viewport const & vp(renderTarget->GetViewport());
 		glViewport(vp.left, vp.top, vp.width, vp.height);
 	}
 

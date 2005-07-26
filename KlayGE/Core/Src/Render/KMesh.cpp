@@ -34,7 +34,7 @@ namespace KlayGE
 							tex_(tex)
 	{
 		// ‘ÿ»Îfx
-		effect_ = LoadRenderEffect("KMesh.fx");
+		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("KMesh.fx");
 
 		if (tex_)
 		{

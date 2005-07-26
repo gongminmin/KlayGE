@@ -26,9 +26,6 @@
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 
 #include <cassert>
-#pragma warning(disable : 4244)
-#pragma warning(disable : 4245)
-#include <boost/crc.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderEffect.hpp>
 
@@ -38,10 +35,6 @@ namespace KlayGE
 	{
 		assert(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
 
-		boost::crc_32_type crc32;
-		crc32.process_bytes(&srcData[0], srcData.size());
-		crc32_ = crc32.checksum();
-
 		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 
 		ID3DXEffect* effect;
@@ -49,11 +42,6 @@ namespace KlayGE
 			static_cast<UINT>(srcData.size()), NULL, NULL,
 			0, NULL, &effect, NULL);
 		effect_ = MakeCOMPtr(effect);
-	}
-
-	uint32_t D3D9RenderEffect::HashCode() const
-	{
-		return crc32_;
 	}
 
 	void D3D9RenderEffect::Desc(uint32_t& parameters, uint32_t& techniques, uint32_t& functions)
@@ -76,32 +64,14 @@ namespace KlayGE
 		return D3D9RenderEffectParameterPtr(new D3D9RenderEffectParameter(*this, name));
 	}
 
-	bool D3D9RenderEffect::DoSetTechnique(D3DXHANDLE handle)
+	bool D3D9RenderEffect::Validate(std::string const & technique)
 	{
-		if (this->Validate(handle))
-		{
-			TIF(effect_->SetTechnique(handle));
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+		return SUCCEEDED(effect_->ValidateTechnique(technique.c_str()));
 	}
 
-	bool D3D9RenderEffect::SetTechnique(std::string const & technique)
+	void D3D9RenderEffect::SetTechnique(std::string const & technique)
 	{
-		return this->DoSetTechnique(effect_->GetTechniqueByName(technique.c_str()));
-	}
-
-	bool D3D9RenderEffect::SetTechnique(uint32_t technique)
-	{
-		return this->DoSetTechnique(effect_->GetTechnique(technique));
-	}
-
-	bool D3D9RenderEffect::Validate(D3DXHANDLE handle)
-	{
-		return SUCCEEDED(effect_->ValidateTechnique(handle));
+		TIF(effect_->SetTechnique(technique.c_str()));
 	}
 
 	uint32_t D3D9RenderEffect::Begin(uint32_t flags)

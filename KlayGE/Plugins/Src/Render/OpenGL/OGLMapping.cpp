@@ -181,7 +181,7 @@ namespace KlayGE
 
 	void OGLMapping::Mapping(GLenum& primType, uint32_t& primCount, VertexBuffer const & vb)
 	{
-		size_t const vertexCount = vb.UseIndices() ? vb.NumIndices() : vb.NumVertices();
+		uint32_t const vertexCount = static_cast<uint32_t>(vb.UseIndices() ? vb.NumIndices() : vb.NumVertices());
 		primType = GL_POINTS;
 		primCount = vertexCount;
 		switch (vb.Type())

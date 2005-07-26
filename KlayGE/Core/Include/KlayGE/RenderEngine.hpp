@@ -6,6 +6,7 @@
 //
 // 2.8.0
 // 简化了StencilBuffer相关操作 (2005.7.20)
+// 简化了RenderTarget，支持MRT (20057.25)
 //
 // 2.7.1
 // ViewMatrix和ProjectionMatrix改为const (2005.7.10)
@@ -137,10 +138,6 @@ namespace KlayGE
 		};
 
 	public:
-		typedef std::list<RenderTargetPtr> RenderTargetList;
-		typedef RenderTargetList::iterator RenderTargetListIterator;
-
-	public:
 		RenderEngine();
 		virtual ~RenderEngine();
 
@@ -191,16 +188,8 @@ namespace KlayGE
 			Color const & color = Color(1, 1, 1, 1),
 			float expDensity = 1, float linearStart = 0, float linearEnd = 1) = 0;
 
-		// Attaches the passed render target to the render system.
-		virtual RenderTargetListIterator AddRenderTarget(RenderTargetPtr const & target);
-		// Renders a iterator to the beginning of the RenderTargetList
-		virtual RenderTargetListIterator RenderTargetListBegin();
-		// Renders a iterator to the one the pass the last one of the RenderTargetList
-		virtual RenderTargetListIterator RenderTargetListEnd();
-		// Detaches the render target with the passed name from the render system and returns a pointer to it.
-		virtual RenderTargetPtr RemoveRenderTarget(RenderTargetListIterator iter);
-		virtual void ActiveRenderTarget(RenderTargetListIterator iter);
-		RenderTargetListIterator const & ActiveRenderTarget() const;
+		void ActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget);
+		RenderTargetPtr ActiveRenderTarget(uint32_t n) const;
 
 		virtual void SetTexture(uint32_t stage, TexturePtr const & texture) = 0;
 
@@ -231,6 +220,8 @@ namespace KlayGE
 		RenderDeviceCaps const & DeviceCaps() const;
 
 	protected:
+		virtual void DoActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget) = 0;
+
 		virtual void DoWorldMatrix() = 0;
 		virtual void DoViewMatrix() = 0;
 		virtual void DoProjectionMatrix() = 0;
@@ -240,8 +231,7 @@ namespace KlayGE
 		virtual void FillRenderDeviceCaps() = 0;
 
 	protected:
-		RenderTargetList renderTargetList_;
-		RenderTargetListIterator activeRenderTarget_;
+		std::vector<RenderTargetPtr> renderTargets_;
 
 		RenderEffectPtr renderEffect_;
 		uint32_t renderPasses_;

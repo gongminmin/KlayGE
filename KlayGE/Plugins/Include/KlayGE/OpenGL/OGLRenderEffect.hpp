@@ -34,12 +34,10 @@ namespace KlayGE
 	public:
 		explicit OGLRenderEffect(std::string const & srcData);
 
-		uint32_t HashCode() const;
-
 		void Desc(uint32_t& parameters, uint32_t& techniques, uint32_t& functions);
 
-		bool SetTechnique(std::string const & technique);
-		bool SetTechnique(uint32_t technique);
+		bool Validate(std::string const & technique);
+		void SetTechnique(std::string const & technique);
 
 		uint32_t Begin(uint32_t flags);
 		void End();
@@ -49,9 +47,6 @@ namespace KlayGE
 	private:
 		std::string DoNameBySemantic(std::string const & semantic);
 		RenderEffectParameterPtr DoParameterByName(std::string const & name);
-
-	private:
-		uint32_t crc32_;
 	};
 
 	class OGLRenderEffectParameter : public RenderEffectParameter

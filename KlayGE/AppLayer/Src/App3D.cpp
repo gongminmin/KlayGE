@@ -63,7 +63,7 @@ namespace KlayGE
 	Camera& App3DFramework::ActiveCamera()
 	{
 		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		RenderTarget& activeRenderTarget(*(*renderEngine.ActiveRenderTarget()));
+		RenderTarget& activeRenderTarget(*renderEngine.ActiveRenderTarget(0));
 
 		return activeRenderTarget.GetViewport().camera;
 	}
@@ -88,7 +88,7 @@ namespace KlayGE
 		assert(farPlane > nearPlane);
 
 		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		RenderTarget& activeRenderTarget(*(*renderEngine.ActiveRenderTarget()));
+		RenderTarget& activeRenderTarget(*renderEngine.ActiveRenderTarget(0));
 		Camera& camera(this->ActiveCamera());
 
 		camera.ProjParams(PI / 4, static_cast<float>(activeRenderTarget.Width()) / activeRenderTarget.Height(),

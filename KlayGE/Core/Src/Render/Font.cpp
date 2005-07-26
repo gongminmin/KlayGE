@@ -217,7 +217,7 @@ namespace KlayGE
 		theTexture_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(caps.max_texture_width,
 			caps.max_texture_height, 1, TEX_FORMAT);
 
-		effect_ = LoadRenderEffect("Font.fx");
+		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("Font.fx");
 		*(effect_->ParameterByName("texFont")) = theTexture_;
 		effect_->SetTechnique("fontTec");
 
@@ -385,7 +385,7 @@ namespace KlayGE
 			this->UpdateTexture(text);
 
 			RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			Viewport const & viewport((*renderEngine.ActiveRenderTarget())->GetViewport());
+			Viewport const & viewport(renderEngine.ActiveRenderTarget(0)->GetViewport());
 			*(effect_->ParameterByName("halfWidth")) = viewport.width / 2;
 			*(effect_->ParameterByName("halfHeight")) = viewport.height / 2;
 

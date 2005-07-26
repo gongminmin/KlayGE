@@ -65,16 +65,15 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::AddToRenderQueue(RenderablePtr const & obj)
 	{
-		uint32_t const hash_code = obj->GetRenderEffect()->HashCode();
-
-		RenderQueueType::iterator iter(renderQueue_.find(hash_code));
+		RenderEffectPtr const & effect = obj->GetRenderEffect();
+		RenderQueueType::iterator iter = renderQueue_.find(effect);
 		if (iter != renderQueue_.end())
 		{
 			iter->second.push_back(obj);
 		}
 		else
 		{
-			renderQueue_.insert(RenderQueueType::value_type(hash_code,
+			renderQueue_.insert(RenderQueueType::value_type(effect,
 				RenderItemsType(1, obj)));
 		}
 	}
@@ -105,14 +104,14 @@ namespace KlayGE
 
 		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-		this->ClipScene((*renderEngine.ActiveRenderTarget())->GetViewport().camera);
+		this->ClipScene(renderEngine.ActiveRenderTarget(0)->GetViewport().camera);
 
 		renderEngine.BeginFrame();
 
 		for (RenderQueueType::iterator queueIter = renderQueue_.begin();
 			queueIter != renderQueue_.end(); ++ queueIter)
 		{
-			renderEngine.SetRenderEffect(queueIter->second[0]->GetRenderEffect());
+			renderEngine.SetRenderEffect(queueIter->first);
 
 			for (RenderItemsType::iterator itemIter = queueIter->second.begin();
 				itemIter != queueIter->second.end(); ++ itemIter)

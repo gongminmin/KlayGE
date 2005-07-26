@@ -68,7 +68,7 @@
 				TreatWChar_tAsBuiltInType="TRUE"
 				ForceConformanceInForLoopScope="TRUE"
 				RuntimeTypeInfo="TRUE"
-				WarningLevel="4"/>
+				WarningLevel="3"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
@@ -156,6 +156,9 @@
 				</File>
 				<File
 					RelativePath=".\Src\Render\RenderEngine.cpp">
+				</File>
+				<File
+					RelativePath=".\Src\Render\RenderFactory.cpp">
 				</File>
 				<File
 					RelativePath=".\Src\Render\RenderTarget.cpp">

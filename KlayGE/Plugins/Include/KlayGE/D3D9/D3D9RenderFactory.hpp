@@ -67,8 +67,7 @@ namespace KlayGE
 		TexturePtr MakeTextureCube(uint32_t size, uint16_t numMipMaps,
 			PixelFormat format, Texture::TextureUsage usage);
 		RenderTexturePtr MakeRenderTexture();
-		RenderEffectPtr MakeRenderEffect(std::string const & srcData);
-			
+
 		VertexStreamPtr MakeVertexStream(VertexStreamType type,
 			uint8_t sizeElement, uint8_t numElement, bool staticStream);
 
@@ -78,6 +77,9 @@ namespace KlayGE
 
 		void OnLostDevice();
 		void OnResetDevice();
+
+	private:
+		RenderEffectPtr DoMakeRenderEffect(std::string const & srcData);
 
 	private:
 		std::vector<boost::weak_ptr<D3D9Resource> > resource_pool_;

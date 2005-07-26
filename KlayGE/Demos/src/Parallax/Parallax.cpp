@@ -35,7 +35,7 @@ namespace
 	public:
 		RenderPolygon()
 		{
-			effect_ = LoadRenderEffect("parallax.fx");
+			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("parallax.fx");
 			*(effect_->ParameterByName("diffusemap")) = LoadTexture("diffuse.dds");
 			*(effect_->ParameterByName("normalmap")) = LoadTexture("normal.dds");
 			*(effect_->ParameterByName("heightmap")) = LoadTexture("height.dds");
@@ -202,7 +202,7 @@ void Parallax::Update()
 	*(renderPolygon_->GetRenderEffect()->ParameterByName("lightPos")) = Vector4(lightPos.x(), lightPos.y(), lightPos.z(), 1);
 
 	std::wostringstream stream;
-	stream << (*renderEngine.ActiveRenderTarget())->FPS();
+	stream << renderEngine.ActiveRenderTarget(0)->FPS();
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Parallax²âÊÔ");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());

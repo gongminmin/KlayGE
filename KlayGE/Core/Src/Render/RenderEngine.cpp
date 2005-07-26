@@ -50,52 +50,23 @@ namespace KlayGE
 	{
 	}
 
-	// 增加渲染目标
-	/////////////////////////////////////////////////////////////////////////////////
-	RenderEngine::RenderTargetListIterator RenderEngine::AddRenderTarget(RenderTargetPtr const & target)
-	{
-		renderTargetList_.push_back(target);
-		RenderTargetListIterator iter(renderTargetList_.end());
-		-- iter;
-
-		return iter;
-	}
-
-	// 渲染目标列表的Begin迭代器
-	/////////////////////////////////////////////////////////////////////////////////
-	RenderEngine::RenderTargetListIterator RenderEngine::RenderTargetListBegin()
-	{
-		return renderTargetList_.begin();
-	}
-
-	// 显示目标列表的End迭代器
-	/////////////////////////////////////////////////////////////////////////////////
-	RenderEngine::RenderTargetListIterator RenderEngine::RenderTargetListEnd()
-	{
-		return renderTargetList_.end();
-	}
-
-	// 从渲染目标列表中删除渲染目标
-	/////////////////////////////////////////////////////////////////////////////////
-	RenderTargetPtr RenderEngine::RemoveRenderTarget(RenderTargetListIterator iter)
-	{
-		RenderTargetPtr ret(*iter);
-		renderTargetList_.erase(iter);
-		return ret;
-	}
-
 	// 设置当前渲染目标
 	/////////////////////////////////////////////////////////////////////////////////
-	void RenderEngine::ActiveRenderTarget(RenderTargetListIterator iter)
+	void RenderEngine::ActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget)
 	{
-		activeRenderTarget_ = iter;
+		assert(n < renderTargets_.size());
+
+		renderTargets_[n] = renderTarget;
+		this->DoActiveRenderTarget(n, renderTarget);
 	}
 
 	// 获取当前渲染目标
 	/////////////////////////////////////////////////////////////////////////////////
-	RenderEngine::RenderTargetListIterator const & RenderEngine::ActiveRenderTarget() const
+	RenderTargetPtr RenderEngine::ActiveRenderTarget(uint32_t n) const
 	{
-		return activeRenderTarget_;
+		assert(n < renderTargets_.size());
+
+		return renderTargets_[n];
 	}
 
 	// 设置渲染状态

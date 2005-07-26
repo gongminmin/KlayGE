@@ -31,14 +31,22 @@ namespace
 	public:
 		RenderFractal()
 		{
-			effect_ = LoadRenderEffect("Fractal.fx");
+			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("Fractal.fx");
 
-			if (!effect_->SetTechnique("FractalPS30"))
+			if (!effect_->Validate("FractalPS30"))
 			{
-				if (!effect_->SetTechnique("FractalPS2a"))
+				if (!effect_->Validate("FractalPS2a"))
 				{
 					effect_->SetTechnique("FractalPS20");
 				}
+				else
+				{
+					effect_->SetTechnique("FractalPS2a");
+				}
+			}
+			else
+			{
+				effect_->SetTechnique("FractalPS30");
 			}
 
 			Vector3 xyzs[] =
@@ -134,7 +142,7 @@ void Fractal::Update()
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 	std::wostringstream stream;
-	stream << (*renderEngine.ActiveRenderTarget())->FPS();
+	stream << renderEngine.ActiveRenderTarget(0)->FPS();
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"GPU¼ÆËã·ÖÐÎ");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());

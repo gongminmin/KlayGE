@@ -31,6 +31,7 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <vector>
 #include <map>
+#include <string>
 
 #pragma warning(disable : 4100)
 #pragma warning(disable : 4512)
@@ -58,15 +59,13 @@ namespace KlayGE
 
 		static RenderEffectPtr NullObject();
 
-		virtual uint32_t HashCode() const = 0;
-
 		virtual void Desc(uint32_t& parameters, uint32_t& techniques, uint32_t& functions) = 0;
 
 		RenderEffectParameterPtr ParameterByName(std::string const & name);
 		RenderEffectParameterPtr ParameterBySemantic(std::string const & semantic);
 
-		virtual bool SetTechnique(std::string const & technique) = 0;
-		virtual bool SetTechnique(uint32_t technique) = 0;
+		virtual bool Validate(std::string const & technique) = 0;
+		virtual void SetTechnique(std::string const & technique) = 0;
 
 		void FlushParams();
 
@@ -76,12 +75,6 @@ namespace KlayGE
 		virtual void EndPass() = 0;
 
 		void DirtyParam(std::string const& name);
-
-		friend bool
-		operator==(RenderEffect const & lhs, RenderEffect const & rhs)
-		{
-			return lhs.HashCode() == rhs.HashCode();
-		}
 
 	private:
 		virtual std::string DoNameBySemantic(std::string const & semantic) = 0;
@@ -162,8 +155,6 @@ namespace KlayGE
 		boost::variant<float, Vector4, Matrix4, int, TexturePtr,
 			std::vector<float>, std::vector<Vector4>, std::vector<Matrix4>, std::vector<int> > val_;
 	};
-
-	RenderEffectPtr LoadRenderEffect(std::string const & effectName);
 }
 
 #endif		// _RENDEREFFECT_HPP

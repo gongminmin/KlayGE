@@ -17,9 +17,6 @@
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 
 #include <cassert>
-#pragma warning(disable : 4244)
-#pragma warning(disable : 4245)
-#include <boost/crc.hpp>
 
 #include <KlayGE/OpenGL/OGLRenderEffect.hpp>
 
@@ -27,28 +24,19 @@ namespace KlayGE
 {
 	OGLRenderEffect::OGLRenderEffect(std::string const & srcData)
 	{
-		boost::crc_32_type crc32;
-		crc32.process_bytes(&srcData[0], srcData.size());
-		crc32_ = crc32.checksum();
-	}
-
-	uint32_t OGLRenderEffect::HashCode() const
-	{
-		return crc32_;
 	}
 
 	void OGLRenderEffect::Desc(uint32_t& parameters, uint32_t& techniques, uint32_t& functions)
 	{
 	}
 
-	bool OGLRenderEffect::SetTechnique(std::string const & technique)
+	bool OGLRenderEffect::Validate(std::string const & technique)
 	{
 		return false;
 	}
 
-	bool OGLRenderEffect::SetTechnique(uint32_t technique)
+	void OGLRenderEffect::SetTechnique(std::string const & technique)
 	{
-		return false;
 	}
 
 	std::string OGLRenderEffect::DoNameBySemantic(std::string const & semantic)

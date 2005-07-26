@@ -65,7 +65,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	RenderEffectPtr D3D9RenderFactory::MakeRenderEffect(std::string const & srcData)
+	RenderEffectPtr D3D9RenderFactory::DoMakeRenderEffect(std::string const & srcData)
 	{
 		D3D9RenderEffectPtr ret(new D3D9RenderEffect(srcData));
 		resource_pool_.push_back(ret);
@@ -136,9 +136,10 @@ namespace KlayGE
 		for (std::vector<boost::weak_ptr<D3D9Resource> >::iterator iter = resource_pool_.begin();
 			iter != resource_pool_.end();)
 		{
-			if (D3D9ResourcePtr ptr = iter->lock())
+			D3D9ResourcePtr res = iter->lock();
+			if (res)
 			{
-				ptr->OnLostDevice();
+				res->OnLostDevice();
 				++ iter;
 			}
 			else
@@ -146,16 +147,23 @@ namespace KlayGE
 				iter = resource_pool_.erase(iter);
 			}
 		}
+
+		D3D9RenderEngine& engine = static_cast<D3D9RenderEngine&>(this->RenderEngineInstance());
+		engine.OnLostDevice();
 	}
 
 	void D3D9RenderFactory::OnResetDevice()
 	{
+		D3D9RenderEngine& engine = static_cast<D3D9RenderEngine&>(this->RenderEngineInstance());
+		engine.OnResetDevice();
+
 		for (std::vector<boost::weak_ptr<D3D9Resource> >::iterator iter = resource_pool_.begin();
 			iter != resource_pool_.end();)
 		{
-			if (D3D9ResourcePtr ptr = iter->lock())
+			D3D9ResourcePtr res = iter->lock();
+			if (res)
 			{
-				ptr->OnResetDevice();
+				res->OnResetDevice();
 				++ iter;
 			}
 			else
