@@ -26,6 +26,27 @@ typedef std::vector<void**> entries_t;
 
 namespace glloader
 {
+	class gl_features_extractor
+	{
+	public:
+		static gl_features_extractor& instance();
+
+		bool is_supported(std::string const & name);
+		void promote(std::string const & low_name, std::string const & high_name);
+
+	private:
+		gl_features_extractor();
+
+		void gl_version(int& major, int& minor);
+		void gl_features();
+		void wgl_features();
+		void glx_version(int& major, int& minor);
+		void glx_features();
+
+	private:
+		std::vector<std::string> features_;
+	};
+
 	void load_funcs(entries_t& entries, funcs_names_t const & names);
 
 	void gl_init();

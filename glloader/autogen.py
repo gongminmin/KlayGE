@@ -185,7 +185,8 @@ def create_source(prefix, extensions):
 
 	sourceFile.write("#ifdef GLLOADER_%s\n\n" % prefix.upper())
 
-	sourceFile.write("using glloader::load_funcs;\n\n")
+	sourceFile.write("using glloader::load_funcs;\n")
+	sourceFile.write("using glloader::gl_features_extractor;\n\n")
 
 	sourceFile.write("namespace\n")
 	sourceFile.write("{\n")
@@ -260,6 +261,8 @@ def create_source(prefix, extensions):
 			sourceFile.write("\t\t{\n")
 
 			sourceFile.write("\t\t\t_%s = true;\n" % extension.name)
+			if (ext.string != extension.exts[0].string):
+				sourceFile.write("\t\t\tgl_features_extractor::instance().promote(\"%s\", \"%s\");\n" % (ext.string, extension.exts[0].string))
 
 			if (len(extension.functions) != 0):
 				sourceFile.write("\n\t\t\tfuncs_names_t names;\n\n")

@@ -17,9 +17,9 @@
 
 #include <glloader/glloader.h>
 
-#include <cassert>
 #include <algorithm>
 
+#include <boost/assert.hpp>
 #include <boost/bind.hpp>
 #include <boost/algorithm/string/split.hpp>
 
@@ -39,11 +39,53 @@ namespace
 
 		return ret;
 	}
+}
+
+namespace glloader
+{
+	gl_features_extractor& gl_features_extractor::instance()
+	{
+		static gl_features_extractor inst;
+		return inst;
+	}
+
+	bool gl_features_extractor::is_supported(std::string const & name)
+	{
+		return std::binary_search(features_.begin(), features_.end(), name);
+	}
+
+	void gl_features_extractor::promote(std::string const & low_name, std::string const & high_name)
+	{
+		if (low_name != high_name)
+		{
+			std::vector<std::string>::iterator iter = std::lower_bound(features_.begin(), features_.end(), low_name);
+			if (*iter == low_name)
+			{
+				features_.erase(iter);
+
+				iter = std::lower_bound(features_.begin(), features_.end(), high_name);
+				if (*iter != high_name)
+				{
+					features_.insert(iter, high_name);
+				}
+			}
+		}
+	}
+
+	gl_features_extractor::gl_features_extractor()
+	{
+		gl_features();
+		wgl_features();
+		glx_features();
+
+		std::sort(features_.begin(), features_.end());
+	}
 
 	// Return the version of OpenGL in current system
-	void gl_version(int& major, int& minor)
+	void gl_features_extractor::gl_version(int& major, int& minor)
 	{
 		GLubyte const * str = ::glGetString(GL_VERSION);
+		BOOST_ASSERT(str != NULL);
 
 		std::string const ver(reinterpret_cast<char const *>(str));
 		std::string::size_type const pos(ver.find("."));
@@ -52,11 +94,12 @@ namespace
 		minor = ver[pos + 1] - '0';
 	}
 
-	std::vector<std::string> gl_features()
+	void gl_features_extractor::gl_features()
 	{
 		GLubyte const * str = ::glGetString(GL_EXTENSIONS);
 
-		std::vector<std::string> ret = split(reinterpret_cast<char const *>(str));
+		std::vector<std::string> gl_exts = split(reinterpret_cast<char const *>(str));
+		features_.insert(features_.end(), gl_exts.begin(), gl_exts.end());
 
 		int major, minor;
 		gl_version(major, minor);
@@ -64,39 +107,37 @@ namespace
 		int const ver_code = major * 10 + minor;
 		if (ver_code >= 10)
 		{
-			ret.push_back("GL_VERSION_1_0");
+			features_.push_back("GL_VERSION_1_0");
 		}
 		if (ver_code >= 11)
 		{
-			ret.push_back("GL_VERSION_1_1");
+			features_.push_back("GL_VERSION_1_1");
 		}
 		if (ver_code >= 12)
 		{
-			ret.push_back("GL_VERSION_1_2");
+			features_.push_back("GL_VERSION_1_2");
 		}
 		if (ver_code >= 13)
 		{
-			ret.push_back("GL_VERSION_1_3");
+			features_.push_back("GL_VERSION_1_3");
 		}
 		if (ver_code >= 14)
 		{
-			ret.push_back("GL_VERSION_1_4");
+			features_.push_back("GL_VERSION_1_4");
 		}
 		if (ver_code >= 15)
 		{
-			ret.push_back("GL_VERSION_1_5");
+			features_.push_back("GL_VERSION_1_5");
 		}
 		if (ver_code >= 20)
 		{
-			ret.push_back("GL_VERSION_2_0");
+			features_.push_back("GL_VERSION_2_0");
 		}
-
-		return ret;
 	}
 
-#ifdef GLLOADER_WGL
-	std::vector<std::string> wgl_features()
+	void gl_features_extractor::wgl_features()
 	{
+#ifdef GLLOADER_WGL
 		std::string exts_str;
 
 		::wglGetExtensionsStringARB = (wglGetExtensionsStringARBFUNC)(::glloader_get_gl_proc_address("wglGetExtensionsStringARB"));
@@ -113,72 +154,50 @@ namespace
 			}
 		}
 
-		return split(exts_str);
-	}
+		std::vector<std::string> wgl_exts = split(exts_str);
+		features_.insert(features_.end(), wgl_exts.begin(), wgl_exts.end());
 #endif		// GLLOADER_WGL
-
-#ifdef GLLOADER_GLX
-	// Return the version of GLX in current system	
-	int glx_version()
-	{
-		int major, minor;
-		::glXQueryVersion(::glXGetCurrentDisplay(), &major, &minor);
-		return majoy * 10 + minor;
 	}
 
-	std::vector<std::string> glx_features()
+	// Return the version of GLX in current system	
+	void gl_features_extractor::glx_version(int& major, int& minor)
 	{
-		std::vector<std::string> ret = Split(::glXGetClientString(::glXGetCurrentDisplay(), GLX_EXTENSIONS));
+#ifdef GLLOADER_GLX
+		::glXQueryVersion(::glXGetCurrentDisplay(), &major, &minor);
+#endif		// GLLOADER_GLX
+	}
 
-		int const ver_code = glx_version();
+	void gl_features_extractor::glx_features()
+	{
+#ifdef GLLOADER_GLX
+		std::vector<std::string> glx_exts = split(::glXGetClientString(::glXGetCurrentDisplay(), GLX_EXTENSIONS));
+		features_.insert(features_.end(), glx_exts.begin(), glx_exts.end());
+
+		int major, minor;
+		glx_version(major, minor);
+
+		int const ver_code = major * 10 + minor;
 		if (ver_code >= 10)
 		{
-			ret.push_back("GLX_VERSION_1_0");
+			features_.push_back("GLX_VERSION_1_0");
 		}
 		if (ver_code >= 11)
 		{
-			ret.push_back("GLX_VERSION_1_1");
+			features_.push_back("GLX_VERSION_1_1");
 		}
 		if (ver_code >= 12)
 		{
-			ret.push_back("GLX_VERSION_1_2");
+			features_.push_back("GLX_VERSION_1_2");
 		}
 		if (ver_code >= 13)
 		{
-			ret.push_back("GLX_VERSION_1_3");
+			features_.push_back("GLX_VERSION_1_3");
 		}
 		if (ver_code >= 14)
 		{
-			ret.push_back("GLX_VERSION_1_4");
+			features_.push_back("GLX_VERSION_1_4");
 		}
-
-		return ret;
-	}
 #endif		// GLLOADER_GLX
-
-	std::vector<std::string> const & all_features()
-	{
-		static std::vector<std::string> features;
-
-		if (features.empty())
-		{
-			std::vector<std::string> gl = gl_features();
-			features.insert(features.end(), gl.begin(), gl.end());
-
-	#ifdef GLLOADER_WGL
-			std::vector<std::string> wgl = wgl_features();
-			features.insert(features.end(), wgl.begin(), wgl.end());
-	#endif
-
-	#ifdef GLLOADER_GLX
-			std::vector<std::string> glx = glx_features();
-			features.insert(features.end(), glx.begin(), glx.end());
-	#endif
-
-			std::sort(features.begin(), features.end());
-		}
-
-		return features;
 	}
 }
 
@@ -208,7 +227,7 @@ void* glloader_get_gl_proc_address(const char* name)
 // The functions entries are putted in 'entries'.
 void glloader::load_funcs(entries_t& entries, funcs_names_t const & names)
 {
-	assert(names.size() == entries.size());
+	BOOST_ASSERT(names.size() == entries.size());
 
 	for (size_t i = 0; i < entries.size(); ++ i)
 	{
@@ -223,8 +242,9 @@ void glloader::load_funcs(entries_t& entries, funcs_names_t const & names)
 	}
 }
 
-int glloader_is_supported(const char* name)
+int glloader_is_supported(char const * name)
 {
-	std::vector<std::string> const & features = all_features();
-	return std::binary_search(features.begin(), features.end(), std::string(name));
+	BOOST_ASSERT(name != NULL);
+
+	return glloader::gl_features_extractor::instance().is_supported(name);
 }
