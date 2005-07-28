@@ -50,9 +50,9 @@ namespace KlayGE
 		{
 		}
 
-		uint32_t Begin(uint32_t /*flags*/)
+		uint32_t DoBegin(uint32_t /*flags*/)
 			{ return 0; }
-		void End()
+		void DoEnd()
 			{ }
 		void BeginPass(uint32_t /*passNum*/)
 			{ }
@@ -76,7 +76,7 @@ namespace KlayGE
 		else
 		{
 			RenderEffectParameterPtr ret = this->DoParameterByName(name);
-			params_[name] = std::make_pair(ret, true);
+			params_.insert(std::make_pair(name, std::make_pair(ret, true)));
 			return ret;
 		}
 	}
@@ -93,7 +93,7 @@ namespace KlayGE
 		params_[name].second = true;
 	}
 
-	void RenderEffect::FlushParams()
+	uint32_t RenderEffect::Begin(uint32_t flags)
 	{
 		for (params_type::iterator iter = params_.begin(); iter != params_.end(); ++ iter)
 		{
@@ -103,6 +103,13 @@ namespace KlayGE
 				iter->second.second = false;
 			}
 		}
+
+		return this->DoBegin(flags);
+	}
+
+	void RenderEffect::End()
+	{
+		return this->DoEnd();
 	}
 
 

@@ -48,9 +48,9 @@ namespace KlayGE
 	class OALSoundBuffer : boost::noncopyable, public SoundBuffer
 	{
 	private:
-		typedef std::vector<ALuint>			Sources;
-		typedef Sources::iterator			SourcesIter;
-		typedef Sources::const_iterator		SourcesConstIter;
+		typedef std::vector<ALuint>				Sources_type;
+		typedef Sources_type::iterator			SourcesIter;
+		typedef Sources_type::const_iterator	SourcesConstIter;
 
 	public:
 		OALSoundBuffer(AudioDataSourcePtr const & dataSource, uint32_t numSource, float volume);
@@ -75,8 +75,8 @@ namespace KlayGE
 		SourcesIter FreeSource();
 
 	private:
-		Sources		sources_;
-		ALuint		buffer_;
+		Sources_type	sources_;
+		ALuint			buffer_;
 
 		Vector3		pos_;
 		Vector3		vel_;

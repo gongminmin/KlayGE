@@ -29,7 +29,7 @@ namespace KlayGE
 		impl_ = didImpl;
 
 		didImpl->DataFormat(c_dfDIJoystick);
-		didImpl->CooperativeLevel(::GetForegroundWindow(), DISCL_EXCLUSIVE | DISCL_BACKGROUND);
+		didImpl->CooperativeLevel(::GetActiveWindow(), DISCL_EXCLUSIVE | DISCL_BACKGROUND);
 
 		// Set the X-axis range (-1000 to +1000)
 		DIPROPRANGE diprg;

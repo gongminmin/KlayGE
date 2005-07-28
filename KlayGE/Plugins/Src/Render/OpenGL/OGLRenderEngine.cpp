@@ -770,6 +770,11 @@ namespace KlayGE
 			caps_.max_simultaneous_rts	= 1;
 		}
 
+		glGetIntegerv(GL_MAX_ELEMENTS_VERTICES, &temp);
+		caps_.max_vertices = temp;
+		glGetIntegerv(GL_MAX_ELEMENTS_INDICES, &temp);
+		caps_.max_indices = temp;
+
 		caps_.texture_2d_filter_caps = TFC_Point | TFC_Bilinear | TFC_Anisotropic;
 		caps_.texture_1d_filter_caps = caps_.texture_2d_filter_caps;
 		caps_.texture_3d_filter_caps = caps_.texture_2d_filter_caps;

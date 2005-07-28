@@ -1,8 +1,11 @@
 // DIMouse.cpp
 // KlayGE DInput鼠标管理类 实现文件
-// Ver 2.1.2
+// Ver 2.8.0
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.8.0
+// 改为非独占模式 (2005.7.26)
 //
 // 2.1.2
 // 改用Bridge模式实现 (2004.9.5)
@@ -33,7 +36,7 @@ namespace KlayGE
 		impl_ = didImpl;
 
 		didImpl->DataFormat(c_dfDIMouse);
-		didImpl->CooperativeLevel(::GetActiveWindow(), DISCL_EXCLUSIVE | DISCL_FOREGROUND);
+		didImpl->CooperativeLevel(::GetActiveWindow(), DISCL_NONEXCLUSIVE | DISCL_FOREGROUND);
 
 		// 把鼠标的设为相对模式
 		DIPROPDWORD dipdw;

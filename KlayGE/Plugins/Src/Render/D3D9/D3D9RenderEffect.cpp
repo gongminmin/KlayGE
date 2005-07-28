@@ -74,14 +74,14 @@ namespace KlayGE
 		TIF(effect_->SetTechnique(technique.c_str()));
 	}
 
-	uint32_t D3D9RenderEffect::Begin(uint32_t flags)
+	uint32_t D3D9RenderEffect::DoBegin(uint32_t flags)
 	{
 		UINT passes;
 		TIF(effect_->Begin(&passes, flags));
 		return passes;
 	}
 
-	void D3D9RenderEffect::End()
+	void D3D9RenderEffect::DoEnd()
 	{
 		TIF(effect_->End());
 	}

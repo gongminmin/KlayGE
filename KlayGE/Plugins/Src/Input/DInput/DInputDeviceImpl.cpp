@@ -38,7 +38,10 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void DInputDeviceImpl::Acquire()
 	{
-		TIF(device_->Acquire());
+		while (DIERR_OTHERAPPHASPRIO == device_->Acquire())
+		{
+			Sleep(10);
+		}
 	}
 
 	//  Õ∑≈…Ë±∏

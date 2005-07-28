@@ -15,6 +15,8 @@
 
 #include <cassert>
 
+#pragma warning(disable : 4127)
+#pragma warning(disable : 4512)
 #include <boost/random.hpp>
 #include <boost/bind.hpp>
 

@@ -68,8 +68,6 @@ namespace KlayGE
 		bool Validate(std::string const & technique);
 		void SetTechnique(std::string const & technique);
 
-		uint32_t Begin(uint32_t flags);
-		void End();
 		void BeginPass(uint32_t passNum);
 		void EndPass();
 
@@ -80,7 +78,8 @@ namespace KlayGE
 		std::string DoNameBySemantic(std::string const & semantic);
 		RenderEffectParameterPtr DoParameterByName(std::string const & name);
 
-		bool DoSetTechnique(D3DXHANDLE handle);
+		uint32_t DoBegin(uint32_t flags);
+		void DoEnd();
 
 	private:
 		boost::shared_ptr<ID3DXEffect> effect_;

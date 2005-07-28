@@ -418,6 +418,9 @@ namespace KlayGE
 
 		ret.max_simultaneous_rts	= d3d_caps.NumSimultaneousRTs;
 
+		ret.max_vertices = d3d_caps.MaxPrimitiveCount > 0xFFFF ? d3d_caps.MaxPrimitiveCount : d3d_caps.MaxPrimitiveCount * 3;
+		ret.max_indices = d3d_caps.MaxVertexIndex;
+
 		ret.texture_2d_filter_caps = 0;
 		if (((d3d_caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFPOINT) != 0)
 			|| ((d3d_caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFPOINT) != 0)

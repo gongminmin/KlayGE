@@ -73,12 +73,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void RenderEngine::SetRenderEffect(RenderEffectPtr const & effect)
 	{
-		if (renderEffect_ != effect)
-		{
-			renderEffect_->End();
-			renderEffect_ = (!effect) ? RenderEffect::NullObject() : effect;
-			renderPasses_ = renderEffect_->Begin();
-		}
+		renderEffect_ = (!effect) ? RenderEffect::NullObject() : effect;
 	}
 
 	// 获取渲染状态
@@ -137,9 +132,9 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void RenderEngine::Render(VertexBuffer const & vb)
 	{
-		renderEffect_->FlushParams();
-
+		renderPasses_ = renderEffect_->Begin();
 		this->DoRender(vb);
+		renderEffect_->End();
 	}
 
 	// 上次Render()所渲染的图元数

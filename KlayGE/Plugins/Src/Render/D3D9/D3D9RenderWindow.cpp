@@ -109,6 +109,12 @@ namespace KlayGE
 			reinterpret_cast<MINMAXINFO*>(lParam)->ptMinTrackSize.y = 100;
 			break;
 
+		case WM_SETCURSOR:
+		    // Turn off window cursor 
+			::SetCursor(NULL);
+			d3dDevice_->ShowCursor(true);
+			return TRUE; // prevent Windows from setting cursor to window class cursor
+
 		case WM_CLOSE:
 			this->Destroy();
 			closed_ = true;
@@ -314,7 +320,6 @@ namespace KlayGE
 
 		Verify(d3dDevice != NULL);
 		d3dDevice_ = MakeCOMPtr(d3dDevice);
-		d3dDevice_->ShowCursor(true);
 
 		this->UpdateSurfacesPtrs();
 

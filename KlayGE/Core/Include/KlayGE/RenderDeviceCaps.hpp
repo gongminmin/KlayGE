@@ -49,6 +49,9 @@ namespace KlayGE
 
 		uint32_t max_simultaneous_rts;
 
+		uint32_t max_vertices;
+		uint32_t max_indices;
+
 		uint32_t texture_1d_filter_caps;
 		uint32_t texture_2d_filter_caps;
 		uint32_t texture_3d_filter_caps;

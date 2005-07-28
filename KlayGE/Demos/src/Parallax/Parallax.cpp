@@ -70,16 +70,16 @@ namespace
 
 			vb_.reset(new VertexBuffer(VertexBuffer::BT_TriangleList));
 
-			vb_->AddVertexStream(VST_Positions, sizeof(float), 3);
-			vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2);
-			vb_->AddVertexStream(VST_TextureCoords1, sizeof(float), 3);
-			vb_->AddVertexStream(VST_TextureCoords2, sizeof(float), 3);
+			vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
+			vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2, true);
+			vb_->AddVertexStream(VST_TextureCoords1, sizeof(float), 3, true);
+			vb_->AddVertexStream(VST_TextureCoords2, sizeof(float), 3, true);
 			vb_->GetVertexStream(VST_Positions)->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
 			vb_->GetVertexStream(VST_TextureCoords0)->Assign(texs, sizeof(texs) / sizeof(texs[0]));
 			vb_->GetVertexStream(VST_TextureCoords1)->Assign(t, sizeof(t) / sizeof(t[0]));
 			vb_->GetVertexStream(VST_TextureCoords2)->Assign(b, sizeof(b) / sizeof(b[0]));
 
-			vb_->AddIndexStream();
+			vb_->AddIndexStream(true);
 			vb_->GetIndexStream()->Assign(indices, sizeof(indices) / sizeof(uint16_t));
 
 			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[4]);

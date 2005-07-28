@@ -39,14 +39,15 @@ namespace KlayGE
 		bool Validate(std::string const & technique);
 		void SetTechnique(std::string const & technique);
 
-		uint32_t Begin(uint32_t flags);
-		void End();
 		void BeginPass(uint32_t passNum);
 		void EndPass();
 
 	private:
 		std::string DoNameBySemantic(std::string const & semantic);
 		RenderEffectParameterPtr DoParameterByName(std::string const & name);
+
+		uint32_t DoBegin(uint32_t flags);
+		void DoEnd();
 	};
 
 	class OGLRenderEffectParameter : public RenderEffectParameter

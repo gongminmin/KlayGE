@@ -67,10 +67,8 @@ namespace KlayGE
 		virtual bool Validate(std::string const & technique) = 0;
 		virtual void SetTechnique(std::string const & technique) = 0;
 
-		void FlushParams();
-
-		virtual uint32_t Begin(uint32_t flags = 0) = 0;
-		virtual void End() = 0;
+		uint32_t Begin(uint32_t flags = 0);
+		void End();
 		virtual void BeginPass(uint32_t passNum) = 0;
 		virtual void EndPass() = 0;
 
@@ -79,6 +77,9 @@ namespace KlayGE
 	private:
 		virtual std::string DoNameBySemantic(std::string const & semantic) = 0;
 		virtual RenderEffectParameterPtr DoParameterByName(std::string const & name) = 0;
+
+		virtual uint32_t DoBegin(uint32_t flags) = 0;
+		virtual void DoEnd() = 0;
 
 	protected:
 		typedef std::map<std::string, std::pair<RenderEffectParameterPtr, bool> > params_type;

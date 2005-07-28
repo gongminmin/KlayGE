@@ -49,12 +49,12 @@ namespace KlayGE
 		return RenderEffectParameterPtr();
 	}
 
-	uint32_t OGLRenderEffect::Begin(uint32_t flags)
+	uint32_t OGLRenderEffect::DoBegin(uint32_t flags)
 	{
 		return 0;
 	}
 
-	void OGLRenderEffect::End()
+	void OGLRenderEffect::DoEnd()
 	{
 	}
 
