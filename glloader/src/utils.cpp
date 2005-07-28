@@ -97,6 +97,7 @@ namespace glloader
 	void gl_features_extractor::gl_features()
 	{
 		GLubyte const * str = ::glGetString(GL_EXTENSIONS);
+		BOOST_ASSERT(str != NULL);
 
 		std::vector<std::string> gl_exts = split(reinterpret_cast<char const *>(str));
 		features_.insert(features_.end(), gl_exts.begin(), gl_exts.end());
