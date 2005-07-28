@@ -40,12 +40,12 @@ namespace KlayGE
 
 	void D3D9RenderVertexStream::Attach(VertexStreamPtr vs)
 	{
-		assert(!vs->IsStatic());
-		assert((3 == vs->ElementsPerVertex()) || (4 == vs->ElementsPerVertex()));
-		assert(dynamic_cast<D3D9VertexStream*>(vs.get()) != NULL);
+		BOOST_ASSERT(!vs->IsStatic());
+		BOOST_ASSERT((3 == vs->ElementsPerVertex()) || (4 == vs->ElementsPerVertex()));
+		BOOST_ASSERT(dynamic_cast<D3D9VertexStream*>(vs.get()) != NULL);
 
 		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		assert(dynamic_cast<D3D9RenderEngine const *>(&render_eng) != NULL);
+		BOOST_ASSERT(dynamic_cast<D3D9RenderEngine const *>(&render_eng) != NULL);
 
 		d3d_device_ = static_cast<D3D9RenderEngine const &>(render_eng).D3DDevice();
 
@@ -60,7 +60,7 @@ namespace KlayGE
 		}
 		else
 		{
-			assert(sizeof(uint8_t) == vs_->SizeOfElement());
+			BOOST_ASSERT(sizeof(uint8_t) == vs_->SizeOfElement());
 
 			fmt_ = D3DFMT_A8R8G8B8;
 			colorDepth_ = 32;
@@ -113,7 +113,7 @@ namespace KlayGE
 			return;
 		}
 
-		assert(false);
+		BOOST_ASSERT(false);
 	}
 
 	void D3D9RenderVertexStream::DoOnLostDevice()
@@ -132,7 +132,7 @@ namespace KlayGE
 		if (vs_)
 		{
 			RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			assert(dynamic_cast<D3D9RenderEngine const *>(&render_eng) != NULL);
+			BOOST_ASSERT(dynamic_cast<D3D9RenderEngine const *>(&render_eng) != NULL);
 
 			d3d_device_ = static_cast<D3D9RenderEngine const &>(render_eng).D3DDevice();
 
@@ -190,7 +190,7 @@ namespace KlayGE
 		}
 		else
 		{
-			assert(D3DFMT_A32B32G32R32F == fmt_);
+			BOOST_ASSERT(D3DFMT_A32B32G32R32F == fmt_);
 
 			std::vector<float> vertices(width_ * height_ * elems_per_vert);
 

@@ -1,7 +1,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Math.hpp>
 
-#include <cassert>
+#include <boost/assert.hpp>
 
 #include <KlayGE/Light.hpp>
 

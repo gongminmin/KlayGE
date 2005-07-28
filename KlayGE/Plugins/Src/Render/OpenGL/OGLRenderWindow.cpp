@@ -4,7 +4,7 @@
 #include <KlayGE/RenderSettings.hpp>
 
 #include <map>
-#include <cassert>
+#include <boost/assert.hpp>
 
 #include <glloader/glloader.h>
 
@@ -25,7 +25,7 @@ namespace KlayGE
 		if (winMap.find(hWnd) != winMap.end())
 		{
 			OGLRenderWindow* win(winMap[hWnd]);
-			assert(win != NULL);
+			BOOST_ASSERT(win != NULL);
 
 			return win->MsgProc(hWnd, uMsg, wParam, lParam);
 		}
@@ -188,7 +188,7 @@ namespace KlayGE
 		pfd.iLayerType	= PFD_MAIN_PLANE;
 
 		int pixelFormat(::ChoosePixelFormat(hDC_, &pfd));
-		assert(pixelFormat != 0);
+		BOOST_ASSERT(pixelFormat != 0);
 
 		::SetPixelFormat(hDC_, pixelFormat, &pfd);
 
@@ -296,6 +296,6 @@ namespace KlayGE
 
 	void OGLRenderWindow::CustomAttribute(std::string const & /*name*/, void* /*pData*/)
 	{
-		assert(false);
+		BOOST_ASSERT(false);
 	}
 }

@@ -417,7 +417,7 @@ namespace KlayGE
 
 	void OGLTexture::CopyToTexture(Texture& target)
 	{
-		assert(dynamic_cast<OGLTexture*>(&target) != NULL);
+		BOOST_ASSERT(dynamic_cast<OGLTexture*>(&target) != NULL);
 
 		GLint gl_internal_format;
 		GLenum gl_format;
@@ -523,7 +523,7 @@ namespace KlayGE
 	void OGLTexture::CopyMemoryToTexture1D(int level, void* data, PixelFormat pf,
 		uint32_t width, uint32_t xOffset)
 	{
-		assert(width != 0);
+		BOOST_ASSERT(width != 0);
 
 		GLint glinternalFormat;
 		GLenum glformat;
@@ -558,8 +558,8 @@ namespace KlayGE
 	void OGLTexture::CopyMemoryToTexture2D(int level, void* data, PixelFormat pf,
 		uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset)
 	{
-		assert(width != 0);
-		assert(height != 0);
+		BOOST_ASSERT(width != 0);
+		BOOST_ASSERT(height != 0);
 
 		GLint glinternalFormat;
 		GLenum glformat;
@@ -595,9 +595,9 @@ namespace KlayGE
 			uint32_t width, uint32_t height, uint32_t depth,
 			uint32_t xOffset, uint32_t yOffset, uint32_t zOffset)
 	{
-		assert(width != 0);
-		assert(height != 0);
-		assert(depth != 0);
+		BOOST_ASSERT(width != 0);
+		BOOST_ASSERT(height != 0);
+		BOOST_ASSERT(depth != 0);
 
 		GLint glinternalFormat;
 		GLenum glformat;
@@ -632,7 +632,7 @@ namespace KlayGE
 	void OGLTexture::CopyMemoryToTextureCube(CubeFaces face, int level, void* data, PixelFormat pf,
 			uint32_t size, uint32_t xOffset)
 	{
-		assert(size != 0);
+		BOOST_ASSERT(size != 0);
 
 		GLint glinternalFormat;
 		GLenum glformat;
@@ -670,7 +670,7 @@ namespace KlayGE
 
 	void OGLTexture::CustomAttribute(std::string const & /*name*/, void* /*data*/)
 	{
-		assert(false);
+		BOOST_ASSERT(false);
 	}
 
 	void OGLTexture::UpdateParams()
@@ -743,7 +743,7 @@ namespace KlayGE
 			break;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			break;
 		}
 
@@ -776,7 +776,7 @@ namespace KlayGE
 			break;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			break;
 		}
 	}
@@ -795,7 +795,7 @@ namespace KlayGE
 			return addr_mode_w_;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			return addr_mode_u_;
 		}
 	}
@@ -821,7 +821,7 @@ namespace KlayGE
 				break;
 
 			default:
-				assert(false);
+				BOOST_ASSERT(false);
 				break;
 			}
 		}
@@ -877,7 +877,7 @@ namespace KlayGE
 				break;
 
 			default:
-				assert(false);
+				BOOST_ASSERT(false);
 				break;
 			}
 		}
@@ -900,7 +900,7 @@ namespace KlayGE
 			break;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			break;
 		}
 	}
@@ -919,7 +919,7 @@ namespace KlayGE
 			return mip_filter_;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			return min_filter_;
 		}
 	}
@@ -1017,7 +1017,7 @@ namespace KlayGE
 			break;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			break;
 		}
 	}
@@ -1039,7 +1039,7 @@ namespace KlayGE
 			return GL_TEXTURE_CUBE_MAP;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			return GL_TEXTURE_1D;
 		}
 	}

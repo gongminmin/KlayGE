@@ -133,7 +133,7 @@ namespace KlayGE
 				return this->RightBottomFar();
 
 			default:
-				assert(false);
+				BOOST_ASSERT(false);
 				return Vector_T<T, 3>::Zero();
 			}
 		}

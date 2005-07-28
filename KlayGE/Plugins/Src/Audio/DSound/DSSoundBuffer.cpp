@@ -17,11 +17,11 @@
 #include <KlayGE/AudioFactory.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
-#include <cassert>
 #include <algorithm>
 #include <cstring>
 
-#pragma warning(disable : 4512)
+#include <boost/assert.hpp>
+#pragma warning(disable: 4512)
 #include <boost/random.hpp>
 #include <boost/bind.hpp>
 
@@ -132,7 +132,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	DSSoundBuffer::SourcesIter DSSoundBuffer::FreeSource()
 	{
-		assert(!sources_.empty());
+		BOOST_ASSERT(!sources_.empty());
 
 		SourcesIter iter(std::find_if(sources_.begin(), sources_.end(), IsSourceFree));
 

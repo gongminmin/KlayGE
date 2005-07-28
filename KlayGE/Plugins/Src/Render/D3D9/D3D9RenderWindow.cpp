@@ -26,8 +26,8 @@
 #include <KlayGE/RenderSettings.hpp>
 
 #include <vector>
-#include <cassert>
 #include <cstring>
+#include <boost/assert.hpp>
 
 #define NOMINMAX
 #include <d3d9.h>
@@ -499,6 +499,6 @@ namespace KlayGE
 			return;
 		}
 
-		assert(false);
+		BOOST_ASSERT(false);
 	}
 }

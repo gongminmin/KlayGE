@@ -18,9 +18,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 
-#pragma warning(disable : 4251)
-#pragma warning(disable : 4275)
-
+#pragma warning(disable: 4251 4275)
 #include <boost/thread/xtime.hpp>
 #include <boost/thread/thread.hpp>
 
@@ -33,9 +31,9 @@
 
 #include <cwchar>
 #include <clocale>
-#include <cassert>
 #include <vector>
 #include <algorithm>
+#include <boost/assert.hpp>
 
 #include <KlayGE/Util.hpp>
 

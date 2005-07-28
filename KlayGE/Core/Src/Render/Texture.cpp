@@ -149,15 +149,15 @@ namespace KlayGE
 
 		uint32_t magic;
 		file->read(reinterpret_cast<char*>(&magic), sizeof(magic));
-		assert((MakeFourCC<'D', 'D', 'S', ' '>::value) == magic);
+		BOOST_ASSERT((MakeFourCC<'D', 'D', 'S', ' '>::value) == magic);
 
 		DDSSURFACEDESC2 desc;
 		file->read(reinterpret_cast<char*>(&desc), sizeof(desc));
 
-		assert((desc.flags & DDSD_CAPS) != 0);
-		assert((desc.flags & DDSD_PIXELFORMAT) != 0);
-		assert((desc.flags & DDSD_WIDTH) != 0);
-		assert((desc.flags & DDSD_HEIGHT) != 0);
+		BOOST_ASSERT((desc.flags & DDSD_CAPS) != 0);
+		BOOST_ASSERT((desc.flags & DDSD_PIXELFORMAT) != 0);
+		BOOST_ASSERT((desc.flags & DDSD_WIDTH) != 0);
+		BOOST_ASSERT((desc.flags & DDSD_HEIGHT) != 0);
 
 		if (0 == (desc.flags & DDSD_MIPMAPCOUNT))
 		{
@@ -230,7 +230,7 @@ namespace KlayGE
 						}
 						else
 						{
-							assert(false);
+							BOOST_ASSERT(false);
 						}
 					}
 					break;
@@ -260,7 +260,7 @@ namespace KlayGE
 						}
 						else
 						{
-							assert(false);
+							BOOST_ASSERT(false);
 						}
 					}
 					break;
@@ -291,7 +291,7 @@ namespace KlayGE
 						break;
 
 					default:
-						assert(false);
+						BOOST_ASSERT(false);
 						break;
 					}
 				}
@@ -303,7 +303,7 @@ namespace KlayGE
 					}
 					else
 					{
-						assert(false);
+						BOOST_ASSERT(false);
 					}
 				}
 			}
@@ -386,7 +386,7 @@ namespace KlayGE
 					data.resize(image_size);
 
 					file->read(reinterpret_cast<char*>(&data[0]), static_cast<std::streamsize>(data.size()));
-					assert(file->gcount() == static_cast<int>(data.size()));
+					BOOST_ASSERT(file->gcount() == static_cast<int>(data.size()));
 
 					texture->CopyMemoryToTexture2D(level, &data[0], format,
 						texture->Width(level), texture->Height(level), 0, 0);
@@ -421,7 +421,7 @@ namespace KlayGE
 					data.resize(image_size);
 
 					file->read(reinterpret_cast<char*>(&data[0]), static_cast<std::streamsize>(data.size()));
-					assert(file->gcount() == static_cast<int>(data.size()));
+					BOOST_ASSERT(file->gcount() == static_cast<int>(data.size()));
 
 					texture->CopyMemoryToTexture2D(level, &data[0], format,
 						texture->Width(level), texture->Height(level), 0, 0);
@@ -456,7 +456,7 @@ namespace KlayGE
 					data.resize(image_size);
 
 					file->read(reinterpret_cast<char*>(&data[0]), static_cast<std::streamsize>(data.size()));
-					assert(file->gcount() == static_cast<int>(data.size()));
+					BOOST_ASSERT(file->gcount() == static_cast<int>(data.size()));
 
 					texture->CopyMemoryToTexture3D(level, &data[0], format,
 						texture->Width(level), texture->Height(level),
@@ -494,7 +494,7 @@ namespace KlayGE
 						data.resize(image_size);
 
 						file->read(reinterpret_cast<char*>(&data[0]), static_cast<std::streamsize>(data.size()));
-						assert(file->gcount() == static_cast<int>(data.size()));
+						BOOST_ASSERT(file->gcount() == static_cast<int>(data.size()));
 
 						texture->CopyMemoryToTextureCube(static_cast<Texture::CubeFaces>(face),
 							level, &data[0], format, texture->Width(level), 0);

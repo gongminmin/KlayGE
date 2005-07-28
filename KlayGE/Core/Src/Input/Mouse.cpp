@@ -16,7 +16,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 
-#include <cassert>
+#include <boost/assert.hpp>
 
 #include <KlayGE/Input.hpp>
 
@@ -68,7 +68,7 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	bool InputMouse::Button(size_t index) const
 	{
-		assert(index < buttons_.size());
+		BOOST_ASSERT(index < buttons_.size());
 
 		return buttons_[index];
 	}

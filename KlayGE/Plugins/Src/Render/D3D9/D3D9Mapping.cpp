@@ -21,12 +21,12 @@
 #include <KlayGE/Color.hpp>
 #include <KlayGE/VertexBuffer.hpp>
 
-#include <cassert>
-
 #define NOMINMAX
 #include <d3dx9.h>
 #include <d3dx9.h>
 #include <dxerr9.h>
+
+#include <boost/assert.hpp>
 
 #include <KlayGE/D3D9/D3D9Mapping.hpp>
 
@@ -101,7 +101,7 @@ namespace KlayGE
 			return D3DCMP_GREATER;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			return D3DCMP_NEVER;
 		};
 	}
@@ -131,7 +131,7 @@ namespace KlayGE
 			return D3DSTENCILOP_INVERT;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			return D3DSTENCILOP_KEEP;
 		};
 	}
@@ -190,7 +190,7 @@ namespace KlayGE
 			return D3DLIGHT_SPOT;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			return D3DLIGHT_POINT;
 		}
 	}
@@ -209,7 +209,7 @@ namespace KlayGE
 			return D3DCULL_CCW;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			return D3DCULL_NONE;
 		}
 	}
@@ -228,7 +228,7 @@ namespace KlayGE
 			return D3DFILL_SOLID;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			return D3DFILL_POINT;
 		}
 	}
@@ -247,7 +247,7 @@ namespace KlayGE
 			return D3DSHADE_PHONG;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			return D3DSHADE_FLAT;
 		}
 	}
@@ -266,7 +266,7 @@ namespace KlayGE
 			return D3DFOG_EXP2;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			return D3DFOG_LINEAR;
 		}
 	}
@@ -285,7 +285,7 @@ namespace KlayGE
 			return D3DTADDRESS_MIRROR;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			return D3DTADDRESS_CLAMP;
 		}
 	}
@@ -326,7 +326,7 @@ namespace KlayGE
 			break;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			break;
 		}
 	}

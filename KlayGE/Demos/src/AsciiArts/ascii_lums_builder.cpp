@@ -1,10 +1,10 @@
 #include <KlayGE/KlayGE.hpp>
 
-#include <cassert>
 #include <numeric>
 #include <algorithm>
 #include <functional>
 #include <boost/bind.hpp>
+#include <boost/assert.hpp>
 
 #include "ascii_lums_builder.hpp"
 
@@ -20,7 +20,7 @@ namespace KlayGE
 
 	ascii_tiles_type ascii_lums_builder::build(ascii_tiles_type const & ascii_data)
 	{
-		assert(ascii_data.size() == input_num_ascii_);
+		BOOST_ASSERT(ascii_data.size() == input_num_ascii_);
 
 		lum_to_char_type lum_to_char = this->cal_lum_to_char_map(ascii_data);
 		std::vector<uint8_t> final_chars = get_final_asciis(lum_to_char);
@@ -28,7 +28,7 @@ namespace KlayGE
 		ascii_tiles_type ret(output_num_ascii_);
 		for (size_t i = 0; i < output_num_ascii_; ++ i)
 		{
-			assert(ascii_data[final_chars[i]].size() == ascii_width_ * ascii_height_);
+			BOOST_ASSERT(ascii_data[final_chars[i]].size() == ascii_width_ * ascii_height_);
 
 			ret[i] = ascii_data[final_chars[i]];
 		}
@@ -38,12 +38,12 @@ namespace KlayGE
 
 	std::vector<float> ascii_lums_builder::cal_lums(ascii_tiles_type const & ascii_data)
 	{
-		assert(ascii_data.size() == input_num_ascii_);
+		BOOST_ASSERT(ascii_data.size() == input_num_ascii_);
 
 		std::vector<float> ret(input_num_ascii_);
 		for (size_t i = 0; i < ret.size(); ++ i)
 		{
-			assert(ascii_data[i].size() == ascii_width_ * ascii_height_);
+			BOOST_ASSERT(ascii_data[i].size() == ascii_width_ * ascii_height_);
 
 			ret[i] = std::accumulate(ascii_data[i].begin(), ascii_data[i].end(), 0) / 256.0f;
 		}
@@ -53,8 +53,8 @@ namespace KlayGE
 
 	ascii_lums_builder::lum_to_char_type ascii_lums_builder::cal_lum_to_char_map(ascii_tiles_type const & ascii_data)
 	{
-		assert(ascii_data.size() == input_num_ascii_);
-		assert(ascii_data.size() >= output_num_ascii_);
+		BOOST_ASSERT(ascii_data.size() == input_num_ascii_);
+		BOOST_ASSERT(ascii_data.size() >= output_num_ascii_);
 
 		lum_to_char_type ret;
 
@@ -70,14 +70,14 @@ namespace KlayGE
 				ret.insert(std::make_pair(char_lum, static_cast<uint8_t>(iter - lums.begin())));
 			}
 		}
-		assert(ret.size() >= output_num_ascii_);
+		BOOST_ASSERT(ret.size() >= output_num_ascii_);
 
 		return ret;
 	}
 
 	std::vector<uint8_t> ascii_lums_builder::get_final_asciis(lum_to_char_type const & lum_to_char)
 	{
-		assert(lum_to_char.size() >= output_num_ascii_);
+		BOOST_ASSERT(lum_to_char.size() >= output_num_ascii_);
 
 		diff_lum_to_iter_type diff_lum_to_iter;
 
@@ -98,7 +98,7 @@ namespace KlayGE
 
 			diff_lum_to_iter.push_back(std::make_pair(diff_lum, iter));
 		}
-		assert(diff_lum_to_iter.size() >= output_num_ascii_);
+		BOOST_ASSERT(diff_lum_to_iter.size() >= output_num_ascii_);
 
 		std::partial_sort(diff_lum_to_iter.begin(), diff_lum_to_iter.begin() + output_num_ascii_,
 			diff_lum_to_iter.end(), cmp_diff_lum_to_iter);

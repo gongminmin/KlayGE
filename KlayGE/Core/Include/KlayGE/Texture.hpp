@@ -23,10 +23,10 @@
 #ifndef _TEXTURE_HPP
 #define _TEXTURE_HPP
 
-#include <string>
-#include <cassert>
-
 #include <KlayGE/PreDeclare.hpp>
+
+#include <string>
+#include <boost/assert.hpp>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_Core_d.lib")
@@ -123,7 +123,7 @@ namespace KlayGE
 			return 128;
 		}
 
-		assert(false);
+		BOOST_ASSERT(false);
 		return 0;
 	}
 
@@ -157,7 +157,7 @@ namespace KlayGE
 			return true;
 		}
 
-		assert(false);
+		BOOST_ASSERT(false);
 		return false;
 	}
 
@@ -191,7 +191,7 @@ namespace KlayGE
 			return false;
 		}
 
-		assert(false);
+		BOOST_ASSERT(false);
 		return false;
 	}
 

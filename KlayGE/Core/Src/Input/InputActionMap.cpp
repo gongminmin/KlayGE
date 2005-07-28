@@ -12,7 +12,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 
-#include <cassert>
+#include <boost/assert.hpp>
 
 #include <KlayGE/Input.hpp>
 

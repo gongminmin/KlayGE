@@ -16,7 +16,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 
-#include <cassert>
+#include <boost/assert.hpp>
 
 #include <KlayGE/Script.hpp>
 

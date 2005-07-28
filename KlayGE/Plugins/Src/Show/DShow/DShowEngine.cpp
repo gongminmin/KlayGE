@@ -14,7 +14,7 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
 
-#include <cassert>
+#include <boost/assert.hpp>
 #include <uuids.h>
 
 #include <KlayGE/DShow/DShow.hpp>
@@ -229,7 +229,7 @@ namespace KlayGE
 			return;
 		}
 
-		assert(videoWnd_);
+		BOOST_ASSERT(videoWnd_);
 
 		// 获取当前状态
 		long mode;

@@ -15,9 +15,9 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
-#include <cassert>
 #include <cmath>
 #include <cstring>
+#include <boost/assert.hpp>
 
 #include <KlayGE/DSound/DSAudio.hpp>
 

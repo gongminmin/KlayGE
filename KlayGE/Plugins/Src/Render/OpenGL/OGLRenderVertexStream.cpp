@@ -32,16 +32,16 @@ namespace KlayGE
 
 	void OGLRenderVertexStream::CustomAttribute(std::string const & /*name*/, void* /*data*/)
 	{
-		assert(false);
+		BOOST_ASSERT(false);
 	}
 
 	void OGLRenderVertexStream::Attach(VertexStreamPtr vs)
 	{
-		assert(false);
+		BOOST_ASSERT(false);
 	}
 
 	void OGLRenderVertexStream::Detach()
 	{
-		assert(false);
+		BOOST_ASSERT(false);
 	}
 }

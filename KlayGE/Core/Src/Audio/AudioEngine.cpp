@@ -15,9 +15,8 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
-#include <cassert>
-
-#pragma warning(disable : 4239)
+#include <boost/assert.hpp>
+#pragma warning(disable: 4239)
 #include <boost/bind.hpp>
 
 #include <KlayGE/Audio.hpp>
@@ -134,7 +133,7 @@ namespace KlayGE
 			return iter->second;
 		}
 
-		assert(false);
+		BOOST_ASSERT(false);
 		return AudioBufferPtr();
 	}
 

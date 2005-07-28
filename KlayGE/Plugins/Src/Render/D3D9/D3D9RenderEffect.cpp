@@ -25,7 +25,7 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 
-#include <cassert>
+#include <boost/assert.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderEffect.hpp>
 
@@ -33,7 +33,7 @@ namespace KlayGE
 {
 	D3D9RenderEffect::D3D9RenderEffect(std::string const & srcData)
 	{
-		assert(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
+		BOOST_ASSERT(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
 
 		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 
@@ -126,7 +126,7 @@ namespace KlayGE
 
 	bool D3D9RenderEffectParameter::DoTestType(RenderEffectParameterType type)
 	{
-		assert(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
+		BOOST_ASSERT(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
 
 		boost::shared_ptr<ID3DXEffect> d3dx_effect = static_cast<D3D9RenderEffect&>(effect_).D3DXEffect();
 
@@ -165,14 +165,14 @@ namespace KlayGE
 			return (D3DXPC_SCALAR == desc.Class) && (D3DXPT_INT == desc.Type) && (desc.Elements != 1);
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			return false;
 		}
 	}
 	
 	void D3D9RenderEffectParameter::DoFloat(float value)
 	{
-		assert(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
+		BOOST_ASSERT(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
 
 		boost::shared_ptr<ID3DXEffect> d3dx_effect = static_cast<D3D9RenderEffect&>(effect_).D3DXEffect();
 		TIF(d3dx_effect->SetFloat(name_.c_str(), value));
@@ -180,7 +180,7 @@ namespace KlayGE
 
 	void D3D9RenderEffectParameter::DoVector4(Vector4 const & value)
 	{
-		assert(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
+		BOOST_ASSERT(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
 
 		boost::shared_ptr<ID3DXEffect> d3dx_effect = static_cast<D3D9RenderEffect&>(effect_).D3DXEffect();
 		TIF(d3dx_effect->SetVector(name_.c_str(), reinterpret_cast<D3DXVECTOR4 const *>(&value)));
@@ -188,7 +188,7 @@ namespace KlayGE
 
 	void D3D9RenderEffectParameter::DoMatrix4(Matrix4 const & value)
 	{
-		assert(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
+		BOOST_ASSERT(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
 
 		boost::shared_ptr<ID3DXEffect> d3dx_effect = static_cast<D3D9RenderEffect&>(effect_).D3DXEffect();
 		TIF(d3dx_effect->SetMatrix(name_.c_str(), reinterpret_cast<D3DXMATRIX const *>(&value)));
@@ -196,7 +196,7 @@ namespace KlayGE
 
 	void D3D9RenderEffectParameter::DoInt(int value)
 	{
-		assert(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
+		BOOST_ASSERT(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
 
 		boost::shared_ptr<ID3DXEffect> d3dx_effect = static_cast<D3D9RenderEffect&>(effect_).D3DXEffect();
 		TIF(d3dx_effect->SetInt(name_.c_str(), value));
@@ -204,12 +204,12 @@ namespace KlayGE
 
 	void D3D9RenderEffectParameter::DoTexture(TexturePtr const & tex)
 	{
-		assert(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
+		BOOST_ASSERT(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
 
 		IDirect3DBaseTexture9* texture(NULL);
 		if (tex)
 		{
-			assert(dynamic_cast<D3D9Texture*>(tex.get()) != NULL);
+			BOOST_ASSERT(dynamic_cast<D3D9Texture*>(tex.get()) != NULL);
 
 			D3D9Texture const & d3d9Tex = static_cast<D3D9Texture const &>(*tex);
 			texture = d3d9Tex.D3DBaseTexture().get();
@@ -221,7 +221,7 @@ namespace KlayGE
 
 	void D3D9RenderEffectParameter::DoSetFloatArray(float const * value, size_t count)
 	{
-		assert(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
+		BOOST_ASSERT(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
 
 		boost::shared_ptr<ID3DXEffect> d3dx_effect = static_cast<D3D9RenderEffect&>(effect_).D3DXEffect();
 		TIF(d3dx_effect->SetFloatArray(name_.c_str(), value, static_cast<UINT>(count)));
@@ -229,7 +229,7 @@ namespace KlayGE
 
 	void D3D9RenderEffectParameter::DoSetVector4Array(Vector4 const * value, size_t count)
 	{
-		assert(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
+		BOOST_ASSERT(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
 
 		boost::shared_ptr<ID3DXEffect> d3dx_effect = static_cast<D3D9RenderEffect&>(effect_).D3DXEffect();
 		TIF(d3dx_effect->SetVectorArray(name_.c_str(), reinterpret_cast<D3DXVECTOR4 const *>(value),
@@ -238,7 +238,7 @@ namespace KlayGE
 
 	void D3D9RenderEffectParameter::DoSetMatrix4Array(Matrix4 const * matrices, size_t count)
 	{
-		assert(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
+		BOOST_ASSERT(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
 
 		boost::shared_ptr<ID3DXEffect> d3dx_effect = static_cast<D3D9RenderEffect&>(effect_).D3DXEffect();
 		TIF(d3dx_effect->SetMatrixArray(name_.c_str(),
@@ -247,7 +247,7 @@ namespace KlayGE
 
 	void D3D9RenderEffectParameter::DoSetIntArray(int const * value, size_t count)
 	{
-		assert(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
+		BOOST_ASSERT(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
 
 		boost::shared_ptr<ID3DXEffect> d3dx_effect = static_cast<D3D9RenderEffect&>(effect_).D3DXEffect();
 		TIF(d3dx_effect->SetIntArray(name_.c_str(), value, static_cast<UINT>(count)));
@@ -257,7 +257,7 @@ namespace KlayGE
 	{
 		if (REPT_Texture == type_)
 		{
-			assert(dynamic_cast<D3D9Texture*>(boost::get<TexturePtr>(val_).get()) != NULL);
+			BOOST_ASSERT(dynamic_cast<D3D9Texture*>(boost::get<TexturePtr>(val_).get()) != NULL);
 
 			D3D9Texture& texture = static_cast<D3D9Texture&>(*boost::get<TexturePtr>(val_));
 			texture.OnLostDevice();
@@ -270,7 +270,7 @@ namespace KlayGE
 		{
 			if (boost::get<TexturePtr>(val_))
 			{
-				assert(dynamic_cast<D3D9Texture*>(boost::get<TexturePtr>(val_).get()) != NULL);
+				BOOST_ASSERT(dynamic_cast<D3D9Texture*>(boost::get<TexturePtr>(val_).get()) != NULL);
 
 				D3D9Texture& texture = static_cast<D3D9Texture&>(*boost::get<TexturePtr>(val_));
 				texture.OnResetDevice();

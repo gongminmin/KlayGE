@@ -23,7 +23,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 
-#include <cassert>
+#include <boost/assert.hpp>
 #include <windows.h>
 
 #include <KlayGE/App3D.hpp>
@@ -83,9 +83,9 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void App3DFramework::Proj(float nearPlane, float farPlane)
 	{
-		assert(nearPlane != 0);
-		assert(farPlane != 0);
-		assert(farPlane > nearPlane);
+		BOOST_ASSERT(nearPlane != 0);
+		BOOST_ASSERT(farPlane != 0);
+		BOOST_ASSERT(farPlane > nearPlane);
 
 		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		RenderTarget& activeRenderTarget(*renderEngine.ActiveRenderTarget(0));

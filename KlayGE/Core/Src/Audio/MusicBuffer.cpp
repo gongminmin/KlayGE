@@ -14,7 +14,7 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
-#include <cassert>
+#include <boost/assert.hpp>
 
 #include <KlayGE/Audio.hpp>
 

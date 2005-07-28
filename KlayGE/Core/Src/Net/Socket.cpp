@@ -16,8 +16,8 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 
-#include <cassert>
 #include <cstring>
+#include <boost/assert.hpp>
 
 #include <KlayGE/Socket.hpp>
 
@@ -124,7 +124,7 @@ namespace KlayGE
 		this->Close();
 
 		this->socket_ = socket(addressFormat, socketType, protocolType);
-		assert(this->socket_ != INVALID_SOCKET);
+		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 	}
 
 	// ¹Ø±ÕÌ×½Ó×Ö
@@ -164,7 +164,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void Socket::Bind(SOCKADDR_IN const & sockAddr)
 	{
-		assert(this->socket_ != INVALID_SOCKET);
+		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
 		Verify(bind(this->socket_, reinterpret_cast<SOCKADDR const *>(&sockAddr),
 			sizeof(sockAddr)) != SOCKET_ERROR);
@@ -174,7 +174,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void Socket::IOCtl(long command, uint32_t* argument)
 	{
-		assert(this->socket_ != INVALID_SOCKET);
+		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
 	#ifdef _WIN32
 		Verify(ioctlsocket(this->socket_, command, argument) != SOCKET_ERROR);
@@ -187,7 +187,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void Socket::Listen(int connectionBacklog)
 	{
-		assert(this->socket_ != INVALID_SOCKET);
+		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 		
 		Verify(listen(this->socket_, connectionBacklog) != SOCKET_ERROR);
 	}
@@ -196,7 +196,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	int Socket::Send(void const * buf, int len, int flags)
 	{
-		assert(this->socket_ != INVALID_SOCKET);
+		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
 		return send(this->socket_, static_cast<char const *>(buf), len, flags);
 	}
@@ -205,7 +205,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	int Socket::Receive(void* buf, int len, int flags)
 	{
-		assert(this->socket_ != INVALID_SOCKET);
+		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
 		return recv(this->socket_, static_cast<char*>(buf), len, flags);
 	}
@@ -214,7 +214,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void Socket::ShutDown(ShutDownMode how)
 	{
-		assert(this->socket_ != INVALID_SOCKET);
+		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
 		Verify(shutdown(this->socket_, how) != SOCKET_ERROR);
 	}
@@ -223,7 +223,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void Socket::PeerName(SOCKADDR_IN& sockAddr, int& len)
 	{
-		assert(this->socket_ != INVALID_SOCKET);
+		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
 		Verify(getpeername(this->socket_,
 			reinterpret_cast<SOCKADDR*>(&sockAddr), &len) != SOCKET_ERROR);
@@ -233,7 +233,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void Socket::SockName(SOCKADDR_IN& sockAddr, int& len)
 	{
-		assert(this->socket_ != INVALID_SOCKET);
+		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
 		Verify(getsockname(this->socket_,
 			reinterpret_cast<SOCKADDR*>(&sockAddr), &len) != SOCKET_ERROR);
@@ -243,7 +243,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void Socket::SetSockOpt(int optionName, void const * optionValue, int optionLen, int level)
 	{
-		assert(this->socket_ != INVALID_SOCKET);
+		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
 		Verify(setsockopt(this->socket_, level, optionName,
 			static_cast<char const *>(optionValue), optionLen) != SOCKET_ERROR);
@@ -253,7 +253,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void Socket::GetSockOpt(int optionName, void* optionValue, int& optionLen, int level)
 	{
-		assert(this->socket_ != INVALID_SOCKET);
+		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
 		Verify(getsockopt(this->socket_, level, optionName,
 			static_cast<char*>(optionValue), &optionLen) != SOCKET_ERROR);
@@ -263,7 +263,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	int Socket::ReceiveFrom(void* buf, int len, SOCKADDR_IN& sockFrom, int flags)
 	{
-		assert(this->socket_ != INVALID_SOCKET);
+		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
 		int fromLen(sizeof(sockFrom));
 		return recvfrom(this->socket_, static_cast<char*>(buf), len, flags,
@@ -274,7 +274,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	int Socket::SendTo(void const * buf, int len, SOCKADDR_IN const & sockTo, int flags)
 	{
-		assert(this->socket_ != INVALID_SOCKET);
+		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
 		return sendto(this->socket_, static_cast<char const *>(buf), len, flags,
 			reinterpret_cast<SOCKADDR const *>(&sockTo), sizeof(sockTo));
@@ -284,7 +284,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void Socket::Connect(SOCKADDR_IN const & sockAddr)
 	{
-		assert(this->socket_ != INVALID_SOCKET);
+		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
 		Verify(connect(this->socket_,
 			reinterpret_cast<SOCKADDR const *>(&sockAddr), sizeof(sockAddr)) != SOCKET_ERROR);

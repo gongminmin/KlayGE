@@ -85,7 +85,7 @@ namespace KlayGE
 
 	void FirstPersonCameraController::Update()
 	{
-		assert(camera_ != NULL);
+		BOOST_ASSERT(camera_ != NULL);
 
 		world_ = MathLib::Inverse(camera_->ViewMatrix());
 
@@ -133,7 +133,7 @@ namespace KlayGE
 
 	void FirstPersonCameraController::Move(float x, float y, float z)
 	{
-		assert(camera_ != NULL);
+		BOOST_ASSERT(camera_ != NULL);
 
 		Vector3 movement(x, y, z);
 		movement *= moveScaler_;
@@ -150,7 +150,7 @@ namespace KlayGE
 
 	void FirstPersonCameraController::Rotate(float yaw, float pitch, float roll)
 	{
-		assert(camera_ != NULL);
+		BOOST_ASSERT(camera_ != NULL);
 
 		Matrix4 rot(MathLib::RotationMatrixYawPitchRoll(yaw * rotationScaler_,
 			pitch * rotationScaler_, roll * rotationScaler_));

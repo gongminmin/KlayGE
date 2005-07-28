@@ -5,7 +5,7 @@
 // Homepage: http://klayge.sourceforge.nets
 //
 // 2.4.0
-// 增加了assert
+// 增加了BOOST_ASSERT
 //
 // 2.1.1
 // 改了类名
@@ -22,7 +22,7 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/SceneManager.hpp>
 
-#include <cassert>
+#include <boost/assert.hpp>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_Core_d.lib")
@@ -45,7 +45,7 @@ namespace KlayGE
 			{ app_ = &app; }
 		App3DFramework& AppInstance()
 		{
-			assert(app_ != NULL);
+			BOOST_ASSERT(app_ != NULL);
 			return *app_;
 		}
 
@@ -53,7 +53,7 @@ namespace KlayGE
 			{ sceneMgr_ = &mgr; }
 		SceneManager& SceneManagerInstance()
 		{
-			assert(sceneMgr_ != NULL);
+			BOOST_ASSERT(sceneMgr_ != NULL);
 			return *sceneMgr_;
 		}
 
@@ -61,7 +61,7 @@ namespace KlayGE
 			{ renderFactory_ = &factory; }
 		RenderFactory& RenderFactoryInstance()
 		{
-			assert(renderFactory_ != NULL);
+			BOOST_ASSERT(renderFactory_ != NULL);
 			return *renderFactory_;
 		}
 
@@ -69,7 +69,7 @@ namespace KlayGE
 			{ audioFactory_ = &factory; }
 		AudioFactory& AudioFactoryInstance()
 		{
-			assert(audioFactory_ != NULL);
+			BOOST_ASSERT(audioFactory_ != NULL);
 			return *audioFactory_;
 		}
 
@@ -77,7 +77,7 @@ namespace KlayGE
 			{ inputFactory_ = &factory; }
 		InputFactory& InputFactoryInstance()
 		{
-			assert(inputFactory_ != NULL);
+			BOOST_ASSERT(inputFactory_ != NULL);
 			return *inputFactory_;
 		}
 

@@ -46,7 +46,7 @@ namespace KlayGE
 
 	void D3D9VertexStream::Assign(void const * src, size_t numVertices, size_t stride)
 	{
-		assert(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
+		BOOST_ASSERT(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
 
 		numVertices_ = numVertices;
 
@@ -137,7 +137,7 @@ namespace KlayGE
 	
 	void D3D9VertexStream::DoOnResetDevice()
 	{
-		assert(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
+		BOOST_ASSERT(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
 
 		D3D9RenderEngine const & renderEngine(static_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3d_device_ = renderEngine.D3DDevice();

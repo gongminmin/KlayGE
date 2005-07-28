@@ -36,9 +36,9 @@ namespace KlayGE
 
 	void D3D9RenderTexture::AttachTexture2D(TexturePtr texture2D)
 	{
-		assert(Texture::TU_RenderTarget == texture2D->Usage());
-		assert(Texture::TT_2D == texture2D->Type());
-		assert(dynamic_cast<D3D9Texture*>(texture2D.get()) != NULL);
+		BOOST_ASSERT(Texture::TU_RenderTarget == texture2D->Usage());
+		BOOST_ASSERT(Texture::TT_2D == texture2D->Type());
+		BOOST_ASSERT(dynamic_cast<D3D9Texture*>(texture2D.get()) != NULL);
 
 		privateTex_ = texture2D;
 		width_ = privateTex_->Width(0);
@@ -59,9 +59,9 @@ namespace KlayGE
 
 	void D3D9RenderTexture::AttachTextureCube(TexturePtr textureCube, Texture::CubeFaces face)
 	{
-		assert(Texture::TU_RenderTarget == textureCube->Usage());
-		assert(Texture::TT_Cube == textureCube->Type());
-		assert(dynamic_cast<D3D9Texture*>(textureCube.get()) != NULL);
+		BOOST_ASSERT(Texture::TU_RenderTarget == textureCube->Usage());
+		BOOST_ASSERT(Texture::TT_Cube == textureCube->Type());
+		BOOST_ASSERT(dynamic_cast<D3D9Texture*>(textureCube.get()) != NULL);
 
 		face_ = face;
 		privateTex_ = textureCube;
@@ -119,7 +119,7 @@ namespace KlayGE
 			return;
 		}
 
-		assert(false);
+		BOOST_ASSERT(false);
 	}
 
 	void D3D9RenderTexture::DoOnLostDevice()
@@ -146,7 +146,7 @@ namespace KlayGE
 				break;
 
 			default:
-				assert(false);
+				BOOST_ASSERT(false);
 				break;
 			}
 

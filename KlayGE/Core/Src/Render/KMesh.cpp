@@ -23,7 +23,7 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/ResLoader.hpp>
 
-#include <cassert>
+#include <boost/assert.hpp>
 
 #include <KlayGE/KMesh.hpp>
 
@@ -64,7 +64,7 @@ namespace KlayGE
 	StaticMeshPtr LoadKMesh(const std::string& kmeshName,
 		boost::function<KMeshPtr (std::wstring const &, TexturePtr)> CreateFactoryFunc)
 	{
-		assert(CreateFactoryFunc);
+		BOOST_ASSERT(CreateFactoryFunc);
 
 		typedef std::vector<StaticMeshPtr> MeshesType;
 		MeshesType meshes;

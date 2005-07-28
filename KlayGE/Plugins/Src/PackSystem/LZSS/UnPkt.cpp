@@ -21,16 +21,14 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
 
-#include <cassert>
 #include <string>
 #include <vector>
 #include <sstream>
 
-#pragma warning(disable : 4127)
-#pragma warning(disable : 4800)
+#include <boost/assert.hpp>
+#pragma warning(disable: 4127 4800)
 #include <boost/pool/pool_alloc.hpp>
-#pragma warning(disable : 4244)
-#pragma warning(disable : 4245)
+#pragma warning(disable: 4244 4245)
 #include <boost/crc.hpp>
 
 #include <KlayGE/LZSS/LZSS.hpp>
@@ -208,7 +206,7 @@ namespace KlayGE
 	void UnPkt::LocateFile(std::string const & pathName)
 	{
 		DirTable::iterator iter = dirTable_.find(pathName);
-		assert(iter != dirTable_.end());
+		BOOST_ASSERT(iter != dirTable_.end());
 
 		curFile_ = iter;
 	}
@@ -217,7 +215,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	size_t UnPkt::CurFileSize() const
 	{
-		assert(curFile_ != dirTable_.end());
+		BOOST_ASSERT(curFile_ != dirTable_.end());
 
 		return curFile_->second.DeComLength;
 	}
@@ -226,8 +224,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	bool UnPkt::ReadCurFile(void* data)
 	{
-		assert(data != NULL);
-		assert(curFile_ != dirTable_.end());
+		BOOST_ASSERT(data != NULL);
+		BOOST_ASSERT(curFile_ != dirTable_.end());
 
 		file_->seekg(mag_.FIStart + curFile_->second.start);
 
@@ -267,7 +265,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	size_t UnPkt::CurFileCompressedSize() const
 	{
-		assert(curFile_ != dirTable_.end());
+		BOOST_ASSERT(curFile_ != dirTable_.end());
 
 		return curFile_->second.length;
 	}
@@ -276,8 +274,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void UnPkt::ReadCurFileCompressed(void* data)
 	{
-		assert(data != NULL);
-		assert(curFile_ != dirTable_.end());
+		BOOST_ASSERT(data != NULL);
+		BOOST_ASSERT(curFile_ != dirTable_.end());
 
 		file_->seekg(mag_.FIStart + curFile_->second.start);
 		file_->read(static_cast<char*>(data), static_cast<std::streamsize>(this->CurFileCompressedSize()));

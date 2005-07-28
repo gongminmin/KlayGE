@@ -25,6 +25,7 @@
 
 #include <numeric>
 #include <sstream>
+#include <boost/assert.hpp>
 
 #include "ascii_lums_builder.hpp"
 #include "AsciiArts.hpp"
@@ -127,7 +128,7 @@ namespace
 		int const ASCII_IN_A_ROW = 16;
 
 		KlayGE::TexturePtr ascii_tex = LoadTexture(tex_name);
-		assert(PF_L8 == ascii_tex->Format());
+		BOOST_ASSERT(PF_L8 == ascii_tex->Format());
 
 		std::vector<ascii_tile_type> ret(INPUT_NUM_ASCII);
 
@@ -153,7 +154,7 @@ namespace
 
 	KlayGE::TexturePtr FillTexture(ascii_tiles_type const & ascii_lums)
 	{
-		assert(OUTPUT_NUM_ASCII == ascii_lums.size());
+		BOOST_ASSERT(OUTPUT_NUM_ASCII == ascii_lums.size());
 
 		std::vector<uint8_t> temp_data(LUM_LEVEL * OUTPUT_NUM_ASCII * ASCII_WIDTH * ASCII_HEIGHT);
 

@@ -60,7 +60,7 @@ namespace KlayGE
 			}
 		}
 
-		assert(false);
+		BOOST_ASSERT(false);
 		return "";
 	}
 
@@ -104,7 +104,7 @@ namespace KlayGE
 			}
 		}
 
-		assert(false);
+		BOOST_ASSERT(false);
 		return ResIdentifierPtr();
 	}
 }

@@ -13,7 +13,7 @@
 #include <KlayGE/KlayGE.hpp>
 
 #include <algorithm>
-#pragma warning(disable : 4512)
+#pragma warning(disable: 4512)
 #include <boost/lambda/lambda.hpp>
 
 #include <KlayGE/DInput/DInput.hpp>
@@ -74,7 +74,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void DInputJoystick::UpdateInputs()
 	{
-		assert(dynamic_cast<DInputDeviceImpl*>(impl_.get()) != NULL);
+		BOOST_ASSERT(dynamic_cast<DInputDeviceImpl*>(impl_.get()) != NULL);
 
 		DInputDeviceImpl* didImpl = static_cast<DInputDeviceImpl*>(impl_.get());
 

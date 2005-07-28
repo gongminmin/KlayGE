@@ -33,8 +33,7 @@
 #include <map>
 #include <string>
 
-#pragma warning(disable : 4100)
-#pragma warning(disable : 4512)
+#pragma warning(disable: 4100 4512)
 #include <boost/variant.hpp>
 #include <boost/utility.hpp>
 #include <boost/operators.hpp>

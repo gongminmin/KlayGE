@@ -25,19 +25,18 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
 
-#include <cassert>
 #include <string>
 #include <algorithm>
 #include <vector>
 #include <sstream>
 #include <fstream>
 
-#include <KlayGE/LZSS/LZSS.hpp>
-
-#pragma warning(disable : 4244)
-#pragma warning(disable : 4245)
+#include <boost/assert.hpp>
+#pragma warning(disable: 4244 4245)
 #include <boost/crc.hpp>
 #include <boost/filesystem/operations.hpp>
+
+#include <KlayGE/LZSS/LZSS.hpp>
 
 namespace
 {
@@ -357,7 +356,7 @@ namespace
 			boost::crc_32_type crc32;
 
 			std::ifstream in((rootName + '/' + *iter).c_str(), std::ios_base::binary);
-			assert(in);
+			BOOST_ASSERT(in);
 
 			do
 			{

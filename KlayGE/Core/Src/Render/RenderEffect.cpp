@@ -88,7 +88,7 @@ namespace KlayGE
 
 	void RenderEffect::DirtyParam(std::string const& name)
 	{
-		assert(params_.find(name) != params_.end());
+		BOOST_ASSERT(params_.find(name) != params_.end());
 
 		params_[name].second = true;
 	}
@@ -174,7 +174,7 @@ namespace KlayGE
 
 	RenderEffectParameter& RenderEffectParameter::operator=(float value)
 	{
-		assert(this->DoTestType(REPT_float));
+		BOOST_ASSERT(this->DoTestType(REPT_float));
 
 		bool dirty = false;
 		if (REPT_Unknown == type_)
@@ -184,7 +184,7 @@ namespace KlayGE
 		}
 		else
 		{
-			assert(REPT_float == type_);
+			BOOST_ASSERT(REPT_float == type_);
 			
 			dirty = (this->ToFloat() != value);
 		}
@@ -200,7 +200,7 @@ namespace KlayGE
 
 	RenderEffectParameter& RenderEffectParameter::operator=(Vector4 const & value)
 	{
-		assert(this->DoTestType(REPT_Vector4));
+		BOOST_ASSERT(this->DoTestType(REPT_Vector4));
 
 		bool dirty = false;
 		if (REPT_Unknown == type_)
@@ -210,7 +210,7 @@ namespace KlayGE
 		}
 		else
 		{
-			assert(REPT_Vector4 == type_);
+			BOOST_ASSERT(REPT_Vector4 == type_);
 			
 			dirty = (this->ToVector4() != value);
 		}
@@ -226,7 +226,7 @@ namespace KlayGE
 
 	RenderEffectParameter& RenderEffectParameter::operator=(Matrix4 const & value)
 	{
-		assert(this->DoTestType(REPT_Matrix4));
+		BOOST_ASSERT(this->DoTestType(REPT_Matrix4));
 
 		bool dirty = false;
 		if (REPT_Unknown == type_)
@@ -236,7 +236,7 @@ namespace KlayGE
 		}
 		else
 		{
-			assert(REPT_Matrix4 == type_);
+			BOOST_ASSERT(REPT_Matrix4 == type_);
 			
 			dirty = (this->ToMatrix4() != value);
 		}
@@ -252,7 +252,7 @@ namespace KlayGE
 
 	RenderEffectParameter& RenderEffectParameter::operator=(int value)
 	{
-		assert(this->DoTestType(REPT_int));
+		BOOST_ASSERT(this->DoTestType(REPT_int));
 
 		bool dirty = false;
 		if (REPT_Unknown == type_)
@@ -262,7 +262,7 @@ namespace KlayGE
 		}
 		else
 		{
-			assert(REPT_int == type_);
+			BOOST_ASSERT(REPT_int == type_);
 			
 			dirty = (this->ToInt() != value);
 		}
@@ -278,7 +278,7 @@ namespace KlayGE
 
 	RenderEffectParameter& RenderEffectParameter::operator=(TexturePtr const & value)
 	{
-		assert(this->DoTestType(REPT_Texture));
+		BOOST_ASSERT(this->DoTestType(REPT_Texture));
 
 		bool dirty = false;
 		if (REPT_Unknown == type_)
@@ -288,7 +288,7 @@ namespace KlayGE
 		}
 		else
 		{
-			assert(REPT_Texture == type_);
+			BOOST_ASSERT(REPT_Texture == type_);
 			
 			dirty = (this->ToTexture() != value);
 		}
@@ -304,37 +304,37 @@ namespace KlayGE
 
 	float RenderEffectParameter::ToFloat() const
 	{
-		assert(REPT_float == type_);
+		BOOST_ASSERT(REPT_float == type_);
 		return boost::get<float>(val_);
 	}
 
 	Vector4 const & RenderEffectParameter::ToVector4() const
 	{
-		assert(REPT_Vector4 == type_);
+		BOOST_ASSERT(REPT_Vector4 == type_);
 		return boost::get<Vector4>(val_);
 	}
 
 	Matrix4 const & RenderEffectParameter::ToMatrix4() const
 	{
-		assert(REPT_Matrix4 == type_);
+		BOOST_ASSERT(REPT_Matrix4 == type_);
 		return boost::get<Matrix4>(val_);
 	}
 
 	int RenderEffectParameter::ToInt() const
 	{
-		assert(REPT_int == type_);
+		BOOST_ASSERT(REPT_int == type_);
 		return boost::get<int>(val_);
 	}
 
 	TexturePtr const & RenderEffectParameter::ToTexture() const
 	{
-		assert(REPT_Texture == type_);
+		BOOST_ASSERT(REPT_Texture == type_);
 		return boost::get<TexturePtr>(val_);
 	}
 
 	void RenderEffectParameter::SetFloatArray(float const * value, size_t count)
 	{
-		assert(this->DoTestType(REPT_float_array));
+		BOOST_ASSERT(this->DoTestType(REPT_float_array));
 
 		bool dirty = false;
 		if (REPT_Unknown == type_)
@@ -344,7 +344,7 @@ namespace KlayGE
 		}
 		else
 		{
-			assert(REPT_float_array == type_);
+			BOOST_ASSERT(REPT_float_array == type_);
 
 			std::vector<float>& v = boost::get<std::vector<float> >(val_);
 			dirty = !std::equal(v.begin(), v.end(), value);
@@ -360,7 +360,7 @@ namespace KlayGE
 
 	void RenderEffectParameter::GetFloatArray(float* value, size_t count)
 	{
-		assert(REPT_float_array == type_);
+		BOOST_ASSERT(REPT_float_array == type_);
 
 		std::vector<float>& v = boost::get<std::vector<float> >(val_);
 		std::copy(v.begin(), v.begin() + count, value);
@@ -368,7 +368,7 @@ namespace KlayGE
 
 	void RenderEffectParameter::SetVector4Array(Vector4 const * value, size_t count)
 	{
-		assert(this->DoTestType(REPT_Vector4_array));
+		BOOST_ASSERT(this->DoTestType(REPT_Vector4_array));
 
 		bool dirty = false;
 		if (REPT_Unknown == type_)
@@ -378,7 +378,7 @@ namespace KlayGE
 		}
 		else
 		{
-			assert(REPT_Vector4_array == type_);
+			BOOST_ASSERT(REPT_Vector4_array == type_);
 
 			std::vector<Vector4>& v = boost::get<std::vector<Vector4> >(val_);
 			dirty = !std::equal(v.begin(), v.end(), value);
@@ -394,7 +394,7 @@ namespace KlayGE
 
 	void RenderEffectParameter::GetVector4Array(Vector4* value, size_t count)
 	{
-		assert(REPT_Vector4_array == type_);
+		BOOST_ASSERT(REPT_Vector4_array == type_);
 
 		std::vector<Vector4>& v = boost::get<std::vector<Vector4> >(val_);
 		std::copy(v.begin(), v.begin() + count, value);
@@ -402,7 +402,7 @@ namespace KlayGE
 
 	void RenderEffectParameter::SetMatrix4Array(Matrix4 const * value, size_t count)
 	{
-		assert(this->DoTestType(REPT_Matrix4_array));
+		BOOST_ASSERT(this->DoTestType(REPT_Matrix4_array));
 
 		bool dirty = false;
 		if (REPT_Unknown == type_)
@@ -412,7 +412,7 @@ namespace KlayGE
 		}
 		else
 		{
-			assert(REPT_Matrix4_array == type_);
+			BOOST_ASSERT(REPT_Matrix4_array == type_);
 
 			std::vector<Matrix4>& v = boost::get<std::vector<Matrix4> >(val_);
 			dirty = !std::equal(v.begin(), v.end(), value);
@@ -428,7 +428,7 @@ namespace KlayGE
 
 	void RenderEffectParameter::GetMatrix4Array(Matrix4* value, size_t count)
 	{
-		assert(REPT_Matrix4_array == type_);
+		BOOST_ASSERT(REPT_Matrix4_array == type_);
 
 		std::vector<Matrix4>& v = boost::get<std::vector<Matrix4> >(val_);
 		std::copy(v.begin(), v.begin() + count, value);
@@ -436,7 +436,7 @@ namespace KlayGE
 
 	void RenderEffectParameter::SetIntArray(int const * value, size_t count)
 	{
-		assert(this->DoTestType(REPT_int_array));
+		BOOST_ASSERT(this->DoTestType(REPT_int_array));
 
 		bool dirty = false;
 		if (REPT_Unknown == type_)
@@ -446,7 +446,7 @@ namespace KlayGE
 		}
 		else
 		{
-			assert(REPT_int_array == type_);
+			BOOST_ASSERT(REPT_int_array == type_);
 
 			std::vector<int>& v = boost::get<std::vector<int> >(val_);
 			dirty = !std::equal(v.begin(), v.end(), value);
@@ -462,7 +462,7 @@ namespace KlayGE
 
 	void RenderEffectParameter::GetIntArray(int* value, size_t count)
 	{
-		assert(REPT_int_array == type_);
+		BOOST_ASSERT(REPT_int_array == type_);
 
 		std::vector<int>& v = boost::get<std::vector<int> >(val_);
 		std::copy(v.begin(), v.begin() + count, value);
@@ -521,7 +521,7 @@ namespace KlayGE
 			break;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			break;
 		}
 	}

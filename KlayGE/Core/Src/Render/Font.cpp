@@ -41,10 +41,10 @@
 #include <KlayGE/Box.hpp>
 #include <KlayGE/ResLoader.hpp>
 
-#include <cassert>
 #include <algorithm>
 #include <vector>
 #include <cstring>
+#include <boost/assert.hpp>
 
 #include <KlayGE/Font.hpp>
 
@@ -308,7 +308,7 @@ namespace KlayGE
 					{
 						// 找到使用最长时间没有使用的字
 						CharInfoMapType::iterator iter(charInfoMap_.find(charLRU_.back()));
-						assert(iter != charInfoMap_.end());
+						BOOST_ASSERT(iter != charInfoMap_.end());
 
 						// 用当前字符替换
 						charInfo.texRect	= iter->second.texRect;

@@ -20,9 +20,9 @@
 #include <KlayGE/AudioFactory.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
-#include <cassert>
 #include <algorithm>
 #include <cstring>
+#include <boost/assert.hpp>
 
 #include <KlayGE/DSound/DSAudio.hpp>
 

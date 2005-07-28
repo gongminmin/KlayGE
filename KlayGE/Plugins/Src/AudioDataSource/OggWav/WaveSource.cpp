@@ -14,7 +14,7 @@
 #include <KlayGE/Util.hpp>
 
 #include <vector>
-#include <cassert>
+#include <boost/assert.hpp>
 
 #include <KlayGE/OggWav/WaveSource.hpp>
 
@@ -97,8 +97,8 @@ namespace KlayGE
 		wavFile_->read(reinterpret_cast<char*>(&fileHdr), sizeof(fileHdr));
 
 		// 检查是否是一个有效的 Wave 文件
-		assert(frRIFF == fileHdr.chuck.id);
-		assert(frWAVE == fileHdr.type);
+		BOOST_ASSERT(frRIFF == fileHdr.chuck.id);
+		BOOST_ASSERT(frWAVE == fileHdr.type);
 
 		PCMWaveFmt	pcmWaveFmt;
 		WAVChunkHdr chunkHdr;
@@ -116,7 +116,7 @@ namespace KlayGE
 			{
 			case frFmt:
 				wavFile_->read(reinterpret_cast<char*>(&pcmWaveFmt), sizeof(pcmWaveFmt));
-				assert(WaveFmt_PCM == pcmWaveFmt.wf.formatTag);
+				BOOST_ASSERT(WaveFmt_PCM == pcmWaveFmt.wf.formatTag);
 				wavFile_->seekg(chunkHdr.size - sizeof(pcmWaveFmt), std::ios_base::cur);
 
 				freq_ = pcmWaveFmt.wf.samplesPerSec;
@@ -163,7 +163,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	size_t WaveSource::Read(void* data, size_t size)
 	{
-		assert(data != NULL);
+		BOOST_ASSERT(data != NULL);
 
 		wavFile_->read(static_cast<char*>(data), static_cast<std::streamsize>(size));
 

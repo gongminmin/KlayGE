@@ -20,7 +20,7 @@
 #include <KlayGE/ThrowErr.hpp>
 
 #include <algorithm>
-#pragma warning(disable : 4512)
+#pragma warning(disable: 4512)
 #include <boost/lambda/lambda.hpp>
 
 #include <KlayGE/DInput/DInput.hpp>
@@ -62,7 +62,7 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	void DInputMouse::UpdateInputs()
 	{
-		assert(dynamic_cast<DInputDeviceImpl*>(impl_.get()) != NULL);
+		BOOST_ASSERT(dynamic_cast<DInputDeviceImpl*>(impl_.get()) != NULL);
 
 		DIMOUSESTATE diMouseState;
 		static_cast<DInputDeviceImpl*>(impl_.get())->DeviceState(&diMouseState, sizeof(diMouseState));

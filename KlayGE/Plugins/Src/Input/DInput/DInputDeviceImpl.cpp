@@ -14,7 +14,7 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
 
-#include <cassert>
+#include <boost/assert.hpp>
 
 #include <KlayGE/DInput/DInput.hpp>
 #include <KlayGE/DInput/DInputDeviceImpl.hpp>
@@ -25,7 +25,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	DInputDeviceImpl::DInputDeviceImpl(REFGUID guid, InputEngine& inputEng)
 	{
-		assert(dynamic_cast<DInputEngine*>(&inputEng) != NULL);
+		BOOST_ASSERT(dynamic_cast<DInputEngine*>(&inputEng) != NULL);
 
 		DInputEngine& dinputEng(static_cast<DInputEngine&>(inputEng));
 

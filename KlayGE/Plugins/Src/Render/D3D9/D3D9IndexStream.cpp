@@ -38,7 +38,7 @@ namespace KlayGE
 
 	void D3D9IndexStream::Assign(void const * src, size_t numIndices)
 	{
-		assert(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
+		BOOST_ASSERT(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
 
 		numIndices_ = numIndices;
 
@@ -96,7 +96,7 @@ namespace KlayGE
 
 	void D3D9IndexStream::DoOnLostDevice()
 	{
-		assert(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
+		BOOST_ASSERT(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
 
 		D3D9RenderEngine const & renderEngine(static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3d_device_ = renderEngine.D3DDevice();
@@ -124,7 +124,7 @@ namespace KlayGE
 
 	void D3D9IndexStream::DoOnResetDevice()
 	{
-		assert(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
+		BOOST_ASSERT(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
 
 		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		boost::shared_ptr<IDirect3DDevice9> d3dDevice(renderEngine.D3DDevice());

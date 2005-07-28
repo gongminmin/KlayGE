@@ -21,7 +21,7 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
-#include <cassert>
+#include <boost/assert.hpp>
 
 #include <KlayGE/OpenAL/OALAudio.hpp>
 

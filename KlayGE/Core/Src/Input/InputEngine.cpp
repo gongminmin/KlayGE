@@ -19,9 +19,9 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/MapVector.hpp>
 
-#include <cassert>
 #include <vector>
 
+#include <boost/assert.hpp>
 #include <boost/bind.hpp>
 
 #include <KlayGE/Input.hpp>
@@ -116,7 +116,7 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	InputDevicePtr InputEngine::Device(size_t index) const
 	{
-		assert(index < this->NumDevice());
+		BOOST_ASSERT(index < this->NumDevice());
 
 		return devices_[index];
 	}

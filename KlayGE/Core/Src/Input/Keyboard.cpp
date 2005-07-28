@@ -15,7 +15,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 
-#include <cassert>
+#include <boost/assert.hpp>
 
 #include <KlayGE/Input.hpp>
 
@@ -25,7 +25,7 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	bool InputKeyboard::Key(size_t n) const
 	{
-		assert(n < keys_.size());
+		BOOST_ASSERT(n < keys_.size());
 
 		return keys_[n];
 	}

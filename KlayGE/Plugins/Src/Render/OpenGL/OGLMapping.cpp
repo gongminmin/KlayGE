@@ -18,7 +18,7 @@
 #include <KlayGE/Color.hpp>
 #include <KlayGE/VertexBuffer.hpp>
 
-#include <cassert>
+#include <boost/assert.hpp>
 
 #include <glloader/glloader.h>
 
@@ -68,7 +68,7 @@ namespace KlayGE
 			return GL_GREATER;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			return GL_EQUAL;
 		};
 	}
@@ -98,7 +98,7 @@ namespace KlayGE
 			return GL_INVERT;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			return GL_KEEP;
 		};
 	}
@@ -117,7 +117,7 @@ namespace KlayGE
 			return GL_FILL;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			return GL_FILL;
 		}
 	}
@@ -136,7 +136,7 @@ namespace KlayGE
 			return GL_SMOOTH;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			return GL_FLAT;
 		}
 	}
@@ -155,7 +155,7 @@ namespace KlayGE
 			return GL_LINEAR;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			return GL_LINEAR;
 		}
 	}
@@ -174,7 +174,7 @@ namespace KlayGE
 			return GL_CLAMP;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			return GL_REPEAT;
 		}
 	}
@@ -217,7 +217,7 @@ namespace KlayGE
 			break;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			break;
 		}
 	}

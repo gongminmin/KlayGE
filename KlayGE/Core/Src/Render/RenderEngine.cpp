@@ -54,7 +54,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void RenderEngine::ActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget)
 	{
-		assert(n < renderTargets_.size());
+		BOOST_ASSERT(n < renderTargets_.size());
 
 		renderTargets_[n] = renderTarget;
 		this->DoActiveRenderTarget(n, renderTarget);
@@ -64,7 +64,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderTargetPtr RenderEngine::ActiveRenderTarget(uint32_t n) const
 	{
-		assert(n < renderTargets_.size());
+		BOOST_ASSERT(n < renderTargets_.size());
 
 		return renderTargets_[n];
 	}

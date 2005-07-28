@@ -15,7 +15,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 
-#include <cassert>
+#include <boost/assert.hpp>
 
 #include <KlayGE/Input.hpp>
 
@@ -73,7 +73,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	long InputJoystick::Slider(size_t index) const
 	{
-		assert(index < slider_.size());
+		BOOST_ASSERT(index < slider_.size());
 
 		return slider_[index];
 	}
@@ -82,7 +82,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	bool InputJoystick::Button(size_t index) const
 	{
-		assert(index < buttons_.size());
+		BOOST_ASSERT(index < buttons_.size());
 
 		return buttons_[index];
 	}

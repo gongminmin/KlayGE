@@ -19,21 +19,21 @@ namespace KlayGE
 
 	void OGLRenderTexture::CustomAttribute(std::string const & name, void* pData)
 	{
-		assert(false);
+		BOOST_ASSERT(false);
 	}
 
 	void OGLRenderTexture::AttachTexture2D(TexturePtr texture2D)
 	{
-		assert(false);
+		BOOST_ASSERT(false);
 	}
 	
 	void OGLRenderTexture::AttachTextureCube(TexturePtr textureCube, Texture::CubeFaces face)
 	{
-		assert(false);
+		BOOST_ASSERT(false);
 	}
 
 	void OGLRenderTexture::DetachTexture()
 	{
-		assert(false);
+		BOOST_ASSERT(false);
 	}
 }

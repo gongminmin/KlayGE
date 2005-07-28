@@ -128,7 +128,7 @@ namespace
 			return D3DFMT_D24S8;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			return D3DFMT_UNKNOWN;
 		}
 	}
@@ -201,7 +201,7 @@ namespace
 			return PF_D24S8;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			return PF_Unknown;
 		}
 	}
@@ -212,8 +212,8 @@ namespace KlayGE
 	D3D9Texture::D3D9Texture(uint32_t width, uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
 					: Texture(usage, TT_1D)
 	{
-		assert(TU_Default == usage);
-		assert(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
+		BOOST_ASSERT(TU_Default == usage);
+		BOOST_ASSERT(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
 
 		this->InitParams();
 
@@ -238,7 +238,7 @@ namespace KlayGE
 								uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
 					: Texture(usage, TT_2D)
 	{
-		assert(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
+		BOOST_ASSERT(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
 
 		this->InitParams();
 
@@ -275,8 +275,8 @@ namespace KlayGE
 								uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
 					: Texture(usage, TT_3D)
 	{
-		assert(TU_Default == usage);
-		assert(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
+		BOOST_ASSERT(TU_Default == usage);
+		BOOST_ASSERT(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
 
 		this->InitParams();
 
@@ -300,7 +300,7 @@ namespace KlayGE
 	D3D9Texture::D3D9Texture(uint32_t size, bool /*cube*/, uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
 					: Texture(usage, TT_Cube)
 	{
-		assert(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
+		BOOST_ASSERT(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
 
 		this->InitParams();
 
@@ -361,21 +361,21 @@ namespace KlayGE
 
 	uint32_t D3D9Texture::Width(int level) const
 	{
-		assert(level < numMipMaps_);
+		BOOST_ASSERT(level < numMipMaps_);
 
 		return widths_[level];
 	}
 
 	uint32_t D3D9Texture::Height(int level) const
 	{
-		assert(level < numMipMaps_);
+		BOOST_ASSERT(level < numMipMaps_);
 
 		return heights_[level];
 	}
 
 	uint32_t D3D9Texture::Depth(int level) const
 	{
-		assert(level < numMipMaps_);
+		BOOST_ASSERT(level < numMipMaps_);
 
 		return depths_[level];
 	}
@@ -384,8 +384,8 @@ namespace KlayGE
 	{
 		D3D9Texture& other(static_cast<D3D9Texture&>(target));
 
-		assert(target.Depth(0) == depth_);
-		assert(target.Type() == type_);
+		BOOST_ASSERT(target.Depth(0) == depth_);
+		BOOST_ASSERT(target.Type() == type_);
 
 		uint32_t maxLevel = 1;
 		if (this->NumMipMaps() == target.NumMipMaps())
@@ -471,7 +471,7 @@ namespace KlayGE
 			break;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			break;
 		}
 
@@ -508,14 +508,14 @@ namespace KlayGE
 
 	void D3D9Texture::CopyToMemory1D(int level, void* data)
 	{
-		assert(data != NULL);
+		BOOST_ASSERT(data != NULL);
 
 		this->CopyToMemory2D(level, data);
 	}
 
 	void D3D9Texture::CopyToMemory2D(int level, void* data)
 	{
-		assert(data != NULL);
+		BOOST_ASSERT(data != NULL);
 
 		boost::shared_ptr<IDirect3DSurface9> surface;
 		{
@@ -539,7 +539,7 @@ namespace KlayGE
 
 	void D3D9Texture::CopyToMemory3D(int level, void* data)
 	{
-		assert(data != NULL);
+		BOOST_ASSERT(data != NULL);
 
 		D3DLOCKED_BOX d3d_box;
 		d3dTexture3D_->LockBox(level, &d3d_box, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY);
@@ -568,7 +568,7 @@ namespace KlayGE
 
 	void D3D9Texture::CopyToMemoryCube(CubeFaces face, int level, void* data)
 	{
-		assert(data != NULL);
+		BOOST_ASSERT(data != NULL);
 
 		boost::shared_ptr<IDirect3DSurface9> surface;
 		{
@@ -599,7 +599,7 @@ namespace KlayGE
 	void D3D9Texture::CopyMemoryToTexture2D(int level, void* data, PixelFormat pf,
 		uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset)
 	{
-		assert((TT_1D == type_) || (TT_2D == type_));
+		BOOST_ASSERT((TT_1D == type_) || (TT_2D == type_));
 
 		IDirect3DSurface9* temp;
 		TIF(d3dTexture2D_->GetSurfaceLevel(level, &temp));
@@ -618,7 +618,7 @@ namespace KlayGE
 			uint32_t width, uint32_t height, uint32_t depth,
 			uint32_t xOffset, uint32_t yOffset, uint32_t zOffset)
 	{
-		assert(TT_3D == type_);
+		BOOST_ASSERT(TT_3D == type_);
 
 		IDirect3DVolume9* temp;
 		TIF(d3dTexture3D_->GetVolumeLevel(level, &temp));
@@ -640,7 +640,7 @@ namespace KlayGE
 	void D3D9Texture::CopyMemoryToTextureCube(CubeFaces face, int level, void* data, PixelFormat pf,
 			uint32_t size, uint32_t xOffset)
 	{
-		assert(TT_Cube == type_);
+		BOOST_ASSERT(TT_Cube == type_);
 
 		IDirect3DSurface9* temp;
 		TIF(d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &temp));
@@ -723,7 +723,7 @@ namespace KlayGE
 			break;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			break;
 		}
 
@@ -733,7 +733,7 @@ namespace KlayGE
 
 	void D3D9Texture::CustomAttribute(std::string const & /*name*/, void* /*data*/)
 	{
-		assert(false);
+		BOOST_ASSERT(false);
 	}
 
 	void D3D9Texture::DoOnLostDevice()
@@ -812,7 +812,7 @@ namespace KlayGE
 			break;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			break;
 		}
 
@@ -882,7 +882,7 @@ namespace KlayGE
 			break;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			break;
 		}
 
@@ -951,7 +951,7 @@ namespace KlayGE
 			break;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			break;
 		}
 
@@ -969,7 +969,7 @@ namespace KlayGE
 				D3DSURFACE_DESC desc;
 
 				numMipMaps_ = static_cast<uint16_t>(d3dTexture2D_->GetLevelCount());
-				assert(numMipMaps_ != 0);
+				BOOST_ASSERT(numMipMaps_ != 0);
 
 				widths_.resize(numMipMaps_);
 				heights_.resize(numMipMaps_);
@@ -993,7 +993,7 @@ namespace KlayGE
 				D3DVOLUME_DESC desc;
 
 				numMipMaps_ = static_cast<uint16_t>(d3dTexture3D_->GetLevelCount());
-				assert(numMipMaps_ != 0);
+				BOOST_ASSERT(numMipMaps_ != 0);
 
 				widths_.resize(numMipMaps_);
 				heights_.resize(numMipMaps_);
@@ -1017,7 +1017,7 @@ namespace KlayGE
 				D3DSURFACE_DESC desc;
 
 				numMipMaps_ = static_cast<uint16_t>(d3dTextureCube_->GetLevelCount());
-				assert(numMipMaps_ != 0);
+				BOOST_ASSERT(numMipMaps_ != 0);
 
 				widths_.resize(numMipMaps_);
 				heights_.resize(numMipMaps_);
@@ -1037,7 +1037,7 @@ namespace KlayGE
 			break;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			break;
 		}
 
@@ -1082,7 +1082,7 @@ namespace KlayGE
 			return addr_mode_w_;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			return addr_mode_u_;
 		}
 	}
@@ -1106,7 +1106,7 @@ namespace KlayGE
 			break;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			break;
 		}
 	}
@@ -1127,7 +1127,7 @@ namespace KlayGE
 			return mip_filter_;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			return min_filter_;
 		}
 	}

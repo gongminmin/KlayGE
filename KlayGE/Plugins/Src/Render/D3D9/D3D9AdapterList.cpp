@@ -1,8 +1,8 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 
-#include <cassert>
 #include <vector>
+#include <boost/assert.hpp>
 
 #include <KlayGE/D3D9/D3D9AdapterList.hpp>
 
@@ -26,7 +26,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D9Adapter const & D3D9AdapterList::Adapter(size_t index) const
 	{
-		assert(index < adapters_.size());
+		BOOST_ASSERT(index < adapters_.size());
 
 		return adapters_[index];
 	}

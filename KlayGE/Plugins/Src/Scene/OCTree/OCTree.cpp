@@ -111,8 +111,8 @@ namespace KlayGE
 
 	OCTree::tree_id_t OCTree::Child(tree_id_t const & id, int child_no)
 	{
-		assert(child_no >= 0);
-		assert(child_no < 8);
+		BOOST_ASSERT(child_no >= 0);
+		BOOST_ASSERT(child_no < 8);
 
 		tree_id_t child_id = id;
 		child_id.push_back(static_cast<char>(child_no + '0'));
@@ -171,7 +171,7 @@ namespace KlayGE
 				break;
 
 			default:
-				assert(false);
+				BOOST_ASSERT(false);
 				break;
 			}
 		}
@@ -197,7 +197,7 @@ namespace KlayGE
 
 	void OCTree::InsertRenderable(tree_id_t const & id, RenderablePtr const & renderable)
 	{
-		assert(this->InsideChild(id, renderable));
+		BOOST_ASSERT(this->InsideChild(id, renderable));
 
 		linear_octree_t::iterator node = octree_.find(id);
 
@@ -205,7 +205,7 @@ namespace KlayGE
 		{
 			octree_.insert(std::make_pair(id, renderable_ptrs_t(1, renderable)));
 
-			assert(octree_[id].front() == renderable);
+			BOOST_ASSERT(octree_[id].front() == renderable);
 		}
 		else
 		{

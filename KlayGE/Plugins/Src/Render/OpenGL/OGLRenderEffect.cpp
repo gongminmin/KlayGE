@@ -16,7 +16,7 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 
-#include <cassert>
+#include <boost/assert.hpp>
 
 #include <KlayGE/OpenGL/OGLRenderEffect.hpp>
 

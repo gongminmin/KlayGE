@@ -16,8 +16,8 @@
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <vector>
-#include <cassert>
 #include <cstring>
+#include <boost/assert.hpp>
 
 #include <KlayGE/OggWav/OggSource.hpp>
 
@@ -138,7 +138,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	size_t OggSource::Read(void* data, size_t size)
 	{
-		assert(data != NULL);
+		BOOST_ASSERT(data != NULL);
 
 		std::vector<ogg_int16_t> convbuffer(size / sizeof(ogg_int16_t));
 		int leftsamples(static_cast<int>(convbuffer.size() / vi_.channels));

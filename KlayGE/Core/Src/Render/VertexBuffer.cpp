@@ -69,7 +69,7 @@ namespace KlayGE
 
 	void VertexBuffer::AddVertexStream(VertexStreamType type, uint8_t sizeElement, uint8_t numElement, bool staticStream)
 	{
-		assert(!this->GetVertexStream(type));
+		BOOST_ASSERT(!this->GetVertexStream(type));
 		
 		vertexStreams_.push_back(Context::Instance().RenderFactoryInstance().MakeVertexStream(type,
 			sizeElement, numElement, staticStream));
@@ -77,7 +77,7 @@ namespace KlayGE
 
 	void VertexBuffer::AddVertexStream(VertexStreamPtr vstream)
 	{
-		assert(!this->GetVertexStream(vstream->Type()));
+		BOOST_ASSERT(!this->GetVertexStream(vstream->Type()));
 
 		vertexStreams_.push_back(vstream);
 	}
@@ -131,7 +131,7 @@ namespace KlayGE
 
 	IndexStreamPtr VertexBuffer::GetIndexStream() const
 	{
-		assert(indexStream_);
+		BOOST_ASSERT(indexStream_);
 		return indexStream_;
 	}
 }

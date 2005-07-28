@@ -2,9 +2,9 @@
 
 #include <boost/smart_ptr.hpp>
 
-#include <cassert>
 #include <algorithm>
 #include <cstring>
+#include <boost/assert.hpp>
 
 #include <KlayGE/D3D9/D3D9Adapter.hpp>
 
@@ -46,7 +46,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D9VideoMode const & D3D9Adapter::VideoMode(size_t index) const
 	{
-		assert(index < modes_.size());
+		BOOST_ASSERT(index < modes_.size());
 
 		return modes_[index];
 	}

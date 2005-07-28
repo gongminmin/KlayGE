@@ -36,9 +36,9 @@
 
 #include <glloader/glloader.h>
 
-#include <cassert>
 #include <algorithm>
 #include <cstring>
+#include <boost/assert.hpp>
 
 #include <KlayGE/OpenGL/OGLMapping.hpp>
 #include <KlayGE/OpenGL/OGLRenderWindow.hpp>
@@ -581,7 +581,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::SetTexture(uint32_t stage, TexturePtr const & texture)
 	{
-		assert(dynamic_cast<OGLTexture const *>(texture.get()) != NULL);
+		BOOST_ASSERT(dynamic_cast<OGLTexture const *>(texture.get()) != NULL);
 
 		if (glActiveTexture_ != NULL)
 		{

@@ -15,10 +15,9 @@
 
 #include <KlayGE/KlayGE.hpp>
 
-#include <cassert>
-
+#include <boost/assert.hpp>
 #include <boost/array.hpp>
-#pragma warning(disable : 4512)
+#pragma warning(disable: 4512)
 #include <boost/lambda/lambda.hpp>
 
 #include <KlayGE/DInput/DInput.hpp>
@@ -51,7 +50,7 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	void DInputKeyboard::UpdateInputs()
 	{
-		assert(dynamic_cast<DInputDeviceImpl*>(impl_.get()) != NULL);
+		BOOST_ASSERT(dynamic_cast<DInputDeviceImpl*>(impl_.get()) != NULL);
 
 		boost::array<uint8_t, 256> keys;
 		static_cast<DInputDeviceImpl*>(impl_.get())->DeviceState(&keys[0], keys.size());
