@@ -3,7 +3,7 @@
 <Code::Blocks_project_file>
 	<FileVersion major="1" minor="1"/>
 	<Project>
-		<Option title="Static library"/>
+		<Option title="glloader"/>
 		<Option makefile="Makefile"/>
 		<Option makefile_is_custom="0"/>
 		<Option compiler="0"/>
@@ -19,6 +19,12 @@
 				<Option projectResourceIncludeDirsRelation="2"/>
 			</Target>
 		</Build>
+		<Compiler>
+			<Add option="-O3"/>
+			<Add option="-O2"/>
+			<Add option="-O1"/>
+			<Add option="-O"/>
+		</Compiler>
 		<Unit filename="..\..\include\glloader\gl11.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
