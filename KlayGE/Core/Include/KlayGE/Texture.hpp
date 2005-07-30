@@ -250,40 +250,6 @@ namespace KlayGE
 			CF_Negative_Z = 5,
 		};
 
-		enum TexFilterType
-		{
-			TFT_Min,
-			TFT_Mag,
-			TFT_Mip,
-		};
-
-		enum TexFilterOp
-		{
-			TFO_None,
-			TFO_Point,
-			TFO_Bilinear,
-			TFO_Trilinear,
-			TFO_Anisotropic,
-		};
-
-		enum TexAddressingType
-		{
-			TAT_Addr_U,
-			TAT_Addr_V,
-			TAT_Addr_W,
-		};
-
-		// Texture addressing modes - default is TAM_Wrap.
-		enum TexAddressingMode
-		{
-			// Texture wraps at values over 1.0
-			TAM_Wrap,
-			// Texture mirrors (flips) at joins over 1.0
-			TAM_Mirror,
-			// Texture clamps at 1.0
-			TAM_Clamp,
-		};
-
 	public:
 		Texture(TextureUsage usage, TextureType type);
 		virtual ~Texture();
@@ -331,23 +297,6 @@ namespace KlayGE
 			uint32_t size, uint32_t xOffset) = 0;
 
 		virtual void BuildMipSubLevels() = 0;
-
-		// Sets the texture addressing mode for a texture unit.
-		virtual void AddressingMode(TexAddressingType type, TexAddressingMode tam) = 0;
-		// Sets the texture filtering type for a texture unit.
-		virtual void Filtering(TexFilterType type, TexFilterOp op) = 0;
-		// Sets the maximal anisotropy for the specified texture unit.
-		virtual void Anisotropy(uint32_t maxAnisotropy) = 0;
-
-		virtual TexAddressingMode AddressingMode(TexAddressingType type) const = 0;
-		virtual TexFilterOp Filtering(TexFilterType type) const = 0;
-		virtual uint32_t Anisotropy() const = 0;
-
-		virtual void MaxMipLevel(uint32_t level) = 0;
-		virtual uint32_t MaxMipLevel() const = 0;
-
-		virtual void MipMapLodBias(float bias) = 0;
-		virtual float MipMapLodBias() const = 0;
 
 	protected:
 		uint32_t		height_;

@@ -368,20 +368,6 @@ namespace KlayGE
 	{
 		if (!text.empty())
 		{
-			// ÉèÖÃ¹ýÂËÊôÐÔ
-			if (flags & Font::FA_Filtered)
-			{
-				theTexture_->Filtering(Texture::TFT_Min, Texture::TFO_Bilinear);
-				theTexture_->Filtering(Texture::TFT_Mag, Texture::TFO_Bilinear);
-				theTexture_->Filtering(Texture::TFT_Mip, Texture::TFO_None);
-			}
-			else
-			{
-				theTexture_->Filtering(Texture::TFT_Min, Texture::TFO_Point);
-				theTexture_->Filtering(Texture::TFT_Mag, Texture::TFO_Point);
-				theTexture_->Filtering(Texture::TFT_Mip, Texture::TFO_None);
-			}
-
 			this->UpdateTexture(text);
 
 			RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());

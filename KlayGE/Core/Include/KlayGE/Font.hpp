@@ -54,8 +54,7 @@ namespace KlayGE
 		enum FontAttrib
 		{
 			FA_TwoSided		= 1UL << 1,
-			FA_Filtered		= 1UL << 2,
-			FA_CanBeCulled	= 1UL << 3,
+			FA_CanBeCulled	= 1UL << 2,
 		};
 
 	public:

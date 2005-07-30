@@ -77,12 +77,8 @@ namespace KlayGE
 			Color const & color = Color(1, 1, 1, 1),
 			float expDensity = 1, float linearStart = 0, float linearEnd = 1);
 
-		void SetTexture(uint32_t stage, TexturePtr const & texture);
-
-		void DisableTextureStage(uint32_t stage);
-
-		void TextureCoordCalculation(uint32_t stage, TexCoordCalcMethod m);
-		void TextureMatrix(uint32_t stage, Matrix4 const & mat);
+		void SetSampler(uint32_t stage, SamplerPtr const & sampler);
+		void DisableSampler(uint32_t stage);
 
 		void StencilCheckEnabled(bool enabled);
 		bool HasHardwareStencil();

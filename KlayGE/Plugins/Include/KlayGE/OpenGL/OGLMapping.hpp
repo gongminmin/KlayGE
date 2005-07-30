@@ -16,6 +16,7 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Light.hpp>
 #include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/Sampler.hpp>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_RenderEngine_D3D9_d.lib")
@@ -37,7 +38,7 @@ namespace KlayGE
 		static GLenum Mapping(RenderEngine::FillMode mode);
 		static GLenum Mapping(RenderEngine::ShadeOptions so);
 		static GLint Mapping(RenderEngine::FogMode mode);
-		static GLint Mapping(Texture::TexAddressingMode mode);
+		static GLint Mapping(Sampler::TexAddressingMode mode);
 
 		static void Mapping(GLenum& primType, uint32_t& primCount, VertexBuffer const & vb);
 	};

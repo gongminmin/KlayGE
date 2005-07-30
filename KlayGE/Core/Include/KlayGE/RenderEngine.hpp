@@ -6,7 +6,8 @@
 //
 // 2.8.0
 // 简化了StencilBuffer相关操作 (2005.7.20)
-// 简化了RenderTarget，支持MRT (20057.25)
+// 简化了RenderTarget，支持MRT (2005.7.25)
+// 去掉了纹理坐标生成 (2005.7.30)
 //
 // 2.7.1
 // ViewMatrix和ProjectionMatrix改为const (2005.7.10)
@@ -100,19 +101,6 @@ namespace KlayGE
 			Fog_Linear
 		};
 
-		// Enum describing the ways to generate texture coordinates
-		enum TexCoordCalcMethod
-		{
-			// No calculated texture coordinates
-			TCC_None,
-			// Environment map based on vertex normals
-			TCC_EnvironmentMap,
-			// Environment map based on vertex positions
-			TCC_EnvironmentMapPlanar,
-			TCC_EnvironmentMapReflection,
-			TCC_EnvironmentMapNormal,
-		};
-
 		// Type of texture blend mode.
 		enum TexBlendType
 		{
@@ -191,15 +179,10 @@ namespace KlayGE
 		void ActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget);
 		RenderTargetPtr ActiveRenderTarget(uint32_t n) const;
 
-		virtual void SetTexture(uint32_t stage, TexturePtr const & texture) = 0;
-
-		// Turns off a texture unit.
-		virtual void DisableTextureStage(uint32_t stage) = 0;
-
-		// Sets a method for automatically calculating texture coordinates for a stage.
-		virtual void TextureCoordCalculation(uint32_t stage, TexCoordCalcMethod m) = 0;
-		// Sets the texture coordinate transformation matrix for a texture unit.
-		virtual void TextureMatrix(uint32_t stage, Matrix4 const & mat) = 0;
+		// Set a sampler.
+		virtual void SetSampler(uint32_t stage, SamplerPtr const & sampler) = 0;
+		// Turns off a sampler.
+		virtual void DisableSampler(uint32_t stage) = 0;
 
 		// Turns stencil buffer checking on or off. 
 		virtual void StencilCheckEnabled(bool enabled) = 0;

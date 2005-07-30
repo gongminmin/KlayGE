@@ -138,37 +138,37 @@ namespace KlayGE
 
 	// 从RenderEngine::TexFiltering转换到D3D的Filter标志
 	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t D3D9Mapping::Mapping(uint32_t tfc, Texture::TexFilterOp tf)
+	uint32_t D3D9Mapping::Mapping(uint32_t tfc, Sampler::TexFilterOp tf)
 	{
 		// NOTE: Fall through if device doesn't support requested type
-		if ((Texture::TFO_Anisotropic == tf) && (tfc & TFC_Anisotropic))
+		if ((Sampler::TFO_Anisotropic == tf) && (tfc & TFC_Anisotropic))
 		{
 			return D3DTEXF_ANISOTROPIC;
 		}
 		else
 		{
-			tf = Texture::TFO_Trilinear;
+			tf = Sampler::TFO_Trilinear;
 		}
 
-		if ((Texture::TFO_Trilinear == tf) && (tfc & TFC_Trilinear))
+		if ((Sampler::TFO_Trilinear == tf) && (tfc & TFC_Trilinear))
 		{
 			return D3DTEXF_LINEAR;
 		}
 		else
 		{
-			tf = Texture::TFO_Bilinear;
+			tf = Sampler::TFO_Bilinear;
 		}
 
-		if ((Texture::TFO_Bilinear == tf) && (tfc & TFC_Bilinear))
+		if ((Sampler::TFO_Bilinear == tf) && (tfc & TFC_Bilinear))
 		{
 			return D3DTEXF_LINEAR;
 		}
 		else
 		{
-			tf = Texture::TFO_Point;
+			tf = Sampler::TFO_Point;
 		}
 
-		if ((Texture::TFO_Point == tf) && (tfc & TFC_Point))
+		if ((Sampler::TFO_Point == tf) && (tfc & TFC_Point))
 		{
 			return D3DTEXF_POINT;
 		}
@@ -271,17 +271,17 @@ namespace KlayGE
 		}
 	}
 
-	uint32_t D3D9Mapping::Mapping(Texture::TexAddressingMode mode)
+	uint32_t D3D9Mapping::Mapping(Sampler::TexAddressingMode mode)
 	{
 		switch (mode)
 		{
-		case Texture::TAM_Clamp:
+		case Sampler::TAM_Clamp:
 			return D3DTADDRESS_CLAMP;
 
-		case Texture::TAM_Wrap:
+		case Sampler::TAM_Wrap:
 			return D3DTADDRESS_WRAP;
 
-		case Texture::TAM_Mirror:
+		case Sampler::TAM_Mirror:
 			return D3DTADDRESS_MIRROR;
 
 		default:

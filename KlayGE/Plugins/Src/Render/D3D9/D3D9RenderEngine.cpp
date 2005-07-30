@@ -561,11 +561,13 @@ namespace KlayGE
 
 	// 设置纹理
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::SetTexture(uint32_t stage, TexturePtr const & texture)
+	void D3D9RenderEngine::SetSampler(uint32_t stage, SamplerPtr const & sampler)
 	{
 		BOOST_ASSERT(d3dDevice_);
 
-		if (!texture)
+		TexturePtr texture = sampler->GetTexture();
+
+		if (!sampler || !texture)
 		{
 			TIF(d3dDevice_->SetTexture(stage, NULL));
 		}
@@ -576,137 +578,84 @@ namespace KlayGE
 			D3D9Texture const & d3d9Tex = static_cast<D3D9Texture const &>(*texture);
 			TIF(d3dDevice_->SetTexture(stage, d3d9Tex.D3DBaseTexture().get()));
 
-			uint32_t tfc;
-			switch (texture->Type())
-			{
-			case Texture::TT_1D:
-				tfc = caps_.texture_1d_filter_caps;
-				break;
-
-			case Texture::TT_2D:
-				tfc = caps_.texture_2d_filter_caps;
-				break;
-
-			case Texture::TT_3D:
-				tfc = caps_.texture_3d_filter_caps;
-				break;
-
-			case Texture::TT_Cube:
-				tfc = caps_.texture_cube_filter_caps;
-				break;
-
-			default:
-				BOOST_ASSERT(false);
-				tfc = 0;
-				break;
-			}
-
 			// Set addressing mode
 			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSU,
-				D3D9Mapping::Mapping(texture->AddressingMode(Texture::TAT_Addr_U))));
+				D3D9Mapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_U))));
 			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSV,
-				D3D9Mapping::Mapping(texture->AddressingMode(Texture::TAT_Addr_V))));
+				D3D9Mapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_V))));
 			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSW,
-				D3D9Mapping::Mapping(texture->AddressingMode(Texture::TAT_Addr_W))));
+				D3D9Mapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_W))));
 
-			// Set filter
-			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER,
-				D3D9Mapping::Mapping(tfc, texture->Filtering(Texture::TFT_Min))));
-			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER,
-				D3D9Mapping::Mapping(tfc, texture->Filtering(Texture::TFT_Mag))));
-			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER,
-				D3D9Mapping::Mapping(tfc, texture->Filtering(Texture::TFT_Mip))));
+			{
+				uint32_t tfc;
+				switch (texture->Type())
+				{
+				case Texture::TT_1D:
+					tfc = caps_.texture_1d_filter_caps;
+					break;
+
+				case Texture::TT_2D:
+					tfc = caps_.texture_2d_filter_caps;
+					break;
+
+				case Texture::TT_3D:
+					tfc = caps_.texture_3d_filter_caps;
+					break;
+
+				case Texture::TT_Cube:
+					tfc = caps_.texture_cube_filter_caps;
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					tfc = 0;
+					break;
+				}
+
+				// Set filter
+				TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER,
+					D3D9Mapping::Mapping(tfc, sampler->Filtering(Sampler::TFT_Min))));
+				TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER,
+					D3D9Mapping::Mapping(tfc, sampler->Filtering(Sampler::TFT_Mag))));
+				TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER,
+					D3D9Mapping::Mapping(tfc, sampler->Filtering(Sampler::TFT_Mip))));
+			}
 
 			// Set anisotropy
-			BOOST_ASSERT(texture->Anisotropy() < caps_.max_texture_anisotropy);
-			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, texture->Anisotropy()));
+			BOOST_ASSERT(sampler->Anisotropy() < caps_.max_texture_anisotropy);
+			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, sampler->Anisotropy()));
 
 			// Set max mip level
-			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXMIPLEVEL, texture->MaxMipLevel()));
+			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXMIPLEVEL, sampler->MaxMipLevel()));
 
 			// Set mip map lod bias
-			float bias = texture->MipMapLodBias();
+			float bias = sampler->MipMapLodBias();
 			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPMAPLODBIAS, *reinterpret_cast<DWORD*>(&bias)));
+
+			if (Matrix4::Identity() == sampler->TextureMatrix())
+			{
+				TIF(d3dDevice_->SetTextureStageState(stage, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE));
+			}
+			else
+			{
+				// Set 2D input
+				// TODO: deal with 3D coordinates when cubic environment mapping supported
+				TIF(d3dDevice_->SetTextureStageState(stage, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2));
+
+				D3DMATRIX d3dMat(D3D9Mapping::Mapping(sampler->TextureMatrix()));
+				TIF(d3dDevice_->SetTransform(static_cast<D3DTRANSFORMSTATETYPE>(D3DTS_TEXTURE0 + stage), &d3dMat));
+			}
 		}
 	}
 
 	// 关闭某个纹理阶段
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DisableTextureStage(uint32_t stage)
+	void D3D9RenderEngine::DisableSampler(uint32_t stage)
 	{
 		BOOST_ASSERT(d3dDevice_);
 
 		TIF(d3dDevice_->SetTexture(stage, NULL));
 		TIF(d3dDevice_->SetTextureStageState(stage, D3DTSS_COLOROP, D3DTOP_DISABLE));
-	}
-
-	// 计算纹理坐标
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::TextureCoordCalculation(uint32_t stage, TexCoordCalcMethod m)
-	{
-		BOOST_ASSERT(d3dDevice_);
-
-		HRESULT hr = S_OK;
-		D3DXMATRIX matTrans;
-		switch (m)
-		{
-		case TCC_None:
-			hr = d3dDevice_->SetTextureStageState(stage, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
-			D3DXMatrixIdentity(&matTrans);
-			hr = d3dDevice_->SetTransform(static_cast<D3DTRANSFORMSTATETYPE>(D3DTS_TEXTURE0 + stage), &matTrans);
-			break;
-
-		case TCC_EnvironmentMap:
-			// Sets the flags required for an environment map effect
-			hr = d3dDevice_->SetRenderState(D3DRS_NORMALIZENORMALS, TRUE);
-			hr = d3dDevice_->SetTextureStageState(stage, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_CAMERASPACENORMAL);
-			hr = d3dDevice_->SetTextureStageState(stage, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
-
-			D3DXMatrixIdentity(&matTrans);
-			matTrans._11 = 0.5f;
-			matTrans._41 = 0.5f;
-			matTrans._22 = -0.5f;
-			matTrans._42 = 0.5f;
-			hr = d3dDevice_->SetTransform(static_cast<D3DTRANSFORMSTATETYPE>(D3DTS_TEXTURE0 + stage), &matTrans);
-			break;
-
-		case TCC_EnvironmentMapPlanar:
-			// Sets the flags required for an environment map effect
-			hr = d3dDevice_->SetRenderState(D3DRS_NORMALIZENORMALS, FALSE);
-			hr = d3dDevice_->SetTextureStageState(stage, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_CAMERASPACEREFLECTIONVECTOR);
-			hr = d3dDevice_->SetTextureStageState(stage, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
-
-			D3DXMatrixIdentity(&matTrans);
-			matTrans._11 = 0.5f;
-			matTrans._41 = 0.5f;
-			matTrans._22 = -0.5f;
-			matTrans._42 = 0.5f;
-			hr = d3dDevice_->SetTransform(static_cast<D3DTRANSFORMSTATETYPE>(D3DTS_TEXTURE0 + stage), &matTrans);
-			break;
-		}
-
-		TIF(hr);
-	}
-
-	// 设置纹理矩阵
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::TextureMatrix(uint32_t stage, Matrix4 const & mat)
-	{
-		BOOST_ASSERT(d3dDevice_);
-
-		if (Matrix4::Identity() == mat)
-		{
-			TIF(d3dDevice_->SetTextureStageState(stage, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE));
-		}
-		else
-		{
-			// Set 2D input
-			// TODO: deal with 3D coordinates when cubic environment mapping supported
-			TIF(d3dDevice_->SetTextureStageState(stage, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2));
-
-			D3DMATRIX d3dMat(D3D9Mapping::Mapping(mat));
-			TIF(d3dDevice_->SetTransform(static_cast<D3DTRANSFORMSTATETYPE>(D3DTS_TEXTURE0 + stage), &d3dMat));
-		}
 	}
 
 	// 打开模板缓冲区

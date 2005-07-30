@@ -109,8 +109,6 @@ namespace KlayGE
 								PixelFormat format, TextureUsage usage)
 					: Texture(usage, TT_1D)
 	{
-		this->InitParams();
-
 		format_		= format;
 		width_		= width;
 		height_		= 1;
@@ -172,8 +170,6 @@ namespace KlayGE
 								uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
 					: Texture(usage, TT_2D)
 	{
-		this->InitParams();
-
 		format_		= format;
 		width_		= width;
 		height_		= height;
@@ -236,8 +232,6 @@ namespace KlayGE
 								uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
 					: Texture(usage, TT_3D)
 	{
-		this->InitParams();
-
 		format_		= format;
 		width_		= width;
 		height_		= height;
@@ -301,8 +295,6 @@ namespace KlayGE
 								PixelFormat format, TextureUsage usage)
 					: Texture(usage, TT_Cube)
 	{
-		this->InitParams();
-
 		format_		= format;
 		width_		= size;
 		height_		= size;
@@ -376,22 +368,6 @@ namespace KlayGE
 		{
 			glDeleteTextures(1, &texture_[0]);
 		}
-	}
-
-	void OGLTexture::InitParams()
-	{
-		addr_mode_u_ = TAM_Wrap;
-		addr_mode_v_ = TAM_Wrap;
-		addr_mode_w_ = TAM_Wrap;
-		
-		min_filter_ = TFO_Point;
-		mag_filter_ = TFO_Point;
-		mip_filter_ = TFO_Point;
-
-		anisotropy_ = 0;
-
-		max_mip_level_ = 0;
-		mip_map_lod_bias_ = 0;
 	}
 
 	std::wstring const & OGLTexture::Name() const
@@ -750,247 +726,6 @@ namespace KlayGE
 		width_ = widths_[0];
 		height_ = heights_[0];
 		depth_ = depths_[0];
-	}
-
-	void OGLTexture::AddressingMode(TexAddressingType type, TexAddressingMode tam)
-	{
-		this->GLBindTexture();
-
-		GLint mode = OGLMapping::Mapping(tam);
-
-		switch (type)
-		{
-		case TAT_Addr_U:
-			addr_mode_u_ = tam;
-			glTexParameteri(this->GLType(), GL_TEXTURE_WRAP_S, mode);
-			break;
-
-		case TAT_Addr_V:
-			addr_mode_v_ = tam;
-			glTexParameteri(this->GLType(), GL_TEXTURE_WRAP_T, mode);
-			break;
-
-		case TAT_Addr_W:
-			addr_mode_w_ = tam;
-			glTexParameteri(this->GLType(), GL_TEXTURE_WRAP_R, mode);
-			break;
-
-		default:
-			BOOST_ASSERT(false);
-			break;
-		}
-	}
-
-	Texture::TexAddressingMode OGLTexture::AddressingMode(TexAddressingType type) const
-	{
-		switch (type)
-		{
-		case TAT_Addr_U:
-			return addr_mode_u_;
-
-		case TAT_Addr_V:
-			return addr_mode_v_;
-
-		case TAT_Addr_W:
-			return addr_mode_w_;
-
-		default:
-			BOOST_ASSERT(false);
-			return addr_mode_u_;
-		}
-	}
-
-	void OGLTexture::Filtering(TexFilterType type, TexFilterOp op)
-	{
-		this->GLBindTexture();
-
-		GLint mode = GL_NEAREST;
-		if (type != TFT_Min)
-		{
-			switch (op)
-			{
-			case TFO_None:
-			case TFO_Point:
-				mode = GL_NEAREST;
-				break;
-
-			case TFO_Bilinear:
-			case TFO_Trilinear:
-			case TFO_Anisotropic:
-				mode = GL_LINEAR;
-				break;
-
-			default:
-				BOOST_ASSERT(false);
-				break;
-			}
-		}
-		else
-		{
-			switch (op)
-			{
-			case TFO_None:
-			case TFO_Point:
-				switch (mip_filter_)
-				{
-				case TFO_None:
-					// nearest min, no mip
-					mode = GL_NEAREST;
-					break;
-
-				case TFO_Point:
-					// nearest min, nearest mip
-					mode = GL_NEAREST_MIPMAP_NEAREST;
-					break;
-
-				case TFO_Bilinear:
-				case TFO_Trilinear:
-				case TFO_Anisotropic:
-					// nearest min, linear mip
-					mode = GL_NEAREST_MIPMAP_LINEAR;
-					break;
-				}
-				break;
-
-			case TFO_Bilinear:
-			case TFO_Trilinear:
-			case TFO_Anisotropic:
-				switch (mip_filter_)
-				{
-				case TFO_None:
-					// linear min, no mip
-					mode = GL_LINEAR;
-					break;
-
-				case TFO_Point:
-					// linear min, point mip
-					mode = GL_LINEAR_MIPMAP_NEAREST;
-					break;
-
-				case TFO_Bilinear:
-				case TFO_Trilinear:
-				case TFO_Anisotropic:
-					// linear min, linear mip
-					mode = GL_LINEAR_MIPMAP_LINEAR;
-					break;
-				}
-				break;
-
-			default:
-				BOOST_ASSERT(false);
-				break;
-			}
-		}
-
-		switch (type)
-		{
-		case TFT_Min:
-			min_filter_ = op;
-			glTexParameteri(this->GLType(), GL_TEXTURE_MIN_FILTER, mode);
-			break;
-
-		case TFT_Mag:
-			mag_filter_ = op;
-			glTexParameteri(this->GLType(), GL_TEXTURE_MAG_FILTER, mode);
-			break;
-
-		case TFT_Mip:
-			mip_filter_ = op;
-			glTexParameteri(this->GLType(), GL_TEXTURE_MIN_FILTER, mode);
-			break;
-
-		default:
-			BOOST_ASSERT(false);
-			break;
-		}
-	}
-
-	Texture::TexFilterOp OGLTexture::Filtering(TexFilterType type) const
-	{
-		switch (type)
-		{
-		case TFT_Min:
-			return min_filter_;
-
-		case TFT_Mag:
-			return mag_filter_;
-
-		case TFT_Mip:
-			return mip_filter_;
-
-		default:
-			BOOST_ASSERT(false);
-			return min_filter_;
-		}
-	}
-
-	void OGLTexture::Anisotropy(uint32_t maxAnisotropy)
-	{
-		RenderEngine const & renderEngine = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		uint32_t max_texture_anisotropy = renderEngine.DeviceCaps().max_texture_anisotropy;
-
-		if (max_texture_anisotropy != 0)
-		{
-			anisotropy_ = std::min(max_texture_anisotropy, maxAnisotropy);
-			glTexParameteri(this->GLType(), GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy_);
-		}
-	}
-
-	uint32_t OGLTexture::Anisotropy() const
-	{
-		return anisotropy_;
-	}
-
-	// 设置最大的mip等级
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLTexture::MaxMipLevel(uint32_t level)
-	{
-		if (glloader_GL_VERSION_1_2() || glloader_GL_SGIS_texture_lod())
-		{
-			this->GLBindTexture();
-
-			max_mip_level_ = level;
-			glTexParameteri(this->GLType(), GL_TEXTURE_MAX_LEVEL, max_mip_level_);
-		}
-	}
-	
-	// 获取最大的mip等级
-	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t OGLTexture::MaxMipLevel() const
-	{
-		return max_mip_level_;
-	}
-
-	// 设置mip map偏移量
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLTexture::MipMapLodBias(float bias)
-	{
-		this->GLBindTexture();
-
-		if (glloader_GL_VERSION_1_4() || glloader_GL_EXT_texture_lod_bias())
-		{
-			GLfloat max_bias;
-			glGetFloatv(GL_MAX_TEXTURE_LOD_BIAS, &max_bias);
-			mip_map_lod_bias_ = std::min(bias, max_bias);
-			glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, mip_map_lod_bias_);
-		}
-		else
-		{
-			if (glloader_GL_SGIX_texture_lod_bias())
-			{
-				mip_map_lod_bias_ = bias;
-				glTexParameterf(this->GLType(), GL_TEXTURE_LOD_BIAS_S_SGIX, mip_map_lod_bias_);
-				glTexParameterf(this->GLType(), GL_TEXTURE_LOD_BIAS_T_SGIX, mip_map_lod_bias_);
-				glTexParameterf(this->GLType(), GL_TEXTURE_LOD_BIAS_R_SGIX, mip_map_lod_bias_);
-			}
-		}
-	}
-
-	// 获取mip map偏移量
-	/////////////////////////////////////////////////////////////////////////////////
-	float OGLTexture::MipMapLodBias() const
-	{
-		return mip_map_lod_bias_;
 	}
 
 	void OGLTexture::GLBindTexture()

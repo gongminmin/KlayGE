@@ -579,8 +579,10 @@ namespace KlayGE
 
 	// 设置纹理
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::SetTexture(uint32_t stage, TexturePtr const & texture)
+	void OGLRenderEngine::SetSampler(uint32_t stage, SamplerPtr const & sampler)
 	{
+		TexturePtr texture = sampler->GetTexture();
+
 		BOOST_ASSERT(dynamic_cast<OGLTexture const *>(texture.get()) != NULL);
 
 		if (glActiveTexture_ != NULL)
@@ -597,12 +599,133 @@ namespace KlayGE
 		{
 			glEnable(gl_tex.GLType());
 			gl_tex.GLBindTexture();
+
+			glTexParameteri(gl_tex.GLType(), GL_TEXTURE_WRAP_S, OGLMapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_U)));
+			glTexParameteri(gl_tex.GLType(), GL_TEXTURE_WRAP_T, OGLMapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_V)));
+			glTexParameteri(gl_tex.GLType(), GL_TEXTURE_WRAP_R, OGLMapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_W)));
+
+			{
+				GLint mode = GL_NEAREST;
+				switch (sampler->Filtering(Sampler::TFT_Mag))
+				{
+				case Sampler::TFO_None:
+				case Sampler::TFO_Point:
+					mode = GL_NEAREST;
+					break;
+
+				case Sampler::TFO_Bilinear:
+				case Sampler::TFO_Trilinear:
+				case Sampler::TFO_Anisotropic:
+					mode = GL_LINEAR;
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
+
+				glTexParameteri(gl_tex.GLType(), GL_TEXTURE_MAG_FILTER, mode);
+				
+				switch (sampler->Filtering(Sampler::TFT_Min))
+				{
+				case Sampler::TFO_None:
+				case Sampler::TFO_Point:
+					switch (sampler->Filtering(Sampler::TFT_Mip))
+					{
+					case Sampler::TFO_None:
+						// nearest min, no mip
+						mode = GL_NEAREST;
+						break;
+
+					case Sampler::TFO_Point:
+						// nearest min, nearest mip
+						mode = GL_NEAREST_MIPMAP_NEAREST;
+						break;
+
+					case Sampler::TFO_Bilinear:
+					case Sampler::TFO_Trilinear:
+					case Sampler::TFO_Anisotropic:
+						// nearest min, linear mip
+						mode = GL_NEAREST_MIPMAP_LINEAR;
+						break;
+					}
+					break;
+
+				case Sampler::TFO_Bilinear:
+				case Sampler::TFO_Trilinear:
+				case Sampler::TFO_Anisotropic:
+					switch (sampler->Filtering(Sampler::TFT_Mip))
+					{
+					case Sampler::TFO_None:
+						// linear min, no mip
+						mode = GL_LINEAR;
+						break;
+
+					case Sampler::TFO_Point:
+						// linear min, point mip
+						mode = GL_LINEAR_MIPMAP_NEAREST;
+						break;
+
+					case Sampler::TFO_Bilinear:
+					case Sampler::TFO_Trilinear:
+					case Sampler::TFO_Anisotropic:
+						// linear min, linear mip
+						mode = GL_LINEAR_MIPMAP_LINEAR;
+						break;
+					}
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
+
+				glTexParameteri(gl_tex.GLType(), GL_TEXTURE_MIN_FILTER, mode);
+			}
+
+			if (caps_.max_texture_anisotropy != 0)
+			{
+				uint32_t anisotropy = std::min(caps_.max_texture_anisotropy, sampler->Anisotropy());
+				glTexParameteri(gl_tex.GLType(), GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy);
+			}
+
+			if (glloader_GL_VERSION_1_2() || glloader_GL_SGIS_texture_lod())
+			{
+				glTexParameteri(gl_tex.GLType(), GL_TEXTURE_MAX_LEVEL, sampler->MaxMipLevel());
+			}
+
+			if (glloader_GL_VERSION_1_4() || glloader_GL_EXT_texture_lod_bias())
+			{
+				GLfloat bias;
+				glGetFloatv(GL_MAX_TEXTURE_LOD_BIAS, &bias);
+				bias = std::min(sampler->MipMapLodBias(), bias);
+				glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, bias);
+			}
+			else
+			{
+				if (glloader_GL_SGIX_texture_lod_bias())
+				{
+					GLfloat bias = sampler->MipMapLodBias();
+					glTexParameterf(gl_tex.GLType(), GL_TEXTURE_LOD_BIAS_S_SGIX, bias);
+					glTexParameterf(gl_tex.GLType(), GL_TEXTURE_LOD_BIAS_T_SGIX, bias);
+					glTexParameterf(gl_tex.GLType(), GL_TEXTURE_LOD_BIAS_R_SGIX, bias);
+				}
+			}
+
+			{
+				Matrix4 oglMat(MathLib::LHToRH(sampler->TextureMatrix()));
+
+				glPushAttrib(GL_TRANSFORM_BIT);
+				glMatrixMode(GL_TEXTURE);
+				glLoadMatrixf(&oglMat(0, 0));
+				glPopAttrib();
+			}
 		}
 	}
 
 	// 关闭某个纹理阶段
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::DisableTextureStage(uint32_t stage)
+	void OGLRenderEngine::DisableSampler(uint32_t stage)
 	{
 		if (glActiveTexture_ != NULL)
 		{
@@ -612,28 +735,6 @@ namespace KlayGE
 			glDisable(GL_TEXTURE_3D);
 			glDisable(GL_TEXTURE_CUBE_MAP);
 		}
-	}
-
-	// 计算纹理坐标
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::TextureCoordCalculation(uint32_t /*stage*/, TexCoordCalcMethod /*m*/)
-	{
-	}
-
-	// 设置纹理坐标
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::TextureMatrix(uint32_t stage, Matrix4 const & mat)
-	{
-		if (glActiveTexture_ != NULL)
-		{
-			glActiveTexture_(GL_TEXTURE0 + stage);
-		}
-
-		Matrix4 oglMat(MathLib::LHToRH(mat));
-
-		glMatrixMode(GL_TEXTURE);
-		glLoadMatrixf(&oglMat(0, 0));
-		glMatrixMode(GL_MODELVIEW);
 	}
 
 	// 打开模板缓冲区

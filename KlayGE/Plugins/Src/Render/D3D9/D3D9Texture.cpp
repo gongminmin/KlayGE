@@ -215,8 +215,6 @@ namespace KlayGE
 		BOOST_ASSERT(TU_Default == usage);
 		BOOST_ASSERT(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
 
-		this->InitParams();
-
 		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3dDevice_ = renderEngine.D3DDevice();
 
@@ -239,8 +237,6 @@ namespace KlayGE
 					: Texture(usage, TT_2D)
 	{
 		BOOST_ASSERT(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
-
-		this->InitParams();
 
 		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3dDevice_ = renderEngine.D3DDevice();
@@ -278,8 +274,6 @@ namespace KlayGE
 		BOOST_ASSERT(TU_Default == usage);
 		BOOST_ASSERT(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
 
-		this->InitParams();
-
 		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3dDevice_ = renderEngine.D3DDevice();
 
@@ -301,8 +295,6 @@ namespace KlayGE
 					: Texture(usage, TT_Cube)
 	{
 		BOOST_ASSERT(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
-
-		this->InitParams();
 
 		D3D9RenderEngine& renderEngine(static_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3dDevice_ = renderEngine.D3DDevice();
@@ -335,22 +327,6 @@ namespace KlayGE
 
 	D3D9Texture::~D3D9Texture()
 	{
-	}
-
-	void D3D9Texture::InitParams()
-	{
-		addr_mode_u_ = TAM_Wrap;
-		addr_mode_v_ = TAM_Wrap;
-		addr_mode_w_ = TAM_Wrap;
-		
-		min_filter_ = TFO_Point;
-		mag_filter_ = TFO_Point;
-		mip_filter_ = TFO_Point;
-
-		anisotropy_ = 0;
-
-		max_mip_level_ = 0;
-		mip_map_lod_bias_ = 0;
 	}
 
 	std::wstring const & D3D9Texture::Name() const
@@ -1044,133 +1020,5 @@ namespace KlayGE
 		width_	= widths_[0];
 		height_	= heights_[0];
 		depth_ = depths_[0];
-	}
-
-	// 设置纹理寻址模式
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9Texture::AddressingMode(TexAddressingType type, TexAddressingMode tam)
-	{
-		switch (type)
-		{
-		case TAT_Addr_U:
-			addr_mode_u_ = tam;
-			break;
-
-		case TAT_Addr_V:
-			addr_mode_v_ = tam;
-			break;
-
-		case TAT_Addr_W:
-			addr_mode_w_ = tam;
-			break;
-		}
-	}
-
-	// 获取纹理寻址模式
-	/////////////////////////////////////////////////////////////////////////////////
-	Texture::TexAddressingMode D3D9Texture::AddressingMode(TexAddressingType type) const
-	{
-		switch (type)
-		{
-		case TAT_Addr_U:
-			return addr_mode_u_;
-
-		case TAT_Addr_V:
-			return addr_mode_v_;
-
-		case TAT_Addr_W:
-			return addr_mode_w_;
-
-		default:
-			BOOST_ASSERT(false);
-			return addr_mode_u_;
-		}
-	}
-	
-	// 设置纹理过滤模式
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9Texture::Filtering(TexFilterType type, TexFilterOp op)
-	{
-		switch (type)
-		{
-		case TFT_Min:
-			min_filter_ = op;
-			break;
-
-		case TFT_Mag:
-			mag_filter_ = op;
-			break;
-
-		case TFT_Mip:
-			mip_filter_ = op;
-			break;
-
-		default:
-			BOOST_ASSERT(false);
-			break;
-		}
-	}
-
-	// 获取纹理过滤模式
-	/////////////////////////////////////////////////////////////////////////////////
-	Texture::TexFilterOp D3D9Texture::Filtering(TexFilterType type) const
-	{
-		switch (type)
-		{
-		case TFT_Min:
-			return min_filter_;
-
-		case TFT_Mag:
-			return mag_filter_;
-
-		case TFT_Mip:
-			return mip_filter_;
-
-		default:
-			BOOST_ASSERT(false);
-			return min_filter_;
-		}
-	}
-
-	// 设置纹理异性过滤
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9Texture::Anisotropy(uint32_t maxAnisotropy)
-	{
-		anisotropy_ = maxAnisotropy;
-	}
-
-	// 获取纹理异性过滤
-	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t D3D9Texture::Anisotropy() const
-	{
-		return anisotropy_;
-	}
-
-	// 设置最大的mip等级
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9Texture::MaxMipLevel(uint32_t level)
-	{
-		max_mip_level_ = level;
-	}
-
-	// 获取最大的mip等级
-	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t D3D9Texture::MaxMipLevel() const
-	{
-		return max_mip_level_;
-	}
-
-	// 设置mip map偏移量
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9Texture::MipMapLodBias(float bias)
-	{
-		mip_map_lod_bias_ = bias;
-	}
-
-	// 获取mip map偏移量
-	/////////////////////////////////////////////////////////////////////////////////
-	float D3D9Texture::MipMapLodBias() const
-	{
-		return mip_map_lod_bias_;
 	}
 }

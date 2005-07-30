@@ -95,23 +95,7 @@ namespace KlayGE
 		boost::shared_ptr<IDirect3DSurface9> DepthStencil() const
 			{ return renderZBuffer_; }
 
-		void AddressingMode(TexAddressingType type, TexAddressingMode tam);
-		void Filtering(TexFilterType type, TexFilterOp op);
-		void Anisotropy(uint32_t maxAnisotropy);
-
-		TexAddressingMode AddressingMode(TexAddressingType type) const;
-		TexFilterOp Filtering(TexFilterType type) const;
-		uint32_t Anisotropy() const;
-
-		void MaxMipLevel(uint32_t level);
-		uint32_t MaxMipLevel() const;
-
-		void MipMapLodBias(float bias);
-		float MipMapLodBias() const;
-
 	private:
-		void InitParams();
-
 		void DoOnLostDevice();
 		void DoOnResetDevice();
 
@@ -140,12 +124,6 @@ namespace KlayGE
 		std::vector<uint32_t>	widths_;
 		std::vector<uint32_t>	heights_;
 		std::vector<uint32_t>	depths_;
-
-		TexAddressingMode addr_mode_u_, addr_mode_v_, addr_mode_w_;
-		TexFilterOp min_filter_, mag_filter_, mip_filter_;
-		uint32_t anisotropy_;
-		uint32_t max_mip_level_;
-		float mip_map_lod_bias_;
 	};
 
 	typedef boost::shared_ptr<D3D9Texture> D3D9TexturePtr;
