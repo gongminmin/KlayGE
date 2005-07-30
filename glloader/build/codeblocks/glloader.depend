@@ -1,0 +1,26 @@
+# depslib dependency file v1.0
+1122082312 d:\glloader\src\glloader_glx.cpp
+	<glloader/glloader.h>
+	"utils.hpp"
+
+1122081678 d:\glloader\src\utils.hpp
+	<string>
+	<vector>
+
+1122082312 d:\glloader\src\glloader_wgl.cpp
+	<glloader/glloader.h>
+	"utils.hpp"
+
+1122567702 d:\glloader\src\utils.cpp
+	<glloader/glloader.h>
+	<algorithm>
+	<boost/assert.hpp>
+	<boost/bind.hpp>
+	<boost/algorithm/string/split.hpp>
+	<iostream>
+	"utils.hpp"
+
+1122082312 d:\glloader\src\glloader_gl.cpp
+	<glloader/glloader.h>
+	"utils.hpp"
+
