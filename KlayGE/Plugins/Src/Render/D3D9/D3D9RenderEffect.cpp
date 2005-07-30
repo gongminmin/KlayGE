@@ -44,16 +44,6 @@ namespace KlayGE
 		effect_ = MakeCOMPtr(effect);
 	}
 
-	void D3D9RenderEffect::Desc(uint32_t& parameters, uint32_t& techniques, uint32_t& functions)
-	{
-		D3DXEFFECT_DESC desc;
-		TIF(effect_->GetDesc(&desc));
-
-		parameters = desc.Parameters;
-		techniques = desc.Techniques;
-		functions = desc.Functions;
-	}
-
 	std::string D3D9RenderEffect::DoNameBySemantic(std::string const & semantic)
 	{
 		return effect_->GetParameterBySemantic(NULL, semantic.c_str());
@@ -153,7 +143,7 @@ namespace KlayGE
 					|| (D3DXPT_TEXTURE3D == desc.Type) || (D3DXPT_TEXTURECUBE == desc.Type));
 
 		case REPT_float_array:
-			return (D3DXPT_FLOAT == desc.Type) && (desc.Elements != 1);
+			return (D3DXPC_SCALAR == desc.Class) && (D3DXPT_FLOAT == desc.Type) && (desc.Elements != 1);
 
 		case REPT_Vector4_array:
 			return (D3DXPC_VECTOR == desc.Class) && (D3DXPT_FLOAT == desc.Type) && (desc.Elements != 1);

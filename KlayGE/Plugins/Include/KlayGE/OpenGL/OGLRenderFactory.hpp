@@ -16,10 +16,21 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderFactory.hpp>
 
+#include <KlayGE/OpenGL/OGLRenderEngine.hpp>
+#include <KlayGE/OpenGL/OGLTexture.hpp>
+#include <KlayGE/OpenGL/OGLRenderTexture.hpp>
+#include <KlayGE/OpenGL/OGLRenderEffect.hpp>
+#include <KlayGE/OpenGL/OGLVertexStream.hpp>
+#include <KlayGE/OpenGL/OGLIndexStream.hpp>
+#include <KlayGE/OpenGL/OGLRenderVertexStream.hpp>
+
 #define NOMINMAX
 #include <windows.h>
 #include <glloader/glloader.h>
 #include <gl/glu.h>
+
+#include <Cg/cg.h>
+#include <Cg/cgGL.h>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL_d.lib")
@@ -30,6 +41,43 @@
 namespace KlayGE
 {
 	RenderFactory& OGLRenderFactoryInstance();
+
+	typedef ConcreteRenderFactory<OGLRenderEngine, OGLTexture, OGLRenderTexture,
+				OGLRenderEffect, OGLRenderVertexStream> OGLRenderFactoryBase;
+
+	class OGLRenderFactory : public OGLRenderFactoryBase
+	{
+	public:
+		OGLRenderFactory();
+
+		CGcontext CGContext() const;
+
+		TexturePtr MakeTexture1D(uint32_t width, uint16_t numMipMaps,
+				PixelFormat format, Texture::TextureUsage usage);
+		TexturePtr MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps,
+				PixelFormat format, Texture::TextureUsage usage);
+		TexturePtr MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth,
+				uint16_t numMipMaps, PixelFormat format, Texture::TextureUsage usage);
+		TexturePtr MakeTextureCube(uint32_t size, uint16_t numMipMaps,
+				PixelFormat format, Texture::TextureUsage usage);
+
+		RenderTexturePtr MakeRenderTexture();
+
+		RenderEffectPtr DoMakeRenderEffect(std::string const & srcData);
+			
+		VertexStreamPtr MakeVertexStream(VertexStreamType type,
+			uint8_t sizeElement, uint8_t numElement, bool staticStream);
+		IndexStreamPtr MakeIndexStream(bool staticStream);
+
+		RenderVertexStreamPtr MakeRenderVertexStream(uint32_t width, uint32_t height);
+
+	private:
+		CGcontext context_;
+
+	private:
+		OGLRenderFactory(OGLRenderFactory const &);
+		OGLRenderFactory& operator=(OGLRenderFactory const &);
+	};
 }
 
 #endif			// _OGLRENDERFACTORY_HPP

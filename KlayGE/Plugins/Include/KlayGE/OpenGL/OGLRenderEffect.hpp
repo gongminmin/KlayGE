@@ -1,8 +1,11 @@
 // OGLRenderEffect.hpp
 // KlayGE OpenGL渲染效果类 头文件
-// Ver 2.5.0
+// Ver 2.8.0
 // 版权所有(C) 龚敏敏, 2004-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.8.0
+// 使用Cg实现 (2005.7.30)
 //
 // 2.5.0
 // 去掉了Clone (2005.4.16)
@@ -19,6 +22,9 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderEffect.hpp>
 
+#include <Cg/cg.h>
+#include <Cg/cgGL.h>
+
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL_d.lib")
 #else
@@ -33,8 +39,7 @@ namespace KlayGE
 	{
 	public:
 		explicit OGLRenderEffect(std::string const & srcData);
-
-		void Desc(uint32_t& parameters, uint32_t& techniques, uint32_t& functions);
+		~OGLRenderEffect();
 
 		bool Validate(std::string const & technique);
 		void SetTechnique(std::string const & technique);
@@ -48,11 +53,17 @@ namespace KlayGE
 
 		uint32_t DoBegin(uint32_t flags);
 		void DoEnd();
+
+	private:
+		CGeffect effect_;
+		CGtechnique technique_;
 	};
 
 	class OGLRenderEffectParameter : public RenderEffectParameter
 	{
 	public:
+		explicit OGLRenderEffectParameter(RenderEffect& effect, std::string const & name, CGparameter param);
+		~OGLRenderEffectParameter();
 
 	private:
 		bool DoTestType(RenderEffectParameterType type);
@@ -65,8 +76,11 @@ namespace KlayGE
 
 		void DoSetFloatArray(float const * value, size_t count);
 		void DoSetVector4Array(Vector4 const * value, size_t count);
-		void DoSetMatrix4Array(Matrix4 const * matrices, size_t count);
+		void DoSetMatrix4Array(Matrix4 const * value, size_t count);
 		void DoSetIntArray(int const * value, size_t count);
+
+	private:
+		CGparameter param_;
 
 	private:
 		OGLRenderEffectParameter(OGLRenderEffectParameter const & rhs);

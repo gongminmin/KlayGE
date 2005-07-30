@@ -63,8 +63,6 @@ namespace KlayGE
 		boost::shared_ptr<ID3DXEffect> const & D3DXEffect() const
 			{ return effect_; }
 
-		void Desc(uint32_t& parameters, uint32_t& techniques, uint32_t& functions);
-
 		bool Validate(std::string const & technique);
 		void SetTechnique(std::string const & technique);
 

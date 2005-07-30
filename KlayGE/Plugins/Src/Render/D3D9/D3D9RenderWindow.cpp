@@ -110,10 +110,8 @@ namespace KlayGE
 			break;
 
 		case WM_SETCURSOR:
-		    // Turn off window cursor 
-			::SetCursor(NULL);
-			d3dDevice_->ShowCursor(true);
-			return TRUE; // prevent Windows from setting cursor to window class cursor
+		    d3dDevice_->ShowCursor(true);
+			break;
 
 		case WM_CLOSE:
 			this->Destroy();
@@ -377,7 +375,7 @@ namespace KlayGE
 		return renderSurface_;
 	}
 
-    boost::shared_ptr<IDirect3DSurface9> D3D9RenderWindow::D3DRenderZBuffer() const
+	boost::shared_ptr<IDirect3DSurface9> D3D9RenderWindow::D3DRenderZBuffer() const
 	{
 		return renderZBuffer_;
 	}

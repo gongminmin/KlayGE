@@ -27,7 +27,8 @@ namespace KlayGE
 {
 	D3D9RenderFactory::D3D9RenderFactory()
 		: D3D9RenderFactoryBase(L"Direct3D9 Render Factory")
-		{ }
+	{
+	}
 
 	TexturePtr D3D9RenderFactory::MakeTexture1D(uint32_t width, uint16_t numMipMaps,
 			PixelFormat format, Texture::TextureUsage usage)

@@ -58,8 +58,6 @@ namespace KlayGE
 
 		static RenderEffectPtr NullObject();
 
-		virtual void Desc(uint32_t& parameters, uint32_t& techniques, uint32_t& functions) = 0;
-
 		RenderEffectParameterPtr ParameterByName(std::string const & name);
 		RenderEffectParameterPtr ParameterBySemantic(std::string const & semantic);
 

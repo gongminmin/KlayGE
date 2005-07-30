@@ -30,13 +30,6 @@ namespace KlayGE
 	class NullRenderEffect : public RenderEffect
 	{
 	private:
-		void Desc(uint32_t& parameters, uint32_t& techniques, uint32_t& functions)
-		{
-			parameters = 0;
-			techniques = 0;
-			functions = 0;
-		}
-
 		std::string DoNameBySemantic(std::string const & /*semantic*/)
 			{ return ""; }
 		RenderEffectParameterPtr DoParameterByName(std::string const & /*name*/)

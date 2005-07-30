@@ -8,6 +8,8 @@
 
 #include <glloader/glloader.h>
 
+#include <Cg/CgGL.h>
+
 #include <KlayGE/OpenGL/OGLRenderWindow.hpp>
 
 namespace
@@ -258,8 +260,8 @@ namespace KlayGE
 		if (hWnd_ != NULL)
 		{
 			::wglMakeCurrent(NULL, NULL);
-			::ReleaseDC(hWnd_, hDC_);
 			::wglDeleteContext(hRC_);
+			::ReleaseDC(hWnd_, hDC_);
 
 			if (isFullScreen_)
 			{
