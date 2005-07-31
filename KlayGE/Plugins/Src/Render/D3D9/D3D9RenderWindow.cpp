@@ -1,8 +1,11 @@
 // D3D9RenderWindow.cpp
 // KlayGE D3D9渲染窗口类 实现文件
-// Ver 2.7.0
+// Ver 2.8.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.8.0
+// 自动恢复BackBuffer (2005.7.31)
 //
 // 2.7.0
 // 增加了ResetDevice (2005.7.1)
@@ -445,14 +448,24 @@ namespace KlayGE
 			D3D9RenderFactory& factory = static_cast<D3D9RenderFactory&>(Context::Instance().RenderFactoryInstance());
 			factory.OnLostDevice();
 
-			renderSurface_.reset();
+			D3DSURFACE_DESC desc;
+			renderSurface_->GetDesc(&desc);
+			IDirect3DSurface9* surface;
+			d3dDevice_->CreateOffscreenPlainSurface(desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &surface, NULL);
+			D3DXLoadSurfaceFromSurface(surface, NULL, NULL, renderSurface_.get(), NULL, NULL, D3DX_FILTER_NONE, 0);
+			renderSurface_ = MakeCOMPtr(surface);
 			renderZBuffer_.reset();
 
 			d3dpp_.BackBufferWidth  = this->Width();
 			d3dpp_.BackBufferHeight = this->Height();
 			TIF(d3dDevice_->Reset(&d3dpp_));
 
-			this->UpdateSurfacesPtrs();
+			d3dDevice_->GetRenderTarget(0, &surface);
+			D3DXLoadSurfaceFromSurface(surface, NULL, NULL, renderSurface_.get(), NULL, NULL, D3DX_FILTER_NONE, 0);
+			renderSurface_ = MakeCOMPtr(surface);
+
+			d3dDevice_->GetDepthStencilSurface(&surface);
+			renderZBuffer_ = MakeCOMPtr(surface);
 
 			factory.OnResetDevice();
 		}
