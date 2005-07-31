@@ -59,32 +59,166 @@ namespace KlayGE
 		CGtechnique technique_;
 	};
 
-	class OGLRenderEffectParameter : public RenderEffectParameter
+	template <typename T>
+	class OGLRenderEffectParameter : public RenderEffectParameterConcrete<T>
 	{
 	public:
-		explicit OGLRenderEffectParameter(RenderEffect& effect, std::string const & name, CGparameter param);
-		~OGLRenderEffectParameter();
+		OGLRenderEffectParameter(RenderEffect& effect, std::string const & name, CGparameter param)
+				: RenderEffectParameterConcrete<T>(effect, name),
+					param_(param)
+		{
+		}
+		virtual ~OGLRenderEffectParameter()
+		{
+			cgDestroyParameter(param_);
+		}
 
-	private:
-		bool DoTestType(RenderEffectParameterType type);
-
-		void DoFloat(float value);
-		void DoVector4(Vector4 const & value);
-		void DoMatrix4(Matrix4 const & value);
-		void DoInt(int value);
-		void DoTexture(TexturePtr const & value);
-
-		void DoSetFloatArray(float const * value, size_t count);
-		void DoSetVector4Array(Vector4 const * value, size_t count);
-		void DoSetMatrix4Array(Matrix4 const * value, size_t count);
-		void DoSetIntArray(int const * value, size_t count);
-
-	private:
+	protected:
 		CGparameter param_;
+	};
+
+	class OGLRenderEffectParameterFloat : public OGLRenderEffectParameter<float>
+	{
+	public:
+		OGLRenderEffectParameterFloat(RenderEffect& effect, std::string const & name, CGparameter param)
+			: OGLRenderEffectParameter<float>(effect, name, param)
+		{
+		}
 
 	private:
-		OGLRenderEffectParameter(OGLRenderEffectParameter const & rhs);
-		OGLRenderEffectParameter& operator=(OGLRenderEffectParameter const & rhs);
+		void DoFlush(float const & value);
+
+	private:
+		OGLRenderEffectParameterFloat(OGLRenderEffectParameterFloat const & rhs);
+		OGLRenderEffectParameterFloat& operator=(OGLRenderEffectParameterFloat const & rhs);
+	};
+
+	class OGLRenderEffectParameterVector4 : public OGLRenderEffectParameter<Vector4>
+	{
+	public:
+		OGLRenderEffectParameterVector4(RenderEffect& effect, std::string const & name, CGparameter param)
+			: OGLRenderEffectParameter<Vector4>(effect, name, param)
+		{
+		}
+
+	private:
+		void DoFlush(Vector4 const & value);
+
+	private:
+		OGLRenderEffectParameterVector4(OGLRenderEffectParameterVector4 const & rhs);
+		OGLRenderEffectParameterVector4& operator=(OGLRenderEffectParameterVector4 const & rhs);
+	};
+
+	class OGLRenderEffectParameterMatrix4 : public OGLRenderEffectParameter<Matrix4>
+	{
+	public:
+		OGLRenderEffectParameterMatrix4(RenderEffect& effect, std::string const & name, CGparameter param)
+				: OGLRenderEffectParameter<Matrix4>(effect, name, param)
+		{
+		}
+
+	private:
+		void DoFlush(Matrix4 const & value);
+
+	private:
+		OGLRenderEffectParameterMatrix4(OGLRenderEffectParameterMatrix4 const & rhs);
+		OGLRenderEffectParameterMatrix4& operator=(OGLRenderEffectParameterMatrix4 const & rhs);
+	};
+
+	class OGLRenderEffectParameterInt : public OGLRenderEffectParameter<int>
+	{
+	public:
+		OGLRenderEffectParameterInt(RenderEffect& effect, std::string const & name, CGparameter param)
+				: OGLRenderEffectParameter<int>(effect, name, param)
+		{
+		}
+
+	private:
+		void DoFlush(int const & value);
+
+	private:
+		OGLRenderEffectParameterInt(OGLRenderEffectParameterInt const & rhs);
+		OGLRenderEffectParameterInt& operator=(OGLRenderEffectParameterInt const & rhs);
+	};
+
+	class OGLRenderEffectParameterTexture : public OGLRenderEffectParameter<TexturePtr>
+	{
+	public:
+		OGLRenderEffectParameterTexture(RenderEffect& effect, std::string const & name, CGparameter param)
+				: OGLRenderEffectParameter<TexturePtr>(effect, name, param)
+		{
+		}
+
+	private:
+		void DoFlush(TexturePtr const & value);
+
+	private:
+		OGLRenderEffectParameterTexture(OGLRenderEffectParameterTexture const & rhs);
+		OGLRenderEffectParameterTexture& operator=(OGLRenderEffectParameterTexture const & rhs);
+	};
+
+	class OGLRenderEffectParameterFloatArray : public OGLRenderEffectParameter<std::vector<float> >
+	{
+	public:
+		OGLRenderEffectParameterFloatArray(RenderEffect& effect, std::string const & name, CGparameter param)
+				: OGLRenderEffectParameter<std::vector<float> >(effect, name, param)
+		{
+		}
+
+	private:
+		void DoFlush(std::vector<float> const & value);
+
+	private:
+		OGLRenderEffectParameterFloatArray(OGLRenderEffectParameterFloatArray const & rhs);
+		OGLRenderEffectParameterFloatArray& operator=(OGLRenderEffectParameterFloatArray const & rhs);
+	};
+
+	class OGLRenderEffectParameterVector4Array : public OGLRenderEffectParameter<std::vector<Vector4> >
+	{
+	public:
+		OGLRenderEffectParameterVector4Array(RenderEffect& effect, std::string const & name, CGparameter param)
+				: OGLRenderEffectParameter<std::vector<Vector4> >(effect, name, param)
+		{
+		}
+
+	private:
+		void DoFlush(std::vector<Vector4> const & value);
+
+	private:
+		OGLRenderEffectParameterVector4Array(OGLRenderEffectParameterVector4Array const & rhs);
+		OGLRenderEffectParameterVector4Array& operator=(OGLRenderEffectParameterVector4Array const & rhs);
+	};
+
+	class OGLRenderEffectParameterMatrix4Array : public OGLRenderEffectParameter<std::vector<Matrix4> >
+	{
+	public:
+		OGLRenderEffectParameterMatrix4Array(RenderEffect& effect, std::string const & name, CGparameter param)
+				: OGLRenderEffectParameter<std::vector<Matrix4> >(effect, name, param)
+		{
+		}
+
+	private:
+		void DoFlush(std::vector<Matrix4> const & value);
+
+	private:
+		OGLRenderEffectParameterMatrix4Array(OGLRenderEffectParameterMatrix4Array const & rhs);
+		OGLRenderEffectParameterMatrix4Array& operator=(OGLRenderEffectParameterMatrix4Array const & rhs);
+	};
+
+	class OGLRenderEffectParameterIntArray : public OGLRenderEffectParameter<std::vector<int> >
+	{
+	public:
+		OGLRenderEffectParameterIntArray(RenderEffect& effect, std::string const & name, CGparameter param)
+				: OGLRenderEffectParameter<std::vector<int> >(effect, name, param)
+		{
+		}
+
+	private:
+		void DoFlush(std::vector<int> const & value);
+
+	private:
+		OGLRenderEffectParameterIntArray(OGLRenderEffectParameterIntArray const & rhs);
+		OGLRenderEffectParameterIntArray& operator=(OGLRenderEffectParameterIntArray const & rhs);
 	};
 }
 

@@ -76,7 +76,7 @@ namespace KlayGE
 		glDeleteBuffers_(1, &vb_);
 	}
 
-	void OGLVertexStream::Assign(void const * src, size_t numVertices, size_t stride)
+	void OGLVertexStream::Assign(void const * src, size_t numVertices)
 	{
 		size_t const vertexSize(this->SizeOfElement() * this->ElementsPerVertex());
 		size_t const size(vertexSize * numVertices);

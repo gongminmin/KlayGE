@@ -72,7 +72,7 @@ namespace KlayGE
 
 		virtual bool IsStatic() const = 0;
 
-		virtual void Assign(void const * src, size_t numVertex, size_t stride = 0) = 0;
+		virtual void Assign(void const * src, size_t numVertex) = 0;
 		virtual void CopyToMemory(void* data) = 0;
 
 		virtual size_t NumVertices() const = 0;

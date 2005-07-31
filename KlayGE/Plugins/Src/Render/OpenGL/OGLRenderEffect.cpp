@@ -66,8 +66,62 @@ namespace KlayGE
 
 	RenderEffectParameterPtr OGLRenderEffect::DoParameterByName(std::string const & name)
 	{
-		return RenderEffectParameterPtr(new OGLRenderEffectParameter(*this, name,
-			cgGetNamedEffectParameter(effect_, name.c_str())));
+		CGparameter param = cgGetNamedEffectParameter(effect_, name.c_str());
+
+		CGtype param_type = cgGetParameterType(param);
+		CGtype param_base_type = cgGetParameterBaseType(param);
+		CGparameterclass param_class = cgGetParameterClass(param);
+
+		if ((CG_PARAMETERCLASS_SCALAR == param_class) && (CG_FLOAT == param_type))
+		{
+			return RenderEffectParameterPtr(new OGLRenderEffectParameterFloat(*this, name, param));
+		}
+
+		if ((CG_PARAMETERCLASS_VECTOR == param_class) && (CG_FLOAT == param_type))
+		{
+			return RenderEffectParameterPtr(new OGLRenderEffectParameterVector4(*this, name, param));
+		}
+
+		if ((CG_PARAMETERCLASS_MATRIX == param_class) && (CG_FLOAT == param_type))
+		{
+			return RenderEffectParameterPtr(new OGLRenderEffectParameterMatrix4(*this, name, param));
+		}
+
+		if ((CG_PARAMETERCLASS_SCALAR == param_class) && (CG_INT == param_type))
+		{
+			return RenderEffectParameterPtr(new OGLRenderEffectParameterInt(*this, name, param));
+		}
+
+		if ((CG_PARAMETERCLASS_OBJECT == param_class) && (CG_TEXTURE == param_type))
+		{
+			return RenderEffectParameterPtr(new OGLRenderEffectParameterTexture(*this, name, param));
+		}
+
+		if ((CG_PARAMETERCLASS_ARRAY == param_class) && (CG_ARRAY == param_type) && (CG_FLOAT == param_base_type))
+		{
+			int rows = cgGetParameterRows(param);
+			if (0 == rows)
+			{
+				return RenderEffectParameterPtr(new OGLRenderEffectParameterFloatArray(*this, name, param));
+			}
+			else
+			{
+				int cols = cgGetParameterColumns(param);
+				if (0 == cols)
+				{
+					return RenderEffectParameterPtr(new OGLRenderEffectParameterVector4Array(*this, name, param));
+				}
+				else
+				{
+					return RenderEffectParameterPtr(new OGLRenderEffectParameterMatrix4Array(*this, name, param));
+				}
+			}
+		}
+
+		if ((CG_PARAMETERCLASS_ARRAY == param_class) && (CG_ARRAY == param_type) && (CG_INT == param_base_type))
+		{
+			return RenderEffectParameterPtr(new OGLRenderEffectParameterIntArray(*this, name, param));
+		}
 	}
 
 	uint32_t OGLRenderEffect::DoBegin(uint32_t flags)
@@ -105,79 +159,27 @@ namespace KlayGE
 	}
 
 
-	OGLRenderEffectParameter::OGLRenderEffectParameter(RenderEffect& effect, std::string const & name, CGparameter param)
-		: RenderEffectParameter(effect, name),
-			param_(param)
-	{
-		BOOST_ASSERT(param_);
-	}
-
-	OGLRenderEffectParameter::~OGLRenderEffectParameter()
-	{
-		cgDestroyParameter(param_);
-	}
-
-	bool OGLRenderEffectParameter::DoTestType(RenderEffectParameterType type)
-	{
-		CGtype param_type = cgGetParameterType(param_);
-		CGparameterclass param_class = cgGetParameterClass(param_);
-
-		switch (type)
-		{
-		case REPT_float:
-			return (CG_PARAMETERCLASS_SCALAR == param_class) && (CG_FLOAT == param_type);
-
-		case REPT_Vector4:
-			return (CG_PARAMETERCLASS_VECTOR == param_class) && (CG_FLOAT == param_type);
-
-		case REPT_Matrix4:
-			return (CG_PARAMETERCLASS_MATRIX == param_class) && (CG_FLOAT == param_type);
-
-		case REPT_int:
-			return (CG_PARAMETERCLASS_SCALAR == param_class) && (CG_INT == param_type);
-
-		case REPT_Texture:
-			return (CG_PARAMETERCLASS_OBJECT == param_class) && (CG_TEXTURE == param_type);
-
-		case REPT_float_array:
-			return (CG_PARAMETERCLASS_ARRAY == param_class) && (CG_FLOAT == param_type);
-
-		case REPT_Vector4_array:
-			return (CG_PARAMETERCLASS_ARRAY == param_class) && (CG_FLOAT == param_type);
-
-		case REPT_Matrix4_array:
-			return (CG_PARAMETERCLASS_ARRAY == param_class) && (CG_FLOAT == param_type);
-
-		case REPT_int_array:
-			return (CG_PARAMETERCLASS_ARRAY == param_class) && (CG_INT == param_type);
-
-		default:
-			BOOST_ASSERT(false);
-			return false;
-		}
-	}
-
-	void OGLRenderEffectParameter::DoFloat(float value)
+	void OGLRenderEffectParameterFloat::DoFlush(float const & value)
 	{
 		cgSetParameter1f(param_, value);
 	}
 	
-	void OGLRenderEffectParameter::DoVector4(Vector4 const & value)
+	void OGLRenderEffectParameterVector4::DoFlush(Vector4 const & value)
 	{
 		cgSetParameter4fv(param_, &value[0]);
 	}
 
-	void OGLRenderEffectParameter::DoMatrix4(Matrix4 const & value)
+	void OGLRenderEffectParameterMatrix4::DoFlush(Matrix4 const & value)
 	{
 		cgSetParameterValuefr(param_, 4 * 4, &value[0]);
 	}
 
-	void OGLRenderEffectParameter::DoInt(int value)
+	void OGLRenderEffectParameterInt::DoFlush(int const & value)
 	{
 		cgSetParameter1i(param_, value);
 	}
 
-	void OGLRenderEffectParameter::DoTexture(TexturePtr const & tex)
+	void OGLRenderEffectParameterTexture::DoFlush(TexturePtr const & tex)
 	{
 		BOOST_ASSERT(dynamic_cast<OGLTexture*>(tex.get()) != NULL);
 
@@ -185,23 +187,23 @@ namespace KlayGE
 		cgGLSetTextureParameter(param_, ogl_tex.GLTexture());
 	}
 
-	void OGLRenderEffectParameter::DoSetFloatArray(float const * value, size_t count)
+	void OGLRenderEffectParameterFloatArray::DoFlush(std::vector<float> const & value)
 	{
-		cgGLSetParameterArray1f(param_, 0, static_cast<long>(count), value);
+		cgGLSetParameterArray1f(param_, 0, static_cast<long>(value.size()), &value[0]);
 	}
 
-	void OGLRenderEffectParameter::DoSetVector4Array(Vector4 const * value, size_t count)
+	void OGLRenderEffectParameterVector4Array::DoFlush(std::vector<Vector4> const & value)
 	{
-		cgGLSetParameterArray4f(param_, 0, static_cast<long>(count), &value[0][0]);
+		cgGLSetParameterArray4f(param_, 0, static_cast<long>(value.size()), &value[0][0]);
 	}
 
-	void OGLRenderEffectParameter::DoSetMatrix4Array(Matrix4 const * value, size_t count)
+	void OGLRenderEffectParameterMatrix4Array::DoFlush(std::vector<Matrix4> const & value)
 	{
-		cgGLSetMatrixParameterArrayfr(param_, 0, static_cast<long>(count), &value[0][0]);
+		cgGLSetMatrixParameterArrayfr(param_, 0, static_cast<long>(value.size()), &value[0][0]);
 	}
 
-	void OGLRenderEffectParameter::DoSetIntArray(int const * value, size_t count)
+	void OGLRenderEffectParameterIntArray::DoFlush(std::vector<int> const & value)
 	{
-		cgSetParameterValueir(param_, static_cast<long>(count), value);
+		cgSetParameterValueir(param_, static_cast<long>(value.size()), &value[0]);
 	}
 }

@@ -92,7 +92,7 @@ namespace KlayGE
 		{
 			if (iter->second.second)
 			{
-				iter->second.first->DoFlush();
+				iter->second.first->Flush();
 				iter->second.second = false;
 			}
 		}
@@ -114,38 +114,81 @@ namespace KlayGE
 		{
 		}
 
-	private:
-		bool DoTestType(RenderEffectParameterType /*type*/)
+		RenderEffectParameter& operator=(float const & /*value*/)
 		{
-			return true;
+			return *this;
+		}
+		RenderEffectParameter& operator=(Vector4 const & /*value*/)
+		{
+			return *this;
+		}
+		RenderEffectParameter& operator=(Matrix4 const & /*value*/)
+		{
+			return *this;
+		}
+		RenderEffectParameter& operator=(int const & /*value*/)
+		{
+			return *this;
+		}
+		RenderEffectParameter& operator=(TexturePtr const & /*value*/)
+		{
+			return *this;
+		}
+		RenderEffectParameter& operator=(std::vector<float> const & /*value*/)
+		{
+			return *this;
+		}
+		RenderEffectParameter& operator=(std::vector<Vector4> const & /*value*/)
+		{
+			return *this;
+		}
+		RenderEffectParameter& operator=(std::vector<Matrix4> const & /*value*/)
+		{
+			return *this;
+		}
+		RenderEffectParameter& operator=(std::vector<int> const & /*value*/)
+		{
+			return *this;
+		}
+		
+		void Value(float& val) const
+		{
+			val = 0;
+		}
+		void Value(Vector4& val) const
+		{
+			val = Vector4::Zero();
+		}
+		void Value(Matrix4& val) const
+		{
+			val = Matrix4::Identity();
+		}
+		void Value(int& val) const
+		{
+			val = 0;
+		}
+		void Value(TexturePtr& val) const
+		{
+			val = TexturePtr();
+		}
+		void Value(std::vector<float>& val) const
+		{
+			val.clear();
+		}
+		void Value(std::vector<Vector4>& val) const
+		{
+			val.clear();
+		}
+		void Value(std::vector<Matrix4>& val) const
+		{
+			val.clear();
+		}
+		void Value(std::vector<int>& val) const
+		{
+			val.clear();
 		}
 
-		void DoFloat(float /*value*/)
-		{
-		}
-		void DoVector4(Vector4 const & /*value*/)
-		{
-		}
-		void DoMatrix4(Matrix4 const & /*value*/)
-		{
-		}
-		void DoInt(int /*value*/)
-		{
-		}
-		void DoTexture(TexturePtr const & /*value*/)
-		{
-		}
-
-		void DoSetFloatArray(float const * /*value*/, size_t /*count*/)
-		{
-		}
-		void DoSetVector4Array(Vector4 const * /*value*/, size_t /*count*/)
-		{
-		}
-		void DoSetMatrix4Array(Matrix4 const * /*value*/, size_t /*count*/)
-		{
-		}
-		void DoSetIntArray(int const * /*value*/, size_t /*count*/)
+		void Flush()
 		{
 		}
 
@@ -154,368 +197,177 @@ namespace KlayGE
 		NullRenderEffectParameter& operator=(NullRenderEffectParameter const & rhs);
 	};
 
+
+	RenderEffectParameter::RenderEffectParameter(RenderEffect& effect, std::string const & name)
+		: effect_(effect), name_(name)
+	{
+	}
+
+	RenderEffectParameter::~RenderEffectParameter()
+	{
+	}
+
 	RenderEffectParameterPtr RenderEffectParameter::NullObject()
 	{
 		static RenderEffectParameterPtr obj(new NullRenderEffectParameter);
 		return obj;
 	}
 
-	RenderEffectParameter::RenderEffectParameter(RenderEffect& effect, std::string const & name)
-		: effect_(effect), name_(name), type_(REPT_Unknown)
+	std::string const & RenderEffectParameter::Name() const
 	{
+		return name_;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(float value)
+	RenderEffectParameter& RenderEffectParameter::operator=(float const & value)
 	{
-		BOOST_ASSERT(this->DoTestType(REPT_float));
-
-		bool dirty = false;
-		if (REPT_Unknown == type_)
-		{
-			type_ = REPT_float;
-			dirty = true;
-		}
-		else
-		{
-			BOOST_ASSERT(REPT_float == type_);
-			
-			dirty = (this->ToFloat() != value);
-		}
-
-		if (dirty)
-		{
-			val_ = value;
-			effect_.DirtyParam(name_);
-		}
-
+		BOOST_ASSERT(false);
 		return *this;
 	}
 
 	RenderEffectParameter& RenderEffectParameter::operator=(Vector4 const & value)
 	{
-		BOOST_ASSERT(this->DoTestType(REPT_Vector4));
-
-		bool dirty = false;
-		if (REPT_Unknown == type_)
-		{
-			type_ = REPT_Vector4;
-			dirty = true;
-		}
-		else
-		{
-			BOOST_ASSERT(REPT_Vector4 == type_);
-			
-			dirty = (this->ToVector4() != value);
-		}
-
-		if (dirty)
-		{
-			val_ = value;
-			effect_.DirtyParam(name_);
-		}
-
+		BOOST_ASSERT(false);
 		return *this;
 	}
 
 	RenderEffectParameter& RenderEffectParameter::operator=(Matrix4 const & value)
 	{
-		BOOST_ASSERT(this->DoTestType(REPT_Matrix4));
-
-		bool dirty = false;
-		if (REPT_Unknown == type_)
-		{
-			type_ = REPT_Matrix4;
-			dirty = true;
-		}
-		else
-		{
-			BOOST_ASSERT(REPT_Matrix4 == type_);
-			
-			dirty = (this->ToMatrix4() != value);
-		}
-
-		if (dirty)
-		{
-			val_ = value;
-			effect_.DirtyParam(name_);
-		}
-
+		BOOST_ASSERT(false);
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(int value)
+	RenderEffectParameter& RenderEffectParameter::operator=(int const & value)
 	{
-		BOOST_ASSERT(this->DoTestType(REPT_int));
-
-		bool dirty = false;
-		if (REPT_Unknown == type_)
-		{
-			type_ = REPT_int;
-			dirty = true;
-		}
-		else
-		{
-			BOOST_ASSERT(REPT_int == type_);
-			
-			dirty = (this->ToInt() != value);
-		}
-
-		if (dirty)
-		{
-			val_ = value;
-			effect_.DirtyParam(name_);
-		}
-
+		BOOST_ASSERT(false);
 		return *this;
 	}
 
 	RenderEffectParameter& RenderEffectParameter::operator=(TexturePtr const & value)
 	{
-		BOOST_ASSERT(this->DoTestType(REPT_Texture));
-
-		bool dirty = false;
-		if (REPT_Unknown == type_)
-		{
-			type_ = REPT_Texture;
-			dirty = true;
-		}
-		else
-		{
-			BOOST_ASSERT(REPT_Texture == type_);
-			
-			dirty = (this->ToTexture() != value);
-		}
-
-		if (dirty)
-		{
-			val_ = value;
-			effect_.DirtyParam(name_);
-		}
-
+		BOOST_ASSERT(false);
 		return *this;
 	}
 
-	float RenderEffectParameter::ToFloat() const
+	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<float> const & value)
 	{
-		BOOST_ASSERT(REPT_float == type_);
-		return boost::get<float>(val_);
+		BOOST_ASSERT(false);
+		return *this;
 	}
 
-	Vector4 const & RenderEffectParameter::ToVector4() const
+	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<Vector4> const & value)
 	{
-		BOOST_ASSERT(REPT_Vector4 == type_);
-		return boost::get<Vector4>(val_);
+		BOOST_ASSERT(false);
+		return *this;
 	}
 
-	Matrix4 const & RenderEffectParameter::ToMatrix4() const
+	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<Matrix4> const & value)
 	{
-		BOOST_ASSERT(REPT_Matrix4 == type_);
-		return boost::get<Matrix4>(val_);
+		BOOST_ASSERT(false);
+		return *this;
 	}
 
-	int RenderEffectParameter::ToInt() const
+	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<int> const & value)
 	{
-		BOOST_ASSERT(REPT_int == type_);
-		return boost::get<int>(val_);
+		BOOST_ASSERT(false);
+		return *this;
 	}
 
-	TexturePtr const & RenderEffectParameter::ToTexture() const
+	void RenderEffectParameter::Value(float& val) const
 	{
-		BOOST_ASSERT(REPT_Texture == type_);
-		return boost::get<TexturePtr>(val_);
+		BOOST_ASSERT(false);
+		val = 0;
 	}
 
-	void RenderEffectParameter::SetFloatArray(float const * value, size_t count)
+	void RenderEffectParameter::Value(Vector4& val) const
 	{
-		BOOST_ASSERT(this->DoTestType(REPT_float_array));
-
-		bool dirty = false;
-		if (REPT_Unknown == type_)
-		{
-			type_ = REPT_float_array;
-			dirty = true;
-		}
-		else
-		{
-			BOOST_ASSERT(REPT_float_array == type_);
-
-			std::vector<float>& v = boost::get<std::vector<float> >(val_);
-			dirty = !std::equal(v.begin(), v.end(), value);
-		}
-
-		if (dirty)
-		{
-			std::vector<float>& v = boost::get<std::vector<float> >(val_);
-			v.assign(value, value + count);
-			effect_.DirtyParam(name_);
-		}
+		BOOST_ASSERT(false);
+		val = Vector4::Zero();
 	}
 
-	void RenderEffectParameter::GetFloatArray(float* value, size_t count)
+	void RenderEffectParameter::Value(Matrix4& val) const
 	{
-		BOOST_ASSERT(REPT_float_array == type_);
-
-		std::vector<float>& v = boost::get<std::vector<float> >(val_);
-		std::copy(v.begin(), v.begin() + count, value);
+		BOOST_ASSERT(false);
+		val = Matrix4::Identity();
 	}
 
-	void RenderEffectParameter::SetVector4Array(Vector4 const * value, size_t count)
+	void RenderEffectParameter::Value(int& val) const
 	{
-		BOOST_ASSERT(this->DoTestType(REPT_Vector4_array));
-
-		bool dirty = false;
-		if (REPT_Unknown == type_)
-		{
-			type_ = REPT_Vector4_array;
-			dirty = true;
-		}
-		else
-		{
-			BOOST_ASSERT(REPT_Vector4_array == type_);
-
-			std::vector<Vector4>& v = boost::get<std::vector<Vector4> >(val_);
-			dirty = !std::equal(v.begin(), v.end(), value);
-		}
-
-		if (dirty)
-		{
-			std::vector<Vector4>& v = boost::get<std::vector<Vector4> >(val_);
-			v.assign(value, value + count);
-			effect_.DirtyParam(name_);
-		}
+		BOOST_ASSERT(false);
+		val = 0;
 	}
 
-	void RenderEffectParameter::GetVector4Array(Vector4* value, size_t count)
+	void RenderEffectParameter::Value(TexturePtr& val) const
 	{
-		BOOST_ASSERT(REPT_Vector4_array == type_);
-
-		std::vector<Vector4>& v = boost::get<std::vector<Vector4> >(val_);
-		std::copy(v.begin(), v.begin() + count, value);
+		BOOST_ASSERT(false);
+		val = TexturePtr();
 	}
 
-	void RenderEffectParameter::SetMatrix4Array(Matrix4 const * value, size_t count)
+	void RenderEffectParameter::Value(std::vector<float>& val) const
 	{
-		BOOST_ASSERT(this->DoTestType(REPT_Matrix4_array));
-
-		bool dirty = false;
-		if (REPT_Unknown == type_)
-		{
-			type_ = REPT_Matrix4_array;
-			dirty = true;
-		}
-		else
-		{
-			BOOST_ASSERT(REPT_Matrix4_array == type_);
-
-			std::vector<Matrix4>& v = boost::get<std::vector<Matrix4> >(val_);
-			dirty = !std::equal(v.begin(), v.end(), value);
-		}
-
-		if (dirty)
-		{
-			std::vector<Matrix4>& v = boost::get<std::vector<Matrix4> >(val_);
-			v.assign(value, value + count);
-			effect_.DirtyParam(name_);
-		}
+		BOOST_ASSERT(false);
+		val.clear();
 	}
 
-	void RenderEffectParameter::GetMatrix4Array(Matrix4* value, size_t count)
+	void RenderEffectParameter::Value(std::vector<Vector4>& val) const
 	{
-		BOOST_ASSERT(REPT_Matrix4_array == type_);
-
-		std::vector<Matrix4>& v = boost::get<std::vector<Matrix4> >(val_);
-		std::copy(v.begin(), v.begin() + count, value);
+		BOOST_ASSERT(false);
+		val.clear();
 	}
 
-	void RenderEffectParameter::SetIntArray(int const * value, size_t count)
+	void RenderEffectParameter::Value(std::vector<Matrix4>& val) const
 	{
-		BOOST_ASSERT(this->DoTestType(REPT_int_array));
-
-		bool dirty = false;
-		if (REPT_Unknown == type_)
-		{
-			type_ = REPT_int_array;
-			dirty = true;
-		}
-		else
-		{
-			BOOST_ASSERT(REPT_int_array == type_);
-
-			std::vector<int>& v = boost::get<std::vector<int> >(val_);
-			dirty = !std::equal(v.begin(), v.end(), value);
-		}
-
-		if (dirty)
-		{
-			std::vector<int>& v = boost::get<std::vector<int> >(val_);
-			v.assign(value, value + count);
-			effect_.DirtyParam(name_);
-		}
+		BOOST_ASSERT(false);
+		val.clear();
 	}
 
-	void RenderEffectParameter::GetIntArray(int* value, size_t count)
+	void RenderEffectParameter::Value(std::vector<int>& val) const
 	{
-		BOOST_ASSERT(REPT_int_array == type_);
-
-		std::vector<int>& v = boost::get<std::vector<int> >(val_);
-		std::copy(v.begin(), v.begin() + count, value);
+		BOOST_ASSERT(false);
+		val.clear();
 	}
 
-	void RenderEffectParameter::DoFlush()
+	void RenderEffectParameter::DoFlush(float const & value)
 	{
-		switch (type_)
-		{
-		case REPT_float:
-			this->DoFloat(boost::get<float>(val_));
-			break;
+		BOOST_ASSERT(false);
+	}
 
-		case REPT_Vector4:
-			this->DoVector4(boost::get<Vector4>(val_));
-			break;
+	void RenderEffectParameter::DoFlush(Vector4 const & value)
+	{
+		BOOST_ASSERT(false);
+	}
 
-		case REPT_Matrix4:
-			this->DoMatrix4(boost::get<Matrix4>(val_));
-			break;
+	void RenderEffectParameter::DoFlush(Matrix4 const & value)
+	{
+		BOOST_ASSERT(false);
+	}
 
-		case REPT_int:
-			this->DoInt(boost::get<int>(val_));
-			break;
+	void RenderEffectParameter::DoFlush(int const & value)
+	{
+		BOOST_ASSERT(false);
+	}
 
-		case REPT_Texture:
-			this->DoTexture(boost::get<TexturePtr>(val_));
-			break;
+	void RenderEffectParameter::DoFlush(TexturePtr const & value)
+	{
+		BOOST_ASSERT(false);
+	}
 
-		case REPT_float_array:
-			{
-				std::vector<float>& v = boost::get<std::vector<float> >(val_);
-				this->DoSetFloatArray(&v[0], v.size());
-			}
-			break;
+	void RenderEffectParameter::DoFlush(std::vector<float> const & value)
+	{
+		BOOST_ASSERT(false);
+	}
 
-		case REPT_Vector4_array:
-			{
-				std::vector<Vector4>& v = boost::get<std::vector<Vector4> >(val_);
-				this->DoSetVector4Array(&v[0], v.size());
-			}
-			break;
+	void RenderEffectParameter::DoFlush(std::vector<Vector4> const & value)
+	{
+		BOOST_ASSERT(false);
+	}
 
-		case REPT_Matrix4_array:
-			{
-				std::vector<Matrix4>& v = boost::get<std::vector<Matrix4> >(val_);
-				this->DoSetMatrix4Array(&v[0], v.size());
-			}
-			break;
+	void RenderEffectParameter::DoFlush(std::vector<Matrix4> const & value)
+	{
+		BOOST_ASSERT(false);
+	}
 
-		case REPT_int_array:
-			{
-				std::vector<int>& v = boost::get<std::vector<int> >(val_);
-				this->DoSetIntArray(&v[0], v.size());
-			}
-			break;
-
-		default:
-			BOOST_ASSERT(false);
-			break;
-		}
+	void RenderEffectParameter::DoFlush(std::vector<int> const & value)
+	{
+		BOOST_ASSERT(false);
 	}
 }

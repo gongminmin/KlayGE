@@ -41,7 +41,7 @@ namespace KlayGE
 
 		bool IsStatic() const;
 
-		void Assign(void const * src, size_t numVertices, size_t stride);
+		void Assign(void const * src, size_t numVertices);
 		void CopyToMemory(void* data);
 
 		boost::shared_ptr<IDirect3DVertexBuffer9> D3D9Buffer() const;

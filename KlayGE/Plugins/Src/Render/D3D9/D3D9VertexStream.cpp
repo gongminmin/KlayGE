@@ -44,7 +44,7 @@ namespace KlayGE
 		return numVertices_;
 	}
 
-	void D3D9VertexStream::Assign(void const * src, size_t numVertices, size_t stride)
+	void D3D9VertexStream::Assign(void const * src, size_t numVertices)
 	{
 		BOOST_ASSERT(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
 
@@ -74,20 +74,7 @@ namespace KlayGE
 		uint8_t* destPtr(static_cast<uint8_t*>(dest));
 		uint8_t const * srcPtr(static_cast<uint8_t const *>(src));
 
-		if (stride != 0)
-		{
-			for (size_t i = 0; i < numVertices; ++ i)
-			{
-				std::copy(srcPtr, srcPtr + vertexSize, destPtr);
-
-				destPtr += vertexSize;
-				srcPtr += vertexSize + stride;
-			}
-		}
-		else
-		{
-			std::copy(srcPtr, srcPtr + size, destPtr);
-		}
+		std::copy(srcPtr, srcPtr + size, destPtr);
 
 		buffer_->Unlock();
 	}

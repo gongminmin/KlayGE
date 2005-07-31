@@ -42,7 +42,7 @@ namespace KlayGE
 			return numVertices_;
 		}
 
-		void Assign(void const * src, size_t numVertices, size_t stride);
+		void Assign(void const * src, size_t numVertices);
 		void CopyToMemory(void* data);
 
 		void Active();

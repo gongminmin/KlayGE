@@ -34,9 +34,9 @@
 #include <string>
 
 #pragma warning(disable: 4100 4512)
-#include <boost/variant.hpp>
 #include <boost/utility.hpp>
 #include <boost/operators.hpp>
+#include <boost/any.hpp>
 
 #include <KlayGE/Math.hpp>
 
@@ -83,75 +83,93 @@ namespace KlayGE
 		params_type params_;
 	};
 
-	enum RenderEffectParameterType
-	{
-		REPT_float,
-		REPT_Vector4,
-		REPT_Matrix4,
-		REPT_int,
-		REPT_Texture,
-
-		REPT_float_array,
-		REPT_Vector4_array,
-		REPT_Matrix4_array,
-		REPT_int_array,
-
-		REPT_Unknown,
-	};
-
 	class RenderEffectParameter : boost::noncopyable
 	{
 	public:
 		RenderEffectParameter(RenderEffect& effect, std::string const & name);
-		virtual ~RenderEffectParameter()
-			{ }
+		virtual ~RenderEffectParameter();
 
 		static RenderEffectParameterPtr NullObject();
 
-		RenderEffectParameter& operator=(float value);
-		RenderEffectParameter& operator=(Vector4 const & value);
-		RenderEffectParameter& operator=(Matrix4 const & value);
-		RenderEffectParameter& operator=(int value);
-		RenderEffectParameter& operator=(TexturePtr const & tex);
+		std::string const & Name() const;
 
-		float ToFloat() const;
-		Vector4 const & ToVector4() const;
-		Matrix4 const & ToMatrix4() const;
-		int ToInt() const;
-		TexturePtr const & ToTexture() const;
+		virtual RenderEffectParameter& operator=(float const & value);
+		virtual RenderEffectParameter& operator=(Vector4 const & value);
+		virtual RenderEffectParameter& operator=(Matrix4 const & value);
+		virtual RenderEffectParameter& operator=(int const & value);
+		virtual RenderEffectParameter& operator=(TexturePtr const & value);
+		virtual RenderEffectParameter& operator=(std::vector<float> const & value);
+		virtual RenderEffectParameter& operator=(std::vector<Vector4> const & value);
+		virtual RenderEffectParameter& operator=(std::vector<Matrix4> const & value);
+		virtual RenderEffectParameter& operator=(std::vector<int> const & value);
 
-		void SetFloatArray(float const * value, size_t count);
-		void GetFloatArray(float* value, size_t count);
-		void SetVector4Array(Vector4 const * value, size_t count);
-		void GetVector4Array(Vector4* value, size_t count);
-		void SetMatrix4Array(Matrix4 const * matrices, size_t count);
-		void GetMatrix4Array(Matrix4* matrices, size_t count);
-		void SetIntArray(int const * value, size_t count);
-		void GetIntArray(int* value, size_t count);
+		virtual void Value(float& val) const;
+		virtual void Value(Vector4& val) const;
+		virtual void Value(Matrix4& val) const;
+		virtual void Value(int& val) const;
+		virtual void Value(TexturePtr& val) const;
+		virtual void Value(std::vector<float>& val) const;
+		virtual void Value(std::vector<Vector4>& val) const;
+		virtual void Value(std::vector<Matrix4>& val) const;
+		virtual void Value(std::vector<int>& val) const;
 
-		void DoFlush();
+		virtual void Flush() = 0;
 
-	private:
-		virtual bool DoTestType(RenderEffectParameterType type) = 0;
-
-		virtual void DoFloat(float value) = 0;
-		virtual void DoVector4(Vector4 const & value) = 0;
-		virtual void DoMatrix4(Matrix4 const & value) = 0;
-		virtual void DoInt(int value) = 0;
-		virtual void DoTexture(TexturePtr const & value) = 0;
-
-		virtual void DoSetFloatArray(float const * value, size_t count) = 0;
-		virtual void DoSetVector4Array(Vector4 const * value, size_t count) = 0;
-		virtual void DoSetMatrix4Array(Matrix4 const * matrices, size_t count) = 0;
-		virtual void DoSetIntArray(int const * value, size_t count) = 0;
+	protected:
+		virtual void DoFlush(float const & value);
+		virtual void DoFlush(Vector4 const & value);
+		virtual void DoFlush(Matrix4 const & value);
+		virtual void DoFlush(int const & value);
+		virtual void DoFlush(TexturePtr const & value);
+		virtual void DoFlush(std::vector<float> const & value);
+		virtual void DoFlush(std::vector<Vector4> const & value);
+		virtual void DoFlush(std::vector<Matrix4> const & value);
+		virtual void DoFlush(std::vector<int> const & value);
 
 	protected:
 		RenderEffect& effect_;
-
 		std::string name_;
-		RenderEffectParameterType type_;
-		boost::variant<float, Vector4, Matrix4, int, TexturePtr,
-			std::vector<float>, std::vector<Vector4>, std::vector<Matrix4>, std::vector<int> > val_;
+	};
+
+	template <typename T>
+	class RenderEffectParameterConcrete : public RenderEffectParameter
+	{
+	public:
+		RenderEffectParameterConcrete(RenderEffect& effect, std::string const & name)
+			: RenderEffectParameter(effect, name), val_()
+		{
+		}
+
+		RenderEffectParameter& operator=(T const & value)
+		{
+			bool dirty = false;
+
+			if (value != val_)
+			{
+				dirty = true;
+				val_ = value;
+				effect_.DirtyParam(name_);
+			}
+
+			return *this;
+		}
+
+		void Value(T& val) const
+		{
+			val = val_;
+		}
+
+		void Flush()
+		{
+			this->DoFlush(val_);
+		}
+
+	protected:
+		T val_;
+
+	private:
+		RenderEffectParameterConcrete(RenderEffectParameterConcrete const & rhs);
+		RenderEffectParameterConcrete& operator=(RenderEffectParameterConcrete const & rhs);
 	};
 }
 
