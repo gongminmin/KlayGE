@@ -7,6 +7,7 @@
 // 2.8.0
 // 增加了RenderDeviceCaps (2005.7.17)
 // 简化了StencilBuffer相关操作 (2005.7.20)
+// 只支持vbo (2005.7.31)
 //
 // 2.7.0
 // 支持vertex_buffer_object (2005.6.19)
@@ -386,16 +387,11 @@ namespace KlayGE
 		glDisableClientState(GL_COLOR_ARRAY);
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
-		bool use_vbo = false;
 		for (VertexBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
 			iter != vb.VertexStreamEnd(); ++ iter)
 		{
 			OGLVertexStream& stream(static_cast<OGLVertexStream&>(*(*iter)));
-			if (stream.UseVBO())
-			{
-				use_vbo = true;
-				break;
-			}
+			break;
 		}
 
 		for (VertexBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
@@ -404,48 +400,25 @@ namespace KlayGE
 			OGLVertexStream& stream(static_cast<OGLVertexStream&>(*(*iter)));
 			VertexStreamType type(stream.Type());
 
-			std::vector<uint8_t> const & data(stream.OGLBuffer());
-
 			switch (type)
 			{
 			// Vertex xyzs
 			case VST_Positions:
 				glEnableClientState(GL_VERTEX_ARRAY);
-				if (use_vbo)
-				{
-					stream.Active();
-					glVertexPointer(3, GL_FLOAT, 0, NULL);
-				}
-				else
-				{
-					glVertexPointer(3, GL_FLOAT, 0, &data[0]);
-				}
+				stream.Active();
+				glVertexPointer(3, GL_FLOAT, 0, NULL);
 				break;
 		
 			case VST_Normals:
 				glEnableClientState(GL_NORMAL_ARRAY);
-				if (use_vbo)
-				{
-					stream.Active();
-					glNormalPointer(GL_FLOAT, 0, NULL);
-				}
-				else
-				{
-					glNormalPointer(GL_FLOAT, 0, &data[0]);
-				}
+				stream.Active();
+				glNormalPointer(GL_FLOAT, 0, NULL);
 				break;
 
 			case VST_Diffuses:
 				glEnableClientState(GL_COLOR_ARRAY);
-				if (use_vbo)
-				{
-					stream.Active();
-					glColorPointer(4, GL_UNSIGNED_BYTE, 0, NULL);
-				}
-				else
-				{
-					glColorPointer(4, GL_UNSIGNED_BYTE, 0, &data[0]);
-				}
+				stream.Active();
+				glColorPointer(4, GL_UNSIGNED_BYTE, 0, NULL);
 				break;
 
 			case VST_TextureCoords0:
@@ -461,17 +434,9 @@ namespace KlayGE
 					glClientActiveTexture_(GL_TEXTURE0 + type - VST_TextureCoords0);
 				}
 				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-				if (use_vbo)
-				{
-					stream.Active();
-					glTexCoordPointer(static_cast<GLint>(stream.ElementsPerVertex()),
+				stream.Active();
+				glTexCoordPointer(static_cast<GLint>(stream.ElementsPerVertex()),
 						GL_FLOAT, 0, NULL);
-				}
-				else
-				{
-					glTexCoordPointer(static_cast<GLint>(stream.ElementsPerVertex()),
-						GL_FLOAT, 0, &data[0]);
-				}
 				break;
 			}
 		}
@@ -488,18 +453,9 @@ namespace KlayGE
 		{
 			OGLIndexStream& stream(static_cast<OGLIndexStream&>(*vb.GetIndexStream()));
 
-			if (use_vbo)
-			{
-				stream.Active();
-				glDrawElements(mode, static_cast<GLsizei>(vb.NumIndices()),
+			stream.Active();
+			glDrawElements(mode, static_cast<GLsizei>(vb.NumIndices()),
 					GL_UNSIGNED_SHORT, 0);
-			}
-			else
-			{
-				std::vector<uint16_t> const & data(stream.OGLBuffer());
-				glDrawElements(mode, static_cast<GLsizei>(vb.NumIndices()),
-					GL_UNSIGNED_SHORT, &data[0]);
-			}
 		}
 		else
 		{

@@ -6,6 +6,7 @@
 //
 // 2.8.0
 // 增加了CopyToMemory (2005.7.24)
+// 只支持vbo (2005.7.31)
 //
 // 2.7.0
 // 支持vertex_buffer_object (2005.6.19)
@@ -40,31 +41,20 @@ namespace KlayGE
 		{
 			return numVertices_;
 		}
-		bool UseVBO() const
-		{
-			return use_vbo_;
-		}
 
 		void Assign(void const * src, size_t numVertices, size_t stride);
 		void CopyToMemory(void* data);
 
 		void Active();
 
-		std::vector<uint8_t> const & OGLBuffer() const
-		{
-			return buffer_;
-		}
 		GLuint OGLvbo() const
 		{
 			return vb_;
 		}
 
 	protected:
-		std::vector<uint8_t> buffer_;
-
 		size_t numVertices_;
 
-		bool use_vbo_;
 		bool static_stream_;
 
 		glBindBufferARBFUNC glBindBuffer_;

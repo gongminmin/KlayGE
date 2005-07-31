@@ -6,6 +6,7 @@
 //
 // 2.8.0
 // 增加了CopyToMemory (2005.7.24)
+// 只支持vbo (2005.7.31)
 //
 // 2.7.0
 // 支持vertex_buffer_object (2005.6.19)
@@ -29,7 +30,7 @@ namespace KlayGE
 {
 	OGLVertexStream::OGLVertexStream(VertexStreamType type, uint8_t sizeElement, uint8_t numElement, bool staticStream)
 			: VertexStream(type, sizeElement, numElement),
-				use_vbo_(false), static_stream_(staticStream)
+				static_stream_(staticStream)
 	{
 		if (glloader_GL_VERSION_1_5())
 		{
@@ -44,8 +45,6 @@ namespace KlayGE
 			glIsBuffer_				= glIsBuffer;
 			glMapBuffer_			= glMapBuffer;
 			glUnmapBuffer_			= glUnmapBuffer;
-
-			use_vbo_ = true;
 		}
 		else
 		{
@@ -62,23 +61,19 @@ namespace KlayGE
 				glIsBuffer_				= glIsBufferARB;
 				glMapBuffer_			= glMapBufferARB;
 				glUnmapBuffer_			= glUnmapBufferARB;
-
-				use_vbo_ = true;
+			}
+			else
+			{
+				THR(E_FAIL);
 			}
 		}
 
-		if (use_vbo_)
-		{
-			glGenBuffers_(1, &vb_);
-		}
+		glGenBuffers_(1, &vb_);
 	}
 
 	OGLVertexStream::~OGLVertexStream()
 	{
-		if (use_vbo_)
-		{
-			glDeleteBuffers_(1, &vb_);
-		}
+		glDeleteBuffers_(1, &vb_);
 	}
 
 	void OGLVertexStream::Assign(void const * src, size_t numVertices, size_t stride)
@@ -88,34 +83,9 @@ namespace KlayGE
 
 		numVertices_ = numVertices;
 
-		if (use_vbo_)
-		{
-			glBindBuffer_(GL_ARRAY_BUFFER, vb_);
-			glBufferData_(GL_ARRAY_BUFFER,
-				reinterpret_cast<GLsizeiptr>(size), src, this->IsStatic() ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
-		}
-		else
-		{
-			buffer_.resize(size);
-
-			uint8_t* destPtr(&buffer_[0]);
-			uint8_t const * srcPtr(static_cast<uint8_t const *>(src));
-
-			if (stride != 0)
-			{
-				for (size_t i = 0; i < numVertices; ++ i)
-				{
-					std::copy(srcPtr, srcPtr + vertexSize, destPtr);
-
-					destPtr += vertexSize;
-					srcPtr += vertexSize + stride;
-				}
-			}
-			else
-			{
-				std::copy(srcPtr, srcPtr + size, destPtr);
-			}
-		}
+		glBindBuffer_(GL_ARRAY_BUFFER, vb_);
+		glBufferData_(GL_ARRAY_BUFFER,
+			reinterpret_cast<GLsizeiptr>(size), src, this->IsStatic() ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
 	}
 
 	void OGLVertexStream::CopyToMemory(void* data)
@@ -123,28 +93,18 @@ namespace KlayGE
 		size_t const size(this->SizeOfElement() * this->ElementsPerVertex() * this->NumVertices());
 		uint8_t* destPtr = static_cast<uint8_t*>(data);
 
-		if (use_vbo_)
-		{
-			glBindBuffer_(GL_ARRAY_BUFFER, vb_);
+		glBindBuffer_(GL_ARRAY_BUFFER, vb_);
 
-			uint8_t* srcPtr = static_cast<uint8_t*>(glMapBuffer_(GL_ARRAY_BUFFER,
-				GL_READ_ONLY | (this->IsStatic() ? GL_STATIC_READ : GL_DYNAMIC_READ)));
+		uint8_t* srcPtr = static_cast<uint8_t*>(glMapBuffer_(GL_ARRAY_BUFFER,
+			GL_READ_ONLY | (this->IsStatic() ? GL_STATIC_READ : GL_DYNAMIC_READ)));
 
-			std::copy(srcPtr, srcPtr + size, destPtr);
+		std::copy(srcPtr, srcPtr + size, destPtr);
 
-			glUnmapBuffer(GL_ARRAY_BUFFER);
-		}
-		else
-		{
-			std::copy(buffer_.begin(), buffer_.end(), destPtr);
-		}
+		glUnmapBuffer(GL_ARRAY_BUFFER);
 	}
 
 	void OGLVertexStream::Active()
 	{
-		if (use_vbo_)
-		{
-			glBindBuffer_(GL_ARRAY_BUFFER, vb_);
-		}
+		glBindBuffer_(GL_ARRAY_BUFFER, vb_);
 	}
 }
