@@ -30,13 +30,6 @@ namespace KlayGE
 	class Sampler
 	{
 	public:
-		enum TexFilterType
-		{
-			TFT_Min,
-			TFT_Mag,
-			TFT_Mip,
-		};
-
 		enum TexFilterOp
 		{
 			TFO_None,
@@ -73,12 +66,12 @@ namespace KlayGE
 		// Sets the texture addressing mode for a texture unit.
 		void AddressingMode(TexAddressingType type, TexAddressingMode tam);
 		// Sets the texture filtering type for a texture unit.
-		void Filtering(TexFilterType type, TexFilterOp op);
+		void Filtering(TexFilterOp op);
 		// Sets the maximal anisotropy for the specified texture unit.
 		void Anisotropy(uint32_t maxAnisotropy);
 
 		TexAddressingMode AddressingMode(TexAddressingType type) const;
-		TexFilterOp Filtering(TexFilterType type) const;
+		TexFilterOp Filtering() const;
 		uint32_t Anisotropy() const;
 
 		void MaxMipLevel(uint32_t level);
@@ -94,7 +87,7 @@ namespace KlayGE
 		TexturePtr tex_;
 
 		TexAddressingMode addr_mode_u_, addr_mode_v_, addr_mode_w_;
-		TexFilterOp min_filter_, mag_filter_, mip_filter_;
+		TexFilterOp filter_;
 		uint32_t anisotropy_;
 		uint32_t max_mip_level_;
 		float mip_map_lod_bias_;

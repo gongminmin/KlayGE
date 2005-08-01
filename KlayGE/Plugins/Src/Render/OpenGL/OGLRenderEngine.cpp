@@ -560,89 +560,35 @@ namespace KlayGE
 			glTexParameteri(gl_tex.GLType(), GL_TEXTURE_WRAP_T, OGLMapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_V)));
 			glTexParameteri(gl_tex.GLType(), GL_TEXTURE_WRAP_R, OGLMapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_W)));
 
+			switch (sampler->Filtering())
 			{
-				GLint mode = GL_NEAREST;
-				switch (sampler->Filtering(Sampler::TFT_Mag))
+			case Sampler::TFO_None:
+			case Sampler::TFO_Point:
+				glTexParameteri(gl_tex.GLType(), GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+				glTexParameteri(gl_tex.GLType(), GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+				break;
+
+			case Sampler::TFO_Bilinear:
+				glTexParameteri(gl_tex.GLType(), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexParameteri(gl_tex.GLType(), GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+				break;
+
+			case Sampler::TFO_Trilinear:
+				glTexParameteri(gl_tex.GLType(), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexParameteri(gl_tex.GLType(), GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+				break;
+
+			case Sampler::TFO_Anisotropic:
+				if (caps_.max_texture_anisotropy != 0)
 				{
-				case Sampler::TFO_None:
-				case Sampler::TFO_Point:
-					mode = GL_NEAREST;
-					break;
+					uint32_t anisotropy = std::min(caps_.max_texture_anisotropy, sampler->Anisotropy());
+					glTexParameteri(gl_tex.GLType(), GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy);
+				}	
+				break;
 
-				case Sampler::TFO_Bilinear:
-				case Sampler::TFO_Trilinear:
-				case Sampler::TFO_Anisotropic:
-					mode = GL_LINEAR;
-					break;
-
-				default:
-					BOOST_ASSERT(false);
-					break;
-				}
-
-				glTexParameteri(gl_tex.GLType(), GL_TEXTURE_MAG_FILTER, mode);
-				
-				switch (sampler->Filtering(Sampler::TFT_Min))
-				{
-				case Sampler::TFO_None:
-				case Sampler::TFO_Point:
-					switch (sampler->Filtering(Sampler::TFT_Mip))
-					{
-					case Sampler::TFO_None:
-						// nearest min, no mip
-						mode = GL_NEAREST;
-						break;
-
-					case Sampler::TFO_Point:
-						// nearest min, nearest mip
-						mode = GL_NEAREST_MIPMAP_NEAREST;
-						break;
-
-					case Sampler::TFO_Bilinear:
-					case Sampler::TFO_Trilinear:
-					case Sampler::TFO_Anisotropic:
-						// nearest min, linear mip
-						mode = GL_NEAREST_MIPMAP_LINEAR;
-						break;
-					}
-					break;
-
-				case Sampler::TFO_Bilinear:
-				case Sampler::TFO_Trilinear:
-				case Sampler::TFO_Anisotropic:
-					switch (sampler->Filtering(Sampler::TFT_Mip))
-					{
-					case Sampler::TFO_None:
-						// linear min, no mip
-						mode = GL_LINEAR;
-						break;
-
-					case Sampler::TFO_Point:
-						// linear min, point mip
-						mode = GL_LINEAR_MIPMAP_NEAREST;
-						break;
-
-					case Sampler::TFO_Bilinear:
-					case Sampler::TFO_Trilinear:
-					case Sampler::TFO_Anisotropic:
-						// linear min, linear mip
-						mode = GL_LINEAR_MIPMAP_LINEAR;
-						break;
-					}
-					break;
-
-				default:
-					BOOST_ASSERT(false);
-					break;
-				}
-
-				glTexParameteri(gl_tex.GLType(), GL_TEXTURE_MIN_FILTER, mode);
-			}
-
-			if (caps_.max_texture_anisotropy != 0)
-			{
-				uint32_t anisotropy = std::min(caps_.max_texture_anisotropy, sampler->Anisotropy());
-				glTexParameteri(gl_tex.GLType(), GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy);
+			default:
+				BOOST_ASSERT(false);
+				break;
 			}
 
 			if (glloader_GL_VERSION_1_2() || glloader_GL_SGIS_texture_lod())

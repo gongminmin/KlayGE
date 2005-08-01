@@ -42,8 +42,6 @@ namespace KlayGE
 
 		static D3DSTENCILOP Mapping(RenderEngine::StencilOperation op);
 
-		static uint32_t Mapping(uint32_t tfc, Sampler::TexFilterOp tf);
-
 		static D3DLIGHTTYPE Mapping(Light::LightTypes type);
 
 		static uint32_t Mapping(RenderEngine::CullMode mode);

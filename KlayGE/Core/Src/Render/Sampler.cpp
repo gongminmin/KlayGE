@@ -73,47 +73,16 @@ namespace KlayGE
 	
 	// 设置纹理过滤模式
 	/////////////////////////////////////////////////////////////////////////////////
-	void Sampler::Filtering(TexFilterType type, TexFilterOp op)
+	void Sampler::Filtering(TexFilterOp op)
 	{
-		switch (type)
-		{
-		case TFT_Min:
-			min_filter_ = op;
-			break;
-
-		case TFT_Mag:
-			mag_filter_ = op;
-			break;
-
-		case TFT_Mip:
-			mip_filter_ = op;
-			break;
-
-		default:
-			BOOST_ASSERT(false);
-			break;
-		}
+		filter_ = op;
 	}
 
 	// 获取纹理过滤模式
 	/////////////////////////////////////////////////////////////////////////////////
-	Sampler::TexFilterOp Sampler::Filtering(TexFilterType type) const
+	Sampler::TexFilterOp Sampler::Filtering() const
 	{
-		switch (type)
-		{
-		case TFT_Min:
-			return min_filter_;
-
-		case TFT_Mag:
-			return mag_filter_;
-
-		case TFT_Mip:
-			return mip_filter_;
-
-		default:
-			BOOST_ASSERT(false);
-			return min_filter_;
-		}
+		return filter_;
 	}
 
 	// 设置纹理异性过滤

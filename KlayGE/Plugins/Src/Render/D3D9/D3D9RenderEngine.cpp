@@ -613,12 +613,38 @@ namespace KlayGE
 				}
 
 				// Set filter
-				TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER,
-					D3D9Mapping::Mapping(tfc, sampler->Filtering(Sampler::TFT_Min))));
-				TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER,
-					D3D9Mapping::Mapping(tfc, sampler->Filtering(Sampler::TFT_Mag))));
-				TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER,
-					D3D9Mapping::Mapping(tfc, sampler->Filtering(Sampler::TFT_Mip))));
+				switch (sampler->Filtering())
+				{
+				case Sampler::TFO_None:
+					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_NONE));
+					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_NONE));
+					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_NONE));
+					break;
+
+				case Sampler::TFO_Point:
+					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_POINT));
+					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_POINT));
+					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT));
+					break;
+
+				case Sampler::TFO_Bilinear:
+					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_LINEAR));
+					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR));
+					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT));
+					break;
+
+				case Sampler::TFO_Trilinear:
+					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_LINEAR));
+					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR));
+					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR));
+					break;
+
+				case Sampler::TFO_Anisotropic:
+					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC));
+					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR));
+					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR));
+					break;
+				}
 			}
 
 			// Set anisotropy
