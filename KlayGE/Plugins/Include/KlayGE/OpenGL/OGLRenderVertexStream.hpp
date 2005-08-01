@@ -35,6 +35,33 @@ namespace KlayGE
 
 		bool RequiresTextureFlipping() const
 			{ return false; }
+
+	private:
+		glBindBufferFUNC glBindBuffer_;
+		glBufferDataFUNC glBufferData_;
+
+		glIsRenderbufferEXTFUNC glIsRenderbufferEXT_;
+		glBindRenderbufferEXTFUNC glBindRenderbufferEXT_;
+		glDeleteRenderbuffersEXTFUNC glDeleteRenderbuffersEXT_;
+		glGenRenderbuffersEXTFUNC glGenRenderbuffersEXT_;
+		glRenderbufferStorageEXTFUNC glRenderbufferStorageEXT_;
+		glGetRenderbufferParameterivEXTFUNC glGetRenderbufferParameterivEXT_;
+		glIsFramebufferEXTFUNC glIsFramebufferEXT_;
+		glBindFramebufferEXTFUNC glBindFramebufferEXT_;
+		glDeleteFramebuffersEXTFUNC glDeleteFramebuffersEXT_;
+		glGenFramebuffersEXTFUNC glGenFramebuffersEXT_;
+		glCheckFramebufferStatusEXTFUNC glCheckFramebufferStatusEXT_;
+		glFramebufferTexture1DEXTFUNC glFramebufferTexture1DEXT_;
+		glFramebufferTexture2DEXTFUNC glFramebufferTexture2DEXT_;
+		glFramebufferTexture3DEXTFUNC glFramebufferTexture3DEXT_;
+		glFramebufferRenderbufferEXTFUNC glFramebufferRenderbufferEXT_;
+		glGetFramebufferAttachmentParameterivEXTFUNC glGetFramebufferAttachmentParameterivEXT_;
+		glGenerateMipmapEXTFUNC glGenerateMipmapEXT_;
+
+	private:
+		GLuint texture_;
+		GLuint fbo_;
+		GLuint vbo_;
 	};
 
 	typedef boost::shared_ptr<OGLRenderVertexStream> OGLRenderVertexStreamPtr;
