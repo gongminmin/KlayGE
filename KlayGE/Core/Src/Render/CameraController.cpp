@@ -1,8 +1,11 @@
 // CameraController.cpp
 // KlayGE 摄像机控制器类 实现文件
-// Ver 2.5.0
+// Ver 2.8.0
 // 版权所有(C) 龚敏敏, 2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.8.0
+// 增加了timer (2005.8.2)
 //
 // 2.5.0
 // AttachCamera内增加了Update (2005.3.30)
@@ -18,8 +21,6 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Input.hpp>
 #include <KlayGE/InputFactory.hpp>
-
-#include <ctime>
 
 #pragma warning(disable: 4512)
 
@@ -47,6 +48,7 @@ namespace KlayGE
 
 	void CameraController::AttachCamera(Camera& camera)
 	{
+		timer_.restart();
 		camera_ = &camera;
 		this->Update();
 	}
@@ -89,13 +91,10 @@ namespace KlayGE
 
 		world_ = MathLib::Inverse(camera_->ViewMatrix());
 
-		static clock_t lastTime(std::clock());
-		clock_t curTime(std::clock());
-		if (curTime - lastTime > 10)
+		float const elapsed_time = static_cast<float>(timer_.elapsed());
+		if (elapsed_time > 0.01f)
 		{
-			float const scaler = (curTime - lastTime) / 100.0f;
-
-			lastTime = curTime;
+			float const scaler = elapsed_time * 10;
 
 			InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 			InputActionsType actions(inputEngine.Update(action_map_id_));
@@ -129,6 +128,7 @@ namespace KlayGE
 				}
 			}
 		}
+		timer_.restart();
 	}
 
 	void FirstPersonCameraController::Move(float x, float y, float z)
@@ -144,8 +144,6 @@ namespace KlayGE
 		eyePos = MathLib::TransformCoord(movement, world_);
 
 		camera_->ViewParams(eyePos, eyePos + viewVec, camera_->UpVec());
-
-		this->Update();
 	}
 
 	void FirstPersonCameraController::Rotate(float yaw, float pitch, float roll)
@@ -159,7 +157,5 @@ namespace KlayGE
 		viewVec = MathLib::TransformCoord(viewVec, world_);
 
 		camera_->ViewParams(camera_->EyePos(), viewVec, camera_->UpVec());
-
-		this->Update();
 	}
 }

@@ -171,7 +171,7 @@ namespace KlayGE
 			return GL_MIRRORED_REPEAT;
 
 		case Sampler::TAM_Clamp:
-			return GL_CLAMP;
+			return GL_CLAMP_TO_EDGE;
 
 		default:
 			BOOST_ASSERT(false);

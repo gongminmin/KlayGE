@@ -1,8 +1,11 @@
 // CameraController.hpp
 // KlayGE 摄像机控制器类 头文件
-// Ver 2.4.0
+// Ver 2.8.0
 // 版权所有(C) 龚敏敏, 2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.8.0
+// 增加了timer (2005.8.2)
 //
 // 2.4.0
 // 初次建立 (2005.3.12)
@@ -15,6 +18,7 @@
 
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Camera.hpp>
+#include <boost/timer.hpp>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_Core_d.lib")
@@ -44,6 +48,8 @@ namespace KlayGE
 		float		moveScaler_;		// Scaler for movement
 
 		Camera*		camera_;
+
+		boost::timer timer_;
 	};
 
 	class FirstPersonCameraController : public CameraController

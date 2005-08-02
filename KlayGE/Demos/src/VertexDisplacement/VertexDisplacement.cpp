@@ -169,7 +169,7 @@ void VertexDisplacement::InitObjects()
 	this->Proj(0.1f, 20.0f);
 
 	fpcController_.AttachCamera(this->ActiveCamera());
-	fpcController_.Scalers(0.005f, 0.1f);
+	fpcController_.Scalers(0.05f, 0.2f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	KlayGE::InputActionMap actionMap;
