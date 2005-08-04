@@ -23,7 +23,9 @@
 #include <list>
 #include <map>
 
-#include <KlayGE/Font.hpp>
+#define NOMINMAX
+#pragma warning(disable: 4127 4800)
+#include <boost/pool/pool_alloc.hpp>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -77,8 +79,8 @@ namespace KlayGE
 			uint32_t		width;
 		};
 
-		typedef std::map<wchar_t, CharInfo> CharInfoMapType;
-		typedef std::list<wchar_t> CharLRUType;
+		typedef std::map<wchar_t, CharInfo, std::less<wchar_t>, boost::fast_pool_allocator<std::pair<wchar_t, CharInfo> > > CharInfoMapType;
+		typedef std::list<wchar_t, boost::fast_pool_allocator<wchar_t> > CharLRUType;
 
 	private:
 		void UpdateTexture(std::wstring const & text);

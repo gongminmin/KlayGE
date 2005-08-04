@@ -14,6 +14,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/ResLoader.hpp>
+#include <KlayGE/Font.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 

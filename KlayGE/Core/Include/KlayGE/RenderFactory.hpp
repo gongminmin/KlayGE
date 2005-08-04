@@ -19,7 +19,6 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/VertexBuffer.hpp>
-#include <KlayGE/Font.hpp>
 
 #include <string>
 #include <map>
