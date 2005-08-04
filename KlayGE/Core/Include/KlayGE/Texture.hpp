@@ -299,10 +299,6 @@ namespace KlayGE
 		virtual void BuildMipSubLevels() = 0;
 
 	protected:
-		uint32_t		height_;
-		uint32_t		width_;
-		uint32_t		depth_;
-
 		uint32_t		bpp_;
 
 		uint16_t		numMipMaps_;

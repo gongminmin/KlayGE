@@ -77,12 +77,12 @@ namespace KlayGE
 			return RenderEffectParameterPtr(new OGLRenderEffectParameterFloat(*this, name, param));
 		}
 
-		if ((CG_PARAMETERCLASS_VECTOR == param_class) && (CG_FLOAT == param_type))
+		if ((CG_PARAMETERCLASS_VECTOR == param_class) && (CG_FLOAT4 == param_type))
 		{
 			return RenderEffectParameterPtr(new OGLRenderEffectParameterVector4(*this, name, param));
 		}
 
-		if ((CG_PARAMETERCLASS_MATRIX == param_class) && (CG_FLOAT == param_type))
+		if ((CG_PARAMETERCLASS_MATRIX == param_class) && (CG_FLOAT4x4 == param_type))
 		{
 			return RenderEffectParameterPtr(new OGLRenderEffectParameterMatrix4(*this, name, param));
 		}
@@ -99,29 +99,26 @@ namespace KlayGE
 
 		if ((CG_PARAMETERCLASS_ARRAY == param_class) && (CG_ARRAY == param_type) && (CG_FLOAT == param_base_type))
 		{
-			int rows = cgGetParameterRows(param);
-			if (0 == rows)
-			{
-				return RenderEffectParameterPtr(new OGLRenderEffectParameterFloatArray(*this, name, param));
-			}
-			else
-			{
-				int cols = cgGetParameterColumns(param);
-				if (0 == cols)
-				{
-					return RenderEffectParameterPtr(new OGLRenderEffectParameterVector4Array(*this, name, param));
-				}
-				else
-				{
-					return RenderEffectParameterPtr(new OGLRenderEffectParameterMatrix4Array(*this, name, param));
-				}
-			}
+			return RenderEffectParameterPtr(new OGLRenderEffectParameterFloatArray(*this, name, param));
+		}
+
+		if ((CG_PARAMETERCLASS_ARRAY == param_class) && (CG_ARRAY == param_type) && (CG_FLOAT4 == param_base_type))
+		{
+			return RenderEffectParameterPtr(new OGLRenderEffectParameterVector4Array(*this, name, param));
+		}
+
+		if ((CG_PARAMETERCLASS_ARRAY == param_class) && (CG_ARRAY == param_type) && (CG_FLOAT4x4 == param_base_type))
+		{
+			return RenderEffectParameterPtr(new OGLRenderEffectParameterMatrix4Array(*this, name, param));
 		}
 
 		if ((CG_PARAMETERCLASS_ARRAY == param_class) && (CG_ARRAY == param_type) && (CG_INT == param_base_type))
 		{
 			return RenderEffectParameterPtr(new OGLRenderEffectParameterIntArray(*this, name, param));
 		}
+
+		BOOST_ASSERT(false);
+		return RenderEffectParameterPtr();
 	}
 
 	uint32_t OGLRenderEffect::DoBegin(uint32_t flags)

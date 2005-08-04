@@ -220,9 +220,9 @@ namespace KlayGE
 
 		numMipMaps_ = numMipMaps;
 		format_		= format;
-		width_		= width;
-		height_		= 1;
-		depth_		= 1;
+		widths_[0]	= width;
+		heights_[0]	= 1;
+		depths_[0]	= 1;
 
 		bpp_ = PixelFormatBits(format);
 
@@ -243,9 +243,9 @@ namespace KlayGE
 
 		numMipMaps_ = numMipMaps;
 		format_		= format;
-		width_		= width;
-		height_		= height;
-		depth_		= 1;
+		widths_[0]	= width;
+		heights_[0]	= height;
+		depths_[0]	= 1;
 
 		bpp_ = PixelFormatBits(format);
 
@@ -279,9 +279,9 @@ namespace KlayGE
 
 		numMipMaps_ = numMipMaps;
 		format_		= format;
-		width_		= width;
-		height_		= height;
-		depth_		= depth;
+		widths_[0]	= width;
+		heights_[0]	= height;
+		depths_[0]	= depth;
 
 		bpp_ = PixelFormatBits(format);
 
@@ -301,9 +301,9 @@ namespace KlayGE
 
 		numMipMaps_ = numMipMaps;
 		format_		= format;
-		width_		= size;
-		height_		= size;
-		depth_		= 1;
+		widths_[0]	= size;
+		heights_[0]	= size;
+		depths_[0]	= 1;
 
 		bpp_ = PixelFormatBits(format);
 
@@ -360,7 +360,7 @@ namespace KlayGE
 	{
 		D3D9Texture& other(static_cast<D3D9Texture&>(target));
 
-		BOOST_ASSERT(target.Depth(0) == depth_);
+		BOOST_ASSERT(target.Depth(0) == depths_[0]);
 		BOOST_ASSERT(target.Type() == type_);
 
 		uint32_t maxLevel = 1;
@@ -869,7 +869,7 @@ namespace KlayGE
 	{
 		IDirect3DTexture9* d3dTexture2D;
 		// Use D3DX to help us create the texture, this way it can adjust any relevant sizes
-		TIF(D3DXCreateTexture(d3dDevice_.get(), width_, height_,
+		TIF(D3DXCreateTexture(d3dDevice_.get(), widths_[0], heights_[0],
 			numMipMaps_, usage, ConvertFormat(format_),
 			pool, &d3dTexture2D));
 		return MakeCOMPtr(d3dTexture2D);
@@ -878,7 +878,7 @@ namespace KlayGE
 	D3D9Texture::IDirect3DVolumeTexture9Ptr D3D9Texture::CreateTexture3D(uint32_t usage, D3DPOOL pool)
 	{
 		IDirect3DVolumeTexture9* d3dTexture3D;
-		TIF(D3DXCreateVolumeTexture(d3dDevice_.get(), width_, height_, depth_,
+		TIF(D3DXCreateVolumeTexture(d3dDevice_.get(), widths_[0], heights_[0], depths_[0],
 			numMipMaps_, usage, ConvertFormat(format_),
 			pool, &d3dTexture3D));
 		return MakeCOMPtr(d3dTexture3D);
@@ -887,9 +887,8 @@ namespace KlayGE
 	D3D9Texture::IDirect3DCubeTexture9Ptr D3D9Texture::CreateTextureCube(uint32_t usage, D3DPOOL pool)
 	{
 		IDirect3DCubeTexture9* d3dTextureCube;
-		TIF(D3DXCreateCubeTexture(d3dDevice_.get(), width_, 
-			numMipMaps_, usage, ConvertFormat(format_),
-			pool, &d3dTextureCube));
+		TIF(D3DXCreateCubeTexture(d3dDevice_.get(), widths_[0],  numMipMaps_, usage,
+			ConvertFormat(format_), pool, &d3dTextureCube));
 		return MakeCOMPtr(d3dTextureCube);
 	}
 
@@ -903,8 +902,8 @@ namespace KlayGE
 		tempSurf->GetDesc(&tempDesc);
 		tempSurf->Release();
 
-		TIF(d3dDevice_->CreateDepthStencilSurface(width_, height_, tempDesc.Format, tempDesc.MultiSampleType, 0, 
-			FALSE, &tempSurf, NULL));
+		TIF(d3dDevice_->CreateDepthStencilSurface(widths_[0], heights_[0], tempDesc.Format,
+			tempDesc.MultiSampleType, 0, FALSE, &tempSurf, NULL));
 		renderZBuffer_ = MakeCOMPtr(tempSurf);
 	}
 
@@ -1016,9 +1015,5 @@ namespace KlayGE
 			BOOST_ASSERT(false);
 			break;
 		}
-
-		width_	= widths_[0];
-		height_	= heights_[0];
-		depth_ = depths_[0];
 	}
 }

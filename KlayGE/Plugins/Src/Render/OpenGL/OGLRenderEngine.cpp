@@ -391,13 +391,6 @@ namespace KlayGE
 			iter != vb.VertexStreamEnd(); ++ iter)
 		{
 			OGLVertexStream& stream(static_cast<OGLVertexStream&>(*(*iter)));
-			break;
-		}
-
-		for (VertexBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
-			iter != vb.VertexStreamEnd(); ++ iter)
-		{
-			OGLVertexStream& stream(static_cast<OGLVertexStream&>(*(*iter)));
 			VertexStreamType type(stream.Type());
 
 			switch (type)
@@ -452,14 +445,28 @@ namespace KlayGE
 		if (vb.UseIndices())
 		{
 			OGLIndexStream& stream(static_cast<OGLIndexStream&>(*vb.GetIndexStream()));
-
 			stream.Active();
-			glDrawElements(mode, static_cast<GLsizei>(vb.NumIndices()),
+
+			for (uint32_t i = 0; i < renderPasses_; ++ i)
+			{
+				renderEffect_->BeginPass(i);
+
+				glDrawElements(mode, static_cast<GLsizei>(vb.NumIndices()),
 					GL_UNSIGNED_SHORT, 0);
+
+				renderEffect_->EndPass();
+			}
 		}
 		else
 		{
-			glDrawArrays(mode, 0, static_cast<GLsizei>(vb.NumVertices()));
+			for (uint32_t i = 0; i < renderPasses_; ++ i)
+			{
+				renderEffect_->BeginPass(i);
+			
+				glDrawArrays(mode, 0, static_cast<GLsizei>(vb.NumVertices()));
+
+				renderEffect_->EndPass();
+			}
 		}
 	}
 

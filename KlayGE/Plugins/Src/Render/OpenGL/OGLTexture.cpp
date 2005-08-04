@@ -110,9 +110,6 @@ namespace KlayGE
 					: Texture(usage, TT_1D)
 	{
 		format_		= format;
-		width_		= width;
-		height_		= 1;
-		depth_		= 1;
 
 		if (0 == numMipMaps)
 		{
@@ -137,27 +134,12 @@ namespace KlayGE
 		glGenTextures(1, &texture_[0]);
 		glBindTexture(GL_TEXTURE_1D, texture_[0]);
 
-		if (IsCompressedFormat(format_))
+		for (uint16_t level = 0; level < numMipMaps_; ++ level)
 		{
-			int block_size;
-			if (PF_DXT1 == format_)
-			{
-				block_size = 8;
-			}
-			else
-			{
-				block_size = 16;
-			}
+			glTexImage1D(GL_TEXTURE_1D, level, glinternalFormat,
+				width, 0, glformat, GL_UNSIGNED_BYTE, NULL);
 
-			GLsizei const image_size = ((width_ + 3) / 4) * ((height_ + 3) / 4) * block_size;
-
-			glCompressedTexImage1D(GL_TEXTURE_1D, numMipMaps_, glinternalFormat,
-				width_, 0, image_size, NULL);
-		}
-		else
-		{
-			glTexImage1D(GL_TEXTURE_1D, numMipMaps_, glinternalFormat,
-				width_, 0, glformat, GL_UNSIGNED_BYTE, NULL);
+			width /= 2;
 		}
 
 		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -171,9 +153,6 @@ namespace KlayGE
 					: Texture(usage, TT_2D)
 	{
 		format_		= format;
-		width_		= width;
-		height_		= height;
-		depth_		= 1;
 
 		if (0 == numMipMaps)
 		{
@@ -199,27 +178,13 @@ namespace KlayGE
 		glGenTextures(1, &texture_[0]);
 		glBindTexture(GL_TEXTURE_2D, texture_[0]);
 
-		if (IsCompressedFormat(format_))
+		for (uint16_t level = 0; level < numMipMaps_; ++ level)
 		{
-			int block_size;
-			if (PF_DXT1 == format_)
-			{
-				block_size = 8;
-			}
-			else
-			{
-				block_size = 16;
-			}
+			glTexImage2D(GL_TEXTURE_2D, level, glinternalFormat,
+				width, height, 0, glformat, GL_UNSIGNED_BYTE, NULL);
 
-			GLsizei const image_size = ((width_ + 3) / 4) * ((height_ + 3) / 4) * block_size;
-
-			glCompressedTexImage2D(GL_TEXTURE_2D, numMipMaps_, glinternalFormat,
-				width_, height_, 0, image_size, NULL);
-		}
-		else
-		{
-			glTexImage2D(GL_TEXTURE_2D, numMipMaps_, glinternalFormat,
-				width_, height_, 0, glformat, GL_UNSIGNED_BYTE, NULL);
+			width /= 2;
+			height /= 2;
 		}
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -233,9 +198,6 @@ namespace KlayGE
 					: Texture(usage, TT_3D)
 	{
 		format_		= format;
-		width_		= width;
-		height_		= height;
-		depth_		= depth;
 
 		if (0 == numMipMaps)
 		{
@@ -262,27 +224,14 @@ namespace KlayGE
 		glGenTextures(1, &texture_[0]);
 		glBindTexture(GL_TEXTURE_3D, texture_[0]);
 
-		if (IsCompressedFormat(format_))
+		for (uint16_t level = 0; level < numMipMaps_; ++ level)
 		{
-			int block_size;
-			if (PF_DXT1 == format_)
-			{
-				block_size = 8;
-			}
-			else
-			{
-				block_size = 16;
-			}
+			glTexImage3D(GL_TEXTURE_3D, level, glinternalFormat,
+				width, height, depth, 0, glformat, GL_UNSIGNED_BYTE, NULL);
 
-			GLsizei const image_size = ((width_ + 3) / 4) * ((height_ + 3) / 4) * block_size;
-
-			glCompressedTexImage3D(GL_TEXTURE_3D, numMipMaps_, glinternalFormat,
-				width_, height_, depth_, 0, image_size, NULL);
-		}
-		else
-		{
-			glTexImage3D(GL_TEXTURE_3D, numMipMaps_, glinternalFormat,
-				width_, height_, depth_, 0, glformat, GL_UNSIGNED_BYTE, NULL);
+			width /= 2;
+			height /= 2;
+			depth /= 2;
 		}
 
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -296,9 +245,6 @@ namespace KlayGE
 					: Texture(usage, TT_Cube)
 	{
 		format_		= format;
-		width_		= size;
-		height_		= size;
-		depth_		= 1;
 
 		if (0 == numMipMaps)
 		{
@@ -326,29 +272,12 @@ namespace KlayGE
 
 		for (int face = 0; face < 6; ++ face)
 		{
-			glBindTexture(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, texture_[face]);
-
-			if (IsCompressedFormat(format_))
+			for (uint16_t level = 0; level < numMipMaps_; ++ level)
 			{
-				int block_size;
-				if (PF_DXT1 == format_)
-				{
-					block_size = 8;
-				}
-				else
-				{
-					block_size = 16;
-				}
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glinternalFormat,
+					size, size, 0, glformat, GL_UNSIGNED_BYTE, NULL);
 
-				GLsizei const image_size = ((width_ + 3) / 4) * ((height_ + 3) / 4) * block_size;
-
-				glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, numMipMaps_, glinternalFormat,
-					width_, height_, 0, image_size, NULL);
-			}
-			else
-			{
-				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, numMipMaps_, glinternalFormat,
-					width_, height_, 0, glformat, GL_UNSIGNED_BYTE, NULL);
+				size /= 2;
 			}
 		}
 
@@ -407,10 +336,13 @@ namespace KlayGE
 		{
 		case TT_2D:
 			{
-				std::vector<uint8_t> data_in(width_ * height_ * bpp_ / 8);
-				std::vector<uint8_t> data_out(target.Width(0) * target.Height(0) * target.Bpp() / 8);
+				std::vector<uint8_t> data_in;
+				std::vector<uint8_t> data_out;
 				for (int level = 0; level < numMipMaps_; ++ level)
 				{
+					data_in.resize(this->Width(level) * this->Height(level) * bpp_ / 8);
+					data_out.resize(target.Width(level) * target.Height(level) * target.Bpp() / 8);
+
 					this->CopyToMemory2D(level, &data_in[0]);
 
 					gluScaleImage(gl_format, this->Width(level), this->Height(level), GL_UNSIGNED_BYTE, &data_in[0],
@@ -722,10 +654,6 @@ namespace KlayGE
 			BOOST_ASSERT(false);
 			break;
 		}
-
-		width_ = widths_[0];
-		height_ = heights_[0];
-		depth_ = depths_[0];
 	}
 
 	void OGLTexture::GLBindTexture()
