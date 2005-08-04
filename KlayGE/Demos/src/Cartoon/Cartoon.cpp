@@ -129,16 +129,8 @@ void Cartoon::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
-	uint8_t toonData[16] = { 120, 120, 120, 120, 120, 160, 160, 160, 160, 160, 160, 255, 255, 255, 255, 255 };
-	TexturePtr toonTex = Context::Instance().RenderFactoryInstance().MakeTexture1D(sizeof(toonData) / sizeof(toonData[0]), 0, PF_L8);
-	toonTex->CopyMemoryToTexture1D(0, toonData, PF_L8, 16, 0);
-
-	uint8_t edgeData[4] = { 0, 255, 255, 255 };
-	TexturePtr edgeTex = Context::Instance().RenderFactoryInstance().MakeTexture1D(sizeof(edgeData) / sizeof(edgeData[0]), 0, PF_L8);
-	edgeTex->CopyMemoryToTexture1D(0, edgeData, PF_L8, 4, 0);
-
-	//TexturePtr toonTex = LoadTexture("Toon.dds");
-	//TexturePtr edgeTex = LoadTexture("Edge.dds");
+	TexturePtr toonTex = LoadTexture("Toon.dds");
+	TexturePtr edgeTex = LoadTexture("Edge.dds");
 
 	renderTorus_.reset(new RenderTorus(toonTex, edgeTex));
 	renderTorus_->AddToSceneManager();
