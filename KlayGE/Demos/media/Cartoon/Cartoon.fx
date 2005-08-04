@@ -33,26 +33,8 @@ VS_OUTPUT ToonVS(VS_INPUT input)
 	return output;
 }
 
-texture1D toon;
-texture1D edge;
-
-sampler1D toonMapSampler = sampler_state
-{
-	Texture = <toon>;
-	MinFilter = Point;
-	MagFilter = Point;
-	MipFilter = Point;
-	AddressU  = Clamp;
-};
-
-sampler1D edgeMapSampler = sampler_state
-{
-	Texture = <edge>;
-	MinFilter = Point;
-	MagFilter = Point;
-	MipFilter = Point;
-	AddressU  = Clamp;
-};
+sampler1D toonMapSampler;
+sampler1D edgeMapSampler;
 
 float4 ToonPS(float2 toonTex	: TEXCOORD0,
 				float2 edgeTex	: TEXCOORD1,

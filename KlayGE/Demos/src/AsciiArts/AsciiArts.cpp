@@ -15,6 +15,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/KMesh.hpp>
 #include <KlayGE/RenderSettings.hpp>
+#include <KlayGE/Sampler.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
@@ -50,6 +51,7 @@ namespace
 	{
 	public:
 		RenderQuad(int width, int height)
+			: scene_sampler_(new Sampler), lums_sampler_(new Sampler)
 		{
 			std::vector<Vector3> pos;
 			for (int y = 0; y < height + 1; ++ y)
@@ -99,12 +101,21 @@ namespace
 			vb_->GetIndexStream()->Assign(&index[0], index.size());
 
 			box_ = MathLib::ComputeBoundingBox<float>(pos.begin(), pos.end());
+
+			scene_sampler_->Filtering(Sampler::TFO_Point);
+			scene_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
+			scene_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
+			*(effect_->ParameterByName("scene_sampler")) = scene_sampler_;
+			lums_sampler_->Filtering(Sampler::TFO_Bilinear);
+			lums_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
+			lums_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
+			*(effect_->ParameterByName("lums_sampler")) = lums_sampler_;
 		}
 
 		void SetTexture(TexturePtr const & scene_tex, TexturePtr const & lums_tex)
 		{
-			*(effect_->ParameterByName("scene_tex")) = scene_tex;
-			*(effect_->ParameterByName("lums_tex")) = lums_tex;
+			scene_sampler_->SetTexture(scene_tex);
+			lums_sampler_->SetTexture(lums_tex);
 		}
 
 		void OnRenderBegin()
@@ -121,6 +132,10 @@ namespace
 			static std::wstring name(L"Quad");
 			return name;
 		}
+
+	private:
+		SamplerPtr scene_sampler_;
+		SamplerPtr lums_sampler_;
 	};
 
 	std::vector<ascii_tile_type> LoadFromTexture(std::string const & tex_name)

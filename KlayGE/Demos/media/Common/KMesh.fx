@@ -29,17 +29,7 @@ VS_OUT MeshVS(VS_IN input)
 	return output;
 }
 
-texture tex;
-
-sampler2D texSampler = sampler_state
-{
-	Texture = <tex>;
-	MinFilter = Linear;
-	MagFilter = Linear;
-	MipFilter = Linear;
-	AddressU  = Wrap;
-	AddressV  = Wrap;
-};
+sampler2D texSampler;
 
 float4 MeshPS(float4 clr : COLOR0, float2 uv : TEXCOORD0,
 				uniform sampler2D texSampler) : COLOR

@@ -13,6 +13,7 @@
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/KMesh.hpp>
+#include <KlayGE/Sampler.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
@@ -36,15 +37,22 @@ namespace
 	{
 	public:
 		Refractor(std::wstring const & /*name*/, TexturePtr tex)
-			: KMesh(L"Refractor", tex)
+			: KMesh(L"Refractor", tex),
+				cubemap_sampler_(new Sampler)
 		{
 			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("Refract.fx");
 			effect_->SetTechnique("Refract");
+
+			cubemap_sampler_->Filtering(Sampler::TFO_Bilinear);
+			cubemap_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
+			cubemap_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
+			cubemap_sampler_->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
+			*(effect_->ParameterByName("cubeMapSampler")) = cubemap_sampler_;
 		}
 
 		void CubeMap(TexturePtr const & texture)
 		{
-			*(effect_->ParameterByName("cubemap")) = texture;	
+			cubemap_sampler_->SetTexture(texture);
 		}
 
 		void OnRenderBegin()
@@ -59,6 +67,9 @@ namespace
 			*(effect_->ParameterByName("modelit")) = MathLib::Transpose(MathLib::Inverse(model));
 			*(effect_->ParameterByName("mvp")) = model * view * proj;
 		}
+
+	private:
+		SamplerPtr cubemap_sampler_;
 	};
 
 

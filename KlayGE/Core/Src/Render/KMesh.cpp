@@ -22,6 +22,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/ResLoader.hpp>
+#include <KlayGE/Sampler.hpp>
 
 #include <boost/assert.hpp>
 
@@ -31,13 +32,19 @@ namespace KlayGE
 {
 	KMesh::KMesh(std::wstring const & name, TexturePtr tex)
 						: StaticMesh(name),
-							tex_(tex)
+							sampler_(new Sampler)
 	{
 		// ÔØÈëfx
 		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("KMesh.fx");
 
-		if (tex_)
+		if (tex)
 		{
+			sampler_->SetTexture(tex);
+			sampler_->Filtering(Sampler::TFO_Bilinear);
+			sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
+			sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
+			*(effect_->ParameterByName("texSampler")) = sampler_;
+
 			effect_->SetTechnique("KMeshTec");
 		}
 		else
@@ -57,8 +64,6 @@ namespace KlayGE
 		Matrix4 model = model_ * renderEngine.WorldMatrix();
 		*(effect_->ParameterByName("modelviewproj")) = model * renderEngine.ViewMatrix() * renderEngine.ProjectionMatrix();
 		*(effect_->ParameterByName("modelIT")) = MathLib::Transpose(MathLib::Inverse(model));
-
-		*(effect_->ParameterByName("tex")) = tex_;
 	}
 
 	StaticMeshPtr LoadKMesh(const std::string& kmeshName,

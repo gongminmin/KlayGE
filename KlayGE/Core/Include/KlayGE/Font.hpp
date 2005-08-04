@@ -54,7 +54,8 @@ namespace KlayGE
 		enum FontAttrib
 		{
 			FA_TwoSided		= 1UL << 1,
-			FA_CanBeCulled	= 1UL << 2,
+			FA_Filtered		= 1UL << 2,
+			FA_CanBeCulled	= 1UL << 3,
 		};
 
 	public:
@@ -85,6 +86,7 @@ namespace KlayGE
 		VertexBufferPtr		vb_;
 		RenderEffectPtr		effect_;
 		TexturePtr			theTexture_;
+		SamplerPtr			theSampler_;
 
 		CharInfoMapType		charInfoMap_;
 		CharLRUType			charLRU_;

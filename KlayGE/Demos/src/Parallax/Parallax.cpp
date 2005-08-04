@@ -11,6 +11,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
+#include <KlayGE/Sampler.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
@@ -36,11 +37,37 @@ namespace
 		RenderPolygon()
 		{
 			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("parallax.fx");
-			*(effect_->ParameterByName("diffusemap")) = LoadTexture("diffuse.dds");
-			*(effect_->ParameterByName("normalmap")) = LoadTexture("normal.dds");
-			*(effect_->ParameterByName("heightmap")) = LoadTexture("height.dds");
-			*(effect_->ParameterByName("normalizermap")) = LoadTexture("normalizer.dds");
 			effect_->SetTechnique("Parallax");
+
+			SamplerPtr diffuse_sampler(new Sampler);
+			diffuse_sampler->SetTexture(LoadTexture("diffuse.dds"));
+			diffuse_sampler->Filtering(Sampler::TFO_Bilinear);
+			diffuse_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
+			diffuse_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
+			*(effect_->ParameterByName("diffuseMapSampler")) = diffuse_sampler;
+
+			SamplerPtr normal_sampler(new Sampler);
+			normal_sampler->SetTexture(LoadTexture("normal.dds"));
+			normal_sampler->Filtering(Sampler::TFO_Bilinear);
+			normal_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
+			normal_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
+			*(effect_->ParameterByName("normalMapSampler")) = normal_sampler;
+
+			SamplerPtr height_sampler(new Sampler);
+			height_sampler->SetTexture(LoadTexture("height.dds"));
+			height_sampler->Filtering(Sampler::TFO_Bilinear);
+			height_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
+			height_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
+			*(effect_->ParameterByName("heightMapSampler")) = height_sampler;
+
+			SamplerPtr normalizer_sampler(new Sampler);
+			normalizer_sampler->SetTexture(LoadTexture("normalizer.dds"));
+			normalizer_sampler->Filtering(Sampler::TFO_Point);
+			normalizer_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
+			normalizer_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
+			normalizer_sampler->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
+			*(effect_->ParameterByName("normalizerMapSampler")) = normalizer_sampler;
+
 
 			Vector3 xyzs[] =
 			{

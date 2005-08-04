@@ -105,6 +105,9 @@ namespace KlayGE
 		bool CanBeCulled() const;
 
 		std::wstring const & Name() const;
+
+	private:
+		SamplerPtr cube_sampler_;
 	};
 }
 

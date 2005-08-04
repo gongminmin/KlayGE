@@ -2,24 +2,8 @@ float4x4 matMVP : WorldViewProjection;
 
 float exposureLevel;
 
-texture tFull;
-texture tBlur;
-
-sampler FullSampler = sampler_state
-{
-	Texture = <tFull>;
-	MinFilter = Linear;
-	MagFilter = Linear;
-	MipFilter = Linear;
-};
-
-sampler BlurSampler = sampler_state
-{
-	Texture = <tBlur>;
-	MinFilter = Linear;
-	MagFilter = Linear;
-	MipFilter = Linear;
-};
+sampler2D FullSampler;
+sampler2D BlurSampler;
 
 struct VS_OUT
 {
@@ -40,7 +24,9 @@ VS_OUT ToneMappingVS(float4 inPos: POSITION, float2 inTex: TEXCOORD0)
 	return OUT;
 }
 
-float4 ToneMappingPS(float2 inTex: TEXCOORD0) : COLOR0
+float4 ToneMappingPS(float2 inTex: TEXCOORD0,
+			uniform sampler2D FullSampler,
+			uniform sampler2D BlurSampler) : COLOR0
 {
 	float4 original = tex2D(FullSampler, inTex);
 	float4 blur		= tex2D(BlurSampler, inTex);
@@ -61,6 +47,6 @@ technique Technique0
 	pass Pass0
 	{
 		VertexShader = compile vs_2_0 ToneMappingVS();
-		PixelShader  = compile ps_2_0 ToneMappingPS();
+		PixelShader  = compile ps_2_0 ToneMappingPS(FullSampler, BlurSampler);
 	}
 }

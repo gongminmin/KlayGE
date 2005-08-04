@@ -40,6 +40,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Box.hpp>
 #include <KlayGE/ResLoader.hpp>
+#include <KlayGE/Sampler.hpp>
 
 #include <algorithm>
 #include <vector>
@@ -210,15 +211,17 @@ namespace KlayGE
 	Font::Font(std::string const & fontName, uint32_t height, uint32_t /*flags*/)
 				: curX_(0), curY_(0),
 					fontHeight_(height),
-					vb_(new VertexBuffer(VertexBuffer::BT_TriangleList))
+					vb_(new VertexBuffer(VertexBuffer::BT_TriangleList)),
+					theSampler_(new Sampler)
 	{
 		RenderEngine const & renderEngine = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		RenderDeviceCaps const & caps = renderEngine.DeviceCaps();
 		theTexture_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(caps.max_texture_width,
 			caps.max_texture_height, 1, TEX_FORMAT);
+		theSampler_->SetTexture(theTexture_);
 
 		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("Font.fx");
-		*(effect_->ParameterByName("texFont")) = theTexture_;
+		*(effect_->ParameterByName("texFontSampler")) = theSampler_;
 		effect_->SetTechnique("fontTec");
 
 		vb_->AddVertexStream(VST_Positions, sizeof(float), 3);
@@ -368,6 +371,16 @@ namespace KlayGE
 	{
 		if (!text.empty())
 		{
+			// ÉèÖÃ¹ýÂËÊôÐÔ
+			if (flags & Font::FA_Filtered)
+			{
+				theSampler_->Filtering(Sampler::TFO_Bilinear);
+			}
+			else
+			{
+				theSampler_->Filtering(Sampler::TFO_Point);
+			}
+
 			this->UpdateTexture(text);
 
 			RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());

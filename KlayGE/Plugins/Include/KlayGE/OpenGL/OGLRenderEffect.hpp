@@ -141,20 +141,20 @@ namespace KlayGE
 		OGLRenderEffectParameterInt& operator=(OGLRenderEffectParameterInt const & rhs);
 	};
 
-	class OGLRenderEffectParameterTexture : public OGLRenderEffectParameter<TexturePtr>
+	class OGLRenderEffectParameterSampler : public OGLRenderEffectParameter<SamplerPtr>
 	{
 	public:
-		OGLRenderEffectParameterTexture(RenderEffect& effect, std::string const & name, CGparameter param)
-				: OGLRenderEffectParameter<TexturePtr>(effect, name, param)
+		OGLRenderEffectParameterSampler(RenderEffect& effect, std::string const & name, CGparameter param)
+				: OGLRenderEffectParameter<SamplerPtr>(effect, name, param)
 		{
 		}
 
 	private:
-		void DoFlush(TexturePtr const & value);
+		void DoFlush(SamplerPtr const & value);
 
 	private:
-		OGLRenderEffectParameterTexture(OGLRenderEffectParameterTexture const & rhs);
-		OGLRenderEffectParameterTexture& operator=(OGLRenderEffectParameterTexture const & rhs);
+		OGLRenderEffectParameterSampler(OGLRenderEffectParameterSampler const & rhs);
+		OGLRenderEffectParameterSampler& operator=(OGLRenderEffectParameterSampler const & rhs);
 	};
 
 	class OGLRenderEffectParameterFloatArray : public OGLRenderEffectParameter<std::vector<float> >

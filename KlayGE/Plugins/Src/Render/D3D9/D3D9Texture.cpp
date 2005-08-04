@@ -220,9 +220,9 @@ namespace KlayGE
 
 		numMipMaps_ = numMipMaps;
 		format_		= format;
-		widths_[0]	= width;
-		heights_[0]	= 1;
-		depths_[0]	= 1;
+		widths_.assign(1, width);
+		heights_.assign(1, 1);
+		depths_.assign(1, 1);
 
 		bpp_ = PixelFormatBits(format);
 
@@ -243,9 +243,9 @@ namespace KlayGE
 
 		numMipMaps_ = numMipMaps;
 		format_		= format;
-		widths_[0]	= width;
-		heights_[0]	= height;
-		depths_[0]	= 1;
+		widths_.assign(1, width);
+		heights_.assign(1, height);
+		depths_.assign(1, 1);
 
 		bpp_ = PixelFormatBits(format);
 
@@ -279,9 +279,9 @@ namespace KlayGE
 
 		numMipMaps_ = numMipMaps;
 		format_		= format;
-		widths_[0]	= width;
-		heights_[0]	= height;
-		depths_[0]	= depth;
+		widths_.assign(1, width);
+		heights_.assign(1, height);
+		depths_.assign(1, depth);
 
 		bpp_ = PixelFormatBits(format);
 
@@ -301,9 +301,9 @@ namespace KlayGE
 
 		numMipMaps_ = numMipMaps;
 		format_		= format;
-		widths_[0]	= size;
-		heights_[0]	= size;
-		depths_[0]	= 1;
+		widths_.assign(1, size);
+		heights_.assign(1, size);
+		depths_.assign(1, 1);
 
 		bpp_ = PixelFormatBits(format);
 

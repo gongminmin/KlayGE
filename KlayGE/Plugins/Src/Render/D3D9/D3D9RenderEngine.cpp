@@ -48,6 +48,7 @@
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 #include <KlayGE/D3D9/D3D9VertexStream.hpp>
 #include <KlayGE/D3D9/D3D9IndexStream.hpp>
+#include <KlayGE/D3D9/D3D9RenderEffect.hpp>
 #include <KlayGE/D3D9/D3D9Mapping.hpp>
 
 #include <algorithm>
@@ -394,6 +395,49 @@ namespace KlayGE
 		TIF(d3dDevice_->BeginScene());
 	}
 
+	void D3D9RenderEngine::FlushSamplers(uint32_t pass)
+	{
+		boost::shared_ptr<ID3DXEffect> d3dx_effect = static_cast<D3D9RenderEffect&>(*renderEffect_).D3DXEffect();
+		D3DXPASS_DESC pass_desc;
+		D3DXHANDLE pass_handle = d3dx_effect->GetPass(d3dx_effect->GetCurrentTechnique(), pass);
+		d3dx_effect->GetPassDesc(pass_handle, &pass_desc);
+		if (pass_desc.pPixelShaderFunction != NULL)
+		{
+			ID3DXConstantTable* pConstantTable;
+			D3DXGetShaderConstantTable(pass_desc.pPixelShaderFunction, &pConstantTable);
+			boost::shared_ptr<ID3DXConstantTable> constant_table = MakeCOMPtr(pConstantTable);
+
+			D3DXCONSTANTTABLE_DESC ct_dest;
+			constant_table->GetDesc(&ct_dest);
+			for (UINT c = 0; c < ct_dest.Constants; ++ c)
+			{
+				D3DXHANDLE handle = constant_table->GetConstant(NULL, c);
+				D3DXCONSTANT_DESC constant_desc;
+				UINT count;
+				constant_table->GetConstantDesc(handle, &constant_desc, &count);
+				if ((D3DXPT_SAMPLER == constant_desc.Type)
+					|| (D3DXPT_SAMPLER1D == constant_desc.Type)
+					|| (D3DXPT_SAMPLER2D == constant_desc.Type)
+					|| (D3DXPT_SAMPLER3D == constant_desc.Type)
+					|| (D3DXPT_SAMPLERCUBE == constant_desc.Type))
+				{
+					RenderEffectParameterPtr param = renderEffect_->ParameterByName(constant_desc.Name);
+
+					if (param)
+					{
+						SamplerPtr sampler;
+						param->Value(sampler);
+
+						UINT index = constant_table->GetSamplerIndex(handle);
+						this->SetSampler(index, sampler);
+					}
+				}
+			}
+		}
+
+		d3dx_effect->CommitChanges();
+	}
+
 	// ‰÷»æ
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::DoRender(VertexBuffer const & vb)
@@ -464,6 +508,8 @@ namespace KlayGE
 
 			for (uint32_t i = 0; i < renderPasses_; ++ i)
 			{
+				this->FlushSamplers(i);
+
 				renderEffect_->BeginPass(i);
 
 				TIF(d3dDevice_->DrawIndexedPrimitive(primType, 0, 0,
@@ -476,6 +522,8 @@ namespace KlayGE
 		{
 			for (uint32_t i = 0; i < renderPasses_; ++ i)
 			{
+				this->FlushSamplers(i);
+
 				renderEffect_->BeginPass(i);
 
 				TIF(d3dDevice_->DrawPrimitive(primType, 0, primCount));
@@ -578,6 +626,9 @@ namespace KlayGE
 			D3D9Texture const & d3d9Tex = static_cast<D3D9Texture const &>(*texture);
 			TIF(d3dDevice_->SetTexture(stage, d3d9Tex.D3DBaseTexture().get()));
 
+			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_BORDERCOLOR,
+				D3D9Mapping::MappingToUInt32Color(sampler->BorderColor())));
+
 			// Set addressing mode
 			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSU,
 				D3D9Mapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_U))));
@@ -612,8 +663,38 @@ namespace KlayGE
 					break;
 				}
 
+				Sampler::TexFilterOp filter = sampler->Filtering();
+				if (Sampler::TFO_Anisotropic == filter)
+				{
+					if (0 == (tfc & Sampler::TFO_Anisotropic))
+					{
+						filter = Sampler::TFO_Trilinear;
+					}
+				}
+				if (Sampler::TFO_Trilinear == filter)
+				{
+					if (0 == (tfc & Sampler::TFO_Trilinear))
+					{
+						filter = Sampler::TFO_Bilinear;
+					}
+				}
+				if (Sampler::TFO_Bilinear == filter)
+				{
+					if (0 == (tfc & Sampler::TFO_Bilinear))
+					{
+						filter = Sampler::TFO_Point;
+					}
+				}
+				if (Sampler::TFO_Point == filter)
+				{
+					if (0 == (tfc & Sampler::TFO_Point))
+					{
+						filter = Sampler::TFO_None;
+					}
+				}
+
 				// Set filter
-				switch (sampler->Filtering())
+				switch (filter)
 				{
 				case Sampler::TFO_None:
 					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_NONE));

@@ -11,6 +11,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
+#include <KlayGE/Sampler.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
@@ -85,8 +86,14 @@ namespace
 			box_ = MathLib::ComputeBoundingBox<float>(pos.begin(), pos.end());
 
 			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("VertexDisplacement.fx");
-			*(effect_->ParameterByName("flag")) = LoadTexture("Flag.dds");
 			effect_->SetTechnique("VertexDisplacement");
+
+			SamplerPtr flag_sampler(new Sampler);
+			flag_sampler->SetTexture(LoadTexture("Flag.dds"));
+			flag_sampler->Filtering(Sampler::TFO_Point);
+			flag_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
+			flag_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
+			*(effect_->ParameterByName("flagSampler")) = flag_sampler;
 		}
 
 		Matrix4 GetModelMatrix() const

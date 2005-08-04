@@ -18,6 +18,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
+#include <KlayGE/Sampler.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 #include <KlayGE/OpenGL/OGLRenderFactory.hpp>
 
@@ -92,9 +93,11 @@ namespace KlayGE
 			return RenderEffectParameterPtr(new OGLRenderEffectParameterInt(*this, name, param));
 		}
 
-		if ((CG_PARAMETERCLASS_OBJECT == param_class) && (CG_TEXTURE == param_type))
+		if ((CG_PARAMETERCLASS_OBJECT == param_class)
+			&& ((CG_SAMPLER1D == param_type) || (CG_SAMPLER2D == param_type) || (CG_SAMPLER3D == param_type)
+				|| (CG_SAMPLERCUBE == param_type)))
 		{
-			return RenderEffectParameterPtr(new OGLRenderEffectParameterTexture(*this, name, param));
+			return RenderEffectParameterPtr(new OGLRenderEffectParameterSampler(*this, name, param));
 		}
 
 		if ((CG_PARAMETERCLASS_ARRAY == param_class) && (CG_ARRAY == param_type) && (CG_FLOAT == param_base_type))
@@ -176,12 +179,12 @@ namespace KlayGE
 		cgSetParameter1i(param_, value);
 	}
 
-	void OGLRenderEffectParameterTexture::DoFlush(TexturePtr const & tex)
+	void OGLRenderEffectParameterSampler::DoFlush(SamplerPtr const & value)
 	{
-		BOOST_ASSERT(dynamic_cast<OGLTexture*>(tex.get()) != NULL);
+		BOOST_ASSERT(dynamic_cast<OGLTexture*>(value->GetTexture().get()) != NULL);
 
-		OGLTexture& ogl_tex = static_cast<OGLTexture&>(*tex);
-		cgGLSetTextureParameter(param_, ogl_tex.GLTexture());
+		OGLTexture& ogl_tex = static_cast<OGLTexture&>(*value->GetTexture());
+		cgGLSetupSampler(param_, ogl_tex.GLTexture());
 	}
 
 	void OGLRenderEffectParameterFloatArray::DoFlush(std::vector<float> const & value)

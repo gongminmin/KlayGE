@@ -35,7 +35,6 @@
 
 #pragma warning(disable: 4100 4512)
 #include <boost/utility.hpp>
-#include <boost/operators.hpp>
 #include <boost/any.hpp>
 
 #include <KlayGE/Math.hpp>
@@ -50,7 +49,7 @@ namespace KlayGE
 {
 	// äÖÈ¾Ð§¹û
 	//////////////////////////////////////////////////////////////////////////////////
-	class RenderEffect : boost::equality_comparable<RenderEffect>
+	class RenderEffect
 	{
 	public:
 		virtual ~RenderEffect()
@@ -97,7 +96,7 @@ namespace KlayGE
 		virtual RenderEffectParameter& operator=(Vector4 const & value);
 		virtual RenderEffectParameter& operator=(Matrix4 const & value);
 		virtual RenderEffectParameter& operator=(int const & value);
-		virtual RenderEffectParameter& operator=(TexturePtr const & value);
+		virtual RenderEffectParameter& operator=(SamplerPtr const & value);
 		virtual RenderEffectParameter& operator=(std::vector<float> const & value);
 		virtual RenderEffectParameter& operator=(std::vector<Vector4> const & value);
 		virtual RenderEffectParameter& operator=(std::vector<Matrix4> const & value);
@@ -107,7 +106,7 @@ namespace KlayGE
 		virtual void Value(Vector4& val) const;
 		virtual void Value(Matrix4& val) const;
 		virtual void Value(int& val) const;
-		virtual void Value(TexturePtr& val) const;
+		virtual void Value(SamplerPtr& val) const;
 		virtual void Value(std::vector<float>& val) const;
 		virtual void Value(std::vector<Vector4>& val) const;
 		virtual void Value(std::vector<Matrix4>& val) const;
@@ -120,7 +119,7 @@ namespace KlayGE
 		virtual void DoFlush(Vector4 const & value);
 		virtual void DoFlush(Matrix4 const & value);
 		virtual void DoFlush(int const & value);
-		virtual void DoFlush(TexturePtr const & value);
+		virtual void DoFlush(SamplerPtr const & value);
 		virtual void DoFlush(std::vector<float> const & value);
 		virtual void DoFlush(std::vector<Vector4> const & value);
 		virtual void DoFlush(std::vector<Matrix4> const & value);

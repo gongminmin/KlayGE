@@ -24,18 +24,7 @@ VS_OUTPUT ElectroVS(VS_INPUT input)
 }
 
 
-texture electroMap;
-
-sampler3D electroSampler = sampler_state
-{
-	Texture = <electroMap>;
-	MinFilter = Linear;
-	MagFilter = Linear;
-	MipFilter = Linear;
-	AddressU  = Wrap;
-	AddressV  = Wrap;
-	AddressW  = Wrap;
-};
+sampler3D electroSampler;
 
 float4 ElectroPS(float3 texCoord0	: TEXCOORD0,
 

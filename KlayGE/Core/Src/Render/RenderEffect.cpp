@@ -130,7 +130,7 @@ namespace KlayGE
 		{
 			return *this;
 		}
-		RenderEffectParameter& operator=(TexturePtr const & /*value*/)
+		RenderEffectParameter& operator=(SamplerPtr const & /*value*/)
 		{
 			return *this;
 		}
@@ -167,9 +167,9 @@ namespace KlayGE
 		{
 			val = 0;
 		}
-		void Value(TexturePtr& val) const
+		void Value(SamplerPtr& val) const
 		{
-			val = TexturePtr();
+			val = SamplerPtr();
 		}
 		void Value(std::vector<float>& val) const
 		{
@@ -242,7 +242,7 @@ namespace KlayGE
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(TexturePtr const & value)
+	RenderEffectParameter& RenderEffectParameter::operator=(SamplerPtr const & value)
 	{
 		BOOST_ASSERT(false);
 		return *this;
@@ -296,10 +296,10 @@ namespace KlayGE
 		val = 0;
 	}
 
-	void RenderEffectParameter::Value(TexturePtr& val) const
+	void RenderEffectParameter::Value(SamplerPtr& val) const
 	{
 		BOOST_ASSERT(false);
-		val = TexturePtr();
+		val = SamplerPtr();
 	}
 
 	void RenderEffectParameter::Value(std::vector<float>& val) const
@@ -346,7 +346,7 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void RenderEffectParameter::DoFlush(TexturePtr const & value)
+	void RenderEffectParameter::DoFlush(SamplerPtr const & value)
 	{
 		BOOST_ASSERT(false);
 	}

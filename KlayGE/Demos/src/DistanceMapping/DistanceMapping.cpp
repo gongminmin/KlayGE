@@ -11,6 +11,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
+#include <KlayGE/Sampler.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
@@ -36,10 +37,6 @@ namespace
 		RenderPolygon()
 		{
 			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("DistanceMapping.fx");
-			*(effect_->ParameterByName("diffusemap")) = LoadTexture("diffuse.dds");
-			*(effect_->ParameterByName("normalmap")) = LoadTexture("normal.dds");
-			*(effect_->ParameterByName("distancemap")) = LoadTexture("distance.dds");
-			*(effect_->ParameterByName("normalizermap")) = LoadTexture("normalizer.dds");
 
 			if (!effect_->Validate("DistanceMapping30"))
 			{
@@ -56,6 +53,36 @@ namespace
 			{
 				effect_->SetTechnique("DistanceMapping30");
 			}
+
+			SamplerPtr diffuse_sampler(new Sampler);
+			diffuse_sampler->SetTexture(LoadTexture("diffuse.dds"));
+			diffuse_sampler->Filtering(Sampler::TFO_Bilinear);
+			diffuse_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
+			diffuse_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
+			*(effect_->ParameterByName("diffuseMapSampler")) = diffuse_sampler;
+
+			SamplerPtr normal_sampler(new Sampler);
+			normal_sampler->SetTexture(LoadTexture("normal.dds"));
+			normal_sampler->Filtering(Sampler::TFO_Bilinear);
+			normal_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
+			normal_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
+			*(effect_->ParameterByName("normalMapSampler")) = normal_sampler;
+
+			SamplerPtr distance_sampler(new Sampler);
+			distance_sampler->SetTexture(LoadTexture("distance.dds"));
+			distance_sampler->Filtering(Sampler::TFO_Bilinear);
+			distance_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
+			distance_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
+			distance_sampler->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
+			*(effect_->ParameterByName("distanceMapSampler")) = distance_sampler;
+
+			SamplerPtr normalizer_sampler(new Sampler);
+			normalizer_sampler->SetTexture(LoadTexture("normalizer.dds"));
+			normalizer_sampler->Filtering(Sampler::TFO_Point);
+			normalizer_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
+			normalizer_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
+			normalizer_sampler->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
+			*(effect_->ParameterByName("normalizerMapSampler")) = normalizer_sampler;
 
 			Vector3 xyzs[] =
 			{

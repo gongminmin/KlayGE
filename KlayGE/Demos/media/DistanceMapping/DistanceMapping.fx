@@ -47,52 +47,10 @@ VS_OUTPUT DistanceMappingVS(VS_INPUT input,
 }
 
 
-texture diffusemap;
-texture normalmap;
-texture distancemap;
-texture normalizermap;
-
-sampler2D diffuseMapSampler = sampler_state
-{
-	Texture = <diffusemap>;
-	MinFilter = Linear;
-	MagFilter = Linear;
-	MipFilter = Linear;
-	AddressU  = Wrap;
-	AddressV  = Wrap;
-};
-
-sampler2D normalMapSampler = sampler_state
-{
-	Texture = <normalmap>;
-	MinFilter = Linear;
-	MagFilter = Linear;
-	MipFilter = Linear;
-	AddressU  = Wrap;
-	AddressV  = Wrap;
-};
-
-sampler3D distanceMapSampler = sampler_state
-{
-	Texture = <distancemap>;
-	MinFilter = Linear;
-	MagFilter = Linear;
-	MipFilter = None;
-	AddressU  = Wrap;
-	AddressV  = Wrap;
-	AddressW  = Clamp;
-};
-
-samplerCUBE normalizerMapSampler = sampler_state
-{
-	Texture = <normalizermap>;
-	MinFilter = Point;
-	MagFilter = Point;
-	MipFilter = Point;
-	AddressU  = Clamp;
-	AddressV  = Clamp;
-	AddressW  = Clamp;
-};
+sampler2D diffuseMapSampler;
+sampler2D normalMapSampler;
+sampler3D distanceMapSampler;
+samplerCUBE normalizerMapSampler;
 
 float4 DistanceMappingPS(float3 texCoord0	: TEXCOORD0,
 						float3 L		: TEXCOORD1,

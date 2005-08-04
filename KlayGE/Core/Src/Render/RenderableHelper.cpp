@@ -26,6 +26,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/Sampler.hpp>
 
 #include <KlayGE/RenderableHelper.hpp>
 
@@ -152,6 +153,7 @@ namespace KlayGE
 
 
 	RenderableSkyBox::RenderableSkyBox()
+		: cube_sampler_(new Sampler)
 	{
 		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("RenderableHelper.fx");
 		effect_->SetTechnique("SkyBoxTec");
@@ -177,11 +179,17 @@ namespace KlayGE
 		vb_->GetIndexStream()->Assign(indices, sizeof(indices) / sizeof(uint16_t));
 
 		box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[4]);
+
+		cube_sampler_->Filtering(Sampler::TFO_Bilinear);
+		cube_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
+		cube_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
+		cube_sampler_->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
+		*(effect_->ParameterByName("skybox_cubeMapSampler")) = cube_sampler_;
 	}
 
 	void RenderableSkyBox::CubeMap(TexturePtr const & cube)
 	{
-		*(effect_->ParameterByName("skybox_cubemap")) = cube;
+		cube_sampler_->SetTexture(cube);
 	}
 
 	void RenderableSkyBox::OnRenderBegin()

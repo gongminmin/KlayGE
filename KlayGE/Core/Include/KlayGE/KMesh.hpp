@@ -38,7 +38,7 @@ namespace KlayGE
 		virtual void OnRenderBegin();
 
 	private:
-		TexturePtr tex_;
+		SamplerPtr sampler_;
 	};
 
 	template <typename T>

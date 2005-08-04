@@ -2,29 +2,13 @@
 
 float4x4 matMVP : WorldViewProjection;
 
-texture tBlurX;
-texture tBlurY;
-
 float Width;
 float Height;
 
 float PixelWeight[8] = { 0.2537, 0.2185, 0.0821, 0.0461, 0.0262, 0.0162, 0.0102, 0.0052 };
 
-sampler BlurXSampler = sampler_state
-{
-	Texture = (tBlurX);
-	MinFilter = Point;
-	MagFilter = Point;
-	MipFilter = Point;
-};
-
-sampler BlurYSampler = sampler_state
-{
-	Texture = (tBlurY);
-	MinFilter = Point;
-	MagFilter = Point;
-	MipFilter = Point;
-};
+sampler2D BlurXSampler;
+sampler2D BlurYSampler;
 
 struct VS_OUT
 {
@@ -59,12 +43,14 @@ float4 BlurPS(float2 inTex: TEXCOORD0, float2 offset, sampler BlurSampler) : COL
 	return color;
 }
 
-float4 BlurXPS(float2 inTex: TEXCOORD0) : COLOR0
+float4 BlurXPS(float2 inTex: TEXCOORD0,
+		uniform sampler2D BlurXSampler) : COLOR0
 {
 	return BlurPS(inTex, float2(1.0 / Width, 0), BlurXSampler);
 }
 
-float4 BlurYPS(float2 inTex: TEXCOORD0) : COLOR0
+float4 BlurYPS(float2 inTex: TEXCOORD0,
+		uniform sampler2D BlurYSampler) : COLOR0
 {
 	return BlurPS(inTex, float2(0, 1.0 / Height), BlurYSampler);
 }
@@ -75,7 +61,7 @@ technique BlurXTechnique
 	pass Pass0
 	{
 		VertexShader = compile vs_2_0 BlurVS();
-		PixelShader  = compile ps_2_0 BlurXPS();
+		PixelShader  = compile ps_2_0 BlurXPS(BlurXSampler);
 	}
 }
 
@@ -84,6 +70,6 @@ technique BlurYTechnique
 	pass Pass0
 	{
 		VertexShader = compile vs_2_0 BlurVS();
-		PixelShader  = compile ps_2_0 BlurYPS();
+		PixelShader  = compile ps_2_0 BlurYPS(BlurYSampler);
 	}
 }

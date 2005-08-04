@@ -58,10 +58,13 @@ namespace KlayGE
 		};
 
 	public:
-		virtual ~Sampler();
+		Sampler();
 
 		void SetTexture(TexturePtr tex);
 		TexturePtr GetTexture() const;
+
+		void BorderColor(Color const & clr);
+		Color const & BorderColor() const;
 
 		// Sets the texture addressing mode for a texture unit.
 		void AddressingMode(TexAddressingType type, TexAddressingMode tam);
@@ -85,6 +88,8 @@ namespace KlayGE
 
 	private:
 		TexturePtr tex_;
+
+		Color border_clr_;
 
 		TexAddressingMode addr_mode_u_, addr_mode_v_, addr_mode_w_;
 		TexFilterOp filter_;

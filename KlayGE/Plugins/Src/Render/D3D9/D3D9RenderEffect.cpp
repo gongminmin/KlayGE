@@ -23,6 +23,7 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/Sampler.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 
 #include <boost/assert.hpp>
@@ -108,11 +109,11 @@ namespace KlayGE
 		}
 
 		if ((D3DXPC_OBJECT == desc.Class)
-				&& ((D3DXPT_TEXTURE == desc.Type) || (D3DXPT_TEXTURE1D == desc.Type) || (D3DXPT_TEXTURE2D == desc.Type)
-					|| (D3DXPT_TEXTURE3D == desc.Type) || (D3DXPT_TEXTURECUBE == desc.Type)))
+				&& ((D3DXPT_SAMPLER == desc.Type) || (D3DXPT_SAMPLER1D == desc.Type) || (D3DXPT_SAMPLER2D == desc.Type)
+					|| (D3DXPT_SAMPLER3D == desc.Type) || (D3DXPT_SAMPLERCUBE == desc.Type)))
 		{
-			boost::shared_ptr<D3D9RenderEffectParameterTexture> ret(new D3D9RenderEffectParameterTexture(*this, name));
-			tex_params_.push_back(boost::weak_ptr<D3D9RenderEffectParameterTexture>(ret));
+			boost::shared_ptr<D3D9RenderEffectParameterSampler> ret(new D3D9RenderEffectParameterSampler(*this, name));
+			sampler_params_.push_back(boost::weak_ptr<D3D9RenderEffectParameterSampler>(ret));
 			return ret;
 		}
 
@@ -154,13 +155,15 @@ namespace KlayGE
 
 	void D3D9RenderEffect::DoOnLostDevice()
 	{
-		for (tex_params_type::iterator iter = tex_params_.begin(); iter != tex_params_.end(); ++ iter)
+		for (sampler_params_type::iterator iter = sampler_params_.begin(); iter != sampler_params_.end(); ++ iter)
 		{
-			boost::shared_ptr<D3D9RenderEffectParameterTexture> p = iter->lock();
+			boost::shared_ptr<D3D9RenderEffectParameterSampler> p = iter->lock();
 			BOOST_ASSERT(p);
 			BOOST_ASSERT(params_.find(p->Name()) != params_.end());
 
-			p->OnLostDevice();
+			SamplerPtr s;
+			p->Value(s);
+			static_cast<D3D9Texture&>(*s->GetTexture()).OnLostDevice();
 			params_[p->Name()].second = true;
 		}
 
@@ -171,13 +174,15 @@ namespace KlayGE
 	{
 		TIF(d3dx_effect_->OnResetDevice());
 
-		for (tex_params_type::iterator iter = tex_params_.begin(); iter != tex_params_.end(); ++ iter)
+		for (sampler_params_type::iterator iter = sampler_params_.begin(); iter != sampler_params_.end(); ++ iter)
 		{
-			boost::shared_ptr<D3D9RenderEffectParameterTexture> p = iter->lock();
+			boost::shared_ptr<D3D9RenderEffectParameterSampler> p = iter->lock();
 			BOOST_ASSERT(p);
 			BOOST_ASSERT(params_.find(p->Name()) != params_.end());
 
-			p->OnResetDevice();
+			SamplerPtr s;
+			p->Value(s);
+			static_cast<D3D9Texture&>(*s->GetTexture()).OnResetDevice();
 			params_[p->Name()].second = true;
 		}
 	}
@@ -215,41 +220,29 @@ namespace KlayGE
 		TIF(d3dx_effect->SetInt(name_.c_str(), value));
 	}
 
-	void D3D9RenderEffectParameterTexture::DoFlush(TexturePtr const & tex)
+	void D3D9RenderEffectParameterSampler::DoFlush(SamplerPtr const & value)
 	{
 		BOOST_ASSERT(dynamic_cast<D3D9RenderEffect*>(&effect_) != NULL);
-
-		IDirect3DBaseTexture9* texture(NULL);
-		if (tex)
-		{
-			BOOST_ASSERT(dynamic_cast<D3D9Texture*>(tex.get()) != NULL);
-
-			D3D9Texture const & d3d9Tex = static_cast<D3D9Texture const &>(*tex);
-			texture = d3d9Tex.D3DBaseTexture().get();
-		}
-
-		boost::shared_ptr<ID3DXEffect> d3dx_effect = static_cast<D3D9RenderEffect&>(effect_).D3DXEffect();
-		TIF(d3dx_effect->SetTexture(name_.c_str(), texture));
 	}
 
-	void D3D9RenderEffectParameterTexture::DoOnLostDevice()
+	void D3D9RenderEffectParameterSampler::DoOnLostDevice()
 	{
 		if (val_)
 		{
-			BOOST_ASSERT(dynamic_cast<D3D9Texture*>(val_.get()) != NULL);
+			BOOST_ASSERT(dynamic_cast<D3D9Texture*>(val_->GetTexture().get()) != NULL);
 
-			D3D9Texture& texture = static_cast<D3D9Texture&>(*val_);
+			D3D9Texture& texture = static_cast<D3D9Texture&>(*val_->GetTexture());
 			texture.OnLostDevice();
 		}
 	}
 
-	void D3D9RenderEffectParameterTexture::DoOnResetDevice()
+	void D3D9RenderEffectParameterSampler::DoOnResetDevice()
 	{
 		if (val_)
 		{
-			BOOST_ASSERT(dynamic_cast<D3D9Texture*>(val_.get()) != NULL);
+			BOOST_ASSERT(dynamic_cast<D3D9Texture*>(val_->GetTexture().get()) != NULL);
 
-			D3D9Texture& texture = static_cast<D3D9Texture&>(*val_);
+			D3D9Texture& texture = static_cast<D3D9Texture&>(*val_->GetTexture());
 			texture.OnResetDevice();
 
 			boost::shared_ptr<ID3DXEffect> d3dx_effect = static_cast<D3D9RenderEffect&>(effect_).D3DXEffect();

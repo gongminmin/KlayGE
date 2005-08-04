@@ -12,6 +12,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderSettings.hpp>
+#include <KlayGE/Sampler.hpp>
 #include <KlayGE/PerlinNoise.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
@@ -76,8 +77,15 @@ namespace
 			texture->CopyMemoryToTexture3D(0, &turbBuffer[0], PF_L8, XSIZE, YSIZE, ZSIZE, 0, 0, 0);
 
 			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("Electro.fx");
-			*(effect_->ParameterByName("electroMap")) = texture;
 			effect_->SetTechnique("Electro");
+
+			SamplerPtr electro_sampler(new Sampler);
+			electro_sampler->SetTexture(texture);
+			electro_sampler->Filtering(Sampler::TFO_Bilinear);
+			electro_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
+			electro_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
+			electro_sampler->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Wrap);
+			*(effect_->ParameterByName("electroSampler")) = electro_sampler;
 
 			Vector3 xyzs[] =
 			{

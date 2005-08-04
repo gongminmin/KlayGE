@@ -22,28 +22,8 @@ VS_OUTPUT AsciiArtsVS(VS_INPUT input)
 	return output;
 }
 
-texture scene_tex;
-sampler2D scene_sampler = sampler_state
-{
-	Texture = <scene_tex>;
-	MinFilter = Point;
-	MagFilter = Point;
-	MipFilter = Point;
-	AddressU  = Clamp;
-	AddressV  = Clamp;
-};
-
-texture lums_tex;
-sampler2D lums_sampler = sampler_state
-{
-	Texture = <lums_tex>;
-	MinFilter = Linear;
-	MagFilter = Linear;
-	MipFilter = None;
-	AddressU  = Clamp;
-	AddressV  = Clamp;
-	AddressW  = Clamp;
-};
+sampler2D scene_sampler;
+sampler2D lums_sampler;
 
 float4 AsciiArtsPS(float2 tex_coord0	: TEXCOORD0,
 					uniform sampler2D scene_sampler,

@@ -44,51 +44,10 @@ VS_OUTPUT ParallaxVS(VS_INPUT input,
 }
 
 
-texture diffusemap;
-texture normalmap;
-texture heightmap;
-texture normalizermap;
-
-sampler2D diffuseMapSampler = sampler_state
-{
-	Texture = <diffusemap>;
-	MinFilter = Linear;
-	MagFilter = Linear;
-	MipFilter = Linear;
-	AddressU  = Wrap;
-	AddressV  = Wrap;
-};
-
-sampler2D normalMapSampler = sampler_state
-{
-	Texture = <normalmap>;
-	MinFilter = Linear;
-	MagFilter = Linear;
-	MipFilter = Linear;
-	AddressU  = Wrap;
-	AddressV  = Wrap;
-};
-
-sampler2D heightMapSampler = sampler_state
-{
-	Texture = <heightmap>;
-	MinFilter = Linear;
-	MagFilter = Linear;
-	MipFilter = Linear;
-	AddressU  = Wrap;
-	AddressV  = Wrap;
-};
-
-samplerCUBE normalizerMapSampler = sampler_state
-{
-	Texture = <normalizermap>;
-	MinFilter = Point;
-	MagFilter = Point;
-	MipFilter = Point;
-	AddressU  = Clamp;
-	AddressV  = Clamp;
-	AddressW  = Clamp;
-};
+sampler2D diffuseMapSampler;
+sampler2D normalMapSampler;
+sampler2D heightMapSampler;
+samplerCUBE normalizerMapSampler;
 
 float4 ParallaxPS(float2 texCoord0	: TEXCOORD0,
 					float3 L		: TEXCOORD1,

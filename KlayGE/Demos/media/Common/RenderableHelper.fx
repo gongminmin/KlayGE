@@ -94,20 +94,10 @@ void SkyBoxVS(float4 pos : POSITION,
 }
 
 
-texture skybox_cubemap;
+samplerCUBE skybox_cubeMapSampler;
 
-samplerCUBE skybox_cubeMapSampler = sampler_state
-{
-	Texture = <skybox_cubemap>;
-	MinFilter = Linear;
-	MagFilter = Linear;
-	MipFilter = Linear;
-	AddressU  = Clamp;
-	AddressV  = Clamp;
-	AddressW  = Clamp;
-};
-
-float4 SkyBoxPS(float3 texCoord0 : TEXCOORD0) : COLOR
+float4 SkyBoxPS(float3 texCoord0 : TEXCOORD0,
+		uniform samplerCUBE skybox_cubeMapSampler) : COLOR
 {
 	return texCUBE(skybox_cubeMapSampler, texCoord0);
 }
@@ -118,6 +108,6 @@ technique SkyBoxTec
 	{
 		CullMode = None;
 		VertexShader = compile vs_1_1 SkyBoxVS();
-		PixelShader = compile ps_1_1 SkyBoxPS();
+		PixelShader = compile ps_1_1 SkyBoxPS(skybox_cubeMapSampler);
 	}
 }

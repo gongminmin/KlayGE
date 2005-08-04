@@ -48,7 +48,7 @@
 namespace KlayGE
 {
 	class D3D9RenderEffect;
-	class D3D9RenderEffectParameterTexture;
+	class D3D9RenderEffectParameterSampler;
 
 	typedef boost::shared_ptr<D3D9RenderEffect> D3D9RenderEffectPtr;
 
@@ -81,8 +81,8 @@ namespace KlayGE
 	private:
 		boost::shared_ptr<ID3DXEffect> d3dx_effect_;
 
-		typedef std::vector<boost::weak_ptr<D3D9RenderEffectParameterTexture> > tex_params_type;
-		tex_params_type tex_params_;
+		typedef std::vector<boost::weak_ptr<D3D9RenderEffectParameterSampler> > sampler_params_type;
+		sampler_params_type sampler_params_;
 	};
 
 	class D3D9RenderEffectParameterFloat : public RenderEffectParameterConcrete<float>, public D3D9Resource
@@ -181,24 +181,24 @@ namespace KlayGE
 		D3D9RenderEffectParameterInt& operator=(D3D9RenderEffectParameterInt const & rhs);
 	};
 
-	class D3D9RenderEffectParameterTexture : public RenderEffectParameterConcrete<TexturePtr>, public D3D9Resource
+	class D3D9RenderEffectParameterSampler : public RenderEffectParameterConcrete<SamplerPtr>, public D3D9Resource
 	{
 	public:
-		D3D9RenderEffectParameterTexture(RenderEffect& effect, std::string const & name)
-			: RenderEffectParameterConcrete<TexturePtr>(effect, name)
+		D3D9RenderEffectParameterSampler(RenderEffect& effect, std::string const & name)
+			: RenderEffectParameterConcrete<SamplerPtr>(effect, name)
 		{
 		}
 
 	private:
-		void DoFlush(TexturePtr const & value);
+		void DoFlush(SamplerPtr const & value);
 
 	private:
 		void DoOnLostDevice();
 		void DoOnResetDevice();
 
 	private:
-		D3D9RenderEffectParameterTexture(D3D9RenderEffectParameterTexture const & rhs);
-		D3D9RenderEffectParameterTexture& operator=(D3D9RenderEffectParameterTexture const & rhs);
+		D3D9RenderEffectParameterSampler(D3D9RenderEffectParameterSampler const & rhs);
+		D3D9RenderEffectParameterSampler& operator=(D3D9RenderEffectParameterSampler const & rhs);
 	};
 
 	class D3D9RenderEffectParameterFloatArray : public RenderEffectParameterConcrete<std::vector<float> >, public D3D9Resource

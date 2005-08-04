@@ -30,18 +30,7 @@ VS_OUTPUT RefractVS(VS_INPUT input)
 }
 
 
-texture cubemap;
-
-samplerCUBE cubeMapSampler = sampler_state
-{
-	Texture = <cubemap>;
-	MinFilter = Linear;
-	MagFilter = Linear;
-	MipFilter = Linear;
-	AddressU  = Clamp;
-	AddressV  = Clamp;
-	AddressW  = Clamp;
-};
+samplerCUBE cubeMapSampler;
 
 float3 my_refract(float3 i, float3 n, float eta)
 {

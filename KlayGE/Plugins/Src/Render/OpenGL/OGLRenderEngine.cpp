@@ -567,6 +567,8 @@ namespace KlayGE
 			glTexParameteri(gl_tex.GLType(), GL_TEXTURE_WRAP_T, OGLMapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_V)));
 			glTexParameteri(gl_tex.GLType(), GL_TEXTURE_WRAP_R, OGLMapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_W)));
 
+			glTexParameterfv(gl_tex.GLType(), GL_TEXTURE_BORDER_COLOR, &sampler->BorderColor().r());
+
 			switch (sampler->Filtering())
 			{
 			case Sampler::TFO_None:
@@ -785,7 +787,7 @@ namespace KlayGE
 		glGetIntegerv(GL_MAX_ELEMENTS_INDICES, &temp);
 		caps_.max_indices = temp;
 
-		caps_.texture_2d_filter_caps = TFC_Point | TFC_Bilinear | TFC_Anisotropic;
+		caps_.texture_2d_filter_caps = Sampler::TFO_Point | Sampler::TFO_Bilinear | Sampler::TFO_Trilinear | Sampler::TFO_Anisotropic;
 		caps_.texture_1d_filter_caps = caps_.texture_2d_filter_caps;
 		caps_.texture_3d_filter_caps = caps_.texture_2d_filter_caps;
 		caps_.texture_cube_filter_caps = caps_.texture_2d_filter_caps;

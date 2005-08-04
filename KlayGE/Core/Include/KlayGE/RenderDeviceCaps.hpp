@@ -25,14 +25,6 @@
 
 namespace KlayGE
 {
-	enum TextureFilterCaps
-	{
-		TFC_Point		= 1UL << 1,
-		TFC_Bilinear	= 1UL << 2,
-		TFC_Trilinear	= 1UL << 3,
-		TFC_Anisotropic	= 1UL << 4
-	};
-
 	struct RenderDeviceCaps
 	{
 		uint32_t max_shader_model;

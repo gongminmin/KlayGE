@@ -16,6 +16,16 @@
 
 namespace KlayGE
 {
+	Sampler::Sampler()
+		: addr_mode_u_(TAM_Wrap), addr_mode_v_(TAM_Wrap), addr_mode_w_(TAM_Wrap),
+			filter_(TFO_Point),
+			anisotropy_(0),
+			max_mip_level_(1),
+			mip_map_lod_bias_(0),
+			mat_(Matrix4::Identity())
+	{
+	}
+
 	// 设置纹理
 	/////////////////////////////////////////////////////////////////////////////////
 	void Sampler::SetTexture(TexturePtr tex)
@@ -28,6 +38,20 @@ namespace KlayGE
 	TexturePtr Sampler::GetTexture() const
 	{
 		return tex_;
+	}
+
+	// 设置边界颜色
+	/////////////////////////////////////////////////////////////////////////////////
+	void Sampler::BorderColor(Color const & clr)
+	{
+		border_clr_ = clr;
+	}
+	
+	// 获取边界颜色
+	/////////////////////////////////////////////////////////////////////////////////
+	Color const & Sampler::BorderColor() const
+	{
+		return border_clr_;
 	}
 
 	// 设置纹理寻址模式
