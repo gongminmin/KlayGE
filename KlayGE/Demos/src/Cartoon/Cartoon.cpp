@@ -188,19 +188,16 @@ void Cartoon::Update()
 	*(renderTorus_->GetRenderEffect()->ParameterByName("worldview")) = mat;
 	*(renderTorus_->GetRenderEffect()->ParameterByName("worldviewIT")) = MathLib::Transpose(MathLib::Inverse(mat));
 
-	std::wostringstream stream;
-	stream << renderEngine.ActiveRenderTarget(0)->FPS();
-
 	RenderWindow* rw = static_cast<RenderWindow*>(renderEngine.ActiveRenderTarget(0).get());
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"¿¨Í¨äÖÈ¾²âÊÔ");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), rw->Description());
-	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str().c_str());
 
-	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
+	std::wostringstream stream;
+	stream << rw->DepthBits() << " bits depth " << rw->StencilBits() << " bits stencil";
+	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str().c_str());
+
 	stream.str(L"");
-	stream << sceneMgr.NumObjectsRendered() << " Renderables "
-		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
-		<< sceneMgr.NumVerticesRendered() << " Vertices";
-	font_->RenderText(0, 54, Color(1, 1, 1, 1), stream.str().c_str());
+	stream << renderEngine.ActiveRenderTarget(0)->FPS() << " FPS";
+	font_->RenderText(0, 54, Color(1, 1, 0, 1), stream.str().c_str());
 }

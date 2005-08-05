@@ -38,6 +38,8 @@ namespace KlayGE
 		virtual int Width() const;
 		virtual int Height() const;
 		virtual int ColorDepth() const;
+		virtual int DepthBits() const;
+		virtual int StencilBits() const;
 
 		virtual void Update();
 
@@ -67,6 +69,8 @@ namespace KlayGE
 		int		height_;
 		int		colorDepth_;
 		bool	isDepthBuffered_;
+		int		depthBits_;
+		int		stencilBits_;
 
 		// Stats
 		float	FPS_;

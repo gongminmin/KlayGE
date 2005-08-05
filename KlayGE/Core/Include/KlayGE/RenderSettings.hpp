@@ -30,7 +30,7 @@ namespace KlayGE
 	{
 		RenderSettings()
 			: left(0), top(0),
-				depthBuffer(true),
+				depthBuffer(true), depthBits(16), stencilBits(0),
 				multiSample(0)
 		{
 		}
@@ -44,6 +44,8 @@ namespace KlayGE
 		int		left;
 		int		top;
 		bool	depthBuffer;
+		int		depthBits;
+		int		stencilBits;
 		uint32_t multiSample;
 	};
 }

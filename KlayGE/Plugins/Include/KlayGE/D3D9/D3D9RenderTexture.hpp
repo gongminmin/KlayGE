@@ -48,6 +48,8 @@ namespace KlayGE
 		void DoOnLostDevice();
 		void DoOnResetDevice();
 
+		void UpdateParams(TexturePtr texture);
+
 	private:
 		boost::shared_ptr<IDirect3DSurface9> renderSurface_;
 		boost::shared_ptr<IDirect3DSurface9> depthStencilSurface_;

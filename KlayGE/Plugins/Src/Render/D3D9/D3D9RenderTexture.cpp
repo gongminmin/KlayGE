@@ -40,21 +40,12 @@ namespace KlayGE
 		BOOST_ASSERT(Texture::TT_2D == texture2D->Type());
 		BOOST_ASSERT(dynamic_cast<D3D9Texture*>(texture2D.get()) != NULL);
 
-		privateTex_ = texture2D;
-		width_ = privateTex_->Width(0);
-		height_ = privateTex_->Height(0);
-
-		viewport_.width		= width_;
-		viewport_.height	= height_;
-
 		D3D9Texture const & tex(static_cast<D3D9Texture&>(*privateTex_));
 		IDirect3DSurface9* surface;
 		tex.D3DTexture2D()->GetSurfaceLevel(0, &surface);
 		renderSurface_ = MakeCOMPtr(surface);
-		depthStencilSurface_ = tex.DepthStencil();
 
-		colorDepth_ = privateTex_->Bpp();
-		isDepthBuffered_ = depthStencilSurface_;
+		this->UpdateParams(texture2D);
 	}
 
 	void D3D9RenderTexture::AttachTextureCube(TexturePtr textureCube, Texture::CubeFaces face)
@@ -64,7 +55,18 @@ namespace KlayGE
 		BOOST_ASSERT(dynamic_cast<D3D9Texture*>(textureCube.get()) != NULL);
 
 		face_ = face;
-		privateTex_ = textureCube;
+
+		D3D9Texture const & tex(static_cast<D3D9Texture&>(*privateTex_));
+		IDirect3DSurface9* surface;
+		tex.D3DTextureCube()->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), 0, &surface);
+		renderSurface_ = MakeCOMPtr(surface);
+
+		this->UpdateParams(textureCube);
+	}
+
+	void D3D9RenderTexture::UpdateParams(TexturePtr texture)
+	{
+		privateTex_ = texture;
 		width_ = privateTex_->Width(0);
 		height_ = privateTex_->Height(0);
 
@@ -72,10 +74,45 @@ namespace KlayGE
 		viewport_.height	= height_;
 
 		D3D9Texture const & tex(static_cast<D3D9Texture&>(*privateTex_));
-		IDirect3DSurface9* surface;
-		tex.D3DTextureCube()->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), 0, &surface);
-		renderSurface_ = MakeCOMPtr(surface);
 		depthStencilSurface_ = tex.DepthStencil();
+
+		colorDepth_ = privateTex_->Bpp();
+		isDepthBuffered_ = depthStencilSurface_;
+
+		D3DSURFACE_DESC desc;
+		depthStencilSurface_->GetDesc(&desc);
+		switch (desc.Format)
+		{
+		case D3DFMT_D15S1:
+			depthBits_ = 15;
+			stencilBits_ = 1;
+			break;
+
+		case D3DFMT_D16:
+			depthBits_ = 16;
+			stencilBits_ = 0;
+			break;
+
+		case D3DFMT_D24X8:
+			depthBits_ = 24;
+			stencilBits_ = 0;
+			break;
+
+		case D3DFMT_D24S8:
+			depthBits_ = 24;
+			stencilBits_ = 8;
+			break;
+
+		case D3DFMT_D32:
+			depthBits_ = 32;
+			stencilBits_ = 0;
+			break;
+
+		default:
+			depthBits_ = 0;
+			stencilBits_ = 0;
+			break;
+		}
 	}
 
 	void D3D9RenderTexture::DetachTexture()

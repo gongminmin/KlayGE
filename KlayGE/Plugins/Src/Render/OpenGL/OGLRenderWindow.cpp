@@ -114,6 +114,8 @@ namespace KlayGE
 		width_				= settings.width;
 		height_				= settings.height;
 		isDepthBuffered_	= settings.depthBuffer;
+		depthBits_			= settings.depthBits;
+		stencilBits_		= settings.stencilBits;
 		isFullScreen_		= settings.fullScreen;
 
 		HINSTANCE hInst(::GetModuleHandle(NULL));
@@ -202,8 +204,8 @@ namespace KlayGE
 		glEnable(GL_COLOR_MATERIAL);
 		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
-		viewport_.left = left_;
-		viewport_.top = top_;
+		viewport_.left = 0;
+		viewport_.top = 0;
 		viewport_.width = width_;
 		viewport_.height = height_;
 

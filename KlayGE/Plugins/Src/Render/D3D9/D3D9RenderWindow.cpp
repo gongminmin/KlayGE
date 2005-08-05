@@ -148,6 +148,8 @@ namespace KlayGE
 		width_				= settings.width;
 		height_				= settings.height;
 		isDepthBuffered_	= settings.depthBuffer;
+		depthBits_			= settings.depthBits;
+		stencilBits_		= settings.stencilBits;
 		isFullScreen_		= settings.fullScreen;
 
 		HINSTANCE hInst(::GetModuleHandle(NULL));
@@ -209,7 +211,6 @@ namespace KlayGE
 		d3dpp_.BackBufferHeight			= this->Height();
 		d3dpp_.hDeviceWindow			= hWnd_;
 		d3dpp_.SwapEffect				= D3DSWAPEFFECT_DISCARD;
-		d3dpp_.EnableAutoDepthStencil	= isDepthBuffered_;
 		d3dpp_.Flags					= D3DPRESENTFLAG_DISCARD_DEPTHSTENCIL;
 		d3dpp_.PresentationInterval		= D3DPRESENT_INTERVAL_IMMEDIATE;
 
@@ -230,45 +231,107 @@ namespace KlayGE
 		}
 
 		// Depth-stencil format
-		if (this->ColorDepth() > 16)
+		if (isDepthBuffered_)
 		{
-			// Try to create a 32-bit depth, 8-bit stencil
-			if (FAILED(d3d_->CheckDeviceFormat(adapter_.AdapterNo(),
-				D3DDEVTYPE_HAL, d3dpp_.BackBufferFormat, D3DUSAGE_DEPTHSTENCIL, 
-				D3DRTYPE_SURFACE, D3DFMT_D24S8)))
+			BOOST_ASSERT((32 == depthBits_) || (24 == depthBits_) || (16 == depthBits_) || (15 == depthBits_) || (0 == depthBits_));
+			BOOST_ASSERT((8 == stencilBits_) || (1 == stencilBits_) || (0 == stencilBits_));
+
+			if (32 == depthBits_)
 			{
-				// Bugger, no 8-bit hardware stencil, just try 32-bit zbuffer 
-				if (FAILED(d3d_->CheckDeviceFormat(adapter_.AdapterNo(),
+				BOOST_ASSERT(0 == stencilBits_);
+
+				// Try 32-bit zbuffer 
+				if (SUCCEEDED(d3d_->CheckDeviceFormat(adapter_.AdapterNo(),
 					D3DDEVTYPE_HAL, d3dpp_.BackBufferFormat, D3DUSAGE_DEPTHSTENCIL, 
 					D3DRTYPE_SURFACE, D3DFMT_D32)))
 				{
-					// Jeez, what a naff card. Fall back on 16-bit depth buffering
-					d3dpp_.AutoDepthStencilFormat = D3DFMT_D16;
+					d3dpp_.AutoDepthStencilFormat = D3DFMT_D32;
+					stencilBits_ = 0;
 				}
 				else
 				{
-					d3dpp_.AutoDepthStencilFormat = D3DFMT_D32;
+					depthBits_ = 24;
 				}
 			}
-			else
+			if (24 == depthBits_)
 			{
-				// Woohoo!
-				if (SUCCEEDED(d3d_->CheckDepthStencilMatch(adapter_.AdapterNo(),
-					D3DDEVTYPE_HAL, d3dpp_.BackBufferFormat, d3dpp_.BackBufferFormat, D3DFMT_D24X8)))
+				if (0 == stencilBits_)
 				{
-					d3dpp_.AutoDepthStencilFormat = D3DFMT_D24X8; 
+					if (SUCCEEDED(d3d_->CheckDepthStencilMatch(adapter_.AdapterNo(),
+						D3DDEVTYPE_HAL, d3dpp_.BackBufferFormat, d3dpp_.BackBufferFormat, D3DFMT_D24X8)))
+					{
+						d3dpp_.AutoDepthStencilFormat = D3DFMT_D24X8;
+					}
+					else
+					{
+						if (SUCCEEDED(d3d_->CheckDepthStencilMatch(adapter_.AdapterNo(),
+							D3DDEVTYPE_HAL, d3dpp_.BackBufferFormat, d3dpp_.BackBufferFormat, D3DFMT_D24S8)))
+						{
+							d3dpp_.AutoDepthStencilFormat = D3DFMT_D24S8;
+							stencilBits_ = 8;
+						}
+						else
+						{
+							depthBits_ = 16;
+						}
+					}
 				}
 				else
 				{
-					d3dpp_.AutoDepthStencilFormat = D3DFMT_D24S8;
+					if (SUCCEEDED(d3d_->CheckDepthStencilMatch(adapter_.AdapterNo(),
+							D3DDEVTYPE_HAL, d3dpp_.BackBufferFormat, d3dpp_.BackBufferFormat, D3DFMT_D24S8)))
+					{
+						d3dpp_.AutoDepthStencilFormat = D3DFMT_D24S8; 
+						stencilBits_ = 8;
+					}
+					else
+					{
+						depthBits_ = 16;
+					}
 				}
+			}
+			if (16 == depthBits_)
+			{
+				if (SUCCEEDED(d3d_->CheckDepthStencilMatch(adapter_.AdapterNo(),
+					D3DDEVTYPE_HAL, d3dpp_.BackBufferFormat, d3dpp_.BackBufferFormat, D3DFMT_D16)))
+				{
+					d3dpp_.AutoDepthStencilFormat = D3DFMT_D16;
+					stencilBits_ = 0;
+				}
+				else
+				{
+					depthBits_ = 15;
+				}
+			}
+			if (15 == depthBits_)
+			{
+				if (SUCCEEDED(d3d_->CheckDepthStencilMatch(adapter_.AdapterNo(),
+					D3DDEVTYPE_HAL, d3dpp_.BackBufferFormat, d3dpp_.BackBufferFormat, D3DFMT_D15S1)))
+				{
+					d3dpp_.AutoDepthStencilFormat = D3DFMT_D15S1;
+					stencilBits_ = 1;
+				}
+				else
+				{
+					// Too bad
+					isDepthBuffered_ = false;
+					depthBits_ = 0;
+					stencilBits_ = 0;
+				}
+			}
+			if (0 == depthBits_)
+			{
+				isDepthBuffered_ = false;
+				stencilBits_ = 0;
 			}
 		}
 		else
 		{
-			// 16-bit depth, software stencil
-			d3dpp_.AutoDepthStencilFormat = D3DFMT_D16;
+			depthBits_ = 0;
+			stencilBits_ = 0;
 		}
+		d3dpp_.EnableAutoDepthStencil = isDepthBuffered_;
+
 
 		if ((multiSample_ != 0) && SUCCEEDED(d3d_->CheckDeviceMultiSampleType(this->adapter_.AdapterNo(), 
 			D3DDEVTYPE_HAL, d3dpp_.BackBufferFormat, !isFullScreen_,
@@ -283,8 +346,8 @@ namespace KlayGE
 			d3dpp_.MultiSampleQuality	= 0;
 		}
 
-		viewport_.left		= left_;
-		viewport_.top		= top_;
+		viewport_.left		= 0;
+		viewport_.top		= 0;
 		viewport_.width		= width_;
 		viewport_.height	= height_;
 
