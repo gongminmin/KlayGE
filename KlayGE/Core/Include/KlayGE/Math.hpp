@@ -569,7 +569,7 @@ namespace KlayGE
 		BaryCentric(Vector_T<T, N> const & v1, Vector_T<T, N> const & v2, Vector_T<T, N> const & v3,
 			T const & f, T const & g)
 		{
-			return v1 + f * (v2 - v1) + g * (v3 - v1);
+			return (1 - f - g) * v1 + f * v2 + g * v3;
 		}
 
 		template <typename T>
@@ -584,7 +584,7 @@ namespace KlayGE
 		///////////////////////////////////////////////////////////////////////////////
 		template <typename T>
 		inline T
-		CCW(Vector_T<T, 2> const & lhs, Vector_T<T, 2> const & rhs)
+		Cross(Vector_T<T, 2> const & lhs, Vector_T<T, 2> const & rhs)
 		{
 			return lhs.x() * rhs.y() - lhs.y() * rhs.x();
 		}
