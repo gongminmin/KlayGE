@@ -554,44 +554,45 @@ namespace KlayGE
 		}
 
 		OGLTexture& gl_tex = *static_cast<OGLTexture*>(texture.get());
+		GLenum tex_type = gl_tex.GLType();
 		if (!texture)
 		{
-			glDisable(gl_tex.GLType());
+			glDisable(tex_type);
 		}
 		else
 		{
-			glEnable(gl_tex.GLType());
+			glEnable(tex_type);
 			gl_tex.GLBindTexture();
 
-			glTexParameteri(gl_tex.GLType(), GL_TEXTURE_WRAP_S, OGLMapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_U)));
-			glTexParameteri(gl_tex.GLType(), GL_TEXTURE_WRAP_T, OGLMapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_V)));
-			glTexParameteri(gl_tex.GLType(), GL_TEXTURE_WRAP_R, OGLMapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_W)));
+			glTexParameteri(tex_type, GL_TEXTURE_WRAP_S, OGLMapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_U)));
+			glTexParameteri(tex_type, GL_TEXTURE_WRAP_T, OGLMapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_V)));
+			glTexParameteri(tex_type, GL_TEXTURE_WRAP_R, OGLMapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_W)));
 
-			glTexParameterfv(gl_tex.GLType(), GL_TEXTURE_BORDER_COLOR, &sampler->BorderColor().r());
+			glTexParameterfv(tex_type, GL_TEXTURE_BORDER_COLOR, &sampler->BorderColor().r());
 
 			switch (sampler->Filtering())
 			{
 			case Sampler::TFO_None:
 			case Sampler::TFO_Point:
-				glTexParameteri(gl_tex.GLType(), GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-				glTexParameteri(gl_tex.GLType(), GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+				glTexParameteri(tex_type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+				glTexParameteri(tex_type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 				break;
 
 			case Sampler::TFO_Bilinear:
-				glTexParameteri(gl_tex.GLType(), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glTexParameteri(gl_tex.GLType(), GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+				glTexParameteri(tex_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexParameteri(tex_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
 				break;
 
 			case Sampler::TFO_Trilinear:
-				glTexParameteri(gl_tex.GLType(), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glTexParameteri(gl_tex.GLType(), GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+				glTexParameteri(tex_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexParameteri(tex_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 				break;
 
 			case Sampler::TFO_Anisotropic:
 				if (caps_.max_texture_anisotropy != 0)
 				{
 					uint32_t anisotropy = std::min(caps_.max_texture_anisotropy, sampler->Anisotropy());
-					glTexParameteri(gl_tex.GLType(), GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy);
+					glTexParameteri(tex_type, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy);
 				}	
 				break;
 
@@ -602,7 +603,7 @@ namespace KlayGE
 
 			if (glloader_GL_VERSION_1_2() || glloader_GL_SGIS_texture_lod())
 			{
-				glTexParameteri(gl_tex.GLType(), GL_TEXTURE_MAX_LEVEL, sampler->MaxMipLevel());
+				glTexParameteri(tex_type, GL_TEXTURE_MAX_LEVEL, sampler->MaxMipLevel());
 			}
 
 			if (glloader_GL_VERSION_1_4() || glloader_GL_EXT_texture_lod_bias())
@@ -617,9 +618,9 @@ namespace KlayGE
 				if (glloader_GL_SGIX_texture_lod_bias())
 				{
 					GLfloat bias = sampler->MipMapLodBias();
-					glTexParameterf(gl_tex.GLType(), GL_TEXTURE_LOD_BIAS_S_SGIX, bias);
-					glTexParameterf(gl_tex.GLType(), GL_TEXTURE_LOD_BIAS_T_SGIX, bias);
-					glTexParameterf(gl_tex.GLType(), GL_TEXTURE_LOD_BIAS_R_SGIX, bias);
+					glTexParameterf(tex_type, GL_TEXTURE_LOD_BIAS_S_SGIX, bias);
+					glTexParameterf(tex_type, GL_TEXTURE_LOD_BIAS_T_SGIX, bias);
+					glTexParameterf(tex_type, GL_TEXTURE_LOD_BIAS_R_SGIX, bias);
 				}
 			}
 

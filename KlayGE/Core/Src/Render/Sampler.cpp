@@ -17,7 +17,8 @@
 namespace KlayGE
 {
 	Sampler::Sampler()
-		: addr_mode_u_(TAM_Wrap), addr_mode_v_(TAM_Wrap), addr_mode_w_(TAM_Wrap),
+		: border_clr_(0, 0, 0, 0),
+			addr_mode_u_(TAM_Wrap), addr_mode_v_(TAM_Wrap), addr_mode_w_(TAM_Wrap),
 			filter_(TFO_Point),
 			anisotropy_(0),
 			max_mip_level_(1),

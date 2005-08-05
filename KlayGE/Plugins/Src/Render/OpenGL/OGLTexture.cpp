@@ -142,9 +142,6 @@ namespace KlayGE
 			width /= 2;
 		}
 
-		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
 		this->UpdateParams();
 	}
 
@@ -186,9 +183,6 @@ namespace KlayGE
 			width /= 2;
 			height /= 2;
 		}
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 		this->UpdateParams();
 	}
@@ -234,9 +228,6 @@ namespace KlayGE
 			depth /= 2;
 		}
 
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
 		this->UpdateParams();
 	}
 
@@ -280,9 +271,6 @@ namespace KlayGE
 				size /= 2;
 			}
 		}
-
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 		this->UpdateParams();
 	}

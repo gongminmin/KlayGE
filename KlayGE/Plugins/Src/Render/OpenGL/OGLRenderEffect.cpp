@@ -20,6 +20,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Sampler.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>
+#include <KlayGE/OpenGL/OGLMapping.hpp>
 #include <KlayGE/OpenGL/OGLRenderFactory.hpp>
 
 #include <iostream>
@@ -93,9 +94,7 @@ namespace KlayGE
 			return RenderEffectParameterPtr(new OGLRenderEffectParameterInt(*this, name, param));
 		}
 
-		if ((CG_PARAMETERCLASS_OBJECT == param_class)
-			&& ((CG_SAMPLER1D == param_type) || (CG_SAMPLER2D == param_type) || (CG_SAMPLER3D == param_type)
-				|| (CG_SAMPLERCUBE == param_type)))
+		if (CG_PARAMETERCLASS_SAMPLER == param_class)
 		{
 			return RenderEffectParameterPtr(new OGLRenderEffectParameterSampler(*this, name, param));
 		}
@@ -184,6 +183,7 @@ namespace KlayGE
 		BOOST_ASSERT(dynamic_cast<OGLTexture*>(value->GetTexture().get()) != NULL);
 
 		OGLTexture& ogl_tex = static_cast<OGLTexture&>(*value->GetTexture());
+		Context::Instance().RenderFactoryInstance().RenderEngineInstance().SetSampler(0, value);
 		cgGLSetupSampler(param_, ogl_tex.GLTexture());
 	}
 
