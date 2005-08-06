@@ -266,10 +266,10 @@ namespace KlayGE
 			{
 				// 在现有纹理中找到了
 
-				if (ch != charLRU_.front())
+				CharLRUType::iterator lruIter = std::find(charLRU_.begin(), charLRU_.end(), ch);
+				if (lruIter != charLRU_.begin())
 				{
-					charLRU_.remove(ch);
-					charLRU_.push_front(ch);
+					charLRU_.splice(charLRU_.begin(), charLRU_, lruIter);
 				}
 			}
 			else
@@ -292,10 +292,10 @@ namespace KlayGE
 
 					::RECT charRect;
 					CharInfo charInfo;
-					if ((curX_ < tex_width) && (curY_ < tex_height))
+					if ((curX_ < tex_width) && (curY_ < tex_height)
+						&& (curX_ + width < tex_width) && (curY_ + max_height < tex_height))
 					{
-						curX_ += width;
-						if (curX_ >= tex_width)
+						if (curX_ + width > tex_width)
 						{
 							curX_ = 0;
 							curY_ += max_height;
@@ -312,6 +312,8 @@ namespace KlayGE
 						charInfo.texRect.right()	= static_cast<float>(charRect.right) / tex_width;
 						charInfo.texRect.bottom()	= static_cast<float>(charRect.bottom) / tex_height;
 						charInfo.width				= width;
+
+						curX_ += width;
 					}
 					else
 					{
