@@ -30,6 +30,11 @@ namespace KlayGE
 		width_ = width;
 		height_ = height;
 
+		viewport_.left		= left_;
+		viewport_.top		= top_;
+		viewport_.width		= width_;
+		viewport_.height	= height_;
+
 		if (glloader_GL_EXT_framebuffer_object())
 		{
 			if (glloader_GL_VERSION_1_5())
@@ -102,15 +107,13 @@ namespace KlayGE
 
 	void OGLRenderVertexStream::Attach(VertexStreamPtr vs)
 	{
-		BOOST_ASSERT(glIsFramebufferEXT(fbo_));
+		BOOST_ASSERT(glIsFramebufferEXT_(fbo_));
 		BOOST_ASSERT(dynamic_cast<OGLVertexStream*>(vs.get()) != NULL);
 
 		vs_ = vs;
 
-		OGLVertexStream& ogl_vs = static_cast<OGLVertexStream&>(*vs);
-		vbo_ = ogl_vs.OGLvbo();
-
-		glBindBuffer_(GL_PIXEL_PACK_BUFFER_ARB, vbo_);
+		OGLVertexStream& ogl_vs = static_cast<OGLVertexStream&>(*vs_);
+		glBindBuffer_(GL_PIXEL_PACK_BUFFER_ARB, ogl_vs.OGLvbo());
 		glBufferData_(GL_PIXEL_PACK_BUFFER_ARB,
 			reinterpret_cast<GLsizeiptr>(width_ * height_ * vs->ElementsPerVertex() * sizeof(GLfloat)), NULL, GL_DYNAMIC_DRAW);
 
@@ -119,7 +122,7 @@ namespace KlayGE
 
 	void OGLRenderVertexStream::Detach()
 	{
-		BOOST_ASSERT(glIsFramebufferEXT(fbo_));
+		BOOST_ASSERT(glIsFramebufferEXT_(fbo_));
 
 		GLenum format;
 		if (3 == vs_->ElementsPerVertex())
@@ -147,11 +150,19 @@ namespace KlayGE
 		case VST_TextureCoords6:
 		case VST_TextureCoords7:
 			type = GL_FLOAT;
+			{
+				std::vector<float> dummy(width_ * height_ * vs_->ElementsPerVertex());
+				vs_->Assign(&dummy[0], width_ * height_);
+			}
 			break;
 
 		case VST_Diffuses:
 		case VST_Speculars:
 			type = GL_UNSIGNED_BYTE;
+			{
+				std::vector<uint8_t> dummy(width_ * height_ * vs_->ElementsPerVertex());
+				vs_->Assign(&dummy[0], width_ * height_);
+			}
 			break;
 
 		default:
@@ -160,7 +171,8 @@ namespace KlayGE
 			break;
 		}
 
-		glBindBuffer_(GL_PIXEL_PACK_BUFFER_ARB, vbo_);
+		OGLVertexStream& ogl_vs = static_cast<OGLVertexStream&>(*vs_);
+		glBindBuffer_(GL_PIXEL_PACK_BUFFER_ARB, ogl_vs.OGLvbo());
 		glReadPixels(0, 0, width_, height_, format, type, 0);
 
 		glBindFramebufferEXT_(GL_FRAMEBUFFER_EXT, 0);

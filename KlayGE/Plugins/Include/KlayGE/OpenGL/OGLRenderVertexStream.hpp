@@ -61,7 +61,6 @@ namespace KlayGE
 	private:
 		GLuint texture_;
 		GLuint fbo_;
-		GLuint vbo_;
 	};
 
 	typedef boost::shared_ptr<OGLRenderVertexStream> OGLRenderVertexStreamPtr;

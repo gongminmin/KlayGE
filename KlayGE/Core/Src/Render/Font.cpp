@@ -1,8 +1,11 @@
 // Font.cpp
 // KlayGE Font类 实现文件
-// Ver 2.7.1
+// Ver 2.8.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.8.0
+// 修正了越界的bug
 //
 // 2.7.1
 // 美化了字体显示效果 (2005.7.7)
@@ -284,28 +287,31 @@ namespace KlayGE
 					uint32_t const width = std::min<uint32_t>(max_width,
 						(0 != slot_->bitmap.width) ? slot_->bitmap.width : max_width / 2);
 
+					uint32_t const tex_width = theTexture_->Width(0);
+					uint32_t const tex_height = theTexture_->Height(0);
+
 					::RECT charRect;
 					CharInfo charInfo;
-					if ((curX_ < theTexture_->Width(0)) && (curY_ < theTexture_->Height(0)))
+					if ((curX_ < tex_width) && (curY_ < tex_height))
 					{
+						curX_ += width;
+						if (curX_ >= tex_width)
+						{
+							curX_ = 0;
+							curY_ += max_height;
+						}
+
 						// 纹理还有空间
 						charRect.left	= curX_;
 						charRect.top	= curY_;
 						charRect.right	= curX_ + width;
 						charRect.bottom = curY_ + max_height;
 
-						charInfo.texRect.left()		= static_cast<float>(charRect.left) / theTexture_->Width(0);
-						charInfo.texRect.top()		= static_cast<float>(charRect.top) / theTexture_->Height(0);
-						charInfo.texRect.right()	= static_cast<float>(charRect.right) / theTexture_->Width(0);
-						charInfo.texRect.bottom()	= static_cast<float>(charRect.bottom) / theTexture_->Height(0);
+						charInfo.texRect.left()		= static_cast<float>(charRect.left) / tex_width;
+						charInfo.texRect.top()		= static_cast<float>(charRect.top) / tex_height;
+						charInfo.texRect.right()	= static_cast<float>(charRect.right) / tex_width;
+						charInfo.texRect.bottom()	= static_cast<float>(charRect.bottom) / tex_height;
 						charInfo.width				= width;
-
-						curX_ += width;
-						if (curX_ >= theTexture_->Width(0))
-						{
-							curX_ = 0;
-							curY_ += max_height;
-						}
 					}
 					else
 					{

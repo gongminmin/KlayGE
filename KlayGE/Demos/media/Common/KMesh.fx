@@ -32,9 +32,9 @@ VS_OUT MeshVS(VS_IN input)
 sampler2D texSampler;
 
 float4 MeshPS(float4 clr : COLOR0, float2 uv : TEXCOORD0,
-				uniform sampler2D texSampler) : COLOR
+				uniform sampler2D tex) : COLOR
 {
-	return clr * tex2D(texSampler, uv);
+	return clr * tex2D(tex, uv);
 }
 
 float4 MeshNoTexPS(float4 clr : COLOR0) : COLOR

@@ -20,9 +20,9 @@ void FontVS(float4 position : POSITION,
 sampler2D texFontSampler;
 
 float4 FontPS(float4 clr : COLOR, float2 texCoord : TEXCOORD0,
-		uniform sampler2D texFontSampler) : COLOR0
+		uniform sampler2D texFont) : COLOR0
 {
-	return clr * tex2D(texFontSampler, texCoord);
+	return clr * tex2D(texFont, texCoord);
 }
 
 technique fontTec
@@ -41,7 +41,6 @@ technique fontTec
 		StencilEnable = false;
 		Clipping = true;
 		ClipPlaneEnable = 0;
-		VertexBlend = Disable;
 		FogEnable = false;
 		ColorWriteEnable = RED | GREEN | BLUE | ALPHA;
 

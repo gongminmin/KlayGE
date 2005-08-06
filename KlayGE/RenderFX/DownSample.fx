@@ -7,7 +7,7 @@ float Height;
 // seems to work only when Kd is greater than 1, even by 0.0001f!!!
 float Kd = 1.0001f;
 
-sampler2D DownSampler;
+sampler2D DownSampleSampler;
 
 struct VS_OUT
 {
@@ -41,16 +41,16 @@ float4 SuppressLDR(float4 c)
 }
 
 float4 ps_main(float2 inTex: TEXCOORD0,
-		uniform sampler2D DownSampler) : COLOR0
+		uniform sampler2D DownSample) : COLOR0
 {
-	return SuppressLDR(tex2D(DownSampler, inTex) * Kd);
+	return SuppressLDR(tex2D(DownSample, inTex) * Kd);
 }
 
 technique Technique0
 {
 	pass Pass0
 	{
-		VertexShader = compile vs_2_0 vs_main();
-		PixelShader  = compile ps_2_0 ps_main(DownSampler);
+		VertexShader = compile vs_1_1 vs_main();
+		PixelShader  = compile ps_2_0 ps_main(DownSampleSampler);
 	}
 }

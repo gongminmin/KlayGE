@@ -595,6 +595,7 @@ namespace KlayGE
 
 			case PF_A4R4G4B4:
 				desc.pixel_format.flags |= DDSPF_RGB;
+				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
 				desc.pixel_format.rgb_bit_count = 16;
 
 				desc.pixel_format.rgb_alpha_bit_mask = 0x0000F000;

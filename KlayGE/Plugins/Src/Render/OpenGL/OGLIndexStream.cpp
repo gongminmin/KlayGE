@@ -82,7 +82,7 @@ namespace KlayGE
 		glBindBuffer_(GL_ELEMENT_ARRAY_BUFFER, ib_);
 		glBufferData_(GL_ELEMENT_ARRAY_BUFFER,
 				reinterpret_cast<GLsizeiptr>(numIndices * sizeof(uint16_t)), src,
-				GL_READ_ONLY | (this->IsStatic() ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW));
+				this->IsStatic() ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
 	}
 
 	void OGLIndexStream::CopyToMemory(void* data)
@@ -92,11 +92,11 @@ namespace KlayGE
 		glBindBuffer_(GL_ELEMENT_ARRAY_BUFFER, ib_);
 
 		uint16_t* srcPtr = static_cast<uint16_t*>(glMapBuffer_(GL_ELEMENT_ARRAY_BUFFER,
-				this->IsStatic() ? GL_STATIC_READ : GL_DYNAMIC_READ));
+				GL_READ_ONLY | (this->IsStatic() ? GL_STATIC_READ : GL_DYNAMIC_READ)));
 
 		std::copy(srcPtr, srcPtr + this->NumIndices(), destPtr);
 
-		glUnmapBuffer(GL_ARRAY_BUFFER);
+		glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
 	}
 
 	void OGLIndexStream::Active()

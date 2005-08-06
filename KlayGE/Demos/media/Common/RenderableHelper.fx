@@ -97,9 +97,9 @@ void SkyBoxVS(float4 pos : POSITION,
 samplerCUBE skybox_cubeMapSampler;
 
 float4 SkyBoxPS(float3 texCoord0 : TEXCOORD0,
-		uniform samplerCUBE skybox_cubeMapSampler) : COLOR
+		uniform samplerCUBE skybox_cubeMap) : COLOR
 {
-	return texCUBE(skybox_cubeMapSampler, texCoord0);
+	return texCUBE(skybox_cubeMap, texCoord0);
 }
 
 technique SkyBoxTec
