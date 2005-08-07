@@ -79,14 +79,14 @@ namespace KlayGE
 		{
 			CM_None,
 			CM_Clockwise,
-			CM_AntiClockwise,
+			CM_AntiClockwise
 		};
 
 		enum FillMode
 		{
 			FM_Point,
 			FM_Line,
-			FM_Fill,
+			FM_Fill
 		};
 
 		enum FogMode
@@ -101,11 +101,20 @@ namespace KlayGE
 			Fog_Linear
 		};
 
-		// Type of texture blend mode.
-		enum TexBlendType
+		// Type of alpha blend factor.
+		enum AlphaBlendFactor
 		{
-			TBT_Color,
-			TBT_Alpha
+			ABF_Zero,
+			ABF_One,
+			ABF_Src_Alpha,
+			ABF_Dst_Alpha,
+			ABF_Inv_Src_Alpha,
+			ABF_Inv_Dst_Alpha,
+			ABF_Src_Color,
+			ABF_Dst_Color,
+			ABF_Inv_Src_Color,
+			ABF_Inv_Dst_Color,
+			ABF_Src_Alpha_Sat
 		};
 
 		// Enum describing the various actions which can be taken onthe stencil buffer
@@ -167,10 +176,16 @@ namespace KlayGE
 		Matrix4 ProjectionMatrix() const;
 		void ProjectionMatrix(Matrix4 const & mat);
 
-		virtual void DepthBufferDepthTest(bool depthTest) = 0;
-		virtual void DepthBufferDepthWrite(bool depthWrite) = 0;
+		virtual void AlphaBlend(bool enabled) = 0;
+		virtual void AlphaBlendFunction(AlphaBlendFactor src_factor, AlphaBlendFactor dst_factor) = 0;
+
+		virtual void DepthBufferDepthTest(bool enabled) = 0;
+		virtual void DepthBufferDepthWrite(bool enabled) = 0;
 		virtual void DepthBufferFunction(CompareFunction depthFunction) = 0;
 		virtual void DepthBias(uint16_t bias) = 0;
+
+		virtual void AlphaTest(bool enabled) = 0;
+		virtual void AlphaFunction(CompareFunction alphaFunction, float refValue) = 0;
 
 		virtual void Fog(FogMode mode = Fog_None,
 			Color const & color = Color(1, 1, 1, 1),

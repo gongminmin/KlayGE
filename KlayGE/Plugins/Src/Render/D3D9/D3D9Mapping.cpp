@@ -155,6 +155,49 @@ namespace KlayGE
 		}
 	}
 
+	uint32_t D3D9Mapping::Mapping(RenderEngine::AlphaBlendFactor factor)
+	{
+		switch (factor)
+		{
+		case RenderEngine::ABF_Zero:
+			return D3DBLEND_ZERO;
+
+		case RenderEngine::ABF_One:
+			return D3DBLEND_ONE;
+
+		case RenderEngine::ABF_Src_Alpha:
+			return D3DBLEND_SRCALPHA;
+
+		case RenderEngine::ABF_Dst_Alpha:
+			return D3DBLEND_DESTALPHA;
+
+		case RenderEngine::ABF_Inv_Src_Alpha:
+			return D3DBLEND_INVSRCALPHA;
+
+		case RenderEngine::ABF_Inv_Dst_Alpha:
+			return D3DBLEND_INVDESTALPHA;
+
+		case RenderEngine::ABF_Src_Color:
+			return D3DBLEND_SRCCOLOR;
+
+		case RenderEngine::ABF_Dst_Color:
+			return D3DBLEND_DESTCOLOR;
+
+		case RenderEngine::ABF_Inv_Src_Color:
+			return D3DBLEND_INVSRCCOLOR;
+
+		case RenderEngine::ABF_Inv_Dst_Color:
+			return D3DBLEND_INVDESTCOLOR;
+
+		case RenderEngine::ABF_Src_Alpha_Sat:
+			return D3DBLEND_SRCALPHASAT;
+
+		default:
+			BOOST_ASSERT(false);
+			return D3DBLEND_ZERO;
+		}
+	}
+
 	uint32_t D3D9Mapping::Mapping(RenderEngine::CullMode mode)
 	{
 		switch (mode)

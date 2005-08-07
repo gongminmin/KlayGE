@@ -78,10 +78,16 @@ namespace KlayGE
 		void BeginFrame();
 		void EndFrame();
 
+		void AlphaBlend(bool enabled);
+		void AlphaBlendFunction(AlphaBlendFactor src_factor, AlphaBlendFactor dst_factor);
+
 		void DepthBufferDepthTest(bool depthTest);
 		void DepthBufferDepthWrite(bool depthWrite);
 		void DepthBufferFunction(CompareFunction depthFunction);
 		void DepthBias(uint16_t bias);
+
+		void AlphaTest(bool alphaTest);
+		void AlphaFunction(CompareFunction alphaFunction, float refValue);
 
 		void Fog(FogMode mode = Fog_None,
 			Color const & color = Color(1, 1, 1, 1),

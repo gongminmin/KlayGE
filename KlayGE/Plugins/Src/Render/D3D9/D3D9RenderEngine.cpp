@@ -542,22 +542,41 @@ namespace KlayGE
 		TIF(d3dDevice_->EndScene());
 	}
 
-	// 打开/关闭深度测试
+	// 打开/关闭Alpha混合
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DepthBufferDepthTest(bool depthTest)
+	void D3D9RenderEngine::AlphaBlend(bool enabled)
 	{
 		BOOST_ASSERT(d3dDevice_);
 
-		TIF(d3dDevice_->SetRenderState(D3DRS_ZENABLE, depthTest ? D3DZB_TRUE : D3DZB_FALSE));
+		TIF(d3dDevice_->SetRenderState(D3DRS_ALPHABLENDENABLE, enabled ? D3DZB_TRUE : D3DZB_FALSE));
+	}
+	
+	// 设置Alpha混合因数
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9RenderEngine::AlphaBlendFunction(AlphaBlendFactor src_factor, AlphaBlendFactor dst_factor)
+	{
+		BOOST_ASSERT(d3dDevice_);
+
+		TIF(d3dDevice_->SetRenderState(D3DRS_SRCBLEND, D3D9Mapping::Mapping(src_factor)));
+		TIF(d3dDevice_->SetRenderState(D3DRS_DESTBLEND, D3D9Mapping::Mapping(dst_factor)));
+	}
+
+	// 打开/关闭深度测试
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9RenderEngine::DepthBufferDepthTest(bool enabled)
+	{
+		BOOST_ASSERT(d3dDevice_);
+
+		TIF(d3dDevice_->SetRenderState(D3DRS_ZENABLE, enabled ? D3DZB_TRUE : D3DZB_FALSE));
 	}
 
 	// 打开/关闭深度缓存
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DepthBufferDepthWrite(bool depthWrite)
+	void D3D9RenderEngine::DepthBufferDepthWrite(bool enabled)
 	{
 		BOOST_ASSERT(d3dDevice_);
 
-		TIF(d3dDevice_->SetRenderState(D3DRS_ZWRITEENABLE, depthWrite));
+		TIF(d3dDevice_->SetRenderState(D3DRS_ZWRITEENABLE, enabled ? D3DZB_TRUE : D3DZB_FALSE));
 	}
 
 	// 设置深度比较函数
@@ -576,6 +595,25 @@ namespace KlayGE
 		BOOST_ASSERT(d3dDevice_);
 
 		TIF(d3dDevice_->SetRenderState(D3DRS_DEPTHBIAS, bias));
+	}
+
+	// 打开/关闭Alpha测试
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9RenderEngine::AlphaTest(bool enabled)
+	{
+		BOOST_ASSERT(d3dDevice_);
+
+		TIF(d3dDevice_->SetRenderState(D3DRS_ALPHATESTENABLE, enabled ? D3DZB_TRUE : D3DZB_FALSE));
+	}
+
+	// 设置Alpha比较函数和参考值
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9RenderEngine::AlphaFunction(CompareFunction alphaFunction, float refValue)
+	{
+		BOOST_ASSERT(d3dDevice_);
+
+		TIF(d3dDevice_->SetRenderState(D3DRS_ALPHAFUNC, D3D9Mapping::Mapping(alphaFunction)));
+		TIF(d3dDevice_->SetRenderState(D3DRS_ALPHAREF, static_cast<uint32_t>(refValue * 255) & 0xFF));
 	}
 
 	// 设置雾化效果

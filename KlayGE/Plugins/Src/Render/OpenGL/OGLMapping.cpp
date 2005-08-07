@@ -73,6 +73,51 @@ namespace KlayGE
 		};
 	}
 
+	// 从RenderEngine::AlphaBlendFactor转换到GLenum
+	/////////////////////////////////////////////////////////////////////////////////
+	GLenum OGLMapping::Mapping(RenderEngine::AlphaBlendFactor factor)
+	{
+		switch (factor)
+		{
+		case RenderEngine::ABF_Zero:
+			return GL_ZERO;
+
+		case RenderEngine::ABF_One:
+			return GL_ONE;
+
+		case RenderEngine::ABF_Src_Alpha:
+			return GL_SRC_ALPHA;
+
+		case RenderEngine::ABF_Dst_Alpha:
+			return GL_DST_ALPHA;
+
+		case RenderEngine::ABF_Inv_Src_Alpha:
+			return GL_ONE_MINUS_SRC_ALPHA;
+
+		case RenderEngine::ABF_Inv_Dst_Alpha:
+			return GL_ONE_MINUS_DST_ALPHA;
+
+		case RenderEngine::ABF_Src_Color:
+			return GL_SRC_COLOR;
+
+		case RenderEngine::ABF_Dst_Color:
+			return GL_DST_COLOR;
+
+		case RenderEngine::ABF_Inv_Src_Color:
+			return GL_ONE_MINUS_SRC_COLOR;
+
+		case RenderEngine::ABF_Inv_Dst_Color:
+			return GL_ONE_MINUS_DST_COLOR;
+
+		case RenderEngine::ABF_Src_Alpha_Sat:
+			return GL_SRC_ALPHA_SATURATE;
+
+		default:
+			BOOST_ASSERT(false);
+			return GL_ZERO;
+		}
+	}
+
 	// 从RenderEngine::StencilOperation转换到GLenum
 	/////////////////////////////////////////////////////////////////////////////////
 	GLenum OGLMapping::Mapping(RenderEngine::StencilOperation op)

@@ -478,6 +478,27 @@ namespace KlayGE
 
 	// 打开/关闭深度测试
 	/////////////////////////////////////////////////////////////////////////////////
+	void OGLRenderEngine::AlphaBlend(bool enabled)
+	{
+		if (enabled)
+		{
+			glEnable(GL_BLEND);
+		}
+		else
+		{
+			glDisable(GL_BLEND);
+		}
+	}
+
+	// 设置Alpha混合因数
+	/////////////////////////////////////////////////////////////////////////////////
+	void OGLRenderEngine::AlphaBlendFunction(AlphaBlendFactor src_factor, AlphaBlendFactor dst_factor)
+	{
+		glBlendFunc(OGLMapping::Mapping(src_factor), OGLMapping::Mapping(dst_factor));
+	}
+
+	// 打开/关闭深度测试
+	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::DepthBufferDepthTest(bool enabled)
 	{
 		if (enabled)
@@ -514,6 +535,27 @@ namespace KlayGE
 		glEnable(GL_POLYGON_OFFSET_LINE);
 		// Bias is in {0, 16}, scale the unit addition appropriately
 		glPolygonOffset(1.0f, bias);
+	}
+
+	// 打开/关闭Alpha测试
+	/////////////////////////////////////////////////////////////////////////////////
+	void OGLRenderEngine::AlphaTest(bool enabled)
+	{
+		if (enabled)
+		{
+			glEnable(GL_ALPHA_TEST);
+		}
+		else
+		{
+			glDisable(GL_ALPHA_TEST);
+		}
+	}
+	
+	// 设置Alpha比较函数和参考值
+	/////////////////////////////////////////////////////////////////////////////////
+	void OGLRenderEngine::AlphaFunction(CompareFunction alphaFunction, float refValue)
+	{
+		glAlphaFunc(OGLMapping::Mapping(alphaFunction), refValue);
 	}
 
 	// 设置雾化效果

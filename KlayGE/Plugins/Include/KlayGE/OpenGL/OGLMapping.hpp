@@ -35,6 +35,7 @@ namespace KlayGE
 
 		static GLenum Mapping(RenderEngine::StencilOperation op);
 
+		static GLenum Mapping(RenderEngine::AlphaBlendFactor factor);
 		static GLenum Mapping(RenderEngine::FillMode mode);
 		static GLenum Mapping(RenderEngine::ShadeOptions so);
 		static GLint Mapping(RenderEngine::FogMode mode);

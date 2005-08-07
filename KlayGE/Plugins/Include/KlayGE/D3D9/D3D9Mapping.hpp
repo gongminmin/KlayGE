@@ -44,6 +44,7 @@ namespace KlayGE
 
 		static D3DLIGHTTYPE Mapping(Light::LightTypes type);
 
+		static uint32_t Mapping(RenderEngine::AlphaBlendFactor factor);
 		static uint32_t Mapping(RenderEngine::CullMode mode);
 		static uint32_t Mapping(RenderEngine::FillMode mode);
 		static uint32_t Mapping(RenderEngine::ShadeOptions so);

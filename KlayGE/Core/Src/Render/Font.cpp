@@ -292,8 +292,7 @@ namespace KlayGE
 
 					::RECT charRect;
 					CharInfo charInfo;
-					if ((curX_ < tex_width) && (curY_ < tex_height)
-						&& (curX_ + width < tex_width) && (curY_ + max_height < tex_height))
+					if ((curX_ < tex_width) && (curY_ < tex_height) && (curY_ + max_height < tex_height))
 					{
 						if (curX_ + width > tex_width)
 						{
