@@ -13,18 +13,11 @@
 			<Param type="const void*" name="binary"/>
 			<Param type="GLint" name="length"/>
 		</Function>
-		<Function name="glGetShaderPrecisionFormatOES" return="void">
-			<Param type="GLenum" name="shadertype"/>
-			<Param type="GLenum" name="precisiontype"/>
-			<Param type="GLint*" name="range"/>
-			<Param type="GLint*" name="precision"/>
-		</Function>
 	</Functions>
 
 	<Vendors>
 		<Vendor name="GL_OES" string="GL_OES_shader_binary">
 			<Name name="glShaderBinaryOES"/>
-			<Name name="glGetShaderPrecisionFormatOES"/>
 		</Vendor>
 	</Vendors>
 
