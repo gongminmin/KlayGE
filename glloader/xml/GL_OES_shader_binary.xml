@@ -1,0 +1,34 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_OES_shader_binary">
+	<Tokens>
+		<Token name="GL_PLATFORM_BINARY_OES" value="0x8D63"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glShaderBinaryOES" return="void">
+			<Param type="GLint" name="n"/>
+			<Param type="GLuint*" name="shaders"/>
+			<Param type="GLenum" name="binaryformat"/>
+			<Param type="const void*" name="binary"/>
+			<Param type="GLint" name="length"/>
+		</Function>
+		<Function name="glGetShaderPrecisionFormatOES" return="void">
+			<Param type="GLenum" name="shadertype"/>
+			<Param type="GLenum" name="precisiontype"/>
+			<Param type="GLint*" name="range"/>
+			<Param type="GLint*" name="precision"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_OES" string="GL_OES_shader_binary">
+			<Name name="glShaderBinaryOES"/>
+			<Name name="glGetShaderPrecisionFormatOES"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_OES"/>
+	</InitPath>
+</GLExtension>

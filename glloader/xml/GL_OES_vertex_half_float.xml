@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_OES_vertex_half_float">
+	<Tokens>
+		<Token name="GL_HALF_FLOAT_OES" value="0x8D61"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_OES" string="GL_OES_vertex_half_float"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_OES"/>
+	</InitPath>
+</GLExtension>

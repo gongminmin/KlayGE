@@ -1,0 +1,100 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_OES_framebuffer_object">
+	<Tokens>
+		<Token name="GL_RGB565_OES" value="0x8D62"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glIsRenderbufferOES" return="GLboolean">
+			<Param type="GLuint" name="renderbuffer"/>
+		</Function>
+		<Function name="glBindRenderbufferOES" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLuint" name="renderbuffer"/>
+		</Function>
+		<Function name="glDeleteRenderbuffersOES" return="void">
+			<Param type="GLsizei" name="n"/>
+			<Param type="const GLuint*" name="renderbuffers"/>
+		</Function>
+		<Function name="glGenRenderbuffersOES" return="void">
+			<Param type="GLsizei" name="n"/>
+			<Param type="GLuint*" name="renderbuffers"/>
+		</Function>
+		<Function name="glRenderbufferStorageOES" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="internalformat"/>
+			<Param type="GLsizei" name="width"/>
+			<Param type="GLsizei" name="height"/>
+		</Function>
+		<Function name="glGetRenderbufferParameterivOES" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLint*" name="params"/>
+		</Function>
+		<Function name="glIsFramebufferOES" return="GLboolean">
+			<Param type="GLuint" name="framebuffer"/>
+		</Function>
+		<Function name="glBindFramebufferOES" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLuint" name="framebuffer"/>
+		</Function>
+		<Function name="glDeleteFramebuffersOES" return="void">
+			<Param type="GLsizei" name="n"/>
+			<Param type="const GLuint*" name="framebuffers"/>
+		</Function>
+		<Function name="glGenFramebuffersOES" return="void">
+			<Param type="GLsizei" name="n"/>
+			<Param type="GLuint*" name="framebuffers"/>
+		</Function>
+		<Function name="glCheckFramebufferStatusOES" return="GLenum">
+			<Param type="GLenum" name="target"/>
+		</Function>
+		<Function name="glFramebufferTexture2DOES" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="attachment"/>
+			<Param type="GLenum" name="textarget"/>
+			<Param type="GLuint" name="texture"/>
+			<Param type="GLint" name="level"/>
+		</Function>
+		<Function name="glFramebufferRenderbufferOES" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="attachment"/>
+			<Param type="GLenum" name="renderbuffertarget"/>
+			<Param type="GLuint" name="renderbuffer"/>
+		</Function>
+		<Function name="glGetFramebufferAttachmentParameterivOES" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="attachment"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="GLint*" name="params"/>
+		</Function>
+		<Function name="glGenerateMipmapOES" return="void">
+			<Param type="GLenum" name="target"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_OES" string="GL_OES_framebuffer_object">
+			<Name name="glIsRenderbufferOES"/>
+			<Name name="glBindRenderbufferOES"/>
+			<Name name="glDeleteRenderbuffersOES"/>
+			<Name name="glGenRenderbuffersOES"/>
+			<Name name="glRenderbufferStorageOES"/>
+			<Name name="glGetRenderbufferParameterivOES"/>
+			<Name name="glIsFramebufferOES"/>
+			<Name name="glBindFramebufferOES"/>
+			<Name name="glDeleteFramebuffersOES"/>
+			<Name name="glGenFramebuffersOES"/>
+			<Name name="glCheckFramebufferStatusOES"/>
+			<Name name="glFramebufferTexture2DOES"/>
+			<Name name="glFramebufferRenderbufferOES"/>
+			<Name name="glGetFramebufferAttachmentParameterivOES"/>
+			<Name name="glGenerateMipmapOES"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_OES"/>
+	</InitPath>
+</GLExtension>

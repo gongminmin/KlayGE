@@ -1,0 +1,24 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_OES_shader_source">
+	<Functions>
+		<Function name="glReleaseShaderCompilerOES" return="void"/>
+		<Function name="glGetShaderPrecisionFormatOES" return="void">
+			<Param type="GLenum" name="shadertype"/>
+			<Param type="GLenum" name="precisiontype"/>
+			<Param type="GLint*" name="range"/>
+			<Param type="GLint*" name="precision"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_OES" string="GL_OES_shader_source">
+			<Name name="glReleaseShaderCompilerOES"/>
+			<Name name="glGetShaderPrecisionFormatOES"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_OES"/>
+	</InitPath>
+</GLExtension>

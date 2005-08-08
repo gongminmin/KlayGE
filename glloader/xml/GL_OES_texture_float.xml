@@ -1,0 +1,11 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_OES_texture_float">
+	<Vendors>
+		<Vendor name="GL_OES" string="GL_OES_texture_float"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_OES"/>
+	</InitPath>
+</GLExtension>

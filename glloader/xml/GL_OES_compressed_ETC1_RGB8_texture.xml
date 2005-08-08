@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_OES_compressed_ETC1_RGB8_texture">
+	<Tokens>
+		<Token name="GL_ETC1_RGB8_OES" value="0x8D64"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_OES" string="GL_OES_compressed_ETC1_RGB8_texture"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_OES"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_OES_stencil4">
+	<Tokens>
+		<Token name="GL_STENCIL_INDEX4_OES" value="0x8D47"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_OES" string="GL_OES_stencil4"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_OES"/>
+	</InitPath>
+</GLExtension>
