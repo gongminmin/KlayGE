@@ -1,6 +1,6 @@
 /*
 // glloader
-// Copyright (C) 2004 Minmin Gong
+// Copyright (C) 2004-2005 Minmin Gong
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -907,10 +907,10 @@ void APIENTRY glInterleavedArrays(GLenum format, GLsizei stride, const GLvoid* p
 void APIENTRY glPushClientAttrib(GLbitfield mask);
 void APIENTRY glPopClientAttrib();
 
+#endif		/* GL_VERSION_1_1 */
+
 #ifdef __cplusplus
 }
 #endif
-
-#endif		/* GL_VERSION_1_1 */
 
 #endif			/* _GL11_H */

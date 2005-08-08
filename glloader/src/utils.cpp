@@ -1,5 +1,5 @@
 // glloader
-// Copyright (C) 2004 Minmin Gong
+// Copyright (C) 2004-2005 Minmin Gong
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -69,6 +69,15 @@ namespace glloader
 					features_.insert(iter, high_name);
 				}
 			}
+		}
+	}
+
+	void gl_features_extractor::promote(std::string const & high_name)
+	{
+		std::vector<std::string>::iterator iter = std::lower_bound(features_.begin(), features_.end(), high_name);
+		if (*iter != high_name)
+		{
+			features_.insert(iter, high_name);
 		}
 	}
 

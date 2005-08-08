@@ -1,6 +1,6 @@
 /*
 // glloader
-// Copyright (C) 2004 Minmin Gong
+// Copyright (C) 2004-2005 Minmin Gong
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -152,6 +152,7 @@ void* glloader_get_gl_proc_address(const char* name);
 
 #ifdef GLLOADER_GL
 #include <glloader/gl11.h>
+#include <glloader/gl12.h>
 #include <glloader/glloader_gl.h>
 #endif
 

@@ -103,6 +103,12 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
+				RelativePath="..\..\src\gl12.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\gl13.cpp">
+			</File>
+			<File
 				RelativePath="..\..\src\glloader_gl.cpp">
 			</File>
 			<File
@@ -128,6 +134,12 @@
 			Filter="">
 			<File
 				RelativePath="..\..\include\glloader\gl11.h">
+			</File>
+			<File
+				RelativePath="..\..\include\glloader\gl12.h">
+			</File>
+			<File
+				RelativePath="..\..\include\glloader\gl13.h">
 			</File>
 			<File
 				RelativePath="..\..\include\glloader\glloader.h">

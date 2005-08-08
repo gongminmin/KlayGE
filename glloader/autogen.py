@@ -2,7 +2,7 @@
 #-*- coding: mbcs -*-
 
 GPLNotice = """// glloader
-// Copyright (C) 2004 Minmin Gong
+// Copyright (C) 2004-2005 Minmin Gong
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
