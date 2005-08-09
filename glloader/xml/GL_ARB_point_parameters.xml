@@ -15,7 +15,7 @@
 		</Function>
 		<Function name="glPointParameterfvARB" return="void">
 			<Param type="GLenum" name="pname"/>
-			<Param type="GLfloat*" name="params"/>
+			<Param type="const GLfloat*" name="params"/>
 		</Function>
 	</Functions>
 
