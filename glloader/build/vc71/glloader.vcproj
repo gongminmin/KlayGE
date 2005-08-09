@@ -142,6 +142,9 @@
 			Name="include"
 			Filter="">
 			<File
+				RelativePath="..\..\include\glloader\gl10.h">
+			</File>
+			<File
 				RelativePath="..\..\include\glloader\gl11.h">
 			</File>
 			<File

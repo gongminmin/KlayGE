@@ -33,6 +33,8 @@ namespace
 
 	void init_GL_VERSION_1_4()
 	{
+		glloader_init();
+
 		glloader_GL_VERSION_1_4 = _glloader_GL_VERSION_1_4;
 
 		if (glloader_is_supported("GL_VERSION_1_4"))
@@ -239,7 +241,6 @@ namespace
 
 	char APIENTRY self_init_glloader_GL_VERSION_1_4()
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glloader_GL_VERSION_1_4();
 	}
@@ -253,271 +254,226 @@ namespace
 {
 	void APIENTRY self_init_glBlendFuncSeparate(GLenum sfactorRGB, GLenum dfactorRGB, GLenum sfactorAlpha, GLenum dfactorAlpha)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glBlendFuncSeparate(sfactorRGB, dfactorRGB, sfactorAlpha, dfactorAlpha);
 	}
 	void APIENTRY self_init_glFogCoordf(GLfloat coord)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glFogCoordf(coord);
 	}
 	void APIENTRY self_init_glFogCoordfv(const GLfloat* coord)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glFogCoordfv(coord);
 	}
 	void APIENTRY self_init_glFogCoordd(GLdouble coord)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glFogCoordd(coord);
 	}
 	void APIENTRY self_init_glFogCoorddv(const GLdouble* coord)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glFogCoorddv(coord);
 	}
 	void APIENTRY self_init_glFogCoordPointer(GLenum type, GLsizei stride, const GLvoid* pointer)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glFogCoordPointer(type, stride, pointer);
 	}
 	void APIENTRY self_init_glMultiDrawArrays(GLenum mode, GLint* first, GLsizei* count, GLsizei primcount)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glMultiDrawArrays(mode, first, count, primcount);
 	}
 	void APIENTRY self_init_glMultiDrawElements(GLenum mode, GLsizei* count, GLenum type, const GLvoid** indices, GLsizei primcount)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glMultiDrawElements(mode, count, type, indices, primcount);
 	}
 	void APIENTRY self_init_glPointParameterf(GLenum pname, GLfloat param)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glPointParameterf(pname, param);
 	}
 	void APIENTRY self_init_glPointParameterfv(GLenum pname, const GLfloat* params)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glPointParameterfv(pname, params);
 	}
 	void APIENTRY self_init_glPointParameteri(GLenum pname, GLint param)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glPointParameteri(pname, param);
 	}
 	void APIENTRY self_init_glPointParameteriv(GLenum pname, const GLint* params)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glPointParameteriv(pname, params);
 	}
 	void APIENTRY self_init_glSecondaryColor3b(GLbyte red, GLbyte green, GLbyte blue)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glSecondaryColor3b(red, green, blue);
 	}
 	void APIENTRY self_init_glSecondaryColor3bv(const GLbyte* v)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glSecondaryColor3bv(v);
 	}
 	void APIENTRY self_init_glSecondaryColor3d(GLdouble red, GLdouble green, GLdouble blue)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glSecondaryColor3d(red, green, blue);
 	}
 	void APIENTRY self_init_glSecondaryColor3dv(const GLdouble* v)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glSecondaryColor3dv(v);
 	}
 	void APIENTRY self_init_glSecondaryColor3f(GLfloat red, GLfloat green, GLfloat blue)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glSecondaryColor3f(red, green, blue);
 	}
 	void APIENTRY self_init_glSecondaryColor3fv(const GLfloat* v)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glSecondaryColor3fv(v);
 	}
 	void APIENTRY self_init_glSecondaryColor3i(GLint red, GLint green, GLint blue)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glSecondaryColor3i(red, green, blue);
 	}
 	void APIENTRY self_init_glSecondaryColor3iv(const GLint* v)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glSecondaryColor3iv(v);
 	}
 	void APIENTRY self_init_glSecondaryColor3s(GLshort red, GLshort green, GLshort blue)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glSecondaryColor3s(red, green, blue);
 	}
 	void APIENTRY self_init_glSecondaryColor3sv(const GLshort* v)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glSecondaryColor3sv(v);
 	}
 	void APIENTRY self_init_glSecondaryColor3ub(GLubyte red, GLubyte green, GLubyte blue)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glSecondaryColor3ub(red, green, blue);
 	}
 	void APIENTRY self_init_glSecondaryColor3ubv(const GLubyte* v)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glSecondaryColor3ubv(v);
 	}
 	void APIENTRY self_init_glSecondaryColor3ui(GLuint red, GLuint green, GLuint blue)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glSecondaryColor3ui(red, green, blue);
 	}
 	void APIENTRY self_init_glSecondaryColor3uiv(const GLuint* v)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glSecondaryColor3uiv(v);
 	}
 	void APIENTRY self_init_glSecondaryColor3us(GLushort red, GLushort green, GLushort blue)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glSecondaryColor3us(red, green, blue);
 	}
 	void APIENTRY self_init_glSecondaryColor3usv(const GLushort* v)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glSecondaryColor3usv(v);
 	}
 	void APIENTRY self_init_glSecondaryColorPointer(GLint size, GLenum type, GLsizei stride, GLvoid* pointer)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glSecondaryColorPointer(size, type, stride, pointer);
 	}
 	void APIENTRY self_init_glWindowPos2d(GLdouble x, GLdouble y)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glWindowPos2d(x, y);
 	}
 	void APIENTRY self_init_glWindowPos2dv(const GLdouble* p)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glWindowPos2dv(p);
 	}
 	void APIENTRY self_init_glWindowPos2f(GLfloat x, GLfloat y)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glWindowPos2f(x, y);
 	}
 	void APIENTRY self_init_glWindowPos2fv(const GLfloat* p)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glWindowPos2fv(p);
 	}
 	void APIENTRY self_init_glWindowPos2i(GLint x, GLint y)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glWindowPos2i(x, y);
 	}
 	void APIENTRY self_init_glWindowPos2iv(const GLint* p)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glWindowPos2iv(p);
 	}
 	void APIENTRY self_init_glWindowPos2s(GLshort x, GLshort y)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glWindowPos2s(x, y);
 	}
 	void APIENTRY self_init_glWindowPos2sv(const GLshort* p)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glWindowPos2sv(p);
 	}
 	void APIENTRY self_init_glWindowPos3d(GLdouble x, GLdouble y, GLdouble z)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glWindowPos3d(x, y, z);
 	}
 	void APIENTRY self_init_glWindowPos3dv(const GLdouble* p)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glWindowPos3dv(p);
 	}
 	void APIENTRY self_init_glWindowPos3f(GLfloat x, GLfloat y, GLfloat z)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glWindowPos3f(x, y, z);
 	}
 	void APIENTRY self_init_glWindowPos3fv(const GLfloat* p)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glWindowPos3fv(p);
 	}
 	void APIENTRY self_init_glWindowPos3i(GLint x, GLint y, GLint z)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glWindowPos3i(x, y, z);
 	}
 	void APIENTRY self_init_glWindowPos3iv(const GLint* p)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glWindowPos3iv(p);
 	}
 	void APIENTRY self_init_glWindowPos3s(GLshort x, GLshort y, GLshort z)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glWindowPos3s(x, y, z);
 	}
 	void APIENTRY self_init_glWindowPos3sv(const GLshort* p)
 	{
-		glloader_init();
 		init_GL_VERSION_1_4();
 		return glWindowPos3sv(p);
 	}

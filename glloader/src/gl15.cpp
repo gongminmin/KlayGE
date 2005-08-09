@@ -33,6 +33,8 @@ namespace
 
 	void init_GL_VERSION_1_5()
 	{
+		glloader_init();
+
 		glloader_GL_VERSION_1_5 = _glloader_GL_VERSION_1_5;
 
 		if (glloader_is_supported("GL_VERSION_1_5"))
@@ -140,115 +142,96 @@ namespace
 {
 	void APIENTRY self_init_glGenQueries(GLsizei n, GLuint* ids)
 	{
-		glloader_init();
 		init_GL_VERSION_1_5();
 		return glGenQueries(n, ids);
 	}
 	void APIENTRY self_init_glDeleteQueries(GLsizei n, const GLuint* ids)
 	{
-		glloader_init();
 		init_GL_VERSION_1_5();
 		return glDeleteQueries(n, ids);
 	}
 	GLboolean APIENTRY self_init_glIsQuery(GLuint id)
 	{
-		glloader_init();
 		init_GL_VERSION_1_5();
 		return glIsQuery(id);
 	}
 	void APIENTRY self_init_glBeginQuery(GLenum target, GLuint id)
 	{
-		glloader_init();
 		init_GL_VERSION_1_5();
 		return glBeginQuery(target, id);
 	}
 	void APIENTRY self_init_glEndQuery(GLenum target)
 	{
-		glloader_init();
 		init_GL_VERSION_1_5();
 		return glEndQuery(target);
 	}
 	void APIENTRY self_init_glGetQueryiv(GLenum target, GLenum pname, GLint* param)
 	{
-		glloader_init();
 		init_GL_VERSION_1_5();
 		return glGetQueryiv(target, pname, param);
 	}
 	void APIENTRY self_init_glGetQueryObjectiv(GLuint id, GLenum pname, GLint* params)
 	{
-		glloader_init();
 		init_GL_VERSION_1_5();
 		return glGetQueryObjectiv(id, pname, params);
 	}
 	void APIENTRY self_init_glGetQueryObjectuiv(GLuint id, GLenum pname, GLuint* params)
 	{
-		glloader_init();
 		init_GL_VERSION_1_5();
 		return glGetQueryObjectuiv(id, pname, params);
 	}
 	void APIENTRY self_init_glBindBuffer(GLenum target, GLuint buffer)
 	{
-		glloader_init();
 		init_GL_VERSION_1_5();
 		return glBindBuffer(target, buffer);
 	}
 	void APIENTRY self_init_glDeleteBuffers(GLsizei n, const GLuint* buffers)
 	{
-		glloader_init();
 		init_GL_VERSION_1_5();
 		return glDeleteBuffers(n, buffers);
 	}
 	void APIENTRY self_init_glGenBuffers(GLsizei n, GLuint* buffers)
 	{
-		glloader_init();
 		init_GL_VERSION_1_5();
 		return glGenBuffers(n, buffers);
 	}
 	GLboolean APIENTRY self_init_glIsBuffer(GLuint buffer)
 	{
-		glloader_init();
 		init_GL_VERSION_1_5();
 		return glIsBuffer(buffer);
 	}
 	void APIENTRY self_init_glBufferData(GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage)
 	{
-		glloader_init();
 		init_GL_VERSION_1_5();
 		return glBufferData(target, size, data, usage);
 	}
 	void APIENTRY self_init_glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data)
 	{
-		glloader_init();
 		init_GL_VERSION_1_5();
 		return glBufferSubData(target, offset, size, data);
 	}
 	void APIENTRY self_init_glGetBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, GLvoid* data)
 	{
-		glloader_init();
 		init_GL_VERSION_1_5();
 		return glGetBufferSubData(target, offset, size, data);
 	}
 	GLvoid* APIENTRY self_init_glMapBuffer(GLenum target, GLenum access)
 	{
-		glloader_init();
 		init_GL_VERSION_1_5();
 		return glMapBuffer(target, access);
 	}
 	GLboolean APIENTRY self_init_glUnmapBuffer(GLenum target)
 	{
-		glloader_init();
 		init_GL_VERSION_1_5();
 		return glUnmapBuffer(target);
 	}
 	void APIENTRY self_init_glGetBufferParameteriv(GLenum target, GLenum pname, GLint* params)
 	{
-		glloader_init();
 		init_GL_VERSION_1_5();
 		return glGetBufferParameteriv(target, pname, params);
 	}
 	void APIENTRY self_init_glGetBufferPointerv(GLenum target, GLenum pname, GLvoid** params)
 	{
-		glloader_init();
 		init_GL_VERSION_1_5();
 		return glGetBufferPointerv(target, pname, params);
 	}

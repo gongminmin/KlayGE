@@ -151,6 +151,7 @@ void* glloader_get_gl_proc_address(const char* name);
 #endif
 
 #ifdef GLLOADER_GL
+#include <glloader/gl10.h>
 #include <glloader/gl11.h>
 #include <glloader/gl12.h>
 #include <glloader/gl13.h>

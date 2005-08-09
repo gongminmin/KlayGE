@@ -33,6 +33,8 @@ namespace
 
 	void init_GL_VERSION_1_3()
 	{
+		;
+
 		glloader_GL_VERSION_1_3 = _glloader_GL_VERSION_1_3;
 
 		{
@@ -264,7 +266,6 @@ namespace
 
 	char APIENTRY self_init_glloader_GL_VERSION_1_3()
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glloader_GL_VERSION_1_3();
 	}
@@ -278,277 +279,231 @@ namespace
 {
 	void APIENTRY self_init_glActiveTexture(GLenum texture)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glActiveTexture(texture);
 	}
 	void APIENTRY self_init_glClientActiveTexture(GLenum texture)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glClientActiveTexture(texture);
 	}
 	void APIENTRY self_init_glMultiTexCoord1d(GLenum target, GLdouble s)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord1d(target, s);
 	}
 	void APIENTRY self_init_glMultiTexCoord1dv(GLenum target, const GLdouble* v)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord1dv(target, v);
 	}
 	void APIENTRY self_init_glMultiTexCoord1f(GLenum target, GLfloat s)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord1f(target, s);
 	}
 	void APIENTRY self_init_glMultiTexCoord1fv(GLenum target, const GLfloat* v)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord1fv(target, v);
 	}
 	void APIENTRY self_init_glMultiTexCoord1i(GLenum target, GLint s)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord1i(target, s);
 	}
 	void APIENTRY self_init_glMultiTexCoord1iv(GLenum target, const GLint* v)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord1iv(target, v);
 	}
 	void APIENTRY self_init_glMultiTexCoord1s(GLenum target, GLshort s)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord1s(target, s);
 	}
 	void APIENTRY self_init_glMultiTexCoord1sv(GLenum target, const GLshort* v)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord1sv(target, v);
 	}
 	void APIENTRY self_init_glMultiTexCoord2d(GLenum target, GLdouble s, GLdouble t)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord2d(target, s, t);
 	}
 	void APIENTRY self_init_glMultiTexCoord2dv(GLenum target, const GLdouble* v)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord2dv(target, v);
 	}
 	void APIENTRY self_init_glMultiTexCoord2f(GLenum target, GLfloat s, GLfloat t)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord2f(target, s, t);
 	}
 	void APIENTRY self_init_glMultiTexCoord2fv(GLenum target, const GLfloat* v)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord2fv(target, v);
 	}
 	void APIENTRY self_init_glMultiTexCoord2i(GLenum target, GLint s, GLint t)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord2i(target, s, t);
 	}
 	void APIENTRY self_init_glMultiTexCoord2iv(GLenum target, const GLint* v)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord2iv(target, v);
 	}
 	void APIENTRY self_init_glMultiTexCoord2s(GLenum target, GLshort s, GLshort t)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord2s(target, s, t);
 	}
 	void APIENTRY self_init_glMultiTexCoord2sv(GLenum target, const GLshort* v)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord2sv(target, v);
 	}
 	void APIENTRY self_init_glMultiTexCoord3d(GLenum target, GLdouble s, GLdouble t, GLdouble r)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord3d(target, s, t, r);
 	}
 	void APIENTRY self_init_glMultiTexCoord3dv(GLenum target, const GLdouble* v)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord3dv(target, v);
 	}
 	void APIENTRY self_init_glMultiTexCoord3f(GLenum target, GLfloat s, GLfloat t, GLfloat r)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord3f(target, s, t, r);
 	}
 	void APIENTRY self_init_glMultiTexCoord3fv(GLenum target, const GLfloat* v)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord3fv(target, v);
 	}
 	void APIENTRY self_init_glMultiTexCoord3i(GLenum target, GLint s, GLint t, GLint r)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord3i(target, s, t, r);
 	}
 	void APIENTRY self_init_glMultiTexCoord3iv(GLenum target, const GLint* v)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord3iv(target, v);
 	}
 	void APIENTRY self_init_glMultiTexCoord3s(GLenum target, GLshort s, GLshort t, GLshort r)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord3s(target, s, t, r);
 	}
 	void APIENTRY self_init_glMultiTexCoord3sv(GLenum target, const GLshort* v)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord3sv(target, v);
 	}
 	void APIENTRY self_init_glMultiTexCoord4d(GLenum target, GLdouble s, GLdouble t, GLdouble r, GLdouble q)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord4d(target, s, t, r, q);
 	}
 	void APIENTRY self_init_glMultiTexCoord4dv(GLenum target, const GLdouble* v)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord4dv(target, v);
 	}
 	void APIENTRY self_init_glMultiTexCoord4f(GLenum target, GLfloat s, GLfloat t, GLfloat r, GLfloat q)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord4f(target, s, t, r, q);
 	}
 	void APIENTRY self_init_glMultiTexCoord4fv(GLenum target, const GLfloat* v)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord4fv(target, v);
 	}
 	void APIENTRY self_init_glMultiTexCoord4i(GLenum target, GLint s, GLint t, GLint r, GLint q)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord4i(target, s, t, r, q);
 	}
 	void APIENTRY self_init_glMultiTexCoord4iv(GLenum target, const GLint* v)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord4iv(target, v);
 	}
 	void APIENTRY self_init_glMultiTexCoord4s(GLenum target, GLshort s, GLshort t, GLshort r, GLshort q)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord4s(target, s, t, r, q);
 	}
 	void APIENTRY self_init_glMultiTexCoord4sv(GLenum target, const GLshort* v)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultiTexCoord4sv(target, v);
 	}
 	void APIENTRY self_init_glLoadTransposeMatrixf(const GLfloat* m)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glLoadTransposeMatrixf(m);
 	}
 	void APIENTRY self_init_glLoadTransposeMatrixd(const GLdouble* m)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glLoadTransposeMatrixd(m);
 	}
 	void APIENTRY self_init_glMultTransposeMatrixf(const GLfloat* m)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultTransposeMatrixf(m);
 	}
 	void APIENTRY self_init_glMultTransposeMatrixd(const GLdouble* m)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glMultTransposeMatrixd(m);
 	}
 	void APIENTRY self_init_glSampleCoverage(GLclampf value, GLboolean invert)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glSampleCoverage(value, invert);
 	}
 	void APIENTRY self_init_glCompressedTexImage3D(GLenum target, GLint level, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, const GLvoid* data)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glCompressedTexImage3D(target, level, internalFormat, width, height, depth, border, imageSize, data);
 	}
 	void APIENTRY self_init_glCompressedTexImage2D(GLenum target, GLint level, GLenum internalFormat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid* data)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glCompressedTexImage2D(target, level, internalFormat, width, height, border, imageSize, data);
 	}
 	void APIENTRY self_init_glCompressedTexImage1D(GLenum target, GLint level, GLenum internalFormat, GLsizei width, GLint border, GLsizei imageSize, const GLvoid* data)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glCompressedTexImage1D(target, level, internalFormat, width, border, imageSize, data);
 	}
 	void APIENTRY self_init_glCompressedTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, const GLvoid* data)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glCompressedTexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, imageSize, data);
 	}
 	void APIENTRY self_init_glCompressedTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid* data)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glCompressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, imageSize, data);
 	}
 	void APIENTRY self_init_glCompressedTexSubImage1D(GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLsizei imageSize, const GLvoid* data)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glCompressedTexSubImage1D(target, level, xoffset, width, format, imageSize, data);
 	}
 	void APIENTRY self_init_glGetCompressedTexImage(GLenum target, GLint lod, GLvoid* img)
 	{
-		glloader_init();
 		init_GL_VERSION_1_3();
 		return glGetCompressedTexImage(target, lod, img);
 	}

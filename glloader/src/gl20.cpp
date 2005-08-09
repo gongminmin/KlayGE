@@ -33,6 +33,8 @@ namespace
 
 	void init_GL_VERSION_2_0()
 	{
+
+
 		glloader_GL_VERSION_2_0 = _glloader_GL_VERSION_2_0;
 
 		if (glloader_is_supported("GL_VERSION_2_0"))
@@ -241,7 +243,6 @@ namespace
 
 	char APIENTRY self_init_glloader_GL_VERSION_2_0()
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glloader_GL_VERSION_1_5();
 	}
@@ -255,559 +256,466 @@ namespace
 {
 	void APIENTRY self_init_glBlendEquationSeparate(GLenum modeRGB, GLenum modeAlpha)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glBlendEquationSeparate(modeRGB, modeAlpha);
 	}
 	void APIENTRY self_init_glDrawBuffers(GLsizei n, const GLenum* bufs)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glDrawBuffers(n, bufs);
 	}
 	void APIENTRY self_init_glStencilOpSeparate(GLenum face, GLenum sfail, GLenum dpfail, GLenum dppass)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glStencilOpSeparate(face, sfail, dpfail, dppass);
 	}
 	void APIENTRY self_init_glStencilFuncSeparate(GLenum frontfunc, GLenum backfunc, GLint ref, GLuint mask)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glStencilFuncSeparate(frontfunc, backfunc, ref, mask);
 	}
 	void APIENTRY self_init_glStencilMaskSeparate(GLenum face, GLuint mask)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glStencilMaskSeparate(face, mask);
 	}
 	void APIENTRY self_init_glAttachShader(GLuint program, GLuint shader)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glAttachShader(program, shader);
 	}
 	void APIENTRY self_init_glBindAttribLocation(GLuint program, GLuint index, const GLchar* name)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glBindAttribLocation(program, index, name);
 	}
 	void APIENTRY self_init_glCompileShader(GLuint shader)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glCompileShader(shader);
 	}
 	GLuint APIENTRY self_init_glCreateProgram()
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glCreateProgram();
 	}
 	GLuint APIENTRY self_init_glCreateShader(GLenum type)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glCreateShader(type);
 	}
 	void APIENTRY self_init_glDeleteProgram(GLuint program)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glDeleteProgram(program);
 	}
 	void APIENTRY self_init_glDeleteShader(GLuint shader)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glDeleteShader(shader);
 	}
 	void APIENTRY self_init_glDetachShader(GLuint program, GLuint shader)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glDetachShader(program, shader);
 	}
 	void APIENTRY self_init_glDisableVertexAttribArray(GLuint index)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glDisableVertexAttribArray(index);
 	}
 	void APIENTRY self_init_glEnableVertexAttribArray(GLuint index)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glEnableVertexAttribArray(index);
 	}
 	void APIENTRY self_init_glGetActiveAttrib(GLuint program, GLuint index, GLsizei bufSize, GLsizei* length, GLint* size, GLenum* type, GLchar* name)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glGetActiveAttrib(program, index, bufSize, length, size, type, name);
 	}
 	void APIENTRY self_init_glGetActiveUniform(GLuint program, GLuint index, GLsizei bufSize, GLsizei* length, GLint* size, GLenum* type, GLchar* name)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glGetActiveUniform(program, index, bufSize, length, size, type, name);
 	}
 	void APIENTRY self_init_glGetAttachedShaders(GLuint program, GLsizei maxCount, GLsizei* count, GLuint* shader)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glGetAttachedShaders(program, maxCount, count, shader);
 	}
 	GLint APIENTRY self_init_glGetAttribLocation(GLuint program, const GLchar* name)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glGetAttribLocation(program, name);
 	}
 	void APIENTRY self_init_glGetProgramiv(GLuint program, GLenum pname, const GLint* params)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glGetProgramiv(program, pname, params);
 	}
 	void APIENTRY self_init_glGetProgramInfoLog(GLuint program, GLsizei bufSize, GLsizei* length, GLchar* infoLog)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glGetProgramInfoLog(program, bufSize, length, infoLog);
 	}
 	void APIENTRY self_init_glGetShaderiv(GLuint shader, GLenum pname, const GLint* params)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glGetShaderiv(shader, pname, params);
 	}
 	void APIENTRY self_init_glGetShaderInfoLog(GLuint shader, GLsizei bufSize, GLsizei* length, GLchar* infoLog)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glGetShaderInfoLog(shader, bufSize, length, infoLog);
 	}
 	void APIENTRY self_init_glGetShaderSource(GLuint shader, GLsizei bufSize, GLsizei* length, GLchar* source)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glGetShaderSource(shader, bufSize, length, source);
 	}
 	GLint APIENTRY self_init_glGetUniformLocation(GLuint program, const GLchar* name)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glGetUniformLocation(program, name);
 	}
 	void APIENTRY self_init_glGetUniformfv(GLuint program, GLint location, GLfloat* params)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glGetUniformfv(program, location, params);
 	}
 	void APIENTRY self_init_glGetUniformiv(GLuint program, GLint location, GLint* params)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glGetUniformiv(program, location, params);
 	}
 	void APIENTRY self_init_glGetVertexAttribdv(GLuint index, GLenum pname, GLdouble* params)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glGetVertexAttribdv(index, pname, params);
 	}
 	void APIENTRY self_init_glGetVertexAttribfv(GLuint index, GLenum pname, GLfloat* params)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glGetVertexAttribfv(index, pname, params);
 	}
 	void APIENTRY self_init_glGetVertexAttribiv(GLuint index, GLenum pname, GLint* params)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glGetVertexAttribiv(index, pname, params);
 	}
 	void APIENTRY self_init_glGetVertexAttribPointerv(GLuint index, GLenum pname, GLvoid** pointer)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glGetVertexAttribPointerv(index, pname, pointer);
 	}
 	GLboolean APIENTRY self_init_glIsProgram(GLuint program)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glIsProgram(program);
 	}
 	GLboolean APIENTRY self_init_glIsShader(GLuint shader)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glIsShader(shader);
 	}
 	void APIENTRY self_init_glLinkProgram(GLuint program)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glLinkProgram(program);
 	}
 	void APIENTRY self_init_glShaderSource(GLuint shader, GLsizei count, const GLchar** string, const GLint* length)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glShaderSource(shader, count, string, length);
 	}
 	void APIENTRY self_init_glUseProgram(GLuint program)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glUseProgram(program);
 	}
 	void APIENTRY self_init_glUniform1f(GLint location, GLfloat v0)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glUniform1f(location, v0);
 	}
 	void APIENTRY self_init_glUniform2f(GLint location, GLfloat v0, GLfloat v1)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glUniform2f(location, v0, v1);
 	}
 	void APIENTRY self_init_glUniform3f(GLint location, GLfloat v0, GLfloat v1, GLfloat v2)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glUniform3f(location, v0, v1, v2);
 	}
 	void APIENTRY self_init_glUniform4f(GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glUniform4f(location, v0, v1, v2, v3);
 	}
 	void APIENTRY self_init_glUniform1i(GLint location, GLint v0)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glUniform1i(location, v0);
 	}
 	void APIENTRY self_init_glUniform2i(GLint location, GLint v0, GLint v1)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glUniform2i(location, v0, v1);
 	}
 	void APIENTRY self_init_glUniform3i(GLint location, GLint v0, GLint v1, GLint v2)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glUniform3i(location, v0, v1, v2);
 	}
 	void APIENTRY self_init_glUniform4i(GLint location, GLint v0, GLint v1, GLint v2, GLint v3)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glUniform4i(location, v0, v1, v2, v3);
 	}
 	void APIENTRY self_init_glUniform1fv(GLint location, GLsizei count, const GLfloat* value)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glUniform1fv(location, count, value);
 	}
 	void APIENTRY self_init_glUniform2fv(GLint location, GLsizei count, const GLfloat* value)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glUniform2fv(location, count, value);
 	}
 	void APIENTRY self_init_glUniform3fv(GLint location, GLsizei count, const GLfloat* value)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glUniform3fv(location, count, value);
 	}
 	void APIENTRY self_init_glUniform4fv(GLint location, GLsizei count, const GLfloat* value)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glUniform4fv(location, count, value);
 	}
 	void APIENTRY self_init_glUniform1iv(GLint location, GLsizei count, const GLint* value)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glUniform1iv(location, count, value);
 	}
 	void APIENTRY self_init_glUniform2iv(GLint location, GLsizei count, const GLint* value)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glUniform2iv(location, count, value);
 	}
 	void APIENTRY self_init_glUniform3iv(GLint location, GLsizei count, const GLint* value)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glUniform3iv(location, count, value);
 	}
 	void APIENTRY self_init_glUniform4iv(GLint location, GLsizei count, const GLint* value)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glUniform4iv(location, count, value);
 	}
 	void APIENTRY self_init_glUniformMatrix2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glUniformMatrix2fv(location, count, transpose, value);
 	}
 	void APIENTRY self_init_glUniformMatrix3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glUniformMatrix3fv(location, count, transpose, value);
 	}
 	void APIENTRY self_init_glUniformMatrix4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glUniformMatrix4fv(location, count, transpose, value);
 	}
 	void APIENTRY self_init_glValidateProgram(GLuint program)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glValidateProgram(program);
 	}
 	void APIENTRY self_init_glVertexAttrib1d(GLuint index, GLdouble x)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib1d(index, x);
 	}
 	void APIENTRY self_init_glVertexAttrib1dv(GLuint index, const GLdouble* v)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib1dv(index, v);
 	}
 	void APIENTRY self_init_glVertexAttrib1f(GLuint index, GLfloat x)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib1f(index, x);
 	}
 	void APIENTRY self_init_glVertexAttrib1fv(GLuint index, const GLfloat* v)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib1fv(index, v);
 	}
 	void APIENTRY self_init_glVertexAttrib1s(GLuint index, GLshort x)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib1s(index, x);
 	}
 	void APIENTRY self_init_glVertexAttrib1sv(GLuint index, const GLshort* v)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib1sv(index, v);
 	}
 	void APIENTRY self_init_glVertexAttrib2d(GLuint index, GLdouble x, GLdouble y)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib2d(index, x, y);
 	}
 	void APIENTRY self_init_glVertexAttrib2dv(GLuint index, const GLdouble* v)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib2dv(index, v);
 	}
 	void APIENTRY self_init_glVertexAttrib2f(GLuint index, GLfloat x, GLfloat y)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib2f(index, x, y);
 	}
 	void APIENTRY self_init_glVertexAttrib2fv(GLuint index, const GLfloat* v)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib2fv(index, v);
 	}
 	void APIENTRY self_init_glVertexAttrib2s(GLuint index, GLshort x, GLshort y)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib2s(index, x, y);
 	}
 	void APIENTRY self_init_glVertexAttrib2sv(GLuint index, const GLshort* v)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib2sv(index, v);
 	}
 	void APIENTRY self_init_glVertexAttrib3d(GLuint index, GLdouble x, GLdouble y, GLdouble z)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib3d(index, x, y, z);
 	}
 	void APIENTRY self_init_glVertexAttrib3dv(GLuint index, const GLdouble* v)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib3dv(index, v);
 	}
 	void APIENTRY self_init_glVertexAttrib3f(GLuint index, GLfloat x, GLfloat y, GLfloat z)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib3f(index, x, y, z);
 	}
 	void APIENTRY self_init_glVertexAttrib3fv(GLuint index, const GLfloat* v)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib3fv(index, v);
 	}
 	void APIENTRY self_init_glVertexAttrib3s(GLuint index, GLshort x, GLshort y, GLshort z)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib3s(index, x, y, z);
 	}
 	void APIENTRY self_init_glVertexAttrib3sv(GLuint index, const GLshort* v)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib3sv(index, v);
 	}
 	void APIENTRY self_init_glVertexAttrib4Nbv(GLuint index, const GLbyte* v)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib4Nbv(index, v);
 	}
 	void APIENTRY self_init_glVertexAttrib4Niv(GLuint index, const GLint* v)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib4Niv(index, v);
 	}
 	void APIENTRY self_init_glVertexAttrib4Nsv(GLuint index, const GLshort* v)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib4Nsv(index, v);
 	}
 	void APIENTRY self_init_glVertexAttrib4Nub(GLuint index, GLubyte x, GLubyte y, GLubyte z, GLubyte w)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib4Nub(index, x, y, z, w);
 	}
 	void APIENTRY self_init_glVertexAttrib4Nubv(GLuint index, const GLubyte* v)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib4Nubv(index, v);
 	}
 	void APIENTRY self_init_glVertexAttrib4Nuiv(GLuint index, const GLuint* v)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib4Nuiv(index, v);
 	}
 	void APIENTRY self_init_glVertexAttrib4Nusv(GLuint index, const GLushort* v)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib4Nusv(index, v);
 	}
 	void APIENTRY self_init_glVertexAttrib4bv(GLuint index, const GLbyte* v)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib4bv(index, v);
 	}
 	void APIENTRY self_init_glVertexAttrib4d(GLuint index, GLdouble x, GLdouble y, GLdouble z, GLdouble w)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib4d(index, x, y, z, w);
 	}
 	void APIENTRY self_init_glVertexAttrib4dv(GLuint index, const GLdouble* v)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib4dv(index, v);
 	}
 	void APIENTRY self_init_glVertexAttrib4f(GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib4f(index, x, y, z, w);
 	}
 	void APIENTRY self_init_glVertexAttrib4fv(GLuint index, const GLfloat* v)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib4fv(index, v);
 	}
 	void APIENTRY self_init_glVertexAttrib4iv(GLuint index, const GLint* v)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib4iv(index, v);
 	}
 	void APIENTRY self_init_glVertexAttrib4s(GLuint index, GLshort x, GLshort y, GLshort z, GLshort w)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib4s(index, x, y, z, w);
 	}
 	void APIENTRY self_init_glVertexAttrib4sv(GLuint index, const GLshort* v)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib4sv(index, v);
 	}
 	void APIENTRY self_init_glVertexAttrib4ubv(GLuint index, const GLubyte* v)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib4ubv(index, v);
 	}
 	void APIENTRY self_init_glVertexAttrib4uiv(GLuint index, const GLuint* v)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib4uiv(index, v);
 	}
 	void APIENTRY self_init_glVertexAttrib4usv(GLuint index, const GLushort* v)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttrib4usv(index, v);
 	}
 	void APIENTRY self_init_glVertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* pointer)
 	{
-		glloader_init();
 		init_GL_VERSION_2_0();
 		return glVertexAttribPointer(index, size, type, normalized, stride, pointer);
 	}
