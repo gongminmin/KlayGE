@@ -131,11 +131,12 @@ namespace
 			for (std::wstring::const_iterator citer = text.begin(); citer != text.end(); ++ citer)
 			{
 				wchar_t const & ch(*citer);
-				float const w(charInfoMap[ch].width * xScale);
+				Font::CharInfoMapType::const_iterator cmiter = charInfoMap.find(ch);
+				float const w(cmiter->second.width * xScale);
 
 				if (ch != L'\n')
 				{
-					Rect_T<float> const & texRect(charInfoMap[ch].texRect);
+					Rect_T<float> const & texRect(cmiter->second.texRect);
 
 					xyzs_.push_back(x);
 					xyzs_.push_back(y);
