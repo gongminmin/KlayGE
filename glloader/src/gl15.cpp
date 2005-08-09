@@ -19,6 +19,8 @@
 #include <glloader/gl15.h>
 #include "utils.hpp"
 
+#ifdef GLLOADER_GL
+
 using glloader::load_funcs;
 using glloader::gl_features_extractor;
 
@@ -88,8 +90,6 @@ namespace
 			}
 
 			load_funcs(entries, names);
-
-			return;
 		}
 		else
 		{
@@ -120,8 +120,6 @@ namespace
 				glUnmapBuffer = glUnmapBufferARB;
 				glGetBufferParameteriv = glGetBufferParameterivARB;
 				glGetBufferPointerv = glGetBufferPointervARB;
-
-				return;
 			}
 		}
 	}
@@ -258,3 +256,5 @@ glGetBufferParameterivFUNC glGetBufferParameteriv = self_init_glGetBufferParamet
 glGetBufferPointervFUNC glGetBufferPointerv = self_init_glGetBufferPointerv;
 
 #endif		// GL_VERSION_1_5
+
+#endif			// GLLOADER_GL

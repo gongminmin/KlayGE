@@ -19,6 +19,8 @@
 #include <glloader/gl20.h>
 #include "utils.hpp"
 
+#ifdef GLLOADER_GL
+
 using glloader::load_funcs;
 using glloader::gl_features_extractor;
 
@@ -37,7 +39,7 @@ namespace
 
 		glloader_GL_VERSION_2_0 = _glloader_GL_VERSION_2_0;
 
-		if (glloader_is_supported("GL_VERSION_2_0"))
+		if (glloader_GL_VERSION_2_0())
 		{
 			_GL_VERSION_2_0 = true;
 
@@ -236,9 +238,116 @@ namespace
 			}
 
 			load_funcs(entries, names);
-
-			return;
 		}
+		/*else
+		{
+			if (glloader_GL_ARB_shader_objects()
+				&& (glloader_GL_ARB_vertex_shader() && glloader_GL_ARB_fragment_shader())
+				&& glloader_GL_ARB_shading_language_100()
+				&& glloader_GL_ARB_draw_buffers()
+				&& glloader_GL_ARB_texture_non_power_of_two()
+				&& (glloader_GL_ARB_point_sprite() || glloader_GL_NV_point_sprite())
+				&& (glloader_GL_ATI_separate_stencil() || glloader_GL_EXT_stencil_two_side())
+				&& glloader_GL_EXT_blend_equation_separate())
+			{
+				_GL_VERSION_2_0 = true;
+				gl_features_extractor::instance().promote("GL_VERSION_2_0");
+
+				glBlendEquationSeparate = glBlendEquationSeparateEXT;
+				glDrawBuffers = glDrawBuffersARB;
+				glStencilOpSeparate = glStencilOpSeparateATI;
+				glStencilFuncSeparate = glStencilFuncSeparateATI;
+				glStencilMaskSeparate = glStencilMaskSeparateATI;
+				glAttachShader = glAttachObjectARB;
+				glBindAttribLocation = glBindAttribLocationARB;
+				glCompileShader = glCompileShaderARB;
+				glCreateProgram = glCreateProgramObjectARB;
+				glCreateShader = glCreateShaderObjectARB;
+				glDeleteProgram = glDeleteObjectARB;
+				glDeleteShader = glDeleteObjectARB;
+				glDetachShader = glDetachObjectARB;
+				glDisableVertexAttribArray = glDisableVertexAttribArrayARB;
+				glEnableVertexAttribArray = glEnableVertexAttribArrayARB;
+				glGetActiveAttrib = glGetActiveAttribARB;
+				glGetActiveUniform = glGetActiveUniformARB;
+				glGetAttachedShaders = glGetAttachedObjectsARB;
+				glGetAttribLocation = glGetAttribLocationARB;
+				glGetProgramiv = glGetObjectParameterivARB;
+				glGetProgramInfoLog = glGetInfoLogARB;
+				glGetShaderiv = glGetObjectParameterivARB;
+				glGetShaderInfoLog = glGetInfoLogARB;
+				glGetShaderSource = glGetShaderSourceARB;
+				glGetUniformLocation = glGetUniformLocationARB;
+				glGetUniformfv = glGetUniformfvARB;
+				glGetUniformiv = glGetUniformivARB;
+				glGetVertexAttribdv = glGetVertexAttribdvARB;
+				glGetVertexAttribfv = glGetVertexAttribfvARB;
+				glGetVertexAttribiv = glGetVertexAttribivARB;
+				glGetVertexAttribPointerv = glGetVertexAttribPointervARB;
+				glIsProgram = glIsProgramARB;
+				glIsShader = glIsShaderARB;
+				glLinkProgram = glLinkProgramARB;
+				glShaderSource = glShaderSourceARB;
+				glUseProgram = glUseProgramARB;
+				glUniform1f = glUniform1fARB;
+				glUniform2f = glUniform2fARB;
+				glUniform3f = glUniform3fARB;
+				glUniform4f = glUniform4fARB;
+				glUniform1i = glUniform1iARB;
+				glUniform2i = glUniform2iARB;
+				glUniform3i = glUniform3iARB;
+				glUniform4i = glUniform4iARB;
+				glUniform1fv = glUniform1fvARB;
+				glUniform2fv = glUniform2fvARB;
+				glUniform3fv = glUniform3fvARB;
+				glUniform4fv = glUniform4fvARB;
+				glUniform1iv = glUniform1ivARB;
+				glUniform2iv = glUniform2ivARB;
+				glUniform3iv = glUniform3ivARB;
+				glUniform4iv = glUniform4ivARB;
+				glUniformMatrix2fv = glUniformMatrix2fvARB;
+				glUniformMatrix3fv = glUniformMatrix3fvARB;
+				glUniformMatrix4fv = glUniformMatrix4fvARB;
+				glValidateProgram = glValidateProgramARB;
+				glVertexAttrib1d = glVertexAttrib1dARB;
+				glVertexAttrib1dv = glVertexAttrib1dvARB;
+				glVertexAttrib1f = glVertexAttrib1fARB;
+				glVertexAttrib1fv = glVertexAttrib1fvARB;
+				glVertexAttrib1s = glVertexAttrib1sARB;
+				glVertexAttrib1sv = glVertexAttrib1svARB;
+				glVertexAttrib2d = glVertexAttrib2dARB;
+				glVertexAttrib2dv = glVertexAttrib2dvARB;
+				glVertexAttrib2f = glVertexAttrib2fARB;
+				glVertexAttrib2fv = glVertexAttrib2fvARB;
+				glVertexAttrib2s = glVertexAttrib2sARB;
+				glVertexAttrib2sv = glVertexAttrib2svARB;
+				glVertexAttrib3d = glVertexAttrib3dARB;
+				glVertexAttrib3dv = glVertexAttrib3dvARB;
+				glVertexAttrib3f = glVertexAttrib3fARB;
+				glVertexAttrib3fv = glVertexAttrib3fvARB;
+				glVertexAttrib3s = glVertexAttrib3sARB;
+				glVertexAttrib3sv = glVertexAttrib3svARB;
+				glVertexAttrib4Nbv = glVertexAttrib4NbvARB;
+				glVertexAttrib4Niv = glVertexAttrib4NivARB;
+				glVertexAttrib4Nsv = glVertexAttrib4NsvARB;
+				glVertexAttrib4Nub = glVertexAttrib4NubARB;
+				glVertexAttrib4Nubv = glVertexAttrib4NubvARB;
+				glVertexAttrib4Nuiv = glVertexAttrib4NuivARB;
+				glVertexAttrib4Nusv = glVertexAttrib4NusvARB;
+				glVertexAttrib4bv = glVertexAttrib4bvARB;
+				glVertexAttrib4d = glVertexAttrib4dARB;
+				glVertexAttrib4dv = glVertexAttrib4dvARB;
+				glVertexAttrib4f = glVertexAttrib4fARB;
+				glVertexAttrib4fv = glVertexAttrib4fvARB;
+				glVertexAttrib4iv = glVertexAttrib4ivARB;
+				glVertexAttrib4s = glVertexAttrib4sARB;
+				glVertexAttrib4sv = glVertexAttrib4svARB;
+				glVertexAttrib4ubv = glVertexAttrib4ubvARB;
+				glVertexAttrib4uiv = glVertexAttrib4uivARB;
+				glVertexAttrib4usv = glVertexAttrib4usvARB;
+				glVertexAttribPointer = glVertexAttribPointerARB;
+			}
+		}*/
 	}
 
 	char APIENTRY self_init_glloader_GL_VERSION_2_0()
@@ -816,3 +925,5 @@ glVertexAttrib4usvFUNC glVertexAttrib4usv = self_init_glVertexAttrib4usv;
 glVertexAttribPointerFUNC glVertexAttribPointer = self_init_glVertexAttribPointer;
 
 #endif		// GL_VERSION_2_0
+
+#endif			// GLLOADER_GL

@@ -19,6 +19,8 @@
 #include <glloader/gl12.h>
 #include "utils.hpp"
 
+#ifdef GLLOADER_GL
+
 using glloader::load_funcs;
 using glloader::gl_features_extractor;
 
@@ -126,8 +128,6 @@ namespace
 			}
 
 			load_funcs(entries, names);
-
-			return;
 		}
 		else
 		{
@@ -188,8 +188,6 @@ namespace
 				glTexImage3D = glTexImage3DEXT;
 				glTexSubImage3D = glTexSubImage3DEXT;
 				glCopyTexSubImage3D = glCopyTexSubImage3DEXT;
-
-				return;
 			}
 		}
 	}
@@ -439,3 +437,6 @@ glTexSubImage3DFUNC glTexSubImage3D = self_init_glTexSubImage3D;
 glCopyTexSubImage3DFUNC glCopyTexSubImage3D = self_init_glCopyTexSubImage3D;
 
 #endif		// GL_VERSION_1_2
+
+
+#endif			// GLLOADER_GL

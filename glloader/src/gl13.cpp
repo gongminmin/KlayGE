@@ -19,6 +19,8 @@
 #include <glloader/gl13.h>
 #include "utils.hpp"
 
+#ifdef GLLOADER_GL
+
 using glloader::load_funcs;
 using glloader::gl_features_extractor;
 
@@ -33,233 +35,175 @@ namespace
 
 	void init_GL_VERSION_1_3()
 	{
-		;
-
 		glloader_GL_VERSION_1_3 = _glloader_GL_VERSION_1_3;
-
-		{
-			glActiveTexture = NULL;
-			glClientActiveTexture = NULL;
-			glMultiTexCoord1d = NULL;
-			glMultiTexCoord1dv = NULL;
-			glMultiTexCoord1f = NULL;
-			glMultiTexCoord1fv = NULL;
-			glMultiTexCoord1i = NULL;
-			glMultiTexCoord1iv = NULL;
-			glMultiTexCoord1s = NULL;
-			glMultiTexCoord1sv = NULL;
-			glMultiTexCoord2d = NULL;
-			glMultiTexCoord2dv = NULL;
-			glMultiTexCoord2f = NULL;
-			glMultiTexCoord2fv = NULL;
-			glMultiTexCoord2i = NULL;
-			glMultiTexCoord2iv = NULL;
-			glMultiTexCoord2s = NULL;
-			glMultiTexCoord2sv = NULL;
-			glMultiTexCoord3d = NULL;
-			glMultiTexCoord3dv = NULL;
-			glMultiTexCoord3f = NULL;
-			glMultiTexCoord3fv = NULL;
-			glMultiTexCoord3i = NULL;
-			glMultiTexCoord3iv = NULL;
-			glMultiTexCoord3s = NULL;
-			glMultiTexCoord3sv = NULL;
-			glMultiTexCoord4d = NULL;
-			glMultiTexCoord4dv = NULL;
-			glMultiTexCoord4f = NULL;
-			glMultiTexCoord4fv = NULL;
-			glMultiTexCoord4i = NULL;
-			glMultiTexCoord4iv = NULL;
-			glMultiTexCoord4s = NULL;
-			glMultiTexCoord4sv = NULL;
-			glLoadTransposeMatrixf = NULL;
-			glLoadTransposeMatrixd = NULL;
-			glMultTransposeMatrixf = NULL;
-			glMultTransposeMatrixd = NULL;
-			glSampleCoverage = NULL;
-			glCompressedTexImage3D = NULL;
-			glCompressedTexImage2D = NULL;
-			glCompressedTexImage1D = NULL;
-			glCompressedTexSubImage3D = NULL;
-			glCompressedTexSubImage2D = NULL;
-			glCompressedTexSubImage1D = NULL;
-			glGetCompressedTexImage = NULL;
-		}
-
-		entries_t entries;
-		{
-			entries.push_back(reinterpret_cast<void**>(&glActiveTexture));
-			entries.push_back(reinterpret_cast<void**>(&glClientActiveTexture));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord1d));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord1dv));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord1f));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord1fv));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord1i));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord1iv));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord1s));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord1sv));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord2d));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord2dv));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord2f));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord2fv));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord2i));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord2iv));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord2s));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord2sv));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord3d));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord3dv));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord3f));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord3fv));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord3i));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord3iv));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord3s));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord3sv));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord4d));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord4dv));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord4f));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord4fv));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord4i));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord4iv));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord4s));
-			entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord4sv));
-			entries.push_back(reinterpret_cast<void**>(&glLoadTransposeMatrixf));
-			entries.push_back(reinterpret_cast<void**>(&glLoadTransposeMatrixd));
-			entries.push_back(reinterpret_cast<void**>(&glMultTransposeMatrixf));
-			entries.push_back(reinterpret_cast<void**>(&glMultTransposeMatrixd));
-			entries.push_back(reinterpret_cast<void**>(&glSampleCoverage));
-			entries.push_back(reinterpret_cast<void**>(&glCompressedTexImage3D));
-			entries.push_back(reinterpret_cast<void**>(&glCompressedTexImage2D));
-			entries.push_back(reinterpret_cast<void**>(&glCompressedTexImage1D));
-			entries.push_back(reinterpret_cast<void**>(&glCompressedTexSubImage3D));
-			entries.push_back(reinterpret_cast<void**>(&glCompressedTexSubImage2D));
-			entries.push_back(reinterpret_cast<void**>(&glCompressedTexSubImage1D));
-			entries.push_back(reinterpret_cast<void**>(&glGetCompressedTexImage));
-		}
 
 		if (glloader_is_supported("GL_VERSION_1_3"))
 		{
 			_GL_VERSION_1_3 = true;
 
-			funcs_names_t names;
+			entries_t entries;
+			{
+				entries.push_back(reinterpret_cast<void**>(&glActiveTexture));
+				entries.push_back(reinterpret_cast<void**>(&glClientActiveTexture));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord1d));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord1dv));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord1f));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord1fv));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord1i));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord1iv));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord1s));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord1sv));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord2d));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord2dv));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord2f));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord2fv));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord2i));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord2iv));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord2s));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord2sv));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord3d));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord3dv));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord3f));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord3fv));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord3i));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord3iv));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord3s));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord3sv));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord4d));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord4dv));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord4f));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord4fv));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord4i));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord4iv));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord4s));
+				entries.push_back(reinterpret_cast<void**>(&glMultiTexCoord4sv));
+				entries.push_back(reinterpret_cast<void**>(&glLoadTransposeMatrixf));
+				entries.push_back(reinterpret_cast<void**>(&glLoadTransposeMatrixd));
+				entries.push_back(reinterpret_cast<void**>(&glMultTransposeMatrixf));
+				entries.push_back(reinterpret_cast<void**>(&glMultTransposeMatrixd));
+				entries.push_back(reinterpret_cast<void**>(&glSampleCoverage));
+				entries.push_back(reinterpret_cast<void**>(&glCompressedTexImage3D));
+				entries.push_back(reinterpret_cast<void**>(&glCompressedTexImage2D));
+				entries.push_back(reinterpret_cast<void**>(&glCompressedTexImage1D));
+				entries.push_back(reinterpret_cast<void**>(&glCompressedTexSubImage3D));
+				entries.push_back(reinterpret_cast<void**>(&glCompressedTexSubImage2D));
+				entries.push_back(reinterpret_cast<void**>(&glCompressedTexSubImage1D));
+				entries.push_back(reinterpret_cast<void**>(&glGetCompressedTexImage));
+			}
 
-			names.push_back("glActiveTexture");
-			names.push_back("glClientActiveTexture");
-			names.push_back("glMultiTexCoord1d");
-			names.push_back("glMultiTexCoord1dv");
-			names.push_back("glMultiTexCoord1f");
-			names.push_back("glMultiTexCoord1fv");
-			names.push_back("glMultiTexCoord1i");
-			names.push_back("glMultiTexCoord1iv");
-			names.push_back("glMultiTexCoord1s");
-			names.push_back("glMultiTexCoord1sv");
-			names.push_back("glMultiTexCoord2d");
-			names.push_back("glMultiTexCoord2dv");
-			names.push_back("glMultiTexCoord2f");
-			names.push_back("glMultiTexCoord2fv");
-			names.push_back("glMultiTexCoord2i");
-			names.push_back("glMultiTexCoord2iv");
-			names.push_back("glMultiTexCoord2s");
-			names.push_back("glMultiTexCoord2sv");
-			names.push_back("glMultiTexCoord3d");
-			names.push_back("glMultiTexCoord3dv");
-			names.push_back("glMultiTexCoord3f");
-			names.push_back("glMultiTexCoord3fv");
-			names.push_back("glMultiTexCoord3i");
-			names.push_back("glMultiTexCoord3iv");
-			names.push_back("glMultiTexCoord3s");
-			names.push_back("glMultiTexCoord3sv");
-			names.push_back("glMultiTexCoord4d");
-			names.push_back("glMultiTexCoord4dv");
-			names.push_back("glMultiTexCoord4f");
-			names.push_back("glMultiTexCoord4fv");
-			names.push_back("glMultiTexCoord4i");
-			names.push_back("glMultiTexCoord4iv");
-			names.push_back("glMultiTexCoord4s");
-			names.push_back("glMultiTexCoord4sv");
-			names.push_back("glLoadTransposeMatrixf");
-			names.push_back("glLoadTransposeMatrixd");
-			names.push_back("glMultTransposeMatrixf");
-			names.push_back("glMultTransposeMatrixd");
-			names.push_back("glSampleCoverage");
-			names.push_back("glCompressedTexImage3D");
-			names.push_back("glCompressedTexImage2D");
-			names.push_back("glCompressedTexImage1D");
-			names.push_back("glCompressedTexSubImage3D");
-			names.push_back("glCompressedTexSubImage2D");
-			names.push_back("glCompressedTexSubImage1D");
-			names.push_back("glGetCompressedTexImage");
+			funcs_names_t names;
+			{
+				names.push_back("glActiveTexture");
+				names.push_back("glClientActiveTexture");
+				names.push_back("glMultiTexCoord1d");
+				names.push_back("glMultiTexCoord1dv");
+				names.push_back("glMultiTexCoord1f");
+				names.push_back("glMultiTexCoord1fv");
+				names.push_back("glMultiTexCoord1i");
+				names.push_back("glMultiTexCoord1iv");
+				names.push_back("glMultiTexCoord1s");
+				names.push_back("glMultiTexCoord1sv");
+				names.push_back("glMultiTexCoord2d");
+				names.push_back("glMultiTexCoord2dv");
+				names.push_back("glMultiTexCoord2f");
+				names.push_back("glMultiTexCoord2fv");
+				names.push_back("glMultiTexCoord2i");
+				names.push_back("glMultiTexCoord2iv");
+				names.push_back("glMultiTexCoord2s");
+				names.push_back("glMultiTexCoord2sv");
+				names.push_back("glMultiTexCoord3d");
+				names.push_back("glMultiTexCoord3dv");
+				names.push_back("glMultiTexCoord3f");
+				names.push_back("glMultiTexCoord3fv");
+				names.push_back("glMultiTexCoord3i");
+				names.push_back("glMultiTexCoord3iv");
+				names.push_back("glMultiTexCoord3s");
+				names.push_back("glMultiTexCoord3sv");
+				names.push_back("glMultiTexCoord4d");
+				names.push_back("glMultiTexCoord4dv");
+				names.push_back("glMultiTexCoord4f");
+				names.push_back("glMultiTexCoord4fv");
+				names.push_back("glMultiTexCoord4i");
+				names.push_back("glMultiTexCoord4iv");
+				names.push_back("glMultiTexCoord4s");
+				names.push_back("glMultiTexCoord4sv");
+				names.push_back("glLoadTransposeMatrixf");
+				names.push_back("glLoadTransposeMatrixd");
+				names.push_back("glMultTransposeMatrixf");
+				names.push_back("glMultTransposeMatrixd");
+				names.push_back("glSampleCoverage");
+				names.push_back("glCompressedTexImage3D");
+				names.push_back("glCompressedTexImage2D");
+				names.push_back("glCompressedTexImage1D");
+				names.push_back("glCompressedTexSubImage3D");
+				names.push_back("glCompressedTexSubImage2D");
+				names.push_back("glCompressedTexSubImage1D");
+				names.push_back("glGetCompressedTexImage");
+			}
 
 			load_funcs(entries, names);
-
-			return;
 		}
 		else
 		{
-			if (glloader_is_supported("GL_ARB_texture_compression")
-				&& glloader_is_supported("GL_ARB_texture_cube_map")
-				&& glloader_is_supported("GL_ARB_multisample")
-				&& glloader_is_supported("GL_ARB_multitexture")
-				&& glloader_is_supported("GL_ARB_texture_env_add")
-				&& glloader_is_supported("GL_ARB_texture_env_combine")
-				&& (glloader_is_supported("GL_ARB_texture_env_dot3") ||  glloader_is_supported("GL_EXT_texture_env_dot3"))
-				&& glloader_is_supported("GL_ARB_texture_border_clamp")
-				&& glloader_is_supported("GL_ARB_transpose_matrix"))
+			if (glloader_GL_ARB_texture_compression()
+				&& glloader_GL_ARB_texture_cube_map()
+				&& glloader_GL_ARB_multisample()
+				&& glloader_GL_ARB_multitexture()
+				&& glloader_GL_ARB_texture_env_add()
+				&& glloader_GL_ARB_texture_env_combine()
+				&& (glloader_GL_ARB_texture_env_dot3() ||  glloader_GL_EXT_texture_env_dot3())
+				&& glloader_GL_ARB_texture_border_clamp()
+				&& glloader_GL_ARB_transpose_matrix())
 			{
 				_GL_VERSION_1_3 = true;
 				gl_features_extractor::instance().promote("GL_VERSION_1_3");
 
-				funcs_names_t names;
-
-				names.push_back("glActiveTextureARB");
-				names.push_back("glClientActiveTextureARB");
-				names.push_back("glMultiTexCoord1dARB");
-				names.push_back("glMultiTexCoord1dvARB");
-				names.push_back("glMultiTexCoord1fARB");
-				names.push_back("glMultiTexCoord1fvARB");
-				names.push_back("glMultiTexCoord1iARB");
-				names.push_back("glMultiTexCoord1ivARB");
-				names.push_back("glMultiTexCoord1sARB");
-				names.push_back("glMultiTexCoord1svARB");
-				names.push_back("glMultiTexCoord2dARB");
-				names.push_back("glMultiTexCoord2dvARB");
-				names.push_back("glMultiTexCoord2fARB");
-				names.push_back("glMultiTexCoord2fvARB");
-				names.push_back("glMultiTexCoord2iARB");
-				names.push_back("glMultiTexCoord2ivARB");
-				names.push_back("glMultiTexCoord2sARB");
-				names.push_back("glMultiTexCoord2svARB");
-				names.push_back("glMultiTexCoord3dARB");
-				names.push_back("glMultiTexCoord3dvARB");
-				names.push_back("glMultiTexCoord3fARB");
-				names.push_back("glMultiTexCoord3fvARB");
-				names.push_back("glMultiTexCoord3iARB");
-				names.push_back("glMultiTexCoord3ivARB");
-				names.push_back("glMultiTexCoord3sARB");
-				names.push_back("glMultiTexCoord3svARB");
-				names.push_back("glMultiTexCoord4dARB");
-				names.push_back("glMultiTexCoord4dvARB");
-				names.push_back("glMultiTexCoord4fARB");
-				names.push_back("glMultiTexCoord4fvARB");
-				names.push_back("glMultiTexCoord4iARB");
-				names.push_back("glMultiTexCoord4ivARB");
-				names.push_back("glMultiTexCoord4sARB");
-				names.push_back("glMultiTexCoord4svARB");
-				names.push_back("glLoadTransposeMatrixfARB");
-				names.push_back("glLoadTransposeMatrixdARB");
-				names.push_back("glMultTransposeMatrixfARB");
-				names.push_back("glMultTransposeMatrixdARB");
-				names.push_back("glSampleCoverageARB");
-				names.push_back("glCompressedTexImage3DARB");
-				names.push_back("glCompressedTexImage2DARB");
-				names.push_back("glCompressedTexImage1DARB");
-				names.push_back("glCompressedTexSubImage3DARB");
-				names.push_back("glCompressedTexSubImage2DARB");
-				names.push_back("glCompressedTexSubImage1DARB");
-				names.push_back("glGetCompressedTexImageARB");
-
-				load_funcs(entries, names);
-
-				return;
+				glActiveTexture = glActiveTextureARB;
+				glClientActiveTexture = glClientActiveTextureARB;
+				glMultiTexCoord1d = glMultiTexCoord1dARB;
+				glMultiTexCoord1dv = glMultiTexCoord1dvARB;
+				glMultiTexCoord1f = glMultiTexCoord1fARB;
+				glMultiTexCoord1fv = glMultiTexCoord1fvARB;
+				glMultiTexCoord1i = glMultiTexCoord1iARB;
+				glMultiTexCoord1iv = glMultiTexCoord1ivARB;
+				glMultiTexCoord1s = glMultiTexCoord1sARB;
+				glMultiTexCoord1sv = glMultiTexCoord1svARB;
+				glMultiTexCoord2d = glMultiTexCoord2dARB;
+				glMultiTexCoord2dv = glMultiTexCoord2dvARB;
+				glMultiTexCoord2f = glMultiTexCoord2fARB;
+				glMultiTexCoord2fv = glMultiTexCoord2fvARB;
+				glMultiTexCoord2i = glMultiTexCoord2iARB;
+				glMultiTexCoord2iv = glMultiTexCoord2ivARB;
+				glMultiTexCoord2s = glMultiTexCoord2sARB;
+				glMultiTexCoord2sv = glMultiTexCoord2svARB;
+				glMultiTexCoord3d = glMultiTexCoord3dARB;
+				glMultiTexCoord3dv = glMultiTexCoord3dvARB;
+				glMultiTexCoord3f = glMultiTexCoord3fARB;
+				glMultiTexCoord3fv = glMultiTexCoord3fvARB;
+				glMultiTexCoord3i = glMultiTexCoord3iARB;
+				glMultiTexCoord3iv = glMultiTexCoord3ivARB;
+				glMultiTexCoord3s = glMultiTexCoord3sARB;
+				glMultiTexCoord3sv = glMultiTexCoord3svARB;
+				glMultiTexCoord4d = glMultiTexCoord4dARB;
+				glMultiTexCoord4dv = glMultiTexCoord4dvARB;
+				glMultiTexCoord4f = glMultiTexCoord4fARB;
+				glMultiTexCoord4fv = glMultiTexCoord4fvARB;
+				glMultiTexCoord4i = glMultiTexCoord4iARB;
+				glMultiTexCoord4iv = glMultiTexCoord4ivARB;
+				glMultiTexCoord4s = glMultiTexCoord4sARB;
+				glMultiTexCoord4sv = glMultiTexCoord4svARB;
+				glLoadTransposeMatrixf = glLoadTransposeMatrixfARB;
+				glLoadTransposeMatrixd = glLoadTransposeMatrixdARB;
+				glMultTransposeMatrixf = glMultTransposeMatrixfARB;
+				glMultTransposeMatrixd = glMultTransposeMatrixdARB;
+				glSampleCoverage = glSampleCoverageARB;
+				glCompressedTexImage3D = glCompressedTexImage3DARB;
+				glCompressedTexImage2D = glCompressedTexImage2DARB;
+				glCompressedTexImage1D = glCompressedTexImage1DARB;
+				glCompressedTexSubImage3D = glCompressedTexSubImage3DARB;
+				glCompressedTexSubImage2D = glCompressedTexSubImage2DARB;
+				glCompressedTexSubImage1D = glCompressedTexSubImage1DARB;
+				glGetCompressedTexImage = glGetCompressedTexImageARB;
 			}
 		}
 	}
@@ -557,3 +501,5 @@ glCompressedTexSubImage1DFUNC glCompressedTexSubImage1D = self_init_glCompressed
 glGetCompressedTexImageFUNC glGetCompressedTexImage = self_init_glGetCompressedTexImage;
 
 #endif		// GL_VERSION_1_3
+
+#endif			// GLLOADER_GL

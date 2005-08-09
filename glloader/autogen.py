@@ -287,7 +287,7 @@ def create_source(prefix, extensions):
 
 	sourceFile.write("}\n\n")
 
-	sourceFile.write("#endif\t\t// %s\n" % prefix.upper())
+	sourceFile.write("#endif\t\t// GLLOADER_%s\n" % prefix.upper())
 
 	sourceFile.close()
 

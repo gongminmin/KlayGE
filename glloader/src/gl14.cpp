@@ -19,6 +19,8 @@
 #include <glloader/gl14.h>
 #include "utils.hpp"
 
+#ifdef GLLOADER_GL
+
 using glloader::load_funcs;
 using glloader::gl_features_extractor;
 
@@ -140,8 +142,6 @@ namespace
 			}
 
 			load_funcs(entries, names);
-
-			return;
 		}
 		else
 		{
@@ -233,8 +233,6 @@ namespace
 						glWindowPos3sv = glWindowPos3svMESA;
 					}
 				}
-
-				return;
 			}
 		}
 	}
@@ -526,3 +524,5 @@ glWindowPos3sFUNC glWindowPos3s = self_init_glWindowPos3s;
 glWindowPos3svFUNC glWindowPos3sv = self_init_glWindowPos3sv;
 
 #endif		// GL_VERSION_1_4
+
+#endif			// GLLOADER_GL
