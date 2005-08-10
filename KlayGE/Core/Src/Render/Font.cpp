@@ -5,7 +5,8 @@
 // Homepage: http://klayge.sourceforge.net
 //
 // 2.8.0
-// 修正了越界的bug
+// 修正了越界的bug (2005.7.20)
+// 增加了pool (2005.8.10)
 //
 // 2.7.1
 // 美化了字体显示效果 (2005.7.7)
@@ -49,6 +50,7 @@
 #include <vector>
 #include <cstring>
 #include <boost/assert.hpp>
+#include <boost/mem_fn.hpp>
 
 #include <KlayGE/Font.hpp>
 
@@ -261,7 +263,7 @@ namespace KlayGE
 	{
 		for (std::wstring::const_iterator citer = text.begin(); citer != text.end(); ++ citer)
 		{
-			wchar_t const & ch(*citer);
+			wchar_t const & ch = *citer;
 
 			if (charInfoMap_.find(ch) != charInfoMap_.end())
 			{
@@ -328,15 +330,15 @@ namespace KlayGE
 						charLRU_.pop_back();
 						charInfoMap_.erase(iter);
 
-						charRect.left	= static_cast<long>(charInfo.texRect.left() * theTexture_->Width(0));
-						charRect.top	= static_cast<long>(charInfo.texRect.top() * theTexture_->Height(0));
+						charRect.left	= static_cast<long>(charInfo.texRect.left() * tex_width);
+						charRect.top	= static_cast<long>(charInfo.texRect.top() * tex_height);
 						charRect.right	= charRect.left + width;
-						charRect.bottom	= charRect.top + this->FontHeight();
+						charRect.bottom	= charRect.top + max_height;
 					}
 
 					std::vector<uint16_t> dest(max_width * max_height, 0);
-					int const rows(std::min<int>(slot_->bitmap.rows, max_height));
-					int const cols(std::min<int>(slot_->bitmap.width, max_width));
+					int const rows = std::min<int>(slot_->bitmap.rows, max_height);
+					int const cols = std::min<int>(slot_->bitmap.width, max_width);
 					int const y_start = std::max<int>(max_height * 3 / 4 - slot_->bitmap_top, 0);
 					for (int y = 0; y < rows; ++ y)
 					{
@@ -396,8 +398,20 @@ namespace KlayGE
 			*(effect_->ParameterByName("halfWidth")) = viewport.width / 2;
 			*(effect_->ParameterByName("halfHeight")) = viewport.height / 2;
 
-			boost::shared_ptr<FontRenderable> renderable(new FontRenderable(effect_, vb_));
-			renderable->RenderText(this->FontHeight(), charInfoMap_,
+			RenderablePtr renderable;
+			FontRenderablePoolType::iterator iter = std::find_if(pool_.begin(), pool_.end(),
+				boost::mem_fn(&RenderablePtr::unique));
+			if (iter != pool_.end())
+			{
+				renderable = *iter;
+			}
+			else
+			{
+				renderable.reset(new FontRenderable(effect_, vb_));
+				pool_.push_back(renderable);
+			}
+
+			static_cast<FontRenderable&>(*renderable).RenderText(this->FontHeight(), charInfoMap_,
 				sx, sy, sz, xScale, yScale, clr, text, flags);
 			renderable->AddToSceneManager();
 		}

@@ -1,8 +1,11 @@
 // Font.hpp
 // KlayGE Font类 头文件
-// Ver 2.3.0
+// Ver 2.8.0
 // 版权所有(C) 龚敏敏, 2003-2004
 // Homepage: http://klayge.sourceforge.net
+//
+// 2.8.0
+// 增加了pool (2005.8.10)
 //
 // 2.3.0
 // 使用FreeType实现字体读取 (2004.12.26)
@@ -81,6 +84,7 @@ namespace KlayGE
 
 		typedef std::map<wchar_t, CharInfo, std::less<wchar_t>, boost::fast_pool_allocator<std::pair<wchar_t, CharInfo> > > CharInfoMapType;
 		typedef std::list<wchar_t, boost::fast_pool_allocator<wchar_t> > CharLRUType;
+		typedef std::vector<RenderablePtr, boost::pool_allocator<RenderablePtr> > FontRenderablePoolType;
 
 	private:
 		void UpdateTexture(std::wstring const & text);
@@ -99,6 +103,8 @@ namespace KlayGE
 		::FT_Library	ftLib_;
 		::FT_Face		face_;
 		::FT_GlyphSlot	slot_;
+
+		FontRenderablePoolType pool_;
 	};
 }
 
