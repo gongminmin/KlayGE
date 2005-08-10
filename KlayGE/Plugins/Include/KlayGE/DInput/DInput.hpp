@@ -1,8 +1,11 @@
 // DInput.hpp
 // KlayGE DirectInput输入引擎类 头文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.8.0
+// 版权所有(C) 龚敏敏, 2003-2005
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.8.0
+// 改为多继承结构 (2005.8.11)
 //
 // 2.0.0
 // 初次建立 (2003.8.30)
@@ -20,8 +23,9 @@
 
 #include <KlayGE/Input.hpp>
 #include <boost/smart_ptr.hpp>
-
 #include <boost/utility.hpp>
+
+#include <KlayGE/DInput/DInputDevice.hpp>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_InputEngine_DInput_d.lib")
@@ -51,34 +55,43 @@ namespace KlayGE
 		static BOOL CALLBACK EnumDevicesCB(LPCDIDEVICEINSTANCEW didi, void* pvRef);
 	};
 
-	class DInputKeyboard : public InputKeyboard
+	class DInputKeyboard : public InputKeyboard, public DInputDevice
 	{
 	public:
-		DInputKeyboard(REFGUID guid, InputEngine& inputEng);
+		DInputKeyboard(REFGUID guid, InputEngine const & inputEng);
 
 		std::wstring const & Name() const;
+
+		void Acquire();
+		void Unacquire();
 
 	private:
 		void UpdateInputs();
 	};
 
-	class DInputMouse : public InputMouse
+	class DInputMouse : public InputMouse, public DInputDevice
 	{
 	public:
-		DInputMouse(REFGUID guid, InputEngine& inputEng);
+		DInputMouse(REFGUID guid, InputEngine const & inputEng);
 
 		std::wstring const & Name() const;
+
+		void Acquire();
+		void Unacquire();
 
 	private:
 		void UpdateInputs();
 	};
 
-	class DInputJoystick : public InputJoystick
+	class DInputJoystick : public InputJoystick, public DInputDevice
 	{
 	public:
-		DInputJoystick(REFGUID guid, InputEngine& inputEng);
+		DInputJoystick(REFGUID guid, InputEngine const & inputEng);
 
 		std::wstring const & Name() const;
+
+		void Acquire();
+		void Unacquire();
 
 	private:
 		void UpdateInputs();

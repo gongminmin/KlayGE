@@ -1,11 +1,12 @@
 // DIMouse.cpp
 // KlayGE DInput鼠标管理类 实现文件
 // Ver 2.8.0
-// 版权所有(C) 龚敏敏, 2003-2004
+// 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
 //
 // 2.8.0
 // 改为非独占模式 (2005.7.26)
+// 改用多继承结构 (2005.8.11)
 //
 // 2.1.2
 // 改用Bridge模式实现 (2004.9.5)
@@ -24,19 +25,17 @@
 #include <boost/lambda/lambda.hpp>
 
 #include <KlayGE/DInput/DInput.hpp>
-#include <KlayGE/DInput/DInputDeviceImpl.hpp>
+#include <KlayGE/DInput/DInputDevice.hpp>
 
 namespace KlayGE
 {
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
-	DInputMouse::DInputMouse(REFGUID guid, InputEngine& inputEng)
+	DInputMouse::DInputMouse(REFGUID guid, InputEngine const & inputEng)
+					: DInputDevice(guid, inputEng)
 	{
-		boost::shared_ptr<DInputDeviceImpl> didImpl(new DInputDeviceImpl(guid, inputEng));
-		impl_ = didImpl;
-
-		didImpl->DataFormat(c_dfDIMouse);
-		didImpl->CooperativeLevel(::GetActiveWindow(), DISCL_NONEXCLUSIVE | DISCL_FOREGROUND);
+		this->DataFormat(c_dfDIMouse);
+		this->CooperativeLevel(::GetActiveWindow(), DISCL_NONEXCLUSIVE | DISCL_FOREGROUND);
 
 		// 把鼠标的设为相对模式
 		DIPROPDWORD dipdw;
@@ -45,7 +44,7 @@ namespace KlayGE
 		dipdw.diph.dwObj		= 0;
 		dipdw.diph.dwHow		= DIPH_DEVICE;
 		dipdw.dwData			= DIPROPAXISMODE_REL;
-		didImpl->Property(DIPROP_AXISMODE, dipdw.diph);
+		this->Property(DIPROP_AXISMODE, dipdw.diph);
 
 		this->Acquire();
 	}
@@ -58,14 +57,26 @@ namespace KlayGE
 		return name;
 	}
 
+	// 获取设备
+	//////////////////////////////////////////////////////////////////////////////////
+	void DInputMouse::Acquire()
+	{
+		DInputDevice::Acquire();
+	}
+
+	// 释放设备
+	//////////////////////////////////////////////////////////////////////////////////
+	void DInputMouse::Unacquire()
+	{
+		DInputDevice::Unacquire();
+	}
+
 	// 更新鼠标状态
 	//////////////////////////////////////////////////////////////////////////////////
 	void DInputMouse::UpdateInputs()
 	{
-		BOOST_ASSERT(dynamic_cast<DInputDeviceImpl*>(impl_.get()) != NULL);
-
 		DIMOUSESTATE diMouseState;
-		static_cast<DInputDeviceImpl*>(impl_.get())->DeviceState(&diMouseState, sizeof(diMouseState));
+		this->DeviceState(&diMouseState, sizeof(diMouseState));
 
 		pos_ = Vector_T<long, 3>(diMouseState.lX, diMouseState.lY, diMouseState.lZ);
 

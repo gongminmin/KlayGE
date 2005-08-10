@@ -1,8 +1,11 @@
-// DInput.hpp
+// DInputDevice.hpp
 // KlayGE DirectInput输入引擎类 头文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 2.8.0
+// 版权所有(C) 龚敏敏, 2003-2005
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.8.0
+// 改为基类 (2005.8.11)
 //
 // 2.0.0
 // 初次建立 (2003.8.30)
@@ -10,8 +13,8 @@
 // 修改记录
 /////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _DINPUTDEVICEIMPL_HPP
-#define _DINPUTDEVICEIMPL_HPP
+#ifndef _DINPUTDEVICE_HPP
+#define _DINPUTDEVICE_HPP
 
 #ifndef DIRECTINPUT_VERSION
 #define DIRECTINPUT_VERSION 0x0800
@@ -29,10 +32,11 @@
 
 namespace KlayGE
 {
-	class DInputDeviceImpl : public InputDeviceImpl
+	class DInputDevice
 	{
 	public:
-		DInputDeviceImpl(REFGUID guid, InputEngine& inputEng);
+		DInputDevice(REFGUID guid, InputEngine const & inputEng);
+		virtual ~DInputDevice();
 
 		void Acquire();
 		void Unacquire();
@@ -49,4 +53,4 @@ namespace KlayGE
 	};
 }
 
-#endif		// _DINPUTDEVICEIMPL_HPP
+#endif		// _DINPUTDEVICE_HPP

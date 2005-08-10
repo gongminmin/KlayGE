@@ -301,17 +301,6 @@ namespace KlayGE
 		action_maps_t actionMaps_;
 	};
 
-	class InputDeviceImpl
-	{
-	public:
-		virtual ~InputDeviceImpl()
-		{
-		}
-
-		virtual void Acquire() = 0;
-		virtual void Unacquire() = 0;
-	};
-
 	class InputDevice
 	{
 	public:
@@ -322,8 +311,8 @@ namespace KlayGE
 		InputActionsType Update(uint32_t id);
 		void ActionMap(action_maps_t const & ams);
 
-		void Acquire();
-		void Unacquire();
+		virtual void Acquire() = 0;
+		virtual void Unacquire() = 0;
 
 	protected:
 		virtual void UpdateInputs() = 0;
@@ -332,8 +321,6 @@ namespace KlayGE
 
 	protected:
 		action_maps_t actionMaps_;
-
-		boost::shared_ptr<InputDeviceImpl> impl_;
 	};
 
 	class InputKeyboard : public InputDevice

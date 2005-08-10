@@ -111,7 +111,7 @@
 				RelativePath=".\DIMouse.cpp">
 			</File>
 			<File
-				RelativePath=".\DInputDeviceImpl.cpp">
+				RelativePath=".\DInputDevice.cpp">
 			</File>
 			<File
 				RelativePath=".\DInputEngine.cpp">
@@ -128,7 +128,7 @@
 				RelativePath="..\..\..\Include\KlayGE\DInput\DInput.hpp">
 			</File>
 			<File
-				RelativePath="..\..\..\Include\KlayGE\DInput\DInputDeviceImpl.hpp">
+				RelativePath="..\..\..\Include\KlayGE\DInput\DInputDevice.hpp">
 			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\DInput\DInputFactory.hpp">
