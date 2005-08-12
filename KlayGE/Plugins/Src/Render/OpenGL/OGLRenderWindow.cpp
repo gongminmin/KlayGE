@@ -1,3 +1,15 @@
+// OGLRenderWindow.cpp
+// KlayGE OpenGL渲染窗口类 实现文件
+// Ver 2.8.0
+// 版权所有(C) 龚敏敏, 2004-2005
+// Homepage: http://klayge.sourceforge.net
+//
+// 2.8.0
+// 只支持OpenGL 1.4及以上 (2005.8.12)
+//
+// 修改记录
+//////////////////////////////////////////////////////////////////////////////////
+
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
@@ -201,6 +213,11 @@ namespace KlayGE
 		hRC_ = ::wglCreateContext(hDC_);
 		::wglMakeCurrent(hDC_, hRC_);
 
+		if (!glloader_GL_VERSION_1_4())
+		{
+			THR(E_FAIL);
+		}
+
 		glEnable(GL_COLOR_MATERIAL);
 		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
@@ -277,8 +294,6 @@ namespace KlayGE
 
 	void OGLRenderWindow::Reposition(int left, int top)
 	{
-		viewport_.left = left;
-		viewport_.top = top;
 	}
 
 	void OGLRenderWindow::Resize(int width, int height)
