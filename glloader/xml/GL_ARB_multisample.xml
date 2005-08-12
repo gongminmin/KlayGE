@@ -2,15 +2,15 @@
 
 <GLExtension name="GL_ARB_multisample">
 	<Tokens>
-		<Token name="GL_MULTISAMPLE" value="0x809D"/>
-		<Token name="GL_SAMPLE_ALPHA_TO_COVERAGE" value="0x809E"/>
-		<Token name="GL_SAMPLE_ALPHA_TO_ONE" value="0x809F"/>
-		<Token name="GL_SAMPLE_COVERAGE" value="0x80A0"/>
-		<Token name="GL_SAMPLE_BUFFERS" value="0x80A8"/>
-		<Token name="GL_SAMPLES" value="0x80A9"/>
-		<Token name="GL_SAMPLE_COVERAGE_VALUE" value="0x80AA"/>
-		<Token name="GL_SAMPLE_COVERAGE_INVERT" value="0x80AB"/>
-		<Token name="GL_MULTISAMPLE_BIT" value="0x20000000"/>
+		<Token name="GL_MULTISAMPLE_ARB" value="0x809D"/>
+		<Token name="GL_SAMPLE_ALPHA_TO_COVERAGE_ARB" value="0x809E"/>
+		<Token name="GL_SAMPLE_ALPHA_TO_ONE_ARB" value="0x809F"/>
+		<Token name="GL_SAMPLE_COVERAGE_ARB" value="0x80A0"/>
+		<Token name="GL_SAMPLE_BUFFERS_ARB" value="0x80A8"/>
+		<Token name="GL_SAMPLES_ARB" value="0x80A9"/>
+		<Token name="GL_SAMPLE_COVERAGE_VALUE_ARB" value="0x80AA"/>
+		<Token name="GL_SAMPLE_COVERAGE_INVERT_ARB" value="0x80AB"/>
+		<Token name="GL_MULTISAMPLE_BIT_ARB" value="0x20000000"/>
 	</Tokens>
 
 	<Functions>
