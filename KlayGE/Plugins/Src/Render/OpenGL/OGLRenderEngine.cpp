@@ -8,6 +8,7 @@
 // 增加了RenderDeviceCaps (2005.7.17)
 // 简化了StencilBuffer相关操作 (2005.7.20)
 // 只支持vbo (2005.7.31)
+// 只支持OpenGL 1.5及以上 (2005.8.12)
 //
 // 2.7.0
 // 支持vertex_buffer_object (2005.6.19)
@@ -159,25 +160,6 @@ namespace KlayGE
 		RenderSettings const & settings)
 	{
 		RenderWindowPtr win(new OGLRenderWindow(name, settings));
-
-		if (glloader_GL_VERSION_1_3())
-		{
-			glActiveTexture_ = glActiveTexture;
-			glClientActiveTexture_ = glClientActiveTexture;
-		}
-		else
-		{
-			if (glloader_GL_ARB_multitexture())
-			{
-				glActiveTexture_ = glActiveTextureARB;
-				glClientActiveTexture_ = glClientActiveTextureARB;
-			}
-			else
-			{
-				glActiveTexture_ = NULL;
-				glClientActiveTexture_ = NULL;
-			}
-		}
 
 		this->FillRenderDeviceCaps();
 		renderTargets_.resize(caps_.max_simultaneous_rts);
@@ -422,10 +404,7 @@ namespace KlayGE
 			case VST_TextureCoords5:
 			case VST_TextureCoords6:
 			case VST_TextureCoords7:
-				if (glClientActiveTexture_ != NULL)
-				{
-					glClientActiveTexture_(GL_TEXTURE0 + type - VST_TextureCoords0);
-				}
+				glClientActiveTexture(GL_TEXTURE0 + type - VST_TextureCoords0);
 				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 				stream.Active();
 				glTexCoordPointer(static_cast<GLint>(stream.ElementsPerVertex()),
@@ -590,10 +569,7 @@ namespace KlayGE
 
 		BOOST_ASSERT(dynamic_cast<OGLTexture const *>(texture.get()) != NULL);
 
-		if (glActiveTexture_ != NULL)
-		{
-			glActiveTexture_(GL_TEXTURE0 + stage);
-		}
+		glActiveTexture(GL_TEXTURE0 + stage);
 
 		OGLTexture& gl_tex = *static_cast<OGLTexture*>(texture.get());
 		GLenum tex_type = gl_tex.GLType();
@@ -643,27 +619,13 @@ namespace KlayGE
 				break;
 			}
 
-			if (glloader_GL_VERSION_1_2() || glloader_GL_SGIS_texture_lod())
-			{
-				glTexParameteri(tex_type, GL_TEXTURE_MAX_LEVEL, sampler->MaxMipLevel());
-			}
+			glTexParameteri(tex_type, GL_TEXTURE_MAX_LEVEL, sampler->MaxMipLevel());
 
-			if (glloader_GL_VERSION_1_4() || glloader_GL_EXT_texture_lod_bias())
 			{
 				GLfloat bias;
 				glGetFloatv(GL_MAX_TEXTURE_LOD_BIAS, &bias);
 				bias = std::min(sampler->MipMapLodBias(), bias);
 				glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, bias);
-			}
-			else
-			{
-				if (glloader_GL_SGIX_texture_lod_bias())
-				{
-					GLfloat bias = sampler->MipMapLodBias();
-					glTexParameterf(tex_type, GL_TEXTURE_LOD_BIAS_S_SGIX, bias);
-					glTexParameterf(tex_type, GL_TEXTURE_LOD_BIAS_T_SGIX, bias);
-					glTexParameterf(tex_type, GL_TEXTURE_LOD_BIAS_R_SGIX, bias);
-				}
 			}
 
 			{
@@ -681,14 +643,11 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::DisableSampler(uint32_t stage)
 	{
-		if (glActiveTexture_ != NULL)
-		{
-			glActiveTexture_(GL_TEXTURE0 + stage);
-			glDisable(GL_TEXTURE_1D);
-			glDisable(GL_TEXTURE_2D);
-			glDisable(GL_TEXTURE_3D);
-			glDisable(GL_TEXTURE_CUBE_MAP);
-		}
+		glActiveTexture(GL_TEXTURE0 + stage);
+		glDisable(GL_TEXTURE_1D);
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_TEXTURE_3D);
+		glDisable(GL_TEXTURE_CUBE_MAP);
 	}
 
 	// 打开模板缓冲区
@@ -776,33 +735,15 @@ namespace KlayGE
 
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &temp);
 		caps_.max_texture_height = caps_.max_texture_width = temp;
-		if (glloader_GL_VERSION_1_2() || glloader_GL_EXT_texture3D())
-		{
-			glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &temp);
-			caps_.max_texture_depth = temp;
-		}
-		else
-		{
-			caps_.max_texture_depth = 0;
-		}
-		if (glloader_GL_VERSION_1_3() || glloader_GL_ARB_texture_cube_map())
-		{
-			glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &temp);
-			caps_.max_texture_cube_size = temp;
-		}
-		else
-		{
-			caps_.max_texture_cube_size = 0;
-		}
-		if (glloader_GL_VERSION_1_3() || glloader_GL_ARB_multitexture())
-		{
-			glGetIntegerv(GL_MAX_TEXTURE_UNITS, &temp);
-			caps_.max_textures_units = temp;
-		}
-		else
-		{
-			caps_.max_textures_units = 1;
-		}
+		glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &temp);
+		caps_.max_texture_depth = temp;
+		
+		glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &temp);
+		caps_.max_texture_cube_size = temp;
+
+		glGetIntegerv(GL_MAX_TEXTURE_UNITS, &temp);
+		caps_.max_textures_units = temp;
+
 		if (glloader_GL_EXT_texture_filter_anisotropic())
 		{
 			glGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &temp);

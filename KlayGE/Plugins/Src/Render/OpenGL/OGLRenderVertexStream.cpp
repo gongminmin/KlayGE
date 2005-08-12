@@ -37,24 +37,6 @@ namespace KlayGE
 
 		if (glloader_GL_EXT_framebuffer_object())
 		{
-			if (glloader_GL_VERSION_1_5())
-			{
-				glBindBuffer_ = glBindBuffer;
-				glBufferData_ = glBufferData;
-			}
-			else
-			{
-				if (glloader_GL_ARB_vertex_buffer_object())
-				{
-					glBindBuffer_ = glBindBufferARB;
-					glBufferData_ = glBufferDataARB;
-				}
-				else
-				{
-					THR(E_FAIL);
-				}
-			}
-
 			if (!glloader_GL_ARB_pixel_buffer_object())
 			{
 				THR(E_FAIL);
@@ -113,8 +95,8 @@ namespace KlayGE
 		vs_ = vs;
 
 		OGLVertexStream& ogl_vs = static_cast<OGLVertexStream&>(*vs_);
-		glBindBuffer_(GL_PIXEL_PACK_BUFFER_ARB, ogl_vs.OGLvbo());
-		glBufferData_(GL_PIXEL_PACK_BUFFER_ARB,
+		glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, ogl_vs.OGLvbo());
+		glBufferData(GL_PIXEL_PACK_BUFFER_ARB,
 			reinterpret_cast<GLsizeiptr>(width_ * height_ * vs->ElementsPerVertex() * sizeof(GLfloat)), NULL, GL_DYNAMIC_DRAW);
 
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
@@ -172,7 +154,7 @@ namespace KlayGE
 		}
 
 		OGLVertexStream& ogl_vs = static_cast<OGLVertexStream&>(*vs_);
-		glBindBuffer_(GL_PIXEL_PACK_BUFFER_ARB, ogl_vs.OGLvbo());
+		glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, ogl_vs.OGLvbo());
 		glReadPixels(0, 0, width_, height_, format, type, 0);
 
 		glBindFramebufferEXT_(GL_FRAMEBUFFER_EXT, 0);

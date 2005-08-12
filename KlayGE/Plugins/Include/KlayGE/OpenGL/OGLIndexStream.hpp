@@ -37,10 +37,6 @@ namespace KlayGE
 		{
 			return static_stream_;
 		}
-		bool UseVBO() const
-		{
-			return use_vbo_;
-		}
 		size_t NumIndices() const
 		{
 			return numIndices_;
@@ -51,34 +47,15 @@ namespace KlayGE
 
 		void Active();
 
-		std::vector<uint16_t> const & OGLBuffer() const
-		{
-			return buffer_;
-		}
 		GLuint OGLvbo() const
 		{
 			return ib_;
 		}
 
 	protected:
-		std::vector<uint16_t> buffer_;
-
 		size_t numIndices_;
 
-		bool use_vbo_;
 		bool static_stream_;
-
-		glBindBufferARBFUNC glBindBuffer_;
-		glBufferDataARBFUNC glBufferData_;
-		glBufferSubDataARBFUNC glBufferSubData_;
-		glDeleteBuffersARBFUNC glDeleteBuffers_;
-		glGenBuffersARBFUNC glGenBuffers_;
-		glGetBufferParameterivARBFUNC glGetBufferParameteriv_;
-		glGetBufferPointervARBFUNC glGetBufferPointerv_;
-		glGetBufferSubDataARBFUNC glGetBufferSubData_;
-		glIsBufferARBFUNC glIsBuffer_;
-		glMapBufferARBFUNC glMapBuffer_;
-		glUnmapBufferARBFUNC glUnmapBuffer_;
 
 		GLuint ib_;
 	};

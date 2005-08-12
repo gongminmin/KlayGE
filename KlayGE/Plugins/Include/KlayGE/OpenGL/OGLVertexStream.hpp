@@ -57,18 +57,6 @@ namespace KlayGE
 
 		bool static_stream_;
 
-		glBindBufferARBFUNC glBindBuffer_;
-		glBufferDataARBFUNC glBufferData_;
-		glBufferSubDataARBFUNC glBufferSubData_;
-		glDeleteBuffersARBFUNC glDeleteBuffers_;
-		glGenBuffersARBFUNC glGenBuffers_;
-		glGetBufferParameterivARBFUNC glGetBufferParameteriv_;
-		glGetBufferPointervARBFUNC glGetBufferPointerv_;
-		glGetBufferSubDataARBFUNC glGetBufferSubData_;
-		glIsBufferARBFUNC glIsBuffer_;
-		glMapBufferARBFUNC glMapBuffer_;
-		glUnmapBufferARBFUNC glUnmapBuffer_;
-
 		GLuint vb_;
 	};
 }

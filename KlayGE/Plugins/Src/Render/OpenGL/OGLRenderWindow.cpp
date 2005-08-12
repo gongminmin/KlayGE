@@ -5,7 +5,7 @@
 // Homepage: http://klayge.sourceforge.net
 //
 // 2.8.0
-// 只支持OpenGL 1.4及以上 (2005.8.12)
+// 只支持OpenGL 1.5及以上 (2005.8.12)
 //
 // 修改记录
 //////////////////////////////////////////////////////////////////////////////////
@@ -213,7 +213,7 @@ namespace KlayGE
 		hRC_ = ::wglCreateContext(hDC_);
 		::wglMakeCurrent(hDC_, hRC_);
 
-		if (!glloader_GL_VERSION_1_4())
+		if (!glloader_GL_VERSION_1_5())
 		{
 			THR(E_FAIL);
 		}

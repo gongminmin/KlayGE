@@ -107,10 +107,6 @@ namespace KlayGE
 
 	private:
 		CullMode cullingMode_;
-
-	private:
-		glActiveTextureFUNC glActiveTexture_;
-		glClientActiveTextureFUNC glClientActiveTexture_;
 	};
 
 	typedef boost::shared_ptr<OGLRenderEngine> OGLRenderEnginePtr;

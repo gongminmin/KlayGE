@@ -37,9 +37,6 @@ namespace KlayGE
 			{ return false; }
 
 	private:
-		glBindBufferFUNC glBindBuffer_;
-		glBufferDataFUNC glBufferData_;
-
 		glIsRenderbufferEXTFUNC glIsRenderbufferEXT_;
 		glBindRenderbufferEXTFUNC glBindRenderbufferEXT_;
 		glDeleteRenderbuffersEXTFUNC glDeleteRenderbuffersEXT_;
