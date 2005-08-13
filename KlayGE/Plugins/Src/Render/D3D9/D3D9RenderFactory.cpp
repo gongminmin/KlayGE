@@ -81,6 +81,9 @@ namespace KlayGE
 		switch (type)
 		{
 		case VST_Positions:
+			ret.reset(new D3D9VertexStream(type, sizeof(float), numElement, staticStream));
+			break;
+
 		case VST_Normals:
 			ret.reset(new D3D9VertexStream(type, sizeof(float), 3, staticStream));
 			break;

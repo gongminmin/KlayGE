@@ -32,6 +32,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <algorithm>
+#include <iterator>
 
 #include <boost/static_assert.hpp>
 
@@ -1519,7 +1520,8 @@ namespace KlayGE
 		inline Box_T<T>
 		ComputeBoundingBox(Iterator first, Iterator last)
 		{
-			Vector_T<T, 3> minVec(*first), maxVec(*first);
+			typedef typename std::iterator_traits<Iterator>::value_type vector_type;
+			vector_type minVec(*first), maxVec(*first);
 			Iterator iter = first;
 			++ iter;
 			for (; iter != last; ++ iter)
@@ -1527,21 +1529,23 @@ namespace KlayGE
 				minVec = Minimize(minVec, *iter);
 				maxVec = Maximize(maxVec, *iter);
 			}
-			return Box_T<T>(minVec, maxVec);
+			return Box_T<T>(Vector_T<T, 3>(minVec.x(), minVec.y(), minVec.z()),
+				Vector_T<T, 3>(maxVec.x(), maxVec.y(), maxVec.z()));
 		}
 
 		template <typename T, typename Iterator>
 		inline Sphere_T<T>
 		ComputeBoundingSphere(Iterator first, Iterator last)
 		{
+			typedef typename std::iterator_traits<Iterator>::value_type vector_type;
 			T const min_float = std::numeric_limits<T>::min();
 			T const max_float = std::numeric_limits<T>::max();
-			Vector_T<T, 3> x_min(max_float, max_float, max_float);
-			Vector_T<T, 3> y_min(max_float, max_float, max_float);
-			Vector_T<T, 3> z_min(max_float, max_float, max_float);
-			Vector_T<T, 3> x_max(min_float, min_float, min_float);
-			Vector_T<T, 3> y_max(min_float, min_float, min_float);
-			Vector_T<T, 3> z_max(min_float, min_float, min_float);
+			vector_type x_min(max_float, max_float, max_float);
+			vector_type y_min(max_float, max_float, max_float);
+			vector_type z_min(max_float, max_float, max_float);
+			vector_type x_max(min_float, min_float, min_float);
+			vector_type y_max(min_float, min_float, min_float);
+			vector_type z_max(min_float, min_float, min_float);
 			for (Iterator iter = first; iter != last; ++ iter)
 			{
 				if (x_min.x() > iter->x())
@@ -1575,8 +1579,8 @@ namespace KlayGE
 			T y_span = LengthSq(y_max - y_min);
 			T z_span = LengthSq(z_max - z_min);
 
-			Vector_T<T, 3> dia1 = x_min;
-			Vector_T<T, 3> dia2 = x_max;
+			vector_type dia1 = x_min;
+			vector_type dia2 = x_max;
 			T max_span = x_span;
 			if (y_span > max_span)
 			{
@@ -1591,7 +1595,7 @@ namespace KlayGE
 				dia2 = z_max;
 			}
 
-			Vector_T<T, 3> center((dia1 + dia2) / 2);
+			vector_type center((dia1 + dia2) / 2);
 			T r = Length(dia2 - center);
 
 			for (Iterator iter = first; iter != last; ++ iter)
@@ -1621,6 +1625,9 @@ namespace KlayGE
 								PositionIterator xyzsBegin, PositionIterator xyzsEnd,
 								TexCoordIterator texsBegin)
 		{
+			typedef typename std::iterator_traits<PositionIterator>::value_type position_type;
+			typedef typename std::iterator_traits<TexCoordIterator>::value_type texcoord_type;
+
 			int const num = static_cast<int>(std::distance(xyzsBegin, xyzsEnd));
 
 			for (int i = 0; i < num; ++ i)
@@ -1635,16 +1642,16 @@ namespace KlayGE
 				uint16_t const v1Index = *(iter + 1);
 				uint16_t const v2Index = *(iter + 2);
 
-				Vector_T<T, 3> const & v0XYZ(*(xyzsBegin + v0Index));
-				Vector_T<T, 3> const & v1XYZ(*(xyzsBegin + v1Index));
-				Vector_T<T, 3> const & v2XYZ(*(xyzsBegin + v2Index));
+				position_type const & v0XYZ(*(xyzsBegin + v0Index));
+				position_type const & v1XYZ(*(xyzsBegin + v1Index));
+				position_type const & v2XYZ(*(xyzsBegin + v2Index));
 
-				Vector_T<T, 3> v1v0 = v1XYZ - v0XYZ;
-				Vector_T<T, 3> v2v0 = v2XYZ - v0XYZ;
+				position_type v1v0 = v1XYZ - v0XYZ;
+				position_type v2v0 = v2XYZ - v0XYZ;
 
-				Vector_T<T, 2> const & v0Tex(*(texsBegin + v0Index));
-				Vector_T<T, 2> const & v1Tex(*(texsBegin + v1Index));
-				Vector_T<T, 2> const & v2Tex(*(texsBegin + v2Index));
+				texcoord_type const & v0Tex(*(texsBegin + v0Index));
+				texcoord_type const & v1Tex(*(texsBegin + v1Index));
+				texcoord_type const & v2Tex(*(texsBegin + v2Index));
 
 				T s1 = v1Tex.x() - v0Tex.x();
 				T t1 = v1Tex.y() - v0Tex.y();
@@ -1688,6 +1695,8 @@ namespace KlayGE
 								IndexIterator indicesBegin, IndexIterator indicesEnd,
 								PositionIterator xyzsBegin, PositionIterator xyzsEnd)
 		{
+			typedef typename std::iterator_traits<PositionIterator>::value_type position_type;
+
 			NormalIterator normalEnd = normalBegin;
 			std::advance(normalEnd, std::distance(xyzsBegin, xyzsEnd));
 			std::fill(normalBegin, normalEnd, Vector_T<T, 3>::Zero());
@@ -1698,11 +1707,15 @@ namespace KlayGE
 				uint16_t const v1Index = *(iter + 1);
 				uint16_t const v2Index = *(iter + 2);
 
-				Vector_T<T, 3> const & v0(*(xyzsBegin + v0Index));
-				Vector_T<T, 3> const & v1(*(xyzsBegin + v1Index));
-				Vector_T<T, 3> const & v2(*(xyzsBegin + v2Index));
+				position_type const & v0(*(xyzsBegin + v0Index));
+				position_type const & v1(*(xyzsBegin + v1Index));
+				position_type const & v2(*(xyzsBegin + v2Index));
 
-				Vector_T<T, 3> vec(Cross(v1 - v0, v2 - v0));
+				Vector_T<T, 3> v03(v0.x(), v0.y(), v0.z());
+				Vector_T<T, 3> v13(v1.x(), v1.y(), v1.z());
+				Vector_T<T, 3> v23(v2.x(), v2.y(), v2.z());
+
+				Vector_T<T, 3> vec(Cross(v13 - v03, v23 - v03));
 
 				*(normalBegin + v0Index) += vec;
 				*(normalBegin + v1Index) += vec;

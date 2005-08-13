@@ -75,10 +75,15 @@ __________________________________________________________________
 
 发展历程
 
-2.8.1
+2.8.1 (2005.8.14)
 增加了RenderDeviceCaps
 增加了OpenGL兼容性检测工具
 增加了Sampler
+重写了RenderEffect
+只支持OpenGL 1.5及以上
+简化了RenderEngine
+DInputDevice改为多继承结构
+增加了RenderToVertexStream
 
 2.7.1 (2005.7.15)
 美化了字体显示效果

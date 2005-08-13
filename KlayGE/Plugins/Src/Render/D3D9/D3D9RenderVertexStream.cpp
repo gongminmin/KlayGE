@@ -173,17 +173,32 @@ namespace KlayGE
 
 			uint8_t* src = static_cast<uint8_t*>(locked_rect.pBits);
 			std::vector<uint8_t>::iterator dst = vertices.begin();
-			for (int i = 0; i < height_; ++ i)
+			if (4 == elems_per_vert)
 			{
-				for (int j = 0; j < width_; ++ j)
+				for (int i = 0; i < height_; ++ i)
 				{
-					dst[j * elems_per_vert + 0] = src[j * 4 + 0];
-					dst[j * elems_per_vert + 1] = src[j * 4 + 1];
-					dst[j * elems_per_vert + 2] = src[j * 4 + 2];
-				}
+					std::copy(src, src + width_ * 4, dst);
 
-				src += locked_rect.Pitch;
-				dst += width_ * elems_per_vert;
+					src += locked_rect.Pitch;
+					dst += width_ * elems_per_vert;
+				}
+			}
+			else
+			{
+				BOOST_ASSERT(3 == elems_per_vert);
+
+				for (int i = 0; i < height_; ++ i)
+				{
+					for (int j = 0; j < width_; ++ j)
+					{
+						dst[j * elems_per_vert + 0] = src[j * 4 + 0];
+						dst[j * elems_per_vert + 1] = src[j * 4 + 1];
+						dst[j * elems_per_vert + 2] = src[j * 4 + 2];
+					}
+
+					src += locked_rect.Pitch;
+					dst += width_ * elems_per_vert;
+				}
 			}
 
 			vs_->Assign(&vertices[0], width_ * height_);
@@ -196,17 +211,32 @@ namespace KlayGE
 
 			float* src = static_cast<float*>(locked_rect.pBits);
 			std::vector<float>::iterator dst = vertices.begin();
-			for (int i = 0; i < height_; ++ i)
+			if (4 == elems_per_vert)
 			{
-				for (int j = 0; j < width_; ++ j)
+				for (int i = 0; i < height_; ++ i)
 				{
-					dst[j * elems_per_vert + 0] = src[j * 4 + 0];
-					dst[j * elems_per_vert + 1] = src[j * 4 + 1];
-					dst[j * elems_per_vert + 2] = src[j * 4 + 2];
-				}
+					std::copy(src, src + width_ * 4, dst);
 
-				src += locked_rect.Pitch / sizeof(float);
-				dst += width_ * elems_per_vert;
+					src += locked_rect.Pitch / sizeof(float);
+					dst += width_ * elems_per_vert;
+				}
+			}
+			else
+			{
+				BOOST_ASSERT(3 == elems_per_vert);
+
+				for (int i = 0; i < height_; ++ i)
+				{
+					for (int j = 0; j < width_; ++ j)
+					{
+						dst[j * elems_per_vert + 0] = src[j * 4 + 0];
+						dst[j * elems_per_vert + 1] = src[j * 4 + 1];
+						dst[j * elems_per_vert + 2] = src[j * 4 + 2];
+					}
+
+					src += locked_rect.Pitch / sizeof(float);
+					dst += width_ * elems_per_vert;
+				}
 			}
 
 			vs_->Assign(&vertices[0], width_ * height_);
