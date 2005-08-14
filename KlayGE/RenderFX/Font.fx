@@ -22,7 +22,8 @@ sampler2D texFontSampler;
 float4 FontPS(float4 clr : COLOR, float2 texCoord : TEXCOORD0,
 		uniform sampler2D texFont) : COLOR0
 {
-	return clr * tex2D(texFont, texCoord);
+	float4 texel = tex2D(texFont, texCoord);
+	return clr * texel;
 }
 
 technique fontTec
@@ -41,7 +42,6 @@ technique fontTec
 		StencilEnable = false;
 		Clipping = true;
 		ClipPlaneEnable = 0;
-		FogEnable = false;
 		ColorWriteEnable = RED | GREEN | BLUE | ALPHA;
 
 		VertexShader = compile vs_1_1 FontVS();

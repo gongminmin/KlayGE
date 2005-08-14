@@ -46,9 +46,6 @@ technique KMeshTec
 {
 	pass p0
 	{
-		Lighting = false;
-		SpecularEnable = false;
-
 		FillMode = Solid;
 		CullMode = CCW;
 		Stencilenable = false;
@@ -66,9 +63,6 @@ technique KMeshNoTexTec
 {
 	pass p0
 	{
-		Lighting = false;
-		SpecularEnable = false;
-
 		FillMode = Solid;
 		CullMode = CCW;
 		Stencilenable = false;
