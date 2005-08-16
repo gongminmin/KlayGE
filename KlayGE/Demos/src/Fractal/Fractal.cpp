@@ -137,7 +137,7 @@ void Fractal::InitObjects()
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 }
 
-void Fractal::Update()
+void Fractal::Update(uint32_t pass)
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 

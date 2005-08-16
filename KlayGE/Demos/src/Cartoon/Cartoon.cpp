@@ -151,7 +151,7 @@ void Cartoon::InitObjects()
 	action_map_id_ = inputEngine.ActionMap(actionMap, true);
 }
 
-void Cartoon::Update()
+void Cartoon::Update(uint32_t pass)
 {
 	fpcController_.Update();
 

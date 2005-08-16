@@ -118,6 +118,11 @@ namespace
 			lums_sampler_->SetTexture(lums_tex);
 		}
 
+		bool ShortAge() const
+		{
+			return true;
+		}
+
 		void OnRenderBegin()
 		{
 			RenderEngine const & renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -286,52 +291,72 @@ void AsciiArts::InitObjects()
 	action_map_id_ = inputEngine.ActionMap(actionMap, true);
 }
 
-void AsciiArts::Update()
+uint32_t AsciiArts::NumPasses() const
 {
-	fpcController_.Update();
-
-	Camera& camera = this->ActiveCamera();
-
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
-	InputActionsType actions(inputEngine.Update(action_map_id_));
-	for (InputActionsType::iterator iter = actions.begin(); iter != actions.end(); ++ iter)
+	if (show_ascii_)
 	{
-		switch (iter->first)
-		{
-		case Switch:
-			show_ascii_ = !show_ascii_;
-			KlayGE::Sleep(150);
-			break;
+		return 2;
+	}
+	else
+	{
+		return 1;
+	}
+}
 
-		case Exit:
-			this->Quit();
-			break;
+void AsciiArts::Update(uint32_t pass)
+{
+	if (0 == pass)
+	{
+		fpcController_.Update();
+
+		InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+		InputActionsType actions(inputEngine.Update(action_map_id_));
+		for (InputActionsType::iterator iter = actions.begin(); iter != actions.end(); ++ iter)
+		{
+			switch (iter->first)
+			{
+			case Switch:
+				show_ascii_ = !show_ascii_;
+				KlayGE::Sleep(150);
+				break;
+
+			case Exit:
+				this->Quit();
+				break;
+			}
 		}
 	}
+
+	Camera& camera = this->ActiveCamera();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 
 	if (show_ascii_)
-	{	
-		// 第一遍，正常渲染
-		renderEngine.ActiveRenderTarget(0, render_buffer_);
-		renderEngine.ViewMatrix(camera.ViewMatrix());
-		renderEngine.ProjectionMatrix(camera.ProjMatrix());
+	{
+		switch (pass)
+		{
+		case 0:
+			// 第一遍，正常渲染
+			renderEngine.ActiveRenderTarget(0, render_buffer_);
+			renderEngine.ViewMatrix(camera.ViewMatrix());
+			renderEngine.ProjectionMatrix(camera.ProjMatrix());
 
-		sceneMgr.Clear();
-		mesh_->AddToSceneManager();
-		sceneMgr.Flush();
+			mesh_->AddToSceneManager();
+			break;
 
-		// 降采样
-		rendered_tex_->CopyToTexture(*downsample_tex_);
+		case 1:
+			// 降采样
+			rendered_tex_->CopyToTexture(*downsample_tex_);
 
-		// 第二遍，匹配，最终渲染
-		renderEngine.ActiveRenderTarget(0, screen_buffer_);
+			// 第二遍，匹配，最终渲染
+			renderEngine.ActiveRenderTarget(0, screen_buffer_);
 
-		static_cast<RenderQuad*>(renderQuad_.get())->SetTexture(downsample_tex_, ascii_lums_tex_);
-		sceneMgr.Clear();
-		renderQuad_->AddToSceneManager();
+			static_cast<RenderQuad*>(renderQuad_.get())->SetTexture(downsample_tex_, ascii_lums_tex_);
+			sceneMgr.Clear();
+			renderQuad_->AddToSceneManager();
+			break;
+		}
 	}
 	else
 	{
@@ -343,15 +368,19 @@ void AsciiArts::Update()
 		mesh_->AddToSceneManager();
 	}
 
-	std::wostringstream stream;
-	stream << renderEngine.ActiveRenderTarget(0)->FPS();
+	if ((!show_ascii_ && (0 == pass))
+		|| (show_ascii_ && (1 == pass)))
+	{
+		std::wostringstream stream;
+		stream << renderEngine.ActiveRenderTarget(0)->FPS();
 
-	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"ASCII艺术");
-	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());
+		font_->RenderText(0, 0, Color(1, 1, 0, 1), L"ASCII艺术");
+		font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());
 
-	stream.str(L"");
-	stream << sceneMgr.NumObjectsRendered() << " Renderables "
-		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
-		<< sceneMgr.NumVerticesRendered() << " Vertices";
-	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str().c_str());
+		stream.str(L"");
+		stream << sceneMgr.NumObjectsRendered() << " Renderables "
+			<< sceneMgr.NumPrimitivesRendered() << " Primitives "
+			<< sceneMgr.NumVerticesRendered() << " Vertices";
+		font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str().c_str());
+	}
 }

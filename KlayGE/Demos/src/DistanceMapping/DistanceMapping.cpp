@@ -208,7 +208,7 @@ void DistanceMapping::InitObjects()
 	action_map_id_ = inputEngine.ActionMap(actionMap, true);
 }
 
-void DistanceMapping::Update()
+void DistanceMapping::Update(KlayGE::uint32_t pass)
 {
 	fpcController_.Update();
 

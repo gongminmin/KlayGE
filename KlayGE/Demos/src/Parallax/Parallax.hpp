@@ -13,7 +13,7 @@ public:
 private:
 	void InitObjects();
 
-	void Update();
+	void Update(KlayGE::uint32_t pass);
 
 	KlayGE::FontPtr font_;
 	boost::shared_ptr<KlayGE::Renderable> renderPolygon_;

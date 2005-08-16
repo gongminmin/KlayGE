@@ -34,7 +34,7 @@ namespace KlayGE
 	{
 	protected:
 		typedef std::vector<RenderablePtr> RenderItemsType;
-		typedef MapVector<RenderEffectPtr, RenderItemsType> RenderQueueType;
+		typedef std::vector<std::pair<RenderEffectPtr, RenderItemsType> > RenderQueueType;
 
 	public:
 		SceneManager();

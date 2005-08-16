@@ -182,7 +182,7 @@ void Electro::InitObjects()
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 }
 
-void Electro::Update()
+void Electro::Update(uint32_t pass)
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 

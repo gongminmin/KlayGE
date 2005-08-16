@@ -1,8 +1,11 @@
 // SceneManager.cpp
 // KlayGE 场景管理器类 实现文件
-// Ver 2.6.0
+// Ver 3.0.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.0.0
+// 保证了绘制顺序 (2005.8.16)
 //
 // 2.6.0
 // 修正了CanBeCulled的bug (2005.5.26)
@@ -66,15 +69,18 @@ namespace KlayGE
 	void SceneManager::AddToRenderQueue(RenderablePtr const & obj)
 	{
 		RenderEffectPtr const & effect = obj->GetRenderEffect();
-		RenderQueueType::iterator iter = renderQueue_.find(effect);
-		if (iter != renderQueue_.end())
+		RenderQueueType::iterator iter = renderQueue_.begin();
+		for (; iter != renderQueue_.end(); ++ iter)
 		{
-			iter->second.push_back(obj);
+			if (iter->first == effect)
+			{
+				iter->second.push_back(obj);
+				break;
+			}
 		}
-		else
+		if (iter == renderQueue_.end())
 		{
-			renderQueue_.insert(RenderQueueType::value_type(effect,
-				RenderItemsType(1, obj)));
+			renderQueue_.push_back(std::make_pair(effect, RenderItemsType(1, obj)));
 		}
 	}
 
@@ -89,9 +95,12 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::Update()
 	{
-		Context::Instance().AppInstance().Update();
-
-		this->Flush();
+		App3DFramework& app = Context::Instance().AppInstance();
+		for (uint32_t i = 0; i < app.NumPasses(); ++ i)
+		{
+			app.Update(i);
+			this->Flush();
+		}
 	}
 
 	// 把渲染队列中的物体渲染出来

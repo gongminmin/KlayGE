@@ -1,8 +1,11 @@
 // App3Dp.hpp
 // KlayGE App3D类 头文件
-// Ver 2.7.0
+// Ver 3.0.0
 // 版权所有(C) 龚敏敏, 2003--2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.0.0
+// 增加了多遍更新 (2005.8.16)
 //
 // 2.7.0
 // 增加了Quit (2005.6.28)
@@ -31,6 +34,7 @@ namespace KlayGE
 	//			然后重载以下函数:
 	//
 	//			InitObjects()			- 初始化3D设备
+	//			NumPasses()				- 返回场景需要绘制的遍数
 	//			Update()				- 刷新场景
 	//			DelObjects()			- 清除3D场景
 	/////////////////////////////////////////////////////////////////////////////////
@@ -55,16 +59,22 @@ namespace KlayGE
 
 	protected:
 		virtual void InitObjects()
-			{ }
+		{
+		}
 
-		virtual void Update()
-			{ }
+		virtual uint32_t NumPasses() const
+		{
+			return 1;
+		}
+		virtual void Update(uint32_t /*pass*/) = 0;
 
 		virtual void RenderOver()
-			{ }
+		{
+		}
 
 		virtual void DelObjects()
-			{ }
+		{
+		}
 	};
 }
 

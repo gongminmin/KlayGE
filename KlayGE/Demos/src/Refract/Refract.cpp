@@ -152,7 +152,7 @@ void Refract::InitObjects()
 	action_map_id_ = inputEngine.ActionMap(actionMap, true);
 }
 
-void Refract::Update()
+void Refract::Update(uint32_t pass)
 {
 	fpcController_.Update();
 

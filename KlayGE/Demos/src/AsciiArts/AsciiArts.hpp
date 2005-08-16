@@ -12,9 +12,13 @@ public:
 
 private:
 	void InitObjects();
-	void Update();
+
+	KlayGE::uint32_t NumPasses() const;
+	void Update(KlayGE::uint32_t pass);
 
 	void BuildAsciiLumsTex();
+
+	void RenderInfos();
 
 private:
 	KlayGE::FontPtr font_;

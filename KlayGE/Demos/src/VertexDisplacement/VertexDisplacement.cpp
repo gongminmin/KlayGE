@@ -184,7 +184,7 @@ void VertexDisplacement::InitObjects()
 	action_map_id_ = inputEngine.ActionMap(actionMap, true);
 }
 
-void VertexDisplacement::Update()
+void VertexDisplacement::Update(uint32_t pass)
 {
 	fpcController_.Update();
 

@@ -193,7 +193,7 @@ void Parallax::InitObjects()
 	action_map_id_ = inputEngine.ActionMap(actionMap, true);
 }
 
-void Parallax::Update()
+void Parallax::Update(uint32_t pass)
 {
 	fpcController_.Update();
 
