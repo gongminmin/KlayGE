@@ -73,7 +73,7 @@ namespace KlayGE
 	{
 		RenderEffectPtr const & effect = obj->GetRenderEffect();
 		RenderQueueType::iterator iter = std::find_if(renderQueue_.begin(), renderQueue_.end(),
-			boost::bind(std::equal_to<RenderEffectPtr>(), boost::bind(select1st<RenderQueueType::value_type>(), _1), effect));
+			boost::bind(select1st<RenderQueueType::value_type>(), _1) == effect);
 		if (iter != renderQueue_.end())
 		{
 			iter->second.push_back(obj);
