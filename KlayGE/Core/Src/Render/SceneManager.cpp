@@ -31,6 +31,9 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/Util.hpp>
+
+#include <boost/bind.hpp>
 
 #include <KlayGE/SceneManager.hpp>
 
@@ -69,16 +72,13 @@ namespace KlayGE
 	void SceneManager::AddToRenderQueue(RenderablePtr const & obj)
 	{
 		RenderEffectPtr const & effect = obj->GetRenderEffect();
-		RenderQueueType::iterator iter = renderQueue_.begin();
-		for (; iter != renderQueue_.end(); ++ iter)
+		RenderQueueType::iterator iter = std::find_if(renderQueue_.begin(), renderQueue_.end(),
+			boost::bind(std::equal_to<RenderEffectPtr>(), boost::bind(select1st<RenderQueueType::value_type>(), _1), effect));
+		if (iter != renderQueue_.end())
 		{
-			if (iter->first == effect)
-			{
-				iter->second.push_back(obj);
-				break;
-			}
+			iter->second.push_back(obj);
 		}
-		if (iter == renderQueue_.end())
+		else
 		{
 			renderQueue_.push_back(std::make_pair(effect, RenderItemsType(1, obj)));
 		}

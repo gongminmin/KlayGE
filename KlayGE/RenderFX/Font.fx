@@ -33,9 +33,6 @@ technique fontTec
 		AlphaBlendEnable = true;
 		SrcBlend = SrcAlpha;
 		DestBlend = InvSrcAlpha;
-		AlphaTestEnable = true;
-		AlphaRef = 0x08;
-		AlphaFunc = GreaterEqual;
 
 		FillMode = Solid;
 		CullMode = CCW;

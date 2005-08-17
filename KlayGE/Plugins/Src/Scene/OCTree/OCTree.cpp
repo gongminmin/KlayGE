@@ -1,8 +1,11 @@
 // OCTree.cpp
 // KlayGE 八叉树类 实现文件
-// Ver 2.6.0
+// Ver 3.0.0
 // 版权所有(C) 龚敏敏, 2004-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.0.0
+// 保证了绘制顺序 (2005.8.17)
 //
 // 2.6.0
 // 修正了CanBeCulled的bug (2005.5.26)
@@ -43,10 +46,6 @@ namespace KlayGE
 			{
 				this->InsertRenderable("0", *iter);
 			}
-			else
-			{
-				this->AddToRenderQueue(*iter);				
-			}
 		}
 
 		Frustum frustum(camera.ViewMatrix() * camera.ProjMatrix());
@@ -73,7 +72,9 @@ namespace KlayGE
 						nodes.insert(id);
 
 #ifdef KLAYGE_DEBUG
-						renderables.insert(RenderablePtr(new RenderableBox(box)));
+						RenderablePtr box_helper(new RenderableBox(box));
+						renderItems_.push_back(box_helper);
+						renderables.insert(box_helper);
 #endif
 					}
 					else
@@ -100,10 +101,20 @@ namespace KlayGE
 			}
 		}
 
-		for (std::set<RenderablePtr>::iterator iter = renderables.begin();
-			iter != renderables.end(); ++ iter)
+		for (RenderItemsType::iterator iter = renderItems_.begin(); iter != renderItems_.end(); ++ iter)
 		{
-			this->AddToRenderQueue(*iter);
+			if ((*iter)->CanBeCulled())
+			{
+				if (renderables.find(*iter) != renderables.end())
+				{
+					renderables.erase(*iter);
+					this->AddToRenderQueue(*iter);
+				}
+			}
+			else
+			{
+				this->AddToRenderQueue(*iter);				
+			}
 		}
 
 		octree_.clear();
