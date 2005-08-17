@@ -1,8 +1,11 @@
 // D3D9RenderEffect.cpp
 // KlayGE D3D9渲染效果类 实现文件
-// Ver 2.3.0
-// 版权所有(C) 龚敏敏, 2003-2004
+// Ver 3.0.0
+// 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.0.0
+// 支持"x.y"形式的参数名 (2005.8.17)
 //
 // 2.3.0
 // 增加了OnLostDevice和OnResetDevice (2005.2.23)
@@ -27,6 +30,9 @@
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 
 #include <boost/assert.hpp>
+#include <boost/bind.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <functional>
 
 #include <KlayGE/D3D9/D3D9RenderEffect.hpp>
 
@@ -53,7 +59,15 @@ namespace KlayGE
 	RenderEffectParameterPtr D3D9RenderEffect::DoParameterByName(std::string const & name)
 	{
 		D3DXPARAMETER_DESC desc;
-		d3dx_effect_->GetParameterDesc(name.c_str(), &desc);
+		std::vector<std::string> path;
+		boost::algorithm::split(path, name, boost::bind(std::equal_to<char>(), '.', _1));
+		D3DXHANDLE handle = NULL;
+		for (std::vector<std::string>::iterator iter = path.begin(); iter != path.end(); ++ iter)
+		{
+			handle = d3dx_effect_->GetParameterByName(handle, iter->c_str());
+			BOOST_ASSERT(handle != NULL);
+		}
+		d3dx_effect_->GetParameterDesc(handle, &desc);
 
 		if (D3DXPC_SCALAR == desc.Class)
 		{
