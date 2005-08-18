@@ -37,10 +37,7 @@ namespace KlayGE
 {
 	RenderEngine::RenderEngine()
 		: renderEffect_(RenderEffect::NullObject()),
-			renderPasses_(1),
-			worldMat_(Matrix4::Identity()),
-			viewMat_(Matrix4::Identity()),
-			projMat_(Matrix4::Identity())
+			renderPasses_(1)
 	{
 	}
 
@@ -81,51 +78,6 @@ namespace KlayGE
 	RenderEffectPtr RenderEngine::GetRenderEffect() const
 	{
 		return renderEffect_;
-	}
-	
-	// 获取世界矩阵
-	/////////////////////////////////////////////////////////////////////////////////
-	Matrix4 RenderEngine::WorldMatrix() const
-	{
-		return worldMat_;
-	}
-
-	// 设置世界矩阵
-	/////////////////////////////////////////////////////////////////////////////////
-	void RenderEngine::WorldMatrix(Matrix4 const & mat)
-	{
-		worldMat_ = mat;
-		this->DoWorldMatrix();
-	}
-
-	// 获取观察矩阵
-	/////////////////////////////////////////////////////////////////////////////////
-	Matrix4 RenderEngine::ViewMatrix() const
-	{
-		return viewMat_;
-	}
-
-	// 设置观察矩阵
-	/////////////////////////////////////////////////////////////////////////////////
-	void RenderEngine::ViewMatrix(Matrix4 const & mat)
-	{
-		viewMat_ = mat;
-		this->DoViewMatrix();
-	}
-
-	// 获取投射矩阵
-	/////////////////////////////////////////////////////////////////////////////////
-	Matrix4 RenderEngine::ProjectionMatrix() const
-	{
-		return projMat_;
-	}
-
-	// 设置投射矩阵
-	/////////////////////////////////////////////////////////////////////////////////
-	void RenderEngine::ProjectionMatrix(Matrix4 const & mat)
-	{
-		projMat_ = mat;
-		this->DoProjectionMatrix();
 	}
 
 	// 渲染一个vb

@@ -12,7 +12,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/RenderEngine.hpp>
-#include <KlayGE/Light.hpp>
 #include <KlayGE/Vector.hpp>
 #include <KlayGE/Matrix.hpp>
 #include <KlayGE/Color.hpp>
@@ -183,25 +182,6 @@ namespace KlayGE
 		default:
 			BOOST_ASSERT(false);
 			return GL_FLAT;
-		}
-	}
-
-	GLint OGLMapping::Mapping(RenderEngine::FogMode mode)
-	{
-		switch (mode)
-		{
-		case RenderEngine::Fog_Exp:
-			return GL_EXP;
-
-		case RenderEngine::Fog_Exp2:
-			return GL_EXP2;
-
-		case RenderEngine::Fog_Linear:
-			return GL_LINEAR;
-
-		default:
-			BOOST_ASSERT(false);
-			return GL_LINEAR;
 		}
 	}
 

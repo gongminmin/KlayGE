@@ -25,8 +25,8 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
-#include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Sampler.hpp>
+#include <KlayGE/App3D.hpp>
 
 #include <KlayGE/RenderableHelper.hpp>
 
@@ -194,13 +194,14 @@ namespace KlayGE
 
 	void RenderableSkyBox::OnRenderBegin()
 	{
-		RenderEngine const & render_engine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		App3DFramework const & app = Context::Instance().AppInstance();
+		Camera const & camera = app.ActiveCamera();
 
-		Matrix4 rot_view = render_engine.ViewMatrix();
+		Matrix4 rot_view = camera.ViewMatrix();
 		rot_view(3, 0) = 0;
 		rot_view(3, 1) = 0;
 		rot_view(3, 2) = 0;
-		*(effect_->ParameterByName("inv_mvp")) = MathLib::Inverse(rot_view * render_engine.ProjectionMatrix());
+		*(effect_->ParameterByName("inv_mvp")) = MathLib::Inverse(rot_view * camera.ProjMatrix());
 	}
 
 	bool RenderableSkyBox::CanBeCulled() const

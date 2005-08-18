@@ -16,13 +16,13 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Texture.hpp>
-#include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Sampler.hpp>
+#include <KlayGE/App3D.hpp>
 
 #include <boost/assert.hpp>
 
@@ -59,11 +59,11 @@ namespace KlayGE
 
 	void KMesh::OnRenderBegin()
 	{
-		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		App3DFramework const & app = Context::Instance().AppInstance();
+		Camera const & camera = app.ActiveCamera();
 
-		Matrix4 model = model_ * renderEngine.WorldMatrix();
-		*(effect_->ParameterByName("modelviewproj")) = model * renderEngine.ViewMatrix() * renderEngine.ProjectionMatrix();
-		*(effect_->ParameterByName("modelIT")) = MathLib::Transpose(MathLib::Inverse(model));
+		*(effect_->ParameterByName("modelviewproj")) = model_ * camera.ViewMatrix() * camera.ProjMatrix();
+		*(effect_->ParameterByName("modelIT")) = MathLib::Transpose(MathLib::Inverse(model_));
 	}
 
 	StaticMeshPtr LoadKMesh(const std::string& kmeshName,

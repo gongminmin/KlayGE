@@ -1,8 +1,11 @@
 // D3D9RenderEngine.hpp
 // KlayGE D3D9渲染引擎类 头文件
-// Ver 2.8.0
+// Ver 3.0.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.0.0
+// 去掉了固定流水线 (2005.8.18)
 //
 // 2.8.0
 // 增加了RenderDeviceCaps (2005.7.17)
@@ -60,18 +63,10 @@ namespace KlayGE
 
 		void ShadingType(ShadeOptions so);
 
-		void EnableLighting(bool enabled);
-		void AmbientLight(Color const & col);
-
 		RenderWindowPtr CreateRenderWindow(std::string const & name, RenderSettings const & settings);
 
 		void CullingMode(CullMode mode);
 		void PolygonMode(FillMode mode);
-
-		void SetMaterial(Material const & mat);
-
-		void SetLight(uint32_t index, Light const & lt);
-		void LightEnable(uint32_t index, bool enable);
 
 		void StartRendering();
 
@@ -85,13 +80,6 @@ namespace KlayGE
 		void DepthBufferDepthWrite(bool depthWrite);
 		void DepthBufferFunction(CompareFunction depthFunction);
 		void DepthBias(uint16_t bias);
-
-		void AlphaTest(bool alphaTest);
-		void AlphaFunction(CompareFunction alphaFunction, float refValue);
-
-		void Fog(FogMode mode = Fog_None,
-			Color const & color = Color(1, 1, 1, 1),
-			float expDensity = 1, float linearStart = 0, float linearEnd = 1);
 
 		void SetSampler(uint32_t stage, SamplerPtr const & sampler);
 		void DisableSampler(uint32_t stage);
@@ -109,10 +97,6 @@ namespace KlayGE
 
 	private:
 		void DoActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget);
-
-		void DoWorldMatrix();
-		void DoViewMatrix();
-		void DoProjectionMatrix();
 
 		void DoRender(VertexBuffer const & vb);
 

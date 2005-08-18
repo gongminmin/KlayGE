@@ -112,8 +112,9 @@ namespace KlayGE
 		numVerticesRendered_ = 0;
 
 		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		App3DFramework& app = Context::Instance().AppInstance();
 
-		this->ClipScene(renderEngine.ActiveRenderTarget(0)->GetViewport().camera);
+		this->ClipScene(app.ActiveCamera());
 
 		renderEngine.BeginFrame();
 
@@ -154,7 +155,7 @@ namespace KlayGE
 			}
 		}
 
-		Context::Instance().AppInstance().RenderOver();
+		app.RenderOver();
 	}
 
 	// 获取渲染的物体数量

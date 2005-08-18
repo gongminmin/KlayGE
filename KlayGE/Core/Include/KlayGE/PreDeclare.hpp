@@ -51,11 +51,10 @@ namespace KlayGE
 	typedef Box_T<float> Box;
 
 	class Camera;
+	typedef boost::shared_ptr<Camera> CameraPtr;
 	class FirstPersonCameraController;
 	class Font;
 	typedef boost::shared_ptr<Font> FontPtr;
-	struct Light;
-	struct Material;
 	class RenderEngine;
 	typedef boost::shared_ptr<RenderEngine> RenderEnginePtr;
 	class RenderTarget;

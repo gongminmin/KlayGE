@@ -128,21 +128,6 @@
 					RelativePath=".\Src\Render\KMesh.cpp">
 				</File>
 				<File
-					RelativePath=".\Src\Render\Light.cpp">
-					<FileConfiguration
-						Name="Debug|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-					</FileConfiguration>
-				</File>
-				<File
 					RelativePath=".\Src\Render\Mesh.cpp">
 				</File>
 				<File
@@ -229,12 +214,6 @@
 				</File>
 				<File
 					RelativePath=".\Include\KlayGE\KMesh.hpp">
-				</File>
-				<File
-					RelativePath="Include\KlayGE\Light.hpp">
-				</File>
-				<File
-					RelativePath="Include\KlayGE\Material.hpp">
 				</File>
 				<File
 					RelativePath=".\Include\KlayGE\Mesh.hpp">

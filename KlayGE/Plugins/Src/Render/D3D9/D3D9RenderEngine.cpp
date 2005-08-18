@@ -1,8 +1,11 @@
 // D3D9RenderEngine.cpp
 // KlayGE D3D9渲染引擎类 实现文件
-// Ver 2.8.0
+// Ver 3.0.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.0.0
+// 去掉了固定流水线 (2005.8.18)
 //
 // 2.8.0
 // 增加了RenderDeviceCaps (2005.7.17)
@@ -36,8 +39,6 @@
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Util.hpp>
 
-#include <KlayGE/Light.hpp>
-#include <KlayGE/Material.hpp>
 #include <KlayGE/Viewport.hpp>
 #include <KlayGE/VertexBuffer.hpp>
 #include <KlayGE/RenderTarget.hpp>
@@ -163,15 +164,6 @@ namespace KlayGE
 		}
 	}
 
-	// 设置环境光
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::AmbientLight(Color const & col)
-	{
-		BOOST_ASSERT(d3dDevice_);
-
-		TIF(d3dDevice_->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_COLORVALUE(col.r(), col.g(), col.b(), 1.0f)));
-	}
-
 	// 设置清除颜色
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::ClearColor(Color const & clr)
@@ -186,15 +178,6 @@ namespace KlayGE
 		BOOST_ASSERT(d3dDevice_);
 
 		TIF(d3dDevice_->SetRenderState(D3DRS_SHADEMODE, D3D9Mapping::Mapping(so)));
-	}
-
-	// 打开/关闭光源
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::EnableLighting(bool enabled)
-	{
-		BOOST_ASSERT(d3dDevice_);
-
-		TIF(d3dDevice_->SetRenderState(D3DRS_LIGHTING, enabled));
 	}
 
 	// 建立渲染窗口
@@ -252,107 +235,6 @@ namespace KlayGE
 		BOOST_ASSERT(d3dDevice_);
 
 		TIF(d3dDevice_->SetRenderState(D3DRS_FILLMODE, D3D9Mapping::Mapping(mode)));
-	}
-
-	// 设置光源
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::SetLight(uint32_t index, Light const & lt)
-	{
-		BOOST_ASSERT(d3dDevice_);
-
-		D3DLIGHT9 d3dLight;
-		std::memset(&d3dLight, 0, sizeof(d3dLight));
-
-		d3dLight.Type = D3D9Mapping::Mapping(lt.lightType);
-
-		if (Light::LT_Spot == lt.lightType)
-		{
-			d3dLight.Falloff	= lt.spotFalloff;
-			d3dLight.Theta		= lt.spotInner;
-			d3dLight.Phi		= lt.spotOuter;
-		}
-
-		d3dLight.Diffuse	= D3D9Mapping::MappingToFloat4Color(lt.diffuse);
-		d3dLight.Specular	= D3D9Mapping::MappingToFloat4Color(lt.specular);
-		d3dLight.Ambient	= D3D9Mapping::MappingToFloat4Color(lt.ambient);
-
-		if (lt.lightType != Light::LT_Directional)
-		{
-			d3dLight.Position = D3D9Mapping::Mapping(lt.position);
-		}
-		if (lt.lightType != Light::LT_Point)
-		{
-			d3dLight.Direction = D3D9Mapping::Mapping(lt.direction);
-		}
-
-		d3dLight.Range = lt.range;
-		d3dLight.Attenuation0 = lt.attenuationConst;
-		d3dLight.Attenuation1 = lt.attenuationLinear;
-		d3dLight.Attenuation2 = lt.attenuationQuad;
-
-		TIF(d3dDevice_->SetLight(index, &d3dLight));
-	}
-
-	// 打开/关闭某个光源
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::LightEnable(uint32_t index, bool enabled)
-	{
-		BOOST_ASSERT(d3dDevice_);
-
-		TIF(d3dDevice_->LightEnable(index, enabled));
-	}
-
-	// 实现设置世界矩阵
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DoWorldMatrix()
-	{
-		BOOST_ASSERT(d3dDevice_);
-
-		D3DMATRIX d3dmat(D3D9Mapping::Mapping(worldMat_));
-		TIF(d3dDevice_->SetTransform(D3DTS_WORLD, &d3dmat));
-	}
-
-	// 实现设置观察矩阵
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DoViewMatrix()
-	{
-		BOOST_ASSERT(d3dDevice_);
-
-		D3DMATRIX d3dMat(D3D9Mapping::Mapping(viewMat_));
-		TIF(d3dDevice_->SetTransform(D3DTS_VIEW, &d3dMat));
-	}
-
-	// 实现设置投射矩阵
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DoProjectionMatrix()
-	{
-		BOOST_ASSERT(d3dDevice_);
-
-		D3DMATRIX d3dMat(D3D9Mapping::Mapping(projMat_));
-
-		if (this->ActiveRenderTarget(0)->RequiresTextureFlipping())
-		{
-			d3dMat._22 = -d3dMat._22;
-		}
-
-		TIF(d3dDevice_->SetTransform(D3DTS_PROJECTION, &d3dMat));
-	}
-
-	// 设置材质
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::SetMaterial(Material const & m)
-	{
-		BOOST_ASSERT(d3dDevice_);
-
-		D3DMATERIAL9 material;
-
-		material.Diffuse	= D3D9Mapping::MappingToFloat4Color(m.diffuse);
-		material.Ambient	= D3D9Mapping::MappingToFloat4Color(m.ambient);
-		material.Specular	= D3D9Mapping::MappingToFloat4Color(m.specular);
-		material.Emissive	= D3D9Mapping::MappingToFloat4Color(m.emissive);
-		material.Power		= m.shininess;
-
-		TIF(d3dDevice_->SetMaterial(&material));
 	}
 
 	// 设置当前渲染目标，该渲染目标必须已经在列表中
@@ -595,54 +477,6 @@ namespace KlayGE
 		BOOST_ASSERT(d3dDevice_);
 
 		TIF(d3dDevice_->SetRenderState(D3DRS_DEPTHBIAS, bias));
-	}
-
-	// 打开/关闭Alpha测试
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::AlphaTest(bool enabled)
-	{
-		BOOST_ASSERT(d3dDevice_);
-
-		TIF(d3dDevice_->SetRenderState(D3DRS_ALPHATESTENABLE, enabled ? D3DZB_TRUE : D3DZB_FALSE));
-	}
-
-	// 设置Alpha比较函数和参考值
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::AlphaFunction(CompareFunction alphaFunction, float refValue)
-	{
-		BOOST_ASSERT(d3dDevice_);
-
-		TIF(d3dDevice_->SetRenderState(D3DRS_ALPHAFUNC, D3D9Mapping::Mapping(alphaFunction)));
-		TIF(d3dDevice_->SetRenderState(D3DRS_ALPHAREF, static_cast<uint32_t>(refValue * 255) & 0xFF));
-	}
-
-	// 设置雾化效果
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::Fog(FogMode mode, Color const & color,
-		float expDensity, float linearStart, float linearEnd)
-	{
-		BOOST_ASSERT(d3dDevice_);
-
-		if (Fog_None == mode)
-		{
-			// just disable
-			d3dDevice_->SetRenderState(D3DRS_FOGTABLEMODE, D3DFOG_NONE);
-			d3dDevice_->SetRenderState(D3DRS_FOGENABLE, false);
-		}
-		else
-		{
-			// Allow fog
-			d3dDevice_->SetRenderState(D3DRS_FOGENABLE, true);
-
-			// Set pixel fog mode
-			d3dDevice_->SetRenderState(D3DRS_FOGVERTEXMODE, D3DFOG_NONE);
-			d3dDevice_->SetRenderState(D3DRS_FOGTABLEMODE, D3D9Mapping::Mapping(mode));
-
-			d3dDevice_->SetRenderState(D3DRS_FOGCOLOR, D3D9Mapping::MappingToUInt32Color(color));
-			d3dDevice_->SetRenderState(D3DRS_FOGSTART, *reinterpret_cast<uint32_t*>(&linearStart));
-			d3dDevice_->SetRenderState(D3DRS_FOGEND, *reinterpret_cast<uint32_t*>(&linearEnd));
-			d3dDevice_->SetRenderState(D3DRS_FOGDENSITY, *reinterpret_cast<uint32_t*>(&expDensity));
-		}
 	}
 
 	// 设置纹理

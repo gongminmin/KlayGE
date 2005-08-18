@@ -1,8 +1,11 @@
 // RenderEngine.hpp
 // KlayGE 渲染引擎类 实现文件
-// Ver 2.8.0
+// Ver 3.0.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.0.0
+// 去掉了固定流水线 (2005.8.18)
 //
 // 2.8.0
 // 简化了StencilBuffer相关操作 (2005.7.20)
@@ -89,18 +92,6 @@ namespace KlayGE
 			FM_Fill
 		};
 
-		enum FogMode
-		{
-			// No fog. Duh.
-			Fog_None,
-			// Fog density increases  exponentially from the camera (fog = 1/e^(distance * density))
-			Fog_Exp,
-			// Fog density increases at the square of FOG_EXP, i.e. even quicker (fog = 1/e^(distance * density)^2)
-			Fog_Exp2,
-			// Fog density increases linearly between the start and end distances
-			Fog_Linear
-		};
-
 		// Type of alpha blend factor.
 		enum AlphaBlendFactor
 		{
@@ -156,25 +147,10 @@ namespace KlayGE
 
 		virtual void ShadingType(ShadeOptions so) = 0;
 
-		virtual void EnableLighting(bool enabled) = 0;
-		virtual void AmbientLight(Color const & col) = 0;
-
 		virtual RenderWindowPtr CreateRenderWindow(std::string const & name, RenderSettings const & settings) = 0;
 
 		virtual void CullingMode(CullMode mode) = 0;
 		virtual void PolygonMode(FillMode mode) = 0;
-
-		virtual void SetMaterial(Material const & mat) = 0;
-
-		virtual void SetLight(uint32_t index, Light const & lt) = 0;
-		virtual void LightEnable(uint32_t index, bool enable) = 0;
-
-		Matrix4 WorldMatrix() const;
-		void WorldMatrix(Matrix4 const & mat);
-		Matrix4 ViewMatrix() const;
-		void ViewMatrix(Matrix4 const & mat);
-		Matrix4 ProjectionMatrix() const;
-		void ProjectionMatrix(Matrix4 const & mat);
 
 		virtual void AlphaBlend(bool enabled) = 0;
 		virtual void AlphaBlendFunction(AlphaBlendFactor src_factor, AlphaBlendFactor dst_factor) = 0;
@@ -183,13 +159,6 @@ namespace KlayGE
 		virtual void DepthBufferDepthWrite(bool enabled) = 0;
 		virtual void DepthBufferFunction(CompareFunction depthFunction) = 0;
 		virtual void DepthBias(uint16_t bias) = 0;
-
-		virtual void AlphaTest(bool enabled) = 0;
-		virtual void AlphaFunction(CompareFunction alphaFunction, float refValue) = 0;
-
-		virtual void Fog(FogMode mode = Fog_None,
-			Color const & color = Color(1, 1, 1, 1),
-			float expDensity = 1, float linearStart = 0, float linearEnd = 1) = 0;
 
 		void ActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget);
 		RenderTargetPtr ActiveRenderTarget(uint32_t n) const;
@@ -220,10 +189,6 @@ namespace KlayGE
 	protected:
 		virtual void DoActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget) = 0;
 
-		virtual void DoWorldMatrix() = 0;
-		virtual void DoViewMatrix() = 0;
-		virtual void DoProjectionMatrix() = 0;
-
 		virtual void DoRender(VertexBuffer const & vb) = 0;
 
 		virtual void FillRenderDeviceCaps() = 0;
@@ -233,8 +198,6 @@ namespace KlayGE
 
 		RenderEffectPtr renderEffect_;
 		uint32_t renderPasses_;
-
-		Matrix4 worldMat_, viewMat_, projMat_;
 
 		size_t numPrimitivesJustRendered_;
 		size_t numVerticesJustRendered_;

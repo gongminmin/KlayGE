@@ -15,7 +15,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/RenderEngine.hpp>
-#include <KlayGE/Light.hpp>
 #include <KlayGE/Vector.hpp>
 #include <KlayGE/Matrix.hpp>
 #include <KlayGE/Color.hpp>
@@ -136,25 +135,6 @@ namespace KlayGE
 		};
 	}
 
-	D3DLIGHTTYPE D3D9Mapping::Mapping(Light::LightTypes type)
-	{
-		switch (type)
-		{
-		case Light::LT_Point:
-			return D3DLIGHT_POINT;
-
-		case Light::LT_Directional:
-			return D3DLIGHT_DIRECTIONAL;
-
-		case Light::LT_Spot:
-			return D3DLIGHT_SPOT;
-
-		default:
-			BOOST_ASSERT(false);
-			return D3DLIGHT_POINT;
-		}
-	}
-
 	uint32_t D3D9Mapping::Mapping(RenderEngine::AlphaBlendFactor factor)
 	{
 		switch (factor)
@@ -252,25 +232,6 @@ namespace KlayGE
 		default:
 			BOOST_ASSERT(false);
 			return D3DSHADE_FLAT;
-		}
-	}
-
-	uint32_t D3D9Mapping::Mapping(RenderEngine::FogMode mode)
-	{
-		switch (mode)
-		{
-		case RenderEngine::Fog_Linear:
-			return D3DFOG_LINEAR;
-
-		case RenderEngine::Fog_Exp:
-			return D3DFOG_EXP;
-
-		case RenderEngine::Fog_Exp2:
-			return D3DFOG_EXP2;
-
-		default:
-			BOOST_ASSERT(false);
-			return D3DFOG_LINEAR;
 		}
 	}
 

@@ -219,8 +219,6 @@ void Parallax::Update(uint32_t pass)
 
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-	renderEngine.ViewMatrix(view);
-	renderEngine.ProjectionMatrix(proj);
 
 	float degree(std::clock() / 700.0f);
 	Vector3 lightPos(2, 0, -2);

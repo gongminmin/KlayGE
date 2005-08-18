@@ -60,12 +60,24 @@ namespace KlayGE
 
 	// 获取当前摄像机
 	/////////////////////////////////////////////////////////////////////////////////
+	Camera const & App3DFramework::ActiveCamera() const
+	{
+		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		RenderTarget& activeRenderTarget(*renderEngine.ActiveRenderTarget(0));
+		CameraPtr camera = activeRenderTarget.GetViewport().camera;
+		BOOST_ASSERT(camera);
+
+		return *camera;
+	}
+
 	Camera& App3DFramework::ActiveCamera()
 	{
 		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		RenderTarget& activeRenderTarget(*renderEngine.ActiveRenderTarget(0));
+		CameraPtr camera = activeRenderTarget.GetViewport().camera;
+		BOOST_ASSERT(camera);
 
-		return activeRenderTarget.GetViewport().camera;
+		return *camera;
 	}
 
 	// 设置观察矩阵
@@ -73,10 +85,7 @@ namespace KlayGE
 	void App3DFramework::LookAt(Vector3 const & vEye, Vector3 const & vLookAt,
 												Vector3 const & vUp)
 	{
-		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
 		this->ActiveCamera().ViewParams(vEye, vLookAt, vUp);
-		renderEngine.ViewMatrix(this->ActiveCamera().ViewMatrix());
 	}
 
 	// 设置投射矩阵
@@ -89,11 +98,9 @@ namespace KlayGE
 
 		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		RenderTarget& activeRenderTarget(*renderEngine.ActiveRenderTarget(0));
-		Camera& camera(this->ActiveCamera());
 
-		camera.ProjParams(PI / 4, static_cast<float>(activeRenderTarget.Width()) / activeRenderTarget.Height(),
+		this->ActiveCamera().ProjParams(PI / 4, static_cast<float>(activeRenderTarget.Width()) / activeRenderTarget.Height(),
 			nearPlane, farPlane);
-		renderEngine.ProjectionMatrix(camera.ProjMatrix());
  	}
 
 	void App3DFramework::Quit()

@@ -57,11 +57,11 @@ namespace
 
 		void OnRenderBegin()
 		{
-			RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			App3DFramework const & app = Context::Instance().AppInstance();
 
-			Matrix4 const & model = renderEngine.WorldMatrix();
-			Matrix4 const & view = renderEngine.ViewMatrix();
-			Matrix4 const & proj = renderEngine.ProjectionMatrix();
+			Matrix4 const & model = Matrix4::Identity();
+			Matrix4 const & view = app.ActiveCamera().ViewMatrix();
+			Matrix4 const & proj = app.ActiveCamera().ProjMatrix();
 
 			*(effect_->ParameterByName("model")) = model;
 			*(effect_->ParameterByName("modelit")) = MathLib::Transpose(MathLib::Inverse(model));
@@ -169,8 +169,6 @@ void Refract::Update(uint32_t pass)
 	}
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-	renderEngine.ViewMatrix(this->ActiveCamera().ViewMatrix());
-	renderEngine.ProjectionMatrix(this->ActiveCamera().ProjMatrix());
 
 	*(refractor_->Children(0)->GetRenderEffect()->ParameterByName("eyePos"))
 		= Vector4(this->ActiveCamera().EyePos().x(), this->ActiveCamera().EyePos().y(),

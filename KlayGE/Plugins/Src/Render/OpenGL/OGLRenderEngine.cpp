@@ -1,8 +1,11 @@
 // OGLRenderEngine.cpp
 // KlayGE OpenGL渲染引擎类 实现文件
-// Ver 2.8.0
+// Ver 3.0.0
 // 版权所有(C) 龚敏敏, 2004-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.0.0
+// 去掉了固定流水线 (2005.8.18)
 //
 // 2.8.0
 // 增加了RenderDeviceCaps (2005.7.17)
@@ -28,8 +31,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Math.hpp>
-#include <KlayGE/Light.hpp>
-#include <KlayGE/Material.hpp>
 #include <KlayGE/Viewport.hpp>
 #include <KlayGE/VertexBuffer.hpp>
 #include <KlayGE/RenderTarget.hpp>
@@ -118,14 +119,6 @@ namespace KlayGE
 		}
 	}
 
-	// 设置环境光
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::AmbientLight(Color const & col)
-	{
-		GLfloat ambient[] = { col.r(), col.g(), col.b(), 1.0f };
-		glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
-	}
-
 	// 设置清除颜色
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::ClearColor(Color const & col)
@@ -140,19 +133,6 @@ namespace KlayGE
 		glShadeModel(OGLMapping::Mapping(so));
 	}
 
-	// 打开/关闭光源
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::EnableLighting(bool enabled)
-	{
-		if (enabled)
-		{
-			glEnable(GL_LIGHTING);
-		}
-		else
-		{
-			glDisable(GL_LIGHTING);
-		}
-	}
 
 	// 建立渲染窗口
 	/////////////////////////////////////////////////////////////////////////////////
@@ -168,8 +148,6 @@ namespace KlayGE
 
 		this->DepthBufferDepthTest(settings.depthBuffer);
 		this->DepthBufferDepthWrite(settings.depthBuffer);
-
-		this->SetMaterial(Material(Color(1, 1, 1, 1)));
 
 		return win;
 	}
@@ -203,144 +181,6 @@ namespace KlayGE
 	void OGLRenderEngine::PolygonMode(FillMode mode)
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, OGLMapping::Mapping(mode));
-	}
-
-	// 设置光源
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::SetLight(uint32_t index, Light const & light)
-	{
-		GLint lightIndex(GL_LIGHT0 + index);
-
-		switch (light.lightType)
-		{
-		case Light::LT_Spot:
-			glLightf(lightIndex, GL_SPOT_CUTOFF, light.spotOuter);
-			break;
-
-		default:
-			glLightf(lightIndex, GL_SPOT_CUTOFF, 180.0f);
-			break;
-		}
-
-		GLfloat ambient[4];
-		OGLMapping::Mapping(ambient, light.ambient);
-		glLightfv(lightIndex, GL_AMBIENT, ambient);
-
-		GLfloat diffuse[4];
-		OGLMapping::Mapping(diffuse, light.diffuse);
-		glLightfv(lightIndex, GL_DIFFUSE, diffuse);
-
-		GLfloat specular[4];
-		OGLMapping::Mapping(specular, light.specular);
-		glLightfv(lightIndex, GL_SPECULAR, specular);
-
-		// Set position / direction
-		GLfloat f4vals[4];
-		switch (light.lightType)
-		{
-		case Light::LT_Point:
-			f4vals[0] = light.position.x();
-			f4vals[1] = light.position.y();
-			f4vals[2] = light.position.z();
-			f4vals[3] = 1.0f;
-			glLightfv(lightIndex, GL_POSITION, f4vals);
-			break;
-
-		case Light::LT_Directional:
-			f4vals[0] = -light.direction.x(); // GL light directions are in eye coords
-			f4vals[1] = -light.direction.y();
-			f4vals[2] = -light.direction.z(); // GL light directions are in eye coords
-			f4vals[3] = 0.0f; // important!
-			// In GL you set direction through position, but the
-			//  w value of the vector being 0 indicates which it is
-			glLightfv(lightIndex, GL_POSITION, f4vals);
-			break;
-
-		case Light::LT_Spot:
-			f4vals[0] = light.position.x();
-			f4vals[1] = light.position.y();
-			f4vals[2] = light.position.z();
-			f4vals[3] = 1.0f;
-			glLightfv(lightIndex, GL_POSITION, f4vals);
-
-			f4vals[0] = light.direction.x();
-			f4vals[1] = light.direction.y();
-			f4vals[2] = light.direction.z();
-			f4vals[3] = 0.0f; 
-			glLightfv(lightIndex, GL_SPOT_DIRECTION, f4vals);
-		}
-
-		glLightf(lightIndex, GL_CONSTANT_ATTENUATION, light.attenuationConst);
-		glLightf(lightIndex, GL_LINEAR_ATTENUATION, light.attenuationLinear);
-		glLightf(lightIndex, GL_QUADRATIC_ATTENUATION, light.attenuationQuad);
-	}
-
-	// 打开/关闭某个光源
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::LightEnable(uint32_t index, bool enabled)
-	{
-		if (enabled)
-		{
-			glEnable(GL_LIGHT0 + index);
-		}
-		else
-		{
-			glDisable(GL_LIGHT0 + index);
-		}
-	}
-
-	// 实现设置世界矩阵
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::DoWorldMatrix()
-	{
-		glMatrixMode(GL_MODELVIEW);
-
-		Matrix4 oglViewMat(viewMat_);
-
-		oglViewMat(0, 2) = -oglViewMat(0, 2);
-		oglViewMat(1, 2) = -oglViewMat(1, 2);
-		oglViewMat(2, 2) = -oglViewMat(2, 2);
-		oglViewMat(3, 2) = -oglViewMat(3, 2);
-
-		Matrix4 const oglMat(worldMat_ * oglViewMat);
-		glLoadMatrixf(&oglMat(0, 0));
-	}
-
-	// 设置观察矩阵
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::DoViewMatrix()
-	{
-		this->DoWorldMatrix();
-	}
-
-	// 实现设置投射矩阵
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::DoProjectionMatrix()
-	{
-		Matrix4 oglMat(MathLib::LHToRH(projMat_));
-
-		glMatrixMode(GL_PROJECTION);
-		glLoadMatrixf(&oglMat(0, 0));
-		glMatrixMode(GL_MODELVIEW);
-	}
-
-	// 设置材质
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::SetMaterial(Material const & material)
-	{
-		GLfloat ambient[4];
-		OGLMapping::Mapping(ambient, material.ambient);
-		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient);
-
-		GLfloat diffuse[4];
-		OGLMapping::Mapping(diffuse, material.diffuse);
-		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse);
-
-		GLfloat specular[4];
-		OGLMapping::Mapping(specular, material.specular);
-		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
-
-		glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, material.shininess);
 	}
 
 	// 设置当前渲染目标
@@ -514,51 +354,6 @@ namespace KlayGE
 		glEnable(GL_POLYGON_OFFSET_LINE);
 		// Bias is in {0, 16}, scale the unit addition appropriately
 		glPolygonOffset(1.0f, bias);
-	}
-
-	// 打开/关闭Alpha测试
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::AlphaTest(bool enabled)
-	{
-		if (enabled)
-		{
-			glEnable(GL_ALPHA_TEST);
-		}
-		else
-		{
-			glDisable(GL_ALPHA_TEST);
-		}
-	}
-	
-	// 设置Alpha比较函数和参考值
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::AlphaFunction(CompareFunction alphaFunction, float refValue)
-	{
-		glAlphaFunc(OGLMapping::Mapping(alphaFunction), refValue);
-	}
-
-	// 设置雾化效果
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::Fog(FogMode mode, Color const & color,
-		float expDensity, float linearStart, float linearEnd)
-	{
-		if (Fog_None == mode)
-		{
-			glDisable(GL_FOG);
-		}
-		else
-		{
-			glEnable(GL_FOG);
-			glFogi(GL_FOG_MODE, OGLMapping::Mapping(mode));
-
-			GLfloat fogColor[4];
-			OGLMapping::Mapping(fogColor, color);
-			glFogfv(GL_FOG_COLOR, fogColor);
-
-			glFogf(GL_FOG_DENSITY, expDensity);
-			glFogf(GL_FOG_START, linearStart);
-			glFogf(GL_FOG_END, linearEnd);
-		}
 	}
 
 	// 设置纹理

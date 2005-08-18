@@ -17,7 +17,6 @@
 #define _D3D9MAPPING_HPP
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/Light.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Sampler.hpp>
 
@@ -42,13 +41,10 @@ namespace KlayGE
 
 		static D3DSTENCILOP Mapping(RenderEngine::StencilOperation op);
 
-		static D3DLIGHTTYPE Mapping(Light::LightTypes type);
-
 		static uint32_t Mapping(RenderEngine::AlphaBlendFactor factor);
 		static uint32_t Mapping(RenderEngine::CullMode mode);
 		static uint32_t Mapping(RenderEngine::FillMode mode);
 		static uint32_t Mapping(RenderEngine::ShadeOptions so);
-		static uint32_t Mapping(RenderEngine::FogMode mode);
 		static uint32_t Mapping(Sampler::TexAddressingMode mode);
 
 		static void Mapping(D3DPRIMITIVETYPE& primType, uint32_t& primCount, VertexBuffer const & vb);

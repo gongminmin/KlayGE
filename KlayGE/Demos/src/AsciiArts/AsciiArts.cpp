@@ -283,6 +283,8 @@ void AsciiArts::InitObjects()
 
 	screen_buffer_ = renderEngine.ActiveRenderTarget(0);
 
+	render_buffer_->GetViewport().camera = screen_buffer_->GetViewport().camera;
+
 	renderQuad_.reset(new RenderQuad(1, 1));
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
@@ -339,8 +341,6 @@ void AsciiArts::Update(uint32_t pass)
 		case 0:
 			// 第一遍，正常渲染
 			renderEngine.ActiveRenderTarget(0, render_buffer_);
-			renderEngine.ViewMatrix(camera.ViewMatrix());
-			renderEngine.ProjectionMatrix(camera.ProjMatrix());
 
 			mesh_->AddToSceneManager();
 			break;
@@ -361,8 +361,6 @@ void AsciiArts::Update(uint32_t pass)
 	else
 	{
 		renderEngine.ActiveRenderTarget(0, screen_buffer_);
-		renderEngine.ViewMatrix(camera.ViewMatrix());
-		renderEngine.ProjectionMatrix(camera.ProjMatrix());
 
 		sceneMgr.Clear();
 		mesh_->AddToSceneManager();

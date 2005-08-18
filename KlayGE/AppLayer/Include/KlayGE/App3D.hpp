@@ -48,12 +48,13 @@ namespace KlayGE
 
 		virtual void Create(std::string const & name, RenderSettings const & settings);
 
+		Camera const & ActiveCamera() const;
+		Camera& ActiveCamera();
+
 		void Run();
 		void Quit();
 
 	protected:
-		Camera& ActiveCamera();
-
 		void LookAt(Vector3 const & eye, Vector3 const & lookAt, Vector3 const & up = Vector3(0, 1, 0));
 		void Proj(float nearPlane, float farPlane);
 
