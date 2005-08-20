@@ -1516,12 +1516,12 @@ namespace KlayGE
 		}
 
 		// from Graphics Gems I p301
-		template <typename T, typename Iterator>
-		inline Box_T<T>
+		template <typename value_type, typename Iterator>
+		inline Box_T<value_type>
 		ComputeBoundingBox(Iterator first, Iterator last)
 		{
-			typedef typename std::iterator_traits<Iterator>::value_type vector_type;
-			vector_type minVec(*first), maxVec(*first);
+			Vector_T<value_type, 3> minVec(*first);
+			Vector_T<value_type, 3> maxVec(*first);
 			Iterator iter = first;
 			++ iter;
 			for (; iter != last; ++ iter)
@@ -1529,23 +1529,21 @@ namespace KlayGE
 				minVec = Minimize(minVec, *iter);
 				maxVec = Maximize(maxVec, *iter);
 			}
-			return Box_T<T>(Vector_T<T, 3>(minVec.x(), minVec.y(), minVec.z()),
-				Vector_T<T, 3>(maxVec.x(), maxVec.y(), maxVec.z()));
+			return Box_T<value_type>(minVec, maxVec);
 		}
 
-		template <typename T, typename Iterator>
-		inline Sphere_T<T>
+		template <typename value_type, typename Iterator>
+		inline Sphere_T<value_type>
 		ComputeBoundingSphere(Iterator first, Iterator last)
 		{
-			typedef typename std::iterator_traits<Iterator>::value_type vector_type;
-			T const min_float = std::numeric_limits<T>::min();
-			T const max_float = std::numeric_limits<T>::max();
-			vector_type x_min(max_float, max_float, max_float);
-			vector_type y_min(max_float, max_float, max_float);
-			vector_type z_min(max_float, max_float, max_float);
-			vector_type x_max(min_float, min_float, min_float);
-			vector_type y_max(min_float, min_float, min_float);
-			vector_type z_max(min_float, min_float, min_float);
+			value_type const min_float = std::numeric_limits<value_type>::min();
+			value_type const max_float = std::numeric_limits<value_type>::max();
+			Vector_T<value_type, 3> x_min(max_float, max_float, max_float);
+			Vector_T<value_type, 3> y_min(max_float, max_float, max_float);
+			Vector_T<value_type, 3> z_min(max_float, max_float, max_float);
+			Vector_T<value_type, 3> x_max(min_float, min_float, min_float);
+			Vector_T<value_type, 3> y_max(min_float, min_float, min_float);
+			Vector_T<value_type, 3> z_max(min_float, min_float, min_float);
 			for (Iterator iter = first; iter != last; ++ iter)
 			{
 				if (x_min.x() > iter->x())
@@ -1575,12 +1573,12 @@ namespace KlayGE
 				}
 			}
 
-			T x_span = LengthSq(x_max - x_min);
-			T y_span = LengthSq(y_max - y_min);
-			T z_span = LengthSq(z_max - z_min);
+			value_type x_span = LengthSq(x_max - x_min);
+			value_type y_span = LengthSq(y_max - y_min);
+			value_type z_span = LengthSq(z_max - z_min);
 
-			vector_type dia1 = x_min;
-			vector_type dia2 = x_max;
+			Vector_T<value_type, 3> dia1 = x_min;
+			Vector_T<value_type, 3> dia2 = x_max;
 			T max_span = x_span;
 			if (y_span > max_span)
 			{
@@ -1595,12 +1593,12 @@ namespace KlayGE
 				dia2 = z_max;
 			}
 
-			vector_type center((dia1 + dia2) / 2);
-			T r = Length(dia2 - center);
+			Vector_T<value_type, 3> center((dia1 + dia2) / 2);
+			value_type r = Length(dia2 - center);
 
 			for (Iterator iter = first; iter != last; ++ iter)
 			{
-				T d = Length(*iter - center);
+				value_type d = Length(*iter - center);
 
 				if (d > r)
 				{
@@ -1609,7 +1607,7 @@ namespace KlayGE
 				}
 			}
 
-			return Sphere_T<T>(center, r);
+			return Sphere_T<value_type>(center, r);
 		}
 
 
@@ -1646,8 +1644,8 @@ namespace KlayGE
 				position_type const & v1XYZ(*(xyzsBegin + v1Index));
 				position_type const & v2XYZ(*(xyzsBegin + v2Index));
 
-				position_type v1v0 = v1XYZ - v0XYZ;
-				position_type v2v0 = v2XYZ - v0XYZ;
+				Vector_T<T, 3> v1v0 = v1XYZ - v0XYZ;
+				Vector_T<T, 3> v2v0 = v2XYZ - v0XYZ;
 
 				texcoord_type const & v0Tex(*(texsBegin + v0Index));
 				texcoord_type const & v1Tex(*(texsBegin + v1Index));

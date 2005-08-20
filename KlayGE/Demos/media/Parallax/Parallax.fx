@@ -15,8 +15,8 @@ struct VS_OUTPUT
 	float4 pos			: POSITION;
 	float2 texcoord0	: TEXCOORD0;
 
-	float4 L			: TEXCOORD1;	// in tangent space
-	float4 V			: TEXCOORD2;	// in tangent space
+	float3 L			: TEXCOORD1;	// in tangent space
+	float3 V			: TEXCOORD2;	// in tangent space
 };
 
 VS_OUTPUT ParallaxVS(VS_INPUT input,
@@ -37,8 +37,8 @@ VS_OUTPUT ParallaxVS(VS_INPUT input,
 	float3 lightVec = lightPos.xyz - input.pos;
 	float3 viewVec = eyePos.xyz - input.pos;
 
-	output.L = float4(mul(objToTangentSpace, lightVec), 1);
-	output.V = float4(mul(objToTangentSpace, viewVec), 1);
+	output.L = mul(lightVec, objToTangentSpace);
+	output.V = mul(viewVec, objToTangentSpace);
 
 	return output;
 }
@@ -49,6 +49,11 @@ sampler2D normalMapSampler;
 sampler2D heightMapSampler;
 samplerCUBE normalizerMapSampler;
 
+float3 NormalizeByCube(float3 v)
+{
+	return texCUBE(normalizerMapSampler, v).rgb * 2 - 1;
+}
+
 float4 ParallaxPS(float2 texCoord0	: TEXCOORD0,
 					float3 L		: TEXCOORD1,
 					float3 V		: TEXCOORD2,
@@ -58,15 +63,15 @@ float4 ParallaxPS(float2 texCoord0	: TEXCOORD0,
 					uniform sampler2D heightMap,
 					uniform samplerCUBE normalizerMap) : COLOR
 {
-	float3 view = texCUBE(normalizerMap, V).rgb * 2 - 1;
+	float3 view = NormalizeByCube(V);
 
 	float height = tex2D(heightMap, texCoord0).r * 0.06 - 0.02;
 	float2 texUV = texCoord0 + (view.xy * height);
 
 	float3 diffuse = tex2D(diffuseMap, texUV).rgb;
 
-	float3 bumpNormal = texCUBE(normalizerMap, tex2D(normalMap, texUV).rgb * 2 - 1).rgb * 2 - 1;
-	float3 lightVec = texCUBE(normalizerMap, L).rgb * 2 - 1;
+	float3 bumpNormal = NormalizeByCube(tex2D(normalMap, texUV).rgb * 2 - 1);
+	float3 lightVec = NormalizeByCube(L);
 	float diffuseFactor = dot(lightVec, bumpNormal);
 
 	return float4(diffuse * diffuseFactor, 1);

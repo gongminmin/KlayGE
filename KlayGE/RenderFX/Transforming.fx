@@ -1,9 +1,3 @@
-int MaxLights = 8;
-int MaxClipPlanes = 6;
-int MaxTextureUnits = 8;
-int MaxTextureCoords = 8;
-int MaxDrawBuffers = 1;
-
 float4x4 global_model_matrix;
 float4x4 global_view_matrix;
 float4x4 global_projection_matrix;
@@ -98,16 +92,6 @@ void ProjectionMatrix(float4x4 proj, float4x4 proj_inverse)
 	global_projection_matrix_inverse = proj_inverse;
 	
 	UpdateMatrices();
-}
-
-float DirectionalLighting(float3 lightDir, float3 normal)
-{
-	return dot(-lightDir, normal);
-}
-
-float PointLighting(float3 lightPos, float3 pos, float3 normal)
-{
-	return dot(lightPos - pos, normal);
 }
 
 float4 TransformPos(float4 pos)

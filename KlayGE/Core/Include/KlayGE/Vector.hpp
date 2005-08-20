@@ -184,9 +184,11 @@ namespace KlayGE
 		{
 			Helper<N>::DoCopy(&vec_[0], &rhs[0]);
 		}
-		template <typename U>
-		Vector_T(Vector_T<U, N> const & rhs)
+		template <typename U, int M>
+		Vector_T(Vector_T<U, M> const & rhs)
 		{
+			BOOST_STATIC_ASSERT(M >= N);
+
 			Helper<N>::DoCopy<U>(&vec_[0], &rhs[0]);
 		}
 
@@ -341,13 +343,12 @@ namespace KlayGE
 			}
 			return *this;
 		}
-		template <typename U>
-		Vector_T& operator=(Vector_T<U, N> const & rhs)
+		template <typename U, int M>
+		Vector_T& operator=(Vector_T<U, M> const & rhs)
 		{
-			if (this != &rhs)
-			{
-				vec_ = rhs.vec_;
-			}
+			BOOST_STATIC_ASSERT(M >= N);
+
+			Helper<N>::DoCopy<U>(&vec_[0], &rhs.vec_[0]);
 			return *this;
 		}
 
