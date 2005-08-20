@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 <!DOCTYPE Code::Blocks_layout_file>
 <Code::Blocks_layout_file>
+	<File name="..\..\src\gl12.cpp" open="0" top="0">
+		<Cursor position="20169" topLine="411"/>
+	</File>
 	<File name="..\..\src\glloader_glx.cpp" open="0" top="0">
 		<Cursor position="777" topLine="0"/>
 	</File>

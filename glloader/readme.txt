@@ -6,6 +6,7 @@ The GLLoader is licensed under GPL. See gpl.txt.
 
 2.3.0 (2005.7.23)
 Support promote feature strings
+Add supports for codeblocks
 
 2.2.0 (2005.7.2)
 Switch to GPL.

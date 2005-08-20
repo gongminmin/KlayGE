@@ -1,17 +1,17 @@
 # depslib dependency file v1.0
-1122082312 d:\glloader\src\glloader_glx.cpp
+1123588210 d:\glloader\src\glloader_glx.cpp
 	<glloader/glloader.h>
 	"utils.hpp"
 
-1122081678 d:\glloader\src\utils.hpp
+1123516548 d:\glloader\src\utils.hpp
 	<string>
 	<vector>
 
-1122082312 d:\glloader\src\glloader_wgl.cpp
+1123588210 d:\glloader\src\glloader_wgl.cpp
 	<glloader/glloader.h>
 	"utils.hpp"
 
-1122567702 d:\glloader\src\utils.cpp
+1123516727 d:\glloader\src\utils.cpp
 	<glloader/glloader.h>
 	<algorithm>
 	<boost/assert.hpp>
@@ -20,7 +20,32 @@
 	<iostream>
 	"utils.hpp"
 
-1122082312 d:\glloader\src\glloader_gl.cpp
+1123590623 d:\glloader\src\glloader_gl.cpp
 	<glloader/glloader.h>
+	"utils.hpp"
+
+1124497721 d:\glloader\src\gl12.cpp
+	<glloader/glloader.h>
+	<glloader/gl12.h>
+	"utils.hpp"
+
+1123590699 d:\glloader\src\gl13.cpp
+	<glloader/glloader.h>
+	<glloader/gl13.h>
+	"utils.hpp"
+
+1123590713 d:\glloader\src\gl14.cpp
+	<glloader/glloader.h>
+	<glloader/gl14.h>
+	"utils.hpp"
+
+1123590722 d:\glloader\src\gl15.cpp
+	<glloader/glloader.h>
+	<glloader/gl15.h>
+	"utils.hpp"
+
+1124468279 d:\glloader\src\gl20.cpp
+	<glloader/glloader.h>
+	<glloader/gl20.h>
 	"utils.hpp"
 
