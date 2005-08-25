@@ -51,7 +51,8 @@ namespace
 	{
 	public:
 		RenderQuad(int width, int height)
-			: scene_sampler_(new Sampler), lums_sampler_(new Sampler)
+			: RenderableHelper(L"Quad", true, true),
+				scene_sampler_(new Sampler), lums_sampler_(new Sampler)
 		{
 			std::vector<Vector3> pos;
 			for (int y = 0; y < height + 1; ++ y)
@@ -118,11 +119,6 @@ namespace
 			lums_sampler_->SetTexture(lums_tex);
 		}
 
-		bool ShortAge() const
-		{
-			return true;
-		}
-
 		void OnRenderBegin()
 		{
 			RenderEngine const & renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -130,12 +126,6 @@ namespace
 
 			*(effect_->ParameterByName("cell_per_row")) = static_cast<float>(CELL_WIDTH) / renderTarget.Width();
 			*(effect_->ParameterByName("cell_per_line")) = static_cast<float>(CELL_HEIGHT) / renderTarget.Height();
-		}
-
-		const std::wstring& Name() const
-		{
-			static std::wstring name(L"Quad");
-			return name;
 		}
 
 	private:

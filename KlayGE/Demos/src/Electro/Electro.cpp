@@ -32,6 +32,7 @@ namespace
 	{
 	public:
 		RenderElectro()
+			: RenderableHelper(L"Electro", true, false)
 		{
 			MathLib::PerlinNoise<float>& pn = MathLib::PerlinNoise<float>::Instance();
 
@@ -126,12 +127,6 @@ namespace
 
 			*(effect_->ParameterByName("y")) = t * 2;
 			*(effect_->ParameterByName("z")) = t;
-		}
-
-		std::wstring const & Name() const
-		{
-			static const std::wstring name(L"Electro");
-			return name;
 		}
 	};
 

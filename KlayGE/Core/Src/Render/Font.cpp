@@ -70,16 +70,11 @@ namespace
 	{
 	public:
 		FontRenderable(RenderEffectPtr const & effect, VertexBufferPtr const & vb)
+			: RenderableHelper(L"Font", false, true)
 		{
 			effect_ = effect;
 			vb_ = vb;
 			box_ = Box(Vector3(0, 0, 0), Vector3(0, 0, 0));
-		}
-
-		std::wstring const & Name() const
-		{
-			static const std::wstring name_(L"Font");
-			return name_;
 		}
 
 		void OnRenderBegin()
@@ -92,26 +87,16 @@ namespace
 			*(effect_->ParameterByName("color")) = Vector4(clr_.r(), clr_.g(), clr_.b(), clr_.a());
 		}
 
-		bool CanBeCulled() const
-		{
-			return canBeCulled_;
-		}
-
-		bool ShortAge() const
-		{
-			return true;
-		}
-
 		void RenderText(uint32_t fontHeight, Font::CharInfoMapType& charInfoMap, float sx, float sy, float sz,
 			float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t flags)
 		{
 			if (flags & Font::FA_CanBeCulled)
 			{
-				canBeCulled_ = true;
+				can_be_culled_ = true;
 			}
 			else
 			{
-				canBeCulled_ = false;
+				can_be_culled_ = false;
 			}
 
 			clr_ = clr;
@@ -205,8 +190,6 @@ namespace
 		std::vector<float>		texs_;
 		std::vector<uint16_t>	indices_;
 		Color					clr_;
-
-		bool canBeCulled_;
 	};
 }
 

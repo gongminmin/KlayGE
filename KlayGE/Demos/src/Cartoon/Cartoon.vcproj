@@ -131,9 +131,6 @@
 			<File
 				RelativePath=".\Cartoon.hpp">
 			</File>
-			<File
-				RelativePath=".\Torus.hpp">
-			</File>
 		</Filter>
 	</Files>
 	<Globals>

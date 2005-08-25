@@ -35,6 +35,7 @@ namespace
 	{
 	public:
 		RenderPolygon()
+			: RenderableHelper(L"Polygon", true, false)
 		{
 			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("DistanceMapping.fx");
 
@@ -125,12 +126,6 @@ namespace
 			vb_->GetIndexStream()->Assign(indices, sizeof(indices) / sizeof(uint16_t));
 
 			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[4]);
-		}
-
-		std::wstring const & Name() const
-		{
-			static const std::wstring name(L"Polygon");
-			return name;
 		}
 	};
 

@@ -32,6 +32,12 @@
 
 namespace KlayGE
 {
+	RenderableHelper::RenderableHelper(std::wstring const & name, bool can_be_culled, bool short_age)
+		: name_(name),
+			can_be_culled_(can_be_culled), short_age_(short_age)
+	{
+	}
+
 	RenderEffectPtr RenderableHelper::GetRenderEffect() const
 	{
 		return effect_;
@@ -47,8 +53,24 @@ namespace KlayGE
 		return box_;
 	}
 
+	bool RenderableHelper::CanBeCulled() const
+	{
+		return can_be_culled_;
+	}
+	
+	bool RenderableHelper::ShortAge() const
+	{
+		return short_age_;
+	}
 
-	RenderablePoint::RenderablePoint(Vector3 const & v)
+	std::wstring const & RenderableHelper::Name() const
+	{
+		return name_;
+	}
+
+
+	RenderablePoint::RenderablePoint(Vector3 const & v, bool can_be_culled, bool short_age)
+		: RenderableHelper(L"Point", can_be_culled, short_age)
 	{
 		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("RenderableHelper.fx");
 		effect_->SetTechnique("PointTec");
@@ -60,14 +82,9 @@ namespace KlayGE
 		box_ = MathLib::ComputeBoundingBox<float>(&v, &v + 1);
 	}
 
-	std::wstring const & RenderablePoint::Name() const
-	{
-		static std::wstring const name(L"Point");
-		return name;
-	}
 
-
-	RenderableLine::RenderableLine(Vector3 const & v0, Vector3 const & v1)
+	RenderableLine::RenderableLine(Vector3 const & v0, Vector3 const & v1, bool can_be_culled, bool short_age)
+		: RenderableHelper(L"Line", can_be_culled, short_age)
 	{
 		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("RenderableHelper.fx");
 		effect_->SetTechnique("LineTec");
@@ -84,14 +101,10 @@ namespace KlayGE
 		box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 	}
 
-	std::wstring const & RenderableLine::Name() const
-	{
-		static std::wstring const name(L"Line");
-		return name;
-	}
 
-
-	RenderableTriangle::RenderableTriangle(Vector3 const & v0, Vector3 const & v1, Vector3 const & v2)
+	RenderableTriangle::RenderableTriangle(Vector3 const & v0, Vector3 const & v1, Vector3 const & v2,
+											bool can_be_culled, bool short_age)
+		: RenderableHelper(L"Triangle", can_be_culled, short_age)
 	{
 		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("RenderableHelper.fx");
 		effect_->SetTechnique("TriangleTec");
@@ -108,14 +121,9 @@ namespace KlayGE
 		box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 	}
 
-	std::wstring const & RenderableTriangle::Name() const
-	{
-		static std::wstring const name(L"Triangle");
-		return name;
-	}
 
-
-	RenderableBox::RenderableBox(Box const & box)
+	RenderableBox::RenderableBox(Box const & box, bool can_be_culled, bool short_age)
+		: RenderableHelper(L"Box", can_be_culled, short_age)
 	{
 		box_ = box;
 
@@ -145,15 +153,10 @@ namespace KlayGE
 		vb_->GetIndexStream()->Assign(indices, sizeof(indices) / sizeof(indices[0]));
 	}
 
-	std::wstring const & RenderableBox::Name() const
-	{
-		static std::wstring const name(L"Box");
-		return name;
-	}
-
 
 	RenderableSkyBox::RenderableSkyBox()
-		: cube_sampler_(new Sampler)
+		: RenderableHelper(L"SkyBox", false, false),
+			cube_sampler_(new Sampler)
 	{
 		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("RenderableHelper.fx");
 		effect_->SetTechnique("SkyBoxTec");
@@ -202,16 +205,5 @@ namespace KlayGE
 		rot_view(3, 1) = 0;
 		rot_view(3, 2) = 0;
 		*(effect_->ParameterByName("inv_mvp")) = MathLib::Inverse(rot_view * camera.ProjMatrix());
-	}
-
-	bool RenderableSkyBox::CanBeCulled() const
-	{
-		return false;
-	}
-
-	std::wstring const & RenderableSkyBox::Name() const
-	{
-		static std::wstring const name(L"SkyBox");
-		return name;
 	}
 }

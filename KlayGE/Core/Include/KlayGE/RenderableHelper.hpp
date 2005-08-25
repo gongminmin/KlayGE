@@ -31,6 +31,7 @@ namespace KlayGE
 	class RenderableHelper : public Renderable
 	{
 	public:
+		RenderableHelper(std::wstring const & name, bool can_be_culled, bool short_age);
 		virtual ~RenderableHelper()
 		{
 		}
@@ -40,7 +41,17 @@ namespace KlayGE
 
 		virtual Box GetBound() const;
 
+		virtual bool CanBeCulled() const;
+		virtual bool ShortAge() const;
+
+		virtual std::wstring const & Name() const;
+
 	protected:
+		std::wstring name_;
+
+		bool can_be_culled_;
+		bool short_age_;
+
 		Box box_;
 
 		VertexBufferPtr vb_;
@@ -50,45 +61,39 @@ namespace KlayGE
 	class RenderablePoint : public RenderableHelper
 	{
 	public:
-		explicit RenderablePoint(Vector3 const & v);
+		RenderablePoint(Vector3 const & v, bool can_be_culled, bool short_age);
 		virtual ~RenderablePoint()
 		{
-		}
-
-		std::wstring const & Name() const;
+		}		
 	};
 
 	class RenderableLine : public RenderableHelper
 	{
 	public:
-		explicit RenderableLine(Vector3 const & v0, Vector3 const & v1);
+		explicit RenderableLine(Vector3 const & v0, Vector3 const & v1,
+			bool can_be_culled, bool short_age);
 		virtual ~RenderableLine()
 		{
 		}
-
-		std::wstring const & Name() const;
 	};
 
 	class RenderableTriangle : public RenderableHelper
 	{
 	public:
-		RenderableTriangle(Vector3 const & v0, Vector3 const & v1, Vector3 const & v2);
+		RenderableTriangle(Vector3 const & v0, Vector3 const & v1, Vector3 const & v2,
+			bool can_be_culled, bool short_age);
 		virtual ~RenderableTriangle()
 		{
 		}
-
-		std::wstring const & Name() const;
 	};
 
 	class RenderableBox : public RenderableHelper
 	{
 	public:
-		explicit RenderableBox(Box const & box);
+		explicit RenderableBox(Box const & box, bool can_be_culled, bool short_age);
 		virtual ~RenderableBox()
 		{
 		}
-
-		std::wstring const & Name() const;
 	};
 
 	class RenderableSkyBox : public RenderableHelper
@@ -102,9 +107,6 @@ namespace KlayGE
 		void CubeMap(TexturePtr const & cube);
 
 		void OnRenderBegin();
-		bool CanBeCulled() const;
-
-		std::wstring const & Name() const;
 
 	private:
 		SamplerPtr cube_sampler_;

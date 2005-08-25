@@ -13,6 +13,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Sampler.hpp>
+#include <KlayGE/KMesh.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
@@ -21,10 +22,10 @@
 #include <KlayGE/Input.hpp>
 #include <KlayGE/DInput/DInputFactory.hpp>
 
+#include <boost/bind.hpp>
 #include <sstream>
 #include <ctime>
 
-#include "Torus.hpp"
 #include "Cartoon.hpp"
 
 using namespace std;
@@ -32,10 +33,12 @@ using namespace KlayGE;
 
 namespace
 {
-	struct RenderTorus : public RenderableHelper
+	class RenderTorus : public KMesh
 	{
+	public:
 		RenderTorus(TexturePtr const & toonTex, TexturePtr const & edgeTex)
-			: toon_sampler_(new Sampler), edge_sampler_(new Sampler)
+			: KMesh(L"Torus", TexturePtr()),
+				toon_sampler_(new Sampler), edge_sampler_(new Sampler)
 		{
 			toon_sampler_->SetTexture(toonTex);
 			toon_sampler_->Filtering(Sampler::TFO_Point);
@@ -48,32 +51,41 @@ namespace
 			*(effect_->ParameterByName("toonMapSampler")) = toon_sampler_;
 			*(effect_->ParameterByName("edgeMapSampler")) = edge_sampler_;
 			effect_->SetTechnique("cartoonTec");
-
-			box_ = MathLib::ComputeBoundingBox<float>(reinterpret_cast<Vector3*>(&Pos[0]),
-				reinterpret_cast<Vector3*>(&Pos[0] + sizeof(Pos) / sizeof(float)));
-
-			vb_.reset(new VertexBuffer(VertexBuffer::BT_TriangleList));
-
-			vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
-			vb_->AddVertexStream(VST_Normals, sizeof(float), 3, true);
-
-			vb_->GetVertexStream(VST_Positions)->Assign(Pos, sizeof(Pos) / sizeof(float) / 3);
-			vb_->GetVertexStream(VST_Normals)->Assign(Normal, sizeof(Normal) / sizeof(float) / 3);
-
-			vb_->AddIndexStream(true);
-			vb_->GetIndexStream()->Assign(Index, sizeof(Index) / sizeof(uint16_t));
 		}
 
-		std::wstring const & Name() const
+		void OnRenderBegin()
 		{
-			static const std::wstring name(L"Torus");
-			return name;
+			App3DFramework const & app = Context::Instance().AppInstance();
+
+			Matrix4 view = app.ActiveCamera().ViewMatrix();
+			Matrix4 proj = app.ActiveCamera().ProjMatrix();
+			Vector3 eyePos = app.ActiveCamera().EyePos();
+
+			*(effect_->ParameterByName("proj")) = proj;
+			*(effect_->ParameterByName("lightPos")) = Vector4(2, 2, -3, 1);
+			*(effect_->ParameterByName("eyePos")) = Vector4(eyePos.x(), eyePos.y(), eyePos.z(), 1);
+
+			float rotX(std::clock() / 700.0f);
+			float rotY(std::clock() / 700.0f);
+
+			Matrix4 mat(MathLib::RotationX(rotX));
+			Matrix4 matY(MathLib::RotationY(rotY));
+			mat *= matY;
+			mat *= view;
+
+			*(effect_->ParameterByName("worldview")) = mat;
+			*(effect_->ParameterByName("worldviewIT")) = MathLib::Transpose(MathLib::Inverse(mat));
 		}
 
 	private:
 		SamplerPtr toon_sampler_;
 		SamplerPtr edge_sampler_;
 	};
+
+	KMeshPtr CreateRenderTorusFactory(std::wstring const & name, TexturePtr tex, TexturePtr const & toonTex, TexturePtr const & edgeTex)
+	{
+		return KMeshPtr(new RenderTorus(toonTex, edgeTex));
+	}
 
 
 	enum
@@ -132,7 +144,7 @@ void Cartoon::InitObjects()
 	TexturePtr toonTex = LoadTexture("Toon.dds");
 	TexturePtr edgeTex = LoadTexture("Edge.dds");
 
-	renderTorus_.reset(new RenderTorus(toonTex, edgeTex));
+	renderTorus_ = LoadKMesh("torus.kmesh", boost::bind(CreateRenderTorusFactory, _1, _2, toonTex, edgeTex));
 	renderTorus_->AddToSceneManager();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -167,26 +179,7 @@ void Cartoon::Update(uint32_t pass)
 		}
 	}
 
-	Matrix4 view = this->ActiveCamera().ViewMatrix();
-	Matrix4 proj = this->ActiveCamera().ProjMatrix();
-	Vector3 eyePos = this->ActiveCamera().EyePos();
-
-	*(renderTorus_->GetRenderEffect()->ParameterByName("proj")) = proj;
-	*(renderTorus_->GetRenderEffect()->ParameterByName("lightPos")) = Vector4(2, 2, -3, 1);
-	*(renderTorus_->GetRenderEffect()->ParameterByName("eyePos")) = Vector4(eyePos.x(), eyePos.y(), eyePos.z(), 1);
-
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
-	float rotX(std::clock() / 700.0f);
-	float rotY(std::clock() / 700.0f);
-
-	Matrix4 mat(MathLib::RotationX(rotX));
-	Matrix4 matY(MathLib::RotationY(rotY));
-	mat *= matY;
-	mat *= view;
-
-	*(renderTorus_->GetRenderEffect()->ParameterByName("worldview")) = mat;
-	*(renderTorus_->GetRenderEffect()->ParameterByName("worldviewIT")) = MathLib::Transpose(MathLib::Inverse(mat));
 
 	RenderWindow* rw = static_cast<RenderWindow*>(renderEngine.ActiveRenderTarget(0).get());
 

@@ -72,7 +72,7 @@ namespace KlayGE
 						nodes.insert(id);
 
 #ifdef KLAYGE_DEBUG
-						RenderablePtr box_helper(new RenderableBox(box));
+						RenderablePtr box_helper(new RenderableBox(box, false, true));
 						renderItems_.push_back(box_helper);
 						renderables.insert(box_helper);
 #endif

@@ -38,7 +38,8 @@ namespace
 	{
 	public:
 		Flag(int width, int height)
-			: model_(MathLib::Translation(-WIDTH / 2.0f, HEIGHT / 2.0f, 0.0f))
+			: RenderableHelper(L"Flag", true, false),
+				model_(MathLib::Translation(-WIDTH / 2.0f, HEIGHT / 2.0f, 0.0f))
 		{
 			std::vector<Vector3> pos;
 			for (int y = 0; y < height + 1; ++ y)
@@ -99,12 +100,6 @@ namespace
 		Matrix4 GetModelMatrix() const
 		{
 			return model_;
-		}
-
-		std::wstring const & Name() const
-		{
-			static const std::wstring name(L"Flag");
-			return name;
 		}
 
 	private:
