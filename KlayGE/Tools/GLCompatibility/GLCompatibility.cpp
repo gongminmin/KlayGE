@@ -28,6 +28,8 @@ namespace
 			boost::algorithm::split(extensions_, 
 					std::string(reinterpret_cast<char const *>(::glGetString(GL_EXTENSIONS))),
 					boost::bind(std::equal_to<char>(), ' ', _1));
+			extensions_.erase(std::remove_if(extensions_.begin(), extensions_.end(),
+				boost::bind(&std::string::empty, _1)), extensions_.end());
 		}
 
 		friend std::ostream& operator<<(std::ostream& os, information const & info)

@@ -86,6 +86,14 @@ void ComputeDistanceMap(std::vector<unsigned char>& distances, int width, int he
 	cout << clock() - start << endl;
 }
 
+class EmptyApp : public KlayGE::App3DFramework
+{
+public:
+	void Update(uint32_t /*pass*/)
+	{
+	}
+};
+
 int main(int argc, char* argv[])
 {
 	int width = 256, height = 256, depth = 16;
@@ -117,7 +125,7 @@ int main(int argc, char* argv[])
 		ss >> depth;
 	}
 
-	KlayGE::App3DFramework app;
+	EmptyApp app;
 
 	RenderFactory& render_factory(D3D9RenderFactoryInstance());
 	Context::Instance().RenderFactoryInstance(render_factory);

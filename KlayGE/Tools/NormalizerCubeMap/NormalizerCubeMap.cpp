@@ -101,6 +101,14 @@ TexturePtr CreateCubeMap(int cube_size, std::string const & cube_name)
 	return cube;
 }
 
+class EmptyApp : public KlayGE::App3DFramework
+{
+public:
+	void Update(uint32_t /*pass*/)
+	{
+	}
+};
+
 int main(int argc, char* argv[])
 {
 	std::string cube_name("normalizer_cube.dds");
@@ -116,7 +124,7 @@ int main(int argc, char* argv[])
 		ss >> size;
 	}
 
-	KlayGE::App3DFramework app;
+	EmptyApp app;
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 

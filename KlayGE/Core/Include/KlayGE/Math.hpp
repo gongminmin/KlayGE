@@ -1520,14 +1520,15 @@ namespace KlayGE
 		inline Box_T<value_type>
 		ComputeBoundingBox(Iterator first, Iterator last)
 		{
-			Vector_T<value_type, 3> minVec(*first);
-			Vector_T<value_type, 3> maxVec(*first);
+			Vector_T<value_type, 3> minVec = *first;
+			Vector_T<value_type, 3> maxVec = *first;
 			Iterator iter = first;
 			++ iter;
 			for (; iter != last; ++ iter)
 			{
-				minVec = Minimize(minVec, *iter);
-				maxVec = Maximize(maxVec, *iter);
+				Vector_T<value_type, 3> const & v = *iter;
+				minVec = Minimize(minVec, v);
+				maxVec = Maximize(maxVec, v);
 			}
 			return Box_T<value_type>(minVec, maxVec);
 		}
