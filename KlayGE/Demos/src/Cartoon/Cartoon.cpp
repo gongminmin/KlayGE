@@ -61,7 +61,7 @@ namespace
 			Matrix4 proj = app.ActiveCamera().ProjMatrix();
 			Vector3 eyePos = app.ActiveCamera().EyePos();
 
-			*(effect_->ParameterByName("proj")) = proj;
+			*(effect_->ParameterByName("viewproj")) = view * proj;
 			*(effect_->ParameterByName("lightPos")) = Vector4(2, 2, -3, 1);
 			*(effect_->ParameterByName("eyePos")) = Vector4(eyePos.x(), eyePos.y(), eyePos.z(), 1);
 
@@ -71,10 +71,9 @@ namespace
 			Matrix4 mat(MathLib::RotationX(rotX));
 			Matrix4 matY(MathLib::RotationY(rotY));
 			mat *= matY;
-			mat *= view;
 
-			*(effect_->ParameterByName("worldview")) = mat;
-			*(effect_->ParameterByName("worldviewIT")) = MathLib::Transpose(MathLib::Inverse(mat));
+			*(effect_->ParameterByName("world")) = mat;
+			*(effect_->ParameterByName("worldviewIT")) = MathLib::Transpose(MathLib::Inverse(mat * view));
 		}
 
 	private:

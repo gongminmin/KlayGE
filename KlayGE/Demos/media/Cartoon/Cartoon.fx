@@ -1,12 +1,12 @@
-float4x4 proj : PROJECTION;
-float4x4 worldview : WORLDVIEW;
+float4x4 viewproj : VIEWPROJECTION;
+float4x4 world : WORLD;
 float4x4 worldviewIT : WORLDVIEWIT;
 float4 lightPos;
 float4 eyePos;
 
 struct VS_INPUT
 {
-	float4 pos			: POSITION;
+	float3 pos			: POSITION;
 	float3 normal		: NORMAL;
 };
 
@@ -19,14 +19,14 @@ struct VS_OUTPUT
 
 VS_OUTPUT ToonVS(VS_INPUT input)
 {
-	float4 pos = mul(input.pos, worldview);
+	float3 pos = mul(input.pos, world);
 	float3 normal = normalize(mul(input.normal, (float3x3)worldviewIT));
 
-	float3 L = normalize(lightPos.xyz - input.pos);
-	float3 V = normalize(eyePos.xyz - pos.xyz);
+	float3 L = normalize(lightPos.xyz - pos);
+	float3 V = normalize(eyePos.xyz - pos);
 
 	VS_OUTPUT output;
-	output.pos = mul(pos, proj);
+	output.pos = mul(float4(pos, 1), viewproj);
 	output.texcoord0 = float2(dot(normal, L), 0);
 	output.texcoord1 = float2(dot(normal, V), 0);
 
