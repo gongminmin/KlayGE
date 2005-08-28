@@ -20,7 +20,7 @@ namespace KlayGE
 		: border_clr_(0, 0, 0, 0),
 			addr_mode_u_(TAM_Wrap), addr_mode_v_(TAM_Wrap), addr_mode_w_(TAM_Wrap),
 			filter_(TFO_Point),
-			anisotropy_(0),
+			anisotropy_(1),
 			max_mip_level_(1),
 			mip_map_lod_bias_(0),
 			mat_(Matrix4::Identity())
