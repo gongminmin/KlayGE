@@ -18,15 +18,15 @@ VS_OUTPUT MandelbrotVS(float4 pos : POSITION, float2 texcoord0 : TEXCOORD0)
 
 sampler fractal_sampler;
 
-float4 MandelbrotPS(float2 texcoord0 : TEXCOORD0, float2 texcoord1 : TEXCOORD1,
+half4 MandelbrotPS(float2 texcoord0 : TEXCOORD0, float2 texcoord1 : TEXCOORD1,
 					uniform sampler fractal_sampler) : COLOR
 {
-	float2 z = tex2D(fractal_sampler, texcoord0).rg;
-	float2 c = texcoord1;
+	half2 z = tex2D(fractal_sampler, texcoord0).rg;
+	half2 c = texcoord1;
 
-	z = float2(z.x * z.x - z.y * z.y, z.x * z.y + z.y * z.x) + c;
+	z = half2(z.x * z.x - z.y * z.y, z.x * z.y + z.y * z.x) + c;
 
-	return float4(z.xy, 0, 1);
+	return half4(z.xy, 0, 1);
 }
 
 technique Mandelbrot
@@ -45,11 +45,11 @@ void ShowVS(float4 pos : POSITION, float2 texcoord0 : TEXCOORD0,
 	oTexcoord0 = texcoord0;
 }
 
-float4 ShowPS(float2 texCoord0 : TEXCOORD0,
+half4 ShowPS(float2 texCoord0 : TEXCOORD0,
 					uniform sampler fractal_sampler) : COLOR
 {
-	float2 z = tex2D(fractal_sampler, texCoord0).rg;
-	return float4(0, 0, dot(z, z), 1);
+	half2 z = tex2D(fractal_sampler, texCoord0).rg;
+	return half4(0, 0, dot(z, z), 1);
 }
 
 technique Show
