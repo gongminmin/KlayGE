@@ -5,7 +5,7 @@ struct VS_OUTPUT
 	float2 texcoord1	: TEXCOORD1;
 };
 
-VS_OUTPUT FractalVS(float4 pos : POSITION, float2 texcoord0 : TEXCOORD0)
+VS_OUTPUT MandelbrotVS(float4 pos : POSITION, float2 texcoord0 : TEXCOORD0)
 {
 	VS_OUTPUT output;
 
@@ -18,23 +18,23 @@ VS_OUTPUT FractalVS(float4 pos : POSITION, float2 texcoord0 : TEXCOORD0)
 
 sampler fractal_sampler;
 
-float4 FractalPS(float2 texCoord0 : TEXCOORD0, float2 texCoord1 : TEXCOORD1,
+float4 MandelbrotPS(float2 texcoord0 : TEXCOORD0, float2 texcoord1 : TEXCOORD1,
 					uniform sampler fractal_sampler) : COLOR
 {
-	float2 z = tex2D(fractal_sampler, texCoord0).rg;
-	float2 c = texCoord1;
+	float2 z = tex2D(fractal_sampler, texcoord0).rg;
+	float2 c = texcoord1;
 
 	z = float2(z.x * z.x - z.y * z.y, z.x * z.y + z.y * z.x) + c;
 
 	return float4(z.xy, 0, 1);
 }
 
-technique Fractal
+technique Mandelbrot
 {
 	pass p0
 	{
-		VertexShader = compile vs_1_1 FractalVS();
-		PixelShader = compile ps_2_0 FractalPS(fractal_sampler);
+		VertexShader = compile vs_1_1 MandelbrotVS();
+		PixelShader = compile ps_2_0 MandelbrotPS(fractal_sampler);
 	}
 }
 

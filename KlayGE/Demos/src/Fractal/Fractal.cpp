@@ -47,18 +47,18 @@ namespace
 
 			Vector3 xyzs[] =
 			{
-				Vector3(-1, 1, 1),
-				Vector3(1, 1, 1),
-				Vector3(1, -1, 1),
-				Vector3(-1, -1, 1),
+				Vector3(-1, +1, 0.5f),
+				Vector3(+1, +1, 0.5f),
+				Vector3(+1, -1, 0.5f),
+				Vector3(-1, -1, 0.5f),
 			};
 
 			Vector2 texs[] =
 			{
-				Vector2(0, 0),
-				Vector2(1, 0),
-				Vector2(1, 1),
-				Vector2(0, 1),
+				Vector2(0 + 0.5f / WIDTH, 0 + 0.5f / HEIGHT),
+				Vector2(1 + 0.5f / WIDTH, 0 + 0.5f / HEIGHT),
+				Vector2(1 + 0.5f / WIDTH, 1 + 0.5f / HEIGHT),
+				Vector2(0 + 0.5f / WIDTH, 1 + 0.5f / HEIGHT),
 			};
 
 			uint16_t indices[] = 
@@ -81,7 +81,7 @@ namespace
 
 		void OnRenderBegin()
 		{
-			effect_->SetTechnique("Fractal");
+			effect_->SetTechnique("Mandelbrot");
 		}
 	};
 
@@ -102,10 +102,10 @@ namespace
 
 			Vector3 xyzs[] =
 			{
-				Vector3(-1, 1, 1),
-				Vector3(1, 1, 1),
-				Vector3(1, -1, 1),
-				Vector3(-1, -1, 1),
+				Vector3(-1, +1, 0.5f),
+				Vector3(+1, +1, 0.5f),
+				Vector3(+1, -1, 0.5f),
+				Vector3(-1, -1, 0.5f),
 			};
 
 			Vector2 texs[] =
@@ -214,16 +214,11 @@ void Fractal::Update(uint32_t pass)
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 
-	static int i = 0;
 	switch (pass)
 	{
 	case 0:
-		if (i < 30)
-		{
-			renderEngine.ActiveRenderTarget(0, render_buffer_);
-			renderFractal_->AddToSceneManager();
-			++ i;
-		}
+		renderEngine.ActiveRenderTarget(0, render_buffer_);
+		renderFractal_->AddToSceneManager();
 		break;
 
 	case 1:
