@@ -33,17 +33,16 @@ namespace
 	class RenderFractal : public RenderableHelper
 	{
 	public:
-		explicit RenderFractal(TexturePtr texture)
+		RenderFractal()
 			: RenderableHelper(L"Fractal", true, true)
 		{
 			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("Fractal.fx");
 
-			SamplerPtr sampler(new Sampler);
-			sampler->Filtering(Sampler::TFO_Point);
-			sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
-			sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
-			sampler->SetTexture(texture);
-			*(effect_->ParameterByName("fractal_sampler")) = sampler;
+			sampler_.reset(new Sampler);
+			sampler_->Filtering(Sampler::TFO_Point);
+			sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
+			sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
+			*(effect_->ParameterByName("fractal_sampler")) = sampler_;
 
 			Vector3 xyzs[] =
 			{
@@ -79,26 +78,33 @@ namespace
 			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 		}
 
+		void SetTexture(TexturePtr texture)
+		{
+			sampler_->SetTexture(texture);
+		}
+
 		void OnRenderBegin()
 		{
 			effect_->SetTechnique("Mandelbrot");
 		}
+
+	private:
+		SamplerPtr sampler_;
 	};
 
 	class RenderPlane : public RenderableHelper
 	{
 	public:
-		explicit RenderPlane(TexturePtr texture)
+		RenderPlane()
 			: RenderableHelper(L"Plane", true, true)
 		{
 			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("Fractal.fx");
 
-			SamplerPtr sampler(new Sampler);
-			sampler->Filtering(Sampler::TFO_Point);
-			sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
-			sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
-			sampler->SetTexture(texture);
-			*(effect_->ParameterByName("fractal_sampler")) = sampler;
+			sampler_.reset(new Sampler);
+			sampler_->Filtering(Sampler::TFO_Point);
+			sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
+			sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
+			*(effect_->ParameterByName("fractal_sampler")) = sampler_;
 
 			Vector3 xyzs[] =
 			{
@@ -134,10 +140,18 @@ namespace
 			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 		}
 
+		void SetTexture(TexturePtr texture)
+		{
+			sampler_->SetTexture(texture);
+		}
+
 		void OnRenderBegin()
 		{
 			effect_->SetTechnique("Show");
 		}
+
+	private:
+		SamplerPtr sampler_;
 	};
 
 	bool ConfirmDevice(RenderDeviceCaps const & caps)
@@ -194,14 +208,13 @@ void Fractal::InitObjects()
 	rendered_tex_[1]->CopyMemoryToTexture2D(0, &data[0], PF_A32B32G32R32F, WIDTH, HEIGHT, 0, 0);
 
 	render_buffer_ = Context::Instance().RenderFactoryInstance().MakeRenderTexture();
-	render_buffer_->AttachTexture2D(rendered_tex_[0]);
 
 	screen_buffer_ = renderEngine.ActiveRenderTarget(0);
 
 	render_buffer_->GetViewport().camera = screen_buffer_->GetViewport().camera;
 
-	renderFractal_.reset(new RenderFractal(rendered_tex_[1]));
-	renderPlane_.reset(new RenderPlane(rendered_tex_[1]));
+	renderFractal_.reset(new RenderFractal);
+	renderPlane_.reset(new RenderPlane);
 }
 
 uint32_t Fractal::NumPasses() const
@@ -214,18 +227,24 @@ void Fractal::Update(uint32_t pass)
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 
+	static bool odd = false;
+
 	switch (pass)
 	{
 	case 0:
+		render_buffer_->AttachTexture2D(rendered_tex_[!odd]);
+
 		renderEngine.ActiveRenderTarget(0, render_buffer_);
+		static_cast<RenderFractal&>(*renderFractal_).SetTexture(rendered_tex_[odd]);
 		renderFractal_->AddToSceneManager();
 		break;
 
 	case 1:
-		rendered_tex_[0]->CopyToTexture(*rendered_tex_[1]);
-
 		renderEngine.ActiveRenderTarget(0, screen_buffer_);
+		static_cast<RenderPlane&>(*renderPlane_).SetTexture(rendered_tex_[!odd]);
 		renderPlane_->AddToSceneManager();
+
+		odd = !odd;
 
 		std::wostringstream stream;
 		stream << renderEngine.ActiveRenderTarget(0)->FPS();

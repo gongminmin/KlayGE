@@ -49,7 +49,7 @@ float4 ShowPS(float2 texCoord0 : TEXCOORD0,
 					uniform sampler fractal_sampler) : COLOR
 {
 	float2 z = tex2D(fractal_sampler, texCoord0).rg;
-	return float4(0, 0, length(z) / 2, 1);
+	return float4(0, 0, dot(z, z), 1);
 }
 
 technique Show
@@ -57,6 +57,6 @@ technique Show
 	pass p0
 	{
 		VertexShader = compile vs_1_1 ShowVS();
-		PixelShader = compile ps_2_0 ShowPS(fractal_sampler);
+		PixelShader = compile ps_1_1 ShowPS(fractal_sampler);
 	}
 }

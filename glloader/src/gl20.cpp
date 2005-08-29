@@ -35,11 +35,11 @@ namespace
 
 	void init_GL_VERSION_2_0()
 	{
-
+		glloader_init();
 
 		glloader_GL_VERSION_2_0 = _glloader_GL_VERSION_2_0;
 
-		if (glloader_GL_VERSION_2_0())
+		if (glloader_is_supported("GL_VERSION_2_0"))
 		{
 			_GL_VERSION_2_0 = true;
 
