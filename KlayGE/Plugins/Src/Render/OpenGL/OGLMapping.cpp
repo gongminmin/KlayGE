@@ -1,8 +1,11 @@
 // OGLMapping.hpp
 // KlayGE RenderEngine和OpenGL本地之间的映射 实现文件
-// Ver 2.8.0
+// Ver 3.0.0
 // 版权所有(C) 龚敏敏, 2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.0.0
+// 增加了TAM_Border (2005.8.30)
 //
 // 2.8.0
 // 初次建立 (2005.7.19)
@@ -197,6 +200,9 @@ namespace KlayGE
 
 		case Sampler::TAM_Clamp:
 			return GL_CLAMP_TO_EDGE;
+
+		case Sampler::TAM_Border:
+			return GL_CLAMP_TO_BORDER;
 
 		default:
 			BOOST_ASSERT(false);

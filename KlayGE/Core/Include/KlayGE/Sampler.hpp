@@ -1,8 +1,11 @@
 // Sampler.hpp
 // KlayGE 渲染样本类 实现文件
-// Ver 2.8.0
+// Ver 3.0.0
 // 版权所有(C) 龚敏敏, 2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.0.0
+// 增加了TAM_Border (2005.8.30)
 //
 // 2.8.0
 // 初次建立 (2005.7.30)
@@ -36,14 +39,14 @@ namespace KlayGE
 			TFO_Point,
 			TFO_Bilinear,
 			TFO_Trilinear,
-			TFO_Anisotropic,
+			TFO_Anisotropic
 		};
 
 		enum TexAddressingType
 		{
 			TAT_Addr_U,
 			TAT_Addr_V,
-			TAT_Addr_W,
+			TAT_Addr_W
 		};
 
 		// Sampler addressing modes - default is TAM_Wrap.
@@ -55,6 +58,8 @@ namespace KlayGE
 			TAM_Mirror,
 			// Texture clamps at 1.0
 			TAM_Clamp,
+			// Texture coordinates outside the range [0.0, 1.0] are set to the border color.
+			TAM_Border
 		};
 
 	public:
