@@ -1094,7 +1094,7 @@ namespace KlayGE
 		}
 
 		template <typename T>
-        inline Matrix4_T<T>
+		inline Matrix4_T<T>
 		RotationMatrixYawPitchRoll(Vector_T<T, 3> const & ang)
 		{
 			return RotationMatrixYawPitchRoll(ang.x(), ang.y(), ang.z());
@@ -1278,7 +1278,7 @@ namespace KlayGE
 		}
 
 		template <typename T>
-        inline Quaternion_T<T>
+		inline Quaternion_T<T>
 		RotationAxis(Vector_T<T, 3> const & v, T const & angle)
 		{
 			T const ang(angle * T(0.5));
@@ -1289,7 +1289,7 @@ namespace KlayGE
 		}
 
 		template <typename T>
-        inline Quaternion_T<T>
+		inline Quaternion_T<T>
 		Slerp(Quaternion_T<T> const & lhs, Quaternion_T<T> const & rhs, T const & slerp)
 		{
 			T scale0, scale1;
@@ -1338,7 +1338,7 @@ namespace KlayGE
 		}
 
 		template <typename T>
-        inline Quaternion_T<T>
+		inline Quaternion_T<T>
 		RotationQuatYawPitchRoll(Vector_T<T, 3> const & ang)
 		{
 			return RotationQuatYawPitchRoll(ang.x(), ang.y(), ang.z());
