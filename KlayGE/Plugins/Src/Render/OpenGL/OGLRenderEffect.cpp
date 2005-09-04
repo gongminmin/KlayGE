@@ -43,6 +43,13 @@ namespace KlayGE
 			cerr << cgGetLastListing(renderFactory.CGContext()) << endl;
 		}
 		BOOST_ASSERT(effect_);
+
+		CGtechnique tech = cgGetFirstTechnique(effect_);
+		while (tech)
+		{
+			techniques_.push_back(this->MakeRenderTechnique(tech));
+			tech = cgGetNextTechnique(tech);
+		}
 	}
 
 	OGLRenderEffect::~OGLRenderEffect()
@@ -50,15 +57,8 @@ namespace KlayGE
 		cgDestroyEffect(effect_);
 	}
 
-	bool OGLRenderEffect::Validate(std::string const & technique)
+	void OGLRenderEffect::DoActiveTechnique()
 	{
-		return CG_TRUE == cgValidateTechnique(cgGetNamedTechnique(effect_, technique.c_str()));
-	}
-
-	void OGLRenderEffect::SetTechnique(std::string const & technique)
-	{
-		technique_ = cgGetNamedTechnique(effect_, technique.c_str());
-		BOOST_ASSERT(technique_);
 	}
 
 	std::string OGLRenderEffect::DoNameBySemantic(std::string const & semantic)
@@ -125,35 +125,58 @@ namespace KlayGE
 
 	uint32_t OGLRenderEffect::DoBegin(uint32_t flags)
 	{
-		uint32_t ret = 0;
-
-		CGpass pass = cgGetFirstPass(technique_);
-		while (pass)
-		{
-			++ ret;
-			pass = cgGetNextPass(pass);
-		}
-
-		return ret;
+		RenderTechniquePtr tech = this->ActiveTechnique();
+		return tech->NumPasses();
 	}
 
 	void OGLRenderEffect::DoEnd()
 	{
 	}
-
-	void OGLRenderEffect::BeginPass(uint32_t passNum)
+	
+	RenderTechniquePtr OGLRenderEffect::MakeRenderTechnique(CGtechnique tech)
 	{
-		CGpass pass = cgGetFirstPass(technique_);
-		while (pass && (passNum > 0))
-		{
-			-- passNum;
-			pass = cgGetNextPass(pass);
-		}
-
-		cgSetPassState(pass);
+		BOOST_ASSERT(tech != 0);
+		RenderTechniquePtr ret(new OGLRenderTechnique(*this, cgGetTechniqueName(tech), tech));
+		return ret;
 	}
 
-	void OGLRenderEffect::EndPass()
+
+	OGLRenderTechnique::OGLRenderTechnique(RenderEffect& effect, std::string const & name, CGtechnique tech)
+		: RenderTechnique(effect, name),
+			technique_(tech)
+	{
+		CGpass pass = cgGetFirstPass(technique_);
+		while (pass)
+		{
+			passes_.push_back(this->MakeRenderPass(passes_.size(), pass));
+			pass = cgGetNextPass(pass);
+		}
+	}
+
+	RenderPassPtr OGLRenderTechnique::MakeRenderPass(uint32_t index, CGpass pass)
+	{
+		RenderPassPtr ret(new OGLRenderPass(effect_, index, pass));
+		return ret;
+	}
+
+	bool OGLRenderTechnique::Validate()
+	{
+		return CG_TRUE == cgValidateTechnique(technique_);
+	}
+
+
+	OGLRenderPass::OGLRenderPass(RenderEffect& effect, uint32_t index, CGpass pass)
+		: RenderPass(effect, index),
+			pass_(pass)
+	{
+	}
+
+	void OGLRenderPass::Begin()
+	{
+		cgSetPassState(pass_);
+	}
+
+	void OGLRenderPass::End()
 	{
 	}
 

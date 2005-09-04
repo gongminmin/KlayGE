@@ -78,7 +78,7 @@ namespace
 			texture->CopyMemoryToTexture3D(0, &turbBuffer[0], PF_L8, XSIZE, YSIZE, ZSIZE, 0, 0, 0);
 
 			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("Electro.fx");
-			effect_->SetTechnique("Electro");
+			effect_->ActiveTechnique("Electro");
 
 			SamplerPtr electro_sampler(new Sampler);
 			electro_sampler->SetTexture(texture);

@@ -38,7 +38,7 @@ namespace
 			: RenderableHelper(L"Polygon", true, false)
 		{
 			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("parallax.fx");
-			effect_->SetTechnique("Parallax");
+			effect_->ActiveTechnique("Parallax");
 
 			SamplerPtr diffuse_sampler(new Sampler);
 			diffuse_sampler->SetTexture(LoadTexture("diffuse.dds"));

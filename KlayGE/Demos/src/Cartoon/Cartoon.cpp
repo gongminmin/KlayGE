@@ -50,7 +50,7 @@ namespace
 			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("Cartoon.fx");
 			*(effect_->ParameterByName("toonMapSampler")) = toon_sampler_;
 			*(effect_->ParameterByName("edgeMapSampler")) = edge_sampler_;
-			effect_->SetTechnique("cartoonTec");
+			effect_->ActiveTechnique("cartoonTec");
 		}
 
 		void OnRenderBegin()

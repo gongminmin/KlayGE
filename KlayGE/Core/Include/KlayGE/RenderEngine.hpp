@@ -197,7 +197,6 @@ namespace KlayGE
 		std::vector<RenderTargetPtr> renderTargets_;
 
 		RenderEffectPtr renderEffect_;
-		uint32_t renderPasses_;
 
 		size_t numPrimitivesJustRendered_;
 		size_t numVerticesJustRendered_;

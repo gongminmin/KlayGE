@@ -49,6 +49,13 @@ namespace KlayGE
 			static_cast<UINT>(srcData.size()), NULL, NULL,
 			0, NULL, &effect, NULL);
 		d3dx_effect_ = MakeCOMPtr(effect);
+
+		D3DXEFFECT_DESC desc;
+		d3dx_effect_->GetDesc(&desc);
+		for (uint32_t i = 0; i < desc.Techniques; ++ i)
+		{
+			techniques_.push_back(this->MakeRenderTechnique(i));
+		}
 	}
 
 	std::string D3D9RenderEffect::DoNameBySemantic(std::string const & semantic)
@@ -135,16 +142,6 @@ namespace KlayGE
 		return RenderEffectParameterPtr();
 	}
 
-	bool D3D9RenderEffect::Validate(std::string const & technique)
-	{
-		return SUCCEEDED(d3dx_effect_->ValidateTechnique(technique.c_str()));
-	}
-
-	void D3D9RenderEffect::SetTechnique(std::string const & technique)
-	{
-		TIF(d3dx_effect_->SetTechnique(technique.c_str()));
-	}
-
 	uint32_t D3D9RenderEffect::DoBegin(uint32_t flags)
 	{
 		UINT passes;
@@ -157,14 +154,10 @@ namespace KlayGE
 		TIF(d3dx_effect_->End());
 	}
 
-	void D3D9RenderEffect::BeginPass(uint32_t passNum)
+	void D3D9RenderEffect::DoActiveTechnique()
 	{
-		TIF(d3dx_effect_->BeginPass(passNum));
-	}
-
-	void D3D9RenderEffect::EndPass()
-	{
-		TIF(d3dx_effect_->EndPass());
+		RenderTechniquePtr tech = ActiveTechnique();
+		static_cast<D3D9RenderTechnique&>(*tech).Active();
 	}
 
 	void D3D9RenderEffect::DoOnLostDevice()
@@ -199,6 +192,66 @@ namespace KlayGE
 			static_cast<D3D9Texture&>(*s->GetTexture()).OnResetDevice();
 			params_[p->Name()].second = true;
 		}
+	}
+
+	RenderTechniquePtr D3D9RenderEffect::MakeRenderTechnique(uint32_t n)
+	{
+		D3DXHANDLE tech = d3dx_effect_->GetTechnique(n);
+		BOOST_ASSERT(tech != NULL);
+
+		D3DXTECHNIQUE_DESC desc;
+		d3dx_effect_->GetTechniqueDesc(tech, &desc);
+		RenderTechniquePtr ret(new D3D9RenderTechnique(*this, desc.Name, tech));
+		return ret;
+	}
+
+
+	D3D9RenderTechnique::D3D9RenderTechnique(RenderEffect& effect, std::string const & name, D3DXHANDLE tech)
+		: RenderTechnique(effect, name),
+			tech_(tech)
+	{
+		D3DXTECHNIQUE_DESC desc;
+		static_cast<D3D9RenderEffect&>(effect_).D3DXEffect()->GetTechniqueDesc(tech_, &desc);
+		for (uint32_t i = 0; i < desc.Passes; ++ i)
+		{
+			passes_.push_back(this->MakeRenderPass(i));
+		}
+	}
+
+	bool D3D9RenderTechnique::Validate()
+	{
+		return SUCCEEDED(static_cast<D3D9RenderEffect&>(effect_).D3DXEffect()->ValidateTechnique(tech_));
+	}
+
+	void D3D9RenderTechnique::Active()
+	{
+		TIF(static_cast<D3D9RenderEffect&>(effect_).D3DXEffect()->SetTechnique(tech_));
+	}
+
+	RenderPassPtr D3D9RenderTechnique::MakeRenderPass(uint32_t n)
+	{
+		D3DXHANDLE pass = static_cast<D3D9RenderEffect&>(effect_).D3DXEffect()->GetPass(tech_, n);
+		BOOST_ASSERT(pass != NULL);
+
+		RenderPassPtr ret(new D3D9RenderPass(effect_, n, pass));
+		return ret;
+	}
+
+
+	D3D9RenderPass::D3D9RenderPass(RenderEffect& effect, uint32_t index, D3DXHANDLE pass)
+		: RenderPass(effect, index),
+			pass_(pass)
+	{
+	}
+
+	void D3D9RenderPass::Begin()
+	{
+		TIF(static_cast<D3D9RenderEffect&>(effect_).D3DXEffect()->BeginPass(index_));
+	}
+
+	void D3D9RenderPass::End()
+	{
+		TIF(static_cast<D3D9RenderEffect&>(effect_).D3DXEffect()->EndPass());
 	}
 
 	

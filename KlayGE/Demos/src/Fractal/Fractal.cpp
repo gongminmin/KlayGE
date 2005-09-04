@@ -84,7 +84,7 @@ namespace
 
 		void OnRenderBegin()
 		{
-			effect_->SetTechnique("Mandelbrot");
+			effect_->ActiveTechnique("Mandelbrot");
 		}
 
 	private:
@@ -146,7 +146,7 @@ namespace
 
 		void OnRenderBegin()
 		{
-			effect_->SetTechnique("Show");
+			effect_->ActiveTechnique("Show");
 		}
 
 	private:

@@ -73,7 +73,7 @@ namespace KlayGE
 		: RenderableHelper(L"Point", can_be_culled, short_age)
 	{
 		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("RenderableHelper.fx");
-		effect_->SetTechnique("PointTec");
+		effect_->ActiveTechnique("PointTec");
 
 		vb_.reset(new VertexBuffer(VertexBuffer::BT_PointList));
 		vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
@@ -87,7 +87,7 @@ namespace KlayGE
 		: RenderableHelper(L"Line", can_be_culled, short_age)
 	{
 		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("RenderableHelper.fx");
-		effect_->SetTechnique("LineTec");
+		effect_->ActiveTechnique("LineTec");
 
 		Vector3 xyzs[] =
 		{
@@ -107,7 +107,7 @@ namespace KlayGE
 		: RenderableHelper(L"Triangle", can_be_culled, short_age)
 	{
 		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("RenderableHelper.fx");
-		effect_->SetTechnique("TriangleTec");
+		effect_->ActiveTechnique("TriangleTec");
 
 		Vector3 xyzs[] =
 		{
@@ -128,7 +128,7 @@ namespace KlayGE
 		box_ = box;
 
 		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("RenderableHelper.fx");
-		effect_->SetTechnique("BoxTec");
+		effect_->ActiveTechnique("BoxTec");
 
 		Vector3 xyzs[] =
 		{
@@ -159,7 +159,7 @@ namespace KlayGE
 			cube_sampler_(new Sampler)
 	{
 		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("RenderableHelper.fx");
-		effect_->SetTechnique("SkyBoxTec");
+		effect_->ActiveTechnique("SkyBoxTec");
 
 		Vector3 xyzs[] =
 		{

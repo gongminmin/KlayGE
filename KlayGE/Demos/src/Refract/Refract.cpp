@@ -41,7 +41,7 @@ namespace
 				cubemap_sampler_(new Sampler)
 		{
 			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("Refract.fx");
-			effect_->SetTechnique("Refract");
+			effect_->ActiveTechnique("Refract");
 
 			cubemap_sampler_->Filtering(Sampler::TFO_Bilinear);
 			cubemap_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);

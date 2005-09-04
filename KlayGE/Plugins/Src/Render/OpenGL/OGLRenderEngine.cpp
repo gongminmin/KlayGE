@@ -261,30 +261,32 @@ namespace KlayGE
 		numPrimitivesJustRendered_ += primCount;
 		numVerticesJustRendered_ += vertexCount;
 
+		RenderTechniquePtr tech = renderEffect_->ActiveTechnique();
+		uint32_t num_passes = tech->NumPasses();
 		if (vb.UseIndices())
 		{
 			OGLIndexStream& stream(static_cast<OGLIndexStream&>(*vb.GetIndexStream()));
 			stream.Active();
 
-			for (uint32_t i = 0; i < renderPasses_; ++ i)
+			for (uint32_t i = 0; i < num_passes; ++ i)
 			{
-				renderEffect_->BeginPass(i);
+				RenderPassPtr pass = tech->Pass(i);
 
+				pass->Begin();
 				glDrawElements(mode, static_cast<GLsizei>(vb.NumIndices()),
 					GL_UNSIGNED_SHORT, 0);
-
-				renderEffect_->EndPass();
+				pass->End();
 			}
 		}
 		else
 		{
-			for (uint32_t i = 0; i < renderPasses_; ++ i)
+			for (uint32_t i = 0; i < num_passes; ++ i)
 			{
-				renderEffect_->BeginPass(i);
-			
-				glDrawArrays(mode, 0, static_cast<GLsizei>(vb.NumVertices()));
+				RenderPassPtr pass = tech->Pass(i);
 
-				renderEffect_->EndPass();
+				pass->Begin();
+				glDrawArrays(mode, 0, static_cast<GLsizei>(vb.NumVertices()));
+				pass->End();
 			}
 		}
 	}

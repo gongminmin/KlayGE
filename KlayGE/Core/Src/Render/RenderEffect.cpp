@@ -1,8 +1,11 @@
 // RenderEffect.cpp
 // KlayGE 渲染效果类 实现文件
-// Ver 2.8.0
+// Ver 3.0.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.0.0
+// 增加了RenderTechnique和RenderPass (2005.9.4)
 //
 // 2.8.0
 // 增加了Do*函数，使用模板方法模式 (2005.7.24)
@@ -35,23 +38,20 @@ namespace KlayGE
 		RenderEffectParameterPtr DoParameterByName(std::string const & /*name*/)
 			{ return RenderEffectParameter::NullObject(); }
 
-		bool Validate(std::string const & /*techName*/)
-		{
-			return false;
-		}
-		void SetTechnique(std::string const & /*techName*/)
-		{
-		}
-
 		uint32_t DoBegin(uint32_t /*flags*/)
 			{ return 0; }
 		void DoEnd()
 			{ }
-		void BeginPass(uint32_t /*passNum*/)
-			{ }
-		void EndPass()
-			{ }
+
+		void DoActiveTechnique()
+		{
+		}
 	};
+
+	RenderEffect::RenderEffect()
+		: active_tech_(-1)
+	{
+	}
 
 	RenderEffectPtr RenderEffect::NullObject()
 	{
@@ -77,6 +77,37 @@ namespace KlayGE
 	RenderEffectParameterPtr RenderEffect::ParameterBySemantic(std::string const & semantic)
 	{
 		return this->ParameterByName(this->DoNameBySemantic(semantic));
+	}
+
+	RenderEffect::techniques_type::iterator RenderEffect::TechniqueByName(std::string const & name)
+	{
+		for (techniques_type::iterator iter = techniques_.begin(); iter != techniques_.end(); ++ iter)
+		{
+			if (name == (*iter)->Name())
+			{
+				return iter;
+			}
+		}
+		return techniques_.end();
+	}
+
+	bool RenderEffect::ValidateTechnique(std::string const & name)
+	{
+		techniques_type::iterator iter = this->TechniqueByName(name);
+		return (*iter)->Validate();
+	}
+
+	void RenderEffect::ActiveTechnique(std::string const & name)
+	{
+		techniques_type::iterator iter = this->TechniqueByName(name);
+		active_tech_ = (iter == techniques_.end()) ? -1 : static_cast<int32_t>(iter - techniques_.begin());
+
+		this->DoActiveTechnique();
+	}
+
+	RenderTechniquePtr RenderEffect::ActiveTechnique() const
+	{
+		return techniques_[active_tech_];
 	}
 
 	void RenderEffect::DirtyParam(std::string const& name)

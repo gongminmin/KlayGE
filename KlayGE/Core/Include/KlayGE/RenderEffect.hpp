@@ -1,8 +1,11 @@
 // RenderEffect.hpp
 // KlayGE 渲染效果脚本类 头文件
-// Ver 2.8.0
+// Ver 3.0.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.0.0
+// 增加了RenderTechnique和RenderPass (2005.9.4)
 //
 // 2.8.0
 // 增加了Do*函数，使用模板方法模式 (2005.7.24)
@@ -51,7 +54,12 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	class RenderEffect
 	{
+	private:
+		typedef std::map<std::string, std::pair<RenderEffectParameterPtr, bool> > params_type;
+		typedef std::vector<RenderTechniquePtr> techniques_type;
+		
 	public:
+		RenderEffect();
 		virtual ~RenderEffect()
 			{ }
 
@@ -60,15 +68,14 @@ namespace KlayGE
 		RenderEffectParameterPtr ParameterByName(std::string const & name);
 		RenderEffectParameterPtr ParameterBySemantic(std::string const & semantic);
 
-		virtual bool Validate(std::string const & technique) = 0;
-		virtual void SetTechnique(std::string const & technique) = 0;
+		bool ValidateTechnique(std::string const & name);
+		void ActiveTechnique(std::string const & name);
+		RenderTechniquePtr ActiveTechnique() const;
 
 		uint32_t Begin(uint32_t flags = 0);
 		void End();
-		virtual void BeginPass(uint32_t passNum) = 0;
-		virtual void EndPass() = 0;
 
-		void DirtyParam(std::string const& name);
+		void DirtyParam(std::string const & name);
 
 	private:
 		virtual std::string DoNameBySemantic(std::string const & semantic) = 0;
@@ -77,9 +84,78 @@ namespace KlayGE
 		virtual uint32_t DoBegin(uint32_t flags) = 0;
 		virtual void DoEnd() = 0;
 
+		virtual void DoActiveTechnique() = 0;
+
 	protected:
-		typedef std::map<std::string, std::pair<RenderEffectParameterPtr, bool> > params_type;
+		techniques_type::iterator TechniqueByName(std::string const & name);
+
+	protected:
 		params_type params_;
+
+		techniques_type techniques_;
+		int32_t active_tech_;
+	};
+
+	class RenderTechnique
+	{
+	public:
+		RenderTechnique(RenderEffect& effect, std::string const & name)
+			: effect_(effect), name_(name)
+		{
+		}
+		virtual ~RenderTechnique()
+		{
+		}
+
+		std::string const & Name() const
+		{
+			return name_;
+		}
+
+		uint32_t NumPasses() const
+		{
+			return static_cast<uint32_t>(passes_.size());
+		}
+		RenderPassPtr Pass(uint32_t n)
+		{
+			BOOST_ASSERT(n < passes_.size());
+			return passes_[n];
+		}
+
+		virtual bool Validate() = 0;
+
+	protected:
+		std::string name_;
+
+		RenderEffect& effect_;
+
+		typedef std::vector<RenderPassPtr> passes_type;
+		passes_type passes_;
+	};
+
+	class RenderPass
+	{
+	public:
+		RenderPass(RenderEffect& effect, uint32_t index)
+			: effect_(effect), index_(index)
+		{
+		}
+		virtual ~RenderPass()
+		{
+		}
+
+		uint32_t Index() const
+		{
+			return index_;
+		}
+
+		virtual void Begin() = 0;
+		virtual void End() = 0;
+
+	protected:
+		uint32_t index_;
+
+		RenderEffect& effect_;
 	};
 
 	class RenderEffectParameter : boost::noncopyable

@@ -87,7 +87,7 @@ namespace
 			box_ = MathLib::ComputeBoundingBox<float>(pos.begin(), pos.end());
 
 			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("VertexDisplacement.fx");
-			effect_->SetTechnique("VertexDisplacement");
+			effect_->ActiveTechnique("VertexDisplacement");
 
 			SamplerPtr flag_sampler(new Sampler);
 			flag_sampler->SetTexture(LoadTexture("Flag.dds"));

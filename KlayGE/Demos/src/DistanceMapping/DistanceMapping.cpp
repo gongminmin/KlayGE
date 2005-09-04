@@ -39,20 +39,20 @@ namespace
 		{
 			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("DistanceMapping.fx");
 
-			if (!effect_->Validate("DistanceMapping30"))
+			if (!effect_->ValidateTechnique("DistanceMapping30"))
 			{
-				if (!effect_->Validate("DistanceMapping2a"))
+				if (!effect_->ValidateTechnique("DistanceMapping2a"))
 				{
-					effect_->SetTechnique("DistanceMapping20");
+					effect_->ActiveTechnique("DistanceMapping20");
 				}
 				else
 				{
-					effect_->SetTechnique("DistanceMapping2a");
+					effect_->ActiveTechnique("DistanceMapping2a");
 				}
 			}
 			else
 			{
-				effect_->SetTechnique("DistanceMapping30");
+				effect_->ActiveTechnique("DistanceMapping30");
 			}
 
 			SamplerPtr diffuse_sampler(new Sampler);

@@ -66,6 +66,10 @@ namespace KlayGE
 	typedef boost::shared_ptr<Renderable> RenderablePtr;
 	class RenderEffect;
 	typedef boost::shared_ptr<RenderEffect> RenderEffectPtr;
+	class RenderTechnique;
+	typedef boost::shared_ptr<RenderTechnique> RenderTechniquePtr;
+	class RenderPass;
+	typedef boost::shared_ptr<RenderPass> RenderPassPtr;
 	class RenderEffectParameter;
 	typedef boost::shared_ptr<RenderEffectParameter> RenderEffectParameterPtr;
 	class SceneManager;

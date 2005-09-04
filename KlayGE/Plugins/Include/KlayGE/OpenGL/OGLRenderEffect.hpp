@@ -41,12 +41,6 @@ namespace KlayGE
 		explicit OGLRenderEffect(std::string const & srcData);
 		~OGLRenderEffect();
 
-		bool Validate(std::string const & technique);
-		void SetTechnique(std::string const & technique);
-
-		void BeginPass(uint32_t passNum);
-		void EndPass();
-
 	private:
 		std::string DoNameBySemantic(std::string const & semantic);
 		RenderEffectParameterPtr DoParameterByName(std::string const & name);
@@ -54,9 +48,38 @@ namespace KlayGE
 		uint32_t DoBegin(uint32_t flags);
 		void DoEnd();
 
+		void DoActiveTechnique();
+
+		RenderTechniquePtr MakeRenderTechnique(CGtechnique tech);
+
 	private:
 		CGeffect effect_;
+	};
+
+	class OGLRenderTechnique : public RenderTechnique
+	{
+	public:
+		OGLRenderTechnique(RenderEffect& effect, std::string const & name, CGtechnique tech);
+
+		bool Validate();
+
+	private:
+		RenderPassPtr MakeRenderPass(uint32_t index, CGpass pass);
+
+	private:
 		CGtechnique technique_;
+	};
+
+	class OGLRenderPass : public RenderPass
+	{
+	public:
+		OGLRenderPass(RenderEffect& effect, uint32_t index, CGpass pass);
+
+		void Begin();
+		void End();
+
+	private:
+		CGpass pass_;
 	};
 
 	template <typename T>

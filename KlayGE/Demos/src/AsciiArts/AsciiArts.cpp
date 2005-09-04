@@ -89,7 +89,7 @@ namespace
 			}
 
 			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArts.fx");
-			effect_->SetTechnique("AsciiArts");
+			effect_->ActiveTechnique("AsciiArts");
 
 			vb_.reset(new VertexBuffer(VertexBuffer::BT_TriangleList));
 

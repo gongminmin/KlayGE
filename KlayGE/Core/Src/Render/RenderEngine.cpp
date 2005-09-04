@@ -36,8 +36,7 @@
 namespace KlayGE
 {
 	RenderEngine::RenderEngine()
-		: renderEffect_(RenderEffect::NullObject()),
-			renderPasses_(1)
+		: renderEffect_(RenderEffect::NullObject())
 	{
 	}
 
@@ -84,7 +83,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void RenderEngine::Render(VertexBuffer const & vb)
 	{
-		renderPasses_ = renderEffect_->Begin();
+		renderEffect_->Begin();
 		this->DoRender(vb);
 		renderEffect_->End();
 	}

@@ -382,35 +382,36 @@ namespace KlayGE
 
 		TIF(d3dDevice_->SetVertexDeclaration(currentVertexDecl_.get()));
 
-
+		RenderTechniquePtr tech = renderEffect_->ActiveTechnique();
+		uint32_t num_passes = tech->NumPasses();
 		if (vb.UseIndices())
 		{
 			D3D9IndexStream& d3dis(static_cast<D3D9IndexStream&>(*vb.GetIndexStream()));
 			d3dDevice_->SetIndices(d3dis.D3D9Buffer().get());
 
-			for (uint32_t i = 0; i < renderPasses_; ++ i)
+			for (uint32_t i = 0; i < num_passes; ++ i)
 			{
+				RenderPassPtr pass = tech->Pass(i);
+
 				this->FlushSamplers(i);
 
-				renderEffect_->BeginPass(i);
-
+				pass->Begin();
 				TIF(d3dDevice_->DrawIndexedPrimitive(primType, 0, 0,
 					static_cast<UINT>(vb.NumVertices()), 0, primCount));
-
-				renderEffect_->EndPass();
+				pass->End();
 			}
 		}
 		else
 		{
-			for (uint32_t i = 0; i < renderPasses_; ++ i)
+			for (uint32_t i = 0; i < num_passes; ++ i)
 			{
+				RenderPassPtr pass = tech->Pass(i);
+
 				this->FlushSamplers(i);
 
-				renderEffect_->BeginPass(i);
-
+				pass->Begin();
 				TIF(d3dDevice_->DrawPrimitive(primType, 0, primCount));
-
-				renderEffect_->EndPass();
+				pass->End();
 			}
 		}
 	}

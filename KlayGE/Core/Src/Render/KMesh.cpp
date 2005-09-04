@@ -45,11 +45,11 @@ namespace KlayGE
 			sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
 			*(effect_->ParameterByName("texSampler")) = sampler_;
 
-			effect_->SetTechnique("KMeshTec");
+			effect_->ActiveTechnique("KMeshTec");
 		}
 		else
 		{
-			effect_->SetTechnique("KMeshNoTexTec");
+			effect_->ActiveTechnique("KMeshNoTexTec");
 		}
 	}
 

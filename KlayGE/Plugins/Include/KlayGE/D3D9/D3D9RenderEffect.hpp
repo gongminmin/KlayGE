@@ -62,12 +62,6 @@ namespace KlayGE
 		boost::shared_ptr<ID3DXEffect> const & D3DXEffect() const
 			{ return d3dx_effect_; }
 
-		bool Validate(std::string const & technique);
-		void SetTechnique(std::string const & technique);
-
-		void BeginPass(uint32_t passNum);
-		void EndPass();
-
 	private:
 		void DoOnLostDevice();
 		void DoOnResetDevice();
@@ -78,11 +72,42 @@ namespace KlayGE
 		uint32_t DoBegin(uint32_t flags);
 		void DoEnd();
 
+		void DoActiveTechnique();
+
+		RenderTechniquePtr MakeRenderTechnique(uint32_t n);
+
 	private:
 		boost::shared_ptr<ID3DXEffect> d3dx_effect_;
 
 		typedef std::vector<boost::weak_ptr<D3D9RenderEffectParameterSampler> > sampler_params_type;
 		sampler_params_type sampler_params_;
+	};
+
+	class D3D9RenderTechnique : public RenderTechnique
+	{
+	public:
+		D3D9RenderTechnique(RenderEffect& effect, std::string const & name, D3DXHANDLE tech);
+
+		bool Validate();
+		void Active();
+
+	private:
+		RenderPassPtr MakeRenderPass(uint32_t n);
+
+	private:
+		D3DXHANDLE tech_;
+	};
+
+	class D3D9RenderPass : public RenderPass
+	{
+	public:
+		D3D9RenderPass(RenderEffect& effect, uint32_t index, D3DXHANDLE pass);
+
+		void Begin();
+		void End();
+
+	private:
+		D3DXHANDLE pass_;
 	};
 
 	class D3D9RenderEffectParameterFloat : public RenderEffectParameterConcrete<float>, public D3D9Resource

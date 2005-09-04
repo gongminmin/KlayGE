@@ -211,7 +211,7 @@ namespace KlayGE
 
 		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("Font.fx");
 		*(effect_->ParameterByName("texFontSampler")) = theSampler_;
-		effect_->SetTechnique("fontTec");
+		effect_->ActiveTechnique("fontTec");
 
 		vb_->AddVertexStream(VST_Positions, sizeof(float), 3);
 		vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2);
