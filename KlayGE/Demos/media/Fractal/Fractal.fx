@@ -49,7 +49,13 @@ half4 ShowPS(float2 texCoord0 : TEXCOORD0,
 					uniform sampler fractal_sampler) : COLOR
 {
 	half2 z = tex2D(fractal_sampler, texCoord0).rg;
-	return half4(0, 0, dot(z, z), 1);
+	half len2 = dot(z, z);
+	half4 ret = half4(0, 0, 0, 1);
+	if (len2 > 4)
+	{
+		ret = half4(texCoord0, 1, 1);
+	}
+	return ret;
 }
 
 technique Show
@@ -57,6 +63,6 @@ technique Show
 	pass p0
 	{
 		VertexShader = compile vs_1_1 ShowVS();
-		PixelShader = compile ps_1_1 ShowPS(fractal_sampler);
+		PixelShader = compile ps_2_0 ShowPS(fractal_sampler);
 	}
 }
