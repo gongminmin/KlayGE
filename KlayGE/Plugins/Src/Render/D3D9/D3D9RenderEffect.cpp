@@ -27,13 +27,13 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Sampler.hpp>
-#include <KlayGE/D3D9/D3D9Texture.hpp>
 
 #include <boost/assert.hpp>
 #include <boost/bind.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <functional>
 
+#include <KlayGE/D3D9/D3D9Texture.hpp>
 #include <KlayGE/D3D9/D3D9RenderEffect.hpp>
 
 namespace KlayGE
@@ -242,10 +242,69 @@ namespace KlayGE
 		: RenderPass(effect, index),
 			pass_(pass)
 	{
+		D3DXPASS_DESC desc;
+		static_cast<D3D9RenderEffect&>(effect_).D3DXEffect()->GetPassDesc(pass, &desc);
+
+		if (desc.pVertexShaderFunction != NULL)
+		{
+			ID3DXConstantTable* constant_table;
+			D3DXGetShaderConstantTable(desc.pVertexShaderFunction, &constant_table);
+			constant_table_[0] = MakeCOMPtr(constant_table);
+		}
+		if (desc.pPixelShaderFunction != NULL)
+		{
+			ID3DXConstantTable* constant_table;
+			D3DXGetShaderConstantTable(desc.pPixelShaderFunction, &constant_table);
+			constant_table_[1] = MakeCOMPtr(constant_table);
+		}
+
+		for (int i = 0; i < 2; ++ i)
+		{
+			if (constant_table_[i])
+			{
+				D3DXCONSTANTTABLE_DESC ct_desc;
+				constant_table_[i]->GetDesc(&ct_desc);
+				for (UINT c = 0; c < ct_desc.Constants; ++ c)
+				{
+					D3DXHANDLE handle = constant_table_[i]->GetConstant(NULL, c);
+					D3DXCONSTANT_DESC constant_desc;
+					UINT count;
+					constant_table_[i]->GetConstantDesc(handle, &constant_desc, &count);
+					if ((D3DXPT_SAMPLER == constant_desc.Type)
+						|| (D3DXPT_SAMPLER1D == constant_desc.Type)
+						|| (D3DXPT_SAMPLER2D == constant_desc.Type)
+						|| (D3DXPT_SAMPLER3D == constant_desc.Type)
+						|| (D3DXPT_SAMPLERCUBE == constant_desc.Type))
+					{
+						RenderEffectParameterPtr param = effect_.ParameterByName(constant_desc.Name);
+						if (param)
+						{
+							samplers_[i].insert(std::make_pair(param, constant_table_[i]->GetSamplerIndex(handle)));
+						}
+					}
+				}
+			}
+		}
 	}
 
 	void D3D9RenderPass::Begin()
 	{
+		BOOST_ASSERT(dynamic_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()) != NULL);
+
+		D3D9RenderEngine& render_eng(static_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+
+		for (int i = 0; i < 2; ++ i)
+		{
+			for (MapVector<RenderEffectParameterPtr, uint32_t>::iterator iter = samplers_[i].begin();
+				iter != samplers_[i].end(); ++ iter)
+			{
+				SamplerPtr sampler;
+				iter->first->Value(sampler);
+
+				render_eng.SetSampler(iter->second, sampler);
+			}
+		}
+
 		TIF(static_cast<D3D9RenderEffect&>(effect_).D3DXEffect()->BeginPass(index_));
 	}
 

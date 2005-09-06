@@ -102,8 +102,6 @@ namespace KlayGE
 
 		void FillRenderDeviceCaps();
 
-		void FlushSamplers(uint32_t pass);
-
 	private:
 		D3D9AdapterList const & D3DAdapters() const;
 		D3D9Adapter const & ActiveAdapter() const;

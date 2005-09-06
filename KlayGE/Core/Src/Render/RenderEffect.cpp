@@ -49,7 +49,7 @@ namespace KlayGE
 	};
 
 	RenderEffect::RenderEffect()
-		: active_tech_(-1)
+		: active_tech_(0)
 	{
 	}
 
@@ -100,7 +100,7 @@ namespace KlayGE
 	void RenderEffect::ActiveTechnique(std::string const & name)
 	{
 		techniques_type::iterator iter = this->TechniqueByName(name);
-		active_tech_ = (iter == techniques_.end()) ? -1 : static_cast<int32_t>(iter - techniques_.begin());
+		active_tech_ = (iter == techniques_.end()) ? 0 : static_cast<int32_t>(iter - techniques_.begin());
 
 		this->DoActiveTechnique();
 	}

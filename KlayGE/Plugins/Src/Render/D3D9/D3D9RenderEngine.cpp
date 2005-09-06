@@ -277,49 +277,6 @@ namespace KlayGE
 		TIF(d3dDevice_->BeginScene());
 	}
 
-	void D3D9RenderEngine::FlushSamplers(uint32_t pass)
-	{
-		boost::shared_ptr<ID3DXEffect> d3dx_effect = static_cast<D3D9RenderEffect&>(*renderEffect_).D3DXEffect();
-		D3DXPASS_DESC pass_desc;
-		D3DXHANDLE pass_handle = d3dx_effect->GetPass(d3dx_effect->GetCurrentTechnique(), pass);
-		d3dx_effect->GetPassDesc(pass_handle, &pass_desc);
-		if (pass_desc.pPixelShaderFunction != NULL)
-		{
-			ID3DXConstantTable* pConstantTable;
-			D3DXGetShaderConstantTable(pass_desc.pPixelShaderFunction, &pConstantTable);
-			boost::shared_ptr<ID3DXConstantTable> constant_table = MakeCOMPtr(pConstantTable);
-
-			D3DXCONSTANTTABLE_DESC ct_dest;
-			constant_table->GetDesc(&ct_dest);
-			for (UINT c = 0; c < ct_dest.Constants; ++ c)
-			{
-				D3DXHANDLE handle = constant_table->GetConstant(NULL, c);
-				D3DXCONSTANT_DESC constant_desc;
-				UINT count;
-				constant_table->GetConstantDesc(handle, &constant_desc, &count);
-				if ((D3DXPT_SAMPLER == constant_desc.Type)
-					|| (D3DXPT_SAMPLER1D == constant_desc.Type)
-					|| (D3DXPT_SAMPLER2D == constant_desc.Type)
-					|| (D3DXPT_SAMPLER3D == constant_desc.Type)
-					|| (D3DXPT_SAMPLERCUBE == constant_desc.Type))
-				{
-					RenderEffectParameterPtr param = renderEffect_->ParameterByName(constant_desc.Name);
-
-					if (param)
-					{
-						SamplerPtr sampler;
-						param->Value(sampler);
-
-						UINT index = constant_table->GetSamplerIndex(handle);
-						this->SetSampler(index, sampler);
-					}
-				}
-			}
-		}
-
-		d3dx_effect->CommitChanges();
-	}
-
 	// äÖÈ¾
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::DoRender(VertexBuffer const & vb)
@@ -393,8 +350,6 @@ namespace KlayGE
 			{
 				RenderPassPtr pass = tech->Pass(i);
 
-				this->FlushSamplers(i);
-
 				pass->Begin();
 				TIF(d3dDevice_->DrawIndexedPrimitive(primType, 0, 0,
 					static_cast<UINT>(vb.NumVertices()), 0, primCount));
@@ -406,8 +361,6 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_passes; ++ i)
 			{
 				RenderPassPtr pass = tech->Pass(i);
-
-				this->FlushSamplers(i);
 
 				pass->Begin();
 				TIF(d3dDevice_->DrawPrimitive(primType, 0, primCount));

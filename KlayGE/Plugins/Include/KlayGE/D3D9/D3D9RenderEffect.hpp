@@ -30,6 +30,8 @@
 #define _D3D9RENDEREFFECT_HPP
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KlayGE/MapVector.hpp>
+
 #include <boost/smart_ptr.hpp>
 
 #include <map>
@@ -108,6 +110,9 @@ namespace KlayGE
 
 	private:
 		D3DXHANDLE pass_;
+
+		boost::shared_ptr<ID3DXConstantTable> constant_table_[2];
+		MapVector<RenderEffectParameterPtr, uint32_t> samplers_[2];
 	};
 
 	class D3D9RenderEffectParameterFloat : public RenderEffectParameterConcrete<float>, public D3D9Resource
