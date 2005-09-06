@@ -1,8 +1,11 @@
 // D3D9RenderEffect.hpp
 // KlayGE D3D9渲染效果类 头文件
-// Ver 2.5.0
+// Ver 3.0.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.0.0
+// 优化了Sampler设置 (2005.9.7)
 //
 // 2.5.0
 // 去掉了Clone (2005.4.16)
@@ -80,9 +83,6 @@ namespace KlayGE
 
 	private:
 		boost::shared_ptr<ID3DXEffect> d3dx_effect_;
-
-		typedef std::vector<boost::weak_ptr<D3D9RenderEffectParameterSampler> > sampler_params_type;
-		sampler_params_type sampler_params_;
 	};
 
 	class D3D9RenderTechnique : public RenderTechnique

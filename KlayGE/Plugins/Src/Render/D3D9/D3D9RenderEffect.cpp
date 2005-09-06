@@ -6,6 +6,7 @@
 //
 // 3.0.0
 // 支持"x.y"形式的参数名 (2005.8.17)
+// 优化了Sampler设置 (2005.9.7)
 //
 // 2.3.0
 // 增加了OnLostDevice和OnResetDevice (2005.2.23)
@@ -133,9 +134,7 @@ namespace KlayGE
 				&& ((D3DXPT_SAMPLER == desc.Type) || (D3DXPT_SAMPLER1D == desc.Type) || (D3DXPT_SAMPLER2D == desc.Type)
 					|| (D3DXPT_SAMPLER3D == desc.Type) || (D3DXPT_SAMPLERCUBE == desc.Type)))
 		{
-			boost::shared_ptr<D3D9RenderEffectParameterSampler> ret(new D3D9RenderEffectParameterSampler(*this, name));
-			sampler_params_.push_back(boost::weak_ptr<D3D9RenderEffectParameterSampler>(ret));
-			return ret;
+			return RenderEffectParameterPtr(new D3D9RenderEffectParameterSampler(*this, name));
 		}
 
 		BOOST_ASSERT(false);
@@ -162,16 +161,16 @@ namespace KlayGE
 
 	void D3D9RenderEffect::DoOnLostDevice()
 	{
-		for (sampler_params_type::iterator iter = sampler_params_.begin(); iter != sampler_params_.end(); ++ iter)
+		for (params_type::iterator iter = params_.begin(); iter != params_.end(); ++ iter)
 		{
-			boost::shared_ptr<D3D9RenderEffectParameterSampler> p = iter->lock();
-			BOOST_ASSERT(p);
-			BOOST_ASSERT(params_.find(p->Name()) != params_.end());
-
-			SamplerPtr s;
-			p->Value(s);
-			static_cast<D3D9Texture&>(*s->GetTexture()).OnLostDevice();
-			params_[p->Name()].second = true;
+			RenderEffectParameterPtr param = iter->second.first;
+			if (dynamic_cast<D3D9RenderEffectParameterSampler*>(param.get()) != NULL)
+			{
+				SamplerPtr s;
+				param->Value(s);
+				static_cast<D3D9Texture&>(*s->GetTexture()).OnLostDevice();
+				iter->second.second = true;
+			}
 		}
 
 		TIF(d3dx_effect_->OnLostDevice());
@@ -181,16 +180,16 @@ namespace KlayGE
 	{
 		TIF(d3dx_effect_->OnResetDevice());
 
-		for (sampler_params_type::iterator iter = sampler_params_.begin(); iter != sampler_params_.end(); ++ iter)
+		for (params_type::iterator iter = params_.begin(); iter != params_.end(); ++ iter)
 		{
-			boost::shared_ptr<D3D9RenderEffectParameterSampler> p = iter->lock();
-			BOOST_ASSERT(p);
-			BOOST_ASSERT(params_.find(p->Name()) != params_.end());
-
-			SamplerPtr s;
-			p->Value(s);
-			static_cast<D3D9Texture&>(*s->GetTexture()).OnResetDevice();
-			params_[p->Name()].second = true;
+			RenderEffectParameterPtr param = iter->second.first;
+			if (dynamic_cast<D3D9RenderEffectParameterSampler*>(param.get()) != NULL)
+			{
+				SamplerPtr s;
+				param->Value(s);
+				static_cast<D3D9Texture&>(*s->GetTexture()).OnResetDevice();
+				iter->second.second = true;
+			}
 		}
 	}
 

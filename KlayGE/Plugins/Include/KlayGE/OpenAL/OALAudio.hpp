@@ -15,8 +15,8 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
-#include <al.h>
-#include <alc.h>
+#include <al/al.h>
+#include <al/alc.h>
 
 #include <vector>
 #define NOMINMAX
