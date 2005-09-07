@@ -135,6 +135,9 @@
 				RelativePath=".\D3D9Texture.cpp">
 			</File>
 			<File
+				RelativePath=".\D3D9VertexBuffer.cpp">
+			</File>
+			<File
 				RelativePath=".\D3D9VertexStream.cpp">
 			</File>
 			<File
@@ -180,6 +183,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9Texture.hpp">
+			</File>
+			<File
+				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9VertexBuffer.hpp">
 			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9VertexStream.hpp">

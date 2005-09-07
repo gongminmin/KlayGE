@@ -1,8 +1,11 @@
 // RenderFactory.hpp
 // KlayGE 渲染工厂类 头文件
-// Ver 2.8.0
+// Ver 3.0.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.0.0
+// 增加了MakeVertexBuffer (2005.9.7)
 //
 // 2.8.0
 // 增加了LoadEffect (2005.7.25)
@@ -49,6 +52,7 @@ namespace KlayGE
 
 		RenderEffectPtr LoadEffect(std::string const & effectName);
 
+		virtual VertexBufferPtr MakeVertexBuffer(VertexBuffer::BufferType type) = 0;
 		// sizeElement表示流中每个元素的大小，比如Position流是size(float)
 		// numElement表示一个顶点有几个元素表示，比如Position流是由(x, y, z)组成，所以为3
 		virtual VertexStreamPtr MakeVertexStream(VertexStreamType type,

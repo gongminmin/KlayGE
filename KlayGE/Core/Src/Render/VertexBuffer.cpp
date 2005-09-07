@@ -54,7 +54,11 @@ namespace KlayGE
 	VertexBuffer::VertexBuffer(BufferType type)
 			: type_(type)
 	{
-		vertexStreams_.reserve(16);
+		vertexStreams_.reserve(8);
+	}
+
+	VertexBuffer::~VertexBuffer()
+	{
 	}
 
 	VertexBuffer::BufferType VertexBuffer::Type() const

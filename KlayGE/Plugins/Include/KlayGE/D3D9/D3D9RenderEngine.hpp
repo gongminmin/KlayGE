@@ -119,9 +119,7 @@ namespace KlayGE
 		D3DCOLOR clearClr_;
 		uint32_t clearFlags_;
 
-		typedef std::vector<D3DVERTEXELEMENT9> VertexDeclType;
-		VertexDeclType currentDecl_;
-		boost::shared_ptr<IDirect3DVertexDeclaration9> currentVertexDecl_;
+		size_t last_num_vertex_stream_;
 	};
 
 	typedef boost::shared_ptr<D3D9RenderEngine> D3D9RenderEnginePtr;

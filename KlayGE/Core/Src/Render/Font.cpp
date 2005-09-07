@@ -200,9 +200,10 @@ namespace KlayGE
 	Font::Font(std::string const & fontName, uint32_t height, uint32_t /*flags*/)
 				: curX_(0), curY_(0),
 					fontHeight_(height),
-					vb_(new VertexBuffer(VertexBuffer::BT_TriangleList)),
 					theSampler_(new Sampler)
 	{
+		vb_ = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(VertexBuffer::BT_TriangleList);
+
 		RenderEngine const & renderEngine = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		RenderDeviceCaps const & caps = renderEngine.DeviceCaps();
 		theTexture_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(caps.max_texture_width,

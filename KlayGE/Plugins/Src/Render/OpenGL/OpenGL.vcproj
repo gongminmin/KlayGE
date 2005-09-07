@@ -164,6 +164,9 @@
 				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLTexture.hpp">
 			</File>
 			<File
+				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLVertexBuffer.hpp">
+			</File>
+			<File
 				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLVertexStream.hpp">
 			</File>
 		</Filter>

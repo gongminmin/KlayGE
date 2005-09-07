@@ -15,6 +15,8 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Math.hpp>
+#include <KlayGE/Context.hpp>
+#include <KlayGE/RenderFactory.hpp>
 
 #include <algorithm>
 #include <boost/mem_fn.hpp>
@@ -25,10 +27,10 @@ namespace KlayGE
 {
 	StaticMesh::StaticMesh(std::wstring const & name)
 		: name_(name),
-			vb_(new VertexBuffer(VertexBuffer::BT_TriangleList)),
 			beBuilt_(false),
 			model_(Matrix4::Identity())
 	{
+		vb_ = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 	}
 
 	StaticMesh::~StaticMesh()

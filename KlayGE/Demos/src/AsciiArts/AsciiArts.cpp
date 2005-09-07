@@ -91,7 +91,7 @@ namespace
 			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArts.fx");
 			effect_->ActiveTechnique("AsciiArts");
 
-			vb_.reset(new VertexBuffer(VertexBuffer::BT_TriangleList));
+			vb_ = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 
 			vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
 			vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2, true);

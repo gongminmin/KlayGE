@@ -116,7 +116,8 @@ namespace KlayGE
 		typedef VertexStreamsType::iterator VertexStreamIterator;
 		typedef VertexStreamsType::const_iterator VertexStreamConstIterator;
 
-		VertexBuffer(BufferType type);
+		explicit VertexBuffer(BufferType type);
+		virtual ~VertexBuffer() = 0;
 
 		BufferType Type() const;
 
@@ -138,7 +139,7 @@ namespace KlayGE
 		void AddIndexStream(bool staticStream = false);
 		IndexStreamPtr GetIndexStream() const;
 
-	private:
+	protected:
 		BufferType type_;
 
 		VertexStreamsType vertexStreams_;

@@ -51,9 +51,9 @@
 #include <KlayGE/D3D9/D3D9IndexStream.hpp>
 #include <KlayGE/D3D9/D3D9RenderEffect.hpp>
 #include <KlayGE/D3D9/D3D9Mapping.hpp>
+#include <KlayGE/D3D9/D3D9VertexBuffer.hpp>
 
 #include <algorithm>
-#include <cstring>
 #include <boost/assert.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
@@ -67,7 +67,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D9RenderEngine::D3D9RenderEngine()
 						: cullingMode_(RenderEngine::CM_None),
-							clearFlags_(D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER)
+							clearFlags_(D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER),
+							last_num_vertex_stream_(1)
 	{
 		// Create our Direct3D object
 		d3d_ = MakeCOMPtr(Direct3DCreate9(D3D_SDK_VERSION));
@@ -82,8 +83,6 @@ namespace KlayGE
 	{
 		renderEffect_.reset();
 		renderTargets_.clear();
-
-		currentVertexDecl_.reset();
 
 		d3dDevice_.reset();
 		d3d_.reset();
@@ -282,6 +281,7 @@ namespace KlayGE
 	void D3D9RenderEngine::DoRender(VertexBuffer const & vb)
 	{
 		BOOST_ASSERT(d3dDevice_);
+		BOOST_ASSERT(dynamic_cast<D3D9VertexBuffer const *>(&vb) != NULL);
 		BOOST_ASSERT(vb.VertexStreamEnd() - vb.VertexStreamBegin() != 0);
 
 		D3DPRIMITIVETYPE primType;
@@ -291,53 +291,28 @@ namespace KlayGE
 		numPrimitivesJustRendered_ += primCount;
 		numVerticesJustRendered_ += vb.UseIndices() ? vb.NumIndices() : vb.NumVertices();
 
-		VertexDeclType shaderDecl;
-		shaderDecl.reserve(currentDecl_.size());
-
-		D3DVERTEXELEMENT9 element;
-
 		for (VertexBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
-			iter != vb.VertexStreamEnd(); ++ iter)
+				iter != vb.VertexStreamEnd(); ++ iter)
 		{
 			VertexStream& stream(*(*iter));
 			BOOST_ASSERT(dynamic_cast<D3D9VertexStream*>(&stream) != NULL);
 
-			D3D9Mapping::Mapping(element, shaderDecl.size(), stream);
-			shaderDecl.push_back(element);
-
 			D3D9VertexStream& d3d9vs(static_cast<D3D9VertexStream&>(stream));
-			TIF(d3dDevice_->SetStreamSource(element.Stream,
+			TIF(d3dDevice_->SetStreamSource(iter - vb.VertexStreamBegin(),
 				d3d9vs.D3D9Buffer().get(), 0,
 				static_cast<UINT>(stream.SizeOfElement() * stream.ElementsPerVertex())));
 		}
 
-		{
-			element.Stream		= 0xFF;
-			element.Type		= D3DDECLTYPE_UNUSED;
-			element.Usage		= 0;
-			element.UsageIndex	= 0;
-			shaderDecl.push_back(element);
-		}
-
 		// Clear any previous steam sources
-		for (size_t i = shaderDecl.size() - 1; i < currentDecl_.size(); ++ i)
+		uint32_t const num_vertex_stream = vb.VertexStreamEnd() - vb.VertexStreamBegin();
+		for (uint32_t i = num_vertex_stream; i < last_num_vertex_stream_; ++ i)
 		{
-			d3dDevice_->SetStreamSource(static_cast<uint32_t>(i), NULL, 0, 0);
+			d3dDevice_->SetStreamSource(i, NULL, 0, 0);
 		}
+		last_num_vertex_stream_ = num_vertex_stream;
 
-
-		if ((currentDecl_.size() != shaderDecl.size())
-			|| std::memcmp(&currentDecl_[0], &shaderDecl[0],
-								sizeof(shaderDecl[0]) * shaderDecl.size()) != 0)
-		{
-			currentDecl_ = shaderDecl;
-
-			IDirect3DVertexDeclaration9* theVertexDecl;
-			TIF(d3dDevice_->CreateVertexDeclaration(&currentDecl_[0], &theVertexDecl));
-			currentVertexDecl_ = MakeCOMPtr(theVertexDecl);
-		}
-
-		TIF(d3dDevice_->SetVertexDeclaration(currentVertexDecl_.get()));
+		D3D9VertexBuffer const & d3d9_vb = static_cast<D3D9VertexBuffer const &>(vb);
+		TIF(d3dDevice_->SetVertexDeclaration(d3d9_vb.VertexDeclaration().get()));
 
 		RenderTechniquePtr tech = renderEffect_->ActiveTechnique();
 		uint32_t num_passes = tech->NumPasses();

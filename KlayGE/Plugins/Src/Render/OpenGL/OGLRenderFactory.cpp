@@ -12,9 +12,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 
-#include <iostream>
-using namespace std;
-
 #include <KlayGE/OpenGL/OGLRenderFactory.hpp>
 
 #pragma comment(lib, "Cg.lib")
@@ -67,7 +64,12 @@ namespace KlayGE
 	{
 		return RenderEffectPtr(new OGLRenderEffect(srcData));
 	}
-			
+
+	VertexBufferPtr OGLRenderFactory::MakeVertexBuffer(VertexBuffer::BufferType type)
+	{
+		return VertexBufferPtr(new OGLVertexBuffer(type));
+	}
+
 	VertexStreamPtr OGLRenderFactory::MakeVertexStream(VertexStreamType type,
 			uint8_t sizeElement, uint8_t numElement, bool staticStream)
 	{

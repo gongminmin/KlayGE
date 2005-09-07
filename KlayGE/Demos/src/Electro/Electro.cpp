@@ -109,7 +109,7 @@ namespace
 				0, 1, 3, 3, 2, 0,
 			};
 
-			vb_.reset(new VertexBuffer(VertexBuffer::BT_TriangleList));
+			vb_ = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 			vb_->AddVertexStream(VST_Positions, sizeof(float), 3);
 			vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 3);
 			vb_->GetVertexStream(VST_Positions)->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));

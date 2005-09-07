@@ -25,6 +25,12 @@
 
 #include <KlayGE/VertexBuffer.hpp>
 
+#ifdef KLAYGE_DEBUG
+	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL_d.lib")
+#else
+	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL.lib")
+#endif
+
 namespace KlayGE
 {
 	class OGLVertexStream : public VertexStream

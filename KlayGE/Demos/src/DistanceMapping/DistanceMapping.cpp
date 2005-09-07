@@ -111,7 +111,7 @@ namespace
 				indices, indices + sizeof(indices) / sizeof(indices[0]),
 				xyzs, xyzs + sizeof(xyzs) / sizeof(xyzs[0]), texs);
 
-			vb_.reset(new VertexBuffer(VertexBuffer::BT_TriangleList));
+			vb_ = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 
 			vb_->AddVertexStream(VST_Positions, sizeof(float), 3);
 			vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2);

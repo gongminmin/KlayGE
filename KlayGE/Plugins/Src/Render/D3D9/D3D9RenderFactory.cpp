@@ -18,6 +18,7 @@
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 #include <KlayGE/D3D9/D3D9RenderTexture.hpp>
 #include <KlayGE/D3D9/D3D9RenderEffect.hpp>
+#include <KlayGE/D3D9/D3D9VertexBuffer.hpp>
 #include <KlayGE/D3D9/D3D9VertexStream.hpp>
 #include <KlayGE/D3D9/D3D9IndexStream.hpp>
 
@@ -72,7 +73,12 @@ namespace KlayGE
 		resource_pool_.push_back(ret);
 		return ret;
 	}
-		
+
+	VertexBufferPtr D3D9RenderFactory::MakeVertexBuffer(VertexBuffer::BufferType type)
+	{
+		return VertexBufferPtr(new D3D9VertexBuffer(type));
+	}
+
 	VertexStreamPtr D3D9RenderFactory::MakeVertexStream(VertexStreamType type,
 		uint8_t sizeElement, uint8_t numElement, bool staticStream)
 	{

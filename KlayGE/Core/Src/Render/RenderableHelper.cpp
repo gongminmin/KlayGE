@@ -75,7 +75,7 @@ namespace KlayGE
 		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("RenderableHelper.fx");
 		effect_->ActiveTechnique("PointTec");
 
-		vb_.reset(new VertexBuffer(VertexBuffer::BT_PointList));
+		vb_ = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(VertexBuffer::BT_PointList);
 		vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
 		vb_->GetVertexStream(VST_Positions)->Assign(&v, 1);
 
@@ -94,7 +94,7 @@ namespace KlayGE
 			v0, v1
 		};
 
-		vb_.reset(new VertexBuffer(VertexBuffer::BT_LineList));
+		vb_ = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(VertexBuffer::BT_LineList);
 		vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
 		vb_->GetVertexStream(VST_Positions)->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
 
@@ -114,7 +114,7 @@ namespace KlayGE
 			v0, v1, v2
 		};
 
-		vb_.reset(new VertexBuffer(VertexBuffer::BT_TriangleList));
+		vb_ = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 		vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
 		vb_->GetVertexStream(VST_Positions)->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
 
@@ -145,7 +145,7 @@ namespace KlayGE
 			3, 2, 6, 6, 7, 3,
 		};
 
-		vb_.reset(new VertexBuffer(VertexBuffer::BT_TriangleList));
+		vb_ = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 		vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
 		vb_->GetVertexStream(VST_Positions)->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
 		
@@ -174,7 +174,7 @@ namespace KlayGE
 			0, 1, 2, 2, 3, 0,
 		};
 
-		vb_.reset(new VertexBuffer(VertexBuffer::BT_TriangleList));
+		vb_ = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 		vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
 		vb_->GetVertexStream(VST_Positions)->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
 

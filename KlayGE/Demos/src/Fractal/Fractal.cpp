@@ -64,7 +64,7 @@ namespace
 				0, 1, 2, 2, 3, 0,
 			};
 
-			vb_.reset(new VertexBuffer(VertexBuffer::BT_TriangleList));
+			vb_ = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 
 			vb_->AddVertexStream(VST_Positions, sizeof(float), 3);
 			vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2);
@@ -126,7 +126,7 @@ namespace
 				0, 1, 2, 2, 3, 0,
 			};
 
-			vb_.reset(new VertexBuffer(VertexBuffer::BT_TriangleList));
+			vb_ = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 
 			vb_->AddVertexStream(VST_Positions, sizeof(float), 3);
 			vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2);
