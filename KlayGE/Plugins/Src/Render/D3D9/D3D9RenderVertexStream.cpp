@@ -45,7 +45,7 @@ namespace KlayGE
 
 		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-		d3d_device_ = checked_cast<D3D9RenderEngine const &>(render_eng).D3DDevice();
+		d3d_device_ = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
 
 		vs_ = vs;
 
@@ -131,7 +131,7 @@ namespace KlayGE
 		{
 			RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-			d3d_device_ = checked_cast<D3D9RenderEngine const &>(render_eng).D3DDevice();
+			d3d_device_ = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
 
 			IDirect3DSurface9Ptr default_surf = this->CreateSurface(D3DPOOL_DEFAULT);
 

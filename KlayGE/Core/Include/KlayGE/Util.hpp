@@ -120,13 +120,6 @@ namespace KlayGE
 		BOOST_ASSERT(dynamic_cast<To>(p) == static_cast<To>(p));
 		return static_cast<To>(p);
 	}
-	template <typename To, typename From>
-	inline To
-	checked_cast(From& p)
-	{
-		BOOST_ASSERT(dynamic_cast<To>(p) == static_cast<To>(p));
-		return static_cast<To>(p);
-	}
 
 	uint32_t LastError();
 

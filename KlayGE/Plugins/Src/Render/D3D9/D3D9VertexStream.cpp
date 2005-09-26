@@ -55,7 +55,7 @@ namespace KlayGE
 		{
 			currentSize_ = size;
 
-			D3D9RenderEngine const & renderEngine(checked_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+			D3D9RenderEngine const & renderEngine(*checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 			d3d_device_ = renderEngine.D3DDevice();
 
 			IDirect3DVertexBuffer9* theBuffer;
@@ -122,7 +122,7 @@ namespace KlayGE
 	
 	void D3D9VertexStream::DoOnResetDevice()
 	{
-		D3D9RenderEngine const & renderEngine(checked_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		D3D9RenderEngine const & renderEngine(*checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3d_device_ = renderEngine.D3DDevice();
 
 		size_t const vertexSize(this->SizeOfElement() * this->ElementsPerVertex());

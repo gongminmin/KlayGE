@@ -52,7 +52,7 @@ namespace KlayGE
 	{
 		if (dirty_decl_)
 		{
-			D3D9RenderEngine const & renderEngine(checked_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+			D3D9RenderEngine const & renderEngine(*checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 			boost::shared_ptr<IDirect3DDevice9> d3d_device = renderEngine.D3DDevice();
 
 			vertex_elems_type elems;

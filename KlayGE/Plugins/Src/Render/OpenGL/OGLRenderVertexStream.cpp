@@ -94,7 +94,7 @@ namespace KlayGE
 
 		vs_ = vs;
 
-		OGLVertexStream& ogl_vs = checked_cast<OGLVertexStream&>(*vs_);
+		OGLVertexStream& ogl_vs = *checked_cast<OGLVertexStream*>(vs_.get());
 		glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, ogl_vs.OGLvbo());
 		glBufferData(GL_PIXEL_PACK_BUFFER_ARB,
 			reinterpret_cast<GLsizeiptr>(width_ * height_ * vs->ElementsPerVertex() * sizeof(GLfloat)), NULL, GL_DYNAMIC_DRAW);

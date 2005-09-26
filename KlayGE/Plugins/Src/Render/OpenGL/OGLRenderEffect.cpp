@@ -34,7 +34,7 @@ namespace KlayGE
 {
 	OGLRenderEffect::OGLRenderEffect(std::string const & srcData)
 	{
-		OGLRenderFactory& renderFactory(checked_cast<OGLRenderFactory&>(Context::Instance().RenderFactoryInstance()));
+		OGLRenderFactory& renderFactory(*checked_cast<OGLRenderFactory*>(&Context::Instance().RenderFactoryInstance()));
 
 		effect_ = cgCreateEffect(renderFactory.CGContext(), srcData.c_str(), NULL);
 		if (0 == effect_)
@@ -202,7 +202,7 @@ namespace KlayGE
 
 	void OGLRenderEffectParameterSampler::DoFlush(SamplerPtr const & value)
 	{
-		OGLTexture& ogl_tex = checked_cast<OGLTexture&>(*value->GetTexture());
+		OGLTexture& ogl_tex = *checked_cast<OGLTexture*>(value->GetTexture().get());
 		Context::Instance().RenderFactoryInstance().RenderEngineInstance().SetSampler(0, value);
 		cgGLSetupSampler(param_, ogl_tex.GLTexture());
 	}

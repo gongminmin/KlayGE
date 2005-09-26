@@ -45,6 +45,7 @@
 #include <KlayGE/Box.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Sampler.hpp>
+#include <KlayGE/Util.hpp>
 
 #include <algorithm>
 #include <vector>
@@ -395,7 +396,7 @@ namespace KlayGE
 				pool_.push_back(renderable);
 			}
 
-			static_cast<FontRenderable&>(*renderable).RenderText(this->FontHeight(), charInfoMap_,
+			checked_cast<FontRenderable*>(renderable.get())->RenderText(this->FontHeight(), charInfoMap_,
 				sx, sy, sz, xScale, yScale, clr, text, flags);
 			renderable->AddToSceneManager();
 		}

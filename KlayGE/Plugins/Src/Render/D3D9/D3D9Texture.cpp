@@ -214,7 +214,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(TU_Default == usage);
 
-		D3D9RenderEngine& renderEngine(checked_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3dDevice_ = renderEngine.D3DDevice();
 
 		numMipMaps_ = numMipMaps;
@@ -235,7 +235,7 @@ namespace KlayGE
 								uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
 					: Texture(usage, TT_2D)
 	{
-		D3D9RenderEngine& renderEngine(checked_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3dDevice_ = renderEngine.D3DDevice();
 
 		numMipMaps_ = numMipMaps;
@@ -270,7 +270,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(TU_Default == usage);
 
-		D3D9RenderEngine& renderEngine(checked_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3dDevice_ = renderEngine.D3DDevice();
 
 		numMipMaps_ = numMipMaps;
@@ -290,7 +290,7 @@ namespace KlayGE
 	D3D9Texture::D3D9Texture(uint32_t size, bool /*cube*/, uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
 					: Texture(usage, TT_Cube)
 	{
-		D3D9RenderEngine& renderEngine(checked_cast<D3D9RenderEngine&>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3dDevice_ = renderEngine.D3DDevice();
 
 		numMipMaps_ = numMipMaps;

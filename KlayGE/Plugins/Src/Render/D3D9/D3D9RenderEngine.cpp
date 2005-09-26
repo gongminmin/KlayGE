@@ -295,7 +295,7 @@ namespace KlayGE
 		{
 			VertexStream& stream(*(*iter));
 
-			D3D9VertexStream& d3d9vs(checked_cast<D3D9VertexStream&>(stream));
+			D3D9VertexStream& d3d9vs(*checked_cast<D3D9VertexStream*>(&stream));
 			TIF(d3dDevice_->SetStreamSource(iter - vb.VertexStreamBegin(),
 				d3d9vs.D3D9Buffer().get(), 0,
 				static_cast<UINT>(stream.SizeOfElement() * stream.ElementsPerVertex())));
@@ -309,14 +309,14 @@ namespace KlayGE
 		}
 		last_num_vertex_stream_ = num_vertex_stream;
 
-		D3D9VertexBuffer const & d3d9_vb(checked_cast<D3D9VertexBuffer const &>(vb));
+		D3D9VertexBuffer const & d3d9_vb(*checked_cast<D3D9VertexBuffer const *>(&vb));
 		TIF(d3dDevice_->SetVertexDeclaration(d3d9_vb.VertexDeclaration().get()));
 
 		RenderTechniquePtr tech = renderEffect_->ActiveTechnique();
 		uint32_t num_passes = tech->NumPasses();
 		if (vb.UseIndices())
 		{
-			D3D9IndexStream& d3dis(checked_cast<D3D9IndexStream&>(*vb.GetIndexStream()));
+			D3D9IndexStream& d3dis(*checked_cast<D3D9IndexStream*>(vb.GetIndexStream().get()));
 			d3dDevice_->SetIndices(d3dis.D3D9Buffer().get());
 
 			for (uint32_t i = 0; i < num_passes; ++ i)
@@ -420,7 +420,7 @@ namespace KlayGE
 		}
 		else
 		{
-			D3D9Texture const & d3d9Tex(checked_cast<D3D9Texture const &>(*texture));
+			D3D9Texture const & d3d9Tex(*checked_cast<D3D9Texture const *>(texture.get()));
 			TIF(d3dDevice_->SetTexture(stage, d3d9Tex.D3DBaseTexture().get()));
 
 			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_BORDERCOLOR,
