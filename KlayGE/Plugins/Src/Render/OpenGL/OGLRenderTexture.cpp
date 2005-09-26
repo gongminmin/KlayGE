@@ -16,10 +16,11 @@
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderTexture.hpp>
-#include <KlayGE/OpenGL/OGLTexture.hpp>
+#include <KlayGE/Util.hpp>
 
 #include <glloader/glloader.h>
 
+#include <KlayGE/OpenGL/OGLTexture.hpp>
 #include <KlayGE/OpenGL/OGLRenderTexture.hpp>
 
 namespace KlayGE
@@ -67,9 +68,8 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(glIsFramebufferEXT_(fbo_));
 		BOOST_ASSERT(Texture::TT_2D == texture2D->Type());
-		BOOST_ASSERT(dynamic_cast<OGLTexture*>(texture2D.get()) != NULL);
 
-		OGLTexture& ogl_tex = static_cast<OGLTexture&>(*texture2D);
+		OGLTexture& ogl_tex = checked_cast<OGLTexture&>(*texture2D);
 
 		glBindFramebufferEXT_(GL_FRAMEBUFFER_EXT, fbo_);
 		glFramebufferTexture2DEXT_(GL_FRAMEBUFFER_EXT,
@@ -80,9 +80,8 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(glIsFramebufferEXT_(fbo_));
 		BOOST_ASSERT(Texture::TT_Cube == textureCube->Type());
-		BOOST_ASSERT(dynamic_cast<OGLTexture*>(textureCube.get()) != NULL);
 
-		OGLTexture& ogl_tex = static_cast<OGLTexture&>(*textureCube);
+		OGLTexture& ogl_tex = checked_cast<OGLTexture&>(*textureCube);
 
 		glBindFramebufferEXT_(GL_FRAMEBUFFER_EXT, fbo_);
 		glFramebufferTexture2DEXT_(GL_FRAMEBUFFER_EXT,

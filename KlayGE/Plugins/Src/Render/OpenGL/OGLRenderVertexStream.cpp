@@ -15,6 +15,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/VertexBuffer.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/Util.hpp>
 
 #include <glloader/glloader.h>
 
@@ -90,11 +91,10 @@ namespace KlayGE
 	void OGLRenderVertexStream::Attach(VertexStreamPtr vs)
 	{
 		BOOST_ASSERT(glIsFramebufferEXT_(fbo_));
-		BOOST_ASSERT(dynamic_cast<OGLVertexStream*>(vs.get()) != NULL);
 
 		vs_ = vs;
 
-		OGLVertexStream& ogl_vs = static_cast<OGLVertexStream&>(*vs_);
+		OGLVertexStream& ogl_vs = checked_cast<OGLVertexStream&>(*vs_);
 		glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, ogl_vs.OGLvbo());
 		glBufferData(GL_PIXEL_PACK_BUFFER_ARB,
 			reinterpret_cast<GLsizeiptr>(width_ * height_ * vs->ElementsPerVertex() * sizeof(GLfloat)), NULL, GL_DYNAMIC_DRAW);

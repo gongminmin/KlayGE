@@ -38,11 +38,10 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(Texture::TU_RenderTarget == texture2D->Usage());
 		BOOST_ASSERT(Texture::TT_2D == texture2D->Type());
-		BOOST_ASSERT(dynamic_cast<D3D9Texture*>(texture2D.get()) != NULL);
 
 		this->UpdateParams(texture2D);
 
-		D3D9Texture const & tex(static_cast<D3D9Texture&>(*privateTex_));
+		D3D9Texture const & tex(checked_cast<D3D9Texture const &>(*privateTex_));
 		IDirect3DSurface9* surface;
 		tex.D3DTexture2D()->GetSurfaceLevel(0, &surface);
 		renderSurface_ = MakeCOMPtr(surface);
@@ -52,12 +51,11 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(Texture::TU_RenderTarget == textureCube->Usage());
 		BOOST_ASSERT(Texture::TT_Cube == textureCube->Type());
-		BOOST_ASSERT(dynamic_cast<D3D9Texture*>(textureCube.get()) != NULL);
 
 		face_ = face;
 		this->UpdateParams(textureCube);
 
-		D3D9Texture const & tex(static_cast<D3D9Texture&>(*privateTex_));
+		D3D9Texture const & tex(checked_cast<D3D9Texture const &>(*privateTex_));
 		IDirect3DSurface9* surface;
 		tex.D3DTextureCube()->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), 0, &surface);
 		renderSurface_ = MakeCOMPtr(surface);
@@ -72,7 +70,7 @@ namespace KlayGE
 		viewport_.width		= width_;
 		viewport_.height	= height_;
 
-		D3D9Texture const & tex(static_cast<D3D9Texture&>(*privateTex_));
+		D3D9Texture const & tex(checked_cast<D3D9Texture const &>(*privateTex_));
 		depthStencilSurface_ = tex.DepthStencil();
 
 		colorDepth_ = privateTex_->Bpp();

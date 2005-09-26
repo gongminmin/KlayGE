@@ -42,12 +42,10 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(!vs->IsStatic());
 		BOOST_ASSERT((3 == vs->ElementsPerVertex()) || (4 == vs->ElementsPerVertex()));
-		BOOST_ASSERT(dynamic_cast<D3D9VertexStream*>(vs.get()) != NULL);
 
 		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		BOOST_ASSERT(dynamic_cast<D3D9RenderEngine const *>(&render_eng) != NULL);
 
-		d3d_device_ = static_cast<D3D9RenderEngine const &>(render_eng).D3DDevice();
+		d3d_device_ = checked_cast<D3D9RenderEngine const &>(render_eng).D3DDevice();
 
 		vs_ = vs;
 
@@ -132,9 +130,8 @@ namespace KlayGE
 		if (vs_)
 		{
 			RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			BOOST_ASSERT(dynamic_cast<D3D9RenderEngine const *>(&render_eng) != NULL);
 
-			d3d_device_ = static_cast<D3D9RenderEngine const &>(render_eng).D3DDevice();
+			d3d_device_ = checked_cast<D3D9RenderEngine const &>(render_eng).D3DDevice();
 
 			IDirect3DSurface9Ptr default_surf = this->CreateSurface(D3DPOOL_DEFAULT);
 

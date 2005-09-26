@@ -1,8 +1,11 @@
 // Util.hpp
 // KlayGE 实用函数库 头文件
-// Ver 2.1.2
-// 版权所有(C) 龚敏敏, 2003-2004
+// Ver 3.0.0
+// 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.0.0
+// 增加了checked_cast (2005.9.26)
 //
 // 2.1.2
 // 增加了本地和网络格式的转换函数 (2004.6.2)
@@ -16,6 +19,7 @@
 #include <string>
 #include <functional>
 
+#include <boost/assert.hpp>
 #include <boost/smart_ptr.hpp>
 #define BOOST_MEM_FN_ENABLE_STDCALL
 #include <boost/mem_fn.hpp>
@@ -107,6 +111,21 @@ namespace KlayGE
 	MakeCOMPtr(T* p)
 	{
 		return boost::shared_ptr<T>(p, boost::mem_fn(&T::Release));
+	}
+
+	template <typename To, typename From>
+	inline To
+	checked_cast(From* p)
+	{
+		BOOST_ASSERT(dynamic_cast<To>(p) == static_cast<To>(p));
+		return static_cast<To>(p);
+	}
+	template <typename To, typename From>
+	inline To
+	checked_cast(From& p)
+	{
+		BOOST_ASSERT(dynamic_cast<To>(p) == static_cast<To>(p));
+		return static_cast<To>(p);
 	}
 
 	uint32_t LastError();

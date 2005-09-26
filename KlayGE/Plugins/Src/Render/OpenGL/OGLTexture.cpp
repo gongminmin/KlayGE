@@ -326,8 +326,6 @@ namespace KlayGE
 
 	void OGLTexture::CopyToTexture(Texture& target)
 	{
-		BOOST_ASSERT(dynamic_cast<OGLTexture*>(&target) != NULL);
-
 		GLint gl_internalFormat;
 		GLenum gl_format;
 		GLenum gl_type;

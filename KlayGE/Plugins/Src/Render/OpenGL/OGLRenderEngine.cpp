@@ -36,6 +36,7 @@
 #include <KlayGE/RenderTarget.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderSettings.hpp>
+#include <KlayGE/Util.hpp>
 
 #include <glloader/glloader.h>
 
@@ -364,11 +365,9 @@ namespace KlayGE
 	{
 		TexturePtr texture = sampler->GetTexture();
 
-		BOOST_ASSERT(dynamic_cast<OGLTexture const *>(texture.get()) != NULL);
-
 		glActiveTexture(GL_TEXTURE0 + stage);
 
-		OGLTexture& gl_tex = *static_cast<OGLTexture*>(texture.get());
+		OGLTexture& gl_tex = *checked_cast<OGLTexture*>(texture.get());
 		GLenum tex_type = gl_tex.GLType();
 		if (!texture)
 		{

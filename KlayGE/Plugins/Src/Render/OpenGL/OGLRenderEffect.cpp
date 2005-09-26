@@ -19,23 +19,22 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Sampler.hpp>
-#include <KlayGE/OpenGL/OGLTexture.hpp>
-#include <KlayGE/OpenGL/OGLMapping.hpp>
-#include <KlayGE/OpenGL/OGLRenderFactory.hpp>
+#include <KlayGE/Util.hpp>
 
 #include <iostream>
 using namespace std;
 #include <boost/assert.hpp>
 
+#include <KlayGE/OpenGL/OGLTexture.hpp>
+#include <KlayGE/OpenGL/OGLMapping.hpp>
+#include <KlayGE/OpenGL/OGLRenderFactory.hpp>
 #include <KlayGE/OpenGL/OGLRenderEffect.hpp>
 
 namespace KlayGE
 {
 	OGLRenderEffect::OGLRenderEffect(std::string const & srcData)
 	{
-		BOOST_ASSERT(dynamic_cast<OGLRenderFactory*>(&Context::Instance().RenderFactoryInstance()) != NULL);
-
-		OGLRenderFactory& renderFactory(static_cast<OGLRenderFactory&>(Context::Instance().RenderFactoryInstance()));
+		OGLRenderFactory& renderFactory(checked_cast<OGLRenderFactory&>(Context::Instance().RenderFactoryInstance()));
 
 		effect_ = cgCreateEffect(renderFactory.CGContext(), srcData.c_str(), NULL);
 		if (0 == effect_)
@@ -203,9 +202,7 @@ namespace KlayGE
 
 	void OGLRenderEffectParameterSampler::DoFlush(SamplerPtr const & value)
 	{
-		BOOST_ASSERT(dynamic_cast<OGLTexture*>(value->GetTexture().get()) != NULL);
-
-		OGLTexture& ogl_tex = static_cast<OGLTexture&>(*value->GetTexture());
+		OGLTexture& ogl_tex = checked_cast<OGLTexture&>(*value->GetTexture());
 		Context::Instance().RenderFactoryInstance().RenderEngineInstance().SetSampler(0, value);
 		cgGLSetupSampler(param_, ogl_tex.GLTexture());
 	}
