@@ -21,6 +21,7 @@
 #include <KlayGE/D3D9/D3D9VertexBuffer.hpp>
 #include <KlayGE/D3D9/D3D9VertexStream.hpp>
 #include <KlayGE/D3D9/D3D9IndexStream.hpp>
+#include <KlayGE/D3D9/D3D9OcclusionQuery.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
@@ -139,6 +140,11 @@ namespace KlayGE
 		D3D9RenderVertexStreamPtr ret(new D3D9RenderVertexStream(width, height));
 		resource_pool_.push_back(ret);
 		return ret;
+	}
+
+	OcclusionQueryPtr D3D9RenderFactory::MakeOcclusionQuery()
+	{
+		return OcclusionQueryPtr(new D3D9OcclusionQuery);
 	}
 
 	void D3D9RenderFactory::OnLostDevice()

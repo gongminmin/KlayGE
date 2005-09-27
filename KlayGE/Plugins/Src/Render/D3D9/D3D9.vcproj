@@ -114,6 +114,9 @@
 				RelativePath=".\D3D9Mapping.cpp">
 			</File>
 			<File
+				RelativePath=".\D3D9OcclusionQuery.cpp">
+			</File>
+			<File
 				RelativePath=".\D3D9RenderEffect.cpp">
 			</File>
 			<File
@@ -159,6 +162,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9Mapping.hpp">
+			</File>
+			<File
+				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9OcclusionQuery.hpp">
 			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\D3d9\D3D9RenderEffect.hpp">

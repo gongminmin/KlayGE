@@ -24,6 +24,7 @@
 #include <KlayGE/OpenGL/OGLVertexStream.hpp>
 #include <KlayGE/OpenGL/OGLIndexStream.hpp>
 #include <KlayGE/OpenGL/OGLRenderVertexStream.hpp>
+#include <KlayGE/OpenGL/OGLOcclusionQuery.hpp>
 
 #define NOMINMAX
 #include <windows.h>
@@ -72,6 +73,8 @@ namespace KlayGE
 		IndexStreamPtr MakeIndexStream(bool staticStream);
 
 		RenderVertexStreamPtr MakeRenderVertexStream(uint32_t width, uint32_t height);
+
+		OcclusionQueryPtr MakeOcclusionQuery();
 
 	private:
 		CGcontext context_;

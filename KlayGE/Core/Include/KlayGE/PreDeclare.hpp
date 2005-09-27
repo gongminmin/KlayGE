@@ -100,6 +100,8 @@ namespace KlayGE
 	class KMesh;
 	typedef boost::shared_ptr<KMesh> KMeshPtr;
 	struct RenderDeviceCaps;
+	class OcclusionQuery;
+	typedef boost::shared_ptr<OcclusionQuery> OcclusionQueryPtr;
 
 	class Socket;
 	class Lobby;

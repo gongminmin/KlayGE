@@ -108,6 +108,9 @@
 				RelativePath=".\OGLMapping.cpp">
 			</File>
 			<File
+				RelativePath=".\OGLOcclusionQuery.cpp">
+			</File>
+			<File
 				RelativePath=".\OGLRenderEffect.cpp">
 			</File>
 			<File
@@ -141,6 +144,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLMapping.hpp">
+			</File>
+			<File
+				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLOcclusionQuery.hpp">
 			</File>
 			<File
 				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLRenderEffect.hpp">

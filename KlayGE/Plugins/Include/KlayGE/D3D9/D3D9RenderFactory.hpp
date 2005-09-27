@@ -75,6 +75,8 @@ namespace KlayGE
 
 		RenderVertexStreamPtr MakeRenderVertexStream(uint32_t width, uint32_t height);
 
+		OcclusionQueryPtr MakeOcclusionQuery();
+
 		void OnLostDevice();
 		void OnResetDevice();
 

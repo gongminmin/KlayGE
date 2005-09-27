@@ -219,6 +219,9 @@
 					RelativePath=".\Include\KlayGE\Mesh.hpp">
 				</File>
 				<File
+					RelativePath=".\Include\KlayGE\OcclusionQuery.hpp">
+				</File>
+				<File
 					RelativePath="Include\KlayGE\Renderable.hpp">
 				</File>
 				<File

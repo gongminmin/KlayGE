@@ -124,6 +124,11 @@ namespace KlayGE
 		return RenderVertexStreamPtr(new OGLRenderVertexStream(width, height));
 	}
 
+	OcclusionQueryPtr OGLRenderFactory::MakeOcclusionQuery()
+	{
+		return OcclusionQueryPtr(new OGLOcclusionQuery);
+	}
+
 	RenderFactory& OGLRenderFactoryInstance()
 	{
 		static OGLRenderFactory renderFactory;
