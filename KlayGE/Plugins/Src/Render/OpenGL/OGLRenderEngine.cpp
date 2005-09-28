@@ -150,6 +150,20 @@ namespace KlayGE
 		this->DepthBufferDepthTest(settings.depthBuffer);
 		this->DepthBufferDepthWrite(settings.depthBuffer);
 
+		if (glloader_GL_VERSION_2_0())
+		{
+			glPointParameterf_ = glPointParameterf;
+			glPointParameterfv_ = glPointParameterfv;
+		}
+		else
+		{
+			if (glloader_GL_ARB_point_parameters() && glloader_GL_ARB_point_sprite())
+			{
+				glPointParameterf_ = glPointParameterfARB;
+				glPointParameterfv_ = glPointParameterfvARB;
+			}
+		}
+
 		return win;
 	}
 
@@ -489,6 +503,56 @@ namespace KlayGE
 		glStencilOp(OGLMapping::Mapping(fail), OGLMapping::Mapping(depth_fail), OGLMapping::Mapping(pass));
 	}
 
+	// 打开/关闭点精灵模式
+	/////////////////////////////////////////////////////////////////////////////////
+	void OGLRenderEngine::PointSpriteEnable(bool enable)
+	{
+		if (glPointParameterfv_ != NULL)
+		{
+			if (enable)
+			{
+				glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
+				glEnable(GL_POINT_SPRITE);
+			}
+			else
+			{
+				glDisable(GL_POINT_SPRITE);
+			}
+		}
+	}
+
+	// 设置点距离参数
+	/////////////////////////////////////////////////////////////////////////////////
+	void OGLRenderEngine::PointDistanceAttenuation(float quadratic0, float quadratic1, float quadratic2)
+	{
+		if (glPointParameterfv_ != NULL)
+		{
+			float quadratic[] = { quadratic0, quadratic1, quadratic2 };
+			glPointParameterfv_(GL_POINT_DISTANCE_ATTENUATION, quadratic);
+		}
+	}
+
+	// 设置点大小
+	/////////////////////////////////////////////////////////////////////////////////
+	void OGLRenderEngine::PointSize(float size)
+	{
+		if (glPointParameterfv_ != NULL)
+		{
+			glPointSize(size);
+		}
+	}
+
+	// 设置点的最小最大大小
+	/////////////////////////////////////////////////////////////////////////////////
+	void OGLRenderEngine::PointMinMaxSize(float min_size, float max_size)
+	{
+		if (glPointParameterf_ != NULL)
+		{
+			glPointParameterf_(GL_POINT_SIZE_MIN, std::max(min_size, caps_.min_point_size));
+			glPointParameterf_(GL_POINT_SIZE_MAX, std::min(max_size, caps_.max_point_size));
+		}
+	}
+
 	// 填充设备能力
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::FillRenderDeviceCaps()
@@ -571,5 +635,8 @@ namespace KlayGE
 		caps_.texture_1d_filter_caps = caps_.texture_2d_filter_caps;
 		caps_.texture_3d_filter_caps = caps_.texture_2d_filter_caps;
 		caps_.texture_cube_filter_caps = caps_.texture_2d_filter_caps;
+
+		glGetFloatv(GL_POINT_SIZE_MIN, &caps_.min_point_size);
+		glGetFloatv(GL_POINT_SIZE_MAX, &caps_.max_point_size);
 	}
 }

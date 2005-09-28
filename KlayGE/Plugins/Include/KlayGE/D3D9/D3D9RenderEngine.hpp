@@ -92,6 +92,11 @@ namespace KlayGE
 		void StencilBufferFunction(CompareFunction func, uint32_t refValue, uint32_t mask);
 		void StencilBufferOperation(StencilOperation fail, StencilOperation depth_fail, StencilOperation pass);
 
+		void PointSpriteEnable(bool enable);
+		void PointDistanceAttenuation(float quadratic0, float quadratic1, float quadratic2);
+		void PointSize(float size);
+		void PointMinMaxSize(float min_size, float max_size);
+
 		void OnLostDevice();
 		void OnResetDevice();
 

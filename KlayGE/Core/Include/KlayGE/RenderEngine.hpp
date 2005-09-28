@@ -6,6 +6,7 @@
 //
 // 3.0.0
 // 去掉了固定流水线 (2005.8.18)
+// 支持point sprite (2005.9.28)
 //
 // 2.8.0
 // 简化了StencilBuffer相关操作 (2005.7.20)
@@ -185,6 +186,12 @@ namespace KlayGE
 
 		// Get render device capabilities
 		RenderDeviceCaps const & DeviceCaps() const;
+
+		// Point sprite support
+		virtual void PointSpriteEnable(bool enable) = 0;
+		virtual void PointDistanceAttenuation(float quadratic0, float quadratic1, float quadratic2) = 0;
+		virtual void PointSize(float size) = 0;
+		virtual void PointMinMaxSize(float min_size, float max_size) = 0;
 
 	protected:
 		virtual void DoActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget) = 0;

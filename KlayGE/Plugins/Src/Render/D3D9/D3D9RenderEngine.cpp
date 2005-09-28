@@ -630,6 +630,49 @@ namespace KlayGE
 		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILPASS, D3D9Mapping::Mapping(pass)));
 	}
 
+	// 打开/关闭点精灵模式
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9RenderEngine::PointSpriteEnable(bool enable)
+	{
+		d3dDevice_->SetRenderState(D3DRS_POINTSPRITEENABLE, enable);
+	}
+
+	// 设置点距离参数
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9RenderEngine::PointDistanceAttenuation(float quadratic0, float quadratic1, float quadratic2)
+	{
+		if ((0 == quadratic0) && (0 == quadratic1) && (0 == quadratic2))
+		{
+			d3dDevice_->SetRenderState(D3DRS_POINTSCALEENABLE, false);
+		}
+		else
+		{
+			d3dDevice_->SetRenderState(D3DRS_POINTSCALEENABLE, true);
+
+			d3dDevice_->SetRenderState(D3DRS_POINTSCALE_A, *reinterpret_cast<DWORD*>(&quadratic0));
+			d3dDevice_->SetRenderState(D3DRS_POINTSCALE_B, *reinterpret_cast<DWORD*>(&quadratic1));
+			d3dDevice_->SetRenderState(D3DRS_POINTSCALE_C, *reinterpret_cast<DWORD*>(&quadratic2));
+		}
+	}
+
+	// 设置点大小
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9RenderEngine::PointSize(float size)
+	{
+		d3dDevice_->SetRenderState(D3DRS_POINTSIZE, *reinterpret_cast<DWORD*>(&size));
+	}
+
+	// 设置点的最小最大大小
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9RenderEngine::PointMinMaxSize(float min_size, float max_size)
+	{
+		min_size = std::max(min_size, caps_.min_point_size);
+		max_size = std::min(max_size, caps_.max_point_size);
+
+		d3dDevice_->SetRenderState(D3DRS_POINTSIZE_MIN, *reinterpret_cast<DWORD*>(&min_size));
+		d3dDevice_->SetRenderState(D3DRS_POINTSIZE_MAX, *reinterpret_cast<DWORD*>(&max_size));
+	}
+
 	// 填充设备能力
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::FillRenderDeviceCaps()

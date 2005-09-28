@@ -464,6 +464,9 @@ namespace KlayGE
 			ret.texture_cube_filter_caps |= Sampler::TFO_Anisotropic;
 		}
 
+		ret.min_point_size = 0;
+		ret.max_point_size = d3d_caps.MaxPointSize;
+
 		return ret;
 	}
 }
