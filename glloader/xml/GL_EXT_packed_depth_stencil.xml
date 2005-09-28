@@ -1,0 +1,18 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_packed_depth_stencil">
+	<Tokens>
+		<Token name="GL_DEPTH_STENCIL_EXT" value="0x84F9"/>
+		<Token name="GL_UNSIGNED_INT_24_8_EXT" value="0x84FA"/>
+		<Token name="GL_DEPTH24_STENCIL8_EXT" value="0x88F0"/>
+		<Token name="GL_TEXTURE_STENCIL_SIZE_EXT" value="0x88F1"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_packed_depth_stencil"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>
