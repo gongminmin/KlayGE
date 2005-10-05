@@ -69,6 +69,11 @@ namespace KlayGE
 		BOOST_ASSERT(glIsFramebufferEXT_(fbo_));
 		BOOST_ASSERT(Texture::TT_2D == texture2D->Type());
 
+		if (Texture::TU_RenderTarget != texture2D->Usage())
+		{
+			texture2D->Usage(Texture::TU_RenderTarget);
+		}
+
 		OGLTexture& ogl_tex = *checked_cast<OGLTexture*>(texture2D.get());
 
 		glBindFramebufferEXT_(GL_FRAMEBUFFER_EXT, fbo_);
@@ -80,6 +85,11 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(glIsFramebufferEXT_(fbo_));
 		BOOST_ASSERT(Texture::TT_Cube == textureCube->Type());
+
+		if (Texture::TU_RenderTarget != textureCube->Usage())
+		{
+			textureCube->Usage(Texture::TU_RenderTarget);
+		}
 
 		OGLTexture& ogl_tex = *checked_cast<OGLTexture*>(textureCube.get());
 

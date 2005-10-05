@@ -118,8 +118,8 @@ namespace
 namespace KlayGE
 {
 	OGLTexture::OGLTexture(uint32_t width, uint16_t numMipMaps,
-								PixelFormat format, TextureUsage usage)
-					: Texture(usage, TT_1D)
+								PixelFormat format)
+					: Texture(TT_1D)
 	{
 		format_		= format;
 
@@ -159,8 +159,8 @@ namespace KlayGE
 	}
 
 	OGLTexture::OGLTexture(uint32_t width, uint32_t height,
-								uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
-					: Texture(usage, TT_2D)
+								uint16_t numMipMaps, PixelFormat format)
+					: Texture(TT_2D)
 	{
 		format_		= format;
 
@@ -202,8 +202,8 @@ namespace KlayGE
 	}
 
 	OGLTexture::OGLTexture(uint32_t width, uint32_t height, uint32_t depth,
-								uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
-					: Texture(usage, TT_3D)
+								uint16_t numMipMaps, PixelFormat format)
+					: Texture(TT_3D)
 	{
 		format_		= format;
 
@@ -247,8 +247,8 @@ namespace KlayGE
 	}
 
 	OGLTexture::OGLTexture(uint32_t size, bool /*cube*/, uint16_t numMipMaps,
-								PixelFormat format, TextureUsage usage)
-					: Texture(usage, TT_Cube)
+								PixelFormat format)
+					: Texture(TT_Cube)
 	{
 		format_		= format;
 
@@ -267,8 +267,6 @@ namespace KlayGE
 		}
 
 		bpp_ = PixelFormatBits(format_);
-
-		usage_ = usage;
 
 		GLint glinternalFormat;
 		GLenum glformat;
@@ -717,5 +715,10 @@ namespace KlayGE
 			BOOST_ASSERT(false);
 			return GL_TEXTURE_1D;
 		}
+	}
+
+	void OGLTexture::Usage(Texture::TextureUsage usage)
+	{
+		usage_ = usage;
 	}
 }

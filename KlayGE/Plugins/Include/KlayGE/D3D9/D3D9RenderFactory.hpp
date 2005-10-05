@@ -59,13 +59,13 @@ namespace KlayGE
 		D3D9RenderFactory();
 
 		TexturePtr MakeTexture1D(uint32_t width, uint16_t numMipMaps,
-			PixelFormat format, Texture::TextureUsage usage);
+			PixelFormat format);
 		TexturePtr MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps,
-			PixelFormat format, Texture::TextureUsage usage);
+			PixelFormat format);
 		TexturePtr MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps,
-			PixelFormat format, Texture::TextureUsage usage);
+			PixelFormat format);
 		TexturePtr MakeTextureCube(uint32_t size, uint16_t numMipMaps,
-			PixelFormat format, Texture::TextureUsage usage);
+			PixelFormat format);
 		RenderTexturePtr MakeRenderTexture();
 
 		VertexBufferPtr MakeVertexBuffer(VertexBuffer::BufferType type);

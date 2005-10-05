@@ -36,8 +36,12 @@ namespace KlayGE
 
 	void D3D9RenderTexture::AttachTexture2D(TexturePtr texture2D)
 	{
-		BOOST_ASSERT(Texture::TU_RenderTarget == texture2D->Usage());
 		BOOST_ASSERT(Texture::TT_2D == texture2D->Type());
+
+		if (Texture::TU_RenderTarget != texture2D->Usage())
+		{
+			texture2D->Usage(Texture::TU_RenderTarget);
+		}
 
 		this->UpdateParams(texture2D);
 
@@ -49,8 +53,12 @@ namespace KlayGE
 
 	void D3D9RenderTexture::AttachTextureCube(TexturePtr textureCube, Texture::CubeFaces face)
 	{
-		BOOST_ASSERT(Texture::TU_RenderTarget == textureCube->Usage());
 		BOOST_ASSERT(Texture::TT_Cube == textureCube->Type());
+
+		if (Texture::TU_RenderTarget != textureCube->Usage())
+		{
+			textureCube->Usage(Texture::TU_RenderTarget);
+		}
 
 		face_ = face;
 		this->UpdateParams(textureCube);

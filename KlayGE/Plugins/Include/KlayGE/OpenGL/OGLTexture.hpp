@@ -34,10 +34,10 @@ namespace KlayGE
 	class OGLTexture : public Texture
 	{
 	public:
-		OGLTexture(uint32_t width, uint16_t numMipMaps, PixelFormat format, TextureUsage usage);
-		OGLTexture(uint32_t width, uint32_t height, uint16_t numMipMaps, PixelFormat format, TextureUsage usage);
-		OGLTexture(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps, PixelFormat format, TextureUsage usage);
-		OGLTexture(uint32_t size, bool cube, uint16_t numMipMaps, PixelFormat format, TextureUsage usage);
+		OGLTexture(uint32_t width, uint16_t numMipMaps, PixelFormat format);
+		OGLTexture(uint32_t width, uint32_t height, uint16_t numMipMaps, PixelFormat format);
+		OGLTexture(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps, PixelFormat format);
+		OGLTexture(uint32_t size, bool cube, uint16_t numMipMaps, PixelFormat format);
 		~OGLTexture();
 
 		std::wstring const & Name() const;
@@ -66,6 +66,8 @@ namespace KlayGE
 			uint32_t size, uint32_t xOffset);
 
 		void BuildMipSubLevels();
+
+		void Usage(TextureUsage usage);
 
 		GLenum GLTexture() const
 			{ return texture_[0]; }

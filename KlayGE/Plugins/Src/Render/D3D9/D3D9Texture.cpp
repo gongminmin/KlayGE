@@ -209,11 +209,9 @@ namespace
 
 namespace KlayGE
 {
-	D3D9Texture::D3D9Texture(uint32_t width, uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
-					: Texture(usage, TT_1D)
+	D3D9Texture::D3D9Texture(uint32_t width, uint16_t numMipMaps, PixelFormat format)
+					: Texture(TT_1D)
 	{
-		BOOST_ASSERT(TU_Default == usage);
-
 		D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3dDevice_ = renderEngine.D3DDevice();
 
@@ -232,8 +230,8 @@ namespace KlayGE
 	}
 
 	D3D9Texture::D3D9Texture(uint32_t width, uint32_t height,
-								uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
-					: Texture(usage, TT_2D)
+								uint16_t numMipMaps, PixelFormat format)
+					: Texture(TT_2D)
 	{
 		D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3dDevice_ = renderEngine.D3DDevice();
@@ -246,30 +244,16 @@ namespace KlayGE
 
 		bpp_ = PixelFormatBits(format);
 
-		if (TU_Default == usage_)
-		{
-			d3dTexture2D_ = this->CreateTexture2D(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+		d3dTexture2D_ = this->CreateTexture2D(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 
-			this->QueryBaseTexture();
-			this->UpdateParams();
-		}
-		else
-		{
-			d3dTexture2D_ = this->CreateTexture2D(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
-
-			this->QueryBaseTexture();
-			this->UpdateParams();
-
-			this->CreateDepthStencilBuffer();
-		}
+		this->QueryBaseTexture();
+		this->UpdateParams();
 	}
 
 	D3D9Texture::D3D9Texture(uint32_t width, uint32_t height, uint32_t depth,
-								uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
-					: Texture(usage, TT_3D)
+								uint16_t numMipMaps, PixelFormat format)
+					: Texture(TT_3D)
 	{
-		BOOST_ASSERT(TU_Default == usage);
-
 		D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3dDevice_ = renderEngine.D3DDevice();
 
@@ -287,8 +271,8 @@ namespace KlayGE
 		this->UpdateParams();
 	}
 
-	D3D9Texture::D3D9Texture(uint32_t size, bool /*cube*/, uint16_t numMipMaps, PixelFormat format, TextureUsage usage)
-					: Texture(usage, TT_Cube)
+	D3D9Texture::D3D9Texture(uint32_t size, bool /*cube*/, uint16_t numMipMaps, PixelFormat format)
+					: Texture(TT_Cube)
 	{
 		D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3dDevice_ = renderEngine.D3DDevice();
@@ -301,22 +285,10 @@ namespace KlayGE
 
 		bpp_ = PixelFormatBits(format);
 
-		if (TU_Default == usage_)
-		{
-			d3dTextureCube_ = this->CreateTextureCube(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+		d3dTextureCube_ = this->CreateTextureCube(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 
-			this->QueryBaseTexture();
-			this->UpdateParams();
-		}
-		else
-		{
-			d3dTextureCube_ = this->CreateTextureCube(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
-
-			this->QueryBaseTexture();
-			this->UpdateParams();
-
-			this->CreateDepthStencilBuffer();
-		}
+		this->QueryBaseTexture();
+		this->UpdateParams();
 	}
 
 	D3D9Texture::~D3D9Texture()
@@ -1008,6 +980,16 @@ namespace KlayGE
 		default:
 			BOOST_ASSERT(false);
 			break;
+		}
+	}
+
+	void D3D9Texture::Usage(Texture::TextureUsage usage)
+	{
+		if (usage != usage_)
+		{
+			this->OnLostDevice();
+			usage_ = usage;
+			this->OnResetDevice();
 		}
 	}
 }

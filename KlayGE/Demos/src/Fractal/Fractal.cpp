@@ -196,10 +196,8 @@ void Fractal::InitObjects()
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	rendered_tex_[0] = Context::Instance().RenderFactoryInstance().MakeTexture2D(WIDTH, HEIGHT, 1,
-		PF_G16R16F, Texture::TU_RenderTarget);
-	rendered_tex_[1] = Context::Instance().RenderFactoryInstance().MakeTexture2D(WIDTH, HEIGHT, 1,
-		PF_G16R16F, Texture::TU_RenderTarget);
+	rendered_tex_[0] = Context::Instance().RenderFactoryInstance().MakeTexture2D(WIDTH, HEIGHT, 1, PF_G16R16F);
+	rendered_tex_[1] = Context::Instance().RenderFactoryInstance().MakeTexture2D(WIDTH, HEIGHT, 1, PF_G16R16F);
 
 	std::vector<Vector4> data(WIDTH * HEIGHT);
 	std::fill(data.begin(), data.end(), Vector4(0, 0, 0, 0));

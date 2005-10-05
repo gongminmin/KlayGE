@@ -31,28 +31,27 @@ namespace KlayGE
 		return context_;
 	}
 
-	TexturePtr OGLRenderFactory::MakeTexture1D(uint32_t width, uint16_t numMipMaps,
-				PixelFormat format, Texture::TextureUsage usage)
+	TexturePtr OGLRenderFactory::MakeTexture1D(uint32_t width, uint16_t numMipMaps, PixelFormat format)
 	{
-		return TexturePtr(new OGLTexture(width, numMipMaps, format, usage));
+		return TexturePtr(new OGLTexture(width, numMipMaps, format));
 	}
 	
 	TexturePtr OGLRenderFactory::MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps,
-				PixelFormat format, Texture::TextureUsage usage)
+				PixelFormat format)
 	{
-		return TexturePtr(new OGLTexture(width, height, numMipMaps, format, usage));
+		return TexturePtr(new OGLTexture(width, height, numMipMaps, format));
 	}
 
 	TexturePtr OGLRenderFactory::MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth,
-				uint16_t numMipMaps, PixelFormat format, Texture::TextureUsage usage)
+				uint16_t numMipMaps, PixelFormat format)
 	{
-		return TexturePtr(new OGLTexture(width, height, depth, numMipMaps, format, usage));
+		return TexturePtr(new OGLTexture(width, height, depth, numMipMaps, format));
 	}
 	
 	TexturePtr OGLRenderFactory::MakeTextureCube(uint32_t size, uint16_t numMipMaps,
-				PixelFormat format, Texture::TextureUsage usage)
+				PixelFormat format)
 	{
-		return TexturePtr(new OGLTexture(size, true, numMipMaps, format, usage));
+		return TexturePtr(new OGLTexture(size, true, numMipMaps, format));
 	}
 
 	RenderTexturePtr OGLRenderFactory::MakeRenderTexture()

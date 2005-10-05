@@ -859,8 +859,8 @@ namespace KlayGE
 	}
 
 
-	Texture::Texture(Texture::TextureUsage usage, Texture::TextureType type)
-			: usage_(usage), type_(type)
+	Texture::Texture(Texture::TextureType type)
+			: type_(type), usage_(TU_Default)
 	{
 	}
 

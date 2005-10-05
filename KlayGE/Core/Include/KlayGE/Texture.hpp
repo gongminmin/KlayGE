@@ -1,8 +1,11 @@
 // Texture.hpp
 // KlayGE 纹理类 实现文件
-// Ver 2.7.0
+// Ver 3.0.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.0.0
+// 去掉了构造函数的usage (2005.10.5)
 //
 // 2.7.0
 // 可以获取Mipmap中每层的宽高深 (2005.6.8)
@@ -251,7 +254,7 @@ namespace KlayGE
 		};
 
 	public:
-		Texture(TextureUsage usage, TextureType type);
+		explicit Texture(TextureType type);
 		virtual ~Texture();
 
 		// Gets the name of texture
@@ -262,6 +265,7 @@ namespace KlayGE
 
 		// Returns the TextureUsage indentifier for this Texture
 		TextureUsage Usage() const;
+		virtual void Usage(TextureUsage usage) = 0;
 
         // Returns the width of the texture.
 		virtual uint32_t Width(int level) const = 0;

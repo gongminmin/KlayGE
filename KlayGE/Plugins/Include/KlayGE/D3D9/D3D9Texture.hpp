@@ -51,10 +51,10 @@ namespace KlayGE
 		typedef boost::shared_ptr<IDirect3DVolume9>			IDirect3DVolume9Ptr;
 
 	public:
-		D3D9Texture(uint32_t width, uint16_t numMipMaps, PixelFormat format, TextureUsage usage);
-		D3D9Texture(uint32_t width, uint32_t height, uint16_t numMipMaps, PixelFormat format, TextureUsage usage);
-		D3D9Texture(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps, PixelFormat format, TextureUsage usage);
-		D3D9Texture(uint32_t size, bool cube, uint16_t numMipMaps, PixelFormat format, TextureUsage usage);
+		D3D9Texture(uint32_t width, uint16_t numMipMaps, PixelFormat format);
+		D3D9Texture(uint32_t width, uint32_t height, uint16_t numMipMaps, PixelFormat format);
+		D3D9Texture(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps, PixelFormat format);
+		D3D9Texture(uint32_t size, bool cube, uint16_t numMipMaps, PixelFormat format);
 		~D3D9Texture();
 
 		std::wstring const & Name() const;
@@ -83,6 +83,8 @@ namespace KlayGE
 			uint32_t size, uint32_t xOffset);
 
 		void BuildMipSubLevels();
+
+		void Usage(TextureUsage usage);
 
 		boost::shared_ptr<IDirect3DTexture9> D3DTexture2D() const
 			{ return d3dTexture2D_; }

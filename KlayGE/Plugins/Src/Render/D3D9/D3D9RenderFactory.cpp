@@ -33,30 +33,30 @@ namespace KlayGE
 	}
 
 	TexturePtr D3D9RenderFactory::MakeTexture1D(uint32_t width, uint16_t numMipMaps,
-			PixelFormat format, Texture::TextureUsage usage)
+			PixelFormat format)
 	{
-		D3D9TexturePtr ret(new D3D9Texture(width, numMipMaps, format, usage));
+		D3D9TexturePtr ret(new D3D9Texture(width, numMipMaps, format));
 		resource_pool_.push_back(ret);
 		return ret;
 	}
 	TexturePtr D3D9RenderFactory::MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps,
-			PixelFormat format, Texture::TextureUsage usage)
+			PixelFormat format)
 	{
-		D3D9TexturePtr ret(new D3D9Texture(width, height, numMipMaps, format, usage));
+		D3D9TexturePtr ret(new D3D9Texture(width, height, numMipMaps, format));
 		resource_pool_.push_back(ret);
 		return ret;
 	}
 	TexturePtr D3D9RenderFactory::MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth, 
-			uint16_t numMipMaps, PixelFormat format, Texture::TextureUsage usage)
+			uint16_t numMipMaps, PixelFormat format)
 	{
-		D3D9TexturePtr ret(new D3D9Texture(width, height, depth, numMipMaps, format, usage));
+		D3D9TexturePtr ret(new D3D9Texture(width, height, depth, numMipMaps, format));
 		resource_pool_.push_back(ret);
 		return ret;
 	}
 	TexturePtr D3D9RenderFactory::MakeTextureCube(uint32_t size, uint16_t numMipMaps,
-		PixelFormat format, Texture::TextureUsage usage)
+		PixelFormat format)
 	{
-		D3D9TexturePtr ret(new D3D9Texture(size, true, numMipMaps, format, usage));
+		D3D9TexturePtr ret(new D3D9Texture(size, true, numMipMaps, format));
 		resource_pool_.push_back(ret);
 		return ret;
 	}

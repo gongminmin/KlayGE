@@ -39,13 +39,13 @@ namespace KlayGE
 
 		virtual RenderEngine& RenderEngineInstance() = 0;
 		virtual TexturePtr MakeTexture1D(uint32_t width, uint16_t numMipMaps,
-			PixelFormat format, Texture::TextureUsage usage = Texture::TU_Default) = 0;
+			PixelFormat format) = 0;
 		virtual TexturePtr MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps,
-			PixelFormat format, Texture::TextureUsage usage = Texture::TU_Default) = 0;
+			PixelFormat format) = 0;
 		virtual TexturePtr MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps,
-			PixelFormat format, Texture::TextureUsage usage = Texture::TU_Default) = 0;
+			PixelFormat format) = 0;
 		virtual TexturePtr MakeTextureCube(uint32_t size, uint16_t numMipMaps,
-			PixelFormat format, Texture::TextureUsage usage = Texture::TU_Default) = 0;
+			PixelFormat format) = 0;
 		virtual RenderTexturePtr MakeRenderTexture() = 0;
 
 		FontPtr MakeFont(std::string const & fontName, uint32_t fontHeight = 12, uint32_t flags = 0);
