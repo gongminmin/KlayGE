@@ -87,35 +87,41 @@ namespace KlayGE
 		inputEngine.ActionMap(actionMap, input_handler, true);
 	}
 
-	void FirstPersonCameraController::InputHandler(InputEngine const & sender, InputAction const & action)
+	void FirstPersonCameraController::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
 	{
-		float const scaler = elapsed_time_ * 10;
-
-		switch (action.first)
+		float elapsed_time = static_cast<float>(timer_.elapsed());
+		if (elapsed_time > 0.01f)
 		{
-		case TurnLeftRight:
-			this->Rotate(action.second * scaler, 0, 0);
-			break;
+			float const scaler = elapsed_time * 10;
 
-		case TurnUpDown:
-			this->Rotate(0, action.second * scaler, 0);
-			break;
+			switch (action.first)
+			{
+			case TurnLeftRight:
+				this->Rotate(action.second * scaler, 0, 0);
+				break;
 
-		case Forward:
-			this->Move(0, 0, scaler);
-			break;
+			case TurnUpDown:
+				this->Rotate(0, action.second * scaler, 0);
+				break;
 
-		case Backward:
-			this->Move(0, 0, -scaler);
-			break;
+			case Forward:
+				this->Move(0, 0, scaler);
+				break;
 
-		case MoveLeft:
-			this->Move(-scaler, 0, 0);
-			break;
+			case Backward:
+				this->Move(0, 0, -scaler);
+				break;
 
-		case MoveRight:
-			this->Move(scaler, 0, 0);
-			break;
+			case MoveLeft:
+				this->Move(-scaler, 0, 0);
+				break;
+
+			case MoveRight:
+				this->Move(scaler, 0, 0);
+				break;
+			}
+
+			timer_.restart();
 		}
 	}
 
@@ -125,15 +131,8 @@ namespace KlayGE
 
 		world_ = MathLib::Inverse(camera_->ViewMatrix());
 
-		elapsed_time_ += static_cast<float>(timer_.elapsed());
-		if (elapsed_time_ > 0.01f)
-		{
-			InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
-			inputEngine.Update();
-
-			timer_.restart();
-			elapsed_time_ = 0;
-		}
+		InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+		inputEngine.Update();
 	}
 
 	void FirstPersonCameraController::Move(float x, float y, float z)
