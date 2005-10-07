@@ -37,18 +37,13 @@ namespace KlayGE
 
 	// 设置动作格式
 	//////////////////////////////////////////////////////////////////////////////////
-	uint32_t InputEngine::ActionMap(InputActionMap const & actionMap, bool reenumerate)
+	void InputEngine::ActionMap(InputActionMap const & actionMap,
+		action_handler_t handler, bool reenumerate)
 	{
-		uint32_t id = 0;
-
 		// 保存新的动作格式
-		if (!actionMaps_.empty())
-		{
-			id = actionMaps_.rbegin()->first + 1;
-		}
-		actionMaps_[id] = actionMap;
+		action_handlers_.push_back(std::make_pair(actionMap, handler));
 
-		// 只有当调用时指定要重枚举才销毁并重枚举设备
+		// 只有当调用时指定要重新枚举时才销毁并重枚举设备
 		// 设备列表有可能在循环中使用，如果这时枚举设备有可能造成问题
 		if (reenumerate)
 		{
@@ -65,10 +60,14 @@ namespace KlayGE
 		}
 
 		// 对当前设备应用新的动作映射
-		std::for_each(devices_.begin(), devices_.end(),
-			boost::bind(&InputDevice::ActionMap, _1, actionMaps_));
-
-		return id;
+		for (uint32_t id = 0; id < action_handlers_.size(); ++ id)
+		{
+			for (InputDevicesType::iterator iter = devices_.begin();
+				iter != devices_.end(); ++ iter)
+			{
+				(*iter)->ActionMap(id, action_handlers_[id].first);
+			}
+		}
 	}
 
 	// 获取输入设备个数
@@ -80,28 +79,31 @@ namespace KlayGE
 
 	// 刷新输入状态
 	//////////////////////////////////////////////////////////////////////////////////
-	InputActionsType InputEngine::Update(uint32_t id)
+	void InputEngine::Update()
 	{
-		typedef MapVector<uint16_t, long> ActionSetType;
-		ActionSetType actions;
-
-		// 访问所有设备
-		for (InputDevicesType::iterator iter = devices_.begin(); iter != devices_.end(); ++ iter)
+		for (uint32_t id = 0; id < action_handlers_.size(); ++ id)
 		{
-			InputActionsType const theAction((*iter)->Update(id));
+			typedef MapVector<uint16_t, long> ActionSetType;
+			ActionSetType actions;
 
-			// 去掉重复的动作
-			for (InputActionsType::const_iterator i = theAction.begin(); i != theAction.end(); ++ i)
+			// 访问所有设备
+			for (InputDevicesType::iterator iter = devices_.begin(); iter != devices_.end(); ++ iter)
 			{
-				if (actions.find(i->first) == actions.end())
+				InputActionsType const theAction((*iter)->Update(id));
+
+				// 去掉重复的动作
+				for (InputActionsType::const_iterator i = theAction.begin(); i != theAction.end(); ++ i)
 				{
-					actions.insert(*i);
+					if (actions.find(i->first) == actions.end())
+					{
+						actions.insert(*i);
+
+						// 处理动作
+						action_handlers_[id].second(*i);
+					}
 				}
 			}
 		}
-
-		// 添加到动作列表
-		return InputActionsType(actions.begin(), actions.end());
 	}
 
 	// 释放所有设备

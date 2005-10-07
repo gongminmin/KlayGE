@@ -25,19 +25,6 @@ namespace KlayGE
 	{
 	}
 
-	// 设置动作映射
-	/////////////////////////////////////////////////////////////////////////////////
-	void InputDevice::ActionMap(action_maps_t const & ams)
-	{
-		actionMaps_ = ams;
-
-		for (action_maps_t::iterator iter = actionMaps_.begin();
-			iter != actionMaps_.end(); ++ iter)
-		{
-			this->DoActionMap(iter->first, iter->second);
-		}
-	}
-
 	// 更新动作
 	//////////////////////////////////////////////////////////////////////////////////
 	InputActionsType InputDevice::Update(uint32_t id)

@@ -14,6 +14,8 @@ private:
 	void InitObjects();
 	void Update(KlayGE::uint32_t pass);
 
+	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
+
 	KlayGE::FontPtr font_;
 	boost::shared_ptr<KlayGE::StaticMesh> renderTorus_;
 

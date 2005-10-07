@@ -22,10 +22,10 @@ namespace KlayGE
 	class Event
 	{
 	public:
-		typedef boost::function<void (Sender&, EventArg&)> EventHandler;
+		typedef boost::function<void (Sender const &, EventArg const &)> EventHandler;
 
 	public:
-		Event(Sender& sender)
+		Event(Sender const & sender)
 			: sender_(&sender)
 		{
 		}
@@ -35,17 +35,17 @@ namespace KlayGE
 			handlers_.push_back(handler);
 		}
 
-		void operator()(EventArg& arg)
+		void operator()(EventArg const & arg)
 		{
 			for (std::list<EventHandler>::iterator iter = handlers_.begin();
 				iter != handlers_.end(); ++ iter)
 			{
-				(*iter)(*sender, arg);
+				(*iter)(*sender_, arg);
 			}
 		}
 
 	private:
-		Sender* sender_;
+		Sender const * sender_;
 		std::list<EventHandler> handlers_;
 	};
 }

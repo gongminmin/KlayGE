@@ -23,6 +23,7 @@
 
 #include <KlayGE/Vector.hpp>
 #include <KlayGE/MapVector.hpp>
+#include <KlayGE/Event.hpp>
 
 #include <vector>
 #include <string>
@@ -245,8 +246,9 @@ namespace KlayGE
 		JS_Button31			= 0x227,
 	};
 
-	typedef std::pair<uint16_t, uint16_t> InputAction;
-	typedef std::vector<std::pair<uint16_t, long> > InputActionsType;
+	typedef std::pair<uint16_t, uint16_t> InputActionDefine;
+	typedef std::pair<uint16_t, long> InputAction;
+	typedef std::vector<InputAction> InputActionsType;
 
 
 	// 输入动作格式
@@ -254,7 +256,7 @@ namespace KlayGE
 	class InputActionMap
 	{
 	public:
-		void AddAction(InputAction const & inputAction);
+		void AddAction(InputActionDefine const & action_define);
 
 		template <typename ForwardIterator>
 		void AddActions(ForwardIterator first, ForwardIterator last)
@@ -272,6 +274,7 @@ namespace KlayGE
 		MapVector<uint16_t, uint16_t> actionMap_;
 	};
 
+	typedef Event<InputEngine, InputAction> action_handler_t;
 	typedef MapVector<uint32_t, InputActionMap> action_maps_t;
 
 
@@ -279,6 +282,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	class InputEngine
 	{
+		typedef std::vector<std::pair<InputActionMap, action_handler_t> > action_handlers_t;
+
 	public:
 		virtual ~InputEngine();
 
@@ -287,9 +292,10 @@ namespace KlayGE
 		virtual void EnumDevices() = 0;
 		void UnacquireDevices();
 
-		InputActionsType Update(uint32_t id);
+		void Update();
 
-		uint32_t ActionMap(InputActionMap const & actionMap, bool reenumerate = false);
+		void ActionMap(InputActionMap const & actionMap,
+			action_handler_t handler, bool reenumerate = false);
 
 		size_t NumDevice() const;
 		InputDevicePtr Device(size_t index) const;
@@ -298,7 +304,7 @@ namespace KlayGE
 		typedef std::vector<InputDevicePtr>	InputDevicesType;
 		InputDevicesType	devices_;
 
-		action_maps_t actionMaps_;
+		action_handlers_t action_handlers_;
 	};
 
 	class InputDevice
@@ -309,14 +315,13 @@ namespace KlayGE
 		virtual std::wstring const & Name() const = 0;
 
 		InputActionsType Update(uint32_t id);
-		void ActionMap(action_maps_t const & ams);
+		virtual void ActionMap(uint32_t id, InputActionMap const & actionMap) = 0;
 
 		virtual void Acquire() = 0;
 		virtual void Unacquire() = 0;
 
 	protected:
 		virtual void UpdateInputs() = 0;
-		virtual void DoActionMap(uint32_t id, InputActionMap const & actionMap) = 0;
 		virtual InputActionsType DoUpdate(uint32_t id) = 0;
 
 	protected:
@@ -328,8 +333,9 @@ namespace KlayGE
 	public:
 		bool Key(size_t n) const;
 
+		void ActionMap(uint32_t id, InputActionMap const & actionMap);
+
 	private:
-		void DoActionMap(uint32_t id, InputActionMap const & actionMap);
 		InputActionsType DoUpdate(uint32_t id);
 
 	protected:
@@ -348,8 +354,9 @@ namespace KlayGE
 		bool MiddleButton() const;
 		bool Button(size_t index) const;
 
+		void ActionMap(uint32_t id, InputActionMap const & actionMap);
+
 	private:
-		void DoActionMap(uint32_t id, InputActionMap const & actionMap);
 		InputActionsType DoUpdate(uint32_t id);
 
 	protected:
@@ -373,8 +380,9 @@ namespace KlayGE
 		long Slider(size_t index) const;
 		bool Button(size_t index) const;
 
+		void ActionMap(uint32_t id, InputActionMap const & actionMap);
+
 	private:
-		void DoActionMap(uint32_t id, InputActionMap const & actionMap);
 		InputActionsType DoUpdate(uint32_t id);
 
 	protected:

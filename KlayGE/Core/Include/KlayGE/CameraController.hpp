@@ -19,6 +19,7 @@
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Camera.hpp>
 #include <boost/timer.hpp>
+#include <KlayGE/Input.hpp>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_Core_d.lib")
@@ -64,6 +65,7 @@ namespace KlayGE
 
 	private:
 		Matrix4		world_;				// World matrix of the camera (inverse of the view matrix)
+		float elapsed_time_;
 
 		enum
 		{
@@ -76,7 +78,8 @@ namespace KlayGE
 			MoveRight,
 		};
 
-		uint32_t action_map_id_;
+	private:
+		void InputHandler(InputEngine const & sender, InputAction const & action);
 	};
 }
 

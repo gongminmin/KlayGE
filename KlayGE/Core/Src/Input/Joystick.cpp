@@ -89,7 +89,7 @@ namespace KlayGE
 
 	// 实现动作映射
 	//////////////////////////////////////////////////////////////////////////////////
-	void InputJoystick::DoActionMap(uint32_t id, InputActionMap const & actionMap)
+	void InputJoystick::ActionMap(uint32_t id, InputActionMap const & actionMap)
 	{
 		InputActionMap& iam = actionMaps_[id];
 
@@ -97,7 +97,7 @@ namespace KlayGE
 		{
 			if (actionMap.HasAction(i))
 			{
-				iam.AddAction(InputAction(actionMap.Action(i), i));
+				iam.AddAction(InputActionDefine(actionMap.Action(i), i));
 			}
 		}
 	}

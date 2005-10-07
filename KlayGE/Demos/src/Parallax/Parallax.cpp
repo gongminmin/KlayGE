@@ -120,9 +120,9 @@ namespace
 		Exit,
 	};
 
-	InputAction actions[] = 
+	InputActionDefine actions[] = 
 	{
-		InputAction(Exit, KS_Escape),
+		InputActionDefine(Exit, KS_Escape),
 	};
 
 	bool ConfirmDevice(RenderDeviceCaps const & caps)
@@ -185,7 +185,20 @@ void Parallax::InitObjects()
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	KlayGE::InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
-	action_map_id_ = inputEngine.ActionMap(actionMap, true);
+
+	action_handler_t input_handler(inputEngine);
+	input_handler += boost::bind(&Parallax::InputHandler, this, _1, _2);
+	inputEngine.ActionMap(actionMap, input_handler, true);
+}
+
+void Parallax::InputHandler(InputEngine const & sender, InputAction const & action)
+{
+	switch (action.first)
+	{
+	case Exit:
+		this->Quit();
+		break;
+	}
 }
 
 void Parallax::Update(uint32_t pass)
@@ -193,16 +206,7 @@ void Parallax::Update(uint32_t pass)
 	fpcController_.Update();
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
-	InputActionsType actions(inputEngine.Update(action_map_id_));
-	for (InputActionsType::iterator iter = actions.begin(); iter != actions.end(); ++ iter)
-	{
-		switch (iter->first)
-		{
-		case Exit:
-			this->Quit();
-			break;
-		}
-	}
+	inputEngine.Update();
 
 	Matrix4 model = MathLib::RotationX(-0.5f);
 	Matrix4 view = this->ActiveCamera().ViewMatrix();

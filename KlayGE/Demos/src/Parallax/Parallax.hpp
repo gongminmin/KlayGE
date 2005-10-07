@@ -12,15 +12,14 @@ public:
 
 private:
 	void InitObjects();
-
 	void Update(KlayGE::uint32_t pass);
+
+	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 
 	KlayGE::FontPtr font_;
 	boost::shared_ptr<KlayGE::Renderable> renderPolygon_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
-
-	KlayGE::uint32_t action_map_id_;
 };
 
 #endif		// _PARALLAX_HPP

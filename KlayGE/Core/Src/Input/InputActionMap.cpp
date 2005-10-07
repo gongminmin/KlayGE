@@ -20,9 +20,9 @@ namespace KlayGE
 {
 	// 增加动作
 	//////////////////////////////////////////////////////////////////////////////////
-	void InputActionMap::AddAction(InputAction const & inputAction)
+	void InputActionMap::AddAction(InputActionDefine const & action_define)
 	{
-		actionMap_.insert(std::make_pair(inputAction.second, inputAction.first));
+		actionMap_.insert(std::make_pair(action_define.second, action_define.first));
 	}
 
 	// 更新输入动作

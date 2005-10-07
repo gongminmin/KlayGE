@@ -20,6 +20,8 @@ private:
 
 	void RenderInfos();
 
+	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
+
 private:
 	KlayGE::FontPtr font_;
 
@@ -36,8 +38,6 @@ private:
 	KlayGE::TexturePtr downsample_tex_;
 
 	boost::shared_ptr<KlayGE::Renderable> renderQuad_;
-
-	KlayGE::uint32_t action_map_id_;
 
 	bool show_ascii_;
 };
