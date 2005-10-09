@@ -66,7 +66,7 @@ namespace KlayGE
 		*(effect_->ParameterByName("modelIT")) = MathLib::Transpose(MathLib::Inverse(model_));
 	}
 
-	StaticMeshPtr LoadKMesh(const std::string& kmeshName,
+	RenderModelPtr LoadKMesh(const std::string& kmeshName,
 		boost::function<KMeshPtr (std::wstring const &, TexturePtr)> CreateFactoryFunc)
 	{
 		BOOST_ASSERT(CreateFactoryFunc);
@@ -158,8 +158,8 @@ namespace KlayGE
 			meshes.push_back(mesh);
 		}
 
-		StaticMeshPtr ret(new StaticMesh(L"KMesh"));
-		ret->AssignChildren(meshes.begin(), meshes.end());
+		RenderModelPtr ret(new RenderModel(L"KMesh"));
+		ret->AssignMeshes(meshes.begin(), meshes.end());
 		return ret;
 	}
 }

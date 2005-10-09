@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_ATI_texture_compression_3dc">
+	<Tokens>
+		<Token name="GL_COMPRESSED_LUMINANCE_ALPHA_3DC_ATI" value="0x8837"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_ATI" string="GL_ATI_texture_compression_3dc"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_ATI"/>
+	</InitPath>
+</GLExtension>

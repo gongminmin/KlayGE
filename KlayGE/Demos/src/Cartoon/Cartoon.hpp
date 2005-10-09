@@ -17,7 +17,7 @@ private:
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 
 	KlayGE::FontPtr font_;
-	boost::shared_ptr<KlayGE::StaticMesh> renderTorus_;
+	boost::shared_ptr<KlayGE::RenderModel> renderTorus_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 

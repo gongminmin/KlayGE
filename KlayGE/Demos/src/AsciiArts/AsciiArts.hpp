@@ -26,7 +26,7 @@ private:
 	KlayGE::FontPtr font_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
-	boost::shared_ptr<KlayGE::StaticMesh> mesh_;
+	boost::shared_ptr<KlayGE::RenderModel> mesh_;
 
 	KlayGE::TexturePtr ascii_lums_tex_;
 

@@ -129,7 +129,7 @@ void Refract::InitObjects()
 	cube_map_ = LoadTexture("Glacier2.dds");
 
 	refractor_ = LoadKMesh("bunny.kmesh", CreateFactory<Refractor>);
-	static_cast<Refractor*>(refractor_->Children(0).get())->CubeMap(cube_map_);
+	static_cast<Refractor*>(refractor_->Mesh(0).get())->CubeMap(cube_map_);
 	refractor_->AddToSceneManager();
 
 	renderSkyBox_.reset(new RenderableSkyBox);
@@ -174,7 +174,7 @@ void Refract::Update(uint32_t pass)
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-	*(refractor_->Children(0)->GetRenderEffect()->ParameterByName("eyePos"))
+	*(refractor_->Mesh(0)->GetRenderEffect()->ParameterByName("eyePos"))
 		= Vector4(this->ActiveCamera().EyePos().x(), this->ActiveCamera().EyePos().y(),
 			this->ActiveCamera().EyePos().z(), 1);
 

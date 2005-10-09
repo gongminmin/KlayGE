@@ -1,8 +1,11 @@
 // Mesh.hpp
 // KlayGE Mesh类 头文件
-// Ver 2.7.0
+// Ver 3.0.0
 // 版权所有(C) 龚敏敏, 2004-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.0.0
+// 增加了RenderModel (2005.10.9)
 //
 // 2.7.0
 // 改进了StaticMesh (2005.6.16)
@@ -31,6 +34,77 @@
 
 namespace KlayGE
 {
+	class RenderModel : public Renderable
+	{
+	public:
+		RenderModel(std::wstring const & name);
+
+		template <typename ForwardIterator>
+		void AssignMeshes(ForwardIterator first, ForwardIterator last)
+		{
+			meshes_.assign(first, last);
+		}
+
+		StaticMeshPtr Mesh(size_t id)
+		{
+			return meshes_[id];
+		}
+		StaticMeshPtr Mesh(size_t id) const
+		{
+			return meshes_[id];
+		}
+		size_t NumMesh() const
+		{
+			return meshes_.size();
+		}
+
+		RenderEffectPtr GetRenderEffect() const
+		{
+			return effect_;
+		}
+		void SetRenderEffect(RenderEffectPtr const & effect)
+		{
+			effect_ = effect;
+		}
+
+		VertexBufferPtr GetVertexBuffer() const
+		{
+			return vb_;
+		}
+
+		void OnRenderBegin();
+		void OnRenderEnd();
+
+		Box GetBound() const
+		{
+			return box_;
+		}
+		std::wstring const & Name() const
+		{
+			return name_;
+		}
+
+		void AddToSceneManager();
+
+		void SetModelMatrix(Matrix4 const & mat)
+		{
+			model_ = mat;
+		}
+
+	private:
+		std::wstring name_;
+
+		VertexBufferPtr vb_;
+		RenderEffectPtr effect_;
+
+		Box box_;
+
+		Matrix4 model_;
+
+		typedef std::vector<StaticMeshPtr> StaticMeshesPtrType;
+		StaticMeshesPtrType meshes_;
+	};
+
 	class StaticMesh : public Renderable
 	{
 	public:
@@ -57,22 +131,6 @@ namespace KlayGE
 		{
 			return vb_;
 		}
-
-		StaticMeshPtr Children(size_t id)
-		{
-			return children_[id];
-		}
-		StaticMeshPtr Children(size_t id) const
-		{
-			return children_[id];
-		}
-		size_t NumChildren() const
-		{
-			return children_.size();
-		}
-
-		virtual void OnRenderBegin();
-		virtual void OnRenderEnd();
 
 		virtual Box GetBound() const;
 
@@ -112,13 +170,6 @@ namespace KlayGE
 			beBuilt_ = false;
 		}
 
-		template <typename ForwardIterator>
-		void AssignChildren(ForwardIterator first, ForwardIterator last)
-		{
-			children_.assign(first, last);
-			beBuilt_ = false;
-		}
-
 	protected:
 		virtual void BuildRenderable();
 
@@ -138,9 +189,6 @@ namespace KlayGE
 		NormalsType normals_;
 		MultiTexCoordsType multi_tex_coords_;
 		IndicesType indices_;
-
-		typedef std::vector<StaticMeshPtr> StaticMeshesPtrType;
-		StaticMeshesPtrType children_;
 	};
 
 

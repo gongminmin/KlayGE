@@ -25,6 +25,28 @@
 
 namespace KlayGE
 {
+	RenderModel::RenderModel(std::wstring const & name)
+		: name_(name),
+			model_(Matrix4::Identity())
+	{
+	}
+
+	void RenderModel::AddToSceneManager()
+	{
+		std::for_each(meshes_.begin(), meshes_.end(), boost::mem_fn(&StaticMesh::AddToSceneManager));
+	}
+
+	void RenderModel::OnRenderBegin()
+	{
+		std::for_each(meshes_.begin(), meshes_.end(), boost::mem_fn(&StaticMesh::OnRenderBegin));
+	}
+
+	void RenderModel::OnRenderEnd()
+	{
+		std::for_each(meshes_.begin(), meshes_.end(), boost::mem_fn(&StaticMesh::OnRenderEnd));
+	}
+
+
 	StaticMesh::StaticMesh(std::wstring const & name)
 		: name_(name),
 			beBuilt_(false),
@@ -46,8 +68,6 @@ namespace KlayGE
 	{
 		this->BuildRenderable();
 
-		std::for_each(children_.begin(), children_.end(), boost::mem_fn(&StaticMesh::AddToSceneManager));
-
 		if (!xyzs_.empty())
 		{
 			Renderable::AddToSceneManager();
@@ -59,18 +79,6 @@ namespace KlayGE
 		normals_.resize(xyzs_.size());
 		MathLib::ComputeNormal<float>(normals_.begin(),
 			indices_.begin(), indices_.end(), xyzs_.begin(), xyzs_.end());
-
-		std::for_each(children_.begin(), children_.end(), boost::mem_fn(&StaticMesh::BuildRenderable));
-	}
-
-	void StaticMesh::OnRenderBegin()
-	{
-		std::for_each(children_.begin(), children_.end(), boost::mem_fn(&StaticMesh::OnRenderBegin));
-	}
-
-	void StaticMesh::OnRenderEnd()
-	{
-		std::for_each(children_.begin(), children_.end(), boost::mem_fn(&StaticMesh::OnRenderEnd));
 	}
 
 	Box StaticMesh::GetBound() const
@@ -116,8 +124,6 @@ namespace KlayGE
 			}
 
 			beBuilt_ = true;
-
-			std::for_each(children_.begin(), children_.end(), boost::mem_fn(&StaticMesh::BuildRenderable));
 		}
 	}
 

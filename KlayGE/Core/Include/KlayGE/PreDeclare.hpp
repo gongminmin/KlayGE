@@ -93,6 +93,8 @@ namespace KlayGE
 	struct Viewport;
 	class RenderFactory;
 	typedef boost::shared_ptr<RenderFactory> RenderFactoryPtr;
+	class RenderModel;
+	typedef boost::shared_ptr<RenderModel> RenderModelPtr;
 	class StaticMesh;
 	typedef boost::shared_ptr<StaticMesh> StaticMeshPtr;
 	class BoneMesh;

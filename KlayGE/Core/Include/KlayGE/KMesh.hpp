@@ -47,7 +47,7 @@ namespace KlayGE
 		return KMeshPtr(new T(name, tex));
 	}
 
-	StaticMeshPtr LoadKMesh(std::string const & kmeshName,
+	RenderModelPtr LoadKMesh(std::string const & kmeshName,
 		boost::function<KMeshPtr (std::wstring const &, TexturePtr)> CreateFactoryFunc = CreateFactory<KMesh>);
 }
 
