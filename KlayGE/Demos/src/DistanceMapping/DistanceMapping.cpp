@@ -195,7 +195,7 @@ void DistanceMapping::InitObjects()
 	this->Proj(0.1f, 100);
 
 	fpcController_.AttachCamera(this->ActiveCamera());
-	fpcController_.Scalers(0.005f, 0.1f);
+	fpcController_.Scalers(0.05f, 0.1f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	KlayGE::InputActionMap actionMap;

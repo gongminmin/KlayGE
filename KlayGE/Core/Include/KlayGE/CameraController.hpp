@@ -65,6 +65,7 @@ namespace KlayGE
 
 	private:
 		Matrix4		world_;				// World matrix of the camera (inverse of the view matrix)
+		float elapsed_time_;
 
 		enum
 		{
