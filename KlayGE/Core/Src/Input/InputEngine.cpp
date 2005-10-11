@@ -32,7 +32,6 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	InputEngine::~InputEngine()
 	{
-		this->UnacquireDevices();
 	}
 
 	// 设置动作格式
@@ -52,11 +51,6 @@ namespace KlayGE
 
 			// 重新枚举合适的设备
 			this->EnumDevices();
-		}
-		else // 应用新的动作映射
-		{
-			// 在新的动作映射设置前设备必须全部被释放
-			this->UnacquireDevices();
 		}
 
 		// 对当前设备应用新的动作映射
@@ -104,14 +98,6 @@ namespace KlayGE
 				}
 			}
 		}
-	}
-
-	// 释放所有设备
-	//////////////////////////////////////////////////////////////////////////////////
-	void InputEngine::UnacquireDevices()
-	{
-		std::for_each(devices_.begin(), devices_.end(),
-			boost::bind(&InputDevice::Unacquire, _1));
 	}
 
 	// 获取设备接口

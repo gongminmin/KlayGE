@@ -45,8 +45,6 @@ namespace KlayGE
 		dipdw.diph.dwHow		= DIPH_DEVICE;
 		dipdw.dwData			= DIPROPAXISMODE_REL;
 		this->Property(DIPROP_AXISMODE, dipdw.diph);
-
-		this->Acquire();
 	}
 
 	// Éè±¸Ãû³Æ

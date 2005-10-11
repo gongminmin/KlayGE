@@ -33,6 +33,8 @@ namespace KlayGE
 		IDirectInputDevice8W* device;
 		dinputEng.DInput()->CreateDevice(guid, &device, NULL);
 		device_ = MakeCOMPtr(device);
+
+		this->Unacquire();
 	}
 
 	// Îö¹¹º¯Êı

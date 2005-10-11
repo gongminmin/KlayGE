@@ -85,7 +85,6 @@ namespace KlayGE
 			break;
 		}
 
-		device->Unacquire();
 		inputEng.devices_.push_back(device);
 
 		return DIENUM_CONTINUE;

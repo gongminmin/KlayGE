@@ -35,8 +35,6 @@ namespace KlayGE
 	{
 		this->DataFormat(c_dfDIKeyboard);
 		this->CooperativeLevel(::GetActiveWindow(), DISCL_NONEXCLUSIVE | DISCL_BACKGROUND);
-
-		this->Acquire();
 	}
 
 	// Éè±¸Ãû³Æ

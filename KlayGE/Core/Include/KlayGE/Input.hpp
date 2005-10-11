@@ -290,7 +290,6 @@ namespace KlayGE
 		virtual std::wstring const & Name() const = 0;
 
 		virtual void EnumDevices() = 0;
-		void UnacquireDevices();
 
 		void Update();
 
@@ -316,9 +315,6 @@ namespace KlayGE
 
 		InputActionsType Update(uint32_t id);
 		virtual void ActionMap(uint32_t id, InputActionMap const & actionMap) = 0;
-
-		virtual void Acquire() = 0;
-		virtual void Unacquire() = 0;
 
 	protected:
 		virtual void UpdateInputs() = 0;

@@ -58,8 +58,6 @@ namespace KlayGE
 		// Set Y axis dead zone to 10%
 		dipdw.diph.dwObj = DIJOFS_Y;
 		this->Property(DIPROP_DEADZONE, dipdw.diph);
-
-		this->Acquire();
 	}
 
 	// Éè±¸Ãû³Æ

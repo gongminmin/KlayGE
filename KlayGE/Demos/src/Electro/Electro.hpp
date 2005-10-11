@@ -17,8 +17,6 @@ private:
 
 	KlayGE::FontPtr font_;
 	boost::shared_ptr<KlayGE::Renderable> renderElectro_;
-
-	KlayGE::uint32_t action_map_id_;
 };
 
 #endif		// _ELECTRO_HPP

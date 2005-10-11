@@ -1116,15 +1116,26 @@ namespace KlayGE
 		{
 			Vector_T<T, 3> a(Normalize(from));
 			Vector_T<T, 3> b(Normalize(to));
-			Vector_T<T, 3> half(Normalize(a + b));
 
-			return UnitAxisToUnitAxis(a, half);
+			return UnitAxisToUnitAxis(a, b);
 		}
 		template <typename T>
 		inline Quaternion_T<T>
 		UnitAxisToUnitAxis(Vector_T<T, 3> const & from, Vector_T<T, 3> const & to)
 		{
-			return Quaternion_T<T>(Cross(from, to), Dot(from, to));
+			if (Eq(Abs(Dot(from, to)), T(1)))
+			{
+				return Quaternion_T<T>::Identity();
+			}
+
+			Vector_T<T, 3> axis = Cross(from, to);
+
+			T const cos_theta = Dot(from, to);
+			T const sin_theta = Sqrt(1 - cos_theta * cos_theta);
+			T const sin_half_theta = Sqrt((1 - cos_theta) / 2);
+			T const cos_half_theta = sin_theta / (2 * sin_half_theta);
+
+			return Quaternion_T<T>(axis * sin_half_theta, cos_half_theta);
 		}
 
 		template <typename T>

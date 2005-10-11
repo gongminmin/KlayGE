@@ -20,8 +20,6 @@ private:
 	boost::shared_ptr<KlayGE::Renderable> flag_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
-
-	KlayGE::uint32_t action_map_id_;
 };
 
 #endif		// _VERTEXDISPLACEMENT_HPP

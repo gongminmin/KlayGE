@@ -20,8 +20,6 @@ private:
 	boost::shared_ptr<KlayGE::RenderModel> renderTorus_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
-
-	KlayGE::uint32_t action_map_id_;
 };
 
 #endif		// _CARTOON_HPP
