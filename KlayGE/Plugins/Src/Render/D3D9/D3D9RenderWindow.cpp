@@ -132,7 +132,7 @@ namespace KlayGE
 						: d3d_(d3d),
 							adapter_(adapter),
 							hWnd_(NULL),
-							active_(false), ready_(false), closed_(false)
+							ready_(false), closed_(false)
 	{
 		if (settings.multiSample > 16)
 		{
@@ -396,11 +396,6 @@ namespace KlayGE
 		this->Destroy();
 	}
 
-	bool D3D9RenderWindow::Active() const
-	{
-		return active_;
-	}
-
 	bool D3D9RenderWindow::Closed() const
 	{
 		return closed_;
@@ -474,11 +469,11 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9RenderWindow::Reposition(int /*left*/, int /*top*/)
+	void D3D9RenderWindow::Reposition(uint32_t /*left*/, uint32_t /*top*/)
 	{
 	}
 
-	void D3D9RenderWindow::Resize(int width, int height)
+	void D3D9RenderWindow::Resize(uint32_t width, uint32_t height)
 	{
 		if ((width_ != width) || (height_ != height))
 		{

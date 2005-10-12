@@ -147,7 +147,7 @@ namespace KlayGE
 		CGpass pass = cgGetFirstPass(technique_);
 		while (pass)
 		{
-			passes_.push_back(this->MakeRenderPass(passes_.size(), pass));
+			passes_.push_back(this->MakeRenderPass(static_cast<uint32_t>(passes_.size()), pass));
 			pass = cgGetNextPass(pass);
 		}
 	}

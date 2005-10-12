@@ -26,7 +26,7 @@
 namespace KlayGE
 {
 	OGLRenderTexture::OGLRenderTexture()
-		: fbo_(-1)
+		: fbo_(0xFFFFFFFF)
 	{
 		left_ = 0;
 		top_ = 0;
@@ -59,7 +59,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLRenderTexture::CustomAttribute(std::string const & name, void* pData)
+	void OGLRenderTexture::CustomAttribute(std::string const & /*name*/, void* /*pData*/)
 	{
 		BOOST_ASSERT(false);
 	}
@@ -79,6 +79,8 @@ namespace KlayGE
 		glBindFramebufferEXT_(GL_FRAMEBUFFER_EXT, fbo_);
 		glFramebufferTexture2DEXT_(GL_FRAMEBUFFER_EXT,
 			GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, ogl_tex.GLTexture(), 0);
+
+		active_ = true;
 	}
 	
 	void OGLRenderTexture::AttachTextureCube(TexturePtr textureCube, Texture::CubeFaces face)
@@ -96,6 +98,8 @@ namespace KlayGE
 		glBindFramebufferEXT_(GL_FRAMEBUFFER_EXT, fbo_);
 		glFramebufferTexture2DEXT_(GL_FRAMEBUFFER_EXT,
 			GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, ogl_tex.GLTextureFace(face - Texture::CF_Positive_X), 0);
+
+		active_ = true;
 	}
 
 	void OGLRenderTexture::DetachTexture()

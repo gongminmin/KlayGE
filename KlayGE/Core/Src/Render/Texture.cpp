@@ -164,7 +164,7 @@ namespace KlayGE
 			desc.mip_map_count = 1;
 		}
 
-		PixelFormat format = PF_A8R8G8B8;
+		PixelFormat format = PF_ARGB8;
 		if ((desc.pixel_format.flags & DDSPF_FOURCC) != 0)
 		{
 			switch (desc.pixel_format.four_cc)
@@ -174,11 +174,11 @@ namespace KlayGE
 				break;
 
 			case 112:
-				format = PF_G16R16F;
+				format = PF_GR16F;
 				break;
 
 			case 113:
-				format = PF_A16B16G16R16F;
+				format = PF_ABGR16F;
 				break;
 
 			case 114:
@@ -186,11 +186,11 @@ namespace KlayGE
 				break;
 
 			case 115:
-				format = PF_G32R32F;
+				format = PF_GR32F;
 				break;
 
 			case 116:
-				format = PF_A32B32G32R32F;
+				format = PF_ABGR32F;
 				break;
 
 			case MakeFourCC<'D', 'X', 'T', '1'>::value:
@@ -226,7 +226,7 @@ namespace KlayGE
 							&& (0x00F0 == desc.pixel_format.g_bit_mask)
 							&& (0x000F == desc.pixel_format.b_bit_mask))
 						{
-							format = PF_A4R4G4B4;
+							format = PF_ARGB4;
 						}
 						else
 						{
@@ -242,11 +242,11 @@ namespace KlayGE
 					{
 						if ((desc.pixel_format.flags & DDSPF_ALPHAPIXELS) != 0)
 						{
-							format = PF_A8R8G8B8;
+							format = PF_ARGB8;
 						}
 						else
 						{
-							format = PF_X8R8G8B8;
+							format = PF_XRGB8;
 						}
 					}
 					else
@@ -256,7 +256,7 @@ namespace KlayGE
 							&& (0x000FFC00 == desc.pixel_format.g_bit_mask)
 							&& (0x000003FF == desc.pixel_format.b_bit_mask))
 						{
-							format = PF_A2R10G10B10;
+							format = PF_A2RGB10;
 						}
 						else
 						{
@@ -275,7 +275,7 @@ namespace KlayGE
 					case 8:
 						if ((desc.pixel_format.flags & DDSPF_ALPHAPIXELS) != 0)
 						{
-							format = PF_A4L4;
+							format = PF_AL4;
 						}
 						else
 						{
@@ -286,7 +286,7 @@ namespace KlayGE
 					case 16:
 						if ((desc.pixel_format.flags & DDSPF_ALPHAPIXELS) != 0)
 						{
-							format = PF_A8L8;
+							format = PF_AL8;
 						}
 						break;
 
@@ -546,11 +546,11 @@ namespace KlayGE
 				desc.pixel_format.four_cc = 111;
 				break;
 
-			case PF_G16R16F:
+			case PF_GR16F:
 				desc.pixel_format.four_cc = 112;
 				break;
 
-			case PF_A16B16G16R16F:
+			case PF_ABGR16F:
 				desc.pixel_format.four_cc = 113;
 				break;
 
@@ -558,11 +558,11 @@ namespace KlayGE
 				desc.pixel_format.four_cc = 114;
 				break;
 
-			case PF_G32R32F:
+			case PF_GR32F:
 				desc.pixel_format.four_cc = 115;
 				break;
 
-			case PF_A32B32G32R32F:
+			case PF_ABGR32F:
 				desc.pixel_format.four_cc = 116;
 				break;
 
@@ -593,7 +593,7 @@ namespace KlayGE
 				desc.pixel_format.b_bit_mask = 0x0000001F;
 				break;
 
-			case PF_A4R4G4B4:
+			case PF_ARGB4:
 				desc.pixel_format.flags |= DDSPF_RGB;
 				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
 				desc.pixel_format.rgb_bit_count = 16;
@@ -604,7 +604,7 @@ namespace KlayGE
 				desc.pixel_format.b_bit_mask = 0x0000000F;
 				break;
 
-			case PF_A8R8G8B8:
+			case PF_ARGB8:
 				desc.pixel_format.flags |= DDSPF_RGB;
 				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
 				desc.pixel_format.rgb_bit_count = 32;
@@ -615,7 +615,7 @@ namespace KlayGE
 				desc.pixel_format.b_bit_mask = 0x000000FF;
 				break;
 
-			case PF_X8R8G8B8:
+			case PF_XRGB8:
 				desc.pixel_format.flags |= DDSPF_RGB;
 				desc.pixel_format.rgb_bit_count = 32;
 
@@ -625,7 +625,7 @@ namespace KlayGE
 				desc.pixel_format.b_bit_mask = 0x000000FF;
 				break;
 
-			case PF_A2R10G10B10:
+			case PF_A2RGB10:
 				desc.pixel_format.flags |= DDSPF_RGB;
 				desc.pixel_format.rgb_bit_count = 32;
 
@@ -635,7 +635,7 @@ namespace KlayGE
 				desc.pixel_format.b_bit_mask = 0x000003FF;
 				break;
 
-			case PF_A4L4:
+			case PF_AL4:
 				desc.pixel_format.flags |= DDSPF_LUMINANCE;
 				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
 				desc.pixel_format.rgb_bit_count = 8;
@@ -656,7 +656,7 @@ namespace KlayGE
 				desc.pixel_format.b_bit_mask = 0x00000000;
 				break;
 
-			case PF_A8L8:
+			case PF_AL8:
 				desc.pixel_format.flags |= DDSPF_LUMINANCE;
 				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
 				desc.pixel_format.rgb_bit_count = 16;

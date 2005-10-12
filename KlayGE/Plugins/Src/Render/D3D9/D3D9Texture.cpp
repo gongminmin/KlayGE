@@ -1,8 +1,11 @@
 // D3D9Texture.cpp
 // KlayGE D3D9纹理类 实现文件
-// Ver 2.7.0
+// Ver 3.0.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.0.0
+// 去掉了ZBuffer (2005.10.12)
 //
 // 2.7.0
 // 可以读取RenderTarget (2005.6.18)
@@ -71,42 +74,42 @@ namespace
 		case PF_A8:
 			return D3DFMT_A8;
 
-		case PF_A4L4:
+		case PF_AL4:
 			return D3DFMT_A4L4;
 
-		case PF_A8L8:
+		case PF_AL8:
 			return D3DFMT_A8L8;
 
 		case PF_R5G6B5:
 			return D3DFMT_R5G6B5;
 
-		case PF_A4R4G4B4:
+		case PF_ARGB4:
 			return D3DFMT_A4R4G4B4;
 
-		case PF_X8R8G8B8:
+		case PF_XRGB8:
 			return D3DFMT_X8R8G8B8;
 
-		case PF_A8R8G8B8:
+		case PF_ARGB8:
 			return D3DFMT_A8R8G8B8;
 
-		case PF_A2R10G10B10:
+		case PF_A2RGB10:
 			return D3DFMT_A2B10G10R10;
 
 		case PF_R16F:
 			return D3DFMT_R16F;
 
-		case PF_G16R16F:
+		case PF_GR16F:
 			return D3DFMT_G16R16F;
-		case PF_A16B16G16R16F:
+		case PF_ABGR16F:
 			return D3DFMT_A16B16G16R16F;
 
 		case PF_R32F:
 			return D3DFMT_R32F;
 
-		case PF_G32R32F:
+		case PF_GR32F:
 			return D3DFMT_G32R32F;
 
-		case PF_A32B32G32R32F:
+		case PF_ABGR32F:
 			return D3DFMT_A32B32G32R32F;
 
 		case PF_DXT1:
@@ -144,43 +147,43 @@ namespace
 			return PF_A8;
 
 		case D3DFMT_A4L4:
-			return PF_A4L4;
+			return PF_AL4;
 
 		case D3DFMT_A8L8:
-			return PF_A8L8;
+			return PF_AL8;
 
 		case D3DFMT_R5G6B5:
 			return PF_R5G6B5;
 
 		case D3DFMT_A4R4G4B4:
-			return PF_A4R4G4B4;
+			return PF_ARGB4;
 
 		case D3DFMT_X8R8G8B8:
-			return PF_X8R8G8B8;
+			return PF_XRGB8;
 
 		case D3DFMT_A8R8G8B8:
-			return PF_A8R8G8B8;
+			return PF_ARGB8;
 
 		case D3DFMT_A2B10G10R10:
-			return PF_A2R10G10B10;
+			return PF_A2RGB10;
 
 		case D3DFMT_R16F:
 			return PF_R16F;
 
 		case D3DFMT_G16R16F:
-			return PF_G16R16F;
+			return PF_GR16F;
 
 		case D3DFMT_A16B16G16R16F:
-			return PF_A16B16G16R16F;
+			return PF_ABGR16F;
 
 		case D3DFMT_R32F:
 			return PF_R32F;
 
 		case D3DFMT_G32R32F:
-			return PF_G32R32F;
+			return PF_GR32F;
 
 		case D3DFMT_A32B32G32R32F:
-			return PF_A32B32G32R32F;
+			return PF_ABGR32F;
 
 		case D3DFMT_DXT1:
 			return PF_DXT1;
@@ -702,8 +705,6 @@ namespace KlayGE
 				}
 				tempTexture2D->AddDirtyRect(NULL);
 				d3dTexture2D_ = tempTexture2D;
-
-				renderZBuffer_.reset();
 			}
 			break;
 
@@ -748,8 +749,6 @@ namespace KlayGE
 					}
 				}
 				d3dTextureCube_ = tempTextureCube;
-
-				renderZBuffer_.reset();
 			}
 			break;
 
@@ -779,7 +778,6 @@ namespace KlayGE
 				else
 				{
 					tempTexture2D = this->CreateTexture2D(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
-					this->CreateDepthStencilBuffer();
 				}
 
 				tempTexture2D->AddDirtyRect(NULL);
@@ -810,7 +808,6 @@ namespace KlayGE
 				else
 				{
 					tempTextureCube = this->CreateTextureCube(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
-					this->CreateDepthStencilBuffer();
 				}
 
 				for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face <= D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
@@ -856,21 +853,6 @@ namespace KlayGE
 		TIF(D3DXCreateCubeTexture(d3dDevice_.get(), widths_[0],  numMipMaps_, usage,
 			ConvertFormat(format_), pool, &d3dTextureCube));
 		return MakeCOMPtr(d3dTextureCube);
-	}
-
-	void D3D9Texture::CreateDepthStencilBuffer()
-	{
-		IDirect3DSurface9* tempSurf;
-		D3DSURFACE_DESC tempDesc;
-
-		// Get the format of the depth stencil surface.
-		d3dDevice_->GetDepthStencilSurface(&tempSurf);
-		tempSurf->GetDesc(&tempDesc);
-		tempSurf->Release();
-
-		TIF(d3dDevice_->CreateDepthStencilSurface(widths_[0], heights_[0], tempDesc.Format,
-			tempDesc.MultiSampleType, 0, FALSE, &tempSurf, NULL));
-		renderZBuffer_ = MakeCOMPtr(tempSurf);
 	}
 
 	void D3D9Texture::QueryBaseTexture()

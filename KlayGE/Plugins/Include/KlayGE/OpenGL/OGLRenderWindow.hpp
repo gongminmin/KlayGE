@@ -24,15 +24,13 @@ namespace KlayGE
 
 		void Destroy();
 
-		bool Active() const;
-
 		bool Closed() const;
 
 		bool Ready() const;
 		void Ready(bool ready);
 
-		void Reposition(int left, int top);
-		void Resize(int width, int height);
+		void Reposition(uint32_t left, uint32_t top);
+		void Resize(uint32_t width, uint32_t height);
 		void SwapBuffers();
 
 		HWND WindowHandle() const;
@@ -53,7 +51,6 @@ namespace KlayGE
 		HGLRC	hRC_;
 		HDC		hDC_;
 
-		bool	active_;			// Is active i.e. visible
 		bool	ready_;				// Is ready i.e. available for update
 		bool	closed_;
 

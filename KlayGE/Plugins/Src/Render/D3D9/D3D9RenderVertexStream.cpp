@@ -172,7 +172,7 @@ namespace KlayGE
 			std::vector<uint8_t>::iterator dst = vertices.begin();
 			if (4 == elems_per_vert)
 			{
-				for (int i = 0; i < height_; ++ i)
+				for (uint32_t i = 0; i < height_; ++ i)
 				{
 					std::copy(src, src + width_ * 4, dst);
 
@@ -184,9 +184,9 @@ namespace KlayGE
 			{
 				BOOST_ASSERT(3 == elems_per_vert);
 
-				for (int i = 0; i < height_; ++ i)
+				for (uint32_t i = 0; i < height_; ++ i)
 				{
-					for (int j = 0; j < width_; ++ j)
+					for (uint32_t j = 0; j < width_; ++ j)
 					{
 						dst[j * elems_per_vert + 0] = src[j * 4 + 0];
 						dst[j * elems_per_vert + 1] = src[j * 4 + 1];
@@ -210,7 +210,7 @@ namespace KlayGE
 			std::vector<float>::iterator dst = vertices.begin();
 			if (4 == elems_per_vert)
 			{
-				for (int i = 0; i < height_; ++ i)
+				for (uint32_t i = 0; i < height_; ++ i)
 				{
 					std::copy(src, src + width_ * 4, dst);
 
@@ -222,9 +222,9 @@ namespace KlayGE
 			{
 				BOOST_ASSERT(3 == elems_per_vert);
 
-				for (int i = 0; i < height_; ++ i)
+				for (uint32_t i = 0; i < height_; ++ i)
 				{
-					for (int j = 0; j < width_; ++ j)
+					for (uint32_t j = 0; j < width_; ++ j)
 					{
 						dst[j * elems_per_vert + 0] = src[j * 4 + 0];
 						dst[j * elems_per_vert + 1] = src[j * 4 + 1];

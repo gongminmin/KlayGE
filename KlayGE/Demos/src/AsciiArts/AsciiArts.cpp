@@ -263,12 +263,12 @@ void AsciiArts::InitObjects()
 
 	this->BuildAsciiLumsTex();
 
-	rendered_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(WIDTH, HEIGHT, 1, PF_A8R8G8B8);
+	rendered_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(WIDTH, HEIGHT, 1, PF_ARGB8);
 	render_buffer_ = Context::Instance().RenderFactoryInstance().MakeRenderTexture();
 	render_buffer_->AttachTexture2D(rendered_tex_);
 
 	downsample_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(WIDTH / CELL_WIDTH, HEIGHT / CELL_HEIGHT,
-		1, PF_A8R8G8B8);
+		1, PF_ARGB8);
 	downsample_tex_->Usage(Texture::TU_RenderTarget);
 
 	screen_buffer_ = renderEngine.ActiveRenderTarget(0);

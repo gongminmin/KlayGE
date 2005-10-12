@@ -48,32 +48,32 @@ namespace KlayGE
 		// 8-bit pixel format, all bits alpha.
 		PF_A8,
 		// 8-bit pixel format, 4 bits alpha, 4 bits luminace.
-		PF_A4L4,
+		PF_AL4,
 		// 16-bit pixel format, 8 bits alpha, 8 bits luminace.
-		PF_A8L8,
+		PF_AL8,
 		// 16-bit pixel format, 5 bits red, 6 bits green, 5 bits blue.
 		PF_R5G6B5,
 		// 16-bit pixel format, 4 bits for alpha, red, green and blue.
-		PF_A4R4G4B4,
+		PF_ARGB4,
 		// 32-bit pixel format, 8 bits no used, 8 bits for red, green and blue.
-		PF_X8R8G8B8,
+		PF_XRGB8,
 		// 32-bit pixel format, 8 bits for alpha, red, green and blue.
-		PF_A8R8G8B8,
+		PF_ARGB8,
 		// 32-bit pixel format, 2 bits for alpha, 10 bits for red, green and blue.
-		PF_A2R10G10B10,
+		PF_A2RGB10,
 
 		// 16-bit pixel format, 16 bits floating-point for red.
 		PF_R16F,
 		// 32-bit pixel format, 16 bits floating-point for green and red.
-		PF_G16R16F,
+		PF_GR16F,
 		// 64-bit pixel format, 16 bits floating-point for alpha, blue, green and red.
-		PF_A16B16G16R16F,
+		PF_ABGR16F,
 		// 32-bit pixel format, 32 bits floating-point for red.
 		PF_R32F,
 		// 64-bit pixel format, 32 bits floating-point for green and red.
-		PF_G32R32F,
+		PF_GR32F,
 		// 128-bit pixel format, 32 bits floating-point for alpha, blue, green and red.
-		PF_A32B32G32R32F,
+		PF_ABGR32F,
 
 		// DXT1 compression texture format 
 		PF_DXT1,
@@ -97,20 +97,21 @@ namespace KlayGE
 		{
 		case PF_L8:
 		case PF_A8:
-		case PF_A4L4:
+		case PF_AL4:
 			return 8;
 
+		case PF_AL8:
 		case PF_R5G6B5:
-		case PF_A4R4G4B4:
+		case PF_ARGB4:
 		case PF_R16F:
 		case PF_DXT1:
 		case PF_D16:
 			return 16;
 				
-		case PF_X8R8G8B8:
-		case PF_A8R8G8B8:
-		case PF_A2R10G10B10:
-		case PF_G16R16F:
+		case PF_XRGB8:
+		case PF_ARGB8:
+		case PF_A2RGB10:
+		case PF_GR16F:
 		case PF_R32F:
 		case PF_DXT3:
 		case PF_DXT5:
@@ -118,11 +119,11 @@ namespace KlayGE
 		case PF_D24S8:
 			return 32;
 
-		case PF_A16B16G16R16F:
-		case PF_G32R32F:
+		case PF_ABGR16F:
+		case PF_GR32F:
 			return 64;
 
-		case PF_A32B32G32R32F:
+		case PF_ABGR32F:
 			return 128;
 		}
 
@@ -135,33 +136,16 @@ namespace KlayGE
 	{
 		switch (format)
 		{
-		case PF_L8:
-		case PF_A8:
-		case PF_A4L4:
-		case PF_R5G6B5:
-		case PF_A4R4G4B4:
-		case PF_X8R8G8B8:
-		case PF_A8R8G8B8:
-		case PF_A2R10G10B10:
-		case PF_A16B16G16R16F:
-		case PF_DXT1:
-		case PF_DXT3:
-		case PF_DXT5:
-		case PF_D16:
-		case PF_D24X8:
-		case PF_D24S8:
-			return false;
-				
 		case PF_R16F:
-		case PF_G16R16F:
+		case PF_GR16F:
 		case PF_R32F:
-		case PF_G32R32F:
-		case PF_A32B32G32R32F:
+		case PF_GR32F:
+		case PF_ABGR32F:
 			return true;
-		}
 
-		BOOST_ASSERT(false);
-		return false;
+		default:
+			return false;
+		}
 	}
 
 	inline bool
@@ -174,28 +158,9 @@ namespace KlayGE
 		case PF_DXT5:
 			return true;
 
-		case PF_L8:
-		case PF_A8:
-		case PF_A4L4:
-		case PF_R5G6B5:
-		case PF_A4R4G4B4:
-		case PF_X8R8G8B8:
-		case PF_A8R8G8B8:
-		case PF_A2R10G10B10:
-		case PF_A16B16G16R16F:
-		case PF_R16F:
-		case PF_G16R16F:
-		case PF_R32F:
-		case PF_G32R32F:
-		case PF_A32B32G32R32F:
-		case PF_D16:
-		case PF_D24X8:
-		case PF_D24S8:
+		default:
 			return false;
 		}
-
-		BOOST_ASSERT(false);
-		return false;
 	}
 
 	inline bool

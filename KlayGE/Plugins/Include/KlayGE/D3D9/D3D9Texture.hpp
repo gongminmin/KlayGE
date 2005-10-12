@@ -1,8 +1,11 @@
 // D3D9Texture.hpp
 // KlayGE D3D9纹理类 头文件
-// Ver 2.7.0
+// Ver 3.0.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.0.0
+// 去掉了ZBuffer (2005.10.12)
 //
 // 2.7.0
 // 增加了AddressingMode, Filtering和Anisotropy (2005.6.27)
@@ -94,8 +97,6 @@ namespace KlayGE
 			{ return d3dTextureCube_; }
 		boost::shared_ptr<IDirect3DBaseTexture9> D3DBaseTexture() const
 			{ return d3dBaseTexture_; }
-		boost::shared_ptr<IDirect3DSurface9> DepthStencil() const
-			{ return renderZBuffer_; }
 
 	private:
 		void DoOnLostDevice();
@@ -104,8 +105,6 @@ namespace KlayGE
 		IDirect3DTexture9Ptr CreateTexture2D(uint32_t usage, D3DPOOL pool);
 		IDirect3DVolumeTexture9Ptr CreateTexture3D(uint32_t usage, D3DPOOL pool);
 		IDirect3DCubeTexture9Ptr CreateTextureCube(uint32_t usage, D3DPOOL pool);
-
-		void CreateDepthStencilBuffer();
 
 		void QueryBaseTexture();
 		void UpdateParams();
@@ -120,8 +119,6 @@ namespace KlayGE
 		IDirect3DCubeTexture9Ptr	d3dTextureCube_;
 
 		IDirect3DBaseTexture9Ptr	d3dBaseTexture_;
-
-		IDirect3DSurface9Ptr		renderZBuffer_;		// The z-buffer for the render surface.
 
 		std::vector<uint32_t>	widths_;
 		std::vector<uint32_t>	heights_;

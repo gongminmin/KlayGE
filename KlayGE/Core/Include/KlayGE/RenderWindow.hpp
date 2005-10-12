@@ -33,8 +33,8 @@ namespace KlayGE
 
 		virtual void Destroy() = 0;
 
-		virtual void Resize(int width, int height) = 0;
-		virtual void Reposition(int left, int top) = 0;
+		virtual void Resize(uint32_t width, uint32_t height) = 0;
+		virtual void Reposition(uint32_t left, uint32_t top) = 0;
 
 		virtual bool Closed() const = 0;
 

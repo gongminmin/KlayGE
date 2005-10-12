@@ -33,13 +33,13 @@ namespace KlayGE
 		RenderTarget();
 		virtual ~RenderTarget();
 
-		virtual int Left() const;
-		virtual int Top() const;
-		virtual int Width() const;
-		virtual int Height() const;
-		virtual int ColorDepth() const;
-		virtual int DepthBits() const;
-		virtual int StencilBits() const;
+		virtual uint32_t Left() const;
+		virtual uint32_t Top() const;
+		virtual uint32_t Width() const;
+		virtual uint32_t Height() const;
+		virtual uint32_t ColorDepth() const;
+		virtual uint32_t DepthBits() const;
+		virtual uint32_t StencilBits() const;
 
 		virtual void Update();
 
@@ -63,20 +63,21 @@ namespace KlayGE
 	protected:
 		void UpdateStats();
 
-		int		left_;
-		int		top_;
-		int		width_;
-		int		height_;
-		int		colorDepth_;
-		bool	isDepthBuffered_;
-		int		depthBits_;
-		int		stencilBits_;
+		uint32_t	left_;
+		uint32_t	top_;
+		uint32_t	width_;
+		uint32_t	height_;
+		uint32_t	colorDepth_;
+
+		bool		isDepthBuffered_;
+		uint32_t	depthBits_;
+		uint32_t	stencilBits_;
 
 		// Stats
 		float	FPS_;
 		float	frameTime_;
 
-		bool	active_;
+		bool	active_;	// Is active i.e. visible
 
 		Viewport viewport_;
 

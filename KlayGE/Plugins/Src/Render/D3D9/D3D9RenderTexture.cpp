@@ -1,8 +1,11 @@
 // D3D9RenderTexture.hpp
 // KlayGE D3D9渲染纹理类 实现文件
-// Ver 2.3.0
+// Ver 3.0.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.0.0
+// 在D3D9RenderTexture中建立DepthStencil Buffer (2005.10.12)
 //
 // 2.3.0
 // 增加了OnLostDevice和OnResetDevice (2005.2.23)
@@ -11,6 +14,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -30,8 +34,8 @@ namespace KlayGE
 		left_ = 0;
 		top_ = 0;
 
-		viewport_.left		= left_;
-		viewport_.top		= top_;
+		viewport_.left	= left_;
+		viewport_.top	= top_;
 	}
 
 	void D3D9RenderTexture::AttachTexture2D(TexturePtr texture2D)
@@ -49,6 +53,8 @@ namespace KlayGE
 		IDirect3DSurface9* surface;
 		tex.D3DTexture2D()->GetSurfaceLevel(0, &surface);
 		renderSurface_ = MakeCOMPtr(surface);
+
+		active_ = true;
 	}
 
 	void D3D9RenderTexture::AttachTextureCube(TexturePtr textureCube, Texture::CubeFaces face)
@@ -67,19 +73,23 @@ namespace KlayGE
 		IDirect3DSurface9* surface;
 		tex.D3DTextureCube()->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), 0, &surface);
 		renderSurface_ = MakeCOMPtr(surface);
+
+		active_ = true;
 	}
 
 	void D3D9RenderTexture::UpdateParams(TexturePtr texture)
 	{
 		privateTex_ = texture;
-		width_ = privateTex_->Width(0);
-		height_ = privateTex_->Height(0);
+		if ((privateTex_->Width(0) != width_) || (privateTex_->Height(0) != height_))
+		{
+			width_ = privateTex_->Width(0);
+			height_ = privateTex_->Height(0);
+
+			this->CreateDepthStencilBuffer();
+		}
 
 		viewport_.width		= width_;
 		viewport_.height	= height_;
-
-		D3D9Texture const & tex(*checked_cast<D3D9Texture const *>(privateTex_.get()));
-		depthStencilSurface_ = tex.DepthStencil();
 
 		colorDepth_ = privateTex_->Bpp();
 		isDepthBuffered_ = depthStencilSurface_;
@@ -133,6 +143,24 @@ namespace KlayGE
 	boost::shared_ptr<IDirect3DSurface9> D3D9RenderTexture::D3DRenderZBuffer() const
 	{
 		return depthStencilSurface_;
+	}
+
+	void D3D9RenderTexture::CreateDepthStencilBuffer()
+	{
+		D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		boost::shared_ptr<IDirect3DDevice9> d3dDevice = renderEngine.D3DDevice();
+
+		IDirect3DSurface9* tempSurf;
+		D3DSURFACE_DESC tempDesc;
+
+		// Get the format of the depth stencil surface.
+		d3dDevice->GetDepthStencilSurface(&tempSurf);
+		tempSurf->GetDesc(&tempDesc);
+		tempSurf->Release();
+
+		TIF(d3dDevice->CreateDepthStencilSurface(width_, height_, tempDesc.Format,
+			tempDesc.MultiSampleType, 0, FALSE, &tempSurf, NULL));
+		depthStencilSurface_ = MakeCOMPtr(tempSurf);
 	}
 
 	void D3D9RenderTexture::CustomAttribute(std::string const & name, void* pData)
@@ -193,7 +221,7 @@ namespace KlayGE
 			}
 
 			renderSurface_ = MakeCOMPtr(surface);
-			depthStencilSurface_ = tex.DepthStencil();
+			this->CreateDepthStencilBuffer();
 		}
 	}
 }

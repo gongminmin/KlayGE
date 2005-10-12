@@ -26,7 +26,9 @@ namespace KlayGE
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderTarget::RenderTarget()
-					: active_(true),
+					: left_(0), top_(0), width_(0), height_(0), colorDepth_(0),
+						isDepthBuffered_(false), depthBits_(0), stencilBits_(0),
+						active_(false),
 						FPS_(0)
 	{
 	}
@@ -39,49 +41,49 @@ namespace KlayGE
 
 	// 渲染目标的左坐标
 	/////////////////////////////////////////////////////////////////////////////////
-	int RenderTarget::Left() const
+	uint32_t RenderTarget::Left() const
 	{
 		return left_;
 	}
 
 	// 渲染目标的顶坐标
 	/////////////////////////////////////////////////////////////////////////////////
-	int RenderTarget::Top() const
+	uint32_t RenderTarget::Top() const
 	{
 		return top_;
 	}
 
 	// 渲染目标的宽度
 	/////////////////////////////////////////////////////////////////////////////////
-	int RenderTarget::Width() const
+	uint32_t RenderTarget::Width() const
 	{
 		return width_;
 	}
 
 	// 渲染目标的高度
 	/////////////////////////////////////////////////////////////////////////////////
-	int RenderTarget::Height() const
+	uint32_t RenderTarget::Height() const
 	{
 		return height_;
 	}
 
 	// 渲染目标的颜色深度
 	/////////////////////////////////////////////////////////////////////////////////
-	int RenderTarget::ColorDepth() const
+	uint32_t RenderTarget::ColorDepth() const
 	{
 		return colorDepth_;
 	}
 
 	// 渲染目标的深度位数
 	/////////////////////////////////////////////////////////////////////////////////
-	int RenderTarget::DepthBits() const
+	uint32_t RenderTarget::DepthBits() const
 	{
 		return depthBits_;
 	}
 
 	// 渲染目标的模板位数
 	/////////////////////////////////////////////////////////////////////////////////
-	int RenderTarget::StencilBits() const
+	uint32_t RenderTarget::StencilBits() const
 	{
 		return stencilBits_;
 	}

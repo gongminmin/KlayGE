@@ -48,6 +48,8 @@ namespace KlayGE
 		void DoOnLostDevice();
 		void DoOnResetDevice();
 
+		void CreateDepthStencilBuffer();
+
 		void UpdateParams(TexturePtr texture);
 
 	private:

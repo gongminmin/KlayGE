@@ -52,13 +52,13 @@ namespace
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
-		case PF_A4L4:
+		case PF_AL4:
 			internalFormat = GL_LUMINANCE4_ALPHA4;
 			glformat = GL_LUMINANCE_ALPHA;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
-		case PF_A8L8:
+		case PF_AL8:
 			internalFormat = GL_LUMINANCE8_ALPHA8;
 			glformat = GL_LUMINANCE_ALPHA;
 			gltype = GL_UNSIGNED_BYTE;
@@ -70,25 +70,25 @@ namespace
 			gltype = GL_UNSIGNED_SHORT_5_6_5_REV;
 			break;
 
-		case PF_A4R4G4B4:
+		case PF_ARGB4:
 			internalFormat = GL_RGBA4;
 			glformat = GL_BGRA;
 			gltype = GL_UNSIGNED_SHORT_4_4_4_4_REV;
 			break;
 
-		case PF_X8R8G8B8:
+		case PF_XRGB8:
 			internalFormat = GL_RGB8;
 			glformat = GL_BGR;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
-		case PF_A8R8G8B8:
+		case PF_ARGB8:
 			internalFormat = GL_RGBA8;
 			glformat = GL_BGRA;
 			gltype = GL_UNSIGNED_INT_8_8_8_8_REV;
 			break;
 
-		case PF_A2R10G10B10:
+		case PF_A2RGB10:
 			internalFormat = GL_RGB10_A2;
 			glformat = GL_BGRA;
 			gltype = GL_UNSIGNED_INT_2_10_10_10_REV;

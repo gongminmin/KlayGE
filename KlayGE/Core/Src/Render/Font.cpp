@@ -15,7 +15,7 @@
 // 使用FreeType实现字体读取 (2004.12.26)
 //
 // 2.0.4
-// 纹理格式改为PF_A4L4 (2004.3.18)
+// 纹理格式改为PF_AL4 (2004.3.18)
 //
 // 2.0.3
 // 修正了RenderText的Bug (2004.2.18)
@@ -65,7 +65,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	PixelFormat TEX_FORMAT = PF_A4R4G4B4;
+	PixelFormat TEX_FORMAT = PF_ARGB4;
 
 	class FontRenderable : public RenderableHelper
 	{

@@ -119,7 +119,7 @@ namespace KlayGE
 
 	OGLRenderWindow::OGLRenderWindow(std::string const & name, RenderSettings const & settings)
 						: hWnd_(NULL),
-							active_(false), ready_(false), closed_(false)
+							ready_(false), closed_(false)
 	{
 		// Store info
 		name_				= name;
@@ -235,11 +235,6 @@ namespace KlayGE
 		this->Destroy();
 	}
 
-	bool OGLRenderWindow::Active() const
-	{
-		return active_;
-	}
-
 	bool OGLRenderWindow::Closed() const
 	{
 		return closed_;
@@ -292,11 +287,11 @@ namespace KlayGE
 		}
 	}
 
-	void OGLRenderWindow::Reposition(int left, int top)
+	void OGLRenderWindow::Reposition(uint32_t /*left*/, uint32_t /*top*/)
 	{
 	}
 
-	void OGLRenderWindow::Resize(int width, int height)
+	void OGLRenderWindow::Resize(uint32_t width, uint32_t height)
 	{
 		width_ = width;
 		height_ = height;
