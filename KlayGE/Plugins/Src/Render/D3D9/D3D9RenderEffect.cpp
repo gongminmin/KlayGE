@@ -352,9 +352,6 @@ namespace KlayGE
 		{
 			D3D9Texture& texture = *checked_cast<D3D9Texture*>(val_->GetTexture().get());
 			texture.OnResetDevice();
-
-			boost::shared_ptr<ID3DXEffect> d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
-			TIF(d3dx_effect->SetTexture(name_.c_str(), texture.D3DBaseTexture().get()));
 		}
 	}
 

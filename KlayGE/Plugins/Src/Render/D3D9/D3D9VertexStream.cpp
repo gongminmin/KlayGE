@@ -27,7 +27,8 @@
 
 namespace KlayGE
 {
-	D3D9VertexStream::D3D9VertexStream(VertexStreamType type, uint8_t sizeElement, uint8_t ElementsPerVertex, bool staticStream)
+	D3D9VertexStream::D3D9VertexStream(VertexStreamType type,
+		uint8_t sizeElement, uint8_t ElementsPerVertex, bool staticStream)
 			: VertexStream(type, sizeElement, ElementsPerVertex),
 				currentSize_(0), numVertices_(0), 
 				staticStream_(staticStream)
@@ -103,13 +104,14 @@ namespace KlayGE
 		size_t const size(vertexSize * numVertices_);
 
 		IDirect3DVertexBuffer9* temp;
-		TIF(d3d_device_->CreateVertexBuffer(static_cast<UINT>(size), 0, 0, D3DPOOL_SYSTEMMEM, &temp, NULL));
+		TIF(d3d_device_->CreateVertexBuffer(static_cast<UINT>(size),
+			D3DUSAGE_DYNAMIC, 0, D3DPOOL_SYSTEMMEM, &temp, NULL));
 		boost::shared_ptr<IDirect3DVertexBuffer9> buffer = MakeCOMPtr(temp);
 
 		uint8_t* src;
 		uint8_t* dest;
 		TIF(buffer_->Lock(0, 0, reinterpret_cast<void**>(&src), D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
-		TIF(buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_NOSYSLOCK | D3DLOCK_DISCARD));
+		TIF(buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_NOSYSLOCK | (this->IsStatic() ? 0 : D3DLOCK_DISCARD)));
 
 		std::copy(src, src + size, dest);
 
@@ -137,7 +139,7 @@ namespace KlayGE
 		uint8_t* src;
 		uint8_t* dest;
 		TIF(buffer_->Lock(0, 0, reinterpret_cast<void**>(&src), D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
-		TIF(buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_NOSYSLOCK | D3DLOCK_DISCARD));
+		TIF(buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_NOSYSLOCK | (this->IsStatic() ? 0 : D3DLOCK_DISCARD)));
 
 		std::copy(src, src + size, dest);
 
