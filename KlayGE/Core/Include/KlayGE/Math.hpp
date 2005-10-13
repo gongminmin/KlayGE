@@ -1123,19 +1123,29 @@ namespace KlayGE
 		inline Quaternion_T<T>
 		UnitAxisToUnitAxis(Vector_T<T, 3> const & from, Vector_T<T, 3> const & to)
 		{
-			if (Eq(Abs(Dot(from, to)), T(1)))
+			T dot = Abs(Dot(from, to));
+			if (Eq(dot, T(1)))
 			{
 				return Quaternion_T<T>::Identity();
 			}
+			else
+			{
+				if (Eq(dot, T(-1)))
+				{
+					return Quaternion_T<T>(1, 0, 0, 0);
+				}
+				else
+				{
+					Vector_T<T, 3> axis = Cross(from, to);
 
-			Vector_T<T, 3> axis = Cross(from, to);
+					T const cos_theta = Dot(from, to);
+					T const sin_theta = Sqrt(1 - cos_theta * cos_theta);
+					T const sin_half_theta = Sqrt((1 - cos_theta) / 2);
+					T const cos_half_theta = sin_theta / (2 * sin_half_theta);
 
-			T const cos_theta = Dot(from, to);
-			T const sin_theta = Sqrt(1 - cos_theta * cos_theta);
-			T const sin_half_theta = Sqrt((1 - cos_theta) / 2);
-			T const cos_half_theta = sin_theta / (2 * sin_half_theta);
-
-			return Quaternion_T<T>(axis * sin_half_theta, cos_half_theta);
+					return Quaternion_T<T>(axis * sin_half_theta, cos_half_theta);
+				}
+			}
 		}
 
 		template <typename T>
@@ -1227,8 +1237,8 @@ namespace KlayGE
 			if (tr > 0)
 			{
 				s = Sqrt(tr + 1);
-				quat.w() = s * 0.5f;
-				s = 0.5f / s;
+				quat.w() = s * T(0.5);
+				s = T(0.5) / s;
 				quat.x() = (mat(1, 2) - mat(2, 1)) * s;
 				quat.y() = (mat(2, 0) - mat(0, 2)) * s;
 				quat.z() = (mat(0, 1) - mat(1, 0)) * s;
@@ -1285,7 +1295,7 @@ namespace KlayGE
 				}
 			}
 
-			return quat;
+			return Normalize(quat);
 		}
 
 		template <typename T>
