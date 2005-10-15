@@ -27,10 +27,9 @@
 
 namespace KlayGE
 {
-	D3D9VertexStream::D3D9VertexStream(VertexStreamType type,
-		uint8_t sizeElement, uint8_t ElementsPerVertex, bool staticStream)
-			: VertexStream(type, sizeElement, ElementsPerVertex),
-				currentSize_(0), numVertices_(0), 
+	D3D9VertexStream::D3D9VertexStream(vertex_elements_type const & vertex_elems, bool staticStream)
+			: VertexStream(vertex_elems),
+				numVertices_(0), 
 				staticStream_(staticStream)
 	{
 	}
@@ -40,30 +39,29 @@ namespace KlayGE
 		return staticStream_;
 	}
 
-	size_t D3D9VertexStream::NumVertices() const
+	uint32_t D3D9VertexStream::NumVertices() const
 	{
 		return numVertices_;
 	}
 
-	void D3D9VertexStream::Assign(void const * src, size_t numVertices)
+	void D3D9VertexStream::Assign(void const * src, uint32_t numVertices)
 	{
-		numVertices_ = numVertices;
-
-		size_t const vertexSize(this->SizeOfElement() * this->ElementsPerVertex());
-		size_t const size(vertexSize * numVertices);
-
-		if (currentSize_ < size)
+		if (numVertices_ < numVertices)
 		{
-			currentSize_ = size;
+			numVertices_ = numVertices;
 
 			D3D9RenderEngine const & renderEngine(*checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 			d3d_device_ = renderEngine.D3DDevice();
 
 			IDirect3DVertexBuffer9* theBuffer;
-			TIF(d3d_device_->CreateVertexBuffer(static_cast<UINT>(size),
+			TIF(d3d_device_->CreateVertexBuffer(static_cast<UINT>(this->StreamSize()),
 				this->IsStatic() ? 0 : D3DUSAGE_DYNAMIC,
 				0, D3DPOOL_DEFAULT, &theBuffer, NULL));
 			buffer_ = MakeCOMPtr(theBuffer);
+		}
+		else
+		{
+			numVertices_ = numVertices;
 		}
 
 		void* dest;
@@ -73,22 +71,20 @@ namespace KlayGE
 		uint8_t* destPtr(static_cast<uint8_t*>(dest));
 		uint8_t const * srcPtr(static_cast<uint8_t const *>(src));
 
-		std::copy(srcPtr, srcPtr + size, destPtr);
+		std::copy(srcPtr, srcPtr + this->StreamSize(), destPtr);
 
 		buffer_->Unlock();
 	}
 
 	void D3D9VertexStream::CopyToMemory(void* data)
 	{
-		size_t const size(this->SizeOfElement() * this->ElementsPerVertex() * numVertices_);
-
 		void* src;
 		TIF(buffer_->Lock(0, 0, &src, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
 
 		uint8_t* destPtr(static_cast<uint8_t*>(data));
 		uint8_t const * srcPtr(static_cast<uint8_t const *>(src));
 
-		std::copy(srcPtr, srcPtr + size, destPtr);
+		std::copy(srcPtr, srcPtr + this->StreamSize(), destPtr);
 
 		buffer_->Unlock();
 	}
@@ -100,11 +96,8 @@ namespace KlayGE
 
 	void D3D9VertexStream::DoOnLostDevice()
 	{
-		size_t const vertexSize(this->SizeOfElement() * this->ElementsPerVertex());
-		size_t const size(vertexSize * numVertices_);
-
 		IDirect3DVertexBuffer9* temp;
-		TIF(d3d_device_->CreateVertexBuffer(static_cast<UINT>(size),
+		TIF(d3d_device_->CreateVertexBuffer(static_cast<UINT>(this->StreamSize()),
 			D3DUSAGE_DYNAMIC, 0, D3DPOOL_SYSTEMMEM, &temp, NULL));
 		boost::shared_ptr<IDirect3DVertexBuffer9> buffer = MakeCOMPtr(temp);
 
@@ -113,13 +106,12 @@ namespace KlayGE
 		TIF(buffer_->Lock(0, 0, reinterpret_cast<void**>(&src), D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
 		TIF(buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_NOSYSLOCK | (this->IsStatic() ? 0 : D3DLOCK_DISCARD)));
 
-		std::copy(src, src + size, dest);
+		std::copy(src, src + this->StreamSize(), dest);
 
 		buffer->Unlock();
 		buffer_->Unlock();
 
 		buffer_ = buffer;
-		currentSize_ = size;
 	}
 	
 	void D3D9VertexStream::DoOnResetDevice()
@@ -127,11 +119,8 @@ namespace KlayGE
 		D3D9RenderEngine const & renderEngine(*checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3d_device_ = renderEngine.D3DDevice();
 
-		size_t const vertexSize(this->SizeOfElement() * this->ElementsPerVertex());
-		size_t const size(vertexSize * numVertices_);
-
 		IDirect3DVertexBuffer9* temp;
-		TIF(d3d_device_->CreateVertexBuffer(static_cast<UINT>(size),
+		TIF(d3d_device_->CreateVertexBuffer(static_cast<UINT>(this->StreamSize()),
 				this->IsStatic() ? 0 : D3DUSAGE_DYNAMIC,
 				0, D3DPOOL_DEFAULT, &temp, NULL));
 		boost::shared_ptr<IDirect3DVertexBuffer9> buffer = MakeCOMPtr(temp);
@@ -141,12 +130,11 @@ namespace KlayGE
 		TIF(buffer_->Lock(0, 0, reinterpret_cast<void**>(&src), D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
 		TIF(buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_NOSYSLOCK | (this->IsStatic() ? 0 : D3DLOCK_DISCARD)));
 
-		std::copy(src, src + size, dest);
+		std::copy(src, src + this->StreamSize(), dest);
 
 		buffer->Unlock();
 		buffer_->Unlock();
 
 		buffer_ = buffer;
-		currentSize_ = size;
 	}
 }

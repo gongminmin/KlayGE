@@ -54,6 +54,8 @@ namespace
 			: RenderableHelper(L"Quad", true, true),
 				scene_sampler_(new Sampler), lums_sampler_(new Sampler)
 		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
 			std::vector<Vector3> pos;
 			for (int y = 0; y < height + 1; ++ y)
 			{
@@ -88,18 +90,22 @@ namespace
 				}
 			}
 
-			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArts.fx");
+			effect_ = rf.LoadEffect("AsciiArts.fx");
 			effect_->ActiveTechnique("AsciiArts");
 
-			vb_ = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(VertexBuffer::BT_TriangleList);
+			vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 
-			vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
-			vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2, true);
-			vb_->GetVertexStream(VST_Positions)->Assign(&pos[0], pos.size());
-			vb_->GetVertexStream(VST_TextureCoords0)->Assign(&tex[0], tex.size());
+			VertexStreamPtr pos_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_Positions, sizeof(float), 3)), true);
+			pos_vs->Assign(&pos[0], pos.size());
+			VertexStreamPtr tex0_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_TextureCoords0, sizeof(float), 2)), true);
+			tex0_vs->Assign(&tex[0], tex.size());
 
-			vb_->AddIndexStream(true);
-			vb_->GetIndexStream()->Assign(&index[0], index.size());
+			vb_->AddVertexStream(pos_vs);
+			vb_->AddVertexStream(tex0_vs);
+
+			IndexStreamPtr is = rf.MakeIndexStream(true);
+			is->Assign(&index[0], index.size());
+			vb_->SetIndexStream(is);
 
 			box_ = MathLib::ComputeBoundingBox<float>(pos.begin(), pos.end());
 

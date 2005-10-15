@@ -35,7 +35,9 @@ namespace
 		RenderFractal()
 			: RenderableHelper(L"Fractal", true, true)
 		{
-			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("Fractal.fx");
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+			effect_ = rf.LoadEffect("Fractal.fx");
 
 			sampler_.reset(new Sampler);
 			sampler_->Filtering(Sampler::TFO_Point);
@@ -64,15 +66,19 @@ namespace
 				0, 1, 2, 2, 3, 0,
 			};
 
-			vb_ = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(VertexBuffer::BT_TriangleList);
+			vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 
-			vb_->AddVertexStream(VST_Positions, sizeof(float), 3);
-			vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2);
-			vb_->GetVertexStream(VST_Positions)->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
-			vb_->GetVertexStream(VST_TextureCoords0)->Assign(texs, sizeof(texs) / sizeof(texs[0]));
+			VertexStreamPtr pos_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_Positions, sizeof(float), 3)), true);
+			pos_vs->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
+			VertexStreamPtr tex0_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_TextureCoords0, sizeof(float), 2)), true);
+			tex0_vs->Assign(texs, sizeof(texs) / sizeof(texs[0]));
 
-			vb_->AddIndexStream();
-			vb_->GetIndexStream()->Assign(indices, sizeof(indices) / sizeof(uint16_t));
+			vb_->AddVertexStream(pos_vs);
+			vb_->AddVertexStream(tex0_vs);
+
+			IndexStreamPtr is = rf.MakeIndexStream(true);
+			is->Assign(indices, sizeof(indices) / sizeof(uint16_t));
+			vb_->SetIndexStream(is);
 
 			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 		}
@@ -97,7 +103,9 @@ namespace
 		RenderPlane()
 			: RenderableHelper(L"Plane", true, true)
 		{
-			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("Fractal.fx");
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+			effect_ = rf.LoadEffect("Fractal.fx");
 
 			sampler_.reset(new Sampler);
 			sampler_->Filtering(Sampler::TFO_Point);
@@ -126,15 +134,19 @@ namespace
 				0, 1, 2, 2, 3, 0,
 			};
 
-			vb_ = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(VertexBuffer::BT_TriangleList);
+			vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 
-			vb_->AddVertexStream(VST_Positions, sizeof(float), 3);
-			vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2);
-			vb_->GetVertexStream(VST_Positions)->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
-			vb_->GetVertexStream(VST_TextureCoords0)->Assign(texs, sizeof(texs) / sizeof(texs[0]));
+			VertexStreamPtr pos_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_Positions, sizeof(float), 3)), true);
+			pos_vs->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
+			VertexStreamPtr tex0_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_TextureCoords0, sizeof(float), 2)), true);
+			tex0_vs->Assign(texs, sizeof(texs) / sizeof(texs[0]));
 
-			vb_->AddIndexStream();
-			vb_->GetIndexStream()->Assign(indices, sizeof(indices) / sizeof(uint16_t));
+			vb_->AddVertexStream(pos_vs);
+			vb_->AddVertexStream(tex0_vs);
+
+			IndexStreamPtr is = rf.MakeIndexStream(true);
+			is->Assign(indices, sizeof(indices) / sizeof(uint16_t));
+			vb_->SetIndexStream(is);
 
 			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 		}

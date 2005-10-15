@@ -80,50 +80,9 @@ namespace KlayGE
 		return VertexBufferPtr(new D3D9VertexBuffer(type));
 	}
 
-	VertexStreamPtr D3D9RenderFactory::MakeVertexStream(VertexStreamType type,
-		uint8_t sizeElement, uint8_t numElement, bool staticStream)
+	VertexStreamPtr D3D9RenderFactory::MakeVertexStream(vertex_elements_type const & vertex_elems, bool staticStream)
 	{
-		D3D9VertexStreamPtr ret;
-
-		switch (type)
-		{
-		case VST_Positions:
-			ret.reset(new D3D9VertexStream(type, sizeof(float), numElement, staticStream));
-			break;
-
-		case VST_Normals:
-			ret.reset(new D3D9VertexStream(type, sizeof(float), 3, staticStream));
-			break;
-
-		case VST_Diffuses:
-		case VST_Speculars:
-			ret.reset(new D3D9VertexStream(type, sizeof(D3DCOLOR), 1, staticStream));
-			break;
-
-		case VST_BlendWeights:
-			ret.reset(new D3D9VertexStream(type, sizeof(float), 4, staticStream));
-			break;
-
-		case VST_BlendIndices:
-			ret.reset(new D3D9VertexStream(type, sizeof(uint8_t), 4, staticStream));
-			break;
-
-		case VST_TextureCoords0:
-		case VST_TextureCoords1:
-		case VST_TextureCoords2:
-		case VST_TextureCoords3:
-		case VST_TextureCoords4:
-		case VST_TextureCoords5:
-		case VST_TextureCoords6:
-		case VST_TextureCoords7:
-			ret.reset(new D3D9VertexStream(type, sizeof(float), numElement, staticStream));
-			break;
-
-		default:
-			ret.reset(new D3D9VertexStream(type, sizeElement, numElement, staticStream));
-			break;
-		}
-
+		D3D9VertexStreamPtr ret(new D3D9VertexStream(vertex_elems, staticStream));
 		resource_pool_.push_back(ret);
 		return ret;
 	}

@@ -20,9 +20,8 @@
 
 namespace KlayGE
 {
-	VertexStream::VertexStream(VertexStreamType type, uint8_t sizeElement, uint8_t ElementsPerVertex)
-			: type_(type),
-				sizeElement_(sizeElement), elementPerVertex_(ElementsPerVertex)
+	VertexStream::VertexStream(vertex_elements_type const & vertex_elems)
+			: vertex_elems_(vertex_elems)
 	{
 	}
 
@@ -30,24 +29,42 @@ namespace KlayGE
 	{
 	}
 
-	VertexStreamType VertexStream::Type() const
+	uint32_t VertexStream::NumElements() const
 	{
-		return type_;
+		return vertex_elems_.size();
 	}
 
-	size_t VertexStream::SizeOfElement() const
+	vertex_element const & VertexStream::Element(uint32_t index) const
 	{
-		return sizeElement_;
+		BOOST_ASSERT(index < vertex_elems_.size());
+		
+		return vertex_elems_[index];
 	}
 
-	size_t VertexStream::ElementsPerVertex() const
+	uint16_t VertexStream::VertexSize() const
 	{
-		return elementPerVertex_;
+		uint16_t ret = 0;
+		for (vertex_elements_type::const_iterator iter = vertex_elems_.begin();
+			iter != vertex_elems_.end(); ++ iter)
+		{
+			ret += iter->element_size();
+		}
+		return ret;
+	}
+
+	uint32_t VertexStream::StreamSize() const
+	{
+		return this->VertexSize() * this->NumVertices();
 	}
 
 
 	IndexStream::~IndexStream()
 	{
+	}
+
+	uint32_t IndexStream::StreamSize() const
+	{
+		return sizeof(uint16_t) * this->NumIndices();
 	}
 
 
@@ -66,36 +83,14 @@ namespace KlayGE
 		return type_;
 	}
 
-	size_t VertexBuffer::NumVertices() const
+	uint32_t VertexBuffer::NumVertices() const
 	{
 		return vertexStreams_.empty() ? 0 : vertexStreams_[0]->NumVertices();
 	}
 
-	void VertexBuffer::AddVertexStream(VertexStreamType type, uint8_t sizeElement, uint8_t numElement, bool staticStream)
+	void VertexBuffer::AddVertexStream(VertexStreamPtr vertex_stream)
 	{
-		BOOST_ASSERT(!this->GetVertexStream(type));
-		
-		vertexStreams_.push_back(Context::Instance().RenderFactoryInstance().MakeVertexStream(type,
-			sizeElement, numElement, staticStream));
-	}
-
-	void VertexBuffer::AddVertexStream(VertexStreamPtr vstream)
-	{
-		BOOST_ASSERT(!this->GetVertexStream(vstream->Type()));
-
-		vertexStreams_.push_back(vstream);
-	}
-
-	VertexStreamPtr VertexBuffer::GetVertexStream(VertexStreamType type) const
-	{
-		VertexStreamConstIterator iter = std::find_if(this->VertexStreamBegin(), this->VertexStreamEnd(),
-			boost::bind(std::equal_to<VertexStreamType>(), boost::bind(&VertexStream::Type, _1), type));
-		if (iter != this->VertexStreamEnd())
-		{
-            return *iter;
-		}
-
-		return VertexStreamPtr();
+		vertexStreams_.push_back(vertex_stream);
 	}
 
 	VertexBuffer::VertexStreamIterator VertexBuffer::VertexStreamBegin()
@@ -123,14 +118,14 @@ namespace KlayGE
 		return this->NumIndices() != 0;
 	}
 
-	size_t VertexBuffer::NumIndices() const
+	uint32_t VertexBuffer::NumIndices() const
 	{
 		return (!indexStream_) ? 0 : indexStream_->NumIndices();
 	}
 
-	void VertexBuffer::AddIndexStream(bool staticStream)
+	void VertexBuffer::SetIndexStream(IndexStreamPtr index_stream)
 	{
-		indexStream_ = Context::Instance().RenderFactoryInstance().MakeIndexStream(staticStream);
+		indexStream_ = index_stream;
 	}
 
 	IndexStreamPtr VertexBuffer::GetIndexStream() const

@@ -41,11 +41,11 @@ namespace KlayGE
 
 		bool IsStatic() const;
 
-		void Assign(void const * src, size_t numIndices);
+		void Assign(void const * src, uint32_t numIndices);
 		void CopyToMemory(void* data);
 
 		boost::shared_ptr<IDirect3DIndexBuffer9> D3D9Buffer() const;
-		size_t NumIndices() const;
+		uint32_t NumIndices() const;
 
 	private:
 		void DoOnLostDevice();
@@ -53,11 +53,9 @@ namespace KlayGE
 
 	private:
 		boost::shared_ptr<IDirect3DDevice9> d3d_device_;
-
 		boost::shared_ptr<IDirect3DIndexBuffer9> buffer_;
-		size_t currentSize_;
 
-		size_t numIndices_;
+		uint32_t numIndices_;
 
 		bool staticStream_;
 	};

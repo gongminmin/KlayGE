@@ -37,15 +37,15 @@ namespace KlayGE
 	class D3D9VertexStream : public VertexStream, public D3D9Resource
 	{
 	public:
-		D3D9VertexStream(VertexStreamType type, uint8_t sizeElement, uint8_t ElementsPerVertex, bool staticStream);
+		D3D9VertexStream(vertex_elements_type const & vertex_elems, bool staticStream);
 
 		bool IsStatic() const;
 
-		void Assign(void const * src, size_t numVertices);
+		void Assign(void const * src, uint32_t numVertices);
 		void CopyToMemory(void* data);
 
 		boost::shared_ptr<IDirect3DVertexBuffer9> D3D9Buffer() const;
-		size_t NumVertices() const;
+		uint32_t NumVertices() const;
 
 	private:
 		void DoOnLostDevice();
@@ -53,11 +53,9 @@ namespace KlayGE
 
 	private:
 		boost::shared_ptr<IDirect3DDevice9> d3d_device_;
-
 		boost::shared_ptr<IDirect3DVertexBuffer9> buffer_;
-		size_t currentSize_;
 
-		size_t numVertices_;
+		uint32_t numVertices_;
 
 		bool staticStream_;
 	};

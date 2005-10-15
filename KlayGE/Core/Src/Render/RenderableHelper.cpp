@@ -28,6 +28,8 @@
 #include <KlayGE/Sampler.hpp>
 #include <KlayGE/App3D.hpp>
 
+#include <boost/tuple/tuple.hpp>
+
 #include <KlayGE/RenderableHelper.hpp>
 
 namespace KlayGE
@@ -72,12 +74,16 @@ namespace KlayGE
 	RenderablePoint::RenderablePoint(Vector3 const & v, bool can_be_culled, bool short_age)
 		: RenderableHelper(L"Point", can_be_culled, short_age)
 	{
-		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("RenderableHelper.fx");
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		effect_ = rf.LoadEffect("RenderableHelper.fx");
 		effect_->ActiveTechnique("PointTec");
 
-		vb_ = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(VertexBuffer::BT_PointList);
-		vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
-		vb_->GetVertexStream(VST_Positions)->Assign(&v, 1);
+		vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_PointList);
+
+		VertexStreamPtr vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_Positions, sizeof(float), 3)), true);
+		vs->Assign(&v, 1);
+		vb_->AddVertexStream(vs);
 
 		box_ = MathLib::ComputeBoundingBox<float>(&v, &v + 1);
 	}
@@ -86,7 +92,9 @@ namespace KlayGE
 	RenderableLine::RenderableLine(Vector3 const & v0, Vector3 const & v1, bool can_be_culled, bool short_age)
 		: RenderableHelper(L"Line", can_be_culled, short_age)
 	{
-		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("RenderableHelper.fx");
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		effect_ = rf.LoadEffect("RenderableHelper.fx");
 		effect_->ActiveTechnique("LineTec");
 
 		Vector3 xyzs[] =
@@ -94,9 +102,11 @@ namespace KlayGE
 			v0, v1
 		};
 
-		vb_ = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(VertexBuffer::BT_LineList);
-		vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
-		vb_->GetVertexStream(VST_Positions)->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
+		vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_LineList);
+
+		VertexStreamPtr vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_Positions, sizeof(float), 3)), true);
+		vs->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
+		vb_->AddVertexStream(vs);
 
 		box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 	}
@@ -106,7 +116,9 @@ namespace KlayGE
 											bool can_be_culled, bool short_age)
 		: RenderableHelper(L"Triangle", can_be_culled, short_age)
 	{
-		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("RenderableHelper.fx");
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		effect_ = rf.LoadEffect("RenderableHelper.fx");
 		effect_->ActiveTechnique("TriangleTec");
 
 		Vector3 xyzs[] =
@@ -114,9 +126,11 @@ namespace KlayGE
 			v0, v1, v2
 		};
 
-		vb_ = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(VertexBuffer::BT_TriangleList);
-		vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
-		vb_->GetVertexStream(VST_Positions)->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
+		vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
+
+		VertexStreamPtr vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_Positions, sizeof(float), 3)), true);
+		vs->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
+		vb_->AddVertexStream(vs);
 
 		box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 	}
@@ -125,9 +139,11 @@ namespace KlayGE
 	RenderableBox::RenderableBox(Box const & box, bool can_be_culled, bool short_age)
 		: RenderableHelper(L"Box", can_be_culled, short_age)
 	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
 		box_ = box;
 
-		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("RenderableHelper.fx");
+		effect_ = rf.LoadEffect("RenderableHelper.fx");
 		effect_->ActiveTechnique("BoxTec");
 
 		Vector3 xyzs[] =
@@ -145,11 +161,13 @@ namespace KlayGE
 			3, 2, 6, 6, 7, 3,
 		};
 
-		vb_ = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(VertexBuffer::BT_TriangleList);
-		vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
-		vb_->GetVertexStream(VST_Positions)->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
+		vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
+
+		VertexStreamPtr vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_Positions, sizeof(float), 3)), true);
+		vs->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
+		vb_->AddVertexStream(vs);
 		
-		vb_->AddIndexStream(true);
+		vb_->SetIndexStream(rf.MakeIndexStream(true));
 		vb_->GetIndexStream()->Assign(indices, sizeof(indices) / sizeof(indices[0]));
 	}
 
@@ -158,7 +176,9 @@ namespace KlayGE
 		: RenderableHelper(L"SkyBox", false, false),
 			cube_sampler_(new Sampler)
 	{
-		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("RenderableHelper.fx");
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		effect_ = rf.LoadEffect("RenderableHelper.fx");
 		effect_->ActiveTechnique("SkyBoxTec");
 
 		Vector3 xyzs[] =
@@ -174,11 +194,13 @@ namespace KlayGE
 			0, 1, 2, 2, 3, 0,
 		};
 
-		vb_ = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(VertexBuffer::BT_TriangleList);
-		vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
-		vb_->GetVertexStream(VST_Positions)->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
+		vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 
-		vb_->AddIndexStream(true);
+		VertexStreamPtr vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_Positions, sizeof(float), 3)), true);
+		vs->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
+		vb_->AddVertexStream(vs);
+
+		vb_->SetIndexStream(rf.MakeIndexStream(true));
 		vb_->GetIndexStream()->Assign(indices, sizeof(indices) / sizeof(uint16_t));
 
 		box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[4]);

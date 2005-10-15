@@ -298,7 +298,7 @@ namespace KlayGE
 			D3D9VertexStream& d3d9vs(*checked_cast<D3D9VertexStream*>(&stream));
 			TIF(d3dDevice_->SetStreamSource(iter - vb.VertexStreamBegin(),
 				d3d9vs.D3D9Buffer().get(), 0,
-				static_cast<UINT>(stream.SizeOfElement() * stream.ElementsPerVertex())));
+				static_cast<UINT>(stream.VertexSize())));
 		}
 
 		// Clear any previous steam sources

@@ -69,48 +69,9 @@ namespace KlayGE
 		return VertexBufferPtr(new OGLVertexBuffer(type));
 	}
 
-	VertexStreamPtr OGLRenderFactory::MakeVertexStream(VertexStreamType type,
-			uint8_t sizeElement, uint8_t numElement, bool staticStream)
+	VertexStreamPtr OGLRenderFactory::MakeVertexStream(vertex_elements_type const & vertex_elems, bool staticStream)
 	{
-		VertexStreamPtr stream;
-
-		switch (type)
-		{
-		case VST_Positions:
-		case VST_Normals:
-			stream = VertexStreamPtr(new OGLVertexStream(type, sizeof(float), 3, staticStream));
-			break;
-
-		case VST_Diffuses:
-		case VST_Speculars:
-			stream = VertexStreamPtr(new OGLVertexStream(type, sizeof(uint32_t), 1, staticStream));
-			break;
-
-		case VST_BlendWeights:
-			stream = VertexStreamPtr(new OGLVertexStream(type, sizeof(float), 4, staticStream));
-			break;
-
-		case VST_BlendIndices:
-			stream = VertexStreamPtr(new OGLVertexStream(type, sizeof(uint8_t), 4, staticStream));
-			break;
-
-		case VST_TextureCoords0:
-		case VST_TextureCoords1:
-		case VST_TextureCoords2:
-		case VST_TextureCoords3:
-		case VST_TextureCoords4:
-		case VST_TextureCoords5:
-		case VST_TextureCoords6:
-		case VST_TextureCoords7:
-			stream = VertexStreamPtr(new OGLVertexStream(type, sizeof(float), numElement, staticStream));
-			break;
-
-		default:
-			stream = VertexStreamPtr(new OGLVertexStream(type, sizeElement, numElement, staticStream));
-			break;
-		}
-
-		return stream;
+		return VertexStreamPtr(new OGLVertexStream(vertex_elems, staticStream));
 	}
 
 	IndexStreamPtr OGLRenderFactory::MakeIndexStream(bool staticStream)

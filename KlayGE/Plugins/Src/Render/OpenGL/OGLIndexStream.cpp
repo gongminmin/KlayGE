@@ -40,7 +40,7 @@ namespace KlayGE
 		glDeleteBuffers(1, &ib_);
 	}
 
-	void OGLIndexStream::Assign(void const * src, size_t numIndices)
+	void OGLIndexStream::Assign(void const * src, uint32_t numIndices)
 	{
 		numIndices_ = numIndices;
 

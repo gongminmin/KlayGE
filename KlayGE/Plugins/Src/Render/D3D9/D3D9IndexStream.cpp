@@ -32,52 +32,51 @@ namespace KlayGE
 {
 	D3D9IndexStream::D3D9IndexStream(bool staticStream)
 						: staticStream_(staticStream),
-							currentSize_(0), numIndices_(0)
+							numIndices_(0)
 	{
 	}
 
-	void D3D9IndexStream::Assign(void const * src, size_t numIndices)
+	void D3D9IndexStream::Assign(void const * src, uint32_t numIndices)
 	{
-		numIndices_ = numIndices;
-
-		size_t const size(sizeof(uint16_t) * numIndices);
-
-		if (currentSize_ < size)
+		if (numIndices_ < numIndices)
 		{
-			currentSize_ = size;
+			numIndices_ = numIndices;
 
 			D3D9RenderEngine const & renderEngine(*checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 			d3d_device_ = renderEngine.D3DDevice();
 
 			IDirect3DIndexBuffer9* buffer;
-			TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(size), 
+			TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->StreamSize()), 
 				this->IsStatic() ? 0 : D3DUSAGE_DYNAMIC,
 				D3DFMT_INDEX16, D3DPOOL_DEFAULT, &buffer, NULL));
 			buffer_ = MakeCOMPtr(buffer);
 		}
+		else
+		{
+			numIndices_ = numIndices;
+		}
 
 		void* dest;
 		TIF(buffer_->Lock(0, 0, &dest, D3DLOCK_NOSYSLOCK | (this->IsStatic() ? 0 : D3DLOCK_DISCARD)));
-		std::copy(static_cast<uint8_t const *>(src), static_cast<uint8_t const *>(src) + size, static_cast<uint8_t*>(dest));
+		std::copy(static_cast<uint8_t const *>(src),
+			static_cast<uint8_t const *>(src) + this->StreamSize(), static_cast<uint8_t*>(dest));
 		buffer_->Unlock();
 	}
 
 	void D3D9IndexStream::CopyToMemory(void* data)
 	{
-		size_t const size(sizeof(uint16_t) * numIndices_);
-
 		void* src;
 		TIF(buffer_->Lock(0, 0, &src, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
 
 		uint8_t* destPtr(static_cast<uint8_t*>(data));
 		uint8_t const * srcPtr(static_cast<uint8_t const *>(src));
 
-		std::copy(srcPtr, srcPtr + size, destPtr);
+		std::copy(srcPtr, srcPtr + this->StreamSize(), destPtr);
 
 		buffer_->Unlock();
 	}
 
-	size_t D3D9IndexStream::NumIndices() const
+	uint32_t D3D9IndexStream::NumIndices() const
 	{
 		return numIndices_;
 	}
@@ -97,10 +96,8 @@ namespace KlayGE
 		D3D9RenderEngine const & renderEngine(*checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3d_device_ = renderEngine.D3DDevice();
 
-		size_t const size(sizeof(uint16_t) * numIndices_);
-
 		IDirect3DIndexBuffer9* temp;
-		TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(size), D3DUSAGE_DYNAMIC,
+		TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->StreamSize()), D3DUSAGE_DYNAMIC,
 				D3DFMT_INDEX16, D3DPOOL_SYSTEMMEM, &temp, NULL));
 		boost::shared_ptr<IDirect3DIndexBuffer9> buffer = MakeCOMPtr(temp);
 
@@ -109,23 +106,21 @@ namespace KlayGE
 		TIF(buffer_->Lock(0, 0, reinterpret_cast<void**>(&src), D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
 		TIF(buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_NOSYSLOCK | (this->IsStatic() ? 0 : D3DLOCK_DISCARD)));
 
-		std::copy(src, src + size, dest);
+		std::copy(src, src + this->StreamSize(), dest);
 
 		buffer->Unlock();
 		buffer_->Unlock();
 
 		buffer_ = buffer;
-		currentSize_ = size;
 	}
 
 	void D3D9IndexStream::DoOnResetDevice()
 	{
 		D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		boost::shared_ptr<IDirect3DDevice9> d3dDevice(renderEngine.D3DDevice());
-		size_t const size(sizeof(uint16_t) * numIndices_);
 
 		IDirect3DIndexBuffer9* temp;
-		TIF(d3dDevice->CreateIndexBuffer(static_cast<UINT>(size), 
+		TIF(d3dDevice->CreateIndexBuffer(static_cast<UINT>(this->StreamSize()), 
 				this->IsStatic() ? 0 : D3DUSAGE_DYNAMIC,
 				D3DFMT_INDEX16, D3DPOOL_DEFAULT, &temp, NULL));
 		boost::shared_ptr<IDirect3DIndexBuffer9> buffer = MakeCOMPtr(temp);
@@ -135,12 +130,11 @@ namespace KlayGE
 		TIF(buffer_->Lock(0, 0, reinterpret_cast<void**>(&src), D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
 		TIF(buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_NOSYSLOCK | (this->IsStatic() ? 0 : D3DLOCK_DISCARD)));
 
-		std::copy(src, src + size, dest);
+		std::copy(src, src + this->StreamSize(), dest);
 
 		buffer->Unlock();
 		buffer_->Unlock();
 
 		buffer_ = buffer;
-		currentSize_ = size;
 	}
 }

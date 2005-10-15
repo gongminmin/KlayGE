@@ -41,7 +41,8 @@ namespace KlayGE
 	void D3D9RenderVertexStream::Attach(VertexStreamPtr vs)
 	{
 		BOOST_ASSERT(!vs->IsStatic());
-		BOOST_ASSERT((3 == vs->ElementsPerVertex()) || (4 == vs->ElementsPerVertex()));
+		BOOST_ASSERT(1 == vs->NumElements());
+		BOOST_ASSERT((3 == vs->Element(0).num_components) || (4 == vs->Element(0).num_components));
 
 		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
@@ -51,14 +52,14 @@ namespace KlayGE
 
 		isDepthBuffered_ = false;
 
-		if (sizeof(float) == vs_->SizeOfElement())
+		if (sizeof(float) == vs_->Element(0).component_size)
 		{
 			fmt_ = D3DFMT_A32B32G32R32F;
 			colorDepth_ = 128;
 		}
 		else
 		{
-			BOOST_ASSERT(sizeof(uint8_t) == vs_->SizeOfElement());
+			BOOST_ASSERT(sizeof(uint8_t) == vs_->Element(0).component_size);
 
 			fmt_ = D3DFMT_A8R8G8B8;
 			colorDepth_ = 32;
@@ -162,39 +163,39 @@ namespace KlayGE
 		D3DLOCKED_RECT locked_rect;
 		TIF(render_surf_->LockRect(&locked_rect, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
 
-		size_t const elems_per_vert = vs_->ElementsPerVertex();
+		uint8_t const num_components = vs_->Element(0).num_components;
 
 		if (D3DFMT_A8R8G8B8 == fmt_)
 		{
-			std::vector<uint8_t> vertices(width_ * height_ * elems_per_vert);
+			std::vector<uint8_t> vertices(width_ * height_ * num_components);
 
 			uint8_t* src = static_cast<uint8_t*>(locked_rect.pBits);
 			std::vector<uint8_t>::iterator dst = vertices.begin();
-			if (4 == elems_per_vert)
+			if (4 == num_components)
 			{
 				for (uint32_t i = 0; i < height_; ++ i)
 				{
 					std::copy(src, src + width_ * 4, dst);
 
 					src += locked_rect.Pitch;
-					dst += width_ * elems_per_vert;
+					dst += width_ * num_components;
 				}
 			}
 			else
 			{
-				BOOST_ASSERT(3 == elems_per_vert);
+				BOOST_ASSERT(3 == num_components);
 
 				for (uint32_t i = 0; i < height_; ++ i)
 				{
 					for (uint32_t j = 0; j < width_; ++ j)
 					{
-						dst[j * elems_per_vert + 0] = src[j * 4 + 0];
-						dst[j * elems_per_vert + 1] = src[j * 4 + 1];
-						dst[j * elems_per_vert + 2] = src[j * 4 + 2];
+						dst[j * num_components + 0] = src[j * 4 + 0];
+						dst[j * num_components + 1] = src[j * 4 + 1];
+						dst[j * num_components + 2] = src[j * 4 + 2];
 					}
 
 					src += locked_rect.Pitch;
-					dst += width_ * elems_per_vert;
+					dst += width_ * num_components;
 				}
 			}
 
@@ -204,35 +205,35 @@ namespace KlayGE
 		{
 			BOOST_ASSERT(D3DFMT_A32B32G32R32F == fmt_);
 
-			std::vector<float> vertices(width_ * height_ * elems_per_vert);
+			std::vector<float> vertices(width_ * height_ * num_components);
 
 			float* src = static_cast<float*>(locked_rect.pBits);
 			std::vector<float>::iterator dst = vertices.begin();
-			if (4 == elems_per_vert)
+			if (4 == num_components)
 			{
 				for (uint32_t i = 0; i < height_; ++ i)
 				{
 					std::copy(src, src + width_ * 4, dst);
 
 					src += locked_rect.Pitch / sizeof(float);
-					dst += width_ * elems_per_vert;
+					dst += width_ * num_components;
 				}
 			}
 			else
 			{
-				BOOST_ASSERT(3 == elems_per_vert);
+				BOOST_ASSERT(3 == num_components);
 
 				for (uint32_t i = 0; i < height_; ++ i)
 				{
 					for (uint32_t j = 0; j < width_; ++ j)
 					{
-						dst[j * elems_per_vert + 0] = src[j * 4 + 0];
-						dst[j * elems_per_vert + 1] = src[j * 4 + 1];
-						dst[j * elems_per_vert + 2] = src[j * 4 + 2];
+						dst[j * num_components + 0] = src[j * 4 + 0];
+						dst[j * num_components + 1] = src[j * 4 + 1];
+						dst[j * num_components + 2] = src[j * 4 + 2];
 					}
 
 					src += locked_rect.Pitch / sizeof(float);
-					dst += width_ * elems_per_vert;
+					dst += width_ * num_components;
 				}
 			}
 

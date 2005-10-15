@@ -76,12 +76,28 @@ namespace
 			effect_ = effect;
 			vb_ = vb;
 			box_ = Box(Vector3(0, 0, 0), Vector3(0, 0, 0));
+
+			for (VertexBuffer::VertexStreamIterator iter = vb_->VertexStreamBegin();
+				iter != vb_->VertexStreamEnd(); ++ iter)
+			{
+				if (VST_Positions == (*iter)->Element(0).type)
+				{
+					xyz_vs_ = *iter;
+				}
+				else
+				{
+					if (VST_TextureCoords0 == (*iter)->Element(0).type)
+					{
+						tex_vs_ = *iter;
+					}
+				}
+			}
 		}
 
 		void OnRenderBegin()
 		{
-			vb_->GetVertexStream(VST_Positions)->Assign(&xyzs_[0], xyzs_.size() / 3);
-			vb_->GetVertexStream(VST_TextureCoords0)->Assign(&texs_[0], texs_.size() / 2);
+			xyz_vs_->Assign(&xyzs_[0], xyzs_.size() / 3);
+			tex_vs_->Assign(&texs_[0], texs_.size() / 2);
 
 			vb_->GetIndexStream()->Assign(&indices_[0], indices_.size());
 
@@ -191,6 +207,9 @@ namespace
 		std::vector<float>		texs_;
 		std::vector<uint16_t>	indices_;
 		Color					clr_;
+
+		VertexStreamPtr xyz_vs_;
+		VertexStreamPtr tex_vs_;
 	};
 }
 
@@ -203,22 +222,24 @@ namespace KlayGE
 					fontHeight_(height),
 					theSampler_(new Sampler)
 	{
-		vb_ = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(VertexBuffer::BT_TriangleList);
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		RenderEngine const & renderEngine = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
+
+		RenderEngine const & renderEngine = rf.RenderEngineInstance();
 		RenderDeviceCaps const & caps = renderEngine.DeviceCaps();
-		theTexture_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(caps.max_texture_width,
+		theTexture_ = rf.MakeTexture2D(caps.max_texture_width,
 			caps.max_texture_height, 1, TEX_FORMAT);
 		theSampler_->SetTexture(theTexture_);
 
-		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("Font.fx");
+		effect_ = rf.LoadEffect("Font.fx");
 		*(effect_->ParameterByName("texFontSampler")) = theSampler_;
 		effect_->ActiveTechnique("fontTec");
 
-		vb_->AddVertexStream(VST_Positions, sizeof(float), 3);
-		vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2);
+		vb_->AddVertexStream(rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_Positions, sizeof(float), 3))));
+		vb_->AddVertexStream(rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_TextureCoords0, sizeof(float), 2))));
 
-		vb_->AddIndexStream();
+		vb_->SetIndexStream(rf.MakeIndexStream());
 
 		::FT_Init_FreeType(&ftLib_);
 		::FT_New_Face(ftLib_, ResLoader::Instance().Locate(fontName).c_str(), 0, &face_);

@@ -36,19 +36,19 @@ namespace KlayGE
 	class OGLVertexStream : public VertexStream
 	{
 	public:
-		OGLVertexStream(VertexStreamType type, uint8_t sizeElement, uint8_t numElement, bool staticStream);
+		OGLVertexStream(vertex_elements_type const & vertex_elems, bool staticStream);
 		~OGLVertexStream();
 
 		bool IsStatic() const
 		{
 			return static_stream_;
 		}
-		size_t NumVertices() const
+		uint32_t NumVertices() const
 		{
 			return numVertices_;
 		}
 
-		void Assign(void const * src, size_t numVertices);
+		void Assign(void const * src, uint32_t numVertices);
 		void CopyToMemory(void* data);
 
 		void Active();
@@ -59,7 +59,7 @@ namespace KlayGE
 		}
 
 	protected:
-		size_t numVertices_;
+		uint32_t numVertices_;
 
 		bool static_stream_;
 

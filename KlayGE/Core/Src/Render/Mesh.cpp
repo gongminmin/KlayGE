@@ -97,29 +97,33 @@ namespace KlayGE
 		{
 			if (!xyzs_.empty())
 			{
+				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
 				// 建立顶点坐标
-				vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
-				vb_->GetVertexStream(VST_Positions)->Assign(&xyzs_[0], xyzs_.size());
+				VertexStreamPtr pos_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_Positions, sizeof(float), 3)), true);
+				pos_vs->Assign(&xyzs_[0], xyzs_.size());
+				vb_->AddVertexStream(pos_vs);
 
 				box_ = MathLib::ComputeBoundingBox<float>(xyzs_.begin(), xyzs_.end());
 
 				if (!normals_.empty())
 				{
 					// 建立法线坐标
-					vb_->AddVertexStream(VST_Normals, sizeof(float), 3, true);
-					vb_->GetVertexStream(VST_Normals)->Assign(&normals_[0], normals_.size());
+					VertexStreamPtr normal_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_Normals, sizeof(float), 3)), true);
+					normal_vs->Assign(&normals_[0], normals_.size());
+					vb_->AddVertexStream(normal_vs);
 				}
 
 				// 建立纹理坐标
 				for (size_t i = 0; i < multi_tex_coords_.size(); ++ i)
 				{
-					vb_->AddVertexStream(static_cast<VertexStreamType>(VST_TextureCoords0 + i), sizeof(float), 2, true);
-					vb_->GetVertexStream(static_cast<VertexStreamType>(VST_TextureCoords0 + i))->Assign(&multi_tex_coords_[i][0],
-						multi_tex_coords_[i].size());
+					VertexStreamPtr tex_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(static_cast<VertexStreamType>(VST_TextureCoords0 + i), sizeof(float), 2)), true);
+					tex_vs->Assign(&multi_tex_coords_[i][0], multi_tex_coords_[i].size());
+					vb_->AddVertexStream(tex_vs);
 				}
 
 				// 建立索引
-				vb_->AddIndexStream(true);
+				vb_->SetIndexStream(rf.MakeIndexStream(true));
 				vb_->GetIndexStream()->Assign(&indices_[0], indices_.size());
 			}
 

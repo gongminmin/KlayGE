@@ -228,43 +228,50 @@ namespace KlayGE
 			iter != vb.VertexStreamEnd(); ++ iter)
 		{
 			OGLVertexStream& stream(static_cast<OGLVertexStream&>(*(*iter)));
-			VertexStreamType type(stream.Type());
 
-			switch (type)
+			uint32_t elem_offset = 0;
+			for (uint32_t i = 0; i < stream.NumElements(); ++ i)
 			{
-			// Vertex xyzs
-			case VST_Positions:
-				glEnableClientState(GL_VERTEX_ARRAY);
-				stream.Active();
-				glVertexPointer(3, GL_FLOAT, 0, NULL);
-				break;
-		
-			case VST_Normals:
-				glEnableClientState(GL_NORMAL_ARRAY);
-				stream.Active();
-				glNormalPointer(GL_FLOAT, 0, NULL);
-				break;
+				vertex_element const & vs_elem = stream.Element(i);
 
-			case VST_Diffuses:
-				glEnableClientState(GL_COLOR_ARRAY);
-				stream.Active();
-				glColorPointer(4, GL_UNSIGNED_BYTE, 0, NULL);
-				break;
+				switch (vs_elem.type)
+				{
+				// Vertex xyzs
+				case VST_Positions:
+					glEnableClientState(GL_VERTEX_ARRAY);
+					stream.Active();
+					glVertexPointer(3, GL_FLOAT, stream.VertexSize(), reinterpret_cast<GLvoid const *>(elem_offset));
+					break;
+			
+				case VST_Normals:
+					glEnableClientState(GL_NORMAL_ARRAY);
+					stream.Active();
+					glNormalPointer(GL_FLOAT, stream.VertexSize(), reinterpret_cast<GLvoid const *>(elem_offset));
+					break;
 
-			case VST_TextureCoords0:
-			case VST_TextureCoords1:
-			case VST_TextureCoords2:
-			case VST_TextureCoords3:
-			case VST_TextureCoords4:
-			case VST_TextureCoords5:
-			case VST_TextureCoords6:
-			case VST_TextureCoords7:
-				glClientActiveTexture(GL_TEXTURE0 + type - VST_TextureCoords0);
-				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-				stream.Active();
-				glTexCoordPointer(static_cast<GLint>(stream.ElementsPerVertex()),
-						GL_FLOAT, 0, NULL);
-				break;
+				case VST_Diffuses:
+					glEnableClientState(GL_COLOR_ARRAY);
+					stream.Active();
+					glColorPointer(4, GL_UNSIGNED_BYTE, stream.VertexSize(), reinterpret_cast<GLvoid const *>(elem_offset));
+					break;
+
+				case VST_TextureCoords0:
+				case VST_TextureCoords1:
+				case VST_TextureCoords2:
+				case VST_TextureCoords3:
+				case VST_TextureCoords4:
+				case VST_TextureCoords5:
+				case VST_TextureCoords6:
+				case VST_TextureCoords7:
+					glClientActiveTexture(GL_TEXTURE0 + vs_elem.type - VST_TextureCoords0);
+					glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+					stream.Active();
+					glTexCoordPointer(static_cast<GLint>(vs_elem.num_components),
+							GL_FLOAT, stream.VertexSize(), reinterpret_cast<GLvoid const *>(elem_offset));
+					break;
+				}
+
+				elem_offset += vs_elem.element_size();
 			}
 		}
 

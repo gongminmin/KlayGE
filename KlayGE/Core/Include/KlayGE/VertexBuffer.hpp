@@ -1,8 +1,11 @@
 // VertexBuffer.hpp
 // KlayGE 顶点缓冲区类 头文件
-// Ver 2.8.0
+// Ver 3.0.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.0.0
+// 支持在单流中存储多种成员 (2005.10.15)
 //
 // 2.8.0
 // 增加了CopyToMemory (2005.7.24)
@@ -59,31 +62,50 @@ namespace KlayGE
 		VST_TextureCoords4 = 11,
 		VST_TextureCoords5 = 12,
 		VST_TextureCoords6 = 13,
-		VST_TextureCoords7 = 14,
+		VST_TextureCoords7 = 14
 	};
+
+	struct vertex_element
+	{
+		vertex_element(VertexStreamType type, uint8_t component_size, uint8_t num_components)
+			: type(type), component_size(component_size), num_components(num_components)
+		{
+		}
+
+		VertexStreamType type;
+		// 表示元素中每个成分的大小，比如Position元素的成分是size(float)
+		uint8_t component_size;
+		// 表示一个元素有几个成分表示，比如Position元素是由(x, y, z)组成，所以为3
+		uint8_t num_components;
+
+		uint16_t element_size() const
+		{
+			return component_size * num_components;
+		}
+	};
+	typedef std::vector<vertex_element> vertex_elements_type;
 
 	class VertexStream
 	{
 	public:
-		VertexStream(VertexStreamType type, uint8_t sizeElement, uint8_t ElementsPerVertex);
+		VertexStream(vertex_elements_type const & vertex_elems);
 		virtual ~VertexStream();
-
-		VertexStreamType Type() const;
 
 		virtual bool IsStatic() const = 0;
 
-		virtual void Assign(void const * src, size_t numVertex) = 0;
+		virtual void Assign(void const * src, uint32_t numVertex) = 0;
 		virtual void CopyToMemory(void* data) = 0;
 
-		virtual size_t NumVertices() const = 0;
+		virtual uint32_t NumVertices() const = 0;
 
-		size_t SizeOfElement() const;
-		size_t ElementsPerVertex() const;
+		uint32_t NumElements() const;
+		vertex_element const & Element(uint32_t index) const;
+
+		uint16_t VertexSize() const;
+		uint32_t StreamSize() const;
 
 	protected:
-		uint8_t sizeElement_;
-		uint8_t elementPerVertex_;
-		VertexStreamType type_;
+		vertex_elements_type vertex_elems_; 
 	};
 
 	class IndexStream
@@ -91,11 +113,13 @@ namespace KlayGE
 	public:
 		virtual ~IndexStream();
 
-		virtual size_t NumIndices() const = 0;
+		virtual uint32_t NumIndices() const = 0;
 
 		virtual bool IsStatic() const = 0;
-		virtual void Assign(void const * src, size_t numIndices) = 0;
+		virtual void Assign(void const * src, uint32_t numIndices) = 0;
 		virtual void CopyToMemory(void* data) = 0;
+
+		uint32_t StreamSize() const;
 	};
 
 
@@ -121,11 +145,9 @@ namespace KlayGE
 
 		BufferType Type() const;
 
-		size_t NumVertices() const;
+		uint32_t NumVertices() const;
 
-		void AddVertexStream(VertexStreamType type, uint8_t sizeElement, uint8_t numElement, bool staticStream = false);
-		void AddVertexStream(VertexStreamPtr vstream);
-		VertexStreamPtr GetVertexStream(VertexStreamType type) const;
+		void AddVertexStream(VertexStreamPtr vertex_stream);
 
 		VertexStreamIterator VertexStreamBegin();
 		VertexStreamIterator VertexStreamEnd();
@@ -134,9 +156,9 @@ namespace KlayGE
 
 
 		bool UseIndices() const;
-		size_t NumIndices() const;
+		uint32_t NumIndices() const;
 
-		void AddIndexStream(bool staticStream = false);
+		void SetIndexStream(IndexStreamPtr index_stream);
 		IndexStreamPtr GetIndexStream() const;
 
 	protected:

@@ -41,6 +41,8 @@ namespace
 			: RenderableHelper(L"Flag", true, false),
 				model_(MathLib::Translation(-WIDTH / 2.0f, HEIGHT / 2.0f, 0.0f))
 		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
 			std::vector<Vector3> pos;
 			for (int y = 0; y < height + 1; ++ y)
 			{
@@ -75,14 +77,19 @@ namespace
 				}
 			}
 
-			vb_ = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(VertexBuffer::BT_TriangleList);
-			vb_->AddVertexStream(VST_Positions, sizeof(float), 3, true);
-			vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2, true);
-			vb_->GetVertexStream(VST_Positions)->Assign(&pos[0], pos.size());
-			vb_->GetVertexStream(VST_TextureCoords0)->Assign(&tex[0], tex.size());
+			vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 
-			vb_->AddIndexStream(true);
-			vb_->GetIndexStream()->Assign(&index[0], index.size());
+			VertexStreamPtr pos_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_Positions, sizeof(float), 3)), true);
+			pos_vs->Assign(&pos[0], pos.size());
+			VertexStreamPtr tex0_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_TextureCoords0, sizeof(float), 2)), true);
+			tex0_vs->Assign(&tex[0], tex.size());
+
+			vb_->AddVertexStream(pos_vs);
+			vb_->AddVertexStream(tex0_vs);
+
+			IndexStreamPtr is = rf.MakeIndexStream(true);
+			is->Assign(&index[0], index.size());
+			vb_->SetIndexStream(is);
 
 			box_ = MathLib::ComputeBoundingBox<float>(pos.begin(), pos.end());
 

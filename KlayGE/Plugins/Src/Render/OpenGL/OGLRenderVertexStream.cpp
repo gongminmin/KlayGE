@@ -91,13 +91,14 @@ namespace KlayGE
 	void OGLRenderVertexStream::Attach(VertexStreamPtr vs)
 	{
 		BOOST_ASSERT(glIsFramebufferEXT_(fbo_));
+		BOOST_ASSERT(1 == vs->NumElements());
 
 		vs_ = vs;
 
 		OGLVertexStream& ogl_vs = *checked_cast<OGLVertexStream*>(vs_.get());
 		glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, ogl_vs.OGLvbo());
 		glBufferData(GL_PIXEL_PACK_BUFFER_ARB,
-			reinterpret_cast<GLsizeiptr>(width_ * height_ * vs->ElementsPerVertex() * sizeof(GLfloat)), NULL, GL_DYNAMIC_DRAW);
+			reinterpret_cast<GLsizeiptr>(width_ * height_ * vs->Element(0).element_size()), NULL, GL_DYNAMIC_DRAW);
 
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 	}
@@ -106,20 +107,22 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(glIsFramebufferEXT_(fbo_));
 
+		vertex_element const & elem = vs_->Element(0);
+
 		GLenum format;
-		if (3 == vs_->ElementsPerVertex())
+		if (3 == elem.num_components)
 		{
 			format = GL_RGB;
 		}
 		else
 		{
-			BOOST_ASSERT(4 == vs_->ElementsPerVertex());
+			BOOST_ASSERT(4 == elem.num_components);
 
 			format = GL_RGBA;
 		}
 
 		GLenum type;
-		switch (vs_->Type())
+		switch (elem.type)
 		{
 		case VST_Positions:
 		case VST_Normals:
@@ -133,7 +136,7 @@ namespace KlayGE
 		case VST_TextureCoords7:
 			type = GL_FLOAT;
 			{
-				std::vector<float> dummy(width_ * height_ * vs_->ElementsPerVertex());
+				std::vector<float> dummy(width_ * height_ * elem.num_components);
 				vs_->Assign(&dummy[0], width_ * height_);
 			}
 			break;
@@ -142,7 +145,7 @@ namespace KlayGE
 		case VST_Speculars:
 			type = GL_UNSIGNED_BYTE;
 			{
-				std::vector<uint8_t> dummy(width_ * height_ * vs_->ElementsPerVertex());
+				std::vector<uint8_t> dummy(width_ * height_ * elem.num_components);
 				vs_->Assign(&dummy[0], width_ * height_);
 			}
 			break;

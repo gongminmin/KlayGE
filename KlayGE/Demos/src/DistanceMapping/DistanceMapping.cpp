@@ -37,7 +37,9 @@ namespace
 		RenderPolygon()
 			: RenderableHelper(L"Polygon", true, false)
 		{
-			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("DistanceMapping.fx");
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+			effect_ = rf.LoadEffect("DistanceMapping.fx");
 
 			if (!effect_->ValidateTechnique("DistanceMapping30"))
 			{
@@ -111,19 +113,25 @@ namespace
 				indices, indices + sizeof(indices) / sizeof(indices[0]),
 				xyzs, xyzs + sizeof(xyzs) / sizeof(xyzs[0]), texs);
 
-			vb_ = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(VertexBuffer::BT_TriangleList);
+			vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 
-			vb_->AddVertexStream(VST_Positions, sizeof(float), 3);
-			vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 2);
-			vb_->AddVertexStream(VST_TextureCoords1, sizeof(float), 3);
-			vb_->AddVertexStream(VST_TextureCoords2, sizeof(float), 3);
-			vb_->GetVertexStream(VST_Positions)->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
-			vb_->GetVertexStream(VST_TextureCoords0)->Assign(texs, sizeof(texs) / sizeof(texs[0]));
-			vb_->GetVertexStream(VST_TextureCoords1)->Assign(t, sizeof(t) / sizeof(t[0]));
-			vb_->GetVertexStream(VST_TextureCoords2)->Assign(b, sizeof(b) / sizeof(b[0]));
+			VertexStreamPtr pos_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_Positions, sizeof(float), 3)), true);
+			pos_vs->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
+			VertexStreamPtr tex0_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_TextureCoords0, sizeof(float), 2)), true);
+			tex0_vs->Assign(texs, sizeof(texs) / sizeof(texs[0]));
+			VertexStreamPtr tan_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_TextureCoords1, sizeof(float), 3)), true);
+			tan_vs->Assign(t, sizeof(t) / sizeof(t[0]));
+			VertexStreamPtr binormal_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_TextureCoords2, sizeof(float), 3)), true);
+			binormal_vs->Assign(b, sizeof(b) / sizeof(b[0]));
 
-			vb_->AddIndexStream();
-			vb_->GetIndexStream()->Assign(indices, sizeof(indices) / sizeof(uint16_t));
+			vb_->AddVertexStream(pos_vs);
+			vb_->AddVertexStream(tex0_vs);
+			vb_->AddVertexStream(tan_vs);
+			vb_->AddVertexStream(binormal_vs);
+
+			IndexStreamPtr is = rf.MakeIndexStream(true);
+			is->Assign(indices, sizeof(indices) / sizeof(uint16_t));
+			vb_->SetIndexStream(is);
 
 			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[4]);
 		}

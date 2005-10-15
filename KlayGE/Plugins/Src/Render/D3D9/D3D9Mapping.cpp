@@ -301,71 +301,80 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9Mapping::Mapping(D3DVERTEXELEMENT9& element, size_t stream, VertexStream const & vs)
+	void D3D9Mapping::Mapping(std::vector<D3DVERTEXELEMENT9>& elements, size_t stream, VertexStream const & vs)
 	{
-		element.Offset = 0;
-		element.Method = D3DDECLMETHOD_DEFAULT;
-		element.Stream = static_cast<WORD>(stream);
+		elements.resize(vs.NumElements());
 
-		VertexStreamType type(vs.Type());
-
-		switch (type)
+		uint16_t elem_offset = 0;
+		for (size_t i = 0; i < vs.NumElements(); ++ i)
 		{
-		// Vertex xyzs
-		case VST_Positions:
-			element.Type		= D3DDECLTYPE_FLOAT1 - 1 + static_cast<BYTE>(vs.ElementsPerVertex());
-			element.Usage		= D3DDECLUSAGE_POSITION;
-			element.UsageIndex	= 0;
-			break;
+			D3DVERTEXELEMENT9& element = elements[i];
+			element.Offset = elem_offset;
+			element.Method = D3DDECLMETHOD_DEFAULT;
+			element.Stream = static_cast<WORD>(stream);
 
-		// Normal
-		case VST_Normals:
-			element.Type		= D3DDECLTYPE_FLOAT1 - 1 + static_cast<BYTE>(vs.ElementsPerVertex());
-			element.Usage		= D3DDECLUSAGE_NORMAL;
-			element.UsageIndex	= 0;
-			break;
+			vertex_element const & vs_elem = vs.Element(i);
 
-		// Vertex colors
-		case VST_Diffuses:
-			element.Type		= D3DDECLTYPE_D3DCOLOR;
-			element.Usage		= D3DDECLUSAGE_COLOR;
-			element.UsageIndex	= 0;
-			break;
+			switch (vs_elem.type)
+			{
+			// Vertex xyzs
+			case VST_Positions:
+				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + vs_elem.num_components;
+				element.Usage		= D3DDECLUSAGE_POSITION;
+				element.UsageIndex	= 0;
+				break;
 
-		// Vertex speculars
-		case VST_Speculars:
-			element.Type		= D3DDECLTYPE_D3DCOLOR;
-			element.Usage		= D3DDECLUSAGE_COLOR;
-			element.UsageIndex	= 1;
-			break;
-		
-		// Blend Weights
-		case VST_BlendWeights:
-			element.Type		= D3DDECLTYPE_FLOAT4;
-			element.Usage		= D3DDECLUSAGE_BLENDWEIGHT;
-			element.UsageIndex	= 0;
-			break;
+			// Normal
+			case VST_Normals:
+				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + vs_elem.num_components;
+				element.Usage		= D3DDECLUSAGE_NORMAL;
+				element.UsageIndex	= 0;
+				break;
 
-		// Blend Indices
-		case VST_BlendIndices:
-			element.Type		= D3DDECLTYPE_D3DCOLOR;
-			element.Usage		= D3DDECLUSAGE_BLENDINDICES;
-			element.UsageIndex	= 0;
-			break;
+			// Vertex colors
+			case VST_Diffuses:
+				element.Type		= D3DDECLTYPE_D3DCOLOR;
+				element.Usage		= D3DDECLUSAGE_COLOR;
+				element.UsageIndex	= 0;
+				break;
 
-		// Do texture coords
-		case VST_TextureCoords0:
-		case VST_TextureCoords1:
-		case VST_TextureCoords2:
-		case VST_TextureCoords3:
-		case VST_TextureCoords4:
-		case VST_TextureCoords5:
-		case VST_TextureCoords6:
-		case VST_TextureCoords7:
-			element.Type		= D3DDECLTYPE_FLOAT1 - 1 + static_cast<BYTE>(vs.ElementsPerVertex());
-			element.Usage		= D3DDECLUSAGE_TEXCOORD;
-			element.UsageIndex	= static_cast<BYTE>(type - VST_TextureCoords0);
-			break;
+			// Vertex speculars
+			case VST_Speculars:
+				element.Type		= D3DDECLTYPE_D3DCOLOR;
+				element.Usage		= D3DDECLUSAGE_COLOR;
+				element.UsageIndex	= 1;
+				break;
+			
+			// Blend Weights
+			case VST_BlendWeights:
+				element.Type		= D3DDECLTYPE_FLOAT4;
+				element.Usage		= D3DDECLUSAGE_BLENDWEIGHT;
+				element.UsageIndex	= 0;
+				break;
+
+			// Blend Indices
+			case VST_BlendIndices:
+				element.Type		= D3DDECLTYPE_D3DCOLOR;
+				element.Usage		= D3DDECLUSAGE_BLENDINDICES;
+				element.UsageIndex	= 0;
+				break;
+
+			// Do texture coords
+			case VST_TextureCoords0:
+			case VST_TextureCoords1:
+			case VST_TextureCoords2:
+			case VST_TextureCoords3:
+			case VST_TextureCoords4:
+			case VST_TextureCoords5:
+			case VST_TextureCoords6:
+			case VST_TextureCoords7:
+				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + vs_elem.num_components;
+				element.Usage		= D3DDECLUSAGE_TEXCOORD;
+				element.UsageIndex	= static_cast<BYTE>(vs_elem.type - VST_TextureCoords0);
+				break;
+			}
+
+			elem_offset += vs_elem.element_size();
 		}
 	}
 

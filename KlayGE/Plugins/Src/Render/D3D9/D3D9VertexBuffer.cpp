@@ -58,23 +58,25 @@ namespace KlayGE
 			vertex_elems_type elems;
 			elems.reserve(vertexStreams_.size());
 
-			D3DVERTEXELEMENT9 element;
-
 			for (VertexStreamConstIterator iter = this->VertexStreamBegin();
 				iter != this->VertexStreamEnd(); ++ iter)
 			{
 				VertexStream& stream(*(*iter));
 
-				D3D9Mapping::Mapping(element, elems.size(), stream);
-				elems.push_back(element);
+				std::vector<D3DVERTEXELEMENT9> stream_elems;
+				D3D9Mapping::Mapping(stream_elems, iter - this->VertexStreamBegin(), stream);
+				elems.insert(elems.end(), stream_elems.begin(), stream_elems.end());
 			}
 
 			{
-				element.Stream		= 0xFF;
-				element.Type		= D3DDECLTYPE_UNUSED;
-				element.Usage		= 0;
-				element.UsageIndex	= 0;
-				elems.push_back(element);
+				D3DVERTEXELEMENT9 end_element;
+				end_element.Stream		= 0xFF;
+				end_element.Offset		= 0;
+				end_element.Type		= D3DDECLTYPE_UNUSED;
+				end_element.Method		= D3DDECLMETHOD_DEFAULT;
+				end_element.Usage		= 0;
+				end_element.UsageIndex	= 0;
+				elems.push_back(end_element);
 			}
 
 			IDirect3DVertexDeclaration9* vertex_decl;

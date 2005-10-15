@@ -34,6 +34,8 @@ namespace
 		RenderElectro()
 			: RenderableHelper(L"Electro", true, false)
 		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
 			MathLib::PerlinNoise<float>& pn = MathLib::PerlinNoise<float>::Instance();
 
 			int const XSIZE = 128;
@@ -73,11 +75,10 @@ namespace
 				turbBuffer[i] = (255 * (turbBuffer[i] - min)) / (max - min);
 			}
 
-			RenderFactory& renderFactory(Context::Instance().RenderFactoryInstance());
-			TexturePtr texture = renderFactory.MakeTexture3D(XSIZE, YSIZE, ZSIZE, 1, PF_L8);
+			TexturePtr texture = rf.MakeTexture3D(XSIZE, YSIZE, ZSIZE, 1, PF_L8);
 			texture->CopyMemoryToTexture3D(0, &turbBuffer[0], PF_L8, XSIZE, YSIZE, ZSIZE, 0, 0, 0);
 
-			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("Electro.fx");
+			effect_ = rf.LoadEffect("Electro.fx");
 			effect_->ActiveTechnique("Electro");
 
 			SamplerPtr electro_sampler(new Sampler);
@@ -109,14 +110,19 @@ namespace
 				0, 1, 3, 3, 2, 0,
 			};
 
-			vb_ = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(VertexBuffer::BT_TriangleList);
-			vb_->AddVertexStream(VST_Positions, sizeof(float), 3);
-			vb_->AddVertexStream(VST_TextureCoords0, sizeof(float), 3);
-			vb_->GetVertexStream(VST_Positions)->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
-			vb_->GetVertexStream(VST_TextureCoords0)->Assign(texs, sizeof(texs) / sizeof(texs[0]));
+			vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 
-			vb_->AddIndexStream();
-			vb_->GetIndexStream()->Assign(indices, sizeof(indices) / sizeof(uint16_t));
+			VertexStreamPtr pos_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_Positions, sizeof(float), 3)), true);
+			pos_vs->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
+			VertexStreamPtr tex0_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_TextureCoords0, sizeof(float), 3)), true);
+			tex0_vs->Assign(texs, sizeof(texs) / sizeof(texs[0]));
+
+			vb_->AddVertexStream(pos_vs);
+			vb_->AddVertexStream(tex0_vs);
+
+			IndexStreamPtr is = rf.MakeIndexStream(true);
+			is->Assign(indices, sizeof(indices) / sizeof(uint16_t));
+			vb_->SetIndexStream(is);
 
 			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 		}

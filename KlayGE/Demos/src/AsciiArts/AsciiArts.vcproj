@@ -124,9 +124,6 @@
 			<File
 				RelativePath="..\..\media\AsciiArts\AsciiArts.fx">
 			</File>
-			<File
-				RelativePath="..\..\..\Plugins\Src\Render\D3d9\D3D9RenderTexture.cpp">
-			</File>
 		</Filter>
 		<Filter
 			Name="Í·ÎÄ¼þ"

@@ -68,8 +68,7 @@ namespace KlayGE
 		RenderEffectPtr DoMakeRenderEffect(std::string const & srcData);
 
 		VertexBufferPtr MakeVertexBuffer(VertexBuffer::BufferType type);
-		VertexStreamPtr MakeVertexStream(VertexStreamType type,
-			uint8_t sizeElement, uint8_t numElement, bool staticStream);
+		VertexStreamPtr MakeVertexStream(vertex_elements_type const & vertex_elems, bool staticStream);
 		IndexStreamPtr MakeIndexStream(bool staticStream);
 
 		RenderVertexStreamPtr MakeRenderVertexStream(uint32_t width, uint32_t height);

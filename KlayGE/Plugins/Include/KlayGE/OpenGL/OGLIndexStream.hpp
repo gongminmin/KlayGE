@@ -37,12 +37,12 @@ namespace KlayGE
 		{
 			return static_stream_;
 		}
-		size_t NumIndices() const
+		uint32_t NumIndices() const
 		{
 			return numIndices_;
 		}
 
-		void Assign(void const * src, size_t numIndices);
+		void Assign(void const * src, uint32_t numIndices);
 		void CopyToMemory(void* data);
 
 		void Active();
@@ -53,7 +53,7 @@ namespace KlayGE
 		}
 
 	protected:
-		size_t numIndices_;
+		uint32_t numIndices_;
 
 		bool static_stream_;
 
