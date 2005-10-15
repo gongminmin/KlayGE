@@ -57,6 +57,57 @@ namespace KlayGE
 		return this->VertexSize() * this->NumVertices();
 	}
 
+	VertexStream& VertexStream::Combine(VertexStreamPtr rhs)
+	{
+		BOOST_ASSERT(this->NumVertices() == rhs->NumVertices());
+
+		std::vector<uint8_t> lhs_buffer(this->StreamSize());
+		this->CopyToMemory(&lhs_buffer[0]);
+		uint32_t const lhs_ver_size = this->VertexSize();
+
+		std::vector<uint8_t> rhs_buffer(rhs->StreamSize());
+		rhs->CopyToMemory(&rhs_buffer[0]);
+		uint32_t const rhs_ver_size = rhs->VertexSize();
+
+		std::vector<uint8_t> target_buffer(this->StreamSize() + rhs->StreamSize());
+
+		std::vector<uint8_t>::iterator lhs_iter = lhs_buffer.begin();
+		std::vector<uint8_t>::iterator rhs_iter = rhs_buffer.begin();
+		std::vector<uint8_t>::iterator target_iter = target_buffer.begin();
+		for (uint32_t i = 0; i < this->NumVertices(); ++ i)
+		{
+			std::copy(lhs_iter, lhs_iter + lhs_ver_size, target_iter);
+			lhs_iter += lhs_ver_size;
+			target_iter += lhs_ver_size;
+
+			std::copy(rhs_iter, rhs_iter + rhs_ver_size, target_iter);
+			rhs_iter += rhs_ver_size;
+			target_iter += rhs_ver_size;
+		}
+
+		vertex_elems_.insert(vertex_elems_.end(), rhs->vertex_elems_.begin(), rhs->vertex_elems_.end());
+		this->Assign(&target_buffer[0], this->NumVertices());
+
+		return *this;
+	}
+
+	VertexStream& VertexStream::Append(VertexStreamPtr rhs)
+	{
+		BOOST_ASSERT(this->NumElements() == rhs->NumElements());
+		BOOST_ASSERT(this->VertexSize() == rhs->VertexSize());
+
+		std::vector<uint8_t> target_buffer(this->StreamSize());
+		this->CopyToMemory(&target_buffer[0]);
+
+		std::vector<uint8_t> rhs_buffer(rhs->StreamSize());
+		rhs->CopyToMemory(&rhs_buffer[0]);
+
+		target_buffer.insert(target_buffer.end(), rhs_buffer.begin(), rhs_buffer.end());
+		this->Assign(&target_buffer[0], this->NumVertices() + rhs->NumVertices());
+
+		return *this;
+	}
+
 
 	IndexStream::~IndexStream()
 	{
@@ -65,6 +116,20 @@ namespace KlayGE
 	uint32_t IndexStream::StreamSize() const
 	{
 		return sizeof(uint16_t) * this->NumIndices();
+	}
+
+	IndexStream& IndexStream::Append(IndexStreamPtr rhs)
+	{
+		std::vector<uint8_t> target_buffer(this->StreamSize());
+		this->CopyToMemory(&target_buffer[0]);
+
+		std::vector<uint8_t> rhs_buffer(rhs->StreamSize());
+		rhs->CopyToMemory(&rhs_buffer[0]);
+
+		target_buffer.insert(target_buffer.end(), rhs_buffer.begin(), rhs_buffer.end());
+		this->Assign(&target_buffer[0], this->NumIndices() + rhs->NumIndices());
+
+		return *this;
 	}
 
 

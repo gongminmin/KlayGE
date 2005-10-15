@@ -46,23 +46,16 @@ namespace KlayGE
 
 	void D3D9VertexStream::Assign(void const * src, uint32_t numVertices)
 	{
-		if (numVertices_ < numVertices)
-		{
-			numVertices_ = numVertices;
+		numVertices_ = numVertices;
 
-			D3D9RenderEngine const & renderEngine(*checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-			d3d_device_ = renderEngine.D3DDevice();
+		D3D9RenderEngine const & renderEngine(*checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		d3d_device_ = renderEngine.D3DDevice();
 
-			IDirect3DVertexBuffer9* theBuffer;
-			TIF(d3d_device_->CreateVertexBuffer(static_cast<UINT>(this->StreamSize()),
+		IDirect3DVertexBuffer9* theBuffer;
+		TIF(d3d_device_->CreateVertexBuffer(static_cast<UINT>(this->StreamSize()),
 				this->IsStatic() ? 0 : D3DUSAGE_DYNAMIC,
 				0, D3DPOOL_DEFAULT, &theBuffer, NULL));
-			buffer_ = MakeCOMPtr(theBuffer);
-		}
-		else
-		{
-			numVertices_ = numVertices;
-		}
+		buffer_ = MakeCOMPtr(theBuffer);
 
 		void* dest;
 		TIF(buffer_->Lock(0, 0, &dest,

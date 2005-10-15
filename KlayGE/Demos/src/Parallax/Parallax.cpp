@@ -101,8 +101,8 @@ namespace
 
 			vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 
-			VertexStreamPtr pos_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_Positions, sizeof(float), 3)), true);
-			pos_vs->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
+			VertexStreamPtr vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_Positions, sizeof(float), 3)), true);
+			vs->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
 			VertexStreamPtr tex0_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_TextureCoords0, sizeof(float), 2)), true);
 			tex0_vs->Assign(texs, sizeof(texs) / sizeof(texs[0]));
 			VertexStreamPtr tan_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_TextureCoords1, sizeof(float), 3)), true);
@@ -110,10 +110,9 @@ namespace
 			VertexStreamPtr binormal_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_TextureCoords2, sizeof(float), 3)), true);
 			binormal_vs->Assign(b, sizeof(b) / sizeof(b[0]));
 
-			vb_->AddVertexStream(pos_vs);
-			vb_->AddVertexStream(tex0_vs);
-			vb_->AddVertexStream(tan_vs);
-			vb_->AddVertexStream(binormal_vs);
+			vs->Combine(tex0_vs).Combine(tan_vs).Combine(binormal_vs);
+
+			vb_->AddVertexStream(vs);
 
 			IndexStreamPtr is = rf.MakeIndexStream(true);
 			is->Assign(indices, sizeof(indices) / sizeof(uint16_t));

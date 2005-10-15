@@ -95,13 +95,13 @@ namespace
 
 			vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 
-			VertexStreamPtr pos_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_Positions, sizeof(float), 3)), true);
-			pos_vs->Assign(&pos[0], pos.size());
+			VertexStreamPtr pos_tex_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_Positions, sizeof(float), 3)), true);
+			pos_tex_vs->Assign(&pos[0], pos.size());
 			VertexStreamPtr tex0_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_TextureCoords0, sizeof(float), 2)), true);
 			tex0_vs->Assign(&tex[0], tex.size());
+			pos_tex_vs->Combine(tex0_vs);
 
-			vb_->AddVertexStream(pos_vs);
-			vb_->AddVertexStream(tex0_vs);
+			vb_->AddVertexStream(pos_tex_vs);
 
 			IndexStreamPtr is = rf.MakeIndexStream(true);
 			is->Assign(&index[0], index.size());

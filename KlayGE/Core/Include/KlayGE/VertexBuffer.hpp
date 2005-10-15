@@ -104,6 +104,9 @@ namespace KlayGE
 		uint16_t VertexSize() const;
 		uint32_t StreamSize() const;
 
+		VertexStream& Combine(VertexStreamPtr rhs);
+		VertexStream& Append(VertexStreamPtr rhs);
+
 	protected:
 		vertex_elements_type vertex_elems_; 
 	};
@@ -120,6 +123,8 @@ namespace KlayGE
 		virtual void CopyToMemory(void* data) = 0;
 
 		uint32_t StreamSize() const;
+
+		IndexStream& Append(IndexStreamPtr rhs);
 	};
 
 

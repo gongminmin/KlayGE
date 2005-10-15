@@ -38,23 +38,16 @@ namespace KlayGE
 
 	void D3D9IndexStream::Assign(void const * src, uint32_t numIndices)
 	{
-		if (numIndices_ < numIndices)
-		{
-			numIndices_ = numIndices;
+		numIndices_ = numIndices;
 
-			D3D9RenderEngine const & renderEngine(*checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-			d3d_device_ = renderEngine.D3DDevice();
+		D3D9RenderEngine const & renderEngine(*checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		d3d_device_ = renderEngine.D3DDevice();
 
-			IDirect3DIndexBuffer9* buffer;
-			TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->StreamSize()), 
+		IDirect3DIndexBuffer9* buffer;
+		TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->StreamSize()), 
 				this->IsStatic() ? 0 : D3DUSAGE_DYNAMIC,
 				D3DFMT_INDEX16, D3DPOOL_DEFAULT, &buffer, NULL));
-			buffer_ = MakeCOMPtr(buffer);
-		}
-		else
-		{
-			numIndices_ = numIndices;
-		}
+		buffer_ = MakeCOMPtr(buffer);
 
 		void* dest;
 		TIF(buffer_->Lock(0, 0, &dest, D3DLOCK_NOSYSLOCK | (this->IsStatic() ? 0 : D3DLOCK_DISCARD)));
