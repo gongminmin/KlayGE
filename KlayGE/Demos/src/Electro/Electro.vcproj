@@ -36,7 +36,7 @@
 				OutputFile="$(OutDir)/Electro_d.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/Electro.pdb"
+				ProgramDatabaseFile="$(OutDir)/$(ProjectName)_d.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool

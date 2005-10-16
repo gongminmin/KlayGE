@@ -96,10 +96,10 @@ namespace
 
 		void OnRenderBegin()
 		{
-			xyz_vs_->Assign(&xyzs_[0], xyzs_.size() / 3);
-			tex_vs_->Assign(&texs_[0], texs_.size() / 2);
+			xyz_vs_->Assign(&xyzs_[0], static_cast<uint32_t>(xyzs_.size() / 3));
+			tex_vs_->Assign(&texs_[0], static_cast<uint32_t>(texs_.size() / 2));
 
-			vb_->GetIndexStream()->Assign(&indices_[0], indices_.size());
+			vb_->GetIndexStream()->Assign(&indices_[0], static_cast<uint32_t>(indices_.size()));
 
 			*(effect_->ParameterByName("color")) = Vector4(clr_.r(), clr_.g(), clr_.b(), clr_.a());
 		}

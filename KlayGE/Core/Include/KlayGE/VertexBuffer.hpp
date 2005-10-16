@@ -95,6 +95,7 @@ namespace KlayGE
 
 		virtual void Assign(void const * src, uint32_t numVertex) = 0;
 		virtual void CopyToMemory(void* data) = 0;
+		void CopyToMemory(void* data, vertex_elements_type const & rhs_vertex_elems);
 
 		virtual uint32_t NumVertices() const = 0;
 
@@ -108,7 +109,11 @@ namespace KlayGE
 		VertexStream& Append(VertexStreamPtr rhs);
 
 	protected:
-		vertex_elements_type vertex_elems_; 
+		void RefreshVertexSize();
+
+	protected:
+		vertex_elements_type vertex_elems_;
+		uint16_t vertex_size_;
 	};
 
 	class IndexStream

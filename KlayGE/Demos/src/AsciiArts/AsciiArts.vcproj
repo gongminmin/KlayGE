@@ -35,7 +35,7 @@
 				OutputFile="$(OutDir)/AsciiArts_d.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/AsciiArts.pdb"
+				ProgramDatabaseFile="$(OutDir)/$(ProjectName)_d.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool

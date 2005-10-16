@@ -101,7 +101,7 @@ namespace KlayGE
 
 				// 建立顶点坐标
 				VertexStreamPtr pos_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_Positions, sizeof(float), 3)), true);
-				pos_vs->Assign(&xyzs_[0], xyzs_.size());
+				pos_vs->Assign(&xyzs_[0], static_cast<uint32_t>(xyzs_.size()));
 				vb_->AddVertexStream(pos_vs);
 
 				box_ = MathLib::ComputeBoundingBox<float>(xyzs_.begin(), xyzs_.end());
@@ -110,7 +110,7 @@ namespace KlayGE
 				{
 					// 建立法线坐标
 					VertexStreamPtr normal_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_Normals, sizeof(float), 3)), true);
-					normal_vs->Assign(&normals_[0], normals_.size());
+					normal_vs->Assign(&normals_[0], static_cast<uint32_t>(normals_.size()));
 					vb_->AddVertexStream(normal_vs);
 				}
 
@@ -118,13 +118,13 @@ namespace KlayGE
 				for (size_t i = 0; i < multi_tex_coords_.size(); ++ i)
 				{
 					VertexStreamPtr tex_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(static_cast<VertexStreamType>(VST_TextureCoords0 + i), sizeof(float), 2)), true);
-					tex_vs->Assign(&multi_tex_coords_[i][0], multi_tex_coords_[i].size());
+					tex_vs->Assign(&multi_tex_coords_[i][0], static_cast<uint32_t>(multi_tex_coords_[i].size()));
 					vb_->AddVertexStream(tex_vs);
 				}
 
 				// 建立索引
 				vb_->SetIndexStream(rf.MakeIndexStream(true));
-				vb_->GetIndexStream()->Assign(&indices_[0], indices_.size());
+				vb_->GetIndexStream()->Assign(&indices_[0], static_cast<uint32_t>(indices_.size()));
 			}
 
 			beBuilt_ = true;

@@ -36,7 +36,7 @@
 				OutputFile="$(OutDir)/Refract_d.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/Refract.pdb"
+				ProgramDatabaseFile="$(OutDir)/$(ProjectName)_d.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool

@@ -36,7 +36,7 @@
 				OutputFile="$(OutDir)/Cartoon_d.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/Cartoon.pdb"
+				ProgramDatabaseFile="$(OutDir)/$(ProjectName)_d.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
