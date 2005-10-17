@@ -1,5 +1,5 @@
 // OcclusionQuery.hpp
-// KlayGE 遮挡检测类 实现文件
+// KlayGE 遮挡查询类 实现文件
 // Ver 3.0.0
 // 版权所有(C) 龚敏敏, 2005
 // Homepage: http://klayge.sourceforge.net
@@ -14,6 +14,7 @@
 #define _OCCLUSIONQUERY_HPP
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KlayGE/Query.hpp>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_Core_d.lib")
@@ -23,15 +24,12 @@
 
 namespace KlayGE
 {
-	class OcclusionQuery
+	class OcclusionQuery : public Query
 	{
 	public:
 		virtual ~OcclusionQuery()
 		{
 		}
-
-		virtual void Begin() = 0;
-		virtual void End() = 0;
 
 		virtual uint32_t SamplesPassed() = 0;
 	};

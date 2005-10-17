@@ -6,8 +6,8 @@ struct VS_INPUT
 {
 	float4 pos			: POSITION;
 	float2 texcoord0	: TEXCOORD0;
-	float3 T			: TEXCOORD1;	// in object space
-	float3 B			: TEXCOORD2;	// in object space
+	float3 T			: TANGENT;	// in object space
+	float3 B			: BINORMAL;	// in object space
 };
 
 struct VS_OUTPUT
@@ -96,7 +96,7 @@ float4 DistanceMappingPS_20(float3 texCoord0	: TEXCOORD0,
 					uniform sampler3D distanceMap,
 					uniform samplerCUBE normalizerMap) : COLOR
 {
-	float3 view = (texCUBE(normalizerMap, V).rgb * 2 - 1) * float3(1, 1, 16) * -0.06;
+	float3 view = NormalizeByCube(V) * float3(1, 1, 16) * -0.06;
 
 	float3 texUV = texCoord0;
 	for (int i = 0; i < 2; ++ i)
@@ -107,8 +107,8 @@ float4 DistanceMappingPS_20(float3 texCoord0	: TEXCOORD0,
 
 	float3 diffuse = tex2D(diffuseMap, texUV.xy);
 
-	float3 bumpNormal = texCUBE(normalizerMap, tex2D(normalMap, texUV.xy).rgb * 2 - 1).rgb * 2 - 1;
-	float3 lightVec = texCUBE(normalizerMap, L).rgb * 2 - 1;
+	float3 bumpNormal = NormalizeByCube(tex2D(normalMap, texUV.xy).rgb * 2 - 1);
+	float3 lightVec = NormalizeByCube(L);
 	float diffuseFactor = dot(lightVec, bumpNormal);
 
 	return float4(diffuse * diffuseFactor, 1);

@@ -73,7 +73,7 @@ namespace KlayGE
 
 		RenderVertexStreamPtr MakeRenderVertexStream(uint32_t width, uint32_t height);
 
-		OcclusionQueryPtr MakeOcclusionQuery();
+		QueryPtr MakeOcclusionQuery();
 
 	private:
 		CGcontext context_;

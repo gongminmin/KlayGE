@@ -101,9 +101,9 @@ namespace KlayGE
 		return ret;
 	}
 
-	OcclusionQueryPtr D3D9RenderFactory::MakeOcclusionQuery()
+	QueryPtr D3D9RenderFactory::MakeOcclusionQuery()
 	{
-		return OcclusionQueryPtr(new D3D9OcclusionQuery);
+		return QueryPtr(new D3D9OcclusionQuery);
 	}
 
 	void D3D9RenderFactory::OnLostDevice()

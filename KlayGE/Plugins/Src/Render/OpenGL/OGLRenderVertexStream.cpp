@@ -122,18 +122,9 @@ namespace KlayGE
 		}
 
 		GLenum type;
-		switch (elem.type)
+		switch (elem.component_size)
 		{
-		case VST_Positions:
-		case VST_Normals:
-		case VST_TextureCoords0:
-		case VST_TextureCoords1:
-		case VST_TextureCoords2:
-		case VST_TextureCoords3:
-		case VST_TextureCoords4:
-		case VST_TextureCoords5:
-		case VST_TextureCoords6:
-		case VST_TextureCoords7:
+		case sizeof(float):
 			type = GL_FLOAT;
 			{
 				std::vector<float> dummy(width_ * height_ * elem.num_components);
@@ -141,8 +132,7 @@ namespace KlayGE
 			}
 			break;
 
-		case VST_Diffuses:
-		case VST_Speculars:
+		case sizeof(uint8_t):
 			type = GL_UNSIGNED_BYTE;
 			{
 				std::vector<uint8_t> dummy(width_ * height_ * elem.num_components);

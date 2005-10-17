@@ -6,8 +6,8 @@ struct VS_INPUT
 {
 	float4 pos			: POSITION;
 	float2 texcoord0	: TEXCOORD0;
-	float3 T			: TEXCOORD1;	// in object space
-	float3 B			: TEXCOORD2;	// in object space
+	float3 T			: TANGENT;	// in object space
+	float3 B			: BINORMAL;	// in object space
 };
 
 struct VS_OUTPUT

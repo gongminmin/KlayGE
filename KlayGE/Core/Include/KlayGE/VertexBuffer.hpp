@@ -62,7 +62,11 @@ namespace KlayGE
 		VST_TextureCoords4 = 11,
 		VST_TextureCoords5 = 12,
 		VST_TextureCoords6 = 13,
-		VST_TextureCoords7 = 14
+		VST_TextureCoords7 = 14,
+		// Vertex tangent
+		VST_Tangent = 15,
+		// Vertex binormal
+		VST_Binormal = 16
 	};
 
 	struct vertex_element

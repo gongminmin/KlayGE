@@ -240,19 +240,29 @@ namespace KlayGE
 				case VST_Positions:
 					glEnableClientState(GL_VERTEX_ARRAY);
 					stream.Active();
-					glVertexPointer(3, GL_FLOAT, stream.VertexSize(), reinterpret_cast<GLvoid const *>(elem_offset));
+					glVertexPointer(3, GL_FLOAT, stream.VertexSize(),
+						reinterpret_cast<GLvoid*>(elem_offset));
 					break;
 			
 				case VST_Normals:
 					glEnableClientState(GL_NORMAL_ARRAY);
 					stream.Active();
-					glNormalPointer(GL_FLOAT, stream.VertexSize(), reinterpret_cast<GLvoid const *>(elem_offset));
+					glNormalPointer(GL_FLOAT, stream.VertexSize(),
+						reinterpret_cast<GLvoid*>(elem_offset));
 					break;
 
 				case VST_Diffuses:
 					glEnableClientState(GL_COLOR_ARRAY);
 					stream.Active();
-					glColorPointer(4, GL_UNSIGNED_BYTE, stream.VertexSize(), reinterpret_cast<GLvoid const *>(elem_offset));
+					glColorPointer(4, GL_UNSIGNED_BYTE, stream.VertexSize(),
+						reinterpret_cast<GLvoid*>(elem_offset));
+					break;
+
+				case VST_Speculars:
+					glEnableClientState(GL_SECONDARY_COLOR_ARRAY);
+					stream.Active();
+					glSecondaryColorPointer(4, GL_UNSIGNED_BYTE, stream.VertexSize(),
+						reinterpret_cast<GLvoid*>(elem_offset));
 					break;
 
 				case VST_TextureCoords0:
@@ -267,7 +277,11 @@ namespace KlayGE
 					glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 					stream.Active();
 					glTexCoordPointer(static_cast<GLint>(vs_elem.num_components),
-							GL_FLOAT, stream.VertexSize(), reinterpret_cast<GLvoid const *>(elem_offset));
+							GL_FLOAT, stream.VertexSize(), reinterpret_cast<GLvoid*>(elem_offset));
+					break;
+
+				default:
+					BOOST_ASSERT(false);
 					break;
 				}
 

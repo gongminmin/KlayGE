@@ -372,6 +372,18 @@ namespace KlayGE
 				element.Usage		= D3DDECLUSAGE_TEXCOORD;
 				element.UsageIndex	= static_cast<BYTE>(vs_elem.type - VST_TextureCoords0);
 				break;
+
+			case VST_Tangent:
+				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + vs_elem.num_components;
+				element.Usage		= D3DDECLUSAGE_TANGENT;
+				element.UsageIndex	= 0;
+				break;
+
+			case VST_Binormal:
+				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + vs_elem.num_components;
+				element.Usage		= D3DDECLUSAGE_BINORMAL;
+				element.UsageIndex	= 0;
+				break;
 			}
 
 			elem_offset += vs_elem.element_size();
