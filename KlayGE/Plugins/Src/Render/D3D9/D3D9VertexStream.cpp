@@ -48,14 +48,24 @@ namespace KlayGE
 	{
 		numVertices_ = numVertices;
 
-		D3D9RenderEngine const & renderEngine(*checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		d3d_device_ = renderEngine.D3DDevice();
+		uint32_t vb_size = 0;
+		if (buffer_)
+		{
+			D3DVERTEXBUFFER_DESC desc;
+			buffer_->GetDesc(&desc);
+			vb_size = desc.Size;
+		}
+		if (this->StreamSize() > vb_size)
+		{
+			D3D9RenderEngine const & renderEngine(*checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+			d3d_device_ = renderEngine.D3DDevice();
 
-		IDirect3DVertexBuffer9* theBuffer;
-		TIF(d3d_device_->CreateVertexBuffer(static_cast<UINT>(this->StreamSize()),
-				this->IsStatic() ? 0 : D3DUSAGE_DYNAMIC,
-				0, D3DPOOL_DEFAULT, &theBuffer, NULL));
-		buffer_ = MakeCOMPtr(theBuffer);
+			IDirect3DVertexBuffer9* theBuffer;
+			TIF(d3d_device_->CreateVertexBuffer(static_cast<UINT>(this->StreamSize()),
+					this->IsStatic() ? 0 : D3DUSAGE_DYNAMIC,
+					0, D3DPOOL_DEFAULT, &theBuffer, NULL));
+			buffer_ = MakeCOMPtr(theBuffer);
+		}
 
 		void* dest;
 		TIF(buffer_->Lock(0, 0, &dest,

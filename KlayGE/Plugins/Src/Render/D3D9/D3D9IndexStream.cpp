@@ -40,14 +40,24 @@ namespace KlayGE
 	{
 		numIndices_ = numIndices;
 
-		D3D9RenderEngine const & renderEngine(*checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		d3d_device_ = renderEngine.D3DDevice();
+		uint32_t ib_size = 0;
+		if (buffer_)
+		{
+			D3DINDEXBUFFER_DESC desc;
+			buffer_->GetDesc(&desc);
+			ib_size = desc.Size;
+		}
+		if (this->StreamSize() > ib_size)
+		{
+			D3D9RenderEngine const & renderEngine(*checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+			d3d_device_ = renderEngine.D3DDevice();
 
-		IDirect3DIndexBuffer9* buffer;
-		TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->StreamSize()), 
-				this->IsStatic() ? 0 : D3DUSAGE_DYNAMIC,
-				D3DFMT_INDEX16, D3DPOOL_DEFAULT, &buffer, NULL));
-		buffer_ = MakeCOMPtr(buffer);
+			IDirect3DIndexBuffer9* buffer;
+			TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->StreamSize()), 
+					this->IsStatic() ? 0 : D3DUSAGE_DYNAMIC,
+					D3DFMT_INDEX16, D3DPOOL_DEFAULT, &buffer, NULL));
+			buffer_ = MakeCOMPtr(buffer);
+		}
 
 		void* dest;
 		TIF(buffer_->Lock(0, 0, &dest, D3DLOCK_NOSYSLOCK | (this->IsStatic() ? 0 : D3DLOCK_DISCARD)));
