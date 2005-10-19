@@ -71,6 +71,9 @@ namespace KlayGE
 		void DepthBufferFunction(CompareFunction depthFunction);
 		void DepthBias(uint16_t bias);
 
+		void AlphaTest(bool enabled);
+		void AlphaFunction(CompareFunction alphaFunction, float refValue);
+
 		void SetSampler(uint32_t stage, SamplerPtr const & sampler);
 		void DisableSampler(uint32_t stage);
 
@@ -86,6 +89,9 @@ namespace KlayGE
 		void PointDistanceAttenuation(float quadratic0, float quadratic1, float quadratic2);
 		void PointSize(float size);
 		void PointMinMaxSize(float min_size, float max_size);
+
+		void ScissorTest(bool enabled);
+		void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 
 	private:
 		void DoActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget);

@@ -406,6 +406,25 @@ namespace KlayGE
 		TIF(d3dDevice_->SetRenderState(D3DRS_DEPTHBIAS, bias));
 	}
 
+	// 打开/关闭Alpha测试
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9RenderEngine::AlphaTest(bool enabled)
+	{
+		BOOST_ASSERT(d3dDevice_);
+
+		TIF(d3dDevice_->SetRenderState(D3DRS_ALPHATESTENABLE, enabled ? D3DZB_TRUE : D3DZB_FALSE));
+	}
+
+	// 设置Alpha比较函数和参考值
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9RenderEngine::AlphaFunction(CompareFunction alphaFunction, float refValue)
+	{
+		BOOST_ASSERT(d3dDevice_);
+
+		TIF(d3dDevice_->SetRenderState(D3DRS_ALPHAFUNC, D3D9Mapping::Mapping(alphaFunction)));
+		TIF(d3dDevice_->SetRenderState(D3DRS_ALPHAREF, static_cast<uint32_t>(refValue * 255) & 0xFF));
+	}
+
 	// 设置纹理
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::SetSampler(uint32_t stage, SamplerPtr const & sampler)
@@ -671,6 +690,21 @@ namespace KlayGE
 
 		d3dDevice_->SetRenderState(D3DRS_POINTSIZE_MIN, *reinterpret_cast<DWORD*>(&min_size));
 		d3dDevice_->SetRenderState(D3DRS_POINTSIZE_MAX, *reinterpret_cast<DWORD*>(&max_size));
+	}
+
+	// 打开/关闭剪除测试
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9RenderEngine::ScissorTest(bool enabled)
+	{
+		d3dDevice_->SetRenderState(D3DRS_SCISSORTESTENABLE, enabled);
+	}
+
+	// 设置剪除矩阵
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9RenderEngine::ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+	{
+		RECT rc = { x, y, width, height };
+		d3dDevice_->SetScissorRect(&rc);
 	}
 
 	// 填充设备能力

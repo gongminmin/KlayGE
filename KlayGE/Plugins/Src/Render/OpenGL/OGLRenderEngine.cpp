@@ -394,6 +394,27 @@ namespace KlayGE
 		glPolygonOffset(1.0f, bias);
 	}
 
+	// 打开/关闭Alpha测试
+	/////////////////////////////////////////////////////////////////////////////////
+	void OGLRenderEngine::AlphaTest(bool enabled)
+	{
+		if (enabled)
+		{
+			glEnable(GL_ALPHA_TEST);
+		}
+		else
+		{
+			glDisable(GL_ALPHA_TEST);
+		}
+	}
+
+	// 设置Alpha比较函数和参考值
+	/////////////////////////////////////////////////////////////////////////////////
+	void OGLRenderEngine::AlphaFunction(CompareFunction alphaFunction, float refValue)
+	{
+		glAlphaFunc(OGLMapping::Mapping(alphaFunction), refValue);
+	}
+
 	// 设置纹理
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::SetSampler(uint32_t stage, SamplerPtr const & sampler)
@@ -572,6 +593,27 @@ namespace KlayGE
 			glPointParameterf_(GL_POINT_SIZE_MIN, std::max(min_size, caps_.min_point_size));
 			glPointParameterf_(GL_POINT_SIZE_MAX, std::min(max_size, caps_.max_point_size));
 		}
+	}
+
+	// 打开/关闭剪除测试
+	/////////////////////////////////////////////////////////////////////////////////
+	void OGLRenderEngine::ScissorTest(bool enabled)
+	{
+		if (enabled)
+		{
+			glEnable(GL_SCISSOR_TEST);
+		}
+		else
+		{
+			glDisable(GL_SCISSOR_TEST);
+		}
+	}
+
+	// 设置剪除矩阵
+	/////////////////////////////////////////////////////////////////////////////////
+	void OGLRenderEngine::ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+	{
+		glScissor(x, y, width, height);
 	}
 
 	// 填充设备能力

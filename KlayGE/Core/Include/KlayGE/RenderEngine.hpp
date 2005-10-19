@@ -7,6 +7,7 @@
 // 3.0.0
 // 去掉了固定流水线 (2005.8.18)
 // 支持point sprite (2005.9.28)
+// 支持scissor (2005.10.20)
 //
 // 2.8.0
 // 简化了StencilBuffer相关操作 (2005.7.20)
@@ -161,6 +162,9 @@ namespace KlayGE
 		virtual void DepthBufferFunction(CompareFunction depthFunction) = 0;
 		virtual void DepthBias(uint16_t bias) = 0;
 
+		virtual void AlphaTest(bool enabled) = 0;
+		virtual void AlphaFunction(CompareFunction alphaFunction, float refValue) = 0;
+
 		void ActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget);
 		RenderTargetPtr ActiveRenderTarget(uint32_t n) const;
 
@@ -192,6 +196,10 @@ namespace KlayGE
 		virtual void PointDistanceAttenuation(float quadratic0, float quadratic1, float quadratic2) = 0;
 		virtual void PointSize(float size) = 0;
 		virtual void PointMinMaxSize(float min_size, float max_size) = 0;
+
+		// Scissor support
+		virtual void ScissorTest(bool enabled) = 0;
+		virtual void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height) = 0;
 
 	protected:
 		virtual void DoActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget) = 0;

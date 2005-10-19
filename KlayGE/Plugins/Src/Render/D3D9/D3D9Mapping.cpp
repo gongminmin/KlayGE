@@ -306,7 +306,7 @@ namespace KlayGE
 		elements.resize(vs.NumElements());
 
 		uint16_t elem_offset = 0;
-		for (size_t i = 0; i < vs.NumElements(); ++ i)
+		for (uint32_t i = 0; i < vs.NumElements(); ++ i)
 		{
 			D3DVERTEXELEMENT9& element = elements[i];
 			element.Offset = elem_offset;
