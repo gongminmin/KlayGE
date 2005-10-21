@@ -237,43 +237,43 @@ namespace KlayGE
 				switch (vs_elem.type)
 				{
 				// Vertex xyzs
-				case VST_Positions:
+				case VET_Positions:
 					glEnableClientState(GL_VERTEX_ARRAY);
 					stream.Active();
 					glVertexPointer(3, GL_FLOAT, stream.VertexSize(),
 						reinterpret_cast<GLvoid*>(elem_offset));
 					break;
 			
-				case VST_Normals:
+				case VET_Normals:
 					glEnableClientState(GL_NORMAL_ARRAY);
 					stream.Active();
 					glNormalPointer(GL_FLOAT, stream.VertexSize(),
 						reinterpret_cast<GLvoid*>(elem_offset));
 					break;
 
-				case VST_Diffuses:
+				case VET_Diffuses:
 					glEnableClientState(GL_COLOR_ARRAY);
 					stream.Active();
 					glColorPointer(4, GL_UNSIGNED_BYTE, stream.VertexSize(),
 						reinterpret_cast<GLvoid*>(elem_offset));
 					break;
 
-				case VST_Speculars:
+				case VET_Speculars:
 					glEnableClientState(GL_SECONDARY_COLOR_ARRAY);
 					stream.Active();
 					glSecondaryColorPointer(4, GL_UNSIGNED_BYTE, stream.VertexSize(),
 						reinterpret_cast<GLvoid*>(elem_offset));
 					break;
 
-				case VST_TextureCoords0:
-				case VST_TextureCoords1:
-				case VST_TextureCoords2:
-				case VST_TextureCoords3:
-				case VST_TextureCoords4:
-				case VST_TextureCoords5:
-				case VST_TextureCoords6:
-				case VST_TextureCoords7:
-					glClientActiveTexture(GL_TEXTURE0 + vs_elem.type - VST_TextureCoords0);
+				case VET_TextureCoords0:
+				case VET_TextureCoords1:
+				case VET_TextureCoords2:
+				case VET_TextureCoords3:
+				case VET_TextureCoords4:
+				case VET_TextureCoords5:
+				case VET_TextureCoords6:
+				case VET_TextureCoords7:
+					glClientActiveTexture(GL_TEXTURE0 + vs_elem.type - VET_TextureCoords0);
 					glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 					stream.Active();
 					glTexCoordPointer(static_cast<GLint>(vs_elem.num_components),

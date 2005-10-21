@@ -35,7 +35,7 @@ VS_OUTPUT DistanceMappingVS(VS_INPUT input,
 	matObjToTangentSpace[2] = cross(input.T, input.B);
 
 	float3 vLight = lightPos.xyz - input.pos;
-	float3 vView = eyePos.xyz - input.pos;
+	float3 vView = input.pos - eyePos.xyz;
 
 	float3 vTanLight = mul(vLight, matObjToTangentSpace);
 	float3 vTanView = mul(vView, matObjToTangentSpace);
@@ -52,76 +52,88 @@ sampler2D normalMapSampler;
 sampler3D distanceMapSampler;
 samplerCUBE normalizerMapSampler;
 
-float3 NormalizeByCube(float3 v)
+half3 NormalizeByCube(half3 v)
 {
 	return texCUBE(normalizerMapSampler, v).rgb * 2 - 1;
 }
 
-float4 DistanceMappingPS(float3 texCoord0	: TEXCOORD0,
-						float3 L		: TEXCOORD1,
-						float3 V		: TEXCOORD2,
+half4 DistanceMappingPS(half3 texCoord0	: TEXCOORD0,
+						half3 L		: TEXCOORD1,
+						half3 V		: TEXCOORD2,
 
 					uniform sampler2D diffuseMap,
 					uniform sampler2D normalMap,
-					uniform sampler3D distanceMap,
-					uniform samplerCUBE normalizerMap) : COLOR
+					uniform sampler3D distanceMap) : COLOR
 {
-	float3 view = NormalizeByCube(V) * float3(1, 1, 16) * -0.06;
+	half3 view = NormalizeByCube(V) * half3(1, 1, 16) * 0.06;
 
-	float3 texUV = texCoord0;
+	half3 texUV = texCoord0;
 	for (int i = 0; i < 8; ++ i)
 	{
-		float dist = tex3D(distanceMap, texUV).r;
+		half dist = tex3D(distanceMap, texUV).r;
 		texUV += view * dist;
 	}
 
-	float2 dx = ddx(texCoord0.xy);
-	float2 dy = ddy(texCoord0.xy);
+	half4 clr;
+	if ((texUV.x <= 0) || (texUV.y <= 0) || (texUV.x >= 1) || (texUV.y >= 1))
+	{
+		// should be clipped by alpha test
+		clr = 0;
+	}
+	else
+	{
+		half2 dx = ddx(texCoord0.xy);
+		half2 dy = ddy(texCoord0.xy);
 
-	float3 diffuse = tex2D(diffuseMap, texUV.xy, dx, dy).rgb;
+		half3 diffuse = tex2D(diffuseMap, texUV.xy, dx, dy).rgb;
 
-	float3 bumpNormal = NormalizeByCube(tex2D(normalMap, texUV.xy, dx, dy).rgb * 2 - 1);
-	float3 lightVec = NormalizeByCube(L);
-	float diffuseFactor = dot(lightVec, bumpNormal);
+		half3 bumpNormal = NormalizeByCube(tex2D(normalMap, texUV.xy, dx, dy).rgb * 2 - 1);
+		half3 lightVec = NormalizeByCube(L);
+		half diffuseFactor = dot(lightVec, bumpNormal);
+		
+		clr = half4(diffuse * diffuseFactor, 1);
+	}
 
-	return float4(diffuse * diffuseFactor, 1);
+	return clr;
 }
 
-float4 DistanceMappingPS_20(float3 texCoord0	: TEXCOORD0,
-						float3 L		: TEXCOORD1,
-						float3 V		: TEXCOORD2,
+half4 DistanceMappingPS_20(half3 texCoord0	: TEXCOORD0,
+						half3 L		: TEXCOORD1,
+						half3 V		: TEXCOORD2,
 
 					uniform sampler2D diffuseMap,
 					uniform sampler2D normalMap,
-					uniform sampler3D distanceMap,
-					uniform samplerCUBE normalizerMap) : COLOR
+					uniform sampler3D distanceMap) : COLOR
 {
-	float3 view = NormalizeByCube(V) * float3(1, 1, 16) * -0.06;
+	half3 view = NormalizeByCube(V) * half3(1, 1, 16) * 0.06;
 
-	float3 texUV = texCoord0;
+	half3 texUV = texCoord0;
 	for (int i = 0; i < 2; ++ i)
 	{
-		float dist = tex3D(distanceMap, texUV).r;
+		half dist = tex3D(distanceMap, texUV).r;
 		texUV += view * dist;
 	}
 
-	float3 diffuse = tex2D(diffuseMap, texUV.xy);
+	half3 diffuse = tex2D(diffuseMap, texUV.xy);
 
-	float3 bumpNormal = NormalizeByCube(tex2D(normalMap, texUV.xy).rgb * 2 - 1);
-	float3 lightVec = NormalizeByCube(L);
-	float diffuseFactor = dot(lightVec, bumpNormal);
+	half3 bumpNormal = NormalizeByCube(tex2D(normalMap, texUV.xy).rgb * 2 - 1);
+	half3 lightVec = NormalizeByCube(L);
+	half diffuseFactor = dot(lightVec, bumpNormal);
 
-	return float4(diffuse * diffuseFactor, 1);
+	return half4(diffuse * diffuseFactor, 1);
 }
 
 technique DistanceMapping30
 {
 	pass p0
 	{
+		AlphaTestEnable = true;
+		AlphaRef = 0x08;
+		AlphaFunc = GreaterEqual;
+		
 		VertexShader = compile vs_3_0 DistanceMappingVS(worldviewproj, lightPos, eyePos);
 		PixelShader = compile ps_3_0 DistanceMappingPS(diffuseMapSampler,
-										normalMapSampler, distanceMapSampler,
-										normalizerMapSampler);
+										normalMapSampler, distanceMapSampler);
 	}
 }
 
@@ -129,10 +141,13 @@ technique DistanceMapping2a
 {
 	pass p0
 	{
+		AlphaTestEnable = true;
+		AlphaRef = 0x08;
+		AlphaFunc = GreaterEqual;
+		
 		VertexShader = compile vs_1_1 DistanceMappingVS(worldviewproj, lightPos, eyePos);
 		PixelShader = compile ps_2_a DistanceMappingPS(diffuseMapSampler,
-										normalMapSampler, distanceMapSampler,
-										normalizerMapSampler);
+										normalMapSampler, distanceMapSampler);
 	}
 }
 
@@ -140,9 +155,12 @@ technique DistanceMapping20
 {
 	pass p0
 	{
+		AlphaTestEnable = true;
+		AlphaRef = 0x08;
+		AlphaFunc = GreaterEqual;
+		
 		VertexShader = compile vs_1_1 DistanceMappingVS(worldviewproj, lightPos, eyePos);
 		PixelShader = compile ps_2_0 DistanceMappingPS_20(diffuseMapSampler,
-										normalMapSampler, distanceMapSampler,
-										normalizerMapSampler);
+										normalMapSampler, distanceMapSampler);
 	}
 }

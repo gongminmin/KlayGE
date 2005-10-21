@@ -6,6 +6,7 @@
 //
 // 3.0.0
 // 支持在单流中存储多种成员 (2005.10.15)
+// 支持instancing (2005.10.21)
 //
 // 2.8.0
 // 增加了CopyToMemory (2005.7.24)
@@ -40,43 +41,43 @@
 
 namespace KlayGE
 {
-	enum VertexStreamType
+	enum VertexElementType
 	{
 		// vertex positions
-		VST_Positions = 1,
+		VET_Positions = 1,
 		// vertex normals included (for lighting)
-		VST_Normals = 2,
+		VET_Normals = 2,
 		// Vertex colors - diffuse
-		VST_Diffuses = 3,
+		VET_Diffuses = 3,
 		// Vertex colors - specular
-		VST_Speculars = 4,
+		VET_Speculars = 4,
 		// Vertex blend weights
-		VST_BlendWeights = 5,
+		VET_BlendWeights = 5,
 		// Vertex blend indices
-		VST_BlendIndices = 6,
+		VET_BlendIndices = 6,
 		// at least one set of texture coords (exact number specified in class)
-		VST_TextureCoords0 = 7,
-		VST_TextureCoords1 = 8,
-		VST_TextureCoords2 = 9,
-		VST_TextureCoords3 = 10,
-		VST_TextureCoords4 = 11,
-		VST_TextureCoords5 = 12,
-		VST_TextureCoords6 = 13,
-		VST_TextureCoords7 = 14,
+		VET_TextureCoords0 = 7,
+		VET_TextureCoords1 = 8,
+		VET_TextureCoords2 = 9,
+		VET_TextureCoords3 = 10,
+		VET_TextureCoords4 = 11,
+		VET_TextureCoords5 = 12,
+		VET_TextureCoords6 = 13,
+		VET_TextureCoords7 = 14,
 		// Vertex tangent
-		VST_Tangent = 15,
+		VET_Tangent = 15,
 		// Vertex binormal
-		VST_Binormal = 16
+		VET_Binormal = 16
 	};
 
 	struct vertex_element
 	{
-		vertex_element(VertexStreamType type, uint8_t component_size, uint8_t num_components)
+		vertex_element(VertexElementType type, uint8_t component_size, uint8_t num_components)
 			: type(type), component_size(component_size), num_components(num_components)
 		{
 		}
 
-		VertexStreamType type;
+		VertexElementType type;
 		// 表示元素中每个成分的大小，比如Position元素的成分是size(float)
 		uint8_t component_size;
 		// 表示一个元素有几个成分表示，比如Position元素是由(x, y, z)组成，所以为3
@@ -91,6 +92,13 @@ namespace KlayGE
 
 	class VertexStream
 	{
+	public:
+		enum stream_type
+		{
+			ST_Geometry,
+			ST_Instance
+		};
+
 	public:
 		VertexStream(vertex_elements_type const & vertex_elems);
 		virtual ~VertexStream();
@@ -112,12 +120,19 @@ namespace KlayGE
 		VertexStream& Combine(VertexStreamPtr rhs);
 		VertexStream& Append(VertexStreamPtr rhs);
 
+		void FrequencyDivider(stream_type type, uint32_t freq);
+		stream_type StreamType() const;
+		uint32_t Frequency() const;
+
 	protected:
 		void RefreshVertexSize();
 
 	protected:
 		vertex_elements_type vertex_elems_;
 		uint16_t vertex_size_;
+
+		stream_type type_;
+		uint32_t freq_;
 	};
 
 	class IndexStream
@@ -168,12 +183,13 @@ namespace KlayGE
 		VertexStreamConstIterator VertexStreamBegin() const;
 		VertexStreamConstIterator VertexStreamEnd() const;
 
-
 		bool UseIndices() const;
 		uint32_t NumIndices() const;
 
 		void SetIndexStream(IndexStreamPtr index_stream);
 		IndexStreamPtr GetIndexStream() const;
+
+		void ExpandInstance();
 
 	protected:
 		BufferType type_;

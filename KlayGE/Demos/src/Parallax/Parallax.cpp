@@ -101,13 +101,13 @@ namespace
 
 			vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 
-			VertexStreamPtr vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_Positions, sizeof(float), 3)), true);
+			VertexStreamPtr vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VET_Positions, sizeof(float), 3)), true);
 			vs->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
-			VertexStreamPtr tex0_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_TextureCoords0, sizeof(float), 2)), true);
+			VertexStreamPtr tex0_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VET_TextureCoords0, sizeof(float), 2)), true);
 			tex0_vs->Assign(texs, sizeof(texs) / sizeof(texs[0]));
-			VertexStreamPtr tan_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_Tangent, sizeof(float), 3)), true);
+			VertexStreamPtr tan_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VET_Tangent, sizeof(float), 3)), true);
 			tan_vs->Assign(t, sizeof(t) / sizeof(t[0]));
-			VertexStreamPtr binormal_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_Binormal, sizeof(float), 3)), true);
+			VertexStreamPtr binormal_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VET_Binormal, sizeof(float), 3)), true);
 			binormal_vs->Assign(b, sizeof(b) / sizeof(b[0]));
 
 			vs->Combine(tex0_vs).Combine(tan_vs).Combine(binormal_vs);

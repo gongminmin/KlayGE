@@ -318,68 +318,68 @@ namespace KlayGE
 			switch (vs_elem.type)
 			{
 			// Vertex xyzs
-			case VST_Positions:
+			case VET_Positions:
 				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + vs_elem.num_components;
 				element.Usage		= D3DDECLUSAGE_POSITION;
 				element.UsageIndex	= 0;
 				break;
 
 			// Normal
-			case VST_Normals:
+			case VET_Normals:
 				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + vs_elem.num_components;
 				element.Usage		= D3DDECLUSAGE_NORMAL;
 				element.UsageIndex	= 0;
 				break;
 
 			// Vertex colors
-			case VST_Diffuses:
+			case VET_Diffuses:
 				element.Type		= D3DDECLTYPE_D3DCOLOR;
 				element.Usage		= D3DDECLUSAGE_COLOR;
 				element.UsageIndex	= 0;
 				break;
 
 			// Vertex speculars
-			case VST_Speculars:
+			case VET_Speculars:
 				element.Type		= D3DDECLTYPE_D3DCOLOR;
 				element.Usage		= D3DDECLUSAGE_COLOR;
 				element.UsageIndex	= 1;
 				break;
 			
 			// Blend Weights
-			case VST_BlendWeights:
+			case VET_BlendWeights:
 				element.Type		= D3DDECLTYPE_FLOAT4;
 				element.Usage		= D3DDECLUSAGE_BLENDWEIGHT;
 				element.UsageIndex	= 0;
 				break;
 
 			// Blend Indices
-			case VST_BlendIndices:
+			case VET_BlendIndices:
 				element.Type		= D3DDECLTYPE_D3DCOLOR;
 				element.Usage		= D3DDECLUSAGE_BLENDINDICES;
 				element.UsageIndex	= 0;
 				break;
 
 			// Do texture coords
-			case VST_TextureCoords0:
-			case VST_TextureCoords1:
-			case VST_TextureCoords2:
-			case VST_TextureCoords3:
-			case VST_TextureCoords4:
-			case VST_TextureCoords5:
-			case VST_TextureCoords6:
-			case VST_TextureCoords7:
+			case VET_TextureCoords0:
+			case VET_TextureCoords1:
+			case VET_TextureCoords2:
+			case VET_TextureCoords3:
+			case VET_TextureCoords4:
+			case VET_TextureCoords5:
+			case VET_TextureCoords6:
+			case VET_TextureCoords7:
 				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + vs_elem.num_components;
 				element.Usage		= D3DDECLUSAGE_TEXCOORD;
-				element.UsageIndex	= static_cast<BYTE>(vs_elem.type - VST_TextureCoords0);
+				element.UsageIndex	= static_cast<BYTE>(vs_elem.type - VET_TextureCoords0);
 				break;
 
-			case VST_Tangent:
+			case VET_Tangent:
 				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + vs_elem.num_components;
 				element.Usage		= D3DDECLUSAGE_TANGENT;
 				element.UsageIndex	= 0;
 				break;
 
-			case VST_Binormal:
+			case VET_Binormal:
 				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + vs_elem.num_components;
 				element.Usage		= D3DDECLUSAGE_BINORMAL;
 				element.UsageIndex	= 0;

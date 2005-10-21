@@ -80,13 +80,13 @@ namespace
 			for (VertexBuffer::VertexStreamIterator iter = vb_->VertexStreamBegin();
 				iter != vb_->VertexStreamEnd(); ++ iter)
 			{
-				if (VST_Positions == (*iter)->Element(0).type)
+				if (VET_Positions == (*iter)->Element(0).type)
 				{
 					xyz_vs_ = *iter;
 				}
 				else
 				{
-					if (VST_TextureCoords0 == (*iter)->Element(0).type)
+					if (VET_TextureCoords0 == (*iter)->Element(0).type)
 					{
 						tex_vs_ = *iter;
 					}
@@ -236,8 +236,8 @@ namespace KlayGE
 		*(effect_->ParameterByName("texFontSampler")) = theSampler_;
 		effect_->ActiveTechnique("fontTec");
 
-		vb_->AddVertexStream(rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_Positions, sizeof(float), 3))));
-		vb_->AddVertexStream(rf.MakeVertexStream(boost::make_tuple(vertex_element(VST_TextureCoords0, sizeof(float), 2))));
+		vb_->AddVertexStream(rf.MakeVertexStream(boost::make_tuple(vertex_element(VET_Positions, sizeof(float), 3))));
+		vb_->AddVertexStream(rf.MakeVertexStream(boost::make_tuple(vertex_element(VET_TextureCoords0, sizeof(float), 2))));
 
 		vb_->SetIndexStream(rf.MakeIndexStream());
 

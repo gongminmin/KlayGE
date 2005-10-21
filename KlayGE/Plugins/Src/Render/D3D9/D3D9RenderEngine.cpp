@@ -293,12 +293,27 @@ namespace KlayGE
 		for (VertexBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
 				iter != vb.VertexStreamEnd(); ++ iter)
 		{
-			VertexStream& stream(*(*iter));
+			VertexStream& stream = *(*iter);
+			uint32_t number = iter - vb.VertexStreamBegin();
 
 			D3D9VertexStream& d3d9vs(*checked_cast<D3D9VertexStream*>(&stream));
-			TIF(d3dDevice_->SetStreamSource(iter - vb.VertexStreamBegin(),
+			TIF(d3dDevice_->SetStreamSource(number,
 				d3d9vs.D3D9Buffer().get(), 0,
 				static_cast<UINT>(stream.VertexSize())));
+
+			uint32_t d3dss_type;
+			if (VertexStream::ST_Geometry == stream.StreamType())
+			{
+				d3dss_type = D3DSTREAMSOURCE_INDEXEDDATA;
+			}
+			else
+			{
+				BOOST_ASSERT(VertexStream::ST_Instance == stream.StreamType());
+
+				d3dss_type = D3DSTREAMSOURCE_INDEXEDDATA;
+			}
+
+			TIF(d3dDevice_->SetStreamSourceFreq(number, d3dss_type | stream.Frequency()));
 		}
 
 		// Clear any previous steam sources

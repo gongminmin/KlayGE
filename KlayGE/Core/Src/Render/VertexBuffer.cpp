@@ -22,7 +22,8 @@
 namespace KlayGE
 {
 	VertexStream::VertexStream(vertex_elements_type const & vertex_elems)
-			: vertex_elems_(vertex_elems)
+			: vertex_elems_(vertex_elems),
+				type_(ST_Geometry), freq_(1)
 	{
 		this->RefreshVertexSize();
 	}
@@ -33,7 +34,7 @@ namespace KlayGE
 
 	void VertexStream::CopyToMemory(void* data, vertex_elements_type const & rhs_vertex_elems)
 	{
-		typedef MapVector<VertexStreamType, std::pair<uint32_t, uint32_t> > ve_table_type;
+		typedef MapVector<VertexElementType, std::pair<uint32_t, uint32_t> > ve_table_type;
 		ve_table_type lhs_table;
 		uint32_t offset = 0;
 		for (uint32_t i = 0; i < this->NumElements(); ++ i)
@@ -140,6 +141,22 @@ namespace KlayGE
 		return *this;
 	}
 
+	void VertexStream::FrequencyDivider(stream_type type, uint32_t freq)
+	{
+		type_ = type;
+		freq_ = freq;
+	}
+
+	VertexStream::stream_type VertexStream::StreamType() const
+	{
+		return type_;
+	}
+
+    uint32_t VertexStream::Frequency() const
+	{
+		return freq_;
+	}
+
 	void VertexStream::RefreshVertexSize()
 	{
 		vertex_size_ = 0;
@@ -239,5 +256,74 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(indexStream_);
 		return indexStream_;
+	}
+
+	void VertexBuffer::ExpandInstance()
+	{
+		uint32_t num_vertices = 0;
+		uint32_t num_instance = 0;
+		for (VertexStreamsType::iterator iter = vertexStreams_.begin();
+			iter != vertexStreams_.end(); ++ iter)
+		{
+			VertexStreamPtr& vs = *iter;
+
+			if (VertexStream::ST_Geometry == vs->StreamType())
+			{
+				num_vertices = vs->NumVertices();
+				num_instance = vs->Frequency();
+				break;
+			}
+		}
+
+		if (num_instance > 1)
+		{
+			for (VertexStreamsType::iterator iter = vertexStreams_.begin();
+				iter != vertexStreams_.end(); ++ iter)
+			{
+				VertexStreamPtr& vs = *iter;
+
+				if (VertexStream::ST_Geometry == vs->StreamType())
+				{
+					BOOST_ASSERT(num_vertices == vs->NumVertices());
+					BOOST_ASSERT(num_instance == vs->Frequency());
+
+					uint32_t const geom_size = num_vertices * vs->VertexSize();
+					std::vector<uint8_t> target_buffer(geom_size * num_instance);
+					vs->CopyToMemory(&target_buffer[0]);
+
+					for (uint32_t i = 1; i < num_instance; ++ i)
+					{
+						std::copy(&target_buffer[0], &target_buffer[geom_size],
+							&target_buffer[geom_size * i]);
+					}
+
+					vs->Assign(&target_buffer[0], vs->NumVertices() * num_instance);
+				}
+				else
+				{
+					BOOST_ASSERT(VertexStream::ST_Instance == vs->StreamType());
+
+					uint32_t const instance_size = vs->VertexSize();
+
+					std::vector<uint8_t> ins_buffer(vs->StreamSize());
+					vs->CopyToMemory(&ins_buffer[0]);
+
+					std::vector<uint8_t> target_buffer(instance_size * num_vertices * num_instance);
+
+					for (uint32_t i = 0; i < num_instance; ++ i)
+					{
+						for (uint32_t j = 0; j < num_vertices; ++ j)
+						{
+							std::copy(&ins_buffer[i * instance_size], &ins_buffer[(i + 1) * instance_size],
+								&target_buffer[(i * num_vertices + j) * instance_size]);
+						}
+					}
+
+					vs->Assign(&target_buffer[0], vs->NumVertices() * num_instance);
+				}
+
+				vs->FrequencyDivider(VertexStream::ST_Geometry, 1);
+			}
+		}
 	}
 }
