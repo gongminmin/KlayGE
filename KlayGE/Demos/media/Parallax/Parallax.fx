@@ -49,12 +49,12 @@ sampler2D normalMapSampler;
 sampler2D heightMapSampler;
 samplerCUBE normalizerMapSampler;
 
-float3 NormalizeByCube(float3 v)
+half3 NormalizeByCube(half3 v)
 {
 	return texCUBE(normalizerMapSampler, v).rgb * 2 - 1;
 }
 
-float4 ParallaxPS(float2 texCoord0	: TEXCOORD0,
+half4 ParallaxPS(float2 texCoord0	: TEXCOORD0,
 					float3 L		: TEXCOORD1,
 					float3 V		: TEXCOORD2,
 
@@ -63,18 +63,18 @@ float4 ParallaxPS(float2 texCoord0	: TEXCOORD0,
 					uniform sampler2D heightMap,
 					uniform samplerCUBE normalizerMap) : COLOR
 {
-	float3 view = NormalizeByCube(V);
+	half3 view = NormalizeByCube(V);
 
-	float height = tex2D(heightMap, texCoord0).r * 0.06 - 0.02;
-	float2 texUV = texCoord0 + (view.xy * height);
+	half height = tex2D(heightMap, texCoord0).r * 0.06 - 0.02;
+	half2 texUV = texCoord0 + (view.xy * height);
 
-	float3 diffuse = tex2D(diffuseMap, texUV).rgb;
+	half3 diffuse = tex2D(diffuseMap, texUV).rgb;
 
-	float3 bumpNormal = NormalizeByCube(tex2D(normalMap, texUV).rgb * 2 - 1);
-	float3 lightVec = NormalizeByCube(L);
-	float diffuseFactor = dot(lightVec, bumpNormal);
+	half3 bumpNormal = NormalizeByCube(tex2D(normalMap, texUV).rgb * 2 - 1);
+	half3 lightVec = NormalizeByCube(L);
+	half diffuseFactor = dot(lightVec, bumpNormal);
 
-	return float4(diffuse * diffuseFactor, 1);
+	return half4(diffuse * diffuseFactor, 1);
 }
 
 technique Parallax

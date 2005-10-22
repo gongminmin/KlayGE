@@ -28,9 +28,9 @@ VS_OUTPUT VertexDisplacementVS(VS_INPUT input,
 	float4 v = input.pos;
 	v.z = (cos(input.pos.x + currentAngle) + sin(input.pos.y + currentAngle)) * input.pos.x * 0.2f;
 
-	float3 x_dir = float3(0.5f, 0, -sin(input.pos.x + currentAngle) * 0.2f);
-	float3 y_dir = float3(0, 0.5f, cos(input.pos.y + currentAngle) * input.pos.x * 0.2f);
-	float3 normal = mul(normalize(cross(x_dir, y_dir)), (float3x3)modelviewIT);
+	half3 x_dir = half3(0.5f, 0, -sin(input.pos.x + currentAngle) * 0.2f);
+	half3 y_dir = half3(0, 0.5f, cos(input.pos.y + currentAngle) * input.pos.x * 0.2f);
+	half3 normal = mul(normalize(cross(x_dir, y_dir)), (float3x3)modelviewIT);
 
 	output.pos = mul(mul(v, modelview), proj);
 	output.clr = float4(max(0, dot(lightDir, normal)).xxx, 1);
