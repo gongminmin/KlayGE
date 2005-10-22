@@ -27,6 +27,7 @@
 #define _TEXTURE_HPP
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KlayGE/Math.hpp>
 
 #include <string>
 #include <boost/assert.hpp>
@@ -279,6 +280,52 @@ namespace KlayGE
 
 	TexturePtr LoadTexture(std::string const & tex_name);
 	void SaveToFile(TexturePtr texture, std::string const & tex_name);
+
+	// 返回立方环境映射的观察矩阵
+	//////////////////////////////////////////////////////////////////////////////////
+	template <typename T>
+	inline Matrix4_T<T>
+	CubeMapViewMatrixLH(Texture::CubeFaces face)
+	{
+		Vector_T<T, 3> look_dir;
+		Vector_T<T, 3> up_dir;
+
+		switch (face)
+		{
+		case Texture::CF_Positive_X:
+			look_dir	= Vector_T<T, 3>(1, 0, 0);
+			up_dir		= Vector_T<T, 3>(0, 1, 0);
+			break;
+
+		case Texture::CF_Negative_X:
+			look_dir	= Vector_T<T, 3>(-1, 0, 0);
+			up_dir		= Vector_T<T, 3>(0, 1, 0);
+			break;
+
+		case Texture::CF_Positive_Y:
+			look_dir	= Vector_T<T, 3>(0, 1, 0);
+			up_dir		= Vector_T<T, 3>(0, 0, -1);
+			break;
+
+		case Texture::CF_Negative_Y:
+			look_dir	= Vector_T<T, 3>(0, -1, 0);
+			up_dir		= Vector_T<T, 3>(0, 0, 1);
+			break;
+
+		case Texture::CF_Positive_Z:
+			look_dir	= Vector_T<T, 3>(0, 0, 1);
+			up_dir		= Vector_T<T, 3>(0, 1, 0);
+			break;
+
+		case Texture::CF_Negative_Z:
+			look_dir	= Vector_T<T, 3>(0, 0, -1);
+			up_dir		= Vector_T<T, 3>(0, 1, 0);
+			break;
+		}
+
+		// 设置立方体环境映射的观察矩阵
+		return MathLib::LookAtLH(Vector_T<T, 3>(0, 0, 0), look_dir, up_dir);
+	}
 }
 
 #endif			// _TEXTURE_HPP

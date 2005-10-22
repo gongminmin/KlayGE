@@ -74,13 +74,6 @@ namespace KlayGE
 		}
 	}
 
-	void StaticMesh::ComputeNormal()
-	{
-		normals_.resize(xyzs_.size());
-		MathLib::ComputeNormal<float>(normals_.begin(),
-			indices_.begin(), indices_.end(), xyzs_.begin(), xyzs_.end());
-	}
-
 	Box StaticMesh::GetBound() const
 	{
 		return box_;

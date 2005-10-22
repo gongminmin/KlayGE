@@ -264,7 +264,7 @@ void AsciiArts::InitObjects()
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	mesh_ = LoadKMesh("bunny.kmesh");
+	mesh_ = LoadKMesh("teapot.kmesh");
 	mesh_->AddToSceneManager();
 
 	this->BuildAsciiLumsTex();

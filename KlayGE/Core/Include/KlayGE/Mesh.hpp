@@ -140,8 +140,6 @@ namespace KlayGE
 
 		void SetModelMatrix(Matrix4 const & mat);
 
-		void ComputeNormal();
-
 		template <typename ForwardIterator>
 		void AssignXYZs(ForwardIterator first, ForwardIterator last)
 		{

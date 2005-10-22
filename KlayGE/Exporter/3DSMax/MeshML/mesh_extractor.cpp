@@ -67,15 +67,15 @@ namespace KlayGE
 	{
 	}
 
-	void meshml_extractor::export_objects(std::vector<INode*> const & nodes)
+	void meshml_extractor::export_objects(std::vector<INode*> const & nodes, bool flip_normals)
 	{
 		for (size_t i = 0; i < nodes.size(); ++ i)
 		{
-			this->extract_object(nodes[i]);
+			this->extract_object(nodes[i], flip_normals);
 		}
 	}
 
-	void meshml_extractor::extract_object(INode* node)
+	void meshml_extractor::extract_object(INode* node, bool flip_normals)
 	{
 		if (!is_mesh(node))
 		{
@@ -87,16 +87,16 @@ namespace KlayGE
 		obj_info.name = tstr_to_str(node->GetName());
 
 		Matrix3 obj_matrix = node->GetObjectTM(0);
-		bool is_mirrored = false;
 		Point3 Row0 = obj_matrix.GetRow(0);
 		Point3 Row1 = obj_matrix.GetRow(1);
 		Point3 Row2 = obj_matrix.GetRow(2);
 		if ((Row0 ^ Row1) % Row2 <= 0)
 		{
-			is_mirrored = true;
+			flip_normals = !flip_normals;
 		}
 
 		std::vector<Point3> positions;
+		std::vector<Point3> normals;
 		std::map<int, std::vector<Point2> > texs;
 		std::vector<int> pos_indices;
 		std::map<int, std::vector<int> > tex_indices;
@@ -143,6 +143,7 @@ namespace KlayGE
 			}
 
 			Mesh& mesh = tri->GetMesh();
+			mesh.buildNormals();
 
 			obj_info.triangles.resize(mesh.getNumFaces());
 			for (size_t i = 0; i < obj_info.triangles.size(); ++ i)
@@ -155,6 +156,7 @@ namespace KlayGE
 			for (size_t i = 0; i < mesh.getNumVerts(); ++ i)
 			{
 				positions.push_back(mesh.verts[i]);
+				normals.push_back(mesh.gfxNormals[i]);
 			}
 
 			for (int channel = 1; channel < MAX_MESHMAPS; channel ++)
@@ -199,7 +201,7 @@ namespace KlayGE
 				vertex_index_t vertex_index;
 
 				size_t offset;
-				if (!is_mirrored)
+				if (!flip_normals)
 				{
 					offset = i * 3 + j;
 				}
@@ -237,6 +239,16 @@ namespace KlayGE
 			obj_info.vertices[ver_index].pos.x = pos.x;
 			obj_info.vertices[ver_index].pos.y = pos.z;
 			obj_info.vertices[ver_index].pos.z = pos.y;
+
+			Point3 normal = normals[iter->pos_index] * obj_matrix;
+			if (flip_normals)
+			{
+				normal = -normal;
+			}
+			normal = normal.Normalize();
+			obj_info.vertices[ver_index].normal.x = normal.x;
+			obj_info.vertices[ver_index].normal.y = normal.z;
+			obj_info.vertices[ver_index].normal.z = normal.y;
 
 			int uv_layer = 0;
 			for (std::map<int, std::vector<Point2> >::iterator uv_iter = texs.begin();
@@ -290,6 +302,10 @@ namespace KlayGE
 				ofs << "\t\t\t\t<vertex x=\'" << v_iter->pos.x
 					<< "\' y=\'" << v_iter->pos.y
 					<< "\' z=\'" << v_iter->pos.z << "\'>" << endl;
+
+				ofs << "\t\t\t\t\t<normal x=\'" << v_iter->normal.x
+					<< "\' y=\'" << v_iter->normal.y
+					<< "\' z=\'" << v_iter->normal.z << "\'/>" << endl;
 
 				for (std::vector<Point2>::const_iterator t_iter = v_iter->tex.begin();
 					t_iter != v_iter->tex.end(); ++ t_iter)

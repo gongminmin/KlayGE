@@ -25,6 +25,7 @@ namespace KlayGE
 	struct vertex_t
 	{
 		Point3 pos;
+		Point3 normal;
 		std::vector<Point2> tex;
 	};
 
@@ -55,11 +56,11 @@ namespace KlayGE
 	public:
 		meshml_extractor();
 
-		void export_objects(std::vector<INode*> const & nodes);
+		void export_objects(std::vector<INode*> const & nodes, bool flip_normals);
 		void write_xml(std::basic_string<TCHAR> const & file_name);
 
 	private:
-		void extract_object(INode* node);
+		void extract_object(INode* node, bool flip_normals);
 
 	private:
 		typedef std::vector<object_info_t> objects_info_t;

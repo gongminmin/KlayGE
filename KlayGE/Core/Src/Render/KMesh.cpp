@@ -127,6 +127,7 @@ namespace KlayGE
 			file->read(reinterpret_cast<char*>(&num_tex_coords_per_ver), sizeof(num_tex_coords_per_ver));
 
 			StaticMesh::XYZsType positions(num_vertices);
+			StaticMesh::NormalsType normals(num_vertices);
 			StaticMesh::MultiTexCoordsType multi_tex_coords(num_tex_coords_per_ver);
 			for (uint32_t k = 0; k < num_tex_coords_per_ver; ++ k)
 			{
@@ -136,6 +137,7 @@ namespace KlayGE
 			for (uint32_t j = 0; j < num_vertices; ++ j)
 			{
 				file->read(reinterpret_cast<char*>(&positions[j]), sizeof(positions[j]));
+				file->read(reinterpret_cast<char*>(&normals[j]), sizeof(normals[j]));
 
 				for (uint32_t k = 0; k < num_tex_coords_per_ver; ++ k)
 				{
@@ -150,10 +152,9 @@ namespace KlayGE
 				static_cast<std::streamsize>(sizeof(indices[0]) * indices.size()));
 
 			mesh->AssignXYZs(positions.begin(), positions.end());
+			mesh->AssignNormals(normals.begin(), normals.end());
 			mesh->AssignMultiTexs(multi_tex_coords.begin(), multi_tex_coords.end());
 			mesh->AssignIndices(indices.begin(), indices.end());
-
-			mesh->ComputeNormal();
 
 			meshes.push_back(mesh);
 		}

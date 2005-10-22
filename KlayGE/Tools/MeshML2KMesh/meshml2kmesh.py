@@ -13,8 +13,9 @@ class point3:
 		self.z = float(z)
 
 class vertex:
-	def __init__(self, pos, texs):
+	def __init__(self, pos, normal, texs):
 		self.pos = pos
+		self.normal = normal
 		self.texs = texs
 
 class triangle:
@@ -73,12 +74,15 @@ def parse_model(dom):
 		for vertex_tag in vertex_tags:
 			pos = point3(vertex_tag.getAttribute('x'), vertex_tag.getAttribute('y'), vertex_tag.getAttribute('z'))
 
+			normal_tags = vertex_tag.getElementsByTagName('normal')
+			normal = point3(normal_tags[0].getAttribute('x'), normal_tags[0].getAttribute('y'), normal_tags[0].getAttribute('z'))
+
 			texs = []
 			tex_coord_tags = vertex_tag.getElementsByTagName('tex_coord')
 			for tex_coord_tag in tex_coord_tags:
 				texs.append(point2(tex_coord_tag.getAttribute('u'), tex_coord_tag.getAttribute('v')))
 
-			vertices.append(vertex(pos, texs))
+			vertices.append(vertex(pos, normal, texs))
 
 		triangles = []
 		triangles_chunk_tag = mesh_tag.getElementsByTagName('triangles_chunk')[0]
@@ -131,6 +135,7 @@ if __name__ == '__main__':
 		ofs.write(pack('L', len(mesh.vertices[0].texs)))
 		for vertex in mesh.vertices:
 			ofs.write(pack('fff', vertex.pos.x, vertex.pos.y, vertex.pos.z))
+			ofs.write(pack('fff', vertex.normal.x, vertex.normal.y, vertex.normal.z))
 			for tex in vertex.texs:
 				ofs.write(pack('ff', tex.x, tex.y))
 

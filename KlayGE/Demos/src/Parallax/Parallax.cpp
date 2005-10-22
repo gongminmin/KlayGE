@@ -1,5 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/VertexBuffer.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -12,6 +13,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Sampler.hpp>
+#include <KlayGE/KMesh.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
@@ -32,11 +34,11 @@ using namespace KlayGE;
 
 namespace
 {
-	class RenderPolygon : public RenderableHelper
+	class RenderPolygon : public KMesh
 	{
 	public:
-		RenderPolygon()
-			: RenderableHelper(L"Polygon", true, false)
+		RenderPolygon(std::wstring const & /*name*/, TexturePtr tex)
+			: KMesh(L"Polygon", tex)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -71,54 +73,38 @@ namespace
 			normalizer_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
 			normalizer_sampler->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
 			*(effect_->ParameterByName("normalizerMapSampler")) = normalizer_sampler;
+		}
 
+		void ComputeTB()
+		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			Vector3 xyzs[] =
-			{
-				Vector3(-1, 1,  0),
-				Vector3(1,	1,	0),
-				Vector3(1,	-1,	0),
-				Vector3(-1, -1, 0),
-			};
+			std::vector<Vector3> t(xyzs_.size());
+			std::vector<Vector3> b(xyzs_.size());
+			MathLib::ComputeTangent<float>(t.begin(), b.begin(),
+				indices_.begin(), indices_.end(),
+				xyzs_.begin(), xyzs_.end(), multi_tex_coords_[0].begin());
 
-			Vector2 texs[] =
-			{
-				Vector2(0, 0),
-				Vector2(1, 0),
-				Vector2(1, 1),
-				Vector2(0, 1)
-			};
-
-			uint16_t indices[] = 
-			{
-				0, 1, 2, 2, 3, 0
-			};
-
-			Vector3 t[4], b[4];
-			MathLib::ComputeTangent<float>(t, b,
-				indices, indices + sizeof(indices) / sizeof(indices[0]),
-				xyzs, xyzs + sizeof(xyzs) / sizeof(xyzs[0]), texs);
-
-			vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
-
-			VertexStreamPtr vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VET_Positions, sizeof(float), 3)), true);
-			vs->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
-			VertexStreamPtr tex0_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VET_TextureCoords0, sizeof(float), 2)), true);
-			tex0_vs->Assign(texs, sizeof(texs) / sizeof(texs[0]));
 			VertexStreamPtr tan_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VET_Tangent, sizeof(float), 3)), true);
-			tan_vs->Assign(t, sizeof(t) / sizeof(t[0]));
+			tan_vs->Assign(&t[0], t.size());
 			VertexStreamPtr binormal_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VET_Binormal, sizeof(float), 3)), true);
-			binormal_vs->Assign(b, sizeof(b) / sizeof(b[0]));
+			binormal_vs->Assign(&b[0], b.size());
 
-			vs->Combine(tex0_vs).Combine(tan_vs).Combine(binormal_vs);
+			vb_->AddVertexStream(tan_vs);
+			vb_->AddVertexStream(binormal_vs);
+		}
 
-			vb_->AddVertexStream(vs);
+		void OnRenderBegin()
+		{
+			App3DFramework const & app = Context::Instance().AppInstance();
 
-			IndexStreamPtr is = rf.MakeIndexStream(true);
-			is->Assign(indices, sizeof(indices) / sizeof(uint16_t));
-			vb_->SetIndexStream(is);
+			Matrix4 const & model = Matrix4::Identity();
+			Matrix4 const & view = app.ActiveCamera().ViewMatrix();
+			Matrix4 const & proj = app.ActiveCamera().ProjMatrix();
+			Vector3 const & eyePos = app.ActiveCamera().EyePos();
 
-			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[4]);
+			*(effect_->ParameterByName("mvp")) = model * view * proj;
+			*(effect_->ParameterByName("eyePos")) = Vector4(eyePos.x(), eyePos.y(), eyePos.z(), 1);
 		}
 	};
 
@@ -177,14 +163,15 @@ void Parallax::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
-	renderPolygon_.reset(new RenderPolygon);
+	renderPolygon_ = LoadKMesh("teapot.kmesh", CreateFactory<RenderPolygon>);
+	checked_cast<RenderPolygon*>(renderPolygon_->Mesh(0).get())->ComputeTB();
 	renderPolygon_->AddToSceneManager();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	this->LookAt(Vector3(2, 0, -2), Vector3(0, 0, 0));
+	this->LookAt(Vector3(-0.3f, 0.4f, -0.3f), Vector3(0, 0, 0));
 	this->Proj(0.1f, 100);
 
 	fpcController_.AttachCamera(this->ActiveCamera());
@@ -216,22 +203,13 @@ void Parallax::Update(uint32_t pass)
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	inputEngine.Update();
 
-	Matrix4 model = MathLib::RotationX(-0.5f);
-	Matrix4 view = this->ActiveCamera().ViewMatrix();
-	Matrix4 proj = this->ActiveCamera().ProjMatrix();
-	Vector3 eyePos = this->ActiveCamera().EyePos();
-
-	*(renderPolygon_->GetRenderEffect()->ParameterByName("worldviewproj")) = model * view * proj;
-	*(renderPolygon_->GetRenderEffect()->ParameterByName("eyePos")) = Vector4(eyePos.x(), eyePos.y(), eyePos.z(), 1);
-
-
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 	float degree(std::clock() / 700.0f);
-	Vector3 lightPos(2, 0, -2);
+	Vector3 lightPos(2, 0, 1);
 	Matrix4 matRot(MathLib::RotationZ(degree));
 	lightPos = MathLib::TransformCoord(lightPos, matRot);
-	*(renderPolygon_->GetRenderEffect()->ParameterByName("lightPos")) = Vector4(lightPos.x(), lightPos.y(), lightPos.z(), 1);
+	*(renderPolygon_->Mesh(0)->GetRenderEffect()->ParameterByName("lightPos")) = Vector4(lightPos.x(), lightPos.y(), lightPos.z(), 1);
 
 	std::wostringstream stream;
 	stream << renderEngine.ActiveRenderTarget(0)->FPS();

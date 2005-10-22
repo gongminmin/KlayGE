@@ -887,6 +887,7 @@ namespace KlayGE
 				-(left + right)* invWidth,	-(top + bottom) * invHeight,	q,				1,
 				0,							0,								-nearPlane * q, 0);
 		}
+
 		template <typename T>
 		inline Matrix4_T<T>
 		Reflect(Plane_T<T> const & p)

@@ -128,7 +128,7 @@ void Refract::InitObjects()
 
 	cube_map_ = LoadTexture("Glacier2.dds");
 
-	refractor_ = LoadKMesh("bunny.kmesh", CreateFactory<Refractor>);
+	refractor_ = LoadKMesh("teapot.kmesh", CreateFactory<Refractor>);
 	static_cast<Refractor*>(refractor_->Mesh(0).get())->CubeMap(cube_map_);
 	refractor_->AddToSceneManager();
 

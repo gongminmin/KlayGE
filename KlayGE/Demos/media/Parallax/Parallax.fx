@@ -1,4 +1,4 @@
-float4x4 worldviewproj : WORLDVIEWPROJECTION;
+float4x4 mvp : WORLDVIEWPROJECTION;
 float4 lightPos;
 float4 eyePos;
 
@@ -20,13 +20,13 @@ struct VS_OUTPUT
 };
 
 VS_OUTPUT ParallaxVS(VS_INPUT input,
-						uniform float4x4 worldviewproj,
+						uniform float4x4 mvp,
 						uniform float4 lightPos,
 						uniform float4 eyePos)
 {
 	VS_OUTPUT output;
 
-	output.pos = mul(input.pos, worldviewproj);
+	output.pos = mul(input.pos, mvp);
 	output.texcoord0 = input.texcoord0;
 
 	float3x3 objToTangentSpace;
@@ -83,7 +83,7 @@ technique Parallax
 	{
 		CullMode = CCW;
 		
-		VertexShader = compile vs_1_1 ParallaxVS(worldviewproj, lightPos, eyePos);
+		VertexShader = compile vs_1_1 ParallaxVS(mvp, lightPos, eyePos);
 		PixelShader = compile ps_2_0 ParallaxPS(diffuseMapSampler,
 										normalMapSampler, heightMapSampler,
 										normalizerMapSampler);
