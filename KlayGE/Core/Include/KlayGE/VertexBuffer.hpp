@@ -87,6 +87,14 @@ namespace KlayGE
 		{
 			return component_size * num_components;
 		}
+
+		friend bool
+		operator==(vertex_element const & lhs, vertex_element const & rhs)
+		{
+			return (lhs.type == rhs.type)
+				&& (lhs.component_size == rhs.component_size)
+				&& (lhs.num_components == rhs.num_components);
+		}
 	};
 	typedef std::vector<vertex_element> vertex_elements_type;
 
@@ -108,11 +116,13 @@ namespace KlayGE
 		virtual void Assign(void const * src, uint32_t numVertex) = 0;
 		virtual void CopyToMemory(void* data) = 0;
 		void CopyToMemory(void* data, vertex_elements_type const & rhs_vertex_elems);
+		void CopyToStream(VertexStream& rhs);
 
 		virtual uint32_t NumVertices() const = 0;
 
 		uint32_t NumElements() const;
 		vertex_element const & Element(uint32_t index) const;
+		vertex_elements_type const & Elements() const;
 
 		uint16_t VertexSize() const;
 		uint32_t StreamSize() const;
@@ -145,10 +155,11 @@ namespace KlayGE
 		virtual bool IsStatic() const = 0;
 		virtual void Assign(void const * src, uint32_t numIndices) = 0;
 		virtual void CopyToMemory(void* data) = 0;
+		void CopyToStream(IndexStream& rhs);
 
 		uint32_t StreamSize() const;
 
-		IndexStream& Append(IndexStreamPtr rhs);
+		IndexStream& Append(IndexStreamPtr rhs, uint16_t base_index);
 	};
 
 
@@ -189,7 +200,11 @@ namespace KlayGE
 		void SetIndexStream(IndexStreamPtr index_stream);
 		IndexStreamPtr GetIndexStream() const;
 
-		void ExpandInstance();
+		uint32_t NumInstance() const;
+
+		VertexBufferPtr ExpandInstance(uint32_t inst_no);
+
+		VertexBuffer& Append(VertexBufferPtr rhs);
 
 	protected:
 		BufferType type_;
