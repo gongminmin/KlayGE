@@ -1,0 +1,17 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_timer_query">
+	<Tokens>
+		<Token name="GL_TIME_ELAPSED_EXT" value="0x88BF"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_timer_query"/>
+		<Vendor name="GL_NV" string="GL_NV_timer_query"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+		<Init name="GL_NV"/>
+	</InitPath>
+</GLExtension>
