@@ -284,11 +284,11 @@ namespace KlayGE
 	TexturePtr LoadTexture(std::string const & tex_name);
 	void SaveToFile(TexturePtr texture, std::string const & tex_name);
 
-	// 返回立方环境映射的观察矩阵
+	// 返回立方环境映射的lookat和up向量
 	//////////////////////////////////////////////////////////////////////////////////
 	template <typename T>
-	inline Matrix4_T<T>
-	CubeMapViewMatrixLH(Texture::CubeFaces face)
+	inline std::pair<Vector_T<T, 3>, Vector_T<T, 3> >
+	CubeMapViewVector(Texture::CubeFaces face)
 	{
 		Vector_T<T, 3> look_dir;
 		Vector_T<T, 3> up_dir;
@@ -327,7 +327,7 @@ namespace KlayGE
 		}
 
 		// 设置立方体环境映射的观察矩阵
-		return MathLib::LookAtLH(Vector_T<T, 3>(0, 0, 0), look_dir, up_dir);
+		return std::make_pair(look_dir, up_dir);
 	}
 }
 

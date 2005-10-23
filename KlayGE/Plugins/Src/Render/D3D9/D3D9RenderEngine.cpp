@@ -282,7 +282,54 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(d3dDevice_);
 		BOOST_ASSERT(vb.VertexStreamEnd() - vb.VertexStreamBegin() != 0);
+		
+		VertexBuffer::VertexStreamsType geom_streams;
+		VertexBuffer::VertexStreamsType inst_streams;
+		for (VertexBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
+				iter != vb.VertexStreamEnd(); ++ iter)
+		{
+			VertexStreamPtr stream = *iter;
 
+			if (VertexStream::ST_Geometry == stream->StreamType())
+			{
+				geom_streams.push_back(stream);
+			}
+			else
+			{
+				BOOST_ASSERT(VertexStream::ST_Instance == stream->StreamType());
+
+				inst_streams.push_back(stream);
+			}
+		}
+		uint32_t const num_instance = geom_streams[0]->Frequency();
+
+		if ((num_instance > 1) && (caps_.max_shader_model < 3))
+		{
+			uint32_t num_instance_per_batch = 0xFFFF / geom_streams[0]->NumVertices();
+
+			uint32_t i = 0;
+			while (i < num_instance)
+			{
+				VertexBufferPtr tmp_vb = vb.ExpandInstance(i);
+
+				num_instance_per_batch = std::min(num_instance_per_batch, num_instance - i);
+				for (uint32_t j = i + 1; j < i + num_instance_per_batch; ++ j)
+				{
+					tmp_vb->Append(vb.ExpandInstance(j));
+				}
+				this->RenderVB(*tmp_vb);
+
+				i += num_instance_per_batch;
+			}
+		}
+		else
+		{
+			this->RenderVB(vb);
+		}		
+	}
+
+	void D3D9RenderEngine::RenderVB(VertexBuffer const & vb)
+	{
 		D3DPRIMITIVETYPE primType;
 		uint32_t primCount;
 		D3D9Mapping::Mapping(primType, primCount, vb);
@@ -291,10 +338,10 @@ namespace KlayGE
 		numVerticesJustRendered_ += vb.UseIndices() ? vb.NumIndices() : vb.NumVertices();
 
 		for (VertexBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
-				iter != vb.VertexStreamEnd(); ++ iter)
+			iter != vb.VertexStreamEnd(); ++ iter)
 		{
 			VertexStream& stream = *(*iter);
-			uint32_t number = iter - vb.VertexStreamBegin();
+			uint32_t number = static_cast<uint32_t>(iter - vb.VertexStreamBegin());
 
 			D3D9VertexStream& d3d9vs(*checked_cast<D3D9VertexStream*>(&stream));
 			TIF(d3dDevice_->SetStreamSource(number,
@@ -317,7 +364,7 @@ namespace KlayGE
 		}
 
 		// Clear any previous steam sources
-		uint32_t const num_vertex_stream = vb.VertexStreamEnd() - vb.VertexStreamBegin();
+		uint32_t const num_vertex_stream = static_cast<uint32_t>(vb.VertexStreamEnd() - vb.VertexStreamBegin());
 		for (uint32_t i = num_vertex_stream; i < last_num_vertex_stream_; ++ i)
 		{
 			d3dDevice_->SetStreamSource(i, NULL, 0, 0);

@@ -93,7 +93,7 @@ namespace KlayGE
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 				// 建立顶点坐标
-				VertexStreamPtr pos_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VET_Positions, sizeof(float), 3)), true);
+				VertexStreamPtr pos_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)), true);
 				pos_vs->Assign(&xyzs_[0], static_cast<uint32_t>(xyzs_.size()));
 				vb_->AddVertexStream(pos_vs);
 
@@ -102,7 +102,7 @@ namespace KlayGE
 				if (!normals_.empty())
 				{
 					// 建立法线坐标
-					VertexStreamPtr normal_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VET_Normals, sizeof(float), 3)), true);
+					VertexStreamPtr normal_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_Normal, 0, sizeof(float), 3)), true);
 					normal_vs->Assign(&normals_[0], static_cast<uint32_t>(normals_.size()));
 					vb_->AddVertexStream(normal_vs);
 				}
@@ -110,7 +110,8 @@ namespace KlayGE
 				// 建立纹理坐标
 				for (size_t i = 0; i < multi_tex_coords_.size(); ++ i)
 				{
-					VertexStreamPtr tex_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(static_cast<VertexElementType>(VET_TextureCoords0 + i), sizeof(float), 2)), true);
+					VertexStreamPtr tex_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_TextureCoord,
+						static_cast<uint8_t>(i), sizeof(float), 2)), true);
 					tex_vs->Assign(&multi_tex_coords_[i][0], static_cast<uint32_t>(multi_tex_coords_[i].size()));
 					vb_->AddVertexStream(tex_vs);
 				}

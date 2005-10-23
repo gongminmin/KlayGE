@@ -95,9 +95,9 @@ namespace
 
 			vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 
-			VertexStreamPtr pos_tex_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VET_Positions, sizeof(float), 3)), true);
+			VertexStreamPtr pos_tex_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)), true);
 			pos_tex_vs->Assign(&pos[0], pos.size());
-			VertexStreamPtr tex0_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VET_TextureCoords0, sizeof(float), 2)), true);
+			VertexStreamPtr tex0_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_TextureCoord, 0, sizeof(float), 2)), true);
 			tex0_vs->Assign(&tex[0], tex.size());
 			pos_tex_vs->Combine(tex0_vs);
 

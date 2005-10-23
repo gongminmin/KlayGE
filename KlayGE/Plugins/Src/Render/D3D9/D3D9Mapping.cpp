@@ -308,85 +308,63 @@ namespace KlayGE
 		uint16_t elem_offset = 0;
 		for (uint32_t i = 0; i < vs.NumElements(); ++ i)
 		{
-			D3DVERTEXELEMENT9& element = elements[i];
-			element.Offset = elem_offset;
-			element.Method = D3DDECLMETHOD_DEFAULT;
-			element.Stream = static_cast<WORD>(stream);
-
 			vertex_element const & vs_elem = vs.Element(i);
 
-			switch (vs_elem.type)
+			D3DVERTEXELEMENT9& element = elements[i];
+			element.Type		= D3DDECLTYPE_FLOAT1 - 1 + vs_elem.num_components;
+			element.Offset		= elem_offset;
+			element.Method		= D3DDECLMETHOD_DEFAULT;
+			element.Stream		= static_cast<WORD>(stream);
+			element.UsageIndex	= vs_elem.usage_index;
+
+			switch (vs_elem.usage)
 			{
 			// Vertex xyzs
-			case VET_Positions:
-				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + vs_elem.num_components;
+			case VEU_Position:
 				element.Usage		= D3DDECLUSAGE_POSITION;
-				element.UsageIndex	= 0;
 				break;
 
 			// Normal
-			case VET_Normals:
-				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + vs_elem.num_components;
+			case VEU_Normal:
 				element.Usage		= D3DDECLUSAGE_NORMAL;
-				element.UsageIndex	= 0;
 				break;
 
 			// Vertex colors
-			case VET_Diffuses:
-				element.Type		= D3DDECLTYPE_D3DCOLOR;
+			case VEU_Diffuse:
 				element.Usage		= D3DDECLUSAGE_COLOR;
-				element.UsageIndex	= 0;
 				break;
 
 			// Vertex speculars
-			case VET_Speculars:
-				element.Type		= D3DDECLTYPE_D3DCOLOR;
+			case VEU_Specular:
 				element.Usage		= D3DDECLUSAGE_COLOR;
-				element.UsageIndex	= 1;
 				break;
 			
 			// Blend Weights
-			case VET_BlendWeights:
-				element.Type		= D3DDECLTYPE_FLOAT4;
+			case VEU_BlendWeight:
 				element.Usage		= D3DDECLUSAGE_BLENDWEIGHT;
-				element.UsageIndex	= 0;
 				break;
 
 			// Blend Indices
-			case VET_BlendIndices:
+			case VEU_BlendIndex:
 				element.Type		= D3DDECLTYPE_D3DCOLOR;
 				element.Usage		= D3DDECLUSAGE_BLENDINDICES;
-				element.UsageIndex	= 0;
 				break;
 
 			// Do texture coords
-			case VET_TextureCoords0:
-			case VET_TextureCoords1:
-			case VET_TextureCoords2:
-			case VET_TextureCoords3:
-			case VET_TextureCoords4:
-			case VET_TextureCoords5:
-			case VET_TextureCoords6:
-			case VET_TextureCoords7:
-				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + vs_elem.num_components;
+			case VEU_TextureCoord:
 				element.Usage		= D3DDECLUSAGE_TEXCOORD;
-				element.UsageIndex	= static_cast<BYTE>(vs_elem.type - VET_TextureCoords0);
 				break;
 
-			case VET_Tangent:
-				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + vs_elem.num_components;
+			case VEU_Tangent:
 				element.Usage		= D3DDECLUSAGE_TANGENT;
-				element.UsageIndex	= 0;
 				break;
 
-			case VET_Binormal:
-				element.Type		= D3DDECLTYPE_FLOAT1 - 1 + vs_elem.num_components;
+			case VEU_Binormal:
 				element.Usage		= D3DDECLUSAGE_BINORMAL;
-				element.UsageIndex	= 0;
 				break;
 			}
 
-			elem_offset += vs_elem.element_size();
+			elem_offset = static_cast<uint16_t>(elem_offset + vs_elem.element_size());
 		}
 	}
 

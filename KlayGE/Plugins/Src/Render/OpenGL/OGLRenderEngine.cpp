@@ -256,10 +256,10 @@ namespace KlayGE
 						vertex_element const & vs_elem = stream.Element(i);
 						void const * addr = &buffer[instance * instance_size + elem_offset];
 
-						switch (vs_elem.type)
+						switch (vs_elem.usage)
 						{
 						// Vertex xyzs
-						case VET_Positions:
+						case VEU_Position:
 							switch (vs_elem.num_components)
 							{
 							case 2:
@@ -276,37 +276,30 @@ namespace KlayGE
 							}
 							break;
 					
-						case VET_Normals:
+						case VEU_Normal:
 							glNormal3fv(static_cast<GLfloat const *>(addr));
 							break;
 
-						case VET_Diffuses:
+						case VEU_Diffuse:
 							switch (vs_elem.num_components)
 							{
 							case 3:
-								glColor3ubv(static_cast<GLubyte const *>(addr));
+								glColor3fv(static_cast<GLfloat const *>(addr));
 								break;
 
 							case 4:
-								glColor4ubv(static_cast<GLubyte const *>(addr));
+								glColor4fv(static_cast<GLfloat const *>(addr));
 								break;
 							}
 							break;
 
-						case VET_Speculars:
-							glSecondaryColor3ubv(static_cast<GLubyte const *>(addr));
+						case VEU_Specular:
+							glSecondaryColor3fv(static_cast<GLfloat const *>(addr));
 							break;
 
-						case VET_TextureCoords0:
-						case VET_TextureCoords1:
-						case VET_TextureCoords2:
-						case VET_TextureCoords3:
-						case VET_TextureCoords4:
-						case VET_TextureCoords5:
-						case VET_TextureCoords6:
-						case VET_TextureCoords7:
+						case VEU_TextureCoord:
 							{
-								GLenum target = GL_TEXTURE0 + vs_elem.type - VET_TextureCoords0;
+								GLenum target = GL_TEXTURE0 + vs_elem.usage_index;
 								switch (vs_elem.num_components)
 								{
 								case 1:
@@ -350,46 +343,39 @@ namespace KlayGE
 					{
 						vertex_element const & vs_elem = stream.Element(i);
 
-						switch (vs_elem.type)
+						switch (vs_elem.usage)
 						{
 						// Vertex xyzs
-						case VET_Positions:
+						case VEU_Position:
 							glEnableClientState(GL_VERTEX_ARRAY);
 							stream.Active();
 							glVertexPointer(3, GL_FLOAT, stream.VertexSize(),
 								reinterpret_cast<GLvoid*>(elem_offset));
 							break;
 					
-						case VET_Normals:
+						case VEU_Normal:
 							glEnableClientState(GL_NORMAL_ARRAY);
 							stream.Active();
 							glNormalPointer(GL_FLOAT, stream.VertexSize(),
 								reinterpret_cast<GLvoid*>(elem_offset));
 							break;
 
-						case VET_Diffuses:
+						case VEU_Diffuse:
 							glEnableClientState(GL_COLOR_ARRAY);
 							stream.Active();
 							glColorPointer(4, GL_UNSIGNED_BYTE, stream.VertexSize(),
 								reinterpret_cast<GLvoid*>(elem_offset));
 							break;
 
-						case VET_Speculars:
+						case VEU_Specular:
 							glEnableClientState(GL_SECONDARY_COLOR_ARRAY);
 							stream.Active();
 							glSecondaryColorPointer(4, GL_UNSIGNED_BYTE, stream.VertexSize(),
 								reinterpret_cast<GLvoid*>(elem_offset));
 							break;
 
-						case VET_TextureCoords0:
-						case VET_TextureCoords1:
-						case VET_TextureCoords2:
-						case VET_TextureCoords3:
-						case VET_TextureCoords4:
-						case VET_TextureCoords5:
-						case VET_TextureCoords6:
-						case VET_TextureCoords7:
-							glClientActiveTexture(GL_TEXTURE0 + vs_elem.type - VET_TextureCoords0);
+						case VEU_TextureCoord:
+							glClientActiveTexture(GL_TEXTURE0 + vs_elem.usage_index);
 							glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 							stream.Active();
 							glTexCoordPointer(static_cast<GLint>(vs_elem.num_components),

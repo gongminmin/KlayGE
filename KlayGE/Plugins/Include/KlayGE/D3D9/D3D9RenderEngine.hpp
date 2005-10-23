@@ -110,6 +110,7 @@ namespace KlayGE
 		void DoActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget);
 
 		void DoRender(VertexBuffer const & vb);
+		void RenderVB(VertexBuffer const & vb);
 
 		void FillRenderDeviceCaps();
 

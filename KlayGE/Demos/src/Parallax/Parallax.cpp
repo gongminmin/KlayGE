@@ -85,9 +85,9 @@ namespace
 				indices_.begin(), indices_.end(),
 				xyzs_.begin(), xyzs_.end(), multi_tex_coords_[0].begin());
 
-			VertexStreamPtr tan_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VET_Tangent, sizeof(float), 3)), true);
+			VertexStreamPtr tan_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_Tangent, 0, sizeof(float), 3)), true);
 			tan_vs->Assign(&t[0], t.size());
-			VertexStreamPtr binormal_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VET_Binormal, sizeof(float), 3)), true);
+			VertexStreamPtr binormal_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_Binormal, 0, sizeof(float), 3)), true);
 			binormal_vs->Assign(&b[0], b.size());
 
 			vb_->AddVertexStream(tan_vs);

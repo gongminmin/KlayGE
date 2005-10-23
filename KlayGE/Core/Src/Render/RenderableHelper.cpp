@@ -81,7 +81,7 @@ namespace KlayGE
 
 		vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_PointList);
 
-		VertexStreamPtr vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VET_Positions, sizeof(float), 3)), true);
+		VertexStreamPtr vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)), true);
 		vs->Assign(&v, 1);
 		vb_->AddVertexStream(vs);
 
@@ -104,7 +104,7 @@ namespace KlayGE
 
 		vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_LineList);
 
-		VertexStreamPtr vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VET_Positions, sizeof(float), 3)), true);
+		VertexStreamPtr vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)), true);
 		vs->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
 		vb_->AddVertexStream(vs);
 
@@ -128,7 +128,7 @@ namespace KlayGE
 
 		vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 
-		VertexStreamPtr vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VET_Positions, sizeof(float), 3)), true);
+		VertexStreamPtr vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)), true);
 		vs->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
 		vb_->AddVertexStream(vs);
 
@@ -163,7 +163,7 @@ namespace KlayGE
 
 		vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 
-		VertexStreamPtr vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VET_Positions, sizeof(float), 3)), true);
+		VertexStreamPtr vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)), true);
 		vs->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
 		vb_->AddVertexStream(vs);
 		
@@ -196,7 +196,7 @@ namespace KlayGE
 
 		vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 
-		VertexStreamPtr vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VET_Positions, sizeof(float), 3)), true);
+		VertexStreamPtr vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)), true);
 		vs->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
 		vb_->AddVertexStream(vs);
 

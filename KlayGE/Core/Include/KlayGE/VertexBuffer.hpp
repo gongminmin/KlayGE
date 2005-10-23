@@ -41,43 +41,38 @@
 
 namespace KlayGE
 {
-	enum VertexElementType
+	enum VertexElementUsage
 	{
 		// vertex positions
-		VET_Positions = 1,
+		VEU_Position,
 		// vertex normals included (for lighting)
-		VET_Normals = 2,
+		VEU_Normal,
 		// Vertex colors - diffuse
-		VET_Diffuses = 3,
+		VEU_Diffuse,
 		// Vertex colors - specular
-		VET_Speculars = 4,
+		VEU_Specular,
 		// Vertex blend weights
-		VET_BlendWeights = 5,
+		VEU_BlendWeight,
 		// Vertex blend indices
-		VET_BlendIndices = 6,
+		VEU_BlendIndex,
 		// at least one set of texture coords (exact number specified in class)
-		VET_TextureCoords0 = 7,
-		VET_TextureCoords1 = 8,
-		VET_TextureCoords2 = 9,
-		VET_TextureCoords3 = 10,
-		VET_TextureCoords4 = 11,
-		VET_TextureCoords5 = 12,
-		VET_TextureCoords6 = 13,
-		VET_TextureCoords7 = 14,
+		VEU_TextureCoord,
 		// Vertex tangent
-		VET_Tangent = 15,
+		VEU_Tangent,
 		// Vertex binormal
-		VET_Binormal = 16
+		VEU_Binormal
 	};
 
 	struct vertex_element
 	{
-		vertex_element(VertexElementType type, uint8_t component_size, uint8_t num_components)
-			: type(type), component_size(component_size), num_components(num_components)
+		vertex_element(VertexElementUsage usage, uint8_t usage_index, uint8_t component_size, uint8_t num_components)
+			: usage(usage), usage_index(usage_index), component_size(component_size), num_components(num_components)
 		{
 		}
 
-		VertexElementType type;
+		VertexElementUsage usage;
+		uint8_t usage_index;
+
 		// 表示元素中每个成分的大小，比如Position元素的成分是size(float)
 		uint8_t component_size;
 		// 表示一个元素有几个成分表示，比如Position元素是由(x, y, z)组成，所以为3
@@ -91,7 +86,8 @@ namespace KlayGE
 		friend bool
 		operator==(vertex_element const & lhs, vertex_element const & rhs)
 		{
-			return (lhs.type == rhs.type)
+			return (lhs.usage == rhs.usage)
+				&& (lhs.usage_index == rhs.usage_index)
 				&& (lhs.component_size == rhs.component_size)
 				&& (lhs.num_components == rhs.num_components);
 		}
@@ -136,6 +132,7 @@ namespace KlayGE
 
 	protected:
 		void RefreshVertexSize();
+		void CheckVertexElems();
 
 	protected:
 		vertex_elements_type vertex_elems_;
@@ -202,7 +199,8 @@ namespace KlayGE
 
 		uint32_t NumInstance() const;
 
-		VertexBufferPtr ExpandInstance(uint32_t inst_no);
+		VertexBufferPtr ExpandInstance(uint32_t inst_no) const;
+		bool HasInstanceStream() const;
 
 		VertexBuffer& Append(VertexBufferPtr rhs);
 

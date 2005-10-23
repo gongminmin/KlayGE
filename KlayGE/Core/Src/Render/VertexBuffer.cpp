@@ -28,6 +28,7 @@ namespace KlayGE
 			: vertex_elems_(vertex_elems),
 				type_(ST_Geometry), freq_(1)
 	{
+		this->CheckVertexElems();
 		this->RefreshVertexSize();
 	}
 
@@ -35,15 +36,43 @@ namespace KlayGE
 	{
 	}
 
+	void VertexStream::CheckVertexElems()
+	{
+		for (vertex_elements_type::const_iterator iter = vertex_elems_.begin();
+			iter != vertex_elems_.end(); ++ iter)
+		{
+			if (iter->usage != VEU_BlendIndex)
+			{
+				BOOST_ASSERT(sizeof(float) == iter->component_size);
+			}
+
+			if (VEU_Position == iter->usage)
+			{
+				BOOST_ASSERT(iter->num_components >= 2);
+			}
+
+			if (VEU_Normal == iter->usage)
+			{
+				BOOST_ASSERT(3 == iter->num_components);
+			}
+
+			if ((VEU_Diffuse == iter->usage) || (VEU_Specular == iter->usage))
+			{
+				BOOST_ASSERT((3 == iter->num_components) || (4 == iter->num_components));
+			}
+		}
+	}
+
 	void VertexStream::CopyToMemory(void* data, vertex_elements_type const & rhs_vertex_elems)
 	{
-		typedef MapVector<VertexElementType, std::pair<uint32_t, uint32_t> > ve_table_type;
+		typedef MapVector<std::pair<VertexElementUsage, uint8_t>, std::pair<uint32_t, uint32_t> > ve_table_type;
 		ve_table_type lhs_table;
 		uint32_t offset = 0;
 		for (uint32_t i = 0; i < this->NumElements(); ++ i)
 		{
 			vertex_element const & elem = this->Element(i);
-			lhs_table.insert(std::make_pair(elem.type, std::make_pair(offset, elem.element_size())));
+			lhs_table.insert(std::make_pair(std::make_pair(elem.usage, elem.usage_index),
+				std::make_pair(offset, elem.element_size())));
 			offset += elem.element_size();
 		}
 
@@ -54,10 +83,11 @@ namespace KlayGE
 		uint8_t* dst_ptr = static_cast<uint8_t*>(data);
 		for (uint32_t i = 0; i < this->NumVertices(); ++ i)
 		{
-			for (uint32_t j = 0; j < rhs_vertex_elems.size(); ++ j)
+			for (vertex_elements_type::const_iterator iter = rhs_vertex_elems.begin();
+				iter != rhs_vertex_elems.end(); ++ iter)
 			{
-				vertex_element const & elem = rhs_vertex_elems[i];
-				ve_table_type::iterator lhs_iter = lhs_table.find(elem.type);
+				vertex_element const & elem = *iter;
+				ve_table_type::iterator lhs_iter = lhs_table.find(std::make_pair(elem.usage, elem.usage_index));
 
 				BOOST_ASSERT(lhs_iter != lhs_table.end());
 				BOOST_ASSERT(lhs_iter->second.second == elem.element_size());
@@ -75,7 +105,7 @@ namespace KlayGE
 		std::vector<uint8_t> target_buffer(this->StreamSize());
 		this->CopyToMemory(&target_buffer[0]);
 
-		rhs.Assign(&target_buffer[0], this->StreamSize());
+		rhs.Assign(&target_buffer[0], this->NumVertices());
 	}
 
 	uint32_t VertexStream::NumElements() const
@@ -205,7 +235,7 @@ namespace KlayGE
 			boost::bind(std::plus<uint16_t>(), base_index, _1));
 
 		target_buffer.insert(target_buffer.end(), rhs_buffer.begin(), rhs_buffer.end());
-		this->Assign(&target_buffer[0], target_buffer.size());
+		this->Assign(&target_buffer[0], static_cast<uint32_t>(target_buffer.size()));
 
 		return *this;
 	}
@@ -214,7 +244,7 @@ namespace KlayGE
 	{
 		std::vector<uint16_t> target_buffer(this->NumIndices());
 		this->CopyToMemory(&target_buffer[0]);
-		rhs.Assign(&target_buffer[0], target_buffer.size());
+		rhs.Assign(&target_buffer[0], static_cast<uint32_t>(target_buffer.size()));
 	}
 
 
@@ -300,14 +330,14 @@ namespace KlayGE
 		return 1;
 	}
 
-	VertexBufferPtr VertexBuffer::ExpandInstance(uint32_t inst_no)
+	VertexBufferPtr VertexBuffer::ExpandInstance(uint32_t inst_no) const
 	{
 		uint32_t num_instance = this->NumInstance();
 		uint32_t num_vertices = 0;
-		for (VertexStreamsType::iterator iter = vertexStreams_.begin();
+		for (VertexStreamConstIterator iter = vertexStreams_.begin();
 			iter != vertexStreams_.end(); ++ iter)
 		{
-			VertexStreamPtr& vs = *iter;
+			VertexStreamPtr const & vs = *iter;
 
 			if (VertexStream::ST_Geometry == vs->StreamType())
 			{
@@ -321,10 +351,10 @@ namespace KlayGE
 
 		if (inst_no < num_instance)
 		{
-			for (VertexStreamsType::iterator iter = vertexStreams_.begin();
+			for (VertexStreamConstIterator iter = vertexStreams_.begin();
 				iter != vertexStreams_.end(); ++ iter)
 			{
-				VertexStreamPtr& src_vs = *iter;
+				VertexStreamPtr const & src_vs = *iter;
 				VertexStreamPtr dst_vs = rf.MakeVertexStream(src_vs->Elements(), src_vs->IsStatic());
 
 				if (VertexStream::ST_Geometry == src_vs->StreamType())
@@ -370,6 +400,19 @@ namespace KlayGE
 		}
 	}
 
+	bool VertexBuffer::HasInstanceStream() const
+	{
+		for (VertexStreamConstIterator iter = this->VertexStreamBegin();
+				iter != this->VertexStreamEnd(); ++ iter)
+		{
+			if (VertexStream::ST_Instance == (*iter)->StreamType())
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	VertexBuffer& VertexBuffer::Append(VertexBufferPtr rhs)
 	{
 		std::vector<uint32_t> mapping;
@@ -386,7 +429,7 @@ namespace KlayGE
 
 				if (lhs_vs->Elements() == rhs_vs->Elements())
 				{
-					mapping.push_back(rhs_iter - rhs->VertexStreamBegin());
+					mapping.push_back(static_cast<uint32_t>(rhs_iter - rhs->VertexStreamBegin()));
 					break;
 				}
 
