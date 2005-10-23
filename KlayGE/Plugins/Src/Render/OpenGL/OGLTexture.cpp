@@ -58,6 +58,12 @@ namespace
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
+		case PF_L16:
+			internalFormat = GL_LUMINANCE16;
+			glformat = GL_LUMINANCE;
+			gltype = GL_UNSIGNED_SHORT;
+			break;
+
 		case PF_AL8:
 			internalFormat = GL_LUMINANCE8_ALPHA8;
 			glformat = GL_LUMINANCE_ALPHA;

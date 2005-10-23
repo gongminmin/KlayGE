@@ -50,6 +50,8 @@ namespace KlayGE
 		PF_A8,
 		// 8-bit pixel format, 4 bits alpha, 4 bits luminace.
 		PF_AL4,
+		// 16-bit pixel format, all bits for luminace.
+		PF_L16,
 		// 16-bit pixel format, 8 bits alpha, 8 bits luminace.
 		PF_AL8,
 		// 16-bit pixel format, 5 bits red, 6 bits green, 5 bits blue.
@@ -101,6 +103,7 @@ namespace KlayGE
 		case PF_AL4:
 			return 8;
 
+		case PF_L16:
 		case PF_AL8:
 		case PF_R5G6B5:
 		case PF_ARGB4:

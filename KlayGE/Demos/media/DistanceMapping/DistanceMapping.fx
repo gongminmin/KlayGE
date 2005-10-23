@@ -70,8 +70,7 @@ half4 DistanceMappingPS(half3 texCoord0	: TEXCOORD0,
 	half3 texUV = texCoord0;
 	for (int i = 0; i < 8; ++ i)
 	{
-		half dist = tex3D(distanceMap, texUV).r;
-		texUV += view * dist;
+		texUV += view * tex3D(distanceMap, texUV).r;
 	}
 
 	half4 clr;
@@ -110,8 +109,7 @@ half4 DistanceMappingPS_20(half3 texCoord0	: TEXCOORD0,
 	half3 texUV = texCoord0;
 	for (int i = 0; i < 2; ++ i)
 	{
-		half dist = tex3D(distanceMap, texUV).r;
-		texUV += view * dist;
+		texUV += view * tex3D(distanceMap, texUV).r;
 	}
 
 	half3 diffuse = tex2D(diffuseMap, texUV.xy);

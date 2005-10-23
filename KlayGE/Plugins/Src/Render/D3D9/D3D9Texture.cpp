@@ -77,6 +77,9 @@ namespace
 		case PF_AL4:
 			return D3DFMT_A4L4;
 
+		case PF_L16:
+			return D3DFMT_L16;
+
 		case PF_AL8:
 			return D3DFMT_A8L8;
 
@@ -148,6 +151,9 @@ namespace
 
 		case D3DFMT_A4L4:
 			return PF_AL4;
+
+		case D3DFMT_L16:
+			return PF_L16;
 
 		case D3DFMT_A8L8:
 			return PF_AL8;
