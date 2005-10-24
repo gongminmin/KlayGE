@@ -65,38 +65,45 @@ namespace KlayGE
 
 	void VertexStream::CopyToMemory(void* data, vertex_elements_type const & rhs_vertex_elems)
 	{
-		typedef MapVector<std::pair<VertexElementUsage, uint8_t>, std::pair<uint32_t, uint32_t> > ve_table_type;
-		ve_table_type lhs_table;
-		uint32_t offset = 0;
-		for (uint32_t i = 0; i < this->NumElements(); ++ i)
+		if (rhs_vertex_elems == vertex_elems_)
 		{
-			vertex_element const & elem = this->Element(i);
-			lhs_table.insert(std::make_pair(std::make_pair(elem.usage, elem.usage_index),
-				std::make_pair(offset, elem.element_size())));
-			offset += elem.element_size();
+			this->CopyToMemory(data);
 		}
-
-		std::vector<uint8_t> lhs_buffer(this->StreamSize());
-		this->CopyToMemory(&lhs_buffer[0]);
-
-		uint8_t const * src_ptr = &lhs_buffer[0];
-		uint8_t* dst_ptr = static_cast<uint8_t*>(data);
-		for (uint32_t i = 0; i < this->NumVertices(); ++ i)
+		else
 		{
-			for (vertex_elements_type::const_iterator iter = rhs_vertex_elems.begin();
-				iter != rhs_vertex_elems.end(); ++ iter)
+			typedef MapVector<std::pair<VertexElementUsage, uint8_t>, std::pair<uint32_t, uint32_t> > ve_table_type;
+			ve_table_type lhs_table;
+			uint32_t offset = 0;
+			for (uint32_t i = 0; i < this->NumElements(); ++ i)
 			{
-				vertex_element const & elem = *iter;
-				ve_table_type::iterator lhs_iter = lhs_table.find(std::make_pair(elem.usage, elem.usage_index));
-
-				BOOST_ASSERT(lhs_iter != lhs_table.end());
-				BOOST_ASSERT(lhs_iter->second.second == elem.element_size());
-
-				std::copy(&src_ptr[lhs_iter->second.first],
-					&src_ptr[lhs_iter->second.first + lhs_iter->second.second], dst_ptr);
-				dst_ptr += elem.element_size();
+				vertex_element const & elem = this->Element(i);
+				lhs_table.insert(std::make_pair(std::make_pair(elem.usage, elem.usage_index),
+					std::make_pair(offset, elem.element_size())));
+				offset += elem.element_size();
 			}
-			src_ptr += this->VertexSize();
+
+			std::vector<uint8_t> lhs_buffer(this->StreamSize());
+			this->CopyToMemory(&lhs_buffer[0]);
+
+			uint8_t const * src_ptr = &lhs_buffer[0];
+			uint8_t* dst_ptr = static_cast<uint8_t*>(data);
+			for (uint32_t i = 0; i < this->NumVertices(); ++ i)
+			{
+				for (vertex_elements_type::const_iterator iter = rhs_vertex_elems.begin();
+					iter != rhs_vertex_elems.end(); ++ iter)
+				{
+					vertex_element const & elem = *iter;
+					ve_table_type::iterator lhs_iter = lhs_table.find(std::make_pair(elem.usage, elem.usage_index));
+
+					BOOST_ASSERT(lhs_iter != lhs_table.end());
+					BOOST_ASSERT(lhs_iter->second.second == elem.element_size());
+
+					std::copy(&src_ptr[lhs_iter->second.first],
+						&src_ptr[lhs_iter->second.first + lhs_iter->second.second], dst_ptr);
+					dst_ptr += elem.element_size();
+				}
+				src_ptr += this->VertexSize();
+			}
 		}
 	}
 
@@ -330,7 +337,7 @@ namespace KlayGE
 		return 1;
 	}
 
-	VertexBufferPtr VertexBuffer::ExpandInstance(uint32_t inst_no) const
+	void VertexBuffer::ExpandInstance(VertexStreamsType& hint, uint32_t inst_no) const
 	{
 		uint32_t num_instance = this->NumInstance();
 		uint32_t num_vertices = 0;
@@ -345,59 +352,115 @@ namespace KlayGE
 				break;
 			}
 		}
+		BOOST_ASSERT(inst_no < num_instance);
 
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		VertexBufferPtr ret = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
-
-		if (inst_no < num_instance)
-		{
-			for (VertexStreamConstIterator iter = vertexStreams_.begin();
+		VertexStreamsType inst_streams;
+		for (VertexStreamConstIterator iter = vertexStreams_.begin();
 				iter != vertexStreams_.end(); ++ iter)
+		{
+			VertexStreamPtr const & src_vs = *iter;
+
+			if (VertexStream::ST_Instance == src_vs->StreamType())
 			{
-				VertexStreamPtr const & src_vs = *iter;
-				VertexStreamPtr dst_vs = rf.MakeVertexStream(src_vs->Elements(), src_vs->IsStatic());
-
-				if (VertexStream::ST_Geometry == src_vs->StreamType())
-				{
-					BOOST_ASSERT(num_vertices == src_vs->NumVertices());
-					BOOST_ASSERT(num_instance == src_vs->Frequency());
-
-					src_vs->CopyToStream(*dst_vs);
-				}
-				else
-				{
-					BOOST_ASSERT(VertexStream::ST_Instance == src_vs->StreamType());
-
-					uint32_t const instance_size = src_vs->VertexSize();
-
-					std::vector<uint8_t> ins_buffer(src_vs->StreamSize());
-					src_vs->CopyToMemory(&ins_buffer[0]);
-
-					std::vector<uint8_t> target_buffer(instance_size * num_vertices);
-
-					for (uint32_t i = 0; i < num_vertices; ++ i)
-					{
-						std::copy(&ins_buffer[inst_no * instance_size], &ins_buffer[(inst_no + 1) * instance_size],
-							&target_buffer[i * instance_size]);
-					}
-
-					dst_vs->Assign(&target_buffer[0], num_vertices);
-				}
-
-				dst_vs->FrequencyDivider(VertexStream::ST_Geometry, 1);
-				ret->AddVertexStream(dst_vs);
+				inst_streams.push_back(src_vs);
 			}
+		}
 
-			IndexStreamPtr dst_is = rf.MakeIndexStream(indexStream_->IsStatic());
-			indexStream_->CopyToStream(*dst_is);
-			ret->SetIndexStream(dst_is);
-
-			return ret;
+		bool same_fmt = true;
+		if (inst_streams.size() == hint.size())
+		{
+			for (uint32_t i = 0; i < inst_streams.size(); ++ i)
+			{
+				if (inst_streams[i]->Elements() != hint[i]->Elements())
+				{
+					same_fmt = false;
+				}
+			}
 		}
 		else
 		{
-			return VertexBufferPtr();
+			same_fmt = false;
 		}
+
+		if (same_fmt)
+		{
+			for (uint32_t i = 0; i < inst_streams.size(); ++ i)
+			{
+				VertexStreamPtr const & src_vs = inst_streams[i];
+				VertexStreamPtr dst_vs = hint[i];
+
+				uint32_t const instance_size = src_vs->VertexSize();
+
+				std::vector<uint8_t> ins_buffer(src_vs->StreamSize());
+				src_vs->CopyToMemory(&ins_buffer[0]);
+
+				std::vector<uint8_t> target_buffer(instance_size * num_vertices);
+
+				for (uint32_t i = 0; i < num_vertices; ++ i)
+				{
+					std::copy(&ins_buffer[inst_no * instance_size], &ins_buffer[(inst_no + 1) * instance_size],
+						&target_buffer[i * instance_size]);
+				}
+
+				dst_vs->Assign(&target_buffer[0], num_vertices);
+				dst_vs->FrequencyDivider(VertexStream::ST_Geometry, 1);
+			}
+		}
+		else
+		{
+			hint = this->ExpandInstance(inst_no);
+		}
+	}
+
+	VertexBuffer::VertexStreamsType VertexBuffer::ExpandInstance(uint32_t inst_no) const
+	{
+		uint32_t num_instance = this->NumInstance();
+		uint32_t num_vertices = 0;
+		for (VertexStreamConstIterator iter = vertexStreams_.begin();
+			iter != vertexStreams_.end(); ++ iter)
+		{
+			VertexStreamPtr const & vs = *iter;
+
+			if (VertexStream::ST_Geometry == vs->StreamType())
+			{
+				num_vertices = vs->NumVertices();
+				break;
+			}
+		}
+		BOOST_ASSERT(inst_no < num_instance);
+
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		VertexStreamsType ret;
+
+		for (VertexStreamConstIterator iter = vertexStreams_.begin();
+			iter != vertexStreams_.end(); ++ iter)
+		{
+			VertexStreamPtr const & src_vs = *iter;
+
+			if (VertexStream::ST_Instance == src_vs->StreamType())
+			{
+				VertexStreamPtr dst_vs = rf.MakeVertexStream(src_vs->Elements(), false);
+
+				uint32_t const instance_size = src_vs->VertexSize();
+
+				std::vector<uint8_t> ins_buffer(src_vs->StreamSize());
+				src_vs->CopyToMemory(&ins_buffer[0]);
+
+				std::vector<uint8_t> target_buffer(instance_size * num_vertices);
+
+				for (uint32_t i = 0; i < num_vertices; ++ i)
+				{
+					std::copy(&ins_buffer[inst_no * instance_size], &ins_buffer[(inst_no + 1) * instance_size],
+						&target_buffer[i * instance_size]);
+				}
+
+				dst_vs->Assign(&target_buffer[0], num_vertices);
+				dst_vs->FrequencyDivider(VertexStream::ST_Geometry, 1);
+				ret.push_back(dst_vs);
+			}
+		}
+
+		return ret;
 	}
 
 	bool VertexBuffer::HasInstanceStream() const

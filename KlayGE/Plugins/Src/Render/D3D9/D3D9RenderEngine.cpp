@@ -38,6 +38,8 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/Context.hpp>
+#include <KlayGE/RenderFactory.hpp>
 
 #include <KlayGE/Viewport.hpp>
 #include <KlayGE/VertexBuffer.hpp>
@@ -305,21 +307,32 @@ namespace KlayGE
 
 		if ((num_instance > 1) && (caps_.max_shader_model < 3))
 		{
-			uint32_t num_instance_per_batch = 0xFFFF / geom_streams[0]->NumVertices();
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			uint32_t i = 0;
-			while (i < num_instance)
+			VertexBufferPtr tmp_vb = rf.MakeVertexBuffer(vb.Type());
+			VertexBuffer::VertexStreamsType tmp_vss;
+
+			vb.ExpandInstance(tmp_vss, 0);
+
+			for (uint32_t i = 0; i < geom_streams.size(); ++ i)
 			{
-				VertexBufferPtr tmp_vb = vb.ExpandInstance(i);
+				tmp_vb->AddVertexStream(geom_streams[i]);
+			}
+			for (uint32_t i = 0; i < tmp_vss.size(); ++ i)
+			{
+				tmp_vb->AddVertexStream(tmp_vss[i]);
+			}
+			if (vb.UseIndices())
+			{
+				tmp_vb->SetIndexStream(vb.GetIndexStream());
+			}
 
-				num_instance_per_batch = std::min(num_instance_per_batch, num_instance - i);
-				for (uint32_t j = i + 1; j < i + num_instance_per_batch; ++ j)
-				{
-					tmp_vb->Append(vb.ExpandInstance(j));
-				}
+			this->RenderVB(*tmp_vb);
+
+			for (uint32_t i = 1; i < num_instance; ++ i)
+			{
+				vb.ExpandInstance(tmp_vss, i);
 				this->RenderVB(*tmp_vb);
-
-				i += num_instance_per_batch;
 			}
 		}
 		else

@@ -199,7 +199,8 @@ namespace KlayGE
 
 		uint32_t NumInstance() const;
 
-		VertexBufferPtr ExpandInstance(uint32_t inst_no) const;
+		void ExpandInstance(VertexStreamsType& hint, uint32_t inst_no) const;
+		VertexStreamsType ExpandInstance(uint32_t inst_no) const;
 		bool HasInstanceStream() const;
 
 		VertexBuffer& Append(VertexBufferPtr rhs);
