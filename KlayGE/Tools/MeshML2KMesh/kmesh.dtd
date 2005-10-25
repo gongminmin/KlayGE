@@ -6,8 +6,16 @@
 
 <!ELEMENT meshes_chunk (mesh*)>
 
-<!ELEMENT mesh (textures_chunk?, vertices_chunk, triangles_chunk)>
+<!ELEMENT mesh (vertex_elements_chunk, textures_chunk?, vertices_chunk, triangles_chunk)>
 <!ATTLIST mesh>
+
+<!ELEMENT vertex_elements_chunk (vertex_element*)>
+
+<!ELEMENT vertex_element>
+<!ATTLIST vertex_element
+	usage CDATA #REQUIRED
+	usage_index CDATA #REQUIRED
+	num_components CDATA #REQUIRED>
 
 <!ELEMENT textures_chunk (texture*)>
 
@@ -17,11 +25,20 @@
 
 <!ELEMENT vertices_chunk (vertex*)>
 
-<!ELEMENT vertex (weight*)>
+<!ELEMENT vertex (normal, tex_coord, weight?)>
 <!ATTLIST vertex
 	x CDATA #REQUIRED
 	y CDATA #REQUIRED
-	z CDATA #REQUIRED
+	z CDATA #REQUIRED>
+
+<!ELEMENT normal>
+<!ATTLIST normal
+	x CDATA #REQUIRED
+	y CDATA #REQUIRED
+	z CDATA #REQUIRED>
+
+<!ELEMENT tex_coord>
+<!ATTLIST tex_coord
 	u CDATA #REQUIRED
 	v CDATA #REQUIRED>
 

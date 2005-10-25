@@ -22,6 +22,40 @@
 
 namespace KlayGE
 {
+	enum vertex_element_usage
+	{
+		// vertex positions
+		VEU_Position,
+		// vertex normals included (for lighting)
+		VEU_Normal,
+		// Vertex colors - diffuse
+		VEU_Diffuse,
+		// Vertex colors - specular
+		VEU_Specular,
+		// Vertex blend weights
+		VEU_BlendWeight,
+		// Vertex blend indices
+		VEU_BlendIndex,
+		// at least one set of texture coords (exact number specified in class)
+		VEU_TextureCoord,
+		// Vertex tangent
+		VEU_Tangent,
+		// Vertex binormal
+		VEU_Binormal
+	};
+
+	struct vertex_element_t
+	{
+		vertex_element_t(vertex_element_usage usage, unsigned char usage_index, unsigned char num_components)
+			: usage(usage), usage_index(usage_index), num_components(num_components)
+		{
+		}
+
+		vertex_element_usage usage;
+		unsigned char usage_index;
+		unsigned char num_components;
+	};
+
 	struct vertex_t
 	{
 		Point3 pos;
@@ -41,6 +75,8 @@ namespace KlayGE
 	typedef std::pair<std::string, std::string> texture_slot_t;
 	typedef std::vector<texture_slot_t> texture_slots_t;
 
+	typedef std::vector<vertex_element_t> vertex_elements_t;
+
 	struct object_info_t
 	{
 		std::string		name;
@@ -49,6 +85,8 @@ namespace KlayGE
 
 		vertices_t		vertices;
 		triangles_t		triangles;
+
+		vertex_elements_t vertex_elements;
 	};
 
 	class meshml_extractor

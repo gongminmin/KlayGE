@@ -79,6 +79,12 @@ __________________________________________________________________
 去掉了固定流水线
 增加了Occlusion Query
 增加了Point sprite
+支持Instancing
+支持Vertex Texture
+增强了KMesh和3dsmax导出插件
+优化了RenderEffect
+InputEngine改为使用Event形式处理消息
+支持全场景的多遍渲染
 
 2.8.0 (2005.8.14)
 增加了RenderDeviceCaps

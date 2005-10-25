@@ -1,6 +1,16 @@
 #!/usr/bin/env python
 #-*- coding: mbcs -*-
 
+VEU_Position = 0
+VEU_Normal = 1
+VEU_Diffuse = 2
+VEU_Specular = 3
+VEU_BlendWeight = 4
+VEU_BlendIndex = 5
+VEU_TextureCoord = 6
+VEU_Tangent = 7
+VEU_Binormal = 8
+
 class point2:
 	def __init__(self, x, y):
 		self.x = float(x)
@@ -24,15 +34,22 @@ class triangle:
 		self.b = int(b)
 		self.c = int(c)
 
+class vertex_element:
+	def __init__(self, usage, usage_index, num_components):
+		self.usage = int(usage)
+		self.usage_index = int(usage_index)
+		self.num_components = int(num_components)
+
 class texture:
 	def __init__(self, type, name):
 		self.type = type
 		self.name = name
 
 class mesh:
-	def __init__(self, name, textures, vertices, triangles):
+	def __init__(self, name, vertex_elems, textures, vertices, triangles):
 		self.name = name
 
+		self.vertex_elems = vertex_elems
 		self.textures = textures
 		self.vertices = vertices
 		self.triangles = triangles
@@ -56,11 +73,20 @@ def parse_model(dom):
 	ret = model()
 
 	ret.version = int(dom.documentElement.getAttribute('version'))
+	if ret.version != 2:
+		print "model version must be 2"
+		raise
 
 	meshes_chunk_tag = dom.documentElement.getElementsByTagName('meshes_chunk')[0]
 	mesh_tags = meshes_chunk_tag.getElementsByTagName('mesh')
 	for mesh_tag in mesh_tags:
 		name = mesh_tag.getAttribute('name')
+
+		vertex_elems = []
+		vertex_elems_chunk_tag = mesh_tag.getElementsByTagName('vertex_elements_chunk')[0]
+		vertex_elem_tags = vertex_elems_chunk_tag.getElementsByTagName('vertex_element')
+		for vertex_elem_tag in vertex_elem_tags:
+			vertex_elems.append(vertex_element(vertex_elem_tag.getAttribute('usage'), vertex_elem_tag.getAttribute('usage_index'), vertex_elem_tag.getAttribute('num_components')))
 
 		textures = []
 		textures_chunk_tag = mesh_tag.getElementsByTagName('textures_chunk')[0]
@@ -90,7 +116,7 @@ def parse_model(dom):
 		for triangle_tag in triangle_tags:
 			triangles.append(triangle(triangle_tag.getAttribute('a'), triangle_tag.getAttribute('b'), triangle_tag.getAttribute('c')))
 
-		ret.meshes.append(mesh(name, textures, vertices, triangles))
+		ret.meshes.append(mesh(name, vertex_elems, textures, vertices, triangles))
 
 	return ret
 
@@ -123,6 +149,10 @@ if __name__ == '__main__':
 
 		ofs.write(pack('B', len(mesh.name)))
 		ofs.write(mesh.name)
+
+		ofs.write(pack('B', len(mesh.vertex_elems)))
+		for vertex_elem in mesh.vertex_elems:
+			ofs.write(pack('BBB', vertex_elem.usage, vertex_elem.usage_index, vertex_elem.num_components))
 
 		ofs.write(pack('B', len(mesh.textures)))
 		for texture in mesh.textures:

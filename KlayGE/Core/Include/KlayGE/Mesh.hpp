@@ -86,6 +86,10 @@ namespace KlayGE
 
 		void AddToSceneManager();
 
+		Matrix4 GetModelMatrix() const
+		{
+			return model_;
+		}
 		void SetModelMatrix(Matrix4 const & mat)
 		{
 			model_ = mat;
@@ -138,6 +142,7 @@ namespace KlayGE
 
 		virtual void AddToSceneManager();
 
+		Matrix4 GetModelMatrix() const;
 		void SetModelMatrix(Matrix4 const & mat);
 
 		template <typename ForwardIterator>

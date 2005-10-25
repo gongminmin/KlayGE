@@ -79,6 +79,10 @@ namespace KlayGE
 		return box_;
 	}
 
+	Matrix4 StaticMesh::GetModelMatrix() const
+	{
+		return model_;
+	}
 	void StaticMesh::SetModelMatrix(Matrix4 const & mat)
 	{
 		model_ = mat;

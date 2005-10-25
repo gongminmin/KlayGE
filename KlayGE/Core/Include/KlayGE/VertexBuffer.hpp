@@ -65,6 +65,9 @@ namespace KlayGE
 
 	struct vertex_element
 	{
+		vertex_element()
+		{
+		}
 		vertex_element(VertexElementUsage usage, uint8_t usage_index, uint8_t component_size, uint8_t num_components)
 			: usage(usage), usage_index(usage_index), component_size(component_size), num_components(num_components)
 		{

@@ -1,8 +1,11 @@
 // mesh_extractor.cpp
 // KlayGE 3DSMax网格数据析取类 实现文件
-// Ver 2.5.0
+// Ver 3.0.0
 // 版权所有(C) 龚敏敏, 2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.0.0
+// 导出顶点格式 (2005.10.25)
 //
 // 2.5.0
 // 初次建立 (2005.5.1)
@@ -264,6 +267,13 @@ namespace KlayGE
 			}
 		}
 
+		obj_info.vertex_elements.push_back(vertex_element_t(VEU_Position, 0, 3));
+		obj_info.vertex_elements.push_back(vertex_element_t(VEU_Normal, 0, 3));
+		for (size_t i = 0; i < obj_info.vertices[0].tex.size(); ++ i)
+		{
+			obj_info.vertex_elements.push_back(vertex_element_t(VEU_TextureCoord, static_cast<unsigned char>(i), 2));
+		}
+
 		objs_info_.push_back(obj_info);
 	}
 
@@ -279,12 +289,22 @@ namespace KlayGE
 
 		ofs << "<?xml version=\'1.0\' encoding=\'utf-8\' standalone=\'no\'?>" << endl;
 		ofs << "<!DOCTYPE Model SYSTEM \'model.dtd\'>" << endl << endl;
-		ofs << "<model version=\'1\'>" << endl;
+		ofs << "<model version=\'2\'>" << endl;
 
 		ofs << "\t<meshes_chunk>" << endl;
 		for (objects_info_t::const_iterator oi_iter = objs_info_.begin(); oi_iter != objs_info_.end(); ++ oi_iter)
 		{
 			ofs << "\t\t<mesh name=\'" + oi_iter->name + "\'>" << endl;
+
+			ofs << "\t\t\t<vertex_elements_chunk>" << endl;
+			for (vertex_elements_t::const_iterator ve_iter = oi_iter->vertex_elements.begin();
+				ve_iter != oi_iter->vertex_elements.end(); ++ ve_iter)
+			{
+				ofs << "\t\t\t\t<vertex_element usage=\'" << ve_iter->usage
+					<< "\' usage_index=\'" << int(ve_iter->usage_index)
+					<< "\' num_components=\'" << int(ve_iter->num_components) << "\'/>" << endl;
+			}
+			ofs << "\t\t\t</vertex_elements_chunk>" << endl << endl;
 
 			ofs << "\t\t\t<textures_chunk>" << endl;
 			for (texture_slots_t::const_iterator ts_iter = oi_iter->texture_slots.begin();

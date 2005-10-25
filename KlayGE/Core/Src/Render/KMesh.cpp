@@ -93,6 +93,32 @@ namespace KlayGE
 			std::wstring wname;
 			Convert(wname, name);
 
+			uint8_t num_vertex_elems;
+			file->read(reinterpret_cast<char*>(&num_vertex_elems), sizeof(num_vertex_elems));
+
+			std::vector<vertex_element> vertex_elements;
+			for (uint8_t j = 0; j < num_vertex_elems; ++ j)
+			{
+				vertex_element ve;
+
+				uint8_t usage;
+				file->read(reinterpret_cast<char*>(&usage), 1);
+				ve.usage = static_cast<VertexElementUsage>(usage);
+				file->read(reinterpret_cast<char*>(&ve.usage_index), 1);
+				file->read(reinterpret_cast<char*>(&ve.num_components), 1);
+
+				if (ve.usage != VEU_BlendIndex)
+				{
+					ve.component_size = sizeof(float);
+				}
+				else
+				{
+					ve.component_size = sizeof(uint8_t);
+				}
+
+				vertex_elements.push_back(ve);
+			}
+
 			uint8_t num_textures;
 			file->read(reinterpret_cast<char*>(&num_textures), sizeof(num_textures));
 
