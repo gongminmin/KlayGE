@@ -4,6 +4,9 @@ float4x4 modelviewIT;
 float currentAngle;
 float3 lightDir = float3(0, 0, 1);
 
+float half_length;
+float half_width;
+
 struct VS_INPUT
 {
 	float4 pos			: POSITION;
@@ -26,7 +29,8 @@ VS_OUTPUT VertexDisplacementVS(VS_INPUT input,
 	VS_OUTPUT output;
 
 	float4 v = input.pos;
-	v.z = (cos(input.pos.x + currentAngle) + sin(input.pos.y + currentAngle)) * input.pos.x * 0.2f;
+	float2 offset = input.pos.xy + float2(half_length, -half_width);
+	v.z = (cos(offset.x + currentAngle) + sin(offset.y + currentAngle)) * offset.x * 0.2f;
 
 	half3 x_dir = half3(0.5f, 0, -sin(input.pos.x + currentAngle) * 0.2f);
 	half3 y_dir = half3(0, 0.5f, cos(input.pos.y + currentAngle) * input.pos.x * 0.2f);

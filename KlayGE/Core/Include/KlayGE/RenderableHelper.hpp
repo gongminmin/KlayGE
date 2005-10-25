@@ -111,6 +111,16 @@ namespace KlayGE
 	private:
 		SamplerPtr cube_sampler_;
 	};
+
+	class RenderablePlane : public RenderableHelper
+	{
+	public:
+		RenderablePlane(float length, float width, int length_segs, int width_segs, bool has_tex_coord, 
+			bool can_be_culled, bool short_age);
+		virtual ~RenderablePlane()
+		{
+		}
+	};
 }
 
 #endif		// _RENDERABLEHELPER_HPP

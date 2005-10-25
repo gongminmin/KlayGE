@@ -31,67 +31,16 @@ using namespace KlayGE;
 
 namespace
 {
-	int const WIDTH = 4;
-	int const HEIGHT = 3;
+	int const LENGTH = 4;
+	int const WIDTH = 3;
 
-	class Flag : public RenderableHelper
+	class Flag : public RenderablePlane
 	{
 	public:
-		Flag(int width, int height)
-			: RenderableHelper(L"Flag", true, false),
-				model_(MathLib::Translation(-WIDTH / 2.0f, HEIGHT / 2.0f, 0.0f))
+		Flag(int length_segs, int width_segs)
+			: RenderablePlane(LENGTH, WIDTH, length_segs, width_segs, true, true, false)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			std::vector<Vector3> pos;
-			for (int y = 0; y < height + 1; ++ y)
-			{
-				for (int x = 0; x < width + 1; ++ x)
-				{
-					pos.push_back(Vector3(+x * (static_cast<float>(WIDTH) / width),
-						-y * (static_cast<float>(HEIGHT) / height), 0.0f));
-				}
-			}
-
-			std::vector<Vector2> tex;
-			for (int y = 0; y < height + 1; ++ y)
-			{
-				for (int x = 0; x < width + 1; ++ x)
-				{
-					tex.push_back(Vector2(static_cast<float>(x) / width, static_cast<float>(y) / height));
-				}
-			}
-
-			std::vector<uint16_t> index;
-			for (int y = 0; y < height; ++ y)
-			{
-				for (int x = 0; x < width; ++ x)
-				{
-					index.push_back((y + 0) * (width + 1) + (x + 0));
-					index.push_back((y + 0) * (width + 1) + (x + 1));
-					index.push_back((y + 1) * (width + 1) + (x + 1));
-
-					index.push_back((y + 1) * (width + 1) + (x + 1));
-					index.push_back((y + 1) * (width + 1) + (x + 0));
-					index.push_back((y + 0) * (width + 1) + (x + 0));
-				}
-			}
-
-			vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
-
-			VertexStreamPtr pos_tex_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)), true);
-			pos_tex_vs->Assign(&pos[0], pos.size());
-			VertexStreamPtr tex0_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_TextureCoord, 0, sizeof(float), 2)), true);
-			tex0_vs->Assign(&tex[0], tex.size());
-			pos_tex_vs->Combine(tex0_vs);
-
-			vb_->AddVertexStream(pos_tex_vs);
-
-			IndexStreamPtr is = rf.MakeIndexStream(true);
-			is->Assign(&index[0], index.size());
-			vb_->SetIndexStream(is);
-
-			box_ = MathLib::ComputeBoundingBox<float>(pos.begin(), pos.end());
 
 			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("VertexDisplacement.fx");
 			effect_->ActiveTechnique("VertexDisplacement");
@@ -103,14 +52,6 @@ namespace
 			flag_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
 			*(effect_->ParameterByName("flagSampler")) = flag_sampler;
 		}
-
-		Matrix4 GetModelMatrix() const
-		{
-			return model_;
-		}
-
-	private:
-		Matrix4 model_;
 	};
 
 
@@ -209,6 +150,9 @@ void VertexDisplacement::Update(uint32_t pass)
 	Matrix4 view = this->ActiveCamera().ViewMatrix();
 	Matrix4 proj = this->ActiveCamera().ProjMatrix();
 	Vector3 eyePos = this->ActiveCamera().EyePos();
+
+	*(flag_->GetRenderEffect()->ParameterByName("half_length")) = LENGTH / 2.0f;
+	*(flag_->GetRenderEffect()->ParameterByName("half_width")) = WIDTH / 2.0f;
 
 	Matrix4 modelView = flag_->GetModelMatrix() * view;
 

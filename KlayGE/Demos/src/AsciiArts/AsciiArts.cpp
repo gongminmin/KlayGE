@@ -47,67 +47,17 @@ int const LUM_LEVEL = 8;
 
 namespace
 {
-	class RenderQuad : public RenderableHelper
+	class RenderQuad : public RenderablePlane
 	{
 	public:
-		RenderQuad(int width, int height)
-			: RenderableHelper(L"Quad", true, true),
+		RenderQuad()
+			: RenderablePlane(2, 2, 1, 1, true, true, true),
 				scene_sampler_(new Sampler), lums_sampler_(new Sampler)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			std::vector<Vector3> pos;
-			for (int y = 0; y < height + 1; ++ y)
-			{
-				for (int x = 0; x < width + 1; ++ x)
-				{
-					pos.push_back(Vector3(+x * 2.0f / width - 1,
-						-y * 2.0f / height + 1, 1.0f));
-				}
-			}
-
-			std::vector<Vector2> tex;
-			for (int y = 0; y < height + 1; ++ y)
-			{
-				for (int x = 0; x < width + 1; ++ x)
-				{
-					tex.push_back(Vector2(static_cast<float>(x) / width, static_cast<float>(y) / height));
-				}
-			}
-
-			std::vector<uint16_t> index;
-			for (int y = 0; y < height; ++ y)
-			{
-				for (int x = 0; x < width; ++ x)
-				{
-					index.push_back((y + 0) * (width + 1) + (x + 0));
-					index.push_back((y + 0) * (width + 1) + (x + 1));
-					index.push_back((y + 1) * (width + 1) + (x + 1));
-
-					index.push_back((y + 1) * (width + 1) + (x + 1));
-					index.push_back((y + 1) * (width + 1) + (x + 0));
-					index.push_back((y + 0) * (width + 1) + (x + 0));
-				}
-			}
-
 			effect_ = rf.LoadEffect("AsciiArts.fx");
 			effect_->ActiveTechnique("AsciiArts");
-
-			vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
-
-			VertexStreamPtr pos_tex_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)), true);
-			pos_tex_vs->Assign(&pos[0], pos.size());
-			VertexStreamPtr tex0_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_TextureCoord, 0, sizeof(float), 2)), true);
-			tex0_vs->Assign(&tex[0], tex.size());
-			pos_tex_vs->Combine(tex0_vs);
-
-			vb_->AddVertexStream(pos_tex_vs);
-
-			IndexStreamPtr is = rf.MakeIndexStream(true);
-			is->Assign(&index[0], index.size());
-			vb_->SetIndexStream(is);
-
-			box_ = MathLib::ComputeBoundingBox<float>(pos.begin(), pos.end());
 
 			scene_sampler_->Filtering(Sampler::TFO_Point);
 			scene_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
@@ -281,7 +231,7 @@ void AsciiArts::InitObjects()
 
 	render_buffer_->GetViewport().camera = screen_buffer_->GetViewport().camera;
 
-	renderQuad_.reset(new RenderQuad(1, 1));
+	renderQuad_.reset(new RenderQuad);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	KlayGE::InputActionMap actionMap;

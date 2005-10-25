@@ -17,6 +17,7 @@ VS_OUTPUT AsciiArtsVS(VS_INPUT input)
 	VS_OUTPUT output;
 
 	output.pos = input.pos;
+	output.pos.z = 0.9f;
 	output.texcoord0 = input.texcoord0;
 
 	return output;

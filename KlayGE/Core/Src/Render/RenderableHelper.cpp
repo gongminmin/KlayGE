@@ -228,4 +228,66 @@ namespace KlayGE
 		rot_view(3, 2) = 0;
 		*(effect_->ParameterByName("inv_mvp")) = MathLib::Inverse(rot_view * camera.ProjMatrix());
 	}
+
+	RenderablePlane::RenderablePlane(float length, float width,
+				int length_segs, int width_segs, bool has_tex_coord, 
+				bool can_be_culled, bool short_age)
+			: RenderableHelper(L"RenderablePlane", can_be_culled, short_age)
+	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
+
+		std::vector<Vector3> pos;
+		for (int y = 0; y < width_segs + 1; ++ y)
+		{
+			for (int x = 0; x < length_segs + 1; ++ x)
+			{
+				pos.push_back(Vector3(x * (length / length_segs) - length / 2,
+					-y * (width / width_segs) + width / 2, 0.0f));
+			}
+		}
+
+		VertexStreamPtr pos_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)), true);
+		pos_vs->Assign(&pos[0], pos.size());
+		vb_->AddVertexStream(pos_vs);
+
+		if (has_tex_coord)
+		{
+			std::vector<Vector2> tex;
+			for (int y = 0; y < width_segs + 1; ++ y)
+			{
+				for (int x = 0; x < length_segs + 1; ++ x)
+				{
+					tex.push_back(Vector2(static_cast<float>(x) / length_segs,
+						static_cast<float>(y) / width_segs));
+				}
+			}
+
+			VertexStreamPtr tex_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_TextureCoord, 0, sizeof(float), 2)), true);
+			tex_vs->Assign(&tex[0], tex.size());
+			vb_->AddVertexStream(tex_vs);
+		}
+
+		std::vector<uint16_t> index;
+		for (int y = 0; y < width_segs; ++ y)
+		{
+			for (int x = 0; x < length_segs; ++ x)
+			{
+				index.push_back((y + 0) * (length_segs + 1) + (x + 0));
+				index.push_back((y + 0) * (length_segs + 1) + (x + 1));
+				index.push_back((y + 1) * (length_segs + 1) + (x + 1));
+
+				index.push_back((y + 1) * (length_segs + 1) + (x + 1));
+				index.push_back((y + 1) * (length_segs + 1) + (x + 0));
+				index.push_back((y + 0) * (length_segs + 1) + (x + 0));
+			}
+		}
+
+		IndexStreamPtr is = rf.MakeIndexStream(true);
+		is->Assign(&index[0], index.size());
+		vb_->SetIndexStream(is);
+
+		box_ = MathLib::ComputeBoundingBox<float>(pos.begin(), pos.end());
+	}
 }
