@@ -31,6 +31,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AsciiArts", "src\AsciiArts\
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShadowCubeMap", "src\ShadowCubeMap\ShadowCubeMap.vcproj", "{6E5EDEDF-5BD7-4AAA-83CC-D93955801020}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -69,6 +73,10 @@ Global
 		{3BD6D055-0FB5-436A-B004-BCCF0898FA61}.Debug.Build.0 = Debug|Win32
 		{3BD6D055-0FB5-436A-B004-BCCF0898FA61}.Release.ActiveCfg = Release|Win32
 		{3BD6D055-0FB5-436A-B004-BCCF0898FA61}.Release.Build.0 = Release|Win32
+		{6E5EDEDF-5BD7-4AAA-83CC-D93955801020}.Debug.ActiveCfg = Debug|Win32
+		{6E5EDEDF-5BD7-4AAA-83CC-D93955801020}.Debug.Build.0 = Debug|Win32
+		{6E5EDEDF-5BD7-4AAA-83CC-D93955801020}.Release.ActiveCfg = Release|Win32
+		{6E5EDEDF-5BD7-4AAA-83CC-D93955801020}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection
