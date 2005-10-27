@@ -57,6 +57,9 @@ namespace
 
 		void LightMatrices(Matrix4 const & model, Matrix4 const & view, Matrix4 const & proj)
 		{
+			light_pos_ = Transform(Vector3(0, 0, 0), model);
+			light_pos_ /= light_pos_.w();
+
 			inv_light_model_ = MathLib::Inverse(model);
 			light_view_ = view;
 			light_proj_ = proj;
@@ -76,6 +79,7 @@ namespace
 		bool gen_sm_pass_;
 		SamplerPtr sm_sampler_;
 
+		Vector4 light_pos_;
 		Matrix4 inv_light_model_;
 		Matrix4 light_view_, light_proj_;
 	};
@@ -116,6 +120,7 @@ namespace
 				*(effect_->ParameterByName("LampSampler")) = lamp_sampler_;
 				*(effect_->ParameterByName("ShadowMapSampler")) = sm_sampler_;
 				*(effect_->ParameterByName("WorldViewProj")) = model * view * proj;
+				*(effect_->ParameterByName("light_pos")) = light_pos_;
 			}
 		}
 
@@ -203,6 +208,7 @@ namespace
 				*(effect_->ParameterByName("LampSampler")) = lamp_sampler_;
 				*(effect_->ParameterByName("ShadowMapSampler")) = sm_sampler_;
 				*(effect_->ParameterByName("WorldViewProj")) = model * view * proj;
+				*(effect_->ParameterByName("light_pos")) = light_pos_;
 			}
 		}
 
@@ -354,7 +360,7 @@ void ShadowCubeMap::Update(uint32_t pass)
 
 			Vector3 le = TransformCoord(Vector3(0, 0, 0), light_model_);
 			Vector3 lla = TransformCoord(Vector3(0, 0, 0) + lookat_up.first, light_model_);
-			Vector3 lu = TransformCoord(Vector3(0, 0, 0) + lookat_up.second, Transpose(Inverse(light_model_)));
+			Vector3 lu = TransformNormal(Vector3(0, 0, 0) + lookat_up.second, light_model_);
 
 			Matrix4 light_view = LookAtLH(le, lla, lu);
 			Matrix4 light_proj = PerspectiveFovLH(PI / 2.0f, 1.0f, 0.01f, 10.0f);

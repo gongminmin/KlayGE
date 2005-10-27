@@ -1,6 +1,7 @@
 float4x4 WorldViewProj;
 float4x4 World;
 float4x4 InvLightWorld;
+float4 light_pos;
 
 sampler LampSampler;
 sampler ShadowMapSampler;
@@ -17,34 +18,40 @@ void ShadowMapVS(float4 Position : POSITION,
 float4 OutputDepthPS(float4 oLightWorldPos : TEXCOORD0) : COLOR
 {
 	oLightWorldPos /= oLightWorldPos.w;
-	return float4(length(oLightWorldPos.xyz).xxx, 1.0);
+	return float4(dot(oLightWorldPos.xyz, oLightWorldPos.xyz).xxx, 1.0);
 }
 
 void MainVS(float4 Position : POSITION,
 					float3 Normal   : NORMAL,
 					out float4 oPos : POSITION,
+					out float3 oDiffuse : COLOR0,
 					out float4 oLightWorldPos : TEXCOORD0)
 {
-    oLightWorldPos = mul(mul(Position, World), InvLightWorld);
-    oPos = mul(Position, WorldViewProj);
+	float4 world_pos = mul(Position, World);
+	float3 world_normal = normalize(mul(Normal, (float3x3)World));
+
+	oPos = mul(Position, WorldViewProj);
+	oLightWorldPos = mul(world_pos, InvLightWorld);
+    oDiffuse = dot(normalize(light_pos.xyz - world_pos.xyz), world_normal);
 }
 
-float4 MainPS(float4 oLightWorldPos : TEXCOORD0) : COLOR 
+float4 MainPS(half3 diffuse : COLOR0,
+				half3 LightWorldPos : TEXCOORD0) : COLOR 
 {
-	oLightWorldPos /= oLightWorldPos.w;
-
-	half shadowLength = texCUBE(ShadowMapSampler, oLightWorldPos.xyz).r + 0.02f;
-	bool unshadowed   = (length(oLightWorldPos.xyz) <= shadowLength);
+	half PixelLengthSq = dot(LightWorldPos, LightWorldPos);
+	half ShadowLengthSq = texCUBE(ShadowMapSampler, LightWorldPos).r + 0.03f;
+	
 	half3 color;
-	if (unshadowed)
+	if (PixelLengthSq <= ShadowLengthSq)
 	{
-		color = texCUBE(LampSampler, oLightWorldPos.xyz).rgb;
+		color = texCUBE(LampSampler, LightWorldPos.xyz).rgb / ShadowLengthSq;
 	}
 	else
 	{
 		color = 0;
 	}
-	return float4(color, 1.0);
+
+	return float4(diffuse * color, 1.0);
 }
 
 technique GenShadowMap

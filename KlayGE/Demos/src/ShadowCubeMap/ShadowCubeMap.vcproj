@@ -119,6 +119,9 @@
 			<File
 				RelativePath=".\ShadowCubeMap.cpp">
 			</File>
+			<File
+				RelativePath="..\..\media\ShadowCubeMap\ShadowCubeMap.fx">
+			</File>
 		</Filter>
 		<Filter
 			Name="Í·ÎÄ¼þ"
