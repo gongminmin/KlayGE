@@ -15,9 +15,8 @@ void ShadowMapVS(float4 Position : POSITION,
     oLightWorldPos = mul(mul(Position, World), InvLightWorld);
 }
 
-float4 OutputDepthPS(float4 oLightWorldPos : TEXCOORD0) : COLOR
+float4 OutputDepthPS(float3 oLightWorldPos : TEXCOORD0) : COLOR
 {
-	oLightWorldPos /= oLightWorldPos.w;
 	return float4(dot(oLightWorldPos.xyz, oLightWorldPos.xyz).xxx, 1.0);
 }
 
@@ -44,7 +43,7 @@ float4 MainPS(half3 diffuse : COLOR0,
 	half3 color;
 	if (PixelLengthSq <= ShadowLengthSq)
 	{
-		color = texCUBE(LampSampler, LightWorldPos.xyz).rgb / ShadowLengthSq;
+		color = texCUBE(LampSampler, LightWorldPos.xyz).rgb / (0.4 * ShadowLengthSq);
 	}
 	else
 	{
