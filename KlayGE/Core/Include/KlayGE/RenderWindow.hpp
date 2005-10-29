@@ -29,6 +29,8 @@ namespace KlayGE
 		RenderWindow();
 		virtual ~RenderWindow();
 
+		static RenderWindowPtr NullObject();
+
 		virtual std::wstring const & Description() const = 0;
 
 		virtual void Destroy() = 0;

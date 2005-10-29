@@ -95,10 +95,7 @@ namespace
 
 int main()
 {
-	SceneManager sceneMgr;
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
-	Context::Instance().SceneManagerInstance(sceneMgr);
-
 	Context::Instance().InputFactoryInstance(DInputFactoryInstance());
 
 	RenderSettings settings;
@@ -165,12 +162,9 @@ void Refract::InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputActi
 	}
 }
 
-void Refract::Update(uint32_t pass)
+void Refract::DoUpdate(uint32_t pass)
 {
 	fpcController_.Update();
-
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
-	inputEngine.Update();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 

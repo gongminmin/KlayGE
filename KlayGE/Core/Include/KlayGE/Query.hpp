@@ -13,6 +13,8 @@
 #ifndef _QUERY_HPP
 #define _QUERY_HPP
 
+#include <KlayGE/PreDeclare.hpp>
+
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_Core_d.lib")
 #else
@@ -27,6 +29,8 @@ namespace KlayGE
 		virtual ~Query()
 		{
 		}
+
+		static QueryPtr NullObject();
 
 		virtual void Begin() = 0;
 		virtual void End() = 0;

@@ -196,7 +196,7 @@ void Parallax::InputHandler(InputEngine const & sender, InputAction const & acti
 	}
 }
 
-void Parallax::Update(uint32_t pass)
+void Parallax::DoUpdate(uint32_t pass)
 {
 	fpcController_.Update();
 

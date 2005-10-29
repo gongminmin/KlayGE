@@ -30,6 +30,8 @@ namespace KlayGE
 	class RenderTexture : public RenderTarget
 	{
 	public:
+		static RenderTexturePtr NullObject();
+
 		virtual void AttachTexture2D(TexturePtr texture2D) = 0;
 		virtual void AttachTextureCube(TexturePtr textureCube, Texture::CubeFaces face) = 0;
 		virtual void DetachTexture() = 0;

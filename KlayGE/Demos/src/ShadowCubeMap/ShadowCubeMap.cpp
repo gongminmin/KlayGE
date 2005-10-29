@@ -248,10 +248,7 @@ namespace
 
 int main()
 {
-	SceneManager sceneMgr;
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
-	Context::Instance().SceneManagerInstance(sceneMgr);
-
 	Context::Instance().InputFactoryInstance(DInputFactoryInstance());
 
 	RenderSettings settings;
@@ -330,7 +327,7 @@ uint32_t ShadowCubeMap::NumPasses() const
 	return 7;
 }
 
-void ShadowCubeMap::Update(uint32_t pass)
+void ShadowCubeMap::DoUpdate(uint32_t pass)
 {
 	RenderEngine& renderEngine = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 	SceneManager& sceneMgr = Context::Instance().SceneManagerInstance();
@@ -340,9 +337,6 @@ void ShadowCubeMap::Update(uint32_t pass)
 	case 0:
 		{
 			fpcController_.Update();
-
-			InputEngine& inputEngine = Context::Instance().InputFactoryInstance().InputEngineInstance();
-			inputEngine.Update();
 
 			light_model_ = MathLib::RotationZ(0.4f) * MathLib::RotationY(std::clock() / 700.0f)
 				* MathLib::Translation(0.1f, 0.7f, 0.2f);

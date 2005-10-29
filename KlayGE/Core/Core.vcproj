@@ -131,6 +131,9 @@
 					RelativePath=".\Src\Render\Mesh.cpp">
 				</File>
 				<File
+					RelativePath=".\Src\Render\Query.cpp">
+				</File>
+				<File
 					RelativePath=".\Src\Render\Renderable.cpp">
 				</File>
 				<File
@@ -159,6 +162,12 @@
 							Name="VCCLCompilerTool"
 							ObjectFile="$(IntDir)/$(InputName)1.obj"/>
 					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Src\Render\RenderTexture.cpp">
+				</File>
+				<File
+					RelativePath=".\Src\Render\RenderVertexStream.cpp">
 				</File>
 				<File
 					RelativePath=".\Src\Render\RenderWindow.cpp">
@@ -347,6 +356,9 @@
 					RelativePath="Src\Audio\AudioEngine.cpp">
 				</File>
 				<File
+					RelativePath=".\Src\Audio\AudioFactory.cpp">
+				</File>
+				<File
 					RelativePath="Src\Audio\MusicBuffer.cpp">
 				</File>
 				<File
@@ -498,6 +510,9 @@
 				</File>
 				<File
 					RelativePath=".\Src\Input\InputEngine.cpp">
+				</File>
+				<File
+					RelativePath=".\Src\Input\InputFactory.cpp">
 				</File>
 				<File
 					RelativePath=".\Src\Input\Joystick.cpp">

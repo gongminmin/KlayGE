@@ -12,7 +12,12 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/Texture.hpp>
+#include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/RenderTexture.hpp>
+#include <KlayGE/RenderVertexStream.hpp>
+#include <KlayGE/Query.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Font.hpp>
 
@@ -20,8 +25,84 @@
 
 namespace KlayGE
 {
+	class NullRenderFactory : public RenderFactory
+	{
+		std::wstring const & Name() const
+		{
+			static std::wstring const name(L"Null Render Factory");
+			return name;
+		}
+
+		RenderEngine& RenderEngineInstance()
+		{
+			return *RenderEngine::NullObject();
+		}
+		
+		TexturePtr MakeTexture1D(uint32_t width, uint16_t numMipMaps,
+			PixelFormat format)
+		{
+			return Texture::NullObject();
+		}
+		TexturePtr MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps,
+			PixelFormat format)
+		{
+			return Texture::NullObject();
+		}
+		TexturePtr MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps,
+			PixelFormat format)
+		{
+			return Texture::NullObject();
+		}
+		TexturePtr MakeTextureCube(uint32_t size, uint16_t numMipMaps,
+			PixelFormat format)
+		{
+			return Texture::NullObject();
+		}
+		RenderTexturePtr MakeRenderTexture()
+		{
+			return RenderTexture::NullObject();
+		}
+
+		VertexBufferPtr MakeVertexBuffer(VertexBuffer::BufferType type)
+		{
+			return VertexBuffer::NullObject();
+		}
+
+		VertexStreamPtr MakeVertexStream(vertex_elements_type const & vertex_elems, bool staticStream)
+		{
+			return VertexStream::NullObject();
+		}
+		IndexStreamPtr MakeIndexStream(bool staticStream)
+		{
+			return IndexStream::NullObject();
+		}
+
+		RenderVertexStreamPtr MakeRenderVertexStream(uint32_t width, uint32_t height)
+		{
+			return RenderVertexStream::NullObject();
+		}
+
+		QueryPtr MakeOcclusionQuery()
+		{
+			return Query::NullObject();
+		}
+
+	private:
+		RenderEffectPtr DoMakeRenderEffect(std::string const & effectData)
+		{
+			return RenderEffect::NullObject();
+		}
+	};
+
+
 	RenderFactory::~RenderFactory()
 	{
+	}
+
+	RenderFactoryPtr RenderFactory::NullObject()
+	{
+		static RenderFactoryPtr obj(new NullRenderFactory);
+		return obj;
 	}
 
 	FontPtr RenderFactory::MakeFont(std::string const & fontName, uint32_t fontHeight, uint32_t flags)

@@ -1,8 +1,11 @@
 // AudioFactory.hpp
 // KlayGE 音频引擎抽象工厂 头文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
+// Ver 3.1.0
+// 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://www.enginedev.com
+//
+// 3.1.0
+// 增加了NullObject (2005.10.29)
 //
 // 2.0.0
 // 初次建立 (2003.8.30)
@@ -13,6 +16,9 @@
 #ifndef _AUDIOFACTORY_HPP
 #define _AUDIOFACTORY_HPP
 
+#include <KlayGE/PreDeclare.hpp>
+
+#include <string>
 #include <boost/utility.hpp>
 
 namespace KlayGE
@@ -22,6 +28,8 @@ namespace KlayGE
 	public:
 		virtual ~AudioFactory()
 			{ }
+
+		static AudioFactoryPtr NullObject();
 
 		virtual std::wstring const & Name() const = 0;
 

@@ -67,7 +67,8 @@ namespace KlayGE
 		{
 			return 1;
 		}
-		virtual void Update(uint32_t /*pass*/) = 0;
+		void Update(uint32_t pass);
+		virtual void DoUpdate(uint32_t pass) = 0;
 
 		virtual void RenderOver()
 		{

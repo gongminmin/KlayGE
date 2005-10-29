@@ -131,6 +131,8 @@ namespace KlayGE
 		RenderEngine();
 		virtual ~RenderEngine();
 
+		static RenderEnginePtr NullObject();
+
 		virtual std::wstring const & Name() const = 0;
 
 		virtual void StartRendering() = 0;

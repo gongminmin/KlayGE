@@ -224,12 +224,9 @@ void DistanceMapping::InputHandler(KlayGE::InputEngine const & sender, KlayGE::I
 	}
 }
 
-void DistanceMapping::Update(KlayGE::uint32_t pass)
+void DistanceMapping::DoUpdate(KlayGE::uint32_t pass)
 {
 	fpcController_.Update();
-
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
-	inputEngine.Update();
 
 	Matrix4 model = MathLib::RotationX(-0.5f);
 	Matrix4 view = this->ActiveCamera().ViewMatrix();

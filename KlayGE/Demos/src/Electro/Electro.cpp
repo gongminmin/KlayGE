@@ -148,9 +148,7 @@ namespace
 
 int main()
 {
-	SceneManager sceneMgr;
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
-	Context::Instance().SceneManagerInstance(sceneMgr);
 
 	RenderSettings settings;
 	settings.width = 800;
@@ -183,7 +181,7 @@ void Electro::InitObjects()
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 }
 
-void Electro::Update(uint32_t pass)
+void Electro::DoUpdate(uint32_t pass)
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 

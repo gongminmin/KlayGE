@@ -39,30 +39,49 @@
 
 namespace KlayGE
 {
+	class NullSceneManager : public SceneManager
+	{
+	public:
+		NullSceneManager()
+		{
+		}
+
+		void SceneManager::ClipScene(Camera const & /*camera*/)
+		{
+			for (RenderItemsType::iterator iter = renderItems_.begin(); iter != renderItems_.end(); ++ iter)
+			{
+				this->AddToRenderQueue(*iter);
+			}
+		}
+
+	private:
+		NullSceneManager(NullSceneManager const & rhs);
+		NullSceneManager& operator=(NullSceneManager const & rhs);
+	};
+
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	SceneManager::SceneManager()
 	{
 	}
 
-	// 空的裁减器
+	// 析构函数
 	/////////////////////////////////////////////////////////////////////////////////
-	void SceneManager::ClipScene(Camera const & /*camera*/)
+	SceneManager::~SceneManager()
 	{
-		for (RenderItemsType::iterator iter = renderItems_.begin(); iter != renderItems_.end(); ++ iter)
-		{
-			this->AddToRenderQueue(*iter);
-		}
+	}
+
+	// 返回空对象
+	/////////////////////////////////////////////////////////////////////////////////
+	SceneManagerPtr SceneManager::NullObject()
+	{
+		static SceneManagerPtr obj(new NullSceneManager);
+		return obj;
 	}
 
 	// 加入渲染物体
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::AddRenderable(RenderablePtr const & obj)
-	{
-		this->DoAddRenderable(obj);
-	}
-
-	void SceneManager::DoAddRenderable(RenderablePtr const & obj)
 	{
 		renderItems_.push_back(obj);
 	}

@@ -1,8 +1,11 @@
 // InputFactory.hpp
 // KlayGE 输入引擎抽象工厂 头文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 3.1.0
+// 版权所有(C) 龚敏敏, 2003-2005
+// Homepage: http://klayge.sourceforge.net
+//
+// 3.1.0
+// 增加了NullObject (2005.10.29)
 //
 // 2.0.0
 // 初次建立 (2003.8.30)
@@ -13,6 +16,8 @@
 #ifndef _INPUTFACTORY_HPP
 #define _INPUTFACTORY_HPP
 
+#include <KlayGE/PreDeclare.hpp>
+
 #include <boost/utility.hpp>
 
 namespace KlayGE
@@ -22,6 +27,8 @@ namespace KlayGE
 	public:
 		virtual ~InputFactory()
 			{ }
+
+		static InputFactoryPtr NullObject();
 
 		virtual std::wstring const & Name() const = 0;
 		virtual InputEngine& InputEngineInstance() = 0;

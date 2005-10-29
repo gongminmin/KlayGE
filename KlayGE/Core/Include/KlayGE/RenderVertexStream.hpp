@@ -27,6 +27,12 @@ namespace KlayGE
 	class RenderVertexStream : public RenderTarget
 	{
 	public:
+		virtual ~RenderVertexStream()
+		{
+		}
+
+		static RenderVertexStreamPtr NullObject();
+
 		virtual void Attach(VertexStreamPtr vs) = 0;
 		virtual void Detach() = 0;
 

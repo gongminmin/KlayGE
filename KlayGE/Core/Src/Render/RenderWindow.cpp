@@ -6,6 +6,45 @@
 
 namespace KlayGE
 {
+	class NullRenderWindow : public RenderWindow
+	{
+	public:
+		std::wstring const & Description() const
+		{
+			static std::wstring const desc(L"Null Render Window");
+			return desc;
+		}
+
+		void Destroy()
+		{
+		}
+
+		void Resize(uint32_t width, uint32_t height)
+		{
+		}
+		void Reposition(uint32_t left, uint32_t top)
+		{
+		}
+
+		bool Closed() const
+		{
+			return true;
+		}
+
+		void CustomAttribute(std::string const & name, void* pData)
+		{
+		}
+
+		bool RequiresTextureFlipping() const
+		{
+			return false;
+		}
+
+		void SwapBuffers()
+		{
+		}
+	};
+
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderWindow::RenderWindow()
@@ -16,6 +55,14 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderWindow::~RenderWindow()
 	{
+	}
+
+	// 返回空对象
+	/////////////////////////////////////////////////////////////////////////////////
+	RenderWindowPtr RenderWindow::NullObject()
+	{
+		static RenderWindowPtr obj(new NullRenderWindow);
+		return obj;
 	}
 
 	// 获取是否是全屏状态

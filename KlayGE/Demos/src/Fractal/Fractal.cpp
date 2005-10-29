@@ -177,9 +177,7 @@ namespace
 
 int main()
 {
-	SceneManager sceneMgr;
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
-	Context::Instance().SceneManagerInstance(sceneMgr);
 
 	RenderSettings settings;
 	settings.width = WIDTH;
@@ -231,7 +229,7 @@ uint32_t Fractal::NumPasses() const
 	return 2;
 }
 
-void Fractal::Update(uint32_t pass)
+void Fractal::DoUpdate(uint32_t pass)
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());

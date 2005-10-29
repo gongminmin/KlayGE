@@ -140,12 +140,9 @@ void VertexDisplacement::InputHandler(KlayGE::InputEngine const & sender, KlayGE
 	}
 }
 
-void VertexDisplacement::Update(uint32_t pass)
+void VertexDisplacement::DoUpdate(uint32_t pass)
 {
 	fpcController_.Update();
-
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
-	inputEngine.Update();
 
 	Matrix4 view = this->ActiveCamera().ViewMatrix();
 	Matrix4 proj = this->ActiveCamera().ProjMatrix();

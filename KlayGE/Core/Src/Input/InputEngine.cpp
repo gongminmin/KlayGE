@@ -28,10 +28,32 @@
 
 namespace KlayGE
 {
+	class NullInputEngine : public InputEngine
+	{
+	public:
+		std::wstring const & Name() const
+		{
+			static std::wstring name(L"Null Input Engine");
+			return name;
+		}
+
+		void EnumDevices()
+		{
+		}
+	};
+
 	// 析构函数
 	//////////////////////////////////////////////////////////////////////////////////
 	InputEngine::~InputEngine()
 	{
+	}
+
+	// 返回空对象
+	//////////////////////////////////////////////////////////////////////////////////
+	InputEnginePtr InputEngine::NullObject()
+	{
+		static InputEnginePtr obj(new NullInputEngine);
+		return obj;
 	}
 
 	// 设置动作格式

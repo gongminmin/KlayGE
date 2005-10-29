@@ -21,6 +21,9 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/SceneManager.hpp>
+#include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/AudioFactory.hpp>
+#include <KlayGE/InputFactory.hpp>
 
 #include <boost/assert.hpp>
 
@@ -83,7 +86,13 @@ namespace KlayGE
 
 	private:
 		Context()
-			{ }
+		{
+			sceneMgr_ = SceneManager::NullObject().get();
+
+			renderFactory_ = RenderFactory::NullObject().get();
+			audioFactory_ = AudioFactory::NullObject().get();
+			inputFactory_ = InputFactory::NullObject().get();
+		}
 
 		App3DFramework* app_;
 

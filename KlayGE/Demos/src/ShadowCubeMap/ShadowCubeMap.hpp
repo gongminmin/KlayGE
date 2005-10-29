@@ -14,7 +14,7 @@ private:
 	void InitObjects();
 
 	KlayGE::uint32_t NumPasses() const;
-	void Update(KlayGE::uint32_t pass);
+	void DoUpdate(KlayGE::uint32_t pass);
 
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 

@@ -287,6 +287,8 @@ namespace KlayGE
 	public:
 		virtual ~InputEngine();
 
+		static InputEnginePtr NullObject();
+
 		virtual std::wstring const & Name() const = 0;
 
 		virtual void EnumDevices() = 0;

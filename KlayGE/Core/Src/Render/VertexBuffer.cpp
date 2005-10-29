@@ -24,6 +24,32 @@
 
 namespace KlayGE
 {
+	class NullVertexStream : public VertexStream
+	{
+	public:
+		NullVertexStream()
+			: VertexStream(vertex_elements_type())
+		{
+		}
+
+		bool IsStatic() const
+		{
+			return true;
+		}
+
+		void Assign(void const * src, uint32_t numVertex)
+		{
+		}
+		void CopyToMemory(void* data)
+		{
+		}
+
+		uint32_t NumVertices() const
+		{
+			return 0;
+		}
+	};
+
 	VertexStream::VertexStream(vertex_elements_type const & vertex_elems)
 			: vertex_elems_(vertex_elems),
 				type_(ST_Geometry), freq_(1)
@@ -34,6 +60,12 @@ namespace KlayGE
 
 	VertexStream::~VertexStream()
 	{
+	}
+
+	VertexStreamPtr VertexStream::NullObject()
+	{
+		static VertexStreamPtr obj(new NullVertexStream);
+		return obj;
 	}
 
 	void VertexStream::CheckVertexElems()
@@ -221,8 +253,34 @@ namespace KlayGE
 	}
 
 
+	class NullIndexStream : public IndexStream
+	{
+	public:
+		uint32_t NumIndices() const
+		{
+			return 0;
+		}
+
+		bool IsStatic() const
+		{
+			return true;
+		}
+		void Assign(void const * src, uint32_t numIndices)
+		{
+		}
+		void CopyToMemory(void* data)
+		{
+		}
+	};
+
 	IndexStream::~IndexStream()
 	{
+	}
+
+	IndexStreamPtr IndexStream::NullObject()
+	{
+		static IndexStreamPtr obj(new NullIndexStream);
+		return obj;
 	}
 
 	uint32_t IndexStream::StreamSize() const
@@ -255,6 +313,15 @@ namespace KlayGE
 	}
 
 
+	class NullVertexBuffer : public VertexBuffer
+	{
+	public:
+		NullVertexBuffer()
+			: VertexBuffer(BT_PointList)
+		{
+		}
+	};
+
 	VertexBuffer::VertexBuffer(BufferType type)
 			: type_(type)
 	{
@@ -263,6 +330,12 @@ namespace KlayGE
 
 	VertexBuffer::~VertexBuffer()
 	{
+	}
+
+	VertexBufferPtr VertexBuffer::NullObject()
+	{
+		static VertexBufferPtr obj(new NullVertexBuffer);
+		return obj;
 	}
 
 	VertexBuffer::BufferType VertexBuffer::Type() const

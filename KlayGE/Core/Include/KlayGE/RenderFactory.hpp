@@ -36,6 +36,8 @@ namespace KlayGE
 	public:
 		virtual ~RenderFactory();
 
+		static RenderFactoryPtr NullObject();
+
 		virtual std::wstring const & Name() const = 0;
 
 		virtual RenderEngine& RenderEngineInstance() = 0;

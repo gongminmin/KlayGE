@@ -22,6 +22,8 @@
 #include <KlayGE/RenderWindow.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/Input.hpp>
+#include <KlayGE/InputFactory.hpp>
 
 #include <boost/assert.hpp>
 #include <windows.h>
@@ -110,5 +112,16 @@ namespace KlayGE
 #else
 		exit(0);
 #endif
+	}
+
+	void App3DFramework::Update(uint32_t pass)
+	{
+		if (0 == pass)
+		{
+			InputEngine& inputEngine = Context::Instance().InputFactoryInstance().InputEngineInstance();
+			inputEngine.Update();
+		}
+
+		this->DoUpdate(pass);
 	}
 }

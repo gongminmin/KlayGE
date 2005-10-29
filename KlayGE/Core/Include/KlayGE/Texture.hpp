@@ -226,6 +226,8 @@ namespace KlayGE
 		explicit Texture(TextureType type);
 		virtual ~Texture();
 
+		static TexturePtr NullObject();
+
 		// Gets the name of texture
 		virtual std::wstring const & Name() const = 0;
 

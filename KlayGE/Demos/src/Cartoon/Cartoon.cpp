@@ -175,12 +175,9 @@ void Cartoon::InputHandler(InputEngine const & sender, InputAction const & actio
 	}
 }
 
-void Cartoon::Update(uint32_t pass)
+void Cartoon::DoUpdate(uint32_t pass)
 {
 	fpcController_.Update();
-
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
-	inputEngine.Update();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 

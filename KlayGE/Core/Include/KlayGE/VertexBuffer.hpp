@@ -110,6 +110,8 @@ namespace KlayGE
 		VertexStream(vertex_elements_type const & vertex_elems);
 		virtual ~VertexStream();
 
+		static VertexStreamPtr NullObject();
+
 		virtual bool IsStatic() const = 0;
 
 		virtual void Assign(void const * src, uint32_t numVertex) = 0;
@@ -150,6 +152,8 @@ namespace KlayGE
 	public:
 		virtual ~IndexStream();
 
+		static IndexStreamPtr NullObject();
+
 		virtual uint32_t NumIndices() const = 0;
 
 		virtual bool IsStatic() const = 0;
@@ -182,6 +186,8 @@ namespace KlayGE
 
 		explicit VertexBuffer(BufferType type);
 		virtual ~VertexBuffer() = 0;
+
+		static VertexBufferPtr NullObject();
 
 		BufferType Type() const;
 

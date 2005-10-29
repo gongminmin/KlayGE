@@ -38,8 +38,11 @@ namespace KlayGE
 
 	public:
 		SceneManager();
+		virtual ~SceneManager();
 
-		virtual void ClipScene(Camera const & camera);
+		static SceneManagerPtr NullObject();
+
+		virtual void ClipScene(Camera const & camera) = 0;
 		void AddRenderable(RenderablePtr const & obj);
 
 		virtual void Clear();
@@ -53,8 +56,6 @@ namespace KlayGE
 
 	protected:
 		void AddToRenderQueue(RenderablePtr const & obj);
-
-		virtual void DoAddRenderable(RenderablePtr const & obj);
 
 	protected:
 		RenderItemsType renderItems_;

@@ -269,14 +269,11 @@ void AsciiArts::InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAc
 	}
 }
 
-void AsciiArts::Update(uint32_t pass)
+void AsciiArts::DoUpdate(uint32_t pass)
 {
 	if (0 == pass)
 	{
 		fpcController_.Update();
-
-		InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
-		inputEngine.Update();
 	}
 
 	Camera& camera = this->ActiveCamera();

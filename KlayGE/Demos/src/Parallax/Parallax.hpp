@@ -12,7 +12,7 @@ public:
 
 private:
 	void InitObjects();
-	void Update(KlayGE::uint32_t pass);
+	void DoUpdate(KlayGE::uint32_t pass);
 
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 
