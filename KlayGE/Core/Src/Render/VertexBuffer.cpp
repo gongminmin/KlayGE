@@ -1,8 +1,11 @@
 // VertexBuffer.cpp
 // KlayGE 顶点缓冲区类 实现文件
-// Ver 3.0.0
+// Ver 3.1.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.1.0
+// 分离了实例和几何流 (2005.10.31)
 //
 // 3.0.0
 // 支持instancing (2005.10.22)
@@ -350,7 +353,17 @@ namespace KlayGE
 
 	void VertexBuffer::AddVertexStream(VertexStreamPtr vertex_stream)
 	{
-		vertexStreams_.push_back(vertex_stream);
+		BOOST_ASSERT(vertex_stream);
+
+		if (VertexStream::ST_Geometry == vertex_stream->StreamType())
+		{
+			vertexStreams_.push_back(vertex_stream);
+		}
+		else
+		{
+			BOOST_ASSERT(!instance_stream_);
+			instance_stream_ = vertex_stream;
+		}
 	}
 
 	VertexBuffer::VertexStreamIterator VertexBuffer::VertexStreamBegin()
@@ -394,159 +407,84 @@ namespace KlayGE
 		return indexStream_;
 	}
 
-	uint32_t VertexBuffer::NumInstance() const
+	VertexStreamPtr VertexBuffer::InstanceStream() const
 	{
-		for (VertexStreamsType::const_iterator iter = vertexStreams_.begin();
-			iter != vertexStreams_.end(); ++ iter)
-		{
-			VertexStreamPtr const & vs = *iter;
-
-			if (VertexStream::ST_Geometry == vs->StreamType())
-			{
-				return vs->Frequency();
-			}
-		}
-
-		return 1;
+		return instance_stream_;
 	}
 
-	void VertexBuffer::ExpandInstance(VertexStreamsType& hint, uint32_t inst_no) const
+	uint32_t VertexBuffer::NumInstance() const
 	{
-		uint32_t num_instance = this->NumInstance();
-		uint32_t num_vertices = 0;
-		for (VertexStreamConstIterator iter = vertexStreams_.begin();
-			iter != vertexStreams_.end(); ++ iter)
-		{
-			VertexStreamPtr const & vs = *iter;
+		return vertexStreams_[0]->Frequency();
+	}
 
-			if (VertexStream::ST_Geometry == vs->StreamType())
-			{
-				num_vertices = vs->NumVertices();
-				break;
-			}
-		}
+	void VertexBuffer::ExpandInstance(VertexStreamPtr& hint, uint32_t inst_no) const
+	{
+		BOOST_ASSERT(instance_stream_);
+
+		uint32_t num_instance = this->NumInstance();
 		BOOST_ASSERT(inst_no < num_instance);
 
-		VertexStreamsType inst_streams;
-		for (VertexStreamConstIterator iter = vertexStreams_.begin();
-				iter != vertexStreams_.end(); ++ iter)
-		{
-			VertexStreamPtr const & src_vs = *iter;
-
-			if (VertexStream::ST_Instance == src_vs->StreamType())
-			{
-				inst_streams.push_back(src_vs);
-			}
-		}
-
-		bool same_fmt = true;
-		if (inst_streams.size() == hint.size())
-		{
-			for (uint32_t i = 0; i < inst_streams.size(); ++ i)
-			{
-				if (inst_streams[i]->Elements() != hint[i]->Elements())
-				{
-					same_fmt = false;
-				}
-			}
-		}
-		else
-		{
-			same_fmt = false;
-		}
-
-		if (same_fmt)
-		{
-			for (uint32_t i = 0; i < inst_streams.size(); ++ i)
-			{
-				VertexStreamPtr const & src_vs = inst_streams[i];
-				VertexStreamPtr dst_vs = hint[i];
-
-				uint32_t const instance_size = src_vs->VertexSize();
-
-				std::vector<uint8_t> ins_buffer(src_vs->StreamSize());
-				src_vs->CopyToMemory(&ins_buffer[0]);
-
-				std::vector<uint8_t> target_buffer(instance_size * num_vertices);
-
-				for (uint32_t i = 0; i < num_vertices; ++ i)
-				{
-					std::copy(&ins_buffer[inst_no * instance_size], &ins_buffer[(inst_no + 1) * instance_size],
-						&target_buffer[i * instance_size]);
-				}
-
-				dst_vs->Assign(&target_buffer[0], num_vertices);
-				dst_vs->FrequencyDivider(VertexStream::ST_Geometry, 1);
-			}
-		}
-		else
+		if (!hint || (instance_stream_->NumElements() != hint->NumElements())
+			|| (instance_stream_->Elements() != hint->Elements()))
 		{
 			hint = this->ExpandInstance(inst_no);
 		}
+		else
+		{
+			uint32_t num_vertices = vertexStreams_[0]->NumVertices();
+
+			VertexStreamPtr const & src_vs = instance_stream_;
+			VertexStreamPtr dst_vs = hint;
+
+			uint32_t const instance_size = src_vs->VertexSize();
+
+			std::vector<uint8_t> ins_buffer(src_vs->StreamSize());
+			src_vs->CopyToMemory(&ins_buffer[0]);
+
+			std::vector<uint8_t> target_buffer(instance_size * num_vertices);
+
+			for (uint32_t i = 0; i < num_vertices; ++ i)
+			{
+				std::copy(&ins_buffer[inst_no * instance_size], &ins_buffer[(inst_no + 1) * instance_size],
+					&target_buffer[i * instance_size]);
+			}
+
+			dst_vs->Assign(&target_buffer[0], num_vertices);
+			dst_vs->FrequencyDivider(VertexStream::ST_Geometry, 1);
+		}
 	}
 
-	VertexBuffer::VertexStreamsType VertexBuffer::ExpandInstance(uint32_t inst_no) const
+	VertexStreamPtr VertexBuffer::ExpandInstance(uint32_t inst_no) const
 	{
-		uint32_t num_instance = this->NumInstance();
-		uint32_t num_vertices = 0;
-		for (VertexStreamConstIterator iter = vertexStreams_.begin();
-			iter != vertexStreams_.end(); ++ iter)
-		{
-			VertexStreamPtr const & vs = *iter;
+		BOOST_ASSERT(instance_stream_);
 
-			if (VertexStream::ST_Geometry == vs->StreamType())
-			{
-				num_vertices = vs->NumVertices();
-				break;
-			}
-		}
+		uint32_t num_instance = this->NumInstance();
 		BOOST_ASSERT(inst_no < num_instance);
 
+		uint32_t num_vertices = vertexStreams_[0]->NumVertices();
+
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		VertexStreamsType ret;
 
-		for (VertexStreamConstIterator iter = vertexStreams_.begin();
-			iter != vertexStreams_.end(); ++ iter)
+		VertexStreamPtr const & src_vs = instance_stream_;
+		VertexStreamPtr ret = rf.MakeVertexStream(src_vs->Elements(), false);
+
+		uint32_t const instance_size = src_vs->VertexSize();
+
+		std::vector<uint8_t> ins_buffer(src_vs->StreamSize());
+		src_vs->CopyToMemory(&ins_buffer[0]);
+
+		std::vector<uint8_t> target_buffer(instance_size * num_vertices);
+
+		for (uint32_t i = 0; i < num_vertices; ++ i)
 		{
-			VertexStreamPtr const & src_vs = *iter;
-
-			if (VertexStream::ST_Instance == src_vs->StreamType())
-			{
-				VertexStreamPtr dst_vs = rf.MakeVertexStream(src_vs->Elements(), false);
-
-				uint32_t const instance_size = src_vs->VertexSize();
-
-				std::vector<uint8_t> ins_buffer(src_vs->StreamSize());
-				src_vs->CopyToMemory(&ins_buffer[0]);
-
-				std::vector<uint8_t> target_buffer(instance_size * num_vertices);
-
-				for (uint32_t i = 0; i < num_vertices; ++ i)
-				{
-					std::copy(&ins_buffer[inst_no * instance_size], &ins_buffer[(inst_no + 1) * instance_size],
-						&target_buffer[i * instance_size]);
-				}
-
-				dst_vs->Assign(&target_buffer[0], num_vertices);
-				dst_vs->FrequencyDivider(VertexStream::ST_Geometry, 1);
-				ret.push_back(dst_vs);
-			}
+			std::copy(&ins_buffer[inst_no * instance_size], &ins_buffer[(inst_no + 1) * instance_size],
+				&target_buffer[i * instance_size]);
 		}
+
+		ret->Assign(&target_buffer[0], num_vertices);
+		ret->FrequencyDivider(VertexStream::ST_Geometry, 1);
 
 		return ret;
-	}
-
-	bool VertexBuffer::HasInstanceStream() const
-	{
-		for (VertexStreamConstIterator iter = this->VertexStreamBegin();
-				iter != this->VertexStreamEnd(); ++ iter)
-		{
-			if (VertexStream::ST_Instance == (*iter)->StreamType())
-			{
-				return true;
-			}
-		}
-		return false;
 	}
 
 	VertexBuffer& VertexBuffer::Append(VertexBufferPtr rhs)

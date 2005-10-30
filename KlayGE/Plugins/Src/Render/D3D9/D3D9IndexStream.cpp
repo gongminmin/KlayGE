@@ -38,6 +38,9 @@ namespace KlayGE
 
 	void D3D9IndexStream::Assign(void const * src, uint32_t numIndices)
 	{
+		BOOST_ASSERT(src != NULL);
+		BOOST_ASSERT(numIndices != 0);
+
 		numIndices_ = numIndices;
 
 		uint32_t ib_size = 0;
@@ -68,6 +71,8 @@ namespace KlayGE
 
 	void D3D9IndexStream::CopyToMemory(void* data)
 	{
+		BOOST_ASSERT(data != NULL);
+
 		void* src;
 		TIF(buffer_->Lock(0, 0, &src, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
 

@@ -25,6 +25,7 @@
 
 #include <list>
 #include <map>
+#include <vector>
 
 #define NOMINMAX
 #pragma warning(disable: 4127 4800)

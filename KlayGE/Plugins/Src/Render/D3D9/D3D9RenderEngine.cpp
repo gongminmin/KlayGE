@@ -285,43 +285,23 @@ namespace KlayGE
 		BOOST_ASSERT(d3dDevice_);
 		BOOST_ASSERT(vb.VertexStreamEnd() - vb.VertexStreamBegin() != 0);
 		
-		VertexBuffer::VertexStreamsType geom_streams;
-		VertexBuffer::VertexStreamsType inst_streams;
-		for (VertexBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
-				iter != vb.VertexStreamEnd(); ++ iter)
-		{
-			VertexStreamPtr stream = *iter;
-
-			if (VertexStream::ST_Geometry == stream->StreamType())
-			{
-				geom_streams.push_back(stream);
-			}
-			else
-			{
-				BOOST_ASSERT(VertexStream::ST_Instance == stream->StreamType());
-
-				inst_streams.push_back(stream);
-			}
-		}
-		uint32_t const num_instance = geom_streams[0]->Frequency();
+		uint32_t const num_instance = (*vb.VertexStreamBegin())->Frequency();
 
 		if ((num_instance > 1) && (caps_.max_shader_model < 3))
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			VertexBufferPtr tmp_vb = rf.MakeVertexBuffer(vb.Type());
-			VertexBuffer::VertexStreamsType tmp_vss;
+			VertexStreamPtr tmp_inst_vs;
 
-			vb.ExpandInstance(tmp_vss, 0);
+			vb.ExpandInstance(tmp_inst_vs, 0);
 
-			for (uint32_t i = 0; i < geom_streams.size(); ++ i)
+			for (VertexBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
+				iter != vb.VertexStreamEnd(); ++ iter)
 			{
-				tmp_vb->AddVertexStream(geom_streams[i]);
+				tmp_vb->AddVertexStream(*iter);
 			}
-			for (uint32_t i = 0; i < tmp_vss.size(); ++ i)
-			{
-				tmp_vb->AddVertexStream(tmp_vss[i]);
-			}
+			tmp_vb->AddVertexStream(tmp_inst_vs);
 			if (vb.UseIndices())
 			{
 				tmp_vb->SetIndexStream(vb.GetIndexStream());
@@ -331,7 +311,7 @@ namespace KlayGE
 
 			for (uint32_t i = 1; i < num_instance; ++ i)
 			{
-				vb.ExpandInstance(tmp_vss, i);
+				vb.ExpandInstance(tmp_inst_vs, i);
 				this->RenderVB(*tmp_vb);
 			}
 		}
@@ -361,19 +341,25 @@ namespace KlayGE
 				d3d9vs.D3D9Buffer().get(), 0,
 				static_cast<UINT>(stream.VertexSize())));
 
-			uint32_t d3dss_type;
-			if (VertexStream::ST_Geometry == stream.StreamType())
+			if (caps_.max_shader_model >= 3)
 			{
-				d3dss_type = D3DSTREAMSOURCE_INDEXEDDATA;
+				TIF(d3dDevice_->SetStreamSourceFreq(number, D3DSTREAMSOURCE_INDEXEDDATA | stream.Frequency()));
 			}
-			else
+		}
+		if (vb.InstanceStream())
+		{
+			if (caps_.max_shader_model >= 3)
 			{
-				BOOST_ASSERT(VertexStream::ST_Instance == stream.StreamType());
+				uint32_t number = static_cast<uint32_t>(vb.VertexStreamEnd() - vb.VertexStreamBegin());
 
-				d3dss_type = D3DSTREAMSOURCE_INDEXEDDATA;
+				VertexStream& stream = *vb.InstanceStream();
+				D3D9VertexStream& d3d9vs(*checked_cast<D3D9VertexStream*>(&stream));
+				TIF(d3dDevice_->SetStreamSource(number,
+					d3d9vs.D3D9Buffer().get(), 0,
+					static_cast<UINT>(stream.VertexSize())));
+
+				TIF(d3dDevice_->SetStreamSourceFreq(number, D3DSTREAMSOURCE_INSTANCEDATA | stream.Frequency()));
 			}
-
-			TIF(d3dDevice_->SetStreamSourceFreq(number, d3dss_type | stream.Frequency()));
 		}
 
 		// Clear any previous steam sources
@@ -381,6 +367,10 @@ namespace KlayGE
 		for (uint32_t i = num_vertex_stream; i < last_num_vertex_stream_; ++ i)
 		{
 			d3dDevice_->SetStreamSource(i, NULL, 0, 0);
+			if (caps_.max_shader_model >= 3)
+			{
+				d3dDevice_->SetStreamSourceFreq(i, 0);
+			}
 		}
 		last_num_vertex_stream_ = num_vertex_stream;
 

@@ -46,6 +46,9 @@ namespace KlayGE
 
 	void D3D9VertexStream::Assign(void const * src, uint32_t numVertices)
 	{
+		BOOST_ASSERT(src != NULL);
+		BOOST_ASSERT(numVertices != 0);
+
 		numVertices_ = numVertices;
 
 		uint32_t vb_size = 0;
@@ -81,6 +84,8 @@ namespace KlayGE
 
 	void D3D9VertexStream::CopyToMemory(void* data)
 	{
+		BOOST_ASSERT(data != NULL);
+
 		void* src;
 		TIF(buffer_->Lock(0, 0, &src, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
 

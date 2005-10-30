@@ -1,8 +1,11 @@
 // VertexBuffer.hpp
 // KlayGE 顶点缓冲区类 头文件
-// Ver 3.0.0
+// Ver 3.1.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.1.0
+// 分离了实例和几何流 (2005.10.31)
 //
 // 3.0.0
 // 支持在单流中存储多种成员 (2005.10.15)
@@ -206,11 +209,11 @@ namespace KlayGE
 		void SetIndexStream(IndexStreamPtr index_stream);
 		IndexStreamPtr GetIndexStream() const;
 
+		VertexStreamPtr InstanceStream() const;
 		uint32_t NumInstance() const;
 
-		void ExpandInstance(VertexStreamsType& hint, uint32_t inst_no) const;
-		VertexStreamsType ExpandInstance(uint32_t inst_no) const;
-		bool HasInstanceStream() const;
+		void ExpandInstance(VertexStreamPtr& hint, uint32_t inst_no) const;
+		VertexStreamPtr ExpandInstance(uint32_t inst_no) const;
 
 		VertexBuffer& Append(VertexBufferPtr rhs);
 
@@ -219,6 +222,8 @@ namespace KlayGE
 
 		VertexStreamsType vertexStreams_;
 		IndexStreamPtr indexStream_;
+
+		VertexStreamPtr instance_stream_;
 	};
 }
 

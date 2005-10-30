@@ -224,110 +224,96 @@ namespace KlayGE
 		glDisableClientState(GL_COLOR_ARRAY);
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
-		uint32_t num_instance = 0;
-		for (VertexBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
-			iter != vb.VertexStreamEnd(); ++ iter)
-		{
-			OGLVertexStream& stream(static_cast<OGLVertexStream&>(*(*iter)));
-
-			if (VertexStream::ST_Geometry == stream.StreamType())
-			{
-				num_instance = stream.Frequency();
-				break;
-			}
-		}
+		uint32_t num_instance = (*vb.VertexStreamBegin())->Frequency();
 		BOOST_ASSERT(num_instance != 0);
 
 		for (uint32_t instance = 0; instance < num_instance; ++ instance)
 		{
-			for (VertexBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
-				iter != vb.VertexStreamEnd(); ++ iter)
+			if (vb.InstanceStream())
 			{
-				OGLVertexStream& stream(static_cast<OGLVertexStream&>(*(*iter)));
-				if (VertexStream::ST_Instance == stream.StreamType())
+				VertexStream& stream = *vb.InstanceStream();
+
+				uint32_t instance_size = stream.VertexSize();
+				std::vector<uint8_t> buffer(stream.StreamSize());
+				stream.CopyToMemory(&buffer[0]);
+
+				uint32_t elem_offset = 0;
+				for (uint32_t i = 0; i < stream.NumElements(); ++ i)
 				{
-					uint32_t instance_size = stream.VertexSize();
-					std::vector<uint8_t> buffer(stream.StreamSize());
-					stream.CopyToMemory(&buffer[0]);
+					vertex_element const & vs_elem = stream.Element(i);
+					void const * addr = &buffer[instance * instance_size + elem_offset];
 
-					uint32_t elem_offset = 0;
-					for (uint32_t i = 0; i < stream.NumElements(); ++ i)
+					switch (vs_elem.usage)
 					{
-						vertex_element const & vs_elem = stream.Element(i);
-						void const * addr = &buffer[instance * instance_size + elem_offset];
-
-						switch (vs_elem.usage)
+					// Vertex xyzs
+					case VEU_Position:
+						switch (vs_elem.num_components)
 						{
-						// Vertex xyzs
-						case VEU_Position:
-							switch (vs_elem.num_components)
-							{
-							case 2:
-								glVertex2fv(static_cast<GLfloat const *>(addr));
-								break;
-
-							case 3:
-								glVertex3fv(static_cast<GLfloat const *>(addr));
-								break;
-
-							case 4:
-								glVertex4fv(static_cast<GLfloat const *>(addr));
-								break;
-							}
-							break;
-					
-						case VEU_Normal:
-							glNormal3fv(static_cast<GLfloat const *>(addr));
+						case 2:
+							glVertex2fv(static_cast<GLfloat const *>(addr));
 							break;
 
-						case VEU_Diffuse:
-							switch (vs_elem.num_components)
-							{
-							case 3:
-								glColor3fv(static_cast<GLfloat const *>(addr));
-								break;
-
-							case 4:
-								glColor4fv(static_cast<GLfloat const *>(addr));
-								break;
-							}
+						case 3:
+							glVertex3fv(static_cast<GLfloat const *>(addr));
 							break;
 
-						case VEU_Specular:
-							glSecondaryColor3fv(static_cast<GLfloat const *>(addr));
-							break;
-
-						case VEU_TextureCoord:
-							{
-								GLenum target = GL_TEXTURE0 + vs_elem.usage_index;
-								switch (vs_elem.num_components)
-								{
-								case 1:
-									glMultiTexCoord1fv(target, static_cast<GLfloat const *>(addr));
-									break;
-
-								case 2:
-									glMultiTexCoord2fv(target, static_cast<GLfloat const *>(addr));
-									break;
-
-								case 3:
-									glMultiTexCoord3fv(target, static_cast<GLfloat const *>(addr));
-									break;
-
-								case 4:
-									glMultiTexCoord4fv(target, static_cast<GLfloat const *>(addr));
-									break;
-								}
-							}
-							break;
-
-						default:
-							BOOST_ASSERT(false);
+						case 4:
+							glVertex4fv(static_cast<GLfloat const *>(addr));
 							break;
 						}
+						break;
+					
+					case VEU_Normal:
+						glNormal3fv(static_cast<GLfloat const *>(addr));
+						break;
 
-						elem_offset += vs_elem.element_size();
+					case VEU_Diffuse:
+						switch (vs_elem.num_components)
+						{
+						case 3:
+							glColor3fv(static_cast<GLfloat const *>(addr));
+							break;
+
+						case 4:
+							glColor4fv(static_cast<GLfloat const *>(addr));
+							break;
+						}
+						break;
+
+					case VEU_Specular:
+						glSecondaryColor3fv(static_cast<GLfloat const *>(addr));
+						break;
+
+					case VEU_TextureCoord:
+						{
+							GLenum target = GL_TEXTURE0 + vs_elem.usage_index;
+							switch (vs_elem.num_components)
+							{
+							case 1:
+								glMultiTexCoord1fv(target, static_cast<GLfloat const *>(addr));
+								break;
+
+							case 2:
+								glMultiTexCoord2fv(target, static_cast<GLfloat const *>(addr));
+								break;
+
+							case 3:
+								glMultiTexCoord3fv(target, static_cast<GLfloat const *>(addr));
+								break;
+
+							case 4:
+								glMultiTexCoord4fv(target, static_cast<GLfloat const *>(addr));
+								break;
+							}
+						}
+						break;
+
+					default:
+						BOOST_ASSERT(false);
+						break;
 					}
+
+					elem_offset += vs_elem.element_size();
 				}
 			}
 
@@ -336,59 +322,56 @@ namespace KlayGE
 			{
 				OGLVertexStream& stream(static_cast<OGLVertexStream&>(*(*iter)));
 
-				if (VertexStream::ST_Geometry == stream.StreamType())
+				uint32_t elem_offset = 0;
+				for (uint32_t i = 0; i < stream.NumElements(); ++ i)
 				{
-					uint32_t elem_offset = 0;
-					for (uint32_t i = 0; i < stream.NumElements(); ++ i)
+					vertex_element const & vs_elem = stream.Element(i);
+
+					switch (vs_elem.usage)
 					{
-						vertex_element const & vs_elem = stream.Element(i);
+					// Vertex xyzs
+					case VEU_Position:
+						glEnableClientState(GL_VERTEX_ARRAY);
+						stream.Active();
+						glVertexPointer(3, GL_FLOAT, stream.VertexSize(),
+							reinterpret_cast<GLvoid*>(elem_offset));
+						break;
+				
+					case VEU_Normal:
+						glEnableClientState(GL_NORMAL_ARRAY);
+						stream.Active();
+						glNormalPointer(GL_FLOAT, stream.VertexSize(),
+							reinterpret_cast<GLvoid*>(elem_offset));
+						break;
 
-						switch (vs_elem.usage)
-						{
-						// Vertex xyzs
-						case VEU_Position:
-							glEnableClientState(GL_VERTEX_ARRAY);
-							stream.Active();
-							glVertexPointer(3, GL_FLOAT, stream.VertexSize(),
-								reinterpret_cast<GLvoid*>(elem_offset));
-							break;
-					
-						case VEU_Normal:
-							glEnableClientState(GL_NORMAL_ARRAY);
-							stream.Active();
-							glNormalPointer(GL_FLOAT, stream.VertexSize(),
-								reinterpret_cast<GLvoid*>(elem_offset));
-							break;
+					case VEU_Diffuse:
+						glEnableClientState(GL_COLOR_ARRAY);
+						stream.Active();
+						glColorPointer(4, GL_UNSIGNED_BYTE, stream.VertexSize(),
+							reinterpret_cast<GLvoid*>(elem_offset));
+						break;
 
-						case VEU_Diffuse:
-							glEnableClientState(GL_COLOR_ARRAY);
-							stream.Active();
-							glColorPointer(4, GL_UNSIGNED_BYTE, stream.VertexSize(),
-								reinterpret_cast<GLvoid*>(elem_offset));
-							break;
+					case VEU_Specular:
+						glEnableClientState(GL_SECONDARY_COLOR_ARRAY);
+						stream.Active();
+						glSecondaryColorPointer(4, GL_UNSIGNED_BYTE, stream.VertexSize(),
+							reinterpret_cast<GLvoid*>(elem_offset));
+						break;
 
-						case VEU_Specular:
-							glEnableClientState(GL_SECONDARY_COLOR_ARRAY);
-							stream.Active();
-							glSecondaryColorPointer(4, GL_UNSIGNED_BYTE, stream.VertexSize(),
-								reinterpret_cast<GLvoid*>(elem_offset));
-							break;
+					case VEU_TextureCoord:
+						glClientActiveTexture(GL_TEXTURE0 + vs_elem.usage_index);
+						glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+						stream.Active();
+						glTexCoordPointer(static_cast<GLint>(vs_elem.num_components),
+								GL_FLOAT, stream.VertexSize(), reinterpret_cast<GLvoid*>(elem_offset));
+						break;
 
-						case VEU_TextureCoord:
-							glClientActiveTexture(GL_TEXTURE0 + vs_elem.usage_index);
-							glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-							stream.Active();
-							glTexCoordPointer(static_cast<GLint>(vs_elem.num_components),
-									GL_FLOAT, stream.VertexSize(), reinterpret_cast<GLvoid*>(elem_offset));
-							break;
-
-						default:
-							BOOST_ASSERT(false);
-							break;
-						}
-
-						elem_offset += vs_elem.element_size();
+					default:
+						BOOST_ASSERT(false);
+						break;
 					}
+
+					elem_offset += vs_elem.element_size();
 				}
 			}
 
