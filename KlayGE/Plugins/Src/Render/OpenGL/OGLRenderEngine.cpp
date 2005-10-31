@@ -317,6 +317,7 @@ namespace KlayGE
 				}
 			}
 
+			// Geometry streams
 			for (VertexBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
 				iter != vb.VertexStreamEnd(); ++ iter)
 			{

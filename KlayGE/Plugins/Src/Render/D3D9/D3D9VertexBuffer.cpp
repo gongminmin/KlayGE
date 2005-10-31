@@ -56,15 +56,20 @@ namespace KlayGE
 			boost::shared_ptr<IDirect3DDevice9> d3d_device = renderEngine.D3DDevice();
 
 			vertex_elems_type elems;
-			elems.reserve(vertexStreams_.size());
+			elems.reserve(vertexStreams_.size() + 1);
 
-			for (VertexStreamConstIterator iter = this->VertexStreamBegin();
-				iter != this->VertexStreamEnd(); ++ iter)
+			VertexBuffer::VertexStreamsType vss(this->VertexStreamBegin(), this->VertexStreamEnd());
+			if (instance_stream_)
+			{
+				vss.push_back(instance_stream_);
+			}
+
+			for (VertexStreamConstIterator iter = vss.begin(); iter != vss.end(); ++ iter)
 			{
 				VertexStream& stream(*(*iter));
 
 				std::vector<D3DVERTEXELEMENT9> stream_elems;
-				D3D9Mapping::Mapping(stream_elems, iter - this->VertexStreamBegin(), stream);
+				D3D9Mapping::Mapping(stream_elems, iter - vss.begin(), stream);
 				elems.insert(elems.end(), stream_elems.begin(), stream_elems.end());
 			}
 

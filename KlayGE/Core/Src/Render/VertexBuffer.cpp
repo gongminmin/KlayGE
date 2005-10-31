@@ -491,8 +491,8 @@ namespace KlayGE
 	{
 		std::vector<uint32_t> mapping;
 		mapping.reserve(vertexStreams_.size());
-		for (VertexStreamsType::iterator lhs_iter = vertexStreams_.begin();
-			lhs_iter != vertexStreams_.end(); ++ lhs_iter)
+		for (VertexStreamsType::iterator lhs_iter = this->VertexStreamBegin();
+			lhs_iter != this->VertexStreamEnd(); ++ lhs_iter)
 		{
 			VertexStreamPtr& lhs_vs = *lhs_iter;
 
@@ -515,12 +515,16 @@ namespace KlayGE
 		BOOST_ASSERT((*vertexStreams_.begin())->NumVertices() < 0xFFFF);
 		indexStream_->Append(rhs->indexStream_, static_cast<uint16_t>((*vertexStreams_.begin())->NumVertices()));
 
-		for (VertexStreamsType::iterator lhs_iter = vertexStreams_.begin();
-			lhs_iter != vertexStreams_.end(); ++ lhs_iter)
+		for (VertexStreamsType::iterator lhs_iter = this->VertexStreamBegin();
+			lhs_iter != this->VertexStreamEnd(); ++ lhs_iter)
 		{
 			VertexStreamPtr& lhs_vs = *lhs_iter;
 
 			lhs_vs->Append(rhs->vertexStreams_[mapping[lhs_iter - vertexStreams_.begin()]]);
+		}
+		if (instance_stream_ && rhs->instance_stream_)
+		{
+			instance_stream_->Append(rhs->instance_stream_);
 		}
 
 		return *this;

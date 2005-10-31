@@ -363,7 +363,8 @@ namespace KlayGE
 		}
 
 		// Clear any previous steam sources
-		uint32_t const num_vertex_stream = static_cast<uint32_t>(vb.VertexStreamEnd() - vb.VertexStreamBegin());
+		uint32_t const num_vertex_stream = static_cast<uint32_t>(vb.VertexStreamEnd() - vb.VertexStreamBegin())
+			+ (vb.InstanceStream() ? 1 : 0);
 		for (uint32_t i = num_vertex_stream; i < last_num_vertex_stream_; ++ i)
 		{
 			d3dDevice_->SetStreamSource(i, NULL, 0, 0);
