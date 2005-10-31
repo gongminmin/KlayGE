@@ -16,6 +16,7 @@
 #include <KlayGE/KMesh.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Sampler.hpp>
+#include <KlayGE/SceneObjectHelper.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
@@ -51,7 +52,7 @@ namespace
 	{
 	public:
 		RenderQuad()
-			: RenderablePlane(2, 2, 1, 1, true, true, true),
+			: RenderablePlane(2, 2, 1, 1, true),
 				scene_sampler_(new Sampler), lums_sampler_(new Sampler)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -214,8 +215,7 @@ void AsciiArts::InitObjects()
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	mesh_ = LoadKMesh("teapot.kmesh");
-	mesh_->AddToSceneManager();
+	obj_.reset(new SceneObjectHelper(LoadKMesh("teapot.kmesh"), true, false));
 
 	this->BuildAsciiLumsTex();
 
@@ -289,7 +289,7 @@ void AsciiArts::DoUpdate(uint32_t pass)
 			// 第一遍，正常渲染
 			renderEngine.ActiveRenderTarget(0, render_buffer_);
 
-			mesh_->AddToSceneManager();
+			obj_->AddToSceneManager();
 			break;
 
 		case 1:
@@ -301,7 +301,7 @@ void AsciiArts::DoUpdate(uint32_t pass)
 
 			static_cast<RenderQuad*>(renderQuad_.get())->SetTexture(downsample_tex_, ascii_lums_tex_);
 			sceneMgr.Clear();
-			renderQuad_->AddToSceneManager();
+			renderQuad_->AddToRenderQueue();
 			break;
 		}
 	}
@@ -310,7 +310,7 @@ void AsciiArts::DoUpdate(uint32_t pass)
 		renderEngine.ActiveRenderTarget(0, screen_buffer_);
 
 		sceneMgr.Clear();
-		mesh_->AddToSceneManager();
+		obj_->AddToSceneManager();
 	}
 
 	if ((!show_ascii_ && (0 == pass))
@@ -323,7 +323,7 @@ void AsciiArts::DoUpdate(uint32_t pass)
 		font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());
 
 		stream.str(L"");
-		stream << sceneMgr.NumObjectsRendered() << " Renderables "
+		stream << sceneMgr.NumRenderablesRendered() << " Renderables "
 			<< sceneMgr.NumPrimitivesRendered() << " Primitives "
 			<< sceneMgr.NumVerticesRendered() << " Vertices";
 		font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str().c_str());

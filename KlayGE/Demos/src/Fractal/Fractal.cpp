@@ -1,5 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/VertexBuffer.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -33,7 +34,7 @@ namespace
 	{
 	public:
 		RenderFractal()
-			: RenderableHelper(L"Fractal", true, true)
+			: RenderableHelper(L"Fractal")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -101,7 +102,7 @@ namespace
 	{
 	public:
 		RenderPlane()
-			: RenderableHelper(L"Plane", true, true)
+			: RenderableHelper(L"Plane")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -242,14 +243,14 @@ void Fractal::DoUpdate(uint32_t pass)
 		render_buffer_->AttachTexture2D(rendered_tex_[!odd]);
 
 		renderEngine.ActiveRenderTarget(0, render_buffer_);
-		static_cast<RenderFractal&>(*renderFractal_).SetTexture(rendered_tex_[odd]);
-		renderFractal_->AddToSceneManager();
+		checked_cast<RenderFractal*>(renderFractal_.get())->SetTexture(rendered_tex_[odd]);
+		renderFractal_->AddToRenderQueue();
 		break;
 
 	case 1:
 		renderEngine.ActiveRenderTarget(0, screen_buffer_);
-		static_cast<RenderPlane&>(*renderPlane_).SetTexture(rendered_tex_[!odd]);
-		renderPlane_->AddToSceneManager();
+		checked_cast<RenderPlane*>(renderPlane_.get())->SetTexture(rendered_tex_[!odd]);
+		renderPlane_->AddToRenderQueue();
 
 		odd = !odd;
 

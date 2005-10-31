@@ -14,6 +14,7 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Sampler.hpp>
 #include <KlayGE/KMesh.hpp>
+#include <KlayGE/SceneObjectHelper.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
@@ -86,6 +87,19 @@ namespace
 		return KMeshPtr(new RenderTorus(toonTex, edgeTex));
 	}
 
+	class TorusObject : public SceneObjectHelper
+	{
+	public:
+		TorusObject()
+			: SceneObjectHelper(true, false)
+		{
+			TexturePtr toonTex = LoadTexture("Toon.dds");
+			TexturePtr edgeTex = LoadTexture("Edge.dds");
+
+			renderable_ = LoadKMesh("torus.kmesh", boost::bind(CreateRenderTorusFactory, _1, _2, toonTex, edgeTex));
+		}
+	};
+
 
 	enum
 	{
@@ -143,8 +157,8 @@ void Cartoon::InitObjects()
 	TexturePtr toonTex = LoadTexture("Toon.dds");
 	TexturePtr edgeTex = LoadTexture("Edge.dds");
 
-	renderTorus_ = LoadKMesh("torus.kmesh", boost::bind(CreateRenderTorusFactory, _1, _2, toonTex, edgeTex));
-	renderTorus_->AddToSceneManager();
+	torus_.reset(new TorusObject);
+	torus_->AddToSceneManager();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 

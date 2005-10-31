@@ -26,14 +26,13 @@
 namespace KlayGE
 {
 	RenderModel::RenderModel(std::wstring const & name)
-		: name_(name),
-			model_(Matrix4::Identity())
+		: name_(name)
 	{
 	}
 
-	void RenderModel::AddToSceneManager()
+	void RenderModel::AddToRenderQueue()
 	{
-		std::for_each(meshes_.begin(), meshes_.end(), boost::mem_fn(&StaticMesh::AddToSceneManager));
+		std::for_each(meshes_.begin(), meshes_.end(), boost::mem_fn(&StaticMesh::AddToRenderQueue));
 	}
 
 	void RenderModel::OnRenderBegin()
@@ -49,8 +48,7 @@ namespace KlayGE
 
 	StaticMesh::StaticMesh(std::wstring const & name)
 		: name_(name),
-			beBuilt_(false),
-			model_(Matrix4::Identity())
+			beBuilt_(false)
 	{
 		vb_ = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 	}
@@ -64,28 +62,19 @@ namespace KlayGE
 		return name_;
 	}
 
-	void StaticMesh::AddToSceneManager()
+	void StaticMesh::AddToRenderQueue()
 	{
 		this->BuildRenderable();
 
 		if (!xyzs_.empty())
 		{
-			Renderable::AddToSceneManager();
+			Renderable::AddToRenderQueue();
 		}
 	}
 
 	Box StaticMesh::GetBound() const
 	{
 		return box_;
-	}
-
-	Matrix4 StaticMesh::GetModelMatrix() const
-	{
-		return model_;
-	}
-	void StaticMesh::SetModelMatrix(Matrix4 const & mat)
-	{
-		model_ = mat;
 	}
 
 	void StaticMesh::BuildRenderable()
@@ -100,8 +89,6 @@ namespace KlayGE
 				VertexStreamPtr pos_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)), true);
 				pos_vs->Assign(&xyzs_[0], static_cast<uint32_t>(xyzs_.size()));
 				vb_->AddVertexStream(pos_vs);
-
-				box_ = MathLib::ComputeBoundingBox<float>(xyzs_.begin(), xyzs_.end());
 
 				if (!normals_.empty())
 				{

@@ -31,7 +31,7 @@ namespace KlayGE
 	class RenderableHelper : public Renderable
 	{
 	public:
-		RenderableHelper(std::wstring const & name, bool can_be_culled, bool short_age);
+		RenderableHelper(std::wstring const & name);
 		virtual ~RenderableHelper()
 		{
 		}
@@ -40,9 +40,6 @@ namespace KlayGE
 		virtual VertexBufferPtr GetVertexBuffer() const;
 
 		virtual Box GetBound() const;
-
-		virtual bool CanBeCulled() const;
-		virtual bool ShortAge() const;
 
 		virtual std::wstring const & Name() const;
 
@@ -61,7 +58,7 @@ namespace KlayGE
 	class RenderablePoint : public RenderableHelper
 	{
 	public:
-		RenderablePoint(Vector3 const & v, bool can_be_culled, bool short_age);
+		RenderablePoint(Vector3 const & v);
 		virtual ~RenderablePoint()
 		{
 		}		
@@ -70,8 +67,7 @@ namespace KlayGE
 	class RenderableLine : public RenderableHelper
 	{
 	public:
-		explicit RenderableLine(Vector3 const & v0, Vector3 const & v1,
-			bool can_be_culled, bool short_age);
+		explicit RenderableLine(Vector3 const & v0, Vector3 const & v1);
 		virtual ~RenderableLine()
 		{
 		}
@@ -80,8 +76,7 @@ namespace KlayGE
 	class RenderableTriangle : public RenderableHelper
 	{
 	public:
-		RenderableTriangle(Vector3 const & v0, Vector3 const & v1, Vector3 const & v2,
-			bool can_be_culled, bool short_age);
+		RenderableTriangle(Vector3 const & v0, Vector3 const & v1, Vector3 const & v2);
 		virtual ~RenderableTriangle()
 		{
 		}
@@ -90,7 +85,7 @@ namespace KlayGE
 	class RenderableBox : public RenderableHelper
 	{
 	public:
-		explicit RenderableBox(Box const & box, bool can_be_culled, bool short_age);
+		explicit RenderableBox(Box const & box);
 		virtual ~RenderableBox()
 		{
 		}
@@ -115,8 +110,7 @@ namespace KlayGE
 	class RenderablePlane : public RenderableHelper
 	{
 	public:
-		RenderablePlane(float length, float width, int length_segs, int width_segs, bool has_tex_coord, 
-			bool can_be_culled, bool short_age);
+		RenderablePlane(float length, float width, int length_segs, int width_segs, bool has_tex_coord);
 		virtual ~RenderablePlane()
 		{
 		}

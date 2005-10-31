@@ -23,6 +23,7 @@
 #include <KlayGE/Vector.hpp>
 #include <KlayGE/Plane.hpp>
 #include <KlayGE/Camera.hpp>
+#include <KlayGE/SceneObject.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 
 #include <functional>
@@ -40,18 +41,18 @@ namespace KlayGE
 
 	void OCTree::ClipScene(Camera const & camera)
 	{
-		for (RenderItemsType::iterator iter = renderItems_.begin(); iter != renderItems_.end(); ++ iter)
+		for (SceneObjectsType::iterator iter = scene_objs_.begin(); iter != scene_objs_.end(); ++ iter)
 		{
 			if ((*iter)->CanBeCulled())
 			{
-				this->InsertRenderable("0", *iter);
+				this->InsertSceneObject("0", *iter);
 			}
 		}
 
 		Frustum frustum(camera.ViewMatrix() * camera.ProjMatrix());
 
 		std::set<tree_id_t> nodes;
-		std::set<RenderablePtr> renderables;
+		std::set<SceneObjectPtr> visables;
 		for (linear_octree_t::iterator iter = octree_.begin(); iter != octree_.end(); ++ iter)
 		{
 			for (size_t i = 1; i <= iter->first.size(); ++ i)
@@ -68,13 +69,12 @@ namespace KlayGE
 					{
 						// 全部看见树或部分看见叶子
 
-						renderables.insert(iter->second.begin(), iter->second.end());
+						visables.insert(iter->second.begin(), iter->second.end());
 						nodes.insert(id);
 
 #ifdef KLAYGE_DEBUG
-						RenderablePtr box_helper(new RenderableBox(box, false, true));
-						renderItems_.push_back(box_helper);
-						renderables.insert(box_helper);
+						RenderablePtr box_helper(new RenderableBox(box));
+						box_helper->AddToRenderQueue();
 #endif
 					}
 					else
@@ -96,24 +96,24 @@ namespace KlayGE
 				}
 				else
 				{
-					renderables.insert(iter->second.begin(), iter->second.end());
+					visables.insert(iter->second.begin(), iter->second.end());
 				}
 			}
 		}
 
-		for (RenderItemsType::iterator iter = renderItems_.begin(); iter != renderItems_.end(); ++ iter)
+		for (SceneObjectsType::iterator iter = scene_objs_.begin(); iter != scene_objs_.end(); ++ iter)
 		{
 			if ((*iter)->CanBeCulled())
 			{
-				if (renderables.find(*iter) != renderables.end())
+				if (visables.find(*iter) != visables.end())
 				{
-					renderables.erase(*iter);
-					this->AddToRenderQueue(*iter);
+					visables.erase(*iter);
+					visible_objs_.push_back(*iter);
 				}
 			}
 			else
 			{
-				this->AddToRenderQueue(*iter);				
+				visible_objs_.push_back(*iter);
 			}
 		}
 
@@ -190,14 +190,14 @@ namespace KlayGE
 		return ret;
 	}
 
-	bool OCTree::InsideChild(tree_id_t const & id, RenderablePtr const & renderable)
+	bool OCTree::InsideChild(tree_id_t const & id, SceneObjectPtr const & obj)
 	{
 		Box const & area_box = this->AreaBox(id);
-		Box const & box(renderable->GetBound());
+		Box const & box(obj->GetBound());
 
 		for (size_t i = 0; i < 8; ++ i)
 		{
-			Vector3 vec(MathLib::TransformCoord(box[i], renderable->GetModelMatrix()));
+			Vector3 vec(MathLib::TransformCoord(box[i], obj->GetModelMatrix()));
 			if (MathLib::VecInBox(area_box, vec))
 			{
 				return true;
@@ -206,30 +206,30 @@ namespace KlayGE
 		return false;
 	}
 
-	void OCTree::InsertRenderable(tree_id_t const & id, RenderablePtr const & renderable)
+	void OCTree::InsertSceneObject(tree_id_t const & id, SceneObjectPtr const & obj)
 	{
-		BOOST_ASSERT(this->InsideChild(id, renderable));
+		BOOST_ASSERT(this->InsideChild(id, obj));
 
 		linear_octree_t::iterator node = octree_.find(id);
 
 		if (node == octree_.end())
 		{
-			octree_.insert(std::make_pair(id, renderable_ptrs_t(1, renderable)));
+			octree_.insert(std::make_pair(id, SceneObjectsType(1, obj)));
 
-			BOOST_ASSERT(octree_[id].front() == renderable);
+			BOOST_ASSERT(octree_[id].front() == obj);
 		}
 		else
 		{
 			if (node->second.size() < maxNumObjInANode_)
 			{
-				node->second.push_back(renderable);
+				node->second.push_back(obj);
 			}
 			else
 			{
-				renderable_ptrs_t const & old_renderables = node->second;
+				SceneObjectsType const & old_objs = node->second;
 
-				for (renderable_ptrs_t::const_iterator iter = old_renderables.begin();
-					iter != old_renderables.end(); ++ iter)
+				for (SceneObjectsType::const_iterator iter = old_objs.begin();
+					iter != old_objs.end(); ++ iter)
 				{
 					for (int i = 0; i < 8; ++ i)
 					{
@@ -237,12 +237,12 @@ namespace KlayGE
 
 						if (this->InsideChild(child_id, *iter))
 						{
-							this->InsertRenderable(child_id, *iter);
+							this->InsertSceneObject(child_id, *iter);
 						}
 
-						if (this->InsideChild(child_id, renderable))
+						if (this->InsideChild(child_id, obj))
 						{
-							this->InsertRenderable(child_id, renderable);
+							this->InsertSceneObject(child_id, obj);
 						}
 					}
 				}

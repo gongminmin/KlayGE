@@ -32,7 +32,8 @@ namespace KlayGE
 {
 	KMesh::KMesh(std::wstring const & name, TexturePtr tex)
 						: StaticMesh(name),
-							sampler_(new Sampler)
+							sampler_(new Sampler),
+							model_(Matrix4::Identity())
 	{
 		// ÔØÈëfx
 		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("KMesh.fx");
@@ -65,6 +66,12 @@ namespace KlayGE
 		*(effect_->ParameterByName("modelviewproj")) = model_ * camera.ViewMatrix() * camera.ProjMatrix();
 		*(effect_->ParameterByName("modelIT")) = MathLib::Transpose(MathLib::Inverse(model_));
 	}
+
+	void KMesh::SetModelMatrix(Matrix4 const & model)
+	{
+		model_ = model;
+	}
+
 
 	RenderModelPtr LoadKMesh(const std::string& kmeshName,
 		boost::function<KMeshPtr (std::wstring const &, TexturePtr)> CreateFactoryFunc)

@@ -1,5 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/VertexBuffer.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -14,6 +15,7 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/KMesh.hpp>
 #include <KlayGE/Sampler.hpp>
+#include <KlayGE/SceneObjectHelper.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
@@ -33,10 +35,10 @@ using namespace KlayGE;
 
 namespace
 {
-	class Refractor : public KMesh
+	class RefractorRenderable : public KMesh
 	{
 	public:
-		Refractor(std::wstring const & /*name*/, TexturePtr tex)
+		RefractorRenderable(std::wstring const & /*name*/, TexturePtr tex)
 			: KMesh(L"Refractor", tex),
 				cubemap_sampler_(new Sampler)
 		{
@@ -70,6 +72,17 @@ namespace
 
 	private:
 		SamplerPtr cubemap_sampler_;
+	};
+
+	class RefractorObject : public SceneObjectHelper
+	{
+	public:
+		RefractorObject(TexturePtr cube_map)
+			: SceneObjectHelper(true, false)
+		{
+			renderable_ = LoadKMesh("teapot.kmesh", CreateFactory<RefractorRenderable>)->Mesh(0);
+			checked_cast<RefractorRenderable*>(renderable_.get())->CubeMap(cube_map);	
+		}
 	};
 
 
@@ -125,13 +138,12 @@ void Refract::InitObjects()
 
 	cube_map_ = LoadTexture("Glacier2.dds");
 
-	refractor_ = LoadKMesh("teapot.kmesh", CreateFactory<Refractor>);
-	static_cast<Refractor*>(refractor_->Mesh(0).get())->CubeMap(cube_map_);
+	refractor_.reset(new RefractorObject(cube_map_));
 	refractor_->AddToSceneManager();
 
-	renderSkyBox_.reset(new RenderableSkyBox);
-	static_cast<RenderableSkyBox*>(renderSkyBox_.get())->CubeMap(cube_map_);
-	renderSkyBox_->AddToSceneManager();
+	sky_box_.reset(new SceneObjectSkyBox);
+	static_cast<SceneObjectSkyBox*>(sky_box_.get())->CubeMap(cube_map_);
+	sky_box_->AddToSceneManager();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
@@ -168,7 +180,7 @@ void Refract::DoUpdate(uint32_t pass)
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-	*(refractor_->Mesh(0)->GetRenderEffect()->ParameterByName("eyePos"))
+	*(refractor_->GetRenderable()->GetRenderEffect()->ParameterByName("eyePos"))
 		= Vector4(this->ActiveCamera().EyePos().x(), this->ActiveCamera().EyePos().y(),
 			this->ActiveCamera().EyePos().z(), 1);
 

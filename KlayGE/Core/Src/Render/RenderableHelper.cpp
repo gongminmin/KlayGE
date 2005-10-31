@@ -34,9 +34,8 @@
 
 namespace KlayGE
 {
-	RenderableHelper::RenderableHelper(std::wstring const & name, bool can_be_culled, bool short_age)
-		: name_(name),
-			can_be_culled_(can_be_culled), short_age_(short_age)
+	RenderableHelper::RenderableHelper(std::wstring const & name)
+		: name_(name)
 	{
 	}
 
@@ -55,24 +54,14 @@ namespace KlayGE
 		return box_;
 	}
 
-	bool RenderableHelper::CanBeCulled() const
-	{
-		return can_be_culled_;
-	}
-	
-	bool RenderableHelper::ShortAge() const
-	{
-		return short_age_;
-	}
-
 	std::wstring const & RenderableHelper::Name() const
 	{
 		return name_;
 	}
 
 
-	RenderablePoint::RenderablePoint(Vector3 const & v, bool can_be_culled, bool short_age)
-		: RenderableHelper(L"Point", can_be_culled, short_age)
+	RenderablePoint::RenderablePoint(Vector3 const & v)
+		: RenderableHelper(L"Point")
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -89,8 +78,8 @@ namespace KlayGE
 	}
 
 
-	RenderableLine::RenderableLine(Vector3 const & v0, Vector3 const & v1, bool can_be_culled, bool short_age)
-		: RenderableHelper(L"Line", can_be_culled, short_age)
+	RenderableLine::RenderableLine(Vector3 const & v0, Vector3 const & v1)
+		: RenderableHelper(L"Line")
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -112,9 +101,8 @@ namespace KlayGE
 	}
 
 
-	RenderableTriangle::RenderableTriangle(Vector3 const & v0, Vector3 const & v1, Vector3 const & v2,
-											bool can_be_culled, bool short_age)
-		: RenderableHelper(L"Triangle", can_be_culled, short_age)
+	RenderableTriangle::RenderableTriangle(Vector3 const & v0, Vector3 const & v1, Vector3 const & v2)
+		: RenderableHelper(L"Triangle")
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -136,8 +124,8 @@ namespace KlayGE
 	}
 
 
-	RenderableBox::RenderableBox(Box const & box, bool can_be_culled, bool short_age)
-		: RenderableHelper(L"Box", can_be_culled, short_age)
+	RenderableBox::RenderableBox(Box const & box)
+		: RenderableHelper(L"Box")
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -173,7 +161,7 @@ namespace KlayGE
 
 
 	RenderableSkyBox::RenderableSkyBox()
-		: RenderableHelper(L"SkyBox", false, false),
+		: RenderableHelper(L"SkyBox"),
 			cube_sampler_(new Sampler)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -230,9 +218,8 @@ namespace KlayGE
 	}
 
 	RenderablePlane::RenderablePlane(float length, float width,
-				int length_segs, int width_segs, bool has_tex_coord, 
-				bool can_be_culled, bool short_age)
-			: RenderableHelper(L"RenderablePlane", can_be_culled, short_age)
+				int length_segs, int width_segs, bool has_tex_coord)
+			: RenderableHelper(L"RenderablePlane")
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 

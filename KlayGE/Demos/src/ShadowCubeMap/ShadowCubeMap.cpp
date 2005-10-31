@@ -16,6 +16,7 @@
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/KMesh.hpp>
 #include <KlayGE/Texture.hpp>
+#include <KlayGE/SceneObjectHelper.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
@@ -84,10 +85,10 @@ namespace
 		Matrix4 light_view_, light_proj_;
 	};
 
-	class Occluder : public KMesh, public ShadowMapped
+	class OccluderRenderable : public KMesh, public ShadowMapped
 	{
 	public:
-		Occluder(std::wstring const & /*name*/, TexturePtr tex)
+		OccluderRenderable(std::wstring const & /*name*/, TexturePtr tex)
 			: KMesh(L"Occluder", tex),
 				ShadowMapped(SHADOW_MAP_SIZE),
 				lamp_sampler_(new Sampler)
@@ -96,16 +97,20 @@ namespace
 			effect_->ActiveTechnique("RenderScene");
 		}
 
+		void SetModelMatrix(Matrix4 const & model)
+		{
+			model_ = model;
+		}
+
 		void OnRenderBegin()
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
 
-			Matrix4 model = MathLib::Translation(0.0f, 0.2f, 0.0f);
 			Matrix4 view = app.ActiveCamera().ViewMatrix();
 			Matrix4 proj = app.ActiveCamera().ProjMatrix();
-			Matrix4 light_mat = model * this->LightViewProj();
+			Matrix4 light_mat = model_ * this->LightViewProj();
 
-			*(effect_->ParameterByName("World")) = model;
+			*(effect_->ParameterByName("World")) = model_;
 			*(effect_->ParameterByName("InvLightWorld")) = inv_light_model_;
 
 			if (gen_sm_pass_)
@@ -119,7 +124,7 @@ namespace
 
 				*(effect_->ParameterByName("LampSampler")) = lamp_sampler_;
 				*(effect_->ParameterByName("ShadowMapSampler")) = sm_sampler_;
-				*(effect_->ParameterByName("WorldViewProj")) = model * view * proj;
+				*(effect_->ParameterByName("WorldViewProj")) = model_ * view * proj;
 				*(effect_->ParameterByName("light_pos")) = light_pos_;
 			}
 		}
@@ -134,13 +139,30 @@ namespace
 
 	private:
 		SamplerPtr lamp_sampler_;
+		Matrix4 model_;
 	};
 
-	class RenderGround : public RenderableHelper, public ShadowMapped
+	class OccluderObject : public SceneObjectHelper
 	{
 	public:
-		RenderGround()
-			: RenderableHelper(L"Ground", true, false),
+		OccluderObject()
+			: SceneObjectHelper(true, false)
+		{
+			model_ = MathLib::Translation(0.0f, 0.2f, 0.0f);
+
+			renderable_ = LoadKMesh("teapot.kmesh", CreateFactory<OccluderRenderable>)->Mesh(0);
+			checked_cast<OccluderRenderable*>(renderable_.get())->SetModelMatrix(model_);
+		}
+
+	private:
+		Matrix4 model_;
+	};
+
+	class GroundRenderable : public RenderableHelper, public ShadowMapped
+	{
+	public:
+		GroundRenderable()
+			: RenderableHelper(L"Ground"),
 				ShadowMapped(SHADOW_MAP_SIZE),
 				lamp_sampler_(new Sampler)
 		{
@@ -184,16 +206,20 @@ namespace
 			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[4]);
 		}
 
+		void SetModelMatrix(Matrix4 const & model)
+		{
+			model_ = model;
+		}
+
 		void OnRenderBegin()
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
 
-			Matrix4 model = MathLib::Translation(0.0f, -0.2f, 0.0f);
 			Matrix4 view = app.ActiveCamera().ViewMatrix();
 			Matrix4 proj = app.ActiveCamera().ProjMatrix();
-			Matrix4 light_mat = model * this->LightViewProj();
+			Matrix4 light_mat = model_ * this->LightViewProj();
 
-			*(effect_->ParameterByName("World")) = model;
+			*(effect_->ParameterByName("World")) = model_;
 			*(effect_->ParameterByName("InvLightWorld")) = inv_light_model_;
 
 			if (gen_sm_pass_)
@@ -207,7 +233,7 @@ namespace
 
 				*(effect_->ParameterByName("LampSampler")) = lamp_sampler_;
 				*(effect_->ParameterByName("ShadowMapSampler")) = sm_sampler_;
-				*(effect_->ParameterByName("WorldViewProj")) = model * view * proj;
+				*(effect_->ParameterByName("WorldViewProj")) = model_ * view * proj;
 				*(effect_->ParameterByName("light_pos")) = light_pos_;
 			}
 		}
@@ -222,6 +248,22 @@ namespace
 
 	private:
 		SamplerPtr lamp_sampler_;
+		Matrix4 model_;
+	};
+
+	class GroundObject : public SceneObjectHelper
+	{
+	public:
+		GroundObject()
+			: SceneObjectHelper(RenderablePtr(new GroundRenderable), true, false)
+		{
+			model_ = MathLib::Translation(0.0f, -0.2f, 0.0f);
+
+			checked_cast<GroundRenderable*>(renderable_.get())->SetModelMatrix(model_);
+		}
+
+	private:
+		Matrix4 model_;
 	};
 
 
@@ -276,11 +318,11 @@ void ShadowCubeMap::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
-	renderGround_.reset(new RenderGround);
-	renderGround_->AddToSceneManager();
+	ground_.reset(new GroundObject);
+	ground_->AddToSceneManager();
 
-	renderMesh_ = LoadKMesh("teapot.kmesh", CreateFactory<Occluder>);
-	renderMesh_->AddToSceneManager();
+	mesh_.reset(new OccluderObject);
+	mesh_->AddToSceneManager();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
@@ -291,8 +333,8 @@ void ShadowCubeMap::InitObjects()
 
 	lamp_tex_ = LoadTexture("lamp.dds");
 
-	checked_cast<Occluder*>(renderMesh_->Mesh(0).get())->LampTexture(lamp_tex_);
-	checked_cast<RenderGround*>(renderGround_.get())->LampTexture(lamp_tex_);
+	checked_cast<OccluderRenderable*>(mesh_->GetRenderable().get())->LampTexture(lamp_tex_);
+	checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->LampTexture(lamp_tex_);
 
 	shadow_tex_ = Context::Instance().RenderFactoryInstance().MakeTextureCube(SHADOW_MAP_SIZE, 1, PF_R32F);
 	shadow_buffer_ = Context::Instance().RenderFactoryInstance().MakeRenderTexture();
@@ -358,11 +400,11 @@ void ShadowCubeMap::DoUpdate(uint32_t pass)
 
 			Matrix4 light_view = LookAtLH(le, lla, lu);
 			Matrix4 light_proj = PerspectiveFovLH(PI / 2.0f, 1.0f, 0.01f, 10.0f);
-			checked_cast<Occluder*>(renderMesh_->Mesh(0).get())->LightMatrices(light_model_, light_view, light_proj);
-			checked_cast<RenderGround*>(renderGround_.get())->LightMatrices(light_model_, light_view, light_proj);
+			checked_cast<OccluderRenderable*>(mesh_->GetRenderable().get())->LightMatrices(light_model_, light_view, light_proj);
+			checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->LightMatrices(light_model_, light_view, light_proj);
 
-			checked_cast<Occluder*>(renderMesh_->Mesh(0).get())->GenShadowMapPass(true);
-			checked_cast<RenderGround*>(renderGround_.get())->GenShadowMapPass(true);
+			checked_cast<OccluderRenderable*>(mesh_->GetRenderable().get())->GenShadowMapPass(true);
+			checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->GenShadowMapPass(true);
 
 			shadow_buffer_->AttachTextureCube(shadow_tex_, face);
 			renderEngine.ActiveRenderTarget(0, shadow_buffer_);
@@ -375,11 +417,11 @@ void ShadowCubeMap::DoUpdate(uint32_t pass)
 
 			//SaveToFile(shadow_tex_, "shadow_tex.dds");
 
-			checked_cast<Occluder*>(renderMesh_->Mesh(0).get())->ShadowMapTexture(shadow_tex_);
-			checked_cast<RenderGround*>(renderGround_.get())->ShadowMapTexture(shadow_tex_);
+			checked_cast<OccluderRenderable*>(mesh_->GetRenderable().get())->ShadowMapTexture(shadow_tex_);
+			checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->ShadowMapTexture(shadow_tex_);
 
-			checked_cast<Occluder*>(renderMesh_->Mesh(0).get())->GenShadowMapPass(false);
-			checked_cast<RenderGround*>(renderGround_.get())->GenShadowMapPass(false);
+			checked_cast<OccluderRenderable*>(mesh_->GetRenderable().get())->GenShadowMapPass(false);
+			checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->GenShadowMapPass(false);
 
 			std::wostringstream stream;
 			stream << renderEngine.ActiveRenderTarget(0)->FPS();

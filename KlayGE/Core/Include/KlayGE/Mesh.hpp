@@ -43,6 +43,13 @@ namespace KlayGE
 		void AssignMeshes(ForwardIterator first, ForwardIterator last)
 		{
 			meshes_.assign(first, last);
+
+			box_ = Box(Vector3(0, 0, 0), Vector3(0, 0, 0));
+			for (StaticMeshesPtrType::iterator iter = meshes_.begin();
+				iter != meshes_.end(); ++ iter)
+			{
+				box_ |= (*iter)->GetBound();
+			}
 		}
 
 		StaticMeshPtr Mesh(size_t id)
@@ -84,16 +91,7 @@ namespace KlayGE
 			return name_;
 		}
 
-		void AddToSceneManager();
-
-		Matrix4 GetModelMatrix() const
-		{
-			return model_;
-		}
-		void SetModelMatrix(Matrix4 const & mat)
-		{
-			model_ = mat;
-		}
+		void AddToRenderQueue();
 
 	private:
 		std::wstring name_;
@@ -102,8 +100,6 @@ namespace KlayGE
 		RenderEffectPtr effect_;
 
 		Box box_;
-
-		Matrix4 model_;
 
 		typedef std::vector<StaticMeshPtr> StaticMeshesPtrType;
 		StaticMeshesPtrType meshes_;
@@ -140,15 +136,13 @@ namespace KlayGE
 
 		virtual std::wstring const & Name() const;
 
-		virtual void AddToSceneManager();
-
-		Matrix4 GetModelMatrix() const;
-		void SetModelMatrix(Matrix4 const & mat);
+		virtual void AddToRenderQueue();
 
 		template <typename ForwardIterator>
 		void AssignXYZs(ForwardIterator first, ForwardIterator last)
 		{
 			xyzs_.assign(first, last);
+			box_ = MathLib::ComputeBoundingBox<float>(xyzs_.begin(), xyzs_.end());
 			beBuilt_ = false;
 		}
 
@@ -183,8 +177,6 @@ namespace KlayGE
 		RenderEffectPtr effect_;
 
 		Box box_;
-
-		Matrix4 model_;
 
 		bool beBuilt_;
 

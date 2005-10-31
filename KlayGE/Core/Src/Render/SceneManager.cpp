@@ -32,6 +32,7 @@
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/SceneObject.hpp>
 
 #include <boost/bind.hpp>
 
@@ -48,10 +49,7 @@ namespace KlayGE
 
 		void SceneManager::ClipScene(Camera const & /*camera*/)
 		{
-			for (RenderItemsType::iterator iter = renderItems_.begin(); iter != renderItems_.end(); ++ iter)
-			{
-				this->AddToRenderQueue(*iter);
-			}
+			visible_objs_ = scene_objs_;
 		}
 
 	private:
@@ -81,14 +79,14 @@ namespace KlayGE
 
 	// 加入渲染物体
 	/////////////////////////////////////////////////////////////////////////////////
-	void SceneManager::AddRenderable(RenderablePtr const & obj)
+	void SceneManager::AddSceneObject(SceneObjectPtr const & obj)
 	{
-		renderItems_.push_back(obj);
+		scene_objs_.push_back(obj);
 	}
 
 	// 加入渲染队列
 	/////////////////////////////////////////////////////////////////////////////////
-	void SceneManager::AddToRenderQueue(RenderablePtr const & obj)
+	void SceneManager::AddRenderable(RenderablePtr const & obj)
 	{
 		RenderEffectPtr const & effect = obj->GetRenderEffect();
 		RenderQueueType::iterator iter = std::find_if(renderQueue_.begin(), renderQueue_.end(),
@@ -107,7 +105,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::Clear()
 	{
-		renderItems_.resize(0);
+		scene_objs_.resize(0);
 	}
 
 	// 更新场景管理器
@@ -127,6 +125,7 @@ namespace KlayGE
 	void SceneManager::Flush()
 	{
 		numObjectsRendered_ = 0;
+		numRenderablesRendered_ = 0;
 		numPrimitivesRendered_ = 0;
 		numVerticesRendered_ = 0;
 
@@ -134,6 +133,11 @@ namespace KlayGE
 		App3DFramework& app = Context::Instance().AppInstance();
 
 		this->ClipScene(app.ActiveCamera());
+		for (SceneObjectsType::iterator iter = visible_objs_.begin(); iter != visible_objs_.end(); ++ iter)
+		{
+			(*iter)->GetRenderable()->AddToRenderQueue();
+		}
+		numObjectsRendered_ = visible_objs_.size();
 
 		renderEngine.BeginFrame();
 
@@ -147,7 +151,7 @@ namespace KlayGE
 			{
 				Renderable& obj(*(*itemIter));
 
-				++ numObjectsRendered_;
+				++ numRenderablesRendered_;
 
 				obj.OnRenderBegin();
 				renderEngine.Render(*obj.GetVertexBuffer());
@@ -157,16 +161,17 @@ namespace KlayGE
 				numVerticesRendered_ += renderEngine.NumVerticesJustRendered();
 			}
 		}
-		renderQueue_.clear();
+		visible_objs_.resize(0);
+		renderQueue_.resize(0);
 
 		renderEngine.EndFrame();
 
-		for (RenderItemsType::iterator iter = renderItems_.begin();
-			iter != renderItems_.end();)
+		for (SceneObjectsType::iterator iter = scene_objs_.begin();
+			iter != scene_objs_.end();)
 		{
 			if ((*iter)->ShortAge())
 			{
-				iter = renderItems_.erase(iter);
+				iter = scene_objs_.erase(iter);
 			}
 			else
 			{
@@ -182,6 +187,13 @@ namespace KlayGE
 	size_t SceneManager::NumObjectsRendered() const
 	{
 		return numObjectsRendered_;
+	}
+
+	// 获取渲染的可渲染对象数量
+	/////////////////////////////////////////////////////////////////////////////////
+	size_t SceneManager::NumRenderablesRendered() const
+	{
+		return numRenderablesRendered_;
 	}
 
 	// 获取渲染的图元数量

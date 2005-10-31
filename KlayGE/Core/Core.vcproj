@@ -203,6 +203,12 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath=".\Src\Render\SceneObject.cpp">
+				</File>
+				<File
+					RelativePath=".\Src\Render\SceneObjectHelper.cpp">
+				</File>
+				<File
 					RelativePath=".\Src\Render\Texture.cpp">
 				</File>
 				<File
@@ -274,6 +280,12 @@
 				</File>
 				<File
 					RelativePath=".\Include\KlayGE\SceneNode.hpp">
+				</File>
+				<File
+					RelativePath=".\Include\KlayGE\SceneObject.hpp">
+				</File>
+				<File
+					RelativePath=".\Include\KlayGE\SceneObjectHelper.hpp">
 				</File>
 				<File
 					RelativePath="Include\KlayGE\Texture.hpp">

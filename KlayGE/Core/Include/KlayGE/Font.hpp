@@ -1,7 +1,7 @@
 // Font.hpp
 // KlayGE Font类 头文件
 // Ver 2.8.0
-// 版权所有(C) 龚敏敏, 2003-2004
+// 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
 //
 // 2.8.0

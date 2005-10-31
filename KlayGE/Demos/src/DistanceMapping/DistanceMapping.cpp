@@ -12,6 +12,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Sampler.hpp>
+#include <KlayGE/SceneObjectHelper.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
@@ -35,7 +36,7 @@ namespace
 	{
 	public:
 		RenderPolygon()
-			: RenderableHelper(L"Polygon", true, false)
+			: RenderableHelper(L"Polygon")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -137,6 +138,15 @@ namespace
 		}
 	};
 
+	class PolygonObject : public SceneObjectHelper
+	{
+	public:
+		PolygonObject()
+			: SceneObjectHelper(RenderablePtr(new RenderPolygon), true, false)
+		{
+		}
+	};
+
 
 	enum
 	{
@@ -192,8 +202,8 @@ void DistanceMapping::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
-	renderPolygon_.reset(new RenderPolygon);
-	renderPolygon_->AddToSceneManager();
+	polygon_.reset(new PolygonObject);
+	polygon_->AddToSceneManager();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
@@ -233,8 +243,8 @@ void DistanceMapping::DoUpdate(KlayGE::uint32_t pass)
 	Matrix4 proj = this->ActiveCamera().ProjMatrix();
 	Vector3 eyePos = this->ActiveCamera().EyePos();
 
-	*(renderPolygon_->GetRenderEffect()->ParameterByName("worldviewproj")) = model * view * proj;
-	*(renderPolygon_->GetRenderEffect()->ParameterByName("eyePos")) = Vector4(eyePos.x(), eyePos.y(), eyePos.z(), 0.0f);
+	*(polygon_->GetRenderable()->GetRenderEffect()->ParameterByName("worldviewproj")) = model * view * proj;
+	*(polygon_->GetRenderable()->GetRenderEffect()->ParameterByName("eyePos")) = Vector4(eyePos.x(), eyePos.y(), eyePos.z(), 0.0f);
 
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -243,7 +253,7 @@ void DistanceMapping::DoUpdate(KlayGE::uint32_t pass)
 	Vector3 lightPos(2, 0, -2);
 	Matrix4 matRot(MathLib::RotationZ(degree));
 	lightPos = MathLib::TransformCoord(lightPos, matRot);
-	*(renderPolygon_->GetRenderEffect()->ParameterByName("lightPos")) = Vector4(lightPos.x(), lightPos.y(), lightPos.z(), 1);
+	*(polygon_->GetRenderable()->GetRenderEffect()->ParameterByName("lightPos")) = Vector4(lightPos.x(), lightPos.y(), lightPos.z(), 1);
 
 	std::wostringstream stream;
 	stream << renderEngine.ActiveRenderTarget(0)->FPS();
@@ -253,7 +263,7 @@ void DistanceMapping::DoUpdate(KlayGE::uint32_t pass)
 
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 	stream.str(L"");
-	stream << sceneMgr.NumObjectsRendered() << " Renderables "
+	stream << sceneMgr.NumRenderablesRendered() << " Renderables "
 		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
 		<< sceneMgr.NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str().c_str());

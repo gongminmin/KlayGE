@@ -14,6 +14,7 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Sampler.hpp>
 #include <KlayGE/KMesh.hpp>
+#include <KlayGE/SceneObjectHelper.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
@@ -108,6 +109,17 @@ namespace
 		}
 	};
 
+	class PolygonObject : public SceneObjectHelper
+	{
+	public:
+		PolygonObject()
+			: SceneObjectHelper(true, false)
+		{
+			renderable_ = LoadKMesh("teapot.kmesh", CreateFactory<RenderPolygon>)->Mesh(0);
+			checked_cast<RenderPolygon*>(renderable_.get())->ComputeTB();
+		}
+	};
+
 
 	enum
 	{
@@ -163,9 +175,8 @@ void Parallax::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
-	renderPolygon_ = LoadKMesh("teapot.kmesh", CreateFactory<RenderPolygon>);
-	checked_cast<RenderPolygon*>(renderPolygon_->Mesh(0).get())->ComputeTB();
-	renderPolygon_->AddToSceneManager();
+	polygon_.reset(new PolygonObject);
+	polygon_->AddToSceneManager();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
@@ -209,7 +220,7 @@ void Parallax::DoUpdate(uint32_t pass)
 	Vector3 lightPos(2, 0, 1);
 	Matrix4 matRot(MathLib::RotationZ(degree));
 	lightPos = MathLib::TransformCoord(lightPos, matRot);
-	*(renderPolygon_->Mesh(0)->GetRenderEffect()->ParameterByName("lightPos")) = Vector4(lightPos.x(), lightPos.y(), lightPos.z(), 1);
+	*(polygon_->GetRenderable()->GetRenderEffect()->ParameterByName("lightPos")) = Vector4(lightPos.x(), lightPos.y(), lightPos.z(), 1);
 
 	std::wostringstream stream;
 	stream << renderEngine.ActiveRenderTarget(0)->FPS();
@@ -219,7 +230,7 @@ void Parallax::DoUpdate(uint32_t pass)
 
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 	stream.str(L"");
-	stream << sceneMgr.NumObjectsRendered() << " Renderables "
+	stream << sceneMgr.NumRenderablesRendered() << " Renderables "
 		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
 		<< sceneMgr.NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str().c_str());

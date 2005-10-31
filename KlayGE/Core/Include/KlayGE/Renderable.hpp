@@ -40,13 +40,9 @@ namespace KlayGE
 		virtual void OnRenderBegin();
 		virtual void OnRenderEnd();
 
-		virtual Matrix4 GetModelMatrix() const;
 		virtual Box GetBound() const = 0;
 
-		virtual bool CanBeCulled() const;
-		virtual bool ShortAge() const;
-
-		virtual void AddToSceneManager();
+		virtual void AddToRenderQueue();
 	};
 }
 

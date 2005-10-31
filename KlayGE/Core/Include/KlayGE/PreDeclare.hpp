@@ -106,6 +106,8 @@ namespace KlayGE
 	typedef boost::shared_ptr<Query> QueryPtr;
 	class OcclusionQuery;
 	typedef boost::shared_ptr<OcclusionQuery> OcclusionQueryPtr;
+	class SceneObject;
+	typedef boost::shared_ptr<SceneObject> SceneObjectPtr;
 
 	class Socket;
 	class Lobby;

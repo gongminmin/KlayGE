@@ -17,7 +17,7 @@ private:
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 
 	KlayGE::FontPtr font_;
-	boost::shared_ptr<KlayGE::Renderable> renderPolygon_;
+	KlayGE::SceneObjectPtr polygon_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 };

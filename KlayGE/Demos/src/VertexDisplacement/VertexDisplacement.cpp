@@ -12,6 +12,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Sampler.hpp>
+#include <KlayGE/SceneObjectHelper.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
@@ -34,11 +35,11 @@ namespace
 	int const LENGTH = 4;
 	int const WIDTH = 3;
 
-	class Flag : public RenderablePlane
+	class FlagRenderable : public RenderablePlane
 	{
 	public:
-		Flag(int length_segs, int width_segs)
-			: RenderablePlane(LENGTH, WIDTH, length_segs, width_segs, true, true, false)
+		FlagRenderable(int length_segs, int width_segs)
+			: RenderablePlane(LENGTH, WIDTH, length_segs, width_segs, true)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -51,6 +52,16 @@ namespace
 			flag_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
 			flag_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
 			*(effect_->ParameterByName("flagSampler")) = flag_sampler;
+		}
+	};
+
+	class FlagObject : public SceneObjectHelper
+	{
+	public:
+		FlagObject(int length_segs, int width_segs)
+			: SceneObjectHelper(true, false)
+		{
+			renderable_.reset(new FlagRenderable(length_segs, width_segs));
 		}
 	};
 
@@ -108,7 +119,7 @@ void VertexDisplacement::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
-	flag_.reset(new Flag(8 * 2, 6 * 2));
+	flag_.reset(new FlagObject(8 * 2, 6 * 2));
 	flag_->AddToSceneManager();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -148,21 +159,21 @@ void VertexDisplacement::DoUpdate(uint32_t pass)
 	Matrix4 proj = this->ActiveCamera().ProjMatrix();
 	Vector3 eyePos = this->ActiveCamera().EyePos();
 
-	*(flag_->GetRenderEffect()->ParameterByName("half_length")) = LENGTH / 2.0f;
-	*(flag_->GetRenderEffect()->ParameterByName("half_width")) = WIDTH / 2.0f;
+	*(flag_->GetRenderable()->GetRenderEffect()->ParameterByName("half_length")) = LENGTH / 2.0f;
+	*(flag_->GetRenderable()->GetRenderEffect()->ParameterByName("half_width")) = WIDTH / 2.0f;
 
 	Matrix4 modelView = flag_->GetModelMatrix() * view;
 
-	*(flag_->GetRenderEffect()->ParameterByName("modelview")) = modelView;
-	*(flag_->GetRenderEffect()->ParameterByName("proj")) = proj;
+	*(flag_->GetRenderable()->GetRenderEffect()->ParameterByName("modelview")) = modelView;
+	*(flag_->GetRenderable()->GetRenderEffect()->ParameterByName("proj")) = proj;
 
-	*(flag_->GetRenderEffect()->ParameterByName("modelviewIT")) = MathLib::Transpose(MathLib::Inverse(modelView));
+	*(flag_->GetRenderable()->GetRenderEffect()->ParameterByName("modelviewIT")) = MathLib::Transpose(MathLib::Inverse(modelView));
 
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 	float currentAngle(clock() / 400.0f);
-	*(flag_->GetRenderEffect()->ParameterByName("currentAngle")) = currentAngle;
+	*(flag_->GetRenderable()->GetRenderEffect()->ParameterByName("currentAngle")) = currentAngle;
 
 	std::wostringstream stream;
 	stream << renderEngine.ActiveRenderTarget(0)->FPS();
@@ -172,7 +183,7 @@ void VertexDisplacement::DoUpdate(uint32_t pass)
 
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 	stream.str(L"");
-	stream << sceneMgr.NumObjectsRendered() << " Renderables "
+	stream << sceneMgr.NumRenderablesRendered() << " Renderables "
 		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
 		<< sceneMgr.NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str().c_str());

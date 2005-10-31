@@ -17,8 +17,8 @@ private:
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 
 	KlayGE::FontPtr font_;
-	boost::shared_ptr<KlayGE::RenderModel> refractor_;
-	boost::shared_ptr<KlayGE::Renderable> renderSkyBox_;
+	KlayGE::SceneObjectPtr refractor_;
+	KlayGE::SceneObjectPtr sky_box_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 

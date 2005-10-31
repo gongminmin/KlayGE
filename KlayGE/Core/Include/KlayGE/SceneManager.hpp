@@ -33,6 +33,8 @@ namespace KlayGE
 	class SceneManager : boost::noncopyable
 	{
 	protected:
+		typedef std::vector<SceneObjectPtr> SceneObjectsType;
+
 		typedef std::vector<RenderablePtr> RenderItemsType;
 		typedef std::vector<std::pair<RenderEffectPtr, RenderItemsType> > RenderQueueType;
 
@@ -43,6 +45,7 @@ namespace KlayGE
 		static SceneManagerPtr NullObject();
 
 		virtual void ClipScene(Camera const & camera) = 0;
+		void AddSceneObject(SceneObjectPtr const & obj);
 		void AddRenderable(RenderablePtr const & obj);
 
 		virtual void Clear();
@@ -51,19 +54,19 @@ namespace KlayGE
 		void Flush();
 
 		size_t NumObjectsRendered() const;
+		size_t NumRenderablesRendered() const;
 		size_t NumPrimitivesRendered() const;
 		size_t NumVerticesRendered() const;
 
 	protected:
-		void AddToRenderQueue(RenderablePtr const & obj);
-
-	protected:
-		RenderItemsType renderItems_;
+		SceneObjectsType scene_objs_;
+		SceneObjectsType visible_objs_;
 
 	private:
 		RenderQueueType renderQueue_;
 
 		size_t numObjectsRendered_;
+		size_t numRenderablesRendered_;
 		size_t numPrimitivesRendered_;
 		size_t numVerticesRendered_;
 	};

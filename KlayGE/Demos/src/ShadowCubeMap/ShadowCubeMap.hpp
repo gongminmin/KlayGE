@@ -20,8 +20,8 @@ private:
 
 	KlayGE::FontPtr font_;
 
-	boost::shared_ptr<KlayGE::Renderable> renderGround_;
-	KlayGE::RenderModelPtr renderMesh_;
+	KlayGE::SceneObjectPtr ground_;
+	KlayGE::SceneObjectPtr mesh_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 

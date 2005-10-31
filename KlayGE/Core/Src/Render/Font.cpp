@@ -71,7 +71,7 @@ namespace
 	{
 	public:
 		FontRenderable(RenderEffectPtr const & effect, VertexBufferPtr const & vb)
-			: RenderableHelper(L"Font", false, true)
+			: RenderableHelper(L"Font")
 		{
 			effect_ = effect;
 			vb_ = vb;
@@ -419,7 +419,7 @@ namespace KlayGE
 
 			checked_cast<FontRenderable*>(renderable.get())->RenderText(this->FontHeight(), charInfoMap_,
 				sx, sy, sz, xScale, yScale, clr, text, flags);
-			renderable->AddToSceneManager();
+			renderable->AddToRenderQueue();
 		}
 	}
 }

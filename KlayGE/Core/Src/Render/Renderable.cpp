@@ -33,22 +33,7 @@ namespace KlayGE
 	{
 	}
 
-	Matrix4 Renderable::GetModelMatrix() const
-	{
-		return Matrix4::Identity();
-	}
-
-	bool Renderable::CanBeCulled() const
-	{
-		return true;
-	}
-
-	bool Renderable::ShortAge() const
-	{
-		return false;
-	}
-
-	void Renderable::AddToSceneManager()
+	void Renderable::AddToRenderQueue()
 	{
 		Context::Instance().SceneManagerInstance().AddRenderable(this->shared_from_this());
 	}

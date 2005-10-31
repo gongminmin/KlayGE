@@ -49,16 +49,15 @@ namespace KlayGE
 
 		tree_id_t Child(tree_id_t const & id, int child_no);
 		Box AreaBox(tree_id_t const & id);
-		bool InsideChild(tree_id_t const & id, RenderablePtr const & renderable);
-		void InsertRenderable(tree_id_t const & id, RenderablePtr const & renderable);
+		bool InsideChild(tree_id_t const & id, SceneObjectPtr const & renderable);
+		void InsertSceneObject(tree_id_t const & id, SceneObjectPtr const & renderable);
 
 	private:
 		OCTree(OCTree const & rhs);
 		OCTree& operator=(OCTree const & rhs);
 
 	private:
-		typedef std::vector<RenderablePtr> renderable_ptrs_t;
-		typedef std::map<tree_id_t, renderable_ptrs_t> linear_octree_t;
+		typedef std::map<tree_id_t, SceneObjectsType> linear_octree_t;
 		linear_octree_t octree_;
 		Box root_box_;
 

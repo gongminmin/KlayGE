@@ -32,7 +32,7 @@ namespace
 	{
 	public:
 		RenderElectro()
-			: RenderableHelper(L"Electro", true, false)
+			: RenderableHelper(L"Electro")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -175,7 +175,6 @@ void Electro::InitObjects()
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
 	renderElectro_.reset(new RenderElectro);
-	renderElectro_->AddToSceneManager();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
@@ -184,6 +183,8 @@ void Electro::InitObjects()
 void Electro::DoUpdate(uint32_t pass)
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+	renderElectro_->AddToRenderQueue();
 
 	std::wostringstream stream;
 	stream << renderEngine.ActiveRenderTarget(0)->FPS();
