@@ -56,61 +56,61 @@ namespace KlayGE
 		{
 		}
 
-		void ClearColor(Color const & clr)
+		void ClearColor(Color const & /*clr*/)
 		{
 		}
 
-		void ShadingType(ShadeOptions so)
+		void ShadingType(ShadeOptions /*so*/)
 		{
 		}
 
-		RenderWindowPtr CreateRenderWindow(std::string const & name, RenderSettings const & settings)
+		RenderWindowPtr CreateRenderWindow(std::string const & /*name*/, RenderSettings const & /*settings*/)
 		{
 			return RenderWindow::NullObject();
 		}
 
-		void CullingMode(CullMode mode)
+		void CullingMode(CullMode /*mode*/)
 		{
 		}
-		void PolygonMode(FillMode mode)
-		{
-		}
-
-		void AlphaBlend(bool enabled)
-		{
-		}
-		void AlphaBlendFunction(AlphaBlendFactor src_factor, AlphaBlendFactor dst_factor)
+		void PolygonMode(FillMode /*mode*/)
 		{
 		}
 
-		void DepthBufferDepthTest(bool enabled)
+		void AlphaBlend(bool /*enabled*/)
 		{
 		}
-		void DepthBufferDepthWrite(bool enabled)
-		{
-		}
-		void DepthBufferFunction(CompareFunction depthFunction)
-		{
-		}
-		void DepthBias(uint16_t bias)
+		void AlphaBlendFunction(AlphaBlendFactor /*src_factor*/, AlphaBlendFactor /*dst_factor*/)
 		{
 		}
 
-		void AlphaTest(bool enabled)
+		void DepthBufferDepthTest(bool /*enabled*/)
 		{
 		}
-		void AlphaFunction(CompareFunction alphaFunction, float refValue)
+		void DepthBufferDepthWrite(bool /*enabled*/)
+		{
+		}
+		void DepthBufferFunction(CompareFunction /*depthFunction*/)
+		{
+		}
+		void DepthBias(uint16_t /*bias*/)
 		{
 		}
 
-		void SetSampler(uint32_t stage, SamplerPtr const & sampler)
+		void AlphaTest(bool /*enabled*/)
 		{
 		}
-		void DisableSampler(uint32_t stage)
+		void AlphaFunction(CompareFunction /*alphaFunction*/, float /*refValue*/)
 		{
 		}
 
-		void StencilCheckEnabled(bool enabled)
+		void SetSampler(uint32_t /*stage*/, SamplerPtr const & /*sampler*/)
+		{
+		}
+		void DisableSampler(uint32_t /*stage*/)
+		{
+		}
+
+		void StencilCheckEnabled(bool /*enabled*/)
 		{
 		}
 		bool HasHardwareStencil()
@@ -123,39 +123,39 @@ namespace KlayGE
 			return 0;
 		}
 
-		void StencilBufferFunction(CompareFunction func, uint32_t refValue, uint32_t mask)
+		void StencilBufferFunction(CompareFunction /*func*/, uint32_t /*refValue*/, uint32_t /*mask*/)
 		{
 		}
-		void StencilBufferOperation(StencilOperation fail, StencilOperation depth_fail, StencilOperation pass)
-		{
-		}
-
-		void PointSpriteEnable(bool enable)
-		{
-		}
-		void PointDistanceAttenuation(float quadratic0, float quadratic1, float quadratic2)
-		{
-		}
-		void PointSize(float size)
-		{
-		}
-		void PointMinMaxSize(float min_size, float max_size)
+		void StencilBufferOperation(StencilOperation /*fail*/, StencilOperation /*depth_fail*/, StencilOperation /*pass*/)
 		{
 		}
 
-		void ScissorTest(bool enabled)
+		void PointSpriteEnable(bool /*enable*/)
 		{
 		}
-		void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+		void PointDistanceAttenuation(float /*quadratic0*/, float /*quadratic1*/, float /*quadratic2*/)
+		{
+		}
+		void PointSize(float /*size*/)
+		{
+		}
+		void PointMinMaxSize(float /*min_size*/, float /*max_size*/)
+		{
+		}
+
+		void ScissorTest(bool /*enabled*/)
+		{
+		}
+		void ScissorRect(uint32_t /*x*/, uint32_t /*y*/, uint32_t /*width*/, uint32_t /*height*/)
 		{
 		}
 
 	private:
-		void DoActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget)
+		void DoActiveRenderTarget(uint32_t /*n*/, RenderTargetPtr /*renderTarget*/)
 		{
 		}
 
-		void DoRender(VertexBuffer const & vb)
+		void DoRender(VertexBuffer const & /*vb*/)
 		{
 		}
 

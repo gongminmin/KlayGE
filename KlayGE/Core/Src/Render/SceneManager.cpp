@@ -79,9 +79,10 @@ namespace KlayGE
 
 	// 加入渲染物体
 	/////////////////////////////////////////////////////////////////////////////////
-	void SceneManager::AddSceneObject(SceneObjectPtr const & obj)
+	uint32_t SceneManager::AddSceneObject(SceneObjectPtr const & obj)
 	{
 		scene_objs_.push_back(obj);
+		return static_cast<uint32_t>(scene_objs_.size() - 1);
 	}
 
 	// 加入渲染队列
