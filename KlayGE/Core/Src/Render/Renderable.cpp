@@ -16,6 +16,8 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Context.hpp>
+#include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/RenderFactory.hpp>
 
 #include <KlayGE/Renderable.hpp>
 
@@ -36,5 +38,14 @@ namespace KlayGE
 	void Renderable::AddToRenderQueue()
 	{
 		Context::Instance().SceneManagerInstance().AddRenderable(this->shared_from_this());
+	}
+
+	void Renderable::Render()
+	{
+		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+		this->OnRenderBegin();
+		renderEngine.Render(*this->GetVertexBuffer());
+		this->OnRenderEnd();
 	}
 }

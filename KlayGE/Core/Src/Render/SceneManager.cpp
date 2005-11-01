@@ -79,10 +79,9 @@ namespace KlayGE
 
 	// 加入渲染物体
 	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t SceneManager::AddSceneObject(SceneObjectPtr const & obj)
+	void SceneManager::AddSceneObject(SceneObjectPtr const & obj)
 	{
 		scene_objs_.push_back(obj);
-		return static_cast<uint32_t>(scene_objs_.size() - 1);
 	}
 
 	// 加入渲染队列
@@ -154,9 +153,7 @@ namespace KlayGE
 
 				++ numRenderablesRendered_;
 
-				obj.OnRenderBegin();
-				renderEngine.Render(*obj.GetVertexBuffer());
-				obj.OnRenderEnd();
+				obj.Render();
 
 				numPrimitivesRendered_ += renderEngine.NumPrimitivesJustRendered();
 				numVerticesRendered_ += renderEngine.NumVerticesJustRendered();

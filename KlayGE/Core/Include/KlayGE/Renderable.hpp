@@ -43,6 +43,8 @@ namespace KlayGE
 		virtual Box GetBound() const = 0;
 
 		virtual void AddToRenderQueue();
+
+		void Render();
 	};
 }
 
