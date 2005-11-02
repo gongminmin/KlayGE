@@ -36,6 +36,14 @@ namespace KlayGE
 	{
 	}
 
+	void Renderable::OnInstanceBegin(uint32_t /*id*/)
+	{
+	}
+
+	void Renderable::OnInstanceEnd(uint32_t /*id*/)
+	{
+	}
+
 	void Renderable::AddToRenderQueue()
 	{
 		Context::Instance().SceneManagerInstance().AddRenderable(this->shared_from_this());
@@ -43,13 +51,35 @@ namespace KlayGE
 
 	void Renderable::Render()
 	{
-		this->UpdateInstanceStream();
-
 		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-		this->OnRenderBegin();
-		renderEngine.Render(*this->GetVertexBuffer());
-		this->OnRenderEnd();
+		VertexStreamPtr inst_stream = this->GetVertexBuffer()->InstanceStream();
+		if (inst_stream)
+		{
+			this->UpdateInstanceStream();
+
+			this->OnRenderBegin();
+			renderEngine.Render(*this->GetVertexBuffer());
+			this->OnRenderEnd();
+		}
+		else
+		{
+			this->OnRenderBegin();
+			if (instances_.empty())
+			{
+				renderEngine.Render(*this->GetVertexBuffer());
+			}
+			else
+			{
+				for (size_t i = 0; i < instances_.size(); ++ i)
+				{
+					this->OnInstanceBegin(i);
+					renderEngine.Render(*this->GetVertexBuffer());
+					this->OnInstanceEnd(i);
+				}
+			}
+			this->OnRenderEnd();
+		}
 	}
 
 	void Renderable::AddInstance(SceneObjectPtr obj)

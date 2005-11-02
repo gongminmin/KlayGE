@@ -43,6 +43,10 @@ namespace KlayGE
 		virtual void OnRenderBegin();
 		virtual void OnRenderEnd();
 
+		// These two functions are used for non-instancing rendering
+		virtual void OnInstanceBegin(uint32_t id);
+		virtual void OnInstanceEnd(uint32_t id);
+
 		virtual Box GetBound() const = 0;
 
 		virtual void AddToRenderQueue();
