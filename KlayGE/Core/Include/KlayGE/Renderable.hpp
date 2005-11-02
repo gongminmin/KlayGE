@@ -1,8 +1,11 @@
 // Renderable.hpp
 // KlayGE 可渲染对象类 头文件
-// Ver 2.7.0
+// Ver 3.1.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.1.0
+// 拆出SceneObject (2005.11.2)
 //
 // 2.7.0
 // GetWorld改名为GetModelMatrix (2005.6.17)
@@ -17,7 +20,7 @@
 #define _RENDERABLE_HPP
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/Matrix.hpp>
+#include <vector>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_Core_d.lib")
@@ -45,6 +48,19 @@ namespace KlayGE
 		virtual void AddToRenderQueue();
 
 		void Render();
+
+		template <typename Iterator>
+		void AssignInstances(Iterator begin, Iterator end)
+		{
+			instances_.assign(begin, end);
+		}
+		void AddInstance(SceneObjectPtr obj);
+
+	protected:
+		void UpdateInstanceStream();
+
+	protected:
+		std::vector<SceneObjectPtr> instances_;
 	};
 }
 

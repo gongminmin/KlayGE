@@ -133,11 +133,20 @@ namespace KlayGE
 		App3DFramework& app = Context::Instance().AppInstance();
 
 		this->ClipScene(app.ActiveCamera());
+		numObjectsRendered_ = visible_objs_.size();
+
+		std::map<RenderablePtr, SceneObjectsType> renderables;
 		for (SceneObjectsType::iterator iter = visible_objs_.begin(); iter != visible_objs_.end(); ++ iter)
 		{
-			(*iter)->GetRenderable()->AddToRenderQueue();
+			renderables[(*iter)->GetRenderable()].push_back(*iter);
 		}
-		numObjectsRendered_ = visible_objs_.size();
+		for (std::map<RenderablePtr, SceneObjectsType>::iterator iter = renderables.begin();
+			iter != renderables.end(); ++ iter)
+		{
+			Renderable& ra(*(iter->first));
+			ra.AssignInstances(iter->second.begin(), iter->second.end());
+			ra.AddToRenderQueue();
+		}
 
 		renderEngine.BeginFrame();
 
@@ -149,11 +158,11 @@ namespace KlayGE
 			for (RenderItemsType::iterator itemIter = queueIter->second.begin();
 				itemIter != queueIter->second.end(); ++ itemIter)
 			{
-				Renderable& obj(*(*itemIter));
+				Renderable& ra(*(*itemIter));
 
 				++ numRenderablesRendered_;
 
-				obj.Render();
+				ra.Render();
 
 				numPrimitivesRendered_ += renderEngine.NumPrimitivesJustRendered();
 				numVerticesRendered_ += renderEngine.NumVerticesJustRendered();

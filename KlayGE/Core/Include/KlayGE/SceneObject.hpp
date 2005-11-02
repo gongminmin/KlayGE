@@ -40,6 +40,8 @@ namespace KlayGE
 		virtual bool CanBeCulled() const;
 		virtual bool ShortAge() const;
 
+		virtual void const * InstanceData() const;
+
 	protected:
 		RenderablePtr renderable_;
 	};

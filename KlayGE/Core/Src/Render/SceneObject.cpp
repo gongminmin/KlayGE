@@ -53,4 +53,9 @@ namespace KlayGE
 	{
 		return false;
 	}
+
+	void const * SceneObject::InstanceData() const
+	{
+		return NULL;
+	}
 }

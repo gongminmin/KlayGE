@@ -18,6 +18,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/SceneObject.hpp>
 
 #include <KlayGE/Renderable.hpp>
 
@@ -42,10 +43,42 @@ namespace KlayGE
 
 	void Renderable::Render()
 	{
+		this->UpdateInstanceStream();
+
 		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		this->OnRenderBegin();
 		renderEngine.Render(*this->GetVertexBuffer());
 		this->OnRenderEnd();
+	}
+
+	void Renderable::AddInstance(SceneObjectPtr obj)
+	{
+		instances_.push_back(obj);
+	}
+
+	void Renderable::UpdateInstanceStream()
+	{
+		VertexStreamPtr inst_stream = this->GetVertexBuffer()->InstanceStream();
+		if (inst_stream)
+		{
+			uint32_t const size = inst_stream->VertexSize();
+
+			std::vector<uint8_t> buffer;
+			buffer.reserve(size * instances_.size());
+			for (size_t i = 0; i < instances_.size(); ++ i)
+			{
+				uint8_t const * src = static_cast<uint8_t const *>(instances_[i]->InstanceData());
+				buffer.insert(buffer.end(), src, src + size);
+			}
+
+			inst_stream->Assign(&buffer[0], instances_.size());
+
+			for (VertexBuffer::VertexStreamIterator iter = this->GetVertexBuffer()->VertexStreamBegin();
+				iter != this->GetVertexBuffer()->VertexStreamEnd(); ++ iter)
+			{
+				(*iter)->FrequencyDivider(VertexStream::ST_Geometry, instances_.size());
+			}
+		}
 	}
 }
