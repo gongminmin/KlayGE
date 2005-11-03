@@ -51,13 +51,13 @@ namespace KlayGE
 
 	void Renderable::Render()
 	{
+		this->UpdateInstanceStream();
+
 		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		VertexStreamPtr inst_stream = this->GetVertexBuffer()->InstanceStream();
 		if (inst_stream)
 		{
-			this->UpdateInstanceStream();
-
 			this->OnRenderBegin();
 			renderEngine.Render(*this->GetVertexBuffer());
 			this->OnRenderEnd();
@@ -89,9 +89,25 @@ namespace KlayGE
 
 	void Renderable::UpdateInstanceStream()
 	{
-		VertexStreamPtr inst_stream = this->GetVertexBuffer()->InstanceStream();
-		if (inst_stream)
+		if (!instances_.empty() && !instances_[0]->InstanceFormat().empty())
 		{
+			VertexStreamPtr inst_stream = this->GetVertexBuffer()->InstanceStream();
+			if (!inst_stream)
+			{
+				RenderFactory& rf(Context::Instance().RenderFactoryInstance());
+
+				inst_stream = rf.MakeVertexStream(instances_[0]->InstanceFormat(), false);
+				inst_stream->FrequencyDivider(VertexStream::ST_Instance, 1);
+				this->GetVertexBuffer()->AddVertexStream(inst_stream);
+			}
+			else
+			{
+				for (size_t i = 0; i < instances_.size(); ++ i)
+				{
+					BOOST_ASSERT(inst_stream->Elements() == instances_[i]->InstanceFormat());
+				}
+			}
+
 			uint32_t const size = inst_stream->VertexSize();
 
 			std::vector<uint8_t> buffer;

@@ -14,6 +14,7 @@
 #define _SCENEOBJECT_HPP
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KlayGE/VertexBuffer.hpp>
 
 #include <boost/smart_ptr.hpp>
 
@@ -40,10 +41,13 @@ namespace KlayGE
 		virtual bool CanBeCulled() const;
 		virtual bool ShortAge() const;
 
+		vertex_elements_type const & InstanceFormat() const;
 		virtual void const * InstanceData() const;
 
 	protected:
 		RenderablePtr renderable_;
+
+		vertex_elements_type instance_format_;
 	};
 }
 

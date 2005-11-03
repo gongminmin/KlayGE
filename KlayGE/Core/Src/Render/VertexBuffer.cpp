@@ -40,10 +40,10 @@ namespace KlayGE
 			return true;
 		}
 
-		void Assign(void const * src, uint32_t numVertex)
+		void Assign(void const * /*src*/, uint32_t /*numVertex*/)
 		{
 		}
-		void CopyToMemory(void* data)
+		void CopyToMemory(void* /*data*/)
 		{
 		}
 
@@ -268,10 +268,10 @@ namespace KlayGE
 		{
 			return true;
 		}
-		void Assign(void const * src, uint32_t numIndices)
+		void Assign(void const * /*src*/, uint32_t /*numIndices*/)
 		{
 		}
-		void CopyToMemory(void* data)
+		void CopyToMemory(void* /*data*/)
 		{
 		}
 	};

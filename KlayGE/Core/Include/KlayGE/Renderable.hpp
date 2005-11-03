@@ -61,7 +61,7 @@ namespace KlayGE
 		void AddInstance(SceneObjectPtr obj);
 
 	protected:
-		void UpdateInstanceStream();
+		virtual void UpdateInstanceStream();
 
 	protected:
 		std::vector<SceneObjectPtr> instances_;

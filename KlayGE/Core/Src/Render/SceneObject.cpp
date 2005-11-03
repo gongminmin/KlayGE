@@ -54,6 +54,11 @@ namespace KlayGE
 		return false;
 	}
 
+	vertex_elements_type const & SceneObject::InstanceFormat() const
+	{
+		return instance_format_;
+	}
+
 	void const * SceneObject::InstanceData() const
 	{
 		return NULL;
