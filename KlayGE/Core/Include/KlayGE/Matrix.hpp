@@ -158,7 +158,10 @@ namespace KlayGE
 		template <typename U>
 		Matrix4_T& operator*=(U const & rhs)
 		{
-			m_ *= rhs;
+			for (size_t i = 0; i < row_num; ++ i)
+			{
+				m_[i] *= rhs;
+			}
 			return *this;
 		}
 		template <typename U>
