@@ -47,9 +47,19 @@ namespace KlayGE
 		{
 		}
 
-		void SceneManager::ClipScene(Camera const & /*camera*/)
+		void ClipScene(Camera const & /*camera*/)
 		{
 			visible_objs_ = scene_objs_;
+		}
+
+		void Clear()
+		{
+			scene_objs_.resize(0);
+		}
+
+		void DoAddSceneObject(SceneObjectPtr const & obj)
+		{
+			scene_objs_.push_back(obj);
 		}
 
 	private:
@@ -81,7 +91,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::AddSceneObject(SceneObjectPtr const & obj)
 	{
-		scene_objs_.push_back(obj);
+		this->DoAddSceneObject(obj);
 	}
 
 	// 加入渲染队列
@@ -99,13 +109,6 @@ namespace KlayGE
 		{
 			renderQueue_.push_back(std::make_pair(effect, RenderItemsType(1, obj)));
 		}
-	}
-
-	// 清空场景管理器
-	/////////////////////////////////////////////////////////////////////////////////
-	void SceneManager::Clear()
-	{
-		scene_objs_.resize(0);
 	}
 
 	// 更新场景管理器

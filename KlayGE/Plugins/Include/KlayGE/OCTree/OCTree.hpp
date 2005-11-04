@@ -46,11 +46,14 @@ namespace KlayGE
 
 	private:
 		void ClipScene(Camera const & camera);
+		void Clear();
 
 		tree_id_t Child(tree_id_t const & id, int child_no);
 		Box AreaBox(tree_id_t const & id);
 		bool InsideChild(tree_id_t const & id, SceneObjectPtr const & renderable);
 		void InsertSceneObject(tree_id_t const & id, SceneObjectPtr const & renderable);
+
+		void DoAddSceneObject(SceneObjectPtr const & obj);
 
 	private:
 		OCTree(OCTree const & rhs);

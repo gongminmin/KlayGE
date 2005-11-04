@@ -61,7 +61,7 @@ namespace KlayGE
 		{
 			FA_TwoSided		= 1UL << 1,
 			FA_Filtered		= 1UL << 2,
-			FA_CanBeCulled	= 1UL << 3,
+			FA_Cullable		= 1UL << 3,
 		};
 
 	public:
@@ -85,7 +85,6 @@ namespace KlayGE
 
 		typedef std::map<wchar_t, CharInfo, std::less<wchar_t>, boost::fast_pool_allocator<std::pair<wchar_t, CharInfo> > > CharInfoMapType;
 		typedef std::list<wchar_t, boost::fast_pool_allocator<wchar_t> > CharLRUType;
-		typedef std::vector<RenderablePtr, boost::pool_allocator<RenderablePtr> > FontRenderablePoolType;
 
 	private:
 		void UpdateTexture(std::wstring const & text);
@@ -104,8 +103,6 @@ namespace KlayGE
 		::FT_Library	ftLib_;
 		::FT_Face		face_;
 		::FT_GlyphSlot	slot_;
-
-		FontRenderablePoolType pool_;
 	};
 }
 

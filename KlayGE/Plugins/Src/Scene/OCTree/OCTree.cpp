@@ -41,9 +41,35 @@ namespace KlayGE
 
 	void OCTree::ClipScene(Camera const & camera)
 	{
+		for (linear_octree_t::iterator iter = octree_.begin(); iter != octree_.end();)
+		{
+			SceneObjectsType& objs = iter->second;
+
+			for (SceneObjectsType::iterator obj_iter = objs.begin(); obj_iter != objs.end();)
+			{
+				if ((*obj_iter)->Moveable())
+				{
+					obj_iter = objs.erase(obj_iter);
+				}
+				else
+				{
+					++ obj_iter;
+				}
+			}
+
+			if (objs.empty())
+			{
+				iter = octree_.erase(iter);
+			}
+			else
+			{
+				++ iter;
+			}
+		}
+
 		for (SceneObjectsType::iterator iter = scene_objs_.begin(); iter != scene_objs_.end(); ++ iter)
 		{
-			if ((*iter)->CanBeCulled())
+			if ((*iter)->Cullable() && (*iter)->Moveable())
 			{
 				this->InsertSceneObject("0", *iter);
 			}
@@ -73,7 +99,7 @@ namespace KlayGE
 						nodes.insert(id);
 
 #ifdef KLAYGE_DEBUG
-						RenderablePtr box_helper(new RenderableBox(box));
+						RenderablePtr box_helper(new RenderableBox(box, Color(1, 1, 1, 1)));
 						box_helper->AddToRenderQueue();
 #endif
 					}
@@ -103,7 +129,7 @@ namespace KlayGE
 
 		for (SceneObjectsType::iterator iter = scene_objs_.begin(); iter != scene_objs_.end(); ++ iter)
 		{
-			if ((*iter)->CanBeCulled())
+			if ((*iter)->Cullable())
 			{
 				if (visables.find(*iter) != visables.end())
 				{
@@ -116,8 +142,22 @@ namespace KlayGE
 				visible_objs_.push_back(*iter);
 			}
 		}
+	}
 
+	void OCTree::Clear()
+	{
+		scene_objs_.resize(0);
 		octree_.clear();
+	}
+
+	void OCTree::DoAddSceneObject(SceneObjectPtr const & obj)
+	{
+		scene_objs_.push_back(obj);
+
+		if (obj->Cullable())
+		{
+			this->InsertSceneObject("0", obj);
+		}
 	}
 
 	OCTree::tree_id_t OCTree::Child(tree_id_t const & id, int child_no)

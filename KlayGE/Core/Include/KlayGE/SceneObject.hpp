@@ -29,6 +29,15 @@ namespace KlayGE
 	class SceneObject : public boost::enable_shared_from_this<SceneObject>
 	{
 	public:
+		enum SOAttrib
+		{
+			SOA_Cullable = 1UL << 0,
+			SOA_ShortAge = 1UL << 1,
+			SOA_Moveable = 1UL << 2
+		};
+
+	public:
+		explicit SceneObject(uint32_t attrib);
 		virtual ~SceneObject();
 
 		RenderablePtr GetRenderable() const;
@@ -38,15 +47,17 @@ namespace KlayGE
 
 		virtual void AddToSceneManager();
 
-		virtual bool CanBeCulled() const;
-		virtual bool ShortAge() const;
+		bool Cullable() const;
+		bool ShortAge() const;
+		bool Moveable() const;
 
 		vertex_elements_type const & InstanceFormat() const;
 		virtual void const * InstanceData() const;
 
 	protected:
-		RenderablePtr renderable_;
+		uint32_t attrib_;
 
+		RenderablePtr renderable_;
 		vertex_elements_type instance_format_;
 	};
 }

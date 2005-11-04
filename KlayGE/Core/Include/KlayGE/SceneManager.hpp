@@ -48,7 +48,7 @@ namespace KlayGE
 		void AddSceneObject(SceneObjectPtr const & obj);
 		void AddRenderable(RenderablePtr const & obj);
 
-		virtual void Clear();
+		virtual void Clear() = 0;
 
 		void Update();
 		void Flush();
@@ -57,6 +57,9 @@ namespace KlayGE
 		size_t NumRenderablesRendered() const;
 		size_t NumPrimitivesRendered() const;
 		size_t NumVerticesRendered() const;
+
+	protected:
+		virtual void DoAddSceneObject(SceneObjectPtr const & obj) = 0;
 
 	protected:
 		SceneObjectsType scene_objs_;

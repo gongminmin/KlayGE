@@ -19,6 +19,11 @@
 
 namespace KlayGE
 {
+	SceneObject::SceneObject(uint32_t attrib)
+		: attrib_(attrib)
+	{
+	}
+
 	SceneObject::~SceneObject()
 	{
 	}
@@ -44,14 +49,19 @@ namespace KlayGE
 		Context::Instance().SceneManagerInstance().AddSceneObject(this->shared_from_this());
 	}
 
-	bool SceneObject::CanBeCulled() const
+	bool SceneObject::Cullable() const
 	{
-		return true;
+		return attrib_ & SOA_Cullable;
 	}
 
 	bool SceneObject::ShortAge() const
 	{
-		return false;
+		return attrib_ & SOA_ShortAge;
+	}
+
+	bool SceneObject::Moveable() const
+	{
+		return attrib_ & SOA_Moveable;
 	}
 
 	vertex_elements_type const & SceneObject::InstanceFormat() const

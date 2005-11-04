@@ -46,6 +46,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Sampler.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/SceneObjectHelper.hpp>
 
 #include <algorithm>
 #include <vector>
@@ -107,15 +108,6 @@ namespace
 		void RenderText(uint32_t fontHeight, Font::CharInfoMapType& charInfoMap, float sx, float sy, float sz,
 			float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t flags)
 		{
-			if (flags & Font::FA_CanBeCulled)
-			{
-				can_be_culled_ = true;
-			}
-			else
-			{
-				can_be_culled_ = false;
-			}
-
 			clr_ = clr;
 
 			float const h(fontHeight * yScale);
@@ -210,6 +202,16 @@ namespace
 
 		VertexStreamPtr xyz_vs_;
 		VertexStreamPtr tex_vs_;
+	};
+
+	class FontObject : public SceneObjectHelper
+	{
+	public:
+		FontObject(uint32_t attrib, RenderEffectPtr const & effect, VertexBufferPtr const & vb)
+			: SceneObjectHelper(attrib)
+		{
+			renderable_.reset(new FontRenderable(effect, vb));
+		}
 	};
 }
 
@@ -404,22 +406,16 @@ namespace KlayGE
 			*(effect_->ParameterByName("halfWidth")) = viewport.width / 2;
 			*(effect_->ParameterByName("halfHeight")) = viewport.height / 2;
 
-			RenderablePtr renderable;
-			FontRenderablePoolType::iterator iter = std::find_if(pool_.begin(), pool_.end(),
-				boost::mem_fn(&RenderablePtr::unique));
-			if (iter != pool_.end())
+			uint32_t attrib = SceneObject::SOA_ShortAge;
+			if (flags & Font::FA_Cullable)
 			{
-				renderable = *iter;
-			}
-			else
-			{
-				renderable.reset(new FontRenderable(effect_, vb_));
-				pool_.push_back(renderable);
+				attrib |= SceneObject::SOA_Cullable;
 			}
 
-			checked_cast<FontRenderable*>(renderable.get())->RenderText(this->FontHeight(), charInfoMap_,
+			boost::shared_ptr<FontObject> font_obj(new FontObject(attrib, effect_, vb_));
+			checked_cast<FontRenderable*>(font_obj->GetRenderable().get())->RenderText(this->FontHeight(), charInfoMap_,
 				sx, sy, sz, xScale, yScale, clr, text, flags);
-			renderable->AddToRenderQueue();
+			font_obj->AddToSceneManager();
 		}
 	}
 }

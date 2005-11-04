@@ -142,7 +142,7 @@ namespace
 	{
 	public:
 		PolygonObject()
-			: SceneObjectHelper(RenderablePtr(new RenderPolygon), true, false)
+			: SceneObjectHelper(RenderablePtr(new RenderPolygon), SOA_Cullable)
 		{
 		}
 	};

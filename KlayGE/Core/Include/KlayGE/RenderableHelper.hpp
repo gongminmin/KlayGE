@@ -46,9 +46,6 @@ namespace KlayGE
 	protected:
 		std::wstring name_;
 
-		bool can_be_culled_;
-		bool short_age_;
-
 		Box box_;
 
 		VertexBufferPtr vb_;
@@ -58,37 +55,57 @@ namespace KlayGE
 	class RenderablePoint : public RenderableHelper
 	{
 	public:
-		RenderablePoint(Vector3 const & v);
+		RenderablePoint(Vector3 const & v, Color const & clr);
 		virtual ~RenderablePoint()
 		{
-		}		
+		}
+
+		void OnRenderBegin();
+
+	private:
+		Vector4 clr_;
 	};
 
 	class RenderableLine : public RenderableHelper
 	{
 	public:
-		explicit RenderableLine(Vector3 const & v0, Vector3 const & v1);
+		explicit RenderableLine(Vector3 const & v0, Vector3 const & v1, Color const & clr);
 		virtual ~RenderableLine()
 		{
 		}
+
+		void OnRenderBegin();
+
+	private:
+		Vector4 clr_;
 	};
 
 	class RenderableTriangle : public RenderableHelper
 	{
 	public:
-		RenderableTriangle(Vector3 const & v0, Vector3 const & v1, Vector3 const & v2);
+		RenderableTriangle(Vector3 const & v0, Vector3 const & v1, Vector3 const & v2, Color const & clr);
 		virtual ~RenderableTriangle()
 		{
 		}
+
+		void OnRenderBegin();
+
+	private:
+		Vector4 clr_;
 	};
 
 	class RenderableBox : public RenderableHelper
 	{
 	public:
-		explicit RenderableBox(Box const & box);
+		explicit RenderableBox(Box const & box, Color const & clr);
 		virtual ~RenderableBox()
 		{
 		}
+
+		void OnRenderBegin();
+
+	private:
+		Vector4 clr_;
 	};
 
 	class RenderableSkyBox : public RenderableHelper

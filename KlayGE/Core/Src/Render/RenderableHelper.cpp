@@ -60,8 +60,9 @@ namespace KlayGE
 	}
 
 
-	RenderablePoint::RenderablePoint(Vector3 const & v)
-		: RenderableHelper(L"Point")
+	RenderablePoint::RenderablePoint(Vector3 const & v, Color const & clr)
+		: RenderableHelper(L"Point"),
+			clr_(clr.r(), clr.g(), clr.b(), clr.a())
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -77,9 +78,21 @@ namespace KlayGE
 		box_ = MathLib::ComputeBoundingBox<float>(&v, &v + 1);
 	}
 
+	void RenderablePoint::OnRenderBegin()
+	{
+		App3DFramework const & app = Context::Instance().AppInstance();
+		Camera const & camera = app.ActiveCamera();
 
-	RenderableLine::RenderableLine(Vector3 const & v0, Vector3 const & v1)
-		: RenderableHelper(L"Line")
+		Matrix4 view_proj = camera.ViewMatrix() * camera.ProjMatrix();
+		*(effect_->ParameterByName("matViewProj")) = view_proj;
+
+		*(effect_->ParameterByName("color")) = clr_;
+	}
+
+
+	RenderableLine::RenderableLine(Vector3 const & v0, Vector3 const & v1, Color const & clr)
+		: RenderableHelper(L"Line"),
+			clr_(clr.r(), clr.g(), clr.b(), clr.a())
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -100,9 +113,21 @@ namespace KlayGE
 		box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 	}
 
+	void RenderableLine::OnRenderBegin()
+	{
+		App3DFramework const & app = Context::Instance().AppInstance();
+		Camera const & camera = app.ActiveCamera();
 
-	RenderableTriangle::RenderableTriangle(Vector3 const & v0, Vector3 const & v1, Vector3 const & v2)
-		: RenderableHelper(L"Triangle")
+		Matrix4 view_proj = camera.ViewMatrix() * camera.ProjMatrix();
+		*(effect_->ParameterByName("matViewProj")) = view_proj;
+
+		*(effect_->ParameterByName("color")) = clr_;
+	}
+
+
+	RenderableTriangle::RenderableTriangle(Vector3 const & v0, Vector3 const & v1, Vector3 const & v2, Color const & clr)
+		: RenderableHelper(L"Triangle"),
+			clr_(clr.r(), clr.g(), clr.b(), clr.a())
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -123,9 +148,21 @@ namespace KlayGE
 		box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 	}
 
+	void RenderableTriangle::OnRenderBegin()
+	{
+		App3DFramework const & app = Context::Instance().AppInstance();
+		Camera const & camera = app.ActiveCamera();
 
-	RenderableBox::RenderableBox(Box const & box)
-		: RenderableHelper(L"Box")
+		Matrix4 view_proj = camera.ViewMatrix() * camera.ProjMatrix();
+		*(effect_->ParameterByName("matViewProj")) = view_proj;
+
+		*(effect_->ParameterByName("color")) = clr_;
+	}
+
+
+	RenderableBox::RenderableBox(Box const & box, Color const & clr)
+		: RenderableHelper(L"Box"),
+			clr_(clr.r(), clr.g(), clr.b(), clr.a())
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -157,6 +194,17 @@ namespace KlayGE
 		
 		vb_->SetIndexStream(rf.MakeIndexStream(true));
 		vb_->GetIndexStream()->Assign(indices, sizeof(indices) / sizeof(indices[0]));
+	}
+
+	void RenderableBox::OnRenderBegin()
+	{
+		App3DFramework const & app = Context::Instance().AppInstance();
+		Camera const & camera = app.ActiveCamera();
+
+		Matrix4 view_proj = camera.ViewMatrix() * camera.ProjMatrix();
+		*(effect_->ParameterByName("matViewProj")) = view_proj;
+
+		*(effect_->ParameterByName("color")) = clr_;
 	}
 
 
@@ -236,7 +284,7 @@ namespace KlayGE
 		}
 
 		VertexStreamPtr pos_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)), true);
-		pos_vs->Assign(&pos[0], pos.size());
+		pos_vs->Assign(&pos[0], static_cast<uint32_t>(pos.size()));
 		vb_->AddVertexStream(pos_vs);
 
 		if (has_tex_coord)
@@ -252,7 +300,7 @@ namespace KlayGE
 			}
 
 			VertexStreamPtr tex_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_TextureCoord, 0, sizeof(float), 2)), true);
-			tex_vs->Assign(&tex[0], tex.size());
+			tex_vs->Assign(&tex[0], static_cast<uint32_t>(tex.size()));
 			vb_->AddVertexStream(tex_vs);
 		}
 
@@ -261,18 +309,18 @@ namespace KlayGE
 		{
 			for (int x = 0; x < length_segs; ++ x)
 			{
-				index.push_back((y + 0) * (length_segs + 1) + (x + 0));
-				index.push_back((y + 0) * (length_segs + 1) + (x + 1));
-				index.push_back((y + 1) * (length_segs + 1) + (x + 1));
+				index.push_back(static_cast<uint16_t>((y + 0) * (length_segs + 1) + (x + 0)));
+				index.push_back(static_cast<uint16_t>((y + 0) * (length_segs + 1) + (x + 1)));
+				index.push_back(static_cast<uint16_t>((y + 1) * (length_segs + 1) + (x + 1)));
 
-				index.push_back((y + 1) * (length_segs + 1) + (x + 1));
-				index.push_back((y + 1) * (length_segs + 1) + (x + 0));
-				index.push_back((y + 0) * (length_segs + 1) + (x + 0));
+				index.push_back(static_cast<uint16_t>((y + 1) * (length_segs + 1) + (x + 1)));
+				index.push_back(static_cast<uint16_t>((y + 1) * (length_segs + 1) + (x + 0)));
+				index.push_back(static_cast<uint16_t>((y + 0) * (length_segs + 1) + (x + 0)));
 			}
 		}
 
 		IndexStreamPtr is = rf.MakeIndexStream(true);
-		is->Assign(&index[0], index.size());
+		is->Assign(&index[0], static_cast<uint32_t>(index.size()));
 		vb_->SetIndexStream(is);
 
 		box_ = MathLib::ComputeBoundingBox<float>(pos.begin(), pos.end());

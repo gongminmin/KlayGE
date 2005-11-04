@@ -113,7 +113,7 @@ namespace
 	{
 	public:
 		PolygonObject()
-			: SceneObjectHelper(true, false)
+			: SceneObjectHelper(SOA_Cullable)
 		{
 			renderable_ = LoadKMesh("teapot.kmesh", CreateFactory<RenderPolygon>)->Mesh(0);
 			checked_cast<RenderPolygon*>(renderable_.get())->ComputeTB();

@@ -29,30 +29,19 @@
 
 namespace KlayGE
 {
-	SceneObjectHelper::SceneObjectHelper(bool can_be_culled, bool short_age)
-		: can_be_culled_(can_be_culled), short_age_(short_age)
+	SceneObjectHelper::SceneObjectHelper(uint32_t attrib)
+		: SceneObject(attrib)
 	{
 	}
 
-	SceneObjectHelper::SceneObjectHelper(RenderablePtr renderable,
-			bool can_be_culled, bool short_age)
-		: can_be_culled_(can_be_culled), short_age_(short_age)
+	SceneObjectHelper::SceneObjectHelper(RenderablePtr renderable, uint32_t attrib)
+		: SceneObject(attrib)
 	{
 		renderable_ = renderable;
 	}
 
-	bool SceneObjectHelper::CanBeCulled() const
-	{
-		return can_be_culled_;
-	}
-	
-	bool SceneObjectHelper::ShortAge() const
-	{
-		return short_age_;
-	}
-
 	SceneObjectSkyBox::SceneObjectSkyBox()
-		: SceneObjectHelper(RenderablePtr(new RenderableSkyBox), false, false)
+		: SceneObjectHelper(RenderablePtr(new RenderableSkyBox), 0)
 	{
 	}
 

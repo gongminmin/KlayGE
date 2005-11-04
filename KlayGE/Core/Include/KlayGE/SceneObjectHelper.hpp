@@ -22,18 +22,11 @@ namespace KlayGE
 	class SceneObjectHelper : public SceneObject
 	{
 	public:
-		SceneObjectHelper(bool can_be_culled, bool short_age);
-		SceneObjectHelper(RenderablePtr renderable, bool can_be_culled, bool short_age);
+		SceneObjectHelper(uint32_t attrib);
+		SceneObjectHelper(RenderablePtr renderable, uint32_t attrib);
 		virtual ~SceneObjectHelper()
 		{
 		}
-
-		virtual bool CanBeCulled() const;
-		virtual bool ShortAge() const;
-
-	protected:
-		bool can_be_culled_;
-		bool short_age_;
 	};
 
 	class SceneObjectSkyBox : public SceneObjectHelper

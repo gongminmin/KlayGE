@@ -91,7 +91,7 @@ namespace
 	{
 	public:
 		TorusObject()
-			: SceneObjectHelper(true, false)
+			: SceneObjectHelper(SOA_Cullable)
 		{
 			TexturePtr toonTex = LoadTexture("Toon.dds");
 			TexturePtr edgeTex = LoadTexture("Edge.dds");

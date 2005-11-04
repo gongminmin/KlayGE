@@ -167,7 +167,7 @@ namespace
 
 int main()
 {
-	OCTree sceneMgr(Box(Vector3(-10, -10, -10), Vector3(10, 10, 10)), 3);
+	OCTree sceneMgr(Box(Vector3(-1, -1, -1), Vector3(1, 1, 1)), 3);
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
@@ -215,7 +215,7 @@ void AsciiArts::InitObjects()
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	obj_.reset(new SceneObjectHelper(LoadKMesh("teapot.kmesh"), true, false));
+	obj_.reset(new SceneObjectHelper(LoadKMesh("teapot.kmesh"), SceneObject::SOA_Cullable));
 
 	this->BuildAsciiLumsTex();
 

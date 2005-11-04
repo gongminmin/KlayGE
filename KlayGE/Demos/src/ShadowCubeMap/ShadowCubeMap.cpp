@@ -146,7 +146,7 @@ namespace
 	{
 	public:
 		OccluderObject()
-			: SceneObjectHelper(true, false)
+			: SceneObjectHelper(SOA_Cullable)
 		{
 			model_ = MathLib::Translation(0.0f, 0.2f, 0.0f);
 
@@ -255,7 +255,7 @@ namespace
 	{
 	public:
 		GroundObject()
-			: SceneObjectHelper(RenderablePtr(new GroundRenderable), true, false)
+			: SceneObjectHelper(RenderablePtr(new GroundRenderable), SOA_Cullable)
 		{
 			model_ = MathLib::Translation(0.0f, -0.2f, 0.0f);
 

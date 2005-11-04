@@ -1,3 +1,17 @@
+float4x4 matViewProj;
+float4 color;
+
+void HelperVS(float4 position : POSITION,
+			out float4 oPosition : POSITION)
+{
+	oPosition = mul(position, matViewProj);
+}
+
+float4 HelperPS() : COLOR0
+{
+	return color;
+}
+
 technique PointTec
 {
 	pass p0
@@ -16,6 +30,9 @@ technique PointTec
 		ColorOp[0] = SelectArg1;
 		ColorArg1[0] = Diffuse;
 		AlphaOp[0] = Disable;
+
+		VertexShader = compile vs_1_1 HelperVS();
+		PixelShader = compile ps_1_1 HelperPS();
 	}
 }
 
@@ -37,6 +54,9 @@ technique LineTec
 		ColorOp[0] = SelectArg1;
 		ColorArg1[0] = Diffuse;
 		AlphaOp[0] = Disable;
+
+		VertexShader = compile vs_1_1 HelperVS();
+		PixelShader = compile ps_1_1 HelperPS();
 	}
 }
 
@@ -58,6 +78,9 @@ technique TriangleTec
 		ColorOp[0] = SelectArg1;
 		ColorArg1[0] = Diffuse;
 		AlphaOp[0] = Disable;
+
+		VertexShader = compile vs_1_1 HelperVS();
+		PixelShader = compile ps_1_1 HelperPS();
 	}
 }
 
@@ -79,6 +102,9 @@ technique BoxTec
 		ColorOp[0] = SelectArg1;
 		ColorArg1[0] = Diffuse;
 		AlphaOp[0] = Disable;
+
+		VertexShader = compile vs_1_1 HelperVS();
+		PixelShader = compile ps_1_1 HelperPS();
 	}
 }
 

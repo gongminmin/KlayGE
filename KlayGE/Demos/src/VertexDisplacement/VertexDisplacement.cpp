@@ -39,7 +39,7 @@ namespace
 	{
 	public:
 		FlagRenderable(int length_segs, int width_segs)
-			: RenderablePlane(LENGTH, WIDTH, length_segs, width_segs, true)
+			: RenderablePlane(static_cast<float>(LENGTH), static_cast<float>(WIDTH), length_segs, width_segs, true)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -59,7 +59,7 @@ namespace
 	{
 	public:
 		FlagObject(int length_segs, int width_segs)
-			: SceneObjectHelper(true, false)
+			: SceneObjectHelper(SOA_Cullable)
 		{
 			renderable_.reset(new FlagRenderable(length_segs, width_segs));
 		}
