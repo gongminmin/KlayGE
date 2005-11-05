@@ -25,9 +25,9 @@
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/SceneObject.hpp>
 #include <KlayGE/RenderableHelper.hpp>
+#include <KlayGE/SetVector.hpp>
 
 #include <functional>
-#include <set>
 
 #include <KlayGE/OCTree/Frustum.hpp>
 #include <KlayGE/OCTree/OCTree.hpp>
@@ -41,7 +41,7 @@ namespace KlayGE
 
 	void OCTree::ClipScene(Camera const & camera)
 	{
-		for (linear_octree_t::iterator iter = octree_.begin(); iter != octree_.end();)
+		for (linear_octree_t::iterator iter = octree_.begin(); iter != octree_.end(); ++ iter)
 		{
 			SceneObjectsType& objs = iter->second;
 
@@ -49,21 +49,19 @@ namespace KlayGE
 			{
 				if ((*obj_iter)->Moveable())
 				{
-					obj_iter = objs.erase(obj_iter);
+					if (!this->InsideChild(iter->first, *obj_iter))
+					{
+						obj_iter = objs.erase(obj_iter);
+					}
+					else
+					{
+						++ obj_iter;
+					}
 				}
 				else
 				{
 					++ obj_iter;
 				}
-			}
-
-			if (objs.empty())
-			{
-				iter = octree_.erase(iter);
-			}
-			else
-			{
-				++ iter;
 			}
 		}
 
@@ -75,10 +73,23 @@ namespace KlayGE
 			}
 		}
 
+		for (linear_octree_t::iterator iter = octree_.begin(); iter != octree_.end();)
+		{
+			SceneObjectsType& objs = iter->second;
+			if (objs.empty())
+			{
+				iter = octree_.erase(iter);
+			}
+			else
+			{
+				++ iter;
+			}
+		}
+
 		Frustum frustum(camera.ViewMatrix() * camera.ProjMatrix());
 
-		std::set<tree_id_t> nodes;
-		std::set<SceneObjectPtr> visables;
+		SetVector<tree_id_t> nodes;
+		SetVector<SceneObjectPtr> visables;
 		for (linear_octree_t::iterator iter = octree_.begin(); iter != octree_.end(); ++ iter)
 		{
 			for (size_t i = 1; i <= iter->first.size(); ++ i)

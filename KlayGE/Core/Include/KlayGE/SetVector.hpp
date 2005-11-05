@@ -21,7 +21,7 @@
 #include <utility>
 #include <vector>
 
-#pragma warning(disable: 4800)
+#pragma warning(disable: 4127 4800)
 #include <boost/pool/pool_alloc.hpp>
 
 namespace KlayGE
@@ -35,6 +35,7 @@ namespace KlayGE
 
 	public:
 		typedef Traits			key_compare;
+		typedef Traits			value_compare;
 		typedef Key				key_type;
 		typedef Key				value_type;
 		typedef Allocator		allocator_type;
@@ -46,7 +47,6 @@ namespace KlayGE
 
 		typedef typename ContainerType::size_type				size_type;
 		typedef typename ContainerType::difference_type			difference_type;
-		typedef typename ContainerType::value_type				value_type;
 
 		typedef typename Allocator::pointer					pointer;
 		typedef typename Allocator::const_pointer			const_pointer;
@@ -103,9 +103,9 @@ namespace KlayGE
 			{ return std::equal_range(begin(), end(), k, compare_); }
 
 		iterator erase(iterator where)
-			{ container_.erase(where); }
+			{ return container_.erase(where); }
 		iterator erase(iterator first, iterator last)
-			{ container_.erase(first, last); }
+			{ return container_.erase(first, last); }
 		size_type erase(key_type const & key)
 		{
 			iterator iter(this->find(key));
@@ -217,41 +217,41 @@ namespace KlayGE
 		CompareType		compare_;
 	};
 
-	template <class Key, class Type, class Traits, class Allocator>
+	template <class Key, class Traits, class Allocator>
 	inline void
-	swap(SetVector<Key, Type, Traits, Allocator>& lhs, SetVector<Key, Type, Traits, Allocator>& rhs)
+	swap(SetVector<Key, Traits, Allocator>& lhs, SetVector<Key, Traits, Allocator>& rhs)
 	{
 		lhs.swap(rhs);
 	}
 
-	template <class Key, class Type, class Traits, class Allocator>
+	template <class Key, class Traits, class Allocator>
 	inline bool
-	operator!=(SetVector<Key, Type, Traits, Allocator> const & lhs,
-					SetVector<Key, Type, Traits, Allocator> const & rhs)
+	operator!=(SetVector<Key, Traits, Allocator> const & lhs,
+					SetVector<Key, Traits, Allocator> const & rhs)
 	{
 		return !(lhs == rhs);
 	}
 
-	template <class Key, class Type, class Traits, class Allocator>
+	template <class Key, class Traits, class Allocator>
 	inline bool
-	operator>(SetVector<Key, Type, Traits, Allocator> const & lhs,
-					SetVector<Key, Type, Traits, Allocator> const & rhs)
+	operator>(SetVector<Key, Traits, Allocator> const & lhs,
+					SetVector<Key, Traits, Allocator> const & rhs)
 	{
 		return rhs < lhs;
 	}
 
-	template <class Key, class Type, class Traits, class Allocator>
+	template <class Key, class Traits, class Allocator>
 	inline bool
-	operator>=(SetVector<Key, Type, Traits, Allocator> const & lhs,
-					SetVector<Key, Type, Traits, Allocator> const & rhs)
+	operator>=(SetVector<Key, Traits, Allocator> const & lhs,
+					SetVector<Key, Traits, Allocator> const & rhs)
 	{
 		return !(lhs < rhs);
 	}
 
-	template <class Key, class Type, class Traits, class Allocator>
+	template <class Key, class Traits, class Allocator>
 	inline bool
-	operator<=(SetVector<Key, Type, Traits, Allocator> const & lhs,
-					SetVector<Key, Type, Traits, Allocator> const & rhs)
+	operator<=(SetVector<Key, Traits, Allocator> const & lhs,
+					SetVector<Key, Traits, Allocator> const & rhs)
 	{
 		return !(rhs < lhs);
 	}

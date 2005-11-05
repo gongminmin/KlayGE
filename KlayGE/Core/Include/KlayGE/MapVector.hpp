@@ -149,9 +149,9 @@ namespace KlayGE
 			{ return std::equal_range(begin(), end(), key, compare_); }
 
 		iterator erase(iterator where)
-			{ container_.erase(where); }
+			{ return container_.erase(where); }
 		iterator erase(iterator first, iterator last)
-			{ container_.erase(first, last); }
+			{ return container_.erase(first, last); }
 		size_type erase(key_type const & key)
 		{
 			iterator iter(this->find(key));

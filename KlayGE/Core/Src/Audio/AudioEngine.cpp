@@ -111,11 +111,9 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void AudioEngine::StopAll()
 	{
-		for (AudioBufs::iterator iter = audioBufs_.begin();
-			iter != audioBufs_.end(); ++ iter)
-		{
-			iter->second->Stop();
-		}
+		std::for_each(audioBufs_.begin(), audioBufs_.end(),
+			boost::bind(&AudioBuffer::Stop,
+				boost::bind(select2nd<AudioBufs::value_type>(), _1)));
 	}
 
 	// 列表里缓冲区的数目
