@@ -1,7 +1,7 @@
 float4x4 model;
 float4x4 mvp;
 float4x4 modelit;
-float4 eyePos;
+float3 eyePos;
 
 struct VS_INPUT
 {
@@ -21,7 +21,7 @@ VS_OUTPUT RefractVS(VS_INPUT input)
 	VS_OUTPUT output;
 	
 	float4 pos_in_world = mul(input.pos, model);
-	output.incident = pos_in_world - eyePos.xyz;
+	output.incident = pos_in_world - eyePos;
 
 	output.pos = mul(pos_in_world, mvp);
 	output.normal = mul(input.normal, (float3x3)modelit);

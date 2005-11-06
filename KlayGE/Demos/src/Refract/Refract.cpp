@@ -180,9 +180,7 @@ void Refract::DoUpdate(uint32_t pass)
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-	*(refractor_->GetRenderable()->GetRenderEffect()->ParameterByName("eyePos"))
-		= Vector4(this->ActiveCamera().EyePos().x(), this->ActiveCamera().EyePos().y(),
-			this->ActiveCamera().EyePos().z(), 1);
+	*(refractor_->GetRenderable()->GetRenderEffect()->ParameterByName("eyePos")) = this->ActiveCamera().EyePos();
 
 	std::wostringstream stream;
 	stream << renderEngine.ActiveRenderTarget(0)->FPS();

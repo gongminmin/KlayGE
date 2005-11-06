@@ -102,10 +102,9 @@ namespace
 			Matrix4 const & model = Matrix4::Identity();
 			Matrix4 const & view = app.ActiveCamera().ViewMatrix();
 			Matrix4 const & proj = app.ActiveCamera().ProjMatrix();
-			Vector3 const & eyePos = app.ActiveCamera().EyePos();
 
 			*(effect_->ParameterByName("mvp")) = model * view * proj;
-			*(effect_->ParameterByName("eyePos")) = Vector4(eyePos.x(), eyePos.y(), eyePos.z(), 1);
+			*(effect_->ParameterByName("eyePos")) = app.ActiveCamera().EyePos();
 		}
 	};
 
@@ -220,7 +219,7 @@ void Parallax::DoUpdate(uint32_t pass)
 	Vector3 lightPos(2, 0, 1);
 	Matrix4 matRot(MathLib::RotationZ(degree));
 	lightPos = MathLib::TransformCoord(lightPos, matRot);
-	*(polygon_->GetRenderable()->GetRenderEffect()->ParameterByName("lightPos")) = Vector4(lightPos.x(), lightPos.y(), lightPos.z(), 1);
+	*(polygon_->GetRenderable()->GetRenderEffect()->ParameterByName("lightPos")) = lightPos;
 
 	std::wostringstream stream;
 	stream << renderEngine.ActiveRenderTarget(0)->FPS();

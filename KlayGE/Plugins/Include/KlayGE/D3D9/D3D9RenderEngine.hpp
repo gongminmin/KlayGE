@@ -34,6 +34,7 @@
 #include <dxerr9.h>
 
 #include <vector>
+#include <boost/function.hpp>
 
 #include <KlayGE/RenderEngine.hpp>
 
@@ -110,9 +111,13 @@ namespace KlayGE
 		void DoActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget);
 
 		void DoRender(VertexBuffer const & vb);
-		void RenderVB(VertexBuffer const & vb);
 
 		void FillRenderDeviceCaps();
+
+		void DoRenderSWInstance(VertexBuffer const & vb);
+		void DoRenderHWInstance(VertexBuffer const & vb);
+		void RenderVBSWInstance(VertexBuffer const & vb);
+		void RenderVBHWInstance(VertexBuffer const & vb);
 
 	private:
 		D3D9AdapterList const & D3DAdapters() const;
@@ -132,6 +137,8 @@ namespace KlayGE
 		uint32_t clearFlags_;
 
 		size_t last_num_vertex_stream_;
+
+		boost::function<void (VertexBuffer const &)> RenderInstance;
 	};
 
 	typedef boost::shared_ptr<D3D9RenderEngine> D3D9RenderEnginePtr;

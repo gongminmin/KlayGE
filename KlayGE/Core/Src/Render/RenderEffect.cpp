@@ -149,6 +149,10 @@ namespace KlayGE
 		{
 			return *this;
 		}
+		RenderEffectParameter& operator=(Vector3 const & /*value*/)
+		{
+			return *this;
+		}
 		RenderEffectParameter& operator=(Vector4 const & /*value*/)
 		{
 			return *this;
@@ -186,6 +190,10 @@ namespace KlayGE
 		{
 			val = 0;
 		}
+		void Value(Vector3& val) const
+		{
+			val = Vector3::Zero();
+		}
 		void Value(Vector4& val) const
 		{
 			val = Vector4::Zero();
@@ -203,6 +211,10 @@ namespace KlayGE
 			val = SamplerPtr();
 		}
 		void Value(std::vector<float>& val) const
+		{
+			val.clear();
+		}
+		void Value(std::vector<Vector3>& val) const
 		{
 			val.clear();
 		}
@@ -250,6 +262,12 @@ namespace KlayGE
 	}
 
 	RenderEffectParameter& RenderEffectParameter::operator=(float const & value)
+	{
+		BOOST_ASSERT(false);
+		return *this;
+	}
+
+	RenderEffectParameter& RenderEffectParameter::operator=(Vector3 const & value)
 	{
 		BOOST_ASSERT(false);
 		return *this;
@@ -309,6 +327,12 @@ namespace KlayGE
 		val = 0;
 	}
 
+	void RenderEffectParameter::Value(Vector3& val) const
+	{
+		BOOST_ASSERT(false);
+		val = Vector3::Zero();
+	}
+
 	void RenderEffectParameter::Value(Vector4& val) const
 	{
 		BOOST_ASSERT(false);
@@ -358,6 +382,11 @@ namespace KlayGE
 	}
 
 	void RenderEffectParameter::DoFlush(float const & value)
+	{
+		BOOST_ASSERT(false);
+	}
+
+	void RenderEffectParameter::DoFlush(Vector3 const & value)
 	{
 		BOOST_ASSERT(false);
 	}

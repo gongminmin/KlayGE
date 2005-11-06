@@ -1,8 +1,8 @@
 float4x4 viewproj : VIEWPROJECTION;
 float4x4 world : WORLD;
 float4x4 worldviewIT : WORLDVIEWIT;
-float4 lightPos;
-float4 eyePos;
+float3 lightPos;
+float3 eyePos;
 
 struct VS_INPUT
 {
@@ -22,8 +22,8 @@ VS_OUTPUT ToonVS(VS_INPUT input)
 	float3 pos = mul(input.pos, world);
 	float3 normal = normalize(mul(input.normal, (float3x3)worldviewIT));
 
-	float3 L = normalize(lightPos.xyz - pos);
-	float3 V = normalize(eyePos.xyz - pos);
+	float3 L = normalize(lightPos - pos);
+	float3 V = normalize(eyePos - pos);
 
 	VS_OUTPUT output;
 	output.pos = mul(float4(pos, 1), viewproj);
@@ -36,16 +36,16 @@ VS_OUTPUT ToonVS(VS_INPUT input)
 sampler1D toonMapSampler;
 sampler1D edgeMapSampler;
 
-float4 ToonPS(float2 toonTex	: TEXCOORD0,
-				float2 edgeTex	: TEXCOORD1,
+half4 ToonPS(half2 toonTex	: TEXCOORD0,
+				half2 edgeTex	: TEXCOORD1,
 
 				uniform sampler1D toonMap,
 				uniform sampler1D edgeMap) : COLOR
 {
-	float3 toon = tex1D(toonMap, toonTex.x);
-	float3 edge = tex1D(edgeMap, edgeTex.x);
+	half3 toon = tex1D(toonMap, toonTex.x);
+	half3 edge = tex1D(edgeMap, edgeTex.x);
 
-	return float4(toon * edge, 1);
+	return half4(toon * edge, 1);
 }
 
 technique cartoonTec

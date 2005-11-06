@@ -58,8 +58,7 @@ namespace
 
 		void LightMatrices(Matrix4 const & model, Matrix4 const & view, Matrix4 const & proj)
 		{
-			light_pos_ = Transform(Vector3(0, 0, 0), model);
-			light_pos_ /= light_pos_.w();
+			light_pos_ = TransformCoord(Vector3(0, 0, 0), model);
 
 			inv_light_model_ = MathLib::Inverse(model);
 			light_view_ = view;
@@ -80,7 +79,7 @@ namespace
 		bool gen_sm_pass_;
 		SamplerPtr sm_sampler_;
 
-		Vector4 light_pos_;
+		Vector3 light_pos_;
 		Matrix4 inv_light_model_;
 		Matrix4 light_view_, light_proj_;
 	};

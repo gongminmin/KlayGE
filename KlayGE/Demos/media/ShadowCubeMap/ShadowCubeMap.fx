@@ -1,7 +1,7 @@
 float4x4 WorldViewProj;
 float4x4 World;
 float4x4 InvLightWorld;
-float4 light_pos;
+float3 light_pos;
 
 sampler LampSampler;
 sampler ShadowMapSampler;
@@ -31,7 +31,7 @@ void MainVS(float4 Position : POSITION,
 
 	oPos = mul(Position, WorldViewProj);
 	oLightWorldPos = mul(world_pos, InvLightWorld);
-    oDiffuse = dot(normalize(light_pos.xyz - world_pos.xyz), world_normal);
+    oDiffuse = dot(normalize(light_pos - world_pos.xyz), world_normal);
 }
 
 float4 MainPS(half3 diffuse : COLOR0,

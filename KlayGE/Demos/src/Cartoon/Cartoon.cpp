@@ -63,8 +63,8 @@ namespace
 			Vector3 eyePos = app.ActiveCamera().EyePos();
 
 			*(effect_->ParameterByName("viewproj")) = view * proj;
-			*(effect_->ParameterByName("lightPos")) = Vector4(2, 2, -3, 1);
-			*(effect_->ParameterByName("eyePos")) = Vector4(eyePos.x(), eyePos.y(), eyePos.z(), 1);
+			*(effect_->ParameterByName("lightPos")) = Vector3(2, 2, -3);
+			*(effect_->ParameterByName("eyePos")) = eyePos;
 
 			float rotX(std::clock() / 700.0f);
 			float rotY(std::clock() / 700.0f);

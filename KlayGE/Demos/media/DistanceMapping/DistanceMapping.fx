@@ -1,6 +1,6 @@
 float4x4 worldviewproj : WORLDVIEWPROJECTION;
-float4 lightPos;
-float4 eyePos;
+float3 lightPos;
+float3 eyePos;
 
 struct VS_INPUT
 {
@@ -21,8 +21,8 @@ struct VS_OUTPUT
 
 VS_OUTPUT DistanceMappingVS(VS_INPUT input,
 						uniform float4x4 worldviewproj,
-						uniform float4 lightPos,
-						uniform float4 eyePos)
+						uniform float3 lightPos,
+						uniform float3 eyePos)
 {
 	VS_OUTPUT output;
 
@@ -34,8 +34,8 @@ VS_OUTPUT DistanceMappingVS(VS_INPUT input,
 	matObjToTangentSpace[1] = input.B;
 	matObjToTangentSpace[2] = cross(input.T, input.B);
 
-	float3 vLight = lightPos.xyz - input.pos;
-	float3 vView = input.pos - eyePos.xyz;
+	float3 vLight = lightPos - input.pos;
+	float3 vView = input.pos - eyePos;
 
 	float3 vTanLight = mul(vLight, matObjToTangentSpace);
 	float3 vTanView = mul(vView, matObjToTangentSpace);

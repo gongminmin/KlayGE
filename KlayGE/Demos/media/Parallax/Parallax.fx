@@ -1,6 +1,6 @@
 float4x4 mvp : WORLDVIEWPROJECTION;
-float4 lightPos;
-float4 eyePos;
+float3 lightPos;
+float3 eyePos;
 
 struct VS_INPUT
 {
@@ -21,8 +21,8 @@ struct VS_OUTPUT
 
 VS_OUTPUT ParallaxVS(VS_INPUT input,
 						uniform float4x4 mvp,
-						uniform float4 lightPos,
-						uniform float4 eyePos)
+						uniform float3 lightPos,
+						uniform float3 eyePos)
 {
 	VS_OUTPUT output;
 
@@ -34,8 +34,8 @@ VS_OUTPUT ParallaxVS(VS_INPUT input,
 	objToTangentSpace[1] = input.B;
 	objToTangentSpace[2] = cross(input.T, input.B);
 
-	float3 lightVec = lightPos.xyz - input.pos;
-	float3 viewVec = eyePos.xyz - input.pos;
+	float3 lightVec = lightPos - input.pos;
+	float3 viewVec = eyePos - input.pos;
 
 	output.L = mul(lightVec, objToTangentSpace);
 	output.V = mul(viewVec, objToTangentSpace);

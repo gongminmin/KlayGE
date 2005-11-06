@@ -104,11 +104,19 @@ namespace KlayGE
 			}
 		}
 
-		if ((D3DXPC_VECTOR == desc.Class) && (D3DXPT_FLOAT == desc.Type) && (1 == desc.Rows) && (4 == desc.Columns))
+		if ((D3DXPC_VECTOR == desc.Class) && (D3DXPT_FLOAT == desc.Type) && (1 == desc.Rows))
 		{
 			if (0 == desc.Elements)
 			{
-				return RenderEffectParameterPtr(new D3D9RenderEffectParameterVector4(*this, name));
+				if (3 == desc.Columns)
+				{
+					return RenderEffectParameterPtr(new D3D9RenderEffectParameterVector3(*this, name));
+				}
+				else
+				{
+					BOOST_ASSERT(4 == desc.Columns);
+					return RenderEffectParameterPtr(new D3D9RenderEffectParameterVector4(*this, name));
+				}
 			}
 			else
 			{
@@ -313,6 +321,12 @@ namespace KlayGE
 	{
 		boost::shared_ptr<ID3DXEffect> d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetFloat(name_.c_str(), value));
+	}
+
+	void D3D9RenderEffectParameterVector3::DoFlush(Vector3 const & value)
+	{
+		boost::shared_ptr<ID3DXEffect> d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
+		TIF(d3dx_effect->SetFloatArray(name_.c_str(), &value.x(), 3));
 	}
 
 	void D3D9RenderEffectParameterVector4::DoFlush(Vector4 const & value)

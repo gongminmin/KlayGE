@@ -241,10 +241,9 @@ void DistanceMapping::DoUpdate(KlayGE::uint32_t pass)
 	Matrix4 model = MathLib::RotationX(-0.5f);
 	Matrix4 view = this->ActiveCamera().ViewMatrix();
 	Matrix4 proj = this->ActiveCamera().ProjMatrix();
-	Vector3 eyePos = this->ActiveCamera().EyePos();
 
 	*(polygon_->GetRenderable()->GetRenderEffect()->ParameterByName("worldviewproj")) = model * view * proj;
-	*(polygon_->GetRenderable()->GetRenderEffect()->ParameterByName("eyePos")) = Vector4(eyePos.x(), eyePos.y(), eyePos.z(), 0.0f);
+	*(polygon_->GetRenderable()->GetRenderEffect()->ParameterByName("eyePos")) = this->ActiveCamera().EyePos();
 
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -253,7 +252,7 @@ void DistanceMapping::DoUpdate(KlayGE::uint32_t pass)
 	Vector3 lightPos(2, 0, -2);
 	Matrix4 matRot(MathLib::RotationZ(degree));
 	lightPos = MathLib::TransformCoord(lightPos, matRot);
-	*(polygon_->GetRenderable()->GetRenderEffect()->ParameterByName("lightPos")) = Vector4(lightPos.x(), lightPos.y(), lightPos.z(), 1);
+	*(polygon_->GetRenderable()->GetRenderEffect()->ParameterByName("lightPos")) = lightPos;
 
 	std::wostringstream stream;
 	stream << renderEngine.ActiveRenderTarget(0)->FPS();
