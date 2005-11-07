@@ -117,7 +117,7 @@ namespace KlayGE
 		void DoRenderSWInstance(VertexBuffer const & vb);
 		void DoRenderHWInstance(VertexBuffer const & vb);
 		void RenderVBSWInstance(VertexBuffer const & vb);
-		void RenderVBHWInstance(VertexBuffer const & vb);
+		void RenderVB(VertexBuffer const & vb);
 
 	private:
 		D3D9AdapterList const & D3DAdapters() const;

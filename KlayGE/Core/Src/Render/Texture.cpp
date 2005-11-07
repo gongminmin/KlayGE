@@ -873,55 +873,55 @@ namespace KlayGE
 			return name;
 		}
 
-		void Usage(TextureUsage usage)
+		void Usage(TextureUsage /*usage*/)
 		{
 		}
 
-        uint32_t Width(int level) const
+        uint32_t Width(int /*level*/) const
 		{
 			return 0;
 		}
-		uint32_t Height(int level) const
+		uint32_t Height(int /*level*/) const
 		{
 			return 0;
 		}
-		uint32_t Depth(int level) const
+		uint32_t Depth(int /*level*/) const
 		{
 			return 0;
 		}
 
-		void CopyToTexture(Texture& target)
+		void CopyToTexture(Texture& /*target*/)
 		{
 		}
 
-		void CopyToMemory1D(int level, void* data)
+		void CopyToMemory1D(int /*level*/, void* /*data*/)
 		{
 		}
-		void CopyToMemory2D(int level, void* data)
+		void CopyToMemory2D(int /*level*/, void* /*data*/)
 		{
 		}
-		void CopyToMemory3D(int level, void* data)
+		void CopyToMemory3D(int /*level*/, void* /*data*/)
 		{
 		}
-		void CopyToMemoryCube(CubeFaces face, int level, void* data)
+		void CopyToMemoryCube(CubeFaces /*face*/, int /*level*/, void* /*data*/)
 		{
 		}
 
-		void CopyMemoryToTexture1D(int level, void* data, PixelFormat pf,
-			uint32_t width, uint32_t xOffset)
+		void CopyMemoryToTexture1D(int /*level*/, void* /*data*/, PixelFormat /*pf*/,
+			uint32_t /*width*/, uint32_t /*xOffset*/)
 		{
 		}
-		void CopyMemoryToTexture2D(int level, void* data, PixelFormat pf,
-			uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset)
+		void CopyMemoryToTexture2D(int /*level*/, void* /*data*/, PixelFormat /*pf*/,
+			uint32_t /*width*/, uint32_t /*height*/, uint32_t /*xOffset*/, uint32_t /*yOffset*/)
 		{
 		}
-		void CopyMemoryToTexture3D(int level, void* data, PixelFormat pf,
-			uint32_t width, uint32_t height, uint32_t depth,
-			uint32_t xOffset, uint32_t yOffset, uint32_t zOffset)
+		void CopyMemoryToTexture3D(int /*level*/, void* /*data*/, PixelFormat /*pf*/,
+			uint32_t /*width*/, uint32_t /*height*/, uint32_t /*depth*/,
+			uint32_t /*xOffset*/, uint32_t /*yOffset*/, uint32_t /*zOffset*/)
 		{
 		}
-		void CopyMemoryToTextureCube(CubeFaces face, int level, void* data, PixelFormat pf,
-			uint32_t size, uint32_t xOffset)
+		void CopyMemoryToTextureCube(CubeFaces /*face*/, int /*level*/, void* /*data*/, PixelFormat /*pf*/,
+			uint32_t /*size*/, uint32_t /*xOffset*/)
 		{
 		}
 

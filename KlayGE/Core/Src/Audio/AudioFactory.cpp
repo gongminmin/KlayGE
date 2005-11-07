@@ -30,12 +30,12 @@ namespace KlayGE
 			return *AudioEngine::NullObject();
 		}
 
-		AudioBufferPtr MakeSoundBuffer(AudioDataSourcePtr const & dataSource, uint32_t numSource)
+		AudioBufferPtr MakeSoundBuffer(AudioDataSourcePtr const & /*dataSource*/, uint32_t /*numSource*/)
 		{
 			return AudioBuffer::NullObject();
 		}
 
-		AudioBufferPtr MakeMusicBuffer(AudioDataSourcePtr const & dataSource, uint32_t bufferSeconds)
+		AudioBufferPtr MakeMusicBuffer(AudioDataSourcePtr const & /*dataSource*/, uint32_t /*bufferSeconds*/)
 		{
 			return AudioBuffer::NullObject();
 		}

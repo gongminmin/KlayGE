@@ -338,81 +338,6 @@ namespace KlayGE
 
 	void D3D9RenderEngine::DoRenderHWInstance(VertexBuffer const & vb)
 	{
-		this->RenderVBHWInstance(vb);
-	}
-
-	void D3D9RenderEngine::RenderVBSWInstance(VertexBuffer const & vb)
-	{
-		D3DPRIMITIVETYPE primType;
-		uint32_t primCount;
-		D3D9Mapping::Mapping(primType, primCount, vb);
-
-		numPrimitivesJustRendered_ += primCount;
-		numVerticesJustRendered_ += vb.UseIndices() ? vb.NumIndices() : vb.NumVertices();
-
-		for (VertexBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
-			iter != vb.VertexStreamEnd(); ++ iter)
-		{
-			VertexStream& stream = *(*iter);
-			uint32_t number = static_cast<uint32_t>(iter - vb.VertexStreamBegin());
-
-			D3D9VertexStream& d3d9vs(*checked_cast<D3D9VertexStream*>(&stream));
-			TIF(d3dDevice_->SetStreamSource(number,
-				d3d9vs.D3D9Buffer().get(), 0,
-				static_cast<UINT>(stream.VertexSize())));
-		}
-
-		// Clear any previous steam sources
-		uint32_t const num_vertex_stream = static_cast<uint32_t>(vb.VertexStreamEnd() - vb.VertexStreamBegin())
-			+ (vb.InstanceStream() ? 1 : 0);
-		for (uint32_t i = num_vertex_stream; i < last_num_vertex_stream_; ++ i)
-		{
-			d3dDevice_->SetStreamSource(i, NULL, 0, 0);
-		}
-		last_num_vertex_stream_ = num_vertex_stream;
-
-		D3D9VertexBuffer const & d3d9_vb(*checked_cast<D3D9VertexBuffer const *>(&vb));
-		TIF(d3dDevice_->SetVertexDeclaration(d3d9_vb.VertexDeclaration().get()));
-
-		RenderTechniquePtr tech = renderEffect_->ActiveTechnique();
-		uint32_t num_passes = tech->NumPasses();
-		if (vb.UseIndices())
-		{
-			D3D9IndexStream& d3dis(*checked_cast<D3D9IndexStream*>(vb.GetIndexStream().get()));
-			d3dDevice_->SetIndices(d3dis.D3D9Buffer().get());
-
-			for (uint32_t i = 0; i < num_passes; ++ i)
-			{
-				RenderPassPtr pass = tech->Pass(i);
-
-				pass->Begin();
-				TIF(d3dDevice_->DrawIndexedPrimitive(primType, 0, 0,
-					static_cast<UINT>(vb.NumVertices()), 0, primCount));
-				pass->End();
-			}
-		}
-		else
-		{
-			for (uint32_t i = 0; i < num_passes; ++ i)
-			{
-				RenderPassPtr pass = tech->Pass(i);
-
-				pass->Begin();
-				TIF(d3dDevice_->DrawPrimitive(primType, 0, primCount));
-				pass->End();
-			}
-		}
-	}
-
-	void D3D9RenderEngine::RenderVBHWInstance(VertexBuffer const & vb)
-	{
-		D3DPRIMITIVETYPE primType;
-		uint32_t primCount;
-		D3D9Mapping::Mapping(primType, primCount, vb);
-
-		numPrimitivesJustRendered_ += primCount;
-		numVerticesJustRendered_ += vb.UseIndices() ? vb.NumIndices() : vb.NumVertices();
-
 		for (VertexBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
 			iter != vb.VertexStreamEnd(); ++ iter)
 		{
@@ -448,6 +373,42 @@ namespace KlayGE
 			d3dDevice_->SetStreamSourceFreq(i, 0);
 		}
 		last_num_vertex_stream_ = num_vertex_stream;
+
+		this->RenderVB(vb);
+	}
+
+	void D3D9RenderEngine::RenderVBSWInstance(VertexBuffer const & vb)
+	{
+		for (VertexBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
+			iter != vb.VertexStreamEnd(); ++ iter)
+		{
+			VertexStream& stream = *(*iter);
+			uint32_t number = static_cast<uint32_t>(iter - vb.VertexStreamBegin());
+
+			D3D9VertexStream& d3d9vs(*checked_cast<D3D9VertexStream*>(&stream));
+			TIF(d3dDevice_->SetStreamSource(number,
+				d3d9vs.D3D9Buffer().get(), 0,
+				static_cast<UINT>(stream.VertexSize())));
+		}
+
+		uint32_t const num_vertex_stream = static_cast<uint32_t>(vb.VertexStreamEnd() - vb.VertexStreamBegin());
+		for (uint32_t i = num_vertex_stream; i < last_num_vertex_stream_; ++ i)
+		{
+			d3dDevice_->SetStreamSource(i, NULL, 0, 0);
+		}
+		last_num_vertex_stream_ = num_vertex_stream;
+
+		this->RenderVB(vb);
+	}
+
+	void D3D9RenderEngine::RenderVB(VertexBuffer const & vb)
+	{
+		D3DPRIMITIVETYPE primType;
+		uint32_t primCount;
+		D3D9Mapping::Mapping(primType, primCount, vb);
+
+		numPrimitivesJustRendered_ += primCount;
+		numVerticesJustRendered_ += vb.UseIndices() ? vb.NumIndices() : vb.NumVertices();
 
 		D3D9VertexBuffer const & d3d9_vb(*checked_cast<D3D9VertexBuffer const *>(&vb));
 		TIF(d3dDevice_->SetVertexDeclaration(d3d9_vb.VertexDeclaration().get()));

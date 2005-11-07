@@ -25,7 +25,7 @@ namespace KlayGE
 		{
 		}
 
-		void CustomAttribute(std::string const & name, void* pData)
+		void CustomAttribute(std::string const & /*name*/, void* /*data*/)
 		{
 		}
 		bool RequiresTextureFlipping() const

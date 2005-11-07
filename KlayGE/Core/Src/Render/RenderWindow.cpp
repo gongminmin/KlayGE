@@ -19,10 +19,10 @@ namespace KlayGE
 		{
 		}
 
-		void Resize(uint32_t width, uint32_t height)
+		void Resize(uint32_t /*width*/, uint32_t /*height*/)
 		{
 		}
-		void Reposition(uint32_t left, uint32_t top)
+		void Reposition(uint32_t /*left*/, uint32_t /*top*/)
 		{
 		}
 
@@ -31,7 +31,7 @@ namespace KlayGE
 			return true;
 		}
 
-		void CustomAttribute(std::string const & name, void* pData)
+		void CustomAttribute(std::string const & /*name*/, void* /*data*/)
 		{
 		}
 

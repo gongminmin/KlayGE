@@ -71,7 +71,7 @@ namespace KlayGE
 			}
 			else
 			{
-				for (size_t i = 0; i < instances_.size(); ++ i)
+				for (uint32_t i = 0; i < instances_.size(); ++ i)
 				{
 					this->OnInstanceBegin(i);
 					renderEngine.Render(*this->GetVertexBuffer());
@@ -118,12 +118,12 @@ namespace KlayGE
 				buffer.insert(buffer.end(), src, src + size);
 			}
 
-			inst_stream->Assign(&buffer[0], instances_.size());
+			inst_stream->Assign(&buffer[0], static_cast<uint32_t>(instances_.size()));
 
 			for (VertexBuffer::VertexStreamIterator iter = this->GetVertexBuffer()->VertexStreamBegin();
 				iter != this->GetVertexBuffer()->VertexStreamEnd(); ++ iter)
 			{
-				(*iter)->FrequencyDivider(VertexStream::ST_Geometry, instances_.size());
+				(*iter)->FrequencyDivider(VertexStream::ST_Geometry, static_cast<uint32_t>(instances_.size()));
 			}
 		}
 	}

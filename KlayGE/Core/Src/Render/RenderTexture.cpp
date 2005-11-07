@@ -19,17 +19,17 @@ namespace KlayGE
 	class NullRenderTexture : public RenderTexture
 	{
 	public:
-		void AttachTexture2D(TexturePtr texture2D)
+		void AttachTexture2D(TexturePtr /*texture2D*/)
 		{
 		}
-		void AttachTextureCube(TexturePtr textureCube, Texture::CubeFaces face)
+		void AttachTextureCube(TexturePtr /*textureCube*/, Texture::CubeFaces /*face*/)
 		{
 		}
 		void DetachTexture()
 		{
 		}
 
-		void CustomAttribute(std::string const & name, void* pData)
+		void CustomAttribute(std::string const & /*name*/, void* /*data*/)
 		{
 		}
 		bool RequiresTextureFlipping() const
