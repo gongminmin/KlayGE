@@ -68,6 +68,9 @@ namespace
 			*(effect_->ParameterByName("model")) = model;
 			*(effect_->ParameterByName("modelit")) = MathLib::Transpose(MathLib::Inverse(model));
 			*(effect_->ParameterByName("mvp")) = model * view * proj;
+
+			*(effect_->ParameterByName("eta_ratio")) = Vector3(1 / 1.1f, 1 / 1.1f + 0.001f, 1 / 1.1f + 0.002f);
+			*(effect_->ParameterByName("fresnel_values")) = Vector3(2.0f, 2.0f, 0.1f);
 		}
 
 	private:
