@@ -466,6 +466,15 @@ namespace KlayGE
 		ret.min_point_size = 0;
 		ret.max_point_size = d3d_caps.MaxPointSize;
 
+		if (ret.max_shader_model >= 3)
+		{
+			ret.hw_instancing_support = true;
+		}
+		else
+		{
+			ret.hw_instancing_support = false;
+		}
+
 		return ret;
 	}
 }

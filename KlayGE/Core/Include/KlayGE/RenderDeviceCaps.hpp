@@ -51,6 +51,8 @@ namespace KlayGE
 
 		float min_point_size;
 		float max_point_size;
+
+		bool hw_instancing_support;
 	};
 }
 

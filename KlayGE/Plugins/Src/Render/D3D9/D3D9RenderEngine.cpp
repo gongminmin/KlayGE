@@ -201,7 +201,7 @@ namespace KlayGE
 		this->DepthBufferDepthTest(settings.depthBuffer);
 		this->DepthBufferDepthWrite(settings.depthBuffer);
 
-		if (caps_.max_shader_model >= 3)
+		if (caps_.hw_instancing_support)
 		{
 			RenderInstance = boost::bind(&D3D9RenderEngine::DoRenderHWInstance, this, _1);
 		}
@@ -304,6 +304,8 @@ namespace KlayGE
 
 		if (num_instance > 1)
 		{
+			BOOST_ASSERT(vb.InstanceStream());
+
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			VertexBufferPtr tmp_vb = rf.MakeVertexBuffer(vb.Type());
