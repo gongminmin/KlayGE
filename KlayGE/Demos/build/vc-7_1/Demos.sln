@@ -1,41 +1,41 @@
 Microsoft Visual Studio Solution File, Format Version 8.00
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Cartoon", "src\Cartoon\Cartoon.vcproj", "{DA5E7FC0-CC85-45A7-8D1E-E80A813F2705}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Cartoon", "Cartoon.vcproj", "{DA5E7FC0-CC85-45A7-8D1E-E80A813F2705}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Parallax", "src\Parallax\Parallax.vcproj", "{32EBA7EF-137A-4C06-8E1B-383F27A0E0C1}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Parallax", "Parallax.vcproj", "{32EBA7EF-137A-4C06-8E1B-383F27A0E0C1}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Vertex Displacement", "src\VertexDisplacement\VertexDisplacement.vcproj", "{63128457-8C79-4C9F-ACB7-506537BBC4BE}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Vertex Displacement", "VertexDisplacement.vcproj", "{63128457-8C79-4C9F-ACB7-506537BBC4BE}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Distance Mapping", "src\DistanceMapping\DistanceMapping.vcproj", "{32EBA7EF-137A-4C06-8E1B-383F27A0E0C1}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Distance Mapping", "DistanceMapping.vcproj", "{32EBA7EF-137A-4C06-8E1B-383F27A0E0C1}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Electro", "src\Electro\Electro.vcproj", "{32EBA7EF-137A-4C06-8E1B-383F27A0E0C1}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Electro", "Electro.vcproj", "{32EBA7EF-137A-4C06-8E1B-383F27A0E0C1}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Fractal", "src\Fractal\Fractal.vcproj", "{32EBA7EF-137A-4C06-8E1B-383F27A0E0C1}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Fractal", "Fractal.vcproj", "{32EBA7EF-137A-4C06-8E1B-383F27A0E0C1}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Refract", "src\Refract\Refract.vcproj", "{89215096-621F-48B4-8E29-EFC5ABFBCD7F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Refract", "Refract.vcproj", "{89215096-621F-48B4-8E29-EFC5ABFBCD7F}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AsciiArts", "src\AsciiArts\AsciiArts.vcproj", "{3BD6D055-0FB5-436A-B004-BCCF0898FA61}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AsciiArts", "AsciiArts.vcproj", "{3BD6D055-0FB5-436A-B004-BCCF0898FA61}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShadowCubeMap", "src\ShadowCubeMap\ShadowCubeMap.vcproj", "{6E5EDEDF-5BD7-4AAA-83CC-D93955801020}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShadowCubeMap", "ShadowCubeMap.vcproj", "{6E5EDEDF-5BD7-4AAA-83CC-D93955801020}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Instancing", "src\Instancing\Instancing.vcproj", "{FA98FBF0-62D4-449E-B81B-3C53FD9A6EF1}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Instancing", "Instancing.vcproj", "{FA98FBF0-62D4-449E-B81B-3C53FD9A6EF1}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject

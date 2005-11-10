@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="Instancing"
-	ProjectGUID="{FA98FBF0-62D4-449E-B81B-3C53FD9A6EF1}"
+	Name="Refract"
+	ProjectGUID="{89215096-621F-48B4-8E29-EFC5ABFBCD7F}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -33,7 +33,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/Instancing_d.exe"
+				OutputFile="$(OutDir)/Refract_d.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/$(ProjectName)_d.pdb"
@@ -81,7 +81,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/Instancing.exe"
+				OutputFile="$(OutDir)/Refract.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
@@ -118,10 +118,10 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath=".\Instancing.cpp">
+				RelativePath="..\..\src\Refract\Refract.cpp">
 			</File>
 			<File
-				RelativePath="..\..\media\Instancing\Instancing.fx">
+				RelativePath="..\..\media\Refract\Refract.fx">
 			</File>
 		</Filter>
 		<Filter
@@ -129,13 +129,8 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
-				RelativePath=".\Instancing.hpp">
+				RelativePath="..\..\src\Refract\Refract.hpp">
 			</File>
-		</Filter>
-		<Filter
-			Name="资源文件"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}">
 		</Filter>
 	</Files>
 	<Globals>

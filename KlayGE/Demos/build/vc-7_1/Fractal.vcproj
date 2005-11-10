@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="AsciiArts"
-	ProjectGUID="{3BD6D055-0FB5-436A-B004-BCCF0898FA61}"
+	Name="Fractal"
+	ProjectGUID="{32EBA7EF-137A-4C06-8E1B-383F27A0E0C1}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -27,12 +27,13 @@
 				ForceConformanceInForLoopScope="TRUE"
 				RuntimeTypeInfo="TRUE"
 				WarningLevel="3"
+				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="4"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/AsciiArts_d.exe"
+				OutputFile="$(OutDir)/Fractal_d.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/$(ProjectName)_d.pdb"
@@ -64,7 +65,8 @@
 			OutputDirectory="../../bin"
 			IntermediateDirectory="../../Release"
 			ConfigurationType="1"
-			CharacterSet="1">
+			CharacterSet="1"
+			WholeProgramOptimization="TRUE">
 			<Tool
 				Name="VCCLCompilerTool"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;STRICT"
@@ -79,7 +81,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/AsciiArts.exe"
+				OutputFile="$(OutDir)/Fractal.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
@@ -116,13 +118,10 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath=".\ascii_lums_builder.cpp">
+				RelativePath="..\..\src\Fractal\Fractal.cpp">
 			</File>
 			<File
-				RelativePath=".\AsciiArts.cpp">
-			</File>
-			<File
-				RelativePath="..\..\media\AsciiArts\AsciiArts.fx">
+				RelativePath="..\..\media\Fractal\Fractal.fx">
 			</File>
 		</Filter>
 		<Filter
@@ -130,10 +129,7 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
-				RelativePath=".\ascii_lums_builder.hpp">
-			</File>
-			<File
-				RelativePath=".\AsciiArts.hpp">
+				RelativePath="..\..\src\Fractal\Fractal.hpp">
 			</File>
 		</Filter>
 	</Files>

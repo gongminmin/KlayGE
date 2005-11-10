@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="Refract"
-	ProjectGUID="{89215096-621F-48B4-8E29-EFC5ABFBCD7F}"
+	Name="ShadowCubeMap"
+	ProjectGUID="{6E5EDEDF-5BD7-4AAA-83CC-D93955801020}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;STRICT"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -33,10 +33,10 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/Refract_d.exe"
+				OutputFile="$(OutDir)/ShadowCubeMap.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/$(ProjectName)_d.pdb"
+				ProgramDatabaseFile="$(OutDir)/ShadowCubeMap.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
@@ -65,8 +65,7 @@
 			OutputDirectory="../../bin"
 			IntermediateDirectory="../../Release"
 			ConfigurationType="1"
-			CharacterSet="1"
-			WholeProgramOptimization="TRUE">
+			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;STRICT"
@@ -81,7 +80,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/Refract.exe"
+				OutputFile="$(OutDir)/ShadowCubeMap.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
@@ -118,10 +117,10 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath=".\Refract.cpp">
+				RelativePath="..\..\src\ShadowCubeMap\ShadowCubeMap.cpp">
 			</File>
 			<File
-				RelativePath="..\..\media\Refract\Refract.fx">
+				RelativePath="..\..\media\ShadowCubeMap\ShadowCubeMap.fx">
 			</File>
 		</Filter>
 		<Filter
@@ -129,8 +128,13 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
-				RelativePath=".\Refract.hpp">
+				RelativePath="..\..\src\ShadowCubeMap\ShadowCubeMap.hpp">
 			</File>
+		</Filter>
+		<Filter
+			Name="资源文件"
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}">
 		</Filter>
 	</Files>
 	<Globals>

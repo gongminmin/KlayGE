@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="Distance Mapping"
-	ProjectGUID="{32EBA7EF-137A-4C06-8E1B-383F27A0E0C1}"
+	Name="Cartoon"
+	ProjectGUID="{DA5E7FC0-CC85-45A7-8D1E-E80A813F2705}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -33,7 +33,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/DistanceMapping_d.exe"
+				OutputFile="$(OutDir)/Cartoon_d.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/$(ProjectName)_d.pdb"
@@ -81,7 +81,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/DistanceMapping.exe"
+				OutputFile="$(OutDir)/Cartoon.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
@@ -118,10 +118,10 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath=".\DistanceMapping.cpp">
+				RelativePath="..\..\src\Cartoon\Cartoon.cpp">
 			</File>
 			<File
-				RelativePath="..\..\media\DistanceMapping\DistanceMapping.fx">
+				RelativePath="..\..\media\Cartoon\Cartoon.fx">
 			</File>
 		</Filter>
 		<Filter
@@ -129,7 +129,7 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
-				RelativePath=".\DistanceMapping.hpp">
+				RelativePath="..\..\src\Cartoon.hpp">
 			</File>
 		</Filter>
 	</Files>

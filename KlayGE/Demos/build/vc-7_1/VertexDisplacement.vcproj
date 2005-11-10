@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="Fractal"
-	ProjectGUID="{32EBA7EF-137A-4C06-8E1B-383F27A0E0C1}"
+	Name="Vertex Displacement"
+	ProjectGUID="{63128457-8C79-4C9F-ACB7-506537BBC4BE}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -26,6 +26,7 @@
 				TreatWChar_tAsBuiltInType="TRUE"
 				ForceConformanceInForLoopScope="TRUE"
 				RuntimeTypeInfo="TRUE"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="4"/>
@@ -33,7 +34,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/Fractal_d.exe"
+				OutputFile="$(OutDir)/VertexDisplacement_d.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/$(ProjectName)_d.pdb"
@@ -81,7 +82,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/Fractal.exe"
+				OutputFile="$(OutDir)/VertexDisplacement.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
@@ -118,10 +119,10 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath=".\Fractal.cpp">
+				RelativePath="..\..\src\VertexDisplacement\VertexDisplacement.cpp">
 			</File>
 			<File
-				RelativePath="..\..\media\Fractal\Fractal.fx">
+				RelativePath="..\..\media\VertexDisplacement\VertexDisplacement.fx">
 			</File>
 		</Filter>
 		<Filter
@@ -129,7 +130,7 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
-				RelativePath=".\Fractal.hpp">
+				RelativePath="..\..\src\VertexDisplacement\VertexDisplacement.hpp">
 			</File>
 		</Filter>
 	</Files>
