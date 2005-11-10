@@ -76,33 +76,8 @@ namespace KlayGE
 
 		uint32_t FontHeight() const;
 
-	public:
-		struct CharInfo
-		{
-			Rect_T<float>	texRect;
-			uint32_t		width;
-		};
-
-		typedef std::map<wchar_t, CharInfo, std::less<wchar_t>, boost::fast_pool_allocator<std::pair<wchar_t, CharInfo> > > CharInfoMapType;
-		typedef std::list<wchar_t, boost::fast_pool_allocator<wchar_t> > CharLRUType;
-
 	private:
-		void UpdateTexture(std::wstring const & text);
-
-		VertexBufferPtr		vb_;
-		RenderEffectPtr		effect_;
-		TexturePtr			theTexture_;
-		SamplerPtr			theSampler_;
-
-		CharInfoMapType		charInfoMap_;
-		CharLRUType			charLRU_;
-
-		uint32_t curX_, curY_;
-		uint32_t fontHeight_;
-
-		::FT_Library	ftLib_;
-		::FT_Face		face_;
-		::FT_GlyphSlot	slot_;
+		RenderablePtr		font_renderable_;
 	};
 }
 

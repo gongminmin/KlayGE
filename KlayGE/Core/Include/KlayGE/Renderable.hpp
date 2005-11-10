@@ -51,7 +51,7 @@ namespace KlayGE
 
 		virtual void AddToRenderQueue();
 
-		void Render();
+		virtual void Render();
 
 		template <typename Iterator>
 		void AssignInstances(Iterator begin, Iterator end)

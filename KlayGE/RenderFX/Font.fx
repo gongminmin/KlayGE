@@ -1,8 +1,8 @@
 int halfWidth;
 int halfHeight;
-float4 color;
 
-void FontVS(float4 position : POSITION,
+void Font2DVS(float4 position : POSITION,
+			float4 color : COLOR0,
 			float2 texCoord : TEXCOORD0,
 
 			out float4 oPosition : POSITION,
@@ -26,7 +26,7 @@ float4 FontPS(float4 clr : COLOR, float2 texCoord : TEXCOORD0,
 	return clr * texel;
 }
 
-technique fontTec
+technique Font2DTec
 {
 	pass p0
 	{
@@ -41,7 +41,7 @@ technique fontTec
 		ClipPlaneEnable = 0;
 		ColorWriteEnable = RED | GREEN | BLUE | ALPHA;
 
-		VertexShader = compile vs_1_1 FontVS();
+		VertexShader = compile vs_1_1 Font2DVS();
 		PixelShader = compile ps_1_1 FontPS(texFontSampler);
 	}
 }

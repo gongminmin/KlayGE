@@ -138,12 +138,28 @@ namespace KlayGE
 		this->ClipScene(app.ActiveCamera());
 		numObjectsRendered_ = visible_objs_.size();
 
-		std::map<RenderablePtr, SceneObjectsType> renderables;
+		typedef std::vector<std::pair<RenderablePtr, SceneObjectsType> > renderables_type;
+		renderables_type renderables;
 		for (SceneObjectsType::iterator iter = visible_objs_.begin(); iter != visible_objs_.end(); ++ iter)
 		{
-			renderables[(*iter)->GetRenderable()].push_back(*iter);
+			RenderablePtr const & renderable = (*iter)->GetRenderable();
+
+			size_t i = 0;
+			while ((i < renderables.size()) && (renderables[i].first != renderable))
+			{
+				++ i;
+			}
+
+			if (i < renderables.size())
+			{
+				renderables[i].second.push_back(*iter);
+			}
+			else
+			{
+				renderables.push_back(std::make_pair(renderable, SceneObjectsType(1, *iter)));
+			}
 		}
-		for (std::map<RenderablePtr, SceneObjectsType>::iterator iter = renderables.begin();
+		for (renderables_type::iterator iter = renderables.begin();
 			iter != renderables.end(); ++ iter)
 		{
 			Renderable& ra(*(iter->first));
