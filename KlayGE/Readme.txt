@@ -1,11 +1,11 @@
-粘土游戏引擎(KlayGE) 3.0.0
+粘土游戏引擎(KlayGE) 3.1.0
 
 Homepage: http://klayge.sourceforge.net
 E-Mail:	  enginedev@163.com
 OICQ:     33611210
 
-欢迎使用粘土游戏引擎 3.0.0
-包含的组件：KlayGE头文件，KlayGE源代码，KlayGE的VS.NET 2003工程文件
+欢迎使用粘土游戏引擎 3.1.0
+包含的组件：KlayGE头文件，KlayGE源代码，KlayGE的构建工程文件
 
 KlayGE是一个开放源代码的，跨平台的，基于插件结构的游戏引擎。
 
@@ -52,8 +52,8 @@ __________________________________________________________________
 
 编译
 
-编译KlayGE内核需要一些第三方库：Python 2.4.1、Boost 1.33.0、FreeType 2.1.10，分别在http://www.python.org、http://www.boost.org和http://freetype.sourceforge.net下载
-编译DX相关插件需要DirectX 9.0 SDK Aug 2005，在http://msdn.microsoft.com/directx下载
+编译KlayGE内核需要一些第三方库：Python 2.4.2、Boost 1.33.0、FreeType 2.1.10，分别在http://www.python.org、http://www.boost.org和http://freetype.sourceforge.net下载
+编译DX相关插件需要DirectX 9.0 SDK Oct 2005，在http://msdn.microsoft.com/directx下载
 编译OggWav插件需要Vorbis SDK，在http://www.vorbis.com下载
 编译OpenAL插件需要OpenAL SDK，在http://www.openal.org下载
 
@@ -74,6 +74,10 @@ __________________________________________________________________
 
 
 发展历程
+
+3.1.0
+增加了SceneObject
+简化了Instancing的使用
 
 3.0.0 (2005.10.26)
 去掉了固定流水线
