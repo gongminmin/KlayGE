@@ -188,27 +188,6 @@
 					RelativePath=".\Src\Render\Sampler.cpp">
 				</File>
 				<File
-					RelativePath=".\Src\Render\SceneManager.cpp">
-					<FileConfiguration
-						Name="Debug|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Src\Render\SceneObject.cpp">
-				</File>
-				<File
-					RelativePath=".\Src\Render\SceneObjectHelper.cpp">
-				</File>
-				<File
 					RelativePath=".\Src\Render\Texture.cpp">
 				</File>
 				<File
@@ -274,18 +253,6 @@
 				</File>
 				<File
 					RelativePath=".\Include\KlayGE\Sampler.hpp">
-				</File>
-				<File
-					RelativePath="Include\KlayGE\SceneManager.hpp">
-				</File>
-				<File
-					RelativePath=".\Include\KlayGE\SceneNode.hpp">
-				</File>
-				<File
-					RelativePath=".\Include\KlayGE\SceneObject.hpp">
-				</File>
-				<File
-					RelativePath=".\Include\KlayGE\SceneObjectHelper.hpp">
 				</File>
 				<File
 					RelativePath="Include\KlayGE\Texture.hpp">
@@ -544,6 +511,39 @@
 				</File>
 				<File
 					RelativePath=".\Include\KlayGE\InputFactory.hpp">
+				</File>
+			</Filter>
+		</Filter>
+		<Filter
+			Name="场景管理"
+			Filter="">
+			<Filter
+				Name="源文件"
+				Filter="">
+				<File
+					RelativePath=".\Src\Scene\SceneManager.cpp">
+				</File>
+				<File
+					RelativePath=".\Src\Scene\SceneObject.cpp">
+				</File>
+				<File
+					RelativePath=".\Src\Scene\SceneObjectHelper.cpp">
+				</File>
+			</Filter>
+			<Filter
+				Name="头文件"
+				Filter="">
+				<File
+					RelativePath="Include\KlayGE\SceneManager.hpp">
+				</File>
+				<File
+					RelativePath=".\Include\KlayGE\SceneNode.hpp">
+				</File>
+				<File
+					RelativePath=".\Include\KlayGE\SceneObject.hpp">
+				</File>
+				<File
+					RelativePath=".\Include\KlayGE\SceneObjectHelper.hpp">
 				</File>
 			</Filter>
 		</Filter>
