@@ -127,7 +127,7 @@ namespace KlayGE
 	bool OALSoundBuffer::IsPlaying() const
 	{
 		return (std::find_if(sources_.begin(), sources_.end(),
-			std::not1(std::ptr_fun(IsSourceFree))) != sources_.end());
+			!boost::bind(IsSourceFree, _1)) != sources_.end());
 	}
 
 	// …Ë÷√“Ù¡ø

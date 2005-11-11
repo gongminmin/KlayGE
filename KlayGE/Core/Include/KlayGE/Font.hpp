@@ -54,30 +54,26 @@ namespace KlayGE
 			FS_Italic		= 1UL << 1,
 			FS_Underline	= 1UL << 2,
 			FS_Strikeout	= 1UL << 3,
-		};
 
-		// ×ÖÌåäÖÈ¾±êÖ¾
-		enum FontAttrib
-		{
-			FA_TwoSided		= 1UL << 1,
-			FA_Filtered		= 1UL << 2,
-			FA_Cullable		= 1UL << 3,
+			FS_TwoSided		= 1UL << 4,
+			FS_Filtered		= 1UL << 5,
+			FS_Cullable		= 1UL << 6,
 		};
 
 	public:
 		Font(std::string const & fontName, uint32_t fontHeight = 12, uint32_t flags = 0);
-		~Font();
 
 		void RenderText(float x, float y, Color const & clr,
-			std::wstring const & text, uint32_t flags = 0);
+			std::wstring const & text);
 		void RenderText(float x, float y, float z, float xScale, float yScale, Color const & clr, 
-			std::wstring const & text, uint32_t flags = 0);
-		//void RenderText(std::wstring const & text, uint32_t flags = 0);
+			std::wstring const & text);
+		//void RenderText(std::wstring const & text);
 
 		uint32_t FontHeight() const;
 
 	private:
-		RenderablePtr		font_renderable_;
+		RenderablePtr	font_renderable_;
+		uint32_t		fso_attrib_;
 	};
 }
 

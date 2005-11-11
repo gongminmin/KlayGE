@@ -87,7 +87,7 @@ namespace
 		uint32_t curX_, curY_;
 
 	public:
-		FontRenderable(std::string const & fontName, uint32_t fontHeight)
+		FontRenderable(std::string const & fontName, uint32_t fontHeight, uint32_t flags)
 			: RenderableHelper(L"Font"),
 				curX_(0), curY_(0),
 				fontHeight_(fontHeight),
@@ -102,6 +102,16 @@ namespace
 			theTexture_ = rf.MakeTexture2D(caps.max_texture_width,
 				caps.max_texture_height, 1, TEX_FORMAT);
 			theSampler_->SetTexture(theTexture_);
+
+			// 设置过滤属性
+			if (flags & Font::FS_Filtered)
+			{
+				theSampler_->Filtering(Sampler::TFO_Bilinear);
+			}
+			else
+			{
+				theSampler_->Filtering(Sampler::TFO_Point);
+			}
 
 			effect_ = rf.LoadEffect("Font.fx");
 			*(effect_->ParameterByName("texFontSampler")) = theSampler_;
@@ -172,18 +182,8 @@ namespace
 		}
 
 		void AddText(uint32_t fontHeight, float sx, float sy, float sz,
-			float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t flags)
+			float xScale, float yScale, Color const & clr, std::wstring const & text)
 		{
-			// 设置过滤属性
-			if (flags & Font::FA_Filtered)
-			{
-				theSampler_->Filtering(Sampler::TFO_Bilinear);
-			}
-			else
-			{
-				theSampler_->Filtering(Sampler::TFO_Point);
-			}
-
 			this->UpdateTexture(text);
 
 			float const h(fontHeight * yScale);
@@ -259,7 +259,7 @@ namespace
 		{
 			for (std::wstring::const_iterator citer = text.begin(); citer != text.end(); ++ citer)
 			{
-				wchar_t const & ch = *citer;
+				wchar_t const ch = *citer;
 
 				if (charInfoMap_.find(ch) != charInfoMap_.end())
 				{
@@ -395,15 +395,14 @@ namespace KlayGE
 {
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
-	Font::Font(std::string const & fontName, uint32_t height, uint32_t /*flags*/)
-				: font_renderable_(new FontRenderable(fontName, height))
+	Font::Font(std::string const & fontName, uint32_t height, uint32_t flags)
+				: font_renderable_(new FontRenderable(fontName, height, flags))
 	{
-	}
-
-	// 析构函数
-	/////////////////////////////////////////////////////////////////////////////////
-	Font::~Font()
-	{
+		fso_attrib_ = SceneObject::SOA_ShortAge;
+		if (flags & Font::FS_Cullable)
+		{
+			fso_attrib_ |= SceneObject::SOA_Cullable;
+		}
 	}
 
 	// 获取字体高度
@@ -416,28 +415,22 @@ namespace KlayGE
 	// 在指定位置画出文字
 	/////////////////////////////////////////////////////////////////////////////////
 	void Font::RenderText(float sx, float sy, Color const & clr, 
-		std::wstring const & text, uint32_t flags)
+		std::wstring const & text)
 	{
-		this->RenderText(sx, sy, 0.5f, 1, 1, clr, text, flags);
+		this->RenderText(sx, sy, 0.5f, 1, 1, clr, text);
 	}
 
 	// 在指定位置画出放缩的文字
 	/////////////////////////////////////////////////////////////////////////////////
 	void Font::RenderText(float sx, float sy, float sz,
 		float xScale, float yScale, Color const & clr,
-		std::wstring const & text, uint32_t flags)
+		std::wstring const & text)
 	{
 		if (!text.empty())
 		{
-			uint32_t attrib = SceneObject::SOA_ShortAge;
-			if (flags & Font::FA_Cullable)
-			{
-				attrib |= SceneObject::SOA_Cullable;
-			}
-
-			boost::shared_ptr<FontObject> font_obj(new FontObject(font_renderable_, attrib));
+			boost::shared_ptr<FontObject> font_obj(new FontObject(font_renderable_, fso_attrib_));
 			checked_cast<FontRenderable*>(font_renderable_.get())->AddText(this->FontHeight(),
-				sx, sy, sz, xScale, yScale, clr, text, flags);
+				sx, sy, sz, xScale, yScale, clr, text);
 			font_obj->AddToSceneManager();
 		}
 	}

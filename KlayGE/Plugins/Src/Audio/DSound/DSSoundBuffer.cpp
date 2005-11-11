@@ -179,7 +179,7 @@ namespace KlayGE
 	void DSSoundBuffer::Stop()
 	{
 		std::for_each(sources_.begin(), sources_.end(),
-			boost::bind(&IDirectSoundBuffer::Stop, _1));
+			boost::bind<HRESULT>(boost::mem_fn(&IDirectSoundBuffer::Stop), _1));
 	}
 
 	// 声音缓冲区复位
@@ -195,7 +195,7 @@ namespace KlayGE
 	bool DSSoundBuffer::IsPlaying() const
 	{
 		return (std::find_if(sources_.begin(), sources_.end(),
-			std::not1(std::ptr_fun(IsSourceFree))) != sources_.end());
+			!boost::bind(IsSourceFree, _1)) != sources_.end());
 	}
 
 	// 设置音量
