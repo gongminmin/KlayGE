@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="°Ë²æÊ÷³¡¾°¹ÜÀí-OCTree"
-	ProjectGUID="{6D03BA3A-EDF0-47EF-A008-23A87502AD55}"
+	Name="äÖÈ¾ÒýÇæ-OpenGL"
+	ProjectGUID="{31837598-9F20-4A23-A9B6-9B590B43321B}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\..\..\lib"
-			IntermediateDirectory="..\..\..\..\Debug"
+			OutputDirectory="..\..\lib"
+			IntermediateDirectory="..\..\Debug"
 			ConfigurationType="4"
 			CharacterSet="1">
 			<Tool
@@ -33,7 +33,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_Scene_OCTree_d.lib"/>
+				OutputFile="$(OutDir)/KlayGE_RenderEngine_OpenGL_d.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -55,10 +55,11 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\..\..\lib"
-			IntermediateDirectory="..\..\..\..\Release"
+			OutputDirectory="..\..\lib"
+			IntermediateDirectory="..\..\Release"
 			ConfigurationType="4"
-			CharacterSet="1">
+			CharacterSet="1"
+			WholeProgramOptimization="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;STRICT"
@@ -72,7 +73,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_Scene_OCTree.lib"/>
+				OutputFile="$(OutDir)/KlayGE_RenderEngine_OpenGL.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -101,10 +102,37 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath=".\Frustum.cpp">
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLIndexStream.cpp">
 			</File>
 			<File
-				RelativePath=".\OCTree.cpp">
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLMapping.cpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLOcclusionQuery.cpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderEffect.cpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderEngine.cpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderFactory.cpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderTexture.cpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderVertexStream.cpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderWindow.cpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLTexture.cpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLVertexStream.cpp">
 			</File>
 		</Filter>
 		<Filter
@@ -112,10 +140,40 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
-				RelativePath="..\..\..\Include\KlayGE\OCTree\Frustum.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLIndexStream.hpp">
 			</File>
 			<File
-				RelativePath="..\..\..\Include\KlayGE\OCTree\OCTree.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLMapping.hpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLOcclusionQuery.hpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderEffect.hpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderEngine.hpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderFactory.hpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderTexture.hpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderVertexStream.hpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderWindow.hpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLTexture.hpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLVertexBuffer.hpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLVertexStream.hpp">
 			</File>
 		</Filter>
 	</Files>

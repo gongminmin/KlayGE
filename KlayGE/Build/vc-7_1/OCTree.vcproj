@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="输入引擎-DInput"
-	ProjectGUID="{F3CCD52C-F50A-4D95-970F-D66C9C510E50}"
+	Name="八叉树场景管理-OCTree"
+	ProjectGUID="{6D03BA3A-EDF0-47EF-A008-23A87502AD55}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\..\..\lib"
-			IntermediateDirectory="..\..\..\..\Debug"
+			OutputDirectory="..\..\lib"
+			IntermediateDirectory="..\..\Debug"
 			ConfigurationType="4"
 			CharacterSet="1">
 			<Tool
@@ -33,7 +33,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_InputEngine_DInput_d.lib"/>
+				OutputFile="$(OutDir)/KlayGE_Scene_OCTree_d.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -55,11 +55,10 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\..\..\lib"
-			IntermediateDirectory="..\..\..\..\Release"
+			OutputDirectory="..\..\lib"
+			IntermediateDirectory="..\..\Release"
 			ConfigurationType="4"
-			CharacterSet="1"
-			WholeProgramOptimization="FALSE">
+			CharacterSet="1">
 			<Tool
 				Name="VCCLCompilerTool"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;STRICT"
@@ -73,7 +72,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_InputEngine_DInput.lib"/>
+				OutputFile="$(OutDir)/KlayGE_Scene_OCTree.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -102,22 +101,10 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath=".\DIJoystick.cpp">
+				RelativePath="..\..\Plugins\Src\Scene\OCTree\Frustum.cpp">
 			</File>
 			<File
-				RelativePath=".\DIKeyboard.cpp">
-			</File>
-			<File
-				RelativePath=".\DIMouse.cpp">
-			</File>
-			<File
-				RelativePath=".\DInputDevice.cpp">
-			</File>
-			<File
-				RelativePath=".\DInputEngine.cpp">
-			</File>
-			<File
-				RelativePath=".\DInputFactory.cpp">
+				RelativePath="..\..\Plugins\Src\Scene\OCTree\OCTree.cpp">
 			</File>
 		</Filter>
 		<Filter
@@ -125,13 +112,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
-				RelativePath="..\..\..\Include\KlayGE\DInput\DInput.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\OCTree\Frustum.hpp">
 			</File>
 			<File
-				RelativePath="..\..\..\Include\KlayGE\DInput\DInputDevice.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\Include\KlayGE\DInput\DInputFactory.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\OCTree\OCTree.hpp">
 			</File>
 		</Filter>
 	</Files>

@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="音频引擎-OpenAL"
-	ProjectGUID="{2C79C4F4-7C71-4B60-967B-80FF158E160E}"
+	Name="输入引擎-DInput"
+	ProjectGUID="{F3CCD52C-F50A-4D95-970F-D66C9C510E50}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\..\..\lib"
-			IntermediateDirectory="..\..\..\..\Debug"
+			OutputDirectory="..\..\lib"
+			IntermediateDirectory="..\..\Debug"
 			ConfigurationType="4"
 			CharacterSet="1">
 			<Tool
@@ -33,7 +33,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_AudioEngine_OpenAL_d.lib"/>
+				OutputFile="$(OutDir)/KlayGE_InputEngine_DInput_d.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -55,8 +55,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\..\..\lib"
-			IntermediateDirectory="..\..\..\..\Release"
+			OutputDirectory="..\..\lib"
+			IntermediateDirectory="..\..\Release"
 			ConfigurationType="4"
 			CharacterSet="1"
 			WholeProgramOptimization="FALSE">
@@ -73,7 +73,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_AudioEngine_OpenAL.lib"/>
+				OutputFile="$(OutDir)/KlayGE_InputEngine_DInput.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -99,28 +99,39 @@
 	<Files>
 		<Filter
 			Name="源文件"
-			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm">
+			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath="OALAudioEngine.cpp">
+				RelativePath="..\..\Plugins\Src\Input\DInput\DIJoystick.cpp">
 			</File>
 			<File
-				RelativePath=".\OALAudioFactory.cpp">
+				RelativePath="..\..\Plugins\Src\Input\DInput\DIKeyboard.cpp">
 			</File>
 			<File
-				RelativePath="OALMusicBuffer.cpp">
+				RelativePath="..\..\Plugins\Src\Input\DInput\DIMouse.cpp">
 			</File>
 			<File
-				RelativePath="OALSoundBuffer.cpp">
+				RelativePath="..\..\Plugins\Src\Input\DInput\DInputDevice.cpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Input\DInput\DInputEngine.cpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Input\DInput\DInputFactory.cpp">
 			</File>
 		</Filter>
 		<Filter
 			Name="头文件"
-			Filter="h;hpp;hxx;hm;inl;inc">
+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
-				RelativePath="..\..\..\Include\KlayGE\OpenAL\OALAudio.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\DInput\DInput.hpp">
 			</File>
 			<File
-				RelativePath="..\..\..\Include\KlayGE\OpenAL\OALAudioFactory.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\DInput\DInputDevice.hpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\DInput\DInputFactory.hpp">
 			</File>
 		</Filter>
 	</Files>

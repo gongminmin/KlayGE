@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="地形生成-Heightmap"
-	ProjectGUID="{F3CCD52C-F50A-4D95-970F-D66C9C510E50}"
+	Name="音频引擎-OpenAL"
+	ProjectGUID="{2C79C4F4-7C71-4B60-967B-80FF158E160E}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\..\..\lib"
-			IntermediateDirectory="..\..\..\..\Debug"
+			OutputDirectory="..\..\lib"
+			IntermediateDirectory="..\..\Debug"
 			ConfigurationType="4"
 			CharacterSet="1">
 			<Tool
@@ -22,16 +22,18 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;STRICT"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="5"
+				RuntimeLibrary="3"
 				TreatWChar_tAsBuiltInType="TRUE"
-				WarningLevel="3"
+				ForceConformanceInForLoopScope="TRUE"
+				RuntimeTypeInfo="TRUE"
+				WarningLevel="4"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="4"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_Terrain_Heightmap_d.lib"/>
+				OutputFile="$(OutDir)/KlayGE_AudioEngine_OpenAL_d.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -53,27 +55,25 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\..\..\lib"
-			IntermediateDirectory="..\..\..\..\Release"
+			OutputDirectory="..\..\lib"
+			IntermediateDirectory="..\..\Release"
 			ConfigurationType="4"
 			CharacterSet="1"
 			WholeProgramOptimization="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
-				GlobalOptimizations="TRUE"
-				InlineFunctionExpansion="1"
-				OmitFramePointers="TRUE"
-				OptimizeForProcessor="3"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;STRICT"
-				StringPooling="TRUE"
+				RuntimeLibrary="2"
 				BufferSecurityCheck="FALSE"
 				TreatWChar_tAsBuiltInType="TRUE"
+				ForceConformanceInForLoopScope="TRUE"
+				RuntimeTypeInfo="TRUE"
 				WarningLevel="3"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_Terrain_Heightmap.lib"/>
+				OutputFile="$(OutDir)/KlayGE_AudioEngine_OpenAL.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -99,15 +99,28 @@
 	<Files>
 		<Filter
 			Name="源文件"
-			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
+			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm">
+			<File
+				RelativePath="..\..\Plugins\Src\Audio\OpenAL\OALAudioEngine.cpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Audio\OpenAL\OALAudioFactory.cpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Audio\OpenAL\OALMusicBuffer.cpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Audio\OpenAL\OALSoundBuffer.cpp">
+			</File>
 		</Filter>
 		<Filter
 			Name="头文件"
-			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			Filter="h;hpp;hxx;hm;inl;inc">
 			<File
-				RelativePath="..\..\..\Include\KlayGE\Heightmap\Heightmap.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenAL\OALAudio.hpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenAL\OALAudioFactory.hpp">
 			</File>
 		</Filter>
 	</Files>

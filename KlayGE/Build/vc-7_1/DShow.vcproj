@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="äÖÈ¾ÒýÇæ-OpenGL"
-	ProjectGUID="{31837598-9F20-4A23-A9B6-9B590B43321B}"
+	Name="²¥·ÅÒýÇæ-DShow"
+	ProjectGUID="{88AE3603-38C0-48D1-BCC2-34ABC261788E}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\..\..\lib"
-			IntermediateDirectory="..\..\..\..\Debug"
+			OutputDirectory="..\..\lib"
+			IntermediateDirectory="..\..\Debug"
 			ConfigurationType="4"
 			CharacterSet="1">
 			<Tool
@@ -33,7 +33,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_RenderEngine_OpenGL_d.lib"/>
+				OutputFile="$(OutDir)/KlayGE_ShowEngine_DShow_d.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -55,8 +55,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\..\..\lib"
-			IntermediateDirectory="..\..\..\..\Release"
+			OutputDirectory="..\..\lib"
+			IntermediateDirectory="..\..\Release"
 			ConfigurationType="4"
 			CharacterSet="1"
 			WholeProgramOptimization="FALSE">
@@ -73,7 +73,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_RenderEngine_OpenGL.lib"/>
+				OutputFile="$(OutDir)/KlayGE_ShowEngine_DShow.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -102,37 +102,7 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath=".\OGLIndexStream.cpp">
-			</File>
-			<File
-				RelativePath=".\OGLMapping.cpp">
-			</File>
-			<File
-				RelativePath=".\OGLOcclusionQuery.cpp">
-			</File>
-			<File
-				RelativePath=".\OGLRenderEffect.cpp">
-			</File>
-			<File
-				RelativePath=".\OGLRenderEngine.cpp">
-			</File>
-			<File
-				RelativePath=".\OGLRenderFactory.cpp">
-			</File>
-			<File
-				RelativePath=".\OGLRenderTexture.cpp">
-			</File>
-			<File
-				RelativePath=".\OGLRenderVertexStream.cpp">
-			</File>
-			<File
-				RelativePath=".\OGLRenderWindow.cpp">
-			</File>
-			<File
-				RelativePath=".\OGLTexture.cpp">
-			</File>
-			<File
-				RelativePath=".\OGLVertexStream.cpp">
+				RelativePath="..\..\Plugins\Src\Show\DShow\DShowEngine.cpp">
 			</File>
 		</Filter>
 		<Filter
@@ -140,40 +110,7 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
-				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLIndexStream.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLMapping.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLOcclusionQuery.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLRenderEffect.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLRenderEngine.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLRenderFactory.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLRenderTexture.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLRenderVertexStream.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLRenderWindow.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLTexture.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLVertexBuffer.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\Include\KlayGE\OpenGL\OGLVertexStream.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\DShow\DShow.hpp">
 			</File>
 		</Filter>
 	</Files>

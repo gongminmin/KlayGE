@@ -83,7 +83,7 @@ namespace
 		RefractorObject(TexturePtr cube_map)
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadKMesh("teapot.kmesh", CreateFactory<RefractorRenderable>)->Mesh(0);
+			renderable_ = LoadKMesh("teapot.kmesh", CreateKMeshFactory<RefractorRenderable>())->Mesh(0);
 			checked_cast<RefractorRenderable*>(renderable_.get())->CubeMap(cube_map);	
 		}
 	};

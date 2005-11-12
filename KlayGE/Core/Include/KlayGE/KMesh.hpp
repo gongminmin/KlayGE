@@ -44,13 +44,16 @@ namespace KlayGE
 	};
 
 	template <typename T>
-	KMeshPtr CreateFactory(std::wstring const & name, TexturePtr tex)
+	struct CreateKMeshFactory
 	{
-		return KMeshPtr(new T(name, tex));
-	}
+		KMeshPtr operator()(std::wstring const & name, TexturePtr tex)
+		{
+			return KMeshPtr(new T(name, tex));
+		}
+	};
 
 	RenderModelPtr LoadKMesh(std::string const & kmeshName,
-		boost::function<KMeshPtr (std::wstring const &, TexturePtr)> CreateFactoryFunc = CreateFactory<KMesh>);
+		boost::function<KMeshPtr (std::wstring const &, TexturePtr)> CreateFactoryFunc = CreateKMeshFactory<KMesh>());
 }
 
 #endif			// _KMESH_HPP

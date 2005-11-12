@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="播放引擎-DShow"
-	ProjectGUID="{88AE3603-38C0-48D1-BCC2-34ABC261788E}"
+	Name="音频引擎-DSound"
+	ProjectGUID="{2C79C4F4-7C71-4B60-967B-80FF158E160E}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\..\..\lib"
-			IntermediateDirectory="..\..\..\..\Debug"
+			OutputDirectory="..\..\lib"
+			IntermediateDirectory="..\..\Debug"
 			ConfigurationType="4"
 			CharacterSet="1">
 			<Tool
@@ -33,7 +33,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_ShowEngine_DShow_d.lib"/>
+				OutputFile="$(OutDir)/KlayGE_AudioEngine_DSound_d.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -55,8 +55,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\..\..\lib"
-			IntermediateDirectory="..\..\..\..\Release"
+			OutputDirectory="..\..\lib"
+			IntermediateDirectory="..\..\Release"
 			ConfigurationType="4"
 			CharacterSet="1"
 			WholeProgramOptimization="FALSE">
@@ -73,7 +73,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_ShowEngine_DShow.lib"/>
+				OutputFile="$(OutDir)/KlayGE_AudioEngine_DSound.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -99,18 +99,28 @@
 	<Files>
 		<Filter
 			Name="源文件"
-			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
+			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm">
 			<File
-				RelativePath=".\DShowEngine.cpp">
+				RelativePath="..\..\Plugins\Src\Audio\DSound\DSAudioEngine.cpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Audio\DSound\DSAudioFactory.cpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Audio\DSound\DSMusicBuffer.cpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Audio\DSound\DSSoundBuffer.cpp">
 			</File>
 		</Filter>
 		<Filter
 			Name="头文件"
-			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			Filter="h;hpp;hxx;hm;inl;inc">
 			<File
-				RelativePath="..\..\..\Include\KlayGE\DShow\DShow.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\DSound\DSAudio.hpp">
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\DSound\DSAudioFactory.hpp">
 			</File>
 		</Filter>
 	</Files>

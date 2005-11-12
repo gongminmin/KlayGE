@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="音频引擎-DSound"
-	ProjectGUID="{2C79C4F4-7C71-4B60-967B-80FF158E160E}"
+	Name="应用程序层"
+	ProjectGUID="{E76027F9-0E7B-4B3D-80C9-50E64E0BC5AD}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\..\..\lib"
-			IntermediateDirectory="..\..\..\..\Debug"
+			OutputDirectory="..\..\lib"
+			IntermediateDirectory="..\..\Debug"
 			ConfigurationType="4"
 			CharacterSet="1">
 			<Tool
@@ -33,7 +33,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_AudioEngine_DSound_d.lib"/>
+				OutputFile="$(OutDir)/KlayGE_AppLayer_d.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -55,8 +55,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\..\..\lib"
-			IntermediateDirectory="..\..\..\..\Release"
+			OutputDirectory="..\..\lib"
+			IntermediateDirectory="..\..\Release"
 			ConfigurationType="4"
 			CharacterSet="1"
 			WholeProgramOptimization="FALSE">
@@ -73,7 +73,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_AudioEngine_DSound.lib"/>
+				OutputFile="$(OutDir)/KlayGE_AppLayer.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -99,28 +99,18 @@
 	<Files>
 		<Filter
 			Name="源文件"
-			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm">
+			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath=".\DSAudioEngine.cpp">
-			</File>
-			<File
-				RelativePath=".\DSAudioFactory.cpp">
-			</File>
-			<File
-				RelativePath=".\DSMusicBuffer.cpp">
-			</File>
-			<File
-				RelativePath=".\DSSoundBuffer.cpp">
+				RelativePath="..\..\AppLayer\Src\App3D.cpp">
 			</File>
 		</Filter>
 		<Filter
 			Name="头文件"
-			Filter="h;hpp;hxx;hm;inl;inc">
+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
-				RelativePath="..\..\..\Include\KlayGE\DSound\DSAudio.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\Include\KlayGE\DSound\DSAudioFactory.hpp">
+				RelativePath="..\..\AppLayer\Include\KlayGE\App3D.hpp">
 			</File>
 		</Filter>
 	</Files>

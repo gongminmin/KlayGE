@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\..\..\lib"
-			IntermediateDirectory="..\..\..\..\Debug"
+			OutputDirectory="..\..\lib"
+			IntermediateDirectory="..\..\Debug"
 			ConfigurationType="4"
 			CharacterSet="1">
 			<Tool
@@ -55,8 +55,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\..\..\lib"
-			IntermediateDirectory="..\..\..\..\Release"
+			OutputDirectory="..\..\lib"
+			IntermediateDirectory="..\..\Release"
 			ConfigurationType="4"
 			CharacterSet="1"
 			WholeProgramOptimization="FALSE">
@@ -101,20 +101,20 @@
 			Name="源文件"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm">
 			<File
-				RelativePath="OggSource.cpp">
+				RelativePath="..\..\Plugins\Src\AudioDataSource\OggWav\OggSource.cpp">
 			</File>
 			<File
-				RelativePath="WaveSource.cpp">
+				RelativePath="..\..\Plugins\Src\AudioDataSource\OggWav\WaveSource.cpp">
 			</File>
 		</Filter>
 		<Filter
 			Name="头文件"
 			Filter="h;hpp;hxx;hm;inl;inc">
 			<File
-				RelativePath="..\..\..\Include\KlayGE\OggWav\OggSource.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\OggWav\OggSource.hpp">
 			</File>
 			<File
-				RelativePath="..\..\..\Include\KlayGE\OggWav\WaveSource.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\OggWav\WaveSource.hpp">
 			</File>
 		</Filter>
 	</Files>

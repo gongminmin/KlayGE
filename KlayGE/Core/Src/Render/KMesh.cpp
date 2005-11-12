@@ -74,9 +74,9 @@ namespace KlayGE
 
 
 	RenderModelPtr LoadKMesh(const std::string& kmeshName,
-		boost::function<KMeshPtr (std::wstring const &, TexturePtr)> CreateFactoryFunc)
+		boost::function<KMeshPtr (std::wstring const &, TexturePtr)> CreateKMeshFactoryFunc)
 	{
-		BOOST_ASSERT(CreateFactoryFunc);
+		BOOST_ASSERT(CreateKMeshFactoryFunc);
 
 		typedef std::vector<StaticMeshPtr> MeshesType;
 		MeshesType meshes;
@@ -152,7 +152,7 @@ namespace KlayGE
 				texture = LoadTexture(texture_slots[0].second);
 			}
 
-			StaticMeshPtr mesh = CreateFactoryFunc(wname, texture);
+			StaticMeshPtr mesh = CreateKMeshFactoryFunc(wname, texture);
 
 			uint32_t num_vertices;
 			file->read(reinterpret_cast<char*>(&num_vertices), sizeof(num_vertices));

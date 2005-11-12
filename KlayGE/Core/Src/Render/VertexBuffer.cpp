@@ -445,7 +445,7 @@ namespace KlayGE
 
 			for (uint32_t i = 0; i < num_vertices; ++ i)
 			{
-				std::copy(&ins_buffer[inst_no * instance_size], &ins_buffer[(inst_no + 1) * instance_size],
+				std::copy(ins_buffer.begin() + inst_no * instance_size, ins_buffer.begin() + (inst_no + 1) * instance_size,
 					&target_buffer[i * instance_size]);
 			}
 
@@ -477,7 +477,7 @@ namespace KlayGE
 
 		for (uint32_t i = 0; i < num_vertices; ++ i)
 		{
-			std::copy(&ins_buffer[inst_no * instance_size], &ins_buffer[(inst_no + 1) * instance_size],
+			std::copy(ins_buffer.begin() + inst_no * instance_size, ins_buffer.begin() + (inst_no + 1) * instance_size,
 				&target_buffer[i * instance_size]);
 		}
 
