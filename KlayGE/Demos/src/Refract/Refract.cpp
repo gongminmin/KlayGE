@@ -139,7 +139,7 @@ void Refract::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
-	cube_map_ = LoadTexture("Glacier2.dds");
+	cube_map_ = LoadTexture("uffizi_cross.dds");
 
 	refractor_.reset(new RefractorObject(cube_map_));
 	refractor_->AddToSceneManager();
