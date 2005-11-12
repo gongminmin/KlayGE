@@ -1,21 +1,21 @@
 Microsoft Visual Studio Solution File, Format Version 8.00
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "文件打包工具-Pkt", "Pkt\Pkt.vcproj", "{5E60B2D1-9F1E-4983-AC26-A54DF51876E9}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "文件打包工具-Pkt", "Pkt.vcproj", "{5E60B2D1-9F1E-4983-AC26-A54DF51876E9}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NormalMapGen", "NormalMapGen\NormalMapGen.vcproj", "{7526CFD8-84DB-4A4C-AA3C-D9FC7FF32DCF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NormalMapGen", "NormalMapGen.vcproj", "{7526CFD8-84DB-4A4C-AA3C-D9FC7FF32DCF}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DistanceMapCreator", "DistanceMapCreator\DistanceMapCreator.vcproj", "{A7A4F2AC-4B47-4685-8D7F-7675F246A87C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DistanceMapCreator", "DistanceMapCreator.vcproj", "{A7A4F2AC-4B47-4685-8D7F-7675F246A87C}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NormalizerCubeMap", "NormalizerCubeMap\NormalizerCubeMap.vcproj", "{9C678BF0-CABD-41C5-BDD5-49BD0C9F3DDF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NormalizerCubeMap", "NormalizerCubeMap.vcproj", "{9C678BF0-CABD-41C5-BDD5-49BD0C9F3DDF}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GLCompatibility", "GLCompatibility\GLCompatibility.vcproj", "{A004459D-F259-44EE-960B-CF6EEDCECC08}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GLCompatibility", "GLCompatibility.vcproj", "{A004459D-F259-44EE-960B-CF6EEDCECC08}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject

@@ -89,7 +89,7 @@ void ComputeDistanceMap(std::vector<unsigned char>& distances, int width, int he
 class EmptyApp : public KlayGE::App3DFramework
 {
 public:
-	void Update(uint32_t /*pass*/)
+	void DoUpdate(uint32_t /*pass*/)
 	{
 	}
 };

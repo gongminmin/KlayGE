@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="NormalizerCubeMap"
-	ProjectGUID="{9C678BF0-CABD-41C5-BDD5-49BD0C9F3DDF}"
+	Name="NormalMapGen"
+	ProjectGUID="{7526CFD8-84DB-4A4C-AA3C-D9FC7FF32DCF}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\bin"
-			IntermediateDirectory="..\Debug"
+			OutputDirectory="..\..\bin"
+			IntermediateDirectory="..\..\Debug"
 			ConfigurationType="1"
 			CharacterSet="1">
 			<Tool
@@ -33,10 +33,9 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/NormalizerCubeMap_d.exe"
+				OutputFile="$(OutDir)/NormalMapGen_d.exe"
 				LinkIncremental="2"
-				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/NormalizerCubeMap.pdb"
+				ProgramDatabaseFile="$(OutDir)/NormalMapGen.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
@@ -62,13 +61,13 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\bin"
-			IntermediateDirectory="..\Release"
+			OutputDirectory="..\..\bin"
+			IntermediateDirectory="..\..\Release"
 			ConfigurationType="1"
 			CharacterSet="1">
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;STRICT"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="FALSE"
 				TreatWChar_tAsBuiltInType="TRUE"
@@ -79,7 +78,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/NormalizerCubeMap.exe"
+				OutputFile="$(OutDir)/NormalMapGen.exe"
 				LinkIncremental="1"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -115,18 +114,8 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath=".\NormalizerCubeMap.cpp">
+				RelativePath="..\..\NormalMapGen\NormalMapGen.cpp">
 			</File>
-		</Filter>
-		<Filter
-			Name="头文件"
-			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
-		</Filter>
-		<Filter
-			Name="资源文件"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}">
 		</Filter>
 	</Files>
 	<Globals>

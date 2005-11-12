@@ -2,44 +2,47 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="NormalMapGen"
-	ProjectGUID="{7526CFD8-84DB-4A4C-AA3C-D9FC7FF32DCF}"
-	Keyword="Win32Proj">
+	Name="文件打包工具-Pkt"
+	ProjectGUID="{5E60B2D1-9F1E-4983-AC26-A54DF51876E9}"
+	SccProjectName=""
+	SccLocalPath="">
 	<Platforms>
 		<Platform
 			Name="Win32"/>
 	</Platforms>
 	<Configurations>
 		<Configuration
-			Name="Debug|Win32"
-			OutputDirectory="..\bin"
-			IntermediateDirectory="..\Debug"
+			Name="Release|Win32"
+			OutputDirectory="..\..\bin"
+			IntermediateDirectory="..\..\Release"
 			ConfigurationType="1"
-			CharacterSet="1">
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="1"
+			WholeProgramOptimization="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
-				MinimalRebuild="TRUE"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				PreprocessorDefinitions="WIN32,NDEBUG,_CONSOLE;STRICT"
+				RuntimeLibrary="2"
+				BufferSecurityCheck="FALSE"
 				TreatWChar_tAsBuiltInType="TRUE"
 				ForceConformanceInForLoopScope="TRUE"
 				RuntimeTypeInfo="TRUE"
-				WarningLevel="4"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="4"/>
+				PrecompiledHeaderFile=""
+				WarningLevel="3"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/NormalMapGen_d.exe"
-				LinkIncremental="2"
-				ProgramDatabaseFile="$(OutDir)/NormalMapGen.pdb"
+				OutputFile="$(OutDir)/pkt.exe"
+				LinkIncremental="1"
 				SubSystem="1"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
 				TargetMachine="1"/>
 			<Tool
-				Name="VCMIDLTool"/>
+				Name="VCMIDLTool"
+				TypeLibraryName=".\Release/Pkt.tlb"/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
@@ -47,7 +50,9 @@
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
-				Name="VCResourceCompilerTool"/>
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="2052"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -60,32 +65,41 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="Release|Win32"
-			OutputDirectory="..\bin"
-			IntermediateDirectory="..\Release"
+			Name="Debug|Win32"
+			OutputDirectory="..\..\bin"
+			IntermediateDirectory="..\..\Debug"
 			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
 			CharacterSet="1">
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;STRICT"
-				RuntimeLibrary="2"
-				BufferSecurityCheck="FALSE"
+				Optimization="0"
+				PreprocessorDefinitions="WIN32,_DEBUG,_CONSOLE;STRICT"
+				MinimalRebuild="TRUE"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
 				TreatWChar_tAsBuiltInType="TRUE"
 				ForceConformanceInForLoopScope="TRUE"
 				RuntimeTypeInfo="TRUE"
-				WarningLevel="3"/>
+				PrecompiledHeaderFile=""
+				AssemblerListingLocation=""
+				WarningLevel="4"
+				Detect64BitPortabilityProblems="TRUE"
+				DebugInformationFormat="4"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/NormalMapGen.exe"
-				LinkIncremental="1"
-				SubSystem="1"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				TargetMachine="1"/>
+				AdditionalOptions="/MACHINE:I386"
+				AdditionalDependencies="odbc32.lib odbccp32.lib"
+				OutputFile="$(OutDir)/pkt_d.exe"
+				LinkIncremental="2"
+				SuppressStartupBanner="TRUE"
+				SubSystem="1"/>
 			<Tool
-				Name="VCMIDLTool"/>
+				Name="VCMIDLTool"
+				TypeLibraryName=".\Debug/Pkt.tlb"/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
@@ -93,7 +107,9 @@
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
-				Name="VCResourceCompilerTool"/>
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="2052"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -111,10 +127,9 @@
 	<Files>
 		<Filter
 			Name="源文件"
-			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
+			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
-				RelativePath=".\NormalMapGen.cpp">
+				RelativePath="..\..\Pkt\PktTools.cpp">
 			</File>
 		</Filter>
 	</Files>
