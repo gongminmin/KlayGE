@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual C++ Express 2005
+# Visual Studio 2005
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "glloader", "glloader.vcproj", "{38EFA2F9-D01F-44B7-B37B-16D2584D6FAB}"
 EndProject
 Global

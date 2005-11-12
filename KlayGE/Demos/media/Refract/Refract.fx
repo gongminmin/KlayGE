@@ -16,11 +16,8 @@ struct VS_OUTPUT
 {
 	float4 pos			 : POSITION;
 	
-	float3 R			 : TEXCOORD0;
-	float3 TRed			 : TEXCOORD1;
-	float3 TGreen		 : TEXCOORD2;
-	float3 TBlue		 : TEXCOORD3;
-	float fresnel_factor : TEXCOORD4;
+	float3 normal		 : TEXCOORD0;
+	float3 incident		 : TEXCOORD1;
 };
 
 // fresnel approximation
@@ -48,16 +45,8 @@ VS_OUTPUT RefractVS(VS_INPUT input)
 	float4 pos_in_world = mul(input.pos, model);
 	output.pos = mul(pos_in_world, mvp);
 
-	float3 normal = normalize(mul(input.normal, (float3x3)modelit));
-	float3 incident = normalize(pos_in_world.xyz - eyePos);
-	
-	output.R = reflect(incident, normal);
-
-	output.TRed = refract(incident, normal, eta_ratio.x);
-	output.TGreen = refract(incident, normal, eta_ratio.y);
-	output.TBlue = refract(incident, normal, eta_ratio.z);
-
-	output.fresnel_factor = fast_fresnel(incident, normal, fresnel_values);
+	output.normal = normalize(mul(input.normal, (float3x3)modelit));
+	output.incident = normalize(pos_in_world.xyz - eyePos);
 
 	return output;
 }
@@ -65,12 +54,17 @@ VS_OUTPUT RefractVS(VS_INPUT input)
 
 samplerCUBE cubeMapSampler;
 
-float4 RefractPS(float3 R : TEXCOORD0,
-					float3 TRed : TEXCOORD1,
-					float3 TGreen : TEXCOORD2,
-					float3 TBlue : TEXCOORD3,
-					float fresnel_factor : TEXCOORD4) : COLOR
+float4 RefractPS(float3 normal : TEXCOORD0,
+					float3 incident : TEXCOORD1) : COLOR
 {
+	float3 R = reflect(incident, normal);
+
+	float3 TRed = refract(incident, normal, eta_ratio.x);
+	float3 TGreen = refract(incident, normal, eta_ratio.y);
+	float3 TBlue = refract(incident, normal, eta_ratio.z);
+
+	float fresnel_factor = fast_fresnel(incident, normal, fresnel_values);
+	
 	float4 reflected_clr = texCUBE(cubeMapSampler, R);
 
 	float4 refracted_clr;

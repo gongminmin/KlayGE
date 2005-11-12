@@ -2,6 +2,7 @@
 <VisualStudioUserFile
 	ProjectType="Visual C++"
 	Version="8.00"
+	ShowAllFiles="false"
 	>
 	<Configurations>
 		<Configuration
@@ -22,8 +23,14 @@
 				Environment=""
 				EnvironmentMerge="true"
 				DebuggerFlavor=""
-				DebugInZoneURL=""
-				GenerateManifests="true"
+				MPIRunCommand=""
+				MPIRunArguments=""
+				MPIRunWorkingDirectory=""
+				ApplicationCommand=""
+				ApplicationArguments=""
+				ShimCommand=""
+				MPIAcceptMode=""
+				MPIAcceptFilter=""
 			/>
 		</Configuration>
 		<Configuration
@@ -44,8 +51,14 @@
 				Environment=""
 				EnvironmentMerge="true"
 				DebuggerFlavor=""
-				DebugInZoneURL=""
-				GenerateManifests="true"
+				MPIRunCommand=""
+				MPIRunArguments=""
+				MPIRunWorkingDirectory=""
+				ApplicationCommand=""
+				ApplicationArguments=""
+				ShimCommand=""
+				MPIAcceptMode=""
+				MPIAcceptFilter=""
 			/>
 		</Configuration>
 	</Configurations>

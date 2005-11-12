@@ -19,6 +19,7 @@
 			OutputDirectory="../../lib"
 			IntermediateDirectory="../../Debug"
 			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
@@ -41,15 +42,14 @@
 				Optimization="0"
 				AdditionalIncludeDirectories="../../include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
-				MinimalRebuild="TRUE"
+				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
-				TreatWChar_tAsBuiltInType="TRUE"
-				ForceConformanceInForLoopScope="TRUE"
-				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="0"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
+				RuntimeLibrary="3"
+				TreatWChar_tAsBuiltInType="true"
+				ForceConformanceInForLoopScope="true"
+				RuntimeTypeInfo="true"
+				WarningLevel="4"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="4"
 			/>
 			<Tool
@@ -75,7 +75,7 @@
 				Name="VCBscMakeTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
+				Name="VCFxCopTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -86,6 +86,7 @@
 			OutputDirectory="../../lib"
 			IntermediateDirectory="../../Release"
 			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
@@ -105,14 +106,13 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="2"
 				AdditionalIncludeDirectories="../../include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
-				RuntimeLibrary="0"
-				BufferSecurityCheck="FALSE"
-				TreatWChar_tAsBuiltInType="TRUE"
-				ForceConformanceInForLoopScope="TRUE"
-				RuntimeTypeInfo="TRUE"
+				RuntimeLibrary="2"
+				BufferSecurityCheck="false"
+				TreatWChar_tAsBuiltInType="true"
+				ForceConformanceInForLoopScope="true"
+				RuntimeTypeInfo="true"
 				WarningLevel="3"
 			/>
 			<Tool
@@ -138,7 +138,7 @@
 				Name="VCBscMakeTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
+				Name="VCFxCopTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -153,6 +153,26 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
+			<File
+				RelativePath="..\..\src\gl12.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\gl13.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\gl14.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\gl15.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\gl20.cpp"
+				>
+			</File>
 			<File
 				RelativePath="..\..\src\glloader_gl.cpp"
 				>
@@ -185,6 +205,30 @@
 			>
 			<File
 				RelativePath="..\..\include\glloader\gl10.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\glloader\gl11.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\glloader\gl12.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\glloader\gl13.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\glloader\gl14.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\glloader\gl15.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\glloader\gl20.h"
 				>
 			</File>
 			<File
