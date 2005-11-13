@@ -313,6 +313,17 @@ namespace KlayGE
 
 	void D3D9RenderPass::End()
 	{
+		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+
+		for (int i = 0; i < 2; ++ i)
+		{
+			for (MapVector<RenderEffectParameterPtr, uint32_t>::iterator iter = samplers_[i].begin();
+				iter != samplers_[i].end(); ++ iter)
+			{
+				render_eng.DisableSampler(iter->second);
+			}
+		}
+
 		TIF(static_cast<D3D9RenderEffect&>(effect_).D3DXEffect()->EndPass());
 	}
 

@@ -534,14 +534,14 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(d3dDevice_);
 
-		TexturePtr texture = sampler->GetTexture();
-
-		if (!sampler || !texture)
+		if (!sampler || !sampler->GetTexture())
 		{
 			TIF(d3dDevice_->SetTexture(stage, NULL));
 		}
 		else
 		{
+			TexturePtr texture = sampler->GetTexture();
+
 			D3D9Texture const & d3d9Tex(*checked_cast<D3D9Texture const *>(texture.get()));
 			TIF(d3dDevice_->SetTexture(stage, d3d9Tex.D3DBaseTexture().get()));
 
@@ -681,7 +681,6 @@ namespace KlayGE
 		BOOST_ASSERT(d3dDevice_);
 
 		TIF(d3dDevice_->SetTexture(stage, NULL));
-		TIF(d3dDevice_->SetTextureStageState(stage, D3DTSS_COLOROP, D3DTOP_DISABLE));
 	}
 
 	// 打开模板缓冲区
