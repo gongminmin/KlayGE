@@ -142,6 +142,7 @@ namespace KlayGE
 		{
 		case PF_R16F:
 		case PF_GR16F:
+		case PF_ABGR16F:
 		case PF_R32F:
 		case PF_GR32F:
 		case PF_ABGR32F:

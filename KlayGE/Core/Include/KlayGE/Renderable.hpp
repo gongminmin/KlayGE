@@ -56,7 +56,11 @@ namespace KlayGE
 		template <typename Iterator>
 		void AssignInstances(Iterator begin, Iterator end)
 		{
-			instances_.assign(begin, end);
+			instances_.resize(0);
+			for (Iterator iter = begin; iter != end; ++ iter)
+			{
+				this->AddInstance(*iter);
+			}
 		}
 		void AddInstance(SceneObjectPtr obj);
 
@@ -64,7 +68,7 @@ namespace KlayGE
 		virtual void UpdateInstanceStream();
 
 	protected:
-		std::vector<SceneObjectPtr> instances_;
+		std::vector<boost::weak_ptr<SceneObject> > instances_;
 	};
 }
 

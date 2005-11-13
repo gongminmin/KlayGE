@@ -137,7 +137,7 @@ namespace
 
 		void OnInstanceBegin(uint32_t id)
 		{
-			InstData const * data = static_cast<InstData const *>(instances_[id]->InstanceData());
+			InstData const * data = static_cast<InstData const *>(instances_[id].lock()->InstanceData());
 
 			Matrix4 model;
 			model.Col(0, data->col[0]);
@@ -194,7 +194,7 @@ int main()
 	settings.ConfirmDevice = ConfirmDevice;
 
 	Instancing app;
-	app.Create("testInstance", settings);
+	app.Create("Instance", settings);
 	app.Run();
 
 	return 0;

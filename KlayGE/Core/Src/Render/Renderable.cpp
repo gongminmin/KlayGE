@@ -84,19 +84,19 @@ namespace KlayGE
 
 	void Renderable::AddInstance(SceneObjectPtr obj)
 	{
-		instances_.push_back(obj);
+		instances_.push_back(boost::weak_ptr<SceneObject>(obj));
 	}
 
 	void Renderable::UpdateInstanceStream()
 	{
-		if (!instances_.empty() && !instances_[0]->InstanceFormat().empty())
+		if (!instances_.empty() && !instances_[0].lock()->InstanceFormat().empty())
 		{
 			VertexStreamPtr inst_stream = this->GetVertexBuffer()->InstanceStream();
 			if (!inst_stream)
 			{
 				RenderFactory& rf(Context::Instance().RenderFactoryInstance());
 
-				inst_stream = rf.MakeVertexStream(instances_[0]->InstanceFormat(), false);
+				inst_stream = rf.MakeVertexStream(instances_[0].lock()->InstanceFormat(), false);
 				inst_stream->FrequencyDivider(VertexStream::ST_Instance, 1);
 				this->GetVertexBuffer()->AddVertexStream(inst_stream);
 			}
@@ -104,7 +104,7 @@ namespace KlayGE
 			{
 				for (size_t i = 0; i < instances_.size(); ++ i)
 				{
-					BOOST_ASSERT(inst_stream->Elements() == instances_[i]->InstanceFormat());
+					BOOST_ASSERT(inst_stream->Elements() == instances_[i].lock()->InstanceFormat());
 				}
 			}
 
@@ -114,7 +114,7 @@ namespace KlayGE
 			buffer.reserve(size * instances_.size());
 			for (size_t i = 0; i < instances_.size(); ++ i)
 			{
-				uint8_t const * src = static_cast<uint8_t const *>(instances_[i]->InstanceData());
+				uint8_t const * src = static_cast<uint8_t const *>(instances_[i].lock()->InstanceData());
 				buffer.insert(buffer.end(), src, src + size);
 			}
 

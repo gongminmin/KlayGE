@@ -1,8 +1,11 @@
 // SceneManager.cpp
 // KlayGE 场景管理器类 实现文件
-// Ver 3.0.0
+// Ver 3.1.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.1.0
+// 自动处理Instance (2005.11.13)
 //
 // 3.0.0
 // 保证了绘制顺序 (2005.8.16)
