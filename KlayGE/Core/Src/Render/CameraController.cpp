@@ -125,9 +125,6 @@ namespace KlayGE
 
 		world_ = MathLib::Inverse(camera_->ViewMatrix());
 
-		InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
-		inputEngine.Update();
-
 		elapsed_time_ = static_cast<float>(timer_.elapsed());
 		if (elapsed_time_ > 0.01f)
 		{

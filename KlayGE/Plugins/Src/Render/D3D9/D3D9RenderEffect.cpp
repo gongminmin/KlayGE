@@ -150,7 +150,7 @@ namespace KlayGE
 	uint32_t D3D9RenderEffect::DoBegin(uint32_t flags)
 	{
 		UINT passes;
-		TIF(d3dx_effect_->Begin(&passes, flags));
+		TIF(d3dx_effect_->Begin(&passes, D3DXFX_DONOTSAVESAMPLERSTATE | flags));
 		return passes;
 	}
 
