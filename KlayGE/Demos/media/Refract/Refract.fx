@@ -21,11 +21,11 @@ struct VS_OUTPUT
 };
 
 // fresnel approximation
-float fast_fresnel(float3 incident, float3 normal, float3 fresnel_values)
+half fast_fresnel(half3 incident, half3 normal, half3 fresnel_values)
 {
-    float power = fresnel_values.x;
-    float scale = fresnel_values.y;
-    float bias = fresnel_values.z;
+    half power = fresnel_values.x;
+    half scale = fresnel_values.y;
+    half bias = fresnel_values.z;
 
     return bias + pow(1.0 + dot(incident, normal), power) * scale;
 }
@@ -57,21 +57,20 @@ samplerCUBE cubeMapSampler;
 float4 RefractPS(float3 normal : TEXCOORD0,
 					float3 incident : TEXCOORD1) : COLOR
 {
-	float3 R = reflect(incident, normal);
+	half3 TRed = refract(incident, normal, eta_ratio.x);
+	half3 TGreen = refract(incident, normal, eta_ratio.y);
+	half3 TBlue = refract(incident, normal, eta_ratio.z);
 
-	float3 TRed = refract(incident, normal, eta_ratio.x);
-	float3 TGreen = refract(incident, normal, eta_ratio.y);
-	float3 TBlue = refract(incident, normal, eta_ratio.z);
-
-	float fresnel_factor = fast_fresnel(incident, normal, fresnel_values);
-	
-	float4 reflected_clr = texCUBE(cubeMapSampler, R);
-
-	float4 refracted_clr;
+	half4 refracted_clr;
 	refracted_clr.r = texCUBE(cubeMapSampler, TRed).r;
 	refracted_clr.g = texCUBE(cubeMapSampler, TGreen).g;
 	refracted_clr.b = texCUBE(cubeMapSampler, TBlue).b;
 	refracted_clr.a = 1;
+
+	half fresnel_factor = fast_fresnel(incident, normal, fresnel_values);
+
+	half3 R = reflect(incident, normal);
+	half4 reflected_clr = texCUBE(cubeMapSampler, R);
 
 	return lerp(refracted_clr, reflected_clr, fresnel_factor);
 }
