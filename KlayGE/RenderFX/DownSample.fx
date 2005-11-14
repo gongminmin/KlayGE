@@ -1,8 +1,5 @@
 float4x4 matMVP : WorldViewProjection;
 
-float Width;
-float Height;
-
 // This hack is necessary because the suppress function
 // seems to work only when Kd is greater than 1, even by 0.0001f!!!
 float Kd = 1.0001f;

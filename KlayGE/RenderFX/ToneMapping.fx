@@ -32,11 +32,6 @@ float4 ToneMappingPS(float2 inTex: TEXCOORD0,
 	float4 blur		= tex2D(Blur, inTex);
 
 	float4 color	= lerp(original, blur, 0.4);
-
-	inTex		   -= 0.5;
-	float vignette	= 1 - dot(inTex, inTex);
-	color		   *= pow(vignette, 4.0);
-
 	color		   *= exposureLevel;
 
 	return pow(color, 0.55);
