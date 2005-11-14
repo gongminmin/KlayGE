@@ -315,6 +315,8 @@ namespace KlayGE
 	{
 		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 
+		TIF(static_cast<D3D9RenderEffect&>(effect_).D3DXEffect()->EndPass());
+
 		for (int i = 0; i < 2; ++ i)
 		{
 			for (MapVector<RenderEffectParameterPtr, uint32_t>::iterator iter = samplers_[i].begin();
@@ -323,11 +325,9 @@ namespace KlayGE
 				render_eng.DisableSampler(iter->second);
 			}
 		}
-
-		TIF(static_cast<D3D9RenderEffect&>(effect_).D3DXEffect()->EndPass());
 	}
 
-	
+
 	void D3D9RenderEffectParameterFloat::DoFlush(float const & value)
 	{
 		boost::shared_ptr<ID3DXEffect> d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
