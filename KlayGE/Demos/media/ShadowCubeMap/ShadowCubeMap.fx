@@ -17,7 +17,7 @@ void ShadowMapVS(float4 Position : POSITION,
 
 float4 OutputDepthPS(float3 oLightWorldPos : TEXCOORD0) : COLOR
 {
-	return float4(dot(oLightWorldPos.xyz, oLightWorldPos.xyz).xxx, 1.0);
+	return dot(oLightWorldPos, oLightWorldPos);
 }
 
 void MainVS(float4 Position : POSITION,
@@ -35,15 +35,15 @@ void MainVS(float4 Position : POSITION,
 }
 
 float4 MainPS(half3 diffuse : COLOR0,
-				half3 LightWorldPos : TEXCOORD0) : COLOR 
+				float3 LightWorldPos : TEXCOORD0) : COLOR 
 {
-	half PixelLengthSq = dot(LightWorldPos, LightWorldPos);
-	half ShadowLengthSq = texCUBE(ShadowMapSampler, LightWorldPos).r + 0.03f;
+	float PixelLengthSq = dot(LightWorldPos, LightWorldPos);
+	float ShadowLengthSq = texCUBE(ShadowMapSampler, LightWorldPos).r * 1.1f;
 	
 	half3 color;
-	if (PixelLengthSq <= ShadowLengthSq)
+	if (PixelLengthSq < ShadowLengthSq)
 	{
-		color = texCUBE(LampSampler, LightWorldPos.xyz).rgb / (0.4 * ShadowLengthSq);
+		color = texCUBE(LampSampler, LightWorldPos).rgb / (0.4 * ShadowLengthSq);
 	}
 	else
 	{
@@ -57,6 +57,8 @@ technique GenShadowMap
 {
 	Pass P0
 	{
+		CullMode = None;
+		
 		VertexShader = compile vs_1_1 ShadowMapVS();
 		PixelShader = compile ps_2_0 OutputDepthPS();
 	}
@@ -66,6 +68,8 @@ technique RenderScene
 {
 	Pass P0
 	{
+		CullMode = CCW;
+		
 		VertexShader = compile vs_1_1 MainVS();
 		PixelShader = compile ps_2_0 MainPS();
 	}
