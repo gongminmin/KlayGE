@@ -150,8 +150,8 @@ namespace KlayGE
 		GLenum gltype;
 		Convert(glinternalFormat, glformat, gltype, format_);
 
-		glGenTextures(1, &texture_[0]);
-		glBindTexture(GL_TEXTURE_1D, texture_[0]);
+		glGenTextures(1, &texture_);
+		glBindTexture(GL_TEXTURE_1D, texture_);
 
 		for (uint16_t level = 0; level < numMipMaps_; ++ level)
 		{
@@ -192,8 +192,8 @@ namespace KlayGE
 		GLenum gltype;
 		Convert(glinternalFormat, glformat, gltype, format_);
 
-		glGenTextures(1, &texture_[0]);
-		glBindTexture(GL_TEXTURE_2D, texture_[0]);
+		glGenTextures(1, &texture_);
+		glBindTexture(GL_TEXTURE_2D, texture_);
 
 		for (uint16_t level = 0; level < numMipMaps_; ++ level)
 		{
@@ -236,8 +236,8 @@ namespace KlayGE
 		GLenum gltype;
 		Convert(glinternalFormat, glformat, gltype, format_);
 
-		glGenTextures(1, &texture_[0]);
-		glBindTexture(GL_TEXTURE_3D, texture_[0]);
+		glGenTextures(1, &texture_);
+		glBindTexture(GL_TEXTURE_3D, texture_);
 
 		for (uint16_t level = 0; level < numMipMaps_; ++ level)
 		{
@@ -279,7 +279,8 @@ namespace KlayGE
 		GLenum gltype;
 		Convert(glinternalFormat, glformat, gltype, format_);
 
-		glGenTextures(6, &texture_[0]);
+		glGenTextures(1, &texture_);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
 
 		for (int face = 0; face < 6; ++ face)
 		{
@@ -297,14 +298,7 @@ namespace KlayGE
 
 	OGLTexture::~OGLTexture()
 	{
-		if (TT_Cube == type_)
-		{
-			glDeleteTextures(6, &texture_[0]);
-		}
-		else
-		{
-			glDeleteTextures(1, &texture_[0]);
-		}
+		glDeleteTextures(1, &texture_);
 	}
 
 	std::wstring const & OGLTexture::Name() const
@@ -371,11 +365,11 @@ namespace KlayGE
 		GLenum gltype;
 		Convert(glinternalFormat, glformat, gltype, format_);
 
-		glBindTexture(GL_TEXTURE_1D, texture_[0]);
+		glBindTexture(GL_TEXTURE_1D, texture_);
 
 		if (IsCompressedFormat(format_))
 		{
-			glGetCompressedTexImageARB(GL_TEXTURE_1D, level, data);
+			glGetCompressedTexImage(GL_TEXTURE_1D, level, data);
 		}
 		else
 		{
@@ -390,11 +384,11 @@ namespace KlayGE
 		GLenum gltype;
 		Convert(glinternalFormat, glformat, gltype, format_);
 
-		glBindTexture(GL_TEXTURE_2D, texture_[0]);
+		glBindTexture(GL_TEXTURE_2D, texture_);
 
 		if (IsCompressedFormat(format_))
 		{
-			glGetCompressedTexImageARB(GL_TEXTURE_2D, level, data);
+			glGetCompressedTexImage(GL_TEXTURE_2D, level, data);
 		}
 		else
 		{
@@ -409,11 +403,11 @@ namespace KlayGE
 		GLenum gltype;
 		Convert(glinternalFormat, glformat, gltype, format_);
 
-		glBindTexture(GL_TEXTURE_3D, texture_[0]);
+		glBindTexture(GL_TEXTURE_3D, texture_);
 
 		if (IsCompressedFormat(format_))
 		{
-			glGetCompressedTexImageARB(GL_TEXTURE_3D, level, data);
+			glGetCompressedTexImage(GL_TEXTURE_3D, level, data);
 		}
 		else
 		{
@@ -428,11 +422,11 @@ namespace KlayGE
 		GLenum gltype;
 		Convert(glinternalFormat, glformat, gltype, format_);
 
-		glBindTexture(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, texture_[0]);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
 
 		if (IsCompressedFormat(format_))
 		{
-			glGetCompressedTexImageARB(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, data);
+			glGetCompressedTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, data);
 		}
 		else
 		{
@@ -450,7 +444,7 @@ namespace KlayGE
 		GLenum gltype;
 		Convert(glinternalFormat, glformat, gltype, pf);
 
-		glBindTexture(GL_TEXTURE_2D, texture_[0]);
+		glBindTexture(GL_TEXTURE_2D, texture_);
 
 		if (IsCompressedFormat(format_))
 		{
@@ -487,7 +481,7 @@ namespace KlayGE
 		GLenum gltype;
 		Convert(glinternalFormat, glformat, gltype, pf);
 
-		glBindTexture(GL_TEXTURE_2D, texture_[0]);
+		glBindTexture(GL_TEXTURE_2D, texture_);
 
 		if (IsCompressedFormat(format_))
 		{
@@ -526,7 +520,7 @@ namespace KlayGE
 		GLenum gltype;
 		Convert(glinternalFormat, glformat, gltype, pf);
 
-		glBindTexture(GL_TEXTURE_3D, texture_[0]);
+		glBindTexture(GL_TEXTURE_3D, texture_);
 
 		if (IsCompressedFormat(format_))
 		{
@@ -562,7 +556,7 @@ namespace KlayGE
 		GLenum gltype;
 		Convert(glinternalFormat, glformat, gltype, pf);
 
-		glBindTexture(GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB + face, texture_[0]);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
 
 		if (IsCompressedFormat(format_))
 		{
@@ -578,12 +572,12 @@ namespace KlayGE
 
 			GLsizei const image_size = ((size + 3) / 4) * ((size + 3) / 4) * block_size;
 
-			glCompressedTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB + face, level, xOffset, xOffset,
+			glCompressedTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, xOffset, xOffset,
 				size, size, glformat, image_size, data);
 		}
 		else
 		{
-			glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB + face, level, xOffset, xOffset,
+			glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, xOffset, xOffset,
 				size, size, glformat, gltype, data);
 		}
 	}
@@ -607,7 +601,7 @@ namespace KlayGE
 		switch (type_)
 		{
 		case TT_1D:
-			glBindTexture(GL_TEXTURE_1D, texture_[0]);
+			glBindTexture(GL_TEXTURE_1D, texture_);
 			for (uint16_t level = 0; level < numMipMaps_; ++ level)
 			{
 				glGetTexLevelParameteriv(GL_TEXTURE_1D, level, GL_TEXTURE_WIDTH, &w);
@@ -622,7 +616,7 @@ namespace KlayGE
 			break;
 
 		case TT_2D:
-			glBindTexture(GL_TEXTURE_2D, texture_[0]);
+			glBindTexture(GL_TEXTURE_2D, texture_);
 			for (uint16_t level = 0; level < numMipMaps_; ++ level)
 			{
 				glGetTexLevelParameteriv(GL_TEXTURE_2D, level, GL_TEXTURE_WIDTH, &w);
@@ -637,7 +631,7 @@ namespace KlayGE
 			break;
 
 		case TT_3D:
-			glBindTexture(GL_TEXTURE_3D, texture_[0]);
+			glBindTexture(GL_TEXTURE_3D, texture_);
 			for (uint16_t level = 0; level < numMipMaps_; ++ level)
 			{
 				glGetTexLevelParameteriv(GL_TEXTURE_3D, level, GL_TEXTURE_WIDTH, &w);
@@ -652,7 +646,7 @@ namespace KlayGE
 			break;
 
 		case TT_Cube:
-			glBindTexture(GL_TEXTURE_CUBE_MAP_POSITIVE_X, texture_[0]);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
 			for (uint16_t level = 0; level < numMipMaps_; ++ level)
 			{
 				glGetTexLevelParameteriv(GL_TEXTURE_CUBE_MAP, level, GL_TEXTURE_WIDTH, &w);
@@ -677,22 +671,19 @@ namespace KlayGE
 		switch (type_)
 		{
 		case TT_1D:
-			glBindTexture(GL_TEXTURE_1D, texture_[0]);
+			glBindTexture(GL_TEXTURE_1D, texture_);
 			break;
 
 		case TT_2D:
-			glBindTexture(GL_TEXTURE_2D, texture_[0]);
+			glBindTexture(GL_TEXTURE_2D, texture_);
 			break;
 
 		case TT_3D:
-			glBindTexture(GL_TEXTURE_3D, texture_[0]);
+			glBindTexture(GL_TEXTURE_3D, texture_);
 			break;
 
 		case TT_Cube:
-			for (int face = 0; face < 6; ++ face)
-			{
-				glBindTexture(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, texture_[face]);
-			}
+			glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
 			break;
 
 		default:

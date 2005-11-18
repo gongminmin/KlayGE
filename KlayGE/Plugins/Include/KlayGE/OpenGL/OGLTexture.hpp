@@ -70,9 +70,7 @@ namespace KlayGE
 		void Usage(TextureUsage usage);
 
 		GLenum GLTexture() const
-			{ return texture_[0]; }
-		GLenum GLTextureFace(int face) const
-			{ return texture_[face]; }
+			{ return texture_; }
 
 		void GLBindTexture();
 		GLenum GLType() const;
@@ -81,7 +79,7 @@ namespace KlayGE
 		void UpdateParams();
 
 	private:
-		GLenum texture_[6];
+		GLenum texture_;
 
 		std::vector<uint32_t> widths_;
 		std::vector<uint32_t> heights_;

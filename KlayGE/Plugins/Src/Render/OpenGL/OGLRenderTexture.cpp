@@ -97,7 +97,8 @@ namespace KlayGE
 
 		glBindFramebufferEXT_(GL_FRAMEBUFFER_EXT, fbo_);
 		glFramebufferTexture2DEXT_(GL_FRAMEBUFFER_EXT,
-			GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, ogl_tex.GLTextureFace(face - Texture::CF_Positive_X), 0);
+			GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face - Texture::CF_Positive_X,
+			ogl_tex.GLTexture(), 0);
 
 		active_ = true;
 	}
