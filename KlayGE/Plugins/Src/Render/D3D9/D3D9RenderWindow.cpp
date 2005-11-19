@@ -387,6 +387,9 @@ namespace KlayGE
 
 		this->UpdateSurfacesPtrs();
 
+		this->Reposition(left_, top_);
+		this->Resize(width_, height_);
+
 		active_ = true;
 		ready_ = true;
 	}
@@ -469,23 +472,13 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9RenderWindow::Reposition(uint32_t /*left*/, uint32_t /*top*/)
+	void D3D9RenderWindow::DoReposition(uint32_t /*left*/, uint32_t /*top*/)
 	{
 	}
 
-	void D3D9RenderWindow::Resize(uint32_t width, uint32_t height)
+	void D3D9RenderWindow::DoResize(uint32_t width, uint32_t height)
 	{
-		if ((width_ != width) || (height_ != height))
-		{
-			width_ = width;
-			height_ = height;
-
-			// Notify viewports of resize
-			viewport_.width = width;
-			viewport_.height = height;
-
-			this->ResetDevice();
-		}
+		this->ResetDevice();
 	}
 
 	void D3D9RenderWindow::UpdateSurfacesPtrs()

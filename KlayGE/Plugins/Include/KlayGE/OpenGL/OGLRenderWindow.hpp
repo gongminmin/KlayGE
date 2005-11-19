@@ -29,8 +29,6 @@ namespace KlayGE
 		bool Ready() const;
 		void Ready(bool ready);
 
-		void Reposition(uint32_t left, uint32_t top);
-		void Resize(uint32_t width, uint32_t height);
 		void SwapBuffers();
 
 		HWND WindowHandle() const;
@@ -43,6 +41,10 @@ namespace KlayGE
 
 		// Method for dealing with resize / move & 3d library
 		void WindowMovedOrResized();
+		
+	private:
+		void DoReposition(uint32_t left, uint32_t top);
+		void DoResize(uint32_t width, uint32_t height);
 
 	protected:
 		std::string	name_;

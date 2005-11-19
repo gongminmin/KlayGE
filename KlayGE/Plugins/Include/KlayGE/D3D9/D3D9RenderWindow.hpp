@@ -44,8 +44,6 @@ namespace KlayGE
 		bool Ready() const;
 		void Ready(bool ready);
 
-		void Reposition(uint32_t left, uint32_t top);
-		void Resize(uint32_t width, uint32_t height);
 		void SwapBuffers();
 
 		HWND WindowHandle() const;
@@ -67,6 +65,9 @@ namespace KlayGE
 	private:
 		void UpdateSurfacesPtrs();
 		void ResetDevice();
+
+		void DoReposition(uint32_t left, uint32_t top);
+		void DoResize(uint32_t width, uint32_t height);
 
 	private:
 		std::string	name_;

@@ -100,7 +100,7 @@ namespace KlayGE
 		glBufferData(GL_PIXEL_PACK_BUFFER_ARB,
 			reinterpret_cast<GLsizeiptr>(width_ * height_ * vs->Element(0).element_size()), NULL, GL_DYNAMIC_DRAW);
 
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
+		glBindFramebufferEXT_(GL_FRAMEBUFFER_EXT, fbo_);
 	}
 
 	void OGLRenderVertexStream::Detach()

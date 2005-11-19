@@ -226,6 +226,9 @@ namespace KlayGE
 		viewport_.width = width_;
 		viewport_.height = height_;
 
+		this->Reposition(left_, top_);
+		this->Resize(width_, height_);
+
 		active_ = true;
 		ready_ = true;
 	}
@@ -287,21 +290,6 @@ namespace KlayGE
 		}
 	}
 
-	void OGLRenderWindow::Reposition(uint32_t /*left*/, uint32_t /*top*/)
-	{
-	}
-
-	void OGLRenderWindow::Resize(uint32_t width, uint32_t height)
-	{
-		width_ = width;
-		height_ = height;
-
-		// Notify viewports of resize
-		viewport_.width = width;
-		viewport_.height = height;
-		// TODO - resize window
-	}
-
 	void OGLRenderWindow::SwapBuffers()
 	{
 		::glFlush();
@@ -311,5 +299,13 @@ namespace KlayGE
 	void OGLRenderWindow::CustomAttribute(std::string const & /*name*/, void* /*pData*/)
 	{
 		BOOST_ASSERT(false);
+	}
+
+	void OGLRenderWindow::DoReposition(uint32_t left, uint32_t top)
+	{
+	}
+
+    void OGLRenderWindow::DoResize(uint32_t width, uint32_t height)
+	{
 	}
 }

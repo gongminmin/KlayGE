@@ -105,6 +105,8 @@ namespace KlayGE
 			nearPlane, farPlane);
  	}
 
+	// 退出程序
+	/////////////////////////////////////////////////////////////////////////////////
 	void App3DFramework::Quit()
 	{
 #ifdef WIN32
@@ -114,6 +116,8 @@ namespace KlayGE
 #endif
 	}
 
+	// 更新场景
+	/////////////////////////////////////////////////////////////////////////////////
 	void App3DFramework::Update(uint32_t pass)
 	{
 		if (0 == pass)
@@ -123,5 +127,11 @@ namespace KlayGE
 		}
 
 		this->DoUpdate(pass);
+	}
+
+	// 响应窗口大小变化
+	/////////////////////////////////////////////////////////////////////////////////
+	void App3DFramework::OnResize(uint32_t /*width*/, uint32_t /*height*/)
+	{
 	}
 }

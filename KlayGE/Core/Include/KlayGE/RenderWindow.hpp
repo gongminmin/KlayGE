@@ -35,8 +35,8 @@ namespace KlayGE
 
 		virtual void Destroy() = 0;
 
-		virtual void Resize(uint32_t width, uint32_t height) = 0;
-		virtual void Reposition(uint32_t left, uint32_t top) = 0;
+		void Resize(uint32_t width, uint32_t height);
+		void Reposition(uint32_t left, uint32_t top);
 
 		virtual bool Closed() const = 0;
 
@@ -46,6 +46,10 @@ namespace KlayGE
 		{
 			return false;
 		}
+
+	protected:
+		virtual void DoResize(uint32_t width, uint32_t height) = 0;
+		virtual void DoReposition(uint32_t left, uint32_t top) = 0;
 
 	protected:
 		bool isFullScreen_;

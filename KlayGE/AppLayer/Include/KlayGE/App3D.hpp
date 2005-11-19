@@ -1,8 +1,11 @@
 // App3Dp.hpp
 // KlayGE App3D类 头文件
-// Ver 3.0.0
+// Ver 3.1.0
 // 版权所有(C) 龚敏敏, 2003--2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.1.0
+// 增加了OnResize (2005.11.20)
 //
 // 3.0.0
 // 增加了多遍更新 (2005.8.16)
@@ -53,6 +56,8 @@ namespace KlayGE
 
 		void Run();
 		void Quit();
+
+		virtual void OnResize(uint32_t width, uint32_t height);
 
 	protected:
 		void LookAt(Vector3 const & eye, Vector3 const & lookAt, Vector3 const & up = Vector3(0, 1, 0));
