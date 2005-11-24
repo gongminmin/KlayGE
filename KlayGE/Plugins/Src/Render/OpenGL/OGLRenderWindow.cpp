@@ -226,9 +226,6 @@ namespace KlayGE
 		viewport_.width = width_;
 		viewport_.height = height_;
 
-		this->Reposition(left_, top_);
-		this->Resize(width_, height_);
-
 		active_ = true;
 		ready_ = true;
 	}
@@ -270,6 +267,22 @@ namespace KlayGE
 
 	void OGLRenderWindow::WindowMovedOrResized()
 	{
+		::RECT rect;
+		::GetWindowRect(hWnd_, &rect);
+
+		uint32_t new_left = rect.left;
+		uint32_t new_top = rect.top;
+		if ((new_left != left_) || (new_top != top_))
+		{
+			this->Reposition(new_left, new_top);
+		}
+
+		uint32_t new_width = rect.right - rect.left;
+		uint32_t new_height = rect.bottom - rect.top;
+		if ((new_width != width_) || (new_height != height_))
+		{
+			this->Resize(new_width, new_height);
+		}
 	}
 
 	void OGLRenderWindow::Destroy()
@@ -301,11 +314,11 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void OGLRenderWindow::DoReposition(uint32_t left, uint32_t top)
+	void OGLRenderWindow::DoReposition(uint32_t /*left*/, uint32_t /*top*/)
 	{
 	}
 
-    void OGLRenderWindow::DoResize(uint32_t width, uint32_t height)
+    void OGLRenderWindow::DoResize(uint32_t /*width*/, uint32_t /*height*/)
 	{
 	}
 }

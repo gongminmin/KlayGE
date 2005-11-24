@@ -263,14 +263,18 @@ namespace KlayGE
 		virtual void CopyToMemoryCube(CubeFaces face, int level, void* data) = 0;
 
 		virtual void CopyMemoryToTexture1D(int level, void* data, PixelFormat pf,
-			uint32_t width, uint32_t xOffset) = 0;
+			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width, uint32_t src_xOffset) = 0;
 		virtual void CopyMemoryToTexture2D(int level, void* data, PixelFormat pf,
-			uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset) = 0;
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
+			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset) = 0;
 		virtual void CopyMemoryToTexture3D(int level, void* data, PixelFormat pf,
-			uint32_t width, uint32_t height, uint32_t depth,
-			uint32_t xOffset, uint32_t yOffset, uint32_t zOffset) = 0;
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
+			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
+			uint32_t src_width, uint32_t src_height, uint32_t src_depth,
+			uint32_t src_xOffset, uint32_t src_yOffset, uint32_t src_zOffset) = 0;
 		virtual void CopyMemoryToTextureCube(CubeFaces face, int level, void* data, PixelFormat pf,
-			uint32_t size, uint32_t xOffset) = 0;
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
+			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset) = 0;
 
 		virtual void BuildMipSubLevels() = 0;
 

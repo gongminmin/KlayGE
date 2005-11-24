@@ -139,7 +139,8 @@ namespace
 
 		KlayGE::TexturePtr ret = Context::Instance().RenderFactoryInstance().MakeTexture2D(OUTPUT_NUM_ASCII * ASCII_WIDTH,
 			ASCII_HEIGHT, 1, PF_L8);
-		ret->CopyMemoryToTexture2D(0, &temp_data[0], PF_L8, OUTPUT_NUM_ASCII * ASCII_WIDTH, ASCII_HEIGHT, 0, 0);
+		ret->CopyMemoryToTexture2D(0, &temp_data[0], PF_L8, OUTPUT_NUM_ASCII * ASCII_WIDTH, ASCII_HEIGHT, 0, 0,
+			OUTPUT_NUM_ASCII * ASCII_WIDTH, ASCII_HEIGHT, 0, 0);
 		return ret;
 	}
 
@@ -219,13 +220,7 @@ void AsciiArts::InitObjects()
 
 	this->BuildAsciiLumsTex();
 
-	rendered_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(WIDTH, HEIGHT, 1, PF_ARGB8);
 	render_buffer_ = Context::Instance().RenderFactoryInstance().MakeRenderTexture();
-	render_buffer_->AttachTexture2D(rendered_tex_);
-
-	downsample_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(WIDTH / CELL_WIDTH, HEIGHT / CELL_HEIGHT,
-		1, PF_ARGB8);
-	downsample_tex_->Usage(Texture::TU_RenderTarget);
 
 	screen_buffer_ = renderEngine.ActiveRenderTarget(0);
 
@@ -240,6 +235,16 @@ void AsciiArts::InitObjects()
 	action_handler_t input_handler(inputEngine);
 	input_handler += boost::bind(&AsciiArts::InputHandler, this, _1, _2);
 	inputEngine.ActionMap(actionMap, input_handler, true);
+}
+
+void AsciiArts::OnResize(uint32_t width, uint32_t height)
+{
+	rendered_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, PF_ARGB8);
+	render_buffer_->AttachTexture2D(rendered_tex_);	
+
+	downsample_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(width / CELL_WIDTH, height / CELL_HEIGHT,
+		1, PF_ARGB8);
+	downsample_tex_->Usage(Texture::TU_RenderTarget);
 }
 
 uint32_t AsciiArts::NumPasses() const

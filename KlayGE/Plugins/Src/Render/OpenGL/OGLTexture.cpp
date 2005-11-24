@@ -351,6 +351,7 @@ namespace KlayGE
 						target.Width(0), target.Height(0), gl_type, &data_out[0]);
 
 					target.CopyMemoryToTexture2D(level, &data_out[0], format_,
+						target.Width(level), target.Height(level), 0, 0,
 						target.Width(level), target.Height(level), 0, 0);
 				}
 			}
@@ -435,16 +436,25 @@ namespace KlayGE
 	}
 
 	void OGLTexture::CopyMemoryToTexture1D(int level, void* data, PixelFormat pf,
-		uint32_t width, uint32_t xOffset)
+		uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width, uint32_t src_xOffset)
 	{
-		BOOST_ASSERT(width != 0);
+		BOOST_ASSERT(src_width != 0);
+		BOOST_ASSERT(dst_width != 0);
 
 		GLint glinternalFormat;
 		GLenum glformat;
 		GLenum gltype;
 		Convert(glinternalFormat, glformat, gltype, pf);
 
-		glBindTexture(GL_TEXTURE_2D, texture_);
+		glBindTexture(GL_TEXTURE_1D, texture_);
+
+		std::vector<uint8_t> tmp;
+		if (dst_width != src_width)
+		{
+			gluScaleImage(glformat, src_width, 1, gltype, data,
+				dst_width, 1, gltype, &tmp[0]);
+			data = &tmp[0];
+		}
 
 		if (IsCompressedFormat(format_))
 		{
@@ -458,23 +468,26 @@ namespace KlayGE
 				block_size = 16;
 			}
 
-			GLsizei const image_size = ((width + 3) / 4) * block_size;
+			GLsizei const image_size = ((dst_width + 3) / 4) * block_size;
 
-			glCompressedTexSubImage1D(GL_TEXTURE_1D, level, xOffset,
-				width, glformat, image_size, data);
+			glCompressedTexSubImage1D(GL_TEXTURE_1D, level, dst_xOffset,
+				dst_width, glformat, image_size, data);
 		}
 		else
 		{
-			glTexSubImage1D(GL_TEXTURE_1D, level, xOffset,
-				width, glformat, gltype, data);
+			glTexSubImage1D(GL_TEXTURE_1D, level, dst_xOffset,
+				dst_width, glformat, gltype, data);
 		}
 	}
 
 	void OGLTexture::CopyMemoryToTexture2D(int level, void* data, PixelFormat pf,
-		uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset)
+		uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
+		uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset)
 	{
-		BOOST_ASSERT(width != 0);
-		BOOST_ASSERT(height != 0);
+		BOOST_ASSERT(src_width != 0);
+		BOOST_ASSERT(src_height != 0);
+		BOOST_ASSERT(dst_width != 0);
+		BOOST_ASSERT(dst_height != 0);
 
 		GLint glinternalFormat;
 		GLenum glformat;
@@ -482,6 +495,14 @@ namespace KlayGE
 		Convert(glinternalFormat, glformat, gltype, pf);
 
 		glBindTexture(GL_TEXTURE_2D, texture_);
+
+		std::vector<uint8_t> tmp;
+		if ((dst_width != src_width) || (dst_height != src_height))
+		{
+			gluScaleImage(glformat, src_width, src_height, gltype, data,
+				dst_width, dst_height, gltype, &tmp[0]);
+			data = &tmp[0];
+		}
 
 		if (IsCompressedFormat(format_))
 		{
@@ -495,25 +516,34 @@ namespace KlayGE
 				block_size = 16;
 			}
 
-			GLsizei const image_size = ((width + 3) / 4) * ((height + 3) / 4) * block_size;
+			GLsizei const image_size = ((dst_width + 3) / 4) * ((dst_height + 3) / 4) * block_size;
 
-			glCompressedTexSubImage2D(GL_TEXTURE_2D, level, xOffset, yOffset,
-				width, height, glformat, image_size, data);
+			glCompressedTexSubImage2D(GL_TEXTURE_2D, level, dst_xOffset, dst_yOffset,
+				dst_width, dst_height, glformat, image_size, data);
 		}
 		else
 		{
-			glTexSubImage2D(GL_TEXTURE_2D, level, xOffset, yOffset,
-				width, height, glformat, gltype, data);
+			glTexSubImage2D(GL_TEXTURE_2D, level, dst_xOffset, dst_yOffset,
+				dst_width, dst_height, glformat, gltype, data);
 		}
 	}
 
 	void OGLTexture::CopyMemoryToTexture3D(int level, void* data, PixelFormat pf,
-			uint32_t width, uint32_t height, uint32_t depth,
-			uint32_t xOffset, uint32_t yOffset, uint32_t zOffset)
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
+			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
+			uint32_t src_width, uint32_t src_height, uint32_t src_depth,
+			uint32_t src_xOffset, uint32_t src_yOffset, uint32_t src_zOffset)
 	{
-		BOOST_ASSERT(width != 0);
-		BOOST_ASSERT(height != 0);
-		BOOST_ASSERT(depth != 0);
+		BOOST_ASSERT(src_width != 0);
+		BOOST_ASSERT(src_height != 0);
+		BOOST_ASSERT(src_depth != 0);
+		BOOST_ASSERT(dst_width != 0);
+		BOOST_ASSERT(dst_height != 0);
+		BOOST_ASSERT(dst_depth != 0);
+
+		BOOST_ASSERT(dst_width == src_width);
+		BOOST_ASSERT(dst_height == src_height);
+		BOOST_ASSERT(dst_depth == src_depth);
 
 		GLint glinternalFormat;
 		GLenum glformat;
@@ -534,22 +564,26 @@ namespace KlayGE
 				block_size = 16;
 			}
 
-			GLsizei const image_size = ((width + 3) / 4) * ((height + 3) / 4) * ((depth + 3) / 4) * block_size;
+			GLsizei const image_size = ((dst_width + 3) / 4) * ((dst_height + 3) / 4) * ((dst_depth + 3) / 4) * block_size;
 
-			glCompressedTexSubImage3D(GL_TEXTURE_3D, level, xOffset, yOffset, zOffset,
-				width, height, depth, glformat, image_size, data);
+			glCompressedTexSubImage3D(GL_TEXTURE_3D, level, dst_xOffset, dst_yOffset, dst_zOffset,
+				dst_width, dst_height, dst_depth, glformat, image_size, data);
 		}
 		else
 		{
-			glTexSubImage3D(GL_TEXTURE_3D, level, xOffset, yOffset, zOffset,
-				width, height, depth, glformat, gltype, data);
+			glTexSubImage3D(GL_TEXTURE_3D, level, dst_xOffset, dst_yOffset, dst_zOffset,
+				dst_width, dst_height, dst_depth, glformat, gltype, data);
 		}
 	}
 
 	void OGLTexture::CopyMemoryToTextureCube(CubeFaces face, int level, void* data, PixelFormat pf,
-			uint32_t size, uint32_t xOffset)
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
+			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset)
 	{
-		BOOST_ASSERT(size != 0);
+		BOOST_ASSERT(src_width != 0);
+		BOOST_ASSERT(src_height != 0);
+		BOOST_ASSERT(dst_width != 0);
+		BOOST_ASSERT(dst_height != 0);
 
 		GLint glinternalFormat;
 		GLenum glformat;
@@ -557,6 +591,14 @@ namespace KlayGE
 		Convert(glinternalFormat, glformat, gltype, pf);
 
 		glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
+
+		std::vector<uint8_t> tmp;
+		if ((dst_width != src_width) || (dst_height != src_height))
+		{
+			gluScaleImage(glformat, src_width, src_height, gltype, data,
+				dst_width, dst_height, gltype, &tmp[0]);
+			data = &tmp[0];
+		}
 
 		if (IsCompressedFormat(format_))
 		{
@@ -570,15 +612,15 @@ namespace KlayGE
 				block_size = 16;
 			}
 
-			GLsizei const image_size = ((size + 3) / 4) * ((size + 3) / 4) * block_size;
+			GLsizei const image_size = ((dst_width + 3) / 4) * ((dst_height + 3) / 4) * block_size;
 
-			glCompressedTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, xOffset, xOffset,
-				size, size, glformat, image_size, data);
+			glCompressedTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, dst_xOffset, dst_yOffset,
+				dst_width, dst_height, glformat, image_size, data);
 		}
 		else
 		{
-			glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, xOffset, xOffset,
-				size, size, glformat, gltype, data);
+			glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, dst_xOffset, dst_yOffset,
+				dst_width, dst_height, glformat, gltype, data);
 		}
 	}
 

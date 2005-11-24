@@ -542,13 +542,14 @@ namespace KlayGE
 	}
 
 	void D3D9Texture::CopyMemoryToTexture1D(int level, void* data, PixelFormat pf,
-		uint32_t width, uint32_t xOffset)
+		uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width, uint32_t src_xOffset)
 	{
-		this->CopyMemoryToTexture2D(level, data, pf, width, 1, xOffset, 0);
+		this->CopyMemoryToTexture2D(level, data, pf, dst_width, 1, dst_xOffset, 0, src_width, 1, src_xOffset, 0);
 	}
 
 	void D3D9Texture::CopyMemoryToTexture2D(int level, void* data, PixelFormat pf,
-		uint32_t width, uint32_t height, uint32_t xOffset, uint32_t yOffset)
+		uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
+		uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset)
 	{
 		BOOST_ASSERT((TT_1D == type_) || (TT_2D == type_));
 
@@ -558,16 +559,18 @@ namespace KlayGE
 
 		if (surface)
 		{
-			RECT srcRc = { 0, 0, width, height };
-			RECT dstRc = { xOffset, yOffset, xOffset + srcRc.right, yOffset + srcRc.bottom };
+			RECT srcRc = { src_xOffset, src_yOffset, src_xOffset + src_width, src_yOffset + src_height };
+			RECT dstRc = { dst_xOffset, dst_yOffset, dst_xOffset + dst_width, dst_yOffset + dst_height };
 			TIF(D3DXLoadSurfaceFromMemory(surface.get(), NULL, &dstRc, data, ConvertFormat(pf),
-					width * PixelFormatBits(pf) / 8, NULL, &srcRc, D3DX_FILTER_NONE, 0));
+					src_width * PixelFormatBits(pf) / 8, NULL, &srcRc, D3DX_DEFAULT, 0));
 		}
 	}
 
 	void D3D9Texture::CopyMemoryToTexture3D(int level, void* data, PixelFormat pf,
-			uint32_t width, uint32_t height, uint32_t depth,
-			uint32_t xOffset, uint32_t yOffset, uint32_t zOffset)
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
+			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
+			uint32_t src_width, uint32_t src_height, uint32_t src_depth,
+			uint32_t src_xOffset, uint32_t src_yOffset, uint32_t src_zOffset)
 	{
 		BOOST_ASSERT(TT_3D == type_);
 
@@ -577,19 +580,21 @@ namespace KlayGE
 
 		if (volume)
 		{
-			uint32_t const srcRowPitch = width * PixelFormatBits(pf) / 8;
-			uint32_t const srcSlicePitch = srcRowPitch * height;
+			uint32_t const srcRowPitch = src_width * PixelFormatBits(pf) / 8;
+			uint32_t const srcSlicePitch = srcRowPitch * src_height;
 
-			D3DBOX srcBox = { 0, 0, width, height, 0, depth };
-			D3DBOX dstBox = { xOffset, yOffset, xOffset + srcBox.Right, yOffset + srcBox.Bottom,
-				zOffset, zOffset + srcBox.Back };
+			D3DBOX srcBox = { src_xOffset, src_yOffset, src_xOffset + src_width, src_yOffset + src_height,
+				src_zOffset, src_zOffset + src_depth };
+			D3DBOX dstBox = { dst_xOffset, dst_yOffset, dst_xOffset + dst_width, dst_yOffset + dst_height,
+				dst_zOffset, dst_zOffset + dst_depth };
 			TIF(D3DXLoadVolumeFromMemory(volume.get(), NULL, &dstBox, data, ConvertFormat(pf),
-					srcRowPitch, srcSlicePitch, NULL, &srcBox, D3DX_FILTER_NONE, 0));
+					srcRowPitch, srcSlicePitch, NULL, &srcBox, D3DX_DEFAULT, 0));
 		}
 	}
 
 	void D3D9Texture::CopyMemoryToTextureCube(CubeFaces face, int level, void* data, PixelFormat pf,
-			uint32_t size, uint32_t xOffset)
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
+			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset)
 	{
 		BOOST_ASSERT(TT_Cube == type_);
 
@@ -599,10 +604,10 @@ namespace KlayGE
 
 		if (surface)
 		{
-			RECT srcRc = { 0, 0, size, size };
-			RECT dstRc = { xOffset, xOffset, xOffset + srcRc.right, xOffset + srcRc.bottom };
+			RECT srcRc = { src_xOffset, src_yOffset, src_xOffset + src_width, src_yOffset + src_height };
+			RECT dstRc = { dst_xOffset, dst_yOffset, dst_xOffset + dst_width, dst_yOffset + dst_height };
 			TIF(D3DXLoadSurfaceFromMemory(surface.get(), NULL, &dstRc, data, ConvertFormat(pf),
-					size * PixelFormatBits(pf) / 8, NULL, &srcRc, D3DX_FILTER_NONE, 0));
+					src_width * PixelFormatBits(pf) / 8, NULL, &srcRc, D3DX_DEFAULT, 0));
 		}
 	}
 

@@ -1,8 +1,11 @@
 // App3D.cpp
 // KlayGE App3D类 实现文件
-// Ver 2.7.0
-// 版权所有(C) 龚敏敏, 2003--2005
+// Ver 3.1.0
+// 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.1.0
+// 增加了OnResize (2005.11.20)
 //
 // 2.7.0
 // 增加了Quit (2005.6.28)
@@ -22,6 +25,7 @@
 #include <KlayGE/RenderWindow.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Input.hpp>
 #include <KlayGE/InputFactory.hpp>
 
@@ -51,6 +55,7 @@ namespace KlayGE
 		Context::Instance().RenderFactoryInstance().RenderEngineInstance().CreateRenderWindow(name, settings);
 
 		this->InitObjects();
+		this->OnResize(settings.width, settings.height);
 	}
 
 	void App3DFramework::Run()

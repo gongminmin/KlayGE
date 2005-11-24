@@ -86,25 +86,24 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void RenderWindow::Resize(uint32_t width, uint32_t height)
 	{
-		if ((width_ != width) || (height_ != height))
-		{
-			width_ = width;
-			height_ = height;
+		width_ = width;
+		height_ = height;
 
-			// Notify viewports of resize
-			viewport_.width = width;
-			viewport_.height = height;
+		// Notify viewports of resize
+		viewport_.width = width;
+		viewport_.height = height;
 
-			this->DoResize(width, height);
+		this->DoResize(width, height);
 
-			App3DFramework& app = Context::Instance().AppInstance();
-			app.OnResize(width, height);
-		}
+		App3DFramework& app = Context::Instance().AppInstance();
+		app.OnResize(width, height);
 	}
 
 	// 改变窗口位置
 	/////////////////////////////////////////////////////////////////////////////////
 	void RenderWindow::Reposition(uint32_t left, uint32_t top)
 	{
+		left_ = left;
+		top_ = top;
 	}
 }

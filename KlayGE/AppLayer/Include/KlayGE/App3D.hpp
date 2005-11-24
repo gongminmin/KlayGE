@@ -1,7 +1,7 @@
 // App3Dp.hpp
 // KlayGE App3D类 头文件
 // Ver 3.1.0
-// 版权所有(C) 龚敏敏, 2003--2005
+// 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
 //
 // 3.1.0

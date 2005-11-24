@@ -387,9 +387,6 @@ namespace KlayGE
 
 		this->UpdateSurfacesPtrs();
 
-		this->Reposition(left_, top_);
-		this->Resize(width_, height_);
-
 		active_ = true;
 		ready_ = true;
 	}
@@ -454,8 +451,19 @@ namespace KlayGE
 		::RECT rect;
 		::GetWindowRect(hWnd_, &rect);
 
-		this->Reposition(rect.left, rect.top);
-		this->Resize(rect.right - rect.left, rect.bottom - rect.top);
+		uint32_t new_left = rect.left;
+		uint32_t new_top = rect.top;
+		if ((new_left != left_) || (new_top != top_))
+		{
+			this->Reposition(new_left, new_top);
+		}
+
+		uint32_t new_width = rect.right - rect.left;
+		uint32_t new_height = rect.bottom - rect.top;
+		if ((new_width != width_) || (new_height != height_))
+		{
+			this->Resize(new_width, new_height);
+		}
 	}
 
 	void D3D9RenderWindow::Destroy()

@@ -76,7 +76,8 @@ namespace
 			}
 
 			TexturePtr texture = rf.MakeTexture3D(XSIZE, YSIZE, ZSIZE, 1, PF_L8);
-			texture->CopyMemoryToTexture3D(0, &turbBuffer[0], PF_L8, XSIZE, YSIZE, ZSIZE, 0, 0, 0);
+			texture->CopyMemoryToTexture3D(0, &turbBuffer[0], PF_L8, XSIZE, YSIZE, ZSIZE, 0, 0, 0,
+				XSIZE, YSIZE, ZSIZE, 0, 0, 0);
 
 			effect_ = rf.LoadEffect("Electro.fx");
 			effect_->ActiveTechnique("Electro");
