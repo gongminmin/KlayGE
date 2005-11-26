@@ -151,7 +151,8 @@ int main(int argc, char* argv[])
 	ComputeDistanceMap(distances, 256, 256, 16, height_map);
 
 	TexturePtr distance_map_texture = render_factory.MakeTexture3D(width, height, depth, 1, PF_L8);
-	distance_map_texture->CopyMemoryToTexture3D(0, &distances[0], PF_L8, width, height, depth, 0, 0, 0);
+	distance_map_texture->CopyMemoryToTexture3D(0, &distances[0], PF_L8,
+		width, height, depth, 0, 0, 0, width, height, depth, 0, 0, 0);
 	SaveToFile(distance_map_texture, distance_name);
 
 	cout << "Distance map is saved to " << distance_name << endl;
