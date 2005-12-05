@@ -118,9 +118,16 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/D_SECURE_SCL=0"
+				InlineFunctionExpansion="2"
+				EnableIntrinsicFunctions="true"
+				FavorSizeOrSpeed="1"
+				WholeProgramOptimization="true"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;STRICT"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
+				FloatingPointModel="2"
+				OpenMP="true"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>

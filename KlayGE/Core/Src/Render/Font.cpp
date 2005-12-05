@@ -334,20 +334,19 @@ namespace
 
 						int const buf_width = slot_->bitmap.width;
 						int const buf_height = slot_->bitmap.rows;
-						std::vector<uint16_t> dest(buf_width * buf_height, 0);
 						int const y_start = std::max<int>(max_height * 3 / 4 - slot_->bitmap_top, 0);
+						std::vector<uint16_t> dest(max_width * max_height, 0);
 						for (int y = 0; y < buf_height; ++ y)
 						{
-							int const y_offset = y_start + y;
 							for (int x = 0; x < buf_width; ++ x)
 							{
-								dest[y_offset * buf_width + x]
+								dest[(y + y_start) * max_width + x]
 										= ((slot_->bitmap.buffer[y * buf_width + x] & 0xF0) << 8) | 0x0FFF;
 							}
 						}
 						theTexture_->CopyMemoryToTexture2D(0, &dest[0], TEX_FORMAT,
 								max_width, max_height, charRect.left, charRect.top,
-								buf_width, buf_height, 0, 0);
+								max_width, max_height, 0, 0);
 
 						charInfoMap_.insert(std::make_pair(ch, charInfo));
 						charLRU_.push_front(ch);
