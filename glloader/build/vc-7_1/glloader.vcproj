@@ -15,7 +15,7 @@
 			OutputDirectory="../../lib"
 			IntermediateDirectory="../../Debug"
 			ConfigurationType="4"
-			CharacterSet="2">
+			CharacterSet="1">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
@@ -59,7 +59,7 @@
 			OutputDirectory="../../lib"
 			IntermediateDirectory="../../Release"
 			ConfigurationType="4"
-			CharacterSet="2">
+			CharacterSet="1">
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="../../include"

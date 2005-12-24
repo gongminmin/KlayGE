@@ -1,0 +1,20 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_MESAX_texture_stack">
+	<Tokens>
+		<Token name="GL_TEXTURE_1D_STACK_MESAX" value="0x8759"/>
+		<Token name="GL_TEXTURE_2D_STACK_MESAX" value="0x875A"/>
+		<Token name="GL_PROXY_TEXTURE_1D_STACK_MESAX" value="0x875B"/>
+		<Token name="GL_PROXY_TEXTURE_2D_STACK_MESAX" value="0x875C"/>
+		<Token name="GL_TEXTURE_1D_STACK_BINDING_MESAX" value="0x875D"/>
+		<Token name="GL_TEXTURE_2D_STACK_BINDING_MESAX" value="0x875E"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_MESAX" string="GL_MESAX_texture_stack"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_MESAX"/>
+	</InitPath>
+</GLExtension>
