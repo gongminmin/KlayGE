@@ -221,9 +221,7 @@ void AsciiArts::InitObjects()
 	this->BuildAsciiLumsTex();
 
 	render_buffer_ = Context::Instance().RenderFactoryInstance().MakeRenderTexture();
-
 	screen_buffer_ = renderEngine.ActiveRenderTarget(0);
-
 	render_buffer_->GetViewport().camera = screen_buffer_->GetViewport().camera;
 
 	renderQuad_.reset(new RenderQuad);
