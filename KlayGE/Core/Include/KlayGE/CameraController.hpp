@@ -18,7 +18,7 @@
 
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Camera.hpp>
-#include <boost/timer.hpp>
+#include <KlayGE/Timer.hpp>
 #include <KlayGE/Input.hpp>
 
 #ifdef KLAYGE_DEBUG
@@ -50,7 +50,7 @@ namespace KlayGE
 
 		Camera*		camera_;
 
-		boost::timer timer_;
+		Timer timer_;
 	};
 
 	class FirstPersonCameraController : public CameraController

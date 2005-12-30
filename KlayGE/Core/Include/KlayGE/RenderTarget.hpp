@@ -17,7 +17,7 @@
 #define _RENDERTARGET_HPP
 
 #include <KlayGE/Viewport.hpp>
-#include <boost/timer.hpp>
+#include <KlayGE/Timer.hpp>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_Core_d.lib")
@@ -81,7 +81,7 @@ namespace KlayGE
 
 		Viewport viewport_;
 
-		boost::timer timer_;
+		Timer timer_;
 	};
 }
 

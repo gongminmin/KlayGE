@@ -198,7 +198,7 @@ void Cartoon::InitObjects()
 	normal_buffer_->GetViewport().camera = screen_buffer_->GetViewport().camera;
 
 	fpcController_.AttachCamera(this->ActiveCamera());
-	fpcController_.Scalers(0.05f, 0.1f);
+	fpcController_.Scalers(0.05f, 0.5f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;

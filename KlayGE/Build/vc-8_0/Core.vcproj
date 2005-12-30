@@ -379,6 +379,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Include\KlayGE\Timer.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Include\KlayGE\Trace.hpp"
 					>
 				</File>

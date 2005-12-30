@@ -50,7 +50,7 @@ namespace KlayGE
 	{
 		while (DIERR_OTHERAPPHASPRIO == device_->Acquire())
 		{
-			Sleep(10);
+			Sleep(1);
 		}
 	}
 
@@ -67,7 +67,7 @@ namespace KlayGE
 			}
 			else
 			{
-				Sleep(10);
+				Sleep(1);
 			}
 		}
 	}
