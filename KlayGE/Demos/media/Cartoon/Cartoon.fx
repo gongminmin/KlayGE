@@ -1,6 +1,6 @@
 float4x4 model_view;
 float4x4 proj;
-float3 lightPos;
+float3 light_in_model;
 
 
 void PositionVS(float4 pos : POSITION,
@@ -66,83 +66,71 @@ technique Normal
 	}
 }
 
+
 float inv_width, inv_height;
 
 void PostToonVS(float4 pos : POSITION,
+				float3 normal : NORMAL,
 				float2 tex : TEXCOORD0,
 				out float4 oPos : POSITION,
-				out float2 oTc0: TEXCOORD0, // 中心
-				out float2 oTc1: TEXCOORD1, // 左上
-				out float2 oTc2: TEXCOORD2, // 右下
-				out float2 oTc3: TEXCOORD3, // 右上
-				out float2 oTc4: TEXCOORD4, // 左下
-				out float4 oTc5: TEXCOORD5, // 左 / 右
-				out float4 oTc6: TEXCOORD6) // 上 / 下
+				out float2 oTc0 : TEXCOORD0, // 中心
+				out float4 oTc1 : TEXCOORD1, // 左上 / 右下
+				out float4 oTc2 : TEXCOORD2, // 右上 / 左下
+				out float4 oTc3 : TEXCOORD3, // 左 / 右
+				out float4 oTc4 : TEXCOORD4, // 上 / 下
+				out float oToon : TEXCOORD5)
 {
-	oPos = pos;
-	oPos.z = 0.9f;
-	oTc0 = tex;
-	oTc1 = tex + float2(-inv_width, -inv_height);
-	oTc2 = tex + float2(+inv_width, +inv_height);
-	oTc3 = tex + float2(+inv_width, -inv_height);
-	oTc4 = tex + float2(-inv_width, +inv_height);
-	oTc5.xy = tex + float2(-inv_width, 0);
-	oTc5.zw = tex + float2(+inv_width, 0);
-	oTc6.xy = tex + float2(0, -inv_height);
-	oTc6.zw = tex + float2(0, +inv_height);
+	oPos = mul(mul(pos, model_view), proj);
+	
+	oTc0 = oPos.xy / oPos.w / 2 + 0.5f;
+	oTc0.y = 1 - oTc0.y;
+
+	oTc1 = oTc0.xyxy + float4(-inv_width, -inv_height, +inv_width, +inv_height);
+	oTc2 = oTc0.xyxy + float4(+inv_width, -inv_height, -inv_width, +inv_height);
+	oTc3 = oTc0.xyxy + float4(-inv_width, 0, +inv_width, 0);
+	oTc4 = oTc0.xyxy + float4(0, -inv_height, 0, +inv_height);
+
+	half3 L = normalize(light_in_model - pos.xyz);
+	oToon = dot(normalize(normal), L);
 }
 
 sampler1D toonMapSampler;
 sampler2D posSampler;
 sampler2D normalSampler;
 
-const float2 e_barrier = float2(0.8f, 0.1f); // x=norm(~.8f), y=depth(~.5f)
+const float2 e_barrier = float2(0.8f, 0.1f); // x=norm, y=depth
 const float2 e_weights = float2(0.25f, 0.5f); // x=norm, y=depth
 
-half4 PostToonPS(float2 tc0: TEXCOORD0,
-				float2 tc1: TEXCOORD1,
-				float2 tc2: TEXCOORD2,
-				float2 tc3: TEXCOORD3,
-				float2 tc4: TEXCOORD4,
-				float4 tc5: TEXCOORD5,
-				float4 tc6: TEXCOORD6,
-				uniform sampler1D toonMap) : COLOR
+half4 PostToonPS(float2 tc0 : TEXCOORD0,
+				float4 tc1 : TEXCOORD1,
+				float4 tc2 : TEXCOORD2,
+				float4 tc3 : TEXCOORD3,
+				float4 tc4 : TEXCOORD4,
+				float toon : TEXCOORD5) : COLOR
 {
-	half4 ret = 0;
-	
-	// 法线间断点过滤器
-	half4 nc = tex2D(normalSampler, tc0);
-	if (nc.w < 0.1)
-	{
-		half4 nd;
-		nd.x = dot(nc.xyz, tex2D(normalSampler, tc1).xyz);
-		nd.y = dot(nc.xyz, tex2D(normalSampler, tc2).xyz);
-		nd.z = dot(nc.xyz, tex2D(normalSampler, tc3).xyz);
-		nd.w = dot(nc.xyz, tex2D(normalSampler, tc4).xyz);
-		nd -= e_barrier.x;
-		nd = (nd > 0) ? 1 : 0;
-		half ne = (dot(nd, e_weights.x) < 1) ? 0 : 1;
+	// 法线间断点过滤
+	half3 nc = tex2D(normalSampler, tc0);
+	half4 nd;
+	nd.x = dot(nc.xyz, tex2D(normalSampler, tc1.xy).xyz);
+	nd.y = dot(nc.xyz, tex2D(normalSampler, tc1.zw).xyz);
+	nd.z = dot(nc.xyz, tex2D(normalSampler, tc2.xy).xyz);
+	nd.w = dot(nc.xyz, tex2D(normalSampler, tc2.zw).xyz);
+	nd -= e_barrier.x;
+	nd = (nd > 0) ? 1 : 0;
+	half ne = (dot(nd, e_weights.x) < 1) ? 0 : 1;
 
-		// 深度过滤器：计算梯度差距：
-		// (c-sample1)+(c-sample1_opposite)
-		half4 dc = tex2D(posSampler, tc0.xy);
-		half4 dd;
-		dd.x = tex2D(posSampler, tc1.xy).z + tex2D(posSampler, tc2.xy).z;
-		dd.y = tex2D(posSampler, tc3.xy).z + tex2D(posSampler, tc4.xy).z;
-		dd.z = tex2D(posSampler, tc5.xy).z + tex2D(posSampler, tc5.zw).z;
-		dd.w = tex2D(posSampler, tc6.xy).z + tex2D(posSampler, tc6.zw).z;
-		dd = abs(2 * dc.z - dd) - e_barrier.y;
-		dd = (dd > 0) ? 1 : 0;
-		half de = (dot(dd, e_weights.y) < 1) ? 1 : 0;
+	// 深度过滤，计算梯度差距
+	half3 dc = tex2D(posSampler, tc0.xy);
+	half4 dd;
+	dd.x = tex2D(posSampler, tc1.xy).z + tex2D(posSampler, tc1.zw).z;
+	dd.y = tex2D(posSampler, tc2.xy).z + tex2D(posSampler, tc2.zw).z;
+	dd.z = tex2D(posSampler, tc3.xy).z + tex2D(posSampler, tc3.zw).z;
+	dd.w = tex2D(posSampler, tc4.xy).z + tex2D(posSampler, tc4.zw).z;
+	dd = abs(2 * dc.z - dd) - e_barrier.y;
+	dd = (dd > 0) ? 1 : 0;
+	half de = (dot(dd, e_weights.y) < 1) ? 1 : 0;
 
-		half3 L = normalize(lightPos - dc.xyz);
-		half toon = dot(nc.xyz, L);
-
-		ret = tex1D(toonMap, toon) * de * ne;
-		ret.a = 1;
-	}
-
-	return ret;
+	return tex1D(toonMapSampler, toon) * de * ne;
 }
 
 technique Cartoon
@@ -157,11 +145,7 @@ technique Cartoon
 		ZEnable      = true;
 		ZWriteEnable = true;
 
-		AlphaTestEnable = true;
-		AlphaFunc = Greater;
-		AlphaRef = 8;
-
-		VertexShader = compile vs_1_1 PostToonVS();
-		PixelShader = compile ps_2_0 PostToonPS(toonMapSampler);
+		VertexShader = compile vs_2_0 PostToonVS();
+		PixelShader = compile ps_2_0 PostToonPS();
 	}
 }

@@ -35,11 +35,11 @@ using namespace KlayGE;
 
 namespace
 {
-	class RenderQuad : public RenderablePlane
+	class RenderTorus : public KMesh
 	{
 	public:
-		RenderQuad()
-			: RenderablePlane(2, 2, 1, 1, true),
+		RenderTorus(std::wstring const & name, TexturePtr tex)
+			: KMesh(L"Torus", TexturePtr()),
 				toon_sampler_(new Sampler),
 				pos_sampler_(new Sampler),
 				normal_sampler_(new Sampler)
@@ -62,6 +62,30 @@ namespace
 			*(effect_->ParameterByName("normalSampler")) = normal_sampler_;
 		}
 
+		void Pass(int i)
+		{
+			switch (i)
+			{
+			case 0:
+				{
+					float rotX(std::clock() / 700.0f);
+					float rotY(std::clock() / 700.0f);
+
+					model_mat_ = MathLib::RotationX(rotX) * MathLib::RotationY(rotY);
+				}
+				effect_->ActiveTechnique("Position");
+				break;
+			
+			case 1:
+				effect_->ActiveTechnique("Normal");
+				break;
+
+			case 2:
+				effect_->ActiveTechnique("Cartoon");
+				break;
+			}
+		}
+
 		void UpdateTexture(TexturePtr const & pos_tex, TexturePtr const & normal_tex)
 		{
 			pos_sampler_->SetTexture(pos_tex);
@@ -73,9 +97,16 @@ namespace
 
 		void OnRenderBegin()
 		{
-			effect_->ActiveTechnique("Cartoon");
+			App3DFramework const & app = Context::Instance().AppInstance();
 
-			*(effect_->ParameterByName("lightPos")) = Vector3(2, 2, -3);
+			Matrix4 view = app.ActiveCamera().ViewMatrix();
+			Matrix4 proj = app.ActiveCamera().ProjMatrix();
+
+			*(effect_->ParameterByName("model_view")) = model_mat_ * view;
+			*(effect_->ParameterByName("proj")) = proj;
+
+			*(effect_->ParameterByName("light_in_model")) = MathLib::TransformCoord(Vector3(2, 2, -3),
+																	MathLib::Inverse(model_mat_));
 		}
 
 	private:
@@ -83,49 +114,8 @@ namespace
 
 		SamplerPtr pos_sampler_;
 		SamplerPtr normal_sampler_;
-	};
 
-	class RenderTorus : public KMesh
-	{
-	public:
-		RenderTorus(std::wstring const & name, TexturePtr tex)
-			: KMesh(L"Torus", TexturePtr())
-		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			effect_ = rf.LoadEffect("Cartoon.fx");
-		}
-
-		void PositionPass(bool b)
-		{
-			if (b)
-			{
-				effect_->ActiveTechnique("Position");
-			}
-			else
-			{
-				effect_->ActiveTechnique("Normal");
-			}
-		}
-
-		void OnRenderBegin()
-		{
-			App3DFramework const & app = Context::Instance().AppInstance();
-
-			Matrix4 view = app.ActiveCamera().ViewMatrix();
-			Matrix4 proj = app.ActiveCamera().ProjMatrix();
-
-			*(effect_->ParameterByName("proj")) = proj;
-
-			float rotX(std::clock() / 700.0f);
-			float rotY(std::clock() / 700.0f);
-
-			Matrix4 mat(MathLib::RotationX(rotX));
-			Matrix4 matY(MathLib::RotationY(rotY));
-			mat *= matY;
-
-			*(effect_->ParameterByName("model_view")) = mat * view;
-		}
+		Matrix4 model_mat_;
 	};
 
 	class TorusObject : public SceneObjectHelper
@@ -193,7 +183,6 @@ void Cartoon::InitObjects()
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
 	torus_.reset(new TorusObject);
-	renderQuad_.reset(new RenderQuad);
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
@@ -255,14 +244,14 @@ void Cartoon::DoUpdate(uint32_t pass)
 		
 		renderEngine.ActiveRenderTarget(0, pos_buffer_);
 		sceneMgr.Clear();
-		checked_cast<RenderTorus*>(torus_->GetRenderable().get())->PositionPass(true);
+		checked_cast<RenderTorus*>(torus_->GetRenderable().get())->Pass(0);
 		torus_->AddToSceneManager();
 		break;
 
 	case 1:
 		renderEngine.ActiveRenderTarget(0, normal_buffer_);
 		sceneMgr.Clear();
-		checked_cast<RenderTorus*>(torus_->GetRenderable().get())->PositionPass(false);
+		checked_cast<RenderTorus*>(torus_->GetRenderable().get())->Pass(1);
 		torus_->AddToSceneManager();
 		break;
 
@@ -270,8 +259,9 @@ void Cartoon::DoUpdate(uint32_t pass)
 		renderEngine.ActiveRenderTarget(0, screen_buffer_);
 
 		sceneMgr.Clear();
-		checked_cast<RenderQuad*>(renderQuad_.get())->UpdateTexture(pos_tex_, normal_tex_);
-		renderQuad_->AddToRenderQueue();
+		checked_cast<RenderTorus*>(torus_->GetRenderable().get())->UpdateTexture(pos_tex_, normal_tex_);
+		checked_cast<RenderTorus*>(torus_->GetRenderable().get())->Pass(2);
+		torus_->AddToSceneManager();
 
 		RenderWindow* rw = static_cast<RenderWindow*>(renderEngine.ActiveRenderTarget(0).get());
 
