@@ -246,12 +246,16 @@ void Fractal::DoUpdate(uint32_t pass)
 		render_buffer_->AttachTexture2D(rendered_tex_[!odd]);
 
 		renderEngine.ActiveRenderTarget(0, render_buffer_);
+		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+
 		checked_cast<RenderFractal*>(renderFractal_.get())->SetTexture(rendered_tex_[odd]);
 		renderFractal_->AddToRenderQueue();
 		break;
 
 	case 1:
 		renderEngine.ActiveRenderTarget(0, screen_buffer_);
+		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+
 		checked_cast<RenderPlane*>(renderPlane_.get())->SetTexture(rendered_tex_[!odd]);
 		renderPlane_->AddToRenderQueue();
 

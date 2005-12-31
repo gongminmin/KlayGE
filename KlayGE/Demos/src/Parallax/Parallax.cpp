@@ -210,10 +210,8 @@ void Parallax::DoUpdate(uint32_t pass)
 {
 	fpcController_.Update();
 
-	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
-	inputEngine.Update();
-
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+	renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 	float degree(std::clock() / 700.0f);
 	Vector3 lightPos(2, 0, 1);

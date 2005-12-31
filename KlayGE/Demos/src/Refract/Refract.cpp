@@ -182,6 +182,7 @@ void Refract::DoUpdate(uint32_t pass)
 	fpcController_.Update();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+	renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 	*(refractor_->GetRenderable()->GetRenderEffect()->ParameterByName("eyePos")) = this->ActiveCamera().EyePos();
 

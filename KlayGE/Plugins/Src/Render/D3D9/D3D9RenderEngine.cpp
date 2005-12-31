@@ -70,7 +70,6 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D9RenderEngine::D3D9RenderEngine()
 						: cullingMode_(RenderEngine::CM_None),
-							clearFlags_(D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER),
 							last_num_vertex_stream_(1)
 	{
 		// Create our Direct3D object
@@ -171,6 +170,27 @@ namespace KlayGE
 	void D3D9RenderEngine::ClearColor(Color const & clr)
 	{
 		clearClr_ = D3DCOLOR_COLORVALUE(clr.r(), clr.g(), clr.b(), 1.0f);
+	}
+
+	// 清空缓冲区
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9RenderEngine::Clear(uint32_t masks)
+	{
+		uint32_t flags = 0;
+		if (masks & CBM_Color)
+		{
+			flags |= D3DCLEAR_TARGET;
+		}
+		if (masks & CBM_Depth)
+		{
+			flags |= D3DCLEAR_ZBUFFER;
+		}
+		if (masks & CBM_Stencil)
+		{
+			flags |= D3DCLEAR_STENCIL;
+		}
+
+		TIF(d3dDevice_->Clear(0, NULL, flags, clearClr_, 1, 0));
 	}
 
 	// 设置光影类型
@@ -282,8 +302,6 @@ namespace KlayGE
 	void D3D9RenderEngine::BeginFrame()
 	{
 		BOOST_ASSERT(d3dDevice_);
-
-		TIF(d3dDevice_->Clear(0, NULL, clearFlags_, clearClr_, 1, 0));
 
 		TIF(d3dDevice_->BeginScene());
 	}
@@ -687,14 +705,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::StencilCheckEnabled(bool enabled)
 	{
-		if (enabled)
-		{
-			clearFlags_ |= D3DCLEAR_STENCIL;
-		}
-		else
-		{
-			clearFlags_ &= ~D3DCLEAR_STENCIL;
-		}
+		BOOST_ASSERT(d3dDevice_);
 
 		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILENABLE, enabled));
 	}

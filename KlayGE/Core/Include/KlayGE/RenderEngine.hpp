@@ -1,8 +1,11 @@
 // RenderEngine.hpp
 // KlayGE 渲染引擎类 实现文件
-// Ver 3.0.0
+// Ver 3.2.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.2.0
+// 暴露出了Clear (2005.12.31)
 //
 // 3.0.0
 // 去掉了固定流水线 (2005.8.18)
@@ -127,6 +130,13 @@ namespace KlayGE
 			SOP_Invert
 		};
 
+		enum ClearBufferMask
+		{
+			CBM_Color   = 1UL << 0,
+			CBM_Depth   = 1UL << 1,
+			CBM_Stencil = 1UL << 2
+		};
+
 	public:
 		RenderEngine();
 		virtual ~RenderEngine();
@@ -148,6 +158,7 @@ namespace KlayGE
 		size_t NumVerticesJustRendered();
 
 		virtual void ClearColor(Color const & clr) = 0;
+		virtual void Clear(uint32_t masks) = 0;
 
 		virtual void ShadingType(ShadeOptions so) = 0;
 

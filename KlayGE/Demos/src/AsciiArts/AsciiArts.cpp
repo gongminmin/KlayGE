@@ -291,6 +291,7 @@ void AsciiArts::DoUpdate(uint32_t pass)
 		case 0:
 			// 第一遍，正常渲染
 			renderEngine.ActiveRenderTarget(0, render_buffer_);
+			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 			obj_->AddToSceneManager();
 			break;
@@ -301,6 +302,7 @@ void AsciiArts::DoUpdate(uint32_t pass)
 
 			// 第二遍，匹配，最终渲染
 			renderEngine.ActiveRenderTarget(0, screen_buffer_);
+			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 			static_cast<RenderQuad*>(renderQuad_.get())->SetTexture(downsample_tex_, ascii_lums_tex_);
 			sceneMgr.Clear();
@@ -311,6 +313,7 @@ void AsciiArts::DoUpdate(uint32_t pass)
 	else
 	{
 		renderEngine.ActiveRenderTarget(0, screen_buffer_);
+		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 		sceneMgr.Clear();
 		obj_->AddToSceneManager();

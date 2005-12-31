@@ -136,6 +136,24 @@ namespace
 
 			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[4]);
 		}
+
+		void OnRenderBegin()
+		{
+			App3DFramework const & app = Context::Instance().AppInstance();
+
+			Matrix4 model = MathLib::RotationX(-0.5f);
+			Matrix4 const & view = app.ActiveCamera().ViewMatrix();
+			Matrix4 const & proj = app.ActiveCamera().ProjMatrix();
+
+			*(effect_->ParameterByName("worldviewproj")) = model * view * proj;
+			*(effect_->ParameterByName("eyePos")) = app.ActiveCamera().EyePos();
+
+			float degree(std::clock() / 700.0f);
+			Vector3 lightPos(2, 0, -2);
+			Matrix4 matRot(MathLib::RotationZ(degree));
+			lightPos = MathLib::TransformCoord(lightPos, matRot);
+			*(effect_->ParameterByName("lightPos")) = lightPos;
+		}
 	};
 
 	class PolygonObject : public SceneObjectHelper
@@ -238,21 +256,8 @@ void DistanceMapping::DoUpdate(KlayGE::uint32_t pass)
 {
 	fpcController_.Update();
 
-	Matrix4 model = MathLib::RotationX(-0.5f);
-	Matrix4 view = this->ActiveCamera().ViewMatrix();
-	Matrix4 proj = this->ActiveCamera().ProjMatrix();
-
-	*(polygon_->GetRenderable()->GetRenderEffect()->ParameterByName("worldviewproj")) = model * view * proj;
-	*(polygon_->GetRenderable()->GetRenderEffect()->ParameterByName("eyePos")) = this->ActiveCamera().EyePos();
-
-
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
-	float degree(std::clock() / 700.0f);
-	Vector3 lightPos(2, 0, -2);
-	Matrix4 matRot(MathLib::RotationZ(degree));
-	lightPos = MathLib::TransformCoord(lightPos, matRot);
-	*(polygon_->GetRenderable()->GetRenderEffect()->ParameterByName("lightPos")) = lightPos;
+	renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 	std::wostringstream stream;
 	stream << renderEngine.ActiveRenderTarget(0)->FPS();

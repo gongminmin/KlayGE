@@ -59,6 +59,9 @@ namespace KlayGE
 		void ClearColor(Color const & /*clr*/)
 		{
 		}
+		void Clear(uint32_t /*masks*/)
+		{
+		}
 
 		void ShadingType(ShadeOptions /*so*/)
 		{

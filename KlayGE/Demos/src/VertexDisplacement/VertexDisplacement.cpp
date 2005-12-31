@@ -48,10 +48,19 @@ namespace
 
 			SamplerPtr flag_sampler(new Sampler);
 			flag_sampler->SetTexture(LoadTexture("Flag.dds"));
-			flag_sampler->Filtering(Sampler::TFO_Point);
+			flag_sampler->Filtering(Sampler::TFO_Bilinear);
 			flag_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
 			flag_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
 			*(effect_->ParameterByName("flagSampler")) = flag_sampler;
+		}
+
+		void OnRenderBegin()
+		{
+			float currentAngle(clock() / 400.0f);
+			*(effect_->ParameterByName("currentAngle")) = currentAngle;
+
+			*(effect_->ParameterByName("half_length")) = LENGTH / 2.0f;
+			*(effect_->ParameterByName("half_width")) = WIDTH / 2.0f;
 		}
 	};
 
@@ -157,11 +166,6 @@ void VertexDisplacement::DoUpdate(uint32_t pass)
 
 	Matrix4 view = this->ActiveCamera().ViewMatrix();
 	Matrix4 proj = this->ActiveCamera().ProjMatrix();
-	Vector3 eyePos = this->ActiveCamera().EyePos();
-
-	*(flag_->GetRenderable()->GetRenderEffect()->ParameterByName("half_length")) = LENGTH / 2.0f;
-	*(flag_->GetRenderable()->GetRenderEffect()->ParameterByName("half_width")) = WIDTH / 2.0f;
-
 	Matrix4 modelView = flag_->GetModelMatrix() * view;
 
 	*(flag_->GetRenderable()->GetRenderEffect()->ParameterByName("modelview")) = modelView;
@@ -169,11 +173,8 @@ void VertexDisplacement::DoUpdate(uint32_t pass)
 
 	*(flag_->GetRenderable()->GetRenderEffect()->ParameterByName("modelviewIT")) = MathLib::Transpose(MathLib::Inverse(modelView));
 
-
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
-	float currentAngle(clock() / 400.0f);
-	*(flag_->GetRenderable()->GetRenderEffect()->ParameterByName("currentAngle")) = currentAngle;
+	renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 	std::wostringstream stream;
 	stream << renderEngine.ActiveRenderTarget(0)->FPS();

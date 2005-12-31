@@ -379,6 +379,8 @@ void ShadowCubeMap::DoUpdate(uint32_t pass)
 		{
 			fpcController_.Update();
 
+			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+
 			light_model_ = MathLib::RotationZ(0.4f) * MathLib::RotationY(std::clock() / 700.0f)
 				* MathLib::Translation(0.1f, 0.7f, 0.2f);
 		}
@@ -407,12 +409,14 @@ void ShadowCubeMap::DoUpdate(uint32_t pass)
 
 			shadow_buffer_->AttachTextureCube(shadow_tex_, face);
 			renderEngine.ActiveRenderTarget(0, shadow_buffer_);
+			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 		}
 		break;
 
 	case 6:
 		{
 			renderEngine.ActiveRenderTarget(0, screen_buffer_);
+			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 			//SaveToFile(shadow_tex_, "shadow_tex.dds");
 

@@ -127,6 +127,27 @@ namespace KlayGE
 		glClearColor(col.r(), col.g(), col.b(), col.a());
 	}
 
+	// 清空缓冲区
+	/////////////////////////////////////////////////////////////////////////////////
+	void OGLRenderEngine::Clear(uint32_t masks)
+	{
+		uint32_t flags = 0;
+		if (masks & CBM_Color)
+		{
+			flags |= GL_COLOR_BUFFER_BIT;
+		}
+		if (masks & CBM_Depth)
+		{
+			flags |= GL_DEPTH_BUFFER_BIT;
+		}
+		if (masks & CBM_Stencil)
+		{
+			flags |= GL_STENCIL_BUFFER_BIT;
+		}
+
+		glClear(flags);
+	}
+
 	// 设置光影类型
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::ShadingType(ShadeOptions so)
@@ -212,7 +233,6 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::BeginFrame()
 	{
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 	// 渲染

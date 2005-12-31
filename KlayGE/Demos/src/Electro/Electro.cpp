@@ -185,6 +185,8 @@ void Electro::DoUpdate(uint32_t pass)
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
+	renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+
 	renderElectro_->AddToRenderQueue();
 
 	std::wostringstream stream;

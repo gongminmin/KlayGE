@@ -50,6 +50,7 @@ namespace KlayGE
 		std::wstring const & Name() const;
 
 		void ClearColor(Color const & clr);
+		void Clear(uint32_t masks);
 
 		void ShadingType(ShadeOptions so);
 

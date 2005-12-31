@@ -99,8 +99,8 @@ namespace
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
 
-			Matrix4 view = app.ActiveCamera().ViewMatrix();
-			Matrix4 proj = app.ActiveCamera().ProjMatrix();
+			Matrix4 const & view = app.ActiveCamera().ViewMatrix();
+			Matrix4 const & proj = app.ActiveCamera().ProjMatrix();
 
 			*(effect_->ParameterByName("model_view")) = model_mat_ * view;
 			*(effect_->ParameterByName("proj")) = proj;
@@ -243,6 +243,8 @@ void Cartoon::DoUpdate(uint32_t pass)
 		fpcController_.Update();
 		
 		renderEngine.ActiveRenderTarget(0, pos_buffer_);
+		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+
 		sceneMgr.Clear();
 		checked_cast<RenderTorus*>(torus_->GetRenderable().get())->Pass(0);
 		torus_->AddToSceneManager();
@@ -250,6 +252,8 @@ void Cartoon::DoUpdate(uint32_t pass)
 
 	case 1:
 		renderEngine.ActiveRenderTarget(0, normal_buffer_);
+		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+
 		sceneMgr.Clear();
 		checked_cast<RenderTorus*>(torus_->GetRenderable().get())->Pass(1);
 		torus_->AddToSceneManager();
@@ -257,6 +261,7 @@ void Cartoon::DoUpdate(uint32_t pass)
 
 	case 2:
 		renderEngine.ActiveRenderTarget(0, screen_buffer_);
+		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 		sceneMgr.Clear();
 		checked_cast<RenderTorus*>(torus_->GetRenderable().get())->UpdateTexture(pos_tex_, normal_tex_);

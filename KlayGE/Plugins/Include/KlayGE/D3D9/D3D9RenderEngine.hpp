@@ -61,6 +61,7 @@ namespace KlayGE
 		boost::shared_ptr<IDirect3DDevice9> const & D3DDevice() const;
 
 		void ClearColor(Color const & clr);
+		void Clear(uint32_t masks);
 
 		void ShadingType(ShadeOptions so);
 
@@ -134,7 +135,6 @@ namespace KlayGE
 
 		CullMode cullingMode_;
 		D3DCOLOR clearClr_;
-		uint32_t clearFlags_;
 
 		size_t last_num_vertex_stream_;
 
