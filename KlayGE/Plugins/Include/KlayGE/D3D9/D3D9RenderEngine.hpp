@@ -57,7 +57,7 @@ namespace KlayGE
 
 		std::wstring const & Name() const;
 
-		boost::shared_ptr<IDirect3D9> const & D3D() const;
+		boost::shared_ptr<IDirect3D9> const & D3DObject() const;
 		boost::shared_ptr<IDirect3DDevice9> const & D3DDevice() const;
 
 		void ClearColor(Color const & clr);

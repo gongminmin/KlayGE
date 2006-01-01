@@ -1,8 +1,11 @@
 // D3D9Mapping.hpp
 // KlayGE RenderEngine和D3D9本地之间的映射 实现文件
 // Ver 3.0.0
-// 版权所有(C) 龚敏敏, 2005
+// 版权所有(C) 龚敏敏, 2005-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.2.0
+// 支持ATI的instancing (2006.1.1)
 //
 // 3.0.0
 // 增加了TAM_Border (2005.8.30)
@@ -17,6 +20,8 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
+#include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Vector.hpp>
 #include <KlayGE/Matrix.hpp>
@@ -30,6 +35,7 @@
 
 #include <boost/assert.hpp>
 
+#include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9Mapping.hpp>
 
 namespace KlayGE
@@ -472,7 +478,19 @@ namespace KlayGE
 		}
 		else
 		{
-			ret.hw_instancing_support = false;
+			// Check for ATI instancing support
+			D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+			if (D3D_OK == renderEngine.D3DObject()->CheckDeviceFormat(D3DADAPTER_DEFAULT,
+				D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE,
+				static_cast<D3DFORMAT>(MAKEFOURCC('I', 'N', 'S', 'T'))))
+			{
+				// Notify the driver that instancing support is expected
+				renderEngine.D3DDevice()->SetRenderState(D3DRS_POINTSIZE, MAKEFOURCC('I', 'N', 'S', 'T'));
+			}
+			else
+			{
+				ret.hw_instancing_support = false;
+			}
 		}
 
 		return ret;

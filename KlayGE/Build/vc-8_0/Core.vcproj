@@ -114,9 +114,6 @@
 				EnableFunctionLevelLinking="true"
 				EnableEnhancedInstructionSet="1"
 				FloatingPointModel="2"
-				ForceConformanceInForLoopScope="true"
-				RuntimeTypeInfo="true"
-				OpenMP="true"
 				WarningLevel="3"
 			/>
 			<Tool

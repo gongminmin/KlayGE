@@ -511,7 +511,7 @@ namespace KlayGE
 			renderSurface_->GetDesc(&desc);
 			IDirect3DSurface9* surface;
 			d3dDevice_->CreateOffscreenPlainSurface(desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &surface, NULL);
-			D3DXLoadSurfaceFromSurface(surface, NULL, NULL, renderSurface_.get(), NULL, NULL, D3DX_FILTER_NONE, 0);
+			d3dDevice_->GetRenderTargetData(renderSurface_.get(), surface);
 			renderSurface_ = MakeCOMPtr(surface);
 			renderZBuffer_.reset();
 
@@ -520,7 +520,7 @@ namespace KlayGE
 			TIF(d3dDevice_->Reset(&d3dpp_));
 
 			d3dDevice_->GetRenderTarget(0, &surface);
-			D3DXLoadSurfaceFromSurface(surface, NULL, NULL, renderSurface_.get(), NULL, NULL, D3DX_FILTER_NONE, 0);
+			d3dDevice_->UpdateSurface(renderSurface_.get(), NULL, surface, NULL);
 			renderSurface_ = MakeCOMPtr(surface);
 
 			d3dDevice_->GetDepthStencilSurface(&surface);

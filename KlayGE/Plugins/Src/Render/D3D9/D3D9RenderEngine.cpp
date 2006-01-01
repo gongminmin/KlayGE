@@ -100,7 +100,7 @@ namespace KlayGE
 
 	// 获取D3D接口
 	/////////////////////////////////////////////////////////////////////////////////
-	boost::shared_ptr<IDirect3D9> const & D3D9RenderEngine::D3D() const
+	boost::shared_ptr<IDirect3D9> const & D3D9RenderEngine::D3DObject() const
 	{
 		return d3d_;
 	}
