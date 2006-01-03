@@ -67,6 +67,45 @@ technique Normal
 }
 
 
+void PositionNormalVS(float4 pos : POSITION,
+			float3 normal : NORMAL,
+			out float4 oPos : POSITION,
+			out float4 oPosOut : TEXCOORD0,
+			out float3 oNormal : TEXCOORD1)
+{
+	oPos = mul(mul(pos, model_view), proj);
+	oPosOut = oPos;
+	oNormal = normalize(mul(normal, (float3x3)model_view));
+}
+
+void PositionNormalPS(float4 position : TEXCOORD0,
+						float3 normal : TEXCOORD1,
+					out float4 oPos : COLOR0,
+					out float4 oNormal : COLOR1)
+{
+	oPos = position / position.w;
+	normal = normalize(normal);
+	oNormal = float4(normal, 0);
+}
+
+technique PositionNormal
+{
+	pass p0
+	{
+		FillMode = Solid;
+		CullMode = CCW;
+		Stencilenable = false;
+		Clipping = true;
+
+		ZEnable      = true;
+		ZWriteEnable = true;
+
+		VertexShader = compile vs_1_1 PositionNormalVS();
+		PixelShader = compile ps_2_0 PositionNormalPS();
+	}
+}
+
+
 float inv_width, inv_height;
 
 void PostToonVS(float4 pos : POSITION,
@@ -129,7 +168,7 @@ half4 PostToonPS(float2 tc0 : TEXCOORD0,
 	dd = abs(2 * dc.z - dd) - e_barrier.y;
 	dd = (dd > 0) ? 1 : 0;
 	half de = (dot(dd, e_weights.y) < 1) ? 1 : 0;
-
+	
 	return tex1D(toonMapSampler, toon) * de * ne;
 }
 

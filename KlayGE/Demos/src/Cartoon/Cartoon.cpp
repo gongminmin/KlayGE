@@ -64,25 +64,48 @@ namespace
 
 		void Pass(int i)
 		{
-			switch (i)
+			RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			if (renderEngine.DeviceCaps().max_simultaneous_rts > 1)
 			{
-			case 0:
+				switch (i)
 				{
-					float rotX(std::clock() / 700.0f);
-					float rotY(std::clock() / 700.0f);
+				case 0:
+					{
+						float rotX(std::clock() / 700.0f);
+						float rotY(std::clock() / 700.0f);
 
-					model_mat_ = MathLib::RotationX(rotX) * MathLib::RotationY(rotY);
+						model_mat_ = MathLib::RotationX(rotX) * MathLib::RotationY(rotY);
+					}
+					effect_->ActiveTechnique("PositionNormal");
+					break;
+
+				case 2:
+					effect_->ActiveTechnique("Cartoon");
+					break;
 				}
-				effect_->ActiveTechnique("Position");
-				break;
-			
-			case 1:
-				effect_->ActiveTechnique("Normal");
-				break;
+			}
+			else
+			{
+				switch (i)
+				{
+				case 0:
+					{
+						float rotX(std::clock() / 700.0f);
+						float rotY(std::clock() / 700.0f);
 
-			case 2:
-				effect_->ActiveTechnique("Cartoon");
-				break;
+						model_mat_ = MathLib::RotationX(rotX) * MathLib::RotationY(rotY);
+					}
+					effect_->ActiveTechnique("Position");
+					break;
+				
+				case 1:
+					effect_->ActiveTechnique("Normal");
+					break;
+
+				case 2:
+					effect_->ActiveTechnique("Cartoon");
+					break;
+				}
 			}
 		}
 
@@ -229,7 +252,15 @@ void Cartoon::InputHandler(InputEngine const & sender, InputAction const & actio
 
 uint32_t Cartoon::NumPasses() const
 {
-	return 3;
+	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+	if (renderEngine.DeviceCaps().max_simultaneous_rts > 1)
+	{
+		return 2;
+	}
+	else
+	{
+		return 3;
+	}
 }
 
 void Cartoon::DoUpdate(uint32_t pass)
@@ -237,29 +268,47 @@ void Cartoon::DoUpdate(uint32_t pass)
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-	switch (pass)
+	if (renderEngine.DeviceCaps().max_simultaneous_rts > 1)
 	{
-	case 0:
-		fpcController_.Update();
-		
-		renderEngine.ActiveRenderTarget(0, pos_buffer_);
-		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+		if (0 == pass)
+		{
+			fpcController_.Update();
 
-		sceneMgr.Clear();
-		checked_cast<RenderTorus*>(torus_->GetRenderable().get())->Pass(0);
-		torus_->AddToSceneManager();
-		break;
+			renderEngine.ActiveRenderTarget(0, pos_buffer_);
+			renderEngine.ActiveRenderTarget(1, normal_buffer_);
+			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
-	case 1:
-		renderEngine.ActiveRenderTarget(0, normal_buffer_);
-		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+			sceneMgr.Clear();
+			checked_cast<RenderTorus*>(torus_->GetRenderable().get())->Pass(0);
+			torus_->AddToSceneManager();
+		}
+	}
+	else
+	{
+		if (0 == pass)
+		{
+			fpcController_.Update();
 
-		sceneMgr.Clear();
-		checked_cast<RenderTorus*>(torus_->GetRenderable().get())->Pass(1);
-		torus_->AddToSceneManager();
-		break;
+			renderEngine.ActiveRenderTarget(0, pos_buffer_);
+			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
-	case 2:
+			sceneMgr.Clear();
+			checked_cast<RenderTorus*>(torus_->GetRenderable().get())->Pass(0);
+			torus_->AddToSceneManager();
+		}
+		if (1 == pass)
+		{
+			renderEngine.ActiveRenderTarget(0, normal_buffer_);
+			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+
+			sceneMgr.Clear();
+			checked_cast<RenderTorus*>(torus_->GetRenderable().get())->Pass(1);
+			torus_->AddToSceneManager();
+		}
+	}
+
+	if (pass == this->NumPasses() - 1)
+	{
 		renderEngine.ActiveRenderTarget(0, screen_buffer_);
 		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
@@ -280,6 +329,5 @@ void Cartoon::DoUpdate(uint32_t pass)
 		stream.str(L"");
 		stream << renderEngine.ActiveRenderTarget(0)->FPS() << " FPS";
 		font_->RenderText(0, 54, Color(1, 1, 0, 1), stream.str().c_str());
-		break;
 	}
 }
