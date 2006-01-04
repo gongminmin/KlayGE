@@ -87,9 +87,9 @@ namespace KlayGE
 		return ret;
 	}
 
-	IndexStreamPtr D3D9RenderFactory::MakeIndexStream(bool staticStream)
+	IndexStreamPtr D3D9RenderFactory::MakeIndexStream(IndexFormat format, bool staticStream)
 	{
-		D3D9IndexStreamPtr ret(new D3D9IndexStream(staticStream));
+		D3D9IndexStreamPtr ret(new D3D9IndexStream(format, staticStream));
 		resource_pool_.push_back(ret);
 		return ret;
 	}

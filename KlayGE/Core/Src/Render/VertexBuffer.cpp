@@ -1,8 +1,11 @@
 // VertexBuffer.cpp
 // KlayGE 顶点缓冲区类 实现文件
-// Ver 3.1.0
-// 版权所有(C) 龚敏敏, 2003-2005
+// Ver 3.2.0
+// 版权所有(C) 龚敏敏, 2003-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.2.0
+// 支持32位的IndexStream (2006.1.4)
 //
 // 3.1.0
 // 分离了实例和几何流 (2005.10.31)
@@ -259,6 +262,11 @@ namespace KlayGE
 	class NullIndexStream : public IndexStream
 	{
 	public:
+		NullIndexStream()
+			: IndexStream(IF_Index16)
+		{
+		}
+
 		uint32_t NumIndices() const
 		{
 			return 0;
@@ -276,6 +284,11 @@ namespace KlayGE
 		}
 	};
 
+	IndexStream::IndexStream(IndexFormat format)
+		: format_(format)
+	{
+	}
+
 	IndexStream::~IndexStream()
 	{
 	}
@@ -288,31 +301,59 @@ namespace KlayGE
 
 	uint32_t IndexStream::StreamSize() const
 	{
-		return sizeof(uint16_t) * this->NumIndices();
+		return ((IF_Index32 == format_) ? sizeof(uint32_t) : sizeof(uint16_t)) * this->NumIndices();
 	}
 
 	IndexStream& IndexStream::Append(IndexStreamPtr rhs, uint16_t base_index)
 	{
-		std::vector<uint16_t> target_buffer(this->NumIndices());
-		this->CopyToMemory(&target_buffer[0]);
+		BOOST_ASSERT(rhs->format_ == format_);
 
-		std::vector<uint16_t> rhs_buffer(rhs->NumIndices());
-		rhs->CopyToMemory(&rhs_buffer[0]);
+		if (IF_Index32 == format_)
+		{
+			std::vector<uint32_t> target_buffer(this->NumIndices());
+			this->CopyToMemory(&target_buffer[0]);
 
-		std::transform(rhs_buffer.begin(), rhs_buffer.end(), rhs_buffer.begin(),
-			boost::bind(std::plus<uint16_t>(), base_index, _1));
+			std::vector<uint32_t> rhs_buffer(rhs->NumIndices());
+			rhs->CopyToMemory(&rhs_buffer[0]);
 
-		target_buffer.insert(target_buffer.end(), rhs_buffer.begin(), rhs_buffer.end());
-		this->Assign(&target_buffer[0], static_cast<uint32_t>(target_buffer.size()));
+			std::transform(rhs_buffer.begin(), rhs_buffer.end(), rhs_buffer.begin(),
+				boost::bind(std::plus<uint32_t>(), base_index, _1));
+
+			target_buffer.insert(target_buffer.end(), rhs_buffer.begin(), rhs_buffer.end());
+			this->Assign(&target_buffer[0], static_cast<uint32_t>(target_buffer.size()));
+		}
+		else
+		{
+			std::vector<uint16_t> target_buffer(this->NumIndices());
+			this->CopyToMemory(&target_buffer[0]);
+
+			std::vector<uint16_t> rhs_buffer(rhs->NumIndices());
+			rhs->CopyToMemory(&rhs_buffer[0]);
+
+			std::transform(rhs_buffer.begin(), rhs_buffer.end(), rhs_buffer.begin(),
+				boost::bind(std::plus<uint16_t>(), base_index, _1));
+
+			target_buffer.insert(target_buffer.end(), rhs_buffer.begin(), rhs_buffer.end());
+			this->Assign(&target_buffer[0], static_cast<uint32_t>(target_buffer.size()));
+		}
 
 		return *this;
 	}
 
 	void IndexStream::CopyToStream(IndexStream& rhs)
 	{
-		std::vector<uint16_t> target_buffer(this->NumIndices());
-		this->CopyToMemory(&target_buffer[0]);
-		rhs.Assign(&target_buffer[0], static_cast<uint32_t>(target_buffer.size()));
+		if (IF_Index32 == format_)
+		{
+			std::vector<uint32_t> target_buffer(this->NumIndices());
+			this->CopyToMemory(&target_buffer[0]);
+			rhs.Assign(&target_buffer[0], static_cast<uint32_t>(target_buffer.size()));
+		}
+		else
+		{
+			std::vector<uint16_t> target_buffer(this->NumIndices());
+			this->CopyToMemory(&target_buffer[0]);
+			rhs.Assign(&target_buffer[0], static_cast<uint32_t>(target_buffer.size()));
+		}
 	}
 
 

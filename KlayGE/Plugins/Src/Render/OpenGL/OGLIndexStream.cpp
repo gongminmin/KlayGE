@@ -29,8 +29,8 @@
 
 namespace KlayGE
 {
-	OGLIndexStream::OGLIndexStream(bool staticStream)
-		: static_stream_(staticStream)
+	OGLIndexStream::OGLIndexStream(IndexFormat format, bool staticStream)
+		: IndexStream(format), static_stream_(staticStream)
 	{
 		glGenBuffers(1, &ib_);
 	}
@@ -45,23 +45,48 @@ namespace KlayGE
 		numIndices_ = numIndices;
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib_);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+		if (IF_Index32 == format_)
+		{
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+				reinterpret_cast<GLsizeiptr>(numIndices * sizeof(uint32_t)), src,
+				this->IsStatic() ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+		}
+		else
+		{
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER,
 				reinterpret_cast<GLsizeiptr>(numIndices * sizeof(uint16_t)), src,
 				this->IsStatic() ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+		}
 	}
 
 	void OGLIndexStream::CopyToMemory(void* data)
 	{
-		uint16_t* destPtr = static_cast<uint16_t*>(data);
+		if (IF_Index32 == format_)
+		{
+			uint32_t* destPtr = static_cast<uint32_t*>(data);
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib_);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib_);
 
-		uint16_t* srcPtr = static_cast<uint16_t*>(glMapBuffer(GL_ELEMENT_ARRAY_BUFFER,
-				GL_READ_ONLY | (this->IsStatic() ? GL_STATIC_READ : GL_DYNAMIC_READ)));
+			uint32_t* srcPtr = static_cast<uint32_t*>(glMapBuffer(GL_ELEMENT_ARRAY_BUFFER,
+					GL_READ_ONLY | (this->IsStatic() ? GL_STATIC_READ : GL_DYNAMIC_READ)));
 
-		std::copy(srcPtr, srcPtr + this->NumIndices(), destPtr);
+			std::copy(srcPtr, srcPtr + this->NumIndices(), destPtr);
 
-		glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+			glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+		}
+		else
+		{
+			uint16_t* destPtr = static_cast<uint16_t*>(data);
+
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib_);
+
+			uint16_t* srcPtr = static_cast<uint16_t*>(glMapBuffer(GL_ELEMENT_ARRAY_BUFFER,
+					GL_READ_ONLY | (this->IsStatic() ? GL_STATIC_READ : GL_DYNAMIC_READ)));
+
+			std::copy(srcPtr, srcPtr + this->NumIndices(), destPtr);
+
+			glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+		}
 	}
 
 	void OGLIndexStream::Active()

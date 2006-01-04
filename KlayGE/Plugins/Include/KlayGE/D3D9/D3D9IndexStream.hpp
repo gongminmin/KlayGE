@@ -37,7 +37,7 @@ namespace KlayGE
 	class D3D9IndexStream : public IndexStream, public D3D9Resource
 	{
 	public:
-		D3D9IndexStream(bool staticStream);
+		D3D9IndexStream(IndexFormat format, bool staticStream);
 
 		bool IsStatic() const;
 

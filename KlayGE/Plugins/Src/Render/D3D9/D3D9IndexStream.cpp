@@ -30,8 +30,9 @@
 
 namespace KlayGE
 {
-	D3D9IndexStream::D3D9IndexStream(bool staticStream)
-						: staticStream_(staticStream),
+	D3D9IndexStream::D3D9IndexStream(IndexFormat format, bool staticStream)
+						: IndexStream(format),
+							staticStream_(staticStream),
 							numIndices_(0)
 	{
 	}
@@ -58,7 +59,7 @@ namespace KlayGE
 			IDirect3DIndexBuffer9* buffer;
 			TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->StreamSize()), 
 					this->IsStatic() ? 0 : D3DUSAGE_DYNAMIC,
-					D3DFMT_INDEX16, D3DPOOL_DEFAULT, &buffer, NULL));
+					(IF_Index32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_DEFAULT, &buffer, NULL));
 			buffer_ = MakeCOMPtr(buffer);
 		}
 
@@ -106,7 +107,7 @@ namespace KlayGE
 
 		IDirect3DIndexBuffer9* temp;
 		TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->StreamSize()), D3DUSAGE_DYNAMIC,
-				D3DFMT_INDEX16, D3DPOOL_SYSTEMMEM, &temp, NULL));
+			(IF_Index32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_SYSTEMMEM, &temp, NULL));
 		boost::shared_ptr<IDirect3DIndexBuffer9> buffer = MakeCOMPtr(temp);
 
 		uint8_t* src;
@@ -130,7 +131,7 @@ namespace KlayGE
 		IDirect3DIndexBuffer9* temp;
 		TIF(d3dDevice->CreateIndexBuffer(static_cast<UINT>(this->StreamSize()), 
 				this->IsStatic() ? 0 : D3DUSAGE_DYNAMIC,
-				D3DFMT_INDEX16, D3DPOOL_DEFAULT, &temp, NULL));
+				(IF_Index32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_DEFAULT, &temp, NULL));
 		boost::shared_ptr<IDirect3DIndexBuffer9> buffer = MakeCOMPtr(temp);
 
 		uint8_t* src;

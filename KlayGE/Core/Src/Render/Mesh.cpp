@@ -108,7 +108,7 @@ namespace KlayGE
 				}
 
 				// ½¨Á¢Ë÷Òý
-				vb_->SetIndexStream(rf.MakeIndexStream(true));
+				vb_->SetIndexStream(rf.MakeIndexStream(IF_Index16));
 				vb_->GetIndexStream()->Assign(&indices_[0], static_cast<uint32_t>(indices_.size()));
 			}
 

@@ -1,8 +1,11 @@
 // VertexBuffer.hpp
 // KlayGE 顶点缓冲区类 头文件
-// Ver 3.1.0
-// 版权所有(C) 龚敏敏, 2003-2005
+// Ver 3.2.0
+// 版权所有(C) 龚敏敏, 2003-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.2.0
+// 支持32位的IndexStream (2006.1.4)
 //
 // 3.1.0
 // 分离了实例和几何流 (2005.10.31)
@@ -110,7 +113,7 @@ namespace KlayGE
 		};
 
 	public:
-		VertexStream(vertex_elements_type const & vertex_elems);
+		explicit VertexStream(vertex_elements_type const & vertex_elems);
 		virtual ~VertexStream();
 
 		static VertexStreamPtr NullObject();
@@ -150,9 +153,17 @@ namespace KlayGE
 		uint32_t freq_;
 	};
 
+
+	enum IndexFormat
+	{
+		IF_Index32,
+		IF_Index16
+	};
+
 	class IndexStream
 	{
 	public:
+		explicit IndexStream(IndexFormat format);
 		virtual ~IndexStream();
 
 		static IndexStreamPtr NullObject();
@@ -167,6 +178,9 @@ namespace KlayGE
 		uint32_t StreamSize() const;
 
 		IndexStream& Append(IndexStreamPtr rhs, uint16_t base_index);
+
+	protected:
+		IndexFormat format_;
 	};
 
 

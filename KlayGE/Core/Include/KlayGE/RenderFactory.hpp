@@ -64,7 +64,7 @@ namespace KlayGE
 		}
 
 		virtual VertexStreamPtr MakeVertexStream(vertex_elements_type const & vertex_elems, bool staticStream = false) = 0;
-		virtual IndexStreamPtr MakeIndexStream(bool staticStream = false) = 0;
+		virtual IndexStreamPtr MakeIndexStream(IndexFormat format, bool staticStream = false) = 0;
 
 		virtual RenderVertexStreamPtr MakeRenderVertexStream(uint32_t width, uint32_t height) = 0;
 

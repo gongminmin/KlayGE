@@ -192,7 +192,7 @@ namespace KlayGE
 		vs->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
 		vb_->AddVertexStream(vs);
 		
-		vb_->SetIndexStream(rf.MakeIndexStream(true));
+		vb_->SetIndexStream(rf.MakeIndexStream(IF_Index16, true));
 		vb_->GetIndexStream()->Assign(indices, sizeof(indices) / sizeof(indices[0]));
 	}
 
@@ -236,7 +236,7 @@ namespace KlayGE
 		vs->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
 		vb_->AddVertexStream(vs);
 
-		vb_->SetIndexStream(rf.MakeIndexStream(true));
+		vb_->SetIndexStream(rf.MakeIndexStream(IF_Index16, true));
 		vb_->GetIndexStream()->Assign(indices, sizeof(indices) / sizeof(uint16_t));
 
 		box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[4]);
@@ -319,7 +319,7 @@ namespace KlayGE
 			}
 		}
 
-		IndexStreamPtr is = rf.MakeIndexStream(true);
+		IndexStreamPtr is = rf.MakeIndexStream(IF_Index16, true);
 		is->Assign(&index[0], static_cast<uint32_t>(index.size()));
 		vb_->SetIndexStream(is);
 

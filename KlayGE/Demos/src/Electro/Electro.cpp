@@ -121,7 +121,7 @@ namespace
 			vb_->AddVertexStream(pos_vs);
 			vb_->AddVertexStream(tex0_vs);
 
-			IndexStreamPtr is = rf.MakeIndexStream(true);
+			IndexStreamPtr is = rf.MakeIndexStream(IF_Index16, true);
 			is->Assign(indices, sizeof(indices) / sizeof(uint16_t));
 			vb_->SetIndexStream(is);
 

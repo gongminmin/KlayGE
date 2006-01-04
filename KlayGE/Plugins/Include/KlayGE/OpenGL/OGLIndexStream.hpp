@@ -30,7 +30,7 @@ namespace KlayGE
 	class OGLIndexStream : public IndexStream
 	{
 	public:
-		OGLIndexStream(bool staticStream);
+		OGLIndexStream(IndexFormat format, bool staticStream);
 		~OGLIndexStream();
 
 		bool IsStatic() const

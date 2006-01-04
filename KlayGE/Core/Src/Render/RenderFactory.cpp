@@ -72,7 +72,7 @@ namespace KlayGE
 		{
 			return VertexStream::NullObject();
 		}
-		IndexStreamPtr MakeIndexStream(bool staticStream)
+		IndexStreamPtr MakeIndexStream(IndexFormat format, bool staticStream)
 		{
 			return IndexStream::NullObject();
 		}

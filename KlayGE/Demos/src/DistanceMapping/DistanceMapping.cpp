@@ -130,7 +130,7 @@ namespace
 			vb_->AddVertexStream(tan_vs);
 			vb_->AddVertexStream(binormal_vs);
 
-			IndexStreamPtr is = rf.MakeIndexStream(true);
+			IndexStreamPtr is = rf.MakeIndexStream(IF_Index16, true);
 			is->Assign(indices, sizeof(indices) / sizeof(uint16_t));
 			vb_->SetIndexStream(is);
 

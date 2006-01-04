@@ -124,7 +124,7 @@ namespace
 			vb_->AddVertexStream(clr_vs_);
 			vb_->AddVertexStream(tex_vs_);
 
-			vb_->SetIndexStream(rf.MakeIndexStream());
+			vb_->SetIndexStream(rf.MakeIndexStream(IF_Index16));
 
 			box_ = Box(Vector3(0, 0, 0), Vector3(0, 0, 0));
 

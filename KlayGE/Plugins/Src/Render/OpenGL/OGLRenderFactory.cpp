@@ -74,9 +74,9 @@ namespace KlayGE
 		return VertexStreamPtr(new OGLVertexStream(vertex_elems, staticStream));
 	}
 
-	IndexStreamPtr OGLRenderFactory::MakeIndexStream(bool staticStream)
+	IndexStreamPtr OGLRenderFactory::MakeIndexStream(IndexFormat format, bool staticStream)
 	{
-		return IndexStreamPtr(new OGLIndexStream(staticStream));
+		return IndexStreamPtr(new OGLIndexStream(format, staticStream));
 	}
 
 	RenderVertexStreamPtr OGLRenderFactory::MakeRenderVertexStream(uint32_t width, uint32_t height)
