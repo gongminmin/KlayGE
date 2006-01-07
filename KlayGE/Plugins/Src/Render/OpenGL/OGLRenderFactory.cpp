@@ -69,14 +69,14 @@ namespace KlayGE
 		return VertexBufferPtr(new OGLVertexBuffer(type));
 	}
 
-	VertexStreamPtr OGLRenderFactory::MakeVertexStream(vertex_elements_type const & vertex_elems, bool staticStream)
+	VertexStreamPtr OGLRenderFactory::MakeVertexStream(BufferUsage usage)
 	{
-		return VertexStreamPtr(new OGLVertexStream(vertex_elems, staticStream));
+		return VertexStreamPtr(new OGLVertexStream(usage));
 	}
 
-	IndexStreamPtr OGLRenderFactory::MakeIndexStream(IndexFormat format, bool staticStream)
+	IndexStreamPtr OGLRenderFactory::MakeIndexStream(BufferUsage usage)
 	{
-		return IndexStreamPtr(new OGLIndexStream(format, staticStream));
+		return IndexStreamPtr(new OGLIndexStream(usage));
 	}
 
 	RenderVertexStreamPtr OGLRenderFactory::MakeRenderVertexStream(uint32_t width, uint32_t height)

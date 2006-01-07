@@ -29,8 +29,8 @@
 
 namespace KlayGE
 {
-	OGLIndexStream::OGLIndexStream(IndexFormat format, bool staticStream)
-		: IndexStream(format), static_stream_(staticStream)
+	OGLIndexStream::OGLIndexStream(BufferUsage usage)
+		: IndexStream(usage)
 	{
 		glGenBuffers(1, &ib_);
 	}
@@ -40,53 +40,43 @@ namespace KlayGE
 		glDeleteBuffers(1, &ib_);
 	}
 
-	void OGLIndexStream::Assign(void const * src, uint32_t numIndices)
+	void OGLIndexStream::DoCreate()
 	{
-		numIndices_ = numIndices;
+		BOOST_ASSERT(size_in_byte_ != 0);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib_);
-		if (IF_Index32 == format_)
-		{
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-				reinterpret_cast<GLsizeiptr>(numIndices * sizeof(uint32_t)), src,
-				this->IsStatic() ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
-		}
-		else
-		{
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-				reinterpret_cast<GLsizeiptr>(numIndices * sizeof(uint16_t)), src,
-				this->IsStatic() ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
-		}
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+				reinterpret_cast<GLsizeiptr>(size_in_byte_), NULL,
+				(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
 	}
 
-	void OGLIndexStream::CopyToMemory(void* data)
+	void* OGLIndexStream::Map(BufferAccess ba)
 	{
-		if (IF_Index32 == format_)
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib_);
+
+		GLenum flag = 0;
+		switch (ba)
 		{
-			uint32_t* destPtr = static_cast<uint32_t*>(data);
+		case BA_Read_Only:
+			flag = GL_READ_ONLY;
+			break;
 
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib_);
+		case BA_Write_Only:
+			flag = GL_WRITE_ONLY;
+			break;
 
-			uint32_t* srcPtr = static_cast<uint32_t*>(glMapBuffer(GL_ELEMENT_ARRAY_BUFFER,
-					GL_READ_ONLY | (this->IsStatic() ? GL_STATIC_READ : GL_DYNAMIC_READ)));
-
-			std::copy(srcPtr, srcPtr + this->NumIndices(), destPtr);
-
-			glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+		case BA_Read_Write:
+			flag = GL_READ_WRITE;
+			break;
 		}
-		else
-		{
-			uint16_t* destPtr = static_cast<uint16_t*>(data);
 
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib_);
+		return glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, flag);
+	}
 
-			uint16_t* srcPtr = static_cast<uint16_t*>(glMapBuffer(GL_ELEMENT_ARRAY_BUFFER,
-					GL_READ_ONLY | (this->IsStatic() ? GL_STATIC_READ : GL_DYNAMIC_READ)));
-
-			std::copy(srcPtr, srcPtr + this->NumIndices(), destPtr);
-
-			glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
-		}
+	void OGLIndexStream::Unmap()
+	{
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib_);
+		glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
 	}
 
 	void OGLIndexStream::Active()

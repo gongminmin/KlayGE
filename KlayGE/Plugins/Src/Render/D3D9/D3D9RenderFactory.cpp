@@ -80,16 +80,16 @@ namespace KlayGE
 		return VertexBufferPtr(new D3D9VertexBuffer(type));
 	}
 
-	VertexStreamPtr D3D9RenderFactory::MakeVertexStream(vertex_elements_type const & vertex_elems, bool staticStream)
+	VertexStreamPtr D3D9RenderFactory::MakeVertexStream(BufferUsage usage)
 	{
-		D3D9VertexStreamPtr ret(new D3D9VertexStream(vertex_elems, staticStream));
+		D3D9VertexStreamPtr ret(new D3D9VertexStream(usage));
 		resource_pool_.push_back(ret);
 		return ret;
 	}
 
-	IndexStreamPtr D3D9RenderFactory::MakeIndexStream(IndexFormat format, bool staticStream)
+	IndexStreamPtr D3D9RenderFactory::MakeIndexStream(BufferUsage usage)
 	{
-		D3D9IndexStreamPtr ret(new D3D9IndexStream(format, staticStream));
+		D3D9IndexStreamPtr ret(new D3D9IndexStream(usage));
 		resource_pool_.push_back(ret);
 		return ret;
 	}

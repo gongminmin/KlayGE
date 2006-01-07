@@ -185,22 +185,34 @@ namespace
 
 			vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 
-			VertexStreamPtr pos_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)), true);
-			pos_vs->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
-			vb_->AddVertexStream(pos_vs);
+			VertexStreamPtr pos_vs = rf.MakeVertexStream(BU_Static);
+			pos_vs->Resize(sizeof(xyzs));
+			{
+				VertexStream::Mapper mapper(*pos_vs, BA_Write_Only);
+				std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<Vector3>());
+			}
+			vb_->AddVertexStream(pos_vs, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
 
-			IndexStreamPtr is = rf.MakeIndexStream(IF_Index16, true);
-			is->Assign(indices, sizeof(indices) / sizeof(uint16_t));
-			vb_->SetIndexStream(is);
+			IndexStreamPtr is = rf.MakeIndexStream(BU_Static);
+			is->Resize(sizeof(indices));
+			{
+				IndexStream::Mapper mapper(*is, BA_Write_Only);
+				std::copy(indices, indices + sizeof(indices) / sizeof(uint16_t), mapper.Pointer<uint16_t>());
+			}
+			vb_->SetIndexStream(is, IF_Index16);
 
 			Vector3 normal[sizeof(xyzs) / sizeof(xyzs[0])];
 			MathLib::ComputeNormal<float>(&normal[0],
 				&indices[0], &indices[sizeof(indices) / sizeof(uint16_t)],
 				&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
 
-			VertexStreamPtr normal_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_Normal, 0, sizeof(float), 3)), true);
-			normal_vs->Assign(normal, sizeof(normal) / sizeof(normal[0]));
-			vb_->AddVertexStream(normal_vs);
+			VertexStreamPtr normal_vs = rf.MakeVertexStream(BU_Static);
+			normal_vs->Resize(sizeof(normal));
+			{
+				VertexStream::Mapper mapper(*normal_vs, BA_Write_Only);
+				std::copy(&normal[0], &normal[0] + sizeof(normal) / sizeof(normal[0]), mapper.Pointer<Vector3>());
+			}
+			vb_->AddVertexStream(normal_vs, boost::make_tuple(vertex_element(VEU_Normal, 0, sizeof(float), 3)));
 
 			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[4]);
 		}

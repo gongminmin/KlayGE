@@ -25,7 +25,6 @@
 
 #include <string>
 #include <map>
-#include <boost/tuple/tuple.hpp>
 #include <boost/smart_ptr.hpp>
 #include <boost/utility.hpp>
 
@@ -57,14 +56,8 @@ namespace KlayGE
 
 		virtual VertexBufferPtr MakeVertexBuffer(VertexBuffer::BufferType type) = 0;
 
-		template <typename tuple_type>
-		VertexStreamPtr MakeVertexStream(tuple_type const & vertex_elems, bool staticStream = false)
-		{
-			return this->MakeVertexStream(Tuple2Vector(vertex_elems), staticStream);
-		}
-
-		virtual VertexStreamPtr MakeVertexStream(vertex_elements_type const & vertex_elems, bool staticStream = false) = 0;
-		virtual IndexStreamPtr MakeIndexStream(IndexFormat format, bool staticStream = false) = 0;
+		virtual VertexStreamPtr MakeVertexStream(BufferUsage usage) = 0;
+		virtual IndexStreamPtr MakeIndexStream(BufferUsage usage) = 0;
 
 		virtual RenderVertexStreamPtr MakeRenderVertexStream(uint32_t width, uint32_t height) = 0;
 
@@ -72,24 +65,6 @@ namespace KlayGE
 
 	private:
 		virtual RenderEffectPtr DoMakeRenderEffect(std::string const & effectData) = 0;
-
-	private:
-		template <typename tuple_type>
-		vertex_elements_type Tuple2Vector(tuple_type const & t)
-		{
-			vertex_elements_type ret;
-			ret.push_back(boost::tuples::get<0>(t));
-
-			vertex_elements_type tail(Tuple2Vector(t.get_tail()));
-			ret.insert(ret.end(), tail.begin(), tail.end());
-
-			return ret;
-		}
-		template <>
-		vertex_elements_type Tuple2Vector<boost::tuples::null_type>(boost::tuples::null_type const & /*t*/)
-		{
-			return vertex_elements_type();
-		}
 
 	protected:
 		typedef std::map<std::string, boost::weak_ptr<RenderEffect> > effect_pool_type;

@@ -69,17 +69,29 @@ namespace
 
 			vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 
-			VertexStreamPtr pos_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)), true);
-			pos_vs->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
-			VertexStreamPtr tex0_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_TextureCoord, 0, sizeof(float), 2)), true);
-			tex0_vs->Assign(texs, sizeof(texs) / sizeof(texs[0]));
+			VertexStreamPtr pos_vs = rf.MakeVertexStream(BU_Static);
+			pos_vs->Resize(sizeof(xyzs));
+			{
+				VertexStream::Mapper mapper(*pos_vs, BA_Write_Only);
+				std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<Vector3>());
+			}
+			VertexStreamPtr tex0_vs = rf.MakeVertexStream(BU_Static);
+			tex0_vs->Resize(sizeof(texs));
+			{
+				VertexStream::Mapper mapper(*tex0_vs, BA_Write_Only);
+				std::copy(&texs[0], &texs[0] + sizeof(texs) / sizeof(texs[0]), mapper.Pointer<Vector2>());
+			}
 
-			vb_->AddVertexStream(pos_vs);
-			vb_->AddVertexStream(tex0_vs);
+			vb_->AddVertexStream(pos_vs, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
+			vb_->AddVertexStream(tex0_vs, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, sizeof(float), 2)));
 
-			IndexStreamPtr is = rf.MakeIndexStream(IF_Index16, true);
-			is->Assign(indices, sizeof(indices) / sizeof(uint16_t));
-			vb_->SetIndexStream(is);
+			IndexStreamPtr is = rf.MakeIndexStream(BU_Static);
+			is->Resize(sizeof(indices));
+			{
+				IndexStream::Mapper mapper(*is, BA_Write_Only);
+				std::copy(indices, indices + sizeof(indices) / sizeof(uint16_t), mapper.Pointer<uint16_t>());
+			}
+			vb_->SetIndexStream(is, IF_Index16);
 
 			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 		}
@@ -137,17 +149,29 @@ namespace
 
 			vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 
-			VertexStreamPtr pos_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)), true);
-			pos_vs->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
-			VertexStreamPtr tex0_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_TextureCoord, 0, sizeof(float), 2)), true);
-			tex0_vs->Assign(texs, sizeof(texs) / sizeof(texs[0]));
+			VertexStreamPtr pos_vs = rf.MakeVertexStream(BU_Static);
+			pos_vs->Resize(sizeof(xyzs));
+			{
+				VertexStream::Mapper mapper(*pos_vs, BA_Write_Only);
+				std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<Vector3>());
+			}
+			VertexStreamPtr tex0_vs = rf.MakeVertexStream(BU_Static);
+			tex0_vs->Resize(sizeof(texs));
+			{
+				VertexStream::Mapper mapper(*tex0_vs, BA_Write_Only);
+				std::copy(&texs[0], &texs[0] + sizeof(texs) / sizeof(texs[0]), mapper.Pointer<Vector2>());
+			}
 
-			vb_->AddVertexStream(pos_vs);
-			vb_->AddVertexStream(tex0_vs);
+			vb_->AddVertexStream(pos_vs, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
+			vb_->AddVertexStream(tex0_vs, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, sizeof(float), 2)));
 
-			IndexStreamPtr is = rf.MakeIndexStream(IF_Index16, true);
-			is->Assign(indices, sizeof(indices) / sizeof(uint16_t));
-			vb_->SetIndexStream(is);
+			IndexStreamPtr is = rf.MakeIndexStream(BU_Static);
+			is->Resize(sizeof(indices));
+			{
+				IndexStream::Mapper mapper(*is, BA_Write_Only);
+				std::copy(indices, indices + sizeof(indices) / sizeof(uint16_t), mapper.Pointer<uint16_t>());
+			}
+			vb_->SetIndexStream(is, IF_Index16);
 
 			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 		}

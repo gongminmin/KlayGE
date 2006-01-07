@@ -91,14 +91,13 @@ namespace KlayGE
 	void OGLRenderVertexStream::Attach(VertexStreamPtr vs)
 	{
 		BOOST_ASSERT(glIsFramebufferEXT_(fbo_));
-		BOOST_ASSERT(1 == vs->NumElements());
 
 		vs_ = vs;
 
 		OGLVertexStream& ogl_vs = *checked_cast<OGLVertexStream*>(vs_.get());
 		glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, ogl_vs.OGLvbo());
 		glBufferData(GL_PIXEL_PACK_BUFFER_ARB,
-			reinterpret_cast<GLsizeiptr>(width_ * height_ * vs->Element(0).element_size()), NULL, GL_DYNAMIC_DRAW);
+			reinterpret_cast<GLsizeiptr>(width_ * height_ * 4 * sizeof(float)), NULL, GL_DYNAMIC_DRAW);
 
 		glBindFramebufferEXT_(GL_FRAMEBUFFER_EXT, fbo_);
 	}
@@ -107,48 +106,11 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(glIsFramebufferEXT_(fbo_));
 
-		vertex_element const & elem = vs_->Element(0);
-
-		GLenum format;
-		if (3 == elem.num_components)
-		{
-			format = GL_RGB;
-		}
-		else
-		{
-			BOOST_ASSERT(4 == elem.num_components);
-
-			format = GL_RGBA;
-		}
-
-		GLenum type;
-		switch (elem.component_size)
-		{
-		case sizeof(float):
-			type = GL_FLOAT;
-			{
-				std::vector<float> dummy(width_ * height_ * elem.num_components);
-				vs_->Assign(&dummy[0], width_ * height_);
-			}
-			break;
-
-		case sizeof(uint8_t):
-			type = GL_UNSIGNED_BYTE;
-			{
-				std::vector<uint8_t> dummy(width_ * height_ * elem.num_components);
-				vs_->Assign(&dummy[0], width_ * height_);
-			}
-			break;
-
-		default:
-			BOOST_ASSERT(false);
-			type = GL_FLOAT;
-			break;
-		}
+		vs_->Resize(width_ * height_ * 4 * sizeof(GL_FLOAT));
 
 		OGLVertexStream& ogl_vs = static_cast<OGLVertexStream&>(*vs_);
 		glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, ogl_vs.OGLvbo());
-		glReadPixels(0, 0, width_, height_, format, type, 0);
+		glReadPixels(0, 0, width_, height_, GL_RGBA, GL_FLOAT, 0);
 
 		glBindFramebufferEXT_(GL_FRAMEBUFFER_EXT, 0);
 	}

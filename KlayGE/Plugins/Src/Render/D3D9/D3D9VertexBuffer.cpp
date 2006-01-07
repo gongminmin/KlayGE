@@ -69,7 +69,7 @@ namespace KlayGE
 				VertexStream& stream(*(*iter));
 
 				std::vector<D3DVERTEXELEMENT9> stream_elems;
-				D3D9Mapping::Mapping(stream_elems, iter - vss.begin(), stream);
+				D3D9Mapping::Mapping(stream_elems, iter - vss.begin(), *this);
 				elems.insert(elems.end(), stream_elems.begin(), stream_elems.end());
 			}
 

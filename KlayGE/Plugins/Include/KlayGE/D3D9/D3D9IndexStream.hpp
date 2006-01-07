@@ -37,27 +37,26 @@ namespace KlayGE
 	class D3D9IndexStream : public IndexStream, public D3D9Resource
 	{
 	public:
-		D3D9IndexStream(IndexFormat format, bool staticStream);
+		explicit D3D9IndexStream(BufferUsage usage);
 
-		bool IsStatic() const;
-
-		void Assign(void const * src, uint32_t numIndices);
-		void CopyToMemory(void* data);
+		void* Map(BufferAccess ba);
+		void Unmap();
 
 		boost::shared_ptr<IDirect3DIndexBuffer9> D3D9Buffer() const;
-		uint32_t NumIndices() const;
+		void SwitchFormat(IndexFormat format);
+
+	private:
+		void DoCreate();
 
 	private:
 		void DoOnLostDevice();
 		void DoOnResetDevice();
 
 	private:
+		IndexFormat format_;
+
 		boost::shared_ptr<IDirect3DDevice9> d3d_device_;
 		boost::shared_ptr<IDirect3DIndexBuffer9> buffer_;
-
-		uint32_t numIndices_;
-
-		bool staticStream_;
 	};
 
 	typedef boost::shared_ptr<D3D9IndexStream> D3D9IndexStreamPtr;

@@ -307,14 +307,14 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9Mapping::Mapping(std::vector<D3DVERTEXELEMENT9>& elements, size_t stream, VertexStream const & vs)
+	void D3D9Mapping::Mapping(std::vector<D3DVERTEXELEMENT9>& elements, size_t stream, VertexBuffer const & vb)
 	{
-		elements.resize(vs.NumElements());
+		elements.resize(vb.VertexStreamFormat(stream).size());
 
 		uint16_t elem_offset = 0;
-		for (uint32_t i = 0; i < vs.NumElements(); ++ i)
+		for (uint32_t i = 0; i < elements.size(); ++ i)
 		{
-			vertex_element const & vs_elem = vs.Element(i);
+			vertex_element const & vs_elem = vb.VertexStreamFormat(stream)[i];
 
 			D3DVERTEXELEMENT9& element = elements[i];
 			element.Type		= D3DDECLTYPE_FLOAT1 - 1 + vs_elem.num_components;
@@ -327,46 +327,46 @@ namespace KlayGE
 			{
 			// Vertex xyzs
 			case VEU_Position:
-				element.Usage		= D3DDECLUSAGE_POSITION;
+				element.Usage = D3DDECLUSAGE_POSITION;
 				break;
 
 			// Normal
 			case VEU_Normal:
-				element.Usage		= D3DDECLUSAGE_NORMAL;
+				element.Usage = D3DDECLUSAGE_NORMAL;
 				break;
 
 			// Vertex colors
 			case VEU_Diffuse:
-				element.Usage		= D3DDECLUSAGE_COLOR;
+				element.Usage = D3DDECLUSAGE_COLOR;
 				break;
 
 			// Vertex speculars
 			case VEU_Specular:
-				element.Usage		= D3DDECLUSAGE_COLOR;
+				element.Usage = D3DDECLUSAGE_COLOR;
 				break;
 			
 			// Blend Weights
 			case VEU_BlendWeight:
-				element.Usage		= D3DDECLUSAGE_BLENDWEIGHT;
+				element.Usage = D3DDECLUSAGE_BLENDWEIGHT;
 				break;
 
 			// Blend Indices
 			case VEU_BlendIndex:
-				element.Type		= D3DDECLTYPE_D3DCOLOR;
-				element.Usage		= D3DDECLUSAGE_BLENDINDICES;
+				element.Type = D3DDECLTYPE_D3DCOLOR;
+				element.Usage = D3DDECLUSAGE_BLENDINDICES;
 				break;
 
 			// Do texture coords
 			case VEU_TextureCoord:
-				element.Usage		= D3DDECLUSAGE_TEXCOORD;
+				element.Usage = D3DDECLUSAGE_TEXCOORD;
 				break;
 
 			case VEU_Tangent:
-				element.Usage		= D3DDECLUSAGE_TANGENT;
+				element.Usage = D3DDECLUSAGE_TANGENT;
 				break;
 
 			case VEU_Binormal:
-				element.Usage		= D3DDECLUSAGE_BINORMAL;
+				element.Usage = D3DDECLUSAGE_BINORMAL;
 				break;
 			}
 

@@ -334,12 +334,12 @@ namespace KlayGE
 			for (VertexBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
 				iter != vb.VertexStreamEnd(); ++ iter)
 			{
-				tmp_vb->AddVertexStream(*iter);
+				tmp_vb->AddVertexStream(*iter, vb.VertexStreamFormat(iter - vb.VertexStreamBegin()));
 			}
-			tmp_vb->AddVertexStream(tmp_inst_vs);
+			tmp_vb->AddVertexStream(tmp_inst_vs, vb.InstanceStreamFormat());
 			if (vb.UseIndices())
 			{
-				tmp_vb->SetIndexStream(vb.GetIndexStream());
+				tmp_vb->SetIndexStream(vb.GetIndexStream(), vb.GetIndexStreamFormat());
 			}
 
 			this->RenderVBSWInstance(*tmp_vb);
@@ -367,7 +367,7 @@ namespace KlayGE
 			D3D9VertexStream& d3d9vs(*checked_cast<D3D9VertexStream*>(&stream));
 			TIF(d3dDevice_->SetStreamSource(number,
 				d3d9vs.D3D9Buffer().get(), 0,
-				static_cast<UINT>(stream.VertexSize())));
+				static_cast<UINT>(vb.VertexSize(number))));
 
 			TIF(d3dDevice_->SetStreamSourceFreq(number, D3DSTREAMSOURCE_INDEXEDDATA | stream.Frequency()));
 		}
@@ -379,7 +379,7 @@ namespace KlayGE
 			D3D9VertexStream& d3d9vs(*checked_cast<D3D9VertexStream*>(&stream));
 			TIF(d3dDevice_->SetStreamSource(number,
 				d3d9vs.D3D9Buffer().get(), 0,
-				static_cast<UINT>(stream.VertexSize())));
+				static_cast<UINT>(vb.VertexSize(number))));
 
 			TIF(d3dDevice_->SetStreamSourceFreq(number, D3DSTREAMSOURCE_INSTANCEDATA | stream.Frequency()));
 		}
@@ -408,7 +408,7 @@ namespace KlayGE
 			D3D9VertexStream& d3d9vs(*checked_cast<D3D9VertexStream*>(&stream));
 			TIF(d3dDevice_->SetStreamSource(number,
 				d3d9vs.D3D9Buffer().get(), 0,
-				static_cast<UINT>(stream.VertexSize())));
+				static_cast<UINT>(vb.VertexSize(number))));
 		}
 
 		uint32_t const num_vertex_stream = static_cast<uint32_t>(vb.VertexStreamEnd() - vb.VertexStreamBegin());
@@ -438,6 +438,7 @@ namespace KlayGE
 		if (vb.UseIndices())
 		{
 			D3D9IndexStream& d3dis(*checked_cast<D3D9IndexStream*>(vb.GetIndexStream().get()));
+			d3dis.SwitchFormat(vb.GetIndexStreamFormat());
 			d3dDevice_->SetIndices(d3dis.D3D9Buffer().get());
 
 			for (uint32_t i = 0; i < num_passes; ++ i)

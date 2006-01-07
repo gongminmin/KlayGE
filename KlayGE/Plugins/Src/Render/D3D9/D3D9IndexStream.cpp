@@ -30,19 +30,73 @@
 
 namespace KlayGE
 {
-	D3D9IndexStream::D3D9IndexStream(IndexFormat format, bool staticStream)
-						: IndexStream(format),
-							staticStream_(staticStream),
-							numIndices_(0)
+	D3D9IndexStream::D3D9IndexStream(BufferUsage usage)
+						: IndexStream(usage),
+							format_(IF_Index16)
 	{
 	}
 
-	void D3D9IndexStream::Assign(void const * src, uint32_t numIndices)
+	void D3D9IndexStream::SwitchFormat(IndexFormat format)
 	{
-		BOOST_ASSERT(src != NULL);
-		BOOST_ASSERT(numIndices != 0);
+		BOOST_ASSERT(d3d_device_);
 
-		numIndices_ = numIndices;
+		if (format_ != format)
+		{
+			IndexFormat old_format = format_;
+			format_ = format;
+
+			if (IF_Index16 == old_format)
+			{
+				IDirect3DIndexBuffer9* buffer;
+				TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->Size() * (sizeof(uint32_t) / sizeof(uint16_t))), 
+					(BU_Dynamic == usage_) ? D3DUSAGE_DYNAMIC : 0,
+					(IF_Index32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_DEFAULT, &buffer, NULL));
+
+				uint16_t* src;
+				uint32_t* dest;
+				TIF(buffer_->Lock(0, 0, reinterpret_cast<void**>(&src), D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
+				TIF(buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_NOSYSLOCK | ((BU_Dynamic == usage_) ? D3DLOCK_DISCARD : 0)));
+
+				for (size_t i = 0; i < this->Size() / sizeof(uint16_t); ++ i)
+				{
+					src[i] = static_cast<uint16_t>(dest[i] & 0xFFFF);
+				}
+
+				buffer->Unlock();
+				buffer_->Unlock();
+
+				buffer_ = MakeCOMPtr(buffer);
+			}
+			else
+			{
+				BOOST_ASSERT(IF_Index32 == old_format);
+
+				IDirect3DIndexBuffer9* buffer;
+				TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->Size() / (sizeof(uint32_t) / sizeof(uint16_t))), 
+					(BU_Dynamic == usage_) ? D3DUSAGE_DYNAMIC : 0,
+					(IF_Index32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_DEFAULT, &buffer, NULL));
+
+				uint32_t* src;
+				uint16_t* dest;
+				TIF(buffer_->Lock(0, 0, reinterpret_cast<void**>(&src), D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
+				TIF(buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_NOSYSLOCK | ((BU_Dynamic == usage_) ? D3DLOCK_DISCARD : 0)));
+
+				for (size_t i = 0; i < this->Size() / sizeof(uint32_t); ++ i)
+				{
+					src[i] = dest[i];
+				}
+
+				buffer->Unlock();
+				buffer_->Unlock();
+
+				buffer_ = MakeCOMPtr(buffer);
+			}
+		}
+	}
+
+	void D3D9IndexStream::DoCreate()
+	{
+		BOOST_ASSERT(size_in_byte_ != 0);
 
 		uint32_t ib_size = 0;
 		if (buffer_)
@@ -51,53 +105,55 @@ namespace KlayGE
 			buffer_->GetDesc(&desc);
 			ib_size = desc.Size;
 		}
-		if (this->StreamSize() > ib_size)
+		if (this->Size() > ib_size)
 		{
 			D3D9RenderEngine const & renderEngine(*checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 			d3d_device_ = renderEngine.D3DDevice();
 
 			IDirect3DIndexBuffer9* buffer;
-			TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->StreamSize()), 
-					this->IsStatic() ? 0 : D3DUSAGE_DYNAMIC,
-					(IF_Index32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_DEFAULT, &buffer, NULL));
+			TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->Size()), 
+				(BU_Dynamic == usage_) ? D3DUSAGE_DYNAMIC : 0,
+				(IF_Index32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_DEFAULT, &buffer, NULL));
 			buffer_ = MakeCOMPtr(buffer);
 		}
-
-		void* dest;
-		TIF(buffer_->Lock(0, 0, &dest, D3DLOCK_NOSYSLOCK | (this->IsStatic() ? 0 : D3DLOCK_DISCARD)));
-		std::copy(static_cast<uint8_t const *>(src),
-			static_cast<uint8_t const *>(src) + this->StreamSize(), static_cast<uint8_t*>(dest));
-		buffer_->Unlock();
 	}
 
-	void D3D9IndexStream::CopyToMemory(void* data)
+	void* D3D9IndexStream::Map(BufferAccess ba)
 	{
-		BOOST_ASSERT(data != NULL);
+		BOOST_ASSERT(buffer_);
 
-		void* src;
-		TIF(buffer_->Lock(0, 0, &src, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
+		uint32_t flags = 0;
+		switch (ba)
+		{
+		case BA_Read_Only:
+			break;
 
-		uint8_t* destPtr(static_cast<uint8_t*>(data));
-		uint8_t const * srcPtr(static_cast<uint8_t const *>(src));
+		case BA_Write_Only:
+			if (BU_Dynamic == usage_)
+			{
+				flags = D3DLOCK_DISCARD;
+			}
+			break;
 
-		std::copy(srcPtr, srcPtr + this->StreamSize(), destPtr);
+		case BA_Read_Write:
+			break;
+		}
 
-		buffer_->Unlock();
+		void* ret;
+		TIF(buffer_->Lock(0, 0, &ret, D3DLOCK_NOSYSLOCK | flags));
+		return ret;
 	}
 
-	uint32_t D3D9IndexStream::NumIndices() const
+	void D3D9IndexStream::Unmap()
 	{
-		return numIndices_;
+		BOOST_ASSERT(buffer_);
+
+		buffer_->Unlock();
 	}
 
 	boost::shared_ptr<IDirect3DIndexBuffer9> D3D9IndexStream::D3D9Buffer() const
 	{
 		return buffer_;
-	}
-
-	bool D3D9IndexStream::IsStatic() const
-	{
-		return staticStream_;
 	}
 
 	void D3D9IndexStream::DoOnLostDevice()
@@ -106,16 +162,16 @@ namespace KlayGE
 		d3d_device_ = renderEngine.D3DDevice();
 
 		IDirect3DIndexBuffer9* temp;
-		TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->StreamSize()), D3DUSAGE_DYNAMIC,
+		TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->Size()), D3DUSAGE_DYNAMIC,
 			(IF_Index32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_SYSTEMMEM, &temp, NULL));
 		boost::shared_ptr<IDirect3DIndexBuffer9> buffer = MakeCOMPtr(temp);
 
 		uint8_t* src;
 		uint8_t* dest;
 		TIF(buffer_->Lock(0, 0, reinterpret_cast<void**>(&src), D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
-		TIF(buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_NOSYSLOCK | (this->IsStatic() ? 0 : D3DLOCK_DISCARD)));
+		TIF(buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_NOSYSLOCK | ((BU_Dynamic == usage_) ? D3DLOCK_DISCARD : 0)));
 
-		std::copy(src, src + this->StreamSize(), dest);
+		std::copy(src, src + this->Size(), dest);
 
 		buffer->Unlock();
 		buffer_->Unlock();
@@ -129,17 +185,17 @@ namespace KlayGE
 		boost::shared_ptr<IDirect3DDevice9> d3dDevice(renderEngine.D3DDevice());
 
 		IDirect3DIndexBuffer9* temp;
-		TIF(d3dDevice->CreateIndexBuffer(static_cast<UINT>(this->StreamSize()), 
-				this->IsStatic() ? 0 : D3DUSAGE_DYNAMIC,
+		TIF(d3dDevice->CreateIndexBuffer(static_cast<UINT>(this->Size()), 
+				(BU_Dynamic == usage_) ? D3DUSAGE_DYNAMIC : 0,
 				(IF_Index32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_DEFAULT, &temp, NULL));
 		boost::shared_ptr<IDirect3DIndexBuffer9> buffer = MakeCOMPtr(temp);
 
 		uint8_t* src;
 		uint8_t* dest;
 		TIF(buffer_->Lock(0, 0, reinterpret_cast<void**>(&src), D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
-		TIF(buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_NOSYSLOCK | (this->IsStatic() ? 0 : D3DLOCK_DISCARD)));
+		TIF(buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_NOSYSLOCK | ((BU_Dynamic == usage_) ? D3DLOCK_DISCARD : 0)));
 
-		std::copy(src, src + this->StreamSize(), dest);
+		std::copy(src, src + this->Size(), dest);
 
 		buffer->Unlock();
 		buffer_->Unlock();

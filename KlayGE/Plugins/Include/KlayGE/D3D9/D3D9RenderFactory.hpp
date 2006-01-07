@@ -69,8 +69,8 @@ namespace KlayGE
 		RenderTexturePtr MakeRenderTexture();
 
 		VertexBufferPtr MakeVertexBuffer(VertexBuffer::BufferType type);
-		VertexStreamPtr MakeVertexStream(vertex_elements_type const & vertex_elems, bool staticStream);
-		IndexStreamPtr MakeIndexStream(IndexFormat format, bool staticStream);
+		VertexStreamPtr MakeVertexStream(BufferUsage usage);
+		IndexStreamPtr MakeIndexStream(BufferUsage usage);
 
 		RenderVertexStreamPtr MakeRenderVertexStream(uint32_t width, uint32_t height);
 

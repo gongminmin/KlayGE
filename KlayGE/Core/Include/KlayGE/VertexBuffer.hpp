@@ -38,6 +38,8 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <vector>
+#include <boost/utility.hpp>
+#include <boost/tuple/tuple.hpp>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_Core_d.lib")
@@ -47,6 +49,24 @@
 
 namespace KlayGE
 {
+	enum IndexFormat
+	{
+		IF_Index32,
+		IF_Index16
+	};
+
+	enum BufferUsage
+	{
+		BU_Static,
+		BU_Dynamic
+	};
+	enum BufferAccess
+	{
+		BA_Read_Only,
+		BA_Write_Only,
+		BA_Read_Write
+	};
+
 	enum VertexElementUsage
 	{
 		// vertex positions
@@ -112,75 +132,135 @@ namespace KlayGE
 			ST_Instance
 		};
 
+		class Mapper : boost::noncopyable
+		{
+		public:
+			Mapper(VertexStream& buffer, BufferAccess ba)
+				: buffer_(buffer)
+			{
+				data_ = buffer_.Map(ba);
+			}
+			~Mapper()
+			{
+				buffer_.Unmap();
+			}
+
+			template <typename T>
+			const T* Pointer() const
+			{
+				return static_cast<T*>(data_);
+			}
+			template <typename T>
+			T* Pointer()
+			{
+				return static_cast<T*>(data_);
+			}
+
+		private:
+			VertexStream& buffer_;
+			void* data_;
+		};
+
 	public:
-		explicit VertexStream(vertex_elements_type const & vertex_elems);
+		explicit VertexStream(BufferUsage usage);
 		virtual ~VertexStream();
 
 		static VertexStreamPtr NullObject();
 
-		virtual bool IsStatic() const = 0;
+		void Resize(uint32_t size_in_byte);
+		uint32_t Size() const
+		{
+			return size_in_byte_;
+		}
 
-		virtual void Assign(void const * src, uint32_t numVertex) = 0;
-		virtual void CopyToMemory(void* data) = 0;
-		void CopyToMemory(void* data, vertex_elements_type const & rhs_vertex_elems);
+		BufferUsage Usage() const
+		{
+			return usage_;
+		}
+
+		virtual void* Map(BufferAccess ba) = 0;
+		virtual void Unmap() = 0;
+
 		void CopyToStream(VertexStream& rhs);
-
-		virtual uint32_t NumVertices() const = 0;
-
-		uint32_t NumElements() const;
-		vertex_element const & Element(uint32_t index) const;
-		vertex_elements_type const & Elements() const;
-
-		uint16_t VertexSize() const;
-		uint32_t StreamSize() const;
-
-		VertexStream& Combine(VertexStreamPtr rhs);
-		VertexStream& Append(VertexStreamPtr rhs);
 
 		void FrequencyDivider(stream_type type, uint32_t freq);
 		stream_type StreamType() const;
 		uint32_t Frequency() const;
 
-	protected:
-		void RefreshVertexSize();
-		void CheckVertexElems();
+	private:
+		virtual void DoCreate() = 0;
 
 	protected:
-		vertex_elements_type vertex_elems_;
-		uint16_t vertex_size_;
+		BufferUsage usage_;
+
+		uint32_t size_in_byte_;
 
 		stream_type type_;
 		uint32_t freq_;
 	};
 
 
-	enum IndexFormat
-	{
-		IF_Index32,
-		IF_Index16
-	};
-
 	class IndexStream
 	{
 	public:
-		explicit IndexStream(IndexFormat format);
+		class Mapper : boost::noncopyable
+		{
+		public:
+			Mapper(IndexStream& buffer, BufferAccess ba)
+				: buffer_(buffer)
+			{
+				data_ = buffer_.Map(ba);
+			}
+			~Mapper()
+			{
+				buffer_.Unmap();
+			}
+
+			template <typename T>
+			const T* Pointer() const
+			{
+				return static_cast<T*>(data_);
+			}
+			template <typename T>
+			T* Pointer()
+			{
+				return static_cast<T*>(data_);
+			}
+
+		private:
+			IndexStream& buffer_;
+			void* data_;
+		};
+
+	public:
+		explicit IndexStream(BufferUsage usage);
 		virtual ~IndexStream();
 
 		static IndexStreamPtr NullObject();
 
-		virtual uint32_t NumIndices() const = 0;
+		void Resize(uint32_t size_in_byte);
+		uint32_t Size() const
+		{
+			return size_in_byte_;
+		}
 
-		virtual bool IsStatic() const = 0;
-		virtual void Assign(void const * src, uint32_t numIndices) = 0;
-		virtual void CopyToMemory(void* data) = 0;
+		BufferUsage Usage() const
+		{
+			return usage_;
+		}
+
+		virtual void* Map(BufferAccess ba) = 0;
+		virtual void Unmap() = 0;
+
 		void CopyToStream(IndexStream& rhs);
 
-		uint32_t StreamSize() const;
-
-		IndexStream& Append(IndexStreamPtr rhs, uint16_t base_index);
+	private:
+		virtual void DoCreate() = 0;
 
 	protected:
-		IndexFormat format_;
+		BufferUsage usage_;
+
+		uint32_t size_in_byte_;
 	};
 
 
@@ -210,34 +290,81 @@ namespace KlayGE
 
 		uint32_t NumVertices() const;
 
-		void AddVertexStream(VertexStreamPtr vertex_stream);
+		template <typename tuple_type>
+		void AddVertexStream(VertexStreamPtr vertex_stream, tuple_type const & vertex_elems)
+		{
+			this->AddVertexStream(vertex_stream, Tuple2Vector(vertex_elems));
+		}
+		void AddVertexStream(VertexStreamPtr vertex_stream, vertex_elements_type const & vet);
 
 		VertexStreamIterator VertexStreamBegin();
 		VertexStreamIterator VertexStreamEnd();
 		VertexStreamConstIterator VertexStreamBegin() const;
 		VertexStreamConstIterator VertexStreamEnd() const;
+		vertex_elements_type const & VertexStreamFormat(uint32_t index) const
+		{
+			return vertex_stream_formats_[index];
+		}
+		uint32_t VertexSize(uint32_t index) const
+		{
+			return vertex_sizes_[index];
+		}
 
 		bool UseIndices() const;
 		uint32_t NumIndices() const;
 
-		void SetIndexStream(IndexStreamPtr index_stream);
+		void SetIndexStream(IndexStreamPtr index_stream, IndexFormat format);
 		IndexStreamPtr GetIndexStream() const;
+		IndexFormat GetIndexStreamFormat() const
+		{
+			return index_format_;
+		}
 
 		VertexStreamPtr InstanceStream() const;
+		vertex_elements_type const & InstanceStreamFormat() const
+		{
+			return instance_format_;
+		}
+		uint32_t InstanceSize() const
+		{
+			return instance_size_;
+		}
 		uint32_t NumInstance() const;
 
 		void ExpandInstance(VertexStreamPtr& hint, uint32_t inst_no) const;
 		VertexStreamPtr ExpandInstance(uint32_t inst_no) const;
 
-		VertexBuffer& Append(VertexBufferPtr rhs);
+	private:
+		template <typename tuple_type>
+		vertex_elements_type Tuple2Vector(tuple_type const & t)
+		{
+			vertex_elements_type ret;
+			ret.push_back(boost::tuples::get<0>(t));
+
+			vertex_elements_type tail(Tuple2Vector(t.get_tail()));
+			ret.insert(ret.end(), tail.begin(), tail.end());
+
+			return ret;
+		}
+		template <>
+		vertex_elements_type Tuple2Vector<boost::tuples::null_type>(boost::tuples::null_type const & /*t*/)
+		{
+			return vertex_elements_type();
+		}
 
 	protected:
 		BufferType type_;
 
 		VertexStreamsType vertexStreams_;
+		std::vector<vertex_elements_type> vertex_stream_formats_;
+		std::vector<uint32_t> vertex_sizes_;
+
 		IndexStreamPtr indexStream_;
+		IndexFormat index_format_;
 
 		VertexStreamPtr instance_stream_;
+		vertex_elements_type instance_format_;
+		uint32_t instance_size_;
 	};
 }
 

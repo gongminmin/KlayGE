@@ -28,9 +28,8 @@
 
 namespace KlayGE
 {
-	OGLVertexStream::OGLVertexStream(vertex_elements_type const & vertex_elems, bool staticStream)
-			: VertexStream(vertex_elems),
-				static_stream_(staticStream)
+	OGLVertexStream::OGLVertexStream(BufferUsage usage)
+			: VertexStream(usage)
 	{
 		glGenBuffers(1, &vb_);
 	}
@@ -40,26 +39,42 @@ namespace KlayGE
 		glDeleteBuffers(1, &vb_);
 	}
 
-	void OGLVertexStream::Assign(void const * src, uint32_t numVertices)
+	void OGLVertexStream::DoCreate()
 	{
-		numVertices_ = numVertices;
+		BOOST_ASSERT(size_in_byte_ != 0);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vb_);
 		glBufferData(GL_ARRAY_BUFFER,
-			reinterpret_cast<GLsizeiptr>(this->StreamSize()), src, this->IsStatic() ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+				reinterpret_cast<GLsizeiptr>(size_in_byte_), NULL,
+				(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
 	}
 
-	void OGLVertexStream::CopyToMemory(void* data)
+	void* OGLVertexStream::Map(BufferAccess ba)
 	{
-		uint8_t* destPtr = static_cast<uint8_t*>(data);
-
 		glBindBuffer(GL_ARRAY_BUFFER, vb_);
 
-		uint8_t* srcPtr = static_cast<uint8_t*>(glMapBuffer(GL_ARRAY_BUFFER,
-			GL_READ_ONLY | (this->IsStatic() ? GL_STATIC_READ : GL_DYNAMIC_READ)));
+		GLenum flag = 0;
+		switch (ba)
+		{
+		case BA_Read_Only:
+			flag = GL_READ_ONLY;
+			break;
 
-		std::copy(srcPtr, srcPtr + this->StreamSize(), destPtr);
+		case BA_Write_Only:
+			flag = GL_WRITE_ONLY;
+			break;
 
+		case BA_Read_Write:
+			flag = GL_READ_WRITE;
+			break;
+		}
+
+		return glMapBuffer(GL_ARRAY_BUFFER, flag);
+	}
+
+	void OGLVertexStream::Unmap()
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, vb_);
 		glUnmapBuffer(GL_ARRAY_BUFFER);
 	}
 

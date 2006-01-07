@@ -71,9 +71,13 @@ namespace KlayGE
 
 		vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_PointList);
 
-		VertexStreamPtr vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)), true);
-		vs->Assign(&v, 1);
-		vb_->AddVertexStream(vs);
+		VertexStreamPtr vs = rf.MakeVertexStream(BU_Static);
+		vs->Resize(sizeof(v));
+		{
+			VertexStream::Mapper mapper(*vs, BA_Write_Only);
+			std::copy(&v, &v + 1, mapper.Pointer<Vector3>());
+		}
+		vb_->AddVertexStream(vs, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
 
 		box_ = MathLib::ComputeBoundingBox<float>(&v, &v + 1);
 	}
@@ -106,9 +110,13 @@ namespace KlayGE
 
 		vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_LineList);
 
-		VertexStreamPtr vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)), true);
-		vs->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
-		vb_->AddVertexStream(vs);
+		VertexStreamPtr vs = rf.MakeVertexStream(BU_Static);
+		vs->Resize(sizeof(xyzs));
+		{
+			VertexStream::Mapper mapper(*vs, BA_Write_Only);
+			std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<Vector3>());
+		}
+		vb_->AddVertexStream(vs, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
 
 		box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 	}
@@ -141,9 +149,13 @@ namespace KlayGE
 
 		vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 
-		VertexStreamPtr vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)), true);
-		vs->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
-		vb_->AddVertexStream(vs);
+		VertexStreamPtr vs = rf.MakeVertexStream(BU_Static);
+		vs->Resize(sizeof(xyzs));
+		{
+			VertexStream::Mapper mapper(*vs, BA_Write_Only);
+			std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<Vector3>());
+		}
+		vb_->AddVertexStream(vs, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
 
 		box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 	}
@@ -188,12 +200,21 @@ namespace KlayGE
 
 		vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 
-		VertexStreamPtr vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)), true);
-		vs->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
-		vb_->AddVertexStream(vs);
+		VertexStreamPtr vs = rf.MakeVertexStream(BU_Static);
+		vs->Resize(sizeof(xyzs));
+		{
+			VertexStream::Mapper mapper(*vs, BA_Write_Only);
+			std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<Vector3>());
+		}
+		vb_->AddVertexStream(vs, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
 		
-		vb_->SetIndexStream(rf.MakeIndexStream(IF_Index16, true));
-		vb_->GetIndexStream()->Assign(indices, sizeof(indices) / sizeof(indices[0]));
+		IndexStreamPtr is = rf.MakeIndexStream(BU_Static);
+		is->Resize(sizeof(indices));
+		{
+			IndexStream::Mapper mapper(*is, BA_Write_Only);
+			std::copy(indices, indices + sizeof(indices) / sizeof(indices[0]), mapper.Pointer<uint16_t>());
+		}
+		vb_->SetIndexStream(is, IF_Index16);
 	}
 
 	void RenderableBox::OnRenderBegin()
@@ -232,12 +253,21 @@ namespace KlayGE
 
 		vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
 
-		VertexStreamPtr vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)), true);
-		vs->Assign(xyzs, sizeof(xyzs) / sizeof(xyzs[0]));
-		vb_->AddVertexStream(vs);
+		VertexStreamPtr vs = rf.MakeVertexStream(BU_Static);
+		vs->Resize(sizeof(xyzs));
+		{
+			VertexStream::Mapper mapper(*vs, BA_Write_Only);
+			std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<Vector3>());
+		}
+		vb_->AddVertexStream(vs, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
 
-		vb_->SetIndexStream(rf.MakeIndexStream(IF_Index16, true));
-		vb_->GetIndexStream()->Assign(indices, sizeof(indices) / sizeof(uint16_t));
+		IndexStreamPtr is = rf.MakeIndexStream(BU_Static);
+		is->Resize(sizeof(indices));
+		{
+			IndexStream::Mapper mapper(*is, BA_Write_Only);
+			std::copy(indices, indices + sizeof(indices) / sizeof(indices[0]), mapper.Pointer<uint16_t>());
+		}
+		vb_->SetIndexStream(is, IF_Index16);
 
 		box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[4]);
 
@@ -283,9 +313,13 @@ namespace KlayGE
 			}
 		}
 
-		VertexStreamPtr pos_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)), true);
-		pos_vs->Assign(&pos[0], static_cast<uint32_t>(pos.size()));
-		vb_->AddVertexStream(pos_vs);
+		VertexStreamPtr pos_vs = rf.MakeVertexStream(BU_Static);
+		pos_vs->Resize(sizeof(pos[0]) * pos.size());
+		{
+			VertexStream::Mapper mapper(*pos_vs, BA_Write_Only);
+			std::copy(pos.begin(), pos.end(), mapper.Pointer<Vector3>());
+		}
+		vb_->AddVertexStream(pos_vs, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
 
 		if (has_tex_coord)
 		{
@@ -299,9 +333,13 @@ namespace KlayGE
 				}
 			}
 
-			VertexStreamPtr tex_vs = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_TextureCoord, 0, sizeof(float), 2)), true);
-			tex_vs->Assign(&tex[0], static_cast<uint32_t>(tex.size()));
-			vb_->AddVertexStream(tex_vs);
+			VertexStreamPtr tex_vs = rf.MakeVertexStream(BU_Static);
+			tex_vs->Resize(sizeof(tex[0]) * tex.size());
+			{
+				VertexStream::Mapper mapper(*tex_vs, BA_Write_Only);
+				std::copy(tex.begin(), tex.end(), mapper.Pointer<Vector2>());
+			}
+			vb_->AddVertexStream(tex_vs, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, sizeof(float), 2)));
 		}
 
 		std::vector<uint16_t> index;
@@ -319,9 +357,13 @@ namespace KlayGE
 			}
 		}
 
-		IndexStreamPtr is = rf.MakeIndexStream(IF_Index16, true);
-		is->Assign(&index[0], static_cast<uint32_t>(index.size()));
-		vb_->SetIndexStream(is);
+		IndexStreamPtr is = rf.MakeIndexStream(BU_Static);
+		is->Resize(static_cast<uint32_t>(index.size() * sizeof(index[0])));
+		{
+			IndexStream::Mapper mapper(*is, BA_Write_Only);
+			std::copy(index.begin(), index.end(), mapper.Pointer<uint16_t>());
+		}
+		vb_->SetIndexStream(is, IF_Index16);
 
 		box_ = MathLib::ComputeBoundingBox<float>(pos.begin(), pos.end());
 	}

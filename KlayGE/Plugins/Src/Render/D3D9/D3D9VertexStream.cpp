@@ -27,29 +27,14 @@
 
 namespace KlayGE
 {
-	D3D9VertexStream::D3D9VertexStream(vertex_elements_type const & vertex_elems, bool staticStream)
-			: VertexStream(vertex_elems),
-				numVertices_(0), 
-				staticStream_(staticStream)
+	D3D9VertexStream::D3D9VertexStream(BufferUsage usage)
+			: VertexStream(usage)
 	{
 	}
 
-	bool D3D9VertexStream::IsStatic() const
+	void D3D9VertexStream::DoCreate()
 	{
-		return staticStream_;
-	}
-
-	uint32_t D3D9VertexStream::NumVertices() const
-	{
-		return numVertices_;
-	}
-
-	void D3D9VertexStream::Assign(void const * src, uint32_t numVertices)
-	{
-		BOOST_ASSERT(src != NULL);
-		BOOST_ASSERT(numVertices != 0);
-
-		numVertices_ = numVertices;
+		BOOST_ASSERT(size_in_byte_ != 0);
 
 		uint32_t vb_size = 0;
 		if (buffer_)
@@ -58,41 +43,48 @@ namespace KlayGE
 			buffer_->GetDesc(&desc);
 			vb_size = desc.Size;
 		}
-		if (this->StreamSize() > vb_size)
+		if (this->Size() > vb_size)
 		{
 			D3D9RenderEngine const & renderEngine(*checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 			d3d_device_ = renderEngine.D3DDevice();
 
-			IDirect3DVertexBuffer9* theBuffer;
-			TIF(d3d_device_->CreateVertexBuffer(static_cast<UINT>(this->StreamSize()),
-					this->IsStatic() ? 0 : D3DUSAGE_DYNAMIC,
-					0, D3DPOOL_DEFAULT, &theBuffer, NULL));
-			buffer_ = MakeCOMPtr(theBuffer);
+			IDirect3DVertexBuffer9* buffer;
+			TIF(d3d_device_->CreateVertexBuffer(static_cast<UINT>(this->Size()),
+					(BU_Dynamic == usage_) ? D3DUSAGE_DYNAMIC : 0,
+					0, D3DPOOL_DEFAULT, &buffer, NULL));
+			buffer_ = MakeCOMPtr(buffer);
 		}
-
-		void* dest;
-		TIF(buffer_->Lock(0, 0, &dest,
-			D3DLOCK_NOSYSLOCK | (this->IsStatic() ? 0 : D3DLOCK_DISCARD)));
-
-		uint8_t* destPtr(static_cast<uint8_t*>(dest));
-		uint8_t const * srcPtr(static_cast<uint8_t const *>(src));
-
-		std::copy(srcPtr, srcPtr + this->StreamSize(), destPtr);
-
-		buffer_->Unlock();
 	}
 
-	void D3D9VertexStream::CopyToMemory(void* data)
+	void* D3D9VertexStream::Map(BufferAccess ba)
 	{
-		BOOST_ASSERT(data != NULL);
+		BOOST_ASSERT(buffer_);
 
-		void* src;
-		TIF(buffer_->Lock(0, 0, &src, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
+		uint32_t flags = 0;
+		switch (ba)
+		{
+		case BA_Read_Only:
+			break;
 
-		uint8_t* destPtr(static_cast<uint8_t*>(data));
-		uint8_t const * srcPtr(static_cast<uint8_t const *>(src));
+		case BA_Write_Only:
+			if (BU_Dynamic == usage_)
+			{
+				flags = D3DLOCK_DISCARD;
+			}
+			break;
 
-		std::copy(srcPtr, srcPtr + this->StreamSize(), destPtr);
+		case BA_Read_Write:
+			break;
+		}
+
+		void* ret;
+		TIF(buffer_->Lock(0, 0, &ret, D3DLOCK_NOSYSLOCK | flags));
+		return ret;
+	}
+
+	void D3D9VertexStream::Unmap()
+	{
+		BOOST_ASSERT(buffer_);
 
 		buffer_->Unlock();
 	}
@@ -105,16 +97,16 @@ namespace KlayGE
 	void D3D9VertexStream::DoOnLostDevice()
 	{
 		IDirect3DVertexBuffer9* temp;
-		TIF(d3d_device_->CreateVertexBuffer(static_cast<UINT>(this->StreamSize()),
+		TIF(d3d_device_->CreateVertexBuffer(static_cast<UINT>(this->Size()),
 			D3DUSAGE_DYNAMIC, 0, D3DPOOL_SYSTEMMEM, &temp, NULL));
 		boost::shared_ptr<IDirect3DVertexBuffer9> buffer = MakeCOMPtr(temp);
 
 		uint8_t* src;
 		uint8_t* dest;
 		TIF(buffer_->Lock(0, 0, reinterpret_cast<void**>(&src), D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
-		TIF(buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_NOSYSLOCK | (this->IsStatic() ? 0 : D3DLOCK_DISCARD)));
+		TIF(buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_NOSYSLOCK | ((BU_Dynamic == usage_) ? D3DLOCK_DISCARD : 0)));
 
-		std::copy(src, src + this->StreamSize(), dest);
+		std::copy(src, src + this->Size(), dest);
 
 		buffer->Unlock();
 		buffer_->Unlock();
@@ -128,17 +120,17 @@ namespace KlayGE
 		d3d_device_ = renderEngine.D3DDevice();
 
 		IDirect3DVertexBuffer9* temp;
-		TIF(d3d_device_->CreateVertexBuffer(static_cast<UINT>(this->StreamSize()),
-				this->IsStatic() ? 0 : D3DUSAGE_DYNAMIC,
+		TIF(d3d_device_->CreateVertexBuffer(static_cast<UINT>(this->Size()),
+				(BU_Dynamic == usage_) ? D3DUSAGE_DYNAMIC : 0,
 				0, D3DPOOL_DEFAULT, &temp, NULL));
 		boost::shared_ptr<IDirect3DVertexBuffer9> buffer = MakeCOMPtr(temp);
 
 		uint8_t* src;
 		uint8_t* dest;
 		TIF(buffer_->Lock(0, 0, reinterpret_cast<void**>(&src), D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
-		TIF(buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_NOSYSLOCK | (this->IsStatic() ? 0 : D3DLOCK_DISCARD)));
+		TIF(buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_NOSYSLOCK | ((BU_Dynamic == usage_) ? D3DLOCK_DISCARD : 0)));
 
-		std::copy(src, src + this->StreamSize(), dest);
+		std::copy(src, src + this->Size(), dest);
 
 		buffer->Unlock();
 		buffer_->Unlock();

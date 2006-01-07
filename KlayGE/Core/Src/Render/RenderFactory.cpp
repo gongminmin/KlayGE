@@ -68,11 +68,11 @@ namespace KlayGE
 			return VertexBuffer::NullObject();
 		}
 
-		VertexStreamPtr MakeVertexStream(vertex_elements_type const & vertex_elems, bool staticStream)
+		VertexStreamPtr MakeVertexStream(BufferUsage usage)
 		{
 			return VertexStream::NullObject();
 		}
-		IndexStreamPtr MakeIndexStream(IndexFormat format, bool staticStream)
+		IndexStreamPtr MakeIndexStream(BufferUsage usage)
 		{
 			return IndexStream::NullObject();
 		}

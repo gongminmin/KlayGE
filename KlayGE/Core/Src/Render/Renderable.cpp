@@ -96,29 +96,29 @@ namespace KlayGE
 			{
 				RenderFactory& rf(Context::Instance().RenderFactoryInstance());
 
-				inst_stream = rf.MakeVertexStream(instances_[0].lock()->InstanceFormat(), false);
+				inst_stream = rf.MakeVertexStream(BU_Dynamic);
 				inst_stream->FrequencyDivider(VertexStream::ST_Instance, 1);
-				this->GetVertexBuffer()->AddVertexStream(inst_stream);
+				this->GetVertexBuffer()->AddVertexStream(inst_stream, instances_[0].lock()->InstanceFormat());
 			}
 			else
 			{
 				for (size_t i = 0; i < instances_.size(); ++ i)
 				{
-					BOOST_ASSERT(inst_stream->Elements() == instances_[i].lock()->InstanceFormat());
+					BOOST_ASSERT(this->GetVertexBuffer()->InstanceStreamFormat() == instances_[i].lock()->InstanceFormat());
 				}
 			}
 
-			uint32_t const size = inst_stream->VertexSize();
+			uint32_t const size = this->GetVertexBuffer()->InstanceSize();
 
-			std::vector<uint8_t> buffer;
-			buffer.reserve(size * instances_.size());
-			for (size_t i = 0; i < instances_.size(); ++ i)
+			inst_stream->Resize(size * instances_.size());
 			{
-				uint8_t const * src = static_cast<uint8_t const *>(instances_[i].lock()->InstanceData());
-				buffer.insert(buffer.end(), src, src + size);
+				VertexStream::Mapper mapper(*inst_stream, BA_Write_Only);
+				for (size_t i = 0; i < instances_.size(); ++ i)
+				{
+					uint8_t const * src = static_cast<uint8_t const *>(instances_[i].lock()->InstanceData());
+					std::copy(src, src + size, mapper.Pointer<uint8_t>() + i * size);
+				}
 			}
-
-			inst_stream->Assign(&buffer[0], static_cast<uint32_t>(instances_.size()));
 
 			for (VertexBuffer::VertexStreamIterator iter = this->GetVertexBuffer()->VertexStreamBegin();
 				iter != this->GetVertexBuffer()->VertexStreamEnd(); ++ iter)

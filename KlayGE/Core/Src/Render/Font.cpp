@@ -116,15 +116,15 @@ namespace
 			effect_ = rf.LoadEffect("Font.fx");
 			*(effect_->ParameterByName("texFontSampler")) = theSampler_;
 
-			xyz_vs_ = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
-			clr_vs_ = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_Diffuse, 0, sizeof(float), 4)));
-			tex_vs_ = rf.MakeVertexStream(boost::make_tuple(vertex_element(VEU_TextureCoord, 0, sizeof(float), 2)));
+			xyz_vs_ = rf.MakeVertexStream(BU_Dynamic);
+			clr_vs_ = rf.MakeVertexStream(BU_Dynamic);
+			tex_vs_ = rf.MakeVertexStream(BU_Dynamic);
 
-			vb_->AddVertexStream(xyz_vs_);
-			vb_->AddVertexStream(clr_vs_);
-			vb_->AddVertexStream(tex_vs_);
+			vb_->AddVertexStream(xyz_vs_, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
+			vb_->AddVertexStream(clr_vs_, boost::make_tuple(vertex_element(VEU_Diffuse, 0, sizeof(float), 4)));
+			vb_->AddVertexStream(tex_vs_, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, sizeof(float), 2)));
 
-			vb_->SetIndexStream(rf.MakeIndexStream(IF_Index16));
+			vb_->SetIndexStream(rf.MakeIndexStream(BU_Dynamic), IF_Index16);
 
 			box_ = Box(Vector3(0, 0, 0), Vector3(0, 0, 0));
 
@@ -145,11 +145,27 @@ namespace
 		{
 			effect_->ActiveTechnique("Font2DTec");
 
-			xyz_vs_->Assign(&xyzs_[0], static_cast<uint32_t>(xyzs_.size()));
-			clr_vs_->Assign(&clrs_[0], static_cast<uint32_t>(clrs_.size()));
-			tex_vs_->Assign(&texs_[0], static_cast<uint32_t>(texs_.size()));
+			xyz_vs_->Resize(static_cast<uint32_t>(xyzs_.size() * sizeof(xyzs_[0])));
+			{
+				VertexStream::Mapper mapper(*xyz_vs_, BA_Write_Only);
+				std::copy(xyzs_.begin(), xyzs_.end(), mapper.Pointer<Vector3>());
+			}
+			clr_vs_->Resize(static_cast<uint32_t>(clrs_.size() * sizeof(clrs_[0])));
+			{
+				VertexStream::Mapper mapper(*clr_vs_, BA_Write_Only);
+				std::copy(clrs_.begin(), clrs_.end(), mapper.Pointer<Color>());
+			}
+			tex_vs_->Resize(static_cast<uint32_t>(texs_.size() * sizeof(texs_[0])));
+			{
+				VertexStream::Mapper mapper(*tex_vs_, BA_Write_Only);
+				std::copy(texs_.begin(), texs_.end(), mapper.Pointer<Vector2>());
+			}
 
-			vb_->GetIndexStream()->Assign(&indices_[0], static_cast<uint32_t>(indices_.size()));
+			vb_->GetIndexStream()->Resize(static_cast<uint32_t>(indices_.size() * sizeof(indices_[0])));
+			{
+				IndexStream::Mapper mapper(*vb_->GetIndexStream(), BA_Write_Only);
+				std::copy(indices_.begin(), indices_.end(), mapper.Pointer<uint16_t>());
+			}
 
 			RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			Viewport const & viewport(renderEngine.ActiveRenderTarget(0)->GetViewport());

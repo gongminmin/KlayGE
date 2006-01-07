@@ -30,20 +30,11 @@ namespace KlayGE
 	class OGLIndexStream : public IndexStream
 	{
 	public:
-		OGLIndexStream(IndexFormat format, bool staticStream);
+		explicit OGLIndexStream(BufferUsage usage);
 		~OGLIndexStream();
 
-		bool IsStatic() const
-		{
-			return static_stream_;
-		}
-		uint32_t NumIndices() const
-		{
-			return numIndices_;
-		}
-
-		void Assign(void const * src, uint32_t numIndices);
-		void CopyToMemory(void* data);
+		void* Map(BufferAccess ba);
+		void Unmap();
 
 		void Active();
 
@@ -52,11 +43,10 @@ namespace KlayGE
 			return ib_;
 		}
 
-	protected:
-		uint32_t numIndices_;
+	private:
+		void DoCreate();
 
-		bool static_stream_;
-
+	private:
 		GLuint ib_;
 	};
 }
