@@ -23,15 +23,15 @@
 
 namespace KlayGE
 {
-	class OGLVertexBuffer : public VertexBuffer
+	class OGLRenderLayout : public RenderLayout
 	{
 	public:
-		explicit OGLVertexBuffer(BufferType type)
-			: VertexBuffer(type)
+		explicit OGLRenderLayout(buffer_type type)
+			: RenderLayout(type)
 		{
 		}
 
-		~OGLVertexBuffer()
+		~OGLRenderLayout()
 		{
 		}
 	};

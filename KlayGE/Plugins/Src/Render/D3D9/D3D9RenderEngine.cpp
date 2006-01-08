@@ -308,85 +308,81 @@ namespace KlayGE
 
 	// äÖÈ¾
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DoRender(VertexBuffer const & vb)
+	void D3D9RenderEngine::DoRender(RenderLayout const & rl)
 	{
-		this->RenderInstance(vb);
+		this->RenderInstance(rl);
 	}
 
-	void D3D9RenderEngine::DoRenderSWInstance(VertexBuffer const & vb)
+	void D3D9RenderEngine::DoRenderSWInstance(RenderLayout const & rl)
 	{
 		BOOST_ASSERT(d3dDevice_);
-		BOOST_ASSERT(vb.VertexStreamEnd() - vb.VertexStreamBegin() != 0);
+		BOOST_ASSERT(rl.NumVertexStreams() != 0);
 		
-		uint32_t const num_instance = (*vb.VertexStreamBegin())->Frequency();
+		uint32_t const num_instance = rl.NumInstance();
 
 		if (num_instance > 1)
 		{
-			BOOST_ASSERT(vb.InstanceStream());
+			BOOST_ASSERT(rl.InstanceStream());
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			VertexBufferPtr tmp_vb = rf.MakeVertexBuffer(vb.Type());
+			RenderLayoutPtr tmp_rl = rf.MakeRenderLayout(rl.Type());
 			VertexStreamPtr tmp_inst_vs;
 
-			vb.ExpandInstance(tmp_inst_vs, 0);
+			rl.ExpandInstance(tmp_inst_vs, 0);
 
-			for (VertexBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
-				iter != vb.VertexStreamEnd(); ++ iter)
+			for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
 			{
-				tmp_vb->AddVertexStream(*iter, vb.VertexStreamFormat(iter - vb.VertexStreamBegin()));
+				tmp_rl->AddVertexStream(rl.GetVertexStream(i), rl.VertexStreamFormat(i));
 			}
-			tmp_vb->AddVertexStream(tmp_inst_vs, vb.InstanceStreamFormat());
-			if (vb.UseIndices())
+			tmp_rl->AddVertexStream(tmp_inst_vs, rl.InstanceStreamFormat());
+			if (rl.UseIndices())
 			{
-				tmp_vb->SetIndexStream(vb.GetIndexStream(), vb.GetIndexStreamFormat());
+				tmp_rl->SetIndexStream(rl.GetIndexStream(), rl.IndexStreamFormat());
 			}
 
-			this->RenderVBSWInstance(*tmp_vb);
+			this->RenderRLSWInstance(*tmp_rl);
 
 			for (uint32_t i = 1; i < num_instance; ++ i)
 			{
-				vb.ExpandInstance(tmp_inst_vs, i);
-				this->RenderVBSWInstance(*tmp_vb);
+				rl.ExpandInstance(tmp_inst_vs, i);
+				this->RenderRLSWInstance(*tmp_rl);
 			}
 		}
 		else
 		{
-			this->RenderVBSWInstance(vb);
+			this->RenderRLSWInstance(rl);
 		}
 	}
 
-	void D3D9RenderEngine::DoRenderHWInstance(VertexBuffer const & vb)
+	void D3D9RenderEngine::DoRenderHWInstance(RenderLayout const & rl)
 	{
-		for (VertexBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
-			iter != vb.VertexStreamEnd(); ++ iter)
+		for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
 		{
-			VertexStream& stream = *(*iter);
-			uint32_t number = static_cast<uint32_t>(iter - vb.VertexStreamBegin());
-
+			VertexStream& stream = *rl.GetVertexStream(i);
+			
 			D3D9VertexStream& d3d9vs(*checked_cast<D3D9VertexStream*>(&stream));
-			TIF(d3dDevice_->SetStreamSource(number,
+			TIF(d3dDevice_->SetStreamSource(i,
 				d3d9vs.D3D9Buffer().get(), 0,
-				static_cast<UINT>(vb.VertexSize(number))));
+				static_cast<UINT>(rl.VertexSize(i))));
 
-			TIF(d3dDevice_->SetStreamSourceFreq(number, D3DSTREAMSOURCE_INDEXEDDATA | stream.Frequency()));
+			TIF(d3dDevice_->SetStreamSourceFreq(i, D3DSTREAMSOURCE_INDEXEDDATA | rl.VertexStreamFrequency(i)));
 		}
-		if (vb.InstanceStream())
+		if (rl.InstanceStream())
 		{
-			uint32_t number = static_cast<uint32_t>(vb.VertexStreamEnd() - vb.VertexStreamBegin());
+			uint32_t number = rl.NumVertexStreams();
 
-			VertexStream& stream = *vb.InstanceStream();
+			VertexStream& stream = *rl.InstanceStream();
 			D3D9VertexStream& d3d9vs(*checked_cast<D3D9VertexStream*>(&stream));
 			TIF(d3dDevice_->SetStreamSource(number,
 				d3d9vs.D3D9Buffer().get(), 0,
-				static_cast<UINT>(vb.VertexSize(number))));
+				static_cast<UINT>(rl.VertexSize(number))));
 
-			TIF(d3dDevice_->SetStreamSourceFreq(number, D3DSTREAMSOURCE_INSTANCEDATA | stream.Frequency()));
+			TIF(d3dDevice_->SetStreamSourceFreq(number, D3DSTREAMSOURCE_INSTANCEDATA | 1));
 		}
 
 		// Clear any previous steam sources
-		uint32_t const num_vertex_stream = static_cast<uint32_t>(vb.VertexStreamEnd() - vb.VertexStreamBegin())
-			+ (vb.InstanceStream() ? 1 : 0);
+		uint32_t const num_vertex_stream = rl.NumVertexStreams() + (rl.InstanceStream() ? 1 : 0);
 		for (uint32_t i = num_vertex_stream; i < last_num_vertex_stream_; ++ i)
 		{
 			d3dDevice_->SetStreamSource(i, NULL, 0, 0);
@@ -394,51 +390,49 @@ namespace KlayGE
 		}
 		last_num_vertex_stream_ = num_vertex_stream;
 
-		this->RenderVB(vb);
+		this->RenderRL(rl);
 	}
 
-	void D3D9RenderEngine::RenderVBSWInstance(VertexBuffer const & vb)
+	void D3D9RenderEngine::RenderRLSWInstance(RenderLayout const & rl)
 	{
-		for (VertexBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
-			iter != vb.VertexStreamEnd(); ++ iter)
+		for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
 		{
-			VertexStream& stream = *(*iter);
-			uint32_t number = static_cast<uint32_t>(iter - vb.VertexStreamBegin());
+			VertexStream& stream = *rl.GetVertexStream(i);
 
 			D3D9VertexStream& d3d9vs(*checked_cast<D3D9VertexStream*>(&stream));
-			TIF(d3dDevice_->SetStreamSource(number,
+			TIF(d3dDevice_->SetStreamSource(i,
 				d3d9vs.D3D9Buffer().get(), 0,
-				static_cast<UINT>(vb.VertexSize(number))));
+				static_cast<UINT>(rl.VertexSize(i))));
 		}
 
-		uint32_t const num_vertex_stream = static_cast<uint32_t>(vb.VertexStreamEnd() - vb.VertexStreamBegin());
+		uint32_t const num_vertex_stream = rl.NumVertexStreams();
 		for (uint32_t i = num_vertex_stream; i < last_num_vertex_stream_; ++ i)
 		{
 			d3dDevice_->SetStreamSource(i, NULL, 0, 0);
 		}
 		last_num_vertex_stream_ = num_vertex_stream;
 
-		this->RenderVB(vb);
+		this->RenderRL(rl);
 	}
 
-	void D3D9RenderEngine::RenderVB(VertexBuffer const & vb)
+	void D3D9RenderEngine::RenderRL(RenderLayout const & rl)
 	{
 		D3DPRIMITIVETYPE primType;
 		uint32_t primCount;
-		D3D9Mapping::Mapping(primType, primCount, vb);
+		D3D9Mapping::Mapping(primType, primCount, rl);
 
 		numPrimitivesJustRendered_ += primCount;
-		numVerticesJustRendered_ += vb.UseIndices() ? vb.NumIndices() : vb.NumVertices();
+		numVerticesJustRendered_ += rl.UseIndices() ? rl.NumIndices() : rl.NumVertices();
 
-		D3D9VertexBuffer const & d3d9_vb(*checked_cast<D3D9VertexBuffer const *>(&vb));
-		TIF(d3dDevice_->SetVertexDeclaration(d3d9_vb.VertexDeclaration().get()));
+		D3D9RenderLayout const & d3d9_rl(*checked_cast<D3D9RenderLayout const *>(&rl));
+		TIF(d3dDevice_->SetVertexDeclaration(d3d9_rl.VertexDeclaration().get()));
 
 		RenderTechniquePtr tech = renderEffect_->ActiveTechnique();
 		uint32_t num_passes = tech->NumPasses();
-		if (vb.UseIndices())
+		if (rl.UseIndices())
 		{
-			D3D9IndexStream& d3dis(*checked_cast<D3D9IndexStream*>(vb.GetIndexStream().get()));
-			d3dis.SwitchFormat(vb.GetIndexStreamFormat());
+			D3D9IndexStream& d3dis(*checked_cast<D3D9IndexStream*>(rl.GetIndexStream().get()));
+			d3dis.SwitchFormat(rl.IndexStreamFormat());
 			d3dDevice_->SetIndices(d3dis.D3D9Buffer().get());
 
 			for (uint32_t i = 0; i < num_passes; ++ i)
@@ -447,7 +441,7 @@ namespace KlayGE
 
 				pass->Begin();
 				TIF(d3dDevice_->DrawIndexedPrimitive(primType, 0, 0,
-					static_cast<UINT>(vb.NumVertices()), 0, primCount));
+					static_cast<UINT>(rl.NumVertices()), 0, primCount));
 				pass->End();
 			}
 		}

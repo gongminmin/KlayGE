@@ -111,14 +111,14 @@ namespace KlayGE
 	private:
 		void DoActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget);
 
-		void DoRender(VertexBuffer const & vb);
+		void DoRender(RenderLayout const & rl);
 
 		void FillRenderDeviceCaps();
 
-		void DoRenderSWInstance(VertexBuffer const & vb);
-		void DoRenderHWInstance(VertexBuffer const & vb);
-		void RenderVBSWInstance(VertexBuffer const & vb);
-		void RenderVB(VertexBuffer const & vb);
+		void DoRenderSWInstance(RenderLayout const & rl);
+		void DoRenderHWInstance(RenderLayout const & rl);
+		void RenderRLSWInstance(RenderLayout const & rl);
+		void RenderRL(RenderLayout const & rl);
 
 	private:
 		D3D9AdapterList const & D3DAdapters() const;
@@ -138,7 +138,7 @@ namespace KlayGE
 
 		size_t last_num_vertex_stream_;
 
-		boost::function<void (VertexBuffer const &)> RenderInstance;
+		boost::function<void (RenderLayout const &)> RenderInstance;
 	};
 
 	typedef boost::shared_ptr<D3D9RenderEngine> D3D9RenderEnginePtr;

@@ -75,9 +75,9 @@ namespace KlayGE
 		return ret;
 	}
 
-	VertexBufferPtr D3D9RenderFactory::MakeVertexBuffer(VertexBuffer::BufferType type)
+	RenderLayoutPtr D3D9RenderFactory::MakeRenderLayout(RenderLayout::buffer_type type)
 	{
-		return VertexBufferPtr(new D3D9VertexBuffer(type));
+		return RenderLayoutPtr(new D3D9RenderLayout(type));
 	}
 
 	VertexStreamPtr D3D9RenderFactory::MakeVertexStream(BufferUsage usage)

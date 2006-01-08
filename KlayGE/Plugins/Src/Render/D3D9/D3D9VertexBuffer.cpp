@@ -27,28 +27,28 @@
 
 namespace KlayGE
 {
-	D3D9VertexBuffer::D3D9VertexBuffer(BufferType type)
-		: VertexBuffer(type),
+	D3D9RenderLayout::D3D9RenderLayout(buffer_type type)
+		: RenderLayout(type),
 			dirty_decl_(true)
 	{
 	}
 
-	D3D9VertexBuffer::~D3D9VertexBuffer()
+	D3D9RenderLayout::~D3D9RenderLayout()
 	{
 		decl_.reset();
 	}
 
-	void D3D9VertexBuffer::DoOnLostDevice()
+	void D3D9RenderLayout::DoOnLostDevice()
 	{
 		dirty_decl_ = true;
 	}
 	
-	void D3D9VertexBuffer::DoOnResetDevice()
+	void D3D9RenderLayout::DoOnResetDevice()
 	{
 		dirty_decl_ = true;
 	}
 
-	boost::shared_ptr<IDirect3DVertexDeclaration9> D3D9VertexBuffer::VertexDeclaration() const
+	boost::shared_ptr<IDirect3DVertexDeclaration9> D3D9RenderLayout::VertexDeclaration() const
 	{
 		if (dirty_decl_)
 		{
@@ -58,13 +58,17 @@ namespace KlayGE
 			vertex_elems_type elems;
 			elems.reserve(vertex_streams_.size() + 1);
 
-			VertexBuffer::VertexStreamsType vss(this->VertexStreamBegin(), this->VertexStreamEnd());
-			if (instance_stream_)
+			std::vector<VertexStreamPtr> vss;
+			for (uint32_t i = 0; i < this->NumVertexStreams(); ++ i)
 			{
-				vss.push_back(instance_stream_);
+				vss.push_back(this->GetVertexStream(i));
+			}
+			if (instance_stream_.stream)
+			{
+				vss.push_back(instance_stream_.stream);
 			}
 
-			for (VertexStreamConstIterator iter = vss.begin(); iter != vss.end(); ++ iter)
+			for (std::vector<VertexStreamPtr>::const_iterator iter = vss.begin(); iter != vss.end(); ++ iter)
 			{
 				VertexStream& stream(*(*iter));
 

@@ -24,8 +24,6 @@ private:
 
 	bool use_instance_;
 
-	KlayGE::VertexBufferPtr vb_;
-
 	KlayGE::FirstPersonCameraController fpcController_;
 };
 

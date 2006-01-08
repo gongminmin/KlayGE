@@ -29,11 +29,11 @@
 
 namespace KlayGE
 {
-	class D3D9VertexBuffer : public VertexBuffer, public D3D9Resource
+	class D3D9RenderLayout : public RenderLayout, public D3D9Resource
 	{
 	public:
-		explicit D3D9VertexBuffer(BufferType type);
-		~D3D9VertexBuffer();
+		explicit D3D9RenderLayout(buffer_type type);
+		~D3D9RenderLayout();
 		
 		boost::shared_ptr<IDirect3DVertexDeclaration9> VertexDeclaration() const;
 

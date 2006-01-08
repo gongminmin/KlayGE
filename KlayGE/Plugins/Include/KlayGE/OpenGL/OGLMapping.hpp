@@ -39,7 +39,7 @@ namespace KlayGE
 		static GLenum Mapping(RenderEngine::ShadeOptions so);
 		static GLint Mapping(Sampler::TexAddressingMode mode);
 
-		static void Mapping(GLenum& primType, uint32_t& primCount, VertexBuffer const & vb);
+		static void Mapping(GLenum& primType, uint32_t& primCount, RenderLayout const & rl);
 	};
 }
 

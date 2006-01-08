@@ -64,9 +64,9 @@ namespace KlayGE
 		return RenderEffectPtr(new OGLRenderEffect(srcData));
 	}
 
-	VertexBufferPtr OGLRenderFactory::MakeVertexBuffer(VertexBuffer::BufferType type)
+	RenderLayoutPtr OGLRenderFactory::MakeRenderLayout(RenderLayout::buffer_type type)
 	{
-		return VertexBufferPtr(new OGLVertexBuffer(type));
+		return RenderLayoutPtr(new OGLRenderLayout(type));
 	}
 
 	VertexStreamPtr OGLRenderFactory::MakeVertexStream(BufferUsage usage)

@@ -97,7 +97,7 @@ namespace KlayGE
 	private:
 		void DoActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget);
 
-		void DoRender(VertexBuffer const & vb);
+		void DoRender(RenderLayout const & rl);
 
 		void FillRenderDeviceCaps();
 

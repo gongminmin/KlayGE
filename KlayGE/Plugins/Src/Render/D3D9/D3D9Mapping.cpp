@@ -266,37 +266,37 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9Mapping::Mapping(D3DPRIMITIVETYPE& primType, uint32_t& primCount, VertexBuffer const & vb)
+	void D3D9Mapping::Mapping(D3DPRIMITIVETYPE& primType, uint32_t& primCount, RenderLayout const & rl)
 	{
-		uint32_t const vertexCount(static_cast<uint32_t>(vb.UseIndices() ? vb.NumIndices() : vb.NumVertices()));
-		switch (vb.Type())
+		uint32_t const vertexCount(static_cast<uint32_t>(rl.UseIndices() ? rl.NumIndices() : rl.NumVertices()));
+		switch (rl.Type())
 		{
-		case VertexBuffer::BT_PointList:
+		case RenderLayout::BT_PointList:
 			primType = D3DPT_POINTLIST;
 			primCount = vertexCount;
 			break;
 
-		case VertexBuffer::BT_LineList:
+		case RenderLayout::BT_LineList:
 			primType = D3DPT_LINELIST;
 			primCount = vertexCount / 2;
 			break;
 
-		case VertexBuffer::BT_LineStrip:
+		case RenderLayout::BT_LineStrip:
 			primType = D3DPT_LINESTRIP;
 			primCount = vertexCount - 1;
 			break;
 
-		case VertexBuffer::BT_TriangleList:
+		case RenderLayout::BT_TriangleList:
 			primType = D3DPT_TRIANGLELIST;
 			primCount = vertexCount / 3;
 			break;
 
-		case VertexBuffer::BT_TriangleStrip:
+		case RenderLayout::BT_TriangleStrip:
 			primType = D3DPT_TRIANGLESTRIP;
 			primCount = vertexCount - 2;
 			break;
 
-		case VertexBuffer::BT_TriangleFan:
+		case RenderLayout::BT_TriangleFan:
 			primType = D3DPT_TRIANGLEFAN;
 			primCount = vertexCount - 2;
 			break;
@@ -307,14 +307,14 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9Mapping::Mapping(std::vector<D3DVERTEXELEMENT9>& elements, size_t stream, VertexBuffer const & vb)
+	void D3D9Mapping::Mapping(std::vector<D3DVERTEXELEMENT9>& elements, size_t stream, RenderLayout const & rl)
 	{
-		elements.resize(vb.VertexStreamFormat(stream).size());
+		elements.resize(rl.VertexStreamFormat(stream).size());
 
 		uint16_t elem_offset = 0;
 		for (uint32_t i = 0; i < elements.size(); ++ i)
 		{
-			vertex_element const & vs_elem = vb.VertexStreamFormat(stream)[i];
+			vertex_element const & vs_elem = rl.VertexStreamFormat(stream)[i];
 
 			D3DVERTEXELEMENT9& element = elements[i];
 			element.Type		= D3DDECLTYPE_FLOAT1 - 1 + vs_elem.num_components;

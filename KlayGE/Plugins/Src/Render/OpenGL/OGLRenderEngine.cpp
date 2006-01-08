@@ -237,30 +237,30 @@ namespace KlayGE
 
 	// äÖÈ¾
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::DoRender(VertexBuffer const & vb)
+	void OGLRenderEngine::DoRender(RenderLayout const & rl)
 	{
 		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_NORMAL_ARRAY);
 		glDisableClientState(GL_COLOR_ARRAY);
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
-		uint32_t num_instance = (*vb.VertexStreamBegin())->Frequency();
+		uint32_t const num_instance = rl.NumInstance();
 		BOOST_ASSERT(num_instance != 0);
 
 		for (uint32_t instance = 0; instance < num_instance; ++ instance)
 		{
-			if (vb.InstanceStream())
+			if (rl.InstanceStream())
 			{
-				VertexStream& stream = *vb.InstanceStream();
+				VertexStream& stream = *rl.InstanceStream();
 
-				uint32_t const instance_size = vb.InstanceSize();
+				uint32_t const instance_size = rl.InstanceSize();
 				VertexStream::Mapper mapper(stream, BA_Read_Only);
 				uint8_t const * buffer = mapper.Pointer<uint8_t>();
 
 				uint32_t elem_offset = 0;
-				for (uint32_t i = 0; i < vb.InstanceStreamFormat().size(); ++ i)
+				for (uint32_t i = 0; i < rl.InstanceStreamFormat().size(); ++ i)
 				{
-					vertex_element const & vs_elem = vb.InstanceStreamFormat()[i];
+					vertex_element const & vs_elem = rl.InstanceStreamFormat()[i];
 					void const * addr = &buffer[instance * instance_size + elem_offset];
 
 					switch (vs_elem.usage)
@@ -338,15 +338,14 @@ namespace KlayGE
 			}
 
 			// Geometry streams
-			for (VertexBuffer::VertexStreamConstIterator iter = vb.VertexStreamBegin();
-				iter != vb.VertexStreamEnd(); ++ iter)
+			for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
 			{
-				OGLVertexStream& stream(static_cast<OGLVertexStream&>(*(*iter)));
+				OGLVertexStream& stream(static_cast<OGLVertexStream&>(*rl.GetVertexStream(i)));
 
 				uint32_t elem_offset = 0;
-				for (uint32_t i = 0; i < vb.VertexStreamFormat(iter - vb.VertexStreamBegin()).size(); ++ i)
+				for (uint32_t j = 0; j < rl.VertexStreamFormat(i).size(); ++ j)
 				{
-					vertex_element const & vs_elem = vb.VertexStreamFormat(iter - vb.VertexStreamBegin())[i];
+					vertex_element const & vs_elem = rl.VertexStreamFormat(i)[j];
 
 					switch (vs_elem.usage)
 					{
@@ -354,28 +353,28 @@ namespace KlayGE
 					case VEU_Position:
 						glEnableClientState(GL_VERTEX_ARRAY);
 						stream.Active();
-						glVertexPointer(3, GL_FLOAT, vb.VertexSize(iter - vb.VertexStreamBegin()),
+						glVertexPointer(3, GL_FLOAT, rl.VertexSize(i),
 							reinterpret_cast<GLvoid*>(elem_offset));
 						break;
 				
 					case VEU_Normal:
 						glEnableClientState(GL_NORMAL_ARRAY);
 						stream.Active();
-						glNormalPointer(GL_FLOAT, vb.VertexSize(iter - vb.VertexStreamBegin()),
+						glNormalPointer(GL_FLOAT, rl.VertexSize(i),
 							reinterpret_cast<GLvoid*>(elem_offset));
 						break;
 
 					case VEU_Diffuse:
 						glEnableClientState(GL_COLOR_ARRAY);
 						stream.Active();
-						glColorPointer(4, GL_UNSIGNED_BYTE, vb.VertexSize(iter - vb.VertexStreamBegin()),
+						glColorPointer(4, GL_UNSIGNED_BYTE, rl.VertexSize(i),
 							reinterpret_cast<GLvoid*>(elem_offset));
 						break;
 
 					case VEU_Specular:
 						glEnableClientState(GL_SECONDARY_COLOR_ARRAY);
 						stream.Active();
-						glSecondaryColorPointer(4, GL_UNSIGNED_BYTE, vb.VertexSize(iter - vb.VertexStreamBegin()),
+						glSecondaryColorPointer(4, GL_UNSIGNED_BYTE, rl.VertexSize(i),
 							reinterpret_cast<GLvoid*>(elem_offset));
 						break;
 
@@ -384,7 +383,7 @@ namespace KlayGE
 						glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 						stream.Active();
 						glTexCoordPointer(static_cast<GLint>(vs_elem.num_components),
-								GL_FLOAT, vb.VertexSize(iter - vb.VertexStreamBegin()), reinterpret_cast<GLvoid*>(elem_offset));
+								GL_FLOAT, rl.VertexSize(i), reinterpret_cast<GLvoid*>(elem_offset));
 						break;
 
 					default:
@@ -396,23 +395,23 @@ namespace KlayGE
 				}
 			}
 
-			size_t const vertexCount = vb.UseIndices() ? vb.NumIndices() : vb.NumVertices();
+			size_t const vertexCount = rl.UseIndices() ? rl.NumIndices() : rl.NumVertices();
 			GLenum mode;
 			uint32_t primCount;
-			OGLMapping::Mapping(mode, primCount, vb);
+			OGLMapping::Mapping(mode, primCount, rl);
 
 			numPrimitivesJustRendered_ += primCount;
 			numVerticesJustRendered_ += vertexCount;
 
 			RenderTechniquePtr tech = renderEffect_->ActiveTechnique();
 			uint32_t num_passes = tech->NumPasses();
-			if (vb.UseIndices())
+			if (rl.UseIndices())
 			{
-				OGLIndexStream& stream(static_cast<OGLIndexStream&>(*vb.GetIndexStream()));
+				OGLIndexStream& stream(static_cast<OGLIndexStream&>(*rl.GetIndexStream()));
 				stream.Active();
 
 				GLenum index_type;
-				if (IF_Index16 == vb.GetIndexStreamFormat())
+				if (IF_Index16 == rl.IndexStreamFormat())
 				{
 					index_type = GL_UNSIGNED_SHORT;
 				}
@@ -426,7 +425,7 @@ namespace KlayGE
 					RenderPassPtr pass = tech->Pass(i);
 
 					pass->Begin();
-					glDrawElements(mode, static_cast<GLsizei>(vb.NumIndices()),
+					glDrawElements(mode, static_cast<GLsizei>(rl.NumIndices()),
 						index_type, 0);
 					pass->End();
 				}
@@ -438,7 +437,7 @@ namespace KlayGE
 					RenderPassPtr pass = tech->Pass(i);
 
 					pass->Begin();
-					glDrawArrays(mode, 0, static_cast<GLsizei>(vb.NumVertices()));
+					glDrawArrays(mode, 0, static_cast<GLsizei>(rl.NumVertices()));
 					pass->End();
 				}
 			}

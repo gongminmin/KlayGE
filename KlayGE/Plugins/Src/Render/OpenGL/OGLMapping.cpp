@@ -210,39 +210,39 @@ namespace KlayGE
 		}
 	}
 
-	void OGLMapping::Mapping(GLenum& primType, uint32_t& primCount, VertexBuffer const & vb)
+	void OGLMapping::Mapping(GLenum& primType, uint32_t& primCount, RenderLayout const & rl)
 	{
-		uint32_t const vertexCount = static_cast<uint32_t>(vb.UseIndices() ? vb.NumIndices() : vb.NumVertices());
+		uint32_t const vertexCount = static_cast<uint32_t>(rl.UseIndices() ? rl.NumIndices() : rl.NumVertices());
 		primType = GL_POINTS;
 		primCount = vertexCount;
-		switch (vb.Type())
+		switch (rl.Type())
 		{
-		case VertexBuffer::BT_PointList:
+		case RenderLayout::BT_PointList:
 			primType = GL_POINTS;
 			primCount = vertexCount;
 			break;
 
-		case VertexBuffer::BT_LineList:
+		case RenderLayout::BT_LineList:
 			primType = GL_LINES;
 			primCount = vertexCount / 2;
 			break;
 
-		case VertexBuffer::BT_LineStrip:
+		case RenderLayout::BT_LineStrip:
 			primType = GL_LINE_STRIP;
 			primCount = vertexCount - 1;
 			break;
 
-		case VertexBuffer::BT_TriangleList:
+		case RenderLayout::BT_TriangleList:
 			primType = GL_TRIANGLES;
 			primCount = vertexCount / 3;
 			break;
 
-		case VertexBuffer::BT_TriangleStrip:
+		case RenderLayout::BT_TriangleStrip:
 			primType = GL_TRIANGLE_STRIP;
 			primCount = vertexCount - 2;
 			break;
 
-		case VertexBuffer::BT_TriangleFan:
+		case RenderLayout::BT_TriangleFan:
 			primType = GL_TRIANGLE_FAN;
 			primCount = vertexCount - 2;
 			break;

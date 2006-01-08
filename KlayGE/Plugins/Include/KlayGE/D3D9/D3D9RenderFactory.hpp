@@ -68,7 +68,7 @@ namespace KlayGE
 			PixelFormat format);
 		RenderTexturePtr MakeRenderTexture();
 
-		VertexBufferPtr MakeVertexBuffer(VertexBuffer::BufferType type);
+		RenderLayoutPtr MakeRenderLayout(RenderLayout::buffer_type type);
 		VertexStreamPtr MakeVertexStream(BufferUsage usage);
 		IndexStreamPtr MakeIndexStream(BufferUsage usage);
 

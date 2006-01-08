@@ -67,7 +67,7 @@ namespace KlayGE
 
 		RenderEffectPtr DoMakeRenderEffect(std::string const & srcData);
 
-		VertexBufferPtr MakeVertexBuffer(VertexBuffer::BufferType type);
+		RenderLayoutPtr MakeRenderLayout(RenderLayout::buffer_type type);
 		VertexStreamPtr MakeVertexStream(BufferUsage usage);
 		IndexStreamPtr MakeIndexStream(BufferUsage usage);
 
