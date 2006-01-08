@@ -151,7 +151,7 @@ namespace KlayGE
 		RenderEffectPtr GetRenderEffect() const;
 
 		virtual void BeginFrame() = 0;
-		void Render(VertexBuffer const & vb);
+		void Render(RenderLayout const & rl);
 		virtual void EndFrame() = 0;
 
 		size_t NumPrimitivesJustRendered();
@@ -217,7 +217,7 @@ namespace KlayGE
 	protected:
 		virtual void DoActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget) = 0;
 
-		virtual void DoRender(VertexBuffer const & vb) = 0;
+		virtual void DoRender(RenderLayout const & rl) = 0;
 
 		virtual void FillRenderDeviceCaps() = 0;
 

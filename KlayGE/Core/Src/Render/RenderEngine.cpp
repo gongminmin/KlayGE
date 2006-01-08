@@ -158,7 +158,7 @@ namespace KlayGE
 		{
 		}
 
-		void DoRender(VertexBuffer const & /*vb*/)
+		void DoRender(RenderLayout const & /*rl*/)
 		{
 		}
 
@@ -223,10 +223,10 @@ namespace KlayGE
 
 	// äÖÈ¾Ò»¸övb
 	/////////////////////////////////////////////////////////////////////////////////
-	void RenderEngine::Render(VertexBuffer const & vb)
+	void RenderEngine::Render(RenderLayout const & rl)
 	{
 		renderEffect_->Begin();
-		this->DoRender(vb);
+		this->DoRender(rl);
 		renderEffect_->End();
 	}
 

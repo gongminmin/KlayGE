@@ -37,7 +37,7 @@ namespace KlayGE
 		}
 
 		virtual RenderEffectPtr GetRenderEffect() const;
-		virtual VertexBufferPtr GetVertexBuffer() const;
+		virtual RenderLayoutPtr GetRenderLayout() const;
 
 		virtual Box GetBound() const;
 
@@ -48,7 +48,7 @@ namespace KlayGE
 
 		Box box_;
 
-		VertexBufferPtr vb_;
+		RenderLayoutPtr rl_;
 		RenderEffectPtr effect_;
 	};
 

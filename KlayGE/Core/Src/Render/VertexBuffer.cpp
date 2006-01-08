@@ -53,8 +53,7 @@ namespace KlayGE
 	};
 
 	VertexStream::VertexStream(BufferUsage usage)
-			: usage_(usage), size_in_byte_(0),
-				type_(ST_Geometry), freq_(1)
+			: usage_(usage), size_in_byte_(0)
 	{
 	}
 
@@ -80,22 +79,6 @@ namespace KlayGE
 		VertexStream::Mapper rhs_mapper(rhs, BA_Write_Only);
 		std::copy(lhs_mapper.Pointer<uint8_t>(), lhs_mapper.Pointer<uint8_t>() + size_in_byte_,
 			rhs_mapper.Pointer<uint8_t>());
-	}
-
-	void VertexStream::FrequencyDivider(stream_type type, uint32_t freq)
-	{
-		type_ = type;
-		freq_ = freq;
-	}
-
-	VertexStream::stream_type VertexStream::StreamType() const
-	{
-		return type_;
-	}
-
-    uint32_t VertexStream::Frequency() const
-	{
-		return freq_;
 	}
 
 
@@ -151,47 +134,43 @@ namespace KlayGE
 	}
 
 
-	class NullVertexBuffer : public VertexBuffer
+	class NullRenderLayout : public RenderLayout
 	{
 	public:
-		NullVertexBuffer()
-			: VertexBuffer(BT_PointList)
+		NullRenderLayout()
+			: RenderLayout(BT_PointList)
 		{
 		}
 	};
 
-	VertexBuffer::VertexBuffer(BufferType type)
+	RenderLayout::RenderLayout(buffer_type type)
 			: type_(type)
 	{
 		vertex_streams_.reserve(8);
 	}
 
-	VertexBuffer::~VertexBuffer()
+	RenderLayout::~RenderLayout()
 	{
 	}
 
-	VertexBufferPtr VertexBuffer::NullObject()
+	RenderLayoutPtr RenderLayout::NullObject()
 	{
-		static VertexBufferPtr obj(new NullVertexBuffer);
+		static RenderLayoutPtr obj(new NullRenderLayout);
 		return obj;
 	}
 
-	VertexBuffer::BufferType VertexBuffer::Type() const
+	RenderLayout::buffer_type RenderLayout::Type() const
 	{
 		return type_;
 	}
 
-	uint32_t VertexBuffer::NumVertices() const
+	uint32_t RenderLayout::NumVertices() const
 	{
-		uint32_t vertex_size = 0;
-		for (size_t i = 0; i < vertex_stream_formats_[0].size(); ++ i)
-		{
-			vertex_size += vertex_stream_formats_[0][i].element_size();
-		}
-		return vertex_streams_.empty() ? 0 : (vertex_streams_[0]->Size() / vertex_size);
+		return vertex_streams_.empty() ? 0 : (vertex_streams_[0].stream->Size() / vertex_streams_[0].vertex_size);
 	}
 
-	void VertexBuffer::AddVertexStream(VertexStreamPtr vertex_stream, vertex_elements_type const & vet)
+	void RenderLayout::AddVertexStream(VertexStreamPtr vertex_stream, vertex_elements_type const & vet,
+		stream_type type, uint32_t freq)
 	{
 		BOOST_ASSERT(vertex_stream);
 
@@ -201,47 +180,33 @@ namespace KlayGE
 			size += vet[i].element_size();
 		}
 
-		if (VertexStream::ST_Geometry == vertex_stream->StreamType())
+		if (ST_Geometry == type)
 		{
-			vertex_streams_.push_back(vertex_stream);
-			vertex_stream_formats_.push_back(vet);
-			vertex_sizes_.push_back(size);
+			VertexStreamUnit vs;
+			vs.stream = vertex_stream;
+			vs.format = vet;
+			vs.vertex_size = size;
+			vs.type = type;
+			vs.freq = freq;
+			vertex_streams_.push_back(vs);
 		}
 		else
 		{
 			BOOST_ASSERT(!instance_stream_);
-			instance_stream_ = vertex_stream;
-			instance_format_ = vet;
-			instance_size_ = size;
+			instance_stream_.stream = vertex_stream;
+			instance_stream_.format = vet;
+			instance_stream_.vertex_size = size;
+			instance_stream_.type = type;
+			instance_stream_.freq = freq;
 		}
 	}
 
-	VertexBuffer::VertexStreamIterator VertexBuffer::VertexStreamBegin()
-	{
-		return vertex_streams_.begin();
-	}
-
-	VertexBuffer::VertexStreamIterator VertexBuffer::VertexStreamEnd()
-	{
-		return vertex_streams_.end();
-	}
-
-	VertexBuffer::VertexStreamConstIterator VertexBuffer::VertexStreamBegin() const
-	{
-		return vertex_streams_.begin();
-	}
-
-	VertexBuffer::VertexStreamConstIterator VertexBuffer::VertexStreamEnd() const
-	{
-		return vertex_streams_.end();
-	}
-
-	bool VertexBuffer::UseIndices() const
+	bool RenderLayout::UseIndices() const
 	{
 		return this->NumIndices() != 0;
 	}
 
-	uint32_t VertexBuffer::NumIndices() const
+	uint32_t RenderLayout::NumIndices() const
 	{
 		if (index_stream_)
 		{
@@ -260,29 +225,29 @@ namespace KlayGE
 		}
 	}
 
-	void VertexBuffer::SetIndexStream(IndexStreamPtr index_stream, IndexFormat format)
+	void RenderLayout::SetIndexStream(IndexStreamPtr index_stream, IndexFormat format)
 	{
 		index_stream_ = index_stream;
 		index_format_ = format;
 	}
 
-	IndexStreamPtr VertexBuffer::GetIndexStream() const
+	IndexStreamPtr RenderLayout::GetIndexStream() const
 	{
 		BOOST_ASSERT(index_stream_);
 		return index_stream_;
 	}
 
-	VertexStreamPtr VertexBuffer::InstanceStream() const
+	VertexStreamPtr RenderLayout::InstanceStream() const
 	{
-		return instance_stream_;
+		return instance_stream_.stream;
 	}
 
-	uint32_t VertexBuffer::NumInstance() const
+	uint32_t RenderLayout::NumInstance() const
 	{
-		return vertex_streams_[0]->Frequency();
+		return vertex_streams_[0].freq;
 	}
 
-	void VertexBuffer::ExpandInstance(VertexStreamPtr& hint, uint32_t inst_no) const
+	void RenderLayout::ExpandInstance(VertexStreamPtr& hint, uint32_t inst_no) const
 	{
 		BOOST_ASSERT(instance_stream_);
 
@@ -297,22 +262,20 @@ namespace KlayGE
 			hint = rf.MakeVertexStream(BU_Dynamic);
 		}
 
-		std::vector<uint8_t> instance_buffer(instance_stream_->Size());
+		std::vector<uint8_t> instance_buffer(instance_stream_.stream->Size());
 		{
-			VertexStream::Mapper mapper(*instance_stream_, BA_Read_Only);
-			std::copy(mapper.Pointer<uint8_t>(), mapper.Pointer<uint8_t>() + instance_stream_->Size(),
+			VertexStream::Mapper mapper(*instance_stream_.stream, BA_Read_Only);
+			std::copy(mapper.Pointer<uint8_t>(), mapper.Pointer<uint8_t>() + instance_stream_.stream->Size(),
 				instance_buffer.begin());
 		}
-		hint->Resize(instance_size_ * num_vertices);
+		hint->Resize(instance_stream_.vertex_size * num_vertices);
 		VertexStream::Mapper dst_mapper(*hint, BA_Write_Only);
 
 		for (uint32_t i = 0; i < num_vertices; ++ i)
 		{
-			std::copy(&instance_buffer[0] + inst_no * instance_size_,
-				&instance_buffer[0] + (inst_no + 1) * instance_size_,
-				dst_mapper.Pointer<uint8_t>() + i * instance_size_);
+			std::copy(&instance_buffer[0] + inst_no * instance_stream_.vertex_size,
+				&instance_buffer[0] + (inst_no + 1) * instance_stream_.vertex_size,
+				dst_mapper.Pointer<uint8_t>() + i * instance_stream_.vertex_size);
 		}
-
-		hint->FrequencyDivider(VertexStream::ST_Geometry, 1);
 	}
 }

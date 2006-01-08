@@ -95,7 +95,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			vb_ = rf.MakeVertexBuffer(VertexBuffer::BT_TriangleList);
+			rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleList);
 
 			RenderEngine const & renderEngine = rf.RenderEngineInstance();
 			RenderDeviceCaps const & caps = renderEngine.DeviceCaps();
@@ -120,11 +120,11 @@ namespace
 			clr_vs_ = rf.MakeVertexStream(BU_Dynamic);
 			tex_vs_ = rf.MakeVertexStream(BU_Dynamic);
 
-			vb_->AddVertexStream(xyz_vs_, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
-			vb_->AddVertexStream(clr_vs_, boost::make_tuple(vertex_element(VEU_Diffuse, 0, sizeof(float), 4)));
-			vb_->AddVertexStream(tex_vs_, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, sizeof(float), 2)));
+			rl_->AddVertexStream(xyz_vs_, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
+			rl_->AddVertexStream(clr_vs_, boost::make_tuple(vertex_element(VEU_Diffuse, 0, sizeof(float), 4)));
+			rl_->AddVertexStream(tex_vs_, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, sizeof(float), 2)));
 
-			vb_->SetIndexStream(rf.MakeIndexStream(BU_Dynamic), IF_Index16);
+			rl_->SetIndexStream(rf.MakeIndexStream(BU_Dynamic), IF_Index16);
 
 			box_ = Box(Vector3(0, 0, 0), Vector3(0, 0, 0));
 
@@ -161,9 +161,9 @@ namespace
 				std::copy(texs_.begin(), texs_.end(), mapper.Pointer<Vector2>());
 			}
 
-			vb_->GetIndexStream()->Resize(static_cast<uint32_t>(indices_.size() * sizeof(indices_[0])));
+			rl_->GetIndexStream()->Resize(static_cast<uint32_t>(indices_.size() * sizeof(indices_[0])));
 			{
-				IndexStream::Mapper mapper(*vb_->GetIndexStream(), BA_Write_Only);
+				IndexStream::Mapper mapper(*rl_->GetIndexStream(), BA_Write_Only);
 				std::copy(indices_.begin(), indices_.end(), mapper.Pointer<uint16_t>());
 			}
 
@@ -188,7 +188,7 @@ namespace
 			RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 			this->OnRenderBegin();
-			renderEngine.Render(*vb_);
+			renderEngine.Render(*rl_);
 			this->OnRenderEnd();
 		}
 

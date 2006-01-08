@@ -37,7 +37,7 @@ namespace KlayGE
 		virtual ~Renderable();
 
 		virtual RenderEffectPtr GetRenderEffect() const = 0;
-		virtual VertexBufferPtr GetVertexBuffer() const = 0;
+		virtual RenderLayoutPtr GetRenderLayout() const = 0;
 		virtual std::wstring const & Name() const = 0;
 
 		virtual void OnRenderBegin();

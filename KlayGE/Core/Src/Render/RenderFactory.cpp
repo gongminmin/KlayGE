@@ -63,9 +63,9 @@ namespace KlayGE
 			return RenderTexture::NullObject();
 		}
 
-		VertexBufferPtr MakeVertexBuffer(VertexBuffer::BufferType type)
+		RenderLayoutPtr MakeRenderLayout(RenderLayout::buffer_type type)
 		{
-			return VertexBuffer::NullObject();
+			return RenderLayout::NullObject();
 		}
 
 		VertexStreamPtr MakeVertexStream(BufferUsage usage)

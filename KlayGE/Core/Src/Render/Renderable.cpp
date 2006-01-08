@@ -55,11 +55,11 @@ namespace KlayGE
 
 		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-		VertexStreamPtr inst_stream = this->GetVertexBuffer()->InstanceStream();
+		VertexStreamPtr inst_stream = this->GetRenderLayout()->InstanceStream();
 		if (inst_stream)
 		{
 			this->OnRenderBegin();
-			renderEngine.Render(*this->GetVertexBuffer());
+			renderEngine.Render(*this->GetRenderLayout());
 			this->OnRenderEnd();
 		}
 		else
@@ -67,14 +67,14 @@ namespace KlayGE
 			this->OnRenderBegin();
 			if (instances_.empty())
 			{
-				renderEngine.Render(*this->GetVertexBuffer());
+				renderEngine.Render(*this->GetRenderLayout());
 			}
 			else
 			{
 				for (uint32_t i = 0; i < instances_.size(); ++ i)
 				{
 					this->OnInstanceBegin(i);
-					renderEngine.Render(*this->GetVertexBuffer());
+					renderEngine.Render(*this->GetRenderLayout());
 					this->OnInstanceEnd(i);
 				}
 			}
@@ -91,24 +91,25 @@ namespace KlayGE
 	{
 		if (!instances_.empty() && !instances_[0].lock()->InstanceFormat().empty())
 		{
-			VertexStreamPtr inst_stream = this->GetVertexBuffer()->InstanceStream();
+			RenderLayoutPtr rl = this->GetRenderLayout();
+
+			VertexStreamPtr inst_stream = rl->InstanceStream();
 			if (!inst_stream)
 			{
 				RenderFactory& rf(Context::Instance().RenderFactoryInstance());
 
 				inst_stream = rf.MakeVertexStream(BU_Dynamic);
-				inst_stream->FrequencyDivider(VertexStream::ST_Instance, 1);
-				this->GetVertexBuffer()->AddVertexStream(inst_stream, instances_[0].lock()->InstanceFormat());
+				rl->AddVertexStream(inst_stream, instances_[0].lock()->InstanceFormat(), RenderLayout::ST_Instance, 1);
 			}
 			else
 			{
 				for (size_t i = 0; i < instances_.size(); ++ i)
 				{
-					BOOST_ASSERT(this->GetVertexBuffer()->InstanceStreamFormat() == instances_[i].lock()->InstanceFormat());
+					BOOST_ASSERT(vb->InstanceStreamFormat() == instances_[i].lock()->InstanceFormat());
 				}
 			}
 
-			uint32_t const size = this->GetVertexBuffer()->InstanceSize();
+			uint32_t const size = rl->InstanceSize();
 
 			inst_stream->Resize(size * instances_.size());
 			{
@@ -120,10 +121,9 @@ namespace KlayGE
 				}
 			}
 
-			for (VertexBuffer::VertexStreamIterator iter = this->GetVertexBuffer()->VertexStreamBegin();
-				iter != this->GetVertexBuffer()->VertexStreamEnd(); ++ iter)
+			for (uint32_t i = 0; i < rl->NumVertexStreams(); ++ i)
 			{
-				(*iter)->FrequencyDivider(VertexStream::ST_Geometry, static_cast<uint32_t>(instances_.size()));
+				rl->VertexStreamFrequencyDivider(i, RenderLayout::ST_Geometry, static_cast<uint32_t>(instances_.size()));
 			}
 		}
 	}

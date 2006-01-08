@@ -126,12 +126,6 @@ namespace KlayGE
 	class VertexStream
 	{
 	public:
-		enum stream_type
-		{
-			ST_Geometry,
-			ST_Instance
-		};
-
 		class Mapper : boost::noncopyable
 		{
 		public:
@@ -183,10 +177,6 @@ namespace KlayGE
 
 		void CopyToStream(VertexStream& rhs);
 
-		void FrequencyDivider(stream_type type, uint32_t freq);
-		stream_type StreamType() const;
-		uint32_t Frequency() const;
-
 	private:
 		virtual void DoCreate() = 0;
 
@@ -194,9 +184,6 @@ namespace KlayGE
 		BufferUsage usage_;
 
 		uint32_t size_in_byte_;
-
-		stream_type type_;
-		uint32_t freq_;
 	};
 
 
@@ -264,10 +251,10 @@ namespace KlayGE
 	};
 
 
-	class VertexBuffer
+	class RenderLayout
 	{
 	public:
-		enum BufferType
+		enum buffer_type
 		{
 			BT_PointList,
 			BT_LineList,
@@ -277,37 +264,58 @@ namespace KlayGE
 			BT_TriangleFan
 		};
 
-		typedef std::vector<VertexStreamPtr> VertexStreamsType;
-		typedef VertexStreamsType::iterator VertexStreamIterator;
-		typedef VertexStreamsType::const_iterator VertexStreamConstIterator;
+		enum stream_type
+		{
+			ST_Geometry,
+			ST_Instance
+		};
 
-		explicit VertexBuffer(BufferType type);
-		virtual ~VertexBuffer() = 0;
+		explicit RenderLayout(buffer_type type);
+		virtual ~RenderLayout() = 0;
 
-		static VertexBufferPtr NullObject();
+		static RenderLayoutPtr NullObject();
 
-		BufferType Type() const;
+		buffer_type Type() const;
 
 		uint32_t NumVertices() const;
 
 		template <typename tuple_type>
-		void AddVertexStream(VertexStreamPtr vertex_stream, tuple_type const & vertex_elems)
+		void AddVertexStream(VertexStreamPtr vertex_stream, tuple_type const & vertex_elems,
+			stream_type type = ST_Geometry, uint32_t freq = 1)
 		{
-			this->AddVertexStream(vertex_stream, Tuple2Vector(vertex_elems));
+			this->AddVertexStream(vertex_stream, Tuple2Vector(vertex_elems), type, freq);
 		}
-		void AddVertexStream(VertexStreamPtr vertex_stream, vertex_elements_type const & vet);
+		void AddVertexStream(VertexStreamPtr vertex_stream, vertex_elements_type const & vet,
+			stream_type type = ST_Geometry, uint32_t freq = 1);
 
-		VertexStreamIterator VertexStreamBegin();
-		VertexStreamIterator VertexStreamEnd();
-		VertexStreamConstIterator VertexStreamBegin() const;
-		VertexStreamConstIterator VertexStreamEnd() const;
+		uint32_t NumVertexStreams() const
+		{
+			return static_cast<uint32_t>(vertex_streams_.size());
+		}
+		VertexStreamPtr GetVertexStream(uint32_t index) const
+		{
+			return vertex_streams_[index].stream;
+		}
 		vertex_elements_type const & VertexStreamFormat(uint32_t index) const
 		{
-			return vertex_stream_formats_[index];
+			return vertex_streams_[index].format;
 		}
 		uint32_t VertexSize(uint32_t index) const
 		{
-			return vertex_sizes_[index];
+			return vertex_streams_[index].vertex_size;
+		}
+		stream_type VertexStreamType(uint32_t index) const
+		{
+			return vertex_streams_[index].type;
+		}
+		uint32_t VertexStreamFrequency(uint32_t index) const
+		{
+			return vertex_streams_[index].freq;
+		}
+		void VertexStreamFrequencyDivider(uint32_t index, stream_type type, uint32_t freq)
+		{
+			vertex_streams_[index].type = type;
+			vertex_streams_[index].freq = freq;
 		}
 
 		bool UseIndices() const;
@@ -315,7 +323,7 @@ namespace KlayGE
 
 		void SetIndexStream(IndexStreamPtr index_stream, IndexFormat format);
 		IndexStreamPtr GetIndexStream() const;
-		IndexFormat GetIndexStreamFormat() const
+		IndexFormat IndexStreamFormat() const
 		{
 			return index_format_;
 		}
@@ -323,11 +331,11 @@ namespace KlayGE
 		VertexStreamPtr InstanceStream() const;
 		vertex_elements_type const & InstanceStreamFormat() const
 		{
-			return instance_format_;
+			return instance_stream_.format;
 		}
 		uint32_t InstanceSize() const
 		{
-			return instance_size_;
+			return instance_stream_.vertex_size;
 		}
 		uint32_t NumInstance() const;
 
@@ -352,18 +360,23 @@ namespace KlayGE
 		}
 
 	protected:
-		BufferType type_;
+		buffer_type type_;
 
-		VertexStreamsType vertex_streams_;
-		std::vector<vertex_elements_type> vertex_stream_formats_;
-		std::vector<uint32_t> vertex_sizes_;
+		struct VertexStreamUnit
+		{
+			VertexStreamPtr stream;
+			vertex_elements_type format;
+			uint32_t vertex_size;
+
+			stream_type type;
+			uint32_t freq;
+		};
+
+		std::vector<VertexStreamUnit> vertex_streams_;
+		VertexStreamUnit instance_stream_;
 
 		IndexStreamPtr index_stream_;
 		IndexFormat index_format_;
-
-		VertexStreamPtr instance_stream_;
-		vertex_elements_type instance_format_;
-		uint32_t instance_size_;
 	};
 }
 

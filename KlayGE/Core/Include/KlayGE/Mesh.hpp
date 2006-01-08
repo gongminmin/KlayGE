@@ -74,9 +74,9 @@ namespace KlayGE
 			effect_ = effect;
 		}
 
-		VertexBufferPtr GetVertexBuffer() const
+		RenderLayoutPtr GetRenderLayout() const
 		{
-			return vb_;
+			return rl_;
 		}
 
 		void OnRenderBegin();
@@ -96,7 +96,7 @@ namespace KlayGE
 	private:
 		std::wstring name_;
 
-		VertexBufferPtr vb_;
+		RenderLayoutPtr rl_;
 		RenderEffectPtr effect_;
 
 		Box box_;
@@ -127,9 +127,9 @@ namespace KlayGE
 			effect_ = effect;
 		}
 
-		VertexBufferPtr GetVertexBuffer() const
+		RenderLayoutPtr GetRenderLayout() const
 		{
-			return vb_;
+			return rl_;
 		}
 
 		virtual Box GetBound() const;
@@ -173,7 +173,7 @@ namespace KlayGE
 	protected:
 		std::wstring name_;
 
-		VertexBufferPtr vb_;
+		RenderLayoutPtr rl_;
 		RenderEffectPtr effect_;
 
 		Box box_;
@@ -215,8 +215,8 @@ namespace KlayGE
 
 		RenderEffectPtr GetRenderEffect() const
 			{ return staticMesh_->GetRenderEffect(); }
-		VertexBufferPtr GetVertexBuffer() const
-			{ return staticMesh_->GetVertexBuffer(); }
+		RenderLayoutPtr GetRenderLayout() const
+			{ return staticMesh_->GetRenderLayout(); }
 
 		std::wstring const & Name() const;
 
