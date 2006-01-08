@@ -56,7 +56,7 @@ namespace KlayGE
 			boost::shared_ptr<IDirect3DDevice9> d3d_device = renderEngine.D3DDevice();
 
 			vertex_elems_type elems;
-			elems.reserve(vertexStreams_.size() + 1);
+			elems.reserve(vertex_streams_.size() + 1);
 
 			VertexBuffer::VertexStreamsType vss(this->VertexStreamBegin(), this->VertexStreamEnd());
 			if (instance_stream_)

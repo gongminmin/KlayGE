@@ -332,7 +332,6 @@ namespace KlayGE
 		uint32_t NumInstance() const;
 
 		void ExpandInstance(VertexStreamPtr& hint, uint32_t inst_no) const;
-		VertexStreamPtr ExpandInstance(uint32_t inst_no) const;
 
 	private:
 		template <typename tuple_type>
@@ -355,11 +354,11 @@ namespace KlayGE
 	protected:
 		BufferType type_;
 
-		VertexStreamsType vertexStreams_;
+		VertexStreamsType vertex_streams_;
 		std::vector<vertex_elements_type> vertex_stream_formats_;
 		std::vector<uint32_t> vertex_sizes_;
 
-		IndexStreamPtr indexStream_;
+		IndexStreamPtr index_stream_;
 		IndexFormat index_format_;
 
 		VertexStreamPtr instance_stream_;

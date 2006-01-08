@@ -163,7 +163,7 @@ namespace KlayGE
 	VertexBuffer::VertexBuffer(BufferType type)
 			: type_(type)
 	{
-		vertexStreams_.reserve(8);
+		vertex_streams_.reserve(8);
 	}
 
 	VertexBuffer::~VertexBuffer()
@@ -188,7 +188,7 @@ namespace KlayGE
 		{
 			vertex_size += vertex_stream_formats_[0][i].element_size();
 		}
-		return vertexStreams_.empty() ? 0 : (vertexStreams_[0]->Size() / vertex_size);
+		return vertex_streams_.empty() ? 0 : (vertex_streams_[0]->Size() / vertex_size);
 	}
 
 	void VertexBuffer::AddVertexStream(VertexStreamPtr vertex_stream, vertex_elements_type const & vet)
@@ -203,7 +203,7 @@ namespace KlayGE
 
 		if (VertexStream::ST_Geometry == vertex_stream->StreamType())
 		{
-			vertexStreams_.push_back(vertex_stream);
+			vertex_streams_.push_back(vertex_stream);
 			vertex_stream_formats_.push_back(vet);
 			vertex_sizes_.push_back(size);
 		}
@@ -218,22 +218,22 @@ namespace KlayGE
 
 	VertexBuffer::VertexStreamIterator VertexBuffer::VertexStreamBegin()
 	{
-		return vertexStreams_.begin();
+		return vertex_streams_.begin();
 	}
 
 	VertexBuffer::VertexStreamIterator VertexBuffer::VertexStreamEnd()
 	{
-		return vertexStreams_.end();
+		return vertex_streams_.end();
 	}
 
 	VertexBuffer::VertexStreamConstIterator VertexBuffer::VertexStreamBegin() const
 	{
-		return vertexStreams_.begin();
+		return vertex_streams_.begin();
 	}
 
 	VertexBuffer::VertexStreamConstIterator VertexBuffer::VertexStreamEnd() const
 	{
-		return vertexStreams_.end();
+		return vertex_streams_.end();
 	}
 
 	bool VertexBuffer::UseIndices() const
@@ -243,15 +243,15 @@ namespace KlayGE
 
 	uint32_t VertexBuffer::NumIndices() const
 	{
-		if (indexStream_)
+		if (index_stream_)
 		{
 			if (IF_Index16 == index_format_)
 			{
-				return indexStream_->Size() / sizeof(uint16_t);
+				return index_stream_->Size() / sizeof(uint16_t);
 			}
 			else
 			{
-				return indexStream_->Size() / sizeof(uint32_t);
+				return index_stream_->Size() / sizeof(uint32_t);
 			}
 		}
 		else
@@ -262,14 +262,14 @@ namespace KlayGE
 
 	void VertexBuffer::SetIndexStream(IndexStreamPtr index_stream, IndexFormat format)
 	{
-		indexStream_ = index_stream;
+		index_stream_ = index_stream;
 		index_format_ = format;
 	}
 
 	IndexStreamPtr VertexBuffer::GetIndexStream() const
 	{
-		BOOST_ASSERT(indexStream_);
-		return indexStream_;
+		BOOST_ASSERT(index_stream_);
+		return index_stream_;
 	}
 
 	VertexStreamPtr VertexBuffer::InstanceStream() const
@@ -279,7 +279,7 @@ namespace KlayGE
 
 	uint32_t VertexBuffer::NumInstance() const
 	{
-		return vertexStreams_[0]->Frequency();
+		return vertex_streams_[0]->Frequency();
 	}
 
 	void VertexBuffer::ExpandInstance(VertexStreamPtr& hint, uint32_t inst_no) const
@@ -291,53 +291,28 @@ namespace KlayGE
 
 		uint32_t num_vertices = this->NumVertices();
 		
-		if (!hint || (instance_size_ * num_vertices != hint->Size()))
+		if (!hint)
 		{
-			hint = this->ExpandInstance(inst_no);
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			hint = rf.MakeVertexStream(BU_Dynamic);
 		}
-		else
+
+		std::vector<uint8_t> instance_buffer(instance_stream_->Size());
 		{
-			VertexStream::Mapper src_mapper(*instance_stream_, BA_Read_Only);
-			hint->Resize(instance_size_ * num_vertices);
-			VertexStream::Mapper dst_mapper(*hint, BA_Write_Only);
-
-			for (uint32_t i = 0; i < num_vertices; ++ i)
-			{
-				std::copy(src_mapper.Pointer<uint8_t>() + inst_no * instance_size_,
-					src_mapper.Pointer<uint8_t>() + (inst_no + 1) * instance_size_,
-					dst_mapper.Pointer<uint8_t>() + i * instance_size_);
-			}
-
-			hint->FrequencyDivider(VertexStream::ST_Geometry, 1);
+			VertexStream::Mapper mapper(*instance_stream_, BA_Read_Only);
+			std::copy(mapper.Pointer<uint8_t>(), mapper.Pointer<uint8_t>() + instance_stream_->Size(),
+				instance_buffer.begin());
 		}
-	}
-
-	VertexStreamPtr VertexBuffer::ExpandInstance(uint32_t inst_no) const
-	{
-		BOOST_ASSERT(instance_stream_);
-
-		uint32_t num_instance = this->NumInstance();
-		BOOST_ASSERT(inst_no < num_instance);
-
-		uint32_t num_vertices = this->NumVertices();
-
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-		VertexStreamPtr ret = rf.MakeVertexStream(BU_Dynamic);
-
-		VertexStream::Mapper src_mapper(*instance_stream_, BA_Read_Only);
-		ret->Resize(instance_size_ * num_vertices);
-		VertexStream::Mapper dst_mapper(*ret, BA_Write_Only);
+		hint->Resize(instance_size_ * num_vertices);
+		VertexStream::Mapper dst_mapper(*hint, BA_Write_Only);
 
 		for (uint32_t i = 0; i < num_vertices; ++ i)
 		{
-			std::copy(src_mapper.Pointer<uint8_t>() + inst_no * instance_size_,
-				src_mapper.Pointer<uint8_t>() + (inst_no + 1) * instance_size_,
+			std::copy(&instance_buffer[0] + inst_no * instance_size_,
+				&instance_buffer[0] + (inst_no + 1) * instance_size_,
 				dst_mapper.Pointer<uint8_t>() + i * instance_size_);
 		}
 
-		ret->FrequencyDivider(VertexStream::ST_Geometry, 1);
-
-		return ret;
+		hint->FrequencyDivider(VertexStream::ST_Geometry, 1);
 	}
 }
