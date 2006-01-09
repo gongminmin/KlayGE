@@ -28,7 +28,7 @@ namespace KlayGE
 	public:
 		OGLRenderVertexStream(uint32_t width, uint32_t height);
 
-		void Attach(VertexStreamPtr vs);
+		void Attach(GraphicsBufferPtr buffer);
 		void Detach();
 
 		virtual void CustomAttribute(std::string const & name, void* pData);

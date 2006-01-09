@@ -38,7 +38,7 @@ namespace KlayGE
 		viewport_.height	= height_;
 	}
 
-	void D3D9RenderVertexStream::Attach(VertexStreamPtr vs)
+	void D3D9RenderVertexStream::Attach(GraphicsBufferPtr vs)
 	{
 		BOOST_ASSERT(vs->Usage() != BU_Static);
 
@@ -150,7 +150,7 @@ namespace KlayGE
 		D3DLOCKED_RECT locked_rect;
 		TIF(render_surf_->LockRect(&locked_rect, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
 
-		VertexStream::Mapper mapper(*vs_, BA_Write_Only);
+		GraphicsBuffer::Mapper mapper(*vs_, BA_Write_Only);
 
 		const float* src = static_cast<float*>(locked_rect.pBits);
 		float* dst = mapper.Pointer<float>();

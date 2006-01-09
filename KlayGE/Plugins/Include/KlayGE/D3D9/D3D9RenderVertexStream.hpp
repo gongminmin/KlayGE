@@ -32,7 +32,7 @@ namespace KlayGE
 		D3D9RenderVertexStream(uint32_t width, uint32_t height);
 
 		/// MUST call Detach before use the VertexStream
-		void Attach(VertexStreamPtr vs);
+		void Attach(GraphicsBufferPtr vs);
 		void Detach();
 
 		boost::shared_ptr<IDirect3DSurface9> D3DRenderSurface() const;

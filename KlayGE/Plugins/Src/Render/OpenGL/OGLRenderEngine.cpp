@@ -32,7 +32,8 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Viewport.hpp>
-#include <KlayGE/VertexBuffer.hpp>
+#include <KlayGE/GraphicsBuffer.hpp>
+#include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/RenderTarget.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderSettings.hpp>
@@ -47,8 +48,8 @@
 #include <KlayGE/OpenGL/OGLMapping.hpp>
 #include <KlayGE/OpenGL/OGLRenderWindow.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>
-#include <KlayGE/OpenGL/OGLVertexStream.hpp>
-#include <KlayGE/OpenGL/OGLIndexStream.hpp>
+#include <KlayGE/OpenGL/OGLGraphicsBuffer.hpp>
+#include <KlayGE/OpenGL/OGLRenderLayout.hpp>
 #include <KlayGE/OpenGL/OGLRenderEngine.hpp>
 
 #ifdef KLAYGE_DEBUG
@@ -251,10 +252,10 @@ namespace KlayGE
 		{
 			if (rl.InstanceStream())
 			{
-				VertexStream& stream = *rl.InstanceStream();
+				GraphicsBuffer& stream = *rl.InstanceStream();
 
 				uint32_t const instance_size = rl.InstanceSize();
-				VertexStream::Mapper mapper(stream, BA_Read_Only);
+				GraphicsBuffer::Mapper mapper(stream, BA_Read_Only);
 				uint8_t const * buffer = mapper.Pointer<uint8_t>();
 
 				uint32_t elem_offset = 0;
@@ -340,7 +341,7 @@ namespace KlayGE
 			// Geometry streams
 			for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
 			{
-				OGLVertexStream& stream(static_cast<OGLVertexStream&>(*rl.GetVertexStream(i)));
+				OGLGraphicsBuffer& stream(static_cast<OGLGraphicsBuffer&>(*rl.GetVertexStream(i)));
 
 				uint32_t elem_offset = 0;
 				for (uint32_t j = 0; j < rl.VertexStreamFormat(i).size(); ++ j)
@@ -407,7 +408,7 @@ namespace KlayGE
 			uint32_t num_passes = tech->NumPasses();
 			if (rl.UseIndices())
 			{
-				OGLIndexStream& stream(static_cast<OGLIndexStream&>(*rl.GetIndexStream()));
+				OGLGraphicsBuffer& stream(static_cast<OGLGraphicsBuffer&>(*rl.GetIndexStream()));
 				stream.Active();
 
 				GLenum index_type;

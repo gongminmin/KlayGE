@@ -18,7 +18,7 @@
 #include <KlayGE/Vector.hpp>
 #include <KlayGE/Matrix.hpp>
 #include <KlayGE/Color.hpp>
-#include <KlayGE/VertexBuffer.hpp>
+#include <KlayGE/RenderLayout.hpp>
 
 #include <boost/assert.hpp>
 

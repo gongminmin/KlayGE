@@ -14,7 +14,7 @@
 #define _SCENEOBJECT_HPP
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/VertexBuffer.hpp>
+#include <KlayGE/RenderLayout.hpp>
 
 #include <boost/smart_ptr.hpp>
 

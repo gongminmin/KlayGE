@@ -23,7 +23,7 @@
 
 #include <d3d9.h>
 
-#include <KlayGE/VertexBuffer.hpp>
+#include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/D3D9/D3D9Resource.hpp>
 
 #ifdef KLAYGE_DEBUG
@@ -34,7 +34,7 @@
 
 namespace KlayGE
 {
-	class D3D9IndexStream : public IndexStream, public D3D9Resource
+	class D3D9IndexStream : public GraphicsBuffer, public D3D9Resource
 	{
 	public:
 		explicit D3D9IndexStream(BufferUsage usage);

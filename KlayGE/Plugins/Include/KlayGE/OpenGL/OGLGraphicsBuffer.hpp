@@ -1,8 +1,11 @@
-// OGLVertexStream.hpp
-// KlayGE OpenGL顶点数据流类 头文件
-// Ver 2.8.0
+// OGLGraphicsBuffer.hpp
+// KlayGE OpenGL图形缓冲区类 头文件
+// Ver 3.2.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.2.0
+// 把OGLIndexStream和OGLVertexStream合并成OGLGraphicsBuffer (2006.1.10)
 //
 // 2.8.0
 // 增加了CopyToMemory (2005.7.24)
@@ -17,13 +20,13 @@
 // 修改记录
 //////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _OGLVERTEXSTREAM_HPP
-#define _OGLVERTEXSTREAM_HPP
+#ifndef _OGLGRAPHICSBUFFERHPP
+#define _OGLGRAPHICSBUFFERHPP
 
 #include <vector>
 #include <glloader/glloader.h>
 
-#include <KlayGE/VertexBuffer.hpp>
+#include <KlayGE/GraphicsBuffer.hpp>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL_d.lib")
@@ -33,11 +36,11 @@
 
 namespace KlayGE
 {
-	class OGLVertexStream : public VertexStream
+	class OGLGraphicsBuffer : public GraphicsBuffer
 	{
 	public:
-		explicit OGLVertexStream(BufferUsage usage);
-		~OGLVertexStream();
+		explicit OGLGraphicsBuffer(BufferUsage usage, GLenum target);
+		~OGLGraphicsBuffer();
 
 		void* Map(BufferAccess ba);
 		void Unmap();
@@ -54,7 +57,8 @@ namespace KlayGE
 
 	private:
 		GLuint vb_;
+		GLenum target_;
 	};
 }
 
-#endif			// _OGLVERTEXSTREAM_HPP
+#endif			// _OGLGRAPHICSBUFFERHPP

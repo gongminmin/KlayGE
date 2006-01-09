@@ -31,7 +31,7 @@
 namespace KlayGE
 {
 	D3D9IndexStream::D3D9IndexStream(BufferUsage usage)
-						: IndexStream(usage),
+						: GraphicsBuffer(usage),
 							format_(IF_Index16)
 	{
 	}

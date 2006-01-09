@@ -82,10 +82,8 @@ namespace KlayGE
 	typedef boost::shared_ptr<Sampler> SamplerPtr;
 	class RenderTexture;
 	typedef boost::shared_ptr<RenderTexture> RenderTexturePtr;
-	class VertexStream;
-	typedef boost::shared_ptr<VertexStream> VertexStreamPtr;
-	class IndexStream;
-	typedef boost::shared_ptr<IndexStream> IndexStreamPtr;
+	class GraphicsBuffer;
+	typedef boost::shared_ptr<GraphicsBuffer> GraphicsBufferPtr;
 	class RenderLayout;
 	typedef boost::shared_ptr<RenderLayout> RenderLayoutPtr;
 	class RenderVertexStream;

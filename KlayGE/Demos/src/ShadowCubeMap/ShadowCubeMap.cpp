@@ -1,7 +1,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/VertexBuffer.hpp>
+#include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/Renderable.hpp>
@@ -185,34 +185,34 @@ namespace
 
 			rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleList);
 
-			VertexStreamPtr pos_vs = rf.MakeVertexStream(BU_Static);
-			pos_vs->Resize(sizeof(xyzs));
+			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static);
+			pos_vb->Resize(sizeof(xyzs));
 			{
-				VertexStream::Mapper mapper(*pos_vs, BA_Write_Only);
+				GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
 				std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<Vector3>());
 			}
-			rl_->AddVertexStream(pos_vs, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
+			rl_->AddVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
 
-			IndexStreamPtr is = rf.MakeIndexStream(BU_Static);
-			is->Resize(sizeof(indices));
+			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static);
+			ib->Resize(sizeof(indices));
 			{
-				IndexStream::Mapper mapper(*is, BA_Write_Only);
+				GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
 				std::copy(indices, indices + sizeof(indices) / sizeof(uint16_t), mapper.Pointer<uint16_t>());
 			}
-			rl_->SetIndexStream(is, IF_Index16);
+			rl_->SetIndexStream(ib, IF_Index16);
 
 			Vector3 normal[sizeof(xyzs) / sizeof(xyzs[0])];
 			MathLib::ComputeNormal<float>(&normal[0],
 				&indices[0], &indices[sizeof(indices) / sizeof(uint16_t)],
 				&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
 
-			VertexStreamPtr normal_vs = rf.MakeVertexStream(BU_Static);
-			normal_vs->Resize(sizeof(normal));
+			GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static);
+			normal_vb->Resize(sizeof(normal));
 			{
-				VertexStream::Mapper mapper(*normal_vs, BA_Write_Only);
+				GraphicsBuffer::Mapper mapper(*normal_vb, BA_Write_Only);
 				std::copy(&normal[0], &normal[0] + sizeof(normal) / sizeof(normal[0]), mapper.Pointer<Vector3>());
 			}
-			rl_->AddVertexStream(normal_vs, boost::make_tuple(vertex_element(VEU_Normal, 0, sizeof(float), 3)));
+			rl_->AddVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, sizeof(float), 3)));
 
 			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[4]);
 		}

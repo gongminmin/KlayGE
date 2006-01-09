@@ -42,7 +42,8 @@
 #include <KlayGE/RenderFactory.hpp>
 
 #include <KlayGE/Viewport.hpp>
-#include <KlayGE/VertexBuffer.hpp>
+#include <KlayGE/GraphicsBuffer.hpp>
+#include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/RenderTarget.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderSettings.hpp>
@@ -53,7 +54,7 @@
 #include <KlayGE/D3D9/D3D9IndexStream.hpp>
 #include <KlayGE/D3D9/D3D9RenderEffect.hpp>
 #include <KlayGE/D3D9/D3D9Mapping.hpp>
-#include <KlayGE/D3D9/D3D9VertexBuffer.hpp>
+#include <KlayGE/D3D9/D3D9RenderLayout.hpp>
 
 #include <algorithm>
 #include <boost/assert.hpp>
@@ -327,7 +328,7 @@ namespace KlayGE
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			RenderLayoutPtr tmp_rl = rf.MakeRenderLayout(rl.Type());
-			VertexStreamPtr tmp_inst_vs;
+			GraphicsBufferPtr tmp_inst_vs;
 
 			rl.ExpandInstance(tmp_inst_vs, 0);
 
@@ -359,7 +360,7 @@ namespace KlayGE
 	{
 		for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
 		{
-			VertexStream& stream = *rl.GetVertexStream(i);
+			GraphicsBuffer& stream = *rl.GetVertexStream(i);
 			
 			D3D9VertexStream& d3d9vs(*checked_cast<D3D9VertexStream*>(&stream));
 			TIF(d3dDevice_->SetStreamSource(i,
@@ -372,7 +373,7 @@ namespace KlayGE
 		{
 			uint32_t number = rl.NumVertexStreams();
 
-			VertexStream& stream = *rl.InstanceStream();
+			GraphicsBuffer& stream = *rl.InstanceStream();
 			D3D9VertexStream& d3d9vs(*checked_cast<D3D9VertexStream*>(&stream));
 			TIF(d3dDevice_->SetStreamSource(number,
 				d3d9vs.D3D9Buffer().get(), 0,
@@ -397,7 +398,7 @@ namespace KlayGE
 	{
 		for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
 		{
-			VertexStream& stream = *rl.GetVertexStream(i);
+			GraphicsBuffer& stream = *rl.GetVertexStream(i);
 
 			D3D9VertexStream& d3d9vs(*checked_cast<D3D9VertexStream*>(&stream));
 			TIF(d3dDevice_->SetStreamSource(i,

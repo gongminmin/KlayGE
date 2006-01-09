@@ -26,7 +26,7 @@
 #include <KlayGE/Vector.hpp>
 #include <KlayGE/Matrix.hpp>
 #include <KlayGE/Color.hpp>
-#include <KlayGE/VertexBuffer.hpp>
+#include <KlayGE/GraphicsBuffer.hpp>
 
 #define NOMINMAX
 #include <d3d9.h>

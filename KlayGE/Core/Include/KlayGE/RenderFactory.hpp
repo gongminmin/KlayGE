@@ -21,7 +21,8 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Texture.hpp>
-#include <KlayGE/VertexBuffer.hpp>
+#include <KlayGE/GraphicsBuffer.hpp>
+#include <KlayGE/RenderLayout.hpp>
 
 #include <string>
 #include <map>
@@ -56,8 +57,8 @@ namespace KlayGE
 
 		virtual RenderLayoutPtr MakeRenderLayout(RenderLayout::buffer_type type) = 0;
 
-		virtual VertexStreamPtr MakeVertexStream(BufferUsage usage) = 0;
-		virtual IndexStreamPtr MakeIndexStream(BufferUsage usage) = 0;
+		virtual GraphicsBufferPtr MakeVertexBuffer(BufferUsage usage) = 0;
+		virtual GraphicsBufferPtr MakeIndexBuffer(BufferUsage usage) = 0;
 
 		virtual RenderVertexStreamPtr MakeRenderVertexStream(uint32_t width, uint32_t height) = 0;
 

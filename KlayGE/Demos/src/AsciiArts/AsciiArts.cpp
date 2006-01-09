@@ -1,6 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/VertexBuffer.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/Texture.hpp>

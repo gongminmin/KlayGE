@@ -69,8 +69,8 @@ namespace KlayGE
 		RenderTexturePtr MakeRenderTexture();
 
 		RenderLayoutPtr MakeRenderLayout(RenderLayout::buffer_type type);
-		VertexStreamPtr MakeVertexStream(BufferUsage usage);
-		IndexStreamPtr MakeIndexStream(BufferUsage usage);
+		GraphicsBufferPtr MakeVertexBuffer(BufferUsage usage);
+		GraphicsBufferPtr MakeIndexBuffer(BufferUsage usage);
 
 		RenderVertexStreamPtr MakeRenderVertexStream(uint32_t width, uint32_t height);
 

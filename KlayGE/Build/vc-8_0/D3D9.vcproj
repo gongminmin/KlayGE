@@ -187,6 +187,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9RenderLayout.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9RenderTexture.cpp"
 				>
 			</File>
@@ -200,10 +204,6 @@
 			</File>
 			<File
 				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9Texture.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9VertexBuffer.cpp"
 				>
 			</File>
 			<File
@@ -253,6 +253,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\D3D9\D3D9RenderLayout.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9RenderTexture.hpp"
 				>
 			</File>
@@ -270,10 +274,6 @@
 			</File>
 			<File
 				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9Texture.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9VertexBuffer.hpp"
 				>
 			</File>
 			<File

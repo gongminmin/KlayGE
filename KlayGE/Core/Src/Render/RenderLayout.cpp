@@ -1,20 +1,11 @@
-// VertexBuffer.cpp
-// KlayGE 顶点缓冲区类 实现文件
+// RenderLayout.cpp
+// KlayGE 渲染流布局类 实现文件
 // Ver 3.2.0
-// 版权所有(C) 龚敏敏, 2003-2006
+// 版权所有(C) 龚敏敏, 2006
 // Homepage: http://klayge.sourceforge.net
 //
 // 3.2.0
-// 支持32位的IndexStream (2006.1.4)
-//
-// 3.1.0
-// 分离了实例和几何流 (2005.10.31)
-//
-// 3.0.0
-// 支持instancing (2005.10.22)
-//
-// 2.4.0
-// 改名为VertexBuffer (2005.3.7)
+// 初次建立 (2006.1.9)
 //
 // 修改记录
 /////////////////////////////////////////////////////////////////////////////////
@@ -26,114 +17,10 @@
 
 #include <boost/bind.hpp>
 
-#include <KlayGE/VertexBuffer.hpp>
+#include <KlayGE/RenderLayout.hpp>
 
 namespace KlayGE
 {
-	class NullVertexStream : public VertexStream
-	{
-	public:
-		NullVertexStream()
-			: VertexStream(BU_Static)
-		{
-		}
-
-		void* Map(BufferAccess /*ba*/)
-		{
-			return NULL;
-		}
-
-		void Unmap()
-		{
-		}
-
-		void DoCreate()
-		{
-		}
-	};
-
-	VertexStream::VertexStream(BufferUsage usage)
-			: usage_(usage), size_in_byte_(0)
-	{
-	}
-
-	VertexStream::~VertexStream()
-	{
-	}
-
-	VertexStreamPtr VertexStream::NullObject()
-	{
-		static VertexStreamPtr obj(new NullVertexStream);
-		return obj;
-	}
-
-	void VertexStream::Resize(uint32_t size_in_byte)
-	{
-		size_in_byte_ = size_in_byte;
-		this->DoCreate();
-	}
-
-	void VertexStream::CopyToStream(VertexStream& rhs)
-	{
-		VertexStream::Mapper lhs_mapper(*this, BA_Read_Only);
-		VertexStream::Mapper rhs_mapper(rhs, BA_Write_Only);
-		std::copy(lhs_mapper.Pointer<uint8_t>(), lhs_mapper.Pointer<uint8_t>() + size_in_byte_,
-			rhs_mapper.Pointer<uint8_t>());
-	}
-
-
-	class NullIndexStream : public IndexStream
-	{
-	public:
-		NullIndexStream()
-			: IndexStream(BU_Static)
-		{
-		}
-
-		void* Map(BufferAccess /*ba*/)
-		{
-			return NULL;
-		}
-		void Unmap()
-		{
-		}
-
-	private:
-		void DoCreate()
-		{
-		}
-	};
-
-	IndexStream::IndexStream(BufferUsage usage)
-		: usage_(usage)
-	{
-	}
-
-	IndexStream::~IndexStream()
-	{
-	}
-
-	IndexStreamPtr IndexStream::NullObject()
-	{
-		static IndexStreamPtr obj(new NullIndexStream);
-		return obj;
-	}
-
-	void IndexStream::Resize(uint32_t size_in_byte)
-	{
-		size_in_byte_ = size_in_byte;
-		this->DoCreate();
-	}
-
-	void IndexStream::CopyToStream(IndexStream& rhs)
-	{
-		IndexStream::Mapper lhs_mapper(*this, BA_Read_Only);
-		IndexStream::Mapper rhs_mapper(rhs, BA_Write_Only);
-		std::copy(lhs_mapper.Pointer<uint8_t>(), lhs_mapper.Pointer<uint8_t>() + size_in_byte_,
-			rhs_mapper.Pointer<uint8_t>());
-	}
-
-
 	class NullRenderLayout : public RenderLayout
 	{
 	public:
@@ -169,7 +56,7 @@ namespace KlayGE
 		return vertex_streams_.empty() ? 0 : (vertex_streams_[0].stream->Size() / vertex_streams_[0].vertex_size);
 	}
 
-	void RenderLayout::AddVertexStream(VertexStreamPtr vertex_stream, vertex_elements_type const & vet,
+	void RenderLayout::AddVertexStream(GraphicsBufferPtr buffer, vertex_elements_type const & vet,
 		stream_type type, uint32_t freq)
 	{
 		BOOST_ASSERT(vertex_stream);
@@ -182,8 +69,8 @@ namespace KlayGE
 
 		if (ST_Geometry == type)
 		{
-			VertexStreamUnit vs;
-			vs.stream = vertex_stream;
+			StreamUnit vs;
+			vs.stream = buffer;
 			vs.format = vet;
 			vs.vertex_size = size;
 			vs.type = type;
@@ -193,7 +80,7 @@ namespace KlayGE
 		else
 		{
 			BOOST_ASSERT(!instance_stream_);
-			instance_stream_.stream = vertex_stream;
+			instance_stream_.stream = buffer;
 			instance_stream_.format = vet;
 			instance_stream_.vertex_size = size;
 			instance_stream_.type = type;
@@ -225,19 +112,19 @@ namespace KlayGE
 		}
 	}
 
-	void RenderLayout::SetIndexStream(IndexStreamPtr index_stream, IndexFormat format)
+	void RenderLayout::SetIndexStream(GraphicsBufferPtr buffer, IndexFormat format)
 	{
-		index_stream_ = index_stream;
+		index_stream_ = buffer;
 		index_format_ = format;
 	}
 
-	IndexStreamPtr RenderLayout::GetIndexStream() const
+	GraphicsBufferPtr RenderLayout::GetIndexStream() const
 	{
 		BOOST_ASSERT(index_stream_);
 		return index_stream_;
 	}
 
-	VertexStreamPtr RenderLayout::InstanceStream() const
+	GraphicsBufferPtr RenderLayout::InstanceStream() const
 	{
 		return instance_stream_.stream;
 	}
@@ -247,7 +134,7 @@ namespace KlayGE
 		return vertex_streams_[0].freq;
 	}
 
-	void RenderLayout::ExpandInstance(VertexStreamPtr& hint, uint32_t inst_no) const
+	void RenderLayout::ExpandInstance(GraphicsBufferPtr& hint, uint32_t inst_no) const
 	{
 		BOOST_ASSERT(instance_stream_);
 
@@ -259,17 +146,17 @@ namespace KlayGE
 		if (!hint)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			hint = rf.MakeVertexStream(BU_Dynamic);
+			hint = rf.MakeVertexBuffer(BU_Dynamic);
 		}
 
 		std::vector<uint8_t> instance_buffer(instance_stream_.stream->Size());
 		{
-			VertexStream::Mapper mapper(*instance_stream_.stream, BA_Read_Only);
+			GraphicsBuffer::Mapper mapper(*instance_stream_.stream, BA_Read_Only);
 			std::copy(mapper.Pointer<uint8_t>(), mapper.Pointer<uint8_t>() + instance_stream_.stream->Size(),
 				instance_buffer.begin());
 		}
 		hint->Resize(instance_stream_.vertex_size * num_vertices);
-		VertexStream::Mapper dst_mapper(*hint, BA_Write_Only);
+		GraphicsBuffer::Mapper dst_mapper(*hint, BA_Write_Only);
 
 		for (uint32_t i = 0; i < num_vertices; ++ i)
 		{

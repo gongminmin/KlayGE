@@ -20,9 +20,8 @@
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 #include <KlayGE/OpenGL/OGLRenderTexture.hpp>
 #include <KlayGE/OpenGL/OGLRenderEffect.hpp>
-#include <KlayGE/OpenGL/OGLVertexBuffer.hpp>
-#include <KlayGE/OpenGL/OGLVertexStream.hpp>
-#include <KlayGE/OpenGL/OGLIndexStream.hpp>
+#include <KlayGE/OpenGL/OGLRenderLayout.hpp>
+#include <KlayGE/OpenGL/OGLGraphicsBuffer.hpp>
 #include <KlayGE/OpenGL/OGLRenderVertexStream.hpp>
 #include <KlayGE/OpenGL/OGLOcclusionQuery.hpp>
 
@@ -68,8 +67,8 @@ namespace KlayGE
 		RenderEffectPtr DoMakeRenderEffect(std::string const & srcData);
 
 		RenderLayoutPtr MakeRenderLayout(RenderLayout::buffer_type type);
-		VertexStreamPtr MakeVertexStream(BufferUsage usage);
-		IndexStreamPtr MakeIndexStream(BufferUsage usage);
+		GraphicsBufferPtr MakeVertexBuffer(BufferUsage usage);
+		GraphicsBufferPtr MakeIndexBuffer(BufferUsage usage);
 
 		RenderVertexStreamPtr MakeRenderVertexStream(uint32_t width, uint32_t height);
 

@@ -68,13 +68,13 @@ namespace KlayGE
 			return RenderLayout::NullObject();
 		}
 
-		VertexStreamPtr MakeVertexStream(BufferUsage usage)
+		GraphicsBufferPtr MakeVertexBuffer(BufferUsage usage)
 		{
-			return VertexStream::NullObject();
+			return GraphicsBuffer::NullObject();
 		}
-		IndexStreamPtr MakeIndexStream(BufferUsage usage)
+		GraphicsBufferPtr MakeIndexBuffer(BufferUsage usage)
 		{
-			return IndexStream::NullObject();
+			return GraphicsBuffer::NullObject();
 		}
 
 		RenderVertexStreamPtr MakeRenderVertexStream(uint32_t width, uint32_t height)

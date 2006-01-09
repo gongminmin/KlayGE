@@ -155,7 +155,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLIndexStream.cpp"
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLGraphicsBuffer.cpp"
 				>
 			</File>
 			<File
@@ -194,10 +194,6 @@
 				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLTexture.cpp"
 				>
 			</File>
-			<File
-				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLVertexStream.cpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Í·ÎÄ¼þ"
@@ -205,7 +201,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLIndexStream.hpp"
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLGraphicsBuffer.hpp"
 				>
 			</File>
 			<File
@@ -229,6 +225,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderLayout.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderTexture.hpp"
 				>
 			</File>
@@ -242,14 +242,6 @@
 			</File>
 			<File
 				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLTexture.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLVertexBuffer.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLVertexStream.hpp"
 				>
 			</File>
 		</Filter>

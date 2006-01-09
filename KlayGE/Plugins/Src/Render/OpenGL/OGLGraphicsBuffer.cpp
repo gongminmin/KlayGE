@@ -1,13 +1,15 @@
-// OGLIndexStream.cpp
-// KlayGE OpenGL索引数据流类 实现文件
-// Ver 2.8.0
+// OGLGraphicsBuffer.hpp
+// KlayGE OpenGL图形缓冲区类 实现文件
+// Ver 3.2.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.2.0
+// 把OGLIndexStream和OGLVertexStream合并成OGLGraphicsBuffer (2006.1.10)
 //
 // 2.8.0
 // 增加了CopyToMemory (2005.7.24)
 // 只支持vbo (2005.7.31)
-// 只支持OpenGL 1.5及以上 (2005.8.12)
 //
 // 2.7.0
 // 支持vertex_buffer_object (2005.6.19)
@@ -25,34 +27,37 @@
 
 #include <algorithm>
 
-#include <KlayGE/OpenGL/OGLIndexStream.hpp>
+#include <KlayGE/OpenGL/OGLGraphicsBuffer.hpp>
 
 namespace KlayGE
 {
-	OGLIndexStream::OGLIndexStream(BufferUsage usage)
-		: IndexStream(usage)
+	OGLGraphicsBuffer::OGLGraphicsBuffer(BufferUsage usage, GLenum target)
+			: GraphicsBuffer(usage),
+				target_(target)
 	{
-		glGenBuffers(1, &ib_);
+		BOOST_ASSERT((GL_ARRAY_BUFFER == target) || (GL_ELEMENT_ARRAY_BUFFER == target));
+
+		glGenBuffers(1, &vb_);
 	}
 
-	OGLIndexStream::~OGLIndexStream()
+	OGLGraphicsBuffer::~OGLGraphicsBuffer()
 	{
-		glDeleteBuffers(1, &ib_);
+		glDeleteBuffers(1, &vb_);
 	}
 
-	void OGLIndexStream::DoCreate()
+	void OGLGraphicsBuffer::DoCreate()
 	{
 		BOOST_ASSERT(size_in_byte_ != 0);
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib_);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+		glBindBuffer(target_, vb_);
+		glBufferData(target_,
 				reinterpret_cast<GLsizeiptr>(size_in_byte_), NULL,
 				(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
 	}
 
-	void* OGLIndexStream::Map(BufferAccess ba)
+	void* OGLGraphicsBuffer::Map(BufferAccess ba)
 	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib_);
+		glBindBuffer(target_, vb_);
 
 		GLenum flag = 0;
 		switch (ba)
@@ -70,17 +75,17 @@ namespace KlayGE
 			break;
 		}
 
-		return glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, flag);
+		return glMapBuffer(target_, flag);
 	}
 
-	void OGLIndexStream::Unmap()
+	void OGLGraphicsBuffer::Unmap()
 	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib_);
-		glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+		glBindBuffer(target_, vb_);
+		glUnmapBuffer(target_);
 	}
 
-	void OGLIndexStream::Active()
+	void OGLGraphicsBuffer::Active()
 	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib_);
+		glBindBuffer(target_, vb_);
 	}
 }

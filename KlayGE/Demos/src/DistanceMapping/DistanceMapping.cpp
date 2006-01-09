@@ -1,8 +1,8 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/VertexBuffer.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
+#include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -116,43 +116,43 @@ namespace
 
 			rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleList);
 
-			VertexStreamPtr pos_vs = rf.MakeVertexStream(BU_Static);
-			pos_vs->Resize(sizeof(xyzs));
+			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static);
+			pos_vb->Resize(sizeof(xyzs));
 			{
-				VertexStream::Mapper mapper(*pos_vs, BA_Write_Only);
+				GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
 				std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<Vector3>());
 			}
-			VertexStreamPtr tex0_vs = rf.MakeVertexStream(BU_Static);
-			tex0_vs->Resize(sizeof(texs));
+			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static);
+			tex0_vb->Resize(sizeof(texs));
 			{
-				VertexStream::Mapper mapper(*tex0_vs, BA_Write_Only);
+				GraphicsBuffer::Mapper mapper(*tex0_vb, BA_Write_Only);
 				std::copy(&texs[0], &texs[0] + sizeof(texs) / sizeof(texs[0]), mapper.Pointer<Vector2>());
 			}
-			VertexStreamPtr tan_vs = rf.MakeVertexStream(BU_Static);
-			tan_vs->Resize(sizeof(t));
+			GraphicsBufferPtr tan_vb = rf.MakeVertexBuffer(BU_Static);
+			tan_vb->Resize(sizeof(t));
 			{
-				VertexStream::Mapper mapper(*tan_vs, BA_Write_Only);
+				GraphicsBuffer::Mapper mapper(*tan_vb, BA_Write_Only);
 				std::copy(&t[0], &t[0] + sizeof(t) / sizeof(t[0]), mapper.Pointer<Vector3>());
 			}
-			VertexStreamPtr binormal_vs = rf.MakeVertexStream(BU_Static);
-			binormal_vs->Resize(sizeof(b));
+			GraphicsBufferPtr binormal_vb = rf.MakeVertexBuffer(BU_Static);
+			binormal_vb->Resize(sizeof(b));
 			{
-				VertexStream::Mapper mapper(*binormal_vs, BA_Write_Only);
+				GraphicsBuffer::Mapper mapper(*binormal_vb, BA_Write_Only);
 				std::copy(&b[0], &b[0] + sizeof(b) / sizeof(b[0]), mapper.Pointer<Vector3>());
 			}
 
-			rl_->AddVertexStream(pos_vs, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
-			rl_->AddVertexStream(tex0_vs, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, sizeof(float), 2)));
-			rl_->AddVertexStream(tan_vs, boost::make_tuple(vertex_element(VEU_Tangent, 0, sizeof(float), 3)));
-			rl_->AddVertexStream(binormal_vs, boost::make_tuple(vertex_element(VEU_Binormal, 0, sizeof(float), 3)));
+			rl_->AddVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
+			rl_->AddVertexStream(tex0_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, sizeof(float), 2)));
+			rl_->AddVertexStream(tan_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, sizeof(float), 3)));
+			rl_->AddVertexStream(binormal_vb, boost::make_tuple(vertex_element(VEU_Binormal, 0, sizeof(float), 3)));
 
-			IndexStreamPtr is = rf.MakeIndexStream(BU_Static);
-			is->Resize(sizeof(indices));
+			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static);
+			ib->Resize(sizeof(indices));
 			{
-				IndexStream::Mapper mapper(*is, BA_Write_Only);
+				GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
 				std::copy(indices, indices + sizeof(indices) / sizeof(uint16_t), mapper.Pointer<uint16_t>());
 			}
-			rl_->SetIndexStream(is, IF_Index16);
+			rl_->SetIndexStream(ib, IF_Index16);
 
 			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[4]);
 		}

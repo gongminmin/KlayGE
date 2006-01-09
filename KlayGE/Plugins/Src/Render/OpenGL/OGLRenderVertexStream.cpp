@@ -13,13 +13,13 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/VertexBuffer.hpp>
+#include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Util.hpp>
 
 #include <glloader/glloader.h>
 
-#include <KlayGE/OpenGL/OGLVertexStream.hpp>
+#include <KlayGE/OpenGL/OGLGraphicsBuffer.hpp>
 #include <KlayGE/OpenGL/OGLRenderVertexStream.hpp>
 
 namespace KlayGE
@@ -88,13 +88,13 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void OGLRenderVertexStream::Attach(VertexStreamPtr vs)
+	void OGLRenderVertexStream::Attach(GraphicsBufferPtr vs)
 	{
 		BOOST_ASSERT(glIsFramebufferEXT_(fbo_));
 
 		vs_ = vs;
 
-		OGLVertexStream& ogl_vs = *checked_cast<OGLVertexStream*>(vs_.get());
+		OGLGraphicsBuffer& ogl_vs = *checked_cast<OGLGraphicsBuffer*>(vs_.get());
 		glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, ogl_vs.OGLvbo());
 		glBufferData(GL_PIXEL_PACK_BUFFER_ARB,
 			reinterpret_cast<GLsizeiptr>(width_ * height_ * 4 * sizeof(float)), NULL, GL_DYNAMIC_DRAW);
@@ -108,7 +108,7 @@ namespace KlayGE
 
 		vs_->Resize(width_ * height_ * 4 * sizeof(GL_FLOAT));
 
-		OGLVertexStream& ogl_vs = static_cast<OGLVertexStream&>(*vs_);
+		OGLGraphicsBuffer& ogl_vs = static_cast<OGLGraphicsBuffer&>(*vs_);
 		glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, ogl_vs.OGLvbo());
 		glReadPixels(0, 0, width_, height_, GL_RGBA, GL_FLOAT, 0);
 

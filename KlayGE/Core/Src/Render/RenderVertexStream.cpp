@@ -18,7 +18,7 @@ namespace KlayGE
 	class NullRenderVertexStream : public RenderVertexStream
 	{
 	public:
-		void Attach(VertexStreamPtr vs)
+		void Attach(GraphicsBufferPtr vs)
 		{
 		}
 		void Detach()

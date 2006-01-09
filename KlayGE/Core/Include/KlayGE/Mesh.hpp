@@ -21,7 +21,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Renderable.hpp>
-#include <KlayGE/VertexBuffer.hpp>
+#include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/Math.hpp>
 
 #include <vector>

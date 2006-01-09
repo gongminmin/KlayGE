@@ -1,11 +1,11 @@
-// D3D9VertexBuffer.cpp
-// KlayGE D3D9顶点缓冲区类 实现文件
-// Ver 3.0.0
-// 版权所有(C) 龚敏敏, 2005
+// D3D9RenderLayout.cpp
+// KlayGE D3D9渲染布局类 实现文件
+// Ver 3.2.0
+// 版权所有(C) 龚敏敏, 2006
 // Homepage: http://klayge.sourceforge.net
 //
-// 3.0.0
-// 初次建立 (2005.9.7)
+// 3.2.0
+// 初次建立 (2006.1.9)
 //
 // 修改记录
 /////////////////////////////////////////////////////////////////////////////////
@@ -23,7 +23,7 @@
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9Mapping.hpp>
 #include <KlayGE/D3D9/D3D9VertexStream.hpp>
-#include <KlayGE/D3D9/D3D9VertexBuffer.hpp>
+#include <KlayGE/D3D9/D3D9RenderLayout.hpp>
 
 namespace KlayGE
 {
@@ -58,7 +58,7 @@ namespace KlayGE
 			vertex_elems_type elems;
 			elems.reserve(vertex_streams_.size() + 1);
 
-			std::vector<VertexStreamPtr> vss;
+			std::vector<GraphicsBufferPtr> vss;
 			for (uint32_t i = 0; i < this->NumVertexStreams(); ++ i)
 			{
 				vss.push_back(this->GetVertexStream(i));
@@ -68,9 +68,9 @@ namespace KlayGE
 				vss.push_back(instance_stream_.stream);
 			}
 
-			for (std::vector<VertexStreamPtr>::const_iterator iter = vss.begin(); iter != vss.end(); ++ iter)
+			for (std::vector<GraphicsBufferPtr>::const_iterator iter = vss.begin(); iter != vss.end(); ++ iter)
 			{
-				VertexStream& stream(*(*iter));
+				GraphicsBuffer& stream(*(*iter));
 
 				std::vector<D3DVERTEXELEMENT9> stream_elems;
 				D3D9Mapping::Mapping(stream_elems, iter - vss.begin(), *this);

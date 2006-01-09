@@ -1,24 +1,24 @@
-// D3D9VertexBuffer.hpp
-// KlayGE D3D9顶点缓冲区类 头文件
-// Ver 3.0.0
-// 版权所有(C) 龚敏敏, 2005
+// D3D9RenderLayout.hpp
+// KlayGE D3D9渲染布局类 头文件
+// Ver 3.2.0
+// 版权所有(C) 龚敏敏, 2006
 // Homepage: http://klayge.sourceforge.net
 //
-// 3.0.0
-// 初次建立 (2005.9.7)
+// 3.2.0
+// 初次建立 (2006.1.9)
 //
 // 修改记录
 /////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _D3D9VERTEXBUFFER_HPP
-#define _D3D9VERTEXBUFFER_HPP
+#ifndef _D3D9RENDERLAYOUT_HPP
+#define _D3D9RENDERLAYOUT_HPP
 
 #include <boost/smart_ptr.hpp>
 
 #include <vector>
 #include <d3d9.h>
 
-#include <KlayGE/VertexBuffer.hpp>
+#include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/D3D9/D3D9Resource.hpp>
 
 #ifdef KLAYGE_DEBUG
@@ -50,4 +50,4 @@ namespace KlayGE
 	};
 }
 
-#endif			// _D3D9VERTEXBUFFER_HPP
+#endif			// _D3D9RENDERLAYOUT_HPP

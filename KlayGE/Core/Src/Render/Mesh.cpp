@@ -86,47 +86,47 @@ namespace KlayGE
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 				// 建立顶点坐标
-				VertexStreamPtr pos_vs = rf.MakeVertexStream(BU_Static);
-				pos_vs->Resize(xyzs_.size() * sizeof(xyzs_[0]));
+				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static);
+				pos_vb->Resize(xyzs_.size() * sizeof(xyzs_[0]));
 				{
-					VertexStream::Mapper mapper(*pos_vs, BA_Write_Only);
+					GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
 					std::copy(xyzs_.begin(), xyzs_.end(), mapper.Pointer<Vector3>());
 				}
-				rl_->AddVertexStream(pos_vs, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
+				rl_->AddVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
 
 				if (!normals_.empty())
 				{
 					// 建立法线坐标
-					VertexStreamPtr normal_vs = rf.MakeVertexStream(BU_Static);
-					normal_vs->Resize(normals_.size() * sizeof(normals_[0]));
+					GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static);
+					normal_vb->Resize(normals_.size() * sizeof(normals_[0]));
 					{
-						VertexStream::Mapper mapper(*normal_vs, BA_Write_Only);
+						GraphicsBuffer::Mapper mapper(*normal_vb, BA_Write_Only);
 						std::copy(normals_.begin(), normals_.end(), mapper.Pointer<Vector3>());
 					}
-					rl_->AddVertexStream(normal_vs, boost::make_tuple(vertex_element(VEU_Normal, 0, sizeof(float), 3)));
+					rl_->AddVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, sizeof(float), 3)));
 				}
 
 				// 建立纹理坐标
 				for (size_t i = 0; i < multi_tex_coords_.size(); ++ i)
 				{
-					VertexStreamPtr tex_vs = rf.MakeVertexStream(BU_Static);
-					tex_vs->Resize(multi_tex_coords_[i].size() * sizeof(multi_tex_coords_[i][0]));
+					GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static);
+					tex_vb->Resize(multi_tex_coords_[i].size() * sizeof(multi_tex_coords_[i][0]));
 					{
-						VertexStream::Mapper mapper(*tex_vs, BA_Write_Only);
+						GraphicsBuffer::Mapper mapper(*tex_vb, BA_Write_Only);
 						std::copy(multi_tex_coords_[i].begin(), multi_tex_coords_[i].end(), mapper.Pointer<Vector2>());
 					}
-					rl_->AddVertexStream(tex_vs, boost::make_tuple(vertex_element(VEU_TextureCoord,
+					rl_->AddVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_TextureCoord,
 						static_cast<uint8_t>(i), sizeof(float), 2)));
 				}
 
 				// 建立索引
-				IndexStreamPtr is = rf.MakeIndexStream(BU_Static);
-				is->Resize(static_cast<uint32_t>(indices_.size() * sizeof(indices_[0])));
+				GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static);
+				ib->Resize(static_cast<uint32_t>(indices_.size() * sizeof(indices_[0])));
 				{
-					IndexStream::Mapper mapper(*is, BA_Write_Only);
+					GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
 					std::copy(indices_.begin(), indices_.end(), mapper.Pointer<uint16_t>());
 				}
-				rl_->SetIndexStream(is, IF_Index16);
+				rl_->SetIndexStream(ib, IF_Index16);
 			}
 
 			beBuilt_ = true;

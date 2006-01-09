@@ -1,7 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
-#include <KlayGE/VertexBuffer.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/Renderable.hpp>
@@ -86,21 +85,21 @@ namespace
 				indices_.begin(), indices_.end(),
 				xyzs_.begin(), xyzs_.end(), multi_tex_coords_[0].begin());
 
-			VertexStreamPtr tan_vs = rf.MakeVertexStream(BU_Static);
-			tan_vs->Resize(static_cast<uint32_t>(t.size() * sizeof(t[0])));
+			GraphicsBufferPtr tan_vb = rf.MakeVertexBuffer(BU_Static);
+			tan_vb->Resize(static_cast<uint32_t>(t.size() * sizeof(t[0])));
 			{
-				VertexStream::Mapper mapper(*tan_vs, BA_Write_Only);
+				GraphicsBuffer::Mapper mapper(*tan_vb, BA_Write_Only);
 				std::copy(t.begin(), t.end(), mapper.Pointer<Vector3>());
 			}
-			VertexStreamPtr binormal_vs = rf.MakeVertexStream(BU_Static);
-			binormal_vs->Resize(static_cast<uint32_t>(b.size() * sizeof(b[0])));
+			GraphicsBufferPtr binormal_vb = rf.MakeVertexBuffer(BU_Static);
+			binormal_vb->Resize(static_cast<uint32_t>(b.size() * sizeof(b[0])));
 			{
-				VertexStream::Mapper mapper(*binormal_vs, BA_Write_Only);
+				GraphicsBuffer::Mapper mapper(*binormal_vb, BA_Write_Only);
 				std::copy(b.begin(), b.end(), mapper.Pointer<Vector3>());
 			}
 
-			rl_->AddVertexStream(tan_vs, boost::make_tuple(vertex_element(VEU_Tangent, 0, sizeof(float), 3)));
-			rl_->AddVertexStream(binormal_vs, boost::make_tuple(vertex_element(VEU_Binormal, 0, sizeof(float), 3)));
+			rl_->AddVertexStream(tan_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, sizeof(float), 3)));
+			rl_->AddVertexStream(binormal_vb, boost::make_tuple(vertex_element(VEU_Binormal, 0, sizeof(float), 3)));
 		}
 
 		void OnRenderBegin()

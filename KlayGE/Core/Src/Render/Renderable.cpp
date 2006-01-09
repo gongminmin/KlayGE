@@ -55,7 +55,7 @@ namespace KlayGE
 
 		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-		VertexStreamPtr inst_stream = this->GetRenderLayout()->InstanceStream();
+		GraphicsBufferPtr inst_stream = this->GetRenderLayout()->InstanceStream();
 		if (inst_stream)
 		{
 			this->OnRenderBegin();
@@ -93,12 +93,12 @@ namespace KlayGE
 		{
 			RenderLayoutPtr rl = this->GetRenderLayout();
 
-			VertexStreamPtr inst_stream = rl->InstanceStream();
+			GraphicsBufferPtr inst_stream = rl->InstanceStream();
 			if (!inst_stream)
 			{
 				RenderFactory& rf(Context::Instance().RenderFactoryInstance());
 
-				inst_stream = rf.MakeVertexStream(BU_Dynamic);
+				inst_stream = rf.MakeVertexBuffer(BU_Dynamic);
 				rl->AddVertexStream(inst_stream, instances_[0].lock()->InstanceFormat(), RenderLayout::ST_Instance, 1);
 			}
 			else
@@ -113,7 +113,7 @@ namespace KlayGE
 
 			inst_stream->Resize(size * instances_.size());
 			{
-				VertexStream::Mapper mapper(*inst_stream, BA_Write_Only);
+				GraphicsBuffer::Mapper mapper(*inst_stream, BA_Write_Only);
 				for (size_t i = 0; i < instances_.size(); ++ i)
 				{
 					uint8_t const * src = static_cast<uint8_t const *>(instances_[i].lock()->InstanceData());

@@ -32,7 +32,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/VertexBuffer.hpp>
+#include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/Viewport.hpp>
 #include <KlayGE/RenderTarget.hpp>
 #include <KlayGE/Texture.hpp>
@@ -116,15 +116,15 @@ namespace
 			effect_ = rf.LoadEffect("Font.fx");
 			*(effect_->ParameterByName("texFontSampler")) = theSampler_;
 
-			xyz_vs_ = rf.MakeVertexStream(BU_Dynamic);
-			clr_vs_ = rf.MakeVertexStream(BU_Dynamic);
-			tex_vs_ = rf.MakeVertexStream(BU_Dynamic);
+			xyz_vb_ = rf.MakeVertexBuffer(BU_Dynamic);
+			clr_vb_ = rf.MakeVertexBuffer(BU_Dynamic);
+			tex_vb_ = rf.MakeVertexBuffer(BU_Dynamic);
 
-			rl_->AddVertexStream(xyz_vs_, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
-			rl_->AddVertexStream(clr_vs_, boost::make_tuple(vertex_element(VEU_Diffuse, 0, sizeof(float), 4)));
-			rl_->AddVertexStream(tex_vs_, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, sizeof(float), 2)));
+			rl_->AddVertexStream(xyz_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
+			rl_->AddVertexStream(clr_vb_, boost::make_tuple(vertex_element(VEU_Diffuse, 0, sizeof(float), 4)));
+			rl_->AddVertexStream(tex_vb_, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, sizeof(float), 2)));
 
-			rl_->SetIndexStream(rf.MakeIndexStream(BU_Dynamic), IF_Index16);
+			rl_->SetIndexStream(rf.MakeIndexBuffer(BU_Dynamic), IF_Index16);
 
 			box_ = Box(Vector3(0, 0, 0), Vector3(0, 0, 0));
 
@@ -145,25 +145,25 @@ namespace
 		{
 			effect_->ActiveTechnique("Font2DTec");
 
-			xyz_vs_->Resize(static_cast<uint32_t>(xyzs_.size() * sizeof(xyzs_[0])));
+			xyz_vb_->Resize(static_cast<uint32_t>(xyzs_.size() * sizeof(xyzs_[0])));
 			{
-				VertexStream::Mapper mapper(*xyz_vs_, BA_Write_Only);
+				GraphicsBuffer::Mapper mapper(*xyz_vb_, BA_Write_Only);
 				std::copy(xyzs_.begin(), xyzs_.end(), mapper.Pointer<Vector3>());
 			}
-			clr_vs_->Resize(static_cast<uint32_t>(clrs_.size() * sizeof(clrs_[0])));
+			clr_vb_->Resize(static_cast<uint32_t>(clrs_.size() * sizeof(clrs_[0])));
 			{
-				VertexStream::Mapper mapper(*clr_vs_, BA_Write_Only);
+				GraphicsBuffer::Mapper mapper(*clr_vb_, BA_Write_Only);
 				std::copy(clrs_.begin(), clrs_.end(), mapper.Pointer<Color>());
 			}
-			tex_vs_->Resize(static_cast<uint32_t>(texs_.size() * sizeof(texs_[0])));
+			tex_vb_->Resize(static_cast<uint32_t>(texs_.size() * sizeof(texs_[0])));
 			{
-				VertexStream::Mapper mapper(*tex_vs_, BA_Write_Only);
+				GraphicsBuffer::Mapper mapper(*tex_vb_, BA_Write_Only);
 				std::copy(texs_.begin(), texs_.end(), mapper.Pointer<Vector2>());
 			}
 
 			rl_->GetIndexStream()->Resize(static_cast<uint32_t>(indices_.size() * sizeof(indices_[0])));
 			{
-				IndexStream::Mapper mapper(*rl_->GetIndexStream(), BA_Write_Only);
+				GraphicsBuffer::Mapper mapper(*rl_->GetIndexStream(), BA_Write_Only);
 				std::copy(indices_.begin(), indices_.end(), mapper.Pointer<uint16_t>());
 			}
 
@@ -379,12 +379,12 @@ namespace
 		std::vector<Vector2>	texs_;
 		std::vector<uint16_t>	indices_;
 
-		VertexStreamPtr xyz_vs_;
-		VertexStreamPtr clr_vs_;
-		VertexStreamPtr tex_vs_;
+		GraphicsBufferPtr xyz_vb_;
+		GraphicsBufferPtr clr_vb_;
+		GraphicsBufferPtr tex_vb_;
 
-		TexturePtr			theTexture_;
-		SamplerPtr			theSampler_;
+		TexturePtr		theTexture_;
+		SamplerPtr		theSampler_;
 
 		::FT_Library	ftLib_;
 		::FT_Face		face_;

@@ -1,0 +1,128 @@
+// GraphicsBuffer.hpp
+// KlayGE 图形缓冲区类 头文件
+// Ver 3.2.0
+// 版权所有(C) 龚敏敏, 2003-2006
+// Homepage: http://klayge.sourceforge.net
+//
+// 3.2.0
+// 把IndexStream和VertexStream合并成GraphicsBuffer (2006.1.9)
+//
+// 3.1.0
+// 分离了实例和几何流 (2005.10.31)
+//
+// 3.0.0
+// 支持在单流中存储多种成员 (2005.10.15)
+// 支持instancing (2005.10.21)
+//
+// 2.8.0
+// 增加了CopyToMemory (2005.7.24)
+//
+// 2.4.0
+// 改名为VertexBuffer (2005.3.7)
+//
+// 2.0.4
+// 修改了纹理坐标 (2004.3.16)
+//
+// 2.0.3
+// 去掉了VO_2D (2004.3.1)
+// 改用vector存放数据 (2004.3.13)
+//
+// 2.0.0
+// 初次建立 (2003.8.18)
+//
+// 修改记录
+/////////////////////////////////////////////////////////////////////////////////
+
+#ifndef _GRAPHICSBUFFER_HPP
+#define _GRAPHICSBUFFER_HPP
+
+#include <KlayGE/PreDeclare.hpp>
+#include <vector>
+#include <boost/utility.hpp>
+#include <boost/tuple/tuple.hpp>
+
+#ifdef KLAYGE_DEBUG
+	#pragma comment(lib, "KlayGE_Core_d.lib")
+#else
+	#pragma comment(lib, "KlayGE_Core.lib")
+#endif
+
+namespace KlayGE
+{
+	enum BufferUsage
+	{
+		BU_Static,
+		BU_Dynamic
+	};
+	enum BufferAccess
+	{
+		BA_Read_Only,
+		BA_Write_Only,
+		BA_Read_Write
+	};
+
+	class GraphicsBuffer
+	{
+	public:
+		class Mapper : boost::noncopyable
+		{
+		public:
+			Mapper(GraphicsBuffer& buffer, BufferAccess ba)
+				: buffer_(buffer)
+			{
+				data_ = buffer_.Map(ba);
+			}
+			~Mapper()
+			{
+				buffer_.Unmap();
+			}
+
+			template <typename T>
+			const T* Pointer() const
+			{
+				return static_cast<T*>(data_);
+			}
+			template <typename T>
+			T* Pointer()
+			{
+				return static_cast<T*>(data_);
+			}
+
+		private:
+			GraphicsBuffer& buffer_;
+			void* data_;
+		};
+
+	public:
+		explicit GraphicsBuffer(BufferUsage usage);
+		virtual ~GraphicsBuffer();
+
+		static GraphicsBufferPtr NullObject();
+
+		void Resize(uint32_t size_in_byte);
+		uint32_t Size() const
+		{
+			return size_in_byte_;
+		}
+
+		BufferUsage Usage() const
+		{
+			return usage_;
+		}
+
+		virtual void* Map(BufferAccess ba) = 0;
+		virtual void Unmap() = 0;
+
+		void CopyToBuffer(GraphicsBuffer& rhs);
+
+	private:
+		virtual void DoCreate() = 0;
+
+	protected:
+		BufferUsage usage_;
+
+		uint32_t size_in_byte_;
+	};
+}
+
+#endif		// _GRAPHICSBUFFER_HPP

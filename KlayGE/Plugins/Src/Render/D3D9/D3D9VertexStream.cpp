@@ -28,7 +28,7 @@
 namespace KlayGE
 {
 	D3D9VertexStream::D3D9VertexStream(BufferUsage usage)
-			: VertexStream(usage)
+			: GraphicsBuffer(usage)
 	{
 	}
 

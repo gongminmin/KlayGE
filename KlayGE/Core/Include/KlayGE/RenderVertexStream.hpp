@@ -33,7 +33,7 @@ namespace KlayGE
 
 		static RenderVertexStreamPtr NullObject();
 
-		virtual void Attach(VertexStreamPtr vs) = 0;
+		virtual void Attach(GraphicsBufferPtr gb) = 0;
 		virtual void Detach() = 0;
 
 		void SwapBuffers()
@@ -46,7 +46,7 @@ namespace KlayGE
 		}
 
 	protected:
-		VertexStreamPtr vs_;
+		GraphicsBufferPtr vs_;
 	};
 }
 

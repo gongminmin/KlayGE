@@ -168,6 +168,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Src\Render\GraphicsBuffer.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Src\Render\KMesh.cpp"
 					>
 				</File>
@@ -200,6 +204,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Src\Render\RenderLayout.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Src\Render\RenderTarget.cpp"
 					>
 				</File>
@@ -223,10 +231,6 @@
 					RelativePath="..\..\Core\Src\Render\Texture.cpp"
 					>
 				</File>
-				<File
-					RelativePath="..\..\Core\Src\Render\VertexBuffer.cpp"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="Í·ÎÄ¼þ"
@@ -241,6 +245,10 @@
 				</File>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\Font.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\GraphicsBuffer.hpp"
 					>
 				</File>
 				<File
@@ -284,6 +292,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Include\KlayGE\RenderLayout.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Include\KlayGE\RenderSettings.hpp"
 					>
 				</File>
@@ -309,10 +321,6 @@
 				</File>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\Texture.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\Core\Include\KlayGE\VertexBuffer.hpp"
 					>
 				</File>
 				<File
