@@ -41,8 +41,7 @@ namespace
 		RenderTorus(std::wstring const & name, TexturePtr tex)
 			: KMesh(L"Torus", TexturePtr()),
 				toon_sampler_(new Sampler),
-				pos_sampler_(new Sampler),
-				normal_sampler_(new Sampler)
+				normal_depth_sampler_(new Sampler)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -51,71 +50,40 @@ namespace
 			toon_sampler_->SetTexture(LoadTexture("toon.dds"));
 			toon_sampler_->Filtering(Sampler::TFO_Point);
 			toon_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-			pos_sampler_->Filtering(Sampler::TFO_Point);
-			pos_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-			normal_sampler_->Filtering(Sampler::TFO_Point);
-			normal_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
+			normal_depth_sampler_->Filtering(Sampler::TFO_Point);
+			normal_depth_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
 
 			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("Cartoon.fx");
-			*(effect_->ParameterByName("toonMapSampler")) = toon_sampler_;
-			*(effect_->ParameterByName("posSampler")) = pos_sampler_;
-			*(effect_->ParameterByName("normalSampler")) = normal_sampler_;
+			*(effect_->ParameterByName("toonmap_sampler")) = toon_sampler_;
+			*(effect_->ParameterByName("normal_depth_sampler")) = normal_depth_sampler_;
 		}
 
 		void Pass(int i)
 		{
-			RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			if (renderEngine.DeviceCaps().max_simultaneous_rts > 1)
+			switch (i)
 			{
-				switch (i)
+			case 0:
 				{
-				case 0:
-					{
-						float rotX(std::clock() / 700.0f);
-						float rotY(std::clock() / 700.0f);
+					float rotX(std::clock() / 700.0f);
+					float rotY(std::clock() / 700.0f);
 
-						model_mat_ = MathLib::RotationX(rotX) * MathLib::RotationY(rotY);
-					}
-					effect_->ActiveTechnique("PositionNormal");
-					break;
-
-				case 2:
-					effect_->ActiveTechnique("Cartoon");
-					break;
+					model_mat_ = MathLib::RotationX(rotX) * MathLib::RotationY(rotY);
 				}
-			}
-			else
-			{
-				switch (i)
-				{
-				case 0:
-					{
-						float rotX(std::clock() / 700.0f);
-						float rotY(std::clock() / 700.0f);
+				effect_->ActiveTechnique("NormalDepth");
+				break;
 
-						model_mat_ = MathLib::RotationX(rotX) * MathLib::RotationY(rotY);
-					}
-					effect_->ActiveTechnique("Position");
-					break;
-				
-				case 1:
-					effect_->ActiveTechnique("Normal");
-					break;
-
-				case 2:
-					effect_->ActiveTechnique("Cartoon");
-					break;
-				}
+			case 1:
+				effect_->ActiveTechnique("Cartoon");
+				break;
 			}
 		}
 
-		void UpdateTexture(TexturePtr const & pos_tex, TexturePtr const & normal_tex)
+		void UpdateTexture(TexturePtr const & normal_depth_tex)
 		{
-			pos_sampler_->SetTexture(pos_tex);
-			normal_sampler_->SetTexture(normal_tex);
+			normal_depth_sampler_->SetTexture(normal_depth_tex);
 
-			*(effect_->ParameterByName("inv_width")) = 2.0f / pos_tex->Width(0);
-			*(effect_->ParameterByName("inv_height")) = 2.0f / pos_tex->Height(0);
+			*(effect_->ParameterByName("inv_width")) = 2.0f / normal_depth_tex->Width(0);
+			*(effect_->ParameterByName("inv_height")) = 2.0f / normal_depth_tex->Height(0);
 		}
 
 		void OnRenderBegin()
@@ -134,9 +102,7 @@ namespace
 
 	private:
 		SamplerPtr toon_sampler_;
-
-		SamplerPtr pos_sampler_;
-		SamplerPtr normal_sampler_;
+		SamplerPtr normal_depth_sampler_;
 
 		Matrix4 model_mat_;
 	};
@@ -215,10 +181,8 @@ void Cartoon::InitObjects()
 	this->Proj(0.1f, 20.0f);
 
 	screen_buffer_ = renderEngine.ActiveRenderTarget(0);
-	pos_buffer_ = Context::Instance().RenderFactoryInstance().MakeRenderTexture();
-	pos_buffer_->GetViewport().camera = screen_buffer_->GetViewport().camera;
-	normal_buffer_ = Context::Instance().RenderFactoryInstance().MakeRenderTexture();
-	normal_buffer_->GetViewport().camera = screen_buffer_->GetViewport().camera;
+	normal_depth_buffer_ = Context::Instance().RenderFactoryInstance().MakeRenderTexture();
+	normal_depth_buffer_->GetViewport().camera = screen_buffer_->GetViewport().camera;
 
 	fpcController_.AttachCamera(this->ActiveCamera());
 	fpcController_.Scalers(0.05f, 0.5f);
@@ -234,10 +198,8 @@ void Cartoon::InitObjects()
 
 void Cartoon::OnResize(uint32_t width, uint32_t height)
 {
-	pos_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, PF_ABGR16F);
-	pos_buffer_->AttachTexture2D(pos_tex_);
-	normal_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, PF_ABGR16F);
-	normal_buffer_->AttachTexture2D(normal_tex_);
+	normal_depth_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, PF_ABGR16F);
+	normal_depth_buffer_->AttachTexture2D(normal_depth_tex_);
 }
 
 void Cartoon::InputHandler(InputEngine const & sender, InputAction const & action)
@@ -252,15 +214,7 @@ void Cartoon::InputHandler(InputEngine const & sender, InputAction const & actio
 
 uint32_t Cartoon::NumPasses() const
 {
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-	if (renderEngine.DeviceCaps().max_simultaneous_rts > 1)
-	{
-		return 2;
-	}
-	else
-	{
-		return 3;
-	}
+	return 2;
 }
 
 void Cartoon::DoUpdate(uint32_t pass)
@@ -268,53 +222,26 @@ void Cartoon::DoUpdate(uint32_t pass)
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-	if (renderEngine.DeviceCaps().max_simultaneous_rts > 1)
+	switch (pass)
 	{
-		if (0 == pass)
-		{
-			fpcController_.Update();
+	case 0:
+		fpcController_.Update();
 
-			renderEngine.ActiveRenderTarget(0, pos_buffer_);
-			renderEngine.ActiveRenderTarget(1, normal_buffer_);
-			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+		renderEngine.ActiveRenderTarget(0, normal_depth_buffer_);
+		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
-			sceneMgr.Clear();
-			checked_cast<RenderTorus*>(torus_->GetRenderable().get())->Pass(0);
-			torus_->AddToSceneManager();
-		}
-	}
-	else
-	{
-		if (0 == pass)
-		{
-			fpcController_.Update();
-
-			renderEngine.ActiveRenderTarget(0, pos_buffer_);
-			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
-
-			sceneMgr.Clear();
-			checked_cast<RenderTorus*>(torus_->GetRenderable().get())->Pass(0);
-			torus_->AddToSceneManager();
-		}
-		if (1 == pass)
-		{
-			renderEngine.ActiveRenderTarget(0, normal_buffer_);
-			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
-
-			sceneMgr.Clear();
-			checked_cast<RenderTorus*>(torus_->GetRenderable().get())->Pass(1);
-			torus_->AddToSceneManager();
-		}
-	}
-
-	if (pass == this->NumPasses() - 1)
-	{
+		sceneMgr.Clear();
+		checked_cast<RenderTorus*>(torus_->GetRenderable().get())->Pass(0);
+		torus_->AddToSceneManager();
+		break;
+	
+	case 1:
 		renderEngine.ActiveRenderTarget(0, screen_buffer_);
 		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 		sceneMgr.Clear();
-		checked_cast<RenderTorus*>(torus_->GetRenderable().get())->UpdateTexture(pos_tex_, normal_tex_);
-		checked_cast<RenderTorus*>(torus_->GetRenderable().get())->Pass(2);
+		checked_cast<RenderTorus*>(torus_->GetRenderable().get())->UpdateTexture(normal_depth_tex_);
+		checked_cast<RenderTorus*>(torus_->GetRenderable().get())->Pass(1);
 		torus_->AddToSceneManager();
 
 		RenderWindow* rw = static_cast<RenderWindow*>(renderEngine.ActiveRenderTarget(0).get());
@@ -329,5 +256,6 @@ void Cartoon::DoUpdate(uint32_t pass)
 		stream.str(L"");
 		stream << renderEngine.ActiveRenderTarget(0)->FPS() << " FPS";
 		font_->RenderText(0, 54, Color(1, 1, 0, 1), stream.str().c_str());
+		break;
 	}
 }

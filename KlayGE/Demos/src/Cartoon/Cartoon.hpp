@@ -29,10 +29,8 @@ private:
 
 	KlayGE::RenderTargetPtr screen_buffer_;
 
-	KlayGE::RenderTexturePtr pos_buffer_;
-	KlayGE::TexturePtr pos_tex_;
-	KlayGE::RenderTexturePtr normal_buffer_;
-	KlayGE::TexturePtr normal_tex_;
+	KlayGE::RenderTexturePtr normal_depth_buffer_;
+	KlayGE::TexturePtr normal_depth_tex_;
 };
 
 #endif		// _CARTOON_HPP

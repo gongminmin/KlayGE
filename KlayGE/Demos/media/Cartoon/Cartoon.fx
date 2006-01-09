@@ -3,53 +3,24 @@ float4x4 proj;
 float3 light_in_model;
 
 
-void PositionVS(float4 pos : POSITION,
-			out float4 oPos : POSITION,
-			out float4 oPosOut : TEXCOORD0)
-{
-	oPos = mul(mul(pos, model_view), proj);
-	oPosOut = oPos;
-}
-
-half4 PositionPS(float4 position : TEXCOORD0) : COLOR
-{
-	return position / position.w;
-}
-
-technique Position
-{
-	pass p0
-	{
-		FillMode = Solid;
-		CullMode = CCW;
-		Stencilenable = false;
-		Clipping = true;
-
-		ZEnable      = true;
-		ZWriteEnable = true;
-
-		VertexShader = compile vs_1_1 PositionVS();
-		PixelShader = compile ps_2_0 PositionPS();
-	}
-}
-
-
-void NormalVS(float4 pos : POSITION,
+void NormalDepthVS(float4 pos : POSITION,
 			float3 normal : NORMAL,
 			out float4 oPos : POSITION,
-			out float3 oNormal : TEXCOORD0)
+			out float3 oNormal : TEXCOORD0,
+			out float2 oDepth : TEXCOORD1)
 {
 	oPos = mul(mul(pos, model_view), proj);
 	oNormal = normalize(mul(normal, (float3x3)model_view));
+	oDepth = oPos.zw;
 }
 
-half4 NormalPS(float3 normal : TEXCOORD0) : COLOR
+half4 NormalDepthPS(float3 normal : TEXCOORD0, float2 depth : TEXCOORD1) : COLOR
 {
 	normal = normalize(normal);
-	return half4(normal, 0);
+	return half4(normal, depth.x / depth.y);
 }
 
-technique Normal
+technique NormalDepth
 {
 	pass p0
 	{
@@ -61,47 +32,8 @@ technique Normal
 		ZEnable      = true;
 		ZWriteEnable = true;
 
-		VertexShader = compile vs_1_1 NormalVS();
-		PixelShader = compile ps_2_0 NormalPS();
-	}
-}
-
-
-void PositionNormalVS(float4 pos : POSITION,
-			float3 normal : NORMAL,
-			out float4 oPos : POSITION,
-			out float4 oPosOut : TEXCOORD0,
-			out float3 oNormal : TEXCOORD1)
-{
-	oPos = mul(mul(pos, model_view), proj);
-	oPosOut = oPos;
-	oNormal = normalize(mul(normal, (float3x3)model_view));
-}
-
-void PositionNormalPS(float4 position : TEXCOORD0,
-						float3 normal : TEXCOORD1,
-					out float4 oPos : COLOR0,
-					out float4 oNormal : COLOR1)
-{
-	oPos = position / position.w;
-	normal = normalize(normal);
-	oNormal = float4(normal, 0);
-}
-
-technique PositionNormal
-{
-	pass p0
-	{
-		FillMode = Solid;
-		CullMode = CCW;
-		Stencilenable = false;
-		Clipping = true;
-
-		ZEnable      = true;
-		ZWriteEnable = true;
-
-		VertexShader = compile vs_1_1 PositionNormalVS();
-		PixelShader = compile ps_2_0 PositionNormalPS();
+		VertexShader = compile vs_1_1 NormalDepthVS();
+		PixelShader = compile ps_2_0 NormalDepthPS();
 	}
 }
 
@@ -133,9 +65,8 @@ void PostToonVS(float4 pos : POSITION,
 	oToon = dot(normalize(normal), L);
 }
 
-sampler1D toonMapSampler;
-sampler2D posSampler;
-sampler2D normalSampler;
+sampler1D toonmap_sampler;
+sampler2D normal_depth_sampler;
 
 const float2 e_barrier = float2(0.8f, 0.1f); // x=norm, y=depth
 const float2 e_weights = float2(0.25f, 0.5f); // x=norm, y=depth
@@ -148,28 +79,27 @@ half4 PostToonPS(float2 tc0 : TEXCOORD0,
 				float toon : TEXCOORD5) : COLOR
 {
 	// 法线间断点过滤
-	half3 nc = tex2D(normalSampler, tc0);
+	half4 ndc = tex2D(normal_depth_sampler, tc0);
 	half4 nd;
-	nd.x = dot(nc.xyz, tex2D(normalSampler, tc1.xy).xyz);
-	nd.y = dot(nc.xyz, tex2D(normalSampler, tc1.zw).xyz);
-	nd.z = dot(nc.xyz, tex2D(normalSampler, tc2.xy).xyz);
-	nd.w = dot(nc.xyz, tex2D(normalSampler, tc2.zw).xyz);
+	nd.x = dot(ndc.xyz, tex2D(normal_depth_sampler, tc1.xy).xyz);
+	nd.y = dot(ndc.xyz, tex2D(normal_depth_sampler, tc1.zw).xyz);
+	nd.z = dot(ndc.xyz, tex2D(normal_depth_sampler, tc2.xy).xyz);
+	nd.w = dot(ndc.xyz, tex2D(normal_depth_sampler, tc2.zw).xyz);
 	nd -= e_barrier.x;
 	nd = (nd > 0) ? 1 : 0;
 	half ne = (dot(nd, e_weights.x) < 1) ? 0 : 1;
 
 	// 深度过滤，计算梯度差距
-	half3 dc = tex2D(posSampler, tc0.xy);
 	half4 dd;
-	dd.x = tex2D(posSampler, tc1.xy).z + tex2D(posSampler, tc1.zw).z;
-	dd.y = tex2D(posSampler, tc2.xy).z + tex2D(posSampler, tc2.zw).z;
-	dd.z = tex2D(posSampler, tc3.xy).z + tex2D(posSampler, tc3.zw).z;
-	dd.w = tex2D(posSampler, tc4.xy).z + tex2D(posSampler, tc4.zw).z;
-	dd = abs(2 * dc.z - dd) - e_barrier.y;
+	dd.x = tex2D(normal_depth_sampler, tc1.xy).w + tex2D(normal_depth_sampler, tc1.zw).w;
+	dd.y = tex2D(normal_depth_sampler, tc2.xy).w + tex2D(normal_depth_sampler, tc2.zw).w;
+	dd.z = tex2D(normal_depth_sampler, tc3.xy).w + tex2D(normal_depth_sampler, tc3.zw).w;
+	dd.w = tex2D(normal_depth_sampler, tc4.xy).w + tex2D(normal_depth_sampler, tc4.zw).w;
+	dd = abs(2 * ndc.w - dd) - e_barrier.y;
 	dd = (dd > 0) ? 1 : 0;
 	half de = (dot(dd, e_weights.y) < 1) ? 1 : 0;
-	
-	return tex1D(toonMapSampler, toon) * de * ne;
+
+	return tex1D(toonmap_sampler, toon) * de * ne;
 }
 
 technique Cartoon
