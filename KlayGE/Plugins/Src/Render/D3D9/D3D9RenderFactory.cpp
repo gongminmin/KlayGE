@@ -19,8 +19,7 @@
 #include <KlayGE/D3D9/D3D9RenderTexture.hpp>
 #include <KlayGE/D3D9/D3D9RenderEffect.hpp>
 #include <KlayGE/D3D9/D3D9RenderLayout.hpp>
-#include <KlayGE/D3D9/D3D9VertexStream.hpp>
-#include <KlayGE/D3D9/D3D9IndexStream.hpp>
+#include <KlayGE/D3D9/D3D9GraphicsBuffer.hpp>
 #include <KlayGE/D3D9/D3D9OcclusionQuery.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
@@ -82,14 +81,14 @@ namespace KlayGE
 
 	GraphicsBufferPtr D3D9RenderFactory::MakeVertexBuffer(BufferUsage usage)
 	{
-		D3D9VertexStreamPtr ret(new D3D9VertexStream(usage));
+		D3D9VertexBufferPtr ret(new D3D9VertexBuffer(usage));
 		resource_pool_.push_back(ret);
 		return ret;
 	}
 
 	GraphicsBufferPtr D3D9RenderFactory::MakeIndexBuffer(BufferUsage usage)
 	{
-		D3D9IndexStreamPtr ret(new D3D9IndexStream(usage));
+		D3D9IndexBufferPtr ret(new D3D9IndexBuffer(usage));
 		resource_pool_.push_back(ret);
 		return ret;
 	}

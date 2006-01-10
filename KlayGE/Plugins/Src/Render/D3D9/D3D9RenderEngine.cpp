@@ -50,8 +50,7 @@
 
 #include <KlayGE/D3D9/D3D9RenderWindow.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
-#include <KlayGE/D3D9/D3D9VertexStream.hpp>
-#include <KlayGE/D3D9/D3D9IndexStream.hpp>
+#include <KlayGE/D3D9/D3D9GraphicsBuffer.hpp>
 #include <KlayGE/D3D9/D3D9RenderEffect.hpp>
 #include <KlayGE/D3D9/D3D9Mapping.hpp>
 #include <KlayGE/D3D9/D3D9RenderLayout.hpp>
@@ -362,9 +361,9 @@ namespace KlayGE
 		{
 			GraphicsBuffer& stream = *rl.GetVertexStream(i);
 			
-			D3D9VertexStream& d3d9vs(*checked_cast<D3D9VertexStream*>(&stream));
+			D3D9VertexBuffer& d3d9vb(*checked_cast<D3D9VertexBuffer*>(&stream));
 			TIF(d3dDevice_->SetStreamSource(i,
-				d3d9vs.D3D9Buffer().get(), 0,
+				d3d9vb.D3D9Buffer().get(), 0,
 				static_cast<UINT>(rl.VertexSize(i))));
 
 			TIF(d3dDevice_->SetStreamSourceFreq(i, D3DSTREAMSOURCE_INDEXEDDATA | rl.VertexStreamFrequency(i)));
@@ -374,9 +373,9 @@ namespace KlayGE
 			uint32_t number = rl.NumVertexStreams();
 
 			GraphicsBuffer& stream = *rl.InstanceStream();
-			D3D9VertexStream& d3d9vs(*checked_cast<D3D9VertexStream*>(&stream));
+			D3D9VertexBuffer& d3d9vb(*checked_cast<D3D9VertexBuffer*>(&stream));
 			TIF(d3dDevice_->SetStreamSource(number,
-				d3d9vs.D3D9Buffer().get(), 0,
+				d3d9vb.D3D9Buffer().get(), 0,
 				static_cast<UINT>(rl.VertexSize(number))));
 
 			TIF(d3dDevice_->SetStreamSourceFreq(number, D3DSTREAMSOURCE_INSTANCEDATA | 1));
@@ -400,9 +399,9 @@ namespace KlayGE
 		{
 			GraphicsBuffer& stream = *rl.GetVertexStream(i);
 
-			D3D9VertexStream& d3d9vs(*checked_cast<D3D9VertexStream*>(&stream));
+			D3D9VertexBuffer& d3d9vb(*checked_cast<D3D9VertexBuffer*>(&stream));
 			TIF(d3dDevice_->SetStreamSource(i,
-				d3d9vs.D3D9Buffer().get(), 0,
+				d3d9vb.D3D9Buffer().get(), 0,
 				static_cast<UINT>(rl.VertexSize(i))));
 		}
 
@@ -432,9 +431,9 @@ namespace KlayGE
 		uint32_t num_passes = tech->NumPasses();
 		if (rl.UseIndices())
 		{
-			D3D9IndexStream& d3dis(*checked_cast<D3D9IndexStream*>(rl.GetIndexStream().get()));
-			d3dis.SwitchFormat(rl.IndexStreamFormat());
-			d3dDevice_->SetIndices(d3dis.D3D9Buffer().get());
+			D3D9IndexBuffer& d3dib(*checked_cast<D3D9IndexBuffer*>(rl.GetIndexStream().get()));
+			d3dib.SwitchFormat(rl.IndexStreamFormat());
+			d3dDevice_->SetIndices(d3dib.D3D9Buffer().get());
 
 			for (uint32_t i = 0; i < num_passes; ++ i)
 			{

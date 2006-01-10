@@ -22,7 +22,7 @@
 
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9Mapping.hpp>
-#include <KlayGE/D3D9/D3D9VertexStream.hpp>
+#include <KlayGE/D3D9/D3D9GraphicsBuffer.hpp>
 #include <KlayGE/D3D9/D3D9RenderLayout.hpp>
 
 namespace KlayGE

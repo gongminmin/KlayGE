@@ -36,8 +36,7 @@
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 #include <KlayGE/D3D9/D3D9RenderTexture.hpp>
 #include <KlayGE/D3D9/D3D9RenderEffect.hpp>
-#include <KlayGE/D3D9/D3D9VertexStream.hpp>
-#include <KlayGE/D3D9/D3D9IndexStream.hpp>
+#include <KlayGE/D3D9/D3D9GraphicsBuffer.hpp>
 #include <KlayGE/D3D9/D3D9RenderVertexStream.hpp>
 
 #ifdef KLAYGE_DEBUG
