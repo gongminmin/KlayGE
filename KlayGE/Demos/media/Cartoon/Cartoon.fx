@@ -10,7 +10,7 @@ void NormalDepthVS(float4 pos : POSITION,
 			out float2 oDepth : TEXCOORD1)
 {
 	oPos = mul(mul(pos, model_view), proj);
-	oNormal = normalize(mul(normal, (float3x3)model_view));
+	oNormal = mul(normal, (float3x3)model_view);
 	oDepth = oPos.zw;
 }
 
@@ -78,23 +78,27 @@ half4 PostToonPS(float2 tc0 : TEXCOORD0,
 				float4 tc4 : TEXCOORD4,
 				float toon : TEXCOORD5) : COLOR
 {
+	half4 s1 = tex2D(normal_depth_sampler, tc1.xy);
+	half4 s2 = tex2D(normal_depth_sampler, tc1.zw);
+	half4 s3 = tex2D(normal_depth_sampler, tc2.xy);
+	half4 s4 = tex2D(normal_depth_sampler, tc2.zw);
+	half4 s5 = tex2D(normal_depth_sampler, tc3.xy);
+	half4 s6 = tex2D(normal_depth_sampler, tc3.zw);
+	half4 s7 = tex2D(normal_depth_sampler, tc4.xy);
+	half4 s8 = tex2D(normal_depth_sampler, tc4.zw);
+
 	// 法线间断点过滤
 	half4 ndc = tex2D(normal_depth_sampler, tc0);
-	half4 nd;
-	nd.x = dot(ndc.xyz, tex2D(normal_depth_sampler, tc1.xy).xyz);
-	nd.y = dot(ndc.xyz, tex2D(normal_depth_sampler, tc1.zw).xyz);
-	nd.z = dot(ndc.xyz, tex2D(normal_depth_sampler, tc2.xy).xyz);
-	nd.w = dot(ndc.xyz, tex2D(normal_depth_sampler, tc2.zw).xyz);
+	half4 nd = half4(dot(ndc.xyz, s1.xyz),
+				dot(ndc.xyz, s2.xyz),
+				dot(ndc.xyz, s3.xyz),
+				dot(ndc.xyz, s4.xyz));
 	nd -= e_barrier.x;
 	nd = (nd > 0) ? 1 : 0;
 	half ne = (dot(nd, e_weights.x) < 1) ? 0 : 1;
 
 	// 深度过滤，计算梯度差距
-	half4 dd;
-	dd.x = tex2D(normal_depth_sampler, tc1.xy).w + tex2D(normal_depth_sampler, tc1.zw).w;
-	dd.y = tex2D(normal_depth_sampler, tc2.xy).w + tex2D(normal_depth_sampler, tc2.zw).w;
-	dd.z = tex2D(normal_depth_sampler, tc3.xy).w + tex2D(normal_depth_sampler, tc3.zw).w;
-	dd.w = tex2D(normal_depth_sampler, tc4.xy).w + tex2D(normal_depth_sampler, tc4.zw).w;
+	half4 dd = half4(s1.w + s2.w, s3.w + s4.w, s5.w + s6.w, s7.w + s8.w);
 	dd = abs(2 * ndc.w - dd) - e_barrier.y;
 	dd = (dd > 0) ? 1 : 0;
 	half de = (dot(dd, e_weights.y) < 1) ? 1 : 0;

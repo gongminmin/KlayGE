@@ -92,7 +92,7 @@ namespace KlayGE
 					GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
 					std::copy(xyzs_.begin(), xyzs_.end(), mapper.Pointer<Vector3>());
 				}
-				rl_->AddVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
+				rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
 
 				if (!normals_.empty())
 				{
@@ -103,7 +103,7 @@ namespace KlayGE
 						GraphicsBuffer::Mapper mapper(*normal_vb, BA_Write_Only);
 						std::copy(normals_.begin(), normals_.end(), mapper.Pointer<Vector3>());
 					}
-					rl_->AddVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, sizeof(float), 3)));
+					rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, sizeof(float), 3)));
 				}
 
 				// 建立纹理坐标
@@ -115,7 +115,7 @@ namespace KlayGE
 						GraphicsBuffer::Mapper mapper(*tex_vb, BA_Write_Only);
 						std::copy(multi_tex_coords_[i].begin(), multi_tex_coords_[i].end(), mapper.Pointer<Vector2>());
 					}
-					rl_->AddVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_TextureCoord,
+					rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_TextureCoord,
 						static_cast<uint8_t>(i), sizeof(float), 2)));
 				}
 
@@ -126,7 +126,7 @@ namespace KlayGE
 					GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
 					std::copy(indices_.begin(), indices_.end(), mapper.Pointer<uint16_t>());
 				}
-				rl_->SetIndexStream(ib, IF_Index16);
+				rl_->BindIndexStream(ib, IF_Index16);
 			}
 
 			beBuilt_ = true;

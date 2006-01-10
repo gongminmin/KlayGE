@@ -119,12 +119,12 @@ namespace KlayGE
 		uint32_t NumVertices() const;
 
 		template <typename tuple_type>
-		void AddVertexStream(GraphicsBufferPtr buffer, tuple_type const & vertex_elems,
+		void BindVertexStream(GraphicsBufferPtr buffer, tuple_type const & vertex_elems,
 			stream_type type = ST_Geometry, uint32_t freq = 1)
 		{
-			this->AddVertexStream(buffer, Tuple2Vector(vertex_elems), type, freq);
+			this->BindVertexStream(buffer, Tuple2Vector(vertex_elems), type, freq);
 		}
-		void AddVertexStream(GraphicsBufferPtr buffer, vertex_elements_type const & vet,
+		void BindVertexStream(GraphicsBufferPtr buffer, vertex_elements_type const & vet,
 			stream_type type = ST_Geometry, uint32_t freq = 1);
 
 		uint32_t NumVertexStreams() const
@@ -160,7 +160,7 @@ namespace KlayGE
 		bool UseIndices() const;
 		uint32_t NumIndices() const;
 
-		void SetIndexStream(GraphicsBufferPtr index_stream, IndexFormat format);
+		void BindIndexStream(GraphicsBufferPtr index_stream, IndexFormat format);
 		GraphicsBufferPtr GetIndexStream() const;
 		IndexFormat IndexStreamFormat() const
 		{

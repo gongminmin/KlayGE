@@ -333,12 +333,12 @@ namespace KlayGE
 
 			for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
 			{
-				tmp_rl->AddVertexStream(rl.GetVertexStream(i), rl.VertexStreamFormat(i));
+				tmp_rl->BindVertexStream(rl.GetVertexStream(i), rl.VertexStreamFormat(i));
 			}
-			tmp_rl->AddVertexStream(tmp_inst_vs, rl.InstanceStreamFormat());
+			tmp_rl->BindVertexStream(tmp_inst_vs, rl.InstanceStreamFormat());
 			if (rl.UseIndices())
 			{
-				tmp_rl->SetIndexStream(rl.GetIndexStream(), rl.IndexStreamFormat());
+				tmp_rl->BindIndexStream(rl.GetIndexStream(), rl.IndexStreamFormat());
 			}
 
 			this->RenderRLSWInstance(*tmp_rl);

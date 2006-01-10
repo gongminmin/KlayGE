@@ -77,7 +77,7 @@ namespace KlayGE
 			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
 			std::copy(&v, &v + 1, mapper.Pointer<Vector3>());
 		}
-		rl_->AddVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
+		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
 
 		box_ = MathLib::ComputeBoundingBox<float>(&v, &v + 1);
 	}
@@ -116,7 +116,7 @@ namespace KlayGE
 			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
 			std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<Vector3>());
 		}
-		rl_->AddVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
+		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
 
 		box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 	}
@@ -155,7 +155,7 @@ namespace KlayGE
 			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
 			std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<Vector3>());
 		}
-		rl_->AddVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
+		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
 
 		box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 	}
@@ -206,7 +206,7 @@ namespace KlayGE
 			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
 			std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<Vector3>());
 		}
-		rl_->AddVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
+		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
 
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static);
 		ib->Resize(sizeof(indices));
@@ -214,7 +214,7 @@ namespace KlayGE
 			GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
 			std::copy(indices, indices + sizeof(indices) / sizeof(indices[0]), mapper.Pointer<uint16_t>());
 		}
-		rl_->SetIndexStream(ib, IF_Index16);
+		rl_->BindIndexStream(ib, IF_Index16);
 	}
 
 	void RenderableBox::OnRenderBegin()
@@ -259,7 +259,7 @@ namespace KlayGE
 			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
 			std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<Vector3>());
 		}
-		rl_->AddVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
+		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
 
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static);
 		ib->Resize(sizeof(indices));
@@ -267,7 +267,7 @@ namespace KlayGE
 			GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
 			std::copy(indices, indices + sizeof(indices) / sizeof(indices[0]), mapper.Pointer<uint16_t>());
 		}
-		rl_->SetIndexStream(ib, IF_Index16);
+		rl_->BindIndexStream(ib, IF_Index16);
 
 		box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[4]);
 
@@ -319,7 +319,7 @@ namespace KlayGE
 			GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
 			std::copy(pos.begin(), pos.end(), mapper.Pointer<Vector3>());
 		}
-		rl_->AddVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
+		rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
 
 		if (has_tex_coord)
 		{
@@ -339,7 +339,7 @@ namespace KlayGE
 				GraphicsBuffer::Mapper mapper(*tex_vb, BA_Write_Only);
 				std::copy(tex.begin(), tex.end(), mapper.Pointer<Vector2>());
 			}
-			rl_->AddVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, sizeof(float), 2)));
+			rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, sizeof(float), 2)));
 		}
 
 		std::vector<uint16_t> index;
@@ -363,7 +363,7 @@ namespace KlayGE
 			GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
 			std::copy(index.begin(), index.end(), mapper.Pointer<uint16_t>());
 		}
-		rl_->SetIndexStream(ib, IF_Index16);
+		rl_->BindIndexStream(ib, IF_Index16);
 
 		box_ = MathLib::ComputeBoundingBox<float>(pos.begin(), pos.end());
 	}

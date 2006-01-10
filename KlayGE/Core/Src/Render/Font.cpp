@@ -120,11 +120,11 @@ namespace
 			clr_vb_ = rf.MakeVertexBuffer(BU_Dynamic);
 			tex_vb_ = rf.MakeVertexBuffer(BU_Dynamic);
 
-			rl_->AddVertexStream(xyz_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
-			rl_->AddVertexStream(clr_vb_, boost::make_tuple(vertex_element(VEU_Diffuse, 0, sizeof(float), 4)));
-			rl_->AddVertexStream(tex_vb_, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, sizeof(float), 2)));
+			rl_->BindVertexStream(xyz_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
+			rl_->BindVertexStream(clr_vb_, boost::make_tuple(vertex_element(VEU_Diffuse, 0, sizeof(float), 4)));
+			rl_->BindVertexStream(tex_vb_, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, sizeof(float), 2)));
 
-			rl_->SetIndexStream(rf.MakeIndexBuffer(BU_Dynamic), IF_Index16);
+			rl_->BindIndexStream(rf.MakeIndexBuffer(BU_Dynamic), IF_Index16);
 
 			box_ = Box(Vector3(0, 0, 0), Vector3(0, 0, 0));
 

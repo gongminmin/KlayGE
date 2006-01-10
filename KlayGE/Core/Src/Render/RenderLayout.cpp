@@ -56,10 +56,10 @@ namespace KlayGE
 		return vertex_streams_.empty() ? 0 : (vertex_streams_[0].stream->Size() / vertex_streams_[0].vertex_size);
 	}
 
-	void RenderLayout::AddVertexStream(GraphicsBufferPtr buffer, vertex_elements_type const & vet,
+	void RenderLayout::BindVertexStream(GraphicsBufferPtr buffer, vertex_elements_type const & vet,
 		stream_type type, uint32_t freq)
 	{
-		BOOST_ASSERT(vertex_stream);
+		BOOST_ASSERT(buffer);
 
 		uint32_t size = 0;
 		for (size_t i = 0; i < vet.size(); ++ i)
@@ -79,7 +79,7 @@ namespace KlayGE
 		}
 		else
 		{
-			BOOST_ASSERT(!instance_stream_);
+			BOOST_ASSERT(!instance_stream_.stream);
 			instance_stream_.stream = buffer;
 			instance_stream_.format = vet;
 			instance_stream_.vertex_size = size;
@@ -112,7 +112,7 @@ namespace KlayGE
 		}
 	}
 
-	void RenderLayout::SetIndexStream(GraphicsBufferPtr buffer, IndexFormat format)
+	void RenderLayout::BindIndexStream(GraphicsBufferPtr buffer, IndexFormat format)
 	{
 		index_stream_ = buffer;
 		index_format_ = format;
@@ -136,7 +136,7 @@ namespace KlayGE
 
 	void RenderLayout::ExpandInstance(GraphicsBufferPtr& hint, uint32_t inst_no) const
 	{
-		BOOST_ASSERT(instance_stream_);
+		BOOST_ASSERT(instance_stream_.stream);
 
 		uint32_t num_instance = this->NumInstance();
 		BOOST_ASSERT(inst_no < num_instance);
