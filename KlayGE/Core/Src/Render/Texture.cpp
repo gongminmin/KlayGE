@@ -390,7 +390,7 @@ namespace KlayGE
 
 					texture->CopyMemoryToTexture2D(level, &data[0], format,
 						texture->Width(level), texture->Height(level), 0, 0,
-						texture->Width(level), texture->Height(level), 0, 0);
+						texture->Width(level), texture->Height(level));
 				}
 			}
 			break;
@@ -426,7 +426,7 @@ namespace KlayGE
 
 					texture->CopyMemoryToTexture2D(level, &data[0], format,
 						texture->Width(level), texture->Height(level), 0, 0,
-						texture->Width(level), texture->Height(level), 0, 0);
+						texture->Width(level), texture->Height(level));
 				}
 			}
 			break;
@@ -462,7 +462,7 @@ namespace KlayGE
 
 					texture->CopyMemoryToTexture3D(level, &data[0], format,
 						texture->Width(level), texture->Height(level), texture->Depth(level), 0, 0, 0,
-						texture->Width(level), texture->Height(level), texture->Depth(level), 0, 0, 0);
+						texture->Width(level), texture->Height(level), texture->Depth(level));
 				}
 			}
 			break;
@@ -501,7 +501,7 @@ namespace KlayGE
 						texture->CopyMemoryToTextureCube(static_cast<Texture::CubeFaces>(face),
 							level, &data[0], format,
 							texture->Width(level), texture->Height(level), 0, 0,
-							texture->Width(level), texture->Height(level), 0, 0);
+							texture->Width(level), texture->Height(level));
 					}
 				}
 			}
@@ -912,24 +912,23 @@ namespace KlayGE
 		}
 
 		void CopyMemoryToTexture1D(int /*level*/, void* /*data*/, PixelFormat /*pf*/,
-			uint32_t /*dst_width*/, uint32_t /*dst_xOffset*/, uint32_t /*src_width*/, uint32_t /*src_xOffset*/)
+			uint32_t /*dst_width*/, uint32_t /*dst_xOffset*/, uint32_t /*src_width*/)
 		{
 		}
 		void CopyMemoryToTexture2D(int /*level*/, void* /*data*/, PixelFormat /*pf*/,
 			uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/,
-			uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_xOffset*/, uint32_t /*src_yOffset*/)
+			uint32_t /*src_width*/, uint32_t /*src_height*/)
 		{
 		}
 		void CopyMemoryToTexture3D(int /*level*/, void* /*data*/, PixelFormat /*pf*/,
 			uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_depth*/,
 			uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/, uint32_t /*dst_zOffset*/,
-			uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_depth*/,
-			uint32_t /*src_xOffset*/, uint32_t /*src_yOffset*/, uint32_t /*src_zOffset*/)
+			uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_depth*/)
 		{
 		}
 		void CopyMemoryToTextureCube(CubeFaces /*face*/, int /*level*/, void* /*data*/, PixelFormat /*pf*/,
 			uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/,
-			uint32_t /*src_width*/, uint32_t /*dst_height*/, uint32_t /*src_xOffset*/, uint32_t /*src_yOffset*/)
+			uint32_t /*src_width*/, uint32_t /*dst_height*/)
 		{
 		}
 

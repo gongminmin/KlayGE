@@ -248,8 +248,8 @@ void Fractal::OnResize(uint32_t width, uint32_t height)
 
 	std::vector<Vector4> data(width * height);
 	std::fill(data.begin(), data.end(), Vector4(0, 0, 0, 0));
-	rendered_tex_[0]->CopyMemoryToTexture2D(0, &data[0], PF_ABGR32F, width, height, 0, 0, width, height, 0, 0);
-	rendered_tex_[1]->CopyMemoryToTexture2D(0, &data[0], PF_ABGR32F, width, height, 0, 0, width, height, 0, 0);
+	rendered_tex_[0]->CopyMemoryToTexture2D(0, &data[0], PF_ABGR32F, width, height, 0, 0, width, height);
+	rendered_tex_[1]->CopyMemoryToTexture2D(0, &data[0], PF_ABGR32F, width, height, 0, 0, width, height);
 }
 
 uint32_t Fractal::NumPasses() const

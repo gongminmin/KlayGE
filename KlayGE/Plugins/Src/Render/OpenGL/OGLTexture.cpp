@@ -352,7 +352,7 @@ namespace KlayGE
 
 					target.CopyMemoryToTexture2D(level, &data_out[0], format_,
 						target.Width(level), target.Height(level), 0, 0,
-						target.Width(level), target.Height(level), 0, 0);
+						target.Width(level), target.Height(level));
 				}
 			}
 			break;
@@ -436,7 +436,7 @@ namespace KlayGE
 	}
 
 	void OGLTexture::CopyMemoryToTexture1D(int level, void* data, PixelFormat pf,
-		uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width, uint32_t src_xOffset)
+		uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width)
 	{
 		BOOST_ASSERT(src_width != 0);
 		BOOST_ASSERT(dst_width != 0);
@@ -482,7 +482,7 @@ namespace KlayGE
 
 	void OGLTexture::CopyMemoryToTexture2D(int level, void* data, PixelFormat pf,
 		uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
-		uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset)
+		uint32_t src_width, uint32_t src_height)
 	{
 		BOOST_ASSERT(src_width != 0);
 		BOOST_ASSERT(src_height != 0);
@@ -531,8 +531,7 @@ namespace KlayGE
 	void OGLTexture::CopyMemoryToTexture3D(int level, void* data, PixelFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
 			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
-			uint32_t src_width, uint32_t src_height, uint32_t src_depth,
-			uint32_t src_xOffset, uint32_t src_yOffset, uint32_t src_zOffset)
+			uint32_t src_width, uint32_t src_height, uint32_t src_depth)
 	{
 		BOOST_ASSERT(src_width != 0);
 		BOOST_ASSERT(src_height != 0);
@@ -578,7 +577,7 @@ namespace KlayGE
 
 	void OGLTexture::CopyMemoryToTextureCube(CubeFaces face, int level, void* data, PixelFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
-			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset)
+			uint32_t src_width, uint32_t src_height)
 	{
 		BOOST_ASSERT(src_width != 0);
 		BOOST_ASSERT(src_height != 0);
