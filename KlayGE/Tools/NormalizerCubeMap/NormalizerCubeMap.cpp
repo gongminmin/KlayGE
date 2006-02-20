@@ -96,7 +96,7 @@ TexturePtr CreateCubeMap(int cube_size, std::string const & cube_name)
 		}
 
 		cube->CopyMemoryToTextureCube(static_cast<Texture::CubeFaces>(face), 0, &data[0], PF_XRGB8,
-			cube_size, cube_size, 0, 0, cube_size, cube_size, 0, 0);
+			cube_size, cube_size, 0, 0, cube_size, cube_size);
 	}
 
 	return cube;

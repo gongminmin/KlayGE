@@ -93,7 +93,7 @@ namespace
 	{
 		int const ASCII_IN_A_ROW = 16;
 
-		KlayGE::TexturePtr ascii_tex = LoadTexture(tex_name);
+		TexturePtr ascii_tex = LoadTexture(tex_name);
 		BOOST_ASSERT(PF_L8 == ascii_tex->Format());
 
 		std::vector<ascii_tile_type> ret(INPUT_NUM_ASCII);
@@ -118,7 +118,7 @@ namespace
 		return ret;
 	}
 
-	KlayGE::TexturePtr FillTexture(ascii_tiles_type const & ascii_lums)
+	TexturePtr FillTexture(ascii_tiles_type const & ascii_lums)
 	{
 		BOOST_ASSERT(OUTPUT_NUM_ASCII == ascii_lums.size());
 
@@ -136,7 +136,7 @@ namespace
 			}
 		}
 
-		KlayGE::TexturePtr ret = Context::Instance().RenderFactoryInstance().MakeTexture2D(OUTPUT_NUM_ASCII * ASCII_WIDTH,
+		TexturePtr ret = Context::Instance().RenderFactoryInstance().MakeTexture2D(OUTPUT_NUM_ASCII * ASCII_WIDTH,
 			ASCII_HEIGHT, 1, PF_L8);
 		ret->CopyMemoryToTexture2D(0, &temp_data[0], PF_L8, OUTPUT_NUM_ASCII * ASCII_WIDTH, ASCII_HEIGHT, 0, 0,
 			OUTPUT_NUM_ASCII * ASCII_WIDTH, ASCII_HEIGHT);
@@ -226,7 +226,7 @@ void AsciiArts::InitObjects()
 	renderQuad_.reset(new RenderQuad);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
-	KlayGE::InputActionMap actionMap;
+	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler(inputEngine);
@@ -256,7 +256,7 @@ uint32_t AsciiArts::NumPasses() const
 	}
 }
 
-void AsciiArts::InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action)
+void AsciiArts::InputHandler(InputEngine const & sender, InputAction const & action)
 {
 	switch (action.first)
 	{

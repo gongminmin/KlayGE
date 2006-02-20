@@ -62,7 +62,7 @@
 				OutputFile="$(OutDir)/GLCompatibility_d.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/GLCompatibility.pdb"
+				ProgramDatabaseFile="$(TargetDir)$(TargetName)_d.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>

@@ -158,7 +158,7 @@ void Refract::InitObjects()
 	fpcController_.Scalers(0.05f, 0.1f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
-	KlayGE::InputActionMap actionMap;
+	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler(inputEngine);
@@ -166,7 +166,7 @@ void Refract::InitObjects()
 	inputEngine.ActionMap(actionMap, input_handler, true);
 }
 
-void Refract::InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action)
+void Refract::InputHandler(InputEngine const & sender, InputAction const & action)
 {
 	switch (action.first)
 	{

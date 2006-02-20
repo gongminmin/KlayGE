@@ -45,6 +45,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="4"
 			/>
 			<Tool
@@ -61,7 +62,7 @@
 				OutputFile="$(OutDir)/AsciiArts_d.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/$(ProjectName)_d.pdb"
+				ProgramDatabaseFile="$(TargetDir)$(TargetName)_d.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
