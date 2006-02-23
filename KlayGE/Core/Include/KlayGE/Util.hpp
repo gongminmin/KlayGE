@@ -1,8 +1,11 @@
 // Util.hpp
 // KlayGE 实用函数库 头文件
-// Ver 3.0.0
+// Ver 3.2.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.2.0
+// 增加了copy_if (2006.2.23)
 //
 // 3.0.0
 // 增加了checked_cast (2005.9.26)
@@ -123,20 +126,20 @@ namespace KlayGE
 
 	uint32_t LastError();
 
-#ifndef _SELECT1ST2ND_SUPPORT
-	template <typename Pair>
-	struct select1st : public std::unary_function<Pair, typename Pair::first_type>
+#ifdef _SELECT1ST2ND_SUPPORT
+	template <typename pair_type>
+	struct select1st : public std::unary_function<pair_type const &, typename pair_type::first_type const &>
 	{
-		const typename Pair::first_type& operator()(const Pair& x) const
+		const typename pair_type::first_type& operator()(pair_type const & x) const
 		{
 			return x.first;
 		}
 	};
 
-	template <typename Pair>
-	struct select2nd : public std::unary_function<Pair, typename Pair::second_type>
+	template <typename pair_type>
+	struct select2nd : public std::unary_function<pair_type const &, typename pair_type::second_type const &>
 	{
-		const typename Pair::second_type& operator()(const Pair& x) const
+		const typename pair_type::second_type& operator()(pair_type const & x) const
 		{
 			return x.second;
 		}
@@ -145,6 +148,27 @@ namespace KlayGE
 	using std::select1st;
 	using std::select2nd;
 #endif		// _SELECT1ST2ND_SUPPORT
+
+#ifdef _COPYIF_SUPPORT
+	template<typename InputIterator, typename OutputIterator, typename Predicate>
+	OutputIterator copy_if(InputIterator first, InputIterator last,
+							OutputIterator dest_first,
+							Predicate p)
+	{
+		for (InputIterator iter = first; iter != last; ++ iter)
+		{
+			if (p(*iter))
+			{
+				*dest_first = *iter;
+				++ dest_first;
+			}
+		}
+
+		return dest_first;
+	}
+#else
+	using std::copyif;
+#endif
 }
 
 #endif		// _UTIL_HPP

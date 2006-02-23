@@ -2,7 +2,8 @@
 #define _CONFIG_HPP
 
 // 定义各种编译期选项
-// #define _SELECT1ST2ND_SUPPORT
+#define _SELECT1ST2ND_SUPPORT
+#define _COPYIF_SUPPORT
 
 #if defined(DEBUG) | defined(_DEBUG)
 #define KLAYGE_DEBUG
