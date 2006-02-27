@@ -19,6 +19,7 @@
 #ifndef DIRECTINPUT_VERSION
 #define DIRECTINPUT_VERSION 0x0800
 #endif
+#define NOMINMAX
 #include <dinput.h>
 
 #include <KlayGE/Input.hpp>

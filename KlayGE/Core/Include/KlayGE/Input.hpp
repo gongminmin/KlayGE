@@ -24,6 +24,7 @@
 #include <KlayGE/Vector.hpp>
 #include <KlayGE/MapVector.hpp>
 #include <KlayGE/Event.hpp>
+#include <KlayGE/Timer.hpp>
 
 #include <vector>
 #include <string>

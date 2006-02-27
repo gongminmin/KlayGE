@@ -149,7 +149,7 @@ namespace KlayGE
 		Matrix4 rot(MathLib::RotationMatrixYawPitchRoll(yaw * rotationScaler_,
 			pitch * rotationScaler_, roll * rotationScaler_));
 
-		Vector3 const viewVec = MathLib::TransformCoord(Vector3(rot(2, 0), rot(2, 1), rot(2, 2)), world_);
-		camera_->ViewParams(camera_->EyePos(), viewVec, camera_->UpVec());
+		Vector3 const viewVec = MathLib::TransformCoord(MathLib::TransformNormal(Vector3(0, 0, 1), world_), rot);
+		camera_->ViewParams(camera_->EyePos(), camera_->EyePos() + viewVec, camera_->UpVec());
 	}
 }
