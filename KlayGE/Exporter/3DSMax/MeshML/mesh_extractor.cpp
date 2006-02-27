@@ -104,7 +104,7 @@ namespace KlayGE
 		std::vector<int> pos_indices;
 		std::map<int, std::vector<int> > tex_indices;
 
-		Matrix2 uv_trans(TRUE);
+		std::vector<Matrix2> uv_transs;
 		Mtl* mtl = node->GetMtl();
 		if (mtl != NULL)
 		{
@@ -121,12 +121,14 @@ namespace KlayGE
 
 							Matrix3 uv_mat;
 							tex_map->GetUVTransform(uv_mat);
+							Matrix2 uv_trans(TRUE);
 							uv_trans.SetRow(0, Point2(uv_mat.GetRow(0)[0], uv_mat.GetRow(0)[1]));
 							uv_trans.SetRow(1, Point2(uv_mat.GetRow(1)[0], uv_mat.GetRow(1)[1]));
 							uv_trans.SetRow(2, Point2(uv_mat.GetRow(2)[0], uv_mat.GetRow(2)[1]));
 
 							obj_info.texture_slots.push_back(texture_slot_t(tstr_to_str(mtl->GetSubTexmapSlotName(i).data()),
 								tstr_to_str(bitmap_tex->GetMapName())));
+							uv_transs.push_back(uv_trans);
 						}
 					}
 				}
@@ -257,7 +259,7 @@ namespace KlayGE
 			for (std::map<int, std::vector<Point2> >::iterator uv_iter = texs.begin();
 				uv_iter != texs.end(); ++ uv_iter, ++ uv_layer)
 			{
-				Point2 tex = uv_iter->second[iter->tex_indices[uv_layer]] * uv_trans;
+				Point2 tex = uv_iter->second[iter->tex_indices[uv_layer]] * uv_transs[uv_layer];
 				obj_info.vertices[ver_index].tex.push_back(Point2(tex.x, 1 - tex.y));
 			}
 
