@@ -274,27 +274,34 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(d3dDevice_);
 
-		IDirect3DSurface9* backBuffer;
-		renderTarget->CustomAttribute("DDBACKBUFFER", &backBuffer);
-		TIF(d3dDevice_->SetRenderTarget(n, backBuffer));
-
-		IDirect3DSurface9* zBuffer;
-		renderTarget->CustomAttribute("D3DZBUFFER", &zBuffer);
-		if (zBuffer)
+		if (renderTarget)
 		{
-			this->DepthBufferDepthTest(true);
-			TIF(d3dDevice_->SetDepthStencilSurface(zBuffer));
+			IDirect3DSurface9* backBuffer;
+			renderTarget->CustomAttribute("DDBACKBUFFER", &backBuffer);
+			TIF(d3dDevice_->SetRenderTarget(n, backBuffer));
+
+			IDirect3DSurface9* zBuffer;
+			renderTarget->CustomAttribute("D3DZBUFFER", &zBuffer);
+			if (zBuffer)
+			{
+				this->DepthBufferDepthTest(true);
+				TIF(d3dDevice_->SetDepthStencilSurface(zBuffer));
+			}
+			else
+			{
+				this->DepthBufferDepthTest(false);
+			}
+
+			this->CullingMode(cullingMode_);
+
+			Viewport const & vp(renderTarget->GetViewport());
+			D3DVIEWPORT9 d3dvp = { vp.left, vp.top, vp.width, vp.height, 0, 1 };
+			TIF(d3dDevice_->SetViewport(&d3dvp));
 		}
 		else
 		{
-			this->DepthBufferDepthTest(false);
+			TIF(d3dDevice_->SetRenderTarget(n, NULL));
 		}
-
-		this->CullingMode(cullingMode_);
-
-		Viewport const & vp(renderTarget->GetViewport());
-		D3DVIEWPORT9 d3dvp = { vp.left, vp.top, vp.width, vp.height, 0, 1 };
-		TIF(d3dDevice_->SetViewport(&d3dvp));
 	}
 
 	// ¿ªÊ¼Ò»Ö¡

@@ -17,7 +17,6 @@
 #include <KlayGE/Show.hpp>
 #include <strmif.h>
 #include <control.h>
-#include <evcode.h>
 
 #include <string>
 

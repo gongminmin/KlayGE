@@ -175,7 +175,7 @@ namespace KlayGE
 							reinterpret_cast<LONG_PTR*>(&lParam2), 0));
 		if (SUCCEEDED(hr))
 		{
-			if (EC_COMPLETE == lEventCode)
+			if (1 == lEventCode)	// EC_COMPLETE
 			{
 				ret = true;
 			}

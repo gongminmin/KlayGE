@@ -127,7 +127,6 @@
 				EnableFunctionLevelLinking="true"
 				EnableEnhancedInstructionSet="1"
 				FloatingPointModel="2"
-				OpenMP="true"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
