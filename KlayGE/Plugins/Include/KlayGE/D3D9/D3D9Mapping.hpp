@@ -48,7 +48,7 @@ namespace KlayGE
 		static uint32_t Mapping(Sampler::TexAddressingMode mode);
 
 		static void Mapping(D3DPRIMITIVETYPE& primType, uint32_t& primCount, RenderLayout const & rl);
-		static void Mapping(std::vector<D3DVERTEXELEMENT9>& elements, size_t stream, RenderLayout const & rl);
+		static void Mapping(std::vector<D3DVERTEXELEMENT9>& elements, size_t stream, vertex_elements_type const & vet);
 
 		static RenderDeviceCaps Mapping(D3DCAPS9 const & d3d_caps);
 	};

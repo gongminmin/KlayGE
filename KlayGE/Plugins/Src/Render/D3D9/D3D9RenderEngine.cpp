@@ -376,7 +376,7 @@ namespace KlayGE
 			D3D9VertexBuffer& d3d9vb(*checked_cast<D3D9VertexBuffer*>(&stream));
 			TIF(d3dDevice_->SetStreamSource(number,
 				d3d9vb.D3D9Buffer().get(), 0,
-				static_cast<UINT>(rl.VertexSize(number))));
+				static_cast<UINT>(rl.InstanceSize())));
 
 			TIF(d3dDevice_->SetStreamSourceFreq(number, D3DSTREAMSOURCE_INSTANCEDATA | 1));
 		}

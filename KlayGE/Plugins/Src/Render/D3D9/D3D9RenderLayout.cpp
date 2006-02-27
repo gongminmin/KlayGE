@@ -58,22 +58,20 @@ namespace KlayGE
 			vertex_elems_type elems;
 			elems.reserve(vertex_streams_.size() + 1);
 
-			std::vector<GraphicsBufferPtr> vss;
 			for (uint32_t i = 0; i < this->NumVertexStreams(); ++ i)
 			{
-				vss.push_back(this->GetVertexStream(i));
+				GraphicsBuffer& stream = *this->GetVertexStream(i);
+
+				std::vector<D3DVERTEXELEMENT9> stream_elems;
+				D3D9Mapping::Mapping(stream_elems, i, this->VertexStreamFormat(i));
+				elems.insert(elems.end(), stream_elems.begin(), stream_elems.end());
 			}
 			if (instance_stream_.stream)
 			{
-				vss.push_back(instance_stream_.stream);
-			}
-
-			for (std::vector<GraphicsBufferPtr>::const_iterator iter = vss.begin(); iter != vss.end(); ++ iter)
-			{
-				GraphicsBuffer& stream(*(*iter));
+				GraphicsBuffer& stream = *instance_stream_.stream;
 
 				std::vector<D3DVERTEXELEMENT9> stream_elems;
-				D3D9Mapping::Mapping(stream_elems, iter - vss.begin(), *this);
+				D3D9Mapping::Mapping(stream_elems, this->NumVertexStreams(), this->InstanceStreamFormat());
 				elems.insert(elems.end(), stream_elems.begin(), stream_elems.end());
 			}
 

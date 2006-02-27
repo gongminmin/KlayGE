@@ -307,14 +307,14 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9Mapping::Mapping(std::vector<D3DVERTEXELEMENT9>& elements, size_t stream, RenderLayout const & rl)
+	void D3D9Mapping::Mapping(std::vector<D3DVERTEXELEMENT9>& elements, size_t stream, vertex_elements_type const & vet)
 	{
-		elements.resize(rl.VertexStreamFormat(stream).size());
+		elements.resize(vet.size());
 
 		uint16_t elem_offset = 0;
 		for (uint32_t i = 0; i < elements.size(); ++ i)
 		{
-			vertex_element const & vs_elem = rl.VertexStreamFormat(stream)[i];
+			vertex_element const & vs_elem = vet[i];
 
 			D3DVERTEXELEMENT9& element = elements[i];
 			element.Type		= D3DDECLTYPE_FLOAT1 - 1 + vs_elem.num_components;
