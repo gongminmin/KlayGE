@@ -94,39 +94,47 @@ namespace KlayGE
 		colorDepth_ = privateTex_->Bpp();
 		isDepthBuffered_ = depthStencilSurface_;
 
-		D3DSURFACE_DESC desc;
-		depthStencilSurface_->GetDesc(&desc);
-		switch (desc.Format)
+		if (isDepthBuffered_)
 		{
-		case D3DFMT_D15S1:
-			depthBits_ = 15;
-			stencilBits_ = 1;
-			break;
+			D3DSURFACE_DESC desc;
+			depthStencilSurface_->GetDesc(&desc);
+			switch (desc.Format)
+			{
+			case D3DFMT_D15S1:
+				depthBits_ = 15;
+				stencilBits_ = 1;
+				break;
 
-		case D3DFMT_D16:
-			depthBits_ = 16;
-			stencilBits_ = 0;
-			break;
+			case D3DFMT_D16:
+				depthBits_ = 16;
+				stencilBits_ = 0;
+				break;
 
-		case D3DFMT_D24X8:
-			depthBits_ = 24;
-			stencilBits_ = 0;
-			break;
+			case D3DFMT_D24X8:
+				depthBits_ = 24;
+				stencilBits_ = 0;
+				break;
 
-		case D3DFMT_D24S8:
-			depthBits_ = 24;
-			stencilBits_ = 8;
-			break;
+			case D3DFMT_D24S8:
+				depthBits_ = 24;
+				stencilBits_ = 8;
+				break;
 
-		case D3DFMT_D32:
-			depthBits_ = 32;
-			stencilBits_ = 0;
-			break;
+			case D3DFMT_D32:
+				depthBits_ = 32;
+				stencilBits_ = 0;
+				break;
 
-		default:
+			default:
+				depthBits_ = 0;
+				stencilBits_ = 0;
+				break;
+			}
+		}
+		else
+		{
 			depthBits_ = 0;
 			stencilBits_ = 0;
-			break;
 		}
 	}
 
@@ -150,17 +158,20 @@ namespace KlayGE
 		D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		boost::shared_ptr<IDirect3DDevice9> d3dDevice = renderEngine.D3DDevice();
 
-		IDirect3DSurface9* tempSurf;
+		IDirect3DSurface9* tempSurf = NULL;
 		D3DSURFACE_DESC tempDesc;
 
 		// Get the format of the depth stencil surface.
 		d3dDevice->GetDepthStencilSurface(&tempSurf);
-		tempSurf->GetDesc(&tempDesc);
-		tempSurf->Release();
+		if (tempSurf)
+		{
+			tempSurf->GetDesc(&tempDesc);
+			tempSurf->Release();
 
-		TIF(d3dDevice->CreateDepthStencilSurface(width_, height_, tempDesc.Format,
-			tempDesc.MultiSampleType, 0, FALSE, &tempSurf, NULL));
-		depthStencilSurface_ = MakeCOMPtr(tempSurf);
+			TIF(d3dDevice->CreateDepthStencilSurface(width_, height_, tempDesc.Format,
+				tempDesc.MultiSampleType, 0, FALSE, &tempSurf, NULL));
+			depthStencilSurface_ = MakeCOMPtr(tempSurf);
+		}
 	}
 
 	void D3D9RenderTexture::CustomAttribute(std::string const & name, void* pData)

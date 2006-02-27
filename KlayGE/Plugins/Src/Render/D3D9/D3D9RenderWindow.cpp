@@ -211,7 +211,7 @@ namespace KlayGE
 		d3dpp_.BackBufferHeight			= this->Height();
 		d3dpp_.hDeviceWindow			= hWnd_;
 		d3dpp_.SwapEffect				= D3DSWAPEFFECT_DISCARD;
-		d3dpp_.Flags					= D3DPRESENTFLAG_DISCARD_DEPTHSTENCIL;
+		d3dpp_.Flags					= isDepthBuffered_ ? D3DPRESENTFLAG_DISCARD_DEPTHSTENCIL : 0;
 		d3dpp_.PresentationInterval		= D3DPRESENT_INTERVAL_IMMEDIATE;
 
 		if (!this->FullScreen())
@@ -495,9 +495,12 @@ namespace KlayGE
 		d3dDevice_->GetRenderTarget(0, &renderSurface);
 		renderSurface_ = MakeCOMPtr(renderSurface);
 
-		IDirect3DSurface9* renderZBuffer;
-		d3dDevice_->GetDepthStencilSurface(&renderZBuffer);
-		renderZBuffer_ = MakeCOMPtr(renderZBuffer);
+		if (isDepthBuffered_)
+		{
+			IDirect3DSurface9* renderZBuffer;
+			d3dDevice_->GetDepthStencilSurface(&renderZBuffer);
+			renderZBuffer_ = MakeCOMPtr(renderZBuffer);
+		}
 	}
 
 	void D3D9RenderWindow::ResetDevice()
@@ -523,8 +526,11 @@ namespace KlayGE
 			d3dDevice_->UpdateSurface(renderSurface_.get(), NULL, surface, NULL);
 			renderSurface_ = MakeCOMPtr(surface);
 
-			d3dDevice_->GetDepthStencilSurface(&surface);
-			renderZBuffer_ = MakeCOMPtr(surface);
+			if (isDepthBuffered_)
+			{
+				d3dDevice_->GetDepthStencilSurface(&surface);
+				renderZBuffer_ = MakeCOMPtr(surface);
+			}
 
 			factory.OnResetDevice();
 		}
