@@ -899,6 +899,7 @@ namespace KlayGE
 		case TT_2D:
 			{
 				D3DSURFACE_DESC desc;
+				std::memset(&desc, 0, sizeof(desc));
 
 				numMipMaps_ = static_cast<uint16_t>(d3dTexture2D_->GetLevelCount());
 				BOOST_ASSERT(numMipMaps_ != 0);
@@ -923,6 +924,7 @@ namespace KlayGE
 		case TT_3D:
 			{
 				D3DVOLUME_DESC desc;
+				std::memset(&desc, 0, sizeof(desc));
 
 				numMipMaps_ = static_cast<uint16_t>(d3dTexture3D_->GetLevelCount());
 				BOOST_ASSERT(numMipMaps_ != 0);
@@ -947,6 +949,7 @@ namespace KlayGE
 		case TT_Cube:
 			{
 				D3DSURFACE_DESC desc;
+				std::memset(&desc, 0, sizeof(desc));
 
 				numMipMaps_ = static_cast<uint16_t>(d3dTextureCube_->GetLevelCount());
 				BOOST_ASSERT(numMipMaps_ != 0);
