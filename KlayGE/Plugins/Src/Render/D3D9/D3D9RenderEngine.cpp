@@ -393,7 +393,7 @@ namespace KlayGE
 		for (uint32_t i = num_vertex_stream; i < last_num_vertex_stream_; ++ i)
 		{
 			d3dDevice_->SetStreamSource(i, NULL, 0, 0);
-			d3dDevice_->SetStreamSourceFreq(i, 0);
+			d3dDevice_->SetStreamSourceFreq(i, 1);
 		}
 		last_num_vertex_stream_ = num_vertex_stream;
 
