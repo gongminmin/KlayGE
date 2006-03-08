@@ -115,6 +115,54 @@ namespace KlayGE
 		MapVector<RenderEffectParameterPtr, uint32_t> samplers_[2];
 	};
 
+	class D3D9RenderEffectParameterBool : public RenderEffectParameterConcrete<bool>, public D3D9Resource
+	{
+	public:
+		D3D9RenderEffectParameterBool(RenderEffect& effect, std::string const & name)
+			: RenderEffectParameterConcrete<bool>(effect, name)
+		{
+		}
+
+	private:
+		void DoFlush(bool const & value);
+
+	private:
+		virtual void DoOnLostDevice()
+		{
+		}
+		virtual void DoOnResetDevice()
+		{
+		}
+
+	private:
+		D3D9RenderEffectParameterBool(D3D9RenderEffectParameterBool const & rhs);
+		D3D9RenderEffectParameterBool& operator=(D3D9RenderEffectParameterBool const & rhs);
+	};
+
+	class D3D9RenderEffectParameterInt : public RenderEffectParameterConcrete<int>, public D3D9Resource
+	{
+	public:
+		D3D9RenderEffectParameterInt(RenderEffect& effect, std::string const & name)
+			: RenderEffectParameterConcrete<int>(effect, name)
+		{
+		}
+
+	private:
+		void DoFlush(int const & value);
+
+	private:
+		virtual void DoOnLostDevice()
+		{
+		}
+		virtual void DoOnResetDevice()
+		{
+		}
+
+	private:
+		D3D9RenderEffectParameterInt(D3D9RenderEffectParameterInt const & rhs);
+		D3D9RenderEffectParameterInt& operator=(D3D9RenderEffectParameterInt const & rhs);
+	};
+
 	class D3D9RenderEffectParameterFloat : public RenderEffectParameterConcrete<float>, public D3D9Resource
 	{
 	public:
@@ -211,30 +259,6 @@ namespace KlayGE
 		D3D9RenderEffectParameterMatrix4& operator=(D3D9RenderEffectParameterMatrix4 const & rhs);
 	};
 
-	class D3D9RenderEffectParameterInt : public RenderEffectParameterConcrete<int>, public D3D9Resource
-	{
-	public:
-		D3D9RenderEffectParameterInt(RenderEffect& effect, std::string const & name)
-			: RenderEffectParameterConcrete<int>(effect, name)
-		{
-		}
-
-	private:
-		void DoFlush(int const & value);
-
-	private:
-		virtual void DoOnLostDevice()
-		{
-		}
-		virtual void DoOnResetDevice()
-		{
-		}
-
-	private:
-		D3D9RenderEffectParameterInt(D3D9RenderEffectParameterInt const & rhs);
-		D3D9RenderEffectParameterInt& operator=(D3D9RenderEffectParameterInt const & rhs);
-	};
-
 	class D3D9RenderEffectParameterSampler : public RenderEffectParameterConcrete<SamplerPtr>, public D3D9Resource
 	{
 	public:
@@ -253,6 +277,54 @@ namespace KlayGE
 	private:
 		D3D9RenderEffectParameterSampler(D3D9RenderEffectParameterSampler const & rhs);
 		D3D9RenderEffectParameterSampler& operator=(D3D9RenderEffectParameterSampler const & rhs);
+	};
+
+	class D3D9RenderEffectParameterBoolArray : public RenderEffectParameterConcrete<std::vector<bool> >, public D3D9Resource
+	{
+	public:
+		D3D9RenderEffectParameterBoolArray(RenderEffect& effect, std::string const & name)
+			: RenderEffectParameterConcrete<std::vector<bool> >(effect, name)
+		{
+		}
+
+	private:
+		void DoFlush(std::vector<bool> const & value);
+
+	private:
+		virtual void DoOnLostDevice()
+		{
+		}
+		virtual void DoOnResetDevice()
+		{
+		}
+
+	private:
+		D3D9RenderEffectParameterBoolArray(D3D9RenderEffectParameterBoolArray const & rhs);
+		D3D9RenderEffectParameterBoolArray& operator=(D3D9RenderEffectParameterBoolArray const & rhs);
+	};
+
+	class D3D9RenderEffectParameterIntArray : public RenderEffectParameterConcrete<std::vector<int> >, public D3D9Resource
+	{
+	public:
+		D3D9RenderEffectParameterIntArray(RenderEffect& effect, std::string const & name)
+			: RenderEffectParameterConcrete<std::vector<int> >(effect, name)
+		{
+		}
+
+	private:
+		void DoFlush(std::vector<int> const & value);
+
+	private:
+		virtual void DoOnLostDevice()
+		{
+		}
+		virtual void DoOnResetDevice()
+		{
+		}
+
+	private:
+		D3D9RenderEffectParameterIntArray(D3D9RenderEffectParameterIntArray const & rhs);
+		D3D9RenderEffectParameterIntArray& operator=(D3D9RenderEffectParameterIntArray const & rhs);
 	};
 
 	class D3D9RenderEffectParameterFloatArray : public RenderEffectParameterConcrete<std::vector<float> >, public D3D9Resource
@@ -325,30 +397,6 @@ namespace KlayGE
 	private:
 		D3D9RenderEffectParameterMatrix4Array(D3D9RenderEffectParameterMatrix4Array const & rhs);
 		D3D9RenderEffectParameterMatrix4Array& operator=(D3D9RenderEffectParameterMatrix4Array const & rhs);
-	};
-
-	class D3D9RenderEffectParameterIntArray : public RenderEffectParameterConcrete<std::vector<int> >, public D3D9Resource
-	{
-	public:
-		D3D9RenderEffectParameterIntArray(RenderEffect& effect, std::string const & name)
-			: RenderEffectParameterConcrete<std::vector<int> >(effect, name)
-		{
-		}
-
-	private:
-		void DoFlush(std::vector<int> const & value);
-
-	private:
-		virtual void DoOnLostDevice()
-		{
-		}
-		virtual void DoOnResetDevice()
-		{
-		}
-
-	private:
-		D3D9RenderEffectParameterIntArray(D3D9RenderEffectParameterIntArray const & rhs);
-		D3D9RenderEffectParameterIntArray& operator=(D3D9RenderEffectParameterIntArray const & rhs);
 	};
 }
 

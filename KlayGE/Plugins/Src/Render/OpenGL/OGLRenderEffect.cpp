@@ -73,6 +73,16 @@ namespace KlayGE
 		CGtype param_base_type = cgGetParameterBaseType(param);
 		CGparameterclass param_class = cgGetParameterClass(param);
 
+		if ((CG_PARAMETERCLASS_SCALAR == param_class) && (CG_BOOL == param_type))
+		{
+			return RenderEffectParameterPtr(new OGLRenderEffectParameterBool(*this, name, param));
+		}
+
+		if ((CG_PARAMETERCLASS_SCALAR == param_class) && (CG_INT == param_type))
+		{
+			return RenderEffectParameterPtr(new OGLRenderEffectParameterInt(*this, name, param));
+		}
+
 		if ((CG_PARAMETERCLASS_SCALAR == param_class) && (CG_FLOAT == param_type))
 		{
 			return RenderEffectParameterPtr(new OGLRenderEffectParameterFloat(*this, name, param));
@@ -93,14 +103,19 @@ namespace KlayGE
 			return RenderEffectParameterPtr(new OGLRenderEffectParameterMatrix4(*this, name, param));
 		}
 
-		if ((CG_PARAMETERCLASS_SCALAR == param_class) && (CG_INT == param_type))
-		{
-			return RenderEffectParameterPtr(new OGLRenderEffectParameterInt(*this, name, param));
-		}
-
 		if (CG_PARAMETERCLASS_SAMPLER == param_class)
 		{
 			return RenderEffectParameterPtr(new OGLRenderEffectParameterSampler(*this, name, param));
+		}
+
+		if ((CG_PARAMETERCLASS_ARRAY == param_class) && (CG_ARRAY == param_type) && (CG_BOOL == param_base_type))
+		{
+			return RenderEffectParameterPtr(new OGLRenderEffectParameterBoolArray(*this, name, param));
+		}
+
+		if ((CG_PARAMETERCLASS_ARRAY == param_class) && (CG_ARRAY == param_type) && (CG_INT == param_base_type))
+		{
+			return RenderEffectParameterPtr(new OGLRenderEffectParameterIntArray(*this, name, param));
 		}
 
 		if ((CG_PARAMETERCLASS_ARRAY == param_class) && (CG_ARRAY == param_type) && (CG_FLOAT == param_base_type))
@@ -116,11 +131,6 @@ namespace KlayGE
 		if ((CG_PARAMETERCLASS_ARRAY == param_class) && (CG_ARRAY == param_type) && (CG_FLOAT4x4 == param_base_type))
 		{
 			return RenderEffectParameterPtr(new OGLRenderEffectParameterMatrix4Array(*this, name, param));
-		}
-
-		if ((CG_PARAMETERCLASS_ARRAY == param_class) && (CG_ARRAY == param_type) && (CG_INT == param_base_type))
-		{
-			return RenderEffectParameterPtr(new OGLRenderEffectParameterIntArray(*this, name, param));
 		}
 
 		BOOST_ASSERT(false);

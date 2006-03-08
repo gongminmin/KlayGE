@@ -1,8 +1,11 @@
 // RenderEffect.cpp
 // KlayGE 渲染效果类 实现文件
-// Ver 3.0.0
+// Ver 3.2.0
 // 版权所有(C) 龚敏敏, 2003-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.2.0
+// 支持了bool类型 (2006.3.8)
 //
 // 3.0.0
 // 增加了RenderTechnique和RenderPass (2005.9.4)
@@ -145,6 +148,14 @@ namespace KlayGE
 		{
 		}
 
+		RenderEffectParameter& operator=(bool const & /*value*/)
+		{
+			return *this;
+		}
+		RenderEffectParameter& operator=(int const & /*value*/)
+		{
+			return *this;
+		}
 		RenderEffectParameter& operator=(float const & /*value*/)
 		{
 			return *this;
@@ -161,11 +172,15 @@ namespace KlayGE
 		{
 			return *this;
 		}
-		RenderEffectParameter& operator=(int const & /*value*/)
+		RenderEffectParameter& operator=(SamplerPtr const & /*value*/)
 		{
 			return *this;
 		}
-		RenderEffectParameter& operator=(SamplerPtr const & /*value*/)
+		RenderEffectParameter& operator=(std::vector<bool> const & /*value*/)
+		{
+			return *this;
+		}
+		RenderEffectParameter& operator=(std::vector<int> const & /*value*/)
 		{
 			return *this;
 		}
@@ -181,11 +196,15 @@ namespace KlayGE
 		{
 			return *this;
 		}
-		RenderEffectParameter& operator=(std::vector<int> const & /*value*/)
+
+		void Value(bool& val) const
 		{
-			return *this;
+			val = false;
 		}
-		
+		void Value(int& val) const
+		{
+			val = 0;
+		}
 		void Value(float& val) const
 		{
 			val = 0;
@@ -202,13 +221,17 @@ namespace KlayGE
 		{
 			val = Matrix4::Identity();
 		}
-		void Value(int& val) const
-		{
-			val = 0;
-		}
 		void Value(SamplerPtr& val) const
 		{
 			val = SamplerPtr();
+		}
+		void Value(std::vector<bool>& val) const
+		{
+			val.clear();
+		}
+		void Value(std::vector<int>& val) const
+		{
+			val.clear();
 		}
 		void Value(std::vector<float>& val) const
 		{
@@ -223,10 +246,6 @@ namespace KlayGE
 			val.clear();
 		}
 		void Value(std::vector<Matrix4>& val) const
-		{
-			val.clear();
-		}
-		void Value(std::vector<int>& val) const
 		{
 			val.clear();
 		}
@@ -261,6 +280,19 @@ namespace KlayGE
 		return name_;
 	}
 
+	
+	RenderEffectParameter& RenderEffectParameter::operator=(bool const & value)
+	{
+		BOOST_ASSERT(false);
+		return *this;
+	}
+
+	RenderEffectParameter& RenderEffectParameter::operator=(int const & value)
+	{
+		BOOST_ASSERT(false);
+		return *this;
+	}
+
 	RenderEffectParameter& RenderEffectParameter::operator=(float const & value)
 	{
 		BOOST_ASSERT(false);
@@ -285,13 +317,19 @@ namespace KlayGE
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(int const & value)
+	RenderEffectParameter& RenderEffectParameter::operator=(SamplerPtr const & value)
 	{
 		BOOST_ASSERT(false);
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(SamplerPtr const & value)
+	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<bool> const & value)
+	{
+		BOOST_ASSERT(false);
+		return *this;
+	}
+
+	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<int> const & value)
 	{
 		BOOST_ASSERT(false);
 		return *this;
@@ -315,10 +353,16 @@ namespace KlayGE
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<int> const & value)
+	void RenderEffectParameter::Value(bool& val) const
 	{
 		BOOST_ASSERT(false);
-		return *this;
+		val = false;
+	}
+
+	void RenderEffectParameter::Value(int& val) const
+	{
+		BOOST_ASSERT(false);
+		val = 0;
 	}
 
 	void RenderEffectParameter::Value(float& val) const
@@ -345,16 +389,22 @@ namespace KlayGE
 		val = Matrix4::Identity();
 	}
 
-	void RenderEffectParameter::Value(int& val) const
-	{
-		BOOST_ASSERT(false);
-		val = 0;
-	}
-
 	void RenderEffectParameter::Value(SamplerPtr& val) const
 	{
 		BOOST_ASSERT(false);
 		val = SamplerPtr();
+	}
+
+	void RenderEffectParameter::Value(std::vector<bool>& val) const
+	{
+		BOOST_ASSERT(false);
+		val.clear();
+	}
+
+	void RenderEffectParameter::Value(std::vector<int>& val) const
+	{
+		BOOST_ASSERT(false);
+		val.clear();
 	}
 
 	void RenderEffectParameter::Value(std::vector<float>& val) const
@@ -375,10 +425,14 @@ namespace KlayGE
 		val.clear();
 	}
 
-	void RenderEffectParameter::Value(std::vector<int>& val) const
+	void RenderEffectParameter::DoFlush(bool const & value)
 	{
 		BOOST_ASSERT(false);
-		val.clear();
+	}
+
+	void RenderEffectParameter::DoFlush(int const & value)
+	{
+		BOOST_ASSERT(false);
 	}
 
 	void RenderEffectParameter::DoFlush(float const & value)
@@ -401,12 +455,17 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void RenderEffectParameter::DoFlush(int const & value)
+	void RenderEffectParameter::DoFlush(SamplerPtr const & value)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void RenderEffectParameter::DoFlush(SamplerPtr const & value)
+	void RenderEffectParameter::DoFlush(std::vector<bool> const & value)
+	{
+		BOOST_ASSERT(false);
+	}
+
+	void RenderEffectParameter::DoFlush(std::vector<int> const & value)
 	{
 		BOOST_ASSERT(false);
 	}
@@ -422,11 +481,6 @@ namespace KlayGE
 	}
 
 	void RenderEffectParameter::DoFlush(std::vector<Matrix4> const & value)
-	{
-		BOOST_ASSERT(false);
-	}
-
-	void RenderEffectParameter::DoFlush(std::vector<int> const & value)
 	{
 		BOOST_ASSERT(false);
 	}
