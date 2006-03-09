@@ -148,6 +148,22 @@ namespace KlayGE
 		OGLRenderEffectParameterFloat& operator=(OGLRenderEffectParameterFloat const & rhs);
 	};
 
+	class OGLRenderEffectParameterVector2 : public OGLRenderEffectParameter<Vector2>
+	{
+	public:
+		OGLRenderEffectParameterVector2(RenderEffect& effect, std::string const & name, CGparameter param)
+			: OGLRenderEffectParameter<Vector2>(effect, name, param)
+		{
+		}
+
+	private:
+		void DoFlush(Vector2 const & value);
+
+	private:
+		OGLRenderEffectParameterVector2(OGLRenderEffectParameterVector2 const & rhs);
+		OGLRenderEffectParameterVector2& operator=(OGLRenderEffectParameterVector2 const & rhs);
+	};
+
 	class OGLRenderEffectParameterVector3 : public OGLRenderEffectParameter<Vector3>
 	{
 	public:

@@ -174,6 +174,7 @@ namespace KlayGE
 		virtual RenderEffectParameter& operator=(bool const & value);
 		virtual RenderEffectParameter& operator=(int const & value);
 		virtual RenderEffectParameter& operator=(float const & value);
+		virtual RenderEffectParameter& operator=(Vector2 const & value);
 		virtual RenderEffectParameter& operator=(Vector3 const & value);
 		virtual RenderEffectParameter& operator=(Vector4 const & value);
 		virtual RenderEffectParameter& operator=(Matrix4 const & value);
@@ -187,6 +188,7 @@ namespace KlayGE
 		virtual void Value(bool& val) const;
 		virtual void Value(int& val) const;
 		virtual void Value(float& val) const;
+		virtual void Value(Vector2& val) const;
 		virtual void Value(Vector3& val) const;
 		virtual void Value(Vector4& val) const;
 		virtual void Value(Matrix4& val) const;
@@ -203,6 +205,7 @@ namespace KlayGE
 		virtual void DoFlush(bool const & value);
 		virtual void DoFlush(int const & value);
 		virtual void DoFlush(float const & value);
+		virtual void DoFlush(Vector2 const & value);
 		virtual void DoFlush(Vector3 const & value);
 		virtual void DoFlush(Vector4 const & value);
 		virtual void DoFlush(Matrix4 const & value);

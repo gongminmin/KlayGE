@@ -88,6 +88,11 @@ namespace KlayGE
 			return RenderEffectParameterPtr(new OGLRenderEffectParameterFloat(*this, name, param));
 		}
 
+		if ((CG_PARAMETERCLASS_VECTOR == param_class) && (CG_FLOAT2 == param_type))
+		{
+			return RenderEffectParameterPtr(new OGLRenderEffectParameterVector2(*this, name, param));
+		}
+
 		if ((CG_PARAMETERCLASS_VECTOR == param_class) && (CG_FLOAT3 == param_type))
 		{
 			return RenderEffectParameterPtr(new OGLRenderEffectParameterVector3(*this, name, param));
@@ -198,6 +203,11 @@ namespace KlayGE
 	void OGLRenderEffectParameterFloat::DoFlush(float const & value)
 	{
 		cgSetParameter1f(param_, value);
+	}
+
+	void OGLRenderEffectParameterVector2::DoFlush(Vector2 const & value)
+	{
+		cgSetParameter2fv(param_, &value[0]);
 	}
 
 	void OGLRenderEffectParameterVector3::DoFlush(Vector3 const & value)

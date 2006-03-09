@@ -187,6 +187,30 @@ namespace KlayGE
 		D3D9RenderEffectParameterFloat& operator=(D3D9RenderEffectParameterFloat const & rhs);
 	};
 
+	class D3D9RenderEffectParameterVector2 : public RenderEffectParameterConcrete<Vector2>, public D3D9Resource
+	{
+	public:
+		D3D9RenderEffectParameterVector2(RenderEffect& effect, std::string const & name)
+			: RenderEffectParameterConcrete<Vector2>(effect, name)
+		{
+		}
+
+	private:
+		void DoFlush(Vector2 const & value);
+
+	private:
+		virtual void DoOnLostDevice()
+		{
+		}
+		virtual void DoOnResetDevice()
+		{
+		}
+
+	private:
+		D3D9RenderEffectParameterVector2(D3D9RenderEffectParameterVector2 const & rhs);
+		D3D9RenderEffectParameterVector2& operator=(D3D9RenderEffectParameterVector2 const & rhs);
+	};
+
 	class D3D9RenderEffectParameterVector3 : public RenderEffectParameterConcrete<Vector3>, public D3D9Resource
 	{
 	public:
