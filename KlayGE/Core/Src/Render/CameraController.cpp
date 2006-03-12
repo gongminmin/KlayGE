@@ -126,7 +126,10 @@ namespace KlayGE
 		world_ = MathLib::Inverse(camera_->ViewMatrix());
 
 		elapsed_time_ = static_cast<float>(timer_.elapsed());
-		timer_.restart();
+		if (elapsed_time_ > 0.01f)
+		{
+			timer_.restart();
+		}
 	}
 
 	void FirstPersonCameraController::Move(float x, float y, float z)
@@ -136,8 +139,10 @@ namespace KlayGE
 		Vector3 movement(x, y, z);
 		movement *= moveScaler_;
 
-		Vector3 const & viewVec = camera_->ViewVec();
-		Vector3 const eyePos = MathLib::TransformCoord(movement, world_);
+		Vector3 eyePos = camera_->EyePos();
+		Vector3 viewVec = camera_->ViewVec();
+
+		eyePos = MathLib::TransformCoord(movement, world_);
 
 		camera_->ViewParams(eyePos, eyePos + viewVec, camera_->UpVec());
 	}
@@ -149,7 +154,8 @@ namespace KlayGE
 		Matrix4 rot(MathLib::RotationMatrixYawPitchRoll(yaw * rotationScaler_,
 			pitch * rotationScaler_, roll * rotationScaler_));
 
-		Vector3 const viewVec = MathLib::TransformCoord(MathLib::TransformNormal(Vector3(0, 0, 1), world_), rot);
-		camera_->ViewParams(camera_->EyePos(), camera_->EyePos() + viewVec, camera_->UpVec());
+		camera_->ViewParams(camera_->EyePos(),
+			MathLib::TransformCoord(Vector3(rot(2, 0), rot(2, 1), rot(2, 2)), world_),
+			camera_->UpVec());
 	}
 }
