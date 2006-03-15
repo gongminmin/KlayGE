@@ -130,4 +130,11 @@ namespace KlayGE
 			}
 		}
 	}
+
+	// 获取设备数据，缓冲状态
+	/////////////////////////////////////////////////////////////////////////////////
+	void DInputDevice::DeviceData(size_t size, DIDEVICEOBJECTDATA& rgdod, uint32_t& num_elements)
+	{
+		device_->GetDeviceData(size, &rgdod, &num_elements, 0);
+	}
 }

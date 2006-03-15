@@ -45,6 +45,9 @@ namespace KlayGE
 		dipdw.diph.dwHow		= DIPH_DEVICE;
 		dipdw.dwData			= DIPROPAXISMODE_REL;
 		this->Property(DIPROP_AXISMODE, dipdw.diph);
+
+		dipdw.dwData			= 16;
+		this->Property(DIPROP_BUFFERSIZE, dipdw.diph);
 	}
 
 	// Éè±¸Ãû³Æ
@@ -73,12 +76,41 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	void DInputMouse::UpdateInputs()
 	{
+		for (;;)
+		{
+			DIDEVICEOBJECTDATA od;
+			uint32_t num_elements = 1;
+
+			HRESULT hr = device_->GetDeviceData(sizeof(od), &od, &num_elements, 0);
+			if ((DIERR_INPUTLOST == hr) || (DIERR_NOTACQUIRED == hr))
+			{
+				this->Acquire();
+				return;
+			}
+
+			// Unable to read data or no data available
+			if (FAILED(hr))
+			{
+				break;
+			}
+
+			if (0 == num_elements)
+			{
+				break;
+			}
+
+			if ((od.dwOfs >= DIMOFS_BUTTON0) && (od.dwOfs <= DIMOFS_BUTTON7))
+			{
+				buttons_[od.dwOfs - DIMOFS_BUTTON0] = true;
+			}
+		}
+
 		DIMOUSESTATE diMouseState;
 		this->DeviceState(&diMouseState, sizeof(diMouseState));
 
 		pos_ = Vector_T<long, 3>(diMouseState.lX, diMouseState.lY, diMouseState.lZ);
 
-		std::transform(diMouseState.rgbButtons, diMouseState.rgbButtons + buttons_.size(),
-			buttons_.begin(), boost::lambda::_1 != 0);
+		//std::transform(diMouseState.rgbButtons, diMouseState.rgbButtons + buttons_.size(),
+		//	buttons_.begin(), boost::lambda::_1 != 0);
 	}
 }

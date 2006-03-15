@@ -47,8 +47,9 @@ namespace KlayGE
 
 		void Poll();
 		void DeviceState(void* data, size_t size);
+		void DeviceData(size_t size, DIDEVICEOBJECTDATA& rgdod, uint32_t& num_elements);
 
-	private:
+	protected:
 		boost::shared_ptr<IDirectInputDevice8W> device_;
 	};
 }
