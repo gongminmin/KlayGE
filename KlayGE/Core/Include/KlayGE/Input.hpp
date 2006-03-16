@@ -360,7 +360,7 @@ namespace KlayGE
 	protected:
 		Vector_T<long, 3> pos_;
 
-		typedef boost::array<bool, 4> ButtonsType;
+		typedef boost::array<bool, 8> ButtonsType;
 		ButtonsType buttons_;
 	};
 

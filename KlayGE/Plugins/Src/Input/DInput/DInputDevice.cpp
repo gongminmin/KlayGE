@@ -133,8 +133,20 @@ namespace KlayGE
 
 	// 获取设备数据，缓冲状态
 	/////////////////////////////////////////////////////////////////////////////////
-	void DInputDevice::DeviceData(size_t size, DIDEVICEOBJECTDATA& rgdod, uint32_t& num_elements)
+	void DInputDevice::DeviceData(size_t size, DIDEVICEOBJECTDATA* rgdod, uint32_t& num_elements)
 	{
-		device_->GetDeviceData(size, &rgdod, &num_elements, 0);
+		for (;;)
+		{
+			HRESULT hr = device_->GetDeviceData(size, rgdod, &num_elements, 0);
+			if ((DIERR_INPUTLOST == hr) || (DIERR_NOTACQUIRED == hr))
+			{
+				this->Acquire();
+			}
+			else
+			{
+				BOOST_ASSERT(DIERR_NOTINITIALIZED != hr);
+				break;
+			}
+		}
 	}
 }
