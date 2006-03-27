@@ -122,6 +122,7 @@
 				Name="VCCLCompilerTool"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;MESHML_EXPORTS"
 				RuntimeLibrary="0"
+				ForceConformanceInForLoopScope="false"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
