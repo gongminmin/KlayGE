@@ -60,7 +60,7 @@ namespace KlayGE
 		{
 			return meshes_[id];
 		}
-		size_t NumMesh() const
+		size_t NumMeshes() const
 		{
 			return meshes_.size();
 		}
@@ -137,6 +137,16 @@ namespace KlayGE
 		virtual std::wstring const & Name() const;
 
 		virtual void AddToRenderQueue();
+
+		size_t NumVertices() const
+		{
+			return xyzs_.size();
+		}
+
+		size_t NumTriangles() const
+		{
+			return indices_.size() / 3;
+		}
 
 		template <typename ForwardIterator>
 		void AssignXYZs(ForwardIterator first, ForwardIterator last)

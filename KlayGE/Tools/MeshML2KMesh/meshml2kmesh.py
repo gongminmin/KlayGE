@@ -124,12 +124,19 @@ def parse_model(dom):
 if __name__ == '__main__':
 	import sys
 
-	if len(sys.argv) < 3:
-		print "Usage: meshml2kmesh.py src.meshml dst.kmesh"
+	if len(sys.argv) < 2:
+		print "Usage: meshml2kmesh.py src.meshml [dst.kmesh]"
 		sys.exit()
 
-	in_file_name = sys.argv[1]
-	out_file_name = sys.argv[2]
+	in_file_name = sys.argv[1]	
+	if len(sys.argv) == 2:
+		index = in_file_name.rfind('.')
+		if index != -1:
+			out_file_name = in_file_name[0 : index] + ".kmesh"
+		else:
+			out_file_name = in_file_name + ".kmesh"
+	else:
+		out_file_name = sys.argv[2]
 
 	print "Prasing:", in_file_name
 	from xml.dom.minidom import parse
