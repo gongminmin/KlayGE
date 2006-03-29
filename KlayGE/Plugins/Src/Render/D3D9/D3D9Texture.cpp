@@ -459,6 +459,7 @@ namespace KlayGE
 
 	void D3D9Texture::CopyToMemory1D(int level, void* data)
 	{
+		BOOST_ASSERT(level < numMipMaps_);
 		BOOST_ASSERT(data != NULL);
 
 		this->CopyToMemory2D(level, data);
@@ -466,7 +467,9 @@ namespace KlayGE
 
 	void D3D9Texture::CopyToMemory2D(int level, void* data)
 	{
+		BOOST_ASSERT(level < numMipMaps_);
 		BOOST_ASSERT(data != NULL);
+		BOOST_ASSERT((TT_1D == type_) || (TT_2D == type_));
 
 		boost::shared_ptr<IDirect3DSurface9> surface;
 		{
@@ -490,7 +493,9 @@ namespace KlayGE
 
 	void D3D9Texture::CopyToMemory3D(int level, void* data)
 	{
+		BOOST_ASSERT(level < numMipMaps_);
 		BOOST_ASSERT(data != NULL);
+		BOOST_ASSERT(TT_3D == type_);
 
 		D3DLOCKED_BOX d3d_box;
 		d3dTexture3D_->LockBox(level, &d3d_box, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY);
@@ -519,7 +524,9 @@ namespace KlayGE
 
 	void D3D9Texture::CopyToMemoryCube(CubeFaces face, int level, void* data)
 	{
+		BOOST_ASSERT(level < numMipMaps_);
 		BOOST_ASSERT(data != NULL);
+		BOOST_ASSERT(TT_Cube == type_);
 
 		boost::shared_ptr<IDirect3DSurface9> surface;
 		{
