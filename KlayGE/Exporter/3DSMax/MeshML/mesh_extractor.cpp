@@ -97,6 +97,8 @@ namespace KlayGE
 		{
 			flip_normals = !flip_normals;
 		}
+		Matrix3 normal_matrix = obj_matrix;
+		normal_matrix.NoTrans();
 
 		std::vector<Point3> positions;
 		std::vector<Point3> normals;
@@ -245,7 +247,7 @@ namespace KlayGE
 			obj_info.vertices[ver_index].pos.y = pos.z;
 			obj_info.vertices[ver_index].pos.z = pos.y;
 
-			Point3 normal = normals[iter->pos_index] * obj_matrix;
+			Point3 normal = normals[iter->pos_index] * normal_matrix;
 			if (flip_normals)
 			{
 				normal = -normal;
