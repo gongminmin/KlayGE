@@ -69,6 +69,18 @@ namespace KlayGE
 
 		if (ST_Geometry == type)
 		{
+			for (size_t i = 0; i < vertex_streams_.size(); ++ i)
+			{
+				if (vertex_streams_[i].format == vet)
+				{
+					vertex_streams_[i].stream = buffer;
+					vertex_streams_[i].vertex_size = size;
+					vertex_streams_[i].type = type;
+					vertex_streams_[i].freq = freq;
+					return;
+				}
+			}
+
 			StreamUnit vs;
 			vs.stream = buffer;
 			vs.format = vet;
@@ -79,7 +91,6 @@ namespace KlayGE
 		}
 		else
 		{
-			BOOST_ASSERT(!instance_stream_.stream);
 			instance_stream_.stream = buffer;
 			instance_stream_.format = vet;
 			instance_stream_.vertex_size = size;
