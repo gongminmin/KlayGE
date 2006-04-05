@@ -81,7 +81,7 @@ namespace KlayGE
 		void DepthBufferDepthTest(bool depthTest);
 		void DepthBufferDepthWrite(bool depthWrite);
 		void DepthBufferFunction(CompareFunction depthFunction);
-		void DepthBias(uint16_t bias);
+		void DepthBias(float slope_scale, float bias);
 
 		void AlphaTest(bool enabled);
 		void AlphaFunction(CompareFunction alphaFunction, float refValue);

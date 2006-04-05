@@ -522,11 +522,12 @@ namespace KlayGE
 
 	// 设置深度偏移
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DepthBias(uint16_t bias)
+	void D3D9RenderEngine::DepthBias(float slope_scale, float bias)
 	{
 		BOOST_ASSERT(d3dDevice_);
 
-		TIF(d3dDevice_->SetRenderState(D3DRS_DEPTHBIAS, bias));
+		TIF(d3dDevice_->SetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, *reinterpret_cast<DWORD*>(&slope_scale)));
+		TIF(d3dDevice_->SetRenderState(D3DRS_DEPTHBIAS, *reinterpret_cast<DWORD*>(&bias)));
 	}
 
 	// 打开/关闭Alpha测试

@@ -95,7 +95,7 @@ namespace KlayGE
 		void DepthBufferFunction(CompareFunction /*depthFunction*/)
 		{
 		}
-		void DepthBias(uint16_t /*bias*/)
+		void DepthBias(float /*slope_scale*/, float /*bias*/)
 		{
 		}
 

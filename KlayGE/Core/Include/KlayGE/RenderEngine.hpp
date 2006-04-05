@@ -173,7 +173,7 @@ namespace KlayGE
 		virtual void DepthBufferDepthTest(bool enabled) = 0;
 		virtual void DepthBufferDepthWrite(bool enabled) = 0;
 		virtual void DepthBufferFunction(CompareFunction depthFunction) = 0;
-		virtual void DepthBias(uint16_t bias) = 0;
+		virtual void DepthBias(float slope_scale, float bias) = 0;
 
 		virtual void AlphaTest(bool enabled) = 0;
 		virtual void AlphaFunction(CompareFunction alphaFunction, float refValue) = 0;

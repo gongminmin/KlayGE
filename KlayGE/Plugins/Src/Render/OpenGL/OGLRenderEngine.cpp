@@ -503,13 +503,13 @@ namespace KlayGE
 
 	// 设置深度偏移
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::DepthBias(uint16_t bias)
+	void OGLRenderEngine::DepthBias(float slope_scale, float bias)
 	{
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glEnable(GL_POLYGON_OFFSET_POINT);
 		glEnable(GL_POLYGON_OFFSET_LINE);
 		// Bias is in {0, 16}, scale the unit addition appropriately
-		glPolygonOffset(1.0f, bias);
+		glPolygonOffset(slope_scale, bias);
 	}
 
 	// 打开/关闭Alpha测试
