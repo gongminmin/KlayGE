@@ -239,7 +239,7 @@ namespace KlayGE
 		TextureUsage Usage() const;
 		virtual void Usage(TextureUsage usage) = 0;
 
-        // Returns the width of the texture.
+		// Returns the width of the texture.
 		virtual uint32_t Width(int level) const = 0;
 		// Returns the height of the texture.
 		virtual uint32_t Height(int level) const = 0;
