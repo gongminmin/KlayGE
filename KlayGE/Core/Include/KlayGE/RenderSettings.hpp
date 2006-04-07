@@ -14,6 +14,7 @@
 #define _RENDERSETTINGS_HPP
 
 #define BOOST_MEM_FN_ENABLE_STDCALL
+#pragma warning(disable : 4189)
 #include <boost/mem_fn.hpp>
 #include <boost/function.hpp>
 #include <KlayGE/RenderDeviceCaps.hpp>

@@ -30,6 +30,7 @@
 #include <KlayGE/Sampler.hpp>
 
 #include <boost/assert.hpp>
+#pragma warning(disable : 4189)
 #include <boost/bind.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <functional>
@@ -417,31 +418,31 @@ namespace KlayGE
 	{
 		boost::shared_ptr<ID3DXEffect> d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		std::vector<BOOL> tmp(value.begin(), value.end());
-		TIF(d3dx_effect->SetValue(name_.c_str(), &tmp[0], tmp.size() * sizeof(tmp[0])));
+		TIF(d3dx_effect->SetValue(name_.c_str(), &tmp[0], static_cast<UINT>(tmp.size() * sizeof(tmp[0]))));
 	}
 
 	void D3D9RenderEffectParameterIntArray::DoFlush(std::vector<int> const & value)
 	{
 		boost::shared_ptr<ID3DXEffect> d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
-		TIF(d3dx_effect->SetValue(name_.c_str(), &value[0], value.size() * sizeof(value[0])));
+		TIF(d3dx_effect->SetValue(name_.c_str(), &value[0], static_cast<UINT>(value.size() * sizeof(value[0]))));
 	}
 
 	void D3D9RenderEffectParameterFloatArray::DoFlush(std::vector<float> const & value)
 	{
 		boost::shared_ptr<ID3DXEffect> d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
-		TIF(d3dx_effect->SetValue(name_.c_str(), &value[0], value.size() * sizeof(value[0])));
+		TIF(d3dx_effect->SetValue(name_.c_str(), &value[0], static_cast<UINT>(value.size() * sizeof(value[0]))));
 	}
 
 	void D3D9RenderEffectParameterVector4Array::DoFlush(std::vector<Vector4> const & value)
 	{
 		boost::shared_ptr<ID3DXEffect> d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
-		TIF(d3dx_effect->SetValue(name_.c_str(), &value[0], value.size() * sizeof(value[0])));
+		TIF(d3dx_effect->SetValue(name_.c_str(), &value[0], static_cast<UINT>(value.size() * sizeof(value[0]))));
 	}
 
 	void D3D9RenderEffectParameterMatrix4Array::DoFlush(std::vector<Matrix4> const & value)
 	{
 		boost::shared_ptr<ID3DXEffect> d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
-		TIF(d3dx_effect->SetValue(name_.c_str(), &value[0], value.size() * sizeof(value[0])));
+		TIF(d3dx_effect->SetValue(name_.c_str(), &value[0], static_cast<UINT>(value.size() * sizeof(value[0]))));
 	}
 
 }

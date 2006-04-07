@@ -57,6 +57,7 @@
 
 #include <algorithm>
 #include <boost/assert.hpp>
+#pragma warning(disable : 4189)
 #include <boost/bind.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
@@ -385,7 +386,7 @@ namespace KlayGE
 				d3d9vb.D3D9Buffer().get(), 0,
 				static_cast<UINT>(rl.InstanceSize())));
 
-			TIF(d3dDevice_->SetStreamSourceFreq(number, D3DSTREAMSOURCE_INSTANCEDATA | 1));
+			TIF(d3dDevice_->SetStreamSourceFreq(number, D3DSTREAMSOURCE_INSTANCEDATA | 1UL));
 		}
 
 		// Clear any previous steam sources
