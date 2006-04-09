@@ -219,7 +219,8 @@ namespace
 namespace KlayGE
 {
 	D3D9Texture::D3D9Texture(uint32_t width, uint16_t numMipMaps, PixelFormat format)
-					: Texture(TT_1D)
+					: Texture(TT_1D),
+						auto_gen_mipmaps_(false)
 	{
 		D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3dDevice_ = renderEngine.D3DDevice();
@@ -240,7 +241,8 @@ namespace KlayGE
 
 	D3D9Texture::D3D9Texture(uint32_t width, uint32_t height,
 								uint16_t numMipMaps, PixelFormat format)
-					: Texture(TT_2D)
+					: Texture(TT_2D),
+						auto_gen_mipmaps_(false)
 	{
 		D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3dDevice_ = renderEngine.D3DDevice();
@@ -261,7 +263,8 @@ namespace KlayGE
 
 	D3D9Texture::D3D9Texture(uint32_t width, uint32_t height, uint32_t depth,
 								uint16_t numMipMaps, PixelFormat format)
-					: Texture(TT_3D)
+					: Texture(TT_3D),
+						auto_gen_mipmaps_(false)
 	{
 		D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3dDevice_ = renderEngine.D3DDevice();
@@ -281,7 +284,8 @@ namespace KlayGE
 	}
 
 	D3D9Texture::D3D9Texture(uint32_t size, bool /*cube*/, uint16_t numMipMaps, PixelFormat format)
-					: Texture(TT_Cube)
+					: Texture(TT_Cube),
+						auto_gen_mipmaps_(false)
 	{
 		D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3dDevice_ = renderEngine.D3DDevice();
@@ -620,76 +624,173 @@ namespace KlayGE
 	{
 		IDirect3DBaseTexture9Ptr d3dBaseTexture;
 
-		switch (type_)
+		if (auto_gen_mipmaps_)
 		{
-		case TT_1D:
-		case TT_2D:
+			switch (type_)
 			{
-				IDirect3DTexture9Ptr d3dTexture2D = this->CreateTexture2D(0, D3DPOOL_SYSTEMMEM);
+			case TT_1D:
+			case TT_2D:
+				d3dTexture2D_->GenerateMipSubLevels();
+				break;
 
-				IDirect3DBaseTexture9* base;
-				d3dTexture2D->QueryInterface(IID_IDirect3DBaseTexture9, reinterpret_cast<void**>(&base));
-				d3dBaseTexture = MakeCOMPtr(base);
+			case TT_3D:
+				d3dTexture3D_->GenerateMipSubLevels();
+				break;
 
-				IDirect3DSurface9* temp;
-				TIF(d3dTexture2D_->GetSurfaceLevel(0, &temp));
-				IDirect3DSurface9Ptr src = MakeCOMPtr(temp);
+			case TT_Cube:
+				d3dTextureCube_->GenerateMipSubLevels();
+				break;
 
-				TIF(d3dTexture2D->GetSurfaceLevel(0, &temp));
-				IDirect3DSurface9Ptr dst = MakeCOMPtr(temp);
-
-				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+			default:
+				BOOST_ASSERT(false);
+				break;
 			}
-			break;
-
-		case TT_3D:
-			{
-				IDirect3DVolumeTexture9Ptr d3dTexture3D = this->CreateTexture3D(0, D3DPOOL_SYSTEMMEM);
-
-				IDirect3DBaseTexture9* base;
-				d3dTexture3D->QueryInterface(IID_IDirect3DBaseTexture9, reinterpret_cast<void**>(&base));
-				d3dBaseTexture = MakeCOMPtr(base);
-
-				IDirect3DVolume9* temp;
-				TIF(d3dTexture3D_->GetVolumeLevel(0, &temp));
-				IDirect3DVolume9Ptr src = MakeCOMPtr(temp);
-
-				TIF(d3dTexture3D->GetVolumeLevel(0, &temp));
-				IDirect3DVolume9Ptr dst = MakeCOMPtr(temp);
-
-				TIF(D3DXLoadVolumeFromVolume(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
-			}
-			break;
-
-		case TT_Cube:
-			{
-				IDirect3DCubeTexture9Ptr d3dTextureCube = this->CreateTextureCube(0, D3DPOOL_SYSTEMMEM);
-
-				IDirect3DBaseTexture9* base;
-				d3dTextureCube->QueryInterface(IID_IDirect3DBaseTexture9, reinterpret_cast<void**>(&base));
-				d3dBaseTexture = MakeCOMPtr(base);
-
-				for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face <= D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
-				{
-					IDirect3DSurface9* temp;
-					TIF(d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), 0, &temp));
-					IDirect3DSurface9Ptr src = MakeCOMPtr(temp);
-
-					TIF(d3dTextureCube->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), 0, &temp));
-					IDirect3DSurface9Ptr dst = MakeCOMPtr(temp);
-
-					TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
-				}
-			}
-			break;
-
-		default:
-			BOOST_ASSERT(false);
-			break;
 		}
+		else
+		{
+			if (TU_RenderTarget == usage_)
+			{
+				switch (type_)
+				{
+				case TT_1D:
+				case TT_2D:
+					{
+						IDirect3DTexture9Ptr d3dTexture2D = this->CreateTexture2D(D3DUSAGE_AUTOGENMIPMAP, D3DPOOL_DEFAULT);
 
-		TIF(D3DXFilterTexture(d3dBaseTexture.get(), NULL, D3DX_DEFAULT, D3DX_DEFAULT));
-		TIF(d3dDevice_->UpdateTexture(d3dBaseTexture.get(), d3dBaseTexture_.get()));
+						IDirect3DSurface9* temp;
+						TIF(d3dTexture2D_->GetSurfaceLevel(0, &temp));
+						IDirect3DSurface9Ptr src = MakeCOMPtr(temp);
+
+						TIF(d3dTexture2D->GetSurfaceLevel(0, &temp));
+						IDirect3DSurface9Ptr dst = MakeCOMPtr(temp);
+
+						TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+
+						d3dTexture2D->GenerateMipSubLevels();
+						d3dTexture2D_ = d3dTexture2D;
+					}
+					break;
+
+				case TT_3D:
+					{
+						IDirect3DVolumeTexture9Ptr d3dTexture3D = this->CreateTexture3D(D3DUSAGE_AUTOGENMIPMAP, D3DPOOL_DEFAULT);
+
+						IDirect3DVolume9* temp;
+						TIF(d3dTexture3D_->GetVolumeLevel(0, &temp));
+						IDirect3DVolume9Ptr src = MakeCOMPtr(temp);
+
+						TIF(d3dTexture3D->GetVolumeLevel(0, &temp));
+						IDirect3DVolume9Ptr dst = MakeCOMPtr(temp);
+
+						TIF(D3DXLoadVolumeFromVolume(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+
+						d3dTexture3D->GenerateMipSubLevels();
+						d3dTexture3D_ = d3dTexture3D;
+					}
+					break;
+
+				case TT_Cube:
+					{
+						IDirect3DCubeTexture9Ptr d3dTextureCube = this->CreateTextureCube(D3DUSAGE_AUTOGENMIPMAP, D3DPOOL_DEFAULT);
+
+						for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face <= D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
+						{
+							IDirect3DSurface9* temp;
+							TIF(d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), 0, &temp));
+							IDirect3DSurface9Ptr src = MakeCOMPtr(temp);
+
+							TIF(d3dTextureCube->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), 0, &temp));
+							IDirect3DSurface9Ptr dst = MakeCOMPtr(temp);
+
+							TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+						}
+
+						d3dTextureCube->GenerateMipSubLevels();
+						d3dTextureCube_ = d3dTextureCube;
+					}
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
+
+				auto_gen_mipmaps_ = true;
+			}
+			else
+			{
+				switch (type_)
+				{
+				case TT_1D:
+				case TT_2D:
+					{
+						IDirect3DTexture9Ptr d3dTexture2D = this->CreateTexture2D(0, D3DPOOL_SYSTEMMEM);
+
+						IDirect3DBaseTexture9* base;
+						d3dTexture2D->QueryInterface(IID_IDirect3DBaseTexture9, reinterpret_cast<void**>(&base));
+						d3dBaseTexture = MakeCOMPtr(base);
+
+						IDirect3DSurface9* temp;
+						TIF(d3dTexture2D_->GetSurfaceLevel(0, &temp));
+						IDirect3DSurface9Ptr src = MakeCOMPtr(temp);
+
+						TIF(d3dTexture2D->GetSurfaceLevel(0, &temp));
+						IDirect3DSurface9Ptr dst = MakeCOMPtr(temp);
+
+						TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+					}
+					break;
+
+				case TT_3D:
+					{
+						IDirect3DVolumeTexture9Ptr d3dTexture3D = this->CreateTexture3D(0, D3DPOOL_SYSTEMMEM);
+
+						IDirect3DBaseTexture9* base;
+						d3dTexture3D->QueryInterface(IID_IDirect3DBaseTexture9, reinterpret_cast<void**>(&base));
+						d3dBaseTexture = MakeCOMPtr(base);
+
+						IDirect3DVolume9* temp;
+						TIF(d3dTexture3D_->GetVolumeLevel(0, &temp));
+						IDirect3DVolume9Ptr src = MakeCOMPtr(temp);
+
+						TIF(d3dTexture3D->GetVolumeLevel(0, &temp));
+						IDirect3DVolume9Ptr dst = MakeCOMPtr(temp);
+
+						TIF(D3DXLoadVolumeFromVolume(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+					}
+					break;
+
+				case TT_Cube:
+					{
+						IDirect3DCubeTexture9Ptr d3dTextureCube = this->CreateTextureCube(0, D3DPOOL_SYSTEMMEM);
+
+						IDirect3DBaseTexture9* base;
+						d3dTextureCube->QueryInterface(IID_IDirect3DBaseTexture9, reinterpret_cast<void**>(&base));
+						d3dBaseTexture = MakeCOMPtr(base);
+
+						for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face <= D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
+						{
+							IDirect3DSurface9* temp;
+							TIF(d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), 0, &temp));
+							IDirect3DSurface9Ptr src = MakeCOMPtr(temp);
+
+							TIF(d3dTextureCube->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), 0, &temp));
+							IDirect3DSurface9Ptr dst = MakeCOMPtr(temp);
+
+							TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+						}
+					}
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
+
+				TIF(D3DXFilterTexture(d3dBaseTexture.get(), NULL, D3DX_DEFAULT, D3DX_DEFAULT));
+				TIF(d3dDevice_->UpdateTexture(d3dBaseTexture.get(), d3dBaseTexture_.get()));
+			}
+		}
 	}
 
 	void D3D9Texture::CustomAttribute(std::string const & /*name*/, void* /*data*/)

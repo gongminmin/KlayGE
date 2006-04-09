@@ -126,6 +126,8 @@ namespace KlayGE
 		std::vector<uint32_t>	widths_;
 		std::vector<uint32_t>	heights_;
 		std::vector<uint32_t>	depths_;
+
+		bool auto_gen_mipmaps_;
 	};
 
 	typedef boost::shared_ptr<D3D9Texture> D3D9TexturePtr;

@@ -625,6 +625,39 @@ namespace KlayGE
 
 	void OGLTexture::BuildMipSubLevels()
 	{
+		if (glloader_GL_EXT_framebuffer_object())
+		{
+			switch (type_)
+			{
+			case TT_1D:
+				glBindTexture(GL_TEXTURE_1D, texture_);
+				glGenerateMipmapEXT(GL_TEXTURE_1D);
+				break;
+
+			case TT_2D:
+				glBindTexture(GL_TEXTURE_2D, texture_);
+				glGenerateMipmapEXT(GL_TEXTURE_2D);
+				break;
+
+			case TT_3D:
+				glBindTexture(GL_TEXTURE_3D, texture_);
+				glGenerateMipmapEXT(GL_TEXTURE_3D);
+				break;
+
+			case TT_Cube:
+				glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
+				glGenerateMipmapEXT(GL_TEXTURE_CUBE_MAP);
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				break;
+			}
+		}
+		else
+		{
+			THR(E_FAIL);
+		}
 	}
 
 	void OGLTexture::CustomAttribute(std::string const & /*name*/, void* /*data*/)
