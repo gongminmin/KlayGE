@@ -80,14 +80,6 @@ namespace
 			distance_sampler->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
 			*(effect_->ParameterByName("distanceMapSampler")) = distance_sampler;
 
-			SamplerPtr normalizer_sampler(new Sampler);
-			normalizer_sampler->SetTexture(LoadTexture("normalizer.dds"));
-			normalizer_sampler->Filtering(Sampler::TFO_Point);
-			normalizer_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-			normalizer_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
-			normalizer_sampler->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
-			*(effect_->ParameterByName("normalizerMapSampler")) = normalizer_sampler;
-
 			Vector3 xyzs[] =
 			{
 				Vector3(-1, 1,  0),

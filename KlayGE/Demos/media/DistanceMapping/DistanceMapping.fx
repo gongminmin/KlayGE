@@ -50,12 +50,6 @@ VS_OUTPUT DistanceMappingVS(VS_INPUT input,
 sampler2D diffuseMapSampler;
 sampler2D normalMapSampler;
 sampler3D distanceMapSampler;
-samplerCUBE normalizerMapSampler;
-
-half3 NormalizeByCube(half3 v)
-{
-	return texCUBE(normalizerMapSampler, v).rgb * 2 - 1;
-}
 
 half4 DistanceMappingPS(half3 texCoord0	: TEXCOORD0,
 						half3 L		: TEXCOORD1,
@@ -65,7 +59,7 @@ half4 DistanceMappingPS(half3 texCoord0	: TEXCOORD0,
 					uniform sampler2D normalMap,
 					uniform sampler3D distanceMap) : COLOR
 {
-	half3 view = NormalizeByCube(V) * half3(1, 1, 16) * 0.06;
+	half3 view = normalize(V) * half3(1, 1, 16) * 0.06;
 
 	half3 texUV = texCoord0;
 	for (int i = 0; i < 8; ++ i)
@@ -73,11 +67,10 @@ half4 DistanceMappingPS(half3 texCoord0	: TEXCOORD0,
 		texUV += view * tex3D(distanceMap, texUV).r;
 	}
 
-	half4 clr;
 	if ((texUV.x <= 0) || (texUV.y <= 0) || (texUV.x >= 1) || (texUV.y >= 1))
 	{
 		// should be clipped by alpha test
-		clr = 0;
+		return 0;
 	}
 	else
 	{
@@ -86,14 +79,12 @@ half4 DistanceMappingPS(half3 texCoord0	: TEXCOORD0,
 
 		half3 diffuse = tex2D(diffuseMap, texUV.xy, dx, dy).rgb;
 
-		half3 bumpNormal = NormalizeByCube(tex2D(normalMap, texUV.xy, dx, dy).rgb * 2 - 1);
-		half3 lightVec = NormalizeByCube(L);
+		half3 bumpNormal = normalize(tex2D(normalMap, texUV.xy, dx, dy).rgb * 2 - 1);
+		half3 lightVec = normalize(L);
 		half diffuseFactor = dot(lightVec, bumpNormal);
 		
-		clr = half4(diffuse * diffuseFactor, 1);
+		return half4(diffuse * diffuseFactor, 1);
 	}
-
-	return clr;
 }
 
 half4 DistanceMappingPS_20(half3 texCoord0	: TEXCOORD0,
@@ -104,7 +95,7 @@ half4 DistanceMappingPS_20(half3 texCoord0	: TEXCOORD0,
 					uniform sampler2D normalMap,
 					uniform sampler3D distanceMap) : COLOR
 {
-	half3 view = NormalizeByCube(V) * half3(1, 1, 16) * 0.06;
+	half3 view = normalize(V) * half3(1, 1, 16) * 0.06;
 
 	half3 texUV = texCoord0;
 	for (int i = 0; i < 2; ++ i)
@@ -114,8 +105,8 @@ half4 DistanceMappingPS_20(half3 texCoord0	: TEXCOORD0,
 
 	half3 diffuse = tex2D(diffuseMap, texUV.xy);
 
-	half3 bumpNormal = NormalizeByCube(tex2D(normalMap, texUV.xy).rgb * 2 - 1);
-	half3 lightVec = NormalizeByCube(L);
+	half3 bumpNormal = normalize(tex2D(normalMap, texUV.xy).rgb * 2 - 1);
+	half3 lightVec = normalize(L);
 	half diffuseFactor = dot(lightVec, bumpNormal);
 
 	return half4(diffuse * diffuseFactor, 1);
