@@ -1,4 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
