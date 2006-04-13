@@ -14,12 +14,12 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderTexture.hpp>
-#include <KlayGE/Util.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 
 #define NOMINMAX
