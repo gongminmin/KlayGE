@@ -26,6 +26,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Viewport.hpp>
@@ -34,7 +35,6 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderEffect.hpp>
-#include <KlayGE/Util.hpp>
 #include <KlayGE/SceneObject.hpp>
 
 #include <boost/bind.hpp>
