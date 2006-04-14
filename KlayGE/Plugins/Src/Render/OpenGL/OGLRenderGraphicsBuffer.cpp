@@ -1,11 +1,11 @@
-// OGLRenderVertexStream.hpp
-// KlayGE OpenGL渲染到顶点流类 实现文件
-// Ver 2.8.0
-// 版权所有(C) 龚敏敏, 2005
+// OGLRenderGraphicsBuffer.hpp
+// KlayGE OpenGL渲染图形缓冲区类 实现文件
+// Ver 3.2.0
+// 版权所有(C) 龚敏敏, 2006
 // Homepage: http://klayge.sourceforge.net
 //
-// 2.8.0
-// 初次建立 (2005.7.21)
+// 3.2.0
+// 初次建立 (2006.4.15)
 //
 // 修改记录
 /////////////////////////////////////////////////////////////////////////////////
@@ -20,11 +20,11 @@
 #include <glloader/glloader.h>
 
 #include <KlayGE/OpenGL/OGLGraphicsBuffer.hpp>
-#include <KlayGE/OpenGL/OGLRenderVertexStream.hpp>
+#include <KlayGE/OpenGL/OGLRenderGraphicsBuffer.hpp>
 
 namespace KlayGE
 {
-	OGLRenderVertexStream::OGLRenderVertexStream(uint32_t width, uint32_t height)
+	OGLRenderGraphicsBuffer::OGLRenderGraphicsBuffer(uint32_t width, uint32_t height)
 	{
 		left_ = 0;
 		top_ = 0;
@@ -83,12 +83,12 @@ namespace KlayGE
 		}
 	}
 
-	void OGLRenderVertexStream::CustomAttribute(std::string const & /*name*/, void* /*data*/)
+	void OGLRenderGraphicsBuffer::CustomAttribute(std::string const & /*name*/, void* /*data*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void OGLRenderVertexStream::Attach(GraphicsBufferPtr vs)
+	void OGLRenderGraphicsBuffer::Attach(GraphicsBufferPtr vs)
 	{
 		BOOST_ASSERT(glIsFramebufferEXT_(fbo_));
 
@@ -102,7 +102,7 @@ namespace KlayGE
 		glBindFramebufferEXT_(GL_FRAMEBUFFER_EXT, fbo_);
 	}
 
-	void OGLRenderVertexStream::Detach()
+	void OGLRenderGraphicsBuffer::Detach()
 	{
 		BOOST_ASSERT(glIsFramebufferEXT_(fbo_));
 

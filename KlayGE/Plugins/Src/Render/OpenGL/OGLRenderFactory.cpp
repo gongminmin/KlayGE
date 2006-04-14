@@ -79,9 +79,9 @@ namespace KlayGE
 		return GraphicsBufferPtr(new OGLGraphicsBuffer(usage, GL_ELEMENT_ARRAY_BUFFER));
 	}
 
-	RenderVertexStreamPtr OGLRenderFactory::MakeRenderVertexStream(uint32_t width, uint32_t height)
+	RenderGraphicsBufferPtr OGLRenderFactory::MakeRenderGraphicsBuffer(uint32_t width, uint32_t height)
 	{
-		return RenderVertexStreamPtr(new OGLRenderVertexStream(width, height));
+		return RenderGraphicsBufferPtr(new OGLRenderGraphicsBuffer(width, height));
 	}
 
 	QueryPtr OGLRenderFactory::MakeOcclusionQuery()
