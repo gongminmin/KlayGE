@@ -207,6 +207,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Src\Render\RenderGraphicsBuffer.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Src\Render\RenderLayout.cpp"
 					>
 				</File>
@@ -216,10 +220,6 @@
 				</File>
 				<File
 					RelativePath="..\..\Core\Src\Render\RenderTexture.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\Core\Src\Render\RenderVertexStream.cpp"
 					>
 				</File>
 				<File
@@ -295,6 +295,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Include\KlayGE\RenderGraphicsBuffer.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Include\KlayGE\RenderLayout.hpp"
 					>
 				</File>
@@ -308,10 +312,6 @@
 				</File>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\RenderTexture.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\Core\Include\KlayGE\RenderVertexStream.hpp"
 					>
 				</File>
 				<File
