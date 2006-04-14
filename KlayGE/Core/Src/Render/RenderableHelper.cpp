@@ -314,7 +314,7 @@ namespace KlayGE
 		}
 
 		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static);
-		pos_vb->Resize(sizeof(pos[0]) * pos.size());
+		pos_vb->Resize(static_cast<uint32_t>(sizeof(pos[0]) * pos.size()));
 		{
 			GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
 			std::copy(pos.begin(), pos.end(), mapper.Pointer<Vector3>());
@@ -334,7 +334,7 @@ namespace KlayGE
 			}
 
 			GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static);
-			tex_vb->Resize(sizeof(tex[0]) * tex.size());
+			tex_vb->Resize(static_cast<uint32_t>(sizeof(tex[0]) * tex.size()));
 			{
 				GraphicsBuffer::Mapper mapper(*tex_vb, BA_Write_Only);
 				std::copy(tex.begin(), tex.end(), mapper.Pointer<Vector2>());

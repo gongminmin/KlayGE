@@ -16,7 +16,7 @@
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderTexture.hpp>
-#include <KlayGE/RenderVertexStream.hpp>
+#include <KlayGE/RenderGraphicsBuffer.hpp>
 #include <KlayGE/Query.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Font.hpp>
@@ -77,9 +77,9 @@ namespace KlayGE
 			return GraphicsBuffer::NullObject();
 		}
 
-		RenderVertexStreamPtr MakeRenderVertexStream(uint32_t width, uint32_t height)
+		RenderGraphicsBufferPtr MakeRenderGraphicsBuffer(uint32_t width, uint32_t height)
 		{
-			return RenderVertexStream::NullObject();
+			return RenderGraphicsBuffer::NullObject();
 		}
 
 		QueryPtr MakeOcclusionQuery()
