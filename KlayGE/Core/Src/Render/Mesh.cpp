@@ -87,7 +87,7 @@ namespace KlayGE
 
 				// 建立顶点坐标
 				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static);
-				pos_vb->Resize(xyzs_.size() * sizeof(xyzs_[0]));
+				pos_vb->Resize(static_cast<uint32_t>(xyzs_.size() * sizeof(xyzs_[0])));
 				{
 					GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
 					std::copy(xyzs_.begin(), xyzs_.end(), mapper.Pointer<Vector3>());
@@ -98,7 +98,7 @@ namespace KlayGE
 				{
 					// 建立法线坐标
 					GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static);
-					normal_vb->Resize(normals_.size() * sizeof(normals_[0]));
+					normal_vb->Resize(static_cast<uint32_t>(normals_.size() * sizeof(normals_[0])));
 					{
 						GraphicsBuffer::Mapper mapper(*normal_vb, BA_Write_Only);
 						std::copy(normals_.begin(), normals_.end(), mapper.Pointer<Vector3>());
@@ -110,7 +110,7 @@ namespace KlayGE
 				for (size_t i = 0; i < multi_tex_coords_.size(); ++ i)
 				{
 					GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static);
-					tex_vb->Resize(multi_tex_coords_[i].size() * sizeof(multi_tex_coords_[i][0]));
+					tex_vb->Resize(static_cast<uint32_t>(multi_tex_coords_[i].size() * sizeof(multi_tex_coords_[i][0])));
 					{
 						GraphicsBuffer::Mapper mapper(*tex_vb, BA_Write_Only);
 						std::copy(multi_tex_coords_[i].begin(), multi_tex_coords_[i].end(), mapper.Pointer<Vector2>());
