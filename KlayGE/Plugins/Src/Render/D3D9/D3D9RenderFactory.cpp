@@ -93,9 +93,9 @@ namespace KlayGE
 		return ret;
 	}
 
-	RenderVertexStreamPtr D3D9RenderFactory::MakeRenderVertexStream(uint32_t width, uint32_t height)
+	RenderGraphicsBufferPtr D3D9RenderFactory::MakeRenderGraphicsBuffer(uint32_t width, uint32_t height)
 	{
-		D3D9RenderVertexStreamPtr ret(new D3D9RenderVertexStream(width, height));
+		D3D9RenderGraphicsBufferPtr ret(new D3D9RenderGraphicsBuffer(width, height));
 		resource_pool_.push_back(ret);
 		return ret;
 	}

@@ -1,11 +1,11 @@
-// D3D9RenderVertexStream.hpp
-// KlayGE D3D9渲染到顶点流类 实现文件
-// Ver 2.8.0
-// 版权所有(C) 龚敏敏, 2005
+// D3D9RenderGraphicsBuffer.hpp
+// KlayGE D3D9渲染图形缓冲区类 实现文件
+// Ver 3.2.0
+// 版权所有(C) 龚敏敏, 2006
 // Homepage: http://klayge.sourceforge.net
 //
-// 2.8.0
-// 初次建立 (2005.7.21)
+// 3.2.0
+// 初次建立 (2006.4.15)
 //
 // 修改记录
 /////////////////////////////////////////////////////////////////////////////////
@@ -21,11 +21,11 @@
 
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9GraphicsBuffer.hpp>
-#include <KlayGE/D3D9/D3D9RenderVertexStream.hpp>
+#include <KlayGE/D3D9/D3D9RenderGraphicsBuffer.hpp>
 
 namespace KlayGE
 {
-	D3D9RenderVertexStream::D3D9RenderVertexStream(uint32_t width, uint32_t height)
+	D3D9RenderGraphicsBuffer::D3D9RenderGraphicsBuffer(uint32_t width, uint32_t height)
 	{
 		left_ = 0;
 		top_ = 0;
@@ -38,7 +38,7 @@ namespace KlayGE
 		viewport_.height	= height_;
 	}
 
-	void D3D9RenderVertexStream::Attach(GraphicsBufferPtr vs)
+	void D3D9RenderGraphicsBuffer::Attach(GraphicsBufferPtr vs)
 	{
 		BOOST_ASSERT(vs->Usage() != BU_Static);
 
@@ -55,7 +55,7 @@ namespace KlayGE
 		render_surf_ = this->CreateSurface(D3DPOOL_DEFAULT);
 	}
 
-	void D3D9RenderVertexStream::Detach()
+	void D3D9RenderGraphicsBuffer::Detach()
 	{
 		this->CopyToVertexStream();
 
@@ -63,17 +63,17 @@ namespace KlayGE
 		render_surf_.reset();
 	}
 
-	boost::shared_ptr<IDirect3DSurface9> D3D9RenderVertexStream::D3DRenderSurface() const
+	boost::shared_ptr<IDirect3DSurface9> D3D9RenderGraphicsBuffer::D3DRenderSurface() const
 	{
 		return render_surf_;
 	}
 	
-	boost::shared_ptr<IDirect3DSurface9> D3D9RenderVertexStream::D3DRenderZBuffer() const
+	boost::shared_ptr<IDirect3DSurface9> D3D9RenderGraphicsBuffer::D3DRenderZBuffer() const
 	{
 		return boost::shared_ptr<IDirect3DSurface9>();
 	}
 
-	void D3D9RenderVertexStream::CustomAttribute(std::string const & name, void* pData)
+	void D3D9RenderGraphicsBuffer::CustomAttribute(std::string const & name, void* pData)
 	{
 		if (("DDBACKBUFFER" == name) || ("DDFRONTBUFFER" == name))
 		{
@@ -102,7 +102,7 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void D3D9RenderVertexStream::DoOnLostDevice()
+	void D3D9RenderGraphicsBuffer::DoOnLostDevice()
 	{
 		if (vs_)
 		{
@@ -113,7 +113,7 @@ namespace KlayGE
 		}
 	}
 	
-	void D3D9RenderVertexStream::DoOnResetDevice()
+	void D3D9RenderGraphicsBuffer::DoOnResetDevice()
 	{
 		if (vs_)
 		{
@@ -129,7 +129,7 @@ namespace KlayGE
 		}
 	}
 
-	D3D9RenderVertexStream::IDirect3DSurface9Ptr D3D9RenderVertexStream::CreateSurface(D3DPOOL pool)
+	D3D9RenderGraphicsBuffer::IDirect3DSurface9Ptr D3D9RenderGraphicsBuffer::CreateSurface(D3DPOOL pool)
 	{
 		IDirect3DSurface9* surface = NULL;
 
@@ -145,7 +145,7 @@ namespace KlayGE
 		return MakeCOMPtr(surface);
 	}
 
-	void D3D9RenderVertexStream::CopyToVertexStream()
+	void D3D9RenderGraphicsBuffer::CopyToVertexStream()
 	{
 		D3DLOCKED_RECT locked_rect;
 		TIF(render_surf_->LockRect(&locked_rect, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
