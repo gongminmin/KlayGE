@@ -182,11 +182,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderTexture.cpp"
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderGraphicsBuffer.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderVertexStream.cpp"
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderTexture.cpp"
 				>
 			</File>
 			<File
@@ -228,15 +228,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderGraphicsBuffer.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderLayout.hpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderTexture.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderVertexStream.hpp"
 				>
 			</File>
 			<File
