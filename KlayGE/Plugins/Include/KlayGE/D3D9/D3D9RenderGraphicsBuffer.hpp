@@ -1,19 +1,19 @@
-// D3D9RenderVertexStream.hpp
-// KlayGE D3D9渲染到顶点流类 头文件
-// Ver 2.8.0
-// 版权所有(C) 龚敏敏, 2005
+// D3D9RenderGraphicsBuffer.hpp
+// KlayGE D3D9渲染图形缓冲区类 头文件
+// Ver 3.2.0
+// 版权所有(C) 龚敏敏, 2006
 // Homepage: http://klayge.sourceforge.net
 //
-// 2.8.0
-// 初次建立 (2005.7.21)
+// 3.2.0
+// 初次建立 (2006.4.15)
 //
 // 修改记录
 /////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _D3D9RENDERVERTEXSTREAM_HPP
-#define _D3D9RENDERVERTEXSTREAM_HPP
+#ifndef _D3D9RENDERGRAPHICSBUFFER_HPP
+#define _D3D9RENDERGRAPHICSBUFFER_HPP
 
-#include <KlayGE/RenderVertexStream.hpp>
+#include <KlayGE/RenderGraphicsBuffer.hpp>
 #include <KlayGE/D3D9/D3D9Resource.hpp>
 
 #ifdef KLAYGE_DEBUG
@@ -24,14 +24,14 @@
 
 namespace KlayGE
 {
-	class D3D9RenderVertexStream : public RenderVertexStream, public D3D9Resource
+	class D3D9RenderGraphicsBuffer : public RenderGraphicsBuffer, public D3D9Resource
 	{
 		typedef boost::shared_ptr<IDirect3DSurface9> IDirect3DSurface9Ptr;
 
 	public:
-		D3D9RenderVertexStream(uint32_t width, uint32_t height);
+		D3D9RenderGraphicsBuffer(uint32_t width, uint32_t height);
 
-		/// MUST call Detach before use the VertexStream
+		/// MUST call Detach before use the GraphicsBuffer
 		void Attach(GraphicsBufferPtr vs);
 		void Detach();
 
@@ -58,7 +58,7 @@ namespace KlayGE
 		D3DFORMAT fmt_;
 	};
 
-	typedef boost::shared_ptr<D3D9RenderVertexStream> D3D9RenderVertexStreamPtr;
+	typedef boost::shared_ptr<D3D9RenderGraphicsBuffer> D3D9RenderGraphicsBufferPtr;
 }
 
-#endif			// _D3D9RENDERVERTEXSTREAM_HPP
+#endif			// _D3D9RENDERGRAPHICSBUFFER_HPP
