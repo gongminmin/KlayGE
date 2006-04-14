@@ -42,7 +42,8 @@ namespace
 	public:
 		ShadowMapped(uint32_t shadow_map_size)
 			: shadow_map_size_(shadow_map_size),
-				sm_sampler_(new Sampler)
+				sm_sampler_(new Sampler),
+				lamp_sampler_(new Sampler)
 		{
 		}
 
@@ -73,6 +74,42 @@ namespace
 			sm_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
 		}
 
+		void LampTexture(TexturePtr tex)
+		{
+			lamp_sampler_->SetTexture(tex);
+			lamp_sampler_->Filtering(Sampler::TFO_Bilinear);
+			lamp_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
+			lamp_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
+		}
+
+	protected:
+		void OnRenderBegin(Matrix4 const & model, RenderEffectPtr effect)
+		{
+			App3DFramework const & app = Context::Instance().AppInstance();
+
+			Matrix4 view = app.ActiveCamera().ViewMatrix();
+			Matrix4 proj = app.ActiveCamera().ProjMatrix();
+			Matrix4 light_mat = model * this->LightViewProj();
+
+			*(effect->ParameterByName("World")) = model;
+			*(effect->ParameterByName("InvLightWorld")) = inv_light_model_;
+
+			if (gen_sm_pass_)
+			{
+				effect->ActiveTechnique("GenShadowMap");
+				*(effect->ParameterByName("WorldViewProj")) = light_mat;
+			}
+			else
+			{
+				effect->ActiveTechnique("RenderScene");
+
+				*(effect->ParameterByName("LampSampler")) = lamp_sampler_;
+				*(effect->ParameterByName("ShadowMapSampler")) = sm_sampler_;
+				*(effect->ParameterByName("WorldViewProj")) = model * view * proj;
+				*(effect->ParameterByName("light_pos")) = light_pos_;
+			}
+		}
+
 	protected:
 		uint32_t shadow_map_size_;
 
@@ -82,6 +119,8 @@ namespace
 		Vector3 light_pos_;
 		Matrix4 inv_light_model_;
 		Matrix4 light_view_, light_proj_;
+
+		SamplerPtr lamp_sampler_;
 	};
 
 	class OccluderRenderable : public KMesh, public ShadowMapped
@@ -89,8 +128,7 @@ namespace
 	public:
 		OccluderRenderable(std::wstring const & /*name*/, TexturePtr tex)
 			: KMesh(L"Occluder", tex),
-				ShadowMapped(SHADOW_MAP_SIZE),
-				lamp_sampler_(new Sampler)
+				ShadowMapped(SHADOW_MAP_SIZE)
 		{
 			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("ShadowCubeMap.fx");
 			effect_->ActiveTechnique("RenderScene");
@@ -103,41 +141,10 @@ namespace
 
 		void OnRenderBegin()
 		{
-			App3DFramework const & app = Context::Instance().AppInstance();
-
-			Matrix4 view = app.ActiveCamera().ViewMatrix();
-			Matrix4 proj = app.ActiveCamera().ProjMatrix();
-			Matrix4 light_mat = model_ * this->LightViewProj();
-
-			*(effect_->ParameterByName("World")) = model_;
-			*(effect_->ParameterByName("InvLightWorld")) = inv_light_model_;
-
-			if (gen_sm_pass_)
-			{
-				effect_->ActiveTechnique("GenShadowMap");
-				*(effect_->ParameterByName("WorldViewProj")) = light_mat;
-			}
-			else
-			{
-				effect_->ActiveTechnique("RenderScene");
-
-				*(effect_->ParameterByName("LampSampler")) = lamp_sampler_;
-				*(effect_->ParameterByName("ShadowMapSampler")) = sm_sampler_;
-				*(effect_->ParameterByName("WorldViewProj")) = model_ * view * proj;
-				*(effect_->ParameterByName("light_pos")) = light_pos_;
-			}
-		}
-
-		void LampTexture(TexturePtr tex)
-		{
-			lamp_sampler_->SetTexture(tex);
-			lamp_sampler_->Filtering(Sampler::TFO_Bilinear);
-			lamp_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
-			lamp_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
+			ShadowMapped::OnRenderBegin(model_, effect_);
 		}
 
 	private:
-		SamplerPtr lamp_sampler_;
 		Matrix4 model_;
 	};
 
@@ -162,8 +169,7 @@ namespace
 	public:
 		GroundRenderable()
 			: RenderableHelper(L"Ground"),
-				ShadowMapped(SHADOW_MAP_SIZE),
-				lamp_sampler_(new Sampler)
+				ShadowMapped(SHADOW_MAP_SIZE)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -224,41 +230,10 @@ namespace
 
 		void OnRenderBegin()
 		{
-			App3DFramework const & app = Context::Instance().AppInstance();
-
-			Matrix4 view = app.ActiveCamera().ViewMatrix();
-			Matrix4 proj = app.ActiveCamera().ProjMatrix();
-			Matrix4 light_mat = model_ * this->LightViewProj();
-
-			*(effect_->ParameterByName("World")) = model_;
-			*(effect_->ParameterByName("InvLightWorld")) = inv_light_model_;
-
-			if (gen_sm_pass_)
-			{
-				effect_->ActiveTechnique("GenShadowMap");
-				*(effect_->ParameterByName("WorldViewProj")) = light_mat;
-			}
-			else
-			{
-				effect_->ActiveTechnique("RenderScene");
-
-				*(effect_->ParameterByName("LampSampler")) = lamp_sampler_;
-				*(effect_->ParameterByName("ShadowMapSampler")) = sm_sampler_;
-				*(effect_->ParameterByName("WorldViewProj")) = model_ * view * proj;
-				*(effect_->ParameterByName("light_pos")) = light_pos_;
-			}
-		}
-
-		void LampTexture(TexturePtr tex)
-		{
-			lamp_sampler_->SetTexture(tex);
-			lamp_sampler_->Filtering(Sampler::TFO_Bilinear);
-			lamp_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
-			lamp_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
+			ShadowMapped::OnRenderBegin(model_, effect_);
 		}
 
 	private:
-		SamplerPtr lamp_sampler_;
 		Matrix4 model_;
 	};
 
