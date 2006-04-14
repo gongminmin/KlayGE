@@ -118,7 +118,7 @@ namespace KlayGE
 
 	template <typename To, typename From>
 	inline To
-	checked_cast(From* p)
+	checked_cast(From p)
 	{
 		BOOST_ASSERT(dynamic_cast<To>(p) == static_cast<To>(p));
 		return static_cast<To>(p);

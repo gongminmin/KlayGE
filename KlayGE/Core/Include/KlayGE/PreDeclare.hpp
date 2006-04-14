@@ -86,8 +86,8 @@ namespace KlayGE
 	typedef boost::shared_ptr<GraphicsBuffer> GraphicsBufferPtr;
 	class RenderLayout;
 	typedef boost::shared_ptr<RenderLayout> RenderLayoutPtr;
-	class RenderVertexStream;
-	typedef boost::shared_ptr<RenderVertexStream> RenderVertexStreamPtr;
+	class RenderGraphicsBuffer;
+	typedef boost::shared_ptr<RenderGraphicsBuffer> RenderGraphicsBufferPtr;
 	struct Viewport;
 	class RenderFactory;
 	typedef boost::shared_ptr<RenderFactory> RenderFactoryPtr;

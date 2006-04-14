@@ -1,17 +1,17 @@
-// RenderVertexStream.hpp
-// KlayGE 渲染到顶点流类 头文件
-// Ver 2.8.0
-// 版权所有(C) 龚敏敏, 2005
+// RenderGraphicsBuffer.hpp
+// KlayGE 渲染图形缓冲区类 头文件
+// Ver 3.2.0
+// 版权所有(C) 龚敏敏, 2006
 // Homepage: http://klayge.sourceforge.net
 //
-// 2.8.0
-// 初次建立 (2005.7.19)
+// 3.2.0
+// 初次建立 (2006.4.15)
 //
 // 修改记录
 //////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _RENDERVERTEXSTREAM_HPP
-#define _RENDERVERTEXSTREAM_HPP
+#ifndef _RENDERGRAPHICSBUFFER_HPP
+#define _RENDERGRAPHICSBUFFER_HPP
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderTarget.hpp>
@@ -24,14 +24,14 @@
 
 namespace KlayGE
 {	
-	class RenderVertexStream : public RenderTarget
+	class RenderGraphicsBuffer : public RenderTarget
 	{
 	public:
-		virtual ~RenderVertexStream()
+		virtual ~RenderGraphicsBuffer()
 		{
 		}
 
-		static RenderVertexStreamPtr NullObject();
+		static RenderGraphicsBufferPtr NullObject();
 
 		virtual void Attach(GraphicsBufferPtr gb) = 0;
 		virtual void Detach() = 0;
@@ -50,4 +50,4 @@ namespace KlayGE
 	};
 }
 
-#endif			// _RENDERVERTEXSTREAM_HPP
+#endif			// _RENDERGRAPHICSBUFFER_HPP
