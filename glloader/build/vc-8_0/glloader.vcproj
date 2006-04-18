@@ -20,7 +20,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="../../lib"
-			IntermediateDirectory="../../Debug"
+			IntermediateDirectory="../../Debug/x86"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
@@ -87,7 +87,7 @@
 		<Configuration
 			Name="Debug|x64"
 			OutputDirectory="../../lib"
-			IntermediateDirectory="../../Debug"
+			IntermediateDirectory="../../Debug/x64"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
@@ -155,7 +155,7 @@
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="../../lib"
-			IntermediateDirectory="../../Release"
+			IntermediateDirectory="../../Release/x86"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
@@ -222,7 +222,7 @@
 		<Configuration
 			Name="Release|x64"
 			OutputDirectory="../../lib"
-			IntermediateDirectory="../../Release"
+			IntermediateDirectory="../../Release/x64"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
