@@ -1,8 +1,11 @@
 // Mesh.cpp
 // KlayGE Mesh类 实现文件
-// Ver 2.7.0
-// 版权所有(C) 龚敏敏, 2004-2005
+// Ver 3.2.0
+// 版权所有(C) 龚敏敏, 2004-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.2.0
+// 增加了SkinnedModel和SkinnedMesh (2006.4.23)
 //
 // 2.7.0
 // 改进了StaticMesh (2005.6.16)
@@ -134,13 +137,91 @@ namespace KlayGE
 	}
 
 
-	BoneMesh::~BoneMesh()
+	SkinnedModel::SkinnedModel(std::wstring const & name)
+		: RenderModel(name),
+			last_frame_(-1)
+	{
+	}
+	
+	void SkinnedModel::BuildBones(int frame)
+	{
+		for (JointsType::iterator iter = joints_.begin(); iter != joints_.end(); ++ iter)
+		{
+			Joint& joint(*iter);
+
+			KeyFrames const & kf = key_frames_->find(joint.name)->second;
+			Vector3 const & key_pos = kf.FramePos(frame);
+			Quaternion const & key_quat = kf.FrameQuat(frame);
+
+			if (joint.parent != -1)
+			{
+				Joint& parent(joints_[joint.parent]);
+
+				joint.bind_quat = key_quat * parent.bind_quat;
+				joint.bind_pos = MathLib::TransQuat(key_pos, parent.bind_quat) + parent.bind_pos;
+			}
+			else
+			{
+				joint.bind_quat = key_quat;
+				joint.bind_pos = MathLib::TransQuat(key_pos, key_quat);
+			}
+		}
+
+		this->UpdateBinds();
+	}
+
+	void SkinnedModel::UpdateBinds()
+	{
+		binds_.resize(joints_.size());
+		for (size_t i = 0; i < joints_.size(); ++ i)
+		{
+			binds_[i] = joints_[i].inverse_origin_mat
+				* MathLib::ToMatrix(joints_[i].bind_quat) * MathLib::Translation(joints_[i].bind_pos);
+		}
+	}
+
+	void SkinnedModel::AttachKeyFrames(boost::shared_ptr<KlayGE::KeyFramesType> const & key_frames)
+	{
+		key_frames_ = key_frames;
+	}
+
+	void SkinnedModel::SetFrame(int frame)
+	{
+		if (last_frame_ != frame)
+		{
+			last_frame_ = frame;
+
+			this->BuildBones(frame);
+		}
+	}
+
+
+	SkinnedMesh::SkinnedMesh(std::wstring const & name)
+		: StaticMesh(name)
 	{
 	}
 
-	std::wstring const & BoneMesh::Name() const
+	void SkinnedMesh::BuildRenderable()
 	{
-		static std::wstring name(L"Bone Mesh");
-		return name;
+		if (!beBuilt_)
+		{
+			// 填充混合信息
+			GraphicsBufferPtr bw = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(BU_Static);
+			bw->Resize(blend_weights_.size() * sizeof(blend_weights_[0]));
+			{
+				GraphicsBuffer::Mapper mapper(*bw, BA_Write_Only);
+				std::copy(blend_weights_.begin(), blend_weights_.end(), mapper.Pointer<float>());
+			}
+			rl_->BindVertexStream(bw, boost::make_tuple(vertex_element(VEU_BlendWeight, 0, sizeof(float), 4)));
+			GraphicsBufferPtr bi = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(BU_Static);
+			bi->Resize(blend_indices_.size() * sizeof(blend_indices_[0]));
+			{
+				GraphicsBuffer::Mapper mapper(*bi, BA_Write_Only);
+				std::copy(blend_indices_.begin(), blend_indices_.end(), mapper.Pointer<uint8_t>());
+			}
+			rl_->BindVertexStream(bi, boost::make_tuple(vertex_element(VEU_BlendIndex, 0, sizeof(uint8_t), 4)));
+		}
+
+		StaticMesh::BuildRenderable();
 	}
 }

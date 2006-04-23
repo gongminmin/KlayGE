@@ -1,8 +1,11 @@
 // Mesh.hpp
 // KlayGE Mesh类 头文件
-// Ver 3.0.0
-// 版权所有(C) 龚敏敏, 2004-2005
+// Ver 3.2.0
+// 版权所有(C) 龚敏敏, 2004-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.2.0
+// 增加了SkinnedModel和SkinnedMesh (2006.4.23)
 //
 // 3.0.0
 // 增加了RenderModel (2005.10.9)
@@ -23,6 +26,7 @@
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/Math.hpp>
+#include <KlayGE/MapVector.hpp>
 
 #include <vector>
 
@@ -93,7 +97,7 @@ namespace KlayGE
 
 		void AddToRenderQueue();
 
-	private:
+	protected:
 		std::wstring name_;
 
 		RenderLayoutPtr rl_;
@@ -197,57 +201,106 @@ namespace KlayGE
 	};
 
 
-	struct Bone
+	struct Joint
 	{
 		std::string name;
 
-		Vector3 bindpos;
-		Matrix4 bindmat;
+		Vector3 bind_pos;
+		Quaternion bind_quat;
 
-		Matrix4 originMat;
-		Matrix4 inverseOriginMat;
+		Matrix4 origin_mat;
+		Matrix4 inverse_origin_mat;
 
 		int16_t parent;
-
-		boost::array<float, 6> attribute;
 	};
 
-	class BoneMesh : public Renderable
+	struct KeyFrames
+	{
+		std::vector<Vector3> bind_pos;
+		std::vector<Quaternion> bind_quat;
+
+		Vector3 const & FramePos(int frame) const
+		{
+			const int lframe(frame % bind_pos.size());
+			return bind_pos[lframe];
+		}
+
+		Quaternion const & FrameQuat(int frame) const
+		{
+			const int lframe(frame % bind_quat.size());
+			return bind_quat[lframe];
+		}
+	};
+	typedef MapVector<std::string, KeyFrames> KeyFramesType;
+
+	class SkinnedModel : public RenderModel
 	{
 	public:
-		typedef boost::shared_ptr<std::vector<Bone> > BonesType;
-
+		typedef std::vector<Joint> JointsType;
+		typedef std::vector<Matrix4> BindsType;
+		
 	public:
-		virtual ~BoneMesh();
+		SkinnedModel(std::wstring const & name);
+		virtual ~SkinnedModel()
+		{
+		}
 
-		void SetBones(BonesType& bones)
-			{ bones_ = bones; }
+		template <typename ForwardIterator>
+		void AssignJoints(ForwardIterator first, ForwardIterator last)
+		{
+			joints_.assign(first, last);
+		}
+		BindsType const & GetBinds() const
+		{
+			return binds_;
+		}
+		void AttachKeyFrames(boost::shared_ptr<KlayGE::KeyFramesType> const & kf);
 
-		RenderEffectPtr GetRenderEffect() const
-			{ return staticMesh_->GetRenderEffect(); }
-		RenderLayoutPtr GetRenderLayout() const
-			{ return staticMesh_->GetRenderLayout(); }
+		void SetFrame(int frame);
 
-		std::wstring const & Name() const;
+	protected:
+		void BuildBones(int frame);
+		void UpdateBinds();
+
+	protected:
+		JointsType joints_;
+		BindsType binds_;
+
+		boost::shared_ptr<KlayGE::KeyFramesType> key_frames_;
+		int last_frame_;	
+	};
+
+	class SkinnedMesh : public StaticMesh
+	{
+	public:
+		SkinnedMesh(std::wstring const & name);
+		virtual ~SkinnedMesh()
+		{
+		}
 
 		template <typename ForwardIterator>
 		void AssignBlendWeights(ForwardIterator first, ForwardIterator last)
-			{ blendWeights_.assign(first, last); }
+		{
+			blend_weights_.assign(first, last);
+			beBuilt_ = false;
+		}
 
 		template <typename ForwardIterator>
 		void AssignBlendIndices(ForwardIterator first, ForwardIterator last)
-			{ blendIndices_.assign(first, last); }
+		{
+			blend_indices_.assign(first, last);
+			beBuilt_ = false;
+		}
 
 	protected:
-		StaticMeshPtr staticMesh_;
+		virtual void BuildRenderable();
 
-		BonesType bones_;
-
+	protected:
 		typedef std::vector<float> BlendWeightsType;
-		BlendWeightsType blendWeights_;
+		BlendWeightsType blend_weights_;
 
 		typedef std::vector<KlayGE::uint8_t> BlendIndicesType;
-		BlendIndicesType blendIndices_;
+		BlendIndicesType blend_indices_;
 	};
 }
 
