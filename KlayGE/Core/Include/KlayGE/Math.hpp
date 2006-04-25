@@ -1173,7 +1173,7 @@ namespace KlayGE
 		Ln(Quaternion_T<T> const & rhs)
 		{
 			T const theta_2(ACos(rhs.w()));
-			return Quaternion_T<T>(Normalize(rhs.v() * (theta_2 + theta_2)), 0);
+			return Quaternion_T<T>(Normalize(rhs.v()) * (theta_2 + theta_2), 0);
 		}
 
 		template <typename T>
