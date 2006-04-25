@@ -693,6 +693,8 @@ namespace KlayGE
 				D3DMATRIX d3dMat(D3D9Mapping::Mapping(sampler->TextureMatrix()));
 				TIF(d3dDevice_->SetTransform(static_cast<D3DTRANSFORMSTATETYPE>(D3DTS_TEXTURE0 + stage), &d3dMat));
 			}
+
+			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_SRGBTEXTURE, IsSRGB(texture->Format())));
 		}
 	}
 

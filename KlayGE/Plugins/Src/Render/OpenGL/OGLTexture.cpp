@@ -36,7 +36,28 @@ namespace
 {
 	using namespace KlayGE;
 
-	void Convert(GLint& internalFormat, GLenum& glformat, GLenum& gltype, KlayGE::PixelFormat pf)
+	PixelFormat SRGBToRGB(PixelFormat pf)
+	{
+		switch (pf)
+		{
+		case PF_ARGB8_SRGB:
+			return PF_ARGB8;
+
+		case PF_DXT1_SRGB:
+			return PF_DXT1;
+
+		case PF_DXT3_SRGB:
+			return PF_DXT3;
+
+		case PF_DXT5_SRGB:
+			return PF_DXT5;
+
+		default:
+			return pf;
+		}
+	}
+
+	void Convert(GLint& internalFormat, GLenum& glformat, GLenum& gltype, PixelFormat pf)
 	{
 		switch (pf)
 		{
@@ -102,7 +123,7 @@ namespace
 
 		case PF_DXT1:
 			internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-			glformat = GL_BGR;
+			glformat = GL_BGRA;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
@@ -117,6 +138,34 @@ namespace
 			glformat = GL_BGRA;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
+
+		case PF_ARGB8_SRGB:
+			internalFormat = GL_SRGB8_ALPHA8_EXT;
+			glformat = GL_BGRA;
+			gltype = GL_UNSIGNED_INT_8_8_8_8_REV;
+			break;
+
+		case PF_DXT1_SRGB:
+			internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
+			glformat = GL_BGRA;
+			gltype = GL_UNSIGNED_BYTE;
+			break;
+
+		case PF_DXT3_SRGB:
+			internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
+			glformat = GL_BGRA;
+			gltype = GL_UNSIGNED_BYTE;
+			break;
+
+		case PF_DXT5_SRGB:
+			internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
+			glformat = GL_BGRA;
+			gltype = GL_UNSIGNED_BYTE;
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
 		}
 	}
 }
@@ -127,6 +176,11 @@ namespace KlayGE
 								PixelFormat format)
 					: Texture(TT_1D)
 	{
+		if (!glloader_GL_EXT_texture_sRGB())
+		{
+			format = SRGBToRGB(format);
+		}
+
 		format_		= format;
 
 		if (0 == numMipMaps)
@@ -168,6 +222,11 @@ namespace KlayGE
 								uint16_t numMipMaps, PixelFormat format)
 					: Texture(TT_2D)
 	{
+		if (!glloader_GL_EXT_texture_sRGB())
+		{
+			format = SRGBToRGB(format);
+		}
+
 		format_		= format;
 
 		if (0 == numMipMaps)
@@ -211,6 +270,11 @@ namespace KlayGE
 								uint16_t numMipMaps, PixelFormat format)
 					: Texture(TT_3D)
 	{
+		if (!glloader_GL_EXT_texture_sRGB())
+		{
+			format = SRGBToRGB(format);
+		}
+
 		format_		= format;
 
 		if (0 == numMipMaps)
@@ -256,6 +320,11 @@ namespace KlayGE
 								PixelFormat format)
 					: Texture(TT_Cube)
 	{
+		if (!glloader_GL_EXT_texture_sRGB())
+		{
+			format = SRGBToRGB(format);
+		}
+
 		format_		= format;
 
 		if (0 == numMipMaps)

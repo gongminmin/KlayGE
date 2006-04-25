@@ -93,6 +93,7 @@ namespace
 			return D3DFMT_X8R8G8B8;
 
 		case PF_ARGB8:
+		case PF_ARGB8_SRGB:
 			return D3DFMT_A8R8G8B8;
 
 		case PF_A2RGB10:
@@ -116,12 +117,15 @@ namespace
 			return D3DFMT_A32B32G32R32F;
 
 		case PF_DXT1:
+		case PF_DXT1_SRGB:
 			return D3DFMT_DXT1;
 
 		case PF_DXT3:
+		case PF_DXT3_SRGB:
 			return D3DFMT_DXT3;
 
 		case PF_DXT5:
+		case PF_DXT5_SRGB:
 			return D3DFMT_DXT5;
 
 		case PF_D16:

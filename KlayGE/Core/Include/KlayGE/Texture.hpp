@@ -1,8 +1,11 @@
 // Texture.hpp
 // KlayGE 纹理类 实现文件
-// Ver 3.0.0
-// 版权所有(C) 龚敏敏, 2003-2005
+// Ver 3.2.0
+// 版权所有(C) 龚敏敏, 2003-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.2.0
+// 支持sRGB (2006.4.24)
 //
 // 3.0.0
 // 去掉了构造函数的usage (2005.10.5)
@@ -91,6 +94,15 @@ namespace KlayGE
 		PF_D24X8,
 		// 32-bit pixel format, 24 bits depth and 8 bits stencil
 		PF_D24S8,
+
+		// 32-bit pixel format, 8 bits for alpha, red, green and blue. Standard RGB (gamma = 2.2).
+		PF_ARGB8_SRGB,
+		// DXT1 compression texture format. Standard RGB (gamma = 2.2).
+		PF_DXT1_SRGB,
+		// DXT3 compression texture format. Standard RGB (gamma = 2.2).
+		PF_DXT3_SRGB,
+		// DXT5 compression texture format. Standard RGB (gamma = 2.2).
+		PF_DXT5_SRGB,
 	};
 
 	inline uint8_t
@@ -109,16 +121,20 @@ namespace KlayGE
 		case PF_ARGB4:
 		case PF_R16F:
 		case PF_DXT1:
+		case PF_DXT1_SRGB:
 		case PF_D16:
 			return 16;
 				
 		case PF_XRGB8:
 		case PF_ARGB8:
+		case PF_ARGB8_SRGB:
 		case PF_A2RGB10:
 		case PF_GR16F:
 		case PF_R32F:
 		case PF_DXT3:
 		case PF_DXT5:
+		case PF_DXT3_SRGB:
+		case PF_DXT5_SRGB:
 		case PF_D24X8:
 		case PF_D24S8:
 			return 32;
@@ -161,6 +177,9 @@ namespace KlayGE
 		case PF_DXT1:
 		case PF_DXT3:
 		case PF_DXT5:
+		case PF_DXT1_SRGB:
+		case PF_DXT3_SRGB:
+		case PF_DXT5_SRGB:
 			return true;
 
 		default:
@@ -176,6 +195,22 @@ namespace KlayGE
 		case PF_D16:
 		case PF_D24X8:
 		case PF_D24S8:
+			return true;
+
+		default:
+			return false;
+		}
+	}
+
+	inline bool
+	IsSRGB(PixelFormat format)
+	{
+		switch (format)
+		{
+		case PF_ARGB8_SRGB:
+		case PF_DXT1_SRGB:
+		case PF_DXT3_SRGB:
+		case PF_DXT5_SRGB:
 			return true;
 
 		default:
