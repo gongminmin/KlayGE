@@ -92,11 +92,11 @@ features_db = {
 		},
 
 	'2.1' : {
-			'Floating point buffer' : lambda : is_supported('GL_ARB_color_buffer_float'),
-			'Floating point texture' : lambda : support_one(['GL_ARB_texture_float', 'GL_ATI_texture_float', 'GL_NV_float_buffer']),
-			'Texture rectangle' : lambda : support_one(['GL_ARB_texture_rectangle', 'GL_EXT_texture_rectangle', 'GL_NV_texture_rectangle']),
 			'Pixel buffer object' : lambda : support_one(['GL_ARB_pixel_buffer_object', 'GL_EXT_pixel_buffer_object']),
-			'Super buffer' : lambda : support_one(['GL_EXT_framebuffer_object', 'GL_ATI_uber_buffers'])
+			'Floating point buffer' : lambda : support_one(['GL_ARB_color_buffer_float', 'GL_ARB_texture_float', 'GL_ATI_texture_float', 'GL_NV_float_buffer', 'GL_ARB_half_float_pixel']),
+			'sRGB texture' : lambda : support_one(['GL_EXT_texture_sRGB']),
+			'Sync object' : lambda : support_one(['GL_ARB_synch_object', 'GL_NV_fence', 'GL2_async_core']),
+			'Frame buffer object' : lambda : support_one(['GL_EXT_framebuffer_object', 'EXT_framebuffer_multisample', 'EXT_framebuffer_blit'])
 		}
 }
 
