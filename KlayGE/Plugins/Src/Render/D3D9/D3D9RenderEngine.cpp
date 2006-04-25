@@ -286,12 +286,13 @@ namespace KlayGE
 			if (zBuffer)
 			{
 				this->DepthBufferDepthTest(true);
-				TIF(d3dDevice_->SetDepthStencilSurface(zBuffer));
 			}
 			else
 			{
 				this->DepthBufferDepthTest(false);
 			}
+
+			TIF(d3dDevice_->SetDepthStencilSurface(zBuffer));
 
 			this->CullingMode(cullingMode_);
 
