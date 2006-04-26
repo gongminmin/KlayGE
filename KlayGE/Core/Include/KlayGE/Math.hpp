@@ -1218,12 +1218,14 @@ namespace KlayGE
 		ToAxisAngle(Vector_T<T, 3>& vec, T& ang, Quaternion_T<T> const & quat)
 		{
 			T const tw(ACos(quat.w()));
-			T const scale(T(1) / Sin(tw));
+			T const stw = Sin(tw);
 
 			ang = tw + tw;
-			vec.x() = quat.x() * scale;
-			vec.y() = quat.y() * scale;
-			vec.z() = quat.z() * scale;
+			vec = quat.v();
+			if (!Eq<T>(stw, 0))
+			{
+				vec /= stw;
+			}
 		}
 
 		template <typename T>
@@ -1303,11 +1305,17 @@ namespace KlayGE
 		inline Quaternion_T<T>
 		RotationAxis(Vector_T<T, 3> const & v, T const & angle)
 		{
-			T const ang(angle * T(0.5));
 			T sa, ca;
-			SinCos(ang, sa, ca);
+			SinCos(angle * T(0.5), sa, ca);
 
-			return Quaternion_T<T>(sa * Normalize(v), ca);
+			if (Eq<T>(LengthSq(v), 0))
+			{
+				return Quaternion_T<T>(sa, sa, sa, ca);
+			}
+			else
+			{
+				return Quaternion_T<T>(sa * Normalize(v), ca);
+			}
 		}
 
 		template <typename T>
