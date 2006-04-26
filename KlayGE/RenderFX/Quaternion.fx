@@ -22,20 +22,18 @@ float4 inverse_quat(float4 rhs)
 
 float4 mul_quat(float4 lhs, float4 rhs)
 {
-	return float4(
-		lhs.x * rhs.w - lhs.y * rhs.z + lhs.z * rhs.y + lhs.w * rhs.x,
-		lhs.x * rhs.z + lhs.y * rhs.w - lhs.z * rhs.x + lhs.w * rhs.y,
-		-lhs.x * rhs.y + lhs.y * rhs.x + lhs.z * rhs.w + lhs.w * rhs.z,
-		-lhs.x * rhs.x - lhs.y * rhs.y - lhs.z * rhs.z + lhs.w * rhs.w);
+	return float4(dot(lhs, float4(rhs.w, -rhs.z, rhs.yx)),
+		dot(lhs, float4(rhs.zw, -rhs.x, rhs.y)),
+		dot(lhs, float4(-rhs.y, rhs.xwz)),
+		dot(lhs, float4(-rhs.xyz, rhs.w)));
 }
 
 float3 mul_quat(float3 v, float4 quat)
 {
-	float a = quat.w * quat.w - dot(quat.xyz, quat.xyz);
-	float b = 2 * dot(quat.xyz, v);
-	float c = quat.w + quat.w;
+	float3 abc = float3(quat.w * quat.w - dot(quat.xyz, quat.xyz),
+					2 * dot(quat.xyz, v), quat.w + quat.w);
 
-	return a * v + b * quat.xyz + c * cross(quat.xyz, v);
+	return abc.x * v + abc.y * quat.xyz + abc.z * cross(quat.xyz, v);
 }
 
 float4 rotation_quat(float3 yaw_pitch_roll)
@@ -55,19 +53,29 @@ float4 rotation_quat(float3 yaw_pitch_roll)
 void quat_to_axis_angle(out float3 vec, out float ang, float4 quat)
 {
 	float tw = acos(quat.w);
-	float scale = 1.0 / sin(tw);
 
 	ang = tw + tw;
-	vec = quat.xyz * scale;
+	vec = quat.xyz;
+	
+	float stw = sin(tw);
+	if (stw != 0)
+	{
+		vec /= stw;
+	}
 }
 
 float4 axis_angle_to_quat(float3 v, float angle)
 {
-	float ang = angle / 2;
 	float sa, ca;
-	sincos(ang, sa, ca);
+	sincos(angle / 2, sa, ca);
 
-	return float4(sa * normalize(v), ca);
+	float4 ret = float4(sa.xxx, ca);
+	if (dot(v, v) != 0)
+	{
+		ret.xyz *= normalize(v);
+	}
+
+	return ret;
 }
 
 float4 slerp(float4 lhs, float4 rhs, float s)
@@ -116,68 +124,47 @@ float4 slerp(float4 lhs, float4 rhs, float s)
 
 float4 mat4_to_quat(float4x4 mat)
 {
-	float4 quat;
-	float s;
-	float tr = mat[0][0] + mat[1][1] + mat[2][2];
+	float3 diag = float3(mat._m00, mat._m11, mat._m22);
+	float tr = diag.x + diag.y + diag.z;
+	float4 s = sqrt(float4(tr, diag.y - (diag.z + diag.x),
+				diag.z - (diag.x + diag.y), diag.x - (diag.y + diag.z)) + 1);
+	float4 quat = s.wyzx / 2;
+	float4 s2 = 0.5 / s;
+
+	s.x = s2.x;
+	if (s.y != 0)
+	{
+		s.y = s2.y;
+	}
+	if (s.z != 0)
+	{
+		s.z = s2.z;
+	}
+	if (s.w != 0)
+	{
+		s.w = s2.w;
+	}
 
 	// check the diagonal
 	if (tr > 0)
 	{
-		s = sqrt(tr + 1);
-		quat.w = s / 2;
-		s = 0.5 / s;
-		quat.x = (mat[1][2] - mat[2][1]) * s;
-		quat.y = (mat[2][0] - mat[0][2]) * s;
-		quat.z = (mat[0][1] - mat[1][0]) * s;
+		quat.xyz = (mat._m12_m20_m01 - mat._m21_m02_m10) * s.x;
 	}
 	else
 	{
-		if ((mat[1][1] > mat[0][0]) && (mat[2][2] <= mat[1][1]))
+		if ((diag.y > diag.x) && (diag.z <= diag.y))
 		{
-			s = sqrt((mat[1][1] - (mat[2][2] + mat[0][0])) + 1);
-
-			quat.y = s / 2;
-
-			if (s != 0)
-			{
-				s = 0.5 / s;
-			}
-
-			quat.w = (mat[2][0] - mat[0][2]) * s;
-			quat.z = (mat[2][1] + mat[1][2]) * s;
-			quat.x = (mat[0][1] + mat[1][0]) * s;
+			quat.xzw = (mat._m01_m21_m20 - mat._m10_m12_m02) * s.y;
 		}
 		else
 		{
-			if (((mat[1][1] <= mat[0][0]) && (mat[2][2] > mat[0][0])) || (mat[2][2] > mat[1][1]))
+			if (((diag.y <= diag.x) && (diag.z > diag.x)) || (diag.z > diag.y))
 			{
-				s = sqrt((mat[2][2] - (mat[0][0] + mat[1][1])) + 1);
-
-				quat.z = s / 2;
-
-				if (s != 0)
-				{
-					s = 0.5 / s;
-				}
-
-				quat.w = (mat[0][1] - mat[1][0]) * s;
-				quat.x = (mat[0][2] + mat[2][0]) * s;
-				quat.y = (mat[1][2] + mat[2][1]) * s;
+				quat.xyw = (mat._m02_m12_m01 - mat._m20_m21_m10) * s.z;
 			}
 			else
 			{
-				s = sqrt((mat[0][0] - (mat[1][1] + mat[2][2])) + 1);
-
-				quat.x = s / 2;
-
-				if (s != 0)
-				{
-					s = 0.5 / s;
-				}
-
-				quat.w = (mat[1][2] - mat[2][1]) * s;
-				quat.y = (mat[1][0] + mat[0][1]) * s;
-				quat.z = (mat[2][0] + mat[0][2]) * s;
+				quat.yzw = (mat._m10_m20_m12 - mat._m01_m02_m21) * s.w;
 			}
 		}
 	}
@@ -197,5 +184,5 @@ float4x4 quat_to_mat4(float4 quat)
 		1 - c1.x - c1.z,	c0.y + c2.z,		c0.z - c2.y,		0,
 		c0.y - c2.z,		1 - c0.x - c1.z,	c1.y + c2.x,		0,
 		c0.z + c2.y,		c1.y - c2.x,		1 - c0.x - c1.x,	0,
-		0,				0,				0,				1);
+		0,					0,					0,					1);
 }
