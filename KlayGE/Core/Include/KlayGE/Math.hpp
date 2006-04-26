@@ -1263,7 +1263,7 @@ namespace KlayGE
 				}
 				else
 				{
-					if ((mat(1, 1) <= mat(0, 0) && mat(2, 2) > mat(0, 0)) || (mat(2, 2) > mat(1, 1)))
+					if (((mat(1, 1) <= mat(0, 0)) && (mat(2, 2) > mat(0, 0))) || (mat(2, 2) > mat(1, 1)))
 					{
 						s = Sqrt((mat(2, 2) - (mat(0, 0) + mat(1, 1))) + 1);
 
