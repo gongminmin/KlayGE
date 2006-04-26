@@ -96,7 +96,7 @@ features_db = {
 			'OpenGL Shading Language 1.20' : lambda : support_all(['GL_ATI_shader_texture_lod']),
 			'Floating point buffer' : lambda : support_one(['GL_ARB_color_buffer_float', 'GL_ARB_texture_float', 'GL_ATI_texture_float', 'GL_NV_float_buffer', 'GL_ARB_half_float_pixel']),
 			'sRGB texture' : lambda : support_one(['GL_EXT_texture_sRGB']),
-			'Sync object' : lambda : support_one(['GL_ARB_synch_object', 'GL_NV_fence', 'GL2_async_core']),
+			'Sync object' : lambda : support_one(['GL_ARB_sync_object', 'GL_NV_fence', 'GL2_async_core']),
 			'Frame buffer object' : lambda : support_one(['GL_ARB_framebuffer_object', 'GL_EXT_framebuffer_object', 'EXT_framebuffer_multisample', 'EXT_framebuffer_blit'])
 		}
 }
