@@ -29,6 +29,15 @@ float4 mul_quat(float4 lhs, float4 rhs)
 		-lhs.x * rhs.x - lhs.y * rhs.y - lhs.z * rhs.z + lhs.w * rhs.w);
 }
 
+float3 mul_quat(float3 v, float4 quat)
+{
+	float a = quat.w * quat.w - dot(quat.xyz, quat.xyz);
+	float b = 2 * dot(quat.xyz, v);
+	float c = quat.w + quat.w;
+
+	return a * v + b * quat.xyz + c * cross(quat.xyz, v);
+}
+
 float4 rotation_quat(float3 yaw_pitch_roll)
 {
 	float3 ang = yaw_pitch_roll / 2;
@@ -54,7 +63,7 @@ void quat_to_axis_angle(out float3 vec, out float ang, float4 quat)
 
 float4 axis_angle_to_quat(float3 v, float angle)
 {
-	float ang(angle / 2);
+	float ang = angle / 2;
 	float sa, ca;
 	sincos(ang, sa, ca);
 
@@ -95,8 +104,8 @@ float4 slerp(float4 lhs, float4 rhs, float s)
 	{
 		// SLERP towards a perpendicular quat
 		// Set slerp parameters
-		scale0 = sin(1 - slerp) * 3.1415926 / 2);
-		scale1 = sin(slerp * 3.1415926 / 2);
+		scale0 = sin((1 - s) * 3.1415926 / 2);
+		scale1 = sin(s * 3.1415926 / 2);
 
 		q2 = float4(-rhs.y, rhs.x, -rhs.w, rhs.z) * scale1;
 	}
@@ -109,12 +118,12 @@ float4 mat4_to_quat(float4x4 mat)
 {
 	float4 quat;
 	float s;
-	float const tr = mat[0][0] + mat[1][1] + mat[2][2];
+	float tr = mat[0][0] + mat[1][1] + mat[2][2];
 
 	// check the diagonal
 	if (tr > 0)
 	{
-		s = Sqrt(tr + 1);
+		s = sqrt(tr + 1);
 		quat.w = s / 2;
 		s = 0.5 / s;
 		quat.x = (mat[1][2] - mat[2][1]) * s;
@@ -176,7 +185,7 @@ float4 mat4_to_quat(float4x4 mat)
 	return normalize(quat);
 }
 
-float4x4 quat_to_mat(float4 quat)
+float4x4 quat_to_mat4(float4 quat)
 {
 	float3 xyz2 = quat.xyz + quat.xyz;
 			  
