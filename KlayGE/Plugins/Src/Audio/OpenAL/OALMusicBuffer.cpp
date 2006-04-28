@@ -22,32 +22,11 @@
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <boost/assert.hpp>
+#include <boost/bind.hpp>
 
 #include <KlayGE/OpenAL/OALAudio.hpp>
 
 size_t const READSIZE(88200);
-
-namespace
-{
-	// 处理时间事件
-	/////////////////////////////////////////////////////////////////////////////////
-	class PlayProc
-	{
-	public:
-		PlayProc(KlayGE::OALMusicBuffer* streaming)
-					: streaming_(streaming)
-			{ }
-
-		void operator()()
-		{
-			// 更新缓冲区
-			streaming_->LoopUpdateBuffer();
-		}
-
-	private:
-		KlayGE::OALMusicBuffer* streaming_;
-	};
-}
 
 namespace KlayGE
 {
@@ -162,7 +141,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OALMusicBuffer::DoPlay(bool loop)
 	{
-		playThread_.reset(new boost::thread(PlayProc(this)));
+		playThread_.reset(new boost::thread(boost::bind(&OALMusicBuffer::LoopUpdateBuffer, this)));
 
 		loop_ = loop;
 

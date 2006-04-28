@@ -25,7 +25,7 @@
 #pragma warning(disable: 4251 4275)
 #include <boost/utility.hpp>
 #include <boost/smart_ptr.hpp>
-#include <boost/thread/thread.hpp>
+#include <boost/thread.hpp>
 
 #include <KlayGE/Audio.hpp>
 
