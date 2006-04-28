@@ -343,6 +343,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Src\Kernel\thread_pool.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Src\Kernel\Util.cpp"
 					>
 				</File>
@@ -380,6 +384,10 @@
 				</File>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\SetVector.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\thread_pool.hpp"
 					>
 				</File>
 				<File
