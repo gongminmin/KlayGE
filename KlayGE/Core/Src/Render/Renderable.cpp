@@ -20,7 +20,6 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/SceneObject.hpp>
 
-#include <boost/thread.hpp>
 #include <boost/bind.hpp>
 
 #include <KlayGE/Renderable.hpp>

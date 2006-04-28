@@ -36,7 +36,14 @@ namespace KlayGE
 							model_(Matrix4::Identity())
 	{
 		// ‘ÿ»Îfx
-		effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("KMesh.fx");
+		if (!ResLoader::Instance().Locate("KMesh.fx").empty())
+		{
+			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("KMesh.fx");
+		}
+		else
+		{
+			effect_ = RenderEffect::NullObject();
+		}
 
 		if (tex)
 		{

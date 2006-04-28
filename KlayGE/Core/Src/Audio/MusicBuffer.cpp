@@ -55,10 +55,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void MusicBuffer::Play(bool loop)
 	{
-		if (this->IsPlaying())
-		{
-			this->Stop();
-		}
+		this->Stop();
 
 		this->DoPlay(loop);
 	}
