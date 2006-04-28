@@ -69,7 +69,7 @@ namespace
 		void ShadowMapTexture(TexturePtr tex)
 		{
 			sm_sampler_->SetTexture(tex);
-			sm_sampler_->Filtering(Sampler::TFO_Point);
+			sm_sampler_->Filtering(Sampler::TFO_Bilinear);
 			sm_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
 			sm_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
 		}
@@ -322,7 +322,7 @@ void ShadowCubeMap::InitObjects()
 	checked_cast<OccluderRenderable*>(mesh_->GetRenderable().get())->LampTexture(lamp_tex_);
 	checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->LampTexture(lamp_tex_);
 
-	shadow_tex_ = Context::Instance().RenderFactoryInstance().MakeTextureCube(SHADOW_MAP_SIZE, 1, PF_R32F);
+	shadow_tex_ = Context::Instance().RenderFactoryInstance().MakeTextureCube(SHADOW_MAP_SIZE, 1, PF_ABGR16F);
 	shadow_buffer_ = Context::Instance().RenderFactoryInstance().MakeRenderTexture();
 
 	screen_buffer_ = renderEngine.ActiveRenderTarget(0);

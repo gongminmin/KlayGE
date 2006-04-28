@@ -17,7 +17,8 @@ void ShadowMapVS(float4 Position : POSITION,
 
 float4 OutputDepthPS(float3 oLightWorldPos : TEXCOORD0) : COLOR
 {
-	return dot(oLightWorldPos, oLightWorldPos);
+	float dist = length(oLightWorldPos);
+	return float4(dist, dist * dist, 0, 1);
 }
 
 void MainVS(float4 Position : POSITION,
@@ -37,20 +38,21 @@ void MainVS(float4 Position : POSITION,
 float4 MainPS(half3 diffuse : COLOR0,
 				float3 LightWorldPos : TEXCOORD0) : COLOR 
 {
-	float PixelLengthSq = dot(LightWorldPos, LightWorldPos);
-	float ShadowLengthSq = texCUBE(ShadowMapSampler, LightWorldPos).r * 1.1f;
+	float2 moments = texCUBE(ShadowMapSampler, LightWorldPos);
 	
-	half3 color;
-	if (PixelLengthSq < ShadowLengthSq)
+	float dist = length(LightWorldPos);
+	float3 color = diffuse * texCUBE(LampSampler, LightWorldPos).rgb / (0.4 * moments.y);
+	if (dist > moments.x + 0.1f)
 	{
-		color = texCUBE(LampSampler, LightWorldPos).rgb / (0.4 * ShadowLengthSq);
-	}
-	else
-	{
-		color = 0;
+		// Variance shadow mapping
+		float variance = moments.y - moments.x * moments.x;
+		float m_d = moments.x - dist;
+		float p_max = variance / (variance + m_d * m_d);
+
+		color *= p_max;
 	}
 
-	return float4(diffuse * color, 1.0);
+	return float4(color, 1.0);
 }
 
 technique GenShadowMap
