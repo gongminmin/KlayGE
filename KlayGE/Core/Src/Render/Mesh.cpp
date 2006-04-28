@@ -172,11 +172,19 @@ namespace KlayGE
 
 	void SkinnedModel::UpdateBinds()
 	{
-		binds_.resize(joints_.size());
+		bind_rots_.resize(joints_.size());
+		bind_poss_.resize(joints_.size());
 		for (size_t i = 0; i < joints_.size(); ++ i)
 		{
-			binds_[i] = joints_[i].inverse_origin_mat
-				* MathLib::ToMatrix(joints_[i].bind_quat) * MathLib::Translation(joints_[i].bind_pos);
+			Quaternion quat = joints_[i].inverse_origin_quat * joints_[i].bind_quat;
+			Vector3 pos = MathLib::TransQuat(joints_[i].inverse_origin_pos, joints_[i].bind_quat) + joints_[i].bind_pos;
+			bind_rots_[i].x() = quat.x();
+			bind_rots_[i].y() = quat.y();
+			bind_rots_[i].z() = quat.z();
+			bind_rots_[i].w() = quat.w();
+			bind_poss_[i].x() = pos.x();
+			bind_poss_[i].y() = pos.y();
+			bind_poss_[i].z() = pos.z();
 		}
 	}
 

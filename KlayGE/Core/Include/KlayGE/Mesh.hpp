@@ -208,8 +208,8 @@ namespace KlayGE
 		Vector3 bind_pos;
 		Quaternion bind_quat;
 
-		Matrix4 origin_mat;
-		Matrix4 inverse_origin_mat;
+		Vector3 inverse_origin_pos;
+		Quaternion inverse_origin_quat;
 
 		int16_t parent;
 	};
@@ -237,8 +237,9 @@ namespace KlayGE
 	{
 	public:
 		typedef std::vector<Joint> JointsType;
-		typedef std::vector<Matrix4> BindsType;
-		
+		typedef std::vector<Vector4> RotationsType;
+		typedef std::vector<Vector4> PositionsType;
+
 	public:
 		SkinnedModel(std::wstring const & name);
 		virtual ~SkinnedModel()
@@ -250,9 +251,13 @@ namespace KlayGE
 		{
 			joints_.assign(first, last);
 		}
-		BindsType const & GetBinds() const
+		RotationsType const & GetBindRotations() const
 		{
-			return binds_;
+			return bind_rots_;
+		}
+		PositionsType const & GetBindPositions() const
+		{
+			return bind_poss_;
 		}
 		void AttachKeyFrames(boost::shared_ptr<KlayGE::KeyFramesType> const & kf);
 
@@ -264,7 +269,8 @@ namespace KlayGE
 
 	protected:
 		JointsType joints_;
-		BindsType binds_;
+		RotationsType bind_rots_;
+		PositionsType bind_poss_;
 
 		boost::shared_ptr<KlayGE::KeyFramesType> key_frames_;
 		int last_frame_;	
