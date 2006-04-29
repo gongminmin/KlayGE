@@ -2,7 +2,7 @@
 // KlayGE Ogg Vorbis数据源类 实现文件
 // Ver 2.0.0
 // 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Homepage: http://klayge.sourceforge.net
 //
 // 2.0.0
 // 初次建立 (2003.7.7)
