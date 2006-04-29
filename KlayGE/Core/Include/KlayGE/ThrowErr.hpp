@@ -2,7 +2,7 @@
 // KlayGE 抛出错误 头文件
 // Ver 1.3.8.1
 // 版权所有(C) 龚敏敏, 2001--2002
-// Homepage: http://www.enginedev.com
+// Homepage: http://klayge.sourceforge.net
 //
 // 1.3.8.1
 // 初次建立

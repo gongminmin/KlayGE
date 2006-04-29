@@ -2,7 +2,7 @@
 // KlayGE 脚本引擎类 头文件
 // Ver 2.1.3
 // 版权所有(C) 龚敏敏, 2001--2002
-// Homepage: http://www.enginedev.com
+// Homepage: http://klayge.sourceforge.net
 //
 // 2.1.3
 // 增加了以tuple为参数的Call (2004.9.15)
