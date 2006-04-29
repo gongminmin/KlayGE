@@ -1,8 +1,11 @@
 // OALAudio.hpp
 // KlayGE OpenAL声音引擎 头文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Ver 3.2.0
+// 版权所有(C) 龚敏敏, 2003-2006
+// Homepage: http://klayge.sourceforge.net
+//
+// 3.2.0
+// 改进了OALMusicBuffer中线程的使用 (2006.4.29)
 //
 // 2.0.0
 // 初次建立 (2003.7.7)
@@ -113,13 +116,15 @@ namespace KlayGE
 		void DoStop();
 
 	private:
-		boost::shared_ptr<boost::thread> playThread_;
-
-	private:
 		ALuint		source_;
 		Buffers		bufferQueue_;
 
 		bool		loop_;
+
+		bool stopped_;
+		boost::condition play_cond_;
+		boost::mutex play_mutex_;
+		boost::thread play_thread_;
 	};
 
 	// 管理音频播放
