@@ -103,14 +103,16 @@ namespace KlayGE
 						{
 							if (loop_)
 							{
+								stopped_ = false;
+								buffersInQueue = bufferQueue_.size();
 								this->Reset();
-								this->Play(true);
 							}
 							else
 							{
 								stopped_ = true;
-								break;
 							}
+
+							break;
 						}
 					}
 				}
