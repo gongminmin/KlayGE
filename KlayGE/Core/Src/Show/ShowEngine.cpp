@@ -2,7 +2,7 @@
 // KlayGE 播放引擎 实现文件
 // Ver 1.2.8.11
 // 版权所有(C) 龚敏敏, 2001--2002
-// Homepage: http://www.enginedev.com
+// Homepage: http://klayge.sourceforge.net
 //
 // 1.2.8.10
 // 用string代替字符串指针 (2002.10.27)

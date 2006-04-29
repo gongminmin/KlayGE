@@ -2,7 +2,7 @@
 // KlayGE 音频引擎抽象工厂 实现文件
 // Ver 3.1.0
 // 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Homepage: http://klayge.sourceforge.net
 //
 // 3.1.0
 // 初次建立 (2005.10.29)

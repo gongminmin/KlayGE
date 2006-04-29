@@ -2,7 +2,7 @@
 // KlayGE 玩家 实现文件
 // Ver 1.4.8.4
 // 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Homepage: http://klayge.sourceforge.net
 //
 // 1.4.8.3
 // 初次建立 (2003.3.8)
