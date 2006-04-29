@@ -1,8 +1,11 @@
 // OALMusicBuffer.cpp
 // KlayGE OpenAL音乐缓冲区类 实现文件
-// Ver 2.2.0
-// 版权所有(C) 龚敏敏, 2003-2004
+// Ver 3.2.0
+// 版权所有(C) 龚敏敏, 2003-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.2.0
+// 改进了线程的使用 (2006.4.29)
 //
 // 2.2.0
 // 修正了DoStop的死锁 (2004.10.22)
@@ -34,7 +37,9 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	OALMusicBuffer::OALMusicBuffer(AudioDataSourcePtr const & dataSource, uint32_t bufferSeconds, float volume)
 							: MusicBuffer(dataSource),
-								bufferQueue_(bufferSeconds * PreSecond)
+								bufferQueue_(bufferSeconds * PreSecond),
+								play_thread_(boost::bind(&OALMusicBuffer::LoopUpdateBuffer, this)),
+								stopped_(true)
 	{
 		alGenBuffers(static_cast<ALsizei>(bufferQueue_.size()), &bufferQueue_[0]);
 
@@ -64,12 +69,14 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OALMusicBuffer::LoopUpdateBuffer()
 	{
+		boost::mutex::scoped_lock lock(play_mutex_);
+		play_cond_.wait(lock);
+
 		ALint processed;
-		bool finishedPlaying(false);
 		size_t buffersInQueue(bufferQueue_.size());
 		ALuint buf;
 
-		while (!finishedPlaying)
+		while (!stopped_)
 		{
 			alGetSourcei(source_, AL_BUFFERS_PROCESSED, &processed);
 			if (processed > 0)
@@ -101,7 +108,7 @@ namespace KlayGE
 							}
 							else
 							{
-								finishedPlaying = true;
+								stopped_ = true;
 								break;
 							}
 						}
@@ -124,6 +131,8 @@ namespace KlayGE
 		ALenum const format(Convert(format_));
 		std::vector<uint8_t> data(READSIZE);
 
+		dataSource_->Reset();
+
 		// 每个缓冲区中装1 / PreSecond秒的数据
 		for (BuffersIter iter = bufferQueue_.begin(); iter != bufferQueue_.end(); ++ iter)
 		{
@@ -141,7 +150,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OALMusicBuffer::DoPlay(bool loop)
 	{
-		playThread_.reset(new boost::thread(boost::bind(&OALMusicBuffer::LoopUpdateBuffer, this)));
+		stopped_ = false;
+		play_cond_.notify_one();
 
 		loop_ = loop;
 
@@ -153,9 +163,10 @@ namespace KlayGE
 	////////////////////////////////////////////////////////////////////////////////
 	void OALMusicBuffer::DoStop()
 	{
-		if (playThread_)
+		if (!stopped_)
 		{
-			playThread_.reset();
+			stopped_ = true;
+			play_thread_.join();
 		}
 
 		alSourceStopv(1, &source_);
