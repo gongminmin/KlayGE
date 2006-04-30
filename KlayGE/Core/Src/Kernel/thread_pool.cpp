@@ -12,6 +12,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 
+#pragma warning(disable : 4127 4189)
 #include <boost/bind.hpp>
 
 #include <KlayGE/thread_pool.hpp>
@@ -66,31 +67,38 @@ namespace KlayGE
 		return last_thread_id_;
 	}
 
+	bool thread_pool::finished(boost::uint32_t thread_id)
+	{
+		boost::mutex::scoped_lock lock(mutex_threads_);
+
+		if (busy_queue_.find(thread_id) == busy_queue_.end())
+		{
+			for (std::deque<thread_desc>::iterator iter = ready_queue_.begin(); iter != ready_queue_.end(); ++ iter)
+			{
+				if (iter->thread_id == thread_id)
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
 	void thread_pool::join(uint32_t thread_id)
 	{
 		for (;;)
 		{
-			bool found = false;
-
-			mutex::scoped_lock lock(mutex_threads_);
-
-			if (busy_queue_.find(thread_id) == busy_queue_.end())
+			if (this->finished(thread_id))
 			{
-				for (std::deque<thread_desc>::iterator iter = ready_queue_.begin(); iter != ready_queue_.end(); ++ iter)
-				{
-					if (iter->thread_id == thread_id)
-					{
-						found = true;
-						break;
-					}
-				}
-
-				if (!found)
-				{
-					break;
-				}
+				break;
 			}
 
+			boost::mutex::scoped_lock lock(mutex_threads_);
 			cond_finish_.wait(lock);
 		}
 	}

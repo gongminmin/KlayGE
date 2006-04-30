@@ -33,6 +33,7 @@ namespace KlayGE
 		void max_num_threads(uint32_t max_num_threads);
 
 		uint32_t add_thread(boost::function0<void> const & thread_func);
+		bool finished(boost::uint32_t thread_id);
 		void join(uint32_t thread_id);
 		void join_all();
 
