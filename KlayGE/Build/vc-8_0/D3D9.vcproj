@@ -210,6 +210,22 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9Texture1D.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9Texture2D.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9Texture3D.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9TextureCube.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9VideoMode.cpp"
 				>
 			</File>

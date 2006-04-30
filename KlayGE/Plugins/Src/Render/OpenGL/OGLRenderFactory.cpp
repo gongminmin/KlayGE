@@ -33,25 +33,25 @@ namespace KlayGE
 
 	TexturePtr OGLRenderFactory::MakeTexture1D(uint32_t width, uint16_t numMipMaps, PixelFormat format)
 	{
-		return TexturePtr(new OGLTexture(width, numMipMaps, format));
+		return TexturePtr(new OGLTexture1D(width, numMipMaps, format));
 	}
 	
 	TexturePtr OGLRenderFactory::MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps,
 				PixelFormat format)
 	{
-		return TexturePtr(new OGLTexture(width, height, numMipMaps, format));
+		return TexturePtr(new OGLTexture2D(width, height, numMipMaps, format));
 	}
 
 	TexturePtr OGLRenderFactory::MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth,
 				uint16_t numMipMaps, PixelFormat format)
 	{
-		return TexturePtr(new OGLTexture(width, height, depth, numMipMaps, format));
+		return TexturePtr(new OGLTexture3D(width, height, depth, numMipMaps, format));
 	}
 	
 	TexturePtr OGLRenderFactory::MakeTextureCube(uint32_t size, uint16_t numMipMaps,
 				PixelFormat format)
 	{
-		return TexturePtr(new OGLTexture(size, true, numMipMaps, format));
+		return TexturePtr(new OGLTextureCube(size, true, numMipMaps, format));
 	}
 
 	RenderTexturePtr OGLRenderFactory::MakeRenderTexture()

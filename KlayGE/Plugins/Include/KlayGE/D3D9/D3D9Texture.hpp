@@ -45,6 +45,42 @@ namespace KlayGE
 {
 	class D3D9Texture : public Texture, public D3D9Resource
 	{
+	public:
+		explicit D3D9Texture(TextureType type);
+		virtual ~D3D9Texture();
+
+		std::wstring const & Name() const;
+
+		void CustomAttribute(std::string const & name, void* pData);
+
+		virtual uint32_t Width(int level) const;
+		virtual uint32_t Height(int level) const;
+		virtual uint32_t Depth(int level) const;
+
+		virtual void CopyToMemory1D(int level, void* data);
+		virtual void CopyToMemory2D(int level, void* data);
+		virtual void CopyToMemory3D(int level, void* data);
+		virtual void CopyToMemoryCube(CubeFaces face, int level, void* data);
+
+		virtual void CopyMemoryToTexture1D(int level, void* data, PixelFormat pf,
+			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_widtht);
+		virtual void CopyMemoryToTexture2D(int level, void* data, PixelFormat pf,
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
+			uint32_t src_width, uint32_t src_height);
+		virtual void CopyMemoryToTexture3D(int level, void* data, PixelFormat pf,
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
+			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
+			uint32_t src_width, uint32_t src_height, uint32_t src_depth);
+		virtual void CopyMemoryToTextureCube(CubeFaces face, int level, void* data, PixelFormat pf,
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
+			uint32_t src_width, uint32_t src_height);
+
+		void Usage(TextureUsage usage);
+
+		boost::shared_ptr<IDirect3DBaseTexture9> D3DBaseTexture() const
+			{ return d3dBaseTexture_; }
+
+	protected:
 		typedef boost::shared_ptr<IDirect3DDevice9>			IDirect3DDevice9Ptr;
 		typedef boost::shared_ptr<IDirect3DTexture9>		IDirect3DTexture9Ptr;
 		typedef boost::shared_ptr<IDirect3DVolumeTexture9>	IDirect3DVolumeTexture9Ptr;
@@ -53,16 +89,99 @@ namespace KlayGE
 		typedef boost::shared_ptr<IDirect3DSurface9>		IDirect3DSurface9Ptr;
 		typedef boost::shared_ptr<IDirect3DVolume9>			IDirect3DVolume9Ptr;
 
+	protected:
+		D3DFORMAT ConvertFormat(PixelFormat format);
+		PixelFormat ConvertFormat(D3DFORMAT format);
+
+		void CopySurfaceToMemory(boost::shared_ptr<IDirect3DSurface9> const & surface, void* data);
+
+	protected:
+		IDirect3DDevice9Ptr			d3dDevice_;
+		IDirect3DBaseTexture9Ptr	d3dBaseTexture_;
+	};
+
+	typedef boost::shared_ptr<D3D9Texture> D3D9TexturePtr;
+
+
+	class D3D9Texture1D : public D3D9Texture
+	{
 	public:
-		D3D9Texture(uint32_t width, uint16_t numMipMaps, PixelFormat format);
-		D3D9Texture(uint32_t width, uint32_t height, uint16_t numMipMaps, PixelFormat format);
-		D3D9Texture(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps, PixelFormat format);
-		D3D9Texture(uint32_t size, bool cube, uint16_t numMipMaps, PixelFormat format);
-		~D3D9Texture();
+		D3D9Texture1D(uint32_t width, uint16_t numMipMaps, PixelFormat format);
 
-		std::wstring const & Name() const;
+		uint32_t Width(int level) const;
 
-		void CustomAttribute(std::string const & name, void* pData);
+		void CopyToTexture(Texture& target);
+		
+		void CopyToMemory1D(int level, void* data);
+
+		void CopyMemoryToTexture1D(int level, void* data, PixelFormat pf,
+			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_widtht);
+
+		void BuildMipSubLevels();
+
+		boost::shared_ptr<IDirect3DTexture9> D3DTexture1D() const
+			{ return d3dTexture1D_; }
+
+	private:
+		void DoOnLostDevice();
+		void DoOnResetDevice();
+
+		void QueryBaseTexture();
+		void UpdateParams();
+
+		IDirect3DTexture9Ptr CreateTexture1D(uint32_t usage, D3DPOOL pool);
+
+	private:
+		IDirect3DTexture9Ptr		d3dTexture1D_;
+
+		std::vector<uint32_t>	widths_;
+
+		bool auto_gen_mipmaps_;
+	};
+
+	class D3D9Texture2D : public D3D9Texture
+	{
+	public:
+		D3D9Texture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, PixelFormat format);
+
+		uint32_t Width(int level) const;
+		uint32_t Height(int level) const;
+
+		void CopyToTexture(Texture& target);
+		
+		void CopyToMemory2D(int level, void* data);
+
+		void CopyMemoryToTexture2D(int level, void* data, PixelFormat pf,
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
+			uint32_t src_width, uint32_t src_height);
+
+		void BuildMipSubLevels();
+
+		boost::shared_ptr<IDirect3DTexture9> D3DTexture2D() const
+			{ return d3dTexture2D_; }
+
+	private:
+		void DoOnLostDevice();
+		void DoOnResetDevice();
+
+		void QueryBaseTexture();
+		void UpdateParams();
+
+		IDirect3DTexture9Ptr CreateTexture2D(uint32_t usage, D3DPOOL pool);
+
+	private:
+		IDirect3DTexture9Ptr		d3dTexture2D_;
+
+		std::vector<uint32_t>	widths_;
+		std::vector<uint32_t>	heights_;
+
+		bool auto_gen_mipmaps_;
+	};
+
+	class D3D9Texture3D : public D3D9Texture
+	{
+	public:
+		D3D9Texture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps, PixelFormat format);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
@@ -70,58 +189,29 @@ namespace KlayGE
 
 		void CopyToTexture(Texture& target);
 		
-		void CopyToMemory1D(int level, void* data);
-		void CopyToMemory2D(int level, void* data);
 		void CopyToMemory3D(int level, void* data);
-		void CopyToMemoryCube(CubeFaces face, int level, void* data);
 
-		void CopyMemoryToTexture1D(int level, void* data, PixelFormat pf,
-			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_widtht);
-		void CopyMemoryToTexture2D(int level, void* data, PixelFormat pf,
-			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
-			uint32_t src_width, uint32_t src_height);
 		void CopyMemoryToTexture3D(int level, void* data, PixelFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
 			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
 			uint32_t src_width, uint32_t src_height, uint32_t src_depth);
-		void CopyMemoryToTextureCube(CubeFaces face, int level, void* data, PixelFormat pf,
-			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
-			uint32_t src_width, uint32_t src_height);
 
 		void BuildMipSubLevels();
 
-		void Usage(TextureUsage usage);
-
-		boost::shared_ptr<IDirect3DTexture9> D3DTexture2D() const
-			{ return d3dTexture2D_; }
 		boost::shared_ptr<IDirect3DVolumeTexture9> D3DTexture3D() const
 			{ return d3dTexture3D_; }
-		boost::shared_ptr<IDirect3DCubeTexture9> D3DTextureCube() const
-			{ return d3dTextureCube_; }
-		boost::shared_ptr<IDirect3DBaseTexture9> D3DBaseTexture() const
-			{ return d3dBaseTexture_; }
 
 	private:
 		void DoOnLostDevice();
 		void DoOnResetDevice();
 
-		IDirect3DTexture9Ptr CreateTexture2D(uint32_t usage, D3DPOOL pool);
-		IDirect3DVolumeTexture9Ptr CreateTexture3D(uint32_t usage, D3DPOOL pool);
-		IDirect3DCubeTexture9Ptr CreateTextureCube(uint32_t usage, D3DPOOL pool);
-
 		void QueryBaseTexture();
 		void UpdateParams();
 
-		void CopySurfaceToMemory(boost::shared_ptr<IDirect3DSurface9> const & surface, void* data);
+		IDirect3DVolumeTexture9Ptr CreateTexture3D(uint32_t usage, D3DPOOL pool);
 
 	private:
-		IDirect3DDevice9Ptr			d3dDevice_;
-
-		IDirect3DTexture9Ptr		d3dTexture2D_;
 		IDirect3DVolumeTexture9Ptr	d3dTexture3D_;
-		IDirect3DCubeTexture9Ptr	d3dTextureCube_;
-
-		IDirect3DBaseTexture9Ptr	d3dBaseTexture_;
 
 		std::vector<uint32_t>	widths_;
 		std::vector<uint32_t>	heights_;
@@ -130,7 +220,45 @@ namespace KlayGE
 		bool auto_gen_mipmaps_;
 	};
 
-	typedef boost::shared_ptr<D3D9Texture> D3D9TexturePtr;
+	class D3D9TextureCube : public D3D9Texture
+	{
+	public:
+		D3D9TextureCube(uint32_t size, uint16_t numMipMaps, PixelFormat format);
+
+		uint32_t Width(int level) const;
+		uint32_t Height(int level) const;
+
+		void CopyToTexture(Texture& target);
+		
+		void CopyToMemoryCube(CubeFaces face, int level, void* data);
+
+		void CopyMemoryToTextureCube(CubeFaces face, int level, void* data, PixelFormat pf,
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
+			uint32_t src_width, uint32_t src_height);
+
+		void BuildMipSubLevels();
+
+		boost::shared_ptr<IDirect3DCubeTexture9> D3DTextureCube() const
+			{ return d3dTextureCube_; }
+
+	private:
+		void DoOnLostDevice();
+		void DoOnResetDevice();
+
+		void QueryBaseTexture();
+		void UpdateParams();
+
+		IDirect3DCubeTexture9Ptr CreateTextureCube(uint32_t usage, D3DPOOL pool);
+
+	private:
+		IDirect3DDevice9Ptr			d3dDevice_;
+
+		IDirect3DCubeTexture9Ptr	d3dTextureCube_;
+
+		std::vector<uint32_t>	widths_;
+
+		bool auto_gen_mipmaps_;
+	};
 }
 
 #endif			// _D3D9TEXTURE_HPP

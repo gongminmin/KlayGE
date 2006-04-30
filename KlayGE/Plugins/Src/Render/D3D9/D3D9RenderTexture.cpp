@@ -49,7 +49,7 @@ namespace KlayGE
 
 		this->UpdateParams(texture2D);
 
-		D3D9Texture const & tex(*checked_cast<D3D9Texture const *>(privateTex_.get()));
+		D3D9Texture2D const & tex(*checked_cast<D3D9Texture2D const *>(privateTex_.get()));
 		IDirect3DSurface9* surface;
 		tex.D3DTexture2D()->GetSurfaceLevel(0, &surface);
 		renderSurface_ = MakeCOMPtr(surface);
@@ -69,7 +69,7 @@ namespace KlayGE
 		face_ = face;
 		this->UpdateParams(textureCube);
 
-		D3D9Texture const & tex(*checked_cast<D3D9Texture const *>(privateTex_.get()));
+		D3D9TextureCube const & tex(*checked_cast<D3D9TextureCube const *>(privateTex_.get()));
 		IDirect3DSurface9* surface;
 		tex.D3DTextureCube()->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), 0, &surface);
 		renderSurface_ = MakeCOMPtr(surface);
@@ -213,17 +213,22 @@ namespace KlayGE
 	{
 		if (privateTex_)
 		{
-			D3D9Texture const & tex(static_cast<D3D9Texture&>(*privateTex_));
 			IDirect3DSurface9* surface = NULL;
 
 			switch (privateTex_->Type())
 			{
 			case Texture::TT_2D:
-				tex.D3DTexture2D()->GetSurfaceLevel(0, &surface);
+				{
+					D3D9Texture2D const & tex(*checked_cast<D3D9Texture2D const *>(privateTex_.get()));
+					tex.D3DTexture2D()->GetSurfaceLevel(0, &surface);
+				}
 				break;
 
 			case Texture::TT_Cube:
-				tex.D3DTextureCube()->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face_), 0, &surface);
+				{
+					D3D9TextureCube const & tex(*checked_cast<D3D9TextureCube const *>(privateTex_.get()));
+					tex.D3DTextureCube()->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face_), 0, &surface);
+				}
 				break;
 
 			default:

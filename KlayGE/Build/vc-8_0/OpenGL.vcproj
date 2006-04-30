@@ -197,6 +197,22 @@
 				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLTexture.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLTexture1D.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLTexture2D.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLTexture3D.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLTextureCube.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Í·ÎÄ¼þ"
