@@ -93,6 +93,35 @@ namespace KlayGE
 
 	void OGLTextureCube::CopyToTexture(Texture& target)
 	{
+		GLint gl_internalFormat;
+		GLenum gl_format;
+		GLenum gl_type;
+		this->Convert(gl_internalFormat, gl_format, gl_type, format_);
+
+		GLint gl_target_internal_format;
+		GLenum gl_target_format;
+		GLenum gl_target_type;
+		this->Convert(gl_target_internal_format, gl_target_format, gl_target_type, target.Format());
+
+		std::vector<uint8_t> data_in;
+		std::vector<uint8_t> data_out;
+		for (int level = 0; level < numMipMaps_; ++ level)
+		{
+			data_in.resize(this->Width(level) * this->Height(level) * bpp_ / 8);
+			data_out.resize(target.Width(level) * target.Height(level) * target.Bpp() / 8);
+
+			for (int face = 0; face < 6; ++ face)
+			{
+				this->CopyToMemoryCube(static_cast<CubeFaces>(face), level, &data_in[0]);
+
+				gluScaleImage(gl_format, this->Width(level), this->Height(level), GL_UNSIGNED_BYTE, &data_in[0],
+					target.Width(0), target.Height(0), gl_type, &data_out[0]);
+
+				target.CopyMemoryToTextureCube(static_cast<CubeFaces>(face), level, &data_out[0], format_,
+					target.Width(level), target.Height(level), 0, 0,
+					target.Width(level), target.Height(level));
+			}
+		}
 	}
 
 	void OGLTextureCube::CopyToMemoryCube(CubeFaces face, int level, void* data)

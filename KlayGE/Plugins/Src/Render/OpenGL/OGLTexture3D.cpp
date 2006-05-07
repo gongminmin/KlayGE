@@ -90,8 +90,44 @@ namespace KlayGE
 		return static_cast<GLint>(heights_[level]);
 	}
 
-	void OGLTexture3D::CopyToTexture(Texture& /*target*/)
+	uint32_t OGLTexture3D::Depth(int level) const
 	{
+		return static_cast<GLint>(depths_[level]);
+	}
+
+	void OGLTexture3D::CopyToTexture(Texture& target)
+	{
+		GLint gl_internalFormat;
+		GLenum gl_format;
+		GLenum gl_type;
+		this->Convert(gl_internalFormat, gl_format, gl_type, format_);
+
+		GLint gl_target_internal_format;
+		GLenum gl_target_format;
+		GLenum gl_target_type;
+		this->Convert(gl_target_internal_format, gl_target_format, gl_target_type, target.Format());
+
+		std::vector<uint8_t> data_in;
+		std::vector<uint8_t> data_out;
+		for (int level = 0; level < numMipMaps_; ++ level)
+		{
+			data_in.resize(this->Width(level) * this->Height(level) * this->Depth(level) * bpp_ / 8);
+			data_out.resize(target.Width(level) * target.Height(level) * target.Depth(level) * target.Bpp() / 8);
+
+			this->CopyToMemory3D(level, &data_in[0]);
+
+			for (uint32_t i = 0; i < this->Depth(level); ++ i)
+			{
+				gluScaleImage(gl_format, this->Width(level), this->Height(level), GL_UNSIGNED_BYTE,
+					&data_in[this->Width(level) * this->Height(level) * bpp_ / 8 * i],
+					target.Width(0), target.Height(0), gl_type,
+					&data_out[target.Width(level) * target.Height(level) * bpp_ / 8 * i]);
+			}
+
+			target.CopyMemoryToTexture3D(level, &data_out[0], format_,
+				target.Width(level), target.Height(level), target.Depth(level), 0, 0, 0,
+				target.Width(level), target.Height(level), target.Depth(level));
+		}
 	}
 
 	void OGLTexture3D::CopyToMemory3D(int level, void* data)
