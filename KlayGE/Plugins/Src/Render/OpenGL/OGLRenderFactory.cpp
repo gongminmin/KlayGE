@@ -51,7 +51,7 @@ namespace KlayGE
 	TexturePtr OGLRenderFactory::MakeTextureCube(uint32_t size, uint16_t numMipMaps,
 				PixelFormat format)
 	{
-		return TexturePtr(new OGLTextureCube(size, true, numMipMaps, format));
+		return TexturePtr(new OGLTextureCube(size, numMipMaps, format));
 	}
 
 	RenderTexturePtr OGLRenderFactory::MakeRenderTexture()
