@@ -57,6 +57,7 @@ __________________________________________________________________
 编译OggWav插件需要Vorbis SDK，在http://www.vorbis.com下载。
 编译OpenAL插件需要OpenAL SDK，在http://www.openal.org下载。
 编译OpenGL插件需要NVIDIA Cg，在http://developer.nvidia.com/page/cg_main.html下载。
+由于KlayGE在VC下使用的运行库是多线程的DLL，所以需要把所有连接到KlayGE的exe项目的运行库改为多线程DLL（Project->Properties->Configuration Properties->C/C++->Code Generation->RuntimeLibrary，选择Multi-threaded Debug DLL/Multi-threaded DLL）。
 
 __________________________________________________________________
 
