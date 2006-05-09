@@ -45,7 +45,7 @@ namespace KlayGE
 		glDeleteBuffers(1, &vb_);
 	}
 
-	void OGLGraphicsBuffer::DoCreate()
+	void OGLGraphicsBuffer::DoResize()
 	{
 		BOOST_ASSERT(size_in_byte_ != 0);
 
