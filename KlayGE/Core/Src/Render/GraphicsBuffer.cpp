@@ -47,7 +47,7 @@ namespace KlayGE
 		{
 		}
 
-		void DoCreate()
+		void DoResize()
 		{
 		}
 	};
@@ -70,7 +70,7 @@ namespace KlayGE
 	void GraphicsBuffer::Resize(uint32_t size_in_byte)
 	{
 		size_in_byte_ = size_in_byte;
-		this->DoCreate();
+		this->DoResize();
 	}
 
 	void GraphicsBuffer::CopyToBuffer(GraphicsBuffer& rhs)
