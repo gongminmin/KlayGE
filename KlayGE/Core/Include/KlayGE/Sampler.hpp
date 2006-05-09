@@ -1,8 +1,11 @@
 // Sampler.hpp
 // KlayGE 渲染样本类 实现文件
-// Ver 3.0.0
-// 版权所有(C) 龚敏敏, 2005
+// Ver 3.2.0
+// 版权所有(C) 龚敏敏, 2005-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.2.0
+// 去掉了TextureMatrix (2006.5.9)
 //
 // 3.0.0
 // 增加了TAM_Border (2005.8.30)
@@ -88,9 +91,6 @@ namespace KlayGE
 		void MipMapLodBias(float bias);
 		float MipMapLodBias() const;
 
-		void TextureMatrix(Matrix4 const & mat);
-		Matrix4 const & TextureMatrix() const;
-
 	private:
 		TexturePtr tex_;
 
@@ -101,8 +101,6 @@ namespace KlayGE
 		uint32_t anisotropy_;
 		uint32_t max_mip_level_;
 		float mip_map_lod_bias_;
-
-		Matrix4 mat_;
 	};
 }
 

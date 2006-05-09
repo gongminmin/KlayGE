@@ -597,15 +597,6 @@ namespace KlayGE
 				bias = std::min(sampler->MipMapLodBias(), bias);
 				glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, bias);
 			}
-
-			{
-				Matrix4 oglMat(MathLib::LHToRH(sampler->TextureMatrix()));
-
-				glPushAttrib(GL_TRANSFORM_BIT);
-				glMatrixMode(GL_TEXTURE);
-				glLoadMatrixf(&oglMat(0, 0));
-				glPopAttrib();
-			}
 		}
 	}
 

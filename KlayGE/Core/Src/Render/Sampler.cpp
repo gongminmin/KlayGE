@@ -1,8 +1,11 @@
 // Sampler.cpp
 // KlayGE 渲染样本类 实现文件
-// Ver 2.8.0
-// 版权所有(C) 龚敏敏, 2005
+// Ver 3.2.0
+// 版权所有(C) 龚敏敏, 2005-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.2.0
+// 去掉了TextureMatrix (2006.5.9)
 //
 // 2.8.0
 // 初次建立 (2005.7.30)
@@ -22,8 +25,7 @@ namespace KlayGE
 			filter_(TFO_Point),
 			anisotropy_(1),
 			max_mip_level_(1),
-			mip_map_lod_bias_(0),
-			mat_(Matrix4::Identity())
+			mip_map_lod_bias_(0)
 	{
 	}
 
@@ -150,19 +152,5 @@ namespace KlayGE
 	float Sampler::MipMapLodBias() const
 	{
 		return mip_map_lod_bias_;
-	}
-
-	// 设置纹理矩阵
-	/////////////////////////////////////////////////////////////////////////////////
-	void Sampler::TextureMatrix(Matrix4 const & mat)
-	{
-		mat_ = mat;
-	}
-	
-	// 获取纹理矩阵
-	/////////////////////////////////////////////////////////////////////////////////
-	Matrix4 const & Sampler::TextureMatrix() const
-	{
-		return mat_;
 	}
 }

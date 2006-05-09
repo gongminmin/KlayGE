@@ -681,20 +681,6 @@ namespace KlayGE
 			float bias = sampler->MipMapLodBias();
 			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPMAPLODBIAS, *reinterpret_cast<DWORD*>(&bias)));
 
-			if (Matrix4::Identity() == sampler->TextureMatrix())
-			{
-				TIF(d3dDevice_->SetTextureStageState(stage, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE));
-			}
-			else
-			{
-				// Set 2D input
-				// TODO: deal with 3D coordinates when cubic environment mapping supported
-				TIF(d3dDevice_->SetTextureStageState(stage, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2));
-
-				D3DMATRIX d3dMat(D3D9Mapping::Mapping(sampler->TextureMatrix()));
-				TIF(d3dDevice_->SetTransform(static_cast<D3DTRANSFORMSTATETYPE>(D3DTS_TEXTURE0 + stage), &d3dMat));
-			}
-
 			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_SRGBTEXTURE, IsSRGB(texture->Format())));
 		}
 	}
