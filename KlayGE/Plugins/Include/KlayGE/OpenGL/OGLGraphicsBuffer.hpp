@@ -53,7 +53,7 @@ namespace KlayGE
 		}
 
 	private:
-		void DoCreate();
+		void DoResize();
 
 	private:
 		GLuint vb_;

@@ -1,4 +1,4 @@
-// D3D9Graphics.hpp
+// D3D9GraphicsBuffer.hpp
 // KlayGE D3D9图形缓冲区类 头文件
 // Ver 3.2.0
 // 版权所有(C) 龚敏敏, 2006
@@ -10,8 +10,8 @@
 // 修改记录
 /////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _D3D9VERTEXSTREAM_HPP
-#define _D3D9VERTEXSTREAM_HPP
+#ifndef _D3D9GRAPHICSBUFFER_HPP
+#define _D3D9GRAPHICSBUFFER_HPP
 
 #include <boost/smart_ptr.hpp>
 
@@ -40,7 +40,7 @@ namespace KlayGE
 		void SwitchFormat(IndexFormat format);
 
 	private:
-		void DoCreate();
+		void DoResize();
 
 	private:
 		void DoOnLostDevice();
@@ -65,7 +65,7 @@ namespace KlayGE
 		boost::shared_ptr<IDirect3DVertexBuffer9> D3D9Buffer() const;
 
 	private:
-		void DoCreate();
+		void DoResize();
 
 	private:
 		void DoOnLostDevice();
@@ -78,4 +78,4 @@ namespace KlayGE
 	typedef boost::shared_ptr<D3D9VertexBuffer> D3D9VertexBufferPtr;
 }
 
-#endif			// _D3D9VERTEXSTREAM_HPP
+#endif			// _D3D9GRAPHICSBUFFER_HPP
