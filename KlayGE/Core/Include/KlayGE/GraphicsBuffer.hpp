@@ -116,7 +116,7 @@ namespace KlayGE
 		void CopyToBuffer(GraphicsBuffer& rhs);
 
 	private:
-		virtual void DoCreate() = 0;
+		virtual void DoResize() = 0;
 
 	protected:
 		BufferUsage usage_;
