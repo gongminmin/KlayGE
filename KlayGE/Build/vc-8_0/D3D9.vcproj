@@ -166,7 +166,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9GraphicsBuffer.cpp"
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9IndexBuffer.cpp"
 				>
 			</File>
 			<File
@@ -223,6 +223,10 @@
 			</File>
 			<File
 				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9TextureCube.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9VertexBuffer.cpp"
 				>
 			</File>
 			<File
