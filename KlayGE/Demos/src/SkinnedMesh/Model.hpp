@@ -1,0 +1,41 @@
+#ifndef _MODEL_HPP
+#define _MODEL_HPP
+
+#include <KlayGE/PreDeclare.hpp>
+#include <string>
+#include <KlayGE/Mesh.hpp>
+
+class MD5SkinnedModel : public KlayGE::SkinnedModel
+{
+public:
+	MD5SkinnedModel();
+
+	void SetTime(float time);
+	void SetEyePos(const KlayGE::Vector3& eye_pos);
+};
+
+class MD5SkinnedMesh : public KlayGE::SkinnedMesh
+{
+public:
+	explicit MD5SkinnedMesh(boost::shared_ptr<MD5SkinnedModel> model);
+
+	void OnRenderBegin();
+
+	void SetWorld(const KlayGE::Matrix4& mat);
+	void SetShaderName(std::string const & shader);
+	void SetEyePos(const KlayGE::Vector3& eye_pos);
+
+private:
+	void BuildRenderable();
+
+	KlayGE::Matrix4 world_;
+
+	std::string shader_;
+	KlayGE::SamplerPtr diffuse_map_, normal_map_, specular_map_;
+
+	KlayGE::Vector3 eye_pos_;
+
+	boost::shared_ptr<MD5SkinnedModel> model_;
+};
+
+#endif		// _MODEL_HPP
