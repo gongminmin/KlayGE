@@ -126,10 +126,10 @@ namespace KlayGE
 			return 0;
 		}
 
-		void StencilBufferFunction(CompareFunction /*func*/, uint32_t /*refValue*/, uint32_t /*mask*/)
+		void StencilBufferFunction(FaceType /*face*/, CompareFunction /*func*/, uint32_t /*refValue*/, uint32_t /*mask*/)
 		{
 		}
-		void StencilBufferOperation(StencilOperation /*fail*/, StencilOperation /*depth_fail*/, StencilOperation /*pass*/)
+		void StencilBufferOperation(FaceType /*face*/, StencilOperation /*fail*/, StencilOperation /*depth_fail*/, StencilOperation /*pass*/)
 		{
 		}
 

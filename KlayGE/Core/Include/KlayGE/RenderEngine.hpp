@@ -137,6 +137,13 @@ namespace KlayGE
 			CBM_Stencil = 1UL << 2
 		};
 
+		enum FaceType
+		{
+			FT_Front,
+			FT_Back,
+			FT_Front_Back
+		};
+
 	public:
 		RenderEngine();
 		virtual ~RenderEngine();
@@ -195,11 +202,11 @@ namespace KlayGE
 		virtual uint16_t StencilBufferBitDepth() = 0;
 
 		// Sets the stencil test function, reference value and mask value.
-		virtual void StencilBufferFunction(CompareFunction func, uint32_t refValue, uint32_t mask) = 0;
+		virtual void StencilBufferFunction(FaceType face, CompareFunction func, uint32_t refValue, uint32_t mask) = 0;
 		// Sets the action to perform if the stencil test fails,
 		// if the stencil test passes, but the depth buffer test fails, and
 		// if both the stencil test and the depth buffer test passes.
-		virtual void StencilBufferOperation(StencilOperation fail, StencilOperation depth_fail, StencilOperation pass) = 0;
+		virtual void StencilBufferOperation(FaceType face, StencilOperation fail, StencilOperation depth_fail, StencilOperation pass) = 0;
 
 		// Get render device capabilities
 		RenderDeviceCaps const & DeviceCaps() const;

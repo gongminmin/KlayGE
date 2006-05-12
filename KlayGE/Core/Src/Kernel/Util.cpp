@@ -105,52 +105,31 @@ namespace KlayGE
 		boost::thread::sleep(xt);
 	}
 
-	// uint32_t本地格式到网络格式
+	// Endian的切换
 	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t ToNet(uint32_t host)
+	template <>
+	void EndianSwitch<2>(void* p)
 	{
-		union
-		{
-			uint8_t byte[sizeof(uint32_t) / sizeof(uint8_t)];
-			uint32_t net;
-		} ret;
-
-		ret.byte[0] = static_cast<uint8_t>((host & 0xFF000000) >> 24);
-		ret.byte[1] = static_cast<uint8_t>((host & 0x00FF0000) >> 16);
-		ret.byte[2] = static_cast<uint8_t>((host & 0x0000FF00) >> 8);
-		ret.byte[3] = static_cast<uint8_t>((host & 0x000000FF) >> 0);
-
-		return ret.net;
+		uint8_t* bytes = static_cast<uint8_t*>(p);
+		std::swap(bytes[0], bytes[1]);
 	}
 
-	// uint16_t本地格式到网络格式
-	/////////////////////////////////////////////////////////////////////////////////
-	uint16_t ToNet(uint16_t host)
+	template <>
+	void EndianSwitch<4>(void* p)
 	{
-		union
-		{
-			uint8_t byte[sizeof(uint16_t) / sizeof(uint8_t)];
-			uint16_t net;
-		} ret;
-
-		ret.byte[0] = static_cast<uint8_t>((host & 0xFF00) >> 8);
-		ret.byte[1] = static_cast<uint8_t>((host & 0x00FF) >> 0);
-
-		return ret.net;
+		uint8_t* bytes = static_cast<uint8_t*>(p);
+		std::swap(bytes[0], bytes[3]);
+		std::swap(bytes[1], bytes[2]);
 	}
 
-	// uint32_t网络格式到本地格式
-	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t ToHost(uint32_t net)
+	template <>
+	void EndianSwitch<8>(void* p)
 	{
-		return ToNet(net);
-	}
-
-	// uint16_t网络格式到本地格式
-	/////////////////////////////////////////////////////////////////////////////////
-	uint16_t ToHost(uint16_t net)
-	{
-		return ToNet(net);
+		uint8_t* bytes = static_cast<uint8_t*>(p);
+		std::swap(bytes[0], bytes[7]);
+		std::swap(bytes[1], bytes[6]);
+		std::swap(bytes[2], bytes[5]);
+		std::swap(bytes[3], bytes[4]);
 	}
 
 	// 获取上一个错误代码

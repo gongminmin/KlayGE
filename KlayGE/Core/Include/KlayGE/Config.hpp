@@ -13,4 +13,7 @@
 #define D3D_DEBUG_INFO
 #endif
 
+// 定义本地的endian方式
+#define _LITTLE_ENDIAN
+
 #endif		// _CONFIG_HPP

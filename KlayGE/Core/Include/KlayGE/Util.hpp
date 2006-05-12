@@ -1,11 +1,12 @@
 // Util.hpp
 // KlayGE 实用函数库 头文件
 // Ver 3.2.0
-// 版权所有(C) 龚敏敏, 2003-2005
+// 版权所有(C) 龚敏敏, 2003-2006
 // Homepage: http://klayge.sourceforge.net
 //
 // 3.2.0
 // 增加了copy_if (2006.2.23)
+// 增加了EndianSwitch (2006.5.13) 
 //
 // 3.0.0
 // 增加了checked_cast (2005.9.26)
@@ -102,11 +103,46 @@ namespace KlayGE
 	// 暂停几毫秒
 	void Sleep(uint32_t ms);
 
-	// 网络格式和本地格式之间转换
-	uint32_t ToNet(uint32_t host);
-	uint16_t ToNet(uint16_t host);
-	uint32_t ToHost(uint32_t network);
-	uint16_t ToHost(uint16_t network);
+	// Endian的转换
+	template <int size>
+	void EndianSwitch(void* p);
+
+	template <>
+	void EndianSwitch<2>(void* p);
+	template <>
+	void EndianSwitch<4>(void* p);
+	template <>
+	void EndianSwitch<8>(void* p);
+
+	template <int size>
+	void NativeToBigEndian(void* p)
+	{
+	#ifdef _LITTLE_ENDIAN
+		EndianSwitch<size>(p);
+	#else
+		p;
+	#endif
+	}
+	template <int size>
+	void NativeToLittleEndian(void* p)
+	{
+	#ifdef _LITTLE_ENDIAN
+		p;
+	#else
+		EndianSwitch<size>(p);
+	#endif
+	}
+
+	template <int size>
+	void BigEndianToNative(void* p)
+	{
+		NativeToBigEndian(p);
+	}
+	template <int size>
+	void LittleEndianToNative(void* p)
+	{
+		NativeToLittleEndian(p);
+	}
 
 	// 得到COM对象的智能指针
 	template <typename T>
