@@ -188,6 +188,25 @@ namespace KlayGE
 		}
 	}
 
+	GLenum OGLMapping::Mapping(RenderEngine::FaceType mode)
+	{
+		switch (mode)
+		{
+		case RenderEngine::FT_Front:
+			return GL_FRONT;
+
+		case RenderEngine::FT_Back:
+			return GL_BACK;
+
+		case RenderEngine::FT_Front_Back:
+			return GL_FRONT_AND_BACK;
+
+		default:
+			BOOST_ASSERT(false);
+			return GL_FRONT;
+		}
+	}
+
 	GLint OGLMapping::Mapping(Sampler::TexAddressingMode mode)
 	{
 		switch (mode)

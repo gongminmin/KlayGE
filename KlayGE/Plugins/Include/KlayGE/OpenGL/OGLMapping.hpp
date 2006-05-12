@@ -37,6 +37,7 @@ namespace KlayGE
 		static GLenum Mapping(RenderEngine::AlphaBlendFactor factor);
 		static GLenum Mapping(RenderEngine::FillMode mode);
 		static GLenum Mapping(RenderEngine::ShadeOptions so);
+		static GLenum Mapping(RenderEngine::FaceType mode);
 		static GLint Mapping(Sampler::TexAddressingMode mode);
 
 		static void Mapping(GLenum& primType, uint32_t& primCount, RenderLayout const & rl);

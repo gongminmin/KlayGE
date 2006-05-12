@@ -734,25 +734,45 @@ namespace KlayGE
 
 	// 设置模板比较函数，参考值和掩码
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::StencilBufferFunction(CompareFunction func, uint32_t refValue, uint32_t mask)
+	void D3D9RenderEngine::StencilBufferFunction(FaceType face, CompareFunction func, uint32_t refValue, uint32_t mask)
 	{
 		BOOST_ASSERT(d3dDevice_);
 
-		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILFUNC, D3D9Mapping::Mapping(func)));
-		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILREF, refValue));
-		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILMASK, mask));
+		if ((FT_Front == face) || (FT_Front_Back == face))
+		{
+			TIF(d3dDevice_->SetRenderState(D3DRS_STENCILFUNC, D3D9Mapping::Mapping(func)));
+			TIF(d3dDevice_->SetRenderState(D3DRS_STENCILREF, refValue));
+			TIF(d3dDevice_->SetRenderState(D3DRS_STENCILMASK, mask));
+		}
+
+		if ((FT_Back == face) || (FT_Front_Back == face))
+		{
+			TIF(d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFUNC, D3D9Mapping::Mapping(func)));
+			TIF(d3dDevice_->SetRenderState(D3DRS_STENCILREF, refValue));
+			TIF(d3dDevice_->SetRenderState(D3DRS_STENCILMASK, mask));
+		}
 	}
 
 	// 设置模板缓冲区模板测试失败，深度测试失败和通过后的操作
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::StencilBufferOperation(StencilOperation fail,
+	void D3D9RenderEngine::StencilBufferOperation(FaceType face, StencilOperation fail,
 		StencilOperation depth_fail, StencilOperation pass)
 	{
 		BOOST_ASSERT(d3dDevice_);
 
-		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILFAIL, D3D9Mapping::Mapping(fail)));
-		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILZFAIL, D3D9Mapping::Mapping(depth_fail)));
-		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILPASS, D3D9Mapping::Mapping(pass)));
+		if ((FT_Front == face) || (FT_Front_Back == face))
+		{
+			TIF(d3dDevice_->SetRenderState(D3DRS_STENCILFAIL, D3D9Mapping::Mapping(fail)));
+			TIF(d3dDevice_->SetRenderState(D3DRS_STENCILZFAIL, D3D9Mapping::Mapping(depth_fail)));
+			TIF(d3dDevice_->SetRenderState(D3DRS_STENCILPASS, D3D9Mapping::Mapping(pass)));
+		}
+
+		if ((FT_Back == face) || (FT_Front_Back == face))
+		{
+			TIF(d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFAIL, D3D9Mapping::Mapping(fail)));
+			TIF(d3dDevice_->SetRenderState(D3DRS_CCW_STENCILZFAIL, D3D9Mapping::Mapping(depth_fail)));
+			TIF(d3dDevice_->SetRenderState(D3DRS_CCW_STENCILPASS, D3D9Mapping::Mapping(pass)));
+		}
 	}
 
 	// 打开/关闭点精灵模式

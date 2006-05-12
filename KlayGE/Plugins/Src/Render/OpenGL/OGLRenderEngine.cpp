@@ -641,17 +641,19 @@ namespace KlayGE
 
 		// 设置模板比较函数，参考值和掩码
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::StencilBufferFunction(CompareFunction func, uint32_t refValue, uint32_t mask)
+	void OGLRenderEngine::StencilBufferFunction(FaceType face, CompareFunction func, uint32_t refValue, uint32_t mask)
 	{
-		glStencilFunc(OGLMapping::Mapping(func), refValue, mask);
+		glStencilFuncSeparate(OGLMapping::Mapping(face),
+			OGLMapping::Mapping(func), refValue, mask);
 	}
 
 	// 设置模板缓冲区模板测试失败，深度测试失败和通过后的操作
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::StencilBufferOperation(StencilOperation fail,
+	void OGLRenderEngine::StencilBufferOperation(FaceType face, StencilOperation fail,
 		StencilOperation depth_fail, StencilOperation pass)
 	{
-		glStencilOp(OGLMapping::Mapping(fail), OGLMapping::Mapping(depth_fail), OGLMapping::Mapping(pass));
+		glStencilOpSeparate(OGLMapping::Mapping(face),
+			OGLMapping::Mapping(fail), OGLMapping::Mapping(depth_fail), OGLMapping::Mapping(pass));
 	}
 
 	// 打开/关闭点精灵模式
