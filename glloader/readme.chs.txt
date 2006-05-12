@@ -1,8 +1,12 @@
-GLLoader v2.3.0
+GLLoader v2.4.0
 
 GLLoader是一个OpenGL扩展载入库，可以载入OpenGL1.0-2.0，以及WGL、GLX等OpenGL扩展，只要编写xml脚本就能自动生成扩展载入代码。
 GLLoader的特点是按照功能划分扩展，而不像其他同类产品是通过版本和扩展名称载入。
 GLLoader遵循GPL协议。协议的内容可以参考附带的gpl.txt
+
+2.4.0
+增加了一些扩展
+支持x64
 
 2.3.0 (2005.7.23)
 支持特性字符串的提升
