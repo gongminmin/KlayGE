@@ -61,7 +61,7 @@ int main()
 	settings.fullScreen = false;
 	settings.ConfirmDevice = ConfirmDevice;
 
-	app.Create("TestMD5", settings);
+	app.Create("SkinnedMesh", settings);
 	app.Run();
 
 	return 0;
