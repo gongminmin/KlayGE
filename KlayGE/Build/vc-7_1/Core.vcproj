@@ -99,415 +99,537 @@
 	<Files>
 		<Filter
 			Name="渲染系统"
-			Filter="">
+			>
 			<Filter
 				Name="源文件"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\Core\Src\Render\Camera.cpp">
+					RelativePath="..\..\Core\Src\Render\Camera.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Render\CameraController.cpp">
+					RelativePath="..\..\Core\Src\Render\CameraController.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Render\Font.cpp">
+					RelativePath="..\..\Core\Src\Render\Font.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Render\KMesh.cpp">
+					RelativePath="..\..\Core\Src\Render\GraphicsBuffer.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Render\Mesh.cpp">
+					RelativePath="..\..\Core\Src\Render\KMesh.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Render\Query.cpp">
+					RelativePath="..\..\Core\Src\Render\Mesh.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Render\Renderable.cpp">
+					RelativePath="..\..\Core\Src\Render\Query.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Render\RenderableHelper.cpp">
+					RelativePath="..\..\Core\Src\Render\Renderable.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Render\RenderEffect.cpp">
+					RelativePath="..\..\Core\Src\Render\RenderableHelper.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Render\RenderEngine.cpp">
+					RelativePath="..\..\Core\Src\Render\RenderEffect.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Render\RenderFactory.cpp">
+					RelativePath="..\..\Core\Src\Render\RenderEngine.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Render\RenderTarget.cpp">
+					RelativePath="..\..\Core\Src\Render\RenderFactory.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Render\RenderTexture.cpp">
+					RelativePath="..\..\Core\Src\Render\RenderGraphicsBuffer.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Render\RenderVertexStream.cpp">
+					RelativePath="..\..\Core\Src\Render\RenderLayout.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Render\RenderWindow.cpp">
+					RelativePath="..\..\Core\Src\Render\RenderTarget.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Render\Sampler.cpp">
+					RelativePath="..\..\Core\Src\Render\RenderTexture.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Render\Texture.cpp">
+					RelativePath="..\..\Core\Src\Render\RenderWindow.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Render\VertexBuffer.cpp">
+					RelativePath="..\..\Core\Src\Render\Sampler.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Src\Render\Texture.cpp"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="头文件"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Camera.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Camera.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\CameraController.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\CameraController.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Font.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Font.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\KMesh.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\GraphicsBuffer.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Mesh.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\KMesh.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\OcclusionQuery.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Mesh.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Query.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\OcclusionQuery.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Renderable.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Query.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\RenderableHelper.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Renderable.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\RenderDeviceCaps.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\RenderableHelper.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\RenderEffect.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\RenderDeviceCaps.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\RenderEngine.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\RenderEffect.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\RenderFactory.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\RenderEngine.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\RenderSettings.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\RenderFactory.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\RenderTarget.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\RenderGraphicsBuffer.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\RenderTexture.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\RenderLayout.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\RenderVertexStream.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\RenderSettings.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\RenderWindow.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\RenderTarget.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Sampler.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\RenderTexture.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Texture.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\RenderWindow.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\VertexBuffer.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Sampler.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Viewport.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Texture.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\Viewport.hpp"
+					>
 				</File>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="核心"
-			Filter="">
+			>
 			<Filter
 				Name="源文件"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\Core\Src\Kernel\ResLoader.cpp">
+					RelativePath="..\..\Core\Src\Kernel\ResLoader.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Kernel\Util.cpp">
+					RelativePath="..\..\Core\Src\Kernel\thread_pool.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Src\Kernel\Util.cpp"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="头文件"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Config.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Config.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Context.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Context.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Event.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Event.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\KlayGE.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\KlayGE.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\MapVector.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\MapVector.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\PreDeclare.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\PreDeclare.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\ResLoader.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\ResLoader.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\SetVector.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\SetVector.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\ThrowErr.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\thread_pool.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Trace.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\ThrowErr.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Types.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Timer.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Util.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Trace.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\Types.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\Util.hpp"
+					>
 				</File>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="音频系统"
-			Filter="">
+			>
 			<Filter
 				Name="源文件"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\Core\Src\Audio\AudioBuffer.cpp">
+					RelativePath="..\..\Core\Src\Audio\AudioBuffer.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Audio\AudioDataSource.cpp">
+					RelativePath="..\..\Core\Src\Audio\AudioDataSource.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Audio\AudioEngine.cpp">
+					RelativePath="..\..\Core\Src\Audio\AudioEngine.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Audio\AudioFactory.cpp">
+					RelativePath="..\..\Core\Src\Audio\AudioFactory.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Audio\MusicBuffer.cpp">
+					RelativePath="..\..\Core\Src\Audio\MusicBuffer.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Audio\SoundBuffer.cpp">
+					RelativePath="..\..\Core\Src\Audio\SoundBuffer.cpp"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="头文件"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Audio.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Audio.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\AudioDataSource.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\AudioDataSource.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\AudioFactory.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\AudioFactory.hpp"
+					>
 				</File>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="数学库"
-			Filter="">
+			>
 			<Filter
 				Name="源文件"
-				Filter="">
+				>
 			</Filter>
 			<Filter
 				Name="头文件"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Bound.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Bound.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Box.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Box.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Color.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Color.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\half.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\half.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Math.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Math.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Matrix.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Matrix.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\PerlinNoise.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\PerlinNoise.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Plane.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Plane.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Quaternion.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Quaternion.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Rect.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Rect.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Size.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Size.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Sphere.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Sphere.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Vector.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Vector.hpp"
+					>
 				</File>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="网络系统"
-			Filter="">
+			>
 			<Filter
 				Name="源文件"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\Core\Src\Net\Lobby.cpp">
+					RelativePath="..\..\Core\Src\Net\Lobby.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Net\Player.cpp">
+					RelativePath="..\..\Core\Src\Net\Player.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Net\Socket.cpp">
+					RelativePath="..\..\Core\Src\Net\Socket.cpp"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="头文件"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Lobby.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Lobby.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Player.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Player.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Socket.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Socket.hpp"
+					>
 				</File>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="脚本系统"
-			Filter="">
+			>
 			<Filter
 				Name="源文件"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\Core\Src\Script\Script.cpp">
+					RelativePath="..\..\Core\Src\Script\Script.cpp"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="头文件"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Script.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Script.hpp"
+					>
 				</File>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="播放系统"
-			Filter="">
+			>
 			<Filter
 				Name="源文件"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\Core\Src\Show\ShowEngine.cpp">
+					RelativePath="..\..\Core\Src\Show\ShowEngine.cpp"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="头文件"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Show.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Show.hpp"
+					>
 				</File>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="输入系统"
-			Filter="">
+			>
 			<Filter
 				Name="源文件"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\Core\Src\Input\InputActionMap.cpp">
+					RelativePath="..\..\Core\Src\Input\InputActionMap.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Input\InputDevice.cpp">
+					RelativePath="..\..\Core\Src\Input\InputDevice.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Input\InputEngine.cpp">
+					RelativePath="..\..\Core\Src\Input\InputEngine.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Input\InputFactory.cpp">
+					RelativePath="..\..\Core\Src\Input\InputFactory.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Input\Joystick.cpp">
+					RelativePath="..\..\Core\Src\Input\Joystick.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Input\Keyboard.cpp">
+					RelativePath="..\..\Core\Src\Input\Keyboard.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Input\Mouse.cpp">
+					RelativePath="..\..\Core\Src\Input\Mouse.cpp"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="头文件"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Input.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\Input.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\InputFactory.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\InputFactory.hpp"
+					>
 				</File>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="场景管理"
-			Filter="">
+			>
 			<Filter
 				Name="源文件"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\Core\Src\Scene\SceneManager.cpp">
+					RelativePath="..\..\Core\Src\Scene\SceneManager.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Scene\SceneObject.cpp">
+					RelativePath="..\..\Core\Src\Scene\SceneObject.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Scene\SceneObjectHelper.cpp">
+					RelativePath="..\..\Core\Src\Scene\SceneObjectHelper.cpp"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="头文件"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\SceneManager.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\SceneManager.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\SceneNode.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\SceneNode.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\SceneObject.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\SceneObject.hpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\SceneObjectHelper.hpp">
+					RelativePath="..\..\Core\Include\KlayGE\SceneObjectHelper.hpp"
+					>
 				</File>
 			</Filter>
 		</Filter>

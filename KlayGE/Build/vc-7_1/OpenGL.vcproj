@@ -102,37 +102,60 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLIndexStream.cpp">
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLGraphicsBuffer.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLMapping.cpp">
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLMapping.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLOcclusionQuery.cpp">
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLOcclusionQuery.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderEffect.cpp">
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderEffect.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderEngine.cpp">
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderEngine.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderFactory.cpp">
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderFactory.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderTexture.cpp">
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderGraphicsBuffer.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderVertexStream.cpp">
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderTexture.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderWindow.cpp">
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderWindow.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLTexture.cpp">
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLTexture.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLVertexStream.cpp">
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLTexture1D.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLTexture2D.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLTexture3D.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLTextureCube.cpp"
+				>
 			</File>
 		</Filter>
 		<Filter
@@ -140,40 +163,48 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLIndexStream.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLGraphicsBuffer.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLMapping.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLMapping.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLOcclusionQuery.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLOcclusionQuery.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderEffect.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderEffect.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderEngine.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderEngine.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderFactory.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderFactory.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderTexture.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderGraphicsBuffer.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderVertexStream.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderLayout.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderWindow.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderTexture.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLTexture.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderWindow.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLVertexBuffer.hpp">
-			</File>
-			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLVertexStream.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLTexture.hpp"
+				>
 			</File>
 		</Filter>
 	</Files>

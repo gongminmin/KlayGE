@@ -102,49 +102,80 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9Adapter.cpp">
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9Adapter.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9AdapterList.cpp">
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9AdapterList.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9IndexStream.cpp">
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9IndexBuffer.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9Mapping.cpp">
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9Mapping.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9OcclusionQuery.cpp">
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9OcclusionQuery.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9RenderEffect.cpp">
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9RenderEffect.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9RenderEngine.cpp">
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9RenderEngine.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9RenderFactory.cpp">
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9RenderFactory.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9RenderTexture.cpp">
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9RenderGraphicsBuffer.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9RenderVertexStream.cpp">
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9RenderLayout.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9RenderWindow.cpp">
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9RenderTexture.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9Texture.cpp">
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9RenderWindow.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9VertexBuffer.cpp">
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9Texture.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9VertexStream.cpp">
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9Texture1D.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9VideoMode.cpp">
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9Texture2D.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9Texture3D.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9TextureCube.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9VertexBuffer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9VideoMode.cpp"
+				>
 			</File>
 		</Filter>
 		<Filter
@@ -152,52 +183,64 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9Adapter.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9Adapter.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9AdapterList.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9AdapterList.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9IndexStream.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\D3D9\D3D9GraphicsBuffer.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9Mapping.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9Mapping.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9OcclusionQuery.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9OcclusionQuery.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9RenderEffect.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9RenderEffect.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9RenderEngine.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9RenderEngine.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9RenderFactory.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9RenderFactory.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9RenderTexture.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\D3D9\D3D9RenderGraphicsBuffer.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9RenderVertexStream.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\D3D9\D3D9RenderLayout.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9RenderWindow.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9RenderTexture.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9Resource.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9RenderWindow.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9Texture.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9Resource.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9VertexBuffer.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9Texture.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9VertexStream.hpp">
-			</File>
-			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9VideoMode.hpp">
+				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9VideoMode.hpp"
+				>
 			</File>
 		</Filter>
 		<Filter
