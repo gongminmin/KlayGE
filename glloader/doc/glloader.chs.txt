@@ -19,8 +19,8 @@ void* glloader_get_gl_proc_address(const char* name);
 代码自动生成
 
 由于载入代码具有极大的重复性，所以我采用了代码自动生成技术。在xml目录下的xml脚本包含一个扩展定义的typedef、常量、函数和初始化路径。用户可以根据格式写出自己需要支持的扩展脚本，然后运行autogen.py，就会在src和include目录下生成相应的载入代码。该xml格式的DTD，可以看附带的Extension.dtd。
-需要Python 2.3来运行autogen.py。
+需要Python 2.4来运行autogen.py。
 
 
-CVS
-:pserver:anonymous@cvs.sourceforge.net:/cvsroot/klayge co glloader
+SVN
+https://svn.sourceforge.net/svnroot/klayge/trunk/glloader

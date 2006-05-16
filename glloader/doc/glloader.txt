@@ -19,8 +19,8 @@ Note: When the function fails, there is not guarantee that the return value is N
 Automatic Code Generater
 
 Because writting the loading code is very boring, I developed a automatic code generater to help writting the code. There are many xml files in the "./xml" directory. Each xml contains the typedefs, tokens, functions, and initializing path of an extension. Users can write their own xml scripts, the run "autogen.py". And it'll generate the loading code in src and include directories.
-Python 2.3 is required to run "autogen.py".
+Python 2.4 is required to run "autogen.py".
 
 
-CVS
-:pserver:anonymous@cvs.sourceforge.net:/cvsroot/klayge co glloader
+SVN
+https://svn.sourceforge.net/svnroot/klayge/trunk/glloader
