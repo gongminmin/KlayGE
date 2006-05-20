@@ -1,0 +1,69 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GLX_EXT_texture_from_pixmap">
+	<Tokens>
+		<Token name="GLX_BIND_TO_TEXTURE_RGB_EXT" value="0x20D0"/>
+		<Token name="GLX_BIND_TO_TEXTURE_RGBA_EXT" value="0x20D1"/>
+		<Token name="GLX_BIND_TO_MIPMAP_TEXTURE_EXT" value="0x20D2"/>
+		<Token name="GLX_BIND_TO_TEXTURE_TARGETS_EXT" value="0x20D3"/>
+		<Token name="GLX_Y_INVERTED_EXT" value="0x20D4"/>
+
+		<Token name="GLX_TEXTURE_FORMAT_EXT" value="0x20D5"/>
+		<Token name="GLX_TEXTURE_TARGET_EXT" value="0x20D6"/>
+		<Token name="GLX_MIPMAP_TEXTURE_EXT" value="0x20D7"/>
+
+		<Token name="GLX_TEXTURE_FORMAT_NONE_EXT" value="0x20D8"/>
+		<Token name="GLX_TEXTURE_FORMAT_RGB_EXT" value="0x20D9"/>
+		<Token name="GLX_TEXTURE_FORMAT_RGBA_EXT" value="0x20DA"/>
+
+		<Token name="GLX_TEXTURE_1D_BIT_EXT" value="0x00000001"/>
+		<Token name="GLX_TEXTURE_2D_BIT_EXT" value="0x00000002"/>
+		<Token name="GLX_TEXTURE_RECTANGLE_BIT_EXT" value="0x00000004"/>
+
+		<Token name="GLX_TEXTURE_1D_EXT" value="0x20DB"/>
+		<Token name="GLX_TEXTURE_2D_EXT" value="0x20DC"/>
+		<Token name="GLX_TEXTURE_RECTANGLE_EXT" value="0x20DD"/>
+
+		<Token name="GLX_FRONT_LEFT_EXT" value="0x20DE"/>
+		<Token name="GLX_FRONT_RIGHT_EXT" value="0x20DF"/>
+		<Token name="GLX_BACK_LEFT_EXT" value="0x20E0"/>
+		<Token name="GLX_BACK_RIGHT_EXT" value="0x20E1"/>
+		<Token name="GLX_FRONT_EXT" value="GLX_FRONT_LEFT_EXT"/>
+		<Token name="GLX_BACK_EXT" value="GLX_BACK_LEFT_EXT"/>
+		<Token name="GLX_AUX0_EXT" value="0x20E2"/>
+		<Token name="GLX_AUX1_EXT" value="0x20E3"/>
+		<Token name="GLX_AUX2_EXT" value="0x20E4"/>
+		<Token name="GLX_AUX3_EXT" value="0x20E5"/>
+		<Token name="GLX_AUX4_EXT" value="0x20E6"/>
+		<Token name="GLX_AUX5_EXT" value="0x20E7"/>
+		<Token name="GLX_AUX6_EXT" value="0x20E8"/>
+		<Token name="GLX_AUX7_EXT" value="0x20E9"/> 
+		<Token name="GLX_AUX8_EXT" value="0x20EA"/>
+		<Token name="GLX_AUX9_EXT" value="0x20EB"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glXBindTexImageEXT" return="void">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXDrawable" name="drawable"/>
+			<Param type="int" name="buffer"/>
+			<Param type="const int*" name="attrib_list"/>
+		</Function>
+		<Function name="glXReleaseTexImageEXT" return="void">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXDrawable" name="drawable"/>
+			<Param type="int" name="buffer"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GLX_EXT" string="GLX_EXT_texture_from_pixmap">
+			<Name name="glXBindTexImageEXT"/>
+			<Name name="glXReleaseTexImageEXT"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GLX_EXT"/>
+	</InitPath>
+</GLExtension>
