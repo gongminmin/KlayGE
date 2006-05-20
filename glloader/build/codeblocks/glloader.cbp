@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<!DOCTYPE Code::Blocks_project_file>
-<Code::Blocks_project_file>
+<!DOCTYPE CodeBlocks_project_file>
+<CodeBlocks_project_file>
 	<FileVersion major="1" minor="1"/>
 	<Project>
 		<Option title="glloader"/>
@@ -14,7 +14,6 @@
 				<Option working_dir=""/>
 				<Option object_output=".objs"/>
 				<Option deps_output=".deps"/>
-				<Option external_deps=""/>
 				<Option type="2"/>
 				<Option compiler="0"/>
 				<Option projectResourceIncludeDirsRelation="2"/>
@@ -31,9 +30,8 @@
 			<Target title="Debug">
 				<Option output="..\..\lib\libglloader_d.a"/>
 				<Option working_dir=""/>
-				<Option object_output=".objs"/>
+				<Option object_output=".objs_d"/>
 				<Option deps_output=".deps"/>
-				<Option external_deps=""/>
 				<Option type="2"/>
 				<Option compiler="0"/>
 				<Option projectResourceIncludeDirsRelation="2"/>
@@ -186,4 +184,4 @@
 			<Option target="Debug"/>
 		</Unit>
 	</Project>
-</Code::Blocks_project_file>
+</CodeBlocks_project_file>
