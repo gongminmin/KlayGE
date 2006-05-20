@@ -1,6 +1,6 @@
 float FogFactorLinear(float fog_coord, float start, float end)
 {
-	float fog = (end - fog_coord) * (end - start);
+	float fog = (end - fog_coord) / (end - start);
 	return saturate(fog);
 }
 
