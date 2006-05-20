@@ -1,8 +1,11 @@
 // Font.hpp
 // KlayGE Font类 头文件
-// Ver 2.8.0
-// 版权所有(C) 龚敏敏, 2003-2005
+// Ver 3.3.0
+// 版权所有(C) 龚敏敏, 2003-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.3.0
+// 支持渲染到3D位置 (2006.5.20)
 //
 // 2.8.0
 // 增加了pool (2005.8.10)
@@ -67,7 +70,7 @@ namespace KlayGE
 			std::wstring const & text);
 		void RenderText(float x, float y, float z, float xScale, float yScale, Color const & clr, 
 			std::wstring const & text);
-		//void RenderText(std::wstring const & text);
+		void RenderText(Matrix4 const & mvp, Color const & clr, std::wstring const & text);
 
 		uint32_t FontHeight() const;
 

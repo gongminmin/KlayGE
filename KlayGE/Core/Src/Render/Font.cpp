@@ -1,8 +1,11 @@
 // Font.cpp
 // KlayGE Font类 实现文件
-// Ver 2.8.0
-// 版权所有(C) 龚敏敏, 2003-2005
+// Ver 3.3.0
+// 版权所有(C) 龚敏敏, 2003-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.3.0
+// 支持渲染到3D位置 (2006.5.20)
 //
 // 2.8.0
 // 修正了越界的bug (2005.7.20)
@@ -70,28 +73,13 @@ namespace
 
 	class FontRenderable : public RenderableHelper
 	{
-	private:
-		struct CharInfo
-		{
-			Rect_T<float>	texRect;
-			uint32_t		width;
-		};
-
-		typedef std::map<wchar_t, CharInfo, std::less<wchar_t>, boost::fast_pool_allocator<std::pair<wchar_t, CharInfo> > > CharInfoMapType;
-		typedef std::list<wchar_t, boost::fast_pool_allocator<wchar_t> > CharLRUType;
-
-	private:
-		CharInfoMapType		charInfoMap_;
-		CharLRUType			charLRU_;
-
-		uint32_t curX_, curY_;
-
 	public:
 		FontRenderable(std::string const & fontName, uint32_t fontHeight, uint32_t flags)
 			: RenderableHelper(L"Font"),
 				curX_(0), curY_(0),
 				fontHeight_(fontHeight),
-				theSampler_(new Sampler)
+				theSampler_(new Sampler),
+				three_dim_(false)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -143,8 +131,6 @@ namespace
 
 		void OnRenderBegin()
 		{
-			effect_->ActiveTechnique("Font2DTec");
-
 			xyz_vb_->Resize(static_cast<uint32_t>(xyzs_.size() * sizeof(xyzs_[0])));
 			{
 				GraphicsBuffer::Mapper mapper(*xyz_vb_, BA_Write_Only);
@@ -167,10 +153,21 @@ namespace
 				std::copy(indices_.begin(), indices_.end(), mapper.Pointer<uint16_t>());
 			}
 
-			RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			Viewport const & viewport(renderEngine.ActiveRenderTarget(0)->GetViewport());
-			*(effect_->ParameterByName("halfWidth")) = viewport.width / 2;
-			*(effect_->ParameterByName("halfHeight")) = viewport.height / 2;
+			if (!three_dim_)
+			{
+				effect_->ActiveTechnique("Font2DTec");
+			
+				RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				Viewport const & viewport(renderEngine.ActiveRenderTarget(0)->GetViewport());
+				*(effect_->ParameterByName("halfWidth")) = viewport.width / 2;
+				*(effect_->ParameterByName("halfHeight")) = viewport.height / 2;
+			}
+			else
+			{
+				effect_->ActiveTechnique("Font3DTec");
+
+				*(effect_->ParameterByName("mvp")) = mvp_;
+			}
 		}
 
 		void OnRenderEnd()
@@ -197,6 +194,24 @@ namespace
 			return fontHeight_;
 		}
 
+		void AddText2D(uint32_t fontHeight, float sx, float sy, float sz,
+			float xScale, float yScale, Color const & clr, std::wstring const & text)
+		{
+			three_dim_ = false;
+
+			this->AddText(fontHeight, sx, sy, sz, xScale, yScale, clr, text);
+		}
+
+		void AddText3D(uint32_t fontHeight, Matrix4 const & mvp, Color const & clr, 
+			std::wstring const & text)
+		{
+			three_dim_ = true;
+			mvp_ = mvp;
+
+			this->AddText(fontHeight, 0, 0, 0, 1, 1, clr, text);
+		}
+
+	private:
 		void AddText(uint32_t fontHeight, float sx, float sy, float sz,
 			float xScale, float yScale, Color const & clr, std::wstring const & text)
 		{
@@ -268,7 +283,6 @@ namespace
 			box_ |= Box(Vector3(sx, sy, sz), Vector3(maxx, maxy, sz + 0.1f));
 		}
 
-	private:
 		// 更新纹理，使用LRU算法
 		/////////////////////////////////////////////////////////////////////////////////
 		void UpdateTexture(std::wstring const & text)
@@ -372,6 +386,23 @@ namespace
 		}
 
 	private:
+		struct CharInfo
+		{
+			Rect_T<float>	texRect;
+			uint32_t		width;
+		};
+
+		typedef std::map<wchar_t, CharInfo, std::less<wchar_t>, boost::fast_pool_allocator<std::pair<wchar_t, CharInfo> > > CharInfoMapType;
+		typedef std::list<wchar_t, boost::fast_pool_allocator<wchar_t> > CharLRUType;
+
+		CharInfoMapType		charInfoMap_;
+		CharLRUType			charLRU_;
+
+		uint32_t curX_, curY_;
+
+		bool three_dim_;
+		Matrix4 mvp_;
+
 		uint32_t fontHeight_;
 
 		std::vector<Vector3>	xyzs_;
@@ -439,8 +470,21 @@ namespace KlayGE
 		if (!text.empty())
 		{
 			boost::shared_ptr<FontObject> font_obj(new FontObject(font_renderable_, fso_attrib_));
-			checked_cast<FontRenderable*>(font_renderable_.get())->AddText(this->FontHeight(),
+			checked_cast<FontRenderable*>(font_renderable_.get())->AddText2D(this->FontHeight(),
 				sx, sy, sz, xScale, yScale, clr, text);
+			font_obj->AddToSceneManager();
+		}
+	}
+
+	// 在指定位置画出3D的文字
+	/////////////////////////////////////////////////////////////////////////////////
+	void Font::RenderText(Matrix4 const & mvp, Color const & clr, std::wstring const & text)
+	{
+		if (!text.empty())
+		{
+			boost::shared_ptr<FontObject> font_obj(new FontObject(font_renderable_, fso_attrib_));
+			checked_cast<FontRenderable*>(font_renderable_.get())->AddText3D(this->FontHeight(),
+				mvp, clr, text);
 			font_obj->AddToSceneManager();
 		}
 	}
