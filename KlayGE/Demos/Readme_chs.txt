@@ -5,7 +5,14 @@ E-Mail:	  enginedev@163.com
 QQ:       33611210
 
 由于我编译这些demo所用的编译器是VS2005，在没有安装VS2005的机器上直接运行demo的exe
-需要安装vcredist_x86.exe（WinXP 64上对应的包为vcredist_x64.exe）。
+需要安装VS2005的重发布包：
+x86版本vcredist_x86.exe
+http://www.microsoft.com/downloads/details.aspx?FamilyID=32bc1bee-a3f9-4c13-9c99-220b62a191ee
+x64版本vcredist_x64.exe
+http://www.microsoft.com/downloads/details.aspx?FamilyID=90548130-4468-4bbc-9673-d6acabd5d13b
+IA64版本vcredist_IA64.exe
+http://www.microsoft.com/downloads/details.aspx?FamilyID=526bf4a7-44e6-4a91-b328-a4594adb70e5
+
 
 ====================================================================================
 AsciiArts
