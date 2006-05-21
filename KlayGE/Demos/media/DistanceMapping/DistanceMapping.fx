@@ -69,22 +69,19 @@ half4 DistanceMappingPS(half3 texCoord0	: TEXCOORD0,
 
 	if ((texUV.x <= 0) || (texUV.y <= 0) || (texUV.x >= 1) || (texUV.y >= 1))
 	{
-		// should be clipped by alpha test
-		return 0;
+		clip(-1);
 	}
-	else
-	{
-		half2 dx = ddx(texCoord0.xy);
-		half2 dy = ddy(texCoord0.xy);
 
-		half3 diffuse = tex2D(diffuseMap, texUV.xy, dx, dy).rgb;
+	half2 dx = ddx(texCoord0.xy);
+	half2 dy = ddy(texCoord0.xy);
 
-		half3 bumpNormal = normalize(tex2D(normalMap, texUV.xy, dx, dy).rgb * 2 - 1);
-		half3 lightVec = normalize(L);
-		half diffuseFactor = dot(lightVec, bumpNormal);
-		
-		return half4(diffuse * diffuseFactor, 1);
-	}
+	half3 diffuse = tex2D(diffuseMap, texUV.xy, dx, dy).rgb;
+
+	half3 bumpNormal = normalize(tex2D(normalMap, texUV.xy, dx, dy).rgb * 2 - 1);
+	half3 lightVec = normalize(L);
+	half diffuseFactor = dot(lightVec, bumpNormal);
+	
+	return half4(diffuse * diffuseFactor, 1);
 }
 
 half4 DistanceMappingPS_20(half3 texCoord0	: TEXCOORD0,
@@ -116,10 +113,6 @@ technique DistanceMapping30
 {
 	pass p0
 	{
-		AlphaTestEnable = true;
-		AlphaRef = 0x08;
-		AlphaFunc = GreaterEqual;
-		
 		VertexShader = compile vs_3_0 DistanceMappingVS(worldviewproj, lightPos, eyePos);
 		PixelShader = compile ps_3_0 DistanceMappingPS(diffuseMapSampler,
 										normalMapSampler, distanceMapSampler);
@@ -130,10 +123,6 @@ technique DistanceMapping2a
 {
 	pass p0
 	{
-		AlphaTestEnable = true;
-		AlphaRef = 0x08;
-		AlphaFunc = GreaterEqual;
-		
 		VertexShader = compile vs_1_1 DistanceMappingVS(worldviewproj, lightPos, eyePos);
 		PixelShader = compile ps_2_a DistanceMappingPS(diffuseMapSampler,
 										normalMapSampler, distanceMapSampler);
@@ -144,10 +133,6 @@ technique DistanceMapping20
 {
 	pass p0
 	{
-		AlphaTestEnable = true;
-		AlphaRef = 0x08;
-		AlphaFunc = GreaterEqual;
-		
 		VertexShader = compile vs_1_1 DistanceMappingVS(worldviewproj, lightPos, eyePos);
 		PixelShader = compile ps_2_0 DistanceMappingPS_20(diffuseMapSampler,
 										normalMapSampler, distanceMapSampler);
