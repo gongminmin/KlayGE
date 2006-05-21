@@ -36,6 +36,7 @@ namespace KlayGE
 		static D3DVECTOR Mapping(Vector3 const & vec);
 		static D3DCOLOR MappingToUInt32Color(Color const & clr);
 		static D3DCOLORVALUE MappingToFloat4Color(Color const & clr);
+		static uint32_t MappingColorMask(uint32_t mask);
 
 		static D3DCMPFUNC Mapping(RenderEngine::CompareFunction func);
 
@@ -43,8 +44,9 @@ namespace KlayGE
 
 		static uint32_t Mapping(RenderEngine::AlphaBlendFactor factor);
 		static uint32_t Mapping(RenderEngine::CullMode mode);
-		static uint32_t Mapping(RenderEngine::FillMode mode);
-		static uint32_t Mapping(RenderEngine::ShadeOptions so);
+		static uint32_t Mapping(RenderEngine::PolygonMode mode);
+		static uint32_t Mapping(RenderEngine::ShadeMode mode);
+		static uint32_t Mapping(RenderEngine::BlendOperation bo);
 		static uint32_t Mapping(Sampler::TexAddressingMode mode);
 
 		static void Mapping(D3DPRIMITIVETYPE& primType, uint32_t& primCount, RenderLayout const & rl);

@@ -149,14 +149,6 @@ namespace KlayGE
 		glClear(flags);
 	}
 
-	// 设置光影类型
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::ShadingType(ShadeOptions so)
-	{
-		glShadeModel(OGLMapping::Mapping(so));
-	}
-
-
 	// 建立渲染窗口
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderWindowPtr OGLRenderEngine::CreateRenderWindow(std::string const & name,
@@ -169,62 +161,19 @@ namespace KlayGE
 
 		this->ActiveRenderTarget(0, win);
 
-		this->DepthBufferDepthTest(settings.depthBuffer);
-		this->DepthBufferDepthWrite(settings.depthBuffer);
+		this->SetRenderState(RST_DepthEnable, settings.depthBuffer);
+		this->SetRenderState(RST_DepthMask, settings.depthBuffer);
 
-		if (glloader_GL_VERSION_2_0())
-		{
-			glPointParameterf_ = glPointParameterf;
-			glPointParameterfv_ = glPointParameterfv;
-		}
-		else
-		{
-			if (glloader_GL_ARB_point_parameters() && glloader_GL_ARB_point_sprite())
-			{
-				glPointParameterf_ = glPointParameterfARB;
-				glPointParameterfv_ = glPointParameterfvARB;
-			}
-		}
+		this->InitRenderStates();
 
 		return win;
-	}
-
-	// 设置剪裁模式
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::CullingMode(CullMode mode)
-	{
-		cullingMode_ = mode;
-
-		switch (mode)
-		{
-		case CM_None:
-			glDisable(GL_CULL_FACE);
-			break;
-
-		case CM_Clockwise:
-			glEnable(GL_CULL_FACE);
-			glFrontFace(GL_CCW);
-			break;
-
-		case CM_AntiClockwise:
-			glEnable(GL_CULL_FACE);
-			glFrontFace(GL_CW);
-			break;
-		}
-	}
-
-	// 设置多变性填充模式
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::PolygonMode(FillMode mode)
-	{
-		glPolygonMode(GL_FRONT_AND_BACK, OGLMapping::Mapping(mode));
 	}
 
 	// 设置当前渲染目标
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::DoActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget)
 	{
-		this->CullingMode(cullingMode_);
+		this->SetRenderState(RST_CullMode, cullingMode_);
 
 		Viewport const & vp(renderTarget->GetViewport());
 		glViewport(vp.left, vp.top, vp.width, vp.height);
@@ -451,86 +400,237 @@ namespace KlayGE
 	{
 	}
 
-	// 打开/关闭深度测试
+	// 初始化渲染状态
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::AlphaBlend(bool enabled)
+	void OGLRenderEngine::InitRenderStates()
 	{
-		if (enabled)
-		{
-			glEnable(GL_BLEND);
-		}
-		else
-		{
-			glDisable(GL_BLEND);
-		}
-	}
+		render_states_[RST_PolygonMode]		= PM_Fill;
+		render_states_[RST_ShadeMode]		= SM_Gouraud;
+		render_states_[RST_CullMode]		= CM_AntiClockwise;
+		render_states_[RST_Clipping]		= true;
 
-	// 设置Alpha混合因数
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::AlphaBlendFunction(AlphaBlendFactor src_factor, AlphaBlendFactor dst_factor)
-	{
-		glBlendFunc(OGLMapping::Mapping(src_factor), OGLMapping::Mapping(dst_factor));
-	}
+		render_states_[RST_BlendEnable]		= false;
+		render_states_[RST_BlendOp]			= BOP_Add;
+		render_states_[RST_SrcBlend]		= ABF_One;
+		render_states_[RST_DestBlend]		= ABF_Zero;
+		render_states_[RST_BlendOpAlpha]	= BOP_Add;
+		render_states_[RST_SrcBlendAlpha]	= ABF_One;
+		render_states_[RST_DestBlendAlpha]	= ABF_Zero;
+			
+		render_states_[RST_DepthEnable]			= true;
+		render_states_[RST_DepthMask]			= true;
+		render_states_[RST_DepthFunc]			= CF_LessEqual;
+		render_states_[RST_PolygonOffsetFactor]	= 0;
+		render_states_[RST_PolygonOffsetUnits]	= 0;
 
-	// 打开/关闭深度测试
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::DepthBufferDepthTest(bool enabled)
-	{
-		if (enabled)
+		render_states_[RST_FrontStencilEnable]		= false;
+		render_states_[RST_FrontStencilFunc]		= CF_AlwaysPass;
+		render_states_[RST_FrontStencilRef]			= 0;
+		render_states_[RST_FrontStencilMask]		= 0xFFFFFFFF;
+		render_states_[RST_FrontStencilFail]		= SOP_Keep;
+		render_states_[RST_FrontStencilDepthFail]	= SOP_Keep;
+		render_states_[RST_FrontStencilPass]		= SOP_Keep;
+		render_states_[RST_FrontStencilWriteMask]	= 0xFFFFFFFF;
+		render_states_[RST_BackStencilEnable]		= false;
+		render_states_[RST_BackStencilFunc]			= CF_AlwaysPass;
+		render_states_[RST_BackStencilRef]			= 0;
+		render_states_[RST_BackStencilMask]			= 0xFFFFFFFF;
+		render_states_[RST_BackStencilFail]			= SOP_Keep;
+		render_states_[RST_BackStencilDepthFail]	= SOP_Keep;
+		render_states_[RST_BackStencilPass]			= SOP_Keep;
+		render_states_[RST_BackStencilWriteMask]	= 0xFFFFFFFF;
+
+		render_states_[RST_ColorMask0] = 0xF;
+		render_states_[RST_ColorMask1] = 0xF;
+		render_states_[RST_ColorMask2] = 0xF;
+		render_states_[RST_ColorMask3] = 0xF;
+
+		for (size_t i = 0; i < RST_NUM_RENDER_STATES; ++ i)
 		{
-			glClearDepth(1.0f);
-			glEnable(GL_DEPTH_TEST);
-		}
-		else
-		{
-			glDisable(GL_DEPTH_TEST);
-		}
-	}
-
-	// 打开/关闭深度缓存
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::DepthBufferDepthWrite(bool enabled)
-	{
-		glDepthMask(enabled ? GL_TRUE : GL_FALSE);
-	}
-
-	// 设置深度比较函数
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::DepthBufferFunction(CompareFunction func)
-	{
-		glDepthFunc(OGLMapping::Mapping(func));
-	}
-
-	// 设置深度偏移
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::DepthBias(float slope_scale, float bias)
-	{
-		glEnable(GL_POLYGON_OFFSET_FILL);
-		glEnable(GL_POLYGON_OFFSET_POINT);
-		glEnable(GL_POLYGON_OFFSET_LINE);
-		// Bias is in {0, 16}, scale the unit addition appropriately
-		glPolygonOffset(slope_scale, bias);
-	}
-
-	// 打开/关闭Alpha测试
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::AlphaTest(bool enabled)
-	{
-		if (enabled)
-		{
-			glEnable(GL_ALPHA_TEST);
-		}
-		else
-		{
-			glDisable(GL_ALPHA_TEST);
+			dirty_render_states_[i] = false;
 		}
 	}
 
-	// 设置Alpha比较函数和参考值
+	// 刷新渲染状态
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::AlphaFunction(CompareFunction alphaFunction, float refValue)
+	void OGLRenderEngine::DoFlushRenderStates()
 	{
-		glAlphaFunc(OGLMapping::Mapping(alphaFunction), refValue);
+		if (dirty_render_states_[RST_PolygonMode])
+		{
+			glPolygonMode(GL_FRONT_AND_BACK,
+				OGLMapping::Mapping(static_cast<PolygonMode>(render_states_[RST_PolygonMode])));
+		}
+		if (dirty_render_states_[RST_ShadeMode])
+		{
+			glShadeModel(OGLMapping::Mapping(static_cast<ShadeMode>(render_states_[RST_ShadeMode])));
+		}
+		if (dirty_render_states_[RST_CullMode])
+		{
+			cullingMode_ = static_cast<CullMode>(render_states_[RST_CullMode]);
+
+			switch (render_states_[RST_CullMode])
+			{
+			case CM_None:
+				glDisable(GL_CULL_FACE);
+				break;
+
+			case CM_Clockwise:
+				glEnable(GL_CULL_FACE);
+				glFrontFace(GL_CCW);
+				break;
+
+			case CM_AntiClockwise:
+				glEnable(GL_CULL_FACE);
+				glFrontFace(GL_CW);
+				break;
+			}
+		}
+		if (dirty_render_states_[RST_Clipping])
+		{
+			// do nothing;
+		}
+
+		if (dirty_render_states_[RST_BlendEnable])
+		{
+			if (render_states_[RST_BlendEnable])
+			{
+				glEnable(GL_BLEND);
+			}
+			else
+			{
+				glDisable(GL_BLEND);
+			}
+		}
+		if (dirty_render_states_[RST_BlendOp] || dirty_render_states_[RST_BlendOpAlpha])
+		{
+			glBlendEquationSeparate(OGLMapping::Mapping(static_cast<BlendOperation>(render_states_[RST_BlendOp])),
+				OGLMapping::Mapping(static_cast<BlendOperation>(render_states_[RST_BlendOpAlpha])));
+		}
+		if (dirty_render_states_[RST_SrcBlend] || dirty_render_states_[RST_DestBlend]
+			|| dirty_render_states_[RST_SrcBlendAlpha] || dirty_render_states_[RST_DestBlendAlpha])
+		{
+			glBlendFuncSeparate(OGLMapping::Mapping(static_cast<AlphaBlendFactor>(render_states_[RST_SrcBlend])),
+				OGLMapping::Mapping(static_cast<AlphaBlendFactor>(render_states_[RST_DestBlend])),
+				OGLMapping::Mapping(static_cast<AlphaBlendFactor>(render_states_[RST_SrcBlendAlpha])),
+				OGLMapping::Mapping(static_cast<AlphaBlendFactor>(render_states_[RST_DestBlendAlpha])));
+		}
+			
+		if (dirty_render_states_[RST_DepthEnable])
+		{
+			if (render_states_[RST_DepthEnable])
+			{
+				glClearDepth(1.0f);
+				glEnable(GL_DEPTH_TEST);
+			}
+			else
+			{
+				glDisable(GL_DEPTH_TEST);
+			}
+		}
+		if (dirty_render_states_[RST_DepthMask])
+		{
+			glDepthMask(render_states_[RST_DepthMask] ? GL_TRUE : GL_FALSE);
+		}
+		if (dirty_render_states_[RST_DepthFunc])
+		{
+			glDepthFunc(OGLMapping::Mapping(static_cast<CompareFunction>(render_states_[RST_DepthFunc])));
+		}
+		if (dirty_render_states_[RST_PolygonOffsetFactor] || dirty_render_states_[RST_PolygonOffsetUnits])
+		{
+			glEnable(GL_POLYGON_OFFSET_FILL);
+			glEnable(GL_POLYGON_OFFSET_POINT);
+			glEnable(GL_POLYGON_OFFSET_LINE);
+			// Bias is in {0, 16}, scale the unit addition appropriately
+			glPolygonOffset(render_states_[RST_PolygonOffsetFactor], render_states_[RST_PolygonOffsetUnits]);
+		}
+
+		if (dirty_render_states_[RST_FrontStencilEnable] || dirty_render_states_[RST_BackStencilEnable])
+		{
+			if (render_states_[RST_FrontStencilEnable] || render_states_[RST_BackStencilEnable])
+			{
+				glEnable(GL_STENCIL_TEST);
+			}
+			else
+			{
+				glDisable(GL_STENCIL_TEST);
+			}
+		}
+		if (dirty_render_states_[RST_FrontStencilFunc]
+			|| dirty_render_states_[RST_FrontStencilRef]
+			|| dirty_render_states_[RST_FrontStencilMask])
+		{
+			glStencilFuncSeparate(GL_FRONT,
+				OGLMapping::Mapping(static_cast<CompareFunction>(render_states_[RST_FrontStencilFunc])),
+				render_states_[RST_FrontStencilRef], render_states_[RST_FrontStencilMask]);
+		}
+		if (dirty_render_states_[RST_FrontStencilFail]
+			|| dirty_render_states_[RST_FrontStencilDepthFail]
+			|| dirty_render_states_[RST_FrontStencilPass])
+		{
+			glStencilOpSeparate(GL_FRONT,
+				OGLMapping::Mapping(static_cast<StencilOperation>(render_states_[RST_FrontStencilFail])),
+				OGLMapping::Mapping(static_cast<StencilOperation>(render_states_[RST_FrontStencilDepthFail])),
+				OGLMapping::Mapping(static_cast<StencilOperation>(render_states_[RST_FrontStencilPass])));
+		}
+		if (dirty_render_states_[RST_FrontStencilWriteMask])
+		{
+			glStencilMaskSeparate(GL_FRONT, render_states_[RST_FrontStencilWriteMask]);
+		}
+		if (dirty_render_states_[RST_BackStencilFunc]
+			|| dirty_render_states_[RST_BackStencilRef]
+			|| dirty_render_states_[RST_BackStencilMask])
+		{
+			glStencilFuncSeparate(GL_BACK,
+				OGLMapping::Mapping(static_cast<CompareFunction>(render_states_[RST_BackStencilFunc])),
+				render_states_[RST_BackStencilRef], render_states_[RST_BackStencilMask]);
+		}
+		if (dirty_render_states_[RST_BackStencilFail]
+			|| dirty_render_states_[RST_BackStencilDepthFail]
+			|| dirty_render_states_[RST_BackStencilPass])
+		{
+			glStencilOpSeparate(GL_BACK,
+				OGLMapping::Mapping(static_cast<StencilOperation>(render_states_[RST_BackStencilFail])),
+				OGLMapping::Mapping(static_cast<StencilOperation>(render_states_[RST_BackStencilDepthFail])),
+				OGLMapping::Mapping(static_cast<StencilOperation>(render_states_[RST_BackStencilPass])));
+		}
+		if (dirty_render_states_[RST_BackStencilWriteMask])
+		{
+			glStencilMaskSeparate(GL_BACK, render_states_[RST_BackStencilWriteMask]);
+		}
+
+		if (dirty_render_states_[RST_ColorMask0])
+		{
+			glColorMask((render_states_[RST_ColorMask0] & CMASK_Red) != 0,
+				(render_states_[RST_ColorMask0] & CMASK_Green) != 0, 
+				(render_states_[RST_ColorMask0] & CMASK_Blue) != 0,
+				(render_states_[RST_ColorMask0] & CMASK_Alpha) != 0);
+		}
+		if (dirty_render_states_[RST_ColorMask1])
+		{
+			glColorMask((render_states_[RST_ColorMask1] & CMASK_Red) != 0,
+				(render_states_[RST_ColorMask1] & CMASK_Green) != 0, 
+				(render_states_[RST_ColorMask1] & CMASK_Blue) != 0,
+				(render_states_[RST_ColorMask1] & CMASK_Alpha) != 0);
+		}
+		if (dirty_render_states_[RST_ColorMask2])
+		{
+			glColorMask((render_states_[RST_ColorMask2] & CMASK_Red) != 0,
+				(render_states_[RST_ColorMask2] & CMASK_Green) != 0, 
+				(render_states_[RST_ColorMask2] & CMASK_Blue) != 0,
+				(render_states_[RST_ColorMask2] & CMASK_Alpha) != 0);
+		}
+		if (dirty_render_states_[RST_ColorMask3])
+		{
+			glColorMask((render_states_[RST_ColorMask3] & CMASK_Red) != 0,
+				(render_states_[RST_ColorMask3] & CMASK_Green) != 0, 
+				(render_states_[RST_ColorMask3] & CMASK_Blue) != 0,
+				(render_states_[RST_ColorMask3] & CMASK_Alpha) != 0);
+		}
+
+		for (size_t i = 0; i < RST_NUM_RENDER_STATES; ++ i)
+		{
+			dirty_render_states_[i] = false;
+		}
 	}
 
 	// 设置纹理
@@ -611,99 +711,11 @@ namespace KlayGE
 		glDisable(GL_TEXTURE_CUBE_MAP);
 	}
 
-	// 打开模板缓冲区
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::StencilCheckEnabled(bool enabled)
-	{
-		if (enabled)
-		{
-			glEnable(GL_STENCIL_TEST);
-		}
-		else
-		{
-			glDisable(GL_STENCIL_TEST);
-		}
-	}
-
-	// 硬件是否支持模板缓冲区
-	/////////////////////////////////////////////////////////////////////////////////
-	bool OGLRenderEngine::HasHardwareStencil()
-	{
-		return true;
-	}
-
 	// 设置模板位数
 	/////////////////////////////////////////////////////////////////////////////////
 	uint16_t OGLRenderEngine::StencilBufferBitDepth()
 	{
 		return 8;
-	}
-
-		// 设置模板比较函数，参考值和掩码
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::StencilBufferFunction(FaceType face, CompareFunction func, uint32_t refValue, uint32_t mask)
-	{
-		glStencilFuncSeparate(OGLMapping::Mapping(face),
-			OGLMapping::Mapping(func), refValue, mask);
-	}
-
-	// 设置模板缓冲区模板测试失败，深度测试失败和通过后的操作
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::StencilBufferOperation(FaceType face, StencilOperation fail,
-		StencilOperation depth_fail, StencilOperation pass)
-	{
-		glStencilOpSeparate(OGLMapping::Mapping(face),
-			OGLMapping::Mapping(fail), OGLMapping::Mapping(depth_fail), OGLMapping::Mapping(pass));
-	}
-
-	// 打开/关闭点精灵模式
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::PointSpriteEnable(bool enable)
-	{
-		if (glPointParameterfv_ != NULL)
-		{
-			if (enable)
-			{
-				glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
-				glEnable(GL_POINT_SPRITE);
-			}
-			else
-			{
-				glDisable(GL_POINT_SPRITE);
-			}
-		}
-	}
-
-	// 设置点距离参数
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::PointDistanceAttenuation(float quadratic0, float quadratic1, float quadratic2)
-	{
-		if (glPointParameterfv_ != NULL)
-		{
-			float quadratic[] = { quadratic0, quadratic1, quadratic2 };
-			glPointParameterfv_(GL_POINT_DISTANCE_ATTENUATION, quadratic);
-		}
-	}
-
-	// 设置点大小
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::PointSize(float size)
-	{
-		if (glPointParameterfv_ != NULL)
-		{
-			glPointSize(size);
-		}
-	}
-
-	// 设置点的最小最大大小
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::PointMinMaxSize(float min_size, float max_size)
-	{
-		if (glPointParameterf_ != NULL)
-		{
-			glPointParameterf_(GL_POINT_SIZE_MIN, std::max(min_size, caps_.min_point_size));
-			glPointParameterf_(GL_POINT_SIZE_MAX, std::min(max_size, caps_.max_point_size));
-		}
 	}
 
 	// 打开/关闭剪除测试

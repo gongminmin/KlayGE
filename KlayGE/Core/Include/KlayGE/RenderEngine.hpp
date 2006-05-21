@@ -1,8 +1,11 @@
 // RenderEngine.hpp
 // KlayGE 渲染引擎类 实现文件
 // Ver 3.2.0
-// 版权所有(C) 龚敏敏, 2003-2005
+// 版权所有(C) 龚敏敏, 2003-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.3.0
+// 统一了RenderState (2006.5.21)
 //
 // 3.2.0
 // 暴露出了Clear (2005.12.31)
@@ -52,6 +55,7 @@
 
 #include <vector>
 #include <list>
+#include <boost/array.hpp>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_Core_d.lib")
@@ -61,14 +65,24 @@
 
 namespace KlayGE
 {
+	inline uint32_t
+	float_to_uint32(float v)
+	{
+		return *reinterpret_cast<uint32_t*>(&v);
+	}
+	inline float
+	uint32_to_float(uint32_t v)
+	{
+		return *reinterpret_cast<float*>(&v);
+	}
+
 	class RenderEngine
 	{
 	public:
-		enum ShadeOptions
+		enum ShadeMode
 		{
-			SO_Flat,
-			SO_Gouraud,
-			SO_Phong
+			SM_Flat,
+			SM_Gouraud
 		};
 
 		enum CompareFunction
@@ -90,11 +104,11 @@ namespace KlayGE
 			CM_AntiClockwise
 		};
 
-		enum FillMode
+		enum PolygonMode
 		{
-			FM_Point,
-			FM_Line,
-			FM_Fill
+			PM_Point,
+			PM_Line,
+			PM_Fill
 		};
 
 		// Type of alpha blend factor.
@@ -111,6 +125,15 @@ namespace KlayGE
 			ABF_Inv_Src_Color,
 			ABF_Inv_Dst_Color,
 			ABF_Src_Alpha_Sat
+		};
+
+		enum BlendOperation
+		{
+			BOP_Add		= 1,
+			BOP_Sub		= 2,
+			BOP_Rev_Sub	= 3,
+			BOP_Min		= 4,
+			BOP_Max		= 5,
 		};
 
 		// Enum describing the various actions which can be taken onthe stencil buffer
@@ -137,11 +160,66 @@ namespace KlayGE
 			CBM_Stencil = 1UL << 2
 		};
 
-		enum FaceType
+		enum RenderStateType
 		{
-			FT_Front,
-			FT_Back,
-			FT_Front_Back
+			RST_PolygonMode				= 0x00,
+			RST_ShadeMode				= 0x01,
+			RST_CullMode				= 0x02,
+			RST_Clipping				= 0x03,
+
+			RST_BlendEnable				= 0x04,
+			RST_BlendOp					= 0x05,
+			RST_SrcBlend				= 0x06,
+			RST_DestBlend				= 0x07,
+			RST_BlendOpAlpha			= 0x08,
+			RST_SrcBlendAlpha			= 0x09,
+			RST_DestBlendAlpha			= 0x0A,
+			
+			RST_DepthEnable				= 0x0B,
+			RST_DepthMask				= 0x0C,
+			RST_DepthFunc				= 0x0D,
+			RST_PolygonOffsetFactor		= 0x0E,
+			RST_PolygonOffsetUnits		= 0x0F,
+
+			// Turns stencil buffer checking on or off. 
+			RST_FrontStencilEnable		= 0x10,
+			// Stencil test function
+			RST_FrontStencilFunc		= 0x11,
+			// Stencil test reference value
+			RST_FrontStencilRef			= 0x12,
+			// Stencil test mask value
+			RST_FrontStencilMask		= 0x13,
+			// Sets the action to perform if the stencil test fails,
+			RST_FrontStencilFail		= 0x14,
+			// if the stencil test passes, but the depth buffer test fails
+			RST_FrontStencilDepthFail	= 0x15,
+			// if both the stencil test and the depth buffer test passes
+			RST_FrontStencilPass		= 0x16,
+			RST_FrontStencilWriteMask	= 0x17,
+			RST_BackStencilEnable		= 0x18,
+			RST_BackStencilFunc			= 0x19,
+			RST_BackStencilRef			= 0x1A,
+			RST_BackStencilMask			= 0x1B,
+			RST_BackStencilFail			= 0x1C,
+			RST_BackStencilDepthFail	= 0x1D,
+			RST_BackStencilPass			= 0x1E,
+			RST_BackStencilWriteMask	= 0x1F,
+
+			RST_ColorMask0				= 0x20,
+			RST_ColorMask1				= 0x21,
+			RST_ColorMask2				= 0x22,
+			RST_ColorMask3				= 0x23,
+
+			RST_NUM_RENDER_STATES		= 0x24
+		};
+
+		enum ColorMask
+		{
+			CMASK_Red   = 1UL << 3,
+			CMASK_Green = 1UL << 2,
+			CMASK_Blue  = 1UL << 1,
+			CMASK_Alpha = 1UL << 0,
+			CMASK_All   = CMASK_Red | CMASK_Green | CMASK_Blue | CMASK_Alpha
 		};
 
 	public:
@@ -167,23 +245,10 @@ namespace KlayGE
 		virtual void ClearColor(Color const & clr) = 0;
 		virtual void Clear(uint32_t masks) = 0;
 
-		virtual void ShadingType(ShadeOptions so) = 0;
-
 		virtual RenderWindowPtr CreateRenderWindow(std::string const & name, RenderSettings const & settings) = 0;
 
-		virtual void CullingMode(CullMode mode) = 0;
-		virtual void PolygonMode(FillMode mode) = 0;
-
-		virtual void AlphaBlend(bool enabled) = 0;
-		virtual void AlphaBlendFunction(AlphaBlendFactor src_factor, AlphaBlendFactor dst_factor) = 0;
-
-		virtual void DepthBufferDepthTest(bool enabled) = 0;
-		virtual void DepthBufferDepthWrite(bool enabled) = 0;
-		virtual void DepthBufferFunction(CompareFunction depthFunction) = 0;
-		virtual void DepthBias(float slope_scale, float bias) = 0;
-
-		virtual void AlphaTest(bool enabled) = 0;
-		virtual void AlphaFunction(CompareFunction alphaFunction, float refValue) = 0;
+		void SetRenderState(RenderStateType rst, uint32_t state);
+		uint32_t GetRenderState(RenderStateType rst);
 
 		void ActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget);
 		RenderTargetPtr ActiveRenderTarget(uint32_t n) const;
@@ -193,29 +258,11 @@ namespace KlayGE
 		// Turns off a sampler.
 		virtual void DisableSampler(uint32_t stage) = 0;
 
-		// Turns stencil buffer checking on or off. 
-		virtual void StencilCheckEnabled(bool enabled) = 0;
-		// Determines if this system supports hardware accelerated stencil buffer. 
-		virtual bool HasHardwareStencil() = 0;
-
 		// Determines the bit depth of the hardware accelerated stencil buffer, if supported.
 		virtual uint16_t StencilBufferBitDepth() = 0;
 
-		// Sets the stencil test function, reference value and mask value.
-		virtual void StencilBufferFunction(FaceType face, CompareFunction func, uint32_t refValue, uint32_t mask) = 0;
-		// Sets the action to perform if the stencil test fails,
-		// if the stencil test passes, but the depth buffer test fails, and
-		// if both the stencil test and the depth buffer test passes.
-		virtual void StencilBufferOperation(FaceType face, StencilOperation fail, StencilOperation depth_fail, StencilOperation pass) = 0;
-
 		// Get render device capabilities
 		RenderDeviceCaps const & DeviceCaps() const;
-
-		// Point sprite support
-		virtual void PointSpriteEnable(bool enable) = 0;
-		virtual void PointDistanceAttenuation(float quadratic0, float quadratic1, float quadratic2) = 0;
-		virtual void PointSize(float size) = 0;
-		virtual void PointMinMaxSize(float min_size, float max_size) = 0;
 
 		// Scissor support
 		virtual void ScissorTest(bool enabled) = 0;
@@ -223,9 +270,10 @@ namespace KlayGE
 
 	protected:
 		virtual void DoActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget) = 0;
-
 		virtual void DoRender(RenderLayout const & rl) = 0;
+		virtual void DoFlushRenderStates() = 0;
 
+		virtual void InitRenderStates() = 0;
 		virtual void FillRenderDeviceCaps() = 0;
 
 	protected:
@@ -237,6 +285,9 @@ namespace KlayGE
 		size_t numVerticesJustRendered_;
 
 		RenderDeviceCaps caps_;
+
+		boost::array<uint32_t, RST_NUM_RENDER_STATES> render_states_;
+		boost::array<bool, RST_NUM_RENDER_STATES> dirty_render_states_;
 	};
 }
 

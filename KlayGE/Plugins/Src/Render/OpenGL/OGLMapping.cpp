@@ -150,17 +150,17 @@ namespace KlayGE
 		};
 	}
 
-	GLenum OGLMapping::Mapping(RenderEngine::FillMode mode)
+	GLenum OGLMapping::Mapping(RenderEngine::PolygonMode mode)
 	{
 		switch (mode)
 		{
-		case RenderEngine::FM_Point:
+		case RenderEngine::PM_Point:
 			return GL_POINT;
 
-		case RenderEngine::FM_Line:
+		case RenderEngine::PM_Line:
 			return GL_LINE;
 
-		case RenderEngine::FM_Fill:
+		case RenderEngine::PM_Fill:
 			return GL_FILL;
 
 		default:
@@ -169,41 +169,44 @@ namespace KlayGE
 		}
 	}
 
-	GLenum OGLMapping::Mapping(RenderEngine::ShadeOptions so)
-	{
-		switch (so)
-		{
-		case RenderEngine::SO_Flat:
-			return GL_FLAT;
-
-		case RenderEngine::SO_Gouraud:
-			return GL_SMOOTH;
-
-		case RenderEngine::SO_Phong:
-			return GL_SMOOTH;
-
-		default:
-			BOOST_ASSERT(false);
-			return GL_FLAT;
-		}
-	}
-
-	GLenum OGLMapping::Mapping(RenderEngine::FaceType mode)
+	GLenum OGLMapping::Mapping(RenderEngine::ShadeMode mode)
 	{
 		switch (mode)
 		{
-		case RenderEngine::FT_Front:
-			return GL_FRONT;
+		case RenderEngine::SM_Flat:
+			return GL_FLAT;
 
-		case RenderEngine::FT_Back:
-			return GL_BACK;
-
-		case RenderEngine::FT_Front_Back:
-			return GL_FRONT_AND_BACK;
+		case RenderEngine::SM_Gouraud:
+			return GL_SMOOTH;
 
 		default:
 			BOOST_ASSERT(false);
-			return GL_FRONT;
+			return GL_FLAT;
+		}
+	}
+
+	GLenum OGLMapping::Mapping(RenderEngine::BlendOperation bo)
+	{
+		switch (bo)
+		{
+		case RenderEngine::BOP_Add:
+			return GL_FUNC_ADD;
+
+		case RenderEngine::BOP_Sub:
+			return GL_FUNC_SUBTRACT;
+
+		case RenderEngine::BOP_Rev_Sub:
+			return GL_FUNC_REVERSE_SUBTRACT;
+
+		case RenderEngine::BOP_Min:
+			return GL_MIN;
+
+		case RenderEngine::BOP_Max:
+			return GL_MAX;
+
+		default:
+			BOOST_ASSERT(false);
+			return GL_FUNC_ADD;
 		}
 	}
 

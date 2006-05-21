@@ -1,8 +1,11 @@
 // RenderEngine.cpp
 // KlayGE 渲染引擎类 实现文件
-// Ver 2.8.0
-// 版权所有(C) 龚敏敏, 2003-2005
+// Ver 3.3.0
+// 版权所有(C) 龚敏敏, 2003-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.3.0
+// 统一了RenderState (2006.5.21)
 //
 // 2.8.0
 // 简化了StencilBuffer相关操作 (2005.7.20)
@@ -63,47 +66,9 @@ namespace KlayGE
 		{
 		}
 
-		void ShadingType(ShadeOptions /*so*/)
-		{
-		}
-
 		RenderWindowPtr CreateRenderWindow(std::string const & /*name*/, RenderSettings const & /*settings*/)
 		{
 			return RenderWindow::NullObject();
-		}
-
-		void CullingMode(CullMode /*mode*/)
-		{
-		}
-		void PolygonMode(FillMode /*mode*/)
-		{
-		}
-
-		void AlphaBlend(bool /*enabled*/)
-		{
-		}
-		void AlphaBlendFunction(AlphaBlendFactor /*src_factor*/, AlphaBlendFactor /*dst_factor*/)
-		{
-		}
-
-		void DepthBufferDepthTest(bool /*enabled*/)
-		{
-		}
-		void DepthBufferDepthWrite(bool /*enabled*/)
-		{
-		}
-		void DepthBufferFunction(CompareFunction /*depthFunction*/)
-		{
-		}
-		void DepthBias(float /*slope_scale*/, float /*bias*/)
-		{
-		}
-
-		void AlphaTest(bool /*enabled*/)
-		{
-		}
-		void AlphaFunction(CompareFunction /*alphaFunction*/, float /*refValue*/)
-		{
 		}
 
 		void SetSampler(uint32_t /*stage*/, SamplerPtr const & /*sampler*/)
@@ -113,37 +78,9 @@ namespace KlayGE
 		{
 		}
 
-		void StencilCheckEnabled(bool /*enabled*/)
-		{
-		}
-		bool HasHardwareStencil()
-		{
-			return false;
-		}
-
 		uint16_t StencilBufferBitDepth()
 		{
 			return 0;
-		}
-
-		void StencilBufferFunction(FaceType /*face*/, CompareFunction /*func*/, uint32_t /*refValue*/, uint32_t /*mask*/)
-		{
-		}
-		void StencilBufferOperation(FaceType /*face*/, StencilOperation /*fail*/, StencilOperation /*depth_fail*/, StencilOperation /*pass*/)
-		{
-		}
-
-		void PointSpriteEnable(bool /*enable*/)
-		{
-		}
-		void PointDistanceAttenuation(float /*quadratic0*/, float /*quadratic1*/, float /*quadratic2*/)
-		{
-		}
-		void PointSize(float /*size*/)
-		{
-		}
-		void PointMinMaxSize(float /*min_size*/, float /*max_size*/)
-		{
 		}
 
 		void ScissorTest(bool /*enabled*/)
@@ -159,6 +96,14 @@ namespace KlayGE
 		}
 
 		void DoRender(RenderLayout const & /*rl*/)
+		{
+		}
+
+		void DoFlushRenderStates()
+		{
+		}
+
+		void InitRenderStates()
 		{
 		}
 
@@ -207,24 +152,46 @@ namespace KlayGE
 		return renderTargets_[n];
 	}
 
-	// 设置渲染状态
+	// 设置渲染特效
 	/////////////////////////////////////////////////////////////////////////////////
 	void RenderEngine::SetRenderEffect(RenderEffectPtr const & effect)
 	{
 		renderEffect_ = (!effect) ? RenderEffect::NullObject() : effect;
 	}
 
-	// 获取渲染状态
+	// 获取渲染特效
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderEffectPtr RenderEngine::GetRenderEffect() const
 	{
 		return renderEffect_;
 	}
 
+	// 设置渲染状态
+	/////////////////////////////////////////////////////////////////////////////////
+	void RenderEngine::SetRenderState(RenderStateType rst, uint32_t state)
+	{
+		BOOST_ASSERT(rst < render_states_.size());
+
+		if (render_states_[rst] != state)
+		{
+			render_states_[rst] = state;
+			dirty_render_states_[rst] = true;
+		}
+	}
+
+	// 获取渲染状态
+	/////////////////////////////////////////////////////////////////////////////////
+	uint32_t RenderEngine::GetRenderState(RenderStateType rst)
+	{
+		return render_states_[rst];
+	}
+
 	// 渲染一个vb
 	/////////////////////////////////////////////////////////////////////////////////
 	void RenderEngine::Render(RenderLayout const & rl)
 	{
+		this->DoFlushRenderStates();
+
 		renderEffect_->Begin();
 		this->DoRender(rl);
 		renderEffect_->End();

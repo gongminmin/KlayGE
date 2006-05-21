@@ -77,19 +77,19 @@ namespace KlayGE
 		return name;
 	}
 
-	uint32_t D3D9Texture::Width(int level) const
+	uint32_t D3D9Texture::Width(int /*level*/) const
 	{
 		BOOST_ASSERT(false);
 		return 0;
 	}
 
-	uint32_t D3D9Texture::Height(int level) const
+	uint32_t D3D9Texture::Height(int /*level*/) const
 	{
 		BOOST_ASSERT(false);
 		return 0;
 	}
 
-	uint32_t D3D9Texture::Depth(int level) const
+	uint32_t D3D9Texture::Depth(int /*level*/) const
 	{
 		BOOST_ASSERT(false);
 		return 0;
@@ -120,50 +120,50 @@ namespace KlayGE
 		surface->UnlockRect();
 	}
 
-	void D3D9Texture::CopyToMemory1D(int level, void* data)
+	void D3D9Texture::CopyToMemory1D(int /*level*/, void* /*data*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void D3D9Texture::CopyToMemory2D(int level, void* data)
+	void D3D9Texture::CopyToMemory2D(int /*level*/, void* /*data*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void D3D9Texture::CopyToMemory3D(int level, void* data)
+	void D3D9Texture::CopyToMemory3D(int /*level*/, void* /*data*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void D3D9Texture::CopyToMemoryCube(CubeFaces face, int level, void* data)
+	void D3D9Texture::CopyToMemoryCube(CubeFaces /*face*/, int /*level*/, void* /*data*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void D3D9Texture::CopyMemoryToTexture1D(int level, void* data, PixelFormat pf,
-		uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width)
+	void D3D9Texture::CopyMemoryToTexture1D(int /*level*/, void* /*data*/, PixelFormat /*pf*/,
+		uint32_t /*dst_width*/, uint32_t /*dst_xOffset*/, uint32_t /*src_width*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void D3D9Texture::CopyMemoryToTexture2D(int level, void* data, PixelFormat pf,
-		uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
-		uint32_t src_width, uint32_t src_height)
+	void D3D9Texture::CopyMemoryToTexture2D(int /*level*/, void* /*data*/, PixelFormat /*pf*/,
+		uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/,
+		uint32_t /*src_width*/, uint32_t /*src_height*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void D3D9Texture::CopyMemoryToTexture3D(int level, void* data, PixelFormat pf,
-			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
-			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
-			uint32_t src_width, uint32_t src_height, uint32_t src_depth)
+	void D3D9Texture::CopyMemoryToTexture3D(int /*level*/, void* /*data*/, PixelFormat /*pf*/,
+			uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_depth*/,
+			uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/, uint32_t /*dst_zOffset*/,
+			uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_depth*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void D3D9Texture::CopyMemoryToTextureCube(CubeFaces face, int level, void* data, PixelFormat pf,
-			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
-			uint32_t src_width, uint32_t src_height)
+	void D3D9Texture::CopyMemoryToTextureCube(CubeFaces /*face*/, int /*level*/, void* /*data*/, PixelFormat /*pf*/,
+			uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/,
+			uint32_t /*src_width*/, uint32_t /*src_height*/)
 	{
 		BOOST_ASSERT(false);
 	}

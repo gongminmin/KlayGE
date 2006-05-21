@@ -194,15 +194,6 @@ namespace KlayGE
 		TIF(d3dDevice_->Clear(0, NULL, flags, clearClr_, 1, 0));
 	}
 
-	// 设置光影类型
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::ShadingType(ShadeOptions so)
-	{
-		BOOST_ASSERT(d3dDevice_);
-
-		TIF(d3dDevice_->SetRenderState(D3DRS_SHADEMODE, D3D9Mapping::Mapping(so)));
-	}
-
 	// 建立渲染窗口
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderWindowPtr D3D9RenderEngine::CreateRenderWindow(std::string const & name,
@@ -219,8 +210,8 @@ namespace KlayGE
 
 		this->ActiveRenderTarget(0, win);
 
-		this->DepthBufferDepthTest(settings.depthBuffer);
-		this->DepthBufferDepthWrite(settings.depthBuffer);
+		this->SetRenderState(RST_DepthEnable, settings.depthBuffer);
+		this->SetRenderState(RST_DepthMask, settings.depthBuffer);
 
 		if (caps_.hw_instancing_support)
 		{
@@ -231,42 +222,9 @@ namespace KlayGE
 			RenderInstance = boost::bind(&D3D9RenderEngine::DoRenderSWInstance, this, _1);
 		}
 
+		this->InitRenderStates();
+
 		return win;
-	}
-
-	// 设置剪裁模式
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::CullingMode(CullMode mode)
-	{
-		BOOST_ASSERT(d3dDevice_);
-
-		cullingMode_ = mode;
-
-		if (this->ActiveRenderTarget(0)->RequiresTextureFlipping())
-		{
-			if (CM_Clockwise == mode)
-			{
-				mode = CM_AntiClockwise;
-			}
-			else
-			{
-				if (CM_AntiClockwise == mode)
-				{
-					mode = CM_Clockwise;
-				}
-			}
-		}
-
-		TIF(d3dDevice_->SetRenderState(D3DRS_CULLMODE, D3D9Mapping::Mapping(mode)));
-	}
-
-	// 设置多变性填充模式
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::PolygonMode(FillMode mode)
-	{
-		BOOST_ASSERT(d3dDevice_);
-
-		TIF(d3dDevice_->SetRenderState(D3DRS_FILLMODE, D3D9Mapping::Mapping(mode)));
 	}
 
 	// 设置当前渲染目标，该渲染目标必须已经在列表中
@@ -285,16 +243,16 @@ namespace KlayGE
 			renderTarget->CustomAttribute("D3DZBUFFER", &zBuffer);
 			if (zBuffer)
 			{
-				this->DepthBufferDepthTest(true);
+				this->SetRenderState(RST_DepthEnable, true);
 			}
 			else
 			{
-				this->DepthBufferDepthTest(false);
+				this->SetRenderState(RST_DepthEnable, false);
 			}
 
 			TIF(d3dDevice_->SetDepthStencilSurface(zBuffer));
 
-			this->CullingMode(cullingMode_);
+			this->SetRenderState(RST_CullMode, cullingMode_);
 
 			Viewport const & vp(renderTarget->GetViewport());
 			D3DVIEWPORT9 d3dvp = { vp.left, vp.top, vp.width, vp.height, 0, 1 };
@@ -476,79 +434,287 @@ namespace KlayGE
 		TIF(d3dDevice_->EndScene());
 	}
 
-	// 打开/关闭Alpha混合
+	// 初始化渲染状态
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::AlphaBlend(bool enabled)
+	void D3D9RenderEngine::InitRenderStates()
 	{
-		BOOST_ASSERT(d3dDevice_);
+		render_states_[RST_PolygonMode]		= PM_Fill;
+		render_states_[RST_ShadeMode]		= SM_Gouraud;
+		render_states_[RST_CullMode]		= CM_AntiClockwise;
+		render_states_[RST_Clipping]		= true;
 
-		TIF(d3dDevice_->SetRenderState(D3DRS_ALPHABLENDENABLE, enabled ? D3DZB_TRUE : D3DZB_FALSE));
-	}
-	
-	// 设置Alpha混合因数
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::AlphaBlendFunction(AlphaBlendFactor src_factor, AlphaBlendFactor dst_factor)
-	{
-		BOOST_ASSERT(d3dDevice_);
+		render_states_[RST_BlendEnable]		= false;
+		render_states_[RST_BlendOp]			= BOP_Add;
+		render_states_[RST_SrcBlend]		= ABF_One;
+		render_states_[RST_DestBlend]		= ABF_Zero;
+		render_states_[RST_BlendOpAlpha]	= BOP_Add;
+		render_states_[RST_SrcBlendAlpha]	= ABF_One;
+		render_states_[RST_DestBlendAlpha]	= ABF_Zero;
+			
+		render_states_[RST_DepthEnable]			= true;
+		render_states_[RST_DepthMask]			= true;
+		render_states_[RST_DepthFunc]			= CF_LessEqual;
+		render_states_[RST_PolygonOffsetFactor]	= 0;
+		render_states_[RST_PolygonOffsetUnits]	= 0;
 
-		TIF(d3dDevice_->SetRenderState(D3DRS_SRCBLEND, D3D9Mapping::Mapping(src_factor)));
-		TIF(d3dDevice_->SetRenderState(D3DRS_DESTBLEND, D3D9Mapping::Mapping(dst_factor)));
-	}
+		render_states_[RST_FrontStencilEnable]		= false;
+		render_states_[RST_FrontStencilFunc]		= CF_AlwaysPass;
+		render_states_[RST_FrontStencilRef]			= 0;
+		render_states_[RST_FrontStencilMask]		= 0xFFFFFFFF;
+		render_states_[RST_FrontStencilFail]		= SOP_Keep;
+		render_states_[RST_FrontStencilDepthFail]	= SOP_Keep;
+		render_states_[RST_FrontStencilPass]		= SOP_Keep;
+		render_states_[RST_FrontStencilWriteMask]	= 0xFFFFFFFF;
+		render_states_[RST_BackStencilEnable]		= false;
+		render_states_[RST_BackStencilFunc]			= CF_AlwaysPass;
+		render_states_[RST_BackStencilRef]			= 0;
+		render_states_[RST_BackStencilMask]			= 0xFFFFFFFF;
+		render_states_[RST_BackStencilFail]			= SOP_Keep;
+		render_states_[RST_BackStencilDepthFail]	= SOP_Keep;
+		render_states_[RST_BackStencilPass]			= SOP_Keep;
+		render_states_[RST_BackStencilWriteMask]	= 0xFFFFFFFF;
 
-	// 打开/关闭深度测试
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DepthBufferDepthTest(bool enabled)
-	{
-		BOOST_ASSERT(d3dDevice_);
+		render_states_[RST_ColorMask0] = 0xF;
+		render_states_[RST_ColorMask1] = 0xF;
+		render_states_[RST_ColorMask2] = 0xF;
+		render_states_[RST_ColorMask3] = 0xF;
 
-		TIF(d3dDevice_->SetRenderState(D3DRS_ZENABLE, enabled ? D3DZB_TRUE : D3DZB_FALSE));
-	}
-
-	// 打开/关闭深度缓存
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DepthBufferDepthWrite(bool enabled)
-	{
-		BOOST_ASSERT(d3dDevice_);
-
-		TIF(d3dDevice_->SetRenderState(D3DRS_ZWRITEENABLE, enabled ? D3DZB_TRUE : D3DZB_FALSE));
-	}
-
-	// 设置深度比较函数
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DepthBufferFunction(CompareFunction depthFunction)
-	{
-		BOOST_ASSERT(d3dDevice_);
-
-		TIF(d3dDevice_->SetRenderState(D3DRS_ZFUNC, D3D9Mapping::Mapping(depthFunction)));
-	}
-
-	// 设置深度偏移
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DepthBias(float slope_scale, float bias)
-	{
-		BOOST_ASSERT(d3dDevice_);
-
-		TIF(d3dDevice_->SetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, *reinterpret_cast<DWORD*>(&slope_scale)));
-		TIF(d3dDevice_->SetRenderState(D3DRS_DEPTHBIAS, *reinterpret_cast<DWORD*>(&bias)));
+		for (size_t i = 0; i < RST_NUM_RENDER_STATES; ++ i)
+		{
+			dirty_render_states_[i] = false;
+		}
 	}
 
-	// 打开/关闭Alpha测试
+	// 刷新渲染状态
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::AlphaTest(bool enabled)
+	void D3D9RenderEngine::DoFlushRenderStates()
 	{
 		BOOST_ASSERT(d3dDevice_);
 
-		TIF(d3dDevice_->SetRenderState(D3DRS_ALPHATESTENABLE, enabled ? D3DZB_TRUE : D3DZB_FALSE));
-	}
+		if (dirty_render_states_[RST_PolygonMode])
+		{
+			d3dDevice_->SetRenderState(D3DRS_FILLMODE,
+				D3D9Mapping::Mapping(static_cast<PolygonMode>(render_states_[RST_PolygonMode])));
+		}
+		if (dirty_render_states_[RST_ShadeMode])
+		{
+			d3dDevice_->SetRenderState(D3DRS_SHADEMODE,
+				D3D9Mapping::Mapping(static_cast<ShadeMode>(render_states_[RST_ShadeMode])));
+		}
+		if (dirty_render_states_[RST_CullMode])
+		{
+			CullMode mode = static_cast<CullMode>(render_states_[RST_CullMode]);
+			cullingMode_ = mode;
 
-	// 设置Alpha比较函数和参考值
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::AlphaFunction(CompareFunction alphaFunction, float refValue)
-	{
-		BOOST_ASSERT(d3dDevice_);
+			if (this->ActiveRenderTarget(0)->RequiresTextureFlipping())
+			{
+				if (CM_Clockwise == mode)
+				{
+					mode = CM_AntiClockwise;
+				}
+				else
+				{
+					if (CM_AntiClockwise == mode)
+					{
+						mode = CM_Clockwise;
+					}
+				}
+			}
 
-		TIF(d3dDevice_->SetRenderState(D3DRS_ALPHAFUNC, D3D9Mapping::Mapping(alphaFunction)));
-		TIF(d3dDevice_->SetRenderState(D3DRS_ALPHAREF, static_cast<uint32_t>(refValue * 255) & 0xFF));
+			d3dDevice_->SetRenderState(D3DRS_CULLMODE, D3D9Mapping::Mapping(mode));
+		}
+		if (dirty_render_states_[RST_Clipping])
+		{
+			d3dDevice_->SetRenderState(D3DRS_CLIPPING, render_states_[RST_Clipping]);
+		}
+
+		if (dirty_render_states_[RST_BlendEnable])
+		{
+			d3dDevice_->SetRenderState(D3DRS_ALPHABLENDENABLE,
+				render_states_[RST_BlendEnable]);
+			d3dDevice_->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE,
+				render_states_[RST_BlendEnable]);
+		}
+		if (dirty_render_states_[RST_BlendOp])
+		{
+			d3dDevice_->SetRenderState(D3DRS_BLENDOP,
+				D3D9Mapping::Mapping(static_cast<BlendOperation>(render_states_[RST_BlendOp])));
+		}
+		if (dirty_render_states_[RST_SrcBlend])
+		{
+			d3dDevice_->SetRenderState(D3DRS_SRCBLEND,
+				D3D9Mapping::Mapping(static_cast<AlphaBlendFactor>(render_states_[RST_SrcBlend])));
+		}
+		if (dirty_render_states_[RST_DestBlend])
+		{
+			d3dDevice_->SetRenderState(D3DRS_DESTBLEND,
+				D3D9Mapping::Mapping(static_cast<AlphaBlendFactor>(render_states_[RST_DestBlend])));
+		}
+		if (dirty_render_states_[RST_BlendOpAlpha])
+		{
+			d3dDevice_->SetRenderState(D3DRS_BLENDOPALPHA,
+				D3D9Mapping::Mapping(static_cast<BlendOperation>(render_states_[RST_BlendOpAlpha])));
+		}
+		if (dirty_render_states_[RST_SrcBlendAlpha])
+		{
+			d3dDevice_->SetRenderState(D3DRS_SRCBLENDALPHA,
+				D3D9Mapping::Mapping(static_cast<AlphaBlendFactor>(render_states_[RST_SrcBlendAlpha])));
+		}
+		if (dirty_render_states_[RST_DestBlendAlpha])
+		{
+			d3dDevice_->SetRenderState(D3DRS_DESTBLENDALPHA,
+				D3D9Mapping::Mapping(static_cast<AlphaBlendFactor>(render_states_[RST_DestBlendAlpha])));
+		}
+			
+		if (dirty_render_states_[RST_DepthEnable])
+		{
+			d3dDevice_->SetRenderState(D3DRS_ZENABLE,
+				render_states_[RST_DepthEnable] ? D3DZB_TRUE : D3DZB_FALSE);
+		}
+		if (dirty_render_states_[RST_DepthMask])
+		{
+			d3dDevice_->SetRenderState(D3DRS_ZWRITEENABLE,
+				render_states_[RST_DepthMask] ? D3DZB_TRUE : D3DZB_FALSE);
+		}
+		if (dirty_render_states_[RST_DepthFunc])
+		{
+			d3dDevice_->SetRenderState(D3DRS_ZFUNC,
+				D3D9Mapping::Mapping(static_cast<CompareFunction>(render_states_[RST_DepthFunc])));
+		}
+		if (dirty_render_states_[RST_PolygonOffsetFactor])
+		{
+			d3dDevice_->SetRenderState(D3DRS_SLOPESCALEDEPTHBIAS,
+				render_states_[RST_PolygonOffsetFactor]);
+		}
+		if (dirty_render_states_[RST_PolygonOffsetUnits])
+		{
+			d3dDevice_->SetRenderState(D3DRS_DEPTHBIAS,
+				render_states_[RST_PolygonOffsetUnits]);
+		}
+
+		if (dirty_render_states_[RST_FrontStencilFunc])
+		{
+			d3dDevice_->SetRenderState(D3DRS_STENCILFUNC,
+				D3D9Mapping::Mapping(static_cast<CompareFunction>(render_states_[RST_FrontStencilFunc])));
+		}
+		if (dirty_render_states_[RST_FrontStencilRef])
+		{
+			d3dDevice_->SetRenderState(D3DRS_STENCILREF,
+				render_states_[RST_FrontStencilRef]);
+		}
+		if (dirty_render_states_[RST_FrontStencilMask])
+		{
+			d3dDevice_->SetRenderState(D3DRS_STENCILMASK,
+				render_states_[RST_FrontStencilMask]);
+		}
+		if (dirty_render_states_[RST_FrontStencilFail])
+		{
+			d3dDevice_->SetRenderState(D3DRS_STENCILFAIL,
+				D3D9Mapping::Mapping(static_cast<StencilOperation>(render_states_[RST_FrontStencilFail])));
+		}
+		if (dirty_render_states_[RST_FrontStencilDepthFail])
+		{
+			d3dDevice_->SetRenderState(D3DRS_STENCILZFAIL,
+				D3D9Mapping::Mapping(static_cast<StencilOperation>(render_states_[RST_FrontStencilDepthFail])));
+		}
+		if (dirty_render_states_[RST_FrontStencilPass])
+		{
+			d3dDevice_->SetRenderState(D3DRS_STENCILPASS,
+				D3D9Mapping::Mapping(static_cast<StencilOperation>(render_states_[RST_FrontStencilPass])));
+		}
+		if (dirty_render_states_[RST_FrontStencilWriteMask])
+		{
+			d3dDevice_->SetRenderState(D3DRS_STENCILWRITEMASK,
+				render_states_[RST_FrontStencilWriteMask]);
+		}
+		if (dirty_render_states_[RST_BackStencilFunc])
+		{
+			d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFUNC,
+				D3D9Mapping::Mapping(static_cast<CompareFunction>(render_states_[RST_BackStencilFunc])));
+		}
+		if (dirty_render_states_[RST_BackStencilRef])
+		{
+			d3dDevice_->SetRenderState(D3DRS_STENCILREF,
+				render_states_[RST_BackStencilRef]);
+		}
+		if (dirty_render_states_[RST_BackStencilMask])
+		{
+			d3dDevice_->SetRenderState(D3DRS_STENCILMASK,
+				render_states_[RST_BackStencilMask]);
+		}
+		if (dirty_render_states_[RST_BackStencilFail])
+		{
+			d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFAIL,
+				D3D9Mapping::Mapping(static_cast<StencilOperation>(render_states_[RST_BackStencilFail])));
+		}
+		if (dirty_render_states_[RST_BackStencilDepthFail])
+		{
+			d3dDevice_->SetRenderState(D3DRS_CCW_STENCILZFAIL,
+				D3D9Mapping::Mapping(static_cast<StencilOperation>(render_states_[RST_BackStencilDepthFail])));
+		}
+		if (dirty_render_states_[RST_BackStencilPass])
+		{
+			d3dDevice_->SetRenderState(D3DRS_CCW_STENCILPASS,
+				D3D9Mapping::Mapping(static_cast<StencilOperation>(render_states_[RST_BackStencilPass])));
+		}
+		if (dirty_render_states_[RST_BackStencilWriteMask])
+		{
+			d3dDevice_->SetRenderState(D3DRS_STENCILWRITEMASK,
+				render_states_[RST_BackStencilWriteMask]);
+		}
+		if (dirty_render_states_[RST_FrontStencilEnable] || dirty_render_states_[RST_BackStencilEnable])
+		{
+			if (render_states_[RST_FrontStencilEnable] && render_states_[RST_BackStencilEnable])
+			{
+				d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, true);
+			}
+			else
+			{
+				if (render_states_[RST_FrontStencilEnable])
+				{
+					d3dDevice_->SetRenderState(D3DRS_STENCILENABLE, true);
+				}
+				else
+				{
+					if (render_states_[RST_BackStencilEnable])
+					{
+						d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, true);
+						d3dDevice_->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
+					}
+					else
+					{
+						d3dDevice_->SetRenderState(D3DRS_STENCILENABLE, false);
+						d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, false);
+					}
+				}
+			}
+		}
+
+		if (dirty_render_states_[RST_ColorMask0])
+		{
+			d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE,
+				D3D9Mapping::MappingColorMask(render_states_[RST_ColorMask0]));
+		}
+		if (dirty_render_states_[RST_ColorMask1])
+		{
+			d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE,
+				D3D9Mapping::MappingColorMask(render_states_[RST_ColorMask1]));
+		}
+		if (dirty_render_states_[RST_ColorMask2])
+		{
+			d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE,
+				D3D9Mapping::MappingColorMask(render_states_[RST_ColorMask2]));
+		}
+		if (dirty_render_states_[RST_ColorMask3])
+		{
+			d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE,
+				D3D9Mapping::MappingColorMask(render_states_[RST_ColorMask3]));
+		}
+
+		for (size_t i = 0; i < RST_NUM_RENDER_STATES; ++ i)
+		{
+			dirty_render_states_[i] = false;
+		}
 	}
 
 	// 设置纹理
@@ -694,18 +860,9 @@ namespace KlayGE
 		TIF(d3dDevice_->SetTexture(stage, NULL));
 	}
 
-	// 打开模板缓冲区
+	// 获取模板位数
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::StencilCheckEnabled(bool enabled)
-	{
-		BOOST_ASSERT(d3dDevice_);
-
-		TIF(d3dDevice_->SetRenderState(D3DRS_STENCILENABLE, enabled));
-	}
-
-	// 硬件是否支持模板缓冲区
-	/////////////////////////////////////////////////////////////////////////////////
-	bool D3D9RenderEngine::HasHardwareStencil()
+	uint16_t D3D9RenderEngine::StencilBufferBitDepth()
 	{
 		BOOST_ASSERT(d3dDevice_);
 
@@ -717,105 +874,12 @@ namespace KlayGE
 
 		if (D3DFMT_D24S8 == surfDesc.Format)
 		{
-			return true;
+			return 8;
 		}
 		else
 		{
-			return false;
+			return 0;
 		}
-	}
-
-	// 设置模板位数
-	/////////////////////////////////////////////////////////////////////////////////
-	uint16_t D3D9RenderEngine::StencilBufferBitDepth()
-	{
-		return 8;
-	}
-
-	// 设置模板比较函数，参考值和掩码
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::StencilBufferFunction(FaceType face, CompareFunction func, uint32_t refValue, uint32_t mask)
-	{
-		BOOST_ASSERT(d3dDevice_);
-
-		if ((FT_Front == face) || (FT_Front_Back == face))
-		{
-			TIF(d3dDevice_->SetRenderState(D3DRS_STENCILFUNC, D3D9Mapping::Mapping(func)));
-			TIF(d3dDevice_->SetRenderState(D3DRS_STENCILREF, refValue));
-			TIF(d3dDevice_->SetRenderState(D3DRS_STENCILMASK, mask));
-		}
-
-		if ((FT_Back == face) || (FT_Front_Back == face))
-		{
-			TIF(d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFUNC, D3D9Mapping::Mapping(func)));
-			TIF(d3dDevice_->SetRenderState(D3DRS_STENCILREF, refValue));
-			TIF(d3dDevice_->SetRenderState(D3DRS_STENCILMASK, mask));
-		}
-	}
-
-	// 设置模板缓冲区模板测试失败，深度测试失败和通过后的操作
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::StencilBufferOperation(FaceType face, StencilOperation fail,
-		StencilOperation depth_fail, StencilOperation pass)
-	{
-		BOOST_ASSERT(d3dDevice_);
-
-		if ((FT_Front == face) || (FT_Front_Back == face))
-		{
-			TIF(d3dDevice_->SetRenderState(D3DRS_STENCILFAIL, D3D9Mapping::Mapping(fail)));
-			TIF(d3dDevice_->SetRenderState(D3DRS_STENCILZFAIL, D3D9Mapping::Mapping(depth_fail)));
-			TIF(d3dDevice_->SetRenderState(D3DRS_STENCILPASS, D3D9Mapping::Mapping(pass)));
-		}
-
-		if ((FT_Back == face) || (FT_Front_Back == face))
-		{
-			TIF(d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFAIL, D3D9Mapping::Mapping(fail)));
-			TIF(d3dDevice_->SetRenderState(D3DRS_CCW_STENCILZFAIL, D3D9Mapping::Mapping(depth_fail)));
-			TIF(d3dDevice_->SetRenderState(D3DRS_CCW_STENCILPASS, D3D9Mapping::Mapping(pass)));
-		}
-	}
-
-	// 打开/关闭点精灵模式
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::PointSpriteEnable(bool enable)
-	{
-		d3dDevice_->SetRenderState(D3DRS_POINTSPRITEENABLE, enable);
-	}
-
-	// 设置点距离参数
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::PointDistanceAttenuation(float quadratic0, float quadratic1, float quadratic2)
-	{
-		if ((0 == quadratic0) && (0 == quadratic1) && (0 == quadratic2))
-		{
-			d3dDevice_->SetRenderState(D3DRS_POINTSCALEENABLE, false);
-		}
-		else
-		{
-			d3dDevice_->SetRenderState(D3DRS_POINTSCALEENABLE, true);
-
-			d3dDevice_->SetRenderState(D3DRS_POINTSCALE_A, *reinterpret_cast<DWORD*>(&quadratic0));
-			d3dDevice_->SetRenderState(D3DRS_POINTSCALE_B, *reinterpret_cast<DWORD*>(&quadratic1));
-			d3dDevice_->SetRenderState(D3DRS_POINTSCALE_C, *reinterpret_cast<DWORD*>(&quadratic2));
-		}
-	}
-
-	// 设置点大小
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::PointSize(float size)
-	{
-		d3dDevice_->SetRenderState(D3DRS_POINTSIZE, *reinterpret_cast<DWORD*>(&size));
-	}
-
-	// 设置点的最小最大大小
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::PointMinMaxSize(float min_size, float max_size)
-	{
-		min_size = std::max(min_size, caps_.min_point_size);
-		max_size = std::min(max_size, caps_.max_point_size);
-
-		d3dDevice_->SetRenderState(D3DRS_POINTSIZE_MIN, *reinterpret_cast<DWORD*>(&min_size));
-		d3dDevice_->SetRenderState(D3DRS_POINTSIZE_MAX, *reinterpret_cast<DWORD*>(&max_size));
 	}
 
 	// 打开/关闭剪除测试

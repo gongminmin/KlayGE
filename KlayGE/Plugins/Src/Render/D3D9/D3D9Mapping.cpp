@@ -78,6 +78,30 @@ namespace KlayGE
 		return D3DXCOLOR(clr.r(), clr.g(), clr.b(), clr.a());
 	}
 
+	// 从KlayGE的ColorMask转换到D3DCOLORWRITEENABLE所使用的格式
+	/////////////////////////////////////////////////////////////////////////////////
+	uint32_t D3D9Mapping::MappingColorMask(uint32_t mask)
+	{
+		uint32_t ret = 0;
+		if (mask & RenderEngine::CMASK_Red)
+		{
+			ret |= D3DCOLORWRITEENABLE_RED;
+		}
+		if (mask & RenderEngine::CMASK_Green)
+		{
+			ret |= D3DCOLORWRITEENABLE_GREEN;
+		}
+		if (mask & RenderEngine::CMASK_Blue)
+		{
+			ret |= D3DCOLORWRITEENABLE_BLUE;
+		}
+		if (mask & RenderEngine::CMASK_Alpha)
+		{
+			ret |= D3DCOLORWRITEENABLE_ALPHA;
+		}
+		return ret;
+	}
+
 	// 从RenderEngine::CompareFunction转换到D3DCMPFUNC
 	/////////////////////////////////////////////////////////////////////////////////
 	D3DCMPFUNC D3D9Mapping::Mapping(RenderEngine::CompareFunction func)
@@ -206,17 +230,17 @@ namespace KlayGE
 		}
 	}
 
-	uint32_t D3D9Mapping::Mapping(RenderEngine::FillMode mode)
+	uint32_t D3D9Mapping::Mapping(RenderEngine::PolygonMode mode)
 	{
 		switch (mode)
 		{
-		case RenderEngine::FM_Point:
+		case RenderEngine::PM_Point:
 			return D3DFILL_POINT;
 
-		case RenderEngine::FM_Line:
+		case RenderEngine::PM_Line:
 			return D3DFILL_WIREFRAME;
 
-		case RenderEngine::FM_Fill:
+		case RenderEngine::PM_Fill:
 			return D3DFILL_SOLID;
 
 		default:
@@ -225,22 +249,44 @@ namespace KlayGE
 		}
 	}
 
-	uint32_t D3D9Mapping::Mapping(RenderEngine::ShadeOptions so)
+	uint32_t D3D9Mapping::Mapping(RenderEngine::ShadeMode mode)
 	{
-		switch (so)
+		switch (mode)
 		{
-		case RenderEngine::SO_Flat:
+		case RenderEngine::SM_Flat:
 			return D3DSHADE_FLAT;
 
-		case RenderEngine::SO_Gouraud:
+		case RenderEngine::SM_Gouraud:
 			return D3DSHADE_GOURAUD;
-
-		case RenderEngine::SO_Phong:
-			return D3DSHADE_PHONG;
 
 		default:
 			BOOST_ASSERT(false);
 			return D3DSHADE_FLAT;
+		}
+	}
+
+	uint32_t D3D9Mapping::Mapping(RenderEngine::BlendOperation bo)
+	{
+		switch (bo)
+		{
+		case RenderEngine::BOP_Add:
+			return D3DBLENDOP_ADD;
+
+		case RenderEngine::BOP_Sub:
+			return D3DBLENDOP_SUBTRACT;
+
+		case RenderEngine::BOP_Rev_Sub:
+			return D3DBLENDOP_REVSUBTRACT;
+
+		case RenderEngine::BOP_Min:
+			return D3DBLENDOP_MIN;
+
+		case RenderEngine::BOP_Max:
+			return D3DBLENDOP_MAX;
+
+		default:
+			BOOST_ASSERT(false);
+			return D3DBLENDOP_ADD;
 		}
 	}
 

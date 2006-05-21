@@ -63,44 +63,17 @@ namespace KlayGE
 		void ClearColor(Color const & clr);
 		void Clear(uint32_t masks);
 
-		void ShadingType(ShadeOptions so);
-
 		RenderWindowPtr CreateRenderWindow(std::string const & name, RenderSettings const & settings);
-
-		void CullingMode(CullMode mode);
-		void PolygonMode(FillMode mode);
 
 		void StartRendering();
 
 		void BeginFrame();
 		void EndFrame();
 
-		void AlphaBlend(bool enabled);
-		void AlphaBlendFunction(AlphaBlendFactor src_factor, AlphaBlendFactor dst_factor);
-
-		void DepthBufferDepthTest(bool depthTest);
-		void DepthBufferDepthWrite(bool depthWrite);
-		void DepthBufferFunction(CompareFunction depthFunction);
-		void DepthBias(float slope_scale, float bias);
-
-		void AlphaTest(bool enabled);
-		void AlphaFunction(CompareFunction alphaFunction, float refValue);
-
 		void SetSampler(uint32_t stage, SamplerPtr const & sampler);
 		void DisableSampler(uint32_t stage);
 
-		void StencilCheckEnabled(bool enabled);
-		bool HasHardwareStencil();
-
 		uint16_t StencilBufferBitDepth();
-
-		void StencilBufferFunction(FaceType face, CompareFunction func, uint32_t refValue, uint32_t mask);
-		void StencilBufferOperation(FaceType face, StencilOperation fail, StencilOperation depth_fail, StencilOperation pass);
-
-		void PointSpriteEnable(bool enable);
-		void PointDistanceAttenuation(float quadratic0, float quadratic1, float quadratic2);
-		void PointSize(float size);
-		void PointMinMaxSize(float min_size, float max_size);
 
 		void ScissorTest(bool enabled);
 		void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
@@ -110,9 +83,10 @@ namespace KlayGE
 
 	private:
 		void DoActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget);
-
 		void DoRender(RenderLayout const & rl);
+		void DoFlushRenderStates();
 
+		void InitRenderStates();
 		void FillRenderDeviceCaps();
 
 		void DoRenderSWInstance(RenderLayout const & rl);

@@ -1,8 +1,11 @@
 // OGLRenderEngine.hpp
 // KlayGE OpenGL渲染引擎类 头文件
-// Ver 3.0.0
-// 版权所有(C) 龚敏敏, 2003-2005
+// Ver 3.3.0
+// 版权所有(C) 龚敏敏, 2003-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.3.0
+// 只支持OpenGL 2.0 (2006.5.21)
 //
 // 3.0.0
 // 去掉了固定流水线 (2005.8.18)
@@ -52,60 +55,31 @@ namespace KlayGE
 		void ClearColor(Color const & clr);
 		void Clear(uint32_t masks);
 
-		void ShadingType(ShadeOptions so);
-
 		RenderWindowPtr CreateRenderWindow(std::string const & name, RenderSettings const & settings);
-
-		void CullingMode(CullMode mode);
-		void PolygonMode(FillMode mode);
 
 		void StartRendering();
 
 		void BeginFrame();
 		void EndFrame();
 
-		void AlphaBlend(bool enabled);
-		void AlphaBlendFunction(AlphaBlendFactor src_factor, AlphaBlendFactor dst_factor);
-
-		void DepthBufferDepthTest(bool enabled);
-		void DepthBufferDepthWrite(bool enabled);
-		void DepthBufferFunction(CompareFunction depthFunction);
-		void DepthBias(float slope_scale, float bias);
-
-		void AlphaTest(bool enabled);
-		void AlphaFunction(CompareFunction alphaFunction, float refValue);
-
 		void SetSampler(uint32_t stage, SamplerPtr const & sampler);
 		void DisableSampler(uint32_t stage);
 
-		void StencilCheckEnabled(bool enabled);
-		bool HasHardwareStencil();
-
 		uint16_t StencilBufferBitDepth();
-
-		void StencilBufferFunction(FaceType face, CompareFunction func, uint32_t refValue, uint32_t mask);
-		void StencilBufferOperation(FaceType face, StencilOperation fail, StencilOperation depth_fail, StencilOperation pass);
-
-		void PointSpriteEnable(bool enable);
-		void PointDistanceAttenuation(float quadratic0, float quadratic1, float quadratic2);
-		void PointSize(float size);
-		void PointMinMaxSize(float min_size, float max_size);
 
 		void ScissorTest(bool enabled);
 		void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 
 	private:
 		void DoActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget);
-
 		void DoRender(RenderLayout const & rl);
+		void DoFlushRenderStates();
 
+		void InitRenderStates();
 		void FillRenderDeviceCaps();
 
 	private:
 		CullMode cullingMode_;
-
-		glPointParameterfFUNC glPointParameterf_;
-		glPointParameterfvFUNC glPointParameterfv_;
 	};
 
 	typedef boost::shared_ptr<OGLRenderEngine> OGLRenderEnginePtr;
