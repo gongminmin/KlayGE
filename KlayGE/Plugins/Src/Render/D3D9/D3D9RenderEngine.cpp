@@ -277,7 +277,14 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::DoRender(RenderLayout const & rl)
 	{
-		this->RenderInstance(rl);
+		if (rl.InstanceStream() && !rl.UseIndices())
+		{
+			this->DoRenderSWInstance(rl);
+		}
+		else
+		{
+			this->RenderInstance(rl);
+		}
 	}
 
 	void D3D9RenderEngine::DoRenderSWInstance(RenderLayout const & rl)
@@ -414,6 +421,8 @@ namespace KlayGE
 		}
 		else
 		{
+			d3dDevice_->SetIndices(NULL);
+
 			for (uint32_t i = 0; i < num_passes; ++ i)
 			{
 				RenderPassPtr pass = tech->Pass(i);
