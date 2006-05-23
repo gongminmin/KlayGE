@@ -83,9 +83,6 @@ namespace KlayGE
 			return 0;
 		}
 
-		void ScissorTest(bool /*enabled*/)
-		{
-		}
 		void ScissorRect(uint32_t /*x*/, uint32_t /*y*/, uint32_t /*width*/, uint32_t /*height*/)
 		{
 		}

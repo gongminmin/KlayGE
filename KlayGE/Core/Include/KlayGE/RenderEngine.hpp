@@ -205,12 +205,14 @@ namespace KlayGE
 			RST_BackStencilPass			= 0x1E,
 			RST_BackStencilWriteMask	= 0x1F,
 
-			RST_ColorMask0				= 0x20,
-			RST_ColorMask1				= 0x21,
-			RST_ColorMask2				= 0x22,
-			RST_ColorMask3				= 0x23,
+			RST_ScissorEnable			= 0x20,
 
-			RST_NUM_RENDER_STATES		= 0x24
+			RST_ColorMask0				= 0x21,
+			RST_ColorMask1				= 0x22,
+			RST_ColorMask2				= 0x23,
+			RST_ColorMask3				= 0x24,
+
+			RST_NUM_RENDER_STATES		= 0x25
 		};
 
 		enum ColorMask
@@ -265,7 +267,6 @@ namespace KlayGE
 		RenderDeviceCaps const & DeviceCaps() const;
 
 		// Scissor support
-		virtual void ScissorTest(bool enabled) = 0;
 		virtual void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height) = 0;
 
 	protected:

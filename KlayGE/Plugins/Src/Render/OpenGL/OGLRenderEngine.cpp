@@ -598,6 +598,18 @@ namespace KlayGE
 			glStencilMaskSeparate(GL_BACK, render_states_[RST_BackStencilWriteMask]);
 		}
 
+		if (dirty_render_states_[RST_ScissorEnable])
+		{
+			if (render_states_[RST_ScissorEnable])
+			{
+				glEnable(GL_SCISSOR_TEST);
+			}
+			else
+			{
+				glDisable(GL_SCISSOR_TEST);
+			}
+		}
+
 		if (dirty_render_states_[RST_ColorMask0])
 		{
 			glColorMask((render_states_[RST_ColorMask0] & CMASK_Red) != 0,
@@ -716,20 +728,6 @@ namespace KlayGE
 	uint16_t OGLRenderEngine::StencilBufferBitDepth()
 	{
 		return 8;
-	}
-
-	// ´ò¿ª/¹Ø±Õ¼ô³ý²âÊÔ
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::ScissorTest(bool enabled)
-	{
-		if (enabled)
-		{
-			glEnable(GL_SCISSOR_TEST);
-		}
-		else
-		{
-			glDisable(GL_SCISSOR_TEST);
-		}
 	}
 
 	// ÉèÖÃ¼ô³ý¾ØÕó

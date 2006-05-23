@@ -699,6 +699,12 @@ namespace KlayGE
 			}
 		}
 
+		if (dirty_render_states_[RST_ScissorEnable])
+		{
+			d3dDevice_->SetRenderState(D3DRS_SCISSORTESTENABLE,
+				render_states_[RST_ScissorEnable]);
+		}
+
 		if (dirty_render_states_[RST_ColorMask0])
 		{
 			d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE,
@@ -889,13 +895,6 @@ namespace KlayGE
 		{
 			return 0;
 		}
-	}
-
-	// 打开/关闭剪除测试
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::ScissorTest(bool enabled)
-	{
-		d3dDevice_->SetRenderState(D3DRS_SCISSORTESTENABLE, enabled);
 	}
 
 	// 设置剪除矩阵
