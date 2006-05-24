@@ -132,6 +132,18 @@ typedef float			GLclampf;
 typedef double			GLdouble;
 typedef double			GLclampd;
 
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
+	typedef long long int			GLint64;
+	typedef unsigned long long int	GLuint64;
+#elif defined(_WIN32)
+	typedef __int64					GLint64;
+	typedef unsigned __int64		GLuint64;
+#else
+	/* this might actually be a 32-bit type */
+	typedef long int				GLint64;
+	typedef unsigned long int		GLuint64;
+#endif
+
 #ifdef __cplusplus
 extern "C"
 {

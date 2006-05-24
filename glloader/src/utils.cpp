@@ -174,6 +174,8 @@ namespace glloader
 	{
 #ifdef GLLOADER_GLX
 		::glXQueryVersion(::glXGetCurrentDisplay(), &major, &minor);
+#else
+		major; minor;
 #endif		// GLLOADER_GLX
 	}
 
