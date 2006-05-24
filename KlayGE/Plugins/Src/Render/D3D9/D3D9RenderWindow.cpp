@@ -43,7 +43,7 @@ namespace KlayGE
 {
 	LRESULT D3D9RenderWindow::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
-		D3D9RenderWindow* win(reinterpret_cast<D3D9RenderWindow*>(::GetWindowLong(hWnd, 0)));
+		D3D9RenderWindow* win(reinterpret_cast<D3D9RenderWindow*>(::GetWindowLongPtrW(hWnd, 0)));
 		if (win != NULL)
 		{
 			return win->MsgProc(hWnd, uMsg, wParam, lParam);
@@ -183,7 +183,7 @@ namespace KlayGE
 			WS_OVERLAPPEDWINDOW, settings.left, settings.top,
 			settings.width, settings.height, 0, 0, hInst, NULL);
 
-		::SetWindowLong(hWnd_, 0, reinterpret_cast<long>(this));
+		::SetWindowLongPtrW(hWnd_, 0, reinterpret_cast<LONG_PTR>(this));
 
 		::ShowWindow(hWnd_, SW_SHOWNORMAL);
 		::UpdateWindow(hWnd_);
