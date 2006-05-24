@@ -49,9 +49,6 @@ namespace KlayGE
 		uint32_t texture_3d_filter_caps;
 		uint32_t texture_cube_filter_caps;
 
-		float min_point_size;
-		float max_point_size;
-
 		bool hw_instancing_support;
 	};
 }

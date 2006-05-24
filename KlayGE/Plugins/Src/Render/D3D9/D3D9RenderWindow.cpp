@@ -368,6 +368,16 @@ namespace KlayGE
 			if (SUCCEEDED(d3d_->CreateDevice(adapter_.AdapterNo(), D3DDEVTYPE_HAL, hWnd_,
 				iter->first, &d3dpp_, &d3dDevice)))
 			{
+                // Check for ATI instancing support
+			    D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+			    if (D3D_OK == d3d_->CheckDeviceFormat(D3DADAPTER_DEFAULT,
+				    D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE,
+				    static_cast<D3DFORMAT>(MAKEFOURCC('I', 'N', 'S', 'T'))))
+			    {
+				    // Notify the driver that instancing support is expected
+				    d3dDevice->SetRenderState(D3DRS_POINTSIZE, MAKEFOURCC('I', 'N', 'S', 'T'));
+			    }
+
 				D3DCAPS9 d3d_caps;
 				d3dDevice->GetDeviceCaps(&d3d_caps);
 				if (settings.ConfirmDevice && !settings.ConfirmDevice(D3D9Mapping::Mapping(d3d_caps)))
@@ -383,7 +393,7 @@ namespace KlayGE
 		}
 
 		Verify(d3dDevice != NULL);
-		d3dDevice_ = MakeCOMPtr(d3dDevice);
+        d3dDevice_ = MakeCOMPtr(d3dDevice);
 
 		this->UpdateSurfacesPtrs();
 

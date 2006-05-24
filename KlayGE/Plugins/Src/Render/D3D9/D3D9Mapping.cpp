@@ -515,9 +515,6 @@ namespace KlayGE
 			ret.texture_cube_filter_caps |= Sampler::TFO_Anisotropic;
 		}
 
-		ret.min_point_size = 0;
-		ret.max_point_size = d3d_caps.MaxPointSize;
-
 		if (ret.max_shader_model >= 3)
 		{
 			ret.hw_instancing_support = true;
@@ -530,8 +527,7 @@ namespace KlayGE
 				D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE,
 				static_cast<D3DFORMAT>(MAKEFOURCC('I', 'N', 'S', 'T'))))
 			{
-				// Notify the driver that instancing support is expected
-				renderEngine.D3DDevice()->SetRenderState(D3DRS_POINTSIZE, MAKEFOURCC('I', 'N', 'S', 'T'));
+				ret.hw_instancing_support = true;
 			}
 			else
 			{

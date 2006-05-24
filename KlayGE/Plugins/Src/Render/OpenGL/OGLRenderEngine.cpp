@@ -820,9 +820,6 @@ namespace KlayGE
 		caps_.texture_3d_filter_caps = caps_.texture_2d_filter_caps;
 		caps_.texture_cube_filter_caps = caps_.texture_2d_filter_caps;
 
-		glGetFloatv(GL_POINT_SIZE_MIN, &caps_.min_point_size);
-		glGetFloatv(GL_POINT_SIZE_MAX, &caps_.max_point_size);
-
 		caps_.hw_instancing_support = true;
 	}
 }
