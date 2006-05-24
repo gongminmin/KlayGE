@@ -13,6 +13,12 @@
 #define D3D_DEBUG_INFO
 #endif
 
+#if _MSC_VER >= 1400
+#define _VC_8_0
+#elif _MSC_VER >= 1310
+#define _VC_7_1
+#endif
+
 // 定义本地的endian方式
 #define _LITTLE_ENDIAN
 

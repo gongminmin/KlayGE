@@ -19,13 +19,17 @@
 #ifndef _KLAYGE_HPP
 #define _KLAYGE_HPP
 
-#define KLAYGE_MAJOR		3
-#define KLAYGE_MINOR		2
-#define KLAYGE_RELEASE		0
-#define KLAYGE_VER_STR		"KlayGE 3.2.0"
-
 #include <KlayGE/Config.hpp>
 #include <KlayGE/Types.hpp>
+
+#define KLAYGE_MAJOR		3
+#define KLAYGE_MINOR		3
+#define KLAYGE_RELEASE		0
+#define KLAYGE_VER_STR		"KlayGE 3.3.0"
+
+#ifdef _VC_8_0
+#pragma warning(disable : 4819)
+#endif
 
 #include <boost/config/requires_threads.hpp>
 

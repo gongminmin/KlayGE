@@ -541,7 +541,8 @@ namespace KlayGE
 			glEnable(GL_POLYGON_OFFSET_POINT);
 			glEnable(GL_POLYGON_OFFSET_LINE);
 			// Bias is in {0, 16}, scale the unit addition appropriately
-			glPolygonOffset(render_states_[RST_PolygonOffsetFactor], render_states_[RST_PolygonOffsetUnits]);
+			glPolygonOffset(uint32_to_float(render_states_[RST_PolygonOffsetFactor]),
+				uint32_to_float(render_states_[RST_PolygonOffsetUnits]));
 		}
 
 		if (dirty_render_states_[RST_FrontStencilEnable] || dirty_render_states_[RST_BackStencilEnable])
