@@ -23,14 +23,9 @@
 			<Name name="glGetQueryObjecti64vEXT"/>
 			<Name name="glGetQueryObjectui64vEXT"/>
 		</Vendor>
-		<Vendor name="GL_NV" string="GL_NV_timer_query">
-			<Name name="glGetQueryObjecti64vNV"/>
-			<Name name="glGetQueryObjectui64vNV"/>
-		</Vendor>
 	</Vendors>
 
 	<InitPath>
 		<Init name="GL_EXT"/>
-		<Init name="GL_NV"/>
 	</InitPath>
 </GLExtension>
