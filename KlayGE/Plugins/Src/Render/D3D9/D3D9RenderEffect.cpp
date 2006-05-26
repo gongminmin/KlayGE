@@ -305,7 +305,12 @@ namespace KlayGE
 						RenderEffectParameterPtr param = effect_.ParameterByName(constant_desc.Name);
 						if (param)
 						{
-							samplers_[i].insert(std::make_pair(param, constant_table_[i]->GetSamplerIndex(handle)));
+							UINT sampler_index = constant_table_[i]->GetSamplerIndex(handle);
+							if (0 == i)
+							{
+								sampler_index += D3DVERTEXTEXTURESAMPLER0;
+							}
+							samplers_[i].insert(std::make_pair(param, sampler_index));
 						}
 					}
 				}
