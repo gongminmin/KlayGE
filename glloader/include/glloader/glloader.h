@@ -54,15 +54,16 @@
 #endif
 
 #if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
-#define ISWIN32
-#define GLLOADER_WGL
+	#define GLLOADER_WGL
+#elif defined(__APPLE__) || defined(__APPLE_CC__)
+	#define GLLOADER_AGL
 #else
-#define GLLOADER_GLX
+	#define GLLOADER_GLX
 #endif		/* _WIN32 */
 
 #define GLLOADER_GL
 
-#ifdef ISWIN32
+#ifdef GLLOADER_WGL
 #define WIN32_LEAN_AND_MEAN 1
 #include <windows.h>
 #endif

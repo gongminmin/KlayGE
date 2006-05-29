@@ -228,7 +228,7 @@ void glloader_init()
 
 void* glloader_get_gl_proc_address(const char* name)
 {
-#ifdef ISWIN32
+#ifdef GLLOADER_WGL
 	return (void*)(::wglGetProcAddress(name));
 #else
 	return (void*)(::glXGetProcAddress(reinterpret_cast<const GLubyte*>(name)));
