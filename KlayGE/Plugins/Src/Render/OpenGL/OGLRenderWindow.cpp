@@ -213,13 +213,18 @@ namespace KlayGE
 		hRC_ = ::wglCreateContext(hDC_);
 		::wglMakeCurrent(hDC_, hRC_);
 
-		if (!glloader_GL_VERSION_1_5())
+		if (!glloader_GL_VERSION_2_0())
 		{
 			THR(E_FAIL);
 		}
 
 		glEnable(GL_COLOR_MATERIAL);
 		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+		if (settings.multiSample != 0)
+		{
+			glEnable(GL_MULTISAMPLE);
+			glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+		}
 
 		viewport_.left = 0;
 		viewport_.top = 0;

@@ -39,7 +39,7 @@ namespace
 			MathLib::PerlinNoise<float>& pn = MathLib::PerlinNoise<float>::Instance();
 
 			int const XSIZE = 128;
-            int const YSIZE = 32;
+			int const YSIZE = 32;
 			int const ZSIZE = 32;
 			float const XSCALE = 0.04f;
 			float const YSCALE = 0.08f;
