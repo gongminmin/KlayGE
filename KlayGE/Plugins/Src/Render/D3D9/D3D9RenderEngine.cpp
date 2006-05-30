@@ -49,6 +49,7 @@
 #include <KlayGE/RenderSettings.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderWindow.hpp>
+#include <KlayGE/D3D9/D3D9FrameBuffer.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 #include <KlayGE/D3D9/D3D9GraphicsBuffer.hpp>
 #include <KlayGE/D3D9/D3D9RenderEffect.hpp>
@@ -85,7 +86,7 @@ namespace KlayGE
 	D3D9RenderEngine::~D3D9RenderEngine()
 	{
 		renderEffect_.reset();
-		renderTargets_.clear();
+		cur_render_target_.reset();
 
 		d3dDevice_.reset();
 		d3d_.reset();
@@ -136,7 +137,7 @@ namespace KlayGE
 
 		::PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
 
-		RenderTarget& renderTarget(*this->ActiveRenderTarget(0));
+		RenderTarget& renderTarget(*this->CurRenderTarget());
 		while (WM_QUIT != msg.message)
 		{
 			// 如果窗口是激活的，用 PeekMessage()以便我们可以用空闲时间渲染场景
@@ -201,14 +202,14 @@ namespace KlayGE
 	{
 		D3D9RenderWindowPtr win(new D3D9RenderWindow(d3d_, this->ActiveAdapter(),
 			name, settings));
+		default_render_window_ = win;
 
 		d3dDevice_ = win->D3DDevice();
 		Verify(d3dDevice_);
 
 		this->FillRenderDeviceCaps();
-		renderTargets_.resize(caps_.max_simultaneous_rts);
 
-		this->ActiveRenderTarget(0, win);
+		this->BindRenderTarget(win);
 
 		this->SetRenderState(RST_DepthEnable, settings.depthBuffer);
 		this->SetRenderState(RST_DepthMask, settings.depthBuffer);
@@ -229,39 +230,60 @@ namespace KlayGE
 
 	// 设置当前渲染目标，该渲染目标必须已经在列表中
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DoActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget)
+	void D3D9RenderEngine::DoBindRenderTarget(RenderTargetPtr rt)
 	{
 		BOOST_ASSERT(d3dDevice_);
+		BOOST_ASSERT(rt);
 
-		if (renderTarget)
+		IDirect3DSurface9* zBuffer = NULL;
+		if (dynamic_cast<D3D9RenderWindow*>(rt.get()) != NULL)
 		{
-			IDirect3DSurface9* backBuffer;
-			renderTarget->CustomAttribute("DDBACKBUFFER", &backBuffer);
-			TIF(d3dDevice_->SetRenderTarget(n, backBuffer));
+			D3D9RenderWindow* rw = dynamic_cast<D3D9RenderWindow*>(rt.get());
 
-			IDirect3DSurface9* zBuffer;
-			renderTarget->CustomAttribute("D3DZBUFFER", &zBuffer);
-			if (zBuffer)
+			IDirect3DSurface9* backBuffer = rw->D3DRenderSurface().get();
+			TIF(d3dDevice_->SetRenderTarget(0, backBuffer));
+			for (size_t i = 1; i < this->DeviceCaps().max_simultaneous_rts; ++ i)
 			{
-				this->SetRenderState(RST_DepthEnable, true);
-			}
-			else
-			{
-				this->SetRenderState(RST_DepthEnable, false);
+				TIF(d3dDevice_->SetRenderTarget(i, NULL));
 			}
 
-			TIF(d3dDevice_->SetDepthStencilSurface(zBuffer));
-
-			this->SetRenderState(RST_CullMode, cullingMode_);
-
-			Viewport const & vp(renderTarget->GetViewport());
-			D3DVIEWPORT9 d3dvp = { vp.left, vp.top, vp.width, vp.height, 0, 1 };
-			TIF(d3dDevice_->SetViewport(&d3dvp));
+			zBuffer = rw->D3DRenderZBuffer().get();
 		}
 		else
 		{
-			TIF(d3dDevice_->SetRenderTarget(n, NULL));
+			if (dynamic_cast<D3D9FrameBuffer*>(rt.get()) != NULL)
+			{
+				D3D9FrameBuffer* fb = dynamic_cast<D3D9FrameBuffer*>(rt.get());
+
+				for (size_t i = 0; i < this->DeviceCaps().max_simultaneous_rts; ++ i)
+				{
+					TIF(d3dDevice_->SetRenderTarget(i, fb->D3DRenderSurface(i).get()));
+				}
+
+				zBuffer = fb->D3DRenderZBuffer().get();
+			}
+			else
+			{
+				BOOST_ASSERT(false);
+			}
 		}
+
+		if (zBuffer)
+		{
+			this->SetRenderState(RST_DepthEnable, true);
+		}
+		else
+		{
+			this->SetRenderState(RST_DepthEnable, false);
+		}
+
+		TIF(d3dDevice_->SetDepthStencilSurface(zBuffer));
+
+		this->SetRenderState(RST_CullMode, cullingMode_);
+
+		Viewport const & vp(rt->GetViewport());
+		D3DVIEWPORT9 d3dvp = { vp.left, vp.top, vp.width, vp.height, 0, 1 };
+		TIF(d3dDevice_->SetViewport(&d3dvp));
 	}
 
 	// 开始一帧
@@ -515,7 +537,7 @@ namespace KlayGE
 			CullMode mode = static_cast<CullMode>(render_states_[RST_CullMode]);
 			cullingMode_ = mode;
 
-			if (this->ActiveRenderTarget(0)->RequiresTextureFlipping())
+			if (this->CurRenderTarget()->RequiresTextureFlipping())
 			{
 				if (CM_Clockwise == mode)
 				{
@@ -927,9 +949,6 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::OnResetDevice()
 	{
-		for (uint32_t i = 0; i < renderTargets_.size(); ++ i)
-		{
-			this->ActiveRenderTarget(i, renderTargets_[i]);
-		}
+		this->BindRenderTarget(cur_render_target_);
 	}
 }

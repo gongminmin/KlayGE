@@ -27,7 +27,7 @@ private:
 
 	KlayGE::RenderTargetPtr screen_buffer_;
 
-	KlayGE::RenderTexturePtr shadow_buffer_;
+	KlayGE::FrameBufferPtr shadow_buffer_;
 	KlayGE::TexturePtr shadow_tex_;
 
 	KlayGE::TexturePtr lamp_tex_;

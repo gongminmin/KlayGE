@@ -323,9 +323,9 @@ void ShadowCubeMap::InitObjects()
 	checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->LampTexture(lamp_tex_);
 
 	shadow_tex_ = Context::Instance().RenderFactoryInstance().MakeTextureCube(SHADOW_MAP_SIZE, 1, PF_ABGR16F);
-	shadow_buffer_ = Context::Instance().RenderFactoryInstance().MakeRenderTexture();
+	shadow_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
 
-	screen_buffer_ = renderEngine.ActiveRenderTarget(0);
+	screen_buffer_ = renderEngine.CurRenderTarget();
 
 
 	fpcController_.AttachCamera(this->ActiveCamera());
@@ -394,15 +394,15 @@ void ShadowCubeMap::DoUpdate(uint32_t pass)
 			checked_cast<OccluderRenderable*>(mesh_->GetRenderable().get())->GenShadowMapPass(true);
 			checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->GenShadowMapPass(true);
 
-			shadow_buffer_->AttachTextureCube(shadow_tex_, face);
-			renderEngine.ActiveRenderTarget(0, shadow_buffer_);
+			shadow_buffer_->AttachTextureCube(0, shadow_tex_, face);
+			renderEngine.BindRenderTarget(shadow_buffer_);
 			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 		}
 		break;
 
 	case 6:
 		{
-			renderEngine.ActiveRenderTarget(0, screen_buffer_);
+			renderEngine.BindRenderTarget(screen_buffer_);
 			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 			//SaveToFile(shadow_tex_, "shadow_tex.dds");
@@ -414,7 +414,7 @@ void ShadowCubeMap::DoUpdate(uint32_t pass)
 			checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->GenShadowMapPass(false);
 
 			std::wostringstream stream;
-			stream << renderEngine.ActiveRenderTarget(0)->FPS();
+			stream << renderEngine.CurRenderTarget()->FPS();
 
 			font_->RenderText(0, 0, Color(1, 1, 0, 1), L"ShadowCubeMap");
 			font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());

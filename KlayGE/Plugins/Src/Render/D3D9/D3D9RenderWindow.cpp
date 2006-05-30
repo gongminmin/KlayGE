@@ -553,38 +553,4 @@ namespace KlayGE
 			d3dDevice_->Present(NULL, NULL, NULL, NULL);
 		}
 	}
-
-	void D3D9RenderWindow::CustomAttribute(std::string const & name, void* pData)
-	{
-		// Valid attributes and their equvalent native functions:
-		// D3DZBUFFER			: Z buffer surface
-		// DDBACKBUFFER			: Back buffer surface
-		// DDFRONTBUFFER		: Front buffer surface
-
-		if ("D3DZBUFFER" == name)
-		{
-			IDirect3DSurface9** pSurf = reinterpret_cast<IDirect3DSurface9**>(pData);
-			*pSurf = renderZBuffer_.get();
-
-			return;
-		}
-
-		if ("DDBACKBUFFER" == name)
-		{
-			IDirect3DSurface9** pSurf = reinterpret_cast<IDirect3DSurface9**>(pData);
-			*pSurf = renderSurface_.get();
-
-			return;
-		}
-
-		if ("DDFRONTBUFFER" == name)
-		{
-			IDirect3DSurface9** pSurf = reinterpret_cast<IDirect3DSurface9**>(pData);
-			*pSurf = renderSurface_.get();
-
-			return;
-		}
-
-		BOOST_ASSERT(false);
-	}
 }

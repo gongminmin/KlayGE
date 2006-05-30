@@ -16,7 +16,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
-#include <KlayGE/D3D9/D3D9RenderTexture.hpp>
+#include <KlayGE/D3D9/D3D9FrameBuffer.hpp>
 #include <KlayGE/D3D9/D3D9RenderEffect.hpp>
 #include <KlayGE/D3D9/D3D9RenderLayout.hpp>
 #include <KlayGE/D3D9/D3D9GraphicsBuffer.hpp>
@@ -60,9 +60,9 @@ namespace KlayGE
 		return ret;
 	}
 
-	RenderTexturePtr D3D9RenderFactory::MakeRenderTexture()
+	FrameBufferPtr D3D9RenderFactory::MakeFrameBuffer()
 	{
-		D3D9RenderTexturePtr ret(new D3D9RenderTexture);
+		D3D9FrameBufferPtr ret(new D3D9FrameBuffer);
 		resource_pool_.push_back(ret);
 		return ret;
 	}

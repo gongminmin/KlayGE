@@ -179,8 +179,8 @@ void Cartoon::InitObjects()
 	this->LookAt(Vector3(0, 0, -6), Vector3(0, 0, 0));
 	this->Proj(0.1f, 20.0f);
 
-	screen_buffer_ = renderEngine.ActiveRenderTarget(0);
-	normal_depth_buffer_ = Context::Instance().RenderFactoryInstance().MakeRenderTexture();
+	screen_buffer_ = renderEngine.CurRenderTarget();
+	normal_depth_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
 	normal_depth_buffer_->GetViewport().camera = screen_buffer_->GetViewport().camera;
 
 	fpcController_.AttachCamera(this->ActiveCamera());
@@ -198,7 +198,7 @@ void Cartoon::InitObjects()
 void Cartoon::OnResize(uint32_t width, uint32_t height)
 {
 	normal_depth_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, PF_ABGR16F);
-	normal_depth_buffer_->AttachTexture2D(normal_depth_tex_);
+	normal_depth_buffer_->AttachTexture2D(0, normal_depth_tex_);
 }
 
 void Cartoon::InputHandler(InputEngine const & sender, InputAction const & action)
@@ -226,7 +226,7 @@ void Cartoon::DoUpdate(uint32_t pass)
 	case 0:
 		fpcController_.Update();
 
-		renderEngine.ActiveRenderTarget(0, normal_depth_buffer_);
+		renderEngine.BindRenderTarget(normal_depth_buffer_);
 		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 		sceneMgr.Clear();
@@ -235,7 +235,7 @@ void Cartoon::DoUpdate(uint32_t pass)
 		break;
 	
 	case 1:
-		renderEngine.ActiveRenderTarget(0, screen_buffer_);
+		renderEngine.BindRenderTarget(screen_buffer_);
 		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 		sceneMgr.Clear();
@@ -243,7 +243,7 @@ void Cartoon::DoUpdate(uint32_t pass)
 		checked_cast<RenderTorus*>(torus_->GetRenderable().get())->Pass(1);
 		torus_->AddToSceneManager();
 
-		RenderWindow* rw = static_cast<RenderWindow*>(renderEngine.ActiveRenderTarget(0).get());
+		RenderWindow* rw = static_cast<RenderWindow*>(renderEngine.CurRenderTarget().get());
 
 		font_->RenderText(0, 0, Color(1, 1, 0, 1), L"¿¨Í¨äÖÈ¾²âÊÔ");
 		font_->RenderText(0, 18, Color(1, 1, 0, 1), rw->Description());
@@ -253,7 +253,7 @@ void Cartoon::DoUpdate(uint32_t pass)
 		font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str().c_str());
 
 		stream.str(L"");
-		stream << renderEngine.ActiveRenderTarget(0)->FPS() << " FPS";
+		stream << renderEngine.CurRenderTarget()->FPS() << " FPS";
 		font_->RenderText(0, 54, Color(1, 1, 0, 1), stream.str().c_str());
 		break;
 	}

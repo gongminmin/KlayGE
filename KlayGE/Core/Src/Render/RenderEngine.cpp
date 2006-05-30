@@ -88,7 +88,7 @@ namespace KlayGE
 		}
 
 	private:
-		void DoActiveRenderTarget(uint32_t /*n*/, RenderTargetPtr /*renderTarget*/)
+		void DoBindRenderTarget(RenderTargetPtr /*rt*/)
 		{
 		}
 
@@ -132,21 +132,25 @@ namespace KlayGE
 
 	// 设置当前渲染目标
 	/////////////////////////////////////////////////////////////////////////////////
-	void RenderEngine::ActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget)
+	void RenderEngine::BindRenderTarget(RenderTargetPtr rt)
 	{
-		BOOST_ASSERT(n < renderTargets_.size());
+		if (!rt)
+		{
+			cur_render_target_ = default_render_window_;
+		}
+		else
+		{
+			cur_render_target_ = rt;
+		}
 
-		renderTargets_[n] = renderTarget;
-		this->DoActiveRenderTarget(n, renderTarget);
+		this->DoBindRenderTarget(cur_render_target_);
 	}
 
 	// 获取当前渲染目标
 	/////////////////////////////////////////////////////////////////////////////////
-	RenderTargetPtr RenderEngine::ActiveRenderTarget(uint32_t n) const
+	RenderTargetPtr RenderEngine::CurRenderTarget() const
 	{
-		BOOST_ASSERT(n < renderTargets_.size());
-
-		return renderTargets_[n];
+		return cur_render_target_;
 	}
 
 	// 设置渲染特效

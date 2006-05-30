@@ -18,7 +18,7 @@
 
 #include <KlayGE/OpenGL/OGLRenderEngine.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>
-#include <KlayGE/OpenGL/OGLRenderTexture.hpp>
+#include <KlayGE/OpenGL/OGLFrameBuffer.hpp>
 #include <KlayGE/OpenGL/OGLRenderEffect.hpp>
 #include <KlayGE/OpenGL/OGLRenderLayout.hpp>
 #include <KlayGE/OpenGL/OGLGraphicsBuffer.hpp>
@@ -43,7 +43,7 @@ namespace KlayGE
 {
 	RenderFactory& OGLRenderFactoryInstance();
 
-	typedef ConcreteRenderFactory<OGLRenderEngine, OGLTexture, OGLRenderTexture,
+	typedef ConcreteRenderFactory<OGLRenderEngine, OGLTexture, OGLFrameBuffer,
 				OGLRenderEffect, OGLRenderGraphicsBuffer> OGLRenderFactoryBase;
 
 	class OGLRenderFactory : public OGLRenderFactoryBase
@@ -62,7 +62,7 @@ namespace KlayGE
 		TexturePtr MakeTextureCube(uint32_t size, uint16_t numMipMaps,
 				PixelFormat format);
 
-		RenderTexturePtr MakeRenderTexture();
+		FrameBufferPtr MakeFrameBuffer();
 
 		RenderEffectPtr DoMakeRenderEffect(std::string const & srcData);
 

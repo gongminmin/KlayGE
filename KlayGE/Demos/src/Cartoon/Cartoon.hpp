@@ -29,7 +29,7 @@ private:
 
 	KlayGE::RenderTargetPtr screen_buffer_;
 
-	KlayGE::RenderTexturePtr normal_depth_buffer_;
+	KlayGE::FrameBufferPtr normal_depth_buffer_;
 	KlayGE::TexturePtr normal_depth_tex_;
 };
 

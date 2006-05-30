@@ -186,7 +186,7 @@ void Refract::DoUpdate(uint32_t pass)
 	*(refractor_->GetRenderable()->GetRenderEffect()->ParameterByName("eyePos")) = this->ActiveCamera().EyePos();
 
 	std::wostringstream stream;
-	stream << renderEngine.ActiveRenderTarget(0)->FPS();
+	stream << renderEngine.CurRenderTarget()->FPS();
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Refract");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());

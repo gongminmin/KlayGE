@@ -15,7 +15,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderEffect.hpp>
-#include <KlayGE/RenderTexture.hpp>
+#include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderGraphicsBuffer.hpp>
 #include <KlayGE/Query.hpp>
 #include <KlayGE/ResLoader.hpp>
@@ -58,9 +58,9 @@ namespace KlayGE
 		{
 			return Texture::NullObject();
 		}
-		RenderTexturePtr MakeRenderTexture()
+		FrameBufferPtr MakeFrameBuffer()
 		{
-			return RenderTexture::NullObject();
+			return FrameBuffer::NullObject();
 		}
 
 		RenderLayoutPtr MakeRenderLayout(RenderLayout::buffer_type type)

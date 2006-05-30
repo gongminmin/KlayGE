@@ -33,7 +33,7 @@ private:
 
 	KlayGE::RenderTargetPtr screen_buffer_;
 
-	KlayGE::RenderTexturePtr render_buffer_;
+	KlayGE::FrameBufferPtr render_buffer_;
 	KlayGE::TexturePtr rendered_tex_;
 
 	KlayGE::TexturePtr downsample_tex_;

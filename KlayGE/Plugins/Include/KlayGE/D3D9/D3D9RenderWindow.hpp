@@ -55,8 +55,6 @@ namespace KlayGE
 		boost::shared_ptr<IDirect3DSurface9> D3DRenderSurface() const;
 		boost::shared_ptr<IDirect3DSurface9> D3DRenderZBuffer() const;
 
-		void CustomAttribute(std::string const & name, void* pData);
-
 		bool RequiresTextureFlipping() const;
 
 		// Method for dealing with resize / move & 3d library

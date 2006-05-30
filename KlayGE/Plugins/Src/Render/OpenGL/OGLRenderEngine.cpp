@@ -47,6 +47,7 @@
 
 #include <KlayGE/OpenGL/OGLMapping.hpp>
 #include <KlayGE/OpenGL/OGLRenderWindow.hpp>
+#include <KlayGE/OpenGL/OGLFrameBuffer.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 #include <KlayGE/OpenGL/OGLGraphicsBuffer.hpp>
 #include <KlayGE/OpenGL/OGLRenderLayout.hpp>
@@ -91,7 +92,7 @@ namespace KlayGE
 
 		::PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
 
-		RenderTarget& renderTarget = *this->ActiveRenderTarget(0);
+		RenderTarget& renderTarget = *this->CurRenderTarget();
 		while (WM_QUIT != msg.message)
 		{
 			// 如果窗口是激活的，用 PeekMessage()以便我们可以用空闲时间渲染场景
@@ -155,11 +156,11 @@ namespace KlayGE
 		RenderSettings const & settings)
 	{
 		RenderWindowPtr win(new OGLRenderWindow(name, settings));
+		default_render_window_ = win;
 
 		this->FillRenderDeviceCaps();
-		renderTargets_.resize(caps_.max_simultaneous_rts);
 
-		this->ActiveRenderTarget(0, win);
+		this->BindRenderTarget(win);
 
 		this->SetRenderState(RST_DepthEnable, settings.depthBuffer);
 		this->SetRenderState(RST_DepthMask, settings.depthBuffer);
@@ -171,11 +172,29 @@ namespace KlayGE
 
 	// 设置当前渲染目标
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::DoActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget)
+	void OGLRenderEngine::DoBindRenderTarget(RenderTargetPtr rt)
 	{
+		BOOST_ASSERT(rt);
+
+		if (dynamic_cast<OGLRenderWindow*>(rt.get()) != NULL)
+		{
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		}
+		else
+		{
+			if (dynamic_cast<OGLFrameBuffer*>(rt.get()) != NULL)
+			{
+				glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, checked_cast<OGLFrameBuffer*>(rt.get())->OGLFbo());
+			}
+			else
+			{
+				BOOST_ASSERT(false);
+			}
+		}
+
 		this->SetRenderState(RST_CullMode, cullingMode_);
 
-		Viewport const & vp(renderTarget->GetViewport());
+		Viewport const & vp(rt->GetViewport());
 		glViewport(vp.left, vp.top, vp.width, vp.height);
 	}
 

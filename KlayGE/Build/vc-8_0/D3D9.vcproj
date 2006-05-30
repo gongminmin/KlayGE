@@ -166,6 +166,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9FrameBuffer.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9IndexBuffer.cpp"
 				>
 			</File>
@@ -195,10 +199,6 @@
 			</File>
 			<File
 				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9RenderLayout.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9RenderTexture.cpp"
 				>
 			</File>
 			<File
@@ -245,6 +245,10 @@
 			</File>
 			<File
 				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9AdapterList.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\D3D9\D3D9FrameBuffer.hpp"
 				>
 			</File>
 			<File

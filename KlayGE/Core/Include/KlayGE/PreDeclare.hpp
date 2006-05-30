@@ -80,8 +80,8 @@ namespace KlayGE
 	typedef boost::shared_ptr<Texture> TexturePtr;
 	class Sampler;
 	typedef boost::shared_ptr<Sampler> SamplerPtr;
-	class RenderTexture;
-	typedef boost::shared_ptr<RenderTexture> RenderTexturePtr;
+	class FrameBuffer;
+	typedef boost::shared_ptr<FrameBuffer> FrameBufferPtr;
 	class GraphicsBuffer;
 	typedef boost::shared_ptr<GraphicsBuffer> GraphicsBufferPtr;
 	class RenderLayout;

@@ -73,35 +73,6 @@ namespace KlayGE
 		return boost::shared_ptr<IDirect3DSurface9>();
 	}
 
-	void D3D9RenderGraphicsBuffer::CustomAttribute(std::string const & name, void* pData)
-	{
-		if (("DDBACKBUFFER" == name) || ("DDFRONTBUFFER" == name))
-		{
-			IDirect3DSurface9** pSurf = reinterpret_cast<IDirect3DSurface9**>(pData);
-			*pSurf = this->D3DRenderSurface().get();
-
-			return;
-		}
-
-		if ("D3DZBUFFER" == name)
-		{
-			IDirect3DSurface9** pSurf = reinterpret_cast<IDirect3DSurface9**>(pData);
-			*pSurf = NULL;
-
-			return;
-		}
-
-		if ("HWND" == name)
-		{
-			HWND* pHwnd = reinterpret_cast<HWND*>(pData);
-			*pHwnd = NULL;
-
-			return;
-		}
-
-		BOOST_ASSERT(false);
-	}
-
 	void D3D9RenderGraphicsBuffer::DoOnLostDevice()
 	{
 		if (vs_)

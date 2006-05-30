@@ -70,7 +70,7 @@ namespace KlayGE
 		void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 
 	private:
-		void DoActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget);
+		void DoBindRenderTarget(RenderTargetPtr renderTarget);
 		void DoRender(RenderLayout const & rl);
 		void DoFlushRenderStates();
 

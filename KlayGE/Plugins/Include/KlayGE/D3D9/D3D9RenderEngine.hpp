@@ -81,7 +81,7 @@ namespace KlayGE
 		void OnResetDevice();
 
 	private:
-		void DoActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget);
+		void DoBindRenderTarget(RenderTargetPtr rt);
 		void DoRender(RenderLayout const & rl);
 		void DoFlushRenderStates();
 

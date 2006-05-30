@@ -34,7 +34,7 @@
 #include <KlayGE/D3D9/D3D9Resource.hpp>
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
-#include <KlayGE/D3D9/D3D9RenderTexture.hpp>
+#include <KlayGE/D3D9/D3D9FrameBuffer.hpp>
 #include <KlayGE/D3D9/D3D9RenderEffect.hpp>
 #include <KlayGE/D3D9/D3D9GraphicsBuffer.hpp>
 #include <KlayGE/D3D9/D3D9RenderGraphicsBuffer.hpp>
@@ -49,7 +49,7 @@ namespace KlayGE
 {
 	RenderFactory& D3D9RenderFactoryInstance();
 
-	typedef ConcreteRenderFactory<D3D9RenderEngine, D3D9Texture, D3D9RenderTexture,
+	typedef ConcreteRenderFactory<D3D9RenderEngine, D3D9Texture, D3D9FrameBuffer,
 			D3D9RenderEffect, D3D9RenderGraphicsBuffer> D3D9RenderFactoryBase;
 
 	class D3D9RenderFactory : public D3D9RenderFactoryBase
@@ -65,7 +65,7 @@ namespace KlayGE
 			PixelFormat format);
 		TexturePtr MakeTextureCube(uint32_t size, uint16_t numMipMaps,
 			PixelFormat format);
-		RenderTexturePtr MakeRenderTexture();
+		FrameBufferPtr MakeFrameBuffer();
 
 		RenderLayoutPtr MakeRenderLayout(RenderLayout::buffer_type type);
 		GraphicsBufferPtr MakeVertexBuffer(BufferUsage usage);

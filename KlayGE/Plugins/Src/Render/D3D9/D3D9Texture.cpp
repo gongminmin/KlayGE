@@ -168,11 +168,6 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void D3D9Texture::CustomAttribute(std::string const & /*name*/, void* /*data*/)
-	{
-		BOOST_ASSERT(false);
-	}
-
 	void D3D9Texture::Usage(Texture::TextureUsage usage)
 	{
 		if (usage != usage_)

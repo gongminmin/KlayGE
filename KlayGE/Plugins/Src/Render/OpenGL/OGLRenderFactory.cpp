@@ -54,9 +54,9 @@ namespace KlayGE
 		return TexturePtr(new OGLTextureCube(size, numMipMaps, format));
 	}
 
-	RenderTexturePtr OGLRenderFactory::MakeRenderTexture()
+	FrameBufferPtr OGLRenderFactory::MakeFrameBuffer()
 	{
-		return RenderTexturePtr(new OGLRenderTexture);
+		return FrameBufferPtr(new OGLFrameBuffer);
 	}
 
 	RenderEffectPtr OGLRenderFactory::DoMakeRenderEffect(std::string const & srcData)

@@ -49,7 +49,7 @@ namespace KlayGE
 			PixelFormat format) = 0;
 		virtual TexturePtr MakeTextureCube(uint32_t size, uint16_t numMipMaps,
 			PixelFormat format) = 0;
-		virtual RenderTexturePtr MakeRenderTexture() = 0;
+		virtual FrameBufferPtr MakeFrameBuffer() = 0;
 
 		FontPtr MakeFont(std::string const & fontName, uint32_t fontHeight = 12, uint32_t flags = 0);
 
@@ -72,7 +72,7 @@ namespace KlayGE
 		effect_pool_type effect_pool_;
 	};
 
-	template <typename RenderEngineType, typename TextureType, typename RenderTextureType,
+	template <typename RenderEngineType, typename TextureType, typename FrameBufferType,
 		typename RenderEffectType, typename RenderVertexStreamType>
 	class ConcreteRenderFactory : boost::noncopyable, public RenderFactory
 	{

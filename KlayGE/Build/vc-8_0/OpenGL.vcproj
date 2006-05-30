@@ -158,6 +158,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLFrameBuffer.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLGraphicsBuffer.cpp"
 				>
 			</File>
@@ -183,10 +187,6 @@
 			</File>
 			<File
 				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderGraphicsBuffer.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderTexture.cpp"
 				>
 			</File>
 			<File
@@ -220,6 +220,10 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLFrameBuffer.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLGraphicsBuffer.hpp"
 				>
 			</File>
@@ -249,10 +253,6 @@
 			</File>
 			<File
 				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderLayout.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderTexture.hpp"
 				>
 			</File>
 			<File

@@ -231,9 +231,9 @@ void Fractal::InitObjects()
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	render_buffer_ = Context::Instance().RenderFactoryInstance().MakeRenderTexture();
+	render_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
 
-	screen_buffer_ = renderEngine.ActiveRenderTarget(0);
+	screen_buffer_ = renderEngine.CurRenderTarget();
 
 	render_buffer_->GetViewport().camera = screen_buffer_->GetViewport().camera;
 
@@ -267,9 +267,9 @@ void Fractal::DoUpdate(uint32_t pass)
 	switch (pass)
 	{
 	case 0:
-		render_buffer_->AttachTexture2D(rendered_tex_[!odd]);
+		render_buffer_->AttachTexture2D(0, rendered_tex_[!odd]);
 
-		renderEngine.ActiveRenderTarget(0, render_buffer_);
+		renderEngine.BindRenderTarget(render_buffer_);
 		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 		checked_cast<RenderFractal*>(renderFractal_.get())->SetTexture(rendered_tex_[odd]);
@@ -277,7 +277,7 @@ void Fractal::DoUpdate(uint32_t pass)
 		break;
 
 	case 1:
-		renderEngine.ActiveRenderTarget(0, screen_buffer_);
+		renderEngine.BindRenderTarget(screen_buffer_);
 		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 		checked_cast<RenderPlane*>(renderPlane_.get())->SetTexture(rendered_tex_[!odd]);
@@ -286,7 +286,7 @@ void Fractal::DoUpdate(uint32_t pass)
 		odd = !odd;
 
 		std::wostringstream stream;
-		stream << renderEngine.ActiveRenderTarget(0)->FPS();
+		stream << renderEngine.CurRenderTarget()->FPS();
 
 		font_->RenderText(0, 0, Color(1, 1, 0, 1), L"GPU¼ÆËã·ÖÐÎ");
 		font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());

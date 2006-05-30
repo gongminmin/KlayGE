@@ -273,7 +273,7 @@ void DistanceMapping::DoUpdate(uint32_t pass)
 	renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 	std::wostringstream stream;
-	stream << renderEngine.ActiveRenderTarget(0)->FPS();
+	stream << renderEngine.CurRenderTarget()->FPS();
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"DistanceMapping²âÊÔ");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());

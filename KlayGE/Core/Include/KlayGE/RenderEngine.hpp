@@ -252,8 +252,8 @@ namespace KlayGE
 		void SetRenderState(RenderStateType rst, uint32_t state);
 		uint32_t GetRenderState(RenderStateType rst);
 
-		void ActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget);
-		RenderTargetPtr ActiveRenderTarget(uint32_t n) const;
+		void BindRenderTarget(RenderTargetPtr rt);
+		RenderTargetPtr CurRenderTarget() const;
 
 		// Set a sampler.
 		virtual void SetSampler(uint32_t stage, SamplerPtr const & sampler) = 0;
@@ -270,7 +270,7 @@ namespace KlayGE
 		virtual void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height) = 0;
 
 	protected:
-		virtual void DoActiveRenderTarget(uint32_t n, RenderTargetPtr renderTarget) = 0;
+		virtual void DoBindRenderTarget(RenderTargetPtr rt) = 0;
 		virtual void DoRender(RenderLayout const & rl) = 0;
 		virtual void DoFlushRenderStates() = 0;
 
@@ -278,7 +278,8 @@ namespace KlayGE
 		virtual void FillRenderDeviceCaps() = 0;
 
 	protected:
-		std::vector<RenderTargetPtr> renderTargets_;
+		RenderTargetPtr cur_render_target_;
+		RenderTargetPtr default_render_window_;
 
 		RenderEffectPtr renderEffect_;
 
