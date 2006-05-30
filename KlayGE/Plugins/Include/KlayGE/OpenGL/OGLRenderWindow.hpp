@@ -37,8 +37,6 @@ namespace KlayGE
 
 		void CustomAttribute(std::string const & name, void* pData);
 
-		bool RequiresTextureFlipping() const;
-
 		// Method for dealing with resize / move & 3d library
 		void WindowMovedOrResized();
 		

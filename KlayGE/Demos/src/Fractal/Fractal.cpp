@@ -232,10 +232,7 @@ void Fractal::InitObjects()
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
 	render_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
-
-	screen_buffer_ = renderEngine.CurRenderTarget();
-
-	render_buffer_->GetViewport().camera = screen_buffer_->GetViewport().camera;
+	render_buffer_->GetViewport().camera = renderEngine.CurRenderTarget()->GetViewport().camera;
 
 	renderFractal_.reset(new RenderFractal);
 	renderPlane_.reset(new RenderPlane);
@@ -277,7 +274,7 @@ void Fractal::DoUpdate(uint32_t pass)
 		break;
 
 	case 1:
-		renderEngine.BindRenderTarget(screen_buffer_);
+		renderEngine.BindRenderTarget(RenderTargetPtr());
 		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 		checked_cast<RenderPlane*>(renderPlane_.get())->SetTexture(rendered_tex_[!odd]);

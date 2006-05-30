@@ -27,8 +27,6 @@ private:
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
-	KlayGE::RenderTargetPtr screen_buffer_;
-
 	KlayGE::FrameBufferPtr normal_depth_buffer_;
 	KlayGE::TexturePtr normal_depth_tex_;
 };

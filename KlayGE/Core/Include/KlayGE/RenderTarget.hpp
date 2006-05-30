@@ -52,9 +52,6 @@ namespace KlayGE
 		virtual bool Active() const;
 		virtual void Active(bool state);
 
-		virtual bool RequiresTextureFlipping() const = 0;
-		virtual bool IsTexture() const = 0;
-
 		virtual void SwapBuffers() = 0;
 
 	protected:

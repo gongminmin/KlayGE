@@ -211,10 +211,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Render\RenderGraphicsBuffer.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\Core\Src\Render\RenderLayout.cpp"
 					>
 				</File>
@@ -296,10 +292,6 @@
 				</File>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\RenderFactory.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\Core\Include\KlayGE\RenderGraphicsBuffer.hpp"
 					>
 				</File>
 				<File

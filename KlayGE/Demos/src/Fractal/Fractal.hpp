@@ -21,8 +21,6 @@ private:
 	boost::shared_ptr<KlayGE::Renderable> renderFractal_;
 	boost::shared_ptr<KlayGE::Renderable> renderPlane_;
 
-	KlayGE::RenderTargetPtr screen_buffer_;
-
 	KlayGE::FrameBufferPtr render_buffer_;
 	KlayGE::TexturePtr rendered_tex_[2];
 };

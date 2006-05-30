@@ -194,10 +194,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9RenderGraphicsBuffer.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9RenderLayout.cpp"
 				>
 			</File>
@@ -273,10 +269,6 @@
 			</File>
 			<File
 				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9RenderFactory.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\D3D9\D3D9RenderGraphicsBuffer.hpp"
 				>
 			</File>
 			<File

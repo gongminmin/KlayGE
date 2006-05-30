@@ -37,7 +37,6 @@
 #include <KlayGE/D3D9/D3D9FrameBuffer.hpp>
 #include <KlayGE/D3D9/D3D9RenderEffect.hpp>
 #include <KlayGE/D3D9/D3D9GraphicsBuffer.hpp>
-#include <KlayGE/D3D9/D3D9RenderGraphicsBuffer.hpp>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_RenderEngine_D3D9_d.lib")
@@ -50,7 +49,7 @@ namespace KlayGE
 	RenderFactory& D3D9RenderFactoryInstance();
 
 	typedef ConcreteRenderFactory<D3D9RenderEngine, D3D9Texture, D3D9FrameBuffer,
-			D3D9RenderEffect, D3D9RenderGraphicsBuffer> D3D9RenderFactoryBase;
+			D3D9RenderEffect> D3D9RenderFactoryBase;
 
 	class D3D9RenderFactory : public D3D9RenderFactoryBase
 	{
@@ -70,8 +69,6 @@ namespace KlayGE
 		RenderLayoutPtr MakeRenderLayout(RenderLayout::buffer_type type);
 		GraphicsBufferPtr MakeVertexBuffer(BufferUsage usage);
 		GraphicsBufferPtr MakeIndexBuffer(BufferUsage usage);
-
-		RenderGraphicsBufferPtr MakeRenderGraphicsBuffer(uint32_t width, uint32_t height);
 
 		QueryPtr MakeOcclusionQuery();
 

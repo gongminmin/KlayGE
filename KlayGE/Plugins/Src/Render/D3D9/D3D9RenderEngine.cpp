@@ -242,7 +242,7 @@ namespace KlayGE
 
 			IDirect3DSurface9* backBuffer = rw->D3DRenderSurface().get();
 			TIF(d3dDevice_->SetRenderTarget(0, backBuffer));
-			for (size_t i = 1; i < this->DeviceCaps().max_simultaneous_rts; ++ i)
+			for (uint32_t i = 1; i < this->DeviceCaps().max_simultaneous_rts; ++ i)
 			{
 				TIF(d3dDevice_->SetRenderTarget(i, NULL));
 			}
@@ -255,7 +255,7 @@ namespace KlayGE
 			{
 				D3D9FrameBuffer* fb = dynamic_cast<D3D9FrameBuffer*>(rt.get());
 
-				for (size_t i = 0; i < this->DeviceCaps().max_simultaneous_rts; ++ i)
+				for (uint32_t i = 0; i < this->DeviceCaps().max_simultaneous_rts; ++ i)
 				{
 					TIF(d3dDevice_->SetRenderTarget(i, fb->D3DRenderSurface(i).get()));
 				}
@@ -536,22 +536,6 @@ namespace KlayGE
 		{
 			CullMode mode = static_cast<CullMode>(render_states_[RST_CullMode]);
 			cullingMode_ = mode;
-
-			if (this->CurRenderTarget()->RequiresTextureFlipping())
-			{
-				if (CM_Clockwise == mode)
-				{
-					mode = CM_AntiClockwise;
-				}
-				else
-				{
-					if (CM_AntiClockwise == mode)
-					{
-						mode = CM_Clockwise;
-					}
-				}
-			}
-
 			d3dDevice_->SetRenderState(D3DRS_CULLMODE, D3D9Mapping::Mapping(mode));
 		}
 		if (dirty_render_states_[RST_Clipping])

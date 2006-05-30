@@ -220,8 +220,7 @@ void AsciiArts::InitObjects()
 	this->BuildAsciiLumsTex();
 
 	render_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
-	screen_buffer_ = renderEngine.CurRenderTarget();
-	render_buffer_->GetViewport().camera = screen_buffer_->GetViewport().camera;
+	render_buffer_->GetViewport().camera = renderEngine.CurRenderTarget()->GetViewport().camera;
 
 	renderQuad_.reset(new RenderQuad);
 
@@ -300,7 +299,7 @@ void AsciiArts::DoUpdate(uint32_t pass)
 			rendered_tex_->CopyToTexture(*downsample_tex_);
 
 			// µÚ¶ş±é£¬Æ¥Åä£¬×îÖÕäÖÈ¾
-			renderEngine.BindRenderTarget(screen_buffer_);
+			renderEngine.BindRenderTarget(RenderTargetPtr());
 			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 			static_cast<RenderQuad*>(renderQuad_.get())->SetTexture(downsample_tex_, ascii_lums_tex_);
@@ -311,7 +310,7 @@ void AsciiArts::DoUpdate(uint32_t pass)
 	}
 	else
 	{
-		renderEngine.BindRenderTarget(screen_buffer_);
+		renderEngine.BindRenderTarget(RenderTargetPtr());
 		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 		sceneMgr.Clear();

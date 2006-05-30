@@ -25,8 +25,6 @@ private:
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
-	KlayGE::RenderTargetPtr screen_buffer_;
-
 	KlayGE::FrameBufferPtr shadow_buffer_;
 	KlayGE::TexturePtr shadow_tex_;
 

@@ -31,8 +31,6 @@ private:
 
 	KlayGE::TexturePtr ascii_lums_tex_;
 
-	KlayGE::RenderTargetPtr screen_buffer_;
-
 	KlayGE::FrameBufferPtr render_buffer_;
 	KlayGE::TexturePtr rendered_tex_;
 

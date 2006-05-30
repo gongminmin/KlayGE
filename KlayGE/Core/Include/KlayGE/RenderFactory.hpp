@@ -60,8 +60,6 @@ namespace KlayGE
 		virtual GraphicsBufferPtr MakeVertexBuffer(BufferUsage usage) = 0;
 		virtual GraphicsBufferPtr MakeIndexBuffer(BufferUsage usage) = 0;
 
-		virtual RenderGraphicsBufferPtr MakeRenderGraphicsBuffer(uint32_t width, uint32_t height) = 0;
-
 		virtual QueryPtr MakeOcclusionQuery() = 0;
 
 	private:
@@ -73,7 +71,7 @@ namespace KlayGE
 	};
 
 	template <typename RenderEngineType, typename TextureType, typename FrameBufferType,
-		typename RenderEffectType, typename RenderVertexStreamType>
+		typename RenderEffectType>
 	class ConcreteRenderFactory : boost::noncopyable, public RenderFactory
 	{
 	public:

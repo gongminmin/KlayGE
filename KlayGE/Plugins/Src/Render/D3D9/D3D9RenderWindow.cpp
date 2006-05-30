@@ -451,11 +451,6 @@ namespace KlayGE
 		return renderZBuffer_;
 	}
 
-	bool D3D9RenderWindow::RequiresTextureFlipping() const
-	{
-		return false;
-	}
-
 	void D3D9RenderWindow::WindowMovedOrResized()
 	{
 		::RECT rect;

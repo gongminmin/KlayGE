@@ -16,7 +16,6 @@
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/FrameBuffer.hpp>
-#include <KlayGE/RenderGraphicsBuffer.hpp>
 #include <KlayGE/Query.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Font.hpp>
@@ -75,11 +74,6 @@ namespace KlayGE
 		GraphicsBufferPtr MakeIndexBuffer(BufferUsage usage)
 		{
 			return GraphicsBuffer::NullObject();
-		}
-
-		RenderGraphicsBufferPtr MakeRenderGraphicsBuffer(uint32_t width, uint32_t height)
-		{
-			return RenderGraphicsBuffer::NullObject();
 		}
 
 		QueryPtr MakeOcclusionQuery()

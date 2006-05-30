@@ -179,9 +179,8 @@ void Cartoon::InitObjects()
 	this->LookAt(Vector3(0, 0, -6), Vector3(0, 0, 0));
 	this->Proj(0.1f, 20.0f);
 
-	screen_buffer_ = renderEngine.CurRenderTarget();
 	normal_depth_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
-	normal_depth_buffer_->GetViewport().camera = screen_buffer_->GetViewport().camera;
+	normal_depth_buffer_->GetViewport().camera = renderEngine.CurRenderTarget()->GetViewport().camera;
 
 	fpcController_.AttachCamera(this->ActiveCamera());
 	fpcController_.Scalers(0.05f, 0.5f);
@@ -235,7 +234,7 @@ void Cartoon::DoUpdate(uint32_t pass)
 		break;
 	
 	case 1:
-		renderEngine.BindRenderTarget(screen_buffer_);
+		renderEngine.BindRenderTarget(RenderTargetPtr());
 		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 		sceneMgr.Clear();

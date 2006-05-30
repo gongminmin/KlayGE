@@ -325,9 +325,6 @@ void ShadowCubeMap::InitObjects()
 	shadow_tex_ = Context::Instance().RenderFactoryInstance().MakeTextureCube(SHADOW_MAP_SIZE, 1, PF_ABGR16F);
 	shadow_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
 
-	screen_buffer_ = renderEngine.CurRenderTarget();
-
-
 	fpcController_.AttachCamera(this->ActiveCamera());
 	fpcController_.Scalers(0.05f, 0.1f);
 
@@ -402,7 +399,7 @@ void ShadowCubeMap::DoUpdate(uint32_t pass)
 
 	case 6:
 		{
-			renderEngine.BindRenderTarget(screen_buffer_);
+			renderEngine.BindRenderTarget(RenderTargetPtr());
 			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 			//SaveToFile(shadow_tex_, "shadow_tex.dds");

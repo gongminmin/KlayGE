@@ -33,11 +33,6 @@ namespace KlayGE
 			return true;
 		}
 
-		bool RequiresTextureFlipping() const
-		{
-			return false;
-		}
-
 		void SwapBuffers()
 		{
 		}

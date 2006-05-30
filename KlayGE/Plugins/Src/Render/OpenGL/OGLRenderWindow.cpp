@@ -265,11 +265,6 @@ namespace KlayGE
 		return description_;
 	}
 
-	bool OGLRenderWindow::RequiresTextureFlipping() const
-	{
-		return false;
-	}
-
 	void OGLRenderWindow::WindowMovedOrResized()
 	{
 		::RECT rect;
