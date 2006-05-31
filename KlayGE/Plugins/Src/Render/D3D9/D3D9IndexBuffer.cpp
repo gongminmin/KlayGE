@@ -145,6 +145,12 @@ namespace KlayGE
 		buffer_->Unlock();
 	}
 
+	RenderViewPtr D3D9IndexBuffer::CreateRenderView(uint32_t width, uint32_t height)
+	{
+		BOOST_ASSERT(false);
+		return RenderViewPtr();
+	}
+
 	boost::shared_ptr<IDirect3DIndexBuffer9> D3D9IndexBuffer::D3D9Buffer() const
 	{
 		return buffer_;

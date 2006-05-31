@@ -20,7 +20,10 @@
 #define _FRAMEBUFFER_HPP
 
 #include <KlayGE/PreDeclare.hpp>
+
 #include <vector>
+
+#include <KlayGE/RenderView.hpp>
 #include <KlayGE/RenderTarget.hpp>
 
 #ifdef KLAYGE_DEBUG
@@ -34,25 +37,33 @@ namespace KlayGE
 	class FrameBuffer : public RenderTarget
 	{
 	public:
+		enum ATTACHMENT
+		{
+			ATT_Depth,
+			ATT_Stencil,
+			ATT_DepthStencil,
+			ATT_Color0,
+			ATT_Color1,
+			ATT_Color2,
+			ATT_Color3
+		};
+
+	public:
+		virtual ~FrameBuffer()
+		{
+		}
+
 		static FrameBufferPtr NullObject();
 
-		virtual void AttachTexture2D(uint32_t n, TexturePtr texture2D) = 0;
-		virtual void AttachTextureCube(uint32_t n, TexturePtr textureCube, Texture::CubeFaces face) = 0;
-
-		virtual void AttachGraphicsBuffer(uint32_t n, GraphicsBufferPtr gb,
-			uint32_t width, uint32_t height) = 0;
-
-		virtual void Detach(uint32_t n) = 0;
+		virtual void Attach(uint32_t att, RenderViewPtr view) = 0;
+		virtual void Detach(uint32_t att) = 0;
 
 		void SwapBuffers()
 		{
 		}
 
 	protected:
-		std::vector<TexturePtr> privateTexs_;
-		std::vector<Texture::CubeFaces> faces_;
-
-		std::vector<GraphicsBufferPtr> gbuffers_;
+		std::vector<RenderViewPtr> clr_views_;
 	};
 }
 

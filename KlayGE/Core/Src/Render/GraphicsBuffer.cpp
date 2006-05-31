@@ -20,8 +20,9 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
+#include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/RenderView.hpp>
 #include <KlayGE/MapVector.hpp>
 
 #include <boost/bind.hpp>
@@ -49,6 +50,11 @@ namespace KlayGE
 
 		void DoResize()
 		{
+		}
+
+		RenderViewPtr CreateRenderView(uint32_t /*width*/, uint32_t /*height*/)
+		{
+			return RenderView::NullObject();
 		}
 	};
 

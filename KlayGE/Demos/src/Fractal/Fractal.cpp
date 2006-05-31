@@ -264,7 +264,7 @@ void Fractal::DoUpdate(uint32_t pass)
 	switch (pass)
 	{
 	case 0:
-		render_buffer_->AttachTexture2D(0, rendered_tex_[!odd]);
+		render_buffer_->Attach(FrameBuffer::ATT_Color0, rendered_tex_[!odd]->CreateRenderView(0));
 
 		renderEngine.BindRenderTarget(render_buffer_);
 		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);

@@ -20,6 +20,7 @@
 #include <algorithm>
 
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
+#include <KlayGE/D3D9/D3D9RenderView.hpp>
 #include <KlayGE/D3D9/D3D9GraphicsBuffer.hpp>
 
 namespace KlayGE
@@ -84,6 +85,12 @@ namespace KlayGE
 		BOOST_ASSERT(buffer_);
 
 		buffer_->Unlock();
+	}
+
+	RenderViewPtr D3D9VertexBuffer::CreateRenderView(uint32_t width, uint32_t height)
+	{
+		BOOST_ASSERT(false);
+		return RenderViewPtr(new D3D9GraphicsBufferRenderView(*this, width, height, PF_ABGR32F));
 	}
 
 	boost::shared_ptr<IDirect3DVertexBuffer9> D3D9VertexBuffer::D3D9Buffer() const

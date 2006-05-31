@@ -221,13 +221,13 @@ namespace KlayGE
 
 		Vector3 const & FramePos(int frame) const
 		{
-			const int lframe(frame % bind_pos.size());
+			const int lframe(static_cast<int>(frame % bind_pos.size()));
 			return bind_pos[lframe];
 		}
 
 		Quaternion const & FrameQuat(int frame) const
 		{
-			const int lframe(frame % bind_quat.size());
+			const int lframe(static_cast<int>(frame % bind_quat.size()));
 			return bind_quat[lframe];
 		}
 	};

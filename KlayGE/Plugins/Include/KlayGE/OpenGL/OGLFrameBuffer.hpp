@@ -17,6 +17,7 @@
 #define _OGLFRAMEBUFFER_HPP
 
 #include <KlayGE/FrameBuffer.hpp>
+#include <KlayGE/RenderView.hpp>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL_d.lib")
@@ -32,13 +33,8 @@ namespace KlayGE
 		OGLFrameBuffer();
 		~OGLFrameBuffer();
 
-		void AttachTexture2D(uint32_t n, TexturePtr texture2D);
-		void AttachTextureCube(uint32_t n, TexturePtr textureCube, Texture::CubeFaces face);
-
-		void AttachGraphicsBuffer(uint32_t n, GraphicsBufferPtr gb,
-			uint32_t width, uint32_t height);
-
-		void Detach(boost::uint32_t n);
+		void Attach(uint32_t att, RenderViewPtr view);
+		void Detach(boost::uint32_t att);
 
 		GLuint OGLFbo() const
 		{
@@ -46,12 +42,8 @@ namespace KlayGE
 		}
 
 	private:
-		void UpdateParams(uint32_t n, TexturePtr texture);
-		void UpdateParams(uint32_t n, GraphicsBufferPtr gb, uint32_t width, uint32_t height);
-
-	private:
-		std::vector<GLuint> texs_;
 		GLuint fbo_;
+		GLuint depth_rb_;
 	};
 
 	typedef boost::shared_ptr<OGLFrameBuffer> OGLFrameBufferPtr;

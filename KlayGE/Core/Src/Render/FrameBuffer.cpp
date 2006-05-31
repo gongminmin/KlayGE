@@ -19,17 +19,10 @@ namespace KlayGE
 	class NullFrameBuffer : public FrameBuffer
 	{
 	public:
-		void AttachTexture2D(uint32_t /*n*/, TexturePtr /*texture2D*/)
+		void Attach(uint32_t /*att*/, RenderViewPtr /*view*/)
 		{
 		}
-		void AttachTextureCube(uint32_t /*n*/, TexturePtr /*textureCube*/, Texture::CubeFaces /*face*/)
-		{
-		}
-		void AttachGraphicsBuffer(uint32_t /*n*/, GraphicsBufferPtr /*gb*/,
-			uint32_t /*width*/, uint32_t /*height*/)
-		{
-		}
-		void Detach(uint32_t /*n*/)
+		void Detach(uint32_t /*att*/)
 		{
 		}
 	};

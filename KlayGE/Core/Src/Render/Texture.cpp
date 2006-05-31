@@ -13,6 +13,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/RenderView.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Util.hpp>
 
@@ -935,6 +936,15 @@ namespace KlayGE
 		void BuildMipSubLevels()
 		{
 		}
+
+		RenderViewPtr CreateRenderView(int /*level*/)
+		{
+			return RenderView::NullObject();
+		}
+		RenderViewPtr CreateRenderView(CubeFaces /*face*/, int /*level*/)
+		{
+			return RenderView::NullObject();
+		}		
 	};
 
 

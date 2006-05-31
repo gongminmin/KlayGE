@@ -391,7 +391,7 @@ void ShadowCubeMap::DoUpdate(uint32_t pass)
 			checked_cast<OccluderRenderable*>(mesh_->GetRenderable().get())->GenShadowMapPass(true);
 			checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->GenShadowMapPass(true);
 
-			shadow_buffer_->AttachTextureCube(0, shadow_tex_, face);
+			shadow_buffer_->Attach(FrameBuffer::ATT_Color0, shadow_tex_->CreateRenderView(face, 0));
 			renderEngine.BindRenderTarget(shadow_buffer_);
 			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 		}

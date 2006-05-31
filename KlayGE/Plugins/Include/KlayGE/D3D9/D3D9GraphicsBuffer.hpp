@@ -36,6 +36,8 @@ namespace KlayGE
 		void* Map(BufferAccess ba);
 		void Unmap();
 
+		RenderViewPtr CreateRenderView(uint32_t width, uint32_t height);
+
 		boost::shared_ptr<IDirect3DIndexBuffer9> D3D9Buffer() const;
 		void SwitchFormat(IndexFormat format);
 
@@ -61,6 +63,8 @@ namespace KlayGE
 
 		void* Map(BufferAccess ba);
 		void Unmap();
+
+		RenderViewPtr CreateRenderView(uint32_t width, uint32_t height);
 
 		boost::shared_ptr<IDirect3DVertexBuffer9> D3D9Buffer() const;
 

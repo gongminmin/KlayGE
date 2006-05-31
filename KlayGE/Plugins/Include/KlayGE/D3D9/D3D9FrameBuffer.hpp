@@ -20,6 +20,7 @@
 #define _D3D9FRAMEBUFFER_HPP
 
 #include <KlayGE/FrameBuffer.hpp>
+#include <KlayGE/D3D9/D3D9Typedefs.hpp>
 #include <KlayGE/D3D9/D3D9Resource.hpp>
 
 #ifdef KLAYGE_DEBUG
@@ -32,21 +33,14 @@ namespace KlayGE
 {
 	class D3D9FrameBuffer : public FrameBuffer, public D3D9Resource
 	{
-		typedef boost::shared_ptr<IDirect3DSurface9> IDirect3DSurface9Ptr;
-
 	public:
 		D3D9FrameBuffer();
 
-		void AttachTexture2D(uint32_t n, TexturePtr texture2D);
-		void AttachTextureCube(uint32_t n, TexturePtr textureCube, Texture::CubeFaces face);
+		void Attach(uint32_t att, RenderViewPtr view);
+		void Detach(uint32_t att);
 
-		void AttachGraphicsBuffer(uint32_t n, GraphicsBufferPtr gb,
-			uint32_t width, uint32_t height);
-
-		void Detach(uint32_t n);
-
-		boost::shared_ptr<IDirect3DSurface9> D3DRenderSurface(uint32_t n) const;
-		boost::shared_ptr<IDirect3DSurface9> D3DRenderZBuffer() const;
+		ID3D9SurfacePtr D3DRenderSurface(uint32_t n) const;
+		ID3D9SurfacePtr D3DRenderZBuffer() const;
 
 	private:
 		void DoOnLostDevice();
@@ -54,15 +48,8 @@ namespace KlayGE
 
 		void CreateDepthStencilBuffer();
 
-		IDirect3DSurface9Ptr CreateGBSurface(D3DPOOL pool);
-		void CopyToGraphicsBuffer(uint32_t n);
-
-		void UpdateParams(uint32_t n, TexturePtr texture);
-		void UpdateParams(uint32_t n, GraphicsBufferPtr gb, uint32_t width, uint32_t height);
-
 	private:
-		std::vector<boost::shared_ptr<IDirect3DSurface9> > renderSurfaces_;
-		boost::shared_ptr<IDirect3DSurface9> depthStencilSurface_;
+		ID3D9SurfacePtr depthStencilSurface_;
 	};
 
 	typedef boost::shared_ptr<D3D9FrameBuffer> D3D9FrameBufferPtr;

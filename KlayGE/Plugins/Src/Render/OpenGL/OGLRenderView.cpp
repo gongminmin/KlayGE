@@ -1,0 +1,191 @@
+// OGLRenderView.cpp
+// KlayGE OGL渲染视图类 实现文件
+// Ver 3.3.0
+// 版权所有(C) 龚敏敏, 2006
+// Homepage: http://klayge.sourceforge.net
+//
+// 3.3.0
+// 初次建立 (2006.5.31)
+//
+// 修改记录
+/////////////////////////////////////////////////////////////////////////////////
+
+#include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
+#include <KlayGE/ThrowErr.hpp>
+#include <KlayGE/Context.hpp>
+
+#include <boost/assert.hpp>
+
+#include <KlayGE/OpenGL/OGLTexture.hpp>
+#include <KlayGE/OpenGL/OGLGraphicsBuffer.hpp>
+#include <KlayGE/OpenGL/OGLFrameBuffer.hpp>
+#include <KlayGE/OpenGL/OGLRenderView.hpp>
+
+namespace KlayGE
+{
+	OGLRenderView::~OGLRenderView()
+	{
+	}
+
+
+	OGLTexture1DRenderView::OGLTexture1DRenderView(Texture& texture_1d, int level)
+		: texture_1d_(static_cast<OGLTexture1D&>(texture_1d)),
+			level_(level)
+	{
+		BOOST_ASSERT(Texture::TT_1D == texture_1d.Type());
+		BOOST_ASSERT(dynamic_cast<OGLTexture1D*>(&texture_1d) != NULL);
+
+		tex_ = texture_1d_.GLTexture();
+
+		width_ = texture_1d_.Width(level);
+		height_ = 1;
+		bpp_ = texture_1d_.Bpp();
+	}
+
+	void OGLTexture1DRenderView::OnAttached(FrameBuffer& fb, uint32_t n)
+	{
+		if (Texture::TU_RenderTarget != texture_1d_.Usage())
+		{
+			texture_1d_.Usage(Texture::TU_RenderTarget);
+		}
+
+		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+		glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
+			GL_COLOR_ATTACHMENT0_EXT + n, GL_TEXTURE_1D, tex_, level_);
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	}
+
+	void OGLTexture1DRenderView::OnDetached(FrameBuffer& fb, uint32_t n)
+	{
+		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+		glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
+			GL_COLOR_ATTACHMENT0_EXT + n, GL_TEXTURE_1D, 0, 0);
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	}
+
+
+	OGLTexture2DRenderView::OGLTexture2DRenderView(Texture& texture_2d, int level)
+		: texture_2d_(static_cast<OGLTexture2D&>(texture_2d)),
+			level_(level)
+	{
+		BOOST_ASSERT(Texture::TT_2D == texture_2d.Type());
+		BOOST_ASSERT(dynamic_cast<OGLTexture2D*>(&texture_2d) != NULL);
+
+		tex_ = texture_2d_.GLTexture();
+
+		width_ = texture_2d_.Width(level);
+		height_ = texture_2d_.Height(level);
+		bpp_ = texture_2d_.Bpp();
+	}
+
+	void OGLTexture2DRenderView::OnAttached(FrameBuffer& fb, uint32_t n)
+	{
+		if (Texture::TU_RenderTarget != texture_2d_.Usage())
+		{
+			texture_2d_.Usage(Texture::TU_RenderTarget);
+		}
+
+		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+			GL_COLOR_ATTACHMENT0_EXT + n, GL_TEXTURE_2D, tex_, level_);
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	}
+
+	void OGLTexture2DRenderView::OnDetached(FrameBuffer& fb, uint32_t n)
+	{
+		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+			GL_COLOR_ATTACHMENT0_EXT + n, GL_TEXTURE_2D, 0, 0);
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	}
+
+
+	OGLTextureCubeRenderView::OGLTextureCubeRenderView(Texture& texture_cube, Texture::CubeFaces face, int level)
+		: texture_cube_(static_cast<OGLTextureCube&>(texture_cube)),
+			face_(face), level_(level)
+	{
+		BOOST_ASSERT(Texture::TT_Cube == texture_cube.Type());
+		BOOST_ASSERT(dynamic_cast<OGLTextureCube*>(&texture_cube) != NULL);
+
+		tex_ = texture_cube_.GLTexture();
+
+		width_ = texture_cube_.Width(level);
+		height_ = texture_cube_.Height(level);
+		bpp_ = texture_cube_.Bpp();
+	}
+
+	void OGLTextureCubeRenderView::OnAttached(FrameBuffer& fb, uint32_t n)
+	{
+		if (Texture::TU_RenderTarget != texture_cube_.Usage())
+		{
+			texture_cube_.Usage(Texture::TU_RenderTarget);
+		}
+
+		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+			GL_COLOR_ATTACHMENT0_EXT + n,
+			GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X,
+			tex_, level_);
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	}
+
+	void OGLTextureCubeRenderView::OnDetached(FrameBuffer& fb, uint32_t n)
+	{
+		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+			GL_COLOR_ATTACHMENT0_EXT + n,
+			GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X,
+			0, 0);
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	}
+
+
+	OGLGraphicsBufferRenderView::OGLGraphicsBufferRenderView(GraphicsBuffer& gb,
+									uint32_t width, uint32_t height, PixelFormat pf)
+		: gbuffer_(gb), pf_(pf)
+	{
+		width_ = width;
+		height_ = height;
+		bpp_ = PixelFormatBits(pf_);
+	}
+
+	void OGLGraphicsBufferRenderView::OnAttached(FrameBuffer& fb, uint32_t n)
+	{
+		glGenTextures(1, &tex_);
+		glBindTexture(GL_TEXTURE_RECTANGLE_ARB, tex_);
+		glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA32F_ARB, width_, height_,
+			0, GL_RGB, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+			GL_COLOR_ATTACHMENT0_EXT + n, GL_TEXTURE_RECTANGLE_ARB, tex_, 0);
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	}
+
+	void OGLGraphicsBufferRenderView::OnDetached(FrameBuffer& fb, uint32_t n)
+	{
+		gbuffer_.Resize(width_ * height_ * 4 * sizeof(GL_FLOAT));
+
+		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+		glReadBuffer(GL_COLOR_ATTACHMENT0_EXT + n);
+
+		OGLGraphicsBuffer* ogl_gb = checked_cast<OGLGraphicsBuffer*>(&gbuffer_);
+		glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, ogl_gb->OGLvbo());
+		glReadPixels(0, 0, width_, height_, GL_RGBA, GL_FLOAT, 0);
+
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	}
+}

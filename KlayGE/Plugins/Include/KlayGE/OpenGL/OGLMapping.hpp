@@ -18,9 +18,9 @@
 #include <KlayGE/Sampler.hpp>
 
 #ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_RenderEngine_D3D9_d.lib")
+	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL_d.lib")
 #else
-	#pragma comment(lib, "KlayGE_RenderEngine_D3D9.lib")
+	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL.lib")
 #endif
 
 namespace KlayGE

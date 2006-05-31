@@ -28,10 +28,12 @@
 
 #include <boost/smart_ptr.hpp>
 
+#define NOMINMAX
 #include <d3d9.h>
 #include <d3dx9.h>
 #include <dxerr9.h>
 
+#include <KlayGE/D3D9/D3D9Typedefs.hpp>
 #include <KlayGE/D3D9/D3D9Resource.hpp>
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 
@@ -73,29 +75,21 @@ namespace KlayGE
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height);
 
+		virtual RenderViewPtr CreateRenderView(int level);
+		virtual RenderViewPtr CreateRenderView(CubeFaces face, int level);
+
+		using Texture::Usage;
 		void Usage(TextureUsage usage);
 
-		boost::shared_ptr<IDirect3DBaseTexture9> D3DBaseTexture() const
+		ID3D9BaseTexturePtr D3DBaseTexture() const
 			{ return d3dBaseTexture_; }
 
 	protected:
-		typedef boost::shared_ptr<IDirect3DDevice9>			IDirect3DDevice9Ptr;
-		typedef boost::shared_ptr<IDirect3DTexture9>		IDirect3DTexture9Ptr;
-		typedef boost::shared_ptr<IDirect3DVolumeTexture9>	IDirect3DVolumeTexture9Ptr;
-		typedef boost::shared_ptr<IDirect3DCubeTexture9>	IDirect3DCubeTexture9Ptr;
-		typedef boost::shared_ptr<IDirect3DBaseTexture9>	IDirect3DBaseTexture9Ptr;
-		typedef boost::shared_ptr<IDirect3DSurface9>		IDirect3DSurface9Ptr;
-		typedef boost::shared_ptr<IDirect3DVolume9>			IDirect3DVolume9Ptr;
-
-	protected:
-		D3DFORMAT ConvertFormat(PixelFormat format);
-		PixelFormat ConvertFormat(D3DFORMAT format);
-
 		void CopySurfaceToMemory(boost::shared_ptr<IDirect3DSurface9> const & surface, void* data);
 
 	protected:
-		IDirect3DDevice9Ptr			d3dDevice_;
-		IDirect3DBaseTexture9Ptr	d3dBaseTexture_;
+		ID3D9DevicePtr			d3dDevice_;
+		ID3D9BaseTexturePtr	d3dBaseTexture_;
 	};
 
 	typedef boost::shared_ptr<D3D9Texture> D3D9TexturePtr;
@@ -117,7 +111,9 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
-		boost::shared_ptr<IDirect3DTexture9> D3DTexture1D() const
+		RenderViewPtr CreateRenderView(int level);
+
+		ID3D9TexturePtr D3DTexture1D() const
 			{ return d3dTexture1D_; }
 
 	private:
@@ -127,10 +123,10 @@ namespace KlayGE
 		void QueryBaseTexture();
 		void UpdateParams();
 
-		IDirect3DTexture9Ptr CreateTexture1D(uint32_t usage, D3DPOOL pool);
+		ID3D9TexturePtr CreateTexture1D(uint32_t usage, D3DPOOL pool);
 
 	private:
-		IDirect3DTexture9Ptr		d3dTexture1D_;
+		ID3D9TexturePtr			d3dTexture1D_;
 
 		std::vector<uint32_t>	widths_;
 
@@ -155,7 +151,9 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
-		boost::shared_ptr<IDirect3DTexture9> D3DTexture2D() const
+		RenderViewPtr CreateRenderView(int level);
+
+		ID3D9TexturePtr D3DTexture2D() const
 			{ return d3dTexture2D_; }
 
 	private:
@@ -165,10 +163,10 @@ namespace KlayGE
 		void QueryBaseTexture();
 		void UpdateParams();
 
-		IDirect3DTexture9Ptr CreateTexture2D(uint32_t usage, D3DPOOL pool);
+		ID3D9TexturePtr CreateTexture2D(uint32_t usage, D3DPOOL pool);
 
 	private:
-		IDirect3DTexture9Ptr		d3dTexture2D_;
+		ID3D9TexturePtr			d3dTexture2D_;
 
 		std::vector<uint32_t>	widths_;
 		std::vector<uint32_t>	heights_;
@@ -196,7 +194,7 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
-		boost::shared_ptr<IDirect3DVolumeTexture9> D3DTexture3D() const
+		ID3D9VolumeTexturePtr D3DTexture3D() const
 			{ return d3dTexture3D_; }
 
 	private:
@@ -206,10 +204,10 @@ namespace KlayGE
 		void QueryBaseTexture();
 		void UpdateParams();
 
-		IDirect3DVolumeTexture9Ptr CreateTexture3D(uint32_t usage, D3DPOOL pool);
+		ID3D9VolumeTexturePtr CreateTexture3D(uint32_t usage, D3DPOOL pool);
 
 	private:
-		IDirect3DVolumeTexture9Ptr	d3dTexture3D_;
+		ID3D9VolumeTexturePtr	d3dTexture3D_;
 
 		std::vector<uint32_t>	widths_;
 		std::vector<uint32_t>	heights_;
@@ -236,7 +234,9 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
-		boost::shared_ptr<IDirect3DCubeTexture9> D3DTextureCube() const
+		RenderViewPtr CreateRenderView(CubeFaces face, int level);
+
+		ID3D9CubeTexturePtr D3DTextureCube() const
 			{ return d3dTextureCube_; }
 
 	private:
@@ -246,12 +246,10 @@ namespace KlayGE
 		void QueryBaseTexture();
 		void UpdateParams();
 
-		IDirect3DCubeTexture9Ptr CreateTextureCube(uint32_t usage, D3DPOOL pool);
+		ID3D9CubeTexturePtr CreateTextureCube(uint32_t usage, D3DPOOL pool);
 
 	private:
-		IDirect3DDevice9Ptr			d3dDevice_;
-
-		IDirect3DCubeTexture9Ptr	d3dTextureCube_;
+		ID3D9CubeTexturePtr		d3dTextureCube_;
 
 		std::vector<uint32_t>	widths_;
 

@@ -63,12 +63,16 @@ namespace KlayGE
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height);
 
+		virtual RenderViewPtr CreateRenderView(int level);
+		virtual RenderViewPtr CreateRenderView(CubeFaces face, int level);
+
 		void BuildMipSubLevels();
 
+		using Texture::Usage;
 		void Usage(TextureUsage usage);
 
 		void GLBindTexture();
-		GLenum GLTexture() const
+		GLuint GLTexture() const
 		{
 			return texture_;
 		}
@@ -82,7 +86,7 @@ namespace KlayGE
 		void Convert(GLint& internalFormat, GLenum& glformat, GLenum& gltype, PixelFormat pf);
 
 	protected:
-		GLenum texture_;
+		GLuint texture_;
 		GLenum target_type_;
 	};
 
@@ -102,6 +106,8 @@ namespace KlayGE
 
 		void CopyMemoryToTexture1D(int level, void* data, PixelFormat pf,
 			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width);
+
+		RenderViewPtr CreateRenderView(int level);
 
 	private:
 		void UpdateParams();
@@ -125,6 +131,8 @@ namespace KlayGE
 		void CopyMemoryToTexture2D(int level, void* data, PixelFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height);
+
+		RenderViewPtr CreateRenderView(int level);
 
 	private:
 		void UpdateParams();
@@ -176,6 +184,8 @@ namespace KlayGE
 		void CopyMemoryToTextureCube(CubeFaces face, int level, void* data, PixelFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height);
+
+		RenderViewPtr CreateRenderView(CubeFaces face, int level);
 
 	private:
 		void UpdateParams();

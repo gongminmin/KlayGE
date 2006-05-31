@@ -1,0 +1,133 @@
+// D3D9RenderView.hpp
+// KlayGE D3D9渲染视图类 头文件
+// Ver 3.3.0
+// 版权所有(C) 龚敏敏, 2006
+// Homepage: http://klayge.sourceforge.net
+//
+// 3.3.0
+// 初次建立 (2006.5.31)
+//
+// 修改记录
+/////////////////////////////////////////////////////////////////////////////////
+
+#ifndef _D3D9RENDERVIEW_HPP
+#define _D3D9RENDERVIEW_HPP
+
+#include <KlayGE/RenderView.hpp>
+#include <KlayGE/Texture.hpp>
+
+#include <KlayGE/D3D9/D3D9Typedefs.hpp>
+#include <KlayGE/D3D9/D3D9Texture.hpp>
+#include <KlayGE/D3D9/D3D9Resource.hpp>
+
+#ifdef KLAYGE_DEBUG
+	#pragma comment(lib, "KlayGE_RenderEngine_D3D9_d.lib")
+#else
+	#pragma comment(lib, "KlayGE_RenderEngine_D3D9.lib")
+#endif
+
+namespace KlayGE
+{
+	class D3D9RenderView : public RenderView, public D3D9Resource
+	{
+	public:
+		virtual ~D3D9RenderView();
+
+		ID3D9SurfacePtr D3DRenderSurface() const
+		{
+			return surface_;
+		}
+
+	protected:
+		ID3D9SurfacePtr surface_;
+	};
+
+	typedef boost::shared_ptr<D3D9RenderView> D3D9RenderViewPtr;
+
+
+	class D3D9Texture1DRenderView : public D3D9RenderView, boost::noncopyable
+	{
+	public:
+		D3D9Texture1DRenderView(Texture& texture_1d, int level);
+
+		void OnAttached(FrameBuffer& fb, uint32_t n);
+		void OnDetached(FrameBuffer& fb, uint32_t n);
+
+	private:
+		void DoOnLostDevice();
+		void DoOnResetDevice();
+
+	private:
+		D3D9Texture1D& texture_1d_;
+		int level_;
+	};
+
+	typedef boost::shared_ptr<D3D9Texture1DRenderView> D3D9Texture1DRenderViewPtr;
+
+
+	class D3D9Texture2DRenderView : public D3D9RenderView, boost::noncopyable
+	{
+	public:
+		D3D9Texture2DRenderView(Texture& texture_2d, int level);
+
+		void OnAttached(FrameBuffer& fb, uint32_t n);
+		void OnDetached(FrameBuffer& fb, uint32_t n);
+
+	private:
+		void DoOnLostDevice();
+		void DoOnResetDevice();
+
+	private:
+		D3D9Texture2D& texture_2d_;
+		int level_;
+	};
+
+	typedef boost::shared_ptr<D3D9Texture2DRenderView> D3D9Texture2DRenderViewPtr;
+
+
+	class D3D9TextureCubeRenderView : public D3D9RenderView, boost::noncopyable
+	{
+	public:
+		D3D9TextureCubeRenderView(Texture& texture_cube, Texture::CubeFaces face, int level);
+
+		void OnAttached(FrameBuffer& fb, uint32_t n);
+		void OnDetached(FrameBuffer& fb, uint32_t n);
+
+	private:
+		void DoOnLostDevice();
+		void DoOnResetDevice();
+
+	private:
+		D3D9TextureCube& texture_cube_;
+		Texture::CubeFaces face_;
+		int level_;
+	};
+
+	typedef boost::shared_ptr<D3D9Texture2DRenderView> D3D9Texture2DRenderViewPtr;
+
+
+	class D3D9GraphicsBufferRenderView : public D3D9RenderView, boost::noncopyable
+	{
+	public:
+		D3D9GraphicsBufferRenderView(GraphicsBuffer& gb,
+							uint32_t width, uint32_t height, PixelFormat pf);
+
+		void OnAttached(FrameBuffer& fb, uint32_t n);
+		void OnDetached(FrameBuffer& fb, uint32_t n);
+
+	private:
+		ID3D9SurfacePtr CreateGBSurface(D3DPOOL pool);
+
+	private:
+		void DoOnLostDevice();
+		void DoOnResetDevice();
+
+	private:
+		GraphicsBuffer& gbuffer_;
+		PixelFormat pf_;
+	};
+
+	typedef boost::shared_ptr<D3D9GraphicsBufferRenderView> D3D9GraphicsBufferRenderViewPtr;
+}
+
+#endif			// _D3D9RENDERVIEW_HPP

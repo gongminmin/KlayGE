@@ -537,4 +537,159 @@ namespace KlayGE
 
 		return ret;
 	}
+
+	D3DFORMAT D3D9Mapping::MappingFormat(PixelFormat format)
+	{
+		switch (format)
+		{
+		case PF_L8:
+			return D3DFMT_L8;
+
+		case PF_A8:
+			return D3DFMT_A8;
+
+		case PF_AL4:
+			return D3DFMT_A4L4;
+
+		case PF_L16:
+			return D3DFMT_L16;
+
+		case PF_AL8:
+			return D3DFMT_A8L8;
+
+		case PF_R5G6B5:
+			return D3DFMT_R5G6B5;
+
+		case PF_ARGB4:
+			return D3DFMT_A4R4G4B4;
+
+		case PF_XRGB8:
+			return D3DFMT_X8R8G8B8;
+
+		case PF_ARGB8:
+		case PF_ARGB8_SRGB:
+			return D3DFMT_A8R8G8B8;
+
+		case PF_A2RGB10:
+			return D3DFMT_A2B10G10R10;
+
+		case PF_R16F:
+			return D3DFMT_R16F;
+
+		case PF_GR16F:
+			return D3DFMT_G16R16F;
+		case PF_ABGR16F:
+			return D3DFMT_A16B16G16R16F;
+
+		case PF_R32F:
+			return D3DFMT_R32F;
+
+		case PF_GR32F:
+			return D3DFMT_G32R32F;
+
+		case PF_ABGR32F:
+			return D3DFMT_A32B32G32R32F;
+
+		case PF_DXT1:
+		case PF_DXT1_SRGB:
+			return D3DFMT_DXT1;
+
+		case PF_DXT3:
+		case PF_DXT3_SRGB:
+			return D3DFMT_DXT3;
+
+		case PF_DXT5:
+		case PF_DXT5_SRGB:
+			return D3DFMT_DXT5;
+
+		case PF_D16:
+			return D3DFMT_D16;
+
+		case PF_D24X8:
+			return D3DFMT_D24X8;
+
+		case PF_D24S8:
+			return D3DFMT_D24S8;
+
+		default:
+			BOOST_ASSERT(false);
+			return D3DFMT_UNKNOWN;
+		}
+	}
+
+	PixelFormat D3D9Mapping::MappingFormat(D3DFORMAT format)
+	{
+		switch (format)
+		{
+		case D3DFMT_L8:
+			return PF_L8;
+
+		case D3DFMT_A8:
+			return PF_A8;
+
+		case D3DFMT_A4L4:
+			return PF_AL4;
+
+		case D3DFMT_L16:
+			return PF_L16;
+
+		case D3DFMT_A8L8:
+			return PF_AL8;
+
+		case D3DFMT_R5G6B5:
+			return PF_R5G6B5;
+
+		case D3DFMT_A4R4G4B4:
+			return PF_ARGB4;
+
+		case D3DFMT_X8R8G8B8:
+			return PF_XRGB8;
+
+		case D3DFMT_A8R8G8B8:
+			return PF_ARGB8;
+
+		case D3DFMT_A2B10G10R10:
+			return PF_A2RGB10;
+
+		case D3DFMT_R16F:
+			return PF_R16F;
+
+		case D3DFMT_G16R16F:
+			return PF_GR16F;
+
+		case D3DFMT_A16B16G16R16F:
+			return PF_ABGR16F;
+
+		case D3DFMT_R32F:
+			return PF_R32F;
+
+		case D3DFMT_G32R32F:
+			return PF_GR32F;
+
+		case D3DFMT_A32B32G32R32F:
+			return PF_ABGR32F;
+
+		case D3DFMT_DXT1:
+			return PF_DXT1;
+
+		case D3DFMT_DXT3:
+			return PF_DXT3;
+
+		case D3DFMT_DXT5:
+			return PF_DXT5;
+
+		case D3DFMT_D16:
+			return PF_D16;
+
+		case D3DFMT_D24X8:
+			return PF_D24X8;
+
+		case D3DFMT_D24S8:
+			return PF_D24S8;
+
+		default:
+			BOOST_ASSERT(false);
+			return PF_Unknown;
+		}
+	}
 }

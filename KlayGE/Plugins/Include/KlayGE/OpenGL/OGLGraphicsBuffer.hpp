@@ -45,6 +45,8 @@ namespace KlayGE
 		void* Map(BufferAccess ba);
 		void Unmap();
 
+		RenderViewPtr CreateRenderView(uint32_t width, uint32_t height);
+
 		void Active();
 
 		GLuint OGLvbo() const

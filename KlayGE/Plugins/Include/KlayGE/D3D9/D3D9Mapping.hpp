@@ -53,6 +53,9 @@ namespace KlayGE
 		static void Mapping(std::vector<D3DVERTEXELEMENT9>& elements, size_t stream, vertex_elements_type const & vet);
 
 		static RenderDeviceCaps Mapping(D3DCAPS9 const & d3d_caps);
+
+		static D3DFORMAT MappingFormat(PixelFormat pf);
+		static PixelFormat MappingFormat(D3DFORMAT d3dfmt);
 	};
 }
 

@@ -24,6 +24,9 @@
 #include <d3dx9.h>
 #include <dxerr9.h>
 
+#include <KlayGE/D3D9/D3D9Typedefs.hpp>
+#include <KlayGE/D3D9/D3D9Mapping.hpp>
+#include <KlayGE/D3D9/D3D9RenderView.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 
 #pragma comment(lib, "d3d9.lib")
@@ -93,7 +96,7 @@ namespace KlayGE
 			maxLevel = this->NumMipMaps();
 		}
 
-		IDirect3DVolume9Ptr src, dst;
+		ID3D9VolumePtr src, dst;
 		for (uint32_t level = 0; level < maxLevel; ++ level)
 		{
 			IDirect3DVolume9* temp;
@@ -153,7 +156,7 @@ namespace KlayGE
 
 		IDirect3DVolume9* temp;
 		TIF(d3dTexture3D_->GetVolumeLevel(level, &temp));
-		IDirect3DVolume9Ptr volume = MakeCOMPtr(temp);
+		ID3D9VolumePtr volume = MakeCOMPtr(temp);
 
 		if (volume)
 		{
@@ -163,14 +166,14 @@ namespace KlayGE
 			D3DBOX srcBox = { 0, 0, src_width, src_height, 0, src_depth };
 			D3DBOX dstBox = { dst_xOffset, dst_yOffset, dst_xOffset + dst_width, dst_yOffset + dst_height,
 				dst_zOffset, dst_zOffset + dst_depth };
-			TIF(D3DXLoadVolumeFromMemory(volume.get(), NULL, &dstBox, data, this->ConvertFormat(pf),
+			TIF(D3DXLoadVolumeFromMemory(volume.get(), NULL, &dstBox, data, D3D9Mapping::MappingFormat(pf),
 					srcRowPitch, srcSlicePitch, NULL, &srcBox, D3DX_DEFAULT, 0));
 		}
 	}
 
 	void D3D9Texture3D::BuildMipSubLevels()
 	{
-		IDirect3DBaseTexture9Ptr d3dBaseTexture;
+		ID3D9BaseTexturePtr d3dBaseTexture;
 
 		if (auto_gen_mipmaps_)
 		{
@@ -180,14 +183,14 @@ namespace KlayGE
 		{
 			if (TU_RenderTarget == usage_)
 			{
-				IDirect3DVolumeTexture9Ptr d3dTexture3D = this->CreateTexture3D(D3DUSAGE_AUTOGENMIPMAP, D3DPOOL_DEFAULT);
+				ID3D9VolumeTexturePtr d3dTexture3D = this->CreateTexture3D(D3DUSAGE_AUTOGENMIPMAP, D3DPOOL_DEFAULT);
 
 				IDirect3DVolume9* temp;
 				TIF(d3dTexture3D_->GetVolumeLevel(0, &temp));
-				IDirect3DVolume9Ptr src = MakeCOMPtr(temp);
+				ID3D9VolumePtr src = MakeCOMPtr(temp);
 
 				TIF(d3dTexture3D->GetVolumeLevel(0, &temp));
-				IDirect3DVolume9Ptr dst = MakeCOMPtr(temp);
+				ID3D9VolumePtr dst = MakeCOMPtr(temp);
 
 				TIF(D3DXLoadVolumeFromVolume(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
 
@@ -198,7 +201,7 @@ namespace KlayGE
 			}
 			else
 			{
-				IDirect3DVolumeTexture9Ptr d3dTexture3D = this->CreateTexture3D(0, D3DPOOL_SYSTEMMEM);
+				ID3D9VolumeTexturePtr d3dTexture3D = this->CreateTexture3D(0, D3DPOOL_SYSTEMMEM);
 
 				IDirect3DBaseTexture9* base;
 				d3dTexture3D->QueryInterface(IID_IDirect3DBaseTexture9, reinterpret_cast<void**>(&base));
@@ -206,10 +209,10 @@ namespace KlayGE
 
 				IDirect3DVolume9* temp;
 				TIF(d3dTexture3D_->GetVolumeLevel(0, &temp));
-				IDirect3DVolume9Ptr src = MakeCOMPtr(temp);
+				ID3D9VolumePtr src = MakeCOMPtr(temp);
 
 				TIF(d3dTexture3D->GetVolumeLevel(0, &temp));
-				IDirect3DVolume9Ptr dst = MakeCOMPtr(temp);
+				ID3D9VolumePtr dst = MakeCOMPtr(temp);
 
 				TIF(D3DXLoadVolumeFromVolume(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
 
@@ -223,16 +226,16 @@ namespace KlayGE
 	{
 		d3dDevice_ = static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
 
-		IDirect3DVolumeTexture9Ptr tempTexture3D = this->CreateTexture3D(0, D3DPOOL_SYSTEMMEM);
+		ID3D9VolumeTexturePtr tempTexture3D = this->CreateTexture3D(0, D3DPOOL_SYSTEMMEM);
 
 		for (uint16_t i = 0; i < this->NumMipMaps(); ++ i)
 		{
 			IDirect3DVolume9* temp;
 			TIF(d3dTexture3D_->GetVolumeLevel(i, &temp));
-			IDirect3DVolume9Ptr src = MakeCOMPtr(temp);
+			ID3D9VolumePtr src = MakeCOMPtr(temp);
 
 			TIF(tempTexture3D->GetVolumeLevel(i, &temp));
-			IDirect3DVolume9Ptr dst = MakeCOMPtr(temp);
+			ID3D9VolumePtr dst = MakeCOMPtr(temp);
 
 			TIF(D3DXLoadVolumeFromVolume(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
 		}
@@ -246,7 +249,7 @@ namespace KlayGE
 	{
 		d3dDevice_ = static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
 
-		IDirect3DVolumeTexture9Ptr tempTexture3D = this->CreateTexture3D(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+		ID3D9VolumeTexturePtr tempTexture3D = this->CreateTexture3D(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 		tempTexture3D->AddDirtyBox(NULL);
 
 		d3dDevice_->UpdateTexture(d3dTexture3D_.get(), tempTexture3D.get());
@@ -255,11 +258,11 @@ namespace KlayGE
 		this->QueryBaseTexture();
 	}
 
-	D3D9Texture::IDirect3DVolumeTexture9Ptr D3D9Texture3D::CreateTexture3D(uint32_t usage, D3DPOOL pool)
+	ID3D9VolumeTexturePtr D3D9Texture3D::CreateTexture3D(uint32_t usage, D3DPOOL pool)
 	{
 		IDirect3DVolumeTexture9* d3dTexture3D;
 		TIF(D3DXCreateVolumeTexture(d3dDevice_.get(), widths_[0], heights_[0], depths_[0],
-			numMipMaps_, usage, this->ConvertFormat(format_),
+			numMipMaps_, usage, D3D9Mapping::MappingFormat(format_),
 			pool, &d3dTexture3D));
 		return MakeCOMPtr(d3dTexture3D);
 	}
@@ -291,7 +294,7 @@ namespace KlayGE
 			depths_[level] = desc.Depth;
 		}					
 
-		format_ = this->ConvertFormat(desc.Format);
+		format_ = D3D9Mapping::MappingFormat(desc.Format);
 		bpp_	= PixelFormatBits(format_);
 	}
 }
