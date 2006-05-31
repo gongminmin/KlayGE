@@ -210,7 +210,7 @@ namespace KlayGE
 
 		glGenTextures(1, &texs_[n]);
 		glBindTexture(GL_TEXTURE_RECTANGLE_ARB, texs_[n]);
-		glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_FLOAT_RGBA_NV, width, height,
+		glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA32F_ARB, width, height,
 			0, GL_RGB, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
