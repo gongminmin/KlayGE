@@ -89,7 +89,6 @@ namespace KlayGE
 
 	RenderViewPtr D3D9VertexBuffer::CreateRenderView(uint32_t width, uint32_t height)
 	{
-		BOOST_ASSERT(false);
 		return RenderViewPtr(new D3D9GraphicsBufferRenderView(*this, width, height, PF_ABGR32F));
 	}
 
