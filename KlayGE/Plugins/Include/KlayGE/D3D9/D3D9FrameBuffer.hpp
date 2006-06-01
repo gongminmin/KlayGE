@@ -45,11 +45,6 @@ namespace KlayGE
 	private:
 		void DoOnLostDevice();
 		void DoOnResetDevice();
-
-		void CreateDepthStencilBuffer();
-
-	private:
-		ID3D9SurfacePtr depthStencilSurface_;
 	};
 
 	typedef boost::shared_ptr<D3D9FrameBuffer> D3D9FrameBufferPtr;

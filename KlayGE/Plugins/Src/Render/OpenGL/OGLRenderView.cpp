@@ -40,7 +40,7 @@ namespace KlayGE
 
 		width_ = texture_1d_.Width(level);
 		height_ = 1;
-		bpp_ = texture_1d_.Bpp();
+		pf_ = texture_1d_.Format();
 	}
 
 	void OGLTexture1DRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
@@ -78,7 +78,7 @@ namespace KlayGE
 
 		width_ = texture_2d_.Width(level);
 		height_ = texture_2d_.Height(level);
-		bpp_ = texture_2d_.Bpp();
+		pf_ = texture_2d_.Format();
 	}
 
 	void OGLTexture2DRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
@@ -116,7 +116,7 @@ namespace KlayGE
 
 		width_ = texture_cube_.Width(level);
 		height_ = texture_cube_.Height(level);
-		bpp_ = texture_cube_.Bpp();
+		pf_ = texture_cube_.Format();
 	}
 
 	void OGLTextureCubeRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
@@ -149,15 +149,12 @@ namespace KlayGE
 
 	OGLGraphicsBufferRenderView::OGLGraphicsBufferRenderView(GraphicsBuffer& gb,
 									uint32_t width, uint32_t height, PixelFormat pf)
-		: gbuffer_(gb), pf_(pf)
+		: gbuffer_(gb)
 	{
 		width_ = width;
 		height_ = height;
-		bpp_ = PixelFormatBits(pf_);
-	}
+		pf_ = pf;
 
-	void OGLGraphicsBufferRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
-	{
 		glGenTextures(1, &tex_);
 		glBindTexture(GL_TEXTURE_RECTANGLE_ARB, tex_);
 		glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA32F_ARB, width_, height_,
@@ -166,7 +163,15 @@ namespace KlayGE
 		glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	}
 
+	OGLGraphicsBufferRenderView::~OGLGraphicsBufferRenderView()
+	{
+		glDeleteTextures(1, &tex_);
+	}
+
+	void OGLGraphicsBufferRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
+	{
 		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
@@ -186,6 +191,76 @@ namespace KlayGE
 		OGLGraphicsBuffer* ogl_gb = checked_cast<OGLGraphicsBuffer*>(&gbuffer_);
 		glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, ogl_gb->OGLvbo());
 		glReadPixels(0, 0, width_, height_, GL_RGBA, GL_FLOAT, 0);
+
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	}
+
+
+	OGLDepthStencilRenderView::OGLDepthStencilRenderView(uint32_t width, uint32_t height,
+									PixelFormat pf, uint32_t multi_sample)
+		: multi_sample_(multi_sample)
+	{
+		width_ = width;
+		height_ = height;
+		pf_ = pf;
+
+		GLenum format;
+		switch (pf_)
+		{
+		case PF_D16:
+			format = GL_DEPTH_COMPONENT16;
+			break;
+
+		case PF_D24X8:
+			format = GL_DEPTH_COMPONENT32;
+			break;
+
+		case PF_D24S8:
+			format = GL_DEPTH24_STENCIL8_EXT;
+			break;
+		}
+
+		glGenRenderbuffersEXT(1, &rbo_);
+		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, rbo_);
+		glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT,
+								format, width_, height_);
+	}
+
+	OGLDepthStencilRenderView::~OGLDepthStencilRenderView()
+	{
+		glDeleteRenderbuffersEXT(1, &rbo_);
+	}
+
+	void OGLDepthStencilRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
+	{
+		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+
+		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
+								GL_DEPTH_ATTACHMENT_EXT,
+								GL_RENDERBUFFER_EXT, rbo_);
+
+		if (PF_D24S8 == pf_)
+		{
+			glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
+								GL_STENCIL_ATTACHMENT_EXT,
+								GL_RENDERBUFFER_EXT, rbo_);
+		}
+
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	}
+
+	void OGLDepthStencilRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
+	{
+		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+
+		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
+								GL_DEPTH_ATTACHMENT_EXT,
+								GL_RENDERBUFFER_EXT, 0);
+		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
+								GL_STENCIL_ATTACHMENT_EXT,
+								GL_RENDERBUFFER_EXT, 0);
 
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}

@@ -18,6 +18,7 @@
 #include <boost/assert.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
+#include <KlayGE/D3D9/D3D9Mapping.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 #include <KlayGE/D3D9/D3D9RenderView.hpp>
 
@@ -41,7 +42,7 @@ namespace KlayGE
 
 		width_ = texture_1d_.Width(level);
 		height_ = 1;
-		bpp_ = texture_1d_.Bpp();
+		pf_ = texture_1d_.Format();
 	}
 
 	void D3D9Texture1DRenderView::OnAttached(FrameBuffer& /*fb*/, uint32_t /*att*/)
@@ -49,11 +50,11 @@ namespace KlayGE
 		if (Texture::TU_RenderTarget != texture_1d_.Usage())
 		{
 			texture_1d_.Usage(Texture::TU_RenderTarget);
-		}
 
-		IDirect3DSurface9* surface;
-		texture_1d_.D3DTexture1D()->GetSurfaceLevel(level_, &surface);
-		surface_ = MakeCOMPtr(surface);
+			IDirect3DSurface9* surface;
+			texture_1d_.D3DTexture1D()->GetSurfaceLevel(level_, &surface);
+			surface_ = MakeCOMPtr(surface);
+		}
 	}
 
 	void D3D9Texture1DRenderView::OnDetached(FrameBuffer& /*fb*/, uint32_t /*att*/)
@@ -86,7 +87,7 @@ namespace KlayGE
 
 		width_ = texture_2d_.Width(level);
 		height_ = texture_2d_.Height(level);
-		bpp_ = texture_2d_.Bpp();
+		pf_ = texture_2d_.Format();
 	}
 
 	void D3D9Texture2DRenderView::OnAttached(FrameBuffer& /*fb*/, uint32_t /*n*/)
@@ -94,11 +95,11 @@ namespace KlayGE
 		if (Texture::TU_RenderTarget != texture_2d_.Usage())
 		{
 			texture_2d_.Usage(Texture::TU_RenderTarget);
-		}
 
-		IDirect3DSurface9* surface;
-		texture_2d_.D3DTexture2D()->GetSurfaceLevel(level_, &surface);
-		surface_ = MakeCOMPtr(surface);
+			IDirect3DSurface9* surface;
+			texture_2d_.D3DTexture2D()->GetSurfaceLevel(level_, &surface);
+			surface_ = MakeCOMPtr(surface);
+		}
 	}
 
 	void D3D9Texture2DRenderView::OnDetached(FrameBuffer& /*fb*/, uint32_t /*n*/)
@@ -131,7 +132,7 @@ namespace KlayGE
 
 		width_ = texture_cube_.Width(level);
 		height_ = texture_cube_.Height(level);
-		bpp_ = texture_cube_.Bpp();
+		pf_ = texture_cube_.Format();
 	}
 
 	void D3D9TextureCubeRenderView::OnAttached(FrameBuffer& /*fb*/, uint32_t /*att*/)
@@ -139,11 +140,11 @@ namespace KlayGE
 		if (Texture::TU_RenderTarget != texture_cube_.Usage())
 		{
 			texture_cube_.Usage(Texture::TU_RenderTarget);
-		}
 
-		IDirect3DSurface9* surface;
-		texture_cube_.D3DTextureCube()->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face_), level_, &surface);
-		surface_ = MakeCOMPtr(surface);
+			IDirect3DSurface9* surface;
+			texture_cube_.D3DTextureCube()->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face_), level_, &surface);
+			surface_ = MakeCOMPtr(surface);
+		}
 	}
 
 	void D3D9TextureCubeRenderView::OnDetached(FrameBuffer& /*fb*/, uint32_t /*att*/)
@@ -165,18 +166,19 @@ namespace KlayGE
 
 	D3D9GraphicsBufferRenderView::D3D9GraphicsBufferRenderView(GraphicsBuffer& gb,
 									uint32_t width, uint32_t height, PixelFormat pf)
-		: gbuffer_(gb), pf_(pf)
+		: gbuffer_(gb)
 	{
 		BOOST_ASSERT(PF_ABGR32F == pf_);
 
 		width_ = width;
 		height_ = height;
-		bpp_ = PixelFormatBits(pf_);
+		pf_ = pf;
+
+		surface_ = this->CreateGBSurface(D3DPOOL_DEFAULT);
 	}
 
 	void D3D9GraphicsBufferRenderView::OnAttached(FrameBuffer& /*fb*/, uint32_t /*att*/)
 	{
-		surface_ = this->CreateGBSurface(D3DPOOL_DEFAULT);
 	}
 
 	void D3D9GraphicsBufferRenderView::OnDetached(FrameBuffer& /*fb*/, uint32_t /*att*/)
@@ -240,5 +242,63 @@ namespace KlayGE
 		TIF(D3DXLoadSurfaceFromSurface(surface_.get(), NULL, NULL,
 			default_surf.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
 		surface_ = default_surf;
+	}
+
+
+	D3D9DepthStencilRenderView::D3D9DepthStencilRenderView(uint32_t width, uint32_t height,
+											PixelFormat pf, uint32_t multi_sample)
+	{
+		BOOST_ASSERT(IsDepthFormat(pf_));
+
+		width_ = width;
+		height_ = height;
+		pf_ = pf;
+
+		if (multi_sample > 16)
+		{
+			multi_sample_ = D3DMULTISAMPLE_16_SAMPLES;
+		}
+		else
+		{
+			multi_sample_ = D3DMULTISAMPLE_TYPE(multi_sample);
+		}
+
+		surface_ = this->CreateSurface();
+	}
+
+	void D3D9DepthStencilRenderView::OnAttached(FrameBuffer& /*fb*/, uint32_t att)
+	{
+		BOOST_ASSERT((FrameBuffer::ATT_DepthStencil == att)
+			|| (FrameBuffer::ATT_Depth == att)
+			|| (FrameBuffer::ATT_Stencil == att));
+	}
+
+	void D3D9DepthStencilRenderView::OnDetached(FrameBuffer& /*fb*/, uint32_t att)
+	{
+		BOOST_ASSERT((FrameBuffer::ATT_DepthStencil == att)
+			|| (FrameBuffer::ATT_Depth == att)
+			|| (FrameBuffer::ATT_Stencil == att));
+	}
+
+	ID3D9SurfacePtr D3D9DepthStencilRenderView::CreateSurface()
+	{
+		IDirect3DSurface9* surface = NULL;
+
+		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
+		TIF(d3d_device->CreateDepthStencilSurface(width_, height_, D3D9Mapping::MappingFormat(pf_),
+			multi_sample_, 0, false, &surface, NULL));
+
+		return MakeCOMPtr(surface);
+	}
+
+	void D3D9DepthStencilRenderView::DoOnLostDevice()
+	{
+		surface_.reset();
+	}
+
+	void D3D9DepthStencilRenderView::DoOnResetDevice()
+	{
+		surface_ = this->CreateSurface();
 	}
 }

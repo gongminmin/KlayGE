@@ -43,7 +43,6 @@ namespace KlayGE
 
 	private:
 		GLuint fbo_;
-		GLuint depth_rb_;
 	};
 
 	typedef boost::shared_ptr<OGLFrameBuffer> OGLFrameBufferPtr;

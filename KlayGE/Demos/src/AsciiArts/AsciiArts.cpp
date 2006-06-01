@@ -238,9 +238,10 @@ void AsciiArts::OnResize(uint32_t width, uint32_t height)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 	rendered_tex_ = rf.MakeTexture2D(width, height, 1, PF_ARGB8);
-	render_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_, 0));	
+	render_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_, 0));
+	render_buffer_->Attach(FrameBuffer::ATT_Depth, rf.MakeDepthStencilRenderView(width, height, PF_D16, 0));
 
-	downsample_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(width / CELL_WIDTH, height / CELL_HEIGHT,
+	downsample_tex_ = rf.MakeTexture2D(width / CELL_WIDTH, height / CELL_HEIGHT,
 		1, PF_ARGB8);
 	downsample_tex_->Usage(Texture::TU_RenderTarget);
 }

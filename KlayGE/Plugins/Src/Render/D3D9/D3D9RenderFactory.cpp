@@ -128,6 +128,14 @@ namespace KlayGE
 		return ret;
 	}
 
+	RenderViewPtr D3D9RenderFactory::MakeDepthStencilRenderView(uint32_t width, uint32_t height,
+		PixelFormat pf, uint32_t multi_sample)
+	{
+		D3D9RenderViewPtr ret(new D3D9DepthStencilRenderView(width, height, pf, multi_sample));
+		resource_pool_.push_back(ret);
+		return ret;
+	}
+
 	void D3D9RenderFactory::OnLostDevice()
 	{
 		for (std::vector<boost::weak_ptr<D3D9Resource> >::iterator iter = resource_pool_.begin();

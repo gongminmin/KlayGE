@@ -64,6 +64,7 @@ namespace KlayGE
 
 	protected:
 		std::vector<RenderViewPtr> clr_views_;
+		RenderViewPtr rs_view_;
 	};
 }
 

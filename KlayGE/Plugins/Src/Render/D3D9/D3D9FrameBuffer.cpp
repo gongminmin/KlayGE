@@ -35,6 +35,8 @@ namespace KlayGE
 {
 	D3D9FrameBuffer::D3D9FrameBuffer()
 	{
+		isDepthBuffered_ = false;
+
 		left_ = 0;
 		top_ = 0;
 
@@ -44,76 +46,36 @@ namespace KlayGE
 
 	void D3D9FrameBuffer::Attach(uint32_t att, RenderViewPtr view)
 	{
-		BOOST_ASSERT(att >= ATT_Color0);
-
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		if (att >= ATT_Color0 + re.DeviceCaps().max_simultaneous_rts)
+		switch (att)
 		{
-			THR(E_FAIL);
-		}
-
-		uint32_t clr_id = att - ATT_Color0;
-		if ((clr_id < clr_views_.size()) && clr_views_[clr_id])
-		{
-			this->Detach(att);
-		}
-
-		if (clr_views_.size() < clr_id + 1)
-		{
-			clr_views_.resize(clr_id + 1);
-		}
-
-		clr_views_[clr_id] = view;
-		uint32_t min_clr_index = clr_id;
-		for (uint32_t i = 0; i < clr_id; ++ i)
-		{
-			if (clr_views_[i])
+		case ATT_Depth:
+		case ATT_Stencil:
+		case ATT_DepthStencil:
 			{
-				min_clr_index = i;
-			}
-		}
-		if (min_clr_index == clr_id)
-		{
-			width_ = clr_views_[clr_id]->Width();
-			height_ = clr_views_[clr_id]->Height();
-			colorDepth_ = clr_views_[clr_id]->Bpp();		
-
-			this->CreateDepthStencilBuffer();
-
-			viewport_.width		= width_;
-			viewport_.height	= height_;
-
-			isDepthBuffered_ = depthStencilSurface_;
-
-			if (isDepthBuffered_)
-			{
-				D3DSURFACE_DESC desc;
-				depthStencilSurface_->GetDesc(&desc);
-				switch (desc.Format)
+				if (rs_view_)
 				{
-				case D3DFMT_D15S1:
-					depthBits_ = 15;
-					stencilBits_ = 1;
-					break;
+					this->Detach(att);
+				}
 
-				case D3DFMT_D16:
+				rs_view_ = view;
+
+				isDepthBuffered_ = true;
+
+				switch (view->Format())
+				{
+				case PF_D16:
 					depthBits_ = 16;
 					stencilBits_ = 0;
 					break;
 
-				case D3DFMT_D24X8:
+				case PF_D24X8:
 					depthBits_ = 24;
 					stencilBits_ = 0;
 					break;
 
-				case D3DFMT_D24S8:
+				case PF_D24S8:
 					depthBits_ = 24;
 					stencilBits_ = 8;
-					break;
-
-				case D3DFMT_D32:
-					depthBits_ = 32;
-					stencilBits_ = 0;
 					break;
 
 				default:
@@ -122,40 +84,96 @@ namespace KlayGE
 					break;
 				}
 			}
-			else
+			break;
+
+		default:
 			{
-				depthBits_ = 0;
-				stencilBits_ = 0;
+				BOOST_ASSERT(att >= ATT_Color0);
+
+				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+				if (att >= ATT_Color0 + re.DeviceCaps().max_simultaneous_rts)
+				{
+					THR(E_FAIL);
+				}
+
+				uint32_t clr_id = att - ATT_Color0;
+				if ((clr_id < clr_views_.size()) && clr_views_[clr_id])
+				{
+					this->Detach(att);
+				}
+
+				if (clr_views_.size() < clr_id + 1)
+				{
+					clr_views_.resize(clr_id + 1);
+				}
+
+				clr_views_[clr_id] = view;
+				size_t min_clr_index = clr_id;
+				for (size_t i = 0; i < clr_id; ++ i)
+				{
+					if (clr_views_[i])
+					{
+						min_clr_index = i;
+					}
+				}
+				if (min_clr_index == clr_id)
+				{
+					width_ = view->Width();
+					height_ = view->Height();
+					colorDepth_ = view->Bpp();
+
+					viewport_.width		= width_;
+					viewport_.height	= height_;
+				}
+				else
+				{
+					BOOST_ASSERT(clr_views_[min_clr_index]->Width() == view->Width());
+					BOOST_ASSERT(clr_views_[min_clr_index]->Height() == view->Height());
+					BOOST_ASSERT(clr_views_[min_clr_index]->Bpp() == view->Bpp());
+				}
 			}
-		}
-		else
-		{
-			BOOST_ASSERT(clr_views_[min_clr_index]->Width() == view->Width());
-			BOOST_ASSERT(clr_views_[min_clr_index]->Height() == view->Height());
-			BOOST_ASSERT(clr_views_[min_clr_index]->Bpp() == view->Bpp());
+			break;
 		}
 
-		clr_views_[clr_id]->OnAttached(*this, att);
+		view->OnAttached(*this, att);
 
 		active_ = true;
 	}
 	
 	void D3D9FrameBuffer::Detach(uint32_t att)
 	{
-		BOOST_ASSERT(att >= ATT_Color0);
-
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		if (att >= ATT_Color0 + re.DeviceCaps().max_simultaneous_rts)
+		switch (att)
 		{
-			THR(E_FAIL);
+		case ATT_Depth:
+		case ATT_Stencil:
+		case ATT_DepthStencil:
+			{
+				rs_view_.reset();
+
+				isDepthBuffered_ = false;
+
+				depthBits_ = 0;
+				stencilBits_ = 0;
+			}
+			break;
+
+		default:
+			{
+				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+				if (att >= ATT_Color0 + re.DeviceCaps().max_simultaneous_rts)
+				{
+					THR(E_FAIL);
+				}
+
+				uint32_t clr_id = att - ATT_Color0;
+
+				BOOST_ASSERT(clr_id < clr_views_.size());
+
+				clr_views_[clr_id]->OnDetached(*this, att);
+				clr_views_[clr_id].reset();
+			}
+			break;
 		}
-
-		uint32_t clr_id = att - ATT_Color0;
-
-		BOOST_ASSERT(clr_id < clr_views_.size());
-
-		clr_views_[clr_id]->OnDetached(*this, att);
-		clr_views_[clr_id].reset();
 	}
 
 	boost::shared_ptr<IDirect3DSurface9> D3D9FrameBuffer::D3DRenderSurface(uint32_t n) const
@@ -173,37 +191,22 @@ namespace KlayGE
 	
 	boost::shared_ptr<IDirect3DSurface9> D3D9FrameBuffer::D3DRenderZBuffer() const
 	{
-		return depthStencilSurface_;
-	}
-
-	void D3D9FrameBuffer::CreateDepthStencilBuffer()
-	{
-		D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		boost::shared_ptr<IDirect3DDevice9> d3dDevice = renderEngine.D3DDevice();
-
-		IDirect3DSurface9* tempSurf = NULL;
-		D3DSURFACE_DESC tempDesc;
-
-		// Get the format of the depth stencil surface.
-		d3dDevice->GetDepthStencilSurface(&tempSurf);
-		if (tempSurf)
+		if (rs_view_)
 		{
-			tempSurf->GetDesc(&tempDesc);
-			tempSurf->Release();
-
-			TIF(d3dDevice->CreateDepthStencilSurface(width_, height_, tempDesc.Format,
-				tempDesc.MultiSampleType, 0, FALSE, &tempSurf, NULL));
-			depthStencilSurface_ = MakeCOMPtr(tempSurf);
+			D3D9RenderView const & d3d_view(*checked_cast<D3D9RenderView const *>(rs_view_.get()));
+			return d3d_view.D3DRenderSurface();
+		}
+		else
+		{
+			return boost::shared_ptr<IDirect3DSurface9>();
 		}
 	}
 
 	void D3D9FrameBuffer::DoOnLostDevice()
 	{
-		depthStencilSurface_.reset();
 	}
 	
 	void D3D9FrameBuffer::DoOnResetDevice()
 	{
-		this->CreateDepthStencilBuffer();
 	}
 }

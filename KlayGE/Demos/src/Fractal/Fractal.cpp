@@ -272,7 +272,7 @@ void Fractal::DoUpdate(uint32_t pass)
 	{
 	case 0:
 		renderEngine.BindRenderTarget(render_buffer_[!odd]);
-		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+		renderEngine.Clear(RenderEngine::CBM_Color);
 
 		checked_cast<RenderFractal*>(renderFractal_.get())->SetTexture(rendered_tex_[odd]);
 		renderFractal_->AddToRenderQueue();

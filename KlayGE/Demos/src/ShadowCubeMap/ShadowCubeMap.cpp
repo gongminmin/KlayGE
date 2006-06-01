@@ -324,12 +324,14 @@ void ShadowCubeMap::InitObjects()
 	checked_cast<OccluderRenderable*>(mesh_->GetRenderable().get())->LampTexture(lamp_tex_);
 	checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->LampTexture(lamp_tex_);
 
+	RenderViewPtr depth_view = rf.MakeDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, PF_D16, 0);
 	shadow_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, PF_ABGR16F);
 	for (int i = 0; i < 6; ++ i)
 	{
 		shadow_buffers_[i] = rf.MakeFrameBuffer();
 		shadow_buffers_[i]->Attach(FrameBuffer::ATT_Color0,
 			rf.Make2DRenderView(*shadow_tex_, static_cast<Texture::CubeFaces>(i), 0));
+		shadow_buffers_[i]->Attach(FrameBuffer::ATT_DepthStencil, depth_view);
 	}
 
 	fpcController_.AttachCamera(this->ActiveCamera());

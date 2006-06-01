@@ -101,6 +101,11 @@ namespace KlayGE
 			return RenderView::NullObject();
 		}
 
+		RenderViewPtr MakeDepthStencilRenderView(uint32_t /*width*/, uint32_t /*height*/, PixelFormat /*pf*/, uint32_t /*multi_sample*/)
+		{
+			return RenderView::NullObject();
+		}
+
 	private:
 		RenderEffectPtr DoMakeRenderEffect(std::string const & /*effectData*/)
 		{

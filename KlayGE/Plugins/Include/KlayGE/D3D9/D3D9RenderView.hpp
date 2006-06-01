@@ -130,10 +130,32 @@ namespace KlayGE
 
 	private:
 		GraphicsBuffer& gbuffer_;
-		PixelFormat pf_;
 	};
 
 	typedef boost::shared_ptr<D3D9GraphicsBufferRenderView> D3D9GraphicsBufferRenderViewPtr;
+
+
+	class D3D9DepthStencilRenderView : public D3D9RenderView, boost::noncopyable
+	{
+	public:
+		D3D9DepthStencilRenderView(uint32_t width, uint32_t height,
+			PixelFormat pf, uint32_t multi_sample);
+
+		void OnAttached(FrameBuffer& fb, uint32_t att);
+		void OnDetached(FrameBuffer& fb, uint32_t att);
+
+	private:
+		ID3D9SurfacePtr CreateSurface();
+
+	private:
+		void DoOnLostDevice();
+		void DoOnResetDevice();
+
+	private:
+		D3DMULTISAMPLE_TYPE multi_sample_;
+	};
+
+	typedef boost::shared_ptr<D3D9DepthStencilRenderView> D3D9DepthStencilRenderViewPtr;
 }
 
 #endif			// _D3D9RENDERVIEW_HPP

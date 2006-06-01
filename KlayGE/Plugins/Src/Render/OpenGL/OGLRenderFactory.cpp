@@ -105,6 +105,11 @@ namespace KlayGE
 		return checked_cast<OGLGraphicsBuffer*>(&gbuffer)->CreateRenderView(width, height);
 	}
 
+	RenderViewPtr OGLRenderFactory::MakeDepthStencilRenderView(uint32_t width, uint32_t height, PixelFormat pf, uint32_t multi_sample)
+	{
+		return RenderViewPtr(new OGLDepthStencilRenderView(width, height, pf, multi_sample));
+	}
+
 	RenderFactory& OGLRenderFactoryInstance()
 	{
 		static OGLRenderFactory renderFactory;
