@@ -100,6 +100,11 @@ namespace KlayGE
 		return checked_cast<OGLTextureCube*>(&texture)->CreateRenderView(face, level);
 	}
 
+	RenderViewPtr OGLRenderFactory::Make3DRenderView(Texture& texture, int slice, int level)
+	{
+		return checked_cast<OGLTexture3D*>(&texture)->CreateRenderView(slice, level);
+	}
+
 	RenderViewPtr OGLRenderFactory::MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer, uint32_t width, uint32_t height)
 	{
 		return checked_cast<OGLGraphicsBuffer*>(&gbuffer)->CreateRenderView(width, height);

@@ -63,9 +63,6 @@ namespace KlayGE
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height);
 
-		virtual RenderViewPtr CreateRenderView(int level);
-		virtual RenderViewPtr CreateRenderView(CubeFaces face, int level);
-
 		void BuildMipSubLevels();
 
 		using Texture::Usage;
@@ -159,6 +156,8 @@ namespace KlayGE
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
 			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
 			uint32_t src_width, uint32_t src_height, uint32_t src_depth);
+
+		RenderViewPtr CreateRenderView(int slice, int level);
 
 	private:
 		void UpdateParams();

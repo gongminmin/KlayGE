@@ -121,6 +121,13 @@ namespace KlayGE
 		return ret;
 	}
 
+	RenderViewPtr D3D9RenderFactory::Make3DRenderView(Texture& texture, int slice, int level)
+	{
+		D3D9RenderViewPtr ret(checked_cast<D3D9Texture3D*>(&texture)->CreateRenderView(slice, level));
+		resource_pool_.push_back(ret);
+		return ret;
+	}
+
 	RenderViewPtr D3D9RenderFactory::MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer, uint32_t width, uint32_t height)
 	{
 		D3D9RenderViewPtr ret(checked_cast<D3D9GraphicsBuffer*>(&gbuffer)->CreateRenderView(width, height));

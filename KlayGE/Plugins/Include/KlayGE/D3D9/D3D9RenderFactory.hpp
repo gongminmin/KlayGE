@@ -76,6 +76,7 @@ namespace KlayGE
 		RenderViewPtr Make1DRenderView(Texture& texture, int level);
 		RenderViewPtr Make2DRenderView(Texture& texture, int level);
 		RenderViewPtr Make2DRenderView(Texture& texture, Texture::CubeFaces face, int level);
+		RenderViewPtr Make3DRenderView(Texture& texture, int slice, int level);
 		RenderViewPtr MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer, uint32_t width, uint32_t height);
 		RenderViewPtr MakeDepthStencilRenderView(uint32_t width, uint32_t height, PixelFormat pf, uint32_t multi_sample);
 

@@ -75,6 +75,23 @@ namespace KlayGE
 	typedef boost::shared_ptr<OGLTexture2DRenderView> OGLTexture2DRenderViewPtr;
 
 
+	class OGLTexture3DRenderView : public OGLRenderView, boost::noncopyable
+	{
+	public:
+		OGLTexture3DRenderView(Texture& texture_3d, int slice, int level);
+
+		void OnAttached(FrameBuffer& fb, uint32_t att);
+		void OnDetached(FrameBuffer& fb, uint32_t att);
+
+	private:
+		OGLTexture3D& texture_3d_;
+		int slice_;
+		int level_;
+	};
+
+	typedef boost::shared_ptr<OGLTexture3DRenderView> OGLTexture3DRenderViewPtr;
+
+
 	class OGLTextureCubeRenderView : public OGLRenderView, boost::noncopyable
 	{
 	public:

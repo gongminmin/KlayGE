@@ -96,6 +96,11 @@ namespace KlayGE
 			return RenderView::NullObject();
 		}
 
+		RenderViewPtr Make3DRenderView(Texture& /*texture*/, int /*slice*/, int /*level*/)
+		{
+			return RenderView::NullObject();
+		}
+
 		RenderViewPtr MakeGraphicsBufferRenderView(GraphicsBuffer& /*gbuffer*/, uint32_t /*width*/, uint32_t /*height*/)
 		{
 			return RenderView::NullObject();

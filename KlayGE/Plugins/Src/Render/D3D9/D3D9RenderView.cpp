@@ -164,6 +164,85 @@ namespace KlayGE
 	}
 
 
+	D3D9Texture3DRenderView::D3D9Texture3DRenderView(Texture& texture_3d, int slice, int level)
+		: texture_3d_(static_cast<D3D9Texture3D&>(texture_3d)),
+			slice_(slice), level_(level)
+	{
+		BOOST_ASSERT(Texture::TT_3D == texture_3d.Type());
+		BOOST_ASSERT(dynamic_cast<D3D9Texture3D*>(&texture_3d) != NULL);
+		BOOST_ASSERT(texture_3d_.Depth(level) > slice);
+
+		width_ = texture_3d_.Width(level);
+		height_ = texture_3d_.Height(level);
+		pf_ = texture_3d_.Format();
+
+		surface_ = this->CreateSurface(D3DPOOL_DEFAULT);
+	}
+
+	void D3D9Texture3DRenderView::OnAttached(FrameBuffer& /*fb*/, uint32_t /*att*/)
+	{
+	}
+
+	void D3D9Texture3DRenderView::OnDetached(FrameBuffer& /*fb*/, uint32_t /*att*/)
+	{
+		IDirect3DVolume9* pTmp;
+		texture_3d_.D3DTexture3D()->GetVolumeLevel(level_, &pTmp);
+		ID3D9VolumePtr pVol = MakeCOMPtr(pTmp);
+
+		D3DLOCKED_RECT locked_rect;
+		TIF(surface_->LockRect(&locked_rect, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
+
+		D3DBOX src_box = { 0, 0, width_, height_, 0, 1 };
+		D3DBOX dst_box = { 0, 0, width_, height_, level_, level_ + 1 };
+		D3DXLoadVolumeFromMemory(pVol.get(), NULL, &dst_box, locked_rect.pBits,
+			D3D9Mapping::MappingFormat(pf_), locked_rect.Pitch, locked_rect.Pitch * height_,
+			NULL, &src_box, D3DX_FILTER_NONE, 0);
+
+		surface_->UnlockRect();
+	}
+
+	ID3D9SurfacePtr D3D9Texture3DRenderView::CreateSurface(D3DPOOL pool)
+	{
+		IDirect3DSurface9* surface = NULL;
+
+		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
+		if (D3DPOOL_SYSTEMMEM == pool)
+		{
+			TIF(d3d_device->CreateOffscreenPlainSurface(width_, height_,
+				D3D9Mapping::MappingFormat(pf_), pool, &surface, NULL));
+		}
+		else
+		{
+			TIF(d3d_device->CreateRenderTarget(width_, height_, D3D9Mapping::MappingFormat(pf_),
+				D3DMULTISAMPLE_NONE, 0, true, &surface, NULL));
+		}
+
+		return MakeCOMPtr(surface);
+	}
+
+	void D3D9Texture3DRenderView::DoOnLostDevice()
+	{
+		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		boost::shared_ptr<IDirect3DDevice9> d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
+
+		ID3D9SurfacePtr sys_mem_surf = this->CreateSurface(D3DPOOL_SYSTEMMEM);
+		TIF(d3d_device->GetRenderTargetData(surface_.get(), sys_mem_surf.get()));
+		surface_ = sys_mem_surf;
+	}
+
+	void D3D9Texture3DRenderView::DoOnResetDevice()
+	{
+		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		boost::shared_ptr<IDirect3DDevice9> d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
+
+		ID3D9SurfacePtr default_surf = this->CreateSurface(D3DPOOL_DEFAULT);
+		TIF(D3DXLoadSurfaceFromSurface(surface_.get(), NULL, NULL,
+			default_surf.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+		surface_ = default_surf;
+	}
+
+
 	D3D9GraphicsBufferRenderView::D3D9GraphicsBufferRenderView(GraphicsBuffer& gb,
 									uint32_t width, uint32_t height, PixelFormat pf)
 		: gbuffer_(gb)
@@ -212,11 +291,11 @@ namespace KlayGE
 		if (D3DPOOL_SYSTEMMEM == pool)
 		{
 			TIF(d3d_device->CreateOffscreenPlainSurface(width_, height_,
-				D3DFMT_A32B32G32R32F, pool, &surface, NULL));
+				D3D9Mapping::MappingFormat(pf_), pool, &surface, NULL));
 		}
 		else
 		{
-			TIF(d3d_device->CreateRenderTarget(width_, height_, D3DFMT_A32B32G32R32F,
+			TIF(d3d_device->CreateRenderTarget(width_, height_, D3D9Mapping::MappingFormat(pf_),
 				D3DMULTISAMPLE_NONE, 0, true, &surface, NULL));
 		}
 

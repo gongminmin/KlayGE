@@ -52,8 +52,32 @@ namespace KlayGE
 
 		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-		glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
-			GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_1D, tex_, level_);
+
+		switch (att)
+		{
+		case FrameBuffer::ATT_Depth:
+			glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
+				GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_1D, tex_, level_);
+			break;
+
+		case FrameBuffer::ATT_Stencil:
+			glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
+				GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_1D, tex_, level_);
+			break;
+
+		case FrameBuffer::ATT_DepthStencil:
+			glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
+				GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_1D, tex_, level_);
+			glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
+				GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_1D, tex_, level_);
+			break;
+
+		default:
+			glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
+				GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_1D, tex_, level_);
+			break;
+		}
+
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
 
@@ -61,8 +85,32 @@ namespace KlayGE
 	{
 		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-		glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
-			GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_1D, 0, 0);
+
+		switch (att)
+		{
+		case FrameBuffer::ATT_Depth:
+			glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
+				GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_1D, 0, 0);
+			break;
+
+		case FrameBuffer::ATT_Stencil:
+			glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
+				GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_1D, 0, 0);
+			break;
+
+		case FrameBuffer::ATT_DepthStencil:
+			glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
+				GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_1D, 0, 0);
+			glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
+				GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_1D, 0, 0);
+			break;
+
+		default:
+			glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
+				GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_1D, 0, 0);
+			break;
+		}
+
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
 
@@ -90,8 +138,32 @@ namespace KlayGE
 
 		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-			GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_2D, tex_, level_);
+
+		switch (att)
+		{
+		case FrameBuffer::ATT_Depth:
+			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+				GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, tex_, level_);
+			break;
+
+		case FrameBuffer::ATT_Stencil:
+			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+				GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_2D, tex_, level_);
+			break;
+
+		case FrameBuffer::ATT_DepthStencil:
+			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+				GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, tex_, level_);
+			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+				GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_2D, tex_, level_);
+			break;
+
+		default:
+			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+				GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_2D, tex_, level_);
+			break;
+		}
+
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
 
@@ -99,8 +171,32 @@ namespace KlayGE
 	{
 		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-			GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_2D, 0, 0);
+
+		switch (att)
+		{
+		case FrameBuffer::ATT_Depth:
+			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+				GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, 0, 0);
+			break;
+
+		case FrameBuffer::ATT_Stencil:
+			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+				GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_2D, 0, 0);
+			break;
+
+		case FrameBuffer::ATT_DepthStencil:
+			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+				GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, 0, 0);
+			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+				GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_2D, 0, 0);
+			break;
+
+		default:
+			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+				GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_2D, 0, 0);
+			break;
+		}
+
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
 
@@ -128,10 +224,34 @@ namespace KlayGE
 
 		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-			GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
-			GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X,
-			tex_, level_);
+
+		GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X;
+		switch (att)
+		{
+		case FrameBuffer::ATT_Depth:
+			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+				GL_DEPTH_ATTACHMENT_EXT, face, tex_, level_);
+			break;
+
+		case FrameBuffer::ATT_Stencil:
+			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+				GL_STENCIL_ATTACHMENT_EXT, face, tex_, level_);
+			break;
+
+		case FrameBuffer::ATT_DepthStencil:
+			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+				GL_DEPTH_ATTACHMENT_EXT, face, tex_, level_);
+			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+				GL_STENCIL_ATTACHMENT_EXT, face, tex_, level_);
+			break;
+
+		default:
+			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+				GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
+				face, tex_, level_);
+			break;
+		}
+
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
 
@@ -139,10 +259,123 @@ namespace KlayGE
 	{
 		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-			GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
-			GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X,
-			0, 0);
+		
+		GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X;
+		switch (att)
+		{
+		case FrameBuffer::ATT_Depth:
+			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+				GL_DEPTH_ATTACHMENT_EXT, face, 0, 0);
+			break;
+
+		case FrameBuffer::ATT_Stencil:
+			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+				GL_STENCIL_ATTACHMENT_EXT, face, 0, 0);
+			break;
+
+		case FrameBuffer::ATT_DepthStencil:
+			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+				GL_DEPTH_ATTACHMENT_EXT, face, 0, 0);
+			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+				GL_STENCIL_ATTACHMENT_EXT, face, 0, 0);
+			break;
+
+		default:
+			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+				GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
+				face, 0, 0);
+			break;
+		}
+
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	}
+
+
+	OGLTexture3DRenderView::OGLTexture3DRenderView(Texture& texture_3d, int slice, int level)
+		: texture_3d_(static_cast<OGLTexture3D&>(texture_3d)),
+			slice_(slice), level_(level)
+	{
+		BOOST_ASSERT(Texture::TT_3D == texture_3d.Type());
+		BOOST_ASSERT(dynamic_cast<OGLTexture3D*>(&texture_3d) != NULL);
+		BOOST_ASSERT(texture_3d_.Depth(level) > slice);
+
+		tex_ = texture_3d_.GLTexture();
+
+		width_ = texture_3d_.Width(level);
+		height_ = texture_3d_.Height(level);
+		pf_ = texture_3d_.Format();
+	}
+
+	void OGLTexture3DRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
+	{
+		if (Texture::TU_RenderTarget != texture_3d_.Usage())
+		{
+			texture_3d_.Usage(Texture::TU_RenderTarget);
+		}
+
+		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+
+		switch (att)
+		{
+		case FrameBuffer::ATT_Depth:
+			glFramebufferTexture3DEXT(GL_FRAMEBUFFER_EXT,
+				GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_3D, tex_, level_, slice_);
+			break;
+
+		case FrameBuffer::ATT_Stencil:
+			glFramebufferTexture3DEXT(GL_FRAMEBUFFER_EXT,
+				GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_3D, tex_, level_, slice_);
+			break;
+
+		case FrameBuffer::ATT_DepthStencil:
+			glFramebufferTexture3DEXT(GL_FRAMEBUFFER_EXT,
+				GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_3D, tex_, level_, slice_);
+			glFramebufferTexture3DEXT(GL_FRAMEBUFFER_EXT,
+				GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_3D, tex_, level_, slice_);
+			break;
+
+		default:
+			glFramebufferTexture3DEXT(GL_FRAMEBUFFER_EXT,
+				GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
+				GL_TEXTURE_3D, tex_, level_, slice_);
+			break;
+		}
+
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	}
+
+	void OGLTexture3DRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
+	{
+		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+		
+		switch (att)
+		{
+		case FrameBuffer::ATT_Depth:
+			glFramebufferTexture3DEXT(GL_FRAMEBUFFER_EXT,
+				GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_3D, 0, 0, 0);
+			break;
+
+		case FrameBuffer::ATT_Stencil:
+			glFramebufferTexture3DEXT(GL_FRAMEBUFFER_EXT,
+				GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_3D, 0, 0, 0);
+			break;
+
+		case FrameBuffer::ATT_DepthStencil:
+			glFramebufferTexture3DEXT(GL_FRAMEBUFFER_EXT,
+				GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_3D, 0, 0, 0);
+			glFramebufferTexture3DEXT(GL_FRAMEBUFFER_EXT,
+				GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_3D, 0, 0, 0);
+			break;
+
+		default:
+			glFramebufferTexture3DEXT(GL_FRAMEBUFFER_EXT,
+				GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
+				GL_TEXTURE_3D, 0, 0, 0);
+			break;
+		}
+
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
 

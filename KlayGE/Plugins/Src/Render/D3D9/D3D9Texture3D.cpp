@@ -298,4 +298,9 @@ namespace KlayGE
 		format_ = D3D9Mapping::MappingFormat(desc.Format);
 		bpp_	= PixelFormatBits(format_);
 	}
+
+	D3D9RenderViewPtr D3D9Texture3D::CreateRenderView(int slice, int level)
+	{
+		return D3D9RenderViewPtr(new D3D9Texture3DRenderView(*this, slice, level));
+	}
 }

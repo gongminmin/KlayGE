@@ -75,9 +75,6 @@ namespace KlayGE
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height);
 
-		virtual D3D9RenderViewPtr CreateRenderView(int level);
-		virtual D3D9RenderViewPtr CreateRenderView(CubeFaces face, int level);
-
 		using Texture::Usage;
 		void Usage(TextureUsage usage);
 
@@ -193,6 +190,8 @@ namespace KlayGE
 			uint32_t src_width, uint32_t src_height, uint32_t src_depth);
 
 		void BuildMipSubLevels();
+
+		D3D9RenderViewPtr CreateRenderView(int slice, int level);
 
 		ID3D9VolumeTexturePtr D3DTexture3D() const
 			{ return d3dTexture3D_; }

@@ -32,7 +32,9 @@ namespace KlayGE
 {
 	class D3D9Texture1D;
 	class D3D9Texture2D;
+	class D3D9Texture3D;
 	class D3D9TextureCube;
+	class D3D9GraphicsBuffer;
 
 	class D3D9RenderView : public RenderView, public D3D9Resource
 	{
@@ -109,7 +111,31 @@ namespace KlayGE
 		int level_;
 	};
 
-	typedef boost::shared_ptr<D3D9Texture2DRenderView> D3D9Texture2DRenderViewPtr;
+	typedef boost::shared_ptr<D3D9TextureCubeRenderView> D3D9TextureCubeRenderViewPtr;
+
+
+	class D3D9Texture3DRenderView : public D3D9RenderView, boost::noncopyable
+	{
+	public:
+		D3D9Texture3DRenderView(Texture& texture_3d, int slice, int level);
+
+		void OnAttached(FrameBuffer& fb, uint32_t att);
+		void OnDetached(FrameBuffer& fb, uint32_t att);
+
+	private:
+		ID3D9SurfacePtr CreateSurface(D3DPOOL pool);
+
+	private:
+		void DoOnLostDevice();
+		void DoOnResetDevice();
+
+	private:
+		D3D9Texture3D& texture_3d_;
+		int slice_;
+		int level_;
+	};
+
+	typedef boost::shared_ptr<D3D9Texture3DRenderView> D3D9Texture3DRenderViewPtr;
 
 
 	class D3D9GraphicsBufferRenderView : public D3D9RenderView, boost::noncopyable

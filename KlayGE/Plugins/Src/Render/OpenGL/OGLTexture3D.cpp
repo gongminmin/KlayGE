@@ -23,6 +23,7 @@
 #include <gl/glu.h>
 
 #include <KlayGE/OpenGL/OGLMapping.hpp>
+#include <KlayGE/OpenGL/OGLRenderView.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 
 #pragma comment(lib, "OpenGL32.lib")
@@ -216,5 +217,10 @@ namespace KlayGE
 			glGetTexLevelParameteriv(GL_TEXTURE_3D, level, GL_TEXTURE_DEPTH, &d);
 			depths_[level] = d;
 		}
+	}
+
+	RenderViewPtr OGLTexture3D::CreateRenderView(int slice, int level)
+	{
+		return RenderViewPtr(new OGLTexture3DRenderView(*this, slice, level));
 	}
 }
