@@ -21,7 +21,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/InputFactory.hpp>
 
-#pragma warning(disable: 4512)
+#pragma warning(disable: 4512 4189)
 
 #include <boost/assign.hpp>
 #include <boost/assign/std/vector.hpp>

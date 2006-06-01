@@ -18,11 +18,11 @@ namespace KlayGE
 	class NullRenderView : public RenderView
 	{
 	public:
-		void OnAttached(FrameBuffer& /*fb*/, uint32_t /*n*/)
+		void OnAttached(FrameBuffer& /*fb*/, uint32_t /*att*/)
 		{
 		}
 
-		void OnDetached(FrameBuffer& /*fb*/, uint32_t /*n*/)
+		void OnDetached(FrameBuffer& /*fb*/, uint32_t /*att*/)
 		{
 		}
 	};

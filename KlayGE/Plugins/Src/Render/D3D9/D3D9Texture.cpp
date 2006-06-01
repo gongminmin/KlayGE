@@ -168,16 +168,16 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	RenderViewPtr D3D9Texture::CreateRenderView(int /*level*/)
+	D3D9RenderViewPtr D3D9Texture::CreateRenderView(int /*level*/)
 	{
 		BOOST_ASSERT(false);
-		return RenderViewPtr();
+		return D3D9RenderViewPtr();
 	}
 
-	RenderViewPtr D3D9Texture::CreateRenderView(CubeFaces /*face*/, int /*level*/)
+	D3D9RenderViewPtr D3D9Texture::CreateRenderView(CubeFaces /*face*/, int /*level*/)
 	{
 		BOOST_ASSERT(false);
-		return RenderViewPtr();
+		return D3D9RenderViewPtr();
 	}
 
 	void D3D9Texture::Usage(Texture::TextureUsage usage)

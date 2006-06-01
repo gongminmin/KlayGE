@@ -43,7 +43,7 @@ namespace KlayGE
 		bpp_ = texture_1d_.Bpp();
 	}
 
-	void OGLTexture1DRenderView::OnAttached(FrameBuffer& fb, uint32_t n)
+	void OGLTexture1DRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
 		if (Texture::TU_RenderTarget != texture_1d_.Usage())
 		{
@@ -53,16 +53,16 @@ namespace KlayGE
 		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 		glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
-			GL_COLOR_ATTACHMENT0_EXT + n, GL_TEXTURE_1D, tex_, level_);
+			GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_1D, tex_, level_);
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
 
-	void OGLTexture1DRenderView::OnDetached(FrameBuffer& fb, uint32_t n)
+	void OGLTexture1DRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
 	{
 		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 		glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
-			GL_COLOR_ATTACHMENT0_EXT + n, GL_TEXTURE_1D, 0, 0);
+			GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_1D, 0, 0);
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
 
@@ -81,7 +81,7 @@ namespace KlayGE
 		bpp_ = texture_2d_.Bpp();
 	}
 
-	void OGLTexture2DRenderView::OnAttached(FrameBuffer& fb, uint32_t n)
+	void OGLTexture2DRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
 		if (Texture::TU_RenderTarget != texture_2d_.Usage())
 		{
@@ -91,16 +91,16 @@ namespace KlayGE
 		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-			GL_COLOR_ATTACHMENT0_EXT + n, GL_TEXTURE_2D, tex_, level_);
+			GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_2D, tex_, level_);
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
 
-	void OGLTexture2DRenderView::OnDetached(FrameBuffer& fb, uint32_t n)
+	void OGLTexture2DRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
 	{
 		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-			GL_COLOR_ATTACHMENT0_EXT + n, GL_TEXTURE_2D, 0, 0);
+			GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_2D, 0, 0);
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
 
@@ -119,7 +119,7 @@ namespace KlayGE
 		bpp_ = texture_cube_.Bpp();
 	}
 
-	void OGLTextureCubeRenderView::OnAttached(FrameBuffer& fb, uint32_t n)
+	void OGLTextureCubeRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
 		if (Texture::TU_RenderTarget != texture_cube_.Usage())
 		{
@@ -129,18 +129,18 @@ namespace KlayGE
 		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-			GL_COLOR_ATTACHMENT0_EXT + n,
+			GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
 			GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X,
 			tex_, level_);
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
 
-	void OGLTextureCubeRenderView::OnDetached(FrameBuffer& fb, uint32_t n)
+	void OGLTextureCubeRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
 	{
 		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-			GL_COLOR_ATTACHMENT0_EXT + n,
+			GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
 			GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X,
 			0, 0);
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
@@ -156,7 +156,7 @@ namespace KlayGE
 		bpp_ = PixelFormatBits(pf_);
 	}
 
-	void OGLGraphicsBufferRenderView::OnAttached(FrameBuffer& fb, uint32_t n)
+	void OGLGraphicsBufferRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
 		glGenTextures(1, &tex_);
 		glBindTexture(GL_TEXTURE_RECTANGLE_ARB, tex_);
@@ -170,17 +170,18 @@ namespace KlayGE
 		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-			GL_COLOR_ATTACHMENT0_EXT + n, GL_TEXTURE_RECTANGLE_ARB, tex_, 0);
+			GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
+			GL_TEXTURE_RECTANGLE_ARB, tex_, 0);
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
 
-	void OGLGraphicsBufferRenderView::OnDetached(FrameBuffer& fb, uint32_t n)
+	void OGLGraphicsBufferRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
 	{
 		gbuffer_.Resize(width_ * height_ * 4 * sizeof(GL_FLOAT));
 
 		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-		glReadBuffer(GL_COLOR_ATTACHMENT0_EXT + n);
+		glReadBuffer(GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0);
 
 		OGLGraphicsBuffer* ogl_gb = checked_cast<OGLGraphicsBuffer*>(&gbuffer_);
 		glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, ogl_gb->OGLvbo());

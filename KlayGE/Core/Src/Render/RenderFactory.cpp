@@ -37,23 +37,23 @@ namespace KlayGE
 			return *RenderEngine::NullObject();
 		}
 		
-		TexturePtr MakeTexture1D(uint32_t width, uint16_t numMipMaps,
-			PixelFormat format)
+		TexturePtr MakeTexture1D(uint32_t /*width*/, uint16_t /*numMipMaps*/,
+			PixelFormat /*format*/)
 		{
 			return Texture::NullObject();
 		}
-		TexturePtr MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps,
-			PixelFormat format)
+		TexturePtr MakeTexture2D(uint32_t /*width*/, uint32_t /*height*/, uint16_t /*numMipMaps*/,
+			PixelFormat /*format*/)
 		{
 			return Texture::NullObject();
 		}
-		TexturePtr MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps,
-			PixelFormat format)
+		TexturePtr MakeTexture3D(uint32_t /*width*/, uint32_t /*height*/, uint32_t /*depth*/, uint16_t /*numMipMaps*/,
+			PixelFormat /*format*/)
 		{
 			return Texture::NullObject();
 		}
-		TexturePtr MakeTextureCube(uint32_t size, uint16_t numMipMaps,
-			PixelFormat format)
+		TexturePtr MakeTextureCube(uint32_t /*size*/, uint16_t /*numMipMaps*/,
+			PixelFormat /*format*/)
 		{
 			return Texture::NullObject();
 		}
@@ -62,16 +62,16 @@ namespace KlayGE
 			return FrameBuffer::NullObject();
 		}
 
-		RenderLayoutPtr MakeRenderLayout(RenderLayout::buffer_type type)
+		RenderLayoutPtr MakeRenderLayout(RenderLayout::buffer_type /*type*/)
 		{
 			return RenderLayout::NullObject();
 		}
 
-		GraphicsBufferPtr MakeVertexBuffer(BufferUsage usage)
+		GraphicsBufferPtr MakeVertexBuffer(BufferUsage /*usage*/)
 		{
 			return GraphicsBuffer::NullObject();
 		}
-		GraphicsBufferPtr MakeIndexBuffer(BufferUsage usage)
+		GraphicsBufferPtr MakeIndexBuffer(BufferUsage /*usage*/)
 		{
 			return GraphicsBuffer::NullObject();
 		}
@@ -81,8 +81,28 @@ namespace KlayGE
 			return Query::NullObject();
 		}
 
+		RenderViewPtr Make1DRenderView(Texture& /*texture*/, int /*level*/)
+		{
+			return RenderView::NullObject();
+		}
+
+		RenderViewPtr Make2DRenderView(Texture& /*texture*/, int /*level*/)
+		{
+			return RenderView::NullObject();
+		}
+
+		RenderViewPtr Make2DRenderView(Texture& /*texture*/, Texture::CubeFaces /*face*/, int /*level*/)
+		{
+			return RenderView::NullObject();
+		}
+
+		RenderViewPtr MakeGraphicsBufferRenderView(GraphicsBuffer& /*gbuffer*/, uint32_t /*width*/, uint32_t /*height*/)
+		{
+			return RenderView::NullObject();
+		}
+
 	private:
-		RenderEffectPtr DoMakeRenderEffect(std::string const & effectData)
+		RenderEffectPtr DoMakeRenderEffect(std::string const & /*effectData*/)
 		{
 			return RenderEffect::NullObject();
 		}

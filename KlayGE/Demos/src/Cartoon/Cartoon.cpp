@@ -196,8 +196,9 @@ void Cartoon::InitObjects()
 
 void Cartoon::OnResize(uint32_t width, uint32_t height)
 {
-	normal_depth_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, PF_ABGR16F);
-	normal_depth_buffer_->Attach(FrameBuffer::ATT_Color0, normal_depth_tex_->CreateRenderView(0));
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	normal_depth_tex_ = rf.MakeTexture2D(width, height, 1, PF_ABGR16F);
+	normal_depth_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*normal_depth_tex_, 0));
 }
 
 void Cartoon::InputHandler(InputEngine const & sender, InputAction const & action)

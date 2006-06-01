@@ -11,6 +11,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 
 #include <KlayGE/OpenGL/OGLRenderFactory.hpp>
 
@@ -82,6 +83,26 @@ namespace KlayGE
 	QueryPtr OGLRenderFactory::MakeOcclusionQuery()
 	{
 		return QueryPtr(new OGLOcclusionQuery);
+	}
+
+	RenderViewPtr OGLRenderFactory::Make1DRenderView(Texture& texture, int level)
+	{
+		return checked_cast<OGLTexture1D*>(&texture)->CreateRenderView(level);
+	}
+
+	RenderViewPtr OGLRenderFactory::Make2DRenderView(Texture& texture, int level)
+	{
+		return checked_cast<OGLTexture2D*>(&texture)->CreateRenderView(level);
+	}
+
+	RenderViewPtr OGLRenderFactory::Make2DRenderView(Texture& texture, Texture::CubeFaces face, int level)
+	{
+		return checked_cast<OGLTextureCube*>(&texture)->CreateRenderView(face, level);
+	}
+
+	RenderViewPtr OGLRenderFactory::MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer, uint32_t width, uint32_t height)
+	{
+		return checked_cast<OGLGraphicsBuffer*>(&gbuffer)->CreateRenderView(width, height);
 	}
 
 	RenderFactory& OGLRenderFactoryInstance()

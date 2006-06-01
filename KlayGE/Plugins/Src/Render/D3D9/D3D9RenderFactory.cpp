@@ -14,6 +14,8 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
+
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 #include <KlayGE/D3D9/D3D9FrameBuffer.hpp>
@@ -96,6 +98,34 @@ namespace KlayGE
 	QueryPtr D3D9RenderFactory::MakeOcclusionQuery()
 	{
 		return QueryPtr(new D3D9OcclusionQuery);
+	}
+
+	RenderViewPtr D3D9RenderFactory::Make1DRenderView(Texture& texture, int level)
+	{
+		D3D9RenderViewPtr ret(checked_cast<D3D9Texture1D*>(&texture)->CreateRenderView(level));
+		resource_pool_.push_back(ret);
+		return ret;
+	}
+
+	RenderViewPtr D3D9RenderFactory::Make2DRenderView(Texture& texture, int level)
+	{
+		D3D9RenderViewPtr ret(checked_cast<D3D9Texture2D*>(&texture)->CreateRenderView(level));
+		resource_pool_.push_back(ret);
+		return ret;
+	}
+
+	RenderViewPtr D3D9RenderFactory::Make2DRenderView(Texture& texture, Texture::CubeFaces face, int level)
+	{
+		D3D9RenderViewPtr ret(checked_cast<D3D9TextureCube*>(&texture)->CreateRenderView(face, level));
+		resource_pool_.push_back(ret);
+		return ret;
+	}
+
+	RenderViewPtr D3D9RenderFactory::MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer, uint32_t width, uint32_t height)
+	{
+		D3D9RenderViewPtr ret(checked_cast<D3D9GraphicsBuffer*>(&gbuffer)->CreateRenderView(width, height));
+		resource_pool_.push_back(ret);
+		return ret;
 	}
 
 	void D3D9RenderFactory::OnLostDevice()

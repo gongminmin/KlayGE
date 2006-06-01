@@ -25,7 +25,7 @@
 namespace KlayGE
 {
 	D3D9IndexBuffer::D3D9IndexBuffer(BufferUsage usage)
-						: GraphicsBuffer(usage),
+						: D3D9GraphicsBuffer(usage),
 							format_(IF_Index16)
 	{
 	}
@@ -145,10 +145,10 @@ namespace KlayGE
 		buffer_->Unlock();
 	}
 
-	RenderViewPtr D3D9IndexBuffer::CreateRenderView(uint32_t width, uint32_t height)
+	D3D9RenderViewPtr D3D9IndexBuffer::CreateRenderView(uint32_t /*width*/, uint32_t /*height*/)
 	{
 		BOOST_ASSERT(false);
-		return RenderViewPtr();
+		return D3D9RenderViewPtr();
 	}
 
 	boost::shared_ptr<IDirect3DIndexBuffer9> D3D9IndexBuffer::D3D9Buffer() const

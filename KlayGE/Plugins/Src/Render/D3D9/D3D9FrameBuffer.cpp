@@ -27,6 +27,7 @@
 #define NOMINMAX
 #include <d3d9.h>
 
+#include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9RenderView.hpp>
 #include <KlayGE/D3D9/D3D9FrameBuffer.hpp>
 

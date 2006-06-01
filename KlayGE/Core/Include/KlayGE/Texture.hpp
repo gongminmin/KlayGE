@@ -312,9 +312,6 @@ namespace KlayGE
 
 		virtual void BuildMipSubLevels() = 0;
 
-		virtual RenderViewPtr CreateRenderView(int level) = 0;
-		virtual RenderViewPtr CreateRenderView(CubeFaces face, int level) = 0;
-
 	protected:
 		uint32_t		bpp_;
 

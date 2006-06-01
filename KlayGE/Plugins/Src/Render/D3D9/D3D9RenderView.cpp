@@ -17,6 +17,7 @@
 
 #include <boost/assert.hpp>
 
+#include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 #include <KlayGE/D3D9/D3D9RenderView.hpp>
 
@@ -43,7 +44,7 @@ namespace KlayGE
 		bpp_ = texture_1d_.Bpp();
 	}
 
-	void D3D9Texture1DRenderView::OnAttached(FrameBuffer& /*fb*/, uint32_t /*n*/)
+	void D3D9Texture1DRenderView::OnAttached(FrameBuffer& /*fb*/, uint32_t /*att*/)
 	{
 		if (Texture::TU_RenderTarget != texture_1d_.Usage())
 		{
@@ -55,7 +56,7 @@ namespace KlayGE
 		surface_ = MakeCOMPtr(surface);
 	}
 
-	void D3D9Texture1DRenderView::OnDetached(FrameBuffer& /*fb*/, uint32_t /*n*/)
+	void D3D9Texture1DRenderView::OnDetached(FrameBuffer& /*fb*/, uint32_t /*att*/)
 	{
 	}
 
@@ -133,7 +134,7 @@ namespace KlayGE
 		bpp_ = texture_cube_.Bpp();
 	}
 
-	void D3D9TextureCubeRenderView::OnAttached(FrameBuffer& /*fb*/, uint32_t /*n*/)
+	void D3D9TextureCubeRenderView::OnAttached(FrameBuffer& /*fb*/, uint32_t /*att*/)
 	{
 		if (Texture::TU_RenderTarget != texture_cube_.Usage())
 		{
@@ -145,7 +146,7 @@ namespace KlayGE
 		surface_ = MakeCOMPtr(surface);
 	}
 
-	void D3D9TextureCubeRenderView::OnDetached(FrameBuffer& /*fb*/, uint32_t /*n*/)
+	void D3D9TextureCubeRenderView::OnDetached(FrameBuffer& /*fb*/, uint32_t /*att*/)
 	{
 	}
 
@@ -173,12 +174,12 @@ namespace KlayGE
 		bpp_ = PixelFormatBits(pf_);
 	}
 
-	void D3D9GraphicsBufferRenderView::OnAttached(FrameBuffer& /*fb*/, uint32_t /*n*/)
+	void D3D9GraphicsBufferRenderView::OnAttached(FrameBuffer& /*fb*/, uint32_t /*att*/)
 	{
 		surface_ = this->CreateGBSurface(D3DPOOL_DEFAULT);
 	}
 
-	void D3D9GraphicsBufferRenderView::OnDetached(FrameBuffer& /*fb*/, uint32_t /*n*/)
+	void D3D9GraphicsBufferRenderView::OnDetached(FrameBuffer& /*fb*/, uint32_t /*att*/)
 	{
 		gbuffer_.Resize(width_ * height_ * sizeof(float) * 4);
 

@@ -45,8 +45,8 @@ namespace KlayGE
 			return bpp_;
 		}
 
-		virtual void OnAttached(FrameBuffer& fb, uint32_t n) = 0;
-		virtual void OnDetached(FrameBuffer& fb, uint32_t n) = 0;
+		virtual void OnAttached(FrameBuffer& fb, uint32_t att) = 0;
+		virtual void OnDetached(FrameBuffer& fb, uint32_t att) = 0;
 
 	protected:
 		uint32_t width_;

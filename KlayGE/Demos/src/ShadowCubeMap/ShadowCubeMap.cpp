@@ -301,8 +301,10 @@ ShadowCubeMap::ShadowCubeMap()
 
 void ShadowCubeMap::InitObjects()
 {
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
 	// ½¨Á¢×ÖÌå
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
+	font_ = rf.MakeFont("gkai00mp.ttf", 16);
 
 	ground_.reset(new GroundObject);
 	ground_->AddToSceneManager();
@@ -310,7 +312,7 @@ void ShadowCubeMap::InitObjects()
 	mesh_.reset(new OccluderObject);
 	mesh_->AddToSceneManager();
 
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+	RenderEngine& renderEngine(rf.RenderEngineInstance());
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
@@ -322,8 +324,13 @@ void ShadowCubeMap::InitObjects()
 	checked_cast<OccluderRenderable*>(mesh_->GetRenderable().get())->LampTexture(lamp_tex_);
 	checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->LampTexture(lamp_tex_);
 
-	shadow_tex_ = Context::Instance().RenderFactoryInstance().MakeTextureCube(SHADOW_MAP_SIZE, 1, PF_ABGR16F);
-	shadow_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
+	shadow_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, PF_ABGR16F);
+	for (int i = 0; i < 6; ++ i)
+	{
+		shadow_buffers_[i] = rf.MakeFrameBuffer();
+		shadow_buffers_[i]->Attach(FrameBuffer::ATT_Color0,
+			rf.Make2DRenderView(*shadow_tex_, static_cast<Texture::CubeFaces>(i), 0));
+	}
 
 	fpcController_.AttachCamera(this->ActiveCamera());
 	fpcController_.Scalers(0.05f, 0.1f);
@@ -363,6 +370,7 @@ void ShadowCubeMap::DoUpdate(uint32_t pass)
 		{
 			fpcController_.Update();
 
+			renderEngine.BindRenderTarget(shadow_buffers_[pass]);
 			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 			light_model_ = MathLib::RotationZ(0.4f) * MathLib::RotationY(std::clock() / 700.0f)
@@ -391,8 +399,7 @@ void ShadowCubeMap::DoUpdate(uint32_t pass)
 			checked_cast<OccluderRenderable*>(mesh_->GetRenderable().get())->GenShadowMapPass(true);
 			checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->GenShadowMapPass(true);
 
-			shadow_buffer_->Attach(FrameBuffer::ATT_Color0, shadow_tex_->CreateRenderView(face, 0));
-			renderEngine.BindRenderTarget(shadow_buffer_);
+			renderEngine.BindRenderTarget(shadow_buffers_[pass]);
 			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 		}
 		break;

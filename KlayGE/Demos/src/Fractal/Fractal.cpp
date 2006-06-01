@@ -231,8 +231,10 @@ void Fractal::InitObjects()
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	render_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
-	render_buffer_->GetViewport().camera = renderEngine.CurRenderTarget()->GetViewport().camera;
+	render_buffer_[0] = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
+	render_buffer_[1] = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
+	render_buffer_[0]->GetViewport().camera
+		= render_buffer_[1]->GetViewport().camera = renderEngine.CurRenderTarget()->GetViewport().camera;
 
 	renderFractal_.reset(new RenderFractal);
 	renderPlane_.reset(new RenderPlane);
@@ -240,13 +242,18 @@ void Fractal::InitObjects()
 
 void Fractal::OnResize(uint32_t width, uint32_t height)
 {
-	rendered_tex_[0] = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, PF_GR16F);
-	rendered_tex_[1] = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, PF_GR16F);
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+	rendered_tex_[0] = rf.MakeTexture2D(width, height, 1, PF_GR16F);
+	rendered_tex_[1] = rf.MakeTexture2D(width, height, 1, PF_GR16F);
 
 	std::vector<Vector4> data(width * height);
 	std::fill(data.begin(), data.end(), Vector4(0, 0, 0, 0));
 	rendered_tex_[0]->CopyMemoryToTexture2D(0, &data[0], PF_ABGR32F, width, height, 0, 0, width, height);
 	rendered_tex_[1]->CopyMemoryToTexture2D(0, &data[0], PF_ABGR32F, width, height, 0, 0, width, height);
+
+	render_buffer_[0]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_[0], 0));
+	render_buffer_[1]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_[1], 0));
 }
 
 uint32_t Fractal::NumPasses() const
@@ -264,9 +271,7 @@ void Fractal::DoUpdate(uint32_t pass)
 	switch (pass)
 	{
 	case 0:
-		render_buffer_->Attach(FrameBuffer::ATT_Color0, rendered_tex_[!odd]->CreateRenderView(0));
-
-		renderEngine.BindRenderTarget(render_buffer_);
+		renderEngine.BindRenderTarget(render_buffer_[!odd]);
 		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 		checked_cast<RenderFractal*>(renderFractal_.get())->SetTexture(rendered_tex_[odd]);

@@ -13,11 +13,13 @@
 #ifndef _D3D9RENDERVIEW_HPP
 #define _D3D9RENDERVIEW_HPP
 
+#include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderView.hpp>
 #include <KlayGE/Texture.hpp>
 
+#include <boost/utility.hpp>
+
 #include <KlayGE/D3D9/D3D9Typedefs.hpp>
-#include <KlayGE/D3D9/D3D9Texture.hpp>
 #include <KlayGE/D3D9/D3D9Resource.hpp>
 
 #ifdef KLAYGE_DEBUG
@@ -28,6 +30,10 @@
 
 namespace KlayGE
 {
+	class D3D9Texture1D;
+	class D3D9Texture2D;
+	class D3D9TextureCube;
+
 	class D3D9RenderView : public RenderView, public D3D9Resource
 	{
 	public:
@@ -50,8 +56,8 @@ namespace KlayGE
 	public:
 		D3D9Texture1DRenderView(Texture& texture_1d, int level);
 
-		void OnAttached(FrameBuffer& fb, uint32_t n);
-		void OnDetached(FrameBuffer& fb, uint32_t n);
+		void OnAttached(FrameBuffer& fb, uint32_t att);
+		void OnDetached(FrameBuffer& fb, uint32_t att);
 
 	private:
 		void DoOnLostDevice();
@@ -70,8 +76,8 @@ namespace KlayGE
 	public:
 		D3D9Texture2DRenderView(Texture& texture_2d, int level);
 
-		void OnAttached(FrameBuffer& fb, uint32_t n);
-		void OnDetached(FrameBuffer& fb, uint32_t n);
+		void OnAttached(FrameBuffer& fb, uint32_t att);
+		void OnDetached(FrameBuffer& fb, uint32_t att);
 
 	private:
 		void DoOnLostDevice();
@@ -90,8 +96,8 @@ namespace KlayGE
 	public:
 		D3D9TextureCubeRenderView(Texture& texture_cube, Texture::CubeFaces face, int level);
 
-		void OnAttached(FrameBuffer& fb, uint32_t n);
-		void OnDetached(FrameBuffer& fb, uint32_t n);
+		void OnAttached(FrameBuffer& fb, uint32_t att);
+		void OnDetached(FrameBuffer& fb, uint32_t att);
 
 	private:
 		void DoOnLostDevice();
@@ -112,8 +118,8 @@ namespace KlayGE
 		D3D9GraphicsBufferRenderView(GraphicsBuffer& gb,
 							uint32_t width, uint32_t height, PixelFormat pf);
 
-		void OnAttached(FrameBuffer& fb, uint32_t n);
-		void OnDetached(FrameBuffer& fb, uint32_t n);
+		void OnAttached(FrameBuffer& fb, uint32_t att);
+		void OnDetached(FrameBuffer& fb, uint32_t att);
 
 	private:
 		ID3D9SurfacePtr CreateGBSurface(D3DPOOL pool);

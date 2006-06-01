@@ -48,8 +48,8 @@ namespace KlayGE
 	public:
 		OGLTexture1DRenderView(Texture& texture_1d, int level);
 
-		void OnAttached(FrameBuffer& fb, uint32_t n);
-		void OnDetached(FrameBuffer& fb, uint32_t n);
+		void OnAttached(FrameBuffer& fb, uint32_t att);
+		void OnDetached(FrameBuffer& fb, uint32_t att);
 
 	private:
 		OGLTexture1D& texture_1d_;
@@ -64,8 +64,8 @@ namespace KlayGE
 	public:
 		OGLTexture2DRenderView(Texture& texture_2d, int level);
 
-		void OnAttached(FrameBuffer& fb, uint32_t n);
-		void OnDetached(FrameBuffer& fb, uint32_t n);
+		void OnAttached(FrameBuffer& fb, uint32_t att);
+		void OnDetached(FrameBuffer& fb, uint32_t att);
 
 	private:
 		OGLTexture2D& texture_2d_;
@@ -80,8 +80,8 @@ namespace KlayGE
 	public:
 		OGLTextureCubeRenderView(Texture& texture_cube, Texture::CubeFaces face, int level);
 
-		void OnAttached(FrameBuffer& fb, uint32_t n);
-		void OnDetached(FrameBuffer& fb, uint32_t n);
+		void OnAttached(FrameBuffer& fb, uint32_t att);
+		void OnDetached(FrameBuffer& fb, uint32_t att);
 
 	private:
 		OGLTextureCube& texture_cube_;
@@ -98,8 +98,8 @@ namespace KlayGE
 		OGLGraphicsBufferRenderView(GraphicsBuffer& gb,
 							uint32_t width, uint32_t height, PixelFormat pf);
 
-		void OnAttached(FrameBuffer& fb, uint32_t n);
-		void OnDetached(FrameBuffer& fb, uint32_t n);
+		void OnAttached(FrameBuffer& fb, uint32_t att);
+		void OnDetached(FrameBuffer& fb, uint32_t att);
 
 	private:
 		GraphicsBuffer& gbuffer_;

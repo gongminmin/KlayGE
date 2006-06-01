@@ -25,6 +25,7 @@
 #include <dxerr9.h>
 
 #include <KlayGE/D3D9/D3D9Typedefs.hpp>
+#include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9Mapping.hpp>
 #include <KlayGE/D3D9/D3D9RenderView.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>

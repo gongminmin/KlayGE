@@ -37,6 +37,7 @@
 #include <KlayGE/D3D9/D3D9FrameBuffer.hpp>
 #include <KlayGE/D3D9/D3D9RenderEffect.hpp>
 #include <KlayGE/D3D9/D3D9GraphicsBuffer.hpp>
+#include <KlayGE/D3D9/D3D9RenderView.hpp>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_RenderEngine_D3D9_d.lib")
@@ -49,7 +50,7 @@ namespace KlayGE
 	RenderFactory& D3D9RenderFactoryInstance();
 
 	typedef ConcreteRenderFactory<D3D9RenderEngine, D3D9Texture, D3D9FrameBuffer,
-			D3D9RenderEffect> D3D9RenderFactoryBase;
+			D3D9RenderEffect, D3D9RenderView> D3D9RenderFactoryBase;
 
 	class D3D9RenderFactory : public D3D9RenderFactoryBase
 	{
@@ -71,6 +72,11 @@ namespace KlayGE
 		GraphicsBufferPtr MakeIndexBuffer(BufferUsage usage);
 
 		QueryPtr MakeOcclusionQuery();
+
+		RenderViewPtr Make1DRenderView(Texture& texture, int level);
+		RenderViewPtr Make2DRenderView(Texture& texture, int level);
+		RenderViewPtr Make2DRenderView(Texture& texture, Texture::CubeFaces face, int level);
+		RenderViewPtr MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer, uint32_t width, uint32_t height);
 
 		void OnLostDevice();
 		void OnResetDevice();

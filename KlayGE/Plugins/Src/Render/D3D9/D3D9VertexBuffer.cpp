@@ -26,7 +26,7 @@
 namespace KlayGE
 {
 	D3D9VertexBuffer::D3D9VertexBuffer(BufferUsage usage)
-			: GraphicsBuffer(usage)
+			: D3D9GraphicsBuffer(usage)
 	{
 	}
 
@@ -87,9 +87,9 @@ namespace KlayGE
 		buffer_->Unlock();
 	}
 
-	RenderViewPtr D3D9VertexBuffer::CreateRenderView(uint32_t width, uint32_t height)
+	D3D9RenderViewPtr D3D9VertexBuffer::CreateRenderView(uint32_t width, uint32_t height)
 	{
-		return RenderViewPtr(new D3D9GraphicsBufferRenderView(*this, width, height, PF_ABGR32F));
+		return D3D9RenderViewPtr(new D3D9GraphicsBufferRenderView(*this, width, height, PF_ABGR32F));
 	}
 
 	boost::shared_ptr<IDirect3DVertexBuffer9> D3D9VertexBuffer::D3D9Buffer() const

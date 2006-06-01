@@ -936,15 +936,6 @@ namespace KlayGE
 		void BuildMipSubLevels()
 		{
 		}
-
-		RenderViewPtr CreateRenderView(int /*level*/)
-		{
-			return RenderView::NullObject();
-		}
-		RenderViewPtr CreateRenderView(CubeFaces /*face*/, int /*level*/)
-		{
-			return RenderView::NullObject();
-		}		
 	};
 
 

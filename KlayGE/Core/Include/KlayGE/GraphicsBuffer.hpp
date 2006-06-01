@@ -115,8 +115,6 @@ namespace KlayGE
 
 		void CopyToBuffer(GraphicsBuffer& rhs);
 
-		virtual RenderViewPtr CreateRenderView(uint32_t width, uint32_t height) = 0;
-
 	private:
 		virtual void DoResize() = 0;
 

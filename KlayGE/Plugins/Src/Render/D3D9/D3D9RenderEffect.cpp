@@ -35,6 +35,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include <functional>
 
+#include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 #include <KlayGE/D3D9/D3D9RenderEffect.hpp>
 

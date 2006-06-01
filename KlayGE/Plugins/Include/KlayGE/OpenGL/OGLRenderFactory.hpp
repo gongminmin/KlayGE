@@ -23,6 +23,7 @@
 #include <KlayGE/OpenGL/OGLRenderLayout.hpp>
 #include <KlayGE/OpenGL/OGLGraphicsBuffer.hpp>
 #include <KlayGE/OpenGL/OGLOcclusionQuery.hpp>
+#include <KlayGE/OpenGL/OGLRenderView.hpp>
 
 #define NOMINMAX
 #include <windows.h>
@@ -43,7 +44,7 @@ namespace KlayGE
 	RenderFactory& OGLRenderFactoryInstance();
 
 	typedef ConcreteRenderFactory<OGLRenderEngine, OGLTexture, OGLFrameBuffer,
-				OGLRenderEffect> OGLRenderFactoryBase;
+				OGLRenderEffect, OGLRenderView> OGLRenderFactoryBase;
 
 	class OGLRenderFactory : public OGLRenderFactoryBase
 	{
@@ -70,6 +71,11 @@ namespace KlayGE
 		GraphicsBufferPtr MakeIndexBuffer(BufferUsage usage);
 
 		QueryPtr MakeOcclusionQuery();
+
+		RenderViewPtr Make1DRenderView(Texture& texture, int level);
+		RenderViewPtr Make2DRenderView(Texture& texture, int level);
+		RenderViewPtr Make2DRenderView(Texture& texture, Texture::CubeFaces face, int level);
+		RenderViewPtr MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer, uint32_t width, uint32_t height);
 
 	private:
 		CGcontext context_;

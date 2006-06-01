@@ -19,6 +19,7 @@
 
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/D3D9/D3D9Resource.hpp>
+#include <KlayGE/D3D9/D3D9RenderView.hpp>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_RenderEngine_D3D9_d.lib")
@@ -28,7 +29,24 @@
 
 namespace KlayGE
 {
-	class D3D9IndexBuffer : public GraphicsBuffer, public D3D9Resource
+	class D3D9GraphicsBuffer : public GraphicsBuffer, public D3D9Resource
+	{
+	public:
+		explicit D3D9GraphicsBuffer(BufferUsage usage)
+			: GraphicsBuffer(usage)
+		{
+		}
+
+		virtual ~D3D9GraphicsBuffer()
+		{
+		}
+
+		virtual D3D9RenderViewPtr CreateRenderView(uint32_t width, uint32_t height) = 0;
+	};
+	typedef boost::shared_ptr<D3D9GraphicsBuffer> D3D9GraphicsBufferPtr;
+
+
+	class D3D9IndexBuffer : public D3D9GraphicsBuffer
 	{
 	public:
 		explicit D3D9IndexBuffer(BufferUsage usage);
@@ -36,7 +54,7 @@ namespace KlayGE
 		void* Map(BufferAccess ba);
 		void Unmap();
 
-		RenderViewPtr CreateRenderView(uint32_t width, uint32_t height);
+		D3D9RenderViewPtr CreateRenderView(uint32_t width, uint32_t height);
 
 		boost::shared_ptr<IDirect3DIndexBuffer9> D3D9Buffer() const;
 		void SwitchFormat(IndexFormat format);
@@ -56,7 +74,8 @@ namespace KlayGE
 	};
 	typedef boost::shared_ptr<D3D9IndexBuffer> D3D9IndexBufferPtr;
 
-	class D3D9VertexBuffer : public GraphicsBuffer, public D3D9Resource
+
+	class D3D9VertexBuffer : public D3D9GraphicsBuffer
 	{
 	public:
 		explicit D3D9VertexBuffer(BufferUsage usage);
@@ -64,7 +83,7 @@ namespace KlayGE
 		void* Map(BufferAccess ba);
 		void Unmap();
 
-		RenderViewPtr CreateRenderView(uint32_t width, uint32_t height);
+		D3D9RenderViewPtr CreateRenderView(uint32_t width, uint32_t height);
 
 		boost::shared_ptr<IDirect3DVertexBuffer9> D3D9Buffer() const;
 

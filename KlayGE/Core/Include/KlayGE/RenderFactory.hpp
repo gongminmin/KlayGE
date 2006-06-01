@@ -62,6 +62,11 @@ namespace KlayGE
 
 		virtual QueryPtr MakeOcclusionQuery() = 0;
 
+		virtual RenderViewPtr Make1DRenderView(Texture& texture, int level) = 0;
+		virtual RenderViewPtr Make2DRenderView(Texture& texture, int level) = 0;
+		virtual RenderViewPtr Make2DRenderView(Texture& texture, Texture::CubeFaces face, int level) = 0;
+		virtual RenderViewPtr MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer, uint32_t width, uint32_t height) = 0;
+
 	private:
 		virtual RenderEffectPtr DoMakeRenderEffect(std::string const & effectData) = 0;
 
@@ -71,7 +76,7 @@ namespace KlayGE
 	};
 
 	template <typename RenderEngineType, typename TextureType, typename FrameBufferType,
-		typename RenderEffectType>
+		typename RenderEffectType, typename RenderViewType>
 	class ConcreteRenderFactory : boost::noncopyable, public RenderFactory
 	{
 	public:
