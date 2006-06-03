@@ -36,7 +36,7 @@ namespace KlayGE
 	public:
 		virtual ~Renderable();
 
-		virtual RenderEffectPtr GetRenderEffect() const = 0;
+		virtual RenderTechniquePtr GetRenderTechnique() const = 0;
 		virtual RenderLayoutPtr GetRenderLayout() const = 0;
 		virtual std::wstring const & Name() const = 0;
 

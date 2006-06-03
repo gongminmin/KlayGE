@@ -39,9 +39,9 @@ namespace KlayGE
 	{
 	}
 
-	RenderEffectPtr RenderableHelper::GetRenderEffect() const
+	RenderTechniquePtr RenderableHelper::GetRenderTechnique() const
 	{
-		return effect_;
+		return technique_;
 	}
 
 	RenderLayoutPtr RenderableHelper::GetRenderLayout() const
@@ -66,8 +66,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		effect_ = rf.LoadEffect("RenderableHelper.fx");
-		effect_->ActiveTechnique("PointTec");
+		technique_ = rf.LoadEffect("RenderableHelper.fx")->Technique("PointTec");
 
 		rl_ = rf.MakeRenderLayout(RenderLayout::BT_PointList);
 
@@ -88,9 +87,9 @@ namespace KlayGE
 		Camera const & camera = app.ActiveCamera();
 
 		Matrix4 view_proj = camera.ViewMatrix() * camera.ProjMatrix();
-		*(effect_->ParameterByName("matViewProj")) = view_proj;
+		*(technique_->Effect().ParameterByName("matViewProj")) = view_proj;
 
-		*(effect_->ParameterByName("color")) = clr_;
+		*(technique_->Effect().ParameterByName("color")) = clr_;
 	}
 
 
@@ -100,8 +99,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		effect_ = rf.LoadEffect("RenderableHelper.fx");
-		effect_->ActiveTechnique("LineTec");
+		technique_ = rf.LoadEffect("RenderableHelper.fx")->Technique("LineTec");
 
 		Vector3 xyzs[] =
 		{
@@ -127,9 +125,9 @@ namespace KlayGE
 		Camera const & camera = app.ActiveCamera();
 
 		Matrix4 view_proj = camera.ViewMatrix() * camera.ProjMatrix();
-		*(effect_->ParameterByName("matViewProj")) = view_proj;
+		*(technique_->Effect().ParameterByName("matViewProj")) = view_proj;
 
-		*(effect_->ParameterByName("color")) = clr_;
+		*(technique_->Effect().ParameterByName("color")) = clr_;
 	}
 
 
@@ -139,8 +137,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		effect_ = rf.LoadEffect("RenderableHelper.fx");
-		effect_->ActiveTechnique("TriangleTec");
+		technique_ = rf.LoadEffect("RenderableHelper.fx")->Technique("TriangleTec");
 
 		Vector3 xyzs[] =
 		{
@@ -166,9 +163,9 @@ namespace KlayGE
 		Camera const & camera = app.ActiveCamera();
 
 		Matrix4 view_proj = camera.ViewMatrix() * camera.ProjMatrix();
-		*(effect_->ParameterByName("matViewProj")) = view_proj;
+		*(technique_->Effect().ParameterByName("matViewProj")) = view_proj;
 
-		*(effect_->ParameterByName("color")) = clr_;
+		*(technique_->Effect().ParameterByName("color")) = clr_;
 	}
 
 
@@ -180,8 +177,7 @@ namespace KlayGE
 
 		box_ = box;
 
-		effect_ = rf.LoadEffect("RenderableHelper.fx");
-		effect_->ActiveTechnique("BoxTec");
+		technique_ = rf.LoadEffect("RenderableHelper.fx")->Technique("BoxTec");
 
 		Vector3 xyzs[] =
 		{
@@ -223,9 +219,9 @@ namespace KlayGE
 		Camera const & camera = app.ActiveCamera();
 
 		Matrix4 view_proj = camera.ViewMatrix() * camera.ProjMatrix();
-		*(effect_->ParameterByName("matViewProj")) = view_proj;
+		*(technique_->Effect().ParameterByName("matViewProj")) = view_proj;
 
-		*(effect_->ParameterByName("color")) = clr_;
+		*(technique_->Effect().ParameterByName("color")) = clr_;
 	}
 
 
@@ -235,8 +231,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		effect_ = rf.LoadEffect("RenderableHelper.fx");
-		effect_->ActiveTechnique("SkyBoxTec");
+		technique_ = rf.LoadEffect("RenderableHelper.fx")->Technique("SkyBoxTec");
 
 		Vector3 xyzs[] =
 		{
@@ -275,7 +270,7 @@ namespace KlayGE
 		cube_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
 		cube_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
 		cube_sampler_->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
-		*(effect_->ParameterByName("skybox_cubeMapSampler")) = cube_sampler_;
+		*(technique_->Effect().ParameterByName("skybox_cubeMapSampler")) = cube_sampler_;
 	}
 
 	void RenderableSkyBox::CubeMap(TexturePtr const & cube)
@@ -292,7 +287,7 @@ namespace KlayGE
 		rot_view(3, 0) = 0;
 		rot_view(3, 1) = 0;
 		rot_view(3, 2) = 0;
-		*(effect_->ParameterByName("inv_mvp")) = MathLib::Inverse(rot_view * camera.ProjMatrix());
+		*(technique_->Effect().ParameterByName("inv_mvp")) = MathLib::Inverse(rot_view * camera.ProjMatrix());
 	}
 
 	RenderablePlane::RenderablePlane(float length, float width,

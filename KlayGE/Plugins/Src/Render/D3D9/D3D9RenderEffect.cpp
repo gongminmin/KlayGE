@@ -169,24 +169,6 @@ namespace KlayGE
 		return RenderEffectParameterPtr();
 	}
 
-	uint32_t D3D9RenderEffect::DoBegin(uint32_t flags)
-	{
-		UINT passes;
-		TIF(d3dx_effect_->Begin(&passes, D3DXFX_DONOTSAVESAMPLERSTATE | flags));
-		return passes;
-	}
-
-	void D3D9RenderEffect::DoEnd()
-	{
-		TIF(d3dx_effect_->End());
-	}
-
-	void D3D9RenderEffect::DoActiveTechnique()
-	{
-		RenderTechniquePtr tech = ActiveTechnique();
-		static_cast<D3D9RenderTechnique&>(*tech).Active();
-	}
-
 	void D3D9RenderEffect::DoOnLostDevice()
 	{
 		for (params_type::iterator iter = params_.begin(); iter != params_.end(); ++ iter)
@@ -250,9 +232,18 @@ namespace KlayGE
 		return SUCCEEDED(static_cast<D3D9RenderEffect&>(effect_).D3DXEffect()->ValidateTechnique(tech_));
 	}
 
-	void D3D9RenderTechnique::Active()
+	uint32_t D3D9RenderTechnique::DoBegin(uint32_t flags)
 	{
 		TIF(static_cast<D3D9RenderEffect&>(effect_).D3DXEffect()->SetTechnique(tech_));
+
+		UINT passes;
+		TIF(static_cast<D3D9RenderEffect&>(effect_).D3DXEffect()->Begin(&passes, D3DXFX_DONOTSAVESAMPLERSTATE | flags));
+		return passes;
+	}
+
+	void D3D9RenderTechnique::DoEnd()
+	{
+		TIF(static_cast<D3D9RenderEffect&>(effect_).D3DXEffect()->End());
 	}
 
 	RenderPassPtr D3D9RenderTechnique::MakeRenderPass(uint32_t n)

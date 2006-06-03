@@ -62,7 +62,6 @@ namespace KlayGE
 		typedef std::vector<RenderTechniquePtr> techniques_type;
 		
 	public:
-		RenderEffect();
 		virtual ~RenderEffect()
 			{ }
 
@@ -72,31 +71,29 @@ namespace KlayGE
 		RenderEffectParameterPtr ParameterBySemantic(std::string const & semantic);
 
 		bool ValidateTechnique(std::string const & name);
-		void ActiveTechnique(std::string const & name);
-		RenderTechniquePtr ActiveTechnique() const;
 
-		uint32_t Begin(uint32_t flags = 0);
-		void End();
+		uint32_t NumTechniques() const
+		{
+			return static_cast<uint32_t>(techniques_.size());
+		}
+		RenderTechniquePtr Technique(std::string const & name);
+		RenderTechniquePtr Technique(uint32_t n) const
+		{
+			BOOST_ASSERT(n < techniques_.size());
+			return techniques_[n];
+		}
 
 		void DirtyParam(std::string const & name);
+		void FlushParams();
 
 	private:
 		virtual std::string DoNameBySemantic(std::string const & semantic) = 0;
 		virtual RenderEffectParameterPtr DoParameterByName(std::string const & name) = 0;
 
-		virtual uint32_t DoBegin(uint32_t flags) = 0;
-		virtual void DoEnd() = 0;
-
-		virtual void DoActiveTechnique() = 0;
-
-	protected:
-		techniques_type::iterator TechniqueByName(std::string const & name);
-
 	protected:
 		params_type params_;
 
 		techniques_type techniques_;
-		int32_t active_tech_;
 	};
 
 	class RenderTechnique
@@ -110,9 +107,16 @@ namespace KlayGE
 		{
 		}
 
+		static RenderTechniquePtr NullObject();
+
 		std::string const & Name() const
 		{
 			return name_;
+		}
+
+		RenderEffect& Effect() const
+		{
+			return effect_;
 		}
 
 		uint32_t NumPasses() const
@@ -125,7 +129,14 @@ namespace KlayGE
 			return passes_[n];
 		}
 
+		uint32_t Begin(uint32_t flags = 0);
+		void End();
+
 		virtual bool Validate() = 0;
+
+	private:
+		virtual uint32_t DoBegin(uint32_t flags) = 0;
+		virtual void DoEnd() = 0;
 
 	protected:
 		std::string name_;

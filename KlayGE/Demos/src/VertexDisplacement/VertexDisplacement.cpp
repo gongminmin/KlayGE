@@ -42,24 +42,34 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("VertexDisplacement.fx");
-			effect_->ActiveTechnique("VertexDisplacement");
+			technique_ = rf.LoadEffect("VertexDisplacement.fx")->Technique("VertexDisplacement");
 
 			SamplerPtr flag_sampler(new Sampler);
 			flag_sampler->SetTexture(LoadTexture("Flag.dds"));
 			flag_sampler->Filtering(Sampler::TFO_Bilinear);
 			flag_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
 			flag_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
-			*(effect_->ParameterByName("flagSampler")) = flag_sampler;
+			*(technique_->Effect().ParameterByName("flagSampler")) = flag_sampler;
 		}
 
 		void OnRenderBegin()
 		{
 			float currentAngle(clock() / 400.0f);
-			*(effect_->ParameterByName("currentAngle")) = currentAngle;
+			*(technique_->Effect().ParameterByName("currentAngle")) = currentAngle;
 
-			*(effect_->ParameterByName("half_length")) = LENGTH / 2.0f;
-			*(effect_->ParameterByName("half_width")) = WIDTH / 2.0f;
+			*(technique_->Effect().ParameterByName("half_length")) = LENGTH / 2.0f;
+			*(technique_->Effect().ParameterByName("half_width")) = WIDTH / 2.0f;
+
+			App3DFramework const & app = Context::Instance().AppInstance();
+
+			Matrix4 view = app.ActiveCamera().ViewMatrix();
+			Matrix4 proj = app.ActiveCamera().ProjMatrix();
+			Matrix4 modelView = Matrix4::Identity() * view;
+
+			*(technique_->Effect().ParameterByName("modelview")) = modelView;
+			*(technique_->Effect().ParameterByName("proj")) = proj;
+
+			*(technique_->Effect().ParameterByName("modelviewIT")) = MathLib::Transpose(MathLib::Inverse(modelView));
 		}
 	};
 
@@ -162,15 +172,6 @@ void VertexDisplacement::InputHandler(InputEngine const & sender, InputAction co
 void VertexDisplacement::DoUpdate(uint32_t pass)
 {
 	fpcController_.Update();
-
-	Matrix4 view = this->ActiveCamera().ViewMatrix();
-	Matrix4 proj = this->ActiveCamera().ProjMatrix();
-	Matrix4 modelView = flag_->GetModelMatrix() * view;
-
-	*(flag_->GetRenderable()->GetRenderEffect()->ParameterByName("modelview")) = modelView;
-	*(flag_->GetRenderable()->GetRenderEffect()->ParameterByName("proj")) = proj;
-
-	*(flag_->GetRenderable()->GetRenderEffect()->ParameterByName("modelviewIT")) = MathLib::Transpose(MathLib::Inverse(modelView));
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);

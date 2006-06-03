@@ -36,9 +36,6 @@ namespace KlayGE
 	public:
 		D3D9FrameBuffer();
 
-		void Attach(uint32_t att, RenderViewPtr view);
-		void Detach(uint32_t att);
-
 		ID3D9SurfacePtr D3DRenderSurface(uint32_t n) const;
 		ID3D9SurfacePtr D3DRenderZBuffer() const;
 

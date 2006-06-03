@@ -68,11 +68,11 @@ namespace
 
 					model_mat_ = MathLib::RotationX(rotX) * MathLib::RotationY(rotY);
 				}
-				effect_->ActiveTechnique("NormalDepth");
+				technique_ = effect_->Technique("NormalDepth");
 				break;
 
 			case 1:
-				effect_->ActiveTechnique("Cartoon");
+				technique_ = effect_->Technique("Cartoon");
 				break;
 			}
 		}
@@ -104,6 +104,8 @@ namespace
 		SamplerPtr normal_depth_sampler_;
 
 		Matrix4 model_mat_;
+
+		RenderEffectPtr effect_;
 	};
 
 	class TorusObject : public SceneObjectHelper
@@ -199,7 +201,7 @@ void Cartoon::OnResize(uint32_t width, uint32_t height)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	normal_depth_tex_ = rf.MakeTexture2D(width, height, 1, PF_ABGR16F);
 	normal_depth_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*normal_depth_tex_, 0));
-	normal_depth_buffer_->Attach(FrameBuffer::ATT_Depth, rf.MakeDepthStencilRenderView(width, height, PF_D16, 0));
+	normal_depth_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, PF_D16, 0));
 }
 
 void Cartoon::InputHandler(InputEngine const & sender, InputAction const & action)

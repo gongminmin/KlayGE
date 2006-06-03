@@ -78,14 +78,16 @@ namespace KlayGE
 	class OGLTexture3DRenderView : public OGLRenderView, boost::noncopyable
 	{
 	public:
-		OGLTexture3DRenderView(Texture& texture_3d, int slice, int level);
+		OGLTexture3DRenderView(Texture& texture_3d, uint32_t slice, int level);
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
 
+		void OnUnbind(FrameBuffer& fb, uint32_t att);
+
 	private:
 		OGLTexture3D& texture_3d_;
-		int slice_;
+		uint32_t slice_;
 		int level_;
 	};
 
@@ -118,6 +120,8 @@ namespace KlayGE
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
+
+		void OnUnbind(FrameBuffer& fb, uint32_t att);
 
 	private:
 		GraphicsBuffer& gbuffer_;

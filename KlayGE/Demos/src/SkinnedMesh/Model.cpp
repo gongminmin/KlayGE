@@ -22,8 +22,7 @@ MD5SkinnedMesh::MD5SkinnedMesh(boost::shared_ptr<MD5SkinnedModel> model)
 		world_(Matrix4::Identity()),
 		model_(model)
 {
-	effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("SkinnedMesh.fx");
-	effect_->ActiveTechnique("SkinnedMeshTech");
+	technique_ = Context::Instance().RenderFactoryInstance().LoadEffect("SkinnedMesh.fx")->Technique("SkinnedMeshTech");
 
 	diffuse_map_.reset(new Sampler);
 	diffuse_map_->Filtering(Sampler::TFO_Bilinear);
@@ -45,16 +44,16 @@ void MD5SkinnedMesh::OnRenderBegin()
 {
 	App3DFramework& app = Context::Instance().AppInstance();
 	Matrix4 worldview(world_ * app.ActiveCamera().ViewMatrix());
-	*(effect_->ParameterByName("worldviewproj")) = worldview * app.ActiveCamera().ProjMatrix();
+	*(technique_->Effect().ParameterByName("worldviewproj")) = worldview * app.ActiveCamera().ProjMatrix();
 
-	*(effect_->ParameterByName("diffuse_map")) = diffuse_map_;
-	*(effect_->ParameterByName("normal_map")) = normal_map_;
-	*(effect_->ParameterByName("specular_map")) = specular_map_;
+	*(technique_->Effect().ParameterByName("diffuse_map")) = diffuse_map_;
+	*(technique_->Effect().ParameterByName("normal_map")) = normal_map_;
+	*(technique_->Effect().ParameterByName("specular_map")) = specular_map_;
 
-	*(effect_->ParameterByName("joint_rots")) = model_->GetBindRotations();
-	*(effect_->ParameterByName("joint_poss")) = model_->GetBindPositions();
+	*(technique_->Effect().ParameterByName("joint_rots")) = model_->GetBindRotations();
+	*(technique_->Effect().ParameterByName("joint_poss")) = model_->GetBindPositions();
 
-	*(effect_->ParameterByName("eye_pos")) = eye_pos_;
+	*(technique_->Effect().ParameterByName("eye_pos")) = eye_pos_;
 }
 
 void MD5SkinnedMesh::SetWorld(const Matrix4& mat)
@@ -84,14 +83,14 @@ void MD5SkinnedMesh::BuildRenderable()
 			xyzs_.begin(), xyzs_.end(),
 			multi_tex_coords_[0].begin());
 		GraphicsBufferPtr tan = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(BU_Static);
-		tan->Resize(t.size() * sizeof(t[0]));
+		tan->Resize(static_cast<uint32_t>(t.size() * sizeof(t[0])));
 		{
 			GraphicsBuffer::Mapper mapper(*tan, BA_Write_Only);
 			std::copy(t.begin(), t.end(), mapper.Pointer<Vector3>());
 		}
 		rl_->BindVertexStream(tan, boost::make_tuple(vertex_element(VEU_TextureCoord, 1, sizeof(float), 3)));
 		GraphicsBufferPtr bn = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(BU_Static);
-		bn->Resize(b.size() * sizeof(b[0]));
+		bn->Resize(static_cast<uint32_t>(b.size() * sizeof(b[0])));
 		{
 			GraphicsBuffer::Mapper mapper(*bn, BA_Write_Only);
 			std::copy(b.begin(), b.end(), mapper.Pointer<Vector3>());

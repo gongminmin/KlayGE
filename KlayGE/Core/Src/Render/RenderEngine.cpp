@@ -112,7 +112,7 @@ namespace KlayGE
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderEngine::RenderEngine()
-		: renderEffect_(RenderEffect::NullObject())
+		: render_tech_(RenderTechnique::NullObject())
 	{
 	}
 
@@ -134,6 +134,11 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void RenderEngine::BindRenderTarget(RenderTargetPtr rt)
 	{
+		if (cur_render_target_)
+		{
+			cur_render_target_->OnUnbind();
+		}
+
 		if (!rt)
 		{
 			cur_render_target_ = default_render_window_;
@@ -142,6 +147,8 @@ namespace KlayGE
 		{
 			cur_render_target_ = rt;
 		}
+
+		cur_render_target_->OnBind();
 
 		this->DoBindRenderTarget(cur_render_target_);
 	}
@@ -155,16 +162,16 @@ namespace KlayGE
 
 	// 设置渲染特效
 	/////////////////////////////////////////////////////////////////////////////////
-	void RenderEngine::SetRenderEffect(RenderEffectPtr const & effect)
+	void RenderEngine::SetRenderTechnique(RenderTechniquePtr const & tech)
 	{
-		renderEffect_ = (!effect) ? RenderEffect::NullObject() : effect;
+		render_tech_ = (!tech) ? RenderTechnique::NullObject() : tech;
 	}
 
 	// 获取渲染特效
 	/////////////////////////////////////////////////////////////////////////////////
-	RenderEffectPtr RenderEngine::GetRenderEffect() const
+	RenderTechniquePtr RenderEngine::GetRenderTechnique() const
 	{
-		return renderEffect_;
+		return render_tech_;
 	}
 
 	// 设置渲染状态
@@ -193,9 +200,9 @@ namespace KlayGE
 	{
 		this->DoFlushRenderStates();
 
-		renderEffect_->Begin();
+		render_tech_->Begin();
 		this->DoRender(rl);
-		renderEffect_->End();
+		render_tech_->End();
 	}
 
 	// 上次Render()所渲染的图元数

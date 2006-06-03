@@ -155,7 +155,7 @@ namespace
 
 			if (!three_dim_)
 			{
-				effect_->ActiveTechnique("Font2DTec");
+				technique_ = effect_->Technique("Font2DTec");
 			
 				RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				Viewport const & viewport(renderEngine.CurRenderTarget()->GetViewport());
@@ -164,7 +164,7 @@ namespace
 			}
 			else
 			{
-				effect_->ActiveTechnique("Font3DTec");
+				technique_ = effect_->Technique("Font3DTec");
 
 				*(effect_->ParameterByName("mvp")) = mvp_;
 			}
@@ -420,6 +420,8 @@ namespace
 		::FT_Library	ftLib_;
 		::FT_Face		face_;
 		::FT_GlyphSlot	slot_;
+
+		RenderEffectPtr	effect_;
 	};
 
 	class FontObject : public SceneObjectHelper

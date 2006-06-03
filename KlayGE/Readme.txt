@@ -80,6 +80,7 @@ Font支持渲染到3D位置
 统一了渲染引擎的状态设置
 只支持OpenGL 2.0
 增加了FrameBuffer和RenderView的结构
+使用以technique为单位的渲染
 
 3.2.0 (2006.5.15)
 增加了高精度计时器

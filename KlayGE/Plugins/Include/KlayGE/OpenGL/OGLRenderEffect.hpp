@@ -45,11 +45,6 @@ namespace KlayGE
 		std::string DoNameBySemantic(std::string const & semantic);
 		RenderEffectParameterPtr DoParameterByName(std::string const & name);
 
-		uint32_t DoBegin(uint32_t flags);
-		void DoEnd();
-
-		void DoActiveTechnique();
-
 		RenderTechniquePtr MakeRenderTechnique(CGtechnique tech);
 
 	private:
@@ -65,6 +60,9 @@ namespace KlayGE
 
 	private:
 		RenderPassPtr MakeRenderPass(uint32_t index, CGpass pass);
+
+		uint32_t DoBegin(uint32_t flags);
+		void DoEnd();
 
 	private:
 		CGtechnique technique_;

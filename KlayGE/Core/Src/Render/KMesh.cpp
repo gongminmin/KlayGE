@@ -36,28 +36,29 @@ namespace KlayGE
 							model_(Matrix4::Identity())
 	{
 		// ÔØÈëfx
+		RenderEffectPtr effect;
 		if (!ResLoader::Instance().Locate("KMesh.fx").empty())
 		{
-			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("KMesh.fx");
+			effect = Context::Instance().RenderFactoryInstance().LoadEffect("KMesh.fx");
 		}
 		else
 		{
-			effect_ = RenderEffect::NullObject();
+			effect = RenderEffect::NullObject();
 		}
 
 		if (tex)
 		{
+			technique_ = effect->Technique("KMeshTec");
+
 			sampler_->SetTexture(tex);
 			sampler_->Filtering(Sampler::TFO_Bilinear);
 			sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
 			sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
-			*(effect_->ParameterByName("texSampler")) = sampler_;
-
-			effect_->ActiveTechnique("KMeshTec");
+			*(technique_->Effect().ParameterByName("texSampler")) = sampler_;
 		}
 		else
 		{
-			effect_->ActiveTechnique("KMeshNoTexTec");
+			technique_ = effect->Technique("KMeshNoTexTec");
 		}
 	}
 
@@ -70,8 +71,8 @@ namespace KlayGE
 		App3DFramework const & app = Context::Instance().AppInstance();
 		Camera const & camera = app.ActiveCamera();
 
-		*(effect_->ParameterByName("modelviewproj")) = model_ * camera.ViewMatrix() * camera.ProjMatrix();
-		*(effect_->ParameterByName("modelIT")) = MathLib::Transpose(MathLib::Inverse(model_));
+		*(technique_->Effect().ParameterByName("modelviewproj")) = model_ * camera.ViewMatrix() * camera.ProjMatrix();
+		*(technique_->Effect().ParameterByName("modelIT")) = MathLib::Transpose(MathLib::Inverse(model_));
 	}
 
 	void KMesh::SetModelMatrix(Matrix4 const & model)

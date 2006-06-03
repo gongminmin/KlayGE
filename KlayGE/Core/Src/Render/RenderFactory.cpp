@@ -138,18 +138,6 @@ namespace KlayGE
 	{
 		RenderEffectPtr ret;
 
-		for (effect_pool_type::iterator iter = effect_pool_.begin(); iter != effect_pool_.end();)
-		{
-			if (!(iter->second.lock()))
-			{
-				iter = effect_pool_.erase(iter);
-			}
-			else
-			{
-				++ iter;
-			}
-		}
-
 		effect_pool_type::iterator eiter = effect_pool_.find(effectName);
 		if (eiter == effect_pool_.end())
 		{
@@ -163,7 +151,7 @@ namespace KlayGE
 			ret = this->DoMakeRenderEffect(std::string(data.begin(), data.end()));
 			if (ret)
 			{
-				effect_pool_.insert(std::make_pair(effectName, boost::weak_ptr<RenderEffect>(ret)));
+				effect_pool_.insert(std::make_pair(effectName, ret));
 			}
 		}
 		else

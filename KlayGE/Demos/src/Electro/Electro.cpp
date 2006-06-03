@@ -79,8 +79,7 @@ namespace
 			texture->CopyMemoryToTexture3D(0, &turbBuffer[0], PF_L8, XSIZE, YSIZE, ZSIZE, 0, 0, 0,
 				XSIZE, YSIZE, ZSIZE);
 
-			effect_ = rf.LoadEffect("Electro.fx");
-			effect_->ActiveTechnique("Electro");
+			technique_ = rf.LoadEffect("Electro.fx")->Technique("Electro");
 
 			SamplerPtr electro_sampler(new Sampler);
 			electro_sampler->SetTexture(texture);
@@ -88,7 +87,7 @@ namespace
 			electro_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
 			electro_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
 			electro_sampler->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Wrap);
-			*(effect_->ParameterByName("electroSampler")) = electro_sampler;
+			*(technique_->Effect().ParameterByName("electroSampler")) = electro_sampler;
 
 			Vector3 xyzs[] =
 			{
@@ -144,8 +143,8 @@ namespace
 		{
 			float const t = std::clock() * 0.0002f;
 
-			*(effect_->ParameterByName("y")) = t * 2;
-			*(effect_->ParameterByName("z")) = t;
+			*(technique_->Effect().ParameterByName("y")) = t * 2;
+			*(technique_->Effect().ParameterByName("z")) = t;
 		}
 	};
 

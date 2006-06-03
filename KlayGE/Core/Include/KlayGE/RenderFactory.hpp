@@ -73,7 +73,7 @@ namespace KlayGE
 		virtual RenderEffectPtr DoMakeRenderEffect(std::string const & effectData) = 0;
 
 	protected:
-		typedef std::map<std::string, boost::weak_ptr<RenderEffect> > effect_pool_type;
+		typedef std::map<std::string, RenderEffectPtr> effect_pool_type;
 		effect_pool_type effect_pool_;
 	};
 

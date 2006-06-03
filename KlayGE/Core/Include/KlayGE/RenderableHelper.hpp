@@ -36,7 +36,7 @@ namespace KlayGE
 		{
 		}
 
-		virtual RenderEffectPtr GetRenderEffect() const;
+		virtual RenderTechniquePtr GetRenderTechnique() const;
 		virtual RenderLayoutPtr GetRenderLayout() const;
 
 		virtual Box GetBound() const;
@@ -49,7 +49,7 @@ namespace KlayGE
 		Box box_;
 
 		RenderLayoutPtr rl_;
-		RenderEffectPtr effect_;
+		RenderTechniquePtr technique_;
 	};
 
 	class RenderablePoint : public RenderableHelper

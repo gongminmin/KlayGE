@@ -38,13 +38,13 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			effect_ = rf.LoadEffect("Fractal.fx");
+			technique_ = rf.LoadEffect("Fractal.fx")->Technique("Mandelbrot");
 
 			sampler_.reset(new Sampler);
 			sampler_->Filtering(Sampler::TFO_Point);
 			sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
 			sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
-			*(effect_->ParameterByName("fractal_sampler")) = sampler_;
+			*(technique_->Effect().ParameterByName("fractal_sampler")) = sampler_;
 
 			Vector3 xyzs[] =
 			{
@@ -101,11 +101,6 @@ namespace
 			sampler_->SetTexture(texture);
 		}
 
-		void OnRenderBegin()
-		{
-			effect_->ActiveTechnique("Mandelbrot");
-		}
-
 	private:
 		SamplerPtr sampler_;
 	};
@@ -118,13 +113,13 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			effect_ = rf.LoadEffect("Fractal.fx");
+			technique_ = rf.LoadEffect("Fractal.fx")->Technique("Show");
 
 			sampler_.reset(new Sampler);
 			sampler_->Filtering(Sampler::TFO_Point);
 			sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
 			sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
-			*(effect_->ParameterByName("fractal_sampler")) = sampler_;
+			*(technique_->Effect().ParameterByName("fractal_sampler")) = sampler_;
 
 			Vector3 xyzs[] =
 			{
@@ -179,11 +174,6 @@ namespace
 		void SetTexture(TexturePtr texture)
 		{
 			sampler_->SetTexture(texture);
-		}
-
-		void OnRenderBegin()
-		{
-			effect_->ActiveTechnique("Show");
 		}
 
 	private:

@@ -101,16 +101,16 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::AddRenderable(RenderablePtr const & obj)
 	{
-		RenderEffectPtr const & effect = obj->GetRenderEffect();
-		RenderQueueType::iterator iter = std::find_if(renderQueue_.begin(), renderQueue_.end(),
-			boost::bind(select1st<RenderQueueType::value_type>(), _1) == effect);
-		if (iter != renderQueue_.end())
+		RenderTechniquePtr const & tech = obj->GetRenderTechnique();
+		RenderQueueType::iterator iter = std::find_if(render_queue_.begin(), render_queue_.end(),
+			boost::bind(select1st<RenderQueueType::value_type>(), _1) == tech);
+		if (iter != render_queue_.end())
 		{
 			iter->second.push_back(obj);
 		}
 		else
 		{
-			renderQueue_.push_back(std::make_pair(effect, RenderItemsType(1, obj)));
+			render_queue_.push_back(std::make_pair(tech, RenderItemsType(1, obj)));
 		}
 	}
 
@@ -118,12 +118,17 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::Update()
 	{
+		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		renderEngine.BeginFrame();
+
 		App3DFramework& app = Context::Instance().AppInstance();
 		for (uint32_t i = 0; i < app.NumPasses(); ++ i)
 		{
 			app.Update(i);
 			this->Flush();
 		}
+
+		renderEngine.EndFrame();
 	}
 
 	// 把渲染队列中的物体渲染出来
@@ -170,12 +175,10 @@ namespace KlayGE
 			ra.AddToRenderQueue();
 		}
 
-		renderEngine.BeginFrame();
-
-		for (RenderQueueType::iterator queueIter = renderQueue_.begin();
-			queueIter != renderQueue_.end(); ++ queueIter)
+		for (RenderQueueType::iterator queueIter = render_queue_.begin();
+			queueIter != render_queue_.end(); ++ queueIter)
 		{
-			renderEngine.SetRenderEffect(queueIter->first);
+			renderEngine.SetRenderTechnique(queueIter->first);
 
 			for (RenderItemsType::iterator itemIter = queueIter->second.begin();
 				itemIter != queueIter->second.end(); ++ itemIter)
@@ -191,9 +194,7 @@ namespace KlayGE
 			}
 		}
 		visible_objs_.resize(0);
-		renderQueue_.resize(0);
-
-		renderEngine.EndFrame();
+		render_queue_.resize(0);
 
 		for (SceneObjectsType::iterator iter = scene_objs_.begin();
 			iter != scene_objs_.end();)

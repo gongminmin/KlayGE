@@ -74,11 +74,6 @@ namespace KlayGE
 		std::string DoNameBySemantic(std::string const & semantic);
 		RenderEffectParameterPtr DoParameterByName(std::string const & name);
 
-		uint32_t DoBegin(uint32_t flags);
-		void DoEnd();
-
-		void DoActiveTechnique();
-
 		RenderTechniquePtr MakeRenderTechnique(uint32_t n);
 
 	private:
@@ -91,10 +86,12 @@ namespace KlayGE
 		D3D9RenderTechnique(RenderEffect& effect, std::string const & name, D3DXHANDLE tech);
 
 		bool Validate();
-		void Active();
 
 	private:
 		RenderPassPtr MakeRenderPass(uint32_t n);
+
+		uint32_t DoBegin(uint32_t flags);
+		void DoEnd();
 
 	private:
 		D3DXHANDLE tech_;

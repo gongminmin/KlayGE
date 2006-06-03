@@ -56,10 +56,6 @@ namespace KlayGE
 		cgDestroyEffect(effect_);
 	}
 
-	void OGLRenderEffect::DoActiveTechnique()
-	{
-	}
-
 	std::string OGLRenderEffect::DoNameBySemantic(std::string const & semantic)
 	{
 		return cgGetParameterName(cgGetEffectParameterBySemantic(effect_, semantic.c_str()));
@@ -142,16 +138,6 @@ namespace KlayGE
 		return RenderEffectParameterPtr();
 	}
 
-	uint32_t OGLRenderEffect::DoBegin(uint32_t flags)
-	{
-		RenderTechniquePtr tech = this->ActiveTechnique();
-		return tech->NumPasses();
-	}
-
-	void OGLRenderEffect::DoEnd()
-	{
-	}
-	
 	RenderTechniquePtr OGLRenderEffect::MakeRenderTechnique(CGtechnique tech)
 	{
 		BOOST_ASSERT(tech != 0);
@@ -176,6 +162,15 @@ namespace KlayGE
 	{
 		RenderPassPtr ret(new OGLRenderPass(effect_, index, pass));
 		return ret;
+	}
+
+	uint32_t OGLRenderTechnique::DoBegin(uint32_t flags)
+	{
+		return this->NumPasses();
+	}
+
+	void OGLRenderTechnique::DoEnd()
+	{
 	}
 
 	bool OGLRenderTechnique::Validate()

@@ -41,22 +41,22 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			effect_ = rf.LoadEffect("DistanceMapping.fx");
+			RenderEffectPtr effect = rf.LoadEffect("DistanceMapping.fx");
 
-			if (!effect_->ValidateTechnique("DistanceMapping30"))
+			if (!effect->ValidateTechnique("DistanceMapping30"))
 			{
-				if (!effect_->ValidateTechnique("DistanceMapping2a"))
+				if (!effect->ValidateTechnique("DistanceMapping2a"))
 				{
-					effect_->ActiveTechnique("DistanceMapping20");
+					technique_ = effect->Technique("DistanceMapping20");
 				}
 				else
 				{
-					effect_->ActiveTechnique("DistanceMapping2a");
+					technique_ = effect->Technique("DistanceMapping2a");
 				}
 			}
 			else
 			{
-				effect_->ActiveTechnique("DistanceMapping30");
+				technique_ = effect->Technique("DistanceMapping30");
 			}
 
 			SamplerPtr diffuse_sampler(new Sampler);
@@ -64,14 +64,14 @@ namespace
 			diffuse_sampler->Filtering(Sampler::TFO_Bilinear);
 			diffuse_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
 			diffuse_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
-			*(effect_->ParameterByName("diffuseMapSampler")) = diffuse_sampler;
+			*(technique_->Effect().ParameterByName("diffuseMapSampler")) = diffuse_sampler;
 
 			SamplerPtr normal_sampler(new Sampler);
 			normal_sampler->SetTexture(LoadTexture("normal.dds"));
 			normal_sampler->Filtering(Sampler::TFO_Bilinear);
 			normal_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
 			normal_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
-			*(effect_->ParameterByName("normalMapSampler")) = normal_sampler;
+			*(technique_->Effect().ParameterByName("normalMapSampler")) = normal_sampler;
 
 			SamplerPtr distance_sampler(new Sampler);
 			distance_sampler->SetTexture(LoadTexture("distance.dds"));
@@ -79,7 +79,7 @@ namespace
 			distance_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
 			distance_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
 			distance_sampler->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
-			*(effect_->ParameterByName("distanceMapSampler")) = distance_sampler;
+			*(technique_->Effect().ParameterByName("distanceMapSampler")) = distance_sampler;
 
 			Vector3 xyzs[] =
 			{
@@ -158,14 +158,14 @@ namespace
 			Matrix4 const & view = app.ActiveCamera().ViewMatrix();
 			Matrix4 const & proj = app.ActiveCamera().ProjMatrix();
 
-			*(effect_->ParameterByName("worldviewproj")) = model * view * proj;
-			*(effect_->ParameterByName("eyePos")) = app.ActiveCamera().EyePos();
+			*(technique_->Effect().ParameterByName("worldviewproj")) = model * view * proj;
+			*(technique_->Effect().ParameterByName("eyePos")) = app.ActiveCamera().EyePos();
 
 			float degree(std::clock() / 700.0f);
 			Vector3 lightPos(2, 0, -2);
 			Matrix4 matRot(MathLib::RotationZ(degree));
 			lightPos = MathLib::TransformCoord(lightPos, matRot);
-			*(effect_->ParameterByName("lightPos")) = lightPos;
+			*(technique_->Effect().ParameterByName("lightPos")) = lightPos;
 		}
 	};
 

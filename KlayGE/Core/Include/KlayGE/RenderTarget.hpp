@@ -54,6 +54,9 @@ namespace KlayGE
 
 		virtual void SwapBuffers() = 0;
 
+		virtual void OnBind() = 0;
+		virtual void OnUnbind() = 0;
+
 	protected:
 		void UpdateStats();
 

@@ -40,21 +40,7 @@ namespace KlayGE
 			{ return ""; }
 		RenderEffectParameterPtr DoParameterByName(std::string const & /*name*/)
 			{ return RenderEffectParameter::NullObject(); }
-
-		uint32_t DoBegin(uint32_t /*flags*/)
-			{ return 0; }
-		void DoEnd()
-			{ }
-
-		void DoActiveTechnique()
-		{
-		}
 	};
-
-	RenderEffect::RenderEffect()
-		: active_tech_(0)
-	{
-	}
 
 	RenderEffectPtr RenderEffect::NullObject()
 	{
@@ -82,35 +68,22 @@ namespace KlayGE
 		return this->ParameterByName(this->DoNameBySemantic(semantic));
 	}
 
-	RenderEffect::techniques_type::iterator RenderEffect::TechniqueByName(std::string const & name)
+	bool RenderEffect::ValidateTechnique(std::string const & name)
+	{
+		RenderTechniquePtr tech = this->Technique(name);
+		return tech->Validate();
+	}
+	
+	RenderTechniquePtr RenderEffect::Technique(std::string const & name)
 	{
 		for (techniques_type::iterator iter = techniques_.begin(); iter != techniques_.end(); ++ iter)
 		{
 			if (name == (*iter)->Name())
 			{
-				return iter;
+				return *iter;
 			}
 		}
-		return techniques_.end();
-	}
-
-	bool RenderEffect::ValidateTechnique(std::string const & name)
-	{
-		techniques_type::iterator iter = this->TechniqueByName(name);
-		return (*iter)->Validate();
-	}
-
-	void RenderEffect::ActiveTechnique(std::string const & name)
-	{
-		techniques_type::iterator iter = this->TechniqueByName(name);
-		active_tech_ = (iter == techniques_.end()) ? 0 : static_cast<int32_t>(iter - techniques_.begin());
-
-		this->DoActiveTechnique();
-	}
-
-	RenderTechniquePtr RenderEffect::ActiveTechnique() const
-	{
-		return techniques_[active_tech_];
+		return RenderTechnique::NullObject();
 	}
 
 	void RenderEffect::DirtyParam(std::string const& name)
@@ -120,7 +93,7 @@ namespace KlayGE
 		params_[name].second = true;
 	}
 
-	uint32_t RenderEffect::Begin(uint32_t flags)
+	void RenderEffect::FlushParams()
 	{
 		for (params_type::iterator iter = params_.begin(); iter != params_.end(); ++ iter)
 		{
@@ -130,11 +103,45 @@ namespace KlayGE
 				iter->second.second = false;
 			}
 		}
+	}
 
+	
+	class NullRenderTechnique : public RenderTechnique
+	{
+	public:
+		NullRenderTechnique()
+			: RenderTechnique(*RenderEffect::NullObject(), "")
+		{
+		}
+
+		bool Validate()
+		{
+			return true;
+		}
+
+	private:
+		uint32_t DoBegin(uint32_t /*flags*/)
+		{
+			return 0;
+		}
+		void DoEnd()
+		{
+		}
+	};
+
+	RenderTechniquePtr RenderTechnique::NullObject()
+	{
+		static RenderTechniquePtr obj(new NullRenderTechnique);
+		return obj;
+	}
+
+	uint32_t RenderTechnique::Begin(uint32_t flags)
+	{
+		effect_.FlushParams();
 		return this->DoBegin(flags);
 	}
 
-	void RenderEffect::End()
+	void RenderTechnique::End()
 	{
 		return this->DoEnd();
 	}

@@ -56,17 +56,16 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			effect_ = rf.LoadEffect("AsciiArts.fx");
-			effect_->ActiveTechnique("AsciiArts");
+			technique_ = rf.LoadEffect("AsciiArts.fx")->Technique("AsciiArts");
 
 			scene_sampler_->Filtering(Sampler::TFO_Point);
 			scene_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
 			scene_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
-			*(effect_->ParameterByName("scene_sampler")) = scene_sampler_;
+			*(technique_->Effect().ParameterByName("scene_sampler")) = scene_sampler_;
 			lums_sampler_->Filtering(Sampler::TFO_Bilinear);
 			lums_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
 			lums_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
-			*(effect_->ParameterByName("lums_sampler")) = lums_sampler_;
+			*(technique_->Effect().ParameterByName("lums_sampler")) = lums_sampler_;
 		}
 
 		void SetTexture(TexturePtr const & scene_tex, TexturePtr const & lums_tex)
@@ -80,8 +79,8 @@ namespace
 			RenderEngine const & renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			RenderTarget const & renderTarget(*renderEngine.CurRenderTarget());
 
-			*(effect_->ParameterByName("cell_per_row")) = static_cast<float>(CELL_WIDTH) / renderTarget.Width();
-			*(effect_->ParameterByName("cell_per_line")) = static_cast<float>(CELL_HEIGHT) / renderTarget.Height();
+			*(technique_->Effect().ParameterByName("cell_per_row")) = static_cast<float>(CELL_WIDTH) / renderTarget.Width();
+			*(technique_->Effect().ParameterByName("cell_per_line")) = static_cast<float>(CELL_HEIGHT) / renderTarget.Height();
 		}
 
 	private:
@@ -239,7 +238,7 @@ void AsciiArts::OnResize(uint32_t width, uint32_t height)
 
 	rendered_tex_ = rf.MakeTexture2D(width, height, 1, PF_ARGB8);
 	render_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_, 0));
-	render_buffer_->Attach(FrameBuffer::ATT_Depth, rf.MakeDepthStencilRenderView(width, height, PF_D16, 0));
+	render_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, PF_D16, 0));
 
 	downsample_tex_ = rf.MakeTexture2D(width / CELL_WIDTH, height / CELL_HEIGHT,
 		1, PF_ARGB8);

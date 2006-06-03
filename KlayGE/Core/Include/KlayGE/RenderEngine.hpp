@@ -234,8 +234,8 @@ namespace KlayGE
 
 		virtual void StartRendering() = 0;
 
-		void SetRenderEffect(RenderEffectPtr const & effect);
-		RenderEffectPtr GetRenderEffect() const;
+		void SetRenderTechnique(RenderTechniquePtr const & tech);
+		RenderTechniquePtr GetRenderTechnique() const;
 
 		virtual void BeginFrame() = 0;
 		void Render(RenderLayout const & rl);
@@ -281,7 +281,7 @@ namespace KlayGE
 		RenderTargetPtr cur_render_target_;
 		RenderTargetPtr default_render_window_;
 
-		RenderEffectPtr renderEffect_;
+		RenderTechniquePtr render_tech_;
 
 		size_t numPrimitivesJustRendered_;
 		size_t numVerticesJustRendered_;

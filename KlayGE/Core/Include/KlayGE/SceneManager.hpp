@@ -36,7 +36,7 @@ namespace KlayGE
 		typedef std::vector<SceneObjectPtr> SceneObjectsType;
 
 		typedef std::vector<RenderablePtr> RenderItemsType;
-		typedef std::vector<std::pair<RenderEffectPtr, RenderItemsType> > RenderQueueType;
+		typedef std::vector<std::pair<RenderTechniquePtr, RenderItemsType> > RenderQueueType;
 
 	public:
 		SceneManager();
@@ -66,7 +66,7 @@ namespace KlayGE
 		SceneObjectsType visible_objs_;
 
 	private:
-		RenderQueueType renderQueue_;
+		RenderQueueType render_queue_;
 
 		size_t numObjectsRendered_;
 		size_t numRenderablesRendered_;

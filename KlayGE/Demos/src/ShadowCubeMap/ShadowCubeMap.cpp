@@ -52,7 +52,7 @@ namespace
 			return light_view_ * light_proj_;
 		}
 
-		void GenShadowMapPass(bool gen_sm)
+		virtual void GenShadowMapPass(bool gen_sm)
 		{
 			gen_sm_pass_ = gen_sm;
 		}
@@ -96,13 +96,10 @@ namespace
 
 			if (gen_sm_pass_)
 			{
-				effect->ActiveTechnique("GenShadowMap");
 				*(effect->ParameterByName("WorldViewProj")) = light_mat;
 			}
 			else
 			{
-				effect->ActiveTechnique("RenderScene");
-
 				*(effect->ParameterByName("LampSampler")) = lamp_sampler_;
 				*(effect->ParameterByName("ShadowMapSampler")) = sm_sampler_;
 				*(effect->ParameterByName("WorldViewProj")) = model * view * proj;
@@ -131,12 +128,25 @@ namespace
 				ShadowMapped(SHADOW_MAP_SIZE)
 		{
 			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("ShadowCubeMap.fx");
-			effect_->ActiveTechnique("RenderScene");
 		}
 
 		void SetModelMatrix(Matrix4 const & model)
 		{
 			model_ = model;
+		}
+
+		void GenShadowMapPass(bool gen_sm)
+		{
+			ShadowMapped::GenShadowMapPass(gen_sm);
+
+			if (gen_sm)
+			{
+				technique_ = effect_->Technique("GenShadowMap");
+			}
+			else
+			{
+				technique_ = effect_->Technique("RenderScene");
+			}
 		}
 
 		void OnRenderBegin()
@@ -146,6 +156,8 @@ namespace
 
 	private:
 		Matrix4 model_;
+
+		RenderEffectPtr effect_;
 	};
 
 	class OccluderObject : public SceneObjectHelper
@@ -174,7 +186,7 @@ namespace
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			effect_ = rf.LoadEffect("ShadowCubeMap.fx");
-			effect_->ActiveTechnique("RenderScene");
+			technique_ = effect_->Technique("RenderScene");
 
 			Vector3 xyzs[] =
 			{
@@ -223,6 +235,20 @@ namespace
 			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[4]);
 		}
 
+		void GenShadowMapPass(bool gen_sm)
+		{
+			ShadowMapped::GenShadowMapPass(gen_sm);
+
+			if (gen_sm)
+			{
+				technique_ = effect_->Technique("GenShadowMap");
+			}
+			else
+			{
+				technique_ = effect_->Technique("RenderScene");
+			}
+		}
+
 		void SetModelMatrix(Matrix4 const & model)
 		{
 			model_ = model;
@@ -235,6 +261,8 @@ namespace
 
 	private:
 		Matrix4 model_;
+
+		RenderEffectPtr effect_;
 	};
 
 	class GroundObject : public SceneObjectHelper

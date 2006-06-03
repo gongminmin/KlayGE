@@ -39,8 +39,6 @@ namespace KlayGE
 	public:
 		enum ATTACHMENT
 		{
-			ATT_Depth,
-			ATT_Stencil,
 			ATT_DepthStencil,
 			ATT_Color0,
 			ATT_Color1,
@@ -55,8 +53,11 @@ namespace KlayGE
 
 		static FrameBufferPtr NullObject();
 
-		virtual void Attach(uint32_t att, RenderViewPtr view) = 0;
-		virtual void Detach(uint32_t att) = 0;
+		void Attach(uint32_t att, RenderViewPtr view);
+		void Detach(uint32_t att);
+
+		void OnBind();
+		void OnUnbind();
 
 		void SwapBuffers()
 		{

@@ -41,14 +41,13 @@ namespace
 			: KMesh(L"Refractor", tex),
 				cubemap_sampler_(new Sampler)
 		{
-			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("Refract.fx");
-			effect_->ActiveTechnique("Refract");
+			technique_ = Context::Instance().RenderFactoryInstance().LoadEffect("Refract.fx")->Technique("Refract");
 
 			cubemap_sampler_->Filtering(Sampler::TFO_Bilinear);
 			cubemap_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
 			cubemap_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
 			cubemap_sampler_->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
-			*(effect_->ParameterByName("cubeMapSampler")) = cubemap_sampler_;
+			*(technique_->Effect().ParameterByName("cubeMapSampler")) = cubemap_sampler_;
 		}
 
 		void CubeMap(TexturePtr const & texture)
@@ -64,12 +63,14 @@ namespace
 			Matrix4 const & view = app.ActiveCamera().ViewMatrix();
 			Matrix4 const & proj = app.ActiveCamera().ProjMatrix();
 
-			*(effect_->ParameterByName("model")) = model;
-			*(effect_->ParameterByName("modelit")) = MathLib::Transpose(MathLib::Inverse(model));
-			*(effect_->ParameterByName("mvp")) = model * view * proj;
+			*(technique_->Effect().ParameterByName("model")) = model;
+			*(technique_->Effect().ParameterByName("modelit")) = MathLib::Transpose(MathLib::Inverse(model));
+			*(technique_->Effect().ParameterByName("mvp")) = model * view * proj;
 
-			*(effect_->ParameterByName("eta_ratio")) = Vector3(1 / 1.1f, 1 / 1.1f - 0.003f, 1 / 1.1f - 0.006f);
-			*(effect_->ParameterByName("fresnel_values")) = Vector3(2.0f, 2.0f, 0.1f);
+			*(technique_->Effect().ParameterByName("eta_ratio")) = Vector3(1 / 1.1f, 1 / 1.1f - 0.003f, 1 / 1.1f - 0.006f);
+			*(technique_->Effect().ParameterByName("fresnel_values")) = Vector3(2.0f, 2.0f, 0.1f);
+
+			*(technique_->Effect().ParameterByName("eyePos")) = Context::Instance().AppInstance().ActiveCamera().EyePos();
 		}
 
 	private:
@@ -182,8 +183,6 @@ void Refract::DoUpdate(uint32_t pass)
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
-
-	*(refractor_->GetRenderable()->GetRenderEffect()->ParameterByName("eyePos")) = this->ActiveCamera().EyePos();
 
 	std::wostringstream stream;
 	stream << renderEngine.CurRenderTarget()->FPS();

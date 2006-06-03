@@ -42,29 +42,28 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			effect_ = rf.LoadEffect("parallax.fx");
-			effect_->ActiveTechnique("Parallax");
+			technique_ = rf.LoadEffect("parallax.fx")->Technique("Parallax");
 
 			SamplerPtr diffuse_sampler(new Sampler);
 			diffuse_sampler->SetTexture(LoadTexture("diffuse.dds"));
 			diffuse_sampler->Filtering(Sampler::TFO_Bilinear);
 			diffuse_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
 			diffuse_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
-			*(effect_->ParameterByName("diffuseMapSampler")) = diffuse_sampler;
+			*(technique_->Effect().ParameterByName("diffuseMapSampler")) = diffuse_sampler;
 
 			SamplerPtr normal_sampler(new Sampler);
 			normal_sampler->SetTexture(LoadTexture("normal.dds"));
 			normal_sampler->Filtering(Sampler::TFO_Bilinear);
 			normal_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
 			normal_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
-			*(effect_->ParameterByName("normalMapSampler")) = normal_sampler;
+			*(technique_->Effect().ParameterByName("normalMapSampler")) = normal_sampler;
 
 			SamplerPtr height_sampler(new Sampler);
 			height_sampler->SetTexture(LoadTexture("height.dds"));
 			height_sampler->Filtering(Sampler::TFO_Bilinear);
 			height_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
 			height_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
-			*(effect_->ParameterByName("heightMapSampler")) = height_sampler;
+			*(technique_->Effect().ParameterByName("heightMapSampler")) = height_sampler;
 
 			SamplerPtr normalizer_sampler(new Sampler);
 			normalizer_sampler->SetTexture(LoadTexture("normalizer.dds"));
@@ -72,7 +71,7 @@ namespace
 			normalizer_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
 			normalizer_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
 			normalizer_sampler->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
-			*(effect_->ParameterByName("normalizerMapSampler")) = normalizer_sampler;
+			*(technique_->Effect().ParameterByName("normalizerMapSampler")) = normalizer_sampler;
 		}
 
 		void ComputeTB()
@@ -110,8 +109,8 @@ namespace
 			Matrix4 const & view = app.ActiveCamera().ViewMatrix();
 			Matrix4 const & proj = app.ActiveCamera().ProjMatrix();
 
-			*(effect_->ParameterByName("mvp")) = model * view * proj;
-			*(effect_->ParameterByName("eyePos")) = app.ActiveCamera().EyePos();
+			*(technique_->Effect().ParameterByName("mvp")) = model * view * proj;
+			*(technique_->Effect().ParameterByName("eyePos")) = app.ActiveCamera().EyePos();
 		}
 	};
 
@@ -224,7 +223,7 @@ void Parallax::DoUpdate(uint32_t pass)
 	Vector3 lightPos(2, 0, 1);
 	Matrix4 matRot(MathLib::RotationZ(degree));
 	lightPos = MathLib::TransformCoord(lightPos, matRot);
-	*(polygon_->GetRenderable()->GetRenderEffect()->ParameterByName("lightPos")) = lightPos;
+	*(polygon_->GetRenderable()->GetRenderTechnique()->Effect().ParameterByName("lightPos")) = lightPos;
 
 	std::wostringstream stream;
 	stream << renderEngine.CurRenderTarget()->FPS();

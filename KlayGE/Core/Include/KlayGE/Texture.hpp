@@ -203,6 +203,19 @@ namespace KlayGE
 	}
 
 	inline bool
+	IsStencilFormat(PixelFormat format)
+	{
+		switch (format)
+		{
+		case PF_D24S8:
+			return true;
+
+		default:
+			return false;
+		}
+	}
+
+	inline bool
 	IsSRGB(PixelFormat format)
 	{
 		switch (format)

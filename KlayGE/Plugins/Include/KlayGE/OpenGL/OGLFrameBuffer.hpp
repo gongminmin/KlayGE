@@ -33,9 +33,6 @@ namespace KlayGE
 		OGLFrameBuffer();
 		~OGLFrameBuffer();
 
-		void Attach(uint32_t att, RenderViewPtr view);
-		void Detach(boost::uint32_t att);
-
 		GLuint OGLFbo() const
 		{
 			return fbo_;

@@ -42,6 +42,13 @@ namespace KlayGE
 
 		bool FullScreen() const;
 
+		void OnBind()
+		{
+		}
+		void OnUnbind()
+		{
+		}
+
 	protected:
 		virtual void DoResize(uint32_t width, uint32_t height) = 0;
 		virtual void DoReposition(uint32_t left, uint32_t top) = 0;

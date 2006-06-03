@@ -69,13 +69,13 @@ namespace KlayGE
 			return meshes_.size();
 		}
 
-		RenderEffectPtr GetRenderEffect() const
+		RenderTechniquePtr GetRenderTechnique() const
 		{
-			return effect_;
+			return technique_;
 		}
-		void SetRenderEffect(RenderEffectPtr const & effect)
+		void SetRenderTechnique(RenderTechniquePtr const & tech)
 		{
-			effect_ = effect;
+			technique_ = tech;
 		}
 
 		RenderLayoutPtr GetRenderLayout() const
@@ -101,7 +101,7 @@ namespace KlayGE
 		std::wstring name_;
 
 		RenderLayoutPtr rl_;
-		RenderEffectPtr effect_;
+		RenderTechniquePtr technique_;
 
 		Box box_;
 
@@ -122,13 +122,13 @@ namespace KlayGE
 		StaticMesh(std::wstring const & name);
 		virtual ~StaticMesh();
 
-		RenderEffectPtr GetRenderEffect() const
+		RenderTechniquePtr GetRenderTechnique() const
 		{
-			return effect_;
+			return technique_;
 		}
-		void SetRenderEffect(RenderEffectPtr const & effect)
+		void SetRenderTechnique(RenderTechniquePtr const & tech)
 		{
-			effect_ = effect;
+			technique_ = tech;
 		}
 
 		RenderLayoutPtr GetRenderLayout() const
@@ -188,7 +188,7 @@ namespace KlayGE
 		std::wstring name_;
 
 		RenderLayoutPtr rl_;
-		RenderEffectPtr effect_;
+		RenderTechniquePtr technique_;
 
 		Box box_;
 

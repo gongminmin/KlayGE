@@ -85,21 +85,19 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			effect_ = rf.LoadEffect("Instancing.fx");
+			technique_ = rf.LoadEffect("Instancing.fx")->Technique("Instance");
 		}
 
 		void OnRenderBegin()
 		{
-			effect_->ActiveTechnique("Instance");
-
 			App3DFramework const & app = Context::Instance().AppInstance();
 
 			Matrix4 const & model = Matrix4::Identity();
 			Matrix4 const & view = app.ActiveCamera().ViewMatrix();
 			Matrix4 const & proj = app.ActiveCamera().ProjMatrix();
 
-			*(effect_->ParameterByName("ViewProj")) = view * proj;
-			*(effect_->ParameterByName("lightPos")) = Vector4(-1, 0, -1, 1);
+			*(technique_->Effect().ParameterByName("ViewProj")) = view * proj;
+			*(technique_->Effect().ParameterByName("lightPos")) = Vector4(-1, 0, -1, 1);
 		}
 	};
 
@@ -118,7 +116,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			effect_ = rf.LoadEffect("Instancing.fx");
+			technique_ = rf.LoadEffect("Instancing.fx")->Technique("NormalMesh");
 		}
 
 		void OnRenderBegin()
@@ -128,10 +126,8 @@ namespace
 			Matrix4 const & view = app.ActiveCamera().ViewMatrix();
 			Matrix4 const & proj = app.ActiveCamera().ProjMatrix();
 
-			effect_->ActiveTechnique("NormalMesh");
-
-			*(effect_->ParameterByName("ViewProj")) = view * proj;
-			*(effect_->ParameterByName("lightPos")) = Vector4(-1, 0, -1, 1);
+			*(technique_->Effect().ParameterByName("ViewProj")) = view * proj;
+			*(technique_->Effect().ParameterByName("lightPos")) = Vector4(-1, 0, -1, 1);
 		}
 
 		void OnInstanceBegin(uint32_t id)
@@ -144,8 +140,8 @@ namespace
 			model.Col(2, data->col[2]);
 			model.Col(3, Vector4(0, 0, 0, 1));
 
-			*(effect_->ParameterByName("modelmat")) = model;
-			*(effect_->ParameterByName("color")) = Vector4(data->clr.r(), data->clr.g(), data->clr.b(), data->clr.a());
+			*(technique_->Effect().ParameterByName("modelmat")) = model;
+			*(technique_->Effect().ParameterByName("color")) = Vector4(data->clr.r(), data->clr.g(), data->clr.b(), data->clr.a());
 		}
 
 	private:

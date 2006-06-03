@@ -85,7 +85,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D9RenderEngine::~D3D9RenderEngine()
 	{
-		renderEffect_.reset();
+		render_tech_.reset();
 		cur_render_target_.reset();
 
 		d3dDevice_.reset();
@@ -423,8 +423,7 @@ namespace KlayGE
 		D3D9RenderLayout const & d3d9_rl(*checked_cast<D3D9RenderLayout const *>(&rl));
 		TIF(d3dDevice_->SetVertexDeclaration(d3d9_rl.VertexDeclaration().get()));
 
-		RenderTechniquePtr tech = renderEffect_->ActiveTechnique();
-		uint32_t num_passes = tech->NumPasses();
+		uint32_t num_passes = render_tech_->NumPasses();
 		if (rl.UseIndices())
 		{
 			D3D9IndexBuffer& d3dib(*checked_cast<D3D9IndexBuffer*>(rl.GetIndexStream().get()));
@@ -433,7 +432,7 @@ namespace KlayGE
 
 			for (uint32_t i = 0; i < num_passes; ++ i)
 			{
-				RenderPassPtr pass = tech->Pass(i);
+				RenderPassPtr pass = render_tech_->Pass(i);
 
 				pass->Begin();
 				TIF(d3dDevice_->DrawIndexedPrimitive(primType, 0, 0,
@@ -447,7 +446,7 @@ namespace KlayGE
 
 			for (uint32_t i = 0; i < num_passes; ++ i)
 			{
-				RenderPassPtr pass = tech->Pass(i);
+				RenderPassPtr pass = render_tech_->Pass(i);
 
 				pass->Begin();
 				TIF(d3dDevice_->DrawPrimitive(primType, 0, primCount));

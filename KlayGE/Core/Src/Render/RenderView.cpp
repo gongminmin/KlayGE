@@ -25,11 +25,27 @@ namespace KlayGE
 		void OnDetached(FrameBuffer& /*fb*/, uint32_t /*att*/)
 		{
 		}
+
+		void OnBind(FrameBuffer& /*fb*/, uint32_t /*att*/)
+		{
+		}
+
+		void OnUnbind(FrameBuffer& /*fb*/, uint32_t /*att*/)
+		{
+		}
 	};
 
 	RenderViewPtr RenderView::NullObject()
 	{
 		static RenderViewPtr obj(new NullRenderView);
 		return obj;
+	}
+
+	void RenderView::OnBind(FrameBuffer& /*fb*/, uint32_t /*att*/)
+	{
+	}
+	
+	void RenderView::OnUnbind(FrameBuffer& /*fb*/, uint32_t /*att*/)
+	{
 	}
 }
