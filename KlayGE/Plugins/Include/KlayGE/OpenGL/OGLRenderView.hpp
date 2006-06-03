@@ -79,6 +79,7 @@ namespace KlayGE
 	{
 	public:
 		OGLTexture3DRenderView(Texture& texture_3d, uint32_t slice, int level);
+		~OGLTexture3DRenderView();
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
@@ -89,6 +90,8 @@ namespace KlayGE
 		OGLTexture3D& texture_3d_;
 		uint32_t slice_;
 		int level_;
+		int copy_to_tex_;
+		GLuint tex_2d_;
 	};
 
 	typedef boost::shared_ptr<OGLTexture3DRenderView> OGLTexture3DRenderViewPtr;

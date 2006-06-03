@@ -23,7 +23,6 @@
 #include <gl/glu.h>
 
 #include <KlayGE/OpenGL/OGLMapping.hpp>
-#include <KlayGE/OpenGL/OGLRenderView.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 
 #pragma comment(lib, "OpenGL32.lib")
@@ -193,10 +192,5 @@ namespace KlayGE
 			glGetTexLevelParameteriv(GL_TEXTURE_1D, level, GL_TEXTURE_WIDTH, &w);
 			widths_[level] = w;
 		}
-	}
-
-	RenderViewPtr OGLTexture1D::CreateRenderView(int level)
-	{
-		return RenderViewPtr(new OGLTexture1DRenderView(*this, level));
 	}
 }

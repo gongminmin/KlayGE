@@ -87,22 +87,22 @@ namespace KlayGE
 
 	RenderViewPtr OGLRenderFactory::Make1DRenderView(Texture& texture, int level)
 	{
-		return checked_cast<OGLTexture1D*>(&texture)->CreateRenderView(level);
+		return RenderViewPtr(new OGLTexture1DRenderView(texture, level));
 	}
 
 	RenderViewPtr OGLRenderFactory::Make2DRenderView(Texture& texture, int level)
 	{
-		return checked_cast<OGLTexture2D*>(&texture)->CreateRenderView(level);
+		return RenderViewPtr(new OGLTexture2DRenderView(texture, level));
 	}
 
 	RenderViewPtr OGLRenderFactory::Make2DRenderView(Texture& texture, Texture::CubeFaces face, int level)
 	{
-		return checked_cast<OGLTextureCube*>(&texture)->CreateRenderView(face, level);
+		return RenderViewPtr(new OGLTextureCubeRenderView(texture, face, level));
 	}
 
-	RenderViewPtr OGLRenderFactory::Make3DRenderView(Texture& texture, int slice, int level)
+	RenderViewPtr OGLRenderFactory::Make3DRenderView(Texture& texture, uint32_t slice, int level)
 	{
-		return checked_cast<OGLTexture3D*>(&texture)->CreateRenderView(slice, level);
+		return RenderViewPtr(new OGLTexture3DRenderView(texture, slice, level));
 	}
 
 	RenderViewPtr OGLRenderFactory::MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer, uint32_t width, uint32_t height)

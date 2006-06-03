@@ -23,7 +23,6 @@
 #include <gl/glu.h>
 
 #include <KlayGE/OpenGL/OGLMapping.hpp>
-#include <KlayGE/OpenGL/OGLRenderView.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 
 #pragma comment(lib, "OpenGL32.lib")
@@ -204,10 +203,5 @@ namespace KlayGE
 			glGetTexLevelParameteriv(GL_TEXTURE_CUBE_MAP, level, GL_TEXTURE_WIDTH, &w);
 			widths_[level] = w;
 		}
-	}
-
-	RenderViewPtr OGLTextureCube::CreateRenderView(CubeFaces face, int level)
-	{
-		return RenderViewPtr(new OGLTextureCubeRenderView(*this, face, level));
 	}
 }

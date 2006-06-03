@@ -108,8 +108,6 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
-		D3D9RenderViewPtr CreateRenderView(int level);
-
 		ID3D9TexturePtr D3DTexture1D() const
 			{ return d3dTexture1D_; }
 
@@ -147,8 +145,6 @@ namespace KlayGE
 			uint32_t src_width, uint32_t src_height);
 
 		void BuildMipSubLevels();
-
-		D3D9RenderViewPtr CreateRenderView(int level);
 
 		ID3D9TexturePtr D3DTexture2D() const
 			{ return d3dTexture2D_; }
@@ -191,8 +187,6 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
-		D3D9RenderViewPtr CreateRenderView(int slice, int level);
-
 		ID3D9VolumeTexturePtr D3DTexture3D() const
 			{ return d3dTexture3D_; }
 
@@ -232,8 +226,6 @@ namespace KlayGE
 			uint32_t src_width, uint32_t src_height);
 
 		void BuildMipSubLevels();
-
-		D3D9RenderViewPtr CreateRenderView(CubeFaces face, int level);
 
 		ID3D9CubeTexturePtr D3DTextureCube() const
 			{ return d3dTextureCube_; }

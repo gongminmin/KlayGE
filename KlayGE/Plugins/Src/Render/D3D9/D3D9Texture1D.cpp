@@ -27,7 +27,6 @@
 #include <KlayGE/D3D9/D3D9Typedefs.hpp>
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9Mapping.hpp>
-#include <KlayGE/D3D9/D3D9RenderView.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 
 #pragma comment(lib, "d3d9.lib")
@@ -274,10 +273,5 @@ namespace KlayGE
 
 		format_ = D3D9Mapping::MappingFormat(desc.Format);
 		bpp_	= PixelFormatBits(format_);
-	}
-
-	D3D9RenderViewPtr D3D9Texture1D::CreateRenderView(int level)
-	{
-		return D3D9RenderViewPtr(new D3D9Texture1DRenderView(*this, level));
 	}
 }

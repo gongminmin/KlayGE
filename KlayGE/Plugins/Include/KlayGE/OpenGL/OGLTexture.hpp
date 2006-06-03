@@ -104,8 +104,6 @@ namespace KlayGE
 		void CopyMemoryToTexture1D(int level, void* data, PixelFormat pf,
 			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width);
 
-		RenderViewPtr CreateRenderView(int level);
-
 	private:
 		void UpdateParams();
 
@@ -128,8 +126,6 @@ namespace KlayGE
 		void CopyMemoryToTexture2D(int level, void* data, PixelFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height);
-
-		RenderViewPtr CreateRenderView(int level);
 
 	private:
 		void UpdateParams();
@@ -157,8 +153,6 @@ namespace KlayGE
 			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
 			uint32_t src_width, uint32_t src_height, uint32_t src_depth);
 
-		RenderViewPtr CreateRenderView(int slice, int level);
-
 	private:
 		void UpdateParams();
 
@@ -183,8 +177,6 @@ namespace KlayGE
 		void CopyMemoryToTextureCube(CubeFaces face, int level, void* data, PixelFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height);
-
-		RenderViewPtr CreateRenderView(CubeFaces face, int level);
 
 	private:
 		void UpdateParams();

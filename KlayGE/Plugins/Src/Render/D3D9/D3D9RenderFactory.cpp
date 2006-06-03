@@ -102,28 +102,28 @@ namespace KlayGE
 
 	RenderViewPtr D3D9RenderFactory::Make1DRenderView(Texture& texture, int level)
 	{
-		D3D9RenderViewPtr ret(checked_cast<D3D9Texture1D*>(&texture)->CreateRenderView(level));
+		D3D9RenderViewPtr ret(new D3D9Texture1DRenderView(texture, level));
 		resource_pool_.push_back(ret);
 		return ret;
 	}
 
 	RenderViewPtr D3D9RenderFactory::Make2DRenderView(Texture& texture, int level)
 	{
-		D3D9RenderViewPtr ret(checked_cast<D3D9Texture2D*>(&texture)->CreateRenderView(level));
+		D3D9RenderViewPtr ret(new D3D9Texture2DRenderView(texture, level));
 		resource_pool_.push_back(ret);
 		return ret;
 	}
 
 	RenderViewPtr D3D9RenderFactory::Make2DRenderView(Texture& texture, Texture::CubeFaces face, int level)
 	{
-		D3D9RenderViewPtr ret(checked_cast<D3D9TextureCube*>(&texture)->CreateRenderView(face, level));
+		D3D9RenderViewPtr ret(new D3D9TextureCubeRenderView(texture, face, level));
 		resource_pool_.push_back(ret);
 		return ret;
 	}
 
-	RenderViewPtr D3D9RenderFactory::Make3DRenderView(Texture& texture, int slice, int level)
+	RenderViewPtr D3D9RenderFactory::Make3DRenderView(Texture& texture, uint32_t slice, int level)
 	{
-		D3D9RenderViewPtr ret(checked_cast<D3D9Texture3D*>(&texture)->CreateRenderView(slice, level));
+		D3D9RenderViewPtr ret(new D3D9Texture3DRenderView(texture, slice, level));
 		resource_pool_.push_back(ret);
 		return ret;
 	}

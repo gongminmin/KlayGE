@@ -96,7 +96,7 @@ namespace KlayGE
 			return RenderView::NullObject();
 		}
 
-		RenderViewPtr Make3DRenderView(Texture& /*texture*/, int /*slice*/, int /*level*/)
+		RenderViewPtr Make3DRenderView(Texture& /*texture*/, uint32_t /*slice*/, int /*level*/)
 		{
 			return RenderView::NullObject();
 		}
