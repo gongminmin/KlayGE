@@ -178,7 +178,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void RenderEngine::SetRenderState(RenderStateType rst, uint32_t state)
 	{
-		BOOST_ASSERT(rst < render_states_.size());
+		BOOST_ASSERT(static_cast<size_t>(rst) < render_states_.size());
 
 		if (render_states_[rst] != state)
 		{

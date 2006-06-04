@@ -165,7 +165,7 @@ namespace KlayGE
 
 	void FrameBuffer::OnBind()
 	{
-		for (size_t i = 0; i < clr_views_.size(); ++ i)
+		for (uint32_t i = 0; i < clr_views_.size(); ++ i)
 		{
 			if (clr_views_[i])
 			{
@@ -180,7 +180,7 @@ namespace KlayGE
 
 	void FrameBuffer::OnUnbind()
 	{
-		for (size_t i = 0; i < clr_views_.size(); ++ i)
+		for (uint32_t i = 0; i < clr_views_.size(); ++ i)
 		{
 			if (clr_views_[i])
 			{

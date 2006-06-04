@@ -274,4 +274,116 @@ namespace KlayGE
 			break;
 		}
 	}
+
+	void OGLMapping::MappingFormat(GLint& internalFormat, GLenum& glformat, GLenum& gltype, PixelFormat pf)
+	{
+		switch (pf)
+		{
+		case PF_L8:
+			internalFormat = GL_LUMINANCE8;
+			glformat = GL_LUMINANCE;
+			gltype = GL_UNSIGNED_BYTE;
+			break;
+
+		case PF_A8:
+			internalFormat = GL_ALPHA8;
+			glformat = GL_ALPHA;
+			gltype = GL_UNSIGNED_BYTE;
+			break;
+
+		case PF_AL4:
+			internalFormat = GL_LUMINANCE4_ALPHA4;
+			glformat = GL_LUMINANCE_ALPHA;
+			gltype = GL_UNSIGNED_BYTE;
+			break;
+
+		case PF_L16:
+			internalFormat = GL_LUMINANCE16;
+			glformat = GL_LUMINANCE;
+			gltype = GL_UNSIGNED_SHORT;
+			break;
+
+		case PF_AL8:
+			internalFormat = GL_LUMINANCE8_ALPHA8;
+			glformat = GL_LUMINANCE_ALPHA;
+			gltype = GL_UNSIGNED_BYTE;
+			break;
+
+		case PF_R5G6B5:
+			internalFormat = GL_RGB5;
+			glformat = GL_BGR;
+			gltype = GL_UNSIGNED_SHORT_5_6_5_REV;
+			break;
+
+		case PF_ARGB4:
+			internalFormat = GL_RGBA4;
+			glformat = GL_BGRA;
+			gltype = GL_UNSIGNED_SHORT_4_4_4_4_REV;
+			break;
+
+		case PF_XRGB8:
+			internalFormat = GL_RGB8;
+			glformat = GL_BGR;
+			gltype = GL_UNSIGNED_BYTE;
+			break;
+
+		case PF_ARGB8:
+			internalFormat = GL_RGBA8;
+			glformat = GL_BGRA;
+			gltype = GL_UNSIGNED_INT_8_8_8_8_REV;
+			break;
+
+		case PF_A2RGB10:
+			internalFormat = GL_RGB10_A2;
+			glformat = GL_BGRA;
+			gltype = GL_UNSIGNED_INT_2_10_10_10_REV;
+			break;
+
+		case PF_DXT1:
+			internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+			glformat = GL_BGRA;
+			gltype = GL_UNSIGNED_BYTE;
+			break;
+
+		case PF_DXT3:
+			internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+			glformat = GL_BGRA;
+			gltype = GL_UNSIGNED_BYTE;
+			break;
+
+		case PF_DXT5:
+			internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+			glformat = GL_BGRA;
+			gltype = GL_UNSIGNED_BYTE;
+			break;
+
+		case PF_ARGB8_SRGB:
+			internalFormat = GL_SRGB8_ALPHA8_EXT;
+			glformat = GL_BGRA;
+			gltype = GL_UNSIGNED_INT_8_8_8_8_REV;
+			break;
+
+		case PF_DXT1_SRGB:
+			internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
+			glformat = GL_BGRA;
+			gltype = GL_UNSIGNED_BYTE;
+			break;
+
+		case PF_DXT3_SRGB:
+			internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
+			glformat = GL_BGRA;
+			gltype = GL_UNSIGNED_BYTE;
+			break;
+
+		case PF_DXT5_SRGB:
+			internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
+			glformat = GL_BGRA;
+			gltype = GL_UNSIGNED_BYTE;
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
+		}
+	}
 }

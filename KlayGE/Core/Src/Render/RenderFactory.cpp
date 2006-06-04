@@ -101,7 +101,7 @@ namespace KlayGE
 			return RenderView::NullObject();
 		}
 
-		RenderViewPtr MakeGraphicsBufferRenderView(GraphicsBuffer& /*gbuffer*/, uint32_t /*width*/, uint32_t /*height*/)
+		RenderViewPtr MakeGraphicsBufferRenderView(GraphicsBuffer& /*gbuffer*/, uint32_t /*width*/, uint32_t /*height*/, PixelFormat /*pf*/)
 		{
 			return RenderView::NullObject();
 		}

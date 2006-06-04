@@ -17,6 +17,7 @@
 
 #include <boost/assert.hpp>
 
+#include <KlayGE/OpenGL/OGLMapping.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 #include <KlayGE/OpenGL/OGLGraphicsBuffer.hpp>
 #include <KlayGE/OpenGL/OGLFrameBuffer.hpp>
@@ -475,17 +476,30 @@ namespace KlayGE
 
 	void OGLGraphicsBufferRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
+		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
+
 		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+
 		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-			GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
-			GL_TEXTURE_RECTANGLE_ARB, tex_, 0);
+				GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
+				GL_TEXTURE_RECTANGLE_ARB, tex_, 0);
+
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
 
 	void OGLGraphicsBufferRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
 	{
-		this->OnUnbind(fb, att);
+		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+
+		this->CopyToGB(att);
+
+		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+				GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
+				GL_TEXTURE_RECTANGLE_ARB, 0, 0);
+
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
 
 	void OGLGraphicsBufferRenderView::OnUnbind(FrameBuffer& fb, uint32_t att)
@@ -494,13 +508,24 @@ namespace KlayGE
 
 		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+
+		this->CopyToGB(att);
+
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	}
+
+	void OGLGraphicsBufferRenderView::CopyToGB(uint32_t att)
+	{
+		GLint internalFormat;
+		GLenum glformat;
+		GLenum gltype;
+		OGLMapping::MappingFormat(internalFormat, glformat, gltype, pf_);
+
 		glReadBuffer(GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0);
 
 		OGLGraphicsBuffer* ogl_gb = checked_cast<OGLGraphicsBuffer*>(&gbuffer_);
 		glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, ogl_gb->OGLvbo());
-		glReadPixels(0, 0, width_, height_, GL_RGBA, GL_FLOAT, 0);
-
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		glReadPixels(0, 0, width_, height_, glformat, gltype, 0);
 	}
 
 

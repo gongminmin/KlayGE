@@ -153,6 +153,7 @@ namespace KlayGE
 
 	private:
 		ID3D9SurfacePtr CreateGBSurface(D3DPOOL pool);
+		void CopyToGB();
 
 	private:
 		void DoOnLostDevice();

@@ -127,6 +127,9 @@ namespace KlayGE
 		void OnUnbind(FrameBuffer& fb, uint32_t att);
 
 	private:
+		void CopyToGB(uint32_t att);
+
+	private:
 		GraphicsBuffer& gbuffer_;
 	};
 

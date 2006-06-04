@@ -215,14 +215,14 @@ namespace KlayGE
 		{
 			// Ìî³ä»ìºÏÐÅÏ¢
 			GraphicsBufferPtr bw = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(BU_Static);
-			bw->Resize(blend_weights_.size() * sizeof(blend_weights_[0]));
+			bw->Resize(static_cast<uint32_t>(blend_weights_.size() * sizeof(blend_weights_[0])));
 			{
 				GraphicsBuffer::Mapper mapper(*bw, BA_Write_Only);
 				std::copy(blend_weights_.begin(), blend_weights_.end(), mapper.Pointer<float>());
 			}
 			rl_->BindVertexStream(bw, boost::make_tuple(vertex_element(VEU_BlendWeight, 0, sizeof(float), 4)));
 			GraphicsBufferPtr bi = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(BU_Static);
-			bi->Resize(blend_indices_.size() * sizeof(blend_indices_[0]));
+			bi->Resize(static_cast<uint32_t>(blend_indices_.size() * sizeof(blend_indices_[0])));
 			{
 				GraphicsBuffer::Mapper mapper(*bi, BA_Write_Only);
 				std::copy(blend_indices_.begin(), blend_indices_.end(), mapper.Pointer<uint8_t>());

@@ -105,9 +105,9 @@ namespace KlayGE
 		return RenderViewPtr(new OGLTexture3DRenderView(texture, slice, level));
 	}
 
-	RenderViewPtr OGLRenderFactory::MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer, uint32_t width, uint32_t height)
+	RenderViewPtr OGLRenderFactory::MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer, uint32_t width, uint32_t height, PixelFormat pf)
 	{
-		return checked_cast<OGLGraphicsBuffer*>(&gbuffer)->CreateRenderView(width, height);
+		return RenderViewPtr(new OGLGraphicsBufferRenderView(gbuffer, width, height, pf));
 	}
 
 	RenderViewPtr OGLRenderFactory::MakeDepthStencilRenderView(uint32_t width, uint32_t height, PixelFormat pf, uint32_t multi_sample)

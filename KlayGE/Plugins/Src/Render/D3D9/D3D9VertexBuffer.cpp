@@ -87,11 +87,6 @@ namespace KlayGE
 		buffer_->Unlock();
 	}
 
-	D3D9RenderViewPtr D3D9VertexBuffer::CreateRenderView(uint32_t width, uint32_t height)
-	{
-		return D3D9RenderViewPtr(new D3D9GraphicsBufferRenderView(*this, width, height, PF_ABGR32F));
-	}
-
 	boost::shared_ptr<IDirect3DVertexBuffer9> D3D9VertexBuffer::D3D9Buffer() const
 	{
 		return buffer_;

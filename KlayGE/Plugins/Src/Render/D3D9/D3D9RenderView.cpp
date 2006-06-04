@@ -253,8 +253,6 @@ namespace KlayGE
 									uint32_t width, uint32_t height, PixelFormat pf)
 		: gbuffer_(gb)
 	{
-		BOOST_ASSERT(PF_ABGR32F == pf_);
-
 		width_ = width;
 		height_ = height;
 		pf_ = pf;
@@ -266,31 +264,14 @@ namespace KlayGE
 	{
 	}
 
-	void D3D9GraphicsBufferRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
+	void D3D9GraphicsBufferRenderView::OnDetached(FrameBuffer& /*fb*/, uint32_t /*att*/)
 	{
-		this->OnUnbind(fb, att);
+		this->CopyToGB();
 	}
 
 	void D3D9GraphicsBufferRenderView::OnUnbind(FrameBuffer& /*fb*/, uint32_t /*att*/)
 	{
-		gbuffer_.Resize(width_ * height_ * sizeof(float) * 4);
-
-		D3DLOCKED_RECT locked_rect;
-		TIF(surface_->LockRect(&locked_rect, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
-
-		GraphicsBuffer::Mapper mapper(gbuffer_, BA_Write_Only);
-
-		const float* src = static_cast<float*>(locked_rect.pBits);
-		float* dst = mapper.Pointer<float>();
-		for (uint32_t i = 0; i < height_; ++ i)
-		{
-			std::copy(src, src + width_ * 4, dst);
-
-			src += locked_rect.Pitch / sizeof(float);
-			dst += width_ * 4;
-		}
-
-		surface_->UnlockRect();
+		this->CopyToGB();
 	}
 
 	ID3D9SurfacePtr D3D9GraphicsBufferRenderView::CreateGBSurface(D3DPOOL pool)
@@ -311,6 +292,30 @@ namespace KlayGE
 		}
 
 		return MakeCOMPtr(surface);
+	}
+
+	void D3D9GraphicsBufferRenderView::CopyToGB()
+	{
+		size_t const format_size = PixelFormatBits(pf_) / 8;
+
+		gbuffer_.Resize(width_ * height_ * format_size);
+
+		D3DLOCKED_RECT locked_rect;
+		TIF(surface_->LockRect(&locked_rect, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
+
+		GraphicsBuffer::Mapper mapper(gbuffer_, BA_Write_Only);
+
+		const uint8_t* src = static_cast<uint8_t*>(locked_rect.pBits);
+		uint8_t* dst = mapper.Pointer<uint8_t>();
+		for (uint32_t i = 0; i < height_; ++ i)
+		{
+			std::copy(src, src + width_ * format_size, dst);
+
+			src += locked_rect.Pitch;
+			dst += width_ * format_size;
+		}
+
+		surface_->UnlockRect();
 	}
 
 	void D3D9GraphicsBufferRenderView::DoOnLostDevice()
