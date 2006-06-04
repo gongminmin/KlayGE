@@ -352,8 +352,8 @@ namespace KlayGE
 
 	void D3D9RenderEngine::DoRenderHWInstance(RenderLayout const & rl)
 	{
-		uint32_t const last_num_vertex_stream = active_vertex_streams_.size();
-		for (size_t i = 0; i < last_num_vertex_stream; ++ i)
+		uint32_t const last_num_vertex_stream = static_cast<uint32_t>(active_vertex_streams_.size());
+		for (uint32_t i = 0; i < last_num_vertex_stream; ++ i)
 		{
 			if (active_vertex_streams_[i])
 			{
@@ -394,8 +394,8 @@ namespace KlayGE
 
 	void D3D9RenderEngine::RenderRLSWInstance(RenderLayout const & rl)
 	{
-		uint32_t const last_num_vertex_stream = active_vertex_streams_.size();
-		for (size_t i = 0; i < last_num_vertex_stream; ++ i)
+		uint32_t const last_num_vertex_stream = static_cast<uint32_t>(active_vertex_streams_.size());
+		for (uint32_t i = 0; i < last_num_vertex_stream; ++ i)
 		{
 			if (active_vertex_streams_[i])
 			{
