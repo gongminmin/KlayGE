@@ -37,6 +37,7 @@
 #include <boost/function.hpp>
 
 #include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/D3D9/D3D9GraphicsBuffer.hpp>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_RenderEngine_D3D9_d.lib")
@@ -109,7 +110,8 @@ namespace KlayGE
 		CullMode cullingMode_;
 		D3DCOLOR clearClr_;
 
-		size_t last_num_vertex_stream_;
+		std::vector<D3D9VertexBufferPtr> active_vertex_streams_;
+		D3D9IndexBufferPtr active_index_stream_;
 
 		boost::function<void (RenderLayout const &)> RenderInstance;
 	};

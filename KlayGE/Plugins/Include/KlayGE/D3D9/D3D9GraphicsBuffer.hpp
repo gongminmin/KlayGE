@@ -18,6 +18,7 @@
 #include <d3d9.h>
 
 #include <KlayGE/GraphicsBuffer.hpp>
+#include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/D3D9/D3D9Resource.hpp>
 #include <KlayGE/D3D9/D3D9RenderView.hpp>
 
@@ -52,6 +53,9 @@ namespace KlayGE
 		void* Map(BufferAccess ba);
 		void Unmap();
 
+		void Active();
+		void Deactive();
+
 		boost::shared_ptr<IDirect3DIndexBuffer9> D3D9Buffer() const;
 		void SwitchFormat(IndexFormat format);
 
@@ -78,6 +82,9 @@ namespace KlayGE
 
 		void* Map(BufferAccess ba);
 		void Unmap();
+
+		void Active(uint32_t stream, uint32_t stride);
+		void Deactive(uint32_t stream);
 
 		boost::shared_ptr<IDirect3DVertexBuffer9> D3D9Buffer() const;
 

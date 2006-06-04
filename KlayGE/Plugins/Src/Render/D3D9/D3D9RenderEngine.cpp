@@ -71,8 +71,7 @@ namespace KlayGE
 	// ¹¹Ôìº¯Êý
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D9RenderEngine::D3D9RenderEngine()
-						: cullingMode_(RenderEngine::CM_None),
-							last_num_vertex_stream_(1)
+						: cullingMode_(RenderEngine::CM_None)
 	{
 		// Create our Direct3D object
 		d3d_ = MakeCOMPtr(Direct3DCreate9(D3D_SDK_VERSION));
@@ -353,60 +352,67 @@ namespace KlayGE
 
 	void D3D9RenderEngine::DoRenderHWInstance(RenderLayout const & rl)
 	{
+		uint32_t const last_num_vertex_stream = active_vertex_streams_.size();
+		for (size_t i = 0; i < last_num_vertex_stream; ++ i)
+		{
+			if (active_vertex_streams_[i])
+			{
+				active_vertex_streams_[i]->Deactive(i);
+			}
+			TIF(d3dDevice_->SetStreamSourceFreq(i, 1UL));
+		}
+		active_vertex_streams_.resize(0);
+
 		for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
 		{
-			GraphicsBuffer& stream = *rl.GetVertexStream(i);
-			
-			D3D9VertexBuffer& d3d9vb(*checked_cast<D3D9VertexBuffer*>(&stream));
-			TIF(d3dDevice_->SetStreamSource(i,
-				d3d9vb.D3D9Buffer().get(), 0,
-				static_cast<UINT>(rl.VertexSize(i))));
+			GraphicsBufferPtr stream = rl.GetVertexStream(i);
 
-			TIF(d3dDevice_->SetStreamSourceFreq(i, D3DSTREAMSOURCE_INDEXEDDATA | rl.VertexStreamFrequency(i)));
+			D3D9VertexBuffer& d3d9vb(*checked_cast<D3D9VertexBuffer*>(stream.get()));
+			d3d9vb.Active(i, rl.VertexSize(i));
+
+			TIF(d3dDevice_->SetStreamSourceFreq(i,
+				D3DSTREAMSOURCE_INDEXEDDATA | rl.VertexStreamFrequency(i)));
+
+			active_vertex_streams_.push_back(boost::static_pointer_cast<D3D9VertexBuffer>(stream));
 		}
 		if (rl.InstanceStream())
 		{
 			uint32_t number = rl.NumVertexStreams();
+			GraphicsBufferPtr stream = rl.InstanceStream();
 
-			GraphicsBuffer& stream = *rl.InstanceStream();
-			D3D9VertexBuffer& d3d9vb(*checked_cast<D3D9VertexBuffer*>(&stream));
-			TIF(d3dDevice_->SetStreamSource(number,
-				d3d9vb.D3D9Buffer().get(), 0,
-				static_cast<UINT>(rl.InstanceSize())));
+			D3D9VertexBuffer& d3d9vb(*checked_cast<D3D9VertexBuffer*>(stream.get()));
+			d3d9vb.Active(number, rl.InstanceSize());
 
-			TIF(d3dDevice_->SetStreamSourceFreq(number, D3DSTREAMSOURCE_INSTANCEDATA | 1UL));
+			TIF(d3dDevice_->SetStreamSourceFreq(number,
+				D3DSTREAMSOURCE_INSTANCEDATA | 1UL));
+
+			active_vertex_streams_.push_back(boost::static_pointer_cast<D3D9VertexBuffer>(stream));
 		}
-
-		// Clear any previous steam sources
-		uint32_t const num_vertex_stream = rl.NumVertexStreams() + (rl.InstanceStream() ? 1 : 0);
-		for (uint32_t i = num_vertex_stream; i < last_num_vertex_stream_; ++ i)
-		{
-			d3dDevice_->SetStreamSource(i, NULL, 0, 0);
-			d3dDevice_->SetStreamSourceFreq(i, 1);
-		}
-		last_num_vertex_stream_ = num_vertex_stream;
 
 		this->RenderRL(rl);
 	}
 
 	void D3D9RenderEngine::RenderRLSWInstance(RenderLayout const & rl)
 	{
+		uint32_t const last_num_vertex_stream = active_vertex_streams_.size();
+		for (size_t i = 0; i < last_num_vertex_stream; ++ i)
+		{
+			if (active_vertex_streams_[i])
+			{
+				active_vertex_streams_[i]->Deactive(i);
+			}
+		}
+		active_vertex_streams_.resize(0);
+
 		for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
 		{
-			GraphicsBuffer& stream = *rl.GetVertexStream(i);
+			GraphicsBufferPtr stream = rl.GetVertexStream(i);
 
-			D3D9VertexBuffer& d3d9vb(*checked_cast<D3D9VertexBuffer*>(&stream));
-			TIF(d3dDevice_->SetStreamSource(i,
-				d3d9vb.D3D9Buffer().get(), 0,
-				static_cast<UINT>(rl.VertexSize(i))));
-		}
+			D3D9VertexBuffer& d3d9vb(*checked_cast<D3D9VertexBuffer*>(stream.get()));
+			d3d9vb.Active(i, rl.VertexSize(i));
 
-		uint32_t const num_vertex_stream = rl.NumVertexStreams();
-		for (uint32_t i = num_vertex_stream; i < last_num_vertex_stream_; ++ i)
-		{
-			d3dDevice_->SetStreamSource(i, NULL, 0, 0);
+			active_vertex_streams_.push_back(boost::static_pointer_cast<D3D9VertexBuffer>(stream));
 		}
-		last_num_vertex_stream_ = num_vertex_stream;
 
 		this->RenderRL(rl);
 	}
@@ -423,12 +429,18 @@ namespace KlayGE
 		D3D9RenderLayout const & d3d9_rl(*checked_cast<D3D9RenderLayout const *>(&rl));
 		TIF(d3dDevice_->SetVertexDeclaration(d3d9_rl.VertexDeclaration().get()));
 
+		if (active_index_stream_)
+		{
+			active_index_stream_->Deactive();
+			active_index_stream_.reset();
+		}
+
 		uint32_t num_passes = render_tech_->NumPasses();
 		if (rl.UseIndices())
 		{
 			D3D9IndexBuffer& d3dib(*checked_cast<D3D9IndexBuffer*>(rl.GetIndexStream().get()));
 			d3dib.SwitchFormat(rl.IndexStreamFormat());
-			d3dDevice_->SetIndices(d3dib.D3D9Buffer().get());
+			d3dib.Active();
 
 			for (uint32_t i = 0; i < num_passes; ++ i)
 			{
@@ -439,11 +451,11 @@ namespace KlayGE
 					static_cast<UINT>(rl.NumVertices()), 0, primCount));
 				pass->End();
 			}
+
+			active_index_stream_ = boost::static_pointer_cast<D3D9IndexBuffer>(rl.GetIndexStream());
 		}
 		else
 		{
-			d3dDevice_->SetIndices(NULL);
-
 			for (uint32_t i = 0; i < num_passes; ++ i)
 			{
 				RenderPassPtr pass = render_tech_->Pass(i);

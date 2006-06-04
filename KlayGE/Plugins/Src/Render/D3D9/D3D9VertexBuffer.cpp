@@ -87,6 +87,16 @@ namespace KlayGE
 		buffer_->Unlock();
 	}
 
+	void D3D9VertexBuffer::Active(uint32_t stream, uint32_t stride)
+	{
+		TIF(d3d_device_->SetStreamSource(stream, buffer_.get(), 0, stride));
+	}
+
+	void D3D9VertexBuffer::Deactive(uint32_t stream)
+	{
+		TIF(d3d_device_->SetStreamSource(stream, NULL, 0, 0));
+	}
+
 	boost::shared_ptr<IDirect3DVertexBuffer9> D3D9VertexBuffer::D3D9Buffer() const
 	{
 		return buffer_;
