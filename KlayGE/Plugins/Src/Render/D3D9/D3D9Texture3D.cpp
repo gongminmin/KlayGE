@@ -122,29 +122,14 @@ namespace KlayGE
 		BOOST_ASSERT(data != NULL);
 		BOOST_ASSERT(TT_3D == type_);
 
-		D3DLOCKED_BOX d3d_box;
-		d3dTexture3D_->LockBox(level, &d3d_box, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY);
-
-		uint8_t* dst = static_cast<uint8_t*>(data);
-		uint8_t* src = static_cast<uint8_t*>(d3d_box.pBits);
-
-		uint32_t const srcPitch = d3d_box.RowPitch;
-		uint32_t const dstPitch = this->Width(level) * bpp_ / 8;
-
-		for (uint32_t j = 0; j < this->Depth(level); ++ j)
+		ID3D9VolumePtr volume;
 		{
-			src = static_cast<uint8_t*>(d3d_box.pBits) + j * d3d_box.SlicePitch;
-
-			for (uint32_t i = 0; i < this->Height(level); ++ i)
-			{
-				std::copy(src, src + dstPitch, dst);
-
-				src += srcPitch;
-				dst += dstPitch;
-			}
+			IDirect3DVolume9* tmp_vol;
+			TIF(d3dTexture3D_->GetVolumeLevel(level, &tmp_vol));
+			volume = MakeCOMPtr(tmp_vol);
 		}
 
-		d3dTexture3D_->UnlockBox(0);
+		this->CopyVolumeToMemory(volume, data);
 	}
 
 	void D3D9Texture3D::CopyMemoryToTexture3D(int level, void* data, PixelFormat pf,

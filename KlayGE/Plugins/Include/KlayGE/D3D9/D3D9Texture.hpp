@@ -82,7 +82,8 @@ namespace KlayGE
 			{ return d3dBaseTexture_; }
 
 	protected:
-		void CopySurfaceToMemory(boost::shared_ptr<IDirect3DSurface9> const & surface, void* data);
+		void CopySurfaceToMemory(ID3D9SurfacePtr const & surface, void* data);
+		void CopyVolumeToMemory(ID3D9VolumePtr const & volume, void* data);
 
 	protected:
 		ID3D9DevicePtr			d3dDevice_;

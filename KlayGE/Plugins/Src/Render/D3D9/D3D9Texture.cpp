@@ -95,7 +95,7 @@ namespace KlayGE
 		return 0;
 	}
 
-	void D3D9Texture::CopySurfaceToMemory(boost::shared_ptr<IDirect3DSurface9> const & surface, void* data)
+	void D3D9Texture::CopySurfaceToMemory(ID3D9SurfacePtr const & surface, void* data)
 	{
 		D3DLOCKED_RECT d3d_rc;
 		TIF(surface->LockRect(&d3d_rc, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
@@ -106,18 +106,84 @@ namespace KlayGE
 		D3DSURFACE_DESC desc;
 		surface->GetDesc(&desc);
 
-		uint32_t const srcPitch = d3d_rc.Pitch;
-		uint32_t const dstPitch = desc.Width * bpp_ / 8;
-
-		for (uint32_t i = 0; i < desc.Height; ++ i)
+		if (IsCompressedFormat(format_))
 		{
-			std::copy(src, src + dstPitch, dst);
+			int block_size;
+			if (PF_DXT1 == format_)
+			{
+				block_size = 8;
+			}
+			else
+			{
+				block_size = 16;
+			}
 
-			src += srcPitch;
-			dst += dstPitch;
+			uint32_t const image_size = ((desc.Width + 3) / 4) * ((desc.Height + 3) / 4) * block_size;
+			std::copy(src, src + image_size, dst);
+		}
+		else
+		{
+			uint32_t const srcPitch = d3d_rc.Pitch;
+			uint32_t const dstPitch = desc.Width * bpp_ / 8;
+
+			for (uint32_t i = 0; i < desc.Height; ++ i)
+			{
+				std::copy(src, src + dstPitch, dst);
+
+				src += srcPitch;
+				dst += dstPitch;
+			}
 		}
 
 		surface->UnlockRect();
+	}
+
+	void D3D9Texture::CopyVolumeToMemory(ID3D9VolumePtr const & volume, void* data)
+	{
+		D3DLOCKED_BOX d3d_box;
+		volume->LockBox(&d3d_box, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY);
+
+		uint8_t* dst = static_cast<uint8_t*>(data);
+		uint8_t* src = static_cast<uint8_t*>(d3d_box.pBits);
+
+		D3DVOLUME_DESC desc;
+		volume->GetDesc(&desc);
+
+		if (IsCompressedFormat(format_))
+		{
+			int block_size;
+			if (PF_DXT1 == format_)
+			{
+				block_size = 8;
+			}
+			else
+			{
+				block_size = 16;
+			}
+
+			uint32_t const image_size = ((desc.Width + 3) / 4) * ((desc.Height + 3) / 4) * desc.Depth * block_size;
+			std::copy(src, src + image_size, dst);
+		}
+		else
+		{
+			uint32_t const srcPitch = d3d_box.RowPitch;
+			uint32_t const dstPitch = desc.Width * bpp_ / 8;
+
+			for (uint32_t j = 0; j < desc.Depth; ++ j)
+			{
+				src = static_cast<uint8_t*>(d3d_box.pBits) + j * d3d_box.SlicePitch;
+
+				for (uint32_t i = 0; i < desc.Height; ++ i)
+				{
+					std::copy(src, src + dstPitch, dst);
+
+					src += srcPitch;
+					dst += dstPitch;
+				}
+			}
+		}
+
+		volume->UnlockBox();
 	}
 
 	void D3D9Texture::CopyToMemory1D(int /*level*/, void* /*data*/)

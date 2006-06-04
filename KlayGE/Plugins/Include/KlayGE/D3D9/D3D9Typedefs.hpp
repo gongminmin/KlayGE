@@ -15,6 +15,7 @@
 
 #define NOMINMAX
 #include <d3d9.h>
+#include <d3dx9.h>
 
 namespace KlayGE
 {
@@ -26,7 +27,12 @@ namespace KlayGE
 	typedef boost::shared_ptr<IDirect3DBaseTexture9>	ID3D9BaseTexturePtr;
 	typedef boost::shared_ptr<IDirect3DSurface9>		ID3D9SurfacePtr;
 	typedef boost::shared_ptr<IDirect3DVolume9>			ID3D9VolumePtr;
-	typedef boost::shared_ptr<IDirect3DSurface9>		ID3D9SurfacePtr;
+	typedef boost::shared_ptr<IDirect3DIndexBuffer9>	ID3D9IndexBufferPtr;
+	typedef boost::shared_ptr<IDirect3DVertexBuffer9>	ID3D9VertexBufferPtr;
+	typedef boost::shared_ptr<IDirect3DVertexDeclaration9> ID3D9VertexDeclarationPtr;
+	typedef boost::shared_ptr<IDirect3DQuery9>			ID3D9QueryPtr;
+	typedef boost::shared_ptr<ID3DXEffect>				ID3DXEffectPtr;
+	typedef boost::shared_ptr<ID3DXConstantTable>		ID3DXConstantTablePtr;
 }
 
 #endif		// _D3D9TYPEDEFS_HPP

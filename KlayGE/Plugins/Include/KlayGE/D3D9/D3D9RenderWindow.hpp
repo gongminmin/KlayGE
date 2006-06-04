@@ -31,7 +31,7 @@ namespace KlayGE
 	class D3D9RenderWindow : public RenderWindow
 	{
 	public:
-		D3D9RenderWindow(boost::shared_ptr<IDirect3D9> const & d3d, D3D9Adapter const & adapter,
+		D3D9RenderWindow(ID3D9Ptr const & d3d, D3D9Adapter const & adapter,
 			std::string const & name, RenderSettings const & settings);
 		~D3D9RenderWindow();
 
@@ -51,9 +51,9 @@ namespace KlayGE
 		std::wstring const & Description() const;
 
 		D3D9Adapter const & Adapter() const;
-		boost::shared_ptr<IDirect3DDevice9> D3DDevice() const;
-		boost::shared_ptr<IDirect3DSurface9> D3DRenderSurface() const;
-		boost::shared_ptr<IDirect3DSurface9> D3DRenderZBuffer() const;
+		ID3D9DevicePtr D3DDevice() const;
+		ID3D9SurfacePtr D3DRenderSurface() const;
+		ID3D9SurfacePtr D3DRenderZBuffer() const;
 
 		// Method for dealing with resize / move & 3d library
 		void WindowMovedOrResized();
@@ -81,14 +81,14 @@ namespace KlayGE
 		D3D9Adapter					adapter_;
 
 		// Pointer to the 3D device specific for this window
-		boost::shared_ptr<IDirect3D9>			d3d_;
-		boost::shared_ptr<IDirect3DDevice9>		d3dDevice_;
-		D3DPRESENT_PARAMETERS					d3dpp_;
+		ID3D9Ptr				d3d_;
+		ID3D9DevicePtr			d3dDevice_;
+		D3DPRESENT_PARAMETERS	d3dpp_;
 		
-		boost::shared_ptr<IDirect3DSurface9>	renderSurface_;
-		boost::shared_ptr<IDirect3DSurface9>	renderZBuffer_;
+		ID3D9SurfacePtr			renderSurface_;
+		ID3D9SurfacePtr			renderZBuffer_;
 
-		std::wstring		description_;
+		std::wstring			description_;
 	};
 
 	typedef boost::shared_ptr<D3D9RenderWindow> D3D9RenderWindowPtr;

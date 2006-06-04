@@ -97,7 +97,7 @@ namespace KlayGE
 		TIF(d3d_device_->SetStreamSource(stream, NULL, 0, 0));
 	}
 
-	boost::shared_ptr<IDirect3DVertexBuffer9> D3D9VertexBuffer::D3D9Buffer() const
+	ID3D9VertexBufferPtr D3D9VertexBuffer::D3D9Buffer() const
 	{
 		return buffer_;
 	}
@@ -107,7 +107,7 @@ namespace KlayGE
 		IDirect3DVertexBuffer9* temp;
 		TIF(d3d_device_->CreateVertexBuffer(static_cast<UINT>(this->Size()),
 			D3DUSAGE_DYNAMIC, 0, D3DPOOL_SYSTEMMEM, &temp, NULL));
-		boost::shared_ptr<IDirect3DVertexBuffer9> buffer = MakeCOMPtr(temp);
+		ID3D9VertexBufferPtr buffer = MakeCOMPtr(temp);
 
 		uint8_t* src;
 		uint8_t* dest;
@@ -131,7 +131,7 @@ namespace KlayGE
 		TIF(d3d_device_->CreateVertexBuffer(static_cast<UINT>(this->Size()),
 				(BU_Dynamic == usage_) ? D3DUSAGE_DYNAMIC : 0,
 				0, D3DPOOL_DEFAULT, &temp, NULL));
-		boost::shared_ptr<IDirect3DVertexBuffer9> buffer = MakeCOMPtr(temp);
+		ID3D9VertexBufferPtr buffer = MakeCOMPtr(temp);
 
 		uint8_t* src;
 		uint8_t* dest;

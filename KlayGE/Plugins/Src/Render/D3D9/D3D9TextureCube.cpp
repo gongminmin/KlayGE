@@ -95,11 +95,7 @@ namespace KlayGE
 				TIF(other.d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &temp));
 				dst = MakeCOMPtr(temp);
 
-				if (Texture::TU_RenderTarget == target.Usage())
-				{
-					TIF(d3dDevice_->StretchRect(src.get(), NULL, dst.get(), NULL, D3DTEXF_LINEAR));
-				}
-				else
+				if (FAILED(d3dDevice_->StretchRect(src.get(), NULL, dst.get(), NULL, D3DTEXF_LINEAR)))
 				{
 					TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_LINEAR, 0));
 				}
@@ -117,7 +113,7 @@ namespace KlayGE
 		BOOST_ASSERT(level < numMipMaps_);
 		BOOST_ASSERT(data != NULL);
 
-		boost::shared_ptr<IDirect3DSurface9> surface;
+		ID3D9SurfacePtr surface;
 		{
 			IDirect3DSurface9* tmp_surface;
 			d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &tmp_surface);

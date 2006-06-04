@@ -34,7 +34,7 @@ namespace KlayGE
 		uint32_t SamplesPassed();
 
 	private:
-		boost::shared_ptr<IDirect3DQuery9> query_;
+		ID3D9QueryPtr query_;
 	};
 }
 

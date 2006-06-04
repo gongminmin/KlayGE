@@ -62,7 +62,7 @@ namespace KlayGE
 
 		void OnRenderBegin();
 
-	private:
+	protected:
 		Vector4 clr_;
 	};
 
@@ -76,7 +76,7 @@ namespace KlayGE
 
 		void OnRenderBegin();
 
-	private:
+	protected:
 		Vector4 clr_;
 	};
 
@@ -90,7 +90,7 @@ namespace KlayGE
 
 		void OnRenderBegin();
 
-	private:
+	protected:
 		Vector4 clr_;
 	};
 
@@ -104,7 +104,7 @@ namespace KlayGE
 
 		void OnRenderBegin();
 
-	private:
+	protected:
 		Vector4 clr_;
 	};
 
@@ -120,7 +120,7 @@ namespace KlayGE
 
 		void OnRenderBegin();
 
-	private:
+	protected:
 		SamplerPtr cube_sampler_;
 	};
 

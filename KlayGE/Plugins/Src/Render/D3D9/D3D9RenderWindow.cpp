@@ -126,7 +126,7 @@ namespace KlayGE
 		return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 
-	D3D9RenderWindow::D3D9RenderWindow(boost::shared_ptr<IDirect3D9> const & d3d,
+	D3D9RenderWindow::D3D9RenderWindow(ID3D9Ptr const & d3d,
 										D3D9Adapter const & adapter, std::string const & name,
 										RenderSettings const & settings)
 						: d3d_(d3d),
@@ -436,17 +436,17 @@ namespace KlayGE
 		return adapter_;
 	}
 
-	boost::shared_ptr<IDirect3DDevice9> D3D9RenderWindow::D3DDevice() const
+	ID3D9DevicePtr D3D9RenderWindow::D3DDevice() const
 	{
 		return d3dDevice_;
 	}
 
-	boost::shared_ptr<IDirect3DSurface9> D3D9RenderWindow::D3DRenderSurface() const
+	ID3D9SurfacePtr D3D9RenderWindow::D3DRenderSurface() const
 	{
 		return renderSurface_;
 	}
 
-	boost::shared_ptr<IDirect3DSurface9> D3D9RenderWindow::D3DRenderZBuffer() const
+	ID3D9SurfacePtr D3D9RenderWindow::D3DRenderZBuffer() const
 	{
 		return renderZBuffer_;
 	}

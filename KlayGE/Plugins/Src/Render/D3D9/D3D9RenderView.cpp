@@ -185,7 +185,7 @@ namespace KlayGE
 	void D3D9Texture3DRenderView::DoOnLostDevice()
 	{
 		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		boost::shared_ptr<IDirect3DDevice9> d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
+		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
 
 		ID3D9SurfacePtr sys_mem_surf = this->CreateSurface(D3DPOOL_SYSTEMMEM);
 		TIF(d3d_device->GetRenderTargetData(surface_.get(), sys_mem_surf.get()));
@@ -195,7 +195,7 @@ namespace KlayGE
 	void D3D9Texture3DRenderView::DoOnResetDevice()
 	{
 		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		boost::shared_ptr<IDirect3DDevice9> d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
+		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
 
 		ID3D9SurfacePtr default_surf = this->CreateSurface(D3DPOOL_DEFAULT);
 		TIF(D3DXLoadSurfaceFromSurface(surface_.get(), NULL, NULL,
@@ -321,7 +321,7 @@ namespace KlayGE
 	void D3D9GraphicsBufferRenderView::DoOnLostDevice()
 	{
 		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		boost::shared_ptr<IDirect3DDevice9> d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
+		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
 
 		ID3D9SurfacePtr sys_mem_surf = this->CreateGBSurface(D3DPOOL_SYSTEMMEM);
 		TIF(d3d_device->GetRenderTargetData(surface_.get(), sys_mem_surf.get()));
@@ -331,7 +331,7 @@ namespace KlayGE
 	void D3D9GraphicsBufferRenderView::DoOnResetDevice()
 	{
 		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		boost::shared_ptr<IDirect3DDevice9> d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
+		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
 
 		ID3D9SurfacePtr default_surf = this->CreateGBSurface(D3DPOOL_DEFAULT);
 		TIF(D3DXLoadSurfaceFromSurface(surface_.get(), NULL, NULL,

@@ -19,6 +19,7 @@
 
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/RenderLayout.hpp>
+#include <KlayGE/D3D9/D3D9Typedefs.hpp>
 #include <KlayGE/D3D9/D3D9Resource.hpp>
 #include <KlayGE/D3D9/D3D9RenderView.hpp>
 
@@ -56,7 +57,7 @@ namespace KlayGE
 		void Active();
 		void Deactive();
 
-		boost::shared_ptr<IDirect3DIndexBuffer9> D3D9Buffer() const;
+		ID3D9IndexBufferPtr D3D9Buffer() const;
 		void SwitchFormat(IndexFormat format);
 
 	private:
@@ -69,8 +70,8 @@ namespace KlayGE
 	private:
 		IndexFormat format_;
 
-		boost::shared_ptr<IDirect3DDevice9> d3d_device_;
-		boost::shared_ptr<IDirect3DIndexBuffer9> buffer_;
+		ID3D9DevicePtr d3d_device_;
+		ID3D9IndexBufferPtr buffer_;
 	};
 	typedef boost::shared_ptr<D3D9IndexBuffer> D3D9IndexBufferPtr;
 
@@ -86,7 +87,7 @@ namespace KlayGE
 		void Active(uint32_t stream, uint32_t stride);
 		void Deactive(uint32_t stream);
 
-		boost::shared_ptr<IDirect3DVertexBuffer9> D3D9Buffer() const;
+		ID3D9VertexBufferPtr D3D9Buffer() const;
 
 	private:
 		void DoResize();
@@ -96,8 +97,8 @@ namespace KlayGE
 		void DoOnResetDevice();
 
 	private:
-		boost::shared_ptr<IDirect3DDevice9> d3d_device_;
-		boost::shared_ptr<IDirect3DVertexBuffer9> buffer_;
+		ID3D9DevicePtr d3d_device_;
+		ID3D9VertexBufferPtr buffer_;
 	};
 	typedef boost::shared_ptr<D3D9VertexBuffer> D3D9VertexBufferPtr;
 }

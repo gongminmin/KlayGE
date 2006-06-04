@@ -256,6 +256,7 @@ namespace std
 	template<>
 	class numeric_limits<KlayGE::half>
 	{
+	public:
 		static bool const is_specialized = true;
 		static int const digits = HALF_MANT_DIG;
 		static int const digits10 = HALF_DIG;

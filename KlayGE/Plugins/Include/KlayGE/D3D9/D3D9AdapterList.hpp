@@ -22,7 +22,7 @@ namespace KlayGE
 	public:
 		D3D9AdapterList();
 
-		void Enumerate(boost::shared_ptr<IDirect3D9> const & d3d);
+		void Enumerate(ID3D9Ptr const & d3d);
 
 		size_t NumAdapter() const;
 		D3D9Adapter const & Adapter(size_t index) const;

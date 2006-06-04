@@ -155,7 +155,7 @@ namespace KlayGE
 		d3d_device_->SetIndices(NULL);
 	}
 
-	boost::shared_ptr<IDirect3DIndexBuffer9> D3D9IndexBuffer::D3D9Buffer() const
+	ID3D9IndexBufferPtr D3D9IndexBuffer::D3D9Buffer() const
 	{
 		return buffer_;
 	}
@@ -168,7 +168,7 @@ namespace KlayGE
 		IDirect3DIndexBuffer9* temp;
 		TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->Size()), D3DUSAGE_DYNAMIC,
 			(IF_Index32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_SYSTEMMEM, &temp, NULL));
-		boost::shared_ptr<IDirect3DIndexBuffer9> buffer = MakeCOMPtr(temp);
+		ID3D9IndexBufferPtr buffer = MakeCOMPtr(temp);
 
 		uint8_t* src;
 		uint8_t* dest;
@@ -186,13 +186,13 @@ namespace KlayGE
 	void D3D9IndexBuffer::DoOnResetDevice()
 	{
 		D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		boost::shared_ptr<IDirect3DDevice9> d3dDevice(renderEngine.D3DDevice());
+		ID3D9DevicePtr d3dDevice(renderEngine.D3DDevice());
 
 		IDirect3DIndexBuffer9* temp;
 		TIF(d3dDevice->CreateIndexBuffer(static_cast<UINT>(this->Size()), 
 				(BU_Dynamic == usage_) ? D3DUSAGE_DYNAMIC : 0,
 				(IF_Index32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_DEFAULT, &temp, NULL));
-		boost::shared_ptr<IDirect3DIndexBuffer9> buffer = MakeCOMPtr(temp);
+		ID3D9IndexBufferPtr buffer = MakeCOMPtr(temp);
 
 		uint8_t* src;
 		uint8_t* dest;

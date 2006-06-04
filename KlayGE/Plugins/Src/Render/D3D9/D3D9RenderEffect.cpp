@@ -348,44 +348,44 @@ namespace KlayGE
 
 	void D3D9RenderEffectParameterBool::DoFlush(bool const & value)
 	{
-		boost::shared_ptr<ID3DXEffect> d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
+		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		BOOL tmp = value;
 		TIF(d3dx_effect->SetValue(name_.c_str(), &tmp, sizeof(tmp)));
 	}
 
 	void D3D9RenderEffectParameterInt::DoFlush(int const & value)
 	{
-		boost::shared_ptr<ID3DXEffect> d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
+		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
 	}
 
 	void D3D9RenderEffectParameterFloat::DoFlush(float const & value)
 	{
-		boost::shared_ptr<ID3DXEffect> d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
+		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
 	}
 
 	void D3D9RenderEffectParameterVector2::DoFlush(Vector2 const & value)
 	{
-		boost::shared_ptr<ID3DXEffect> d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
+		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
 	}
 
 	void D3D9RenderEffectParameterVector3::DoFlush(Vector3 const & value)
 	{
-		boost::shared_ptr<ID3DXEffect> d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
+		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
 	}
 
 	void D3D9RenderEffectParameterVector4::DoFlush(Vector4 const & value)
 	{
-		boost::shared_ptr<ID3DXEffect> d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
+		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
 	}
 
 	void D3D9RenderEffectParameterMatrix4::DoFlush(Matrix4 const & value)
 	{
-		boost::shared_ptr<ID3DXEffect> d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
+		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
 	}
 
@@ -413,33 +413,33 @@ namespace KlayGE
 
 	void D3D9RenderEffectParameterBoolArray::DoFlush(std::vector<bool> const & value)
 	{
-		boost::shared_ptr<ID3DXEffect> d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
+		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		std::vector<BOOL> tmp(value.begin(), value.end());
 		TIF(d3dx_effect->SetBoolArray(name_.c_str(), &tmp[0], static_cast<UINT>(tmp.size())));
 	}
 
 	void D3D9RenderEffectParameterIntArray::DoFlush(std::vector<int> const & value)
 	{
-		boost::shared_ptr<ID3DXEffect> d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
+		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetIntArray(name_.c_str(), &value[0], static_cast<UINT>(value.size())));
 	}
 
 	void D3D9RenderEffectParameterFloatArray::DoFlush(std::vector<float> const & value)
 	{
-		boost::shared_ptr<ID3DXEffect> d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
+		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetFloatArray(name_.c_str(), &value[0], static_cast<UINT>(value.size())));
 	}
 
 	void D3D9RenderEffectParameterVector4Array::DoFlush(std::vector<Vector4> const & value)
 	{
-		boost::shared_ptr<ID3DXEffect> d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
+		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetVectorArray(name_.c_str(), reinterpret_cast<D3DXVECTOR4 const *>(&value[0]),
 			static_cast<UINT>(value.size())));
 	}
 
 	void D3D9RenderEffectParameterMatrix4Array::DoFlush(std::vector<Matrix4> const & value)
 	{
-		boost::shared_ptr<ID3DXEffect> d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
+		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetMatrixArray(name_.c_str(), reinterpret_cast<D3DXMATRIX const *>(&value[0]),
 			static_cast<UINT>(value.size())));
 	}

@@ -101,14 +101,14 @@ namespace KlayGE
 
 	// 获取D3D接口
 	/////////////////////////////////////////////////////////////////////////////////
-	boost::shared_ptr<IDirect3D9> const & D3D9RenderEngine::D3DObject() const
+	ID3D9Ptr const & D3D9RenderEngine::D3DObject() const
 	{
 		return d3d_;
 	}
 
 	// 获取D3D Device接口
 	/////////////////////////////////////////////////////////////////////////////////
-	boost::shared_ptr<IDirect3DDevice9> const & D3D9RenderEngine::D3DDevice() const
+	ID3D9DevicePtr const & D3D9RenderEngine::D3DDevice() const
 	{
 		return d3dDevice_;
 	}
@@ -901,7 +901,7 @@ namespace KlayGE
 		IDirect3DSurface9* surf;
 		D3DSURFACE_DESC surfDesc;
 		d3dDevice_->GetDepthStencilSurface(&surf);
-		boost::shared_ptr<IDirect3DSurface9> surf_ptr = MakeCOMPtr(surf);
+		ID3D9SurfacePtr surf_ptr = MakeCOMPtr(surf);
 		surf_ptr->GetDesc(&surfDesc);
 
 		if (D3DFMT_D24S8 == surfDesc.Format)

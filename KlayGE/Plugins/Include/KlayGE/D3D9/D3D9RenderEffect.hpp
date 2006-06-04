@@ -42,6 +42,7 @@
 #include <d3dx9effect.h>
 
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/D3D9/D3D9Typedefs.hpp>
 #include <KlayGE/D3D9/D3D9Resource.hpp>
 
 #ifdef KLAYGE_DEBUG
@@ -64,7 +65,7 @@ namespace KlayGE
 	public:
 		explicit D3D9RenderEffect(std::string const & srcData);
 
-		boost::shared_ptr<ID3DXEffect> const & D3DXEffect() const
+		ID3DXEffectPtr const & D3DXEffect() const
 			{ return d3dx_effect_; }
 
 	private:
@@ -77,7 +78,7 @@ namespace KlayGE
 		RenderTechniquePtr MakeRenderTechnique(uint32_t n);
 
 	private:
-		boost::shared_ptr<ID3DXEffect> d3dx_effect_;
+		ID3DXEffectPtr d3dx_effect_;
 	};
 
 	class D3D9RenderTechnique : public RenderTechnique
@@ -108,7 +109,7 @@ namespace KlayGE
 	private:
 		D3DXHANDLE pass_;
 
-		boost::shared_ptr<ID3DXConstantTable> constant_table_[2];
+		ID3DXConstantTablePtr constant_table_[2];
 		MapVector<RenderEffectParameterPtr, uint32_t> samplers_[2];
 	};
 

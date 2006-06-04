@@ -47,7 +47,7 @@ namespace KlayGE
 
 	// 枚举系统显卡
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9AdapterList::Enumerate(boost::shared_ptr<IDirect3D9> const & d3d)
+	void D3D9AdapterList::Enumerate(ID3D9Ptr const & d3d)
 	{
 		// 枚举系统中的适配器 (通常只有一个，除非有几块显卡)
 		for (uint32_t i = 0; i < d3d->GetAdapterCount(); ++ i)

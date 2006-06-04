@@ -19,6 +19,7 @@
 #include <d3d9.h>
 
 #include <KlayGE/RenderLayout.hpp>
+#include <KlayGE/D3D9/D3D9Typedefs.hpp>
 #include <KlayGE/D3D9/D3D9Resource.hpp>
 
 #ifdef KLAYGE_DEBUG
@@ -35,7 +36,7 @@ namespace KlayGE
 		explicit D3D9RenderLayout(buffer_type type);
 		~D3D9RenderLayout();
 		
-		boost::shared_ptr<IDirect3DVertexDeclaration9> VertexDeclaration() const;
+		ID3D9VertexDeclarationPtr VertexDeclaration() const;
 
 	private:
 		void DoOnLostDevice();
@@ -46,7 +47,7 @@ namespace KlayGE
 		vertex_elems_type vertex_elems_;
 
 		mutable bool dirty_decl_;
-		mutable boost::shared_ptr<IDirect3DVertexDeclaration9> decl_;
+		mutable ID3D9VertexDeclarationPtr decl_;
 	};
 }
 

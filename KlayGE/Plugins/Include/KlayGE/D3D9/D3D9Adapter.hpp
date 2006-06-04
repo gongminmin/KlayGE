@@ -4,6 +4,7 @@
 #include <d3d9.h>
 #include <vector>
 #include <string>
+#include <KlayGE/D3D9/D3D9Typedefs.hpp>
 #include <KlayGE/D3D9/D3D9VideoMode.hpp>
 
 #ifdef KLAYGE_DEBUG
@@ -24,7 +25,7 @@ namespace KlayGE
 			D3DADAPTER_IDENTIFIER9 const & d3dadapterIdentifer,
 			D3DDISPLAYMODE const & d3ddmDesktop);
 
-		void Enumerate(boost::shared_ptr<IDirect3D9> const & d3d);
+		void Enumerate(ID3D9Ptr const & d3d);
 
 		// ∑√Œ …Ë±∏√Ë ˆ◊÷∑˚¥Æ
 		std::string const Description() const;

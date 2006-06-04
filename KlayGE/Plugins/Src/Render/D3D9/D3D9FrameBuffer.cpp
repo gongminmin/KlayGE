@@ -44,7 +44,7 @@ namespace KlayGE
 		viewport_.top	= top_;
 	}
 
-	boost::shared_ptr<IDirect3DSurface9> D3D9FrameBuffer::D3DRenderSurface(uint32_t n) const
+	ID3D9SurfacePtr D3D9FrameBuffer::D3DRenderSurface(uint32_t n) const
 	{
 		if (n < clr_views_.size())
 		{
@@ -53,11 +53,11 @@ namespace KlayGE
 		}
 		else
 		{
-			return boost::shared_ptr<IDirect3DSurface9>();
+			return ID3D9SurfacePtr();
 		}
 	}
 	
-	boost::shared_ptr<IDirect3DSurface9> D3D9FrameBuffer::D3DRenderZBuffer() const
+	ID3D9SurfacePtr D3D9FrameBuffer::D3DRenderZBuffer() const
 	{
 		if (rs_view_)
 		{
@@ -66,7 +66,7 @@ namespace KlayGE
 		}
 		else
 		{
-			return boost::shared_ptr<IDirect3DSurface9>();
+			return ID3D9SurfacePtr();
 		}
 	}
 

@@ -106,7 +106,7 @@ namespace KlayGE
 		BOOST_ASSERT(level < numMipMaps_);
 		BOOST_ASSERT(data != NULL);
 
-		boost::shared_ptr<IDirect3DSurface9> surface;
+		ID3D9SurfacePtr surface;
 		{
 			IDirect3DSurface9* tmp_surface;
 			TIF(d3dTexture1D_->GetSurfaceLevel(level, &tmp_surface));

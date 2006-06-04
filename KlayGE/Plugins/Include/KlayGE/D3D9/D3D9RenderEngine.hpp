@@ -37,6 +37,7 @@
 #include <boost/function.hpp>
 
 #include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/D3D9/D3D9Typedefs.hpp>
 #include <KlayGE/D3D9/D3D9GraphicsBuffer.hpp>
 
 #ifdef KLAYGE_DEBUG
@@ -58,8 +59,8 @@ namespace KlayGE
 
 		std::wstring const & Name() const;
 
-		boost::shared_ptr<IDirect3D9> const & D3DObject() const;
-		boost::shared_ptr<IDirect3DDevice9> const & D3DDevice() const;
+		ID3D9Ptr const & D3DObject() const;
+		ID3D9DevicePtr const & D3DDevice() const;
 
 		void ClearColor(Color const & clr);
 		void Clear(uint32_t masks);
@@ -100,8 +101,8 @@ namespace KlayGE
 
 		// Direct3D rendering device
 		// Only created after top-level window created
-		boost::shared_ptr<IDirect3D9>		d3d_;
-		boost::shared_ptr<IDirect3DDevice9>	d3dDevice_;
+		ID3D9Ptr		d3d_;
+		ID3D9DevicePtr	d3dDevice_;
 
 		// List of D3D drivers installed (video cards)
 		// Enumerates itself
