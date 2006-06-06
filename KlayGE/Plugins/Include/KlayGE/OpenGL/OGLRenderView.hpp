@@ -87,6 +87,9 @@ namespace KlayGE
 		void OnUnbind(FrameBuffer& fb, uint32_t att);
 
 	private:
+		void CopyToSlice(uint32_t att);
+
+	private:
 		OGLTexture3D& texture_3d_;
 		uint32_t slice_;
 		int level_;

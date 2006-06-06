@@ -353,19 +353,37 @@ namespace KlayGE
 					GL_TEXTURE_RECTANGLE_ARB, 0, 0);
 				break;
 			}
+
+			this->CopyToSlice(att);
 		}
 
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
 
-	void OGLTexture3DRenderView::OnUnbind(FrameBuffer& /*fb*/, uint32_t /*att*/)
+	void OGLTexture3DRenderView::OnUnbind(FrameBuffer& /*fb*/, uint32_t att)
 	{
 		BOOST_ASSERT(copy_to_tex_ != 0);
 		if (2 == copy_to_tex_)
 		{
-			glBindTexture(GL_TEXTURE_3D, tex_);
-			glCopyTexSubImage3D(GL_TEXTURE_3D, level_, 0, 0, slice_, 0, 0, width_, height_);
+			this->CopyToSlice(att);
 		}
+	}
+
+	void OGLTexture3DRenderView::CopyToSlice(uint32_t att)
+	{
+		switch (att)
+		{
+		case FrameBuffer::ATT_DepthStencil:
+			glReadBuffer(GL_DEPTH_ATTACHMENT_EXT);
+			break;
+
+		default:
+			glReadBuffer(GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0);
+			break;
+		}
+
+		glBindTexture(GL_TEXTURE_3D, tex_);
+		glCopyTexSubImage3D(GL_TEXTURE_3D, level_, 0, 0, slice_, 0, 0, width_, height_);
 	}
 
 

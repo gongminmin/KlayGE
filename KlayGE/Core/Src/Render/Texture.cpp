@@ -289,6 +289,10 @@ namespace KlayGE
 						{
 							format = PF_AL8;
 						}
+						else
+						{
+							format = PF_L16;
+						}
 						break;
 
 					default:
@@ -668,6 +672,16 @@ namespace KlayGE
 
 				desc.pixel_format.rgb_alpha_bit_mask = 0x0000FF00;
 				desc.pixel_format.r_bit_mask = 0x000000FF;
+				desc.pixel_format.g_bit_mask = 0x00000000;
+				desc.pixel_format.b_bit_mask = 0x00000000;
+				break;
+
+			case PF_L16:
+				desc.pixel_format.flags |= DDSPF_LUMINANCE;
+				desc.pixel_format.rgb_bit_count = 16;
+
+				desc.pixel_format.rgb_alpha_bit_mask = 0x00000000;
+				desc.pixel_format.r_bit_mask = 0x0000FFFF;
 				desc.pixel_format.g_bit_mask = 0x00000000;
 				desc.pixel_format.b_bit_mask = 0x00000000;
 				break;
