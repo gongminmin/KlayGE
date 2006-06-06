@@ -178,7 +178,11 @@ namespace KlayGE
 			{
 				SamplerPtr s;
 				param->Value(s);
-				checked_cast<D3D9Texture*>(s->GetTexture().get())->OnLostDevice();
+				if (s && s->GetTexture())
+				{
+					checked_cast<D3D9Texture*>(s->GetTexture().get())->OnLostDevice();
+				}
+
 				iter->second.second = true;
 			}
 		}
@@ -197,7 +201,11 @@ namespace KlayGE
 			{
 				SamplerPtr s;
 				param->Value(s);
-				checked_cast<D3D9Texture*>(s->GetTexture().get())->OnResetDevice();
+				if (s && s->GetTexture())
+				{
+					checked_cast<D3D9Texture*>(s->GetTexture().get())->OnResetDevice();
+				}
+
 				iter->second.second = true;
 			}
 		}
