@@ -573,6 +573,12 @@ namespace KlayGE
 		case PF_A2RGB10:
 			return D3DFMT_A2B10G10R10;
 
+		case PF_GR16:
+			return D3DFMT_G16R16;
+
+		case PF_ABGR16:
+			return D3DFMT_A16B16G16R16;
+
 		case PF_R16F:
 			return D3DFMT_R16F;
 
@@ -650,6 +656,12 @@ namespace KlayGE
 
 		case D3DFMT_A2B10G10R10:
 			return PF_A2RGB10;
+
+		case D3DFMT_G16R16:
+			return PF_GR16;
+
+		case D3DFMT_A16B16G16R16:
+			return PF_ABGR16;
 
 		case D3DFMT_R16F:
 			return PF_R16F;

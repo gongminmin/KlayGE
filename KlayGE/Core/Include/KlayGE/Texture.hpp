@@ -1,8 +1,11 @@
 // Texture.hpp
 // KlayGE 纹理类 实现文件
-// Ver 3.2.0
+// Ver 3.3.0
 // 版权所有(C) 龚敏敏, 2003-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.3.0
+// 支持GR16和ABGR16 (2006.6.7)
 //
 // 3.2.0
 // 支持sRGB (2006.4.24)
@@ -67,6 +70,10 @@ namespace KlayGE
 		PF_ARGB8,
 		// 32-bit pixel format, 2 bits for alpha, 10 bits for red, green and blue.
 		PF_A2RGB10,
+		// 32-bit pixel format, 16 bits for red and green.
+		PF_GR16,
+		// 64-bit pixel format, 16 bits for alpha, blue, green and red.
+		PF_ABGR16,
 
 		// 16-bit pixel format, 16 bits floating-point for red.
 		PF_R16F,
@@ -129,6 +136,7 @@ namespace KlayGE
 		case PF_ARGB8:
 		case PF_ARGB8_SRGB:
 		case PF_A2RGB10:
+		case PF_GR16:
 		case PF_GR16F:
 		case PF_R32F:
 		case PF_DXT3:
@@ -139,6 +147,7 @@ namespace KlayGE
 		case PF_D24S8:
 			return 32;
 
+		case PF_ABGR16:
 		case PF_ABGR16F:
 		case PF_GR32F:
 			return 64;

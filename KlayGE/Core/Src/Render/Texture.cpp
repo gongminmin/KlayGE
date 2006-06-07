@@ -1,8 +1,11 @@
 // Texture.cpp
 // KlayGE 纹理类 实现文件
-// Ver 2.4.0
-// 版权所有(C) 龚敏敏, 2005
+// Ver 3.3.0
+// 版权所有(C) 龚敏敏, 2005-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.3.0
+// 支持GR16和ABGR16 (2006.6.7)
 //
 // 2.4.0
 // 初次建立 (2005.3.6)
@@ -170,6 +173,10 @@ namespace KlayGE
 		{
 			switch (desc.pixel_format.four_cc)
 			{
+			case 36:
+				format = PF_ABGR16;
+				break;
+
 			case 111:
 				format = PF_R16F;
 				break;
@@ -261,7 +268,17 @@ namespace KlayGE
 						}
 						else
 						{
-							BOOST_ASSERT(false);
+							if ((0x00000000 == desc.pixel_format.rgb_alpha_bit_mask)
+								&& (0x0000FFFF == desc.pixel_format.r_bit_mask)
+								&& (0xFFFF0000 == desc.pixel_format.g_bit_mask)
+								&& (0x00000000 == desc.pixel_format.b_bit_mask))
+							{
+								format = PF_GR16;
+							}
+							else
+							{
+								BOOST_ASSERT(false);
+							}
 						}
 					}
 					break;
@@ -545,12 +562,17 @@ namespace KlayGE
 
 		desc.pixel_format.size = sizeof(desc.pixel_format);
 
-		if (IsFloatFormat(texture->Format()) || IsCompressedFormat(texture->Format()))
+		if ((PF_ABGR16 == texture->Format())
+			|| IsFloatFormat(texture->Format()) || IsCompressedFormat(texture->Format()))
 		{
 			desc.pixel_format.flags |= DDSPF_FOURCC;
 
 			switch (texture->Format())
 			{
+			case PF_ABGR16:
+				desc.pixel_format.four_cc = 36;
+				break;
+
 			case PF_R16F:
 				desc.pixel_format.four_cc = 111;
 				break;
@@ -642,6 +664,16 @@ namespace KlayGE
 				desc.pixel_format.r_bit_mask = 0x3FF00000;
 				desc.pixel_format.g_bit_mask = 0x000FFC00;
 				desc.pixel_format.b_bit_mask = 0x000003FF;
+				break;
+
+			case PF_GR16:
+				desc.pixel_format.flags |= DDSPF_RGB;
+				desc.pixel_format.rgb_bit_count = 32;
+
+				desc.pixel_format.rgb_alpha_bit_mask = 0x00000000;
+				desc.pixel_format.r_bit_mask = 0x0000FFFF;
+				desc.pixel_format.g_bit_mask = 0xFFFF0000;
+				desc.pixel_format.b_bit_mask = 0x00000000;
 				break;
 
 			case PF_AL4:

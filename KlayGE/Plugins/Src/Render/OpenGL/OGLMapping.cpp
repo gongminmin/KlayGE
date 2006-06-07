@@ -339,6 +339,18 @@ namespace KlayGE
 			gltype = GL_UNSIGNED_INT_2_10_10_10_REV;
 			break;
 
+		case PF_GR16:
+			internalFormat = GL_LUMINANCE16_ALPHA16;
+			glformat = GL_LUMINANCE_ALPHA;
+			gltype = GL_UNSIGNED_SHORT;
+			break;
+
+		case PF_ABGR16:
+			internalFormat = GL_RGBA16;
+			glformat = GL_BGRA;
+			gltype = GL_UNSIGNED_SHORT;
+			break;
+
 		case PF_DXT1:
 			internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
 			glformat = GL_BGRA;
