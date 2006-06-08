@@ -224,6 +224,8 @@ namespace KlayGE
 		{
 			glEnable(GL_MULTISAMPLE);
 			glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+			glEnable(GL_SAMPLE_COVERAGE);
+			glSampleCoverage(settings.multiSample / 16.0f, false);
 		}
 
 		viewport_.left = 0;
