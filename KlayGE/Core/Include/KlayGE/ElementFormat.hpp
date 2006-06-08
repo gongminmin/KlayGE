@@ -56,12 +56,16 @@ namespace KlayGE
 		EF_R16F,
 		// 32-bit element format, 16 bits floating-point for green and red.
 		EF_GR16F,
+		// 48-bit element format, 16 bits floating-point for blue, green and red.
+		EF_BGR16F,
 		// 64-bit element format, 16 bits floating-point for alpha, blue, green and red.
 		EF_ABGR16F,
 		// 32-bit element format, 32 bits floating-point for red.
 		EF_R32F,
 		// 64-bit element format, 32 bits floating-point for green and red.
 		EF_GR32F,
+		// 96-bit element format, 32 bits floating-point for blue, green and red.
+		EF_BGR32F,
 		// 128-bit element format, 32 bits floating-point for alpha, blue, green and red.
 		EF_ABGR32F,
 
@@ -134,10 +138,11 @@ namespace KlayGE
 
 		case EF_ABGR32F:
 			return 128;
-		}
 
-		BOOST_ASSERT(false);
-		return 0;
+		default:
+			BOOST_ASSERT(false);
+			return 0;
+		}
 	}
 
 	inline bool
@@ -218,6 +223,96 @@ namespace KlayGE
 
 		default:
 			return false;
+		}
+	}
+
+	inline uint32_t
+	NumComponents(ElementFormat format)
+	{
+		switch (format)
+		{
+		case EF_L8:
+		case EF_A8:
+		case EF_L16:
+		case EF_R16F:
+		case EF_R32F:
+		case EF_D16:
+		case EF_D32:
+			return 1;
+
+		case EF_AL4:
+		case EF_AL8:
+		case EF_GR16:
+		case EF_GR16F:
+		case EF_GR32F:
+		case EF_D24X8:
+		case EF_D24S8:
+			return 2;
+
+		case EF_R5G6B5:
+		case EF_BGR16F:
+		case EF_BGR32F:
+			return 3;
+
+		case EF_ARGB4:
+		case EF_XRGB8:
+		case EF_ARGB8:
+		case EF_A2RGB10:
+		case EF_ABGR16:
+		case EF_ABGR16F:
+		case EF_ABGR32F:
+		case EF_DXT1:
+		case EF_DXT3:
+		case EF_DXT5:
+		case EF_ARGB8_SRGB:
+		case EF_DXT1_SRGB:
+		case EF_DXT3_SRGB:
+		case EF_DXT5_SRGB:
+			return 4;
+
+		default:
+			BOOST_ASSERT(false);
+			return 0;
+		}
+	}
+
+	inline uint32_t
+	ComponentBpps(ElementFormat format)
+	{
+		switch (format)
+		{
+		case EF_AL4:
+		case EF_ARGB4:
+			return 4;
+
+		case EF_L8:
+		case EF_A8:
+		case EF_AL8:
+		case EF_XRGB8:
+		case EF_ARGB8:
+		case EF_ARGB8_SRGB:
+			return 8;
+
+		case EF_L16:
+		case EF_GR16:
+		case EF_ABGR16:
+		case EF_R16F:
+		case EF_GR16F:
+		case EF_BGR16F:
+		case EF_ABGR16F:
+		case EF_D16:
+			return 16;
+
+		case EF_R32F:
+		case EF_GR32F:
+		case EF_BGR32F:
+		case EF_ABGR32F:
+		case EF_D32:
+			return 32;
+
+		default:
+			BOOST_ASSERT(false);
+			return 0;
 		}
 	}
 }

@@ -351,6 +351,54 @@ namespace KlayGE
 			gltype = GL_UNSIGNED_SHORT;
 			break;
 
+		case EF_R16F:
+			internalFormat = GL_LUMINANCE16F_ARB;
+			glformat = GL_LUMINANCE;
+			gltype = GL_HALF_FLOAT_ARB;
+			break;
+
+		case EF_GR16F:
+			internalFormat = GL_LUMINANCE_ALPHA16F_ARB;
+			glformat = GL_LUMINANCE_ALPHA;
+			gltype = GL_HALF_FLOAT_ARB;
+			break;
+
+		case EF_BGR16F:
+			internalFormat = GL_RGB16F_ARB;
+			glformat = GL_RGB;
+			gltype = GL_HALF_FLOAT_ARB;
+			break;
+
+		case EF_ABGR16F:
+			internalFormat = GL_RGBA16F_ARB;
+			glformat = GL_RGBA;
+			gltype = GL_HALF_FLOAT_ARB;
+			break;
+
+		case EF_R32F:
+			internalFormat = GL_LUMINANCE32F_ARB;
+			glformat = GL_LUMINANCE;
+			gltype = GL_FLOAT;
+			break;
+
+		case EF_GR32F:
+			internalFormat = GL_LUMINANCE_ALPHA32F_ARB;
+			glformat = GL_LUMINANCE_ALPHA;
+			gltype = GL_FLOAT;
+			break;
+
+		case EF_BGR32F:
+			internalFormat = GL_RGB32F_ARB;
+			glformat = GL_RGB;
+			gltype = GL_FLOAT;
+			break;
+
+		case EF_ABGR32F:
+			internalFormat = GL_RGBA32F_ARB;
+			glformat = GL_RGBA;
+			gltype = GL_FLOAT;
+			break;
+
 		case EF_DXT1:
 			internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
 			glformat = GL_BGRA;
