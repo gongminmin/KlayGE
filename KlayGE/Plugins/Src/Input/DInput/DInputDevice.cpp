@@ -137,7 +137,7 @@ namespace KlayGE
 	{
 		for (;;)
 		{
-			HRESULT hr = device_->GetDeviceData(size, rgdod, &num_elements, 0);
+			HRESULT hr = device_->GetDeviceData(static_cast<DWORD>(size), rgdod, &num_elements, 0);
 			if ((DIERR_INPUTLOST == hr) || (DIERR_NOTACQUIRED == hr))
 			{
 				this->Acquire();

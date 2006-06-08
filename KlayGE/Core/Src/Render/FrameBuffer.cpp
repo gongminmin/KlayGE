@@ -52,22 +52,24 @@ namespace KlayGE
 
 				switch (view->Format())
 				{
-				case PF_D16:
+				case EF_D16:
 					depthBits_ = 16;
 					stencilBits_ = 0;
 					break;
 
-				case PF_D24X8:
+				case EF_D24X8:
 					depthBits_ = 24;
 					stencilBits_ = 0;
 					break;
 
-				case PF_D24S8:
+				case EF_D24S8:
 					depthBits_ = 24;
 					stencilBits_ = 8;
 					break;
 
 				default:
+					BOOST_ASSERT(false);
+
 					depthBits_ = 0;
 					stencilBits_ = 0;
 					break;

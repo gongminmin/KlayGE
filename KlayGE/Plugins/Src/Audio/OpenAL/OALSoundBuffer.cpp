@@ -58,9 +58,9 @@ namespace KlayGE
 			alSourcei(*iter, AL_BUFFER, buffer_);
 		}
 
-		this->Position(Vector3(0, 0, 0.1f));
-		this->Velocity(Vector3(0, 0, 0));
-		this->Direction(Vector3(0, 0, 0));
+		this->Position(float3(0, 0, 0.1f));
+		this->Velocity(float3(0, 0, 0));
+		this->Direction(float3(0, 0, 0));
 
 		this->Reset();
 	}
@@ -140,42 +140,42 @@ namespace KlayGE
 
 	// 获取声源位置
 	/////////////////////////////////////////////////////////////////////////////////
-	Vector3 OALSoundBuffer::Position() const
+	float3 OALSoundBuffer::Position() const
 	{
 		return ALVecToVec(pos_);
 	}
 
 	// 设置声源位置
 	/////////////////////////////////////////////////////////////////////////////////
-	void OALSoundBuffer::Position(Vector3 const & v)
+	void OALSoundBuffer::Position(float3 const & v)
 	{
 		pos_ = VecToALVec(v);
 	}
 
 	// 获取声源速度
 	/////////////////////////////////////////////////////////////////////////////////
-	Vector3 OALSoundBuffer::Velocity() const
+	float3 OALSoundBuffer::Velocity() const
 	{
 		return ALVecToVec(vel_);
 	}
 
 	// 设置声源速度
 	/////////////////////////////////////////////////////////////////////////////////
-	void OALSoundBuffer::Velocity(Vector3 const & v)
+	void OALSoundBuffer::Velocity(float3 const & v)
 	{
 		vel_ = VecToALVec(v);
 	}
 
 	// 获取声源方向
 	/////////////////////////////////////////////////////////////////////////////////
-	Vector3 OALSoundBuffer::Direction() const
+	float3 OALSoundBuffer::Direction() const
 	{
 		return ALVecToVec(dir_);
 	}
 
 	// 设置声源方向
 	/////////////////////////////////////////////////////////////////////////////////
-	void OALSoundBuffer::Direction(Vector3 const & v)
+	void OALSoundBuffer::Direction(float3 const & v)
 	{
 		dir_ = VecToALVec(v);
 	}

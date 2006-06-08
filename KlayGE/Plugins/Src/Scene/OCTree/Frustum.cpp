@@ -20,12 +20,12 @@
 
 namespace KlayGE
 {
-	Frustum::Frustum(Matrix4 const & clip)
+	Frustum::Frustum(float4x4 const & clip)
 	{
-		Vector4 column1(clip(0, 0), clip(1, 0), clip(2, 0), clip(3, 0));
-		Vector4 column2(clip(0, 1), clip(1, 1), clip(2, 1), clip(3, 1));
-		Vector4 column3(clip(0, 2), clip(1, 2), clip(2, 2), clip(3, 2));
-		Vector4 column4(clip(0, 3), clip(1, 3), clip(2, 3), clip(3, 3));
+		float4 column1(clip(0, 0), clip(1, 0), clip(2, 0), clip(3, 0));
+		float4 column2(clip(0, 1), clip(1, 1), clip(2, 1), clip(3, 1));
+		float4 column3(clip(0, 2), clip(1, 2), clip(2, 2), clip(3, 2));
+		float4 column4(clip(0, 3), clip(1, 3), clip(2, 3), clip(3, 3));
 
 		planes_[0] = column4 - column1;  // left
 		planes_[1] = column4 + column1;  // right
@@ -55,8 +55,8 @@ namespace KlayGE
 			int const n = vertex_lut_[i];
 
 			// v1 is diagonally opposed to v0
-			Vector3 v0((n & 1) ? box.Min().x() : box.Max().x(), (n & 2) ? box.Min().y() : box.Max().y(), (n & 4) ? box.Min().z() : box.Max().z());
-			Vector3 v1((n & 1) ? box.Max().x() : box.Min().x(), (n & 2) ? box.Max().y() : box.Min().y(), (n & 4) ? box.Max().z() : box.Min().z());
+			float3 v0((n & 1) ? box.Min().x() : box.Max().x(), (n & 2) ? box.Min().y() : box.Max().y(), (n & 4) ? box.Min().z() : box.Max().z());
+			float3 v1((n & 1) ? box.Max().x() : box.Min().x(), (n & 2) ? box.Max().y() : box.Min().y(), (n & 4) ? box.Max().z() : box.Min().z());
 
 			if (MathLib::DotCoord(planes_[i], v0) < 0)
 			{

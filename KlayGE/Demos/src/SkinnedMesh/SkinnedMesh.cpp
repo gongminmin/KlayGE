@@ -79,7 +79,7 @@ void SkinnedMeshApp::InitObjects()
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-	this->LookAt(Vector3(250.0f, 48.0f, 0.0f), Vector3(0.0f, 48.0f, 0.0f), Vector3(0.0f, 1.0f, 0.0f));
+	this->LookAt(float3(250.0f, 48.0f, 0.0f), float3(0.0f, 48.0f, 0.0f), float3(0.0f, 1.0f, 0.0f));
 	this->Proj(0.1f, 1000);
 
 	fpsController_.AttachCamera(this->ActiveCamera());

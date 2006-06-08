@@ -373,25 +373,25 @@ namespace KlayGE
 		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
 	}
 
-	void D3D9RenderEffectParameterVector2::DoFlush(Vector2 const & value)
+	void D3D9RenderEffectParameterVector2::DoFlush(float2 const & value)
 	{
 		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
 	}
 
-	void D3D9RenderEffectParameterVector3::DoFlush(Vector3 const & value)
+	void D3D9RenderEffectParameterVector3::DoFlush(float3 const & value)
 	{
 		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
 	}
 
-	void D3D9RenderEffectParameterVector4::DoFlush(Vector4 const & value)
+	void D3D9RenderEffectParameterVector4::DoFlush(float4 const & value)
 	{
 		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
 	}
 
-	void D3D9RenderEffectParameterMatrix4::DoFlush(Matrix4 const & value)
+	void D3D9RenderEffectParameterMatrix4::DoFlush(float4x4 const & value)
 	{
 		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
@@ -438,14 +438,14 @@ namespace KlayGE
 		TIF(d3dx_effect->SetFloatArray(name_.c_str(), &value[0], static_cast<UINT>(value.size())));
 	}
 
-	void D3D9RenderEffectParameterVector4Array::DoFlush(std::vector<Vector4> const & value)
+	void D3D9RenderEffectParameterVector4Array::DoFlush(std::vector<float4> const & value)
 	{
 		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetVectorArray(name_.c_str(), reinterpret_cast<D3DXVECTOR4 const *>(&value[0]),
 			static_cast<UINT>(value.size())));
 	}
 
-	void D3D9RenderEffectParameterMatrix4Array::DoFlush(std::vector<Matrix4> const & value)
+	void D3D9RenderEffectParameterMatrix4Array::DoFlush(std::vector<float4x4> const & value)
 	{
 		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetMatrixArray(name_.c_str(), reinterpret_cast<D3DXMATRIX const *>(&value[0]),

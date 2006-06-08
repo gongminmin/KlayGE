@@ -90,8 +90,8 @@ namespace KlayGE
 
 	// ÉèÖÃ¹Û²ì¾ØÕó
 	/////////////////////////////////////////////////////////////////////////////////
-	void App3DFramework::LookAt(Vector3 const & vEye, Vector3 const & vLookAt,
-												Vector3 const & vUp)
+	void App3DFramework::LookAt(float3 const & vEye, float3 const & vLookAt,
+												float3 const & vUp)
 	{
 		this->ActiveCamera().ViewParams(vEye, vLookAt, vUp);
 	}

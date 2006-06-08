@@ -78,8 +78,8 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			std::vector<Vector3> t(xyzs_.size());
-			std::vector<Vector3> b(xyzs_.size());
+			std::vector<float3> t(xyzs_.size());
+			std::vector<float3> b(xyzs_.size());
 			MathLib::ComputeTangent<float>(t.begin(), b.begin(),
 				indices_.begin(), indices_.end(),
 				xyzs_.begin(), xyzs_.end(), multi_tex_coords_[0].begin());
@@ -88,13 +88,13 @@ namespace
 			tan_vb->Resize(static_cast<uint32_t>(t.size() * sizeof(t[0])));
 			{
 				GraphicsBuffer::Mapper mapper(*tan_vb, BA_Write_Only);
-				std::copy(t.begin(), t.end(), mapper.Pointer<Vector3>());
+				std::copy(t.begin(), t.end(), mapper.Pointer<float3>());
 			}
 			GraphicsBufferPtr binormal_vb = rf.MakeVertexBuffer(BU_Static);
 			binormal_vb->Resize(static_cast<uint32_t>(b.size() * sizeof(b[0])));
 			{
 				GraphicsBuffer::Mapper mapper(*binormal_vb, BA_Write_Only);
-				std::copy(b.begin(), b.end(), mapper.Pointer<Vector3>());
+				std::copy(b.begin(), b.end(), mapper.Pointer<float3>());
 			}
 
 			rl_->BindVertexStream(tan_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, sizeof(float), 3)));
@@ -105,9 +105,9 @@ namespace
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
 
-			Matrix4 const & model = Matrix4::Identity();
-			Matrix4 const & view = app.ActiveCamera().ViewMatrix();
-			Matrix4 const & proj = app.ActiveCamera().ProjMatrix();
+			float4x4 const & model = float4x4::Identity();
+			float4x4 const & view = app.ActiveCamera().ViewMatrix();
+			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
 			*(technique_->Effect().ParameterByName("mvp")) = model * view * proj;
 			*(technique_->Effect().ParameterByName("eyePos")) = app.ActiveCamera().EyePos();
@@ -149,7 +149,7 @@ namespace
 
 int main()
 {
-	OCTree sceneMgr(Box(Vector3(-5, -5, -5), Vector3(5, 5, 5)), 3);
+	OCTree sceneMgr(Box(float3(-5, -5, -5), float3(5, 5, 5)), 3);
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
 
@@ -187,7 +187,7 @@ void Parallax::InitObjects()
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	this->LookAt(Vector3(-0.3f, 0.4f, -0.3f), Vector3(0, 0, 0));
+	this->LookAt(float3(-0.3f, 0.4f, -0.3f), float3(0, 0, 0));
 	this->Proj(0.1f, 100);
 
 	fpcController_.AttachCamera(this->ActiveCamera());
@@ -220,8 +220,8 @@ void Parallax::DoUpdate(uint32_t pass)
 	renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 	float degree(std::clock() / 700.0f);
-	Vector3 lightPos(2, 0, 1);
-	Matrix4 matRot(MathLib::RotationZ(degree));
+	float3 lightPos(2, 0, 1);
+	float4x4 matRot(MathLib::RotationZ(degree));
 	lightPos = MathLib::TransformCoord(lightPos, matRot);
 	*(polygon_->GetRenderable()->GetRenderTechnique()->Effect().ParameterByName("lightPos")) = lightPos;
 

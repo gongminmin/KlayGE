@@ -34,28 +34,28 @@ namespace KlayGE
 	}
 
 	TexturePtr D3D9RenderFactory::MakeTexture1D(uint32_t width, uint16_t numMipMaps,
-			PixelFormat format)
+			ElementFormat format)
 	{
 		D3D9TexturePtr ret(new D3D9Texture1D(width, numMipMaps, format));
 		resource_pool_.push_back(ret);
 		return ret;
 	}
 	TexturePtr D3D9RenderFactory::MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps,
-			PixelFormat format)
+			ElementFormat format)
 	{
 		D3D9TexturePtr ret(new D3D9Texture2D(width, height, numMipMaps, format));
 		resource_pool_.push_back(ret);
 		return ret;
 	}
 	TexturePtr D3D9RenderFactory::MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth, 
-			uint16_t numMipMaps, PixelFormat format)
+			uint16_t numMipMaps, ElementFormat format)
 	{
 		D3D9TexturePtr ret(new D3D9Texture3D(width, height, depth, numMipMaps, format));
 		resource_pool_.push_back(ret);
 		return ret;
 	}
 	TexturePtr D3D9RenderFactory::MakeTextureCube(uint32_t size, uint16_t numMipMaps,
-		PixelFormat format)
+		ElementFormat format)
 	{
 		D3D9TexturePtr ret(new D3D9TextureCube(size, numMipMaps, format));
 		resource_pool_.push_back(ret);
@@ -128,7 +128,8 @@ namespace KlayGE
 		return ret;
 	}
 
-	RenderViewPtr D3D9RenderFactory::MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer, uint32_t width, uint32_t height, PixelFormat pf)
+	RenderViewPtr D3D9RenderFactory::MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer,
+		uint32_t width, uint32_t height, ElementFormat pf)
 	{
 		D3D9RenderViewPtr ret(new D3D9GraphicsBufferRenderView(gbuffer, width, height, pf));
 		resource_pool_.push_back(ret);
@@ -136,7 +137,7 @@ namespace KlayGE
 	}
 
 	RenderViewPtr D3D9RenderFactory::MakeDepthStencilRenderView(uint32_t width, uint32_t height,
-		PixelFormat pf, uint32_t multi_sample)
+		ElementFormat pf, uint32_t multi_sample)
 	{
 		D3D9RenderViewPtr ret(new D3D9DepthStencilRenderView(width, height, pf, multi_sample));
 		resource_pool_.push_back(ret);

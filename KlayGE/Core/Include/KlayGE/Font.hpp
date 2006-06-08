@@ -70,7 +70,7 @@ namespace KlayGE
 			std::wstring const & text);
 		void RenderText(float x, float y, float z, float xScale, float yScale, Color const & clr, 
 			std::wstring const & text);
-		void RenderText(Matrix4 const & mvp, Color const & clr, std::wstring const & text);
+		void RenderText(float4x4 const & mvp, Color const & clr, std::wstring const & text);
 
 		uint32_t FontHeight() const;
 

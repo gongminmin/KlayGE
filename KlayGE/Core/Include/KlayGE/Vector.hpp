@@ -390,10 +390,10 @@ namespace KlayGE
 		lhs.swap(rhs);
 	}
 
-	typedef Vector_T<float, 1> Vector1;
-	typedef Vector_T<float, 2> Vector2;
-	typedef Vector_T<float, 3> Vector3;
-	typedef Vector_T<float, 4> Vector4;
+	typedef Vector_T<float, 1> float1;
+	typedef Vector_T<float, 2> float2;
+	typedef Vector_T<float, 3> float3;
+	typedef Vector_T<float, 4> float4;
 }
 
 #endif			// _VECTOR_HPP

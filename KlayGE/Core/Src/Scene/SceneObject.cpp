@@ -39,9 +39,9 @@ namespace KlayGE
 		return renderable_->GetBound();
 	}
 
-	Matrix4 SceneObject::GetModelMatrix() const
+	float4x4 SceneObject::GetModelMatrix() const
 	{
-		return Matrix4::Identity();
+		return float4x4::Identity();
 	}
 
 	void SceneObject::AddToSceneManager()

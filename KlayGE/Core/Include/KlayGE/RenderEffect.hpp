@@ -185,30 +185,30 @@ namespace KlayGE
 		virtual RenderEffectParameter& operator=(bool const & value);
 		virtual RenderEffectParameter& operator=(int const & value);
 		virtual RenderEffectParameter& operator=(float const & value);
-		virtual RenderEffectParameter& operator=(Vector2 const & value);
-		virtual RenderEffectParameter& operator=(Vector3 const & value);
-		virtual RenderEffectParameter& operator=(Vector4 const & value);
-		virtual RenderEffectParameter& operator=(Matrix4 const & value);
+		virtual RenderEffectParameter& operator=(float2 const & value);
+		virtual RenderEffectParameter& operator=(float3 const & value);
+		virtual RenderEffectParameter& operator=(float4 const & value);
+		virtual RenderEffectParameter& operator=(float4x4 const & value);
 		virtual RenderEffectParameter& operator=(SamplerPtr const & value);
 		virtual RenderEffectParameter& operator=(std::vector<bool> const & value);
 		virtual RenderEffectParameter& operator=(std::vector<int> const & value);
 		virtual RenderEffectParameter& operator=(std::vector<float> const & value);
-		virtual RenderEffectParameter& operator=(std::vector<Vector4> const & value);
-		virtual RenderEffectParameter& operator=(std::vector<Matrix4> const & value);
+		virtual RenderEffectParameter& operator=(std::vector<float4> const & value);
+		virtual RenderEffectParameter& operator=(std::vector<float4x4> const & value);
 
 		virtual void Value(bool& val) const;
 		virtual void Value(int& val) const;
 		virtual void Value(float& val) const;
-		virtual void Value(Vector2& val) const;
-		virtual void Value(Vector3& val) const;
-		virtual void Value(Vector4& val) const;
-		virtual void Value(Matrix4& val) const;
+		virtual void Value(float2& val) const;
+		virtual void Value(float3& val) const;
+		virtual void Value(float4& val) const;
+		virtual void Value(float4x4& val) const;
 		virtual void Value(SamplerPtr& val) const;
 		virtual void Value(std::vector<bool>& val) const;
 		virtual void Value(std::vector<int>& val) const;
 		virtual void Value(std::vector<float>& val) const;
-		virtual void Value(std::vector<Vector4>& val) const;
-		virtual void Value(std::vector<Matrix4>& val) const;
+		virtual void Value(std::vector<float4>& val) const;
+		virtual void Value(std::vector<float4x4>& val) const;
 
 		virtual void Flush() = 0;
 
@@ -216,16 +216,16 @@ namespace KlayGE
 		virtual void DoFlush(bool const & value);
 		virtual void DoFlush(int const & value);
 		virtual void DoFlush(float const & value);
-		virtual void DoFlush(Vector2 const & value);
-		virtual void DoFlush(Vector3 const & value);
-		virtual void DoFlush(Vector4 const & value);
-		virtual void DoFlush(Matrix4 const & value);
+		virtual void DoFlush(float2 const & value);
+		virtual void DoFlush(float3 const & value);
+		virtual void DoFlush(float4 const & value);
+		virtual void DoFlush(float4x4 const & value);
 		virtual void DoFlush(SamplerPtr const & value);
 		virtual void DoFlush(std::vector<bool> const & value);
 		virtual void DoFlush(std::vector<int> const & value);
 		virtual void DoFlush(std::vector<float> const & value);
-		virtual void DoFlush(std::vector<Vector4> const & value);
-		virtual void DoFlush(std::vector<Matrix4> const & value);
+		virtual void DoFlush(std::vector<float4> const & value);
+		virtual void DoFlush(std::vector<float4x4> const & value);
 
 	protected:
 		RenderEffect& effect_;

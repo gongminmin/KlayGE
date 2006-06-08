@@ -33,7 +33,7 @@ namespace KlayGE
 	KMesh::KMesh(std::wstring const & name, TexturePtr tex)
 						: StaticMesh(name),
 							sampler_(new Sampler),
-							model_(Matrix4::Identity())
+							model_(float4x4::Identity())
 	{
 		// ÔØÈëfx
 		RenderEffectPtr effect;
@@ -75,7 +75,7 @@ namespace KlayGE
 		*(technique_->Effect().ParameterByName("modelIT")) = MathLib::Transpose(MathLib::Inverse(model_));
 	}
 
-	void KMesh::SetModelMatrix(Matrix4 const & model)
+	void KMesh::SetModelMatrix(float4x4 const & model)
 	{
 		model_ = model;
 	}

@@ -59,16 +59,16 @@ namespace
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
 
-			Matrix4 const & model = Matrix4::Identity();
-			Matrix4 const & view = app.ActiveCamera().ViewMatrix();
-			Matrix4 const & proj = app.ActiveCamera().ProjMatrix();
+			float4x4 const & model = float4x4::Identity();
+			float4x4 const & view = app.ActiveCamera().ViewMatrix();
+			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
 			*(technique_->Effect().ParameterByName("model")) = model;
 			*(technique_->Effect().ParameterByName("modelit")) = MathLib::Transpose(MathLib::Inverse(model));
 			*(technique_->Effect().ParameterByName("mvp")) = model * view * proj;
 
-			*(technique_->Effect().ParameterByName("eta_ratio")) = Vector3(1 / 1.1f, 1 / 1.1f - 0.003f, 1 / 1.1f - 0.006f);
-			*(technique_->Effect().ParameterByName("fresnel_values")) = Vector3(2.0f, 2.0f, 0.1f);
+			*(technique_->Effect().ParameterByName("eta_ratio")) = float3(1 / 1.1f, 1 / 1.1f - 0.003f, 1 / 1.1f - 0.006f);
+			*(technique_->Effect().ParameterByName("fresnel_values")) = float3(2.0f, 2.0f, 0.1f);
 
 			*(technique_->Effect().ParameterByName("eyePos")) = Context::Instance().AppInstance().ActiveCamera().EyePos();
 		}
@@ -152,7 +152,7 @@ void Refract::InitObjects()
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	this->LookAt(Vector3(-0.05f, -0.01f, -0.5f), Vector3(0, 0.05f, 0));
+	this->LookAt(float3(-0.05f, -0.01f, -0.5f), float3(0, 0.05f, 0));
 	this->Proj(0.05f, 100);
 
 	fpcController_.AttachCamera(this->ActiveCamera());

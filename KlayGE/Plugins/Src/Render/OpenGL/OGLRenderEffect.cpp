@@ -200,22 +200,22 @@ namespace KlayGE
 		cgSetParameter1f(param_, value);
 	}
 
-	void OGLRenderEffectParameterVector2::DoFlush(Vector2 const & value)
+	void OGLRenderEffectParameterVector2::DoFlush(float2 const & value)
 	{
 		cgSetParameter2fv(param_, &value[0]);
 	}
 
-	void OGLRenderEffectParameterVector3::DoFlush(Vector3 const & value)
+	void OGLRenderEffectParameterVector3::DoFlush(float3 const & value)
 	{
 		cgSetParameter3fv(param_, &value[0]);
 	}
 
-	void OGLRenderEffectParameterVector4::DoFlush(Vector4 const & value)
+	void OGLRenderEffectParameterVector4::DoFlush(float4 const & value)
 	{
 		cgSetParameter4fv(param_, &value[0]);
 	}
 
-	void OGLRenderEffectParameterMatrix4::DoFlush(Matrix4 const & value)
+	void OGLRenderEffectParameterMatrix4::DoFlush(float4x4 const & value)
 	{
 		cgSetParameterValuefr(param_, 4 * 4, &value[0]);
 	}
@@ -237,12 +237,12 @@ namespace KlayGE
 		cgGLSetParameterArray1f(param_, 0, static_cast<long>(value.size()), &value[0]);
 	}
 
-	void OGLRenderEffectParameterVector4Array::DoFlush(std::vector<Vector4> const & value)
+	void OGLRenderEffectParameterVector4Array::DoFlush(std::vector<float4> const & value)
 	{
 		cgGLSetParameterArray4f(param_, 0, static_cast<long>(value.size()), &value[0][0]);
 	}
 
-	void OGLRenderEffectParameterMatrix4Array::DoFlush(std::vector<Matrix4> const & value)
+	void OGLRenderEffectParameterMatrix4Array::DoFlush(std::vector<float4x4> const & value)
 	{
 		cgGLSetMatrixParameterArrayfr(param_, 0, static_cast<long>(value.size()), &value[0][0]);
 	}

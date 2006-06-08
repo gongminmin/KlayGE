@@ -36,11 +36,11 @@ namespace KlayGE
 		virtual ~KMesh();
 
 		virtual void OnRenderBegin();
-		void SetModelMatrix(Matrix4 const & model);
+		void SetModelMatrix(float4x4 const & model);
 
 	private:
 		SamplerPtr sampler_;
-		Matrix4 model_;
+		float4x4 model_;
 	};
 
 	template <typename T>

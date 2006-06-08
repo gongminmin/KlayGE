@@ -19,7 +19,7 @@ using namespace KlayGE;
 
 MD5SkinnedMesh::MD5SkinnedMesh(boost::shared_ptr<MD5SkinnedModel> model)
 	: SkinnedMesh(L"MD5SkinnedMesh"),
-		world_(Matrix4::Identity()),
+		world_(float4x4::Identity()),
 		model_(model)
 {
 	technique_ = Context::Instance().RenderFactoryInstance().LoadEffect("SkinnedMesh.fx")->Technique("SkinnedMeshTech");
@@ -43,7 +43,7 @@ MD5SkinnedMesh::MD5SkinnedMesh(boost::shared_ptr<MD5SkinnedModel> model)
 void MD5SkinnedMesh::OnRenderBegin()
 {
 	App3DFramework& app = Context::Instance().AppInstance();
-	Matrix4 worldview(world_ * app.ActiveCamera().ViewMatrix());
+	float4x4 worldview(world_ * app.ActiveCamera().ViewMatrix());
 	*(technique_->Effect().ParameterByName("worldviewproj")) = worldview * app.ActiveCamera().ProjMatrix();
 
 	*(technique_->Effect().ParameterByName("diffuse_map")) = diffuse_map_;
@@ -56,7 +56,7 @@ void MD5SkinnedMesh::OnRenderBegin()
 	*(technique_->Effect().ParameterByName("eye_pos")) = eye_pos_;
 }
 
-void MD5SkinnedMesh::SetWorld(const Matrix4& mat)
+void MD5SkinnedMesh::SetWorld(const float4x4& mat)
 {
 	world_ = mat;
 }
@@ -66,7 +66,7 @@ void MD5SkinnedMesh::SetShaderName(std::string const & shader)
 	shader_ = shader;
 }
 
-void MD5SkinnedMesh::SetEyePos(const KlayGE::Vector3& eye_pos)
+void MD5SkinnedMesh::SetEyePos(const KlayGE::float3& eye_pos)
 {
 	eye_pos_ = eye_pos;
 }
@@ -76,8 +76,8 @@ void MD5SkinnedMesh::BuildRenderable()
 	if (!beBuilt_)
 	{
 		// º∆À„TBN
-		std::vector<Vector3> t(xyzs_.size());
-		std::vector<Vector3> b(xyzs_.size());
+		std::vector<float3> t(xyzs_.size());
+		std::vector<float3> b(xyzs_.size());
 		MathLib::ComputeTangent<float>(t.begin(), b.begin(),
 			indices_.begin(), indices_.end(),
 			xyzs_.begin(), xyzs_.end(),
@@ -86,14 +86,14 @@ void MD5SkinnedMesh::BuildRenderable()
 		tan->Resize(static_cast<uint32_t>(t.size() * sizeof(t[0])));
 		{
 			GraphicsBuffer::Mapper mapper(*tan, BA_Write_Only);
-			std::copy(t.begin(), t.end(), mapper.Pointer<Vector3>());
+			std::copy(t.begin(), t.end(), mapper.Pointer<float3>());
 		}
 		rl_->BindVertexStream(tan, boost::make_tuple(vertex_element(VEU_TextureCoord, 1, sizeof(float), 3)));
 		GraphicsBufferPtr bn = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(BU_Static);
 		bn->Resize(static_cast<uint32_t>(b.size() * sizeof(b[0])));
 		{
 			GraphicsBuffer::Mapper mapper(*bn, BA_Write_Only);
-			std::copy(b.begin(), b.end(), mapper.Pointer<Vector3>());
+			std::copy(b.begin(), b.end(), mapper.Pointer<float3>());
 		}
 		rl_->BindVertexStream(bn, boost::make_tuple(vertex_element(VEU_TextureCoord, 2, sizeof(float), 3)));
 
@@ -124,7 +124,7 @@ MD5SkinnedModel::MD5SkinnedModel()
 {
 }
 
-void MD5SkinnedModel::SetEyePos(const KlayGE::Vector3& eye_pos)
+void MD5SkinnedModel::SetEyePos(const KlayGE::float3& eye_pos)
 {
 	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
 	{

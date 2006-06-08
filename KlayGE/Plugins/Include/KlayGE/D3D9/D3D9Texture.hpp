@@ -62,16 +62,16 @@ namespace KlayGE
 		virtual void CopyToMemory3D(int level, void* data);
 		virtual void CopyToMemoryCube(CubeFaces face, int level, void* data);
 
-		virtual void CopyMemoryToTexture1D(int level, void* data, PixelFormat pf,
+		virtual void CopyMemoryToTexture1D(int level, void* data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_widtht);
-		virtual void CopyMemoryToTexture2D(int level, void* data, PixelFormat pf,
+		virtual void CopyMemoryToTexture2D(int level, void* data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height);
-		virtual void CopyMemoryToTexture3D(int level, void* data, PixelFormat pf,
+		virtual void CopyMemoryToTexture3D(int level, void* data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
 			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
 			uint32_t src_width, uint32_t src_height, uint32_t src_depth);
-		virtual void CopyMemoryToTextureCube(CubeFaces face, int level, void* data, PixelFormat pf,
+		virtual void CopyMemoryToTextureCube(CubeFaces face, int level, void* data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height);
 
@@ -96,7 +96,7 @@ namespace KlayGE
 	class D3D9Texture1D : public D3D9Texture
 	{
 	public:
-		D3D9Texture1D(uint32_t width, uint16_t numMipMaps, PixelFormat format);
+		D3D9Texture1D(uint32_t width, uint16_t numMipMaps, ElementFormat format);
 
 		uint32_t Width(int level) const;
 
@@ -104,7 +104,7 @@ namespace KlayGE
 		
 		void CopyToMemory1D(int level, void* data);
 
-		void CopyMemoryToTexture1D(int level, void* data, PixelFormat pf,
+		void CopyMemoryToTexture1D(int level, void* data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_widtht);
 
 		void BuildMipSubLevels();
@@ -132,7 +132,7 @@ namespace KlayGE
 	class D3D9Texture2D : public D3D9Texture
 	{
 	public:
-		D3D9Texture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, PixelFormat format);
+		D3D9Texture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, ElementFormat format);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
@@ -141,7 +141,7 @@ namespace KlayGE
 		
 		void CopyToMemory2D(int level, void* data);
 
-		void CopyMemoryToTexture2D(int level, void* data, PixelFormat pf,
+		void CopyMemoryToTexture2D(int level, void* data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height);
 
@@ -171,7 +171,7 @@ namespace KlayGE
 	class D3D9Texture3D : public D3D9Texture
 	{
 	public:
-		D3D9Texture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps, PixelFormat format);
+		D3D9Texture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps, ElementFormat format);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
@@ -181,7 +181,7 @@ namespace KlayGE
 		
 		void CopyToMemory3D(int level, void* data);
 
-		void CopyMemoryToTexture3D(int level, void* data, PixelFormat pf,
+		void CopyMemoryToTexture3D(int level, void* data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
 			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
 			uint32_t src_width, uint32_t src_height, uint32_t src_depth);
@@ -213,7 +213,7 @@ namespace KlayGE
 	class D3D9TextureCube : public D3D9Texture
 	{
 	public:
-		D3D9TextureCube(uint32_t size, uint16_t numMipMaps, PixelFormat format);
+		D3D9TextureCube(uint32_t size, uint16_t numMipMaps, ElementFormat format);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
@@ -222,7 +222,7 @@ namespace KlayGE
 		
 		void CopyToMemoryCube(CubeFaces face, int level, void* data);
 
-		void CopyMemoryToTextureCube(CubeFaces face, int level, void* data, PixelFormat pf,
+		void CopyMemoryToTextureCube(CubeFaces face, int level, void* data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height);
 

@@ -93,7 +93,7 @@ namespace
 		int const ASCII_IN_A_ROW = 16;
 
 		TexturePtr ascii_tex = LoadTexture(tex_name);
-		BOOST_ASSERT(PF_L8 == ascii_tex->Format());
+		BOOST_ASSERT(EF_L8 == ascii_tex->Format());
 
 		std::vector<ascii_tile_type> ret(INPUT_NUM_ASCII);
 
@@ -136,8 +136,8 @@ namespace
 		}
 
 		TexturePtr ret = Context::Instance().RenderFactoryInstance().MakeTexture2D(OUTPUT_NUM_ASCII * ASCII_WIDTH,
-			ASCII_HEIGHT, 1, PF_L8);
-		ret->CopyMemoryToTexture2D(0, &temp_data[0], PF_L8, OUTPUT_NUM_ASCII * ASCII_WIDTH, ASCII_HEIGHT, 0, 0,
+			ASCII_HEIGHT, 1, EF_L8);
+		ret->CopyMemoryToTexture2D(0, &temp_data[0], EF_L8, OUTPUT_NUM_ASCII * ASCII_WIDTH, ASCII_HEIGHT, 0, 0,
 			OUTPUT_NUM_ASCII * ASCII_WIDTH, ASCII_HEIGHT);
 		return ret;
 	}
@@ -166,7 +166,7 @@ namespace
 
 int main()
 {
-	OCTree sceneMgr(Box(Vector3(-1, -1, -1), Vector3(1, 1, 1)), 3);
+	OCTree sceneMgr(Box(float3(-1, -1, -1), float3(1, 1, 1)), 3);
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
@@ -204,7 +204,7 @@ void AsciiArts::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
-	this->LookAt(Vector3(0.0f, 0.3f, -0.2f), Vector3(0.0f, 0.1f, 0.0f));
+	this->LookAt(float3(0.0f, 0.3f, -0.2f), float3(0.0f, 0.1f, 0.0f));
 	this->Proj(0.1f, 100.0f);
 
 	fpcController_.AttachCamera(this->ActiveCamera());
@@ -236,12 +236,12 @@ void AsciiArts::OnResize(uint32_t width, uint32_t height)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	rendered_tex_ = rf.MakeTexture2D(width, height, 1, PF_ARGB8);
+	rendered_tex_ = rf.MakeTexture2D(width, height, 1, EF_ARGB8);
 	render_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_, 0));
-	render_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, PF_D16, 0));
+	render_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));
 
 	downsample_tex_ = rf.MakeTexture2D(width / CELL_WIDTH, height / CELL_HEIGHT,
-		1, PF_ARGB8);
+		1, EF_ARGB8);
 	downsample_tex_->Usage(Texture::TU_RenderTarget);
 }
 

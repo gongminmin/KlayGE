@@ -58,12 +58,12 @@ namespace KlayGE
 
 		bool IsPlaying() const;
 
-		Vector3 Position() const;
-		void Position(Vector3 const & v);
-		Vector3 Velocity() const;
-		void Velocity(Vector3 const & v);
-		Vector3 Direction() const;
-		void Direction(Vector3 const & v);
+		float3 Position() const;
+		void Position(float3 const & v);
+		float3 Velocity() const;
+		void Velocity(float3 const & v);
+		float3 Direction() const;
+		void Direction(float3 const & v);
 
 	private:
 		boost::shared_ptr<IDirectSound3DBuffer> Get3DBufferInterface(SourcesIter iter);
@@ -74,9 +74,9 @@ namespace KlayGE
 	private:
 		Sources		sources_;
 
-		Vector3		pos_;
-		Vector3		vel_;
-		Vector3		dir_;
+		float3		pos_;
+		float3		vel_;
+		float3		dir_;
 	};
 
 	// “Ù¿÷ª∫≥Â«¯
@@ -91,12 +91,12 @@ namespace KlayGE
 
 		bool IsPlaying() const;
 
-		Vector3 Position() const;
-		void Position(Vector3 const & v);
-		Vector3 Velocity() const;
-		void Velocity(Vector3 const & v);
-		Vector3 Direction() const;
-		void Direction(Vector3 const & v);
+		float3 Position() const;
+		void Position(float3 const & v);
+		float3 Velocity() const;
+		void Velocity(float3 const & v);
+		float3 Direction() const;
+		void Direction(float3 const & v);
 
 	private:
 		void LoopUpdateBuffer();
@@ -133,12 +133,12 @@ namespace KlayGE
 
 		std::wstring const & Name() const;
 
-		Vector3 GetListenerPos() const;
-		void SetListenerPos(Vector3 const & v);
-		Vector3 GetListenerVel() const;
-		void SetListenerVel(Vector3 const & v);
-		void GetListenerOri(Vector3& face, Vector3& up) const;
-		void SetListenerOri(Vector3 const & face, Vector3 const & up);
+		float3 GetListenerPos() const;
+		void SetListenerPos(float3 const & v);
+		float3 GetListenerVel() const;
+		void SetListenerVel(float3 const & v);
+		void GetListenerOri(float3& face, float3& up) const;
+		void SetListenerOri(float3 const & face, float3 const & up);
 
 	private:
 		boost::shared_ptr<IDirectSound>				dsound_;

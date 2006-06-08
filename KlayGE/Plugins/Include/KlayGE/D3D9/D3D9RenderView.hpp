@@ -144,7 +144,7 @@ namespace KlayGE
 	{
 	public:
 		D3D9GraphicsBufferRenderView(GraphicsBuffer& gb,
-							uint32_t width, uint32_t height, PixelFormat pf);
+							uint32_t width, uint32_t height, ElementFormat pf);
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
@@ -170,7 +170,7 @@ namespace KlayGE
 	{
 	public:
 		D3D9DepthStencilRenderView(uint32_t width, uint32_t height,
-			PixelFormat pf, uint32_t multi_sample);
+			ElementFormat pf, uint32_t multi_sample);
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);

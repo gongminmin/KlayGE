@@ -38,20 +38,20 @@ namespace KlayGE
 		AudioBufferPtr Buffer(size_t /*bufID*/) const
 			{ return AudioBuffer::NullObject(); }
 
-		Vector3 GetListenerPos() const
-			{ return Vector3::Zero(); }
-		void SetListenerPos(Vector3 const & /*v*/)
+		float3 GetListenerPos() const
+			{ return float3::Zero(); }
+		void SetListenerPos(float3 const & /*v*/)
 			{ }
-		Vector3 GetListenerVel() const
-			{ return Vector3::Zero(); }
-		void SetListenerVel(Vector3 const & /*v*/)
+		float3 GetListenerVel() const
+			{ return float3::Zero(); }
+		void SetListenerVel(float3 const & /*v*/)
 			{ }
-		void GetListenerOri(Vector3& face, Vector3& up) const
+		void GetListenerOri(float3& face, float3& up) const
 		{
-			face = Vector3::Zero();
-			up = Vector3::Zero();
+			face = float3::Zero();
+			up = float3::Zero();
 		}
-		void SetListenerOri(Vector3 const & /*face*/, Vector3 const & /*up*/)
+		void SetListenerOri(float3 const & /*face*/, float3 const & /*up*/)
 			{ }
 	};
 

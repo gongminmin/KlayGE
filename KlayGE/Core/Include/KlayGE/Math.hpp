@@ -467,12 +467,12 @@ namespace KlayGE
 		template <typename T, int N>
 		struct TransformHelper
 		{
-			static Vector_T<T, 4> Do(Vector_T<T, N> const & v, Matrix4 const & mat);
+			static Vector_T<T, 4> Do(Vector_T<T, N> const & v, Matrix4_T<T> const & mat);
 		};
 		template <typename T>
 		struct TransformHelper<T, 4>
 		{
-			static Vector_T<T, 4> Do(Vector_T<T, 4> const & v, Matrix4 const & mat)
+			static Vector_T<T, 4> Do(Vector_T<T, 4> const & v, Matrix4_T<T> const & mat)
 			{
 				return Vector_T<T, 4>(v.x() * mat(0, 0) + v.y() * mat(1, 0) + v.z() * mat(2, 0) + v.w() * mat(3, 0),
 					v.x() * mat(0, 1) + v.y() * mat(1, 1) + v.z() * mat(2, 1) + v.w() * mat(3, 1),
@@ -483,7 +483,7 @@ namespace KlayGE
 		template <typename T>
 		struct TransformHelper<T, 3>
 		{
-			static Vector_T<T, 4> Do(Vector_T<T, 3> const & v, Matrix4 const & mat)
+			static Vector_T<T, 4> Do(Vector_T<T, 3> const & v, Matrix4_T<T> const & mat)
 			{
 				return Vector_T<T, 4>(v.x() * mat(0, 0) + v.y() * mat(1, 0) + v.z() * mat(2, 0) + mat(3, 0),
 					v.x() * mat(0, 1) + v.y() * mat(1, 1) + v.z() * mat(2, 1) + mat(3, 1),
@@ -494,7 +494,7 @@ namespace KlayGE
 		template <typename T>
 		struct TransformHelper<T, 2>
 		{
-			static Vector_T<T, 4> Do(Vector_T<T, 2> const & v, Matrix4 const & mat)
+			static Vector_T<T, 4> Do(Vector_T<T, 2> const & v, Matrix4_T<T> const & mat)
 			{
 				return Vector_T<T, 4>(v.x() * mat(0, 0) + v.y() * mat(1, 0) + mat(3, 0),
 					v.x() * mat(0, 1) + v.y() * mat(1, 1) + mat(3, 1),
@@ -505,14 +505,14 @@ namespace KlayGE
 
 		template <typename T, int N>
 		inline Vector_T<T, 4>
-		Transform(Vector_T<T, N> const & v, Matrix4 const & mat)
+		Transform(Vector_T<T, N> const & v, Matrix4_T<T> const & mat)
 		{
 			return TransformHelper<T, N>::Do(v, mat);
 		}
 
 		template <typename T, int N>
 		inline Vector_T<T, N>
-		TransformCoord(Vector_T<T, N> const & v, Matrix4 const & mat)
+		TransformCoord(Vector_T<T, N> const & v, Matrix4_T<T> const & mat)
 		{
 			BOOST_STATIC_ASSERT(N < 4);
 
@@ -533,12 +533,12 @@ namespace KlayGE
 		template <typename T, int N>
 		struct TransformNormalHelper
 		{
-			static Vector_T<T, N> Do(Vector_T<T, N> const & v, Matrix4 const & mat);
+			static Vector_T<T, N> Do(Vector_T<T, N> const & v, Matrix4_T<T> const & mat);
 		};
 		template <typename T>
 		struct TransformNormalHelper<T, 3>
 		{
-			static Vector_T<T, 3> Do(Vector_T<T, 3> const & v, Matrix4 const & mat)
+			static Vector_T<T, 3> Do(Vector_T<T, 3> const & v, Matrix4_T<T> const & mat)
 			{
 				Vector_T<T, 4> temp(v.x(), v.y(), v.z(), T(0));
 				temp = TransformHelper<T, 4>::Do(temp, mat);
@@ -548,7 +548,7 @@ namespace KlayGE
 		template <typename T>
 		struct TransformNormalHelper<T, 2>
 		{
-			static Vector_T<T, 2> Do(Vector_T<T, 2> const & v, Matrix4 const & mat)
+			static Vector_T<T, 2> Do(Vector_T<T, 2> const & v, Matrix4_T<T> const & mat)
 			{
 				Vector_T<T, 3> temp(v.x(), v.y(), T(0));
 				temp = TransformNormalHelper<T, 3>::Do(temp, mat);
@@ -558,7 +558,7 @@ namespace KlayGE
 
 		template <typename T, int N>
 		inline Vector_T<T, N>
-		TransformNormal(Vector_T<T, N> const & v, Matrix4 const & mat)
+		TransformNormal(Vector_T<T, N> const & v, Matrix4_T<T> const & mat)
 		{
 			BOOST_STATIC_ASSERT(N < 4);
 
@@ -761,7 +761,7 @@ namespace KlayGE
 			{
 				T invDet(T(1) / det);
 
-				return Matrix4(
+				return Matrix4_T<T>(
 					+invDet * (rhs(1, 1) * _3344_3443 - rhs(1, 2) * _3244_3442 + rhs(1, 3) * _3243_3342),
 					-invDet * (rhs(0, 1) * _3344_3443 - rhs(0, 2) * _3244_3442 + rhs(0, 3) * _3243_3342),
 					+invDet * (rhs(0, 1) * _2344_2443 - rhs(0, 2) * _2244_2442 + rhs(0, 3) * _2243_2342),
@@ -954,9 +954,9 @@ namespace KlayGE
 		inline Matrix4_T<T>
 		RotationMatrixYawPitchRoll(T const & yaw, T const & pitch, T const & roll)
 		{
-			Matrix4 rotX(RotationX(pitch));
-			Matrix4 rotY(RotationY(yaw));
-			Matrix4 rotZ(RotationZ(roll));
+			Matrix4_T<T> rotX(RotationX(pitch));
+			Matrix4_T<T> rotY(RotationY(yaw));
+			Matrix4_T<T> rotZ(RotationZ(roll));
 			return rotZ * rotX * rotY;
 		}
 
@@ -964,7 +964,7 @@ namespace KlayGE
 		inline Matrix4_T<T>
 		Scaling(T const & sx, T const & sy, T const & sz)
 		{
-			return Matrix4(
+			return Matrix4_T<T>(
 				sx,	0,	0,	0,
 				0,	sy,	0,	0,
 				0,	0,	sz,	0,
@@ -1661,8 +1661,8 @@ namespace KlayGE
 
 			for (int i = 0; i < num; ++ i)
 			{
-				*(targentBegin + i) = Vector3::Zero();
-				*(binormBegin + i) = Vector3::Zero();
+				*(targentBegin + i) = float3::Zero();
+				*(binormBegin + i) = float3::Zero();
 			}
 
 			for (IndexIterator iter = indicesBegin; iter != indicesEnd; iter += 3)

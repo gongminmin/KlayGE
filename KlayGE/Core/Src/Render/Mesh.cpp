@@ -93,7 +93,7 @@ namespace KlayGE
 				pos_vb->Resize(static_cast<uint32_t>(xyzs_.size() * sizeof(xyzs_[0])));
 				{
 					GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
-					std::copy(xyzs_.begin(), xyzs_.end(), mapper.Pointer<Vector3>());
+					std::copy(xyzs_.begin(), xyzs_.end(), mapper.Pointer<float3>());
 				}
 				rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
 
@@ -104,7 +104,7 @@ namespace KlayGE
 					normal_vb->Resize(static_cast<uint32_t>(normals_.size() * sizeof(normals_[0])));
 					{
 						GraphicsBuffer::Mapper mapper(*normal_vb, BA_Write_Only);
-						std::copy(normals_.begin(), normals_.end(), mapper.Pointer<Vector3>());
+						std::copy(normals_.begin(), normals_.end(), mapper.Pointer<float3>());
 					}
 					rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, sizeof(float), 3)));
 				}
@@ -116,7 +116,7 @@ namespace KlayGE
 					tex_vb->Resize(static_cast<uint32_t>(multi_tex_coords_[i].size() * sizeof(multi_tex_coords_[i][0])));
 					{
 						GraphicsBuffer::Mapper mapper(*tex_vb, BA_Write_Only);
-						std::copy(multi_tex_coords_[i].begin(), multi_tex_coords_[i].end(), mapper.Pointer<Vector2>());
+						std::copy(multi_tex_coords_[i].begin(), multi_tex_coords_[i].end(), mapper.Pointer<float2>());
 					}
 					rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_TextureCoord,
 						static_cast<uint8_t>(i), sizeof(float), 2)));
@@ -129,7 +129,7 @@ namespace KlayGE
 					GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
 					std::copy(indices_.begin(), indices_.end(), mapper.Pointer<uint16_t>());
 				}
-				rl_->BindIndexStream(ib, IF_Index16);
+				rl_->BindIndexStream(ib, EF_D16);
 			}
 
 			beBuilt_ = true;
@@ -150,7 +150,7 @@ namespace KlayGE
 			Joint& joint(*iter);
 
 			KeyFrames const & kf = key_frames_->find(joint.name)->second;
-			Vector3 const & key_pos = kf.FramePos(frame);
+			float3 const & key_pos = kf.FramePos(frame);
 			Quaternion const & key_quat = kf.FrameQuat(frame);
 
 			if (joint.parent != -1)
@@ -177,7 +177,7 @@ namespace KlayGE
 		for (size_t i = 0; i < joints_.size(); ++ i)
 		{
 			Quaternion quat = joints_[i].inverse_origin_quat * joints_[i].bind_quat;
-			Vector3 pos = MathLib::TransQuat(joints_[i].inverse_origin_pos, joints_[i].bind_quat) + joints_[i].bind_pos;
+			float3 pos = MathLib::TransQuat(joints_[i].inverse_origin_pos, joints_[i].bind_quat) + joints_[i].bind_pos;
 			bind_rots_[i].x() = quat.x();
 			bind_rots_[i].y() = quat.y();
 			bind_rots_[i].z() = quat.z();

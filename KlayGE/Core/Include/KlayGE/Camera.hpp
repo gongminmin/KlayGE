@@ -29,13 +29,13 @@ namespace KlayGE
 	class Camera
 	{
 	public:
-		Vector3 const & EyePos() const
+		float3 const & EyePos() const
 			{ return eyePos_; }
-		Vector3 const & LookAt() const
+		float3 const & LookAt() const
 			{ return lookat_; }
-		Vector3 const & UpVec() const
+		float3 const & UpVec() const
 			{ return upVec_; }
-		Vector3 const & ViewVec() const
+		float3 const & ViewVec() const
 			{ return viewVec_; }
 
 		float FOV() const
@@ -47,33 +47,33 @@ namespace KlayGE
 		float FarPlane() const
 			{ return farPlane_; }
 
-		Matrix4 const & ViewMatrix() const
+		float4x4 const & ViewMatrix() const
 			{ return this->viewMat_; }
-		Matrix4 const & BillboardMatrix();
-		Matrix4 const & ProjMatrix() const
+		float4x4 const & BillboardMatrix();
+		float4x4 const & ProjMatrix() const
 			{ return this->projMat_; }
 
-		void ViewParams(Vector3 const & eyePos, Vector3 const & lookat,
-			Vector3 const & upVec = Vector3(0, 1, 0));
+		void ViewParams(float3 const & eyePos, float3 const & lookat,
+			float3 const & upVec = float3(0, 1, 0));
 		void ProjParams(float FOV, float aspect, float nearPlane, float farPlane);
 
 		Camera();
 
 	private:
-		Vector3		eyePos_;			// 观察矩阵的属性
-		Vector3		lookat_;
-		Vector3		upVec_;
-		Vector3		viewVec_;
-		Matrix4		viewMat_;
+		float3		eyePos_;			// 观察矩阵的属性
+		float3		lookat_;
+		float3		upVec_;
+		float3		viewVec_;
+		float4x4	viewMat_;
 
 		bool		reEvalBillboard_;
-		Matrix4		billboardMat_;
+		float4x4	billboardMat_;
 
 		float		FOV_;			// 投射矩阵的属性
 		float		aspect_;
 		float		nearPlane_;
 		float		farPlane_;
-		Matrix4		projMat_;
+		float4x4	projMat_;
 	};
 }
 

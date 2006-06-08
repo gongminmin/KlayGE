@@ -48,7 +48,7 @@ namespace KlayGE
 		{
 			meshes_.assign(first, last);
 
-			box_ = Box(Vector3(0, 0, 0), Vector3(0, 0, 0));
+			box_ = Box(float3(0, 0, 0), float3(0, 0, 0));
 			for (StaticMeshesPtrType::iterator iter = meshes_.begin();
 				iter != meshes_.end(); ++ iter)
 			{
@@ -112,10 +112,10 @@ namespace KlayGE
 	class StaticMesh : public Renderable
 	{
 	public:
-		typedef std::vector<Vector3> XYZsType;
-		typedef std::vector<Vector2> TexCoordsType;
+		typedef std::vector<float3> XYZsType;
+		typedef std::vector<float2> TexCoordsType;
 		typedef std::vector<TexCoordsType> MultiTexCoordsType;
-		typedef std::vector<Vector3> NormalsType;
+		typedef std::vector<float3> NormalsType;
 		typedef std::vector<uint16_t> IndicesType;
 
 	public:
@@ -205,10 +205,10 @@ namespace KlayGE
 	{
 		std::string name;
 
-		Vector3 bind_pos;
+		float3 bind_pos;
 		Quaternion bind_quat;
 
-		Vector3 inverse_origin_pos;
+		float3 inverse_origin_pos;
 		Quaternion inverse_origin_quat;
 
 		int16_t parent;
@@ -216,10 +216,10 @@ namespace KlayGE
 
 	struct KeyFrames
 	{
-		std::vector<Vector3> bind_pos;
+		std::vector<float3> bind_pos;
 		std::vector<Quaternion> bind_quat;
 
-		Vector3 const & FramePos(int frame) const
+		float3 const & FramePos(int frame) const
 		{
 			const int lframe(static_cast<int>(frame % bind_pos.size()));
 			return bind_pos[lframe];
@@ -237,8 +237,8 @@ namespace KlayGE
 	{
 	public:
 		typedef std::vector<Joint> JointsType;
-		typedef std::vector<Vector4> RotationsType;
-		typedef std::vector<Vector4> PositionsType;
+		typedef std::vector<float4> RotationsType;
+		typedef std::vector<float4> PositionsType;
 
 	public:
 		SkinnedModel(std::wstring const & name);

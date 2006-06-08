@@ -40,17 +40,17 @@ namespace KlayGE
 		bool IsSound() const
 			{ return true; }
 
-		Vector3 Position() const
-			{ return Vector3::Zero(); }
-		void Position(Vector3 const & /*v*/)
+		float3 Position() const
+			{ return float3::Zero(); }
+		void Position(float3 const & /*v*/)
 			{ }
-		Vector3 Velocity() const
-			{ return Vector3::Zero(); }
-		void Velocity(Vector3 const & /*v*/)
+		float3 Velocity() const
+			{ return float3::Zero(); }
+		void Velocity(float3 const & /*v*/)
 			{ }
-		Vector3 Direction() const
-			{ return Vector3::Zero(); }
-		void Direction(Vector3 const & /*v*/)
+		float3 Direction() const
+			{ return float3::Zero(); }
+		void Direction(float3 const & /*v*/)
 			{ }
 	};
 

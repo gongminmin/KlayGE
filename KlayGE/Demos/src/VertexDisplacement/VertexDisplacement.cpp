@@ -62,9 +62,9 @@ namespace
 
 			App3DFramework const & app = Context::Instance().AppInstance();
 
-			Matrix4 view = app.ActiveCamera().ViewMatrix();
-			Matrix4 proj = app.ActiveCamera().ProjMatrix();
-			Matrix4 modelView = Matrix4::Identity() * view;
+			float4x4 view = app.ActiveCamera().ViewMatrix();
+			float4x4 proj = app.ActiveCamera().ProjMatrix();
+			float4x4 modelView = float4x4::Identity() * view;
 
 			*(technique_->Effect().ParameterByName("modelview")) = modelView;
 			*(technique_->Effect().ParameterByName("proj")) = proj;
@@ -106,7 +106,7 @@ namespace
 
 int main()
 {
-	OCTree sceneMgr(Box(Vector3(-10, -10, -10), Vector3(10, 10, 10)), 3);
+	OCTree sceneMgr(Box(float3(-10, -10, -10), float3(10, 10, 10)), 3);
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
@@ -144,7 +144,7 @@ void VertexDisplacement::InitObjects()
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	this->LookAt(Vector3(0, 0, -10), Vector3(0, 0, 0));
+	this->LookAt(float3(0, 0, -10), float3(0, 0, 0));
 	this->Proj(0.1f, 20.0f);
 
 	fpcController_.AttachCamera(this->ActiveCamera());

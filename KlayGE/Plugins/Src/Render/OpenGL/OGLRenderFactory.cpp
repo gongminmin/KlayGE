@@ -32,25 +32,25 @@ namespace KlayGE
 		return context_;
 	}
 
-	TexturePtr OGLRenderFactory::MakeTexture1D(uint32_t width, uint16_t numMipMaps, PixelFormat format)
+	TexturePtr OGLRenderFactory::MakeTexture1D(uint32_t width, uint16_t numMipMaps, ElementFormat format)
 	{
 		return TexturePtr(new OGLTexture1D(width, numMipMaps, format));
 	}
 	
 	TexturePtr OGLRenderFactory::MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps,
-				PixelFormat format)
+				ElementFormat format)
 	{
 		return TexturePtr(new OGLTexture2D(width, height, numMipMaps, format));
 	}
 
 	TexturePtr OGLRenderFactory::MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth,
-				uint16_t numMipMaps, PixelFormat format)
+				uint16_t numMipMaps, ElementFormat format)
 	{
 		return TexturePtr(new OGLTexture3D(width, height, depth, numMipMaps, format));
 	}
 	
 	TexturePtr OGLRenderFactory::MakeTextureCube(uint32_t size, uint16_t numMipMaps,
-				PixelFormat format)
+				ElementFormat format)
 	{
 		return TexturePtr(new OGLTextureCube(size, numMipMaps, format));
 	}
@@ -105,12 +105,12 @@ namespace KlayGE
 		return RenderViewPtr(new OGLTexture3DRenderView(texture, slice, level));
 	}
 
-	RenderViewPtr OGLRenderFactory::MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer, uint32_t width, uint32_t height, PixelFormat pf)
+	RenderViewPtr OGLRenderFactory::MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer, uint32_t width, uint32_t height, ElementFormat pf)
 	{
 		return RenderViewPtr(new OGLGraphicsBufferRenderView(gbuffer, width, height, pf));
 	}
 
-	RenderViewPtr OGLRenderFactory::MakeDepthStencilRenderView(uint32_t width, uint32_t height, PixelFormat pf, uint32_t multi_sample)
+	RenderViewPtr OGLRenderFactory::MakeDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t multi_sample)
 	{
 		return RenderViewPtr(new OGLDepthStencilRenderView(width, height, pf, multi_sample));
 	}

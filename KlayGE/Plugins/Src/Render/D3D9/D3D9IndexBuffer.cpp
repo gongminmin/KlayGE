@@ -26,25 +26,26 @@ namespace KlayGE
 {
 	D3D9IndexBuffer::D3D9IndexBuffer(BufferUsage usage)
 						: D3D9GraphicsBuffer(usage),
-							format_(IF_Index16)
+							format_(EF_D16)
 	{
 	}
 
-	void D3D9IndexBuffer::SwitchFormat(IndexFormat format)
+	void D3D9IndexBuffer::SwitchFormat(ElementFormat format)
 	{
 		BOOST_ASSERT(d3d_device_);
+		BOOST_ASSERT((EF_D16 == format) || (EF_D32 == format));
 
 		if (format_ != format)
 		{
-			IndexFormat old_format = format_;
+			ElementFormat old_format = format_;
 			format_ = format;
 
-			if (IF_Index16 == old_format)
+			if (EF_D16 == old_format)
 			{
 				IDirect3DIndexBuffer9* buffer;
 				TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->Size() * (sizeof(uint32_t) / sizeof(uint16_t))), 
 					(BU_Dynamic == usage_) ? D3DUSAGE_DYNAMIC : 0,
-					(IF_Index32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_DEFAULT, &buffer, NULL));
+					(EF_D32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_DEFAULT, &buffer, NULL));
 
 				uint16_t* src;
 				uint32_t* dest;
@@ -63,12 +64,12 @@ namespace KlayGE
 			}
 			else
 			{
-				BOOST_ASSERT(IF_Index32 == old_format);
+				BOOST_ASSERT(EF_D32 == old_format);
 
 				IDirect3DIndexBuffer9* buffer;
 				TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->Size() / (sizeof(uint32_t) / sizeof(uint16_t))), 
 					(BU_Dynamic == usage_) ? D3DUSAGE_DYNAMIC : 0,
-					(IF_Index32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_DEFAULT, &buffer, NULL));
+					(EF_D32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_DEFAULT, &buffer, NULL));
 
 				uint32_t* src;
 				uint16_t* dest;
@@ -107,7 +108,7 @@ namespace KlayGE
 			IDirect3DIndexBuffer9* buffer;
 			TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->Size()), 
 				(BU_Dynamic == usage_) ? D3DUSAGE_DYNAMIC : 0,
-				(IF_Index32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_DEFAULT, &buffer, NULL));
+				(EF_D32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_DEFAULT, &buffer, NULL));
 			buffer_ = MakeCOMPtr(buffer);
 		}
 	}
@@ -167,7 +168,7 @@ namespace KlayGE
 
 		IDirect3DIndexBuffer9* temp;
 		TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->Size()), D3DUSAGE_DYNAMIC,
-			(IF_Index32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_SYSTEMMEM, &temp, NULL));
+			(EF_D32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_SYSTEMMEM, &temp, NULL));
 		ID3D9IndexBufferPtr buffer = MakeCOMPtr(temp);
 
 		uint8_t* src;
@@ -191,7 +192,7 @@ namespace KlayGE
 		IDirect3DIndexBuffer9* temp;
 		TIF(d3dDevice->CreateIndexBuffer(static_cast<UINT>(this->Size()), 
 				(BU_Dynamic == usage_) ? D3DUSAGE_DYNAMIC : 0,
-				(IF_Index32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_DEFAULT, &temp, NULL));
+				(EF_D32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_DEFAULT, &temp, NULL));
 		ID3D9IndexBufferPtr buffer = MakeCOMPtr(temp);
 
 		uint8_t* src;

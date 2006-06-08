@@ -111,9 +111,9 @@ namespace KlayGE
 		// 缓冲区解锁
 		sources_[0]->Unlock(lockedBuffer, lockedBufferSize, NULL, 0);
 
-		this->Position(Vector3(0, 0, 0));
-		this->Velocity(Vector3(0, 0, 0));
-		this->Direction(Vector3(0, 0, 0));
+		this->Position(float3(0, 0, 0));
+		this->Velocity(float3(0, 0, 0));
+		this->Direction(float3(0, 0, 0));
 
 		this->Reset();
 
@@ -209,42 +209,42 @@ namespace KlayGE
 
 	// 获取声源位置
 	/////////////////////////////////////////////////////////////////////////////////
-	Vector3 DSSoundBuffer::Position() const
+	float3 DSSoundBuffer::Position() const
 	{
 		return pos_;
 	}
 
 	// 设置声源位置
 	/////////////////////////////////////////////////////////////////////////////////
-	void DSSoundBuffer::Position(Vector3 const & v)
+	void DSSoundBuffer::Position(float3 const & v)
 	{
 		pos_ = v;
 	}
 
 	// 获取声源速度
 	/////////////////////////////////////////////////////////////////////////////////
-	Vector3 DSSoundBuffer::Velocity() const
+	float3 DSSoundBuffer::Velocity() const
 	{
 		return vel_;
 	}
 
 	// 设置声源速度
 	/////////////////////////////////////////////////////////////////////////////////
-	void DSSoundBuffer::Velocity(Vector3 const & v)
+	void DSSoundBuffer::Velocity(float3 const & v)
 	{
 		vel_ = v;
 	}
 
 	// 获取声源方向
 	/////////////////////////////////////////////////////////////////////////////////
-	Vector3 DSSoundBuffer::Direction() const
+	float3 DSSoundBuffer::Direction() const
 	{
 		return dir_;
 	}
 
 	// 设置声源方向
 	/////////////////////////////////////////////////////////////////////////////////
-	void DSSoundBuffer::Direction(Vector3 const & v)
+	void DSSoundBuffer::Direction(float3 const & v)
 	{
 		dir_ = v;
 	}

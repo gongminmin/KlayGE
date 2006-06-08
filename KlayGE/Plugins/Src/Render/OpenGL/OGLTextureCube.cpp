@@ -31,7 +31,7 @@
 namespace KlayGE
 {
 	OGLTextureCube::OGLTextureCube(uint32_t size, uint16_t numMipMaps,
-								PixelFormat format)
+								ElementFormat format)
 					: OGLTexture(TT_Cube)
 	{
 		if (!glloader_GL_EXT_texture_sRGB())
@@ -55,12 +55,12 @@ namespace KlayGE
 			numMipMaps_ = numMipMaps;
 		}
 
-		bpp_ = PixelFormatBits(format_);
+		bpp_ = ElementFormatBits(format_);
 
 		GLint glinternalFormat;
 		GLenum glformat;
 		GLenum gltype;
-		this->Convert(glinternalFormat, glformat, gltype, format_);
+		OGLMapping::MappingFormat(glinternalFormat, glformat, gltype, format_);
 
 		glGenTextures(1, &texture_);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
@@ -96,12 +96,12 @@ namespace KlayGE
 		GLint gl_internalFormat;
 		GLenum gl_format;
 		GLenum gl_type;
-		this->Convert(gl_internalFormat, gl_format, gl_type, format_);
+		OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
 
 		GLint gl_target_internal_format;
 		GLenum gl_target_format;
 		GLenum gl_target_type;
-		this->Convert(gl_target_internal_format, gl_target_format, gl_target_type, target.Format());
+		OGLMapping::MappingFormat(gl_target_internal_format, gl_target_format, gl_target_type, target.Format());
 
 		std::vector<uint8_t> data_in;
 		std::vector<uint8_t> data_out;
@@ -129,7 +129,7 @@ namespace KlayGE
 		GLint glinternalFormat;
 		GLenum glformat;
 		GLenum gltype;
-		this->Convert(glinternalFormat, glformat, gltype, format_);
+		OGLMapping::MappingFormat(glinternalFormat, glformat, gltype, format_);
 
 		glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
 
@@ -143,7 +143,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLTextureCube::CopyMemoryToTextureCube(CubeFaces face, int level, void* data, PixelFormat pf,
+	void OGLTextureCube::CopyMemoryToTextureCube(CubeFaces face, int level, void* data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height)
 	{
@@ -155,7 +155,7 @@ namespace KlayGE
 		GLint glinternalFormat;
 		GLenum glformat;
 		GLenum gltype;
-		this->Convert(glinternalFormat, glformat, gltype, pf);
+		OGLMapping::MappingFormat(glinternalFormat, glformat, gltype, pf);
 
 		glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
 
@@ -170,7 +170,7 @@ namespace KlayGE
 		if (IsCompressedFormat(format_))
 		{
 			int block_size;
-			if (PF_DXT1 == format_)
+			if (EF_DXT1 == format_)
 			{
 				block_size = 8;
 			}

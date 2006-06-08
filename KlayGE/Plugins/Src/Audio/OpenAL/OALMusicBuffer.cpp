@@ -46,9 +46,9 @@ namespace KlayGE
 		alGenSources(1, &source_);
 		alSourcef(source_, AL_PITCH, 1);
 
-		this->Position(Vector3(0, 0, 0.1f));
-		this->Velocity(Vector3(0, 0, 0));
-		this->Direction(Vector3(0, 0, 0));
+		this->Position(float3(0, 0, 0.1f));
+		this->Velocity(float3(0, 0, 0));
+		this->Direction(float3(0, 0, 0));
 
 		this->Volume(volume);
 
@@ -193,52 +193,52 @@ namespace KlayGE
 
 	// 获取声源位置
 	/////////////////////////////////////////////////////////////////////////////////
-	Vector3 OALMusicBuffer::Position() const
+	float3 OALMusicBuffer::Position() const
 	{
 		float pos[3];
 		alGetSourcefv(source_, AL_POSITION, pos);
-		return ALVecToVec(Vector3(pos[0], pos[1], pos[2]));
+		return ALVecToVec(float3(pos[0], pos[1], pos[2]));
 	}
 
 	// 设置声源位置
 	/////////////////////////////////////////////////////////////////////////////////
-	void OALMusicBuffer::Position(Vector3 const & v)
+	void OALMusicBuffer::Position(float3 const & v)
 	{
-		Vector3 alv(VecToALVec(v));
+		float3 alv(VecToALVec(v));
 		alSourcefv(source_, AL_POSITION, &alv.x());
 	}
 
 	// 获取声源速度
 	/////////////////////////////////////////////////////////////////////////////////
-	Vector3 OALMusicBuffer::Velocity() const
+	float3 OALMusicBuffer::Velocity() const
 	{
 		float vel[3];
 		alGetSourcefv(source_, AL_VELOCITY, vel);
-		return ALVecToVec(Vector3(vel[0], vel[1], vel[2]));
+		return ALVecToVec(float3(vel[0], vel[1], vel[2]));
 	}
 
 	// 设置声源速度
 	/////////////////////////////////////////////////////////////////////////////////
-	void OALMusicBuffer::Velocity(Vector3 const & v)
+	void OALMusicBuffer::Velocity(float3 const & v)
 	{
-		Vector3 alv(VecToALVec(v));
+		float3 alv(VecToALVec(v));
 		alSourcefv(source_, AL_VELOCITY, &alv.x());
 	}
 
 	// 获取声源方向
 	/////////////////////////////////////////////////////////////////////////////////
-	Vector3 OALMusicBuffer::Direction() const
+	float3 OALMusicBuffer::Direction() const
 	{
 		float dir[3];
 		alGetSourcefv(source_, AL_DIRECTION, dir);
-		return ALVecToVec(Vector3(dir[0], dir[1], dir[2]));
+		return ALVecToVec(float3(dir[0], dir[1], dir[2]));
 	}
 
 	// 设置声源方向
 	/////////////////////////////////////////////////////////////////////////////////
-	void OALMusicBuffer::Direction(Vector3 const & v)
+	void OALMusicBuffer::Direction(float3 const & v)
 	{
-		Vector3 alv(VecToALVec(v));
+		float3 alv(VecToALVec(v));
 		alSourcefv(source_, AL_DIRECTION, &alv.x());
 	}
 }

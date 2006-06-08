@@ -39,7 +39,7 @@ namespace
 	private:
 		struct InstData
 		{
-			Vector4 col[3];
+			float4 col[3];
 			Color clr;
 		};
 
@@ -53,9 +53,9 @@ namespace
 			instance_format_.push_back(vertex_element(VEU_Diffuse, 0, sizeof(float), 4));
 		}
 
-		void Instance(Matrix4 const & mat, Color const & clr)
+		void Instance(float4x4 const & mat, Color const & clr)
 		{
-			Matrix4 matT = MathLib::Transpose(mat);
+			float4x4 matT = MathLib::Transpose(mat);
 
 			inst_.col[0] = matT.Row(0);
 			inst_.col[1] = matT.Row(1);
@@ -92,12 +92,12 @@ namespace
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
 
-			Matrix4 const & model = Matrix4::Identity();
-			Matrix4 const & view = app.ActiveCamera().ViewMatrix();
-			Matrix4 const & proj = app.ActiveCamera().ProjMatrix();
+			float4x4 const & model = float4x4::Identity();
+			float4x4 const & view = app.ActiveCamera().ViewMatrix();
+			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
 			*(technique_->Effect().ParameterByName("ViewProj")) = view * proj;
-			*(technique_->Effect().ParameterByName("lightPos")) = Vector4(-1, 0, -1, 1);
+			*(technique_->Effect().ParameterByName("lightPos")) = float4(-1, 0, -1, 1);
 		}
 	};
 
@@ -106,7 +106,7 @@ namespace
 	private:
 		struct InstData
 		{
-			Vector4 col[3];
+			float4 col[3];
 			Color clr;
 		};
 
@@ -123,25 +123,25 @@ namespace
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
 
-			Matrix4 const & view = app.ActiveCamera().ViewMatrix();
-			Matrix4 const & proj = app.ActiveCamera().ProjMatrix();
+			float4x4 const & view = app.ActiveCamera().ViewMatrix();
+			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
 			*(technique_->Effect().ParameterByName("ViewProj")) = view * proj;
-			*(technique_->Effect().ParameterByName("lightPos")) = Vector4(-1, 0, -1, 1);
+			*(technique_->Effect().ParameterByName("lightPos")) = float4(-1, 0, -1, 1);
 		}
 
 		void OnInstanceBegin(uint32_t id)
 		{
 			InstData const * data = static_cast<InstData const *>(instances_[id].lock()->InstanceData());
 
-			Matrix4 model;
+			float4x4 model;
 			model.Col(0, data->col[0]);
 			model.Col(1, data->col[1]);
 			model.Col(2, data->col[2]);
-			model.Col(3, Vector4(0, 0, 0, 1));
+			model.Col(3, float4(0, 0, 0, 1));
 
 			*(technique_->Effect().ParameterByName("modelmat")) = model;
-			*(technique_->Effect().ParameterByName("color")) = Vector4(data->clr.r(), data->clr.g(), data->clr.b(), data->clr.a());
+			*(technique_->Effect().ParameterByName("color")) = float4(data->clr.r(), data->clr.g(), data->clr.b(), data->clr.a());
 		}
 
 	private:
@@ -226,7 +226,7 @@ void Instancing::InitObjects()
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	this->LookAt(Vector3(-0.3f, 0.4f, -0.3f), Vector3(0, 0, 0));
+	this->LookAt(float3(-0.3f, 0.4f, -0.3f), float3(0, 0, 0));
 	this->Proj(0.1f, 100);
 
 	fpcController_.AttachCamera(this->ActiveCamera());

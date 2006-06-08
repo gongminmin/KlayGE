@@ -121,7 +121,7 @@ namespace KlayGE
 	{
 	public:
 		OGLGraphicsBufferRenderView(GraphicsBuffer& gb,
-							uint32_t width, uint32_t height, PixelFormat pf);
+							uint32_t width, uint32_t height, ElementFormat pf);
 		~OGLGraphicsBufferRenderView();
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
@@ -142,7 +142,7 @@ namespace KlayGE
 	class OGLDepthStencilRenderView : public OGLRenderView, boost::noncopyable
 	{
 	public:
-		OGLDepthStencilRenderView(uint32_t width, uint32_t height, PixelFormat pf, uint32_t multi_sample);
+		OGLDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t multi_sample);
 		~OGLDepthStencilRenderView();
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);

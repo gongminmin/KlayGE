@@ -1,6 +1,3 @@
-KlayGE 3.0中去掉固定流水线
-KlayGE 3.0将完全支持HDR
-KlayGE 3.0完全支持Instancing，Point Sprites，Occlusion Querying
-
 即将加入的特性：
 Deferred shading
+Particle system

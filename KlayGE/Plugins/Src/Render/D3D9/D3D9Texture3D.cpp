@@ -39,7 +39,7 @@
 namespace KlayGE
 {
 	D3D9Texture3D::D3D9Texture3D(uint32_t width, uint32_t height, uint32_t depth,
-								uint16_t numMipMaps, PixelFormat format)
+								uint16_t numMipMaps, ElementFormat format)
 					: D3D9Texture(TT_3D),
 						auto_gen_mipmaps_(false)
 	{
@@ -52,7 +52,7 @@ namespace KlayGE
 		heights_.assign(1, height);
 		depths_.assign(1, depth);
 
-		bpp_ = PixelFormatBits(format);
+		bpp_ = ElementFormatBits(format);
 
 		d3dTexture3D_ = this->CreateTexture3D(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 
@@ -132,7 +132,7 @@ namespace KlayGE
 		this->CopyVolumeToMemory(volume, data);
 	}
 
-	void D3D9Texture3D::CopyMemoryToTexture3D(int level, void* data, PixelFormat pf,
+	void D3D9Texture3D::CopyMemoryToTexture3D(int level, void* data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
 			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
 			uint32_t src_width, uint32_t src_height, uint32_t src_depth)
@@ -145,7 +145,7 @@ namespace KlayGE
 
 		if (volume)
 		{
-			uint32_t const srcRowPitch = src_width * PixelFormatBits(pf) / 8;
+			uint32_t const srcRowPitch = src_width * ElementFormatBits(pf) / 8;
 			uint32_t const srcSlicePitch = srcRowPitch * src_height;
 
 			D3DBOX srcBox = { 0, 0, src_width, src_height, 0, src_depth };
@@ -280,6 +280,6 @@ namespace KlayGE
 		}					
 
 		format_ = D3D9Mapping::MappingFormat(desc.Format);
-		bpp_	= PixelFormatBits(format_);
+		bpp_	= ElementFormatBits(format_);
 	}
 }

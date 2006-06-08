@@ -75,13 +75,13 @@ namespace KlayGE
 
 				T a, b;
 				{
-					T u = Dot(g2_[b00], Vector2(rx.x(), ry.x()));
-					T v = Dot(g2_[b10], Vector2(rx.y(), ry.x()));
+					T u = Dot(g2_[b00], float2(rx.x(), ry.x()));
+					T v = Dot(g2_[b10], float2(rx.y(), ry.x()));
 					a = Lerp(u, v, sx);
 				}
 				{
-					T u = Dot(g2_[b01], Vector2(rx.x(), ry.y()));
-					T v = Dot(g2_[b11], Vector2(rx.y(), ry.y()));
+					T u = Dot(g2_[b01], float2(rx.x(), ry.y()));
+					T v = Dot(g2_[b11], float2(rx.y(), ry.y()));
 					b = Lerp(u, v, sx);
 				}
 
@@ -122,13 +122,13 @@ namespace KlayGE
 				{
 					T a, b;
 					{
-						T u = Dot(g3_[b000], Vector3(rx.x(), ry.x(), rz.x()));
-						T v = Dot(g3_[b100], Vector3(rx.y(), ry.x(), rz.x()));
+						T u = Dot(g3_[b000], float3(rx.x(), ry.x(), rz.x()));
+						T v = Dot(g3_[b100], float3(rx.y(), ry.x(), rz.x()));
 						a = Lerp(u, v, sx);
 					}
 					{
-						T u = Dot(g3_[b010], Vector3(rx.x(), ry.y(), rz.x()));
-						T v = Dot(g3_[b110], Vector3(rx.y(), ry.y(), rz.x()));
+						T u = Dot(g3_[b010], float3(rx.x(), ry.y(), rz.x()));
+						T v = Dot(g3_[b110], float3(rx.y(), ry.y(), rz.x()));
 						b = Lerp(u, v, sx);
 					}
 					c = Lerp(a, b, sy);
@@ -136,13 +136,13 @@ namespace KlayGE
 				{
 					T a, b;
 					{
-						T u = Dot(g3_[b001], Vector3(rx.x(), ry.x(), rz.y()));
-						T v = Dot(g3_[b101], Vector3(rx.y(), ry.x(), rz.y()));
+						T u = Dot(g3_[b001], float3(rx.x(), ry.x(), rz.y()));
+						T v = Dot(g3_[b101], float3(rx.y(), ry.x(), rz.y()));
 						a = Lerp(u, v, sx);
 					}
 					{
-						T u = Dot(g3_[b011], Vector3(rx.x(), ry.y(), rz.y()));
-						T v = Dot(g3_[b111], Vector3(rx.y(), ry.y(), rz.y()));
+						T u = Dot(g3_[b011], float3(rx.x(), ry.y(), rz.y()));
+						T v = Dot(g3_[b111], float3(rx.y(), ry.y(), rz.y()));
 						b = Lerp(u, v, sx);
 					}
 					d = Lerp(a, b, sy);

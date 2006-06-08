@@ -11,7 +11,7 @@ public:
 	MD5SkinnedModel();
 
 	void SetTime(float time);
-	void SetEyePos(const KlayGE::Vector3& eye_pos);
+	void SetEyePos(const KlayGE::float3& eye_pos);
 };
 
 class MD5SkinnedMesh : public KlayGE::SkinnedMesh
@@ -21,19 +21,19 @@ public:
 
 	void OnRenderBegin();
 
-	void SetWorld(const KlayGE::Matrix4& mat);
+	void SetWorld(const KlayGE::float4x4& mat);
 	void SetShaderName(std::string const & shader);
-	void SetEyePos(const KlayGE::Vector3& eye_pos);
+	void SetEyePos(const KlayGE::float3& eye_pos);
 
 private:
 	void BuildRenderable();
 
-	KlayGE::Matrix4 world_;
+	KlayGE::float4x4 world_;
 
 	std::string shader_;
 	KlayGE::SamplerPtr diffuse_map_, normal_map_, specular_map_;
 
-	KlayGE::Vector3 eye_pos_;
+	KlayGE::float3 eye_pos_;
 
 	boost::shared_ptr<MD5SkinnedModel> model_;
 };

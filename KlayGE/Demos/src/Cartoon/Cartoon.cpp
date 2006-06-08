@@ -89,13 +89,13 @@ namespace
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
 
-			Matrix4 const & view = app.ActiveCamera().ViewMatrix();
-			Matrix4 const & proj = app.ActiveCamera().ProjMatrix();
+			float4x4 const & view = app.ActiveCamera().ViewMatrix();
+			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
 			*(effect_->ParameterByName("model_view")) = model_mat_ * view;
 			*(effect_->ParameterByName("proj")) = proj;
 
-			*(effect_->ParameterByName("light_in_model")) = MathLib::TransformCoord(Vector3(2, 2, -3),
+			*(effect_->ParameterByName("light_in_model")) = MathLib::TransformCoord(float3(2, 2, -3),
 																	MathLib::Inverse(model_mat_));
 		}
 
@@ -103,7 +103,7 @@ namespace
 		SamplerPtr toon_sampler_;
 		SamplerPtr normal_depth_sampler_;
 
-		Matrix4 model_mat_;
+		float4x4 model_mat_;
 
 		RenderEffectPtr effect_;
 	};
@@ -141,7 +141,7 @@ namespace
 
 int main()
 {
-	OCTree sceneMgr(Box(Vector3(-10, -10, -10), Vector3(10, 10, 10)), 3);
+	OCTree sceneMgr(Box(float3(-10, -10, -10), float3(10, 10, 10)), 3);
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
@@ -178,7 +178,7 @@ void Cartoon::InitObjects()
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	this->LookAt(Vector3(0, 0, -6), Vector3(0, 0, 0));
+	this->LookAt(float3(0, 0, -6), float3(0, 0, 0));
 	this->Proj(0.1f, 20.0f);
 
 	normal_depth_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
@@ -199,9 +199,9 @@ void Cartoon::InitObjects()
 void Cartoon::OnResize(uint32_t width, uint32_t height)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	normal_depth_tex_ = rf.MakeTexture2D(width, height, 1, PF_ABGR16F);
+	normal_depth_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F);
 	normal_depth_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*normal_depth_tex_, 0));
-	normal_depth_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, PF_D16, 0));
+	normal_depth_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));
 }
 
 void Cartoon::InputHandler(InputEngine const & sender, InputAction const & action)

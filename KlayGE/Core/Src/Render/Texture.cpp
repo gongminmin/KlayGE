@@ -168,49 +168,49 @@ namespace KlayGE
 			desc.mip_map_count = 1;
 		}
 
-		PixelFormat format = PF_ARGB8;
+		ElementFormat format = EF_ARGB8;
 		if ((desc.pixel_format.flags & DDSPF_FOURCC) != 0)
 		{
 			switch (desc.pixel_format.four_cc)
 			{
 			case 36:
-				format = PF_ABGR16;
+				format = EF_ABGR16;
 				break;
 
 			case 111:
-				format = PF_R16F;
+				format = EF_R16F;
 				break;
 
 			case 112:
-				format = PF_GR16F;
+				format = EF_GR16F;
 				break;
 
 			case 113:
-				format = PF_ABGR16F;
+				format = EF_ABGR16F;
 				break;
 
 			case 114:
-				format = PF_R32F;
+				format = EF_R32F;
 				break;
 
 			case 115:
-				format = PF_GR32F;
+				format = EF_GR32F;
 				break;
 
 			case 116:
-				format = PF_ABGR32F;
+				format = EF_ABGR32F;
 				break;
 
 			case MakeFourCC<'D', 'X', 'T', '1'>::value:
-				format = PF_DXT1;
+				format = EF_DXT1;
 				break;
 
 			case MakeFourCC<'D', 'X', 'T', '3'>::value:
-				format = PF_DXT3;
+				format = EF_DXT3;
 				break;
 
 			case MakeFourCC<'D', 'X', 'T', '5'>::value:
-				format = PF_DXT5;
+				format = EF_DXT5;
 				break;
 			}
 		}
@@ -225,7 +225,7 @@ namespace KlayGE
 						&& (0x7E0 == desc.pixel_format.g_bit_mask)
 						&& (0x1F == desc.pixel_format.b_bit_mask))
 					{
-						format = PF_R5G6B5;
+						format = EF_R5G6B5;
 					}
 					else
 					{
@@ -234,7 +234,7 @@ namespace KlayGE
 							&& (0x00F0 == desc.pixel_format.g_bit_mask)
 							&& (0x000F == desc.pixel_format.b_bit_mask))
 						{
-							format = PF_ARGB4;
+							format = EF_ARGB4;
 						}
 						else
 						{
@@ -250,11 +250,11 @@ namespace KlayGE
 					{
 						if ((desc.pixel_format.flags & DDSPF_ALPHAPIXELS) != 0)
 						{
-							format = PF_ARGB8;
+							format = EF_ARGB8;
 						}
 						else
 						{
-							format = PF_XRGB8;
+							format = EF_XRGB8;
 						}
 					}
 					else
@@ -264,7 +264,7 @@ namespace KlayGE
 							&& (0x000FFC00 == desc.pixel_format.g_bit_mask)
 							&& (0x000003FF == desc.pixel_format.b_bit_mask))
 						{
-							format = PF_A2RGB10;
+							format = EF_A2RGB10;
 						}
 						else
 						{
@@ -273,7 +273,7 @@ namespace KlayGE
 								&& (0xFFFF0000 == desc.pixel_format.g_bit_mask)
 								&& (0x00000000 == desc.pixel_format.b_bit_mask))
 							{
-								format = PF_GR16;
+								format = EF_GR16;
 							}
 							else
 							{
@@ -293,22 +293,22 @@ namespace KlayGE
 					case 8:
 						if ((desc.pixel_format.flags & DDSPF_ALPHAPIXELS) != 0)
 						{
-							format = PF_AL4;
+							format = EF_AL4;
 						}
 						else
 						{
-							format = PF_L8;
+							format = EF_L8;
 						}
 						break;
 
 					case 16:
 						if ((desc.pixel_format.flags & DDSPF_ALPHAPIXELS) != 0)
 						{
-							format = PF_AL8;
+							format = EF_AL8;
 						}
 						else
 						{
-							format = PF_L16;
+							format = EF_L16;
 						}
 						break;
 
@@ -321,7 +321,7 @@ namespace KlayGE
 				{
 					if ((desc.pixel_format.flags & DDSPF_ALPHAPIXELS) != 0)
 					{
-						format = PF_A8;
+						format = EF_A8;
 					}
 					else
 					{
@@ -350,7 +350,7 @@ namespace KlayGE
 				}
 				else
 				{
-					main_image_size = desc.width * desc.height * PixelFormatBits(format) / 8;
+					main_image_size = desc.width * desc.height * ElementFormatBits(format) / 8;
 				}
 			}
 		}
@@ -389,7 +389,7 @@ namespace KlayGE
 					if (IsCompressedFormat(format))
 					{
 						int block_size;
-						if (PF_DXT1 == format)
+						if (EF_DXT1 == format)
 						{
 							block_size = 8;
 						}
@@ -425,7 +425,7 @@ namespace KlayGE
 					if (IsCompressedFormat(format))
 					{
 						int block_size;
-						if (PF_DXT1 == format)
+						if (EF_DXT1 == format)
 						{
 							block_size = 8;
 						}
@@ -461,7 +461,7 @@ namespace KlayGE
 					if (IsCompressedFormat(format))
 					{
 						int block_size;
-						if (PF_DXT1 == format)
+						if (EF_DXT1 == format)
 						{
 							block_size = 8;
 						}
@@ -499,7 +499,7 @@ namespace KlayGE
 						if (IsCompressedFormat(format))
 						{
 							int block_size;
-							if (PF_DXT1 == format)
+							if (EF_DXT1 == format)
 							{
 								block_size = 8;
 							}
@@ -562,50 +562,50 @@ namespace KlayGE
 
 		desc.pixel_format.size = sizeof(desc.pixel_format);
 
-		if ((PF_ABGR16 == texture->Format())
+		if ((EF_ABGR16 == texture->Format())
 			|| IsFloatFormat(texture->Format()) || IsCompressedFormat(texture->Format()))
 		{
 			desc.pixel_format.flags |= DDSPF_FOURCC;
 
 			switch (texture->Format())
 			{
-			case PF_ABGR16:
+			case EF_ABGR16:
 				desc.pixel_format.four_cc = 36;
 				break;
 
-			case PF_R16F:
+			case EF_R16F:
 				desc.pixel_format.four_cc = 111;
 				break;
 
-			case PF_GR16F:
+			case EF_GR16F:
 				desc.pixel_format.four_cc = 112;
 				break;
 
-			case PF_ABGR16F:
+			case EF_ABGR16F:
 				desc.pixel_format.four_cc = 113;
 				break;
 
-			case PF_R32F:
+			case EF_R32F:
 				desc.pixel_format.four_cc = 114;
 				break;
 
-			case PF_GR32F:
+			case EF_GR32F:
 				desc.pixel_format.four_cc = 115;
 				break;
 
-			case PF_ABGR32F:
+			case EF_ABGR32F:
 				desc.pixel_format.four_cc = 116;
 				break;
 
-			case PF_DXT1:
+			case EF_DXT1:
 				desc.pixel_format.four_cc = MakeFourCC<'D', 'X', 'T', '1'>::value;
 				break;
 
-			case PF_DXT3:
+			case EF_DXT3:
 				desc.pixel_format.four_cc = MakeFourCC<'D', 'X', 'T', '3'>::value;
 				break;
 
-			case PF_DXT5:
+			case EF_DXT5:
 				desc.pixel_format.four_cc = MakeFourCC<'D', 'X', 'T', '5'>::value;
 				break;
 			}
@@ -614,7 +614,7 @@ namespace KlayGE
 		{
 			switch (texture->Format())
 			{
-			case PF_R5G6B5:
+			case EF_R5G6B5:
 				desc.pixel_format.flags |= DDSPF_RGB;
 				desc.pixel_format.rgb_bit_count = 16;
 
@@ -624,7 +624,7 @@ namespace KlayGE
 				desc.pixel_format.b_bit_mask = 0x0000001F;
 				break;
 
-			case PF_ARGB4:
+			case EF_ARGB4:
 				desc.pixel_format.flags |= DDSPF_RGB;
 				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
 				desc.pixel_format.rgb_bit_count = 16;
@@ -635,7 +635,7 @@ namespace KlayGE
 				desc.pixel_format.b_bit_mask = 0x0000000F;
 				break;
 
-			case PF_ARGB8:
+			case EF_ARGB8:
 				desc.pixel_format.flags |= DDSPF_RGB;
 				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
 				desc.pixel_format.rgb_bit_count = 32;
@@ -646,7 +646,7 @@ namespace KlayGE
 				desc.pixel_format.b_bit_mask = 0x000000FF;
 				break;
 
-			case PF_XRGB8:
+			case EF_XRGB8:
 				desc.pixel_format.flags |= DDSPF_RGB;
 				desc.pixel_format.rgb_bit_count = 32;
 
@@ -656,7 +656,7 @@ namespace KlayGE
 				desc.pixel_format.b_bit_mask = 0x000000FF;
 				break;
 
-			case PF_A2RGB10:
+			case EF_A2RGB10:
 				desc.pixel_format.flags |= DDSPF_RGB;
 				desc.pixel_format.rgb_bit_count = 32;
 
@@ -666,7 +666,7 @@ namespace KlayGE
 				desc.pixel_format.b_bit_mask = 0x000003FF;
 				break;
 
-			case PF_GR16:
+			case EF_GR16:
 				desc.pixel_format.flags |= DDSPF_RGB;
 				desc.pixel_format.rgb_bit_count = 32;
 
@@ -676,7 +676,7 @@ namespace KlayGE
 				desc.pixel_format.b_bit_mask = 0x00000000;
 				break;
 
-			case PF_AL4:
+			case EF_AL4:
 				desc.pixel_format.flags |= DDSPF_LUMINANCE;
 				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
 				desc.pixel_format.rgb_bit_count = 8;
@@ -687,7 +687,7 @@ namespace KlayGE
 				desc.pixel_format.b_bit_mask = 0x00000000;
 				break;
 
-			case PF_L8:
+			case EF_L8:
 				desc.pixel_format.flags |= DDSPF_LUMINANCE;
 				desc.pixel_format.rgb_bit_count = 8;
 				
@@ -697,7 +697,7 @@ namespace KlayGE
 				desc.pixel_format.b_bit_mask = 0x00000000;
 				break;
 
-			case PF_AL8:
+			case EF_AL8:
 				desc.pixel_format.flags |= DDSPF_LUMINANCE;
 				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
 				desc.pixel_format.rgb_bit_count = 16;
@@ -708,7 +708,7 @@ namespace KlayGE
 				desc.pixel_format.b_bit_mask = 0x00000000;
 				break;
 
-			case PF_L16:
+			case EF_L16:
 				desc.pixel_format.flags |= DDSPF_LUMINANCE;
 				desc.pixel_format.rgb_bit_count = 16;
 
@@ -718,7 +718,7 @@ namespace KlayGE
 				desc.pixel_format.b_bit_mask = 0x00000000;
 				break;
 
-			case PF_A8:
+			case EF_A8:
 				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
 				desc.pixel_format.rgb_bit_count = 8;
 
@@ -755,10 +755,10 @@ namespace KlayGE
 			desc.dds_caps.caps2 |= DDSCAPS2_CUBEMAP_NEGATIVEZ;
 		}
 
-		uint32_t main_image_size = texture->Width(0) * texture->Height(0) * PixelFormatBits(texture->Format()) / 8;
+		uint32_t main_image_size = texture->Width(0) * texture->Height(0) * ElementFormatBits(texture->Format()) / 8;
 		if (IsCompressedFormat(texture->Format()))
 		{
-			if (PF_DXT1 == texture->Format())
+			if (EF_DXT1 == texture->Format())
 			{
 				main_image_size = texture->Width(0) * texture->Height(0) / 2;
 			}
@@ -784,7 +784,7 @@ namespace KlayGE
 					if (IsCompressedFormat(texture->Format()))
 					{
 						int block_size;
-						if (PF_DXT1 == texture->Format())
+						if (EF_DXT1 == texture->Format())
 						{
 							block_size = 8;
 						}
@@ -816,7 +816,7 @@ namespace KlayGE
 					if (IsCompressedFormat(texture->Format()))
 					{
 						int block_size;
-						if (PF_DXT1 == texture->Format())
+						if (EF_DXT1 == texture->Format())
 						{
 							block_size = 8;
 						}
@@ -848,7 +848,7 @@ namespace KlayGE
 					if (IsCompressedFormat(texture->Format()))
 					{
 						int block_size;
-						if (PF_DXT1 == texture->Format())
+						if (EF_DXT1 == texture->Format())
 						{
 							block_size = 8;
 						}
@@ -882,7 +882,7 @@ namespace KlayGE
 						if (IsCompressedFormat(texture->Format()))
 						{
 							int block_size;
-							if (PF_DXT1 == texture->Format())
+							if (EF_DXT1 == texture->Format())
 							{
 								block_size = 8;
 							}
@@ -958,22 +958,22 @@ namespace KlayGE
 		{
 		}
 
-		void CopyMemoryToTexture1D(int /*level*/, void* /*data*/, PixelFormat /*pf*/,
+		void CopyMemoryToTexture1D(int /*level*/, void* /*data*/, ElementFormat /*pf*/,
 			uint32_t /*dst_width*/, uint32_t /*dst_xOffset*/, uint32_t /*src_width*/)
 		{
 		}
-		void CopyMemoryToTexture2D(int /*level*/, void* /*data*/, PixelFormat /*pf*/,
+		void CopyMemoryToTexture2D(int /*level*/, void* /*data*/, ElementFormat /*pf*/,
 			uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/,
 			uint32_t /*src_width*/, uint32_t /*src_height*/)
 		{
 		}
-		void CopyMemoryToTexture3D(int /*level*/, void* /*data*/, PixelFormat /*pf*/,
+		void CopyMemoryToTexture3D(int /*level*/, void* /*data*/, ElementFormat /*pf*/,
 			uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_depth*/,
 			uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/, uint32_t /*dst_zOffset*/,
 			uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_depth*/)
 		{
 		}
-		void CopyMemoryToTextureCube(CubeFaces /*face*/, int /*level*/, void* /*data*/, PixelFormat /*pf*/,
+		void CopyMemoryToTextureCube(CubeFaces /*face*/, int /*level*/, void* /*data*/, ElementFormat /*pf*/,
 			uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/,
 			uint32_t /*src_width*/, uint32_t /*dst_height*/)
 		{
@@ -1015,7 +1015,7 @@ namespace KlayGE
 		return bpp_;
 	}
 
-	PixelFormat Texture::Format() const
+	ElementFormat Texture::Format() const
 	{
 		return format_;
 	}

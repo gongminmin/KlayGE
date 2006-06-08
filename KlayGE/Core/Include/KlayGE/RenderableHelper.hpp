@@ -55,7 +55,7 @@ namespace KlayGE
 	class RenderablePoint : public RenderableHelper
 	{
 	public:
-		RenderablePoint(Vector3 const & v, Color const & clr);
+		RenderablePoint(float3 const & v, Color const & clr);
 		virtual ~RenderablePoint()
 		{
 		}
@@ -63,13 +63,13 @@ namespace KlayGE
 		void OnRenderBegin();
 
 	protected:
-		Vector4 clr_;
+		float4 clr_;
 	};
 
 	class RenderableLine : public RenderableHelper
 	{
 	public:
-		explicit RenderableLine(Vector3 const & v0, Vector3 const & v1, Color const & clr);
+		explicit RenderableLine(float3 const & v0, float3 const & v1, Color const & clr);
 		virtual ~RenderableLine()
 		{
 		}
@@ -77,13 +77,13 @@ namespace KlayGE
 		void OnRenderBegin();
 
 	protected:
-		Vector4 clr_;
+		float4 clr_;
 	};
 
 	class RenderableTriangle : public RenderableHelper
 	{
 	public:
-		RenderableTriangle(Vector3 const & v0, Vector3 const & v1, Vector3 const & v2, Color const & clr);
+		RenderableTriangle(float3 const & v0, float3 const & v1, float3 const & v2, Color const & clr);
 		virtual ~RenderableTriangle()
 		{
 		}
@@ -91,7 +91,7 @@ namespace KlayGE
 		void OnRenderBegin();
 
 	protected:
-		Vector4 clr_;
+		float4 clr_;
 	};
 
 	class RenderableBox : public RenderableHelper
@@ -105,7 +105,7 @@ namespace KlayGE
 		void OnRenderBegin();
 
 	protected:
-		Vector4 clr_;
+		float4 clr_;
 	};
 
 	class RenderableSkyBox : public RenderableHelper

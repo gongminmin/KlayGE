@@ -379,7 +379,7 @@ namespace KlayGE
 				stream.Active();
 
 				GLenum index_type;
-				if (IF_Index16 == rl.IndexStreamFormat())
+				if (EF_D16 == rl.IndexStreamFormat())
 				{
 					index_type = GL_UNSIGNED_SHORT;
 				}

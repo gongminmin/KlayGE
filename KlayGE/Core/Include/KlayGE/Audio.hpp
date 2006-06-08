@@ -50,12 +50,12 @@ namespace KlayGE
 		virtual bool IsPlaying() const = 0;
 		virtual bool IsSound() const = 0;
 
-		virtual Vector3 Position() const = 0;
-		virtual void Position(Vector3 const & v) = 0;
-		virtual Vector3 Velocity() const = 0;
-		virtual void Velocity(Vector3 const & v) = 0;
-		virtual Vector3 Direction() const = 0;
-		virtual void Direction(Vector3 const & v) = 0;
+		virtual float3 Position() const = 0;
+		virtual void Position(float3 const & v) = 0;
+		virtual float3 Velocity() const = 0;
+		virtual void Velocity(float3 const & v) = 0;
+		virtual float3 Direction() const = 0;
+		virtual void Direction(float3 const & v) = 0;
 
 	protected:
 		AudioDataSourcePtr dataSource_;
@@ -135,12 +135,12 @@ namespace KlayGE
 		void  MusicVolume(float vol);
 		float MusicVolume() const;
 
-		virtual Vector3 GetListenerPos() const = 0;
-		virtual void SetListenerPos(Vector3 const & v) = 0;
-		virtual Vector3 GetListenerVel() const = 0;
-		virtual void SetListenerVel(Vector3 const & v) = 0;
-		virtual void GetListenerOri(Vector3& face, Vector3& up) const = 0;
-		virtual void SetListenerOri(Vector3 const & face, Vector3 const & up) = 0;
+		virtual float3 GetListenerPos() const = 0;
+		virtual void SetListenerPos(float3 const & v) = 0;
+		virtual float3 GetListenerVel() const = 0;
+		virtual void SetListenerVel(float3 const & v) = 0;
+		virtual void GetListenerOri(float3& face, float3& up) const = 0;
+		virtual void SetListenerOri(float3 const & face, float3 const & up) = 0;
 
 	protected:
 		AudioBufs	audioBufs_;

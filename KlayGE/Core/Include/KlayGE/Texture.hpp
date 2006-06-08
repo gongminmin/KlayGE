@@ -1,11 +1,11 @@
 // Texture.hpp
-// KlayGE 纹理类 实现文件
+// KlayGE 纹理类 头文件
 // Ver 3.3.0
 // 版权所有(C) 龚敏敏, 2003-2006
 // Homepage: http://klayge.sourceforge.net
 //
 // 3.3.0
-// 支持GR16和ABGR16 (2006.6.7)
+// 使用ElementFormat (2006.6.8)
 //
 // 3.2.0
 // 支持sRGB (2006.4.24)
@@ -34,6 +34,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Math.hpp>
+#include <KlayGE/ElementFormat.hpp>
 
 #include <string>
 #include <boost/assert.hpp>
@@ -46,200 +47,6 @@
 
 namespace KlayGE
 {
-	enum PixelFormat
-	{
-		// Unknown pixel format.
-		PF_Unknown,
-		// 8-bit pixel format, all bits luminace.
-		PF_L8,
-		// 8-bit pixel format, all bits alpha.
-		PF_A8,
-		// 8-bit pixel format, 4 bits alpha, 4 bits luminace.
-		PF_AL4,
-		// 16-bit pixel format, all bits for luminace.
-		PF_L16,
-		// 16-bit pixel format, 8 bits alpha, 8 bits luminace.
-		PF_AL8,
-		// 16-bit pixel format, 5 bits red, 6 bits green, 5 bits blue.
-		PF_R5G6B5,
-		// 16-bit pixel format, 4 bits for alpha, red, green and blue.
-		PF_ARGB4,
-		// 32-bit pixel format, 8 bits no used, 8 bits for red, green and blue.
-		PF_XRGB8,
-		// 32-bit pixel format, 8 bits for alpha, red, green and blue.
-		PF_ARGB8,
-		// 32-bit pixel format, 2 bits for alpha, 10 bits for red, green and blue.
-		PF_A2RGB10,
-		// 32-bit pixel format, 16 bits for red and green.
-		PF_GR16,
-		// 64-bit pixel format, 16 bits for alpha, blue, green and red.
-		PF_ABGR16,
-
-		// 16-bit pixel format, 16 bits floating-point for red.
-		PF_R16F,
-		// 32-bit pixel format, 16 bits floating-point for green and red.
-		PF_GR16F,
-		// 64-bit pixel format, 16 bits floating-point for alpha, blue, green and red.
-		PF_ABGR16F,
-		// 32-bit pixel format, 32 bits floating-point for red.
-		PF_R32F,
-		// 64-bit pixel format, 32 bits floating-point for green and red.
-		PF_GR32F,
-		// 128-bit pixel format, 32 bits floating-point for alpha, blue, green and red.
-		PF_ABGR32F,
-
-		// DXT1 compression texture format 
-		PF_DXT1,
-		// DXT3 compression texture format
-		PF_DXT3,
-		// DXT5 compression texture format
-		PF_DXT5,
-
-		// 16-bit pixel format, 16 bits depth
-		PF_D16,
-		// 32-bit pixel format, 24 bits depth
-		PF_D24X8,
-		// 32-bit pixel format, 24 bits depth and 8 bits stencil
-		PF_D24S8,
-
-		// 32-bit pixel format, 8 bits for alpha, red, green and blue. Standard RGB (gamma = 2.2).
-		PF_ARGB8_SRGB,
-		// DXT1 compression texture format. Standard RGB (gamma = 2.2).
-		PF_DXT1_SRGB,
-		// DXT3 compression texture format. Standard RGB (gamma = 2.2).
-		PF_DXT3_SRGB,
-		// DXT5 compression texture format. Standard RGB (gamma = 2.2).
-		PF_DXT5_SRGB,
-	};
-
-	inline uint8_t
-	PixelFormatBits(PixelFormat format)
-	{
-		switch (format)
-		{
-		case PF_L8:
-		case PF_A8:
-		case PF_AL4:
-			return 8;
-
-		case PF_L16:
-		case PF_AL8:
-		case PF_R5G6B5:
-		case PF_ARGB4:
-		case PF_R16F:
-		case PF_DXT1:
-		case PF_DXT1_SRGB:
-		case PF_D16:
-			return 16;
-				
-		case PF_XRGB8:
-		case PF_ARGB8:
-		case PF_ARGB8_SRGB:
-		case PF_A2RGB10:
-		case PF_GR16:
-		case PF_GR16F:
-		case PF_R32F:
-		case PF_DXT3:
-		case PF_DXT5:
-		case PF_DXT3_SRGB:
-		case PF_DXT5_SRGB:
-		case PF_D24X8:
-		case PF_D24S8:
-			return 32;
-
-		case PF_ABGR16:
-		case PF_ABGR16F:
-		case PF_GR32F:
-			return 64;
-
-		case PF_ABGR32F:
-			return 128;
-		}
-
-		BOOST_ASSERT(false);
-		return 0;
-	}
-
-	inline bool
-	IsFloatFormat(PixelFormat format)
-	{
-		switch (format)
-		{
-		case PF_R16F:
-		case PF_GR16F:
-		case PF_ABGR16F:
-		case PF_R32F:
-		case PF_GR32F:
-		case PF_ABGR32F:
-			return true;
-
-		default:
-			return false;
-		}
-	}
-
-	inline bool
-	IsCompressedFormat(PixelFormat format)
-	{
-		switch (format)
-		{
-		case PF_DXT1:
-		case PF_DXT3:
-		case PF_DXT5:
-		case PF_DXT1_SRGB:
-		case PF_DXT3_SRGB:
-		case PF_DXT5_SRGB:
-			return true;
-
-		default:
-			return false;
-		}
-	}
-
-	inline bool
-	IsDepthFormat(PixelFormat format)
-	{
-		switch (format)
-		{
-		case PF_D16:
-		case PF_D24X8:
-		case PF_D24S8:
-			return true;
-
-		default:
-			return false;
-		}
-	}
-
-	inline bool
-	IsStencilFormat(PixelFormat format)
-	{
-		switch (format)
-		{
-		case PF_D24S8:
-			return true;
-
-		default:
-			return false;
-		}
-	}
-
-	inline bool
-	IsSRGB(PixelFormat format)
-	{
-		switch (format)
-		{
-		case PF_ARGB8_SRGB:
-		case PF_DXT1_SRGB:
-		case PF_DXT3_SRGB:
-		case PF_DXT5_SRGB:
-			return true;
-
-		default:
-			return false;
-		}
-	}
-
 	// Abstract class representing a Texture resource.
 	// @remarks
 	// The actual concrete subclass which will exist for a texture
@@ -306,7 +113,7 @@ namespace KlayGE
 		// Returns the bpp of the texture.
 		uint32_t Bpp() const;
 		// Returns the pixel format for the texture surface.
-		PixelFormat Format() const;
+		ElementFormat Format() const;
 
 		// Returns the texture type of the texture.
 		TextureType Type() const;
@@ -319,16 +126,16 @@ namespace KlayGE
 		virtual void CopyToMemory3D(int level, void* data) = 0;
 		virtual void CopyToMemoryCube(CubeFaces face, int level, void* data) = 0;
 
-		virtual void CopyMemoryToTexture1D(int level, void* data, PixelFormat pf,
+		virtual void CopyMemoryToTexture1D(int level, void* data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width) = 0;
-		virtual void CopyMemoryToTexture2D(int level, void* data, PixelFormat pf,
+		virtual void CopyMemoryToTexture2D(int level, void* data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height) = 0;
-		virtual void CopyMemoryToTexture3D(int level, void* data, PixelFormat pf,
+		virtual void CopyMemoryToTexture3D(int level, void* data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
 			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
 			uint32_t src_width, uint32_t src_height, uint32_t src_depth) = 0;
-		virtual void CopyMemoryToTextureCube(CubeFaces face, int level, void* data, PixelFormat pf,
+		virtual void CopyMemoryToTextureCube(CubeFaces face, int level, void* data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height) = 0;
 
@@ -339,7 +146,7 @@ namespace KlayGE
 
 		uint16_t		numMipMaps_;
 
-		PixelFormat		format_;
+		ElementFormat	format_;
 		TextureUsage	usage_;
 		TextureType		type_;
 	};

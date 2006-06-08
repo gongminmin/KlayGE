@@ -75,8 +75,8 @@ namespace
 				turbBuffer[i] = (255 * (turbBuffer[i] - min)) / (max - min);
 			}
 
-			TexturePtr texture = rf.MakeTexture3D(XSIZE, YSIZE, ZSIZE, 1, PF_L8);
-			texture->CopyMemoryToTexture3D(0, &turbBuffer[0], PF_L8, XSIZE, YSIZE, ZSIZE, 0, 0, 0,
+			TexturePtr texture = rf.MakeTexture3D(XSIZE, YSIZE, ZSIZE, 1, EF_L8);
+			texture->CopyMemoryToTexture3D(0, &turbBuffer[0], EF_L8, XSIZE, YSIZE, ZSIZE, 0, 0, 0,
 				XSIZE, YSIZE, ZSIZE);
 
 			technique_ = rf.LoadEffect("Electro.fx")->Technique("Electro");
@@ -89,20 +89,20 @@ namespace
 			electro_sampler->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Wrap);
 			*(technique_->Effect().ParameterByName("electroSampler")) = electro_sampler;
 
-			Vector3 xyzs[] =
+			float3 xyzs[] =
 			{
-				Vector3(-0.8f, 0.8f, 1),
-				Vector3(0.8f, 0.8f, 1),
-				Vector3(-0.8f, -0.8f, 1),
-				Vector3(0.8f, -0.8f, 1),
+				float3(-0.8f, 0.8f, 1),
+				float3(0.8f, 0.8f, 1),
+				float3(-0.8f, -0.8f, 1),
+				float3(0.8f, -0.8f, 1),
 			};
 
-			Vector3 texs[] =
+			float3 texs[] =
 			{
-				Vector3(-1, 0, 0),
-				Vector3(1, 0, 0),
-				Vector3(-1, -1, 0),
-				Vector3(1, -1, 0),
+				float3(-1, 0, 0),
+				float3(1, 0, 0),
+				float3(-1, -1, 0),
+				float3(1, -1, 0),
 			};
 
 			uint16_t indices[] = 
@@ -116,13 +116,13 @@ namespace
 			pos_vb->Resize(sizeof(xyzs));
 			{
 				GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
-				std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<Vector3>());
+				std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
 			}
 			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static);
 			tex0_vb->Resize(sizeof(texs));
 			{
 				GraphicsBuffer::Mapper mapper(*tex0_vb, BA_Write_Only);
-				std::copy(&texs[0], &texs[0] + sizeof(texs) / sizeof(texs[0]), mapper.Pointer<Vector3>());
+				std::copy(&texs[0], &texs[0] + sizeof(texs) / sizeof(texs[0]), mapper.Pointer<float3>());
 			}
 
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
@@ -134,7 +134,7 @@ namespace
 				GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
 				std::copy(indices, indices + sizeof(indices) / sizeof(uint16_t), mapper.Pointer<uint16_t>());
 			}
-			rl_->BindIndexStream(ib, IF_Index16);
+			rl_->BindIndexStream(ib, EF_D16);
 
 			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 		}

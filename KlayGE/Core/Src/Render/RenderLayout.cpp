@@ -108,14 +108,7 @@ namespace KlayGE
 	{
 		if (index_stream_)
 		{
-			if (IF_Index16 == index_format_)
-			{
-				return index_stream_->Size() / sizeof(uint16_t);
-			}
-			else
-			{
-				return index_stream_->Size() / sizeof(uint32_t);
-			}
+			return index_stream_->Size() / (ElementFormatBits(index_format_) / 8);
 		}
 		else
 		{
@@ -123,7 +116,7 @@ namespace KlayGE
 		}
 	}
 
-	void RenderLayout::BindIndexStream(GraphicsBufferPtr buffer, IndexFormat format)
+	void RenderLayout::BindIndexStream(GraphicsBufferPtr buffer, ElementFormat format)
 	{
 		index_stream_ = buffer;
 		index_format_ = format;

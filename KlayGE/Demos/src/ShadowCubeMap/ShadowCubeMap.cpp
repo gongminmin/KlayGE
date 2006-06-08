@@ -47,7 +47,7 @@ namespace
 		{
 		}
 
-		Matrix4 LightViewProj() const
+		float4x4 LightViewProj() const
 		{
 			return light_view_ * light_proj_;
 		}
@@ -57,9 +57,9 @@ namespace
 			gen_sm_pass_ = gen_sm;
 		}
 
-		void LightMatrices(Matrix4 const & model, Matrix4 const & view, Matrix4 const & proj)
+		void LightMatrices(float4x4 const & model, float4x4 const & view, float4x4 const & proj)
 		{
-			light_pos_ = TransformCoord(Vector3(0, 0, 0), model);
+			light_pos_ = TransformCoord(float3(0, 0, 0), model);
 
 			inv_light_model_ = MathLib::Inverse(model);
 			light_view_ = view;
@@ -83,13 +83,13 @@ namespace
 		}
 
 	protected:
-		void OnRenderBegin(Matrix4 const & model, RenderEffectPtr effect)
+		void OnRenderBegin(float4x4 const & model, RenderEffectPtr effect)
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
 
-			Matrix4 view = app.ActiveCamera().ViewMatrix();
-			Matrix4 proj = app.ActiveCamera().ProjMatrix();
-			Matrix4 light_mat = model * this->LightViewProj();
+			float4x4 view = app.ActiveCamera().ViewMatrix();
+			float4x4 proj = app.ActiveCamera().ProjMatrix();
+			float4x4 light_mat = model * this->LightViewProj();
 
 			*(effect->ParameterByName("World")) = model;
 			*(effect->ParameterByName("InvLightWorld")) = inv_light_model_;
@@ -113,9 +113,9 @@ namespace
 		bool gen_sm_pass_;
 		SamplerPtr sm_sampler_;
 
-		Vector3 light_pos_;
-		Matrix4 inv_light_model_;
-		Matrix4 light_view_, light_proj_;
+		float3 light_pos_;
+		float4x4 inv_light_model_;
+		float4x4 light_view_, light_proj_;
 
 		SamplerPtr lamp_sampler_;
 	};
@@ -130,7 +130,7 @@ namespace
 			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("ShadowCubeMap.fx");
 		}
 
-		void SetModelMatrix(Matrix4 const & model)
+		void SetModelMatrix(float4x4 const & model)
 		{
 			model_ = model;
 		}
@@ -155,7 +155,7 @@ namespace
 		}
 
 	private:
-		Matrix4 model_;
+		float4x4 model_;
 
 		RenderEffectPtr effect_;
 	};
@@ -173,7 +173,7 @@ namespace
 		}
 
 	private:
-		Matrix4 model_;
+		float4x4 model_;
 	};
 
 	class GroundRenderable : public RenderableHelper, public ShadowMapped
@@ -188,12 +188,12 @@ namespace
 			effect_ = rf.LoadEffect("ShadowCubeMap.fx");
 			technique_ = effect_->Technique("RenderScene");
 
-			Vector3 xyzs[] =
+			float3 xyzs[] =
 			{
-				Vector3(-1, 0, 1),
-				Vector3(1, 0, 1),
-				Vector3(1, 0, -1),
-				Vector3(-1, 0, -1),
+				float3(-1, 0, 1),
+				float3(1, 0, 1),
+				float3(1, 0, -1),
+				float3(-1, 0, -1),
 			};
 
 			uint16_t indices[] = 
@@ -207,7 +207,7 @@ namespace
 			pos_vb->Resize(sizeof(xyzs));
 			{
 				GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
-				std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<Vector3>());
+				std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
 			}
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
 
@@ -217,9 +217,9 @@ namespace
 				GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
 				std::copy(indices, indices + sizeof(indices) / sizeof(uint16_t), mapper.Pointer<uint16_t>());
 			}
-			rl_->BindIndexStream(ib, IF_Index16);
+			rl_->BindIndexStream(ib, EF_D16);
 
-			Vector3 normal[sizeof(xyzs) / sizeof(xyzs[0])];
+			float3 normal[sizeof(xyzs) / sizeof(xyzs[0])];
 			MathLib::ComputeNormal<float>(&normal[0],
 				&indices[0], &indices[sizeof(indices) / sizeof(uint16_t)],
 				&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
@@ -228,7 +228,7 @@ namespace
 			normal_vb->Resize(sizeof(normal));
 			{
 				GraphicsBuffer::Mapper mapper(*normal_vb, BA_Write_Only);
-				std::copy(&normal[0], &normal[0] + sizeof(normal) / sizeof(normal[0]), mapper.Pointer<Vector3>());
+				std::copy(&normal[0], &normal[0] + sizeof(normal) / sizeof(normal[0]), mapper.Pointer<float3>());
 			}
 			rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, sizeof(float), 3)));
 
@@ -249,7 +249,7 @@ namespace
 			}
 		}
 
-		void SetModelMatrix(Matrix4 const & model)
+		void SetModelMatrix(float4x4 const & model)
 		{
 			model_ = model;
 		}
@@ -260,7 +260,7 @@ namespace
 		}
 
 	private:
-		Matrix4 model_;
+		float4x4 model_;
 
 		RenderEffectPtr effect_;
 	};
@@ -277,7 +277,7 @@ namespace
 		}
 
 	private:
-		Matrix4 model_;
+		float4x4 model_;
 	};
 
 
@@ -344,7 +344,7 @@ void ShadowCubeMap::InitObjects()
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	this->LookAt(Vector3(2, 0, -1), Vector3(0, 0, 0));
+	this->LookAt(float3(2, 0, -1), float3(0, 0, 0));
 	this->Proj(0.01f, 100);
 
 	lamp_tex_ = LoadTexture("lamp.dds");
@@ -352,8 +352,8 @@ void ShadowCubeMap::InitObjects()
 	checked_cast<OccluderRenderable*>(mesh_->GetRenderable().get())->LampTexture(lamp_tex_);
 	checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->LampTexture(lamp_tex_);
 
-	RenderViewPtr depth_view = rf.MakeDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, PF_D16, 0);
-	shadow_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, PF_ABGR16F);
+	RenderViewPtr depth_view = rf.MakeDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, EF_D16, 0);
+	shadow_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, EF_ABGR16F);
 	for (int i = 0; i < 6; ++ i)
 	{
 		shadow_buffers_[i] = rf.MakeFrameBuffer();
@@ -415,14 +415,14 @@ void ShadowCubeMap::DoUpdate(uint32_t pass)
 		{
 			Texture::CubeFaces face = static_cast<Texture::CubeFaces>(Texture::CF_Positive_X + pass);
 
-			std::pair<Vector3, Vector3> lookat_up = CubeMapViewVector<float>(face);
+			std::pair<float3, float3> lookat_up = CubeMapViewVector<float>(face);
 
-			Vector3 le = TransformCoord(Vector3(0, 0, 0), light_model_);
-			Vector3 lla = TransformCoord(Vector3(0, 0, 0) + lookat_up.first, light_model_);
-			Vector3 lu = TransformNormal(Vector3(0, 0, 0) + lookat_up.second, light_model_);
+			float3 le = TransformCoord(float3(0, 0, 0), light_model_);
+			float3 lla = TransformCoord(float3(0, 0, 0) + lookat_up.first, light_model_);
+			float3 lu = TransformNormal(float3(0, 0, 0) + lookat_up.second, light_model_);
 
-			Matrix4 light_view = LookAtLH(le, lla, lu);
-			Matrix4 light_proj = PerspectiveFovLH(PI / 2.0f, 1.0f, 0.01f, 10.0f);
+			float4x4 light_view = LookAtLH(le, lla, lu);
+			float4x4 light_proj = PerspectiveFovLH(PI / 2.0f, 1.0f, 0.01f, 10.0f);
 			checked_cast<OccluderRenderable*>(mesh_->GetRenderable().get())->LightMatrices(light_model_, light_view, light_proj);
 			checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->LightMatrices(light_model_, light_view, light_proj);
 

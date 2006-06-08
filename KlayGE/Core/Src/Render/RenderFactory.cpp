@@ -38,22 +38,22 @@ namespace KlayGE
 		}
 		
 		TexturePtr MakeTexture1D(uint32_t /*width*/, uint16_t /*numMipMaps*/,
-			PixelFormat /*format*/)
+			ElementFormat /*format*/)
 		{
 			return Texture::NullObject();
 		}
 		TexturePtr MakeTexture2D(uint32_t /*width*/, uint32_t /*height*/, uint16_t /*numMipMaps*/,
-			PixelFormat /*format*/)
+			ElementFormat /*format*/)
 		{
 			return Texture::NullObject();
 		}
 		TexturePtr MakeTexture3D(uint32_t /*width*/, uint32_t /*height*/, uint32_t /*depth*/, uint16_t /*numMipMaps*/,
-			PixelFormat /*format*/)
+			ElementFormat /*format*/)
 		{
 			return Texture::NullObject();
 		}
 		TexturePtr MakeTextureCube(uint32_t /*size*/, uint16_t /*numMipMaps*/,
-			PixelFormat /*format*/)
+			ElementFormat /*format*/)
 		{
 			return Texture::NullObject();
 		}
@@ -101,12 +101,12 @@ namespace KlayGE
 			return RenderView::NullObject();
 		}
 
-		RenderViewPtr MakeGraphicsBufferRenderView(GraphicsBuffer& /*gbuffer*/, uint32_t /*width*/, uint32_t /*height*/, PixelFormat /*pf*/)
+		RenderViewPtr MakeGraphicsBufferRenderView(GraphicsBuffer& /*gbuffer*/, uint32_t /*width*/, uint32_t /*height*/, ElementFormat /*pf*/)
 		{
 			return RenderView::NullObject();
 		}
 
-		RenderViewPtr MakeDepthStencilRenderView(uint32_t /*width*/, uint32_t /*height*/, PixelFormat /*pf*/, uint32_t /*multi_sample*/)
+		RenderViewPtr MakeDepthStencilRenderView(uint32_t /*width*/, uint32_t /*height*/, ElementFormat /*pf*/, uint32_t /*multi_sample*/)
 		{
 			return RenderView::NullObject();
 		}

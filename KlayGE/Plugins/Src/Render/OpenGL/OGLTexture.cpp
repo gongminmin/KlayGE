@@ -41,19 +41,24 @@ namespace KlayGE
 		{
 		case TT_1D:
 			target_type_ = GL_TEXTURE_1D;
+			break;
 
 		case TT_2D:
 			target_type_ = GL_TEXTURE_2D;
+			break;
 
 		case TT_3D:
 			target_type_ = GL_TEXTURE_3D;
+			break;
 
 		case TT_Cube:
 			target_type_ = GL_TEXTURE_CUBE_MAP;
+			break;
 
 		default:
 			BOOST_ASSERT(false);
 			target_type_ = GL_TEXTURE_1D;
+			break;
 		}
 	}
 
@@ -106,20 +111,20 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void OGLTexture::CopyMemoryToTexture1D(int /*level*/, void* /*data*/, PixelFormat /*pf*/,
+	void OGLTexture::CopyMemoryToTexture1D(int /*level*/, void* /*data*/, ElementFormat /*pf*/,
 		uint32_t /*dst_width*/, uint32_t /*dst_xOffset*/, uint32_t /*src_width*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void OGLTexture::CopyMemoryToTexture2D(int /*level*/, void* /*data*/, PixelFormat /*pf*/,
+	void OGLTexture::CopyMemoryToTexture2D(int /*level*/, void* /*data*/, ElementFormat /*pf*/,
 		uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/,
 		uint32_t /*src_width*/, uint32_t /*src_height*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void OGLTexture::CopyMemoryToTexture3D(int /*level*/, void* /*data*/, PixelFormat /*pf*/,
+	void OGLTexture::CopyMemoryToTexture3D(int /*level*/, void* /*data*/, ElementFormat /*pf*/,
 			uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_depth*/,
 			uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/, uint32_t /*dst_zOffset*/,
 			uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_depth*/)
@@ -127,7 +132,7 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void OGLTexture::CopyMemoryToTextureCube(CubeFaces /*face*/, int /*level*/, void* /*data*/, PixelFormat /*pf*/,
+	void OGLTexture::CopyMemoryToTextureCube(CubeFaces /*face*/, int /*level*/, void* /*data*/, ElementFormat /*pf*/,
 			uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/,
 			uint32_t /*src_width*/, uint32_t /*src_height*/)
 	{
@@ -162,21 +167,21 @@ namespace KlayGE
 		usage_ = usage;
 	}
 
-	PixelFormat OGLTexture::SRGBToRGB(PixelFormat pf)
+	ElementFormat OGLTexture::SRGBToRGB(ElementFormat pf)
 	{
 		switch (pf)
 		{
-		case PF_ARGB8_SRGB:
-			return PF_ARGB8;
+		case EF_ARGB8_SRGB:
+			return EF_ARGB8;
 
-		case PF_DXT1_SRGB:
-			return PF_DXT1;
+		case EF_DXT1_SRGB:
+			return EF_DXT1;
 
-		case PF_DXT3_SRGB:
-			return PF_DXT3;
+		case EF_DXT3_SRGB:
+			return EF_DXT3;
 
-		case PF_DXT5_SRGB:
-			return PF_DXT5;
+		case EF_DXT5_SRGB:
+			return EF_DXT5;
 
 		default:
 			return pf;

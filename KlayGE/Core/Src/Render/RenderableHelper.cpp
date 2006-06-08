@@ -60,7 +60,7 @@ namespace KlayGE
 	}
 
 
-	RenderablePoint::RenderablePoint(Vector3 const & v, Color const & clr)
+	RenderablePoint::RenderablePoint(float3 const & v, Color const & clr)
 		: RenderableHelper(L"Point"),
 			clr_(clr.r(), clr.g(), clr.b(), clr.a())
 	{
@@ -74,7 +74,7 @@ namespace KlayGE
 		vb->Resize(sizeof(v));
 		{
 			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
-			std::copy(&v, &v + 1, mapper.Pointer<Vector3>());
+			std::copy(&v, &v + 1, mapper.Pointer<float3>());
 		}
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
 
@@ -86,14 +86,14 @@ namespace KlayGE
 		App3DFramework const & app = Context::Instance().AppInstance();
 		Camera const & camera = app.ActiveCamera();
 
-		Matrix4 view_proj = camera.ViewMatrix() * camera.ProjMatrix();
+		float4x4 view_proj = camera.ViewMatrix() * camera.ProjMatrix();
 		*(technique_->Effect().ParameterByName("matViewProj")) = view_proj;
 
 		*(technique_->Effect().ParameterByName("color")) = clr_;
 	}
 
 
-	RenderableLine::RenderableLine(Vector3 const & v0, Vector3 const & v1, Color const & clr)
+	RenderableLine::RenderableLine(float3 const & v0, float3 const & v1, Color const & clr)
 		: RenderableHelper(L"Line"),
 			clr_(clr.r(), clr.g(), clr.b(), clr.a())
 	{
@@ -101,7 +101,7 @@ namespace KlayGE
 
 		technique_ = rf.LoadEffect("RenderableHelper.fx")->Technique("LineTec");
 
-		Vector3 xyzs[] =
+		float3 xyzs[] =
 		{
 			v0, v1
 		};
@@ -112,7 +112,7 @@ namespace KlayGE
 		vb->Resize(sizeof(xyzs));
 		{
 			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
-			std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<Vector3>());
+			std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
 		}
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
 
@@ -124,14 +124,14 @@ namespace KlayGE
 		App3DFramework const & app = Context::Instance().AppInstance();
 		Camera const & camera = app.ActiveCamera();
 
-		Matrix4 view_proj = camera.ViewMatrix() * camera.ProjMatrix();
+		float4x4 view_proj = camera.ViewMatrix() * camera.ProjMatrix();
 		*(technique_->Effect().ParameterByName("matViewProj")) = view_proj;
 
 		*(technique_->Effect().ParameterByName("color")) = clr_;
 	}
 
 
-	RenderableTriangle::RenderableTriangle(Vector3 const & v0, Vector3 const & v1, Vector3 const & v2, Color const & clr)
+	RenderableTriangle::RenderableTriangle(float3 const & v0, float3 const & v1, float3 const & v2, Color const & clr)
 		: RenderableHelper(L"Triangle"),
 			clr_(clr.r(), clr.g(), clr.b(), clr.a())
 	{
@@ -139,7 +139,7 @@ namespace KlayGE
 
 		technique_ = rf.LoadEffect("RenderableHelper.fx")->Technique("TriangleTec");
 
-		Vector3 xyzs[] =
+		float3 xyzs[] =
 		{
 			v0, v1, v2
 		};
@@ -150,7 +150,7 @@ namespace KlayGE
 		vb->Resize(sizeof(xyzs));
 		{
 			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
-			std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<Vector3>());
+			std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
 		}
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
 
@@ -162,7 +162,7 @@ namespace KlayGE
 		App3DFramework const & app = Context::Instance().AppInstance();
 		Camera const & camera = app.ActiveCamera();
 
-		Matrix4 view_proj = camera.ViewMatrix() * camera.ProjMatrix();
+		float4x4 view_proj = camera.ViewMatrix() * camera.ProjMatrix();
 		*(technique_->Effect().ParameterByName("matViewProj")) = view_proj;
 
 		*(technique_->Effect().ParameterByName("color")) = clr_;
@@ -179,7 +179,7 @@ namespace KlayGE
 
 		technique_ = rf.LoadEffect("RenderableHelper.fx")->Technique("BoxTec");
 
-		Vector3 xyzs[] =
+		float3 xyzs[] =
 		{
 			box[0], box[1], box[2], box[3], box[4], box[5], box[6], box[7]
 		};
@@ -200,7 +200,7 @@ namespace KlayGE
 		vb->Resize(sizeof(xyzs));
 		{
 			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
-			std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<Vector3>());
+			std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
 		}
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
 
@@ -210,7 +210,7 @@ namespace KlayGE
 			GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
 			std::copy(indices, indices + sizeof(indices) / sizeof(indices[0]), mapper.Pointer<uint16_t>());
 		}
-		rl_->BindIndexStream(ib, IF_Index16);
+		rl_->BindIndexStream(ib, EF_D16);
 	}
 
 	void RenderableBox::OnRenderBegin()
@@ -218,7 +218,7 @@ namespace KlayGE
 		App3DFramework const & app = Context::Instance().AppInstance();
 		Camera const & camera = app.ActiveCamera();
 
-		Matrix4 view_proj = camera.ViewMatrix() * camera.ProjMatrix();
+		float4x4 view_proj = camera.ViewMatrix() * camera.ProjMatrix();
 		*(technique_->Effect().ParameterByName("matViewProj")) = view_proj;
 
 		*(technique_->Effect().ParameterByName("color")) = clr_;
@@ -233,12 +233,12 @@ namespace KlayGE
 
 		technique_ = rf.LoadEffect("RenderableHelper.fx")->Technique("SkyBoxTec");
 
-		Vector3 xyzs[] =
+		float3 xyzs[] =
 		{
-			Vector3(1.0f, 1.0f, 1.0f),
-			Vector3(1.0f, -1.0f, 1.0f),
-			Vector3(-1.0f, -1.0f, 1.0f),
-			Vector3(-1.0f, 1.0f, 1.0f),
+			float3(1.0f, 1.0f, 1.0f),
+			float3(1.0f, -1.0f, 1.0f),
+			float3(-1.0f, -1.0f, 1.0f),
+			float3(-1.0f, 1.0f, 1.0f),
 		};
 
 		uint16_t indices[] =
@@ -252,7 +252,7 @@ namespace KlayGE
 		vb->Resize(sizeof(xyzs));
 		{
 			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
-			std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<Vector3>());
+			std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
 		}
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
 
@@ -262,7 +262,7 @@ namespace KlayGE
 			GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
 			std::copy(indices, indices + sizeof(indices) / sizeof(indices[0]), mapper.Pointer<uint16_t>());
 		}
-		rl_->BindIndexStream(ib, IF_Index16);
+		rl_->BindIndexStream(ib, EF_D16);
 
 		box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[4]);
 
@@ -283,7 +283,7 @@ namespace KlayGE
 		App3DFramework const & app = Context::Instance().AppInstance();
 		Camera const & camera = app.ActiveCamera();
 
-		Matrix4 rot_view = camera.ViewMatrix();
+		float4x4 rot_view = camera.ViewMatrix();
 		rot_view(3, 0) = 0;
 		rot_view(3, 1) = 0;
 		rot_view(3, 2) = 0;
@@ -298,12 +298,12 @@ namespace KlayGE
 
 		rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleList);
 
-		std::vector<Vector3> pos;
+		std::vector<float3> pos;
 		for (int y = 0; y < width_segs + 1; ++ y)
 		{
 			for (int x = 0; x < length_segs + 1; ++ x)
 			{
-				pos.push_back(Vector3(x * (length / length_segs) - length / 2,
+				pos.push_back(float3(x * (length / length_segs) - length / 2,
 					-y * (width / width_segs) + width / 2, 0.0f));
 			}
 		}
@@ -312,18 +312,18 @@ namespace KlayGE
 		pos_vb->Resize(static_cast<uint32_t>(sizeof(pos[0]) * pos.size()));
 		{
 			GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
-			std::copy(pos.begin(), pos.end(), mapper.Pointer<Vector3>());
+			std::copy(pos.begin(), pos.end(), mapper.Pointer<float3>());
 		}
 		rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
 
 		if (has_tex_coord)
 		{
-			std::vector<Vector2> tex;
+			std::vector<float2> tex;
 			for (int y = 0; y < width_segs + 1; ++ y)
 			{
 				for (int x = 0; x < length_segs + 1; ++ x)
 				{
-					tex.push_back(Vector2(static_cast<float>(x) / length_segs,
+					tex.push_back(float2(static_cast<float>(x) / length_segs,
 						static_cast<float>(y) / width_segs));
 				}
 			}
@@ -332,7 +332,7 @@ namespace KlayGE
 			tex_vb->Resize(static_cast<uint32_t>(sizeof(tex[0]) * tex.size()));
 			{
 				GraphicsBuffer::Mapper mapper(*tex_vb, BA_Write_Only);
-				std::copy(tex.begin(), tex.end(), mapper.Pointer<Vector2>());
+				std::copy(tex.begin(), tex.end(), mapper.Pointer<float2>());
 			}
 			rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, sizeof(float), 2)));
 		}
@@ -358,7 +358,7 @@ namespace KlayGE
 			GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
 			std::copy(index.begin(), index.end(), mapper.Pointer<uint16_t>());
 		}
-		rl_->BindIndexStream(ib, IF_Index16);
+		rl_->BindIndexStream(ib, EF_D16);
 
 		box_ = MathLib::ComputeBoundingBox<float>(pos.begin(), pos.end());
 	}

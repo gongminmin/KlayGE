@@ -38,7 +38,7 @@
 
 namespace KlayGE
 {
-	D3D9TextureCube::D3D9TextureCube(uint32_t size, uint16_t numMipMaps, PixelFormat format)
+	D3D9TextureCube::D3D9TextureCube(uint32_t size, uint16_t numMipMaps, ElementFormat format)
 					: D3D9Texture(TT_Cube),
 						auto_gen_mipmaps_(false)
 	{
@@ -49,7 +49,7 @@ namespace KlayGE
 		format_		= format;
 		widths_.assign(1, size);
 
-		bpp_ = PixelFormatBits(format);
+		bpp_ = ElementFormatBits(format);
 
 		d3dTextureCube_ = this->CreateTextureCube(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 
@@ -133,7 +133,7 @@ namespace KlayGE
 		this->CopySurfaceToMemory(surface, data);
 	}
 
-	void D3D9TextureCube::CopyMemoryToTextureCube(CubeFaces face, int level, void* data, PixelFormat pf,
+	void D3D9TextureCube::CopyMemoryToTextureCube(CubeFaces face, int level, void* data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height)
 	{
@@ -148,7 +148,7 @@ namespace KlayGE
 			RECT srcRc = { 0, 0, src_width, src_height };
 			RECT dstRc = { dst_xOffset, dst_yOffset, dst_xOffset + dst_width, dst_yOffset + dst_height };
 			TIF(D3DXLoadSurfaceFromMemory(surface.get(), NULL, &dstRc, data, D3D9Mapping::MappingFormat(pf),
-					src_width * PixelFormatBits(pf) / 8, NULL, &srcRc, D3DX_DEFAULT, 0));
+					src_width * ElementFormatBits(pf) / 8, NULL, &srcRc, D3DX_DEFAULT, 0));
 		}
 	}
 
@@ -294,6 +294,6 @@ namespace KlayGE
 		}
 
 		format_ = D3D9Mapping::MappingFormat(desc.Format);
-		bpp_	= PixelFormatBits(format_);
+		bpp_	= ElementFormatBits(format_);
 	}
 }

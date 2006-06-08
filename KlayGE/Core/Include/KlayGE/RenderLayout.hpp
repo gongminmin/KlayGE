@@ -14,10 +14,13 @@
 #define _RENDERLAYOUT_HPP
 
 #include <KlayGE/PreDeclare.hpp>
+
 #include <vector>
 #include <boost/utility.hpp>
 #include <boost/tuple/tuple.hpp>
+
 #include <KlayGE/GraphicsBuffer.hpp>
+#include <KlayGE/ElementFormat.hpp>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_Core_d.lib")
@@ -82,12 +85,6 @@ namespace KlayGE
 		}
 	};
 	typedef std::vector<vertex_element> vertex_elements_type;
-
-	enum IndexFormat
-	{
-		IF_Index32,
-		IF_Index16
-	};
 
 
 	class RenderLayout
@@ -160,9 +157,9 @@ namespace KlayGE
 		bool UseIndices() const;
 		uint32_t NumIndices() const;
 
-		void BindIndexStream(GraphicsBufferPtr index_stream, IndexFormat format);
+		void BindIndexStream(GraphicsBufferPtr index_stream, ElementFormat format);
 		GraphicsBufferPtr GetIndexStream() const;
-		IndexFormat IndexStreamFormat() const
+		ElementFormat IndexStreamFormat() const
 		{
 			return index_format_;
 		}
@@ -215,7 +212,7 @@ namespace KlayGE
 		StreamUnit instance_stream_;
 
 		GraphicsBufferPtr index_stream_;
-		IndexFormat index_format_;
+		ElementFormat index_format_;
 	};
 }
 

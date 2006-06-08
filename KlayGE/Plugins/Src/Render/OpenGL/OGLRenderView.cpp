@@ -470,7 +470,7 @@ namespace KlayGE
 
 
 	OGLGraphicsBufferRenderView::OGLGraphicsBufferRenderView(GraphicsBuffer& gb,
-									uint32_t width, uint32_t height, PixelFormat pf)
+									uint32_t width, uint32_t height, ElementFormat pf)
 		: gbuffer_(gb)
 	{
 		width_ = width;
@@ -548,38 +548,24 @@ namespace KlayGE
 
 
 	OGLDepthStencilRenderView::OGLDepthStencilRenderView(uint32_t width, uint32_t height,
-									PixelFormat pf, uint32_t multi_sample)
+									ElementFormat pf, uint32_t multi_sample)
 		: multi_sample_(multi_sample)
 	{
+		BOOST_ASSERT(IsDepthFormat(pf));
+
 		width_ = width;
 		height_ = height;
 		pf_ = pf;
 
-		GLenum format;
-		switch (pf_)
-		{
-		case PF_D16:
-			format = GL_DEPTH_COMPONENT16;
-			break;
-
-		case PF_D24X8:
-			format = GL_DEPTH_COMPONENT32;
-			break;
-
-		case PF_D24S8:
-			format = GL_DEPTH24_STENCIL8_EXT;
-			break;
-
-		default:
-			BOOST_ASSERT(false);
-			format = GL_DEPTH_COMPONENT16;
-			break;
-		}
+		GLint internalFormat;
+		GLenum glformat;
+		GLenum gltype;
+		OGLMapping::MappingFormat(internalFormat, glformat, gltype, pf_);
 
 		glGenRenderbuffersEXT(1, &rbo_);
 		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, rbo_);
 		glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT,
-								format, width_, height_);
+								glformat, width_, height_);
 	}
 
 	OGLDepthStencilRenderView::~OGLDepthStencilRenderView()
@@ -598,7 +584,7 @@ namespace KlayGE
 								GL_DEPTH_ATTACHMENT_EXT,
 								GL_RENDERBUFFER_EXT, rbo_);
 
-		if (PF_D24S8 == pf_)
+		if (IsStencilFormat(pf_))
 		{
 			glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
 								GL_STENCIL_ATTACHMENT_EXT,

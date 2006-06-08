@@ -50,18 +50,18 @@ namespace KlayGE
 		return out;
 	}
 
-	// 从左手坐标系的Vector3转化为OpenAL的右手坐标系
+	// 从左手坐标系的float3转化为OpenAL的右手坐标系
 	/////////////////////////////////////////////////////////////////////////////////
-	Vector3 VecToALVec(Vector3 const & v)
+	float3 VecToALVec(float3 const & v)
 	{
-		return Vector3(v.x(), v.y(), -v.z());
+		return float3(v.x(), v.y(), -v.z());
 	}
 
-	// 从OpenAL的右手坐标系转化为左手坐标系的Vector3
+	// 从OpenAL的右手坐标系转化为左手坐标系的float3
 	/////////////////////////////////////////////////////////////////////////////////
-	Vector3 ALVecToVec(Vector3 const & v)
+	float3 ALVecToVec(float3 const & v)
 	{
-		return Vector3(v.x(), v.y(), -v.z());
+		return float3(v.x(), v.y(), -v.z());
 	}
 
 	// 构造函数
@@ -73,9 +73,9 @@ namespace KlayGE
 
 		alcMakeContextCurrent(context);
 
-		this->SetListenerPos(Vector3(0, 0, 0));
-		this->SetListenerVel(Vector3(0, 0, 0));
-		this->SetListenerOri(Vector3(0, 0, 1), Vector3(0, 1, 0));
+		this->SetListenerPos(float3(0, 0, 0));
+		this->SetListenerVel(float3(0, 0, 0));
+		this->SetListenerOri(float3(0, 0, 1), float3(0, 1, 0));
 
 		alDistanceModel(AL_INVERSE_DISTANCE);
 
@@ -108,54 +108,54 @@ namespace KlayGE
 
 	// 获取3D听者位置
 	/////////////////////////////////////////////////////////////////////////////////
-	Vector3 OALAudioEngine::GetListenerPos() const
+	float3 OALAudioEngine::GetListenerPos() const
 	{
-		Vector3 v;
+		float3 v;
 		alGetListener3f(AL_POSITION, &v.x(), &v.y(), &v.z());
 		return ALVecToVec(v);
 	}
 
 	// 设置3D听者位置
 	/////////////////////////////////////////////////////////////////////////////////
-	void OALAudioEngine::SetListenerPos(Vector3 const & v)
+	void OALAudioEngine::SetListenerPos(float3 const & v)
 	{
-		Vector3 alv(VecToALVec(v));
+		float3 alv(VecToALVec(v));
 		alListener3f(AL_POSITION, alv.x(), alv.y(), alv.z());
 	}
 
 	// 获取3D听者速度
 	/////////////////////////////////////////////////////////////////////////////////
-	Vector3 OALAudioEngine::GetListenerVel() const
+	float3 OALAudioEngine::GetListenerVel() const
 	{
-		Vector3 v;
+		float3 v;
 		alGetListener3f(AL_VELOCITY, &v.x(), &v.y(), &v.z());
 		return ALVecToVec(v);
 	}
 
 	// 设置3D听者速度
 	/////////////////////////////////////////////////////////////////////////////////
-	void OALAudioEngine::SetListenerVel(Vector3 const & v)
+	void OALAudioEngine::SetListenerVel(float3 const & v)
 	{
-		Vector3 alv(VecToALVec(v));
+		float3 alv(VecToALVec(v));
 		alListener3f(AL_VELOCITY, alv.x(), alv.y(), alv.z());
 	}
 
 	// 获取3D听者方向
 	/////////////////////////////////////////////////////////////////////////////////
-	void OALAudioEngine::GetListenerOri(Vector3& face, Vector3& up) const
+	void OALAudioEngine::GetListenerOri(float3& face, float3& up) const
 	{
 		float v[6];
 		alGetListenerfv(AL_ORIENTATION, v);
-		face = ALVecToVec(Vector3(v));
-		up = ALVecToVec(Vector3(&v[3]));
+		face = ALVecToVec(float3(v));
+		up = ALVecToVec(float3(&v[3]));
 	}
 
 	// 获取3D听者方向
 	/////////////////////////////////////////////////////////////////////////////////
-	void OALAudioEngine::SetListenerOri(Vector3 const & face, Vector3 const & up)
+	void OALAudioEngine::SetListenerOri(float3 const & face, float3 const & up)
 	{
-		Vector3 alface(VecToALVec(face));
-		Vector3 alup(VecToALVec(up));
+		float3 alface(VecToALVec(face));
+		float3 alup(VecToALVec(up));
 		float v[6] = { alface.x(), alface.y(), alface.z(), alup.x(), alup.y(), alup.z() };
 		alListenerfv(AL_ORIENTATION, v);
 	}

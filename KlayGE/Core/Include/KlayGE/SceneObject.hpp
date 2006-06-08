@@ -42,7 +42,7 @@ namespace KlayGE
 
 		RenderablePtr GetRenderable() const;
 
-		virtual Matrix4 GetModelMatrix() const;
+		virtual float4x4 GetModelMatrix() const;
 		virtual Box GetBound() const;
 
 		virtual void AddToSceneManager();

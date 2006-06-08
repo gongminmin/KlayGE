@@ -58,7 +58,7 @@ namespace KlayGE
 		void Deactive();
 
 		ID3D9IndexBufferPtr D3D9Buffer() const;
-		void SwitchFormat(IndexFormat format);
+		void SwitchFormat(ElementFormat format);
 
 	private:
 		void DoResize();
@@ -68,7 +68,7 @@ namespace KlayGE
 		void DoOnResetDevice();
 
 	private:
-		IndexFormat format_;
+		ElementFormat format_;
 
 		ID3D9DevicePtr d3d_device_;
 		ID3D9IndexBufferPtr buffer_;

@@ -60,7 +60,7 @@ namespace KlayGE
 		virtual void OnResize(uint32_t width, uint32_t height);
 
 	protected:
-		void LookAt(Vector3 const & eye, Vector3 const & lookAt, Vector3 const & up = Vector3(0, 1, 0));
+		void LookAt(float3 const & eye, float3 const & lookAt, float3 const & up = float3(0, 1, 0));
 		void Proj(float nearPlane, float farPlane);
 
 	protected:

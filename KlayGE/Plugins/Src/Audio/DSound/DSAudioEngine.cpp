@@ -120,9 +120,9 @@ namespace KlayGE
 		ds3dListener_ = MakeCOMPtr(ds3dListener);
 
 
-		this->SetListenerPos(Vector3(0, 0, 0));
-		this->SetListenerVel(Vector3(0, 0, 0));
-		this->SetListenerOri(Vector3(0, 0, 1), Vector3(0, 1, 0));
+		this->SetListenerPos(float3(0, 0, 0));
+		this->SetListenerVel(float3(0, 0, 0));
+		this->SetListenerOri(float3(0, 0, 1), float3(0, 1, 0));
 
 		pDSBPrimary->Release();
 	}
@@ -144,50 +144,50 @@ namespace KlayGE
 
 	// 获取3D听者位置
 	/////////////////////////////////////////////////////////////////////////////////
-	Vector3 DSAudioEngine::GetListenerPos() const
+	float3 DSAudioEngine::GetListenerPos() const
 	{
 		D3DVECTOR vec;
 		this->ds3dListener_->GetPosition(&vec);
-		return Vector3(vec.x, vec.y, vec.z);
+		return float3(vec.x, vec.y, vec.z);
 	}
 
 	// 设置3D听者位置
 	/////////////////////////////////////////////////////////////////////////////////
-	void DSAudioEngine::SetListenerPos(Vector3 const & v)
+	void DSAudioEngine::SetListenerPos(float3 const & v)
 	{
 		this->ds3dListener_->SetPosition(v.x(), v.y(), v.z(), DS3D_IMMEDIATE);
 	}
 
 	// 获取3D听者速度
 	/////////////////////////////////////////////////////////////////////////////////
-	Vector3 DSAudioEngine::GetListenerVel() const
+	float3 DSAudioEngine::GetListenerVel() const
 	{
 		D3DVECTOR vec;
 		this->ds3dListener_->GetVelocity(&vec);
-		return Vector3(vec.x, vec.y, vec.z);
+		return float3(vec.x, vec.y, vec.z);
 	}
 
 	// 设置3D听者速度
 	/////////////////////////////////////////////////////////////////////////////////
-	void DSAudioEngine::SetListenerVel(Vector3 const & v)
+	void DSAudioEngine::SetListenerVel(float3 const & v)
 	{
 		this->ds3dListener_->SetVelocity(v.x(), v.y(), v.z(), DS3D_IMMEDIATE);
 	}
 
 	// 获取3D听者方向
 	/////////////////////////////////////////////////////////////////////////////////
-	void DSAudioEngine::GetListenerOri(Vector3& face, Vector3& up) const
+	void DSAudioEngine::GetListenerOri(float3& face, float3& up) const
 	{
 		D3DVECTOR d3dFace, d3dUp;
 		this->ds3dListener_->GetOrientation(&d3dFace, &d3dUp);
 
-		face = Vector3(d3dFace.x, d3dFace.y, d3dFace.z);
-		up = Vector3(d3dUp.x, d3dUp.y, d3dUp.z);
+		face = float3(d3dFace.x, d3dFace.y, d3dFace.z);
+		up = float3(d3dUp.x, d3dUp.y, d3dUp.z);
 	}
 
 	// 获取3D听者方向
 	/////////////////////////////////////////////////////////////////////////////////
-	void DSAudioEngine::SetListenerOri(Vector3 const & face, Vector3 const & up)
+	void DSAudioEngine::SetListenerOri(float3 const & face, float3 const & up)
 	{
 		this->ds3dListener_->SetOrientation(face.x(), face.y(), face.z(),
 			up.x(), up.y(), up.z(), DS3D_IMMEDIATE);

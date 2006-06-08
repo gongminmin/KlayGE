@@ -71,9 +71,9 @@ namespace KlayGE
 			ds3DBuffer_ = MakeCOMPtr(ds3DBuffer);
 		}
 
-		this->Position(Vector3::Zero());
-		this->Velocity(Vector3::Zero());
-		this->Direction(Vector3::Zero());
+		this->Position(float3::Zero());
+		this->Velocity(float3::Zero());
+		this->Direction(float3::Zero());
 
 		this->Volume(volume);
 
@@ -212,15 +212,15 @@ namespace KlayGE
 
 	// 获取声源位置
 	/////////////////////////////////////////////////////////////////////////////////
-	Vector3 DSMusicBuffer::Position() const
+	float3 DSMusicBuffer::Position() const
 	{
-		Vector3 ret(Vector3::Zero());
+		float3 ret(float3::Zero());
 
 		if (ds3DBuffer_)
 		{
 			D3DVECTOR v;
 			ds3DBuffer_->GetPosition(&v);
-			ret = Vector3(v.x, v.y, v.z);
+			ret = float3(v.x, v.y, v.z);
 		}
 
 		return ret;
@@ -228,7 +228,7 @@ namespace KlayGE
 
 	// 设置声源位置
 	/////////////////////////////////////////////////////////////////////////////////
-	void DSMusicBuffer::Position(Vector3 const & v)
+	void DSMusicBuffer::Position(float3 const & v)
 	{
 		if (ds3DBuffer_)
 		{
@@ -238,15 +238,15 @@ namespace KlayGE
 
 	// 获取声源速度
 	/////////////////////////////////////////////////////////////////////////////////
-	Vector3 DSMusicBuffer::Velocity() const
+	float3 DSMusicBuffer::Velocity() const
 	{
-		Vector3 ret(Vector3::Zero());
+		float3 ret(float3::Zero());
 
 		if (ds3DBuffer_)
 		{
 			D3DVECTOR v;
 			ds3DBuffer_->GetVelocity(&v);
-			ret = Vector3(v.x, v.y, v.z);
+			ret = float3(v.x, v.y, v.z);
 		}
 
 		return ret;
@@ -254,7 +254,7 @@ namespace KlayGE
 
 	// 设置声源速度
 	/////////////////////////////////////////////////////////////////////////////////
-	void DSMusicBuffer::Velocity(Vector3 const & v)
+	void DSMusicBuffer::Velocity(float3 const & v)
 	{
 		if (ds3DBuffer_)
 		{
@@ -264,15 +264,15 @@ namespace KlayGE
 
 	// 获取声源方向
 	/////////////////////////////////////////////////////////////////////////////////
-	Vector3 DSMusicBuffer::Direction() const
+	float3 DSMusicBuffer::Direction() const
 	{
-		Vector3 ret(Vector3::Zero());
+		float3 ret(float3::Zero());
 
 		if (ds3DBuffer_)
 		{
 			D3DVECTOR v;
 			ds3DBuffer_->GetConeOrientation(&v);
-			ret = Vector3(v.x, v.y, v.z);
+			ret = float3(v.x, v.y, v.z);
 		}
 
 		return ret;
@@ -280,7 +280,7 @@ namespace KlayGE
 
 	// 设置声源方向
 	/////////////////////////////////////////////////////////////////////////////////
-	void DSMusicBuffer::Direction(Vector3 const & v)
+	void DSMusicBuffer::Direction(float3 const & v)
 	{
 		if (ds3DBuffer_)
 		{

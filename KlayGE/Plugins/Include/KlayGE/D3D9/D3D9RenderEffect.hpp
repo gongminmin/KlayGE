@@ -185,16 +185,16 @@ namespace KlayGE
 		D3D9RenderEffectParameterFloat& operator=(D3D9RenderEffectParameterFloat const & rhs);
 	};
 
-	class D3D9RenderEffectParameterVector2 : public RenderEffectParameterConcrete<Vector2>, public D3D9Resource
+	class D3D9RenderEffectParameterVector2 : public RenderEffectParameterConcrete<float2>, public D3D9Resource
 	{
 	public:
 		D3D9RenderEffectParameterVector2(RenderEffect& effect, std::string const & name)
-			: RenderEffectParameterConcrete<Vector2>(effect, name)
+			: RenderEffectParameterConcrete<float2>(effect, name)
 		{
 		}
 
 	private:
-		void DoFlush(Vector2 const & value);
+		void DoFlush(float2 const & value);
 
 	private:
 		virtual void DoOnLostDevice()
@@ -209,16 +209,16 @@ namespace KlayGE
 		D3D9RenderEffectParameterVector2& operator=(D3D9RenderEffectParameterVector2 const & rhs);
 	};
 
-	class D3D9RenderEffectParameterVector3 : public RenderEffectParameterConcrete<Vector3>, public D3D9Resource
+	class D3D9RenderEffectParameterVector3 : public RenderEffectParameterConcrete<float3>, public D3D9Resource
 	{
 	public:
 		D3D9RenderEffectParameterVector3(RenderEffect& effect, std::string const & name)
-			: RenderEffectParameterConcrete<Vector3>(effect, name)
+			: RenderEffectParameterConcrete<float3>(effect, name)
 		{
 		}
 
 	private:
-		void DoFlush(Vector3 const & value);
+		void DoFlush(float3 const & value);
 
 	private:
 		virtual void DoOnLostDevice()
@@ -233,16 +233,16 @@ namespace KlayGE
 		D3D9RenderEffectParameterVector3& operator=(D3D9RenderEffectParameterVector3 const & rhs);
 	};
 
-	class D3D9RenderEffectParameterVector4 : public RenderEffectParameterConcrete<Vector4>, public D3D9Resource
+	class D3D9RenderEffectParameterVector4 : public RenderEffectParameterConcrete<float4>, public D3D9Resource
 	{
 	public:
 		D3D9RenderEffectParameterVector4(RenderEffect& effect, std::string const & name)
-			: RenderEffectParameterConcrete<Vector4>(effect, name)
+			: RenderEffectParameterConcrete<float4>(effect, name)
 		{
 		}
 
 	private:
-		void DoFlush(Vector4 const & value);
+		void DoFlush(float4 const & value);
 
 	private:
 		virtual void DoOnLostDevice()
@@ -257,16 +257,16 @@ namespace KlayGE
 		D3D9RenderEffectParameterVector4& operator=(D3D9RenderEffectParameterVector4 const & rhs);
 	};
 
-	class D3D9RenderEffectParameterMatrix4 : public RenderEffectParameterConcrete<Matrix4>, public D3D9Resource
+	class D3D9RenderEffectParameterMatrix4 : public RenderEffectParameterConcrete<float4x4>, public D3D9Resource
 	{
 	public:
 		D3D9RenderEffectParameterMatrix4(RenderEffect& effect, std::string const & name)
-			: RenderEffectParameterConcrete<Matrix4>(effect, name)
+			: RenderEffectParameterConcrete<float4x4>(effect, name)
 		{
 		}
 
 	private:
-		void DoFlush(Matrix4 const & value);
+		void DoFlush(float4x4 const & value);
 
 	private:
 		void DoOnLostDevice()
@@ -373,16 +373,16 @@ namespace KlayGE
 		D3D9RenderEffectParameterFloatArray& operator=(D3D9RenderEffectParameterFloatArray const & rhs);
 	};
 
-	class D3D9RenderEffectParameterVector4Array : public RenderEffectParameterConcrete<std::vector<Vector4> >, public D3D9Resource
+	class D3D9RenderEffectParameterVector4Array : public RenderEffectParameterConcrete<std::vector<float4> >, public D3D9Resource
 	{
 	public:
 		D3D9RenderEffectParameterVector4Array(RenderEffect& effect, std::string const & name)
-			: RenderEffectParameterConcrete<std::vector<Vector4> >(effect, name)
+			: RenderEffectParameterConcrete<std::vector<float4> >(effect, name)
 		{
 		}
 
 	private:
-		void DoFlush(std::vector<Vector4> const & value);
+		void DoFlush(std::vector<float4> const & value);
 
 	private:
 		virtual void DoOnLostDevice()
@@ -397,16 +397,16 @@ namespace KlayGE
 		D3D9RenderEffectParameterVector4Array& operator=(D3D9RenderEffectParameterVector4Array const & rhs);
 	};
 
-	class D3D9RenderEffectParameterMatrix4Array : public RenderEffectParameterConcrete<std::vector<Matrix4> >, public D3D9Resource
+	class D3D9RenderEffectParameterMatrix4Array : public RenderEffectParameterConcrete<std::vector<float4x4> >, public D3D9Resource
 	{
 	public:
 		D3D9RenderEffectParameterMatrix4Array(RenderEffect& effect, std::string const & name)
-			: RenderEffectParameterConcrete<std::vector<Matrix4> >(effect, name)
+			: RenderEffectParameterConcrete<std::vector<float4x4> >(effect, name)
 		{
 		}
 
 	private:
-		void DoFlush(std::vector<Matrix4> const & value);
+		void DoFlush(std::vector<float4x4> const & value);
 
 	private:
 		virtual void DoOnLostDevice()

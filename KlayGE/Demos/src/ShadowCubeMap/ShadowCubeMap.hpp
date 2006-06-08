@@ -30,7 +30,7 @@ private:
 
 	KlayGE::TexturePtr lamp_tex_;
 
-	KlayGE::Matrix4 light_model_;
+	KlayGE::float4x4 light_model_;
 };
 
 #endif		// _SHADOWCUBEMAP_HPP

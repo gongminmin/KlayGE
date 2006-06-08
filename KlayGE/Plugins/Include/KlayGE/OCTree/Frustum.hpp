@@ -38,7 +38,7 @@ namespace KlayGE
 		};
 
 	public:
-		explicit Frustum(Matrix4 const & clip);
+		explicit Frustum(float4x4 const & clip);
 
 		VIS Visiable(Box const & box) const;
 

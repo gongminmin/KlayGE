@@ -213,7 +213,7 @@ namespace KlayGE
 		return Matrix4_T<T>(lhs) *= rhs;
 	}
 
-	typedef Matrix4_T<float> Matrix4;
+	typedef Matrix4_T<float> float4x4;
 }
 
 #endif			// _MATRIX_HPP

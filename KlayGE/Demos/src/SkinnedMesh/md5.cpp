@@ -73,18 +73,18 @@ boost::shared_ptr<MD5SkinnedModel> LoadModel(const std::string& fileName)
 
 		int boneindex;
 		char name[64];
-		Matrix4 bind_mat = Matrix4::Identity();
+		float4x4 bind_mat = float4x4::Identity();
 		fscanf(fp, "bone %d {\n name \"%s\nbindpos %f %f %f\nbindmat %f %f %f %f %f %f %f %f %f\n", &boneindex,
 			name, &joint.bind_pos.x(), &joint.bind_pos.y(), &joint.bind_pos.z(),
 			&bind_mat(0, 0), &bind_mat(0, 1), &bind_mat(0, 2),
 			&bind_mat(1, 0), &bind_mat(1, 1), &bind_mat(1, 2),
 			&bind_mat(2, 0), &bind_mat(2, 1), &bind_mat(2, 2));
 		joint.bind_quat = MathLib::ToQuaternion(bind_mat);
-		Matrix4 origin_mat = bind_mat;
+		float4x4 origin_mat = bind_mat;
 		origin_mat *= MathLib::Translation(joint.bind_pos);
-		Matrix4 inverse_origin_mat = MathLib::Inverse(origin_mat);
+		float4x4 inverse_origin_mat = MathLib::Inverse(origin_mat);
 		joint.inverse_origin_quat = MathLib::ToQuaternion(inverse_origin_mat);
-		joint.inverse_origin_pos = Vector3(inverse_origin_mat(3, 0), inverse_origin_mat(3, 1), inverse_origin_mat(3, 2));
+		joint.inverse_origin_pos = float3(inverse_origin_mat(3, 0), inverse_origin_mat(3, 1), inverse_origin_mat(3, 2));
 
 		joint.name = name;
 
@@ -136,8 +136,8 @@ boost::shared_ptr<MD5SkinnedModel> LoadModel(const std::string& fileName)
 
 		int numverts;
 		fscanf(fp, "numverts %d\n", &numverts);
-		std::vector<Vector3> xyzs(numverts);
-		std::vector<std::vector<Vector2> > texs(1);
+		std::vector<float3> xyzs(numverts);
+		std::vector<std::vector<float2> > texs(1);
 		texs[0].reserve(numverts);
 		std::vector<std::pair<uint32_t, uint32_t> > weightIndexCounts;
 		weightIndexCounts.reserve(numverts);
@@ -145,7 +145,7 @@ boost::shared_ptr<MD5SkinnedModel> LoadModel(const std::string& fileName)
 		{
 			uint32_t weightIndex;
 			uint32_t weightCount;
-			Vector2 tex;
+			float2 tex;
 
 			fscanf(fp, "vert %d %f %f %d %d\n",
 				&meshindex,
@@ -182,13 +182,13 @@ boost::shared_ptr<MD5SkinnedModel> LoadModel(const std::string& fileName)
 		int numweights;
 		fscanf(fp, "numweights %d\n\n", &numweights);
 		std::vector<Weight> weights;
-		std::vector<Vector3> positions;
+		std::vector<float3> positions;
 		weights.reserve(numweights);
 		positions.reserve(numweights);
 		for (int j = 0; j < numweights; ++ j)
 		{
 			Weight weight;
-			Vector3 pos;
+			float3 pos;
 
 			int weightindex;
 			int joint;
@@ -361,11 +361,11 @@ boost::shared_ptr<KlayGE::KeyFramesType> LoadAnim(const std::string& fileName)
 		KeyFrames kf;
 		for (int i = 0; i < iter->second[0].range[1]; ++ i)
 		{
-			kf.bind_pos.push_back(Vector3(iter->second[0].Key(i), iter->second[1].Key(i), iter->second[2].Key(i)));
+			kf.bind_pos.push_back(float3(iter->second[0].Key(i), iter->second[1].Key(i), iter->second[2].Key(i)));
 
-			Matrix4 matX = MathLib::RotationX(MathLib::Deg2Rad(iter->second[3].Key(i)));
-			Matrix4 matY = MathLib::RotationY(MathLib::Deg2Rad(iter->second[4].Key(i)));
-			Matrix4 matZ = MathLib::RotationZ(MathLib::Deg2Rad(iter->second[5].Key(i)));
+			float4x4 matX = MathLib::RotationX(MathLib::Deg2Rad(iter->second[3].Key(i)));
+			float4x4 matY = MathLib::RotationY(MathLib::Deg2Rad(iter->second[4].Key(i)));
+			float4x4 matZ = MathLib::RotationZ(MathLib::Deg2Rad(iter->second[5].Key(i)));
 
 			kf.bind_quat.push_back(MathLib::ToQuaternion(matX * matY * matZ));
 		}

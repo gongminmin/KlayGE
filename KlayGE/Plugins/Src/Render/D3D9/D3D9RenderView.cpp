@@ -250,7 +250,7 @@ namespace KlayGE
 
 
 	D3D9GraphicsBufferRenderView::D3D9GraphicsBufferRenderView(GraphicsBuffer& gb,
-									uint32_t width, uint32_t height, PixelFormat pf)
+									uint32_t width, uint32_t height, ElementFormat pf)
 		: gbuffer_(gb)
 	{
 		width_ = width;
@@ -296,7 +296,7 @@ namespace KlayGE
 
 	void D3D9GraphicsBufferRenderView::CopyToGB()
 	{
-		size_t const format_size = PixelFormatBits(pf_) / 8;
+		size_t const format_size = ElementFormatBits(pf_) / 8;
 
 		gbuffer_.Resize(width_ * height_ * format_size);
 
@@ -341,7 +341,7 @@ namespace KlayGE
 
 
 	D3D9DepthStencilRenderView::D3D9DepthStencilRenderView(uint32_t width, uint32_t height,
-											PixelFormat pf, uint32_t multi_sample)
+											ElementFormat pf, uint32_t multi_sample)
 	{
 		BOOST_ASSERT(IsDepthFormat(pf));
 

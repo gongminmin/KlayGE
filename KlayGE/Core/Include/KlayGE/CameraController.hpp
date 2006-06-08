@@ -64,7 +64,7 @@ namespace KlayGE
 		void Rotate(float yaw, float pitch, float roll);
 
 	private:
-		Matrix4		world_;				// World matrix of the camera (inverse of the view matrix)
+		float4x4		world_;				// World matrix of the camera (inverse of the view matrix)
 		float elapsed_time_;
 
 		enum

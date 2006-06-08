@@ -81,20 +81,20 @@ namespace
 			distance_sampler->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
 			*(technique_->Effect().ParameterByName("distanceMapSampler")) = distance_sampler;
 
-			Vector3 xyzs[] =
+			float3 xyzs[] =
 			{
-				Vector3(-1, 1,  0),
-				Vector3(1,	1,	0),
-				Vector3(1,	-1,	0),
-				Vector3(-1, -1, 0),
+				float3(-1, 1,  0),
+				float3(1,	1,	0),
+				float3(1,	-1,	0),
+				float3(-1, -1, 0),
 			};
 
-			Vector2 texs[] =
+			float2 texs[] =
 			{
-				Vector2(0, 0),
-				Vector2(1, 0),
-				Vector2(1, 1),
-				Vector2(0, 1)
+				float2(0, 0),
+				float2(1, 0),
+				float2(1, 1),
+				float2(0, 1)
 			};
 
 			uint16_t indices[] = 
@@ -102,7 +102,7 @@ namespace
 				0, 1, 2, 2, 3, 0
 			};
 
-			Vector3 t[4], b[4];
+			float3 t[4], b[4];
 			MathLib::ComputeTangent<float>(t, b,
 				indices, indices + sizeof(indices) / sizeof(indices[0]),
 				xyzs, xyzs + sizeof(xyzs) / sizeof(xyzs[0]), texs);
@@ -113,25 +113,25 @@ namespace
 			pos_vb->Resize(sizeof(xyzs));
 			{
 				GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
-				std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<Vector3>());
+				std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
 			}
 			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static);
 			tex0_vb->Resize(sizeof(texs));
 			{
 				GraphicsBuffer::Mapper mapper(*tex0_vb, BA_Write_Only);
-				std::copy(&texs[0], &texs[0] + sizeof(texs) / sizeof(texs[0]), mapper.Pointer<Vector2>());
+				std::copy(&texs[0], &texs[0] + sizeof(texs) / sizeof(texs[0]), mapper.Pointer<float2>());
 			}
 			GraphicsBufferPtr tan_vb = rf.MakeVertexBuffer(BU_Static);
 			tan_vb->Resize(sizeof(t));
 			{
 				GraphicsBuffer::Mapper mapper(*tan_vb, BA_Write_Only);
-				std::copy(&t[0], &t[0] + sizeof(t) / sizeof(t[0]), mapper.Pointer<Vector3>());
+				std::copy(&t[0], &t[0] + sizeof(t) / sizeof(t[0]), mapper.Pointer<float3>());
 			}
 			GraphicsBufferPtr binormal_vb = rf.MakeVertexBuffer(BU_Static);
 			binormal_vb->Resize(sizeof(b));
 			{
 				GraphicsBuffer::Mapper mapper(*binormal_vb, BA_Write_Only);
-				std::copy(&b[0], &b[0] + sizeof(b) / sizeof(b[0]), mapper.Pointer<Vector3>());
+				std::copy(&b[0], &b[0] + sizeof(b) / sizeof(b[0]), mapper.Pointer<float3>());
 			}
 
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
@@ -145,7 +145,7 @@ namespace
 				GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
 				std::copy(indices, indices + sizeof(indices) / sizeof(uint16_t), mapper.Pointer<uint16_t>());
 			}
-			rl_->BindIndexStream(ib, IF_Index16);
+			rl_->BindIndexStream(ib, EF_D16);
 
 			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[4]);
 		}
@@ -154,16 +154,16 @@ namespace
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
 
-			Matrix4 model = MathLib::RotationX(-0.5f);
-			Matrix4 const & view = app.ActiveCamera().ViewMatrix();
-			Matrix4 const & proj = app.ActiveCamera().ProjMatrix();
+			float4x4 model = MathLib::RotationX(-0.5f);
+			float4x4 const & view = app.ActiveCamera().ViewMatrix();
+			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
 			*(technique_->Effect().ParameterByName("worldviewproj")) = model * view * proj;
 			*(technique_->Effect().ParameterByName("eyePos")) = app.ActiveCamera().EyePos();
 
 			float degree(std::clock() / 700.0f);
-			Vector3 lightPos(2, 0, -2);
-			Matrix4 matRot(MathLib::RotationZ(degree));
+			float3 lightPos(2, 0, -2);
+			float4x4 matRot(MathLib::RotationZ(degree));
 			lightPos = MathLib::TransformCoord(lightPos, matRot);
 			*(technique_->Effect().ParameterByName("lightPos")) = lightPos;
 		}
@@ -201,7 +201,7 @@ namespace
 
 int main()
 {
-	OCTree sceneMgr(Box(Vector3(-20, -20, -20), Vector3(20, 20, 20)), 3);
+	OCTree sceneMgr(Box(float3(-20, -20, -20), float3(20, 20, 20)), 3);
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
@@ -240,7 +240,7 @@ void DistanceMapping::InitObjects()
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	this->LookAt(Vector3(2, 0, -2), Vector3(0, 0, 0));
+	this->LookAt(float3(2, 0, -2), float3(0, 0, 0));
 	this->Proj(0.1f, 100);
 
 	fpcController_.AttachCamera(this->ActiveCamera());

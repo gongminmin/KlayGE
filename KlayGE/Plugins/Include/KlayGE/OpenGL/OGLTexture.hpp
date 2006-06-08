@@ -50,16 +50,16 @@ namespace KlayGE
 		virtual void CopyToMemory3D(int level, void* data);
 		virtual void CopyToMemoryCube(CubeFaces face, int level, void* data);
 
-		virtual void CopyMemoryToTexture1D(int level, void* data, PixelFormat pf,
+		virtual void CopyMemoryToTexture1D(int level, void* data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width);
-		virtual void CopyMemoryToTexture2D(int level, void* data, PixelFormat pf,
+		virtual void CopyMemoryToTexture2D(int level, void* data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height);
-		virtual void CopyMemoryToTexture3D(int level, void* data, PixelFormat pf,
+		virtual void CopyMemoryToTexture3D(int level, void* data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
 			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
 			uint32_t src_width, uint32_t src_height, uint32_t src_depth);
-		virtual void CopyMemoryToTextureCube(CubeFaces face, int level, void* data, PixelFormat pf,
+		virtual void CopyMemoryToTextureCube(CubeFaces face, int level, void* data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height);
 
@@ -79,8 +79,7 @@ namespace KlayGE
 		}
 
 	protected:
-		PixelFormat SRGBToRGB(PixelFormat pf);
-		void Convert(GLint& internalFormat, GLenum& glformat, GLenum& gltype, PixelFormat pf);
+		ElementFormat SRGBToRGB(ElementFormat pf);
 
 	protected:
 		GLuint texture_;
@@ -93,7 +92,7 @@ namespace KlayGE
 	class OGLTexture1D : public OGLTexture
 	{
 	public:
-		OGLTexture1D(uint32_t width, uint16_t numMipMaps, PixelFormat format);
+		OGLTexture1D(uint32_t width, uint16_t numMipMaps, ElementFormat format);
 
 		uint32_t Width(int level) const;
 
@@ -101,7 +100,7 @@ namespace KlayGE
 		
 		void CopyToMemory1D(int level, void* data);
 
-		void CopyMemoryToTexture1D(int level, void* data, PixelFormat pf,
+		void CopyMemoryToTexture1D(int level, void* data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width);
 
 	private:
@@ -114,7 +113,7 @@ namespace KlayGE
 	class OGLTexture2D : public OGLTexture
 	{
 	public:
-		OGLTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, PixelFormat format);
+		OGLTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, ElementFormat format);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
@@ -123,7 +122,7 @@ namespace KlayGE
 
 		void CopyToMemory2D(int level, void* data);
 
-		void CopyMemoryToTexture2D(int level, void* data, PixelFormat pf,
+		void CopyMemoryToTexture2D(int level, void* data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height);
 
@@ -138,7 +137,7 @@ namespace KlayGE
 	class OGLTexture3D : public OGLTexture
 	{
 	public:
-		OGLTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps, PixelFormat format);
+		OGLTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps, ElementFormat format);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
@@ -148,7 +147,7 @@ namespace KlayGE
 
 		void CopyToMemory3D(int level, void* data);
 
-		void CopyMemoryToTexture3D(int level, void* data, PixelFormat pf,
+		void CopyMemoryToTexture3D(int level, void* data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
 			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
 			uint32_t src_width, uint32_t src_height, uint32_t src_depth);
@@ -165,7 +164,7 @@ namespace KlayGE
 	class OGLTextureCube : public OGLTexture
 	{
 	public:
-		OGLTextureCube(uint32_t size, uint16_t numMipMaps, PixelFormat format);
+		OGLTextureCube(uint32_t size, uint16_t numMipMaps, ElementFormat format);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
@@ -174,7 +173,7 @@ namespace KlayGE
 
 		void CopyToMemoryCube(CubeFaces face, int level, void* data);
 
-		void CopyMemoryToTextureCube(CubeFaces face, int level, void* data, PixelFormat pf,
+		void CopyMemoryToTextureCube(CubeFaces face, int level, void* data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height);
 

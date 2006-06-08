@@ -46,20 +46,20 @@ namespace
 			sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
 			*(technique_->Effect().ParameterByName("fractal_sampler")) = sampler_;
 
-			Vector3 xyzs[] =
+			float3 xyzs[] =
 			{
-				Vector3(-1, +1, 0.5f),
-				Vector3(+1, +1, 0.5f),
-				Vector3(+1, -1, 0.5f),
-				Vector3(-1, -1, 0.5f),
+				float3(-1, +1, 0.5f),
+				float3(+1, +1, 0.5f),
+				float3(+1, -1, 0.5f),
+				float3(-1, -1, 0.5f),
 			};
 
-			Vector2 texs[] =
+			float2 texs[] =
 			{
-				Vector2(0 + 0.5f / WIDTH, 0 + 0.5f / HEIGHT),
-				Vector2(1 + 0.5f / WIDTH, 0 + 0.5f / HEIGHT),
-				Vector2(1 + 0.5f / WIDTH, 1 + 0.5f / HEIGHT),
-				Vector2(0 + 0.5f / WIDTH, 1 + 0.5f / HEIGHT),
+				float2(0 + 0.5f / WIDTH, 0 + 0.5f / HEIGHT),
+				float2(1 + 0.5f / WIDTH, 0 + 0.5f / HEIGHT),
+				float2(1 + 0.5f / WIDTH, 1 + 0.5f / HEIGHT),
+				float2(0 + 0.5f / WIDTH, 1 + 0.5f / HEIGHT),
 			};
 
 			uint16_t indices[] = 
@@ -73,13 +73,13 @@ namespace
 			pos_vb->Resize(sizeof(xyzs));
 			{
 				GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
-				std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<Vector3>());
+				std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
 			}
 			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static);
 			tex0_vb->Resize(sizeof(texs));
 			{
 				GraphicsBuffer::Mapper mapper(*tex0_vb, BA_Write_Only);
-				std::copy(&texs[0], &texs[0] + sizeof(texs) / sizeof(texs[0]), mapper.Pointer<Vector2>());
+				std::copy(&texs[0], &texs[0] + sizeof(texs) / sizeof(texs[0]), mapper.Pointer<float2>());
 			}
 
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
@@ -91,7 +91,7 @@ namespace
 				GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
 				std::copy(indices, indices + sizeof(indices) / sizeof(uint16_t), mapper.Pointer<uint16_t>());
 			}
-			rl_->BindIndexStream(ib, IF_Index16);
+			rl_->BindIndexStream(ib, EF_D16);
 
 			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 		}
@@ -121,20 +121,20 @@ namespace
 			sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
 			*(technique_->Effect().ParameterByName("fractal_sampler")) = sampler_;
 
-			Vector3 xyzs[] =
+			float3 xyzs[] =
 			{
-				Vector3(-1, +1, 0.5f),
-				Vector3(+1, +1, 0.5f),
-				Vector3(+1, -1, 0.5f),
-				Vector3(-1, -1, 0.5f),
+				float3(-1, +1, 0.5f),
+				float3(+1, +1, 0.5f),
+				float3(+1, -1, 0.5f),
+				float3(-1, -1, 0.5f),
 			};
 
-			Vector2 texs[] =
+			float2 texs[] =
 			{
-				Vector2(0, 0),
-				Vector2(1, 0),
-				Vector2(1, 1),
-				Vector2(0, 1),
+				float2(0, 0),
+				float2(1, 0),
+				float2(1, 1),
+				float2(0, 1),
 			};
 
 			uint16_t indices[] = 
@@ -148,13 +148,13 @@ namespace
 			pos_vb->Resize(sizeof(xyzs));
 			{
 				GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
-				std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<Vector3>());
+				std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
 			}
 			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static);
 			tex0_vb->Resize(sizeof(texs));
 			{
 				GraphicsBuffer::Mapper mapper(*tex0_vb, BA_Write_Only);
-				std::copy(&texs[0], &texs[0] + sizeof(texs) / sizeof(texs[0]), mapper.Pointer<Vector2>());
+				std::copy(&texs[0], &texs[0] + sizeof(texs) / sizeof(texs[0]), mapper.Pointer<float2>());
 			}
 
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
@@ -166,7 +166,7 @@ namespace
 				GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
 				std::copy(indices, indices + sizeof(indices) / sizeof(uint16_t), mapper.Pointer<uint16_t>());
 			}
-			rl_->BindIndexStream(ib, IF_Index16);
+			rl_->BindIndexStream(ib, EF_D16);
 
 			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 		}
@@ -234,13 +234,13 @@ void Fractal::OnResize(uint32_t width, uint32_t height)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	rendered_tex_[0] = rf.MakeTexture2D(width, height, 1, PF_GR16F);
-	rendered_tex_[1] = rf.MakeTexture2D(width, height, 1, PF_GR16F);
+	rendered_tex_[0] = rf.MakeTexture2D(width, height, 1, EF_GR16F);
+	rendered_tex_[1] = rf.MakeTexture2D(width, height, 1, EF_GR16F);
 
-	std::vector<Vector4> data(width * height);
-	std::fill(data.begin(), data.end(), Vector4(0, 0, 0, 0));
-	rendered_tex_[0]->CopyMemoryToTexture2D(0, &data[0], PF_ABGR32F, width, height, 0, 0, width, height);
-	rendered_tex_[1]->CopyMemoryToTexture2D(0, &data[0], PF_ABGR32F, width, height, 0, 0, width, height);
+	std::vector<float4> data(width * height);
+	std::fill(data.begin(), data.end(), float4(0, 0, 0, 0));
+	rendered_tex_[0]->CopyMemoryToTexture2D(0, &data[0], EF_ABGR32F, width, height, 0, 0, width, height);
+	rendered_tex_[1]->CopyMemoryToTexture2D(0, &data[0], EF_ABGR32F, width, height, 0, 0, width, height);
 
 	render_buffer_[0]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_[0], 0));
 	render_buffer_[1]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_[1], 0));

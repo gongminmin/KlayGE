@@ -167,19 +167,19 @@ namespace KlayGE
 		{
 			return *this;
 		}
-		RenderEffectParameter& operator=(Vector2 const & /*value*/)
+		RenderEffectParameter& operator=(float2 const & /*value*/)
 		{
 			return *this;
 		}
-		RenderEffectParameter& operator=(Vector3 const & /*value*/)
+		RenderEffectParameter& operator=(float3 const & /*value*/)
 		{
 			return *this;
 		}
-		RenderEffectParameter& operator=(Vector4 const & /*value*/)
+		RenderEffectParameter& operator=(float4 const & /*value*/)
 		{
 			return *this;
 		}
-		RenderEffectParameter& operator=(Matrix4 const & /*value*/)
+		RenderEffectParameter& operator=(float4x4 const & /*value*/)
 		{
 			return *this;
 		}
@@ -199,11 +199,11 @@ namespace KlayGE
 		{
 			return *this;
 		}
-		RenderEffectParameter& operator=(std::vector<Vector4> const & /*value*/)
+		RenderEffectParameter& operator=(std::vector<float4> const & /*value*/)
 		{
 			return *this;
 		}
-		RenderEffectParameter& operator=(std::vector<Matrix4> const & /*value*/)
+		RenderEffectParameter& operator=(std::vector<float4x4> const & /*value*/)
 		{
 			return *this;
 		}
@@ -220,21 +220,21 @@ namespace KlayGE
 		{
 			val = 0;
 		}
-		void Value(Vector2& val) const
+		void Value(float2& val) const
 		{
-			val = Vector2::Zero();
+			val = float2::Zero();
 		}
-		void Value(Vector3& val) const
+		void Value(float3& val) const
 		{
-			val = Vector3::Zero();
+			val = float3::Zero();
 		}
-		void Value(Vector4& val) const
+		void Value(float4& val) const
 		{
-			val = Vector4::Zero();
+			val = float4::Zero();
 		}
-		void Value(Matrix4& val) const
+		void Value(float4x4& val) const
 		{
-			val = Matrix4::Identity();
+			val = float4x4::Identity();
 		}
 		void Value(SamplerPtr& val) const
 		{
@@ -252,11 +252,11 @@ namespace KlayGE
 		{
 			val.clear();
 		}
-		void Value(std::vector<Vector4>& val) const
+		void Value(std::vector<float4>& val) const
 		{
 			val.clear();
 		}
-		void Value(std::vector<Matrix4>& val) const
+		void Value(std::vector<float4x4>& val) const
 		{
 			val.clear();
 		}
@@ -310,25 +310,25 @@ namespace KlayGE
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(Vector2 const & value)
+	RenderEffectParameter& RenderEffectParameter::operator=(float2 const & value)
 	{
 		BOOST_ASSERT(false);
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(Vector3 const & value)
+	RenderEffectParameter& RenderEffectParameter::operator=(float3 const & value)
 	{
 		BOOST_ASSERT(false);
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(Vector4 const & value)
+	RenderEffectParameter& RenderEffectParameter::operator=(float4 const & value)
 	{
 		BOOST_ASSERT(false);
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(Matrix4 const & value)
+	RenderEffectParameter& RenderEffectParameter::operator=(float4x4 const & value)
 	{
 		BOOST_ASSERT(false);
 		return *this;
@@ -358,13 +358,13 @@ namespace KlayGE
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<Vector4> const & value)
+	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<float4> const & value)
 	{
 		BOOST_ASSERT(false);
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<Matrix4> const & value)
+	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<float4x4> const & value)
 	{
 		BOOST_ASSERT(false);
 		return *this;
@@ -388,28 +388,28 @@ namespace KlayGE
 		val = 0;
 	}
 
-	void RenderEffectParameter::Value(Vector2& val) const
+	void RenderEffectParameter::Value(float2& val) const
 	{
 		BOOST_ASSERT(false);
-		val = Vector3::Zero();
+		val = float3::Zero();
 	}
 
-	void RenderEffectParameter::Value(Vector3& val) const
+	void RenderEffectParameter::Value(float3& val) const
 	{
 		BOOST_ASSERT(false);
-		val = Vector3::Zero();
+		val = float3::Zero();
 	}
 
-	void RenderEffectParameter::Value(Vector4& val) const
+	void RenderEffectParameter::Value(float4& val) const
 	{
 		BOOST_ASSERT(false);
-		val = Vector4::Zero();
+		val = float4::Zero();
 	}
 
-	void RenderEffectParameter::Value(Matrix4& val) const
+	void RenderEffectParameter::Value(float4x4& val) const
 	{
 		BOOST_ASSERT(false);
-		val = Matrix4::Identity();
+		val = float4x4::Identity();
 	}
 
 	void RenderEffectParameter::Value(SamplerPtr& val) const
@@ -436,13 +436,13 @@ namespace KlayGE
 		val.clear();
 	}
 
-	void RenderEffectParameter::Value(std::vector<Vector4>& val) const
+	void RenderEffectParameter::Value(std::vector<float4>& val) const
 	{
 		BOOST_ASSERT(false);
 		val.clear();
 	}
 
-	void RenderEffectParameter::Value(std::vector<Matrix4>& val) const
+	void RenderEffectParameter::Value(std::vector<float4x4>& val) const
 	{
 		BOOST_ASSERT(false);
 		val.clear();
@@ -463,22 +463,22 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void RenderEffectParameter::DoFlush(Vector2 const & value)
+	void RenderEffectParameter::DoFlush(float2 const & value)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void RenderEffectParameter::DoFlush(Vector3 const & value)
+	void RenderEffectParameter::DoFlush(float3 const & value)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void RenderEffectParameter::DoFlush(Vector4 const & value)
+	void RenderEffectParameter::DoFlush(float4 const & value)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void RenderEffectParameter::DoFlush(Matrix4 const & value)
+	void RenderEffectParameter::DoFlush(float4x4 const & value)
 	{
 		BOOST_ASSERT(false);
 	}
@@ -503,12 +503,12 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void RenderEffectParameter::DoFlush(std::vector<Vector4> const & value)
+	void RenderEffectParameter::DoFlush(std::vector<float4> const & value)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void RenderEffectParameter::DoFlush(std::vector<Matrix4> const & value)
+	void RenderEffectParameter::DoFlush(std::vector<float4x4> const & value)
 	{
 		BOOST_ASSERT(false);
 	}

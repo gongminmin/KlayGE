@@ -31,9 +31,9 @@ namespace KlayGE
 	class D3D9Mapping
 	{
 	public:
-		static D3DMATRIX Mapping(Matrix4 const & mat);
-		static Matrix4 Mapping(D3DMATRIX const & mat);
-		static D3DVECTOR Mapping(Vector3 const & vec);
+		static D3DMATRIX Mapping(float4x4 const & mat);
+		static float4x4 Mapping(D3DMATRIX const & mat);
+		static D3DVECTOR Mapping(float3 const & vec);
 		static D3DCOLOR MappingToUInt32Color(Color const & clr);
 		static D3DCOLORVALUE MappingToFloat4Color(Color const & clr);
 		static uint32_t MappingColorMask(uint32_t mask);
@@ -54,8 +54,8 @@ namespace KlayGE
 
 		static RenderDeviceCaps Mapping(D3DCAPS9 const & d3d_caps);
 
-		static D3DFORMAT MappingFormat(PixelFormat pf);
-		static PixelFormat MappingFormat(D3DFORMAT d3dfmt);
+		static D3DFORMAT MappingFormat(ElementFormat pf);
+		static ElementFormat MappingFormat(D3DFORMAT d3dfmt);
 	};
 }
 

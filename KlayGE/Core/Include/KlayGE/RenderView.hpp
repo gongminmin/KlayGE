@@ -41,13 +41,13 @@ namespace KlayGE
 		{
 			return height_;
 		}
-		PixelFormat Format() const
+		ElementFormat Format() const
 		{
 			return pf_;
 		}
 		uint32_t Bpp() const
 		{
-			return PixelFormatBits(pf_);
+			return ElementFormatBits(pf_);
 		}
 
 		virtual void OnAttached(FrameBuffer& fb, uint32_t att) = 0;
@@ -59,7 +59,7 @@ namespace KlayGE
 	protected:
 		uint32_t width_;
 		uint32_t height_;
-		PixelFormat pf_;
+		ElementFormat pf_;
 	};
 }
 

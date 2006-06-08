@@ -188,9 +188,9 @@ namespace KlayGE
 
 		for (tree_id_t::const_iterator iter = id.begin() + 1; iter != id.end(); ++ iter)
 		{
-			Vector3 const & min = ret.Min();
-			Vector3 const & max = ret.Max();
-			Vector3 const & center = ret.Center();
+			float3 const & min = ret.Min();
+			float3 const & max = ret.Max();
+			float3 const & center = ret.Center();
 
 			switch (*iter - '0')
 			{
@@ -199,33 +199,33 @@ namespace KlayGE
 				break;
 
 			case 1:
-				ret = Box(Vector3(center.x(), min.y(), min.z()),
-					Vector3(max.x(), center.y(), center.z()));
+				ret = Box(float3(center.x(), min.y(), min.z()),
+					float3(max.x(), center.y(), center.z()));
 				break;
 
 			case 2:
-				ret = Box(Vector3(min.x(), center.y(), min.z()),
-					Vector3(center.x(), max.y(), center.z()));
+				ret = Box(float3(min.x(), center.y(), min.z()),
+					float3(center.x(), max.y(), center.z()));
 				break;
 
 			case 3:
-				ret = Box(Vector3(center.x(), center.y(), min.z()),
-					Vector3(max.x(), max.y(), center.z()));
+				ret = Box(float3(center.x(), center.y(), min.z()),
+					float3(max.x(), max.y(), center.z()));
 				break;
 
 			case 4:
-				ret = Box(Vector3(min.x(), min.y(), center.z()),
-					Vector3(center.x(), center.y(), max.z()));
+				ret = Box(float3(min.x(), min.y(), center.z()),
+					float3(center.x(), center.y(), max.z()));
 				break;
 
 			case 5:
-				ret = Box(Vector3(center.x(), min.y(), center.z()),
-					Vector3(max.x(), center.y(), max.z()));
+				ret = Box(float3(center.x(), min.y(), center.z()),
+					float3(max.x(), center.y(), max.z()));
 				break;
 
 			case 6:
-				ret = Box(Vector3(min.x(), center.y(), center.z()),
-					Vector3(center.x(), max.y(), max.z()));
+				ret = Box(float3(min.x(), center.y(), center.z()),
+					float3(center.x(), max.y(), max.z()));
 				break;
 
 			case 7:
@@ -248,7 +248,7 @@ namespace KlayGE
 
 		for (size_t i = 0; i < 8; ++ i)
 		{
-			Vector3 vec(MathLib::TransformCoord(box[i], obj->GetModelMatrix()));
+			float3 vec(MathLib::TransformCoord(box[i], obj->GetModelMatrix()));
 			if (MathLib::VecInBox(area_box, vec))
 			{
 				return true;

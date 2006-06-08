@@ -69,7 +69,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	PixelFormat TEX_FORMAT = PF_ARGB4;
+	ElementFormat const TEX_FORMAT = EF_ARGB4;
 
 	class FontRenderable : public RenderableHelper
 	{
@@ -112,9 +112,9 @@ namespace
 			rl_->BindVertexStream(clr_vb_, boost::make_tuple(vertex_element(VEU_Diffuse, 0, sizeof(float), 4)));
 			rl_->BindVertexStream(tex_vb_, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, sizeof(float), 2)));
 
-			rl_->BindIndexStream(rf.MakeIndexBuffer(BU_Dynamic), IF_Index16);
+			rl_->BindIndexStream(rf.MakeIndexBuffer(BU_Dynamic), EF_D16);
 
-			box_ = Box(Vector3(0, 0, 0), Vector3(0, 0, 0));
+			box_ = Box(float3(0, 0, 0), float3(0, 0, 0));
 
 			::FT_Init_FreeType(&ftLib_);
 			::FT_New_Face(ftLib_, ResLoader::Instance().Locate(fontName).c_str(), 0, &face_);
@@ -134,7 +134,7 @@ namespace
 			xyz_vb_->Resize(static_cast<uint32_t>(xyzs_.size() * sizeof(xyzs_[0])));
 			{
 				GraphicsBuffer::Mapper mapper(*xyz_vb_, BA_Write_Only);
-				std::copy(xyzs_.begin(), xyzs_.end(), mapper.Pointer<Vector3>());
+				std::copy(xyzs_.begin(), xyzs_.end(), mapper.Pointer<float3>());
 			}
 			clr_vb_->Resize(static_cast<uint32_t>(clrs_.size() * sizeof(clrs_[0])));
 			{
@@ -144,7 +144,7 @@ namespace
 			tex_vb_->Resize(static_cast<uint32_t>(texs_.size() * sizeof(texs_[0])));
 			{
 				GraphicsBuffer::Mapper mapper(*tex_vb_, BA_Write_Only);
-				std::copy(texs_.begin(), texs_.end(), mapper.Pointer<Vector2>());
+				std::copy(texs_.begin(), texs_.end(), mapper.Pointer<float2>());
 			}
 
 			rl_->GetIndexStream()->Resize(static_cast<uint32_t>(indices_.size() * sizeof(indices_[0])));
@@ -177,7 +177,7 @@ namespace
 			texs_.resize(0);
 			indices_.resize(0);
 
-			box_ = Box(Vector3(0, 0, 0), Vector3(0, 0, 0));
+			box_ = Box(float3(0, 0, 0), float3(0, 0, 0));
 		}
 
 		void Render()
@@ -202,7 +202,7 @@ namespace
 			this->AddText(fontHeight, sx, sy, sz, xScale, yScale, clr, text);
 		}
 
-		void AddText3D(uint32_t fontHeight, Matrix4 const & mvp, Color const & clr, 
+		void AddText3D(uint32_t fontHeight, float4x4 const & mvp, Color const & clr, 
 			std::wstring const & text)
 		{
 			three_dim_ = true;
@@ -238,20 +238,20 @@ namespace
 				{
 					Rect_T<float> const & texRect(cmiter->second.texRect);
 
-					xyzs_.push_back(Vector3(x + 0, y + 0, sz));
-					xyzs_.push_back(Vector3(x + w, y + 0, sz));
-					xyzs_.push_back(Vector3(x + w, y + h, sz));
-					xyzs_.push_back(Vector3(x + 0, y + h, sz));
+					xyzs_.push_back(float3(x + 0, y + 0, sz));
+					xyzs_.push_back(float3(x + w, y + 0, sz));
+					xyzs_.push_back(float3(x + w, y + h, sz));
+					xyzs_.push_back(float3(x + 0, y + h, sz));
 
 					clrs_.push_back(clr);
 					clrs_.push_back(clr);
 					clrs_.push_back(clr);
 					clrs_.push_back(clr);
 
-					texs_.push_back(Vector2(texRect.left(), texRect.top()));
-					texs_.push_back(Vector2(texRect.right(), texRect.top()));
-					texs_.push_back(Vector2(texRect.right(), texRect.bottom()));
-					texs_.push_back(Vector2(texRect.left(), texRect.bottom()));
+					texs_.push_back(float2(texRect.left(), texRect.top()));
+					texs_.push_back(float2(texRect.right(), texRect.top()));
+					texs_.push_back(float2(texRect.right(), texRect.bottom()));
+					texs_.push_back(float2(texRect.left(), texRect.bottom()));
 
 					indices_.push_back(lastIndex + 0);
 					indices_.push_back(lastIndex + 1);
@@ -280,7 +280,7 @@ namespace
 				}
 			}
 
-			box_ |= Box(Vector3(sx, sy, sz), Vector3(maxx, maxy, sz + 0.1f));
+			box_ |= Box(float3(sx, sy, sz), float3(maxx, maxy, sz + 0.1f));
 		}
 
 		// 更新纹理，使用LRU算法
@@ -401,13 +401,13 @@ namespace
 		uint32_t curX_, curY_;
 
 		bool three_dim_;
-		Matrix4 mvp_;
+		float4x4 mvp_;
 
 		uint32_t fontHeight_;
 
-		std::vector<Vector3>	xyzs_;
+		std::vector<float3>	xyzs_;
 		std::vector<Color>		clrs_;
-		std::vector<Vector2>	texs_;
+		std::vector<float2>	texs_;
 		std::vector<uint16_t>	indices_;
 
 		GraphicsBufferPtr xyz_vb_;
@@ -480,7 +480,7 @@ namespace KlayGE
 
 	// 在指定位置画出3D的文字
 	/////////////////////////////////////////////////////////////////////////////////
-	void Font::RenderText(Matrix4 const & mvp, Color const & clr, std::wstring const & text)
+	void Font::RenderText(float4x4 const & mvp, Color const & clr, std::wstring const & text)
 	{
 		if (!text.empty())
 		{
