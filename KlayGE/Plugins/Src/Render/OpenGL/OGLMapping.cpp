@@ -321,9 +321,15 @@ namespace KlayGE
 			gltype = GL_UNSIGNED_SHORT_4_4_4_4_REV;
 			break;
 
-		case EF_XRGB8:
+		case EF_RGB8:
 			internalFormat = GL_RGB8;
 			glformat = GL_BGR;
+			gltype = GL_UNSIGNED_BYTE;
+			break;
+
+		case EF_XRGB8:
+			internalFormat = GL_RGBA8;
+			glformat = GL_BGRA;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
@@ -342,6 +348,12 @@ namespace KlayGE
 		case EF_GR16:
 			internalFormat = GL_LUMINANCE16_ALPHA16;
 			glformat = GL_LUMINANCE_ALPHA;
+			gltype = GL_UNSIGNED_SHORT;
+			break;
+
+		case EF_BGR16:
+			internalFormat = GL_RGB16;
+			glformat = GL_BGR;
 			gltype = GL_UNSIGNED_SHORT;
 			break;
 
