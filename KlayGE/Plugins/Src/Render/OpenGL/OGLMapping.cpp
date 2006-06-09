@@ -327,12 +327,6 @@ namespace KlayGE
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
-		case EF_XRGB8:
-			internalFormat = GL_RGBA8;
-			glformat = GL_BGRA;
-			gltype = GL_UNSIGNED_BYTE;
-			break;
-
 		case EF_ARGB8:
 			internalFormat = GL_RGBA8;
 			glformat = GL_BGRA;
@@ -459,12 +453,6 @@ namespace KlayGE
 			gltype = GL_UNSIGNED_SHORT;
 			break;
 
-		case EF_D24X8:
-			internalFormat = GL_DEPTH24_STENCIL8_EXT;
-			glformat = GL_DEPTH_COMPONENT;
-			gltype = GL_UNSIGNED_INT_24_8_EXT;
-			break;
-
 		case EF_D24S8:
 			internalFormat = GL_DEPTH24_STENCIL8_EXT;
 			glformat = GL_DEPTH_STENCIL_EXT;
@@ -474,7 +462,7 @@ namespace KlayGE
 		case EF_D32:
 			internalFormat = GL_DEPTH_COMPONENT32;
 			glformat = GL_DEPTH_COMPONENT;
-			gltype = GL_UNSIGNED_SHORT;
+			gltype = GL_UNSIGNED_INT;
 			break;
 
 		default:

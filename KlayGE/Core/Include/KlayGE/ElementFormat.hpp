@@ -43,8 +43,6 @@ namespace KlayGE
 		EF_ARGB4,
 		// 24-bit element format, 8 bits for red, green and blue.
 		EF_RGB8,
-		// 32-bit element format, 8 bits no used, 8 bits for red, green and blue.
-		EF_XRGB8,
 		// 32-bit element format, 8 bits for alpha, red, green and blue.
 		EF_ARGB8,
 		// 32-bit element format, 2 bits for alpha, 10 bits for red, green and blue.
@@ -82,8 +80,6 @@ namespace KlayGE
 
 		// 16-bit element format, 16 bits depth
 		EF_D16,
-		// 32-bit element format, 24 bits depth
-		EF_D24X8,
 		// 32-bit element format, 24 bits depth and 8 bits stencil
 		EF_D24S8,
 		// 32-bit element format, 32 bits depth
@@ -122,7 +118,6 @@ namespace KlayGE
 		case EF_RGB8:
 			return 24;
 				
-		case EF_XRGB8:
 		case EF_ARGB8:
 		case EF_ARGB8_SRGB:
 		case EF_A2RGB10:
@@ -133,7 +128,6 @@ namespace KlayGE
 		case EF_DXT5:
 		case EF_DXT3_SRGB:
 		case EF_DXT5_SRGB:
-		case EF_D24X8:
 		case EF_D24S8:
 		case EF_D32:
 			return 32;
@@ -209,7 +203,6 @@ namespace KlayGE
 		switch (format)
 		{
 		case EF_D16:
-		case EF_D24X8:
 		case EF_D24S8:
 		case EF_D32:
 			return true;
@@ -267,7 +260,6 @@ namespace KlayGE
 		case EF_GR16:
 		case EF_GR16F:
 		case EF_GR32F:
-		case EF_D24X8:
 		case EF_D24S8:
 			return 2;
 
@@ -277,7 +269,6 @@ namespace KlayGE
 			return 3;
 
 		case EF_ARGB4:
-		case EF_XRGB8:
 		case EF_ARGB8:
 		case EF_A2RGB10:
 		case EF_ABGR16:
@@ -310,7 +301,6 @@ namespace KlayGE
 		case EF_L8:
 		case EF_A8:
 		case EF_AL8:
-		case EF_XRGB8:
 		case EF_ARGB8:
 		case EF_ARGB8_SRGB:
 			return 8;

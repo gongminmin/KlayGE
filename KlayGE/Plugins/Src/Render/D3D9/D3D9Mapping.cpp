@@ -563,9 +563,6 @@ namespace KlayGE
 		case EF_ARGB4:
 			return D3DFMT_A4R4G4B4;
 
-		case EF_XRGB8:
-			return D3DFMT_X8R8G8B8;
-
 		case EF_ARGB8:
 		case EF_ARGB8_SRGB:
 			return D3DFMT_A8R8G8B8;
@@ -612,9 +609,6 @@ namespace KlayGE
 		case EF_D16:
 			return D3DFMT_D16;
 
-		case EF_D24X8:
-			return D3DFMT_D24X8;
-
 		case EF_D24S8:
 			return D3DFMT_D24S8;
 
@@ -651,9 +645,6 @@ namespace KlayGE
 
 		case D3DFMT_A4R4G4B4:
 			return EF_ARGB4;
-
-		case D3DFMT_X8R8G8B8:
-			return EF_XRGB8;
 
 		case D3DFMT_A8R8G8B8:
 			return EF_ARGB8;
@@ -696,9 +687,6 @@ namespace KlayGE
 
 		case D3DFMT_D16:
 			return EF_D16;
-
-		case D3DFMT_D24X8:
-			return EF_D24X8;
 
 		case D3DFMT_D24S8:
 			return EF_D24S8;

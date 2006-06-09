@@ -273,7 +273,7 @@ struct Channel
 		}
 		else
 		{
-			const int lframe(frame % keys.size());
+			int const lframe = static_cast<int>(frame % keys.size());
 
 			if ((lframe >= range[0]) && (lframe <= range[1]))
 			{
@@ -325,7 +325,7 @@ boost::shared_ptr<KlayGE::KeyFramesType> LoadAnim(const std::string& fileName)
 		attr[s - 1] = 0;
 
 		static std::string attributeCode[6] = { "x", "y", "z", "roll", "pitch", "yaw" };
-		int attribute(find(&attributeCode[0], &attributeCode[6], std::string(attr)) - &attributeCode[0]);
+		int attribute(std::find(&attributeCode[0], &attributeCode[6], std::string(attr)) - &attributeCode[0]);
 
 		Channel channel;
 

@@ -57,11 +57,6 @@ namespace KlayGE
 					stencilBits_ = 0;
 					break;
 
-				case EF_D24X8:
-					depthBits_ = 24;
-					stencilBits_ = 0;
-					break;
-
 				case EF_D24S8:
 					depthBits_ = 24;
 					stencilBits_ = 8;

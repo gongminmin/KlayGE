@@ -254,7 +254,7 @@ namespace KlayGE
 						}
 						else
 						{
-							format = EF_XRGB8;
+							BOOST_ASSERT(false);
 						}
 					}
 					else
@@ -641,16 +641,6 @@ namespace KlayGE
 				desc.pixel_format.rgb_bit_count = 32;
 
 				desc.pixel_format.rgb_alpha_bit_mask = 0xFF000000;
-				desc.pixel_format.r_bit_mask = 0x00FF0000;
-				desc.pixel_format.g_bit_mask = 0x0000FF00;
-				desc.pixel_format.b_bit_mask = 0x000000FF;
-				break;
-
-			case EF_XRGB8:
-				desc.pixel_format.flags |= DDSPF_RGB;
-				desc.pixel_format.rgb_bit_count = 32;
-
-				desc.pixel_format.rgb_alpha_bit_mask = 0x00000000;
 				desc.pixel_format.r_bit_mask = 0x00FF0000;
 				desc.pixel_format.g_bit_mask = 0x0000FF00;
 				desc.pixel_format.b_bit_mask = 0x000000FF;
