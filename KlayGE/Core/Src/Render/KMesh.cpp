@@ -152,6 +152,10 @@ namespace KlayGE
 						ve.format = EF_L8;
 						break;
 
+					case 2:
+						ve.format = EF_AL8;
+						break;
+
 					case 3:
 						ve.format = EF_RGB8;
 						break;

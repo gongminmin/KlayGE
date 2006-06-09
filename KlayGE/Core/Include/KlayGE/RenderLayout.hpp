@@ -57,70 +57,9 @@ namespace KlayGE
 		vertex_element()
 		{
 		}
-		vertex_element(VertexElementUsage usage, uint8_t usage_index, uint8_t component_size, uint8_t num_components)
-			: usage(usage), usage_index(usage_index)
+		vertex_element(VertexElementUsage usage, uint8_t usage_index, ElementFormat format)
+			: usage(usage), usage_index(usage_index), format(format)
 		{
-			switch (component_size)
-			{
-			case 1:
-				switch (num_components)
-				{
-				case 1:
-					format = EF_L8;
-					break;
-
-				case 3:
-					format = EF_RGB8;
-					break;
-
-				case 4:
-					format = EF_ARGB8;
-					break;
-				}
-				break;
-
-			case 2:
-				switch (num_components)
-				{
-				case 1:
-					format = EF_R16F;
-					break;
-
-				case 2:
-					format = EF_GR16F;
-					break;
-
-				case 3:
-					format = EF_BGR16F;
-					break;
-
-				case 4:
-					format = EF_ABGR16F;
-					break;
-				}
-				break;
-
-			case 4:
-				switch (num_components)
-				{
-				case 1:
-					format = EF_R32F;
-					break;
-
-				case 2:
-					format = EF_GR32F;
-					break;
-
-				case 3:
-					format = EF_BGR32F;
-					break;
-
-				case 4:
-					format = EF_ABGR32F;
-					break;
-				}
-				break;
-			}
 		}
 
 		VertexElementUsage usage;

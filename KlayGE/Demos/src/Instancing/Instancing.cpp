@@ -47,10 +47,10 @@ namespace
 		Teapot()
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			instance_format_.push_back(vertex_element(VEU_TextureCoord, 1, sizeof(float), 4));
-			instance_format_.push_back(vertex_element(VEU_TextureCoord, 2, sizeof(float), 4));
-			instance_format_.push_back(vertex_element(VEU_TextureCoord, 3, sizeof(float), 4));
-			instance_format_.push_back(vertex_element(VEU_Diffuse, 0, sizeof(float), 4));
+			instance_format_.push_back(vertex_element(VEU_TextureCoord, 1, EF_ABGR32F));
+			instance_format_.push_back(vertex_element(VEU_TextureCoord, 2, EF_ABGR32F));
+			instance_format_.push_back(vertex_element(VEU_TextureCoord, 3, EF_ABGR32F));
+			instance_format_.push_back(vertex_element(VEU_Diffuse, 0, EF_ABGR32F));
 		}
 
 		void Instance(float4x4 const & mat, Color const & clr)

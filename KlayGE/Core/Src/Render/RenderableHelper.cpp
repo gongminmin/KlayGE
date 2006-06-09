@@ -76,7 +76,7 @@ namespace KlayGE
 			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
 			std::copy(&v, &v + 1, mapper.Pointer<float3>());
 		}
-		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
+		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 		box_ = MathLib::ComputeBoundingBox<float>(&v, &v + 1);
 	}
@@ -114,7 +114,7 @@ namespace KlayGE
 			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
 			std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
 		}
-		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
+		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 		box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 	}
@@ -152,7 +152,7 @@ namespace KlayGE
 			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
 			std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
 		}
-		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
+		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 		box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 	}
@@ -202,7 +202,7 @@ namespace KlayGE
 			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
 			std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
 		}
-		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
+		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static);
 		ib->Resize(sizeof(indices));
@@ -254,7 +254,7 @@ namespace KlayGE
 			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
 			std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
 		}
-		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
+		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static);
 		ib->Resize(sizeof(indices));
@@ -314,7 +314,7 @@ namespace KlayGE
 			GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
 			std::copy(pos.begin(), pos.end(), mapper.Pointer<float3>());
 		}
-		rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
+		rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 		if (has_tex_coord)
 		{
@@ -334,7 +334,7 @@ namespace KlayGE
 				GraphicsBuffer::Mapper mapper(*tex_vb, BA_Write_Only);
 				std::copy(tex.begin(), tex.end(), mapper.Pointer<float2>());
 			}
-			rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, sizeof(float), 2)));
+			rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 		}
 
 		std::vector<uint16_t> index;

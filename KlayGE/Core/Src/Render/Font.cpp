@@ -108,9 +108,9 @@ namespace
 			clr_vb_ = rf.MakeVertexBuffer(BU_Dynamic);
 			tex_vb_ = rf.MakeVertexBuffer(BU_Dynamic);
 
-			rl_->BindVertexStream(xyz_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
-			rl_->BindVertexStream(clr_vb_, boost::make_tuple(vertex_element(VEU_Diffuse, 0, sizeof(float), 4)));
-			rl_->BindVertexStream(tex_vb_, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, sizeof(float), 2)));
+			rl_->BindVertexStream(xyz_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+			rl_->BindVertexStream(clr_vb_, boost::make_tuple(vertex_element(VEU_Diffuse, 0, EF_ABGR32F)));
+			rl_->BindVertexStream(tex_vb_, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 
 			rl_->BindIndexStream(rf.MakeIndexBuffer(BU_Dynamic), EF_D16);
 

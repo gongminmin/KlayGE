@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
 
 	app.Create("DistanceMapCreator", settings);
 
-	TexturePtr height_map_texture = render_factory.MakeTexture2D(width, height, 1, PF_L8);
+	TexturePtr height_map_texture = render_factory.MakeTexture2D(width, height, 1, EF_L8);
 	{
 		TexturePtr temp_texture = LoadTexture(height_name);
 		temp_texture->CopyToTexture(*height_map_texture);
@@ -151,8 +151,8 @@ int main(int argc, char* argv[])
 	std::vector<unsigned char> distances(depth * height * width);
 	ComputeDistanceMap(distances, 256, 256, 16, height_map);
 
-	TexturePtr distance_map_texture = render_factory.MakeTexture3D(width, height, depth, 1, PF_L8);
-	distance_map_texture->CopyMemoryToTexture3D(0, &distances[0], PF_L8,
+	TexturePtr distance_map_texture = render_factory.MakeTexture3D(width, height, depth, 1, EF_L8);
+	distance_map_texture->CopyMemoryToTexture3D(0, &distances[0], EF_L8,
 		width, height, depth, 0, 0, 0, width, height, depth);
 	SaveToFile(distance_map_texture, distance_name);
 

@@ -95,7 +95,7 @@ namespace KlayGE
 					GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
 					std::copy(xyzs_.begin(), xyzs_.end(), mapper.Pointer<float3>());
 				}
-				rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
+				rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 				if (!normals_.empty())
 				{
@@ -106,7 +106,7 @@ namespace KlayGE
 						GraphicsBuffer::Mapper mapper(*normal_vb, BA_Write_Only);
 						std::copy(normals_.begin(), normals_.end(), mapper.Pointer<float3>());
 					}
-					rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, sizeof(float), 3)));
+					rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
 				}
 
 				// 建立纹理坐标
@@ -119,7 +119,7 @@ namespace KlayGE
 						std::copy(multi_tex_coords_[i].begin(), multi_tex_coords_[i].end(), mapper.Pointer<float2>());
 					}
 					rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_TextureCoord,
-						static_cast<uint8_t>(i), sizeof(float), 2)));
+						static_cast<uint8_t>(i), EF_GR32F)));
 				}
 
 				// 建立索引
@@ -220,14 +220,14 @@ namespace KlayGE
 				GraphicsBuffer::Mapper mapper(*bw, BA_Write_Only);
 				std::copy(blend_weights_.begin(), blend_weights_.end(), mapper.Pointer<float>());
 			}
-			rl_->BindVertexStream(bw, boost::make_tuple(vertex_element(VEU_BlendWeight, 0, sizeof(float), 4)));
+			rl_->BindVertexStream(bw, boost::make_tuple(vertex_element(VEU_BlendWeight, 0, EF_ABGR32F)));
 			GraphicsBufferPtr bi = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(BU_Static);
 			bi->Resize(static_cast<uint32_t>(blend_indices_.size() * sizeof(blend_indices_[0])));
 			{
 				GraphicsBuffer::Mapper mapper(*bi, BA_Write_Only);
 				std::copy(blend_indices_.begin(), blend_indices_.end(), mapper.Pointer<uint8_t>());
 			}
-			rl_->BindVertexStream(bi, boost::make_tuple(vertex_element(VEU_BlendIndex, 0, sizeof(uint8_t), 4)));
+			rl_->BindVertexStream(bi, boost::make_tuple(vertex_element(VEU_BlendIndex, 0, EF_ARGB8)));
 		}
 
 		StaticMesh::BuildRenderable();

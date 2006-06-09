@@ -209,7 +209,7 @@ namespace
 				GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
 				std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
 			}
-			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, sizeof(float), 3)));
+			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static);
 			ib->Resize(sizeof(indices));
@@ -230,7 +230,7 @@ namespace
 				GraphicsBuffer::Mapper mapper(*normal_vb, BA_Write_Only);
 				std::copy(&normal[0], &normal[0] + sizeof(normal) / sizeof(normal[0]), mapper.Pointer<float3>());
 			}
-			rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, sizeof(float), 3)));
+			rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
 
 			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[4]);
 		}

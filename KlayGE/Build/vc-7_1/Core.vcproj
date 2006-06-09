@@ -116,6 +116,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Src\Render\FrameBuffer.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Src\Render\GraphicsBuffer.cpp"
 					>
 				</File>
@@ -152,10 +156,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Render\RenderGraphicsBuffer.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\Core\Src\Render\RenderLayout.cpp"
 					>
 				</File>
@@ -164,7 +164,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Render\RenderTexture.cpp"
+					RelativePath="..\..\Core\Src\Render\RenderView.cpp"
 					>
 				</File>
 				<File
@@ -192,7 +192,15 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Include\KlayGE\ElementFormat.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Include\KlayGE\Font.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\FrameBuffer.hpp"
 					>
 				</File>
 				<File
@@ -240,10 +248,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\RenderGraphicsBuffer.hpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\Core\Include\KlayGE\RenderLayout.hpp"
 					>
 				</File>
@@ -256,7 +260,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\RenderTexture.hpp"
+					RelativePath="..\..\Core\Include\KlayGE\RenderView.hpp"
 					>
 				</File>
 				<File

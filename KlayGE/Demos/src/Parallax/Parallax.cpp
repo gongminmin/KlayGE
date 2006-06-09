@@ -97,8 +97,8 @@ namespace
 				std::copy(b.begin(), b.end(), mapper.Pointer<float3>());
 			}
 
-			rl_->BindVertexStream(tan_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, sizeof(float), 3)));
-			rl_->BindVertexStream(binormal_vb, boost::make_tuple(vertex_element(VEU_Binormal, 0, sizeof(float), 3)));
+			rl_->BindVertexStream(tan_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_BGR32F)));
+			rl_->BindVertexStream(binormal_vb, boost::make_tuple(vertex_element(VEU_Binormal, 0, EF_BGR32F)));
 		}
 
 		void OnRenderBegin()

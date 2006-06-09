@@ -116,8 +116,8 @@ int main(int argc, char* argv[])
 	{
 		for (int x = 0; x < header.width; ++ x)
 		{
-			Vector3 normal = MathLib::Normalize(Vector3(dx[y * header.width + x] / 255.0f, dy[y * header.width + x] / 255.0f, 1.0f));
-			normal = normal * 0.5f + Vector3(0.5f, 0.5f, 0.5f);
+			float3 normal = MathLib::Normalize(float3(dx[y * header.width + x] / 255.0f, dy[y * header.width + x] / 255.0f, 1.0f));
+			normal = normal * 0.5f + float3(0.5f, 0.5f, 0.5f);
 
 			normalmap.push_back(static_cast<uint8_t>(normal.z() * 255));
 			normalmap.push_back(static_cast<uint8_t>(normal.y() * 255));

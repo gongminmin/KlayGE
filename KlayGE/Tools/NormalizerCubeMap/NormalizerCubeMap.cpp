@@ -79,7 +79,7 @@ TexturePtr CreateCubeMap(int cube_size, std::string const & cube_name)
 {
 	RenderFactory& render_factory(Context::Instance().RenderFactoryInstance());
 
-	TexturePtr cube = render_factory.MakeTextureCube(cube_size, 1, PF_XRGB8);
+	TexturePtr cube = render_factory.MakeTextureCube(cube_size, 1, EF_ARGB8);
 
 	for (int face = 0; face < 6; ++ face)
 	{
@@ -95,7 +95,7 @@ TexturePtr CreateCubeMap(int cube_size, std::string const & cube_name)
 			}
 		}
 
-		cube->CopyMemoryToTextureCube(static_cast<Texture::CubeFaces>(face), 0, &data[0], PF_XRGB8,
+		cube->CopyMemoryToTextureCube(static_cast<Texture::CubeFaces>(face), 0, &data[0], EF_ARGB8,
 			cube_size, cube_size, 0, 0, cube_size, cube_size);
 	}
 
