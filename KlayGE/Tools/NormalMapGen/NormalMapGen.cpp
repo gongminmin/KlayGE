@@ -1,5 +1,12 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Context.hpp>
+#include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Math.hpp>
+#include <KlayGE/Texture.hpp>
+#include <KlayGE/App3D.hpp>
+#include <KlayGE/RenderSettings.hpp>
+
+#include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -10,70 +17,64 @@ namespace
 {
 	using namespace KlayGE;
 
-#pragma pack(push, 1)
-
-	struct TGAHeader
+	TexturePtr CreateNormalMap(TexturePtr height_map)
 	{
-		uint8_t	infoLength;
-		uint8_t	colorMapType;
-		uint8_t	imageTypeCode;
+		uint32_t const width = height_map->Width(0);
+		uint32_t const height = height_map->Height(0);
 
-		int16_t	colorMapEntry;
-		int16_t	colorMapLength;
-		uint8_t	colorMapBits;
+		std::vector<uint8_t> heights(width, height);
+		height_map->CopyToMemory2D(0, &heights[0]);
 
-		int16_t	leftbottomX;
-		int16_t	leftbottomY;
-
-		int16_t	width;
-		int16_t	height;
-
-		uint8_t	pixelSize;
-		uint8_t	imageDescriptor;
-	};
-
-#pragma pack(pop)
-
-
-	void LoadHeightMap(TGAHeader& tgaHeader, std::vector<uint8_t>& tgaData, std::string const & fileName)
-	{
-		ifstream file(fileName.c_str(), std::ios_base::binary);
-		file.read(reinterpret_cast<char*>(&tgaHeader), sizeof(tgaHeader));
-		file.seekg(tgaHeader.infoLength, std::ios_base::cur);
-
-		std::vector<uint8_t> data(tgaHeader.width * tgaHeader.height * tgaHeader.pixelSize / 8);
-		file.read(reinterpret_cast<char*>(&data[0]), data.size());
-
-		tgaData.clear();
-		tgaData.reserve(tgaHeader.width * tgaHeader.height);
-
-		for (short y = 0; y < tgaHeader.height; ++ y)
+		std::vector<char> dx;
+		dx.resize(heights.size());
+		for (uint32_t y = 0; y < height; ++ y)
 		{
-			short line(y);
-			if (0 == (tgaHeader.imageDescriptor & 0x20))
+			for (uint32_t x = 0; x < width - 1; ++ x)
 			{
-				// 图像从下到上
-				line = tgaHeader.height - y - 1;
+				dx[y * width + x] = heights[y * width + (x + 1)] - heights[y * width + x];
 			}
+			dx[y * width + (width - 1)] = 0;
+		}
 
-			for (short x = 0; x < tgaHeader.width; ++ x)
+		std::vector<char> dy;
+		dy.resize(heights.size());
+		for (uint32_t x = 0; x < width; ++ x)
+		{
+			for (uint32_t y = 0; y < height - 1; ++ y)
 			{
-				size_t const offset((line * tgaHeader.width + x) * (tgaHeader.pixelSize / 8));
+				dy[y * width + x] = heights[(y + 1) * width + x] - heights[y * width + x];
+			}
+			dy[(height - 1) * width + x] = 0;
+		}
 
-				tgaData.push_back(data[offset]);
+		std::vector<uint8_t> normals;
+		for (uint32_t y = 0; y < height; ++ y)
+		{
+			for (uint32_t x = 0; x < width; ++ x)
+			{
+				float3 normal = MathLib::normalize(float3(dx[y * width + x] / 255.0f, dy[y * width + x] / 255.0f, 1.0f));
+				normal = normal * 0.5f + float3(0.5f, 0.5f, 0.5f);
+
+				normals.push_back(static_cast<uint8_t>(normal.z() * 255));
+				normals.push_back(static_cast<uint8_t>(normal.y() * 255));
+				normals.push_back(static_cast<uint8_t>(normal.x() * 255));
+				normals.push_back(255);
 			}
 		}
-	}
 
-	void SaveNormalMap(TGAHeader& tgaHeader, std::vector<uint8_t>& tgaData, std::string const & fileName)
-	{
-		std::ofstream file(fileName.c_str(), std::ios_base::binary);
-		file.write(reinterpret_cast<char*>(&tgaHeader), sizeof(tgaHeader));
-		file.seekp(tgaHeader.infoLength, std::ios_base::cur);
-
-		file.write(reinterpret_cast<char*>(&tgaData[0]), tgaData.size());
+		TexturePtr normal_map = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, EF_ARGB8);
+		normal_map->CopyMemoryToTexture2D(0, &normals[0], EF_ARGB8, width, height, 0, 0, width, height);
+		return normal_map;
 	}
 }
+
+class EmptyApp : public KlayGE::App3DFramework
+{
+public:
+	void DoUpdate(uint32_t /*pass*/)
+	{
+	}
+};
 
 int main(int argc, char* argv[])
 {
@@ -81,52 +82,29 @@ int main(int argc, char* argv[])
 
 	if (argc != 3)
 	{
-		cout << "使用方法: NormalMapGen xxx.tga yyy.tga" << endl;
+		cout << "使用方法: NormalMapGen xxx.dds yyy.dds" << endl;
 		return 1;
 	}
 
-	TGAHeader header;
-	std::vector<uint8_t> heightmap;
-	LoadHeightMap(header, heightmap, argv[1]);
+	EmptyApp app;
 
-	std::vector<char> dx;
-	dx.resize(heightmap.size());
-	for (int y = 0; y < header.height; ++ y)
-	{
-		for (int x = 0; x < header.width - 1; ++ x)
-		{
-			dx[y * header.width + x] = heightmap[y * header.width + (x + 1)] - heightmap[y * header.width + x];
-		}
-		dx[y * header.width + (header.width - 1)] = 0;
-	}
+	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 
-	std::vector<char> dy;
-	dy.resize(heightmap.size());
-	for (int x = 0; x < header.width; ++ x)
-	{
-		for (int y = 0; y < header.height - 1; ++ y)
-		{
-			dy[y * header.width + x] = heightmap[(y + 1) * header.width + x] - heightmap[y * header.width + x];
-		}
-		dy[(header.height - 1) * header.width + x] = 0;
-	}
+	RenderSettings settings;
+	settings.width = 800;
+	settings.height = 600;
+	settings.colorDepth = 32;
+	settings.fullScreen = false;
 
-	std::vector<uint8_t> normalmap;
-	for (int y = 0; y < header.height; ++ y)
-	{
-		for (int x = 0; x < header.width; ++ x)
-		{
-			float3 normal = MathLib::Normalize(float3(dx[y * header.width + x] / 255.0f, dy[y * header.width + x] / 255.0f, 1.0f));
-			normal = normal * 0.5f + float3(0.5f, 0.5f, 0.5f);
+	app.Create("NormalMapGen", settings);
 
-			normalmap.push_back(static_cast<uint8_t>(normal.z() * 255));
-			normalmap.push_back(static_cast<uint8_t>(normal.y() * 255));
-			normalmap.push_back(static_cast<uint8_t>(normal.x() * 255));
-		}
-	}
+	TexturePtr temp = LoadTexture(argv[1]);
+	TexturePtr height_map = Context::Instance().RenderFactoryInstance().MakeTexture2D(temp->Width(0), temp->Height(0), 1, EF_ARGB8);
+	temp->CopyToTexture(*height_map);
+	TexturePtr normal_map = CreateNormalMap(height_map);
+	SaveTexture(normal_map, argv[2]);
 
-	header.imageDescriptor |= 0x20;
-	SaveNormalMap(header, normalmap, argv[2]);
+	cout << "Normal map is saved to " << argv[2] << endl;
 
 	return 0;
 }

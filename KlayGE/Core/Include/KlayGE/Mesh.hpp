@@ -156,7 +156,7 @@ namespace KlayGE
 		void AssignXYZs(ForwardIterator first, ForwardIterator last)
 		{
 			xyzs_.assign(first, last);
-			box_ = MathLib::ComputeBoundingBox<float>(xyzs_.begin(), xyzs_.end());
+			box_ = MathLib::compute_bounding_box<float>(xyzs_.begin(), xyzs_.end());
 			beBuilt_ = false;
 		}
 

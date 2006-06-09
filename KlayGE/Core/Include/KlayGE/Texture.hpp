@@ -152,7 +152,7 @@ namespace KlayGE
 	};
 
 	TexturePtr LoadTexture(std::string const & tex_name);
-	void SaveToFile(TexturePtr texture, std::string const & tex_name);
+	void SaveTexture(TexturePtr texture, std::string const & tex_name);
 
 	// 返回立方环境映射的lookat和up向量
 	//////////////////////////////////////////////////////////////////////////////////

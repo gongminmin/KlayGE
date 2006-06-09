@@ -248,8 +248,8 @@ namespace KlayGE
 
 		for (size_t i = 0; i < 8; ++ i)
 		{
-			float3 vec(MathLib::TransformCoord(box[i], obj->GetModelMatrix()));
-			if (MathLib::VecInBox(area_box, vec))
+			float3 vec(MathLib::transform_coord(box[i], obj->GetModelMatrix()));
+			if (MathLib::vec_in_box(area_box, vec))
 			{
 				return true;
 			}

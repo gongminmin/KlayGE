@@ -79,11 +79,11 @@ boost::shared_ptr<MD5SkinnedModel> LoadModel(const std::string& fileName)
 			&bind_mat(0, 0), &bind_mat(0, 1), &bind_mat(0, 2),
 			&bind_mat(1, 0), &bind_mat(1, 1), &bind_mat(1, 2),
 			&bind_mat(2, 0), &bind_mat(2, 1), &bind_mat(2, 2));
-		joint.bind_quat = MathLib::ToQuaternion(bind_mat);
+		joint.bind_quat = MathLib::to_quaternion(bind_mat);
 		float4x4 origin_mat = bind_mat;
-		origin_mat *= MathLib::Translation(joint.bind_pos);
-		float4x4 inverse_origin_mat = MathLib::Inverse(origin_mat);
-		joint.inverse_origin_quat = MathLib::ToQuaternion(inverse_origin_mat);
+		origin_mat *= MathLib::translation(joint.bind_pos);
+		float4x4 inverse_origin_mat = MathLib::inverse(origin_mat);
+		joint.inverse_origin_quat = MathLib::to_quaternion(inverse_origin_mat);
 		joint.inverse_origin_pos = float3(inverse_origin_mat(3, 0), inverse_origin_mat(3, 1), inverse_origin_mat(3, 2));
 
 		joint.name = name;
@@ -210,8 +210,8 @@ boost::shared_ptr<MD5SkinnedModel> LoadModel(const std::string& fileName)
 			std::vector<Weight> w(&weights[weightIndexCounts[i].first],
 				&weights[weightIndexCounts[i].first] + weightIndexCounts[i].second);
 
-			xyzs[i] = MathLib::TransformCoord(positions[weightIndexCounts[i].first],
-				MathLib::ToMatrix(joints[w[0].joint].bind_quat) * MathLib::Translation(joints[w[0].joint].bind_pos));
+			xyzs[i] = MathLib::transform_coord(positions[weightIndexCounts[i].first],
+				MathLib::to_matrix(joints[w[0].joint].bind_quat) * MathLib::translation(joints[w[0].joint].bind_pos));
 
 			if (w.size() > 4)
 			{
@@ -363,11 +363,11 @@ boost::shared_ptr<KlayGE::KeyFramesType> LoadAnim(const std::string& fileName)
 		{
 			kf.bind_pos.push_back(float3(iter->second[0].Key(i), iter->second[1].Key(i), iter->second[2].Key(i)));
 
-			float4x4 matX = MathLib::RotationX(MathLib::Deg2Rad(iter->second[3].Key(i)));
-			float4x4 matY = MathLib::RotationY(MathLib::Deg2Rad(iter->second[4].Key(i)));
-			float4x4 matZ = MathLib::RotationZ(MathLib::Deg2Rad(iter->second[5].Key(i)));
+			float4x4 matX = MathLib::rotation_x(MathLib::deg2rad(iter->second[3].Key(i)));
+			float4x4 matY = MathLib::rotation_y(MathLib::deg2rad(iter->second[4].Key(i)));
+			float4x4 matZ = MathLib::rotation_z(MathLib::deg2rad(iter->second[5].Key(i)));
 
-			kf.bind_quat.push_back(MathLib::ToQuaternion(matX * matY * matZ));
+			kf.bind_quat.push_back(MathLib::to_quaternion(matX * matY * matZ));
 		}
 		anim->insert(std::make_pair(iter->first, kf));
 	}

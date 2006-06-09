@@ -46,12 +46,12 @@ namespace KlayGE
 				int i = p_[bx.x()];
 				int j = p_[bx.y()];
 
-				float sx = curve(rx.x());
+				float sx = this->curve(rx.x());
 
 				float u = rx.x() * g1_[i].x();
 				float v = rx.y() * g1_[j].x();
 
-				return Lerp(u, v, sx);
+				return lerp(u, v, sx);
 			}
 
 			T noise(T const & x, T const & y)
@@ -70,22 +70,22 @@ namespace KlayGE
 				int b10 = p_[j + by.x()];
 				int b11 = p_[j + by.y()];
 
-				T sx = curve(rx.x());
-				T sy = curve(ry.x());
+				T sx = this->curve(rx.x());
+				T sy = this->curve(ry.x());
 
 				T a, b;
 				{
-					T u = Dot(g2_[b00], float2(rx.x(), ry.x()));
-					T v = Dot(g2_[b10], float2(rx.y(), ry.x()));
-					a = Lerp(u, v, sx);
+					T u = dot(g2_[b00], float2(rx.x(), ry.x()));
+					T v = dot(g2_[b10], float2(rx.y(), ry.x()));
+					a = lerp(u, v, sx);
 				}
 				{
-					T u = Dot(g2_[b01], float2(rx.x(), ry.y()));
-					T v = Dot(g2_[b11], float2(rx.y(), ry.y()));
-					b = Lerp(u, v, sx);
+					T u = dot(g2_[b01], float2(rx.x(), ry.y()));
+					T v = dot(g2_[b11], float2(rx.y(), ry.y()));
+					b = lerp(u, v, sx);
 				}
 
-				return Lerp(a, b, sy);
+				return lerp(a, b, sy);
 			}
 
 			T noise(T const & x, T const & y, T const & z)
@@ -114,41 +114,41 @@ namespace KlayGE
 				int b110 = b11 + bz.x();
 				int b111 = b11 + bz.y();
 
-				T sx = curve(rx.x());
-				T sy = curve(ry.x());
-				T sz = curve(rz.x());
+				T sx = this->curve(rx.x());
+				T sy = this->curve(ry.x());
+				T sz = this->curve(rz.x());
 
 				T c, d;
 				{
 					T a, b;
 					{
-						T u = Dot(g3_[b000], float3(rx.x(), ry.x(), rz.x()));
-						T v = Dot(g3_[b100], float3(rx.y(), ry.x(), rz.x()));
-						a = Lerp(u, v, sx);
+						T u = dot(g3_[b000], float3(rx.x(), ry.x(), rz.x()));
+						T v = dot(g3_[b100], float3(rx.y(), ry.x(), rz.x()));
+						a = lerp(u, v, sx);
 					}
 					{
-						T u = Dot(g3_[b010], float3(rx.x(), ry.y(), rz.x()));
-						T v = Dot(g3_[b110], float3(rx.y(), ry.y(), rz.x()));
-						b = Lerp(u, v, sx);
+						T u = dot(g3_[b010], float3(rx.x(), ry.y(), rz.x()));
+						T v = dot(g3_[b110], float3(rx.y(), ry.y(), rz.x()));
+						b = lerp(u, v, sx);
 					}
-					c = Lerp(a, b, sy);
+					c = lerp(a, b, sy);
 				}
 				{
 					T a, b;
 					{
-						T u = Dot(g3_[b001], float3(rx.x(), ry.x(), rz.y()));
-						T v = Dot(g3_[b101], float3(rx.y(), ry.x(), rz.y()));
-						a = Lerp(u, v, sx);
+						T u = dot(g3_[b001], float3(rx.x(), ry.x(), rz.y()));
+						T v = dot(g3_[b101], float3(rx.y(), ry.x(), rz.y()));
+						a = lerp(u, v, sx);
 					}
 					{
-						T u = Dot(g3_[b011], float3(rx.x(), ry.y(), rz.y()));
-						T v = Dot(g3_[b111], float3(rx.y(), ry.y(), rz.y()));
-						b = Lerp(u, v, sx);
+						T u = dot(g3_[b011], float3(rx.x(), ry.y(), rz.y()));
+						T v = dot(g3_[b111], float3(rx.y(), ry.y(), rz.y()));
+						b = lerp(u, v, sx);
 					}
-					d = Lerp(a, b, sy);
+					d = lerp(a, b, sy);
 				}
 
-				return Lerp(c, d, sz);
+				return lerp(c, d, sz);
 			}
 
 			T turbulence(T const & x, T const & y, T freq)
@@ -253,13 +253,13 @@ namespace KlayGE
 					{
 						g2_[i][j] = static_cast<T>((std::rand() % (B + B)) - B) / B;
 					}
-					g2_[i] = Normalize(g2_[i]);
+					g2_[i] = normalize(g2_[i]);
 
 					for (int j = 0; j < 3; ++ j)
 					{
 						g3_[i][j] = static_cast<T>((std::rand() % (B + B)) - B) / B;
 					}
-					g3_[i] = Normalize(g3_[i]);
+					g3_[i] = normalize(g3_[i]);
 				}
 
 				for (int i = B - 1; i > 0; -- i)

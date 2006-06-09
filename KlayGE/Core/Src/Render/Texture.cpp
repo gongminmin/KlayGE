@@ -534,7 +534,7 @@ namespace KlayGE
 	}
 
 	// 把纹理保存入DDS文件
-	void SaveToFile(TexturePtr texture, std::string const & tex_name)
+	void SaveTexture(TexturePtr texture, std::string const & tex_name)
 	{
 		std::ofstream file(tex_name.c_str(), std::ios_base::binary);
 

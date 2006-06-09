@@ -93,7 +93,7 @@ namespace
 			}
 			rl_->BindIndexStream(ib, EF_D16);
 
-			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
+			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 		}
 
 		void SetTexture(TexturePtr texture)
@@ -168,7 +168,7 @@ namespace
 			}
 			rl_->BindIndexStream(ib, EF_D16);
 
-			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
+			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 		}
 
 		void SetTexture(TexturePtr texture)

@@ -101,7 +101,7 @@ namespace KlayGE
 
 		bool IsEmpty() const
 		{
-			return MathLib::Eq(radius_, 0.0f);
+			return MathLib::equal(radius_, 0.0f);
 		}
 
 		bool VecInBound(Vector_T<T, 3> const & v) const

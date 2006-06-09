@@ -59,9 +59,9 @@ namespace
 
 		void LightMatrices(float4x4 const & model, float4x4 const & view, float4x4 const & proj)
 		{
-			light_pos_ = TransformCoord(float3(0, 0, 0), model);
+			light_pos_ = transform_coord(float3(0, 0, 0), model);
 
-			inv_light_model_ = MathLib::Inverse(model);
+			inv_light_model_ = MathLib::inverse(model);
 			light_view_ = view;
 			light_proj_ = proj;
 		}
@@ -166,7 +166,7 @@ namespace
 		OccluderObject()
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			model_ = MathLib::Translation(0.0f, 0.2f, 0.0f);
+			model_ = MathLib::translation(0.0f, 0.2f, 0.0f);
 
 			renderable_ = LoadKMesh("teapot.kmesh", CreateKMeshFactory<OccluderRenderable>())->Mesh(0);
 			checked_cast<OccluderRenderable*>(renderable_.get())->SetModelMatrix(model_);
@@ -220,7 +220,7 @@ namespace
 			rl_->BindIndexStream(ib, EF_D16);
 
 			float3 normal[sizeof(xyzs) / sizeof(xyzs[0])];
-			MathLib::ComputeNormal<float>(&normal[0],
+			MathLib::compute_normal<float>(&normal[0],
 				&indices[0], &indices[sizeof(indices) / sizeof(uint16_t)],
 				&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
 
@@ -232,7 +232,7 @@ namespace
 			}
 			rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
 
-			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[4]);
+			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[4]);
 		}
 
 		void GenShadowMapPass(bool gen_sm)
@@ -271,7 +271,7 @@ namespace
 		GroundObject()
 			: SceneObjectHelper(RenderablePtr(new GroundRenderable), SOA_Cullable)
 		{
-			model_ = MathLib::Translation(0.0f, -0.2f, 0.0f);
+			model_ = MathLib::translation(0.0f, -0.2f, 0.0f);
 
 			checked_cast<GroundRenderable*>(renderable_.get())->SetModelMatrix(model_);
 		}
@@ -403,8 +403,8 @@ void ShadowCubeMap::DoUpdate(uint32_t pass)
 			renderEngine.BindRenderTarget(shadow_buffers_[pass]);
 			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
-			light_model_ = MathLib::RotationZ(0.4f) * MathLib::RotationY(std::clock() / 700.0f)
-				* MathLib::Translation(0.1f, 0.7f, 0.2f);
+			light_model_ = MathLib::rotation_z(0.4f) * MathLib::rotation_y(std::clock() / 700.0f)
+				* MathLib::translation(0.1f, 0.7f, 0.2f);
 		}
 
 	case 1:
@@ -417,12 +417,12 @@ void ShadowCubeMap::DoUpdate(uint32_t pass)
 
 			std::pair<float3, float3> lookat_up = CubeMapViewVector<float>(face);
 
-			float3 le = TransformCoord(float3(0, 0, 0), light_model_);
-			float3 lla = TransformCoord(float3(0, 0, 0) + lookat_up.first, light_model_);
-			float3 lu = TransformNormal(float3(0, 0, 0) + lookat_up.second, light_model_);
+			float3 le = transform_coord(float3(0, 0, 0), light_model_);
+			float3 lla = transform_coord(float3(0, 0, 0) + lookat_up.first, light_model_);
+			float3 lu = transform_normal(float3(0, 0, 0) + lookat_up.second, light_model_);
 
-			float4x4 light_view = LookAtLH(le, lla, lu);
-			float4x4 light_proj = PerspectiveFovLH(PI / 2.0f, 1.0f, 0.01f, 10.0f);
+			float4x4 light_view = look_at_lh(le, lla, lu);
+			float4x4 light_proj = perspective_fov_lh(PI / 2.0f, 1.0f, 0.01f, 10.0f);
 			checked_cast<OccluderRenderable*>(mesh_->GetRenderable().get())->LightMatrices(light_model_, light_view, light_proj);
 			checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->LightMatrices(light_model_, light_view, light_proj);
 

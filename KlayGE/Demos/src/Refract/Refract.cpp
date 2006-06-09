@@ -64,7 +64,7 @@ namespace
 			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
 			*(technique_->Effect().ParameterByName("model")) = model;
-			*(technique_->Effect().ParameterByName("modelit")) = MathLib::Transpose(MathLib::Inverse(model));
+			*(technique_->Effect().ParameterByName("modelit")) = MathLib::transpose(MathLib::inverse(model));
 			*(technique_->Effect().ParameterByName("mvp")) = model * view * proj;
 
 			*(technique_->Effect().ParameterByName("eta_ratio")) = float3(1 / 1.1f, 1 / 1.1f - 0.003f, 1 / 1.1f - 0.006f);

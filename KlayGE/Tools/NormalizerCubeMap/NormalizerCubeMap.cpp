@@ -138,7 +138,7 @@ int main(int argc, char* argv[])
 	app.Create("NormalizerCubeMap", settings);
 
 	TexturePtr cube = CreateCubeMap(size, cube_name);
-	SaveToFile(cube, cube_name);
+	SaveTexture(cube, cube_name);
 
 	cout << "Normalizer cube map is saved to " << cube_name << endl;
 }

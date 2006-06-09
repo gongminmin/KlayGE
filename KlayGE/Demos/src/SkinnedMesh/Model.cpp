@@ -78,7 +78,7 @@ void MD5SkinnedMesh::BuildRenderable()
 		// º∆À„TBN
 		std::vector<float3> t(xyzs_.size());
 		std::vector<float3> b(xyzs_.size());
-		MathLib::ComputeTangent<float>(t.begin(), b.begin(),
+		MathLib::compute_tangent<float>(t.begin(), b.begin(),
 			indices_.begin(), indices_.end(),
 			xyzs_.begin(), xyzs_.end(),
 			multi_tex_coords_[0].begin());

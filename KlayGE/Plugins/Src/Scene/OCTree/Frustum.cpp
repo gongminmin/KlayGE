@@ -37,7 +37,7 @@ namespace KlayGE
 		// Loop through each side of the frustum and normalize it.
 		for (planes_t::iterator iter = planes_.begin(); iter != planes_.end(); ++ iter)
 		{
-			*iter = MathLib::Normalize(*iter);
+			*iter = MathLib::normalize(*iter);
 		}
 
 		//  build a bit-field that will tell us the indices for the nearest and farthest vertices from each plane...
@@ -58,11 +58,11 @@ namespace KlayGE
 			float3 v0((n & 1) ? box.Min().x() : box.Max().x(), (n & 2) ? box.Min().y() : box.Max().y(), (n & 4) ? box.Min().z() : box.Max().z());
 			float3 v1((n & 1) ? box.Max().x() : box.Min().x(), (n & 2) ? box.Max().y() : box.Min().y(), (n & 4) ? box.Max().z() : box.Min().z());
 
-			if (MathLib::DotCoord(planes_[i], v0) < 0)
+			if (MathLib::dot_coord(planes_[i], v0) < 0)
 			{
 				return VIS_NO;
 			}
-			if (MathLib::DotCoord(planes_[i], v1) < 0)
+			if (MathLib::dot_coord(planes_[i], v1) < 0)
 			{
 				intersect = true;
 			}

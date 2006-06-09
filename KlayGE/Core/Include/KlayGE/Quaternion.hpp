@@ -126,7 +126,7 @@ namespace KlayGE
 		template <typename U>
 		Quaternion_T const & operator*=(Quaternion_T<U> const & rhs)
 		{
-			*this = MathLib::Multiply(*this, rhs);
+			*this = MathLib::mul(*this, rhs);
 			return *this;
 		}
 		template <typename U>

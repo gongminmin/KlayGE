@@ -80,7 +80,7 @@ namespace
 
 			std::vector<float3> t(xyzs_.size());
 			std::vector<float3> b(xyzs_.size());
-			MathLib::ComputeTangent<float>(t.begin(), b.begin(),
+			MathLib::compute_tangent<float>(t.begin(), b.begin(),
 				indices_.begin(), indices_.end(),
 				xyzs_.begin(), xyzs_.end(), multi_tex_coords_[0].begin());
 
@@ -221,8 +221,8 @@ void Parallax::DoUpdate(uint32_t pass)
 
 	float degree(std::clock() / 700.0f);
 	float3 lightPos(2, 0, 1);
-	float4x4 matRot(MathLib::RotationZ(degree));
-	lightPos = MathLib::TransformCoord(lightPos, matRot);
+	float4x4 matRot(MathLib::rotation_z(degree));
+	lightPos = MathLib::transform_coord(lightPos, matRot);
 	*(polygon_->GetRenderable()->GetRenderTechnique()->Effect().ParameterByName("lightPos")) = lightPos;
 
 	std::wostringstream stream;

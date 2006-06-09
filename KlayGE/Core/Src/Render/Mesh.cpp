@@ -158,12 +158,12 @@ namespace KlayGE
 				Joint& parent(joints_[joint.parent]);
 
 				joint.bind_quat = key_quat * parent.bind_quat;
-				joint.bind_pos = MathLib::TransQuat(key_pos, parent.bind_quat) + parent.bind_pos;
+				joint.bind_pos = MathLib::transform_quat(key_pos, parent.bind_quat) + parent.bind_pos;
 			}
 			else
 			{
 				joint.bind_quat = key_quat;
-				joint.bind_pos = MathLib::TransQuat(key_pos, key_quat);
+				joint.bind_pos = MathLib::transform_quat(key_pos, key_quat);
 			}
 		}
 
@@ -177,7 +177,7 @@ namespace KlayGE
 		for (size_t i = 0; i < joints_.size(); ++ i)
 		{
 			Quaternion quat = joints_[i].inverse_origin_quat * joints_[i].bind_quat;
-			float3 pos = MathLib::TransQuat(joints_[i].inverse_origin_pos, joints_[i].bind_quat) + joints_[i].bind_pos;
+			float3 pos = MathLib::transform_quat(joints_[i].inverse_origin_pos, joints_[i].bind_quat) + joints_[i].bind_pos;
 			bind_rots_[i].x() = quat.x();
 			bind_rots_[i].y() = quat.y();
 			bind_rots_[i].z() = quat.z();

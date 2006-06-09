@@ -72,7 +72,7 @@ namespace KlayGE
 		Camera const & camera = app.ActiveCamera();
 
 		*(technique_->Effect().ParameterByName("modelviewproj")) = model_ * camera.ViewMatrix() * camera.ProjMatrix();
-		*(technique_->Effect().ParameterByName("modelIT")) = MathLib::Transpose(MathLib::Inverse(model_));
+		*(technique_->Effect().ParameterByName("modelIT")) = MathLib::transpose(MathLib::inverse(model_));
 	}
 
 	void KMesh::SetModelMatrix(float4x4 const & model)

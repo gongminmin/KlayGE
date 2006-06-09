@@ -103,7 +103,7 @@ namespace
 			};
 
 			float3 t[4], b[4];
-			MathLib::ComputeTangent<float>(t, b,
+			MathLib::compute_tangent<float>(t, b,
 				indices, indices + sizeof(indices) / sizeof(indices[0]),
 				xyzs, xyzs + sizeof(xyzs) / sizeof(xyzs[0]), texs);
 
@@ -147,14 +147,14 @@ namespace
 			}
 			rl_->BindIndexStream(ib, EF_D16);
 
-			box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[4]);
+			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[4]);
 		}
 
 		void OnRenderBegin()
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
 
-			float4x4 model = MathLib::RotationX(-0.5f);
+			float4x4 model = MathLib::rotation_x(-0.5f);
 			float4x4 const & view = app.ActiveCamera().ViewMatrix();
 			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
@@ -163,8 +163,8 @@ namespace
 
 			float degree(std::clock() / 700.0f);
 			float3 lightPos(2, 0, -2);
-			float4x4 matRot(MathLib::RotationZ(degree));
-			lightPos = MathLib::TransformCoord(lightPos, matRot);
+			float4x4 matRot(MathLib::rotation_z(degree));
+			lightPos = MathLib::transform_coord(lightPos, matRot);
 			*(technique_->Effect().ParameterByName("lightPos")) = lightPos;
 		}
 	};

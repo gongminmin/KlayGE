@@ -66,7 +66,7 @@ namespace
 					float rotX(std::clock() / 700.0f);
 					float rotY(std::clock() / 700.0f);
 
-					model_mat_ = MathLib::RotationX(rotX) * MathLib::RotationY(rotY);
+					model_mat_ = MathLib::rotation_x(rotX) * MathLib::rotation_y(rotY);
 				}
 				technique_ = effect_->Technique("NormalDepth");
 				break;
@@ -95,8 +95,8 @@ namespace
 			*(effect_->ParameterByName("model_view")) = model_mat_ * view;
 			*(effect_->ParameterByName("proj")) = proj;
 
-			*(effect_->ParameterByName("light_in_model")) = MathLib::TransformCoord(float3(2, 2, -3),
-																	MathLib::Inverse(model_mat_));
+			*(effect_->ParameterByName("light_in_model")) = MathLib::transform_coord(float3(2, 2, -3),
+																	MathLib::inverse(model_mat_));
 		}
 
 	private:

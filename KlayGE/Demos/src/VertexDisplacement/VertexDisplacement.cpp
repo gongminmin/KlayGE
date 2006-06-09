@@ -69,7 +69,7 @@ namespace
 			*(technique_->Effect().ParameterByName("modelview")) = modelView;
 			*(technique_->Effect().ParameterByName("proj")) = proj;
 
-			*(technique_->Effect().ParameterByName("modelviewIT")) = MathLib::Transpose(MathLib::Inverse(modelView));
+			*(technique_->Effect().ParameterByName("modelviewIT")) = MathLib::transpose(MathLib::inverse(modelView));
 		}
 	};
 

@@ -39,8 +39,8 @@ namespace KlayGE
 		}
 		Box_T(Vector_T<T, 3> const & vMin, Vector_T<T, 3> const & vMax)
 		{
-			min_ = MathLib::Minimize(vMin, vMax);
-			max_ = MathLib::Maximize(vMin, vMax);
+			min_ = MathLib::minimize(vMin, vMax);
+			max_ = MathLib::maximize(vMin, vMax);
 		}
 		Box_T(Box_T const & rhs)
 			: min_(rhs.min_), max_(rhs.max_)
@@ -72,14 +72,14 @@ namespace KlayGE
 		}
 		Box_T& operator&=(Box_T const & rhs)
 		{
-			min_ = MathLib::Maximize(this->Min(), rhs.Min());
-			max_ = MathLib::Minimize(this->Max(), rhs.Max());
+			min_ = MathLib::maximize(this->Min(), rhs.Min());
+			max_ = MathLib::minimize(this->Max(), rhs.Max());
 			return *this;
 		}
 		Box_T& operator|=(Box_T const & rhs)
 		{
-			min_ = MathLib::Minimize(this->Min(), rhs.Min());
-			max_ = MathLib::Maximize(this->Max(), rhs.Max());
+			min_ = MathLib::minimize(this->Min(), rhs.Min());
+			max_ = MathLib::maximize(this->Max(), rhs.Max());
 			return *this;
 		}
 
@@ -216,11 +216,11 @@ namespace KlayGE
 
 		bool VecInBound(Vector_T<T, 3> const & v) const
 		{
-			return MathLib::VecInBox(*this, v);
+			return MathLib::vec_in_box(*this, v);
 		}
 		T MaxRadiusSq() const
 		{
-			return std::max<T>(MathLib::LengthSq(this->Max()), MathLib::LengthSq(this->Min()));
+			return std::max<T>(MathLib::length_sq(this->Max()), MathLib::length_sq(this->Min()));
 		}
 
 	private:

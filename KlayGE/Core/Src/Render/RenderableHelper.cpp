@@ -78,7 +78,7 @@ namespace KlayGE
 		}
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
-		box_ = MathLib::ComputeBoundingBox<float>(&v, &v + 1);
+		box_ = MathLib::compute_bounding_box<float>(&v, &v + 1);
 	}
 
 	void RenderablePoint::OnRenderBegin()
@@ -116,7 +116,7 @@ namespace KlayGE
 		}
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
-		box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
+		box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 	}
 
 	void RenderableLine::OnRenderBegin()
@@ -154,7 +154,7 @@ namespace KlayGE
 		}
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
-		box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
+		box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 	}
 
 	void RenderableTriangle::OnRenderBegin()
@@ -264,7 +264,7 @@ namespace KlayGE
 		}
 		rl_->BindIndexStream(ib, EF_D16);
 
-		box_ = MathLib::ComputeBoundingBox<float>(&xyzs[0], &xyzs[4]);
+		box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[4]);
 
 		cube_sampler_->Filtering(Sampler::TFO_Bilinear);
 		cube_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
@@ -287,7 +287,7 @@ namespace KlayGE
 		rot_view(3, 0) = 0;
 		rot_view(3, 1) = 0;
 		rot_view(3, 2) = 0;
-		*(technique_->Effect().ParameterByName("inv_mvp")) = MathLib::Inverse(rot_view * camera.ProjMatrix());
+		*(technique_->Effect().ParameterByName("inv_mvp")) = MathLib::inverse(rot_view * camera.ProjMatrix());
 	}
 
 	RenderablePlane::RenderablePlane(float length, float width,
@@ -360,6 +360,6 @@ namespace KlayGE
 		}
 		rl_->BindIndexStream(ib, EF_D16);
 
-		box_ = MathLib::ComputeBoundingBox<float>(pos.begin(), pos.end());
+		box_ = MathLib::compute_bounding_box<float>(pos.begin(), pos.end());
 	}
 }

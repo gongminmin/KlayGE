@@ -72,7 +72,7 @@ void ComputeDistanceMap(std::vector<unsigned char>& distances, int width, int he
 						}
 					}
 
-					float const dist = MathLib::Clamp(std::sqrt(static_cast<float>(dis_sq)) / (depth / 256.0f),
+					float const dist = MathLib::clamp(std::sqrt(static_cast<float>(dis_sq)) / (depth / 256.0f),
 						0.0f, 255.0f);
 					distances[(z * height + y) * width + x] = static_cast<unsigned char>(dist + 0.5f);
 				}
@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
 	TexturePtr distance_map_texture = render_factory.MakeTexture3D(width, height, depth, 1, EF_L8);
 	distance_map_texture->CopyMemoryToTexture3D(0, &distances[0], EF_L8,
 		width, height, depth, 0, 0, 0, width, height, depth);
-	SaveToFile(distance_map_texture, distance_name);
+	SaveTexture(distance_map_texture, distance_name);
 
 	cout << "Distance map is saved to " << distance_name << endl;
 }

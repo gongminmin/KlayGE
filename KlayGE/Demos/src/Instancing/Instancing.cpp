@@ -55,7 +55,7 @@ namespace
 
 		void Instance(float4x4 const & mat, Color const & clr)
 		{
-			float4x4 matT = MathLib::Transpose(mat);
+			float4x4 matT = MathLib::transpose(mat);
 
 			inst_.col[0] = matT.Row(0);
 			inst_.col[1] = matT.Row(1);
@@ -211,7 +211,7 @@ void Instancing::InitObjects()
 	{
 		SceneObjectPtr so(new Teapot);
 		checked_cast<Teapot*>(so.get())->Instance(
-			MathLib::Translation((i / 10) / 10.0f, (i % 10) / 10.0f, 0.0f),
+			MathLib::translation((i / 10) / 10.0f, (i % 10) / 10.0f, 0.0f),
 			Color((i % 10) / 10.0f, (i / 10) / 10.0f, 0, 1));
 
 		checked_cast<Teapot*>(so.get())->SetRenderable(renderInstance_);

@@ -123,7 +123,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(camera_ != NULL);
 
-		world_ = MathLib::Inverse(camera_->ViewMatrix());
+		world_ = MathLib::inverse(camera_->ViewMatrix());
 
 		elapsed_time_ = static_cast<float>(timer_.elapsed());
 		if (elapsed_time_ > 0.01f)
@@ -142,7 +142,7 @@ namespace KlayGE
 		float3 eyePos = camera_->EyePos();
 		float3 viewVec = camera_->ViewVec();
 
-		eyePos = MathLib::TransformCoord(movement, world_);
+		eyePos = MathLib::transform_coord(movement, world_);
 
 		camera_->ViewParams(eyePos, eyePos + viewVec, camera_->UpVec());
 	}
@@ -151,11 +151,11 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(camera_ != NULL);
 
-		float4x4 rot(MathLib::RotationMatrixYawPitchRoll(yaw * rotationScaler_,
+		float4x4 rot(MathLib::rotation_matrix_yaw_pitch_roll(yaw * rotationScaler_,
 			pitch * rotationScaler_, roll * rotationScaler_));
 
 		camera_->ViewParams(camera_->EyePos(),
-			MathLib::TransformCoord(float3(rot(2, 0), rot(2, 1), rot(2, 2)), world_),
+			MathLib::transform_coord(float3(rot(2, 0), rot(2, 1), rot(2, 2)), world_),
 			camera_->UpVec());
 	}
 }
