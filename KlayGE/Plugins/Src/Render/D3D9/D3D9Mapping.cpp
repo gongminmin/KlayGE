@@ -363,7 +363,7 @@ namespace KlayGE
 			vertex_element const & vs_elem = vet[i];
 
 			D3DVERTEXELEMENT9& element = elements[i];
-			element.Type		= D3DDECLTYPE_FLOAT1 - 1 + vs_elem.num_components;
+			element.Type		= D3DDECLTYPE_FLOAT1 - 1 + NumComponents(vs_elem.format);
 			element.Offset		= elem_offset;
 			element.Method		= D3DDECLMETHOD_DEFAULT;
 			element.Stream		= static_cast<WORD>(stream);

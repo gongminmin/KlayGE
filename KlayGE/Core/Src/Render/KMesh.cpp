@@ -120,15 +120,46 @@ namespace KlayGE
 				file->read(reinterpret_cast<char*>(&usage), 1);
 				ve.usage = static_cast<VertexElementUsage>(usage);
 				file->read(reinterpret_cast<char*>(&ve.usage_index), 1);
-				file->read(reinterpret_cast<char*>(&ve.num_components), 1);
+				uint8_t num_components;
+				file->read(reinterpret_cast<char*>(&num_components), 1);
 
 				if (ve.usage != VEU_BlendIndex)
 				{
-					ve.component_size = sizeof(float);
+					switch (num_components)
+					{
+					case 1:
+						ve.format = EF_R32F;
+						break;
+
+					case 2:
+						ve.format = EF_GR32F;
+						break;
+
+					case 3:
+						ve.format = EF_BGR32F;
+						break;
+
+					case 4:
+						ve.format = EF_ABGR32F;
+						break;
+					}
 				}
 				else
 				{
-					ve.component_size = sizeof(uint8_t);
+					switch (num_components)
+					{
+					case 1:
+						ve.format = EF_L8;
+						break;
+
+					case 3:
+						ve.format = EF_RGB8;
+						break;
+
+					case 4:
+						ve.format = EF_ARGB8;
+						break;
+					}
 				}
 
 				vertex_elements.push_back(ve);

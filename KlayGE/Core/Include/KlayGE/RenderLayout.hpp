@@ -58,21 +58,79 @@ namespace KlayGE
 		{
 		}
 		vertex_element(VertexElementUsage usage, uint8_t usage_index, uint8_t component_size, uint8_t num_components)
-			: usage(usage), usage_index(usage_index), component_size(component_size), num_components(num_components)
+			: usage(usage), usage_index(usage_index)
 		{
+			switch (component_size)
+			{
+			case 1:
+				switch (num_components)
+				{
+				case 1:
+					format = EF_L8;
+					break;
+
+				case 3:
+					format = EF_RGB8;
+					break;
+
+				case 4:
+					format = EF_ARGB8;
+					break;
+				}
+				break;
+
+			case 2:
+				switch (num_components)
+				{
+				case 1:
+					format = EF_R16F;
+					break;
+
+				case 2:
+					format = EF_GR16F;
+					break;
+
+				case 3:
+					format = EF_BGR16F;
+					break;
+
+				case 4:
+					format = EF_ABGR16F;
+					break;
+				}
+				break;
+
+			case 4:
+				switch (num_components)
+				{
+				case 1:
+					format = EF_R32F;
+					break;
+
+				case 2:
+					format = EF_GR32F;
+					break;
+
+				case 3:
+					format = EF_BGR32F;
+					break;
+
+				case 4:
+					format = EF_ABGR32F;
+					break;
+				}
+				break;
+			}
 		}
 
 		VertexElementUsage usage;
 		uint8_t usage_index;
 
-		// 表示元素中每个成分的大小，比如Position元素的成分是size(float)
-		uint8_t component_size;
-		// 表示一个元素有几个成分表示，比如Position元素是由(x, y, z)组成，所以为3
-		uint8_t num_components;
+		ElementFormat format;
 
 		uint16_t element_size() const
 		{
-			return component_size * num_components;
+			return ElementFormatBytes(format);
 		}
 
 		friend bool
@@ -80,8 +138,7 @@ namespace KlayGE
 		{
 			return (lhs.usage == rhs.usage)
 				&& (lhs.usage_index == rhs.usage_index)
-				&& (lhs.component_size == rhs.component_size)
-				&& (lhs.num_components == rhs.num_components);
+				&& (lhs.format == rhs.format);
 		}
 	};
 	typedef std::vector<vertex_element> vertex_elements_type;

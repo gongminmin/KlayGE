@@ -159,6 +159,12 @@ namespace KlayGE
 		}
 	}
 
+	inline uint8_t
+	ElementFormatBytes(ElementFormat format)
+	{
+		return ElementFormatBits(format) / 8;
+	}
+
 	inline bool
 	IsFloatFormat(ElementFormat format)
 	{

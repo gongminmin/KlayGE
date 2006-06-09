@@ -236,7 +236,7 @@ namespace KlayGE
 					{
 					// Vertex xyzs
 					case VEU_Position:
-						switch (vs_elem.num_components)
+						switch (NumComponents(vs_elem.format))
 						{
 						case 2:
 							glVertex2fv(static_cast<GLfloat const *>(addr));
@@ -257,7 +257,7 @@ namespace KlayGE
 						break;
 
 					case VEU_Diffuse:
-						switch (vs_elem.num_components)
+						switch (NumComponents(vs_elem.format))
 						{
 						case 3:
 							glColor3fv(static_cast<GLfloat const *>(addr));
@@ -276,7 +276,7 @@ namespace KlayGE
 					case VEU_TextureCoord:
 						{
 							GLenum target = GL_TEXTURE0 + vs_elem.usage_index;
-							switch (vs_elem.num_components)
+							switch (NumComponents(vs_elem.format))
 							{
 							case 1:
 								glMultiTexCoord1fv(target, static_cast<GLfloat const *>(addr));
@@ -351,7 +351,7 @@ namespace KlayGE
 						glClientActiveTexture(GL_TEXTURE0 + vs_elem.usage_index);
 						glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 						stream.Active();
-						glTexCoordPointer(static_cast<GLint>(vs_elem.num_components),
+						glTexCoordPointer(static_cast<GLint>(NumComponents(vs_elem.format)),
 								GL_FLOAT, rl.VertexSize(i), reinterpret_cast<GLvoid*>(elem_offset));
 						break;
 
