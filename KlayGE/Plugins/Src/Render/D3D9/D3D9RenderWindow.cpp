@@ -355,45 +355,64 @@ namespace KlayGE
 		Convert(description_, adapter_.Description());
 		description_ += L' ';
 
-		typedef std::vector<std::pair<uint32_t, std::wstring> > BehaviorType;
-		BehaviorType behavior;
-		behavior.push_back(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_PUREDEVICE, std::wstring(L"(pure hw vp)")));
-		behavior.push_back(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING, std::wstring(L"(hw vp)")));
-		behavior.push_back(std::make_pair(D3DCREATE_MIXED_VERTEXPROCESSING, std::wstring(L"(mix vp)")));
-		behavior.push_back(std::make_pair(D3DCREATE_SOFTWARE_VERTEXPROCESSING, std::wstring(L"(sw vp)")));
-
-		IDirect3DDevice9* d3dDevice(NULL);
-		for (BehaviorType::iterator iter = behavior.begin(); iter != behavior.end(); ++ iter)
+		D3D9RenderEngine& re(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		if (re.D3DDevice())
 		{
-			if (SUCCEEDED(d3d_->CreateDevice(adapter_.AdapterNo(), D3DDEVTYPE_HAL, hWnd_,
-				iter->first, &d3dpp_, &d3dDevice)))
-			{
-                // Check for ATI instancing support
-			    D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-			    if (D3D_OK == d3d_->CheckDeviceFormat(D3DADAPTER_DEFAULT,
-				    D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE,
-				    static_cast<D3DFORMAT>(MAKEFOURCC('I', 'N', 'S', 'T'))))
-			    {
-				    // Notify the driver that instancing support is expected
-				    d3dDevice->SetRenderState(D3DRS_POINTSIZE, MAKEFOURCC('I', 'N', 'S', 'T'));
-			    }
+			d3dDevice_ = re.D3DDevice();
 
-				D3DCAPS9 d3d_caps;
-				d3dDevice->GetDeviceCaps(&d3d_caps);
-				if (settings.ConfirmDevice && !settings.ConfirmDevice(D3D9Mapping::Mapping(d3d_caps)))
+			IDirect3DSwapChain9* sc = NULL;
+			d3dDevice_->CreateAdditionalSwapChain(&d3dpp_, &sc);
+			d3d_swap_chain_ = MakeCOMPtr(sc);
+
+			main_wnd_ = false;
+		}
+		else
+		{
+			typedef std::vector<std::pair<uint32_t, std::wstring> > BehaviorType;
+			BehaviorType behavior;
+			behavior.push_back(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_PUREDEVICE, std::wstring(L"(pure hw vp)")));
+			behavior.push_back(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING, std::wstring(L"(hw vp)")));
+			behavior.push_back(std::make_pair(D3DCREATE_MIXED_VERTEXPROCESSING, std::wstring(L"(mix vp)")));
+			behavior.push_back(std::make_pair(D3DCREATE_SOFTWARE_VERTEXPROCESSING, std::wstring(L"(sw vp)")));
+
+			IDirect3DDevice9* d3dDevice(NULL);
+			for (BehaviorType::iterator iter = behavior.begin(); iter != behavior.end(); ++ iter)
+			{
+				if (SUCCEEDED(d3d_->CreateDevice(adapter_.AdapterNo(), D3DDEVTYPE_HAL, hWnd_,
+					iter->first, &d3dpp_, &d3dDevice)))
 				{
-					d3dDevice->Release();
-				}
-				else
-				{
-					description_ += iter->second;
-					break;
+					// Check for ATI instancing support
+					if (D3D_OK == d3d_->CheckDeviceFormat(D3DADAPTER_DEFAULT,
+						D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE,
+						static_cast<D3DFORMAT>(MAKEFOURCC('I', 'N', 'S', 'T'))))
+					{
+						// Notify the driver that instancing support is expected
+						d3dDevice->SetRenderState(D3DRS_POINTSIZE, MAKEFOURCC('I', 'N', 'S', 'T'));
+					}
+
+					D3DCAPS9 d3d_caps;
+					d3dDevice->GetDeviceCaps(&d3d_caps);
+					if (settings.ConfirmDevice && !settings.ConfirmDevice(D3D9Mapping::Mapping(d3d_caps)))
+					{
+						d3dDevice->Release();
+					}
+					else
+					{
+						description_ += iter->second;
+						break;
+					}
 				}
 			}
-		}
 
-		Verify(d3dDevice != NULL);
-        d3dDevice_ = MakeCOMPtr(d3dDevice);
+			Verify(d3dDevice != NULL);
+			d3dDevice_ = MakeCOMPtr(d3dDevice);
+
+			IDirect3DSwapChain9* sc = NULL;
+			d3dDevice_->GetSwapChain(0, &sc);
+			d3d_swap_chain_ = MakeCOMPtr(sc);
+
+			main_wnd_ = true;
+		}
 
 		this->UpdateSurfacesPtrs();
 
@@ -512,6 +531,8 @@ namespace KlayGE
 	{
 		if (d3dDevice_)
 		{
+			d3d_swap_chain_.reset();
+
 			D3D9RenderFactory& factory = static_cast<D3D9RenderFactory&>(Context::Instance().RenderFactoryInstance());
 			factory.OnLostDevice();
 
@@ -538,6 +559,18 @@ namespace KlayGE
 			}
 
 			factory.OnResetDevice();
+
+			IDirect3DSwapChain9* sc = NULL;
+			if (main_wnd_)
+			{
+				d3dDevice_->GetSwapChain(0, &sc);
+			}
+			else
+			{
+				d3dDevice_->CreateAdditionalSwapChain(&d3dpp_, &sc);
+			}
+
+			d3d_swap_chain_ = MakeCOMPtr(sc);
 		}
 	}
 
@@ -545,7 +578,7 @@ namespace KlayGE
 	{
 		if (d3dDevice_)
 		{
-			d3dDevice_->Present(NULL, NULL, NULL, NULL);
+			d3d_swap_chain_->Present(NULL, NULL, hWnd_, NULL, 0);
 		}
 	}
 }

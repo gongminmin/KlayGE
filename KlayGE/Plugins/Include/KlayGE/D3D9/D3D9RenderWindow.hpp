@@ -78,13 +78,15 @@ namespace KlayGE
 			WPARAM wParam, LPARAM lParam );
 
 
-		D3D9Adapter					adapter_;
+		D3D9Adapter				adapter_;
 
 		// Pointer to the 3D device specific for this window
 		ID3D9Ptr				d3d_;
 		ID3D9DevicePtr			d3dDevice_;
 		D3DPRESENT_PARAMETERS	d3dpp_;
-		
+		ID3D9SwapChainPtr		d3d_swap_chain_;
+		bool					main_wnd_;
+
 		ID3D9SurfacePtr			renderSurface_;
 		ID3D9SurfacePtr			renderZBuffer_;
 

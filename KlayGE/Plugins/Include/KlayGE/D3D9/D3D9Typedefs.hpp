@@ -31,6 +31,7 @@ namespace KlayGE
 	typedef boost::shared_ptr<IDirect3DVertexBuffer9>	ID3D9VertexBufferPtr;
 	typedef boost::shared_ptr<IDirect3DVertexDeclaration9> ID3D9VertexDeclarationPtr;
 	typedef boost::shared_ptr<IDirect3DQuery9>			ID3D9QueryPtr;
+	typedef boost::shared_ptr<IDirect3DSwapChain9>		ID3D9SwapChainPtr;
 	typedef boost::shared_ptr<ID3DXEffect>				ID3DXEffectPtr;
 	typedef boost::shared_ptr<ID3DXConstantTable>		ID3DXConstantTablePtr;
 }
