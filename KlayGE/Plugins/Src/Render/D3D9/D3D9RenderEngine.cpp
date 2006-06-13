@@ -71,7 +71,6 @@ namespace KlayGE
 	// ¹¹Ôìº¯Êý
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D9RenderEngine::D3D9RenderEngine()
-						: cullingMode_(RenderEngine::CM_None)
 	{
 		// Create our Direct3D object
 		d3d_ = MakeCOMPtr(Direct3DCreate9(D3D_SDK_VERSION));
@@ -237,34 +236,27 @@ namespace KlayGE
 		IDirect3DSurface9* zBuffer = NULL;
 		if (dynamic_cast<D3D9RenderWindow*>(rt.get()) != NULL)
 		{
-			D3D9RenderWindow* rw = dynamic_cast<D3D9RenderWindow*>(rt.get());
+			D3D9RenderWindow* rw = checked_cast<D3D9RenderWindow*>(rt.get());
 
-			IDirect3DSurface9* backBuffer = rw->D3DRenderSurface().get();
-			TIF(d3dDevice_->SetRenderTarget(0, backBuffer));
-			for (uint32_t i = 1; i < this->DeviceCaps().max_simultaneous_rts; ++ i)
+			for (uint32_t i = 0; i < this->DeviceCaps().max_simultaneous_rts; ++ i)
 			{
-				TIF(d3dDevice_->SetRenderTarget(i, NULL));
+				TIF(d3dDevice_->SetRenderTarget(i, rw->D3DRenderSurface(i).get()));
 			}
 
 			zBuffer = rw->D3DRenderZBuffer().get();
 		}
 		else
 		{
-			if (dynamic_cast<D3D9FrameBuffer*>(rt.get()) != NULL)
-			{
-				D3D9FrameBuffer* fb = dynamic_cast<D3D9FrameBuffer*>(rt.get());
+			BOOST_ASSERT(dynamic_cast<D3D9FrameBuffer*>(rt.get()) != NULL);
 
-				for (uint32_t i = 0; i < this->DeviceCaps().max_simultaneous_rts; ++ i)
-				{
-					TIF(d3dDevice_->SetRenderTarget(i, fb->D3DRenderSurface(i).get()));
-				}
+			D3D9FrameBuffer* fb = checked_cast<D3D9FrameBuffer*>(rt.get());
 
-				zBuffer = fb->D3DRenderZBuffer().get();
-			}
-			else
+			for (uint32_t i = 0; i < this->DeviceCaps().max_simultaneous_rts; ++ i)
 			{
-				BOOST_ASSERT(false);
+				TIF(d3dDevice_->SetRenderTarget(i, fb->D3DRenderSurface(i).get()));
 			}
+
+			zBuffer = fb->D3DRenderZBuffer().get();
 		}
 
 		if (zBuffer)
@@ -277,8 +269,6 @@ namespace KlayGE
 		}
 
 		TIF(d3dDevice_->SetDepthStencilSurface(zBuffer));
-
-		this->SetRenderState(RST_CullMode, cullingMode_);
 
 		Viewport const & vp(rt->GetViewport());
 		D3DVIEWPORT9 d3dvp = { vp.left, vp.top, vp.width, vp.height, 0, 1 };
@@ -545,9 +535,7 @@ namespace KlayGE
 		}
 		if (dirty_render_states_[RST_CullMode])
 		{
-			CullMode mode = static_cast<CullMode>(render_states_[RST_CullMode]);
-			cullingMode_ = mode;
-			d3dDevice_->SetRenderState(D3DRS_CULLMODE, D3D9Mapping::Mapping(mode));
+			d3dDevice_->SetRenderState(D3DRS_CULLMODE, D3D9Mapping::Mapping(static_cast<CullMode>(render_states_[RST_CullMode])));
 		}
 		if (dirty_render_states_[RST_Clipping])
 		{

@@ -163,56 +163,56 @@ namespace KlayGE
 		enum RenderStateType
 		{
 			RST_PolygonMode				= 0x00,
-			RST_ShadeMode				= 0x01,
-			RST_CullMode				= 0x02,
-			RST_Clipping				= 0x03,
+			RST_ShadeMode,
+			RST_CullMode,
+			RST_Clipping,
 
-			RST_BlendEnable				= 0x04,
-			RST_BlendOp					= 0x05,
-			RST_SrcBlend				= 0x06,
-			RST_DestBlend				= 0x07,
-			RST_BlendOpAlpha			= 0x08,
-			RST_SrcBlendAlpha			= 0x09,
-			RST_DestBlendAlpha			= 0x0A,
+			RST_BlendEnable,
+			RST_BlendOp,
+			RST_SrcBlend,
+			RST_DestBlend,
+			RST_BlendOpAlpha,
+			RST_SrcBlendAlpha,
+			RST_DestBlendAlpha,
 			
-			RST_DepthEnable				= 0x0B,
-			RST_DepthMask				= 0x0C,
-			RST_DepthFunc				= 0x0D,
-			RST_PolygonOffsetFactor		= 0x0E,
-			RST_PolygonOffsetUnits		= 0x0F,
+			RST_DepthEnable,
+			RST_DepthMask,
+			RST_DepthFunc,
+			RST_PolygonOffsetFactor,
+			RST_PolygonOffsetUnits,
 
 			// Turns stencil buffer checking on or off. 
-			RST_FrontStencilEnable		= 0x10,
+			RST_FrontStencilEnable,
 			// Stencil test function
-			RST_FrontStencilFunc		= 0x11,
+			RST_FrontStencilFunc,
 			// Stencil test reference value
-			RST_FrontStencilRef			= 0x12,
+			RST_FrontStencilRef,
 			// Stencil test mask value
-			RST_FrontStencilMask		= 0x13,
+			RST_FrontStencilMask,
 			// Sets the action to perform if the stencil test fails,
-			RST_FrontStencilFail		= 0x14,
+			RST_FrontStencilFail,
 			// if the stencil test passes, but the depth buffer test fails
-			RST_FrontStencilDepthFail	= 0x15,
+			RST_FrontStencilDepthFail,
 			// if both the stencil test and the depth buffer test passes
-			RST_FrontStencilPass		= 0x16,
-			RST_FrontStencilWriteMask	= 0x17,
-			RST_BackStencilEnable		= 0x18,
-			RST_BackStencilFunc			= 0x19,
-			RST_BackStencilRef			= 0x1A,
-			RST_BackStencilMask			= 0x1B,
-			RST_BackStencilFail			= 0x1C,
-			RST_BackStencilDepthFail	= 0x1D,
-			RST_BackStencilPass			= 0x1E,
-			RST_BackStencilWriteMask	= 0x1F,
+			RST_FrontStencilPass,
+			RST_FrontStencilWriteMask,
+			RST_BackStencilEnable,
+			RST_BackStencilFunc,
+			RST_BackStencilRef,
+			RST_BackStencilMask,
+			RST_BackStencilFail,
+			RST_BackStencilDepthFail,
+			RST_BackStencilPass,
+			RST_BackStencilWriteMask,
 
-			RST_ScissorEnable			= 0x20,
+			RST_ScissorEnable,
 
-			RST_ColorMask0				= 0x21,
-			RST_ColorMask1				= 0x22,
-			RST_ColorMask2				= 0x23,
-			RST_ColorMask3				= 0x24,
+			RST_ColorMask0,
+			RST_ColorMask1,
+			RST_ColorMask2,
+			RST_ColorMask3,
 
-			RST_NUM_RENDER_STATES		= 0x25
+			RST_NUM_RENDER_STATES
 		};
 
 		enum ColorMask

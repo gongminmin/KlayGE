@@ -76,9 +76,6 @@ namespace KlayGE
 
 		void InitRenderStates();
 		void FillRenderDeviceCaps();
-
-	private:
-		CullMode cullingMode_;
 	};
 
 	typedef boost::shared_ptr<OGLRenderEngine> OGLRenderEnginePtr;

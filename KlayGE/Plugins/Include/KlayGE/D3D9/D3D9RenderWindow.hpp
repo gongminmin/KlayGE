@@ -52,7 +52,7 @@ namespace KlayGE
 
 		D3D9Adapter const & Adapter() const;
 		ID3D9DevicePtr D3DDevice() const;
-		ID3D9SurfacePtr D3DRenderSurface() const;
+		ID3D9SurfacePtr D3DRenderSurface(uint32_t n) const;
 		ID3D9SurfacePtr D3DRenderZBuffer() const;
 
 		// Method for dealing with resize / move & 3d library

@@ -460,9 +460,16 @@ namespace KlayGE
 		return d3dDevice_;
 	}
 
-	ID3D9SurfacePtr D3D9RenderWindow::D3DRenderSurface() const
+	ID3D9SurfacePtr D3D9RenderWindow::D3DRenderSurface(uint32_t n) const
 	{
-		return renderSurface_;
+		if (0 == n)
+		{
+			return renderSurface_;
+		}
+		else
+		{
+			return ID3D9SurfacePtr();
+		}
 	}
 
 	ID3D9SurfacePtr D3D9RenderWindow::D3DRenderZBuffer() const

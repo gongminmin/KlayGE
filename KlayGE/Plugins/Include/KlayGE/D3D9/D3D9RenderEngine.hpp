@@ -108,7 +108,6 @@ namespace KlayGE
 		// Enumerates itself
 		D3D9AdapterList adapterList_;
 
-		CullMode cullingMode_;
 		D3DCOLOR clearClr_;
 
 		std::vector<D3D9VertexBufferPtr> active_vertex_streams_;

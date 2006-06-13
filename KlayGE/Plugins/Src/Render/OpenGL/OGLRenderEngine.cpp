@@ -65,7 +65,6 @@ namespace KlayGE
 	// ¹¹Ôìº¯Êý
 	/////////////////////////////////////////////////////////////////////////////////
 	OGLRenderEngine::OGLRenderEngine()
-		: cullingMode_(RenderEngine::CM_None)
 	{
 	}
 
@@ -182,17 +181,10 @@ namespace KlayGE
 		}
 		else
 		{
-			if (dynamic_cast<OGLFrameBuffer*>(rt.get()) != NULL)
-			{
-				glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, checked_cast<OGLFrameBuffer*>(rt.get())->OGLFbo());
-			}
-			else
-			{
-				BOOST_ASSERT(false);
-			}
-		}
+			BOOST_ASSERT(dynamic_cast<OGLFrameBuffer*>(rt.get()) != NULL);
 
-		this->SetRenderState(RST_CullMode, cullingMode_);
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, checked_cast<OGLFrameBuffer*>(rt.get())->OGLFbo());
+		}
 
 		Viewport const & vp(rt->GetViewport());
 		glViewport(vp.left, vp.top, vp.width, vp.height);
@@ -484,8 +476,6 @@ namespace KlayGE
 		}
 		if (dirty_render_states_[RST_CullMode])
 		{
-			cullingMode_ = static_cast<CullMode>(render_states_[RST_CullMode]);
-
 			switch (render_states_[RST_CullMode])
 			{
 			case CM_None:
