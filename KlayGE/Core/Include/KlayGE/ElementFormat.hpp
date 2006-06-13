@@ -27,6 +27,7 @@ namespace KlayGE
 	{
 		// Unknown element format.
 		EF_Unknown,
+
 		// 8-bit element format, all bits luminace.
 		EF_L8,
 		// 8-bit element format, all bits alpha.
@@ -47,12 +48,23 @@ namespace KlayGE
 		EF_ARGB8,
 		// 32-bit element format, 2 bits for alpha, 10 bits for red, green and blue.
 		EF_A2RGB10,
+
+		// 32-bit element format, 16 bits for red and green.
+		EF_R16,
 		// 32-bit element format, 16 bits for red and green.
 		EF_GR16,
 		// 48-bit element format, 16 bits for alpha, blue, green and red.
 		EF_BGR16,
 		// 64-bit element format, 16 bits for alpha, blue, green and red.
 		EF_ABGR16,
+		// 32-bit element format, 32 bits for red.
+		EF_R32,
+		// 64-bit element format, 16 bits for red and green.
+		EF_GR32,
+		// 96-bit element format, 16 bits for alpha, blue, green and red.
+		EF_BGR32,
+		// 128-bit element format, 16 bits for alpha, blue, green and red.
+		EF_ABGR32,
 
 		// 16-bit element format, 16 bits floating-point for red.
 		EF_R16F,
@@ -109,6 +121,7 @@ namespace KlayGE
 		case EF_AL8:
 		case EF_R5G6B5:
 		case EF_ARGB4:
+		case EF_R16:
 		case EF_R16F:
 		case EF_DXT1:
 		case EF_DXT1_SRGB:
@@ -123,6 +136,7 @@ namespace KlayGE
 		case EF_A2RGB10:
 		case EF_GR16:
 		case EF_GR16F:
+		case EF_R32:
 		case EF_R32F:
 		case EF_DXT3:
 		case EF_DXT5:
@@ -138,12 +152,15 @@ namespace KlayGE
 
 		case EF_ABGR16:
 		case EF_ABGR16F:
+		case EF_GR32:
 		case EF_GR32F:
 			return 64;
 
+		case EF_BGR32:
 		case EF_BGR32F:
 			return 96;
 
+		case EF_ABGR32:
 		case EF_ABGR32F:
 			return 128;
 
@@ -249,6 +266,8 @@ namespace KlayGE
 		case EF_L8:
 		case EF_A8:
 		case EF_L16:
+		case EF_R16:
+		case EF_R32:
 		case EF_R16F:
 		case EF_R32F:
 		case EF_D16:
@@ -258,12 +277,15 @@ namespace KlayGE
 		case EF_AL4:
 		case EF_AL8:
 		case EF_GR16:
+		case EF_GR32:
 		case EF_GR16F:
 		case EF_GR32F:
 		case EF_D24S8:
 			return 2;
 
 		case EF_R5G6B5:
+		case EF_BGR16:
+		case EF_BGR32:
 		case EF_BGR16F:
 		case EF_BGR32F:
 			return 3;
@@ -272,6 +294,7 @@ namespace KlayGE
 		case EF_ARGB8:
 		case EF_A2RGB10:
 		case EF_ABGR16:
+		case EF_ABGR32:
 		case EF_ABGR16F:
 		case EF_ABGR32F:
 		case EF_DXT1:

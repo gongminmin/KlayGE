@@ -112,7 +112,7 @@ namespace
 			rl_->BindVertexStream(clr_vb_, boost::make_tuple(vertex_element(VEU_Diffuse, 0, EF_ABGR32F)));
 			rl_->BindVertexStream(tex_vb_, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 
-			rl_->BindIndexStream(rf.MakeIndexBuffer(BU_Dynamic), EF_D16);
+			rl_->BindIndexStream(rf.MakeIndexBuffer(BU_Dynamic), EF_R16);
 
 			box_ = Box(float3(0, 0, 0), float3(0, 0, 0));
 

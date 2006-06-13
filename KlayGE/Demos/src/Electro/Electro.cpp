@@ -134,7 +134,7 @@ namespace
 				GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
 				std::copy(indices, indices + sizeof(indices) / sizeof(uint16_t), mapper.Pointer<uint16_t>());
 			}
-			rl_->BindIndexStream(ib, EF_D16);
+			rl_->BindIndexStream(ib, EF_R16);
 
 			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 		}

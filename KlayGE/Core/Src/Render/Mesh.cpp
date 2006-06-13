@@ -129,7 +129,7 @@ namespace KlayGE
 					GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
 					std::copy(indices_.begin(), indices_.end(), mapper.Pointer<uint16_t>());
 				}
-				rl_->BindIndexStream(ib, EF_D16);
+				rl_->BindIndexStream(ib, EF_R16);
 			}
 
 			beBuilt_ = true;

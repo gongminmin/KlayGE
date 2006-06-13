@@ -118,6 +118,8 @@ namespace KlayGE
 
 	void RenderLayout::BindIndexStream(GraphicsBufferPtr buffer, ElementFormat format)
 	{
+		BOOST_ASSERT((EF_R16 == format) || (EF_R32 == format));
+
 		index_stream_ = buffer;
 		index_format_ = format;
 	}
