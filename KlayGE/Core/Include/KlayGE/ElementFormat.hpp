@@ -28,16 +28,20 @@ namespace KlayGE
 		// Unknown element format.
 		EF_Unknown,
 
-		// 8-bit element format, all bits luminace.
-		EF_L8,
 		// 8-bit element format, all bits alpha.
 		EF_A8,
 		// 8-bit element format, 4 bits alpha, 4 bits luminace.
 		EF_AL4,
-		// 16-bit element format, all bits for luminace.
-		EF_L16,
 		// 16-bit element format, 8 bits alpha, 8 bits luminace.
 		EF_AL8,
+		// 32-bit element format, 16 bits alpha, 16 bits luminace.
+		EF_AL16,
+
+		// 8-bit element format, all bits luminace.
+		EF_L8,
+		// 16-bit element format, all bits for luminace.
+		EF_L16,
+
 		// 16-bit element format, 5 bits red, 6 bits green, 5 bits blue.
 		EF_R5G6B5,
 		// 16-bit element format, 4 bits for alpha, red, green and blue.
@@ -130,7 +134,8 @@ namespace KlayGE
 
 		case EF_RGB8:
 			return 24;
-				
+
+		case EF_AL16:
 		case EF_ARGB8:
 		case EF_ARGB8_SRGB:
 		case EF_A2RGB10:
@@ -276,6 +281,7 @@ namespace KlayGE
 
 		case EF_AL4:
 		case EF_AL8:
+		case EF_AL16:
 		case EF_GR16:
 		case EF_GR32:
 		case EF_GR16F:
@@ -329,6 +335,7 @@ namespace KlayGE
 			return 8;
 
 		case EF_L16:
+		case EF_AL16:
 		case EF_GR16:
 		case EF_ABGR16:
 		case EF_R16F:
