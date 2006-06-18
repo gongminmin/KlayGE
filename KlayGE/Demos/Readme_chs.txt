@@ -1,4 +1,4 @@
-粘土游戏引擎(KlayGE) 3.2.0 Demo
+粘土游戏引擎(KlayGE) 3.3.0 Demo
 
 Homepage: http://klayge.sourceforge.net
 E-Mail:	  enginedev@163.com
@@ -54,7 +54,7 @@ Fractal
 Instancing
 ====================================================================================
 演示了引擎中的instancing实现。在硬件支持instancing的时候会自动切换到硬件实现，
-否则使用CPU解开instance数据。
+否则使用CPU解开instance数据。按1打开instancing，按2关闭。
 
 需求：Geforce FX以上或Radeon 9500以上。推荐使用Geforce 6以上。
 
@@ -68,9 +68,9 @@ Parallax mapping，扩展了normal map技术。
 ====================================================================================
 Refract
 ====================================================================================
-折射的演示。支持fresnel和色散现象。
+折射的演示。支持Fresnel和色散现象。3.3.0开始支持HDR，按1增加曝光度，按2减少曝光度。
 
-需求：Geforce FX以上或Radeon 9500以上。
+需求：Geforce FX以上或Radeon 9500以上。推荐使用Geforce 6以上。
 
 ====================================================================================
 Shadow cube map

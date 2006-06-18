@@ -23,6 +23,8 @@ private:
 	KlayGE::FirstPersonCameraController fpcController_;
 
 	KlayGE::TexturePtr cube_map_;
+
+	float exposure_level_;
 };
 
 #endif		// _REFRACT_HPP

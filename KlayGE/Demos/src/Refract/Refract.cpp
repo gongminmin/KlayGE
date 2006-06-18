@@ -34,6 +34,38 @@ using namespace KlayGE;
 
 namespace
 {
+	class HDRSkyBox : public RenderableSkyBox
+	{
+	public:
+		HDRSkyBox()
+		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			technique_ = rf.LoadEffect("HDRSkyBox.fx")->Technique("HDRSkyBoxTec");
+
+			cube_sampler_->Filtering(Sampler::TFO_Bilinear);
+			cube_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
+			cube_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
+			cube_sampler_->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
+			*(technique_->Effect().ParameterByName("skybox_cubeMapSampler")) = cube_sampler_;
+		}
+
+		void ExposureLevel(float exposure_level)
+		{
+			*(technique_->Effect().ParameterByName("exposure_level")) = exposure_level;
+		}
+
+	private:
+	};
+
+	class HDRSceneObjectSkyBox : public SceneObjectSkyBox
+	{
+	public:
+		HDRSceneObjectSkyBox()
+		{
+			renderable_.reset(new HDRSkyBox);
+		}
+	};
+
 	class RefractorRenderable : public KMesh
 	{
 	public:
@@ -53,6 +85,11 @@ namespace
 		void CubeMap(TexturePtr const & texture)
 		{
 			cubemap_sampler_->SetTexture(texture);
+		}
+
+		void ExposureLevel(float exposure_level)
+		{
+			*(technique_->Effect().ParameterByName("exposure_level")) = exposure_level;
 		}
 
 		void OnRenderBegin()
@@ -91,11 +128,17 @@ namespace
 
 	enum
 	{
+		AddExposure,
+		SubExposure,
+
 		Exit,
 	};
 
 	InputActionDefine actions[] = 
 	{
+		InputActionDefine(AddExposure, KS_1),
+		InputActionDefine(SubExposure, KS_2),
+
 		InputActionDefine(Exit, KS_Escape),
 	};
 
@@ -129,6 +172,7 @@ int main()
 }
 
 Refract::Refract()
+			: exposure_level_(1)
 {
 	ResLoader::Instance().AddPath("../media/Common");
 	ResLoader::Instance().AddPath("../media/Refract");
@@ -144,8 +188,8 @@ void Refract::InitObjects()
 	refractor_.reset(new RefractorObject(cube_map_));
 	refractor_->AddToSceneManager();
 
-	sky_box_.reset(new SceneObjectSkyBox);
-	static_cast<SceneObjectSkyBox*>(sky_box_.get())->CubeMap(cube_map_);
+	sky_box_.reset(new HDRSceneObjectSkyBox);
+	checked_cast<SceneObjectSkyBox*>(sky_box_.get())->CubeMap(cube_map_);
 	sky_box_->AddToSceneManager();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -171,6 +215,14 @@ void Refract::InputHandler(InputEngine const & sender, InputAction const & actio
 {
 	switch (action.first)
 	{
+	case AddExposure:
+		exposure_level_ += 0.01f;
+		break;
+
+	case SubExposure:
+		exposure_level_ -= 0.01f;
+		break;
+
 	case Exit:
 		this->Quit();
 		break;
@@ -181,12 +233,16 @@ void Refract::DoUpdate(uint32_t pass)
 {
 	fpcController_.Update();
 
+	checked_cast<HDRSkyBox*>(sky_box_->GetRenderable().get())->ExposureLevel(exposure_level_);
+	checked_cast<RefractorRenderable*>(refractor_->GetRenderable().get())->ExposureLevel(exposure_level_);
+
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 	std::wostringstream stream;
 	stream << renderEngine.CurRenderTarget()->FPS();
 
-	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Refract");
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"HDR Refract");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());
+	font_->RenderText(0, 54, Color(1, 1, 0, 1), L"Press '1' to turn up exposure, '2' to turn down exposure");
 }

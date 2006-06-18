@@ -32,7 +32,7 @@ using namespace KlayGE;
 
 namespace
 {
-	int const NUM_INSTANCE = 20;
+	int const NUM_INSTANCE = 400;
 
 	class Teapot : public SceneObjectHelper
 	{
@@ -207,16 +207,21 @@ void Instancing::InitObjects()
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
 	renderInstance_ = LoadKMesh("teapot.kmesh", CreateKMeshFactory<RenderInstance>())->Mesh(0);
-	for (int i = 0; i < NUM_INSTANCE; ++ i)
+	for (int i = 0; i < 10; ++ i)
 	{
-		SceneObjectPtr so(new Teapot);
-		checked_cast<Teapot*>(so.get())->Instance(
-			MathLib::translation((i / 10) / 10.0f, (i % 10) / 10.0f, 0.0f),
-			Color((i % 10) / 10.0f, (i / 10) / 10.0f, 0, 1));
+		for (int j = 0; j < NUM_INSTANCE / 10; ++ j)
+		{
+			float const s = sin(2 * PI * j / (NUM_INSTANCE / 10));
+			float const c = cos(2 * PI * j / (NUM_INSTANCE / 10));
 
-		checked_cast<Teapot*>(so.get())->SetRenderable(renderInstance_);
-		so->AddToSceneManager();
-		scene_objs_.push_back(so);
+			SceneObjectPtr so(new Teapot);
+			checked_cast<Teapot*>(so.get())->Instance(
+				MathLib::translation(s, i / 10.0f, c), Color(s, c, 0, 1));
+
+			checked_cast<Teapot*>(so.get())->SetRenderable(renderInstance_);
+			so->AddToSceneManager();
+			scene_objs_.push_back(so);
+		}
 	}
 	use_instance_ = true;
 
@@ -226,7 +231,7 @@ void Instancing::InitObjects()
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	this->LookAt(float3(-0.3f, 0.4f, -0.3f), float3(0, 0, 0));
+	this->LookAt(float3(-1.8f, 1.9f, -1.8f), float3(0, 0, 0));
 	this->Proj(0.1f, 100);
 
 	fpcController_.AttachCamera(this->ActiveCamera());
@@ -300,10 +305,12 @@ void Instancing::DoUpdate(uint32_t pass)
 
 	if (use_instance_)
 	{
-		font_->RenderText(0, 52, Color(1, 1, 1, 1), L"Instancing is enabled");
+		font_->RenderText(0, 54, Color(1, 1, 1, 1), L"Instancing is enabled");
 	}
 	else
 	{
-		font_->RenderText(0, 52, Color(1, 1, 1, 1), L"Instancing is disabled");
+		font_->RenderText(0, 54, Color(1, 1, 1, 1), L"Instancing is disabled");
 	}
+
+	font_->RenderText(0, 72, Color(1, 1, 1, 1), L"Press '1' to enable instancing, '2' to disable it");
 }
