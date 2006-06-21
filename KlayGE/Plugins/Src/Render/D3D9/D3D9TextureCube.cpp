@@ -148,7 +148,7 @@ namespace KlayGE
 			RECT srcRc = { 0, 0, src_width, src_height };
 			RECT dstRc = { dst_xOffset, dst_yOffset, dst_xOffset + dst_width, dst_yOffset + dst_height };
 			TIF(D3DXLoadSurfaceFromMemory(surface.get(), NULL, &dstRc, data, D3D9Mapping::MappingFormat(pf),
-					src_width * ElementFormatBits(pf) / 8, NULL, &srcRc, D3DX_DEFAULT, 0));
+					src_width * ElementFormatBytes(pf), NULL, &srcRc, D3DX_DEFAULT, 0));
 		}
 	}
 
@@ -265,8 +265,8 @@ namespace KlayGE
 	ID3D9CubeTexturePtr D3D9TextureCube::CreateTextureCube(uint32_t usage, D3DPOOL pool)
 	{
 		IDirect3DCubeTexture9* d3dTextureCube;
-		TIF(D3DXCreateCubeTexture(d3dDevice_.get(), widths_[0],  numMipMaps_, usage,
-			D3D9Mapping::MappingFormat(format_), pool, &d3dTextureCube));
+		TIF(d3dDevice_->CreateCubeTexture(widths_[0],  numMipMaps_, usage,
+			D3D9Mapping::MappingFormat(format_), pool, &d3dTextureCube, NULL));
 		return MakeCOMPtr(d3dTextureCube);
 	}
 

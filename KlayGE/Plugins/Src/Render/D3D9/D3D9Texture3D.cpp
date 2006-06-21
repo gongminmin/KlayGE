@@ -145,7 +145,7 @@ namespace KlayGE
 
 		if (volume)
 		{
-			uint32_t const srcRowPitch = src_width * ElementFormatBits(pf) / 8;
+			uint32_t const srcRowPitch = src_width * ElementFormatBytes(pf);
 			uint32_t const srcSlicePitch = srcRowPitch * src_height;
 
 			D3DBOX srcBox = { 0, 0, src_width, src_height, 0, src_depth };
@@ -246,9 +246,9 @@ namespace KlayGE
 	ID3D9VolumeTexturePtr D3D9Texture3D::CreateTexture3D(uint32_t usage, D3DPOOL pool)
 	{
 		IDirect3DVolumeTexture9* d3dTexture3D;
-		TIF(D3DXCreateVolumeTexture(d3dDevice_.get(), widths_[0], heights_[0], depths_[0],
+		TIF(d3dDevice_->CreateVolumeTexture(widths_[0], heights_[0], depths_[0],
 			numMipMaps_, usage, D3D9Mapping::MappingFormat(format_),
-			pool, &d3dTexture3D));
+			pool, &d3dTexture3D, NULL));
 		return MakeCOMPtr(d3dTexture3D);
 	}
 

@@ -517,7 +517,6 @@ namespace KlayGE
 
 	void D3D9RenderWindow::DoResize(uint32_t width, uint32_t height)
 	{
-		this->ResetDevice();
 	}
 
 	void D3D9RenderWindow::UpdateSurfacesPtrs()
@@ -543,20 +542,15 @@ namespace KlayGE
 			D3D9RenderFactory& factory = static_cast<D3D9RenderFactory&>(Context::Instance().RenderFactoryInstance());
 			factory.OnLostDevice();
 
-			D3DSURFACE_DESC desc;
-			renderSurface_->GetDesc(&desc);
-			IDirect3DSurface9* surface;
-			d3dDevice_->CreateOffscreenPlainSurface(desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &surface, NULL);
-			d3dDevice_->GetRenderTargetData(renderSurface_.get(), surface);
-			renderSurface_ = MakeCOMPtr(surface);
+			renderSurface_.reset();
 			renderZBuffer_.reset();
 
 			d3dpp_.BackBufferWidth  = this->Width();
 			d3dpp_.BackBufferHeight = this->Height();
 			TIF(d3dDevice_->Reset(&d3dpp_));
 
+			IDirect3DSurface9* surface;
 			d3dDevice_->GetRenderTarget(0, &surface);
-			d3dDevice_->UpdateSurface(renderSurface_.get(), NULL, surface, NULL);
 			renderSurface_ = MakeCOMPtr(surface);
 
 			if (isDepthBuffered_)
@@ -585,7 +579,10 @@ namespace KlayGE
 	{
 		if (d3dDevice_)
 		{
-			d3d_swap_chain_->Present(NULL, NULL, hWnd_, NULL, 0);
+			if (D3DERR_DEVICELOST == d3d_swap_chain_->Present(NULL, NULL, hWnd_, NULL, 0))
+			{
+				this->ResetDevice();
+			}
 		}
 	}
 }

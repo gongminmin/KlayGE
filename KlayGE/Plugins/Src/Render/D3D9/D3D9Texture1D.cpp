@@ -138,7 +138,7 @@ namespace KlayGE
 			RECT srcRc = { 0, 0, src_width, 1 };
 			RECT dstRc = { dst_xOffset, 0, dst_xOffset + dst_width, 1 };
 			TIF(D3DXLoadSurfaceFromMemory(surface.get(), NULL, &dstRc, data, D3D9Mapping::MappingFormat(pf),
-					src_width * ElementFormatBits(pf) / 8, NULL, &srcRc, D3DX_DEFAULT, 0));
+					src_width * ElementFormatBytes(pf), NULL, &srcRc, D3DX_DEFAULT, 0));
 		}
 	}
 
@@ -241,10 +241,9 @@ namespace KlayGE
 	ID3D9TexturePtr D3D9Texture1D::CreateTexture1D(uint32_t usage, D3DPOOL pool)
 	{
 		IDirect3DTexture9* d3dTexture1D;
-		// Use D3DX to help us create the texture, this way it can adjust any relevant sizes
-		TIF(D3DXCreateTexture(d3dDevice_.get(), widths_[0], 1,
+		TIF(d3dDevice_->CreateTexture(widths_[0], 1,
 			numMipMaps_, usage, D3D9Mapping::MappingFormat(format_),
-			pool, &d3dTexture1D));
+			pool, &d3dTexture1D, NULL));
 		return MakeCOMPtr(d3dTexture1D);
 	}
 

@@ -1,3 +1,7 @@
+// Distance map生成器
+// 算法主体来自GPU Gems 2第8章
+//
+
 #include <cmath>
 #include <iostream>
 #include <sstream>
@@ -16,75 +20,197 @@ using namespace std;
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 using namespace KlayGE;
 
-//-----------------------------------------------------------------------------
-// Name: ComputeDistanceMap()
-// Desc: Compute the distance map from height map
-//-----------------------------------------------------------------------------
-void ComputeDistanceMap(std::vector<unsigned char>& distances, int width, int height, int depth,
-						std::vector<unsigned char> const & height_map)
+// A type to hold the distance map while it's being constructed
+template <typename DistanceType>
+class DistanceMap
 {
-	std::vector<unsigned char> heights(height_map);
-	for (int y = 0; y < height; ++ y)
+public:
+	DistanceMap(int width, int height, int depth)
+		: data_(width * height * depth * 3),
+			width_(width), height_(height), depth_(depth)
 	{
-		for (int x = 0; x < width; ++ x)
+	}
+
+	DistanceType& operator()(int x, int y, int z, int i)
+	{
+		return data_[((z * height_ + y) * width_ + x) * 3 + i];
+	}
+
+	DistanceType const & operator()(int x, int y, int z, int i) const
+	{
+		return data_[((z * height_ + y) * width_ + x) * 3 + i];
+	}
+
+	bool inside(int x, int y, int z) const
+	{
+		return (0 <= x) && (x < width_)
+			&& (0 <= y) && (y < height_)
+			&& (0 <= z) && (z < depth_); 
+	}
+
+	// Do a single pass over the data.
+	// Start at (x,y,z) and walk in the direction (cx,cy,cz)
+	// Combine each pixel (x,y,z) with the value at (x+dx,y+dy,z+dz)
+	void combine(int dx, int dy, int dz,
+		int cx, int cy, int cz,
+		int x, int y, int z)
+	{
+		while (inside(x, y, z) && inside(x + dx, y + dy, z + dz))
 		{
-			heights[y * width + x]
-				= static_cast<unsigned char>((heights[y * width + x] / (256.0f / depth)) + 0.5f);
+			int d[3] =
+			{
+				abs(dx),
+				abs(dy),
+				abs(dz)
+			};
+
+			uint32_t v1[3], v2[3];
+			for (int i = 0; i < 3; ++ i)
+			{
+				v1[i] = operator()(x, y, z, i);
+				v2[i] = operator()(x + dx, y + dy, z + dz, i) + d[i];
+			}
+
+			if (v1[0] * v1[0] + v1[1] * v1[1] + v1[2] * v1[2] > v2[0] * v2[0] + v2[1] * v2[1] + v2[2] * v2[2])
+			{
+				for (int i = 0; i < 3; ++ i)
+				{
+					operator()(x, y, z, i) = static_cast<DistanceType>(v2[i]);
+				}
+			}
+
+			x += cx;
+			y += cy;
+			z += cz;
 		}
 	}
 
-	clock_t start = clock();
+private:
+	std::vector<DistanceType> data_;
+	int width_, height_, depth_;
+};
 
-	distances.resize(depth * height * width);
+void ComputeDistanceField(std::vector<uint8_t>& distances, int width, int height, int depth,
+						std::vector<uint8_t> const & volume)
+{
+	// and +infinity above
+	DistanceMap<uint16_t> dmap(width, height, depth);
 	for (int z = 0; z < depth; ++ z)
 	{
-		cout << "z = " << z << endl;
 		for (int y = 0; y < height; ++ y)
 		{
 			for (int x = 0; x < width; ++ x)
 			{
-				if (heights[y * width + x] < z)
+				for (int i = 0; i < 3; ++ i)
 				{
-					int const max_depth = z - heights[y * width + x];
-					int dis_sq = max_depth * max_depth;
-
-					int const y_begin = std::max(0, y - max_depth);
-                    int const y_end = std::min(height, y + max_depth);
-					for (int y1 = y_begin; y1 < y_end; ++ y1)
+					if (volume[(z * height + y) * width + x] != 0)
 					{
-						int const dy = (y1 - y) * (y1 - y);
-						if (dy < dis_sq)
-						{
-							int const x_begin = std::max(0, x - max_depth);
-							int const x_end = std::min(width, x + max_depth);
-							for (int x1 = x_begin; x1 < x_end; ++ x1)
-							{
-								int const dx = (x1 - x) * (x1 - x);
-								if (dx + dy < dis_sq)
-								{
-									int const dz = (heights[y1 * width + x1] - z) * (heights[y1 * width + x1] - z);
-									if (dx + dy + dz < dis_sq)
-									{
-										dis_sq = dx + dy + dz;
-									}
-								}
-							}
-						}
+						dmap(x, y, z, i) = 0;
 					}
-
-					float const dist = MathLib::clamp(std::sqrt(static_cast<float>(dis_sq)) / (depth / 256.0f),
-						0.0f, 255.0f);
-					distances[(z * height + y) * width + x] = static_cast<unsigned char>(dist + 0.5f);
-				}
-				else
-				{
-					distances[(z * height + y) * width + x] = 0;
+					else
+					{
+						dmap(x, y, z, i) = std::numeric_limits<uint16_t>::max();
+					}
 				}
 			}
 		}
 	}
 
-	cout << clock() - start << endl;
+
+	// Compute the rest of dmap by sequential sweeps over the data
+	// using a 3d variant of Danielsson's algorithm
+
+	for (int z = 1; z < depth; ++ z)
+	{
+		// combine with everything with dz = -1
+		for (int y = 0; y < height; ++ y)
+		{
+			dmap.combine(0, 0, -1,
+				1, 0, 0,
+				0, y, z);
+		}
+
+		for (int y = 1; y < height; ++ y)
+		{
+			dmap.combine(0, -1, 0,
+				1, 0, 0,
+				0, y, z);
+			dmap.combine(-1, 0, 0,
+				1, 0, 0,
+				1, y, z);
+			dmap.combine(+1, 0, 0,
+				-1, 0, 0,
+				width - 2, y, z);
+		}
+
+		for (int y = height - 1; y >= 0; -- y)
+		{
+			dmap.combine(0, +1, 0,
+				1, 0, 0,
+				0, y, z);
+			dmap.combine(-1, 0, 0,
+				1, 0, 0,
+				1, y, z);
+			dmap.combine(+1, 0, 0,
+				-1, 0, 0,
+				width - 1, y, z);
+		}
+	}
+
+	for (int z = depth - 1; z >= 0; -- z)
+	{
+		cout << ".";
+
+		// combine with everything with dz = +1
+		for (int y = 0; y < height; ++ y)
+		{
+			dmap.combine(0, 0, +1,
+				1, 0, 0,
+				0, y, z);
+		}
+
+		for (int y = 1; y < height; ++ y)
+		{
+			dmap.combine(0, -1, 0,
+				1, 0, 0,
+				0, y, z);
+			dmap.combine(-1, 0, 0,
+				1, 0, 0,
+				1, y, z);
+			dmap.combine(+1, 0, 0,
+				-1, 0, 0,
+				width - 2, y, z);
+		}
+		for (int y = height - 1; y >= 0; -- y)
+		{
+			dmap.combine(0, +1, 0,
+				1, 0, 0,
+				0, y, z);
+			dmap.combine(-1, 0, 0,
+				1, 0, 0,
+				1, y, z);
+			dmap.combine(+1, 0, 0,
+				-1, 0, 0,
+				width - 1, y, z);
+		}
+	}
+
+	for (int z = 0; z < depth; ++ z)
+	{
+		for (int y = 0; y < height; ++ y)
+		{
+			for (int x = 0; x < width; ++ x)
+			{
+				float value = 0;
+				for (int i = 0; i < 3; ++ i)
+				{
+					value += dmap(x, y, z, i) * dmap(x, y, z, i);
+				}
+				distances[(z * height + y) * width + x]
+					= static_cast<uint8_t>(MathLib::clamp(sqrt(value) / depth, 0.0f, 1.0f) * 255);
+			}
+		}
+	}
 }
 
 class EmptyApp : public KlayGE::App3DFramework
@@ -99,12 +225,12 @@ int main(int argc, char* argv[])
 {
 	int width = 256, height = 256, depth = 16;
 
-	std::string height_name("height.dds");
+	std::string src_name("height.dds");
 	std::string distance_name("distance.dds");
 
 	if (argc > 1)
 	{
-		height_name = argv[1];
+		src_name = argv[1];
 	}
 	if (argc > 2)
 	{
@@ -139,17 +265,50 @@ int main(int argc, char* argv[])
 
 	app.Create("DistanceMapCreator", settings);
 
-	TexturePtr height_map_texture = render_factory.MakeTexture2D(width, height, 1, EF_L8);
+	std::vector<uint8_t> volume(width * height * depth);
+	TexturePtr src_texture = LoadTexture(src_name);
+	if (Texture::TT_2D == src_texture->Type())
 	{
-		TexturePtr temp_texture = LoadTexture(height_name);
-		temp_texture->CopyToTexture(*height_map_texture);
+		TexturePtr height_map_texture = render_factory.MakeTexture2D(width, height, 1, EF_L8);
+		src_texture->CopyToTexture(*height_map_texture);
+		
+		std::vector<uint8_t> height_map(height * width);
+		height_map_texture->CopyToMemory2D(0, &height_map[0]);
+
+		for (int z = 0; z < depth; ++ z)
+		{
+			for (int y = 0; y < height; ++ y)
+			{
+				for (int x = 0; x < width; ++ x)
+				{
+					if (height_map[y * width + x] >= z * (256 / depth))
+					{
+						volume[z * width * height + y * width + x] = 255;
+					}
+					else
+					{
+						volume[z * width * height + y * width + x] = 0;
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		BOOST_ASSERT(Texture::TT_3D == temp_texture->Type());
+
+		TexturePtr vol_map_texture = render_factory.MakeTexture3D(width, height, depth, 1, EF_L8);
+		src_texture->CopyToTexture(*vol_map_texture);
+
+		vol_map_texture->CopyToMemory3D(0, &volume[0]);
 	}
 
-	std::vector<unsigned char> height_map(height * width);
-	height_map_texture->CopyToMemory2D(0, &height_map[0]);
+	clock_t start = clock();
 
-	std::vector<unsigned char> distances(depth * height * width);
-	ComputeDistanceMap(distances, 256, 256, 16, height_map);
+	std::vector<uint8_t> distances(width * height * depth);
+	ComputeDistanceField(distances, width, height, depth, volume);
+
+	cout << endl << "Computing time: " << clock() - start << " ms" << endl;
 
 	TexturePtr distance_map_texture = render_factory.MakeTexture3D(width, height, depth, 1, EF_L8);
 	distance_map_texture->CopyMemoryToTexture3D(0, &distances[0], EF_L8,

@@ -296,7 +296,7 @@ namespace KlayGE
 
 	void D3D9GraphicsBufferRenderView::CopyToGB()
 	{
-		size_t const format_size = ElementFormatBits(pf_) / 8;
+		size_t const format_size = ElementFormatBytes(pf_);
 
 		gbuffer_.Resize(width_ * height_ * format_size);
 

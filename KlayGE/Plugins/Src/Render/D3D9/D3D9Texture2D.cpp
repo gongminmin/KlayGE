@@ -149,7 +149,7 @@ namespace KlayGE
 			RECT srcRc = { 0, 0, src_width, src_height };
 			RECT dstRc = { dst_xOffset, dst_yOffset, dst_xOffset + dst_width, dst_yOffset + dst_height };
 			TIF(D3DXLoadSurfaceFromMemory(surface.get(), NULL, &dstRc, data, D3D9Mapping::MappingFormat(pf),
-					src_width * ElementFormatBits(pf) / 8, NULL, &srcRc, D3DX_DEFAULT, 0));
+					src_width * ElementFormatBytes(pf), NULL, &srcRc, D3DX_DEFAULT, 0));
 		}
 	}
 
@@ -206,24 +206,73 @@ namespace KlayGE
 
 	void D3D9Texture2D::DoOnLostDevice()
 	{
-		d3dDevice_ = static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
-
-		ID3D9TexturePtr tempTexture2D = this->CreateTexture2D(0, D3DPOOL_SYSTEMMEM);
-		for (uint16_t i = 0; i < this->NumMipMaps(); ++ i)
+		if (TU_Default == usage_)
 		{
-			IDirect3DSurface9* temp;
-			TIF(d3dTexture2D_->GetSurfaceLevel(i, &temp));
-			ID3D9SurfacePtr src = MakeCOMPtr(temp);
+			d3dDevice_ = static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
 
-			TIF(tempTexture2D->GetSurfaceLevel(i, &temp));
-			ID3D9SurfacePtr dst = MakeCOMPtr(temp);
+			ID3D9TexturePtr tempTexture2D = this->CreateTexture2D(0, D3DPOOL_SYSTEMMEM);
+			for (uint16_t i = 0; i < this->NumMipMaps(); ++ i)
+			{
+				IDirect3DSurface9* temp;
+				TIF(d3dTexture2D_->GetSurfaceLevel(i, &temp));
+				ID3D9SurfacePtr src = MakeCOMPtr(temp);
 
-			TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+				TIF(tempTexture2D->GetSurfaceLevel(i, &temp));
+				ID3D9SurfacePtr dst = MakeCOMPtr(temp);
+
+				D3DLOCKED_RECT src_locked_rect;
+				src->LockRect(&src_locked_rect, NULL, D3DLOCK_READONLY | D3DLOCK_NOSYSLOCK);
+				D3DLOCKED_RECT dst_locked_rect;
+				dst->LockRect(&dst_locked_rect, NULL, D3DLOCK_NOSYSLOCK);
+				uint8_t* src_ptr = static_cast<uint8_t*>(src_locked_rect.pBits);
+				uint8_t* dst_ptr = static_cast<uint8_t*>(dst_locked_rect.pBits);
+				uint32_t line_size;
+				if (IsCompressedFormat(format_))
+				{
+					int block_size;
+					if (EF_DXT1 == format_)
+					{
+						block_size = 8;
+					}
+					else
+					{
+						block_size = 16;
+					}
+
+					line_size = ((widths_[i] + 3) / 4) * block_size;
+
+					for (uint32_t y = 0; y < (heights_[i] + 3) / 4; ++ y)
+					{
+						memcpy(dst_ptr, src_ptr, line_size);
+						dst_ptr += dst_locked_rect.Pitch;
+						src_ptr += src_locked_rect.Pitch;
+					}
+				}
+				else
+				{
+					line_size = widths_[i] * ElementFormatBytes(format_);
+
+					for (uint32_t y = 0; y < heights_[i]; ++ y)
+					{
+						memcpy(dst_ptr, src_ptr, line_size);
+						dst_ptr += dst_locked_rect.Pitch;
+						src_ptr += src_locked_rect.Pitch;
+					}
+				}
+
+				src->UnlockRect();
+				dst->UnlockRect();
+			}
+			tempTexture2D->AddDirtyRect(NULL);
+			d3dTexture2D_ = tempTexture2D;
+
+			this->QueryBaseTexture();
 		}
-		tempTexture2D->AddDirtyRect(NULL);
-		d3dTexture2D_ = tempTexture2D;
-
-		this->QueryBaseTexture();
+		else
+		{
+			d3dBaseTexture_.reset();
+			d3dTexture2D_.reset();
+		}
 	}
 
 	void D3D9Texture2D::DoOnResetDevice()
@@ -250,10 +299,9 @@ namespace KlayGE
 	ID3D9TexturePtr D3D9Texture2D::CreateTexture2D(uint32_t usage, D3DPOOL pool)
 	{
 		IDirect3DTexture9* d3dTexture2D;
-		// Use D3DX to help us create the texture, this way it can adjust any relevant sizes
-		TIF(D3DXCreateTexture(d3dDevice_.get(), widths_[0], heights_[0],
+		TIF(d3dDevice_->CreateTexture(widths_[0], heights_[0],
 			numMipMaps_, usage, D3D9Mapping::MappingFormat(format_),
-			pool, &d3dTexture2D));
+			pool, &d3dTexture2D, NULL));
 		return MakeCOMPtr(d3dTexture2D);
 	}
 

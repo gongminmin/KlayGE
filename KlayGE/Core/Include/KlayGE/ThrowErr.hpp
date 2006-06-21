@@ -70,7 +70,7 @@ TIF(HRESULT hr)
 #define THR(x)			{ throw KlayGE::Exception(__FILE__, __LINE__, static_cast<KlayGE::uint32_t>(x), #x); }
 
 // 如果错误，就抛出错误代码
-#define TIF(x)			{ HRESULT _hr = x; if (FAILED(_hr)) { THR(x); } }
+#define TIF(x)			{ HRESULT _hr = x; if (FAILED(_hr)) { THR(_hr); } }
 
 #endif
 

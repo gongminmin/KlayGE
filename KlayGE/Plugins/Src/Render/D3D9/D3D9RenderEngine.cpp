@@ -269,10 +269,6 @@ namespace KlayGE
 		}
 
 		TIF(d3dDevice_->SetDepthStencilSurface(zBuffer));
-
-		Viewport const & vp(rt->GetViewport());
-		D3DVIEWPORT9 d3dvp = { vp.left, vp.top, vp.width, vp.height, 0, 1 };
-		TIF(d3dDevice_->SetViewport(&d3dvp));
 	}
 
 	// ¿ªÊ¼Ò»Ö¡

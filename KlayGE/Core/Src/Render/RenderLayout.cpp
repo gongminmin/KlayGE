@@ -108,7 +108,7 @@ namespace KlayGE
 	{
 		if (index_stream_)
 		{
-			return index_stream_->Size() / (ElementFormatBits(index_format_) / 8);
+			return index_stream_->Size() / ElementFormatBytes(index_format_);
 		}
 		else
 		{

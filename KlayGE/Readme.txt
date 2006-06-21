@@ -80,10 +80,11 @@ Font支持渲染到3D位置
 统一了渲染引擎的状态设置
 OpenGL插件要求硬件支持OpenGL 2.0和FBO
 增加了FrameBuffer和RenderView的结构
-使用以technique为单位的渲染
-支持渲染到3d texture的一个片
-支持D32，GR16和ABGR16纹理格式
-统一了元素格式
+使用以Technique为单位的渲染
+支持渲染到3D Texture的一个片
+增加了多种纹理格式
+统一了元素格式的使用
+DistanceMap生成器支持直接对Volume的计算
 
 3.2.0 (2006.5.15)
 增加了高精度计时器
