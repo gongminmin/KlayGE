@@ -84,6 +84,7 @@ namespace KlayGE
 	protected:
 		void CopySurfaceToMemory(ID3D9SurfacePtr const & surface, void* data);
 		void CopyVolumeToMemory(ID3D9VolumePtr const & volume, void* data);
+		void CopySurfaceToSurface(ID3D9SurfacePtr const & dst, ID3D9SurfacePtr const & src);
 
 	protected:
 		ID3D9DevicePtr			d3dDevice_;

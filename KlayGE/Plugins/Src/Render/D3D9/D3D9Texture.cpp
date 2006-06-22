@@ -186,6 +186,61 @@ namespace KlayGE
 		volume->UnlockBox();
 	}
 
+	void D3D9Texture::CopySurfaceToSurface(ID3D9SurfacePtr const & dst, ID3D9SurfacePtr const & src)
+	{
+		D3DSURFACE_DESC src_desc;
+		src->GetDesc(&src_desc);
+		D3DSURFACE_DESC dst_desc;
+		dst->GetDesc(&dst_desc);
+		BOOST_ASSERT(src_desc.Width == dst_desc.Width);
+		BOOST_ASSERT(src_desc.Height == dst_desc.Height);
+		BOOST_ASSERT(src_desc.Format == dst_desc.Format);
+
+		D3DLOCKED_RECT src_locked_rect;
+		src->LockRect(&src_locked_rect, NULL, D3DLOCK_READONLY | D3DLOCK_NOSYSLOCK);
+		D3DLOCKED_RECT dst_locked_rect;
+		dst->LockRect(&dst_locked_rect, NULL, D3DLOCK_NOSYSLOCK);
+		
+		uint8_t* src_ptr = static_cast<uint8_t*>(src_locked_rect.pBits);
+		uint8_t* dst_ptr = static_cast<uint8_t*>(dst_locked_rect.pBits);
+		uint32_t line_size;
+		if (IsCompressedFormat(format_))
+		{
+			int block_size;
+			if (EF_DXT1 == format_)
+			{
+				block_size = 8;
+			}
+			else
+			{
+				block_size = 16;
+			}
+
+			line_size = ((src_desc.Width + 3) / 4) * block_size;
+
+			for (uint32_t y = 0; y < (src_desc.Height + 3) / 4; ++ y)
+			{
+				memcpy(dst_ptr, src_ptr, line_size);
+				dst_ptr += dst_locked_rect.Pitch;
+				src_ptr += src_locked_rect.Pitch;
+			}
+		}
+		else
+		{
+			line_size = src_desc.Width * ElementFormatBytes(format_);
+
+			for (uint32_t y = 0; y < src_desc.Height; ++ y)
+			{
+				memcpy(dst_ptr, src_ptr, line_size);
+				dst_ptr += dst_locked_rect.Pitch;
+				src_ptr += src_locked_rect.Pitch;
+			}
+		}
+
+		src->UnlockRect();
+		dst->UnlockRect();
+	}
+
 	void D3D9Texture::CopyToMemory1D(int /*level*/, void* /*data*/)
 	{
 		BOOST_ASSERT(false);

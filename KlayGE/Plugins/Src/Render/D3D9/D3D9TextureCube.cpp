@@ -226,10 +226,10 @@ namespace KlayGE
 				TIF(tempTextureCube->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &temp));
 				ID3D9SurfacePtr dst = MakeCOMPtr(temp);
 
-				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
-
-				tempTextureCube->AddDirtyRect(static_cast<D3DCUBEMAP_FACES>(face), NULL);
+				this->CopySurfaceToSurface(dst, src);
 			}
+
+			tempTextureCube->AddDirtyRect(static_cast<D3DCUBEMAP_FACES>(face), NULL);
 		}
 		d3dTextureCube_ = tempTextureCube;
 

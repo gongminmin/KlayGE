@@ -208,7 +208,7 @@ namespace KlayGE
 			TIF(tempTexture1D->GetSurfaceLevel(i, &temp));
 			ID3D9SurfacePtr dst = MakeCOMPtr(temp);
 
-			TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+			this->CopySurfaceToSurface(dst, src);
 		}
 		tempTexture1D->AddDirtyRect(NULL);
 		d3dTexture1D_ = tempTexture1D;
