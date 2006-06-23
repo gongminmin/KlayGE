@@ -125,10 +125,10 @@ namespace KlayGE
 		name_				= name;
 		width_				= settings.width;
 		height_				= settings.height;
-		isDepthBuffered_	= settings.depthBuffer;
-		depthBits_			= settings.depthBits;
-		stencilBits_		= settings.stencilBits;
-		isFullScreen_		= settings.fullScreen;
+		isDepthBuffered_	= IsDepthFormat(settings.depth_stencil_fmt);
+		depthBits_			= NumDepthBits(settings.depth_stencil_fmt);
+		stencilBits_		= NumStencilBits(settings.depth_stencil_fmt);
+		isFullScreen_		= settings.full_screen;
 
 		HINSTANCE hInst(::GetModuleHandle(NULL));
 
@@ -171,7 +171,7 @@ namespace KlayGE
 
 		if (isFullScreen_)
 		{
-			colorDepth_ = settings.colorDepth;
+			colorDepth_ = NumFormatBits(settings.color_fmt);
 			left_ = 0;
 			top_ = 0;
 
@@ -220,12 +220,12 @@ namespace KlayGE
 
 		glEnable(GL_COLOR_MATERIAL);
 		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-		if (settings.multiSample != 0)
+		if (settings.multi_sample != 0)
 		{
 			glEnable(GL_MULTISAMPLE);
 			glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
 			glEnable(GL_SAMPLE_COVERAGE);
-			glSampleCoverage(settings.multiSample / 16.0f, false);
+			glSampleCoverage(settings.multi_sample / 16.0f, false);
 		}
 
 		viewport_.left = 0;

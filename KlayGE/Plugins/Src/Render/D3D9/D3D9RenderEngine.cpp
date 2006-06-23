@@ -209,8 +209,9 @@ namespace KlayGE
 
 		this->BindRenderTarget(win);
 
-		this->SetRenderState(RST_DepthEnable, settings.depthBuffer);
-		this->SetRenderState(RST_DepthMask, settings.depthBuffer);
+		bool has_depth_buf = IsDepthFormat(settings.depth_stencil_fmt);
+		this->SetRenderState(RST_DepthEnable, has_depth_buf);
+		this->SetRenderState(RST_DepthMask, has_depth_buf);
 
 		if (caps_.hw_instancing_support)
 		{

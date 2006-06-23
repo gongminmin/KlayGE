@@ -105,7 +105,6 @@ namespace
 			*(technique_->Effect().ParameterByName("mvp")) = model * view * proj;
 
 			*(technique_->Effect().ParameterByName("eta_ratio")) = float3(1 / 1.1f, 1 / 1.1f - 0.003f, 1 / 1.1f - 0.006f);
-			*(technique_->Effect().ParameterByName("fresnel_values")) = float3(2.0f, 2.0f, 0.1f);
 
 			*(technique_->Effect().ParameterByName("eyePos")) = Context::Instance().AppInstance().ActiveCamera().EyePos();
 		}
@@ -160,8 +159,8 @@ int main()
 	RenderSettings settings;
 	settings.width = 800;
 	settings.height = 600;
-	settings.colorDepth = 32;
-	settings.fullScreen = false;
+	settings.color_fmt = EF_ARGB8;
+	settings.full_screen = false;
 	settings.ConfirmDevice = ConfirmDevice;
 
 	Refract app;

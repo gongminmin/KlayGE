@@ -112,7 +112,7 @@ namespace KlayGE
 	};
 
 	inline uint8_t
-	ElementFormatBits(ElementFormat format)
+	NumFormatBits(ElementFormat format)
 	{
 		switch (format)
 		{
@@ -176,9 +176,9 @@ namespace KlayGE
 	}
 
 	inline uint8_t
-	ElementFormatBytes(ElementFormat format)
+	NumFormatBytes(ElementFormat format)
 	{
-		return ElementFormatBits(format) / 8;
+		return NumFormatBits(format) / 8;
 	}
 
 	inline bool
@@ -260,6 +260,38 @@ namespace KlayGE
 
 		default:
 			return false;
+		}
+	}
+
+	inline uint8_t
+	NumDepthBits(ElementFormat format)
+	{
+		switch (format)
+		{
+		case EF_D16:
+			return 16;
+
+		case EF_D24S8:
+			return 24;
+
+		case EF_D32:
+			return 32;
+
+		default:
+			return 0;
+		}
+	}
+
+	inline uint8_t
+	NumStencilBits(ElementFormat format)
+	{
+		switch (format)
+		{
+		case EF_D24S8:
+			return 8;
+
+		default:
+			return 0;
 		}
 	}
 

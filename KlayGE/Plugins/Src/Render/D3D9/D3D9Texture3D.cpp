@@ -52,7 +52,7 @@ namespace KlayGE
 		heights_.assign(1, height);
 		depths_.assign(1, depth);
 
-		bpp_ = ElementFormatBits(format);
+		bpp_ = NumFormatBits(format);
 
 		d3dTexture3D_ = this->CreateTexture3D(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 
@@ -145,7 +145,7 @@ namespace KlayGE
 
 		if (volume)
 		{
-			uint32_t const srcRowPitch = src_width * ElementFormatBytes(pf);
+			uint32_t const srcRowPitch = src_width * NumFormatBytes(pf);
 			uint32_t const srcSlicePitch = srcRowPitch * src_height;
 
 			D3DBOX srcBox = { 0, 0, src_width, src_height, 0, src_depth };
@@ -280,6 +280,6 @@ namespace KlayGE
 		}					
 
 		format_ = D3D9Mapping::MappingFormat(desc.Format);
-		bpp_	= ElementFormatBits(format_);
+		bpp_	= NumFormatBits(format_);
 	}
 }

@@ -55,7 +55,7 @@ namespace KlayGE
 			numMipMaps_ = numMipMaps;
 		}
 
-		bpp_ = ElementFormatBits(format_);
+		bpp_ = NumFormatBits(format_);
 
 		GLint glinternalFormat;
 		GLenum glformat;

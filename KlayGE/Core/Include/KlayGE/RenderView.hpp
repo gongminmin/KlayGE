@@ -47,7 +47,7 @@ namespace KlayGE
 		}
 		uint32_t Bpp() const
 		{
-			return ElementFormatBits(pf_);
+			return NumFormatBits(pf_);
 		}
 
 		virtual void OnAttached(FrameBuffer& fb, uint32_t att) = 0;

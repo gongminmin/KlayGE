@@ -227,7 +227,7 @@ namespace KlayGE
 		}
 		else
 		{
-			line_size = src_desc.Width * ElementFormatBytes(format_);
+			line_size = src_desc.Width * NumFormatBytes(format_);
 
 			for (uint32_t y = 0; y < src_desc.Height; ++ y)
 			{

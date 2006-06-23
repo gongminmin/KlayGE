@@ -56,9 +56,9 @@ int main()
 	RenderSettings settings;
 	settings.width = 800;
 	settings.height = 600;
-	settings.colorDepth = 32;
-	settings.depthBits = 24;
-	settings.fullScreen = false;
+	settings.color_fmt = EF_ARGB8;
+	settings.depth_stencil_fmt = EF_D24S8;
+	settings.full_screen = false;
 	settings.ConfirmDevice = ConfirmDevice;
 
 	app.Create("SkinnedMesh", settings);

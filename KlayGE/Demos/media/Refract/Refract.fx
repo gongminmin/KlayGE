@@ -4,7 +4,6 @@ float4x4 modelit;
 float3 eyePos;
 
 float3 eta_ratio;
-float3 fresnel_values;
 float exposure_level;
 
 struct VS_INPUT
@@ -22,13 +21,12 @@ struct VS_OUTPUT
 };
 
 // fresnel approximation
-half fast_fresnel(half3 incident, half3 normal, half3 fresnel_values)
+half fast_fresnel(half3 eye, half3 normal, half R0)
 {
-    half power = fresnel_values.x;
-    half scale = fresnel_values.y;
-    half bias = fresnel_values.z;
+	// R0 = pow(1.0 - refractionIndexRatio, 2.0) / pow(1.0 + refractionIndexRatio, 2.0);
 
-    return bias + pow(1.0 + dot(incident, normal), power) * scale;
+	half edn = max(0, dot(eye, normal));
+	return R0 + (1.0 - R0) * pow(1.0 - edn, 5);
 }
 
 float3 my_refract(float3 i, float3 n, float eta)
@@ -68,7 +66,7 @@ float4 RefractPS(float3 normal : TEXCOORD0,
 	refracted_clr.b = texCUBE(cubeMapSampler, TBlue).b;
 	refracted_clr.a = 1;
 
-	half fresnel_factor = fast_fresnel(incident, normal, fresnel_values);
+	half fresnel_factor = fast_fresnel(-incident, normal, 0.2f);
 
 	half3 R = reflect(incident, normal);
 	half4 reflected_clr = texCUBE(cubeMapSampler, R);

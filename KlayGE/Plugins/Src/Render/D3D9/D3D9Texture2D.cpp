@@ -51,7 +51,7 @@ namespace KlayGE
 		widths_.assign(1, width);
 		heights_.assign(1, height);
 
-		bpp_ = ElementFormatBits(format);
+		bpp_ = NumFormatBits(format);
 
 		d3dTexture2D_ = this->CreateTexture2D(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
 
@@ -149,7 +149,7 @@ namespace KlayGE
 			RECT srcRc = { 0, 0, src_width, src_height };
 			RECT dstRc = { dst_xOffset, dst_yOffset, dst_xOffset + dst_width, dst_yOffset + dst_height };
 			TIF(D3DXLoadSurfaceFromMemory(surface.get(), NULL, &dstRc, data, D3D9Mapping::MappingFormat(pf),
-					src_width * ElementFormatBytes(pf), NULL, &srcRc, D3DX_DEFAULT, 0));
+					src_width * NumFormatBytes(pf), NULL, &srcRc, D3DX_DEFAULT, 0));
 		}
 	}
 
@@ -290,6 +290,6 @@ namespace KlayGE
 		}					
 
 		format_ = D3D9Mapping::MappingFormat(desc.Format);
-		bpp_	= ElementFormatBits(format_);
+		bpp_	= NumFormatBits(format_);
 	}
 }

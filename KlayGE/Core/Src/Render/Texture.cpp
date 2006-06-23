@@ -350,7 +350,7 @@ namespace KlayGE
 				}
 				else
 				{
-					main_image_size = desc.width * desc.height * ElementFormatBytes(format);
+					main_image_size = desc.width * desc.height * NumFormatBytes(format);
 				}
 			}
 		}
@@ -745,7 +745,7 @@ namespace KlayGE
 			desc.dds_caps.caps2 |= DDSCAPS2_CUBEMAP_NEGATIVEZ;
 		}
 
-		uint32_t main_image_size = texture->Width(0) * texture->Height(0) * ElementFormatBytes(texture->Format());
+		uint32_t main_image_size = texture->Width(0) * texture->Height(0) * NumFormatBytes(texture->Format());
 		if (IsCompressedFormat(texture->Format()))
 		{
 			if (EF_DXT1 == texture->Format())

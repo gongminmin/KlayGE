@@ -69,7 +69,7 @@ namespace KlayGE
 
 		uint16_t element_size() const
 		{
-			return ElementFormatBytes(format);
+			return NumFormatBytes(format);
 		}
 
 		friend bool

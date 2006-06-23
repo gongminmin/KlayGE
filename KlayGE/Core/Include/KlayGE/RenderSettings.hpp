@@ -17,6 +17,8 @@
 #pragma warning(disable : 4189)
 #include <boost/mem_fn.hpp>
 #include <boost/function.hpp>
+
+#include <KlayGE/ElementFormat.hpp>
 #include <KlayGE/RenderDeviceCaps.hpp>
 
 #ifdef KLAYGE_DEBUG
@@ -33,23 +35,21 @@ namespace KlayGE
 	{
 		RenderSettings()
 			: left(0), top(0),
-				depthBuffer(true), depthBits(16), stencilBits(0),
-				multiSample(0)
+				depth_stencil_fmt(EF_D16),
+				multi_sample(0)
 		{
 		}
 
 		boost::function<bool (RenderDeviceCaps const &)> ConfirmDevice;
 
-		int		width;
-		int		height;
-		int		colorDepth;
-		bool	fullScreen;
+		bool	full_screen;
 		int		left;
 		int		top;
-		bool	depthBuffer;
-		int		depthBits;
-		int		stencilBits;
-		uint32_t multiSample;
+		int		width;
+		int		height;
+		ElementFormat color_fmt;
+		ElementFormat depth_stencil_fmt;
+		uint32_t multi_sample;
 	};
 }
 

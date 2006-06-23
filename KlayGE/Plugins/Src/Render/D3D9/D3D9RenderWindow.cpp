@@ -134,23 +134,23 @@ namespace KlayGE
 							hWnd_(NULL),
 							ready_(false), closed_(false)
 	{
-		if (settings.multiSample > 16)
+		if (settings.multi_sample > 16)
 		{
 			multiSample_ = D3DMULTISAMPLE_16_SAMPLES;
 		}
 		else
 		{
-			multiSample_ = D3DMULTISAMPLE_TYPE(settings.multiSample);
+			multiSample_ = static_cast<D3DMULTISAMPLE_TYPE>(settings.multi_sample);
 		}
 
 		// Store info
 		name_				= name;
 		width_				= settings.width;
 		height_				= settings.height;
-		isDepthBuffered_	= settings.depthBuffer;
-		depthBits_			= settings.depthBits;
-		stencilBits_		= settings.stencilBits;
-		isFullScreen_		= settings.fullScreen;
+		isDepthBuffered_	= IsDepthFormat(settings.depth_stencil_fmt);
+		depthBits_			= NumDepthBits(settings.depth_stencil_fmt);
+		stencilBits_		= NumStencilBits(settings.depth_stencil_fmt);
+		isFullScreen_		= settings.full_screen;
 
 		HINSTANCE hInst(::GetModuleHandle(NULL));
 
@@ -190,7 +190,7 @@ namespace KlayGE
 
 		if (this->FullScreen())
 		{
-			colorDepth_ = settings.colorDepth;
+			colorDepth_ = NumFormatBits(settings.color_fmt);
 			left_ = 0;
 			top_ = 0;
 		}
@@ -233,8 +233,8 @@ namespace KlayGE
 		// Depth-stencil format
 		if (isDepthBuffered_)
 		{
-			BOOST_ASSERT((32 == depthBits_) || (24 == depthBits_) || (16 == depthBits_) || (15 == depthBits_) || (0 == depthBits_));
-			BOOST_ASSERT((8 == stencilBits_) || (1 == stencilBits_) || (0 == stencilBits_));
+			BOOST_ASSERT((32 == depthBits_) || (24 == depthBits_) || (16 == depthBits_) || (0 == depthBits_));
+			BOOST_ASSERT((8 == stencilBits_) || (0 == stencilBits_));
 
 			if (32 == depthBits_)
 			{
@@ -300,23 +300,7 @@ namespace KlayGE
 				}
 				else
 				{
-					depthBits_ = 15;
-				}
-			}
-			if (15 == depthBits_)
-			{
-				if (SUCCEEDED(d3d_->CheckDepthStencilMatch(adapter_.AdapterNo(),
-					D3DDEVTYPE_HAL, d3dpp_.BackBufferFormat, d3dpp_.BackBufferFormat, D3DFMT_D15S1)))
-				{
-					d3dpp_.AutoDepthStencilFormat = D3DFMT_D15S1;
-					stencilBits_ = 1;
-				}
-				else
-				{
-					// Too bad
-					isDepthBuffered_ = false;
 					depthBits_ = 0;
-					stencilBits_ = 0;
 				}
 			}
 			if (0 == depthBits_)
