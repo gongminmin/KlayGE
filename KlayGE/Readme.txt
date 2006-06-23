@@ -85,6 +85,7 @@ OpenGL插件要求硬件支持OpenGL 2.0和FBO
 增加了多种纹理格式
 统一了元素格式的使用
 DistanceMap生成器支持直接对Volume的计算
+增加了PostProcess
 
 3.2.0 (2006.5.15)
 增加了高精度计时器

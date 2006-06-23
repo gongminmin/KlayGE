@@ -186,6 +186,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Src\Render\PostProcess.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Src\Render\Query.cpp"
 					>
 				</File>
@@ -271,6 +275,10 @@
 				</File>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\OcclusionQuery.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\PostProcess.hpp"
 					>
 				</File>
 				<File

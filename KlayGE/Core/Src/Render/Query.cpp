@@ -1,5 +1,5 @@
 // Query.hpp
-// KlayGE 查询抽象类 实现文件
+// KlayGE 查询抽象类 头文件
 // Ver 3.1.0
 // 版权所有(C) 龚敏敏, 2005
 // Homepage: http://klayge.sourceforge.net
