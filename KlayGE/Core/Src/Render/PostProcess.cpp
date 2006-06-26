@@ -25,8 +25,7 @@ namespace KlayGE
 {
 	PostProcess::PostProcess(KlayGE::RenderTechniquePtr tech)
 			: RenderableHelper(L"PostProcess"),
-				src_sampler_(new Sampler),
-				render_buffer_(Context::Instance().RenderFactoryInstance().MakeFrameBuffer())
+				src_sampler_(new Sampler)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -88,16 +87,16 @@ namespace KlayGE
 		src_sampler_->SetTexture(tex);
 	}
 
-	void PostProcess::Destinate(RenderViewPtr const & view)
+	void PostProcess::Destinate(RenderTargetPtr const & rt)
 	{
-		render_buffer_->Attach(FrameBuffer::ATT_Color0, view);
+		render_target_ = rt;
 	}
 
 	void PostProcess::Apply()
 	{
 		RenderEngine& render_engine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-		render_engine.BindRenderTarget(render_buffer_);
+		render_engine.BindRenderTarget(render_target_);
 		render_engine.Clear(RenderEngine::CBM_Color);
 
 		render_engine.SetRenderTechnique(technique_);

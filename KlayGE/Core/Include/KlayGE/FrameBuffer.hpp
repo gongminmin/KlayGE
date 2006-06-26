@@ -47,7 +47,7 @@ namespace KlayGE
 		};
 
 	public:
-		virtual ~FrameBuffer()
+		virtual ~FrameBuffer() = 0
 		{
 		}
 

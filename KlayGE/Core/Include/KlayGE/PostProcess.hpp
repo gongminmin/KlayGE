@@ -26,7 +26,7 @@ namespace KlayGE
 		}
 
 		virtual void Source(TexturePtr const & tex, Sampler::TexFilterOp filter);
-		virtual void Destinate(RenderViewPtr const & view);
+		virtual void Destinate(RenderTargetPtr const & rt);
 
 		virtual void Apply();
 
@@ -34,7 +34,7 @@ namespace KlayGE
 
 	protected:
 		KlayGE::SamplerPtr src_sampler_;
-		KlayGE::FrameBufferPtr render_buffer_;
+		KlayGE::RenderTargetPtr render_target_;
 	};
 }
 
