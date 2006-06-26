@@ -51,6 +51,13 @@ namespace KlayGE
 	class Box_T;
 	typedef Box_T<float> Box;
 
+	class SceneManager;
+	typedef boost::shared_ptr<SceneManager> SceneManagerPtr;
+	class SceneNode;
+	typedef boost::shared_ptr<SceneNode> SceneNodePtr;
+	class SceneObject;
+	typedef boost::shared_ptr<SceneObject> SceneObjectPtr;
+
 	class Camera;
 	typedef boost::shared_ptr<Camera> CameraPtr;
 	class FirstPersonCameraController;
@@ -73,10 +80,6 @@ namespace KlayGE
 	typedef boost::shared_ptr<RenderPass> RenderPassPtr;
 	class RenderEffectParameter;
 	typedef boost::shared_ptr<RenderEffectParameter> RenderEffectParameterPtr;
-	class SceneManager;
-	typedef boost::shared_ptr<SceneManager> SceneManagerPtr;
-	class SceneNode;
-	typedef boost::shared_ptr<SceneNode> SceneNodePtr;
 	class Texture;
 	typedef boost::shared_ptr<Texture> TexturePtr;
 	class Sampler;
@@ -107,8 +110,8 @@ namespace KlayGE
 	typedef boost::shared_ptr<Query> QueryPtr;
 	class OcclusionQuery;
 	typedef boost::shared_ptr<OcclusionQuery> OcclusionQueryPtr;
-	class SceneObject;
-	typedef boost::shared_ptr<SceneObject> SceneObjectPtr;
+	class PostProcess;
+	typedef boost::shared_ptr<PostProcess> PostProcessPtr;
 
 	class Socket;
 	class Lobby;

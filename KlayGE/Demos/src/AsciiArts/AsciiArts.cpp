@@ -79,8 +79,9 @@ namespace
 			RenderEngine const & renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			RenderTarget const & renderTarget(*renderEngine.CurRenderTarget());
 
-			*(technique_->Effect().ParameterByName("cell_per_row")) = static_cast<float>(CELL_WIDTH) / renderTarget.Width();
-			*(technique_->Effect().ParameterByName("cell_per_line")) = static_cast<float>(CELL_HEIGHT) / renderTarget.Height();
+			*(technique_->Effect().ParameterByName("cell_per_row_line")) =
+				float2(static_cast<float>(CELL_WIDTH) / renderTarget.Width(),
+						static_cast<float>(CELL_HEIGHT) / renderTarget.Height());
 		}
 
 	private:

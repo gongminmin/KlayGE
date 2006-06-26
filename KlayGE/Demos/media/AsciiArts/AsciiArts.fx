@@ -1,5 +1,3 @@
-float cell_per_row, cell_per_line;
-
 struct VS_INPUT
 {
 	float4 pos			: POSITION;
@@ -23,18 +21,16 @@ VS_OUTPUT AsciiArtsVS(VS_INPUT input)
 	return output;
 }
 
-sampler2D scene_sampler;
-sampler2D lums_sampler;
+sampler scene_sampler;
+sampler lums_sampler;
+float2 cell_per_row_line;
 
-float4 AsciiArtsPS(float2 tex_coord0	: TEXCOORD0,
-					uniform sampler2D scene_sampler,
-					uniform sampler2D lums_sampler,
-					uniform float2 arg) : COLOR
+float4 AsciiArtsPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 {
 	const float3 rgb_to_lum = float3(0.299, 0.587, 0.114);
 
 	float lum = dot(tex2D(scene_sampler, tex_coord0).rgb, rgb_to_lum);
-	float2 t = float2(floor(lum * 31) / 32, 0) + frac(tex_coord0 / arg) / float2(32, 1);
+	float2 t = float2(floor(lum * 31) / 32, 0) + frac(tex_coord0 / cell_per_row_line) / float2(32, 1);
 	return lum * tex2D(lums_sampler, t);
 }
 
@@ -43,6 +39,6 @@ technique AsciiArts
 	pass p0
 	{
 		VertexShader = compile vs_1_1 AsciiArtsVS();
-		PixelShader = compile ps_2_0 AsciiArtsPS(scene_sampler, lums_sampler, float2(cell_per_row, cell_per_line));
+		PixelShader = compile ps_2_0 AsciiArtsPS();
 	}
 }
