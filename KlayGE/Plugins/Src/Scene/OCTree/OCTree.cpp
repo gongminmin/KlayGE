@@ -171,6 +171,38 @@ namespace KlayGE
 		}
 	}
 
+	SceneManager::SceneObjectsType::iterator OCTree::DoDelSceneObject(SceneManager::SceneObjectsType::iterator iter)
+	{
+		for (linear_octree_t::iterator tree_iter = octree_.begin();
+			tree_iter != octree_.end();)
+		{
+			SceneObjectsType& objs = tree_iter->second;
+			for (SceneObjectsType::iterator obj_iter = objs.begin();
+				obj_iter != objs.end();)
+			{
+				if (*obj_iter == *iter)
+				{
+					obj_iter = objs.erase(obj_iter);
+				}
+				else
+				{
+					++ obj_iter;
+				}
+			}
+
+			if (objs.empty())
+			{
+				tree_iter = octree_.erase(tree_iter);
+			}
+			else
+			{
+				++ tree_iter;
+			}
+		}
+
+		return scene_objs_.erase(iter);
+	}
+
 	OCTree::tree_id_t OCTree::Child(tree_id_t const & id, int child_no)
 	{
 		BOOST_ASSERT(child_no >= 0);

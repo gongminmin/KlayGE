@@ -65,6 +65,11 @@ namespace KlayGE
 			scene_objs_.push_back(obj);
 		}
 
+		SceneObjectsType::iterator DoDelSceneObject(SceneObjectsType::iterator iter)
+		{
+			return scene_objs_.erase(iter);
+		}
+
 	private:
 		NullSceneManager(NullSceneManager const & rhs);
 		NullSceneManager& operator=(NullSceneManager const & rhs);
@@ -201,7 +206,7 @@ namespace KlayGE
 		{
 			if ((*iter)->ShortAge())
 			{
-				iter = scene_objs_.erase(iter);
+				iter = this->DoDelSceneObject(iter);
 			}
 			else
 			{

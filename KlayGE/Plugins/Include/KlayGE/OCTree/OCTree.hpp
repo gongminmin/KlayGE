@@ -54,6 +54,7 @@ namespace KlayGE
 		void InsertSceneObject(tree_id_t const & id, SceneObjectPtr const & renderable);
 
 		void DoAddSceneObject(SceneObjectPtr const & obj);
+		SceneObjectsType::iterator DoDelSceneObject(SceneObjectsType::iterator iter);
 
 	private:
 		OCTree(OCTree const & rhs);

@@ -36,7 +36,7 @@ private:
 
 	KlayGE::TexturePtr downsample_tex_;
 
-	boost::shared_ptr<KlayGE::Renderable> renderQuad_;
+	KlayGE::PostProcessPtr renderQuad_;
 
 	bool show_ascii_;
 };

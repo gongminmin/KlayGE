@@ -45,16 +45,16 @@ namespace
 			float const YSCALE = 0.08f;
 			float const ZSCALE = 0.08f;
 
-			std::vector<unsigned char> turbBuffer;
+			std::vector<uint8_t> turbBuffer;
 			turbBuffer.reserve(XSIZE * YSIZE * ZSIZE);
-			unsigned int min = 255, max = 0;
+			uint16_t min = 255, max = 0;
 			for (int z = 0; z < ZSIZE; ++ z)
 			{
 				for (int y = 0; y < YSIZE; ++ y)
 				{
 					for (int x = 0; x < XSIZE; ++ x)
 					{
-						unsigned char t = static_cast<unsigned char>(127 * (1
+						unsigned char t = static_cast<uint8_t>(127 * (1
 							+ pn.tileable_turbulence(XSCALE * x, YSCALE * y, ZSCALE * z,
 								XSIZE * XSCALE, YSIZE * YSCALE, ZSIZE * ZSCALE, 16)));
 						if (t > max)

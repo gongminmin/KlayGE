@@ -60,6 +60,7 @@ namespace KlayGE
 
 	protected:
 		virtual void DoAddSceneObject(SceneObjectPtr const & obj) = 0;
+		virtual SceneObjectsType::iterator DoDelSceneObject(SceneObjectsType::iterator iter) = 0;
 
 	protected:
 		SceneObjectsType scene_objs_;

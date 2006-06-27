@@ -16,6 +16,7 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Sampler.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/PostProcess.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
@@ -47,30 +48,25 @@ int const LUM_LEVEL = 8;
 
 namespace
 {
-	class RenderQuad : public RenderablePlane
+	class RenderQuad : public PostProcess
 	{
 	public:
 		RenderQuad()
-			: RenderablePlane(2, 2, 1, 1, true),
-				scene_sampler_(new Sampler), lums_sampler_(new Sampler)
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArts.fx")->Technique("AsciiArts")),
+				lums_sampler_(new Sampler)
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			technique_ = rf.LoadEffect("AsciiArts.fx")->Technique("AsciiArts");
-
-			scene_sampler_->Filtering(Sampler::TFO_Point);
-			scene_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-			scene_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
-			*(technique_->Effect().ParameterByName("scene_sampler")) = scene_sampler_;
+			src_sampler_->Filtering(Sampler::TFO_Point);
+			src_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
+			src_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
+			*(technique_->Effect().ParameterByName("src_sampler")) = src_sampler_;
 			lums_sampler_->Filtering(Sampler::TFO_Bilinear);
 			lums_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
 			lums_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
 			*(technique_->Effect().ParameterByName("lums_sampler")) = lums_sampler_;
 		}
 
-		void SetTexture(TexturePtr const & scene_tex, TexturePtr const & lums_tex)
+		void SetLumsTex(TexturePtr const & lums_tex)
 		{
-			scene_sampler_->SetTexture(scene_tex);
 			lums_sampler_->SetTexture(lums_tex);
 		}
 
@@ -85,7 +81,6 @@ namespace
 		}
 
 	private:
-		SamplerPtr scene_sampler_;
 		SamplerPtr lums_sampler_;
 	};
 
@@ -215,7 +210,7 @@ void AsciiArts::InitObjects()
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	obj_.reset(new SceneObjectHelper(LoadKMesh("teapot.kmesh"), SceneObject::SOA_Cullable));
+	obj_.reset(new SceneObjectHelper(LoadKMesh("teapot.kmesh"), SceneObject::SOA_Cullable | SceneObject::SOA_ShortAge));
 
 	this->BuildAsciiLumsTex();
 
@@ -223,6 +218,7 @@ void AsciiArts::InitObjects()
 	render_buffer_->GetViewport().camera = renderEngine.CurRenderTarget()->GetViewport().camera;
 
 	renderQuad_.reset(new RenderQuad);
+	renderQuad_->Destinate(RenderTargetPtr());
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
@@ -305,9 +301,9 @@ void AsciiArts::DoUpdate(uint32_t pass)
 			renderEngine.BindRenderTarget(RenderTargetPtr());
 			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
-			static_cast<RenderQuad*>(renderQuad_.get())->SetTexture(downsample_tex_, ascii_lums_tex_);
-			sceneMgr.Clear();
-			renderQuad_->AddToRenderQueue();
+			static_cast<RenderQuad*>(renderQuad_.get())->SetLumsTex(ascii_lums_tex_);
+			renderQuad_->Source(downsample_tex_, Sampler::TFO_Point);
+			renderQuad_->Apply();
 			break;
 		}
 	}
