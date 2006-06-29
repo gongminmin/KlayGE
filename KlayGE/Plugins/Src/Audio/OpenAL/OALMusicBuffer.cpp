@@ -38,9 +38,10 @@ namespace KlayGE
 	OALMusicBuffer::OALMusicBuffer(AudioDataSourcePtr const & dataSource, uint32_t bufferSeconds, float volume)
 							: MusicBuffer(dataSource),
 								bufferQueue_(bufferSeconds * PreSecond),
-								play_thread_(boost::bind(&OALMusicBuffer::LoopUpdateBuffer, this)),
 								stopped_(true)
 	{
+		play_thread_.reset(new boost::thread(boost::bind(&OALMusicBuffer::LoopUpdateBuffer, this)));
+
 		alGenBuffers(static_cast<ALsizei>(bufferQueue_.size()), &bufferQueue_[0]);
 
 		alGenSources(1, &source_);
@@ -168,7 +169,7 @@ namespace KlayGE
 		if (!stopped_)
 		{
 			stopped_ = true;
-			play_thread_.join();
+			play_thread_->join();
 		}
 
 		alSourceStopv(1, &source_);

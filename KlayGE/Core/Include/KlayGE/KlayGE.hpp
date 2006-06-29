@@ -28,7 +28,7 @@
 #define KLAYGE_VER_STR		"KlayGE 3.3.0"
 
 #ifdef _VC_8_0
-#pragma warning(disable : 4819)
+#pragma warning(disable: 4819)
 #endif
 
 #include <boost/config/requires_threads.hpp>

@@ -292,79 +292,79 @@ namespace KlayGE
 	}
 
 	
-	RenderEffectParameter& RenderEffectParameter::operator=(bool const & value)
+	RenderEffectParameter& RenderEffectParameter::operator=(bool const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(int const & value)
+	RenderEffectParameter& RenderEffectParameter::operator=(int const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(float const & value)
+	RenderEffectParameter& RenderEffectParameter::operator=(float const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(float2 const & value)
+	RenderEffectParameter& RenderEffectParameter::operator=(float2 const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(float3 const & value)
+	RenderEffectParameter& RenderEffectParameter::operator=(float3 const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(float4 const & value)
+	RenderEffectParameter& RenderEffectParameter::operator=(float4 const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(float4x4 const & value)
+	RenderEffectParameter& RenderEffectParameter::operator=(float4x4 const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(SamplerPtr const & value)
+	RenderEffectParameter& RenderEffectParameter::operator=(SamplerPtr const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<bool> const & value)
+	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<bool> const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<int> const & value)
+	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<int> const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<float> const & value)
+	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<float> const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<float4> const & value)
+	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<float4> const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<float4x4> const & value)
+	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<float4x4> const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 		return *this;
@@ -448,67 +448,67 @@ namespace KlayGE
 		val.clear();
 	}
 
-	void RenderEffectParameter::DoFlush(bool const & value)
+	void RenderEffectParameter::DoFlush(bool const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void RenderEffectParameter::DoFlush(int const & value)
+	void RenderEffectParameter::DoFlush(int const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void RenderEffectParameter::DoFlush(float const & value)
+	void RenderEffectParameter::DoFlush(float const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void RenderEffectParameter::DoFlush(float2 const & value)
+	void RenderEffectParameter::DoFlush(float2 const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void RenderEffectParameter::DoFlush(float3 const & value)
+	void RenderEffectParameter::DoFlush(float3 const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void RenderEffectParameter::DoFlush(float4 const & value)
+	void RenderEffectParameter::DoFlush(float4 const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void RenderEffectParameter::DoFlush(float4x4 const & value)
+	void RenderEffectParameter::DoFlush(float4x4 const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void RenderEffectParameter::DoFlush(SamplerPtr const & value)
+	void RenderEffectParameter::DoFlush(SamplerPtr const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void RenderEffectParameter::DoFlush(std::vector<bool> const & value)
+	void RenderEffectParameter::DoFlush(std::vector<bool> const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void RenderEffectParameter::DoFlush(std::vector<int> const & value)
+	void RenderEffectParameter::DoFlush(std::vector<int> const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void RenderEffectParameter::DoFlush(std::vector<float> const & value)
+	void RenderEffectParameter::DoFlush(std::vector<float> const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void RenderEffectParameter::DoFlush(std::vector<float4> const & value)
+	void RenderEffectParameter::DoFlush(std::vector<float4> const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void RenderEffectParameter::DoFlush(std::vector<float4x4> const & value)
+	void RenderEffectParameter::DoFlush(std::vector<float4x4> const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 	}

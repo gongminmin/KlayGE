@@ -20,8 +20,10 @@
 
 #include <boost/assert.hpp>
 #include <boost/array.hpp>
+#pragma warning(push)
 #pragma warning(disable: 4512)
 #include <boost/lambda/lambda.hpp>
+#pragma warning(pop)
 
 #include <KlayGE/DInput/DInput.hpp>
 #include <KlayGE/DInput/DInputDevice.hpp>

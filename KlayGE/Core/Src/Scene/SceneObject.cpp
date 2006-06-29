@@ -51,17 +51,17 @@ namespace KlayGE
 
 	bool SceneObject::Cullable() const
 	{
-		return attrib_ & SOA_Cullable;
+		return ((attrib_ & SOA_Cullable) != 0);
 	}
 
 	bool SceneObject::ShortAge() const
 	{
-		return attrib_ & SOA_ShortAge;
+		return ((attrib_ & SOA_ShortAge) != 0);
 	}
 
 	bool SceneObject::Moveable() const
 	{
-		return attrib_ & SOA_Moveable;
+		return ((attrib_ & SOA_Moveable) != 0);
 	}
 
 	vertex_elements_type const & SceneObject::InstanceFormat() const

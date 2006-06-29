@@ -66,7 +66,7 @@ float4 RefractPS(float3 normal : TEXCOORD0,
 	refracted_clr.b = texCUBE(cubeMapSampler, TBlue).b;
 	refracted_clr.a = 1;
 
-	half fresnel_factor = fast_fresnel(-incident, normal, 0.2f);
+	half fresnel_factor = fast_fresnel(-incident, normal, 0.03f);
 
 	half3 R = reflect(incident, normal);
 	half4 reflected_clr = texCUBE(cubeMapSampler, R);

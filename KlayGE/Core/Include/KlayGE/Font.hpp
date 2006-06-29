@@ -31,8 +31,10 @@
 #include <vector>
 
 #define NOMINMAX
+#pragma warning(push)
 #pragma warning(disable: 4127 4800)
 #include <boost/pool/pool_alloc.hpp>
+#pragma warning(pop)
 
 #include <ft2build.h>
 #include FT_FREETYPE_H

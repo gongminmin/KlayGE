@@ -12,12 +12,12 @@
 
 #include <KlayGE/KlayGE.hpp>
 
-#pragma warning(disable : 4127 4189)
 #include <boost/bind.hpp>
 
+#pragma warning(push)
+#pragma warning(disable: 4127 4189)
 #include <KlayGE/thread_pool.hpp>
-
-using namespace boost;
+#pragma warning(pop)
 
 namespace KlayGE
 {
@@ -49,14 +49,15 @@ namespace KlayGE
 		uint32_t old_max = static_cast<uint32_t>(threads_.size());
 		for (uint32_t i = old_max; i < max_num_threads; ++ i)
 		{
-			threads_.push_back(shared_ptr<thread>(new thread(bind(&thread_pool::working_thread_func, this))));
+			threads_.push_back(boost::shared_ptr<boost::thread>(
+				new boost::thread(boost::bind(&thread_pool::working_thread_func, this))));
 		}
 	}
 
-	uint32_t thread_pool::add_thread(function0<void> const & thread_func)
+	uint32_t thread_pool::add_thread(boost::function0<void> const & thread_func)
 	{
 		{
-			mutex::scoped_lock lock(mutex_threads_);
+			boost::mutex::scoped_lock lock(mutex_threads_);
 
 			++ last_thread_id_;
 			ready_queue_.push_back(thread_desc(last_thread_id_, thread_func));
@@ -107,7 +108,7 @@ namespace KlayGE
 	{
 		for (;;)
 		{
-			mutex::scoped_lock lock(mutex_threads_);
+			boost::mutex::scoped_lock lock(mutex_threads_);
 			if (ready_queue_.empty() && busy_queue_.empty())
 			{
 				break;
@@ -121,11 +122,11 @@ namespace KlayGE
 	{
 		for (;;)
 		{
-			mutex::scoped_lock lock(mutex_threads_);
+			boost::mutex::scoped_lock lock(mutex_threads_);
 
 			if (!ready_queue_.empty())
 			{
-				function0<void> thread_func = ready_queue_.front().func;
+				boost::function0<void> thread_func = ready_queue_.front().func;
 				uint32_t cur_id = ready_queue_.front().thread_id;
 				busy_queue_.insert(cur_id);
 				ready_queue_.pop_front();

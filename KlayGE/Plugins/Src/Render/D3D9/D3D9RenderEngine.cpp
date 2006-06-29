@@ -58,7 +58,6 @@
 
 #include <algorithm>
 #include <boost/assert.hpp>
-#pragma warning(disable : 4189)
 #include <boost/bind.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
@@ -74,7 +73,7 @@ namespace KlayGE
 	{
 		// Create our Direct3D object
 		d3d_ = MakeCOMPtr(Direct3DCreate9(D3D_SDK_VERSION));
-		Verify(d3d_);
+		Verify(d3d_ != ID3D9Ptr());
 
 		adapterList_.Enumerate(d3d_);
 	}
@@ -203,7 +202,7 @@ namespace KlayGE
 		default_render_window_ = win;
 
 		d3dDevice_ = win->D3DDevice();
-		Verify(d3dDevice_);
+		Verify(d3dDevice_ != ID3D9DevicePtr());
 
 		this->FillRenderDeviceCaps();
 

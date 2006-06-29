@@ -164,7 +164,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	uint32_t OGLRenderTechnique::DoBegin(uint32_t flags)
+	uint32_t OGLRenderTechnique::DoBegin(uint32_t /*flags*/)
 	{
 		return this->NumPasses();
 	}

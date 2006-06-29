@@ -499,7 +499,7 @@ namespace KlayGE
 	{
 	}
 
-	void D3D9RenderWindow::DoResize(uint32_t width, uint32_t height)
+	void D3D9RenderWindow::DoResize(uint32_t /*width*/, uint32_t /*height*/)
 	{
 	}
 

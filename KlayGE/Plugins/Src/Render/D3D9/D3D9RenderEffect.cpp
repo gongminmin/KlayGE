@@ -30,9 +30,11 @@
 #include <KlayGE/Sampler.hpp>
 
 #include <boost/assert.hpp>
-#pragma warning(disable : 4189)
 #include <boost/bind.hpp>
+#pragma warning(push)
+#pragma warning(disable: 4127 4189)
 #include <boost/algorithm/string/split.hpp>
+#pragma warning(pop)
 #include <functional>
 
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
@@ -397,7 +399,7 @@ namespace KlayGE
 		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
 	}
 
-	void D3D9RenderEffectParameterSampler::DoFlush(SamplerPtr const & value)
+	void D3D9RenderEffectParameterSampler::DoFlush(SamplerPtr const & /*value*/)
 	{
 	}
 

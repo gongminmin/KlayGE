@@ -32,8 +32,10 @@
 #include <fstream>
 
 #include <boost/assert.hpp>
+#pragma warning(push)
 #pragma warning(disable: 4244 4245)
 #include <boost/crc.hpp>
+#pragma warning(pop)
 #include <boost/filesystem/operations.hpp>
 
 #include <KlayGE/LZSS/LZSS.hpp>

@@ -29,8 +29,10 @@
 
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
+#pragma warning(push)
 #pragma warning(disable: 4512)
 #include <boost/algorithm/string/case_conv.hpp>
+#pragma warning(pop)
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_FileSystem_PackedFile_d.lib")

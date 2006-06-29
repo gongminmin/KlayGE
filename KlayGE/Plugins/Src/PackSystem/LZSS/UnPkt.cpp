@@ -26,10 +26,14 @@
 #include <sstream>
 
 #include <boost/assert.hpp>
+#pragma warning(push)
 #pragma warning(disable: 4127 4800)
 #include <boost/pool/pool_alloc.hpp>
+#pragma warning(pop)
+#pragma warning(push)
 #pragma warning(disable: 4244 4245)
 #include <boost/crc.hpp>
+#pragma warning(pop)
 
 #include <KlayGE/LZSS/LZSS.hpp>
 

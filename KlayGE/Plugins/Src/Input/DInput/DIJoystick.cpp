@@ -16,8 +16,10 @@
 #include <KlayGE/KlayGE.hpp>
 
 #include <algorithm>
+#pragma warning(push)
 #pragma warning(disable: 4512)
 #include <boost/lambda/lambda.hpp>
+#pragma warning(pop)
 
 #include <KlayGE/DInput/DInput.hpp>
 #include <KlayGE/DInput/DInputDevice.hpp>

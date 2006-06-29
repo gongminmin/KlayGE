@@ -21,9 +21,10 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/InputFactory.hpp>
 
-#pragma warning(disable: 4512 4189)
-
+#pragma warning(push)
+#pragma warning(disable: 4512)
 #include <boost/assign.hpp>
+#pragma warning(pop)
 #include <boost/assign/std/vector.hpp>
 
 #include <KlayGE/CameraController.hpp>

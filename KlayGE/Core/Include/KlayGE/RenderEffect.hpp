@@ -39,8 +39,10 @@
 #include <map>
 #include <string>
 
+#pragma warning(push)
 #pragma warning(disable: 4100 4512)
 #include <boost/utility.hpp>
+#pragma warning(pop)
 #include <boost/any.hpp>
 
 #include <KlayGE/Math.hpp>
@@ -96,7 +98,7 @@ namespace KlayGE
 		techniques_type techniques_;
 	};
 
-	class RenderTechnique
+	class RenderTechnique : boost::noncopyable
 	{
 	public:
 		RenderTechnique(RenderEffect& effect, std::string const & name)
@@ -147,7 +149,7 @@ namespace KlayGE
 		passes_type passes_;
 	};
 
-	class RenderPass
+	class RenderPass : boost::noncopyable
 	{
 	public:
 		RenderPass(RenderEffect& effect, uint32_t index)

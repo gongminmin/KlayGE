@@ -14,8 +14,10 @@
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <boost/assert.hpp>
+#pragma warning(push)
 #pragma warning(disable: 4127 4512)
 #include <boost/random.hpp>
+#pragma warning(pop)
 #include <boost/bind.hpp>
 
 #include <KlayGE/OpenAL/OALAudio.hpp>
@@ -51,7 +53,7 @@ namespace KlayGE
 
 		alGenSources(static_cast<ALsizei>(sources_.size()), &sources_[0]);
 
-		for (SourcesIter iter = sources_.begin(); iter != sources_.end(); ++ iter)
+		for (std::vector<ALuint>::iterator iter = sources_.begin(); iter != sources_.end(); ++ iter)
 		{
 			alSourcef(*iter, AL_PITCH, 1);
 			alSourcef(*iter, AL_GAIN, volume);
@@ -77,11 +79,11 @@ namespace KlayGE
 
 	// ·µ»Ø¿ÕÏÐµÄ»º³åÇø
 	/////////////////////////////////////////////////////////////////////////////////
-	OALSoundBuffer::SourcesIter OALSoundBuffer::FreeSource()
+	std::vector<ALuint>::iterator OALSoundBuffer::FreeSource()
 	{
 		BOOST_ASSERT(!sources_.empty());
 
-		SourcesIter iter(std::find_if(sources_.begin(), sources_.end(), IsSourceFree));
+		std::vector<ALuint>::iterator iter = std::find_if(sources_.begin(), sources_.end(), IsSourceFree);
 
 		if (iter == sources_.end())
 		{

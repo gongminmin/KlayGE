@@ -25,10 +25,12 @@
 #define NOMINMAX
 #include <windows.h>
 
-#pragma warning(disable: 4251 4275)
 #include <boost/utility.hpp>
 #include <boost/smart_ptr.hpp>
+#pragma warning(push)
+#pragma warning(disable: 4127 4189)
 #include <boost/thread.hpp>
+#pragma warning(pop)
 
 #include <KlayGE/Audio.hpp>
 
@@ -48,11 +50,6 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	class OALSoundBuffer : boost::noncopyable, public SoundBuffer
 	{
-	private:
-		typedef std::vector<ALuint>				Sources_type;
-		typedef Sources_type::iterator			SourcesIter;
-		typedef Sources_type::const_iterator	SourcesConstIter;
-
 	public:
 		OALSoundBuffer(AudioDataSourcePtr const & dataSource, uint32_t numSource, float volume);
 		~OALSoundBuffer();
@@ -73,10 +70,10 @@ namespace KlayGE
 
 	private:
 		void DoReset();
-		SourcesIter FreeSource();
+		std::vector<ALuint>::iterator FreeSource();
 
 	private:
-		Sources_type	sources_;
+		std::vector<ALuint>	sources_;
 		ALuint			buffer_;
 
 		float3		pos_;
@@ -124,7 +121,7 @@ namespace KlayGE
 		bool stopped_;
 		boost::condition play_cond_;
 		boost::mutex play_mutex_;
-		boost::thread play_thread_;
+		boost::shared_ptr<boost::thread> play_thread_;
 	};
 
 	// π‹¿Ì“Ù∆µ≤•∑≈

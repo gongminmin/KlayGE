@@ -16,7 +16,6 @@
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <boost/assert.hpp>
-#pragma warning(disable: 4239)
 #include <boost/bind.hpp>
 
 #include <KlayGE/Audio.hpp>

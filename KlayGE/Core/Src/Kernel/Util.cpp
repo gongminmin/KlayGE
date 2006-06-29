@@ -18,7 +18,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 
-#pragma warning(disable: 4251 4275)
 #include <boost/thread/xtime.hpp>
 #include <boost/thread/thread.hpp>
 

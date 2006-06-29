@@ -14,7 +14,11 @@
 #define _EVENT_HPP
 
 #include <list>
+
+#pragma warning(push)
+#pragma warning(disable: 4127 4189)
 #include <boost/function.hpp>
+#pragma warning(pop)
 
 namespace KlayGE
 {

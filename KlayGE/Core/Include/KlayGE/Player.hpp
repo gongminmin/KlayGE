@@ -19,9 +19,11 @@
 #include <list>
 #include <vector>
 
-#pragma warning(disable : 4251 4275)
 #include <boost/smart_ptr.hpp>
+#pragma warning(push)
+#pragma warning(disable : 4127 4189)
 #include <boost/thread/thread.hpp>
+#pragma warning(pop)
 
 #include <KlayGE/Socket.hpp>
 

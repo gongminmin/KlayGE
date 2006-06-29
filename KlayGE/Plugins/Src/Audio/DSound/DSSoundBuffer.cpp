@@ -21,8 +21,10 @@
 #include <cstring>
 
 #include <boost/assert.hpp>
-#pragma warning(disable: 4512)
+#pragma warning(push)
+#pragma warning(disable: 4127 4512)
 #include <boost/random.hpp>
+#pragma warning(pop)
 #include <boost/bind.hpp>
 
 #include <KlayGE/DSound/DSAudio.hpp>
