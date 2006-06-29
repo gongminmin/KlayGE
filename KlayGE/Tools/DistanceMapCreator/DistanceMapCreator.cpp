@@ -260,8 +260,8 @@ int main(int argc, char* argv[])
 	RenderSettings settings;
 	settings.width = 800;
 	settings.height = 600;
-	settings.colorDepth = 32;
-	settings.fullScreen = false;
+	settings.color_fmt = EF_ARGB8;
+	settings.full_screen = false;
 
 	app.Create("DistanceMapCreator", settings);
 
@@ -295,7 +295,7 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		BOOST_ASSERT(Texture::TT_3D == temp_texture->Type());
+		BOOST_ASSERT(Texture::TT_3D == src_texture->Type());
 
 		TexturePtr vol_map_texture = render_factory.MakeTexture3D(width, height, depth, 1, EF_L8);
 		src_texture->CopyToTexture(*vol_map_texture);

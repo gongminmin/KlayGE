@@ -75,7 +75,7 @@ void VecToUChar(D3DXVECTOR3 const & v, unsigned char& x, unsigned char& y, unsig
 	z = static_cast<unsigned char>((v.z * 127 + 128));
 }
 
-TexturePtr CreateCubeMap(int cube_size, std::string const & cube_name)
+TexturePtr CreateCubeMap(int cube_size)
 {
 	RenderFactory& render_factory(Context::Instance().RenderFactoryInstance());
 
@@ -132,12 +132,12 @@ int main(int argc, char* argv[])
 	RenderSettings settings;
 	settings.width = 800;
 	settings.height = 600;
-	settings.colorDepth = 32;
-	settings.fullScreen = false;
+	settings.color_fmt = EF_ARGB8;
+	settings.full_screen = false;
 
 	app.Create("NormalizerCubeMap", settings);
 
-	TexturePtr cube = CreateCubeMap(size, cube_name);
+	TexturePtr cube = CreateCubeMap(size);
 	SaveTexture(cube, cube_name);
 
 	cout << "Normalizer cube map is saved to " << cube_name << endl;
