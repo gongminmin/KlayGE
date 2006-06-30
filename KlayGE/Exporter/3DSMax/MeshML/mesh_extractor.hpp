@@ -56,11 +56,15 @@ namespace KlayGE
 		unsigned char num_components;
 	};
 
+	typedef std::vector<std::pair<std::string, float> > binds_t;
+
 	struct vertex_t
 	{
 		Point3 pos;
 		Point3 normal;
 		std::vector<Point2> tex;
+
+		binds_t binds;
 	};
 
 	typedef std::vector<vertex_t> vertices_t;
@@ -77,6 +81,16 @@ namespace KlayGE
 
 	typedef std::vector<vertex_element_t> vertex_elements_t;
 
+	struct joint_t
+	{
+		Point3 pos;
+		Quat quat;
+
+		std::string parent_name;
+	};
+
+	typedef std::map<std::string, joint_t> joints_t;
+
 	struct object_info_t
 	{
 		std::string		name;
@@ -92,18 +106,29 @@ namespace KlayGE
 	class meshml_extractor
 	{
 	public:
-		meshml_extractor();
+		explicit meshml_extractor(int joints_per_ver);
 
 		void export_objects(std::vector<INode*> const & nodes, bool flip_normals);
 		void write_xml(std::basic_string<TCHAR> const & file_name);
 
 	private:
 		void extract_object(INode* node, bool flip_normals);
+		void remove_redundant_joints();
+
+		void joint_from_matrix(joint_t& joint, Matrix3 const & mat);
+		Modifier* find_modifier(INode* node, Class_ID const & class_id);
+		void physique_modifier(INode* node, std::string const & root_name,
+			std::vector<std::pair<Point3, binds_t> >& positions);
+		void skin_modifier(INode* node, std::string const & root_name,
+			std::vector<std::pair<Point3, binds_t> >& positions);
 
 	private:
 		typedef std::vector<object_info_t> objects_info_t;
 
 		objects_info_t objs_info_;
+
+		joints_t joints_;
+		int joints_per_ver_;
 	};
 }
 

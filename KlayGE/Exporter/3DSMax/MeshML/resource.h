@@ -5,6 +5,9 @@
 #define IDD_MESHML_EXPORT               1002
 #define IDC_HIDDEN                      1004
 #define IDC_SEL_ALL                     1006
+#define IDC_MAX_WEIGHT                  1007
+#define IDC_JOINT_PER_VER               1007
+#define IDC_SPIN                        1008
 #define IDC_NODE_LIST                   1015
 #define IDC_FLIP_NORMALS                1016
 

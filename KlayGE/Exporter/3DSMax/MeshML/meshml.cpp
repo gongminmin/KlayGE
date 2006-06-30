@@ -153,7 +153,7 @@ namespace KlayGE
 			meshml_export* instance = reinterpret_cast<meshml_export*>(lparam);
 			assert(instance != NULL);
 
-			::SetWindowLong(wnd, GWL_USERDATA, reinterpret_cast<long>(instance));
+			::SetWindowLongPtr(wnd, GWL_USERDATA, reinterpret_cast<LONG_PTR>(instance));
 
 			instance->dlg_wnd_ = wnd;
 
@@ -163,7 +163,7 @@ namespace KlayGE
 		}
 		else
 		{
-			meshml_export* instance = reinterpret_cast<meshml_export*>(::GetWindowLong(wnd, GWL_USERDATA));
+			meshml_export* instance = reinterpret_cast<meshml_export*>(::GetWindowLongPtr(wnd, GWL_USERDATA));
 
 			switch (msg)
 			{
@@ -183,17 +183,20 @@ namespace KlayGE
 					{
 						assert(instance != NULL);
 
+						HWND spin_wnd = ::GetDlgItem(wnd, IDC_SPIN);
+						int joint_per_ver = ::SendMessage(spin_wnd, UDM_GETPOS32, NULL, NULL);
+
 						HWND node_list_wnd = ::GetDlgItem(wnd, IDC_NODE_LIST);
 						int num_sel = ::SendMessage(node_list_wnd, LB_GETSELCOUNT, NULL, NULL);
 						if (num_sel > 0)
 						{
-							meshml_extractor extractor;
+							meshml_extractor extractor(joint_per_ver);
 
 							std::vector<int> sel_items(num_sel);
 							::SendMessage(node_list_wnd, LB_GETSELITEMS, num_sel, reinterpret_cast<LPARAM>(&sel_items[0]));
 
 							bool flip_normals = false;
-							if (BST_CHECKED == ::SendMessage(GetDlgItem(wnd, IDC_FLIP_NORMALS), BM_GETCHECK, NULL, NULL))
+							if (BST_CHECKED == ::SendMessage(::GetDlgItem(wnd, IDC_FLIP_NORMALS), BM_GETCHECK, NULL, NULL))
 							{
 								flip_normals = true;
 							}

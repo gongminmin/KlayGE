@@ -62,11 +62,18 @@ namespace
 			}
 		}
 	}
+
+	bool bind_cmp(std::pair<std::string, float> const& lhs,
+		std::pair<std::string, float> const& rhs)
+	{
+		return lhs.second > rhs.second;
+	}
 }
 
 namespace KlayGE
 {
-	meshml_extractor::meshml_extractor()
+	meshml_extractor::meshml_extractor(int joints_per_ver)
+						: joints_per_ver_(joints_per_ver)
 	{
 	}
 
@@ -100,7 +107,7 @@ namespace KlayGE
 		Matrix3 normal_matrix = obj_matrix;
 		normal_matrix.NoTrans();
 
-		std::vector<Point3> positions;
+		std::vector<std::pair<Point3, binds_t> > positions;
 		std::vector<Point3> normals;
 		std::map<int, std::vector<Point2> > texs;
 		std::vector<int> pos_indices;
@@ -162,7 +169,7 @@ namespace KlayGE
 			}
 			for (size_t i = 0; i < mesh.getNumVerts(); ++ i)
 			{
-				positions.push_back(mesh.verts[i]);
+				positions.push_back(std::make_pair(mesh.verts[i], binds_t()));
 				normals.push_back(mesh.gfxNormals[i]);
 			}
 
@@ -237,12 +244,56 @@ namespace KlayGE
 			}
 		}
 
+		this->physique_modifier(node, "root", positions);
+		this->skin_modifier(node, "root", positions);
+
+		if (joints_.empty())
+		{
+			joint_t root;
+			root.pos = Point3(0, 0, 0);
+			root.quat.Identity();
+			root.parent_name = "";
+			joints_.insert(std::make_pair("root", root));
+		}
+
+		for (std::vector<std::pair<Point3, binds_t> >::iterator iter = positions.begin();
+			iter != positions.end(); ++ iter)
+		{
+			binds_t binds = iter->second;
+
+			if (binds.size() > joints_per_ver_)
+			{
+				std::nth_element(binds.begin(), binds.begin() + joints_per_ver_, binds.end(), bind_cmp);
+				binds.resize(joints_per_ver_);
+
+				float totalweight = 0;
+				for (int j = 0; j < joints_per_ver_; ++ j)
+				{
+					totalweight += binds[j].second;
+				}
+
+				for (int j = 0; j < joints_per_ver_; ++ j)
+				{
+					binds[j].second /= totalweight;
+				}
+			}
+			else
+			{
+				for (int j = static_cast<int>(binds.size()); j < joints_per_ver_; ++ j)
+				{
+					binds.push_back(std::make_pair("root", 0));
+				}
+			}
+
+			iter->second = binds;
+		}
+
 		obj_info.vertices.resize(vertex_indices.size());
 		int ver_index = 0;
 		for (std::set<vertex_index_t>::iterator iter = vertex_indices.begin();
 			iter != vertex_indices.end(); ++ iter, ++ ver_index)
 		{
-			Point3 pos = positions[iter->pos_index] * obj_matrix;
+			Point3 pos = positions[iter->pos_index].first * obj_matrix;
 			obj_info.vertices[ver_index].pos.x = pos.x;
 			obj_info.vertices[ver_index].pos.y = pos.z;
 			obj_info.vertices[ver_index].pos.z = pos.y;
@@ -274,6 +325,8 @@ namespace KlayGE
 			{
 				obj_info.triangles[iter->ref_triangle[i] / 3].vertex_index[iter->ref_triangle[i] % 3] = ver_index;
 			}
+
+			obj_info.vertices[ver_index].binds = positions[iter->pos_index].second;
 		}
 
 		obj_info.vertex_elements.push_back(vertex_element_t(VEU_Position, 0, 3));
@@ -286,6 +339,264 @@ namespace KlayGE
 		objs_info_.push_back(obj_info);
 	}
 
+	void meshml_extractor::joint_from_matrix(joint_t& joint, Matrix3 const & mat)
+	{
+		Point3 pos(mat.GetTrans());
+		joint.pos.x = pos.x;
+		joint.pos.y = pos.z;
+		joint.pos.z = pos.y;
+
+		Quat quat(mat);
+		joint.quat.x = quat.x;
+		joint.quat.y = quat.z;
+		joint.quat.z = quat.y;
+		joint.quat.w = quat.w;
+	}
+
+	Modifier* meshml_extractor::find_modifier(INode* node, Class_ID const & class_id)
+	{
+		Object* obj_ref = node->GetObjectRef();
+		while ((obj_ref != NULL) && (obj_ref->SuperClassID() == GEN_DERIVOB_CLASS_ID))
+		{
+			IDerivedObject* DerivedObjectPtr = static_cast<IDerivedObject*>(obj_ref);
+
+			// Iterate over all entries of the modifier stack.
+			for (int mod_stack_index = 0; mod_stack_index < DerivedObjectPtr->NumModifiers(); ++ mod_stack_index)
+			{
+				Modifier* mod = DerivedObjectPtr->GetModifier(mod_stack_index);
+				if (class_id == mod->ClassID())
+				{
+					return mod;
+				}
+			}
+
+			obj_ref = DerivedObjectPtr->GetObjRef();
+		}
+
+		return NULL;
+	}
+
+	void meshml_extractor::physique_modifier(INode* node, std::string const & root_name,
+										std::vector<std::pair<Point3, binds_t> >& positions)
+	{
+		Modifier* mod = this->find_modifier(node, Class_ID(PHYSIQUE_CLASS_ID_A, PHYSIQUE_CLASS_ID_B));
+		if (mod != NULL)
+		{
+			// Is this Physique?
+			assert(Class_ID(PHYSIQUE_CLASS_ID_A, PHYSIQUE_CLASS_ID_B) == mod->ClassID());
+
+			IPhysiqueExport* phy_exp = static_cast<IPhysiqueExport*>(mod->GetInterface(I_PHYINTERFACE));
+			if (phy_exp != NULL)
+			{
+				// create a ModContext Export Interface for the specific node of the Physique Modifier
+				IPhyContextExport* mod_context = phy_exp->GetContextInterface(node);
+				if (mod_context != NULL)
+				{
+					// needed by vertex interface (only Rigid supported by now)
+					mod_context->ConvertToRigid(true);
+
+					// more than a single bone per vertex
+					mod_context->AllowBlending(true);
+
+					for (int i = 0; i < mod_context->GetNumberVertices(); ++ i)
+					{
+						IPhyVertexExport* phy_ver_exp = mod_context->GetVertexInterface(i);
+
+						if (phy_ver_exp != NULL)
+						{
+							switch (phy_ver_exp->GetVertexType())
+							{
+							case RIGID_NON_BLENDED_TYPE:
+								{
+									IPhyRigidVertex* phy_rigid_ver = static_cast<IPhyRigidVertex*>(phy_ver_exp);
+
+									INode* joint_node = phy_rigid_ver->GetNode();
+									std::string joint_name = tstr_to_str(joint_node->GetName());
+
+									joints_t::iterator joint_iter = joints_.find(joint_name);
+									if (joint_iter == joints_.end())
+									{
+										joint_t joint;
+										this->joint_from_matrix(joint, joint_node->GetNodeTM(0));
+
+										INode* parent_node = joint_node->GetParentNode();
+										if (is_bone(parent_node))
+										{
+											joint.parent_name = tstr_to_str(parent_node->GetName());
+										}
+										else
+										{
+											joint.parent_name = root_name;
+										}
+
+										joints_[joint_name] = joint;
+									}
+
+									for (binds_t::iterator iter = positions[i].second.begin();
+										iter != positions[i].second.end(); ++ iter)
+									{
+										if (iter->first == joint_name)
+										{
+											iter->second = 1;
+										}
+									}
+								}
+								break;
+
+							case RIGID_BLENDED_TYPE:
+								{
+									IPhyBlendedRigidVertex* phy_blended_rigid_ver = static_cast<IPhyBlendedRigidVertex*>(phy_ver_exp);
+
+									for (int i = 0; i < phy_blended_rigid_ver->GetNumberNodes(); ++ i)
+									{
+										INode* joint_node = phy_blended_rigid_ver->GetNode(i);
+										std::string joint_name = tstr_to_str(joint_node->GetName());
+
+										joints_t::iterator joint_iter = joints_.find(joint_name);
+										if (joint_iter == joints_.end())
+										{
+											joint_t joint;
+											this->joint_from_matrix(joint, joint_node->GetNodeTM(0));
+
+											INode* parent_node = joint_node->GetParentNode();
+											if (is_bone(parent_node))
+											{
+												joint.parent_name = tstr_to_str(parent_node->GetName());
+											}
+											else
+											{
+												joint.parent_name = root_name;
+											}
+
+											joints_[joint_name] = joint;
+										}
+
+										for (binds_t::iterator iter = positions[i].second.begin();
+											iter != positions[i].second.end(); ++ iter)
+										{
+											if (iter->first == joint_name)
+											{
+												iter->second = phy_blended_rigid_ver->GetWeight(i);
+											}
+										}
+									}
+								}
+								break;
+							}
+						}
+					}
+				}
+
+				phy_exp->ReleaseContextInterface(mod_context);
+			}
+
+			mod->ReleaseInterface(I_PHYINTERFACE, phy_exp);
+		}
+	}
+
+	void meshml_extractor::skin_modifier(INode* node, std::string const & root_name,
+									std::vector<std::pair<Point3, binds_t> >& positions)
+	{
+		Modifier* mod = this->find_modifier(node, SKIN_CLASSID);
+		if (mod != NULL)
+		{
+			// Is this Skin?
+			assert(SKIN_CLASSID == mod->ClassID());
+
+			ISkin* skin = static_cast<ISkin*>(mod->GetInterface(I_SKIN));
+			if (skin != NULL)
+			{
+				ISkinContextData* skin_cd = skin->GetContextInterface(node);
+
+				if (skin_cd != NULL)
+				{
+					for (int i = 0; i < skin_cd->GetNumPoints(); ++ i)
+					{
+						for (int j = 0; j < skin_cd->GetNumAssignedBones(i); ++ j)
+						{
+							INode* joint_node = skin->GetBone(skin_cd->GetAssignedBone(i, j));
+							std::string const joint_name = tstr_to_str(joint_node->GetName());
+							for (binds_t::iterator iter = positions[i].second.begin();
+								iter != positions[i].second.end(); ++ iter)
+							{
+								if (iter->first == joint_name)
+								{
+									iter->second = skin_cd->GetBoneWeight(i, j);
+								}
+							}
+						}
+					}
+
+					for (int i = 0; i < skin->GetNumBones(); ++ i)
+					{
+						INode* joint_node = skin->GetBone(i);
+						std::string joint_name = tstr_to_str(joint_node->GetName());
+
+						Matrix3 joint_init_mat;
+						skin->GetBoneInitTM(joint_node, joint_init_mat, false);
+
+						joints_t::iterator joint_iter = joints_.find(joint_name);
+						if (joint_iter == joints_.end())
+						{
+							joint_t joint;
+							this->joint_from_matrix(joint, joint_init_mat);
+
+							INode* parent_node = joint_node->GetParentNode();
+							if (is_bone(parent_node))
+							{
+								joint.parent_name = tstr_to_str(parent_node->GetName());
+							}
+							else
+							{
+								joint.parent_name = root_name;
+							}
+
+							joints_[joint_name] = joint;
+						}
+					}
+				}
+
+				mod->ReleaseInterface(I_SKIN, skin);
+			}
+		}
+	}
+
+	void meshml_extractor::remove_redundant_joints()
+	{
+		std::set<std::string> joints_used;
+		for (size_t i = 0; i < objs_info_.size(); ++ i)
+		{
+			for (size_t j = 0; j < objs_info_[i].vertices.size(); ++ j)
+			{
+				for (binds_t::iterator k = objs_info_[i].vertices[j].binds.begin();
+					k != objs_info_[i].vertices[j].binds.end(); ++ k)
+				{
+					joints_used.insert(k->first);
+				}
+			}
+		}
+
+		for (joints_t::iterator iter = joints_.begin(); iter != joints_.end(); ++ iter)
+		{
+			if (joints_used.find(iter->first) != joints_used.end())
+			{
+				joints_used.insert(iter->second.parent_name);
+			}
+		}
+
+		for (joints_t::iterator iter = joints_.begin(); iter != joints_.end();)
+		{
+			if (joints_used.find(iter->first) == joints_used.end())
+			{
+				iter = joints_.erase(iter);
+			}
+			else
+			{
+				++ iter;
+			}
+		}
+	}
+
 	void meshml_extractor::write_xml(std::basic_string<TCHAR> const & file_name)
 	{
 		std::ofstream ofs(tstr_to_str(file_name).c_str());
@@ -294,11 +605,80 @@ namespace KlayGE
 			return;
 		}
 
+		this->remove_redundant_joints();
+
+		std::map<std::string, int> joints_name_to_id;
+		std::vector<std::string> joints_id_to_name;
+		{
+			for (joints_t::const_iterator iter = joints_.begin(); iter != joints_.end(); ++ iter)
+			{
+				joints_id_to_name.push_back(iter->first);
+			}
+
+			bool swapped = true;
+			while (swapped)
+			{
+				swapped = false;
+				for (int i = 0; i < joints_id_to_name.size(); ++ i)
+				{
+					int par_index = -1;
+					if (!joints_[joints_id_to_name[i]].parent_name.empty())
+					{
+						std::vector<std::string>::iterator par_iter = std::find(joints_id_to_name.begin(), joints_id_to_name.end(),
+							joints_[joints_id_to_name[i]].parent_name);
+						assert(par_iter != joints_id_to_name.end());
+						par_index = par_iter - joints_id_to_name.begin();
+					}
+
+					if (par_index > i)
+					{
+						std::swap(joints_id_to_name[i], joints_id_to_name[par_index]);
+						swapped = true;
+						break;
+					}
+				}
+			}
+
+			for (int i = 0; i < joints_id_to_name.size(); ++ i)
+			{
+				joints_name_to_id.insert(std::make_pair(joints_id_to_name[i], i));
+			}
+		}
+
 		using std::endl;
 
 		ofs << "<?xml version=\'1.0\' encoding=\'utf-8\' standalone=\'no\'?>" << endl;
 		ofs << "<!DOCTYPE Model SYSTEM \'model.dtd\'>" << endl << endl;
 		ofs << "<model version=\'2\'>" << endl;
+
+		ofs << "\t<bones_chunk>" << endl;
+		for (std::vector<std::string>::const_iterator iter = joints_id_to_name.begin(); iter != joints_id_to_name.end(); ++ iter)
+		{
+			int parent_id = -1;
+			if (!joints_[*iter].parent_name.empty())
+			{
+				assert(joints_name_to_id.find(joints_[*iter].parent_name) != joints_name_to_id.end());
+				parent_id = joints_name_to_id[joints_[*iter].parent_name];
+			}
+
+			ofs << "\t\t<bone name=\'" << *iter
+				<< "\' parent=\'" << parent_id
+				<< "\'>" << endl;
+
+			joint_t& joint = joints_[*iter];
+
+			ofs << "\t\t\t<bind_pos x=\'" << joint.pos.x
+				<< "\' y=\'" << joint.pos.y
+				<< "\' z=\'" << joint.pos.z << "\'/>" << endl;
+
+			ofs << "\t\t\t<bind_quat x=\'" << joint.quat.x
+				<< "\' y=\'" << joint.quat.y
+				<< "\' z=\'" << joint.quat.z
+				<< "\' w=\'" << joint.quat.w << "\'/>" << endl;
+
+			ofs << "\t\t</bone>" << endl;
+		}
+		ofs << "\t</bones_chunk>" << endl << endl;
 
 		ofs << "\t<meshes_chunk>" << endl;
 		for (objects_info_t::const_iterator oi_iter = objs_info_.begin(); oi_iter != objs_info_.end(); ++ oi_iter)
@@ -341,6 +721,14 @@ namespace KlayGE
 				{
 					ofs << "\t\t\t\t\t<tex_coord u=\'" << t_iter->x
 						<< "\' v=\'" << t_iter->y << "\'/>" << endl;
+				}
+
+				for (binds_t::const_iterator b_iter = v_iter->binds.begin();
+					b_iter != v_iter->binds.end(); ++ b_iter)
+				{
+					assert(joints_name_to_id.find(b_iter->first) != joints_name_to_id.end());
+					ofs << "\t\t\t\t\t<weight bone_index=\'" << joints_name_to_id[b_iter->first]
+						<< "\' weight=\'" << b_iter->second << "\'/>" << endl;
 				}
 
 				ofs << "\t\t\t\t</vertex>" << endl;
