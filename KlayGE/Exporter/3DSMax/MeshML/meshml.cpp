@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <max.h>
+#include <Interval.h>
 
 #include <vector>
 #include <sstream>
@@ -183,14 +184,14 @@ namespace KlayGE
 					{
 						assert(instance != NULL);
 
-						HWND spin_wnd = ::GetDlgItem(wnd, IDC_SPIN);
-						int joint_per_ver = ::SendMessage(spin_wnd, UDM_GETPOS32, NULL, NULL);
-
 						HWND node_list_wnd = ::GetDlgItem(wnd, IDC_NODE_LIST);
 						int num_sel = ::SendMessage(node_list_wnd, LB_GETSELCOUNT, NULL, NULL);
 						if (num_sel > 0)
 						{
-							meshml_extractor extractor(joint_per_ver);
+							int const joint_per_ver = ::SendMessage(::GetDlgItem(wnd, IDC_SPIN_JOINT_PER_VER), UDM_GETPOS32, NULL, NULL);
+							Interval const se_ticks = instance->max_interface_->GetAnimRange();
+							meshml_extractor extractor(joint_per_ver,
+								se_ticks.Start() / GetTicksPerFrame(), se_ticks.End() / GetTicksPerFrame());
 
 							std::vector<int> sel_items(num_sel);
 							::SendMessage(node_list_wnd, LB_GETSELITEMS, num_sel, reinterpret_cast<LPARAM>(&sel_items[0]));

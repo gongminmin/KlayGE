@@ -72,8 +72,10 @@ namespace
 
 namespace KlayGE
 {
-	meshml_extractor::meshml_extractor(int joints_per_ver)
-						: joints_per_ver_(joints_per_ver)
+	meshml_extractor::meshml_extractor(int joints_per_ver, int start_frame, int end_frame)
+						: joints_per_ver_(joints_per_ver),
+							start_frame_(start_frame), end_frame_(end_frame),
+							frame_rate_(GetFrameRate())
 	{
 	}
 
@@ -81,16 +83,22 @@ namespace KlayGE
 	{
 		for (size_t i = 0; i < nodes.size(); ++ i)
 		{
-			this->extract_object(nodes[i], flip_normals);
+			if (is_mesh(nodes[i]))
+			{
+				this->extract_object(nodes[i], flip_normals);
+			}
+			else
+			{
+				assert(is_bone(nodes[i]));
+
+				this->extract_bone(nodes[i]);
+			}
 		}
 	}
 
 	void meshml_extractor::extract_object(INode* node, bool flip_normals)
 	{
-		if (!is_mesh(node))
-		{
-			return;
-		}
+		assert(is_mesh(node));
 
 		object_info_t obj_info;
 
@@ -339,18 +347,43 @@ namespace KlayGE
 		objs_info_.push_back(obj_info);
 	}
 
-	void meshml_extractor::joint_from_matrix(joint_t& joint, Matrix3 const & mat)
+	void meshml_extractor::extract_bone(INode* node)
+	{
+		assert(is_bone(node));
+
+		int tpf = GetTicksPerFrame();
+		int start_tick = start_frame_ * tpf;
+		int end_tick = end_frame_ * tpf;
+		int tps = frame_rate_ * tpf;
+
+		key_frame_t kf;
+		kf.joint = tstr_to_str(node->GetName());
+
+		for (int i = start_tick; i != end_tick; i += tps)
+		{
+			Matrix3 tm = node->GetNodeTM(i);
+
+			kf.positions.push_back(point_from_matrix(tm));
+			kf.quaternions.push_back(quat_from_matrix(tm));
+		}
+
+		kfs_.push_back(kf);
+	}
+
+	Point3 meshml_extractor::point_from_matrix(Matrix3 const & mat)
 	{
 		Point3 pos(mat.GetTrans());
-		joint.pos.x = pos.x;
-		joint.pos.y = pos.z;
-		joint.pos.z = pos.y;
+		std::swap(pos.y, pos.z);
 
+		return pos;
+	}
+
+	Quat meshml_extractor::quat_from_matrix(Matrix3 const & mat)
+	{
 		Quat quat(mat);
-		joint.quat.x = quat.x;
-		joint.quat.y = quat.z;
-		joint.quat.z = quat.y;
-		joint.quat.w = quat.w;
+		std::swap(quat.y, quat.z);
+
+		return quat;
 	}
 
 	Modifier* meshml_extractor::find_modifier(INode* node, Class_ID const & class_id)
@@ -416,8 +449,11 @@ namespace KlayGE
 									joints_t::iterator joint_iter = joints_.find(joint_name);
 									if (joint_iter == joints_.end())
 									{
+										Matrix3 tm = joint_node->GetNodeTM(0);
+
 										joint_t joint;
-										this->joint_from_matrix(joint, joint_node->GetNodeTM(0));
+										joint.pos = this->point_from_matrix(tm);
+										joint.quat = this->quat_from_matrix(tm);
 
 										INode* parent_node = joint_node->GetParentNode();
 										if (is_bone(parent_node))
@@ -455,8 +491,11 @@ namespace KlayGE
 										joints_t::iterator joint_iter = joints_.find(joint_name);
 										if (joint_iter == joints_.end())
 										{
+											Matrix3 tm = joint_node->GetNodeTM(0);
+
 											joint_t joint;
-											this->joint_from_matrix(joint, joint_node->GetNodeTM(0));
+											joint.pos = this->point_from_matrix(tm);
+											joint.quat = this->quat_from_matrix(tm);
 
 											INode* parent_node = joint_node->GetParentNode();
 											if (is_bone(parent_node))
@@ -538,8 +577,11 @@ namespace KlayGE
 						joints_t::iterator joint_iter = joints_.find(joint_name);
 						if (joint_iter == joints_.end())
 						{
+							Matrix3 tm = joint_node->GetNodeTM(0);
+
 							joint_t joint;
-							this->joint_from_matrix(joint, joint_init_mat);
+							joint.pos = this->point_from_matrix(tm);
+							joint.quat = this->quat_from_matrix(tm);
 
 							INode* parent_node = joint_node->GetParentNode();
 							if (is_bone(parent_node))
@@ -748,6 +790,36 @@ namespace KlayGE
 			ofs << "\t\t</mesh>" << endl;
 		}
 		ofs << "\t</meshes_chunk>" << endl;
+
+		ofs << "\t<key_frames_chunk start_frame=\'" << start_frame_
+			<< "\' end_frame=\'" << end_frame_
+			<< "\' frame_rate=\'" << frame_rate_ << "\'>" << endl;
+		for (key_frames_t::const_iterator iter = kfs_.begin(); iter != kfs_.end(); ++ iter)
+		{
+			assert(iter->positions.size() == iter->quaternions.size());
+
+			ofs << "\t\t<key_frame joint=\'" << iter->joint << "\'>" << endl;
+
+			for (size_t i = 0; i < iter->positions.size(); ++ i)
+			{
+				ofs << "\t\t\t<key>" << endl;
+
+				ofs << "\t\t\t\t<pos x=\'" << iter->positions[i].x
+					<< "\' y=\'" << iter->positions[i].y
+					<< "\' z=\'" << iter->positions[i].z << "\'/>" << endl;
+
+				ofs << "\t\t\t\t<quat x=\'" << iter->quaternions[i].x
+					<< "\' y=\'" << iter->quaternions[i].y
+					<< "\' z=\'" << iter->quaternions[i].z
+					<< "\' w=\'" << iter->quaternions[i].w << "\'/>" << endl;
+
+				ofs << "\t\t\t</key>" << endl;
+			}
+
+			ofs << "\t\t</key_frame>" << endl;
+		}
+		ofs << "\t</key_frames_chunk>" << endl << endl;
+
 		ofs << "</model>" << endl;
 	}
 }

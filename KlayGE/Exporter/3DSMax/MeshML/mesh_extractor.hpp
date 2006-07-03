@@ -91,6 +91,16 @@ namespace KlayGE
 
 	typedef std::map<std::string, joint_t> joints_t;
 
+	struct key_frame_t
+	{
+		std::string joint;
+
+		std::vector<Point3> positions;
+		std::vector<Quat> quaternions;
+	};
+
+	typedef std::vector<key_frame_t> key_frames_t;
+
 	struct object_info_t
 	{
 		std::string		name;
@@ -106,16 +116,18 @@ namespace KlayGE
 	class meshml_extractor
 	{
 	public:
-		explicit meshml_extractor(int joints_per_ver);
+		meshml_extractor(int joints_per_ver, int start_frame, int end_frame);
 
 		void export_objects(std::vector<INode*> const & nodes, bool flip_normals);
 		void write_xml(std::basic_string<TCHAR> const & file_name);
 
 	private:
 		void extract_object(INode* node, bool flip_normals);
+		void extract_bone(INode* node);
 		void remove_redundant_joints();
 
-		void joint_from_matrix(joint_t& joint, Matrix3 const & mat);
+		Point3 point_from_matrix(Matrix3 const & mat);
+		Quat quat_from_matrix(Matrix3 const & mat);
 		Modifier* find_modifier(INode* node, Class_ID const & class_id);
 		void physique_modifier(INode* node, std::string const & root_name,
 			std::vector<std::pair<Point3, binds_t> >& positions);
@@ -129,6 +141,11 @@ namespace KlayGE
 
 		joints_t joints_;
 		int joints_per_ver_;
+
+		int start_frame_;
+		int end_frame_;
+		int frame_rate_;
+		key_frames_t kfs_;
 	};
 }
 
