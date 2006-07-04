@@ -10,6 +10,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NormalizerCubeMap", "Normal
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GLCompatibility", "GLCompatibility.vcproj", "{A004459D-F259-44EE-960B-CF6EEDCECC08}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NormalMapCompressor", "NormalMapCompressor.vcproj", "{15F21D55-8B10-470F-BE79-54D53DE384A7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -36,6 +38,10 @@ Global
 		{A004459D-F259-44EE-960B-CF6EEDCECC08}.Debug|Win32.Build.0 = Debug|Win32
 		{A004459D-F259-44EE-960B-CF6EEDCECC08}.Release|Win32.ActiveCfg = Release|Win32
 		{A004459D-F259-44EE-960B-CF6EEDCECC08}.Release|Win32.Build.0 = Release|Win32
+		{15F21D55-8B10-470F-BE79-54D53DE384A7}.Debug|Win32.ActiveCfg = Debug|Win32
+		{15F21D55-8B10-470F-BE79-54D53DE384A7}.Debug|Win32.Build.0 = Debug|Win32
+		{15F21D55-8B10-470F-BE79-54D53DE384A7}.Release|Win32.ActiveCfg = Release|Win32
+		{15F21D55-8B10-470F-BE79-54D53DE384A7}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

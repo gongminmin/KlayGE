@@ -1,9 +1,10 @@
-float4 joint_rots[64];
-float4 joint_poss[64];
-
-float4x4 worldviewproj : WORLDVIEWPROJECTION;
-float3 light_pos = float3(300, 100, 100);
-float3 eye_pos;
+float3 decompress_normal(sampler2D normal_map, float2 uv)
+{
+	float3 normal;
+	normal.xy = tex2D(normal_map, uv).ag * 2 - 1;
+	normal.z = sqrt(1 - dot(normal.xy, normal.xy));
+	return normal;
+}
 
 float3 mul_quat(float3 v, float4 quat)
 {
@@ -12,6 +13,13 @@ float3 mul_quat(float3 v, float4 quat)
 
 	return abc.x * v + abc.y * quat.xyz + abc.z * cross(quat.xyz, v);
 }
+
+float4 joint_rots[64];
+float4 joint_poss[64];
+
+float4x4 worldviewproj : WORLDVIEWPROJECTION;
+float3 light_pos = float3(300, 100, 100);
+float3 eye_pos;
 
 void SkinnedMeshVS(float4 pos : POSITION,
 				float2 tex0 : TEXCOORD0,
@@ -66,7 +74,7 @@ float4 SkinnedMeshPS(float2 uv : TEXCOORD0,
 				float3 L	: TEXCOORD1,
 				float3 H	: TEXCOORD2) : COLOR
 {
-	float3 bump_normal = 2 * tex2D(normal_map, uv) - 1;
+	float3 bump_normal = decompress_normal(normal_map, uv);	
 	float3 diffuse = tex2D(diffuse_map, uv);
 	float3 specular = tex2D(specular_map, uv);
 	

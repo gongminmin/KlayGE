@@ -22,7 +22,7 @@ namespace
 		uint32_t const width = height_map->Width(0);
 		uint32_t const height = height_map->Height(0);
 
-		std::vector<uint8_t> heights(width, height);
+		std::vector<uint8_t> heights(width * height);
 		height_map->CopyToMemory2D(0, &heights[0]);
 
 		std::vector<char> dx;
@@ -48,6 +48,7 @@ namespace
 		}
 
 		std::vector<uint8_t> normals;
+		normals.reserve(width * height * 4);
 		for (uint32_t y = 0; y < height; ++ y)
 		{
 			for (uint32_t x = 0; x < width; ++ x)
