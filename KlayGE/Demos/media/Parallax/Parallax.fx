@@ -1,7 +1,7 @@
-float3 decompress_normal(sampler2D normal_map, float2 uv)
+float3 decompress_normal(float4 comp_normal)
 {
 	float3 normal;
-	normal.xy = tex2D(normal_map, uv).ag * 2 - 1;
+	normal.xy = comp_normal.ag * 2 - 1;
 	normal.z = sqrt(1 - dot(normal.xy, normal.xy));
 	return normal;
 }
@@ -78,7 +78,7 @@ half4 ParallaxPS(float2 texCoord0	: TEXCOORD0,
 
 	half3 diffuse = tex2D(diffuseMap, texUV).rgb;
 
-	half3 bumpNormal = decompress_normal(normalMap, texUV);
+	half3 bumpNormal = decompress_normal(tex2D(normalMap, texUV));
 	half3 lightVec = NormalizeByCube(L);
 	half diffuseFactor = dot(lightVec, bumpNormal);
 

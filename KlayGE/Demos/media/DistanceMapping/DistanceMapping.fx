@@ -1,3 +1,11 @@
+float3 decompress_normal(float4 comp_normal)
+{
+	float3 normal;
+	normal.xy = comp_normal.ag * 2 - 1;
+	normal.z = sqrt(1 - dot(normal.xy, normal.xy));
+	return normal;
+}
+
 float4x4 worldviewproj : WORLDVIEWPROJECTION;
 float3 lightPos;
 float3 eyePos;
@@ -77,7 +85,7 @@ half4 DistanceMappingPS(half3 texCoord0	: TEXCOORD0,
 
 	half3 diffuse = tex2D(diffuseMap, texUV.xy, dx, dy).rgb;
 
-	half3 bumpNormal = normalize(tex2D(normalMap, texUV.xy, dx, dy).rgb * 2 - 1);
+	half3 bumpNormal = decompress_normal(tex2D(normalMap, texUV.xy, dx, dy));
 	half3 lightVec = normalize(L);
 	half diffuseFactor = dot(lightVec, bumpNormal);
 	
@@ -102,7 +110,7 @@ half4 DistanceMappingPS_20(half3 texCoord0	: TEXCOORD0,
 
 	half3 diffuse = tex2D(diffuseMap, texUV.xy);
 
-	half3 bumpNormal = normalize(tex2D(normalMap, texUV.xy).rgb * 2 - 1);
+	half3 bumpNormal = decompress_normal(tex2D(normalMap, texUV.xy));
 	half3 lightVec = normalize(L);
 	half diffuseFactor = dot(lightVec, bumpNormal);
 

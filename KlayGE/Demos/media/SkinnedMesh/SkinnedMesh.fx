@@ -1,7 +1,7 @@
-float3 decompress_normal(sampler2D normal_map, float2 uv)
+float3 decompress_normal(float4 comp_normal)
 {
 	float3 normal;
-	normal.xy = tex2D(normal_map, uv).ag * 2 - 1;
+	normal.xy = comp_normal.ag * 2 - 1;
 	normal.z = sqrt(1 - dot(normal.xy, normal.xy));
 	return normal;
 }
@@ -74,7 +74,7 @@ float4 SkinnedMeshPS(float2 uv : TEXCOORD0,
 				float3 L	: TEXCOORD1,
 				float3 H	: TEXCOORD2) : COLOR
 {
-	float3 bump_normal = decompress_normal(normal_map, uv);	
+	float3 bump_normal = decompress_normal(tex2D(normal_map, uv));	
 	float3 diffuse = tex2D(diffuse_map, uv);
 	float3 specular = tex2D(specular_map, uv);
 	
