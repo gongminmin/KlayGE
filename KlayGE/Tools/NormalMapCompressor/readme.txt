@@ -1,4 +1,4 @@
-NormalMapCompressor是KlayGE的normal map压缩工具，可以把normal压缩成AL8或DXT5格式，分别由2:1和4:1的压缩率。
+NormalMapCompressor是KlayGE的normal map压缩工具，可以把normal压缩成AL8或DXT5格式，分别由2:1和4:1的压缩率。支持2D和Cube texture。
 
 使用方法 NormalMapCompressor normal_map.dds new_normal_map.dds format
 normal_map是源normal map文件名。

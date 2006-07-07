@@ -38,15 +38,22 @@ namespace
 	{
 	public:
 		HDRSkyBox()
+			: y_sampler_(new Sampler), c_sampler_(new Sampler)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			technique_ = rf.LoadEffect("HDRSkyBox.fx")->Technique("HDRSkyBoxTec");
 
-			cube_sampler_->Filtering(Sampler::TFO_Bilinear);
-			cube_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-			cube_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
-			cube_sampler_->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
-			*(technique_->Effect().ParameterByName("skybox_cubeMapSampler")) = cube_sampler_;
+			y_sampler_->Filtering(Sampler::TFO_Bilinear);
+			y_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
+			y_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
+			y_sampler_->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
+			*(technique_->Effect().ParameterByName("skybox_YcubeMapSampler")) = y_sampler_;
+
+			c_sampler_->Filtering(Sampler::TFO_Bilinear);
+			c_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
+			c_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
+			c_sampler_->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
+			*(technique_->Effect().ParameterByName("skybox_CcubeMapSampler")) = c_sampler_;
 		}
 
 		void ExposureLevel(float exposure_level)
@@ -54,7 +61,15 @@ namespace
 			*(technique_->Effect().ParameterByName("exposure_level")) = exposure_level;
 		}
 
+		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)
+		{
+			y_sampler_->SetTexture(y_cube);
+			c_sampler_->SetTexture(c_cube);
+		}
+
 	private:
+		SamplerPtr y_sampler_;
+		SamplerPtr c_sampler_;
 	};
 
 	class HDRSceneObjectSkyBox : public SceneObjectSkyBox
@@ -64,6 +79,11 @@ namespace
 		{
 			renderable_.reset(new HDRSkyBox);
 		}
+
+		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)
+		{
+			checked_cast<HDRSkyBox*>(renderable_.get())->CompressedCubeMap(y_cube, c_cube);
+		}
 	};
 
 	class RefractorRenderable : public KMesh
@@ -71,20 +91,27 @@ namespace
 	public:
 		RefractorRenderable(std::wstring const & /*name*/, TexturePtr tex)
 			: KMesh(L"Refractor", tex),
-				cubemap_sampler_(new Sampler)
+				y_sampler_(new Sampler), c_sampler_(new Sampler)
 		{
 			technique_ = Context::Instance().RenderFactoryInstance().LoadEffect("Refract.fx")->Technique("Refract");
 
-			cubemap_sampler_->Filtering(Sampler::TFO_Bilinear);
-			cubemap_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-			cubemap_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
-			cubemap_sampler_->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
-			*(technique_->Effect().ParameterByName("cubeMapSampler")) = cubemap_sampler_;
+			y_sampler_->Filtering(Sampler::TFO_Bilinear);
+			y_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
+			y_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
+			y_sampler_->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
+			*(technique_->Effect().ParameterByName("skybox_YcubeMapSampler")) = y_sampler_;
+
+			c_sampler_->Filtering(Sampler::TFO_Bilinear);
+			c_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
+			c_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
+			c_sampler_->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
+			*(technique_->Effect().ParameterByName("skybox_CcubeMapSampler")) = c_sampler_;
 		}
 
-		void CubeMap(TexturePtr const & texture)
+		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)
 		{
-			cubemap_sampler_->SetTexture(texture);
+			y_sampler_->SetTexture(y_cube);
+			c_sampler_->SetTexture(c_cube);
 		}
 
 		void ExposureLevel(float exposure_level)
@@ -110,17 +137,18 @@ namespace
 		}
 
 	private:
-		SamplerPtr cubemap_sampler_;
+		SamplerPtr y_sampler_;
+		SamplerPtr c_sampler_;
 	};
 
 	class RefractorObject : public SceneObjectHelper
 	{
 	public:
-		RefractorObject(TexturePtr cube_map)
+		RefractorObject(TexturePtr const & y_cube, TexturePtr const & c_cube)
 			: SceneObjectHelper(SOA_Cullable)
 		{
 			renderable_ = LoadKMesh("teapot.kmesh", CreateKMeshFactory<RefractorRenderable>())->Mesh(0);
-			checked_cast<RefractorRenderable*>(renderable_.get())->CubeMap(cube_map);	
+			checked_cast<RefractorRenderable*>(renderable_.get())->CompressedCubeMap(y_cube, c_cube);	
 		}
 	};
 
@@ -182,13 +210,14 @@ void Refract::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
-	cube_map_ = LoadTexture("uffizi_cross.dds");
+	y_cube_map_ = LoadTexture("uffizi_cross_y.dds");
+	c_cube_map_ = LoadTexture("uffizi_cross_c.dds");
 
-	refractor_.reset(new RefractorObject(cube_map_));
+	refractor_.reset(new RefractorObject(y_cube_map_, c_cube_map_));
 	refractor_->AddToSceneManager();
 
 	sky_box_.reset(new HDRSceneObjectSkyBox);
-	checked_cast<SceneObjectSkyBox*>(sky_box_.get())->CubeMap(cube_map_);
+	checked_cast<HDRSceneObjectSkyBox*>(sky_box_.get())->CompressedCubeMap(y_cube_map_, c_cube_map_);
 	sky_box_->AddToSceneManager();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());

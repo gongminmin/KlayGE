@@ -66,9 +66,9 @@ namespace KlayGE
 		{
 			int32_t i = *reinterpret_cast<int32_t*>(&f);
 
-			int s = (i >> 16) & 0x00008000;
-			int e = ((i >> 23) & 0x000000FF) - (127 - 15);
-			int m = i & 0x007FFFFF;
+			int32_t s = (i >> 16) & 0x00008000;
+			int32_t e = ((i >> 23) & 0x000000FF) - (127 - 15);
+			int32_t m = i & 0x007FFFFF;
 
 			if (e <= 0)
 			{
@@ -114,11 +114,11 @@ namespace KlayGE
 
 		operator float() const
 		{
-			int ret;
+			int32_t ret;
 
-			int s = ((value_ & 0x8000) >> 15) << 31;
-			int e = (value_ & 0x7C00) >> 10;
-			int m = value_ & 0x03FF;
+			int32_t s = ((value_ & 0x8000) >> 15) << 31;
+			int32_t e = (value_ & 0x7C00) >> 10;
+			int32_t m = value_ & 0x03FF;
 
 			if (0 == e)
 			{

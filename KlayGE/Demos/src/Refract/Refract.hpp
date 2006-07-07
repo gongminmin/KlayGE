@@ -22,7 +22,8 @@ private:
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
-	KlayGE::TexturePtr cube_map_;
+	KlayGE::TexturePtr y_cube_map_;
+	KlayGE::TexturePtr c_cube_map_;
 
 	float exposure_level_;
 };
