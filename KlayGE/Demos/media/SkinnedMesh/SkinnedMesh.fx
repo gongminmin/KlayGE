@@ -1,18 +1,5 @@
-float3 decompress_normal(float4 comp_normal)
-{
-	float3 normal;
-	normal.xy = comp_normal.ag * 2 - 1;
-	normal.z = sqrt(1 - dot(normal.xy, normal.xy));
-	return normal;
-}
-
-float3 mul_quat(float3 v, float4 quat)
-{
-	float3 abc = float3(quat.w * quat.w - dot(quat.xyz, quat.xyz),
-					2 * dot(quat.xyz, v), quat.w + quat.w);
-
-	return abc.x * v + abc.y * quat.xyz + abc.z * cross(quat.xyz, v);
-}
+#include "../Common/util.fx"
+#include "../Common/Quaternion.fx"
 
 float4 joint_rots[64];
 float4 joint_poss[64];

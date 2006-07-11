@@ -35,7 +35,7 @@ private:
 
 	KlayGE::float3 eye_pos_;
 
-	boost::shared_ptr<MD5SkinnedModel> model_;
+	boost::weak_ptr<MD5SkinnedModel> model_;
 };
 
 #endif		// _MODEL_HPP

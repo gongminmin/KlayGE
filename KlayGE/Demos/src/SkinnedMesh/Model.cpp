@@ -50,10 +50,14 @@ void MD5SkinnedMesh::OnRenderBegin()
 	*(technique_->Effect().ParameterByName("normal_map")) = normal_map_;
 	*(technique_->Effect().ParameterByName("specular_map")) = specular_map_;
 
-	*(technique_->Effect().ParameterByName("joint_rots")) = model_->GetBindRotations();
-	*(technique_->Effect().ParameterByName("joint_poss")) = model_->GetBindPositions();
-
 	*(technique_->Effect().ParameterByName("eye_pos")) = eye_pos_;
+
+	boost::shared_ptr<MD5SkinnedModel> model = model_.lock();
+	if (model)
+	{
+		*(technique_->Effect().ParameterByName("joint_rots")) = model->GetBindRotations();
+		*(technique_->Effect().ParameterByName("joint_poss")) = model->GetBindPositions();
+	}
 }
 
 void MD5SkinnedMesh::SetWorld(const float4x4& mat)

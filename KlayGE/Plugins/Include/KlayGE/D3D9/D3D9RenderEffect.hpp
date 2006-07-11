@@ -1,8 +1,11 @@
 // D3D9RenderEffect.hpp
 // KlayGE D3D9渲染效果类 头文件
-// Ver 3.0.0
-// 版权所有(C) 龚敏敏, 2003-2005
+// Ver 3.4.0
+// 版权所有(C) 龚敏敏, 2003-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.4.0
+// 增加了D3D9RenderEffectInclude (2006.7.12)
 //
 // 3.0.0
 // 优化了Sampler设置 (2005.9.7)
@@ -419,6 +422,14 @@ namespace KlayGE
 	private:
 		D3D9RenderEffectParameterMatrix4Array(D3D9RenderEffectParameterMatrix4Array const & rhs);
 		D3D9RenderEffectParameterMatrix4Array& operator=(D3D9RenderEffectParameterMatrix4Array const & rhs);
+	};
+
+	class D3D9RenderEffectInclude : public ID3DXInclude
+	{
+	public:
+		STDMETHOD(Open)(D3DXINCLUDE_TYPE IncludeType, LPCSTR pFileName,
+			LPCVOID pParentData, LPCVOID* ppData, UINT* pBytes);
+		STDMETHOD(Close)(LPCVOID pData);
 	};
 }
 

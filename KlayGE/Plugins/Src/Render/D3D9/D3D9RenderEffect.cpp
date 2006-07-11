@@ -1,8 +1,11 @@
 // D3D9RenderEffect.cpp
 // KlayGE D3D9渲染效果类 实现文件
-// Ver 3.0.0
-// 版权所有(C) 龚敏敏, 2003-2005
+// Ver 3.4.0
+// 版权所有(C) 龚敏敏, 2003-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.4.0
+// 增加了D3D9RenderEffectInclude (2006.7.12)
 //
 // 3.0.0
 // 支持"x.y"形式的参数名 (2005.8.17)
@@ -28,6 +31,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Sampler.hpp>
+#include <KlayGE/ResLoader.hpp>
 
 #include <boost/assert.hpp>
 #include <boost/bind.hpp>
@@ -36,6 +40,7 @@
 #include <boost/algorithm/string/split.hpp>
 #pragma warning(pop)
 #include <functional>
+#include <string>
 
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
@@ -47,9 +52,11 @@ namespace KlayGE
 	{
 		D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 
+		D3D9RenderEffectInclude include;
+
 		ID3DXEffect* effect;
 		D3DXCreateEffect(renderEngine.D3DDevice().get(), srcData.c_str(),
-			static_cast<UINT>(srcData.size()), NULL, NULL,
+			static_cast<UINT>(srcData.size()), NULL, &include,
 			0, NULL, &effect, NULL);
 		d3dx_effect_ = MakeCOMPtr(effect);
 
@@ -452,5 +459,43 @@ namespace KlayGE
 		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetMatrixArray(name_.c_str(), reinterpret_cast<D3DXMATRIX const *>(&value[0]),
 			static_cast<UINT>(value.size())));
+	}
+
+	HRESULT D3D9RenderEffectInclude::Open(D3DXINCLUDE_TYPE /*IncludeType*/, LPCSTR pFileName,
+		LPCVOID /*pParentData*/, LPCVOID* ppData, UINT* pBytes)
+	{
+		ResLoader& loader = ResLoader::Instance();
+
+		if (!loader.Locate(pFileName).empty())
+		{
+			ResIdentifierPtr res = loader.Load(pFileName);
+
+			res->seekg(0, std::ios_base::end);
+			std::streamsize size = res->tellg();
+			res->seekg(0);
+
+			char* pData = new char[size];
+			res->read(pData, size);
+
+			*ppData = pData;
+			*pBytes = size;
+
+			return S_OK;
+		}
+		else
+		{
+			*ppData = NULL;
+			*pBytes = 0;
+
+			return E_FAIL;
+		}
+	}
+
+	HRESULT D3D9RenderEffectInclude::Close(LPCVOID pData)
+	{
+		char const * pData2 = static_cast<char const *>(pData);
+		delete[] pData2;
+
+		return S_OK;
 	}
 }
