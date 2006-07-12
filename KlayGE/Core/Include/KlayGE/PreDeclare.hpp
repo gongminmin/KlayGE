@@ -112,6 +112,8 @@ namespace KlayGE
 	typedef boost::shared_ptr<OcclusionQuery> OcclusionQueryPtr;
 	class PostProcess;
 	typedef boost::shared_ptr<PostProcess> PostProcessPtr;
+	template <typename ParticleType>
+	class ParticleSystem;
 
 	class Socket;
 	class Lobby;

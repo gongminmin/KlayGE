@@ -278,6 +278,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Include\KlayGE\ParticleSystem.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Include\KlayGE\PostProcess.hpp"
 					>
 				</File>

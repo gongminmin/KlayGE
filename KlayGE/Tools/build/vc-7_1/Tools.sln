@@ -19,6 +19,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GLCompatibility", "GLCompat
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NormalMapCompressor", "NormalMapCompressor.vcproj", "{15F21D55-8B10-470F-BE79-54D53DE384A7}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HDRCompressor", "HDRCompressor.vcproj", "{8AD3A5E0-A2C2-426A-BE6F-132E869303D7}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -45,6 +53,14 @@ Global
 		{A004459D-F259-44EE-960B-CF6EEDCECC08}.Debug.Build.0 = Debug|Win32
 		{A004459D-F259-44EE-960B-CF6EEDCECC08}.Release.ActiveCfg = Release|Win32
 		{A004459D-F259-44EE-960B-CF6EEDCECC08}.Release.Build.0 = Release|Win32
+		{15F21D55-8B10-470F-BE79-54D53DE384A7}.Debug|Win32.ActiveCfg = Debug|Win32
+		{15F21D55-8B10-470F-BE79-54D53DE384A7}.Debug|Win32.Build.0 = Debug|Win32
+		{15F21D55-8B10-470F-BE79-54D53DE384A7}.Release|Win32.ActiveCfg = Release|Win32
+		{15F21D55-8B10-470F-BE79-54D53DE384A7}.Release|Win32.Build.0 = Release|Win32
+		{8AD3A5E0-A2C2-426A-BE6F-132E869303D7}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8AD3A5E0-A2C2-426A-BE6F-132E869303D7}.Debug|Win32.Build.0 = Debug|Win32
+		{8AD3A5E0-A2C2-426A-BE6F-132E869303D7}.Release|Win32.ActiveCfg = Release|Win32
+		{8AD3A5E0-A2C2-426A-BE6F-132E869303D7}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection
