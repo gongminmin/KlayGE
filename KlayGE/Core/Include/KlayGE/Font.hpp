@@ -66,7 +66,7 @@ namespace KlayGE
 		};
 
 	public:
-		Font(std::string const & fontName, uint32_t fontHeight = 12, uint32_t flags = 0);
+		Font(std::string const & fontName, uint32_t fontHeight = 16, uint32_t flags = 0);
 
 		void RenderText(float x, float y, Color const & clr,
 			std::wstring const & text);
