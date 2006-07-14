@@ -37,6 +37,10 @@
 #include <boost/crc.hpp>
 #pragma warning(pop)
 #include <boost/filesystem/operations.hpp>
+#pragma warning(push)
+#pragma warning(disable: 4127 4800)
+#include <boost/pool/pool_alloc.hpp>
+#pragma warning(pop)
 
 #include <KlayGE/LZSS/LZSS.hpp>
 

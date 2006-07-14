@@ -21,10 +21,7 @@ struct VS_OUTPUT
 	float3 V			: TEXCOORD2;	// in tangent space
 };
 
-VS_OUTPUT DistanceMappingVS(VS_INPUT input,
-						uniform float4x4 worldviewproj,
-						uniform float3 lightPos,
-						uniform float3 eyePos)
+VS_OUTPUT DistanceMappingVS(VS_INPUT input)
 {
 	VS_OUTPUT output;
 
@@ -49,17 +46,13 @@ VS_OUTPUT DistanceMappingVS(VS_INPUT input,
 }
 
 
-sampler2D diffuseMapSampler;
-sampler2D normalMapSampler;
-sampler3D distanceMapSampler;
+sampler diffuseMap;
+sampler normalMap;
+sampler distanceMap;
 
 half4 DistanceMappingPS(half3 texCoord0	: TEXCOORD0,
 						half3 L		: TEXCOORD1,
-						half3 V		: TEXCOORD2,
-
-					uniform sampler2D diffuseMap,
-					uniform sampler2D normalMap,
-					uniform sampler3D distanceMap) : COLOR
+						half3 V		: TEXCOORD2) : COLOR
 {
 	half3 view = normalize(V) * half3(1, 1, 16) * 0.06;
 
@@ -69,10 +62,7 @@ half4 DistanceMappingPS(half3 texCoord0	: TEXCOORD0,
 		texUV += view * tex3D(distanceMap, texUV).r;
 	}
 
-	if ((texUV.x <= 0) || (texUV.y <= 0) || (texUV.x >= 1) || (texUV.y >= 1))
-	{
-		clip(-1);
-	}
+	clip(half4(texUV.xy, 1 - texUV.xy));
 
 	half2 dx = ddx(texCoord0.xy);
 	half2 dy = ddy(texCoord0.xy);
@@ -88,11 +78,7 @@ half4 DistanceMappingPS(half3 texCoord0	: TEXCOORD0,
 
 half4 DistanceMappingPS_20(half3 texCoord0	: TEXCOORD0,
 						half3 L		: TEXCOORD1,
-						half3 V		: TEXCOORD2,
-
-					uniform sampler2D diffuseMap,
-					uniform sampler2D normalMap,
-					uniform sampler3D distanceMap) : COLOR
+						half3 V		: TEXCOORD2) : COLOR
 {
 	half3 view = normalize(V) * half3(1, 1, 16) * 0.06;
 
@@ -101,6 +87,8 @@ half4 DistanceMappingPS_20(half3 texCoord0	: TEXCOORD0,
 	{
 		texUV += view * tex3D(distanceMap, texUV).r;
 	}
+	
+	clip(half4(texUV.xy, 1 - texUV.xy));
 
 	half3 diffuse = tex2D(diffuseMap, texUV.xy);
 
@@ -115,9 +103,8 @@ technique DistanceMapping30
 {
 	pass p0
 	{
-		VertexShader = compile vs_3_0 DistanceMappingVS(worldviewproj, lightPos, eyePos);
-		PixelShader = compile ps_3_0 DistanceMappingPS(diffuseMapSampler,
-										normalMapSampler, distanceMapSampler);
+		VertexShader = compile vs_3_0 DistanceMappingVS();
+		PixelShader = compile ps_3_0 DistanceMappingPS();
 	}
 }
 
@@ -125,9 +112,8 @@ technique DistanceMapping2a
 {
 	pass p0
 	{
-		VertexShader = compile vs_1_1 DistanceMappingVS(worldviewproj, lightPos, eyePos);
-		PixelShader = compile ps_2_a DistanceMappingPS(diffuseMapSampler,
-										normalMapSampler, distanceMapSampler);
+		VertexShader = compile vs_1_1 DistanceMappingVS();
+		PixelShader = compile ps_2_a DistanceMappingPS();
 	}
 }
 
@@ -135,8 +121,7 @@ technique DistanceMapping20
 {
 	pass p0
 	{
-		VertexShader = compile vs_1_1 DistanceMappingVS(worldviewproj, lightPos, eyePos);
-		PixelShader = compile ps_2_0 DistanceMappingPS_20(diffuseMapSampler,
-										normalMapSampler, distanceMapSampler);
+		VertexShader = compile vs_1_1 DistanceMappingVS();
+		PixelShader = compile ps_2_0 DistanceMappingPS_20();
 	}
 }

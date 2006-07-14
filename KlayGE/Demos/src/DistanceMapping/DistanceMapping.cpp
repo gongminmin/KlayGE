@@ -64,14 +64,14 @@ namespace
 			diffuse_sampler->Filtering(Sampler::TFO_Bilinear);
 			diffuse_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
 			diffuse_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
-			*(technique_->Effect().ParameterByName("diffuseMapSampler")) = diffuse_sampler;
+			*(technique_->Effect().ParameterByName("diffuseMap")) = diffuse_sampler;
 
 			SamplerPtr normal_sampler(new Sampler);
 			normal_sampler->SetTexture(LoadTexture("normal.dds"));
 			normal_sampler->Filtering(Sampler::TFO_Bilinear);
 			normal_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
 			normal_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
-			*(technique_->Effect().ParameterByName("normalMapSampler")) = normal_sampler;
+			*(technique_->Effect().ParameterByName("normalMap")) = normal_sampler;
 
 			SamplerPtr distance_sampler(new Sampler);
 			distance_sampler->SetTexture(LoadTexture("distance.dds"));
@@ -79,7 +79,7 @@ namespace
 			distance_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
 			distance_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
 			distance_sampler->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
-			*(technique_->Effect().ParameterByName("distanceMapSampler")) = distance_sampler;
+			*(technique_->Effect().ParameterByName("distanceMap")) = distance_sampler;
 
 			float3 xyzs[] =
 			{
@@ -275,7 +275,7 @@ void DistanceMapping::DoUpdate(uint32_t pass)
 	std::wostringstream stream;
 	stream << renderEngine.CurRenderTarget()->FPS();
 
-	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"DistanceMapping²âÊÔ");
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Distance Mapping");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());
 
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
