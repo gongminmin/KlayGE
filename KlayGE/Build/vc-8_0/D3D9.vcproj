@@ -312,11 +312,55 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\RenderFX\Blur.fx"
+				>
+			</File>
+			<File
+				RelativePath="..\..\RenderFX\Bone.fx"
+				>
+			</File>
+			<File
+				RelativePath="..\..\RenderFX\DownSample.fx"
+				>
+			</File>
+			<File
+				RelativePath="..\..\RenderFX\Fog.fx"
+				>
+			</File>
+			<File
 				RelativePath="..\..\RenderFX\Font.fx"
 				>
 			</File>
 			<File
-				RelativePath="..\..\RenderFX\TNL.fx"
+				RelativePath="..\..\RenderFX\KMesh.fx"
+				>
+			</File>
+			<File
+				RelativePath="..\..\RenderFX\Lighting.fx"
+				>
+			</File>
+			<File
+				RelativePath="..\..\RenderFX\PointSprite.fx"
+				>
+			</File>
+			<File
+				RelativePath="..\..\RenderFX\Quaternion.fx"
+				>
+			</File>
+			<File
+				RelativePath="..\..\RenderFX\RenderableHelper.fx"
+				>
+			</File>
+			<File
+				RelativePath="..\..\RenderFX\ToneMapping.fx"
+				>
+			</File>
+			<File
+				RelativePath="..\..\RenderFX\Transforming.fx"
+				>
+			</File>
+			<File
+				RelativePath="..\..\RenderFX\util.fx"
 				>
 			</File>
 		</Filter>

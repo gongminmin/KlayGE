@@ -18,11 +18,8 @@ struct VS_OUTPUT
 {
 	float4 pos			 : POSITION;
 	
-	float3 refract_r     : TEXCOORD0;
-	float3 refract_g     : TEXCOORD1;
-	float3 refract_b     : TEXCOORD2;
-	float3 reflect_vec   : TEXCOORD3;
-	float fresnel_factor : TEXCOORD4;
+	float3 normal        : TEXCOORD0;
+	float3 incident      : TEXCOORD1;
 };
 
 // fresnel approximation
@@ -34,12 +31,21 @@ half fast_fresnel(half3 eye, half3 normal, half R0)
 	return R0 + (1.0 - R0) * pow(1.0 - edn, 5);
 }
 
-float3 my_refract(float3 i, float3 n, float eta)
+float3x3 my_refract3(float3 i, float3 n, float3 eta)
 {
     float cosi = dot(-i, n);
-    float cost2 = 1.0 - eta * eta * (1.0 - cosi * cosi);
-    float3 t = eta * i + ((eta * cosi - sqrt(abs(cost2))) * n);
-    return t * (cost2 > 0.0);
+    float3 cost2 = 1.0 - eta * eta * (1.0 - cosi * cosi);
+    float3 tmp = eta * cosi - sqrt(abs(cost2));
+    float3 t0 = eta.x * i + tmp.x * n;
+    float3 t1 = eta.y * i + tmp.y * n;
+    float3 t2 = eta.z * i + tmp.z * n;
+    bool3 b = cost2 > 0.0f;
+    
+    float3x3 ret;
+    ret[0] = t0 * b.x;
+    ret[1] = t1 * b.y;
+    ret[2] = t2 * b.z;
+    return ret;
 }
 
 VS_OUTPUT RefractVS(VS_INPUT input)
@@ -52,11 +58,8 @@ VS_OUTPUT RefractVS(VS_INPUT input)
 	float3 normal = normalize(mul(input.normal, (float3x3)modelit));
 	float3 incident = normalize(pos_in_world.xyz - eyePos);
 
-	output.refract_r = refract(incident, normal, eta_ratio.x);
-	output.refract_g = refract(incident, normal, eta_ratio.y);
-	output.refract_b = refract(incident, normal, eta_ratio.z);
-	output.reflect_vec = reflect(incident, normal);
-	output.fresnel_factor = fast_fresnel(-incident, normal, 0.03f);
+	output.normal = normal;
+	output.incident = incident;
 	
 	return output;
 }
@@ -65,29 +68,30 @@ VS_OUTPUT RefractVS(VS_INPUT input)
 sampler skybox_YcubeMapSampler;
 sampler skybox_CcubeMapSampler;
 
-float4 RefractPS(float3 refract_r     : TEXCOORD0,
-					float3 refract_g     : TEXCOORD1,
-					float3 refract_b     : TEXCOORD2,
-					float3 reflect_vec   : TEXCOORD3,
-					float fresnel_factor : TEXCOORD4) : COLOR
+float4 RefractPS(float3 normal        : TEXCOORD0,
+					float3 incident   : TEXCOORD1) : COLOR
 {
-	half3 refracted_y = half3(texCUBE(skybox_YcubeMapSampler, refract_r).r,
-									texCUBE(skybox_YcubeMapSampler, refract_g).r,
-									texCUBE(skybox_YcubeMapSampler, refract_b).r);
+	float3x3 refract_rgb = my_refract3(incident, normal, eta_ratio);
+	
+	half3 refracted_y = half3(texCUBE(skybox_YcubeMapSampler, refract_rgb[0]).r,
+									texCUBE(skybox_YcubeMapSampler, refract_rgb[1]).r,
+									texCUBE(skybox_YcubeMapSampler, refract_rgb[2]).r);
 	refracted_y = exp2(refracted_y * 65536 / 2048 - 16);
-	half4 refracted_c = half4(texCUBE(skybox_CcubeMapSampler, refract_r).a,
-									texCUBE(skybox_CcubeMapSampler, refract_g).g,
-									texCUBE(skybox_CcubeMapSampler, refract_b).ga);
+	half4 refracted_c = half4(texCUBE(skybox_CcubeMapSampler, refract_rgb[0]).a,
+									texCUBE(skybox_CcubeMapSampler, refract_rgb[1]).g,
+									texCUBE(skybox_CcubeMapSampler, refract_rgb[2]).ga);
 	refracted_c *= refracted_c;
 
 	half4 refracted_clr;
 	refracted_clr.rbg = refracted_y.rbg * half3(refracted_c.xy, (1 - refracted_c.z - refracted_c.w))
 											/ half3(0.299f, 0.114f, 0.587f);
 	refracted_clr.a = 1;
-
+	
+	float3 reflect_vec = reflect(incident, normal);
 	half4 reflected_clr = decode_hdr_yc(texCUBE(skybox_YcubeMapSampler, reflect_vec).r,
 					texCUBE(skybox_CcubeMapSampler, reflect_vec).ga);
 
+	float fresnel_factor = fast_fresnel(-incident, normal, 0.03f);
 	return lerp(refracted_clr, reflected_clr, fresnel_factor) * exposure_level;
 }
 

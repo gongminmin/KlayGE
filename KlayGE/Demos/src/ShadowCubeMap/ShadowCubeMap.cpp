@@ -151,6 +151,8 @@ namespace
 
 		void OnRenderBegin()
 		{
+			model_ = MathLib::translation(0.2f, 0.2f, 0.0f)
+				* MathLib::rotation_y(-std::clock() / 1000.0f);
 			ShadowMapped::OnRenderBegin(model_, effect_);
 		}
 
@@ -353,7 +355,7 @@ void ShadowCubeMap::InitObjects()
 	checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->LampTexture(lamp_tex_);
 
 	RenderViewPtr depth_view = rf.MakeDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, EF_D16, 0);
-	shadow_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, EF_ABGR16F);
+	shadow_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, EF_GR16F);
 	for (int i = 0; i < 6; ++ i)
 	{
 		shadow_buffers_[i] = rf.MakeFrameBuffer();
