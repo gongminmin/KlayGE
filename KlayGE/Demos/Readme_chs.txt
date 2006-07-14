@@ -78,7 +78,7 @@ Shadow cube map
 把传统的shadow map扩展到cube map上，模拟了全方向的点光源和光源的投射。另一个改
 进是加入了Variance Shadow Maps（http://www.punkuser.net/vsm/）。
 
-需求：Geforce FX以上或Radeon 9500以上。
+需求：Geforce FX 5600以上或Radeon 9500以上。
 
 ====================================================================================
 Skinned mesh

@@ -60,9 +60,9 @@
 #include <KlayGE/Font.hpp>
 
 #ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "freetype2110MT_D.lib")
+	#pragma comment(lib, "freetype221_D.lib")
 #else
-	#pragma comment(lib, "freetype2110MT.lib")
+	#pragma comment(lib, "freetype221.lib")
 #endif
 
 namespace
