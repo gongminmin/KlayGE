@@ -39,6 +39,8 @@ namespace KlayGE
 		ID3D9SurfacePtr D3DRenderSurface(uint32_t n) const;
 		ID3D9SurfacePtr D3DRenderZBuffer() const;
 
+		void OnBind();
+
 	private:
 		void DoOnLostDevice();
 		void DoOnResetDevice();

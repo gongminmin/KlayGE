@@ -39,6 +39,8 @@ namespace KlayGE
 
 		// Method for dealing with resize / move & 3d library
 		void WindowMovedOrResized();
+
+		void OnBind();
 		
 	private:
 		void DoReposition(uint32_t left, uint32_t top);

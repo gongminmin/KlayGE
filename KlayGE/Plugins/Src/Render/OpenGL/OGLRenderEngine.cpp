@@ -176,17 +176,6 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(rt);
 
-		if (dynamic_cast<OGLRenderWindow*>(rt.get()) != NULL)
-		{
-			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-		}
-		else
-		{
-			BOOST_ASSERT(dynamic_cast<OGLFrameBuffer*>(rt.get()) != NULL);
-
-			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, checked_cast<OGLFrameBuffer*>(rt.get())->OGLFbo());
-		}
-
 		Viewport const & vp(rt->GetViewport());
 		glViewport(vp.left, vp.top, vp.width, vp.height);
 	}

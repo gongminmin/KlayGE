@@ -33,6 +33,8 @@ namespace KlayGE
 		OGLFrameBuffer();
 		~OGLFrameBuffer();
 
+		void OnBind();
+
 		GLuint OGLFbo() const
 		{
 			return fbo_;

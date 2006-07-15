@@ -232,43 +232,6 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(d3dDevice_);
 		BOOST_ASSERT(rt);
-
-		IDirect3DSurface9* zBuffer = NULL;
-		if (dynamic_cast<D3D9RenderWindow*>(rt.get()) != NULL)
-		{
-			D3D9RenderWindow* rw = checked_cast<D3D9RenderWindow*>(rt.get());
-
-			for (uint32_t i = 0; i < this->DeviceCaps().max_simultaneous_rts; ++ i)
-			{
-				TIF(d3dDevice_->SetRenderTarget(i, rw->D3DRenderSurface(i).get()));
-			}
-
-			zBuffer = rw->D3DRenderZBuffer().get();
-		}
-		else
-		{
-			BOOST_ASSERT(dynamic_cast<D3D9FrameBuffer*>(rt.get()) != NULL);
-
-			D3D9FrameBuffer* fb = checked_cast<D3D9FrameBuffer*>(rt.get());
-
-			for (uint32_t i = 0; i < this->DeviceCaps().max_simultaneous_rts; ++ i)
-			{
-				TIF(d3dDevice_->SetRenderTarget(i, fb->D3DRenderSurface(i).get()));
-			}
-
-			zBuffer = fb->D3DRenderZBuffer().get();
-		}
-
-		if (zBuffer)
-		{
-			this->SetRenderState(RST_DepthEnable, true);
-		}
-		else
-		{
-			this->SetRenderState(RST_DepthEnable, false);
-		}
-
-		TIF(d3dDevice_->SetDepthStencilSurface(zBuffer));
 	}
 
 	// ¿ªÊ¼Ò»Ö¡

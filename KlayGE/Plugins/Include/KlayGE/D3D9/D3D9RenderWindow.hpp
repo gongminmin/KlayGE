@@ -58,6 +58,8 @@ namespace KlayGE
 		// Method for dealing with resize / move & 3d library
 		void WindowMovedOrResized();
 
+		void OnBind();
+
 	private:
 		void UpdateSurfacesPtrs();
 		void ResetDevice();

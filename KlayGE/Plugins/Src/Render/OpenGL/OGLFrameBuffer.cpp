@@ -41,4 +41,9 @@ namespace KlayGE
 	{
 		glDeleteFramebuffersEXT(1, &fbo_);
 	}
+
+	void OGLFrameBuffer::OnBind()
+	{
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
+	}
 }

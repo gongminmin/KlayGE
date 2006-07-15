@@ -70,6 +70,30 @@ namespace KlayGE
 		}
 	}
 
+	void D3D9FrameBuffer::OnBind()
+	{
+		D3D9RenderEngine& re(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		ID3D9DevicePtr d3dDevice = re.D3DDevice();
+
+		for (uint32_t i = 0; i < re.DeviceCaps().max_simultaneous_rts; ++ i)
+		{
+			TIF(d3dDevice->SetRenderTarget(i, this->D3DRenderSurface(i).get()));
+		}
+
+		ID3D9SurfacePtr zBuffer = this->D3DRenderZBuffer();
+		bool depth_enable;
+		if (zBuffer)
+		{
+			depth_enable = true;
+		}
+		else
+		{
+			depth_enable = false;
+		}
+		re.SetRenderState(RenderEngine::RST_DepthEnable, depth_enable);
+		TIF(d3dDevice->SetDepthStencilSurface(zBuffer.get()));
+	}
+
 	void D3D9FrameBuffer::DoOnLostDevice()
 	{
 	}
