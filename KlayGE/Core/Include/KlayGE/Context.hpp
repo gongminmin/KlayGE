@@ -24,6 +24,7 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/AudioFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
+#include <KlayGE/ShowFactory.hpp>
 
 #include <boost/assert.hpp>
 
@@ -84,6 +85,14 @@ namespace KlayGE
 			return *inputFactory_;
 		}
 
+		void ShowFactoryInstance(ShowFactory& factory)
+			{ showFactory_ = &factory; }
+		ShowFactory& ShowFactoryInstance()
+		{
+			BOOST_ASSERT(showFactory_ != NULL);
+			return *showFactory_;
+		}
+
 	private:
 		Context()
 		{
@@ -92,6 +101,7 @@ namespace KlayGE
 			renderFactory_ = RenderFactory::NullObject().get();
 			audioFactory_ = AudioFactory::NullObject().get();
 			inputFactory_ = InputFactory::NullObject().get();
+			showFactory_ = ShowFactory::NullObject().get();
 		}
 
 		App3DFramework* app_;
@@ -101,6 +111,7 @@ namespace KlayGE
 		RenderFactory*	renderFactory_;
 		AudioFactory*	audioFactory_;
 		InputFactory*	inputFactory_;
+		ShowFactory*    showFactory_;
 	};
 }
 

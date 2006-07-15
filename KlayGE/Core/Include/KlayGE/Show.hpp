@@ -13,6 +13,8 @@
 #ifndef _SHOW_HPP
 #define _SHOW_HPP
 
+#include <KlayGE/PreDeclare.hpp>
+
 #include <string>
 
 #ifdef KLAYGE_DEBUG
@@ -37,6 +39,8 @@ namespace KlayGE
 	public:
 		virtual ~ShowEngine();
 
+		static ShowEnginePtr NullObject();
+
 		bool CanPlay() const;
 		bool CanStop() const;
 		bool CanPause() const;
@@ -44,14 +48,13 @@ namespace KlayGE
 
 		virtual bool IsComplete() = 0;
 
-		virtual void Load(std::wstring const & fileName) = 0;
+		virtual void Load(std::wstring const & fileName, TexturePtr tex) = 0;
 
 		void Play();
 		void Stop();
 		void Pause();
 
 		virtual ShowState State(long timeout = -1) = 0;
-		virtual void ToggleFullScreen() = 0;
 
 	protected:
 		ShowState	state_;

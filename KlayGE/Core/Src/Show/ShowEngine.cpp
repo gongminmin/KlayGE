@@ -19,8 +19,53 @@
 
 namespace KlayGE
 {
+	class NullShowEngine : public ShowEngine
+	{
+	public:
+		std::wstring const & Name() const
+		{
+			static std::wstring name(L"Null Show Engine");
+			return name;
+		}
+
+		bool IsComplete()
+		{
+			return true;
+		}
+
+		void Load(std::wstring const & /*fileName*/, TexturePtr /*tex*/)
+		{
+		}
+
+		ShowState State(long /*timeout*/)
+		{
+			return SS_Stopped;
+		}
+
+	private:
+		void DoPlay()
+		{
+		}
+
+		void DoStop()
+		{
+		}
+
+		void DoPause()
+		{
+		}
+	};
+
 	ShowEngine::~ShowEngine()
 	{
+	}
+
+	// 返回空对象
+	//////////////////////////////////////////////////////////////////////////////////
+	ShowEnginePtr ShowEngine::NullObject()
+	{
+		static ShowEnginePtr obj(new NullShowEngine);
+		return obj;
 	}
 
 	// 可以播放

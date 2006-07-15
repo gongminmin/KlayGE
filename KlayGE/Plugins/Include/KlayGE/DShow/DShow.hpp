@@ -14,13 +14,17 @@
 #define _DSHOW_HPP
 
 #include <boost/smart_ptr.hpp>
-#include <KlayGE/Show.hpp>
 #include <strmif.h>
 #include <control.h>
+#include <d3d9.h>
+#include <strmif.h>
+#include <vmr9.h>
 
 #include <string>
 
 #include <boost/utility.hpp>
+
+#include <KlayGE/Show.hpp>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_ShowEngine_DShow_d.lib")
@@ -41,23 +45,18 @@ namespace KlayGE
 
 		bool IsComplete();
 
-		void Load(std::wstring const & fileName);
+		void Load(std::wstring const & fileName, TexturePtr tex);
 
 		ShowState State(long msTimeout = -1);
-		void ToggleFullScreen();
 
 	private:
-		HWND		hWnd_;
-		bool		audioOnly_;
-
 		boost::shared_ptr<IGraphBuilder>	graph_;
+		boost::shared_ptr<IBaseFilter>      filter_;
 		boost::shared_ptr<IMediaControl>	mediaControl_;
 		boost::shared_ptr<IMediaEvent>		mediaEvent_;
-		boost::shared_ptr<IVideoWindow>		videoWnd_;
+		boost::shared_ptr<IVMRSurfaceAllocator9> vmr_allocator_;
 
 	private:
-		void CheckVisibility();
-
 		void Init();
 		void Free();
 

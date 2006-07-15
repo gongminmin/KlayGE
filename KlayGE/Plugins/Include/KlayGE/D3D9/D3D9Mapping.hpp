@@ -19,6 +19,7 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Sampler.hpp>
+#include <KlayGE/RenderLayout.hpp>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_RenderEngine_D3D9_d.lib")

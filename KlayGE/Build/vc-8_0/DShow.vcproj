@@ -161,6 +161,14 @@
 				RelativePath="..\..\Plugins\Src\Show\DShow\DShowEngine.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Show\DShow\DShowFactory.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Show\DShow\DShowVMR9Allocator.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Í·ÎÄ¼þ"
@@ -169,6 +177,14 @@
 			>
 			<File
 				RelativePath="..\..\Plugins\Include\KlayGE\DShow\DShow.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\DShow\DShowFactory.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\DShow\DShowVMR9Allocator.hpp"
 				>
 			</File>
 		</Filter>

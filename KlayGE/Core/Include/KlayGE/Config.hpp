@@ -9,10 +9,6 @@
 #define KLAYGE_DEBUG
 #endif
 
-#ifdef KLAYGE_DEBUG
-#define D3D_DEBUG_INFO
-#endif
-
 #if _MSC_VER >= 1400
 #define _VC_8_0
 #elif _MSC_VER >= 1310

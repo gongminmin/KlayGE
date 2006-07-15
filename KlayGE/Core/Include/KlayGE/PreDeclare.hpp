@@ -144,6 +144,8 @@ namespace KlayGE
 
 	class ShowEngine;
 	typedef boost::shared_ptr<ShowEngine> ShowEnginePtr;
+	class ShowFactory;
+	typedef boost::shared_ptr<ShowFactory> ShowFactoryPtr;
 
 	class ScriptModule;
 	class RegisterModule;
