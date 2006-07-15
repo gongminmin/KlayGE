@@ -371,8 +371,7 @@ namespace
 						{
 							for (int x = 0; x < buf_width; ++ x)
 							{
-								uint16_t const bits = slot_->bitmap.buffer[y * buf_width + x];
-								dest[(y + y_start) * max_width + x] = static_cast<uint8_t>(MathLib::clamp(bits / 2 * 3, 0, 255));
+								dest[(y + y_start) * max_width + x] = slot_->bitmap.buffer[y * buf_width + x];
 							}
 						}
 						theTexture_->CopyMemoryToTexture2D(0, &dest[0], TEX_FORMAT,

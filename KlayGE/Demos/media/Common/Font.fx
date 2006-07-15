@@ -38,8 +38,8 @@ sampler texFontSampler;
 
 float4 FontPS(float4 clr : COLOR, float2 texCoord : TEXCOORD0) : COLOR0
 {
-	float alpha = tex2D(texFontSampler, texCoord).r;
-	return clr * alpha;
+	clr.a = tex2D(texFontSampler, texCoord).r;
+	return clr;
 }
 
 technique Font2DTec
