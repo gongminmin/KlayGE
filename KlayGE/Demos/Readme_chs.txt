@@ -1,4 +1,4 @@
-粘土游戏引擎(KlayGE) 3.3.0 Demo
+粘土游戏引擎(KlayGE) 3.4.0 Demo
 
 Homepage: http://klayge.sourceforge.net
 E-Mail:	  enginedev@163.com
@@ -32,7 +32,7 @@ Cartoon
 Distance mapping
 ====================================================================================
 GPU Gems 2中提到的distance mapping。在pixel shader中根据预处理的距离场进行局部
-球面光线跟踪。这里我做的扩展是可以描述边缘的凹凸。
+球面光线跟踪。这里我做的扩展是可以表现出边缘的轮廓。
 
 需求：Geforce FX以上或Radeon 9500以上。推荐使用Geforce 6以上。
 
@@ -61,7 +61,7 @@ Instancing
 ====================================================================================
 Parallax
 ====================================================================================
-Parallax mapping，扩展了normal map技术。
+Parallax mapping，扩展了normal map技术。3.4.0开始支持normal map的压缩。
 
 需求：Geforce FX以上或Radeon 9500以上。
 
@@ -69,6 +69,7 @@ Parallax mapping，扩展了normal map技术。
 Refract
 ====================================================================================
 折射的演示。支持Fresnel和色散现象。3.3.0开始支持HDR，按1增加曝光度，按2减少曝光度。
+3.4.0开始支持压缩的HDR纹理。
 
 需求：Geforce FX以上或Radeon 9500以上。推荐使用Geforce 6以上。
 
