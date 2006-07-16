@@ -19,9 +19,6 @@
 #include <boost/assert.hpp>
 #include <uuids.h>
 
-#include <KlayGE/D3D9/D3D9RenderFactory.hpp>
-#include <KlayGE/D3D9/D3D9RenderEngine.hpp>
-#include <KlayGE/D3D9/D3D9Typedefs.hpp>
 #include <KlayGE/DShow/DShowVMR9Allocator.hpp>
 #include <KlayGE/DShow/DShow.hpp>
 
@@ -63,8 +60,8 @@ namespace KlayGE
 		this->Stop();
 
 		vmr_allocator_.reset();
-		mediaEvent_.reset();
-		mediaControl_.reset();
+		media_event_.reset();
+		media_control_.reset();
 		filter_.reset();
 		graph_.reset();
 	}
@@ -73,26 +70,26 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void DShowEngine::DoPlay()
 	{
-		TIF(mediaControl_->Run());
+		TIF(media_control_->Run());
 	}
 
 	// 暂停播放
 	/////////////////////////////////////////////////////////////////////////////////
 	void DShowEngine::DoPause()
 	{
-		TIF(mediaControl_->Pause());
+		TIF(media_control_->Pause());
 	}
 
 	// 停止播放
 	/////////////////////////////////////////////////////////////////////////////////
 	void DShowEngine::DoStop()
 	{
-		TIF(mediaControl_->Stop());
+		TIF(media_control_->Stop());
 	}
 
 	// 载入文件
 	/////////////////////////////////////////////////////////////////////////////////
-	void DShowEngine::Load(std::wstring const & fileName, TexturePtr tex)
+	void DShowEngine::Load(std::wstring const & fileName)
 	{
 		this->Free();
 		this->Init();
@@ -125,24 +122,22 @@ namespace KlayGE
 		}
 
 		// create our surface allocator
-		vmr_allocator_ = MakeCOMPtr(new DShowVMR9Allocator(tex));
+		vmr_allocator_ = MakeCOMPtr(new DShowVMR9Allocator(::GetActiveWindow()));
 
 		// let the allocator and the notify know about each other
-		TIF(vmr_surf_alloc_notify->AdviseSurfaceAllocator(0xACDCACDC, vmr_allocator_.get()));
+		TIF(vmr_surf_alloc_notify->AdviseSurfaceAllocator(static_cast<DWORD_PTR>(DShowVMR9Allocator::USER_ID),
+			vmr_allocator_.get()));
 		TIF(vmr_allocator_->AdviseNotify(vmr_surf_alloc_notify.get()));
 
 		TIF(graph_->AddFilter(filter_.get(), L"Video Mixing Renderer 9"));
 
-		// 获取 DirectShow 接口
-		IMediaControl* mediaControl;
-		TIF(graph_->QueryInterface(IID_IMediaControl,
-			reinterpret_cast<void**>(&mediaControl)));
-		mediaControl_ = MakeCOMPtr(mediaControl);
+		IMediaControl* media_control;
+		TIF(graph_->QueryInterface(IID_IMediaControl, reinterpret_cast<void**>(&media_control)));
+		media_control_ = MakeCOMPtr(media_control);
 
-		IMediaEvent* mediaEvent;
-		TIF(graph_->QueryInterface(IID_IMediaEvent,
-			reinterpret_cast<void**>(&mediaEvent)));
-		mediaEvent_ = MakeCOMPtr(mediaEvent);
+		IMediaEvent* media_event;
+		TIF(graph_->QueryInterface(IID_IMediaEvent, reinterpret_cast<void**>(&media_event)));
+		media_event_ = MakeCOMPtr(media_event);
 
 		TIF(graph_->RenderFile(fileName.c_str(), NULL));
 
@@ -156,7 +151,7 @@ namespace KlayGE
 		long lEventCode, lParam1, lParam2;
 		bool ret(false);
 
-		HRESULT hr(mediaEvent_->GetEvent(&lEventCode, reinterpret_cast<LONG_PTR*>(&lParam1),
+		HRESULT hr(media_event_->GetEvent(&lEventCode, reinterpret_cast<LONG_PTR*>(&lParam1),
 							reinterpret_cast<LONG_PTR*>(&lParam2), 0));
 		if (SUCCEEDED(hr))
 		{
@@ -166,7 +161,7 @@ namespace KlayGE
 			}
 
 			// 释放和这个事件相关的内存
-			TIF(mediaEvent_->FreeEventParams(lEventCode, lParam1, lParam2));
+			TIF(media_event_->FreeEventParams(lEventCode, lParam1, lParam2));
 		}
 
 		return ret;
@@ -177,7 +172,7 @@ namespace KlayGE
 	ShowState DShowEngine::State(long msTimeout)
 	{
 		OAFilterState fs;
-		HRESULT hr(mediaControl_->GetState(msTimeout, &fs));
+		HRESULT hr(media_control_->GetState(msTimeout, &fs));
 		if (FAILED(hr))
 		{
 			return SS_Unkown;
@@ -200,5 +195,12 @@ namespace KlayGE
 		}
 
 		return state_;
+	}
+
+	// 获取显示的纹理
+	/////////////////////////////////////////////////////////////////////////////////
+	TexturePtr DShowEngine::PresentTexture()
+	{
+		return checked_cast<DShowVMR9Allocator*>(vmr_allocator_.get())->PresentTexture();
 	}
 }

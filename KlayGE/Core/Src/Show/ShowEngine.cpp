@@ -14,6 +14,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Texture.hpp>
 
 #include <KlayGE/Show.hpp>
 
@@ -33,8 +34,13 @@ namespace KlayGE
 			return true;
 		}
 
-		void Load(std::wstring const & /*fileName*/, TexturePtr /*tex*/)
+		void Load(std::wstring const & /*fileName*/)
 		{
+		}
+
+		TexturePtr PresentTexture()
+		{
+			return Texture::NullObject();
 		}
 
 		ShowState State(long /*timeout*/)

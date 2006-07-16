@@ -48,7 +48,8 @@ namespace KlayGE
 
 		virtual bool IsComplete() = 0;
 
-		virtual void Load(std::wstring const & fileName, TexturePtr tex) = 0;
+		virtual void Load(std::wstring const & fileName) = 0;
+		virtual TexturePtr PresentTexture() = 0;
 
 		void Play();
 		void Stop();

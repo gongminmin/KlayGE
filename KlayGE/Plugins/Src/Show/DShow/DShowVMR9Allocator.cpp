@@ -16,29 +16,42 @@
 #include <KlayGE/ElementFormat.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Texture.hpp>
+#include <KlayGE/RenderFactory.hpp>
 
 #include <d3d9.h>
 #include <boost/assert.hpp>
+#include <boost/pool/pool_alloc.hpp>
 
 #include <KlayGE/D3D9/D3D9Mapping.hpp>
-#include <KlayGE/D3D9/D3D9RenderEngine.hpp>
+#include <KlayGE/D3D9/D3D9Texture.hpp>
 #include <KlayGE/DShow/DShowVMR9Allocator.hpp>
 
 namespace KlayGE
 {
-	DShowVMR9Allocator::DShowVMR9Allocator(TexturePtr present_tex)
-					: ref_count_(1), 
-						present_tex_(present_tex)
+	DShowVMR9Allocator::DShowVMR9Allocator(HWND wnd)
+					: ref_count_(1),
+						wnd_(wnd)
 	{
-		boost::mutex::scoped_lock lock(mutex_);
+		d3d_ = MakeCOMPtr(::Direct3DCreate9(D3D_SDK_VERSION));
 
-		D3D9RenderEngine& re = *checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		d3d_ = re.D3DObject();
-		d3d_device_ = re.D3DDevice();
+		D3DDISPLAYMODE dm;
+		d3d_->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &dm);
 
-		D3DDEVICE_CREATION_PARAMETERS parameters;
-		d3d_device_->GetCreationParameters(&parameters);
-		wnd_ = parameters.hFocusWindow;
+		D3DPRESENT_PARAMETERS pp;
+		memset(&pp, 0, sizeof(pp));
+		pp.Windowed = true;
+		pp.hDeviceWindow = wnd_;
+		pp.SwapEffect = D3DSWAPEFFECT_DISCARD;
+		pp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+
+		IDirect3DDevice9* d3d_device;
+		d3d_->CreateDevice(D3DADAPTER_DEFAULT,
+								D3DDEVTYPE_HAL,
+								wnd_,
+								D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_PUREDEVICE | D3DCREATE_MULTITHREADED,
+								&pp,
+								&d3d_device);
+		d3d_device_ = MakeCOMPtr(d3d_device);
 	}
 
 	DShowVMR9Allocator::~DShowVMR9Allocator()
@@ -51,6 +64,8 @@ namespace KlayGE
 		boost::mutex::scoped_lock lock(mutex_);
 
 		// clear out the private texture
+		cache_tex_.reset();
+		cache_surf_.reset();
 		private_tex_.reset();
 
 		for (size_t i = 0; i < surfaces_.size(); ++ i) 
@@ -65,11 +80,14 @@ namespace KlayGE
 
 
 	//IVMRSurfaceAllocator9
-	HRESULT DShowVMR9Allocator::InitializeDevice( 
-				/* [in] */ DWORD_PTR /*dwUserID*/,
-				/* [in] */ VMR9AllocationInfo* lpAllocInfo,
-				/* [out][in] */ DWORD* lpNumBuffers)
+	HRESULT DShowVMR9Allocator::InitializeDevice(DWORD_PTR dwUserID,
+				VMR9AllocationInfo* lpAllocInfo, DWORD* lpNumBuffers)
 	{
+		if (dwUserID != USER_ID)
+		{
+			return S_OK;
+		}
+
 		if (NULL == lpNumBuffers)
 		{
 			return E_POINTER;
@@ -90,7 +108,7 @@ namespace KlayGE
 		this->DeleteSurfaces();
 		surfaces_.resize(*lpNumBuffers);
 		hr = vmr_surf_alloc_notify_->AllocateSurfaceHelper(lpAllocInfo, lpNumBuffers, &surfaces_[0]);
-	    
+
 		// If we couldn't create a texture surface and 
 		// the format is not an alpha format,
 		// then we probably cannot create a texture.
@@ -112,7 +130,7 @@ namespace KlayGE
 										1, 
 										D3DUSAGE_RENDERTARGET, 
 										dm.Format, 
-										D3DPOOL_DEFAULT /* default pool - usually video memory */, 
+										D3DPOOL_DEFAULT,
 										&tex, NULL));
 				private_tex_ = MakeCOMPtr(tex);
 			}
@@ -123,22 +141,39 @@ namespace KlayGE
 			TIF(vmr_surf_alloc_notify_->AllocateSurfaceHelper(lpAllocInfo, lpNumBuffers, &surfaces_[0]));
 		}
 
+
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		present_tex_ = rf.MakeTexture2D(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight, 1, EF_ARGB8);
+		present_tex_->Usage(Texture::TU_RenderTarget);
+
+		IDirect3DSurface9* surf;
+		d3d_device_->CreateOffscreenPlainSurface(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight,
+			D3DFMT_X8R8G8B8, D3DPOOL_SYSTEMMEM, &surf, NULL);
+		cache_surf_ = MakeCOMPtr(surf);
+
 		return S_OK;
 	}
 	            
-	HRESULT DShowVMR9Allocator::TerminateDevice( 
-			/* [in] */ DWORD_PTR /*dwID*/)
+	HRESULT DShowVMR9Allocator::TerminateDevice(DWORD_PTR dwID)
 	{
+		if (dwID != USER_ID)
+		{
+			return S_OK;
+		}
+
 		this->DeleteSurfaces();
 		return S_OK;
 	}
 	    
-	HRESULT DShowVMR9Allocator::GetSurface( 
-			/* [in] */ DWORD_PTR /*dwUserID*/,
-			/* [in] */ DWORD SurfaceIndex,
-			/* [in] */ DWORD /*SurfaceFlags*/,
-			/* [out] */ IDirect3DSurface9** lplpSurface)
+	HRESULT DShowVMR9Allocator::GetSurface(DWORD_PTR dwUserID,
+			DWORD SurfaceIndex, DWORD /*SurfaceFlags*/, IDirect3DSurface9** lplpSurface)
 	{
+		if (dwUserID != USER_ID)
+		{
+			*lplpSurface = NULL;
+			return S_OK;
+		}
+
 		if (NULL == lplpSurface)
 		{
 			return E_POINTER;
@@ -156,8 +191,7 @@ namespace KlayGE
 		return S_OK;
 	}
 	    
-	HRESULT DShowVMR9Allocator::AdviseNotify( 
-			/* [in] */ IVMRSurfaceAllocatorNotify9* lpIVMRSurfAllocNotify)
+	HRESULT DShowVMR9Allocator::AdviseNotify(IVMRSurfaceAllocatorNotify9* lpIVMRSurfAllocNotify)
 	{
 		boost::mutex::scoped_lock lock(mutex_);
 
@@ -170,9 +204,13 @@ namespace KlayGE
 		return S_OK;
 	}
 
-	HRESULT DShowVMR9Allocator::StartPresenting( 
-		/* [in] */ DWORD_PTR /*dwUserID*/)
+	HRESULT DShowVMR9Allocator::StartPresenting(DWORD_PTR dwUserID)
 	{
+		if (dwUserID != USER_ID)
+		{
+			return S_OK;
+		}
+
 		boost::mutex::scoped_lock lock(mutex_);
 
 		if (!d3d_device_)
@@ -183,17 +221,22 @@ namespace KlayGE
 		return S_OK;
 	}
 
-	HRESULT DShowVMR9Allocator::StopPresenting( 
-		/* [in] */ DWORD_PTR /*dwUserID*/)
+	HRESULT DShowVMR9Allocator::StopPresenting(DWORD_PTR dwUserID)
 	{
+		if (dwUserID != USER_ID)
+		{
+			return S_OK;
+		}
+
 		return S_OK;
 	}
 
-	HRESULT DShowVMR9Allocator::PresentImage( 
-		/* [in] */ DWORD_PTR /*dwUserID*/,
-		/* [in] */ VMR9PresentationInfo* lpPresInfo)
+	HRESULT DShowVMR9Allocator::PresentImage(DWORD_PTR dwUserID, VMR9PresentationInfo* lpPresInfo)
 	{
-		boost::mutex::scoped_lock lock(mutex_);
+		if (dwUserID != USER_ID)
+		{
+			return S_OK;
+		}
 
 		// parameter validation
 		if (NULL == lpPresInfo)
@@ -208,7 +251,7 @@ namespace KlayGE
 			}
 		}
 
-		ID3D9TexturePtr texture;
+		boost::mutex::scoped_lock lock(mutex_);
 
 		// if we created a  private texture
 		// blt the decoded image onto the texture.
@@ -226,7 +269,7 @@ namespace KlayGE
 								 surface.get(), NULL,
 								 D3DTEXF_NONE));
 
-			texture = private_tex_;
+			cache_tex_ = private_tex_;
 		}
 		else
 		{
@@ -235,65 +278,14 @@ namespace KlayGE
 
 			IDirect3DTexture9* tmp;
 			TIF(lpPresInfo->lpSurf->GetContainer(IID_IDirect3DTexture9, reinterpret_cast<void**>(&tmp)));
-			texture = MakeCOMPtr(tmp);
+			cache_tex_ = MakeCOMPtr(tmp);
 		}
-
-		D3DSURFACE_DESC desc;
-		texture->GetLevelDesc(0, &desc);
-
-		ID3D9SurfacePtr surface;
-		{
-			IDirect3DSurface9* tmp_vm;
-			TIF(texture->GetSurfaceLevel(0 , &tmp_vm));
-
-			IDirect3DSurface9* tmp_sm;
-			d3d_device_->CreateOffscreenPlainSurface(desc.Width, desc.Height, desc.Format,
-				D3DPOOL_SYSTEMMEM, &tmp_sm, NULL);
-
-			d3d_device_->GetRenderTargetData(tmp_vm, tmp_sm);
-
-			surface = MakeCOMPtr(tmp_sm);
-
-			tmp_vm->Release();
-		}
-
-		ElementFormat const ef = D3D9Mapping::MappingFormat(desc.Format);
-		uint32_t const element_size = NumFormatBytes(ef);
-		std::vector<uint8_t> data(desc.Width * desc.Height * element_size);
-
-		D3DLOCKED_RECT d3dlocked_rc;
-		surface->LockRect(&d3dlocked_rc, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY);
-		uint8_t const * src = static_cast<uint8_t const *>(d3dlocked_rc.pBits);
-		uint8_t * dst = &data[0];
-		for (uint32_t y = 0; y < desc.Height; ++ y)
-		{
-			std::copy(src, src + desc.Width * element_size, dst);
-			src += d3dlocked_rc.Pitch;
-			dst += desc.Width * element_size;
-		}
-		surface->UnlockRect();
-
-		if (D3DFMT_X8R8G8B8 == desc.Format)
-		{
-			for (uint32_t y = 0; y < desc.Height; ++ y)
-			{
-				for (uint32_t x = 0; x < desc.Width; ++ x)
-				{
-					data[(y * desc.Width + x) * element_size + 3] = 0xFF;
-				}
-			}
-		}
-
-		present_tex_->CopyMemoryToTexture2D(0, &data[0], ef,
-			present_tex_->Width(0), present_tex_->Height(0), 0, 0, desc.Width, desc.Height);
 
 		return S_OK;
 	}
 
 	// IUnknown
-	HRESULT DShowVMR9Allocator::QueryInterface( 
-			REFIID riid,
-			void** ppvObject)
+	HRESULT DShowVMR9Allocator::QueryInterface(REFIID riid, void** ppvObject)
 	{
 		HRESULT hr = E_NOINTERFACE;
 
@@ -334,17 +326,57 @@ namespace KlayGE
 
 	ULONG DShowVMR9Allocator::AddRef()
 	{
-		return InterlockedIncrement(&ref_count_);
+		return ::InterlockedIncrement(&ref_count_);
 	}
 
 	ULONG DShowVMR9Allocator::Release()
 	{
-		ULONG ret = InterlockedDecrement(&ref_count_);
+		ULONG ret = ::InterlockedDecrement(&ref_count_);
 		if (0 == ret)
 		{
 			delete this;
 		}
 
 		return ret;
+	}
+
+	TexturePtr DShowVMR9Allocator::PresentTexture()
+	{
+		boost::mutex::scoped_lock lock(mutex_);
+
+		if (cache_tex_)
+		{
+			{
+				IDirect3DSurface9* tmp;
+				TIF(cache_tex_->GetSurfaceLevel(0 , &tmp));
+				ID3D9SurfacePtr surf = MakeCOMPtr(tmp);
+
+				TIF(d3d_device_->GetRenderTargetData(surf.get(), cache_surf_.get()));
+			}
+
+			D3DSURFACE_DESC desc;
+			cache_tex_->GetLevelDesc(0, &desc);
+
+			ElementFormat const ef = D3D9Mapping::MappingFormat(desc.Format);
+			uint32_t const line_size = desc.Width * NumFormatBytes(ef);
+			std::vector<uint8_t, boost::pool_allocator<uint8_t> > data(line_size * desc.Height);
+
+			D3DLOCKED_RECT d3dlocked_rc;
+			cache_surf_->LockRect(&d3dlocked_rc, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY);
+			uint8_t const * src = static_cast<uint8_t const *>(d3dlocked_rc.pBits);
+			uint8_t* dst = &data[0];
+			for (uint32_t y = 0; y < desc.Height; ++ y)
+			{
+				std::copy(src, src + line_size, dst);
+				src += d3dlocked_rc.Pitch;
+				dst += line_size;
+			}
+			cache_surf_->UnlockRect();
+
+			present_tex_->CopyMemoryToTexture2D(0, &data[0], ef,
+				present_tex_->Width(0), present_tex_->Height(0), 0, 0, desc.Width, desc.Height);
+		}
+
+		return present_tex_;
 	}
 }

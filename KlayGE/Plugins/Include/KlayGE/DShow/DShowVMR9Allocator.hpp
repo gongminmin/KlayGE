@@ -17,10 +17,9 @@
 
 #include <d3d9.h>
 #include <strmif.h>
-#include <vector>
 #include <vmr9.h>
+#include <vector>
 
-#include <boost/function.hpp>
 #include <boost/thread/mutex.hpp>
 
 #include <KlayGE/D3D9/D3D9Typedefs.hpp>
@@ -30,7 +29,13 @@ namespace KlayGE
 	class DShowVMR9Allocator : public IVMRSurfaceAllocator9, IVMRImagePresenter9
 	{
 	public:
-		explicit DShowVMR9Allocator(TexturePtr present_tex);
+		enum
+		{
+			USER_ID = 0xBAFEDCBA
+		};
+
+	public:
+		explicit DShowVMR9Allocator(HWND wnd);
 		virtual~DShowVMR9Allocator();
 
 		// IVMRSurfaceAllocator9
@@ -70,6 +75,8 @@ namespace KlayGE
 		virtual ULONG STDMETHODCALLTYPE AddRef();
 		virtual ULONG STDMETHODCALLTYPE Release();
 
+		TexturePtr PresentTexture();
+
 	protected:
 		// a helper function to erase every surface in the vector
 		void DeleteSurfaces();
@@ -87,7 +94,9 @@ namespace KlayGE
 		std::vector<IDirect3DSurface9*>	surfaces_;
 		ID3D9TexturePtr					private_tex_;
 
-		TexturePtr present_tex_;
+		ID3D9TexturePtr		cache_tex_;
+		ID3D9SurfacePtr		cache_surf_;
+		TexturePtr			present_tex_;
 	};
 }
 

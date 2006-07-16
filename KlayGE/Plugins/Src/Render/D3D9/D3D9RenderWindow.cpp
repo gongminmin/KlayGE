@@ -363,7 +363,7 @@ namespace KlayGE
 			for (BehaviorType::iterator iter = behavior.begin(); iter != behavior.end(); ++ iter)
 			{
 				if (SUCCEEDED(d3d_->CreateDevice(adapter_.AdapterNo(), D3DDEVTYPE_HAL, hWnd_,
-					iter->first | D3DCREATE_MULTITHREADED, &d3dpp_, &d3dDevice)))
+					iter->first, &d3dpp_, &d3dDevice)))
 				{
 					// Check for ATI instancing support
 					if (D3D_OK == d3d_->CheckDeviceFormat(D3DADAPTER_DEFAULT,

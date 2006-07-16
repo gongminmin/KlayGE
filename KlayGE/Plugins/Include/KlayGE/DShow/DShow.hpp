@@ -13,8 +13,6 @@
 #ifndef _DSHOW_HPP
 #define _DSHOW_HPP
 
-#include <boost/smart_ptr.hpp>
-#include <strmif.h>
 #include <control.h>
 #include <d3d9.h>
 #include <strmif.h>
@@ -22,6 +20,7 @@
 
 #include <string>
 
+#include <boost/smart_ptr.hpp>
 #include <boost/utility.hpp>
 
 #include <KlayGE/Show.hpp>
@@ -34,9 +33,6 @@
 
 namespace KlayGE
 {
-	long const OAFALSE = 0;
-	long const OATRUE  = -1;
-
 	class DShowEngine : boost::noncopyable, public ShowEngine
 	{
 	public:
@@ -45,15 +41,16 @@ namespace KlayGE
 
 		bool IsComplete();
 
-		void Load(std::wstring const & fileName, TexturePtr tex);
+		void Load(std::wstring const & fileName);
+		TexturePtr PresentTexture();
 
 		ShowState State(long msTimeout = -1);
 
 	private:
 		boost::shared_ptr<IGraphBuilder>	graph_;
 		boost::shared_ptr<IBaseFilter>      filter_;
-		boost::shared_ptr<IMediaControl>	mediaControl_;
-		boost::shared_ptr<IMediaEvent>		mediaEvent_;
+		boost::shared_ptr<IMediaControl>	media_control_;
+		boost::shared_ptr<IMediaEvent>		media_event_;
 		boost::shared_ptr<IVMRSurfaceAllocator9> vmr_allocator_;
 
 	private:

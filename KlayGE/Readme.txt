@@ -52,8 +52,8 @@ __________________________________________________________________
 
 编译
 
-编译KlayGE内核需要一些第三方库：Python 2.4.3、Boost 1.33.1、FreeType 2.1.10，分别在http://www.python.org、http://www.boost.org和http://freetype.sourceforge.net下载。
-编译DX相关插件需要DirectX 9.0 SDK Apr 2006，在http://msdn.microsoft.com/directx下载。
+编译KlayGE内核需要一些第三方库：Python 2.4.3、Boost 1.33.1、FreeType 2.2.0，分别在http://www.python.org、http://www.boost.org和http://freetype.sourceforge.net下载。
+编译DX相关插件需要DirectX 9.0 SDK June 2006，在http://msdn.microsoft.com/directx下载。
 编译OggWav插件需要Vorbis SDK，在http://www.vorbis.com下载。
 编译OpenAL插件需要OpenAL SDK，在http://www.openal.org下载。
 编译OpenGL插件需要NVIDIA Cg，在http://developer.nvidia.com/page/cg_main.html下载。
@@ -80,6 +80,7 @@ __________________________________________________________________
 支持normal map的压缩
 支持HDR纹理的压缩
 加入了粒子系统
+重写的播放引擎现在通过图形引擎播放视频
 
 3.3.0 (2006.6.30)
 Font支持渲染到3D位置
