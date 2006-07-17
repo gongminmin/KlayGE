@@ -151,7 +151,7 @@ namespace
 
 		void OnRenderBegin()
 		{
-			model_ = MathLib::translation(0.2f, 0.2f, 0.0f)
+			model_ = MathLib::translation(0.2f, 0.1f, 0.0f)
 				* MathLib::rotation_y(-std::clock() / 1000.0f);
 			ShadowMapped::OnRenderBegin(model_, effect_);
 		}
@@ -346,7 +346,7 @@ void ShadowCubeMap::InitObjects()
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	this->LookAt(float3(2, 0, -1), float3(0, 0, 0));
+	this->LookAt(float3(1.3f, 0.5f, -0.7f), float3(0, 0, 0));
 	this->Proj(0.01f, 100);
 
 	lamp_tex_ = LoadTexture("lamp.dds");

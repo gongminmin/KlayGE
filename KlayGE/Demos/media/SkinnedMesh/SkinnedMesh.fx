@@ -17,8 +17,8 @@ void SkinnedMeshVS(float4 pos : POSITION,
 				
 				out float4 oPos : POSITION,
 				out float2 oTex0 : TEXCOORD0,
-				out float4 oL	: TEXCOORD1,	// in tangent space
-				out float4 oH	: TEXCOORD2)	// in tangent space
+				out float3 oL	: TEXCOORD1,	// in tangent space
+				out float3 oH	: TEXCOORD2)	// in tangent space
 {
 	oTex0 = tex0;
 
@@ -48,8 +48,8 @@ void SkinnedMeshVS(float4 pos : POSITION,
 	float3 V = eye_pos - result_pos;
 	float3 H = normalize(L + V);
 
-	oH = float4(mul(obj2tan, H), 1);
-	oL = float4(mul(obj2tan, L), 1);
+	oH = mul(obj2tan, H);
+	oL = mul(obj2tan, L);
 }
 
 

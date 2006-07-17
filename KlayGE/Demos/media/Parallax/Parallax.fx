@@ -39,8 +39,8 @@ VS_OUTPUT ParallaxVS(VS_INPUT input,
 	float3 lightVec = lightPos - input.pos;
 	float3 viewVec = eyePos - input.pos;
 
-	output.L = mul(lightVec, objToTangentSpace);
-	output.V = mul(viewVec, objToTangentSpace);
+	output.L = mul(objToTangentSpace, lightVec);
+	output.V = mul(objToTangentSpace, viewVec);
 
 	return output;
 }

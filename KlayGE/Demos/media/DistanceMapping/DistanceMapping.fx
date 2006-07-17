@@ -36,8 +36,8 @@ VS_OUTPUT DistanceMappingVS(VS_INPUT input)
 	float3 vLight = lightPos - input.pos;
 	float3 vView = input.pos - eyePos;
 
-	float3 vTanLight = mul(vLight, matObjToTangentSpace);
-	float3 vTanView = mul(vView, matObjToTangentSpace);
+	float3 vTanLight = mul(matObjToTangentSpace, vLight);
+	float3 vTanView = mul(matObjToTangentSpace, vView);
 
 	output.L = vTanLight;
 	output.V = vTanView;
