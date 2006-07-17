@@ -27,64 +27,64 @@ namespace KlayGE
 						boost::dividable2<Vector_T<T, N>, T,
 						boost::multipliable2<Vector_T<T, N>, T> > > > > >
 	{
-		template <int N>
+		template <int M>
 		struct Helper
 		{
 			template <typename U>
-			static void DoCopy(T out[N], U const rhs[N])
+			static void DoCopy(T out[M], U const rhs[M])
 			{
 				out[0] = rhs[0];
-				Helper<N - 1>::DoCopy<U>(out + 1, rhs + 1);
+				Helper<M - 1>::DoCopy<U>(out + 1, rhs + 1);
 			}
 
-			static void DoAssign(T out[N], T const & rhs)
+			static void DoAssign(T out[M], T const & rhs)
 			{
 				out[0] = rhs;
-				Helper<N - 1>::DoAssign(out + 1, rhs);
+				Helper<M - 1>::DoAssign(out + 1, rhs);
 			}
 
-			static void DoAdd(T out[N], T const lhs[N], T const rhs[N])
+			static void DoAdd(T out[M], T const lhs[M], T const rhs[M])
 			{
 				out[0] = lhs[0] + rhs[0];
-				Helper<N - 1>::DoAdd(out + 1, lhs + 1, rhs + 1);
+				Helper<M - 1>::DoAdd(out + 1, lhs + 1, rhs + 1);
 			}
 
-			static void DoSub(T out[N], T const lhs[N], T const rhs[N])
+			static void DoSub(T out[M], T const lhs[M], T const rhs[M])
 			{
 				out[0] = lhs[0] - rhs[0];
-				Helper<N - 1>::DoSub(out + 1, lhs + 1, rhs + 1);
+				Helper<M - 1>::DoSub(out + 1, lhs + 1, rhs + 1);
 			}
 
-			static void DoMul(T out[N], T const lhs[N], T const rhs[N])
+			static void DoMul(T out[M], T const lhs[M], T const rhs[M])
 			{
 				out[0] = lhs[0] * rhs[0];
-				Helper<N - 1>::DoMul(out + 1, lhs + 1, rhs + 1);
+				Helper<M - 1>::DoMul(out + 1, lhs + 1, rhs + 1);
 			}
 
-			static void DoScale(T out[N], T const lhs[N], T const & rhs)
+			static void DoScale(T out[M], T const lhs[M], T const & rhs)
 			{
 				out[0] = lhs[0] * rhs;
-				Helper<N - 1>::DoScale(out + 1, lhs + 1, rhs);
+				Helper<M - 1>::DoScale(out + 1, lhs + 1, rhs);
 			}
 
-			static void DoDiv(T out[N], T const lhs[N], T const rhs[N])
+			static void DoDiv(T out[M], T const lhs[M], T const rhs[M])
 			{
 				out[0] = lhs[0] / rhs[0];
-				Helper<N - 1>::DoMul(out + 1, lhs + 1, rhs + 1);
+				Helper<M - 1>::DoMul(out + 1, lhs + 1, rhs + 1);
 			}
 
-			static void DoNegate(T out[N], T const rhs[N])
+			static void DoNegate(T out[M], T const rhs[M])
 			{
 				out[0] = -rhs[0];
-				Helper<N - 1>::DoNegate(out + 1, rhs + 1);
+				Helper<M - 1>::DoNegate(out + 1, rhs + 1);
 			}
 
-			static bool DoEqual(T const lhs[N], T const rhs[N])
+			static bool DoEqual(T const lhs[M], T const rhs[M])
 			{
-				return Helper<1>::DoEqual(lhs, rhs) && Helper<N - 1>::DoEqual(lhs + 1, rhs + 1);
+				return Helper<1>::DoEqual(lhs, rhs) && Helper<M - 1>::DoEqual(lhs + 1, rhs + 1);
 			}
 
-			static void DoSwap(T lhs[N], T rhs[N])
+			static void DoSwap(T lhs[M], T rhs[M])
 			{
 				std::swap(lhs[0], rhs[0]);
 				return Helper<1>::DoSwap(lhs + 1, rhs + 1);
