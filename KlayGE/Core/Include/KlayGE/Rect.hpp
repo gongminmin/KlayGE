@@ -29,9 +29,6 @@ namespace KlayGE
 						boost::orable<Rect_T<T>,
 						boost::equality_comparable<Rect_T<T> > > > > > > >
 	{
-		template <typename U>
-		friend class Rect_T;
-
 	public:
 		typedef T					value_type;
 

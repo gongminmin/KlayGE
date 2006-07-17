@@ -24,9 +24,6 @@ namespace KlayGE
 	template <typename T>
 	class Plane_T : boost::equality_comparable<Plane_T<T> >
 	{
-		template <typename U>
-		friend class Plane_T;
-
 	public:
 		typedef T					value_type;
 

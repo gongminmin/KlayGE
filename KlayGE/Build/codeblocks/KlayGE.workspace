@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!DOCTYPE CodeBlocks_workspace_file>
+<CodeBlocks_workspace_file>
+	<Workspace title="KlayGE workspace">
+		<Project filename="Core.cbp"/>
+		<Project filename="OpenAL.cbp"/>
+		<Project filename="DInput.cbp"/>
+		<Project filename="DShow.cbp"/>
+		<Project filename="OggWav.cbp"/>
+		<Project filename="AppLayer.cbp"/>
+		<Project filename="DSound.cbp"/>
+		<Project filename="Heightmap.cbp"/>
+		<Project filename="D3D9.cbp"/>
+		<Project filename="OpenGL.cbp"/>
+		<Project filename="OCTree.cbp"/>
+		<Project filename="..\vc-8_0\LZSS.cbp" active="1"/>
+	</Workspace>
+</CodeBlocks_workspace_file>

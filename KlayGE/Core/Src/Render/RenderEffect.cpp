@@ -391,7 +391,7 @@ namespace KlayGE
 	void RenderEffectParameter::Value(float2& val) const
 	{
 		BOOST_ASSERT(false);
-		val = float3::Zero();
+		val = float2::Zero();
 	}
 
 	void RenderEffectParameter::Value(float3& val) const

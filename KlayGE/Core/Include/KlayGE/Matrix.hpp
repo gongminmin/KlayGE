@@ -28,9 +28,6 @@ namespace KlayGE
 						boost::multipliable2<Matrix4_T<T>, T,
 						boost::equality_comparable<Matrix4_T<T> > > > > >
 	{
-		template <typename U>
-		friend class Matrix4_T;
-
 	public:
 		typedef T					value_type;
 
