@@ -506,6 +506,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Include\KlayGE\Detail\MathHelper.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Include\KlayGE\Matrix.hpp"
 					>
 				</File>

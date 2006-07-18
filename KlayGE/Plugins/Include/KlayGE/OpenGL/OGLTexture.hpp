@@ -19,7 +19,6 @@
 
 #include <KlayGE/Texture.hpp>
 
-#define NOMINMAX
 #include <windows.h>
 #include <glloader/glloader.h>
 

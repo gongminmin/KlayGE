@@ -22,12 +22,12 @@
 #include <boost/thread/thread.hpp>
 
 #ifdef WIN32
-	#define NOMINMAX
 	#include <windows.h>
 #else
 	#include <cerrno>
 #endif
 
+#include <cstdlib>
 #include <cwchar>
 #include <clocale>
 #include <vector>
@@ -44,9 +44,9 @@ namespace KlayGE
 	{
 		std::setlocale(LC_CTYPE, "");
 
-		size_t const mbs_len = std::wcstombs(NULL, src.c_str(), 0);
+		size_t const mbs_len = wcstombs(NULL, src.c_str(), 0);
 		std::vector<char> tmp(mbs_len + 1);
-		std::wcstombs(&tmp[0], src.c_str(), tmp.size());
+		wcstombs(&tmp[0], src.c_str(), tmp.size());
 
 		dest.assign(tmp.begin(), tmp.end() - 1);
 
@@ -68,9 +68,9 @@ namespace KlayGE
 	{
 		std::setlocale(LC_CTYPE, "");
 
-		size_t const wcs_len = std::mbstowcs(NULL, src.c_str(), 0);
+		size_t const wcs_len = mbstowcs(NULL, src.c_str(), 0);
 		std::vector<wchar_t> tmp(wcs_len + 1);
-		std::mbstowcs(&tmp[0], src.c_str(), src.size());
+		mbstowcs(&tmp[0], src.c_str(), src.size());
 
 		dest.assign(tmp.begin(), tmp.end() - 1);
 

@@ -6,7 +6,7 @@
 //
 // 3.2.0
 // 增加了copy_if (2006.2.23)
-// 增加了EndianSwitch (2006.5.13) 
+// 增加了EndianSwitch (2006.5.13)
 //
 // 3.0.0
 // 增加了checked_cast (2005.9.26)
@@ -136,12 +136,12 @@ namespace KlayGE
 	template <int size>
 	void BigEndianToNative(void* p)
 	{
-		NativeToBigEndian(p);
+		NativeToBigEndian<size>(p);
 	}
 	template <int size>
 	void LittleEndianToNative(void* p)
 	{
-		NativeToLittleEndian(p);
+		NativeToLittleEndian<size>(p);
 	}
 
 	// 得到COM对象的智能指针

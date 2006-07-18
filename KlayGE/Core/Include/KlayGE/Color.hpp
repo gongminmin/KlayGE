@@ -131,7 +131,7 @@ namespace KlayGE
 		}
 		Color_T& operator*=(Color_T const & rhs)
 		{
-			*this = MathLib::Modulate(*this, rhs);
+			*this = MathLib::modulate(*this, rhs);
 			return *this;
 		}
 		Color_T& operator/=(T const & rhs)

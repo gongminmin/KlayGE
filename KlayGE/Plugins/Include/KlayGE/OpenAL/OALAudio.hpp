@@ -22,7 +22,6 @@
 #include <al/alc.h>
 
 #include <vector>
-#define NOMINMAX
 #include <windows.h>
 
 #include <boost/utility.hpp>

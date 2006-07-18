@@ -31,8 +31,6 @@
 // 修改记录
 /////////////////////////////////////////////////////////////////////////////////
 
-#define NOMINMAX
-
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
@@ -78,9 +76,9 @@ namespace
 		FontRenderable(std::string const & fontName, uint32_t fontHeight, uint32_t flags)
 			: RenderableHelper(L"Font"),
 				curX_(0), curY_(0),
+				three_dim_(false),
 				fontHeight_(fontHeight),
-				theSampler_(new Sampler),
-				three_dim_(false)
+				theSampler_(new Sampler)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -157,7 +155,7 @@ namespace
 			if (!three_dim_)
 			{
 				technique_ = effect_->Technique("Font2DTec");
-			
+
 				RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				Viewport const & viewport(renderEngine.CurRenderTarget()->GetViewport());
 				*(effect_->ParameterByName("halfWidth")) = viewport.width / 2;
@@ -203,7 +201,7 @@ namespace
 			this->AddText(fontHeight, sx, sy, sz, xScale, yScale, clr, text);
 		}
 
-		void AddText3D(uint32_t fontHeight, float4x4 const & mvp, Color const & clr, 
+		void AddText3D(uint32_t fontHeight, float4x4 const & mvp, Color const & clr,
 			std::wstring const & text)
 		{
 			three_dim_ = true;
@@ -457,7 +455,7 @@ namespace KlayGE
 
 	// 在指定位置画出文字
 	/////////////////////////////////////////////////////////////////////////////////
-	void Font::RenderText(float sx, float sy, Color const & clr, 
+	void Font::RenderText(float sx, float sy, Color const & clr,
 		std::wstring const & text)
 	{
 		this->RenderText(sx, sy, 0.5f, 1, 1, clr, text);

@@ -25,7 +25,6 @@
 #include <KlayGE/OpenGL/OGLOcclusionQuery.hpp>
 #include <KlayGE/OpenGL/OGLRenderView.hpp>
 
-#define NOMINMAX
 #include <windows.h>
 #include <glloader/glloader.h>
 #include <gl/glu.h>

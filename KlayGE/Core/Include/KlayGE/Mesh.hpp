@@ -38,77 +38,6 @@
 
 namespace KlayGE
 {
-	class RenderModel : public Renderable
-	{
-	public:
-		RenderModel(std::wstring const & name);
-
-		template <typename ForwardIterator>
-		void AssignMeshes(ForwardIterator first, ForwardIterator last)
-		{
-			meshes_.assign(first, last);
-
-			box_ = Box(float3(0, 0, 0), float3(0, 0, 0));
-			for (StaticMeshesPtrType::iterator iter = meshes_.begin();
-				iter != meshes_.end(); ++ iter)
-			{
-				box_ |= (*iter)->GetBound();
-			}
-		}
-
-		StaticMeshPtr Mesh(size_t id)
-		{
-			return meshes_[id];
-		}
-		StaticMeshPtr Mesh(size_t id) const
-		{
-			return meshes_[id];
-		}
-		size_t NumMeshes() const
-		{
-			return meshes_.size();
-		}
-
-		RenderTechniquePtr GetRenderTechnique() const
-		{
-			return technique_;
-		}
-		void SetRenderTechnique(RenderTechniquePtr const & tech)
-		{
-			technique_ = tech;
-		}
-
-		RenderLayoutPtr GetRenderLayout() const
-		{
-			return rl_;
-		}
-
-		void OnRenderBegin();
-		void OnRenderEnd();
-
-		Box GetBound() const
-		{
-			return box_;
-		}
-		std::wstring const & Name() const
-		{
-			return name_;
-		}
-
-		void AddToRenderQueue();
-
-	protected:
-		std::wstring name_;
-
-		RenderLayoutPtr rl_;
-		RenderTechniquePtr technique_;
-
-		Box box_;
-
-		typedef std::vector<StaticMeshPtr> StaticMeshesPtrType;
-		StaticMeshesPtrType meshes_;
-	};
-
 	class StaticMesh : public Renderable
 	{
 	public:
@@ -200,6 +129,77 @@ namespace KlayGE
 		IndicesType indices_;
 	};
 
+	class RenderModel : public Renderable
+	{
+	public:
+		RenderModel(std::wstring const & name);
+
+		template <typename ForwardIterator>
+		void AssignMeshes(ForwardIterator first, ForwardIterator last)
+		{
+			meshes_.assign(first, last);
+
+			box_ = Box(float3(0, 0, 0), float3(0, 0, 0));
+			for (StaticMeshesPtrType::iterator iter = meshes_.begin();
+				iter != meshes_.end(); ++ iter)
+			{
+				box_ |= (*iter)->GetBound();
+			}
+		}
+
+		StaticMeshPtr Mesh(size_t id)
+		{
+			return meshes_[id];
+		}
+		StaticMeshPtr Mesh(size_t id) const
+		{
+			return meshes_[id];
+		}
+		size_t NumMeshes() const
+		{
+			return meshes_.size();
+		}
+
+		RenderTechniquePtr GetRenderTechnique() const
+		{
+			return technique_;
+		}
+		void SetRenderTechnique(RenderTechniquePtr const & tech)
+		{
+			technique_ = tech;
+		}
+
+		RenderLayoutPtr GetRenderLayout() const
+		{
+			return rl_;
+		}
+
+		void OnRenderBegin();
+		void OnRenderEnd();
+
+		Box GetBound() const
+		{
+			return box_;
+		}
+		std::wstring const & Name() const
+		{
+			return name_;
+		}
+
+		void AddToRenderQueue();
+
+	protected:
+		std::wstring name_;
+
+		RenderLayoutPtr rl_;
+		RenderTechniquePtr technique_;
+
+		Box box_;
+
+		typedef std::vector<StaticMeshPtr> StaticMeshesPtrType;
+		StaticMeshesPtrType meshes_;
+	};
+
 
 	struct Joint
 	{
@@ -273,7 +273,7 @@ namespace KlayGE
 		PositionsType bind_poss_;
 
 		boost::shared_ptr<KlayGE::KeyFramesType> key_frames_;
-		int last_frame_;	
+		int last_frame_;
 	};
 
 	class SkinnedMesh : public StaticMesh

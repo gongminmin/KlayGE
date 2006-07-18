@@ -62,7 +62,7 @@ namespace KlayGE
 	private:
 		typedef std::map<std::string, std::pair<RenderEffectParameterPtr, bool> > params_type;
 		typedef std::vector<RenderTechniquePtr> techniques_type;
-		
+
 	public:
 		virtual ~RenderEffect()
 			{ }
@@ -141,9 +141,8 @@ namespace KlayGE
 		virtual void DoEnd() = 0;
 
 	protected:
-		std::string name_;
-
 		RenderEffect& effect_;
+		std::string name_;
 
 		typedef std::vector<RenderPassPtr> passes_type;
 		passes_type passes_;
@@ -169,9 +168,8 @@ namespace KlayGE
 		virtual void End() = 0;
 
 	protected:
-		uint32_t index_;
-
 		RenderEffect& effect_;
+		uint32_t index_;
 	};
 
 	class RenderEffectParameter : boost::noncopyable

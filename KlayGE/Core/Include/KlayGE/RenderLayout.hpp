@@ -185,11 +185,6 @@ namespace KlayGE
 
 			return ret;
 		}
-		template <>
-		vertex_elements_type Tuple2Vector<boost::tuples::null_type>(boost::tuples::null_type const & /*t*/)
-		{
-			return vertex_elements_type();
-		}
 
 	protected:
 		buffer_type type_;
@@ -210,6 +205,13 @@ namespace KlayGE
 		GraphicsBufferPtr index_stream_;
 		ElementFormat index_format_;
 	};
+
+	template <>
+	inline vertex_elements_type
+	RenderLayout::Tuple2Vector<boost::tuples::null_type>(boost::tuples::null_type const & /*t*/)
+	{
+		return vertex_elements_type();
+	}
 }
 
 #endif		// _RENDERLAYOUT_HPP

@@ -30,7 +30,6 @@
 #include <vector>
 #include <map>
 
-#define NOMINMAX
 #include <windows.h>
 #include <glloader/glloader.h>
 

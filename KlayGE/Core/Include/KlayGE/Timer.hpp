@@ -14,7 +14,6 @@
 #define _TIMER_HPP
 
 #ifdef WIN32
-	#define NOMINMAX
 	#include <windows.h>
 #else
 	#include <ctime>

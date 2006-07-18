@@ -21,7 +21,6 @@
 #include <utility>
 #include <vector>
 
-#define NOMINMAX
 #pragma warning(push)
 #pragma warning(disable: 4127 4800)
 #include <boost/pool/pool_alloc.hpp>
@@ -29,8 +28,8 @@
 
 namespace KlayGE
 {
-	template <typename Key, typename Type, 
-				class Traits = std::less<Key>, 
+	template <typename Key, typename Type,
+				class Traits = std::less<Key>,
 				class Allocator = boost::fast_pool_allocator<std::pair<Key, Type> > >
 	class MapVector
 	{
@@ -95,14 +94,14 @@ namespace KlayGE
 		};
 
 	public:
-		explicit MapVector(key_compare const & comp = key_compare(), 
+		explicit MapVector(key_compare const & comp = key_compare(),
 								Allocator const & alloc = Allocator())
 					: container_(alloc), compare_(comp)
 			{ }
 
 		template <class InputIterator>
-        MapVector(InputIterator first, InputIterator last, 
-						key_compare const & comp = key_compare(), 
+        MapVector(InputIterator first, InputIterator last,
+						key_compare const & comp = key_compare(),
 						Allocator const & alloc = Allocator())
 					: container_(first, last, alloc), compare_(comp)
 			{ std::sort(this->begin(), this->end(), compare_); }
@@ -110,9 +109,9 @@ namespace KlayGE
 		MapVector(MapVector const & rhs)
 			: container_(rhs.container_), compare_(rhs.compare_)
 			{ }
-        
+
         MapVector& operator=(MapVector const & rhs)
-        { 
+        {
             MapVector(rhs).swap(*this);
             return *this;
         }
@@ -143,7 +142,7 @@ namespace KlayGE
 			{ return container_.size(); }
 
 		size_type count(Key const & key) const
-			{ return find(key) != end() }
+			{ return find(key) != end(); }
 
 		std::pair<iterator, iterator> equal_range(Key const & key)
 			{ return std::equal_range(begin(), end(), key, compare_); }
@@ -203,7 +202,7 @@ namespace KlayGE
 		}
 		iterator insert(iterator where, value_type const & val)
 		{
-			if (where != this->end() && compare_(*pos, val)
+			if (where != this->end() && compare_(*where, val)
 				&& (where == this->end() - 1
 					|| (!compare_(val, where + 1)
 						&& compare_(where + 1, val))))
@@ -253,12 +252,12 @@ namespace KlayGE
 		value_compare value_comp() const
 			{ return value_compare(compare_); }
 
-			
+
 		friend bool operator==(MapVector const & lhs, MapVector const & rhs)
-			{ return lhs.container_ == rhs.container_; } 
+			{ return lhs.container_ == rhs.container_; }
 
 		friend bool operator<(MapVector const & lhs, MapVector const & rhs)
-			{ return lhs.container_ < rhs.container_; } 
+			{ return lhs.container_ < rhs.container_; }
 
 	private:
 		ContainerType	container_;

@@ -16,7 +16,6 @@
 #include <string>
 #include <exception>
 
-#define NOMINMAX
 #include <windows.h>
 
 namespace KlayGE
@@ -27,17 +26,29 @@ namespace KlayGE
 		Exception(std::string const & errFile, uint32_t errLine, uint32_t errCode, std::string const & msg) throw()
 			: errFile_(errFile), errLine_(errLine),
 				errCode_(errCode), msg_(msg)
-			{ }
+		{
+		}
+		virtual ~Exception() throw()
+		{
+		}
 
 		std::string const & ErrorFile() const throw()
-			{ return errFile_; }
+		{
+			return errFile_;
+		}
 		uint32_t ErrorLine() const throw()
-			{ return errLine_; }
+		{
+			return errLine_;
+		}
 
 		uint32_t ErrorCode() const throw()
-			{ return errCode_; }
+		{
+			return errCode_;
+		}
 		const char* what() const throw()
-			{ return msg_.c_str(); }
+		{
+			return msg_.c_str();
+		}
 
 	public:
 		std::string errFile_;

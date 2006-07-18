@@ -36,6 +36,8 @@
 
 #include <boost/static_assert.hpp>
 
+#include <KlayGE/Detail/MathHelper.hpp>
+
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_Core_d.lib")
 #else
@@ -49,26 +51,26 @@ namespace KlayGE
 	float const PI		= 3.141592f;			// PI
 	float const PI2		= 6.283185f;			// PI * 2
 	float const PIdiv2	= 1.570796f;			// PI / 2
-		  
+
 	float const DEG90	= 1.570796f;			// 90 度
 	float const DEG270	= -1.570796f;			// 270 度
 	float const DEG45	= 0.7853981f;			// 45 度
 	float const DEG5	= 0.0872664f;			// 5 度
 	float const DEG10	= 0.1745329f;			// 10 度
-	float const DEG20	= 0.3490658f;			// 20 度 
+	float const DEG20	= 0.3490658f;			// 20 度
 	float const DEG30	= 0.5235987f;			// 30 度
 	float const DEG60	= 1.047197f;			// 60 度
 	float const DEG120	= 2.094395f;			// 120 度
-		  
+
 	float const DEG40	= 0.6981317f;			// 40 度
 	float const DEG80	= 1.396263f;			// 80 度
 	float const DEG140	= 2.443460f;			// 140 度
 	float const DEG160	= 2.792526f;			// 160 度
-		  
+
 	float const SQRT2	= 1.414213f;			// 根2
 	float const SQRT_2	= 0.7071068f;			// 1 / SQRT2
 	float const SQRT3	= 1.732050f;			// 根3
-		  
+
 	float const DEG2RAD	= 0.01745329f;			// 角度化弧度因数
 	float const RAD2DEG	= 57.29577f;			// 弧度化角度因数
 
@@ -89,7 +91,7 @@ namespace KlayGE
 		{
 			return x < T(0) ? T(-1) : (x > T(0) ? T(1) : T(0));
 		}
-		
+
 		// 平方
 		template <typename T>
 		inline T
@@ -248,7 +250,7 @@ namespace KlayGE
 		{
 			return ((val >= low) && (val <= high));
 		}
-		
+
 		// 判断两个数是否相等
 		template <typename T>
 		inline bool
@@ -368,29 +370,13 @@ namespace KlayGE
 		}
 
 
-		template <typename T, int N>
-		struct dot_helper
-		{
-			static T Do(T const * lhs, T const * rhs)
-			{
-				return lhs[0] * rhs[0] + dot_helper<T, N - 1>::Do(lhs + 1, rhs + 1);
-			}
-		};
-		template <typename T>
-		struct dot_helper<T, 1>
-		{
-			static T Do(T const * lhs, T const * rhs)
-			{
-				return lhs[0] * rhs[0];
-			}
-		};
-
 		// 几种类型的Dot
 		template <typename T>
 		inline typename T::value_type
 		dot(T const & lhs, T const & rhs)
 		{
-			return dot_helper<T::value_type, T::elem_num>::Do(&lhs[0], &rhs[0]);
+			return detail::dot_helper<typename T::value_type,
+							T::elem_num>::Do(&lhs[0], &rhs[0]);
 		}
 
 		// Length的平方
@@ -418,40 +404,11 @@ namespace KlayGE
 		}
 
 		template <typename T, int N>
-		struct max_minimize_helper
-		{
-			static void DoMax(T out[N], T const lhs[N], T const rhs[N])
-			{
-				out[0] = std::max<T>(lhs[0], rhs[0]);
-				max_minimize_helper<T, N - 1>::DoMax(out + 1, lhs + 1, rhs + 1);
-			}
-
-			static void DoMin(T out[N], T const lhs[N], T const rhs[N])
-			{
-				out[0] = std::min<T>(lhs[0], rhs[0]);
-				max_minimize_helper<T, N - 1>::DoMin(out + 1, lhs + 1, rhs + 1);
-			}
-		};
-		template <typename T>
-		struct max_minimize_helper<T, 1>
-		{
-			static void DoMax(T out[1], T const lhs[1], T const rhs[1])
-			{
-				out[0] = std::max<T>(lhs[0], rhs[0]);
-			}
-
-			static void DoMin(T out[1], T const lhs[1], T const rhs[1])
-			{
-				out[0] = std::min<T>(lhs[0], rhs[0]);
-			}
-		};
-
-		template <typename T, int N>
 		inline Vector_T<T, N>
 		maximize(Vector_T<T, N> const & lhs, Vector_T<T, N> const & rhs)
 		{
 			Vector_T<T, N> ret;
-			max_minimize_helper<T, N>::DoMax(&ret[0], &lhs[0], &rhs[0]);
+			detail::max_minimize_helper<T, N>::DoMax(&ret[0], &lhs[0], &rhs[0]);
 			return ret;
 		}
 
@@ -460,54 +417,15 @@ namespace KlayGE
 		minimize(Vector_T<T, N> const & lhs, Vector_T<T, N> const & rhs)
 		{
 			Vector_T<T, N> ret;
-			max_minimize_helper<T, N>::DoMin(&ret[0], &lhs[0], &rhs[0]);
+			detail::max_minimize_helper<T, N>::DoMin(&ret[0], &lhs[0], &rhs[0]);
 			return ret;
 		}
-
-		template <typename T, int N>
-		struct transform_helper
-		{
-			static Vector_T<T, 4> Do(Vector_T<T, N> const & v, Matrix4_T<T> const & mat);
-		};
-		template <typename T>
-		struct transform_helper<T, 4>
-		{
-			static Vector_T<T, 4> Do(Vector_T<T, 4> const & v, Matrix4_T<T> const & mat)
-			{
-				return Vector_T<T, 4>(v.x() * mat(0, 0) + v.y() * mat(1, 0) + v.z() * mat(2, 0) + v.w() * mat(3, 0),
-					v.x() * mat(0, 1) + v.y() * mat(1, 1) + v.z() * mat(2, 1) + v.w() * mat(3, 1),
-					v.x() * mat(0, 2) + v.y() * mat(1, 2) + v.z() * mat(2, 2) + v.w() * mat(3, 2),
-					v.x() * mat(0, 3) + v.y() * mat(1, 3) + v.z() * mat(2, 3) + v.w() * mat(3, 3));
-			}
-		};
-		template <typename T>
-		struct transform_helper<T, 3>
-		{
-			static Vector_T<T, 4> Do(Vector_T<T, 3> const & v, Matrix4_T<T> const & mat)
-			{
-				return Vector_T<T, 4>(v.x() * mat(0, 0) + v.y() * mat(1, 0) + v.z() * mat(2, 0) + mat(3, 0),
-					v.x() * mat(0, 1) + v.y() * mat(1, 1) + v.z() * mat(2, 1) + mat(3, 1),
-					v.x() * mat(0, 2) + v.y() * mat(1, 2) + v.z() * mat(2, 2) + mat(3, 2),
-					v.x() * mat(0, 3) + v.y() * mat(1, 3) + v.z() * mat(2, 3) + mat(3, 3));
-			}
-		};
-		template <typename T>
-		struct transform_helper<T, 2>
-		{
-			static Vector_T<T, 4> Do(Vector_T<T, 2> const & v, Matrix4_T<T> const & mat)
-			{
-				return Vector_T<T, 4>(v.x() * mat(0, 0) + v.y() * mat(1, 0) + mat(3, 0),
-					v.x() * mat(0, 1) + v.y() * mat(1, 1) + mat(3, 1),
-					v.x() * mat(0, 2) + v.y() * mat(1, 2) + mat(3, 2),
-					v.x() * mat(0, 3) + v.y() * mat(1, 3) + mat(3, 3));
-			}
-		};
 
 		template <typename T, int N>
 		inline Vector_T<T, 4>
 		transform(Vector_T<T, N> const & v, Matrix4_T<T> const & mat)
 		{
-			return transform_helper<T, N>::Do(v, mat);
+			return detail::transform_helper<T, N>::Do(v, mat);
 		}
 
 		template <typename T, int N>
@@ -516,7 +434,7 @@ namespace KlayGE
 		{
 			BOOST_STATIC_ASSERT(N < 4);
 
-			Vector_T<T, 4> temp(transform_helper<T, N>::Do(v, mat));
+			Vector_T<T, 4> temp(detail::transform_helper<T, N>::Do(v, mat));
 			Vector_T<T, N> ret = Vector_T<T, N>(&temp[0]);
 			if (equal(temp.w(), T(0)))
 			{
@@ -529,40 +447,13 @@ namespace KlayGE
 			return ret;
 		}
 
-
-		template <typename T, int N>
-		struct transform_normal_helper
-		{
-			static Vector_T<T, N> Do(Vector_T<T, N> const & v, Matrix4_T<T> const & mat);
-		};
-		template <typename T>
-		struct transform_normal_helper<T, 3>
-		{
-			static Vector_T<T, 3> Do(Vector_T<T, 3> const & v, Matrix4_T<T> const & mat)
-			{
-				Vector_T<T, 4> temp(v.x(), v.y(), v.z(), T(0));
-				temp = transform_helper<T, 4>::Do(temp, mat);
-				return Vector_T<T, 3>(temp.x(), temp.y(), temp.z());
-			}
-		};
-		template <typename T>
-		struct transform_normal_helper<T, 2>
-		{
-			static Vector_T<T, 2> Do(Vector_T<T, 2> const & v, Matrix4_T<T> const & mat)
-			{
-				Vector_T<T, 3> temp(v.x(), v.y(), T(0));
-				temp = transform_normal_helper<T, 3>::Do(temp, mat);
-				return Vector_T<T, 2>(temp.x(), temp.y());
-			}
-		};
-
 		template <typename T, int N>
 		inline Vector_T<T, N>
 		transform_normal(Vector_T<T, N> const & v, Matrix4_T<T> const & mat)
 		{
 			BOOST_STATIC_ASSERT(N < 4);
 
-			return transform_normal_helper<T, N>::Do(v, mat);
+			return detail::transform_normal_helper<T, N>::Do(v, mat);
 		}
 
 		template <typename T, int N>
@@ -636,9 +527,9 @@ namespace KlayGE
 			Matrix4_T<T> const & world, Matrix4_T<T> const & view, Matrix4_T<T> const & proj,
 			int const viewport[4], T const & nearPlane, T const & farPlane)
 		{
-			Vector_T<T, 4> temp(Transform(objVec, world));
-			temp = Transform(temp, view);
-			temp = Transform(temp, proj);
+			Vector_T<T, 4> temp(transform(vec, world));
+			temp = transform(temp, view);
+			temp = transform(temp, proj);
 			temp /= temp.w();
 
 			Vector_T<T, 3> ret;
@@ -973,7 +864,7 @@ namespace KlayGE
 
 		template <typename T>
 		inline Matrix4_T<T>
-		shadow(Vector_T<T, 4> const & v, Plane_T<T> const & p)
+		shadow(Vector_T<T, 4> const & L, Plane_T<T> const & p)
 		{
 			Vector_T<T, 4> const v(-L);
 			Plane_T<T> P(normalize(p));
@@ -994,7 +885,7 @@ namespace KlayGE
 			T const x2(quat.x() + quat.x());
 			T const y2(quat.y() + quat.y());
 			T const z2(quat.z() + quat.z());
-			  
+
 			T const xx2(quat.x() * x2), xy2(quat.x() * y2), xz2(quat.x() * z2);
 			T const yy2(quat.y() * y2), yz2(quat.y() * z2), zz2(quat.z() * z2);
 			T const wx2(quat.w() * x2), wy2(quat.w() * y2), wz2(quat.w() * z2);
@@ -1056,11 +947,11 @@ namespace KlayGE
 		inline Matrix4_T<T>
 		ortho_rh(T const & width, T const & height, T const & nearPlane, T const & farPlane)
 		{
-			return lh_to_rh(ortho_lh(w, h, nearPlane, farPlane));
+			return lh_to_rh(ortho_lh(width, height, nearPlane, farPlane));
 		}
 		template <typename T>
 		inline Matrix4_T<T>
-		ortho_off_center_rh(T const & left, T const & right, T const & bottom, T const & top, 
+		ortho_off_center_rh(T const & left, T const & right, T const & bottom, T const & top,
 			T const & nearPlane, T const & farPlane)
 		{
 			return lh_to_rh(ortho_off_center_lh(left, right, bottom, top, nearPlane, farPlane));
@@ -1070,7 +961,7 @@ namespace KlayGE
 		perspective_rh(T const & width, T const & height,
 			T const & nearPlane, T const & farPlane)
 		{
-			return lh_to_rh(perspective_lh(w, h, nearPlane, farPlane));
+			return lh_to_rh(perspective_lh(width, height, nearPlane, farPlane));
 		}
 		template <typename T>
 		inline Matrix4_T<T>
@@ -1081,7 +972,7 @@ namespace KlayGE
 		}
 		template <typename T>
 		inline Matrix4_T<T>
-		perspective_off_center_rh(T const & left, T const & right, T const & bottom, T const & top, 
+		perspective_off_center_rh(T const & left, T const & right, T const & bottom, T const & top,
 			T const & nearPlane, T const & farPlane)
 		{
 			return lh_to_rh(perspective_off_center_lh(left, right, bottom, top, nearPlane, farPlane));
@@ -1426,7 +1317,7 @@ namespace KlayGE
 				p.a() * mat(0, 2) + p.b() * mat(1, 2) + p.c() * mat(2, 2) + p.d() * mat(3, 2),
 				p.a() * mat(0, 3) + p.b() * mat(1, 3) + p.c() * mat(2, 3) + p.d() * mat(3, 3));
 		}
-		
+
 		// 求直线和平面的交点，直线orig + t * dir
 		template <typename T>
 		inline T
@@ -1578,28 +1469,28 @@ namespace KlayGE
 			for (Iterator iter = first; iter != last; ++ iter)
 			{
 				if (x_min.x() > iter->x())
-				{	
+				{
 					x_min = *iter;
-				}	
+				}
 				if (y_min.y() > iter->y())
-				{	
+				{
 					y_min = *iter;
-				}	
+				}
 				if (z_min.z() > iter->z())
-				{	
+				{
 					z_min = *iter;
 				}
 
 				if (x_max.x() < iter->x())
-				{	
+				{
 					x_max = *iter;
-				}	
+				}
 				if (y_max.y() < iter->y())
-				{	
+				{
 					y_max = *iter;
-				}	
+				}
 				if (z_max.z() < iter->z())
-				{	
+				{
 					z_max = *iter;
 				}
 			}
@@ -1610,7 +1501,7 @@ namespace KlayGE
 
 			Vector_T<value_type, 3> dia1 = x_min;
 			Vector_T<value_type, 3> dia2 = x_max;
-			T max_span = x_span;
+			value_type max_span = x_span;
 			if (y_span > max_span)
 			{
 				max_span = y_span;
@@ -1661,8 +1552,8 @@ namespace KlayGE
 
 			for (int i = 0; i < num; ++ i)
 			{
-				*(targentBegin + i) = float3::Zero();
-				*(binormBegin + i) = float3::Zero();
+				*(targentBegin + i) = Vector_T<T, 3>::Zero();
+				*(binormBegin + i) = Vector_T<T, 3>::Zero();
 			}
 
 			for (IndexIterator iter = indicesBegin; iter != indicesEnd; iter += 3)

@@ -26,7 +26,7 @@
 namespace KlayGE
 {
 	template <typename T>
-	class Box_T : boost::addable2<Box_T<T>, Vector_T<T, 3>, 
+	class Box_T : boost::addable2<Box_T<T>, Vector_T<T, 3>,
 						boost::subtractable2<Box_T<T>, Vector_T<T, 3>,
 						boost::andable<Box_T<T>,
 						boost::orable<Box_T<T>,
@@ -43,7 +43,8 @@ namespace KlayGE
 			max_ = MathLib::maximize(vMin, vMax);
 		}
 		Box_T(Box_T const & rhs)
-			: min_(rhs.min_), max_(rhs.max_)
+			: Bound_T<T>(rhs),
+				min_(rhs.min_), max_(rhs.max_)
 		{
 		}
 

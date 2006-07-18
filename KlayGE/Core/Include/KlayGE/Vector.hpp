@@ -17,6 +17,8 @@
 #include <boost/array.hpp>
 #include <boost/operators.hpp>
 
+#include <KlayGE/Detail/MathHelper.hpp>
+
 namespace KlayGE
 {
 	template <typename T, int N>
@@ -27,124 +29,6 @@ namespace KlayGE
 						boost::dividable2<Vector_T<T, N>, T,
 						boost::multipliable2<Vector_T<T, N>, T> > > > > >
 	{
-		template <int M>
-		struct Helper
-		{
-			template <typename U>
-			static void DoCopy(T out[M], U const rhs[M])
-			{
-				out[0] = rhs[0];
-				Helper<M - 1>::DoCopy<U>(out + 1, rhs + 1);
-			}
-
-			static void DoAssign(T out[M], T const & rhs)
-			{
-				out[0] = rhs;
-				Helper<M - 1>::DoAssign(out + 1, rhs);
-			}
-
-			static void DoAdd(T out[M], T const lhs[M], T const rhs[M])
-			{
-				out[0] = lhs[0] + rhs[0];
-				Helper<M - 1>::DoAdd(out + 1, lhs + 1, rhs + 1);
-			}
-
-			static void DoSub(T out[M], T const lhs[M], T const rhs[M])
-			{
-				out[0] = lhs[0] - rhs[0];
-				Helper<M - 1>::DoSub(out + 1, lhs + 1, rhs + 1);
-			}
-
-			static void DoMul(T out[M], T const lhs[M], T const rhs[M])
-			{
-				out[0] = lhs[0] * rhs[0];
-				Helper<M - 1>::DoMul(out + 1, lhs + 1, rhs + 1);
-			}
-
-			static void DoScale(T out[M], T const lhs[M], T const & rhs)
-			{
-				out[0] = lhs[0] * rhs;
-				Helper<M - 1>::DoScale(out + 1, lhs + 1, rhs);
-			}
-
-			static void DoDiv(T out[M], T const lhs[M], T const rhs[M])
-			{
-				out[0] = lhs[0] / rhs[0];
-				Helper<M - 1>::DoMul(out + 1, lhs + 1, rhs + 1);
-			}
-
-			static void DoNegate(T out[M], T const rhs[M])
-			{
-				out[0] = -rhs[0];
-				Helper<M - 1>::DoNegate(out + 1, rhs + 1);
-			}
-
-			static bool DoEqual(T const lhs[M], T const rhs[M])
-			{
-				return Helper<1>::DoEqual(lhs, rhs) && Helper<M - 1>::DoEqual(lhs + 1, rhs + 1);
-			}
-
-			static void DoSwap(T lhs[M], T rhs[M])
-			{
-				std::swap(lhs[0], rhs[0]);
-				return Helper<1>::DoSwap(lhs + 1, rhs + 1);
-			}
-		};
-		template <>
-		struct Helper<1>
-		{
-			template <typename U>
-			static void DoCopy(T out[1], U const rhs[1])
-			{
-				out[0] = rhs[0];
-			}
-
-			static void DoAssign(T out[1], T const & rhs)
-			{
-				out[0] = rhs;
-			}
-
-			static void DoAdd(T out[1], T const lhs[1], T const rhs[1])
-			{
-				out[0] = lhs[0] + rhs[0];
-			}
-
-			static void DoSub(T out[1], T const lhs[1], T const rhs[1])
-			{
-				out[0] = lhs[0] - rhs[0];
-			}
-
-			static void DoMul(T out[1], T const lhs[1], T const rhs[1])
-			{
-				out[0] = lhs[0] * rhs[0];
-			}
-
-			static void DoScale(T out[1], T const lhs[1], T const & rhs)
-			{
-				out[0] = lhs[0] * rhs;
-			}
-
-			static void DoDiv(T out[1], T const lhs[1], T const rhs[1])
-			{
-				out[0] = lhs[0] / rhs[0];
-			}
-
-			static void DoNegate(T out[1], T const rhs[1])
-			{
-				out[0] = -rhs[0];
-			}
-
-			static bool DoEqual(T const lhs[1], T const rhs[1])
-			{
-				return lhs[0] == rhs[0];
-			}
-
-			static void DoSwap(T lhs[1], T rhs[1])
-			{
-				std::swap(lhs[0], rhs[0]);
-			}
-		};
-
 		typedef boost::array<T, N>	DetailType;
 
 	public:
@@ -170,22 +54,22 @@ namespace KlayGE
 		}
 		explicit Vector_T(T const * rhs)
 		{
-			Helper<N>::DoCopy(&vec_[0], rhs);
+			detail::vector_helper<T, N>::DoCopy(&vec_[0], rhs);
 		}
 		explicit Vector_T(T const & rhs)
 		{
-			Helper<N>::DoAssign(&vec_[0], rhs);
+			detail::vector_helper<T, N>::DoAssign(&vec_[0], rhs);
 		}
 		Vector_T(Vector_T const & rhs)
 		{
-			Helper<N>::DoCopy(&vec_[0], &rhs[0]);
+			detail::vector_helper<T, N>::DoCopy(&vec_[0], &rhs[0]);
 		}
 		template <typename U, int M>
 		Vector_T(Vector_T<U, M> const & rhs)
 		{
 			BOOST_STATIC_ASSERT(M >= N);
 
-			Helper<N>::DoCopy<U>(&vec_[0], &rhs[0]);
+			detail::vector_helper<T, N>::DoCopy(&vec_[0], &rhs[0]);
 		}
 
 		Vector_T(T const & x, T const & y)
@@ -298,31 +182,31 @@ namespace KlayGE
 		template <typename U>
 		Vector_T const & operator+=(Vector_T<U, N> const & rhs)
 		{
-			Helper<N>::DoAdd(&vec_[0], &vec_[0], &rhs.vec_[0]);
+			detail::vector_helper<T, N>::DoAdd(&vec_[0], &vec_[0], &rhs.vec_[0]);
 			return *this;
 		}
 		template <typename U>
 		Vector_T const & operator-=(Vector_T<U, N> const & rhs)
 		{
-			Helper<N>::DoSub(&vec_[0], &vec_[0], &rhs.vec_[0]);
+			detail::vector_helper<T, N>::DoSub(&vec_[0], &vec_[0], &rhs.vec_[0]);
 			return *this;
 		}
 		template <typename U>
 		Vector_T const & operator*=(Vector_T<U, N> const & rhs)
 		{
-			Helper<N>::DoMul(&vec_[0], &vec_[0], &rhs[0]);
+			detail::vector_helper<T, N>::DoMul(&vec_[0], &vec_[0], &rhs[0]);
 			return *this;
 		}
 		template <typename U>
 		Vector_T const & operator*=(U const & rhs)
 		{
-			Helper<N>::DoScale(&vec_[0], &vec_[0], rhs);
+			detail::vector_helper<T, N>::DoScale(&vec_[0], &vec_[0], rhs);
 			return *this;
 		}
 		template <typename U>
 		Vector_T const & operator/=(Vector_T<U, N> const & rhs)
 		{
-			Helper<N>::DoDiv(&vec_[0], &vec_[0], &rhs[0]);
+			detail::vector_helper<T, N>::DoDiv(&vec_[0], &vec_[0], &rhs[0]);
 			return *this;
 		}
 		template <typename U>
@@ -344,7 +228,7 @@ namespace KlayGE
 		{
 			BOOST_STATIC_ASSERT(M >= N);
 
-			Helper<N>::DoCopy<U>(&vec_[0], &rhs.vec_[0]);
+			detail::vector_helper<T, N>::DoCopy(&vec_[0], &rhs.vec_[0]);
 			return *this;
 		}
 
@@ -354,19 +238,19 @@ namespace KlayGE
 		Vector_T const operator-() const
 		{
 			Vector_T temp(*this);
-			Helper<N>::DoNegate(&temp.vec_[0], &vec_[0]);
+			detail::vector_helper<T, N>::DoNegate(&temp.vec_[0], &vec_[0]);
 			return temp;
 		}
 
 		void swap(Vector_T& rhs)
 		{
-			Helper<N>::DoSwap(&vec_[0], &rhs.vec_[0]);
+			detail::vector_helper<T, N>::DoSwap(&vec_[0], &rhs.vec_[0]);
 		}
 
 		friend bool
 		operator==(Vector_T const & lhs, Vector_T const & rhs)
 		{
-			return Helper<N>::DoEqual(&lhs[0], &rhs[0]);
+			return detail::vector_helper<T, N>::DoEqual(&lhs[0], &rhs[0]);
 		}
 
 	private:

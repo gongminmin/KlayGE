@@ -32,7 +32,6 @@
 #include <cstring>
 #include <boost/assert.hpp>
 
-#define NOMINMAX
 #include <d3d9.h>
 
 #include <KlayGE/D3D9/D3D9Mapping.hpp>

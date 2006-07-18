@@ -23,7 +23,7 @@
 namespace KlayGE
 {
 	template <typename T>
-	class Sphere_T : boost::addable2<Sphere_T<T>, Vector_T<T, 3>, 
+	class Sphere_T : boost::addable2<Sphere_T<T>, Vector_T<T, 3>,
 						boost::subtractable2<Sphere_T<T>, Vector_T<T, 3>,
 						boost::andable<Sphere_T<T>,
 						boost::orable<Sphere_T<T>,
@@ -106,7 +106,7 @@ namespace KlayGE
 
 		bool VecInBound(Vector_T<T, 3> const & v) const
 		{
-			return MathLib::VecInSphere(*this, v);
+			return MathLib::vec_in_sphere(*this, v);
 		}
 		T MaxRadiusSq() const
 		{

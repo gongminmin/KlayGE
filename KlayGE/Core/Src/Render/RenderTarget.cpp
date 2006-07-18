@@ -28,8 +28,7 @@ namespace KlayGE
 	RenderTarget::RenderTarget()
 					: left_(0), top_(0), width_(0), height_(0), colorDepth_(0),
 						isDepthBuffered_(false), depthBits_(0), stencilBits_(0),
-						active_(false),
-						FPS_(0)
+						FPS_(0), active_(false)
 	{
 	}
 
@@ -131,7 +130,7 @@ namespace KlayGE
 	{
 		static float accumulateTime = 0;
 		static long numFrames  = 0;
-		
+
 		// measure statistics
 		++ numFrames;
 		accumulateTime += static_cast<float>(timer_.elapsed());
@@ -155,11 +154,11 @@ namespace KlayGE
 	{
 		return active_;
 	}
-	
+
 	// 设置该渲染目标是否处于活动状态
 	/////////////////////////////////////////////////////////////////////////////////
 	void RenderTarget::Active(bool state)
 	{
 		active_ = state;
 	}
-}        
+}

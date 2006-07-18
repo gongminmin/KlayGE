@@ -22,8 +22,6 @@
 #ifndef _D3D9RENDERFACTORY_HPP
 #define _D3D9RENDERFACTORY_HPP
 
-#define NOMINMAX
-
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderFactory.hpp>
 

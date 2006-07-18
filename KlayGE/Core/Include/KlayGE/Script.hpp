@@ -41,33 +41,29 @@ namespace KlayGE
 
 	// PyObject指针
 	/////////////////////////////////////////////////////////////////////////////////
-	PyObjectPtr MakePyObjectPtr(PyObject* p)
+	inline PyObjectPtr
+	MakePyObjectPtr(PyObject* p)
 	{
 		return PyObjectPtr(p, PyObjDeleter);
 	};
-
-	template <typename TupleType>
-	std::vector<PyObjectPtr> Tuple2Vector(TupleType const & t)
-	{
-		std::vector<PyObjectPtr> ret;
-		ret.push_back(boost::tuples::get<0>(t));
-
-		std::vector<PyObjectPtr> tail(Tuple2Vector(t.get_tail()));
-		ret.insert(ret.end(), tail.begin(), tail.end());
-
-		return ret;
-	}
-
-	template <>
-	std::vector<PyObjectPtr> Tuple2Vector<boost::tuples::null_type>(boost::tuples::null_type const & /*t*/)
-	{
-		return std::vector<PyObjectPtr>();
-	}
 
 	// 从一个.py载入模块
 	/////////////////////////////////////////////////////////////////////////////////
 	class ScriptModule
 	{
+	private:
+		template <typename TupleType>
+		std::vector<PyObjectPtr> Tuple2Vector(TupleType const & t)
+		{
+			std::vector<PyObjectPtr> ret;
+			ret.push_back(boost::tuples::get<0>(t));
+
+			std::vector<PyObjectPtr> tail(Tuple2Vector(t.get_tail()));
+			ret.insert(ret.end(), tail.begin(), tail.end());
+
+			return ret;
+		}
+
 	public:
 		explicit ScriptModule(std::string const & name);
 
@@ -98,6 +94,13 @@ namespace KlayGE
 		PyObjectPtr module_;
 		PyObjectPtr dict_;
 	};
+
+	template <>
+	inline std::vector<PyObjectPtr>
+	ScriptModule::Tuple2Vector<boost::tuples::null_type>(boost::tuples::null_type const & /*t*/)
+	{
+		return std::vector<PyObjectPtr>();
+	}
 
 	#define BEGIN_REG() 	methods.clear() 
 	#define ADD(x, y) 		AddMethod(x,y) 

@@ -1,8 +1,6 @@
 #ifndef _D3D9ADAPTERLIST_HPP
 #define _D3D9ADAPTERLIST_HPP
 
-#define NOMINMAX
-
 #include <KlayGE/PreDeclare.hpp>
 #include <boost/smart_ptr.hpp>
 #include <KlayGE/D3D9/D3D9Adapter.hpp>

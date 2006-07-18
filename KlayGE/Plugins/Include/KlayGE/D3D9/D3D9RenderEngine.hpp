@@ -24,8 +24,6 @@
 #ifndef _D3D9RENDERENGINE_HPP
 #define _D3D9RENDERENGINE_HPP
 
-#define NOMINMAX
-
 #include <boost/smart_ptr.hpp>
 #include <KlayGE/D3D9/D3D9AdapterList.hpp>
 

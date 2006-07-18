@@ -16,7 +16,6 @@
 #include <KlayGE/PreDeclare.hpp>
 
 #include <vector>
-#define NOMINMAX
 #include <windows.h>
 #include <dsound.h>
 

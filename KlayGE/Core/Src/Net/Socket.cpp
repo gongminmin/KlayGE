@@ -177,7 +177,7 @@ namespace KlayGE
 		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
 	#ifdef _WIN32
-		Verify(ioctlsocket(this->socket_, command, argument) != SOCKET_ERROR);
+		Verify(ioctlsocket(this->socket_, command, reinterpret_cast<u_long*>(argument)) != SOCKET_ERROR);
 	#else
 		Verify(ioctl(this->socket_, command, argument) != SOCKET_ERROR);
 	#endif
@@ -188,7 +188,7 @@ namespace KlayGE
 	void Socket::Listen(int connectionBacklog)
 	{
 		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
-		
+
 		Verify(listen(this->socket_, connectionBacklog) != SOCKET_ERROR);
 	}
 

@@ -16,7 +16,6 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 
-#define NOMINMAX
 #include <d3d9.h>
 
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>

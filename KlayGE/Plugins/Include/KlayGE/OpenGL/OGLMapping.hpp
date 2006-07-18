@@ -17,7 +17,6 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Sampler.hpp>
 
-#define NOMINMAX
 #include <windows.h>
 #include <glloader/glloader.h>
 

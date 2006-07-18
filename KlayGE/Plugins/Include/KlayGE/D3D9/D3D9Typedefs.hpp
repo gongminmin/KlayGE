@@ -13,7 +13,6 @@
 #ifndef _D3D9TYPEDEFS_HPP
 #define _D3D9TYPEDEFS_HPP
 
-#define NOMINMAX
 #include <d3d9.h>
 #include <d3dx9.h>
 

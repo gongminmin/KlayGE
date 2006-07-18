@@ -33,7 +33,7 @@
 #endif
 
 namespace KlayGE
-{	
+{
 	class FrameBuffer : public RenderTarget
 	{
 	public:
@@ -47,9 +47,7 @@ namespace KlayGE
 		};
 
 	public:
-		virtual ~FrameBuffer() = 0
-		{
-		}
+		virtual ~FrameBuffer() = 0;
 
 		static FrameBufferPtr NullObject();
 

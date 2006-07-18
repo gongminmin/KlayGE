@@ -133,7 +133,7 @@ namespace
 			int32_t		pitch;				// distance to start of next line (return value only)
 			uint32_t	linear_size;		// Formless late-allocated optimized surface size
 		};
-		uint32_t		depth;				// the depth if this is a volume texture 
+		uint32_t		depth;				// the depth if this is a volume texture
 		uint32_t		mip_map_count;		// number of mip-map levels requestde
 		uint32_t		reserved1[11];		// reserved
 		DDSPIXELFORMAT	pixel_format;		// pixel format description of the surface
@@ -330,7 +330,7 @@ namespace KlayGE
 				}
 			}
 		}
-		
+
 		uint32_t main_image_size;
 		if ((desc.flags & DDSD_LINEARSIZE) != 0)
 		{
@@ -476,7 +476,7 @@ namespace KlayGE
 					{
 						image_size = main_image_size / (1UL << (level * 2)) * texture->Depth(level);
 					}
-				
+
 					data.resize(image_size);
 
 					file->read(reinterpret_cast<char*>(&data[0]), static_cast<std::streamsize>(data.size()));
@@ -530,7 +530,7 @@ namespace KlayGE
 			break;
 		}
 
-		return texture;		
+		return texture;
 	}
 
 	// 把纹理保存入DDS文件
@@ -608,6 +608,10 @@ namespace KlayGE
 			case EF_DXT5:
 				desc.pixel_format.four_cc = MakeFourCC<'D', 'X', 'T', '5'>::value;
 				break;
+
+			default:
+				BOOST_ASSERT(false);
+				break;
 			}
 		}
 		else
@@ -680,7 +684,7 @@ namespace KlayGE
 			case EF_L8:
 				desc.pixel_format.flags |= DDSPF_LUMINANCE;
 				desc.pixel_format.rgb_bit_count = 8;
-				
+
 				desc.pixel_format.rgb_alpha_bit_mask = 0x00000000;
 				desc.pixel_format.r_bit_mask = 0x000000FF;
 				desc.pixel_format.g_bit_mask = 0x00000000;
@@ -716,6 +720,10 @@ namespace KlayGE
 				desc.pixel_format.r_bit_mask = 0x00000000;
 				desc.pixel_format.g_bit_mask = 0x00000000;
 				desc.pixel_format.b_bit_mask = 0x00000000;
+				break;
+
+			default:
+				BOOST_ASSERT(false);
 				break;
 			}
 		}
@@ -887,7 +895,7 @@ namespace KlayGE
 						{
 							image_size = main_image_size / (1UL << (level * 2));
 						}
-					
+
 						data.resize(image_size);
 						texture->CopyToMemoryCube(static_cast<Texture::CubeFaces>(face), level, &data[0]);
 
@@ -976,7 +984,7 @@ namespace KlayGE
 
 
 	Texture::Texture(Texture::TextureType type)
-			: type_(type), usage_(TU_Default)
+			: usage_(TU_Default), type_(type)
 	{
 	}
 

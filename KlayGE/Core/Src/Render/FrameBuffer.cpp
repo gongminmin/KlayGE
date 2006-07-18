@@ -29,6 +29,10 @@ namespace KlayGE
 		}
 	};
 
+	FrameBuffer::~FrameBuffer()
+	{
+	}
+
 	FrameBufferPtr FrameBuffer::NullObject()
 	{
 		static FrameBufferPtr obj(new NullFrameBuffer);

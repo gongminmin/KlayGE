@@ -19,7 +19,6 @@
 #include <string>
 
 #ifdef _WIN32
-	#define NOMINMAX
 	#ifndef _WINSOCKAPI_
 	#include <winsock.h>
 	#endif
