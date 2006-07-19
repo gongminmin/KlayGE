@@ -26,6 +26,7 @@
 #include <boost/assign.hpp>
 #pragma warning(pop)
 #include <boost/assign/std/vector.hpp>
+#include <boost/bind.hpp>
 
 #include <KlayGE/CameraController.hpp>
 

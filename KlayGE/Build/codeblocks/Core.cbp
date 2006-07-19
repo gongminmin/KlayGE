@@ -38,8 +38,8 @@
 				<Option createDefFile="1"/>
 				<Option projectResourceIncludeDirsRelation="2"/>
 				<Compiler>
+					<Add option="-O3"/>
 					<Add option="-W"/>
-					<Add option="-g"/>
 					<Add option="-DWIN32"/>
 					<Add option="-DNDEBUG"/>
 					<Add option="-D_LIB"/>

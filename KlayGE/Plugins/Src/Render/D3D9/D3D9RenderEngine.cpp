@@ -38,6 +38,7 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/COMPtr.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 

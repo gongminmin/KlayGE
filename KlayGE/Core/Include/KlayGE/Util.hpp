@@ -25,8 +25,6 @@
 
 #include <boost/assert.hpp>
 #include <boost/smart_ptr.hpp>
-#define BOOST_MEM_FN_ENABLE_STDCALL
-#include <boost/mem_fn.hpp>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_Core_d.lib")
@@ -144,13 +142,6 @@ namespace KlayGE
 		NativeToLittleEndian<size>(p);
 	}
 
-	// 得到COM对象的智能指针
-	template <typename T>
-	inline boost::shared_ptr<T>
-	MakeCOMPtr(T* p)
-	{
-		return boost::shared_ptr<T>(p, boost::mem_fn(&T::Release));
-	}
 
 	template <typename To, typename From>
 	inline To

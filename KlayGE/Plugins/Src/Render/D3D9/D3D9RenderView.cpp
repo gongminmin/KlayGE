@@ -12,6 +12,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/COMPtr.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGe/FrameBuffer.hpp>

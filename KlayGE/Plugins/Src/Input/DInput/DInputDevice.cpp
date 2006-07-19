@@ -16,6 +16,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/COMPtr.hpp>
 
 #include <boost/assert.hpp>
 
@@ -137,7 +138,8 @@ namespace KlayGE
 	{
 		for (;;)
 		{
-			HRESULT hr = device_->GetDeviceData(static_cast<DWORD>(size), rgdod, &num_elements, 0);
+			HRESULT hr = device_->GetDeviceData(static_cast<DWORD>(size), rgdod,
+							reinterpret_cast<DWORD*>(&num_elements), 0);
 			if ((DIERR_INPUTLOST == hr) || (DIERR_NOTACQUIRED == hr))
 			{
 				this->Acquire();

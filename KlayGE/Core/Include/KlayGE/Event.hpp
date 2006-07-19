@@ -1,8 +1,11 @@
 // Event.hpp
 // KlayGE 事件模板 头文件
-// Ver 2.7.0
-// 版权所有(C) 龚敏敏, 2005
+// Ver 3.4.0
+// 版权所有(C) 龚敏敏, 2005-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.4.0
+// 改用boost::signal实现 (2006.7.19)
 //
 // 2.7.0
 // 初次建立 (2005.6.14)
@@ -13,11 +16,14 @@
 #ifndef _EVENT_HPP
 #define _EVENT_HPP
 
-#include <list>
-
+#include <boost/shared_ptr.hpp>
 #pragma warning(push)
 #pragma warning(disable: 4127 4189)
 #include <boost/function.hpp>
+#pragma warning(pop)
+#pragma warning(push)
+#pragma warning(disable: 4512)
+#include <boost/signal.hpp>
 #pragma warning(pop)
 
 namespace KlayGE
@@ -25,33 +31,36 @@ namespace KlayGE
 	template <typename Sender, typename EventArg>
 	class Event
 	{
+		typedef boost::signal<void(Sender const &, EventArg const &)> event_signal;
+
 	public:
-		typedef boost::function<void (Sender const &, EventArg const &)> event_handler;
-		typedef std::list<event_handler> event_handles_type;
+		typedef typename event_signal::slot_type event_handler;
 
 	public:
 		Event(Sender const & sender)
-			: sender_(&sender)
+			: sender_(&sender),
+				handlers_(new boost::signal<void(Sender const &, EventArg const &)>)
 		{
 		}
 
 		void operator+=(event_handler const & handler)
 		{
-			handlers_.push_back(handler);
+			handlers_->connect(handler);
+		}
+
+		void operator-=(event_handler const & handler)
+		{
+			handlers_->disconnect(handler);
 		}
 
 		void operator()(EventArg const & arg)
 		{
-			for (typename event_handles_type::iterator iter = handlers_.begin();
-					iter != handlers_.end(); ++ iter)
-			{
-				(*iter)(*sender_, arg);
-			}
+			(*handlers_)(*sender_, arg);
 		}
 
 	private:
 		Sender const * sender_;
-		event_handles_type handlers_;
+		boost::shared_ptr<event_signal> handlers_;
 	};
 }
 

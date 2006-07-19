@@ -97,12 +97,12 @@ namespace KlayGE
 			{ return container_.size(); }
 
 		size_type count(Key const & key) const
-			{ return find(key) != end() }
+			{ return this->find(key) != end(); }
 
 		std::pair<iterator, iterator> equal_range(Key const & key)
-			{ return std::equal_range(begin(), end(), k, compare_); }
+			{ return std::equal_range(this->begin(), this->end(), key, compare_); }
 		std::pair<const_iterator, const_iterator> equal_range(Key const & key) const
-			{ return std::equal_range(begin(), end(), k, compare_); }
+			{ return std::equal_range(this->begin(), this->end(), key, compare_); }
 
 		iterator erase(iterator where)
 			{ return container_.erase(where); }
@@ -157,7 +157,7 @@ namespace KlayGE
 		}
 		iterator insert(iterator where, value_type const & val)
 		{
-			if (where != this->end() && compare_(*pos, val)
+			if (where != this->end() && compare_(*where, val)
 				&& (where == this->end() - 1
 					|| (!compare_(val, where + 1)
 						&& compare_(where + 1, val))))

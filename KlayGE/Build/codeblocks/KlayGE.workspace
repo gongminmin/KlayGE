@@ -13,6 +13,6 @@
 		<Project filename="D3D9.cbp"/>
 		<Project filename="OpenGL.cbp"/>
 		<Project filename="OCTree.cbp"/>
-		<Project filename="..\vc-8_0\LZSS.cbp"/>
+		<Project filename="LZSS.cbp"/>
 	</Workspace>
 </CodeBlocks_workspace_file>

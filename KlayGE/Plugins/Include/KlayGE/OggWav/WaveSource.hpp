@@ -15,6 +15,8 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
+#include <istream>
+
 #include <KlayGE/AudioDataSource.hpp>
 
 #ifdef KLAYGE_DEBUG

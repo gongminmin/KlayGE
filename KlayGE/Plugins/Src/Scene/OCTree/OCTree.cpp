@@ -78,7 +78,7 @@ namespace KlayGE
 			SceneObjectsType& objs = iter->second;
 			if (objs.empty())
 			{
-				iter = octree_.erase(iter);
+				octree_.erase(iter ++);
 			}
 			else
 			{
@@ -192,7 +192,7 @@ namespace KlayGE
 
 			if (objs.empty())
 			{
-				tree_iter = octree_.erase(tree_iter);
+				octree_.erase(tree_iter ++);
 			}
 			else
 			{

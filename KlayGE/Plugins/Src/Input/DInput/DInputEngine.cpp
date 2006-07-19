@@ -12,7 +12,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/Util.hpp>
+#include <KlayGE/COMPtr.hpp>
 
 #include <KlayGE/DInput/DInput.hpp>
 

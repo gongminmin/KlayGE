@@ -27,10 +27,8 @@
 
 #include <vector>
 #include <string>
-#include <algorithm>
 
 #include <boost/array.hpp>
-#include <boost/bind.hpp>
 
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "KlayGE_Core_d.lib")
@@ -261,8 +259,10 @@ namespace KlayGE
 		template <typename ForwardIterator>
 		void AddActions(ForwardIterator first, ForwardIterator last)
 		{
-			std::for_each(first, last,
-				boost::bind(&InputActionMap::AddAction, this, _1));
+			for (ForwardIterator iter = first; iter != last; ++ iter)
+			{
+				this->AddAction(*iter);
+			}
 		}
 
 		void UpdateInputActions(InputActionsType& actions, uint16_t key, long value = 0);

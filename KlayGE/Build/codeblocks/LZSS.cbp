@@ -6,17 +6,63 @@
 		<Option title="打包系统-LZSS"/>
 		<Option makefile="Makefile"/>
 		<Option makefile_is_custom="0"/>
+		<Option default_target="-1"/>
 		<Option compiler="0"/>
 		<Build>
-			<Target title="default">
-				<Option output="D:\KlayGE\Build\codeblocks\LZSS.exe"/>
-				<Option working_dir="."/>
-				<Option object_output=".objs"/>
+			<Target title="Debug">
+				<Option output="..\..\lib\libKlayGE_FileSystem_PackedFile_d.a"/>
+				<Option working_dir=""/>
+				<Option object_output="..\..\Debug"/>
 				<Option deps_output=".deps"/>
-				<Option type="0"/>
+				<Option type="2"/>
 				<Option compiler="0"/>
-				<Option projectResourceIncludeDirsRelation="0"/>
+				<Option createDefFile="1"/>
+				<Option projectResourceIncludeDirsRelation="2"/>
+				<Compiler>
+					<Add option="-Wall"/>
+					<Add option="-g"/>
+					<Add option="-O0"/>
+					<Add option="-DWIN32"/>
+					<Add option="-D_DEBUG"/>
+					<Add option="-D_LIB"/>
+					<Add option="-DSTRICT"/>
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="..\..\lib\libKlayGE_FileSystem_PackedFile.a"/>
+				<Option working_dir=""/>
+				<Option object_output="..\..\Release"/>
+				<Option deps_output=".deps"/>
+				<Option type="2"/>
+				<Option compiler="0"/>
+				<Option createDefFile="1"/>
+				<Option projectResourceIncludeDirsRelation="2"/>
+				<Compiler>
+					<Add option="-O3"/>
+					<Add option="-W"/>
+					<Add option="-DWIN32"/>
+					<Add option="-DNDEBUG"/>
+					<Add option="-D_LIB"/>
+					<Add option="-DSTRICT"/>
+				</Compiler>
 			</Target>
 		</Build>
+		<Unit filename="..\..\Plugins\Include\KlayGE\LZSS\LZSS.hpp">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\Plugins\Src\PackSystem\LZSS\Pkt.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\Plugins\Src\PackSystem\LZSS\UnPkt.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
 	</Project>
 </CodeBlocks_project_file>

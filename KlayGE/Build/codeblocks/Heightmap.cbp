@@ -19,7 +19,8 @@
 				<Option createDefFile="1"/>
 				<Option projectResourceIncludeDirsRelation="2"/>
 				<Compiler>
-					<Add option="-W"/>
+					<Add option="-Wall"/>
+					<Add option="-g"/>
 					<Add option="-O0"/>
 					<Add option="-DWIN32"/>
 					<Add option="-D_DEBUG"/>
@@ -37,6 +38,7 @@
 				<Option createDefFile="1"/>
 				<Option projectResourceIncludeDirsRelation="2"/>
 				<Compiler>
+					<Add option="-O3"/>
 					<Add option="-W"/>
 					<Add option="-DWIN32"/>
 					<Add option="-DNDEBUG"/>
