@@ -34,7 +34,7 @@ namespace KlayGE
 			return true;
 		}
 
-		void Load(std::wstring const & /*fileName*/)
+		void Load(std::string const & /*fileName*/)
 		{
 		}
 

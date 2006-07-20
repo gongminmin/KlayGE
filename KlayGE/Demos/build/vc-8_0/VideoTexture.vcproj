@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="SkinnedMesh"
-	ProjectGUID="{6F6E43D9-6164-452A-8769-3B96F33469A9}"
-	RootNamespace="SkinnedMesh"
+	Name="VideoTexture"
+	ProjectGUID="{1B7FBD4B-6805-40C5-B6AF-0BF156B87957}"
+	RootNamespace="testDShow"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -60,7 +60,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/SkinnedMesh_d.exe"
+				OutputFile="$(OutDir)/VideoTexture_d.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -141,7 +141,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/SkinnedMesh.exe"
+				OutputFile="$(OutDir)/VideoTexture.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -184,19 +184,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\src\SkinnedMesh\md5.cpp"
+				RelativePath="..\..\src\VideoTexture\VideoTexture.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\SkinnedMesh\Model.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\SkinnedMesh\SkinnedMesh.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\media\SkinnedMesh\SkinnedMesh.fx"
+				RelativePath="..\..\media\VideoTexture\VideoTexture.fx"
 				>
 			</File>
 		</Filter>
@@ -206,15 +198,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\src\SkinnedMesh\md5.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\SkinnedMesh\Model.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\SkinnedMesh\SkinnedMesh.hpp"
+				RelativePath="..\..\src\VideoTexture\VideoTexture.hpp"
 				>
 			</File>
 		</Filter>

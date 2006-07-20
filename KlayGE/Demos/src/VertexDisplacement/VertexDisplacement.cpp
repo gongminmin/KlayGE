@@ -23,6 +23,7 @@
 #include <vector>
 #include <sstream>
 #include <ctime>
+#include <boost/bind.hpp>
 
 #include "VertexDisplacement.hpp"
 
@@ -159,7 +160,7 @@ void VertexDisplacement::InitObjects()
 	inputEngine.ActionMap(actionMap, input_handler, true);
 }
 
-void VertexDisplacement::InputHandler(InputEngine const & sender, InputAction const & action)
+void VertexDisplacement::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
 {
 	switch (action.first)
 	{
@@ -169,7 +170,7 @@ void VertexDisplacement::InputHandler(InputEngine const & sender, InputAction co
 	}
 }
 
-void VertexDisplacement::DoUpdate(uint32_t pass)
+void VertexDisplacement::DoUpdate(uint32_t /*pass*/)
 {
 	fpcController_.Update();
 

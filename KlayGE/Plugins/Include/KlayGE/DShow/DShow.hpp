@@ -41,7 +41,7 @@ namespace KlayGE
 
 		bool IsComplete();
 
-		void Load(std::wstring const & fileName);
+		void Load(std::string const & fileName);
 		TexturePtr PresentTexture();
 
 		ShowState State(long msTimeout = -1);

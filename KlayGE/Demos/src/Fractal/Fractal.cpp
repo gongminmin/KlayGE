@@ -254,7 +254,6 @@ uint32_t Fractal::NumPasses() const
 void Fractal::DoUpdate(uint32_t pass)
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 
 	static bool odd = false;
 

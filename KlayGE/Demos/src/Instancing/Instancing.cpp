@@ -23,7 +23,7 @@
 #include <vector>
 #include <sstream>
 #include <ctime>
-#include <boost/tuple/tuple.hpp>
+#include <boost/bind.hpp>
 
 #include "Instancing.hpp"
 
@@ -96,7 +96,7 @@ namespace
 			float4x4 const & view = app.ActiveCamera().ViewMatrix();
 			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
-			*(technique_->Effect().ParameterByName("ViewProj")) = view * proj;
+			*(technique_->Effect().ParameterByName("ViewProj")) = model * view * proj;
 			*(technique_->Effect().ParameterByName("lightPos")) = float4(-1, 0, -1, 1);
 		}
 	};
@@ -111,7 +111,7 @@ namespace
 		};
 
 	public:
-		RenderNormalMesh(std::wstring const & name, TexturePtr tex)
+		RenderNormalMesh(std::wstring const & /*name*/, TexturePtr tex)
 			: KMesh(L"NormalMesh", tex)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -246,10 +246,8 @@ void Instancing::InitObjects()
 	inputEngine.ActionMap(actionMap, input_handler, true);
 }
 
-void Instancing::InputHandler(InputEngine const & sender, InputAction const & action)
+void Instancing::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
 {
-	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
-
 	switch (action.first)
 	{
 	case UseInstance:
@@ -282,7 +280,7 @@ void Instancing::InputHandler(InputEngine const & sender, InputAction const & ac
 	}
 }
 
-void Instancing::DoUpdate(uint32_t pass)
+void Instancing::DoUpdate(uint32_t /*pass*/)
 {
 	fpcController_.Update();
 

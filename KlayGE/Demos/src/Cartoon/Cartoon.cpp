@@ -37,7 +37,7 @@ namespace
 	class RenderTorus : public KMesh
 	{
 	public:
-		RenderTorus(std::wstring const & name, TexturePtr tex)
+		RenderTorus(std::wstring const & /*name*/, TexturePtr tex)
 			: KMesh(L"Torus", TexturePtr()),
 				toon_sampler_(new Sampler),
 				normal_depth_sampler_(new Sampler)
@@ -204,7 +204,7 @@ void Cartoon::OnResize(uint32_t width, uint32_t height)
 	normal_depth_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));
 }
 
-void Cartoon::InputHandler(InputEngine const & sender, InputAction const & action)
+void Cartoon::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
 {
 	switch (action.first)
 	{

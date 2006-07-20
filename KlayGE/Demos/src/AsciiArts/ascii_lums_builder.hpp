@@ -16,7 +16,7 @@ namespace KlayGE
 		typedef std::vector<std::pair<float, lum_to_char_type::const_iterator> > diff_lum_to_iter_type;
 
 	public:
-		ascii_lums_builder(size_t input_num_ascii, size_t output_num_ascii, size_t lum_level,
+		ascii_lums_builder(size_t input_num_ascii, size_t output_num_ascii,
 			size_t ascii_width, size_t ascii_height);
 
 		ascii_tiles_type build(ascii_tiles_type const & ascii_data);

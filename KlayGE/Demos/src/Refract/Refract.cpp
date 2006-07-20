@@ -26,6 +26,7 @@
 #include <vector>
 #include <sstream>
 #include <ctime>
+#include <boost/bind.hpp>
 
 #include "Refract.hpp"
 
@@ -239,7 +240,7 @@ void Refract::InitObjects()
 	inputEngine.ActionMap(actionMap, input_handler, true);
 }
 
-void Refract::InputHandler(InputEngine const & sender, InputAction const & action)
+void Refract::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
 {
 	switch (action.first)
 	{
@@ -257,7 +258,7 @@ void Refract::InputHandler(InputEngine const & sender, InputAction const & actio
 	}
 }
 
-void Refract::DoUpdate(uint32_t pass)
+void Refract::DoUpdate(uint32_t /*pass*/)
 {
 	fpcController_.Update();
 

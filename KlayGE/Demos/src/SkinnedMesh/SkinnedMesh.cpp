@@ -18,6 +18,7 @@
 #include <iostream>
 #include <sstream>
 #include <ctime>
+#include <boost/bind.hpp>
 
 #include "SkinnedMesh.hpp"
 
@@ -102,7 +103,7 @@ void SkinnedMeshApp::InitObjects()
 	inputEngine.ActionMap(actionMap, input_handler, true);
 }
 
-void SkinnedMeshApp::InputHandler(InputEngine const & sender, InputAction const & action)
+void SkinnedMeshApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
 {
 	switch (action.first)
 	{
@@ -112,7 +113,7 @@ void SkinnedMeshApp::InputHandler(InputEngine const & sender, InputAction const 
 	}
 }
 
-void SkinnedMeshApp::DoUpdate(KlayGE::uint32_t pass)
+void SkinnedMeshApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 {
 	fpsController_.Update();
 

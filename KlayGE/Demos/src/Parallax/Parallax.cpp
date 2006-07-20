@@ -26,6 +26,7 @@
 #include <sstream>
 #include <ctime>
 #include <boost/tuple/tuple.hpp>
+#include <boost/bind.hpp>
 
 #include "Parallax.hpp"
 
@@ -202,7 +203,7 @@ void Parallax::InitObjects()
 	inputEngine.ActionMap(actionMap, input_handler, true);
 }
 
-void Parallax::InputHandler(InputEngine const & sender, InputAction const & action)
+void Parallax::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
 {
 	switch (action.first)
 	{
@@ -212,7 +213,7 @@ void Parallax::InputHandler(InputEngine const & sender, InputAction const & acti
 	}
 }
 
-void Parallax::DoUpdate(uint32_t pass)
+void Parallax::DoUpdate(uint32_t /*pass*/)
 {
 	fpcController_.Update();
 

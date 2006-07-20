@@ -90,7 +90,7 @@ namespace KlayGE
 
 	// ÔØÈëÎÄ¼þ
 	/////////////////////////////////////////////////////////////////////////////////
-	void DShowEngine::Load(std::wstring const & fileName)
+	void DShowEngine::Load(std::string const & fileName)
 	{
 		this->Free();
 		this->Init();
@@ -140,7 +140,9 @@ namespace KlayGE
 		TIF(graph_->QueryInterface(IID_IMediaEvent, reinterpret_cast<void**>(&media_event)));
 		media_event_ = MakeCOMPtr(media_event);
 
-		TIF(graph_->RenderFile(fileName.c_str(), NULL));
+		std::wstring fn;
+		Convert(fn, fileName);
+		TIF(graph_->RenderFile(fn.c_str(), NULL));
 
 		state_ = SS_Stopped;
 	}

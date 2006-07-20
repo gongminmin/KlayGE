@@ -10,7 +10,7 @@
 
 namespace KlayGE
 {
-	ascii_lums_builder::ascii_lums_builder(size_t input_num_ascii, size_t output_num_ascii, size_t lum_level,
+	ascii_lums_builder::ascii_lums_builder(size_t input_num_ascii, size_t output_num_ascii,
 			size_t ascii_width, size_t ascii_height)
 				: input_num_ascii_(input_num_ascii),
 					output_num_ascii_(output_num_ascii),

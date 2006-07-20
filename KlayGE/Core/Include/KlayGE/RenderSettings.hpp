@@ -13,8 +13,6 @@
 #ifndef _RENDERSETTINGS_HPP
 #define _RENDERSETTINGS_HPP
 
-#define BOOST_MEM_FN_ENABLE_STDCALL
-#include <boost/mem_fn.hpp>
 #pragma warning(push)
 #pragma warning(disable: 4127 4189)
 #include <boost/function.hpp>

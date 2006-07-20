@@ -25,6 +25,7 @@
 #include <vector>
 #include <sstream>
 #include <ctime>
+#include <boost/bind.hpp>
 
 #include "DistanceMapping.hpp"
 
@@ -265,7 +266,7 @@ void DistanceMapping::InputHandler(InputEngine const & /*sender*/, InputAction c
 	}
 }
 
-void DistanceMapping::DoUpdate(uint32_t pass)
+void DistanceMapping::DoUpdate(uint32_t /*pass*/)
 {
 	fpcController_.Update();
 

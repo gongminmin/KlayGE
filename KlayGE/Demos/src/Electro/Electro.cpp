@@ -72,7 +72,7 @@ namespace
 			}
 			for (unsigned int i = 0; i < XSIZE * YSIZE * ZSIZE; ++ i)
 			{
-				turbBuffer[i] = (255 * (turbBuffer[i] - min)) / (max - min);
+				turbBuffer[i] = static_cast<uint8_t>((255 * (turbBuffer[i] - min)) / (max - min));
 			}
 
 			TexturePtr texture = rf.MakeTexture3D(XSIZE, YSIZE, ZSIZE, 1, EF_L8);
@@ -192,7 +192,7 @@ void Electro::InitObjects()
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 }
 
-void Electro::DoUpdate(uint32_t pass)
+void Electro::DoUpdate(uint32_t /*pass*/)
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 

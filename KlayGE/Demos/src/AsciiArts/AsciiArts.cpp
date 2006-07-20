@@ -5,18 +5,19 @@
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderableHelper.hpp>
+#include <KlayGE/RenderWindow.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/Util.hpp>
 #include <KlayGE/ResLoader.hpp>
-#include <KlayGE/KMesh.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Sampler.hpp>
+#include <KlayGE/KMesh.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
+#include <KlayGE/Util.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
@@ -28,6 +29,7 @@
 #include <numeric>
 #include <sstream>
 #include <boost/assert.hpp>
+#include <boost/bind.hpp>
 
 #include "ascii_lums_builder.hpp"
 #include "AsciiArts.hpp"
@@ -44,7 +46,6 @@ int const ASCII_WIDTH = 16;
 int const ASCII_HEIGHT = 16;
 
 int const OUTPUT_NUM_ASCII = 32;
-int const LUM_LEVEL = 8;
 
 namespace
 {
@@ -117,7 +118,7 @@ namespace
 	{
 		BOOST_ASSERT(OUTPUT_NUM_ASCII == ascii_lums.size());
 
-		std::vector<uint8_t> temp_data(LUM_LEVEL * OUTPUT_NUM_ASCII * ASCII_WIDTH * ASCII_HEIGHT);
+		std::vector<uint8_t> temp_data(OUTPUT_NUM_ASCII * ASCII_WIDTH * ASCII_HEIGHT);
 
 		for (size_t i = 0; i < OUTPUT_NUM_ASCII; ++ i)
 		{
@@ -192,7 +193,7 @@ AsciiArts::AsciiArts()
 
 void AsciiArts::BuildAsciiLumsTex()
 {
-	ascii_lums_builder builder(INPUT_NUM_ASCII, OUTPUT_NUM_ASCII, LUM_LEVEL, ASCII_WIDTH, ASCII_HEIGHT);
+	ascii_lums_builder builder(INPUT_NUM_ASCII, OUTPUT_NUM_ASCII, ASCII_WIDTH, ASCII_HEIGHT);
 	ascii_lums_tex_ = FillTexture(builder.build(LoadFromTexture("font.dds")));
 }
 
@@ -254,7 +255,7 @@ uint32_t AsciiArts::NumPasses() const
 	}
 }
 
-void AsciiArts::InputHandler(InputEngine const & sender, InputAction const & action)
+void AsciiArts::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
 {
 	switch (action.first)
 	{
@@ -275,8 +276,6 @@ void AsciiArts::DoUpdate(uint32_t pass)
 	{
 		fpcController_.Update();
 	}
-
-	Camera& camera = this->ActiveCamera();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());

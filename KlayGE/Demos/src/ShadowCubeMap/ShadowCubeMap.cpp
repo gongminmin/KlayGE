@@ -26,6 +26,7 @@
 #include <vector>
 #include <sstream>
 #include <ctime>
+#include <boost/bind.hpp>
 
 #include "ShadowCubeMap.hpp"
 
@@ -376,7 +377,7 @@ void ShadowCubeMap::InitObjects()
 	inputEngine.ActionMap(actionMap, input_handler, true);
 }
 
-void ShadowCubeMap::InputHandler(InputEngine const & sender, InputAction const & action)
+void ShadowCubeMap::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
 {
 	switch (action.first)
 	{
@@ -394,7 +395,6 @@ uint32_t ShadowCubeMap::NumPasses() const
 void ShadowCubeMap::DoUpdate(uint32_t pass)
 {
 	RenderEngine& renderEngine = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-	SceneManager& sceneMgr = Context::Instance().SceneManagerInstance();
 
 	switch (pass)
 	{
