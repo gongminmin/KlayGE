@@ -171,9 +171,9 @@ boost::shared_ptr<MD5SkinnedModel> LoadModel(const std::string& fileName)
 			int a, b, c;
 			fscanf(fp, "tri %d %d %d %d\n", &triangleindex, &a, &b, &c);
 
-			indices.push_back(b);
-			indices.push_back(a);
-			indices.push_back(c);
+			indices.push_back(static_cast<uint16_t>(b));
+			indices.push_back(static_cast<uint16_t>(a));
+			indices.push_back(static_cast<uint16_t>(c));
 		}
 		mesh->AssignIndices(indices.begin(), indices.end());
 
