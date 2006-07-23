@@ -19,7 +19,11 @@
 #include <vector>
 #include <boost/function.hpp>
 
-#include <KlayGE/Vector.hpp>
+#ifdef KLAYGE_DEBUG
+	#pragma comment(lib, "KlayGE_Terrain_HeightMap_d.lib")
+#else
+	#pragma comment(lib, "KlayGE_Terrain_HeightMap.lib")
+#endif
 
 namespace KlayGE
 {
