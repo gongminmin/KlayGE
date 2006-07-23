@@ -201,7 +201,7 @@ void Electro::DoUpdate(uint32_t /*pass*/)
 	renderElectro_->AddToRenderQueue();
 
 	std::wostringstream stream;
-	stream << renderEngine.CurRenderTarget()->FPS();
+	stream << this->FPS();
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"电流效果");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());

@@ -14,6 +14,7 @@
 #define _PARTICLESYSTEM_HPP
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KlayGE/Math.hpp>
 
 namespace KlayGE
 {
@@ -21,12 +22,24 @@ namespace KlayGE
 	class ParticleSystem
 	{
 	public:
-		ParticleSystem(uint32_t max_num_particles, boost::function<void(ParticleType& par)> const & gen_func,
+		ParticleSystem(uint32_t max_num_particles,
+						boost::function<void(ParticleType& par, float4x4 const & mat)> const & gen_func,
 						boost::function<void(ParticleType& par, float elapse_time)> const & update_func)
 			: max_num_particles_(max_num_particles),
 				gen_func_(gen_func), update_func_(update_func),
-				auto_emit_freq_(0), total_elapse_time_(0)
+				auto_emit_freq_(0), accumulate_time_(0),
+				model_mat_(float4x4::Identity())
 		{
+		}
+
+		void ModelMatrix(float4x4 const & model)
+		{
+			model_mat_ = model;
+		}
+
+		float4x4 const & ModelMatrix() const
+		{
+			return model_mat_;
 		}
 
 		void EmitOne()
@@ -38,7 +51,7 @@ namespace KlayGE
 				{
 					if (iter->life <= 0)
 					{
-						gen_func_(*iter);
+						gen_func_(*iter, model_mat_);
 						break;
 					}
 				}
@@ -46,7 +59,7 @@ namespace KlayGE
 			else
 			{
 				ParticleType par;
-				gen_func_(par);
+				gen_func_(par, model_mat_);
 				particles_.push_back(par);
 			}
 		}
@@ -68,12 +81,12 @@ namespace KlayGE
 		{
 			if (auto_emit_freq_ > 0)
 			{
-				total_elapse_time_ += elapse_time;
+				accumulate_time_ += elapse_time;
 
-				if (total_elapse_time_ >= 1.0f / auto_emit_freq_)
+				if (accumulate_time_ >= 1.0f / auto_emit_freq_)
 				{
 					this->EmitOne();
-					total_elapse_time_ = 0;
+					accumulate_time_ = 0;
 				}
 			}
 
@@ -101,13 +114,15 @@ namespace KlayGE
 	private:
 		uint32_t max_num_particles_;
 
-		boost::function<void(ParticleType& par)> gen_func_;
+		boost::function<void(ParticleType& par, float4x4 const & mat)> gen_func_;
 		boost::function<void(ParticleType& par, float elapse_time)> update_func_;
 
 		std::deque<ParticleType> particles_;
 
 		float auto_emit_freq_;
-		float total_elapse_time_;
+		float accumulate_time_;
+
+		float4x4 model_mat_;
 	};
 
 	template <typename ParticleType>

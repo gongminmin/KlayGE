@@ -28,7 +28,7 @@ namespace KlayGE
 	RenderTarget::RenderTarget()
 					: left_(0), top_(0), width_(0), height_(0), colorDepth_(0),
 						isDepthBuffered_(false), depthBits_(0), stencilBits_(0),
-						FPS_(0), active_(false)
+						active_(false)
 	{
 	}
 
@@ -92,9 +92,6 @@ namespace KlayGE
 	void RenderTarget::Update()
 	{
 		Context::Instance().SceneManagerInstance().Update();
-
-		this->UpdateStats();
-
 		this->SwapBuffers();
 	}
 
@@ -115,37 +112,6 @@ namespace KlayGE
 	void RenderTarget::SetViewport(Viewport const & viewport)
 	{
 		viewport_ = viewport;
-	}
-
-	// 获取渲染目标的每秒帧数
-	/////////////////////////////////////////////////////////////////////////////////
-	float RenderTarget::FPS() const
-	{
-		return FPS_;
-	}
-
-	// 更新状态
-	/////////////////////////////////////////////////////////////////////////////////
-	void RenderTarget::UpdateStats()
-	{
-		static float accumulateTime = 0;
-		static long numFrames  = 0;
-
-		// measure statistics
-		++ numFrames;
-		accumulateTime += static_cast<float>(timer_.elapsed());
-
-		// check if new second
-		if (accumulateTime > 1)
-		{
-			// new second - not 100% precise
-			FPS_ = static_cast<float>(numFrames) / accumulateTime;
-
-			accumulateTime = 0;
-			numFrames  = 0;
-		}
-
-		timer_.restart();
 	}
 
 	// 获取该渲染目标是否处于活动状态

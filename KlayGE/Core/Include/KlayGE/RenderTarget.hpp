@@ -47,8 +47,6 @@ namespace KlayGE
 		virtual Viewport& GetViewport();
 		virtual void SetViewport(Viewport const & viewport);
 
-		virtual float FPS() const;
-
 		virtual bool Active() const;
 		virtual void Active(bool state);
 
@@ -58,8 +56,6 @@ namespace KlayGE
 		virtual void OnUnbind() = 0;
 
 	protected:
-		void UpdateStats();
-
 		uint32_t	left_;
 		uint32_t	top_;
 		uint32_t	width_;
@@ -70,15 +66,9 @@ namespace KlayGE
 		uint32_t	depthBits_;
 		uint32_t	stencilBits_;
 
-		// Stats
-		float	FPS_;
-		float	frameTime_;
-
 		bool	active_;	// Is active i.e. visible
 
 		Viewport viewport_;
-
-		Timer timer_;
 	};
 }
 

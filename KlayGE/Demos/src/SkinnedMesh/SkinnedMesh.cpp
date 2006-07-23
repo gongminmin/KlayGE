@@ -124,7 +124,7 @@ void SkinnedMeshApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 	model_->SetTime(std::clock() / 1000.0f);
 
 	std::wostringstream stream;
-	stream << renderEngine.CurRenderTarget()->FPS();
+	stream << this->FPS();
 
 	model_->SetEyePos(this->ActiveCamera().EyePos());
 

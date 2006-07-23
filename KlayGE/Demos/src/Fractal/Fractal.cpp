@@ -277,7 +277,7 @@ void Fractal::DoUpdate(uint32_t pass)
 		odd = !odd;
 
 		std::wostringstream stream;
-		stream << renderEngine.CurRenderTarget()->FPS();
+		stream << this->FPS();
 
 		font_->RenderText(0, 0, Color(1, 1, 0, 1), L"GPU¼ÆËã·ÖÐÎ");
 		font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());

@@ -54,6 +54,8 @@ namespace KlayGE
 		Camera const & ActiveCamera() const;
 		Camera& ActiveCamera();
 
+		float FPS() const;
+
 		void Run();
 		void Quit();
 
@@ -74,6 +76,7 @@ namespace KlayGE
 		}
 		void Update(uint32_t pass);
 		virtual void DoUpdate(uint32_t pass) = 0;
+		void UpdateStats();
 
 		virtual void RenderOver()
 		{
@@ -82,6 +85,15 @@ namespace KlayGE
 		virtual void DelObjects()
 		{
 		}
+
+	protected:
+		// Stats
+		float	fps_;
+		float	frame_time_;
+		float	accumulate_time_;
+		uint32_t num_frames_;
+
+		Timer timer_;
 	};
 }
 

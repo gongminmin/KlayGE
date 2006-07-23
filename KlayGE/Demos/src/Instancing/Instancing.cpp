@@ -288,7 +288,7 @@ void Instancing::DoUpdate(uint32_t /*pass*/)
 	renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 	std::wostringstream stream;
-	stream << renderEngine.CurRenderTarget()->FPS();
+	stream << this->FPS();
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"几何体实例化");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());

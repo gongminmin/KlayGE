@@ -194,7 +194,7 @@ void VideoTextureApp::DoUpdate(uint32_t /*pass*/)
 	fpcController_.Update();
 
 	std::wostringstream stream;
-	stream << re.CurRenderTarget()->FPS();
+	stream << this->FPS();
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Video Texture");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());

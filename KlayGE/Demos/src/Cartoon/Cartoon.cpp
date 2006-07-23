@@ -256,7 +256,7 @@ void Cartoon::DoUpdate(uint32_t pass)
 		font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str().c_str());
 
 		stream.str(L"");
-		stream << renderEngine.CurRenderTarget()->FPS() << " FPS";
+		stream << this->FPS() << " FPS";
 		font_->RenderText(0, 54, Color(1, 1, 0, 1), stream.str().c_str());
 		break;
 	}

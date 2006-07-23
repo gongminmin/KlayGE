@@ -38,6 +38,7 @@ namespace KlayGE
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	App3DFramework::App3DFramework()
+						: fps_(0), accumulate_time_(0), num_frames_(0)
 	{
 		Context::Instance().AppInstance(*this);
 	}
@@ -126,6 +127,8 @@ namespace KlayGE
 	{
 		if (0 == pass)
 		{
+			this->UpdateStats();
+
 			InputEngine& inputEngine = Context::Instance().InputFactoryInstance().InputEngineInstance();
 			inputEngine.Update();
 		}
@@ -137,5 +140,33 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void App3DFramework::OnResize(uint32_t /*width*/, uint32_t /*height*/)
 	{
+	}
+
+	// 更新状态
+	/////////////////////////////////////////////////////////////////////////////////
+	void App3DFramework::UpdateStats()
+	{
+		// measure statistics
+		++ num_frames_;
+		accumulate_time_ += static_cast<float>(timer_.elapsed());
+
+		// check if new second
+		if (accumulate_time_ > 1)
+		{
+			// new second - not 100% precise
+			fps_ = num_frames_ / accumulate_time_;
+
+			accumulate_time_ = 0;
+			num_frames_  = 0;
+		}
+
+		timer_.restart();
+	}
+
+	// 获取渲染目标的每秒帧数
+	/////////////////////////////////////////////////////////////////////////////////
+	float App3DFramework::FPS() const
+	{
+		return fps_;
 	}
 }

@@ -227,7 +227,7 @@ void Parallax::DoUpdate(uint32_t /*pass*/)
 	*(polygon_->GetRenderable()->GetRenderTechnique()->Effect().ParameterByName("lightPos")) = lightPos;
 
 	std::wostringstream stream;
-	stream << renderEngine.CurRenderTarget()->FPS();
+	stream << this->FPS();
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Parallax²âÊÔ");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());
