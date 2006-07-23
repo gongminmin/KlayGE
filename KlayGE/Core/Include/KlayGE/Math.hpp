@@ -502,6 +502,13 @@ namespace KlayGE
 
 		template <typename T>
 		inline Vector_T<T, 3>
+		reflect(Vector_T<T, 3> const & incident, Vector_T<T, 3> const & normal)
+		{
+			return incident - 2 * dot(incident, normal) * normal;
+		}
+
+		template <typename T>
+		inline Vector_T<T, 3>
 		transform_quat(Vector_T<T, 3> const & v, Quaternion_T<T> const & quat)
 		{
 			// result = av + bq + c(q.v CROSS v)

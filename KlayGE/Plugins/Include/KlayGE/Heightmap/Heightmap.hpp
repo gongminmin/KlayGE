@@ -14,7 +14,7 @@
 #define _HEIGHTMAP_HPP
 
 #include <vector>
-#include <KlayGE/float3.hpp>
+#include <KlayGE/Vector.hpp>
 
 namespace KlayGE
 {
@@ -24,29 +24,51 @@ namespace KlayGE
 	{
 	public:
 		template <typename HeightFunc>
-		void Terrain(float startX, float startY, float width, float height, float spanX, float spanY,
+		void Terrain(float start_x, float start_y, float end_x, float end_y, float span_x, float span_y,
 			std::vector<float3>& vertices, std::vector<uint16_t>& indices,
 			HeightFunc& Height)
 		{
-			vertices.clear();
-			indices.clear();
+			vertices.resize(0);
+			indices.resize(0);
 
-			for (float y = startY; y < startY + height; y += spanY)
+			if ((end_x - start_x) * span_x < 0)
 			{
-				for (float x = startX; x < startX + width; x += spanX)
-				{
-					float3 vec(x, y, Height(x, y));
+				span_x = -span_x;
+			}
+			if ((end_y - start_y) * span_y < 0)
+			{
+				span_y = -span_y;
+			}
 
-					std::vector<float3>::iterator iter(std::find(vertices.begin(), vertices.end(), vec));
-					if (iter == vertices.end())
-					{
-						indices.push_back(vertices.size());
-						vertices.push_back(vec);
-					}
-					else
-					{
-						indices.push_back(std::distance(iter, vertices.begin()));
-					}
+			int const num_x = static_cast<int>((end_x - start_x) / span_x);
+			int const num_y = static_cast<int>((end_y - start_y) / span_y);
+
+			float pos_x = start_x;
+			float pos_y = start_y;
+			for (int y = 0; y < num_y; ++ y)
+			{
+				pos_x = start_x;
+				for (int x = 0; x < num_x; ++ x)
+				{
+					pos_x += span_x;
+
+					float3 vec(pos_x, Height(pos_x, pos_y), pos_y);
+					vertices.push_back(vec);
+				}
+				pos_y += span_y;
+			}
+
+			for (int y = 0; y < num_y - 1; ++ y)
+			{
+				for (int x = 0; x < num_x - 1; ++ x)
+				{
+					indices.push_back((y + 0) * num_x + (x + 0));
+					indices.push_back((y + 1) * num_x + (x + 0));
+					indices.push_back((y + 1) * num_x + (x + 1));
+
+					indices.push_back((y + 1) * num_x + (x + 1));
+					indices.push_back((y + 0) * num_x + (x + 1));
+					indices.push_back((y + 0) * num_x + (x + 0));
 				}
 			}
 		}

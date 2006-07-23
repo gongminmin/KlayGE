@@ -31,31 +31,19 @@ namespace KlayGE
 
 		void EmitOne()
 		{
-			bool emit = false;
 			if (particles_.size() >= max_num_particles_)
 			{
-				bool found = false;
 				for (std::deque<ParticleType>::iterator iter = particles_.begin();
 					iter != particles_.end(); ++ iter)
 				{
 					if (iter->life <= 0)
 					{
 						gen_func_(*iter);
-						found = true;
+						break;
 					}
-				}
-
-				if (!found)
-				{
-					emit = true;
 				}
 			}
 			else
-			{
-				emit = true;
-			}
-
-			if (emit)
 			{
 				ParticleType par;
 				gen_func_(par);
