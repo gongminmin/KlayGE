@@ -16,6 +16,8 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Math.hpp>
 
+#include <vector>
+
 namespace KlayGE
 {
 	template <typename ParticleType>
@@ -32,6 +34,10 @@ namespace KlayGE
 		{
 		}
 
+		virtual ~ParticleSystem()
+		{
+		}
+
 		void ModelMatrix(float4x4 const & model)
 		{
 			model_mat_ = model;
@@ -40,28 +46,6 @@ namespace KlayGE
 		float4x4 const & ModelMatrix() const
 		{
 			return model_mat_;
-		}
-
-		void EmitOne()
-		{
-			if (particles_.size() >= max_num_particles_)
-			{
-				for (std::deque<ParticleType>::iterator iter = particles_.begin();
-					iter != particles_.end(); ++ iter)
-				{
-					if (iter->life <= 0)
-					{
-						gen_func_(*iter, model_mat_);
-						break;
-					}
-				}
-			}
-			else
-			{
-				ParticleType par;
-				gen_func_(par, model_mat_);
-				particles_.push_back(par);
-			}
 		}
 
 		void Emit(uint32_t num)
@@ -90,14 +74,7 @@ namespace KlayGE
 				}
 			}
 
-			for (std::deque<ParticleType>::iterator iter = particles_.begin();
-				iter != particles_.end(); ++ iter)
-			{
-				if (iter->life > 0)
-				{
-					update_func_(*iter, elapse_time);
-				}
-			}
+			this->UpdateAll(elapse_time);
 		}
 
 		uint32_t NumParticles() const
@@ -111,13 +88,48 @@ namespace KlayGE
 			return particles_[i];
 		}
 
-	private:
+	protected:
+		virtual void EmitOne()
+		{
+			if (particles_.size() >= max_num_particles_)
+			{
+				for (std::vector<ParticleType>::iterator iter = particles_.begin();
+					iter != particles_.end(); ++ iter)
+				{
+					if (iter->life <= 0)
+					{
+						gen_func_(*iter, model_mat_);
+						break;
+					}
+				}
+			}
+			else
+			{
+				ParticleType par;
+				gen_func_(par, model_mat_);
+				particles_.push_back(par);
+			}
+		}
+
+		virtual void UpdateAll(float elapse_time)
+		{
+			for (std::vector<ParticleType>::iterator iter = particles_.begin();
+				iter != particles_.end(); ++ iter)
+			{
+				if (iter->life > 0)
+				{
+					update_func_(*iter, elapse_time);
+				}
+			}
+		}
+
+	protected:
 		uint32_t max_num_particles_;
 
 		boost::function<void(ParticleType& par, float4x4 const & mat)> gen_func_;
 		boost::function<void(ParticleType& par, float elapse_time)> update_func_;
 
-		std::deque<ParticleType> particles_;
+		std::vector<ParticleType> particles_;
 
 		float auto_emit_freq_;
 		float accumulate_time_;
@@ -131,7 +143,6 @@ namespace KlayGE
 	public:
 		void operator()(ParticleType& par, float elapse_time)
 		{
-			par.vel += par.accel * elapse_time;
 			par.pos += par.vel * elapse_time;
 			par.life -= elapse_time;
 		}
