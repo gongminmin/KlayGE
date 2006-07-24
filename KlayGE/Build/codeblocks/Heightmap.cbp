@@ -3,14 +3,14 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="1"/>
 	<Project>
-		<Option title="地形生成-Heightmap"/>
+		<Option title="地形生成-HeightMap"/>
 		<Option makefile="Makefile"/>
 		<Option makefile_is_custom="0"/>
 		<Option default_target="-1"/>
 		<Option compiler="0"/>
 		<Build>
 			<Target title="Debug">
-				<Option output="..\..\lib\libKlayGE_Terrain_Heightmap_d.a"/>
+				<Option output="..\..\lib\libKlayGE_Terrain_HeightMap_d.a"/>
 				<Option working_dir=""/>
 				<Option object_output="..\..\Debug"/>
 				<Option deps_output=".deps"/>
@@ -26,10 +26,12 @@
 					<Add option="-D_DEBUG"/>
 					<Add option="-D_LIB"/>
 					<Add option="-DSTRICT"/>
+					<Add option="-D_CRT_SECURE_NO_DEPRECATE"/>
+					<Add option="-D_SCL_SECURE_NO_DEPRECATE"/>
 				</Compiler>
 			</Target>
 			<Target title="Release">
-				<Option output="..\..\lib\libKlayGE_Terrain_Heightmap.a"/>
+				<Option output="..\..\lib\libKlayGE_Terrain_HeightMap.a"/>
 				<Option working_dir=""/>
 				<Option object_output="..\..\Release"/>
 				<Option deps_output=".deps"/>
@@ -44,13 +46,20 @@
 					<Add option="-DNDEBUG"/>
 					<Add option="-D_LIB"/>
 					<Add option="-DSTRICT"/>
+					<Add option="-D_CRT_SECURE_NO_DEPRECATE"/>
+					<Add option="-D_SECURE_SCL=0"/>
 				</Compiler>
 			</Target>
 		</Build>
-		<Unit filename="..\..\Plugins\Include\KlayGE\Heightmap\Heightmap.hpp">
+		<Unit filename="..\..\Plugins\Include\KlayGE\HeightMap\HeightMap.hpp">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\Plugins\Src\Terrain\HeightMap\HeightMap.cpp">
+			<Option compilerVar="CPP"/>
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
