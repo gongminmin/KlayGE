@@ -24,6 +24,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SkinnedMesh", "SkinnedMesh.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VideoTexture", "VideoTexture.vcproj", "{1B7FBD4B-6805-40C5-B6AF-0BF156B87957}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ParticleSystem", "ParticleSystem.vcproj", "{56B6DAC5-8984-41D1-BEB8-2DE731807932}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -78,6 +80,10 @@ Global
 		{1B7FBD4B-6805-40C5-B6AF-0BF156B87957}.Debug|Win32.Build.0 = Debug|Win32
 		{1B7FBD4B-6805-40C5-B6AF-0BF156B87957}.Release|Win32.ActiveCfg = Release|Win32
 		{1B7FBD4B-6805-40C5-B6AF-0BF156B87957}.Release|Win32.Build.0 = Release|Win32
+		{56B6DAC5-8984-41D1-BEB8-2DE731807932}.Debug|Win32.ActiveCfg = Debug|Win32
+		{56B6DAC5-8984-41D1-BEB8-2DE731807932}.Debug|Win32.Build.0 = Debug|Win32
+		{56B6DAC5-8984-41D1-BEB8-2DE731807932}.Release|Win32.ActiveCfg = Release|Win32
+		{56B6DAC5-8984-41D1-BEB8-2DE731807932}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
