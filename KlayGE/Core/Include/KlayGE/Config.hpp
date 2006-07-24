@@ -11,6 +11,14 @@
 #define _VC_7_1
 #endif
 
+#if __GNUC__ == 2
+#define _GCC_2_x
+#elif __GNUC__ == 3
+#define _GCC_3_x
+#elif __GNUC__ == 4
+#define _GCC_4_x
+#endif
+
 // 定义各种编译期选项
 #define _SELECT1ST2ND_SUPPORT
 #define _COPYIF_SUPPORT

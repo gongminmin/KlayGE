@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="SkinnedMesh"
+	Name="Skinned Mesh"
 	ProjectGUID="{6F6E43D9-6164-452A-8769-3B96F33469A9}"
 	RootNamespace="SkinnedMesh"
 	Keyword="Win32Proj"

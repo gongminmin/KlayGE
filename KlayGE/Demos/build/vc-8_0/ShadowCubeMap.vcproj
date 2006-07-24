@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="ShadowCubeMap"
+	Name="Shadow Cubemap"
 	ProjectGUID="{6E5EDEDF-5BD7-4AAA-83CC-D93955801020}"
 	Keyword="Win32Proj"
 	>
