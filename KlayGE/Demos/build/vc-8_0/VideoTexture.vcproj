@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="VideoTexture"
+	Name="Video Texture"
 	ProjectGUID="{1B7FBD4B-6805-40C5-B6AF-0BF156B87957}"
-	RootNamespace="testDShow"
+	RootNamespace="VideoTexture"
 	Keyword="Win32Proj"
 	>
 	<Platforms>

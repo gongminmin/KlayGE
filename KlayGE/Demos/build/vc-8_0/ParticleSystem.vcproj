@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="ParticleSystem"
+	Name="Particle System"
 	ProjectGUID="{56B6DAC5-8984-41D1-BEB8-2DE731807932}"
 	RootNamespace="ParticleSystem"
 	Keyword="Win32Proj"

@@ -43,6 +43,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SkinnedMesh", "SkinnedMesh.
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VideoTexture", "VideoTexture.vcproj", "{1B7FBD4B-6805-40C5-B6AF-0BF156B87957}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ParticleSystem", "ParticleSystem.vcproj", "{56B6DAC5-8984-41D1-BEB8-2DE731807932}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -93,6 +101,14 @@ Global
 		{6F6E43D9-6164-452A-8769-3B96F33469A9}.Debug.Build.0 = Debug|Win32
 		{6F6E43D9-6164-452A-8769-3B96F33469A9}.Release.ActiveCfg = Release|Win32
 		{6F6E43D9-6164-452A-8769-3B96F33469A9}.Release.Build.0 = Release|Win32
+		{1B7FBD4B-6805-40C5-B6AF-0BF156B87957}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1B7FBD4B-6805-40C5-B6AF-0BF156B87957}.Debug|Win32.Build.0 = Debug|Win32
+		{1B7FBD4B-6805-40C5-B6AF-0BF156B87957}.Release|Win32.ActiveCfg = Release|Win32
+		{1B7FBD4B-6805-40C5-B6AF-0BF156B87957}.Release|Win32.Build.0 = Release|Win32
+		{56B6DAC5-8984-41D1-BEB8-2DE731807932}.Debug|Win32.ActiveCfg = Debug|Win32
+		{56B6DAC5-8984-41D1-BEB8-2DE731807932}.Debug|Win32.Build.0 = Debug|Win32
+		{56B6DAC5-8984-41D1-BEB8-2DE731807932}.Release|Win32.ActiveCfg = Release|Win32
+		{56B6DAC5-8984-41D1-BEB8-2DE731807932}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection
