@@ -12,7 +12,7 @@ namespace KlayGE
 	class ascii_lums_builder
 	{
 	private:
-		typedef KlayGE::MapVector<float, uint8_t> lum_to_char_type;
+		typedef MapVector<float, uint8_t> lum_to_char_type;
 		typedef std::vector<std::pair<float, lum_to_char_type::const_iterator> > diff_lum_to_iter_type;
 
 	public:

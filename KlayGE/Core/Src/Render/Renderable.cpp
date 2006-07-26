@@ -1,8 +1,11 @@
 // Renderable.cpp
 // KlayGE 可渲染对象类 实现文件
-// Ver 2.7.0
-// 版权所有(C) 龚敏敏, 2003-2005
+// Ver 3.4.0
+// 版权所有(C) 龚敏敏, 2003-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.4.0
+// 修正了Render没有设置Technique的bug (2006.7.26)
 //
 // 2.7.0
 // GetWorld改名为GetModelMatrix (2005.6.17)
@@ -55,13 +58,15 @@ namespace KlayGE
 	{
 		this->UpdateInstanceStream();
 
-		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+
+		re.SetRenderTechnique(this->GetRenderTechnique());
 
 		GraphicsBufferPtr inst_stream = this->GetRenderLayout()->InstanceStream();
 		if (inst_stream)
 		{
 			this->OnRenderBegin();
-			renderEngine.Render(*this->GetRenderLayout());
+			re.Render(*this->GetRenderLayout());
 			this->OnRenderEnd();
 		}
 		else
@@ -69,14 +74,14 @@ namespace KlayGE
 			this->OnRenderBegin();
 			if (instances_.empty())
 			{
-				renderEngine.Render(*this->GetRenderLayout());
+				re.Render(*this->GetRenderLayout());
 			}
 			else
 			{
 				for (uint32_t i = 0; i < instances_.size(); ++ i)
 				{
 					this->OnInstanceBegin(i);
-					renderEngine.Render(*this->GetRenderLayout());
+					re.Render(*this->GetRenderLayout());
 					this->OnInstanceEnd(i);
 				}
 			}

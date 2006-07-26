@@ -40,8 +40,6 @@
 
 #include <boost/smart_ptr.hpp>
 
-#include <map>
-
 #include <d3dx9effect.h>
 
 #include <KlayGE/RenderEffect.hpp>

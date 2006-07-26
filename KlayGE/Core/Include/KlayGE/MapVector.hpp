@@ -20,17 +20,13 @@
 #include <functional>
 #include <utility>
 #include <vector>
-
-#pragma warning(push)
-#pragma warning(disable: 4127 4800)
-#include <boost/pool/pool_alloc.hpp>
-#pragma warning(pop)
+#include <memory>
 
 namespace KlayGE
 {
 	template <typename Key, typename Type,
 				class Traits = std::less<Key>,
-				class Allocator = boost::fast_pool_allocator<std::pair<Key, Type> > >
+				class Allocator = std::allocator<std::pair<Key, Type> > >
 	class MapVector
 	{
 		typedef std::vector<std::pair<Key, Type>, Allocator>	ContainerType;
