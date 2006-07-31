@@ -13,13 +13,11 @@ void SkyBoxVS(float4 pos : POSITION,
 
 sampler skybox_YcubeMapSampler;
 sampler skybox_CcubeMapSampler;
-float exposure_level;
 
 float4 HDRSkyBoxPS(float3 texCoord0 : TEXCOORD0) : COLOR
 {
 	float3 rgb = decode_hdr_yc(texCUBE(skybox_YcubeMapSampler, texCoord0).r,
 					texCUBE(skybox_CcubeMapSampler, texCoord0).ga);
-	rgb *= exposure_level;
 	
 	return float4(rgb, 1);
 }

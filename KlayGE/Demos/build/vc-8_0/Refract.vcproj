@@ -183,6 +183,14 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath="..\..\media\Common\Blur.fx"
+				>
+			</File>
+			<File
+				RelativePath="..\..\media\Common\DownSample.fx"
+				>
+			</File>
+			<File
 				RelativePath="..\..\media\Refract\HDRSkyBox.fx"
 				>
 			</File>
@@ -192,6 +200,14 @@
 			</File>
 			<File
 				RelativePath="..\..\media\Refract\Refract.fx"
+				>
+			</File>
+			<File
+				RelativePath="..\..\media\Common\SumLum.fx"
+				>
+			</File>
+			<File
+				RelativePath="..\..\media\Common\ToneMapping.fx"
 				>
 			</File>
 		</Filter>

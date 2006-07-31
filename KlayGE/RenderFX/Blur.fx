@@ -9,7 +9,6 @@ void BlurVS(float4 pos : POSITION,
 					out float2 oTex : TEXCOORD0)
 {
 	oPos = pos;
-	oPos.z = 0.9f;
 	oTex = tex;
 }
 
@@ -42,6 +41,7 @@ technique BlurX
 	pass p0
 	{
 		CullMode = CCW;
+		ZEnable = false;
 
 		VertexShader = compile vs_1_1 BlurVS();
 		PixelShader = compile ps_2_0 BlurXPS();
@@ -53,6 +53,7 @@ technique BlurY
 	pass p0
 	{
 		CullMode = CCW;
+		ZEnable = false;
 
 		VertexShader = compile vs_1_1 BlurVS();
 		PixelShader = compile ps_2_0 BlurYPS();

@@ -6,7 +6,6 @@ float4x4 modelit;
 float3 eyePos;
 
 float3 eta_ratio;
-float exposure_level;
 
 struct VS_INPUT
 {
@@ -92,7 +91,7 @@ float4 RefractPS(float3 normal        : TEXCOORD0,
 					texCUBE(skybox_CcubeMapSampler, reflect_vec).ga);
 
 	float fresnel_factor = fast_fresnel(-incident, normal, 0.03f);
-	return lerp(refracted_clr, reflected_clr, fresnel_factor) * exposure_level;
+	return lerp(refracted_clr, reflected_clr, fresnel_factor);
 }
 
 technique Refract
