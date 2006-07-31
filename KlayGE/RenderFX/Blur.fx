@@ -1,75 +1,61 @@
-// Gaussian filter to blur along x-axis.
+sampler src_sampler;
 
-float4x4 matMVP : WorldViewProjection;
+float color_weight[15];
+float tex_coord_offset[15];
 
-float Width;
-float Height;
-
-float PixelWeight[8] = { 0.2537, 0.2185, 0.0821, 0.0461, 0.0262, 0.0162, 0.0102, 0.0052 };
-
-sampler2D BlurXSampler;
-sampler2D BlurYSampler;
-
-struct VS_OUT
+void BlurVS(float4 pos : POSITION,
+					float2 tex : TEXCOORD0,
+					out float4 oPos : POSITION,
+					out float2 oTex : TEXCOORD0)
 {
-	float4 Pos:	POSITION;
-	float2 Tex:	TEXCOORD0;
-};
-
-VS_OUT BlurVS(float4 inPos: POSITION, float2 inTex : TEXCOORD0)
-{
-	VS_OUT OUT;
-
-	// Output the transformed vertex
-	OUT.Pos = mul(inPos, matMVP);
-
-	// Output the texture coordinates
-	OUT.Tex = inTex;
-
-	return OUT;
+	oPos = pos;
+	oPos.z = 0.9f;
+	oTex = tex;
 }
 
-float4 BlurPS(float2 inTex: TEXCOORD0, float2 offset, sampler2D Blur) : COLOR0
+float4 BlurXPS(float2 inTex: TEXCOORD0) : COLOR0
 {
-	float4 color = tex2D(Blur, inTex);
+	half4 color = half4(0, 0, 0, 1);
 
-	// Sample pixels on either side
-	for (int i = 0; i < 8; ++ i)
+	for (int i = 0; i < 15; ++ i)
 	{
-		color += tex2D(Blur, inTex + offset * i) * PixelWeight[i];
-		color += tex2D(Blur, inTex - offset * i) * PixelWeight[i];
+		color.rgb += tex2D(src_sampler, inTex + float2(tex_coord_offset[i], 0)).rgb * half(color_weight[i]);
 	}
 
 	return color;
 }
 
-float4 BlurXPS(float2 inTex: TEXCOORD0,
-		uniform sampler2D BlurX) : COLOR0
+float4 BlurYPS(float2 inTex: TEXCOORD0) : COLOR0
 {
-	return BlurPS(inTex, float2(1.0 / Width, 0), BlurX);
-}
+	half4 color = float4(0, 0, 0, 1);
 
-float4 BlurYPS(float2 inTex: TEXCOORD0,
-		uniform sampler2D BlurY) : COLOR0
-{
-	return BlurPS(inTex, float2(0, 1.0 / Height), BlurY);
-}
-
-
-technique BlurXTechnique
-{
-	pass Pass0
+	for (int i = 0; i < 15; ++ i)
 	{
+		color.rgb += tex2D(src_sampler, inTex + float2(0, tex_coord_offset[i])).rgb * half(color_weight[i]);
+	}
+
+	return color;
+}
+
+technique BlurX
+{
+	pass p0
+	{
+		CullMode = CCW;
+
 		VertexShader = compile vs_1_1 BlurVS();
-		PixelShader  = compile ps_2_0 BlurXPS(BlurXSampler);
+		PixelShader = compile ps_2_0 BlurXPS();
 	}
 }
 
-technique BlurYTechnique
+technique BlurY
 {
-	pass Pass0
+	pass p0
 	{
+		CullMode = CCW;
+
 		VertexShader = compile vs_1_1 BlurVS();
-		PixelShader  = compile ps_2_0 BlurYPS(BlurYSampler);
+		PixelShader = compile ps_2_0 BlurYPS();
 	}
 }
+

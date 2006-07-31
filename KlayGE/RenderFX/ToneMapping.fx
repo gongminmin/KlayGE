@@ -1,47 +1,40 @@
-float4x4 matMVP : WorldViewProjection;
+const float EXPOSURE = 0.55f;
 
-float exposureLevel;
-
-sampler2D FullSampler;
-sampler2D BlurSampler;
-
-struct VS_OUT
+void ToneMappingVS(float4 pos : POSITION,
+					float2 tex : TEXCOORD0,
+					out float4 oPos : POSITION,
+					out float2 oTex : TEXCOORD0)
 {
-	float4 Pos:	POSITION;
-	float2 Tex:	TEXCOORD0;
-};
-
-VS_OUT ToneMappingVS(float4 inPos: POSITION, float2 inTex: TEXCOORD0)
-{
-	VS_OUT OUT;
-
-	// Output the transformed vertex
-	OUT.Pos = mul(inPos, matMVP);
-
-	// Output the texture coordinates
-	OUT.Tex = inTex;
-
-	return OUT;
+	oPos = pos;
+	oPos.z = 0.9f;
+	oTex = tex;
 }
 
-float4 ToneMappingPS(float2 inTex: TEXCOORD0,
-			uniform sampler2D Full,
-			uniform sampler2D Blur) : COLOR0
+sampler lum_sampler;
+sampler scene_sampler;
+sampler bloom_sampler;
+
+float4 ToneMappingPS(float2 oTex : TEXCOORD0) : COLOR
 {
-	float4 original = tex2D(Full, inTex);
-	float4 blur		= tex2D(Blur, inTex);
+	half3 blur = tex2D(bloom_sampler, oTex).rgb;
+	half lum = max(0.001f, tex2D(lum_sampler, float2(0.5f, 0.5f)).r);
+	
+	half3 clr = tex2D(scene_sampler, oTex) + blur * 0.25f;
 
-	float4 color	= lerp(original, blur, 0.4);
-	color		   *= exposureLevel;
+	half3 L = clr * EXPOSURE / lum;
+	clr = L / (1 + L);
 
-	return pow(color, 0.55);
+    return float4(clr, 1);
 }
 
-technique Technique0
+technique ToneMapping
 {
-	pass Pass0
+	pass p0
 	{
-		VertexShader = compile vs_2_0 ToneMappingVS();
-		PixelShader  = compile ps_2_0 ToneMappingPS(FullSampler, BlurSampler);
+		CullMode = CCW;
+
+		VertexShader = compile vs_1_1 ToneMappingVS();
+		PixelShader = compile ps_2_0 ToneMappingPS();
 	}
 }
+

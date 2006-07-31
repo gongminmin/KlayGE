@@ -99,7 +99,6 @@ namespace KlayGE
 		render_engine.BindRenderTarget(render_target_);
 		render_engine.Clear(RenderEngine::CBM_Color);
 
-		render_engine.SetRenderTechnique(technique_);
 		this->Render();
 
 		render_engine.BindRenderTarget(RenderTargetPtr());

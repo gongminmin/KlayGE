@@ -1,53 +1,48 @@
-float4x4 matMVP : WorldViewProjection;
+const float BRIGHT_THRESHOLD = 0.5f;
 
-// This hack is necessary because the suppress function
-// seems to work only when Kd is greater than 1, even by 0.0001f!!!
-float Kd = 1.0001f;
-
-sampler2D DownSampleSampler;
-
-struct VS_OUT
+void DownsampleVS(float4 pos : POSITION,
+					float2 tex : TEXCOORD0,
+					out float4 oPos : POSITION,
+					out float2 oTex : TEXCOORD0)
 {
-	float4 Pos:	POSITION;
-	float2 Tex:	TEXCOORD0;
-};
-
-VS_OUT vs_main( float4 inPos: POSITION, float2 inTex: TEXCOORD0 )
-{
-	VS_OUT OUT;
-
-	// Output the transformed vertex
-	OUT.Pos = mul(inPos, matMVP);
-
-	// Output the texture coordinates
-	OUT.Tex = inTex;
-
-	return OUT;
+	oPos = pos;
+	oPos.z = 0.9f;
+	oTex = tex;
 }
 
-float4 SuppressLDR(float4 c)
+sampler src_sampler;
+float4 tex_coord_offset[4];
+
+half4 SuppressLDR(half4 c)
 {
-	if ((c.r > 1.0f) || (c.g > 1.0f) || (c.b > 1.0f))
+	if ((c.r > BRIGHT_THRESHOLD) || (c.g > BRIGHT_THRESHOLD) || (c.b > BRIGHT_THRESHOLD))
 	{
 		return c;
 	}
 	else
 	{
-		return float4(0.0f, 0.0f, 0.0f, 0.0f);
+		return 0;
 	}
 }
 
-float4 ps_main(float2 inTex: TEXCOORD0,
-		uniform sampler2D DownSample) : COLOR0
+float4 DownsamplePS(float2 oTex : TEXCOORD0) : COLOR
 {
-	return SuppressLDR(tex2D(DownSample, inTex) * Kd);
+	half4 clr = 0;
+	for (int i = 0; i < 4; ++ i)
+	{
+		clr += SuppressLDR(tex2D(src_sampler, oTex + tex_coord_offset[i]) * 1.0001f);
+	}
+
+	return clr / 4;
 }
 
-technique Technique0
+technique Downsample
 {
-	pass Pass0
+	pass p0
 	{
-		VertexShader = compile vs_1_1 vs_main();
-		PixelShader  = compile ps_2_0 ps_main(DownSampleSampler);
+		CullMode = CCW;
+
+		VertexShader = compile vs_1_1 DownsampleVS();
+		PixelShader = compile ps_2_0 DownsamplePS();
 	}
 }
