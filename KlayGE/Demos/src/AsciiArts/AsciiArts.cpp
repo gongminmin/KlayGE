@@ -296,7 +296,6 @@ void AsciiArtsApp::OnResize(uint32_t width, uint32_t height)
 
 	downsample_tex_ = rf.MakeTexture2D(width / CELL_WIDTH, height / CELL_HEIGHT,
 		1, EF_ARGB8);
-	downsample_tex_->Usage(Texture::TU_RenderTarget);
 
 	FrameBufferPtr fb = rf.MakeFrameBuffer();
 	fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*downsample_tex_, 0));

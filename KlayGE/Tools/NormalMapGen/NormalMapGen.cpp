@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
 	app.Create("NormalMapGen", settings);
 
 	TexturePtr temp = LoadTexture(argv[1]);
-	TexturePtr height_map = Context::Instance().RenderFactoryInstance().MakeTexture2D(temp->Width(0), temp->Height(0), 1, EF_ARGB8);
+	TexturePtr height_map = Context::Instance().RenderFactoryInstance().MakeTexture2D(temp->Width(0), temp->Height(0), 1, EF_L8);
 	temp->CopyToTexture(*height_map);
 	TexturePtr normal_map = CreateNormalMap(height_map);
 	SaveTexture(normal_map, argv[2]);
