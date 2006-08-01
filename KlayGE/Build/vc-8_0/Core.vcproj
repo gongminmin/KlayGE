@@ -178,6 +178,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Src\Render\HDRPostProcess.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Src\Render\KMesh.cpp"
 					>
 				</File>
@@ -263,6 +267,10 @@
 				</File>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\GraphicsBuffer.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\HDRPostProcess.hpp"
 					>
 				</File>
 				<File

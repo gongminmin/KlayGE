@@ -112,6 +112,28 @@ namespace KlayGE
 	typedef boost::shared_ptr<OcclusionQuery> OcclusionQueryPtr;
 	class PostProcess;
 	typedef boost::shared_ptr<PostProcess> PostProcessPtr;
+	class Downsampler2x2PostProcess;
+	typedef boost::shared_ptr<Downsampler2x2PostProcess> Downsampler2x2PostProcessPtr;
+	class BlurPostProcess;
+	typedef boost::shared_ptr<BlurPostProcess> BlurPostProcessPtr;
+	class BlurXPostProcess;
+	typedef boost::shared_ptr<BlurXPostProcess> BlurXPostProcessPtr;
+	class BlurYPostProcess;
+	typedef boost::shared_ptr<BlurYPostProcess> BlurYPostProcessPtr;
+	class SumLumPostProcess;
+	typedef boost::shared_ptr<SumLumPostProcess> SumLumPostProcessPtr;
+	class SumLumLogPostProcess;
+	typedef boost::shared_ptr<SumLumLogPostProcess> SumLumLogPostProcessPtr;
+	class SumLumIterativePostProcess;
+	typedef boost::shared_ptr<SumLumIterativePostProcess> SumLumIterativePostProcessPtr;
+	class SumLumExpPostProcess;
+	typedef boost::shared_ptr<SumLumExpPostProcess> SumLumExpPostProcessPtr;
+	class AdaptedLumPostProcess;
+	typedef boost::shared_ptr<AdaptedLumPostProcess> AdaptedLumPostProcessPtr;
+	class ToneMappingPostProcess;
+	typedef boost::shared_ptr<ToneMappingPostProcess> ToneMappingPostProcessPtr;
+	class HDRPostProcess;
+	typedef boost::shared_ptr<HDRPostProcess> HDRPostProcessPtr;
 	template <typename ParticleType>
 	class ParticleSystem;
 

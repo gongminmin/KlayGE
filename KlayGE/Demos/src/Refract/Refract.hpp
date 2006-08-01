@@ -30,19 +30,7 @@ private:
 	KlayGE::FrameBufferPtr render_buffer_;
 	KlayGE::TexturePtr rendered_tex_;
 
-	KlayGE::TexturePtr downsample_tex_;
-	KlayGE::TexturePtr blurx_tex_;
-	KlayGE::TexturePtr blury_tex_;
-	std::vector<KlayGE::TexturePtr> lum_texs_;
-	KlayGE::TexturePtr lum_exp_tex_;
-
-	KlayGE::RenderablePtr renderToneMapping_;
-	KlayGE::RenderablePtr renderDownsampler_;
-	KlayGE::RenderablePtr renderBlurX_;
-	KlayGE::RenderablePtr renderBlurY_;
-	KlayGE::RenderablePtr renderBloom_;
-	std::vector<KlayGE::RenderablePtr> renderSumLums_;
-	KlayGE::RenderablePtr renderAdaptedLum_;
+	KlayGE::HDRPostProcessPtr hdr_;
 };
 
 #endif		// _REFRACT_HPP

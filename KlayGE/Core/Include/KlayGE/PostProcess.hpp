@@ -14,6 +14,7 @@
 #define _POSTPROCESS_HPP
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KlayGE/RenderableHelper.hpp>
 
 namespace KlayGE
 {

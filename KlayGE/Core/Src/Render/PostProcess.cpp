@@ -1,4 +1,4 @@
-// PostProcess.hpp
+// PostProcess.cpp
 // KlayGE 后期处理类 实现文件
 // Ver 3.3.0
 // 版权所有(C) 龚敏敏, 2006
