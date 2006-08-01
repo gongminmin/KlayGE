@@ -49,10 +49,60 @@ int const OUTPUT_NUM_ASCII = 32;
 
 namespace
 {
-	class RenderQuad : public PostProcess
+	class Downsampler8x8 : public PostProcess
 	{
 	public:
-		RenderQuad()
+		Downsampler8x8()
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArts.fx")->Technique("Downsample8x8"))
+		{
+		}
+
+		void Source(TexturePtr const & src_tex, Sampler::TexFilterOp filter)
+		{
+			PostProcess::Source(src_tex, filter);
+
+			this->GetSampleOffsets8x8(src_tex->Width(0), src_tex->Height(0));
+		}
+
+		void OnRenderBegin()
+		{
+			PostProcess::OnRenderBegin();
+
+			*(technique_->Effect().ParameterByName("tex_coord_offset")) = tex_coord_offset_;
+		}
+
+	private:
+		void GetSampleOffsets8x8(uint32_t width, uint32_t height)
+		{
+			tex_coord_offset_.resize(8);
+
+			float const tu = 1.0f / width;
+			float const tv = 1.0f / height;
+
+			// Sample from the 64 surrounding points. 
+			int index = 0;
+			for (int y = -3; y <= 4; y += 2)
+			{
+				for (int x = -3; x <= 4; x += 4)
+				{
+					tex_coord_offset_[index].x() = (x + 0) * tu;
+					tex_coord_offset_[index].y() = y * tv;
+					tex_coord_offset_[index].z() = (x + 2) * tu;
+					tex_coord_offset_[index].w() = y * tv;
+
+					++ index;
+				}
+			}
+		}
+
+	private:
+		std::vector<float4> tex_coord_offset_;
+	};
+
+	class AsciiArts : public PostProcess
+	{
+	public:
+		AsciiArts()
 			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArts.fx")->Technique("AsciiArts")),
 				lums_sampler_(new Sampler)
 		{
@@ -73,6 +123,8 @@ namespace
 
 		void OnRenderBegin()
 		{
+			PostProcess::OnRenderBegin();
+
 			RenderEngine const & renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			RenderTarget const & renderTarget(*renderEngine.CurRenderTarget());
 
@@ -177,27 +229,27 @@ int main()
 	settings.full_screen = false;
 	settings.ConfirmDevice = ConfirmDevice;
 
-	AsciiArts app;
+	AsciiArtsApp app;
 	app.Create("ASCII Arts", settings);
 	app.Run();
 
 	return 0;
 }
 
-AsciiArts::AsciiArts()
+AsciiArtsApp::AsciiArtsApp()
 			: show_ascii_(true)
 {
 	ResLoader::Instance().AddPath("../media/Common");
 	ResLoader::Instance().AddPath("../media/AsciiArts");
 }
 
-void AsciiArts::BuildAsciiLumsTex()
+void AsciiArtsApp::BuildAsciiLumsTex()
 {
 	ascii_lums_builder builder(INPUT_NUM_ASCII, OUTPUT_NUM_ASCII, ASCII_WIDTH, ASCII_HEIGHT);
 	ascii_lums_tex_ = FillTexture(builder.build(LoadFromTexture("font.dds")));
 }
 
-void AsciiArts::InitObjects()
+void AsciiArtsApp::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
@@ -210,6 +262,7 @@ void AsciiArts::InitObjects()
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
+	renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 	obj_.reset(new SceneObjectHelper(LoadKMesh("teapot.kmesh"), SceneObject::SOA_Cullable | SceneObject::SOA_ShortAge));
 
@@ -218,19 +271,22 @@ void AsciiArts::InitObjects()
 	render_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
 	render_buffer_->GetViewport().camera = renderEngine.CurRenderTarget()->GetViewport().camera;
 
-	renderQuad_.reset(new RenderQuad);
-	renderQuad_->Destinate(RenderTargetPtr());
-
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler(inputEngine);
-	input_handler += boost::bind(&AsciiArts::InputHandler, this, _1, _2);
+	input_handler += boost::bind(&AsciiArtsApp::InputHandler, this, _1, _2);
 	inputEngine.ActionMap(actionMap, input_handler, true);
+
+	downsampler_.reset(new Downsampler8x8);
+
+	ascii_arts_.reset(new AsciiArts);
+	ascii_arts_->Destinate(RenderTargetPtr());
+	static_cast<AsciiArts*>(ascii_arts_.get())->SetLumsTex(ascii_lums_tex_);
 }
 
-void AsciiArts::OnResize(uint32_t width, uint32_t height)
+void AsciiArtsApp::OnResize(uint32_t width, uint32_t height)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -241,9 +297,16 @@ void AsciiArts::OnResize(uint32_t width, uint32_t height)
 	downsample_tex_ = rf.MakeTexture2D(width / CELL_WIDTH, height / CELL_HEIGHT,
 		1, EF_ARGB8);
 	downsample_tex_->Usage(Texture::TU_RenderTarget);
+
+	FrameBufferPtr fb = rf.MakeFrameBuffer();
+	fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*downsample_tex_, 0));
+	downsampler_->Source(rendered_tex_, Sampler::TFO_Bilinear);
+	downsampler_->Destinate(fb);
+
+	ascii_arts_->Source(downsample_tex_, Sampler::TFO_Point);
 }
 
-uint32_t AsciiArts::NumPasses() const
+uint32_t AsciiArtsApp::NumPasses() const
 {
 	if (show_ascii_)
 	{
@@ -255,7 +318,7 @@ uint32_t AsciiArts::NumPasses() const
 	}
 }
 
-void AsciiArts::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
+void AsciiArtsApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
 {
 	switch (action.first)
 	{
@@ -270,7 +333,7 @@ void AsciiArts::InputHandler(InputEngine const & /*sender*/, InputAction const &
 	}
 }
 
-void AsciiArts::DoUpdate(uint32_t pass)
+void AsciiArtsApp::DoUpdate(uint32_t pass)
 {
 	if (0 == pass)
 	{
@@ -285,7 +348,7 @@ void AsciiArts::DoUpdate(uint32_t pass)
 		switch (pass)
 		{
 		case 0:
-			// 第一遍，正常渲染
+			// 正常渲染
 			renderEngine.BindRenderTarget(render_buffer_);
 			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
@@ -294,15 +357,10 @@ void AsciiArts::DoUpdate(uint32_t pass)
 
 		case 1:
 			// 降采样
-			rendered_tex_->CopyToTexture(*downsample_tex_);
+			downsampler_->Apply();
 
-			// 第二遍，匹配，最终渲染
-			renderEngine.BindRenderTarget(RenderTargetPtr());
-			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
-
-			static_cast<RenderQuad*>(renderQuad_.get())->SetLumsTex(ascii_lums_tex_);
-			renderQuad_->Source(downsample_tex_, Sampler::TFO_Point);
-			renderQuad_->Apply();
+			// 匹配，最终渲染
+			ascii_arts_->Apply();
 			break;
 		}
 	}

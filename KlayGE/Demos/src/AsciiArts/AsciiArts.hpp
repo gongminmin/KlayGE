@@ -5,10 +5,10 @@
 #include <KlayGE/Font.hpp>
 #include <KlayGE/CameraController.hpp>
 
-class AsciiArts : public KlayGE::App3DFramework
+class AsciiArtsApp : public KlayGE::App3DFramework
 {
 public:
-	AsciiArts();
+	AsciiArtsApp();
 
 private:
 	void InitObjects();
@@ -36,7 +36,8 @@ private:
 
 	KlayGE::TexturePtr downsample_tex_;
 
-	KlayGE::PostProcessPtr renderQuad_;
+	KlayGE::PostProcessPtr downsampler_;
+	KlayGE::PostProcessPtr ascii_arts_;
 
 	bool show_ascii_;
 };
