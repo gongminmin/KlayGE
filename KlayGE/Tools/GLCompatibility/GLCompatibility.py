@@ -14,6 +14,7 @@ def support_one(feature_names):
 	return False
 
 ogl_ver_db = ['1.1', '1.2', '1.3', '1.4', '1.5', '2.0', '2.1']
+glsl_ver_db = ['1.1', '1.2' ]
 
 features_db = {
 	'1.1' : {
@@ -92,12 +93,9 @@ features_db = {
 		},
 
 	'2.1' : {
+			'OpenGL Shading Language 1.20' : lambda : support_one(['GLSL_1_2'], ['GL_ATI_shader_texture_lod']),
 			'Pixel buffer object' : lambda : support_one(['GL_ARB_pixel_buffer_object', 'GL_EXT_pixel_buffer_object']),
-			'OpenGL Shading Language 1.20' : lambda : support_all(['GL_ATI_shader_texture_lod']),
-			'Floating point buffer' : lambda : support_one(['GL_ARB_color_buffer_float', 'GL_ARB_texture_float', 'GL_ATI_texture_float', 'GL_NV_float_buffer', 'GL_ARB_half_float_pixel']),
 			'sRGB texture' : lambda : support_one(['GL_EXT_texture_sRGB']),
-			'Sync object' : lambda : support_one(['GL_ARB_sync_object', 'GL_NV_fence', 'GL2_async_core']),
-			'Frame buffer object' : lambda : support_one(['GL_ARB_framebuffer_object', 'GL_EXT_framebuffer_object', 'EXT_framebuffer_multisample', 'EXT_framebuffer_blit'])
 		}
 }
 
@@ -113,7 +111,7 @@ class information:
 		stream.write('<?xml version="1.0" encoding="utf-8"?>\n')
 		stream.write('<?xml-stylesheet type="text/xsl" href="report.xsl"?>\n\n')
 
-		stream.write('<compatibility vendor="%s" renderer="%s" core="%i.%i">\n' % (self.vendor, self.renderer, self.major_ver, self.minor_ver))
+		stream.write('<compatibility vendor="%s" renderer="%s" core="%i.%i" glsl_version="%i.%i">\n' % (self.vendor, self.renderer, self.major_ver, self.minor_ver, self.glsl_major_ver, self.glsl_minor_ver))
 
 		for feature_info in self.feature_infos:
 			supported = feature_info[1][0]
@@ -133,16 +131,24 @@ class information:
 
 		stream.write('</compatibility>\n')
 
-	def make_reports(self, vendor, renderer, major_ver, minor_ver, exts):
+	def make_reports(self, vendor, renderer, major_ver, minor_ver, glsl_major_ver, glsl_minor_ver, exts):
 		core_ver_index = ogl_ver_db.index(str(major_ver) + '.' + str(minor_ver))
-
-		is_supported.exts = exts
+		glsl_ver_index = glsl_ver_db.index(str(glsl_major_ver) + '.' + str(glsl_minor_ver))
 
 		self.vendor = vendor
 		self.renderer = renderer
 		self.major_ver = major_ver
 		self.minor_ver = minor_ver
+		self.glsl_major_ver = glsl_major_ver
+		self.glsl_minor_ver = glsl_minor_ver
 		self.feature_infos = []
+
+		is_supported.exts = exts
+
+		if glsl_ver_index >= 0:
+			is_supported.exts.append('GLSL_1_1')
+		if glsl_ver_index >= 1:
+			is_supported.exts.append('GLSL_1_2')
 
 		for i in range(0, len(ogl_ver_db)):
 			supported = []
@@ -172,6 +178,8 @@ if __name__ == '__main__':
 		renderer = dom.documentElement.getAttribute('renderer')
 		major_ver = int(dom.documentElement.getAttribute('major_ver'))
 		minor_ver = int(dom.documentElement.getAttribute('minor_ver'))
+		glsl_major_ver = int(dom.documentElement.getAttribute('glsl_major_ver'))
+		glsl_minor_ver = int(dom.documentElement.getAttribute('glsl_minor_ver'))
 
 		exts = []
 		ext_tags = dom.documentElement.getElementsByTagName('extension')
@@ -182,7 +190,7 @@ if __name__ == '__main__':
 		print 'Copyright(C) 2004-2006 Minmin Gong\n'
 
 		info = information()
-		info.make_reports(vendor, renderer, major_ver, minor_ver, exts)
+		info.make_reports(vendor, renderer, major_ver, minor_ver, glsl_major_ver, glsl_minor_ver, exts)
 
 		report_file_name = 'report.xml'
 

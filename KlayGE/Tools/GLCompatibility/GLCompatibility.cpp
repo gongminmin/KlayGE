@@ -7,6 +7,7 @@
 #include <boost/bind.hpp>
 #include <boost/algorithm/string/split.hpp>
 
+#include <glloader/glloader.h>
 #include <gl/glut.h>
 
 namespace
@@ -20,10 +21,14 @@ namespace
 			renderer_ = reinterpret_cast<char const *>(::glGetString(GL_RENDERER));
 
 			std::string const ver(reinterpret_cast<char const *>(::glGetString(GL_VERSION)));
-			std::string::size_type const pos(ver.find("."));
-		
-			major_ver_ = ver[pos - 1] - '0';
-			minor_ver_ = ver[pos + 1] - '0';
+			std::string::size_type const dot_pos(ver.find("."));
+			major_ver_ = ver[dot_pos - 1] - '0';
+			minor_ver_ = ver[dot_pos + 1] - '0';
+
+			std::string const glsl_ver(reinterpret_cast<char const *>(::glGetString(GL_SHADING_LANGUAGE_VERSION)));
+			std::string::size_type const glsl_dot_pos(ver.find("."));
+			glsl_major_ver_ = glsl_ver[glsl_dot_pos - 1] - '0';
+			glsl_minor_ver_ = glsl_ver[glsl_dot_pos + 1] - '0';
 
 			boost::algorithm::split(extensions_, 
 					std::string(reinterpret_cast<char const *>(::glGetString(GL_EXTENSIONS))),
@@ -39,7 +44,9 @@ namespace
 			os << "<info vendor='" << info.vendor_
 				<< "' renderer='" << info.renderer_
 				<< "' major_ver='" << info.major_ver_
-				<< "' minor_ver='" << info.minor_ver_ << "'>" << std::endl;
+				<< "' minor_ver='" << info.minor_ver_
+				<< "' glsl_major_ver='" << info.glsl_major_ver_
+				<< "' glsl_minor_ver='" << info.glsl_minor_ver_ << "'>" << std::endl;
 
 			for (std::vector<std::string>::const_iterator iter = info.extensions_.begin();
 					iter != info.extensions_.end(); ++ iter)
@@ -58,6 +65,9 @@ namespace
 
 		int major_ver_;
 		int minor_ver_;
+
+		int glsl_major_ver_;
+		int glsl_minor_ver_;
 
 		std::vector<std::string> extensions_;
 	};
