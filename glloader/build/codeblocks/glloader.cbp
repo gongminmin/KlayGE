@@ -96,6 +96,13 @@
 			<Option target="Release"/>
 			<Option target="Debug"/>
 		</Unit>
+		<Unit filename="..\..\include\glloader\gl21.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Release"/>
+			<Option target="Debug"/>
+		</Unit>
 		<Unit filename="..\..\include\glloader\glloader.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
@@ -152,6 +159,11 @@
 			<Option target="Debug"/>
 		</Unit>
 		<Unit filename="..\..\src\gl20.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Release"/>
+			<Option target="Debug"/>
+		</Unit>
+		<Unit filename="..\..\src\gl21.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Release"/>
 			<Option target="Debug"/>

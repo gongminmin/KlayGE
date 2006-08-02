@@ -118,6 +118,9 @@
 				RelativePath="..\..\src\gl20.cpp">
 			</File>
 			<File
+				RelativePath="..\..\src\gl21.cpp">
+			</File>
+			<File
 				RelativePath="..\..\src\glloader_gl.cpp">
 			</File>
 			<File
@@ -161,6 +164,9 @@
 			</File>
 			<File
 				RelativePath="..\..\include\glloader\gl20.h">
+			</File>
+			<File
+				RelativePath="..\..\include\glloader\gl21.h">
 			</File>
 			<File
 				RelativePath="..\..\include\glloader\glloader.h">

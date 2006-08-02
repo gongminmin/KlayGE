@@ -353,7 +353,7 @@ namespace
 	char APIENTRY self_init_glloader_GL_VERSION_2_0()
 	{
 		init_GL_VERSION_2_0();
-		return glloader_GL_VERSION_1_5();
+		return glloader_GL_VERSION_2_0();
 	}
 }
 

@@ -147,6 +147,10 @@ namespace glloader
 		{
 			features_.push_back("GL_VERSION_2_0");
 		}
+		if (ver_code >= 21)
+		{
+			features_.push_back("GL_VERSION_2_1");
+		}
 	}
 
 	void gl_features_extractor::wgl_features()
