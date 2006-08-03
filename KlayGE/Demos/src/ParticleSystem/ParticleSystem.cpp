@@ -53,7 +53,7 @@ namespace
 		{
 			par.pos = MathLib::transform_coord(float3(0, 0, 0), mat);
 			par.vel = MathLib::transform_normal(float3(random_gen_(), 0.2f + abs(random_gen_()) * 3, random_gen_()), mat);
-			par.life = 30;
+			par.life = 10;
 		}
 
 	private:
@@ -71,7 +71,7 @@ namespace
 
 		void operator()(ParticleType& par, float elapse_time)
 		{
-			par.vel += float3(0, -0.05f, 0) * elapse_time;
+			par.vel += float3(0, -0.1f, 0) * elapse_time;
 			par.pos += par.vel * elapse_time;
 			par.life -= elapse_time;
 
@@ -155,7 +155,7 @@ namespace
 		}
 	};
 
-	int const NUM_PARTICLE = 65536;
+	int const NUM_PARTICLE = 8192;
 
 	class PointSpriteObject : public SceneObjectHelper
 	{
@@ -354,7 +354,7 @@ void ParticleSystemApp::InitObjects()
 	ps_.reset(new ParticleSystem<Particle>(NUM_PARTICLE,
 		GenParticle<Particle>(), UpdateParticle<Particle>(height_img_, normal)));
 
-	ps_->AutoEmit(500);
+	ps_->AutoEmit(128);
 }
 
 void ParticleSystemApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -405,7 +405,7 @@ void ParticleSystemApp::DoUpdate(uint32_t /*pass*/)
 		scene_objs_[i]->AddToSceneManager();
 	}
 
-	float4x4 mat = MathLib::translation(0.0f, 0.5f, 0.0f);
+	float4x4 mat = MathLib::rotation_x(PI / 6) * MathLib::rotation_y(clock() / 300.0f) * MathLib::translation(0.0f, 0.5f, 0.0f);
 	ps_->ModelMatrix(mat);
 
 	ps_->Update(static_cast<float>(timer_.elapsed()));

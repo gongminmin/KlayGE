@@ -15,6 +15,7 @@ struct Particle
 	KlayGE::float3 pos;
 	KlayGE::float3 vel;
 	float life;
+	float birth_time;
 };
 
 class HeightImg
