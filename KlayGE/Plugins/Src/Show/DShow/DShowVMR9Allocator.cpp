@@ -20,7 +20,10 @@
 
 #include <d3d9.h>
 #include <boost/assert.hpp>
+#pragma warning(push)
+#pragma warning(disable: 4127 4800)
 #include <boost/pool/pool_alloc.hpp>
+#pragma warning(pop)
 
 #include <KlayGE/D3D9/D3D9Mapping.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>

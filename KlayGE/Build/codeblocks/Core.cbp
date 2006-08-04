@@ -152,6 +152,13 @@
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
+		<Unit filename="..\..\Core\Include\KlayGE\HDRPostProcess.hpp">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
 		<Unit filename="..\..\Core\Include\KlayGE\Input.hpp">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
@@ -639,6 +646,11 @@
 			<Option target="Release"/>
 		</Unit>
 		<Unit filename="..\..\Core\Src\Render\GraphicsBuffer.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\Core\Src\Render\HDRPostProcess.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Debug"/>
 			<Option target="Release"/>

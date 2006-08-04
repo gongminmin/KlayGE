@@ -258,6 +258,11 @@ namespace KlayGE
 
 	ID3D9TexturePtr D3D9Texture2D::CreateTexture2D(uint32_t usage, D3DPOOL pool)
 	{
+		if (IsDepthFormat(format_))
+		{
+			usage = D3DUSAGE_DEPTHSTENCIL;
+		}
+
 		IDirect3DTexture9* d3dTexture2D;
 		TIF(d3dDevice_->CreateTexture(widths_[0], heights_[0],
 			numMipMaps_, usage, D3D9Mapping::MappingFormat(format_),

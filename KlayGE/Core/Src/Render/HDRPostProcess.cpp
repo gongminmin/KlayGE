@@ -68,7 +68,7 @@ namespace KlayGE
 		float weight = 1.0f * this->GaussianDistribution(0, 0, deviation);
 		color_weight_[0] = 0;
 		tex_coord_offset_[0] = 0.0f;
-	    
+
 		// Fill the right side
 		for (int i = 1; i < length + 1; ++ i)
 		{
@@ -129,7 +129,7 @@ namespace KlayGE
 		float tu = 1.0f / width;
 		float tv = 1.0f / height;
 
-		// Sample from the 16 surrounding points. 
+		// Sample from the 16 surrounding points.
 		int index = 0;
 		for (int y = -1; y <= 2; y += 2)
 		{
