@@ -122,6 +122,22 @@ namespace KlayGE
 			return static_cast<T>(x * RAD2DEG);
 		}
 
+		// 取小于等于x的最大整数
+		template <typename T>
+		inline T
+		floor(T const & x)
+		{
+			return static_cast<T>(static_cast<int>(x));
+		}
+
+		// 取x的小数部分
+		template <typename T>
+		inline T
+		frac(T const & x)
+		{
+			return x - floor(x);
+		}
+
 		// 四舍五入
 		template <typename T>
 		inline T

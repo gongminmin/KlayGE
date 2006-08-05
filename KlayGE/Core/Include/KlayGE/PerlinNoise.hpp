@@ -1,10 +1,13 @@
 // PerlinNoise.hpp
 // KlayGE 数学函数库 头文件
-// Ver 2.5.0
-// 版权所有(C) 龚敏敏, 2005
+// Ver 3.4.0
+// 版权所有(C) 龚敏敏, 2005-2006
 // Homepage: http://klayge.sourceforge.net
 // This algorithm is based on the great work done by Ken Perlin.
 // http://mrl.nyu.edu/~perlin/doc/oscar.html
+//
+// 3.4.0
+// 使用了Improving Noise (2006.8.6)
 //
 // 2.5.0
 // 初次建立 (2005.4.11)
@@ -14,9 +17,6 @@
 
 #ifndef _PERLINNOISE_HPP
 #define _PERLINNOISE_HPP
-
-#include <cstdlib>
-#include <ctime>
 
 #include <KlayGE/Math.hpp>
 
@@ -38,118 +38,77 @@ namespace KlayGE
 
 			T noise(T const & x)
 			{
-				Vector_T<int, 2> bx;
-				Vector_T<T, 2> rx;
+				int bx;
+				Vector_T<T, 1> r;
 
-				this->setup(x, bx, rx);
+				this->setup(x, bx, r.x());
 
-				int i = p_[bx.x()];
-				int j = p_[bx.y()];
+				T u = this->fade(r.x());
 
-				float sx = this->curve(rx.x());
+				int A  = p_[bx];
+				int AA = p_[A];    
+				int B  = p_[bx + 1];
+				int BA = p_[B];
 
-				float u = rx.x() * g1_[i].x();
-				float v = rx.y() * g1_[j].x();
-
-				return lerp(u, v, sx);
+				return lerp(this->grad(p_[AA], r),
+								this->grad(p_[BA], r + Vector_T<T, 1>(-1)), u);
 			}
 
 			T noise(T const & x, T const & y)
 			{
-				Vector_T<int, 2> bx, by;
-				Vector_T<T, 2> rx, ry;
+				int bx, by;
+				Vector_T<T, 2> r;
 
-				this->setup(x, bx, rx);
-				this->setup(y, by, ry);
+				this->setup(x, bx, r.x());
+				this->setup(y, by, r.y());
 
-				int i = p_[bx.x()];
-				int j = p_[bx.y()];
+				T u = this->fade(r.x());
+				T v = this->fade(r.y());
 
-				int b00 = p_[i + by.x()];
-				int b01 = p_[i + by.y()];
-				int b10 = p_[j + by.x()];
-				int b11 = p_[j + by.y()];
+				int A  = p_[bx] + by;
+				int AA = p_[A];
+				int AB = p_[A + 1];
+				int B  = p_[bx + 1] + by;
+				int BA = p_[B];
+				int BB = p_[B + 1];
 
-				T sx = this->curve(rx.x());
-				T sy = this->curve(ry.x());
-
-				T a, b;
-				{
-					T u = dot(g2_[b00], float2(rx.x(), ry.x()));
-					T v = dot(g2_[b10], float2(rx.y(), ry.x()));
-					a = lerp(u, v, sx);
-				}
-				{
-					T u = dot(g2_[b01], float2(rx.x(), ry.y()));
-					T v = dot(g2_[b11], float2(rx.y(), ry.y()));
-					b = lerp(u, v, sx);
-				}
-
-				return lerp(a, b, sy);
+				return lerp(lerp(this->grad(p_[AA], r),
+									this->grad(p_[BA], r + Vector_T<T, 2>(-1, 0)), u),
+								lerp(this->grad(p_[AB], r + Vector_T<T, 2>(0, -1)),
+									this->grad(p_[BB], r +  + Vector_T<T, 2>(-1, -1)), u), v);
 			}
 
 			T noise(T const & x, T const & y, T const & z)
 			{
-				Vector_T<int, 2> bx, by, bz;
-				Vector_T<T, 2> rx, ry, rz;
+				int bx, by, bz;
+				Vector_T<T, 3> r;
 
-				this->setup(x, bx, rx);
-				this->setup(y, by, ry);
-				this->setup(z, bz, rz);
+				this->setup(x, bx, r.x());
+				this->setup(y, by, r.y());
+				this->setup(z, bz, r.z());
 
-				int i = p_[bx.x()];
-				int j = p_[bx.y()];
+				T u = this->fade(r.x());
+				T v = this->fade(r.y());
+				T w = this->fade(r.z());
 
-				int b00 = p_[i + by.x()];
-				int b01 = p_[i + by.y()];
-				int b10 = p_[j + by.x()];
-				int b11 = p_[j + by.y()];
+				// HASH COORDINATES OF THE 8 CUBE CORNERS,
+				int A  = p_[bx] + by;
+				int AA = p_[A] + bz;
+				int AB = p_[A + 1] + bz;
+				int B  = p_[bx + 1] + by;
+				int BA = p_[B] + bz;
+				int BB = p_[B + 1] + bz;
 
-				int b000 = b00 + bz.x();
-				int b001 = b00 + bz.y();
-				int b010 = b01 + bz.x();
-				int b011 = b01 + bz.y();
-				int b100 = b10 + bz.x();
-				int b101 = b10 + bz.y();
-				int b110 = b11 + bz.x();
-				int b111 = b11 + bz.y();
-
-				T sx = this->curve(rx.x());
-				T sy = this->curve(ry.x());
-				T sz = this->curve(rz.x());
-
-				T c, d;
-				{
-					T a, b;
-					{
-						T u = dot(g3_[b000], float3(rx.x(), ry.x(), rz.x()));
-						T v = dot(g3_[b100], float3(rx.y(), ry.x(), rz.x()));
-						a = lerp(u, v, sx);
-					}
-					{
-						T u = dot(g3_[b010], float3(rx.x(), ry.y(), rz.x()));
-						T v = dot(g3_[b110], float3(rx.y(), ry.y(), rz.x()));
-						b = lerp(u, v, sx);
-					}
-					c = lerp(a, b, sy);
-				}
-				{
-					T a, b;
-					{
-						T u = dot(g3_[b001], float3(rx.x(), ry.x(), rz.y()));
-						T v = dot(g3_[b101], float3(rx.y(), ry.x(), rz.y()));
-						a = lerp(u, v, sx);
-					}
-					{
-						T u = dot(g3_[b011], float3(rx.x(), ry.y(), rz.y()));
-						T v = dot(g3_[b111], float3(rx.y(), ry.y(), rz.y()));
-						b = lerp(u, v, sx);
-					}
-					d = lerp(a, b, sy);
-				}
-
-				return lerp(c, d, sz);
+				return lerp(lerp(lerp(this->grad(p_[AA], r),	// AND ADD
+									this->grad(p_[BA], r + Vector_T<T, 3>(-1, 0, 0)), u),			// BLENDED
+								lerp(this->grad(p_[AB], r + Vector_T<T, 3>(0, -1, 0)),				// RESULTS
+									this->grad(p_[BB], r + Vector_T<T, 3>(-1, -1, 0)), u), v),		// FROM  8
+							lerp(lerp(this->grad(p_[AA + 1], r + Vector_T<T, 3>(0, 0, -1)),			// CORNERS
+									this->grad(p_[BA + 1], r + Vector_T<T, 3>(-1, 0, -1)), u),		// OF CUBE
+								lerp(this->grad(p_[AB + 1], r + Vector_T<T, 3>(0, -1, -1)),
+									this->grad(p_[BB + 1], r + Vector_T<T, 3>(-1, -1, -1)), u), v), w);
 			}
+
 
 			T turbulence(T const & x, T const & y, T freq)
 			{
@@ -234,71 +193,77 @@ namespace KlayGE
 			}
 
 		private:
-			static int const B = 0x1000;
-
 			PerlinNoise()
 			{
-				std::srand(static_cast<unsigned int>(std::time(NULL)));
-
-				for (int i = 0; i < B; ++ i)
+				int const permutation[] =
 				{
-					p_[i] = i;
-
-					for (int j = 0; j < 1; ++ j)
-					{
-						g1_[i][j] = static_cast<T>((std::rand() % (B + B)) - B) / B;
-					}
-
-					for (int j = 0; j < 2; ++ j)
-					{
-						g2_[i][j] = static_cast<T>((std::rand() % (B + B)) - B) / B;
-					}
-					g2_[i] = normalize(g2_[i]);
-
-					for (int j = 0; j < 3; ++ j)
-					{
-						g3_[i][j] = static_cast<T>((std::rand() % (B + B)) - B) / B;
-					}
-					g3_[i] = normalize(g3_[i]);
+					151, 160, 137, 91, 90, 15,
+					131, 13, 201, 95, 96, 53, 194, 233, 7, 225, 140, 36, 103, 30, 69, 142, 8, 99, 37, 240, 21, 10, 23,
+					190, 6, 148, 247, 120, 234, 75, 0, 26, 197, 62, 94, 252, 219, 203, 117, 35, 11, 32, 57, 177, 33,
+					88, 237, 149, 56, 87, 174, 20, 125, 136, 171, 168, 68, 175, 74, 165, 71, 134, 139, 48, 27, 166,
+					77, 146, 158, 231, 83, 111, 229, 122, 60, 211, 133, 230, 220, 105, 92, 41, 55, 46, 245, 40, 244,
+					102, 143, 54, 65, 25, 63, 161, 1, 216, 80, 73, 209, 76, 132, 187, 208, 89, 18, 169, 200, 196,
+					135, 130, 116, 188, 159, 86, 164, 100, 109, 198, 173, 186, 3, 64, 52, 217, 226, 250, 124, 123,
+					5, 202, 38, 147, 118, 126, 255, 82, 85, 212, 207, 206, 59, 227, 47, 16, 58, 17, 182, 189, 28, 42,
+					223, 183, 170, 213, 119, 248, 152, 2, 44, 154, 163, 70, 221, 153, 101, 155, 167, 43, 172, 9,
+					129, 22, 39, 253, 19, 98, 108, 110, 79, 113, 224, 232, 178, 185, 112, 104, 218, 246, 97, 228,
+					251, 34, 242, 193, 238, 210, 144, 12, 191, 179, 162, 241, 81, 51, 145, 235, 249, 14, 239, 107,
+					49, 192, 214, 31, 181, 199, 106, 157, 184, 84, 204, 176, 115, 121, 50, 45, 127, 4, 150, 254,
+					138, 236, 205, 93, 222, 114, 67, 29, 24, 72, 243, 141, 128, 195, 78, 66, 215, 61, 156, 180
+				};
+				for (int i = 0; i < 256; ++ i)
+				{
+					p_[256 + i] = p_[i] = permutation[i];
 				}
 
-				for (int i = B - 1; i > 0; -- i)
-				{
-					std::swap(p_[i], p_[std::rand() % B]);
-				}
-
-				for (int i = 0; i < B + 2; ++ i)
-				{
-					p_[B + i] = p_[i];
-					g1_[B + i] = g1_[i];
-					g2_[B + i] = g2_[i];
-					g3_[B + i] = g3_[i];
-				}
+				g_[0] = Vector_T<T, 3>(1, 1, 0);
+				g_[1] = Vector_T<T, 3>(-1, 1, 0);
+				g_[2] = Vector_T<T, 3>(1, -1, 0);
+				g_[3] = Vector_T<T, 3>(-1, -1, 0);
+				g_[4] = Vector_T<T, 3>(1, 0, 1);
+				g_[5] = Vector_T<T, 3>(-1, 0, 1);
+				g_[6] = Vector_T<T, 3>(1, 0, -1);
+				g_[7] = Vector_T<T, 3>(-1, 0, -1);
+				g_[8] = Vector_T<T, 3>(0, 1, 1);
+				g_[9] = Vector_T<T, 3>(0, -1, 1);
+				g_[10] = Vector_T<T, 3>(0, 1, -1);
+				g_[11] = Vector_T<T, 3>(0, -1, -1);
+				g_[12] = Vector_T<T, 3>(1, 1, 0);
+				g_[13] = Vector_T<T, 3>(0, -1, 1);
+				g_[14] = Vector_T<T, 3>(-1, 1, 0);
+				g_[15] = Vector_T<T, 3>(0, -1, -1);
 			}
 
-			void setup(T const & i, Vector_T<int, 2>& b, Vector_T<T, 2>& r)
+			void setup(T const & i, int& b, T& r)
 			{
-				int const BM = 0xFF;
-				int const N = 0x1000;
-
-				T t = i + N;
-				b.x() = (static_cast<int>(t)) & BM;
-				b.y() = (b.x() + 1) & BM;
-				r.x() = t - static_cast<int>(t);
-				r.y() = r.x() - 1;
+				T x = i + 0x1000;
+				b = (static_cast<int>(x)) & 255;
+				r = frac(x);
 			}
 
-			T curve(T const & t)
+			T grad(int hash, Vector_T<T, 1> const & p)
 			{
-				return t * t * (3 - 2 * t);
+				return this->grad(hash, Vector_T<T, 2>(p.x(), 0));
+			}
+
+			T grad(int hash, Vector_T<T, 2> const & p)
+			{
+				return this->grad(hash, Vector_T<T, 3>(p.x(), p.y(), 0));
+			}
+
+			T grad(int hash, Vector_T<T, 3> const & p)
+			{
+				return dot(g_[hash & 15], p);
+			}
+
+			T fade(T const & t)
+			{
+				return t * t * t * (t * (t * 6 - 15) + 10);
 			}
 
 		private:
-			int p_[B + B + 2];
-
-			Vector_T<T, 1> g1_[B + B + 2];
-			Vector_T<T, 2> g2_[B + B + 2];
-			Vector_T<T, 3> g3_[B + B + 2];
+			int p_[512];
+			Vector_T<T, 3> g_[16];
 		};
 	}
 }
