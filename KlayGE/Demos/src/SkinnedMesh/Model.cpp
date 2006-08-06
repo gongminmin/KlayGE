@@ -79,13 +79,17 @@ void MD5SkinnedMesh::BuildRenderable()
 {
 	if (!beBuilt_)
 	{
+		std::vector<float3> normal(xyzs_.size());
+		MathLib::compute_normal<float>(normal.begin(),
+			indices_.begin(), indices_.end(), xyzs_.begin(), xyzs_.end());
+
 		// º∆À„TBN
 		std::vector<float3> t(xyzs_.size());
 		std::vector<float3> b(xyzs_.size());
 		MathLib::compute_tangent<float>(t.begin(), b.begin(),
 			indices_.begin(), indices_.end(),
 			xyzs_.begin(), xyzs_.end(),
-			multi_tex_coords_[0].begin());
+			multi_tex_coords_[0].begin(), normal.begin());
 		GraphicsBufferPtr tan = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(BU_Static);
 		tan->Resize(static_cast<uint32_t>(t.size() * sizeof(t[0])));
 		{

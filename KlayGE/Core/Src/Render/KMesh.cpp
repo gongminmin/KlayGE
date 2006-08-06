@@ -190,7 +190,8 @@ namespace KlayGE
 			}
 
 			TexturePtr texture;
-			if (!texture_slots.empty() && !texture_slots[0].second.empty())
+			if (!texture_slots.empty() && !texture_slots[0].second.empty()
+				&& !ResLoader::Instance().Locate(texture_slots[0].second).empty())
 			{
 				texture = LoadTexture(texture_slots[0].second);
 			}

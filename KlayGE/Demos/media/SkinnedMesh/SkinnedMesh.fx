@@ -68,10 +68,20 @@ float4 SkinnedMeshPS(float2 uv : TEXCOORD0,
 	float3 light_vec = normalize(L);
 	float3 half_way = normalize(H);
 
-	float diffuse_factor = saturate(dot(light_vec, bump_normal));
-	float specular_factor = pow(dot(half_way, bump_normal), 8);
+	float4 clr;
+	
+	float diffuse_factor = dot(light_vec, bump_normal);
+	if (diffuse_factor > 0)
+	{
+		float specular_factor = pow(dot(half_way, bump_normal), 8);
+		clr = float4(diffuse * diffuse_factor + specular * specular_factor, 1);
+	}
+	else
+	{
+		clr = float4(0, 0, 0, 1);
+	}
 
-	return float4(diffuse * diffuse_factor + specular * specular_factor, 1);
+	return clr;	
 }
 
 technique SkinnedMeshTech

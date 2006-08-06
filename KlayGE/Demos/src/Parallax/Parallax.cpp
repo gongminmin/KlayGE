@@ -79,11 +79,15 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
+			std::vector<float3> normal(xyzs_.size());
+			MathLib::compute_normal<float>(normal.begin(),
+				indices_.begin(), indices_.end(), xyzs_.begin(), xyzs_.end());
+
 			std::vector<float3> t(xyzs_.size());
 			std::vector<float3> b(xyzs_.size());
 			MathLib::compute_tangent<float>(t.begin(), b.begin(),
 				indices_.begin(), indices_.end(),
-				xyzs_.begin(), xyzs_.end(), multi_tex_coords_[0].begin());
+				xyzs_.begin(), xyzs_.end(), multi_tex_coords_[0].begin(), normal.begin());
 
 			GraphicsBufferPtr tan_vb = rf.MakeVertexBuffer(BU_Static);
 			tan_vb->Resize(static_cast<uint32_t>(t.size() * sizeof(t[0])));
@@ -222,7 +226,7 @@ void Parallax::DoUpdate(uint32_t /*pass*/)
 
 	float degree(std::clock() / 700.0f);
 	float3 lightPos(2, 0, 1);
-	float4x4 matRot(MathLib::rotation_z(degree));
+	float4x4 matRot(MathLib::rotation_y(degree));
 	lightPos = MathLib::transform_coord(lightPos, matRot);
 	*(polygon_->GetRenderable()->GetRenderTechnique()->Effect().ParameterByName("lightPos")) = lightPos;
 

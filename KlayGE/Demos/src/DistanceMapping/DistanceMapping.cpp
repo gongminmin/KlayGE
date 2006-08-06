@@ -103,10 +103,15 @@ namespace
 				0, 1, 2, 2, 3, 0
 			};
 
+			float3 normal[4];
+			MathLib::compute_normal<float>(normal,
+				indices, indices + sizeof(indices) / sizeof(indices[0]),
+				xyzs, xyzs + sizeof(xyzs) / sizeof(xyzs[0]));
+
 			float3 t[4], b[4];
 			MathLib::compute_tangent<float>(t, b,
 				indices, indices + sizeof(indices) / sizeof(indices[0]),
-				xyzs, xyzs + sizeof(xyzs) / sizeof(xyzs[0]), texs);
+				xyzs, xyzs + sizeof(xyzs) / sizeof(xyzs[0]), texs, normal);
 
 			rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleList);
 

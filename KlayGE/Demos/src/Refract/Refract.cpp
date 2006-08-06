@@ -226,7 +226,6 @@ void Refract::InitObjects()
 
 	render_buffer_ = rf.MakeFrameBuffer();
 	RenderTargetPtr screen_buffer = re.CurRenderTarget();
-
 	render_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
 
 	hdr_.reset(new HDRPostProcess);
@@ -281,7 +280,7 @@ void Refract::DoUpdate(uint32_t pass)
 
 	case 1:
 		sm.Clear();
-		
+
 		hdr_->Apply();
 
 		std::wostringstream stream;

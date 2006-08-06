@@ -1561,22 +1561,25 @@ namespace KlayGE
 
 		// ¼ÆËãTBN»ù
 		template <typename T, typename TangentIterator, typename BinormIterator,
-			typename IndexIterator, typename PositionIterator, typename TexCoordIterator>
+			typename IndexIterator, typename PositionIterator, typename TexCoordIterator, typename NormalIterator>
 		inline void
-		compute_tangent(TangentIterator targentBegin, BinormIterator binormBegin,
+		compute_tangent(TangentIterator targentsBegin, BinormIterator binormsBegin,
 								IndexIterator indicesBegin, IndexIterator indicesEnd,
 								PositionIterator xyzsBegin, PositionIterator xyzsEnd,
-								TexCoordIterator texsBegin)
+								TexCoordIterator texsBegin, NormalIterator normalsBegin)
 		{
 			typedef typename std::iterator_traits<PositionIterator>::value_type position_type;
 			typedef typename std::iterator_traits<TexCoordIterator>::value_type texcoord_type;
+			typedef typename std::iterator_traits<TexCoordIterator>::value_type tangent_type;
+			typedef typename std::iterator_traits<TexCoordIterator>::value_type binormal_type;
+			typedef typename std::iterator_traits<TexCoordIterator>::value_type normal_type;
 
 			int const num = static_cast<int>(std::distance(xyzsBegin, xyzsEnd));
 
 			for (int i = 0; i < num; ++ i)
 			{
-				*(targentBegin + i) = Vector_T<T, 3>::Zero();
-				*(binormBegin + i) = Vector_T<T, 3>::Zero();
+				*(targentsBegin + i) = Vector_T<T, 3>::Zero();
+				*(binormsBegin + i) = Vector_T<T, 3>::Zero();
 			}
 
 			for (IndexIterator iter = indicesBegin; iter != indicesEnd; iter += 3)
@@ -1604,7 +1607,7 @@ namespace KlayGE
 
 				T denominator = s1 * t2 - s2 * t1;
 				Vector_T<T, 3> tangent, binormal;
-				if (denominator < std::numeric_limits<T>::epsilon())
+				if (abs(denominator) < std::numeric_limits<T>::epsilon())
 				{
 					tangent = Vector_T<T, 3>(1, 0, 0);
 					binormal = Vector_T<T, 3>(0, 1, 0);
@@ -1615,20 +1618,32 @@ namespace KlayGE
 					binormal = (s1 * v2v0 - s2 * v1v0) / denominator;
 				}
 
-				*(targentBegin + v0Index) += tangent;
-				*(binormBegin + v0Index) += binormal;
+				*(targentsBegin + v0Index) += tangent;
+				*(binormsBegin + v0Index) += binormal;
 
-				*(targentBegin + v1Index) += tangent;
-				*(binormBegin + v1Index) += binormal;
+				*(targentsBegin + v1Index) += tangent;
+				*(binormsBegin + v1Index) += binormal;
 
-				*(targentBegin + v2Index) += tangent;
-				*(binormBegin + v2Index) += binormal;
+				*(targentsBegin + v2Index) += tangent;
+				*(binormsBegin + v2Index) += binormal;
 			}
 
 			for (int i = 0; i < num; ++ i)
 			{
-				*(targentBegin + i) = normalize(*(targentBegin + i));
-				*(binormBegin + i) = normalize(*(binormBegin + i));
+				Vector_T<T, 3> tangent(*(targentsBegin + i));
+				Vector_T<T, 3> binormal(*(binormsBegin + i));
+				Vector_T<T, 3> normal(*(normalsBegin + i));
+
+				// Gram-Schmidt orthogonalize
+				tangent = normalize(tangent - normal * dot(tangent, normal)); 
+				// Calculate handedness
+				if (dot(cross(normal, tangent), binormal) < 0)
+				{
+					tangent = -tangent;
+				}
+
+				*(targentsBegin + i) = tangent;
+				*(binormsBegin + i) = cross(normal, tangent);
 			}
 		}
 
