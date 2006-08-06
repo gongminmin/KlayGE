@@ -16,14 +16,14 @@ sampler bloom_sampler;
 float4 ToneMappingPS(float2 oTex : TEXCOORD0) : COLOR
 {
 	half3 blur = tex2D(bloom_sampler, oTex).rgb;
-	half lum = max(0.001f, tex2D(lum_sampler, float2(0.5f, 0.5f)).r);
+	half lum = 0.001f + tex2D(lum_sampler, float2(0.5f, 0.5f)).r;
 	
 	half3 clr = tex2D(src_sampler, oTex) + blur * 0.25f;
 
-	half3 L = clr * EXPOSURE / lum;
-	clr = L / (1 + L);
+	clr *= EXPOSURE / lum;
+	clr /= max(0.001f, (1.0f + clr));
 
-    return float4(clr, 1);
+	return float4(clr, 1);
 }
 
 technique ToneMapping

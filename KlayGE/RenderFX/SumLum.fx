@@ -17,8 +17,8 @@ float4 SumLum4x4LogPS(float2 oTex : TEXCOORD0) : COLOR
 	half s = 0;
 	for (int i = 0; i < 2; ++ i)
 	{
-		s += log(dot(tex2D(src_sampler, oTex + tex_coord_offset[i].xy).rgb, rgb_to_lum) + 0.0001f);
-		s += log(dot(tex2D(src_sampler, oTex + tex_coord_offset[i].zw).rgb, rgb_to_lum) + 0.0001f);
+		s += log(dot(tex2D(src_sampler, oTex + tex_coord_offset[i].xy).rgb, rgb_to_lum) + 0.001f);
+		s += log(dot(tex2D(src_sampler, oTex + tex_coord_offset[i].zw).rgb, rgb_to_lum) + 0.001f);
 	}
 	
 	return s / 4;
