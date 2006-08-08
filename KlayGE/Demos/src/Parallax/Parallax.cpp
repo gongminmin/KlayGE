@@ -196,7 +196,7 @@ void Parallax::InitObjects()
 	this->Proj(0.1f, 100);
 
 	fpcController_.AttachCamera(this->ActiveCamera());
-	fpcController_.Scalers(0.05f, 0.1f);
+	fpcController_.Scalers(0.05f, 0.05f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;

@@ -19,6 +19,7 @@ struct VS_OUTPUT
 
 	float3 L			: TEXCOORD1;	// in tangent space
 	float3 V			: TEXCOORD2;	// in tangent space
+	float3 H			: TEXCOORD3;	// in tangent space
 };
 
 VS_OUTPUT ParallaxVS(VS_INPUT input,
@@ -38,9 +39,11 @@ VS_OUTPUT ParallaxVS(VS_INPUT input,
 
 	float3 lightVec = lightPos - input.pos;
 	float3 viewVec = eyePos - input.pos;
+	float3 halfVec = lightVec + viewVec;
 
 	output.L = mul(objToTangentSpace, lightVec);
 	output.V = mul(objToTangentSpace, viewVec);
+	output.H = mul(objToTangentSpace, halfVec);
 
 	return output;
 }
@@ -59,6 +62,7 @@ half3 NormalizeByCube(half3 v)
 half4 ParallaxPS(float2 texCoord0	: TEXCOORD0,
 					float3 L		: TEXCOORD1,
 					float3 V		: TEXCOORD2,
+					float3 H		: TEXCOORD3,
 
 					uniform sampler2D diffuseMap,
 					uniform sampler2D normalMap,
@@ -72,11 +76,23 @@ half4 ParallaxPS(float2 texCoord0	: TEXCOORD0,
 
 	half3 diffuse = tex2D(diffuseMap, texUV).rgb;
 
-	half3 bumpNormal = decompress_normal(tex2D(normalMap, texUV));
-	half3 lightVec = NormalizeByCube(L);
-	half diffuseFactor = dot(lightVec, bumpNormal);
+	half3 bump_normal = decompress_normal(tex2D(normalMap, texUV));
+	half3 light_vec = NormalizeByCube(L);
+	half diffuse_factor = dot(light_vec, bump_normal);
 
-	return half4(diffuse * diffuseFactor, 1);
+	half4 clr;
+	if (diffuse_factor > 0)
+	{
+		half3 half_way = normalize(H);
+		half specular_factor = pow(dot(half_way, bump_normal), 4);
+		clr = half4(diffuse * diffuse_factor + 0.3f * specular_factor, 1);
+	}
+	else
+	{
+		clr = half4(0, 0, 0, 1);
+	}
+
+	return clr;
 }
 
 technique Parallax

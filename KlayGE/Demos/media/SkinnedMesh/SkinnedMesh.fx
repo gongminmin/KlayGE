@@ -46,7 +46,7 @@ void SkinnedMeshVS(float4 pos : POSITION,
 
 	float3 L = light_pos - result_pos;
 	float3 V = eye_pos - result_pos;
-	float3 H = normalize(L + V);
+	float3 H = L + V;
 
 	oH = mul(obj2tan, H);
 	oL = mul(obj2tan, L);
@@ -61,24 +61,23 @@ float4 SkinnedMeshPS(float2 uv : TEXCOORD0,
 				float3 L	: TEXCOORD1,
 				float3 H	: TEXCOORD2) : COLOR
 {
-	float3 bump_normal = decompress_normal(tex2D(normal_map, uv));	
-	float3 diffuse = tex2D(diffuse_map, uv);
-	float3 specular = tex2D(specular_map, uv);
+	half3 bump_normal = decompress_normal(tex2D(normal_map, uv));	
+	half3 diffuse = tex2D(diffuse_map, uv);
+	half3 specular = tex2D(specular_map, uv);
 	
-	float3 light_vec = normalize(L);
-	float3 half_way = normalize(H);
+	half3 light_vec = normalize(L);
+	half diffuse_factor = dot(light_vec, bump_normal);
 
-	float4 clr;
-	
-	float diffuse_factor = dot(light_vec, bump_normal);
+	half4 clr;
 	if (diffuse_factor > 0)
 	{
-		float specular_factor = pow(dot(half_way, bump_normal), 8);
-		clr = float4(diffuse * diffuse_factor + specular * specular_factor, 1);
+		half3 half_way = normalize(H);
+		half specular_factor = pow(dot(half_way, bump_normal), 8);
+		clr = half4(diffuse * diffuse_factor + specular * specular_factor, 1);
 	}
 	else
 	{
-		clr = float4(0, 0, 0, 1);
+		clr = half4(0, 0, 0, 1);
 	}
 
 	return clr;	

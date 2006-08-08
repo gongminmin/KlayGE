@@ -1,4 +1,4 @@
-const float EXPOSURE = 1.0f / 2.2f;
+const float MIDDLE_GREY = 0.36f;
 
 void ToneMappingVS(float4 pos : POSITION,
 					float2 tex : TEXCOORD0,
@@ -16,12 +16,12 @@ sampler bloom_sampler;
 float4 ToneMappingPS(float2 oTex : TEXCOORD0) : COLOR
 {
 	half3 blur = tex2D(bloom_sampler, oTex).rgb;
-	half lum = 0.001f + tex2D(lum_sampler, float2(0.5f, 0.5f)).r;
+	half lum = max(0.001f, tex2D(lum_sampler, float2(0.5f, 0.5f)).r);
 	
 	half3 clr = tex2D(src_sampler, oTex) + blur * 0.25f;
 
-	clr *= EXPOSURE / lum;
-	clr /= max(0.001f, (1.0f + clr));
+	clr *= MIDDLE_GREY / lum;
+	clr /= 1.0f + clr;
 
 	return float4(clr, 1);
 }
