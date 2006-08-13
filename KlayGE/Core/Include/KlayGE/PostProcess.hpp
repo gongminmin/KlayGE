@@ -26,7 +26,7 @@ namespace KlayGE
 		{
 		}
 
-		virtual void Source(TexturePtr const & tex, Sampler::TexFilterOp filter);
+		virtual void Source(TexturePtr const & tex, Sampler::TexFilterOp filter, Sampler::TexAddressingMode am);
 		virtual void Destinate(RenderTargetPtr const & rt);
 
 		virtual void Apply();

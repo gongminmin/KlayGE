@@ -81,10 +81,12 @@ namespace KlayGE
 		src_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
 	}
 
-	void PostProcess::Source(TexturePtr const & tex, Sampler::TexFilterOp filter)
+	void PostProcess::Source(TexturePtr const & tex, Sampler::TexFilterOp filter, Sampler::TexAddressingMode am)
 	{
 		src_sampler_->Filtering(filter);
 		src_sampler_->SetTexture(tex);
+		src_sampler_->AddressingMode(Sampler::TAT_Addr_U, am);
+		src_sampler_->AddressingMode(Sampler::TAT_Addr_V, am);
 	}
 
 	void PostProcess::Destinate(RenderTargetPtr const & rt)
@@ -94,14 +96,14 @@ namespace KlayGE
 
 	void PostProcess::Apply()
 	{
-		RenderEngine& render_engine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-		render_engine.BindRenderTarget(render_target_);
-		render_engine.Clear(RenderEngine::CBM_Color);
+		RenderTargetPtr backup_rt = re.CurRenderTarget();
+		re.BindRenderTarget(render_target_);
 
 		this->Render();
 
-		render_engine.BindRenderTarget(RenderTargetPtr());
+		re.BindRenderTarget(backup_rt);
 	}
 
 	void PostProcess::OnRenderBegin()

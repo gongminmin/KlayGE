@@ -108,9 +108,9 @@ namespace KlayGE
 	{
 	}
 
-	void SumLumPostProcess::Source(TexturePtr const & src_tex, Sampler::TexFilterOp filter)
+	void SumLumPostProcess::Source(TexturePtr const & src_tex, Sampler::TexFilterOp filter, Sampler::TexAddressingMode am)
 	{
-		PostProcess::Source(src_tex, filter);
+		PostProcess::Source(src_tex, filter, am);
 
 		this->GetSampleOffsets4x4(src_tex->Width(0), src_tex->Height(0));
 	}
@@ -256,9 +256,9 @@ namespace KlayGE
 		adapted_lum_.reset(new AdaptedLumPostProcess);
 	}
 
-	void HDRPostProcess::Source(TexturePtr const & tex, Sampler::TexFilterOp filter)
+	void HDRPostProcess::Source(TexturePtr const & tex, Sampler::TexFilterOp filter, Sampler::TexAddressingMode am)
 	{
-		PostProcess::Source(tex, filter);
+		PostProcess::Source(tex, filter, am);
 
 		uint32_t const width = tex->Width(0);
 		uint32_t const height = tex->Height(0);
@@ -282,49 +282,49 @@ namespace KlayGE
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*downsample_tex_, 0));
-			downsampler_->Source(src_sampler_->GetTexture(), Sampler::TFO_Bilinear);
+			downsampler_->Source(src_sampler_->GetTexture(), Sampler::TFO_Bilinear, am);
 			downsampler_->Destinate(fb);
 		}
 
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blurx_tex_, 0));
-			blur_x_->Source(downsample_tex_, Sampler::TFO_Bilinear);
+			blur_x_->Source(downsample_tex_, Sampler::TFO_Bilinear, Sampler::TAM_Clamp);
 			blur_x_->Destinate(fb);
 		}
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blury_tex_, 0));
-			blur_y_->Source(blurx_tex_, Sampler::TFO_Bilinear);
+			blur_y_->Source(blurx_tex_, Sampler::TFO_Bilinear, Sampler::TAM_Clamp);
 			blur_y_->Destinate(fb);
 		}
 
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[0], 0));
-			sum_lums_[0]->Source(src_sampler_->GetTexture(), Sampler::TFO_Bilinear);
+			sum_lums_[0]->Source(src_sampler_->GetTexture(), Sampler::TFO_Bilinear, am);
 			sum_lums_[0]->Destinate(fb);
 		}
 		for (int i = 1; i < NUM_TONEMAP_TEXTURES; ++ i)
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[i], 0));
-			sum_lums_[i]->Source(lum_texs_[i - 1], Sampler::TFO_Bilinear);
+			sum_lums_[i]->Source(lum_texs_[i - 1], Sampler::TFO_Bilinear, Sampler::TAM_Clamp);
 			sum_lums_[i]->Destinate(fb);
 		}
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_exp_tex_, 0));
-			sum_lums_[NUM_TONEMAP_TEXTURES]->Source(lum_texs_[NUM_TONEMAP_TEXTURES - 1], Sampler::TFO_Bilinear);
+			sum_lums_[NUM_TONEMAP_TEXTURES]->Source(lum_texs_[NUM_TONEMAP_TEXTURES - 1], Sampler::TFO_Bilinear, Sampler::TAM_Clamp);
 			sum_lums_[NUM_TONEMAP_TEXTURES]->Destinate(fb);
 		}
 
 		{
-			adapted_lum_->Source(lum_exp_tex_, Sampler::TFO_Point);
+			adapted_lum_->Source(lum_exp_tex_, Sampler::TFO_Point, Sampler::TAM_Clamp);
 		}
 
 		{
-			tone_mapping_->Source(src_sampler_->GetTexture(), Sampler::TFO_Bilinear);
+			tone_mapping_->Source(src_sampler_->GetTexture(), Sampler::TFO_Bilinear, am);
 			tone_mapping_->Destinate(render_target_);
 		}
 	}

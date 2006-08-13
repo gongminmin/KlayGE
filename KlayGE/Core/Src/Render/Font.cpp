@@ -458,7 +458,7 @@ namespace KlayGE
 	void Font::RenderText(float sx, float sy, Color const & clr,
 		std::wstring const & text)
 	{
-		this->RenderText(sx, sy, 0.5f, 1, 1, clr, text);
+		this->RenderText(sx, sy, 0, 1, 1, clr, text);
 	}
 
 	// 在指定位置画出放缩的文字

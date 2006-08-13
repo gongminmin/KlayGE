@@ -63,7 +63,7 @@ namespace KlayGE
 		explicit SumLumPostProcess(std::string const & tech);
 		virtual ~SumLumPostProcess();
 
-		void Source(TexturePtr const & src_tex, Sampler::TexFilterOp filter);
+		void Source(TexturePtr const & src_tex, Sampler::TexFilterOp filter, Sampler::TexAddressingMode am);
 
 		void OnRenderBegin();
 
@@ -135,7 +135,7 @@ namespace KlayGE
 	public:
 		HDRPostProcess();
 
-		void Source(TexturePtr const & tex, Sampler::TexFilterOp filter);
+		void Source(TexturePtr const & tex, Sampler::TexFilterOp filter, Sampler::TexAddressingMode am);
 		void Apply();
 
 	private:

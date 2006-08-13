@@ -169,7 +169,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::ClearColor(Color const & clr)
 	{
-		clearClr_ = D3DCOLOR_COLORVALUE(clr.r(), clr.g(), clr.b(), 1.0f);
+		clearClr_ = D3DCOLOR_COLORVALUE(clr.r(), clr.g(), clr.b(), clr.a());
 	}
 
 	// Çå¿Õ»º³åÇø

@@ -57,9 +57,9 @@ namespace
 		{
 		}
 
-		void Source(TexturePtr const & src_tex, Sampler::TexFilterOp filter)
+		void Source(TexturePtr const & src_tex, Sampler::TexFilterOp filter, Sampler::TexAddressingMode am)
 		{
-			PostProcess::Source(src_tex, filter);
+			PostProcess::Source(src_tex, filter, am);
 
 			this->GetSampleOffsets8x8(src_tex->Width(0), src_tex->Height(0));
 		}
@@ -283,7 +283,7 @@ void AsciiArtsApp::InitObjects()
 
 	ascii_arts_.reset(new AsciiArts);
 	ascii_arts_->Destinate(RenderTargetPtr());
-	static_cast<AsciiArts*>(ascii_arts_.get())->SetLumsTex(ascii_lums_tex_);
+	checked_cast<AsciiArts*>(ascii_arts_.get())->SetLumsTex(ascii_lums_tex_);
 }
 
 void AsciiArtsApp::OnResize(uint32_t width, uint32_t height)
@@ -299,10 +299,10 @@ void AsciiArtsApp::OnResize(uint32_t width, uint32_t height)
 
 	FrameBufferPtr fb = rf.MakeFrameBuffer();
 	fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*downsample_tex_, 0));
-	downsampler_->Source(rendered_tex_, Sampler::TFO_Bilinear);
+	downsampler_->Source(rendered_tex_, Sampler::TFO_Bilinear, Sampler::TAM_Clamp);
 	downsampler_->Destinate(fb);
 
-	ascii_arts_->Source(downsample_tex_, Sampler::TFO_Point);
+	ascii_arts_->Source(downsample_tex_, Sampler::TFO_Point, Sampler::TAM_Clamp);
 }
 
 uint32_t AsciiArtsApp::NumPasses() const
@@ -375,6 +375,8 @@ void AsciiArtsApp::DoUpdate(uint32_t pass)
 	if ((!show_ascii_ && (0 == pass))
 		|| (show_ascii_ && (1 == pass)))
 	{
+		renderEngine.BindRenderTarget(RenderTargetPtr());
+
 		std::wostringstream stream;
 		stream << this->FPS();
 

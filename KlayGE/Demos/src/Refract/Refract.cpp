@@ -240,7 +240,7 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 	render_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_, 0));
 	render_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));
 
-	hdr_->Source(rendered_tex_, Sampler::TFO_Bilinear);
+	hdr_->Source(rendered_tex_, Sampler::TFO_Bilinear, Sampler::TAM_Clamp);
 }
 
 void Refract::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -282,6 +282,8 @@ void Refract::DoUpdate(uint32_t pass)
 		sm.Clear();
 
 		hdr_->Apply();
+
+		re.BindRenderTarget(RenderTargetPtr());
 
 		std::wostringstream stream;
 		stream << this->FPS();
