@@ -90,23 +90,23 @@ namespace
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
 
-			float4x4 view = app.ActiveCamera().ViewMatrix();
-			float4x4 proj = app.ActiveCamera().ProjMatrix();
-			float4x4 light_mat = model * this->LightViewProj();
-
-			*(effect->ParameterByName("World")) = model;
-			*(effect->ParameterByName("InvLightWorld")) = inv_light_model_;
+			*(effect->ParameterByName("model")) = model;
+			*(effect->ParameterByName("obj_model_to_light_model")) = model * inv_light_model_;
 
 			if (gen_sm_pass_)
 			{
-				*(effect->ParameterByName("WorldViewProj")) = light_mat;
+				*(effect->ParameterByName("model_view_proj")) = model * this->LightViewProj();
 			}
 			else
 			{
-				*(effect->ParameterByName("LampSampler")) = lamp_sampler_;
-				*(effect->ParameterByName("ShadowMapSampler")) = sm_sampler_;
-				*(effect->ParameterByName("WorldViewProj")) = model * view * proj;
+				float4x4 const & view = app.ActiveCamera().ViewMatrix();
+				float4x4 const & proj = app.ActiveCamera().ProjMatrix();
+
+				*(effect->ParameterByName("model_view_proj")) = model * view * proj;
 				*(effect->ParameterByName("light_pos")) = light_pos_;
+
+				*(effect->ParameterByName("lamp_sampler")) = lamp_sampler_;
+				*(effect->ParameterByName("shadow_map_sampler")) = sm_sampler_;
 			}
 		}
 
