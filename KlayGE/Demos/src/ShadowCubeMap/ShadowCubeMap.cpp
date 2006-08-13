@@ -58,13 +58,15 @@ namespace
 			gen_sm_pass_ = gen_sm;
 		}
 
-		void LightMatrices(float4x4 const & model, float4x4 const & view, float4x4 const & proj)
+		void LightMatrices(float4x4 const & model)
 		{
 			light_pos_ = transform_coord(float3(0, 0, 0), model);
 
 			inv_light_model_ = MathLib::inverse(model);
-			light_view_ = view;
-			light_proj_ = proj;
+
+			App3DFramework const & app = Context::Instance().AppInstance();
+			light_view_ = app.ActiveCamera().ViewMatrix();
+			light_proj_ = app.ActiveCamera().ProjMatrix();
 		}
 
 		void ShadowMapTexture(TexturePtr tex)
@@ -363,6 +365,9 @@ void ShadowCubeMap::InitObjects()
 		shadow_buffers_[i]->Attach(FrameBuffer::ATT_Color0,
 			rf.Make2DRenderView(*shadow_tex_, static_cast<Texture::CubeFaces>(i), 0));
 		shadow_buffers_[i]->Attach(FrameBuffer::ATT_DepthStencil, depth_view);
+
+		CameraPtr camera = shadow_buffers_[i]->GetViewport().camera;
+		camera->ProjParams(PI / 2.0f, 1.0f, 0.01f, 10.0f);
 	}
 
 	fpcController_.AttachCamera(this->ActiveCamera());
@@ -402,11 +407,26 @@ void ShadowCubeMap::DoUpdate(uint32_t pass)
 		{
 			fpcController_.Update();
 
-			renderEngine.BindRenderTarget(shadow_buffers_[pass]);
-			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+			checked_cast<OccluderRenderable*>(mesh_->GetRenderable().get())->GenShadowMapPass(true);
+			checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->GenShadowMapPass(true);
 
 			light_model_ = MathLib::rotation_z(0.4f) * MathLib::rotation_y(std::clock() / 700.0f)
 				* MathLib::translation(0.1f, 0.7f, 0.2f);
+
+			for (int i = 0; i < 6; ++ i)
+			{
+				CameraPtr camera = shadow_buffers_[i]->GetViewport().camera;
+
+				Texture::CubeFaces face = static_cast<Texture::CubeFaces>(Texture::CF_Positive_X + i);
+
+				std::pair<float3, float3> lookat_up = CubeMapViewVector<float>(face);
+
+				float3 le = transform_coord(float3(0, 0, 0), light_model_);
+				float3 lla = transform_coord(float3(0, 0, 0) + lookat_up.first, light_model_);
+				float3 lu = transform_normal(float3(0, 0, 0) + lookat_up.second, light_model_);
+
+				camera->ViewParams(le, lla, lu);
+			}
 		}
 
 	case 1:
@@ -415,24 +435,11 @@ void ShadowCubeMap::DoUpdate(uint32_t pass)
 	case 4:
 	case 5:
 		{
-			Texture::CubeFaces face = static_cast<Texture::CubeFaces>(Texture::CF_Positive_X + pass);
-
-			std::pair<float3, float3> lookat_up = CubeMapViewVector<float>(face);
-
-			float3 le = transform_coord(float3(0, 0, 0), light_model_);
-			float3 lla = transform_coord(float3(0, 0, 0) + lookat_up.first, light_model_);
-			float3 lu = transform_normal(float3(0, 0, 0) + lookat_up.second, light_model_);
-
-			float4x4 light_view = look_at_lh(le, lla, lu);
-			float4x4 light_proj = perspective_fov_lh(PI / 2.0f, 1.0f, 0.01f, 10.0f);
-			checked_cast<OccluderRenderable*>(mesh_->GetRenderable().get())->LightMatrices(light_model_, light_view, light_proj);
-			checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->LightMatrices(light_model_, light_view, light_proj);
-
-			checked_cast<OccluderRenderable*>(mesh_->GetRenderable().get())->GenShadowMapPass(true);
-			checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->GenShadowMapPass(true);
-
 			renderEngine.BindRenderTarget(shadow_buffers_[pass]);
 			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+
+			checked_cast<OccluderRenderable*>(mesh_->GetRenderable().get())->LightMatrices(light_model_);
+			checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->LightMatrices(light_model_);
 		}
 		break;
 
@@ -441,7 +448,7 @@ void ShadowCubeMap::DoUpdate(uint32_t pass)
 			renderEngine.BindRenderTarget(RenderTargetPtr());
 			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
-			//SaveToFile(shadow_tex_, "shadow_tex.dds");
+			//SaveTexture(shadow_cube_tex_, "shadow_tex.dds");
 
 			checked_cast<OccluderRenderable*>(mesh_->GetRenderable().get())->ShadowMapTexture(shadow_tex_);
 			checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->ShadowMapTexture(shadow_tex_);

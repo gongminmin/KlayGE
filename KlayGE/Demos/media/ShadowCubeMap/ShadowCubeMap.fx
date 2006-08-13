@@ -7,7 +7,7 @@ sampler LampSampler;
 sampler ShadowMapSampler;
 
 
-void ShadowMapVS(float4 Position : POSITION,
+void GenShadowMapVS(float4 Position : POSITION,
 						out float4 oPos : POSITION,
 						out float4 oLightWorldPos : TEXCOORD0)
 {
@@ -15,13 +15,13 @@ void ShadowMapVS(float4 Position : POSITION,
     oLightWorldPos = mul(mul(Position, World), InvLightWorld);
 }
 
-float4 OutputDepthPS(float3 oLightWorldPos : TEXCOORD0) : COLOR
+float4 GenShadowMapPS(float3 oLightWorldPos : TEXCOORD0) : COLOR
 {
 	float dist = length(oLightWorldPos);
 	return float4(dist, dist * dist, 0, 1);
 }
 
-void MainVS(float4 Position : POSITION,
+void RenderSceneVS(float4 Position : POSITION,
 					float3 Normal   : NORMAL,
 					out float4 oPos : POSITION,
 					out float3 oDiffuse : COLOR0,
@@ -35,7 +35,7 @@ void MainVS(float4 Position : POSITION,
     oDiffuse = dot(normalize(light_pos - world_pos.xyz), world_normal);
 }
 
-float4 MainPS(half3 diffuse : COLOR0,
+float4 RenderScenePS(half3 diffuse : COLOR0,
 				float3 LightWorldPos : TEXCOORD0) : COLOR 
 {
 	float2 moments = texCUBE(ShadowMapSampler, LightWorldPos);
@@ -61,8 +61,8 @@ technique GenShadowMap
 	{
 		CullMode = None;
 		
-		VertexShader = compile vs_1_1 ShadowMapVS();
-		PixelShader = compile ps_2_0 OutputDepthPS();
+		VertexShader = compile vs_1_1 GenShadowMapVS();
+		PixelShader = compile ps_2_0 GenShadowMapPS();
 	}
 }
 
@@ -72,7 +72,7 @@ technique RenderScene
 	{
 		CullMode = CCW;
 		
-		VertexShader = compile vs_1_1 MainVS();
-		PixelShader = compile ps_2_0 MainPS();
+		VertexShader = compile vs_1_1 RenderSceneVS();
+		PixelShader = compile ps_2_0 RenderScenePS();
 	}
 }

@@ -30,8 +30,10 @@ namespace KlayGE
 	class BlurPostProcess : public PostProcess
 	{
 	public:
-		explicit BlurPostProcess(std::string const & tech);
+		BlurPostProcess(std::string const & tech, int length, float multiplier);
 		virtual ~BlurPostProcess();
+
+		void Source(TexturePtr const & src_tex, Sampler::TexFilterOp filter, Sampler::TexAddressingMode am);
 
 		void OnRenderBegin();
 
@@ -43,18 +45,21 @@ namespace KlayGE
 	private:
 		std::vector<float> color_weight_;
 		std::vector<float> tex_coord_offset_;
+
+		int length_;
+		float multiplier_;
 	};
 
 	class BlurXPostProcess : public BlurPostProcess
 	{
 	public:
-		BlurXPostProcess();
+		BlurXPostProcess(int length, float multiplier);
 	};
 
 	class BlurYPostProcess : public BlurPostProcess
 	{
 	public:
-		BlurYPostProcess();
+		BlurYPostProcess(int length, float multiplier);
 	};
 
 	class SumLumPostProcess : public PostProcess

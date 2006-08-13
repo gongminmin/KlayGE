@@ -19,6 +19,8 @@
 #include <KlayGE/Sampler.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 
+#include <boost/assert.hpp>
+
 #include <KlayGE/HDRPostProcess.hpp>
 
 namespace KlayGE
@@ -29,21 +31,28 @@ namespace KlayGE
 	}
 
 
-	BlurPostProcess::BlurPostProcess(std::string const & tech)
+	BlurPostProcess::BlurPostProcess(std::string const & tech, int length, float multiplier)
 			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Blur.fx")->Technique(tech)),
-				color_weight_(15), tex_coord_offset_(15)
+				color_weight_(15), tex_coord_offset_(15),
+				length_(length), multiplier_(multiplier)
 	{
+		BOOST_ASSERT(length <= 7);
 	}
 
 	BlurPostProcess::~BlurPostProcess()
 	{
 	}
 
+	void BlurPostProcess::Source(TexturePtr const & src_tex, Sampler::TexFilterOp filter, Sampler::TexAddressingMode am)
+	{
+		PostProcess::Source(src_tex, filter, am);
+
+		this->CalSampleOffsets(length_, src_sampler_->GetTexture()->Width(0), 3, multiplier_);
+	}
+
 	void BlurPostProcess::OnRenderBegin()
 	{
 		PostProcess::OnRenderBegin();
-
-		this->CalSampleOffsets(7, src_sampler_->GetTexture()->Width(0), 3, 2);
 
 		*(technique_->Effect().ParameterByName("color_weight")) = color_weight_;
 		*(technique_->Effect().ParameterByName("tex_coord_offset")) = tex_coord_offset_;
@@ -59,14 +68,14 @@ namespace KlayGE
 	void BlurPostProcess::CalSampleOffsets(int length, uint32_t tex_size,
 							float deviation, float multiplier)
 	{
-		color_weight_.resize(length * 2 + 1);
-		tex_coord_offset_.resize(length * 2 + 1);
+		color_weight_.assign(15, 0);
+		tex_coord_offset_.assign(15, 0);
 
 		float tu = 1.0f / tex_size;
 
 		// Fill the center texel
-		float weight = 1.0f * this->GaussianDistribution(0, 0, deviation);
-		color_weight_[0] = 0;
+		float weight = multiplier * this->GaussianDistribution(0, 0, deviation);
+		color_weight_[0] = weight;
 		tex_coord_offset_[0] = 0.0f;
 
 		// Fill the right side
@@ -74,27 +83,25 @@ namespace KlayGE
 		{
 			weight = multiplier * this->GaussianDistribution(float(i), 0, deviation);
 			color_weight_[i] = weight;
-
 			tex_coord_offset_[i] = float(i) * tu;
 		}
 
 		// Copy to the left side
-		for (int i = length; i < 2 * length + 1; ++ i)
+		for (int i = length + 1; i < 2 * length + 1; ++ i)
 		{
 			color_weight_[i] = color_weight_[i - length];
-
 			tex_coord_offset_[i] = -tex_coord_offset_[i - length];
 		}
 	}
 
 
-	BlurXPostProcess::BlurXPostProcess()
-			: BlurPostProcess("BlurX")
+	BlurXPostProcess::BlurXPostProcess(int length, float multiplier)
+			: BlurPostProcess("BlurX", length, multiplier)
 	{
 	}
 
-	BlurYPostProcess::BlurYPostProcess()
-			: BlurPostProcess("BlurY")
+	BlurYPostProcess::BlurYPostProcess(int length, float multiplier)
+			: BlurPostProcess("BlurY", length, multiplier)
 	{
 	}
 
@@ -244,8 +251,8 @@ namespace KlayGE
 	{
 		tone_mapping_.reset(new ToneMappingPostProcess);
 		downsampler_.reset(new Downsampler2x2PostProcess);
-		blur_x_.reset(new BlurXPostProcess);
-		blur_y_.reset(new BlurYPostProcess);
+		blur_x_.reset(new BlurXPostProcess(7, 2));
+		blur_y_.reset(new BlurYPostProcess(7, 2));
 		sum_lums_.resize(NUM_TONEMAP_TEXTURES + 1);
 		sum_lums_[0].reset(new SumLumLogPostProcess);
 		for (int i = 1; i < NUM_TONEMAP_TEXTURES; ++ i)
