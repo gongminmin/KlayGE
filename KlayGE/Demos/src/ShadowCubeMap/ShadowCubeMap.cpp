@@ -155,7 +155,7 @@ namespace
 		void OnRenderBegin()
 		{
 			model_ = MathLib::translation(0.2f, 0.1f, 0.0f)
-				* MathLib::rotation_y(-std::clock() / 1000.0f);
+				* MathLib::rotation_y(-std::clock() / 1500.0f);
 			ShadowMapped::OnRenderBegin(model_, effect_);
 		}
 
@@ -410,8 +410,8 @@ void ShadowCubeMap::DoUpdate(uint32_t pass)
 			checked_cast<OccluderRenderable*>(mesh_->GetRenderable().get())->GenShadowMapPass(true);
 			checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->GenShadowMapPass(true);
 
-			light_model_ = MathLib::rotation_z(0.4f) * MathLib::rotation_y(std::clock() / 700.0f)
-				* MathLib::translation(0.1f, 0.7f, 0.2f);
+			light_model_ = MathLib::rotation_z(0.4f) * MathLib::rotation_y(std::clock() / 1400.0f)
+				* MathLib::translation(0.1f, 0.4f, 0.2f);
 
 			for (int i = 0; i < 6; ++ i)
 			{
