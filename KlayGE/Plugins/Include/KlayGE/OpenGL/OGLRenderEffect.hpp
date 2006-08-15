@@ -19,17 +19,14 @@
 #ifndef _OGLRENDEREFFECT_HPP
 #define _OGLRENDEREFFECT_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_RenderEngine_OpenGL
+#include <KlayGE/config/auto_link.hpp>
+
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderEffect.hpp>
 
 #include <Cg/cg.h>
 #include <Cg/cgGL.h>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL.lib")
-#endif
 
 namespace KlayGE
 {

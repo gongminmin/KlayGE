@@ -1,17 +1,14 @@
 #ifndef _D3D9ADAPTERINFO_HPP
 #define _D3D9ADAPTERINFO_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_RenderEngine_D3D9
+#include <KlayGE/config/auto_link.hpp>
+
 #include <d3d9.h>
 #include <vector>
 #include <string>
 #include <KlayGE/D3D9/D3D9Typedefs.hpp>
 #include <KlayGE/D3D9/D3D9VideoMode.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_RenderEngine_D3D9_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_RenderEngine_D3D9.lib")
-#endif
 
 namespace KlayGE
 {

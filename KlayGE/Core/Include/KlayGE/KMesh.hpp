@@ -16,16 +16,13 @@
 #ifndef _KMESH_HPP
 #define _KMESH_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_Core
+#include <KlayGE/config/auto_link.hpp>
+
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Mesh.hpp>
 
 #include <boost/function.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_Core_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_Core.lib")
-#endif
 
 namespace KlayGE
 {

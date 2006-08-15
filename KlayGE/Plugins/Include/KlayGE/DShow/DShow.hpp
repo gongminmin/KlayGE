@@ -13,6 +13,9 @@
 #ifndef _DSHOW_HPP
 #define _DSHOW_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_ShowEngine_DShow
+#include <KlayGE/config/auto_link.hpp>
+
 #include <control.h>
 #include <d3d9.h>
 #include <strmif.h>
@@ -24,12 +27,6 @@
 #include <boost/utility.hpp>
 
 #include <KlayGE/Show.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_ShowEngine_DShow_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_ShowEngine_DShow.lib")
-#endif
 
 namespace KlayGE
 {

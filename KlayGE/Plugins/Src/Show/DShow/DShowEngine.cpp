@@ -23,9 +23,11 @@
 #include <KlayGE/DShow/DShowVMR9Allocator.hpp>
 #include <KlayGE/DShow/DShow.hpp>
 
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "ole32.lib")
 #pragma comment(lib, "strmiids.lib")
+#endif
 
 namespace KlayGE
 {

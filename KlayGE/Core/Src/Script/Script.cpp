@@ -20,10 +20,12 @@
 
 #include <KlayGE/Script.hpp>
 
+#ifdef KLAYGE_COMPILER_MSVC
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "python24d.lib")
 #else
 	#pragma comment(lib, "python24.lib")
+#endif
 #endif
 
 namespace KlayGE

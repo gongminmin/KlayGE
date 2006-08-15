@@ -19,6 +19,9 @@
 #ifndef _CONTEXT_HPP
 #define _CONTEXT_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_Core
+#include <KlayGE/config/auto_link.hpp>
+
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -27,12 +30,6 @@
 #include <KlayGE/ShowFactory.hpp>
 
 #include <boost/assert.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_Core_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_Core.lib")
-#endif
 
 namespace KlayGE
 {

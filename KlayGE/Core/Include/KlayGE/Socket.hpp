@@ -16,20 +16,17 @@
 #ifndef	_SOCKET_HPP
 #define	_SOCKET_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_Core
+#include <KlayGE/config/auto_link.hpp>
+
 #include <string>
 
-#ifdef _WIN32
+#ifdef KLAYGE_PLATFORM_WINDOWS
 	#ifndef _WINSOCKAPI_
 	#include <winsock.h>
 	#endif
 #else
 	#include <sys/socket.h>
-#endif
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_Core_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_Core.lib")
 #endif
 
 namespace KlayGE

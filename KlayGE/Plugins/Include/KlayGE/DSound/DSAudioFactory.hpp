@@ -16,14 +16,11 @@
 #ifndef _DSAUDIOFACTORY_HPP
 #define _DSAUDIOFACTORY_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_AudioEngine_DSound
+#include <KlayGE/config/auto_link.hpp>
+
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/AudioFactory.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_AudioEngine_DSound_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_AudioEngine_DSound.lib")
-#endif
 
 namespace KlayGE
 {

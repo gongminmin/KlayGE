@@ -16,16 +16,13 @@
 #ifndef _CAMERACONTROLLER_HPP
 #define _CAMERACONTROLLER_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_Core
+#include <KlayGE/config/auto_link.hpp>
+
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/Timer.hpp>
 #include <KlayGE/Input.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_Core_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_Core.lib")
-#endif
 
 namespace KlayGE
 {

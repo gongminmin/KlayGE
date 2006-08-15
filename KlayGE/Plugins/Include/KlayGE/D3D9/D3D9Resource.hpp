@@ -13,13 +13,10 @@
 #ifndef _D3D9RESOURCE_HPP
 #define _D3D9RESOURCE_HPP
 
-#include <boost/smart_ptr.hpp>
+#define KLAYGE_LIB_NAME KlayGE_RenderEngine_D3D9
+#include <KlayGE/config/auto_link.hpp>
 
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_RenderEngine_D3D9_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_RenderEngine_D3D9.lib")
-#endif
+#include <boost/smart_ptr.hpp>
 
 namespace KlayGE
 {

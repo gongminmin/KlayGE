@@ -21,7 +21,7 @@
 #include <boost/thread/xtime.hpp>
 #include <boost/thread/thread.hpp>
 
-#ifdef WIN32
+#ifdef KLAYGE_PLATFORM_WINDOWS
 	#include <windows.h>
 #else
 	#include <cerrno>
@@ -135,7 +135,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	uint32_t LastError()
 	{
-#ifdef WIN32
+#ifdef KLAYGE_PLATFORM_WINDOWS
 		return ::GetLastError();
 #else
 		return errno;

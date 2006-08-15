@@ -53,12 +53,14 @@
 #include <KlayGE/OpenGL/OGLRenderLayout.hpp>
 #include <KlayGE/OpenGL/OGLRenderEngine.hpp>
 
+#ifdef KLAYGE_COMPILER_MSVC
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "glloader_d.lib")
 #else
 	#pragma comment(lib, "glloader.lib")
 #endif
 #pragma comment(lib, "glu32.lib")
+#endif
 
 namespace KlayGE
 {

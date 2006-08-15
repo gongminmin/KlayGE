@@ -16,9 +16,11 @@
 
 #include <KlayGE/DInput/DInput.hpp>
 
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "dinput8.lib")
 #pragma comment(lib, "ole32.lib")
+#endif
 
 namespace KlayGE
 {

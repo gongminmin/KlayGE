@@ -16,6 +16,9 @@
 #ifndef _OALAUDIO_HPP
 #define _OALAUDIO_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_AudioEngine_OpenAL
+#include <KlayGE/config/auto_link.hpp>
+
 #include <KlayGE/PreDeclare.hpp>
 
 #include <al/al.h>
@@ -32,12 +35,6 @@
 #pragma warning(pop)
 
 #include <KlayGE/Audio.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_AudioEngine_OpenAL_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_AudioEngine_OpenAL.lib")
-#endif
 
 namespace KlayGE
 {

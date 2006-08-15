@@ -13,13 +13,10 @@
 #ifndef _QUERY_HPP
 #define _QUERY_HPP
 
-#include <KlayGE/PreDeclare.hpp>
+#define KLAYGE_LIB_NAME KlayGE_Core
+#include <KlayGE/config/auto_link.hpp>
 
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_Core_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_Core.lib")
-#endif
+#include <KlayGE/PreDeclare.hpp>
 
 namespace KlayGE
 {

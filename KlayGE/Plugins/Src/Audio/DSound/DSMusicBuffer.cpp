@@ -26,7 +26,9 @@
 
 #include <KlayGE/DSound/DSAudio.hpp>
 
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma comment(lib, "winmm.lib")
+#endif
 
 namespace KlayGE
 {

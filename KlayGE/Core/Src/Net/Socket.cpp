@@ -21,8 +21,11 @@
 
 #include <KlayGE/Socket.hpp>
 
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma comment(lib, "wsock32.lib")
+#endif
 
+#ifdef KLAYGE_PLATFORM_WINDOWS
 // ³õÊ¼»¯Winsock
 /////////////////////////////////////////////////////////////////////////////////
 class WSAIniter
@@ -40,6 +43,7 @@ public:
 		WSACleanup();
 	}
 } wsaInit;
+#endif
 
 namespace KlayGE
 {
@@ -133,7 +137,7 @@ namespace KlayGE
 	{
 		if (this->socket_ != INVALID_SOCKET)
 		{
-	#ifdef _WIN32
+	#ifdef KLAYGE_PLATFORM_WINDOWS
 			closesocket(this->socket_);
 	#else
 			close(this->socket_);
@@ -176,7 +180,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
-	#ifdef _WIN32
+	#ifdef KLAYGE_PLATFORM_WINDOWS
 		Verify(ioctlsocket(this->socket_, command, reinterpret_cast<u_long*>(argument)) != SOCKET_ERROR);
 	#else
 		Verify(ioctl(this->socket_, command, argument) != SOCKET_ERROR);

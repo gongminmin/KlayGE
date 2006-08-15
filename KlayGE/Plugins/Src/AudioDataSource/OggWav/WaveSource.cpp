@@ -35,8 +35,8 @@ namespace KlayGE
 		frData	= MakeFourCC<'d', 'a', 't', 'a'>::value,
 	};
 
-	#ifdef _MSC_VER
-		#pragma pack (push, 1)						// 关闭对齐
+	#ifdef KLAYGE_COMPILER_MSVC
+		#pragma pack(push, 1)						// 关闭对齐
 	#endif
 
 	struct WAVChunkHdr
@@ -73,8 +73,8 @@ namespace KlayGE
 		uint16_t			extraSize;
 	};
 
-	#ifdef _MSC_VER
-		#pragma pack (pop)
+	#ifdef KLAYGE_COMPILER_MSVC
+		#pragma pack(pop)
 	#endif
 
 	// 构造函数

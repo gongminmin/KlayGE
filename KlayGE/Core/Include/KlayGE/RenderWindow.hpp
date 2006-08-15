@@ -13,13 +13,10 @@
 #ifndef _RENDERWINDOW_HPP
 #define _RENDERWINDOW_HPP
 
-#include <KlayGE/RenderTarget.hpp>
+#define KLAYGE_LIB_NAME KlayGE_Core
+#include <KlayGE/config/auto_link.hpp>
 
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_Core_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_Core.lib")
-#endif
+#include <KlayGE/RenderTarget.hpp>
 
 namespace KlayGE
 {

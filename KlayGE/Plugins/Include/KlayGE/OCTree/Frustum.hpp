@@ -16,14 +16,11 @@
 #ifndef _FRUSTUM_HPP
 #define _FRUSTUM_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_Scene_OCTree
+#include <KlayGE/config/auto_link.hpp>
+
 #include <KlayGE/Math.hpp>
 #include <boost/array.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_Scene_OCTree_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_Scene_OCTree.lib")
-#endif
 
 namespace KlayGE
 {

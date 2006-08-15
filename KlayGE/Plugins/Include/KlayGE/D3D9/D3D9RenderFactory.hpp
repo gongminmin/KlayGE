@@ -22,6 +22,9 @@
 #ifndef _D3D9RENDERFACTORY_HPP
 #define _D3D9RENDERFACTORY_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_RenderEngine_D3D9
+#include <KlayGE/config/auto_link.hpp>
+
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderFactory.hpp>
 
@@ -36,12 +39,6 @@
 #include <KlayGE/D3D9/D3D9RenderEffect.hpp>
 #include <KlayGE/D3D9/D3D9GraphicsBuffer.hpp>
 #include <KlayGE/D3D9/D3D9RenderView.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_RenderEngine_D3D9_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_RenderEngine_D3D9.lib")
-#endif
 
 namespace KlayGE
 {

@@ -23,16 +23,13 @@
 #ifndef _OGLGRAPHICSBUFFERHPP
 #define _OGLGRAPHICSBUFFERHPP
 
+#define KLAYGE_LIB_NAME KlayGE_RenderEngine_OpenGL
+#include <KlayGE/config/auto_link.hpp>
+
 #include <vector>
 #include <glloader/glloader.h>
 
 #include <KlayGE/GraphicsBuffer.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL.lib")
-#endif
 
 namespace KlayGE
 {

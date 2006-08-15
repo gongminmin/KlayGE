@@ -19,17 +19,14 @@
 #ifndef _SAMPLER_HPP
 #define _SAMPLER_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_Core
+#include <KlayGE/config/auto_link.hpp>
+
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Math.hpp>
 
 #include <string>
 #include <boost/assert.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_Core_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_Core.lib")
-#endif
 
 namespace KlayGE
 {

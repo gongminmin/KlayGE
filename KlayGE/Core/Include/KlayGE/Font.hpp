@@ -22,6 +22,9 @@
 #ifndef _FONT_HPP
 #define _FONT_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_Core
+#include <KlayGE/config/auto_link.hpp>
+
 #include <KlayGE/PreDeclare.hpp>
 
 #include <KlayGE/Rect.hpp>
@@ -37,12 +40,6 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_Core_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_Core.lib")
-#endif
 
 namespace KlayGE
 {

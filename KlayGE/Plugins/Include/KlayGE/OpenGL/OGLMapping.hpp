@@ -13,18 +13,15 @@
 #ifndef _OGLMAPPING_HPP
 #define _OGLMAPPING_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_RenderEngine_OpenGL
+#include <KlayGE/config/auto_link.hpp>
+
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Sampler.hpp>
 
 #include <windows.h>
 #include <glloader/glloader.h>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL.lib")
-#endif
 
 namespace KlayGE
 {

@@ -19,15 +19,12 @@
 #ifndef _D3D9FRAMEBUFFER_HPP
 #define _D3D9FRAMEBUFFER_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_RenderEngine_D3D9
+#include <KlayGE/config/auto_link.hpp>
+
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/D3D9/D3D9Typedefs.hpp>
 #include <KlayGE/D3D9/D3D9Resource.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_RenderEngine_D3D9_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_RenderEngine_D3D9.lib")
-#endif
 
 namespace KlayGE
 {

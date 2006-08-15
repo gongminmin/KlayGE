@@ -21,8 +21,10 @@
 
 #include <KlayGE/DSound/DSAudio.hpp>
 
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "dsound.lib")
+#endif
 
 namespace KlayGE
 {

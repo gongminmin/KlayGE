@@ -16,14 +16,11 @@
 #ifndef _DINPUTFACTORY_HPP
 #define _DINPUTFACTORY_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_InputEngine_DInput
+#include <KlayGE/config/auto_link.hpp>
+
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/InputFactory.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_InputEngine_DInput_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_InputEngine_DInput.lib")
-#endif
 
 namespace KlayGE
 {

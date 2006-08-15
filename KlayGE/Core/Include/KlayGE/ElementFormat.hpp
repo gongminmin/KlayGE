@@ -13,13 +13,10 @@
 #ifndef _ELEMENTFORMAT_HPP
 #define _ELEMENTFORMAT_HPP
 
-#include <boost/assert.hpp>
+#define KLAYGE_LIB_NAME KlayGE_Core
+#include <KlayGE/config/auto_link.hpp>
 
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_Core_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_Core.lib")
-#endif
+#include <boost/assert.hpp>
 
 namespace KlayGE
 {

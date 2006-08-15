@@ -16,14 +16,11 @@
 #ifndef _HEIGHTMAP_HPP
 #define _HEIGHTMAP_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_Terrain_HeightMap
+#include <KlayGE/config/auto_link.hpp>
+
 #include <vector>
 #include <boost/function.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_Terrain_HeightMap_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_Terrain_HeightMap.lib")
-#endif
 
 namespace KlayGE
 {

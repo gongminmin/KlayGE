@@ -13,17 +13,14 @@
 #ifndef _WAVESOURCE_HPP
 #define _WAVESOURCE_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_AudioDataSource_OggWav
+#include <KlayGE/config/auto_link.hpp>
+
 #include <KlayGE/PreDeclare.hpp>
 
 #include <istream>
 
 #include <KlayGE/AudioDataSource.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_AudioDataSource_OggWav_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_AudioDataSource_OggWav.lib")
-#endif
 
 namespace KlayGE
 {

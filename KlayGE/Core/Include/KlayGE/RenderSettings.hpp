@@ -13,6 +13,9 @@
 #ifndef _RENDERSETTINGS_HPP
 #define _RENDERSETTINGS_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_Core
+#include <KlayGE/config/auto_link.hpp>
+
 #pragma warning(push)
 #pragma warning(disable: 4127 4189)
 #include <boost/function.hpp>
@@ -20,12 +23,6 @@
 
 #include <KlayGE/ElementFormat.hpp>
 #include <KlayGE/RenderDeviceCaps.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_Core_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_Core.lib")
-#endif
 
 namespace KlayGE
 {

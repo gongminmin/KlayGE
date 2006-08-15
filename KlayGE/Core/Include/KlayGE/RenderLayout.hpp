@@ -13,6 +13,9 @@
 #ifndef _RENDERLAYOUT_HPP
 #define _RENDERLAYOUT_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_Core
+#include <KlayGE/config/auto_link.hpp>
+
 #include <KlayGE/PreDeclare.hpp>
 
 #include <vector>
@@ -21,12 +24,6 @@
 
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/ElementFormat.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_Core_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_Core.lib")
-#endif
 
 namespace KlayGE
 {

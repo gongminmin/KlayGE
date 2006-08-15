@@ -13,16 +13,13 @@
 #ifndef _OGLRENDERVIEW_HPP
 #define _OGLRENDERVIEW_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_RenderEngine_OpenGL
+#include <KlayGE/config/auto_link.hpp>
+
 #include <KlayGE/RenderView.hpp>
 #include <KlayGE/Texture.hpp>
 
 #include <KlayGE/OpenGL/OGLTexture.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL.lib")
-#endif
 
 namespace KlayGE
 {

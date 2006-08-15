@@ -19,18 +19,15 @@
 #ifndef _FRAMEBUFFER_HPP
 #define _FRAMEBUFFER_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_Core
+#include <KlayGE/config/auto_link.hpp>
+
 #include <KlayGE/PreDeclare.hpp>
 
 #include <vector>
 
 #include <KlayGE/RenderView.hpp>
 #include <KlayGE/RenderTarget.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_Core_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_Core.lib")
-#endif
 
 namespace KlayGE
 {

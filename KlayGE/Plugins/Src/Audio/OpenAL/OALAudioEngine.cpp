@@ -18,7 +18,9 @@
 
 #include <KlayGE/OpenAL/OALAudio.hpp>
 
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma comment(lib, "OpenAL32.lib")
+#endif
 
 namespace KlayGE
 {
@@ -44,6 +46,10 @@ namespace KlayGE
 
 		case AF_Stereo16:
 			out = AL_FORMAT_STEREO16;
+			break;
+
+		default:
+			BOOST_ASSERT(false);
 			break;
 		}
 

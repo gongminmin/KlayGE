@@ -35,6 +35,9 @@
 #ifndef _D3D9RENDEREFFECT_HPP
 #define _D3D9RENDEREFFECT_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_RenderEngine_D3D9
+#include <KlayGE/config/auto_link.hpp>
+
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/MapVector.hpp>
 
@@ -45,12 +48,6 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/D3D9/D3D9Typedefs.hpp>
 #include <KlayGE/D3D9/D3D9Resource.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_RenderEngine_D3D9_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_RenderEngine_D3D9.lib")
-#endif
 
 namespace KlayGE
 {

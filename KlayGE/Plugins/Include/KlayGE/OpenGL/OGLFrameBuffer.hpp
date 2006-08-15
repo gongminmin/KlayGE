@@ -16,14 +16,11 @@
 #ifndef _OGLFRAMEBUFFER_HPP
 #define _OGLFRAMEBUFFER_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_RenderEngine_OpenGL
+#include <KlayGE/config/auto_link.hpp>
+
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderView.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL.lib")
-#endif
 
 namespace KlayGE
 {

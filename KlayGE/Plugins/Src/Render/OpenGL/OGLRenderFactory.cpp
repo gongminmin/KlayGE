@@ -15,8 +15,10 @@
 
 #include <KlayGE/OpenGL/OGLRenderFactory.hpp>
 
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma comment(lib, "Cg.lib")
 #pragma comment(lib, "CgGL.lib")
+#endif
 
 namespace KlayGE
 {

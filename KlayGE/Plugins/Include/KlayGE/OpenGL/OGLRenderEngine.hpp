@@ -27,6 +27,9 @@
 #ifndef _OGLRENDERENGINE_HPP
 #define _OGLRENDERENGINE_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_RenderEngine_OpenGL
+#include <KlayGE/config/auto_link.hpp>
+
 #include <vector>
 #include <map>
 
@@ -34,12 +37,6 @@
 #include <glloader/glloader.h>
 
 #include <KlayGE/RenderEngine.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_RenderEngine_OpenGL.lib")
-#endif
 
 namespace KlayGE
 {

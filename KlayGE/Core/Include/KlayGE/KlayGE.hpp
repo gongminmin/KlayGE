@@ -22,14 +22,10 @@
 #include <KlayGE/Config.hpp>
 #include <KlayGE/Types.hpp>
 
-#define KLAYGE_MAJOR		3
-#define KLAYGE_MINOR		4
-#define KLAYGE_RELEASE		0
+#define KLAYGE_VER_MAJOR	3
+#define KLAYGE_VER_MINOR	4
+#define KLAYGE_VER_RELEASE	0
 #define KLAYGE_VER_STR		"KlayGE 3.4.0"
-
-#ifdef _VC_8_0
-#pragma warning(disable: 4819)
-#endif
 
 #include <boost/config/requires_threads.hpp>
 

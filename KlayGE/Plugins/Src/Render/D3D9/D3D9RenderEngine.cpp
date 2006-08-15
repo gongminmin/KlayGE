@@ -63,8 +63,10 @@
 
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "d3d9.lib")
+#endif
 
 namespace KlayGE
 {

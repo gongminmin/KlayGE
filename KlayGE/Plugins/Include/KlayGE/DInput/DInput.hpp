@@ -16,6 +16,9 @@
 #ifndef _DINPUT_HPP
 #define _DINPUT_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_InputEngine_DInput
+#include <KlayGE/config/auto_link.hpp>
+
 #ifndef DIRECTINPUT_VERSION
 #define DIRECTINPUT_VERSION 0x0800
 #endif
@@ -27,12 +30,6 @@
 #include <boost/timer.hpp>
 
 #include <KlayGE/DInput/DInputDevice.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_InputEngine_DInput_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_InputEngine_DInput.lib")
-#endif
 
 namespace KlayGE
 {

@@ -23,6 +23,9 @@
 #ifndef _LZSS_HPP
 #define _LZSS_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_FileSystem_PackedFile
+#include <KlayGE/config/auto_link.hpp>
+
 #include <functional>
 
 #include <KlayGE/MapVector.hpp>
@@ -34,15 +37,9 @@
 #include <boost/algorithm/string/case_conv.hpp>
 #pragma warning(pop)
 
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_FileSystem_PackedFile_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_FileSystem_PackedFile.lib")
-#endif
-
 namespace KlayGE
 {
-#ifdef _MSC_VER
+#ifdef KLAYGE_COMPILER_MSVC
 	#pragma pack(push, 1)
 #endif
 
@@ -65,7 +62,7 @@ namespace KlayGE
 		uint32_t		FIStart;
 	};
 
-#ifdef _MSC_VER
+#ifdef KLAYGE_COMPILER_MSVC
 	#pragma pack(pop)
 #endif
 

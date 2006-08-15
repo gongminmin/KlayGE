@@ -13,7 +13,7 @@
 #ifndef _TIMER_HPP
 #define _TIMER_HPP
 
-#ifdef WIN32
+#ifdef KLAYGE_PLATFORM_WINDOWS
 	#include <windows.h>
 #else
 	#include <ctime>
@@ -43,7 +43,7 @@ namespace KlayGE
 		// return estimated maximum value for elapsed()
 		double elapsed_max() const   
 		{
-#ifdef WIN32
+#ifdef KLAYGE_PLATFORM_WINDOWS
 			return static_cast<double>(std::numeric_limits<uint64_t>::max()) / this->clocks_per_sec() - start_time_;
 #else
 			return static_cast<double>(std::numeric_limits<std::clock_t>::max()) / this->clocks_per_sec() - start_time_;
@@ -59,7 +59,7 @@ namespace KlayGE
 	private:
 		double current_time() const
 		{
-#ifdef WIN32
+#ifdef KLAYGE_PLATFORM_WINDOWS
 			LARGE_INTEGER count;
 			QueryPerformanceCounter(&count);
 			return static_cast<double>(count.QuadPart) / this->clocks_per_sec();
@@ -70,7 +70,7 @@ namespace KlayGE
 
 		uint64_t clocks_per_sec() const
 		{
-#ifdef WIN32
+#ifdef KLAYGE_PLATFORM_WINDOWS
 			LARGE_INTEGER frequency;
 			QueryPerformanceFrequency(&frequency);
 			return static_cast<uint64_t>(frequency.QuadPart);

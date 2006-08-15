@@ -22,14 +22,11 @@
 #ifndef _APP3D_HPP
 #define _APP3D_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_AppLayer
+#include <KlayGE/config/auto_link.hpp>
+
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/RenderEngine.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_AppLayer_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_AppLayer.lib")
-#endif
 
 namespace KlayGE
 {

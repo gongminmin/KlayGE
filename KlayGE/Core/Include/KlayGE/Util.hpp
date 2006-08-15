@@ -20,17 +20,14 @@
 #ifndef _UTIL_HPP
 #define _UTIL_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_Core
+#include <KlayGE/config/auto_link.hpp>
+
 #include <string>
 #include <functional>
 
 #include <boost/assert.hpp>
 #include <boost/smart_ptr.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_Core_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_Core.lib")
-#endif
 
 namespace KlayGE
 {
@@ -115,7 +112,7 @@ namespace KlayGE
 	template <int size>
 	void NativeToBigEndian(void* p)
 	{
-	#ifdef _LITTLE_ENDIAN
+	#ifdef KLAYGE_LITTLE_ENDIAN
 		EndianSwitch<size>(p);
 	#else
 		p;
@@ -124,7 +121,7 @@ namespace KlayGE
 	template <int size>
 	void NativeToLittleEndian(void* p)
 	{
-	#ifdef _LITTLE_ENDIAN
+	#ifdef KLAYGE_LITTLE_ENDIAN
 		p;
 	#else
 		EndianSwitch<size>(p);

@@ -28,7 +28,9 @@ namespace
 {
 	using namespace KlayGE;
 
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma pack(push, 1)
+#endif
 
 	enum
 	{
@@ -141,7 +143,9 @@ namespace
 		uint32_t		reserved2;
 	};
 
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma pack(pop)
+#endif
 }
 
 namespace KlayGE

@@ -16,6 +16,9 @@
 #ifndef _PLAYER_HPP
 #define _PLAYER_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_Core
+#include <KlayGE/config/auto_link.hpp>
+
 #include <list>
 #include <vector>
 
@@ -26,12 +29,6 @@
 #pragma warning(pop)
 
 #include <KlayGE/Socket.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_Core_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_Core.lib")
-#endif
 
 namespace KlayGE
 {

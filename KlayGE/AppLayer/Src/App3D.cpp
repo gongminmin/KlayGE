@@ -114,7 +114,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void App3DFramework::Quit()
 	{
-#ifdef WIN32
+#ifdef KLAYGE_PLATFORM_WINDOWS
 		::PostQuitMessage(0);
 #else
 		exit(0);

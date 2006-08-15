@@ -21,10 +21,12 @@
 
 #include <KlayGE/OggWav/OggSource.hpp>
 
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma comment(lib, "ogg.lib")
 #pragma comment(lib, "vorbis.lib")
+#endif
 
-size_t const READSIZE(4096);
+size_t const READSIZE = 4096;
 
 namespace KlayGE
 {

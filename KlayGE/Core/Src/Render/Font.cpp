@@ -58,10 +58,12 @@
 
 #include <KlayGE/Font.hpp>
 
+#ifdef KLAYGE_COMPILER_MSVC
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "freetype221_D.lib")
 #else
 	#pragma comment(lib, "freetype221.lib")
+#endif
 #endif
 
 namespace

@@ -13,15 +13,12 @@
 #ifndef _COMPTR_HPP
 #define _COMPTR_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_Core
+#include <KlayGE/config/auto_link.hpp>
+
 #include <boost/smart_ptr.hpp>
 #define BOOST_MEM_FN_ENABLE_STDCALL
 #include <boost/mem_fn.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_Core_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_Core.lib")
-#endif
 
 namespace KlayGE
 {

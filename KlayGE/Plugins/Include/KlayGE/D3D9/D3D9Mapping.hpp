@@ -16,16 +16,13 @@
 #ifndef _D3D9MAPPING_HPP
 #define _D3D9MAPPING_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_RenderEngine_D3D9
+#include <KlayGE/config/auto_link.hpp>
+
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderLayout.hpp>
-
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "KlayGE_RenderEngine_D3D9_d.lib")
-#else
-	#pragma comment(lib, "KlayGE_RenderEngine_D3D9.lib")
-#endif
 
 namespace KlayGE
 {
