@@ -136,7 +136,7 @@ void MD5SkinnedModel::SetEyePos(const KlayGE::float3& eye_pos)
 {
 	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
 	{
-		checked_cast<MD5SkinnedMesh*>(iter->get())->SetEyePos(eye_pos);
+		checked_pointer_cast<MD5SkinnedMesh>(*iter)->SetEyePos(eye_pos);
 	}
 }
 

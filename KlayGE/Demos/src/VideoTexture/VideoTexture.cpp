@@ -84,7 +84,7 @@ namespace
 
 		void VideoTexture(TexturePtr video_tex)
 		{
-			checked_cast<RenderTeapot*>(renderable_.get())->VideoTexture(video_tex);
+			checked_pointer_cast<RenderTeapot>(renderable_)->VideoTexture(video_tex);
 		}
 	};
 
@@ -188,7 +188,7 @@ void VideoTextureApp::DoUpdate(uint32_t /*pass*/)
 	re.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 	TexturePtr tex = se.PresentTexture();
-	checked_cast<TeapotObject*>(ground_.get())->VideoTexture(tex);
+	checked_pointer_cast<TeapotObject>(ground_)->VideoTexture(tex);
 	ground_->AddToSceneManager();
 
 	fpcController_.Update();

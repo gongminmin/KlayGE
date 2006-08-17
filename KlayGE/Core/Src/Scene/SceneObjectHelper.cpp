@@ -47,6 +47,6 @@ namespace KlayGE
 
 	void SceneObjectSkyBox::CubeMap(TexturePtr const & cube)
 	{
-		checked_cast<RenderableSkyBox*>(renderable_.get())->CubeMap(cube);
+		checked_pointer_cast<RenderableSkyBox>(renderable_)->CubeMap(cube);
 	}
 }

@@ -227,7 +227,7 @@ namespace KlayGE
 
 	void OGLRenderEffectParameterSampler::DoFlush(SamplerPtr const & value)
 	{
-		OGLTexture& ogl_tex = *checked_cast<OGLTexture*>(value->GetTexture().get());
+		OGLTexture& ogl_tex = *checked_pointer_cast<OGLTexture>(value->GetTexture());
 		Context::Instance().RenderFactoryInstance().RenderEngineInstance().SetSampler(0, value);
 		cgGLSetupSampler(param_, ogl_tex.GLTexture());
 	}

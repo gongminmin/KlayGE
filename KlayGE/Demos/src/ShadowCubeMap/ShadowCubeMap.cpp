@@ -174,7 +174,7 @@ namespace
 			model_ = MathLib::translation(0.0f, 0.2f, 0.0f);
 
 			renderable_ = LoadKMesh("teapot.kmesh", CreateKMeshFactory<OccluderRenderable>())->Mesh(0);
-			checked_cast<OccluderRenderable*>(renderable_.get())->SetModelMatrix(model_);
+			checked_pointer_cast<OccluderRenderable>(renderable_)->SetModelMatrix(model_);
 		}
 
 	private:
@@ -278,7 +278,7 @@ namespace
 		{
 			model_ = MathLib::translation(0.0f, -0.2f, 0.0f);
 
-			checked_cast<GroundRenderable*>(renderable_.get())->SetModelMatrix(model_);
+			checked_pointer_cast<GroundRenderable>(renderable_)->SetModelMatrix(model_);
 		}
 
 	private:
@@ -354,8 +354,8 @@ void ShadowCubeMap::InitObjects()
 
 	lamp_tex_ = LoadTexture("lamp.dds");
 
-	checked_cast<OccluderRenderable*>(mesh_->GetRenderable().get())->LampTexture(lamp_tex_);
-	checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->LampTexture(lamp_tex_);
+	checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->LampTexture(lamp_tex_);
+	checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->LampTexture(lamp_tex_);
 
 	RenderViewPtr depth_view = rf.MakeDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, EF_D16, 0);
 	shadow_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, EF_GR16F);
@@ -407,8 +407,8 @@ void ShadowCubeMap::DoUpdate(uint32_t pass)
 		{
 			fpcController_.Update();
 
-			checked_cast<OccluderRenderable*>(mesh_->GetRenderable().get())->GenShadowMapPass(true);
-			checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->GenShadowMapPass(true);
+			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->GenShadowMapPass(true);
+			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->GenShadowMapPass(true);
 
 			light_model_ = MathLib::rotation_z(0.4f) * MathLib::rotation_y(std::clock() / 1400.0f)
 				* MathLib::translation(0.1f, 0.4f, 0.2f);
@@ -438,8 +438,8 @@ void ShadowCubeMap::DoUpdate(uint32_t pass)
 			renderEngine.BindRenderTarget(shadow_buffers_[pass]);
 			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
-			checked_cast<OccluderRenderable*>(mesh_->GetRenderable().get())->LightMatrices(light_model_);
-			checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->LightMatrices(light_model_);
+			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->LightMatrices(light_model_);
+			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->LightMatrices(light_model_);
 		}
 		break;
 
@@ -450,11 +450,11 @@ void ShadowCubeMap::DoUpdate(uint32_t pass)
 
 			//SaveTexture(shadow_cube_tex_, "shadow_tex.dds");
 
-			checked_cast<OccluderRenderable*>(mesh_->GetRenderable().get())->ShadowMapTexture(shadow_tex_);
-			checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->ShadowMapTexture(shadow_tex_);
+			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->ShadowMapTexture(shadow_tex_);
+			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->ShadowMapTexture(shadow_tex_);
 
-			checked_cast<OccluderRenderable*>(mesh_->GetRenderable().get())->GenShadowMapPass(false);
-			checked_cast<GroundRenderable*>(ground_->GetRenderable().get())->GenShadowMapPass(false);
+			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->GenShadowMapPass(false);
+			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->GenShadowMapPass(false);
 
 			std::wostringstream stream;
 			stream << this->FPS();

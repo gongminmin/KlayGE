@@ -334,7 +334,7 @@ void ParticleSystemApp::InitObjects()
 	for (int i = 0; i < NUM_PARTICLE; ++ i)
 	{
 		SceneObjectPtr so(new PointSpriteObject);
-		checked_cast<PointSpriteObject*>(so.get())->SetRenderable(renderInstance_);
+		checked_pointer_cast<PointSpriteObject>(so)->SetRenderable(renderInstance_);
 		scene_objs_.push_back(so);
 	}
 
@@ -401,7 +401,7 @@ void ParticleSystemApp::DoUpdate(uint32_t /*pass*/)
 	std::sort(active_particles.begin(), active_particles.end(), particle_cmp);
 	for (uint32_t i = 0; i < active_particles.size(); ++ i)
 	{
-		checked_cast<PointSpriteObject*>(scene_objs_[i].get())->Instance(active_particles[i]);
+		checked_pointer_cast<PointSpriteObject>(scene_objs_[i])->Instance(active_particles[i]);
 		scene_objs_[i]->AddToSceneManager();
 	}
 

@@ -215,10 +215,10 @@ void Instancing::InitObjects()
 			float const c = cos(2 * PI * j / (NUM_INSTANCE / 10));
 
 			SceneObjectPtr so(new Teapot);
-			checked_cast<Teapot*>(so.get())->Instance(
+			checked_pointer_cast<Teapot>(so)->Instance(
 				MathLib::translation(s, i / 10.0f, c), Color(s, c, 0, 1));
 
-			checked_cast<Teapot*>(so.get())->SetRenderable(renderInstance_);
+			checked_pointer_cast<Teapot>(so)->SetRenderable(renderInstance_);
 			so->AddToSceneManager();
 			scene_objs_.push_back(so);
 		}
@@ -255,7 +255,7 @@ void Instancing::InputHandler(InputEngine const & /*sender*/, InputAction const 
 		{
 			for (int i = 0; i < NUM_INSTANCE; ++ i)
 			{
-				checked_cast<Teapot*>(scene_objs_[i].get())->SetRenderable(renderInstance_);
+				checked_pointer_cast<Teapot>(scene_objs_[i])->SetRenderable(renderInstance_);
 			}
 
 			use_instance_ = true;
@@ -267,7 +267,7 @@ void Instancing::InputHandler(InputEngine const & /*sender*/, InputAction const 
 		{
 			for (int i = 0; i < NUM_INSTANCE; ++ i)
 			{
-				checked_cast<Teapot*>(scene_objs_[i].get())->SetRenderable(renderMesh_);
+				checked_pointer_cast<Teapot>(scene_objs_[i])->SetRenderable(renderMesh_);
 			}
 
 			use_instance_ = false;

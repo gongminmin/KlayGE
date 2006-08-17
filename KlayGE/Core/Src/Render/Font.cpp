@@ -452,7 +452,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	uint32_t Font::FontHeight() const
 	{
-		return checked_cast<FontRenderable*>(font_renderable_.get())->FontHeight();
+		return checked_pointer_cast<FontRenderable>(font_renderable_)->FontHeight();
 	}
 
 	// 在指定位置画出文字
@@ -472,7 +472,7 @@ namespace KlayGE
 		if (!text.empty())
 		{
 			boost::shared_ptr<FontObject> font_obj(new FontObject(font_renderable_, fso_attrib_));
-			checked_cast<FontRenderable*>(font_renderable_.get())->AddText2D(this->FontHeight(),
+			checked_pointer_cast<FontRenderable>(font_renderable_)->AddText2D(this->FontHeight(),
 				sx, sy, sz, xScale, yScale, clr, text);
 			font_obj->AddToSceneManager();
 		}
@@ -485,7 +485,7 @@ namespace KlayGE
 		if (!text.empty())
 		{
 			boost::shared_ptr<FontObject> font_obj(new FontObject(font_renderable_, fso_attrib_));
-			checked_cast<FontRenderable*>(font_renderable_.get())->AddText3D(this->FontHeight(),
+			checked_pointer_cast<FontRenderable>(font_renderable_)->AddText3D(this->FontHeight(),
 				mvp, clr, text);
 			font_obj->AddToSceneManager();
 		}

@@ -206,6 +206,6 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	TexturePtr DShowEngine::PresentTexture()
 	{
-		return checked_cast<DShowVMR9Allocator*>(vmr_allocator_.get())->PresentTexture();
+		return checked_pointer_cast<DShowVMR9Allocator>(vmr_allocator_)->PresentTexture();
 	}
 }

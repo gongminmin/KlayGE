@@ -233,7 +233,7 @@ void Cartoon::DoUpdate(uint32_t pass)
 		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 		sceneMgr.Clear();
-		checked_cast<RenderTorus*>(torus_->GetRenderable().get())->Pass(0);
+		checked_pointer_cast<RenderTorus>(torus_->GetRenderable())->Pass(0);
 		torus_->AddToSceneManager();
 		break;
 	
@@ -242,8 +242,8 @@ void Cartoon::DoUpdate(uint32_t pass)
 		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
 
 		sceneMgr.Clear();
-		checked_cast<RenderTorus*>(torus_->GetRenderable().get())->UpdateTexture(normal_depth_tex_);
-		checked_cast<RenderTorus*>(torus_->GetRenderable().get())->Pass(1);
+		checked_pointer_cast<RenderTorus>(torus_->GetRenderable())->UpdateTexture(normal_depth_tex_);
+		checked_pointer_cast<RenderTorus>(torus_->GetRenderable())->Pass(1);
 		torus_->AddToSceneManager();
 
 		RenderWindow* rw = static_cast<RenderWindow*>(renderEngine.CurRenderTarget().get());

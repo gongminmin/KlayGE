@@ -283,7 +283,7 @@ void AsciiArtsApp::InitObjects()
 
 	ascii_arts_.reset(new AsciiArts);
 	ascii_arts_->Destinate(RenderTargetPtr());
-	checked_cast<AsciiArts*>(ascii_arts_.get())->SetLumsTex(ascii_lums_tex_);
+	checked_pointer_cast<AsciiArts>(ascii_arts_)->SetLumsTex(ascii_lums_tex_);
 }
 
 void AsciiArtsApp::OnResize(uint32_t width, uint32_t height)

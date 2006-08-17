@@ -319,7 +319,7 @@ namespace KlayGE
 		{
 			GraphicsBufferPtr stream = rl.GetVertexStream(i);
 
-			D3D9VertexBuffer& d3d9vb(*checked_cast<D3D9VertexBuffer*>(stream.get()));
+			D3D9VertexBuffer& d3d9vb(*checked_pointer_cast<D3D9VertexBuffer>(stream));
 			d3d9vb.Active(i, rl.VertexSize(i));
 
 			TIF(d3dDevice_->SetStreamSourceFreq(i,
@@ -332,7 +332,7 @@ namespace KlayGE
 			uint32_t number = rl.NumVertexStreams();
 			GraphicsBufferPtr stream = rl.InstanceStream();
 
-			D3D9VertexBuffer& d3d9vb(*checked_cast<D3D9VertexBuffer*>(stream.get()));
+			D3D9VertexBuffer& d3d9vb(*checked_pointer_cast<D3D9VertexBuffer>(stream));
 			d3d9vb.Active(number, rl.InstanceSize());
 
 			TIF(d3dDevice_->SetStreamSourceFreq(number,
@@ -360,7 +360,7 @@ namespace KlayGE
 		{
 			GraphicsBufferPtr stream = rl.GetVertexStream(i);
 
-			D3D9VertexBuffer& d3d9vb(*checked_cast<D3D9VertexBuffer*>(stream.get()));
+			D3D9VertexBuffer& d3d9vb(*checked_pointer_cast<D3D9VertexBuffer>(stream));
 			d3d9vb.Active(i, rl.VertexSize(i));
 
 			active_vertex_streams_.push_back(boost::static_pointer_cast<D3D9VertexBuffer>(stream));
@@ -390,7 +390,7 @@ namespace KlayGE
 		uint32_t num_passes = render_tech_->NumPasses();
 		if (rl.UseIndices())
 		{
-			D3D9IndexBuffer& d3dib(*checked_cast<D3D9IndexBuffer*>(rl.GetIndexStream().get()));
+			D3D9IndexBuffer& d3dib(*checked_pointer_cast<D3D9IndexBuffer>(rl.GetIndexStream()));
 			d3dib.SwitchFormat(rl.IndexStreamFormat());
 			d3dib.Active();
 
@@ -713,7 +713,7 @@ namespace KlayGE
 		{
 			TexturePtr texture = sampler->GetTexture();
 
-			D3D9Texture const & d3d9Tex(*checked_cast<D3D9Texture const *>(texture.get()));
+			D3D9Texture const & d3d9Tex(*checked_pointer_cast<D3D9Texture>(texture));
 			TIF(d3dDevice_->SetTexture(stage, d3d9Tex.D3DBaseTexture().get()));
 
 			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_BORDERCOLOR,

@@ -79,7 +79,7 @@ namespace
 
 		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)
 		{
-			checked_cast<HDRSkyBox*>(renderable_.get())->CompressedCubeMap(y_cube, c_cube);
+			checked_pointer_cast<HDRSkyBox>(renderable_)->CompressedCubeMap(y_cube, c_cube);
 		}
 	};
 
@@ -140,7 +140,7 @@ namespace
 			: SceneObjectHelper(SOA_Cullable)
 		{
 			renderable_ = LoadKMesh("teapot.kmesh", CreateKMeshFactory<RefractorRenderable>())->Mesh(0);
-			checked_cast<RefractorRenderable*>(renderable_.get())->CompressedCubeMap(y_cube, c_cube);	
+			checked_pointer_cast<RefractorRenderable>(renderable_)->CompressedCubeMap(y_cube, c_cube);	
 		}
 	};
 
@@ -201,7 +201,7 @@ void Refract::InitObjects()
 	refractor_->AddToSceneManager();
 
 	sky_box_.reset(new HDRSceneObjectSkyBox);
-	checked_cast<HDRSceneObjectSkyBox*>(sky_box_.get())->CompressedCubeMap(y_cube_map_, c_cube_map_);
+	checked_pointer_cast<HDRSceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map_, c_cube_map_);
 	sky_box_->AddToSceneManager();
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();

@@ -1,8 +1,11 @@
 // Util.hpp
 // KlayGE 实用函数库 头文件
-// Ver 3.2.0
+// Ver 3.4.0
 // 版权所有(C) 龚敏敏, 2003-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.4.0
+// 增加了checked_pointer_cast (2006.8.17)
 //
 // 3.2.0
 // 增加了copy_if (2006.2.23)
@@ -146,6 +149,14 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(dynamic_cast<To>(p) == static_cast<To>(p));
 		return static_cast<To>(p);
+	}
+
+	template <typename To, typename From>
+	inline boost::shared_ptr<To>
+	checked_pointer_cast(boost::shared_ptr<From> const & p)
+	{
+		BOOST_ASSERT(boost::dynamic_pointer_cast<To>(p) == boost::static_pointer_cast<To>(p));
+		return boost::static_pointer_cast<To>(p);
 	}
 
 	uint32_t LastError();

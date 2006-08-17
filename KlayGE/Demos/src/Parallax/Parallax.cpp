@@ -126,7 +126,7 @@ namespace
 			: SceneObjectHelper(SOA_Cullable)
 		{
 			renderable_ = LoadKMesh("teapot.kmesh", CreateKMeshFactory<RenderPolygon>())->Mesh(0);
-			checked_cast<RenderPolygon*>(renderable_.get())->ComputeTB();
+			checked_pointer_cast<RenderPolygon>(renderable_)->ComputeTB();
 		}
 	};
 

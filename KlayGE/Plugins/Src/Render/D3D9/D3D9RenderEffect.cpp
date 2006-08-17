@@ -190,7 +190,7 @@ namespace KlayGE
 				param->Value(s);
 				if (s && s->GetTexture())
 				{
-					checked_cast<D3D9Texture*>(s->GetTexture().get())->OnLostDevice();
+					checked_pointer_cast<D3D9Texture>(s->GetTexture())->OnLostDevice();
 				}
 
 				iter->second.second = true;
@@ -213,7 +213,7 @@ namespace KlayGE
 				param->Value(s);
 				if (s && s->GetTexture())
 				{
-					checked_cast<D3D9Texture*>(s->GetTexture().get())->OnResetDevice();
+					checked_pointer_cast<D3D9Texture>(s->GetTexture())->OnResetDevice();
 				}
 
 				iter->second.second = true;
@@ -415,7 +415,7 @@ namespace KlayGE
 	{
 		if (val_)
 		{
-			D3D9Texture& texture = *checked_cast<D3D9Texture*>(val_->GetTexture().get());
+			D3D9Texture& texture = *checked_pointer_cast<D3D9Texture>(val_->GetTexture());
 			texture.OnLostDevice();
 		}
 	}
@@ -424,7 +424,7 @@ namespace KlayGE
 	{
 		if (val_)
 		{
-			D3D9Texture& texture = *checked_cast<D3D9Texture*>(val_->GetTexture().get());
+			D3D9Texture& texture = *checked_pointer_cast<D3D9Texture>(val_->GetTexture());
 			texture.OnResetDevice();
 		}
 	}

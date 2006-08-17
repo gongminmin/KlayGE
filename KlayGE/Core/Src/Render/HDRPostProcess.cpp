@@ -359,8 +359,8 @@ namespace KlayGE
 
 		{
 			// Tone mapping
-			ToneMappingPostProcess* ppor = checked_cast<ToneMappingPostProcess*>(tone_mapping_.get());
-			ppor->SetTexture(checked_cast<AdaptedLumPostProcess*>(adapted_lum_.get())->AdaptedLum(), blury_tex_);
+			ToneMappingPostProcessPtr ppor = checked_pointer_cast<ToneMappingPostProcess>(tone_mapping_);
+			ppor->SetTexture(checked_pointer_cast<AdaptedLumPostProcess>(adapted_lum_)->AdaptedLum(), blury_tex_);
 			ppor->Apply();
 		}
 	}

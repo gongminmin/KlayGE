@@ -47,7 +47,7 @@ namespace KlayGE
 	{
 		if (n < clr_views_.size())
 		{
-			D3D9RenderView const & d3d_view(*checked_cast<D3D9RenderView const *>(clr_views_[n].get()));
+			D3D9RenderView const & d3d_view(*checked_pointer_cast<D3D9RenderView>(clr_views_[n]));
 			return d3d_view.D3DRenderSurface();
 		}
 		else
@@ -60,7 +60,7 @@ namespace KlayGE
 	{
 		if (rs_view_)
 		{
-			D3D9RenderView const & d3d_view(*checked_cast<D3D9RenderView const *>(rs_view_.get()));
+			D3D9RenderView const & d3d_view(*checked_pointer_cast<D3D9RenderView>(rs_view_));
 			return d3d_view.D3DRenderSurface();
 		}
 		else
