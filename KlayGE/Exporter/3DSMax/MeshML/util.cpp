@@ -70,6 +70,14 @@ namespace KlayGE
 			return true;
 		}
 
+		if (os.obj->SuperClassID() == GEOMOBJECT_CLASS_ID)
+		{
+			if (os.obj->ClassID() == BONE_OBJ_CLASSID)
+			{
+				return true;
+			}
+		}
+
 		Control* ctl = node->GetTMController();
 		if ((ctl->ClassID() == BIPSLAVE_CONTROL_CLASS_ID)
 			|| (ctl->ClassID() == BIPBODY_CONTROL_CLASS_ID))

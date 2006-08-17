@@ -81,17 +81,40 @@ namespace KlayGE
 
 	void meshml_extractor::export_objects(std::vector<INode*> const & nodes, bool flip_normals)
 	{
+		if (joints_per_ver_ != 0)
+		{
+			// root bone
+			joint_t root;
+			root.pos = Point3(0, 0, 0);
+			root.quat.Identity();
+			root.parent_name = "";
+			joints_.insert(std::make_pair("root", root));
+
+			key_frame_t kf;
+			kf.joint = "root";
+			for (int i = start_frame_; i < end_frame_; ++ i)
+			{
+				Matrix3 tm;
+				tm.IdentityMatrix();
+
+				kf.positions.push_back(point_from_matrix(tm));
+				kf.quaternions.push_back(quat_from_matrix(tm));
+			}
+			kfs_.push_back(kf);
+		}
+
 		for (size_t i = 0; i < nodes.size(); ++ i)
 		{
-			if (is_mesh(nodes[i]))
+			if (is_bone(nodes[i]))
 			{
-				this->extract_object(nodes[i], flip_normals);
+				this->extract_bone(nodes[i]);
 			}
 			else
 			{
-				assert(is_bone(nodes[i]));
-
-				this->extract_bone(nodes[i]);
+				if (is_mesh(nodes[i]))
+				{
+					this->extract_object(nodes[i], flip_normals);
+				}
 			}
 		}
 	}
@@ -255,19 +278,15 @@ namespace KlayGE
 		this->physique_modifier(node, "root", positions);
 		this->skin_modifier(node, "root", positions);
 
-		if (joints_.empty())
-		{
-			joint_t root;
-			root.pos = Point3(0, 0, 0);
-			root.quat.Identity();
-			root.parent_name = "";
-			joints_.insert(std::make_pair("root", root));
-		}
-
 		for (std::vector<std::pair<Point3, binds_t> >::iterator iter = positions.begin();
 			iter != positions.end(); ++ iter)
 		{
 			binds_t binds = iter->second;
+
+			if (binds.empty())
+			{
+				binds.push_back(std::make_pair("root", 1));
+			}
 
 			if (binds.size() > joints_per_ver_)
 			{
@@ -343,6 +362,11 @@ namespace KlayGE
 		{
 			obj_info.vertex_elements.push_back(vertex_element_t(VEU_TextureCoord, static_cast<unsigned char>(i), 2));
 		}
+		if (!obj_info.vertices[0].binds.empty())
+		{
+			obj_info.vertex_elements.push_back(vertex_element_t(VEU_BlendWeight, 0, 4));
+			obj_info.vertex_elements.push_back(vertex_element_t(VEU_BlendIndex, 0, 4));
+		}
 
 		objs_info_.push_back(obj_info);
 	}
@@ -359,9 +383,9 @@ namespace KlayGE
 		key_frame_t kf;
 		kf.joint = tstr_to_str(node->GetName());
 
-		for (int i = start_tick; i != end_tick; i += tps)
+		for (int i = start_frame_; i < end_frame_; ++ i)
 		{
-			Matrix3 tm = node->GetNodeTM(i);
+			Matrix3 tm = node->GetNodeTM(i * tpf);
 
 			kf.positions.push_back(point_from_matrix(tm));
 			kf.quaternions.push_back(quat_from_matrix(tm));
@@ -468,14 +492,7 @@ namespace KlayGE
 										joints_[joint_name] = joint;
 									}
 
-									for (binds_t::iterator iter = positions[i].second.begin();
-										iter != positions[i].second.end(); ++ iter)
-									{
-										if (iter->first == joint_name)
-										{
-											iter->second = 1;
-										}
-									}
+									positions[i].second.push_back(std::make_pair(joint_name, 1));
 								}
 								break;
 
@@ -510,13 +527,10 @@ namespace KlayGE
 											joints_[joint_name] = joint;
 										}
 
-										for (binds_t::iterator iter = positions[i].second.begin();
-											iter != positions[i].second.end(); ++ iter)
+										float const weight = phy_blended_rigid_ver->GetWeight(i);
+										if (weight > 0)
 										{
-											if (iter->first == joint_name)
-											{
-												iter->second = phy_blended_rigid_ver->GetWeight(i);
-											}
+											positions[i].second.push_back(std::make_pair(joint_name, weight));
 										}
 									}
 								}
@@ -555,13 +569,11 @@ namespace KlayGE
 						{
 							INode* joint_node = skin->GetBone(skin_cd->GetAssignedBone(i, j));
 							std::string const joint_name = tstr_to_str(joint_node->GetName());
-							for (binds_t::iterator iter = positions[i].second.begin();
-								iter != positions[i].second.end(); ++ iter)
+
+							float const weight = skin_cd->GetBoneWeight(i, j);
+							if (weight > 0)
 							{
-								if (iter->first == joint_name)
-								{
-									iter->second = skin_cd->GetBoneWeight(i, j);
-								}
+								positions[i].second.push_back(std::make_pair(joint_name, weight));
 							}
 						}
 					}

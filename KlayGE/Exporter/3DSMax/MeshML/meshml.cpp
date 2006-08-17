@@ -132,12 +132,9 @@ namespace KlayGE
 		if (!node->IsNodeHidden()
 			|| (BST_CHECKED == SendMessage(GetDlgItem(dlg_wnd, IDC_HIDDEN), BM_GETCHECK, NULL, NULL)))
 		{
-			if (is_mesh(node) && !is_bone(node))
-			{
-				HWND node_list_wnd = ::GetDlgItem(dlg_wnd, IDC_NODE_LIST);
-				int i = ::SendMessage(node_list_wnd, LB_ADDSTRING, NULL, reinterpret_cast<LPARAM>(node->GetName()));
-				::SendMessage(node_list_wnd, LB_SETITEMDATA, i, reinterpret_cast<LPARAM>(node));
-			}
+			HWND node_list_wnd = ::GetDlgItem(dlg_wnd, IDC_NODE_LIST);
+			int i = ::SendMessage(node_list_wnd, LB_ADDSTRING, NULL, reinterpret_cast<LPARAM>(node->GetName()));
+			::SendMessage(node_list_wnd, LB_SETITEMDATA, i, reinterpret_cast<LPARAM>(node));
 		}
 
 		int num_children = node->NumberOfChildren();
