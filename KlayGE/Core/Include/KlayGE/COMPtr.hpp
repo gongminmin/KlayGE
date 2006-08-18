@@ -17,7 +17,9 @@
 #include <KlayGE/config/auto_link.hpp>
 
 #include <boost/smart_ptr.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
 #define BOOST_MEM_FN_ENABLE_STDCALL
+#endif
 #include <boost/mem_fn.hpp>
 
 namespace KlayGE

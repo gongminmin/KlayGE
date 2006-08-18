@@ -106,7 +106,7 @@ namespace KlayGE
 	{
 		// 锁定缓冲区
 		uint8_t* lockedBuffer;			// 指向缓冲区锁定的内存的指针
-		uint32_t lockedBufferSize;		// 锁定的内存大小
+		DWORD lockedBufferSize;		// 锁定的内存大小
 		TIF(buffer_->Lock(fillSize_ * writePos_, fillSize_,
 			reinterpret_cast<void**>(&lockedBuffer), &lockedBufferSize,
 			NULL, NULL, 0));
@@ -144,7 +144,7 @@ namespace KlayGE
 
 		// 锁定缓冲区
 		uint8_t* lockedBuffer;			// 指向缓冲区锁定的内存的指针
-		uint32_t lockedBufferSize;		// 锁定的内存大小
+		DWORD lockedBufferSize;		// 锁定的内存大小
 		TIF(buffer_->Lock(0, fillSize_ * fillCount_,
 			reinterpret_cast<void**>(&lockedBuffer), &lockedBufferSize, NULL, NULL, 0));
 
@@ -196,7 +196,7 @@ namespace KlayGE
 	{
 		if (buffer_)
 		{
-			uint32_t status;
+			DWORD status;
 			buffer_->GetStatus(&status);
 			return ((status & DSBSTATUS_PLAYING) != 0);
 		}

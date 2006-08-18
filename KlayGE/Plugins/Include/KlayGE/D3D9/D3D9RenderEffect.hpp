@@ -422,6 +422,10 @@ namespace KlayGE
 	class D3D9RenderEffectInclude : public ID3DXInclude
 	{
 	public:
+        virtual ~D3D9RenderEffectInclude()
+        {
+        }
+
 		STDMETHOD(Open)(D3DXINCLUDE_TYPE IncludeType, LPCSTR pFileName,
 			LPCVOID pParentData, LPCVOID* ppData, UINT* pBytes);
 		STDMETHOD(Close)(LPCVOID pData);

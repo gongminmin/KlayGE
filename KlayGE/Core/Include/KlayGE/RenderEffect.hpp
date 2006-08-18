@@ -56,7 +56,7 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	class RenderEffect
 	{
-	private:
+	protected:
 		typedef std::map<std::string, std::pair<RenderEffectParameterPtr, bool> > params_type;
 		typedef std::vector<RenderTechniquePtr> techniques_type;
 

@@ -82,6 +82,13 @@
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
+		<Unit filename="..\..\Core\Include\KlayGE\COMPtr.hpp">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
 		<Unit filename="..\..\Core\Include\KlayGE\Camera.hpp">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
@@ -111,6 +118,13 @@
 			<Option target="Release"/>
 		</Unit>
 		<Unit filename="..\..\Core\Include\KlayGE\Context.hpp">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\Core\Include\KlayGE\Detail\MathHelper.hpp">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
@@ -216,6 +230,13 @@
 			<Option target="Release"/>
 		</Unit>
 		<Unit filename="..\..\Core\Include\KlayGE\Mesh.hpp">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\Core\Include\KlayGE\NetMsg.hpp">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
@@ -510,6 +531,13 @@
 			<Option target="Release"/>
 		</Unit>
 		<Unit filename="..\..\Core\Include\KlayGE\Viewport.hpp">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\Core\Include\KlayGE\config\auto_link.hpp">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>

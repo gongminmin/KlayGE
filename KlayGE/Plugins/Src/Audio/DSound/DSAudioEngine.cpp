@@ -61,6 +61,10 @@ namespace KlayGE
 			wfx.wBitsPerSample = 16;
 			wfx.nChannels		= 2;
 			break;
+
+        case AF_Unknown:
+			BOOST_ASSERT(false);
+			break;
 		}
 
 		wfx.nBlockAlign		= wfx.nChannels * wfx.wBitsPerSample / 8;
@@ -107,7 +111,7 @@ namespace KlayGE
 
 		WAVEFORMATEX wfx;
 		std::memset(&wfx, 0, sizeof(wfx));
-		wfx.wFormatTag		= WAVE_FORMAT_PCM; 
+		wfx.wFormatTag		= WAVE_FORMAT_PCM;
 		wfx.nChannels		= 2;
 		wfx.nSamplesPerSec	= 22050;
 		wfx.wBitsPerSample	= 16;

@@ -90,7 +90,7 @@ namespace KlayGE
 			break;
 
 		case WM_SIZE:
-			// Check to see if we are losing or gaining our window.  Set the 
+			// Check to see if we are losing or gaining our window.  Set the
 			// active flag to match
 			if ((SIZE_MAXHIDE == wParam) || (SIZE_MINIMIZED == wParam))
 			{
@@ -129,10 +129,10 @@ namespace KlayGE
 	D3D9RenderWindow::D3D9RenderWindow(ID3D9Ptr const & d3d,
 										D3D9Adapter const & adapter, std::string const & name,
 										RenderSettings const & settings)
-						: d3d_(d3d),
-							adapter_(adapter),
-							hWnd_(NULL),
-							ready_(false), closed_(false)
+						: hWnd_(NULL),
+                            ready_(false), closed_(false),
+                            adapter_(adapter),
+                            d3d_(d3d)
 	{
 		if (settings.multi_sample > 16)
 		{
@@ -240,9 +240,9 @@ namespace KlayGE
 			{
 				BOOST_ASSERT(0 == stencilBits_);
 
-				// Try 32-bit zbuffer 
+				// Try 32-bit zbuffer
 				if (SUCCEEDED(d3d_->CheckDeviceFormat(adapter_.AdapterNo(),
-					D3DDEVTYPE_HAL, d3dpp_.BackBufferFormat, D3DUSAGE_DEPTHSTENCIL, 
+					D3DDEVTYPE_HAL, d3dpp_.BackBufferFormat, D3DUSAGE_DEPTHSTENCIL,
 					D3DRTYPE_SURFACE, D3DFMT_D32)))
 				{
 					d3dpp_.AutoDepthStencilFormat = D3DFMT_D32;
@@ -281,7 +281,7 @@ namespace KlayGE
 					if (SUCCEEDED(d3d_->CheckDepthStencilMatch(adapter_.AdapterNo(),
 							D3DDEVTYPE_HAL, d3dpp_.BackBufferFormat, d3dpp_.BackBufferFormat, D3DFMT_D24S8)))
 					{
-						d3dpp_.AutoDepthStencilFormat = D3DFMT_D24S8; 
+						d3dpp_.AutoDepthStencilFormat = D3DFMT_D24S8;
 						stencilBits_ = 8;
 					}
 					else
@@ -317,7 +317,7 @@ namespace KlayGE
 		d3dpp_.EnableAutoDepthStencil = isDepthBuffered_;
 
 
-		if ((multiSample_ != 0) && SUCCEEDED(d3d_->CheckDeviceMultiSampleType(this->adapter_.AdapterNo(), 
+		if ((multiSample_ != 0) && SUCCEEDED(d3d_->CheckDeviceMultiSampleType(this->adapter_.AdapterNo(),
 			D3DDEVTYPE_HAL, d3dpp_.BackBufferFormat, !isFullScreen_,
 			multiSample_, NULL)))
 		{

@@ -83,9 +83,9 @@ namespace KlayGE
 
 		// 锁定缓冲区
 		uint8_t* lockedBuffer;			// 指向缓冲区锁定的内存的指针
-		uint32_t lockedBufferSize;		// 锁定的内存大小
+		DWORD lockedBufferSize;		// 锁定的内存大小
 		TIF(sources_[0]->Lock(0, static_cast<DWORD>(dataSource_->Size()),
-			reinterpret_cast<void**>(&lockedBuffer), &lockedBufferSize, 
+			reinterpret_cast<void**>(&lockedBuffer), &lockedBufferSize,
 			NULL, NULL, DSBLOCK_FROMWRITECURSOR));
 
 		dataSource_->Reset();
