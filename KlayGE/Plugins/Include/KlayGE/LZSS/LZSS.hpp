@@ -117,10 +117,10 @@ namespace KlayGE
 	public:
 		UnPkt();
 
-		static void UnPkt::Decode(std::ostream& out, std::istream& in);
+		static void Decode(std::ostream& out, std::istream& in);
 
 		void Open(boost::shared_ptr<std::istream> const & pktFile);
-		
+
 		void LocateFile(std::string const & pathName);
 
 		size_t CurFileSize() const;

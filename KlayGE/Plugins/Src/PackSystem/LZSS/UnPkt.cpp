@@ -102,7 +102,7 @@ namespace
 					for (uint32_t k = 0; k <= c2; ++ k)
 					{
 						c = textBuf_[(c1 + k) & (N - 1)];
-						
+
 						*outIter = c;
 						++ outIter;
 
@@ -124,7 +124,7 @@ namespace
 		static int const NIL = N;			// index for root of binary search trees
 
 
-		uint8_t textBuf_[N + F - 1];				// ring buffer of size N, 
+		uint8_t textBuf_[N + F - 1];				// ring buffer of size N,
 											// with extra F-1 bytes to facilitate string comparison
 	};
 

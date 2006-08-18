@@ -51,7 +51,7 @@ namespace KlayGE
 
 	// 建立游戏大厅
 	/////////////////////////////////////////////////////////////////////////////////
-	void Lobby::Create(std::string const & Name, char maxPlayers, uint16_t port, Processer const & pro)
+	void Lobby::Create(std::string const & Name, char maxPlayers, uint16_t port, Processor const & pro)
 	{
 		this->LobbyName(Name);
 
@@ -211,7 +211,7 @@ namespace KlayGE
 
 
 	void Lobby::OnJoin(char* revBuf, char* sendBuf, int& numSend,
-							SOCKADDR_IN& from, Processer const & pro)
+							SOCKADDR_IN& from, Processor const & pro)
 	{
 		// 命令格式:
 		//			Player名字		16 字节
@@ -254,7 +254,7 @@ namespace KlayGE
 	}
 
 	void Lobby::OnQuit(PlayerAddrsIter iter, char* sendBuf,
-							int& numSend, Processer const & pro)
+							int& numSend, Processor const & pro)
 	{
 		if (iter != this->players_.end())
 		{
@@ -270,7 +270,7 @@ namespace KlayGE
 		numSend = 1;
 	}
 
-	void Lobby::OnGetLobbyInfo(char* sendBuf, int& numSend, Processer const & /*pro*/)
+	void Lobby::OnGetLobbyInfo(char* sendBuf, int& numSend, Processor const & /*pro*/)
 	{
 		// 返回格式:
 		//			当前Players数	1 字节

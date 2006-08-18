@@ -22,7 +22,6 @@
 #include <KlayGE/Util.hpp>
 
 #include <iostream>
-using namespace std;
 #include <boost/assert.hpp>
 
 #include <KlayGE/OpenGL/OGLTexture.hpp>
@@ -39,7 +38,7 @@ namespace KlayGE
 		effect_ = cgCreateEffect(renderFactory.CGContext(), srcData.c_str(), NULL);
 		if (0 == effect_)
 		{
-			cerr << cgGetLastListing(renderFactory.CGContext()) << endl;
+			std::cerr << cgGetLastListing(renderFactory.CGContext()) << std::endl;
 		}
 		BOOST_ASSERT(effect_);
 

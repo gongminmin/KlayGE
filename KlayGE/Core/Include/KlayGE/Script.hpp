@@ -76,7 +76,7 @@ namespace KlayGE
 		template <typename ForwardIterator>
 		PyObjectPtr Call(std::string const & funcName, ForwardIterator first, ForwardIterator last)
 		{
-			PyObjectPtr func(MakePyObjectPtr(this->Value(funcName)));
+			PyObjectPtr func(this->Value(funcName));
 			PyObjectPtr args(MakePyObjectPtr(PyTuple_New(last - first)));
 
 			for (ForwardIterator iter = first; iter != last; ++ iter)
@@ -99,8 +99,8 @@ namespace KlayGE
 		return std::vector<PyObjectPtr>();
 	}
 
-	#define BEGIN_REG() 	methods.clear() 
-	#define ADD(x, y) 		AddMethod(x,y) 
+	#define BEGIN_REG() 	methods.clear()
+	#define ADD(x, y) 		AddMethod(x,y)
 	#define END_REG() \
 				do\
 				{\

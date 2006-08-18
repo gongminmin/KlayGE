@@ -29,16 +29,23 @@ namespace KlayGE
 
 	uint32_t const Max_Buffer(64);
 
-	class Processer
+	class Processor
 	{
 	public:
+        virtual ~Processor()
+        {
+        }
+
 		virtual void OnJoin(uint32_t /*ID*/) const
-			{ }
+		{
+        }
 		virtual void OnQuit(uint32_t /*ID*/) const
-			{ }
-		virtual void OnDefault(PVOID /*revBuf*/, int /*maxSize*/,
-			PVOID /*sendBuf*/, int& /*numSend*/, SOCKADDR_IN& /*from*/) const
-			{ }
+		{
+        }
+		virtual void OnDefault(void* /*revBuf*/, int /*maxSize*/,
+			void* /*sendBuf*/, int& /*numSend*/, SOCKADDR_IN& /*from*/) const
+		{
+        }
 	};
 
 	// ÃèÊöPlayer
@@ -61,7 +68,7 @@ namespace KlayGE
 		Lobby();
 		~Lobby();
 
-		void Create(std::string const & Name, char maxPlayers, uint16_t port, Processer const & pro);
+		void Create(std::string const & Name, char maxPlayers, uint16_t port, Processor const & pro);
 		void Close();
 
 		void LobbyName(std::string const & Name);
@@ -84,10 +91,10 @@ namespace KlayGE
 			{ return this->sockAddr_; }
 
 	private:
-		void OnJoin(char* revbuf, char* sendbuf, int& sendnum, SOCKADDR_IN& From, Processer const & pro);
-		void OnQuit(PlayerAddrsIter iter, char* sendbuf, int& sendnum, Processer const & pro);
+		void OnJoin(char* revbuf, char* sendbuf, int& sendnum, SOCKADDR_IN& From, Processor const & pro);
+		void OnQuit(PlayerAddrsIter iter, char* sendbuf, int& sendnum, Processor const & pro);
 
-		void OnGetLobbyInfo(char* sendbuf, int& sendnum, Processer const & pro);
+		void OnGetLobbyInfo(char* sendbuf, int& sendnum, Processor const & pro);
 		void OnNop(PlayerAddrsIter iter);
 
 		PlayerAddrsIter ID(SOCKADDR_IN const & Addr);

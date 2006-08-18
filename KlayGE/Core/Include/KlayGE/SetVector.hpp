@@ -52,21 +52,21 @@ namespace KlayGE
 		typedef typename Allocator::const_reference			const_reference;
 
 	public:
-		explicit SetVector(key_compare const & comp = key_compare(), 
+		explicit SetVector(key_compare const & comp = key_compare(),
 								Allocator const & alloc = Allocator())
 					: container_(alloc), compare_(comp)
 			{ }
 
 		template <class InputIterator>
-        SetVector(InputIterator first, InputIterator last, 
-						key_compare const & comp = key_compare(), 
+        SetVector(InputIterator first, InputIterator last,
+						key_compare const & comp = key_compare(),
 						Allocator const & alloc = Allocator())
 					: container_(first, last, alloc), compare_(comp)
 			{ std::sort(this->begin(), this->end(), compare_); }
-        
+
         SetVector& operator=(SetVector const & rhs)
-        { 
-            SetVector(rhs).swap(*this); 
+        {
+            SetVector(rhs).swap(*this);
             return *this;
         }
 
@@ -84,7 +84,7 @@ namespace KlayGE
 			{ container_.clear(); }
 
 		bool empty() const
-			{ container_.empty(); }
+			{ return container_.empty(); }
 
 		size_type max_size() const
 			{ return container_.max_size(); }
@@ -203,12 +203,12 @@ namespace KlayGE
 		value_compare value_comp() const
 			{ return value_compare(compare_); }
 
-			
+
 		friend bool operator==(SetVector const & lhs, SetVector const & rhs)
-			{ return lhs.container_ == rhs.container_; } 
+			{ return lhs.container_ == rhs.container_; }
 
 		friend bool operator<(SetVector const & lhs, SetVector const & rhs)
-			{ return lhs.container_ < rhs.container_; } 
+			{ return lhs.container_ < rhs.container_; }
 
 	private:
 		ContainerType	container_;
