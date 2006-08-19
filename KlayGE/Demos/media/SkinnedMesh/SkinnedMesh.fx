@@ -10,8 +10,8 @@ float3 eye_pos;
 
 void SkinnedMeshVS(float4 pos : POSITION,
 				float2 tex0 : TEXCOORD0,
-				float3 T	: TEXCOORD1,	// in object space
-				float3 B	: TEXCOORD2,	// in object space
+				float3 T	: TANGENT,	// in object space
+				float3 B	: BINORMAL,	// in object space
 				float4 blend_weights : BLENDWEIGHT,
 				float4 blend_indices : BLENDINDICES,
 				

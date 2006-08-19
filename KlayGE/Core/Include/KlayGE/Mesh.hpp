@@ -38,10 +38,16 @@ namespace KlayGE
 	class StaticMesh : public Renderable
 	{
 	public:
-		typedef std::vector<float3> XYZsType;
+		typedef std::vector<float3> PositionsType;
+		typedef std::vector<float3> NormalsType;
+		typedef std::vector<float4> DiffusesType;
+		typedef std::vector<float4> SpecularsType;
+		typedef std::vector<uint8_t> BlendIndicesType;
+		typedef std::vector<float> BlendWeightsType;
 		typedef std::vector<float2> TexCoordsType;
 		typedef std::vector<TexCoordsType> MultiTexCoordsType;
-		typedef std::vector<float3> NormalsType;
+		typedef std::vector<float3> TangentsType;
+		typedef std::vector<float3> BinormalsType;
 		typedef std::vector<uint16_t> IndicesType;
 
 	public:
@@ -70,7 +76,7 @@ namespace KlayGE
 
 		size_t NumVertices() const
 		{
-			return xyzs_.size();
+			return positions_.size();
 		}
 
 		size_t NumTriangles() const
@@ -79,10 +85,45 @@ namespace KlayGE
 		}
 
 		template <typename ForwardIterator>
-		void AssignXYZs(ForwardIterator first, ForwardIterator last)
+		void AssignPositions(ForwardIterator first, ForwardIterator last)
 		{
-			xyzs_.assign(first, last);
-			box_ = MathLib::compute_bounding_box<float>(xyzs_.begin(), xyzs_.end());
+			positions_.assign(first, last);
+			box_ = MathLib::compute_bounding_box<float>(positions_.begin(), positions_.end());
+			beBuilt_ = false;
+		}
+
+		template <typename ForwardIterator>
+		void AssignNormals(ForwardIterator first, ForwardIterator last)
+		{
+			normals_.assign(first, last);
+			beBuilt_ = false;
+		}
+
+		template <typename ForwardIterator>
+		void AssignDiffuses(ForwardIterator first, ForwardIterator last)
+		{
+			diffuses_.assign(first, last);
+			beBuilt_ = false;
+		}
+
+		template <typename ForwardIterator>
+		void AssignSpeculars(ForwardIterator first, ForwardIterator last)
+		{
+			speculars_.assign(first, last);
+			beBuilt_ = false;
+		}
+
+		template <typename ForwardIterator>
+		void AssignBlendIndices(ForwardIterator first, ForwardIterator last)
+		{
+			blend_indices_.assign(first, last);
+			beBuilt_ = false;
+		}
+
+		template <typename ForwardIterator>
+		void AssignBlendWeights(ForwardIterator first, ForwardIterator last)
+		{
+			blend_weights_.assign(first, last);
 			beBuilt_ = false;
 		}
 
@@ -94,9 +135,16 @@ namespace KlayGE
 		}
 
 		template <typename ForwardIterator>
-		void AssignNormals(ForwardIterator first, ForwardIterator last)
+		void AssignTangents(ForwardIterator first, ForwardIterator last)
 		{
-			normals_.assign(first, last);
+			tangents_.assign(first, last);
+			beBuilt_ = false;
+		}
+
+		template <typename ForwardIterator>
+		void AssignBinormals(ForwardIterator first, ForwardIterator last)
+		{
+			binormals_.assign(first, last);
 			beBuilt_ = false;
 		}
 
@@ -120,9 +168,15 @@ namespace KlayGE
 
 		bool beBuilt_;
 
-		XYZsType xyzs_;
+		PositionsType positions_;
 		NormalsType normals_;
+		DiffusesType diffuses_;
+		SpecularsType speculars_;
+		BlendIndicesType blend_indices_;
+		BlendWeightsType blend_weights_;
 		MultiTexCoordsType multi_tex_coords_;
+		TangentsType tangents_;
+		BinormalsType binormals_;
 		IndicesType indices_;
 	};
 
@@ -281,29 +335,8 @@ namespace KlayGE
 		{
 		}
 
-		template <typename ForwardIterator>
-		void AssignBlendWeights(ForwardIterator first, ForwardIterator last)
-		{
-			blend_weights_.assign(first, last);
-			beBuilt_ = false;
-		}
-
-		template <typename ForwardIterator>
-		void AssignBlendIndices(ForwardIterator first, ForwardIterator last)
-		{
-			blend_indices_.assign(first, last);
-			beBuilt_ = false;
-		}
-
 	protected:
 		virtual void BuildRenderable();
-
-	protected:
-		typedef std::vector<float> BlendWeightsType;
-		BlendWeightsType blend_weights_;
-
-		typedef std::vector<KlayGE::uint8_t> BlendIndicesType;
-		BlendIndicesType blend_indices_;
 	};
 }
 

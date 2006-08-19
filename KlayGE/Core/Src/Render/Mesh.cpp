@@ -69,7 +69,7 @@ namespace KlayGE
 	{
 		this->BuildRenderable();
 
-		if (!xyzs_.empty())
+		if (!positions_.empty())
 		{
 			Renderable::AddToRenderQueue();
 		}
@@ -84,16 +84,16 @@ namespace KlayGE
 	{
 		if (!beBuilt_)
 		{
-			if (!xyzs_.empty())
+			if (!positions_.empty())
 			{
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 				// 建立顶点坐标
 				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static);
-				pos_vb->Resize(static_cast<uint32_t>(xyzs_.size() * sizeof(xyzs_[0])));
+				pos_vb->Resize(static_cast<uint32_t>(positions_.size() * sizeof(positions_[0])));
 				{
 					GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
-					std::copy(xyzs_.begin(), xyzs_.end(), mapper.Pointer<float3>());
+					std::copy(positions_.begin(), positions_.end(), mapper.Pointer<float3>());
 				}
 				rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
@@ -109,6 +109,54 @@ namespace KlayGE
 					rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
 				}
 
+				if (!diffuses_.empty())
+				{
+					// 建立漫反射
+					GraphicsBufferPtr diffuse_vb = rf.MakeVertexBuffer(BU_Static);
+					diffuse_vb->Resize(static_cast<uint32_t>(diffuses_.size() * sizeof(diffuses_[0])));
+					{
+						GraphicsBuffer::Mapper mapper(*diffuse_vb, BA_Write_Only);
+						std::copy(diffuses_.begin(), diffuses_.end(), mapper.Pointer<float4>());
+					}
+					rl_->BindVertexStream(diffuse_vb, boost::make_tuple(vertex_element(VEU_Diffuse, 0, EF_ABGR32F)));
+				}
+
+				if (!speculars_.empty())
+				{
+					// 建立高光
+					GraphicsBufferPtr specular_vb = rf.MakeVertexBuffer(BU_Static);
+					specular_vb->Resize(static_cast<uint32_t>(speculars_.size() * sizeof(speculars_[0])));
+					{
+						GraphicsBuffer::Mapper mapper(*specular_vb, BA_Write_Only);
+						std::copy(speculars_.begin(), speculars_.end(), mapper.Pointer<float4>());
+					}
+					rl_->BindVertexStream(specular_vb, boost::make_tuple(vertex_element(VEU_Diffuse, 0, EF_ABGR32F)));
+				}
+
+				if (!blend_indices_.empty())
+				{
+					// 建立骨骼索引
+					GraphicsBufferPtr blend_index_vb = rf.MakeVertexBuffer(BU_Static);
+					blend_index_vb->Resize(static_cast<uint32_t>(blend_indices_.size() * sizeof(blend_indices_[0])));
+					{
+						GraphicsBuffer::Mapper mapper(*blend_index_vb, BA_Write_Only);
+						std::copy(blend_indices_.begin(), blend_indices_.end(), mapper.Pointer<uint8_t>());
+					}
+					rl_->BindVertexStream(blend_index_vb, boost::make_tuple(vertex_element(VEU_BlendIndex, 0, EF_ARGB8)));
+				}
+
+				if (!blend_weights_.empty())
+				{
+					// 建立骨骼权重
+					GraphicsBufferPtr blend_weight_vb = rf.MakeVertexBuffer(BU_Static);
+					blend_weight_vb->Resize(static_cast<uint32_t>(blend_weights_.size() * sizeof(blend_weights_[0])));
+					{
+						GraphicsBuffer::Mapper mapper(*blend_weight_vb, BA_Write_Only);
+						std::copy(blend_weights_.begin(), blend_weights_.end(), mapper.Pointer<float>());
+					}
+					rl_->BindVertexStream(blend_weight_vb, boost::make_tuple(vertex_element(VEU_BlendWeight, 0, EF_ABGR32F)));
+				}
+
 				// 建立纹理坐标
 				for (size_t i = 0; i < multi_tex_coords_.size(); ++ i)
 				{
@@ -120,6 +168,30 @@ namespace KlayGE
 					}
 					rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_TextureCoord,
 						static_cast<uint8_t>(i), EF_GR32F)));
+				}
+
+				if (!tangents_.empty())
+				{
+					// 建立切线坐标
+					GraphicsBufferPtr tangent_vb = rf.MakeVertexBuffer(BU_Static);
+					tangent_vb->Resize(static_cast<uint32_t>(tangents_.size() * sizeof(tangents_[0])));
+					{
+						GraphicsBuffer::Mapper mapper(*tangent_vb, BA_Write_Only);
+						std::copy(tangents_.begin(), tangents_.end(), mapper.Pointer<float3>());
+					}
+					rl_->BindVertexStream(tangent_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_BGR32F)));
+				}
+
+				if (!binormals_.empty())
+				{
+					// 建立副法线坐标
+					GraphicsBufferPtr binormal_vb = rf.MakeVertexBuffer(BU_Static);
+					binormal_vb->Resize(static_cast<uint32_t>(binormals_.size() * sizeof(tangents_[0])));
+					{
+						GraphicsBuffer::Mapper mapper(*binormal_vb, BA_Write_Only);
+						std::copy(binormals_.begin(), binormals_.end(), mapper.Pointer<float3>());
+					}
+					rl_->BindVertexStream(binormal_vb, boost::make_tuple(vertex_element(VEU_Binormal, 0, EF_BGR32F)));
 				}
 
 				// 建立索引

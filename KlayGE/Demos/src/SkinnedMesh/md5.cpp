@@ -244,7 +244,7 @@ boost::shared_ptr<MD5SkinnedModel> LoadModel(const std::string& fileName)
 				blend_indices.push_back(w[j].joint);
 			}
 		}
-		mesh->AssignXYZs(xyzs.begin(), xyzs.end());
+		mesh->AssignPositions(xyzs.begin(), xyzs.end());
 		mesh->AssignBlendWeights(blend_weights.begin(), blend_weights.end());
 		mesh->AssignBlendIndices(blend_indices.begin(), blend_indices.end());
 

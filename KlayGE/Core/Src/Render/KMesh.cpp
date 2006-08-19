@@ -203,22 +203,73 @@ namespace KlayGE
 			uint32_t num_tex_coords_per_ver;
 			file->read(reinterpret_cast<char*>(&num_tex_coords_per_ver), sizeof(num_tex_coords_per_ver));
 
-			StaticMesh::XYZsType positions(num_vertices);
+			StaticMesh::PositionsType positions(num_vertices);
 			StaticMesh::NormalsType normals(num_vertices);
 			StaticMesh::MultiTexCoordsType multi_tex_coords(num_tex_coords_per_ver);
+			StaticMesh::DiffusesType diffuses(num_vertices);
+			StaticMesh::SpecularsType speculars(num_vertices);
+			StaticMesh::BlendIndicesType blend_indices;
+			StaticMesh::BlendWeightsType blend_weights;
+			StaticMesh::TangentsType tangents(num_vertices);
+			StaticMesh::BinormalsType binormals(num_vertices);
+
 			for (uint32_t k = 0; k < num_tex_coords_per_ver; ++ k)
 			{
 				multi_tex_coords[k].resize(num_vertices);
 			}
 
+			for (uint8_t k = 0; k < num_vertex_elems; ++ k)
+			{
+				if ((VEU_BlendWeight == vertex_elements[k].usage) || (VEU_BlendIndex == vertex_elements[k].usage))
+				{
+					blend_indices.resize(num_vertices * NumComponents(vertex_elements[k].format));
+					blend_weights.resize(num_vertices * NumComponents(vertex_elements[k].format));
+					break;
+				}
+			}
+
 			for (uint32_t j = 0; j < num_vertices; ++ j)
 			{
-				file->read(reinterpret_cast<char*>(&positions[j]), sizeof(positions[j]));
-				file->read(reinterpret_cast<char*>(&normals[j]), sizeof(normals[j]));
-
-				for (uint32_t k = 0; k < num_tex_coords_per_ver; ++ k)
+				for (uint8_t k = 0; k < num_vertex_elems; ++ k)
 				{
-					file->read(reinterpret_cast<char*>(&multi_tex_coords[k][j]), sizeof(multi_tex_coords[k][j]));
+					switch (vertex_elements[k].usage)
+					{
+					case VEU_Position:
+						file->read(reinterpret_cast<char*>(&positions[j]), sizeof(positions[j]));
+						break;
+
+					case VEU_Normal:
+						file->read(reinterpret_cast<char*>(&normals[j]), sizeof(normals[j]));
+						break;
+
+					case VEU_Diffuse:
+						file->read(reinterpret_cast<char*>(&diffuses[j]), sizeof(diffuses[j]));
+						break;
+
+					case VEU_Specular:
+						file->read(reinterpret_cast<char*>(&speculars[j]), sizeof(speculars[j]));
+						break;
+
+					case VEU_BlendIndex:
+						file->read(reinterpret_cast<char*>(&blend_indices[j]), sizeof(blend_indices[j]) * NumComponents(vertex_elements[k].format));
+						break;
+
+					case VEU_BlendWeight:
+						file->read(reinterpret_cast<char*>(&blend_weights[j]), sizeof(blend_weights[j]) * NumComponents(vertex_elements[k].format));
+						break;
+
+					case VEU_TextureCoord:
+						file->read(reinterpret_cast<char*>(&multi_tex_coords[vertex_elements[k].usage_index][j]), sizeof(multi_tex_coords[vertex_elements[k].usage_index][j]));
+						break;
+
+					case VEU_Tangent:
+						file->read(reinterpret_cast<char*>(&tangents[j]), sizeof(tangents[j]));
+						break;
+
+					case VEU_Binormal:
+						file->read(reinterpret_cast<char*>(&binormals[j]), sizeof(binormals[j]));
+						break;
+					}
 				}
 			}
 
@@ -228,9 +279,15 @@ namespace KlayGE
 			file->read(reinterpret_cast<char*>(&indices[0]),
 				static_cast<std::streamsize>(sizeof(indices[0]) * indices.size()));
 
-			mesh->AssignXYZs(positions.begin(), positions.end());
+			mesh->AssignPositions(positions.begin(), positions.end());
 			mesh->AssignNormals(normals.begin(), normals.end());
+			mesh->AssignDiffuses(diffuses.begin(), diffuses.end());
+			mesh->AssignSpeculars(speculars.begin(), speculars.end());
+			mesh->AssignBlendIndices(blend_indices.begin(), blend_indices.end());
+			mesh->AssignBlendWeights(blend_weights.begin(), blend_weights.end());
 			mesh->AssignMultiTexs(multi_tex_coords.begin(), multi_tex_coords.end());
+			mesh->AssignTangents(tangents.begin(), tangents.end());
+			mesh->AssignBinormals(binormals.begin(), binormals.end());
 			mesh->AssignIndices(indices.begin(), indices.end());
 
 			meshes.push_back(mesh);

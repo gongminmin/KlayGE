@@ -801,7 +801,7 @@ namespace KlayGE
 
 			ofs << "\t\t</mesh>" << endl;
 		}
-		ofs << "\t</meshes_chunk>" << endl;
+		ofs << "\t</meshes_chunk>" << endl << endl;
 
 		ofs << "\t<key_frames_chunk start_frame=\'" << start_frame_
 			<< "\' end_frame=\'" << end_frame_

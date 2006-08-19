@@ -65,45 +65,21 @@ namespace
 			height_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
 			height_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
 			*(technique_->Effect().ParameterByName("heightMapSampler")) = height_sampler;
-
-			SamplerPtr normalizer_sampler(new Sampler);
-			normalizer_sampler->SetTexture(LoadTexture("normalizer.dds"));
-			normalizer_sampler->Filtering(Sampler::TFO_Point);
-			normalizer_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-			normalizer_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
-			normalizer_sampler->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
-			*(technique_->Effect().ParameterByName("normalizerMapSampler")) = normalizer_sampler;
 		}
 
 		void ComputeTB()
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			std::vector<float3> normal(xyzs_.size());
+			std::vector<float3> normal(positions_.size());
 			MathLib::compute_normal<float>(normal.begin(),
-				indices_.begin(), indices_.end(), xyzs_.begin(), xyzs_.end());
+				indices_.begin(), indices_.end(), positions_.begin(), positions_.end());
 
-			std::vector<float3> t(xyzs_.size());
-			std::vector<float3> b(xyzs_.size());
-			MathLib::compute_tangent<float>(t.begin(), b.begin(),
+			tangents_.resize(positions_.size());
+			binormals_.resize(positions_.size());
+			MathLib::compute_tangent<float>(tangents_.begin(), binormals_.begin(),
 				indices_.begin(), indices_.end(),
-				xyzs_.begin(), xyzs_.end(), multi_tex_coords_[0].begin(), normal.begin());
+				positions_.begin(), positions_.end(), multi_tex_coords_[0].begin(), normal.begin());
 
-			GraphicsBufferPtr tan_vb = rf.MakeVertexBuffer(BU_Static);
-			tan_vb->Resize(static_cast<uint32_t>(t.size() * sizeof(t[0])));
-			{
-				GraphicsBuffer::Mapper mapper(*tan_vb, BA_Write_Only);
-				std::copy(t.begin(), t.end(), mapper.Pointer<float3>());
-			}
-			GraphicsBufferPtr binormal_vb = rf.MakeVertexBuffer(BU_Static);
-			binormal_vb->Resize(static_cast<uint32_t>(b.size() * sizeof(b[0])));
-			{
-				GraphicsBuffer::Mapper mapper(*binormal_vb, BA_Write_Only);
-				std::copy(b.begin(), b.end(), mapper.Pointer<float3>());
-			}
-
-			rl_->BindVertexStream(tan_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_BGR32F)));
-			rl_->BindVertexStream(binormal_vb, boost::make_tuple(vertex_element(VEU_Binormal, 0, EF_BGR32F)));
+			beBuilt_ = false;
 		}
 
 		void OnRenderBegin()

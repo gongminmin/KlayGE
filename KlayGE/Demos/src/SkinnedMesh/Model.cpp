@@ -79,31 +79,17 @@ void MD5SkinnedMesh::BuildRenderable()
 {
 	if (!beBuilt_)
 	{
-		std::vector<float3> normal(xyzs_.size());
-		MathLib::compute_normal<float>(normal.begin(),
-			indices_.begin(), indices_.end(), xyzs_.begin(), xyzs_.end());
+		NormalsType normals(positions_.size());
+		MathLib::compute_normal<float>(normals.begin(),
+			indices_.begin(), indices_.end(), positions_.begin(), positions_.end());
 
 		// 计算TBN
-		std::vector<float3> t(xyzs_.size());
-		std::vector<float3> b(xyzs_.size());
-		MathLib::compute_tangent<float>(t.begin(), b.begin(),
+		tangents_.resize(positions_.size());
+		binormals_.resize(positions_.size());
+		MathLib::compute_tangent<float>(tangents_.begin(), binormals_.begin(),
 			indices_.begin(), indices_.end(),
-			xyzs_.begin(), xyzs_.end(),
-			multi_tex_coords_[0].begin(), normal.begin());
-		GraphicsBufferPtr tan = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(BU_Static);
-		tan->Resize(static_cast<uint32_t>(t.size() * sizeof(t[0])));
-		{
-			GraphicsBuffer::Mapper mapper(*tan, BA_Write_Only);
-			std::copy(t.begin(), t.end(), mapper.Pointer<float3>());
-		}
-		rl_->BindVertexStream(tan, boost::make_tuple(vertex_element(VEU_TextureCoord, 1, EF_BGR32F)));
-		GraphicsBufferPtr bn = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(BU_Static);
-		bn->Resize(static_cast<uint32_t>(b.size() * sizeof(b[0])));
-		{
-			GraphicsBuffer::Mapper mapper(*bn, BA_Write_Only);
-			std::copy(b.begin(), b.end(), mapper.Pointer<float3>());
-		}
-		rl_->BindVertexStream(bn, boost::make_tuple(vertex_element(VEU_TextureCoord, 2, EF_BGR32F)));
+			positions_.begin(), positions_.end(),
+			multi_tex_coords_[0].begin(), normals.begin());
 
 		// 建立纹理
 		std::string shader(shader_);

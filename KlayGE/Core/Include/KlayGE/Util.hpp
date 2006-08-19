@@ -118,14 +118,14 @@ namespace KlayGE
 	#ifdef KLAYGE_LITTLE_ENDIAN
 		EndianSwitch<size>(p);
 	#else
-		p;
+		p = p;
 	#endif
 	}
 	template <int size>
 	void NativeToLittleEndian(void* p)
 	{
 	#ifdef KLAYGE_LITTLE_ENDIAN
-		p;
+		p = p;
 	#else
 		EndianSwitch<size>(p);
 	#endif
