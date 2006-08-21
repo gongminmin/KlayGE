@@ -137,8 +137,7 @@ boost::shared_ptr<MD5SkinnedModel> LoadModel(const std::string& fileName)
 		int numverts;
 		fscanf(fp, "numverts %d\n", &numverts);
 		std::vector<float3> xyzs(numverts);
-		std::vector<std::vector<float2> > texs(1);
-		texs[0].reserve(numverts);
+		std::vector<float2> texs(numverts);
 		std::vector<std::pair<uint32_t, uint32_t> > weightIndexCounts;
 		weightIndexCounts.reserve(numverts);
 		for (int j = 0; j < numverts; ++ j)
@@ -149,15 +148,15 @@ boost::shared_ptr<MD5SkinnedModel> LoadModel(const std::string& fileName)
 
 			fscanf(fp, "vert %d %f %f %d %d\n",
 				&meshindex,
-				&tex.x(),
-				&tex.y(),
+				&texs[j].x(),
+				&texs[j].y(),
 				&weightIndex,
 				&weightCount);
 
-			texs[0].push_back(tex);
 			weightIndexCounts.push_back(std::make_pair(weightIndex, weightCount));
 		}
-		mesh->AssignMultiTexs(texs.begin(), texs.end());
+		mesh->AddVertexStream(&texs[0], static_cast<uint32_t>(sizeof(texs[0]) * texs.size()),
+			vertex_element(VEU_TextureCoord, 0, EF_GR32F));
 
 		fscanf(fp, "\n");
 
@@ -175,7 +174,7 @@ boost::shared_ptr<MD5SkinnedModel> LoadModel(const std::string& fileName)
 			indices.push_back(static_cast<uint16_t>(a));
 			indices.push_back(static_cast<uint16_t>(c));
 		}
-		mesh->AssignIndices(indices.begin(), indices.end());
+		mesh->AddIndexStream(&indices[0], static_cast<uint32_t>(sizeof(indices[0]) * indices.size()), EF_R16);
 
 		fscanf(fp, "\n");
 
@@ -244,9 +243,14 @@ boost::shared_ptr<MD5SkinnedModel> LoadModel(const std::string& fileName)
 				blend_indices.push_back(w[j].joint);
 			}
 		}
-		mesh->AssignPositions(xyzs.begin(), xyzs.end());
-		mesh->AssignBlendWeights(blend_weights.begin(), blend_weights.end());
-		mesh->AssignBlendIndices(blend_indices.begin(), blend_indices.end());
+		mesh->AddVertexStream(&xyzs[0], static_cast<uint32_t>(sizeof(xyzs[0]) * xyzs.size()),
+			vertex_element(VEU_Position, 0, EF_BGR32F));
+		mesh->AddVertexStream(&blend_weights[0], static_cast<uint32_t>(sizeof(blend_weights[0]) * blend_weights.size()),
+			vertex_element(VEU_BlendWeight, 0, EF_ABGR32F));
+		mesh->AddVertexStream(&blend_indices[0], static_cast<uint32_t>(sizeof(blend_indices[0]) * blend_indices.size()),
+			vertex_element(VEU_BlendIndex, 0, EF_ARGB8));
+
+		mesh->ComputeTB();
 
 		meshes.push_back(mesh);
 	}

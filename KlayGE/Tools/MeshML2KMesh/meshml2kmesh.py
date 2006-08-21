@@ -100,8 +100,8 @@ def parse_model(dom):
 	ret = model()
 
 	ret.version = int(dom.documentElement.getAttribute('version'))
-	if ret.version != 2:
-		print "model version must be 2"
+	if ret.version != 3:
+		print "model version must be 3"
 		raise
 
 	if len(dom.documentElement.getElementsByTagName('bones_chunk')) > 0:
@@ -261,23 +261,29 @@ if __name__ == '__main__':
 
 		ofs.write(pack('L', len(mesh.vertices)))
 		ofs.write(pack('L', len(mesh.vertices[0].texs)))
-		for vertex in mesh.vertices:
-			for vertex_elem in mesh.vertex_elems:
-				if (VEU_Position == vertex_elem.usage):
+		for vertex_elem in mesh.vertex_elems:
+			if (VEU_Position == vertex_elem.usage):
+				for vertex in mesh.vertices:
 					ofs.write(pack('fff', vertex.pos.x, vertex.pos.y, vertex.pos.z))
-				elif (VEU_Normal == vertex_elem.usage):
+			elif (VEU_Normal == vertex_elem.usage):
+				for vertex in mesh.vertices:
 					ofs.write(pack('fff', vertex.normal.x, vertex.normal.y, vertex.normal.z))
-				elif (VEU_Diffuse == vertex_elem.usage):
+			elif (VEU_Diffuse == vertex_elem.usage):
+				for vertex in mesh.vertices:
 					ofs.write(pack('ffff', vertex.diffuse.x, vertex.diffuse.y, vertex.diffuse.z, vertex.diffuse.w))
-				elif (VEU_Specular == vertex_elem.usage):
+			elif (VEU_Specular == vertex_elem.usage):
+				for vertex in mesh.vertices:
 					ofs.write(pack('ffff', vertex.specular.x, vertex.specular.y, vertex.specular.z, vertex.specular.w))
-				elif (VEU_BlendIndex == vertex_elem.usage):
+			elif (VEU_BlendIndex == vertex_elem.usage):
+				for vertex in mesh.vertices:
 					for index in vertex.blend_indices:
 						ofs.write(pack('B', index))
-				elif (VEU_BlendWeight == vertex_elem.usage):
+			elif (VEU_BlendWeight == vertex_elem.usage):
+				for vertex in mesh.vertices:
 					for weight in vertex.blend_weights:
 						ofs.write(pack('f', weight))
-				elif VEU_TextureCoord == vertex_elem.usage:
+			elif VEU_TextureCoord == vertex_elem.usage:
+				for vertex in mesh.vertices:
 					tex = vertex.texs[vertex_elem.usage_index]
 					if 1 == vertex_elem.num_components:
 						ofs.write(pack('f', tex.x))
@@ -285,9 +291,11 @@ if __name__ == '__main__':
 						ofs.write(pack('ff', tex.x, tex.y))
 					elif 3 == vertex_elem.num_components:
 						ofs.write(pack('fff', tex.x, tex.y, tex.z))
-				elif (VEU_Tangent == vertex_elem.usage):
+			elif (VEU_Tangent == vertex_elem.usage):
+				for vertex in mesh.vertices:
 					ofs.write(pack('fff', vertex.tangent.x, vertex.tangent.y, vertex.tangent.z))
-				elif (VEU_Binormal == vertex_elem.usage):
+			elif (VEU_Binormal == vertex_elem.usage):
+				for vertex in mesh.vertices:
 					ofs.write(pack('fff', vertex.binormal.x, vertex.binormal.y, vertex.binormal.z))
 
 		ofs.write(pack('L', len(mesh.triangles)))

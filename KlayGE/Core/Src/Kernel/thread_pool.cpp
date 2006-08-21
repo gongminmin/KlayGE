@@ -14,10 +14,7 @@
 
 #include <boost/bind.hpp>
 
-#pragma warning(push)
-#pragma warning(disable: 4127 4189)
 #include <KlayGE/thread_pool.hpp>
-#pragma warning(pop)
 
 namespace KlayGE
 {

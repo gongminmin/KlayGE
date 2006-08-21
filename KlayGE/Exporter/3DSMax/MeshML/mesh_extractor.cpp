@@ -703,7 +703,7 @@ namespace KlayGE
 
 		ofs << "<?xml version=\'1.0\' encoding=\'utf-8\' standalone=\'no\'?>" << endl;
 		ofs << "<!DOCTYPE Model SYSTEM \'model.dtd\'>" << endl << endl;
-		ofs << "<model version=\'2\'>" << endl;
+		ofs << "<model version=\'3\'>" << endl;
 
 		ofs << "\t<bones_chunk>" << endl;
 		for (std::vector<std::string>::const_iterator iter = joints_id_to_name.begin(); iter != joints_id_to_name.end(); ++ iter)

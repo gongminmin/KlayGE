@@ -40,6 +40,73 @@ MD5SkinnedMesh::MD5SkinnedMesh(boost::shared_ptr<MD5SkinnedModel> model)
 	specular_map_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
 }
 
+void MD5SkinnedMesh::ComputeTB()
+{
+	std::vector<float3> positions(this->NumVertices());
+	std::vector<float2> texcoords(this->NumVertices());
+	for (uint32_t i = 0; i < rl_->NumVertexStreams(); ++ i)
+	{
+		GraphicsBufferPtr vb = rl_->GetVertexStream(i);
+		switch (rl_->VertexStreamFormat(i)[0].usage)
+		{
+		case VEU_Position:
+			{
+				GraphicsBuffer::Mapper mapper(*vb, BA_Read_Only);
+				std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + positions.size(), positions.begin());
+			}
+			break;
+
+		case VEU_TextureCoord:
+			{
+				GraphicsBuffer::Mapper mapper(*vb, BA_Read_Only);
+				std::copy(mapper.Pointer<float2>(), mapper.Pointer<float2>() + texcoords.size(), texcoords.begin());
+			}
+			break;
+
+		default:
+			break;
+		}
+	}
+	std::vector<uint16_t> indices(this->NumTriangles() * 3);
+	{
+		GraphicsBuffer::Mapper mapper(*rl_->GetIndexStream(), BA_Read_Only);
+		std::copy(mapper.Pointer<uint16_t>(), mapper.Pointer<uint16_t>() + indices.size(), indices.begin());
+	}
+
+	std::vector<float3> normals(this->NumVertices());
+	MathLib::compute_normal<float>(normals.begin(),
+		indices.begin(), indices.end(), positions.begin(), positions.end());
+
+	// 计算TBN
+	std::vector<float3> tangents(this->NumVertices());
+	std::vector<float3> binormals(this->NumVertices());
+	MathLib::compute_tangent<float>(tangents.begin(), binormals.begin(),
+		indices.begin(), indices.end(),
+		positions.begin(), positions.end(),
+		texcoords.begin(), normals.begin());
+	this->AddVertexStream(&tangents[0], static_cast<uint32_t>(sizeof(tangents[0]) * tangents.size()),
+			vertex_element(VEU_Tangent, 0, EF_BGR32F));
+	this->AddVertexStream(&binormals[0], static_cast<uint32_t>(sizeof(binormals[0]) * binormals.size()),
+			vertex_element(VEU_Binormal, 0, EF_BGR32F));
+
+	// 建立纹理
+	std::string shader(shader_);
+
+	if (shader.find_last_of("_d") == shader.length() - 1)
+	{
+		shader = shader.substr(0, shader.length() - 2);
+		diffuse_map_->SetTexture(LoadTexture(shader + "_d.dds"));
+		normal_map_->SetTexture(LoadTexture(shader + "_local.dds"));
+		specular_map_->SetTexture(LoadTexture(shader + "_s.dds"));
+	}
+	else
+	{
+		diffuse_map_->SetTexture(LoadTexture(shader + ".dds"));
+		normal_map_->SetTexture(TexturePtr());
+		specular_map_->SetTexture(TexturePtr());
+	}
+}
+
 void MD5SkinnedMesh::OnRenderBegin()
 {
 	App3DFramework& app = Context::Instance().AppInstance();
@@ -73,43 +140,6 @@ void MD5SkinnedMesh::SetShaderName(std::string const & shader)
 void MD5SkinnedMesh::SetEyePos(const KlayGE::float3& eye_pos)
 {
 	eye_pos_ = eye_pos;
-}
-
-void MD5SkinnedMesh::BuildRenderable()
-{
-	if (!beBuilt_)
-	{
-		NormalsType normals(positions_.size());
-		MathLib::compute_normal<float>(normals.begin(),
-			indices_.begin(), indices_.end(), positions_.begin(), positions_.end());
-
-		// 计算TBN
-		tangents_.resize(positions_.size());
-		binormals_.resize(positions_.size());
-		MathLib::compute_tangent<float>(tangents_.begin(), binormals_.begin(),
-			indices_.begin(), indices_.end(),
-			positions_.begin(), positions_.end(),
-			multi_tex_coords_[0].begin(), normals.begin());
-
-		// 建立纹理
-		std::string shader(shader_);
-
-		if (shader.find_last_of("_d") == shader.length() - 1)
-		{
-			shader = shader.substr(0, shader.length() - 2);
-			diffuse_map_->SetTexture(LoadTexture(shader + "_d.dds"));
-			normal_map_->SetTexture(LoadTexture(shader + "_local.dds"));
-			specular_map_->SetTexture(LoadTexture(shader + "_s.dds"));
-		}
-		else
-		{
-			diffuse_map_->SetTexture(LoadTexture(shader + ".dds"));
-			normal_map_->SetTexture(TexturePtr());
-			specular_map_->SetTexture(TexturePtr());
-		}
-	}
-
-	SkinnedMesh::BuildRenderable();
 }
 
 

@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <boost/mem_fn.hpp>
+#include <boost/tuple/tuple.hpp>
 
 #include <KlayGE/Mesh.hpp>
 
@@ -50,8 +51,7 @@ namespace KlayGE
 
 
 	StaticMesh::StaticMesh(std::wstring const & name)
-		: name_(name),
-			beBuilt_(false)
+		: name_(name)
 	{
 		rl_ = Context::Instance().RenderFactoryInstance().MakeRenderLayout(RenderLayout::BT_TriangleList);
 	}
@@ -65,147 +65,57 @@ namespace KlayGE
 		return name_;
 	}
 
-	void StaticMesh::AddToRenderQueue()
-	{
-		this->BuildRenderable();
-
-		if (!positions_.empty())
-		{
-			Renderable::AddToRenderQueue();
-		}
-	}
-
 	Box StaticMesh::GetBound() const
 	{
 		return box_;
 	}
 
-	void StaticMesh::BuildRenderable()
+	void StaticMesh::AddVertexStream(void const * buf, uint32_t size, vertex_element const & ve)
 	{
-		if (!beBuilt_)
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static);
+		vb->Resize(size);
 		{
-			if (!positions_.empty())
-			{
-				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-				// 建立顶点坐标
-				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static);
-				pos_vb->Resize(static_cast<uint32_t>(positions_.size() * sizeof(positions_[0])));
-				{
-					GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
-					std::copy(positions_.begin(), positions_.end(), mapper.Pointer<float3>());
-				}
-				rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
-
-				if (!normals_.empty())
-				{
-					// 建立法线坐标
-					GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static);
-					normal_vb->Resize(static_cast<uint32_t>(normals_.size() * sizeof(normals_[0])));
-					{
-						GraphicsBuffer::Mapper mapper(*normal_vb, BA_Write_Only);
-						std::copy(normals_.begin(), normals_.end(), mapper.Pointer<float3>());
-					}
-					rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
-				}
-
-				if (!diffuses_.empty())
-				{
-					// 建立漫反射
-					GraphicsBufferPtr diffuse_vb = rf.MakeVertexBuffer(BU_Static);
-					diffuse_vb->Resize(static_cast<uint32_t>(diffuses_.size() * sizeof(diffuses_[0])));
-					{
-						GraphicsBuffer::Mapper mapper(*diffuse_vb, BA_Write_Only);
-						std::copy(diffuses_.begin(), diffuses_.end(), mapper.Pointer<float4>());
-					}
-					rl_->BindVertexStream(diffuse_vb, boost::make_tuple(vertex_element(VEU_Diffuse, 0, EF_ABGR32F)));
-				}
-
-				if (!speculars_.empty())
-				{
-					// 建立高光
-					GraphicsBufferPtr specular_vb = rf.MakeVertexBuffer(BU_Static);
-					specular_vb->Resize(static_cast<uint32_t>(speculars_.size() * sizeof(speculars_[0])));
-					{
-						GraphicsBuffer::Mapper mapper(*specular_vb, BA_Write_Only);
-						std::copy(speculars_.begin(), speculars_.end(), mapper.Pointer<float4>());
-					}
-					rl_->BindVertexStream(specular_vb, boost::make_tuple(vertex_element(VEU_Diffuse, 0, EF_ABGR32F)));
-				}
-
-				if (!blend_indices_.empty())
-				{
-					// 建立骨骼索引
-					GraphicsBufferPtr blend_index_vb = rf.MakeVertexBuffer(BU_Static);
-					blend_index_vb->Resize(static_cast<uint32_t>(blend_indices_.size() * sizeof(blend_indices_[0])));
-					{
-						GraphicsBuffer::Mapper mapper(*blend_index_vb, BA_Write_Only);
-						std::copy(blend_indices_.begin(), blend_indices_.end(), mapper.Pointer<uint8_t>());
-					}
-					rl_->BindVertexStream(blend_index_vb, boost::make_tuple(vertex_element(VEU_BlendIndex, 0, EF_ARGB8)));
-				}
-
-				if (!blend_weights_.empty())
-				{
-					// 建立骨骼权重
-					GraphicsBufferPtr blend_weight_vb = rf.MakeVertexBuffer(BU_Static);
-					blend_weight_vb->Resize(static_cast<uint32_t>(blend_weights_.size() * sizeof(blend_weights_[0])));
-					{
-						GraphicsBuffer::Mapper mapper(*blend_weight_vb, BA_Write_Only);
-						std::copy(blend_weights_.begin(), blend_weights_.end(), mapper.Pointer<float>());
-					}
-					rl_->BindVertexStream(blend_weight_vb, boost::make_tuple(vertex_element(VEU_BlendWeight, 0, EF_ABGR32F)));
-				}
-
-				// 建立纹理坐标
-				for (size_t i = 0; i < multi_tex_coords_.size(); ++ i)
-				{
-					GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static);
-					tex_vb->Resize(static_cast<uint32_t>(multi_tex_coords_[i].size() * sizeof(multi_tex_coords_[i][0])));
-					{
-						GraphicsBuffer::Mapper mapper(*tex_vb, BA_Write_Only);
-						std::copy(multi_tex_coords_[i].begin(), multi_tex_coords_[i].end(), mapper.Pointer<float2>());
-					}
-					rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_TextureCoord,
-						static_cast<uint8_t>(i), EF_GR32F)));
-				}
-
-				if (!tangents_.empty())
-				{
-					// 建立切线坐标
-					GraphicsBufferPtr tangent_vb = rf.MakeVertexBuffer(BU_Static);
-					tangent_vb->Resize(static_cast<uint32_t>(tangents_.size() * sizeof(tangents_[0])));
-					{
-						GraphicsBuffer::Mapper mapper(*tangent_vb, BA_Write_Only);
-						std::copy(tangents_.begin(), tangents_.end(), mapper.Pointer<float3>());
-					}
-					rl_->BindVertexStream(tangent_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_BGR32F)));
-				}
-
-				if (!binormals_.empty())
-				{
-					// 建立副法线坐标
-					GraphicsBufferPtr binormal_vb = rf.MakeVertexBuffer(BU_Static);
-					binormal_vb->Resize(static_cast<uint32_t>(binormals_.size() * sizeof(tangents_[0])));
-					{
-						GraphicsBuffer::Mapper mapper(*binormal_vb, BA_Write_Only);
-						std::copy(binormals_.begin(), binormals_.end(), mapper.Pointer<float3>());
-					}
-					rl_->BindVertexStream(binormal_vb, boost::make_tuple(vertex_element(VEU_Binormal, 0, EF_BGR32F)));
-				}
-
-				// 建立索引
-				GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static);
-				ib->Resize(static_cast<uint32_t>(indices_.size() * sizeof(indices_[0])));
-				{
-					GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
-					std::copy(indices_.begin(), indices_.end(), mapper.Pointer<uint16_t>());
-				}
-				rl_->BindIndexStream(ib, EF_R16);
-			}
-
-			beBuilt_ = true;
+			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
+			std::copy(static_cast<uint8_t const *>(buf), static_cast<uint8_t const *>(buf) + size,
+				mapper.Pointer<uint8_t>());
 		}
+		rl_->BindVertexStream(vb, boost::make_tuple(ve));
+
+		if (VEU_Position == ve.usage)
+		{
+			switch (ve.format)
+			{
+			case EF_BGR32F:
+				box_ = MathLib::compute_bounding_box<float>(static_cast<float3 const *>(buf),
+					static_cast<float3 const *>(buf) + size / sizeof(float3));
+				break;
+
+			case EF_ABGR32F:
+				box_ = MathLib::compute_bounding_box<float>(static_cast<float4 const *>(buf),
+					static_cast<float4 const *>(buf) + size / sizeof(float4));
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				break;
+			}
+		}
+	}
+
+	void StaticMesh::AddIndexStream(void const * buf, uint32_t size, ElementFormat format)
+	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static);
+		ib->Resize(size);
+		{
+			GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
+			std::copy(static_cast<uint8_t const *>(buf), static_cast<uint8_t const *>(buf) + size,
+				mapper.Pointer<uint8_t>());
+		}
+		rl_->BindIndexStream(ib, format);
 	}
 
 
@@ -279,29 +189,5 @@ namespace KlayGE
 	SkinnedMesh::SkinnedMesh(std::wstring const & name)
 		: StaticMesh(name)
 	{
-	}
-
-	void SkinnedMesh::BuildRenderable()
-	{
-		if (!beBuilt_)
-		{
-			// 填充混合信息
-			GraphicsBufferPtr bw = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(BU_Static);
-			bw->Resize(static_cast<uint32_t>(blend_weights_.size() * sizeof(blend_weights_[0])));
-			{
-				GraphicsBuffer::Mapper mapper(*bw, BA_Write_Only);
-				std::copy(blend_weights_.begin(), blend_weights_.end(), mapper.Pointer<float>());
-			}
-			rl_->BindVertexStream(bw, boost::make_tuple(vertex_element(VEU_BlendWeight, 0, EF_ABGR32F)));
-			GraphicsBufferPtr bi = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(BU_Static);
-			bi->Resize(static_cast<uint32_t>(blend_indices_.size() * sizeof(blend_indices_[0])));
-			{
-				GraphicsBuffer::Mapper mapper(*bi, BA_Write_Only);
-				std::copy(blend_indices_.begin(), blend_indices_.end(), mapper.Pointer<uint8_t>());
-			}
-			rl_->BindVertexStream(bi, boost::make_tuple(vertex_element(VEU_BlendIndex, 0, EF_ARGB8)));
-		}
-
-		StaticMesh::BuildRenderable();
 	}
 }

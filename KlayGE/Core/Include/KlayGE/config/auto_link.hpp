@@ -14,7 +14,7 @@
 #endif
 
 #pragma comment(lib, LIB_FILE_NAME)
-#pragma message("Linking to lib file: " LIB_FILE_NAME)
+//#pragma message("Linking to lib file: " LIB_FILE_NAME)
 #undef LIB_FILE_NAME
 
 #endif

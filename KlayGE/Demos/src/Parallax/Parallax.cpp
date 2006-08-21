@@ -13,6 +13,7 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Sampler.hpp>
 #include <KlayGE/KMesh.hpp>
+#include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
@@ -69,17 +70,51 @@ namespace
 
 		void ComputeTB()
 		{
-			std::vector<float3> normal(positions_.size());
+			std::vector<float3> positions(this->NumVertices());
+			std::vector<float2> texcoords(this->NumVertices());
+			for (uint32_t i = 0; i < rl_->NumVertexStreams(); ++ i)
+			{
+				GraphicsBufferPtr vb = rl_->GetVertexStream(i);
+				switch (rl_->VertexStreamFormat(i)[0].usage)
+				{
+				case VEU_Position:
+					{
+						GraphicsBuffer::Mapper mapper(*vb, BA_Read_Only);
+						std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + positions.size(), positions.begin());
+					}
+					break;
+
+				case VEU_TextureCoord:
+					{
+						GraphicsBuffer::Mapper mapper(*vb, BA_Read_Only);
+						std::copy(mapper.Pointer<float2>(), mapper.Pointer<float2>() + texcoords.size(), texcoords.begin());
+					}
+					break;
+
+				default:
+					break;
+				}
+			}
+			std::vector<uint16_t> indices(this->NumTriangles() * 3);
+			{
+				GraphicsBuffer::Mapper mapper(*rl_->GetIndexStream(), BA_Read_Only);
+				std::copy(mapper.Pointer<uint16_t>(), mapper.Pointer<uint16_t>() + indices.size(), indices.begin());
+			}
+
+			std::vector<float3> normal(this->NumVertices());
 			MathLib::compute_normal<float>(normal.begin(),
-				indices_.begin(), indices_.end(), positions_.begin(), positions_.end());
+				indices.begin(), indices.end(), positions.begin(), positions.end());
 
-			tangents_.resize(positions_.size());
-			binormals_.resize(positions_.size());
-			MathLib::compute_tangent<float>(tangents_.begin(), binormals_.begin(),
-				indices_.begin(), indices_.end(),
-				positions_.begin(), positions_.end(), multi_tex_coords_[0].begin(), normal.begin());
+			std::vector<float3> tangents(this->NumVertices());
+			std::vector<float3> binormals(this->NumVertices());
+			MathLib::compute_tangent<float>(tangents.begin(), binormals.begin(),
+				indices.begin(), indices.end(),
+				positions.begin(), positions.end(), texcoords.begin(), normal.begin());
 
-			beBuilt_ = false;
+			this->AddVertexStream(&tangents[0], static_cast<uint32_t>(sizeof(tangents[0]) * tangents.size()),
+				vertex_element(VEU_Tangent, 0, EF_BGR32F));
+			this->AddVertexStream(&binormals[0], static_cast<uint32_t>(sizeof(binormals[0]) * binormals.size()),
+				vertex_element(VEU_Binormal, 0, EF_BGR32F));
 		}
 
 		void OnRenderBegin()

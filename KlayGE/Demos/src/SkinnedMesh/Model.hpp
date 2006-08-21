@@ -25,9 +25,9 @@ public:
 	void SetShaderName(std::string const & shader);
 	void SetEyePos(const KlayGE::float3& eye_pos);
 
-private:
-	void BuildRenderable();
+	void ComputeTB();
 
+private:
 	KlayGE::float4x4 world_;
 
 	std::string shader_;

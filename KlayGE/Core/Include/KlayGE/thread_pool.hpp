@@ -13,7 +13,10 @@
 #ifndef _THREADPOOL_HPP
 #define _THREADPOOL_HPP
 
+#pragma warning(push)
+#pragma warning(disable: 4127 4189)
 #include <boost/thread.hpp>
+#pragma warning(pop)
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
 #include <vector>
