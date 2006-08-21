@@ -35,7 +35,7 @@ namespace KlayGE
 		frData	= MakeFourCC<'d', 'a', 't', 'a'>::value,
 	};
 
-	#ifdef KLAYGE_COMPILER_MSVC
+	#ifdef KLAYGE_PLATFORM_WINDOWS
 		#pragma pack(push, 1)						// ¹Ø±Õ¶ÔÆë
 	#endif
 
@@ -73,7 +73,7 @@ namespace KlayGE
 		uint16_t			extraSize;
 	};
 
-	#ifdef KLAYGE_COMPILER_MSVC
+	#ifdef KLAYGE_PLATFORM_WINDOWS
 		#pragma pack(pop)
 	#endif
 

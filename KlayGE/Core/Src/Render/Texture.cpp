@@ -28,7 +28,7 @@ namespace
 {
 	using namespace KlayGE;
 
-#ifdef KLAYGE_COMPILER_MSVC
+#ifdef KLAYGE_PLATFORM_WINDOWS
 #pragma pack(push, 1)
 #endif
 
@@ -143,7 +143,7 @@ namespace
 		uint32_t		reserved2;
 	};
 
-#ifdef KLAYGE_COMPILER_MSVC
+#ifdef KLAYGE_PLATFORM_WINDOWS
 #pragma pack(pop)
 #endif
 }
