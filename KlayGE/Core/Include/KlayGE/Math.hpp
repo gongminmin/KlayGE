@@ -1,8 +1,11 @@
 // Math.hpp
 // KlayGE 数学函数库 头文件
-// Ver 2.6.0
-// 版权所有(C) 龚敏敏, 2003-2005
+// Ver 3.4.0
+// 版权所有(C) 龚敏敏, 2003-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.4.0
+// 增加了refract和fresnel_term (2006.8.22)
 //
 // 2.6.0
 // 改进了ComputeBoundingSphere (2005.5.23)
@@ -522,6 +525,34 @@ namespace KlayGE
 
 		template <typename T>
 		inline Vector_T<T, 3>
+		refract(Vector_T<T, 3> const & incident, Vector_T<T, 3> const & normal, T const & refraction_index)
+		{
+			T t = dot(incident, normal);
+			T r = T(1) - refraction_index * refraction_index * (T(1) - t * t);
+
+			if (r < 0.0f)
+			{
+				// Total internal reflection
+				return Vector_T<T, 3>::Zero();
+			}
+			else
+			{
+				T s = refraction_index * t + sqrt(r);
+				return refraction_index * incident - s * normal;
+			}
+		}
+
+		template <typename T>
+		T fresnel_term(T const & cos_theta, T const & refraction_index)
+		{
+			T g = sqrt(sqr(refraction_index) + sqr(cos_theta) - 1);
+			return T(0.5) * sqr(g + cos_theta) / sqr(g - cos_theta)
+					* (sqr(cos_theta * (g + cos_theta) - 1) / sqr(cos_theta * (g - cos_theta) + 1) + 1);
+		}
+
+
+		template <typename T>
+		inline Vector_T<T, 3>
 		transform_quat(Vector_T<T, 3> const & v, Quaternion_T<T> const & quat)
 		{
 			// result = av + bq + c(q.v CROSS v)
@@ -611,17 +642,17 @@ namespace KlayGE
 				lhs(0, 0) * tmp(1, 0) + lhs(0, 1) * tmp(1, 1) + lhs(0, 2) * tmp(1, 2) + lhs(0, 3) * tmp(1, 3),
 				lhs(0, 0) * tmp(2, 0) + lhs(0, 1) * tmp(2, 1) + lhs(0, 2) * tmp(2, 2) + lhs(0, 3) * tmp(2, 3),
 				lhs(0, 0) * tmp(3, 0) + lhs(0, 1) * tmp(3, 1) + lhs(0, 2) * tmp(3, 2) + lhs(0, 3) * tmp(3, 3),
-																										   
+
 				lhs(1, 0) * tmp(0, 0) + lhs(1, 1) * tmp(0, 1) + lhs(1, 2) * tmp(0, 2) + lhs(1, 3) * tmp(0, 3),
 				lhs(1, 0) * tmp(1, 0) + lhs(1, 1) * tmp(1, 1) + lhs(1, 2) * tmp(1, 2) + lhs(1, 3) * tmp(1, 3),
 				lhs(1, 0) * tmp(2, 0) + lhs(1, 1) * tmp(2, 1) + lhs(1, 2) * tmp(2, 2) + lhs(1, 3) * tmp(2, 3),
 				lhs(1, 0) * tmp(3, 0) + lhs(1, 1) * tmp(3, 1) + lhs(1, 2) * tmp(3, 2) + lhs(1, 3) * tmp(3, 3),
-																										   
+
 				lhs(2, 0) * tmp(0, 0) + lhs(2, 1) * tmp(0, 1) + lhs(2, 2) * tmp(0, 2) + lhs(2, 3) * tmp(0, 3),
 				lhs(2, 0) * tmp(1, 0) + lhs(2, 1) * tmp(1, 1) + lhs(2, 2) * tmp(1, 2) + lhs(2, 3) * tmp(1, 3),
 				lhs(2, 0) * tmp(2, 0) + lhs(2, 1) * tmp(2, 1) + lhs(2, 2) * tmp(2, 2) + lhs(2, 3) * tmp(2, 3),
 				lhs(2, 0) * tmp(3, 0) + lhs(2, 1) * tmp(3, 1) + lhs(2, 2) * tmp(3, 2) + lhs(2, 3) * tmp(3, 3),
-																										   
+
 				lhs(3, 0) * tmp(0, 0) + lhs(3, 1) * tmp(0, 1) + lhs(3, 2) * tmp(0, 2) + lhs(3, 3) * tmp(0, 3),
 				lhs(3, 0) * tmp(1, 0) + lhs(3, 1) * tmp(1, 1) + lhs(3, 2) * tmp(1, 2) + lhs(3, 3) * tmp(1, 3),
 				lhs(3, 0) * tmp(2, 0) + lhs(3, 1) * tmp(2, 1) + lhs(3, 2) * tmp(2, 2) + lhs(3, 3) * tmp(2, 3),
@@ -1634,7 +1665,7 @@ namespace KlayGE
 				Vector_T<T, 3> normal(*(normalsBegin + i));
 
 				// Gram-Schmidt orthogonalize
-				tangent = normalize(tangent - normal * dot(tangent, normal)); 
+				tangent = normalize(tangent - normal * dot(tangent, normal));
 				// Calculate handedness
 				if (dot(cross(normal, tangent), binormal) < 0)
 				{
