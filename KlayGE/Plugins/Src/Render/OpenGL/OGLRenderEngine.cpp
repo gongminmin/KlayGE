@@ -215,46 +215,46 @@ namespace KlayGE
 				{
 					vertex_element const & vs_elem = rl.InstanceStreamFormat()[i];
 					void const * addr = &buffer[instance * instance_size + elem_offset];
+					GLfloat const * float_addr = static_cast<GLfloat const *>(addr);
 
 					switch (vs_elem.usage)
 					{
-					// Vertex xyzs
 					case VEU_Position:
 						switch (NumComponents(vs_elem.format))
 						{
 						case 2:
-							glVertex2fv(static_cast<GLfloat const *>(addr));
+							glVertex2fv(float_addr);
 							break;
 
 						case 3:
-							glVertex3fv(static_cast<GLfloat const *>(addr));
+							glVertex3fv(float_addr);
 							break;
 
 						case 4:
-							glVertex4fv(static_cast<GLfloat const *>(addr));
+							glVertex4fv(float_addr);
 							break;
 						}
 						break;
 					
 					case VEU_Normal:
-						glNormal3fv(static_cast<GLfloat const *>(addr));
+						glNormal3fv(float_addr);
 						break;
 
 					case VEU_Diffuse:
 						switch (NumComponents(vs_elem.format))
 						{
 						case 3:
-							glColor3fv(static_cast<GLfloat const *>(addr));
+							glColor3fv(float_addr);
 							break;
 
 						case 4:
-							glColor4fv(static_cast<GLfloat const *>(addr));
+							glColor4fv(float_addr);
 							break;
 						}
 						break;
 
 					case VEU_Specular:
-						glSecondaryColor3fv(static_cast<GLfloat const *>(addr));
+						glSecondaryColor3fv(float_addr);
 						break;
 
 					case VEU_TextureCoord:
@@ -263,19 +263,19 @@ namespace KlayGE
 							switch (NumComponents(vs_elem.format))
 							{
 							case 1:
-								glMultiTexCoord1fv(target, static_cast<GLfloat const *>(addr));
+								glMultiTexCoord1fv(target, float_addr);
 								break;
 
 							case 2:
-								glMultiTexCoord2fv(target, static_cast<GLfloat const *>(addr));
+								glMultiTexCoord2fv(target, float_addr);
 								break;
 
 							case 3:
-								glMultiTexCoord3fv(target, static_cast<GLfloat const *>(addr));
+								glMultiTexCoord3fv(target, float_addr);
 								break;
 
 							case 4:
-								glMultiTexCoord4fv(target, static_cast<GLfloat const *>(addr));
+								glMultiTexCoord4fv(target, float_addr);
 								break;
 							}
 						}
@@ -294,41 +294,38 @@ namespace KlayGE
 			for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
 			{
 				OGLGraphicsBuffer& stream(static_cast<OGLGraphicsBuffer&>(*rl.GetVertexStream(i)));
+				uint32_t const size = rl.VertexSize(i);
 
 				uint32_t elem_offset = 0;
 				for (uint32_t j = 0; j < rl.VertexStreamFormat(i).size(); ++ j)
 				{
 					vertex_element const & vs_elem = rl.VertexStreamFormat(i)[j];
+					GLvoid* offset = reinterpret_cast<GLvoid*>(elem_offset);
 
 					switch (vs_elem.usage)
 					{
-					// Vertex xyzs
 					case VEU_Position:
 						glEnableClientState(GL_VERTEX_ARRAY);
 						stream.Active();
-						glVertexPointer(3, GL_FLOAT, rl.VertexSize(i),
-							reinterpret_cast<GLvoid*>(elem_offset));
+						glVertexPointer(3, GL_FLOAT, size, offset);
 						break;
 				
 					case VEU_Normal:
 						glEnableClientState(GL_NORMAL_ARRAY);
 						stream.Active();
-						glNormalPointer(GL_FLOAT, rl.VertexSize(i),
-							reinterpret_cast<GLvoid*>(elem_offset));
+						glNormalPointer(GL_FLOAT, size, offset);
 						break;
 
 					case VEU_Diffuse:
 						glEnableClientState(GL_COLOR_ARRAY);
 						stream.Active();
-						glColorPointer(4, GL_UNSIGNED_BYTE, rl.VertexSize(i),
-							reinterpret_cast<GLvoid*>(elem_offset));
+						glColorPointer(4, GL_UNSIGNED_BYTE, size, offset);
 						break;
 
 					case VEU_Specular:
 						glEnableClientState(GL_SECONDARY_COLOR_ARRAY);
 						stream.Active();
-						glSecondaryColorPointer(4, GL_UNSIGNED_BYTE, rl.VertexSize(i),
-							reinterpret_cast<GLvoid*>(elem_offset));
+						glSecondaryColorPointer(4, GL_UNSIGNED_BYTE, size, offset);
 						break;
 
 					case VEU_TextureCoord:
@@ -336,7 +333,7 @@ namespace KlayGE
 						glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 						stream.Active();
 						glTexCoordPointer(static_cast<GLint>(NumComponents(vs_elem.format)),
-								GL_FLOAT, rl.VertexSize(i), reinterpret_cast<GLvoid*>(elem_offset));
+								GL_FLOAT, size, offset);
 						break;
 
 					default:

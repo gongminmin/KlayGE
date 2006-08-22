@@ -122,13 +122,13 @@ namespace KlayGE
 	}
 
 
-	SkinnedModel::SkinnedModel(std::wstring const & name)
+	SkinnedModel::SkinnedModel(std::wstring const & name, uint32_t start_frame, uint32_t end_frame, uint32_t frame_rate)
 		: RenderModel(name),
-			last_frame_(-1)
+			last_frame_(-1), start_frame_(start_frame), end_frame_(end_frame), frame_rate_(frame_rate)
 	{
 	}
 	
-	void SkinnedModel::BuildBones(int frame)
+	void SkinnedModel::BuildBones(uint32_t frame)
 	{
 		for (JointsType::iterator iter = joints_.begin(); iter != joints_.end(); ++ iter)
 		{
@@ -178,7 +178,7 @@ namespace KlayGE
 		key_frames_ = key_frames;
 	}
 
-	void SkinnedModel::SetFrame(int frame)
+	void SkinnedModel::SetFrame(uint32_t frame)
 	{
 		if (last_frame_ != frame)
 		{

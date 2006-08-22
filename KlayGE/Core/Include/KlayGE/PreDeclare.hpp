@@ -101,8 +101,10 @@ namespace KlayGE
 	typedef boost::shared_ptr<RenderModel> RenderModelPtr;
 	class StaticMesh;
 	typedef boost::shared_ptr<StaticMesh> StaticMeshPtr;
-	class BoneMesh;
-	typedef boost::shared_ptr<BoneMesh> BoneMeshPtr;
+	class SkinnedModel;
+	typedef boost::shared_ptr<SkinnedModel> SkinnedModelPtr;
+	class SkinnedMesh;
+	typedef boost::shared_ptr<SkinnedMesh> SkinnedMeshPtr;
 	class KMesh;
 	typedef boost::shared_ptr<KMesh> KMeshPtr;
 	struct RenderDeviceCaps;

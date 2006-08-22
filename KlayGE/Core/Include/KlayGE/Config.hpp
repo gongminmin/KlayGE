@@ -50,6 +50,12 @@
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 	#define KLAYGE_PLATFORM_WINDOWS
 
+	#if defined(_WIN64)
+		#define KLAYGE_PLATFORM_WIN64
+	#else
+		#define KLAYGE_PLATFORM_WIN32
+	#endif
+
 	// 关闭windows.h的min/max
 	#define NOMINMAX
 
@@ -64,27 +70,27 @@
 	#error Unknown platform.
 #endif
 
-// 定义机器架构
+// 定义CPU类型
 #if defined(KLAYGE_COMPILER_MSVC)
 	#if defined(_M_X64)
-		#define KLAYGE_MACHINE_X64
+		#define KLAYGE_CPU_X64
 	#elif defined(_M_IX86)
-		#define KLAYGE_MACHINE_X86
+		#define KLAYGE_CPU_X86
 	#else
-		#error Unknown machine.
+		#error Unknown CPU type.
 	#endif
 #elif defined(KLAYGE_COMPILER_GCC)
 	#if defined(__x86_64__)
-		#define KLAYGE_MACHINE_X64
+		#define KLAYGE_CPU_X64
 	#elif defined(__i386__)
-		#define KLAYGE_MACHINE_X86
+		#define KLAYGE_CPU_X86
 	#else
-		#error Unknown machine.
+		#error Unknown CPU type.
 	#endif
 #endif
 
 // 定义本地的endian方式
-#if defined(KLAYGE_MACHINE_X86) || defined(KLAYGE_MACHINE_X64) || defined(KLAYGE_PLATFORM_WINDOWS)
+#if defined(KLAYGE_CPU_X86) || defined(KLAYGE_CPU_X64) || defined(KLAYGE_PLATFORM_WINDOWS)
 	#define KLAYGE_LITTLE_ENDIAN
 #else
 	#define KLAYGE_BIG_ENDIAN

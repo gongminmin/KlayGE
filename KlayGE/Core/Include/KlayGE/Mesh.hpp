@@ -196,7 +196,7 @@ namespace KlayGE
 		typedef std::vector<float4> PositionsType;
 
 	public:
-		SkinnedModel(std::wstring const & name);
+		SkinnedModel(std::wstring const & name, uint32_t start_frame, uint32_t end_frame, uint32_t frame_rate);
 		virtual ~SkinnedModel()
 		{
 		}
@@ -216,10 +216,10 @@ namespace KlayGE
 		}
 		void AttachKeyFrames(boost::shared_ptr<KlayGE::KeyFramesType> const & kf);
 
-		void SetFrame(int frame);
+		void SetFrame(uint32_t frame);
 
 	protected:
-		void BuildBones(int frame);
+		void BuildBones(uint32_t frame);
 		void UpdateBinds();
 
 	protected:
@@ -228,7 +228,11 @@ namespace KlayGE
 		PositionsType bind_poss_;
 
 		boost::shared_ptr<KlayGE::KeyFramesType> key_frames_;
-		int last_frame_;
+		uint32_t last_frame_;
+
+		uint32_t start_frame_;
+		uint32_t end_frame_;
+		uint32_t frame_rate_;
 	};
 
 	class SkinnedMesh : public StaticMesh

@@ -139,7 +139,7 @@ namespace
 		RefractorObject(TexturePtr const & y_cube, TexturePtr const & c_cube)
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadKMesh("teapot.kmesh", CreateKMeshFactory<RefractorRenderable>())->Mesh(0);
+			renderable_ = LoadKModel("teapot.kmodel", CreateKMeshFactory<RefractorRenderable>())->Mesh(0);
 			checked_pointer_cast<RefractorRenderable>(renderable_)->CompressedCubeMap(y_cube, c_cube);	
 		}
 	};

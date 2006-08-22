@@ -114,7 +114,7 @@ namespace
 		TorusObject()
 			: SceneObjectHelper(SOA_Cullable | SOA_ShortAge)
 		{
-			renderable_ = LoadKMesh("torus.kmesh", CreateKMeshFactory<RenderTorus>())->Mesh(0);
+			renderable_ = LoadKModel("torus.kmodel", CreateKMeshFactory<RenderTorus>())->Mesh(0);
 		}
 	};
 

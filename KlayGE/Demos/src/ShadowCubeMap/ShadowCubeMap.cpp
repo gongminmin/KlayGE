@@ -173,7 +173,7 @@ namespace
 		{
 			model_ = MathLib::translation(0.0f, 0.2f, 0.0f);
 
-			renderable_ = LoadKMesh("teapot.kmesh", CreateKMeshFactory<OccluderRenderable>())->Mesh(0);
+			renderable_ = LoadKModel("teapot.kmodel", CreateKMeshFactory<OccluderRenderable>())->Mesh(0);
 			checked_pointer_cast<OccluderRenderable>(renderable_)->SetModelMatrix(model_);
 		}
 

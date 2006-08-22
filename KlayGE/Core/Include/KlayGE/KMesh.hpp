@@ -49,7 +49,9 @@ namespace KlayGE
 		}
 	};
 
-	RenderModelPtr LoadKMesh(std::string const & kmeshName,
+	RenderModelPtr LoadKModel(std::string const & kmodel_name,
+		boost::function<KMeshPtr (std::wstring const &, TexturePtr)> CreateFactoryFunc = CreateKMeshFactory<KMesh>());
+	SkinnedModelPtr LoadKSkinnedModel(std::string const & kmodel_name,
 		boost::function<KMeshPtr (std::wstring const &, TexturePtr)> CreateFactoryFunc = CreateKMeshFactory<KMesh>());
 }
 

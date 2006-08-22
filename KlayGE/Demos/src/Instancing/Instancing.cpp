@@ -206,7 +206,7 @@ void Instancing::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
-	renderInstance_ = LoadKMesh("teapot.kmesh", CreateKMeshFactory<RenderInstance>())->Mesh(0);
+	renderInstance_ = LoadKModel("teapot.kmodel", CreateKMeshFactory<RenderInstance>())->Mesh(0);
 	for (int i = 0; i < 10; ++ i)
 	{
 		for (int j = 0; j < NUM_INSTANCE / 10; ++ j)
@@ -225,7 +225,7 @@ void Instancing::InitObjects()
 	}
 	use_instance_ = true;
 
-	renderMesh_ = LoadKMesh("teapot.kmesh", CreateKMeshFactory<RenderNormalMesh>())->Mesh(0);
+	renderMesh_ = LoadKModel("teapot.kmodel", CreateKMeshFactory<RenderNormalMesh>())->Mesh(0);
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 

@@ -136,7 +136,7 @@ namespace
 		PolygonObject()
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadKMesh("teapot.kmesh", CreateKMeshFactory<RenderPolygon>())->Mesh(0);
+			renderable_ = LoadKModel("teapot.kmodel", CreateKMeshFactory<RenderPolygon>())->Mesh(0);
 			checked_pointer_cast<RenderPolygon>(renderable_)->ComputeTB();
 		}
 	};

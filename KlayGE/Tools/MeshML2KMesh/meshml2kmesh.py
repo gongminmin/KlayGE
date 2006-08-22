@@ -216,16 +216,16 @@ if __name__ == '__main__':
 	import sys
 
 	if len(sys.argv) < 2:
-		print "Usage: meshml2kmesh.py src.meshml [dst.kmesh]"
+		print "Usage: meshml2kmesh.py src.meshml [dst.kmodel]"
 		sys.exit()
 
 	in_file_name = sys.argv[1]	
 	if len(sys.argv) == 2:
 		index = in_file_name.rfind('.')
 		if index != -1:
-			out_file_name = in_file_name[0 : index] + ".kmesh"
+			out_file_name = in_file_name[0 : index] + ".kmodel"
 		else:
-			out_file_name = in_file_name + ".kmesh"
+			out_file_name = in_file_name + ".kmodel"
 	else:
 		out_file_name = sys.argv[2]
 
@@ -309,7 +309,7 @@ if __name__ == '__main__':
 		ofs.write(pack('B', len(bone.name)))
 		ofs.write(bone.name)
 
-		ofs.write(pack('L', bone.parent))
+		ofs.write(pack('h', bone.parent))
 		ofs.write(pack('fff', bone.bind_pos.x, bone.bind_pos.y, bone.bind_pos.z))
 		ofs.write(pack('ffff', bone.bind_quat.x, bone.bind_quat.y, bone.bind_quat.z, bone.bind_quat.w))
 

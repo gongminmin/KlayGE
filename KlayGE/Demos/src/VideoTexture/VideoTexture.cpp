@@ -79,7 +79,7 @@ namespace
 		TeapotObject()
 			: SceneObjectHelper(SOA_Cullable | SOA_ShortAge)
 		{
-			renderable_ = LoadKMesh("teapot.kmesh", CreateKMeshFactory<RenderTeapot>())->Mesh(0);
+			renderable_ = LoadKModel("teapot.kmodel", CreateKMeshFactory<RenderTeapot>())->Mesh(0);
 		}
 
 		void VideoTexture(TexturePtr video_tex)
