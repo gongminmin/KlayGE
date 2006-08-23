@@ -17,7 +17,7 @@ public:
 class MD5SkinnedMesh : public KlayGE::SkinnedMesh
 {
 public:
-	explicit MD5SkinnedMesh(boost::shared_ptr<MD5SkinnedModel> model);
+	MD5SkinnedMesh(KlayGE::RenderModelPtr model, std::wstring const & name);
 
 	void OnRenderBegin();
 
@@ -34,8 +34,6 @@ private:
 	KlayGE::SamplerPtr diffuse_map_, normal_map_, specular_map_;
 
 	KlayGE::float3 eye_pos_;
-
-	boost::weak_ptr<MD5SkinnedModel> model_;
 };
 
 #endif		// _MODEL_HPP

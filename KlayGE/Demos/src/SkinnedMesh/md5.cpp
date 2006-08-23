@@ -87,11 +87,19 @@ boost::shared_ptr<MD5SkinnedModel> LoadModel(const std::string& fileName)
 		joint.inverse_origin_pos = float3(inverse_origin_mat(3, 0), inverse_origin_mat(3, 1), inverse_origin_mat(3, 2));
 
 		joint.name = name;
+		joint.name = joint.name.substr(0, joint.name.size() - 1);
 
 		char parent[64] = { '\0' };
 		fscanf(fp, "parent \"%s\n", parent);
 		if (parent[0] != '\0')
 		{
+			int s = 0;
+			while ((s < 64) && (parent[s] != 0))
+			{
+				++ s;
+			}
+			parent[s - 1] = 0;
+
 			for (short j = 0; j < i; ++ j)
 			{
 				if (joints[j].name == parent)
@@ -119,7 +127,7 @@ boost::shared_ptr<MD5SkinnedModel> LoadModel(const std::string& fileName)
 
 	for (int i = 0; i < nummeshes; ++ i)
 	{
-		boost::shared_ptr<MD5SkinnedMesh> mesh(new MD5SkinnedMesh(model));
+		boost::shared_ptr<MD5SkinnedMesh> mesh(new MD5SkinnedMesh(model, L"MD5SkinnedMesh"));
 
 		int meshindex;
 		fscanf(fp, "mesh %d {\n", &meshindex);
@@ -318,6 +326,7 @@ boost::shared_ptr<KlayGE::KeyFramesType> LoadAnim(const std::string& fileName)
 		char joint[64];
 		fscanf(fp, "joint \"%s\n", joint);
 		std::string jointName(joint);
+		jointName = jointName.substr(0, jointName.size() - 1);
 
 		char attr[8];
 		fscanf(fp, "attribute \"%s\n", attr);

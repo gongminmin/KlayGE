@@ -37,8 +37,8 @@ namespace
 	class RenderTorus : public KMesh
 	{
 	public:
-		RenderTorus(std::wstring const & /*name*/, TexturePtr tex)
-			: KMesh(L"Torus", TexturePtr()),
+		RenderTorus(RenderModelPtr model, std::wstring const & /*name*/)
+			: KMesh(model, L"Torus", TexturePtr()),
 				toon_sampler_(new Sampler),
 				normal_depth_sampler_(new Sampler)
 		{
@@ -114,7 +114,7 @@ namespace
 		TorusObject()
 			: SceneObjectHelper(SOA_Cullable | SOA_ShortAge)
 		{
-			renderable_ = LoadKModel("torus.kmodel", CreateKMeshFactory<RenderTorus>())->Mesh(0);
+			renderable_ = LoadKModel("torus.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderTorus>())->Mesh(0);
 		}
 	};
 

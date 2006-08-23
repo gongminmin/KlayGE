@@ -41,7 +41,7 @@ namespace KlayGE
 	class StaticMesh : public Renderable
 	{
 	public:
-		StaticMesh(std::wstring const & name);
+		StaticMesh(RenderModelPtr model, std::wstring const & name);
 		virtual ~StaticMesh();
 
 		RenderTechniquePtr GetRenderTechnique() const
@@ -62,12 +62,12 @@ namespace KlayGE
 
 		virtual std::wstring const & Name() const;
 
-		size_t NumVertices() const
+		uint32_t NumVertices() const
 		{
 			return rl_->NumVertices();
 		}
 
-		size_t NumTriangles() const
+		uint32_t NumTriangles() const
 		{
 			return rl_->NumIndices() / 3;
 		}
@@ -82,12 +82,22 @@ namespace KlayGE
 		RenderTechniquePtr technique_;
 
 		Box box_;
+
+		boost::weak_ptr<RenderModel> model_;
 	};
 
 	class RenderModel : public Renderable
 	{
 	public:
-		RenderModel(std::wstring const & name);
+		explicit RenderModel(std::wstring const & name);
+		virtual ~RenderModel()
+		{
+		}
+
+		virtual bool IsSkinned() const
+		{
+			return false;
+		}
 
 		template <typename ForwardIterator>
 		void AssignMeshes(ForwardIterator first, ForwardIterator last)
@@ -106,13 +116,13 @@ namespace KlayGE
 		{
 			return meshes_[id];
 		}
-		StaticMeshPtr Mesh(size_t id) const
+		StaticMeshPtr const & Mesh(size_t id) const
 		{
 			return meshes_[id];
 		}
-		size_t NumMeshes() const
+		uint32_t NumMeshes() const
 		{
-			return meshes_.size();
+			return static_cast<uint32_t>(meshes_.size());
 		}
 
 		RenderTechniquePtr GetRenderTechnique() const
@@ -196,9 +206,27 @@ namespace KlayGE
 		typedef std::vector<float4> PositionsType;
 
 	public:
-		SkinnedModel(std::wstring const & name, uint32_t start_frame, uint32_t end_frame, uint32_t frame_rate);
+		explicit SkinnedModel(std::wstring const & name);
 		virtual ~SkinnedModel()
 		{
+		}
+
+		virtual bool IsSkinned() const
+		{
+			return true;
+		}
+
+		Joint& GetJoint(uint32_t index)
+		{
+			return joints_[index];
+		}
+		Joint const & GetJoint(uint32_t index) const
+		{
+			return joints_[index];
+		}
+		uint32_t NumJoints() const
+		{
+			return static_cast<uint32_t>(joints_.size());
 		}
 
 		template <typename ForwardIterator>
@@ -216,6 +244,35 @@ namespace KlayGE
 		}
 		void AttachKeyFrames(boost::shared_ptr<KlayGE::KeyFramesType> const & kf);
 
+		KeyFramesType const & GetKeyFrames() const
+		{
+			return *key_frames_;
+		}
+		uint32_t StartFrame() const
+		{
+			return start_frame_;
+		}
+		void StartFrame(uint32_t sf)
+		{
+			start_frame_ = sf;
+		}
+		uint32_t EndFrame() const
+		{
+			return end_frame_;
+		}
+		void EndFrame(uint32_t ef)
+		{
+			end_frame_ = ef;
+		}
+		uint32_t FrameRate() const
+		{
+			return frame_rate_;
+		}
+		void FrameRate(uint32_t fr)
+		{
+			frame_rate_ = fr;
+		}
+
 		void SetFrame(uint32_t frame);
 
 	protected:
@@ -227,7 +284,7 @@ namespace KlayGE
 		RotationsType bind_rots_;
 		PositionsType bind_poss_;
 
-		boost::shared_ptr<KlayGE::KeyFramesType> key_frames_;
+		boost::shared_ptr<KeyFramesType> key_frames_;
 		uint32_t last_frame_;
 
 		uint32_t start_frame_;
@@ -238,7 +295,7 @@ namespace KlayGE
 	class SkinnedMesh : public StaticMesh
 	{
 	public:
-		SkinnedMesh(std::wstring const & name);
+		SkinnedMesh(RenderModelPtr model, std::wstring const & name);
 		virtual ~SkinnedMesh()
 		{
 		}

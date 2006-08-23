@@ -71,7 +71,7 @@ class mesh:
 		self.vertices = vertices
 		self.triangles = triangles
 
-class bone:
+class joint:
 	def __init__(self, name, parent, bind_pos, bind_quat):
 		self.name = str(name)
 		self.parent = int(parent)
@@ -88,7 +88,7 @@ class model:
 	def __init__(self):
 		self.version = 0
 
-		self.bones = []
+		self.joints = []
 		self.meshes = []
 
 		self.start_frame = 0
@@ -116,7 +116,7 @@ def parse_model(dom):
 			bind_quat_tag = bone_tag.getElementsByTagName('bind_quat')[0]
 			bind_quat = point4(bind_quat_tag.getAttribute('x'), bind_quat_tag.getAttribute('y'), bind_quat_tag.getAttribute('z'), bind_quat_tag.getAttribute('w'))
 
-			ret.bones.append(bone(name, parent, bind_pos, bind_quat))
+			ret.joints.append(joint(name, parent, bind_pos, bind_quat))
 
 	meshes_chunk_tag = dom.documentElement.getElementsByTagName('meshes_chunk')[0]
 	mesh_tags = meshes_chunk_tag.getElementsByTagName('mesh')
@@ -195,7 +195,7 @@ def parse_model(dom):
 
 		key_frame_tags = key_frames_chunk_tag.getElementsByTagName('key_frame')
 		for key_frame_tag in key_frame_tags:
-			joint = key_frame_tag.getAttribute('joint')
+			joint_name = key_frame_tag.getAttribute('joint')
 
 			keys = []
 			key_tags = key_frame_tag.getElementsByTagName('key')
@@ -207,7 +207,7 @@ def parse_model(dom):
 
 				keys.append(key(pos, quat))
 
-			ret.key_frames.append([joint, keys])
+			ret.key_frames.append([joint_name, keys])
 
 	return ret
 
@@ -237,11 +237,21 @@ if __name__ == '__main__':
 	ofs.write('MESH')
 
 	from struct import pack
+
+	header_size = 4 + 1 + 1 + 1 + 4 + 4 + 4
+	ofs.write(pack('L', header_size))
+
 	ofs.write(pack('L', model.version))
 
 	print "Model version:", model.version
 
 	ofs.write(pack('B', len(model.meshes)))
+	ofs.write(pack('B', len(model.joints)))
+	ofs.write(pack('B', len(model.key_frames)))
+	ofs.write(pack('L', model.start_frame))
+	ofs.write(pack('L', model.end_frame))
+	ofs.write(pack('L', model.frame_rate))
+
 	for mesh in model.meshes:
 		print "Compiling mesh:", mesh.name
 
@@ -260,7 +270,6 @@ if __name__ == '__main__':
 			ofs.write(texture.name)
 
 		ofs.write(pack('L', len(mesh.vertices)))
-		ofs.write(pack('L', len(mesh.vertices[0].texs)))
 		for vertex_elem in mesh.vertex_elems:
 			if (VEU_Position == vertex_elem.usage):
 				for vertex in mesh.vertices:
@@ -302,21 +311,16 @@ if __name__ == '__main__':
 		for triangle in mesh.triangles:
 			ofs.write(pack('HHH', triangle.a, triangle.b, triangle.c))
 
-	ofs.write(pack('B', len(model.bones)))
-	for bone in model.bones:
-		print "Compiling bone:", bone.name
+	for jo in model.joints:
+		print "Compiling joint:", jo.name
 
-		ofs.write(pack('B', len(bone.name)))
-		ofs.write(bone.name)
+		ofs.write(pack('B', len(jo.name)))
+		ofs.write(jo.name)
 
-		ofs.write(pack('h', bone.parent))
-		ofs.write(pack('fff', bone.bind_pos.x, bone.bind_pos.y, bone.bind_pos.z))
-		ofs.write(pack('ffff', bone.bind_quat.x, bone.bind_quat.y, bone.bind_quat.z, bone.bind_quat.w))
+		ofs.write(pack('h', jo.parent))
+		ofs.write(pack('fff', jo.bind_pos.x, jo.bind_pos.y, jo.bind_pos.z))
+		ofs.write(pack('ffff', jo.bind_quat.x, jo.bind_quat.y, jo.bind_quat.z, jo.bind_quat.w))
 
-	ofs.write(pack('B', len(model.key_frames)))
-	ofs.write(pack('L', model.start_frame))
-	ofs.write(pack('L', model.end_frame))
-	ofs.write(pack('L', model.frame_rate))
 	for key_frame in model.key_frames:
 		print "Compiling key frame:", key_frame[0]
 

@@ -17,10 +17,9 @@
 using namespace KlayGE;
 
 
-MD5SkinnedMesh::MD5SkinnedMesh(boost::shared_ptr<MD5SkinnedModel> model)
-	: SkinnedMesh(L"MD5SkinnedMesh"),
-		world_(float4x4::Identity()),
-		model_(model)
+MD5SkinnedMesh::MD5SkinnedMesh(RenderModelPtr model, std::wstring const & /*name*/)
+	: SkinnedMesh(model, L"MD5SkinnedMesh"),
+		world_(float4x4::Identity())
 {
 	technique_ = Context::Instance().RenderFactoryInstance().LoadEffect("SkinnedMesh.fx")->Technique("SkinnedMeshTech");
 
@@ -119,11 +118,11 @@ void MD5SkinnedMesh::OnRenderBegin()
 
 	*(technique_->Effect().ParameterByName("eye_pos")) = eye_pos_;
 
-	boost::shared_ptr<MD5SkinnedModel> model = model_.lock();
+	boost::shared_ptr<RenderModel> model = model_.lock();
 	if (model)
 	{
-		*(technique_->Effect().ParameterByName("joint_rots")) = model->GetBindRotations();
-		*(technique_->Effect().ParameterByName("joint_poss")) = model->GetBindPositions();
+		*(technique_->Effect().ParameterByName("joint_rots")) = checked_pointer_cast<MD5SkinnedModel>(model)->GetBindRotations();
+		*(technique_->Effect().ParameterByName("joint_poss")) = checked_pointer_cast<MD5SkinnedModel>(model)->GetBindPositions();
 	}
 }
 
@@ -144,8 +143,11 @@ void MD5SkinnedMesh::SetEyePos(const KlayGE::float3& eye_pos)
 
 
 MD5SkinnedModel::MD5SkinnedModel()
-		: SkinnedModel(L"MD5SkinnedModel", 0, 50, 24)
+		: SkinnedModel(L"MD5SkinnedModel")
 {
+	this->StartFrame(0);
+	this->EndFrame(51);
+	this->FrameRate(24);
 }
 
 void MD5SkinnedModel::SetEyePos(const KlayGE::float3& eye_pos)

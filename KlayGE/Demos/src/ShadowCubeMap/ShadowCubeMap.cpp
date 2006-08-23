@@ -126,8 +126,8 @@ namespace
 	class OccluderRenderable : public KMesh, public ShadowMapped
 	{
 	public:
-		OccluderRenderable(std::wstring const & /*name*/, TexturePtr tex)
-			: KMesh(L"Occluder", tex),
+		OccluderRenderable(RenderModelPtr model, std::wstring const & /*name*/)
+			: KMesh(model, L"Occluder", TexturePtr()),
 				ShadowMapped(SHADOW_MAP_SIZE)
 		{
 			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("ShadowCubeMap.fx");
@@ -173,7 +173,7 @@ namespace
 		{
 			model_ = MathLib::translation(0.0f, 0.2f, 0.0f);
 
-			renderable_ = LoadKModel("teapot.kmodel", CreateKMeshFactory<OccluderRenderable>())->Mesh(0);
+			renderable_ = LoadKModel("teapot.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<OccluderRenderable>())->Mesh(0);
 			checked_pointer_cast<OccluderRenderable>(renderable_)->SetModelMatrix(model_);
 		}
 

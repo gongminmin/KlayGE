@@ -40,8 +40,8 @@ namespace
 	class RenderTeapot : public KMesh
 	{
 	public:
-		RenderTeapot(std::wstring const & /*name*/, TexturePtr tex)
-			: KMesh(L"Teapot", tex),
+		RenderTeapot(RenderModelPtr model, std::wstring const & /*name*/)
+			: KMesh(model, L"Teapot", TexturePtr()),
 				video_sampler_(new Sampler)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -79,7 +79,7 @@ namespace
 		TeapotObject()
 			: SceneObjectHelper(SOA_Cullable | SOA_ShortAge)
 		{
-			renderable_ = LoadKModel("teapot.kmodel", CreateKMeshFactory<RenderTeapot>())->Mesh(0);
+			renderable_ = LoadKModel("teapot.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderTeapot>())->Mesh(0);
 		}
 
 		void VideoTexture(TexturePtr video_tex)

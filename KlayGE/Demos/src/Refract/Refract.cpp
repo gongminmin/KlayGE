@@ -86,8 +86,8 @@ namespace
 	class RefractorRenderable : public KMesh
 	{
 	public:
-		RefractorRenderable(std::wstring const & /*name*/, TexturePtr tex)
-			: KMesh(L"Refractor", tex),
+		RefractorRenderable(RenderModelPtr model, std::wstring const & /*name*/)
+			: KMesh(model, L"Refractor", TexturePtr()),
 				y_sampler_(new Sampler), c_sampler_(new Sampler)
 		{
 			technique_ = Context::Instance().RenderFactoryInstance().LoadEffect("Refract.fx")->Technique("Refract");
@@ -139,7 +139,7 @@ namespace
 		RefractorObject(TexturePtr const & y_cube, TexturePtr const & c_cube)
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadKModel("teapot.kmodel", CreateKMeshFactory<RefractorRenderable>())->Mesh(0);
+			renderable_ = LoadKModel("teapot.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RefractorRenderable>())->Mesh(0);
 			checked_pointer_cast<RefractorRenderable>(renderable_)->CompressedCubeMap(y_cube, c_cube);	
 		}
 	};

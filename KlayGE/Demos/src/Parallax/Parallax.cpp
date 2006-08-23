@@ -39,8 +39,8 @@ namespace
 	class RenderPolygon : public KMesh
 	{
 	public:
-		RenderPolygon(std::wstring const & /*name*/, TexturePtr tex)
-			: KMesh(L"Polygon", tex)
+		RenderPolygon(RenderModelPtr model, std::wstring const & name)
+			: KMesh(model, name, TexturePtr())
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -128,6 +128,11 @@ namespace
 			*(technique_->Effect().ParameterByName("mvp")) = model * view * proj;
 			*(technique_->Effect().ParameterByName("eyePos")) = app.ActiveCamera().EyePos();
 		}
+
+		void LightPos(float3 const & light_pos)
+		{
+			*(technique_->Effect().ParameterByName("lightPos")) = light_pos;
+		}
 	};
 
 	class PolygonObject : public SceneObjectHelper
@@ -136,8 +141,22 @@ namespace
 		PolygonObject()
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadKModel("teapot.kmodel", CreateKMeshFactory<RenderPolygon>())->Mesh(0);
-			checked_pointer_cast<RenderPolygon>(renderable_)->ComputeTB();
+			RenderModelPtr model = LoadKModel("teapot.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderPolygon>());
+			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			{
+				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->ComputeTB();
+			}
+
+			renderable_ = model;
+		}
+
+		void LightPos(float3 const & light_pos)
+		{
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			{
+				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->LightPos(light_pos);
+			}
 		}
 	};
 
@@ -239,7 +258,7 @@ void Parallax::DoUpdate(uint32_t /*pass*/)
 	float3 lightPos(2, 0, 1);
 	float4x4 matRot(MathLib::rotation_y(degree));
 	lightPos = MathLib::transform_coord(lightPos, matRot);
-	*(polygon_->GetRenderable()->GetRenderTechnique()->Effect().ParameterByName("lightPos")) = lightPos;
+	checked_pointer_cast<PolygonObject>(polygon_)->LightPos(lightPos);
 
 	std::wostringstream stream;
 	stream << this->FPS();

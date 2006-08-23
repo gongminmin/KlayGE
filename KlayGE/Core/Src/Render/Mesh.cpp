@@ -53,8 +53,8 @@ namespace KlayGE
 	}
 
 
-	StaticMesh::StaticMesh(std::wstring const & name)
-		: name_(name)
+	StaticMesh::StaticMesh(RenderModelPtr model, std::wstring const & name)
+		: name_(name), model_(model)
 	{
 		rl_ = Context::Instance().RenderFactoryInstance().MakeRenderLayout(RenderLayout::BT_TriangleList);
 	}
@@ -122,9 +122,9 @@ namespace KlayGE
 	}
 
 
-	SkinnedModel::SkinnedModel(std::wstring const & name, uint32_t start_frame, uint32_t end_frame, uint32_t frame_rate)
+	SkinnedModel::SkinnedModel(std::wstring const & name)
 		: RenderModel(name),
-			last_frame_(-1), start_frame_(start_frame), end_frame_(end_frame), frame_rate_(frame_rate)
+			last_frame_(0xFFFFFFFF)
 	{
 	}
 	
@@ -189,8 +189,8 @@ namespace KlayGE
 	}
 
 
-	SkinnedMesh::SkinnedMesh(std::wstring const & name)
-		: StaticMesh(name)
+	SkinnedMesh::SkinnedMesh(RenderModelPtr model, std::wstring const & name)
+		: StaticMesh(model, name)
 	{
 	}
 }

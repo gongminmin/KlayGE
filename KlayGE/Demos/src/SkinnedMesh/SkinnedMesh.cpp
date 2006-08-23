@@ -1,4 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -9,6 +10,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
+#include <KlayGE/KMesh.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
@@ -45,6 +47,14 @@ namespace
 		}
 		return true;
 	}
+
+	struct CreateMD5ModelFactory
+	{
+		RenderModelPtr operator()(std::wstring const & /*name*/)
+		{
+			return RenderModelPtr(new MD5SkinnedModel());
+		}
+	};
 }
 
 int main()
@@ -93,6 +103,8 @@ void SkinnedMeshApp::InitObjects()
 
 	model_->AttachKeyFrames(anim_);
 	model_->SetTime(0);
+
+	//SaveKModel(model_, "idle1.kmodel");
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;

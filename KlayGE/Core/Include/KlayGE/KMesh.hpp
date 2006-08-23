@@ -1,8 +1,11 @@
 // KMesh.hpp
 // KlayGE KMesh类 头文件
-// Ver 2.7.1
-// 版权所有(C) 龚敏敏, 2005
+// Ver 3.4.0
+// 版权所有(C) 龚敏敏, 2005-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.4.0
+// 支持蒙皮模型的载入和保存 (2006.8.23)
 //
 // 2.7.1
 // LoadKMesh可以使用自定义类 (2005.7.13)
@@ -29,7 +32,7 @@ namespace KlayGE
 	class KMesh : public StaticMesh
 	{
 	public:
-		KMesh(std::wstring const & name, TexturePtr tex);
+		KMesh(RenderModelPtr model, std::wstring const & name, TexturePtr tex);
 		virtual ~KMesh();
 
 		virtual void OnRenderBegin();
@@ -43,16 +46,42 @@ namespace KlayGE
 	template <typename T>
 	struct CreateKMeshFactory
 	{
-		KMeshPtr operator()(std::wstring const & name, TexturePtr tex)
+		StaticMeshPtr operator()(RenderModelPtr model, std::wstring const & name)
 		{
-			return KMeshPtr(new T(name, tex));
+			return StaticMeshPtr(new T(model, name));
 		}
 	};
 
+	template <typename T>
+	struct CreateKModelFactory
+	{
+		RenderModelPtr operator()(std::wstring const & name)
+		{
+			return RenderModelPtr(new T(name));
+		}
+	};
+
+#ifdef KLAYGE_PLATFORM_WINDOWS
+#pragma pack(push, 1)
+#endif
+	struct KModelHeader
+	{
+		uint32_t version;
+		uint8_t num_meshes;
+		uint8_t num_joints;
+		uint8_t num_key_frames;
+		uint32_t start_frame;
+		uint32_t end_frame;
+		uint32_t frame_rate;
+	};
+#ifdef KLAYGE_PLATFORM_WINDOWS
+#pragma pack(pop)
+#endif
+
 	RenderModelPtr LoadKModel(std::string const & kmodel_name,
-		boost::function<KMeshPtr (std::wstring const &, TexturePtr)> CreateFactoryFunc = CreateKMeshFactory<KMesh>());
-	SkinnedModelPtr LoadKSkinnedModel(std::string const & kmodel_name,
-		boost::function<KMeshPtr (std::wstring const &, TexturePtr)> CreateFactoryFunc = CreateKMeshFactory<KMesh>());
+		boost::function<RenderModelPtr (std::wstring const &)> CreateModelFactoryFunc = CreateKModelFactory<RenderModel>(),
+		boost::function<StaticMeshPtr (RenderModelPtr, std::wstring const &)> CreateMeshFactoryFunc = CreateKMeshFactory<StaticMesh>());
+	void SaveKModel(RenderModelPtr model, std::string const & kmodel_name);
 }
 
 #endif			// _KMESH_HPP

@@ -80,8 +80,8 @@ namespace
 	class RenderInstance : public KMesh
 	{
 	public:
-		RenderInstance(std::wstring const & /*name*/, TexturePtr tex)
-			: KMesh(L"Instance", tex)
+		RenderInstance(RenderModelPtr model, std::wstring const & /*name*/)
+			: KMesh(model, L"Instance", TexturePtr())
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -111,8 +111,8 @@ namespace
 		};
 
 	public:
-		RenderNormalMesh(std::wstring const & /*name*/, TexturePtr tex)
-			: KMesh(L"NormalMesh", tex)
+		RenderNormalMesh(RenderModelPtr model, std::wstring const & /*name*/)
+			: KMesh(model, L"NormalMesh", TexturePtr())
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -206,7 +206,7 @@ void Instancing::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
-	renderInstance_ = LoadKModel("teapot.kmodel", CreateKMeshFactory<RenderInstance>())->Mesh(0);
+	renderInstance_ = LoadKModel("teapot.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderInstance>())->Mesh(0);
 	for (int i = 0; i < 10; ++ i)
 	{
 		for (int j = 0; j < NUM_INSTANCE / 10; ++ j)
@@ -225,7 +225,7 @@ void Instancing::InitObjects()
 	}
 	use_instance_ = true;
 
-	renderMesh_ = LoadKModel("teapot.kmodel", CreateKMeshFactory<RenderNormalMesh>())->Mesh(0);
+	renderMesh_ = LoadKModel("teapot.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderNormalMesh>())->Mesh(0);
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
