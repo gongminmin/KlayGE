@@ -33,10 +33,14 @@
 #include <map>
 #include <vector>
 
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4127 4800)
+#endif
 #include <boost/pool/pool_alloc.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
+#endif
 
 #include <ft2build.h>
 #include FT_FREETYPE_H

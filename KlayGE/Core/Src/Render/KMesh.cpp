@@ -32,6 +32,26 @@
 
 #include <KlayGE/KMesh.hpp>
 
+namespace
+{
+	std::string ReadShortString(std::istream& is)
+	{
+		KlayGE::uint8_t len;
+		is.read(reinterpret_cast<char*>(&len), sizeof(len));
+		std::vector<char> str(len, 0);
+		is.read(&str[0], static_cast<std::streamsize>(str.size()));
+
+		return std::string(str.begin(), str.end());
+	}
+
+	void WriteShortString(std::ostream& os, std::string const & str)
+	{
+		KlayGE::uint8_t const len = static_cast<KlayGE::uint8_t const>(str.size());
+		os.write(reinterpret_cast<char const *>(&len), sizeof(len));
+		os.write(&str[0], static_cast<std::streamsize>(str.size()));
+	}
+}
+
 namespace KlayGE
 {
 	KMesh::KMesh(RenderModelPtr model, std::wstring const & name, TexturePtr tex)
@@ -120,12 +140,9 @@ namespace KlayGE
 
 		for (uint8_t i = 0; i < header.num_meshes; ++ i)
 		{
-			uint8_t len;
-			file->read(reinterpret_cast<char*>(&len), sizeof(len));
-			std::vector<char> name(len, 0);
-			file->read(&name[0], static_cast<std::streamsize>(name.size()));
 			std::wstring wname;
-			Convert(wname, std::string(name.begin(), name.end()));
+			Convert(wname, ReadShortString(*file));
+			StaticMeshPtr mesh = CreateMeshFactoryFunc(ret, wname);
 
 			uint8_t num_vertex_elems;
 			file->read(reinterpret_cast<char*>(&num_vertex_elems), sizeof(num_vertex_elems));
@@ -191,31 +208,14 @@ namespace KlayGE
 			uint8_t num_textures;
 			file->read(reinterpret_cast<char*>(&num_textures), sizeof(num_textures));
 
-			typedef std::vector<std::pair<std::string, std::string> > TextureSlotsType;
-			TextureSlotsType texture_slots(num_textures);
-
+			StaticMesh::TextureSlotsType texture_slots(num_textures);
 			for (uint8_t j = 0; j < num_textures; ++ j)
 			{
-				uint8_t len;
-				file->read(reinterpret_cast<char*>(&len), sizeof(len));
-				std::vector<char> texture_type(len, 0);
-				file->read(&texture_type[0], static_cast<std::streamsize>(texture_type.size()));
-				file->read(reinterpret_cast<char*>(&len), sizeof(len));
-				std::vector<char> texture_name(len, 0);
-				file->read(&texture_name[0], static_cast<std::streamsize>(texture_name.size()));
-
-				texture_slots[j].first = std::string(texture_type.begin(), texture_type.end());
-				texture_slots[j].second = std::string(texture_name.begin(), texture_name.end());
+				texture_slots[j].first = ReadShortString(*file);
+				texture_slots[j].second = ReadShortString(*file);
 			}
 
-			TexturePtr texture;
-			if (!texture_slots.empty() && !texture_slots[0].second.empty()
-				&& !ResLoader::Instance().Locate(texture_slots[0].second).empty())
-			{
-				texture = LoadTexture(texture_slots[0].second);
-			}
-
-			StaticMeshPtr mesh = CreateMeshFactoryFunc(ret, wname);
+			mesh->TextureSlots(texture_slots);
 
 			uint32_t num_vertices;
 			file->read(reinterpret_cast<char*>(&num_vertices), sizeof(num_vertices));
@@ -244,13 +244,8 @@ namespace KlayGE
 		std::vector<Joint> joints;
 		for (uint8_t i = 0; i < header.num_joints; ++ i)
 		{
-			uint8_t len;
-			file->read(reinterpret_cast<char*>(&len), sizeof(len));
-			std::vector<char> name(len, 0);
-			file->read(&name[0], static_cast<std::streamsize>(name.size()));
-
 			Joint joint;
-			joint.name = std::string(name.begin(), name.end());
+			joint.name = ReadShortString(*file);
 			file->read(reinterpret_cast<char*>(&joint.parent), sizeof(joint.parent));
 			file->read(reinterpret_cast<char*>(&joint.bind_pos), sizeof(joint.bind_pos));
 			file->read(reinterpret_cast<char*>(&joint.bind_quat), sizeof(joint.bind_quat));
@@ -267,10 +262,7 @@ namespace KlayGE
 		boost::shared_ptr<KeyFramesType> kfs(new KeyFramesType);
 		for (uint8_t i = 0; i < header.num_key_frames; ++ i)
 		{
-			uint8_t len;
-			file->read(reinterpret_cast<char*>(&len), sizeof(len));
-			std::vector<char> name(len, 0);
-			file->read(&name[0], static_cast<std::streamsize>(name.size()));
+			std::string name = ReadShortString(*file);
 
 			KeyFrames kf;
 			kf.bind_pos.resize(header.end_frame - header.start_frame);
@@ -281,7 +273,7 @@ namespace KlayGE
 			file->read(reinterpret_cast<char*>(&kf.bind_quat[0]),
 				static_cast<std::streamsize>(sizeof(kf.bind_quat[0]) * kf.bind_quat.size()));
 
-			kfs->insert(std::make_pair(std::string(name.begin(), name.end()), kf));
+			kfs->insert(std::make_pair(name, kf));
 		}
 
 		if (ret->IsSkinned())
@@ -339,10 +331,7 @@ namespace KlayGE
 
 			std::string name;
 			Convert(name, mesh.Name());
-
-			uint8_t const len = static_cast<uint8_t const>(name.size());
-			file.write(reinterpret_cast<char const *>(&len), sizeof(len));
-			file.write(&name[0], static_cast<std::streamsize>(name.size()));
+			WriteShortString(file, name);
 
 			RenderLayoutPtr rl = mesh.GetRenderLayout();
 			uint8_t const num_vertex_elems = static_cast<uint8_t const>(rl->NumVertexStreams());
@@ -359,9 +348,15 @@ namespace KlayGE
 				file.write(reinterpret_cast<char const *>(&num_components), sizeof(num_components));
 			}
 
-			// saving texture's names is not supported now
-			uint8_t const num_textures = 0;
+			uint8_t const num_textures = static_cast<uint8_t const>(mesh.TextureSlots().size());
 			file.write(reinterpret_cast<char const *>(&num_textures), sizeof(num_textures));
+
+			StaticMesh::TextureSlotsType const & texture_slots = mesh.TextureSlots();
+			for (uint8_t j = 0; j < num_textures; ++ j)
+			{
+				WriteShortString(file, texture_slots[j].first);
+				WriteShortString(file, texture_slots[j].second);
+			}
 
 			uint32_t const num_vertices = static_cast<uint32_t const>(mesh.NumVertices());
 			file.write(reinterpret_cast<char const *>(&num_vertices), sizeof(num_vertices));
@@ -389,9 +384,7 @@ namespace KlayGE
 		{
 			Joint const & joint = checked_pointer_cast<SkinnedModel>(model)->GetJoint(i);
 
-			uint8_t const len = static_cast<uint8_t const>(joint.name.size());
-			file.write(reinterpret_cast<char const *>(&len), sizeof(len));
-			file.write(&joint.name[0], static_cast<std::streamsize>(joint.name.size()));
+			WriteShortString(file, joint.name);
 
 			file.write(reinterpret_cast<char const *>(&joint.parent), sizeof(joint.parent));
 			file.write(reinterpret_cast<char const *>(&joint.bind_pos), sizeof(joint.bind_pos));
@@ -405,9 +398,7 @@ namespace KlayGE
 
 			for (uint8_t i = 0; i < header.num_key_frames; ++ i, ++ iter)
 			{
-				uint8_t const len = static_cast<uint8_t const>(iter->first.size());
-				file.write(reinterpret_cast<char const *>(&len), sizeof(len));
-				file.write(&iter->first[0], static_cast<std::streamsize>(iter->first.size()));
+				WriteShortString(file, iter->first);
 
 				file.write(reinterpret_cast<char const *>(&iter->second.bind_pos[0]),
 					static_cast<std::streamsize>(sizeof(iter->second.bind_pos[0]) * iter->second.bind_pos.size()));

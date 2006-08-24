@@ -41,6 +41,9 @@ namespace KlayGE
 	class StaticMesh : public Renderable
 	{
 	public:
+		typedef std::vector<std::pair<std::string, std::string> > TextureSlotsType;
+
+	public:
 		StaticMesh(RenderModelPtr model, std::wstring const & name);
 		virtual ~StaticMesh();
 
@@ -75,6 +78,15 @@ namespace KlayGE
 		void AddVertexStream(void const * buf, uint32_t size, vertex_element const & ve);
 		void AddIndexStream(void const * buf, uint32_t size, ElementFormat format);
 
+		void TextureSlots(TextureSlotsType const & ts)
+		{
+			texture_slots_ = ts;
+		}
+		TextureSlotsType const & TextureSlots() const
+		{
+			return texture_slots_;
+		}
+
 	protected:
 		std::wstring name_;
 
@@ -82,6 +94,8 @@ namespace KlayGE
 		RenderTechniquePtr technique_;
 
 		Box box_;
+
+		TextureSlotsType texture_slots_;
 
 		boost::weak_ptr<RenderModel> model_;
 	};

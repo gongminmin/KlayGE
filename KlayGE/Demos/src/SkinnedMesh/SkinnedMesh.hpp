@@ -4,7 +4,6 @@
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/CameraController.hpp>
-#include "md5.hpp"
 #include "Model.hpp"
 
 class SkinnedMeshApp : public KlayGE::App3DFramework

@@ -23,10 +23,14 @@
 #include <vector>
 
 #include <boost/smart_ptr.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable : 4127 4189)
+#endif
 #include <boost/thread/thread.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
+#endif
 
 #include <KlayGE/Socket.hpp>
 

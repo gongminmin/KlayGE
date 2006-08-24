@@ -16,10 +16,14 @@
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
 
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4127 4189)
+#endif
 #include <boost/function.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
+#endif
 
 #include <KlayGE/ElementFormat.hpp>
 #include <KlayGE/RenderDeviceCaps.hpp>

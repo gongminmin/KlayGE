@@ -42,10 +42,14 @@
 #include <map>
 #include <string>
 
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4100 4512)
+#endif
 #include <boost/utility.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
+#endif
 #include <boost/any.hpp>
 
 #include <KlayGE/Math.hpp>

@@ -17,14 +17,22 @@
 #define _EVENT_HPP
 
 #include <boost/shared_ptr.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4127 4189)
+#endif
 #include <boost/function.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
+#endif
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4512)
+#endif
 #include <boost/signal.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
+#endif
 
 namespace KlayGE
 {

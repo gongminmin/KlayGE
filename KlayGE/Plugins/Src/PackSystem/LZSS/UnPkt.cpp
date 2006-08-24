@@ -26,14 +26,22 @@
 #include <sstream>
 
 #include <boost/assert.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4127 4800)
+#endif
 #include <boost/pool/pool_alloc.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
+#endif
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4244 4245)
+#endif
 #include <boost/crc.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
+#endif
 
 #include <KlayGE/LZSS/LZSS.hpp>
 

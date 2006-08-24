@@ -14,10 +14,14 @@
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <boost/assert.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4127 4512)
+#endif
 #include <boost/random.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
+#endif
 #include <boost/bind.hpp>
 
 #include <KlayGE/OpenAL/OALAudio.hpp>

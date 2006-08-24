@@ -32,15 +32,23 @@
 #include <fstream>
 
 #include <boost/assert.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4244 4245)
+#endif
 #include <boost/crc.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
+#endif
 #include <boost/filesystem/operations.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4127 4800)
+#endif
 #include <boost/pool/pool_alloc.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
+#endif
 
 #include <KlayGE/LZSS/LZSS.hpp>
 
@@ -201,7 +209,7 @@ namespace
 			// one, because the old one will be deleted sooner.
 			// Note r plays double role, as tree node and position in buffer.
 
-			uint32_t cmp(1);
+			int32_t cmp(1);
 			uint8_t* key(&textBuf_[r]);
 			int p(N + 1 + key[0]);
 			rson_[r] = lson_[r] = NIL;
@@ -375,6 +383,7 @@ namespace
 			FileDes fd;
 			fd.crc32 = crc32.checksum();
 			fd.DeComLength = static_cast<uint32_t>(in.tellg());
+			fd.attr = 0;
 			in.seekg(0);
 
 			std::stringstream out;

@@ -98,13 +98,12 @@ void SkinnedMeshApp::InitObjects()
 
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
-	model_ = LoadModel(ResLoader::Instance().Locate("idle1.md5mesh"));
-	anim_ = LoadAnim(ResLoader::Instance().Locate("walk.md5anim"));
-
-	model_->AttachKeyFrames(anim_);
+	model_ = checked_pointer_cast<MD5SkinnedModel>(LoadKModel("pinky.kmodel", CreateMD5ModelFactory(), CreateKMeshFactory<MD5SkinnedMesh>()));
+	for (uint32_t i = 0; i < model_->NumMeshes(); ++ i)
+	{
+		checked_pointer_cast<MD5SkinnedMesh>(model_->Mesh(i))->ComputeTB();
+	}
 	model_->SetTime(0);
-
-	//SaveKModel(model_, "idle1.kmodel");
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;

@@ -16,10 +16,14 @@
 #include <KlayGE/KlayGE.hpp>
 
 #include <algorithm>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4512)
+#endif
 #include <boost/lambda/lambda.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
+#endif
 
 #include <KlayGE/DInput/DInput.hpp>
 #include <KlayGE/DInput/DInputDevice.hpp>

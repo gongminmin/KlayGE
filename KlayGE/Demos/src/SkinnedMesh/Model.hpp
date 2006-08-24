@@ -22,7 +22,6 @@ public:
 	void OnRenderBegin();
 
 	void SetWorld(KlayGE::float4x4 const & mat);
-	void SetShaderName(std::string const & shader);
 	void SetEyePos(KlayGE::float3 const & eye_pos);
 
 	void ComputeTB();
@@ -30,7 +29,6 @@ public:
 private:
 	KlayGE::float4x4 world_;
 
-	std::string shader_;
 	KlayGE::SamplerPtr diffuse_map_, normal_map_, specular_map_;
 
 	KlayGE::float3 eye_pos_;

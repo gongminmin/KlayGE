@@ -10,9 +10,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Sampler.hpp>
 
-#include <cassert>
-
-#include "md5.hpp"
+#include "Model.hpp"
 
 using namespace KlayGE;
 
@@ -89,7 +87,7 @@ void MD5SkinnedMesh::ComputeTB()
 			vertex_element(VEU_Binormal, 0, EF_BGR32F));
 
 	// Ω®¡¢Œ∆¿Ì
-	std::string shader(shader_);
+	std::string shader(texture_slots_[0].second);
 
 	if (shader.find_last_of("_d") == shader.length() - 1)
 	{
@@ -129,11 +127,6 @@ void MD5SkinnedMesh::OnRenderBegin()
 void MD5SkinnedMesh::SetWorld(const float4x4& mat)
 {
 	world_ = mat;
-}
-
-void MD5SkinnedMesh::SetShaderName(std::string const & shader)
-{
-	shader_ = shader;
 }
 
 void MD5SkinnedMesh::SetEyePos(const KlayGE::float3& eye_pos)
