@@ -90,7 +90,7 @@ float4 RefractPS(float3 normal        : TEXCOORD0,
 	half4 reflected_clr = decode_hdr_yc(texCUBE(skybox_YcubeMapSampler, reflect_vec).r,
 					texCUBE(skybox_CcubeMapSampler, reflect_vec).ga);
 
-	float fresnel_factor = fast_fresnel(-incident, normal, 0.03f);
+	float fresnel_factor = fast_fresnel(-incident, normal, 0.0977f);
 	return lerp(refracted_clr, reflected_clr, fresnel_factor);
 }
 
