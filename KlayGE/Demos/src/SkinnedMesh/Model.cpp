@@ -87,20 +87,24 @@ void MD5SkinnedMesh::BuildMeshInfo()
 			vertex_element(VEU_Binormal, 0, EF_BGR32F));
 
 	// ½¨Á¢ÎÆÀí
-	std::string shader(texture_slots_[0].second);
-
-	if (shader.find_last_of("_d") == shader.length() - 1)
+	diffuse_map_->SetTexture(TexturePtr());
+	normal_map_->SetTexture(TexturePtr());
+	specular_map_->SetTexture(TexturePtr());
+	for (StaticMesh::TextureSlotsType::iterator iter = texture_slots_.begin();
+		iter != texture_slots_.end(); ++ iter)
 	{
-		shader = shader.substr(0, shader.length() - 2);
-		diffuse_map_->SetTexture(LoadTexture(shader + "_d.dds"));
-		normal_map_->SetTexture(LoadTexture(shader + "_local.dds"));
-		specular_map_->SetTexture(LoadTexture(shader + "_s.dds"));
-	}
-	else
-	{
-		diffuse_map_->SetTexture(LoadTexture(shader + ".dds"));
-		normal_map_->SetTexture(TexturePtr());
-		specular_map_->SetTexture(TexturePtr());
+		if ("DiffuseMap" == iter->first)
+		{
+			diffuse_map_->SetTexture(LoadTexture(iter->second));
+		}
+		if ("NormalMap" == iter->first)
+		{
+			normal_map_->SetTexture(LoadTexture(iter->second));
+		}
+		if ("SpecularMap" == iter->first)
+		{
+			specular_map_->SetTexture(LoadTexture(iter->second));
+		}
 	}
 }
 
