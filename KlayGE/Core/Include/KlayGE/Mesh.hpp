@@ -47,6 +47,10 @@ namespace KlayGE
 		StaticMesh(RenderModelPtr model, std::wstring const & name);
 		virtual ~StaticMesh();
 
+		virtual void BuildMeshInfo()
+		{
+		}
+
 		RenderTechniquePtr GetRenderTechnique() const
 		{
 			return technique_;
@@ -247,6 +251,7 @@ namespace KlayGE
 		void AssignJoints(ForwardIterator first, ForwardIterator last)
 		{
 			joints_.assign(first, last);
+			this->UpdateBinds();
 		}
 		RotationsType const & GetBindRotations() const
 		{

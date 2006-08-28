@@ -202,7 +202,7 @@ namespace KlayGE
 	{
 		D3D9RenderWindowPtr win(new D3D9RenderWindow(d3d_, this->ActiveAdapter(),
 			name, settings));
-		default_render_window_ = win;
+		default_render_target_ = win;
 
 		d3dDevice_ = win->D3DDevice();
 		Verify(d3dDevice_ != ID3D9DevicePtr());

@@ -87,7 +87,7 @@ namespace
 	{
 	public:
 		RefractorRenderable(RenderModelPtr model, std::wstring const & /*name*/)
-			: KMesh(model, L"Refractor", TexturePtr()),
+			: KMesh(model, L"Refractor"),
 				y_sampler_(new Sampler), c_sampler_(new Sampler)
 		{
 			technique_ = Context::Instance().RenderFactoryInstance().LoadEffect("Refract.fx")->Technique("Refract");
@@ -103,6 +103,10 @@ namespace
 			c_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
 			c_sampler_->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
 			*(technique_->Effect().ParameterByName("skybox_CcubeMapSampler")) = c_sampler_;
+		}
+
+		void BuildMeshInfo()
+		{
 		}
 
 		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)

@@ -38,7 +38,7 @@ namespace
 	{
 	public:
 		RenderTorus(RenderModelPtr model, std::wstring const & /*name*/)
-			: KMesh(model, L"Torus", TexturePtr()),
+			: KMesh(model, L"Torus"),
 				toon_sampler_(new Sampler),
 				normal_depth_sampler_(new Sampler)
 		{

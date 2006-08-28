@@ -29,51 +29,41 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleStrip);
+		rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleFan);
 
-		std::vector<float3> pos;
-		pos.push_back(float3(-1, 1, 0));
-		pos.push_back(float3(1, 1, 0));
-		pos.push_back(float3(-1, -1, 0));
-		pos.push_back(float3(1, -1, 0));
-
-		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static);
-		pos_vb->Resize(static_cast<uint32_t>(sizeof(pos[0]) * pos.size()));
+		float4 const & texel_to_pixel = rf.RenderEngineInstance().TexelToPixelOffset();
+		if ((texel_to_pixel.x() != 0) || (texel_to_pixel.y() != 0))
 		{
-			GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
-			std::copy(pos.begin(), pos.end(), mapper.Pointer<float3>());
-		}
-		rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+			pos_vb_ = rf.MakeVertexBuffer(BU_Static);
+			pos_vb_->Resize(sizeof(float3) * 4);
 
-		std::vector<float2> tex;
-		tex.push_back(float2(0, 0));
-		tex.push_back(float2(1, 0));
-		tex.push_back(float2(0, 1));
-		tex.push_back(float2(1, 1));
+			GraphicsBuffer::Mapper mapper(*pos_vb_, BA_Write_Only);
+			float3* addr = mapper.Pointer<float3>();
+			addr[0] = float3(-1, +1, 0);
+			addr[1] = float3(+1, +1, 0);
+			addr[2] = float3(+1, -1, 0);
+			addr[3] = float3(-1, -1, 0);
+
+			box_ = MathLib::compute_bounding_box<float>(&addr[0], &addr[4]);
+		}
+		else
+		{
+			pos_vb_ = rf.MakeVertexBuffer(BU_Dynamic);
+			pos_vb_->Resize(sizeof(float3) * 4);
+		}
+		rl_->BindVertexStream(pos_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 		GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static);
-		tex_vb->Resize(static_cast<uint32_t>(sizeof(tex[0]) * tex.size()));
+		tex_vb->Resize(sizeof(float2) * 4);
 		{
 			GraphicsBuffer::Mapper mapper(*tex_vb, BA_Write_Only);
-			std::copy(tex.begin(), tex.end(), mapper.Pointer<float2>());
+			float2* addr = mapper.Pointer<float2>();
+			addr[0] = float2(0, 0);
+			addr[1] = float2(1, 0);
+			addr[2] = float2(1, 1);
+			addr[3] = float2(0, 1);
 		}
 		rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
-
-		std::vector<uint16_t> index;
-		index.push_back(0);
-		index.push_back(1);
-		index.push_back(2);
-		index.push_back(3);
-
-		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static);
-		ib->Resize(static_cast<uint32_t>(index.size() * sizeof(index[0])));
-		{
-			GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
-			std::copy(index.begin(), index.end(), mapper.Pointer<uint16_t>());
-		}
-		rl_->BindIndexStream(ib, EF_R16);
-
-		box_ = MathLib::compute_bounding_box<float>(pos.begin(), pos.end());
 
 		technique_ = tech;
 
@@ -91,7 +81,31 @@ namespace KlayGE
 
 	void PostProcess::Destinate(RenderTargetPtr const & rt)
 	{
-		render_target_ = rt;
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		
+		if (rt)
+		{
+			render_target_ = rt;
+		}
+		else
+		{
+			render_target_ = re.DefaultRenderTarget();
+		}
+
+		float4 const & texel_to_pixel = re.TexelToPixelOffset();
+		float const x_offset = texel_to_pixel.x() / render_target_->Width();
+		float const y_offset = texel_to_pixel.y() / render_target_->Height();
+
+		{
+			GraphicsBuffer::Mapper mapper(*pos_vb_, BA_Write_Only);
+			float3* addr = mapper.Pointer<float3>();
+			addr[0] = float3(-1 + x_offset, +1 + y_offset, 0);
+			addr[1] = float3(+1 + x_offset, +1 + y_offset, 0);
+			addr[2] = float3(+1 + x_offset, -1 + y_offset, 0);
+			addr[3] = float3(-1 + x_offset, -1 + y_offset, 0);
+
+			box_ = MathLib::compute_bounding_box<float>(&addr[0], &addr[4]);
+		}
 	}
 
 	void PostProcess::Apply()

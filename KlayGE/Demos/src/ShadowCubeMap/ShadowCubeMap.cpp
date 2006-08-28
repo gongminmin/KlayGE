@@ -127,7 +127,7 @@ namespace
 	{
 	public:
 		OccluderRenderable(RenderModelPtr model, std::wstring const & /*name*/)
-			: KMesh(model, L"Occluder", TexturePtr()),
+			: KMesh(model, L"Occluder"),
 				ShadowMapped(SHADOW_MAP_SIZE)
 		{
 			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("ShadowCubeMap.fx");

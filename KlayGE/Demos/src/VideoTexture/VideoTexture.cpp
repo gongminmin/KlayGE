@@ -41,7 +41,7 @@ namespace
 	{
 	public:
 		RenderTeapot(RenderModelPtr model, std::wstring const & /*name*/)
-			: KMesh(model, L"Teapot", TexturePtr()),
+			: KMesh(model, L"Teapot"),
 				video_sampler_(new Sampler)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();

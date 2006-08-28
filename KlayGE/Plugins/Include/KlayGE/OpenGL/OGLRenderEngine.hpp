@@ -1,8 +1,11 @@
 // OGLRenderEngine.hpp
 // KlayGE OpenGL渲染引擎类 头文件
-// Ver 3.3.0
+// Ver 3.4.0
 // 版权所有(C) 龚敏敏, 2003-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.4.0
+// 增加了TexelToPixelOffset (2006.8.27)
 //
 // 3.3.0
 // 只支持OpenGL 2.0 (2006.5.21)
@@ -64,6 +67,11 @@ namespace KlayGE
 		uint16_t StencilBufferBitDepth();
 
 		void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
+
+		float4 TexelToPixelOffset() const
+		{
+			return float4(0, 0, 0, 0);
+		}
 
 	private:
 		void DoBindRenderTarget(RenderTargetPtr renderTarget);

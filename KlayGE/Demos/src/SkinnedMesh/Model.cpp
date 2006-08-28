@@ -37,7 +37,7 @@ MD5SkinnedMesh::MD5SkinnedMesh(RenderModelPtr model, std::wstring const & /*name
 	specular_map_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
 }
 
-void MD5SkinnedMesh::ComputeTB()
+void MD5SkinnedMesh::BuildMeshInfo()
 {
 	std::vector<float3> positions(this->NumVertices());
 	std::vector<float2> texcoords(this->NumVertices());

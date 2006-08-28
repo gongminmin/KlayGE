@@ -87,6 +87,11 @@ namespace KlayGE
 		{
 		}
 
+		float4 TexelToPixelOffset() const
+		{
+			return float4(0, 0, 0, 0);
+		}
+
 	private:
 		void DoBindRenderTarget(RenderTargetPtr /*rt*/)
 		{
@@ -141,7 +146,7 @@ namespace KlayGE
 
 		if (!rt)
 		{
-			cur_render_target_ = default_render_window_;
+			cur_render_target_ = default_render_target_;
 		}
 		else
 		{
@@ -158,6 +163,13 @@ namespace KlayGE
 	RenderTargetPtr RenderEngine::CurRenderTarget() const
 	{
 		return cur_render_target_;
+	}
+
+	// 获取默认渲染目标
+	/////////////////////////////////////////////////////////////////////////////////
+	RenderTargetPtr RenderEngine::DefaultRenderTarget() const
+	{
+		return default_render_target_;
 	}
 
 	// 设置渲染特效

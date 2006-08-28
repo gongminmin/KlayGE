@@ -32,8 +32,10 @@ namespace KlayGE
 	class KMesh : public StaticMesh
 	{
 	public:
-		KMesh(RenderModelPtr model, std::wstring const & name, TexturePtr tex);
+		KMesh(RenderModelPtr model, std::wstring const & name);
 		virtual ~KMesh();
+
+		virtual void BuildMeshInfo();
 
 		virtual void OnRenderBegin();
 		void SetModelMatrix(float4x4 const & model);

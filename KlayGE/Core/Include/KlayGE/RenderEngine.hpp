@@ -1,8 +1,11 @@
 // RenderEngine.hpp
 // KlayGE 渲染引擎类 实现文件
-// Ver 3.2.0
+// Ver 3.4.0
 // 版权所有(C) 龚敏敏, 2003-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.4.0
+// 增加了TexelToPixelOffset (2006.8.27)
 //
 // 3.3.0
 // 统一了RenderState (2006.5.21)
@@ -251,6 +254,7 @@ namespace KlayGE
 
 		void BindRenderTarget(RenderTargetPtr rt);
 		RenderTargetPtr CurRenderTarget() const;
+		RenderTargetPtr DefaultRenderTarget() const;
 
 		// Set a sampler.
 		virtual void SetSampler(uint32_t stage, SamplerPtr const & sampler) = 0;
@@ -266,6 +270,9 @@ namespace KlayGE
 		// Scissor support
 		virtual void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height) = 0;
 
+		// Return the appropiate offsets as full coordinates in the texture values.
+		virtual float4 TexelToPixelOffset() const = 0;
+
 	protected:
 		virtual void DoBindRenderTarget(RenderTargetPtr rt) = 0;
 		virtual void DoRender(RenderLayout const & rl) = 0;
@@ -276,7 +283,7 @@ namespace KlayGE
 
 	protected:
 		RenderTargetPtr cur_render_target_;
-		RenderTargetPtr default_render_window_;
+		RenderTargetPtr default_render_target_;
 
 		RenderTechniquePtr render_tech_;
 

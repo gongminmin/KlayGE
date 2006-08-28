@@ -1,36 +1,42 @@
 sampler src_sampler;
 
-float color_weight[15];
-float tex_coord_offset[15];
+float color_weight[8];
+float tex_coord_offset[8];
 
-void BlurVS(float4 pos : POSITION,
+void BlurXVS(float4 pos : POSITION,
 					float2 tex : TEXCOORD0,
 					out float4 oPos : POSITION,
-					out float2 oTex : TEXCOORD0)
+					out float4 oTex[4] : TEXCOORD)
 {
 	oPos = pos;
-	oTex = tex;
+
+	for (int i = 0; i < 4; ++ i)
+	{
+		oTex[i] = tex.xyxy + float4(tex_coord_offset[i * 2 + 0], 0, tex_coord_offset[i * 2 + 1], 0);
+	}
 }
 
-float4 BlurXPS(float2 inTex: TEXCOORD0) : COLOR0
+void BlurYVS(float4 pos : POSITION,
+					float2 tex : TEXCOORD0,
+					out float4 oPos : POSITION,
+					out float4 oTex[4] : TEXCOORD)
+{
+	oPos = pos;
+
+	for (int i = 0; i < 4; ++ i)
+	{
+		oTex[i] = tex.xyxy + float4(0, tex_coord_offset[i * 2 + 0], 0, tex_coord_offset[i * 2 + 1]);
+	}
+}
+
+float4 BlurPS(float4 iTex[4] : TEXCOORD) : COLOR0
 {
 	half4 color = half4(0, 0, 0, 1);
 
-	for (int i = 0; i < 15; ++ i)
+	for (int i = 0; i < 4; ++ i)
 	{
-		color.rgb += tex2D(src_sampler, inTex + float2(tex_coord_offset[i], 0)).rgb * half(color_weight[i]);
-	}
-
-	return color;
-}
-
-float4 BlurYPS(float2 inTex: TEXCOORD0) : COLOR0
-{
-	half4 color = float4(0, 0, 0, 1);
-
-	for (int i = 0; i < 15; ++ i)
-	{
-		color.rgb += tex2D(src_sampler, inTex + float2(0, tex_coord_offset[i])).rgb * half(color_weight[i]);
+		color.rgb += tex2D(src_sampler, iTex[i].xy).rgb * color_weight[i * 2 + 0];
+		color.rgb += tex2D(src_sampler, iTex[i].zw).rgb * color_weight[i * 2 + 1];
 	}
 
 	return color;
@@ -43,8 +49,8 @@ technique BlurX
 		CullMode = CCW;
 		ZEnable = false;
 
-		VertexShader = compile vs_1_1 BlurVS();
-		PixelShader = compile ps_2_0 BlurXPS();
+		VertexShader = compile vs_2_0 BlurXVS();
+		PixelShader = compile ps_2_0 BlurPS();
 	}
 }
 
@@ -55,8 +61,8 @@ technique BlurY
 		CullMode = CCW;
 		ZEnable = false;
 
-		VertexShader = compile vs_1_1 BlurVS();
-		PixelShader = compile ps_2_0 BlurYPS();
+		VertexShader = compile vs_2_0 BlurYVS();
+		PixelShader = compile ps_2_0 BlurPS();
 	}
 }
 

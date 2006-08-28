@@ -24,7 +24,7 @@ public:
 	void SetWorld(KlayGE::float4x4 const & mat);
 	void SetEyePos(KlayGE::float3 const & eye_pos);
 
-	void ComputeTB();
+	void BuildMeshInfo();
 
 private:
 	KlayGE::float4x4 world_;

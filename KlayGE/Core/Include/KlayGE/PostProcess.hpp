@@ -34,8 +34,10 @@ namespace KlayGE
 		virtual void OnRenderBegin();
 
 	protected:
-		KlayGE::SamplerPtr src_sampler_;
-		KlayGE::RenderTargetPtr render_target_;
+		SamplerPtr src_sampler_;
+		RenderTargetPtr render_target_;
+
+		GraphicsBufferPtr pos_vb_;
 	};
 }
 

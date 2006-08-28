@@ -329,6 +329,7 @@ if __name__ == '__main__':
 
 		for key in key_frame[1]:
 			ofs.write(pack('fff', key.pos.x, key.pos.y, key.pos.z))
+		for key in key_frame[1]:
 			ofs.write(pack('ffff', key.quat.x, key.quat.y, key.quat.z, key.quat.w))
 
 	print "Done"

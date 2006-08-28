@@ -40,7 +40,7 @@ namespace
 	{
 	public:
 		RenderPolygon(RenderModelPtr model, std::wstring const & name)
-			: KMesh(model, name, TexturePtr())
+			: KMesh(model, name)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -68,7 +68,7 @@ namespace
 			*(technique_->Effect().ParameterByName("heightMapSampler")) = height_sampler;
 		}
 
-		void ComputeTB()
+		void BuildMeshInfo()
 		{
 			std::vector<float3> positions(this->NumVertices());
 			std::vector<float2> texcoords(this->NumVertices());
@@ -141,13 +141,7 @@ namespace
 		PolygonObject()
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			RenderModelPtr model = LoadKModel("teapot.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderPolygon>());
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
-			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->ComputeTB();
-			}
-
-			renderable_ = model;
+			renderable_ = LoadKModel("teapot.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderPolygon>());
 		}
 
 		void LightPos(float3 const & light_pos)

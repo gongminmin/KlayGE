@@ -54,7 +54,7 @@ namespace
 
 namespace KlayGE
 {
-	KMesh::KMesh(RenderModelPtr model, std::wstring const & name, TexturePtr tex)
+	KMesh::KMesh(RenderModelPtr model, std::wstring const & name)
 						: StaticMesh(model, name),
 							sampler_(new Sampler),
 							model_(float4x4::Identity())
@@ -70,9 +70,24 @@ namespace KlayGE
 			effect = RenderEffect::NullObject();
 		}
 
+		technique_ = effect->Technique("KMeshNoTexTec");
+	}
+
+	KMesh::~KMesh()
+	{
+	}
+
+	void KMesh::BuildMeshInfo()
+	{
+		TexturePtr tex;
+		if (!texture_slots_.empty())
+		{
+			tex = LoadTexture(texture_slots_[0].second);
+		}
+
 		if (tex)
 		{
-			technique_ = effect->Technique("KMeshTec");
+			technique_ = technique_->Effect().Technique("KMeshTec");
 
 			sampler_->SetTexture(tex);
 			sampler_->Filtering(Sampler::TFO_Bilinear);
@@ -82,12 +97,8 @@ namespace KlayGE
 		}
 		else
 		{
-			technique_ = effect->Technique("KMeshNoTexTec");
+			technique_ = technique_->Effect().Technique("KMeshNoTexTec");
 		}
-	}
-
-	KMesh::~KMesh()
-	{
 	}
 
 	void KMesh::OnRenderBegin()
@@ -286,6 +297,11 @@ namespace KlayGE
 			skinned->StartFrame(header.start_frame);
 			skinned->EndFrame(header.end_frame);
 			skinned->FrameRate(header.frame_rate);
+		}
+
+		for (MeshesType::iterator iter = meshes.begin(); iter != meshes.end(); ++ iter)
+		{
+			(*iter)->BuildMeshInfo();
 		}
 		ret->AssignMeshes(meshes.begin(), meshes.end());
 

@@ -170,6 +170,7 @@ namespace KlayGE
 			bind_poss_[i].x() = pos.x();
 			bind_poss_[i].y() = pos.y();
 			bind_poss_[i].z() = pos.z();
+			bind_poss_[i].w() = 1;
 		}
 	}
 

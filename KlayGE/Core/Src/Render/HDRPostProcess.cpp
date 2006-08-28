@@ -31,12 +31,12 @@ namespace KlayGE
 	}
 
 
-	BlurPostProcess::BlurPostProcess(std::string const & tech, int length, float multiplier)
+	BlurPostProcess::BlurPostProcess(std::string const & tech, int kernel_radius, float multiplier)
 			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Blur.fx")->Technique(tech)),
-				color_weight_(15), tex_coord_offset_(15),
-				length_(length), multiplier_(multiplier)
+				color_weight_(8, 0), tex_coord_offset_(8, 0),
+				kernel_radius_(kernel_radius), multiplier_(multiplier)
 	{
-		BOOST_ASSERT(length <= 7);
+		BOOST_ASSERT((kernel_radius > 0) && (kernel_radius <= 8));
 	}
 
 	BlurPostProcess::~BlurPostProcess()
@@ -47,7 +47,7 @@ namespace KlayGE
 	{
 		PostProcess::Source(src_tex, filter, am);
 
-		this->CalSampleOffsets(length_, src_sampler_->GetTexture()->Width(0), 3, multiplier_);
+		this->CalSampleOffsets(src_sampler_->GetTexture()->Width(0), 3);
 	}
 
 	void BlurPostProcess::OnRenderBegin()
@@ -65,32 +65,44 @@ namespace KlayGE
 		return g;
 	}
 
-	void BlurPostProcess::CalSampleOffsets(int length, uint32_t tex_size,
-							float deviation, float multiplier)
+	void BlurPostProcess::CalSampleOffsets(uint32_t tex_size, float deviation)
 	{
-		color_weight_.assign(15, 0);
-		tex_coord_offset_.assign(15, 0);
+		std::vector<float> tmp_weights(kernel_radius_ * 2, 0);
+		std::vector<float> tmp_offset(kernel_radius_ * 2, 0);
 
-		float tu = 1.0f / tex_size;
+		float const tu = 1.0f / tex_size;
 
-		// Fill the center texel
-		float weight = multiplier * this->GaussianDistribution(0, 0, deviation);
-		color_weight_[0] = weight;
-		tex_coord_offset_[0] = 0.0f;
-
-		// Fill the right side
-		for (int i = 1; i < length + 1; ++ i)
+		float sum_weight = 0;
+		for (int i = 0; i < 2 * kernel_radius_; ++ i)
 		{
-			weight = multiplier * this->GaussianDistribution(float(i), 0, deviation);
-			color_weight_[i] = weight;
-			tex_coord_offset_[i] = float(i) * tu;
+			float weight = this->GaussianDistribution(i - kernel_radius_ + 0.5f, 0, deviation);
+			tmp_weights[i] = weight;
+			sum_weight += weight;
+		}
+		for (int i = 0; i < 2 * kernel_radius_; ++ i)
+		{
+			tmp_weights[i] /= sum_weight;
 		}
 
-		// Copy to the left side
-		for (int i = length + 1; i < 2 * length + 1; ++ i)
+		// Fill the offsets
+		for (int i = 0; i < kernel_radius_; ++ i)
 		{
-			color_weight_[i] = color_weight_[i - length];
-			tex_coord_offset_[i] = -tex_coord_offset_[i - length];
+			tmp_offset[i]                  = static_cast<float>(i - kernel_radius_);
+			tmp_offset[i + kernel_radius_] = static_cast<float>(i + 1);
+		}
+
+		color_weight_.resize(kernel_radius_);
+		tex_coord_offset_.resize(kernel_radius_);
+
+		// Bilinear filtering taps 
+		// Ordering is left to right.
+		for (int i = 0; i < kernel_radius_; ++ i)
+		{
+			float const scale = tmp_weights[i * 2] + tmp_weights[i * 2 + 1];
+			float const frac = tmp_weights[i * 2] / scale;
+
+			tex_coord_offset_[i] = (tmp_offset[i * 2] + (1 - frac)) * tu;
+			color_weight_[i] = multiplier_ * scale;
 		}
 	}
 
@@ -133,8 +145,8 @@ namespace KlayGE
 	{
 		tex_coord_offset_.resize(2);
 
-		float tu = 1.0f / width;
-		float tv = 1.0f / height;
+		float const tu = 1.0f / width;
+		float const tv = 1.0f / height;
 
 		// Sample from the 16 surrounding points.
 		int index = 0;
@@ -160,11 +172,6 @@ namespace KlayGE
 
 	SumLumIterativePostProcess::SumLumIterativePostProcess()
 			: SumLumPostProcess("SumLumIterative")
-	{
-	}
-
-	SumLumExpPostProcess::SumLumExpPostProcess()
-			: SumLumPostProcess("SumLumExp")
 	{
 	}
 
@@ -219,7 +226,7 @@ namespace KlayGE
 
 
 	ToneMappingPostProcess::ToneMappingPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("ToneMapping.fx")->Technique("ToneMapping")),
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("ToneMapping.fx")->Technique("ToneMapping20")),
 				lum_sampler_(new Sampler), bloom_sampler_(new Sampler)
 	{
 		lum_sampler_->Filtering(Sampler::TFO_Point);
@@ -229,6 +236,12 @@ namespace KlayGE
 		bloom_sampler_->Filtering(Sampler::TFO_Bilinear);
 		bloom_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
 		bloom_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
+
+		RenderEffect& effect = technique_->Effect();
+		if (effect.ValidateTechnique("ToneMapping30"))
+		{
+			technique_ = effect.Technique("ToneMapping30");
+		}
 	}
 
 	void ToneMappingPostProcess::SetTexture(TexturePtr const & lum_tex, TexturePtr const & bloom_tex)
@@ -251,15 +264,14 @@ namespace KlayGE
 	{
 		tone_mapping_.reset(new ToneMappingPostProcess);
 		downsampler_.reset(new Downsampler2x2PostProcess);
-		blur_x_.reset(new BlurXPostProcess(7, 2));
-		blur_y_.reset(new BlurYPostProcess(7, 2));
+		blur_x_.reset(new BlurXPostProcess(8, 2));
+		blur_y_.reset(new BlurYPostProcess(8, 2));
 		sum_lums_.resize(NUM_TONEMAP_TEXTURES + 1);
 		sum_lums_[0].reset(new SumLumLogPostProcess);
-		for (int i = 1; i < NUM_TONEMAP_TEXTURES; ++ i)
+		for (int i = 1; i < NUM_TONEMAP_TEXTURES + 1; ++ i)
 		{
 			sum_lums_[i].reset(new SumLumIterativePostProcess);
 		}
-		sum_lums_[NUM_TONEMAP_TEXTURES].reset(new SumLumExpPostProcess);
 		adapted_lum_.reset(new AdaptedLumPostProcess);
 	}
 
@@ -277,14 +289,13 @@ namespace KlayGE
 		blury_tex_ = rf.MakeTexture2D(width / 4, height / 4, 1, EF_ABGR16F);
 
 		lum_texs_.clear();
-		int len = 4;
-		for (int i = 0; i < NUM_TONEMAP_TEXTURES; ++ i)
+		int len = 1;
+		for (int i = 0; i < NUM_TONEMAP_TEXTURES + 1; ++ i)
 		{
 			lum_texs_.push_back(rf.MakeTexture2D(len, len, 1, EF_GR16F));
 			len *= 4;
 		}
 		std::reverse(lum_texs_.begin(), lum_texs_.end());
-		lum_exp_tex_ = rf.MakeTexture2D(1, 1, 1, EF_R32F);
 
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
@@ -312,22 +323,16 @@ namespace KlayGE
 			sum_lums_[0]->Source(src_sampler_->GetTexture(), Sampler::TFO_Bilinear, am);
 			sum_lums_[0]->Destinate(fb);
 		}
-		for (int i = 1; i < NUM_TONEMAP_TEXTURES; ++ i)
+		for (int i = 1; i < NUM_TONEMAP_TEXTURES + 1; ++ i)
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[i], 0));
 			sum_lums_[i]->Source(lum_texs_[i - 1], Sampler::TFO_Bilinear, Sampler::TAM_Clamp);
 			sum_lums_[i]->Destinate(fb);
 		}
-		{
-			FrameBufferPtr fb = rf.MakeFrameBuffer();
-			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_exp_tex_, 0));
-			sum_lums_[NUM_TONEMAP_TEXTURES]->Source(lum_texs_[NUM_TONEMAP_TEXTURES - 1], Sampler::TFO_Bilinear, Sampler::TAM_Clamp);
-			sum_lums_[NUM_TONEMAP_TEXTURES]->Destinate(fb);
-		}
 
 		{
-			adapted_lum_->Source(lum_exp_tex_, Sampler::TFO_Point, Sampler::TAM_Clamp);
+			adapted_lum_->Source(lum_texs_[NUM_TONEMAP_TEXTURES], Sampler::TFO_Point, Sampler::TAM_Clamp);
 		}
 
 		{

@@ -30,7 +30,7 @@ namespace KlayGE
 	class BlurPostProcess : public PostProcess
 	{
 	public:
-		BlurPostProcess(std::string const & tech, int length, float multiplier);
+		BlurPostProcess(std::string const & tech, int kernel_radius, float multiplier);
 		virtual ~BlurPostProcess();
 
 		void Source(TexturePtr const & src_tex, Sampler::TexFilterOp filter, Sampler::TexAddressingMode am);
@@ -39,14 +39,13 @@ namespace KlayGE
 
 	private:
 		float GaussianDistribution(float x, float y, float rho);
-		void CalSampleOffsets(int length, uint32_t tex_size,
-								float deviation, float multiplier);
+		void CalSampleOffsets(uint32_t tex_size, float deviation);
 
 	private:
 		std::vector<float> color_weight_;
 		std::vector<float> tex_coord_offset_;
 
-		int length_;
+		int kernel_radius_;
 		float multiplier_;
 	};
 
@@ -89,12 +88,6 @@ namespace KlayGE
 	{
 	public:
 		SumLumIterativePostProcess();
-	};
-
-	class SumLumExpPostProcess : public SumLumPostProcess
-	{
-	public:
-		SumLumExpPostProcess();
 	};
 
 	class AdaptedLumPostProcess : public PostProcess
@@ -148,7 +141,6 @@ namespace KlayGE
 		TexturePtr blurx_tex_;
 		TexturePtr blury_tex_;
 		std::vector<TexturePtr> lum_texs_;
-		TexturePtr lum_exp_tex_;
 
 		PostProcessPtr tone_mapping_;
 		PostProcessPtr downsampler_;

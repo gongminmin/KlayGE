@@ -157,7 +157,7 @@ namespace KlayGE
 		RenderSettings const & settings)
 	{
 		RenderWindowPtr win(new OGLRenderWindow(name, settings));
-		default_render_window_ = win;
+		default_render_target_ = win;
 
 		this->FillRenderDeviceCaps();
 

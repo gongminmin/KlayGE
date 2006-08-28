@@ -11,7 +11,7 @@ void DownsampleVS(float4 pos : POSITION,
 
 sampler src_sampler;
 
-half4 SuppressLDR(half4 c)
+half4 BrightPass(half4 c)
 {
 	if (any(c.rgb > BRIGHT_THRESHOLD))
 	{
@@ -25,7 +25,7 @@ half4 SuppressLDR(half4 c)
 
 float4 DownsamplePS(float2 oTex : TEXCOORD0) : COLOR
 {
-	return SuppressLDR(tex2D(src_sampler, oTex));
+	return BrightPass(tex2D(src_sampler, oTex));
 }
 
 technique Downsample

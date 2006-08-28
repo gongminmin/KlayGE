@@ -90,7 +90,7 @@ void SkinnedMeshApp::InitObjects()
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-	this->LookAt(float3(250.0f, 48.0f, 0.0f), float3(0.0f, 48.0f, 0.0f), float3(0.0f, 1.0f, 0.0f));
+	this->LookAt(float3(250.0f, 0.0f, 48.0f), float3(0.0f, 0.0f, 48.0f), float3(0.0f, 0.0f, 1.0f));
 	this->Proj(0.1f, 1000);
 
 	fpsController_.AttachCamera(this->ActiveCamera());
@@ -99,10 +99,6 @@ void SkinnedMeshApp::InitObjects()
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
 	model_ = checked_pointer_cast<MD5SkinnedModel>(LoadKModel("pinky.kmodel", CreateMD5ModelFactory(), CreateKMeshFactory<MD5SkinnedMesh>()));
-	for (uint32_t i = 0; i < model_->NumMeshes(); ++ i)
-	{
-		checked_pointer_cast<MD5SkinnedMesh>(model_->Mesh(i))->ComputeTB();
-	}
 	model_->SetTime(0);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());

@@ -41,7 +41,6 @@ void SkinnedMeshVS(float4 pos : POSITION,
 	obj2tan[1] = normalize(obj2tan[1]);
 	obj2tan[2] = cross(obj2tan[0], obj2tan[1]);
 
-	result_pos.zy = result_pos.yz;
 	oPos = mul(float4(result_pos, 1), worldviewproj);
 
 	float3 L = light_pos - result_pos;
@@ -88,7 +87,7 @@ technique SkinnedMeshTech
 	pass p0
 	{
 		FillMode = Solid;
-		CullMode = CW;
+		CullMode = CCW;
 
 		VertexShader = compile vs_2_0 SkinnedMeshVS();
 		PixelShader = compile ps_2_0 SkinnedMeshPS();

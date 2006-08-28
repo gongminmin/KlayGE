@@ -81,7 +81,7 @@ namespace
 	{
 	public:
 		RenderInstance(RenderModelPtr model, std::wstring const & /*name*/)
-			: KMesh(model, L"Instance", TexturePtr())
+			: KMesh(model, L"Instance")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -112,7 +112,7 @@ namespace
 
 	public:
 		RenderNormalMesh(RenderModelPtr model, std::wstring const & /*name*/)
-			: KMesh(model, L"NormalMesh", TexturePtr())
+			: KMesh(model, L"NormalMesh")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
