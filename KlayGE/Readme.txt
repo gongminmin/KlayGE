@@ -332,10 +332,16 @@ __________________________________________________________________
 		编译生成的工具文件
 	\DistanceMapCreator
 		从height map建立distance map的工具
+	\GLCompatibility
+		OpenGL兼容性测试工具
+	\HDRCompressor
+		HDR纹理压缩器
 	\MeshML2KMesh
-		从.MeshML编译为.KMesh的工具
+		从.MeshML编译为.KModel的工具
 	\NormalizerCubeMap
 		生成归一化Cube map的工具
+	\NormalMapCompressor
+		Normal map压缩器
 	\NormalMapGen
 		从height map建立normal map的工具
 	\Pkt
@@ -344,7 +350,10 @@ __________________________________________________________________
 \Lib
 		存放编译后的静态连接库
 
-
+\Exportors
+	\3DSMax
+		\MeshML
+			3ds max的导出插件
 
 __________________________________________________________________
 
