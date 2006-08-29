@@ -70,51 +70,6 @@ namespace
 
 		void BuildMeshInfo()
 		{
-			std::vector<float3> positions(this->NumVertices());
-			std::vector<float2> texcoords(this->NumVertices());
-			for (uint32_t i = 0; i < rl_->NumVertexStreams(); ++ i)
-			{
-				GraphicsBufferPtr vb = rl_->GetVertexStream(i);
-				switch (rl_->VertexStreamFormat(i)[0].usage)
-				{
-				case VEU_Position:
-					{
-						GraphicsBuffer::Mapper mapper(*vb, BA_Read_Only);
-						std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + positions.size(), positions.begin());
-					}
-					break;
-
-				case VEU_TextureCoord:
-					{
-						GraphicsBuffer::Mapper mapper(*vb, BA_Read_Only);
-						std::copy(mapper.Pointer<float2>(), mapper.Pointer<float2>() + texcoords.size(), texcoords.begin());
-					}
-					break;
-
-				default:
-					break;
-				}
-			}
-			std::vector<uint16_t> indices(this->NumTriangles() * 3);
-			{
-				GraphicsBuffer::Mapper mapper(*rl_->GetIndexStream(), BA_Read_Only);
-				std::copy(mapper.Pointer<uint16_t>(), mapper.Pointer<uint16_t>() + indices.size(), indices.begin());
-			}
-
-			std::vector<float3> normal(this->NumVertices());
-			MathLib::compute_normal<float>(normal.begin(),
-				indices.begin(), indices.end(), positions.begin(), positions.end());
-
-			std::vector<float3> tangents(this->NumVertices());
-			std::vector<float3> binormals(this->NumVertices());
-			MathLib::compute_tangent<float>(tangents.begin(), binormals.begin(),
-				indices.begin(), indices.end(),
-				positions.begin(), positions.end(), texcoords.begin(), normal.begin());
-
-			this->AddVertexStream(&tangents[0], static_cast<uint32_t>(sizeof(tangents[0]) * tangents.size()),
-				vertex_element(VEU_Tangent, 0, EF_BGR32F));
-			this->AddVertexStream(&binormals[0], static_cast<uint32_t>(sizeof(binormals[0]) * binormals.size()),
-				vertex_element(VEU_Binormal, 0, EF_BGR32F));
 		}
 
 		void OnRenderBegin()
@@ -217,10 +172,10 @@ void Parallax::InitObjects()
 	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
 	this->LookAt(float3(-0.3f, 0.4f, -0.3f), float3(0, 0, 0));
-	this->Proj(0.1f, 100);
+	this->Proj(0.01f, 100);
 
 	fpcController_.AttachCamera(this->ActiveCamera());
-	fpcController_.Scalers(0.05f, 0.05f);
+	fpcController_.Scalers(0.05f, 0.01f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;

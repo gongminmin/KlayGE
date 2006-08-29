@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <set>
 #include <vector>
+#include <limits>
 
 #include "util.hpp"
 #include "mesh_extractor.hpp"
@@ -68,6 +69,43 @@ namespace
 	{
 		return lhs.second > rhs.second;
 	}
+
+	Point3 compute_tangent(Point3 const & v0XYZ, Point3 const & v1XYZ, Point3 const & v2XYZ,
+		Point2 const & v0Tex, Point2 const & v1Tex, Point2 const & v2Tex,
+		Point3 const & normal)
+	{
+		Point3 v1v0 = v1XYZ - v0XYZ;
+		Point3 v2v0 = v2XYZ - v0XYZ;
+
+		float s1 = v1Tex.x - v0Tex.x;
+		float t1 = v1Tex.y - v0Tex.y;
+
+		float s2 = v2Tex.x - v0Tex.x;
+		float t2 = v2Tex.y - v0Tex.y;
+
+		float denominator = s1 * t2 - s2 * t1;
+		Point3 tangent, binormal;
+		if (abs(denominator) < std::numeric_limits<float>::epsilon())
+		{
+			tangent = Point3(1, 0, 0);
+			binormal = Point3(0, 1, 0);
+		}
+		else
+		{
+			tangent = (t2 * v1v0 - t1 * v2v0) / denominator;
+			binormal = (s1 * v2v0 - s2 * v1v0) / denominator;
+		}
+
+		// Gram-Schmidt orthogonalize
+		tangent = (tangent - normal * (tangent % normal)).Normalize();
+		// Calculate handedness
+		if ((normal ^ tangent) % binormal < 0)
+		{
+			tangent = -tangent;
+		}
+
+		return tangent;
+	}
 }
 
 namespace KlayGE
@@ -79,7 +117,7 @@ namespace KlayGE
 	{
 	}
 
-	void meshml_extractor::export_objects(std::vector<INode*> const & nodes, bool flip_normals)
+	void meshml_extractor::export_objects(std::vector<INode*> const & nodes)
 	{
 		if (joints_per_ver_ != 0)
 		{
@@ -113,13 +151,13 @@ namespace KlayGE
 			{
 				if (is_mesh(nodes[i]))
 				{
-					this->extract_object(nodes[i], flip_normals);
+					this->extract_object(nodes[i]);
 				}
 			}
 		}
 	}
 
-	void meshml_extractor::extract_object(INode* node, bool flip_normals)
+	void meshml_extractor::extract_object(INode* node)
 	{
 		assert(is_mesh(node));
 
@@ -128,18 +166,14 @@ namespace KlayGE
 		obj_info.name = tstr_to_str(node->GetName());
 
 		Matrix3 obj_matrix = node->GetObjectTM(0);
-		Point3 Row0 = obj_matrix.GetRow(0);
-		Point3 Row1 = obj_matrix.GetRow(1);
-		Point3 Row2 = obj_matrix.GetRow(2);
-		if ((Row0 ^ Row1) % Row2 <= 0)
-		{
-			flip_normals = !flip_normals;
-		}
+		bool flip_normals = obj_matrix.Parity() ? true : false;
 		Matrix3 normal_matrix = obj_matrix;
 		normal_matrix.NoTrans();
 
 		std::vector<std::pair<Point3, binds_t> > positions;
 		std::vector<Point3> normals;
+		std::vector<Point3> tangents;
+		std::vector<Point3> binormals;
 		std::map<int, std::vector<Point2> > texs;
 		std::vector<int> pos_indices;
 		std::map<int, std::vector<int> > tex_indices;
@@ -188,21 +222,8 @@ namespace KlayGE
 			}
 
 			Mesh& mesh = tri->GetMesh();
-			mesh.buildNormals();
-
+			std::vector<std::vector<int> > vertex_triangle_list(mesh.getNumVerts());
 			obj_info.triangles.resize(mesh.getNumFaces());
-			for (size_t i = 0; i < obj_info.triangles.size(); ++ i)
-			{
-				for (int j = 2; j >= 0; -- j)
-				{
-					pos_indices.push_back(mesh.faces[i].v[j]);
-				}
-			}
-			for (size_t i = 0; i < mesh.getNumVerts(); ++ i)
-			{
-				positions.push_back(std::make_pair(mesh.verts[i], binds_t()));
-				normals.push_back(mesh.gfxNormals[i]);
-			}
 
 			for (int channel = 1; channel < MAX_MESHMAPS; channel ++)
 			{
@@ -218,6 +239,11 @@ namespace KlayGE
 						{
 							texs[channel][i].x = uv_verts[i].x;
 							texs[channel][i].y = uv_verts[i].y;
+
+							if (uv_transs.find(channel - 1) != uv_transs.end())
+							{
+								texs[channel][i] = texs[channel][i] * uv_transs[channel - 1];
+							}
 						}
 
 						TVFace* tv_faces = mesh.mapFaces(channel);
@@ -230,6 +256,40 @@ namespace KlayGE
 						}
 					}
 				}
+			}
+
+			for (size_t i = 0; i < obj_info.triangles.size(); ++ i)
+			{
+				for (int j = 2; j >= 0; -- j)
+				{
+					pos_indices.push_back(mesh.faces[i].v[j]);
+					vertex_triangle_list[mesh.faces[i].v[j]].push_back(i);
+				}
+
+				obj_info.triangles[i].normal = mesh.FaceNormal(i, false);
+
+				TVFace* tv_faces = mesh.mapFaces(1);
+				obj_info.triangles[i].tangent = compute_tangent(mesh.verts[mesh.faces[i].v[0]], mesh.verts[mesh.faces[i].v[1]], mesh.verts[mesh.faces[i].v[2]],
+					texs[1][tv_faces[i].t[0]], texs[1][tv_faces[i].t[1]], texs[1][tv_faces[i].t[2]],
+					mesh.FaceNormal(i, true));
+			}
+			for (size_t i = 0; i < mesh.getNumVerts(); ++ i)
+			{
+				positions.push_back(std::make_pair(mesh.verts[i], binds_t()));
+
+				Point3 normal(0, 0, 0);
+				for (size_t j = 0; j < vertex_triangle_list[i].size(); ++ j)
+				{
+					normal += obj_info.triangles[vertex_triangle_list[i][j]].normal;
+				}
+				normals.push_back(normal);
+
+				Point3 tangent(0, 0, 0);
+				for (size_t j = 0; j < vertex_triangle_list[i].size(); ++ j)
+				{
+					tangent += obj_info.triangles[vertex_triangle_list[i][j]].tangent;
+				}
+				tangents.push_back(tangent);
 			}
 
 			if (need_delete)
@@ -320,31 +380,27 @@ namespace KlayGE
 		for (std::set<vertex_index_t>::iterator iter = vertex_indices.begin();
 			iter != vertex_indices.end(); ++ iter, ++ ver_index)
 		{
+			vertex_t& vertex = obj_info.vertices[ver_index];
+
 			Point3 pos = positions[iter->pos_index].first * obj_matrix;
-			obj_info.vertices[ver_index].pos.x = pos.x;
-			obj_info.vertices[ver_index].pos.y = pos.z;
-			obj_info.vertices[ver_index].pos.z = pos.y;
+			vertex.pos = Point3(pos.x, pos.z, pos.y);
 
 			Point3 normal = normals[iter->pos_index] * normal_matrix;
+			Point3 tangent = tangents[iter->pos_index] * normal_matrix;
 			if (flip_normals)
 			{
 				normal = -normal;
+				tangent = -tangent;
 			}
-			normal = normal.Normalize();
-			obj_info.vertices[ver_index].normal.x = normal.x;
-			obj_info.vertices[ver_index].normal.y = normal.z;
-			obj_info.vertices[ver_index].normal.z = normal.y;
+			vertex.normal = Point3(normal.x, normal.z, normal.y).Normalize();
+			vertex.tangent = Point3(tangent.x, tangent.z, tangent.y).Normalize();
+			vertex.binormal = vertex.normal ^ vertex.tangent;
 
 			int uv_layer = 0;
 			for (std::map<int, std::vector<Point2> >::iterator uv_iter = texs.begin();
 				uv_iter != texs.end(); ++ uv_iter, ++ uv_layer)
 			{
 				Point2 tex = uv_iter->second[iter->tex_indices[uv_layer]];
-				if (uv_transs.find(uv_layer) != uv_transs.end())
-				{
-					tex = tex * uv_transs[uv_layer];
-				}
-
 				obj_info.vertices[ver_index].tex.push_back(Point2(tex.x, 1 - tex.y));
 			}
 
@@ -358,6 +414,8 @@ namespace KlayGE
 
 		obj_info.vertex_elements.push_back(vertex_element_t(VEU_Position, 0, 3));
 		obj_info.vertex_elements.push_back(vertex_element_t(VEU_Normal, 0, 3));
+		obj_info.vertex_elements.push_back(vertex_element_t(VEU_Tangent, 0, 3));
+		obj_info.vertex_elements.push_back(vertex_element_t(VEU_Binormal, 0, 3));
 		for (size_t i = 0; i < obj_info.vertices[0].tex.size(); ++ i)
 		{
 			obj_info.vertex_elements.push_back(vertex_element_t(VEU_TextureCoord, static_cast<unsigned char>(i), 2));
@@ -769,6 +827,14 @@ namespace KlayGE
 				ofs << "\t\t\t\t\t<normal x=\'" << v_iter->normal.x
 					<< "\' y=\'" << v_iter->normal.y
 					<< "\' z=\'" << v_iter->normal.z << "\'/>" << endl;
+
+				ofs << "\t\t\t\t\t<tangent x=\'" << v_iter->tangent.x
+					<< "\' y=\'" << v_iter->tangent.y
+					<< "\' z=\'" << v_iter->tangent.z << "\'/>" << endl;
+
+				ofs << "\t\t\t\t\t<binormal x=\'" << v_iter->binormal.x
+					<< "\' y=\'" << v_iter->binormal.y
+					<< "\' z=\'" << v_iter->binormal.z << "\'/>" << endl;
 
 				for (std::vector<Point2>::const_iterator t_iter = v_iter->tex.begin();
 					t_iter != v_iter->tex.end(); ++ t_iter)

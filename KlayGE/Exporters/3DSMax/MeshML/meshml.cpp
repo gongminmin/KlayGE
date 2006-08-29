@@ -193,12 +193,6 @@ namespace KlayGE
 							std::vector<int> sel_items(num_sel);
 							::SendMessage(node_list_wnd, LB_GETSELITEMS, num_sel, reinterpret_cast<LPARAM>(&sel_items[0]));
 
-							bool flip_normals = false;
-							if (BST_CHECKED == ::SendMessage(::GetDlgItem(wnd, IDC_FLIP_NORMALS), BM_GETCHECK, NULL, NULL))
-							{
-								flip_normals = true;
-							}
-
 							std::vector<INode*> nodes;
 							for (size_t i = 0; i < sel_items.size(); ++ i)
 							{
@@ -206,7 +200,7 @@ namespace KlayGE
 									LB_GETITEMDATA, sel_items[i], NULL)));
 							}
 
-							extractor.export_objects(nodes, flip_normals);
+							extractor.export_objects(nodes);
 							extractor.write_xml(instance->file_name_);
 						}
 						else

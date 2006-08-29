@@ -62,6 +62,8 @@ namespace KlayGE
 	{
 		Point3 pos;
 		Point3 normal;
+		Point3 tangent;
+		Point3 binormal;
 		std::vector<Point2> tex;
 
 		binds_t binds;
@@ -72,6 +74,9 @@ namespace KlayGE
 	struct triangle_t
 	{
 		int	vertex_index[3];
+
+		Point3 normal;
+		Point3 tangent;
 	};
 
 	typedef std::vector<triangle_t> triangles_t;
@@ -118,11 +123,11 @@ namespace KlayGE
 	public:
 		meshml_extractor(int joints_per_ver, int start_frame, int end_frame);
 
-		void export_objects(std::vector<INode*> const & nodes, bool flip_normals);
+		void export_objects(std::vector<INode*> const & nodes);
 		void write_xml(std::basic_string<TCHAR> const & file_name);
 
 	private:
-		void extract_object(INode* node, bool flip_normals);
+		void extract_object(INode* node);
 		void extract_bone(INode* node);
 		void remove_redundant_joints();
 
