@@ -88,6 +88,10 @@ namespace
 			technique_ = rf.LoadEffect("Instancing.fx")->Technique("Instance");
 		}
 
+		void BuildMeshInfo()
+		{
+		}
+
 		void OnRenderBegin()
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();

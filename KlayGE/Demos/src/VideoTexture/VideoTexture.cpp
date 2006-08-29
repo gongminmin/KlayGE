@@ -53,6 +53,10 @@ namespace
 			video_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
 		}
 
+		void BuildMeshInfo()
+		{
+		}
+
 		void OnRenderBegin()
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
