@@ -174,13 +174,10 @@ void Cartoon::InitObjects()
 
 	torus_.reset(new TorusObject);
 
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
-	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
-
 	this->LookAt(float3(0, 0, -6), float3(0, 0, 0));
 	this->Proj(0.1f, 20.0f);
 
+	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	normal_depth_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
 	normal_depth_buffer_->GetViewport().camera = renderEngine.CurRenderTarget()->GetViewport().camera;
 
@@ -230,7 +227,7 @@ void Cartoon::DoUpdate(uint32_t pass)
 		fpcController_.Update();
 
 		renderEngine.BindRenderTarget(normal_depth_buffer_);
-		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 		sceneMgr.Clear();
 		checked_pointer_cast<RenderTorus>(torus_->GetRenderable())->Pass(0);
@@ -239,7 +236,7 @@ void Cartoon::DoUpdate(uint32_t pass)
 	
 	case 1:
 		renderEngine.BindRenderTarget(RenderTargetPtr());
-		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 		sceneMgr.Clear();
 		checked_pointer_cast<RenderTorus>(torus_->GetRenderable())->UpdateTexture(normal_depth_tex_);

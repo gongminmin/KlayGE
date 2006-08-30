@@ -31,6 +31,9 @@ private:
 	KlayGE::TexturePtr rendered_tex_;
 
 	KlayGE::HDRPostProcessPtr hdr_;
+
+	KlayGE::FrameBufferPtr back_face_buffer_;
+	KlayGE::TexturePtr back_face_tex_;
 };
 
 #endif		// _REFRACT_HPP

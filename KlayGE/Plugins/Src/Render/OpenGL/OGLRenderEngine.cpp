@@ -123,16 +123,9 @@ namespace KlayGE
 		}
 	}
 
-	// 设置清除颜色
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::ClearColor(Color const & col)
-	{
-		glClearColor(col.r(), col.g(), col.b(), col.a());
-	}
-
 	// 清空缓冲区
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::Clear(uint32_t masks)
+	void OGLRenderEngine::Clear(uint32_t masks, Color const & clr, float depth, int32_t stencil)
 	{
 		uint32_t flags = 0;
 		if (masks & CBM_Color)
@@ -148,6 +141,9 @@ namespace KlayGE
 			flags |= GL_STENCIL_BUFFER_BIT;
 		}
 
+		glClearColor(clr.r(), clr.g(), clr.b(), clr.a());
+		glClearDepth(depth);
+		glClearStencil(stencil);
 		glClear(flags);
 	}
 

@@ -6,6 +6,7 @@
 //
 // 3.4.0
 // 增加了TexelToPixelOffset (2006.8.27)
+// 去掉了ClearColor (2006.8.31)
 //
 // 3.3.0
 // 统一了RenderState (2006.5.21)
@@ -244,8 +245,7 @@ namespace KlayGE
 		size_t NumPrimitivesJustRendered();
 		size_t NumVerticesJustRendered();
 
-		virtual void ClearColor(Color const & clr) = 0;
-		virtual void Clear(uint32_t masks) = 0;
+		virtual void Clear(uint32_t masks, Color const & clr, float depth, int32_t stencil) = 0;
 
 		virtual RenderWindowPtr CreateRenderWindow(std::string const & name, RenderSettings const & settings) = 0;
 

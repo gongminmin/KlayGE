@@ -167,16 +167,9 @@ namespace KlayGE
 		}
 	}
 
-	// 设置清除颜色
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::ClearColor(Color const & clr)
-	{
-		clearClr_ = D3DCOLOR_COLORVALUE(clr.r(), clr.g(), clr.b(), clr.a());
-	}
-
 	// 清空缓冲区
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::Clear(uint32_t masks)
+	void D3D9RenderEngine::Clear(uint32_t masks, Color const & clr, float depth, int32_t stencil)
 	{
 		uint32_t flags = 0;
 		if (masks & CBM_Color)
@@ -192,7 +185,9 @@ namespace KlayGE
 			flags |= D3DCLEAR_STENCIL;
 		}
 
-		TIF(d3dDevice_->Clear(0, NULL, flags, clearClr_, 1, 0));
+		TIF(d3dDevice_->Clear(0, NULL, flags,
+			D3DCOLOR_COLORVALUE(clr.r(), clr.g(), clr.b(), clr.a()),
+			depth, stencil));
 	}
 
 	// 建立渲染窗口

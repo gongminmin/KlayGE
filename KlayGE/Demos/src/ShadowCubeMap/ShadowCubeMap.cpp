@@ -345,10 +345,6 @@ void ShadowCubeMap::InitObjects()
 	mesh_.reset(new OccluderObject);
 	mesh_->AddToSceneManager();
 
-	RenderEngine& renderEngine(rf.RenderEngineInstance());
-
-	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
-
 	this->LookAt(float3(1.3f, 0.5f, -0.7f), float3(0, 0, 0));
 	this->Proj(0.01f, 100);
 
@@ -436,7 +432,7 @@ void ShadowCubeMap::DoUpdate(uint32_t pass)
 	case 5:
 		{
 			renderEngine.BindRenderTarget(shadow_buffers_[pass]);
-			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->LightMatrices(light_model_);
 			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->LightMatrices(light_model_);
@@ -446,7 +442,7 @@ void ShadowCubeMap::DoUpdate(uint32_t pass)
 	case 6:
 		{
 			renderEngine.BindRenderTarget(RenderTargetPtr());
-			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 			//SaveTexture(shadow_cube_tex_, "shadow_tex.dds");
 

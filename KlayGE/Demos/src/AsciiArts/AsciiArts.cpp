@@ -261,8 +261,7 @@ void AsciiArtsApp::InitObjects()
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
-	renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+	renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 	obj_.reset(new SceneObjectHelper(LoadKModel("teapot.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<KMesh>()),
 		SceneObject::SOA_Cullable | SceneObject::SOA_ShortAge));
@@ -350,7 +349,7 @@ void AsciiArtsApp::DoUpdate(uint32_t pass)
 		case 0:
 			// Õý³£äÖÈ¾
 			renderEngine.BindRenderTarget(render_buffer_);
-			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 			obj_->AddToSceneManager();
 			break;
@@ -367,7 +366,7 @@ void AsciiArtsApp::DoUpdate(uint32_t pass)
 	else
 	{
 		renderEngine.BindRenderTarget(RenderTargetPtr());
-		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 		sceneMgr.Clear();
 		obj_->AddToSceneManager();

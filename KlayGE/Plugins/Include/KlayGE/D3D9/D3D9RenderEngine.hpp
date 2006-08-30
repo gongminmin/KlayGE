@@ -60,8 +60,7 @@ namespace KlayGE
 		ID3D9Ptr const & D3DObject() const;
 		ID3D9DevicePtr const & D3DDevice() const;
 
-		void ClearColor(Color const & clr);
-		void Clear(uint32_t masks);
+		void Clear(uint32_t masks, Color const & clr, float depth, int32_t stencil);
 
 		RenderWindowPtr CreateRenderWindow(std::string const & name, RenderSettings const & settings);
 
@@ -112,8 +111,6 @@ namespace KlayGE
 		// List of D3D drivers installed (video cards)
 		// Enumerates itself
 		D3D9AdapterList adapterList_;
-
-		D3DCOLOR clearClr_;
 
 		std::vector<D3D9VertexBufferPtr> active_vertex_streams_;
 		D3D9IndexBufferPtr active_index_stream_;

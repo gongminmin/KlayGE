@@ -219,7 +219,6 @@ void Fractal::InitObjects()
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
 	render_buffer_[0] = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
 	render_buffer_[1] = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
@@ -261,7 +260,7 @@ void Fractal::DoUpdate(uint32_t pass)
 	{
 	case 0:
 		renderEngine.BindRenderTarget(render_buffer_[!odd]);
-		renderEngine.Clear(RenderEngine::CBM_Color);
+		renderEngine.Clear(RenderEngine::CBM_Color, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 		checked_pointer_cast<RenderFractal>(renderFractal_)->SetTexture(rendered_tex_[odd]);
 		renderFractal_->AddToRenderQueue();
@@ -269,7 +268,7 @@ void Fractal::DoUpdate(uint32_t pass)
 
 	case 1:
 		renderEngine.BindRenderTarget(RenderTargetPtr());
-		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 		checked_pointer_cast<RenderPlane>(renderPlane_)->SetTexture(rendered_tex_[!odd]);
 		renderPlane_->AddToRenderQueue();

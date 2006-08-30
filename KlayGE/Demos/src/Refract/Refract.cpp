@@ -88,9 +88,24 @@ namespace
 	public:
 		RefractorRenderable(RenderModelPtr model, std::wstring const & /*name*/)
 			: KMesh(model, L"Refractor"),
-				y_sampler_(new Sampler), c_sampler_(new Sampler)
+				y_sampler_(new Sampler), c_sampler_(new Sampler),
+				bf_sampler_(new Sampler)
 		{
-			technique_ = Context::Instance().RenderFactoryInstance().LoadEffect("Refract.fx")->Technique("Refract");
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+			RenderEffectPtr effect = rf.LoadEffect("Refract.fx");
+			back_face_tech_ = effect->Technique("RefractBackFace");
+
+			if (!effect->ValidateTechnique("Refract2x"))
+			{
+				front_face_tech_ = effect->Technique("Refract20");
+			}
+			else
+			{
+				front_face_tech_ = effect->Technique("Refract2x");
+			}
+
+			technique_ = back_face_tech_;
 
 			y_sampler_->Filtering(Sampler::TFO_Bilinear);
 			y_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
@@ -103,10 +118,38 @@ namespace
 			c_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
 			c_sampler_->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
 			*(technique_->Effect().ParameterByName("skybox_CcubeMapSampler")) = c_sampler_;
+
+			bf_sampler_->Filtering(Sampler::TFO_Bilinear);
+			bf_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
+			bf_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
+			*(technique_->Effect().ParameterByName("BackFace_Sampler")) = bf_sampler_;
 		}
 
 		void BuildMeshInfo()
 		{
+		}
+
+		void Pass(int pass)
+		{
+			switch (pass)
+			{
+			case 0:
+				technique_ = back_face_tech_;
+				break;
+
+			case 1:
+				technique_ = front_face_tech_;
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				break;
+			}
+		}
+
+		void BackFaceTexture(TexturePtr const & bf_tex)
+		{
+			bf_sampler_->SetTexture(bf_tex);
 		}
 
 		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)
@@ -126,15 +169,21 @@ namespace
 			*(technique_->Effect().ParameterByName("model")) = model;
 			*(technique_->Effect().ParameterByName("modelit")) = MathLib::transpose(MathLib::inverse(model));
 			*(technique_->Effect().ParameterByName("mvp")) = model * view * proj;
+			*(technique_->Effect().ParameterByName("eyePos")) = app.ActiveCamera().EyePos();
+
+			*(technique_->Effect().ParameterByName("inv_vp")) = MathLib::inverse(view * proj);
 
 			*(technique_->Effect().ParameterByName("eta_ratio")) = float3(1 / 1.1f, 1 / 1.1f - 0.003f, 1 / 1.1f - 0.006f);
-
-			*(technique_->Effect().ParameterByName("eyePos")) = Context::Instance().AppInstance().ActiveCamera().EyePos();
 		}
 
 	private:
 		SamplerPtr y_sampler_;
 		SamplerPtr c_sampler_;
+
+		SamplerPtr bf_sampler_;
+
+		RenderTechniquePtr back_face_tech_;
+		RenderTechniquePtr front_face_tech_;
 	};
 
 	class RefractorObject : public SceneObjectHelper
@@ -145,6 +194,16 @@ namespace
 		{
 			renderable_ = LoadKModel("teapot.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RefractorRenderable>())->Mesh(0);
 			checked_pointer_cast<RefractorRenderable>(renderable_)->CompressedCubeMap(y_cube, c_cube);	
+		}
+
+		void Pass(int pass)
+		{
+			checked_pointer_cast<RefractorRenderable>(renderable_)->Pass(pass);
+		}
+
+		void BackFaceTexture(TexturePtr const & bf_tex)
+		{
+			checked_pointer_cast<RefractorRenderable>(renderable_)->BackFaceTexture(bf_tex);
 		}
 	};
 
@@ -202,17 +261,14 @@ void Refract::InitObjects()
 	c_cube_map_ = LoadTexture("uffizi_cross_c.dds");
 
 	refractor_.reset(new RefractorObject(y_cube_map_, c_cube_map_));
-	refractor_->AddToSceneManager();
 
 	sky_box_.reset(new HDRSceneObjectSkyBox);
 	checked_pointer_cast<HDRSceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map_, c_cube_map_);
-	sky_box_->AddToSceneManager();
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 
-	re.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
-	re.Clear(RenderEngine::CBM_Depth);
+	re.Clear(RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 	this->LookAt(float3(-0.05f, -0.01f, -0.5f), float3(0, 0.05f, 0));
 	this->Proj(0.05f, 100);
@@ -228,9 +284,10 @@ void Refract::InitObjects()
 	input_handler += boost::bind(&Refract::InputHandler, this, _1, _2);
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
+	back_face_buffer_ = rf.MakeFrameBuffer();
 	render_buffer_ = rf.MakeFrameBuffer();
 	RenderTargetPtr screen_buffer = re.CurRenderTarget();
-	render_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
+	back_face_buffer_->GetViewport().camera = render_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
 
 	hdr_.reset(new HDRPostProcess);
 	hdr_->Destinate(RenderTargetPtr());
@@ -239,6 +296,10 @@ void Refract::InitObjects()
 void Refract::OnResize(uint32_t width, uint32_t height)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+	back_face_tex_ = rf.MakeTexture2D(width, height, 1, EF_ARGB8);
+	back_face_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*back_face_tex_, 0));
+	back_face_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));
 
 	rendered_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F);
 	render_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_, 0));
@@ -259,7 +320,7 @@ void Refract::InputHandler(InputEngine const & /*sender*/, InputAction const & a
 
 uint32_t Refract::NumPasses() const
 {
-	return 2;
+	return 3;
 }
 
 void Refract::DoUpdate(uint32_t pass)
@@ -272,17 +333,26 @@ void Refract::DoUpdate(uint32_t pass)
 	case 0:
 		fpcController_.Update();
 
-		// 第一遍，正常渲染
-		re.BindRenderTarget(render_buffer_);
-		re.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+		// 第一遍，渲染背面
+		re.BindRenderTarget(back_face_buffer_);
+		re.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0, 0, 0, 1), 0, 0);
 
-		*(refractor_->GetRenderable()->GetRenderTechnique()->Effect().ParameterByName("eyePos")) = this->ActiveCamera().EyePos();
+		checked_pointer_cast<RefractorObject>(refractor_)->Pass(0);
 		refractor_->AddToSceneManager();
+		break;
+
+	case 1:
+		// 第二遍，渲染正面
+		re.BindRenderTarget(render_buffer_);
+		re.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
+
+		checked_pointer_cast<RefractorObject>(refractor_)->Pass(1);
+		checked_pointer_cast<RefractorObject>(refractor_)->BackFaceTexture(back_face_tex_);
 
 		sky_box_->AddToSceneManager();
 		break;
 
-	case 1:
+	case 2:
 		sm.Clear();
 
 		hdr_->Apply();

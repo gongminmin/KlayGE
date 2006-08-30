@@ -187,16 +187,13 @@ void Electro::InitObjects()
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
 	renderElectro_.reset(new RenderElectro);
-
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 }
 
 void Electro::DoUpdate(uint32_t /*pass*/)
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-	renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+	renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 	renderElectro_->AddToRenderQueue();
 

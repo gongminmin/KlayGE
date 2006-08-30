@@ -144,10 +144,6 @@ void VideoTextureApp::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
-	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
-
 	this->LookAt(float3(-0.2f, 0.3f, -0.2f), float3(0, 0, 0));
 	this->Proj(0.01f, 100);
 
@@ -189,7 +185,7 @@ void VideoTextureApp::DoUpdate(uint32_t /*pass*/)
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 	ShowEngine& se = Context::Instance().ShowFactoryInstance().ShowEngineInstance();
 
-	re.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+	re.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 	TexturePtr tex = se.PresentTexture();
 	checked_pointer_cast<TeapotObject>(ground_)->VideoTexture(tex);

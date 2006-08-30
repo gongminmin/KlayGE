@@ -59,10 +59,7 @@ namespace KlayGE
 		{
 		}
 
-		void ClearColor(Color const & /*clr*/)
-		{
-		}
-		void Clear(uint32_t /*masks*/)
+		void Clear(uint32_t /*masks*/, Color const & /*clr*/, float /*depth*/, int32_t /*stencil*/)
 		{
 		}
 

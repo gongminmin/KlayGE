@@ -310,10 +310,6 @@ void ParticleSystemApp::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
-	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
-
 	this->LookAt(float3(-1.5f, 1.5f, -1.5f), float3(0, 0, 0));
 	this->Proj(0.01f, 100);
 
@@ -388,7 +384,7 @@ void ParticleSystemApp::DoUpdate(uint32_t /*pass*/)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 
-	re.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+	re.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 	std::vector<Particle> active_particles;
 	for (uint32_t i = 0; i < ps_->NumParticles(); ++ i)

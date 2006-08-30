@@ -141,10 +141,6 @@ void VertexDisplacement::InitObjects()
 	flag_.reset(new FlagObject(8 * 2, 6 * 2));
 	flag_->AddToSceneManager();
 
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
-	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
-
 	this->LookAt(float3(0, 0, -10), float3(0, 0, 0));
 	this->Proj(0.1f, 20.0f);
 
@@ -175,7 +171,7 @@ void VertexDisplacement::DoUpdate(uint32_t /*pass*/)
 	fpcController_.Update();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-	renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+	renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 	std::wostringstream stream;
 	stream << this->FPS();

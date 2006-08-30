@@ -88,15 +88,11 @@ void SkinnedMeshApp::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.TTF", 16);
 
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
 	this->LookAt(float3(250.0f, 0.0f, 48.0f), float3(0.0f, 0.0f, 48.0f), float3(0.0f, 0.0f, 1.0f));
 	this->Proj(0.1f, 1000);
 
 	fpsController_.AttachCamera(this->ActiveCamera());
 	fpsController_.Scalers(0.1f, 10);
-
-	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
 
 	model_ = checked_pointer_cast<MD5SkinnedModel>(LoadKModel("pinky.kmodel", CreateMD5ModelFactory(), CreateKMeshFactory<MD5SkinnedMesh>()));
 	model_->SetTime(0);
@@ -126,7 +122,7 @@ void SkinnedMeshApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-	renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+	renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 	model_->SetTime(std::clock() / 1000.0f);
 

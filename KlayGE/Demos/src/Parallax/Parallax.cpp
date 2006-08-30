@@ -167,10 +167,6 @@ void Parallax::InitObjects()
 	polygon_.reset(new PolygonObject);
 	polygon_->AddToSceneManager();
 
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
-	renderEngine.ClearColor(Color(0.2f, 0.4f, 0.6f, 1));
-
 	this->LookAt(float3(-0.3f, 0.4f, -0.3f), float3(0, 0, 0));
 	this->Proj(0.01f, 100);
 
@@ -201,7 +197,7 @@ void Parallax::DoUpdate(uint32_t /*pass*/)
 	fpcController_.Update();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-	renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth);
+	renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 	float degree(std::clock() / 700.0f);
 	float3 lightPos(2, 0, 1);
