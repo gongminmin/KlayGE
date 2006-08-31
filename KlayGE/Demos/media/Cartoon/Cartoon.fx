@@ -53,8 +53,9 @@ void PostToonVS(float4 pos : POSITION,
 {
 	oPos = mul(mul(pos, model_view), proj);
 	
-	oTc0 = oPos.xy / oPos.w / 2 + 0.5f;
-	oTc0.y = 1 - oTc0.y;
+	oTc0 = oPos.xy / oPos.w;
+	oTc0.y = -oTc0.y;
+	oTc0 = oTc0 / 2 + 0.5f;
 
 	oTc1 = oTc0.xyxy + float4(-inv_width, -inv_height, +inv_width, +inv_height);
 	oTc2 = oTc0.xyxy + float4(+inv_width, -inv_height, -inv_width, +inv_height);

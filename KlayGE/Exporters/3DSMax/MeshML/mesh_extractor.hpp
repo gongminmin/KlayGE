@@ -74,8 +74,6 @@ namespace KlayGE
 	struct triangle_t
 	{
 		int	vertex_index[3];
-
-		Point3 normal;
 		Point3 tangent;
 	};
 

@@ -166,10 +166,14 @@ namespace
 			float4x4 const & view = app.ActiveCamera().ViewMatrix();
 			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
+			float4x4 const mv = model * view;
+			float4x4 const mvp = mv * proj;
+
 			*(technique_->Effect().ParameterByName("model")) = model;
 			*(technique_->Effect().ParameterByName("modelit")) = MathLib::transpose(MathLib::inverse(model));
-			*(technique_->Effect().ParameterByName("mvp")) = model * view * proj;
-			*(technique_->Effect().ParameterByName("eyePos")) = app.ActiveCamera().EyePos();
+			*(technique_->Effect().ParameterByName("mvp")) = mvp;
+			*(technique_->Effect().ParameterByName("mv")) = mv;
+			*(technique_->Effect().ParameterByName("eye_pos")) = app.ActiveCamera().EyePos();
 
 			*(technique_->Effect().ParameterByName("inv_vp")) = MathLib::inverse(view * proj);
 
@@ -297,7 +301,7 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	back_face_tex_ = rf.MakeTexture2D(width, height, 1, EF_ARGB8);
+	back_face_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F);
 	back_face_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*back_face_tex_, 0));
 	back_face_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));
 

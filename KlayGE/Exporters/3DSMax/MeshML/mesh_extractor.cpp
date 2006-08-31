@@ -222,6 +222,8 @@ namespace KlayGE
 			}
 
 			Mesh& mesh = tri->GetMesh();
+			mesh.buildNormals();
+
 			std::vector<std::vector<int> > vertex_triangle_list(mesh.getNumVerts());
 			obj_info.triangles.resize(mesh.getNumFaces());
 
@@ -266,8 +268,6 @@ namespace KlayGE
 					vertex_triangle_list[mesh.faces[i].v[j]].push_back(i);
 				}
 
-				obj_info.triangles[i].normal = mesh.FaceNormal(i, false);
-
 				TVFace* tv_faces = mesh.mapFaces(1);
 				obj_info.triangles[i].tangent = compute_tangent(mesh.verts[mesh.faces[i].v[0]], mesh.verts[mesh.faces[i].v[1]], mesh.verts[mesh.faces[i].v[2]],
 					texs[1][tv_faces[i].t[0]], texs[1][tv_faces[i].t[1]], texs[1][tv_faces[i].t[2]],
@@ -276,13 +276,7 @@ namespace KlayGE
 			for (size_t i = 0; i < mesh.getNumVerts(); ++ i)
 			{
 				positions.push_back(std::make_pair(mesh.verts[i], binds_t()));
-
-				Point3 normal(0, 0, 0);
-				for (size_t j = 0; j < vertex_triangle_list[i].size(); ++ j)
-				{
-					normal += obj_info.triangles[vertex_triangle_list[i][j]].normal;
-				}
-				normals.push_back(normal);
+				normals.push_back(mesh.getNormal(i));
 
 				Point3 tangent(0, 0, 0);
 				for (size_t j = 0; j < vertex_triangle_list[i].size(); ++ j)
