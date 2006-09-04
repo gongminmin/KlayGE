@@ -54,7 +54,7 @@ namespace
 				{
 					for (int x = 0; x < XSIZE; ++ x)
 					{
-						unsigned char t = static_cast<uint8_t>(127 * (1
+						uint8_t t = static_cast<uint8_t>(127 * (1
 							+ pn.tileable_turbulence(XSCALE * x, YSCALE * y, ZSCALE * z,
 								XSIZE * XSCALE, YSIZE * YSCALE, ZSIZE * ZSCALE, 16)));
 						if (t > max)
@@ -70,7 +70,7 @@ namespace
 					}
 				}
 			}
-			for (unsigned int i = 0; i < XSIZE * YSIZE * ZSIZE; ++ i)
+			for (uint32_t i = 0; i < XSIZE * YSIZE * ZSIZE; ++ i)
 			{
 				turbBuffer[i] = static_cast<uint8_t>((255 * (turbBuffer[i] - min)) / (max - min));
 			}
@@ -93,24 +93,19 @@ namespace
 			{
 				float3(-0.8f, 0.8f, 1),
 				float3(0.8f, 0.8f, 1),
-				float3(-0.8f, -0.8f, 1),
 				float3(0.8f, -0.8f, 1),
+				float3(-0.8f, -0.8f, 1),
 			};
 
 			float3 texs[] =
 			{
 				float3(-1, 0, 0),
 				float3(1, 0, 0),
-				float3(-1, -1, 0),
 				float3(1, -1, 0),
+				float3(-1, -1, 0),
 			};
 
-			uint16_t indices[] = 
-			{
-				0, 1, 3, 3, 2, 0,
-			};
-
-			rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleList);
+			rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleFan);
 
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static);
 			pos_vb->Resize(sizeof(xyzs));
@@ -127,14 +122,6 @@ namespace
 
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 			rl_->BindVertexStream(tex0_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_BGR32F)));
-
-			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static);
-			ib->Resize(sizeof(indices));
-			{
-				GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
-				std::copy(indices, indices + sizeof(indices) / sizeof(uint16_t), mapper.Pointer<uint16_t>());
-			}
-			rl_->BindIndexStream(ib, EF_R16);
 
 			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 		}

@@ -290,14 +290,4 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(false);
 	}
-
-	void D3D9Texture::Usage(Texture::TextureUsage usage)
-	{
-		if (usage != usage_)
-		{
-			this->OnLostDevice();
-			usage_ = usage;
-			this->OnResetDevice();
-		}
-	}
 }

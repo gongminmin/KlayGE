@@ -94,16 +94,8 @@ namespace
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			RenderEffectPtr effect = rf.LoadEffect("Refract.fx");
+			front_face_tech_ = effect->Technique("Refract");
 			back_face_tech_ = effect->Technique("RefractBackFace");
-
-			if (!effect->ValidateTechnique("Refract2x"))
-			{
-				front_face_tech_ = effect->Technique("Refract20");
-			}
-			else
-			{
-				front_face_tech_ = effect->Technique("Refract2x");
-			}
 
 			technique_ = back_face_tech_;
 
@@ -288,10 +280,10 @@ void Refract::InitObjects()
 	input_handler += boost::bind(&Refract::InputHandler, this, _1, _2);
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	back_face_buffer_ = rf.MakeFrameBuffer();
 	render_buffer_ = rf.MakeFrameBuffer();
+	hdr_buffer_ = rf.MakeFrameBuffer();
 	RenderTargetPtr screen_buffer = re.CurRenderTarget();
-	back_face_buffer_->GetViewport().camera = render_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
+	render_buffer_->GetViewport().camera = hdr_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
 
 	hdr_.reset(new HDRPostProcess);
 	hdr_->Destinate(RenderTargetPtr());
@@ -301,15 +293,15 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	back_face_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F);
-	back_face_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*back_face_tex_, 0));
-	back_face_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));
-
-	rendered_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F);
-	render_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_, 0));
+	render_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F);
+	render_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*render_tex_, 0));
 	render_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));
 
-	hdr_->Source(rendered_tex_, Sampler::TFO_Bilinear, Sampler::TAM_Clamp);
+	hdr_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F);
+	hdr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0));
+	hdr_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));
+
+	hdr_->Source(hdr_tex_, Sampler::TFO_Bilinear, Sampler::TAM_Clamp);
 }
 
 void Refract::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -338,7 +330,7 @@ void Refract::DoUpdate(uint32_t pass)
 		fpcController_.Update();
 
 		// 第一遍，渲染背面
-		re.BindRenderTarget(back_face_buffer_);
+		re.BindRenderTarget(render_buffer_);
 		re.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0, 0, 0, 1), 0, 0);
 
 		checked_pointer_cast<RefractorObject>(refractor_)->Pass(0);
@@ -347,11 +339,11 @@ void Refract::DoUpdate(uint32_t pass)
 
 	case 1:
 		// 第二遍，渲染正面
-		re.BindRenderTarget(render_buffer_);
+		re.BindRenderTarget(hdr_buffer_);
 		re.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 		checked_pointer_cast<RefractorObject>(refractor_)->Pass(1);
-		checked_pointer_cast<RefractorObject>(refractor_)->BackFaceTexture(back_face_tex_);
+		checked_pointer_cast<RefractorObject>(refractor_)->BackFaceTexture(render_tex_);
 
 		sky_box_->AddToSceneManager();
 		break;

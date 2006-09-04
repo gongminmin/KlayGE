@@ -29,7 +29,7 @@ sampler3D electroSampler;
 half4 ElectroPS(float3 texCoord0	: TEXCOORD0,
 					uniform sampler3D electroMap) : COLOR
 {
-	half turb = tex3D(electroMap, texCoord0) * 2 - 1;
+	half turb = tex3D(electroMap, texCoord0).r * 2 - 1;
 	half4 grow = (1 - pow(turb, 0.2)) * half4(1.70, 1.48, 1.78, 1);
 	return pow(grow, 4);
 }

@@ -119,7 +119,7 @@ namespace KlayGE
 	class meshml_extractor
 	{
 	public:
-		meshml_extractor(int joints_per_ver, int start_frame, int end_frame);
+		meshml_extractor(int joints_per_ver, int cur_time, int start_frame, int end_frame);
 
 		void export_objects(std::vector<INode*> const & nodes);
 		void write_xml(std::basic_string<TCHAR> const & file_name);
@@ -145,6 +145,7 @@ namespace KlayGE
 		joints_t joints_;
 		int joints_per_ver_;
 
+		int cur_time_;
 		int start_frame_;
 		int end_frame_;
 		int frame_rate_;

@@ -529,6 +529,11 @@ namespace KlayGE
 			renderSurface_.reset();
 			renderZBuffer_.reset();
 
+			while (d3dDevice_->TestCooperativeLevel() != D3DERR_DEVICENOTRESET)
+			{
+				Sleep(10);
+			}
+
 			d3dpp_.BackBufferWidth  = this->Width();
 			d3dpp_.BackBufferHeight = this->Height();
 			TIF(d3dDevice_->Reset(&d3dpp_));

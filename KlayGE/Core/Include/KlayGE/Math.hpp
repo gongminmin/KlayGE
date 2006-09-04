@@ -487,6 +487,41 @@ namespace KlayGE
 			return rhs * recip_sqrt(length_sq(rhs));
 		}
 
+		template <typename T, int N>
+		inline Vector_T<T, N>
+		reflect(Vector_T<T, N> const & incident, Vector_T<T, N> const & normal)
+		{
+			return incident - 2 * dot(incident, normal) * normal;
+		}
+
+		template <typename T, int N>
+		inline Vector_T<T, N>
+		refract(Vector_T<T, N> const & incident, Vector_T<T, N> const & normal, T const & refraction_index)
+		{
+			T t = dot(incident, normal);
+			T r = T(1) - refraction_index * refraction_index * (T(1) - t * t);
+
+			if (r < T(0))
+			{
+				// Total internal reflection
+				return Vector_T<T, N>::Zero();
+			}
+			else
+			{
+				T s = refraction_index * t + sqrt(r);
+				return refraction_index * incident - s * normal;
+			}
+		}
+
+		template <typename T>
+		inline T
+		fresnel_term(T const & cos_theta, T const & refraction_index)
+		{
+			T g = sqrt(sqr(refraction_index) + sqr(cos_theta) - 1);
+			return T(0.5) * sqr(g + cos_theta) / sqr(g - cos_theta)
+					* (sqr(cos_theta * (g + cos_theta) - 1) / sqr(cos_theta * (g - cos_theta) + 1) + 1);
+		}
+
 
 		// 2D œÚ¡ø
 		///////////////////////////////////////////////////////////////////////////////
@@ -515,41 +550,6 @@ namespace KlayGE
 				lhs.z() * rhs.x() - lhs.x() * rhs.z(),
 				lhs.x() * rhs.y() - lhs.y() * rhs.x());
 		}
-
-		template <typename T>
-		inline Vector_T<T, 3>
-		reflect(Vector_T<T, 3> const & incident, Vector_T<T, 3> const & normal)
-		{
-			return incident - 2 * dot(incident, normal) * normal;
-		}
-
-		template <typename T>
-		inline Vector_T<T, 3>
-		refract(Vector_T<T, 3> const & incident, Vector_T<T, 3> const & normal, T const & refraction_index)
-		{
-			T t = dot(incident, normal);
-			T r = T(1) - refraction_index * refraction_index * (T(1) - t * t);
-
-			if (r < 0.0f)
-			{
-				// Total internal reflection
-				return Vector_T<T, 3>::Zero();
-			}
-			else
-			{
-				T s = refraction_index * t + sqrt(r);
-				return refraction_index * incident - s * normal;
-			}
-		}
-
-		template <typename T>
-		T fresnel_term(T const & cos_theta, T const & refraction_index)
-		{
-			T g = sqrt(sqr(refraction_index) + sqr(cos_theta) - 1);
-			return T(0.5) * sqr(g + cos_theta) / sqr(g - cos_theta)
-					* (sqr(cos_theta * (g + cos_theta) - 1) / sqr(cos_theta * (g - cos_theta) + 1) + 1);
-		}
-
 
 		template <typename T>
 		inline Vector_T<T, 3>

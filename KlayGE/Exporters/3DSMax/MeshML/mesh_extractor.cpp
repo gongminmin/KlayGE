@@ -110,8 +110,9 @@ namespace
 
 namespace KlayGE
 {
-	meshml_extractor::meshml_extractor(int joints_per_ver, int start_frame, int end_frame)
+	meshml_extractor::meshml_extractor(int joints_per_ver, int cur_time, int start_frame, int end_frame)
 						: joints_per_ver_(joints_per_ver),
+							cur_time_(cur_time),
 							start_frame_(start_frame), end_frame_(end_frame),
 							frame_rate_(GetFrameRate())
 	{
@@ -165,7 +166,7 @@ namespace KlayGE
 
 		obj_info.name = tstr_to_str(node->GetName());
 
-		Matrix3 obj_matrix = node->GetObjectTM(0);
+		Matrix3 obj_matrix = node->GetObjectTM(cur_time_);
 		bool flip_normals = obj_matrix.Parity() ? true : false;
 		Matrix3 normal_matrix = obj_matrix;
 		normal_matrix.NoTrans();
@@ -209,7 +210,7 @@ namespace KlayGE
 			}
 		}
 
-		Object* obj = node->EvalWorldState(0).obj;
+		Object* obj = node->EvalWorldState(cur_time_).obj;
 		if ((obj != NULL) && obj->CanConvertToType(Class_ID(TRIOBJ_CLASS_ID, 0)))
 		{
 			TriObject* tri = static_cast<TriObject*>(obj->ConvertToType(0, Class_ID(TRIOBJ_CLASS_ID, 0)));
@@ -260,7 +261,7 @@ namespace KlayGE
 				}
 			}
 
-			for (size_t i = 0; i < obj_info.triangles.size(); ++ i)
+			for (int i = 0; i < mesh.getNumFaces(); ++ i)
 			{
 				for (int j = 2; j >= 0; -- j)
 				{
@@ -273,7 +274,7 @@ namespace KlayGE
 					texs[1][tv_faces[i].t[0]], texs[1][tv_faces[i].t[1]], texs[1][tv_faces[i].t[2]],
 					mesh.FaceNormal(i, true));
 			}
-			for (size_t i = 0; i < mesh.getNumVerts(); ++ i)
+			for (int i = 0; i < mesh.getNumVerts(); ++ i)
 			{
 				positions.push_back(std::make_pair(mesh.verts[i], binds_t()));
 				normals.push_back(mesh.getNormal(i));

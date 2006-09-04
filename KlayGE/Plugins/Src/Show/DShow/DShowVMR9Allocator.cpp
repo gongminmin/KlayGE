@@ -41,29 +41,33 @@ namespace KlayGE
 	{
 		d3d_ = MakeCOMPtr(::Direct3DCreate9(D3D_SDK_VERSION));
 
+		this->CreateDevice();
+	}
+
+	DShowVMR9Allocator::~DShowVMR9Allocator()
+	{
+		this->DeleteSurfaces();
+	}
+
+	void DShowVMR9Allocator::CreateDevice()
+	{
 		D3DDISPLAYMODE dm;
 		d3d_->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &dm);
 
-		D3DPRESENT_PARAMETERS pp;
-		memset(&pp, 0, sizeof(pp));
-		pp.Windowed = true;
-		pp.hDeviceWindow = wnd_;
-		pp.SwapEffect = D3DSWAPEFFECT_DISCARD;
-		pp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+		memset(&d3dpp_, 0, sizeof(d3dpp_));
+		d3dpp_.Windowed = true;
+		d3dpp_.hDeviceWindow = wnd_;
+		d3dpp_.SwapEffect = D3DSWAPEFFECT_DISCARD;
+		d3dpp_.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 
 		IDirect3DDevice9* d3d_device;
 		d3d_->CreateDevice(D3DADAPTER_DEFAULT,
 								D3DDEVTYPE_HAL,
 								wnd_,
 								D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_PUREDEVICE | D3DCREATE_MULTITHREADED,
-								&pp,
+								&d3dpp_,
 								&d3d_device);
 		d3d_device_ = MakeCOMPtr(d3d_device);
-	}
-
-	DShowVMR9Allocator::~DShowVMR9Allocator()
-	{
-		this->DeleteSurfaces();
 	}
 
 	void DShowVMR9Allocator::DeleteSurfaces()
@@ -260,10 +264,11 @@ namespace KlayGE
 
 		boost::mutex::scoped_lock lock(mutex_);
 
-		// if we created a  private texture
-		// blt the decoded image onto the texture.
 		if (private_tex_)
-		{   
+		{
+			// if we created a private texture
+			// blt the decoded image onto the texture.
+
 			ID3D9SurfacePtr surface;
 			{
 				IDirect3DSurface9* tmp;
@@ -272,9 +277,9 @@ namespace KlayGE
 			}
 
 			// copy the full surface onto the texture's surface
-			TIF(d3d_device_->StretchRect(lpPresInfo->lpSurf, NULL,
+			d3d_device_->StretchRect(lpPresInfo->lpSurf, NULL,
 								 surface.get(), NULL,
-								 D3DTEXF_NONE));
+								 D3DTEXF_NONE);
 
 			cache_tex_ = private_tex_;
 		}
@@ -284,8 +289,29 @@ namespace KlayGE
 			// all we need to do is to get them from the surface
 
 			IDirect3DTexture9* tmp;
-			TIF(lpPresInfo->lpSurf->GetContainer(IID_IDirect3DTexture9, reinterpret_cast<void**>(&tmp)));
+			lpPresInfo->lpSurf->GetContainer(IID_IDirect3DTexture9, reinterpret_cast<void**>(&tmp));
 			cache_tex_ = MakeCOMPtr(tmp);
+		}
+
+		if (D3DERR_DEVICENOTRESET == d3d_device_->TestCooperativeLevel())
+		{
+			cache_tex_.reset();
+			cache_surf_.reset();
+			private_tex_.reset();
+
+			for (size_t i = 0; i < surfaces_.size(); ++ i) 
+			{
+				if (surfaces_[i] != NULL)
+				{
+					surfaces_[i]->Release();
+					surfaces_[i] = NULL;
+				}
+			}
+
+			this->CreateDevice();
+
+			HMONITOR hMonitor = d3d_->GetAdapterMonitor(D3DADAPTER_DEFAULT);
+			TIF(vmr_surf_alloc_notify_->ChangeD3DDevice(d3d_device_.get(), hMonitor));
 		}
 
 		return S_OK;
@@ -350,6 +376,11 @@ namespace KlayGE
 	TexturePtr DShowVMR9Allocator::PresentTexture()
 	{
 		boost::mutex::scoped_lock lock(mutex_);
+
+		if (FAILED(d3d_device_->TestCooperativeLevel()))
+		{
+			return TexturePtr();
+		}
 
 		if (cache_tex_)
 		{

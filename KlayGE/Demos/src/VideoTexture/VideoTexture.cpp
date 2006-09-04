@@ -61,8 +61,8 @@ namespace
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
 
-			float4x4 view = app.ActiveCamera().ViewMatrix();
-			float4x4 proj = app.ActiveCamera().ProjMatrix();
+			float4x4 const & view = app.ActiveCamera().ViewMatrix();
+			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
 			*(technique_->Effect().ParameterByName("mvp")) = view * proj;
 			*(technique_->Effect().ParameterByName("video_sampler")) = video_sampler_;
@@ -187,8 +187,7 @@ void VideoTextureApp::DoUpdate(uint32_t /*pass*/)
 
 	re.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
-	TexturePtr tex = se.PresentTexture();
-	checked_pointer_cast<TeapotObject>(ground_)->VideoTexture(tex);
+	checked_pointer_cast<TeapotObject>(ground_)->VideoTexture(se.PresentTexture());
 	ground_->AddToSceneManager();
 
 	fpcController_.Update();

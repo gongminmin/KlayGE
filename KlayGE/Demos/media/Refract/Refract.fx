@@ -20,41 +20,38 @@ half fast_fresnel(half3 eye, half3 normal, half R0)
 
 float3x3 my_refract3(float3 i, float3 n, float3 eta)
 {
-    float cosi = dot(-i, n);
-    float3 cost2 = 1.0 - eta * eta * (1.0 - cosi * cosi);
-    float3 tmp = eta * cosi - sqrt(abs(cost2));
-    float3 t0 = eta.x * i + tmp.x * n;
-    float3 t1 = eta.y * i + tmp.y * n;
-    float3 t2 = eta.z * i + tmp.z * n;
-    bool3 b = cost2 > 0.0f;
-    
-    float3x3 ret;
-    ret[0] = t0 * b.x;
-    ret[1] = t1 * b.y;
-    ret[2] = t2 * b.z;
+	float cosi = dot(i, n);
+	float3 cost2 = 1.0 - eta * eta * (1.0 - cosi * cosi);
+	float3 tmp = eta * cosi + sqrt(abs(cost2));
+
+	float3x3 ret;
+	ret[0] = (cost2.x < 0) ? 0 : (eta.x * i - tmp.x * n);
+	ret[1] = (cost2.y < 0) ? 0 : (eta.y * i - tmp.y * n);
+	ret[2] = (cost2.z < 0) ? 0 : (eta.z * i - tmp.z * n);
     return ret;
 }
 
 void RefractVS(float4 pos			: POSITION,
 				float3 normal		: NORMAL,
 				out float4 oPos		: POSITION,
-				out float3 oNormal	: TEXCOORD0,
-				out float3 oIncident : TEXCOORD1,
-				out float3 refract_vec : TEXCOORD2,
-				out float4 pos_ws	: TEXCOORD3,
-				out float4 pos_es	: TEXCOORD4, 
-				out float4 pos_ss	: TEXCOORD5)
+				out float3 out_normal	: TEXCOORD0,
+				out float4 incident : TEXCOORD1,
+				out float4 refract_vec : TEXCOORD2,
+				out float4 pos_ss	: TEXCOORD3,
+				out float4 dir_ss	: TEXCOORD4)
 {
-	float4 pos_in_world = mul(pos, model);
 	oPos = mul(pos, mvp);
-
-	pos_ws = pos_in_world;
-	pos_es = mul(pos, mv);
 	pos_ss = oPos;
 
-	oNormal = normalize(mul(normal, (float3x3)modelit));
-	oIncident = normalize(pos_in_world.xyz - eye_pos);
-	refract_vec = refract(oIncident, oNormal, eta_ratio.g);
+	out_normal = mul(normal, (float3x3)modelit);
+	incident.xyz = mul(pos, model).xyz - eye_pos;
+	incident.w = length(incident.xyz);
+	
+	float3 n_incident = normalize(incident.xyz);
+	float3 n_normal = normalize(normal);
+	refract_vec.xyz = refract(n_incident, n_normal, eta_ratio.g);
+	refract_vec.w = fast_fresnel(-n_incident, n_normal, 0.0977f);
+	dir_ss = mul(half4(refract_vec.xyz, 0), mvp);
 }
 
 
@@ -63,73 +60,47 @@ sampler skybox_CcubeMapSampler;
 
 sampler BackFace_Sampler;
 
-half3 GlassReflect(float3 incident, float3 normal)
+float4 RefractPS(float3 normal			: TEXCOORD0,
+					float4 incident		: TEXCOORD1,
+					float4 refract_vec	: TEXCOORD2,
+					float4 pos_ss		: TEXCOORD3,
+					float4 dir_ss		: TEXCOORD4) : COLOR
 {
-	half3 reflect_vec = reflect(incident, normal);
-	half3 reflected_clr = decode_hdr_yc(texCUBE(skybox_YcubeMapSampler, reflect_vec).r,
-					texCUBE(skybox_CcubeMapSampler, reflect_vec).ga);
-					
-	return reflected_clr;
-}
+	normal = normalize(normal);
+	incident.xyz = normalize(incident.xyz);
 
-half3 GlassRefract(float3 incident, float3 normal, float3 eta_ratio)
-{
-	float3x3 refract_rgb = my_refract3(incident, normal, eta_ratio);
-
-	half3 refracted_y = half3(texCUBE(skybox_YcubeMapSampler, refract_rgb[0]).r,
-									texCUBE(skybox_YcubeMapSampler, refract_rgb[1]).r,
-									texCUBE(skybox_YcubeMapSampler, refract_rgb[2]).r);
-	refracted_y = exp2(refracted_y * 65536 / 2048 - 16);
-	half4 refracted_c = half4(texCUBE(skybox_CcubeMapSampler, refract_rgb[0]).a,
-									texCUBE(skybox_CcubeMapSampler, refract_rgb[1]).g,
-									texCUBE(skybox_CcubeMapSampler, refract_rgb[2]).ga);
-	refracted_c *= refracted_c;
-
-	half3 refracted_clr;
-	refracted_clr.rbg = refracted_y.rbg * half3(refracted_c.xy, (1 - refracted_c.z - refracted_c.w))
-											/ half3(0.299f, 0.114f, 0.587f);
-												
-	return refracted_clr;
-}
-
-float4 Refract20PS(float3 normal			: TEXCOORD0,
-					float3 incident		: TEXCOORD1) : COLOR
-{
-	half3 refracted_clr = GlassRefract(incident, normal, eta_ratio);
-	half3 reflected_clr = GlassReflect(incident, normal);
-
-	half fresnel_factor = fast_fresnel(-incident, normal, 0.0977f);
-	return float4(lerp(refracted_clr, reflected_clr, fresnel_factor), 1);
-}
-
-float4 Refract2xPS(float3 normal			: TEXCOORD0,
-					float3 incident		: TEXCOORD1,
-					float3 refract_vec	: TEXCOORD2,
-					float3 pos_ws		: TEXCOORD3,
-					float3 pos_es		: TEXCOORD4,
-					float4 pos_ss		: TEXCOORD5) : COLOR
-{
 	half2 tex = pos_ss.xy / pos_ss.w;
 	tex.y = -tex.y;
 	tex = tex / 2 + 0.5f;
-	half d = tex2D(BackFace_Sampler, tex).w - length(pos_es.xyz);
-
-	half4 dir_ss = mul(half4(d * refract_vec, 0), mvp);
-	pos_ss += dir_ss;
+	pos_ss += dir_ss * (tex2D(BackFace_Sampler, tex).w - incident.w);
 
 	tex = pos_ss.xy / pos_ss.w;
 	tex.y = -tex.y;
 	tex = tex / 2 + 0.5f;
-	half3 back_face_normal = -tex2D(BackFace_Sampler, tex).xyz;
+	half3 back_face_normal = tex2D(BackFace_Sampler, tex).xyz;
 
-	half3 refracted_clr = GlassRefract(refract_vec, back_face_normal, eta_ratio);
-	half3 reflected_clr = GlassReflect(incident, normal);
+	half3x3 refract_rgb = my_refract3(refract_vec.xyz, back_face_normal, 1 / eta_ratio);
+	half3 reflect_vec = reflect(incident.xyz, normal);
 
-	half fresnel_factor = fast_fresnel(-incident, normal, 0.0977f);
-	return float4(lerp(refracted_clr, reflected_clr, fresnel_factor), 1);
+	half4 y = half4(texCUBE(skybox_YcubeMapSampler, refract_rgb[0]).r,
+									texCUBE(skybox_YcubeMapSampler, refract_rgb[1]).r,
+									texCUBE(skybox_YcubeMapSampler, refract_rgb[2]).r,
+									texCUBE(skybox_YcubeMapSampler, reflect_vec).r);
+	y = exp2(y * 65536 / 2048 - 16);
+	half4 refracted_c = half4(texCUBE(skybox_CcubeMapSampler, refract_rgb[0]).a,
+									texCUBE(skybox_CcubeMapSampler, refract_rgb[1]).g,
+									texCUBE(skybox_CcubeMapSampler, refract_rgb[2]).ga);
+	half2 reflected_c = texCUBE(skybox_CcubeMapSampler, reflect_vec).ga;
+	refracted_c *= refracted_c;
+	reflected_c *= reflected_c;
+
+	half3 refracted_clr = y.xyz * half3(refracted_c.x, (1 - refracted_c.z - refracted_c.w), refracted_c.y);
+	half3 reflected_clr = y.w * half3(reflected_c.y, (1 - reflected_c.y - reflected_c.x), reflected_c.x);
+
+	return float4(lerp(refracted_clr, reflected_clr, refract_vec.w) / half3(0.299f, 0.587f, 0.114f), 1);
 }
 
-technique Refract20
+technique Refract
 {
 	pass p0
 	{
@@ -137,19 +108,7 @@ technique Refract20
 		CullMode = CCW;
 
 		VertexShader = compile vs_1_1 RefractVS();
-		PixelShader = compile ps_2_0 Refract20PS();
-	}
-}
-
-technique Refract2x
-{
-	pass p0
-	{
-		ZFunc = LessEqual;
-		CullMode = CCW;
-
-		VertexShader = compile vs_1_1 RefractVS();
-		PixelShader = compile ps_2_b Refract2xPS();
+		PixelShader = compile ps_2_0 RefractPS();
 	}
 }
 
@@ -157,18 +116,18 @@ technique Refract2x
 void RefractBackFaceVS(float4 pos : POSITION,
 							float3 normal : NORMAL,
 							out float4 oPos : POSITION,
-							out float3 oNormal : TEXCOORD0,
+							out float3 out_normal : TEXCOORD0,
 							out float3 pos_es : TEXCOORD1)
 {
 	oPos = mul(pos, mvp);
-	oNormal = mul(normal, (float3x3)modelit);
+	out_normal = mul(normal, (float3x3)modelit);
 	pos_es = mul(pos, model).xyz - eye_pos;
 }
 
 float4 RefractBackFacePS(float3 normal : TEXCOORD0,
 							float3 pos_es : TEXCOORD1) : COLOR
 {
-	return float4(normalize(normal), length(pos_es));
+	return float4(-normalize(normal), length(pos_es));
 }
 
 technique RefractBackFace

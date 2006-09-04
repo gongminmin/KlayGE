@@ -54,7 +54,7 @@ namespace KlayGE
 
 		bpp_ = NumFormatBits(format);
 
-		d3dTextureCube_ = this->CreateTextureCube(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+		d3dTextureCube_ = this->CreateTextureCube(0, D3DPOOL_MANAGED);
 
 		this->QueryBaseTexture();
 		this->UpdateParams();
@@ -167,7 +167,7 @@ namespace KlayGE
 		{
 			if (TU_RenderTarget == usage_)
 			{
-				ID3D9CubeTexturePtr d3dTextureCube = this->CreateTextureCube(D3DUSAGE_AUTOGENMIPMAP, D3DPOOL_DEFAULT);
+				ID3D9CubeTexturePtr d3dTextureCube = this->CreateTextureCube(D3DUSAGE_AUTOGENMIPMAP | D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
 
 				for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face <= D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
 				{
@@ -214,59 +214,29 @@ namespace KlayGE
 
 	void D3D9TextureCube::DoOnLostDevice()
 	{
-		d3dDevice_ = static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
-
-		ID3D9CubeTexturePtr tempTextureCube = this->CreateTextureCube(0, D3DPOOL_SYSTEMMEM);
-
-		for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face <= D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
+		if (TU_RenderTarget == usage_)
 		{
-			for (uint16_t level = 0; level < this->NumMipMaps(); ++ level)
-			{
-				IDirect3DSurface9* temp;
-				TIF(d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &temp));
-				ID3D9SurfacePtr src = MakeCOMPtr(temp);
-
-				TIF(tempTextureCube->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &temp));
-				ID3D9SurfacePtr dst = MakeCOMPtr(temp);
-
-				this->CopySurfaceToSurface(dst, src);
-			}
-
-			tempTextureCube->AddDirtyRect(static_cast<D3DCUBEMAP_FACES>(face), NULL);
+			d3dBaseTexture_.reset();
+			d3dTextureCube_.reset();
 		}
-		d3dTextureCube_ = tempTextureCube;
-
-		this->QueryBaseTexture();
 	}
 
 	void D3D9TextureCube::DoOnResetDevice()
 	{
-		d3dDevice_ = static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
-
-		ID3D9CubeTexturePtr tempTextureCube;
-
-		if (TU_Default == usage_)
+		if (TU_RenderTarget == usage_)
 		{
-			tempTextureCube = this->CreateTextureCube(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+			d3dTextureCube_ = this->CreateTextureCube(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
+			this->QueryBaseTexture();
 		}
-		else
-		{
-			tempTextureCube = this->CreateTextureCube(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
-		}
-
-		for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face <= D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
-		{
-			tempTextureCube->AddDirtyRect(static_cast<D3DCUBEMAP_FACES>(face), NULL);
-		}
-
-		d3dDevice_->UpdateTexture(d3dTextureCube_.get(), tempTextureCube.get());
-		d3dTextureCube_ = tempTextureCube;
-
-		this->QueryBaseTexture();
 	}
 
 	ID3D9CubeTexturePtr D3D9TextureCube::CreateTextureCube(uint32_t usage, D3DPOOL pool)
 	{
+		if (IsDepthFormat(format_))
+		{
+			usage |= D3DUSAGE_DEPTHSTENCIL;
+		}
+
 		IDirect3DCubeTexture9* d3dTextureCube;
 		TIF(d3dDevice_->CreateCubeTexture(widths_[0],  numMipMaps_, usage,
 			D3D9Mapping::MappingFormat(format_), pool, &d3dTextureCube, NULL));
@@ -298,5 +268,47 @@ namespace KlayGE
 
 		format_ = D3D9Mapping::MappingFormat(desc.Format);
 		bpp_	= NumFormatBits(format_);
+	}
+
+	void D3D9TextureCube::Usage(TextureUsage usage)
+	{
+		if (usage != usage_)
+		{
+			ID3D9CubeTexturePtr d3dTmpTextureCube;
+			switch (usage)
+			{
+			case TU_Default:
+				d3dTmpTextureCube = this->CreateTextureCube(0, D3DPOOL_MANAGED);
+				break;
+				
+			case TU_RenderTarget:
+				d3dTmpTextureCube = this->CreateTextureCube(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
+				break;
+			}
+
+			ID3D9SurfacePtr src_surf, dest_surf;
+			for (int face = 0; face < 6; ++ face)
+			{
+				for (uint32_t i = 0; i < d3dTextureCube_->GetLevelCount(); ++ i)
+				{
+					IDirect3DSurface9* pSrcSurf;
+					d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), i, &pSrcSurf);
+					src_surf = MakeCOMPtr(pSrcSurf);
+
+					IDirect3DSurface9* pDestSurf;
+					d3dTmpTextureCube->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), i, &pDestSurf);
+					dest_surf = MakeCOMPtr(pDestSurf);
+
+					TIF(D3DXLoadSurfaceFromSurface(dest_surf.get(), NULL, NULL,
+						src_surf.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+				}
+			}
+			d3dTextureCube_ = d3dTmpTextureCube;
+
+			this->QueryBaseTexture();
+			this->UpdateParams();
+
+			usage_ = usage;
+		}
 	}
 }

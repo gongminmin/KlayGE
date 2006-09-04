@@ -85,7 +85,7 @@ namespace KlayGE
 						m += 0x00002000;
 					}
 
-					value_ = s | (m >> 13);
+					value_ = static_cast<uint16_t>(s | (m >> 13));
 				}
 			}
 			else
@@ -108,7 +108,7 @@ namespace KlayGE
 					}
 				}
 
-				value_ = s | (e << 10) | (m >> 13);
+				value_ = static_cast<uint16_t>(s | (e << 10) | (m >> 13));
 			}
 		}
 

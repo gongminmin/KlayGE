@@ -49,8 +49,7 @@ namespace KlayGE
 
 			IDirect3DVertexBuffer9* buffer;
 			TIF(d3d_device_->CreateVertexBuffer(static_cast<UINT>(this->Size()),
-					(BU_Dynamic == usage_) ? D3DUSAGE_DYNAMIC : 0,
-					0, D3DPOOL_DEFAULT, &buffer, NULL));
+					0, 0, D3DPOOL_MANAGED, &buffer, NULL));
 			buffer_ = MakeCOMPtr(buffer);
 		}
 	}
@@ -63,13 +62,10 @@ namespace KlayGE
 		switch (ba)
 		{
 		case BA_Read_Only:
+			flags |= D3DLOCK_READONLY;
 			break;
 
 		case BA_Write_Only:
-			if (BU_Dynamic == usage_)
-			{
-				flags = D3DLOCK_DISCARD;
-			}
 			break;
 
 		case BA_Read_Write:
@@ -105,45 +101,9 @@ namespace KlayGE
 
 	void D3D9VertexBuffer::DoOnLostDevice()
 	{
-		IDirect3DVertexBuffer9* temp;
-		TIF(d3d_device_->CreateVertexBuffer(static_cast<UINT>(this->Size()),
-			D3DUSAGE_DYNAMIC, 0, D3DPOOL_SYSTEMMEM, &temp, NULL));
-		ID3D9VertexBufferPtr buffer = MakeCOMPtr(temp);
-
-		uint8_t* src;
-		uint8_t* dest;
-		TIF(buffer_->Lock(0, 0, reinterpret_cast<void**>(&src), D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
-		TIF(buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_NOSYSLOCK | ((BU_Dynamic == usage_) ? D3DLOCK_DISCARD : 0)));
-
-		std::copy(src, src + this->Size(), dest);
-
-		buffer->Unlock();
-		buffer_->Unlock();
-
-		buffer_ = buffer;
 	}
 	
 	void D3D9VertexBuffer::DoOnResetDevice()
 	{
-		D3D9RenderEngine const & renderEngine(*checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		d3d_device_ = renderEngine.D3DDevice();
-
-		IDirect3DVertexBuffer9* temp;
-		TIF(d3d_device_->CreateVertexBuffer(static_cast<UINT>(this->Size()),
-				(BU_Dynamic == usage_) ? D3DUSAGE_DYNAMIC : 0,
-				0, D3DPOOL_DEFAULT, &temp, NULL));
-		ID3D9VertexBufferPtr buffer = MakeCOMPtr(temp);
-
-		uint8_t* src;
-		uint8_t* dest;
-		TIF(buffer_->Lock(0, 0, reinterpret_cast<void**>(&src), D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
-		TIF(buffer->Lock(0, 0, reinterpret_cast<void**>(&dest), D3DLOCK_NOSYSLOCK | ((BU_Dynamic == usage_) ? D3DLOCK_DISCARD : 0)));
-
-		std::copy(src, src + this->Size(), dest);
-
-		buffer->Unlock();
-		buffer_->Unlock();
-
-		buffer_ = buffer;
 	}
 }

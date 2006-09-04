@@ -80,6 +80,7 @@ namespace KlayGE
 	protected:
 		// a helper function to erase every surface in the vector
 		void DeleteSurfaces();
+		void CreateDevice();
 
 	private:
 		// needed to make this a thread safe object
@@ -97,6 +98,8 @@ namespace KlayGE
 		ID3D9TexturePtr		cache_tex_;
 		ID3D9SurfacePtr		cache_surf_;
 		TexturePtr			present_tex_;
+
+		D3DPRESENT_PARAMETERS d3dpp_;
 	};
 }
 

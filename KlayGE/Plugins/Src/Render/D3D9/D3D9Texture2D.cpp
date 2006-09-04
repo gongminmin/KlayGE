@@ -56,7 +56,7 @@ namespace KlayGE
 
 		bpp_ = NumFormatBits(format);
 
-		d3dTexture2D_ = this->CreateTexture2D(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+		d3dTexture2D_ = this->CreateTexture2D(0, D3DPOOL_MANAGED);
 
 		this->QueryBaseTexture();
 		this->UpdateParams();
@@ -168,7 +168,7 @@ namespace KlayGE
 		{
 			if (TU_RenderTarget == usage_)
 			{
-				ID3D9TexturePtr d3dTexture2D = this->CreateTexture2D(D3DUSAGE_AUTOGENMIPMAP, D3DPOOL_DEFAULT);
+				ID3D9TexturePtr d3dTexture2D = this->CreateTexture2D(D3DUSAGE_AUTOGENMIPMAP | D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
 
 				IDirect3DSurface9* temp;
 				TIF(d3dTexture2D_->GetSurfaceLevel(0, &temp));
@@ -209,28 +209,7 @@ namespace KlayGE
 
 	void D3D9Texture2D::DoOnLostDevice()
 	{
-		if (TU_Default == usage_)
-		{
-			d3dDevice_ = static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
-
-			ID3D9TexturePtr tempTexture2D = this->CreateTexture2D(0, D3DPOOL_SYSTEMMEM);
-			for (uint16_t i = 0; i < this->NumMipMaps(); ++ i)
-			{
-				IDirect3DSurface9* temp;
-				TIF(d3dTexture2D_->GetSurfaceLevel(i, &temp));
-				ID3D9SurfacePtr src = MakeCOMPtr(temp);
-
-				TIF(tempTexture2D->GetSurfaceLevel(i, &temp));
-				ID3D9SurfacePtr dst = MakeCOMPtr(temp);
-
-				this->CopySurfaceToSurface(dst, src);
-			}
-			tempTexture2D->AddDirtyRect(NULL);
-			d3dTexture2D_ = tempTexture2D;
-
-			this->QueryBaseTexture();
-		}
-		else
+		if (TU_RenderTarget == usage_)
 		{
 			d3dBaseTexture_.reset();
 			d3dTexture2D_.reset();
@@ -239,30 +218,18 @@ namespace KlayGE
 
 	void D3D9Texture2D::DoOnResetDevice()
 	{
-		d3dDevice_ = static_cast<D3D9RenderEngine const &>(Context::Instance().RenderFactoryInstance().RenderEngineInstance()).D3DDevice();
-
-		ID3D9TexturePtr tempTexture2D;
-		if (TU_Default == usage_)
+		if (TU_RenderTarget == usage_)
 		{
-			tempTexture2D = this->CreateTexture2D(D3DUSAGE_DYNAMIC, D3DPOOL_DEFAULT);
+			d3dTexture2D_ = this->CreateTexture2D(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
+			this->QueryBaseTexture();
 		}
-		else
-		{
-			tempTexture2D = this->CreateTexture2D(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
-		}
-		tempTexture2D->AddDirtyRect(NULL);
-
-		d3dDevice_->UpdateTexture(d3dTexture2D_.get(), tempTexture2D.get());
-		d3dTexture2D_ = tempTexture2D;
-
-		this->QueryBaseTexture();
 	}
 
 	ID3D9TexturePtr D3D9Texture2D::CreateTexture2D(uint32_t usage, D3DPOOL pool)
 	{
 		if (IsDepthFormat(format_))
 		{
-			usage = D3DUSAGE_DEPTHSTENCIL;
+			usage |= D3DUSAGE_DEPTHSTENCIL;
 		}
 
 		IDirect3DTexture9* d3dTexture2D;
@@ -299,5 +266,44 @@ namespace KlayGE
 
 		format_ = D3D9Mapping::MappingFormat(desc.Format);
 		bpp_	= NumFormatBits(format_);
+	}
+
+	void D3D9Texture2D::Usage(TextureUsage usage)
+	{
+		if (usage != usage_)
+		{
+			ID3D9TexturePtr d3dTmpTexture2D;
+			switch (usage)
+			{
+			case TU_Default:
+				d3dTmpTexture2D = this->CreateTexture2D(0, D3DPOOL_MANAGED);
+				break;
+				
+			case TU_RenderTarget:
+				d3dTmpTexture2D = this->CreateTexture2D(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
+				break;
+			}
+
+			ID3D9SurfacePtr src_surf, dest_surf;
+			for (uint32_t i = 0; i < d3dTexture2D_->GetLevelCount(); ++ i)
+			{
+				IDirect3DSurface9* pSrcSurf;
+				d3dTexture2D_->GetSurfaceLevel(i, &pSrcSurf);
+				src_surf = MakeCOMPtr(pSrcSurf);
+
+				IDirect3DSurface9* pDestSurf;
+				d3dTmpTexture2D->GetSurfaceLevel(i, &pDestSurf);
+				dest_surf = MakeCOMPtr(pDestSurf);
+
+				TIF(D3DXLoadSurfaceFromSurface(dest_surf.get(), NULL, NULL,
+					src_surf.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+			}
+			d3dTexture2D_ = d3dTmpTexture2D;
+
+			this->QueryBaseTexture();
+			this->UpdateParams();
+
+			usage_ = usage;
+		}
 	}
 }

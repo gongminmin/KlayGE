@@ -35,6 +35,7 @@
 #include <d3dx9.h>
 #include <dxerr9.h>
 
+#include <KlayGE/Texture.hpp>
 #include <KlayGE/D3D9/D3D9Typedefs.hpp>
 #include <KlayGE/D3D9/D3D9Resource.hpp>
 #include <KlayGE/D3D9/D3D9RenderView.hpp>
@@ -71,9 +72,6 @@ namespace KlayGE
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height);
 
-		using Texture::Usage;
-		void Usage(TextureUsage usage);
-
 		ID3D9BaseTexturePtr D3DBaseTexture() const
 			{ return d3dBaseTexture_; }
 
@@ -105,6 +103,9 @@ namespace KlayGE
 			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_widtht);
 
 		void BuildMipSubLevels();
+
+		using Texture::Usage;
+		void Usage(TextureUsage usage);
 
 		ID3D9TexturePtr D3DTexture1D() const
 			{ return d3dTexture1D_; }
@@ -143,6 +144,9 @@ namespace KlayGE
 			uint32_t src_width, uint32_t src_height);
 
 		void BuildMipSubLevels();
+
+		using Texture::Usage;
+		void Usage(TextureUsage usage);
 
 		ID3D9TexturePtr D3DTexture2D() const
 			{ return d3dTexture2D_; }
@@ -185,6 +189,9 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
+		using Texture::Usage;
+		void Usage(TextureUsage usage);
+
 		ID3D9VolumeTexturePtr D3DTexture3D() const
 			{ return d3dTexture3D_; }
 
@@ -224,6 +231,9 @@ namespace KlayGE
 			uint32_t src_width, uint32_t src_height);
 
 		void BuildMipSubLevels();
+
+		using Texture::Usage;
+		void Usage(TextureUsage usage);
 
 		ID3D9CubeTexturePtr D3DTextureCube() const
 			{ return d3dTextureCube_; }
