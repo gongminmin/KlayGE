@@ -316,6 +316,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Src\Kernel\ThrowErr.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Src\Kernel\Util.cpp"
 					>
 				</File>

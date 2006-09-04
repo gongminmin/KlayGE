@@ -23,11 +23,7 @@ namespace KlayGE
 	class Exception : public std::exception
 	{
 	public:
-		Exception(std::string const & errFile, uint32_t errLine, uint32_t errCode, std::string const & msg) throw()
-			: errFile_(errFile), errLine_(errLine),
-				errCode_(errCode), msg_(msg)
-		{
-		}
+		Exception(std::string const & errFile, uint32_t errLine, int32_t errCode, std::string const & msg) throw();
 		virtual ~Exception() throw()
 		{
 		}
@@ -41,7 +37,7 @@ namespace KlayGE
 			return errLine_;
 		}
 
-		uint32_t ErrorCode() const throw()
+		int32_t ErrorCode() const throw()
 		{
 			return errCode_;
 		}
@@ -54,7 +50,7 @@ namespace KlayGE
 		std::string errFile_;
 		uint32_t errLine_;
 
-		uint32_t errCode_;
+		int32_t errCode_;
 		std::string msg_;
 	};
 }
@@ -78,7 +74,7 @@ TIF(HRESULT hr)
 
 #else
 
-#define THR(x)			{ throw KlayGE::Exception(__FILE__, __LINE__, static_cast<KlayGE::uint32_t>(x), #x); }
+#define THR(x)			{ throw KlayGE::Exception(__FILE__, __LINE__, static_cast<KlayGE::int32_t>(x), #x); }
 
 // 如果错误，就抛出错误代码
 #define TIF(x)			{ HRESULT _hr = x; if (FAILED(_hr)) { THR(_hr); } }

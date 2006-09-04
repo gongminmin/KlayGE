@@ -628,6 +628,11 @@
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
+		<Unit filename="..\..\Core\Src\Kernel\ThrowErr.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
 		<Unit filename="..\..\Core\Src\Kernel\Util.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Debug"/>
