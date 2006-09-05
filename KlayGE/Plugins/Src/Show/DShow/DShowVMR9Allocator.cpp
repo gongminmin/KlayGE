@@ -37,7 +37,8 @@ namespace KlayGE
 {
 	DShowVMR9Allocator::DShowVMR9Allocator(HWND wnd)
 					: ref_count_(1),
-						wnd_(wnd)
+						wnd_(wnd),
+						cur_surf_index_(0xFFFFFFFF)
 	{
 		d3d_ = MakeCOMPtr(::Direct3DCreate9(D3D_SDK_VERSION));
 
@@ -75,9 +76,7 @@ namespace KlayGE
 		boost::mutex::scoped_lock lock(mutex_);
 
 		// clear out the private texture
-		cache_tex_.reset();
 		cache_surf_.reset();
-		private_tex_.reset();
 
 		for (size_t i = 0; i < surfaces_.size(); ++ i) 
 		{
@@ -128,23 +127,6 @@ namespace KlayGE
 		if (FAILED(hr) && !(lpAllocInfo->dwFlags & VMR9AllocFlag_3DRenderTarget))
 		{
 			this->DeleteSurfaces();            
-
-			// is surface YUV ?
-			if (lpAllocInfo->Format > '0000') 
-			{           
-				D3DDISPLAYMODE dm; 
-				TIF(d3d_device_->GetDisplayMode(NULL, &dm));
-
-				// create the private texture
-				IDirect3DTexture9* tex;
-				TIF(d3d_device_->CreateTexture(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight,
-										1, 
-										D3DUSAGE_RENDERTARGET, 
-										dm.Format, 
-										D3DPOOL_DEFAULT,
-										&tex, NULL));
-				private_tex_ = MakeCOMPtr(tex);
-			}
 
 			lpAllocInfo->dwFlags &= ~VMR9AllocFlag_TextureSurface;
 			lpAllocInfo->dwFlags |= VMR9AllocFlag_OffscreenSurface;
@@ -264,40 +246,19 @@ namespace KlayGE
 
 		boost::mutex::scoped_lock lock(mutex_);
 
-		if (private_tex_)
+		cur_surf_index_ = 0xFFFFFFFF;
+		for (uint32_t i = 0; i < surfaces_.size(); ++ i)
 		{
-			// if we created a private texture
-			// blt the decoded image onto the texture.
-
-			ID3D9SurfacePtr surface;
+			if (surfaces_[i] == lpPresInfo->lpSurf)
 			{
-				IDirect3DSurface9* tmp;
-				TIF(private_tex_->GetSurfaceLevel(0 , &tmp));
-				surface = MakeCOMPtr(tmp);
+				cur_surf_index_ = i;
+				break;
 			}
-
-			// copy the full surface onto the texture's surface
-			d3d_device_->StretchRect(lpPresInfo->lpSurf, NULL,
-								 surface.get(), NULL,
-								 D3DTEXF_NONE);
-
-			cache_tex_ = private_tex_;
-		}
-		else
-		{
-			// this is the case where we have got the textures allocated by VMR
-			// all we need to do is to get them from the surface
-
-			IDirect3DTexture9* tmp;
-			lpPresInfo->lpSurf->GetContainer(IID_IDirect3DTexture9, reinterpret_cast<void**>(&tmp));
-			cache_tex_ = MakeCOMPtr(tmp);
 		}
 
 		if (D3DERR_DEVICENOTRESET == d3d_device_->TestCooperativeLevel())
 		{
-			cache_tex_.reset();
 			cache_surf_.reset();
-			private_tex_.reset();
 
 			for (size_t i = 0; i < surfaces_.size(); ++ i) 
 			{
@@ -382,18 +343,12 @@ namespace KlayGE
 			return TexturePtr();
 		}
 
-		if (cache_tex_)
+		if (cur_surf_index_ < surfaces_.size())
 		{
-			{
-				IDirect3DSurface9* tmp;
-				TIF(cache_tex_->GetSurfaceLevel(0 , &tmp));
-				ID3D9SurfacePtr surf = MakeCOMPtr(tmp);
-
-				TIF(d3d_device_->GetRenderTargetData(surf.get(), cache_surf_.get()));
-			}
+			TIF(d3d_device_->GetRenderTargetData(surfaces_[cur_surf_index_], cache_surf_.get()));
 
 			D3DSURFACE_DESC desc;
-			cache_tex_->GetLevelDesc(0, &desc);
+			surfaces_[cur_surf_index_]->GetDesc(&desc);
 
 			ElementFormat const ef = D3D9Mapping::MappingFormat(desc.Format);
 			uint32_t const line_size = desc.Width * NumFormatBytes(ef);

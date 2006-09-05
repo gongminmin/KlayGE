@@ -93,9 +93,8 @@ namespace KlayGE
 
 		boost::shared_ptr<IVMRSurfaceAllocatorNotify9> vmr_surf_alloc_notify_;
 		std::vector<IDirect3DSurface9*>	surfaces_;
-		ID3D9TexturePtr					private_tex_;
+		uint32_t cur_surf_index_;
 
-		ID3D9TexturePtr		cache_tex_;
 		ID3D9SurfacePtr		cache_surf_;
 		TexturePtr			present_tex_;
 

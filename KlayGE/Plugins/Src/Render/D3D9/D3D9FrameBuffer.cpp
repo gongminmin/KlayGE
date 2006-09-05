@@ -74,6 +74,18 @@ namespace KlayGE
 		D3D9RenderEngine& re(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		ID3D9DevicePtr d3dDevice = re.D3DDevice();
 
+		bool srgb = false;
+		for (uint32_t i = 0; i < clr_views_.size(); ++ i)
+		{
+			D3D9RenderView const & d3d_view(*checked_pointer_cast<D3D9RenderView>(clr_views_[i]));
+			if (IsSRGB(d3d_view.Format()))
+			{
+				srgb = true;
+				break;
+			}
+		}
+		d3dDevice->SetRenderState(D3DRS_SRGBWRITEENABLE, srgb);
+
 		for (uint32_t i = 0; i < re.DeviceCaps().max_simultaneous_rts; ++ i)
 		{
 			TIF(d3dDevice->SetRenderTarget(i, this->D3DRenderSurface(i).get()));
