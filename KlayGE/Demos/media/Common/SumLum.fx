@@ -16,13 +16,13 @@ void SumLumVS(float4 pos : POSITION,
 
 float4 SumLum4x4LogPS(float4 iTex[2] : TEXCOORD) : COLOR
 {
-	const half3 rgb_to_lum = half3(0.27, 0.67, 0.06);
+	const half3 RGB_TO_LUM = half3(0.27, 0.67, 0.06);
 
 	half s = 0;
 	for (int i = 0; i < 2; ++ i)
 	{
-		s += log(dot(tex2D(src_sampler, iTex[i].xy).rgb, rgb_to_lum) + 0.001f);
-		s += log(dot(tex2D(src_sampler, iTex[i].zw).rgb, rgb_to_lum) + 0.001f);
+		s += log(dot(tex2D(src_sampler, iTex[i].xy).rgb, RGB_TO_LUM) + 0.001f);
+		s += log(dot(tex2D(src_sampler, iTex[i].zw).rgb, RGB_TO_LUM) + 0.001f);
 	}
 
 	return s / 4;

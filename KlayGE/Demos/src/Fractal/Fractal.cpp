@@ -46,7 +46,7 @@ namespace
 			sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
 			*(technique_->Effect().ParameterByName("fractal_sampler")) = sampler_;
 
-			float4 offset = rf.RenderEngineInstance().TexelToPixelOffset();
+			float4 const & offset = rf.RenderEngineInstance().TexelToPixelOffset();
 
 			float3 xyzs[] =
 			{

@@ -97,6 +97,12 @@ namespace
 
 			*(effect_->ParameterByName("light_in_model")) = MathLib::transform_coord(float3(2, 2, -3),
 																	MathLib::inverse(model_mat_));
+
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			float4 const & texel_to_pixel = re.TexelToPixelOffset();
+			float const x_offset = texel_to_pixel.x() / re.CurRenderTarget()->Width();
+			float const y_offset = texel_to_pixel.y() / re.CurRenderTarget()->Height();
+			*(effect_->ParameterByName("offset")) = float2(x_offset, y_offset);
 		}
 
 	private:

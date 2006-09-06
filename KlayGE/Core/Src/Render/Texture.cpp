@@ -359,6 +359,11 @@ namespace KlayGE
 			}
 		}
 
+		if (desc.reserved1[0] != 0)
+		{
+			format = MakeSRGB(format);
+		}
+
 		KlayGE::TexturePtr texture;
 		{
 			RenderFactory& renderFactory = Context::Instance().RenderFactoryInstance();
@@ -566,6 +571,11 @@ namespace KlayGE
 
 		desc.pixel_format.size = sizeof(desc.pixel_format);
 
+		if (IsSRGB(texture->Format()))
+		{
+			desc.reserved1[0] = 1;
+		}
+
 		if ((EF_ABGR16 == texture->Format())
 			|| IsFloatFormat(texture->Format()) || IsCompressedFormat(texture->Format()))
 		{
@@ -602,14 +612,17 @@ namespace KlayGE
 				break;
 
 			case EF_DXT1:
+			case EF_DXT1_SRGB:
 				desc.pixel_format.four_cc = MakeFourCC<'D', 'X', 'T', '1'>::value;
 				break;
 
 			case EF_DXT3:
+			case EF_DXT3_SRGB:
 				desc.pixel_format.four_cc = MakeFourCC<'D', 'X', 'T', '3'>::value;
 				break;
 
 			case EF_DXT5:
+			case EF_DXT5_SRGB:
 				desc.pixel_format.four_cc = MakeFourCC<'D', 'X', 'T', '5'>::value;
 				break;
 
@@ -644,6 +657,7 @@ namespace KlayGE
 				break;
 
 			case EF_ARGB8:
+			case EF_ARGB8_SRGB:
 				desc.pixel_format.flags |= DDSPF_RGB;
 				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
 				desc.pixel_format.rgb_bit_count = 32;

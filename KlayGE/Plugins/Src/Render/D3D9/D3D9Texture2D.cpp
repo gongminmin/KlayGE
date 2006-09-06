@@ -90,8 +90,17 @@ namespace KlayGE
 			maxLevel = this->NumMipMaps();
 		}
 
-		ID3D9SurfacePtr src, dst;
+		DWORD filter = D3DX_FILTER_LINEAR;
+		if (IsSRGB(format_))
+		{
+			filter |= D3DX_FILTER_SRGB_IN;
+		}
+		if (IsSRGB(target.Format()))
+		{
+			filter |= D3DX_FILTER_SRGB_OUT;
+		}
 
+		ID3D9SurfacePtr src, dst;
 		for (uint32_t level = 0; level < maxLevel; ++ level)
 		{
 			IDirect3DSurface9* temp;
@@ -104,7 +113,7 @@ namespace KlayGE
 
 			if (FAILED(d3dDevice_->StretchRect(src.get(), NULL, dst.get(), NULL, D3DTEXF_LINEAR)))
 			{
-				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_LINEAR, 0));
+				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, filter, 0));
 			}
 		}
 
@@ -131,7 +140,13 @@ namespace KlayGE
 			TIF(d3dDevice_->CreateOffscreenPlainSurface(this->Width(level), this->Height(level),
 				D3D9Mapping::MappingFormat(format_), D3DPOOL_SYSTEMMEM, &tmp_surface, NULL));
 
-			TIF(D3DXLoadSurfaceFromSurface(tmp_surface, NULL, NULL, surface.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+			DWORD filter = D3DX_FILTER_NONE;
+			if (IsSRGB(format_))
+			{
+				filter |= D3DX_FILTER_SRGB;
+			}
+
+			TIF(D3DXLoadSurfaceFromSurface(tmp_surface, NULL, NULL, surface.get(), NULL, NULL, filter, 0));
 
 			surface = MakeCOMPtr(tmp_surface);
 		}
@@ -149,10 +164,20 @@ namespace KlayGE
 
 		if (surface)
 		{
+			DWORD filter = D3DX_FILTER_LINEAR;
+			if (IsSRGB(pf))
+			{
+				filter |= D3DX_FILTER_SRGB_IN;
+			}
+			if (IsSRGB(format_))
+			{
+				filter |= D3DX_FILTER_SRGB_OUT;
+			}
+
 			RECT srcRc = { 0, 0, src_width, src_height };
 			RECT dstRc = { dst_xOffset, dst_yOffset, dst_xOffset + dst_width, dst_yOffset + dst_height };
 			TIF(D3DXLoadSurfaceFromMemory(surface.get(), NULL, &dstRc, data, D3D9Mapping::MappingFormat(pf),
-					src_width * NumFormatBytes(pf), NULL, &srcRc, D3DX_DEFAULT, 0));
+					src_width * NumFormatBytes(pf), NULL, &srcRc, filter, 0));
 		}
 	}
 
@@ -166,6 +191,12 @@ namespace KlayGE
 		}
 		else
 		{
+			DWORD filter = D3DX_FILTER_NONE;
+			if (IsSRGB(format_))
+			{
+				filter |= D3DX_FILTER_SRGB;
+			}
+
 			if (TU_RenderTarget == usage_)
 			{
 				ID3D9TexturePtr d3dTexture2D = this->CreateTexture2D(D3DUSAGE_AUTOGENMIPMAP | D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
@@ -177,7 +208,7 @@ namespace KlayGE
 				TIF(d3dTexture2D->GetSurfaceLevel(0, &temp));
 				ID3D9SurfacePtr dst = MakeCOMPtr(temp);
 
-				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, filter, 0));
 
 				d3dTexture2D->GenerateMipSubLevels();
 				d3dTexture2D_ = d3dTexture2D;
@@ -199,9 +230,9 @@ namespace KlayGE
 				TIF(d3dTexture2D->GetSurfaceLevel(0, &temp));
 				ID3D9SurfacePtr dst = MakeCOMPtr(temp);
 
-				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, filter, 0));
 
-				TIF(D3DXFilterTexture(d3dBaseTexture.get(), NULL, D3DX_DEFAULT, D3DX_DEFAULT));
+				TIF(D3DXFilterTexture(d3dBaseTexture.get(), NULL, 0, filter));
 				TIF(d3dDevice_->UpdateTexture(d3dBaseTexture.get(), d3dBaseTexture_.get()));
 			}
 		}
@@ -262,9 +293,15 @@ namespace KlayGE
 
 			widths_[level] = desc.Width;
 			heights_[level] = desc.Height;
-		}					
+		}
 
+		bool srgb = IsSRGB(format_);
 		format_ = D3D9Mapping::MappingFormat(desc.Format);
+		if (srgb)
+		{
+			format_ = MakeSRGB(format_);
+		}
+
 		bpp_	= NumFormatBits(format_);
 	}
 
@@ -284,6 +321,12 @@ namespace KlayGE
 				break;
 			}
 
+			DWORD filter = D3DX_FILTER_NONE;
+			if (IsSRGB(format_))
+			{
+				filter |= D3DX_FILTER_SRGB;
+			}
+
 			ID3D9SurfacePtr src_surf, dest_surf;
 			for (uint32_t i = 0; i < d3dTexture2D_->GetLevelCount(); ++ i)
 			{
@@ -296,7 +339,7 @@ namespace KlayGE
 				dest_surf = MakeCOMPtr(pDestSurf);
 
 				TIF(D3DXLoadSurfaceFromSurface(dest_surf.get(), NULL, NULL,
-					src_surf.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+					src_surf.get(), NULL, NULL, filter, 0));
 			}
 			d3dTexture2D_ = d3dTmpTexture2D;
 

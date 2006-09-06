@@ -39,6 +39,7 @@ technique NormalDepth
 
 
 float inv_width, inv_height;
+float2 offset;
 
 void PostToonVS(float4 pos : POSITION,
 				float3 normal : NORMAL,
@@ -53,7 +54,7 @@ void PostToonVS(float4 pos : POSITION,
 {
 	oPos = mul(mul(pos, model_view), proj);
 	
-	oTc0 = oPos.xy / oPos.w;
+	oTc0 = oPos.xy / oPos.w + offset;
 	oTc0.y = -oTc0.y;
 	oTc0 = oTc0 / 2 + 0.5f;
 

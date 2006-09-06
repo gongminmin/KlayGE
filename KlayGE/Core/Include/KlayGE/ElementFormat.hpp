@@ -1,8 +1,11 @@
 // ElementFormat.hpp
 // KlayGE 元素格式 头文件
-// Ver 3.3.0
+// Ver 3.4.0
 // 版权所有(C) 龚敏敏, 2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.4.0
+// 增加了MakeSRGB/MakeNonSRGB (2006.9.6)
 //
 // 3.3.0
 // 初次建立 (2006.6.8)
@@ -257,6 +260,50 @@ namespace KlayGE
 
 		default:
 			return false;
+		}
+	}
+
+	inline ElementFormat
+	MakeSRGB(ElementFormat format)
+	{
+		switch (format)
+		{
+		case EF_ARGB8:
+			return EF_ARGB8_SRGB;
+
+		case EF_DXT1:
+			return EF_DXT1_SRGB;
+
+		case EF_DXT3:
+			return EF_DXT3_SRGB;
+
+		case EF_DXT5:
+			return EF_DXT5_SRGB;
+
+		default:
+			return format;
+		}
+	}
+
+	inline ElementFormat
+	MakeNonSRGB(ElementFormat format)
+	{
+		switch (format)
+		{
+		case EF_ARGB8_SRGB:
+			return EF_ARGB8;
+
+		case EF_DXT1_SRGB:
+			return EF_DXT1;
+
+		case EF_DXT3_SRGB:
+			return EF_DXT3;
+
+		case EF_DXT5_SRGB:
+			return EF_DXT5;
+
+		default:
+			return format;
 		}
 	}
 

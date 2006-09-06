@@ -5,14 +5,23 @@ sampler lum_sampler;
 sampler bloom_sampler;
 
 
-float4 ToneMapping(float3 color, float3 blur, float lum)
+float4 ToneMapping(float3 color, float3 blur, float adapted_lum)
 {
-	half3 clr = color + blur * 0.25f;
+	const half3 RGB_TO_LUM = half3(0.27, 0.67, 0.06);
+	const half3 BLUE_SHIFT = half3(1.05, 0.97, 1.27); 
 
-	clr *= MIDDLE_GREY / lum;
-	clr /= 1.0f + clr;
+	color += blur * 0.25f;
 
-	return float4(clr, 1);
+	// Blue shift
+	half blue_shift_coef = 1.0f - (adapted_lum + 1.5f) / 4.1f;
+	half3 rod_clr = dot(color, RGB_TO_LUM) * BLUE_SHIFT;
+	color = lerp(color, rod_clr, saturate(blue_shift_coef));
+
+	// Tone mapping
+	color *= MIDDLE_GREY / adapted_lum;
+	color /= 1.0f + color;
+
+	return float4(color, 1);
 }
 
 

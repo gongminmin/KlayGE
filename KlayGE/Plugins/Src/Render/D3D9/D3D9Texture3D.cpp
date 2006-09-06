@@ -99,6 +99,16 @@ namespace KlayGE
 			maxLevel = this->NumMipMaps();
 		}
 
+		DWORD filter = D3DX_FILTER_LINEAR;
+		if (IsSRGB(format_))
+		{
+			filter |= D3DX_FILTER_SRGB_IN;
+		}
+		if (IsSRGB(target.Format()))
+		{
+			filter |= D3DX_FILTER_SRGB_OUT;
+		}
+
 		ID3D9VolumePtr src, dst;
 		for (uint32_t level = 0; level < maxLevel; ++ level)
 		{
@@ -110,7 +120,7 @@ namespace KlayGE
 			TIF(other.d3dTexture3D_->GetVolumeLevel(level, &temp));
 			dst = MakeCOMPtr(temp);
 
-			TIF(D3DXLoadVolumeFromVolume(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_DEFAULT, 0));
+			TIF(D3DXLoadVolumeFromVolume(dst.get(), NULL, NULL, src.get(), NULL, NULL, filter, 0));
 		}
 
 		if (this->NumMipMaps() != target.NumMipMaps())
@@ -148,6 +158,16 @@ namespace KlayGE
 
 		if (volume)
 		{
+			DWORD filter = D3DX_FILTER_LINEAR;
+			if (IsSRGB(pf))
+			{
+				filter |= D3DX_FILTER_SRGB_IN;
+			}
+			if (IsSRGB(format_))
+			{
+				filter |= D3DX_FILTER_SRGB_OUT;
+			}
+
 			uint32_t const srcRowPitch = src_width * NumFormatBytes(pf);
 			uint32_t const srcSlicePitch = srcRowPitch * src_height;
 
@@ -155,7 +175,7 @@ namespace KlayGE
 			D3DBOX dstBox = { dst_xOffset, dst_yOffset, dst_xOffset + dst_width, dst_yOffset + dst_height,
 				dst_zOffset, dst_zOffset + dst_depth };
 			TIF(D3DXLoadVolumeFromMemory(volume.get(), NULL, &dstBox, data, D3D9Mapping::MappingFormat(pf),
-					srcRowPitch, srcSlicePitch, NULL, &srcBox, D3DX_DEFAULT, 0));
+					srcRowPitch, srcSlicePitch, NULL, &srcBox, filter, 0));
 		}
 	}
 
@@ -169,6 +189,12 @@ namespace KlayGE
 		}
 		else
 		{
+			DWORD filter = D3DX_FILTER_NONE;
+			if (IsSRGB(format_))
+			{
+				filter |= D3DX_FILTER_SRGB;
+			}
+
 			if (TU_RenderTarget == usage_)
 			{
 				ID3D9VolumeTexturePtr d3dTexture3D = this->CreateTexture3D(D3DUSAGE_AUTOGENMIPMAP | D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
@@ -180,7 +206,7 @@ namespace KlayGE
 				TIF(d3dTexture3D->GetVolumeLevel(0, &temp));
 				ID3D9VolumePtr dst = MakeCOMPtr(temp);
 
-				TIF(D3DXLoadVolumeFromVolume(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+				TIF(D3DXLoadVolumeFromVolume(dst.get(), NULL, NULL, src.get(), NULL, NULL, filter, 0));
 
 				d3dTexture3D->GenerateMipSubLevels();
 				d3dTexture3D_ = d3dTexture3D;
@@ -202,9 +228,9 @@ namespace KlayGE
 				TIF(d3dTexture3D->GetVolumeLevel(0, &temp));
 				ID3D9VolumePtr dst = MakeCOMPtr(temp);
 
-				TIF(D3DXLoadVolumeFromVolume(dst.get(), NULL, NULL, src.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+				TIF(D3DXLoadVolumeFromVolume(dst.get(), NULL, NULL, src.get(), NULL, NULL, filter, 0));
 
-				TIF(D3DXFilterTexture(d3dBaseTexture.get(), NULL, D3DX_DEFAULT, D3DX_DEFAULT));
+				TIF(D3DXFilterTexture(d3dBaseTexture.get(), NULL, 0, filter));
 				TIF(d3dDevice_->UpdateTexture(d3dBaseTexture.get(), d3dBaseTexture_.get()));
 			}
 		}
@@ -267,9 +293,15 @@ namespace KlayGE
 			widths_[level] = desc.Width;
 			heights_[level] = desc.Height;
 			depths_[level] = desc.Depth;
-		}					
+		}
 
+		bool srgb = IsSRGB(format_);
 		format_ = D3D9Mapping::MappingFormat(desc.Format);
+		if (srgb)
+		{
+			format_ = MakeSRGB(format_);
+		}
+
 		bpp_	= NumFormatBits(format_);
 	}
 
@@ -289,6 +321,12 @@ namespace KlayGE
 				break;
 			}
 
+			DWORD filter = D3DX_FILTER_NONE;
+			if (IsSRGB(format_))
+			{
+				filter |= D3DX_FILTER_SRGB;
+			}
+
 			ID3D9VolumePtr src_vol, dest_vol;
 			for (uint32_t i = 0; i < d3dTexture3D_->GetLevelCount(); ++ i)
 			{
@@ -301,7 +339,7 @@ namespace KlayGE
 				dest_vol = MakeCOMPtr(pDestVol);
 
 				TIF(D3DXLoadVolumeFromVolume(dest_vol.get(), NULL, NULL,
-					src_vol.get(), NULL, NULL, D3DX_FILTER_NONE, 0));
+					src_vol.get(), NULL, NULL, filter, 0));
 			}
 			d3dTexture3D_ = d3dTmpTexture3D;
 

@@ -158,10 +158,9 @@ namespace
 			{
 				technique_ = effect_->Technique("Font2DTec");
 
-				RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-				Viewport const & viewport(renderEngine.CurRenderTarget()->GetViewport());
-				*(effect_->ParameterByName("halfWidth")) = viewport.width / 2;
-				*(effect_->ParameterByName("halfHeight")) = viewport.height / 2;
+				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+				*(effect_->ParameterByName("halfWidth")) = static_cast<int>(re.CurRenderTarget()->Width() / 2);
+				*(effect_->ParameterByName("halfHeight")) = static_cast<int>(re.CurRenderTarget()->Height() / 2);
 			}
 			else
 			{
