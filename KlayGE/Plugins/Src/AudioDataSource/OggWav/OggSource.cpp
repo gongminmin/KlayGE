@@ -22,8 +22,13 @@
 #include <KlayGE/OggWav/OggSource.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
-#pragma comment(lib, "ogg.lib")
-#pragma comment(lib, "vorbis.lib")
+#ifdef KLAYGE_DEBUG
+#pragma comment(lib, "ogg_static_d.lib")
+#pragma comment(lib, "vorbis_static_d.lib")
+#else
+#pragma comment(lib, "ogg_static.lib")
+#pragma comment(lib, "vorbis_static.lib")
+#endif
 #endif
 
 size_t const READSIZE = 4096;

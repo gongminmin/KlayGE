@@ -405,19 +405,19 @@ namespace KlayGE
 			gltype = GL_FLOAT;
 			break;
 
-		case EF_DXT1:
+		case EF_BC1:
 			internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
 			glformat = GL_BGRA;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
-		case EF_DXT3:
+		case EF_BC2:
 			internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
 			glformat = GL_BGRA;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
-		case EF_DXT5:
+		case EF_BC3:
 			internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 			glformat = GL_BGRA;
 			gltype = GL_UNSIGNED_BYTE;
@@ -429,19 +429,19 @@ namespace KlayGE
 			gltype = GL_UNSIGNED_INT_8_8_8_8_REV;
 			break;
 
-		case EF_DXT1_SRGB:
+		case EF_BC1_SRGB:
 			internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
 			glformat = GL_BGRA;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
-		case EF_DXT3_SRGB:
+		case EF_BC2_SRGB:
 			internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
 			glformat = GL_BGRA;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
-		case EF_DXT5_SRGB:
+		case EF_BC3_SRGB:
 			internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
 			glformat = GL_BGRA;
 			gltype = GL_UNSIGNED_BYTE;

@@ -593,16 +593,16 @@ namespace KlayGE
 		case EF_ABGR32F:
 			return D3DFMT_A32B32G32R32F;
 
-		case EF_DXT1:
-		case EF_DXT1_SRGB:
+		case EF_BC1:
+		case EF_BC1_SRGB:
 			return D3DFMT_DXT1;
 
-		case EF_DXT3:
-		case EF_DXT3_SRGB:
+		case EF_BC2:
+		case EF_BC2_SRGB:
 			return D3DFMT_DXT3;
 
-		case EF_DXT5:
-		case EF_DXT5_SRGB:
+		case EF_BC3:
+		case EF_BC3_SRGB:
 			return D3DFMT_DXT5;
 
 		case EF_D16:
@@ -678,13 +678,13 @@ namespace KlayGE
 			return EF_ABGR32F;
 
 		case D3DFMT_DXT1:
-			return EF_DXT1;
+			return EF_BC1;
 
 		case D3DFMT_DXT3:
-			return EF_DXT3;
+			return EF_BC2;
 
 		case D3DFMT_DXT5:
-			return EF_DXT5;
+			return EF_BC3;
 
 		case D3DFMT_D16:
 			return EF_D16;

@@ -177,7 +177,7 @@ namespace KlayGE
 		if (IsCompressedFormat(format_))
 		{
 			int block_size;
-			if (EF_DXT1 == format_)
+			if (EF_BC1 == format_)
 			{
 				block_size = 8;
 			}

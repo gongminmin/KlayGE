@@ -87,12 +87,16 @@ namespace KlayGE
 		// 128-bit element format, 32 bits floating-point for alpha, blue, green and red.
 		EF_ABGR32F,
 
-		// DXT1 compression element format 
-		EF_DXT1,
-		// DXT3 compression element format
-		EF_DXT3,
-		// DXT5 compression element format
-		EF_DXT5,
+		// BC1 compression element format, DXT1
+		EF_BC1,
+		// BC2 compression element format, DXT3
+		EF_BC2,
+		// BC3 compression element format, DXT5
+		EF_BC3,
+		// BC4 compression element format, 1 channel
+		EF_BC4,
+		// BC5 compression element format, 2 channels
+		EF_BC5,
 
 		// 16-bit element format, 16 bits depth
 		EF_D16,
@@ -103,12 +107,12 @@ namespace KlayGE
 
 		// 32-bit element format, 8 bits for alpha, red, green and blue. Standard RGB (gamma = 2.2).
 		EF_ARGB8_SRGB,
-		// DXT1 compression element format. Standard RGB (gamma = 2.2).
-		EF_DXT1_SRGB,
-		// DXT3 compression element format. Standard RGB (gamma = 2.2).
-		EF_DXT3_SRGB,
-		// DXT5 compression element format. Standard RGB (gamma = 2.2).
-		EF_DXT5_SRGB,
+		// BC1 compression element format. Standard RGB (gamma = 2.2).
+		EF_BC1_SRGB,
+		// BC2 compression element format. Standard RGB (gamma = 2.2).
+		EF_BC2_SRGB,
+		// BC3 compression element format. Standard RGB (gamma = 2.2).
+		EF_BC3_SRGB
 	};
 
 	inline uint8_t
@@ -127,8 +131,8 @@ namespace KlayGE
 		case EF_ARGB4:
 		case EF_R16:
 		case EF_R16F:
-		case EF_DXT1:
-		case EF_DXT1_SRGB:
+		case EF_BC1:
+		case EF_BC1_SRGB:
 		case EF_D16:
 			return 16;
 
@@ -143,10 +147,10 @@ namespace KlayGE
 		case EF_GR16F:
 		case EF_R32:
 		case EF_R32F:
-		case EF_DXT3:
-		case EF_DXT5:
-		case EF_DXT3_SRGB:
-		case EF_DXT5_SRGB:
+		case EF_BC2:
+		case EF_BC3:
+		case EF_BC2_SRGB:
+		case EF_BC3_SRGB:
 		case EF_D24S8:
 		case EF_D32:
 			return 32;
@@ -206,12 +210,12 @@ namespace KlayGE
 	{
 		switch (format)
 		{
-		case EF_DXT1:
-		case EF_DXT3:
-		case EF_DXT5:
-		case EF_DXT1_SRGB:
-		case EF_DXT3_SRGB:
-		case EF_DXT5_SRGB:
+		case EF_BC1:
+		case EF_BC2:
+		case EF_BC3:
+		case EF_BC1_SRGB:
+		case EF_BC2_SRGB:
+		case EF_BC3_SRGB:
 			return true;
 
 		default:
@@ -253,9 +257,9 @@ namespace KlayGE
 		switch (format)
 		{
 		case EF_ARGB8_SRGB:
-		case EF_DXT1_SRGB:
-		case EF_DXT3_SRGB:
-		case EF_DXT5_SRGB:
+		case EF_BC1_SRGB:
+		case EF_BC2_SRGB:
+		case EF_BC3_SRGB:
 			return true;
 
 		default:
@@ -271,14 +275,14 @@ namespace KlayGE
 		case EF_ARGB8:
 			return EF_ARGB8_SRGB;
 
-		case EF_DXT1:
-			return EF_DXT1_SRGB;
+		case EF_BC1:
+			return EF_BC1_SRGB;
 
-		case EF_DXT3:
-			return EF_DXT3_SRGB;
+		case EF_BC2:
+			return EF_BC2_SRGB;
 
-		case EF_DXT5:
-			return EF_DXT5_SRGB;
+		case EF_BC3:
+			return EF_BC3_SRGB;
 
 		default:
 			return format;
@@ -293,14 +297,14 @@ namespace KlayGE
 		case EF_ARGB8_SRGB:
 			return EF_ARGB8;
 
-		case EF_DXT1_SRGB:
-			return EF_DXT1;
+		case EF_BC1_SRGB:
+			return EF_BC1;
 
-		case EF_DXT3_SRGB:
-			return EF_DXT3;
+		case EF_BC2_SRGB:
+			return EF_BC2;
 
-		case EF_DXT5_SRGB:
-			return EF_DXT5;
+		case EF_BC3_SRGB:
+			return EF_BC3;
 
 		default:
 			return format;
@@ -379,13 +383,13 @@ namespace KlayGE
 		case EF_ABGR32:
 		case EF_ABGR16F:
 		case EF_ABGR32F:
-		case EF_DXT1:
-		case EF_DXT3:
-		case EF_DXT5:
+		case EF_BC1:
+		case EF_BC2:
+		case EF_BC3:
 		case EF_ARGB8_SRGB:
-		case EF_DXT1_SRGB:
-		case EF_DXT3_SRGB:
-		case EF_DXT5_SRGB:
+		case EF_BC1_SRGB:
+		case EF_BC2_SRGB:
+		case EF_BC3_SRGB:
 			return 4;
 
 		default:

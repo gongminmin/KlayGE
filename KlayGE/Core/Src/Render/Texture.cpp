@@ -206,15 +206,15 @@ namespace KlayGE
 				break;
 
 			case MakeFourCC<'D', 'X', 'T', '1'>::value:
-				format = EF_DXT1;
+				format = EF_BC1;
 				break;
 
 			case MakeFourCC<'D', 'X', 'T', '3'>::value:
-				format = EF_DXT3;
+				format = EF_BC2;
 				break;
 
 			case MakeFourCC<'D', 'X', 'T', '5'>::value:
-				format = EF_DXT5;
+				format = EF_BC3;
 				break;
 			}
 		}
@@ -398,7 +398,7 @@ namespace KlayGE
 					if (IsCompressedFormat(format))
 					{
 						int block_size;
-						if (EF_DXT1 == format)
+						if (EF_BC1 == format)
 						{
 							block_size = 8;
 						}
@@ -434,7 +434,7 @@ namespace KlayGE
 					if (IsCompressedFormat(format))
 					{
 						int block_size;
-						if (EF_DXT1 == format)
+						if (EF_BC1 == format)
 						{
 							block_size = 8;
 						}
@@ -470,7 +470,7 @@ namespace KlayGE
 					if (IsCompressedFormat(format))
 					{
 						int block_size;
-						if (EF_DXT1 == format)
+						if (EF_BC1 == format)
 						{
 							block_size = 8;
 						}
@@ -508,7 +508,7 @@ namespace KlayGE
 						if (IsCompressedFormat(format))
 						{
 							int block_size;
-							if (EF_DXT1 == format)
+							if (EF_BC1 == format)
 							{
 								block_size = 8;
 							}
@@ -611,18 +611,18 @@ namespace KlayGE
 				desc.pixel_format.four_cc = 116;
 				break;
 
-			case EF_DXT1:
-			case EF_DXT1_SRGB:
+			case EF_BC1:
+			case EF_BC1_SRGB:
 				desc.pixel_format.four_cc = MakeFourCC<'D', 'X', 'T', '1'>::value;
 				break;
 
-			case EF_DXT3:
-			case EF_DXT3_SRGB:
+			case EF_BC2:
+			case EF_BC2_SRGB:
 				desc.pixel_format.four_cc = MakeFourCC<'D', 'X', 'T', '3'>::value;
 				break;
 
-			case EF_DXT5:
-			case EF_DXT5_SRGB:
+			case EF_BC3:
+			case EF_BC3_SRGB:
 				desc.pixel_format.four_cc = MakeFourCC<'D', 'X', 'T', '5'>::value;
 				break;
 
@@ -774,7 +774,7 @@ namespace KlayGE
 		uint32_t main_image_size = texture->Width(0) * texture->Height(0) * NumFormatBytes(texture->Format());
 		if (IsCompressedFormat(texture->Format()))
 		{
-			if (EF_DXT1 == texture->Format())
+			if (EF_BC1 == texture->Format())
 			{
 				main_image_size = texture->Width(0) * texture->Height(0) / 2;
 			}
@@ -800,7 +800,7 @@ namespace KlayGE
 					if (IsCompressedFormat(texture->Format()))
 					{
 						int block_size;
-						if (EF_DXT1 == texture->Format())
+						if (EF_BC1 == texture->Format())
 						{
 							block_size = 8;
 						}
@@ -832,7 +832,7 @@ namespace KlayGE
 					if (IsCompressedFormat(texture->Format()))
 					{
 						int block_size;
-						if (EF_DXT1 == texture->Format())
+						if (EF_BC1 == texture->Format())
 						{
 							block_size = 8;
 						}
@@ -864,7 +864,7 @@ namespace KlayGE
 					if (IsCompressedFormat(texture->Format()))
 					{
 						int block_size;
-						if (EF_DXT1 == texture->Format())
+						if (EF_BC1 == texture->Format())
 						{
 							block_size = 8;
 						}
@@ -898,7 +898,7 @@ namespace KlayGE
 						if (IsCompressedFormat(texture->Format()))
 						{
 							int block_size;
-							if (EF_DXT1 == texture->Format())
+							if (EF_BC1 == texture->Format())
 							{
 								block_size = 8;
 							}

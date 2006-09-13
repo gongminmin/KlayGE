@@ -176,14 +176,14 @@ namespace KlayGE
 		case EF_ARGB8_SRGB:
 			return EF_ARGB8;
 
-		case EF_DXT1_SRGB:
-			return EF_DXT1;
+		case EF_BC1_SRGB:
+			return EF_BC1;
 
-		case EF_DXT3_SRGB:
-			return EF_DXT3;
+		case EF_BC2_SRGB:
+			return EF_BC2;
 
-		case EF_DXT5_SRGB:
-			return EF_DXT5;
+		case EF_BC3_SRGB:
+			return EF_BC3;
 
 		default:
 			return pf;
