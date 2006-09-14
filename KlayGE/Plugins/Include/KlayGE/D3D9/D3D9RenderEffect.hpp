@@ -183,10 +183,10 @@ namespace KlayGE
 		D3D9RenderEffectParameterFloat& operator=(D3D9RenderEffectParameterFloat const & rhs);
 	};
 
-	class D3D9RenderEffectParameterVector2 : public RenderEffectParameterConcrete<float2>, public D3D9Resource
+	class D3D9RenderEffectParameterFloat2 : public RenderEffectParameterConcrete<float2>, public D3D9Resource
 	{
 	public:
-		D3D9RenderEffectParameterVector2(RenderEffect& effect, std::string const & name)
+		D3D9RenderEffectParameterFloat2(RenderEffect& effect, std::string const & name)
 			: RenderEffectParameterConcrete<float2>(effect, name)
 		{
 		}
@@ -203,14 +203,14 @@ namespace KlayGE
 		}
 
 	private:
-		D3D9RenderEffectParameterVector2(D3D9RenderEffectParameterVector2 const & rhs);
-		D3D9RenderEffectParameterVector2& operator=(D3D9RenderEffectParameterVector2 const & rhs);
+		D3D9RenderEffectParameterFloat2(D3D9RenderEffectParameterFloat2 const & rhs);
+		D3D9RenderEffectParameterFloat2& operator=(D3D9RenderEffectParameterFloat2 const & rhs);
 	};
 
-	class D3D9RenderEffectParameterVector3 : public RenderEffectParameterConcrete<float3>, public D3D9Resource
+	class D3D9RenderEffectParameterFloat3 : public RenderEffectParameterConcrete<float3>, public D3D9Resource
 	{
 	public:
-		D3D9RenderEffectParameterVector3(RenderEffect& effect, std::string const & name)
+		D3D9RenderEffectParameterFloat3(RenderEffect& effect, std::string const & name)
 			: RenderEffectParameterConcrete<float3>(effect, name)
 		{
 		}
@@ -227,14 +227,14 @@ namespace KlayGE
 		}
 
 	private:
-		D3D9RenderEffectParameterVector3(D3D9RenderEffectParameterVector3 const & rhs);
-		D3D9RenderEffectParameterVector3& operator=(D3D9RenderEffectParameterVector3 const & rhs);
+		D3D9RenderEffectParameterFloat3(D3D9RenderEffectParameterFloat3 const & rhs);
+		D3D9RenderEffectParameterFloat3& operator=(D3D9RenderEffectParameterFloat3 const & rhs);
 	};
 
-	class D3D9RenderEffectParameterVector4 : public RenderEffectParameterConcrete<float4>, public D3D9Resource
+	class D3D9RenderEffectParameterFloat4 : public RenderEffectParameterConcrete<float4>, public D3D9Resource
 	{
 	public:
-		D3D9RenderEffectParameterVector4(RenderEffect& effect, std::string const & name)
+		D3D9RenderEffectParameterFloat4(RenderEffect& effect, std::string const & name)
 			: RenderEffectParameterConcrete<float4>(effect, name)
 		{
 		}
@@ -251,14 +251,14 @@ namespace KlayGE
 		}
 
 	private:
-		D3D9RenderEffectParameterVector4(D3D9RenderEffectParameterVector4 const & rhs);
-		D3D9RenderEffectParameterVector4& operator=(D3D9RenderEffectParameterVector4 const & rhs);
+		D3D9RenderEffectParameterFloat4(D3D9RenderEffectParameterFloat4 const & rhs);
+		D3D9RenderEffectParameterFloat4& operator=(D3D9RenderEffectParameterFloat4 const & rhs);
 	};
 
-	class D3D9RenderEffectParameterMatrix4 : public RenderEffectParameterConcrete<float4x4>, public D3D9Resource
+	class D3D9RenderEffectParameterFloat4x4 : public RenderEffectParameterConcrete<float4x4>, public D3D9Resource
 	{
 	public:
-		D3D9RenderEffectParameterMatrix4(RenderEffect& effect, std::string const & name)
+		D3D9RenderEffectParameterFloat4x4(RenderEffect& effect, std::string const & name)
 			: RenderEffectParameterConcrete<float4x4>(effect, name)
 		{
 		}
@@ -275,8 +275,8 @@ namespace KlayGE
 		}
 
 	private:
-		D3D9RenderEffectParameterMatrix4(D3D9RenderEffectParameterMatrix4 const & rhs);
-		D3D9RenderEffectParameterMatrix4& operator=(D3D9RenderEffectParameterMatrix4 const & rhs);
+		D3D9RenderEffectParameterFloat4x4(D3D9RenderEffectParameterFloat4x4 const & rhs);
+		D3D9RenderEffectParameterFloat4x4& operator=(D3D9RenderEffectParameterFloat4x4 const & rhs);
 	};
 
 	class D3D9RenderEffectParameterSampler : public RenderEffectParameterConcrete<SamplerPtr>, public D3D9Resource
@@ -371,10 +371,10 @@ namespace KlayGE
 		D3D9RenderEffectParameterFloatArray& operator=(D3D9RenderEffectParameterFloatArray const & rhs);
 	};
 
-	class D3D9RenderEffectParameterVector4Array : public RenderEffectParameterConcrete<std::vector<float4> >, public D3D9Resource
+	class D3D9RenderEffectParameterFloat4Array : public RenderEffectParameterConcrete<std::vector<float4> >, public D3D9Resource
 	{
 	public:
-		D3D9RenderEffectParameterVector4Array(RenderEffect& effect, std::string const & name)
+		D3D9RenderEffectParameterFloat4Array(RenderEffect& effect, std::string const & name)
 			: RenderEffectParameterConcrete<std::vector<float4> >(effect, name)
 		{
 		}
@@ -391,14 +391,14 @@ namespace KlayGE
 		}
 
 	private:
-		D3D9RenderEffectParameterVector4Array(D3D9RenderEffectParameterVector4Array const & rhs);
-		D3D9RenderEffectParameterVector4Array& operator=(D3D9RenderEffectParameterVector4Array const & rhs);
+		D3D9RenderEffectParameterFloat4Array(D3D9RenderEffectParameterFloat4Array const & rhs);
+		D3D9RenderEffectParameterFloat4Array& operator=(D3D9RenderEffectParameterFloat4Array const & rhs);
 	};
 
-	class D3D9RenderEffectParameterMatrix4Array : public RenderEffectParameterConcrete<std::vector<float4x4> >, public D3D9Resource
+	class D3D9RenderEffectParameterFloat4x4Array : public RenderEffectParameterConcrete<std::vector<float4x4> >, public D3D9Resource
 	{
 	public:
-		D3D9RenderEffectParameterMatrix4Array(RenderEffect& effect, std::string const & name)
+		D3D9RenderEffectParameterFloat4x4Array(RenderEffect& effect, std::string const & name)
 			: RenderEffectParameterConcrete<std::vector<float4x4> >(effect, name)
 		{
 		}
@@ -415,8 +415,8 @@ namespace KlayGE
 		}
 
 	private:
-		D3D9RenderEffectParameterMatrix4Array(D3D9RenderEffectParameterMatrix4Array const & rhs);
-		D3D9RenderEffectParameterMatrix4Array& operator=(D3D9RenderEffectParameterMatrix4Array const & rhs);
+		D3D9RenderEffectParameterFloat4x4Array(D3D9RenderEffectParameterFloat4x4Array const & rhs);
+		D3D9RenderEffectParameterFloat4x4Array& operator=(D3D9RenderEffectParameterFloat4x4Array const & rhs);
 	};
 
 	class D3D9RenderEffectInclude : public ID3DXInclude

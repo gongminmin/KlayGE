@@ -141,13 +141,13 @@ namespace KlayGE
 				switch (desc.Columns)
 				{
 				case 2:
-					return RenderEffectParameterPtr(new D3D9RenderEffectParameterVector2(*this, name));
+					return RenderEffectParameterPtr(new D3D9RenderEffectParameterFloat2(*this, name));
 
 				case 3:
-					return RenderEffectParameterPtr(new D3D9RenderEffectParameterVector3(*this, name));
+					return RenderEffectParameterPtr(new D3D9RenderEffectParameterFloat3(*this, name));
 				
 				case 4:
-					return RenderEffectParameterPtr(new D3D9RenderEffectParameterVector4(*this, name));
+					return RenderEffectParameterPtr(new D3D9RenderEffectParameterFloat4(*this, name));
 
 				default:
 					BOOST_ASSERT(false);
@@ -156,7 +156,7 @@ namespace KlayGE
 			}
 			else
 			{
-				return RenderEffectParameterPtr(new D3D9RenderEffectParameterVector4Array(*this, name));
+				return RenderEffectParameterPtr(new D3D9RenderEffectParameterFloat4Array(*this, name));
 			}
 		}
 
@@ -164,11 +164,11 @@ namespace KlayGE
 		{
 			if (0 == desc.Elements)
 			{
-				return RenderEffectParameterPtr(new D3D9RenderEffectParameterMatrix4(*this, name));
+				return RenderEffectParameterPtr(new D3D9RenderEffectParameterFloat4x4(*this, name));
 			}
 			else
 			{
-				return RenderEffectParameterPtr(new D3D9RenderEffectParameterMatrix4Array(*this, name));
+				return RenderEffectParameterPtr(new D3D9RenderEffectParameterFloat4x4Array(*this, name));
 			}
 		}
 
@@ -387,25 +387,25 @@ namespace KlayGE
 		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
 	}
 
-	void D3D9RenderEffectParameterVector2::DoFlush(float2 const & value)
+	void D3D9RenderEffectParameterFloat2::DoFlush(float2 const & value)
 	{
 		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
 	}
 
-	void D3D9RenderEffectParameterVector3::DoFlush(float3 const & value)
+	void D3D9RenderEffectParameterFloat3::DoFlush(float3 const & value)
 	{
 		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
 	}
 
-	void D3D9RenderEffectParameterVector4::DoFlush(float4 const & value)
+	void D3D9RenderEffectParameterFloat4::DoFlush(float4 const & value)
 	{
 		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
 	}
 
-	void D3D9RenderEffectParameterMatrix4::DoFlush(float4x4 const & value)
+	void D3D9RenderEffectParameterFloat4x4::DoFlush(float4x4 const & value)
 	{
 		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
@@ -452,14 +452,14 @@ namespace KlayGE
 		TIF(d3dx_effect->SetFloatArray(name_.c_str(), &value[0], static_cast<UINT>(value.size())));
 	}
 
-	void D3D9RenderEffectParameterVector4Array::DoFlush(std::vector<float4> const & value)
+	void D3D9RenderEffectParameterFloat4Array::DoFlush(std::vector<float4> const & value)
 	{
 		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetVectorArray(name_.c_str(), reinterpret_cast<D3DXVECTOR4 const *>(&value[0]),
 			static_cast<UINT>(value.size())));
 	}
 
-	void D3D9RenderEffectParameterMatrix4Array::DoFlush(std::vector<float4x4> const & value)
+	void D3D9RenderEffectParameterFloat4x4Array::DoFlush(std::vector<float4x4> const & value)
 	{
 		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetMatrixArray(name_.c_str(), reinterpret_cast<D3DXMATRIX const *>(&value[0]),

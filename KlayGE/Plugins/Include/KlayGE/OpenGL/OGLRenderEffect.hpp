@@ -143,10 +143,10 @@ namespace KlayGE
 		OGLRenderEffectParameterFloat& operator=(OGLRenderEffectParameterFloat const & rhs);
 	};
 
-	class OGLRenderEffectParameterVector2 : public OGLRenderEffectParameter<float2>
+	class OGLRenderEffectParameterFloat2 : public OGLRenderEffectParameter<float2>
 	{
 	public:
-		OGLRenderEffectParameterVector2(RenderEffect& effect, std::string const & name, CGparameter param)
+		OGLRenderEffectParameterFloat2(RenderEffect& effect, std::string const & name, CGparameter param)
 			: OGLRenderEffectParameter<float2>(effect, name, param)
 		{
 		}
@@ -155,14 +155,14 @@ namespace KlayGE
 		void DoFlush(float2 const & value);
 
 	private:
-		OGLRenderEffectParameterVector2(OGLRenderEffectParameterVector2 const & rhs);
-		OGLRenderEffectParameterVector2& operator=(OGLRenderEffectParameterVector2 const & rhs);
+		OGLRenderEffectParameterFloat2(OGLRenderEffectParameterFloat2 const & rhs);
+		OGLRenderEffectParameterFloat2& operator=(OGLRenderEffectParameterFloat2 const & rhs);
 	};
 
-	class OGLRenderEffectParameterVector3 : public OGLRenderEffectParameter<float3>
+	class OGLRenderEffectParameterFloat3 : public OGLRenderEffectParameter<float3>
 	{
 	public:
-		OGLRenderEffectParameterVector3(RenderEffect& effect, std::string const & name, CGparameter param)
+		OGLRenderEffectParameterFloat3(RenderEffect& effect, std::string const & name, CGparameter param)
 			: OGLRenderEffectParameter<float3>(effect, name, param)
 		{
 		}
@@ -171,14 +171,14 @@ namespace KlayGE
 		void DoFlush(float3 const & value);
 
 	private:
-		OGLRenderEffectParameterVector3(OGLRenderEffectParameterVector3 const & rhs);
-		OGLRenderEffectParameterVector3& operator=(OGLRenderEffectParameterVector3 const & rhs);
+		OGLRenderEffectParameterFloat3(OGLRenderEffectParameterFloat3 const & rhs);
+		OGLRenderEffectParameterFloat3& operator=(OGLRenderEffectParameterFloat3 const & rhs);
 	};
 
-	class OGLRenderEffectParameterVector4 : public OGLRenderEffectParameter<float4>
+	class OGLRenderEffectParameterFloat4 : public OGLRenderEffectParameter<float4>
 	{
 	public:
-		OGLRenderEffectParameterVector4(RenderEffect& effect, std::string const & name, CGparameter param)
+		OGLRenderEffectParameterFloat4(RenderEffect& effect, std::string const & name, CGparameter param)
 			: OGLRenderEffectParameter<float4>(effect, name, param)
 		{
 		}
@@ -187,14 +187,14 @@ namespace KlayGE
 		void DoFlush(float4 const & value);
 
 	private:
-		OGLRenderEffectParameterVector4(OGLRenderEffectParameterVector4 const & rhs);
-		OGLRenderEffectParameterVector4& operator=(OGLRenderEffectParameterVector4 const & rhs);
+		OGLRenderEffectParameterFloat4(OGLRenderEffectParameterFloat4 const & rhs);
+		OGLRenderEffectParameterFloat4& operator=(OGLRenderEffectParameterFloat4 const & rhs);
 	};
 
-	class OGLRenderEffectParameterMatrix4 : public OGLRenderEffectParameter<float4x4>
+	class OGLRenderEffectParameterFloat4x4 : public OGLRenderEffectParameter<float4x4>
 	{
 	public:
-		OGLRenderEffectParameterMatrix4(RenderEffect& effect, std::string const & name, CGparameter param)
+		OGLRenderEffectParameterFloat4x4(RenderEffect& effect, std::string const & name, CGparameter param)
 				: OGLRenderEffectParameter<float4x4>(effect, name, param)
 		{
 		}
@@ -203,8 +203,8 @@ namespace KlayGE
 		void DoFlush(float4x4 const & value);
 
 	private:
-		OGLRenderEffectParameterMatrix4(OGLRenderEffectParameterMatrix4 const & rhs);
-		OGLRenderEffectParameterMatrix4& operator=(OGLRenderEffectParameterMatrix4 const & rhs);
+		OGLRenderEffectParameterFloat4x4(OGLRenderEffectParameterFloat4x4 const & rhs);
+		OGLRenderEffectParameterFloat4x4& operator=(OGLRenderEffectParameterFloat4x4 const & rhs);
 	};
 
 	class OGLRenderEffectParameterSampler : public OGLRenderEffectParameter<SamplerPtr>
@@ -271,10 +271,10 @@ namespace KlayGE
 		OGLRenderEffectParameterFloatArray& operator=(OGLRenderEffectParameterFloatArray const & rhs);
 	};
 
-	class OGLRenderEffectParameterVector4Array : public OGLRenderEffectParameter<std::vector<float4> >
+	class OGLRenderEffectParameterFloat4Array : public OGLRenderEffectParameter<std::vector<float4> >
 	{
 	public:
-		OGLRenderEffectParameterVector4Array(RenderEffect& effect, std::string const & name, CGparameter param)
+		OGLRenderEffectParameterFloat4Array(RenderEffect& effect, std::string const & name, CGparameter param)
 				: OGLRenderEffectParameter<std::vector<float4> >(effect, name, param)
 		{
 		}
@@ -283,14 +283,14 @@ namespace KlayGE
 		void DoFlush(std::vector<float4> const & value);
 
 	private:
-		OGLRenderEffectParameterVector4Array(OGLRenderEffectParameterVector4Array const & rhs);
-		OGLRenderEffectParameterVector4Array& operator=(OGLRenderEffectParameterVector4Array const & rhs);
+		OGLRenderEffectParameterFloat4Array(OGLRenderEffectParameterFloat4Array const & rhs);
+		OGLRenderEffectParameterFloat4Array& operator=(OGLRenderEffectParameterFloat4Array const & rhs);
 	};
 
-	class OGLRenderEffectParameterMatrix4Array : public OGLRenderEffectParameter<std::vector<float4x4> >
+	class OGLRenderEffectParameterFloat4x4Array : public OGLRenderEffectParameter<std::vector<float4x4> >
 	{
 	public:
-		OGLRenderEffectParameterMatrix4Array(RenderEffect& effect, std::string const & name, CGparameter param)
+		OGLRenderEffectParameterFloat4x4Array(RenderEffect& effect, std::string const & name, CGparameter param)
 				: OGLRenderEffectParameter<std::vector<float4x4> >(effect, name, param)
 		{
 		}
@@ -299,8 +299,8 @@ namespace KlayGE
 		void DoFlush(std::vector<float4x4> const & value);
 
 	private:
-		OGLRenderEffectParameterMatrix4Array(OGLRenderEffectParameterMatrix4Array const & rhs);
-		OGLRenderEffectParameterMatrix4Array& operator=(OGLRenderEffectParameterMatrix4Array const & rhs);
+		OGLRenderEffectParameterFloat4x4Array(OGLRenderEffectParameterFloat4x4Array const & rhs);
+		OGLRenderEffectParameterFloat4x4Array& operator=(OGLRenderEffectParameterFloat4x4Array const & rhs);
 	};
 }
 
