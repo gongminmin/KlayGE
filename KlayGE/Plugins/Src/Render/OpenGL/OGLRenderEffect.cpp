@@ -42,6 +42,136 @@ namespace KlayGE
 		}
 		BOOST_ASSERT(effect_);
 
+		CGprogram program = cgGetFirstProgram(renderFactory.CGContext());
+		while (program)
+		{
+			CGparameter param = cgGetFirstParameter(program, CG_PROGRAM);
+			while (param)
+			{
+				RenderEffectParameterPtr reparam;
+
+				std::string const name = cgGetParameterName(param);
+				std::string semantic;
+				if (cgGetParameterSemantic(param))
+				{
+					semantic = cgGetParameterSemantic(param);
+				}
+
+				CGtype param_type = cgGetParameterType(param);
+				CGtype param_base_type = cgGetParameterBaseType(param);
+				CGparameterclass param_class = cgGetParameterClass(param);
+
+				switch (param_class)
+				{
+				case CG_PARAMETERCLASS_SCALAR:
+					switch (param_type)
+					{
+					case CG_BOOL:
+						reparam.reset(new OGLRenderEffectParameterBool(*this, name, semantic, param));
+						break;
+
+					case CG_INT:
+						reparam.reset(new OGLRenderEffectParameterInt(*this, name, semantic, param));
+						break;
+
+					case CG_FLOAT:
+						reparam.reset(new OGLRenderEffectParameterFloat(*this, name, semantic, param));
+						break;
+
+					default:
+						BOOST_ASSERT(false);
+						break;
+					}
+					break;
+
+				case CG_PARAMETERCLASS_VECTOR:
+					switch (param_type)
+					{
+					case CG_FLOAT2:
+						reparam.reset(new OGLRenderEffectParameterFloat2(*this, name, semantic, param));
+						break;
+
+					case CG_FLOAT3:
+						reparam.reset(new OGLRenderEffectParameterFloat3(*this, name, semantic, param));
+						break;
+
+					case CG_FLOAT4:
+						reparam.reset(new OGLRenderEffectParameterFloat4(*this, name, semantic, param));
+						break;
+
+					default:
+						BOOST_ASSERT(false);
+						break;
+					}
+					break;
+
+				case CG_PARAMETERCLASS_MATRIX:
+					switch (param_type)
+					{
+					case CG_FLOAT4x4:
+						reparam.reset(new OGLRenderEffectParameterFloat4x4(*this, name, semantic, param));
+						break;
+
+					default:
+						BOOST_ASSERT(false);
+						break;
+					}
+					break;
+
+				case CG_PARAMETERCLASS_SAMPLER:
+					reparam.reset(new OGLRenderEffectParameterSampler(*this, name, semantic, param));
+					break;
+
+				case CG_PARAMETERCLASS_ARRAY:
+					switch (param_type)
+					{
+					case CG_ARRAY:
+						switch (param_base_type)
+						{
+						case CG_BOOL:
+							reparam.reset(new OGLRenderEffectParameterBoolArray(*this, name, semantic, param));
+							break;
+
+						case CG_INT:
+							reparam.reset(new OGLRenderEffectParameterIntArray(*this, name, semantic, param));
+							break;
+
+						case CG_FLOAT:
+							reparam.reset(new OGLRenderEffectParameterFloatArray(*this, name, semantic, param));
+							break;
+
+						case CG_FLOAT4:
+							reparam.reset(new OGLRenderEffectParameterFloat4Array(*this, name, semantic, param));
+							break;
+
+						case CG_FLOAT4x4:
+							reparam.reset(new OGLRenderEffectParameterFloat4x4Array(*this, name, semantic, param));
+							break;
+
+						default:
+							BOOST_ASSERT(false);
+							break;
+						}
+						break;
+
+					default:
+						BOOST_ASSERT(false);
+						break;
+					}
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
+
+				params_.push_back(reparam);
+				param = cgGetNextParameter(param);
+			}
+
+			program = cgGetNextProgram(program);
+		}
+
 		CGtechnique tech = cgGetFirstTechnique(effect_);
 		while (tech)
 		{
@@ -53,88 +183,6 @@ namespace KlayGE
 	OGLRenderEffect::~OGLRenderEffect()
 	{
 		cgDestroyEffect(effect_);
-	}
-
-	std::string OGLRenderEffect::DoNameBySemantic(std::string const & semantic)
-	{
-		return cgGetParameterName(cgGetEffectParameterBySemantic(effect_, semantic.c_str()));
-	}
-
-	RenderEffectParameterPtr OGLRenderEffect::DoParameterByName(std::string const & name)
-	{
-		CGparameter param = cgGetNamedEffectParameter(effect_, name.c_str());
-
-		CGtype param_type = cgGetParameterType(param);
-		CGtype param_base_type = cgGetParameterBaseType(param);
-		CGparameterclass param_class = cgGetParameterClass(param);
-
-		if ((CG_PARAMETERCLASS_SCALAR == param_class) && (CG_BOOL == param_type))
-		{
-			return RenderEffectParameterPtr(new OGLRenderEffectParameterBool(*this, name, param));
-		}
-
-		if ((CG_PARAMETERCLASS_SCALAR == param_class) && (CG_INT == param_type))
-		{
-			return RenderEffectParameterPtr(new OGLRenderEffectParameterInt(*this, name, param));
-		}
-
-		if ((CG_PARAMETERCLASS_SCALAR == param_class) && (CG_FLOAT == param_type))
-		{
-			return RenderEffectParameterPtr(new OGLRenderEffectParameterFloat(*this, name, param));
-		}
-
-		if ((CG_PARAMETERCLASS_VECTOR == param_class) && (CG_FLOAT2 == param_type))
-		{
-			return RenderEffectParameterPtr(new OGLRenderEffectParameterFloat2(*this, name, param));
-		}
-
-		if ((CG_PARAMETERCLASS_VECTOR == param_class) && (CG_FLOAT3 == param_type))
-		{
-			return RenderEffectParameterPtr(new OGLRenderEffectParameterFloat3(*this, name, param));
-		}
-
-		if ((CG_PARAMETERCLASS_VECTOR == param_class) && (CG_FLOAT4 == param_type))
-		{
-			return RenderEffectParameterPtr(new OGLRenderEffectParameterFloat4(*this, name, param));
-		}
-
-		if ((CG_PARAMETERCLASS_MATRIX == param_class) && (CG_FLOAT4x4 == param_type))
-		{
-			return RenderEffectParameterPtr(new OGLRenderEffectParameterFloat4x4(*this, name, param));
-		}
-
-		if (CG_PARAMETERCLASS_SAMPLER == param_class)
-		{
-			return RenderEffectParameterPtr(new OGLRenderEffectParameterSampler(*this, name, param));
-		}
-
-		if ((CG_PARAMETERCLASS_ARRAY == param_class) && (CG_ARRAY == param_type) && (CG_BOOL == param_base_type))
-		{
-			return RenderEffectParameterPtr(new OGLRenderEffectParameterBoolArray(*this, name, param));
-		}
-
-		if ((CG_PARAMETERCLASS_ARRAY == param_class) && (CG_ARRAY == param_type) && (CG_INT == param_base_type))
-		{
-			return RenderEffectParameterPtr(new OGLRenderEffectParameterIntArray(*this, name, param));
-		}
-
-		if ((CG_PARAMETERCLASS_ARRAY == param_class) && (CG_ARRAY == param_type) && (CG_FLOAT == param_base_type))
-		{
-			return RenderEffectParameterPtr(new OGLRenderEffectParameterFloatArray(*this, name, param));
-		}
-
-		if ((CG_PARAMETERCLASS_ARRAY == param_class) && (CG_ARRAY == param_type) && (CG_FLOAT4 == param_base_type))
-		{
-			return RenderEffectParameterPtr(new OGLRenderEffectParameterFloat4Array(*this, name, param));
-		}
-
-		if ((CG_PARAMETERCLASS_ARRAY == param_class) && (CG_ARRAY == param_type) && (CG_FLOAT4x4 == param_base_type))
-		{
-			return RenderEffectParameterPtr(new OGLRenderEffectParameterFloat4x4Array(*this, name, param));
-		}
-
-		BOOST_ASSERT(false);
-		return RenderEffectParameterPtr();
 	}
 
 	RenderTechniquePtr OGLRenderEffect::MakeRenderTechnique(CGtechnique tech)

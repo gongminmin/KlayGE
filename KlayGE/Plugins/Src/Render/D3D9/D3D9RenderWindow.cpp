@@ -523,7 +523,7 @@ namespace KlayGE
 		{
 			d3d_swap_chain_.reset();
 
-			D3D9RenderFactory& factory = static_cast<D3D9RenderFactory&>(Context::Instance().RenderFactoryInstance());
+			D3D9RenderFactory& factory = *checked_cast<D3D9RenderFactory*>(&Context::Instance().RenderFactoryInstance());
 			factory.OnLostDevice();
 
 			renderSurface_.reset();

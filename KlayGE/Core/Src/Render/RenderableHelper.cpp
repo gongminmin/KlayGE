@@ -66,7 +66,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		technique_ = rf.LoadEffect("RenderableHelper.fx")->Technique("PointTec");
+		technique_ = rf.LoadEffect("RenderableHelper.fx")->TechniqueByName("PointTec");
 
 		rl_ = rf.MakeRenderLayout(RenderLayout::BT_PointList);
 
@@ -99,7 +99,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		technique_ = rf.LoadEffect("RenderableHelper.fx")->Technique("LineTec");
+		technique_ = rf.LoadEffect("RenderableHelper.fx")->TechniqueByName("LineTec");
 
 		float3 xyzs[] =
 		{
@@ -137,7 +137,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		technique_ = rf.LoadEffect("RenderableHelper.fx")->Technique("TriangleTec");
+		technique_ = rf.LoadEffect("RenderableHelper.fx")->TechniqueByName("TriangleTec");
 
 		float3 xyzs[] =
 		{
@@ -177,7 +177,7 @@ namespace KlayGE
 
 		box_ = box;
 
-		technique_ = rf.LoadEffect("RenderableHelper.fx")->Technique("BoxTec");
+		technique_ = rf.LoadEffect("RenderableHelper.fx")->TechniqueByName("BoxTec");
 
 		float3 xyzs[] =
 		{
@@ -231,7 +231,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		technique_ = rf.LoadEffect("RenderableHelper.fx")->Technique("SkyBoxTec");
+		technique_ = rf.LoadEffect("RenderableHelper.fx")->TechniqueByName("SkyBoxTec");
 
 		float3 xyzs[] =
 		{

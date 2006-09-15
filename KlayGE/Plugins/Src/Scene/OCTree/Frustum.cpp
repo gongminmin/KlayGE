@@ -22,10 +22,10 @@ namespace KlayGE
 {
 	Frustum::Frustum(float4x4 const & clip)
 	{
-		float4 column1(clip(0, 0), clip(1, 0), clip(2, 0), clip(3, 0));
-		float4 column2(clip(0, 1), clip(1, 1), clip(2, 1), clip(3, 1));
-		float4 column3(clip(0, 2), clip(1, 2), clip(2, 2), clip(3, 2));
-		float4 column4(clip(0, 3), clip(1, 3), clip(2, 3), clip(3, 3));
+		float4 const & column1(clip.Col(0));
+		float4 const & column2(clip.Col(1));
+		float4 const & column3(clip.Col(2));
+		float4 const & column4(clip.Col(3));
 
 		planes_[0] = column4 - column1;  // left
 		planes_[1] = column4 + column1;  // right

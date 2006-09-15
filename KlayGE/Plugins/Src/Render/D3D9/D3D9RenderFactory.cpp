@@ -161,13 +161,13 @@ namespace KlayGE
 			}
 		}
 
-		D3D9RenderEngine& engine = static_cast<D3D9RenderEngine&>(this->RenderEngineInstance());
+		D3D9RenderEngine& engine = *checked_cast<D3D9RenderEngine*>(&this->RenderEngineInstance());
 		engine.OnLostDevice();
 	}
 
 	void D3D9RenderFactory::OnResetDevice()
 	{
-		D3D9RenderEngine& engine = static_cast<D3D9RenderEngine&>(this->RenderEngineInstance());
+		D3D9RenderEngine& engine = *checked_cast<D3D9RenderEngine*>(&this->RenderEngineInstance());
 		engine.OnResetDevice();
 
 		for (std::vector<boost::weak_ptr<D3D9Resource> >::iterator iter = resource_pool_.begin();

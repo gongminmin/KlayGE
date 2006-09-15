@@ -39,9 +39,6 @@ namespace KlayGE
 		~OGLRenderEffect();
 
 	private:
-		std::string DoNameBySemantic(std::string const & semantic);
-		RenderEffectParameterPtr DoParameterByName(std::string const & name);
-
 		RenderTechniquePtr MakeRenderTechnique(CGtechnique tech);
 
 	private:
@@ -81,8 +78,8 @@ namespace KlayGE
 	class OGLRenderEffectParameter : public RenderEffectParameterConcrete<T>
 	{
 	public:
-		OGLRenderEffectParameter(RenderEffect& effect, std::string const & name, CGparameter param)
-				: RenderEffectParameterConcrete<T>(effect, name),
+		OGLRenderEffectParameter(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
+				: RenderEffectParameterConcrete<T>(effect, name, semantic),
 					param_(param)
 		{
 		}
@@ -98,8 +95,8 @@ namespace KlayGE
 	class OGLRenderEffectParameterBool : public OGLRenderEffectParameter<bool>
 	{
 	public:
-		OGLRenderEffectParameterBool(RenderEffect& effect, std::string const & name, CGparameter param)
-				: OGLRenderEffectParameter<bool>(effect, name, param)
+		OGLRenderEffectParameterBool(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
+				: OGLRenderEffectParameter<bool>(effect, name, semantic, param)
 		{
 		}
 
@@ -114,8 +111,8 @@ namespace KlayGE
 	class OGLRenderEffectParameterInt : public OGLRenderEffectParameter<int>
 	{
 	public:
-		OGLRenderEffectParameterInt(RenderEffect& effect, std::string const & name, CGparameter param)
-				: OGLRenderEffectParameter<int>(effect, name, param)
+		OGLRenderEffectParameterInt(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
+				: OGLRenderEffectParameter<int>(effect, name, semantic, param)
 		{
 		}
 
@@ -130,8 +127,8 @@ namespace KlayGE
 	class OGLRenderEffectParameterFloat : public OGLRenderEffectParameter<float>
 	{
 	public:
-		OGLRenderEffectParameterFloat(RenderEffect& effect, std::string const & name, CGparameter param)
-			: OGLRenderEffectParameter<float>(effect, name, param)
+		OGLRenderEffectParameterFloat(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
+			: OGLRenderEffectParameter<float>(effect, name, semantic, param)
 		{
 		}
 
@@ -146,8 +143,8 @@ namespace KlayGE
 	class OGLRenderEffectParameterFloat2 : public OGLRenderEffectParameter<float2>
 	{
 	public:
-		OGLRenderEffectParameterFloat2(RenderEffect& effect, std::string const & name, CGparameter param)
-			: OGLRenderEffectParameter<float2>(effect, name, param)
+		OGLRenderEffectParameterFloat2(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
+			: OGLRenderEffectParameter<float2>(effect, name, semantic, param)
 		{
 		}
 
@@ -162,8 +159,8 @@ namespace KlayGE
 	class OGLRenderEffectParameterFloat3 : public OGLRenderEffectParameter<float3>
 	{
 	public:
-		OGLRenderEffectParameterFloat3(RenderEffect& effect, std::string const & name, CGparameter param)
-			: OGLRenderEffectParameter<float3>(effect, name, param)
+		OGLRenderEffectParameterFloat3(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
+			: OGLRenderEffectParameter<float3>(effect, name, semantic, param)
 		{
 		}
 
@@ -178,8 +175,8 @@ namespace KlayGE
 	class OGLRenderEffectParameterFloat4 : public OGLRenderEffectParameter<float4>
 	{
 	public:
-		OGLRenderEffectParameterFloat4(RenderEffect& effect, std::string const & name, CGparameter param)
-			: OGLRenderEffectParameter<float4>(effect, name, param)
+		OGLRenderEffectParameterFloat4(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
+			: OGLRenderEffectParameter<float4>(effect, name, semantic, param)
 		{
 		}
 
@@ -194,8 +191,8 @@ namespace KlayGE
 	class OGLRenderEffectParameterFloat4x4 : public OGLRenderEffectParameter<float4x4>
 	{
 	public:
-		OGLRenderEffectParameterFloat4x4(RenderEffect& effect, std::string const & name, CGparameter param)
-				: OGLRenderEffectParameter<float4x4>(effect, name, param)
+		OGLRenderEffectParameterFloat4x4(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
+				: OGLRenderEffectParameter<float4x4>(effect, name, semantic, param)
 		{
 		}
 
@@ -210,8 +207,8 @@ namespace KlayGE
 	class OGLRenderEffectParameterSampler : public OGLRenderEffectParameter<SamplerPtr>
 	{
 	public:
-		OGLRenderEffectParameterSampler(RenderEffect& effect, std::string const & name, CGparameter param)
-				: OGLRenderEffectParameter<SamplerPtr>(effect, name, param)
+		OGLRenderEffectParameterSampler(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
+				: OGLRenderEffectParameter<SamplerPtr>(effect, name, semantic, param)
 		{
 		}
 
@@ -226,8 +223,8 @@ namespace KlayGE
 	class OGLRenderEffectParameterBoolArray : public OGLRenderEffectParameter<std::vector<bool> >
 	{
 	public:
-		OGLRenderEffectParameterBoolArray(RenderEffect& effect, std::string const & name, CGparameter param)
-				: OGLRenderEffectParameter<std::vector<bool> >(effect, name, param)
+		OGLRenderEffectParameterBoolArray(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
+				: OGLRenderEffectParameter<std::vector<bool> >(effect, name, semantic, param)
 		{
 		}
 
@@ -242,8 +239,8 @@ namespace KlayGE
 	class OGLRenderEffectParameterIntArray : public OGLRenderEffectParameter<std::vector<int> >
 	{
 	public:
-		OGLRenderEffectParameterIntArray(RenderEffect& effect, std::string const & name, CGparameter param)
-				: OGLRenderEffectParameter<std::vector<int> >(effect, name, param)
+		OGLRenderEffectParameterIntArray(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
+				: OGLRenderEffectParameter<std::vector<int> >(effect, name, semantic, param)
 		{
 		}
 
@@ -258,8 +255,8 @@ namespace KlayGE
 	class OGLRenderEffectParameterFloatArray : public OGLRenderEffectParameter<std::vector<float> >
 	{
 	public:
-		OGLRenderEffectParameterFloatArray(RenderEffect& effect, std::string const & name, CGparameter param)
-				: OGLRenderEffectParameter<std::vector<float> >(effect, name, param)
+		OGLRenderEffectParameterFloatArray(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
+				: OGLRenderEffectParameter<std::vector<float> >(effect, name, semantic, param)
 		{
 		}
 
@@ -274,8 +271,8 @@ namespace KlayGE
 	class OGLRenderEffectParameterFloat4Array : public OGLRenderEffectParameter<std::vector<float4> >
 	{
 	public:
-		OGLRenderEffectParameterFloat4Array(RenderEffect& effect, std::string const & name, CGparameter param)
-				: OGLRenderEffectParameter<std::vector<float4> >(effect, name, param)
+		OGLRenderEffectParameterFloat4Array(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
+				: OGLRenderEffectParameter<std::vector<float4> >(effect, name, semantic, param)
 		{
 		}
 
@@ -290,8 +287,8 @@ namespace KlayGE
 	class OGLRenderEffectParameterFloat4x4Array : public OGLRenderEffectParameter<std::vector<float4x4> >
 	{
 	public:
-		OGLRenderEffectParameterFloat4x4Array(RenderEffect& effect, std::string const & name, CGparameter param)
-				: OGLRenderEffectParameter<std::vector<float4x4> >(effect, name, param)
+		OGLRenderEffectParameterFloat4x4Array(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
+				: OGLRenderEffectParameter<std::vector<float4x4> >(effect, name, semantic, param)
 		{
 		}
 

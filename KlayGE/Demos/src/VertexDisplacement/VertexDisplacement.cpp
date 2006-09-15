@@ -43,7 +43,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("VertexDisplacement.fx")->Technique("VertexDisplacement");
+			technique_ = rf.LoadEffect("VertexDisplacement.fx")->TechniqueByName("VertexDisplacement");
 
 			SamplerPtr flag_sampler(new Sampler);
 			flag_sampler->SetTexture(LoadTexture("Flag.dds"));

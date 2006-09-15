@@ -68,11 +68,11 @@ namespace
 
 					model_mat_ = MathLib::rotation_x(rotX) * MathLib::rotation_y(rotY);
 				}
-				technique_ = effect_->Technique("NormalDepth");
+				technique_ = effect_->TechniqueByName("NormalDepth");
 				break;
 
 			case 1:
-				technique_ = effect_->Technique("Cartoon");
+				technique_ = effect_->TechniqueByName("Cartoon");
 				break;
 			}
 		}

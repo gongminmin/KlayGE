@@ -76,7 +76,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
-		D3D9TextureCube& other(static_cast<D3D9TextureCube&>(target));
+		D3D9TextureCube& other(*checked_cast<D3D9TextureCube*>(&target));
 
 		uint32_t maxLevel = 1;
 		if (this->NumMipMaps() == target.NumMipMaps())

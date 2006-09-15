@@ -70,7 +70,7 @@ namespace KlayGE
 			effect = RenderEffect::NullObject();
 		}
 
-		technique_ = effect->Technique("KMeshNoTexTec");
+		technique_ = effect->TechniqueByName("KMeshNoTexTec");
 	}
 
 	KMesh::~KMesh()
@@ -87,7 +87,7 @@ namespace KlayGE
 
 		if (tex)
 		{
-			technique_ = technique_->Effect().Technique("KMeshTec");
+			technique_ = technique_->Effect().TechniqueByName("KMeshTec");
 
 			sampler_->SetTexture(tex);
 			sampler_->Filtering(Sampler::TFO_Bilinear);
@@ -97,7 +97,7 @@ namespace KlayGE
 		}
 		else
 		{
-			technique_ = technique_->Effect().Technique("KMeshNoTexTec");
+			technique_ = technique_->Effect().TechniqueByName("KMeshNoTexTec");
 		}
 	}
 

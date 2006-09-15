@@ -95,7 +95,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("ParticleSystem.fx")->Technique("Terrain");
+			technique_ = rf.LoadEffect("ParticleSystem.fx")->TechniqueByName("Terrain");
 
 			rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleList);
 
@@ -226,7 +226,7 @@ namespace
 				std::copy(&indices[0], &indices[4], mapper.Pointer<uint16_t>());
 			}
 
-			technique_ = rf.LoadEffect("ParticleSystem.fx")->Technique("PointSprite");
+			technique_ = rf.LoadEffect("ParticleSystem.fx")->TechniqueByName("PointSprite");
 
 			particle_sampler_->SetTexture(LoadTexture("particle.dds"));
 			particle_sampler_->Filtering(Sampler::TFO_Bilinear);

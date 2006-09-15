@@ -216,8 +216,7 @@ namespace KlayGE
 																	// actually consumed
 
 								// 把解码后的数据放入缓冲区
-								size_t const size(bout * vi_.channels);
-								std::copy(convbuffer.begin(), convbuffer.begin() + size,
+								std::copy(convbuffer.begin(), convbuffer.begin() + bout * vi_.channels,
 									static_cast<ogg_int16_t*>(data) + cursize);
 								cursize += size;
 							}

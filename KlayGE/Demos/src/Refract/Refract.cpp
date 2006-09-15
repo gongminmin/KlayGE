@@ -43,7 +43,7 @@ namespace
 			: y_sampler_(new Sampler), c_sampler_(new Sampler)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			technique_ = rf.LoadEffect("HDRSkyBox.fx")->Technique("HDRSkyBoxTec");
+			technique_ = rf.LoadEffect("HDRSkyBox.fx")->TechniqueByName("HDRSkyBoxTec");
 
 			y_sampler_->Filtering(Sampler::TFO_Bilinear);
 			y_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
@@ -94,8 +94,8 @@ namespace
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			RenderEffectPtr effect = rf.LoadEffect("Refract.fx");
-			front_face_tech_ = effect->Technique("Refract");
-			back_face_tech_ = effect->Technique("RefractBackFace");
+			front_face_tech_ = effect->TechniqueByName("Refract");
+			back_face_tech_ = effect->TechniqueByName("RefractBackFace");
 
 			technique_ = back_face_tech_;
 

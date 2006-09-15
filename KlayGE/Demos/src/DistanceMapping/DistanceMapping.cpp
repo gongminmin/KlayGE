@@ -44,20 +44,20 @@ namespace
 
 			RenderEffectPtr effect = rf.LoadEffect("DistanceMapping.fx");
 
-			if (!effect->ValidateTechnique("DistanceMapping30"))
+			if (!effect->TechniqueByName("DistanceMapping30")->Validate())
 			{
-				if (!effect->ValidateTechnique("DistanceMapping2a"))
+				if (!effect->TechniqueByName("DistanceMapping2a")->Validate())
 				{
-					technique_ = effect->Technique("DistanceMapping20");
+					technique_ = effect->TechniqueByName("DistanceMapping20");
 				}
 				else
 				{
-					technique_ = effect->Technique("DistanceMapping2a");
+					technique_ = effect->TechniqueByName("DistanceMapping2a");
 				}
 			}
 			else
 			{
-				technique_ = effect->Technique("DistanceMapping30");
+				technique_ = effect->TechniqueByName("DistanceMapping30");
 			}
 
 			SamplerPtr diffuse_sampler(new Sampler);

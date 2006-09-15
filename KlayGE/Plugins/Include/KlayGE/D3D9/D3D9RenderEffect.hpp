@@ -70,9 +70,6 @@ namespace KlayGE
 		void DoOnLostDevice();
 		void DoOnResetDevice();
 
-		std::string DoNameBySemantic(std::string const & semantic);
-		RenderEffectParameterPtr DoParameterByName(std::string const & name);
-
 		RenderTechniquePtr MakeRenderTechnique(uint32_t n);
 
 	private:
@@ -114,8 +111,8 @@ namespace KlayGE
 	class D3D9RenderEffectParameterBool : public RenderEffectParameterConcrete<bool>, public D3D9Resource
 	{
 	public:
-		D3D9RenderEffectParameterBool(RenderEffect& effect, std::string const & name)
-			: RenderEffectParameterConcrete<bool>(effect, name)
+		D3D9RenderEffectParameterBool(RenderEffect& effect, std::string const & name, std::string const & semantic)
+			: RenderEffectParameterConcrete<bool>(effect, name, semantic)
 		{
 		}
 
@@ -138,8 +135,8 @@ namespace KlayGE
 	class D3D9RenderEffectParameterInt : public RenderEffectParameterConcrete<int>, public D3D9Resource
 	{
 	public:
-		D3D9RenderEffectParameterInt(RenderEffect& effect, std::string const & name)
-			: RenderEffectParameterConcrete<int>(effect, name)
+		D3D9RenderEffectParameterInt(RenderEffect& effect, std::string const & name, std::string const & semantic)
+			: RenderEffectParameterConcrete<int>(effect, name, semantic)
 		{
 		}
 
@@ -162,8 +159,8 @@ namespace KlayGE
 	class D3D9RenderEffectParameterFloat : public RenderEffectParameterConcrete<float>, public D3D9Resource
 	{
 	public:
-		D3D9RenderEffectParameterFloat(RenderEffect& effect, std::string const & name)
-			: RenderEffectParameterConcrete<float>(effect, name)
+		D3D9RenderEffectParameterFloat(RenderEffect& effect, std::string const & name, std::string const & semantic)
+			: RenderEffectParameterConcrete<float>(effect, name, semantic)
 		{
 		}
 
@@ -186,8 +183,8 @@ namespace KlayGE
 	class D3D9RenderEffectParameterFloat2 : public RenderEffectParameterConcrete<float2>, public D3D9Resource
 	{
 	public:
-		D3D9RenderEffectParameterFloat2(RenderEffect& effect, std::string const & name)
-			: RenderEffectParameterConcrete<float2>(effect, name)
+		D3D9RenderEffectParameterFloat2(RenderEffect& effect, std::string const & name, std::string const & semantic)
+			: RenderEffectParameterConcrete<float2>(effect, name, semantic)
 		{
 		}
 
@@ -210,8 +207,8 @@ namespace KlayGE
 	class D3D9RenderEffectParameterFloat3 : public RenderEffectParameterConcrete<float3>, public D3D9Resource
 	{
 	public:
-		D3D9RenderEffectParameterFloat3(RenderEffect& effect, std::string const & name)
-			: RenderEffectParameterConcrete<float3>(effect, name)
+		D3D9RenderEffectParameterFloat3(RenderEffect& effect, std::string const & name, std::string const & semantic)
+			: RenderEffectParameterConcrete<float3>(effect, name, semantic)
 		{
 		}
 
@@ -234,8 +231,8 @@ namespace KlayGE
 	class D3D9RenderEffectParameterFloat4 : public RenderEffectParameterConcrete<float4>, public D3D9Resource
 	{
 	public:
-		D3D9RenderEffectParameterFloat4(RenderEffect& effect, std::string const & name)
-			: RenderEffectParameterConcrete<float4>(effect, name)
+		D3D9RenderEffectParameterFloat4(RenderEffect& effect, std::string const & name, std::string const & semantic)
+			: RenderEffectParameterConcrete<float4>(effect, name, semantic)
 		{
 		}
 
@@ -258,8 +255,8 @@ namespace KlayGE
 	class D3D9RenderEffectParameterFloat4x4 : public RenderEffectParameterConcrete<float4x4>, public D3D9Resource
 	{
 	public:
-		D3D9RenderEffectParameterFloat4x4(RenderEffect& effect, std::string const & name)
-			: RenderEffectParameterConcrete<float4x4>(effect, name)
+		D3D9RenderEffectParameterFloat4x4(RenderEffect& effect, std::string const & name, std::string const & semantic)
+			: RenderEffectParameterConcrete<float4x4>(effect, name, semantic)
 		{
 		}
 
@@ -282,8 +279,8 @@ namespace KlayGE
 	class D3D9RenderEffectParameterSampler : public RenderEffectParameterConcrete<SamplerPtr>, public D3D9Resource
 	{
 	public:
-		D3D9RenderEffectParameterSampler(RenderEffect& effect, std::string const & name)
-			: RenderEffectParameterConcrete<SamplerPtr>(effect, name)
+		D3D9RenderEffectParameterSampler(RenderEffect& effect, std::string const & name, std::string const & semantic)
+			: RenderEffectParameterConcrete<SamplerPtr>(effect, name, semantic)
 		{
 		}
 
@@ -302,8 +299,8 @@ namespace KlayGE
 	class D3D9RenderEffectParameterBoolArray : public RenderEffectParameterConcrete<std::vector<bool> >, public D3D9Resource
 	{
 	public:
-		D3D9RenderEffectParameterBoolArray(RenderEffect& effect, std::string const & name)
-			: RenderEffectParameterConcrete<std::vector<bool> >(effect, name)
+		D3D9RenderEffectParameterBoolArray(RenderEffect& effect, std::string const & name, std::string const & semantic)
+			: RenderEffectParameterConcrete<std::vector<bool> >(effect, name, semantic)
 		{
 		}
 
@@ -326,8 +323,8 @@ namespace KlayGE
 	class D3D9RenderEffectParameterIntArray : public RenderEffectParameterConcrete<std::vector<int> >, public D3D9Resource
 	{
 	public:
-		D3D9RenderEffectParameterIntArray(RenderEffect& effect, std::string const & name)
-			: RenderEffectParameterConcrete<std::vector<int> >(effect, name)
+		D3D9RenderEffectParameterIntArray(RenderEffect& effect, std::string const & name, std::string const & semantic)
+			: RenderEffectParameterConcrete<std::vector<int> >(effect, name, semantic)
 		{
 		}
 
@@ -350,8 +347,8 @@ namespace KlayGE
 	class D3D9RenderEffectParameterFloatArray : public RenderEffectParameterConcrete<std::vector<float> >, public D3D9Resource
 	{
 	public:
-		D3D9RenderEffectParameterFloatArray(RenderEffect& effect, std::string const & name)
-			: RenderEffectParameterConcrete<std::vector<float> >(effect, name)
+		D3D9RenderEffectParameterFloatArray(RenderEffect& effect, std::string const & name, std::string const & semantic)
+			: RenderEffectParameterConcrete<std::vector<float> >(effect, name, semantic)
 		{
 		}
 
@@ -374,8 +371,8 @@ namespace KlayGE
 	class D3D9RenderEffectParameterFloat4Array : public RenderEffectParameterConcrete<std::vector<float4> >, public D3D9Resource
 	{
 	public:
-		D3D9RenderEffectParameterFloat4Array(RenderEffect& effect, std::string const & name)
-			: RenderEffectParameterConcrete<std::vector<float4> >(effect, name)
+		D3D9RenderEffectParameterFloat4Array(RenderEffect& effect, std::string const & name, std::string const & semantic)
+			: RenderEffectParameterConcrete<std::vector<float4> >(effect, name, semantic)
 		{
 		}
 
@@ -398,8 +395,8 @@ namespace KlayGE
 	class D3D9RenderEffectParameterFloat4x4Array : public RenderEffectParameterConcrete<std::vector<float4x4> >, public D3D9Resource
 	{
 	public:
-		D3D9RenderEffectParameterFloat4x4Array(RenderEffect& effect, std::string const & name)
-			: RenderEffectParameterConcrete<std::vector<float4x4> >(effect, name)
+		D3D9RenderEffectParameterFloat4x4Array(RenderEffect& effect, std::string const & name, std::string const & semantic)
+			: RenderEffectParameterConcrete<std::vector<float4x4> >(effect, name, semantic)
 		{
 		}
 

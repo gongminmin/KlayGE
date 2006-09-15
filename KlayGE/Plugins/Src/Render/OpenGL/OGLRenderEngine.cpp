@@ -289,7 +289,7 @@ namespace KlayGE
 			// Geometry streams
 			for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
 			{
-				OGLGraphicsBuffer& stream(static_cast<OGLGraphicsBuffer&>(*rl.GetVertexStream(i)));
+				OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(rl.GetVertexStream(i)));
 				uint32_t const size = rl.VertexSize(i);
 
 				uint32_t elem_offset = 0;
@@ -352,7 +352,7 @@ namespace KlayGE
 			uint32_t num_passes = render_tech_->NumPasses();
 			if (rl.UseIndices())
 			{
-				OGLGraphicsBuffer& stream(static_cast<OGLGraphicsBuffer&>(*rl.GetIndexStream()));
+				OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(rl.GetIndexStream()));
 				stream.Active();
 
 				GLenum index_type;

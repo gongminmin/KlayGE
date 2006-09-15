@@ -80,7 +80,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
-		D3D9Texture2D& other(static_cast<D3D9Texture2D&>(target));
+		D3D9Texture2D& other(*checked_cast<D3D9Texture2D*>(&target));
 
 		BOOST_ASSERT(target.Type() == type_);
 

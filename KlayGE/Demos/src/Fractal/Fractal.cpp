@@ -38,7 +38,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("Fractal.fx")->Technique("Mandelbrot");
+			technique_ = rf.LoadEffect("Fractal.fx")->TechniqueByName("Mandelbrot");
 
 			sampler_.reset(new Sampler);
 			sampler_->Filtering(Sampler::TFO_Point);
@@ -102,7 +102,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("Fractal.fx")->Technique("Show");
+			technique_ = rf.LoadEffect("Fractal.fx")->TechniqueByName("Show");
 
 			sampler_.reset(new Sampler);
 			sampler_->Filtering(Sampler::TFO_Point);

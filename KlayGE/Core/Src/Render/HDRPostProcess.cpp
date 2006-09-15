@@ -26,13 +26,13 @@
 namespace KlayGE
 {
 	Downsampler2x2PostProcess::Downsampler2x2PostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Downsample.fx")->Technique("Downsample"))
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Downsample.fx")->TechniqueByName("Downsample"))
 	{
 	}
 
 
 	BlurPostProcess::BlurPostProcess(std::string const & tech, int kernel_radius, float multiplier)
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Blur.fx")->Technique(tech)),
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Blur.fx")->TechniqueByName(tech)),
 				color_weight_(8, 0), tex_coord_offset_(8, 0),
 				kernel_radius_(kernel_radius), multiplier_(multiplier)
 	{
@@ -119,7 +119,7 @@ namespace KlayGE
 
 
 	SumLumPostProcess::SumLumPostProcess(std::string const & tech)
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.fx")->Technique(tech))
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.fx")->TechniqueByName(tech))
 	{
 	}
 
@@ -177,7 +177,7 @@ namespace KlayGE
 
 
 	AdaptedLumPostProcess::AdaptedLumPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.fx")->Technique("AdaptedLum")),
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.fx")->TechniqueByName("AdaptedLum")),
 				last_index_(false)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -226,7 +226,7 @@ namespace KlayGE
 
 
 	ToneMappingPostProcess::ToneMappingPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("ToneMapping.fx")->Technique("ToneMapping20")),
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("ToneMapping.fx")->TechniqueByName("ToneMapping20")),
 				lum_sampler_(new Sampler), bloom_sampler_(new Sampler)
 	{
 		lum_sampler_->Filtering(Sampler::TFO_Point);
@@ -238,9 +238,9 @@ namespace KlayGE
 		bloom_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
 
 		RenderEffect& effect = technique_->Effect();
-		if (effect.ValidateTechnique("ToneMapping30"))
+		if (effect.TechniqueByName("ToneMapping30")->Validate())
 		{
-			technique_ = effect.Technique("ToneMapping30");
+			technique_ = effect.TechniqueByName("ToneMapping30");
 		}
 	}
 

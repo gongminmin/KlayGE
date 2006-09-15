@@ -44,7 +44,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("parallax.fx")->Technique("Parallax");
+			technique_ = rf.LoadEffect("parallax.fx")->TechniqueByName("Parallax");
 
 			SamplerPtr diffuse_sampler(new Sampler);
 			diffuse_sampler->SetTexture(LoadTexture("diffuse.dds"));

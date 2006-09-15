@@ -1,8 +1,11 @@
 // RenderEffect.hpp
 // KlayGE 渲染效果脚本类 头文件
-// Ver 3.2.0
+// Ver 3.4.0
 // 版权所有(C) 龚敏敏, 2003-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.4.0
+// 重写了parameter的存储结构 (2006.9.15)
 //
 // 3.2.0
 // 支持了bool类型 (2006.3.8)
@@ -41,6 +44,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <algorithm>
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
@@ -61,7 +65,7 @@ namespace KlayGE
 	class RenderEffect
 	{
 	protected:
-		typedef std::map<std::string, std::pair<RenderEffectParameterPtr, bool> > params_type;
+		typedef std::vector<RenderEffectParameterPtr> params_type;
 		typedef std::vector<RenderTechniquePtr> techniques_type;
 
 	public:
@@ -70,32 +74,33 @@ namespace KlayGE
 
 		static RenderEffectPtr NullObject();
 
-		RenderEffectParameterPtr ParameterByName(std::string const & name);
+		uint32_t NumParameters() const
+		{
+			return static_cast<uint32_t>(params_.size());
+		}
 		RenderEffectParameterPtr ParameterBySemantic(std::string const & semantic);
-
-		bool ValidateTechnique(std::string const & name);
+		RenderEffectParameterPtr ParameterByName(std::string const & name);
+		RenderEffectParameterPtr ParameterByIndex(uint32_t n)
+		{
+			BOOST_ASSERT(n < params_.size());
+			return params_[n];
+		}
 
 		uint32_t NumTechniques() const
 		{
 			return static_cast<uint32_t>(techniques_.size());
 		}
-		RenderTechniquePtr Technique(std::string const & name);
-		RenderTechniquePtr Technique(uint32_t n) const
+		RenderTechniquePtr TechniqueByName(std::string const & name);
+		RenderTechniquePtr TechniqueByIndex(uint32_t n)
 		{
 			BOOST_ASSERT(n < techniques_.size());
 			return techniques_[n];
 		}
 
-		void DirtyParam(std::string const & name);
 		void FlushParams();
-
-	private:
-		virtual std::string DoNameBySemantic(std::string const & semantic) = 0;
-		virtual RenderEffectParameterPtr DoParameterByName(std::string const & name) = 0;
 
 	protected:
 		params_type params_;
-
 		techniques_type techniques_;
 	};
 
@@ -176,12 +181,29 @@ namespace KlayGE
 	class RenderEffectParameter : boost::noncopyable
 	{
 	public:
-		RenderEffectParameter(RenderEffect& effect, std::string const & name);
+		RenderEffectParameter(RenderEffect& effect,
+			std::string const & name, std::string const & semantic);
 		virtual ~RenderEffectParameter();
 
 		static RenderEffectParameterPtr NullObject();
 
-		std::string const & Name() const;
+		std::string const & Name() const
+		{
+			return name_;
+		}
+		std::string const & Semantic() const
+		{
+			return semantic_;
+		}
+
+		void Dirty()
+		{
+			dirty_ = true;
+		}
+		bool IsDirty() const
+		{
+			return dirty_;
+		}
 
 		virtual RenderEffectParameter& operator=(bool const & value);
 		virtual RenderEffectParameter& operator=(int const & value);
@@ -231,26 +253,27 @@ namespace KlayGE
 	protected:
 		RenderEffect& effect_;
 		std::string name_;
+		std::string semantic_;
+
+		bool dirty_;
 	};
 
 	template <typename T>
 	class RenderEffectParameterConcrete : public RenderEffectParameter
 	{
 	public:
-		RenderEffectParameterConcrete(RenderEffect& effect, std::string const & name)
-			: RenderEffectParameter(effect, name), val_()
+		RenderEffectParameterConcrete(RenderEffect& effect,
+					std::string const & name, std::string const & semantic)
+			: RenderEffectParameter(effect, name, semantic), val_()
 		{
 		}
 
 		RenderEffectParameter& operator=(T const & value)
 		{
-			bool dirty = false;
-
 			if (value != val_)
 			{
-				dirty = true;
 				val_ = value;
-				effect_.DirtyParam(name_);
+				this->Dirty();
 			}
 
 			return *this;
@@ -264,6 +287,7 @@ namespace KlayGE
 		void Flush()
 		{
 			this->DoFlush(val_);
+			dirty_ = false;
 		}
 
 	protected:

@@ -156,7 +156,7 @@ namespace
 
 			if (!three_dim_)
 			{
-				technique_ = effect_->Technique("Font2DTec");
+				technique_ = effect_->TechniqueByName("Font2DTec");
 
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 				*(effect_->ParameterByName("halfWidth")) = static_cast<int>(re.CurRenderTarget()->Width() / 2);
@@ -164,7 +164,7 @@ namespace
 			}
 			else
 			{
-				technique_ = effect_->Technique("Font3DTec");
+				technique_ = effect_->TechniqueByName("Font3DTec");
 
 				*(effect_->ParameterByName("mvp")) = mvp_;
 			}

@@ -19,7 +19,7 @@ MD5SkinnedMesh::MD5SkinnedMesh(RenderModelPtr model, std::wstring const & /*name
 	: SkinnedMesh(model, L"MD5SkinnedMesh"),
 		world_(float4x4::Identity())
 {
-	technique_ = Context::Instance().RenderFactoryInstance().LoadEffect("SkinnedMesh.fx")->Technique("SkinnedMeshTech");
+	technique_ = Context::Instance().RenderFactoryInstance().LoadEffect("SkinnedMesh.fx")->TechniqueByName("SkinnedMeshTech");
 
 	diffuse_map_.reset(new Sampler);
 	diffuse_map_->Filtering(Sampler::TFO_Bilinear);

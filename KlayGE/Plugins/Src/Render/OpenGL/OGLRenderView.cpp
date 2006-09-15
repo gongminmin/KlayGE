@@ -31,11 +31,10 @@ namespace KlayGE
 
 
 	OGLTexture1DRenderView::OGLTexture1DRenderView(Texture& texture_1d, int level)
-		: texture_1d_(static_cast<OGLTexture1D&>(texture_1d)),
+		: texture_1d_(*checked_cast<OGLTexture1D*>(&texture_1d)),
 			level_(level)
 	{
 		BOOST_ASSERT(Texture::TT_1D == texture_1d.Type());
-		BOOST_ASSERT(dynamic_cast<OGLTexture1D*>(&texture_1d) != NULL);
 
 		tex_ = texture_1d_.GLTexture();
 
@@ -109,11 +108,10 @@ namespace KlayGE
 
 
 	OGLTexture2DRenderView::OGLTexture2DRenderView(Texture& texture_2d, int level)
-		: texture_2d_(static_cast<OGLTexture2D&>(texture_2d)),
+		: texture_2d_(*checked_cast<OGLTexture2D*>(&texture_2d)),
 			level_(level)
 	{
 		BOOST_ASSERT(Texture::TT_2D == texture_2d.Type());
-		BOOST_ASSERT(dynamic_cast<OGLTexture2D*>(&texture_2d) != NULL);
 
 		tex_ = texture_2d_.GLTexture();
 
@@ -187,11 +185,10 @@ namespace KlayGE
 
 
 	OGLTexture3DRenderView::OGLTexture3DRenderView(Texture& texture_3d, uint32_t slice, int level)
-		: texture_3d_(static_cast<OGLTexture3D&>(texture_3d)),
+		: texture_3d_(*checked_cast<OGLTexture3D*>(&texture_3d)),
 			slice_(slice), level_(level), copy_to_tex_(0)
 	{
 		BOOST_ASSERT(Texture::TT_3D == texture_3d.Type());
-		BOOST_ASSERT(dynamic_cast<OGLTexture3D*>(&texture_3d) != NULL);
 		BOOST_ASSERT(texture_3d_.Depth(level) > slice);
 
 		tex_ = texture_3d_.GLTexture();
@@ -388,11 +385,10 @@ namespace KlayGE
 
 
 	OGLTextureCubeRenderView::OGLTextureCubeRenderView(Texture& texture_cube, Texture::CubeFaces face, int level)
-		: texture_cube_(static_cast<OGLTextureCube&>(texture_cube)),
+		: texture_cube_(*checked_cast<OGLTextureCube*>(&texture_cube)),
 			face_(face), level_(level)
 	{
 		BOOST_ASSERT(Texture::TT_Cube == texture_cube.Type());
-		BOOST_ASSERT(dynamic_cast<OGLTextureCube*>(&texture_cube) != NULL);
 
 		tex_ = texture_cube_.GLTexture();
 

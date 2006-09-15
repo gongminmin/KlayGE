@@ -35,11 +35,6 @@ namespace KlayGE
 {
 	class NullRenderEffect : public RenderEffect
 	{
-	private:
-		std::string DoNameBySemantic(std::string const & /*semantic*/)
-			{ return ""; }
-		RenderEffectParameterPtr DoParameterByName(std::string const & /*name*/)
-			{ return RenderEffectParameter::NullObject(); }
 	};
 
 	RenderEffectPtr RenderEffect::NullObject()
@@ -50,31 +45,29 @@ namespace KlayGE
 
 	RenderEffectParameterPtr RenderEffect::ParameterByName(std::string const & name)
 	{
-		params_type::iterator iter = params_.find(name);
-		if (iter != params_.end())
+		for (params_type::iterator iter = params_.begin(); iter != params_.end(); ++ iter)
 		{
-			return iter->second.first;
+			if (name == (*iter)->Name())
+			{
+				return *iter;
+			}
 		}
-		else
-		{
-			RenderEffectParameterPtr ret = this->DoParameterByName(name);
-			params_.insert(std::make_pair(name, std::make_pair(ret, true)));
-			return ret;
-		}
+		return RenderEffectParameter::NullObject();
 	}
 
 	RenderEffectParameterPtr RenderEffect::ParameterBySemantic(std::string const & semantic)
 	{
-		return this->ParameterByName(this->DoNameBySemantic(semantic));
+		for (params_type::iterator iter = params_.begin(); iter != params_.end(); ++ iter)
+		{
+			if (semantic == (*iter)->Semantic())
+			{
+				return *iter;
+			}
+		}
+		return RenderEffectParameter::NullObject();
 	}
 
-	bool RenderEffect::ValidateTechnique(std::string const & name)
-	{
-		RenderTechniquePtr tech = this->Technique(name);
-		return tech->Validate();
-	}
-	
-	RenderTechniquePtr RenderEffect::Technique(std::string const & name)
+	RenderTechniquePtr RenderEffect::TechniqueByName(std::string const & name)
 	{
 		for (techniques_type::iterator iter = techniques_.begin(); iter != techniques_.end(); ++ iter)
 		{
@@ -86,21 +79,13 @@ namespace KlayGE
 		return RenderTechnique::NullObject();
 	}
 
-	void RenderEffect::DirtyParam(std::string const& name)
-	{
-		BOOST_ASSERT(params_.find(name) != params_.end());
-
-		params_[name].second = true;
-	}
-
 	void RenderEffect::FlushParams()
 	{
 		for (params_type::iterator iter = params_.begin(); iter != params_.end(); ++ iter)
 		{
-			if (iter->second.second)
+			if ((*iter)->IsDirty())
 			{
-				iter->second.first->Flush();
-				iter->second.second = false;
+				(*iter)->Flush();
 			}
 		}
 	}
@@ -151,7 +136,7 @@ namespace KlayGE
 	{
 	public:
 		NullRenderEffectParameter()
-			: RenderEffectParameter(*RenderEffect::NullObject(), "")
+			: RenderEffectParameter(*RenderEffect::NullObject(), "", "")
 		{
 		}
 
@@ -271,8 +256,10 @@ namespace KlayGE
 	};
 
 
-	RenderEffectParameter::RenderEffectParameter(RenderEffect& effect, std::string const & name)
-		: effect_(effect), name_(name)
+	RenderEffectParameter::RenderEffectParameter(RenderEffect& effect,
+						std::string const & name, std::string const & semantic)
+		: effect_(effect), name_(name), semantic_(semantic),
+			dirty_(false)
 	{
 	}
 
@@ -285,12 +272,6 @@ namespace KlayGE
 		static RenderEffectParameterPtr obj(new NullRenderEffectParameter);
 		return obj;
 	}
-
-	std::string const & RenderEffectParameter::Name() const
-	{
-		return name_;
-	}
-
 	
 	RenderEffectParameter& RenderEffectParameter::operator=(bool const & /*value*/)
 	{

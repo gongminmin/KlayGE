@@ -144,11 +144,11 @@ namespace
 
 			if (gen_sm)
 			{
-				technique_ = effect_->Technique("GenShadowMap");
+				technique_ = effect_->TechniqueByName("GenShadowMap");
 			}
 			else
 			{
-				technique_ = effect_->Technique("RenderScene");
+				technique_ = effect_->TechniqueByName("RenderScene");
 			}
 		}
 
@@ -191,7 +191,7 @@ namespace
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			effect_ = rf.LoadEffect("ShadowCubeMap.fx");
-			technique_ = effect_->Technique("RenderScene");
+			technique_ = effect_->TechniqueByName("RenderScene");
 
 			float3 xyzs[] =
 			{
@@ -246,11 +246,11 @@ namespace
 
 			if (gen_sm)
 			{
-				technique_ = effect_->Technique("GenShadowMap");
+				technique_ = effect_->TechniqueByName("GenShadowMap");
 			}
 			else
 			{
-				technique_ = effect_->Technique("RenderScene");
+				technique_ = effect_->TechniqueByName("RenderScene");
 			}
 		}
 
