@@ -60,7 +60,7 @@ namespace KlayGE
 
 		FrameBufferPtr MakeFrameBuffer();
 
-		RenderEffectPtr DoMakeRenderEffect(std::string const & srcData);
+		RenderEffectPtr DoMakeRenderEffect(ResIdentifierPtr const & source);
 
 		RenderLayoutPtr MakeRenderLayout(RenderLayout::buffer_type type);
 		GraphicsBufferPtr MakeVertexBuffer(BufferUsage usage);

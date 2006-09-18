@@ -506,7 +506,7 @@ namespace KlayGE
 	void D3D9RenderWindow::UpdateSurfacesPtrs()
 	{
 		IDirect3DSurface9* renderSurface;
-		d3dDevice_->GetRenderTarget(0, &renderSurface);
+		d3d_swap_chain_->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &renderSurface);
 		renderSurface_ = MakeCOMPtr(renderSurface);
 
 		if (isDepthBuffered_)
@@ -538,18 +538,6 @@ namespace KlayGE
 			d3dpp_.BackBufferHeight = this->Height();
 			TIF(d3dDevice_->Reset(&d3dpp_));
 
-			IDirect3DSurface9* surface;
-			d3dDevice_->GetRenderTarget(0, &surface);
-			renderSurface_ = MakeCOMPtr(surface);
-
-			if (isDepthBuffered_)
-			{
-				d3dDevice_->GetDepthStencilSurface(&surface);
-				renderZBuffer_ = MakeCOMPtr(surface);
-			}
-
-			factory.OnResetDevice();
-
 			IDirect3DSwapChain9* sc = NULL;
 			if (main_wnd_)
 			{
@@ -559,8 +547,19 @@ namespace KlayGE
 			{
 				d3dDevice_->CreateAdditionalSwapChain(&d3dpp_, &sc);
 			}
-
 			d3d_swap_chain_ = MakeCOMPtr(sc);
+
+			IDirect3DSurface9* surface;
+			d3d_swap_chain_->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &surface);
+			renderSurface_ = MakeCOMPtr(surface);
+
+			if (isDepthBuffered_)
+			{
+				d3dDevice_->GetDepthStencilSurface(&surface);
+				renderZBuffer_ = MakeCOMPtr(surface);
+			}
+
+			factory.OnResetDevice();
 		}
 	}
 

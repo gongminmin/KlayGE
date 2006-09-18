@@ -61,7 +61,7 @@ namespace KlayGE
 	class D3D9RenderEffect : public RenderEffect, public D3D9Resource
 	{
 	public:
-		explicit D3D9RenderEffect(std::string const & srcData);
+		explicit D3D9RenderEffect(ResIdentifierPtr const & source);
 
 		ID3DXEffectPtr const & D3DXEffect() const
 			{ return d3dx_effect_; }
@@ -86,7 +86,7 @@ namespace KlayGE
 	private:
 		RenderPassPtr MakeRenderPass(uint32_t n);
 
-		uint32_t DoBegin(uint32_t flags);
+		void DoBegin(uint32_t flags);
 		void DoEnd();
 
 	private:

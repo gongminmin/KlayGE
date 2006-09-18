@@ -68,10 +68,10 @@ namespace KlayGE
 		explicit Color_T(uint32_t dw)
 		{
 			static T const f(1 / T(255));
-			this->a() = f * (static_cast<float>(static_cast<uint8_t>(dw >> 24)));
-			this->r() = f * (static_cast<float>(static_cast<uint8_t>(dw >> 16)));
-			this->g() = f * (static_cast<float>(static_cast<uint8_t>(dw >>  8)));
-			this->b() = f * (static_cast<float>(static_cast<uint8_t>(dw)));
+			this->a() = f * (static_cast<T>(static_cast<uint8_t>(dw >> 24)));
+			this->r() = f * (static_cast<T>(static_cast<uint8_t>(dw >> 16)));
+			this->g() = f * (static_cast<T>(static_cast<uint8_t>(dw >>  8)));
+			this->b() = f * (static_cast<T>(static_cast<uint8_t>(dw >>  0)));
 		}
 
 		// 取颜色
@@ -107,10 +107,17 @@ namespace KlayGE
 
 		void RGBA(uint8_t& R, uint8_t& G, uint8_t& B, uint8_t& A) const
 		{
-			R = static_cast<uint8_t>((this->r() >= 1) ? 255 : (this->r() <= 0 ? 0 : static_cast<uint32_t>(this->r() * 255.0f + 0.5f)));
-			G = static_cast<uint8_t>((this->g() >= 1) ? 255 : (this->g() <= 0 ? 0 : static_cast<uint32_t>(this->g() * 255.0f + 0.5f)));
-			B = static_cast<uint8_t>((this->b() >= 1) ? 255 : (this->b() <= 0 ? 0 : static_cast<uint32_t>(this->b() * 255.0f + 0.5f)));
-			A = static_cast<uint8_t>((this->a() >= 1) ? 255 : (this->a() <= 0 ? 0 : static_cast<uint32_t>(this->a() * 255.0f + 0.5f)));
+			R = static_cast<uint8_t>(MathLib::clamp(this->r(), T(0), T(1)) * 255 + 0.5f);
+			G = static_cast<uint8_t>(MathLib::clamp(this->g(), T(0), T(1)) * 255 + 0.5f);
+			B = static_cast<uint8_t>(MathLib::clamp(this->b(), T(0), T(1)) * 255 + 0.5f);
+			A = static_cast<uint8_t>(MathLib::clamp(this->a(), T(0), T(1)) * 255 + 0.5f);
+		}
+
+		uint32_t ARGB() const
+		{
+			uint8_t r, g, b, a;
+			this->RGBA(r, g, b, a);
+			return (a << 24) | (r << 16) | (g << 8) | (b << 0);
 		}
 
 		// 赋值操作符

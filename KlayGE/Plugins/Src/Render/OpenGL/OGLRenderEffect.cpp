@@ -31,11 +31,16 @@
 
 namespace KlayGE
 {
-	OGLRenderEffect::OGLRenderEffect(std::string const & srcData)
+	OGLRenderEffect::OGLRenderEffect(ResIdentifierPtr const & source)
 	{
+		source->seekg(0, std::ios_base::end);
+		std::vector<char> data(source->tellg());
+		source->seekg(0);
+		source->read(&data[0], static_cast<std::streamsize>(data.size()));
+
 		OGLRenderFactory& renderFactory(*checked_cast<OGLRenderFactory*>(&Context::Instance().RenderFactoryInstance()));
 
-		effect_ = cgCreateEffect(renderFactory.CGContext(), srcData.c_str(), NULL);
+		effect_ = cgCreateEffect(renderFactory.CGContext(), &data[0], NULL);
 		if (0 == effect_)
 		{
 			std::cerr << cgGetLastListing(renderFactory.CGContext()) << std::endl;
@@ -211,9 +216,8 @@ namespace KlayGE
 		return ret;
 	}
 
-	uint32_t OGLRenderTechnique::DoBegin(uint32_t /*flags*/)
+	void OGLRenderTechnique::DoBegin(uint32_t /*flags*/)
 	{
-		return this->NumPasses();
 	}
 
 	void OGLRenderTechnique::DoEnd()

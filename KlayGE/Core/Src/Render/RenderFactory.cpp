@@ -112,7 +112,7 @@ namespace KlayGE
 		}
 
 	private:
-		RenderEffectPtr DoMakeRenderEffect(std::string const & /*effectData*/)
+		RenderEffectPtr DoMakeRenderEffect(ResIdentifierPtr const & /*source*/)
 		{
 			return RenderEffect::NullObject();
 		}
@@ -141,14 +141,7 @@ namespace KlayGE
 		effect_pool_type::iterator eiter = effect_pool_.find(effectName);
 		if (eiter == effect_pool_.end())
 		{
-			ResIdentifierPtr file(ResLoader::Instance().Load(effectName));
-
-			file->seekg(0, std::ios_base::end);
-			std::vector<char> data(file->tellg());
-			file->seekg(0);
-			file->read(&data[0], static_cast<std::streamsize>(data.size()));
-
-			ret = this->DoMakeRenderEffect(std::string(data.begin(), data.end()));
+			ret = this->DoMakeRenderEffect(ResLoader::Instance().Load(effectName));
 			if (ret)
 			{
 				effect_pool_.insert(std::make_pair(effectName, ret));

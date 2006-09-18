@@ -35,7 +35,7 @@ namespace KlayGE
 	class OGLRenderEffect : public RenderEffect
 	{
 	public:
-		explicit OGLRenderEffect(std::string const & srcData);
+		explicit OGLRenderEffect(ResIdentifierPtr const & source);
 		~OGLRenderEffect();
 
 	private:
@@ -55,7 +55,7 @@ namespace KlayGE
 	private:
 		RenderPassPtr MakeRenderPass(uint32_t index, CGpass pass);
 
-		uint32_t DoBegin(uint32_t flags);
+		void DoBegin(uint32_t flags);
 		void DoEnd();
 
 	private:

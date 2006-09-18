@@ -62,9 +62,9 @@ namespace KlayGE
 		return FrameBufferPtr(new OGLFrameBuffer);
 	}
 
-	RenderEffectPtr OGLRenderFactory::DoMakeRenderEffect(std::string const & srcData)
+	RenderEffectPtr OGLRenderFactory::DoMakeRenderEffect(ResIdentifierPtr const & source)
 	{
-		return RenderEffectPtr(new OGLRenderEffect(srcData));
+		return RenderEffectPtr(new OGLRenderEffect(source));
 	}
 
 	RenderLayoutPtr OGLRenderFactory::MakeRenderLayout(RenderLayout::buffer_type type)

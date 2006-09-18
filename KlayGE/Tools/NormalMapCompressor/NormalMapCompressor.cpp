@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
 
 	app.Create("NormalMapCompressor", settings);
 
-	ElementFormat new_format = EF_DXT5;
+	ElementFormat new_format = EF_BC3;
 	if (argc >= 4)
 	{
 		std::string format_str(argv[3]);

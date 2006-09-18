@@ -105,9 +105,8 @@ namespace KlayGE
 		}
 
 	private:
-		uint32_t DoBegin(uint32_t /*flags*/)
+		void DoBegin(uint32_t /*flags*/)
 		{
-			return 0;
 		}
 		void DoEnd()
 		{
@@ -120,10 +119,10 @@ namespace KlayGE
 		return obj;
 	}
 
-	uint32_t RenderTechnique::Begin(uint32_t flags)
+	void RenderTechnique::Begin(uint32_t flags)
 	{
 		effect_.FlushParams();
-		return this->DoBegin(flags);
+		this->DoBegin(flags);
 	}
 
 	void RenderTechnique::End()

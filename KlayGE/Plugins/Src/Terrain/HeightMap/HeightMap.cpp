@@ -33,15 +33,15 @@ namespace KlayGE
 			span_y = -span_y;
 		}
 
-		int const num_x = static_cast<int>((end_x - start_x) / span_x);
-		int const num_y = static_cast<int>((end_y - start_y) / span_y);
+		uint16_t const num_x = static_cast<uint16_t>((end_x - start_x) / span_x);
+		uint16_t const num_y = static_cast<uint16_t>((end_y - start_y) / span_y);
 
 		float pos_x = start_x;
 		float pos_y = start_y;
-		for (int y = 0; y < num_y; ++ y)
+		for (uint16_t y = 0; y < num_y; ++ y)
 		{
 			pos_x = start_x;
-			for (int x = 0; x < num_x; ++ x)
+			for (uint16_t x = 0; x < num_x; ++ x)
 			{
 				pos_x += span_x;
 
@@ -51,9 +51,9 @@ namespace KlayGE
 			pos_y += span_y;
 		}
 
-		for (int y = 0; y < num_y - 1; ++ y)
+		for (uint16_t y = 0; y < num_y - 1; ++ y)
 		{
-			for (int x = 0; x < num_x - 1; ++ x)
+			for (uint16_t x = 0; x < num_x - 1; ++ x)
 			{
 				indices.push_back((y + 0) * num_x + (x + 0));
 				indices.push_back((y + 1) * num_x + (x + 0));

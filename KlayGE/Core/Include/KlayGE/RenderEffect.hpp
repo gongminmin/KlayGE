@@ -137,13 +137,13 @@ namespace KlayGE
 			return passes_[n];
 		}
 
-		uint32_t Begin(uint32_t flags = 0);
+		void Begin(uint32_t flags = 0);
 		void End();
 
 		virtual bool Validate() = 0;
 
 	private:
-		virtual uint32_t DoBegin(uint32_t flags) = 0;
+		virtual void DoBegin(uint32_t flags) = 0;
 		virtual void DoEnd() = 0;
 
 	protected:

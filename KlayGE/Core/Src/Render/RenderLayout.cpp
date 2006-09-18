@@ -143,11 +143,9 @@ namespace KlayGE
 	void RenderLayout::ExpandInstance(GraphicsBufferPtr& hint, uint32_t inst_no) const
 	{
 		BOOST_ASSERT(instance_stream_.stream);
+		BOOST_ASSERT(inst_no < this->NumInstance());
 
-		uint32_t num_instance = this->NumInstance();
-		BOOST_ASSERT(inst_no < num_instance);
-
-		uint32_t num_vertices = this->NumVertices();
+		uint32_t const num_vertices = this->NumVertices();
 		
 		if (!hint)
 		{

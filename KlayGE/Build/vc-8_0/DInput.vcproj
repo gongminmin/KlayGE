@@ -116,7 +116,7 @@
 				EnableEnhancedInstructionSet="1"
 				FloatingPointModel="2"
 				ProgramDataBaseFileName="$(IntDir)\$(TargetFileName).pdb"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool

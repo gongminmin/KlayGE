@@ -70,7 +70,7 @@ namespace KlayGE
 		virtual RenderViewPtr MakeDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t multi_sample) = 0;
 
 	private:
-		virtual RenderEffectPtr DoMakeRenderEffect(std::string const & effectData) = 0;
+		virtual RenderEffectPtr DoMakeRenderEffect(ResIdentifierPtr const & source) = 0;
 
 	protected:
 		typedef std::map<std::string, RenderEffectPtr> effect_pool_type;

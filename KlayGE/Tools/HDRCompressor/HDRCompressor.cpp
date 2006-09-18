@@ -105,7 +105,7 @@ namespace
 
 		uint32_t const size = tex->Width(0);
 		TexturePtr y_cube_map = rf.MakeTextureCube(size, 1, EF_L16);
-		TexturePtr c_cube_map = rf.MakeTextureCube(size / 2, 1, EF_DXT5);
+		TexturePtr c_cube_map = rf.MakeTextureCube(size / 2, 1, EF_BC3);
 		std::vector<float> hdr_data(size * size * 4);
 		std::vector<uint16_t> y_data(size * size);
 		std::vector<uint8_t> c_data(size / 2 * size / 2 * 4);
@@ -131,7 +131,7 @@ namespace
 		uint32_t const width = tex->Width(0);
 		uint32_t const height = tex->Height(0);
 		TexturePtr y_cube_map = rf.MakeTexture2D(width, height, 1, EF_L16);
-		TexturePtr c_cube_map = rf.MakeTexture2D(width / 2, height / 2, 1, EF_DXT5);
+		TexturePtr c_cube_map = rf.MakeTexture2D(width / 2, height / 2, 1, EF_BC3);
 		std::vector<float> hdr_data(width * height * 4);
 		std::vector<uint16_t> y_data(width * height);
 		std::vector<uint8_t> c_data(width / 2 * height / 2 * 4);

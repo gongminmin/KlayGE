@@ -79,7 +79,7 @@ namespace KlayGE
 		void OnResetDevice();
 
 	private:
-		RenderEffectPtr DoMakeRenderEffect(std::string const & srcData);
+		RenderEffectPtr DoMakeRenderEffect(ResIdentifierPtr const & source);
 
 	private:
 		std::vector<boost::weak_ptr<D3D9Resource> > resource_pool_;

@@ -53,15 +53,20 @@
 
 namespace KlayGE
 {
-	D3D9RenderEffect::D3D9RenderEffect(std::string const & srcData)
+	D3D9RenderEffect::D3D9RenderEffect(ResIdentifierPtr const & source)
 	{
+		source->seekg(0, std::ios_base::end);
+		std::vector<char> data(source->tellg());
+		source->seekg(0);
+		source->read(&data[0], static_cast<std::streamsize>(data.size()));
+
 		D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 
 		D3D9RenderEffectInclude include;
 
 		ID3DXEffect* effect;
-		D3DXCreateEffect(renderEngine.D3DDevice().get(), srcData.c_str(),
-			static_cast<UINT>(srcData.size()), NULL, &include,
+		D3DXCreateEffect(renderEngine.D3DDevice().get(), &data[0],
+			static_cast<UINT>(data.size()), NULL, &include,
 			0, NULL, &effect, NULL);
 		d3dx_effect_ = MakeCOMPtr(effect);
 
@@ -263,13 +268,12 @@ namespace KlayGE
 		return SUCCEEDED(checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect()->ValidateTechnique(tech_));
 	}
 
-	uint32_t D3D9RenderTechnique::DoBegin(uint32_t flags)
+	void D3D9RenderTechnique::DoBegin(uint32_t flags)
 	{
 		TIF(checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect()->SetTechnique(tech_));
 
 		UINT passes;
 		TIF(checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect()->Begin(&passes, D3DXFX_DONOTSAVESAMPLERSTATE | flags));
-		return passes;
 	}
 
 	void D3D9RenderTechnique::DoEnd()
