@@ -214,7 +214,6 @@ namespace KlayGE
 		d3dpp_.BackBufferHeight			= this->Height();
 		d3dpp_.hDeviceWindow			= hWnd_;
 		d3dpp_.SwapEffect				= D3DSWAPEFFECT_DISCARD;
-		d3dpp_.Flags					= isDepthBuffered_ ? D3DPRESENTFLAG_DISCARD_DEPTHSTENCIL : 0;
 		d3dpp_.PresentationInterval		= D3DPRESENT_INTERVAL_IMMEDIATE;
 
 		if (!this->FullScreen())
@@ -223,14 +222,7 @@ namespace KlayGE
 		}
 		else
 		{
-			if (this->ColorDepth() > 16)
-			{
-				d3dpp_.BackBufferFormat = D3DFMT_A8R8G8B8;
-			}
-			else
-			{
-				d3dpp_.BackBufferFormat = D3DFMT_A4R4G4B4;
-			}
+			d3dpp_.BackBufferFormat = D3DFMT_X8R8G8B8;
 		}
 
 		// Depth-stencil format
@@ -317,7 +309,8 @@ namespace KlayGE
 			depthBits_ = 0;
 			stencilBits_ = 0;
 		}
-		d3dpp_.EnableAutoDepthStencil = isDepthBuffered_;
+		d3dpp_.EnableAutoDepthStencil	= isDepthBuffered_;
+		d3dpp_.Flags					= isDepthBuffered_ ? D3DPRESENTFLAG_DISCARD_DEPTHSTENCIL : 0;
 
 
 		if ((multiSample_ != 0) && SUCCEEDED(d3d_->CheckDeviceMultiSampleType(this->adapter_.AdapterNo(),
