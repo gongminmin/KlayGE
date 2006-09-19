@@ -1,8 +1,11 @@
 // Font.cpp
 // KlayGE Font类 实现文件
-// Ver 3.3.0
+// Ver 3.4.0
 // 版权所有(C) 龚敏敏, 2003-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.4.0
+// 优化了顶点缓冲区 (2006.9.20)
 //
 // 3.3.0
 // 支持渲染到3D位置 (2006.5.20)
@@ -105,15 +108,13 @@ namespace
 			effect_ = rf.LoadEffect("Font.fx");
 			*(effect_->ParameterByName("texFontSampler")) = theSampler_;
 
-			xyz_vb_ = rf.MakeVertexBuffer(BU_Dynamic);
-			clr_vb_ = rf.MakeVertexBuffer(BU_Dynamic);
-			tex_vb_ = rf.MakeVertexBuffer(BU_Dynamic);
+			vb_ = rf.MakeVertexBuffer(BU_Dynamic);
+			rl_->BindVertexStream(vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
+											vertex_element(VEU_Diffuse, 0, EF_ARGB8),
+											vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 
-			rl_->BindVertexStream(xyz_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
-			rl_->BindVertexStream(clr_vb_, boost::make_tuple(vertex_element(VEU_Diffuse, 0, EF_ABGR32F)));
-			rl_->BindVertexStream(tex_vb_, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
-
-			rl_->BindIndexStream(rf.MakeIndexBuffer(BU_Dynamic), EF_R16);
+			ib_ = rf.MakeIndexBuffer(BU_Dynamic);
+			rl_->BindIndexStream(ib_, EF_R16);
 
 			box_ = Box(float3(0, 0, 0), float3(0, 0, 0));
 
@@ -132,23 +133,13 @@ namespace
 
 		void OnRenderBegin()
 		{
-			xyz_vb_->Resize(static_cast<uint32_t>(xyzs_.size() * sizeof(xyzs_[0])));
+			vb_->Resize(static_cast<uint32_t>(vertices_.size() * sizeof(vertices_[0])));
 			{
-				GraphicsBuffer::Mapper mapper(*xyz_vb_, BA_Write_Only);
-				std::copy(xyzs_.begin(), xyzs_.end(), mapper.Pointer<float3>());
-			}
-			clr_vb_->Resize(static_cast<uint32_t>(clrs_.size() * sizeof(clrs_[0])));
-			{
-				GraphicsBuffer::Mapper mapper(*clr_vb_, BA_Write_Only);
-				std::copy(clrs_.begin(), clrs_.end(), mapper.Pointer<Color>());
-			}
-			tex_vb_->Resize(static_cast<uint32_t>(texs_.size() * sizeof(texs_[0])));
-			{
-				GraphicsBuffer::Mapper mapper(*tex_vb_, BA_Write_Only);
-				std::copy(texs_.begin(), texs_.end(), mapper.Pointer<float2>());
+				GraphicsBuffer::Mapper mapper(*vb_, BA_Write_Only);
+				std::copy(vertices_.begin(), vertices_.end(), mapper.Pointer<FontVert>());
 			}
 
-			rl_->GetIndexStream()->Resize(static_cast<uint32_t>(indices_.size() * sizeof(indices_[0])));
+			ib_->Resize(static_cast<uint32_t>(indices_.size() * sizeof(indices_[0])));
 			{
 				GraphicsBuffer::Mapper mapper(*rl_->GetIndexStream(), BA_Write_Only);
 				std::copy(indices_.begin(), indices_.end(), mapper.Pointer<uint16_t>());
@@ -172,9 +163,7 @@ namespace
 
 		void OnRenderEnd()
 		{
-			xyzs_.resize(0);
-			clrs_.resize(0);
-			texs_.resize(0);
+			vertices_.resize(0);
 			indices_.resize(0);
 
 			box_ = Box(float3(0, 0, 0), float3(0, 0, 0));
@@ -217,17 +206,16 @@ namespace
 		{
 			this->UpdateTexture(text);
 
+			uint32_t clr32 = clr.ARGB();
 			float const h(fontHeight * yScale);
 			size_t const maxSize(text.length() - std::count(text.begin(), text.end(), L'\n'));
 			float x(sx), y(sy);
 			float maxx(sx), maxy(sy);
 
-			xyzs_.reserve(xyzs_.size() + maxSize * 4);
-			clrs_.reserve(clrs_.size() + maxSize * 4);
-			texs_.reserve(texs_.size() + maxSize * 4);
+			vertices_.reserve(vertices_.size() + maxSize * 4);
 			indices_.reserve(indices_.size() + maxSize * 6);
 
-			uint16_t lastIndex(static_cast<uint16_t>(xyzs_.size()));
+			uint16_t lastIndex(static_cast<uint16_t>(vertices_.size()));
 			for (std::wstring::const_iterator citer = text.begin(); citer != text.end(); ++ citer)
 			{
 				wchar_t const & ch(*citer);
@@ -238,20 +226,25 @@ namespace
 				{
 					Rect_T<float> const & texRect(cmiter->second.texRect);
 
-					xyzs_.push_back(float3(x + 0, y + 0, sz));
-					xyzs_.push_back(float3(x + w, y + 0, sz));
-					xyzs_.push_back(float3(x + w, y + h, sz));
-					xyzs_.push_back(float3(x + 0, y + h, sz));
+					vertices_.push_back(FontVert());
+					vertices_.back().pos = float3(x + 0, y + 0, sz);
+					vertices_.back().clr = clr32;
+					vertices_.back().tex = float2(texRect.left(), texRect.top());
 
-					clrs_.push_back(clr);
-					clrs_.push_back(clr);
-					clrs_.push_back(clr);
-					clrs_.push_back(clr);
+					vertices_.push_back(FontVert());
+					vertices_.back().pos = float3(x + w, y + 0, sz);
+					vertices_.back().clr = clr32;
+					vertices_.back().tex = float2(texRect.right(), texRect.top());
 
-					texs_.push_back(float2(texRect.left(), texRect.top()));
-					texs_.push_back(float2(texRect.right(), texRect.top()));
-					texs_.push_back(float2(texRect.right(), texRect.bottom()));
-					texs_.push_back(float2(texRect.left(), texRect.bottom()));
+					vertices_.push_back(FontVert());
+					vertices_.back().pos = float3(x + w, y + h, sz);
+					vertices_.back().clr = clr32;
+					vertices_.back().tex = float2(texRect.right(), texRect.bottom());
+
+					vertices_.push_back(FontVert());
+					vertices_.back().pos = float3(x + 0, y + h, sz);
+					vertices_.back().clr = clr32;
+					vertices_.back().tex = float2(texRect.left(), texRect.bottom());
 
 					indices_.push_back(lastIndex + 0);
 					indices_.push_back(lastIndex + 1);
@@ -385,11 +378,24 @@ namespace
 		}
 
 	private:
+#ifdef KLAYGE_PLATFORM_WINDOWS
+	#pragma pack(push, 1)
+#endif
 		struct CharInfo
 		{
 			Rect_T<float>	texRect;
 			uint32_t		width;
 		};
+
+		struct FontVert
+		{
+			float3 pos;
+			uint32_t clr;
+			float2 tex;
+		};
+#ifdef KLAYGE_PLATFORM_WINDOWS
+	#pragma pack(pop)
+#endif
 
 		typedef std::map<wchar_t, CharInfo, std::less<wchar_t>, boost::fast_pool_allocator<std::pair<wchar_t, CharInfo> > > CharInfoMapType;
 		typedef std::list<wchar_t, boost::fast_pool_allocator<wchar_t> > CharLRUType;
@@ -404,14 +410,11 @@ namespace
 
 		uint32_t fontHeight_;
 
-		std::vector<float3>	xyzs_;
-		std::vector<Color>		clrs_;
-		std::vector<float2>	texs_;
+		std::vector<FontVert>	vertices_;
 		std::vector<uint16_t>	indices_;
 
-		GraphicsBufferPtr xyz_vb_;
-		GraphicsBufferPtr clr_vb_;
-		GraphicsBufferPtr tex_vb_;
+		GraphicsBufferPtr vb_;
+		GraphicsBufferPtr ib_;
 
 		TexturePtr		theTexture_;
 		SamplerPtr		theSampler_;

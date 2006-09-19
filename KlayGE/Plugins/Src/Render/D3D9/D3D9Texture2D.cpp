@@ -260,7 +260,7 @@ namespace KlayGE
 	{
 		if (IsDepthFormat(format_))
 		{
-			usage |= D3DUSAGE_DEPTHSTENCIL;
+			usage = D3DUSAGE_DEPTHSTENCIL;
 		}
 
 		IDirect3DTexture9* d3dTexture2D;

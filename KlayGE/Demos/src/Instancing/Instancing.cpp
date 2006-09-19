@@ -291,7 +291,7 @@ void Instancing::DoUpdate(uint32_t /*pass*/)
 	stream << this->FPS();
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"几何体实例化");
-	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());
 
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 	stream.str(L"");
@@ -299,7 +299,7 @@ void Instancing::DoUpdate(uint32_t /*pass*/)
 		<< sceneMgr.NumRenderablesRendered() << " Renderables "
 		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
 		<< sceneMgr.NumVerticesRendered() << " Vertices";
-	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str().c_str());
+	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str());
 
 	if (use_instance_)
 	{

@@ -89,20 +89,22 @@ namespace KlayGE
 
 			if (D3DXPC_SCALAR == param_desc.Class)
 			{
-				if (D3DXPT_FLOAT == param_desc.Type)
+				switch (param_desc.Type)
 				{
-					if (0 == param_desc.Elements)
+				case D3DXPT_FLOAT:
 					{
-						reparam.reset(new D3D9RenderEffectParameterFloat(*this, name, semantic));
+						if (0 == param_desc.Elements)
+						{
+							reparam.reset(new D3D9RenderEffectParameterFloat(*this, name, semantic));
+						}
+						else
+						{
+							reparam.reset(new D3D9RenderEffectParameterFloatArray(*this, name, semantic));
+						}
 					}
-					else
-					{
-						reparam.reset(new D3D9RenderEffectParameterFloatArray(*this, name, semantic));
-					}
-				}
-				else
-				{
-					if (D3DXPT_INT == param_desc.Type)
+					break;
+
+				case D3DXPT_INT:
 					{
 						if (0 == param_desc.Elements)
 						{
@@ -113,20 +115,24 @@ namespace KlayGE
 							reparam.reset(new D3D9RenderEffectParameterIntArray(*this, name, semantic));
 						}
 					}
-					else
+					break;
+
+				case D3DXPT_BOOL:
 					{
-						if (D3DXPT_BOOL == param_desc.Type)
+						if (0 == param_desc.Elements)
 						{
-							if (0 == param_desc.Elements)
-							{
-								reparam.reset(new D3D9RenderEffectParameterBool(*this, name, semantic));
-							}
-							else
-							{
-								reparam.reset(new D3D9RenderEffectParameterBoolArray(*this, name, semantic));
-							}
+							reparam.reset(new D3D9RenderEffectParameterBool(*this, name, semantic));
+						}
+						else
+						{
+							reparam.reset(new D3D9RenderEffectParameterBoolArray(*this, name, semantic));
 						}
 					}
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
 				}
 			}
 			else
@@ -246,8 +252,7 @@ namespace KlayGE
 
 		D3DXTECHNIQUE_DESC desc;
 		d3dx_effect_->GetTechniqueDesc(tech, &desc);
-		RenderTechniquePtr ret(new D3D9RenderTechnique(*this, desc.Name, tech));
-		return ret;
+		return RenderTechniquePtr(new D3D9RenderTechnique(*this, desc.Name, tech));
 	}
 
 
@@ -256,7 +261,7 @@ namespace KlayGE
 			tech_(tech)
 	{
 		D3DXTECHNIQUE_DESC desc;
-		checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect()->GetTechniqueDesc(tech_, &desc);
+		this->D3DXEffect()->GetTechniqueDesc(tech_, &desc);
 		for (uint32_t i = 0; i < desc.Passes; ++ i)
 		{
 			passes_.push_back(this->MakeRenderPass(i));
@@ -265,29 +270,33 @@ namespace KlayGE
 
 	bool D3D9RenderTechnique::Validate()
 	{
-		return SUCCEEDED(checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect()->ValidateTechnique(tech_));
+		return SUCCEEDED(this->D3DXEffect()->ValidateTechnique(tech_));
 	}
 
 	void D3D9RenderTechnique::DoBegin(uint32_t flags)
 	{
-		TIF(checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect()->SetTechnique(tech_));
+		TIF(this->D3DXEffect()->SetTechnique(tech_));
 
 		UINT passes;
-		TIF(checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect()->Begin(&passes, D3DXFX_DONOTSAVESAMPLERSTATE | flags));
+		TIF(this->D3DXEffect()->Begin(&passes, D3DXFX_DONOTSAVESAMPLERSTATE | flags));
 	}
 
 	void D3D9RenderTechnique::DoEnd()
 	{
-		TIF(checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect()->End());
+		TIF(this->D3DXEffect()->End());
 	}
 
 	RenderPassPtr D3D9RenderTechnique::MakeRenderPass(uint32_t n)
 	{
-		D3DXHANDLE pass = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect()->GetPass(tech_, n);
+		D3DXHANDLE pass = this->D3DXEffect()->GetPass(tech_, n);
 		BOOST_ASSERT(pass != NULL);
 
-		RenderPassPtr ret(new D3D9RenderPass(effect_, n, pass));
-		return ret;
+		return RenderPassPtr(new D3D9RenderPass(effect_, n, pass));
+	}
+
+	ID3DXEffectPtr const & D3D9RenderTechnique::D3DXEffect() const
+	{
+		return checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 	}
 
 
@@ -296,7 +305,7 @@ namespace KlayGE
 			pass_(pass)
 	{
 		D3DXPASS_DESC desc;
-		checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect()->GetPassDesc(pass, &desc);
+		this->D3DXEffect()->GetPassDesc(pass, &desc);
 
 		if (desc.pVertexShaderFunction != NULL)
 		{
@@ -358,14 +367,14 @@ namespace KlayGE
 			}
 		}
 
-		TIF(checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect()->BeginPass(index_));
+		TIF(this->D3DXEffect()->BeginPass(index_));
 	}
 
 	void D3D9RenderPass::End()
 	{
 		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 
-		TIF(checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect()->EndPass());
+		TIF(this->D3DXEffect()->EndPass());
 
 		for (int i = 0; i < 2; ++ i)
 		{
@@ -375,6 +384,11 @@ namespace KlayGE
 				render_eng.DisableSampler(iter->second);
 			}
 		}
+	}
+
+	ID3DXEffectPtr const & D3D9RenderPass::D3DXEffect() const
+	{
+		return checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 	}
 
 

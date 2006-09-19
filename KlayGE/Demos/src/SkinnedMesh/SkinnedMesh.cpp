@@ -17,7 +17,6 @@
 #include <KlayGE/Input.hpp>
 #include <KlayGE/DInput/DInputFactory.hpp>
 
-#include <iostream>
 #include <sstream>
 #include <ctime>
 #include <boost/bind.hpp>
@@ -135,8 +134,8 @@ void SkinnedMeshApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), renderEngine.Name());
 
-	RenderWindow& win(static_cast<RenderWindow&>(*renderEngine.CurRenderTarget()));
+	RenderWindow& win(*checked_pointer_cast<RenderWindow>(renderEngine.CurRenderTarget()));
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), win.Description());
 
-	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str().c_str());
+	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str());
 }

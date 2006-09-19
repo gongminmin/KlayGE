@@ -89,6 +89,8 @@ namespace KlayGE
 		void DoBegin(uint32_t flags);
 		void DoEnd();
 
+		ID3DXEffectPtr const & D3DXEffect() const;
+
 	private:
 		D3DXHANDLE tech_;
 	};
@@ -100,6 +102,9 @@ namespace KlayGE
 
 		void Begin();
 		void End();
+
+	private:
+		ID3DXEffectPtr const & D3DXEffect() const;
 
 	private:
 		D3DXHANDLE pass_;
