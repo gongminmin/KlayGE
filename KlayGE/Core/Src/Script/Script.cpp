@@ -22,9 +22,9 @@
 
 #ifdef KLAYGE_COMPILER_MSVC
 #ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "python24d.lib")
+	#pragma comment(lib, "python25d.lib")
 #else
-	#pragma comment(lib, "python24.lib")
+	#pragma comment(lib, "python25.lib")
 #endif
 #endif
 
