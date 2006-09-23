@@ -404,6 +404,7 @@ namespace KlayGE
 		render_states_[RST_CullMode]		= CM_AntiClockwise;
 		render_states_[RST_Clipping]		= true;
 
+		render_states_[RST_AlphaToCoverageEnable] = false;
 		render_states_[RST_BlendEnable]		= false;
 		render_states_[RST_BlendOp]			= BOP_Add;
 		render_states_[RST_SrcBlend]		= ABF_One;
@@ -483,6 +484,17 @@ namespace KlayGE
 			// do nothing;
 		}
 
+		if (dirty_render_states_[RST_AlphaToCoverageEnable])
+		{
+			if (render_states_[RST_AlphaToCoverageEnable])
+			{
+				glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+			}
+			else
+			{
+				glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+			}
+		}
 		if (dirty_render_states_[RST_BlendEnable])
 		{
 			if (render_states_[RST_BlendEnable])

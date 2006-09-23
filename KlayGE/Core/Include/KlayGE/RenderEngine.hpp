@@ -1,8 +1,11 @@
 // RenderEngine.hpp
 // KlayGE 渲染引擎类 实现文件
-// Ver 3.4.0
+// Ver 3.5.0
 // 版权所有(C) 龚敏敏, 2003-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.5.0
+// 支持Alpha to Coverage (2006.9.34)
 //
 // 3.4.0
 // 增加了TexelToPixelOffset (2006.8.27)
@@ -168,6 +171,7 @@ namespace KlayGE
 			RST_CullMode,
 			RST_Clipping,
 
+			RST_AlphaToCoverageEnable,
 			RST_BlendEnable,
 			RST_BlendOp,
 			RST_SrcBlend,

@@ -223,7 +223,6 @@ namespace KlayGE
 		if (settings.multi_sample != 0)
 		{
 			glEnable(GL_MULTISAMPLE);
-			glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
 			glEnable(GL_SAMPLE_COVERAGE);
 			glSampleCoverage(settings.multi_sample / 16.0f, false);
 		}

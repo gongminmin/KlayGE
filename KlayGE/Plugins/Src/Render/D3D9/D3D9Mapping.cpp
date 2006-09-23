@@ -428,6 +428,8 @@ namespace KlayGE
 
 	RenderDeviceCaps D3D9Mapping::Mapping(D3DCAPS9 const & d3d_caps)
 	{
+		D3D9RenderEngine& re = *checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			
 		RenderDeviceCaps ret;
 
 		ret.max_shader_model		= std::min((d3d_caps.VertexShaderVersion & 0xFF00) >> 8,
@@ -439,7 +441,17 @@ namespace KlayGE
 		ret.max_texture_cube_size	= d3d_caps.MaxTextureWidth;
 		ret.max_textures_units		= d3d_caps.MaxSimultaneousTextures;
 		ret.max_texture_anisotropy	= d3d_caps.MaxAnisotropy;
-		ret.max_vertex_texture_units = 4;
+
+		if (S_OK == re.D3DObject()->CheckDeviceFormat(D3DADAPTER_DEFAULT,
+				D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, D3DUSAGE_QUERY_VERTEXTEXTURE, D3DRTYPE_TEXTURE,
+				D3DFMT_A32B32G32R32F))
+		{
+			ret.max_vertex_texture_units = 4;
+		}
+		else
+		{
+			ret.max_vertex_texture_units = 0;
+		}
 
 		ret.max_user_clip_planes	= d3d_caps.MaxUserClipPlanes;
 
@@ -528,10 +540,9 @@ namespace KlayGE
 		else
 		{
 			// Check for ATI instancing support
-			D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-			if (D3D_OK == renderEngine.D3DObject()->CheckDeviceFormat(D3DADAPTER_DEFAULT,
+			if (D3D_OK == re.D3DObject()->CheckDeviceFormat(D3DADAPTER_DEFAULT,
 				D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE,
-				static_cast<D3DFORMAT>(MAKEFOURCC('I', 'N', 'S', 'T'))))
+				static_cast<D3DFORMAT>(MakeFourCC<'I', 'N', 'S', 'T'>::value)))
 			{
 				ret.hw_instancing_support = true;
 			}

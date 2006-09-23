@@ -432,6 +432,7 @@ namespace KlayGE
 		render_states_[RST_CullMode]		= CM_AntiClockwise;
 		render_states_[RST_Clipping]		= true;
 
+		render_states_[RST_AlphaToCoverageEnable] = false;
 		render_states_[RST_BlendEnable]		= false;
 		render_states_[RST_BlendOp]			= BOP_Add;
 		render_states_[RST_SrcBlend]		= ABF_One;
@@ -499,6 +500,17 @@ namespace KlayGE
 			d3dDevice_->SetRenderState(D3DRS_CLIPPING, render_states_[RST_Clipping]);
 		}
 
+		if (dirty_render_states_[RST_AlphaToCoverageEnable])
+		{
+			// NVIDIA's Transparency Multisampling
+			if (S_OK == d3d_->CheckDeviceFormat(D3DADAPTER_DEFAULT,
+				D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE,
+				static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'O', 'C'>::value)))
+			{
+				d3dDevice_->SetRenderState(D3DRS_ADAPTIVETESS_Y,
+					static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'O', 'C'>::value));
+			}
+		}
 		if (dirty_render_states_[RST_BlendEnable])
 		{
 			d3dDevice_->SetRenderState(D3DRS_ALPHABLENDENABLE,
