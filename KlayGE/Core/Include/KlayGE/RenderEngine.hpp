@@ -169,7 +169,6 @@ namespace KlayGE
 			RST_PolygonMode				= 0x00,
 			RST_ShadeMode,
 			RST_CullMode,
-			RST_Clipping,
 
 			RST_AlphaToCoverageEnable,
 			RST_BlendEnable,

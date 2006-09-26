@@ -430,7 +430,6 @@ namespace KlayGE
 		render_states_[RST_PolygonMode]		= PM_Fill;
 		render_states_[RST_ShadeMode]		= SM_Gouraud;
 		render_states_[RST_CullMode]		= CM_AntiClockwise;
-		render_states_[RST_Clipping]		= true;
 
 		render_states_[RST_AlphaToCoverageEnable] = false;
 		render_states_[RST_BlendEnable]		= false;
@@ -494,10 +493,6 @@ namespace KlayGE
 		if (dirty_render_states_[RST_CullMode])
 		{
 			d3dDevice_->SetRenderState(D3DRS_CULLMODE, D3D9Mapping::Mapping(static_cast<CullMode>(render_states_[RST_CullMode])));
-		}
-		if (dirty_render_states_[RST_Clipping])
-		{
-			d3dDevice_->SetRenderState(D3DRS_CLIPPING, render_states_[RST_Clipping]);
 		}
 
 		if (dirty_render_states_[RST_AlphaToCoverageEnable])

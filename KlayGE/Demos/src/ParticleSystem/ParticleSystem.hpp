@@ -7,6 +7,7 @@
 #include <KlayGE/CameraController.hpp>
 #include <KlayGE/ParticleSystem.hpp>
 #include <KlayGE/Timer.hpp>
+#include <KlayGE/PostProcess.hpp>
 
 #include <boost/function.hpp>
 
@@ -81,7 +82,7 @@ public:
 
 private:
 	void InitObjects();
-
+	void OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height);
 	void DoUpdate(KlayGE::uint32_t pass);
 	KlayGE::uint32_t NumPasses() const;
 
@@ -100,6 +101,9 @@ private:
 	KlayGE::Timer timer_;
 
 	boost::shared_ptr<HeightImg> height_img_;
+
+	KlayGE::TexturePtr depth_tex_;
+	KlayGE::FrameBufferPtr depth_buffer_;
 };
 
 #endif		// _PARTICLESYSTEMAPP_HPP

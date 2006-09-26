@@ -402,7 +402,6 @@ namespace KlayGE
 		render_states_[RST_PolygonMode]		= PM_Fill;
 		render_states_[RST_ShadeMode]		= SM_Gouraud;
 		render_states_[RST_CullMode]		= CM_AntiClockwise;
-		render_states_[RST_Clipping]		= true;
 
 		render_states_[RST_AlphaToCoverageEnable] = false;
 		render_states_[RST_BlendEnable]		= false;
@@ -478,10 +477,6 @@ namespace KlayGE
 				glFrontFace(GL_CW);
 				break;
 			}
-		}
-		if (dirty_render_states_[RST_Clipping])
-		{
-			// do nothing;
 		}
 
 		if (dirty_render_states_[RST_AlphaToCoverageEnable])

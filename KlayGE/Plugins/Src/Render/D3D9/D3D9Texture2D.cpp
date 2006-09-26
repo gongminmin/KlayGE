@@ -260,7 +260,10 @@ namespace KlayGE
 	{
 		if (IsDepthFormat(format_))
 		{
+			usage_ = TU_RenderTarget;
+
 			usage = D3DUSAGE_DEPTHSTENCIL;
+			pool = D3DPOOL_DEFAULT;
 		}
 
 		IDirect3DTexture9* d3dTexture2D;
