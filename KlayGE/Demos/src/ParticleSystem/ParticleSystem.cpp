@@ -143,18 +143,6 @@ namespace
 			*(technique_->Effect().ParameterByName("Proj")) = proj;
 		}
 
-		void DepthPass(bool depth)
-		{
-			if (depth)
-			{
-				technique_ = technique_->Effect().TechniqueByName("DepthPass");
-			}
-			else
-			{
-				technique_ = technique_->Effect().TechniqueByName("Terrain");
-			}
-		}
-
 	private:
 		float4x4 model_;
 	};
@@ -166,19 +154,14 @@ namespace
 			: SceneObjectHelper(RenderablePtr(new TerrainRenderable(vertices, indices)), SOA_Cullable)
 		{
 		}
-
-		void DepthPass(bool depth)
-		{
-			checked_pointer_cast<TerrainRenderable>(renderable_)->DepthPass(depth);
-		}
 	};
 
 	int const NUM_PARTICLE = 8192;
 
-	class PointSpriteObject : public SceneObjectHelper
+	class ParticleObject : public SceneObjectHelper
 	{
 	public:
-		PointSpriteObject()
+		ParticleObject()
 			: SceneObjectHelper(SOA_Cullable | SOA_ShortAge)
 		{
 			instance_format_.push_back(vertex_element(VEU_Position, 0, EF_ABGR32F));
@@ -206,13 +189,13 @@ namespace
 		float4 par_info_;
 	};
 
-	class RenderPointSprite : public RenderableHelper
+	class RenderParticle : public RenderableHelper
 	{
 	public:
-		RenderPointSprite()
-			: RenderableHelper(L"PointSprite"),
+		RenderParticle()
+			: RenderableHelper(L"Particle"),
 				particle_sampler_(new Sampler),
-				depth_sampler_(new Sampler)
+				scene_sampler_(new Sampler)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -245,32 +228,33 @@ namespace
 				std::copy(&indices[0], &indices[4], mapper.Pointer<uint16_t>());
 			}
 
-			technique_ = rf.LoadEffect("ParticleSystem.fx")->TechniqueByName("PointSprite");
+			technique_ = rf.LoadEffect("ParticleSystem.fx")->TechniqueByName("Particle");
 
 			particle_sampler_->SetTexture(LoadTexture("particle.dds"));
 			particle_sampler_->Filtering(Sampler::TFO_Bilinear);
 			particle_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
 			particle_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
 
-			depth_sampler_->Filtering(Sampler::TFO_Point);
-			depth_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-			depth_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
+			scene_sampler_->Filtering(Sampler::TFO_Point);
+			scene_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
+			scene_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
 		}
 
-		void DepthTexture(TexturePtr tex)
+		void SceneTexture(TexturePtr tex)
 		{
-			depth_sampler_->SetTexture(tex);
+			scene_sampler_->SetTexture(tex);
 		}
 
 		void OnRenderBegin()
 		{
 			*(technique_->Effect().ParameterByName("particle_sampler")) = particle_sampler_;
-			*(technique_->Effect().ParameterByName("depth_sampler")) = depth_sampler_;
+			*(technique_->Effect().ParameterByName("scene_sampler")) = scene_sampler_;
 
 			App3DFramework const & app = Context::Instance().AppInstance();
 
 			float4x4 const & view = app.ActiveCamera().ViewMatrix();
 			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
+			float4x4 const inv_proj = MathLib::inverse(proj);
 
 			*(technique_->Effect().ParameterByName("View")) = view;
 			*(technique_->Effect().ParameterByName("Proj")) = proj;
@@ -285,39 +269,25 @@ namespace
 			float const x_offset = texel_to_pixel.x() / re.CurRenderTarget()->Width();
 			float const y_offset = texel_to_pixel.y() / re.CurRenderTarget()->Height();
 			*(technique_->Effect().ParameterByName("offset")) = float2(x_offset, y_offset);
+
+			*(technique_->Effect().ParameterByName("up_left")) = MathLib::transform_coord(float3(-1, 1, 1), inv_proj);
+			*(technique_->Effect().ParameterByName("up_right")) = MathLib::transform_coord(float3(1, 1, 1), inv_proj);
+			*(technique_->Effect().ParameterByName("down_left")) = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
+			*(technique_->Effect().ParameterByName("down_right")) = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
 		}
 
 	private:
 		SamplerPtr particle_sampler_;
-		SamplerPtr depth_sampler_; 
+		SamplerPtr scene_sampler_; 
 	};
 
 	class CopyPostProcess : public PostProcess
 	{
 	public:
 		CopyPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("ParticleSystem.fx")->TechniqueByName("Copy")),
-				depth_sampler_(new Sampler)
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("ParticleSystem.fx")->TechniqueByName("Copy"))
 		{
-			depth_sampler_->Filtering(Sampler::TFO_Point);
-			depth_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-			depth_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
 		}
-
-		void DepthTexture(TexturePtr depth)
-		{
-			depth_sampler_->SetTexture(depth);
-		}
-
-		void OnRenderBegin()
-		{
-			PostProcess::OnRenderBegin();
-
-			*(technique_->Effect().ParameterByName("depth_sampler")) = depth_sampler_;
-		}
-
-	private:
-		SamplerPtr depth_sampler_;
 	};
 
 	enum
@@ -387,11 +357,11 @@ void ParticleSystemApp::InitObjects()
 
 	height_img_.reset(new HeightImg(-2, -2, 2, 2, LoadTexture("grcanyon.dds"), 0.3f));
 
-	renderInstance_.reset(new RenderPointSprite);
+	renderInstance_.reset(new RenderParticle);
 	for (int i = 0; i < NUM_PARTICLE; ++ i)
 	{
-		SceneObjectPtr so(new PointSpriteObject);
-		checked_pointer_cast<PointSpriteObject>(so)->SetRenderable(renderInstance_);
+		SceneObjectPtr so(new ParticleObject);
+		checked_pointer_cast<ParticleObject>(so)->SetRenderable(renderInstance_);
 		scene_objs_.push_back(so);
 	}
 
@@ -415,19 +385,24 @@ void ParticleSystemApp::InitObjects()
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 
-	depth_buffer_ = rf.MakeFrameBuffer();
+	scene_buffer_ = rf.MakeFrameBuffer();
 	RenderTargetPtr screen_buffer = re.CurRenderTarget();
-	depth_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
+	scene_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
+
+	copy_pp_.reset(new CopyPostProcess);
+	copy_pp_->Destinate(RenderTargetPtr());
 }
 
 void ParticleSystemApp::OnResize(uint32_t width, uint32_t height)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	
-	depth_tex_ = rf.MakeTexture2D(width, height, 1, EF_R32F);
-	depth_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*depth_tex_, 0));
 
-	checked_pointer_cast<RenderPointSprite>(renderInstance_)->DepthTexture(depth_tex_);
+	scene_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F);
+	scene_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*scene_tex_, 0));
+
+	checked_pointer_cast<RenderParticle>(renderInstance_)->SceneTexture(scene_tex_);
+
+	copy_pp_->Source(scene_tex_, Sampler::TFO_Point, Sampler::TAM_Clamp);
 }
 
 void ParticleSystemApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -469,10 +444,9 @@ void ParticleSystemApp::DoUpdate(uint32_t pass)
 
 		sm.Clear();
 
-		re.BindRenderTarget(depth_buffer_);
-		re.Clear(RenderEngine::CBM_Color, Color(1, 1, 1, 1), 1, 0);
+		re.BindRenderTarget(scene_buffer_);
+		re.Clear(RenderEngine::CBM_Color, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 		
-		checked_pointer_cast<TerrainObject>(terrain_)->DepthPass(true);
 		terrain_->AddToSceneManager();
 		break;
 
@@ -482,8 +456,7 @@ void ParticleSystemApp::DoUpdate(uint32_t pass)
 		re.BindRenderTarget(RenderTargetPtr());
 		re.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
-		checked_pointer_cast<TerrainObject>(terrain_)->DepthPass(false);
-		terrain_->AddToSceneManager();
+		copy_pp_->Apply();
 
 		std::vector<Particle> active_particles;
 		for (uint32_t i = 0; i < ps_->NumParticles(); ++ i)
@@ -496,7 +469,7 @@ void ParticleSystemApp::DoUpdate(uint32_t pass)
 		std::sort(active_particles.begin(), active_particles.end(), particle_cmp);
 		for (uint32_t i = 0; i < active_particles.size(); ++ i)
 		{
-			checked_pointer_cast<PointSpriteObject>(scene_objs_[i])->Instance(active_particles[i]);
+			checked_pointer_cast<ParticleObject>(scene_objs_[i])->Instance(active_particles[i]);
 			scene_objs_[i]->AddToSceneManager();
 		}
 

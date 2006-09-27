@@ -1,5 +1,3 @@
-#include "PointSprite.fx"
-
 float4x4 InvWVP;
 float4x4 WVP;
 float4x4 View;
@@ -8,7 +6,9 @@ float4x4 InvProj;
 
 float PointRadius;
 
-void PointSpriteVS(float4 pos			: POSITION,
+float3 up_left, up_right, down_left, down_right;
+
+void ParticleVS(float4 pos			: POSITION,
 					float2 tex			: TEXCOORD0,
 					out float4 oPos		: POSITION,
 					out float4 oClr     : COLOR0,
@@ -27,9 +27,9 @@ void PointSpriteVS(float4 pos			: POSITION,
 
 float2 offset;
 sampler particle_sampler;
-sampler depth_sampler;
+sampler scene_sampler;
 
-float4 PointSpritePS(float4 clr    : COLOR0,
+float4 ParticlePS(float4 clr    : COLOR0,
 						float2 tex : TEXCOORD0,
 						float4 PosSS : TEXCOORD1,
 						float4 CenterView : TEXCOORD2) : COLOR
@@ -52,18 +52,22 @@ float4 PointSpritePS(float4 clr    : COLOR0,
 		float2 tex_coord = PosSS.xy + offset;
 		tex_coord.y = -tex_coord.y;
 		tex_coord = tex_coord / 2 + 0.5f;
-		float depth = tex2D(depth_sampler, tex_coord).r;
-		float4 scene_pos = mul(float4(PosSS.xy, depth, 1), InvProj);
-		scene_pos /= scene_pos.w;
+
+		float depth = tex2D(scene_sampler, tex_coord).a;
+		float dir = lerp(lerp(up_left.z, up_right.z, tex_coord.x),
+							lerp(down_left.z, down_right.z, tex_coord.x),
+							tex_coord.y);
 
 		float3 intersect = (v - sqrt(disc)) * view_dir;
 		clr *= tex2D(particle_sampler, (intersect.xy - CenterView.xy) / PointRadius / 2 + 0.5);
-		clr.a *= saturate((scene_pos.z - intersect.z) * 5);
+		clr.a *= saturate((dir * depth - intersect.z) * 5);
+		clip(clr.a - 0.03f);
+
 		return clr;
 	}
 }
 
-technique PointSprite
+technique Particle
 {
 	pass p0
 	{
@@ -73,8 +77,8 @@ technique PointSprite
 		SrcBlend = SrcAlpha;
 		DestBlend = InvSrcAlpha;
 
-		VertexShader = compile vs_2_0 PointSpriteVS();
-		PixelShader = compile ps_2_0 PointSpritePS();
+		VertexShader = compile vs_2_0 ParticleVS();
+		PixelShader = compile ps_2_0 ParticlePS();
 	}
 }
 
@@ -85,17 +89,22 @@ void TerrainVS(float4 Position : POSITION,
 					float3 Normal : NORMAL,
 					out float4 oPos : POSITION,
 					out float3 oPosOS : TEXCOORD0,
-					out float3 oNormal : TEXCOORD1)
+					out float3 oNormal : TEXCOORD1,
+					out float2 oDepth : TEXCOORD2)
 {
-	oPos = mul(mul(Position, View), Proj);
+	float4 pos_es = mul(Position, View);
+	oPos = mul(pos_es, Proj);
 	oNormal = Normal;
 	oPosOS = Position.xyz;
+	oDepth = pos_es.zw;
 }
 
 float4 TerrainPS(float3 pos : TEXCOORD0,
-					float3 normal : TEXCOORD1) : COLOR 
+					float3 normal : TEXCOORD1,
+					float2 depth : TEXCOORD2) : COLOR 
 {
-	return float4(dot(normalize(LightPos - pos), normal) * float3(0.5, 1, 0.5), 1);
+	return float4(dot(normalize(LightPos - pos), normal) * float3(0.5, 1, 0.5),
+				(depth.x / depth.y - 0.01f) / 100);
 }
 
 technique Terrain
@@ -111,27 +120,39 @@ technique Terrain
 }
 
 
-void DepthPassVS(float4 Position : POSITION,
+void CopyVS(float4 pos : POSITION,
+					float2 tex : TEXCOORD0,
 					out float4 oPos : POSITION,
-					out float2 oDepth : TEXCOORD0)
+					out float2 oTex : TEXCOORD0)
 {
-	oPos = mul(mul(Position, View), Proj);
-	oDepth = oPos.zw;
+	oPos = pos;
+	oTex = tex;
 }
 
-float4 DepthPassPS(float2 depth : TEXCOORD0) : COLOR 
+sampler src_sampler;
+
+void CopyPS(float2 tex_coord0 : TEXCOORD0,
+				out float4 clr : COLOR0,
+				out float depth : DEPTH)
 {
-	return depth.x / depth.y;
+	float4 s = tex2D(src_sampler, tex_coord0);
+	clr = float4(s.rgb, 1);
+	
+	float3 dir = lerp(lerp(up_left, up_right, tex_coord0.x),
+							lerp(down_left, down_right, tex_coord0.x),
+							tex_coord0.y);
+	float4 pos_ps = mul(float4(dir * s.a, 1), Proj);
+	depth = pos_ps.z / pos_ps.w;
 }
 
-technique DepthPass
+technique Copy
 {
 	pass p0
 	{
 		CullMode = CCW;
 		FillMode = Solid;
 
-		VertexShader = compile vs_2_0 DepthPassVS();
-		PixelShader = compile ps_2_0 DepthPassPS();
+		VertexShader = compile vs_2_0 CopyVS();
+		PixelShader = compile ps_2_0 CopyPS();
 	}
 }

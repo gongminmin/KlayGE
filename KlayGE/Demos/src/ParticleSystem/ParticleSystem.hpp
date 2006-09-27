@@ -102,8 +102,10 @@ private:
 
 	boost::shared_ptr<HeightImg> height_img_;
 
-	KlayGE::TexturePtr depth_tex_;
-	KlayGE::FrameBufferPtr depth_buffer_;
+	KlayGE::TexturePtr scene_tex_;
+	KlayGE::FrameBufferPtr scene_buffer_;
+
+	KlayGE::PostProcessPtr copy_pp_;
 };
 
 #endif		// _PARTICLESYSTEMAPP_HPP
