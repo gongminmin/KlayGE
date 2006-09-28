@@ -93,6 +93,11 @@ namespace KlayGE
 			assert(i < particles_.size());
 			return particles_[i];
 		}
+		ParticleType& GetParticle(uint32_t i)
+		{
+			assert(i < particles_.size());
+			return particles_[i];
+		}
 
 	protected:
 		boost::function<void(ParticleType& par, float4x4 const & mat)> gen_func_;

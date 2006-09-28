@@ -92,7 +92,8 @@ namespace
 	{
 	public:
 		TerrainRenderable(std::vector<float3> const & vertices, std::vector<uint16_t> const & indices)
-			: RenderableHelper(L"Terrain")
+			: RenderableHelper(L"Terrain"),
+				grass_sampler_(new Sampler)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -130,6 +131,11 @@ namespace
 			rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
 
 			box_ = MathLib::compute_bounding_box<float>(&vertices[0], &vertices[0] + vertices.size());
+
+			grass_sampler_->SetTexture(LoadTexture("grass.dds"));
+			grass_sampler_->Filtering(Sampler::TFO_Bilinear);
+			grass_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
+			grass_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
 		}
 
 		void OnRenderBegin()
@@ -141,10 +147,14 @@ namespace
 
 			*(technique_->Effect().ParameterByName("View")) = view;
 			*(technique_->Effect().ParameterByName("Proj")) = proj;
+
+			*(technique_->Effect().ParameterByName("grass_sampler")) = grass_sampler_;
 		}
 
 	private:
 		float4x4 model_;
+
+		SamplerPtr grass_sampler_;
 	};
 
 	class TerrainObject : public SceneObjectHelper
@@ -250,10 +260,10 @@ namespace
 			*(technique_->Effect().ParameterByName("particle_sampler")) = particle_sampler_;
 			*(technique_->Effect().ParameterByName("scene_sampler")) = scene_sampler_;
 
-			App3DFramework const & app = Context::Instance().AppInstance();
+			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 
-			float4x4 const & view = app.ActiveCamera().ViewMatrix();
-			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
+			float4x4 const & view = camera.ViewMatrix();
+			float4x4 const & proj = camera.ProjMatrix();
 			float4x4 const inv_proj = MathLib::inverse(proj);
 
 			*(technique_->Effect().ParameterByName("View")) = view;
@@ -262,7 +272,7 @@ namespace
 			*(technique_->Effect().ParameterByName("InvWVP")) = MathLib::inverse(view * proj);
 			*(technique_->Effect().ParameterByName("InvProj")) = MathLib::inverse(proj);
 
-			*(technique_->Effect().ParameterByName("PointRadius")) = 0.04f;
+			*(technique_->Effect().ParameterByName("point_radius")) = 0.04f;
 
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			float4 const & texel_to_pixel = re.TexelToPixelOffset();
@@ -270,10 +280,13 @@ namespace
 			float const y_offset = texel_to_pixel.y() / re.CurRenderTarget()->Height();
 			*(technique_->Effect().ParameterByName("offset")) = float2(x_offset, y_offset);
 
-			*(technique_->Effect().ParameterByName("up_left")) = MathLib::transform_coord(float3(-1, 1, 1), inv_proj);
-			*(technique_->Effect().ParameterByName("up_right")) = MathLib::transform_coord(float3(1, 1, 1), inv_proj);
-			*(technique_->Effect().ParameterByName("down_left")) = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
-			*(technique_->Effect().ParameterByName("down_right")) = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
+			*(technique_->Effect().ParameterByName("upper_left")) = MathLib::transform_coord(float3(-1, 1, 1), inv_proj);
+			*(technique_->Effect().ParameterByName("upper_right")) = MathLib::transform_coord(float3(1, 1, 1), inv_proj);
+			*(technique_->Effect().ParameterByName("lower_left")) = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
+			*(technique_->Effect().ParameterByName("lower_right")) = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
+
+			*(technique_->Effect().ParameterByName("depth_min")) = camera.NearPlane();
+			*(technique_->Effect().ParameterByName("inv_depth_range")) = 1 / (camera.FarPlane() - camera.NearPlane());
 		}
 
 	private:
@@ -341,7 +354,7 @@ void ParticleSystemApp::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
-	this->LookAt(float3(-1.5f, 1.5f, -1.5f), float3(0, 0, 0));
+	this->LookAt(float3(-1.2f, 2.2f, -1.2f), float3(0, 0.5f, 0));
 	this->Proj(0.01f, 100);
 
 	fpcController_.AttachCamera(this->ActiveCamera());
@@ -355,7 +368,7 @@ void ParticleSystemApp::InitObjects()
 	input_handler += boost::bind(&ParticleSystemApp::InputHandler, this, _1, _2);
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	height_img_.reset(new HeightImg(-2, -2, 2, 2, LoadTexture("grcanyon.dds"), 0.3f));
+	height_img_.reset(new HeightImg(-2, -2, 2, 2, LoadTexture("grcanyon.dds"), 1));
 
 	renderInstance_.reset(new RenderParticle);
 	for (int i = 0; i < NUM_PARTICLE; ++ i)
@@ -399,6 +412,7 @@ void ParticleSystemApp::OnResize(uint32_t width, uint32_t height)
 
 	scene_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F);
 	scene_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*scene_tex_, 0));
+	scene_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));
 
 	checked_pointer_cast<RenderParticle>(renderInstance_)->SceneTexture(scene_tex_);
 
@@ -445,7 +459,7 @@ void ParticleSystemApp::DoUpdate(uint32_t pass)
 		sm.Clear();
 
 		re.BindRenderTarget(scene_buffer_);
-		re.Clear(RenderEngine::CBM_Color, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
+		re.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 		
 		terrain_->AddToSceneManager();
 		break;
@@ -473,7 +487,7 @@ void ParticleSystemApp::DoUpdate(uint32_t pass)
 			scene_objs_[i]->AddToSceneManager();
 		}
 
-		float4x4 mat = MathLib::rotation_x(PI / 6) * MathLib::rotation_y(clock() / 300.0f) * MathLib::translation(0.0f, 0.5f, 0.0f);
+		float4x4 mat = MathLib::rotation_x(PI / 6) * MathLib::rotation_y(clock() / 300.0f) * MathLib::translation(0.0f, 0.8f, 0.0f);
 		ps_->ModelMatrix(mat);
 
 		ps_->Update(static_cast<float>(timer_.elapsed()));
