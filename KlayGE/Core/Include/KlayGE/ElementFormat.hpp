@@ -112,7 +112,11 @@ namespace KlayGE
 		// BC2 compression element format. Standard RGB (gamma = 2.2).
 		EF_BC2_SRGB,
 		// BC3 compression element format. Standard RGB (gamma = 2.2).
-		EF_BC3_SRGB
+		EF_BC3_SRGB,
+		// BC4 compression element format. Standard RGB (gamma = 2.2).
+		EF_BC4_SRGB,
+		// BC5 compression element format. Standard RGB (gamma = 2.2).
+		EF_BC5_SRGB,
 	};
 
 	inline uint8_t
