@@ -310,11 +310,13 @@ namespace KlayGE
 		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
 
+		ID3DXConstantTablePtr constant_table[2];
+		
 		if (desc.pVertexShaderFunction != NULL)
 		{
-			ID3DXConstantTable* constant_table;
-			D3DXGetShaderConstantTable(desc.pVertexShaderFunction, &constant_table);
-			constant_table_[0] = MakeCOMPtr(constant_table);
+			ID3DXConstantTable* ct;
+			D3DXGetShaderConstantTable(desc.pVertexShaderFunction, &ct);
+			constant_table[0] = MakeCOMPtr(ct);
 
 			IDirect3DVertexShader9* shader;
 			d3d_device->CreateVertexShader(desc.pVertexShaderFunction, &shader);
@@ -322,9 +324,9 @@ namespace KlayGE
 		}
 		if (desc.pPixelShaderFunction != NULL)
 		{
-			ID3DXConstantTable* constant_table;
-			D3DXGetShaderConstantTable(desc.pPixelShaderFunction, &constant_table);
-			constant_table_[1] = MakeCOMPtr(constant_table);
+			ID3DXConstantTable* ct;
+			D3DXGetShaderConstantTable(desc.pPixelShaderFunction, &ct);
+			constant_table[1] = MakeCOMPtr(ct);
 
 			IDirect3DPixelShader9* shader;
 			d3d_device->CreatePixelShader(desc.pPixelShaderFunction, &shader);
@@ -333,23 +335,23 @@ namespace KlayGE
 
 		for (int i = 0; i < 2; ++ i)
 		{
-			if (constant_table_[i])
+			if (constant_table[i])
 			{
 				D3DXCONSTANTTABLE_DESC ct_desc;
-				constant_table_[i]->GetDesc(&ct_desc);
+				constant_table[i]->GetDesc(&ct_desc);
 				for (UINT c = 0; c < ct_desc.Constants; ++ c)
 				{
-					D3DXHANDLE handle = constant_table_[i]->GetConstant(NULL, c);
+					D3DXHANDLE handle = constant_table[i]->GetConstant(NULL, c);
 					D3DXCONSTANT_DESC constant_desc;
 					UINT count;
-					constant_table_[i]->GetConstantDesc(handle, &constant_desc, &count);
+					constant_table[i]->GetConstantDesc(handle, &constant_desc, &count);
 
 					RenderEffectParameterPtr param = effect_.ParameterByName(constant_desc.Name);
 					D3D9RenderEffectParameterDesc desc;
 
 					if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterSampler>(param))
 					{
-						UINT sampler_index = constant_table_[i]->GetSamplerIndex(handle);
+						UINT sampler_index = constant_table[i]->GetSamplerIndex(handle);
 						if (0 == i)
 						{
 							sampler_index += D3DVERTEXTEXTURESAMPLER0;

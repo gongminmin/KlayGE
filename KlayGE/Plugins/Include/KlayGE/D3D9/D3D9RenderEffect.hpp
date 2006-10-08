@@ -134,7 +134,6 @@ namespace KlayGE
 	private:
 		D3DXHANDLE pass_;
 
-		ID3DXConstantTablePtr constant_table_[2];
 		std::vector<std::pair<RenderEffectParameterPtr, D3D9RenderEffectParameterDesc> > parameters_[2];
 
 		ID3D9VertexShaderPtr vertex_shader_;
