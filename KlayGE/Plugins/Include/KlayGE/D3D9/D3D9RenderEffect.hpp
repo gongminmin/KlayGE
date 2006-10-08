@@ -39,7 +39,6 @@
 #include <KlayGE/config/auto_link.hpp>
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/MapVector.hpp>
 
 #include <boost/smart_ptr.hpp>
 
@@ -55,6 +54,32 @@ namespace KlayGE
 	class D3D9RenderEffectParameterSampler;
 
 	typedef boost::shared_ptr<D3D9RenderEffect> D3D9RenderEffectPtr;
+
+	
+	class D3D9RenderEffectParameterDesc
+	{
+	public:
+		void RegisterInfo(bool is_vertex_shader, uint32_t register_start, uint32_t register_count);
+
+		bool IsVertexShader() const
+		{
+			return is_vertex_shader_;
+		}
+		uint32_t RegisterStart() const
+		{
+			return register_start_;
+		}
+		uint32_t RegisterCount() const
+		{
+			return register_count_;
+		}
+
+	protected:
+		bool is_vertex_shader_;
+
+		uint32_t register_start_;
+		uint32_t register_count_;
+	};
 
 	// äÖÈ¾Ð§¹û
 	//////////////////////////////////////////////////////////////////////////////////
@@ -110,7 +135,10 @@ namespace KlayGE
 		D3DXHANDLE pass_;
 
 		ID3DXConstantTablePtr constant_table_[2];
-		MapVector<RenderEffectParameterPtr, uint32_t> samplers_[2];
+		std::vector<std::pair<RenderEffectParameterPtr, D3D9RenderEffectParameterDesc> > parameters_[2];
+
+		ID3D9VertexShaderPtr vertex_shader_;
+		ID3D9PixelShaderPtr pixel_shader_;
 	};
 
 	class D3D9RenderEffectParameterBool : public RenderEffectParameterConcrete<bool>, public D3D9Resource
@@ -120,6 +148,8 @@ namespace KlayGE
 			: RenderEffectParameterConcrete<bool>(effect, name, semantic)
 		{
 		}
+
+		void Flush(D3D9RenderEffectParameterDesc const & desc);
 
 	private:
 		void DoFlush(bool const & value);
@@ -145,6 +175,8 @@ namespace KlayGE
 		{
 		}
 
+		void Flush(D3D9RenderEffectParameterDesc const & desc);
+
 	private:
 		void DoFlush(int const & value);
 
@@ -168,6 +200,8 @@ namespace KlayGE
 			: RenderEffectParameterConcrete<float>(effect, name, semantic)
 		{
 		}
+
+		void Flush(D3D9RenderEffectParameterDesc const & desc);
 
 	private:
 		void DoFlush(float const & value);
@@ -193,6 +227,8 @@ namespace KlayGE
 		{
 		}
 
+		void Flush(D3D9RenderEffectParameterDesc const & desc);
+
 	private:
 		void DoFlush(float2 const & value);
 
@@ -216,6 +252,8 @@ namespace KlayGE
 			: RenderEffectParameterConcrete<float3>(effect, name, semantic)
 		{
 		}
+
+		void Flush(D3D9RenderEffectParameterDesc const & desc);
 
 	private:
 		void DoFlush(float3 const & value);
@@ -241,6 +279,8 @@ namespace KlayGE
 		{
 		}
 
+		void Flush(D3D9RenderEffectParameterDesc const & desc);
+
 	private:
 		void DoFlush(float4 const & value);
 
@@ -264,6 +304,8 @@ namespace KlayGE
 			: RenderEffectParameterConcrete<float4x4>(effect, name, semantic)
 		{
 		}
+
+		void Flush(D3D9RenderEffectParameterDesc const & desc);
 
 	private:
 		void DoFlush(float4x4 const & value);
@@ -289,6 +331,8 @@ namespace KlayGE
 		{
 		}
 
+		void Flush(D3D9RenderEffectParameterDesc const & desc);
+
 	private:
 		void DoFlush(SamplerPtr const & value);
 
@@ -308,6 +352,8 @@ namespace KlayGE
 			: RenderEffectParameterConcrete<std::vector<bool> >(effect, name, semantic)
 		{
 		}
+
+		void Flush(D3D9RenderEffectParameterDesc const & desc);
 
 	private:
 		void DoFlush(std::vector<bool> const & value);
@@ -333,6 +379,8 @@ namespace KlayGE
 		{
 		}
 
+		void Flush(D3D9RenderEffectParameterDesc const & desc);
+
 	private:
 		void DoFlush(std::vector<int> const & value);
 
@@ -356,6 +404,8 @@ namespace KlayGE
 			: RenderEffectParameterConcrete<std::vector<float> >(effect, name, semantic)
 		{
 		}
+
+		void Flush(D3D9RenderEffectParameterDesc const & desc);
 
 	private:
 		void DoFlush(std::vector<float> const & value);
@@ -381,6 +431,8 @@ namespace KlayGE
 		{
 		}
 
+		void Flush(D3D9RenderEffectParameterDesc const & desc);
+
 	private:
 		void DoFlush(std::vector<float4> const & value);
 
@@ -404,6 +456,8 @@ namespace KlayGE
 			: RenderEffectParameterConcrete<std::vector<float4x4> >(effect, name, semantic)
 		{
 		}
+
+		void Flush(D3D9RenderEffectParameterDesc const & desc);
 
 	private:
 		void DoFlush(std::vector<float4x4> const & value);

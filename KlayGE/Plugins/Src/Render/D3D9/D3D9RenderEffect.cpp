@@ -278,7 +278,7 @@ namespace KlayGE
 		TIF(this->D3DXEffect()->SetTechnique(tech_));
 
 		UINT passes;
-		TIF(this->D3DXEffect()->Begin(&passes, D3DXFX_DONOTSAVESAMPLERSTATE | flags));
+		TIF(this->D3DXEffect()->Begin(&passes, D3DXFX_DONOTSAVESHADERSTATE | D3DXFX_DONOTSAVESAMPLERSTATE | flags));
 	}
 
 	void D3D9RenderTechnique::DoEnd()
@@ -307,17 +307,28 @@ namespace KlayGE
 		D3DXPASS_DESC desc;
 		this->D3DXEffect()->GetPassDesc(pass, &desc);
 
+		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
+
 		if (desc.pVertexShaderFunction != NULL)
 		{
 			ID3DXConstantTable* constant_table;
 			D3DXGetShaderConstantTable(desc.pVertexShaderFunction, &constant_table);
 			constant_table_[0] = MakeCOMPtr(constant_table);
+
+			IDirect3DVertexShader9* shader;
+			d3d_device->CreateVertexShader(desc.pVertexShaderFunction, &shader);
+			vertex_shader_ = MakeCOMPtr(shader);
 		}
 		if (desc.pPixelShaderFunction != NULL)
 		{
 			ID3DXConstantTable* constant_table;
 			D3DXGetShaderConstantTable(desc.pPixelShaderFunction, &constant_table);
 			constant_table_[1] = MakeCOMPtr(constant_table);
+
+			IDirect3DPixelShader9* shader;
+			d3d_device->CreatePixelShader(desc.pPixelShaderFunction, &shader);
+			pixel_shader_ = MakeCOMPtr(shader);
 		}
 
 		for (int i = 0; i < 2; ++ i)
@@ -332,20 +343,26 @@ namespace KlayGE
 					D3DXCONSTANT_DESC constant_desc;
 					UINT count;
 					constant_table_[i]->GetConstantDesc(handle, &constant_desc, &count);
-					if ((D3DXPT_SAMPLER == constant_desc.Type)
-						|| (D3DXPT_SAMPLER1D == constant_desc.Type)
-						|| (D3DXPT_SAMPLER2D == constant_desc.Type)
-						|| (D3DXPT_SAMPLER3D == constant_desc.Type)
-						|| (D3DXPT_SAMPLERCUBE == constant_desc.Type))
+
+					RenderEffectParameterPtr param = effect_.ParameterByName(constant_desc.Name);
+					D3D9RenderEffectParameterDesc desc;
+
+					if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterSampler>(param))
 					{
-						RenderEffectParameterPtr param = effect_.ParameterByName(constant_desc.Name);
 						UINT sampler_index = constant_table_[i]->GetSamplerIndex(handle);
 						if (0 == i)
 						{
 							sampler_index += D3DVERTEXTEXTURESAMPLER0;
 						}
-						samplers_[i].insert(std::make_pair(param, sampler_index));
+
+						desc.RegisterInfo(0 == i, sampler_index, 1);
 					}
+					else
+					{
+						desc.RegisterInfo(0 == i, constant_desc.RegisterIndex, constant_desc.RegisterCount);
+					}
+
+					parameters_[i].push_back(std::make_pair(param, desc));
 				}
 			}
 		}
@@ -354,16 +371,110 @@ namespace KlayGE
 	void D3D9RenderPass::Begin()
 	{
 		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
+
+		d3d_device->SetVertexShader(vertex_shader_.get());
+		d3d_device->SetPixelShader(pixel_shader_.get());
 
 		for (int i = 0; i < 2; ++ i)
 		{
-			for (MapVector<RenderEffectParameterPtr, uint32_t>::iterator iter = samplers_[i].begin();
-				iter != samplers_[i].end(); ++ iter)
+			for (std::vector<std::pair<RenderEffectParameterPtr, D3D9RenderEffectParameterDesc> >::iterator iter = parameters_[i].begin();
+				iter != parameters_[i].end(); ++ iter)
 			{
-				SamplerPtr sampler;
-				iter->first->Value(sampler);
+				RenderEffectParameterPtr param = iter->first;
 
-				render_eng.SetSampler(iter->second, sampler);
+				if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterBool>(param))
+				{
+					checked_pointer_cast<D3D9RenderEffectParameterBool>(param)->Flush(iter->second);
+				}
+				else
+				{
+					if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterInt>(param))
+					{
+						checked_pointer_cast<D3D9RenderEffectParameterInt>(param)->Flush(iter->second);
+					}
+					else
+					{
+						if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterFloat>(param))
+						{
+							checked_pointer_cast<D3D9RenderEffectParameterFloat>(param)->Flush(iter->second);
+						}
+						else
+						{
+							if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterFloat2>(param))
+							{
+								checked_pointer_cast<D3D9RenderEffectParameterFloat2>(param)->Flush(iter->second);
+							}
+							else
+							{
+								if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterFloat3>(param))
+								{
+									checked_pointer_cast<D3D9RenderEffectParameterFloat3>(param)->Flush(iter->second);
+								}
+								else
+								{
+									if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterFloat4>(param))
+									{
+										checked_pointer_cast<D3D9RenderEffectParameterFloat4>(param)->Flush(iter->second);
+									}
+									else
+									{
+										if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterFloat4x4>(param))
+										{
+											checked_pointer_cast<D3D9RenderEffectParameterFloat4x4>(param)->Flush(iter->second);
+										}
+										else
+										{
+											if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterSampler>(param))
+											{
+												checked_pointer_cast<D3D9RenderEffectParameterSampler>(param)->Flush(iter->second);
+											}
+											else
+											{
+												if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterBoolArray>(param))
+												{
+													checked_pointer_cast<D3D9RenderEffectParameterBoolArray>(param)->Flush(iter->second);
+												}
+												else
+												{
+													if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterIntArray>(param))
+													{
+														checked_pointer_cast<D3D9RenderEffectParameterIntArray>(param)->Flush(iter->second);
+													}
+													else
+													{
+														if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterFloatArray>(param))
+														{
+															checked_pointer_cast<D3D9RenderEffectParameterFloatArray>(param)->Flush(iter->second);
+														}
+														else
+														{
+															if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterFloat4Array>(param))
+															{
+																checked_pointer_cast<D3D9RenderEffectParameterFloat4Array>(param)->Flush(iter->second);
+															}
+															else
+															{
+																if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterFloat4x4Array>(param))
+																{
+																	checked_pointer_cast<D3D9RenderEffectParameterFloat4x4Array>(param)->Flush(iter->second);
+																}
+																else
+																{
+																	BOOST_ASSERT(false);
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 
@@ -378,10 +489,13 @@ namespace KlayGE
 
 		for (int i = 0; i < 2; ++ i)
 		{
-			for (MapVector<RenderEffectParameterPtr, uint32_t>::iterator iter = samplers_[i].begin();
-				iter != samplers_[i].end(); ++ iter)
+			for (std::vector<std::pair<RenderEffectParameterPtr, D3D9RenderEffectParameterDesc> >::iterator iter = parameters_[i].begin();
+				iter != parameters_[i].end(); ++ iter)
 			{
-				render_eng.DisableSampler(iter->second);
+				if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterSampler>(iter->first))
+				{
+					render_eng.DisableSampler(iter->second.RegisterStart());
+				}
 			}
 		}
 	}
@@ -392,11 +506,36 @@ namespace KlayGE
 	}
 
 
+	void D3D9RenderEffectParameterDesc::RegisterInfo(bool is_vertex_shader, uint32_t register_start, uint32_t register_count)
+	{
+		is_vertex_shader_ = is_vertex_shader;
+
+		register_start_ = register_start;
+		register_count_ = register_count;
+	}
+
+
 	void D3D9RenderEffectParameterBool::DoFlush(bool const & value)
 	{
 		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		BOOL tmp = value;
 		TIF(d3dx_effect->SetValue(name_.c_str(), &tmp, sizeof(tmp)));
+	}
+
+	void D3D9RenderEffectParameterBool::Flush(D3D9RenderEffectParameterDesc const & desc)
+	{
+		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
+
+		BOOL tmp[4] = { val_, FALSE, FALSE, FALSE };
+		if (desc.IsVertexShader())
+		{
+			d3d_device->SetVertexShaderConstantB(desc.RegisterStart(), tmp, desc.RegisterCount());
+		}
+		else
+		{
+			d3d_device->SetPixelShaderConstantB(desc.RegisterStart(), tmp, desc.RegisterCount());
+		}
 	}
 
 	void D3D9RenderEffectParameterInt::DoFlush(int const & value)
@@ -405,10 +544,42 @@ namespace KlayGE
 		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
 	}
 
+	void D3D9RenderEffectParameterInt::Flush(D3D9RenderEffectParameterDesc const & desc)
+	{
+		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
+
+		int tmp[4] = { val_, 0, 0, 0 };
+		if (desc.IsVertexShader())
+		{
+			d3d_device->SetVertexShaderConstantI(desc.RegisterStart(), tmp, desc.RegisterCount());
+		}
+		else
+		{
+			d3d_device->SetPixelShaderConstantI(desc.RegisterStart(), tmp, desc.RegisterCount());
+		}
+	}
+
 	void D3D9RenderEffectParameterFloat::DoFlush(float const & value)
 	{
 		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
+	}
+
+	void D3D9RenderEffectParameterFloat::Flush(D3D9RenderEffectParameterDesc const & desc)
+	{
+		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
+
+		float tmp[4] = { val_, 0, 0, 0 };
+		if (desc.IsVertexShader())
+		{
+			d3d_device->SetVertexShaderConstantF(desc.RegisterStart(), tmp, desc.RegisterCount());
+		}
+		else
+		{
+			d3d_device->SetPixelShaderConstantF(desc.RegisterStart(), tmp, desc.RegisterCount());
+		}
 	}
 
 	void D3D9RenderEffectParameterFloat2::DoFlush(float2 const & value)
@@ -417,10 +588,42 @@ namespace KlayGE
 		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
 	}
 
+	void D3D9RenderEffectParameterFloat2::Flush(D3D9RenderEffectParameterDesc const & desc)
+	{
+		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
+
+		float tmp[4] = { val_.x(), val_.y(), 0, 0 };
+		if (desc.IsVertexShader())
+		{
+			d3d_device->SetVertexShaderConstantF(desc.RegisterStart(), tmp, desc.RegisterCount());
+		}
+		else
+		{
+			d3d_device->SetPixelShaderConstantF(desc.RegisterStart(), tmp, desc.RegisterCount());
+		}
+	}
+
 	void D3D9RenderEffectParameterFloat3::DoFlush(float3 const & value)
 	{
 		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
+	}
+
+	void D3D9RenderEffectParameterFloat3::Flush(D3D9RenderEffectParameterDesc const & desc)
+	{
+		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
+
+		float tmp[4] = { val_.x(), val_.y(), val_.z(), 0 };
+		if (desc.IsVertexShader())
+		{
+			d3d_device->SetVertexShaderConstantF(desc.RegisterStart(), tmp, desc.RegisterCount());
+		}
+		else
+		{
+			d3d_device->SetPixelShaderConstantF(desc.RegisterStart(), tmp, desc.RegisterCount());
+		}
 	}
 
 	void D3D9RenderEffectParameterFloat4::DoFlush(float4 const & value)
@@ -429,14 +632,50 @@ namespace KlayGE
 		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
 	}
 
+	void D3D9RenderEffectParameterFloat4::Flush(D3D9RenderEffectParameterDesc const & desc)
+	{
+		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
+
+		if (desc.IsVertexShader())
+		{
+			d3d_device->SetVertexShaderConstantF(desc.RegisterStart(), &val_[0], desc.RegisterCount());
+		}
+		else
+		{
+			d3d_device->SetPixelShaderConstantF(desc.RegisterStart(), &val_[0], desc.RegisterCount());
+		}
+	}
+
 	void D3D9RenderEffectParameterFloat4x4::DoFlush(float4x4 const & value)
 	{
 		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
 	}
 
+	void D3D9RenderEffectParameterFloat4x4::Flush(D3D9RenderEffectParameterDesc const & desc)
+	{
+		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
+
+		if (desc.IsVertexShader())
+		{
+			d3d_device->SetVertexShaderConstantF(desc.RegisterStart(), &val_[0], desc.RegisterCount());
+		}
+		else
+		{
+			d3d_device->SetPixelShaderConstantF(desc.RegisterStart(), &val_[0], desc.RegisterCount());
+		}
+	}
+
 	void D3D9RenderEffectParameterSampler::DoFlush(SamplerPtr const & /*value*/)
 	{
+	}
+
+	void D3D9RenderEffectParameterSampler::Flush(D3D9RenderEffectParameterDesc const & desc)
+	{
+		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		render_eng.SetSampler(desc.RegisterStart(), val_);
 	}
 
 	void D3D9RenderEffectParameterSampler::DoOnLostDevice()
@@ -464,16 +703,62 @@ namespace KlayGE
 		TIF(d3dx_effect->SetBoolArray(name_.c_str(), &tmp[0], static_cast<UINT>(tmp.size())));
 	}
 
+	void D3D9RenderEffectParameterBoolArray::Flush(D3D9RenderEffectParameterDesc const & desc)
+	{
+		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
+
+		std::vector<BOOL> tmp(val_.begin(), val_.end());
+		if (desc.IsVertexShader())
+		{
+			d3d_device->SetVertexShaderConstantB(desc.RegisterStart(), &tmp[0], desc.RegisterCount());
+		}
+		else
+		{
+			d3d_device->SetPixelShaderConstantB(desc.RegisterStart(), &tmp[0], desc.RegisterCount());
+		}
+	}
+
 	void D3D9RenderEffectParameterIntArray::DoFlush(std::vector<int> const & value)
 	{
 		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetIntArray(name_.c_str(), &value[0], static_cast<UINT>(value.size())));
 	}
 
+	void D3D9RenderEffectParameterIntArray::Flush(D3D9RenderEffectParameterDesc const & desc)
+	{
+		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
+
+		if (desc.IsVertexShader())
+		{
+			d3d_device->SetVertexShaderConstantI(desc.RegisterStart(), &val_[0], desc.RegisterCount());
+		}
+		else
+		{
+			d3d_device->SetPixelShaderConstantI(desc.RegisterStart(), &val_[0], desc.RegisterCount());
+		}
+	}
+
 	void D3D9RenderEffectParameterFloatArray::DoFlush(std::vector<float> const & value)
 	{
 		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetFloatArray(name_.c_str(), &value[0], static_cast<UINT>(value.size())));
+	}
+
+	void D3D9RenderEffectParameterFloatArray::Flush(D3D9RenderEffectParameterDesc const & desc)
+	{
+		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
+
+		if (desc.IsVertexShader())
+		{
+			d3d_device->SetVertexShaderConstantF(desc.RegisterStart(), &val_[0], desc.RegisterCount());
+		}
+		else
+		{
+			d3d_device->SetPixelShaderConstantF(desc.RegisterStart(), &val_[0], desc.RegisterCount());
+		}
 	}
 
 	void D3D9RenderEffectParameterFloat4Array::DoFlush(std::vector<float4> const & value)
@@ -483,11 +768,41 @@ namespace KlayGE
 			static_cast<UINT>(value.size())));
 	}
 
+	void D3D9RenderEffectParameterFloat4Array::Flush(D3D9RenderEffectParameterDesc const & desc)
+	{
+		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
+
+		if (desc.IsVertexShader())
+		{
+			d3d_device->SetVertexShaderConstantF(desc.RegisterStart(), &val_[0][0], desc.RegisterCount());
+		}
+		else
+		{
+			d3d_device->SetPixelShaderConstantF(desc.RegisterStart(), &val_[0][0], desc.RegisterCount());
+		}
+	}
+
 	void D3D9RenderEffectParameterFloat4x4Array::DoFlush(std::vector<float4x4> const & value)
 	{
 		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
 		TIF(d3dx_effect->SetMatrixArray(name_.c_str(), reinterpret_cast<D3DXMATRIX const *>(&value[0]),
 			static_cast<UINT>(value.size())));
+	}
+
+	void D3D9RenderEffectParameterFloat4x4Array::Flush(D3D9RenderEffectParameterDesc const & desc)
+	{
+		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
+
+		if (desc.IsVertexShader())
+		{
+			d3d_device->SetVertexShaderConstantF(desc.RegisterStart(), &val_[0][0], desc.RegisterCount());
+		}
+		else
+		{
+			d3d_device->SetPixelShaderConstantF(desc.RegisterStart(), &val_[0][0], desc.RegisterCount());
+		}
 	}
 
 	HRESULT D3D9RenderEffectInclude::Open(D3DXINCLUDE_TYPE /*IncludeType*/, LPCSTR pFileName,
