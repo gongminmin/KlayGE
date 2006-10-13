@@ -130,24 +130,54 @@ typedef int				GLint;
 typedef unsigned int	GLuint;
 typedef int				GLsizei;
 typedef unsigned int	GLenum;
-typedef GLint*			GLintptr;
-typedef GLsizei*		GLsizeiptr;
+typedef ptrdiff_t		GLintptr;
+typedef ptrdiff_t		GLsizeiptr;
 typedef unsigned int	GLbitfield;
 typedef float			GLfloat;
 typedef float			GLclampf;
 typedef double			GLdouble;
 typedef double			GLclampd;
 
-#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+	#include <inttypes.h>
+	typedef int64_t		GLint64;
+	typedef uint64_t	GLuint64;
+#elif defined(__sun__)
+	#include <inttypes.h>
+	#if defined(__STDC__)
+		#if defined(__arch64__)
+			typedef long int				GLint64;
+			typedef unsigned long int		GLuint64;
+		#else
+			typedef long long int			GLint64;
+			typedef unsigned long long int	GLuint64;
+		#endif /* __arch64__ */
+	#else
+		typedef int64_t		GLint64;
+		typedef uint64_t	GLuint64;
+	#endif /* __STDC__ */
+#elif defined( __VMS )
+	#include <inttypes.h>
+	typedef int64_t		GLint64;
+	typedef uint64_t	GLuint64;
+#elif defined(__SCO__) || defined(__USLC__)
+	#include <stdint.h>
+	typedef int64_t		GLint64;
+	typedef uint64_t	GLuint64;
+#elif defined(__UNIXOS2__) || defined(__SOL64__)
 	typedef long long int			GLint64;
 	typedef unsigned long long int	GLuint64;
-#elif defined(_WIN32)
-	typedef __int64					GLint64;
-	typedef unsigned __int64		GLuint64;
+#elif defined(WIN32) && defined(__GNUC__)
+	#include <stdint.h>
+	typedef int64_t		GLint64;
+	typedef uint64_t	GLuint64;
+#elif defined(WIN32)
+	typedef __int64				GLint64;
+	typedef unsigned __int64	GLuint64;
 #else
-	/* this might actually be a 32-bit type */
-	typedef long int				GLint64;
-	typedef unsigned long int		GLuint64;
+	#include <inttypes.h>     /* Fallback option */
+	typedef int64_t		GLint64;
+	typedef uint64_t	GLuint64;
 #endif
 
 #ifdef __cplusplus

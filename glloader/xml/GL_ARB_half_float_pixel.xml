@@ -1,6 +1,10 @@
 <?xml version='1.0'?>
 
 <GLExtension name="GL_ARB_half_float_pixel">
+	<Typedefs>
+		<Typedef type="unsigned short" synonym="GLhalfARB"/>
+	</Typedefs>
+
 	<Tokens>
 		<Token name="GL_HALF_FLOAT_ARB" value="0x140B"/>
 	</Tokens>
