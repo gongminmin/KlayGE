@@ -1,0 +1,27 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_APPLE_flush_buffer_range">
+	<Functions>
+		<Function name="glBufferParameteriAPPLE" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="name"/>
+			<Param type="GLint" name="param"/>
+		</Function>
+		<Function name="glFlushMappedBufferRangeAPPLE" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLintptr" name="offset"/>
+			<Param type="GLsizeiptr" name="size"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_APPLE" string="GL_APPLE_flush_buffer_range">
+			<Name name="glBufferParameteriAPPLE"/>
+			<Name name="glFlushMappedBufferRangeAPPLE"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_APPLE"/>
+	</InitPath>
+</GLExtension>
