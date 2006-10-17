@@ -123,6 +123,10 @@ namespace
 			technique_ = rf.LoadEffect("Instancing.fx")->TechniqueByName("NormalMesh");
 		}
 
+		void BuildMeshInfo()
+		{
+		}
+
 		void OnRenderBegin()
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
