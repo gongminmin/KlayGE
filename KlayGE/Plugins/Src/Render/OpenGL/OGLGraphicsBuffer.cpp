@@ -51,7 +51,7 @@ namespace KlayGE
 
 		glBindBuffer(target_, vb_);
 		glBufferData(target_,
-				reinterpret_cast<GLsizeiptr>(size_in_byte_), NULL,
+				static_cast<GLsizeiptr>(size_in_byte_), NULL,
 				(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
 	}
 

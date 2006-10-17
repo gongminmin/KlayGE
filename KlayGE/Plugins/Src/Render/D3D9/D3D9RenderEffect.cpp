@@ -278,7 +278,7 @@ namespace KlayGE
 		TIF(this->D3DXEffect()->SetTechnique(tech_));
 
 		UINT passes;
-		TIF(this->D3DXEffect()->Begin(&passes, D3DXFX_DONOTSAVESHADERSTATE | D3DXFX_DONOTSAVESAMPLERSTATE | flags));
+		TIF(this->D3DXEffect()->Begin(&passes, D3DXFX_DONOTSAVESAMPLERSTATE | flags));
 	}
 
 	void D3D9RenderTechnique::DoEnd()
@@ -375,9 +375,6 @@ namespace KlayGE
 		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
 
-		d3d_device->SetVertexShader(vertex_shader_.get());
-		d3d_device->SetPixelShader(pixel_shader_.get());
-
 		for (int i = 0; i < 2; ++ i)
 		{
 			for (std::vector<std::pair<RenderEffectParameterPtr, D3D9RenderEffectParameterDesc> >::iterator iter = parameters_[i].begin();
@@ -385,97 +382,9 @@ namespace KlayGE
 			{
 				RenderEffectParameterPtr param = iter->first;
 
-				if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterBool>(param))
+				if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterSampler>(param))
 				{
-					checked_pointer_cast<D3D9RenderEffectParameterBool>(param)->Flush(iter->second);
-				}
-				else
-				{
-					if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterInt>(param))
-					{
-						checked_pointer_cast<D3D9RenderEffectParameterInt>(param)->Flush(iter->second);
-					}
-					else
-					{
-						if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterFloat>(param))
-						{
-							checked_pointer_cast<D3D9RenderEffectParameterFloat>(param)->Flush(iter->second);
-						}
-						else
-						{
-							if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterFloat2>(param))
-							{
-								checked_pointer_cast<D3D9RenderEffectParameterFloat2>(param)->Flush(iter->second);
-							}
-							else
-							{
-								if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterFloat3>(param))
-								{
-									checked_pointer_cast<D3D9RenderEffectParameterFloat3>(param)->Flush(iter->second);
-								}
-								else
-								{
-									if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterFloat4>(param))
-									{
-										checked_pointer_cast<D3D9RenderEffectParameterFloat4>(param)->Flush(iter->second);
-									}
-									else
-									{
-										if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterFloat4x4>(param))
-										{
-											checked_pointer_cast<D3D9RenderEffectParameterFloat4x4>(param)->Flush(iter->second);
-										}
-										else
-										{
-											if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterSampler>(param))
-											{
-												checked_pointer_cast<D3D9RenderEffectParameterSampler>(param)->Flush(iter->second);
-											}
-											else
-											{
-												if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterBoolArray>(param))
-												{
-													checked_pointer_cast<D3D9RenderEffectParameterBoolArray>(param)->Flush(iter->second);
-												}
-												else
-												{
-													if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterIntArray>(param))
-													{
-														checked_pointer_cast<D3D9RenderEffectParameterIntArray>(param)->Flush(iter->second);
-													}
-													else
-													{
-														if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterFloatArray>(param))
-														{
-															checked_pointer_cast<D3D9RenderEffectParameterFloatArray>(param)->Flush(iter->second);
-														}
-														else
-														{
-															if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterFloat4Array>(param))
-															{
-																checked_pointer_cast<D3D9RenderEffectParameterFloat4Array>(param)->Flush(iter->second);
-															}
-															else
-															{
-																if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterFloat4x4Array>(param))
-																{
-																	checked_pointer_cast<D3D9RenderEffectParameterFloat4x4Array>(param)->Flush(iter->second);
-																}
-																else
-																{
-																	BOOST_ASSERT(false);
-																}
-															}
-														}
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
+					checked_pointer_cast<D3D9RenderEffectParameterSampler>(param)->Flush(iter->second);
 				}
 			}
 		}

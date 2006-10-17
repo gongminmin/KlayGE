@@ -157,6 +157,15 @@ namespace KlayGE
 			SOP_Invert
 		};
 
+		enum ColorMask
+		{
+			CMASK_Red   = 1UL << 3,
+			CMASK_Green = 1UL << 2,
+			CMASK_Blue  = 1UL << 1,
+			CMASK_Alpha = 1UL << 0,
+			CMASK_All   = CMASK_Red | CMASK_Green | CMASK_Blue | CMASK_Alpha
+		};
+
 		enum ClearBufferMask
 		{
 			CBM_Color   = 1UL << 0,
@@ -217,15 +226,6 @@ namespace KlayGE
 			RST_ColorMask3,
 
 			RST_NUM_RENDER_STATES
-		};
-
-		enum ColorMask
-		{
-			CMASK_Red   = 1UL << 3,
-			CMASK_Green = 1UL << 2,
-			CMASK_Blue  = 1UL << 1,
-			CMASK_Alpha = 1UL << 0,
-			CMASK_All   = CMASK_Red | CMASK_Green | CMASK_Blue | CMASK_Alpha
 		};
 
 	public:
