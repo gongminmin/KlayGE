@@ -140,11 +140,35 @@ namespace KlayGE
 		ID3D9PixelShaderPtr pixel_shader_;
 	};
 
-	class D3D9RenderEffectParameterBool : public RenderEffectParameterConcrete<bool>, public D3D9Resource
+	template <typename T>
+	class D3D9RenderEffectParameter : public RenderEffectParameterConcrete<T>, public D3D9Resource
+	{
+	public:
+		D3D9RenderEffectParameter(RenderEffect& effect,
+				std::string const & name, std::string const & semantic)
+			: RenderEffectParameterConcrete<T>(effect, name, semantic)
+		{
+		}
+		virtual ~D3D9RenderEffectParameter()
+		{
+		}
+
+		virtual void Flush(D3D9RenderEffectParameterDesc const & desc) = 0;
+
+	private:
+		virtual void DoOnLostDevice()
+		{
+		}
+		virtual void DoOnResetDevice()
+		{
+		}
+	};
+
+	class D3D9RenderEffectParameterBool : public D3D9RenderEffectParameter<bool>
 	{
 	public:
 		D3D9RenderEffectParameterBool(RenderEffect& effect, std::string const & name, std::string const & semantic)
-			: RenderEffectParameterConcrete<bool>(effect, name, semantic)
+			: D3D9RenderEffectParameter<bool>(effect, name, semantic)
 		{
 		}
 
@@ -154,23 +178,15 @@ namespace KlayGE
 		void DoFlush(bool const & value);
 
 	private:
-		virtual void DoOnLostDevice()
-		{
-		}
-		virtual void DoOnResetDevice()
-		{
-		}
-
-	private:
 		D3D9RenderEffectParameterBool(D3D9RenderEffectParameterBool const & rhs);
 		D3D9RenderEffectParameterBool& operator=(D3D9RenderEffectParameterBool const & rhs);
 	};
 
-	class D3D9RenderEffectParameterInt : public RenderEffectParameterConcrete<int>, public D3D9Resource
+	class D3D9RenderEffectParameterInt : public D3D9RenderEffectParameter<int>
 	{
 	public:
 		D3D9RenderEffectParameterInt(RenderEffect& effect, std::string const & name, std::string const & semantic)
-			: RenderEffectParameterConcrete<int>(effect, name, semantic)
+			: D3D9RenderEffectParameter<int>(effect, name, semantic)
 		{
 		}
 
@@ -180,23 +196,15 @@ namespace KlayGE
 		void DoFlush(int const & value);
 
 	private:
-		virtual void DoOnLostDevice()
-		{
-		}
-		virtual void DoOnResetDevice()
-		{
-		}
-
-	private:
 		D3D9RenderEffectParameterInt(D3D9RenderEffectParameterInt const & rhs);
 		D3D9RenderEffectParameterInt& operator=(D3D9RenderEffectParameterInt const & rhs);
 	};
 
-	class D3D9RenderEffectParameterFloat : public RenderEffectParameterConcrete<float>, public D3D9Resource
+	class D3D9RenderEffectParameterFloat : public D3D9RenderEffectParameter<float>
 	{
 	public:
 		D3D9RenderEffectParameterFloat(RenderEffect& effect, std::string const & name, std::string const & semantic)
-			: RenderEffectParameterConcrete<float>(effect, name, semantic)
+			: D3D9RenderEffectParameter<float>(effect, name, semantic)
 		{
 		}
 
@@ -206,23 +214,15 @@ namespace KlayGE
 		void DoFlush(float const & value);
 
 	private:
-		virtual void DoOnLostDevice()
-		{
-		}
-		virtual void DoOnResetDevice()
-		{
-		}
-
-	private:
 		D3D9RenderEffectParameterFloat(D3D9RenderEffectParameterFloat const & rhs);
 		D3D9RenderEffectParameterFloat& operator=(D3D9RenderEffectParameterFloat const & rhs);
 	};
 
-	class D3D9RenderEffectParameterFloat2 : public RenderEffectParameterConcrete<float2>, public D3D9Resource
+	class D3D9RenderEffectParameterFloat2 : public D3D9RenderEffectParameter<float2>
 	{
 	public:
 		D3D9RenderEffectParameterFloat2(RenderEffect& effect, std::string const & name, std::string const & semantic)
-			: RenderEffectParameterConcrete<float2>(effect, name, semantic)
+			: D3D9RenderEffectParameter<float2>(effect, name, semantic)
 		{
 		}
 
@@ -232,23 +232,15 @@ namespace KlayGE
 		void DoFlush(float2 const & value);
 
 	private:
-		virtual void DoOnLostDevice()
-		{
-		}
-		virtual void DoOnResetDevice()
-		{
-		}
-
-	private:
 		D3D9RenderEffectParameterFloat2(D3D9RenderEffectParameterFloat2 const & rhs);
 		D3D9RenderEffectParameterFloat2& operator=(D3D9RenderEffectParameterFloat2 const & rhs);
 	};
 
-	class D3D9RenderEffectParameterFloat3 : public RenderEffectParameterConcrete<float3>, public D3D9Resource
+	class D3D9RenderEffectParameterFloat3 : public D3D9RenderEffectParameter<float3>
 	{
 	public:
 		D3D9RenderEffectParameterFloat3(RenderEffect& effect, std::string const & name, std::string const & semantic)
-			: RenderEffectParameterConcrete<float3>(effect, name, semantic)
+			: D3D9RenderEffectParameter<float3>(effect, name, semantic)
 		{
 		}
 
@@ -258,23 +250,15 @@ namespace KlayGE
 		void DoFlush(float3 const & value);
 
 	private:
-		virtual void DoOnLostDevice()
-		{
-		}
-		virtual void DoOnResetDevice()
-		{
-		}
-
-	private:
 		D3D9RenderEffectParameterFloat3(D3D9RenderEffectParameterFloat3 const & rhs);
 		D3D9RenderEffectParameterFloat3& operator=(D3D9RenderEffectParameterFloat3 const & rhs);
 	};
 
-	class D3D9RenderEffectParameterFloat4 : public RenderEffectParameterConcrete<float4>, public D3D9Resource
+	class D3D9RenderEffectParameterFloat4 : public D3D9RenderEffectParameter<float4>
 	{
 	public:
 		D3D9RenderEffectParameterFloat4(RenderEffect& effect, std::string const & name, std::string const & semantic)
-			: RenderEffectParameterConcrete<float4>(effect, name, semantic)
+			: D3D9RenderEffectParameter<float4>(effect, name, semantic)
 		{
 		}
 
@@ -284,23 +268,15 @@ namespace KlayGE
 		void DoFlush(float4 const & value);
 
 	private:
-		virtual void DoOnLostDevice()
-		{
-		}
-		virtual void DoOnResetDevice()
-		{
-		}
-
-	private:
 		D3D9RenderEffectParameterFloat4(D3D9RenderEffectParameterFloat4 const & rhs);
 		D3D9RenderEffectParameterFloat4& operator=(D3D9RenderEffectParameterFloat4 const & rhs);
 	};
 
-	class D3D9RenderEffectParameterFloat4x4 : public RenderEffectParameterConcrete<float4x4>, public D3D9Resource
+	class D3D9RenderEffectParameterFloat4x4 : public D3D9RenderEffectParameter<float4x4>
 	{
 	public:
 		D3D9RenderEffectParameterFloat4x4(RenderEffect& effect, std::string const & name, std::string const & semantic)
-			: RenderEffectParameterConcrete<float4x4>(effect, name, semantic)
+			: D3D9RenderEffectParameter<float4x4>(effect, name, semantic)
 		{
 		}
 
@@ -310,23 +286,15 @@ namespace KlayGE
 		void DoFlush(float4x4 const & value);
 
 	private:
-		void DoOnLostDevice()
-		{
-		}
-		void DoOnResetDevice()
-		{
-		}
-
-	private:
 		D3D9RenderEffectParameterFloat4x4(D3D9RenderEffectParameterFloat4x4 const & rhs);
 		D3D9RenderEffectParameterFloat4x4& operator=(D3D9RenderEffectParameterFloat4x4 const & rhs);
 	};
 
-	class D3D9RenderEffectParameterSampler : public RenderEffectParameterConcrete<SamplerPtr>, public D3D9Resource
+	class D3D9RenderEffectParameterSampler : public D3D9RenderEffectParameter<SamplerPtr>
 	{
 	public:
 		D3D9RenderEffectParameterSampler(RenderEffect& effect, std::string const & name, std::string const & semantic)
-			: RenderEffectParameterConcrete<SamplerPtr>(effect, name, semantic)
+			: D3D9RenderEffectParameter<SamplerPtr>(effect, name, semantic)
 		{
 		}
 
@@ -344,11 +312,11 @@ namespace KlayGE
 		D3D9RenderEffectParameterSampler& operator=(D3D9RenderEffectParameterSampler const & rhs);
 	};
 
-	class D3D9RenderEffectParameterBoolArray : public RenderEffectParameterConcrete<std::vector<bool> >, public D3D9Resource
+	class D3D9RenderEffectParameterBoolArray : public D3D9RenderEffectParameter<std::vector<bool> >
 	{
 	public:
 		D3D9RenderEffectParameterBoolArray(RenderEffect& effect, std::string const & name, std::string const & semantic)
-			: RenderEffectParameterConcrete<std::vector<bool> >(effect, name, semantic)
+			: D3D9RenderEffectParameter<std::vector<bool> >(effect, name, semantic)
 		{
 		}
 
@@ -358,23 +326,15 @@ namespace KlayGE
 		void DoFlush(std::vector<bool> const & value);
 
 	private:
-		virtual void DoOnLostDevice()
-		{
-		}
-		virtual void DoOnResetDevice()
-		{
-		}
-
-	private:
 		D3D9RenderEffectParameterBoolArray(D3D9RenderEffectParameterBoolArray const & rhs);
 		D3D9RenderEffectParameterBoolArray& operator=(D3D9RenderEffectParameterBoolArray const & rhs);
 	};
 
-	class D3D9RenderEffectParameterIntArray : public RenderEffectParameterConcrete<std::vector<int> >, public D3D9Resource
+	class D3D9RenderEffectParameterIntArray : public D3D9RenderEffectParameter<std::vector<int> >
 	{
 	public:
 		D3D9RenderEffectParameterIntArray(RenderEffect& effect, std::string const & name, std::string const & semantic)
-			: RenderEffectParameterConcrete<std::vector<int> >(effect, name, semantic)
+			: D3D9RenderEffectParameter<std::vector<int> >(effect, name, semantic)
 		{
 		}
 
@@ -384,23 +344,15 @@ namespace KlayGE
 		void DoFlush(std::vector<int> const & value);
 
 	private:
-		virtual void DoOnLostDevice()
-		{
-		}
-		virtual void DoOnResetDevice()
-		{
-		}
-
-	private:
 		D3D9RenderEffectParameterIntArray(D3D9RenderEffectParameterIntArray const & rhs);
 		D3D9RenderEffectParameterIntArray& operator=(D3D9RenderEffectParameterIntArray const & rhs);
 	};
 
-	class D3D9RenderEffectParameterFloatArray : public RenderEffectParameterConcrete<std::vector<float> >, public D3D9Resource
+	class D3D9RenderEffectParameterFloatArray : public D3D9RenderEffectParameter<std::vector<float> >
 	{
 	public:
 		D3D9RenderEffectParameterFloatArray(RenderEffect& effect, std::string const & name, std::string const & semantic)
-			: RenderEffectParameterConcrete<std::vector<float> >(effect, name, semantic)
+			: D3D9RenderEffectParameter<std::vector<float> >(effect, name, semantic)
 		{
 		}
 
@@ -410,23 +362,15 @@ namespace KlayGE
 		void DoFlush(std::vector<float> const & value);
 
 	private:
-		virtual void DoOnLostDevice()
-		{
-		}
-		virtual void DoOnResetDevice()
-		{
-		}
-
-	private:
 		D3D9RenderEffectParameterFloatArray(D3D9RenderEffectParameterFloatArray const & rhs);
 		D3D9RenderEffectParameterFloatArray& operator=(D3D9RenderEffectParameterFloatArray const & rhs);
 	};
 
-	class D3D9RenderEffectParameterFloat4Array : public RenderEffectParameterConcrete<std::vector<float4> >, public D3D9Resource
+	class D3D9RenderEffectParameterFloat4Array : public D3D9RenderEffectParameter<std::vector<float4> >
 	{
 	public:
 		D3D9RenderEffectParameterFloat4Array(RenderEffect& effect, std::string const & name, std::string const & semantic)
-			: RenderEffectParameterConcrete<std::vector<float4> >(effect, name, semantic)
+			: D3D9RenderEffectParameter<std::vector<float4> >(effect, name, semantic)
 		{
 		}
 
@@ -436,23 +380,15 @@ namespace KlayGE
 		void DoFlush(std::vector<float4> const & value);
 
 	private:
-		virtual void DoOnLostDevice()
-		{
-		}
-		virtual void DoOnResetDevice()
-		{
-		}
-
-	private:
 		D3D9RenderEffectParameterFloat4Array(D3D9RenderEffectParameterFloat4Array const & rhs);
 		D3D9RenderEffectParameterFloat4Array& operator=(D3D9RenderEffectParameterFloat4Array const & rhs);
 	};
 
-	class D3D9RenderEffectParameterFloat4x4Array : public RenderEffectParameterConcrete<std::vector<float4x4> >, public D3D9Resource
+	class D3D9RenderEffectParameterFloat4x4Array : public D3D9RenderEffectParameter<std::vector<float4x4> >
 	{
 	public:
 		D3D9RenderEffectParameterFloat4x4Array(RenderEffect& effect, std::string const & name, std::string const & semantic)
-			: RenderEffectParameterConcrete<std::vector<float4x4> >(effect, name, semantic)
+			: D3D9RenderEffectParameter<std::vector<float4x4> >(effect, name, semantic)
 		{
 		}
 
@@ -460,14 +396,6 @@ namespace KlayGE
 
 	private:
 		void DoFlush(std::vector<float4x4> const & value);
-
-	private:
-		virtual void DoOnLostDevice()
-		{
-		}
-		virtual void DoOnResetDevice()
-		{
-		}
 
 	private:
 		D3D9RenderEffectParameterFloat4x4Array(D3D9RenderEffectParameterFloat4x4Array const & rhs);
