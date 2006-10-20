@@ -1,0 +1,80 @@
+<?xml version='1.0'?>
+
+<effect>
+	<parameter type="int" name="halfWidth"/>
+	<parameter type="int" name="halfHeight"/>
+
+	<parameter type="float4x4" name="mvp"/>
+
+	<parameter type="sampler" name="texFontSampler"/>
+
+	<shader>
+		<![CDATA[
+void Font2DVS(float4 position : POSITION,
+			float4 color : COLOR0,
+			float2 texCoord : TEXCOORD0,
+
+			out float4 oPosition : POSITION,
+			out float2 oTexCoord : TEXCOORD0,
+			out float4 oColor : COLOR)
+{
+	oPosition.x = (position.x - halfWidth) / halfWidth;
+	oPosition.y = (halfHeight - position.y) / halfHeight;
+	oPosition.zw = position.zw;
+
+	oColor = color;
+	oTexCoord = texCoord;
+}
+
+void Font3DVS(float4 position : POSITION,
+			float4 color : COLOR0,
+			float2 texCoord : TEXCOORD0,
+
+			out float4 oPosition : POSITION,
+			out float2 oTexCoord : TEXCOORD0,
+			out float4 oColor : COLOR)
+{
+	oPosition = mul(position, mvp);
+
+	oColor = color;
+	oTexCoord = texCoord;
+}
+
+float4 FontPS(float4 clr : COLOR, float2 texCoord : TEXCOORD0) : COLOR0
+{
+	clr.a = tex2D(texFontSampler, texCoord).r;
+	return clr;
+}
+		]]>
+	</shader>
+
+	<technique name="Font2DTec">
+		<pass name="p0">
+			<state name="blend_enable" value="true"/>
+			<state name="src_blend" value="src_alpha"/>
+			<state name="dest_blend" value="inv_src_alpha"/>
+			
+			<state name="polygon_mode" value="fill"/>
+			<state name="cull_mode" value="anti_clock_wise"/>
+			<state name="front_stencil_enable" value="false"/>
+
+			<state name="vertex_shader" value="Font2DVS()"/>
+			<state name="pixel_shader" value="FontPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="Font3DTec">
+		<pass name="p0">
+			<state name="blend_enable" value="true"/>
+			<state name="src_blend" value="src_alpha"/>
+			<state name="dest_blend" value="inv_src_alpha"/>
+
+			<state name="polygon_mode" value="fill"/>
+			<state name="cull_mode" value="anti_clock_wise"/>
+			<state name="front_stencil_enable" value="false"/>
+
+			<state name="vertex_shader" value="Font3DVS()"/>
+			<state name="pixel_shader" value="FontPS()"/>
+		</pass>
+	</technique>
+</effect>

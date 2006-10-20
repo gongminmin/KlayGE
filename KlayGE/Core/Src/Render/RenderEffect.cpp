@@ -1,8 +1,11 @@
 // RenderEffect.cpp
 // KlayGE 渲染效果类 实现文件
-// Ver 3.2.0
-// 版权所有(C) 龚敏敏, 2003-2005
+// Ver 3.5.0
+// 版权所有(C) 龚敏敏, 2003-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.5.0
+// 改用基于xml的特效格式 (2006.10.21)
 //
 // 3.2.0
 // 支持了bool类型 (2006.3.8)
@@ -28,14 +31,324 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 
 #include <KlayGE/RenderEffect.hpp>
 
+namespace
+{
+	using namespace KlayGE;
+
+	std::string read_short_string(ResIdentifierPtr const & source)
+	{
+		uint8_t len;
+		source->read(reinterpret_cast<char*>(&len), sizeof(len));
+		std::string ret(len, '\0');
+		source->read(&ret[0], len);
+
+		return ret;
+	}
+
+	boost::shared_ptr<RenderVariable> read_var(ResIdentifierPtr const & source, uint32_t type, uint32_t array_size)
+	{
+		boost::shared_ptr<RenderVariable> var(new RenderVariable);
+
+		switch (type)
+		{
+		case type_define::TC_bool:
+			if (0 == array_size)
+			{
+				bool tmp;
+				source->read(reinterpret_cast<char*>(&tmp), sizeof(tmp));
+				var->set_value(tmp);
+			}
+			break;
+
+		case type_define::TC_dword:
+		case type_define::TC_int:
+			if (0 == array_size)
+			{
+				int tmp;
+				source->read(reinterpret_cast<char*>(&tmp), sizeof(tmp));
+				var->set_value(tmp);
+			}
+			break;
+
+		case type_define::TC_string:
+			var->set_value(read_short_string(source));
+			break;
+
+		case type_define::TC_sampler:
+			break;
+
+		case type_define::TC_shader:
+			{
+				shader_desc desc;
+
+				desc.profile = read_short_string(source);
+
+				std::string value = read_short_string(source);
+				desc.func_name = value.substr(0, value.find("("));
+
+				var->set_value(desc);
+			}
+			break;
+
+		case type_define::TC_float:
+			if (0 == array_size)
+			{
+				float tmp;
+				source->read(reinterpret_cast<char*>(&tmp), sizeof(tmp));
+				var->set_value(tmp);
+			}
+			break;
+
+		case type_define::TC_float2:
+			if (0 == array_size)
+			{
+				float2 tmp;
+				source->read(reinterpret_cast<char*>(&tmp), sizeof(tmp));
+				var->set_value(tmp);
+			}
+			break;
+
+		case type_define::TC_float3:
+			if (0 == array_size)
+			{
+				float3 tmp;
+				source->read(reinterpret_cast<char*>(&tmp), sizeof(tmp));
+				var->set_value(tmp);
+			}
+			break;
+
+		case type_define::TC_float4:
+			if (0 == array_size)
+			{
+				float4 tmp;
+				source->read(reinterpret_cast<char*>(&tmp), sizeof(tmp));
+				var->set_value(tmp);
+			}
+			break;
+
+		case type_define::TC_float4x4:
+			if (0 == array_size)
+			{
+				float4x4 tmp;
+				source->read(reinterpret_cast<char*>(&tmp), sizeof(tmp));
+				var->set_value(tmp);
+			}
+			break;
+
+		default:
+			assert(false);
+			break;
+		}
+
+		return var;
+	}
+}
+
 namespace KlayGE
 {
+	type_define::type_define()
+	{
+		types_.push_back("bool");
+		types_.push_back("dword");
+		types_.push_back("string");
+		types_.push_back("sampler");
+		types_.push_back("shader");
+		types_.push_back("int");
+		types_.push_back("int2");
+		types_.push_back("int3");
+		types_.push_back("int4");
+		types_.push_back("float");
+		types_.push_back("float2");
+		types_.push_back("float2x2");
+		types_.push_back("float2x3");
+		types_.push_back("float2x4");
+		types_.push_back("float3");
+		types_.push_back("float3x2");
+		types_.push_back("float3x3");
+		types_.push_back("float3x4");
+		types_.push_back("float4");
+		types_.push_back("float4x2");
+		types_.push_back("float4x3");
+		types_.push_back("float4x4");
+	}
+
+	type_define& type_define::instance()
+	{
+		static type_define ret;
+		return ret;
+	}
+
+	uint32_t type_define::type_code(std::string const & name) const
+	{
+		for (uint32_t i = 0; i < types_.size(); ++ i)
+		{
+			if (types_[i] == name)
+			{
+				return i;
+			}
+		}
+		assert(false);
+		return 0xFFFFFFFF;
+	}
+
+	std::string const & type_define::type_name(uint32_t code) const
+	{
+		if (code < types_.size())
+		{
+			return types_[code];
+		}
+		assert(false);
+		return "";
+	}
+
+	states_define::states_define()
+	{
+		states_.push_back(std::make_pair("polygon_mode", "int"));
+		states_.push_back(std::make_pair("shade_mode", "int"));
+		states_.push_back(std::make_pair("cull_mode", "int"));
+
+		states_.push_back(std::make_pair("alpha_to_coverage_enable", "bool"));
+		states_.push_back(std::make_pair("blend_enable", "bool"));
+		states_.push_back(std::make_pair("blend_op", "int"));
+		states_.push_back(std::make_pair("src_blend", "int"));
+		states_.push_back(std::make_pair("dest_blend", "int"));
+		states_.push_back(std::make_pair("blend_op_alpha", "int"));
+		states_.push_back(std::make_pair("src_blend_alpha", "int"));
+		states_.push_back(std::make_pair("dest_blend_alpha", "int"));
+
+		states_.push_back(std::make_pair("depth_enable", "bool"));
+		states_.push_back(std::make_pair("depth_write_enable", "bool"));
+		states_.push_back(std::make_pair("depth_func", "int"));
+		states_.push_back(std::make_pair("slope_scale_depth_bias", "float"));
+		states_.push_back(std::make_pair("depth_bias", "float"));
+
+		states_.push_back(std::make_pair("front_stencil_enable", "bool"));
+		states_.push_back(std::make_pair("front_stencil_func", "int"));
+		states_.push_back(std::make_pair("front_stencil_ref", "int"));
+		states_.push_back(std::make_pair("front_stencil_mask", "int"));
+		states_.push_back(std::make_pair("front_stencil_fail", "int"));
+		states_.push_back(std::make_pair("front_stencil_depth_fail", "int"));
+		states_.push_back(std::make_pair("front_stencil_pass", "int"));
+		states_.push_back(std::make_pair("front_stencil_write_mask", "int"));
+		states_.push_back(std::make_pair("back_stencil_enable", "bool"));
+		states_.push_back(std::make_pair("back_stencil_func", "int"));
+		states_.push_back(std::make_pair("back_stencil_ref", "int"));
+		states_.push_back(std::make_pair("back_stencil_mask", "int"));
+		states_.push_back(std::make_pair("back_stencil_fail", "int"));
+		states_.push_back(std::make_pair("back_stencil_depth_fail", "int"));
+		states_.push_back(std::make_pair("back_stencil_pass", "int"));
+		states_.push_back(std::make_pair("back_stencil_write_mask", "int"));
+
+		states_.push_back(std::make_pair("scissor_enable", "bool"));
+
+		states_.push_back(std::make_pair("color_mask_0", "int"));
+		states_.push_back(std::make_pair("color_mask_1", "int"));
+		states_.push_back(std::make_pair("color_mask_2", "int"));
+		states_.push_back(std::make_pair("color_mask_3", "int"));
+
+		states_.push_back(std::make_pair("pixel_shader", "shader"));
+		states_.push_back(std::make_pair("vertex_shader", "shader"));
+	}
+
+	states_define& states_define::instance()
+	{
+		static states_define ret;
+		return ret;
+	}
+
+	uint32_t states_define::state_code(std::string const & name) const
+	{
+		for (std::vector<std::pair<std::string, std::string> >::const_iterator iter = states_.begin();
+			iter != states_.end(); ++ iter)
+		{
+			if (iter->first == name)
+			{
+				return static_cast<uint32_t>(std::distance(states_.begin(), iter));
+			}
+		}
+		assert(false);
+
+		return 0xFFFFFFFF;
+	}
+
+	std::string const & states_define::state_name(uint32_t code) const
+	{
+		if (code < states_.size())
+		{
+			return states_[code].first;
+		}
+		assert(false);
+		return "";
+	}
+
+	void RenderAnnotation::Load(ResIdentifierPtr const & source)
+	{
+		source->read(reinterpret_cast<char*>(&type_), sizeof(type_));
+		name_ = read_short_string(source);
+		var_ = read_var(source, type_, 0);
+	}
+
+
 	class NullRenderEffect : public RenderEffect
 	{
+	public:
+		NullRenderEffect()
+		{
+		}
+
+		RenderTechniquePtr MakeRenderTechnique()
+		{
+			return RenderTechnique::NullObject();
+		}
 	};
+
+	RenderEffect::RenderEffect()
+	{
+	}
+
+	void RenderEffect::Load(ResIdentifierPtr const & source)
+	{
+	#pragma pack(push, 1)
+		struct fxml_header
+		{
+			uint32_t fourcc;
+			uint32_t ver;
+			uint32_t num_parameters;
+			uint32_t num_shaders;
+			uint32_t num_techniques;
+		};
+	#pragma pack(pop)
+
+		if (source)
+		{
+			fxml_header header;
+			source->read(reinterpret_cast<char*>(&header), sizeof(header));
+			BOOST_ASSERT((MakeFourCC<'F', 'X', 'M', 'L'>::value == header.fourcc));
+			BOOST_ASSERT(1 == header.ver);
+
+			for (uint32_t i = 0; i < header.num_parameters; ++ i)
+			{
+				params_.push_back(RenderEffectParameterPtr(new RenderEffectParameter(*this, "", "")));
+				params_[i]->Load(source);
+			}
+
+			for (uint32_t i = 0; i < header.num_shaders; ++ i)
+			{
+				shaders_.push_back(RenderShaderFunc());
+				shaders_[i].Load(source);
+			}
+
+			for (uint32_t i = 0; i < header.num_techniques; ++ i)
+			{
+				techniques_.push_back(this->MakeRenderTechnique());
+				techniques_[i]->Load(source);
+			}
+		}
+	}
 
 	RenderEffectPtr RenderEffect::NullObject()
 	{
@@ -79,29 +392,13 @@ namespace KlayGE
 		return RenderTechnique::NullObject();
 	}
 
-	void RenderEffect::FlushParams()
-	{
-		for (params_type::iterator iter = params_.begin(); iter != params_.end(); ++ iter)
-		{
-			if ((*iter)->IsDirty())
-			{
-				(*iter)->Flush();
-			}
-		}
-	}
-
 	
 	class NullRenderTechnique : public RenderTechnique
 	{
 	public:
 		NullRenderTechnique()
-			: RenderTechnique(*RenderEffect::NullObject(), "")
+			: RenderTechnique(*RenderEffect::NullObject())
 		{
-		}
-
-		bool Validate()
-		{
-			return true;
 		}
 
 	private:
@@ -111,6 +408,11 @@ namespace KlayGE
 		void DoEnd()
 		{
 		}
+
+		RenderPassPtr MakeRenderPass(uint32_t /*index*/)
+		{
+			return RenderPass::NullObject();
+		}
 	};
 
 	RenderTechniquePtr RenderTechnique::NullObject()
@@ -119,15 +421,107 @@ namespace KlayGE
 		return obj;
 	}
 
+	void RenderTechnique::Load(ResIdentifierPtr const & source)
+	{
+		name_ = read_short_string(source);
+		source->read(reinterpret_cast<char*>(&weight_), sizeof(weight_));
+
+		uint32_t len;
+		source->read(reinterpret_cast<char*>(&len), sizeof(len));
+		for (size_t i = 0; i < len; ++ i)
+		{
+			annotations_.push_back(boost::shared_ptr<RenderAnnotation>(new RenderAnnotation));
+			annotations_[i]->Load(source);
+		}
+
+		source->read(reinterpret_cast<char*>(&len), sizeof(len));
+		for (uint32_t i = 0; i < len; ++ i)
+		{
+			passes_.push_back(this->MakeRenderPass(i));
+			passes_[i]->Load(source);
+		}
+	}
+
 	void RenderTechnique::Begin(uint32_t flags)
 	{
-		effect_.FlushParams();
 		this->DoBegin(flags);
 	}
 
 	void RenderTechnique::End()
 	{
 		return this->DoEnd();
+	}
+
+	bool RenderTechnique::Validate()
+	{
+		for (size_t i = 0; i < passes_.size(); ++ i)
+		{
+			if (!passes_[i]->Validate())
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+
+	class NullRenderPass : public RenderPass
+	{
+	public:
+		NullRenderPass()
+			: RenderPass(*RenderEffect::NullObject(), 0)
+		{
+			is_validate_ = true;
+		}
+
+		void Begin()
+		{
+		}
+		void End()
+		{
+		}
+
+		void DoRead()
+		{
+		}
+	};
+
+	RenderPassPtr RenderPass::NullObject()
+	{
+		static RenderPassPtr obj(new NullRenderPass);
+		return obj;
+	}
+
+	void RenderPass::Load(ResIdentifierPtr const & source)
+	{
+		name_ = read_short_string(source);
+
+		uint32_t len;
+		source->read(reinterpret_cast<char*>(&len), sizeof(len));
+		for (size_t i = 0; i < len; ++ i)
+		{
+			annotations_.push_back(boost::shared_ptr<RenderAnnotation>(new RenderAnnotation));
+			annotations_[i]->Load(source);
+		}
+
+		source->read(reinterpret_cast<char*>(&len), sizeof(len));
+		for (size_t i = 0; i < len; ++ i)
+		{
+			render_states_.push_back(boost::shared_ptr<RenderState>(new RenderState));
+			render_states_[i]->Load(source);
+		}
+
+		this->DoRead();
+	}
+
+	uint32_t RenderPass::NumStates() const
+	{
+		return static_cast<uint32_t>(render_states_.size());
+	}
+
+	RenderState const & RenderPass::State(uint32_t state_id) const
+	{
+		return *render_states_[state_id];
 	}
 
 
@@ -258,12 +652,30 @@ namespace KlayGE
 	RenderEffectParameter::RenderEffectParameter(RenderEffect& effect,
 						std::string const & name, std::string const & semantic)
 		: effect_(effect), name_(name), semantic_(semantic),
-			dirty_(false)
+			dirty_(true)
 	{
 	}
 
 	RenderEffectParameter::~RenderEffectParameter()
 	{
+	}
+
+	void RenderEffectParameter::Load(ResIdentifierPtr const & source)
+	{
+		source->read(reinterpret_cast<char*>(&array_size_), sizeof(array_size_));
+		source->read(reinterpret_cast<char*>(&type_), sizeof(type_));
+		name_ = read_short_string(source);
+		var_ = read_var(source, type_, array_size_);
+
+		uint32_t len;
+		source->read(reinterpret_cast<char*>(&len), sizeof(len));
+		for (size_t i = 0; i < len; ++ i)
+		{
+			annotations_.push_back(boost::shared_ptr<RenderAnnotation>(new RenderAnnotation));
+			annotations_[i]->Load(source);
+		}
+
+		semantic_ = read_short_string(source);
 	}
 
 	RenderEffectParameterPtr RenderEffectParameter::NullObject()
@@ -272,224 +684,358 @@ namespace KlayGE
 		return obj;
 	}
 	
-	RenderEffectParameter& RenderEffectParameter::operator=(bool const & /*value*/)
+	RenderEffectParameter& RenderEffectParameter::operator=(bool const & value)
 	{
-		BOOST_ASSERT(false);
+		if (type_define::TC_bool == type_)
+		{
+			var_->set_value(value);
+			this->Dirty(true);
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(int const & /*value*/)
+	RenderEffectParameter& RenderEffectParameter::operator=(int const & value)
 	{
-		BOOST_ASSERT(false);
+		if (type_define::TC_int == type_)
+		{
+			var_->set_value(value);
+			this->Dirty(true);
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(float const & /*value*/)
+	RenderEffectParameter& RenderEffectParameter::operator=(float const & value)
 	{
-		BOOST_ASSERT(false);
+		if (type_define::TC_float == type_)
+		{
+			var_->set_value(value);
+			this->Dirty(true);
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(float2 const & /*value*/)
+	RenderEffectParameter& RenderEffectParameter::operator=(float2 const & value)
 	{
-		BOOST_ASSERT(false);
+		if (type_define::TC_float2 == type_)
+		{
+			var_->set_value(value);
+			this->Dirty(true);
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(float3 const & /*value*/)
+	RenderEffectParameter& RenderEffectParameter::operator=(float3 const & value)
 	{
-		BOOST_ASSERT(false);
+		if (type_define::TC_float3 == type_)
+		{
+			var_->set_value(value);
+			this->Dirty(true);
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(float4 const & /*value*/)
+	RenderEffectParameter& RenderEffectParameter::operator=(float4 const & value)
 	{
-		BOOST_ASSERT(false);
+		if (type_define::TC_float4 == type_)
+		{
+			var_->set_value(value);
+			this->Dirty(true);
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(float4x4 const & /*value*/)
+	RenderEffectParameter& RenderEffectParameter::operator=(float4x4 const & value)
 	{
-		BOOST_ASSERT(false);
+		if (type_define::TC_float4x4 == type_)
+		{
+			var_->set_value(value);
+			this->Dirty(true);
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(SamplerPtr const & /*value*/)
+	RenderEffectParameter& RenderEffectParameter::operator=(SamplerPtr const & value)
 	{
-		BOOST_ASSERT(false);
+		if (type_define::TC_sampler == type_)
+		{
+			var_->set_value(value);
+			this->Dirty(true);
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<bool> const & /*value*/)
+	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<bool> const & value)
 	{
-		BOOST_ASSERT(false);
+		if ((array_size_ != 0) && (type_define::TC_bool == type_))
+		{
+			var_->set_value(value);
+			this->Dirty(true);
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<int> const & /*value*/)
+	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<int> const & value)
 	{
-		BOOST_ASSERT(false);
+		if ((array_size_ != 0) && (type_define::TC_int == type_))
+		{
+			var_->set_value(value);
+			this->Dirty(true);
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<float> const & /*value*/)
+	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<float> const & value)
 	{
-		BOOST_ASSERT(false);
+		if ((array_size_ != 0) && (type_define::TC_float == type_))
+		{
+			var_->set_value(value);
+			this->Dirty(true);
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<float4> const & /*value*/)
+	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<float4> const & value)
 	{
-		BOOST_ASSERT(false);
+		if ((array_size_ != 0) && (type_define::TC_float4 == type_))
+		{
+			var_->set_value(value);
+			this->Dirty(true);
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<float4x4> const & /*value*/)
+	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<float4x4> const & value)
 	{
-		BOOST_ASSERT(false);
+		if ((array_size_ != 0) && (type_define::TC_float4x4 == type_))
+		{
+			var_->set_value(value);
+			this->Dirty(true);
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 		return *this;
 	}
 
 	void RenderEffectParameter::Value(bool& val) const
 	{
-		BOOST_ASSERT(false);
-		val = false;
+		if (type_define::TC_bool == type_)
+		{
+			val = boost::any_cast<bool>(var_->get_value());
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 	}
 
 	void RenderEffectParameter::Value(int& val) const
 	{
-		BOOST_ASSERT(false);
-		val = 0;
+		if (type_define::TC_int == type_)
+		{
+			val = boost::any_cast<int>(var_->get_value());
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 	}
 
 	void RenderEffectParameter::Value(float& val) const
 	{
-		BOOST_ASSERT(false);
-		val = 0;
+		if (type_define::TC_float == type_)
+		{
+			val = boost::any_cast<float>(var_->get_value());
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 	}
-
+	
 	void RenderEffectParameter::Value(float2& val) const
 	{
-		BOOST_ASSERT(false);
-		val = float2::Zero();
+		if (type_define::TC_float2 == type_)
+		{
+			val = boost::any_cast<float2>(var_->get_value());
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 	}
-
+	
 	void RenderEffectParameter::Value(float3& val) const
 	{
-		BOOST_ASSERT(false);
-		val = float3::Zero();
+		if (type_define::TC_float3 == type_)
+		{
+			val = boost::any_cast<float3>(var_->get_value());
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 	}
-
+	
 	void RenderEffectParameter::Value(float4& val) const
 	{
-		BOOST_ASSERT(false);
-		val = float4::Zero();
+		if (type_define::TC_float4 == type_)
+		{
+			val = boost::any_cast<float4>(var_->get_value());
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 	}
-
+	
 	void RenderEffectParameter::Value(float4x4& val) const
 	{
-		BOOST_ASSERT(false);
-		val = float4x4::Identity();
+		if (type_define::TC_float4x4 == type_)
+		{
+			val = boost::any_cast<float4x4>(var_->get_value());
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 	}
-
+	
 	void RenderEffectParameter::Value(SamplerPtr& val) const
 	{
-		BOOST_ASSERT(false);
-		val = SamplerPtr();
+		if (type_define::TC_sampler == type_)
+		{
+			val = boost::any_cast<SamplerPtr>(var_->get_value());
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 	}
-
+	
 	void RenderEffectParameter::Value(std::vector<bool>& val) const
 	{
-		BOOST_ASSERT(false);
-		val.clear();
+		if ((array_size_ != 0) && (type_define::TC_bool == type_))
+		{
+			val = boost::any_cast<std::vector<bool> >(var_->get_value());
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 	}
-
+	
 	void RenderEffectParameter::Value(std::vector<int>& val) const
 	{
-		BOOST_ASSERT(false);
-		val.clear();
+		if ((array_size_ != 0) && (type_define::TC_int == type_))
+		{
+			val = boost::any_cast<std::vector<int> >(var_->get_value());
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 	}
-
+	
 	void RenderEffectParameter::Value(std::vector<float>& val) const
 	{
-		BOOST_ASSERT(false);
-		val.clear();
+		if ((array_size_ != 0) && (type_define::TC_float == type_))
+		{
+			val = boost::any_cast<std::vector<float> >(var_->get_value());
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 	}
-
+	
 	void RenderEffectParameter::Value(std::vector<float4>& val) const
 	{
-		BOOST_ASSERT(false);
-		val.clear();
+		if ((array_size_ != 0) && (type_define::TC_float4 == type_))
+		{
+			val = boost::any_cast<std::vector<float4> >(var_->get_value());
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 	}
-
+	
 	void RenderEffectParameter::Value(std::vector<float4x4>& val) const
 	{
-		BOOST_ASSERT(false);
-		val.clear();
+		if ((array_size_ != 0) && (type_define::TC_float4x4 == type_))
+		{
+			val = boost::any_cast<std::vector<float4x4> >(var_->get_value());
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 	}
 
-	void RenderEffectParameter::DoFlush(bool const & /*value*/)
+
+	void RenderShaderFunc::Load(ResIdentifierPtr const & source)
 	{
-		BOOST_ASSERT(false);
+		uint32_t len;
+		source->read(reinterpret_cast<char*>(&len), sizeof(len));
+		str_.resize(len);
+		source->read(&str_[0], len);
 	}
 
-	void RenderEffectParameter::DoFlush(int const & /*value*/)
-	{
-		BOOST_ASSERT(false);
-	}
 
-	void RenderEffectParameter::DoFlush(float const & /*value*/)
+	void RenderState::Load(ResIdentifierPtr const & source)
 	{
-		BOOST_ASSERT(false);
-	}
-
-	void RenderEffectParameter::DoFlush(float2 const & /*value*/)
-	{
-		BOOST_ASSERT(false);
-	}
-
-	void RenderEffectParameter::DoFlush(float3 const & /*value*/)
-	{
-		BOOST_ASSERT(false);
-	}
-
-	void RenderEffectParameter::DoFlush(float4 const & /*value*/)
-	{
-		BOOST_ASSERT(false);
-	}
-
-	void RenderEffectParameter::DoFlush(float4x4 const & /*value*/)
-	{
-		BOOST_ASSERT(false);
-	}
-
-	void RenderEffectParameter::DoFlush(SamplerPtr const & /*value*/)
-	{
-		BOOST_ASSERT(false);
-	}
-
-	void RenderEffectParameter::DoFlush(std::vector<bool> const & /*value*/)
-	{
-		BOOST_ASSERT(false);
-	}
-
-	void RenderEffectParameter::DoFlush(std::vector<int> const & /*value*/)
-	{
-		BOOST_ASSERT(false);
-	}
-
-	void RenderEffectParameter::DoFlush(std::vector<float> const & /*value*/)
-	{
-		BOOST_ASSERT(false);
-	}
-
-	void RenderEffectParameter::DoFlush(std::vector<float4> const & /*value*/)
-	{
-		BOOST_ASSERT(false);
-	}
-
-	void RenderEffectParameter::DoFlush(std::vector<float4x4> const & /*value*/)
-	{
-		BOOST_ASSERT(false);
+		source->read(reinterpret_cast<char*>(&type_), sizeof(type_));
+		state_ = states_define::instance().state_code(read_short_string(source));
+		var_ = read_var(source, type_, 0);
 	}
 }

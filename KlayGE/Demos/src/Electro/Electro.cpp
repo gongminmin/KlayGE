@@ -79,7 +79,7 @@ namespace
 			texture->CopyMemoryToTexture3D(0, &turbBuffer[0], EF_L8, XSIZE, YSIZE, ZSIZE, 0, 0, 0,
 				XSIZE, YSIZE, ZSIZE);
 
-			technique_ = rf.LoadEffect("Electro.fx")->TechniqueByName("Electro");
+			technique_ = rf.LoadEffect("Electro.kfx")->TechniqueByName("Electro");
 
 			SamplerPtr electro_sampler(new Sampler);
 			electro_sampler->SetTexture(texture);

@@ -1,0 +1,57 @@
+<?xml version='1.0'?>
+
+<effect>
+	<parameter type="float4x4" name="modelview" semantic="WORLDVIEW"/>
+	<parameter type="float4x4" name="proj"/>
+	<parameter type="float4x4" name="modelviewIT"/>
+	<parameter type="float" name="currentAngle"/>
+	<parameter type="float3" name="lightDir" x="0" y="0" z="1"/>
+
+	<parameter type="float" name="half_length"/>
+	<parameter type="float" name="half_width"/>
+
+	<parameter type="sampler" name="flagSampler"/>
+
+	<shader>
+		<![CDATA[
+void VertexDisplacementVS(float4 pos			: POSITION,
+								float2 texcoord0	: TEXCOORD0,
+								out float4 oPos			: POSITION,
+								out float4 oClr			: COLOR0,
+								out float2 oTexcoord0	: TEXCOORD0)
+{
+	float4 v = pos;
+	float2 offset = pos.xy + float2(half_length, -half_width);
+	v.z = (cos(offset.x + currentAngle) + sin(offset.y + currentAngle)) * offset.x * 0.2f;
+
+	float3 x_dir = float3(0.5f, 0, -sin(pos.x + currentAngle) * 0.2f);
+	float3 y_dir = float3(0, 0.5f, cos(pos.y + currentAngle) * pos.x * 0.2f);
+	float3 normal = mul(normalize(cross(x_dir, y_dir)), (float3x3)modelviewIT);
+
+	oPos = mul(mul(v, modelview), proj);
+	oClr = float4(max(0, dot(lightDir, normal)).xxx, 1);
+	oTexcoord0 = texcoord0;
+}
+
+float4 VertexDisplacementPS(float4 clr : COLOR0,
+							float2 texCoord : TEXCOORD0) : COLOR0
+{
+	return clr * tex2D(flagSampler, texCoord);
+}
+		]]>
+	</shader>
+
+	<technique name="VertexDisplacement">
+		<pass name="p0">
+			<state name="polygon_mode" value="fill"/>
+			<state name="cull_mode" value="anti_clock_wise"/>
+			<state name="front_stencil_enable" value="false"/>
+			<state name="depth_enable" value="true"/>
+			<state name="depth_write_enable" value="true"/>
+			<state name="blend_enable" value="false"/>
+
+			<state name="vertex_shader" value="VertexDisplacementVS()"/>
+			<state name="pixel_shader" value="VertexDisplacementPS()"/>
+		</pass>
+	</technique>
+</effect>

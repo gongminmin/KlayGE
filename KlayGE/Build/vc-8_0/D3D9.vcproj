@@ -4,6 +4,7 @@
 	Version="8.00"
 	Name="渲染引擎-D3D9"
 	ProjectGUID="{31837598-9F20-4A23-A9B6-9B590B43321B}"
+	RootNamespace="渲染引擎-D3D9"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -308,60 +309,340 @@
 			Name="特效脚本文件"
 			>
 			<File
-				RelativePath="..\..\RenderFX\2D.fx"
+				RelativePath="..\..\RenderFX\2D.fxml"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\RenderFX\Blur.fx"
+				RelativePath="..\..\RenderFX\Blur.fxml"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\RenderFX\Bone.fx"
+				RelativePath="..\..\RenderFX\Bone.fxml"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\RenderFX\DownSample.fx"
+				RelativePath="..\..\RenderFX\DownSample.fxml"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\RenderFX\Fog.fx"
+				RelativePath="..\..\RenderFX\Fog.fxml"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\RenderFX\Font.fx"
+				RelativePath="..\..\RenderFX\Font.fxml"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\RenderFX\KMesh.fx"
+				RelativePath="..\..\RenderFX\KMesh.fxml"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\RenderFX\Lighting.fx"
+				RelativePath="..\..\RenderFX\Lighting.fxml"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\RenderFX\PointSprite.fx"
+				RelativePath="..\..\RenderFX\PointSprite.fxml"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\RenderFX\Quaternion.fx"
+				RelativePath="..\..\RenderFX\Quaternion.fxml"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\RenderFX\RenderableHelper.fx"
+				RelativePath="..\..\RenderFX\RenderableHelper.fxml"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\RenderFX\ToneMapping.fx"
+				RelativePath="..\..\RenderFX\SumLum.fxml"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\RenderFX\Transforming.fx"
+				RelativePath="..\..\RenderFX\ToneMapping.fxml"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\RenderFX\util.fx"
+				RelativePath="..\..\RenderFX\util.fxml"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
 			</File>
 		</Filter>
 	</Files>

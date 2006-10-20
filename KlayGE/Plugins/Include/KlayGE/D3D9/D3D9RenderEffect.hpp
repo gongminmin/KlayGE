@@ -56,29 +56,17 @@ namespace KlayGE
 	typedef boost::shared_ptr<D3D9RenderEffect> D3D9RenderEffectPtr;
 
 	
-	class D3D9RenderEffectParameterDesc
+	struct D3D9RenderParameterDesc
 	{
-	public:
-		void RegisterInfo(bool is_vertex_shader, uint32_t register_start, uint32_t register_count);
+		RenderEffectParameterPtr param;
 
-		bool IsVertexShader() const
-		{
-			return is_vertex_shader_;
-		}
-		uint32_t RegisterStart() const
-		{
-			return register_start_;
-		}
-		uint32_t RegisterCount() const
-		{
-			return register_count_;
-		}
+		uint32_t register_set;
 
-	protected:
-		bool is_vertex_shader_;
+		uint32_t register_index;
+		uint32_t register_count;
 
-		uint32_t register_start_;
-		uint32_t register_count_;
+		uint32_t rows;
+		uint32_t columns;
 	};
 
 	// äÖÈ¾Ð§¹û
@@ -86,332 +74,68 @@ namespace KlayGE
 	class D3D9RenderEffect : public RenderEffect, public D3D9Resource
 	{
 	public:
-		explicit D3D9RenderEffect(ResIdentifierPtr const & source);
-
-		ID3DXEffectPtr const & D3DXEffect() const
-			{ return d3dx_effect_; }
 
 	private:
-		void DoOnLostDevice();
-		void DoOnResetDevice();
+		void DoOnLostDevice()
+		{
+		}
+		void DoOnResetDevice()
+		{
+		}
 
-		RenderTechniquePtr MakeRenderTechnique(uint32_t n);
-
-	private:
-		ID3DXEffectPtr d3dx_effect_;
+		RenderTechniquePtr MakeRenderTechnique();
 	};
 
 	class D3D9RenderTechnique : public RenderTechnique
 	{
 	public:
-		D3D9RenderTechnique(RenderEffect& effect, std::string const & name, D3DXHANDLE tech);
-
-		bool Validate();
+		explicit D3D9RenderTechnique(RenderEffect& effect)
+			: RenderTechnique(effect)
+		{
+		}
 
 	private:
-		RenderPassPtr MakeRenderPass(uint32_t n);
+		RenderPassPtr MakeRenderPass(uint32_t index);
 
 		void DoBegin(uint32_t flags);
 		void DoEnd();
-
-		ID3DXEffectPtr const & D3DXEffect() const;
-
-	private:
-		D3DXHANDLE tech_;
 	};
 
 	class D3D9RenderPass : public RenderPass
 	{
 	public:
-		D3D9RenderPass(RenderEffect& effect, uint32_t index, D3DXHANDLE pass);
+		D3D9RenderPass(RenderEffect& effect, uint32_t index)
+			: RenderPass(effect, index)
+		{
+		}
+
+		void DoRead();
 
 		void Begin();
 		void End();
 
 	private:
-		ID3DXEffectPtr const & D3DXEffect() const;
-
-	private:
-		D3DXHANDLE pass_;
-
-		std::vector<std::pair<RenderEffectParameterPtr, D3D9RenderEffectParameterDesc> > parameters_[2];
-
 		ID3D9VertexShaderPtr vertex_shader_;
 		ID3D9PixelShaderPtr pixel_shader_;
-	};
 
-	template <typename T>
-	class D3D9RenderEffectParameter : public RenderEffectParameterConcrete<T>, public D3D9Resource
-	{
-	public:
-		D3D9RenderEffectParameter(RenderEffect& effect,
-				std::string const & name, std::string const & semantic)
-			: RenderEffectParameterConcrete<T>(effect, name, semantic)
-		{
-		}
-		virtual ~D3D9RenderEffectParameter()
-		{
-		}
+		std::vector<D3D9RenderParameterDesc> param_descs_[2];
 
-		virtual void Flush(D3D9RenderEffectParameterDesc const & desc) = 0;
+		uint32_t bool_start_[2];
+		uint32_t int_start_[2];
+		uint32_t float_start_[2];
+		std::vector<BOOL> bool_registers_[2];
+		std::vector<int> int_registers_[2];
+		std::vector<float> float_registers_[2];
 
 	private:
-		virtual void DoOnLostDevice()
-		{
-		}
-		virtual void DoOnResetDevice()
-		{
-		}
-	};
+		void compile_shader(ID3DXBuffer*& code, ID3DXConstantTable*& constant_table,
+					std::string const & profile, std::string const & name, std::string const & text);
+		void create_vertex_shader(ID3DXConstantTable*& ct,
+					std::string const & profile, std::string const & name, std::string const & text);
+		void create_pixel_shader(ID3DXConstantTable*& ct,
+					std::string const & profile, std::string const & name, std::string const & text);
 
-	class D3D9RenderEffectParameterBool : public D3D9RenderEffectParameter<bool>
-	{
-	public:
-		D3D9RenderEffectParameterBool(RenderEffect& effect, std::string const & name, std::string const & semantic)
-			: D3D9RenderEffectParameter<bool>(effect, name, semantic)
-		{
-		}
-
-		void Flush(D3D9RenderEffectParameterDesc const & desc);
-
-	private:
-		void DoFlush(bool const & value);
-
-	private:
-		D3D9RenderEffectParameterBool(D3D9RenderEffectParameterBool const & rhs);
-		D3D9RenderEffectParameterBool& operator=(D3D9RenderEffectParameterBool const & rhs);
-	};
-
-	class D3D9RenderEffectParameterInt : public D3D9RenderEffectParameter<int>
-	{
-	public:
-		D3D9RenderEffectParameterInt(RenderEffect& effect, std::string const & name, std::string const & semantic)
-			: D3D9RenderEffectParameter<int>(effect, name, semantic)
-		{
-		}
-
-		void Flush(D3D9RenderEffectParameterDesc const & desc);
-
-	private:
-		void DoFlush(int const & value);
-
-	private:
-		D3D9RenderEffectParameterInt(D3D9RenderEffectParameterInt const & rhs);
-		D3D9RenderEffectParameterInt& operator=(D3D9RenderEffectParameterInt const & rhs);
-	};
-
-	class D3D9RenderEffectParameterFloat : public D3D9RenderEffectParameter<float>
-	{
-	public:
-		D3D9RenderEffectParameterFloat(RenderEffect& effect, std::string const & name, std::string const & semantic)
-			: D3D9RenderEffectParameter<float>(effect, name, semantic)
-		{
-		}
-
-		void Flush(D3D9RenderEffectParameterDesc const & desc);
-
-	private:
-		void DoFlush(float const & value);
-
-	private:
-		D3D9RenderEffectParameterFloat(D3D9RenderEffectParameterFloat const & rhs);
-		D3D9RenderEffectParameterFloat& operator=(D3D9RenderEffectParameterFloat const & rhs);
-	};
-
-	class D3D9RenderEffectParameterFloat2 : public D3D9RenderEffectParameter<float2>
-	{
-	public:
-		D3D9RenderEffectParameterFloat2(RenderEffect& effect, std::string const & name, std::string const & semantic)
-			: D3D9RenderEffectParameter<float2>(effect, name, semantic)
-		{
-		}
-
-		void Flush(D3D9RenderEffectParameterDesc const & desc);
-
-	private:
-		void DoFlush(float2 const & value);
-
-	private:
-		D3D9RenderEffectParameterFloat2(D3D9RenderEffectParameterFloat2 const & rhs);
-		D3D9RenderEffectParameterFloat2& operator=(D3D9RenderEffectParameterFloat2 const & rhs);
-	};
-
-	class D3D9RenderEffectParameterFloat3 : public D3D9RenderEffectParameter<float3>
-	{
-	public:
-		D3D9RenderEffectParameterFloat3(RenderEffect& effect, std::string const & name, std::string const & semantic)
-			: D3D9RenderEffectParameter<float3>(effect, name, semantic)
-		{
-		}
-
-		void Flush(D3D9RenderEffectParameterDesc const & desc);
-
-	private:
-		void DoFlush(float3 const & value);
-
-	private:
-		D3D9RenderEffectParameterFloat3(D3D9RenderEffectParameterFloat3 const & rhs);
-		D3D9RenderEffectParameterFloat3& operator=(D3D9RenderEffectParameterFloat3 const & rhs);
-	};
-
-	class D3D9RenderEffectParameterFloat4 : public D3D9RenderEffectParameter<float4>
-	{
-	public:
-		D3D9RenderEffectParameterFloat4(RenderEffect& effect, std::string const & name, std::string const & semantic)
-			: D3D9RenderEffectParameter<float4>(effect, name, semantic)
-		{
-		}
-
-		void Flush(D3D9RenderEffectParameterDesc const & desc);
-
-	private:
-		void DoFlush(float4 const & value);
-
-	private:
-		D3D9RenderEffectParameterFloat4(D3D9RenderEffectParameterFloat4 const & rhs);
-		D3D9RenderEffectParameterFloat4& operator=(D3D9RenderEffectParameterFloat4 const & rhs);
-	};
-
-	class D3D9RenderEffectParameterFloat4x4 : public D3D9RenderEffectParameter<float4x4>
-	{
-	public:
-		D3D9RenderEffectParameterFloat4x4(RenderEffect& effect, std::string const & name, std::string const & semantic)
-			: D3D9RenderEffectParameter<float4x4>(effect, name, semantic)
-		{
-		}
-
-		void Flush(D3D9RenderEffectParameterDesc const & desc);
-
-	private:
-		void DoFlush(float4x4 const & value);
-
-	private:
-		D3D9RenderEffectParameterFloat4x4(D3D9RenderEffectParameterFloat4x4 const & rhs);
-		D3D9RenderEffectParameterFloat4x4& operator=(D3D9RenderEffectParameterFloat4x4 const & rhs);
-	};
-
-	class D3D9RenderEffectParameterSampler : public D3D9RenderEffectParameter<SamplerPtr>
-	{
-	public:
-		D3D9RenderEffectParameterSampler(RenderEffect& effect, std::string const & name, std::string const & semantic)
-			: D3D9RenderEffectParameter<SamplerPtr>(effect, name, semantic)
-		{
-		}
-
-		void Flush(D3D9RenderEffectParameterDesc const & desc);
-
-	private:
-		void DoFlush(SamplerPtr const & value);
-
-	private:
-		void DoOnLostDevice();
-		void DoOnResetDevice();
-
-	private:
-		D3D9RenderEffectParameterSampler(D3D9RenderEffectParameterSampler const & rhs);
-		D3D9RenderEffectParameterSampler& operator=(D3D9RenderEffectParameterSampler const & rhs);
-	};
-
-	class D3D9RenderEffectParameterBoolArray : public D3D9RenderEffectParameter<std::vector<bool> >
-	{
-	public:
-		D3D9RenderEffectParameterBoolArray(RenderEffect& effect, std::string const & name, std::string const & semantic)
-			: D3D9RenderEffectParameter<std::vector<bool> >(effect, name, semantic)
-		{
-		}
-
-		void Flush(D3D9RenderEffectParameterDesc const & desc);
-
-	private:
-		void DoFlush(std::vector<bool> const & value);
-
-	private:
-		D3D9RenderEffectParameterBoolArray(D3D9RenderEffectParameterBoolArray const & rhs);
-		D3D9RenderEffectParameterBoolArray& operator=(D3D9RenderEffectParameterBoolArray const & rhs);
-	};
-
-	class D3D9RenderEffectParameterIntArray : public D3D9RenderEffectParameter<std::vector<int> >
-	{
-	public:
-		D3D9RenderEffectParameterIntArray(RenderEffect& effect, std::string const & name, std::string const & semantic)
-			: D3D9RenderEffectParameter<std::vector<int> >(effect, name, semantic)
-		{
-		}
-
-		void Flush(D3D9RenderEffectParameterDesc const & desc);
-
-	private:
-		void DoFlush(std::vector<int> const & value);
-
-	private:
-		D3D9RenderEffectParameterIntArray(D3D9RenderEffectParameterIntArray const & rhs);
-		D3D9RenderEffectParameterIntArray& operator=(D3D9RenderEffectParameterIntArray const & rhs);
-	};
-
-	class D3D9RenderEffectParameterFloatArray : public D3D9RenderEffectParameter<std::vector<float> >
-	{
-	public:
-		D3D9RenderEffectParameterFloatArray(RenderEffect& effect, std::string const & name, std::string const & semantic)
-			: D3D9RenderEffectParameter<std::vector<float> >(effect, name, semantic)
-		{
-		}
-
-		void Flush(D3D9RenderEffectParameterDesc const & desc);
-
-	private:
-		void DoFlush(std::vector<float> const & value);
-
-	private:
-		D3D9RenderEffectParameterFloatArray(D3D9RenderEffectParameterFloatArray const & rhs);
-		D3D9RenderEffectParameterFloatArray& operator=(D3D9RenderEffectParameterFloatArray const & rhs);
-	};
-
-	class D3D9RenderEffectParameterFloat4Array : public D3D9RenderEffectParameter<std::vector<float4> >
-	{
-	public:
-		D3D9RenderEffectParameterFloat4Array(RenderEffect& effect, std::string const & name, std::string const & semantic)
-			: D3D9RenderEffectParameter<std::vector<float4> >(effect, name, semantic)
-		{
-		}
-
-		void Flush(D3D9RenderEffectParameterDesc const & desc);
-
-	private:
-		void DoFlush(std::vector<float4> const & value);
-
-	private:
-		D3D9RenderEffectParameterFloat4Array(D3D9RenderEffectParameterFloat4Array const & rhs);
-		D3D9RenderEffectParameterFloat4Array& operator=(D3D9RenderEffectParameterFloat4Array const & rhs);
-	};
-
-	class D3D9RenderEffectParameterFloat4x4Array : public D3D9RenderEffectParameter<std::vector<float4x4> >
-	{
-	public:
-		D3D9RenderEffectParameterFloat4x4Array(RenderEffect& effect, std::string const & name, std::string const & semantic)
-			: D3D9RenderEffectParameter<std::vector<float4x4> >(effect, name, semantic)
-		{
-		}
-
-		void Flush(D3D9RenderEffectParameterDesc const & desc);
-
-	private:
-		void DoFlush(std::vector<float4x4> const & value);
-
-	private:
-		D3D9RenderEffectParameterFloat4x4Array(D3D9RenderEffectParameterFloat4x4Array const & rhs);
-		D3D9RenderEffectParameterFloat4x4Array& operator=(D3D9RenderEffectParameterFloat4x4Array const & rhs);
-	};
-
-	class D3D9RenderEffectInclude : public ID3DXInclude
-	{
-	public:
-        virtual ~D3D9RenderEffectInclude()
-        {
-        }
-
-		STDMETHOD(Open)(D3DXINCLUDE_TYPE IncludeType, LPCSTR pFileName,
-			LPCVOID pParentData, LPCVOID* ppData, UINT* pBytes);
-		STDMETHOD(Close)(LPCVOID pData);
+		void shader(std::string& profile, std::string& name, std::string& func, std::string const & type) const;
 	};
 }
 

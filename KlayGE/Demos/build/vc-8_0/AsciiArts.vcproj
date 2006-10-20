@@ -190,10 +190,6 @@
 				RelativePath="..\..\src\AsciiArts\AsciiArts.cpp"
 				>
 			</File>
-			<File
-				RelativePath="..\..\media\AsciiArts\AsciiArts.fx"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Í·ÎÄ¼þ"
@@ -207,6 +203,34 @@
 			<File
 				RelativePath="..\..\src\AsciiArts\AsciiArts.hpp"
 				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Effects"
+			>
+			<File
+				RelativePath="..\..\media\AsciiArts\AsciiArts.fxml"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
 			</File>
 		</Filter>
 	</Files>

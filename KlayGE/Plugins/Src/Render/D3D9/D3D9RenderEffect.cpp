@@ -46,6 +46,8 @@
 #endif
 #include <functional>
 #include <string>
+#include <sstream>
+#include <iostream>
 
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
@@ -53,290 +55,69 @@
 
 namespace KlayGE
 {
-	D3D9RenderEffect::D3D9RenderEffect(ResIdentifierPtr const & source)
+	RenderTechniquePtr D3D9RenderEffect::MakeRenderTechnique()
 	{
-		source->seekg(0, std::ios_base::end);
-		std::vector<char> data(source->tellg());
-		source->seekg(0);
-		source->read(&data[0], static_cast<std::streamsize>(data.size()));
-
-		D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-
-		D3D9RenderEffectInclude include;
-
-		ID3DXEffect* effect;
-		D3DXCreateEffect(renderEngine.D3DDevice().get(), &data[0],
-			static_cast<UINT>(data.size()), NULL, &include,
-			0, NULL, &effect, NULL);
-		d3dx_effect_ = MakeCOMPtr(effect);
-
-		D3DXEFFECT_DESC desc;
-		d3dx_effect_->GetDesc(&desc);
-
-		for (uint32_t i = 0; i < desc.Parameters; ++ i)
-		{
-			RenderEffectParameterPtr reparam;
-
-			D3DXPARAMETER_DESC param_desc;
-			d3dx_effect_->GetParameterDesc(d3dx_effect_->GetParameter(NULL, i), &param_desc);
-
-			std::string const name = param_desc.Name;
-			std::string semantic;
-			if (param_desc.Semantic)
-			{
-				semantic = param_desc.Semantic;
-			}
-
-			if (D3DXPC_SCALAR == param_desc.Class)
-			{
-				switch (param_desc.Type)
-				{
-				case D3DXPT_FLOAT:
-					{
-						if (0 == param_desc.Elements)
-						{
-							reparam.reset(new D3D9RenderEffectParameterFloat(*this, name, semantic));
-						}
-						else
-						{
-							reparam.reset(new D3D9RenderEffectParameterFloatArray(*this, name, semantic));
-						}
-					}
-					break;
-
-				case D3DXPT_INT:
-					{
-						if (0 == param_desc.Elements)
-						{
-							reparam.reset(new D3D9RenderEffectParameterInt(*this, name, semantic));
-						}
-						else
-						{
-							reparam.reset(new D3D9RenderEffectParameterIntArray(*this, name, semantic));
-						}
-					}
-					break;
-
-				case D3DXPT_BOOL:
-					{
-						if (0 == param_desc.Elements)
-						{
-							reparam.reset(new D3D9RenderEffectParameterBool(*this, name, semantic));
-						}
-						else
-						{
-							reparam.reset(new D3D9RenderEffectParameterBoolArray(*this, name, semantic));
-						}
-					}
-					break;
-
-				default:
-					BOOST_ASSERT(false);
-					break;
-				}
-			}
-			else
-			{
-				if ((D3DXPC_VECTOR == param_desc.Class) && (D3DXPT_FLOAT == param_desc.Type) && (1 == param_desc.Rows))
-				{
-					if (0 == param_desc.Elements)
-					{
-						switch (param_desc.Columns)
-						{
-						case 2:
-							reparam.reset(new D3D9RenderEffectParameterFloat2(*this, name, semantic));
-							break;
-
-						case 3:
-							reparam.reset(new D3D9RenderEffectParameterFloat3(*this, name, semantic));
-							break;
-						
-						case 4:
-							reparam.reset(new D3D9RenderEffectParameterFloat4(*this, name, semantic));
-							break;
-
-						default:
-							BOOST_ASSERT(false);
-							break;
-						}
-					}
-					else
-					{
-						reparam.reset(new D3D9RenderEffectParameterFloat4Array(*this, name, semantic));
-					}
-				}
-				else
-				{
-					if ((D3DXPC_MATRIX_ROWS == param_desc.Class) && (D3DXPT_FLOAT == param_desc.Type))
-					{
-						if (0 == param_desc.Elements)
-						{
-							reparam.reset(new D3D9RenderEffectParameterFloat4x4(*this, name, semantic));
-						}
-						else
-						{
-							reparam.reset(new D3D9RenderEffectParameterFloat4x4Array(*this, name, semantic));
-						}
-					}
-					else
-					{
-						if ((D3DXPC_OBJECT == param_desc.Class)
-								&& ((D3DXPT_SAMPLER == param_desc.Type) || (D3DXPT_SAMPLER1D == param_desc.Type) || (D3DXPT_SAMPLER2D == param_desc.Type)
-									|| (D3DXPT_SAMPLER3D == param_desc.Type) || (D3DXPT_SAMPLERCUBE == param_desc.Type)))
-						{
-							reparam.reset(new D3D9RenderEffectParameterSampler(*this, name, semantic));
-						}
-						else
-						{
-							BOOST_ASSERT(false);
-						}
-					}
-				}
-			}
-
-			params_.push_back(reparam);
-		}
-
-		for (uint32_t i = 0; i < desc.Techniques; ++ i)
-		{
-			techniques_.push_back(this->MakeRenderTechnique(i));
-		}
-	}
-
-	void D3D9RenderEffect::DoOnLostDevice()
-	{
-		for (params_type::iterator iter = params_.begin(); iter != params_.end(); ++ iter)
-		{
-			RenderEffectParameterPtr param = *iter;
-			if (dynamic_cast<D3D9RenderEffectParameterSampler*>(param.get()) != NULL)
-			{
-				SamplerPtr s;
-				param->Value(s);
-				if (s && s->GetTexture())
-				{
-					checked_pointer_cast<D3D9Texture>(s->GetTexture())->OnLostDevice();
-				}
-
-				param->Dirty();
-			}
-		}
-
-		TIF(d3dx_effect_->OnLostDevice());
-	}
-
-	void D3D9RenderEffect::DoOnResetDevice()
-	{
-		TIF(d3dx_effect_->OnResetDevice());
-
-		for (params_type::iterator iter = params_.begin(); iter != params_.end(); ++ iter)
-		{
-			RenderEffectParameterPtr param = *iter;
-			if (dynamic_cast<D3D9RenderEffectParameterSampler*>(param.get()) != NULL)
-			{
-				SamplerPtr s;
-				param->Value(s);
-				if (s && s->GetTexture())
-				{
-					checked_pointer_cast<D3D9Texture>(s->GetTexture())->OnResetDevice();
-				}
-
-				param->Dirty();
-			}
-		}
-	}
-
-	RenderTechniquePtr D3D9RenderEffect::MakeRenderTechnique(uint32_t n)
-	{
-		D3DXHANDLE tech = d3dx_effect_->GetTechnique(n);
-		BOOST_ASSERT(tech != NULL);
-
-		D3DXTECHNIQUE_DESC desc;
-		d3dx_effect_->GetTechniqueDesc(tech, &desc);
-		return RenderTechniquePtr(new D3D9RenderTechnique(*this, desc.Name, tech));
+		return RenderTechniquePtr(new D3D9RenderTechnique(*this));
 	}
 
 
-	D3D9RenderTechnique::D3D9RenderTechnique(RenderEffect& effect, std::string const & name, D3DXHANDLE tech)
-		: RenderTechnique(effect, name),
-			tech_(tech)
+	void D3D9RenderTechnique::DoBegin(uint32_t /*flags*/)
 	{
-		D3DXTECHNIQUE_DESC desc;
-		this->D3DXEffect()->GetTechniqueDesc(tech_, &desc);
-		for (uint32_t i = 0; i < desc.Passes; ++ i)
-		{
-			passes_.push_back(this->MakeRenderPass(i));
-		}
-	}
-
-	bool D3D9RenderTechnique::Validate()
-	{
-		return SUCCEEDED(this->D3DXEffect()->ValidateTechnique(tech_));
-	}
-
-	void D3D9RenderTechnique::DoBegin(uint32_t flags)
-	{
-		TIF(this->D3DXEffect()->SetTechnique(tech_));
-
-		UINT passes;
-		TIF(this->D3DXEffect()->Begin(&passes, D3DXFX_DONOTSAVESAMPLERSTATE | flags));
 	}
 
 	void D3D9RenderTechnique::DoEnd()
 	{
-		TIF(this->D3DXEffect()->End());
 	}
 
-	RenderPassPtr D3D9RenderTechnique::MakeRenderPass(uint32_t n)
+	RenderPassPtr D3D9RenderTechnique::MakeRenderPass(uint32_t index)
 	{
-		D3DXHANDLE pass = this->D3DXEffect()->GetPass(tech_, n);
-		BOOST_ASSERT(pass != NULL);
-
-		return RenderPassPtr(new D3D9RenderPass(effect_, n, pass));
-	}
-
-	ID3DXEffectPtr const & D3D9RenderTechnique::D3DXEffect() const
-	{
-		return checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
+		return RenderPassPtr(new D3D9RenderPass(effect_, index));
 	}
 
 
-	D3D9RenderPass::D3D9RenderPass(RenderEffect& effect, uint32_t index, D3DXHANDLE pass)
-		: RenderPass(effect, index),
-			pass_(pass)
+	void D3D9RenderPass::DoRead()
 	{
-		D3DXPASS_DESC desc;
-		this->D3DXEffect()->GetPassDesc(pass, &desc);
+		is_validate_ = true;
+
+		std::string vs_profile, vs_name, vs_text;
+		this->shader(vs_profile, vs_name, vs_text, "vertex_shader");
+
+		std::string ps_profile, ps_name, ps_text;
+		this->shader(ps_profile, ps_name, ps_text, "pixel_shader");
 
 		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
 
-		ID3DXConstantTablePtr constant_table[2];
+		ID3DXConstantTable* constant_table[2] = { NULL, NULL };
 		
-		if (desc.pVertexShaderFunction != NULL)
+		if (!vs_name.empty())
 		{
-			ID3DXConstantTable* ct;
-			D3DXGetShaderConstantTable(desc.pVertexShaderFunction, &ct);
-			constant_table[0] = MakeCOMPtr(ct);
+			if ("auto" == vs_profile)
+			{
+				vs_profile = D3DXGetVertexShaderProfile(d3d_device.get());
+			}
 
-			IDirect3DVertexShader9* shader;
-			d3d_device->CreateVertexShader(desc.pVertexShaderFunction, &shader);
-			vertex_shader_ = MakeCOMPtr(shader);
+			this->create_vertex_shader(constant_table[0], vs_profile, vs_name, vs_text);
 		}
-		if (desc.pPixelShaderFunction != NULL)
-		{
-			ID3DXConstantTable* ct;
-			D3DXGetShaderConstantTable(desc.pPixelShaderFunction, &ct);
-			constant_table[1] = MakeCOMPtr(ct);
 
-			IDirect3DPixelShader9* shader;
-			d3d_device->CreatePixelShader(desc.pPixelShaderFunction, &shader);
-			pixel_shader_ = MakeCOMPtr(shader);
+		if (!ps_name.empty())
+		{
+			if ("auto" == ps_profile)
+			{
+				ps_profile = D3DXGetPixelShaderProfile(d3d_device.get());
+			}
+
+			this->create_pixel_shader(constant_table[1], ps_profile, ps_name, ps_text);
 		}
 
 		for (int i = 0; i < 2; ++ i)
 		{
 			if (constant_table[i])
 			{
+				uint32_t bool_begin = 0xFFFFFFFF, bool_end = 0;
+				uint32_t int_begin = 0xFFFFFFFF, int_end = 0;
+				uint32_t float_begin = 0xFFFFFFFF, float_end = 0;
+
 				D3DXCONSTANTTABLE_DESC ct_desc;
 				constant_table[i]->GetDesc(&ct_desc);
 				for (UINT c = 0; c < ct_desc.Constants; ++ c)
@@ -346,27 +127,159 @@ namespace KlayGE
 					UINT count;
 					constant_table[i]->GetConstantDesc(handle, &constant_desc, &count);
 
-					RenderEffectParameterPtr param = effect_.ParameterByName(constant_desc.Name);
-					D3D9RenderEffectParameterDesc desc;
-
-					if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterSampler>(param))
+					switch (constant_desc.RegisterSet)
 					{
-						UINT sampler_index = constant_table[i]->GetSamplerIndex(handle);
-						if (0 == i)
-						{
-							sampler_index += D3DVERTEXTEXTURESAMPLER0;
-						}
+					case D3DXRS_BOOL:
+						bool_begin = std::min<uint32_t>(bool_begin, constant_desc.RegisterIndex);
+						bool_end = std::max<uint32_t>(bool_end, constant_desc.RegisterIndex + constant_desc.RegisterCount);
+						break;
 
-						desc.RegisterInfo(0 == i, sampler_index, 1);
-					}
-					else
-					{
-						desc.RegisterInfo(0 == i, constant_desc.RegisterIndex, constant_desc.RegisterCount);
+					case D3DXRS_INT4:
+						int_begin = std::min<uint32_t>(int_begin, constant_desc.RegisterIndex);
+						int_end = std::max<uint32_t>(int_end, constant_desc.RegisterIndex + constant_desc.RegisterCount);
+						break;
+
+					case D3DXRS_FLOAT4:
+						float_begin = std::min<uint32_t>(float_begin, constant_desc.RegisterIndex);
+						float_end = std::max<uint32_t>(float_end, constant_desc.RegisterIndex + constant_desc.RegisterCount);
+						break;
 					}
 
-					parameters_[i].push_back(std::make_pair(param, desc));
+					D3D9RenderParameterDesc p_desc;
+					p_desc.param = effect_.ParameterByName(constant_desc.Name);
+					p_desc.register_set = constant_desc.RegisterSet;
+					p_desc.register_index = constant_desc.RegisterIndex;
+					p_desc.register_count = constant_desc.RegisterCount;
+					p_desc.rows = constant_desc.Rows;
+					p_desc.columns = constant_desc.Columns;
+					param_descs_[i].push_back(p_desc);
 				}
+
+				if (bool_end > bool_begin)
+				{
+					bool_registers_[i].resize((bool_end - bool_begin) * 4);
+					bool_start_[i] = bool_begin;
+				}
+				if (int_end > int_begin)
+				{
+					int_registers_[i].resize((int_end - int_begin) * 4);
+					int_start_[i] = int_begin;
+				}
+				if (float_end > float_begin)
+				{
+					float_registers_[i].resize((float_end - float_begin) * 4);
+					float_start_[i] = float_begin;
+				}
+
+				constant_table[i]->Release();
 			}
+		}
+	}
+
+	void D3D9RenderPass::compile_shader(ID3DXBuffer*& code, ID3DXConstantTable*& constant_table,
+						std::string const & profile, std::string const & name, std::string const & text)
+	{
+		ID3DXBuffer* pErrMsg;
+		D3DXCompileShader(text.c_str(), static_cast<UINT>(text.size()), NULL, NULL, name.c_str(), profile.c_str(),
+			0, &code, &pErrMsg, &constant_table);
+		if (pErrMsg != NULL)
+		{
+#ifdef KLAYGE_DEBUG
+			std::cerr << text << std::endl;
+			std::cerr << static_cast<char*>(pErrMsg->GetBufferPointer()) << std::endl;
+#endif
+			pErrMsg->Release();
+		}
+	}
+
+	void D3D9RenderPass::create_vertex_shader(ID3DXConstantTable*& ct, std::string const & profile, std::string const & name, std::string const & text)
+	{
+		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
+
+		ID3DXBuffer* code;
+		compile_shader(code, ct, profile, name, text);
+		if (NULL == code)
+		{
+			is_validate_ = false;
+		}
+		else
+		{
+			IDirect3DVertexShader9* vs;
+			if (FAILED(d3d_device->CreateVertexShader(static_cast<DWORD*>(code->GetBufferPointer()), &vs)))
+			{
+				is_validate_ = false;
+			}
+			vertex_shader_ = MakeCOMPtr(vs);
+			code->Release();
+		}
+	}
+
+	void D3D9RenderPass::create_pixel_shader(ID3DXConstantTable*& ct, std::string const & profile, std::string const & name, std::string const & text)
+	{
+		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
+
+		ID3DXBuffer* code;
+		compile_shader(code, ct, profile, name, text);
+		if (NULL == code)
+		{
+			is_validate_ = false;
+		}
+		else
+		{
+			IDirect3DPixelShader9* ps;
+			if (FAILED(d3d_device->CreatePixelShader(static_cast<DWORD*>(code->GetBufferPointer()), &ps)))
+			{
+				is_validate_ = false;
+			}
+			pixel_shader_ = MakeCOMPtr(ps);
+			code->Release();
+		}
+	}
+
+	void D3D9RenderPass::shader(std::string& profile, std::string& name, std::string& func, std::string const & type) const
+	{
+		profile.resize(0);
+		name.resize(0);
+		func.resize(0);
+
+		uint32_t const state_code = states_define::instance().state_code(type);
+
+		for (uint32_t i = 0; i < this->NumStates(); ++ i)
+		{
+			if (this->State(i).state() == state_code)
+			{
+				RenderState const & state = this->State(i);
+				shader_desc const & shader = boost::any_cast<shader_desc>(state.var()->get_value());
+				profile = shader.profile;
+				name = shader.func_name;
+				break;
+			}
+		}
+
+		std::stringstream ss;
+		if (!name.empty())
+		{
+			for (uint32_t i = 0; i < effect_.NumParameters(); ++ i)
+			{
+				RenderEffectParameter& param = *effect_.ParameterByIndex(i);
+
+				ss << type_define::instance().type_name(param.type()) << " " << param.Name();
+				if (param.ArraySize() != 0)
+				{
+					ss << "[" << param.ArraySize() << "]";
+				}
+
+				ss << ";" << std::endl;
+			}
+
+			for (uint32_t i = 0; i < effect_.NumShaders(); ++ i)
+			{
+				ss << effect_.ShaderByIndex(i).str() << std::endl;
+			}
+
+			func = ss.str();
 		}
 	}
 
@@ -375,382 +288,286 @@ namespace KlayGE
 		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
 
+		d3d_device->SetVertexShader(vertex_shader_.get());
+		d3d_device->SetPixelShader(pixel_shader_.get());
+
 		for (int i = 0; i < 2; ++ i)
 		{
-			for (std::vector<std::pair<RenderEffectParameterPtr, D3D9RenderEffectParameterDesc> >::iterator iter = parameters_[i].begin();
-				iter != parameters_[i].end(); ++ iter)
-			{
-				RenderEffectParameterPtr param = iter->first;
+			bool bool_dirty = false;
+			bool int_dirty = false;
+			bool float_dirty = false;
 
-				if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterSampler>(param))
+			for (size_t c = 0; c < param_descs_[i].size(); ++ c)
+			{
+				D3D9RenderParameterDesc const & desc = param_descs_[i][c];
+
+				RenderEffectParameterPtr param = desc.param;
+				if (param->IsDirty())
 				{
-					checked_pointer_cast<D3D9RenderEffectParameterSampler>(param)->Flush(iter->second);
+					switch (desc.register_set)
+					{
+					case D3DXRS_BOOL:
+						if (param->ArraySize() != 0)
+						{
+							std::vector<bool> tmp;
+							param->Value(tmp);
+							for (size_t j = 0; j < tmp.size(); ++ j)
+							{
+								bool_registers_[i][(desc.register_index + j) * 4] = tmp[j];
+							}
+						}
+						else
+						{
+							bool tmp;
+							param->Value(tmp);
+							bool_registers_[i][desc.register_index * 4] = tmp;
+						}
+						bool_dirty = true;
+						break;
+
+					case D3DXRS_INT4:
+						if (param->ArraySize() != 0)
+						{
+							std::vector<int> tmp;
+							param->Value(tmp);
+							for (size_t j = 0; j < tmp.size(); ++ j)
+							{
+								bool_registers_[i][(desc.register_index + j) * 4] = tmp[j];
+							}
+						}
+						else
+						{
+							param->Value(int_registers_[i][desc.register_index * 4]);
+						}
+						int_dirty = true;
+						break;
+
+					case D3DXRS_FLOAT4:
+						switch (param->type())
+						{
+						case type_define::TC_int:
+							if (param->ArraySize() != 0)
+							{
+								std::vector<int> tmp;
+								param->Value(tmp);
+								for (size_t j = 0; j < tmp.size(); ++ j)
+								{
+									float_registers_[i][(desc.register_index + j) * 4] = static_cast<float>(tmp[j]);
+								}
+							}
+							else
+							{
+								int v;
+								param->Value(v);
+								float_registers_[i][desc.register_index * 4] = static_cast<float>(v);
+							}
+							float_dirty = true;
+							break;
+
+						case type_define::TC_float:
+							if (param->ArraySize() != 0)
+							{
+								std::vector<float> tmp;
+								param->Value(tmp);
+								for (size_t j = 0; j < tmp.size(); ++ j)
+								{
+									float_registers_[i][(desc.register_index + j) * 4] = tmp[j];
+								}
+							}
+							else
+							{
+								param->Value(float_registers_[i][desc.register_index * 4]);
+							}
+							float_dirty = true;
+							break;
+
+						case type_define::TC_float2:
+							{
+								float2 tmp;
+								param->Value(tmp);
+								memcpy(&float_registers_[i][desc.register_index * 4], &tmp[0], sizeof(tmp));
+							}
+							float_dirty = true;
+							break;
+
+						case type_define::TC_float3:
+							{
+								float3 tmp;
+								param->Value(tmp);
+								memcpy(&float_registers_[i][desc.register_index * 4], &tmp[0], sizeof(tmp));
+							}
+							float_dirty = true;
+							break;
+
+						case type_define::TC_float4:
+							if (param->ArraySize() != 0)
+							{
+								std::vector<float4> tmp;
+								param->Value(tmp);
+								memcpy(&float_registers_[i][desc.register_index * 4], &tmp[0],
+									std::min(desc.register_count, static_cast<uint32_t>(tmp.size())) * sizeof(float4));
+							}
+							else
+							{
+								float4 tmp;
+								param->Value(tmp);
+								memcpy(&float_registers_[i][desc.register_index * 4], &tmp[0], sizeof(tmp));
+							}
+							float_dirty = true;
+							break;
+
+						case type_define::TC_float4x4:
+							if (param->ArraySize() != 0)
+							{
+								uint32_t start = desc.register_index;
+								std::vector<float4x4> tmp;
+								param->Value(tmp);
+								for (std::vector<float4x4>::iterator iter = tmp.begin();
+									iter != tmp.end(); ++ iter)
+								{
+									*iter = MathLib::transpose(*iter);
+									memcpy(&float_registers_[i][start * 4], &(*iter)[0], desc.rows * sizeof(float4));
+									start += desc.rows;
+								}
+							}
+							else
+							{
+								float4x4 tmp;
+								param->Value(tmp);
+								tmp = MathLib::transpose(tmp);
+								memcpy(&float_registers_[i][desc.register_index * 4], &tmp[0], desc.register_count * sizeof(float4));
+							}
+							float_dirty = true;
+							break;
+
+						default:
+							BOOST_ASSERT(false);
+							break;
+						}
+					}
+
+					//param->Dirty(false);
+				}
+			}
+
+			if (bool_dirty && !bool_registers_[i].empty())
+			{
+				if (0 == i)
+				{
+					d3d_device->SetVertexShaderConstantB(bool_start_[i], &bool_registers_[i][0],
+						static_cast<UINT>(bool_registers_[i].size()) / 4);
+				}
+				else
+				{
+					d3d_device->SetPixelShaderConstantB(bool_start_[i], &bool_registers_[i][0],
+						static_cast<UINT>(bool_registers_[i].size()) / 4);
+				}
+			}
+			if (int_dirty && !int_registers_[i].empty())
+			{
+				if (0 == i)
+				{
+					d3d_device->SetVertexShaderConstantI(int_start_[i], &int_registers_[i][0],
+						static_cast<UINT>(int_registers_[i].size()) / 4);
+				}
+				else
+				{
+					d3d_device->SetPixelShaderConstantI(int_start_[i], &int_registers_[i][0],
+						static_cast<UINT>(int_registers_[i].size()) / 4);
+				}
+			}
+			if (float_dirty && !float_registers_[i].empty())
+			{
+				if (0 == i)
+				{
+					d3d_device->SetVertexShaderConstantF(float_start_[i], &float_registers_[i][0],
+						static_cast<UINT>(float_registers_[i].size()) / 4);
+				}
+				else
+				{
+					d3d_device->SetPixelShaderConstantF(float_start_[i], &float_registers_[i][0],
+						static_cast<UINT>(float_registers_[i].size()) / 4);
 				}
 			}
 		}
 
-		TIF(this->D3DXEffect()->BeginPass(index_));
+		for (int i = 0; i < 2; ++ i)
+		{
+			for (size_t c = 0; c < param_descs_[i].size(); ++ c)
+			{
+				D3D9RenderParameterDesc const & desc = param_descs_[i][c];
+
+				RenderEffectParameterPtr param = desc.param;
+				if (D3DXRS_SAMPLER == desc.register_set)
+				{
+					SamplerPtr s;
+					param->Value(s);
+					uint32_t sampler_index = desc.register_index;
+					if (0 == i)
+					{
+						sampler_index += D3DVERTEXTEXTURESAMPLER0;
+					}
+					render_eng.SetSampler(sampler_index, s);
+				}
+			}
+		}
+
+		for (size_t i = 0; i < render_states_.size(); ++ i)
+		{
+			if (type_define::TC_shader != render_states_[i]->type())
+			{
+				uint32_t state;
+				if (type_define::TC_bool == render_states_[i]->type())
+				{
+					state = boost::any_cast<bool>(render_states_[i]->var()->get_value());
+				}
+				else
+				{
+					if (type_define::TC_int == render_states_[i]->type())
+					{
+						state = boost::any_cast<int>(render_states_[i]->var()->get_value());
+					}
+					else
+					{
+						if (type_define::TC_float == render_states_[i]->type())
+						{
+							state = float_to_uint32(boost::any_cast<float>(render_states_[i]->var()->get_value()));
+						}
+						else
+						{
+							BOOST_ASSERT(false);
+							state = 0;
+						}
+					}
+				}
+
+				render_eng.SetRenderState(static_cast<RenderEngine::RenderStateType>(render_states_[i]->state()),
+					state);
+			}
+		}
 	}
 
 	void D3D9RenderPass::End()
 	{
 		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-
-		TIF(this->D3DXEffect()->EndPass());
-
+		
 		for (int i = 0; i < 2; ++ i)
 		{
-			for (std::vector<std::pair<RenderEffectParameterPtr, D3D9RenderEffectParameterDesc> >::iterator iter = parameters_[i].begin();
-				iter != parameters_[i].end(); ++ iter)
+			for (size_t c = 0; c < param_descs_[i].size(); ++ c)
 			{
-				if (boost::dynamic_pointer_cast<D3D9RenderEffectParameterSampler>(iter->first))
+				D3D9RenderParameterDesc const & desc = param_descs_[i][c];
+
+				RenderEffectParameterPtr param = desc.param;
+				if (D3DXRS_SAMPLER == desc.register_set)
 				{
-					render_eng.DisableSampler(iter->second.RegisterStart());
+					uint32_t sampler_index = desc.register_index;
+					if (0 == i)
+					{
+						sampler_index += D3DVERTEXTEXTURESAMPLER0;
+					}
+					render_eng.DisableSampler(sampler_index);
 				}
 			}
 		}
-	}
-
-	ID3DXEffectPtr const & D3D9RenderPass::D3DXEffect() const
-	{
-		return checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
-	}
-
-
-	void D3D9RenderEffectParameterDesc::RegisterInfo(bool is_vertex_shader, uint32_t register_start, uint32_t register_count)
-	{
-		is_vertex_shader_ = is_vertex_shader;
-
-		register_start_ = register_start;
-		register_count_ = register_count;
-	}
-
-
-	void D3D9RenderEffectParameterBool::DoFlush(bool const & value)
-	{
-		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
-		BOOL tmp = value;
-		TIF(d3dx_effect->SetValue(name_.c_str(), &tmp, sizeof(tmp)));
-	}
-
-	void D3D9RenderEffectParameterBool::Flush(D3D9RenderEffectParameterDesc const & desc)
-	{
-		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
-
-		BOOL tmp[4] = { val_, FALSE, FALSE, FALSE };
-		if (desc.IsVertexShader())
-		{
-			d3d_device->SetVertexShaderConstantB(desc.RegisterStart(), tmp, desc.RegisterCount());
-		}
-		else
-		{
-			d3d_device->SetPixelShaderConstantB(desc.RegisterStart(), tmp, desc.RegisterCount());
-		}
-	}
-
-	void D3D9RenderEffectParameterInt::DoFlush(int const & value)
-	{
-		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
-		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
-	}
-
-	void D3D9RenderEffectParameterInt::Flush(D3D9RenderEffectParameterDesc const & desc)
-	{
-		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
-
-		int tmp[4] = { val_, 0, 0, 0 };
-		if (desc.IsVertexShader())
-		{
-			d3d_device->SetVertexShaderConstantI(desc.RegisterStart(), tmp, desc.RegisterCount());
-		}
-		else
-		{
-			d3d_device->SetPixelShaderConstantI(desc.RegisterStart(), tmp, desc.RegisterCount());
-		}
-	}
-
-	void D3D9RenderEffectParameterFloat::DoFlush(float const & value)
-	{
-		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
-		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
-	}
-
-	void D3D9RenderEffectParameterFloat::Flush(D3D9RenderEffectParameterDesc const & desc)
-	{
-		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
-
-		float tmp[4] = { val_, 0, 0, 0 };
-		if (desc.IsVertexShader())
-		{
-			d3d_device->SetVertexShaderConstantF(desc.RegisterStart(), tmp, desc.RegisterCount());
-		}
-		else
-		{
-			d3d_device->SetPixelShaderConstantF(desc.RegisterStart(), tmp, desc.RegisterCount());
-		}
-	}
-
-	void D3D9RenderEffectParameterFloat2::DoFlush(float2 const & value)
-	{
-		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
-		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
-	}
-
-	void D3D9RenderEffectParameterFloat2::Flush(D3D9RenderEffectParameterDesc const & desc)
-	{
-		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
-
-		float tmp[4] = { val_.x(), val_.y(), 0, 0 };
-		if (desc.IsVertexShader())
-		{
-			d3d_device->SetVertexShaderConstantF(desc.RegisterStart(), tmp, desc.RegisterCount());
-		}
-		else
-		{
-			d3d_device->SetPixelShaderConstantF(desc.RegisterStart(), tmp, desc.RegisterCount());
-		}
-	}
-
-	void D3D9RenderEffectParameterFloat3::DoFlush(float3 const & value)
-	{
-		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
-		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
-	}
-
-	void D3D9RenderEffectParameterFloat3::Flush(D3D9RenderEffectParameterDesc const & desc)
-	{
-		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
-
-		float tmp[4] = { val_.x(), val_.y(), val_.z(), 0 };
-		if (desc.IsVertexShader())
-		{
-			d3d_device->SetVertexShaderConstantF(desc.RegisterStart(), tmp, desc.RegisterCount());
-		}
-		else
-		{
-			d3d_device->SetPixelShaderConstantF(desc.RegisterStart(), tmp, desc.RegisterCount());
-		}
-	}
-
-	void D3D9RenderEffectParameterFloat4::DoFlush(float4 const & value)
-	{
-		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
-		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
-	}
-
-	void D3D9RenderEffectParameterFloat4::Flush(D3D9RenderEffectParameterDesc const & desc)
-	{
-		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
-
-		if (desc.IsVertexShader())
-		{
-			d3d_device->SetVertexShaderConstantF(desc.RegisterStart(), &val_[0], desc.RegisterCount());
-		}
-		else
-		{
-			d3d_device->SetPixelShaderConstantF(desc.RegisterStart(), &val_[0], desc.RegisterCount());
-		}
-	}
-
-	void D3D9RenderEffectParameterFloat4x4::DoFlush(float4x4 const & value)
-	{
-		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
-		TIF(d3dx_effect->SetValue(name_.c_str(), &value, sizeof(value)));
-	}
-
-	void D3D9RenderEffectParameterFloat4x4::Flush(D3D9RenderEffectParameterDesc const & desc)
-	{
-		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
-
-		if (desc.IsVertexShader())
-		{
-			d3d_device->SetVertexShaderConstantF(desc.RegisterStart(), &val_[0], desc.RegisterCount());
-		}
-		else
-		{
-			d3d_device->SetPixelShaderConstantF(desc.RegisterStart(), &val_[0], desc.RegisterCount());
-		}
-	}
-
-	void D3D9RenderEffectParameterSampler::DoFlush(SamplerPtr const & /*value*/)
-	{
-	}
-
-	void D3D9RenderEffectParameterSampler::Flush(D3D9RenderEffectParameterDesc const & desc)
-	{
-		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		render_eng.SetSampler(desc.RegisterStart(), val_);
-	}
-
-	void D3D9RenderEffectParameterSampler::DoOnLostDevice()
-	{
-		if (val_)
-		{
-			D3D9Texture& texture = *checked_pointer_cast<D3D9Texture>(val_->GetTexture());
-			texture.OnLostDevice();
-		}
-	}
-
-	void D3D9RenderEffectParameterSampler::DoOnResetDevice()
-	{
-		if (val_)
-		{
-			D3D9Texture& texture = *checked_pointer_cast<D3D9Texture>(val_->GetTexture());
-			texture.OnResetDevice();
-		}
-	}
-
-	void D3D9RenderEffectParameterBoolArray::DoFlush(std::vector<bool> const & value)
-	{
-		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
-		std::vector<BOOL> tmp(value.begin(), value.end());
-		TIF(d3dx_effect->SetBoolArray(name_.c_str(), &tmp[0], static_cast<UINT>(tmp.size())));
-	}
-
-	void D3D9RenderEffectParameterBoolArray::Flush(D3D9RenderEffectParameterDesc const & desc)
-	{
-		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
-
-		std::vector<BOOL> tmp(val_.begin(), val_.end());
-		if (desc.IsVertexShader())
-		{
-			d3d_device->SetVertexShaderConstantB(desc.RegisterStart(), &tmp[0], desc.RegisterCount());
-		}
-		else
-		{
-			d3d_device->SetPixelShaderConstantB(desc.RegisterStart(), &tmp[0], desc.RegisterCount());
-		}
-	}
-
-	void D3D9RenderEffectParameterIntArray::DoFlush(std::vector<int> const & value)
-	{
-		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
-		TIF(d3dx_effect->SetIntArray(name_.c_str(), &value[0], static_cast<UINT>(value.size())));
-	}
-
-	void D3D9RenderEffectParameterIntArray::Flush(D3D9RenderEffectParameterDesc const & desc)
-	{
-		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
-
-		if (desc.IsVertexShader())
-		{
-			d3d_device->SetVertexShaderConstantI(desc.RegisterStart(), &val_[0], desc.RegisterCount());
-		}
-		else
-		{
-			d3d_device->SetPixelShaderConstantI(desc.RegisterStart(), &val_[0], desc.RegisterCount());
-		}
-	}
-
-	void D3D9RenderEffectParameterFloatArray::DoFlush(std::vector<float> const & value)
-	{
-		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
-		TIF(d3dx_effect->SetFloatArray(name_.c_str(), &value[0], static_cast<UINT>(value.size())));
-	}
-
-	void D3D9RenderEffectParameterFloatArray::Flush(D3D9RenderEffectParameterDesc const & desc)
-	{
-		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
-
-		if (desc.IsVertexShader())
-		{
-			d3d_device->SetVertexShaderConstantF(desc.RegisterStart(), &val_[0], desc.RegisterCount());
-		}
-		else
-		{
-			d3d_device->SetPixelShaderConstantF(desc.RegisterStart(), &val_[0], desc.RegisterCount());
-		}
-	}
-
-	void D3D9RenderEffectParameterFloat4Array::DoFlush(std::vector<float4> const & value)
-	{
-		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
-		TIF(d3dx_effect->SetVectorArray(name_.c_str(), reinterpret_cast<D3DXVECTOR4 const *>(&value[0]),
-			static_cast<UINT>(value.size())));
-	}
-
-	void D3D9RenderEffectParameterFloat4Array::Flush(D3D9RenderEffectParameterDesc const & desc)
-	{
-		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
-
-		if (desc.IsVertexShader())
-		{
-			d3d_device->SetVertexShaderConstantF(desc.RegisterStart(), &val_[0][0], desc.RegisterCount());
-		}
-		else
-		{
-			d3d_device->SetPixelShaderConstantF(desc.RegisterStart(), &val_[0][0], desc.RegisterCount());
-		}
-	}
-
-	void D3D9RenderEffectParameterFloat4x4Array::DoFlush(std::vector<float4x4> const & value)
-	{
-		ID3DXEffectPtr d3dx_effect = checked_cast<D3D9RenderEffect*>(&effect_)->D3DXEffect();
-		TIF(d3dx_effect->SetMatrixArray(name_.c_str(), reinterpret_cast<D3DXMATRIX const *>(&value[0]),
-			static_cast<UINT>(value.size())));
-	}
-
-	void D3D9RenderEffectParameterFloat4x4Array::Flush(D3D9RenderEffectParameterDesc const & desc)
-	{
-		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
-
-		if (desc.IsVertexShader())
-		{
-			d3d_device->SetVertexShaderConstantF(desc.RegisterStart(), &val_[0][0], desc.RegisterCount());
-		}
-		else
-		{
-			d3d_device->SetPixelShaderConstantF(desc.RegisterStart(), &val_[0][0], desc.RegisterCount());
-		}
-	}
-
-	HRESULT D3D9RenderEffectInclude::Open(D3DXINCLUDE_TYPE /*IncludeType*/, LPCSTR pFileName,
-		LPCVOID /*pParentData*/, LPCVOID* ppData, UINT* pBytes)
-	{
-		ResLoader& loader = ResLoader::Instance();
-
-		if (!loader.Locate(pFileName).empty())
-		{
-			ResIdentifierPtr res = loader.Load(pFileName);
-
-			res->seekg(0, std::ios_base::end);
-			std::streamsize size = res->tellg();
-			res->seekg(0);
-
-			char* pData = new char[size];
-			res->read(pData, size);
-
-			*ppData = pData;
-			*pBytes = size;
-
-			return S_OK;
-		}
-		else
-		{
-			*ppData = NULL;
-			*pBytes = 0;
-
-			return E_FAIL;
-		}
-	}
-
-	HRESULT D3D9RenderEffectInclude::Close(LPCVOID pData)
-	{
-		char const * pData2 = static_cast<char const *>(pData);
-		delete[] pData2;
-
-		return S_OK;
 	}
 }

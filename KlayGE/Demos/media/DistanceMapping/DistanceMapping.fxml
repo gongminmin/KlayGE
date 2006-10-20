@@ -1,0 +1,129 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="../../../RenderFX/util.fxml"/>
+
+	<parameter type="float4x4" name="worldviewproj" semantic="WORLDVIEWPROJECTION"/>
+	<parameter type="float3" name="light_pos"/>
+	<parameter type="float3" name="eye_pos"/>
+
+	<parameter type="sampler" name="diffuseMap"/>
+	<parameter type="sampler" name="normalMap"/>
+	<parameter type="sampler" name="distanceMap"/>
+
+	<shader>
+		<![CDATA[
+void DistanceMappingVS(float4 pos		: POSITION,
+					float2 texcoord0	: TEXCOORD0,
+					float3 T			: TANGENT,	// in object space
+					float3 B			: BINORMAL,	// in object space
+					
+					out float4 oPos			: POSITION,
+					out float3 oTexcoord0	: TEXCOORD0,
+					out float3 oL			: TEXCOORD1,	// in tangent space
+					out float3 oV			: TEXCOORD2		// in tangent space
+					)
+{
+	oPos = mul(pos, worldviewproj);
+	oTexcoord0 = float3(texcoord0, 1);
+
+	float3x3 matObjToTangentSpace;
+	matObjToTangentSpace[0] = T;
+	matObjToTangentSpace[1] = B;
+	matObjToTangentSpace[2] = cross(T, B);
+
+	float3 vLight = light_pos - pos.xyz;
+	float3 vView = pos.xyz - eye_pos;
+
+	float3 vTanLight = mul(matObjToTangentSpace, vLight);
+	float3 vTanView = mul(matObjToTangentSpace, vView);
+
+	oL = vTanLight;
+	oV = vTanView;
+}
+
+half4 DistanceMappingPS(half3 texCoord0	: TEXCOORD0,
+						half3 L		: TEXCOORD1,
+						half3 V		: TEXCOORD2) : COLOR
+{
+	half3 view = normalize(V) * half3(1, 1, 16) * 0.06;
+
+	half3 texUV = texCoord0;
+	for (int i = 0; i < 8; ++ i)
+	{
+		texUV += view * tex3D(distanceMap, texUV).r;
+	}
+
+	clip(half4(texUV.xy, 1 - texUV.xy));
+
+	half2 dx = ddx(texCoord0.xy);
+	half2 dy = ddy(texCoord0.xy);
+
+	half3 diffuse = tex2D(diffuseMap, texUV.xy, dx, dy).rgb;
+
+	half3 bumpNormal = decompress_normal(tex2D(normalMap, texUV.xy, dx, dy));
+	half3 lightVec = normalize(L);
+	half diffuseFactor = dot(lightVec, bumpNormal);
+	
+	return half4(diffuse * diffuseFactor, 1);
+}
+
+half4 DistanceMappingPS_20(half3 texCoord0	: TEXCOORD0,
+						half3 L		: TEXCOORD1,
+						half3 V		: TEXCOORD2) : COLOR
+{
+	half3 view = normalize(V) * half3(1, 1, 16) * 0.06;
+
+	half3 texUV = texCoord0;
+	for (int i = 0; i < 2; ++ i)
+	{
+		texUV += view * tex3D(distanceMap, texUV).r;
+	}
+	
+	clip(half4(texUV.xy, 1 - texUV.xy));
+
+	half3 diffuse = tex2D(diffuseMap, texUV.xy);
+
+	half3 bumpNormal = decompress_normal(tex2D(normalMap, texUV.xy));
+	half3 lightVec = normalize(L);
+	half diffuseFactor = dot(lightVec, bumpNormal);
+
+	return half4(diffuse * diffuseFactor, 1);
+}
+		]]>
+	</shader>
+
+	<technique name="DistanceMapping30">
+		<pass name="p0">
+			<state name="polygon_mode" value="fill"/>
+			<state name="cull_mode" value="anti_clock_wise"/>
+			<state name="blend_enable" value="false"/>
+
+			<state name="vertex_shader" profile="vs_3_0" value="DistanceMappingVS()"/>
+			<state name="pixel_shader" profile="ps_3_0" value="DistanceMappingPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="DistanceMapping2a">
+		<pass name="p0">
+			<state name="polygon_mode" value="fill"/>
+			<state name="cull_mode" value="anti_clock_wise"/>
+			<state name="blend_enable" value="false"/>
+
+			<state name="vertex_shader" profile="vs_1_1" value="DistanceMappingVS()"/>
+			<state name="pixel_shader" profile="ps_2_a" value="DistanceMappingPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="DistanceMapping20">
+		<pass name="p0">
+			<state name="polygon_mode" value="fill"/>
+			<state name="cull_mode" value="anti_clock_wise"/>
+			<state name="blend_enable" value="false"/>
+
+			<state name="vertex_shader" profile="vs_1_1" value="DistanceMappingVS()"/>
+			<state name="pixel_shader" profile="ps_2_0" value="DistanceMappingPS_20()"/>
+		</pass>
+	</technique>
+</effect>
+

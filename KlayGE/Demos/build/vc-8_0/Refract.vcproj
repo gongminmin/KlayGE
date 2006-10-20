@@ -4,6 +4,7 @@
 	Version="8.00"
 	Name="Refract"
 	ProjectGUID="{89215096-621F-48B4-8E29-EFC5ABFBCD7F}"
+	RootNamespace="Refract"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -183,31 +184,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\media\Common\Blur.fx"
-				>
-			</File>
-			<File
-				RelativePath="..\..\media\Common\DownSample.fx"
-				>
-			</File>
-			<File
-				RelativePath="..\..\media\Refract\HDRSkyBox.fx"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\Refract\Refract.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\media\Refract\Refract.fx"
-				>
-			</File>
-			<File
-				RelativePath="..\..\media\Common\SumLum.fx"
-				>
-			</File>
-			<File
-				RelativePath="..\..\media\Common\ToneMapping.fx"
 				>
 			</File>
 		</Filter>
@@ -219,6 +196,58 @@
 			<File
 				RelativePath="..\..\src\Refract\Refract.hpp"
 				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Effects"
+			>
+			<File
+				RelativePath="..\..\media\Refract\HDRSkyBox.fxml"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\media\Refract\Refract.fxml"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
 			</File>
 		</Filter>
 	</Files>

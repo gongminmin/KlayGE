@@ -1,0 +1,96 @@
+<?xml version='1.0'?>
+
+<effect>
+	<parameter type="float4x4" name="matViewProj"/>
+	<parameter type="float4" name="color"/>
+
+	<shader>
+		<![CDATA[
+void HelperVS(float4 position : POSITION,
+			out float4 oPosition : POSITION)
+{
+	oPosition = mul(position, matViewProj);
+}
+
+float4 HelperPS() : COLOR0
+{
+	return color;
+}
+		]]>
+	</shader>
+	
+	<technique name="PointTec">
+		<pass name="p0">
+			<state name="polygon_mode" value="point"/>
+			<state name="cull_mode" value="none"/>
+			<state name="depth_enable" value="true"/>
+
+			<state name="vertex_shader" value="HelperVS()"/>
+			<state name="pixel_shader" value="HelperPS()"/>
+		</pass>
+	</technique>
+	
+	<technique name="LineTec">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+			<state name="cull_mode" value="none"/>
+			<state name="depth_enable" value="true"/>
+
+			<state name="vertex_shader" value="HelperVS()"/>
+			<state name="pixel_shader" value="HelperPS()"/>
+		</pass>
+	</technique>
+	
+	<technique name="TriangleTec">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+			<state name="cull_mode" value="none"/>
+			<state name="depth_enable" value="true"/>
+
+			<state name="vertex_shader" value="HelperVS()"/>
+			<state name="pixel_shader" value="HelperPS()"/>
+		</pass>
+	</technique>
+	
+	<technique name="BoxTec">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+			<state name="cull_mode" value="none"/>
+			<state name="depth_enable" value="true"/>
+
+			<state name="vertex_shader" value="HelperVS()"/>
+			<state name="pixel_shader" value="HelperPS()"/>
+		</pass>
+	</technique>
+
+	<parameter type="float4x4" name="inv_mvp"/>
+	<parameter type="sampler" name="skybox_cubeMapSampler"/>
+
+	<shader>
+		<![CDATA[
+void SkyBoxVS(float4 pos : POSITION,
+			out float4 oPos : POSITION,
+			out float3 texcoord0 : TEXCOORD0)
+{
+	oPos = pos;
+	texcoord0 = mul(pos, inv_mvp);
+}
+
+float4 SkyBoxPS(float3 texCoord0 : TEXCOORD0) : COLOR
+{
+	return texCUBE(skybox_cubeMapSampler, texCoord0);
+}
+		]]>
+	</shader>
+	
+	<technique name="SkyBoxTec">
+		<pass name="p0">
+			<state name="polygon_mode" value="fill"/>
+			<state name="cull_mode" value="none"/>
+			<state name="depth_enable" value="true"/>
+
+			<state name="vertex_shader" value="SkyBoxVS()"/>
+			<state name="pixel_shader" value="SkyBoxPS()"/>
+		</pass>
+	</technique>
+</effect>

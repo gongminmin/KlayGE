@@ -4,6 +4,7 @@
 	Version="8.00"
 	Name="Vertex Displacement"
 	ProjectGUID="{63128457-8C79-4C9F-ACB7-506537BBC4BE}"
+	RootNamespace="Vertex Displacement"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -186,10 +187,6 @@
 				RelativePath="..\..\src\VertexDisplacement\VertexDisplacement.cpp"
 				>
 			</File>
-			<File
-				RelativePath="..\..\media\VertexDisplacement\VertexDisplacement.fx"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Í·ÎÄ¼þ"
@@ -199,6 +196,34 @@
 			<File
 				RelativePath="..\..\src\VertexDisplacement\VertexDisplacement.hpp"
 				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Effects"
+			>
+			<File
+				RelativePath="..\..\media\VertexDisplacement\VertexDisplacement.fxml"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx&#x0D;&#x0A;"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx&#x0D;&#x0A;"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
 			</File>
 		</Filter>
 	</Files>

@@ -45,7 +45,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			effect_ = rf.LoadEffect("Cartoon.fx");
+			effect_ = rf.LoadEffect("Cartoon.kfx");
 
 			toon_sampler_->SetTexture(LoadTexture("toon.dds"));
 			toon_sampler_->Filtering(Sampler::TFO_Point);
@@ -53,7 +53,6 @@ namespace
 			normal_depth_sampler_->Filtering(Sampler::TFO_Point);
 			normal_depth_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
 
-			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("Cartoon.fx");
 			*(effect_->ParameterByName("toonmap_sampler")) = toon_sampler_;
 			*(effect_->ParameterByName("normal_depth_sampler")) = normal_depth_sampler_;
 		}

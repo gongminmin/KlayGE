@@ -1,0 +1,73 @@
+<?xml version='1.0'?>
+
+<effect>
+	<parameter type="sampler" name="src_sampler"/>
+
+	<parameter type="float" name="color_weight" array_size="8"/>
+	<parameter type="float" name="tex_coord_offset" array_size="8"/>
+
+	<shader>
+		<![CDATA[
+void BlurXVS(float4 pos : POSITION,
+					float2 tex : TEXCOORD0,
+					out float4 oPos : POSITION,
+					out float4 oTex[4] : TEXCOORD)
+{
+	oPos = pos;
+
+	for (int i = 0; i < 4; ++ i)
+	{
+		oTex[i] = tex.xyxy + float4(tex_coord_offset[i * 2 + 0], 0, tex_coord_offset[i * 2 + 1], 0);
+	}
+}
+
+void BlurYVS(float4 pos : POSITION,
+					float2 tex : TEXCOORD0,
+					out float4 oPos : POSITION,
+					out float4 oTex[4] : TEXCOORD)
+{
+	oPos = pos;
+
+	for (int i = 0; i < 4; ++ i)
+	{
+		oTex[i] = tex.xyxy + float4(0, tex_coord_offset[i * 2 + 0], 0, tex_coord_offset[i * 2 + 1]);
+	}
+}
+
+float4 BlurPS(float4 iTex[4] : TEXCOORD) : COLOR0
+{
+	half4 color = half4(0, 0, 0, 1);
+
+	for (int i = 0; i < 4; ++ i)
+	{
+		color.rgb += tex2D(src_sampler, iTex[i].xy).rgb * color_weight[i * 2 + 0];
+		color.rgb += tex2D(src_sampler, iTex[i].zw).rgb * color_weight[i * 2 + 1];
+	}
+
+	return color;
+}
+		]]>
+	</shader>
+	
+	<technique name="BlurX">
+		<pass name="p0">
+			<state name="polygon_mode" value="fill"/>
+			<state name="cull_mode" value="anti_clock_wise"/>
+			<state name="depth_enable" value="false"/>
+
+			<state name="vertex_shader" value="BlurXVS()"/>
+			<state name="pixel_shader" value="BlurPS()"/>
+		</pass>
+	</technique>
+	
+	<technique name="BlurY">
+		<pass name="p0">
+			<state name="polygon_mode" value="fill"/>
+			<state name="cull_mode" value="anti_clock_wise"/>
+			<state name="depth_enable" value="false"/>
+
+			<state name="vertex_shader" value="BlurYVS()"/>
+			<state name="pixel_shader" value="BlurPS()"/>
+		</pass>
+	</technique>
+</effect>

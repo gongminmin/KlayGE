@@ -1,0 +1,40 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="../../../RenderFX/util.fxml"/>
+
+	<parameter type="float4x4" name="inv_mvp"/>
+	<parameter type="sampler" name="skybox_YcubeMapSampler"/>
+	<parameter type="sampler" name="skybox_CcubeMapSampler"/>
+
+	<shader>
+		<![CDATA[
+void SkyBoxVS(float4 pos : POSITION,
+			out float4 oPos : POSITION,
+			out float3 texcoord0 : TEXCOORD0)
+{
+	oPos = pos;
+	texcoord0 = mul(pos, inv_mvp);
+}
+
+float4 HDRSkyBoxPS(float3 texCoord0 : TEXCOORD0) : COLOR
+{
+	float3 rgb = decode_hdr_yc(texCUBE(skybox_YcubeMapSampler, texCoord0).r,
+					texCUBE(skybox_CcubeMapSampler, texCoord0).ga);
+	
+	return float4(rgb, 1);
+}
+		]]>
+	</shader>
+
+	<technique name="HDRSkyBoxTec">
+		<pass name="p0">
+			<state name="polygon_mode" value="fill"/>
+			<state name="cull_mode" value="none"/>
+			<state name="blend_enable" value="false"/>
+
+			<state name="vertex_shader" value="SkyBoxVS()"/>
+			<state name="pixel_shader" value="HDRSkyBoxPS()"/>
+		</pass>
+	</technique>
+</effect>

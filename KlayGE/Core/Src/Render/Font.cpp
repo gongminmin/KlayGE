@@ -105,7 +105,7 @@ namespace
 				theSampler_->Filtering(Sampler::TFO_Point);
 			}
 
-			effect_ = rf.LoadEffect("Font.fx");
+			effect_ = rf.LoadEffect("Font.kfx");
 			*(effect_->ParameterByName("texFontSampler")) = theSampler_;
 
 			vb_ = rf.MakeVertexBuffer(BU_Dynamic);

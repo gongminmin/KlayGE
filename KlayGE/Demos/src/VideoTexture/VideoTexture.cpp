@@ -46,7 +46,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("VideoTexture.fx")->TechniqueByName("Object");
+			technique_ = rf.LoadEffect("VideoTexture.kfx")->TechniqueByName("Object");
 
 			video_sampler_->Filtering(Sampler::TFO_Bilinear);
 			video_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);

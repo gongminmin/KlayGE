@@ -38,13 +38,12 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("Fractal.fx")->TechniqueByName("Mandelbrot");
+			technique_ = rf.LoadEffect("Fractal.kfx")->TechniqueByName("Mandelbrot");
 
 			sampler_.reset(new Sampler);
 			sampler_->Filtering(Sampler::TFO_Point);
 			sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
 			sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
-			*(technique_->Effect().ParameterByName("fractal_sampler")) = sampler_;
 
 			float4 const & offset = rf.RenderEngineInstance().TexelToPixelOffset();
 
@@ -85,6 +84,11 @@ namespace
 			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 		}
 
+		void OnRenderBegin()
+		{
+			*(technique_->Effect().ParameterByName("fractal_sampler")) = sampler_;
+		}
+
 		void SetTexture(TexturePtr texture)
 		{
 			sampler_->SetTexture(texture);
@@ -102,13 +106,12 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("Fractal.fx")->TechniqueByName("Show");
+			technique_ = rf.LoadEffect("Fractal.kfx")->TechniqueByName("Show");
 
 			sampler_.reset(new Sampler);
 			sampler_->Filtering(Sampler::TFO_Point);
 			sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
 			sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
-			*(technique_->Effect().ParameterByName("fractal_sampler")) = sampler_;
 
 			float3 xyzs[] =
 			{
@@ -126,12 +129,7 @@ namespace
 				float2(0, 1),
 			};
 
-			uint16_t indices[] = 
-			{
-				0, 1, 2, 2, 3, 0,
-			};
-
-			rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleList);
+			rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleFan);
 
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static);
 			pos_vb->Resize(sizeof(xyzs));
@@ -149,15 +147,12 @@ namespace
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 			rl_->BindVertexStream(tex0_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 
-			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static);
-			ib->Resize(sizeof(indices));
-			{
-				GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
-				std::copy(indices, indices + sizeof(indices) / sizeof(uint16_t), mapper.Pointer<uint16_t>());
-			}
-			rl_->BindIndexStream(ib, EF_R16);
-
 			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
+		}
+
+		void OnRenderBegin()
+		{
+			*(technique_->Effect().ParameterByName("fractal_sampler")) = sampler_;
 		}
 
 		void SetTexture(TexturePtr texture)

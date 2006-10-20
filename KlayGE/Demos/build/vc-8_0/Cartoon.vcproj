@@ -186,10 +186,6 @@
 				RelativePath="..\..\src\Cartoon\Cartoon.cpp"
 				>
 			</File>
-			<File
-				RelativePath="..\..\media\Cartoon\Cartoon.fx"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Í·ÎÄ¼þ"
@@ -199,6 +195,34 @@
 			<File
 				RelativePath="..\..\src\Cartoon\Cartoon.hpp"
 				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Effects"
+			>
+			<File
+				RelativePath="..\..\media\Cartoon\Cartoon.fxml"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx&#x0D;&#x0A;"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(TargetDir)..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx&#x0D;&#x0A;"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
 			</File>
 		</Filter>
 	</Files>

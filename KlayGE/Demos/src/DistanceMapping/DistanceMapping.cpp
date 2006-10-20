@@ -42,7 +42,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			RenderEffectPtr effect = rf.LoadEffect("DistanceMapping.fx");
+			RenderEffectPtr effect = rf.LoadEffect("DistanceMapping.kfx");
 
 			if (!effect->TechniqueByName("DistanceMapping30")->Validate())
 			{
@@ -165,13 +165,13 @@ namespace
 			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
 			*(technique_->Effect().ParameterByName("worldviewproj")) = model * view * proj;
-			*(technique_->Effect().ParameterByName("eyePos")) = app.ActiveCamera().EyePos();
+			*(technique_->Effect().ParameterByName("eye_pos")) = app.ActiveCamera().EyePos();
 
 			float degree(std::clock() / 700.0f);
 			float3 lightPos(2, 0, -2);
 			float4x4 matRot(MathLib::rotation_z(degree));
 			lightPos = MathLib::transform_coord(lightPos, matRot);
-			*(technique_->Effect().ParameterByName("lightPos")) = lightPos;
+			*(technique_->Effect().ParameterByName("light_pos")) = lightPos;
 		}
 	};
 

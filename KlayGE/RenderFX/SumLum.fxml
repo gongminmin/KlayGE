@@ -1,0 +1,93 @@
+<?xml version='1.0'?>
+
+<effect>
+	<parameter type="sampler" name="src_sampler"/>
+	<parameter type="float4" name="tex_coord_offset" array_size="2"/>
+
+	<parameter type="sampler" name="last_lum_sampler"/>
+	<parameter type="float" name="frame_delta"/>
+
+	<shader>
+		<![CDATA[
+void SumLumVS(float4 pos : POSITION,
+					float2 tex : TEXCOORD0,
+					out float4 oPos : POSITION,
+					out float4 oTex[2] : TEXCOORD)
+{
+	oPos = pos;
+
+	for (int i = 0; i < 2; ++ i)
+	{
+		oTex[i] = tex.xyxy + tex_coord_offset[i];
+	}
+}
+
+float4 SumLum4x4LogPS(float4 iTex[2] : TEXCOORD) : COLOR
+{
+	const half3 RGB_TO_LUM = half3(0.27, 0.67, 0.06);
+
+	half s = 0;
+	for (int i = 0; i < 2; ++ i)
+	{
+		s += log(dot(tex2D(src_sampler, iTex[i].xy).rgb, RGB_TO_LUM) + 0.001f);
+		s += log(dot(tex2D(src_sampler, iTex[i].zw).rgb, RGB_TO_LUM) + 0.001f);
+	}
+
+	return s / 4;
+}
+
+float4 SumLum4x4IterativePS(float4 iTex[2] : TEXCOORD) : COLOR
+{
+	half s = 0;
+	for (int i = 0; i < 2; ++ i)
+	{
+		s += tex2D(src_sampler, iTex[i].xy).r;
+		s += tex2D(src_sampler, iTex[i].zw).r;
+	}
+
+	return s / 4;
+}
+
+float4 AdaptedLumPS(float2 oTex : TEXCOORD0) : COLOR
+{
+	float adapted_lum = tex2D(last_lum_sampler, float2(0.5f, 0.5f)).r;
+	float current_lum = exp(tex2D(src_sampler, float2(0.5f, 0.5f)).r);
+
+	return adapted_lum + (current_lum - adapted_lum) * (1 - pow(0.98f, 50 * frame_delta));
+}
+		]]>
+	</shader>
+	
+	<technique name="SumLumLog">
+		<pass name="p0">
+			<state name="polygon_mode" value="fill"/>
+			<state name="cull_mode" value="anti_clock_wise"/>
+			<state name="depth_enable" value="false"/>
+
+			<state name="vertex_shader" value="SumLumVS()"/>
+			<state name="pixel_shader" value="SumLum4x4LogPS()"/>
+		</pass>
+	</technique>
+	
+	<technique name="SumLumIterative">
+		<pass name="p0">
+			<state name="polygon_mode" value="fill"/>
+			<state name="cull_mode" value="anti_clock_wise"/>
+			<state name="depth_enable" value="false"/>
+
+			<state name="vertex_shader" value="SumLumVS()"/>
+			<state name="pixel_shader" value="SumLum4x4IterativePS()"/>
+		</pass>
+	</technique>
+	
+	<technique name="AdaptedLum">
+		<pass name="p0">
+			<state name="polygon_mode" value="fill"/>
+			<state name="cull_mode" value="anti_clock_wise"/>
+			<state name="depth_enable" value="false"/>
+
+			<state name="vertex_shader" value="SumLumVS()"/>
+			<state name="pixel_shader" value="AdaptedLumPS()"/>
+		</pass>
+	</technique>
+</effect>

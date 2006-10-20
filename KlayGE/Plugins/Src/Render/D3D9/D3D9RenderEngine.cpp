@@ -394,6 +394,7 @@ namespace KlayGE
 				RenderPassPtr pass = render_tech_->Pass(i);
 
 				pass->Begin();
+				this->DoFlushRenderStates();
 				TIF(d3dDevice_->DrawIndexedPrimitive(primType, 0, 0,
 					static_cast<UINT>(rl.NumVertices()), 0, primCount));
 				pass->End();
@@ -408,6 +409,7 @@ namespace KlayGE
 				RenderPassPtr pass = render_tech_->Pass(i);
 
 				pass->Begin();
+				this->DoFlushRenderStates();
 				TIF(d3dDevice_->DrawPrimitive(primType, 0, primCount));
 				pass->End();
 			}

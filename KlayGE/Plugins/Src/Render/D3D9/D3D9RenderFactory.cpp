@@ -71,7 +71,8 @@ namespace KlayGE
 
 	RenderEffectPtr D3D9RenderFactory::DoMakeRenderEffect(ResIdentifierPtr const & source)
 	{
-		D3D9RenderEffectPtr ret(new D3D9RenderEffect(source));
+		D3D9RenderEffectPtr ret(new D3D9RenderEffect);
+		ret->Load(source);
 		resource_pool_.push_back(ret);
 		return ret;
 	}

@@ -85,7 +85,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("Instancing.fx")->TechniqueByName("Instance");
+			technique_ = rf.LoadEffect("Instancing.kfx")->TechniqueByName("Instance");
 		}
 
 		void BuildMeshInfo()
@@ -120,7 +120,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("Instancing.fx")->TechniqueByName("NormalMesh");
+			technique_ = rf.LoadEffect("Instancing.kfx")->TechniqueByName("NormalMesh");
 		}
 
 		void BuildMeshInfo()

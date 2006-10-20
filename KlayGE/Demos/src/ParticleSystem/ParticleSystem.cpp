@@ -97,7 +97,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("ParticleSystem.fx")->TechniqueByName("Terrain");
+			technique_ = rf.LoadEffect("ParticleSystem.kfx")->TechniqueByName("Terrain");
 
 			rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleList);
 
@@ -238,7 +238,7 @@ namespace
 				std::copy(&indices[0], &indices[4], mapper.Pointer<uint16_t>());
 			}
 
-			technique_ = rf.LoadEffect("ParticleSystem.fx")->TechniqueByName("Particle");
+			technique_ = rf.LoadEffect("ParticleSystem.kfx")->TechniqueByName("Particle");
 
 			particle_sampler_->SetTexture(LoadTexture("particle.dds"));
 			particle_sampler_->Filtering(Sampler::TFO_Bilinear);
@@ -298,7 +298,7 @@ namespace
 	{
 	public:
 		CopyPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("ParticleSystem.fx")->TechniqueByName("Copy"))
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("ParticleSystem.kfx")->TechniqueByName("Copy"))
 		{
 		}
 	};

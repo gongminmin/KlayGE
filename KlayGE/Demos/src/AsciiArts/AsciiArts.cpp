@@ -53,7 +53,7 @@ namespace
 	{
 	public:
 		Downsampler8x8()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArts.fx")->TechniqueByName("Downsample8x8"))
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArts.kfx")->TechniqueByName("Downsample8x8"))
 		{
 		}
 
@@ -103,7 +103,7 @@ namespace
 	{
 	public:
 		AsciiArts()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArts.fx")->TechniqueByName("AsciiArts")),
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArts.kfx")->TechniqueByName("AsciiArts")),
 				lums_sampler_(new Sampler)
 		{
 			src_sampler_->Filtering(Sampler::TFO_Point);

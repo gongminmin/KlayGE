@@ -1,8 +1,11 @@
 // RenderEffect.hpp
 // KlayGE 渲染效果脚本类 头文件
-// Ver 3.4.0
+// Ver 3.5.0
 // 版权所有(C) 龚敏敏, 2003-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.5.0
+// 改用基于xml的特效格式 (2006.10.21)
 //
 // 3.4.0
 // 重写了parameter的存储结构 (2006.9.15)
@@ -51,15 +54,120 @@
 #pragma warning(disable: 4100 4512)
 #endif
 #include <boost/utility.hpp>
+#include <boost/any.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-#include <boost/any.hpp>
 
 #include <KlayGE/Math.hpp>
 
 namespace KlayGE
 {
+	class type_define
+	{
+	public:
+		enum code
+		{
+			TC_bool = 0,
+			TC_dword,
+			TC_string,
+			TC_sampler,
+			TC_shader,
+			TC_int,
+			TC_int2,
+			TC_int3,
+			TC_int4,
+			TC_float,
+			TC_float2,
+			TC_float2x2,
+			TC_float2x3,
+			TC_float2x4,
+			TC_float3,
+			TC_float3x2,
+			TC_float3x3,
+			TC_float3x4,
+			TC_float4,
+			TC_float4x2,
+			TC_float4x3,
+			TC_float4x4
+		};
+
+	public:
+		static type_define& instance();
+
+		uint32_t type_code(std::string const & name) const;
+		std::string const & type_name(uint32_t code) const;
+
+	private:
+		type_define();
+
+	private:
+		std::vector<std::string> types_;
+	};
+
+	class states_define
+	{
+	public:
+		static states_define& instance();
+
+		uint32_t state_code(std::string const & name) const;
+		std::string const & state_name(uint32_t code) const;
+
+	private:
+		states_define();
+
+	private:
+		std::vector<std::pair<std::string, std::string> > states_;
+	};
+
+	class RenderVariable
+	{
+	public:
+		void set_value(boost::any const & p)
+		{
+			value_ = p;
+		}
+		boost::any const & get_value() const
+		{
+			return value_;
+		}
+
+	protected:
+		boost::any value_;
+	};
+
+	struct shader_desc
+	{
+		std::string profile;
+		std::string func_name;
+	};
+
+	class RenderAnnotation
+	{
+	public:
+		void Load(ResIdentifierPtr const & source);
+
+	private:
+		uint32_t type_;
+		std::string name_;
+
+		boost::shared_ptr<RenderVariable> var_;
+	};
+
+	class RenderShaderFunc
+	{
+	public:
+		void Load(ResIdentifierPtr const & source);
+
+		std::string const & str() const
+		{
+			return str_;
+		}
+
+	private:
+		std::string str_;
+	};
+
 	// 渲染效果
 	//////////////////////////////////////////////////////////////////////////////////
 	class RenderEffect
@@ -69,8 +177,11 @@ namespace KlayGE
 		typedef std::vector<RenderTechniquePtr> techniques_type;
 
 	public:
+		RenderEffect();
 		virtual ~RenderEffect()
 			{ }
+
+		void Load(ResIdentifierPtr const & source);
 
 		static RenderEffectPtr NullObject();
 
@@ -97,23 +208,38 @@ namespace KlayGE
 			return techniques_[n];
 		}
 
-		void FlushParams();
+		uint32_t NumShaders() const
+		{
+			return static_cast<uint32_t>(shaders_.size());
+		}
+		RenderShaderFunc ShaderByIndex(uint32_t n)
+		{
+			BOOST_ASSERT(n < shaders_.size());
+			return shaders_[n];
+		}
+
+	protected:
+		virtual RenderTechniquePtr MakeRenderTechnique() = 0;
 
 	protected:
 		params_type params_;
 		techniques_type techniques_;
+
+		std::vector<RenderShaderFunc> shaders_;
 	};
 
 	class RenderTechnique : boost::noncopyable
 	{
 	public:
-		RenderTechnique(RenderEffect& effect, std::string const & name)
-			: effect_(effect), name_(name)
+		explicit RenderTechnique(RenderEffect& effect)
+			: effect_(effect)
 		{
 		}
 		virtual ~RenderTechnique()
 		{
 		}
+
+		void Load(ResIdentifierPtr const & source);
 
 		static RenderTechniquePtr NullObject();
 
@@ -140,9 +266,11 @@ namespace KlayGE
 		void Begin(uint32_t flags = 0);
 		void End();
 
-		virtual bool Validate() = 0;
+		bool Validate();
 
-	private:
+	protected:
+		virtual RenderPassPtr MakeRenderPass(uint32_t index) = 0;
+
 		virtual void DoBegin(uint32_t flags) = 0;
 		virtual void DoEnd() = 0;
 
@@ -152,6 +280,36 @@ namespace KlayGE
 
 		typedef std::vector<RenderPassPtr> passes_type;
 		passes_type passes_;
+
+		std::vector<boost::shared_ptr<RenderAnnotation> > annotations_;
+		float weight_;
+	};
+
+	class RenderState
+	{
+	public:
+		void Load(ResIdentifierPtr const & source);
+
+		uint32_t type() const
+		{
+			return type_;
+		}
+
+		uint32_t state() const
+		{
+			return state_;
+		}
+
+		boost::shared_ptr<RenderVariable> const & var() const
+		{
+			return var_;
+		}
+
+	private:
+		uint32_t type_;
+		uint32_t state_;
+
+		boost::shared_ptr<RenderVariable> var_;
 	};
 
 	class RenderPass : boost::noncopyable
@@ -165,17 +323,43 @@ namespace KlayGE
 		{
 		}
 
+		static RenderPassPtr NullObject();
+
+		void Load(ResIdentifierPtr const & source);
+
+		std::string const & name() const
+		{
+			return name_;
+		}
+
 		uint32_t Index() const
 		{
 			return index_;
 		}
 
+		uint32_t NumStates() const;
+		RenderState const & State(uint32_t state_id) const;
+
 		virtual void Begin() = 0;
 		virtual void End() = 0;
+
+		bool Validate() const
+		{
+			return is_validate_;
+		}
+
+	private:
+		virtual void DoRead() = 0;
 
 	protected:
 		RenderEffect& effect_;
 		uint32_t index_;
+
+		std::string name_;
+		std::vector<boost::shared_ptr<RenderAnnotation> > annotations_;
+		std::vector<boost::shared_ptr<RenderState> > render_states_;
+
+		bool is_validate_;
 	};
 
 	class RenderEffectParameter : boost::noncopyable
@@ -187,6 +371,23 @@ namespace KlayGE
 
 		static RenderEffectParameterPtr NullObject();
 
+		void Load(ResIdentifierPtr const & source);
+
+		uint32_t type() const
+		{
+			return type_;
+		}
+
+		boost::shared_ptr<RenderVariable> const & var() const
+		{
+			return var_;
+		}
+
+		uint32_t ArraySize() const
+		{
+			return array_size_;
+		}
+
 		std::string const & Name() const
 		{
 			return name_;
@@ -196,9 +397,9 @@ namespace KlayGE
 			return semantic_;
 		}
 
-		void Dirty()
+		void Dirty(bool dirty)
 		{
-			dirty_ = true;
+			dirty_ = dirty;
 		}
 		bool IsDirty() const
 		{
@@ -233,29 +434,18 @@ namespace KlayGE
 		virtual void Value(std::vector<float4>& val) const;
 		virtual void Value(std::vector<float4x4>& val) const;
 
-		virtual void Flush() = 0;
-
-	protected:
-		virtual void DoFlush(bool const & value);
-		virtual void DoFlush(int const & value);
-		virtual void DoFlush(float const & value);
-		virtual void DoFlush(float2 const & value);
-		virtual void DoFlush(float3 const & value);
-		virtual void DoFlush(float4 const & value);
-		virtual void DoFlush(float4x4 const & value);
-		virtual void DoFlush(SamplerPtr const & value);
-		virtual void DoFlush(std::vector<bool> const & value);
-		virtual void DoFlush(std::vector<int> const & value);
-		virtual void DoFlush(std::vector<float> const & value);
-		virtual void DoFlush(std::vector<float4> const & value);
-		virtual void DoFlush(std::vector<float4x4> const & value);
-
 	protected:
 		RenderEffect& effect_;
 		std::string name_;
 		std::string semantic_;
 
 		bool dirty_;
+
+		uint32_t type_;
+		boost::shared_ptr<RenderVariable> var_;
+		uint32_t array_size_;
+
+		std::vector<boost::shared_ptr<RenderAnnotation> > annotations_;
 	};
 
 	template <typename T>
@@ -282,12 +472,6 @@ namespace KlayGE
 		void Value(T& val) const
 		{
 			val = val_;
-		}
-
-		void Flush()
-		{
-			this->DoFlush(val_);
-			dirty_ = false;
 		}
 
 	protected:

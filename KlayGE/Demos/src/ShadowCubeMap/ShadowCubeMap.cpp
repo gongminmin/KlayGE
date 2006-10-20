@@ -130,7 +130,7 @@ namespace
 			: KMesh(model, L"Occluder"),
 				ShadowMapped(SHADOW_MAP_SIZE)
 		{
-			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("ShadowCubeMap.fx");
+			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("ShadowCubeMap.kfx");
 		}
 
 		void SetModelMatrix(float4x4 const & model)
@@ -190,7 +190,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			effect_ = rf.LoadEffect("ShadowCubeMap.fx");
+			effect_ = rf.LoadEffect("ShadowCubeMap.kfx");
 			technique_ = effect_->TechniqueByName("RenderScene");
 
 			float3 xyzs[] =

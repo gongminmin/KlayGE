@@ -26,13 +26,13 @@
 namespace KlayGE
 {
 	Downsampler2x2PostProcess::Downsampler2x2PostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Downsample.fx")->TechniqueByName("Downsample"))
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Downsample.kfx")->TechniqueByName("Downsample"))
 	{
 	}
 
 
 	BlurPostProcess::BlurPostProcess(std::string const & tech, int kernel_radius, float multiplier)
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Blur.fx")->TechniqueByName(tech)),
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Blur.kfx")->TechniqueByName(tech)),
 				color_weight_(8, 0), tex_coord_offset_(8, 0),
 				kernel_radius_(kernel_radius), multiplier_(multiplier)
 	{
@@ -119,7 +119,7 @@ namespace KlayGE
 
 
 	SumLumPostProcess::SumLumPostProcess(std::string const & tech)
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.fx")->TechniqueByName(tech))
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.kfx")->TechniqueByName(tech))
 	{
 	}
 
@@ -177,7 +177,7 @@ namespace KlayGE
 
 
 	AdaptedLumPostProcess::AdaptedLumPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.fx")->TechniqueByName("AdaptedLum")),
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.kfx")->TechniqueByName("AdaptedLum")),
 				last_index_(false)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -226,7 +226,7 @@ namespace KlayGE
 
 
 	ToneMappingPostProcess::ToneMappingPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("ToneMapping.fx")->TechniqueByName("ToneMapping20")),
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("ToneMapping.kfx")->TechniqueByName("ToneMapping20")),
 				lum_sampler_(new Sampler), bloom_sampler_(new Sampler)
 	{
 		lum_sampler_->Filtering(Sampler::TFO_Point);

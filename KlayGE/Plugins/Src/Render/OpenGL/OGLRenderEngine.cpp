@@ -370,6 +370,7 @@ namespace KlayGE
 					RenderPassPtr pass = render_tech_->Pass(i);
 
 					pass->Begin();
+					this->DoFlushRenderStates();
 					glDrawElements(mode, static_cast<GLsizei>(rl.NumIndices()),
 						index_type, 0);
 					pass->End();
@@ -382,6 +383,7 @@ namespace KlayGE
 					RenderPassPtr pass = render_tech_->Pass(i);
 
 					pass->Begin();
+					this->DoFlushRenderStates();
 					glDrawArrays(mode, 0, static_cast<GLsizei>(rl.NumVertices()));
 					pass->End();
 				}

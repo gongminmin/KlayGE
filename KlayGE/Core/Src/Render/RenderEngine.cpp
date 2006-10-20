@@ -207,8 +207,6 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void RenderEngine::Render(RenderLayout const & rl)
 	{
-		this->DoFlushRenderStates();
-
 		render_tech_->Begin();
 		this->DoRender(rl);
 		render_tech_->End();
