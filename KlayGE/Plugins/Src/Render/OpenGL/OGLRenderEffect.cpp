@@ -21,6 +21,7 @@
 #include <KlayGE/Sampler.hpp>
 #include <KlayGE/Util.hpp>
 
+#include <sstream>
 #include <iostream>
 #include <boost/assert.hpp>
 
@@ -31,189 +32,14 @@
 
 namespace KlayGE
 {
-	OGLRenderEffect::OGLRenderEffect(ResIdentifierPtr const & source)
+	RenderTechniquePtr OGLRenderEffect::MakeRenderTechnique()
 	{
-		source->seekg(0, std::ios_base::end);
-		std::vector<char> data(source->tellg());
-		source->seekg(0);
-		source->read(&data[0], static_cast<std::streamsize>(data.size()));
-
-		OGLRenderFactory& renderFactory(*checked_cast<OGLRenderFactory*>(&Context::Instance().RenderFactoryInstance()));
-
-		effect_ = cgCreateEffect(renderFactory.CGContext(), &data[0], NULL);
-		if (0 == effect_)
-		{
-			std::cerr << cgGetLastListing(renderFactory.CGContext()) << std::endl;
-		}
-		BOOST_ASSERT(effect_);
-
-		CGprogram program = cgGetFirstProgram(renderFactory.CGContext());
-		while (program)
-		{
-			CGparameter param = cgGetFirstParameter(program, CG_PROGRAM);
-			while (param)
-			{
-				RenderEffectParameterPtr reparam;
-
-				std::string const name = cgGetParameterName(param);
-				std::string semantic;
-				if (cgGetParameterSemantic(param))
-				{
-					semantic = cgGetParameterSemantic(param);
-				}
-
-				CGtype param_type = cgGetParameterType(param);
-				CGtype param_base_type = cgGetParameterBaseType(param);
-				CGparameterclass param_class = cgGetParameterClass(param);
-
-				switch (param_class)
-				{
-				case CG_PARAMETERCLASS_SCALAR:
-					switch (param_type)
-					{
-					case CG_BOOL:
-						reparam.reset(new OGLRenderEffectParameterBool(*this, name, semantic, param));
-						break;
-
-					case CG_INT:
-						reparam.reset(new OGLRenderEffectParameterInt(*this, name, semantic, param));
-						break;
-
-					case CG_FLOAT:
-						reparam.reset(new OGLRenderEffectParameterFloat(*this, name, semantic, param));
-						break;
-
-					default:
-						BOOST_ASSERT(false);
-						break;
-					}
-					break;
-
-				case CG_PARAMETERCLASS_VECTOR:
-					switch (param_type)
-					{
-					case CG_FLOAT2:
-						reparam.reset(new OGLRenderEffectParameterFloat2(*this, name, semantic, param));
-						break;
-
-					case CG_FLOAT3:
-						reparam.reset(new OGLRenderEffectParameterFloat3(*this, name, semantic, param));
-						break;
-
-					case CG_FLOAT4:
-						reparam.reset(new OGLRenderEffectParameterFloat4(*this, name, semantic, param));
-						break;
-
-					default:
-						BOOST_ASSERT(false);
-						break;
-					}
-					break;
-
-				case CG_PARAMETERCLASS_MATRIX:
-					switch (param_type)
-					{
-					case CG_FLOAT4x4:
-						reparam.reset(new OGLRenderEffectParameterFloat4x4(*this, name, semantic, param));
-						break;
-
-					default:
-						BOOST_ASSERT(false);
-						break;
-					}
-					break;
-
-				case CG_PARAMETERCLASS_SAMPLER:
-					reparam.reset(new OGLRenderEffectParameterSampler(*this, name, semantic, param));
-					break;
-
-				case CG_PARAMETERCLASS_ARRAY:
-					switch (param_type)
-					{
-					case CG_ARRAY:
-						switch (param_base_type)
-						{
-						case CG_BOOL:
-							reparam.reset(new OGLRenderEffectParameterBoolArray(*this, name, semantic, param));
-							break;
-
-						case CG_INT:
-							reparam.reset(new OGLRenderEffectParameterIntArray(*this, name, semantic, param));
-							break;
-
-						case CG_FLOAT:
-							reparam.reset(new OGLRenderEffectParameterFloatArray(*this, name, semantic, param));
-							break;
-
-						case CG_FLOAT4:
-							reparam.reset(new OGLRenderEffectParameterFloat4Array(*this, name, semantic, param));
-							break;
-
-						case CG_FLOAT4x4:
-							reparam.reset(new OGLRenderEffectParameterFloat4x4Array(*this, name, semantic, param));
-							break;
-
-						default:
-							BOOST_ASSERT(false);
-							break;
-						}
-						break;
-
-					default:
-						BOOST_ASSERT(false);
-						break;
-					}
-					break;
-
-				default:
-					BOOST_ASSERT(false);
-					break;
-				}
-
-				params_.push_back(reparam);
-				param = cgGetNextParameter(param);
-			}
-
-			program = cgGetNextProgram(program);
-		}
-
-		CGtechnique tech = cgGetFirstTechnique(effect_);
-		while (tech)
-		{
-			techniques_.push_back(this->MakeRenderTechnique(tech));
-			tech = cgGetNextTechnique(tech);
-		}
+		return RenderTechniquePtr(new OGLRenderTechnique(*this));
 	}
 
-	OGLRenderEffect::~OGLRenderEffect()
+	RenderPassPtr OGLRenderTechnique::MakeRenderPass()
 	{
-		cgDestroyEffect(effect_);
-	}
-
-	RenderTechniquePtr OGLRenderEffect::MakeRenderTechnique(CGtechnique tech)
-	{
-		BOOST_ASSERT(tech != 0);
-		RenderTechniquePtr ret(new OGLRenderTechnique(*this, cgGetTechniqueName(tech), tech));
-		return ret;
-	}
-
-
-	OGLRenderTechnique::OGLRenderTechnique(RenderEffect& effect, std::string const & name, CGtechnique tech)
-		: RenderTechnique(effect, name),
-			technique_(tech)
-	{
-		CGpass pass = cgGetFirstPass(technique_);
-		while (pass)
-		{
-			passes_.push_back(this->MakeRenderPass(static_cast<uint32_t>(passes_.size()), pass));
-			pass = cgGetNextPass(pass);
-		}
-	}
-
-	RenderPassPtr OGLRenderTechnique::MakeRenderPass(uint32_t index, CGpass pass)
-	{
-		RenderPassPtr ret(new OGLRenderPass(effect_, index, pass));
-		return ret;
+		return RenderPassPtr(new OGLRenderPass(effect_));
 	}
 
 	void OGLRenderTechnique::DoBegin(uint32_t /*flags*/)
@@ -224,82 +50,296 @@ namespace KlayGE
 	{
 	}
 
-	bool OGLRenderTechnique::Validate()
+
+	OGLRenderPass::~OGLRenderPass()
 	{
-		return CG_TRUE == cgValidateTechnique(technique_);
+		cgDestroyProgram(shaders_[0]);
+		cgDestroyProgram(shaders_[1]);
 	}
 
-
-	OGLRenderPass::OGLRenderPass(RenderEffect& effect, uint32_t index, CGpass pass)
-		: RenderPass(effect, index),
-			pass_(pass)
+	void OGLRenderPass::DoRead()
 	{
+		is_validate_ = true;
+
+		std::string vs_profile, vs_name, vs_text;
+		this->shader(vs_profile, vs_name, vs_text, "vertex_shader");
+
+		std::string ps_profile, ps_name, ps_text;
+		this->shader(ps_profile, ps_name, ps_text, "pixel_shader");
+
+		if (!vs_name.empty())
+		{
+			if ("auto" == vs_profile)
+			{
+				profiles_[0] = cgGLGetLatestProfile(CG_GL_VERTEX);
+			}
+			else
+			{
+				profiles_[0] = cgGetProfile(vs_profile.c_str());
+			}
+
+			this->create_vertex_shader(profiles_[0], vs_name, vs_text);
+		}
+
+		if (!ps_name.empty())
+		{
+			if ("auto" == ps_profile)
+			{
+				profiles_[1] = cgGLGetLatestProfile(CG_GL_FRAGMENT);
+			}
+			else
+			{
+				profiles_[1] = cgGetProfile(vs_profile.c_str());
+			}
+
+			this->create_pixel_shader(profiles_[1], ps_name, ps_text);
+		}
+
+		for (int i = 0; i < 2; ++ i)
+		{
+			CGparameter cg_param = cgGetFirstParameter(shaders_[i], CG_GLOBAL);
+			while (cg_param)
+			{
+				OGLRenderParameterDesc p_desc;
+				p_desc.param = effect_.ParameterByName(cgGetParameterName(cg_param));
+				p_desc.cg_handle = cg_param;
+				param_descs_[i].push_back(p_desc);
+
+				cg_param = cgGetNextParameter(cg_param);
+			}
+		}
 	}
 
-	void OGLRenderPass::Begin()
+	CGprogram OGLRenderPass::compile_shader(CGprofile profile, std::string const & name, std::string const & text)
 	{
-		cgSetPassState(pass_);
+		OGLRenderFactory& render_factory(*checked_cast<OGLRenderFactory*>(&Context::Instance().RenderFactoryInstance()));
+
+		CGprogram shader = cgCreateProgram(render_factory.CGContext(),
+				CG_SOURCE, text.c_str(), profile, name.c_str(), NULL);
+
+		CGerror error;
+		char const * err_string = cgGetLastErrorString(&error);
+		if (error != CG_NO_ERROR)
+		{
+#ifdef KLAYGE_DEBUG
+			std::cerr << text << std::endl;
+			std::cerr << err_string << std::endl;
+			if (CG_COMPILER_ERROR == error)
+			{
+				std::cerr << cgGetLastListing(render_factory.CGContext()) << std::endl;
+			}
+#endif
+		}
+
+		return shader;
 	}
 
-	void OGLRenderPass::End()
+	void OGLRenderPass::create_vertex_shader(CGprofile profile, std::string const & name, std::string const & text)
 	{
+		shaders_[0] = this->compile_shader(profile, name, text);
+		cgGLLoadProgram(shaders_[0]);
 	}
 
-
-	void OGLRenderEffectParameterFloat::DoFlush(float const & value)
+	void OGLRenderPass::create_pixel_shader(CGprofile profile, std::string const & name, std::string const & text)
 	{
-		cgSetParameter1f(param_, value);
+		shaders_[1] = this->compile_shader(profile, name, text);
+		cgGLLoadProgram(shaders_[1]);
 	}
 
-	void OGLRenderEffectParameterFloat2::DoFlush(float2 const & value)
+	void OGLRenderPass::shader(std::string& profile, std::string& name, std::string& func, std::string const & type) const
 	{
-		cgSetParameter2fv(param_, &value[0]);
+		profile.resize(0);
+		name.resize(0);
+		func.resize(0);
+
+		RenderEngine::RenderStateType const state_code = states_define::instance().state_code(type);
+
+		for (uint32_t i = 0; i < this->NumStates(); ++ i)
+		{
+			if (this->State(i).State() == state_code)
+			{
+				RenderEffectState const & state = this->State(i);
+				shader_desc shader;
+				state.Var()->Value(shader);
+				profile = shader.profile;
+				name = shader.func_name;
+				break;
+			}
+		}
+
+		std::stringstream ss;
+		if (!name.empty())
+		{
+			for (uint32_t i = 0; i < effect_.NumParameters(); ++ i)
+			{
+				RenderEffectParameter& param = *effect_.ParameterByIndex(i);
+
+				ss << type_define::instance().type_name(param.type()) << " " << param.Name();
+				if (param.ArraySize() != 0)
+				{
+					ss << "[" << param.ArraySize() << "]";
+				}
+
+				ss << ";" << std::endl;
+			}
+
+			for (uint32_t i = 0; i < effect_.NumShaders(); ++ i)
+			{
+				ss << effect_.ShaderByIndex(i).str() << std::endl;
+			}
+
+			func = ss.str();
+		}
 	}
 
-	void OGLRenderEffectParameterFloat3::DoFlush(float3 const & value)
+	void OGLRenderPass::DoBegin()
 	{
-		cgSetParameter3fv(param_, &value[0]);
+		OGLRenderEngine& render_eng(*checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+
+		cgGLBindProgram(shaders_[0]);
+		cgGLEnableProfile(profiles_[0]);
+		cgGLBindProgram(shaders_[1]);
+		cgGLEnableProfile(profiles_[1]);
+
+		for (int i = 0; i < 2; ++ i)
+		{
+			for (size_t c = 0; c < param_descs_[i].size(); ++ c)
+			{
+				OGLRenderParameterDesc const & desc = param_descs_[i][c];
+
+				RenderEffectParameterPtr param = desc.param;
+				if (param->IsDirty())
+				{
+					switch (param->type())
+					{
+					case type_define::TC_bool:
+						if (param->ArraySize() != 0)
+						{
+							std::vector<bool> b;
+							param->Value(b);
+							std::vector<int> tmp(b.begin(), b.end());
+							cgSetParameterValueir(desc.cg_handle, static_cast<int>(tmp.size()), &tmp[0]);
+						}
+						else
+						{
+							bool tmp;
+							param->Value(tmp);
+							cgSetParameter1i(desc.cg_handle, tmp);
+						}
+						break;
+
+					case type_define::TC_int:
+						if (param->ArraySize() != 0)
+						{
+							std::vector<int> tmp;
+							param->Value(tmp);
+							cgSetParameterValueir(desc.cg_handle, static_cast<int>(tmp.size()), &tmp[0]);
+						}
+						else
+						{
+							int tmp;
+							param->Value(tmp);
+							cgSetParameter1i(desc.cg_handle, tmp);
+						}
+						break;
+
+					case type_define::TC_float:
+						if (param->ArraySize() != 0)
+						{
+							std::vector<float> tmp;
+							param->Value(tmp);
+							cgGLSetParameterArray1f(desc.cg_handle, 0, static_cast<long>(tmp.size()), &tmp[0]);
+						}
+						else
+						{
+							float tmp;
+							param->Value(tmp);
+							cgGLSetParameter1f(desc.cg_handle, tmp);
+						}
+						break;
+
+					case type_define::TC_float2:
+						{
+							float2 tmp;
+							param->Value(tmp);
+							cgGLSetParameter2fv(desc.cg_handle, &tmp[0]);
+						}
+						break;
+
+					case type_define::TC_float3:
+						{
+							float3 tmp;
+							param->Value(tmp);
+							cgGLSetParameter3fv(desc.cg_handle, &tmp[0]);
+						}
+						break;
+
+					case type_define::TC_float4:
+						if (param->ArraySize() != 0)
+						{
+							std::vector<float4> tmp;
+							param->Value(tmp);
+							cgGLSetParameterArray4f(desc.cg_handle, 0, static_cast<long>(tmp.size()), &tmp[0][0]);
+						}
+						else
+						{
+							float4 tmp;
+							param->Value(tmp);
+							cgGLSetParameter4fv(desc.cg_handle, &tmp[0]);
+						}
+						break;
+
+					case type_define::TC_float4x4:
+						if (param->ArraySize() != 0)
+						{
+							std::vector<float4x4> tmp;
+							param->Value(tmp);
+							cgGLSetMatrixParameterArrayfr(desc.cg_handle, 0, static_cast<long>(tmp.size()), &tmp[0][0]);
+						}
+						else
+						{
+							float4x4 tmp;
+							param->Value(tmp);
+							cgGLSetMatrixParameterfr(desc.cg_handle, &tmp[0]);
+						}
+						break;
+					}
+				}
+			}
+		}
+
+		for (int i = 0; i < 2; ++ i)
+		{
+			for (size_t c = 0; c < param_descs_[i].size(); ++ c)
+			{
+				OGLRenderParameterDesc const & desc = param_descs_[i][c];
+				if (desc.param->type() == type_define::TC_sampler)
+				{
+					SamplerPtr s;
+					desc.param->Value(s);
+					render_eng.SetSampler(cgGLGetTextureEnum(desc.cg_handle) - GL_TEXTURE0, s);
+				}
+			}
+		}
 	}
 
-	void OGLRenderEffectParameterFloat4::DoFlush(float4 const & value)
+	void OGLRenderPass::DoEnd()
 	{
-		cgSetParameter4fv(param_, &value[0]);
-	}
+		OGLRenderEngine& render_eng(*checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 
-	void OGLRenderEffectParameterFloat4x4::DoFlush(float4x4 const & value)
-	{
-		cgSetParameterValuefr(param_, 4 * 4, &value[0]);
-	}
+		cgGLDisableProfile(profiles_[0]);
+		cgGLDisableProfile(profiles_[1]);
 
-	void OGLRenderEffectParameterInt::DoFlush(int const & value)
-	{
-		cgSetParameter1i(param_, value);
-	}
-
-	void OGLRenderEffectParameterSampler::DoFlush(SamplerPtr const & value)
-	{
-		OGLTexture& ogl_tex = *checked_pointer_cast<OGLTexture>(value->GetTexture());
-		Context::Instance().RenderFactoryInstance().RenderEngineInstance().SetSampler(0, value);
-		cgGLSetupSampler(param_, ogl_tex.GLTexture());
-	}
-
-	void OGLRenderEffectParameterFloatArray::DoFlush(std::vector<float> const & value)
-	{
-		cgGLSetParameterArray1f(param_, 0, static_cast<long>(value.size()), &value[0]);
-	}
-
-	void OGLRenderEffectParameterFloat4Array::DoFlush(std::vector<float4> const & value)
-	{
-		cgGLSetParameterArray4f(param_, 0, static_cast<long>(value.size()), &value[0][0]);
-	}
-
-	void OGLRenderEffectParameterFloat4x4Array::DoFlush(std::vector<float4x4> const & value)
-	{
-		cgGLSetMatrixParameterArrayfr(param_, 0, static_cast<long>(value.size()), &value[0][0]);
-	}
-
-	void OGLRenderEffectParameterIntArray::DoFlush(std::vector<int> const & value)
-	{
-		cgSetParameterValueir(param_, static_cast<long>(value.size()), &value[0]);
+		for (int i = 0; i < 2; ++ i)
+		{
+			for (size_t c = 0; c < param_descs_[i].size(); ++ c)
+			{
+				OGLRenderParameterDesc const & desc = param_descs_[i][c];
+				if (desc.param->type() == type_define::TC_sampler)
+				{
+					render_eng.DisableSampler(cgGLGetTextureEnum(desc.cg_handle) - GL_TEXTURE0);
+				}
+			}
+		}
 	}
 }

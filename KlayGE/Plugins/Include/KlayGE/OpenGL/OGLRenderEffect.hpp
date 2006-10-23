@@ -30,274 +30,68 @@
 
 namespace KlayGE
 {
+	class OGLRenderEffect;
+	typedef boost::shared_ptr<OGLRenderEffect> OGLRenderEffectPtr;
+
+	struct OGLRenderParameterDesc
+	{
+		RenderEffectParameterPtr param;
+
+		CGparameter cg_handle;
+	};
+
 	// äÖÈ¾Ð§¹û
 	//////////////////////////////////////////////////////////////////////////////////
 	class OGLRenderEffect : public RenderEffect
 	{
 	public:
-		explicit OGLRenderEffect(ResIdentifierPtr const & source);
-		~OGLRenderEffect();
 
 	private:
-		RenderTechniquePtr MakeRenderTechnique(CGtechnique tech);
-
-	private:
-		CGeffect effect_;
+		RenderTechniquePtr MakeRenderTechnique();
 	};
 
 	class OGLRenderTechnique : public RenderTechnique
 	{
 	public:
-		OGLRenderTechnique(RenderEffect& effect, std::string const & name, CGtechnique tech);
-
-		bool Validate();
+		explicit OGLRenderTechnique(RenderEffect& effect)
+			: RenderTechnique(effect)
+		{
+		}
 
 	private:
-		RenderPassPtr MakeRenderPass(uint32_t index, CGpass pass);
+		RenderPassPtr MakeRenderPass();
 
 		void DoBegin(uint32_t flags);
 		void DoEnd();
-
-	private:
-		CGtechnique technique_;
 	};
 
 	class OGLRenderPass : public RenderPass
 	{
 	public:
-		OGLRenderPass(RenderEffect& effect, uint32_t index, CGpass pass);
-
-		void Begin();
-		void End();
-
-	private:
-		CGpass pass_;
-	};
-
-	template <typename T>
-	class OGLRenderEffectParameter : public RenderEffectParameterConcrete<T>
-	{
-	public:
-		OGLRenderEffectParameter(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
-				: RenderEffectParameterConcrete<T>(effect, name, semantic),
-					param_(param)
+		explicit OGLRenderPass(RenderEffect& effect)
+			: RenderPass(effect)
 		{
 		}
-		virtual ~OGLRenderEffectParameter()
-		{
-			cgDestroyParameter(param_);
-		}
-
-	protected:
-		CGparameter param_;
-	};
-
-	class OGLRenderEffectParameterBool : public OGLRenderEffectParameter<bool>
-	{
-	public:
-		OGLRenderEffectParameterBool(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
-				: OGLRenderEffectParameter<bool>(effect, name, semantic, param)
-		{
-		}
+		~OGLRenderPass();
 
 	private:
-		void DoFlush(bool const & value);
+		void DoRead();
+
+		void DoBegin();
+		void DoEnd();
 
 	private:
-		OGLRenderEffectParameterBool(OGLRenderEffectParameterBool const & rhs);
-		OGLRenderEffectParameterBool& operator=(OGLRenderEffectParameterBool const & rhs);
-	};
+		boost::array<CGprogram, 2> shaders_;
+		boost::array<CGprofile, 2> profiles_;
 
-	class OGLRenderEffectParameterInt : public OGLRenderEffectParameter<int>
-	{
-	public:
-		OGLRenderEffectParameterInt(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
-				: OGLRenderEffectParameter<int>(effect, name, semantic, param)
-		{
-		}
+		boost::array<std::vector<OGLRenderParameterDesc>, 2> param_descs_;
 
 	private:
-		void DoFlush(int const & value);
+		CGprogram compile_shader(CGprofile profile, std::string const & name, std::string const & text);
+		void create_vertex_shader(CGprofile profile, std::string const & name, std::string const & text);
+		void create_pixel_shader(CGprofile profile, std::string const & name, std::string const & text);
 
-	private:
-		OGLRenderEffectParameterInt(OGLRenderEffectParameterInt const & rhs);
-		OGLRenderEffectParameterInt& operator=(OGLRenderEffectParameterInt const & rhs);
-	};
-
-	class OGLRenderEffectParameterFloat : public OGLRenderEffectParameter<float>
-	{
-	public:
-		OGLRenderEffectParameterFloat(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
-			: OGLRenderEffectParameter<float>(effect, name, semantic, param)
-		{
-		}
-
-	private:
-		void DoFlush(float const & value);
-
-	private:
-		OGLRenderEffectParameterFloat(OGLRenderEffectParameterFloat const & rhs);
-		OGLRenderEffectParameterFloat& operator=(OGLRenderEffectParameterFloat const & rhs);
-	};
-
-	class OGLRenderEffectParameterFloat2 : public OGLRenderEffectParameter<float2>
-	{
-	public:
-		OGLRenderEffectParameterFloat2(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
-			: OGLRenderEffectParameter<float2>(effect, name, semantic, param)
-		{
-		}
-
-	private:
-		void DoFlush(float2 const & value);
-
-	private:
-		OGLRenderEffectParameterFloat2(OGLRenderEffectParameterFloat2 const & rhs);
-		OGLRenderEffectParameterFloat2& operator=(OGLRenderEffectParameterFloat2 const & rhs);
-	};
-
-	class OGLRenderEffectParameterFloat3 : public OGLRenderEffectParameter<float3>
-	{
-	public:
-		OGLRenderEffectParameterFloat3(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
-			: OGLRenderEffectParameter<float3>(effect, name, semantic, param)
-		{
-		}
-
-	private:
-		void DoFlush(float3 const & value);
-
-	private:
-		OGLRenderEffectParameterFloat3(OGLRenderEffectParameterFloat3 const & rhs);
-		OGLRenderEffectParameterFloat3& operator=(OGLRenderEffectParameterFloat3 const & rhs);
-	};
-
-	class OGLRenderEffectParameterFloat4 : public OGLRenderEffectParameter<float4>
-	{
-	public:
-		OGLRenderEffectParameterFloat4(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
-			: OGLRenderEffectParameter<float4>(effect, name, semantic, param)
-		{
-		}
-
-	private:
-		void DoFlush(float4 const & value);
-
-	private:
-		OGLRenderEffectParameterFloat4(OGLRenderEffectParameterFloat4 const & rhs);
-		OGLRenderEffectParameterFloat4& operator=(OGLRenderEffectParameterFloat4 const & rhs);
-	};
-
-	class OGLRenderEffectParameterFloat4x4 : public OGLRenderEffectParameter<float4x4>
-	{
-	public:
-		OGLRenderEffectParameterFloat4x4(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
-				: OGLRenderEffectParameter<float4x4>(effect, name, semantic, param)
-		{
-		}
-
-	private:
-		void DoFlush(float4x4 const & value);
-
-	private:
-		OGLRenderEffectParameterFloat4x4(OGLRenderEffectParameterFloat4x4 const & rhs);
-		OGLRenderEffectParameterFloat4x4& operator=(OGLRenderEffectParameterFloat4x4 const & rhs);
-	};
-
-	class OGLRenderEffectParameterSampler : public OGLRenderEffectParameter<SamplerPtr>
-	{
-	public:
-		OGLRenderEffectParameterSampler(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
-				: OGLRenderEffectParameter<SamplerPtr>(effect, name, semantic, param)
-		{
-		}
-
-	private:
-		void DoFlush(SamplerPtr const & value);
-
-	private:
-		OGLRenderEffectParameterSampler(OGLRenderEffectParameterSampler const & rhs);
-		OGLRenderEffectParameterSampler& operator=(OGLRenderEffectParameterSampler const & rhs);
-	};
-	
-	class OGLRenderEffectParameterBoolArray : public OGLRenderEffectParameter<std::vector<bool> >
-	{
-	public:
-		OGLRenderEffectParameterBoolArray(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
-				: OGLRenderEffectParameter<std::vector<bool> >(effect, name, semantic, param)
-		{
-		}
-
-	private:
-		void DoFlush(std::vector<bool> const & value);
-
-	private:
-		OGLRenderEffectParameterBoolArray(OGLRenderEffectParameterBoolArray const & rhs);
-		OGLRenderEffectParameterBoolArray& operator=(OGLRenderEffectParameterBoolArray const & rhs);
-	};
-	
-	class OGLRenderEffectParameterIntArray : public OGLRenderEffectParameter<std::vector<int> >
-	{
-	public:
-		OGLRenderEffectParameterIntArray(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
-				: OGLRenderEffectParameter<std::vector<int> >(effect, name, semantic, param)
-		{
-		}
-
-	private:
-		void DoFlush(std::vector<int> const & value);
-
-	private:
-		OGLRenderEffectParameterIntArray(OGLRenderEffectParameterIntArray const & rhs);
-		OGLRenderEffectParameterIntArray& operator=(OGLRenderEffectParameterIntArray const & rhs);
-	};
-
-	class OGLRenderEffectParameterFloatArray : public OGLRenderEffectParameter<std::vector<float> >
-	{
-	public:
-		OGLRenderEffectParameterFloatArray(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
-				: OGLRenderEffectParameter<std::vector<float> >(effect, name, semantic, param)
-		{
-		}
-
-	private:
-		void DoFlush(std::vector<float> const & value);
-
-	private:
-		OGLRenderEffectParameterFloatArray(OGLRenderEffectParameterFloatArray const & rhs);
-		OGLRenderEffectParameterFloatArray& operator=(OGLRenderEffectParameterFloatArray const & rhs);
-	};
-
-	class OGLRenderEffectParameterFloat4Array : public OGLRenderEffectParameter<std::vector<float4> >
-	{
-	public:
-		OGLRenderEffectParameterFloat4Array(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
-				: OGLRenderEffectParameter<std::vector<float4> >(effect, name, semantic, param)
-		{
-		}
-
-	private:
-		void DoFlush(std::vector<float4> const & value);
-
-	private:
-		OGLRenderEffectParameterFloat4Array(OGLRenderEffectParameterFloat4Array const & rhs);
-		OGLRenderEffectParameterFloat4Array& operator=(OGLRenderEffectParameterFloat4Array const & rhs);
-	};
-
-	class OGLRenderEffectParameterFloat4x4Array : public OGLRenderEffectParameter<std::vector<float4x4> >
-	{
-	public:
-		OGLRenderEffectParameterFloat4x4Array(RenderEffect& effect, std::string const & name, std::string const & semantic, CGparameter param)
-				: OGLRenderEffectParameter<std::vector<float4x4> >(effect, name, semantic, param)
-		{
-		}
-
-	private:
-		void DoFlush(std::vector<float4x4> const & value);
-
-	private:
-		OGLRenderEffectParameterFloat4x4Array(OGLRenderEffectParameterFloat4x4Array const & rhs);
-		OGLRenderEffectParameterFloat4x4Array& operator=(OGLRenderEffectParameterFloat4x4Array const & rhs);
+		void shader(std::string& profile, std::string& name, std::string& func, std::string const & type) const;
 	};
 }
 

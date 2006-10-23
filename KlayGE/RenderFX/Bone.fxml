@@ -1,8 +1,8 @@
 <?xml version='1.0'?>
 
 <effect>
-  <shader>
-    <![CDATA[
+	<shader>
+		<![CDATA[
 float3 VertexBlend(float3 pos, float4 blend_weights, int4 blend_indices, float4x3 bones[64])
 {
 	float3 result_pos = 0;
@@ -16,6 +16,6 @@ float3 VertexBlend(float3 pos, float4 blend_weights, int4 blend_indices, float4x
 
 	return result_pos;
 }
-    ]]>
-  </shader>
+		]]>
+	</shader>
 </effect>

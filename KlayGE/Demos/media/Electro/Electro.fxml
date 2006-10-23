@@ -28,8 +28,6 @@ half4 ElectroPS(float3 texCoord0	: TEXCOORD0) : COLOR
 
 	<technique name="Electro">
 		<pass name="p0">
-			<state name="blend_enable" value="false"/>
-
 			<state name="vertex_shader" value="ElectroVS()"/>
 			<state name="pixel_shader" value="ElectroPS()"/>
 		</pass>

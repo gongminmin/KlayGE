@@ -54,15 +54,20 @@
 #pragma warning(disable: 4100 4512)
 #endif
 #include <boost/utility.hpp>
-#include <boost/any.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
 
+#include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Math.hpp>
 
 namespace KlayGE
 {
+	enum RenderEffectTechFlags
+	{
+		RETF_RestoreDefalut = 0x01
+	};
+
 	class type_define
 	{
 	public:
@@ -110,7 +115,7 @@ namespace KlayGE
 	public:
 		static states_define& instance();
 
-		uint32_t state_code(std::string const & name) const;
+		RenderEngine::RenderStateType state_code(std::string const & name) const;
 		std::string const & state_name(uint32_t code) const;
 
 	private:
@@ -120,29 +125,113 @@ namespace KlayGE
 		std::vector<std::pair<std::string, std::string> > states_;
 	};
 
-	class RenderVariable
-	{
-	public:
-		void set_value(boost::any const & p)
-		{
-			value_ = p;
-		}
-		boost::any const & get_value() const
-		{
-			return value_;
-		}
-
-	protected:
-		boost::any value_;
-	};
-
 	struct shader_desc
 	{
 		std::string profile;
 		std::string func_name;
+
+		friend bool operator==(shader_desc const & lhs, shader_desc const & rhs)
+		{
+			return (lhs.profile == rhs.profile) && (lhs.func_name == rhs.func_name);
+		}
+		friend bool operator!=(shader_desc const & lhs, shader_desc const & rhs)
+		{
+			return !(lhs == rhs);
+		}
 	};
 
-	class RenderAnnotation
+	class RenderVariable
+	{
+	public:
+		RenderVariable();
+		virtual ~RenderVariable() = 0;
+
+		void Dirty(bool dirty)
+		{
+			dirty_ = dirty;
+		}
+		bool IsDirty() const
+		{
+			return dirty_;
+		}
+
+		virtual RenderVariable& operator=(bool const & value);
+		virtual RenderVariable& operator=(int const & value);
+		virtual RenderVariable& operator=(float const & value);
+		virtual RenderVariable& operator=(float2 const & value);
+		virtual RenderVariable& operator=(float3 const & value);
+		virtual RenderVariable& operator=(float4 const & value);
+		virtual RenderVariable& operator=(float4x4 const & value);
+		virtual RenderVariable& operator=(SamplerPtr const & value);
+		virtual RenderVariable& operator=(std::string const & value);
+		virtual RenderVariable& operator=(shader_desc const & value);
+		virtual RenderVariable& operator=(std::vector<bool> const & value);
+		virtual RenderVariable& operator=(std::vector<int> const & value);
+		virtual RenderVariable& operator=(std::vector<float> const & value);
+		virtual RenderVariable& operator=(std::vector<float4> const & value);
+		virtual RenderVariable& operator=(std::vector<float4x4> const & value);
+
+		virtual void Value(bool& val) const;
+		virtual void Value(int& val) const;
+		virtual void Value(float& val) const;
+		virtual void Value(float2& val) const;
+		virtual void Value(float3& val) const;
+		virtual void Value(float4& val) const;
+		virtual void Value(float4x4& val) const;
+		virtual void Value(SamplerPtr& val) const;
+		virtual void Value(std::string& val) const;
+		virtual void Value(shader_desc& val) const;
+		virtual void Value(std::vector<bool>& val) const;
+		virtual void Value(std::vector<int>& val) const;
+		virtual void Value(std::vector<float>& val) const;
+		virtual void Value(std::vector<float4>& val) const;
+		virtual void Value(std::vector<float4x4>& val) const;
+
+	protected:
+		bool dirty_;
+	};
+
+	template <typename T>
+	class RenderVariableConcrete : public RenderVariable
+	{
+	public:
+		RenderVariableConcrete& operator=(T const & value)
+		{
+			if (val_ != value)
+			{
+				val_ = value;
+				this->Dirty(true);
+			}
+			return *this;
+		}
+
+		void Value(T& val) const
+		{
+			val = val_;
+		}
+
+	protected:
+		T val_;
+	};
+
+	typedef RenderVariableConcrete<bool> RenderVariableBool;
+	typedef RenderVariableConcrete<int> RenderVariableInt;
+	typedef RenderVariableConcrete<float> RenderVariableFloat;
+	typedef RenderVariableConcrete<float2> RenderVariableFloat2;
+	typedef RenderVariableConcrete<float3> RenderVariableFloat3;
+	typedef RenderVariableConcrete<float4> RenderVariableFloat4;
+	typedef RenderVariableConcrete<float4x4> RenderVariableFloat4x4;
+	typedef RenderVariableConcrete<SamplerPtr> RenderVariableSampler;
+	typedef RenderVariableConcrete<std::string> RenderVariableString;
+	typedef RenderVariableConcrete<shader_desc> RenderVariableShader;
+	typedef RenderVariableConcrete<std::vector<bool> > RenderVariableBoolArray;
+	typedef RenderVariableConcrete<std::vector<int> > RenderVariableIntArray;
+	typedef RenderVariableConcrete<std::vector<float> >  RenderVariableFloatArray;
+	typedef RenderVariableConcrete<std::vector<float4> >  RenderVariableFloat4Array;
+	typedef RenderVariableConcrete<std::vector<float4x4> >  RenderVariableFloat4x4Array;
+
+
+	class RenderEffectAnnotation
 	{
 	public:
 		void Load(ResIdentifierPtr const & source);
@@ -263,13 +352,16 @@ namespace KlayGE
 			return passes_[n];
 		}
 
-		void Begin(uint32_t flags = 0);
+		void Begin(uint32_t flags = RETF_RestoreDefalut);
 		void End();
 
-		bool Validate();
+		bool Validate() const
+		{
+			return is_validate_;
+		}
 
 	protected:
-		virtual RenderPassPtr MakeRenderPass(uint32_t index) = 0;
+		virtual RenderPassPtr MakeRenderPass() = 0;
 
 		virtual void DoBegin(uint32_t flags) = 0;
 		virtual void DoEnd() = 0;
@@ -281,33 +373,38 @@ namespace KlayGE
 		typedef std::vector<RenderPassPtr> passes_type;
 		passes_type passes_;
 
-		std::vector<boost::shared_ptr<RenderAnnotation> > annotations_;
+		std::vector<boost::shared_ptr<RenderEffectAnnotation> > annotations_;
 		float weight_;
+
+		std::vector<RenderEngine::RenderStateType> changed_states_;
+
+		bool is_validate_;
+		bool restore_default_;
 	};
 
-	class RenderState
+	class RenderEffectState
 	{
 	public:
 		void Load(ResIdentifierPtr const & source);
 
-		uint32_t type() const
+		uint32_t Type() const
 		{
 			return type_;
 		}
 
-		uint32_t state() const
+		RenderEngine::RenderStateType State() const
 		{
 			return state_;
 		}
 
-		boost::shared_ptr<RenderVariable> const & var() const
+		boost::shared_ptr<RenderVariable> const & Var() const
 		{
 			return var_;
 		}
 
 	private:
 		uint32_t type_;
-		uint32_t state_;
+		RenderEngine::RenderStateType state_;
 
 		boost::shared_ptr<RenderVariable> var_;
 	};
@@ -315,8 +412,8 @@ namespace KlayGE
 	class RenderPass : boost::noncopyable
 	{
 	public:
-		RenderPass(RenderEffect& effect, uint32_t index)
-			: effect_(effect), index_(index)
+		explicit RenderPass(RenderEffect& effect)
+			: effect_(effect)
 		{
 		}
 		virtual ~RenderPass()
@@ -327,21 +424,16 @@ namespace KlayGE
 
 		void Load(ResIdentifierPtr const & source);
 
-		std::string const & name() const
+		std::string const & Name() const
 		{
 			return name_;
 		}
 
-		uint32_t Index() const
-		{
-			return index_;
-		}
-
 		uint32_t NumStates() const;
-		RenderState const & State(uint32_t state_id) const;
+		RenderEffectState const & State(uint32_t state_id) const;
 
-		virtual void Begin() = 0;
-		virtual void End() = 0;
+		void Begin();
+		void End();
 
 		bool Validate() const
 		{
@@ -350,14 +442,15 @@ namespace KlayGE
 
 	private:
 		virtual void DoRead() = 0;
+		virtual void DoBegin() = 0;
+		virtual void DoEnd() = 0;
 
 	protected:
 		RenderEffect& effect_;
-		uint32_t index_;
 
 		std::string name_;
-		std::vector<boost::shared_ptr<RenderAnnotation> > annotations_;
-		std::vector<boost::shared_ptr<RenderState> > render_states_;
+		std::vector<boost::shared_ptr<RenderEffectAnnotation> > annotations_;
+		std::vector<RenderEffectStatePtr> render_states_;
 
 		bool is_validate_;
 	};
@@ -365,8 +458,7 @@ namespace KlayGE
 	class RenderEffectParameter : boost::noncopyable
 	{
 	public:
-		RenderEffectParameter(RenderEffect& effect,
-			std::string const & name, std::string const & semantic);
+		explicit RenderEffectParameter(RenderEffect& effect);
 		virtual ~RenderEffectParameter();
 
 		static RenderEffectParameterPtr NullObject();
@@ -399,11 +491,11 @@ namespace KlayGE
 
 		void Dirty(bool dirty)
 		{
-			dirty_ = dirty;
+			var_->Dirty(dirty);
 		}
 		bool IsDirty() const
 		{
-			return dirty_;
+			return var_->IsDirty();
 		}
 
 		virtual RenderEffectParameter& operator=(bool const & value);
@@ -439,47 +531,11 @@ namespace KlayGE
 		std::string name_;
 		std::string semantic_;
 
-		bool dirty_;
-
 		uint32_t type_;
 		boost::shared_ptr<RenderVariable> var_;
 		uint32_t array_size_;
 
-		std::vector<boost::shared_ptr<RenderAnnotation> > annotations_;
-	};
-
-	template <typename T>
-	class RenderEffectParameterConcrete : public RenderEffectParameter
-	{
-	public:
-		RenderEffectParameterConcrete(RenderEffect& effect,
-					std::string const & name, std::string const & semantic)
-			: RenderEffectParameter(effect, name, semantic), val_()
-		{
-		}
-
-		RenderEffectParameter& operator=(T const & value)
-		{
-			if (value != val_)
-			{
-				val_ = value;
-				this->Dirty();
-			}
-
-			return *this;
-		}
-
-		void Value(T& val) const
-		{
-			val = val_;
-		}
-
-	protected:
-		T val_;
-
-	private:
-		RenderEffectParameterConcrete(RenderEffectParameterConcrete const & rhs);
-		RenderEffectParameterConcrete& operator=(RenderEffectParameterConcrete const & rhs);
+		std::vector<boost::shared_ptr<RenderEffectAnnotation> > annotations_;
 	};
 }
 

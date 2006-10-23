@@ -32,8 +32,6 @@ half4 MandelbrotPS(float2 texcoord0 : TEXCOORD0,
 
 	<technique name="Mandelbrot">
 		<pass name="p0">
-			<state name="blend_enable" value="false"/>
-
 			<state name="vertex_shader" value="MandelbrotVS()"/>
 			<state name="pixel_shader" value="MandelbrotPS()"/>
 		</pass>
@@ -60,8 +58,6 @@ float4 ShowPS(float3 texCoord0 : TEXCOORD0) : COLOR
 
 	<technique name="Show">
 		<pass name="p0">
-			<state name="blend_enable" value="false"/>
-
 			<state name="vertex_shader" value="ShowVS()"/>
 			<state name="pixel_shader" value="ShowPS()"/>
 		</pass>

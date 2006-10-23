@@ -41,8 +41,7 @@
 #include <KlayGE/PreDeclare.hpp>
 
 #include <boost/smart_ptr.hpp>
-
-#include <d3dx9effect.h>
+#include <boost/array.hpp>
 
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/D3D9/D3D9Typedefs.hpp>
@@ -51,8 +50,6 @@
 namespace KlayGE
 {
 	class D3D9RenderEffect;
-	class D3D9RenderEffectParameterSampler;
-
 	typedef boost::shared_ptr<D3D9RenderEffect> D3D9RenderEffectPtr;
 
 	
@@ -95,7 +92,7 @@ namespace KlayGE
 		}
 
 	private:
-		RenderPassPtr MakeRenderPass(uint32_t index);
+		RenderPassPtr MakeRenderPass();
 
 		void DoBegin(uint32_t flags);
 		void DoEnd();
@@ -104,28 +101,29 @@ namespace KlayGE
 	class D3D9RenderPass : public RenderPass
 	{
 	public:
-		D3D9RenderPass(RenderEffect& effect, uint32_t index)
-			: RenderPass(effect, index)
+		explicit D3D9RenderPass(RenderEffect& effect)
+			: RenderPass(effect)
 		{
 		}
 
+	private:
 		void DoRead();
 
-		void Begin();
-		void End();
+		void DoBegin();
+		void DoEnd();
 
 	private:
 		ID3D9VertexShaderPtr vertex_shader_;
 		ID3D9PixelShaderPtr pixel_shader_;
 
-		std::vector<D3D9RenderParameterDesc> param_descs_[2];
+		boost::array<std::vector<D3D9RenderParameterDesc>, 2> param_descs_;
 
-		uint32_t bool_start_[2];
-		uint32_t int_start_[2];
-		uint32_t float_start_[2];
-		std::vector<BOOL> bool_registers_[2];
-		std::vector<int> int_registers_[2];
-		std::vector<float> float_registers_[2];
+		boost::array<uint32_t, 2> bool_start_;
+		boost::array<uint32_t, 2> int_start_;
+		boost::array<uint32_t, 2> float_start_;
+		boost::array<std::vector<BOOL>, 2> bool_registers_;
+		boost::array<std::vector<int>, 2> int_registers_;
+		boost::array<std::vector<float>, 2> float_registers_;
 
 	private:
 		void compile_shader(ID3DXBuffer*& code, ID3DXConstantTable*& constant_table,

@@ -51,8 +51,6 @@ float4 BlurPS(float4 iTex[4] : TEXCOORD) : COLOR0
 	
 	<technique name="BlurX">
 		<pass name="p0">
-			<state name="polygon_mode" value="fill"/>
-			<state name="cull_mode" value="anti_clock_wise"/>
 			<state name="depth_enable" value="false"/>
 
 			<state name="vertex_shader" value="BlurXVS()"/>
@@ -62,8 +60,6 @@ float4 BlurPS(float4 iTex[4] : TEXCOORD) : COLOR0
 	
 	<technique name="BlurY">
 		<pass name="p0">
-			<state name="polygon_mode" value="fill"/>
-			<state name="cull_mode" value="anti_clock_wise"/>
 			<state name="depth_enable" value="false"/>
 
 			<state name="vertex_shader" value="BlurYVS()"/>

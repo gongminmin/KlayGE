@@ -27,24 +27,12 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/COMPtr.hpp>
-#include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Sampler.hpp>
-#include <KlayGE/ResLoader.hpp>
 
 #include <boost/assert.hpp>
-#include <boost/bind.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4127 4189)
-#endif
-#include <boost/algorithm/string/split.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-#include <functional>
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -69,9 +57,9 @@ namespace KlayGE
 	{
 	}
 
-	RenderPassPtr D3D9RenderTechnique::MakeRenderPass(uint32_t index)
+	RenderPassPtr D3D9RenderTechnique::MakeRenderPass()
 	{
-		return RenderPassPtr(new D3D9RenderPass(effect_, index));
+		return RenderPassPtr(new D3D9RenderPass(effect_));
 	}
 
 
@@ -89,7 +77,7 @@ namespace KlayGE
 		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
 
 		ID3DXConstantTable* constant_table[2] = { NULL, NULL };
-		
+
 		if (!vs_name.empty())
 		{
 			if ("auto" == vs_profile)
@@ -143,6 +131,9 @@ namespace KlayGE
 						float_begin = std::min<uint32_t>(float_begin, constant_desc.RegisterIndex);
 						float_end = std::max<uint32_t>(float_end, constant_desc.RegisterIndex + constant_desc.RegisterCount);
 						break;
+
+					default:
+						break;
 					}
 
 					D3D9RenderParameterDesc p_desc;
@@ -152,6 +143,13 @@ namespace KlayGE
 					p_desc.register_count = constant_desc.RegisterCount;
 					p_desc.rows = constant_desc.Rows;
 					p_desc.columns = constant_desc.Columns;
+
+					if ((D3DXRS_SAMPLER == constant_desc.RegisterSet)
+						&& (0 == i))
+					{
+						p_desc.register_index += D3DVERTEXTEXTURESAMPLER0;
+					}
+
 					param_descs_[i].push_back(p_desc);
 				}
 
@@ -244,14 +242,15 @@ namespace KlayGE
 		name.resize(0);
 		func.resize(0);
 
-		uint32_t const state_code = states_define::instance().state_code(type);
+		RenderEngine::RenderStateType const state_code = states_define::instance().state_code(type);
 
 		for (uint32_t i = 0; i < this->NumStates(); ++ i)
 		{
-			if (this->State(i).state() == state_code)
+			if (this->State(i).State() == state_code)
 			{
-				RenderState const & state = this->State(i);
-				shader_desc const & shader = boost::any_cast<shader_desc>(state.var()->get_value());
+				RenderEffectState const & state = this->State(i);
+				shader_desc shader;
+				state.Var()->Value(shader);
 				profile = shader.profile;
 				name = shader.func_name;
 				break;
@@ -283,7 +282,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9RenderPass::Begin()
+	void D3D9RenderPass::DoBegin()
 	{
 		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
@@ -496,76 +495,28 @@ namespace KlayGE
 			for (size_t c = 0; c < param_descs_[i].size(); ++ c)
 			{
 				D3D9RenderParameterDesc const & desc = param_descs_[i][c];
-
-				RenderEffectParameterPtr param = desc.param;
 				if (D3DXRS_SAMPLER == desc.register_set)
 				{
 					SamplerPtr s;
-					param->Value(s);
-					uint32_t sampler_index = desc.register_index;
-					if (0 == i)
-					{
-						sampler_index += D3DVERTEXTEXTURESAMPLER0;
-					}
-					render_eng.SetSampler(sampler_index, s);
+					desc.param->Value(s);
+					render_eng.SetSampler(desc.register_index, s);
 				}
-			}
-		}
-
-		for (size_t i = 0; i < render_states_.size(); ++ i)
-		{
-			if (type_define::TC_shader != render_states_[i]->type())
-			{
-				uint32_t state;
-				if (type_define::TC_bool == render_states_[i]->type())
-				{
-					state = boost::any_cast<bool>(render_states_[i]->var()->get_value());
-				}
-				else
-				{
-					if (type_define::TC_int == render_states_[i]->type())
-					{
-						state = boost::any_cast<int>(render_states_[i]->var()->get_value());
-					}
-					else
-					{
-						if (type_define::TC_float == render_states_[i]->type())
-						{
-							state = float_to_uint32(boost::any_cast<float>(render_states_[i]->var()->get_value()));
-						}
-						else
-						{
-							BOOST_ASSERT(false);
-							state = 0;
-						}
-					}
-				}
-
-				render_eng.SetRenderState(static_cast<RenderEngine::RenderStateType>(render_states_[i]->state()),
-					state);
 			}
 		}
 	}
 
-	void D3D9RenderPass::End()
+	void D3D9RenderPass::DoEnd()
 	{
 		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		
+
 		for (int i = 0; i < 2; ++ i)
 		{
 			for (size_t c = 0; c < param_descs_[i].size(); ++ c)
 			{
 				D3D9RenderParameterDesc const & desc = param_descs_[i][c];
-
-				RenderEffectParameterPtr param = desc.param;
 				if (D3DXRS_SAMPLER == desc.register_set)
 				{
-					uint32_t sampler_index = desc.register_index;
-					if (0 == i)
-					{
-						sampler_index += D3DVERTEXTEXTURESAMPLER0;
-					}
-					render_eng.DisableSampler(sampler_index);
+					render_eng.DisableSampler(desc.register_index);
 				}
 			}
 		}

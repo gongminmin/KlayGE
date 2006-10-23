@@ -254,6 +254,7 @@ namespace KlayGE
 
 		void SetRenderState(RenderStateType rst, uint32_t state);
 		uint32_t GetRenderState(RenderStateType rst);
+		uint32_t GetDefaultRenderState(RenderStateType rst);
 
 		void BindRenderTarget(RenderTargetPtr rt);
 		RenderTargetPtr CurRenderTarget() const;
@@ -281,8 +282,9 @@ namespace KlayGE
 		virtual void DoRender(RenderLayout const & rl) = 0;
 		virtual void DoFlushRenderStates() = 0;
 
-		virtual void InitRenderStates() = 0;
 		virtual void FillRenderDeviceCaps() = 0;
+
+		void InitRenderStates();
 
 	protected:
 		RenderTargetPtr cur_render_target_;
@@ -295,6 +297,7 @@ namespace KlayGE
 
 		RenderDeviceCaps caps_;
 
+		boost::array<uint32_t, RST_NUM_RENDER_STATES> default_render_states_;
 		boost::array<uint32_t, RST_NUM_RENDER_STATES> render_states_;
 		boost::array<bool, RST_NUM_RENDER_STATES> dirty_render_states_;
 	};

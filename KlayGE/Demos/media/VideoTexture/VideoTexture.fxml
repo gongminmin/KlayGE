@@ -24,10 +24,6 @@ float4 ObjectPS(float2 Tex0 : TEXCOORD0) : COLOR
 
 	<technique name="Object">
 		<pass name="p0">
-			<state name="polygon_mode" value="fill"/>
-			<state name="cull_mode" value="anti_clock_wise"/>
-			<state name="blend_enable" value="false"/>
-
 			<state name="vertex_shader" value="ObjectVS()"/>
 			<state name="pixel_shader" value="ObjectPS()"/>
 		</pass>

@@ -26,7 +26,6 @@ namespace KlayGE
 			: OGLRenderFactoryBase(L"OpenGL Render Factory")
 	{
 		context_ = cgCreateContext();
-		cgGLRegisterStates(context_);
 	}
 	
 	CGcontext OGLRenderFactory::CGContext() const
@@ -64,7 +63,9 @@ namespace KlayGE
 
 	RenderEffectPtr OGLRenderFactory::DoMakeRenderEffect(ResIdentifierPtr const & source)
 	{
-		return RenderEffectPtr(new OGLRenderEffect(source));
+		OGLRenderEffectPtr ret(new OGLRenderEffect);
+		ret->Load(source);
+		return ret;
 	}
 
 	RenderLayoutPtr OGLRenderFactory::MakeRenderLayout(RenderLayout::buffer_type type)

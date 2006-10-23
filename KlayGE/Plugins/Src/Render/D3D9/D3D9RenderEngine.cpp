@@ -73,6 +73,7 @@ namespace KlayGE
 	// ¹¹Ôìº¯Êý
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D9RenderEngine::D3D9RenderEngine()
+		: last_num_vertex_stream_(0)
 	{
 		// Create our Direct3D object
 		d3d_ = MakeCOMPtr(Direct3DCreate9(D3D_SDK_VERSION));
@@ -299,28 +300,16 @@ namespace KlayGE
 
 	void D3D9RenderEngine::DoRenderHWInstance(RenderLayout const & rl)
 	{
-		uint32_t const last_num_vertex_stream = static_cast<uint32_t>(active_vertex_streams_.size());
-		for (uint32_t i = 0; i < last_num_vertex_stream; ++ i)
-		{
-			if (active_vertex_streams_[i])
-			{
-				active_vertex_streams_[i]->Deactive(i);
-			}
-			TIF(d3dDevice_->SetStreamSourceFreq(i, 1UL));
-		}
-		active_vertex_streams_.resize(0);
-
+		uint32_t this_num_vertex_stream = rl.NumVertexStreams();
 		for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
 		{
 			GraphicsBufferPtr stream = rl.GetVertexStream(i);
 
 			D3D9VertexBuffer& d3d9vb(*checked_pointer_cast<D3D9VertexBuffer>(stream));
-			d3d9vb.Active(i, rl.VertexSize(i));
+			TIF(d3dDevice_->SetStreamSource(i, d3d9vb.D3D9Buffer().get(), 0, rl.VertexSize(i)));
 
 			TIF(d3dDevice_->SetStreamSourceFreq(i,
 				D3DSTREAMSOURCE_INDEXEDDATA | rl.VertexStreamFrequency(i)));
-
-			active_vertex_streams_.push_back(boost::static_pointer_cast<D3D9VertexBuffer>(stream));
 		}
 		if (rl.InstanceStream())
 		{
@@ -328,38 +317,43 @@ namespace KlayGE
 			GraphicsBufferPtr stream = rl.InstanceStream();
 
 			D3D9VertexBuffer& d3d9vb(*checked_pointer_cast<D3D9VertexBuffer>(stream));
-			d3d9vb.Active(number, rl.InstanceSize());
+			TIF(d3dDevice_->SetStreamSource(number, d3d9vb.D3D9Buffer().get(), 0, rl.InstanceSize()));
 
 			TIF(d3dDevice_->SetStreamSourceFreq(number,
 				D3DSTREAMSOURCE_INSTANCEDATA | 1UL));
 
-			active_vertex_streams_.push_back(boost::static_pointer_cast<D3D9VertexBuffer>(stream));
+			++ this_num_vertex_stream;
 		}
+
+		for (uint32_t i = this_num_vertex_stream; i < last_num_vertex_stream_; ++ i)
+		{
+			TIF(d3dDevice_->SetStreamSource(i, NULL, 0, 0));
+			TIF(d3dDevice_->SetStreamSourceFreq(i, 1UL));
+		}
+
+		last_num_vertex_stream_ = this_num_vertex_stream;
 
 		this->RenderRL(rl);
 	}
 
 	void D3D9RenderEngine::RenderRLSWInstance(RenderLayout const & rl)
 	{
-		uint32_t const last_num_vertex_stream = static_cast<uint32_t>(active_vertex_streams_.size());
-		for (uint32_t i = 0; i < last_num_vertex_stream; ++ i)
-		{
-			if (active_vertex_streams_[i])
-			{
-				active_vertex_streams_[i]->Deactive(i);
-			}
-		}
-		active_vertex_streams_.resize(0);
-
+		uint32_t this_num_vertex_stream = rl.NumVertexStreams();
 		for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
 		{
 			GraphicsBufferPtr stream = rl.GetVertexStream(i);
 
 			D3D9VertexBuffer& d3d9vb(*checked_pointer_cast<D3D9VertexBuffer>(stream));
-			d3d9vb.Active(i, rl.VertexSize(i));
-
-			active_vertex_streams_.push_back(boost::static_pointer_cast<D3D9VertexBuffer>(stream));
+			TIF(d3dDevice_->SetStreamSource(i, d3d9vb.D3D9Buffer().get(), 0, rl.VertexSize(i)));
 		}
+
+		for (uint32_t i = this_num_vertex_stream; i < last_num_vertex_stream_; ++ i)
+		{
+			TIF(d3dDevice_->SetStreamSource(i, NULL, 0, 0));
+			TIF(d3dDevice_->SetStreamSourceFreq(i, 1UL));
+		}
+
+		last_num_vertex_stream_ = this_num_vertex_stream;
 
 		this->RenderRL(rl);
 	}
@@ -376,18 +370,12 @@ namespace KlayGE
 		D3D9RenderLayout const & d3d9_rl(*checked_cast<D3D9RenderLayout const *>(&rl));
 		TIF(d3dDevice_->SetVertexDeclaration(d3d9_rl.VertexDeclaration().get()));
 
-		if (active_index_stream_)
-		{
-			active_index_stream_->Deactive();
-			active_index_stream_.reset();
-		}
-
 		uint32_t num_passes = render_tech_->NumPasses();
 		if (rl.UseIndices())
 		{
 			D3D9IndexBuffer& d3dib(*checked_pointer_cast<D3D9IndexBuffer>(rl.GetIndexStream()));
 			d3dib.SwitchFormat(rl.IndexStreamFormat());
-			d3dib.Active();
+			d3dDevice_->SetIndices(d3dib.D3D9Buffer().get());
 
 			for (uint32_t i = 0; i < num_passes; ++ i)
 			{
@@ -399,11 +387,11 @@ namespace KlayGE
 					static_cast<UINT>(rl.NumVertices()), 0, primCount));
 				pass->End();
 			}
-
-			active_index_stream_ = boost::static_pointer_cast<D3D9IndexBuffer>(rl.GetIndexStream());
 		}
 		else
 		{
+			d3dDevice_->SetIndices(NULL);
+
 			for (uint32_t i = 0; i < num_passes; ++ i)
 			{
 				RenderPassPtr pass = render_tech_->Pass(i);
@@ -423,57 +411,6 @@ namespace KlayGE
 		BOOST_ASSERT(d3dDevice_);
 
 		TIF(d3dDevice_->EndScene());
-	}
-
-	// ³õÊ¼»¯äÖÈ¾×´Ì¬
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::InitRenderStates()
-	{
-		render_states_[RST_PolygonMode]		= PM_Fill;
-		render_states_[RST_ShadeMode]		= SM_Gouraud;
-		render_states_[RST_CullMode]		= CM_AntiClockwise;
-
-		render_states_[RST_AlphaToCoverageEnable] = false;
-		render_states_[RST_BlendEnable]		= false;
-		render_states_[RST_BlendOp]			= BOP_Add;
-		render_states_[RST_SrcBlend]		= ABF_One;
-		render_states_[RST_DestBlend]		= ABF_Zero;
-		render_states_[RST_BlendOpAlpha]	= BOP_Add;
-		render_states_[RST_SrcBlendAlpha]	= ABF_One;
-		render_states_[RST_DestBlendAlpha]	= ABF_Zero;
-			
-		render_states_[RST_DepthEnable]			= true;
-		render_states_[RST_DepthMask]			= true;
-		render_states_[RST_DepthFunc]			= CF_LessEqual;
-		render_states_[RST_PolygonOffsetFactor]	= 0;
-		render_states_[RST_PolygonOffsetUnits]	= 0;
-
-		render_states_[RST_FrontStencilEnable]		= false;
-		render_states_[RST_FrontStencilFunc]		= CF_AlwaysPass;
-		render_states_[RST_FrontStencilRef]			= 0;
-		render_states_[RST_FrontStencilMask]		= 0xFFFFFFFF;
-		render_states_[RST_FrontStencilFail]		= SOP_Keep;
-		render_states_[RST_FrontStencilDepthFail]	= SOP_Keep;
-		render_states_[RST_FrontStencilPass]		= SOP_Keep;
-		render_states_[RST_FrontStencilWriteMask]	= 0xFFFFFFFF;
-		render_states_[RST_BackStencilEnable]		= false;
-		render_states_[RST_BackStencilFunc]			= CF_AlwaysPass;
-		render_states_[RST_BackStencilRef]			= 0;
-		render_states_[RST_BackStencilMask]			= 0xFFFFFFFF;
-		render_states_[RST_BackStencilFail]			= SOP_Keep;
-		render_states_[RST_BackStencilDepthFail]	= SOP_Keep;
-		render_states_[RST_BackStencilPass]			= SOP_Keep;
-		render_states_[RST_BackStencilWriteMask]	= 0xFFFFFFFF;
-
-		render_states_[RST_ColorMask0] = 0xF;
-		render_states_[RST_ColorMask1] = 0xF;
-		render_states_[RST_ColorMask2] = 0xF;
-		render_states_[RST_ColorMask3] = 0xF;
-
-		for (size_t i = 0; i < RST_NUM_RENDER_STATES; ++ i)
-		{
-			dirty_render_states_[i] = false;
-		}
 	}
 
 	// Ë¢ÐÂäÖÈ¾×´Ì¬

@@ -141,16 +141,6 @@ namespace KlayGE
 		buffer_->Unlock();
 	}
 
-	void D3D9IndexBuffer::Active()
-	{
-		d3d_device_->SetIndices(buffer_.get());
-	}
-
-	void D3D9IndexBuffer::Deactive()
-	{
-		d3d_device_->SetIndices(NULL);
-	}
-
 	ID3D9IndexBufferPtr D3D9IndexBuffer::D3D9Buffer() const
 	{
 		return buffer_;

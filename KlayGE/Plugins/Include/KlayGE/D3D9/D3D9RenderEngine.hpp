@@ -91,7 +91,6 @@ namespace KlayGE
 		void DoRender(RenderLayout const & rl);
 		void DoFlushRenderStates();
 
-		void InitRenderStates();
 		void FillRenderDeviceCaps();
 
 		void DoRenderSWInstance(RenderLayout const & rl);
@@ -112,8 +111,7 @@ namespace KlayGE
 		// Enumerates itself
 		D3D9AdapterList adapterList_;
 
-		std::vector<D3D9VertexBufferPtr> active_vertex_streams_;
-		D3D9IndexBufferPtr active_index_stream_;
+		uint32_t last_num_vertex_stream_;
 
 		boost::function<void (RenderLayout const &)> RenderInstance;
 	};

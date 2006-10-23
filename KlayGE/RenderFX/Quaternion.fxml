@@ -1,8 +1,8 @@
 <?xml version='1.0'?>
 
 <effect>
-  <shader>
-    <![CDATA[
+	<shader>
+		<![CDATA[
 float4 conjugate_quat(float4 rhs)
 {
 	return float4(-rhs.x, -rhs.y, -rhs.z, rhs.w);
@@ -191,6 +191,6 @@ float4x4 quat_to_mat4(float4 quat)
 		c0.z + c2.y,		c1.y - c2.x,		1 - c0.x - c1.x,	0,
 		0,					0,					0,					1);
 }
-    ]]>
-  </shader>
+		]]>
+	</shader>
 </effect>

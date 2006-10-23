@@ -37,13 +37,6 @@ float4 MeshNoTexPS(float4 clr : COLOR0) : COLOR
 
 	<technique name="KMeshTec">
 		<pass name="p0">
-			<state name="polygon_mode" value="fill"/>
-			<state name="cull_mode" value="anti_clock_wise"/>
-			<state name="front_stencil_enable" value="false"/>
-			<state name="depth_enable" value="true"/>
-			<state name="depth_write_enable" value="true"/>
-			<state name="blend_enable" value="false"/>
-
 			<state name="vertex_shader" value="MeshVS()"/>
 			<state name="pixel_shader" value="MeshPS()"/>
 		</pass>
@@ -51,13 +44,6 @@ float4 MeshNoTexPS(float4 clr : COLOR0) : COLOR
 
 	<technique name="KMeshNoTexTec">
 		<pass name="p0">
-			<state name="polygon_mode" value="fill"/>
-			<state name="cull_mode" value="anti_clock_wise"/>
-			<state name="front_stencil_enable" value="false"/>
-			<state name="depth_enable" value="true"/>
-			<state name="depth_write_enable" value="true"/>
-			<state name="blend_enable" value="false"/>
-
 			<state name="vertex_shader" value="MeshVS()"/>
 			<state name="pixel_shader" value="MeshNoTexPS()"/>
 		</pass>

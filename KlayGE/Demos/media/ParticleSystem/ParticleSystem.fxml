@@ -82,9 +82,7 @@ float4 ParticlePS(float4 clr    : COLOR0,
 	
 	<technique name="Particle">
 		<pass name="p0">
-			<state name="polygon_mode" value="fill"/>
-			<state name="cull_mode" value="anti_clock_wise"/>
-			
+		
 			<state name="blend_enable" value="true"/>
 			<state name="src_blend" value="src_alpha"/>
 			<state name="dest_blend" value="inv_src_alpha"/>
@@ -128,11 +126,6 @@ float4 TerrainPS(float2 tex0 : TEXCOORD0,
 	
 	<technique name="Terrain">
 		<pass name="p0">
-			<state name="polygon_mode" value="fill"/>
-			<state name="cull_mode" value="anti_clock_wise"/>
-			
-			<state name="blend_enable" value="false"/>
-
 			<state name="vertex_shader" value="TerrainVS()"/>
 			<state name="pixel_shader" value="TerrainPS()"/>
 		</pass>
@@ -169,11 +162,6 @@ void CopyPS(float2 tex : TEXCOORD0,
 	
 	<technique name="Copy">
 		<pass name="p0">
-			<state name="polygon_mode" value="fill"/>
-			<state name="cull_mode" value="anti_clock_wise"/>
-			
-			<state name="blend_enable" value="false"/>
-
 			<state name="vertex_shader" value="CopyVS()"/>
 			<state name="pixel_shader" value="CopyPS()"/>
 		</pass>

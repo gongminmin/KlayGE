@@ -266,7 +266,7 @@ void Refract::InitObjects()
 
 	re.Clear(RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
-	this->LookAt(float3(-0.05f, -0.01f, -0.5f), float3(0, 0.05f, 0));
+	this->LookAt(float3(0.36f, 0.11f, -0.39f), float3(0, 0, 0));
 	this->Proj(0.05f, 100);
 
 	fpcController_.AttachCamera(this->ActiveCamera());
@@ -356,7 +356,7 @@ void Refract::DoUpdate(uint32_t pass)
 		re.BindRenderTarget(RenderTargetPtr());
 
 		std::wostringstream stream;
-		stream << this->FPS();
+		stream << this->FPS() << " FPS";
 
 		font_->RenderText(0, 0, Color(1, 1, 0, 1), L"HDR Refract");
 		font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());

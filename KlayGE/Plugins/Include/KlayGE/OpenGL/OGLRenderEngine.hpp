@@ -77,7 +77,6 @@ namespace KlayGE
 		void DoRender(RenderLayout const & rl);
 		void DoFlushRenderStates();
 
-		void InitRenderStates();
 		void FillRenderDeviceCaps();
 	};
 

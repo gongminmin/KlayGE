@@ -35,10 +35,6 @@ float4 PS(float4 clr : COLOR) : COLOR
 	
 	<technique name="Instance">
 		<pass name="p0">
-			<state name="polygon_mode" value="fill"/>
-			<state name="cull_mode" value="anti_clock_wise"/>
-			<state name="blend_enable" value="false"/>
-
 			<state name="vertex_shader" value="InstanceVS()"/>
 			<state name="pixel_shader" value="PS()"/>
 		</pass>
@@ -70,10 +66,6 @@ void NormalMeshVS(float4 pos			: POSITION,
 
 	<technique name="NormalMesh">
 		<pass name="p0">
-			<state name="polygon_mode" value="fill"/>
-			<state name="cull_mode" value="anti_clock_wise"/>
-			<state name="blend_enable" value="false"/>
-
 			<state name="vertex_shader" value="NormalMeshVS()"/>
 			<state name="pixel_shader" value="PS()"/>
 		</pass>

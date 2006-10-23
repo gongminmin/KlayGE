@@ -51,9 +51,6 @@ namespace KlayGE
 		void* Map(BufferAccess ba);
 		void Unmap();
 
-		void Active();
-		void Deactive();
-
 		ID3D9IndexBufferPtr D3D9Buffer() const;
 		void SwitchFormat(ElementFormat format);
 
@@ -80,9 +77,6 @@ namespace KlayGE
 
 		void* Map(BufferAccess ba);
 		void Unmap();
-
-		void Active(uint32_t stream, uint32_t stride);
-		void Deactive(uint32_t stream);
 
 		ID3D9VertexBufferPtr D3D9Buffer() const;
 

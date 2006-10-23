@@ -1,8 +1,8 @@
 <?xml version='1.0'?>
 
 <effect>
-  <shader>
-    <![CDATA[
+	<shader>
+		<![CDATA[
 float4 PointSpriteVertexExtend(float4 pos, float2 tex, float point_size,
 			float4x4 view, float4x4 proj,
 			float2 viewport_width_height,
@@ -24,6 +24,6 @@ float4 PointSpriteVertexExtend(float4 pos, float2 tex, float point_size,
 
 	return ret;
 }
-    ]]>
-  </shader>
+		]]>
+	</shader>
 </effect>

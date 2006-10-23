@@ -27,9 +27,6 @@ float4 AsciiArtsPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 
 	<technique name="AsciiArts">
 		<pass name="p0">
-			<state name="polygon_mode" value="fill"/>
-			<state name="cull_mode" value="anti_clock_wise"/>
-			<state name="blend_enable" value="false"/>
 			<state name="depth_enable" value="false"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
@@ -60,9 +57,6 @@ float4 Downsample8x8PS(float2 oTex : TEXCOORD0) : COLOR
 
 	<technique name="Downsample8x8">
 		<pass name="p0">
-			<state name="polygon_mode" value="fill"/>
-			<state name="cull_mode" value="anti_clock_wise"/>
-			<state name="blend_enable" value="false"/>
 			<state name="depth_enable" value="false"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>

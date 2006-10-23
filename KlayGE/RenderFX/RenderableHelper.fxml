@@ -23,7 +23,6 @@ float4 HelperPS() : COLOR0
 		<pass name="p0">
 			<state name="polygon_mode" value="point"/>
 			<state name="cull_mode" value="none"/>
-			<state name="depth_enable" value="true"/>
 
 			<state name="vertex_shader" value="HelperVS()"/>
 			<state name="pixel_shader" value="HelperPS()"/>
@@ -34,7 +33,6 @@ float4 HelperPS() : COLOR0
 		<pass name="p0">
 			<state name="polygon_mode" value="line"/>
 			<state name="cull_mode" value="none"/>
-			<state name="depth_enable" value="true"/>
 
 			<state name="vertex_shader" value="HelperVS()"/>
 			<state name="pixel_shader" value="HelperPS()"/>
@@ -45,7 +43,6 @@ float4 HelperPS() : COLOR0
 		<pass name="p0">
 			<state name="polygon_mode" value="line"/>
 			<state name="cull_mode" value="none"/>
-			<state name="depth_enable" value="true"/>
 
 			<state name="vertex_shader" value="HelperVS()"/>
 			<state name="pixel_shader" value="HelperPS()"/>
@@ -56,7 +53,6 @@ float4 HelperPS() : COLOR0
 		<pass name="p0">
 			<state name="polygon_mode" value="line"/>
 			<state name="cull_mode" value="none"/>
-			<state name="depth_enable" value="true"/>
 
 			<state name="vertex_shader" value="HelperVS()"/>
 			<state name="pixel_shader" value="HelperPS()"/>
@@ -87,7 +83,6 @@ float4 SkyBoxPS(float3 texCoord0 : TEXCOORD0) : COLOR
 		<pass name="p0">
 			<state name="polygon_mode" value="fill"/>
 			<state name="cull_mode" value="none"/>
-			<state name="depth_enable" value="true"/>
 
 			<state name="vertex_shader" value="SkyBoxVS()"/>
 			<state name="pixel_shader" value="SkyBoxPS()"/>

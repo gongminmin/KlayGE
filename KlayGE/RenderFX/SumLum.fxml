@@ -60,8 +60,6 @@ float4 AdaptedLumPS(float2 oTex : TEXCOORD0) : COLOR
 	
 	<technique name="SumLumLog">
 		<pass name="p0">
-			<state name="polygon_mode" value="fill"/>
-			<state name="cull_mode" value="anti_clock_wise"/>
 			<state name="depth_enable" value="false"/>
 
 			<state name="vertex_shader" value="SumLumVS()"/>
@@ -71,8 +69,6 @@ float4 AdaptedLumPS(float2 oTex : TEXCOORD0) : COLOR
 	
 	<technique name="SumLumIterative">
 		<pass name="p0">
-			<state name="polygon_mode" value="fill"/>
-			<state name="cull_mode" value="anti_clock_wise"/>
 			<state name="depth_enable" value="false"/>
 
 			<state name="vertex_shader" value="SumLumVS()"/>
@@ -82,8 +78,6 @@ float4 AdaptedLumPS(float2 oTex : TEXCOORD0) : COLOR
 	
 	<technique name="AdaptedLum">
 		<pass name="p0">
-			<state name="polygon_mode" value="fill"/>
-			<state name="cull_mode" value="anti_clock_wise"/>
 			<state name="depth_enable" value="false"/>
 
 			<state name="vertex_shader" value="SumLumVS()"/>
