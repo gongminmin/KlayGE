@@ -7,9 +7,22 @@
 	<parameter type="float3" name="light_pos"/>
 	<parameter type="float3" name="eye_pos"/>
 
-	<parameter type="sampler" name="diffuseMap"/>
-	<parameter type="sampler" name="normalMap"/>
-	<parameter type="sampler" name="distanceMap"/>
+	<parameter type="sampler" name="diffuseMap">
+		<state name="filtering" value="bilinear"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
+	<parameter type="sampler" name="normalMap">
+		<state name="filtering" value="bilinear"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
+	<parameter type="sampler" name="distanceMap">
+		<state name="filtering" value="bilinear"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+		<state name="address_w" value="clamp"/>
+	</parameter>
 
 	<shader>
 		<![CDATA[

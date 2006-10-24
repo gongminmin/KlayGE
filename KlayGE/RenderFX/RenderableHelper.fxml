@@ -60,7 +60,12 @@ float4 HelperPS() : COLOR0
 	</technique>
 
 	<parameter type="float4x4" name="inv_mvp"/>
-	<parameter type="sampler" name="skybox_cubeMapSampler"/>
+	<parameter type="sampler" name="skybox_cubeMapSampler">
+		<state name="filtering" value="bilinear"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+		<state name="address_w" value="clamp"/>
+	</parameter>
 
 	<shader>
 		<![CDATA[

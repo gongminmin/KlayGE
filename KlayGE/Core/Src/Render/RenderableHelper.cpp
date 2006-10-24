@@ -226,8 +226,7 @@ namespace KlayGE
 
 
 	RenderableSkyBox::RenderableSkyBox()
-		: RenderableHelper(L"SkyBox"),
-			cube_sampler_(new Sampler)
+		: RenderableHelper(L"SkyBox")
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -265,17 +264,11 @@ namespace KlayGE
 		rl_->BindIndexStream(ib, EF_R16);
 
 		box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[4]);
-
-		cube_sampler_->Filtering(Sampler::TFO_Bilinear);
-		cube_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-		cube_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
-		cube_sampler_->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
-		*(technique_->Effect().ParameterByName("skybox_cubeMapSampler")) = cube_sampler_;
 	}
 
 	void RenderableSkyBox::CubeMap(TexturePtr const & cube)
 	{
-		cube_sampler_->SetTexture(cube);
+		cube_tex_ = cube;
 	}
 
 	void RenderableSkyBox::OnRenderBegin()
@@ -288,6 +281,8 @@ namespace KlayGE
 		rot_view(3, 1) = 0;
 		rot_view(3, 2) = 0;
 		*(technique_->Effect().ParameterByName("inv_mvp")) = MathLib::inverse(rot_view * camera.ProjMatrix());
+
+		*(technique_->Effect().ParameterByName("skybox_cubeMapSampler")) = cube_tex_;
 	}
 
 	RenderablePlane::RenderablePlane(float length, float width,

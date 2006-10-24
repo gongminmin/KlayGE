@@ -121,7 +121,7 @@ namespace KlayGE
 		void OnRenderBegin();
 
 	protected:
-		SamplerPtr cube_sampler_;
+		TexturePtr cube_tex_;
 	};
 
 	class RenderablePlane : public RenderableHelper

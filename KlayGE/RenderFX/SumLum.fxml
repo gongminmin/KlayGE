@@ -1,10 +1,20 @@
 <?xml version='1.0'?>
 
 <effect>
-	<parameter type="sampler" name="src_sampler"/>
+	<parameter type="sampler" name="src_sampler">
+		<state name="filtering" value="bilinear"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
 	<parameter type="float4" name="tex_coord_offset" array_size="2"/>
 
-	<parameter type="sampler" name="last_lum_sampler"/>
+	<parameter type="sampler" name="last_lum_sampler">
+		<state name="filtering" value="point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
 	<parameter type="float" name="frame_delta"/>
 
 	<shader>

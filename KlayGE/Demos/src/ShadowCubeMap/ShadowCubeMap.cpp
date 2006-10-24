@@ -42,9 +42,7 @@ namespace
 	{
 	public:
 		ShadowMapped(uint32_t shadow_map_size)
-			: shadow_map_size_(shadow_map_size),
-				sm_sampler_(new Sampler),
-				lamp_sampler_(new Sampler)
+			: shadow_map_size_(shadow_map_size)
 		{
 		}
 
@@ -71,18 +69,12 @@ namespace
 
 		void ShadowMapTexture(TexturePtr tex)
 		{
-			sm_sampler_->SetTexture(tex);
-			sm_sampler_->Filtering(Sampler::TFO_Bilinear);
-			sm_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
-			sm_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
+			sm_tex_ = tex;
 		}
 
 		void LampTexture(TexturePtr tex)
 		{
-			lamp_sampler_->SetTexture(tex);
-			lamp_sampler_->Filtering(Sampler::TFO_Bilinear);
-			lamp_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
-			lamp_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
+			lamp_tex_ = tex;
 		}
 
 	protected:
@@ -105,8 +97,8 @@ namespace
 				*(effect->ParameterByName("model_view_proj")) = model * view * proj;
 				*(effect->ParameterByName("light_pos")) = light_pos_;
 
-				*(effect->ParameterByName("lamp_sampler")) = lamp_sampler_;
-				*(effect->ParameterByName("shadow_map_sampler")) = sm_sampler_;
+				*(effect->ParameterByName("lamp_sampler")) = lamp_tex_;
+				*(effect->ParameterByName("shadow_map_sampler")) = sm_tex_;
 			}
 		}
 
@@ -114,13 +106,13 @@ namespace
 		uint32_t shadow_map_size_;
 
 		bool gen_sm_pass_;
-		SamplerPtr sm_sampler_;
+		TexturePtr sm_tex_;
 
 		float3 light_pos_;
 		float4x4 inv_light_model_;
 		float4x4 light_view_, light_proj_;
 
-		SamplerPtr lamp_sampler_;
+		TexturePtr lamp_tex_;
 	};
 
 	class OccluderRenderable : public KMesh, public ShadowMapped

@@ -78,12 +78,11 @@ namespace
 	class FontRenderable : public RenderableHelper
 	{
 	public:
-		FontRenderable(std::string const & fontName, uint32_t fontHeight, uint32_t flags)
+		FontRenderable(std::string const & fontName, uint32_t fontHeight, uint32_t /*flags*/)
 			: RenderableHelper(L"Font"),
 				curX_(0), curY_(0),
 				three_dim_(false),
-				fontHeight_(fontHeight),
-				theSampler_(new Sampler)
+				fontHeight_(fontHeight)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -93,20 +92,9 @@ namespace
 			RenderDeviceCaps const & caps = renderEngine.DeviceCaps();
 			theTexture_ = rf.MakeTexture2D(caps.max_texture_width,
 				caps.max_texture_height, 1, TEX_FORMAT);
-			theSampler_->SetTexture(theTexture_);
-
-			// ÉèÖÃ¹ýÂËÊôÐÔ
-			if (flags & Font::FS_Filtered)
-			{
-				theSampler_->Filtering(Sampler::TFO_Bilinear);
-			}
-			else
-			{
-				theSampler_->Filtering(Sampler::TFO_Point);
-			}
 
 			effect_ = rf.LoadEffect("Font.kfx");
-			*(effect_->ParameterByName("texFontSampler")) = theSampler_;
+			*(effect_->ParameterByName("texFontSampler")) = theTexture_;
 
 			vb_ = rf.MakeVertexBuffer(BU_Dynamic);
 			rl_->BindVertexStream(vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
@@ -417,7 +405,6 @@ namespace
 		GraphicsBufferPtr ib_;
 
 		TexturePtr		theTexture_;
-		SamplerPtr		theSampler_;
 
 		::FT_Library	ftLib_;
 		::FT_Face		face_;

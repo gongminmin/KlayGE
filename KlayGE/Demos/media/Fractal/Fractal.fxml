@@ -1,7 +1,11 @@
 <?xml version='1.0'?>
 
 <effect>
-	<parameter type="sampler" name="fractal_sampler"/>
+	<parameter type="sampler" name="fractal_sampler">
+		<state name="filtering" value="point"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
 
 	<shader>
 		<![CDATA[

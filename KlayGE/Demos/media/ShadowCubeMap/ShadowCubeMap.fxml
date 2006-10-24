@@ -35,8 +35,16 @@ half4 GenShadowMapPS(half4 LightWorldPos : TEXCOORD0) : COLOR
 
 	<parameter type="float3" name="light_pos"/>
 
-	<parameter type="sampler" name="lamp_sampler"/>
-	<parameter type="sampler" name="shadow_map_sampler"/>
+	<parameter type="sampler" name="lamp_sampler">
+		<state name="filtering" value="bilinear"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
+	<parameter type="sampler" name="shadow_map_sampler">
+		<state name="filtering" value="bilinear"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
 
 	<shader>
 		<![CDATA[

@@ -41,16 +41,11 @@ namespace
 	{
 	public:
 		RenderTeapot(RenderModelPtr model, std::wstring const & /*name*/)
-			: KMesh(model, L"Teapot"),
-				video_sampler_(new Sampler)
+			: KMesh(model, L"Teapot")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			technique_ = rf.LoadEffect("VideoTexture.kfx")->TechniqueByName("Object");
-
-			video_sampler_->Filtering(Sampler::TFO_Bilinear);
-			video_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
-			video_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
 		}
 
 		void BuildMeshInfo()
@@ -65,16 +60,16 @@ namespace
 			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
 			*(technique_->Effect().ParameterByName("mvp")) = view * proj;
-			*(technique_->Effect().ParameterByName("video_sampler")) = video_sampler_;
+			*(technique_->Effect().ParameterByName("video_sampler")) = video_tex_;
 		}
 
 		void VideoTexture(TexturePtr video_tex)
 		{
-			video_sampler_->SetTexture(video_tex);
+			video_tex_ = video_tex;
 		}
 
 	private:
-		SamplerPtr video_sampler_;
+		TexturePtr video_tex_;
 	};
 
 	class TeapotObject : public SceneObjectHelper

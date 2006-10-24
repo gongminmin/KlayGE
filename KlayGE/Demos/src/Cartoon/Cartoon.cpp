@@ -39,22 +39,13 @@ namespace
 	{
 	public:
 		RenderTorus(RenderModelPtr model, std::wstring const & /*name*/)
-			: KMesh(model, L"Torus"),
-				toon_sampler_(new Sampler),
-				normal_depth_sampler_(new Sampler)
+			: KMesh(model, L"Torus")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			effect_ = rf.LoadEffect("Cartoon.kfx");
 
-			toon_sampler_->SetTexture(LoadTexture("toon.dds"));
-			toon_sampler_->Filtering(Sampler::TFO_Point);
-			toon_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-			normal_depth_sampler_->Filtering(Sampler::TFO_Point);
-			normal_depth_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-
-			*(effect_->ParameterByName("toonmap_sampler")) = toon_sampler_;
-			*(effect_->ParameterByName("normal_depth_sampler")) = normal_depth_sampler_;
+			toon_tex_ = LoadTexture("toon.dds");
 		}
 
 		void Pass(int i)
@@ -79,10 +70,7 @@ namespace
 
 		void UpdateTexture(TexturePtr const & normal_depth_tex)
 		{
-			normal_depth_sampler_->SetTexture(normal_depth_tex);
-
-			*(effect_->ParameterByName("inv_width")) = 2.0f / normal_depth_tex->Width(0);
-			*(effect_->ParameterByName("inv_height")) = 2.0f / normal_depth_tex->Height(0);
+			normal_depth_tex_ = normal_depth_tex;
 		}
 
 		void OnRenderBegin()
@@ -103,11 +91,20 @@ namespace
 			float const x_offset = texel_to_pixel.x() / re.CurRenderTarget()->Width();
 			float const y_offset = texel_to_pixel.y() / re.CurRenderTarget()->Height();
 			*(effect_->ParameterByName("offset")) = float2(x_offset, y_offset);
+
+			if (normal_depth_tex_)
+			{
+				*(effect_->ParameterByName("inv_width")) = 2.0f / normal_depth_tex_->Width(0);
+				*(effect_->ParameterByName("inv_height")) = 2.0f / normal_depth_tex_->Height(0);
+			}
+
+			*(effect_->ParameterByName("toonmap_sampler")) = toon_tex_;
+			*(effect_->ParameterByName("normal_depth_sampler")) = normal_depth_tex_;
 		}
 
 	private:
-		SamplerPtr toon_sampler_;
-		SamplerPtr normal_depth_sampler_;
+		TexturePtr toon_tex_;
+		TexturePtr normal_depth_tex_;
 
 		float4x4 model_mat_;
 

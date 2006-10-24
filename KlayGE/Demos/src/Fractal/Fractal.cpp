@@ -40,11 +40,6 @@ namespace
 
 			technique_ = rf.LoadEffect("Fractal.kfx")->TechniqueByName("Mandelbrot");
 
-			sampler_.reset(new Sampler);
-			sampler_->Filtering(Sampler::TFO_Point);
-			sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
-			sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
-
 			float4 const & offset = rf.RenderEngineInstance().TexelToPixelOffset();
 
 			float3 xyzs[] =
@@ -86,16 +81,16 @@ namespace
 
 		void OnRenderBegin()
 		{
-			*(technique_->Effect().ParameterByName("fractal_sampler")) = sampler_;
+			*(technique_->Effect().ParameterByName("fractal_sampler")) = tex_;
 		}
 
 		void SetTexture(TexturePtr texture)
 		{
-			sampler_->SetTexture(texture);
+			tex_ = texture;
 		}
 
 	private:
-		SamplerPtr sampler_;
+		TexturePtr tex_;
 	};
 
 	class RenderPlane : public RenderableHelper
@@ -107,11 +102,6 @@ namespace
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			technique_ = rf.LoadEffect("Fractal.kfx")->TechniqueByName("Show");
-
-			sampler_.reset(new Sampler);
-			sampler_->Filtering(Sampler::TFO_Point);
-			sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
-			sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
 
 			float3 xyzs[] =
 			{
@@ -152,16 +142,16 @@ namespace
 
 		void OnRenderBegin()
 		{
-			*(technique_->Effect().ParameterByName("fractal_sampler")) = sampler_;
+			*(technique_->Effect().ParameterByName("fractal_sampler")) = tex_;
 		}
 
 		void SetTexture(TexturePtr texture)
 		{
-			sampler_->SetTexture(texture);
+			tex_ = texture;
 		}
 
 	private:
-		SamplerPtr sampler_;
+		TexturePtr tex_;
 	};
 
 	bool ConfirmDevice(RenderDeviceCaps const & caps)

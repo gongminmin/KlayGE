@@ -53,13 +53,13 @@ namespace
 	{
 	public:
 		Downsampler8x8()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArts.kfx")->TechniqueByName("Downsample8x8"))
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Downsample8x8.kfx")->TechniqueByName("Downsample8x8"))
 		{
 		}
 
-		void Source(TexturePtr const & src_tex, Sampler::TexFilterOp filter, Sampler::TexAddressingMode am)
+		void Source(TexturePtr const & src_tex)
 		{
-			PostProcess::Source(src_tex, filter, am);
+			PostProcess::Source(src_tex);
 
 			this->GetSampleOffsets8x8(src_tex->Width(0), src_tex->Height(0));
 		}
@@ -103,22 +103,13 @@ namespace
 	{
 	public:
 		AsciiArts()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArts.kfx")->TechniqueByName("AsciiArts")),
-				lums_sampler_(new Sampler)
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArts.kfx")->TechniqueByName("AsciiArts"))
 		{
-			src_sampler_->Filtering(Sampler::TFO_Point);
-			src_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-			src_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
-			*(technique_->Effect().ParameterByName("src_sampler")) = src_sampler_;
-			lums_sampler_->Filtering(Sampler::TFO_Bilinear);
-			lums_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-			lums_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
-			*(technique_->Effect().ParameterByName("lums_sampler")) = lums_sampler_;
 		}
 
 		void SetLumsTex(TexturePtr const & lums_tex)
 		{
-			lums_sampler_->SetTexture(lums_tex);
+			lums_texture_ = lums_tex;
 		}
 
 		void OnRenderBegin()
@@ -131,10 +122,13 @@ namespace
 			*(technique_->Effect().ParameterByName("cell_per_row_line")) =
 				float2(static_cast<float>(CELL_WIDTH) / renderTarget.Width(),
 						static_cast<float>(CELL_HEIGHT) / renderTarget.Height());
+
+			*(technique_->Effect().ParameterByName("src_sampler")) = src_texture_;
+			*(technique_->Effect().ParameterByName("lums_sampler")) = lums_texture_;
 		}
 
 	private:
-		SamplerPtr lums_sampler_;
+		TexturePtr lums_texture_;
 	};
 
 	std::vector<ascii_tile_type> LoadFromTexture(std::string const & tex_name)
@@ -299,10 +293,10 @@ void AsciiArtsApp::OnResize(uint32_t width, uint32_t height)
 
 	FrameBufferPtr fb = rf.MakeFrameBuffer();
 	fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*downsample_tex_, 0));
-	downsampler_->Source(rendered_tex_, Sampler::TFO_Bilinear, Sampler::TAM_Clamp);
+	downsampler_->Source(rendered_tex_);
 	downsampler_->Destinate(fb);
 
-	ascii_arts_->Source(downsample_tex_, Sampler::TFO_Point, Sampler::TAM_Clamp);
+	ascii_arts_->Source(downsample_tex_);
 }
 
 uint32_t AsciiArtsApp::NumPasses() const

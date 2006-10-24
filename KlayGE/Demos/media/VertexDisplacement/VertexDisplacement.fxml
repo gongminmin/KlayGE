@@ -10,7 +10,11 @@
 	<parameter type="float" name="half_length"/>
 	<parameter type="float" name="half_width"/>
 
-	<parameter type="sampler" name="flagSampler"/>
+	<parameter type="sampler" name="flagSampler">
+		<state name="filtering" value="bilinear"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
 
 	<shader>
 		<![CDATA[

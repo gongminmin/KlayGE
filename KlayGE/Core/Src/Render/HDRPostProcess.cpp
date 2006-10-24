@@ -43,11 +43,11 @@ namespace KlayGE
 	{
 	}
 
-	void BlurPostProcess::Source(TexturePtr const & src_tex, Sampler::TexFilterOp filter, Sampler::TexAddressingMode am)
+	void BlurPostProcess::Source(TexturePtr const & src_tex)
 	{
-		PostProcess::Source(src_tex, filter, am);
+		PostProcess::Source(src_tex);
 
-		this->CalSampleOffsets(src_sampler_->GetTexture()->Width(0), 3);
+		this->CalSampleOffsets(src_texture_->Width(0), 3);
 	}
 
 	void BlurPostProcess::OnRenderBegin()
@@ -127,9 +127,9 @@ namespace KlayGE
 	{
 	}
 
-	void SumLumPostProcess::Source(TexturePtr const & src_tex, Sampler::TexFilterOp filter, Sampler::TexAddressingMode am)
+	void SumLumPostProcess::Source(TexturePtr const & src_tex)
 	{
-		PostProcess::Source(src_tex, filter, am);
+		PostProcess::Source(src_tex);
 
 		this->GetSampleOffsets4x4(src_tex->Width(0), src_tex->Height(0));
 	}
@@ -184,18 +184,13 @@ namespace KlayGE
 
 		for (int i = 0; i < 2; ++ i)
 		{
-			adapted_samplers_[i].reset(new Sampler);
-			adapted_samplers_[i]->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-			adapted_samplers_[i]->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
-			adapted_samplers_[i]->Filtering(Sampler::TFO_Point);
-
 			TexturePtr tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(1, 1, 1, EF_R32F);
 			float data = 0;
 			tex->CopyMemoryToTexture2D(0, &data, EF_R32F, 1, 1, 0, 0, 1, 1);
-			adapted_samplers_[i]->SetTexture(tex);
+			adapted_textures_[i] = tex;
 
 			fb_[i] = rf.MakeFrameBuffer();
-			fb_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*adapted_samplers_[i]->GetTexture(), 0));
+			fb_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*adapted_textures_[i], 0));
 		}
 
 		this->Destinate(fb_[last_index_]);
@@ -212,7 +207,7 @@ namespace KlayGE
 	{
 		PostProcess::OnRenderBegin();
 
-		*(technique_->Effect().ParameterByName("last_lum_sampler")) = adapted_samplers_[last_index_];
+		*(technique_->Effect().ParameterByName("last_lum_sampler")) = adapted_textures_[last_index_];
 		*(technique_->Effect().ParameterByName("frame_delta")) = float(timer_.elapsed());
 		timer_.restart();
 
@@ -221,22 +216,13 @@ namespace KlayGE
 
 	TexturePtr AdaptedLumPostProcess::AdaptedLum() const
 	{
-		return adapted_samplers_[last_index_]->GetTexture();
+		return adapted_textures_[last_index_];
 	}
 
 
 	ToneMappingPostProcess::ToneMappingPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("ToneMapping.kfx")->TechniqueByName("ToneMapping20")),
-				lum_sampler_(new Sampler), bloom_sampler_(new Sampler)
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("ToneMapping.kfx")->TechniqueByName("ToneMapping20"))
 	{
-		lum_sampler_->Filtering(Sampler::TFO_Point);
-		lum_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-		lum_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
-
-		bloom_sampler_->Filtering(Sampler::TFO_Bilinear);
-		bloom_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-		bloom_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
-
 		RenderEffect& effect = technique_->Effect();
 		if (effect.TechniqueByName("ToneMapping30")->Validate())
 		{
@@ -246,16 +232,16 @@ namespace KlayGE
 
 	void ToneMappingPostProcess::SetTexture(TexturePtr const & lum_tex, TexturePtr const & bloom_tex)
 	{
-		lum_sampler_->SetTexture(lum_tex);
-		bloom_sampler_->SetTexture(bloom_tex);
+		lum_texture_ = lum_tex;
+		bloom_texture_ = bloom_tex;
 	}
 
 	void ToneMappingPostProcess::OnRenderBegin()
 	{
 		PostProcess::OnRenderBegin();
 
-		*(technique_->Effect().ParameterByName("lum_sampler")) = lum_sampler_;
-		*(technique_->Effect().ParameterByName("bloom_sampler")) = bloom_sampler_;
+		*(technique_->Effect().ParameterByName("lum_sampler")) = lum_texture_;
+		*(technique_->Effect().ParameterByName("bloom_sampler")) = bloom_texture_;
 	}
 
 
@@ -275,9 +261,9 @@ namespace KlayGE
 		adapted_lum_.reset(new AdaptedLumPostProcess);
 	}
 
-	void HDRPostProcess::Source(TexturePtr const & tex, Sampler::TexFilterOp filter, Sampler::TexAddressingMode am)
+	void HDRPostProcess::Source(TexturePtr const & tex)
 	{
-		PostProcess::Source(tex, filter, am);
+		PostProcess::Source(tex);
 
 		uint32_t const width = tex->Width(0);
 		uint32_t const height = tex->Height(0);
@@ -300,43 +286,43 @@ namespace KlayGE
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*downsample_tex_, 0));
-			downsampler_->Source(src_sampler_->GetTexture(), Sampler::TFO_Bilinear, am);
+			downsampler_->Source(src_texture_);
 			downsampler_->Destinate(fb);
 		}
 
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blurx_tex_, 0));
-			blur_x_->Source(downsample_tex_, Sampler::TFO_Bilinear, Sampler::TAM_Clamp);
+			blur_x_->Source(downsample_tex_);
 			blur_x_->Destinate(fb);
 		}
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blury_tex_, 0));
-			blur_y_->Source(blurx_tex_, Sampler::TFO_Bilinear, Sampler::TAM_Clamp);
+			blur_y_->Source(blurx_tex_);
 			blur_y_->Destinate(fb);
 		}
 
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[0], 0));
-			sum_lums_[0]->Source(src_sampler_->GetTexture(), Sampler::TFO_Bilinear, am);
+			sum_lums_[0]->Source(src_texture_);
 			sum_lums_[0]->Destinate(fb);
 		}
 		for (int i = 1; i < NUM_TONEMAP_TEXTURES + 1; ++ i)
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[i], 0));
-			sum_lums_[i]->Source(lum_texs_[i - 1], Sampler::TFO_Bilinear, Sampler::TAM_Clamp);
+			sum_lums_[i]->Source(lum_texs_[i - 1]);
 			sum_lums_[i]->Destinate(fb);
 		}
 
 		{
-			adapted_lum_->Source(lum_texs_[NUM_TONEMAP_TEXTURES], Sampler::TFO_Point, Sampler::TAM_Clamp);
+			adapted_lum_->Source(lum_texs_[NUM_TONEMAP_TEXTURES]);
 		}
 
 		{
-			tone_mapping_->Source(src_sampler_->GetTexture(), Sampler::TFO_Bilinear, am);
+			tone_mapping_->Source(src_texture_);
 			tone_mapping_->Destinate(render_target_);
 		}
 	}

@@ -60,27 +60,9 @@ namespace
 				technique_ = effect->TechniqueByName("DistanceMapping30");
 			}
 
-			SamplerPtr diffuse_sampler(new Sampler);
-			diffuse_sampler->SetTexture(LoadTexture("diffuse.dds"));
-			diffuse_sampler->Filtering(Sampler::TFO_Bilinear);
-			diffuse_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
-			diffuse_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
-			*(technique_->Effect().ParameterByName("diffuseMap")) = diffuse_sampler;
-
-			SamplerPtr normal_sampler(new Sampler);
-			normal_sampler->SetTexture(LoadTexture("normal.dds"));
-			normal_sampler->Filtering(Sampler::TFO_Bilinear);
-			normal_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
-			normal_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
-			*(technique_->Effect().ParameterByName("normalMap")) = normal_sampler;
-
-			SamplerPtr distance_sampler(new Sampler);
-			distance_sampler->SetTexture(LoadTexture("distance.dds"));
-			distance_sampler->Filtering(Sampler::TFO_Bilinear);
-			distance_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
-			distance_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
-			distance_sampler->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
-			*(technique_->Effect().ParameterByName("distanceMap")) = distance_sampler;
+			diffuse_tex_ = LoadTexture("diffuse.dds");
+			normal_tex_ = LoadTexture("normal.dds");
+			distance_tex_ = LoadTexture("distance.dds");
 
 			float3 xyzs[] =
 			{
@@ -172,7 +154,14 @@ namespace
 			float4x4 matRot(MathLib::rotation_z(degree));
 			lightPos = MathLib::transform_coord(lightPos, matRot);
 			*(technique_->Effect().ParameterByName("light_pos")) = lightPos;
+
+			*(technique_->Effect().ParameterByName("diffuseMap")) = diffuse_tex_;
+			*(technique_->Effect().ParameterByName("normalMap")) = normal_tex_;
+			*(technique_->Effect().ParameterByName("distanceMap")) = distance_tex_;
 		}
+
+	private:
+		TexturePtr diffuse_tex_, normal_tex_, distance_tex_;
 	};
 
 	class PolygonObject : public SceneObjectHelper

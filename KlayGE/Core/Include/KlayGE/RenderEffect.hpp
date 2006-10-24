@@ -110,16 +110,16 @@ namespace KlayGE
 		std::vector<std::string> types_;
 	};
 
-	class states_define
+	class render_states_define
 	{
 	public:
-		static states_define& instance();
+		static render_states_define& instance();
 
 		RenderEngine::RenderStateType state_code(std::string const & name) const;
 		std::string const & state_name(uint32_t code) const;
 
 	private:
-		states_define();
+		render_states_define();
 
 	private:
 		std::vector<std::pair<std::string, std::string> > states_;
@@ -505,7 +505,7 @@ namespace KlayGE
 		virtual RenderEffectParameter& operator=(float3 const & value);
 		virtual RenderEffectParameter& operator=(float4 const & value);
 		virtual RenderEffectParameter& operator=(float4x4 const & value);
-		virtual RenderEffectParameter& operator=(SamplerPtr const & value);
+		virtual RenderEffectParameter& operator=(TexturePtr const & value);
 		virtual RenderEffectParameter& operator=(std::vector<bool> const & value);
 		virtual RenderEffectParameter& operator=(std::vector<int> const & value);
 		virtual RenderEffectParameter& operator=(std::vector<float> const & value);

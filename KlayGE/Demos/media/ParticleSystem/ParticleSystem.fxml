@@ -18,8 +18,16 @@
 	<parameter type="float" name="inv_depth_range"/>
 
 	<parameter type="float2" name="offset"/>
-	<parameter type="sampler" name="particle_sampler"/>
-	<parameter type="sampler" name="scene_sampler"/>
+	<parameter type="sampler" name="particle_sampler">
+		<state name="filtering" value="bilinear"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
+	<parameter type="sampler" name="scene_sampler">
+		<state name="filtering" value="point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
 
 	<shader>
 		<![CDATA[
@@ -68,7 +76,7 @@ float4 ParticlePS(float4 clr    : COLOR0,
 		float dir = lerp(lerp(upper_left.z, upper_right.z, tex_coord.x),
 							lerp(lower_left.z, lower_right.z, tex_coord.x),
 							tex_coord.y);
-
+							
 		float3 intersect = (v - sqrt(disc)) * view_dir;
 		clr *= tex2D(particle_sampler, (intersect.xy - CenterView.xy) / point_radius / 2 + 0.5);
 		clr.a *= saturate((dir * depth - intersect.z) * 5);
@@ -93,7 +101,11 @@ float4 ParticlePS(float4 clr    : COLOR0,
 	</technique>
 
 	<parameter type="float3" name="LightPos" x="0" y="10" z="3"/>
-	<parameter type="sampler" name="grass_sampler"/>
+	<parameter type="sampler" name="grass_sampler">
+		<state name="filtering" value="bilinear"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
 
 	<shader>
 		<![CDATA[
@@ -131,8 +143,12 @@ float4 TerrainPS(float2 tex0 : TEXCOORD0,
 		</pass>
 	</technique>
 
-	<parameter type="sampler" name="src_sampler"/>
-
+	<parameter type="sampler" name="src_sampler">
+		<state name="filtering" value="point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+	
 	<shader>
 		<![CDATA[
 void CopyVS(float4 pos : POSITION,

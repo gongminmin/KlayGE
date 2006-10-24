@@ -37,8 +37,15 @@ half4 NormalDepthPS(float3 normal : TEXCOORD0, float2 depth : TEXCOORD1) : COLOR
 	<parameter type="float" name="inv_height"/>
 	<parameter type="float2" name="offset"/>
 
-	<parameter type="sampler" name="toonmap_sampler"/>
-	<parameter type="sampler" name="normal_depth_sampler"/>
+	<parameter type="sampler" name="toonmap_sampler">
+		<state name="filtering" value="point"/>
+		<state name="address_u" value="clamp"/>
+	</parameter>
+	<parameter type="sampler" name="normal_depth_sampler">
+		<state name="filtering" value="point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
 
 	<parameter type="float2" name="e_barrier" x="0.8" y="0.1"/>
 	<parameter type="float2" name="e_weights" x="0.25" y="0.5"/>

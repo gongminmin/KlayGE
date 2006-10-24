@@ -56,7 +56,6 @@ namespace KlayGE
 {
 	KMesh::KMesh(RenderModelPtr model, std::wstring const & name)
 						: StaticMesh(model, name),
-							sampler_(new Sampler),
 							model_(float4x4::Identity())
 	{
 		// ÔØÈëfx
@@ -79,21 +78,14 @@ namespace KlayGE
 
 	void KMesh::BuildMeshInfo()
 	{
-		TexturePtr tex;
 		if (!texture_slots_.empty())
 		{
-			tex = LoadTexture(texture_slots_[0].second);
+			tex_ = LoadTexture(texture_slots_[0].second);
 		}
 
-		if (tex)
+		if (tex_)
 		{
 			technique_ = technique_->Effect().TechniqueByName("KMeshTec");
-
-			sampler_->SetTexture(tex);
-			sampler_->Filtering(Sampler::TFO_Bilinear);
-			sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-			sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
-			*(technique_->Effect().ParameterByName("texSampler")) = sampler_;
 		}
 		else
 		{
@@ -108,6 +100,8 @@ namespace KlayGE
 
 		*(technique_->Effect().ParameterByName("modelviewproj")) = model_ * camera.ViewMatrix() * camera.ProjMatrix();
 		*(technique_->Effect().ParameterByName("modelIT")) = MathLib::transpose(MathLib::inverse(model_));
+
+		*(technique_->Effect().ParameterByName("texSampler")) = tex_;
 	}
 
 	void KMesh::SetModelMatrix(float4x4 const & model)

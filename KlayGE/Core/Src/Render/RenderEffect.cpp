@@ -33,6 +33,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Context.hpp>
+#include <KlayGE/Sampler.hpp>
 
 #include <KlayGE/RenderEffect.hpp>
 
@@ -80,12 +81,44 @@ namespace
 			break;
 
 		case type_define::TC_string:
-			var.reset(new RenderVariableString);
-			*var = read_short_string(source);
+			{
+				var.reset(new RenderVariableString);
+				*var = read_short_string(source);
+			}
 			break;
 
 		case type_define::TC_sampler:
-			var.reset(new RenderVariableSampler);
+			{
+				var.reset(new RenderVariableSampler);
+				SamplerPtr s(new Sampler);
+
+				uint32_t tmp_int;
+				source->read(reinterpret_cast<char*>(&tmp_int), sizeof(tmp_int));
+				s->Filtering(static_cast<Sampler::TexFilterOp>(tmp_int));
+
+				source->read(reinterpret_cast<char*>(&tmp_int), sizeof(tmp_int));
+				s->AddressingMode(Sampler::TAT_Addr_U, static_cast<Sampler::TexAddressingMode>(tmp_int));
+				source->read(reinterpret_cast<char*>(&tmp_int), sizeof(tmp_int));
+				s->AddressingMode(Sampler::TAT_Addr_V, static_cast<Sampler::TexAddressingMode>(tmp_int));
+				source->read(reinterpret_cast<char*>(&tmp_int), sizeof(tmp_int));
+				s->AddressingMode(Sampler::TAT_Addr_W, static_cast<Sampler::TexAddressingMode>(tmp_int));
+
+				source->read(reinterpret_cast<char*>(&tmp_int), sizeof(tmp_int));
+				s->Anisotropy(tmp_int);
+
+				source->read(reinterpret_cast<char*>(&tmp_int), sizeof(tmp_int));
+				s->MaxMipLevel(tmp_int);
+
+				float tmp_float;
+				source->read(reinterpret_cast<char*>(&tmp_float), sizeof(tmp_float));
+				s->MipMapLodBias(tmp_float);
+
+				Color border_clr;
+				source->read(reinterpret_cast<char*>(&border_clr), sizeof(border_clr));
+				s->BorderColor(border_clr);
+				
+				*var = s;
+			}
 			break;
 
 		case type_define::TC_shader:
@@ -234,7 +267,7 @@ namespace KlayGE
 		return "";
 	}
 
-	states_define::states_define()
+	render_states_define::render_states_define()
 	{
 		states_.push_back(std::make_pair("polygon_mode", "int"));
 		states_.push_back(std::make_pair("shade_mode", "int"));
@@ -283,13 +316,13 @@ namespace KlayGE
 		states_.push_back(std::make_pair("vertex_shader", "shader"));
 	}
 
-	states_define& states_define::instance()
+	render_states_define& render_states_define::instance()
 	{
-		static states_define ret;
+		static render_states_define ret;
 		return ret;
 	}
 
-	RenderEngine::RenderStateType states_define::state_code(std::string const & name) const
+	RenderEngine::RenderStateType render_states_define::state_code(std::string const & name) const
 	{
 		for (std::vector<std::pair<std::string, std::string> >::const_iterator iter = states_.begin();
 			iter != states_.end(); ++ iter)
@@ -304,7 +337,7 @@ namespace KlayGE
 		return static_cast<RenderEngine::RenderStateType>(0xFFFFFFFF);
 	}
 
-	std::string const & states_define::state_name(uint32_t code) const
+	std::string const & render_states_define::state_name(uint32_t code) const
 	{
 		if (code < states_.size())
 		{
@@ -829,9 +862,13 @@ namespace KlayGE
 		return *this;
 	}
 
-	RenderEffectParameter& RenderEffectParameter::operator=(SamplerPtr const & value)
+	RenderEffectParameter& RenderEffectParameter::operator=(TexturePtr const & value)
 	{
-		*var_ = value;
+		SamplerPtr s;
+		var_->Value(s);
+		BOOST_ASSERT(s);
+
+		s->SetTexture(value);
 		return *this;
 	}
 
@@ -943,7 +980,7 @@ namespace KlayGE
 	void RenderEffectState::Load(ResIdentifierPtr const & source)
 	{
 		source->read(reinterpret_cast<char*>(&type_), sizeof(type_));
-		state_ = states_define::instance().state_code(read_short_string(source));
+		state_ = render_states_define::instance().state_code(read_short_string(source));
 		var_ = read_var(source, type_, 0);
 	}
 

@@ -29,7 +29,7 @@ public:
 private:
 	KlayGE::float4x4 world_;
 
-	KlayGE::SamplerPtr diffuse_map_, normal_map_, specular_map_;
+	KlayGE::TexturePtr diffuse_map_, normal_map_, specular_map_;
 
 	KlayGE::float3 eye_pos_;
 };

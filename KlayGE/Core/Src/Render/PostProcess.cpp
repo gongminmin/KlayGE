@@ -24,8 +24,7 @@
 namespace KlayGE
 {
 	PostProcess::PostProcess(KlayGE::RenderTechniquePtr tech)
-			: RenderableHelper(L"PostProcess"),
-				src_sampler_(new Sampler)
+			: RenderableHelper(L"PostProcess")
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -66,17 +65,11 @@ namespace KlayGE
 		rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 
 		technique_ = tech;
-
-		src_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-		src_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
 	}
 
-	void PostProcess::Source(TexturePtr const & tex, Sampler::TexFilterOp filter, Sampler::TexAddressingMode am)
+	void PostProcess::Source(TexturePtr const & tex)
 	{
-		src_sampler_->Filtering(filter);
-		src_sampler_->SetTexture(tex);
-		src_sampler_->AddressingMode(Sampler::TAT_Addr_U, am);
-		src_sampler_->AddressingMode(Sampler::TAT_Addr_V, am);
+		src_texture_ = tex;
 	}
 
 	void PostProcess::Destinate(RenderTargetPtr const & rt)
@@ -122,6 +115,6 @@ namespace KlayGE
 
 	void PostProcess::OnRenderBegin()
 	{
-		*(technique_->Effect().ParameterByName("src_sampler")) = src_sampler_;
+		*(technique_->Effect().ParameterByName("src_sampler")) = src_texture_;
 	}
 }

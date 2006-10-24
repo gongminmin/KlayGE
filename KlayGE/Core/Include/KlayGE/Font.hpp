@@ -61,8 +61,7 @@ namespace KlayGE
 			FS_Strikeout	= 1UL << 3,
 
 			FS_TwoSided		= 1UL << 4,
-			FS_Filtered		= 1UL << 5,
-			FS_Cullable		= 1UL << 6,
+			FS_Cullable		= 1UL << 5,
 		};
 
 	public:

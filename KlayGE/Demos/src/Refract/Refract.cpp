@@ -40,33 +40,28 @@ namespace
 	{
 	public:
 		HDRSkyBox()
-			: y_sampler_(new Sampler), c_sampler_(new Sampler)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			technique_ = rf.LoadEffect("HDRSkyBox.kfx")->TechniqueByName("HDRSkyBoxTec");
-
-			y_sampler_->Filtering(Sampler::TFO_Bilinear);
-			y_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-			y_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
-			y_sampler_->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
-			*(technique_->Effect().ParameterByName("skybox_YcubeMapSampler")) = y_sampler_;
-
-			c_sampler_->Filtering(Sampler::TFO_Bilinear);
-			c_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-			c_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
-			c_sampler_->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
-			*(technique_->Effect().ParameterByName("skybox_CcubeMapSampler")) = c_sampler_;
 		}
 
 		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)
 		{
-			y_sampler_->SetTexture(y_cube);
-			c_sampler_->SetTexture(c_cube);
+			y_tex_ = y_cube;
+			c_tex_ = c_cube;
+		}
+
+		void OnRenderBegin()
+		{
+			RenderableSkyBox::OnRenderBegin();
+
+			*(technique_->Effect().ParameterByName("skybox_cubeMapSampler")) = y_tex_;
+			*(technique_->Effect().ParameterByName("skybox_CcubeMapSampler")) = c_tex_;
 		}
 
 	private:
-		SamplerPtr y_sampler_;
-		SamplerPtr c_sampler_;
+		TexturePtr y_tex_;
+		TexturePtr c_tex_;
 	};
 
 	class HDRSceneObjectSkyBox : public SceneObjectSkyBox
@@ -87,9 +82,7 @@ namespace
 	{
 	public:
 		RefractorRenderable(RenderModelPtr model, std::wstring const & /*name*/)
-			: KMesh(model, L"Refractor"),
-				y_sampler_(new Sampler), c_sampler_(new Sampler),
-				bf_sampler_(new Sampler)
+			: KMesh(model, L"Refractor")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -98,23 +91,6 @@ namespace
 			back_face_tech_ = effect->TechniqueByName("RefractBackFace");
 
 			technique_ = back_face_tech_;
-
-			y_sampler_->Filtering(Sampler::TFO_Bilinear);
-			y_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-			y_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
-			y_sampler_->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
-			*(technique_->Effect().ParameterByName("skybox_YcubeMapSampler")) = y_sampler_;
-
-			c_sampler_->Filtering(Sampler::TFO_Bilinear);
-			c_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-			c_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
-			c_sampler_->AddressingMode(Sampler::TAT_Addr_W, Sampler::TAM_Clamp);
-			*(technique_->Effect().ParameterByName("skybox_CcubeMapSampler")) = c_sampler_;
-
-			bf_sampler_->Filtering(Sampler::TFO_Bilinear);
-			bf_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-			bf_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
-			*(technique_->Effect().ParameterByName("BackFace_Sampler")) = bf_sampler_;
 		}
 
 		void BuildMeshInfo()
@@ -141,13 +117,13 @@ namespace
 
 		void BackFaceTexture(TexturePtr const & bf_tex)
 		{
-			bf_sampler_->SetTexture(bf_tex);
+			bf_tex_ = bf_tex;
 		}
 
 		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)
 		{
-			y_sampler_->SetTexture(y_cube);
-			c_sampler_->SetTexture(c_cube);
+			y_tex_ = y_cube;
+			c_tex_ = c_cube;
 		}
 
 		void OnRenderBegin()
@@ -170,13 +146,17 @@ namespace
 			*(technique_->Effect().ParameterByName("inv_vp")) = MathLib::inverse(view * proj);
 
 			*(technique_->Effect().ParameterByName("eta_ratio")) = float3(1 / 1.1f, 1 / 1.1f - 0.003f, 1 / 1.1f - 0.006f);
+
+			*(technique_->Effect().ParameterByName("skybox_YcubeMapSampler")) = y_tex_;
+			*(technique_->Effect().ParameterByName("skybox_CcubeMapSampler")) = c_tex_;
+			*(technique_->Effect().ParameterByName("BackFace_Sampler")) = bf_tex_;
 		}
 
 	private:
-		SamplerPtr y_sampler_;
-		SamplerPtr c_sampler_;
+		TexturePtr y_tex_;
+		TexturePtr c_tex_;
 
-		SamplerPtr bf_sampler_;
+		TexturePtr bf_tex_;
 
 		RenderTechniquePtr back_face_tech_;
 		RenderTechniquePtr front_face_tech_;
@@ -301,7 +281,7 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 	hdr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0));
 	hdr_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));
 
-	hdr_->Source(hdr_tex_, Sampler::TFO_Bilinear, Sampler::TAM_Clamp);
+	hdr_->Source(hdr_tex_);
 }
 
 void Refract::InputHandler(InputEngine const & /*sender*/, InputAction const & action)

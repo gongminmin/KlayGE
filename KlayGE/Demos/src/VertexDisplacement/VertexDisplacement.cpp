@@ -45,12 +45,7 @@ namespace
 
 			technique_ = rf.LoadEffect("VertexDisplacement.kfx")->TechniqueByName("VertexDisplacement");
 
-			SamplerPtr flag_sampler(new Sampler);
-			flag_sampler->SetTexture(LoadTexture("Flag.dds"));
-			flag_sampler->Filtering(Sampler::TFO_Bilinear);
-			flag_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-			flag_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
-			*(technique_->Effect().ParameterByName("flagSampler")) = flag_sampler;
+			flag_tex_ = LoadTexture("Flag.dds");
 		}
 
 		void OnRenderBegin()
@@ -71,7 +66,12 @@ namespace
 			*(technique_->Effect().ParameterByName("proj")) = proj;
 
 			*(technique_->Effect().ParameterByName("modelviewIT")) = MathLib::transpose(MathLib::inverse(modelView));
+
+			*(technique_->Effect().ParameterByName("flagSampler")) = flag_tex_;
 		}
+
+	private:
+		TexturePtr flag_tex_;
 	};
 
 	class FlagObject : public SceneObjectHelper

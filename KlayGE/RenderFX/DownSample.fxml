@@ -1,7 +1,11 @@
 <?xml version='1.0'?>
 
 <effect>
-	<parameter type="sampler" name="src_sampler"/>
+	<parameter type="sampler" name="src_sampler">
+		<state name="filtering" value="bilinear"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
 
 	<shader>
 		<![CDATA[

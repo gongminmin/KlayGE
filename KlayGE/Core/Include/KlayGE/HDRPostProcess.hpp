@@ -33,7 +33,7 @@ namespace KlayGE
 		BlurPostProcess(std::string const & tech, int kernel_radius, float multiplier);
 		virtual ~BlurPostProcess();
 
-		void Source(TexturePtr const & src_tex, Sampler::TexFilterOp filter, Sampler::TexAddressingMode am);
+		void Source(TexturePtr const & src_tex);
 
 		void OnRenderBegin();
 
@@ -67,7 +67,7 @@ namespace KlayGE
 		explicit SumLumPostProcess(std::string const & tech);
 		virtual ~SumLumPostProcess();
 
-		void Source(TexturePtr const & src_tex, Sampler::TexFilterOp filter, Sampler::TexAddressingMode am);
+		void Source(TexturePtr const & src_tex);
 
 		void OnRenderBegin();
 
@@ -102,7 +102,7 @@ namespace KlayGE
 
 	private:
 		FrameBufferPtr fb_[2];
-		SamplerPtr adapted_samplers_[2];
+		TexturePtr adapted_textures_[2];
 		bool last_index_;
 
 		Timer timer_;
@@ -118,8 +118,8 @@ namespace KlayGE
 		void OnRenderBegin();
 
 	private:
-		SamplerPtr lum_sampler_;
-		SamplerPtr bloom_sampler_;
+		TexturePtr lum_texture_;
+		TexturePtr bloom_texture_;
 	};
 
 
@@ -133,7 +133,7 @@ namespace KlayGE
 	public:
 		HDRPostProcess();
 
-		void Source(TexturePtr const & tex, Sampler::TexFilterOp filter, Sampler::TexAddressingMode am);
+		void Source(TexturePtr const & tex);
 		void Apply();
 
 	private:

@@ -92,8 +92,7 @@ namespace
 	{
 	public:
 		TerrainRenderable(std::vector<float3> const & vertices, std::vector<uint16_t> const & indices)
-			: RenderableHelper(L"Terrain"),
-				grass_sampler_(new Sampler)
+			: RenderableHelper(L"Terrain")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -132,10 +131,7 @@ namespace
 
 			box_ = MathLib::compute_bounding_box<float>(&vertices[0], &vertices[0] + vertices.size());
 
-			grass_sampler_->SetTexture(LoadTexture("grass.dds"));
-			grass_sampler_->Filtering(Sampler::TFO_Bilinear);
-			grass_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
-			grass_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
+			grass_tex_ = LoadTexture("grass.dds");
 		}
 
 		void OnRenderBegin()
@@ -148,13 +144,13 @@ namespace
 			*(technique_->Effect().ParameterByName("View")) = view;
 			*(technique_->Effect().ParameterByName("Proj")) = proj;
 
-			*(technique_->Effect().ParameterByName("grass_sampler")) = grass_sampler_;
+			*(technique_->Effect().ParameterByName("grass_sampler")) = grass_tex_;
 		}
 
 	private:
 		float4x4 model_;
 
-		SamplerPtr grass_sampler_;
+		TexturePtr grass_tex_;
 	};
 
 	class TerrainObject : public SceneObjectHelper
@@ -203,9 +199,7 @@ namespace
 	{
 	public:
 		RenderParticle()
-			: RenderableHelper(L"Particle"),
-				particle_sampler_(new Sampler),
-				scene_sampler_(new Sampler)
+			: RenderableHelper(L"Particle")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -240,25 +234,18 @@ namespace
 
 			technique_ = rf.LoadEffect("ParticleSystem.kfx")->TechniqueByName("Particle");
 
-			particle_sampler_->SetTexture(LoadTexture("particle.dds"));
-			particle_sampler_->Filtering(Sampler::TFO_Bilinear);
-			particle_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
-			particle_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
-
-			scene_sampler_->Filtering(Sampler::TFO_Point);
-			scene_sampler_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-			scene_sampler_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
+			particle_tex_ = LoadTexture("particle.dds");
 		}
 
 		void SceneTexture(TexturePtr tex)
 		{
-			scene_sampler_->SetTexture(tex);
+			scene_tex_ = tex;
 		}
 
 		void OnRenderBegin()
 		{
-			*(technique_->Effect().ParameterByName("particle_sampler")) = particle_sampler_;
-			*(technique_->Effect().ParameterByName("scene_sampler")) = scene_sampler_;
+			*(technique_->Effect().ParameterByName("particle_sampler")) = particle_tex_;
+			*(technique_->Effect().ParameterByName("scene_sampler")) = scene_tex_;
 
 			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 
@@ -290,8 +277,8 @@ namespace
 		}
 
 	private:
-		SamplerPtr particle_sampler_;
-		SamplerPtr scene_sampler_; 
+		TexturePtr particle_tex_;
+		TexturePtr scene_tex_; 
 	};
 
 	class CopyPostProcess : public PostProcess
@@ -416,7 +403,7 @@ void ParticleSystemApp::OnResize(uint32_t width, uint32_t height)
 
 	checked_pointer_cast<RenderParticle>(renderInstance_)->SceneTexture(scene_tex_);
 
-	copy_pp_->Source(scene_tex_, Sampler::TFO_Point, Sampler::TAM_Clamp);
+	copy_pp_->Source(scene_tex_);
 }
 
 void ParticleSystemApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)

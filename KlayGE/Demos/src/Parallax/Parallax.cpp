@@ -46,26 +46,9 @@ namespace
 
 			technique_ = rf.LoadEffect("parallax.kfx")->TechniqueByName("Parallax");
 
-			SamplerPtr diffuse_sampler(new Sampler);
-			diffuse_sampler->SetTexture(LoadTexture("diffuse.dds"));
-			diffuse_sampler->Filtering(Sampler::TFO_Bilinear);
-			diffuse_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
-			diffuse_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
-			*(technique_->Effect().ParameterByName("diffuseMapSampler")) = diffuse_sampler;
-
-			SamplerPtr normal_sampler(new Sampler);
-			normal_sampler->SetTexture(LoadTexture("normal.dds"));
-			normal_sampler->Filtering(Sampler::TFO_Bilinear);
-			normal_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
-			normal_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
-			*(technique_->Effect().ParameterByName("normalMapSampler")) = normal_sampler;
-
-			SamplerPtr height_sampler(new Sampler);
-			height_sampler->SetTexture(LoadTexture("height.dds"));
-			height_sampler->Filtering(Sampler::TFO_Bilinear);
-			height_sampler->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Wrap);
-			height_sampler->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Wrap);
-			*(technique_->Effect().ParameterByName("heightMapSampler")) = height_sampler;
+			diffuse_tex_ = LoadTexture("diffuse.dds");
+			normal_tex_ = LoadTexture("normal.dds");
+			height_tex_ = LoadTexture("height.dds");
 		}
 
 		void BuildMeshInfo()
@@ -82,12 +65,19 @@ namespace
 
 			*(technique_->Effect().ParameterByName("mvp")) = model * view * proj;
 			*(technique_->Effect().ParameterByName("eyePos")) = app.ActiveCamera().EyePos();
+
+			*(technique_->Effect().ParameterByName("diffuseMapSampler")) = diffuse_tex_;
+			*(technique_->Effect().ParameterByName("normalMapSampler")) = normal_tex_;
+			*(technique_->Effect().ParameterByName("heightMapSampler")) = height_tex_;
 		}
 
 		void LightPos(float3 const & light_pos)
 		{
 			*(technique_->Effect().ParameterByName("lightPos")) = light_pos;
 		}
+
+	private:
+		TexturePtr diffuse_tex_, normal_tex_, height_tex_;
 	};
 
 	class PolygonObject : public SceneObjectHelper

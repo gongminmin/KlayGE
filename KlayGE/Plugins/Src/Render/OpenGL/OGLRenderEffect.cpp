@@ -152,7 +152,7 @@ namespace KlayGE
 		name.resize(0);
 		func.resize(0);
 
-		RenderEngine::RenderStateType const state_code = states_define::instance().state_code(type);
+		RenderEngine::RenderStateType const state_code = render_states_define::instance().state_code(type);
 
 		for (uint32_t i = 0; i < this->NumStates(); ++ i)
 		{

@@ -4,8 +4,13 @@
 	<parameter type="float" name="y"/>
 	<parameter type="float" name="z"/>
 	
-	<parameter type="sampler" name="electroSampler"/>
-
+	<parameter type="sampler" name="electroSampler">
+		<state name="filtering" value="bilinear"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+		<state name="address_w" value="wrap"/>
+	</parameter>
+	
 	<shader>
 		<![CDATA[
 void ElectroVS(float4 pos				: POSITION,

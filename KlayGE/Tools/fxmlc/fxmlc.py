@@ -71,6 +71,21 @@ color_mask_enum = {
 	"all" : 0x0F,
 }
 
+texture_filter_enum = {
+	"none" : 0,
+	"point" : 1,
+	"bilinear" : 2,
+	"trilinear" : 3,
+	"anisotropic" : 4,
+}
+
+texture_addressing_mode_enum = {
+	"wrap" : 0,
+	"mirror" : 1,
+	"clamp" : 2,
+	"border" : 3,
+}
+
 types_define = [
 	"bool",
 	"dword",
@@ -96,7 +111,7 @@ types_define = [
 	"float4x4"
 ]
 
-states_define = [
+render_states_define = [
 	("polygon_mode", "int"),
 	("shade_mode", "int"),
 	("cull_mode", "int"),
@@ -144,6 +159,17 @@ states_define = [
 	("vertex_shader", "shader"),
 ]
 
+sampler_states_define = [
+	("filtering", "int"),
+	("address_u", "int"),
+	("address_v", "int"),
+	("address_w", "int"),
+	("anisotropy", "int"),
+	("max_mip_level", "int"),
+	("mip_map_lod_bias", "float"),
+	("border_clr", "float4")
+]
+
 
 def type_code(type_name):
 	for i in range(0, len(types_define)):
@@ -153,9 +179,9 @@ def type_code(type_name):
 		print "Wrong type name: ", type_name
 		assert False
 
-def state_code(state_name):
-	for i in range(0, len(states_define)):
-		if (states_define[i][0] == state_name):
+def render_state_code(state_name):
+	for i in range(0, len(render_states_define)):
+		if (render_states_define[i][0] == state_name):
 			return i
 	else:
 		print "Wrong state name: ", state_name
@@ -361,6 +387,18 @@ def write_var(stream, type, name, var):
 		write_matrix(stream, 4, 3, var)
 	elif ('float4x4' == type):
 		write_matrix(stream, 4, 4, var)
+	elif ('sampler' == type):
+		stream.write(struct.pack('i', var.filtering))
+		stream.write(struct.pack('i', var.address_u))
+		stream.write(struct.pack('i', var.address_v))
+		stream.write(struct.pack('i', var.address_w))
+		stream.write(struct.pack('i', var.anisotropy))
+		stream.write(struct.pack('i', var.max_mip_level))
+		stream.write(struct.pack('f', var.mip_map_lod_bias))
+		stream.write(struct.pack('f', var.border_clr[0]))
+		stream.write(struct.pack('f', var.border_clr[1]))
+		stream.write(struct.pack('f', var.border_clr[2]))
+		stream.write(struct.pack('f', var.border_clr[3]))
 
 class annotation:
 	def __init__(self, tag):
@@ -408,6 +446,55 @@ class parameter:
 		anns = tag.getElementsByTagName('annotation')			
 		for ann in anns:
 			self.annotations.append(annotation(ann))
+
+		if ('sampler' == self.type):
+			self.filtering = texture_filter_enum['none']
+			self.address_u = texture_addressing_mode_enum['wrap']
+			self.address_v = texture_addressing_mode_enum['wrap']
+			self.address_w = texture_addressing_mode_enum['wrap']
+			self.anisotropy = 1
+			self.max_mip_level = 0
+			self.mip_map_lod_bias = 0
+			self.border_clr = [0.0, 0.0, 0.0, 0.0]
+
+			states = tag.getElementsByTagName('state')
+			for state in states:
+				name = state.getAttribute('name')
+				value_str = state.getAttribute('value')
+				if ('filtering' == name):
+					try:
+						self.filtering = int(value_str)
+					except:
+						self.filtering = texture_filter_enum[value_str]
+				elif ('address_u' == name):
+					try:
+						self.address_u = int(value_str)
+					except:
+						self.address_u = texture_addressing_mode_enum[value_str]
+
+				elif ('address_v' == name):
+					try:
+						self.address_v = int(value_str)
+					except:
+						self.address_v = texture_addressing_mode_enum[value_str]
+				elif ('address_w' == name):
+					try:
+						self.address_w = int(value_str)
+					except:
+						self.address_w = texture_addressing_mode_enum[value_str]
+				elif ('anisotropy' == name):
+					self.anisotropy = int(state.getAttribute('value'))
+				elif ('max_mip_level' == name):
+					self.max_mip_level = int(state.getAttribute('value'))
+				elif ('mip_map_lod_bias' == name):
+					self.mip_map_lod_bias = float(state.getAttribute('value'))
+				elif ('border_clr' == name):
+					self.border_clr[0] = float(state.getAttribute('r'))
+					self.border_clr[1] = float(state.getAttribute('g'))
+					self.border_clr[2] = float(state.getAttribute('b'))
+					self.border_clr[3] = float(state.getAttribute('a'))
+				else:
+					print "Wrong sampler state name:", self.name
 
 	def write(self, stream):
 		stream.write(struct.pack('I', self.array_size))
@@ -468,7 +555,7 @@ class shader_func:
 class render_state:
 	def __init__(self, tag):
 		self.name = tag.getAttribute('name')
-		for state_define in states_define:
+		for state_define in render_states_define:
 			if state_define[0] == self.name:
 				self.type = state_define[1]
 				break

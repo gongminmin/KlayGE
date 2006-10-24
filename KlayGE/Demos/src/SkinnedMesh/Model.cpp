@@ -20,21 +20,6 @@ MD5SkinnedMesh::MD5SkinnedMesh(RenderModelPtr model, std::wstring const & /*name
 		world_(float4x4::Identity())
 {
 	technique_ = Context::Instance().RenderFactoryInstance().LoadEffect("SkinnedMesh.kfx")->TechniqueByName("SkinnedMeshTech");
-
-	diffuse_map_.reset(new Sampler);
-	diffuse_map_->Filtering(Sampler::TFO_Bilinear);
-	diffuse_map_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-	diffuse_map_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
-
-	normal_map_.reset(new Sampler);
-	normal_map_->Filtering(Sampler::TFO_Bilinear);
-	normal_map_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-	normal_map_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
-
-	specular_map_.reset(new Sampler);
-	specular_map_->Filtering(Sampler::TFO_Bilinear);
-	specular_map_->AddressingMode(Sampler::TAT_Addr_U, Sampler::TAM_Clamp);
-	specular_map_->AddressingMode(Sampler::TAT_Addr_V, Sampler::TAM_Clamp);
 }
 
 void MD5SkinnedMesh::BuildMeshInfo()
@@ -87,23 +72,20 @@ void MD5SkinnedMesh::BuildMeshInfo()
 			vertex_element(VEU_Binormal, 0, EF_BGR32F));
 
 	// ½¨Á¢ÎÆÀí
-	diffuse_map_->SetTexture(TexturePtr());
-	normal_map_->SetTexture(TexturePtr());
-	specular_map_->SetTexture(TexturePtr());
 	for (StaticMesh::TextureSlotsType::iterator iter = texture_slots_.begin();
 		iter != texture_slots_.end(); ++ iter)
 	{
 		if ("DiffuseMap" == iter->first)
 		{
-			diffuse_map_->SetTexture(LoadTexture(iter->second));
+			diffuse_map_ = LoadTexture(iter->second);
 		}
 		if ("NormalMap" == iter->first)
 		{
-			normal_map_->SetTexture(LoadTexture(iter->second));
+			normal_map_ = LoadTexture(iter->second);
 		}
 		if ("SpecularMap" == iter->first)
 		{
-			specular_map_->SetTexture(LoadTexture(iter->second));
+			specular_map_ = LoadTexture(iter->second);
 		}
 	}
 }

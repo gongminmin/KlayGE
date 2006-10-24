@@ -4,8 +4,18 @@
 	<include name="../../../RenderFX/util.fxml"/>
 
 	<parameter type="float4x4" name="inv_mvp"/>
-	<parameter type="sampler" name="skybox_YcubeMapSampler"/>
-	<parameter type="sampler" name="skybox_CcubeMapSampler"/>
+	<parameter type="sampler" name="skybox_cubeMapSampler">
+		<state name="filtering" value="bilinear"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+		<state name="address_w" value="clamp"/>
+	</parameter>
+	<parameter type="sampler" name="skybox_CcubeMapSampler">
+		<state name="filtering" value="bilinear"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+		<state name="address_w" value="clamp"/>
+	</parameter>
 
 	<shader>
 		<![CDATA[
@@ -19,7 +29,7 @@ void SkyBoxVS(float4 pos : POSITION,
 
 float4 HDRSkyBoxPS(float3 texCoord0 : TEXCOORD0) : COLOR
 {
-	float3 rgb = decode_hdr_yc(texCUBE(skybox_YcubeMapSampler, texCoord0).r,
+	float3 rgb = decode_hdr_yc(texCUBE(skybox_cubeMapSampler, texCoord0).r,
 					texCUBE(skybox_CcubeMapSampler, texCoord0).ga);
 	
 	return float4(rgb, 1);
