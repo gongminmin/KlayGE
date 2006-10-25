@@ -100,10 +100,17 @@ namespace KlayGE
 			CGparameter cg_param = cgGetFirstParameter(shaders_[i], CG_GLOBAL);
 			while (cg_param)
 			{
-				OGLRenderParameterDesc p_desc;
-				p_desc.param = effect_.ParameterByName(cgGetParameterName(cg_param));
-				p_desc.cg_handle = cg_param;
-				param_descs_[i].push_back(p_desc);
+				if (cgIsParameterUsed(cg_param, shaders_[i])
+					&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param)))
+				{
+					OGLRenderParameterDesc p_desc;
+					p_desc.param = effect_.ParameterByName(cgGetParameterName(cg_param));
+					if (p_desc.param != RenderEffectParameter::NullObject())
+					{
+						p_desc.cg_handle = cg_param;
+						param_descs_[i].push_back(p_desc);
+					}
+				}
 
 				cg_param = cgGetNextParameter(cg_param);
 			}

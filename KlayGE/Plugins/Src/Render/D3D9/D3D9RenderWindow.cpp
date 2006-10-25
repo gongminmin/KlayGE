@@ -180,11 +180,14 @@ namespace KlayGE
 		wc.lpszClassName	= wname.c_str();
 		::RegisterClassW(&wc);
 
+		RECT rc = { 0, 0, width_, height_ };
+		::AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, false);
+
 		// Create our main window
 		// Pass pointer to self
 		hWnd_ = ::CreateWindowW(wname.c_str(), wname.c_str(),
 			WS_OVERLAPPEDWINDOW, settings.left, settings.top,
-			settings.width, settings.height, 0, 0, hInst, NULL);
+			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, NULL);
 
 		::SetWindowLongPtrW(hWnd_, 0, reinterpret_cast<LONG_PTR>(this));
 

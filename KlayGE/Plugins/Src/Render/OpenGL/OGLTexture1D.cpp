@@ -69,8 +69,29 @@ namespace KlayGE
 
 		for (uint16_t level = 0; level < numMipMaps_; ++ level)
 		{
-			glTexImage1D(GL_TEXTURE_1D, level, glinternalFormat,
-				width, 0, glformat, gltype, NULL);
+			if (IsCompressedFormat(format_))
+			{
+				int block_size;
+				if (EF_BC1 == format_)
+				{
+					block_size = 8;
+				}
+				else
+				{
+					block_size = 16;
+				}
+
+				GLsizei const image_size = ((width + 3) / 4) * block_size;
+				std::vector<uint8_t> data(image_size, 0);
+
+				glCompressedTexImage1D(GL_TEXTURE_1D, level, glinternalFormat,
+					width, 0, image_size, &data[0]);
+			}
+			else
+			{
+				glTexImage1D(GL_TEXTURE_1D, level, glinternalFormat,
+					width, 0, glformat, gltype, NULL);
+			}
 
 			width /= 2;
 		}
