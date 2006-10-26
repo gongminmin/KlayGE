@@ -78,7 +78,7 @@ void PostToonVS(float4 pos : POSITION,
 	oToon = dot(normalize(normal), L);
 }
 
-half4 PostToonPS(float2 tc0 : TEXCOORD0,
+float4 PostToonPS(float2 tc0 : TEXCOORD0,
 				float4 tc1 : TEXCOORD1,
 				float4 tc2 : TEXCOORD2,
 				float4 tc3 : TEXCOORD3,
@@ -101,14 +101,20 @@ half4 PostToonPS(float2 tc0 : TEXCOORD0,
 				dot(ndc.xyz, s3.xyz),
 				dot(ndc.xyz, s4.xyz));
 	nd -= e_barrier.x;
-	nd = (nd > 0) ? 1 : 0;
-	half ne = (dot(nd, e_weights.x) < 1) ? 0 : 1;
+	nd.x = (nd.x > 0) ? 1 : 0;
+	nd.y = (nd.y > 0) ? 1 : 0;
+	nd.z = (nd.z > 0) ? 1 : 0;
+	nd.w = (nd.w > 0) ? 1 : 0;
+	half ne = (dot(nd, e_weights.x).x < 1) ? 0 : 1;
 
 	// Depth filter : compute gradiental difference:
 	half4 dd = half4(s1.w + s2.w, s3.w + s4.w, s5.w + s6.w, s7.w + s8.w);
 	dd = abs(2 * ndc.w - dd) - e_barrier.y;
-	dd = (dd > 0) ? 1 : 0;
-	half de = (dot(dd, e_weights.y) < 1) ? 1 : 0;
+	dd.x = (dd.x > 0) ? 1 : 0;
+	dd.y = (dd.y > 0) ? 1 : 0;
+	dd.z = (dd.z > 0) ? 1 : 0;
+	dd.w = (dd.w > 0) ? 1 : 0;
+	half de = (dot(dd, e_weights.y).x < 1) ? 1 : 0;
 
 	return tex1D(toonmap_sampler, toon) * de * ne;
 }

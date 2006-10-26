@@ -155,23 +155,7 @@ namespace KlayGE
 		wc.lpszClassName	= wname.c_str();
 		::RegisterClassW(&wc);
 
-		RECT rc = { 0, 0, width_, height_ };
-		::AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, false);
-
-		// Create our main window
-		// Pass pointer to self
-		hWnd_ = ::CreateWindowW(wname.c_str(), wname.c_str(),
-			WS_OVERLAPPEDWINDOW, settings.left, settings.top,
-			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, NULL);
-
-		winMap.insert(std::make_pair(hWnd_, this));
-
-		::ShowWindow(hWnd_, SW_SHOWNORMAL);
-		::UpdateWindow(hWnd_);
-
-
-		hDC_ = ::GetDC(hWnd_);
-
+		uint32_t style;
 		if (isFullScreen_)
 		{
 			colorDepth_ = NumFormatBits(settings.color_fmt);
@@ -185,6 +169,8 @@ namespace KlayGE
 			devMode.dmPelsHeight = height_;
 			devMode.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
 			::ChangeDisplaySettings(&devMode, CDS_FULLSCREEN);
+
+			style = WS_POPUP;
 		}
 		else
 		{
@@ -192,7 +178,26 @@ namespace KlayGE
 			colorDepth_ = ::GetDeviceCaps(hDC_, BITSPIXEL);
 			top_ = settings.top;
 			left_ = settings.left;
+
+			style = WS_OVERLAPPEDWINDOW;
 		}
+
+		RECT rc = { 0, 0, width_, height_ };
+		::AdjustWindowRect(&rc, style, false);
+
+		// Create our main window
+		// Pass pointer to self
+		hWnd_ = ::CreateWindowW(wname.c_str(), wname.c_str(),
+			style, settings.left, settings.top,
+			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, NULL);
+
+		winMap.insert(std::make_pair(hWnd_, this));
+
+		::ShowWindow(hWnd_, SW_SHOWNORMAL);
+		::UpdateWindow(hWnd_);
+
+
+		hDC_ = ::GetDC(hWnd_);
 
 		// there is no guarantee that the contents of the stack that become
 		// the pfd are zeroed, therefore _make sure_ to clear these bits.
@@ -293,14 +298,15 @@ namespace KlayGE
 	{
 		if (hWnd_ != NULL)
 		{
-			::wglMakeCurrent(NULL, NULL);
-			::wglDeleteContext(hRC_);
-			::ReleaseDC(hWnd_, hDC_);
-
 			if (isFullScreen_)
 			{
 				::ChangeDisplaySettings(NULL, 0);
+				ShowCursor(TRUE);
 			}
+
+			::wglMakeCurrent(NULL, NULL);
+			::wglDeleteContext(hRC_);
+			::ReleaseDC(hWnd_, hDC_);
 
 			::DestroyWindow(hWnd_);
 			hWnd_ = NULL;

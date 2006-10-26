@@ -194,7 +194,7 @@ namespace
 		{
 			this->UpdateTexture(text);
 
-			uint32_t clr32 = clr.ARGB();
+			uint32_t clr32 = clr.ABGR();
 			float const h(fontHeight * yScale);
 			size_t const maxSize(text.length() - std::count(text.begin(), text.end(), L'\n'));
 			float x(sx), y(sy);

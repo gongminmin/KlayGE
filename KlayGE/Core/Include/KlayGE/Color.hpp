@@ -120,6 +120,13 @@ namespace KlayGE
 			return (a << 24) | (r << 16) | (g << 8) | (b << 0);
 		}
 
+		uint32_t ABGR() const
+		{
+			uint8_t r, g, b, a;
+			this->RGBA(r, g, b, a);
+			return (a << 24) | (b << 16) | (g << 8) | (r << 0);
+		}
+
 		// ¸³Öµ²Ù×÷·û
 		Color_T& operator+=(Color_T const & rhs)
 		{

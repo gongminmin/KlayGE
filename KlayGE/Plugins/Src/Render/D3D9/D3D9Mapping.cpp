@@ -391,11 +391,19 @@ namespace KlayGE
 			// Vertex colors
 			case VEU_Diffuse:
 				element.Usage = D3DDECLUSAGE_COLOR;
+				if (EF_ARGB8 == vs_elem.format)
+				{
+					element.Type = D3DDECLTYPE_UBYTE4N;
+				}
 				break;
 
 			// Vertex speculars
 			case VEU_Specular:
 				element.Usage = D3DDECLUSAGE_COLOR;
+				if (EF_ARGB8 == vs_elem.format)
+				{
+					element.Type = D3DDECLTYPE_UBYTE4N;
+				}
 				break;
 			
 			// Blend Weights

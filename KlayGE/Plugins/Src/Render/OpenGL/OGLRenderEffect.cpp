@@ -53,6 +53,13 @@ namespace KlayGE
 
 	OGLRenderPass::~OGLRenderPass()
 	{
+		for (int i = 0; i < 2; ++ i)
+		{
+			for (size_t j = 0; j < param_descs_[i].size(); ++ j)
+			{
+				cgDestroyParameter(param_descs_[i][j].cg_handle);
+			}
+		}
 		cgDestroyProgram(shaders_[0]);
 		cgDestroyProgram(shaders_[1]);
 	}

@@ -23,6 +23,28 @@
 #include <KlayGE/OpenGL/OGLFrameBuffer.hpp>
 #include <KlayGE/OpenGL/OGLRenderView.hpp>
 
+namespace
+{
+	bool CheckFrameBufferStatus()
+	{
+		GLenum status;
+		status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+		switch(status)
+		{
+		case GL_FRAMEBUFFER_COMPLETE_EXT:
+			return true;
+
+		case GL_FRAMEBUFFER_UNSUPPORTED_EXT:
+			// choose different formats
+			return false;
+
+		default:
+			BOOST_ASSERT(false);
+			return false;
+		}
+	}
+}
+
 namespace KlayGE
 {
 	OGLRenderView::~OGLRenderView()
@@ -73,6 +95,7 @@ namespace KlayGE
 				GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_1D, tex_, level_);
 			break;
 		}
+		BOOST_ASSERT(CheckFrameBufferStatus());
 
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
@@ -150,6 +173,7 @@ namespace KlayGE
 				GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_2D, tex_, level_);
 			break;
 		}
+		BOOST_ASSERT(CheckFrameBufferStatus());
 
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
@@ -429,6 +453,7 @@ namespace KlayGE
 				face, tex_, level_);
 			break;
 		}
+		BOOST_ASSERT(CheckFrameBufferStatus());
 
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
@@ -498,6 +523,7 @@ namespace KlayGE
 		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
 				GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
 				GL_TEXTURE_RECTANGLE_ARB, tex_, 0);
+		BOOST_ASSERT(CheckFrameBufferStatus());
 
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
@@ -579,13 +605,13 @@ namespace KlayGE
 		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
 								GL_DEPTH_ATTACHMENT_EXT,
 								GL_RENDERBUFFER_EXT, rbo_);
-
 		if (IsStencilFormat(pf_))
 		{
 			glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
 								GL_STENCIL_ATTACHMENT_EXT,
 								GL_RENDERBUFFER_EXT, rbo_);
 		}
+		BOOST_ASSERT(CheckFrameBufferStatus());
 
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}

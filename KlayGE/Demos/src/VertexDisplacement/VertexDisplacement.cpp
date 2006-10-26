@@ -14,6 +14,7 @@
 #include <KlayGE/SceneObjectHelper.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
+#include <KlayGE/OpenGL/OGLRenderFactory.hpp>
 
 #include <KlayGE/OCTree/OCTree.hpp>
 
@@ -109,7 +110,7 @@ int main()
 {
 	OCTree sceneMgr(Box(float3(-10, -10, -10), float3(10, 10, 10)), 3);
 
-	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
+	Context::Instance().RenderFactoryInstance(OGLRenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
 
 	Context::Instance().InputFactoryInstance(DInputFactoryInstance());
@@ -185,4 +186,5 @@ void VertexDisplacement::DoUpdate(uint32_t /*pass*/)
 		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
 		<< sceneMgr.NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str());
+	font_->RenderText(0, 54, Color(1, 1, 0, 1), renderEngine.Name());
 }
