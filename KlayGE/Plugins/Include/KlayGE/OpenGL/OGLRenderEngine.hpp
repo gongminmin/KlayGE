@@ -79,6 +79,8 @@ namespace KlayGE
 
 		void FillRenderDeviceCaps();
 
+		void AttachAttribs(uint32_t instance, RenderLayout const & rl, RenderPassPtr pass);
+
 	private:
 		std::vector<uint8_t> vertex_attrib_indices_;
 	};

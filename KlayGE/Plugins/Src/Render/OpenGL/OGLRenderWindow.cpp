@@ -240,6 +240,8 @@ namespace KlayGE
 		viewport_.width = width_;
 		viewport_.height = height_;
 
+		description_ = L"OpenGL Render Window";
+
 		active_ = true;
 		ready_ = true;
 	}

@@ -74,7 +74,7 @@ namespace KlayGE
 		}
 		~OGLRenderPass();
 
-		uint8_t AttribIndex(VertexElementUsage usage, uint8_t usage_index);
+		int32_t AttribIndex(VertexElementUsage usage, uint8_t usage_index);
 
 	private:
 		void DoLoad();

@@ -54,7 +54,6 @@ half4 NormalDepthPS(float3 normal : TEXCOORD0, float2 depth : TEXCOORD1) : COLOR
 		<![CDATA[
 void PostToonVS(float4 pos : POSITION,
 				float3 normal : NORMAL,
-				float2 tex : TEXCOORD0,
 				out float4 oPos : POSITION,
 				out float2 oTc0 : TEXCOORD0, // center
 				out float4 oTc1 : TEXCOORD1, // left top / right bottom

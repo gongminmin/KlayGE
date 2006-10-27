@@ -148,8 +148,8 @@ namespace KlayGE
 		CGparameter cg_param = cgGetFirstParameter(shaders_[0], CG_PROGRAM);
 		while (cg_param)
 		{
-			if (cgIsParameterUsed(cg_param, shaders_[0])
-				&& (CG_VARYING == cgGetParameterVariability(cg_param)))
+			if ((CG_VARYING == cgGetParameterVariability(cg_param))
+				&& (CG_IN == cgGetParameterDirection(cg_param)))
 			{
 				std::string semantic = cgGetParameterSemantic(cg_param);
 				VertexElementUsage usage = VEU_Position;
@@ -178,12 +178,18 @@ namespace KlayGE
 		}
 	}
 
-	uint8_t OGLRenderPass::AttribIndex(VertexElementUsage usage, uint8_t usage_index)
+	int32_t OGLRenderPass::AttribIndex(VertexElementUsage usage, uint8_t usage_index)
 	{
 		std::pair<VertexElementUsage, uint8_t> p = std::make_pair(usage, usage_index);
 
-		BOOST_ASSERT(vertex_varyings_.find(p) != vertex_varyings_.end());
-		return vertex_varyings_[p];
+		if (vertex_varyings_.find(p) != vertex_varyings_.end())
+		{
+			return vertex_varyings_[p];
+		}
+		else
+		{
+			return -1;
+		}
 	}
 
 	CGprogram OGLRenderPass::compile_shader(CGprofile profile, std::string const & name, std::string const & text)

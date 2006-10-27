@@ -227,79 +227,16 @@ namespace KlayGE
 
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
-					OGLRenderPassPtr pass = checked_pointer_cast<OGLRenderPass>(render_tech_->Pass(i));
+					RenderPassPtr pass = render_tech_->Pass(i);
 
 					pass->Begin();
 					this->DoFlushRenderStates();
 
-					if (rl.InstanceStream())
-					{
-						GraphicsBuffer& stream = *rl.InstanceStream();
-
-						uint32_t const instance_size = rl.InstanceSize();
-						GraphicsBuffer::Mapper mapper(stream, BA_Read_Only);
-						uint8_t const * buffer = mapper.Pointer<uint8_t>();
-
-						uint32_t elem_offset = 0;
-						for (uint32_t i = 0; i < rl.InstanceStreamFormat().size(); ++ i)
-						{
-							vertex_element const & vs_elem = rl.InstanceStreamFormat()[i];
-							void const * addr = &buffer[instance * instance_size + elem_offset];
-							GLfloat const * float_addr = static_cast<GLfloat const *>(addr);
-							GLuint const index = pass->AttribIndex(vs_elem.usage, vs_elem.usage_index);
-
-							switch (NumComponents(vs_elem.format))
-							{
-							case 2:
-								glVertexAttrib2fv(index, float_addr);
-								break;
-
-							case 3:
-								glVertexAttrib3fv(index, float_addr);
-								break;
-
-							case 4:
-								glVertexAttrib3fv(index, float_addr);
-								break;
-							}
-
-							elem_offset += vs_elem.element_size();
-						}
-					}
-
-					// Geometry streams
-					for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
-					{
-						OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(rl.GetVertexStream(i)));
-						uint32_t const size = rl.VertexSize(i);
-
-						uint32_t elem_offset = 0;
-						for (uint32_t j = 0; j < rl.VertexStreamFormat(i).size(); ++ j)
-						{
-							vertex_element const & vs_elem = rl.VertexStreamFormat(i)[j];
-							GLvoid* offset = reinterpret_cast<GLvoid*>(elem_offset);
-							GLuint const index = pass->AttribIndex(vs_elem.usage, vs_elem.usage_index);
-							GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
-							GLenum const type = IsFloatFormat(vs_elem.format) ? GL_FLOAT : GL_UNSIGNED_BYTE;
-
-							if (VEU_TextureCoord == vs_elem.usage)
-							{
-								glClientActiveTexture(GL_TEXTURE0 + vs_elem.usage_index);
-							}
-
-							glEnableVertexAttribArray(index);
-							stream.Active();
-							glVertexAttribPointer(index, num_components, type, GL_FALSE, size, offset);
-
-							vertex_attrib_indices_.push_back(index);
-
-							elem_offset += vs_elem.element_size();
-						}
-					}
-
+					this->AttachAttribs(instance, rl, pass);
 
 					glDrawElements(mode, static_cast<GLsizei>(rl.NumIndices()),
 						index_type, 0);
+					
 					pass->End();
 				}
 			}
@@ -311,7 +248,11 @@ namespace KlayGE
 
 					pass->Begin();
 					this->DoFlushRenderStates();
+
+					this->AttachAttribs(instance, rl, pass);
+
 					glDrawArrays(mode, 0, static_cast<GLsizei>(rl.NumVertices()));
+					
 					pass->End();
 				}
 			}
@@ -322,6 +263,82 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::EndFrame()
 	{
+	}
+
+	void OGLRenderEngine::AttachAttribs(uint32_t instance, RenderLayout const & rl, RenderPassPtr pass)
+	{
+		OGLRenderPassPtr ogl_pass = checked_pointer_cast<OGLRenderPass>(pass);
+
+		if (rl.InstanceStream())
+		{
+			GraphicsBuffer& stream = *rl.InstanceStream();
+
+			uint32_t const instance_size = rl.InstanceSize();
+			GraphicsBuffer::Mapper mapper(stream, BA_Read_Only);
+			uint8_t const * buffer = mapper.Pointer<uint8_t>();
+
+			uint32_t elem_offset = 0;
+			for (uint32_t i = 0; i < rl.InstanceStreamFormat().size(); ++ i)
+			{
+				vertex_element const & vs_elem = rl.InstanceStreamFormat()[i];
+				int32_t const index = ogl_pass->AttribIndex(vs_elem.usage, vs_elem.usage_index);
+				if (index >= 0)
+				{
+					void const * addr = &buffer[instance * instance_size + elem_offset];
+					GLfloat const * float_addr = static_cast<GLfloat const *>(addr);
+
+					switch (NumComponents(vs_elem.format))
+					{
+					case 2:
+						glVertexAttrib2fv(index, float_addr);
+						break;
+
+					case 3:
+						glVertexAttrib3fv(index, float_addr);
+						break;
+
+					case 4:
+						glVertexAttrib3fv(index, float_addr);
+						break;
+					}
+				}
+
+				elem_offset += vs_elem.element_size();
+			}
+		}
+
+		// Geometry streams
+		for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
+		{
+			OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(rl.GetVertexStream(i)));
+			uint32_t const size = rl.VertexSize(i);
+
+			uint32_t elem_offset = 0;
+			for (uint32_t j = 0; j < rl.VertexStreamFormat(i).size(); ++ j)
+			{
+				vertex_element const & vs_elem = rl.VertexStreamFormat(i)[j];
+				int32_t const index = ogl_pass->AttribIndex(vs_elem.usage, vs_elem.usage_index);
+				if (index >= 0)
+				{
+					GLvoid* offset = reinterpret_cast<GLvoid*>(elem_offset);
+					GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
+					GLenum const type = IsFloatFormat(vs_elem.format) ? GL_FLOAT : GL_UNSIGNED_BYTE;
+
+					if (VEU_TextureCoord == vs_elem.usage)
+					{
+						glClientActiveTexture(GL_TEXTURE0 + vs_elem.usage_index);
+					}
+
+					glEnableVertexAttribArray(index);
+					stream.Active();
+					glVertexAttribPointer(index, num_components, type, GL_FALSE, size, offset);
+
+					vertex_attrib_indices_.push_back(index);
+				}
+
+				elem_offset += vs_elem.element_size();
+			}
+		}
 	}
 
 	// Ë¢ÐÂäÖÈ¾×´Ì¬
