@@ -112,6 +112,8 @@ namespace KlayGE
 					height_ = view->Height();
 					colorDepth_ = view->Bpp();
 
+					viewport_.left		= 0;
+					viewport_.top		= 0;
 					viewport_.width		= width_;
 					viewport_.height	= height_;
 				}
