@@ -77,7 +77,7 @@ namespace KlayGE
 		uint8_t AttribIndex(VertexElementUsage usage, uint8_t usage_index);
 
 	private:
-		void DoRead();
+		void DoLoad();
 
 		void DoBegin();
 		void DoEnd();

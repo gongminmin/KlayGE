@@ -189,10 +189,12 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::DoRender(RenderLayout const & rl)
 	{
-		glDisableClientState(GL_VERTEX_ARRAY);
-		glDisableClientState(GL_NORMAL_ARRAY);
-		glDisableClientState(GL_COLOR_ARRAY);
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		for (std::vector<uint8_t>::iterator iter = vertex_attrib_indices_.begin();
+			iter != vertex_attrib_indices_.end(); ++ iter)
+		{
+			glDisableVertexAttribArray(*iter);
+		}
+		vertex_attrib_indices_.resize(0);
 
 		uint32_t const num_instance = rl.NumInstance();
 		BOOST_ASSERT(num_instance != 0);
@@ -288,6 +290,8 @@ namespace KlayGE
 							glEnableVertexAttribArray(index);
 							stream.Active();
 							glVertexAttribPointer(index, num_components, type, GL_FALSE, size, offset);
+
+							vertex_attrib_indices_.push_back(index);
 
 							elem_offset += vs_elem.element_size();
 						}

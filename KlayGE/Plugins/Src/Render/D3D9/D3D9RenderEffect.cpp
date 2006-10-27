@@ -63,7 +63,7 @@ namespace KlayGE
 	}
 
 
-	void D3D9RenderPass::DoRead()
+	void D3D9RenderPass::DoLoad()
 	{
 		is_validate_ = true;
 

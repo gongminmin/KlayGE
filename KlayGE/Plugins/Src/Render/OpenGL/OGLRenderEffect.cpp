@@ -74,7 +74,7 @@ namespace KlayGE
 		cgDestroyProgram(shaders_[1]);
 	}
 
-	void OGLRenderPass::DoRead()
+	void OGLRenderPass::DoLoad()
 	{
 		is_validate_ = true;
 

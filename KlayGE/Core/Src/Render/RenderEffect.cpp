@@ -559,7 +559,7 @@ namespace KlayGE
 			is_validate_ = true;
 		}
 
-		void DoRead()
+		void DoLoad()
 		{
 		}
 
@@ -596,7 +596,7 @@ namespace KlayGE
 			render_states_[i]->Load(source);
 		}
 
-		this->DoRead();
+		this->DoLoad();
 	}
 
 	uint32_t RenderPass::NumStates() const

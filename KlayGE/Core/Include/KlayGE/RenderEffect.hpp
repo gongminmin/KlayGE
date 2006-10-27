@@ -441,7 +441,8 @@ namespace KlayGE
 		}
 
 	private:
-		virtual void DoRead() = 0;
+		virtual void DoLoad() = 0;
+
 		virtual void DoBegin() = 0;
 		virtual void DoEnd() = 0;
 

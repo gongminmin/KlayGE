@@ -107,7 +107,7 @@ namespace KlayGE
 		}
 
 	private:
-		void DoRead();
+		void DoLoad();
 
 		void DoBegin();
 		void DoEnd();

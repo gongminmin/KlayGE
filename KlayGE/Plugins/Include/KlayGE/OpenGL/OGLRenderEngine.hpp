@@ -78,6 +78,9 @@ namespace KlayGE
 		void DoFlushRenderStates();
 
 		void FillRenderDeviceCaps();
+
+	private:
+		std::vector<uint8_t> vertex_attrib_indices_;
 	};
 
 	typedef boost::shared_ptr<OGLRenderEngine> OGLRenderEnginePtr;
