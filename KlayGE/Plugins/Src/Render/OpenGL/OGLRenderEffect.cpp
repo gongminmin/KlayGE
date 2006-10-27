@@ -24,6 +24,16 @@
 #include <sstream>
 #include <iostream>
 #include <boost/assert.hpp>
+#include <boost/lexical_cast.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4512)
+#endif
+#include <boost/assign.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
+#include <boost/assign/std/vector.hpp>
 
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 #include <KlayGE/OpenGL/OGLMapping.hpp>
@@ -122,6 +132,58 @@ namespace KlayGE
 				cg_param = cgGetNextParameter(cg_param);
 			}
 		}
+
+		using namespace boost::assign;
+		std::vector<std::pair<std::string, VertexElementUsage> > pre_define_semantics; 
+		pre_define_semantics += std::make_pair(std::string("POSITION"), VEU_Position),
+			std::make_pair(std::string("NORMAL"), VEU_Normal),
+			std::make_pair(std::string("COLOR0"), VEU_Diffuse),
+			std::make_pair(std::string("COLOR1"), VEU_Specular),
+			std::make_pair(std::string("BLENDWEIGHT"), VEU_BlendWeight),
+			std::make_pair(std::string("BLENDINDICES"), VEU_BlendIndex),
+			std::make_pair(std::string("TEXCOORD"), VEU_TextureCoord),
+			std::make_pair(std::string("TANGENT"), VEU_Tangent),
+			std::make_pair(std::string("BINORMAL"), VEU_Binormal);
+
+		CGparameter cg_param = cgGetFirstParameter(shaders_[0], CG_PROGRAM);
+		while (cg_param)
+		{
+			if (cgIsParameterUsed(cg_param, shaders_[0])
+				&& (CG_VARYING == cgGetParameterVariability(cg_param)))
+			{
+				std::string semantic = cgGetParameterSemantic(cg_param);
+				VertexElementUsage usage = VEU_Position;
+				uint8_t usage_index = 0;
+
+				for (size_t j = 0; j < pre_define_semantics.size(); ++ j)
+				{
+					if (0 == semantic.find(pre_define_semantics[j].first))
+					{
+						usage = pre_define_semantics[j].second;
+						semantic.erase(0, pre_define_semantics[j].first.size());
+						if (!semantic.empty())
+						{
+							usage_index = static_cast<uint8_t>(boost::lexical_cast<int>(semantic));
+						}
+
+						break;
+					}
+				}
+
+				vertex_varyings_.insert(std::make_pair(std::make_pair(usage, usage_index),
+					static_cast<uint8_t>(cgGetParameterResourceIndex(cg_param))));
+			}
+
+			cg_param = cgGetNextParameter(cg_param);
+		}
+	}
+
+	uint8_t OGLRenderPass::AttribIndex(VertexElementUsage usage, uint8_t usage_index)
+	{
+		std::pair<VertexElementUsage, uint8_t> p = std::make_pair(usage, usage_index);
+
+		BOOST_ASSERT(vertex_varyings_.find(p) != vertex_varyings_.end());
+		return vertex_varyings_[p];
 	}
 
 	CGprogram OGLRenderPass::compile_shader(CGprofile profile, std::string const & name, std::string const & text)

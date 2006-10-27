@@ -24,15 +24,13 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/MapVector.hpp>
 
 #include <Cg/cg.h>
 #include <Cg/cgGL.h>
 
 namespace KlayGE
 {
-	class OGLRenderEffect;
-	typedef boost::shared_ptr<OGLRenderEffect> OGLRenderEffectPtr;
-
 	struct OGLRenderParameterDesc
 	{
 		RenderEffectParameterPtr param;
@@ -49,6 +47,7 @@ namespace KlayGE
 	private:
 		RenderTechniquePtr MakeRenderTechnique();
 	};
+	typedef boost::shared_ptr<OGLRenderEffect> OGLRenderEffectPtr;
 
 	class OGLRenderTechnique : public RenderTechnique
 	{
@@ -64,6 +63,7 @@ namespace KlayGE
 		void DoBegin(uint32_t flags);
 		void DoEnd();
 	};
+	typedef boost::shared_ptr<OGLRenderTechnique> OGLRenderTechniquePtr;
 
 	class OGLRenderPass : public RenderPass
 	{
@@ -73,6 +73,8 @@ namespace KlayGE
 		{
 		}
 		~OGLRenderPass();
+
+		uint8_t AttribIndex(VertexElementUsage usage, uint8_t usage_index);
 
 	private:
 		void DoRead();
@@ -85,6 +87,8 @@ namespace KlayGE
 		boost::array<CGprofile, 2> profiles_;
 
 		boost::array<std::vector<OGLRenderParameterDesc>, 2> param_descs_;
+		
+		MapVector<std::pair<VertexElementUsage, uint8_t>, uint8_t> vertex_varyings_;
 
 	private:
 		CGprogram compile_shader(CGprofile profile, std::string const & name, std::string const & text);
@@ -93,6 +97,7 @@ namespace KlayGE
 
 		void shader(std::string& profile, std::string& name, std::string& func, std::string const & type) const;
 	};
+	typedef boost::shared_ptr<OGLRenderPass> OGLRenderPassPtr;
 }
 
 #endif		// _OGLRENDEREFFECT_HPP
