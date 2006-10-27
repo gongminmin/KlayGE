@@ -49,6 +49,8 @@
 #ifndef _GLLOADER_H
 #define _GLLOADER_H
 
+#include <stddef.h>
+
 #if defined(DEBUG) | defined(_DEBUG)
 #define GLLOADER_DEBUG
 #endif

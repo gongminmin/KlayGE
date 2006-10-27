@@ -6,7 +6,6 @@
 		<Option title="glloader"/>
 		<Option makefile="Makefile"/>
 		<Option makefile_is_custom="0"/>
-		<Option active_target="0"/>
 		<Option compiler="0"/>
 		<Build>
 			<Target title="Release">
