@@ -366,11 +366,6 @@ namespace KlayGE
 			{
 				element.Type = D3DDECLTYPE_FLOAT1 - 1 + static_cast<uint8_t>(NumComponents(vs_elem.format));
 			}
-			else
-			{
-				BOOST_ASSERT(EF_ARGB8 == vs_elem.format);
-				element.Type = D3DDECLTYPE_D3DCOLOR;
-			}
 			element.Offset		= elem_offset;
 			element.Method		= D3DDECLMETHOD_DEFAULT;
 			element.Stream		= static_cast<WORD>(stream);
@@ -414,6 +409,7 @@ namespace KlayGE
 			// Blend Indices
 			case VEU_BlendIndex:
 				element.Usage = D3DDECLUSAGE_BLENDINDICES;
+				element.Type = D3DDECLTYPE_UBYTE4;
 				break;
 
 			// Do texture coords

@@ -211,6 +211,8 @@ namespace KlayGE
 				std::cerr << cgGetLastListing(render_factory.CGContext()) << std::endl;
 			}
 #endif
+
+			is_validate_ = false;
 		}
 
 		return shader;

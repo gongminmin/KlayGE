@@ -317,8 +317,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -327,8 +327,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 			</File>
@@ -341,8 +341,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -351,8 +351,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 			</File>
@@ -365,8 +365,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -375,8 +375,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 			</File>
@@ -389,8 +389,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -399,8 +399,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 			</File>
@@ -413,8 +413,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -423,8 +423,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 			</File>
@@ -437,8 +437,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -447,8 +447,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 			</File>
@@ -461,8 +461,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -471,8 +471,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 			</File>
@@ -485,8 +485,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -495,8 +495,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 			</File>
@@ -509,8 +509,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -519,8 +519,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 			</File>
@@ -533,8 +533,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -543,8 +543,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 			</File>
@@ -557,8 +557,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -567,8 +567,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 			</File>
@@ -581,8 +581,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -591,8 +591,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 			</File>
@@ -605,8 +605,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -615,8 +615,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 			</File>
@@ -629,8 +629,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -639,8 +639,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
-						Outputs="$(InputDir)\$(InputName).kfx"
+						CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 					/>
 				</FileConfiguration>
 			</File>

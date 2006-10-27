@@ -36,7 +36,7 @@ void SkinnedMeshVS(float4 pos : POSITION,
 				float3 T	: TANGENT,	// in object space
 				float3 B	: BINORMAL,	// in object space
 				float4 blend_weights : BLENDWEIGHT,
-				float4 blend_indices : BLENDINDICES,
+				int4 blend_indices : BLENDINDICES,
 				
 				out float4 oPos : POSITION,
 				out float2 oTex0 : TEXCOORD0,
@@ -45,15 +45,12 @@ void SkinnedMeshVS(float4 pos : POSITION,
 {
 	oTex0 = tex0;
 
-	// Compensate for lack of UBYTE4 on Geforce3
-	int4 index_vec = D3DCOLORtoUBYTE4(blend_indices);
-
 	float3 result_pos = 0;
 	float3x3 obj2tan = 0;
 	for (int i = 0; i < 4; ++ i)
 	{
-		float4 joint_rot = joint_rots[index_vec[i]];
-		float4 joint_pos = joint_poss[index_vec[i]];
+		float4 joint_rot = joint_rots[blend_indices[i]];
+		float4 joint_pos = joint_poss[blend_indices[i]];
 		float weight = blend_weights[i];
 
 		result_pos += (mul_quat(pos.xyz, joint_rot) + joint_pos.xyz) * weight;

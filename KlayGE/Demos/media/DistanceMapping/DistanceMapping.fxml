@@ -106,24 +106,17 @@ half4 DistanceMappingPS_20(half3 texCoord0	: TEXCOORD0,
 		]]>
 	</shader>
 
-	<technique name="DistanceMapping30">
-		<pass name="p0">
-			<state name="vertex_shader" profile="vs_3_0" value="DistanceMappingVS()"/>
-			<state name="pixel_shader" profile="ps_3_0" value="DistanceMappingPS()"/>
-		</pass>
-	</technique>
-
 	<technique name="DistanceMapping2a">
 		<pass name="p0">
-			<state name="vertex_shader" profile="vs_1_1" value="DistanceMappingVS()"/>
-			<state name="pixel_shader" profile="ps_2_a" value="DistanceMappingPS()"/>
+			<state name="vertex_shader" value="DistanceMappingVS()"/>
+			<state name="pixel_shader" value="DistanceMappingPS()"/>
 		</pass>
 	</technique>
 
 	<technique name="DistanceMapping20">
 		<pass name="p0">
-			<state name="vertex_shader" profile="vs_1_1" value="DistanceMappingVS()"/>
-			<state name="pixel_shader" profile="ps_2_0" value="DistanceMappingPS_20()"/>
+			<state name="vertex_shader" value="DistanceMappingVS()"/>
+			<state name="pixel_shader" value="DistanceMappingPS_20()"/>
 		</pass>
 	</technique>
 </effect>

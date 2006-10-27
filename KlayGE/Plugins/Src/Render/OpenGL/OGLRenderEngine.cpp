@@ -298,7 +298,7 @@ namespace KlayGE
 						break;
 
 					case 4:
-						glVertexAttrib3fv(index, float_addr);
+						glVertexAttrib4fv(index, float_addr);
 						break;
 					}
 				}
@@ -547,63 +547,66 @@ namespace KlayGE
 	{
 		TexturePtr texture = sampler->GetTexture();
 
-		glActiveTexture(GL_TEXTURE0 + stage);
-
-		OGLTexture& gl_tex = *checked_pointer_cast<OGLTexture>(texture);
-		GLenum tex_type = gl_tex.GLType();
-		if (!texture)
+		if (texture)
 		{
-			glDisable(tex_type);
-		}
-		else
-		{
-			glEnable(tex_type);
-			gl_tex.GLBindTexture();
+			glActiveTexture(GL_TEXTURE0 + stage);
 
-			glTexParameteri(tex_type, GL_TEXTURE_WRAP_S, OGLMapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_U)));
-			glTexParameteri(tex_type, GL_TEXTURE_WRAP_T, OGLMapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_V)));
-			glTexParameteri(tex_type, GL_TEXTURE_WRAP_R, OGLMapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_W)));
-
-			glTexParameterfv(tex_type, GL_TEXTURE_BORDER_COLOR, &sampler->BorderColor().r());
-
-			switch (sampler->Filtering())
+			OGLTexture& gl_tex = *checked_pointer_cast<OGLTexture>(texture);
+			GLenum tex_type = gl_tex.GLType();
+			if (!texture)
 			{
-			case Sampler::TFO_None:
-			case Sampler::TFO_Point:
-				glTexParameteri(tex_type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-				glTexParameteri(tex_type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-				break;
-
-			case Sampler::TFO_Bilinear:
-				glTexParameteri(tex_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glTexParameteri(tex_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-				break;
-
-			case Sampler::TFO_Trilinear:
-				glTexParameteri(tex_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glTexParameteri(tex_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-				break;
-
-			case Sampler::TFO_Anisotropic:
-				if (caps_.max_texture_anisotropy != 0)
-				{
-					uint32_t anisotropy = std::min(caps_.max_texture_anisotropy, sampler->Anisotropy());
-					glTexParameteri(tex_type, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy);
-				}	
-				break;
-
-			default:
-				BOOST_ASSERT(false);
-				break;
+				glDisable(tex_type);
 			}
-
-			glTexParameteri(tex_type, GL_TEXTURE_MAX_LEVEL, sampler->MaxMipLevel());
-
+			else
 			{
-				GLfloat bias;
-				glGetFloatv(GL_MAX_TEXTURE_LOD_BIAS, &bias);
-				bias = std::min(sampler->MipMapLodBias(), bias);
-				glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, bias);
+				glEnable(tex_type);
+				gl_tex.GLBindTexture();
+
+				glTexParameteri(tex_type, GL_TEXTURE_WRAP_S, OGLMapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_U)));
+				glTexParameteri(tex_type, GL_TEXTURE_WRAP_T, OGLMapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_V)));
+				glTexParameteri(tex_type, GL_TEXTURE_WRAP_R, OGLMapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_W)));
+
+				glTexParameterfv(tex_type, GL_TEXTURE_BORDER_COLOR, &sampler->BorderColor().r());
+
+				switch (sampler->Filtering())
+				{
+				case Sampler::TFO_None:
+				case Sampler::TFO_Point:
+					glTexParameteri(tex_type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+					glTexParameteri(tex_type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+					break;
+
+				case Sampler::TFO_Bilinear:
+					glTexParameteri(tex_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+					glTexParameteri(tex_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+					break;
+
+				case Sampler::TFO_Trilinear:
+					glTexParameteri(tex_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+					glTexParameteri(tex_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+					break;
+
+				case Sampler::TFO_Anisotropic:
+					if (caps_.max_texture_anisotropy != 0)
+					{
+						uint32_t anisotropy = std::min(caps_.max_texture_anisotropy, sampler->Anisotropy());
+						glTexParameteri(tex_type, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy);
+					}	
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
+
+				glTexParameteri(tex_type, GL_TEXTURE_MAX_LEVEL, sampler->MaxMipLevel());
+
+				{
+					GLfloat bias;
+					glGetFloatv(GL_MAX_TEXTURE_LOD_BIAS, &bias);
+					bias = std::min(sampler->MipMapLodBias(), bias);
+					glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, bias);
+				}
 			}
 		}
 	}

@@ -44,20 +44,10 @@ namespace
 
 			RenderEffectPtr effect = rf.LoadEffect("DistanceMapping.kfx");
 
-			if (!effect->TechniqueByName("DistanceMapping30")->Validate())
+			technique_ = effect->TechniqueByName("DistanceMapping2a");
+			if (!technique_->Validate())
 			{
-				if (!effect->TechniqueByName("DistanceMapping2a")->Validate())
-				{
-					technique_ = effect->TechniqueByName("DistanceMapping20");
-				}
-				else
-				{
-					technique_ = effect->TechniqueByName("DistanceMapping2a");
-				}
-			}
-			else
-			{
-				technique_ = effect->TechniqueByName("DistanceMapping30");
+				technique_ = effect->TechniqueByName("DistanceMapping20");
 			}
 
 			diffuse_tex_ = LoadTexture("diffuse.dds");
@@ -264,8 +254,9 @@ void DistanceMapping::DoUpdate(uint32_t /*pass*/)
 	renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 	std::wostringstream stream;
-	stream << this->FPS();
+	stream << this->FPS() << " FPS";
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Distance Mapping");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());
+	font_->RenderText(0, 36, Color(1, 1, 0, 1), renderEngine.Name());
 }
