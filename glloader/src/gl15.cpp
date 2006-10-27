@@ -17,6 +17,7 @@
 
 #include <glloader/glloader.h>
 #include <glloader/gl15.h>
+#include <glloader/gl14.h>
 #include "utils.hpp"
 
 #ifdef GLLOADER_GL
@@ -35,8 +36,6 @@ namespace
 
 	void init_GL_VERSION_1_5()
 	{
-		glloader_init();
-
 		glloader_GL_VERSION_1_5 = _glloader_GL_VERSION_1_5;
 
 		if (glloader_is_supported("GL_VERSION_1_5"))
@@ -126,7 +125,8 @@ namespace
 
 	char APIENTRY self_init_glloader_GL_VERSION_1_5()
 	{
-		glloader_init();
+		glloader_GL_VERSION_1_4();
+
 		init_GL_VERSION_1_5();
 		return glloader_GL_VERSION_1_5();
 	}
