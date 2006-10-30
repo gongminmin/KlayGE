@@ -1,6 +1,8 @@
 <?xml version='1.0'?>
 
 <effect>
+	<include name="../../../RenderFX/PostProcess.fxml"/>
+
 	<parameter type="float4x4" name="InvWVP"/>
 	<parameter type="float4x4" name="WVP"/>
 	<parameter type="float4x4" name="View"/>
@@ -39,10 +41,11 @@ void ParticleVS(float4 pos			: POSITION,
 					out float4 oPosSS	: TEXCOORD1,
 					out float4 oCenterView : TEXCOORD2)
 {
-	oCenterView = mul(float4(pos.xyz, 1), View);
+	/*oCenterView = mul(float4(pos.xyz, 1), View);
 	float4 view_pos = oCenterView;
 	view_pos.xy += (float2(tex.x, 1 - tex.y) * 2 - 1) * point_radius * oCenterView.w;
-	oPos = mul(view_pos, Proj);
+	oPos = mul(view_pos, Proj);*/
+	oPos = mul(mul(float4(pos.xyz, 1) + float4(tex.xy, 0, 0), View), Proj);
 	oTex = tex;
 	oClr = float4(1, 1, 1, pos.w);
 	oPosSS = oPos;
@@ -53,6 +56,8 @@ float4 ParticlePS(float4 clr    : COLOR0,
 						float4 PosSS : TEXCOORD1,
 						float4 CenterView : TEXCOORD2) : COLOR
 {
+	return 1;
+	
 	CenterView /= CenterView.w;
 	PosSS /= PosSS.w;
 	float4 view_pos = mul(PosSS, InvProj);
@@ -90,7 +95,6 @@ float4 ParticlePS(float4 clr    : COLOR0,
 	
 	<technique name="Particle">
 		<pass name="p0">
-		
 			<state name="blend_enable" value="true"/>
 			<state name="src_blend" value="src_alpha"/>
 			<state name="dest_blend" value="inv_src_alpha"/>
@@ -151,15 +155,6 @@ float4 TerrainPS(float2 tex0 : TEXCOORD0,
 	
 	<shader>
 		<![CDATA[
-void CopyVS(float4 pos : POSITION,
-					float2 tex : TEXCOORD0,
-					out float4 oPos : POSITION,
-					out float2 oTex : TEXCOORD0)
-{
-	oPos = pos;
-	oTex = tex;
-}
-
 void CopyPS(float2 tex : TEXCOORD0,
 				out float4 clr : COLOR0,
 				out float depth : DEPTH)
@@ -178,7 +173,7 @@ void CopyPS(float2 tex : TEXCOORD0,
 	
 	<technique name="Copy">
 		<pass name="p0">
-			<state name="vertex_shader" value="CopyVS()"/>
+			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="CopyPS()"/>
 		</pass>
 	</technique>

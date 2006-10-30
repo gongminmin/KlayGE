@@ -1,6 +1,8 @@
 <?xml version='1.0'?>
 
 <effect>
+	<include name="../../../RenderFX/PostProcess.fxml"/>
+
 	<parameter type="sampler" name="src_sampler">
 		<state name="filtering" value="point"/>
 		<state name="address_u" value="clamp"/>
@@ -15,15 +17,6 @@
 
 	<shader>
 		<![CDATA[
-void AsciiArtsVS(float4 pos : POSITION,
-					float2 tex : TEXCOORD0,
-					out float4 oPos : POSITION,
-					out float2 oTex : TEXCOORD0)
-{
-	oPos = pos;
-	oTex = tex;
-}
-
 float4 AsciiArtsPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 {
 	half lum = tex2D(src_sampler, tex_coord0).r;
@@ -37,7 +30,7 @@ float4 AsciiArtsPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
 
-			<state name="vertex_shader" value="AsciiArtsVS()"/>
+			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="AsciiArtsPS()"/>
 		</pass>
 	</technique>

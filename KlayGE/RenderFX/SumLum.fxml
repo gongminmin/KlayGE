@@ -1,6 +1,8 @@
 <?xml version='1.0'?>
 
 <effect>
+	<include name="PostProcess.fxml"/>
+
 	<parameter type="sampler" name="src_sampler">
 		<state name="filtering" value="bilinear"/>
 		<state name="address_u" value="clamp"/>
@@ -20,27 +22,28 @@
 	<shader>
 		<![CDATA[
 void SumLumVS(float4 pos : POSITION,
-					float2 tex : TEXCOORD0,
 					out float4 oPos : POSITION,
-					out float4 oTex[2] : TEXCOORD)
+					out float4 oTex0 : TEXCOORD0,
+					out float4 oTex1 : TEXCOORD1)
 {
-	oPos = pos;
+	oPos = AdjustPos(pos);
 
-	for (int i = 0; i < 2; ++ i)
-	{
-		oTex[i] = tex.xyxy + tex_coord_offset[i];
-	}
+	float2 tex = TexCoordFromPos(pos);
+	oTex0 = tex.xyxy + tex_coord_offset[0];
+	oTex1 = tex.xyxy + tex_coord_offset[1];
 }
 
-float4 SumLum4x4LogPS(float4 iTex[2] : TEXCOORD) : COLOR
+float4 SumLum4x4LogPS(float4 iTex0 : TEXCOORD0,
+						float4 iTex1 : TEXCOORD1) : COLOR
 {
 	const half3 RGB_TO_LUM = half3(0.27, 0.67, 0.06);
+	float4 tex[2] = { iTex0, iTex1 };
 
 	half s = 0;
 	for (int i = 0; i < 2; ++ i)
 	{
-		s += log(dot(tex2D(src_sampler, iTex[i].xy).rgb, RGB_TO_LUM) + 0.001f);
-		s += log(dot(tex2D(src_sampler, iTex[i].zw).rgb, RGB_TO_LUM) + 0.001f);
+		s += log(dot(tex2D(src_sampler, tex[i].xy).rgb, RGB_TO_LUM) + 0.001f);
+		s += log(dot(tex2D(src_sampler, tex[i].zw).rgb, RGB_TO_LUM) + 0.001f);
 	}
 
 	return s / 4;

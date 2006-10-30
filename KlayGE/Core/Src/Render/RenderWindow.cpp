@@ -51,6 +51,11 @@ namespace KlayGE
 		void DoReposition(uint32_t /*left*/, uint32_t /*top*/)
 		{
 		}
+
+		bool RequiresFlipping() const
+		{
+			return false;
+		}
 	};
 
 	// ¹¹Ôìº¯Êý

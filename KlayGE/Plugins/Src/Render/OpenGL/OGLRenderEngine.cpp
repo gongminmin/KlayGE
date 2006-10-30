@@ -201,6 +201,128 @@ namespace KlayGE
 
 		for (uint32_t instance = 0; instance < num_instance; ++ instance)
 		{
+			if (rl.InstanceStream())
+			{
+				GraphicsBuffer& stream = *rl.InstanceStream();
+
+				uint32_t const instance_size = rl.InstanceSize();
+				GraphicsBuffer::Mapper mapper(stream, BA_Read_Only);
+				uint8_t const * buffer = mapper.Pointer<uint8_t>();
+
+				uint32_t elem_offset = 0;
+				for (uint32_t i = 0; i < rl.InstanceStreamFormat().size(); ++ i)
+				{
+					vertex_element const & vs_elem = rl.InstanceStreamFormat()[i];
+					void const * addr = &buffer[instance * instance_size + elem_offset];
+					GLfloat const * float_addr = static_cast<GLfloat const *>(addr);
+					GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
+					BOOST_ASSERT(IsFloatFormat(vs_elem.format));
+
+					switch (vs_elem.usage)
+					{
+					case VEU_Position:
+						switch (num_components)
+						{
+						case 2:
+							glVertex2fv(float_addr);
+							break;
+
+						case 3:
+							glVertex3fv(float_addr);
+							break;
+
+						case 4:
+							glVertex4fv(float_addr);
+							break;
+
+						default:
+							BOOST_ASSERT(false);
+							break;
+						}
+						break;
+
+					case VEU_Normal:
+						switch (num_components)
+						{
+						case 3:
+							glNormal3fv(float_addr);
+							break;
+
+						default:
+							BOOST_ASSERT(false);
+							break;
+						}
+						break;
+
+					case VEU_Diffuse:
+						switch (num_components)
+						{
+						case 3:
+							glColor3fv(float_addr);
+							break;
+
+						case 4:
+							glColor4fv(float_addr);
+							break;
+
+						default:
+							BOOST_ASSERT(false);
+							break;
+						}
+						break;
+
+					case VEU_Specular:
+						switch (num_components)
+						{
+						case 3:
+							glSecondaryColor3fv(float_addr);
+							break;
+						
+						default:
+							BOOST_ASSERT(false);
+							break;
+						}
+						break;
+
+					case VEU_TextureCoord:
+						{
+							GLenum target = GL_TEXTURE0 + vs_elem.usage_index;
+							glActiveTexture(target);
+						
+							switch (num_components)
+							{
+							case 1:
+								glMultiTexCoord1fv(target, float_addr);
+								break;
+
+							case 2:
+								glMultiTexCoord2fv(target, float_addr);
+								break;
+
+							case 3:
+								glMultiTexCoord3fv(target, float_addr);
+								break;
+
+							case 4:
+								glMultiTexCoord4fv(target, float_addr);
+								break;
+							
+							default:
+								BOOST_ASSERT(false);
+								break;
+							}
+						}
+						break;
+
+					default:
+						BOOST_ASSERT(false);
+						break;
+					}
+
+					elem_offset += vs_elem.element_size();
+				}
+			}
+
 			size_t const vertexCount = rl.UseIndices() ? rl.NumIndices() : rl.NumVertices();
 			GLenum mode;
 			uint32_t primCount;
@@ -232,7 +354,7 @@ namespace KlayGE
 					pass->Begin();
 					this->DoFlushRenderStates();
 
-					this->AttachAttribs(instance, rl, pass);
+					this->AttachAttribs(rl, pass);
 
 					glDrawElements(mode, static_cast<GLsizei>(rl.NumIndices()),
 						index_type, 0);
@@ -249,7 +371,7 @@ namespace KlayGE
 					pass->Begin();
 					this->DoFlushRenderStates();
 
-					this->AttachAttribs(instance, rl, pass);
+					this->AttachAttribs(rl, pass);
 
 					glDrawArrays(mode, 0, static_cast<GLsizei>(rl.NumVertices()));
 					
@@ -265,47 +387,9 @@ namespace KlayGE
 	{
 	}
 
-	void OGLRenderEngine::AttachAttribs(uint32_t instance, RenderLayout const & rl, RenderPassPtr pass)
+	void OGLRenderEngine::AttachAttribs(RenderLayout const & rl, RenderPassPtr pass)
 	{
 		OGLRenderPassPtr ogl_pass = checked_pointer_cast<OGLRenderPass>(pass);
-
-		if (rl.InstanceStream())
-		{
-			GraphicsBuffer& stream = *rl.InstanceStream();
-
-			uint32_t const instance_size = rl.InstanceSize();
-			GraphicsBuffer::Mapper mapper(stream, BA_Read_Only);
-			uint8_t const * buffer = mapper.Pointer<uint8_t>();
-
-			uint32_t elem_offset = 0;
-			for (uint32_t i = 0; i < rl.InstanceStreamFormat().size(); ++ i)
-			{
-				vertex_element const & vs_elem = rl.InstanceStreamFormat()[i];
-				int32_t const index = ogl_pass->AttribIndex(vs_elem.usage, vs_elem.usage_index);
-				if (index >= 0)
-				{
-					void const * addr = &buffer[instance * instance_size + elem_offset];
-					GLfloat const * float_addr = static_cast<GLfloat const *>(addr);
-
-					switch (NumComponents(vs_elem.format))
-					{
-					case 2:
-						glVertexAttrib2fv(index, float_addr);
-						break;
-
-					case 3:
-						glVertexAttrib3fv(index, float_addr);
-						break;
-
-					case 4:
-						glVertexAttrib4fv(index, float_addr);
-						break;
-					}
-				}
-
-				elem_offset += vs_elem.element_size();
-			}
-		}
 
 		// Geometry streams
 		for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
@@ -333,7 +417,7 @@ namespace KlayGE
 					stream.Active();
 					glVertexAttribPointer(index, num_components, type, GL_FALSE, size, offset);
 
-					vertex_attrib_indices_.push_back(index);
+					vertex_attrib_indices_.push_back(static_cast<uint8_t>(index));
 				}
 
 				elem_offset += vs_elem.element_size();

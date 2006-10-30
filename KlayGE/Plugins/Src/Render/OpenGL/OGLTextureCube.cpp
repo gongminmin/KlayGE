@@ -86,7 +86,7 @@ namespace KlayGE
 					GLsizei const image_size = ((size + 3) / 4) * ((size + 3) / 4) * block_size;
 					std::vector<uint8_t> data(image_size, 0);
 
-					glCompressedTexImage2D(GL_TEXTURE_2D, level, glinternalFormat,
+					glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glinternalFormat,
 						size, size, 0, image_size, &data[0]);
 				}
 				else
@@ -223,7 +223,7 @@ namespace KlayGE
 		glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
 		for (uint16_t level = 0; level < numMipMaps_; ++ level)
 		{
-			glGetTexLevelParameteriv(GL_TEXTURE_CUBE_MAP, level, GL_TEXTURE_WIDTH, &w);
+			glGetTexLevelParameteriv(GL_TEXTURE_CUBE_MAP_POSITIVE_X, level, GL_TEXTURE_WIDTH, &w);
 			widths_[level] = w;
 		}
 	}

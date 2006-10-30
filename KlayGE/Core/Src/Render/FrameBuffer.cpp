@@ -27,6 +27,11 @@ namespace KlayGE
 		void Detach(uint32_t /*att*/)
 		{
 		}
+
+		bool RequiresFlipping() const
+		{
+			return false;
+		}
 	};
 
 	FrameBuffer::~FrameBuffer()

@@ -26,7 +26,7 @@ namespace KlayGE
 		{
 		}
 
-		virtual void Source(TexturePtr const & tex);
+		virtual void Source(TexturePtr const & tex, bool flipping);
 		virtual void Destinate(RenderTargetPtr const & rt);
 
 		virtual void Apply();
@@ -35,6 +35,8 @@ namespace KlayGE
 
 	protected:
 		TexturePtr src_texture_;
+		bool flipping_;
+
 		RenderTargetPtr render_target_;
 
 		GraphicsBufferPtr pos_vb_;

@@ -214,25 +214,18 @@ namespace
 				{
 					Rect_T<float> const & texRect(cmiter->second.texRect);
 
-					vertices_.push_back(FontVert());
-					vertices_.back().pos = float3(x + 0, y + 0, sz);
-					vertices_.back().clr = clr32;
-					vertices_.back().tex = float2(texRect.left(), texRect.top());
-
-					vertices_.push_back(FontVert());
-					vertices_.back().pos = float3(x + w, y + 0, sz);
-					vertices_.back().clr = clr32;
-					vertices_.back().tex = float2(texRect.right(), texRect.top());
-
-					vertices_.push_back(FontVert());
-					vertices_.back().pos = float3(x + w, y + h, sz);
-					vertices_.back().clr = clr32;
-					vertices_.back().tex = float2(texRect.right(), texRect.bottom());
-
-					vertices_.push_back(FontVert());
-					vertices_.back().pos = float3(x + 0, y + h, sz);
-					vertices_.back().clr = clr32;
-					vertices_.back().tex = float2(texRect.left(), texRect.bottom());
+					vertices_.push_back(FontVert(float3(x + 0, y + 0, sz),
+											clr32,
+											float2(texRect.left(), texRect.top())));
+					vertices_.push_back(FontVert(float3(x + w, y + 0, sz),
+											clr32,
+											float2(texRect.right(), texRect.top())));
+					vertices_.push_back(FontVert(float3(x + w, y + h, sz),
+											clr32,
+											float2(texRect.right(), texRect.bottom())));
+					vertices_.push_back(FontVert(float3(x + 0, y + h, sz),
+											clr32,
+											float2(texRect.left(), texRect.bottom())));
 
 					indices_.push_back(lastIndex + 0);
 					indices_.push_back(lastIndex + 1);
@@ -380,6 +373,14 @@ namespace
 			float3 pos;
 			uint32_t clr;
 			float2 tex;
+
+			FontVert()
+			{
+			}
+			FontVert(float3 const & pos, uint32_t clr, float2 const & tex)
+				: pos(pos), clr(clr), tex(tex)
+			{
+			}
 		};
 #ifdef KLAYGE_PLATFORM_WINDOWS
 	#pragma pack(pop)

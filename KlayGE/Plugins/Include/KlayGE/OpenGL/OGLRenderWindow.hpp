@@ -38,6 +38,11 @@ namespace KlayGE
 		void WindowMovedOrResized();
 
 		void OnBind();
+
+		bool RequiresFlipping() const
+		{
+			return false;
+		}
 		
 	private:
 		void DoReposition(uint32_t left, uint32_t top);

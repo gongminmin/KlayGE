@@ -240,7 +240,11 @@ namespace KlayGE
 		viewport_.width = width_;
 		viewport_.height = height_;
 
-		description_ = L"OpenGL Render Window";
+		std::wstring vendor, renderer, version;
+		Convert(vendor, reinterpret_cast<char const *>(glGetString(GL_VENDOR)));
+		Convert(renderer, reinterpret_cast<char const *>(glGetString(GL_RENDERER)));
+		Convert(version, reinterpret_cast<char const *>(glGetString(GL_VERSION)));
+		description_ = vendor + L" " + renderer + L" " + version;
 
 		active_ = true;
 		ready_ = true;

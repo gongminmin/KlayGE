@@ -1,6 +1,8 @@
 <?xml version='1.0'?>
 
 <effect>
+	<include name="PostProcess.fxml"/>
+
 	<parameter type="sampler" name="src_sampler">
 		<state name="filtering" value="bilinear"/>
 		<state name="address_u" value="clamp"/>
@@ -42,28 +44,18 @@ float4 ToneMapping(float3 color, float3 blur, float adapted_lum)
 }
 
 void ToneMapping30VS(float4 pos : POSITION,
-					float2 tex : TEXCOORD0,
 					out float4 oPos : POSITION,
 					out float3 oTex : TEXCOORD0)
 {
-	oPos = pos;
-	oTex.xy = tex;
+	oPos = AdjustPos(pos);
+
+	oTex.xy = TexCoordFromPos(pos);
 	oTex.z = max(0.001f, tex2Dlod(lum_sampler, float4(0.5f, 0.5f, 0, 0)).r);
 }
 
 float4 ToneMapping30PS(float3 iTex : TEXCOORD0) : COLOR
 {
 	return ToneMapping(tex2D(src_sampler, iTex.xy), tex2D(bloom_sampler, iTex.xy), iTex.z);
-}
-
-
-void ToneMapping20VS(float4 pos : POSITION,
-					float2 tex : TEXCOORD0,
-					out float4 oPos : POSITION,
-					out float2 oTex : TEXCOORD0)
-{
-	oPos = pos;
-	oTex = tex;
 }
 
 float4 ToneMapping20PS(float2 iTex : TEXCOORD0) : COLOR
@@ -87,7 +79,7 @@ float4 ToneMapping20PS(float2 iTex : TEXCOORD0) : COLOR
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
 
-			<state name="vertex_shader" value="ToneMapping20VS()"/>
+			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="ToneMapping20PS()"/>
 		</pass>
 	</technique>

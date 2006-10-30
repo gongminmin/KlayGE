@@ -1,6 +1,8 @@
 <?xml version='1.0'?>
 
 <effect>
+	<include name="PostProcess.fxml"/>
+
 	<parameter type="sampler" name="src_sampler">
 		<state name="filtering" value="bilinear"/>
 		<state name="address_u" value="clamp"/>
@@ -13,39 +15,59 @@
 	<shader>
 		<![CDATA[
 void BlurXVS(float4 pos : POSITION,
-					float2 tex : TEXCOORD0,
 					out float4 oPos : POSITION,
-					out float4 oTex[4] : TEXCOORD)
+					out float4 oTex0 : TEXCOORD0,
+					out float4 oTex1 : TEXCOORD1,
+					out float4 oTex2 : TEXCOORD2,
+					out float4 oTex3 : TEXCOORD3)
 {
-	oPos = pos;
-
+	oPos = AdjustPos(pos);
+	
+	float2 Tex0 = TexCoordFromPos(pos);
+	float4 tex[4];
 	for (int i = 0; i < 4; ++ i)
 	{
-		oTex[i] = tex.xyxy + float4(tex_coord_offset[i * 2 + 0], 0, tex_coord_offset[i * 2 + 1], 0);
+		tex[i] = Tex0.xyxy + float4(tex_coord_offset[i * 2 + 0], 0, tex_coord_offset[i * 2 + 1], 0);
 	}
+	oTex0 = tex[0];
+	oTex1 = tex[1];
+	oTex2 = tex[2];
+	oTex3 = tex[3];
 }
 
 void BlurYVS(float4 pos : POSITION,
-					float2 tex : TEXCOORD0,
 					out float4 oPos : POSITION,
-					out float4 oTex[4] : TEXCOORD)
+					out float4 oTex0 : TEXCOORD0,
+					out float4 oTex1 : TEXCOORD1,
+					out float4 oTex2 : TEXCOORD2,
+					out float4 oTex3 : TEXCOORD3)
 {
-	oPos = pos;
+	oPos = AdjustPos(pos);
 
+	float2 Tex0 = TexCoordFromPos(pos);
+	float4 tex[4];
 	for (int i = 0; i < 4; ++ i)
 	{
-		oTex[i] = tex.xyxy + float4(0, tex_coord_offset[i * 2 + 0], 0, tex_coord_offset[i * 2 + 1]);
+		tex[i] = Tex0.xyxy + float4(0, tex_coord_offset[i * 2 + 0], 0, tex_coord_offset[i * 2 + 1]);
 	}
+	oTex0 = tex[0];
+	oTex1 = tex[1];
+	oTex2 = tex[2];
+	oTex3 = tex[3];
 }
 
-float4 BlurPS(float4 iTex[4] : TEXCOORD) : COLOR0
+float4 BlurPS(float4 iTex0 : TEXCOORD0,
+				float4 iTex1 : TEXCOORD1,
+				float4 iTex2 : TEXCOORD2,
+				float4 iTex3 : TEXCOORD3) : COLOR0
 {
 	half4 color = half4(0, 0, 0, 1);
+	float4 tex[4] = { iTex0, iTex1, iTex2, iTex3 };
 
 	for (int i = 0; i < 4; ++ i)
 	{
-		color.rgb += tex2D(src_sampler, iTex[i].xy).rgb * color_weight[i * 2 + 0];
-		color.rgb += tex2D(src_sampler, iTex[i].zw).rgb * color_weight[i * 2 + 1];
+		color.rgb += tex2D(src_sampler, tex[i].xy).rgb * color_weight[i * 2 + 0];
+		color.rgb += tex2D(src_sampler, tex[i].zw).rgb * color_weight[i * 2 + 1];
 	}
 
 	return color;

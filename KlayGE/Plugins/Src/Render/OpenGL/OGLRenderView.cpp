@@ -29,7 +29,7 @@ namespace
 	{
 		GLenum status;
 		status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-		switch(status)
+		switch (status)
 		{
 		case GL_FRAMEBUFFER_COMPLETE_EXT:
 			return true;

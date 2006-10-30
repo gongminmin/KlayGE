@@ -281,7 +281,7 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 	hdr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0));
 	hdr_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));
 
-	hdr_->Source(hdr_tex_);
+	hdr_->Source(hdr_tex_, hdr_buffer_->RequiresFlipping());
 }
 
 void Refract::InputHandler(InputEngine const & /*sender*/, InputAction const & action)

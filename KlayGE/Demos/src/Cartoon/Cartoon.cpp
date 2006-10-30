@@ -18,6 +18,7 @@
 #include <KlayGE/Util.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
+#include <KlayGE/OpenGL/OGLRenderFactory.hpp>
 
 #include <KlayGE/OCTree/OCTree.hpp>
 
@@ -68,9 +69,10 @@ namespace
 			}
 		}
 
-		void UpdateTexture(TexturePtr const & normal_depth_tex)
+		void UpdateTexture(TexturePtr const & normal_depth_tex, bool flipping)
 		{
 			normal_depth_tex_ = normal_depth_tex;
+			flipping_ = flipping;
 		}
 
 		void OnRenderBegin()
@@ -100,11 +102,13 @@ namespace
 
 			*(effect_->ParameterByName("toonmap_sampler")) = toon_tex_;
 			*(effect_->ParameterByName("normal_depth_sampler")) = normal_depth_tex_;
+			*(effect_->ParameterByName("flipping")) = flipping_ ? -1 : +1;
 		}
 
 	private:
 		TexturePtr toon_tex_;
 		TexturePtr normal_depth_tex_;
+		bool flipping_;
 
 		float4x4 model_mat_;
 
@@ -242,7 +246,8 @@ void Cartoon::DoUpdate(uint32_t pass)
 		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 		sceneMgr.Clear();
-		checked_pointer_cast<RenderTorus>(torus_->GetRenderable())->UpdateTexture(normal_depth_tex_);
+		checked_pointer_cast<RenderTorus>(torus_->GetRenderable())->UpdateTexture(normal_depth_tex_,
+			normal_depth_buffer_->RequiresFlipping());
 		checked_pointer_cast<RenderTorus>(torus_->GetRenderable())->Pass(1);
 		torus_->AddToSceneManager();
 

@@ -811,6 +811,11 @@ class effect:
 def preprocess(file_name):
 	ret = ''
 
+	dir = ''
+	last_slash = file_name.rfind('/')
+	if last_slash != -1:
+		dir = file_name[0 : last_slash + 1]
+
 	import xml.dom
 	
 	from xml.dom.minidom import parse
@@ -821,7 +826,7 @@ def preprocess(file_name):
 		for include_file in include_files:
 			include_name = include_file.getAttribute('name')
 			if len(include_name) != 0:
-				include_dom = parse(include_name)
+				include_dom = parse(dir + include_name)
 				for child in include_dom.documentElement.childNodes:
 					if xml.dom.Node.ELEMENT_NODE == child.nodeType:
 						dom.documentElement.insertBefore(child, include_file)
@@ -840,6 +845,9 @@ if __name__ == '__main__':
 	if len(sys.argv) >= 3:
 		input_name = sys.argv[1]
 		output_name = sys.argv[2]
+
+	input_name = input_name.replace('\\', '/')
+	output_name = output_name.replace('\\', '/')
 
 	dom = preprocess(input_name);
 	fx = effect(dom.documentElement)

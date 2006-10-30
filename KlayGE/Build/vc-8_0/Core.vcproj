@@ -354,6 +354,370 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="特效脚本文件"
+				>
+				<File
+					RelativePath="..\..\RenderFX\2D.fxml"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\RenderFX\Blur.fxml"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\RenderFX\Bone.fxml"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\RenderFX\DownSample.fxml"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\RenderFX\Fog.fxml"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\RenderFX\Font.fxml"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\RenderFX\KMesh.fxml"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\RenderFX\Lighting.fxml"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\RenderFX\PointSprite.fxml"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\RenderFX\PostProcess.fxml"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\RenderFX\Quaternion.fxml"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\RenderFX\RenderableHelper.fxml"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\RenderFX\SumLum.fxml"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\RenderFX\ToneMapping.fxml"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\RenderFX\util.fxml"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(TargetDir)..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="核心"

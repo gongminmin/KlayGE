@@ -13,6 +13,7 @@
 #include <KlayGE/KMesh.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
+#include <KlayGE/OpenGL/OGLRenderFactory.hpp>
 
 #include <KlayGE/Input.hpp>
 #include <KlayGE/DInput/DInputFactory.hpp>

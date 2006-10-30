@@ -20,6 +20,7 @@
 #include <KlayGE/Util.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
+#include <KlayGE/OpenGL/OGLRenderFactory.hpp>
 
 #include <KlayGE/Input.hpp>
 #include <KlayGE/DInput/DInputFactory.hpp>
@@ -57,9 +58,9 @@ namespace
 		{
 		}
 
-		void Source(TexturePtr const & src_tex)
+		void Source(TexturePtr const & src_tex, bool flipping)
 		{
-			PostProcess::Source(src_tex);
+			PostProcess::Source(src_tex, flipping);
 
 			this->GetSampleOffsets8x8(src_tex->Width(0), src_tex->Height(0));
 		}
@@ -293,10 +294,10 @@ void AsciiArtsApp::OnResize(uint32_t width, uint32_t height)
 
 	FrameBufferPtr fb = rf.MakeFrameBuffer();
 	fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*downsample_tex_, 0));
-	downsampler_->Source(rendered_tex_);
+	downsampler_->Source(rendered_tex_, render_buffer_->RequiresFlipping());
 	downsampler_->Destinate(fb);
 
-	ascii_arts_->Source(downsample_tex_);
+	ascii_arts_->Source(downsample_tex_, fb->RequiresFlipping());
 }
 
 uint32_t AsciiArtsApp::NumPasses() const
@@ -349,8 +350,12 @@ void AsciiArtsApp::DoUpdate(uint32_t pass)
 			break;
 
 		case 1:
+			//SaveTexture(rendered_tex_, "rendered_tex.dds");
+
 			// ½µ²ÉÑù
 			downsampler_->Apply();
+
+			//SaveTexture(downsample_tex_, "downsample_tex.dds");
 
 			// Æ¥Åä£¬×îÖÕäÖÈ¾
 			ascii_arts_->Apply();

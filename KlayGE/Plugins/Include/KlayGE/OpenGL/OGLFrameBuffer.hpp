@@ -32,6 +32,11 @@ namespace KlayGE
 
 		void OnBind();
 
+		bool RequiresFlipping() const
+		{
+			return false;
+		}
+
 		GLuint OGLFbo() const
 		{
 			return fbo_;

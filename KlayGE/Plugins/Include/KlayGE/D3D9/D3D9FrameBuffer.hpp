@@ -38,6 +38,11 @@ namespace KlayGE
 
 		void OnBind();
 
+		bool RequiresFlipping() const
+		{
+			return true;
+		}
+
 	private:
 		void DoOnLostDevice();
 		void DoOnResetDevice();

@@ -36,6 +36,7 @@ half4 NormalDepthPS(float3 normal : TEXCOORD0, float2 depth : TEXCOORD1) : COLOR
 	<parameter type="float" name="inv_width"/>
 	<parameter type="float" name="inv_height"/>
 	<parameter type="float2" name="offset"/>
+	<parameter type="int" name="flipping"/>
 
 	<parameter type="sampler" name="toonmap_sampler">
 		<state name="filtering" value="point"/>
@@ -65,7 +66,7 @@ void PostToonVS(float4 pos : POSITION,
 	oPos = mul(mul(pos, model_view), proj);
 	
 	oTc0 = oPos.xy / oPos.w + offset;
-	oTc0.y = -oTc0.y;
+	oTc0.y *= flipping;
 	oTc0 = oTc0 / 2 + 0.5f;
 
 	oTc1 = oTc0.xyxy + float4(-inv_width, -inv_height, +inv_width, +inv_height);
@@ -115,7 +116,7 @@ float4 PostToonPS(float2 tc0 : TEXCOORD0,
 	dd.w = (dd.w > 0) ? 1 : 0;
 	half de = (dot(dd, e_weights.y).x < 1) ? 1 : 0;
 
-	return tex1D(toonmap_sampler, toon) * de * ne;
+	return tex2D(toonmap_sampler, float2(toon, 0.5f)) * de * ne;
 }
 		]]>
 	</shader>

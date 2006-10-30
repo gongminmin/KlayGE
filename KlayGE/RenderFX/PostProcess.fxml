@@ -1,0 +1,31 @@
+<?xml version='1.0'?>
+
+<effect>
+	<parameter type='float4' name='texel_to_pixel_offset'/>
+	<parameter type='int' name='flipping'/>
+	
+	<shader>
+		<![CDATA[
+float4 AdjustPos(float4 pos)
+{
+	return pos + texel_to_pixel_offset;
+}
+
+float2 TexCoordFromPos(float4 pos)
+{
+	float2 tex = pos.xy / 2;
+	tex.y *= flipping;
+	tex += 0.5;
+	return tex;
+}
+
+void PostProcessVS(float4 pos : POSITION,
+					out float4 oPos : POSITION,
+					out float2 oTex : TEXCOORD0)
+{
+	oPos = AdjustPos(pos);
+	oTex = TexCoordFromPos(pos);
+}
+		]]>
+	</shader>
+</effect>

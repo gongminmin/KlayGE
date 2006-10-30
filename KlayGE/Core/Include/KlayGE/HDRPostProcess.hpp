@@ -33,7 +33,7 @@ namespace KlayGE
 		BlurPostProcess(std::string const & tech, int kernel_radius, float multiplier);
 		virtual ~BlurPostProcess();
 
-		void Source(TexturePtr const & src_tex);
+		void Source(TexturePtr const & src_tex, bool flipping);
 
 		void OnRenderBegin();
 
@@ -67,7 +67,7 @@ namespace KlayGE
 		explicit SumLumPostProcess(std::string const & tech);
 		virtual ~SumLumPostProcess();
 
-		void Source(TexturePtr const & src_tex);
+		void Source(TexturePtr const & src_tex, bool flipping);
 
 		void OnRenderBegin();
 
@@ -133,7 +133,7 @@ namespace KlayGE
 	public:
 		HDRPostProcess();
 
-		void Source(TexturePtr const & tex);
+		void Source(TexturePtr const & tex, bool flipping);
 		void Apply();
 
 	private:

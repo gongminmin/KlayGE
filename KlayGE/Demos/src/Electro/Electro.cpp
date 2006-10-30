@@ -16,6 +16,7 @@
 #include <KlayGE/PerlinNoise.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
+#include <KlayGE/OpenGL/OGLRenderFactory.hpp>
 
 #include <vector>
 #include <sstream>

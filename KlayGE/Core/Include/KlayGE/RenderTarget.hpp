@@ -47,6 +47,8 @@ namespace KlayGE
 		virtual bool Active() const;
 		virtual void Active(bool state);
 
+		virtual bool RequiresFlipping() const = 0;
+
 		virtual void SwapBuffers() = 0;
 
 		virtual void OnBind() = 0;

@@ -43,9 +43,9 @@ namespace KlayGE
 	{
 	}
 
-	void BlurPostProcess::Source(TexturePtr const & src_tex)
+	void BlurPostProcess::Source(TexturePtr const & src_tex, bool flipping)
 	{
-		PostProcess::Source(src_tex);
+		PostProcess::Source(src_tex, flipping);
 
 		this->CalSampleOffsets(src_texture_->Width(0), 3);
 	}
@@ -127,9 +127,9 @@ namespace KlayGE
 	{
 	}
 
-	void SumLumPostProcess::Source(TexturePtr const & src_tex)
+	void SumLumPostProcess::Source(TexturePtr const & src_tex, bool flipping)
 	{
-		PostProcess::Source(src_tex);
+		PostProcess::Source(src_tex, flipping);
 
 		this->GetSampleOffsets4x4(src_tex->Width(0), src_tex->Height(0));
 	}
@@ -261,9 +261,9 @@ namespace KlayGE
 		adapted_lum_.reset(new AdaptedLumPostProcess);
 	}
 
-	void HDRPostProcess::Source(TexturePtr const & tex)
+	void HDRPostProcess::Source(TexturePtr const & tex, bool flipping)
 	{
-		PostProcess::Source(tex);
+		PostProcess::Source(tex, flipping);
 
 		uint32_t const width = tex->Width(0);
 		uint32_t const height = tex->Height(0);
@@ -283,46 +283,52 @@ namespace KlayGE
 		}
 		std::reverse(lum_texs_.begin(), lum_texs_.end());
 
+		bool tmp_flipping;
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*downsample_tex_, 0));
-			downsampler_->Source(src_texture_);
+			downsampler_->Source(src_texture_, flipping);
 			downsampler_->Destinate(fb);
+			tmp_flipping = fb->RequiresFlipping();
 		}
 
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blurx_tex_, 0));
-			blur_x_->Source(downsample_tex_);
+			blur_x_->Source(downsample_tex_, tmp_flipping);
 			blur_x_->Destinate(fb);
+			tmp_flipping = fb->RequiresFlipping();
 		}
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blury_tex_, 0));
-			blur_y_->Source(blurx_tex_);
+			blur_y_->Source(blurx_tex_, tmp_flipping);
 			blur_y_->Destinate(fb);
+			tmp_flipping = fb->RequiresFlipping();
 		}
 
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[0], 0));
-			sum_lums_[0]->Source(src_texture_);
+			sum_lums_[0]->Source(src_texture_, tmp_flipping);
 			sum_lums_[0]->Destinate(fb);
+			tmp_flipping = fb->RequiresFlipping();
 		}
 		for (int i = 1; i < NUM_TONEMAP_TEXTURES + 1; ++ i)
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[i], 0));
-			sum_lums_[i]->Source(lum_texs_[i - 1]);
+			sum_lums_[i]->Source(lum_texs_[i - 1], tmp_flipping);
 			sum_lums_[i]->Destinate(fb);
+			tmp_flipping = fb->RequiresFlipping();
 		}
 
 		{
-			adapted_lum_->Source(lum_texs_[NUM_TONEMAP_TEXTURES]);
+			adapted_lum_->Source(lum_texs_[NUM_TONEMAP_TEXTURES], tmp_flipping);
 		}
 
 		{
-			tone_mapping_->Source(src_texture_);
+			tone_mapping_->Source(src_texture_, flipping);
 			tone_mapping_->Destinate(render_target_);
 		}
 	}

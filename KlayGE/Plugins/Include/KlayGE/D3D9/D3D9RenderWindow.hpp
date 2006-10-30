@@ -57,6 +57,11 @@ namespace KlayGE
 
 		void OnBind();
 
+		bool RequiresFlipping() const
+		{
+			return false;
+		}
+
 	private:
 		void UpdateSurfacesPtrs();
 		void ResetDevice();

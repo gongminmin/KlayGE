@@ -403,7 +403,7 @@ void ParticleSystemApp::OnResize(uint32_t width, uint32_t height)
 
 	checked_pointer_cast<RenderParticle>(renderInstance_)->SceneTexture(scene_tex_);
 
-	copy_pp_->Source(scene_tex_);
+	copy_pp_->Source(scene_tex_, scene_buffer_->RequiresFlipping());
 }
 
 void ParticleSystemApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
