@@ -235,6 +235,13 @@ namespace KlayGE
 			glSampleCoverage(settings.multi_sample / 16.0f, false);
 		}
 
+		if (glloader_GL_ARB_color_buffer_float())
+		{
+			glClampColorARB(GL_CLAMP_VERTEX_COLOR_ARB, GL_TRUE);
+			glClampColorARB(GL_CLAMP_FRAGMENT_COLOR_ARB, GL_TRUE);
+			glClampColorARB(GL_CLAMP_READ_COLOR_ARB, GL_TRUE);
+		}
+
 		viewport_.left = 0;
 		viewport_.top = 0;
 		viewport_.width = width_;
