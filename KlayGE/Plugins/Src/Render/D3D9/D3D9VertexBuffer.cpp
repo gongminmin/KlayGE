@@ -35,14 +35,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(size_in_byte_ != 0);
 
-		uint32_t vb_size = 0;
-		if (buffer_)
-		{
-			D3DVERTEXBUFFER_DESC desc;
-			buffer_->GetDesc(&desc);
-			vb_size = desc.Size;
-		}
-		if (this->Size() > vb_size)
+		if (this->Size() > hw_buf_size_)
 		{
 			D3D9RenderEngine const & renderEngine(*checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 			d3d_device_ = renderEngine.D3DDevice();
@@ -51,6 +44,7 @@ namespace KlayGE
 			TIF(d3d_device_->CreateVertexBuffer(static_cast<UINT>(this->Size()),
 					0, 0, D3DPOOL_MANAGED, &buffer, NULL));
 			buffer_ = MakeCOMPtr(buffer);
+			hw_buf_size_ = this->Size();
 		}
 	}
 

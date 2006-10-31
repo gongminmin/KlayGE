@@ -32,13 +32,17 @@ namespace KlayGE
 	{
 	public:
 		explicit D3D9GraphicsBuffer(BufferUsage usage)
-			: GraphicsBuffer(usage)
+			: GraphicsBuffer(usage),
+				hw_buf_size_(0)
 		{
 		}
 
 		virtual ~D3D9GraphicsBuffer()
 		{
 		}
+
+	protected:
+		uint32_t hw_buf_size_;
 	};
 	typedef boost::shared_ptr<D3D9GraphicsBuffer> D3D9GraphicsBufferPtr;
 
