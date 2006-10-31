@@ -272,7 +272,7 @@ namespace KlayGE
 						case 3:
 							glSecondaryColor3fv(float_addr);
 							break;
-						
+
 						default:
 							BOOST_ASSERT(false);
 							break;
@@ -283,7 +283,7 @@ namespace KlayGE
 						{
 							GLenum target = GL_TEXTURE0 + vs_elem.usage_index;
 							glActiveTexture(target);
-						
+
 							switch (num_components)
 							{
 							case 1:
@@ -301,7 +301,7 @@ namespace KlayGE
 							case 4:
 								glMultiTexCoord4fv(target, float_addr);
 								break;
-							
+
 							default:
 								BOOST_ASSERT(false);
 								break;
@@ -364,6 +364,9 @@ namespace KlayGE
 						stream.Active();
 						glTexCoordPointer(num_components, type, size, offset);
 						break;
+
+					default:
+						break;
 					}
 
 					elem_offset += vs_elem.element_size();
@@ -405,7 +408,7 @@ namespace KlayGE
 
 					glDrawElements(mode, static_cast<GLsizei>(rl.NumIndices()),
 						index_type, 0);
-					
+
 					pass->End();
 				}
 			}
@@ -421,7 +424,7 @@ namespace KlayGE
 					this->AttachAttribs(rl, pass);
 
 					glDrawArrays(mode, 0, static_cast<GLsizei>(rl.NumVertices()));
-					
+
 					pass->End();
 				}
 			}
@@ -535,7 +538,7 @@ namespace KlayGE
 				OGLMapping::Mapping(static_cast<AlphaBlendFactor>(render_states_[RST_SrcBlendAlpha])),
 				OGLMapping::Mapping(static_cast<AlphaBlendFactor>(render_states_[RST_DestBlendAlpha])));
 		}
-			
+
 		if (dirty_render_states_[RST_DepthEnable])
 		{
 			if (render_states_[RST_DepthEnable])
@@ -635,28 +638,28 @@ namespace KlayGE
 		if (dirty_render_states_[RST_ColorMask0])
 		{
 			glColorMask((render_states_[RST_ColorMask0] & CMASK_Red) != 0,
-				(render_states_[RST_ColorMask0] & CMASK_Green) != 0, 
+				(render_states_[RST_ColorMask0] & CMASK_Green) != 0,
 				(render_states_[RST_ColorMask0] & CMASK_Blue) != 0,
 				(render_states_[RST_ColorMask0] & CMASK_Alpha) != 0);
 		}
 		if (dirty_render_states_[RST_ColorMask1])
 		{
 			glColorMask((render_states_[RST_ColorMask1] & CMASK_Red) != 0,
-				(render_states_[RST_ColorMask1] & CMASK_Green) != 0, 
+				(render_states_[RST_ColorMask1] & CMASK_Green) != 0,
 				(render_states_[RST_ColorMask1] & CMASK_Blue) != 0,
 				(render_states_[RST_ColorMask1] & CMASK_Alpha) != 0);
 		}
 		if (dirty_render_states_[RST_ColorMask2])
 		{
 			glColorMask((render_states_[RST_ColorMask2] & CMASK_Red) != 0,
-				(render_states_[RST_ColorMask2] & CMASK_Green) != 0, 
+				(render_states_[RST_ColorMask2] & CMASK_Green) != 0,
 				(render_states_[RST_ColorMask2] & CMASK_Blue) != 0,
 				(render_states_[RST_ColorMask2] & CMASK_Alpha) != 0);
 		}
 		if (dirty_render_states_[RST_ColorMask3])
 		{
 			glColorMask((render_states_[RST_ColorMask3] & CMASK_Red) != 0,
-				(render_states_[RST_ColorMask3] & CMASK_Green) != 0, 
+				(render_states_[RST_ColorMask3] & CMASK_Green) != 0,
 				(render_states_[RST_ColorMask3] & CMASK_Blue) != 0,
 				(render_states_[RST_ColorMask3] & CMASK_Alpha) != 0);
 		}
@@ -717,7 +720,7 @@ namespace KlayGE
 					{
 						uint32_t anisotropy = std::min(caps_.max_texture_anisotropy, sampler->Anisotropy());
 						glTexParameteri(tex_type, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy);
-					}	
+					}
 					break;
 
 				default:
@@ -806,7 +809,7 @@ namespace KlayGE
 		caps_.max_texture_height = caps_.max_texture_width = temp;
 		glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &temp);
 		caps_.max_texture_depth = temp;
-		
+
 		glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &temp);
 		caps_.max_texture_cube_size = temp;
 
