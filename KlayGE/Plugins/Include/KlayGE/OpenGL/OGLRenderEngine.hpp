@@ -80,9 +80,6 @@ namespace KlayGE
 		void FillRenderDeviceCaps();
 
 		void AttachAttribs(RenderLayout const & rl, RenderPassPtr pass);
-
-	private:
-		std::vector<uint8_t> vertex_attrib_indices_;
 	};
 
 	typedef boost::shared_ptr<OGLRenderEngine> OGLRenderEnginePtr;

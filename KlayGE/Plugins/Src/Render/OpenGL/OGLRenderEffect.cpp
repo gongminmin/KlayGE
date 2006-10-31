@@ -135,13 +135,8 @@ namespace KlayGE
 
 		using namespace boost::assign;
 		std::vector<std::pair<std::string, VertexElementUsage> > pre_define_semantics; 
-		pre_define_semantics += std::make_pair(std::string("POSITION"), VEU_Position),
-			std::make_pair(std::string("NORMAL"), VEU_Normal),
-			std::make_pair(std::string("COLOR0"), VEU_Diffuse),
-			std::make_pair(std::string("COLOR1"), VEU_Specular),
-			std::make_pair(std::string("BLENDWEIGHT"), VEU_BlendWeight),
+		pre_define_semantics += std::make_pair(std::string("BLENDWEIGHT"), VEU_BlendWeight),
 			std::make_pair(std::string("BLENDINDICES"), VEU_BlendIndex),
-			std::make_pair(std::string("TEXCOORD"), VEU_TextureCoord),
 			std::make_pair(std::string("TANGENT"), VEU_Tangent),
 			std::make_pair(std::string("BINORMAL"), VEU_Binormal);
 
@@ -152,26 +147,26 @@ namespace KlayGE
 				&& (CG_IN == cgGetParameterDirection(cg_param)))
 			{
 				std::string semantic = cgGetParameterSemantic(cg_param);
-				VertexElementUsage usage = VEU_Position;
-				uint8_t usage_index = 0;
 
 				for (size_t j = 0; j < pre_define_semantics.size(); ++ j)
 				{
 					if (0 == semantic.find(pre_define_semantics[j].first))
 					{
-						usage = pre_define_semantics[j].second;
+						VertexElementUsage usage = pre_define_semantics[j].second;
+						uint8_t usage_index = 0;
+
 						semantic.erase(0, pre_define_semantics[j].first.size());
 						if (!semantic.empty())
 						{
 							usage_index = static_cast<uint8_t>(boost::lexical_cast<int>(semantic));
 						}
 
+						vertex_varyings_.insert(std::make_pair(std::make_pair(usage, usage_index),
+							static_cast<uint8_t>(cgGetParameterResourceIndex(cg_param))));
+
 						break;
 					}
 				}
-
-				vertex_varyings_.insert(std::make_pair(std::make_pair(usage, usage_index),
-					static_cast<uint8_t>(cgGetParameterResourceIndex(cg_param))));
 			}
 
 			cg_param = cgGetNextParameter(cg_param);
@@ -410,9 +405,6 @@ namespace KlayGE
 	void OGLRenderPass::DoEnd()
 	{
 		OGLRenderEngine& render_eng(*checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-
-		cgGLDisableProfile(profiles_[0]);
-		cgGLDisableProfile(profiles_[1]);
 
 		for (int i = 0; i < 2; ++ i)
 		{

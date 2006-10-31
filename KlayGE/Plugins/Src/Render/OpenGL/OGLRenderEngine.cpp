@@ -189,12 +189,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::DoRender(RenderLayout const & rl)
 	{
-		for (std::vector<uint8_t>::iterator iter = vertex_attrib_indices_.begin();
-			iter != vertex_attrib_indices_.end(); ++ iter)
-		{
-			glDisableVertexAttribArray(*iter);
-		}
-		vertex_attrib_indices_.resize(0);
+		glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
 
 		uint32_t const num_instance = rl.NumInstance();
 		BOOST_ASSERT(num_instance != 0);
@@ -323,6 +318,58 @@ namespace KlayGE
 				}
 			}
 
+			// Geometry streams
+			for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
+			{
+				OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(rl.GetVertexStream(i)));
+				uint32_t const size = rl.VertexSize(i);
+
+				uint32_t elem_offset = 0;
+				for (uint32_t j = 0; j < rl.VertexStreamFormat(i).size(); ++ j)
+				{
+					vertex_element const & vs_elem = rl.VertexStreamFormat(i)[j];
+					GLvoid* offset = reinterpret_cast<GLvoid*>(elem_offset);
+					GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
+					GLenum const type = IsFloatFormat(vs_elem.format) ? GL_FLOAT : GL_UNSIGNED_BYTE;
+
+					switch (vs_elem.usage)
+					{
+					case VEU_Position:
+						glEnableClientState(GL_VERTEX_ARRAY);
+						stream.Active();
+						glVertexPointer(num_components, type, size, offset);
+						break;
+
+					case VEU_Normal:
+						glEnableClientState(GL_NORMAL_ARRAY);
+						stream.Active();
+						glNormalPointer(type, size, offset);
+						break;
+
+					case VEU_Diffuse:
+						glEnableClientState(GL_COLOR_ARRAY);
+						stream.Active();
+						glColorPointer(num_components, type, size, offset);
+						break;
+
+					case VEU_Specular:
+						glEnableClientState(GL_SECONDARY_COLOR_ARRAY);
+						stream.Active();
+						glSecondaryColorPointer(num_components, type, size, offset);
+						break;
+
+					case VEU_TextureCoord:
+						glClientActiveTexture(GL_TEXTURE0 + vs_elem.usage_index);
+						glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+						stream.Active();
+						glTexCoordPointer(num_components, type, size, offset);
+						break;
+					}
+
+					elem_offset += vs_elem.element_size();
+				}
+			}
+
 			size_t const vertexCount = rl.UseIndices() ? rl.NumIndices() : rl.NumVertices();
 			GLenum mode;
 			uint32_t primCount;
@@ -379,6 +426,8 @@ namespace KlayGE
 				}
 			}
 		}
+
+		glPopClientAttrib();
 	}
 
 	// Ω· ¯“ª÷°
@@ -408,16 +457,9 @@ namespace KlayGE
 					GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
 					GLenum const type = IsFloatFormat(vs_elem.format) ? GL_FLOAT : GL_UNSIGNED_BYTE;
 
-					if (VEU_TextureCoord == vs_elem.usage)
-					{
-						glClientActiveTexture(GL_TEXTURE0 + vs_elem.usage_index);
-					}
-
 					glEnableVertexAttribArray(index);
 					stream.Active();
 					glVertexAttribPointer(index, num_components, type, GL_FALSE, size, offset);
-
-					vertex_attrib_indices_.push_back(static_cast<uint8_t>(index));
 				}
 
 				elem_offset += vs_elem.element_size();

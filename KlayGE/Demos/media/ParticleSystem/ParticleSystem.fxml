@@ -41,11 +41,10 @@ void ParticleVS(float4 pos			: POSITION,
 					out float4 oPosSS	: TEXCOORD1,
 					out float4 oCenterView : TEXCOORD2)
 {
-	/*oCenterView = mul(float4(pos.xyz, 1), View);
+	oCenterView = mul(float4(pos.xyz, 1), View);
 	float4 view_pos = oCenterView;
 	view_pos.xy += (float2(tex.x, 1 - tex.y) * 2 - 1) * point_radius * oCenterView.w;
-	oPos = mul(view_pos, Proj);*/
-	oPos = mul(mul(float4(pos.xyz, 1) + float4(tex.xy, 0, 0), View), Proj);
+	oPos = mul(view_pos, Proj);
 	oTex = tex;
 	oClr = float4(1, 1, 1, pos.w);
 	oPosSS = oPos;
@@ -56,8 +55,6 @@ float4 ParticlePS(float4 clr    : COLOR0,
 						float4 PosSS : TEXCOORD1,
 						float4 CenterView : TEXCOORD2) : COLOR
 {
-	return 1;
-	
 	CenterView /= CenterView.w;
 	PosSS /= PosSS.w;
 	float4 view_pos = mul(PosSS, InvProj);
