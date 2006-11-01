@@ -90,15 +90,15 @@ namespace KlayGE
 		}
 
 	private:
+		void DoSetRenderStateObject(RenderStateObject const & /*obj*/)
+		{
+		}
+
 		void DoBindRenderTarget(RenderTargetPtr /*rt*/)
 		{
 		}
 
 		void DoRender(RenderLayout const & /*rl*/)
-		{
-		}
-
-		void DoFlushRenderStates()
 		{
 		}
 
@@ -126,6 +126,15 @@ namespace KlayGE
 	{
 		static RenderEnginePtr obj(new NullRenderEngine);
 		return obj;
+	}
+
+	// 设置当前渲染状态对象
+	/////////////////////////////////////////////////////////////////////////////////
+	void RenderEngine::SetRenderStateObject(RenderStateObject const & obj)
+	{
+		this->DoSetRenderStateObject(obj);
+
+		cur_render_state_obj_ = obj;
 	}
 
 	// 设置当前渲染目标
@@ -179,35 +188,6 @@ namespace KlayGE
 		return render_tech_;
 	}
 
-	// 设置渲染状态
-	/////////////////////////////////////////////////////////////////////////////////
-	void RenderEngine::SetRenderState(RenderStateType rst, uint32_t state)
-	{
-		BOOST_ASSERT(static_cast<size_t>(rst) < render_states_.size());
-
-		if (render_states_[rst] != state)
-		{
-			render_states_[rst] = state;
-			dirty_render_states_[rst] = true;
-		}
-	}
-
-	// 获取渲染状态
-	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t RenderEngine::GetRenderState(RenderStateType rst)
-	{
-		BOOST_ASSERT(static_cast<size_t>(rst) < render_states_.size());
-
-		return render_states_[rst];
-	}
-
-	uint32_t RenderEngine::GetDefaultRenderState(RenderStateType rst)
-	{
-		BOOST_ASSERT(static_cast<size_t>(rst) < default_render_states_.size());
-
-		return default_render_states_[rst];
-	}
-
 	// 渲染一个vb
 	/////////////////////////////////////////////////////////////////////////////////
 	void RenderEngine::Render(RenderLayout const & rl)
@@ -240,61 +220,5 @@ namespace KlayGE
 	RenderDeviceCaps const & RenderEngine::DeviceCaps() const
 	{
 		return caps_;
-	}
-
-	// 初始化渲染状态
-	/////////////////////////////////////////////////////////////////////////////////
-	void RenderEngine::InitRenderStates()
-	{
-		default_render_states_[RST_PolygonMode]		= PM_Fill;
-		default_render_states_[RST_ShadeMode]		= SM_Gouraud;
-		default_render_states_[RST_CullMode]		= CM_AntiClockwise;
-
-		default_render_states_[RST_AlphaToCoverageEnable] = false;
-		default_render_states_[RST_BlendEnable]		= false;
-		default_render_states_[RST_BlendOp]			= BOP_Add;
-		default_render_states_[RST_SrcBlend]		= ABF_One;
-		default_render_states_[RST_DestBlend]		= ABF_Zero;
-		default_render_states_[RST_BlendOpAlpha]	= BOP_Add;
-		default_render_states_[RST_SrcBlendAlpha]	= ABF_One;
-		default_render_states_[RST_DestBlendAlpha]	= ABF_Zero;
-			
-		default_render_states_[RST_DepthEnable]			= true;
-		default_render_states_[RST_DepthMask]			= true;
-		default_render_states_[RST_DepthFunc]			= CF_LessEqual;
-		default_render_states_[RST_PolygonOffsetFactor]	= 0;
-		default_render_states_[RST_PolygonOffsetUnits]	= 0;
-
-		default_render_states_[RST_FrontStencilEnable]		= false;
-		default_render_states_[RST_FrontStencilFunc]		= CF_AlwaysPass;
-		default_render_states_[RST_FrontStencilRef]			= 0;
-		default_render_states_[RST_FrontStencilMask]		= 0xFFFFFFFF;
-		default_render_states_[RST_FrontStencilFail]		= SOP_Keep;
-		default_render_states_[RST_FrontStencilDepthFail]	= SOP_Keep;
-		default_render_states_[RST_FrontStencilPass]		= SOP_Keep;
-		default_render_states_[RST_FrontStencilWriteMask]	= 0xFFFFFFFF;
-		default_render_states_[RST_BackStencilEnable]		= false;
-		default_render_states_[RST_BackStencilFunc]			= CF_AlwaysPass;
-		default_render_states_[RST_BackStencilRef]			= 0;
-		default_render_states_[RST_BackStencilMask]			= 0xFFFFFFFF;
-		default_render_states_[RST_BackStencilFail]			= SOP_Keep;
-		default_render_states_[RST_BackStencilDepthFail]	= SOP_Keep;
-		default_render_states_[RST_BackStencilPass]			= SOP_Keep;
-		default_render_states_[RST_BackStencilWriteMask]	= 0xFFFFFFFF;
-
-		default_render_states_[RST_ColorMask0] = 0xF;
-		default_render_states_[RST_ColorMask1] = 0xF;
-		default_render_states_[RST_ColorMask2] = 0xF;
-		default_render_states_[RST_ColorMask3] = 0xF;
-
-		for (size_t i = 0; i < render_states_.size(); ++ i)
-		{
-			render_states_[i] = default_render_states_[i];
-		}
-
-		for (size_t i = 0; i < dirty_render_states_.size(); ++ i)
-		{
-			dirty_render_states_[i] = true;
-		}
 	}
 }

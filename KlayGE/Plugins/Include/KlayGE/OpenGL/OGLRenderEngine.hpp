@@ -73,9 +73,9 @@ namespace KlayGE
 		}
 
 	private:
+		void DoSetRenderStateObject(RenderStateObject const & obj);
 		void DoBindRenderTarget(RenderTargetPtr renderTarget);
 		void DoRender(RenderLayout const & rl);
-		void DoFlushRenderStates();
 
 		void FillRenderDeviceCaps();
 

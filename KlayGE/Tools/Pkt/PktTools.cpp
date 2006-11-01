@@ -31,8 +31,10 @@ int main(int argc, char* argv[])
 
 	cout << "ÕýÔÚÑ¹Ëõ£¬ÇëÉÔºò..." << endl;
 
+	std::ofstream ofs(argv[3], std::ios_base::binary);
+
 	Pkt pkt;
-	pkt.Pack(argv[2], std::ofstream(argv[3], std::ios_base::binary));
+	pkt.Pack(argv[2], ofs);
 
 	cout << "Ñ¹Ëõ³É¹¦" << endl;
 

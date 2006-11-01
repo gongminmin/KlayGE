@@ -1,3 +1,5 @@
+#include <KlayGE/KlayGE.hpp>
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -5,7 +7,14 @@
 #include <fstream>
 
 #include <boost/bind.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4127)
+#endif
 #include <boost/algorithm/string/split.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #include <glloader/glloader.h>
 #include <gl/glut.h>
@@ -30,8 +39,8 @@ namespace
 			glsl_major_ver_ = glsl_ver[glsl_dot_pos - 1] - '0';
 			glsl_minor_ver_ = glsl_ver[glsl_dot_pos + 1] - '0';
 
-			boost::algorithm::split(extensions_, 
-					std::string(reinterpret_cast<char const *>(::glGetString(GL_EXTENSIONS))),
+			std::string const extension_str(reinterpret_cast<char const *>(::glGetString(GL_EXTENSIONS)));
+			boost::algorithm::split(extensions_, extension_str,
 					boost::bind(std::equal_to<char>(), ' ', _1));
 			extensions_.erase(std::remove_if(extensions_.begin(), extensions_.end(),
 				boost::bind(&std::string::empty, _1)), extensions_.end());

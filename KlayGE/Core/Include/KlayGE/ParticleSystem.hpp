@@ -1,5 +1,5 @@
 // ParticleSystem.hpp
-// KlayGE 例子系统类 头文件
+// KlayGE 粒子系统类 头文件
 // Ver 3.4.0
 // 版权所有(C) 龚敏敏, 2006
 // Homepage: http://klayge.sourceforge.net

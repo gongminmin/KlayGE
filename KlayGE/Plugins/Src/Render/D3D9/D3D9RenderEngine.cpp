@@ -41,11 +41,11 @@
 #include <KlayGE/COMPtr.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
-
 #include <KlayGE/Viewport.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/RenderTarget.hpp>
+#include <KlayGE/RenderStateObject.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderSettings.hpp>
 
@@ -208,8 +208,8 @@ namespace KlayGE
 		this->BindRenderTarget(win);
 
 		bool has_depth_buf = IsDepthFormat(settings.depth_stencil_fmt);
-		this->SetRenderState(RST_DepthEnable, has_depth_buf);
-		this->SetRenderState(RST_DepthMask, has_depth_buf);
+		d3dDevice_->SetRenderState(D3DRS_ZENABLE, has_depth_buf);
+		d3dDevice_->SetRenderState(D3DRS_ZWRITEENABLE, has_depth_buf);
 
 		if (caps_.hw_instancing_support)
 		{
@@ -220,12 +220,232 @@ namespace KlayGE
 			RenderInstance = boost::bind(&D3D9RenderEngine::DoRenderSWInstance, this, _1);
 		}
 
-		this->InitRenderStates();
-
 		return win;
 	}
 
-	// 设置当前渲染目标，该渲染目标必须已经在列表中
+	// 设置当前渲染状态对象
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9RenderEngine::DoSetRenderStateObject(RenderStateObject const & obj)
+	{
+		for (int i = 0; i < RenderStateObject::RST_NUM_RENDER_STATES; ++ i)
+		{
+			RenderStateObject::RenderStateType rst = static_cast<RenderStateObject::RenderStateType>(i);
+			uint32_t state = obj.GetRenderState(rst);
+			if (cur_render_state_obj_.GetRenderState(rst) != state)
+			{
+				switch (rst)
+				{
+				case RenderStateObject::RST_PolygonMode:
+					d3dDevice_->SetRenderState(D3DRS_FILLMODE,
+						D3D9Mapping::Mapping(static_cast<RenderStateObject::PolygonMode>(state)));
+					break;
+
+				case RenderStateObject::RST_ShadeMode:
+					d3dDevice_->SetRenderState(D3DRS_SHADEMODE,
+						D3D9Mapping::Mapping(static_cast<RenderStateObject::ShadeMode>(state)));
+					break;
+
+				case RenderStateObject::RST_CullMode:
+					d3dDevice_->SetRenderState(D3DRS_CULLMODE,
+						D3D9Mapping::Mapping(static_cast<RenderStateObject::CullMode>(state)));
+					break;
+
+				case RenderStateObject::RST_AlphaToCoverageEnable:
+					// NVIDIA's Transparency Multisampling
+					if (S_OK == d3d_->CheckDeviceFormat(D3DADAPTER_DEFAULT,
+						D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE,
+						static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'O', 'C'>::value)))
+					{
+						if (state)
+						{
+							d3dDevice_->SetRenderState(D3DRS_ADAPTIVETESS_Y,
+								static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'O', 'C'>::value));
+						}
+						else
+						{
+							d3dDevice_->SetRenderState(D3DRS_ADAPTIVETESS_Y, D3DFMT_UNKNOWN);
+						}
+					}
+					break;
+
+				case RenderStateObject::RST_BlendEnable:
+					d3dDevice_->SetRenderState(D3DRS_ALPHABLENDENABLE, state);
+					d3dDevice_->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, state);
+					break;
+
+				case RenderStateObject::RST_BlendOp:
+					d3dDevice_->SetRenderState(D3DRS_BLENDOP,
+						D3D9Mapping::Mapping(static_cast<RenderStateObject::BlendOperation>(state)));
+					break;
+
+				case RenderStateObject::RST_SrcBlend:
+					d3dDevice_->SetRenderState(D3DRS_SRCBLEND,
+						D3D9Mapping::Mapping(static_cast<RenderStateObject::AlphaBlendFactor>(state)));
+					break;
+
+				case RenderStateObject::RST_DestBlend:
+					d3dDevice_->SetRenderState(D3DRS_DESTBLEND,
+						D3D9Mapping::Mapping(static_cast<RenderStateObject::AlphaBlendFactor>(state)));
+					break;
+
+				case RenderStateObject::RST_BlendOpAlpha:
+					d3dDevice_->SetRenderState(D3DRS_BLENDOPALPHA,
+						D3D9Mapping::Mapping(static_cast<RenderStateObject::BlendOperation>(state)));
+					break;
+
+				case RenderStateObject::RST_SrcBlendAlpha:
+					d3dDevice_->SetRenderState(D3DRS_SRCBLENDALPHA,
+						D3D9Mapping::Mapping(static_cast<RenderStateObject::AlphaBlendFactor>(state)));
+					break;
+
+				case RenderStateObject::RST_DestBlendAlpha:
+					d3dDevice_->SetRenderState(D3DRS_DESTBLENDALPHA,
+						D3D9Mapping::Mapping(static_cast<RenderStateObject::AlphaBlendFactor>(state)));
+					break;
+
+				case RenderStateObject::RST_DepthEnable:
+					d3dDevice_->SetRenderState(D3DRS_ZENABLE, state ? D3DZB_TRUE : D3DZB_FALSE);
+					break;
+
+				case RenderStateObject::RST_DepthMask:
+					d3dDevice_->SetRenderState(D3DRS_ZWRITEENABLE, state ? D3DZB_TRUE : D3DZB_FALSE);
+					break;
+
+				case RenderStateObject::RST_DepthFunc:
+					d3dDevice_->SetRenderState(D3DRS_ZFUNC,
+						D3D9Mapping::Mapping(static_cast<RenderStateObject::CompareFunction>(state)));
+					break;
+
+				case RenderStateObject::RST_PolygonOffsetFactor:
+					d3dDevice_->SetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, state);
+					break;
+
+				case RenderStateObject::RST_PolygonOffsetUnits:
+					d3dDevice_->SetRenderState(D3DRS_DEPTHBIAS, state);
+					break;
+
+				case RenderStateObject::RST_FrontStencilFunc:
+					d3dDevice_->SetRenderState(D3DRS_STENCILFUNC,
+						D3D9Mapping::Mapping(static_cast<RenderStateObject::CompareFunction>(state)));
+					break;
+
+				case RenderStateObject::RST_FrontStencilRef:
+					d3dDevice_->SetRenderState(D3DRS_STENCILREF, state);
+					break;
+
+				case RenderStateObject::RST_FrontStencilMask:
+					d3dDevice_->SetRenderState(D3DRS_STENCILMASK, state);
+					break;
+
+				case RenderStateObject::RST_FrontStencilFail:
+					d3dDevice_->SetRenderState(D3DRS_STENCILFAIL,
+						D3D9Mapping::Mapping(static_cast<RenderStateObject::StencilOperation>(state)));
+					break;
+
+				case RenderStateObject::RST_FrontStencilDepthFail:
+					d3dDevice_->SetRenderState(D3DRS_STENCILZFAIL,
+						D3D9Mapping::Mapping(static_cast<RenderStateObject::StencilOperation>(state)));
+					break;
+
+				case RenderStateObject::RST_FrontStencilPass:
+					d3dDevice_->SetRenderState(D3DRS_STENCILPASS,
+						D3D9Mapping::Mapping(static_cast<RenderStateObject::StencilOperation>(state)));
+					break;
+
+				case RenderStateObject::RST_FrontStencilWriteMask:
+					d3dDevice_->SetRenderState(D3DRS_STENCILWRITEMASK, state);
+					break;
+
+				case RenderStateObject::RST_BackStencilFunc:
+					d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFUNC,
+						D3D9Mapping::Mapping(static_cast<RenderStateObject::CompareFunction>(state)));
+					break;
+
+				case RenderStateObject::RST_BackStencilRef:
+					d3dDevice_->SetRenderState(D3DRS_STENCILREF, state);
+					break;
+
+				case RenderStateObject::RST_BackStencilMask:
+					d3dDevice_->SetRenderState(D3DRS_STENCILMASK, state);
+					break;
+
+				case RenderStateObject::RST_BackStencilFail:
+					d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFAIL,
+						D3D9Mapping::Mapping(static_cast<RenderStateObject::StencilOperation>(state)));
+					break;
+
+				case RenderStateObject::RST_BackStencilDepthFail:
+					d3dDevice_->SetRenderState(D3DRS_CCW_STENCILZFAIL,
+						D3D9Mapping::Mapping(static_cast<RenderStateObject::StencilOperation>(state)));
+					break;
+
+				case RenderStateObject::RST_BackStencilPass:
+					d3dDevice_->SetRenderState(D3DRS_CCW_STENCILPASS,
+						D3D9Mapping::Mapping(static_cast<RenderStateObject::StencilOperation>(state)));
+					break;
+
+				case RenderStateObject::RST_BackStencilWriteMask:
+					d3dDevice_->SetRenderState(D3DRS_STENCILWRITEMASK, state);
+					break;
+
+				case RenderStateObject::RST_FrontStencilEnable:
+				case RenderStateObject::RST_BackStencilEnable:
+					if (obj.GetRenderState(RenderStateObject::RST_FrontStencilEnable)
+						&& obj.GetRenderState(RenderStateObject::RST_BackStencilEnable))
+					{
+						d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, true);
+					}
+					else
+					{
+						if (obj.GetRenderState(RenderStateObject::RST_FrontStencilEnable))
+						{
+							d3dDevice_->SetRenderState(D3DRS_STENCILENABLE, true);
+						}
+						else
+						{
+							if (obj.GetRenderState(RenderStateObject::RST_BackStencilEnable))
+							{
+								d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, true);
+								d3dDevice_->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
+							}
+							else
+							{
+								d3dDevice_->SetRenderState(D3DRS_STENCILENABLE, false);
+								d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, false);
+							}
+						}
+					}
+					break;
+
+				case RenderStateObject::RST_ScissorEnable:
+					d3dDevice_->SetRenderState(D3DRS_SCISSORTESTENABLE, state);
+					break;
+
+				case RenderStateObject::RST_ColorMask0:
+					d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE,
+						D3D9Mapping::MappingColorMask(state));
+					break;
+
+				case RenderStateObject::RST_ColorMask1:
+					d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE,
+						D3D9Mapping::MappingColorMask(state));
+					break;
+
+				case RenderStateObject::RST_ColorMask2:
+					d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE,
+						D3D9Mapping::MappingColorMask(state));
+					break;
+
+				case RenderStateObject::RST_ColorMask3:
+					d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE,
+						D3D9Mapping::MappingColorMask(state));
+					break;
+				}
+			}
+		}
+	}
+
+	// 设置当前渲染目标
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::DoBindRenderTarget(RenderTargetPtr rt)
 	{
@@ -382,7 +602,6 @@ namespace KlayGE
 				RenderPassPtr pass = render_tech_->Pass(i);
 
 				pass->Begin();
-				this->DoFlushRenderStates();
 				TIF(d3dDevice_->DrawIndexedPrimitive(primType, 0, 0,
 					static_cast<UINT>(rl.NumVertices()), 0, primCount));
 				pass->End();
@@ -397,7 +616,6 @@ namespace KlayGE
 				RenderPassPtr pass = render_tech_->Pass(i);
 
 				pass->Begin();
-				this->DoFlushRenderStates();
 				TIF(d3dDevice_->DrawPrimitive(primType, 0, primCount));
 				pass->End();
 			}
@@ -411,233 +629,6 @@ namespace KlayGE
 		BOOST_ASSERT(d3dDevice_);
 
 		TIF(d3dDevice_->EndScene());
-	}
-
-	// 刷新渲染状态
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DoFlushRenderStates()
-	{
-		BOOST_ASSERT(d3dDevice_);
-
-		if (dirty_render_states_[RST_PolygonMode])
-		{
-			d3dDevice_->SetRenderState(D3DRS_FILLMODE,
-				D3D9Mapping::Mapping(static_cast<PolygonMode>(render_states_[RST_PolygonMode])));
-		}
-		if (dirty_render_states_[RST_ShadeMode])
-		{
-			d3dDevice_->SetRenderState(D3DRS_SHADEMODE,
-				D3D9Mapping::Mapping(static_cast<ShadeMode>(render_states_[RST_ShadeMode])));
-		}
-		if (dirty_render_states_[RST_CullMode])
-		{
-			d3dDevice_->SetRenderState(D3DRS_CULLMODE, D3D9Mapping::Mapping(static_cast<CullMode>(render_states_[RST_CullMode])));
-		}
-
-		if (dirty_render_states_[RST_AlphaToCoverageEnable])
-		{
-			// NVIDIA's Transparency Multisampling
-			if (S_OK == d3d_->CheckDeviceFormat(D3DADAPTER_DEFAULT,
-				D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE,
-				static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'O', 'C'>::value)))
-			{
-				d3dDevice_->SetRenderState(D3DRS_ADAPTIVETESS_Y,
-					static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'O', 'C'>::value));
-			}
-		}
-		if (dirty_render_states_[RST_BlendEnable])
-		{
-			d3dDevice_->SetRenderState(D3DRS_ALPHABLENDENABLE,
-				render_states_[RST_BlendEnable]);
-			d3dDevice_->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE,
-				render_states_[RST_BlendEnable]);
-		}
-		if (dirty_render_states_[RST_BlendOp])
-		{
-			d3dDevice_->SetRenderState(D3DRS_BLENDOP,
-				D3D9Mapping::Mapping(static_cast<BlendOperation>(render_states_[RST_BlendOp])));
-		}
-		if (dirty_render_states_[RST_SrcBlend])
-		{
-			d3dDevice_->SetRenderState(D3DRS_SRCBLEND,
-				D3D9Mapping::Mapping(static_cast<AlphaBlendFactor>(render_states_[RST_SrcBlend])));
-		}
-		if (dirty_render_states_[RST_DestBlend])
-		{
-			d3dDevice_->SetRenderState(D3DRS_DESTBLEND,
-				D3D9Mapping::Mapping(static_cast<AlphaBlendFactor>(render_states_[RST_DestBlend])));
-		}
-		if (dirty_render_states_[RST_BlendOpAlpha])
-		{
-			d3dDevice_->SetRenderState(D3DRS_BLENDOPALPHA,
-				D3D9Mapping::Mapping(static_cast<BlendOperation>(render_states_[RST_BlendOpAlpha])));
-		}
-		if (dirty_render_states_[RST_SrcBlendAlpha])
-		{
-			d3dDevice_->SetRenderState(D3DRS_SRCBLENDALPHA,
-				D3D9Mapping::Mapping(static_cast<AlphaBlendFactor>(render_states_[RST_SrcBlendAlpha])));
-		}
-		if (dirty_render_states_[RST_DestBlendAlpha])
-		{
-			d3dDevice_->SetRenderState(D3DRS_DESTBLENDALPHA,
-				D3D9Mapping::Mapping(static_cast<AlphaBlendFactor>(render_states_[RST_DestBlendAlpha])));
-		}
-			
-		if (dirty_render_states_[RST_DepthEnable])
-		{
-			d3dDevice_->SetRenderState(D3DRS_ZENABLE,
-				render_states_[RST_DepthEnable] ? D3DZB_TRUE : D3DZB_FALSE);
-		}
-		if (dirty_render_states_[RST_DepthMask])
-		{
-			d3dDevice_->SetRenderState(D3DRS_ZWRITEENABLE,
-				render_states_[RST_DepthMask] ? D3DZB_TRUE : D3DZB_FALSE);
-		}
-		if (dirty_render_states_[RST_DepthFunc])
-		{
-			d3dDevice_->SetRenderState(D3DRS_ZFUNC,
-				D3D9Mapping::Mapping(static_cast<CompareFunction>(render_states_[RST_DepthFunc])));
-		}
-		if (dirty_render_states_[RST_PolygonOffsetFactor])
-		{
-			d3dDevice_->SetRenderState(D3DRS_SLOPESCALEDEPTHBIAS,
-				render_states_[RST_PolygonOffsetFactor]);
-		}
-		if (dirty_render_states_[RST_PolygonOffsetUnits])
-		{
-			d3dDevice_->SetRenderState(D3DRS_DEPTHBIAS,
-				render_states_[RST_PolygonOffsetUnits]);
-		}
-
-		if (dirty_render_states_[RST_FrontStencilFunc])
-		{
-			d3dDevice_->SetRenderState(D3DRS_STENCILFUNC,
-				D3D9Mapping::Mapping(static_cast<CompareFunction>(render_states_[RST_FrontStencilFunc])));
-		}
-		if (dirty_render_states_[RST_FrontStencilRef])
-		{
-			d3dDevice_->SetRenderState(D3DRS_STENCILREF,
-				render_states_[RST_FrontStencilRef]);
-		}
-		if (dirty_render_states_[RST_FrontStencilMask])
-		{
-			d3dDevice_->SetRenderState(D3DRS_STENCILMASK,
-				render_states_[RST_FrontStencilMask]);
-		}
-		if (dirty_render_states_[RST_FrontStencilFail])
-		{
-			d3dDevice_->SetRenderState(D3DRS_STENCILFAIL,
-				D3D9Mapping::Mapping(static_cast<StencilOperation>(render_states_[RST_FrontStencilFail])));
-		}
-		if (dirty_render_states_[RST_FrontStencilDepthFail])
-		{
-			d3dDevice_->SetRenderState(D3DRS_STENCILZFAIL,
-				D3D9Mapping::Mapping(static_cast<StencilOperation>(render_states_[RST_FrontStencilDepthFail])));
-		}
-		if (dirty_render_states_[RST_FrontStencilPass])
-		{
-			d3dDevice_->SetRenderState(D3DRS_STENCILPASS,
-				D3D9Mapping::Mapping(static_cast<StencilOperation>(render_states_[RST_FrontStencilPass])));
-		}
-		if (dirty_render_states_[RST_FrontStencilWriteMask])
-		{
-			d3dDevice_->SetRenderState(D3DRS_STENCILWRITEMASK,
-				render_states_[RST_FrontStencilWriteMask]);
-		}
-		if (dirty_render_states_[RST_BackStencilFunc])
-		{
-			d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFUNC,
-				D3D9Mapping::Mapping(static_cast<CompareFunction>(render_states_[RST_BackStencilFunc])));
-		}
-		if (dirty_render_states_[RST_BackStencilRef])
-		{
-			d3dDevice_->SetRenderState(D3DRS_STENCILREF,
-				render_states_[RST_BackStencilRef]);
-		}
-		if (dirty_render_states_[RST_BackStencilMask])
-		{
-			d3dDevice_->SetRenderState(D3DRS_STENCILMASK,
-				render_states_[RST_BackStencilMask]);
-		}
-		if (dirty_render_states_[RST_BackStencilFail])
-		{
-			d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFAIL,
-				D3D9Mapping::Mapping(static_cast<StencilOperation>(render_states_[RST_BackStencilFail])));
-		}
-		if (dirty_render_states_[RST_BackStencilDepthFail])
-		{
-			d3dDevice_->SetRenderState(D3DRS_CCW_STENCILZFAIL,
-				D3D9Mapping::Mapping(static_cast<StencilOperation>(render_states_[RST_BackStencilDepthFail])));
-		}
-		if (dirty_render_states_[RST_BackStencilPass])
-		{
-			d3dDevice_->SetRenderState(D3DRS_CCW_STENCILPASS,
-				D3D9Mapping::Mapping(static_cast<StencilOperation>(render_states_[RST_BackStencilPass])));
-		}
-		if (dirty_render_states_[RST_BackStencilWriteMask])
-		{
-			d3dDevice_->SetRenderState(D3DRS_STENCILWRITEMASK,
-				render_states_[RST_BackStencilWriteMask]);
-		}
-		if (dirty_render_states_[RST_FrontStencilEnable] || dirty_render_states_[RST_BackStencilEnable])
-		{
-			if (render_states_[RST_FrontStencilEnable] && render_states_[RST_BackStencilEnable])
-			{
-				d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, true);
-			}
-			else
-			{
-				if (render_states_[RST_FrontStencilEnable])
-				{
-					d3dDevice_->SetRenderState(D3DRS_STENCILENABLE, true);
-				}
-				else
-				{
-					if (render_states_[RST_BackStencilEnable])
-					{
-						d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, true);
-						d3dDevice_->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
-					}
-					else
-					{
-						d3dDevice_->SetRenderState(D3DRS_STENCILENABLE, false);
-						d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, false);
-					}
-				}
-			}
-		}
-
-		if (dirty_render_states_[RST_ScissorEnable])
-		{
-			d3dDevice_->SetRenderState(D3DRS_SCISSORTESTENABLE,
-				render_states_[RST_ScissorEnable]);
-		}
-
-		if (dirty_render_states_[RST_ColorMask0])
-		{
-			d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE,
-				D3D9Mapping::MappingColorMask(render_states_[RST_ColorMask0]));
-		}
-		if (dirty_render_states_[RST_ColorMask1])
-		{
-			d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE,
-				D3D9Mapping::MappingColorMask(render_states_[RST_ColorMask1]));
-		}
-		if (dirty_render_states_[RST_ColorMask2])
-		{
-			d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE,
-				D3D9Mapping::MappingColorMask(render_states_[RST_ColorMask2]));
-		}
-		if (dirty_render_states_[RST_ColorMask3])
-		{
-			d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE,
-				D3D9Mapping::MappingColorMask(render_states_[RST_ColorMask3]));
-		}
-
-		for (size_t i = 0; i < RST_NUM_RENDER_STATES; ++ i)
-		{
-			dirty_render_states_[i] = false;
-		}
 	}
 
 	// 设置纹理

@@ -82,6 +82,8 @@ namespace KlayGE
 	typedef boost::shared_ptr<RenderEffectParameter> RenderEffectParameterPtr;
 	class RenderEffectState;
 	typedef boost::shared_ptr<RenderEffectState> RenderEffectStatePtr;
+	class RenderStateObject;
+	typedef boost::shared_ptr<RenderStateObject> RenderStateObjectPtr;
 	class Texture;
 	typedef boost::shared_ptr<Texture> TexturePtr;
 	class Sampler;

@@ -30,14 +30,14 @@ namespace KlayGE
 	public:
 		static void Mapping(GLfloat* clr4, Color const & clr);
 
-		static GLenum Mapping(RenderEngine::CompareFunction func);
+		static GLenum Mapping(RenderStateObject::CompareFunction func);
 
-		static GLenum Mapping(RenderEngine::StencilOperation op);
+		static GLenum Mapping(RenderStateObject::StencilOperation op);
 
-		static GLenum Mapping(RenderEngine::AlphaBlendFactor factor);
-		static GLenum Mapping(RenderEngine::PolygonMode mode);
-		static GLenum Mapping(RenderEngine::ShadeMode mode);
-		static GLenum Mapping(RenderEngine::BlendOperation bo);
+		static GLenum Mapping(RenderStateObject::AlphaBlendFactor factor);
+		static GLenum Mapping(RenderStateObject::PolygonMode mode);
+		static GLenum Mapping(RenderStateObject::ShadeMode mode);
+		static GLenum Mapping(RenderStateObject::BlendOperation bo);
 		static GLint Mapping(Sampler::TexAddressingMode mode);
 
 		static void Mapping(GLenum& primType, uint32_t& primCount, RenderLayout const & rl);

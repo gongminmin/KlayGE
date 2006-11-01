@@ -1,8 +1,11 @@
 // D3D9RenderEffect.cpp
 // KlayGE D3D9渲染效果类 实现文件
-// Ver 3.4.0
+// Ver 3.5.0
 // 版权所有(C) 龚敏敏, 2003-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.5.0
+// 使用了新的effect系统 (2006.11.1)
 //
 // 3.4.0
 // 增加了D3D9RenderEffectInclude (2006.7.12)
@@ -49,7 +52,7 @@ namespace KlayGE
 	}
 
 
-	void D3D9RenderTechnique::DoBegin(uint32_t /*flags*/)
+	void D3D9RenderTechnique::DoBegin()
 	{
 	}
 
@@ -67,16 +70,18 @@ namespace KlayGE
 	{
 		is_validate_ = true;
 
-		std::string vs_profile, vs_name, vs_text;
-		this->shader(vs_profile, vs_name, vs_text, "vertex_shader");
+		std::string s_text = this->shader_text();
 
-		std::string ps_profile, ps_name, ps_text;
-		this->shader(ps_profile, ps_name, ps_text, "pixel_shader");
+		std::string vs_profile = shader_descs_[ST_VERTEX_SHADER].profile;
+		std::string const & vs_name = shader_descs_[ST_VERTEX_SHADER].func_name;
+
+		std::string ps_profile = shader_descs_[ST_PIXEL_SHADER].profile;
+		std::string const & ps_name = shader_descs_[ST_PIXEL_SHADER].func_name;
 
 		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
 
-		ID3DXConstantTable* constant_table[2] = { NULL, NULL };
+		ID3DXConstantTable* constant_table[ST_NUM_SHADER_TYPES] = { NULL };
 
 		if (!vs_name.empty())
 		{
@@ -85,7 +90,7 @@ namespace KlayGE
 				vs_profile = D3DXGetVertexShaderProfile(d3d_device.get());
 			}
 
-			this->create_vertex_shader(constant_table[0], vs_profile, vs_name, vs_text);
+			this->create_vertex_shader(constant_table[ST_VERTEX_SHADER], vs_profile, vs_name, s_text);
 		}
 
 		if (!ps_name.empty())
@@ -95,10 +100,10 @@ namespace KlayGE
 				ps_profile = D3DXGetPixelShaderProfile(d3d_device.get());
 			}
 
-			this->create_pixel_shader(constant_table[1], ps_profile, ps_name, ps_text);
+			this->create_pixel_shader(constant_table[ST_PIXEL_SHADER], ps_profile, ps_name, s_text);
 		}
 
-		for (int i = 0; i < 2; ++ i)
+		for (int i = 0; i < ST_NUM_SHADER_TYPES; ++ i)
 		{
 			if (constant_table[i])
 			{
@@ -236,50 +241,28 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9RenderPass::shader(std::string& profile, std::string& name, std::string& func, std::string const & type) const
+	std::string D3D9RenderPass::shader_text() const
 	{
-		profile.resize(0);
-		name.resize(0);
-		func.resize(0);
-
-		RenderEngine::RenderStateType const state_code = render_states_define::instance().state_code(type);
-
-		for (uint32_t i = 0; i < this->NumStates(); ++ i)
-		{
-			if (this->State(i).State() == state_code)
-			{
-				RenderEffectState const & state = this->State(i);
-				shader_desc shader;
-				state.Var()->Value(shader);
-				profile = shader.profile;
-				name = shader.func_name;
-				break;
-			}
-		}
-
 		std::stringstream ss;
-		if (!name.empty())
+		for (uint32_t i = 0; i < effect_.NumParameters(); ++ i)
 		{
-			for (uint32_t i = 0; i < effect_.NumParameters(); ++ i)
+			RenderEffectParameter& param = *effect_.ParameterByIndex(i);
+
+			ss << type_define::instance().type_name(param.type()) << " " << param.Name();
+			if (param.ArraySize() != 0)
 			{
-				RenderEffectParameter& param = *effect_.ParameterByIndex(i);
-
-				ss << type_define::instance().type_name(param.type()) << " " << param.Name();
-				if (param.ArraySize() != 0)
-				{
-					ss << "[" << param.ArraySize() << "]";
-				}
-
-				ss << ";" << std::endl;
+				ss << "[" << param.ArraySize() << "]";
 			}
 
-			for (uint32_t i = 0; i < effect_.NumShaders(); ++ i)
-			{
-				ss << effect_.ShaderByIndex(i).str() << std::endl;
-			}
-
-			func = ss.str();
+			ss << ";" << std::endl;
 		}
+
+		for (uint32_t i = 0; i < effect_.NumShaders(); ++ i)
+		{
+			ss << effect_.ShaderByIndex(i).str() << std::endl;
+		}
+
+		return ss.str();
 	}
 
 	void D3D9RenderPass::DoBegin()
@@ -290,7 +273,7 @@ namespace KlayGE
 		d3d_device->SetVertexShader(vertex_shader_.get());
 		d3d_device->SetPixelShader(pixel_shader_.get());
 
-		for (int i = 0; i < 2; ++ i)
+		for (int i = 0; i < ST_NUM_SHADER_TYPES; ++ i)
 		{
 			bool bool_dirty = false;
 			bool int_dirty = false;
@@ -490,7 +473,7 @@ namespace KlayGE
 			}
 		}
 
-		for (int i = 0; i < 2; ++ i)
+		for (int i = 0; i < ST_NUM_SHADER_TYPES; ++ i)
 		{
 			for (size_t c = 0; c < param_descs_[i].size(); ++ c)
 			{
@@ -509,7 +492,7 @@ namespace KlayGE
 	{
 		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 
-		for (int i = 0; i < 2; ++ i)
+		for (int i = 0; i < ST_NUM_SHADER_TYPES; ++ i)
 		{
 			for (size_t c = 0; c < param_descs_[i].size(); ++ c)
 			{

@@ -101,7 +101,7 @@ namespace KlayGE
 		{
 			depth_enable = false;
 		}
-		re.SetRenderState(RenderEngine::RST_DepthEnable, depth_enable);
+		d3dDevice->SetRenderState(D3DRS_ZENABLE, depth_enable);
 		TIF(d3dDevice->SetDepthStencilSurface(zBuffer.get()));
 	}
 

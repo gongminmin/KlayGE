@@ -41,32 +41,32 @@ namespace KlayGE
 
 	// 从RenderEngine::CompareFunction转换到GLenum
 	/////////////////////////////////////////////////////////////////////////////////
-	GLenum OGLMapping::Mapping(RenderEngine::CompareFunction func)
+	GLenum OGLMapping::Mapping(RenderStateObject::CompareFunction func)
 	{
 		switch (func)
 		{
-		case RenderEngine::CF_AlwaysFail:
+		case RenderStateObject::CF_AlwaysFail:
 			return GL_NEVER;
 
-		case RenderEngine::CF_AlwaysPass:
+		case RenderStateObject::CF_AlwaysPass:
 			return GL_ALWAYS;
 
-		case RenderEngine::CF_Less:
+		case RenderStateObject::CF_Less:
 			return GL_LESS;
 
-		case RenderEngine::CF_LessEqual:
+		case RenderStateObject::CF_LessEqual:
 			return GL_LEQUAL;
 
-		case RenderEngine::CF_Equal:
+		case RenderStateObject::CF_Equal:
 			return GL_EQUAL;
 
-		case RenderEngine::CF_NotEqual:
+		case RenderStateObject::CF_NotEqual:
 			return GL_NOTEQUAL;
 
-		case RenderEngine::CF_GreaterEqual:
+		case RenderStateObject::CF_GreaterEqual:
 			return GL_GEQUAL;
 
-		case RenderEngine::CF_Greater:
+		case RenderStateObject::CF_Greater:
 			return GL_GREATER;
 
 		default:
@@ -77,41 +77,41 @@ namespace KlayGE
 
 	// 从RenderEngine::AlphaBlendFactor转换到GLenum
 	/////////////////////////////////////////////////////////////////////////////////
-	GLenum OGLMapping::Mapping(RenderEngine::AlphaBlendFactor factor)
+	GLenum OGLMapping::Mapping(RenderStateObject::AlphaBlendFactor factor)
 	{
 		switch (factor)
 		{
-		case RenderEngine::ABF_Zero:
+		case RenderStateObject::ABF_Zero:
 			return GL_ZERO;
 
-		case RenderEngine::ABF_One:
+		case RenderStateObject::ABF_One:
 			return GL_ONE;
 
-		case RenderEngine::ABF_Src_Alpha:
+		case RenderStateObject::ABF_Src_Alpha:
 			return GL_SRC_ALPHA;
 
-		case RenderEngine::ABF_Dst_Alpha:
+		case RenderStateObject::ABF_Dst_Alpha:
 			return GL_DST_ALPHA;
 
-		case RenderEngine::ABF_Inv_Src_Alpha:
+		case RenderStateObject::ABF_Inv_Src_Alpha:
 			return GL_ONE_MINUS_SRC_ALPHA;
 
-		case RenderEngine::ABF_Inv_Dst_Alpha:
+		case RenderStateObject::ABF_Inv_Dst_Alpha:
 			return GL_ONE_MINUS_DST_ALPHA;
 
-		case RenderEngine::ABF_Src_Color:
+		case RenderStateObject::ABF_Src_Color:
 			return GL_SRC_COLOR;
 
-		case RenderEngine::ABF_Dst_Color:
+		case RenderStateObject::ABF_Dst_Color:
 			return GL_DST_COLOR;
 
-		case RenderEngine::ABF_Inv_Src_Color:
+		case RenderStateObject::ABF_Inv_Src_Color:
 			return GL_ONE_MINUS_SRC_COLOR;
 
-		case RenderEngine::ABF_Inv_Dst_Color:
+		case RenderStateObject::ABF_Inv_Dst_Color:
 			return GL_ONE_MINUS_DST_COLOR;
 
-		case RenderEngine::ABF_Src_Alpha_Sat:
+		case RenderStateObject::ABF_Src_Alpha_Sat:
 			return GL_SRC_ALPHA_SATURATE;
 
 		default:
@@ -122,26 +122,26 @@ namespace KlayGE
 
 	// 从RenderEngine::StencilOperation转换到GLenum
 	/////////////////////////////////////////////////////////////////////////////////
-	GLenum OGLMapping::Mapping(RenderEngine::StencilOperation op)
+	GLenum OGLMapping::Mapping(RenderStateObject::StencilOperation op)
 	{
 		switch (op)
 		{
-		case RenderEngine::SOP_Keep:
+		case RenderStateObject::SOP_Keep:
 			return GL_KEEP;
 
-		case RenderEngine::SOP_Zero:
+		case RenderStateObject::SOP_Zero:
 			return GL_ZERO;
 
-		case RenderEngine::SOP_Replace:
+		case RenderStateObject::SOP_Replace:
 			return GL_REPLACE;
 
-		case RenderEngine::SOP_Increment:
+		case RenderStateObject::SOP_Increment:
 			return GL_INCR;
 
-		case RenderEngine::SOP_Decrement:
+		case RenderStateObject::SOP_Decrement:
 			return GL_DECR;
 
-		case RenderEngine::SOP_Invert:
+		case RenderStateObject::SOP_Invert:
 			return GL_INVERT;
 
 		default:
@@ -150,17 +150,17 @@ namespace KlayGE
 		};
 	}
 
-	GLenum OGLMapping::Mapping(RenderEngine::PolygonMode mode)
+	GLenum OGLMapping::Mapping(RenderStateObject::PolygonMode mode)
 	{
 		switch (mode)
 		{
-		case RenderEngine::PM_Point:
+		case RenderStateObject::PM_Point:
 			return GL_POINT;
 
-		case RenderEngine::PM_Line:
+		case RenderStateObject::PM_Line:
 			return GL_LINE;
 
-		case RenderEngine::PM_Fill:
+		case RenderStateObject::PM_Fill:
 			return GL_FILL;
 
 		default:
@@ -169,14 +169,14 @@ namespace KlayGE
 		}
 	}
 
-	GLenum OGLMapping::Mapping(RenderEngine::ShadeMode mode)
+	GLenum OGLMapping::Mapping(RenderStateObject::ShadeMode mode)
 	{
 		switch (mode)
 		{
-		case RenderEngine::SM_Flat:
+		case RenderStateObject::SM_Flat:
 			return GL_FLAT;
 
-		case RenderEngine::SM_Gouraud:
+		case RenderStateObject::SM_Gouraud:
 			return GL_SMOOTH;
 
 		default:
@@ -185,23 +185,23 @@ namespace KlayGE
 		}
 	}
 
-	GLenum OGLMapping::Mapping(RenderEngine::BlendOperation bo)
+	GLenum OGLMapping::Mapping(RenderStateObject::BlendOperation bo)
 	{
 		switch (bo)
 		{
-		case RenderEngine::BOP_Add:
+		case RenderStateObject::BOP_Add:
 			return GL_FUNC_ADD;
 
-		case RenderEngine::BOP_Sub:
+		case RenderStateObject::BOP_Sub:
 			return GL_FUNC_SUBTRACT;
 
-		case RenderEngine::BOP_Rev_Sub:
+		case RenderStateObject::BOP_Rev_Sub:
 			return GL_FUNC_REVERSE_SUBTRACT;
 
-		case RenderEngine::BOP_Min:
+		case RenderStateObject::BOP_Min:
 			return GL_MIN;
 
-		case RenderEngine::BOP_Max:
+		case RenderStateObject::BOP_Max:
 			return GL_MAX;
 
 		default:

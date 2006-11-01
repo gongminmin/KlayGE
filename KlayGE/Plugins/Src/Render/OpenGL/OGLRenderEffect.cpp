@@ -1,8 +1,11 @@
 // OGLRenderEffect.cpp
 // KlayGE OpenGL渲染效果类 实现文件
-// Ver 2.8.0
-// 版权所有(C) 龚敏敏, 2004-2005
+// Ver 3.5.0
+// 版权所有(C) 龚敏敏, 2004-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.5.0
+// 使用了新的effect系统 (2006.11.1)
 //
 // 2.8.0
 // 使用Cg实现 (2005.7.30)
@@ -52,7 +55,7 @@ namespace KlayGE
 		return RenderPassPtr(new OGLRenderPass(effect_));
 	}
 
-	void OGLRenderTechnique::DoBegin(uint32_t /*flags*/)
+	void OGLRenderTechnique::DoBegin()
 	{
 	}
 
@@ -63,56 +66,58 @@ namespace KlayGE
 
 	OGLRenderPass::~OGLRenderPass()
 	{
-		for (int i = 0; i < 2; ++ i)
+		for (int i = 0; i < ST_NUM_SHADER_TYPES; ++ i)
 		{
 			for (size_t j = 0; j < param_descs_[i].size(); ++ j)
 			{
 				cgDestroyParameter(param_descs_[i][j].cg_handle);
 			}
 		}
-		cgDestroyProgram(shaders_[0]);
-		cgDestroyProgram(shaders_[1]);
+		cgDestroyProgram(shaders_[ST_VERTEX_SHADER]);
+		cgDestroyProgram(shaders_[ST_PIXEL_SHADER]);
 	}
 
 	void OGLRenderPass::DoLoad()
 	{
 		is_validate_ = true;
 
-		std::string vs_profile, vs_name, vs_text;
-		this->shader(vs_profile, vs_name, vs_text, "vertex_shader");
+		std::string s_text = this->shader_text();
 
-		std::string ps_profile, ps_name, ps_text;
-		this->shader(ps_profile, ps_name, ps_text, "pixel_shader");
+		std::string const & vs_profile = shader_descs_[ST_VERTEX_SHADER].profile;
+		std::string const & vs_name = shader_descs_[ST_VERTEX_SHADER].func_name;
+
+		std::string const & ps_profile = shader_descs_[ST_PIXEL_SHADER].profile;
+		std::string const & ps_name = shader_descs_[ST_PIXEL_SHADER].func_name;
 
 		if (!vs_name.empty())
 		{
 			if ("auto" == vs_profile)
 			{
-				profiles_[0] = cgGLGetLatestProfile(CG_GL_VERTEX);
+				profiles_[ST_VERTEX_SHADER] = cgGLGetLatestProfile(CG_GL_VERTEX);
 			}
 			else
 			{
-				profiles_[0] = cgGetProfile(vs_profile.c_str());
+				profiles_[ST_VERTEX_SHADER] = cgGetProfile(vs_profile.c_str());
 			}
 
-			this->create_vertex_shader(profiles_[0], vs_name, vs_text);
+			this->create_vertex_shader(profiles_[ST_VERTEX_SHADER], vs_name, s_text);
 		}
 
 		if (!ps_name.empty())
 		{
 			if ("auto" == ps_profile)
 			{
-				profiles_[1] = cgGLGetLatestProfile(CG_GL_FRAGMENT);
+				profiles_[ST_PIXEL_SHADER] = cgGLGetLatestProfile(CG_GL_FRAGMENT);
 			}
 			else
 			{
-				profiles_[1] = cgGetProfile(vs_profile.c_str());
+				profiles_[ST_PIXEL_SHADER] = cgGetProfile(vs_profile.c_str());
 			}
 
-			this->create_pixel_shader(profiles_[1], ps_name, ps_text);
+			this->create_pixel_shader(profiles_[ST_PIXEL_SHADER], ps_name, s_text);
 		}
 
-		for (int i = 0; i < 2; ++ i)
+		for (int i = 0; i < ST_NUM_SHADER_TYPES; ++ i)
 		{
 			CGparameter cg_param = cgGetFirstParameter(shaders_[i], CG_GLOBAL);
 			while (cg_param)
@@ -140,7 +145,7 @@ namespace KlayGE
 			std::make_pair(std::string("TANGENT"), VEU_Tangent),
 			std::make_pair(std::string("BINORMAL"), VEU_Binormal);
 
-		CGparameter cg_param = cgGetFirstParameter(shaders_[0], CG_PROGRAM);
+		CGparameter cg_param = cgGetFirstParameter(shaders_[ST_VERTEX_SHADER], CG_PROGRAM);
 		while (cg_param)
 		{
 			if ((CG_VARYING == cgGetParameterVariability(cg_param))
@@ -215,72 +220,50 @@ namespace KlayGE
 
 	void OGLRenderPass::create_vertex_shader(CGprofile profile, std::string const & name, std::string const & text)
 	{
-		shaders_[0] = this->compile_shader(profile, name, text);
-		cgGLLoadProgram(shaders_[0]);
+		shaders_[ST_VERTEX_SHADER] = this->compile_shader(profile, name, text);
+		cgGLLoadProgram(shaders_[ST_VERTEX_SHADER]);
 	}
 
 	void OGLRenderPass::create_pixel_shader(CGprofile profile, std::string const & name, std::string const & text)
 	{
-		shaders_[1] = this->compile_shader(profile, name, text);
-		cgGLLoadProgram(shaders_[1]);
+		shaders_[ST_PIXEL_SHADER] = this->compile_shader(profile, name, text);
+		cgGLLoadProgram(shaders_[ST_PIXEL_SHADER]);
 	}
 
-	void OGLRenderPass::shader(std::string& profile, std::string& name, std::string& func, std::string const & type) const
+	std::string OGLRenderPass::shader_text() const
 	{
-		profile.resize(0);
-		name.resize(0);
-		func.resize(0);
-
-		RenderEngine::RenderStateType const state_code = render_states_define::instance().state_code(type);
-
-		for (uint32_t i = 0; i < this->NumStates(); ++ i)
-		{
-			if (this->State(i).State() == state_code)
-			{
-				RenderEffectState const & state = this->State(i);
-				shader_desc shader;
-				state.Var()->Value(shader);
-				profile = shader.profile;
-				name = shader.func_name;
-				break;
-			}
-		}
-
 		std::stringstream ss;
-		if (!name.empty())
+		for (uint32_t i = 0; i < effect_.NumParameters(); ++ i)
 		{
-			for (uint32_t i = 0; i < effect_.NumParameters(); ++ i)
+			RenderEffectParameter& param = *effect_.ParameterByIndex(i);
+
+			ss << type_define::instance().type_name(param.type()) << " " << param.Name();
+			if (param.ArraySize() != 0)
 			{
-				RenderEffectParameter& param = *effect_.ParameterByIndex(i);
-
-				ss << type_define::instance().type_name(param.type()) << " " << param.Name();
-				if (param.ArraySize() != 0)
-				{
-					ss << "[" << param.ArraySize() << "]";
-				}
-
-				ss << ";" << std::endl;
+				ss << "[" << param.ArraySize() << "]";
 			}
 
-			for (uint32_t i = 0; i < effect_.NumShaders(); ++ i)
-			{
-				ss << effect_.ShaderByIndex(i).str() << std::endl;
-			}
-
-			func = ss.str();
+			ss << ";" << std::endl;
 		}
+
+		for (uint32_t i = 0; i < effect_.NumShaders(); ++ i)
+		{
+			ss << effect_.ShaderByIndex(i).str() << std::endl;
+		}
+
+		return ss.str();
 	}
 
 	void OGLRenderPass::DoBegin()
 	{
 		OGLRenderEngine& render_eng(*checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 
-		cgGLBindProgram(shaders_[0]);
-		cgGLEnableProfile(profiles_[0]);
-		cgGLBindProgram(shaders_[1]);
-		cgGLEnableProfile(profiles_[1]);
+		cgGLBindProgram(shaders_[ST_VERTEX_SHADER]);
+		cgGLEnableProfile(profiles_[ST_VERTEX_SHADER]);
+		cgGLBindProgram(shaders_[ST_PIXEL_SHADER]);
+		cgGLEnableProfile(profiles_[ST_PIXEL_SHADER]);
 
-		for (int i = 0; i < 2; ++ i)
+		for (int i = 0; i < ST_NUM_SHADER_TYPES; ++ i)
 		{
 			for (size_t c = 0; c < param_descs_[i].size(); ++ c)
 			{
@@ -387,7 +370,7 @@ namespace KlayGE
 			}
 		}
 
-		for (int i = 0; i < 2; ++ i)
+		for (int i = 0; i < ST_NUM_SHADER_TYPES; ++ i)
 		{
 			for (size_t c = 0; c < param_descs_[i].size(); ++ c)
 			{
@@ -406,7 +389,7 @@ namespace KlayGE
 	{
 		OGLRenderEngine& render_eng(*checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 
-		for (int i = 0; i < 2; ++ i)
+		for (int i = 0; i < ST_NUM_SHADER_TYPES; ++ i)
 		{
 			for (size_t c = 0; c < param_descs_[i].size(); ++ c)
 			{

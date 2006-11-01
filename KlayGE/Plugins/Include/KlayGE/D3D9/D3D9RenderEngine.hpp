@@ -87,9 +87,9 @@ namespace KlayGE
 		void OnResetDevice();
 
 	private:
+		void DoSetRenderStateObject(RenderStateObject const & obj);
 		void DoBindRenderTarget(RenderTargetPtr rt);
 		void DoRender(RenderLayout const & rl);
-		void DoFlushRenderStates();
 
 		void FillRenderDeviceCaps();
 

@@ -34,6 +34,7 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Sampler.hpp>
+#include <KlayGE/RenderStateObject.hpp>
 
 #include <KlayGE/RenderEffect.hpp>
 
@@ -322,19 +323,19 @@ namespace KlayGE
 		return ret;
 	}
 
-	RenderEngine::RenderStateType render_states_define::state_code(std::string const & name) const
+	RenderStateObject::RenderStateType render_states_define::state_code(std::string const & name) const
 	{
 		for (std::vector<std::pair<std::string, std::string> >::const_iterator iter = states_.begin();
 			iter != states_.end(); ++ iter)
 		{
 			if (iter->first == name)
 			{
-				return static_cast<RenderEngine::RenderStateType>(std::distance(states_.begin(), iter));
+				return static_cast<RenderStateObject::RenderStateType>(std::distance(states_.begin(), iter));
 			}
 		}
 		assert(false);
 
-		return static_cast<RenderEngine::RenderStateType>(0xFFFFFFFF);
+		return static_cast<RenderStateObject::RenderStateType>(0xFFFFFFFF);
 	}
 
 	std::string const & render_states_define::state_name(uint32_t code) const
@@ -465,7 +466,7 @@ namespace KlayGE
 		}
 
 	private:
-		void DoBegin(uint32_t /*flags*/)
+		void DoBegin()
 		{
 		}
 		void DoEnd()
@@ -506,47 +507,17 @@ namespace KlayGE
 			passes_[i]->Load(source);
 
 			is_validate_ &= passes_[i]->Validate();
-
-			for (uint32_t j = 0; j < passes_[i]->NumStates(); ++ j)
-			{
-				if (passes_[i]->State(j).Type() != type_define::TC_shader)
-				{
-					changed_states_.push_back(passes_[i]->State(j).State());
-				}
-			}
 		}
-		std::sort(changed_states_.begin(), changed_states_.end());
-		changed_states_.erase(std::unique(changed_states_.begin(), changed_states_.end()), changed_states_.end());
-		std::vector<RenderEngine::RenderStateType>(changed_states_).swap(changed_states_);
 	}
 
-	void RenderTechnique::Begin(uint32_t flags)
+	void RenderTechnique::Begin()
 	{
-		if (RETF_RestoreDefalut == flags)
-		{
-			restore_default_ = true;
-		}
-		else
-		{
-			restore_default_ = false;
-		}
-
-		this->DoBegin(flags);
+		this->DoBegin();
 	}
 
 	void RenderTechnique::End()
 	{
 		this->DoEnd();
-
-		RenderEngine& render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		if (restore_default_)
-		{
-			for (std::vector<RenderEngine::RenderStateType>::iterator iter = changed_states_.begin();
-				iter != changed_states_.end(); ++ iter)
-			{
-				render_eng.SetRenderState(*iter, render_eng.GetDefaultRenderState(*iter));
-			}
-		}
 	}
 
 
@@ -589,24 +560,68 @@ namespace KlayGE
 			annotations_[i]->Load(source);
 		}
 
+		render_state_obj_.reset(new RenderStateObject);
 		source->read(reinterpret_cast<char*>(&len), sizeof(len));
 		for (size_t i = 0; i < len; ++ i)
 		{
-			render_states_.push_back(RenderEffectStatePtr(new RenderEffectState));
-			render_states_[i]->Load(source);
+			uint32_t type;
+			source->read(reinterpret_cast<char*>(&type), sizeof(type));
+			std::string state_name = read_short_string(source);
+			boost::shared_ptr<RenderVariable> var = read_var(source, type, 0);
+
+			if (type_define::TC_shader != type)
+			{
+				RenderStateObject::RenderStateType state = render_states_define::instance().state_code(state_name);
+
+				uint32_t state_val;
+				switch (type)
+				{
+				case type_define::TC_bool:
+					{
+						bool tmp;
+						var->Value(tmp);
+						state_val = tmp;
+					}
+					break;
+
+				case type_define::TC_int:
+					{
+						int tmp;
+						var->Value(tmp);
+						state_val = tmp;
+					}
+					break;
+
+				case type_define::TC_float:
+					{
+						float tmp;
+						var->Value(tmp);
+						state_val = float_to_uint32(tmp);
+					}
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					state_val = 0;
+					break;
+				}
+
+				render_state_obj_->SetRenderState(state, state_val);
+			}
+			else
+			{
+				if ("vertex_shader" == state_name)
+				{
+					var->Value(shader_descs_[ST_VERTEX_SHADER]);
+				}
+				if ("pixel_shader" == state_name)
+				{
+					var->Value(shader_descs_[ST_PIXEL_SHADER]);
+				}
+			}
 		}
 
 		this->DoLoad();
-	}
-
-	uint32_t RenderPass::NumStates() const
-	{
-		return static_cast<uint32_t>(render_states_.size());
-	}
-
-	RenderEffectState const & RenderPass::State(uint32_t state_id) const
-	{
-		return *render_states_[state_id];
 	}
 
 	void RenderPass::Begin()
@@ -614,46 +629,7 @@ namespace KlayGE
 		this->DoBegin();
 
 		RenderEngine& render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		for (size_t i = 0; i < render_states_.size(); ++ i)
-		{
-			if (type_define::TC_shader != render_states_[i]->Type())
-			{
-				uint32_t state;
-				switch (render_states_[i]->Type())
-				{
-				case type_define::TC_bool:
-					{
-						bool tmp;
-						render_states_[i]->Var()->Value(tmp);
-						state = tmp;
-					}
-					break;
-
-				case type_define::TC_int:
-					{
-						int tmp;
-						render_states_[i]->Var()->Value(tmp);
-						state = tmp;
-					}
-					break;
-
-				case type_define::TC_float:
-					{
-						float tmp;
-						render_states_[i]->Var()->Value(tmp);
-						state = float_to_uint32(tmp);
-					}
-					break;
-
-				default:
-					BOOST_ASSERT(false);
-					state = 0;
-					break;
-				}
-
-				render_eng.SetRenderState(render_states_[i]->State(), state);
-			}
-		}
+		render_eng.SetRenderStateObject(*render_state_obj_);
 	}
 
 	void RenderPass::End()
@@ -974,14 +950,6 @@ namespace KlayGE
 		source->read(reinterpret_cast<char*>(&len), sizeof(len));
 		str_.resize(len);
 		source->read(&str_[0], len);
-	}
-
-
-	void RenderEffectState::Load(ResIdentifierPtr const & source)
-	{
-		source->read(reinterpret_cast<char*>(&type_), sizeof(type_));
-		state_ = render_states_define::instance().state_code(read_short_string(source));
-		var_ = read_var(source, type_, 0);
 	}
 
 

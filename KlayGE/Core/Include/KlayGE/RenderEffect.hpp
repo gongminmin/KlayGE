@@ -63,11 +63,6 @@
 
 namespace KlayGE
 {
-	enum RenderEffectTechFlags
-	{
-		RETF_RestoreDefalut = 0x01
-	};
-
 	class type_define
 	{
 	public:
@@ -115,7 +110,7 @@ namespace KlayGE
 	public:
 		static render_states_define& instance();
 
-		RenderEngine::RenderStateType state_code(std::string const & name) const;
+		RenderStateObject::RenderStateType state_code(std::string const & name) const;
 		std::string const & state_name(uint32_t code) const;
 
 	private:
@@ -352,7 +347,7 @@ namespace KlayGE
 			return passes_[n];
 		}
 
-		void Begin(uint32_t flags = RETF_RestoreDefalut);
+		void Begin();
 		void End();
 
 		bool Validate() const
@@ -363,7 +358,7 @@ namespace KlayGE
 	protected:
 		virtual RenderPassPtr MakeRenderPass() = 0;
 
-		virtual void DoBegin(uint32_t flags) = 0;
+		virtual void DoBegin() = 0;
 		virtual void DoEnd() = 0;
 
 	protected:
@@ -376,41 +371,20 @@ namespace KlayGE
 		std::vector<boost::shared_ptr<RenderEffectAnnotation> > annotations_;
 		float weight_;
 
-		std::vector<RenderEngine::RenderStateType> changed_states_;
-
 		bool is_validate_;
-		bool restore_default_;
-	};
-
-	class RenderEffectState
-	{
-	public:
-		void Load(ResIdentifierPtr const & source);
-
-		uint32_t Type() const
-		{
-			return type_;
-		}
-
-		RenderEngine::RenderStateType State() const
-		{
-			return state_;
-		}
-
-		boost::shared_ptr<RenderVariable> const & Var() const
-		{
-			return var_;
-		}
-
-	private:
-		uint32_t type_;
-		RenderEngine::RenderStateType state_;
-
-		boost::shared_ptr<RenderVariable> var_;
 	};
 
 	class RenderPass : boost::noncopyable
 	{
+	public:
+		enum
+		{
+			ST_VERTEX_SHADER,
+			ST_PIXEL_SHADER,
+
+			ST_NUM_SHADER_TYPES
+		};
+
 	public:
 		explicit RenderPass(RenderEffect& effect)
 			: effect_(effect)
@@ -428,9 +402,6 @@ namespace KlayGE
 		{
 			return name_;
 		}
-
-		uint32_t NumStates() const;
-		RenderEffectState const & State(uint32_t state_id) const;
 
 		void Begin();
 		void End();
@@ -451,7 +422,9 @@ namespace KlayGE
 
 		std::string name_;
 		std::vector<boost::shared_ptr<RenderEffectAnnotation> > annotations_;
-		std::vector<RenderEffectStatePtr> render_states_;
+
+		RenderStateObjectPtr render_state_obj_;
+		shader_desc shader_descs_[ST_NUM_SHADER_TYPES];
 
 		bool is_validate_;
 	};

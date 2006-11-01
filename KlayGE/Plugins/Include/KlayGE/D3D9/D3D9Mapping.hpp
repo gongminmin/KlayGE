@@ -36,15 +36,15 @@ namespace KlayGE
 		static D3DCOLORVALUE MappingToFloat4Color(Color const & clr);
 		static uint32_t MappingColorMask(uint32_t mask);
 
-		static D3DCMPFUNC Mapping(RenderEngine::CompareFunction func);
+		static D3DCMPFUNC Mapping(RenderStateObject::CompareFunction func);
 
-		static D3DSTENCILOP Mapping(RenderEngine::StencilOperation op);
+		static D3DSTENCILOP Mapping(RenderStateObject::StencilOperation op);
 
-		static uint32_t Mapping(RenderEngine::AlphaBlendFactor factor);
-		static uint32_t Mapping(RenderEngine::CullMode mode);
-		static uint32_t Mapping(RenderEngine::PolygonMode mode);
-		static uint32_t Mapping(RenderEngine::ShadeMode mode);
-		static uint32_t Mapping(RenderEngine::BlendOperation bo);
+		static uint32_t Mapping(RenderStateObject::AlphaBlendFactor factor);
+		static uint32_t Mapping(RenderStateObject::CullMode mode);
+		static uint32_t Mapping(RenderStateObject::PolygonMode mode);
+		static uint32_t Mapping(RenderStateObject::ShadeMode mode);
+		static uint32_t Mapping(RenderStateObject::BlendOperation bo);
 		static uint32_t Mapping(Sampler::TexAddressingMode mode);
 
 		static void Mapping(D3DPRIMITIVETYPE& primType, uint32_t& primCount, RenderLayout const & rl);

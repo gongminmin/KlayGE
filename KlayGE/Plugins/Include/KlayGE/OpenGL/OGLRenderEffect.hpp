@@ -1,8 +1,11 @@
 // OGLRenderEffect.hpp
 // KlayGE OpenGL渲染效果类 头文件
-// Ver 2.8.0
-// 版权所有(C) 龚敏敏, 2004-2005
+// Ver 3.5.0
+// 版权所有(C) 龚敏敏, 2004-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.5.0
+// 使用了新的effect系统 (2006.11.1)
 //
 // 2.8.0
 // 使用Cg实现 (2005.7.30)
@@ -60,7 +63,7 @@ namespace KlayGE
 	private:
 		RenderPassPtr MakeRenderPass();
 
-		void DoBegin(uint32_t flags);
+		void DoBegin();
 		void DoEnd();
 	};
 	typedef boost::shared_ptr<OGLRenderTechnique> OGLRenderTechniquePtr;
@@ -83,10 +86,10 @@ namespace KlayGE
 		void DoEnd();
 
 	private:
-		boost::array<CGprogram, 2> shaders_;
-		boost::array<CGprofile, 2> profiles_;
+		boost::array<CGprogram, ST_NUM_SHADER_TYPES> shaders_;
+		boost::array<CGprofile, ST_NUM_SHADER_TYPES> profiles_;
 
-		boost::array<std::vector<OGLRenderParameterDesc>, 2> param_descs_;
+		boost::array<std::vector<OGLRenderParameterDesc>, ST_NUM_SHADER_TYPES> param_descs_;
 		
 		MapVector<std::pair<VertexElementUsage, uint8_t>, uint8_t> vertex_varyings_;
 
@@ -95,7 +98,7 @@ namespace KlayGE
 		void create_vertex_shader(CGprofile profile, std::string const & name, std::string const & text);
 		void create_pixel_shader(CGprofile profile, std::string const & name, std::string const & text);
 
-		void shader(std::string& profile, std::string& name, std::string& func, std::string const & type) const;
+		std::string shader_text() const;
 	};
 	typedef boost::shared_ptr<OGLRenderPass> OGLRenderPassPtr;
 }
