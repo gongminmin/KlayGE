@@ -40,6 +40,7 @@
 #include <glloader/glloader.h>
 
 #include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/ShaderObject.hpp>
 
 namespace KlayGE
 {
@@ -80,7 +81,7 @@ namespace KlayGE
 		void AttachAttribs(RenderLayout const & rl, RenderPassPtr pass);
 
 		RenderStateObject cur_render_state_obj_;
-		std::vector<SamplerPtr> cur_samplers_;
+		boost::array<std::vector<SamplerPtr>, ShaderObject::ST_NumShaderTypes> cur_samplers_;
 	};
 
 	typedef boost::shared_ptr<OGLRenderEngine> OGLRenderEnginePtr;

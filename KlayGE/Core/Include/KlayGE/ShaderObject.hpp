@@ -29,6 +29,10 @@ namespace KlayGE
 		};
 
 	public:
+		virtual ~ShaderObject()
+		{
+		}
+
 		static ShaderObjectPtr NullObject();
 
 		virtual void SetShader(ShaderType type, std::string const & profile, std::string const & name, std::string const & text) = 0;

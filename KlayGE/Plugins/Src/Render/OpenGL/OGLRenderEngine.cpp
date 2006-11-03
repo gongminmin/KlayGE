@@ -345,6 +345,10 @@ namespace KlayGE
 						(state & RenderStateObject::CMASK_Blue) != 0,
 						(state & RenderStateObject::CMASK_Alpha) != 0);
 					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
 				}
 
 				cur_render_state_obj_.SetRenderState(rst, state);
@@ -366,17 +370,14 @@ namespace KlayGE
 			{
 				glActiveTexture(GL_TEXTURE0 + stage);
 
-				SamplerPtr cur_sampler = cur_samplers_[stage];
+				SamplerPtr cur_sampler = cur_samplers_[i][stage];
 				SamplerPtr sampler = samplers[stage];
 				if (!sampler || !sampler->GetTexture())
 				{
-					if (cur_sampler)
+					if (cur_sampler->GetTexture())
 					{
-						if (cur_sampler->GetTexture() != TexturePtr())
-						{
-							glBindTexture(GL_TEXTURE_2D, 0);
-							cur_sampler->SetTexture(TexturePtr());
-						}
+						glBindTexture(GL_TEXTURE_2D, 0);
+						cur_sampler->SetTexture(TexturePtr());
 					}
 				}
 				else
@@ -832,7 +833,7 @@ namespace KlayGE
 		caps_.max_texture_cube_size = temp;
 
 		glGetIntegerv(GL_MAX_TEXTURE_UNITS, &temp);
-		caps_.max_textures_units = temp;
+		caps_.max_texture_units = temp;
 
 		if (glloader_GL_EXT_texture_filter_anisotropic())
 		{
@@ -868,9 +869,13 @@ namespace KlayGE
 
 		caps_.hw_instancing_support = true;
 
-		for (size_t i = 0; i < caps_.max_textures_units; ++ i)
+		for (size_t i = 0; i < caps_.max_vertex_texture_units; ++ i)
 		{
-			cur_samplers_.push_back(SamplerPtr(new Sampler));
+			cur_samplers_[ShaderObject::ST_VertexShader].push_back(SamplerPtr(new Sampler));
+		};
+		for (size_t i = 0; i < caps_.max_texture_units; ++ i)
+		{
+			cur_samplers_[ShaderObject::ST_PixelShader].push_back(SamplerPtr(new Sampler));
 		};
 	}
 }

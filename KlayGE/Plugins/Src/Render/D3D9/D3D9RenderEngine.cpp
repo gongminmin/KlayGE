@@ -435,6 +435,10 @@ namespace KlayGE
 					d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE,
 						D3D9Mapping::MappingColorMask(state));
 					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
 				}
 
 				cur_render_state_obj_.SetRenderState(rst, state);
@@ -498,18 +502,14 @@ namespace KlayGE
 					stage += D3DVERTEXTEXTURESAMPLER0;
 				}
 
-				SamplerPtr cur_sampler = cur_samplers_[j];
+				SamplerPtr cur_sampler = cur_samplers_[type][j];
 				SamplerPtr sampler = d3d9_shader_obj.Samplers(type)[j];
 				if (!sampler || !sampler->GetTexture())
 				{
-					TIF(d3dDevice_->SetTexture(stage, NULL));
-
-					if (cur_sampler)
+					if (cur_sampler->GetTexture())
 					{
-						if (cur_sampler->GetTexture() != TexturePtr())
-						{
-							cur_sampler->SetTexture(TexturePtr());
-						}
+						TIF(d3dDevice_->SetTexture(stage, NULL));
+						cur_sampler->SetTexture(TexturePtr());
 					}
 				}
 				else
@@ -706,7 +706,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(d3dDevice_);
 		BOOST_ASSERT(rl.NumVertexStreams() != 0);
-		
+
 		uint32_t const num_instance = rl.NumInstance();
 
 		if (num_instance > 1)
@@ -898,9 +898,13 @@ namespace KlayGE
 
 		caps_ = D3D9Mapping::Mapping(d3d_caps);
 
-		for (size_t i = 0; i < caps_.max_textures_units; ++ i)
+		for (size_t i = 0; i < caps_.max_vertex_texture_units; ++ i)
 		{
-			cur_samplers_.push_back(SamplerPtr(new Sampler));
+			cur_samplers_[ShaderObject::ST_VertexShader].push_back(SamplerPtr(new Sampler));
+		}
+		for (size_t i = 0; i < caps_.max_texture_units; ++ i)
+		{
+			cur_samplers_[ShaderObject::ST_PixelShader].push_back(SamplerPtr(new Sampler));
 		}
 	}
 
@@ -909,7 +913,7 @@ namespace KlayGE
 	void D3D9RenderEngine::OnLostDevice()
 	{
 	}
-	
+
 	// 响应设备复位
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::OnResetDevice()

@@ -30,7 +30,7 @@ namespace KlayGE
 		uint32_t max_texture_height;
 		uint32_t max_texture_depth;
 		uint32_t max_texture_cube_size;
-		uint32_t max_textures_units;
+		uint32_t max_texture_units;
 		uint32_t max_texture_anisotropy;
 		uint32_t max_vertex_texture_units;
 

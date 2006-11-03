@@ -184,7 +184,7 @@ namespace KlayGE
 			break;
 
 		case ST_PixelShader:
-			samplers_[type].resize(re.DeviceCaps().max_textures_units);
+			samplers_[type].resize(re.DeviceCaps().max_texture_units);
 			break;
 
 		default:
