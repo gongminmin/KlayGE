@@ -61,13 +61,6 @@ namespace KlayGE
 		return FrameBufferPtr(new OGLFrameBuffer);
 	}
 
-	RenderEffectPtr OGLRenderFactory::DoMakeRenderEffect(ResIdentifierPtr const & source)
-	{
-		OGLRenderEffectPtr ret(new OGLRenderEffect);
-		ret->Load(source);
-		return ret;
-	}
-
 	RenderLayoutPtr OGLRenderFactory::MakeRenderLayout(RenderLayout::buffer_type type)
 	{
 		return RenderLayoutPtr(new OGLRenderLayout(type));
@@ -116,6 +109,11 @@ namespace KlayGE
 	RenderViewPtr OGLRenderFactory::MakeDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t multi_sample)
 	{
 		return RenderViewPtr(new OGLDepthStencilRenderView(width, height, pf, multi_sample));
+	}
+
+	ShaderObjectPtr OGLRenderFactory::MakeShaderObject()
+	{
+		return ShaderObjectPtr(new OGLShaderObject);
 	}
 
 	RenderFactory& OGLRenderFactoryInstance()

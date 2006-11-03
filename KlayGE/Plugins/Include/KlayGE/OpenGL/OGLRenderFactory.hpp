@@ -22,11 +22,11 @@
 #include <KlayGE/OpenGL/OGLRenderEngine.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 #include <KlayGE/OpenGL/OGLFrameBuffer.hpp>
-#include <KlayGE/OpenGL/OGLRenderEffect.hpp>
 #include <KlayGE/OpenGL/OGLRenderLayout.hpp>
 #include <KlayGE/OpenGL/OGLGraphicsBuffer.hpp>
 #include <KlayGE/OpenGL/OGLOcclusionQuery.hpp>
 #include <KlayGE/OpenGL/OGLRenderView.hpp>
+#include <KlayGE/OpenGL/OGLShaderObject.hpp>
 
 #include <windows.h>
 #include <glloader/glloader.h>
@@ -40,7 +40,7 @@ namespace KlayGE
 	RenderFactory& OGLRenderFactoryInstance();
 
 	typedef ConcreteRenderFactory<OGLRenderEngine, OGLTexture, OGLFrameBuffer,
-				OGLRenderEffect, OGLRenderView> OGLRenderFactoryBase;
+				OGLRenderView> OGLRenderFactoryBase;
 
 	class OGLRenderFactory : public OGLRenderFactoryBase
 	{
@@ -60,8 +60,6 @@ namespace KlayGE
 
 		FrameBufferPtr MakeFrameBuffer();
 
-		RenderEffectPtr DoMakeRenderEffect(ResIdentifierPtr const & source);
-
 		RenderLayoutPtr MakeRenderLayout(RenderLayout::buffer_type type);
 		GraphicsBufferPtr MakeVertexBuffer(BufferUsage usage);
 		GraphicsBufferPtr MakeIndexBuffer(BufferUsage usage);
@@ -74,6 +72,8 @@ namespace KlayGE
 		RenderViewPtr Make3DRenderView(Texture& texture, uint32_t slice, int level);
 		RenderViewPtr MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer, uint32_t width, uint32_t height, ElementFormat pf);
 		RenderViewPtr MakeDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t multi_sample);
+
+		ShaderObjectPtr MakeShaderObject();
 
 	private:
 		CGcontext context_;

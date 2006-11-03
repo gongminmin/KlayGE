@@ -54,14 +54,13 @@ namespace KlayGE
 		void Clear(uint32_t masks, Color const & clr, float depth, int32_t stencil);
 
 		RenderWindowPtr CreateRenderWindow(std::string const & name, RenderSettings const & settings);
+		
+		void SetStateObjects(RenderStateObject const & rs_obj, ShaderObject const & shader_obj);
 
 		void StartRendering();
 
 		void BeginFrame();
 		void EndFrame();
-
-		void SetSampler(uint32_t stage, SamplerPtr const & sampler);
-		void DisableSampler(uint32_t stage);
 
 		uint16_t StencilBufferBitDepth();
 
@@ -73,13 +72,15 @@ namespace KlayGE
 		}
 
 	private:
-		void DoSetRenderStateObject(RenderStateObject const & obj);
 		void DoBindRenderTarget(RenderTargetPtr renderTarget);
 		void DoRender(RenderLayout const & rl);
 
 		void FillRenderDeviceCaps();
 
 		void AttachAttribs(RenderLayout const & rl, RenderPassPtr pass);
+
+		RenderStateObject cur_render_state_obj_;
+		std::vector<SamplerPtr> cur_samplers_;
 	};
 
 	typedef boost::shared_ptr<OGLRenderEngine> OGLRenderEnginePtr;

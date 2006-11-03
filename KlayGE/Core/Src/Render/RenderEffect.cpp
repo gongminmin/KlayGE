@@ -34,7 +34,11 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Sampler.hpp>
+#include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderStateObject.hpp>
+#include <KlayGE/ShaderObject.hpp>
+
+#include <sstream>
 
 #include <KlayGE/RenderEffect.hpp>
 
@@ -407,7 +411,7 @@ namespace KlayGE
 
 			for (uint32_t i = 0; i < header.num_techniques; ++ i)
 			{
-				techniques_.push_back(this->MakeRenderTechnique());
+				techniques_.push_back(RenderTechniquePtr(new RenderTechnique(*this)));
 				techniques_[i]->Load(source);
 			}
 		}
@@ -503,7 +507,7 @@ namespace KlayGE
 		source->read(reinterpret_cast<char*>(&len), sizeof(len));
 		for (uint32_t i = 0; i < len; ++ i)
 		{
-			passes_.push_back(this->MakeRenderPass());
+			passes_.push_back(RenderPassPtr(new RenderPass(effect_)));
 			passes_[i]->Load(source);
 
 			is_validate_ &= passes_[i]->Validate();
@@ -512,12 +516,10 @@ namespace KlayGE
 
 	void RenderTechnique::Begin()
 	{
-		this->DoBegin();
 	}
 
 	void RenderTechnique::End()
 	{
-		this->DoEnd();
 	}
 
 
@@ -529,17 +531,6 @@ namespace KlayGE
 		{
 			is_validate_ = true;
 		}
-
-		void DoLoad()
-		{
-		}
-
-		void DoBegin()
-		{
-		}
-		void DoEnd()
-		{
-		}
 	};
 
 	RenderPassPtr RenderPass::NullObject()
@@ -550,6 +541,8 @@ namespace KlayGE
 
 	void RenderPass::Load(ResIdentifierPtr const & source)
 	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
 		name_ = read_short_string(source);
 
 		uint32_t len;
@@ -561,6 +554,8 @@ namespace KlayGE
 		}
 
 		render_state_obj_.reset(new RenderStateObject);
+		shader_obj_ = rf.MakeShaderObject();
+
 		source->read(reinterpret_cast<char*>(&len), sizeof(len));
 		for (size_t i = 0; i < len; ++ i)
 		{
@@ -612,29 +607,191 @@ namespace KlayGE
 			{
 				if ("vertex_shader" == state_name)
 				{
-					var->Value(shader_descs_[ST_VERTEX_SHADER]);
+					shader_desc sd;
+					var->Value(sd);
+
+					shader_obj_->SetShader(ShaderObject::ST_VertexShader, sd.profile, sd.func_name, this->GenShaderText());
 				}
 				if ("pixel_shader" == state_name)
 				{
-					var->Value(shader_descs_[ST_PIXEL_SHADER]);
+					shader_desc sd;
+					var->Value(sd);
+
+					shader_obj_->SetShader(ShaderObject::ST_PixelShader, sd.profile, sd.func_name, this->GenShaderText());
 				}
 			}
 		}
 
-		this->DoLoad();
+		is_validate_ = shader_obj_->Validate();
+
+		for (uint32_t i = 0; i < effect_.NumParameters(); ++ i)
+		{
+			for (size_t j = 0; j < ShaderObject::ST_NumShaderTypes; ++ j)
+			{
+				ShaderObject::ShaderType type = static_cast<ShaderObject::ShaderType>(j);
+
+				RenderEffectParameterPtr param = effect_.ParameterByIndex(i);
+				if (shader_obj_->HasParameter(type, param->Name()))
+				{
+					param_descs_[type].push_back(param);
+				}
+			}
+		}
 	}
 
 	void RenderPass::Begin()
 	{
-		this->DoBegin();
+		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
+		{
+			for (size_t j = 0; j < param_descs_[i].size(); ++ j)
+			{
+				RenderEffectParameterPtr param = param_descs_[i][j];
+				if (param->IsDirty())
+				{
+					switch (param->type())
+					{
+					case type_define::TC_bool:
+						if (param->ArraySize() != 0)
+						{
+							std::vector<bool> tmp;
+							param->Value(tmp);
+							shader_obj_->SetParameter(param->Name(), tmp);
+						}
+						else
+						{
+							bool tmp;
+							param->Value(tmp);
+							shader_obj_->SetParameter(param->Name(), tmp);
+						}
+						break;
+
+					case type_define::TC_dword:
+					case type_define::TC_int:
+						if (param->ArraySize() != 0)
+						{
+							std::vector<int> tmp;
+							param->Value(tmp);
+							shader_obj_->SetParameter(param->Name(), tmp);
+						}
+						else
+						{
+							int tmp;
+							param->Value(tmp);
+							shader_obj_->SetParameter(param->Name(), tmp);
+						}
+						break;
+
+					case type_define::TC_float:
+						if (param->ArraySize() != 0)
+						{
+							std::vector<float> tmp;
+							param->Value(tmp);
+							shader_obj_->SetParameter(param->Name(), tmp);
+						}
+						else
+						{
+							float tmp;
+							param->Value(tmp);
+							shader_obj_->SetParameter(param->Name(), tmp);
+						}
+						break;
+
+					case type_define::TC_float2:
+						{
+							float2 tmp;
+							param->Value(tmp);
+							float4 v4(tmp.x(), tmp.y(), 0, 0);
+							shader_obj_->SetParameter(param->Name(), v4);
+						}
+						break;
+
+					case type_define::TC_float3:
+						{
+							float3 tmp;
+							param->Value(tmp);
+							float4 v4(tmp.x(), tmp.y(), tmp.z(), 0);
+							shader_obj_->SetParameter(param->Name(), v4);
+						}
+						break;
+
+					case type_define::TC_float4:
+						if (param->ArraySize() != 0)
+						{
+							std::vector<float4> tmp;
+							param->Value(tmp);
+							shader_obj_->SetParameter(param->Name(), tmp);
+						}
+						else
+						{
+							float4 tmp;
+							param->Value(tmp);
+							shader_obj_->SetParameter(param->Name(), tmp);
+						}
+						break;
+
+					case type_define::TC_float4x4:
+						if (param->ArraySize() != 0)
+						{
+							std::vector<float4x4> tmp;
+							param->Value(tmp);
+							shader_obj_->SetParameter(param->Name(), tmp);
+						}
+						else
+						{
+							float4x4 tmp;
+							param->Value(tmp);
+							shader_obj_->SetParameter(param->Name(), tmp);
+						}
+						break;
+
+					case type_define::TC_sampler:
+						{
+							SamplerPtr tmp;
+							param->Value(tmp);
+							shader_obj_->SetParameter(param->Name(), tmp);
+						}
+						break;
+
+					default:
+						BOOST_ASSERT(false);
+						break;
+					}
+
+					//param->Dirty(false);
+				}
+			}
+		}
 
 		RenderEngine& render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		render_eng.SetRenderStateObject(*render_state_obj_);
+		render_eng.SetStateObjects(*render_state_obj_, *shader_obj_);
 	}
 
 	void RenderPass::End()
 	{
-		this->DoEnd();
+	}
+
+	std::string RenderPass::GenShaderText() const
+	{
+		std::stringstream ss;
+		for (uint32_t i = 0; i < effect_.NumParameters(); ++ i)
+		{
+			RenderEffectParameter& param = *effect_.ParameterByIndex(i);
+
+			ss << type_define::instance().type_name(param.type()) << " " << param.Name();
+			if (param.ArraySize() != 0)
+			{
+				ss << "[" << param.ArraySize() << "]";
+			}
+
+			ss << ";" << std::endl;
+		}
+
+		for (uint32_t i = 0; i < effect_.NumShaders(); ++ i)
+		{
+			ss << effect_.ShaderByIndex(i).str() << std::endl;
+		}
+
+		return ss.str();
 	}
 
 

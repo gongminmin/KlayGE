@@ -19,7 +19,6 @@
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 #include <KlayGE/D3D9/D3D9FrameBuffer.hpp>
-#include <KlayGE/D3D9/D3D9RenderEffect.hpp>
 #include <KlayGE/D3D9/D3D9RenderLayout.hpp>
 #include <KlayGE/D3D9/D3D9GraphicsBuffer.hpp>
 #include <KlayGE/D3D9/D3D9OcclusionQuery.hpp>
@@ -65,14 +64,6 @@ namespace KlayGE
 	FrameBufferPtr D3D9RenderFactory::MakeFrameBuffer()
 	{
 		D3D9FrameBufferPtr ret(new D3D9FrameBuffer);
-		resource_pool_.push_back(ret);
-		return ret;
-	}
-
-	RenderEffectPtr D3D9RenderFactory::DoMakeRenderEffect(ResIdentifierPtr const & source)
-	{
-		D3D9RenderEffectPtr ret(new D3D9RenderEffect);
-		ret->Load(source);
 		resource_pool_.push_back(ret);
 		return ret;
 	}
@@ -142,6 +133,12 @@ namespace KlayGE
 	{
 		D3D9RenderViewPtr ret(new D3D9DepthStencilRenderView(width, height, pf, multi_sample));
 		resource_pool_.push_back(ret);
+		return ret;
+	}
+
+	ShaderObjectPtr D3D9RenderFactory::MakeShaderObject()
+	{
+		D3D9ShaderObjectPtr ret(new D3D9ShaderObject);
 		return ret;
 	}
 

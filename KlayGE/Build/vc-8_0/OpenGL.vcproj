@@ -174,10 +174,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderEffect.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderEngine.cpp"
 				>
 			</File>
@@ -191,6 +187,10 @@
 			</File>
 			<File
 				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderWindow.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLShaderObject.cpp"
 				>
 			</File>
 			<File
@@ -236,10 +236,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderEffect.hpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderEngine.hpp"
 				>
 			</File>
@@ -257,6 +253,10 @@
 			</File>
 			<File
 				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderWindow.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLShaderObject.hpp"
 				>
 			</File>
 			<File

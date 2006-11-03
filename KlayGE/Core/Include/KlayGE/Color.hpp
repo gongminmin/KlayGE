@@ -174,6 +174,12 @@ namespace KlayGE
 		Color_T const operator-() const
 			{ return Color_T(-this->r(), -this->g(), -this->b(), -this->a()); }
 
+		friend bool
+		operator==(Color_T const & lhs, Color_T const & rhs)
+		{
+			return lhs.col_ == rhs.col_;
+		}
+
 	private:
 		Vector_T<T, elem_num> col_;
 	};

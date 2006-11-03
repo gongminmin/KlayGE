@@ -36,16 +36,16 @@
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 #include <KlayGE/D3D9/D3D9FrameBuffer.hpp>
-#include <KlayGE/D3D9/D3D9RenderEffect.hpp>
 #include <KlayGE/D3D9/D3D9GraphicsBuffer.hpp>
 #include <KlayGE/D3D9/D3D9RenderView.hpp>
+#include <KlayGE/D3D9/D3D9ShaderObject.hpp>
 
 namespace KlayGE
 {
 	RenderFactory& D3D9RenderFactoryInstance();
 
 	typedef ConcreteRenderFactory<D3D9RenderEngine, D3D9Texture, D3D9FrameBuffer,
-			D3D9RenderEffect, D3D9RenderView> D3D9RenderFactoryBase;
+			D3D9RenderView> D3D9RenderFactoryBase;
 
 	class D3D9RenderFactory : public D3D9RenderFactoryBase
 	{
@@ -75,11 +75,10 @@ namespace KlayGE
 		RenderViewPtr MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer, uint32_t width, uint32_t height, ElementFormat pf);
 		RenderViewPtr MakeDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t multi_sample);
 
+		ShaderObjectPtr MakeShaderObject();
+
 		void OnLostDevice();
 		void OnResetDevice();
-
-	private:
-		RenderEffectPtr DoMakeRenderEffect(ResIdentifierPtr const & source);
 
 	private:
 		std::vector<boost::weak_ptr<D3D9Resource> > resource_pool_;

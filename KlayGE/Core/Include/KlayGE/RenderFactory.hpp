@@ -69,8 +69,7 @@ namespace KlayGE
 		virtual RenderViewPtr MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer, uint32_t width, uint32_t height, ElementFormat pf) = 0;
 		virtual RenderViewPtr MakeDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t multi_sample) = 0;
 
-	private:
-		virtual RenderEffectPtr DoMakeRenderEffect(ResIdentifierPtr const & source) = 0;
+		virtual ShaderObjectPtr MakeShaderObject() = 0;
 
 	protected:
 		typedef std::map<std::string, RenderEffectPtr> effect_pool_type;
@@ -78,7 +77,7 @@ namespace KlayGE
 	};
 
 	template <typename RenderEngineType, typename TextureType, typename FrameBufferType,
-		typename RenderEffectType, typename RenderViewType>
+		typename RenderViewType>
 	class ConcreteRenderFactory : boost::noncopyable, public RenderFactory
 	{
 	public:

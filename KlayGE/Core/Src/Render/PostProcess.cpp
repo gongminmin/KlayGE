@@ -31,17 +31,17 @@ namespace KlayGE
 		rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleFan);
 
 		pos_vb_ = rf.MakeVertexBuffer(BU_Static);
-		pos_vb_->Resize(sizeof(float3) * 4);
+		pos_vb_->Resize(sizeof(float2) * 4);
 		{
 			GraphicsBuffer::Mapper mapper(*pos_vb_, BA_Write_Only);
-			float3* addr = mapper.Pointer<float3>();
-			addr[0] = float3(-1, +1, 0);
-			addr[1] = float3(+1, +1, 0);
-			addr[2] = float3(+1, -1, 0);
-			addr[3] = float3(-1, -1, 0);
-			box_ = MathLib::compute_bounding_box<float>(&addr[0], &addr[4]);
+			float2* addr = mapper.Pointer<float2>();
+			addr[0] = float2(-1, +1);
+			addr[1] = float2(+1, +1);
+			addr[2] = float2(+1, -1);
+			addr[3] = float2(-1, -1);
+			box_ = Box(float3(-1, -1, -1), float3(1, 1, 1));
 		}
-		rl_->BindVertexStream(pos_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+		rl_->BindVertexStream(pos_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
 		technique_ = tech;
 	}

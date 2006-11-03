@@ -51,8 +51,8 @@
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 #include <KlayGE/OpenGL/OGLGraphicsBuffer.hpp>
 #include <KlayGE/OpenGL/OGLRenderLayout.hpp>
-#include <KlayGE/OpenGL/OGLRenderEffect.hpp>
 #include <KlayGE/OpenGL/OGLRenderEngine.hpp>
+#include <KlayGE/OpenGL/OGLShaderObject.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
 #ifdef KLAYGE_DEBUG
@@ -157,33 +157,19 @@ namespace KlayGE
 		default_render_target_ = win;
 
 		this->FillRenderDeviceCaps();
-
 		this->BindRenderTarget(win);
-
-		bool has_depth_buf = IsDepthFormat(settings.depth_stencil_fmt);
-		if (has_depth_buf)
-		{
-			glClearDepth(1.0f);
-			glEnable(GL_DEPTH_TEST);
-			glDepthMask(GL_TRUE);
-		}
-		else
-		{
-			glDisable(GL_DEPTH_TEST);
-			glDepthMask(GL_FALSE);
-		}
 
 		return win;
 	}
 
 	// 设置当前渲染状态对象
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::DoSetRenderStateObject(RenderStateObject const & obj)
+	void OGLRenderEngine::SetStateObjects(RenderStateObject const & rs_obj, ShaderObject const & shader_obj)
 	{
 		for (int i = 0; i < RenderStateObject::RST_NUM_RENDER_STATES; ++ i)
 		{
 			RenderStateObject::RenderStateType rst = static_cast<RenderStateObject::RenderStateType>(i);
-			uint32_t state = obj.GetRenderState(rst);
+			uint32_t state = rs_obj.GetRenderState(rst);
 			if (cur_render_state_obj_.GetRenderState(rst) != state)
 			{
 				switch (rst)
@@ -240,18 +226,18 @@ namespace KlayGE
 
 				case RenderStateObject::RST_BlendOp:
 				case RenderStateObject::RST_BlendOpAlpha:
-					glBlendEquationSeparate(OGLMapping::Mapping(static_cast<RenderStateObject::BlendOperation>(obj.GetRenderState(RenderStateObject::RST_BlendOp))),
-						OGLMapping::Mapping(static_cast<RenderStateObject::BlendOperation>(obj.GetRenderState(RenderStateObject::RST_BlendOpAlpha))));
+					glBlendEquationSeparate(OGLMapping::Mapping(static_cast<RenderStateObject::BlendOperation>(rs_obj.GetRenderState(RenderStateObject::RST_BlendOp))),
+						OGLMapping::Mapping(static_cast<RenderStateObject::BlendOperation>(rs_obj.GetRenderState(RenderStateObject::RST_BlendOpAlpha))));
 					break;
 
 				case RenderStateObject::RST_SrcBlend:
 				case RenderStateObject::RST_DestBlend:
 				case RenderStateObject::RST_SrcBlendAlpha:
 				case RenderStateObject::RST_DestBlendAlpha:
-					glBlendFuncSeparate(OGLMapping::Mapping(static_cast<RenderStateObject::AlphaBlendFactor>(obj.GetRenderState(RenderStateObject::RST_SrcBlend))),
-						OGLMapping::Mapping(static_cast<RenderStateObject::AlphaBlendFactor>(obj.GetRenderState(RenderStateObject::RST_DestBlend))),
-						OGLMapping::Mapping(static_cast<RenderStateObject::AlphaBlendFactor>(obj.GetRenderState(RenderStateObject::RST_SrcBlendAlpha))),
-						OGLMapping::Mapping(static_cast<RenderStateObject::AlphaBlendFactor>(obj.GetRenderState(RenderStateObject::RST_DestBlendAlpha))));
+					glBlendFuncSeparate(OGLMapping::Mapping(static_cast<RenderStateObject::AlphaBlendFactor>(rs_obj.GetRenderState(RenderStateObject::RST_SrcBlend))),
+						OGLMapping::Mapping(static_cast<RenderStateObject::AlphaBlendFactor>(rs_obj.GetRenderState(RenderStateObject::RST_DestBlend))),
+						OGLMapping::Mapping(static_cast<RenderStateObject::AlphaBlendFactor>(rs_obj.GetRenderState(RenderStateObject::RST_SrcBlendAlpha))),
+						OGLMapping::Mapping(static_cast<RenderStateObject::AlphaBlendFactor>(rs_obj.GetRenderState(RenderStateObject::RST_DestBlendAlpha))));
 					break;
 
 				case RenderStateObject::RST_DepthEnable:
@@ -280,25 +266,25 @@ namespace KlayGE
 					glEnable(GL_POLYGON_OFFSET_POINT);
 					glEnable(GL_POLYGON_OFFSET_LINE);
 					// Bias is in {0, 16}, scale the unit addition appropriately
-					glPolygonOffset(uint32_to_float(obj.GetRenderState(RenderStateObject::RST_PolygonOffsetFactor)),
-						uint32_to_float(obj.GetRenderState(RenderStateObject::RST_PolygonOffsetUnits)));
+					glPolygonOffset(uint32_to_float(rs_obj.GetRenderState(RenderStateObject::RST_PolygonOffsetFactor)),
+						uint32_to_float(rs_obj.GetRenderState(RenderStateObject::RST_PolygonOffsetUnits)));
 					break;
 
 				case RenderStateObject::RST_FrontStencilFunc:
 				case RenderStateObject::RST_FrontStencilRef:
 				case RenderStateObject::RST_FrontStencilMask:
 					glStencilFuncSeparate(GL_FRONT,
-						OGLMapping::Mapping(static_cast<RenderStateObject::CompareFunction>(obj.GetRenderState(RenderStateObject::RST_FrontStencilFunc))),
-						obj.GetRenderState(RenderStateObject::RST_FrontStencilRef), obj.GetRenderState(RenderStateObject::RST_FrontStencilMask));
+						OGLMapping::Mapping(static_cast<RenderStateObject::CompareFunction>(rs_obj.GetRenderState(RenderStateObject::RST_FrontStencilFunc))),
+						rs_obj.GetRenderState(RenderStateObject::RST_FrontStencilRef), rs_obj.GetRenderState(RenderStateObject::RST_FrontStencilMask));
 					break;
 
 				case RenderStateObject::RST_FrontStencilFail:
 				case RenderStateObject::RST_FrontStencilDepthFail:
 				case RenderStateObject::RST_FrontStencilPass:
 					glStencilOpSeparate(GL_FRONT,
-						OGLMapping::Mapping(static_cast<RenderStateObject::StencilOperation>(obj.GetRenderState(RenderStateObject::RST_FrontStencilFail))),
-						OGLMapping::Mapping(static_cast<RenderStateObject::StencilOperation>(obj.GetRenderState(RenderStateObject::RST_FrontStencilDepthFail))),
-						OGLMapping::Mapping(static_cast<RenderStateObject::StencilOperation>(obj.GetRenderState(RenderStateObject::RST_FrontStencilPass))));
+						OGLMapping::Mapping(static_cast<RenderStateObject::StencilOperation>(rs_obj.GetRenderState(RenderStateObject::RST_FrontStencilFail))),
+						OGLMapping::Mapping(static_cast<RenderStateObject::StencilOperation>(rs_obj.GetRenderState(RenderStateObject::RST_FrontStencilDepthFail))),
+						OGLMapping::Mapping(static_cast<RenderStateObject::StencilOperation>(rs_obj.GetRenderState(RenderStateObject::RST_FrontStencilPass))));
 					break;
 
 				case RenderStateObject::RST_FrontStencilWriteMask:
@@ -309,17 +295,17 @@ namespace KlayGE
 				case RenderStateObject::RST_BackStencilRef:
 				case RenderStateObject::RST_BackStencilMask:
 					glStencilFuncSeparate(GL_BACK,
-						OGLMapping::Mapping(static_cast<RenderStateObject::CompareFunction>(obj.GetRenderState(RenderStateObject::RST_BackStencilFunc))),
-						obj.GetRenderState(RenderStateObject::RST_BackStencilRef), obj.GetRenderState(RenderStateObject::RST_BackStencilMask));
+						OGLMapping::Mapping(static_cast<RenderStateObject::CompareFunction>(rs_obj.GetRenderState(RenderStateObject::RST_BackStencilFunc))),
+						rs_obj.GetRenderState(RenderStateObject::RST_BackStencilRef), rs_obj.GetRenderState(RenderStateObject::RST_BackStencilMask));
 					break;
 
 				case RenderStateObject::RST_BackStencilFail:
 				case RenderStateObject::RST_BackStencilDepthFail:
 				case RenderStateObject::RST_BackStencilPass:
 					glStencilOpSeparate(GL_BACK,
-						OGLMapping::Mapping(static_cast<RenderStateObject::StencilOperation>(obj.GetRenderState(RenderStateObject::RST_BackStencilFail))),
-						OGLMapping::Mapping(static_cast<RenderStateObject::StencilOperation>(obj.GetRenderState(RenderStateObject::RST_BackStencilDepthFail))),
-						OGLMapping::Mapping(static_cast<RenderStateObject::StencilOperation>(obj.GetRenderState(RenderStateObject::RST_BackStencilPass))));
+						OGLMapping::Mapping(static_cast<RenderStateObject::StencilOperation>(rs_obj.GetRenderState(RenderStateObject::RST_BackStencilFail))),
+						OGLMapping::Mapping(static_cast<RenderStateObject::StencilOperation>(rs_obj.GetRenderState(RenderStateObject::RST_BackStencilDepthFail))),
+						OGLMapping::Mapping(static_cast<RenderStateObject::StencilOperation>(rs_obj.GetRenderState(RenderStateObject::RST_BackStencilPass))));
 					break;
 
 				case RenderStateObject::RST_BackStencilWriteMask:
@@ -328,8 +314,8 @@ namespace KlayGE
 
 				case RenderStateObject::RST_FrontStencilEnable:
 				case RenderStateObject::RST_BackStencilEnable:
-					if (obj.GetRenderState(RenderStateObject::RST_FrontStencilEnable)
-						|| obj.GetRenderState(RenderStateObject::RST_BackStencilEnable))
+					if (rs_obj.GetRenderState(RenderStateObject::RST_FrontStencilEnable)
+						|| rs_obj.GetRenderState(RenderStateObject::RST_BackStencilEnable))
 					{
 						glEnable(GL_STENCIL_TEST);
 					}
@@ -359,6 +345,126 @@ namespace KlayGE
 						(state & RenderStateObject::CMASK_Blue) != 0,
 						(state & RenderStateObject::CMASK_Alpha) != 0);
 					break;
+				}
+
+				cur_render_state_obj_.SetRenderState(rst, state);
+			}
+		}
+
+		OGLShaderObject const & ogl_shader_obj = *checked_cast<OGLShaderObject const *>(&shader_obj);
+
+		cgGLBindProgram(ogl_shader_obj.VertexShader());
+		cgGLEnableProfile(ogl_shader_obj.VertexShaderProfile());
+		cgGLBindProgram(ogl_shader_obj.PixelShader());
+		cgGLEnableProfile(ogl_shader_obj.PixelShaderProfile());
+
+		for (int i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
+		{
+			std::vector<SamplerPtr> const & samplers = ogl_shader_obj.Samplers(static_cast<ShaderObject::ShaderType>(i));
+
+			for (uint32_t stage = 0; stage < samplers.size(); ++ stage)
+			{
+				glActiveTexture(GL_TEXTURE0 + stage);
+
+				SamplerPtr cur_sampler = cur_samplers_[stage];
+				SamplerPtr sampler = samplers[stage];
+				if (!sampler || !sampler->GetTexture())
+				{
+					if (cur_sampler)
+					{
+						if (cur_sampler->GetTexture() != TexturePtr())
+						{
+							glBindTexture(GL_TEXTURE_2D, 0);
+							cur_sampler->SetTexture(TexturePtr());
+						}
+					}
+				}
+				else
+				{
+					TexturePtr texture = sampler->GetTexture();
+					OGLTexture& gl_tex = *checked_pointer_cast<OGLTexture>(texture);
+					GLenum tex_type = gl_tex.GLType();
+
+					glEnable(tex_type);
+
+					if (cur_sampler->GetTexture() != sampler->GetTexture())
+					{
+						gl_tex.GLBindTexture();
+						cur_sampler->SetTexture(sampler->GetTexture());
+					}
+
+					if (cur_sampler->AddressingMode(Sampler::TAT_Addr_U) != sampler->AddressingMode(Sampler::TAT_Addr_U))
+					{
+						glTexParameteri(tex_type, GL_TEXTURE_WRAP_S, OGLMapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_U)));
+						cur_sampler->AddressingMode(Sampler::TAT_Addr_U, sampler->AddressingMode(Sampler::TAT_Addr_U));
+					}
+					if (cur_sampler->AddressingMode(Sampler::TAT_Addr_V) != sampler->AddressingMode(Sampler::TAT_Addr_V))
+					{
+						glTexParameteri(tex_type, GL_TEXTURE_WRAP_T, OGLMapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_V)));
+						cur_sampler->AddressingMode(Sampler::TAT_Addr_V, sampler->AddressingMode(Sampler::TAT_Addr_V));
+					}
+					if (cur_sampler->AddressingMode(Sampler::TAT_Addr_W) != sampler->AddressingMode(Sampler::TAT_Addr_W))
+					{
+						glTexParameteri(tex_type, GL_TEXTURE_WRAP_R, OGLMapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_W)));
+						cur_sampler->AddressingMode(Sampler::TAT_Addr_W, sampler->AddressingMode(Sampler::TAT_Addr_W));
+					}
+
+					if (cur_sampler->BorderColor() != sampler->BorderColor())
+					{
+						glTexParameterfv(tex_type, GL_TEXTURE_BORDER_COLOR, &sampler->BorderColor().r());
+						cur_sampler->BorderColor(sampler->BorderColor());
+					}
+
+					if (cur_sampler->Filtering() != sampler->Filtering())
+					{
+						switch (sampler->Filtering())
+						{
+						case Sampler::TFO_None:
+						case Sampler::TFO_Point:
+							glTexParameteri(tex_type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+							glTexParameteri(tex_type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+							break;
+
+						case Sampler::TFO_Bilinear:
+							glTexParameteri(tex_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+							glTexParameteri(tex_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+							break;
+
+						case Sampler::TFO_Trilinear:
+							glTexParameteri(tex_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+							glTexParameteri(tex_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+							break;
+
+						case Sampler::TFO_Anisotropic:
+							if (caps_.max_texture_anisotropy != 0)
+							{
+								uint32_t anisotropy = std::min(caps_.max_texture_anisotropy, sampler->Anisotropy());
+								glTexParameteri(tex_type, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy);
+							}
+							break;
+
+						default:
+							BOOST_ASSERT(false);
+							break;
+						}
+
+						cur_sampler->Filtering(sampler->Filtering());
+					}
+
+					if (cur_sampler->MaxMipLevel() != sampler->MaxMipLevel())
+					{
+						glTexParameteri(tex_type, GL_TEXTURE_MAX_LEVEL, sampler->MaxMipLevel());
+						cur_sampler->MaxMipLevel(sampler->MaxMipLevel());
+					}
+
+					if (cur_sampler->MipMapLodBias() != sampler->MipMapLodBias())
+					{
+						GLfloat bias;
+						glGetFloatv(GL_MAX_TEXTURE_LOD_BIAS, &bias);
+						bias = std::min(sampler->MipMapLodBias(), bias);
+						glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, bias);
+						cur_sampler->MipMapLodBias(sampler->MipMapLodBias());
+					}
 				}
 			}
 		}
@@ -634,7 +740,7 @@ namespace KlayGE
 
 	void OGLRenderEngine::AttachAttribs(RenderLayout const & rl, RenderPassPtr pass)
 	{
-		OGLRenderPassPtr ogl_pass = checked_pointer_cast<OGLRenderPass>(pass);
+		OGLShaderObjectPtr ogl_shader_object = checked_pointer_cast<OGLShaderObject>(pass->GetShaderObject());
 
 		// Geometry streams
 		for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
@@ -646,7 +752,7 @@ namespace KlayGE
 			for (uint32_t j = 0; j < rl.VertexStreamFormat(i).size(); ++ j)
 			{
 				vertex_element const & vs_elem = rl.VertexStreamFormat(i)[j];
-				int32_t const index = ogl_pass->AttribIndex(vs_elem.usage, vs_elem.usage_index);
+				int32_t const index = ogl_shader_object->AttribIndex(vs_elem.usage, vs_elem.usage_index);
 				if (index >= 0)
 				{
 					GLvoid* offset = reinterpret_cast<GLvoid*>(elem_offset);
@@ -661,87 +767,6 @@ namespace KlayGE
 				elem_offset += vs_elem.element_size();
 			}
 		}
-	}
-
-	// 设置纹理
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::SetSampler(uint32_t stage, SamplerPtr const & sampler)
-	{
-		TexturePtr texture = sampler->GetTexture();
-
-		if (texture)
-		{
-			glActiveTexture(GL_TEXTURE0 + stage);
-
-			OGLTexture& gl_tex = *checked_pointer_cast<OGLTexture>(texture);
-			GLenum tex_type = gl_tex.GLType();
-			if (!texture)
-			{
-				glDisable(tex_type);
-			}
-			else
-			{
-				glEnable(tex_type);
-				gl_tex.GLBindTexture();
-
-				glTexParameteri(tex_type, GL_TEXTURE_WRAP_S, OGLMapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_U)));
-				glTexParameteri(tex_type, GL_TEXTURE_WRAP_T, OGLMapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_V)));
-				glTexParameteri(tex_type, GL_TEXTURE_WRAP_R, OGLMapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_W)));
-
-				glTexParameterfv(tex_type, GL_TEXTURE_BORDER_COLOR, &sampler->BorderColor().r());
-
-				switch (sampler->Filtering())
-				{
-				case Sampler::TFO_None:
-				case Sampler::TFO_Point:
-					glTexParameteri(tex_type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-					glTexParameteri(tex_type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-					break;
-
-				case Sampler::TFO_Bilinear:
-					glTexParameteri(tex_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-					glTexParameteri(tex_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-					break;
-
-				case Sampler::TFO_Trilinear:
-					glTexParameteri(tex_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-					glTexParameteri(tex_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-					break;
-
-				case Sampler::TFO_Anisotropic:
-					if (caps_.max_texture_anisotropy != 0)
-					{
-						uint32_t anisotropy = std::min(caps_.max_texture_anisotropy, sampler->Anisotropy());
-						glTexParameteri(tex_type, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy);
-					}
-					break;
-
-				default:
-					BOOST_ASSERT(false);
-					break;
-				}
-
-				glTexParameteri(tex_type, GL_TEXTURE_MAX_LEVEL, sampler->MaxMipLevel());
-
-				{
-					GLfloat bias;
-					glGetFloatv(GL_MAX_TEXTURE_LOD_BIAS, &bias);
-					bias = std::min(sampler->MipMapLodBias(), bias);
-					glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, bias);
-				}
-			}
-		}
-	}
-
-	// 关闭某个纹理阶段
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::DisableSampler(uint32_t stage)
-	{
-		glActiveTexture(GL_TEXTURE0 + stage);
-		glDisable(GL_TEXTURE_1D);
-		glDisable(GL_TEXTURE_2D);
-		glDisable(GL_TEXTURE_3D);
-		glDisable(GL_TEXTURE_CUBE_MAP);
 	}
 
 	// 设置模板位数
@@ -842,5 +867,10 @@ namespace KlayGE
 		caps_.texture_cube_filter_caps = caps_.texture_2d_filter_caps;
 
 		caps_.hw_instancing_support = true;
+
+		for (size_t i = 0; i < caps_.max_textures_units; ++ i)
+		{
+			cur_samplers_.push_back(SamplerPtr(new Sampler));
+		};
 	}
 }

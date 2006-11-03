@@ -68,10 +68,7 @@ namespace KlayGE
 			return RenderWindow::NullObject();
 		}
 
-		void SetSampler(uint32_t /*stage*/, SamplerPtr const & /*sampler*/)
-		{
-		}
-		void DisableSampler(uint32_t /*stage*/)
+		void SetStateObjects(RenderStateObject const & /*rs_obj*/, ShaderObject const & /*shader_obj*/)
 		{
 		}
 
@@ -90,10 +87,6 @@ namespace KlayGE
 		}
 
 	private:
-		void DoSetRenderStateObject(RenderStateObject const & /*obj*/)
-		{
-		}
-
 		void DoBindRenderTarget(RenderTargetPtr /*rt*/)
 		{
 		}
@@ -126,15 +119,6 @@ namespace KlayGE
 	{
 		static RenderEnginePtr obj(new NullRenderEngine);
 		return obj;
-	}
-
-	// 设置当前渲染状态对象
-	/////////////////////////////////////////////////////////////////////////////////
-	void RenderEngine::SetRenderStateObject(RenderStateObject const & obj)
-	{
-		this->DoSetRenderStateObject(obj);
-
-		cur_render_state_obj_ = obj;
 	}
 
 	// 设置当前渲染目标

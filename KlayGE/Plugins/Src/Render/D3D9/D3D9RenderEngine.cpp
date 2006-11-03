@@ -53,9 +53,9 @@
 #include <KlayGE/D3D9/D3D9FrameBuffer.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 #include <KlayGE/D3D9/D3D9GraphicsBuffer.hpp>
-#include <KlayGE/D3D9/D3D9RenderEffect.hpp>
 #include <KlayGE/D3D9/D3D9Mapping.hpp>
 #include <KlayGE/D3D9/D3D9RenderLayout.hpp>
+#include <KlayGE/D3D9/D3D9ShaderObject.hpp>
 
 #include <algorithm>
 #include <boost/assert.hpp>
@@ -204,12 +204,7 @@ namespace KlayGE
 		Verify(d3dDevice_ != ID3D9DevicePtr());
 
 		this->FillRenderDeviceCaps();
-
 		this->BindRenderTarget(win);
-
-		bool has_depth_buf = IsDepthFormat(settings.depth_stencil_fmt);
-		d3dDevice_->SetRenderState(D3DRS_ZENABLE, has_depth_buf);
-		d3dDevice_->SetRenderState(D3DRS_ZWRITEENABLE, has_depth_buf);
 
 		if (caps_.hw_instancing_support)
 		{
@@ -225,12 +220,12 @@ namespace KlayGE
 
 	// 设置当前渲染状态对象
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DoSetRenderStateObject(RenderStateObject const & obj)
+	void D3D9RenderEngine::SetStateObjects(RenderStateObject const & rs_obj, ShaderObject const & shader_obj)
 	{
 		for (int i = 0; i < RenderStateObject::RST_NUM_RENDER_STATES; ++ i)
 		{
 			RenderStateObject::RenderStateType rst = static_cast<RenderStateObject::RenderStateType>(i);
-			uint32_t state = obj.GetRenderState(rst);
+			uint32_t state = rs_obj.GetRenderState(rst);
 			if (cur_render_state_obj_.GetRenderState(rst) != state)
 			{
 				switch (rst)
@@ -390,20 +385,20 @@ namespace KlayGE
 
 				case RenderStateObject::RST_FrontStencilEnable:
 				case RenderStateObject::RST_BackStencilEnable:
-					if (obj.GetRenderState(RenderStateObject::RST_FrontStencilEnable)
-						&& obj.GetRenderState(RenderStateObject::RST_BackStencilEnable))
+					if (rs_obj.GetRenderState(RenderStateObject::RST_FrontStencilEnable)
+						&& rs_obj.GetRenderState(RenderStateObject::RST_BackStencilEnable))
 					{
 						d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, true);
 					}
 					else
 					{
-						if (obj.GetRenderState(RenderStateObject::RST_FrontStencilEnable))
+						if (rs_obj.GetRenderState(RenderStateObject::RST_FrontStencilEnable))
 						{
 							d3dDevice_->SetRenderState(D3DRS_STENCILENABLE, true);
 						}
 						else
 						{
-							if (obj.GetRenderState(RenderStateObject::RST_BackStencilEnable))
+							if (rs_obj.GetRenderState(RenderStateObject::RST_BackStencilEnable))
 							{
 								d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, true);
 								d3dDevice_->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
@@ -440,6 +435,237 @@ namespace KlayGE
 					d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE,
 						D3D9Mapping::MappingColorMask(state));
 					break;
+				}
+
+				cur_render_state_obj_.SetRenderState(rst, state);
+			}
+		}
+
+		D3D9ShaderObject const & d3d9_shader_obj = *checked_cast<D3D9ShaderObject const *>(&shader_obj);
+
+		d3dDevice_->SetVertexShader(d3d9_shader_obj.VertexShader().get());
+		d3dDevice_->SetPixelShader(d3d9_shader_obj.PixelShader().get());
+
+		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
+		{
+			ShaderObject::ShaderType type = static_cast<ShaderObject::ShaderType>(i);
+
+			if (!d3d9_shader_obj.BoolRegisters(type).empty())
+			{
+				if (ShaderObject::ST_VertexShader == type)
+				{
+					d3dDevice_->SetVertexShaderConstantB(d3d9_shader_obj.BoolStart(type), &d3d9_shader_obj.BoolRegisters(type)[0],
+						static_cast<UINT>(d3d9_shader_obj.BoolRegisters(type).size()) / 4);
+				}
+				else
+				{
+					d3dDevice_->SetPixelShaderConstantB(d3d9_shader_obj.BoolStart(type), &d3d9_shader_obj.BoolRegisters(type)[0],
+						static_cast<UINT>(d3d9_shader_obj.BoolRegisters(type).size()) / 4);
+				}
+			}
+			if (!d3d9_shader_obj.IntRegisters(type).empty())
+			{
+				if (ShaderObject::ST_VertexShader == type)
+				{
+					d3dDevice_->SetVertexShaderConstantI(d3d9_shader_obj.IntStart(type), &d3d9_shader_obj.IntRegisters(type)[0],
+						static_cast<UINT>(d3d9_shader_obj.IntRegisters(type).size()) / 4);
+				}
+				else
+				{
+					d3dDevice_->SetPixelShaderConstantI(d3d9_shader_obj.IntStart(type), &d3d9_shader_obj.IntRegisters(type)[0],
+						static_cast<UINT>(d3d9_shader_obj.IntRegisters(type).size()) / 4);
+				}
+			}
+			if (!d3d9_shader_obj.FloatRegisters(type).empty())
+			{
+				if (ShaderObject::ST_VertexShader == type)
+				{
+					d3dDevice_->SetVertexShaderConstantF(d3d9_shader_obj.FloatStart(type), &d3d9_shader_obj.FloatRegisters(type)[0],
+						static_cast<UINT>(d3d9_shader_obj.FloatRegisters(type).size()) / 4);
+				}
+				else
+				{
+					d3dDevice_->SetPixelShaderConstantF(d3d9_shader_obj.FloatStart(type), &d3d9_shader_obj.FloatRegisters(type)[0],
+						static_cast<UINT>(d3d9_shader_obj.FloatRegisters(type).size()) / 4);
+				}
+			}
+
+			for (uint32_t j = 0; j < d3d9_shader_obj.Samplers(type).size(); ++ j)
+			{
+				uint32_t stage = j;
+				if (ShaderObject::ST_VertexShader == type)
+				{
+					stage += D3DVERTEXTEXTURESAMPLER0;
+				}
+
+				SamplerPtr cur_sampler = cur_samplers_[j];
+				SamplerPtr sampler = d3d9_shader_obj.Samplers(type)[j];
+				if (!sampler || !sampler->GetTexture())
+				{
+					TIF(d3dDevice_->SetTexture(stage, NULL));
+
+					if (cur_sampler)
+					{
+						if (cur_sampler->GetTexture() != TexturePtr())
+						{
+							cur_sampler->SetTexture(TexturePtr());
+						}
+					}
+				}
+				else
+				{
+					TexturePtr texture = sampler->GetTexture();
+
+					if (cur_sampler->GetTexture() != sampler->GetTexture())
+					{
+						D3D9Texture const & d3d9Tex(*checked_pointer_cast<D3D9Texture>(texture));
+						TIF(d3dDevice_->SetTexture(stage, d3d9Tex.D3DBaseTexture().get()));
+						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_SRGBTEXTURE, IsSRGB(texture->Format())));
+						cur_sampler->SetTexture(texture);
+					}
+
+					if (cur_sampler->BorderColor() != sampler->BorderColor())
+					{
+						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_BORDERCOLOR,
+							D3D9Mapping::MappingToUInt32Color(sampler->BorderColor())));
+						cur_sampler->BorderColor(sampler->BorderColor());
+					}
+
+					// Set addressing mode
+					if (cur_sampler->AddressingMode(Sampler::TAT_Addr_U) != sampler->AddressingMode(Sampler::TAT_Addr_U))
+					{
+						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSU,
+							D3D9Mapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_U))));
+						cur_sampler->AddressingMode(Sampler::TAT_Addr_U, sampler->AddressingMode(Sampler::TAT_Addr_U));
+					}
+					if (cur_sampler->AddressingMode(Sampler::TAT_Addr_V) != sampler->AddressingMode(Sampler::TAT_Addr_V))
+					{
+						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSV,
+							D3D9Mapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_V))));
+						cur_sampler->AddressingMode(Sampler::TAT_Addr_V, sampler->AddressingMode(Sampler::TAT_Addr_V));
+					}
+					if (cur_sampler->AddressingMode(Sampler::TAT_Addr_W) != sampler->AddressingMode(Sampler::TAT_Addr_W))
+					{
+						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSW,
+							D3D9Mapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_W))));
+						cur_sampler->AddressingMode(Sampler::TAT_Addr_W, sampler->AddressingMode(Sampler::TAT_Addr_W));
+					}
+
+					if (cur_sampler->Filtering() != sampler->Filtering())
+					{
+						uint32_t tfc;
+						switch (texture->Type())
+						{
+						case Texture::TT_1D:
+							tfc = caps_.texture_1d_filter_caps;
+							break;
+
+						case Texture::TT_2D:
+							tfc = caps_.texture_2d_filter_caps;
+							break;
+
+						case Texture::TT_3D:
+							tfc = caps_.texture_3d_filter_caps;
+							break;
+
+						case Texture::TT_Cube:
+							tfc = caps_.texture_cube_filter_caps;
+							break;
+
+						default:
+							BOOST_ASSERT(false);
+							tfc = 0;
+							break;
+						}
+
+						Sampler::TexFilterOp filter = sampler->Filtering();
+						if (Sampler::TFO_Anisotropic == filter)
+						{
+							if (0 == (tfc & Sampler::TFO_Anisotropic))
+							{
+								filter = Sampler::TFO_Trilinear;
+							}
+						}
+						if (Sampler::TFO_Trilinear == filter)
+						{
+							if (0 == (tfc & Sampler::TFO_Trilinear))
+							{
+								filter = Sampler::TFO_Bilinear;
+							}
+						}
+						if (Sampler::TFO_Bilinear == filter)
+						{
+							if (0 == (tfc & Sampler::TFO_Bilinear))
+							{
+								filter = Sampler::TFO_Point;
+							}
+						}
+						if (Sampler::TFO_Point == filter)
+						{
+							if (0 == (tfc & Sampler::TFO_Point))
+							{
+								filter = Sampler::TFO_None;
+							}
+						}
+
+						// Set filter
+						switch (filter)
+						{
+						case Sampler::TFO_None:
+							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_NONE));
+							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_NONE));
+							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_NONE));
+							break;
+
+						case Sampler::TFO_Point:
+							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_POINT));
+							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_POINT));
+							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT));
+							break;
+
+						case Sampler::TFO_Bilinear:
+							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_LINEAR));
+							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR));
+							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT));
+							break;
+
+						case Sampler::TFO_Trilinear:
+							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_LINEAR));
+							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR));
+							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR));
+							break;
+
+						case Sampler::TFO_Anisotropic:
+							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC));
+							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR));
+							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR));
+							break;
+						}
+
+						cur_sampler->Filtering(sampler->Filtering());
+					}
+
+					if (cur_sampler->Anisotropy() != sampler->Anisotropy())
+					{
+						// Set anisotropy
+						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXANISOTROPY,
+							std::min(sampler->Anisotropy(), caps_.max_texture_anisotropy)));
+						cur_sampler->Anisotropy(sampler->Anisotropy());
+					}
+
+					if (cur_sampler->MaxMipLevel() != sampler->MaxMipLevel())
+					{
+						// Set max mip level
+						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXMIPLEVEL, sampler->MaxMipLevel()));
+						cur_sampler->MaxMipLevel(sampler->MaxMipLevel());
+					}
+
+					if (cur_sampler->MipMapLodBias() != sampler->MipMapLodBias())
+					{
+						// Set mip map lod bias
+						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPMAPLODBIAS, float_to_uint32(sampler->MipMapLodBias())));
+						cur_sampler->MipMapLodBias(sampler->MipMapLodBias());
+					}
 				}
 			}
 		}
@@ -631,149 +857,6 @@ namespace KlayGE
 		TIF(d3dDevice_->EndScene());
 	}
 
-	// 设置纹理
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::SetSampler(uint32_t stage, SamplerPtr const & sampler)
-	{
-		BOOST_ASSERT(d3dDevice_);
-
-		if (!sampler || !sampler->GetTexture())
-		{
-			TIF(d3dDevice_->SetTexture(stage, NULL));
-		}
-		else
-		{
-			TexturePtr texture = sampler->GetTexture();
-
-			D3D9Texture const & d3d9Tex(*checked_pointer_cast<D3D9Texture>(texture));
-			TIF(d3dDevice_->SetTexture(stage, d3d9Tex.D3DBaseTexture().get()));
-
-			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_BORDERCOLOR,
-				D3D9Mapping::MappingToUInt32Color(sampler->BorderColor())));
-
-			// Set addressing mode
-			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSU,
-				D3D9Mapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_U))));
-			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSV,
-				D3D9Mapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_V))));
-			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSW,
-				D3D9Mapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_W))));
-
-			{
-				uint32_t tfc;
-				switch (texture->Type())
-				{
-				case Texture::TT_1D:
-					tfc = caps_.texture_1d_filter_caps;
-					break;
-
-				case Texture::TT_2D:
-					tfc = caps_.texture_2d_filter_caps;
-					break;
-
-				case Texture::TT_3D:
-					tfc = caps_.texture_3d_filter_caps;
-					break;
-
-				case Texture::TT_Cube:
-					tfc = caps_.texture_cube_filter_caps;
-					break;
-
-				default:
-					BOOST_ASSERT(false);
-					tfc = 0;
-					break;
-				}
-
-				Sampler::TexFilterOp filter = sampler->Filtering();
-				if (Sampler::TFO_Anisotropic == filter)
-				{
-					if (0 == (tfc & Sampler::TFO_Anisotropic))
-					{
-						filter = Sampler::TFO_Trilinear;
-					}
-				}
-				if (Sampler::TFO_Trilinear == filter)
-				{
-					if (0 == (tfc & Sampler::TFO_Trilinear))
-					{
-						filter = Sampler::TFO_Bilinear;
-					}
-				}
-				if (Sampler::TFO_Bilinear == filter)
-				{
-					if (0 == (tfc & Sampler::TFO_Bilinear))
-					{
-						filter = Sampler::TFO_Point;
-					}
-				}
-				if (Sampler::TFO_Point == filter)
-				{
-					if (0 == (tfc & Sampler::TFO_Point))
-					{
-						filter = Sampler::TFO_None;
-					}
-				}
-
-				// Set filter
-				switch (filter)
-				{
-				case Sampler::TFO_None:
-					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_NONE));
-					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_NONE));
-					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_NONE));
-					break;
-
-				case Sampler::TFO_Point:
-					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_POINT));
-					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_POINT));
-					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT));
-					break;
-
-				case Sampler::TFO_Bilinear:
-					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_LINEAR));
-					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR));
-					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT));
-					break;
-
-				case Sampler::TFO_Trilinear:
-					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_LINEAR));
-					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR));
-					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR));
-					break;
-
-				case Sampler::TFO_Anisotropic:
-					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC));
-					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR));
-					TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR));
-					break;
-				}
-			}
-
-			// Set anisotropy
-			BOOST_ASSERT(sampler->Anisotropy() < caps_.max_texture_anisotropy);
-			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, sampler->Anisotropy()));
-
-			// Set max mip level
-			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXMIPLEVEL, sampler->MaxMipLevel()));
-
-			// Set mip map lod bias
-			float bias = sampler->MipMapLodBias();
-			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPMAPLODBIAS, *reinterpret_cast<DWORD*>(&bias)));
-
-			TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_SRGBTEXTURE, IsSRGB(texture->Format())));
-		}
-	}
-
-	// 关闭某个纹理阶段
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DisableSampler(uint32_t stage)
-	{
-		BOOST_ASSERT(d3dDevice_);
-
-		TIF(d3dDevice_->SetTexture(stage, NULL));
-	}
-
 	// 获取模板位数
 	/////////////////////////////////////////////////////////////////////////////////
 	uint16_t D3D9RenderEngine::StencilBufferBitDepth()
@@ -814,6 +897,11 @@ namespace KlayGE
 		d3dDevice_->GetDeviceCaps(&d3d_caps);
 
 		caps_ = D3D9Mapping::Mapping(d3d_caps);
+
+		for (size_t i = 0; i < caps_.max_textures_units; ++ i)
+		{
+			cur_samplers_.push_back(SamplerPtr(new Sampler));
+		}
 	}
 
 	// 响应设备丢失

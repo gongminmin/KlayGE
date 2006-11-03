@@ -1,0 +1,75 @@
+// ShaderObject.cpp
+// KlayGE shader对象类 实现文件
+// Ver 3.5.0
+// 版权所有(C) 龚敏敏, 2006
+// Homepage: http://klayge.sourceforge.net
+//
+// 3.5.0
+// 初次建立 (2006.11.2)
+//
+// 修改记录
+//////////////////////////////////////////////////////////////////////////////////
+
+#include <KlayGE/KlayGE.hpp>
+
+#include <string>
+#include <vector>
+
+#include <KlayGE/ShaderObject.hpp>
+
+namespace KlayGE
+{
+	class NullShaderObject : public ShaderObject
+	{
+	public:
+		void SetShader(ShaderType /*type*/, std::string const & /*profile*/, std::string const & /*name*/, std::string const & /*text*/)
+		{
+			is_validate_ = true;
+		}
+
+		bool HasParameter(ShaderType /*type*/, std::string const & /*name*/) const
+		{
+			return false;
+		}
+
+		void SetParameter(std::string const & /*name*/, bool /*value*/)
+		{
+		}
+		void SetParameter(std::string const & /*name*/, int /*value*/)
+		{
+		}
+		void SetParameter(std::string const & /*name*/, float /*value*/)
+		{
+		}
+		void SetParameter(std::string const & /*name*/, float4 const & /*value*/)
+		{
+		}
+		void SetParameter(std::string const & /*name*/, float4x4 const & /*value*/)
+		{
+		}
+		void SetParameter(std::string const & /*name*/, SamplerPtr const & /*value*/)
+		{
+		}
+		void SetParameter(std::string const & /*name*/, std::vector<bool> const & /*value*/)
+		{
+		}
+		void SetParameter(std::string const & /*name*/, std::vector<int> const & /*value*/)
+		{
+		}
+		void SetParameter(std::string const & /*name*/, std::vector<float> const & /*value*/)
+		{
+		}
+		void SetParameter(std::string const & /*name*/, std::vector<float4> const & /*value*/)
+		{
+		}
+		void SetParameter(std::string const & /*name*/, std::vector<float4x4> const & /*value*/)
+		{
+		}
+	};
+
+	ShaderObjectPtr ShaderObject::NullObject()
+	{
+		static ShaderObjectPtr obj(new NullShaderObject);
+		return obj;
+	}
+}

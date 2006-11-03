@@ -183,10 +183,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9RenderEffect.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9RenderEngine.cpp"
 				>
 			</File>
@@ -204,6 +200,10 @@
 			</File>
 			<File
 				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9RenderWindow.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9ShaderObject.cpp"
 				>
 			</File>
 			<File
@@ -265,10 +265,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9RenderEffect.hpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9RenderEngine.hpp"
 				>
 			</File>
@@ -290,6 +286,10 @@
 			</File>
 			<File
 				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9Resource.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\D3D9\D3D9ShaderObject.hpp"
 				>
 			</File>
 			<File

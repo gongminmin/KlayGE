@@ -59,6 +59,7 @@
 #endif
 
 #include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/ShaderObject.hpp>
 #include <KlayGE/Math.hpp>
 
 namespace KlayGE
@@ -262,8 +263,6 @@ namespace KlayGE
 
 	public:
 		RenderEffect();
-		virtual ~RenderEffect()
-			{ }
 
 		void Load(ResIdentifierPtr const & source);
 
@@ -303,9 +302,6 @@ namespace KlayGE
 		}
 
 	protected:
-		virtual RenderTechniquePtr MakeRenderTechnique() = 0;
-
-	protected:
 		params_type params_;
 		techniques_type techniques_;
 
@@ -317,9 +313,6 @@ namespace KlayGE
 	public:
 		explicit RenderTechnique(RenderEffect& effect)
 			: effect_(effect)
-		{
-		}
-		virtual ~RenderTechnique()
 		{
 		}
 
@@ -356,12 +349,6 @@ namespace KlayGE
 		}
 
 	protected:
-		virtual RenderPassPtr MakeRenderPass() = 0;
-
-		virtual void DoBegin() = 0;
-		virtual void DoEnd() = 0;
-
-	protected:
 		RenderEffect& effect_;
 		std::string name_;
 
@@ -377,20 +364,8 @@ namespace KlayGE
 	class RenderPass : boost::noncopyable
 	{
 	public:
-		enum
-		{
-			ST_VERTEX_SHADER,
-			ST_PIXEL_SHADER,
-
-			ST_NUM_SHADER_TYPES
-		};
-
-	public:
 		explicit RenderPass(RenderEffect& effect)
 			: effect_(effect)
-		{
-		}
-		virtual ~RenderPass()
 		{
 		}
 
@@ -411,11 +386,17 @@ namespace KlayGE
 			return is_validate_;
 		}
 
-	private:
-		virtual void DoLoad() = 0;
+		RenderStateObjectPtr GetRenderStateObject() const
+		{
+			return render_state_obj_;
+		}
+		ShaderObjectPtr GetShaderObject() const
+		{
+			return shader_obj_;
+		}
 
-		virtual void DoBegin() = 0;
-		virtual void DoEnd() = 0;
+	private:
+		std::string GenShaderText() const;
 
 	protected:
 		RenderEffect& effect_;
@@ -424,9 +405,11 @@ namespace KlayGE
 		std::vector<boost::shared_ptr<RenderEffectAnnotation> > annotations_;
 
 		RenderStateObjectPtr render_state_obj_;
-		shader_desc shader_descs_[ST_NUM_SHADER_TYPES];
+		ShaderObjectPtr shader_obj_;
 
 		bool is_validate_;
+
+		boost::array<std::vector<RenderEffectParameterPtr>, ShaderObject::ST_NumShaderTypes> param_descs_;
 	};
 
 	class RenderEffectParameter : boost::noncopyable

@@ -104,16 +104,11 @@ namespace KlayGE
 
 		virtual RenderWindowPtr CreateRenderWindow(std::string const & name, RenderSettings const & settings) = 0;
 
-		void SetRenderStateObject(RenderStateObject const & obj);
+		virtual void SetStateObjects(RenderStateObject const & rs_obj, ShaderObject const & shader_obj) = 0;
 
 		void BindRenderTarget(RenderTargetPtr rt);
 		RenderTargetPtr CurRenderTarget() const;
 		RenderTargetPtr DefaultRenderTarget() const;
-
-		// Set a sampler.
-		virtual void SetSampler(uint32_t stage, SamplerPtr const & sampler) = 0;
-		// Turns off a sampler.
-		virtual void DisableSampler(uint32_t stage) = 0;
 
 		// Determines the bit depth of the hardware accelerated stencil buffer, if supported.
 		virtual uint16_t StencilBufferBitDepth() = 0;
@@ -128,7 +123,6 @@ namespace KlayGE
 		virtual float4 TexelToPixelOffset() const = 0;
 
 	protected:
-		virtual void DoSetRenderStateObject(RenderStateObject const & obj) = 0;
 		virtual void DoBindRenderTarget(RenderTargetPtr rt) = 0;
 		virtual void DoRender(RenderLayout const & rl) = 0;
 
@@ -144,8 +138,6 @@ namespace KlayGE
 		size_t numVerticesJustRendered_;
 
 		RenderDeviceCaps caps_;
-
-		RenderStateObject cur_render_state_obj_;
 	};
 }
 

@@ -19,6 +19,7 @@
 #include <KlayGE/Query.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Font.hpp>
+#include <KlayGE/ShaderObject.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 
@@ -111,10 +112,9 @@ namespace KlayGE
 			return RenderView::NullObject();
 		}
 
-	private:
-		RenderEffectPtr DoMakeRenderEffect(ResIdentifierPtr const & /*source*/)
+		ShaderObjectPtr MakeShaderObject()
 		{
-			return RenderEffect::NullObject();
+			return ShaderObject::NullObject();
 		}
 	};
 
@@ -141,11 +141,9 @@ namespace KlayGE
 		effect_pool_type::iterator eiter = effect_pool_.find(effectName);
 		if (eiter == effect_pool_.end())
 		{
-			ret = this->DoMakeRenderEffect(ResLoader::Instance().Load(effectName));
-			if (ret)
-			{
-				effect_pool_.insert(std::make_pair(effectName, ret));
-			}
+			ret.reset(new RenderEffect);
+			ret->Load(ResLoader::Instance().Load(effectName));
+			effect_pool_.insert(std::make_pair(effectName, ret));
 		}
 		else
 		{

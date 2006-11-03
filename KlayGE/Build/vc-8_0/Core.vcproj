@@ -242,6 +242,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Src\Render\ShaderObject.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Src\Render\Texture.cpp"
 					>
 				</File>
@@ -351,6 +355,10 @@
 				</File>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\Sampler.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\ShaderObject.hpp"
 					>
 				</File>
 				<File

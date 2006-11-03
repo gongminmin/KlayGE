@@ -240,12 +240,7 @@ namespace KlayGE
 			float3(-1.0f, 1.0f, 1.0f),
 		};
 
-		uint16_t indices[] =
-		{
-			0, 1, 2, 2, 3, 0,
-		};
-
-		rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleList);
+		rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleFan);
 
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static);
 		vb->Resize(sizeof(xyzs));
@@ -254,14 +249,6 @@ namespace KlayGE
 			std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
 		}
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
-
-		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static);
-		ib->Resize(sizeof(indices));
-		{
-			GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
-			std::copy(indices, indices + sizeof(indices) / sizeof(indices[0]), mapper.Pointer<uint16_t>());
-		}
-		rl_->BindIndexStream(ib, EF_R16);
 
 		box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[4]);
 	}

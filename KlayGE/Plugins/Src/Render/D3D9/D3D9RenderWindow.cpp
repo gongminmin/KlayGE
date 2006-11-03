@@ -592,18 +592,6 @@ namespace KlayGE
 		{
 			TIF(d3dDevice->SetRenderTarget(i, this->D3DRenderSurface(i).get()));
 		}
-
-		ID3D9SurfacePtr zBuffer = this->D3DRenderZBuffer();
-		bool depth_enable;
-		if (zBuffer)
-		{
-			depth_enable = true;
-		}
-		else
-		{
-			depth_enable = false;
-		}
-		d3dDevice->SetRenderState(D3DRS_ZENABLE, depth_enable);
-		TIF(d3dDevice->SetDepthStencilSurface(zBuffer.get()));
+		TIF(d3dDevice->SetDepthStencilSurface(this->D3DRenderZBuffer().get()));
 	}
 }
