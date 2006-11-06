@@ -93,6 +93,12 @@ namespace KlayGE
 	private:
 		Context()
 		{
+#ifdef KLAYGE_COMPILER_MSVC
+#ifdef KLAYGE_DEBUG
+			_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+#endif
+#endif
+
 			sceneMgr_ = SceneManager::NullObject().get();
 
 			renderFactory_ = RenderFactory::NullObject().get();

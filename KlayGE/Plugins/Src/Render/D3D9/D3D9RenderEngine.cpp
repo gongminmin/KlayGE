@@ -402,15 +402,15 @@ namespace KlayGE
 			}
 			if (cur_render_state_obj_.color_mask_1 != rs_obj.color_mask_1)
 			{
-				d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE, D3D9Mapping::MappingColorMask(rs_obj.color_mask_1));
+				d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE1, D3D9Mapping::MappingColorMask(rs_obj.color_mask_1));
 			}
 			if (cur_render_state_obj_.color_mask_2 != rs_obj.color_mask_2)
 			{
-				d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE, D3D9Mapping::MappingColorMask(rs_obj.color_mask_2));
+				d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE2, D3D9Mapping::MappingColorMask(rs_obj.color_mask_2));
 			}
 			if (cur_render_state_obj_.color_mask_3 != rs_obj.color_mask_3)
 			{
-				d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE, D3D9Mapping::MappingColorMask(rs_obj.color_mask_3));
+				d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE3, D3D9Mapping::MappingColorMask(rs_obj.color_mask_3));
 			}
 
 			cur_render_state_obj_ = rs_obj;

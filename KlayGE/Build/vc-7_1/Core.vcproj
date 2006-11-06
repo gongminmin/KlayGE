@@ -563,12 +563,20 @@
 					RelativePath="..\..\Core\Src\Show\ShowEngine.cpp"
 					>
 				</File>
+				<File
+					RelativePath="..\..\Core\Src\Show\ShowFactory.cpp"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Í·ÎÄ¼þ"
 				>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\Show.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\ShowFactory.hpp"
 					>
 				</File>
 			</Filter>
