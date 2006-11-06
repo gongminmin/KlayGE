@@ -86,7 +86,7 @@ namespace KlayGE
 				BOOST_ASSERT(att >= ATT_Color0);
 
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-				if (att >= ATT_Color0 + re.DeviceCaps().max_simultaneous_rts)
+				if (att >= static_cast<uint32_t>(ATT_Color0 + re.DeviceCaps().max_simultaneous_rts))
 				{
 					THR(E_FAIL);
 				}
@@ -155,7 +155,7 @@ namespace KlayGE
 		default:
 			{
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-				if (att >= ATT_Color0 + re.DeviceCaps().max_simultaneous_rts)
+				if (att >= static_cast<uint32_t>(ATT_Color0 + re.DeviceCaps().max_simultaneous_rts))
 				{
 					THR(E_FAIL);
 				}

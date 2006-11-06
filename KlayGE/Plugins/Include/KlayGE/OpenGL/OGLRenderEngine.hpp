@@ -81,7 +81,6 @@ namespace KlayGE
 		void AttachAttribs(RenderLayout const & rl, RenderPassPtr pass);
 
 		RenderStateObject cur_render_state_obj_;
-		boost::array<std::vector<SamplerPtr>, ShaderObject::ST_NumShaderTypes> cur_samplers_;
 	};
 
 	typedef boost::shared_ptr<OGLRenderEngine> OGLRenderEnginePtr;

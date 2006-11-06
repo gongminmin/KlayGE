@@ -114,7 +114,7 @@ namespace KlayGE
 		boost::function<void (RenderLayout const &)> RenderInstance;
 
 		RenderStateObject cur_render_state_obj_;
-		boost::array<std::vector<SamplerPtr>, ShaderObject::ST_NumShaderTypes> cur_samplers_;
+		boost::array<std::vector<Sampler>, ShaderObject::ST_NumShaderTypes> cur_samplers_;
 	};
 
 	typedef boost::shared_ptr<D3D9RenderEngine> D3D9RenderEnginePtr;

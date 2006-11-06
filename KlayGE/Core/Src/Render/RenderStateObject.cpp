@@ -19,60 +19,43 @@
 namespace KlayGE
 {
 	RenderStateObject::RenderStateObject()
+		: polygon_mode(PM_Fill),
+			shade_mode(SM_Gouraud),
+			cull_mode(CM_AntiClockwise),
+			alpha_to_coverage_enable(false),
+			blend_enable(false),
+			blend_op(BOP_Add),
+			src_blend(ABF_One),
+			dest_blend(ABF_Zero),
+			blend_op_alpha(BOP_Add),
+			src_blend_alpha(ABF_One),
+			dest_blend_alpha(ABF_Zero),
+			depth_enable(true),
+			depth_mask(true),
+			depth_func(CF_LessEqual),
+			polygon_offset_factor(0),
+			polygon_offset_units(0),
+			front_stencil_enable(false),
+			front_stencil_func(CF_AlwaysPass),
+			front_stencil_ref(0),
+			front_stencil_mask(0xFFFF),
+			front_stencil_fail(SOP_Keep),
+			front_stencil_depth_fail(SOP_Keep),
+			front_stencil_pass(SOP_Keep),
+			front_stencil_write_mask(0xFFFF),
+			back_stencil_enable(false),
+			back_stencil_func(CF_AlwaysPass),
+			back_stencil_ref(0),
+			back_stencil_mask(0xFFFF),
+			back_stencil_fail(SOP_Keep),
+			back_stencil_depth_fail(SOP_Keep),
+			back_stencil_pass(SOP_Keep),
+			back_stencil_write_mask(0xFFFF),
+			scissor_enable(false),
+			color_mask_0(CMASK_All),
+			color_mask_1(CMASK_All),
+			color_mask_2(CMASK_All),
+			color_mask_3(CMASK_All)
 	{
-		render_states_[RST_PolygonMode]		= PM_Fill;
-		render_states_[RST_ShadeMode]		= SM_Gouraud;
-		render_states_[RST_CullMode]		= CM_AntiClockwise;
-
-		render_states_[RST_AlphaToCoverageEnable] = false;
-		render_states_[RST_BlendEnable]		= false;
-		render_states_[RST_BlendOp]			= BOP_Add;
-		render_states_[RST_SrcBlend]		= ABF_One;
-		render_states_[RST_DestBlend]		= ABF_Zero;
-		render_states_[RST_BlendOpAlpha]	= BOP_Add;
-		render_states_[RST_SrcBlendAlpha]	= ABF_One;
-		render_states_[RST_DestBlendAlpha]	= ABF_Zero;
-
-		render_states_[RST_DepthEnable]			= true;
-		render_states_[RST_DepthMask]			= true;
-		render_states_[RST_DepthFunc]			= CF_LessEqual;
-		render_states_[RST_PolygonOffsetFactor]	= 0;
-		render_states_[RST_PolygonOffsetUnits]	= 0;
-
-		render_states_[RST_FrontStencilEnable]		= false;
-		render_states_[RST_FrontStencilFunc]		= CF_AlwaysPass;
-		render_states_[RST_FrontStencilRef]			= 0;
-		render_states_[RST_FrontStencilMask]		= 0xFFFFFFFF;
-		render_states_[RST_FrontStencilFail]		= SOP_Keep;
-		render_states_[RST_FrontStencilDepthFail]	= SOP_Keep;
-		render_states_[RST_FrontStencilPass]		= SOP_Keep;
-		render_states_[RST_FrontStencilWriteMask]	= 0xFFFFFFFF;
-		render_states_[RST_BackStencilEnable]		= false;
-		render_states_[RST_BackStencilFunc]			= CF_AlwaysPass;
-		render_states_[RST_BackStencilRef]			= 0;
-		render_states_[RST_BackStencilMask]			= 0xFFFFFFFF;
-		render_states_[RST_BackStencilFail]			= SOP_Keep;
-		render_states_[RST_BackStencilDepthFail]	= SOP_Keep;
-		render_states_[RST_BackStencilPass]			= SOP_Keep;
-		render_states_[RST_BackStencilWriteMask]	= 0xFFFFFFFF;
-
-		render_states_[RST_ColorMask0] = 0xF;
-		render_states_[RST_ColorMask1] = 0xF;
-		render_states_[RST_ColorMask2] = 0xF;
-		render_states_[RST_ColorMask3] = 0xF;
-	}
-
-	void RenderStateObject::SetRenderState(RenderStateType rst, uint32_t state)
-	{
-		BOOST_ASSERT(static_cast<size_t>(rst) < render_states_.size());
-
-		render_states_[rst] = state;
-	}
-
-	uint32_t RenderStateObject::GetRenderState(RenderStateType rst) const
-	{
-		BOOST_ASSERT(static_cast<size_t>(rst) < render_states_.size());
-
-		return render_states_[rst];
 	}
 }

@@ -22,32 +22,36 @@
 
 namespace KlayGE
 {
+#ifdef KLAYGE_PLATFORM_WINDOWS
+#pragma pack(push, 1)
+#endif
 	struct RenderDeviceCaps
 	{
-		uint32_t max_shader_model;
+		uint8_t max_shader_model;
 
 		uint32_t max_texture_width;
 		uint32_t max_texture_height;
 		uint32_t max_texture_depth;
 		uint32_t max_texture_cube_size;
-		uint32_t max_texture_units;
-		uint32_t max_texture_anisotropy;
-		uint32_t max_vertex_texture_units;
+		uint8_t max_texture_units;
+		uint8_t max_vertex_texture_units;
 
-		uint32_t max_user_clip_planes;
-
-		uint32_t max_simultaneous_rts;
+		uint8_t max_simultaneous_rts;
 
 		uint32_t max_vertices;
 		uint32_t max_indices;
 
-		uint32_t texture_1d_filter_caps;
-		uint32_t texture_2d_filter_caps;
-		uint32_t texture_3d_filter_caps;
-		uint32_t texture_cube_filter_caps;
+		uint8_t texture_1d_filter_caps;
+		uint8_t texture_2d_filter_caps;
+		uint8_t texture_3d_filter_caps;
+		uint8_t texture_cube_filter_caps;
+		uint8_t max_texture_anisotropy;
 
 		bool hw_instancing_support;
 	};
+#ifdef KLAYGE_PLATFORM_WINDOWS
+#pragma pack(pop)
+#endif
 }
 
 #endif			// _RENDERDEVICECAPS_HPP

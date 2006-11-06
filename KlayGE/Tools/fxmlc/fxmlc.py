@@ -90,7 +90,10 @@ types_define = [
 	"bool",
 	"dword",
 	"string",
-	"sampler",
+	"sampler1D",
+	"sampler2D",
+	"sampler3D",
+	"samplerCUBE",
 	"shader",
 	"int",
 	"int2",
@@ -126,10 +129,10 @@ render_states_define = [
 	("dest_blend_alpha", "int"),
 
 	("depth_enable", "bool"),
-	("depth_write_enable", "bool"),
+	("depth_mask", "bool"),
 	("depth_func", "int"),
-	("slope_scale_depth_bias", "float"),
-	("depth_bias", "float"),
+	("polygon_offset_factor", "float"),
+	("polygon_offset_units", "float"),
 
 	("front_stencil_enable", "bool"),
 	("front_stencil_func", "int"),
@@ -387,7 +390,7 @@ def write_var(stream, type, name, var):
 		write_matrix(stream, 4, 3, var)
 	elif ('float4x4' == type):
 		write_matrix(stream, 4, 4, var)
-	elif ('sampler' == type):
+	elif type in ['sampler1D', 'sampler2D', 'sampler3D', 'samplerCUBE']:
 		stream.write(struct.pack('i', var.filtering))
 		stream.write(struct.pack('i', var.address_u))
 		stream.write(struct.pack('i', var.address_v))
@@ -447,7 +450,7 @@ class parameter:
 		for ann in anns:
 			self.annotations.append(annotation(ann))
 
-		if ('sampler' == self.type):
+		if self.type in ['sampler1D', 'sampler2D', 'sampler3D', 'samplerCUBE']:
 			self.filtering = texture_filter_enum['none']
 			self.address_u = texture_addressing_mode_enum['wrap']
 			self.address_v = texture_addressing_mode_enum['wrap']

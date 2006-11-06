@@ -2,7 +2,7 @@
 
 <effect>
 	<parameter type="float4x4" name="mvp"/>
-	<parameter type="sampler" name="video_sampler">
+	<parameter type="sampler2D" name="video_sampler">
 		<state name="filtering" value="bilinear"/>
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>

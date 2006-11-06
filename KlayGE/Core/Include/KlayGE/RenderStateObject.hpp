@@ -31,25 +31,22 @@ namespace KlayGE
 		return *reinterpret_cast<float*>(&v);
 	}
 
-	class RenderStateObject
+#ifdef KLAYGE_PLATFORM_WINDOWS
+#pragma pack(push, 1)
+#endif
+	struct RenderStateObject
 	{
-	public:
+		enum PolygonMode
+		{
+			PM_Point,
+			PM_Line,
+			PM_Fill
+		};
+
 		enum ShadeMode
 		{
 			SM_Flat,
 			SM_Gouraud
-		};
-
-		enum CompareFunction
-		{
-			CF_AlwaysFail,
-			CF_AlwaysPass,
-			CF_Less,
-			CF_LessEqual,
-			CF_Equal,
-			CF_NotEqual,
-			CF_GreaterEqual,
-			CF_Greater
 		};
 
 		enum CullMode
@@ -59,14 +56,15 @@ namespace KlayGE
 			CM_AntiClockwise
 		};
 
-		enum PolygonMode
+		enum BlendOperation
 		{
-			PM_Point,
-			PM_Line,
-			PM_Fill
+			BOP_Add		= 1,
+			BOP_Sub		= 2,
+			BOP_Rev_Sub	= 3,
+			BOP_Min		= 4,
+			BOP_Max		= 5,
 		};
 
-		// Type of alpha blend factor.
 		enum AlphaBlendFactor
 		{
 			ABF_Zero,
@@ -82,13 +80,16 @@ namespace KlayGE
 			ABF_Src_Alpha_Sat
 		};
 
-		enum BlendOperation
+		enum CompareFunction
 		{
-			BOP_Add		= 1,
-			BOP_Sub		= 2,
-			BOP_Rev_Sub	= 3,
-			BOP_Min		= 4,
-			BOP_Max		= 5,
+			CF_AlwaysFail,
+			CF_AlwaysPass,
+			CF_Less,
+			CF_LessEqual,
+			CF_Equal,
+			CF_NotEqual,
+			CF_GreaterEqual,
+			CF_Greater
 		};
 
 		// Enum describing the various actions which can be taken onthe stencil buffer
@@ -117,70 +118,56 @@ namespace KlayGE
 			CMASK_All   = CMASK_Red | CMASK_Green | CMASK_Blue | CMASK_Alpha
 		};
 
-		enum RenderStateType
-		{
-			RST_PolygonMode				= 0x00,
-			RST_ShadeMode,
-			RST_CullMode,
+		
+		PolygonMode			polygon_mode : 2;
+		ShadeMode			shade_mode : 2;
+		CullMode			cull_mode : 2;
 
-			RST_AlphaToCoverageEnable,
-			RST_BlendEnable,
-			RST_BlendOp,
-			RST_SrcBlend,
-			RST_DestBlend,
-			RST_BlendOpAlpha,
-			RST_SrcBlendAlpha,
-			RST_DestBlendAlpha,
-			
-			RST_DepthEnable,
-			RST_DepthMask,
-			RST_DepthFunc,
-			RST_PolygonOffsetFactor,
-			RST_PolygonOffsetUnits,
+		bool				alpha_to_coverage_enable : 1;
+		bool				blend_enable : 1;
+		BlendOperation		blend_op : 3;
+		AlphaBlendFactor	src_blend : 4;
+		AlphaBlendFactor	dest_blend : 4;
+		BlendOperation		blend_op_alpha : 3;
+		AlphaBlendFactor	src_blend_alpha : 4;
+		AlphaBlendFactor	dest_blend_alpha : 4;
 
-			// Turns stencil buffer checking on or off. 
-			RST_FrontStencilEnable,
-			// Stencil test function
-			RST_FrontStencilFunc,
-			// Stencil test reference value
-			RST_FrontStencilRef,
-			// Stencil test mask value
-			RST_FrontStencilMask,
-			// Sets the action to perform if the stencil test fails,
-			RST_FrontStencilFail,
-			// if the stencil test passes, but the depth buffer test fails
-			RST_FrontStencilDepthFail,
-			// if both the stencil test and the depth buffer test passes
-			RST_FrontStencilPass,
-			RST_FrontStencilWriteMask,
-			RST_BackStencilEnable,
-			RST_BackStencilFunc,
-			RST_BackStencilRef,
-			RST_BackStencilMask,
-			RST_BackStencilFail,
-			RST_BackStencilDepthFail,
-			RST_BackStencilPass,
-			RST_BackStencilWriteMask,
+		bool				depth_enable : 1;
+		bool				depth_mask : 1;
+		CompareFunction		depth_func : 3;
+		float				polygon_offset_factor;
+		float				polygon_offset_units;
 
-			RST_ScissorEnable,
+		bool				front_stencil_enable : 1;
+		CompareFunction		front_stencil_func : 3;
+		uint16_t			front_stencil_ref;
+		uint16_t			front_stencil_mask;
+		StencilOperation	front_stencil_fail : 3;
+		StencilOperation	front_stencil_depth_fail : 3;
+		StencilOperation	front_stencil_pass : 3;
+		uint16_t			front_stencil_write_mask;
 
-			RST_ColorMask0,
-			RST_ColorMask1,
-			RST_ColorMask2,
-			RST_ColorMask3,
+		bool				back_stencil_enable : 1;
+		CompareFunction		back_stencil_func : 3;
+		uint16_t			back_stencil_ref;
+		uint16_t			back_stencil_mask;
+		StencilOperation	back_stencil_fail : 3;
+		StencilOperation	back_stencil_depth_fail : 3;
+		StencilOperation	back_stencil_pass : 3;
+		uint16_t			back_stencil_write_mask;
 
-			RST_NUM_RENDER_STATES
-		};
+		bool				scissor_enable : 1;
 
-	public:
+		uint8_t				color_mask_0 : 4;
+		uint8_t				color_mask_1 : 4;
+		uint8_t				color_mask_2 : 4;
+		uint8_t				color_mask_3 : 4;
+
 		RenderStateObject();
-
-		void SetRenderState(RenderStateType rst, uint32_t state);
-		uint32_t GetRenderState(RenderStateType rst) const;
-
-	private:
-		boost::array<uint32_t, RST_NUM_RENDER_STATES> render_states_;
 	};
+#ifdef KLAYGE_PLATFORM_WINDOWS
+#pragma pack(pop)
+#endif
 }
 
 #endif			// _RENDERSTATEOBJECT_HPP

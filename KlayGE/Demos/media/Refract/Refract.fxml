@@ -11,19 +11,19 @@
 	<parameter type="float3" name="eye_pos"/>
 	<parameter type="float3" name="eta_ratio"/>
 
-	<parameter type="sampler" name="skybox_YcubeMapSampler">
+	<parameter type="samplerCUBE" name="skybox_YcubeMapSampler">
 		<state name="filtering" value="bilinear"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 		<state name="address_w" value="clamp"/>
 	</parameter>
-	<parameter type="sampler" name="skybox_CcubeMapSampler">
+	<parameter type="samplerCUBE" name="skybox_CcubeMapSampler">
 		<state name="filtering" value="bilinear"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 		<state name="address_w" value="clamp"/>
 	</parameter>
-	<parameter type="sampler" name="BackFace_Sampler">
+	<parameter type="sampler2D" name="BackFace_Sampler">
 		<state name="filtering" value="bilinear"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>

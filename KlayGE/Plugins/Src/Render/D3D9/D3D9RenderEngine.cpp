@@ -222,227 +222,198 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::SetStateObjects(RenderStateObject const & rs_obj, ShaderObject const & shader_obj)
 	{
-		for (int i = 0; i < RenderStateObject::RST_NUM_RENDER_STATES; ++ i)
 		{
-			RenderStateObject::RenderStateType rst = static_cast<RenderStateObject::RenderStateType>(i);
-			uint32_t state = rs_obj.GetRenderState(rst);
-			if (cur_render_state_obj_.GetRenderState(rst) != state)
+			if (cur_render_state_obj_.polygon_mode != rs_obj.polygon_mode)
 			{
-				switch (rst)
+				d3dDevice_->SetRenderState(D3DRS_FILLMODE, D3D9Mapping::Mapping(rs_obj.polygon_mode));
+			}
+			if (cur_render_state_obj_.shade_mode != rs_obj.shade_mode)
+			{
+				d3dDevice_->SetRenderState(D3DRS_SHADEMODE, D3D9Mapping::Mapping(rs_obj.shade_mode));
+			}
+			if (cur_render_state_obj_.cull_mode != rs_obj.cull_mode)
+			{
+				d3dDevice_->SetRenderState(D3DRS_CULLMODE, D3D9Mapping::Mapping(rs_obj.cull_mode));
+			}			
+
+			if (cur_render_state_obj_.alpha_to_coverage_enable != rs_obj.alpha_to_coverage_enable)
+			{
+				// NVIDIA's Transparency Multisampling
+				if (S_OK == d3d_->CheckDeviceFormat(D3DADAPTER_DEFAULT,
+					D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE,
+					static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'O', 'C'>::value)))
 				{
-				case RenderStateObject::RST_PolygonMode:
-					d3dDevice_->SetRenderState(D3DRS_FILLMODE,
-						D3D9Mapping::Mapping(static_cast<RenderStateObject::PolygonMode>(state)));
-					break;
-
-				case RenderStateObject::RST_ShadeMode:
-					d3dDevice_->SetRenderState(D3DRS_SHADEMODE,
-						D3D9Mapping::Mapping(static_cast<RenderStateObject::ShadeMode>(state)));
-					break;
-
-				case RenderStateObject::RST_CullMode:
-					d3dDevice_->SetRenderState(D3DRS_CULLMODE,
-						D3D9Mapping::Mapping(static_cast<RenderStateObject::CullMode>(state)));
-					break;
-
-				case RenderStateObject::RST_AlphaToCoverageEnable:
-					// NVIDIA's Transparency Multisampling
-					if (S_OK == d3d_->CheckDeviceFormat(D3DADAPTER_DEFAULT,
-						D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE,
-						static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'O', 'C'>::value)))
+					if (rs_obj.alpha_to_coverage_enable)
 					{
-						if (state)
-						{
-							d3dDevice_->SetRenderState(D3DRS_ADAPTIVETESS_Y,
-								static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'O', 'C'>::value));
-						}
-						else
-						{
-							d3dDevice_->SetRenderState(D3DRS_ADAPTIVETESS_Y, D3DFMT_UNKNOWN);
-						}
-					}
-					break;
-
-				case RenderStateObject::RST_BlendEnable:
-					d3dDevice_->SetRenderState(D3DRS_ALPHABLENDENABLE, state);
-					d3dDevice_->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, state);
-					break;
-
-				case RenderStateObject::RST_BlendOp:
-					d3dDevice_->SetRenderState(D3DRS_BLENDOP,
-						D3D9Mapping::Mapping(static_cast<RenderStateObject::BlendOperation>(state)));
-					break;
-
-				case RenderStateObject::RST_SrcBlend:
-					d3dDevice_->SetRenderState(D3DRS_SRCBLEND,
-						D3D9Mapping::Mapping(static_cast<RenderStateObject::AlphaBlendFactor>(state)));
-					break;
-
-				case RenderStateObject::RST_DestBlend:
-					d3dDevice_->SetRenderState(D3DRS_DESTBLEND,
-						D3D9Mapping::Mapping(static_cast<RenderStateObject::AlphaBlendFactor>(state)));
-					break;
-
-				case RenderStateObject::RST_BlendOpAlpha:
-					d3dDevice_->SetRenderState(D3DRS_BLENDOPALPHA,
-						D3D9Mapping::Mapping(static_cast<RenderStateObject::BlendOperation>(state)));
-					break;
-
-				case RenderStateObject::RST_SrcBlendAlpha:
-					d3dDevice_->SetRenderState(D3DRS_SRCBLENDALPHA,
-						D3D9Mapping::Mapping(static_cast<RenderStateObject::AlphaBlendFactor>(state)));
-					break;
-
-				case RenderStateObject::RST_DestBlendAlpha:
-					d3dDevice_->SetRenderState(D3DRS_DESTBLENDALPHA,
-						D3D9Mapping::Mapping(static_cast<RenderStateObject::AlphaBlendFactor>(state)));
-					break;
-
-				case RenderStateObject::RST_DepthEnable:
-					d3dDevice_->SetRenderState(D3DRS_ZENABLE, state ? D3DZB_TRUE : D3DZB_FALSE);
-					break;
-
-				case RenderStateObject::RST_DepthMask:
-					d3dDevice_->SetRenderState(D3DRS_ZWRITEENABLE, state ? D3DZB_TRUE : D3DZB_FALSE);
-					break;
-
-				case RenderStateObject::RST_DepthFunc:
-					d3dDevice_->SetRenderState(D3DRS_ZFUNC,
-						D3D9Mapping::Mapping(static_cast<RenderStateObject::CompareFunction>(state)));
-					break;
-
-				case RenderStateObject::RST_PolygonOffsetFactor:
-					d3dDevice_->SetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, state);
-					break;
-
-				case RenderStateObject::RST_PolygonOffsetUnits:
-					d3dDevice_->SetRenderState(D3DRS_DEPTHBIAS, state);
-					break;
-
-				case RenderStateObject::RST_FrontStencilFunc:
-					d3dDevice_->SetRenderState(D3DRS_STENCILFUNC,
-						D3D9Mapping::Mapping(static_cast<RenderStateObject::CompareFunction>(state)));
-					break;
-
-				case RenderStateObject::RST_FrontStencilRef:
-					d3dDevice_->SetRenderState(D3DRS_STENCILREF, state);
-					break;
-
-				case RenderStateObject::RST_FrontStencilMask:
-					d3dDevice_->SetRenderState(D3DRS_STENCILMASK, state);
-					break;
-
-				case RenderStateObject::RST_FrontStencilFail:
-					d3dDevice_->SetRenderState(D3DRS_STENCILFAIL,
-						D3D9Mapping::Mapping(static_cast<RenderStateObject::StencilOperation>(state)));
-					break;
-
-				case RenderStateObject::RST_FrontStencilDepthFail:
-					d3dDevice_->SetRenderState(D3DRS_STENCILZFAIL,
-						D3D9Mapping::Mapping(static_cast<RenderStateObject::StencilOperation>(state)));
-					break;
-
-				case RenderStateObject::RST_FrontStencilPass:
-					d3dDevice_->SetRenderState(D3DRS_STENCILPASS,
-						D3D9Mapping::Mapping(static_cast<RenderStateObject::StencilOperation>(state)));
-					break;
-
-				case RenderStateObject::RST_FrontStencilWriteMask:
-					d3dDevice_->SetRenderState(D3DRS_STENCILWRITEMASK, state);
-					break;
-
-				case RenderStateObject::RST_BackStencilFunc:
-					d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFUNC,
-						D3D9Mapping::Mapping(static_cast<RenderStateObject::CompareFunction>(state)));
-					break;
-
-				case RenderStateObject::RST_BackStencilRef:
-					d3dDevice_->SetRenderState(D3DRS_STENCILREF, state);
-					break;
-
-				case RenderStateObject::RST_BackStencilMask:
-					d3dDevice_->SetRenderState(D3DRS_STENCILMASK, state);
-					break;
-
-				case RenderStateObject::RST_BackStencilFail:
-					d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFAIL,
-						D3D9Mapping::Mapping(static_cast<RenderStateObject::StencilOperation>(state)));
-					break;
-
-				case RenderStateObject::RST_BackStencilDepthFail:
-					d3dDevice_->SetRenderState(D3DRS_CCW_STENCILZFAIL,
-						D3D9Mapping::Mapping(static_cast<RenderStateObject::StencilOperation>(state)));
-					break;
-
-				case RenderStateObject::RST_BackStencilPass:
-					d3dDevice_->SetRenderState(D3DRS_CCW_STENCILPASS,
-						D3D9Mapping::Mapping(static_cast<RenderStateObject::StencilOperation>(state)));
-					break;
-
-				case RenderStateObject::RST_BackStencilWriteMask:
-					d3dDevice_->SetRenderState(D3DRS_STENCILWRITEMASK, state);
-					break;
-
-				case RenderStateObject::RST_FrontStencilEnable:
-				case RenderStateObject::RST_BackStencilEnable:
-					if (rs_obj.GetRenderState(RenderStateObject::RST_FrontStencilEnable)
-						&& rs_obj.GetRenderState(RenderStateObject::RST_BackStencilEnable))
-					{
-						d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, true);
+						d3dDevice_->SetRenderState(D3DRS_ADAPTIVETESS_Y,
+							static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'O', 'C'>::value));
 					}
 					else
 					{
-						if (rs_obj.GetRenderState(RenderStateObject::RST_FrontStencilEnable))
+						d3dDevice_->SetRenderState(D3DRS_ADAPTIVETESS_Y, D3DFMT_UNKNOWN);
+					}
+				}
+			}
+			if (cur_render_state_obj_.blend_enable != rs_obj.blend_enable)
+			{
+				d3dDevice_->SetRenderState(D3DRS_ALPHABLENDENABLE, rs_obj.blend_enable);
+				d3dDevice_->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, rs_obj.blend_enable);		
+			}
+			if (cur_render_state_obj_.blend_op != rs_obj.blend_op)
+			{
+				d3dDevice_->SetRenderState(D3DRS_BLENDOP, D3D9Mapping::Mapping(rs_obj.blend_op));
+			}
+			if (cur_render_state_obj_.src_blend != rs_obj.src_blend)
+			{
+				d3dDevice_->SetRenderState(D3DRS_SRCBLEND, D3D9Mapping::Mapping(rs_obj.src_blend));
+			}
+			if (cur_render_state_obj_.dest_blend != rs_obj.dest_blend)
+			{
+				d3dDevice_->SetRenderState(D3DRS_DESTBLEND, D3D9Mapping::Mapping(rs_obj.dest_blend));
+			}
+			if (cur_render_state_obj_.blend_op_alpha != rs_obj.blend_op_alpha)
+			{
+				d3dDevice_->SetRenderState(D3DRS_BLENDOPALPHA, D3D9Mapping::Mapping(rs_obj.blend_op_alpha));
+			}
+			if (cur_render_state_obj_.src_blend_alpha != rs_obj.src_blend_alpha)
+			{
+				d3dDevice_->SetRenderState(D3DRS_SRCBLENDALPHA, D3D9Mapping::Mapping(rs_obj.src_blend_alpha));
+			}
+			if (cur_render_state_obj_.dest_blend_alpha != rs_obj.dest_blend_alpha)
+			{
+				d3dDevice_->SetRenderState(D3DRS_DESTBLENDALPHA, D3D9Mapping::Mapping(rs_obj.dest_blend_alpha));
+			}
+
+			if (cur_render_state_obj_.depth_enable != rs_obj.depth_enable)
+			{
+				d3dDevice_->SetRenderState(D3DRS_ZENABLE, rs_obj.depth_enable ? D3DZB_TRUE : D3DZB_FALSE);
+			}
+			if (cur_render_state_obj_.depth_mask != rs_obj.depth_mask)
+			{
+				d3dDevice_->SetRenderState(D3DRS_ZWRITEENABLE, rs_obj.depth_mask ? D3DZB_TRUE : D3DZB_FALSE);
+			}
+			if (cur_render_state_obj_.depth_func != rs_obj.depth_func)
+			{
+				d3dDevice_->SetRenderState(D3DRS_ZFUNC, D3D9Mapping::Mapping(rs_obj.depth_func));
+			}
+			if (cur_render_state_obj_.polygon_offset_factor != rs_obj.polygon_offset_factor)
+			{
+				d3dDevice_->SetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, float_to_uint32(rs_obj.polygon_offset_factor));
+			}
+			if (cur_render_state_obj_.polygon_offset_units != rs_obj.polygon_offset_units)
+			{
+				d3dDevice_->SetRenderState(D3DRS_DEPTHBIAS, float_to_uint32(rs_obj.polygon_offset_units));
+			}
+
+			if ((cur_render_state_obj_.front_stencil_enable != rs_obj.front_stencil_enable)
+				|| (cur_render_state_obj_.back_stencil_enable != rs_obj.back_stencil_enable))
+			{
+				if (rs_obj.front_stencil_enable && rs_obj.back_stencil_enable)
+				{
+					d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, true);
+				}
+				else
+				{
+					if (rs_obj.front_stencil_enable)
+					{
+						d3dDevice_->SetRenderState(D3DRS_STENCILENABLE, true);
+					}
+					else
+					{
+						if (rs_obj.back_stencil_enable)
 						{
-							d3dDevice_->SetRenderState(D3DRS_STENCILENABLE, true);
+							d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, true);
+							d3dDevice_->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
 						}
 						else
 						{
-							if (rs_obj.GetRenderState(RenderStateObject::RST_BackStencilEnable))
-							{
-								d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, true);
-								d3dDevice_->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
-							}
-							else
-							{
-								d3dDevice_->SetRenderState(D3DRS_STENCILENABLE, false);
-								d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, false);
-							}
+							d3dDevice_->SetRenderState(D3DRS_STENCILENABLE, false);
+							d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, false);
 						}
 					}
-					break;
-
-				case RenderStateObject::RST_ScissorEnable:
-					d3dDevice_->SetRenderState(D3DRS_SCISSORTESTENABLE, state);
-					break;
-
-				case RenderStateObject::RST_ColorMask0:
-					d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE,
-						D3D9Mapping::MappingColorMask(state));
-					break;
-
-				case RenderStateObject::RST_ColorMask1:
-					d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE,
-						D3D9Mapping::MappingColorMask(state));
-					break;
-
-				case RenderStateObject::RST_ColorMask2:
-					d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE,
-						D3D9Mapping::MappingColorMask(state));
-					break;
-
-				case RenderStateObject::RST_ColorMask3:
-					d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE,
-						D3D9Mapping::MappingColorMask(state));
-					break;
-
-				default:
-					BOOST_ASSERT(false);
-					break;
 				}
-
-				cur_render_state_obj_.SetRenderState(rst, state);
 			}
+			if (cur_render_state_obj_.front_stencil_func != rs_obj.front_stencil_func)
+			{
+				d3dDevice_->SetRenderState(D3DRS_STENCILFUNC, D3D9Mapping::Mapping(rs_obj.front_stencil_func));
+			}
+			if (cur_render_state_obj_.front_stencil_ref != rs_obj.front_stencil_ref)
+			{
+				d3dDevice_->SetRenderState(D3DRS_STENCILREF, rs_obj.front_stencil_ref);
+			}
+			if (cur_render_state_obj_.front_stencil_mask != rs_obj.front_stencil_mask)
+			{
+				d3dDevice_->SetRenderState(D3DRS_STENCILMASK, rs_obj.front_stencil_mask);
+			}
+			if (cur_render_state_obj_.front_stencil_fail != rs_obj.front_stencil_fail)
+			{
+				d3dDevice_->SetRenderState(D3DRS_STENCILFAIL, D3D9Mapping::Mapping(rs_obj.front_stencil_fail));
+			}
+			if (cur_render_state_obj_.front_stencil_depth_fail != rs_obj.front_stencil_depth_fail)
+			{
+				d3dDevice_->SetRenderState(D3DRS_STENCILZFAIL, D3D9Mapping::Mapping(rs_obj.front_stencil_depth_fail));
+			}
+			if (cur_render_state_obj_.front_stencil_pass != rs_obj.front_stencil_pass)
+			{
+				d3dDevice_->SetRenderState(D3DRS_STENCILPASS, D3D9Mapping::Mapping(rs_obj.front_stencil_pass));
+			}
+			if (cur_render_state_obj_.front_stencil_write_mask != rs_obj.front_stencil_write_mask)
+			{
+				d3dDevice_->SetRenderState(D3DRS_STENCILWRITEMASK, rs_obj.front_stencil_write_mask);
+			}
+
+			if (cur_render_state_obj_.back_stencil_func != rs_obj.back_stencil_func)
+			{
+				d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFUNC, D3D9Mapping::Mapping(rs_obj.back_stencil_func));	
+			}
+			if (cur_render_state_obj_.back_stencil_ref != rs_obj.back_stencil_ref)
+			{
+				d3dDevice_->SetRenderState(D3DRS_STENCILREF, rs_obj.back_stencil_ref);
+			}
+			if (cur_render_state_obj_.back_stencil_mask != rs_obj.back_stencil_mask)
+			{
+				d3dDevice_->SetRenderState(D3DRS_STENCILMASK, rs_obj.back_stencil_ref);
+			}
+			if (cur_render_state_obj_.back_stencil_fail != rs_obj.back_stencil_fail)
+			{
+				d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFAIL, D3D9Mapping::Mapping(rs_obj.back_stencil_fail));
+			}
+			if (cur_render_state_obj_.back_stencil_depth_fail != rs_obj.back_stencil_depth_fail)
+			{
+				d3dDevice_->SetRenderState(D3DRS_CCW_STENCILZFAIL, D3D9Mapping::Mapping(rs_obj.back_stencil_depth_fail));
+			}
+			if (cur_render_state_obj_.back_stencil_pass != rs_obj.back_stencil_pass)
+			{
+				d3dDevice_->SetRenderState(D3DRS_CCW_STENCILPASS, D3D9Mapping::Mapping(rs_obj.back_stencil_pass));
+			}
+			if (cur_render_state_obj_.back_stencil_write_mask != rs_obj.back_stencil_write_mask)
+			{
+				d3dDevice_->SetRenderState(D3DRS_STENCILWRITEMASK, rs_obj.back_stencil_write_mask);
+			}
+
+			if (cur_render_state_obj_.scissor_enable != rs_obj.scissor_enable)
+			{
+				d3dDevice_->SetRenderState(D3DRS_SCISSORTESTENABLE, rs_obj.scissor_enable);
+			}
+
+			if (cur_render_state_obj_.color_mask_0 != rs_obj.color_mask_0)
+			{
+				d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE, D3D9Mapping::MappingColorMask(rs_obj.color_mask_0));
+			}
+			if (cur_render_state_obj_.color_mask_1 != rs_obj.color_mask_1)
+			{
+				d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE, D3D9Mapping::MappingColorMask(rs_obj.color_mask_1));
+			}
+			if (cur_render_state_obj_.color_mask_2 != rs_obj.color_mask_2)
+			{
+				d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE, D3D9Mapping::MappingColorMask(rs_obj.color_mask_2));
+			}
+			if (cur_render_state_obj_.color_mask_3 != rs_obj.color_mask_3)
+			{
+				d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE, D3D9Mapping::MappingColorMask(rs_obj.color_mask_3));
+			}
+
+			cur_render_state_obj_ = rs_obj;
 		}
 
 		D3D9ShaderObject const & d3d9_shader_obj = *checked_cast<D3D9ShaderObject const *>(&shader_obj);
@@ -502,114 +473,51 @@ namespace KlayGE
 					stage += D3DVERTEXTEXTURESAMPLER0;
 				}
 
-				SamplerPtr cur_sampler = cur_samplers_[type][j];
+				Sampler& cur_sampler = cur_samplers_[type][j];
 				SamplerPtr sampler = d3d9_shader_obj.Samplers(type)[j];
-				if (!sampler || !sampler->GetTexture())
+				if (!sampler || !sampler->texture)
 				{
-					if (cur_sampler->GetTexture())
+					if (cur_sampler.texture)
 					{
 						TIF(d3dDevice_->SetTexture(stage, NULL));
-						cur_sampler->SetTexture(TexturePtr());
+						cur_sampler.texture.reset();
 					}
 				}
 				else
 				{
-					TexturePtr texture = sampler->GetTexture();
-
-					if (cur_sampler->GetTexture() != sampler->GetTexture())
+					if (cur_sampler.texture != sampler->texture)
 					{
-						D3D9Texture const & d3d9Tex(*checked_pointer_cast<D3D9Texture>(texture));
+						D3D9Texture const & d3d9Tex(*checked_pointer_cast<D3D9Texture>(sampler->texture));
 						TIF(d3dDevice_->SetTexture(stage, d3d9Tex.D3DBaseTexture().get()));
-						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_SRGBTEXTURE, IsSRGB(texture->Format())));
-						cur_sampler->SetTexture(texture);
+						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_SRGBTEXTURE, IsSRGB(sampler->texture->Format())));
 					}
 
-					if (cur_sampler->BorderColor() != sampler->BorderColor())
+					if (cur_sampler.border_clr != sampler->border_clr)
 					{
 						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_BORDERCOLOR,
-							D3D9Mapping::MappingToUInt32Color(sampler->BorderColor())));
-						cur_sampler->BorderColor(sampler->BorderColor());
+							D3D9Mapping::MappingToUInt32Color(sampler->border_clr)));
 					}
 
 					// Set addressing mode
-					if (cur_sampler->AddressingMode(Sampler::TAT_Addr_U) != sampler->AddressingMode(Sampler::TAT_Addr_U))
+					if (cur_sampler.addr_mode_u != sampler->addr_mode_u)
 					{
 						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSU,
-							D3D9Mapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_U))));
-						cur_sampler->AddressingMode(Sampler::TAT_Addr_U, sampler->AddressingMode(Sampler::TAT_Addr_U));
+							D3D9Mapping::Mapping(sampler->addr_mode_u)));
 					}
-					if (cur_sampler->AddressingMode(Sampler::TAT_Addr_V) != sampler->AddressingMode(Sampler::TAT_Addr_V))
+					if (cur_sampler.addr_mode_v != sampler->addr_mode_v)
 					{
 						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSV,
-							D3D9Mapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_V))));
-						cur_sampler->AddressingMode(Sampler::TAT_Addr_V, sampler->AddressingMode(Sampler::TAT_Addr_V));
+							D3D9Mapping::Mapping(sampler->addr_mode_v)));
 					}
-					if (cur_sampler->AddressingMode(Sampler::TAT_Addr_W) != sampler->AddressingMode(Sampler::TAT_Addr_W))
+					if (cur_sampler.addr_mode_w != sampler->addr_mode_w)
 					{
 						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSW,
-							D3D9Mapping::Mapping(sampler->AddressingMode(Sampler::TAT_Addr_W))));
-						cur_sampler->AddressingMode(Sampler::TAT_Addr_W, sampler->AddressingMode(Sampler::TAT_Addr_W));
+							D3D9Mapping::Mapping(sampler->addr_mode_w)));
 					}
 
-					if (cur_sampler->Filtering() != sampler->Filtering())
+					if (cur_sampler.filter != sampler->filter)
 					{
-						uint32_t tfc;
-						switch (texture->Type())
-						{
-						case Texture::TT_1D:
-							tfc = caps_.texture_1d_filter_caps;
-							break;
-
-						case Texture::TT_2D:
-							tfc = caps_.texture_2d_filter_caps;
-							break;
-
-						case Texture::TT_3D:
-							tfc = caps_.texture_3d_filter_caps;
-							break;
-
-						case Texture::TT_Cube:
-							tfc = caps_.texture_cube_filter_caps;
-							break;
-
-						default:
-							BOOST_ASSERT(false);
-							tfc = 0;
-							break;
-						}
-
-						Sampler::TexFilterOp filter = sampler->Filtering();
-						if (Sampler::TFO_Anisotropic == filter)
-						{
-							if (0 == (tfc & Sampler::TFO_Anisotropic))
-							{
-								filter = Sampler::TFO_Trilinear;
-							}
-						}
-						if (Sampler::TFO_Trilinear == filter)
-						{
-							if (0 == (tfc & Sampler::TFO_Trilinear))
-							{
-								filter = Sampler::TFO_Bilinear;
-							}
-						}
-						if (Sampler::TFO_Bilinear == filter)
-						{
-							if (0 == (tfc & Sampler::TFO_Bilinear))
-							{
-								filter = Sampler::TFO_Point;
-							}
-						}
-						if (Sampler::TFO_Point == filter)
-						{
-							if (0 == (tfc & Sampler::TFO_Point))
-							{
-								filter = Sampler::TFO_None;
-							}
-						}
-
-						// Set filter
-						switch (filter)
+						switch (sampler->filter)
 						{
 						case Sampler::TFO_None:
 							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_NONE));
@@ -641,31 +549,24 @@ namespace KlayGE
 							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR));
 							break;
 						}
-
-						cur_sampler->Filtering(sampler->Filtering());
 					}
 
-					if (cur_sampler->Anisotropy() != sampler->Anisotropy())
+					if (cur_sampler.anisotropy != sampler->anisotropy)
 					{
-						// Set anisotropy
-						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXANISOTROPY,
-							std::min(sampler->Anisotropy(), caps_.max_texture_anisotropy)));
-						cur_sampler->Anisotropy(sampler->Anisotropy());
+						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, sampler->anisotropy));
 					}
 
-					if (cur_sampler->MaxMipLevel() != sampler->MaxMipLevel())
+					if (cur_sampler.max_mip_level != sampler->max_mip_level)
 					{
-						// Set max mip level
-						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXMIPLEVEL, sampler->MaxMipLevel()));
-						cur_sampler->MaxMipLevel(sampler->MaxMipLevel());
+						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXMIPLEVEL, sampler->max_mip_level));
 					}
 
-					if (cur_sampler->MipMapLodBias() != sampler->MipMapLodBias())
+					if (cur_sampler.mip_map_lod_bias != sampler->mip_map_lod_bias)
 					{
-						// Set mip map lod bias
-						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPMAPLODBIAS, float_to_uint32(sampler->MipMapLodBias())));
-						cur_sampler->MipMapLodBias(sampler->MipMapLodBias());
+						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPMAPLODBIAS, float_to_uint32(sampler->mip_map_lod_bias)));
 					}
+
+					cur_sampler = *sampler;
 				}
 			}
 		}
@@ -898,14 +799,8 @@ namespace KlayGE
 
 		caps_ = D3D9Mapping::Mapping(d3d_caps);
 
-		for (size_t i = 0; i < caps_.max_vertex_texture_units; ++ i)
-		{
-			cur_samplers_[ShaderObject::ST_VertexShader].push_back(SamplerPtr(new Sampler));
-		}
-		for (size_t i = 0; i < caps_.max_texture_units; ++ i)
-		{
-			cur_samplers_[ShaderObject::ST_PixelShader].push_back(SamplerPtr(new Sampler));
-		}
+		cur_samplers_[ShaderObject::ST_VertexShader].resize(caps_.max_vertex_texture_units);
+		cur_samplers_[ShaderObject::ST_PixelShader].resize(caps_.max_texture_units);
 	}
 
 	// ÏìÓ¦Éè±¸¶ªÊ§

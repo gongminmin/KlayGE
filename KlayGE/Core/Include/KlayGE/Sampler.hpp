@@ -1,8 +1,11 @@
 // Sampler.hpp
 // KlayGE 渲染样本类 实现文件
-// Ver 3.2.0
+// Ver 3.5.0
 // 版权所有(C) 龚敏敏, 2005-2006
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.5.0
+// 改为使用结构体 (2006.11.5)
 //
 // 3.2.0
 // 去掉了TextureMatrix (2006.5.9)
@@ -30,25 +33,11 @@
 
 namespace KlayGE
 {
-	class Sampler
+#ifdef KLAYGE_PLATFORM_WINDOWS
+#pragma pack(push, 1)
+#endif
+	struct Sampler
 	{
-	public:
-		enum TexFilterOp
-		{
-			TFO_None,
-			TFO_Point,
-			TFO_Bilinear,
-			TFO_Trilinear,
-			TFO_Anisotropic
-		};
-
-		enum TexAddressingType
-		{
-			TAT_Addr_U,
-			TAT_Addr_V,
-			TAT_Addr_W
-		};
-
 		// Sampler addressing modes - default is TAM_Wrap.
 		enum TexAddressingMode
 		{
@@ -62,43 +51,34 @@ namespace KlayGE
 			TAM_Border
 		};
 
-	public:
+		enum TexFilterOp
+		{
+			TFO_None = 1UL << 0,
+			TFO_Point = 1UL << 1,
+			TFO_Bilinear = 1UL << 2,
+			TFO_Trilinear = 1UL << 3,
+			TFO_Anisotropic = 1UL << 4
+		};
+
+		TexturePtr texture;
+
+		Color border_clr;
+
+		TexAddressingMode addr_mode_u : 3;
+		TexAddressingMode addr_mode_v : 3;
+		TexAddressingMode addr_mode_w : 3;
+
+		TexFilterOp filter : 7;
+
+		uint8_t anisotropy;
+		uint8_t max_mip_level;
+		float mip_map_lod_bias;
+
 		Sampler();
-
-		void SetTexture(TexturePtr tex);
-		TexturePtr GetTexture() const;
-
-		void BorderColor(Color const & clr);
-		Color const & BorderColor() const;
-
-		// Sets the texture addressing mode for a texture unit.
-		void AddressingMode(TexAddressingType type, TexAddressingMode tam);
-		// Sets the texture filtering type for a texture unit.
-		void Filtering(TexFilterOp op);
-		// Sets the maximal anisotropy for the specified texture unit.
-		void Anisotropy(uint32_t maxAnisotropy);
-
-		TexAddressingMode AddressingMode(TexAddressingType type) const;
-		TexFilterOp Filtering() const;
-		uint32_t Anisotropy() const;
-
-		void MaxMipLevel(uint32_t level);
-		uint32_t MaxMipLevel() const;
-
-		void MipMapLodBias(float bias);
-		float MipMapLodBias() const;
-
-	private:
-		TexturePtr tex_;
-
-		Color border_clr_;
-
-		TexAddressingMode addr_mode_u_, addr_mode_v_, addr_mode_w_;
-		TexFilterOp filter_;
-		uint32_t anisotropy_;
-		uint32_t max_mip_level_;
-		float mip_map_lod_bias_;
 	};
+#ifdef KLAYGE_PLATFORM_WINDOWS
+#pragma pack(pop)
+#endif
 }
 
 #endif			// _SAMPLER_HPP

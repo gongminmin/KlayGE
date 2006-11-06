@@ -154,7 +154,7 @@ namespace KlayGE
 				p_handle.rows = static_cast<uint8_t>(constant_desc.Rows);
 				p_handle.columns = static_cast<uint8_t>(constant_desc.Columns);
 
-				param_descs_[type].push_back(std::make_pair(constant_desc.Name, p_handle));
+				param_descs_[type].insert(std::make_pair(constant_desc.Name, p_handle));
 			}
 
 			if (bool_end > bool_begin)
@@ -195,15 +195,7 @@ namespace KlayGE
 
 	bool D3D9ShaderObject::HasParameter(ShaderType type, std::string const & name) const
 	{
-		for (parameter_descs_t::const_iterator iter = param_descs_[type].begin();
-			iter != param_descs_[type].end(); ++ iter)
-		{
-			if (name == iter->first)
-			{
-				return true;
-			}
-		}
-		return false;
+		return param_descs_[type].find(name) != param_descs_[type].end();
 	}
 
 	void D3D9ShaderObject::SetParameter(std::string const & name, bool value)
@@ -211,33 +203,28 @@ namespace KlayGE
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ShaderType type = static_cast<ShaderType>(i);
-			
-			for (parameter_descs_t::iterator iter = param_descs_[type].begin();
-				iter != param_descs_[type].end(); ++ iter)
+
+			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			if (iter != param_descs_[type].end())
 			{
-				if (name == iter->first)
+				D3D9ShaderParameterHandle const & p_handle = iter->second;
+
+				switch (p_handle.register_set)
 				{
-					D3D9ShaderParameterHandle const & p_handle = iter->second;
+				case D3DXRS_BOOL:
+					bool_registers_[p_handle.shader_type][p_handle.register_index * 4] = value;
+					break;
 
-					switch (p_handle.register_set)
-					{
-					case D3DXRS_BOOL:
-						bool_registers_[p_handle.shader_type][p_handle.register_index * 4] = value;
-						break;
+				case D3DXRS_INT4:
+					int_registers_[p_handle.shader_type][p_handle.register_index * 4] = value;
+					break;
 
-					case D3DXRS_INT4:
-						int_registers_[p_handle.shader_type][p_handle.register_index * 4] = value;
-						break;
+				case D3DXRS_FLOAT4:
+					float_registers_[p_handle.shader_type][p_handle.register_index * 4] = value;
+					break;
 
-					case D3DXRS_FLOAT4:
-						float_registers_[p_handle.shader_type][p_handle.register_index * 4] = value;
-						break;
-
-					default:
-						BOOST_ASSERT(false);
-						break;
-					}
-
+				default:
+					BOOST_ASSERT(false);
 					break;
 				}
 			}
@@ -250,32 +237,27 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 			
-			for (parameter_descs_t::iterator iter = param_descs_[type].begin();
-				iter != param_descs_[type].end(); ++ iter)
+			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			if (iter != param_descs_[type].end())
 			{
-				if (name == iter->first)
+				D3D9ShaderParameterHandle const & p_handle = iter->second;
+
+				switch (p_handle.register_set)
 				{
-					D3D9ShaderParameterHandle const & p_handle = iter->second;
+				case D3DXRS_BOOL:
+					bool_registers_[p_handle.shader_type][p_handle.register_index * 4] = value;
+					break;
 
-					switch (p_handle.register_set)
-					{
-					case D3DXRS_BOOL:
-						bool_registers_[p_handle.shader_type][p_handle.register_index * 4] = value;
-						break;
+				case D3DXRS_INT4:
+					int_registers_[p_handle.shader_type][p_handle.register_index * 4] = value;
+					break;
 
-					case D3DXRS_INT4:
-						int_registers_[p_handle.shader_type][p_handle.register_index * 4] = value;
-						break;
+				case D3DXRS_FLOAT4:
+					float_registers_[p_handle.shader_type][p_handle.register_index * 4] = static_cast<float>(value);
+					break;
 
-					case D3DXRS_FLOAT4:
-						float_registers_[p_handle.shader_type][p_handle.register_index * 4] = static_cast<float>(value);
-						break;
-
-					default:
-						BOOST_ASSERT(false);
-						break;
-					}
-
+				default:
+					BOOST_ASSERT(false);
 					break;
 				}
 			}
@@ -288,18 +270,13 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 			
-			for (parameter_descs_t::iterator iter = param_descs_[type].begin();
-				iter != param_descs_[type].end(); ++ iter)
+			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			if (iter != param_descs_[type].end())
 			{
-				if (name == iter->first)
-				{
-					D3D9ShaderParameterHandle const & p_handle = iter->second;
-					BOOST_ASSERT(D3DXRS_FLOAT4 == p_handle.register_set);
+				D3D9ShaderParameterHandle const & p_handle = iter->second;
+				BOOST_ASSERT(D3DXRS_FLOAT4 == p_handle.register_set);
 
-					float_registers_[p_handle.shader_type][p_handle.register_index * 4] = value;
-
-					break;
-				}
+				float_registers_[p_handle.shader_type][p_handle.register_index * 4] = value;
 			}
 		}
 	}
@@ -310,18 +287,13 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 			
-			for (parameter_descs_t::iterator iter = param_descs_[type].begin();
-				iter != param_descs_[type].end(); ++ iter)
+			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			if (iter != param_descs_[type].end())
 			{
-				if (name == iter->first)
-				{
-					D3D9ShaderParameterHandle const & p_handle = iter->second;
-					BOOST_ASSERT(D3DXRS_FLOAT4 == p_handle.register_set);
+				D3D9ShaderParameterHandle const & p_handle = iter->second;
+				BOOST_ASSERT(D3DXRS_FLOAT4 == p_handle.register_set);
 
-					memcpy(&float_registers_[p_handle.shader_type][p_handle.register_index * 4], &value[0], sizeof(value));
-
-					break;
-				}
+				memcpy(&float_registers_[p_handle.shader_type][p_handle.register_index * 4], &value[0], sizeof(value));
 			}
 		}
 	}
@@ -332,19 +304,14 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 			
-			for (parameter_descs_t::iterator iter = param_descs_[type].begin();
-				iter != param_descs_[type].end(); ++ iter)
+			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			if (iter != param_descs_[type].end())
 			{
-				if (name == iter->first)
-				{
-					D3D9ShaderParameterHandle const & p_handle = iter->second;
-					BOOST_ASSERT(D3DXRS_FLOAT4 == p_handle.register_set);
+				D3D9ShaderParameterHandle const & p_handle = iter->second;
+				BOOST_ASSERT(D3DXRS_FLOAT4 == p_handle.register_set);
 
-					float4x4 tmp = MathLib::transpose(value);
-					memcpy(&float_registers_[p_handle.shader_type][p_handle.register_index * 4], &tmp[0], p_handle.register_count * sizeof(float4));
-
-					break;
-				}
+				float4x4 tmp = MathLib::transpose(value);
+				memcpy(&float_registers_[p_handle.shader_type][p_handle.register_index * 4], &tmp[0], p_handle.register_count * sizeof(float4));
 			}
 		}
 	}
@@ -355,41 +322,36 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 			
-			for (parameter_descs_t::iterator iter = param_descs_[type].begin();
-				iter != param_descs_[type].end(); ++ iter)
+			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			if (iter != param_descs_[type].end())
 			{
-				if (name == iter->first)
+				D3D9ShaderParameterHandle const & p_handle = iter->second;
+
+				switch (p_handle.register_set)
 				{
-					D3D9ShaderParameterHandle const & p_handle = iter->second;
-
-					switch (p_handle.register_set)
+				case D3DXRS_BOOL:
+					for (size_t i = 0; i < value.size(); ++ i)
 					{
-					case D3DXRS_BOOL:
-						for (size_t i = 0; i < value.size(); ++ i)
-						{
-							bool_registers_[p_handle.shader_type][(p_handle.register_index + i) * 4] = value[i];
-						}
-						break;
-
-					case D3DXRS_INT4:
-						for (size_t i = 0; i < value.size(); ++ i)
-						{
-							int_registers_[p_handle.shader_type][(p_handle.register_index + i) * 4] = value[i];
-						}
-						break;
-
-					case D3DXRS_FLOAT4:
-						for (size_t i = 0; i < value.size(); ++ i)
-						{
-							float_registers_[p_handle.shader_type][(p_handle.register_index + i) * 4] = value[i];
-						}
-						break;
-
-					default:
-						BOOST_ASSERT(false);
-						break;
+						bool_registers_[p_handle.shader_type][(p_handle.register_index + i) * 4] = value[i];
 					}
+					break;
 
+				case D3DXRS_INT4:
+					for (size_t i = 0; i < value.size(); ++ i)
+					{
+						int_registers_[p_handle.shader_type][(p_handle.register_index + i) * 4] = value[i];
+					}
+					break;
+
+				case D3DXRS_FLOAT4:
+					for (size_t i = 0; i < value.size(); ++ i)
+					{
+						float_registers_[p_handle.shader_type][(p_handle.register_index + i) * 4] = value[i];
+					}
+					break;
+
+				default:
+					BOOST_ASSERT(false);
 					break;
 				}
 			}
@@ -402,41 +364,36 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 			
-			for (parameter_descs_t::iterator iter = param_descs_[type].begin();
-				iter != param_descs_[type].end(); ++ iter)
+			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			if (iter != param_descs_[type].end())
 			{
-				if (name == iter->first)
+				D3D9ShaderParameterHandle const & p_handle = iter->second;
+
+				switch (p_handle.register_set)
 				{
-					D3D9ShaderParameterHandle const & p_handle = iter->second;
-
-					switch (p_handle.register_set)
+				case D3DXRS_BOOL:
+					for (size_t i = 0; i < value.size(); ++ i)
 					{
-					case D3DXRS_BOOL:
-						for (size_t i = 0; i < value.size(); ++ i)
-						{
-							bool_registers_[p_handle.shader_type][(p_handle.register_index + i) * 4] = value[i];
-						}
-						break;
-
-					case D3DXRS_INT4:
-						for (size_t i = 0; i < value.size(); ++ i)
-						{
-							int_registers_[p_handle.shader_type][(p_handle.register_index + i) * 4] = value[i];
-						}
-						break;
-
-					case D3DXRS_FLOAT4:
-						for (size_t i = 0; i < value.size(); ++ i)
-						{
-							float_registers_[p_handle.shader_type][(p_handle.register_index + i) * 4] = static_cast<float>(value[i]);
-						}
-						break;
-
-					default:
-						BOOST_ASSERT(false);
-						break;
+						bool_registers_[p_handle.shader_type][(p_handle.register_index + i) * 4] = value[i];
 					}
+					break;
 
+				case D3DXRS_INT4:
+					for (size_t i = 0; i < value.size(); ++ i)
+					{
+						int_registers_[p_handle.shader_type][(p_handle.register_index + i) * 4] = value[i];
+					}
+					break;
+
+				case D3DXRS_FLOAT4:
+					for (size_t i = 0; i < value.size(); ++ i)
+					{
+						float_registers_[p_handle.shader_type][(p_handle.register_index + i) * 4] = static_cast<float>(value[i]);
+					}
+					break;
+
+				default:
+					BOOST_ASSERT(false);
 					break;
 				}
 			}
@@ -449,20 +406,15 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 			
-			for (parameter_descs_t::iterator iter = param_descs_[type].begin();
-				iter != param_descs_[type].end(); ++ iter)
+			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			if (iter != param_descs_[type].end())
 			{
-				if (name == iter->first)
+				D3D9ShaderParameterHandle const & p_handle = iter->second;
+				BOOST_ASSERT(D3DXRS_FLOAT4 == p_handle.register_set);
+
+				for (size_t i = 0; i < value.size(); ++ i)
 				{
-					D3D9ShaderParameterHandle const & p_handle = iter->second;
-					BOOST_ASSERT(D3DXRS_FLOAT4 == p_handle.register_set);
-
-					for (size_t i = 0; i < value.size(); ++ i)
-					{
-						float_registers_[p_handle.shader_type][(p_handle.register_index + i) * 4] = value[i];
-					}
-
-					break;
+					float_registers_[p_handle.shader_type][(p_handle.register_index + i) * 4] = value[i];
 				}
 			}
 		}
@@ -474,18 +426,13 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 			
-			for (parameter_descs_t::iterator iter = param_descs_[type].begin();
-				iter != param_descs_[type].end(); ++ iter)
+			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			if (iter != param_descs_[type].end())
 			{
-				if (name == iter->first)
-				{
-					D3D9ShaderParameterHandle const & p_handle = iter->second;
+				D3D9ShaderParameterHandle const & p_handle = iter->second;
 
-					memcpy(&float_registers_[p_handle.shader_type][p_handle.register_index * 4], &value[0],
-						std::min(p_handle.register_count, static_cast<uint16_t>(value.size())) * sizeof(float4));
-
-					break;
-				}
+				memcpy(&float_registers_[p_handle.shader_type][p_handle.register_index * 4], &value[0],
+					std::min(p_handle.register_count, static_cast<uint16_t>(value.size())) * sizeof(float4));
 			}
 		}
 	}
@@ -496,23 +443,18 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 			
-			for (parameter_descs_t::iterator iter = param_descs_[type].begin();
-				iter != param_descs_[type].end(); ++ iter)
+			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			if (iter != param_descs_[type].end())
 			{
-				if (name == iter->first)
+				D3D9ShaderParameterHandle const & p_handle = iter->second;
+
+				uint32_t start = p_handle.register_index;
+				std::vector<float4x4> tmp(value);
+				for (std::vector<float4x4>::iterator iter = tmp.begin(); iter != tmp.end(); ++ iter)
 				{
-					D3D9ShaderParameterHandle const & p_handle = iter->second;
-
-					uint32_t start = p_handle.register_index;
-					std::vector<float4x4> tmp(value);
-					for (std::vector<float4x4>::iterator iter = tmp.begin(); iter != tmp.end(); ++ iter)
-					{
-						*iter = MathLib::transpose(*iter);
-						memcpy(&float_registers_[p_handle.shader_type][start * 4], &(*iter)[0], p_handle.rows * sizeof(float4));
-						start += p_handle.rows;
-					}
-
-					break;
+					*iter = MathLib::transpose(*iter);
+					memcpy(&float_registers_[p_handle.shader_type][start * 4], &(*iter)[0], p_handle.rows * sizeof(float4));
+					start += p_handle.rows;
 				}
 			}
 		}
@@ -524,18 +466,13 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 			
-			for (parameter_descs_t::iterator iter = param_descs_[type].begin();
-				iter != param_descs_[type].end(); ++ iter)
+			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			if (iter != param_descs_[type].end())
 			{
-				if (name == iter->first)
-				{
-					D3D9ShaderParameterHandle const & p_handle = iter->second;
+				D3D9ShaderParameterHandle const & p_handle = iter->second;
 
-					BOOST_ASSERT(p_handle.register_index < samplers_[p_handle.shader_type].size());
-					samplers_[p_handle.shader_type][p_handle.register_index] = value;
-
-					break;
-				}
+				BOOST_ASSERT(p_handle.register_index < samplers_[p_handle.shader_type].size());
+				samplers_[p_handle.shader_type][p_handle.register_index] = value;
 			}
 		}
 	}

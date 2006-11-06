@@ -15,6 +15,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/ShaderObject.hpp>
+#include <KlayGE/MapVector.hpp>
 
 #include <KlayGE/D3D9/D3D9Typedefs.hpp>
 
@@ -98,7 +99,7 @@ namespace KlayGE
 		}
 
 	private:
-		typedef std::vector<std::pair<std::string, D3D9ShaderParameterHandle> > parameter_descs_t;
+		typedef MapVector<std::string, D3D9ShaderParameterHandle> parameter_descs_t;
 		boost::array<parameter_descs_t, ST_NumShaderTypes> param_descs_;
 
 		ID3D9VertexShaderPtr vertex_shader_;

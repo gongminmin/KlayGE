@@ -38,11 +38,11 @@ half4 NormalDepthPS(float3 normal : TEXCOORD0, float2 depth : TEXCOORD1) : COLOR
 	<parameter type="float2" name="offset"/>
 	<parameter type="int" name="flipping"/>
 
-	<parameter type="sampler" name="toonmap_sampler">
+	<parameter type="sampler2D" name="toonmap_sampler">
 		<state name="filtering" value="point"/>
 		<state name="address_u" value="clamp"/>
 	</parameter>
-	<parameter type="sampler" name="normal_depth_sampler">
+	<parameter type="sampler2D" name="normal_depth_sampler">
 		<state name="filtering" value="point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>

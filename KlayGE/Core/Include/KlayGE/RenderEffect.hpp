@@ -72,7 +72,10 @@ namespace KlayGE
 			TC_bool = 0,
 			TC_dword,
 			TC_string,
-			TC_sampler,
+			TC_sampler1D,
+			TC_sampler2D,
+			TC_sampler3D,
+			TC_samplerCUBE,
 			TC_shader,
 			TC_int,
 			TC_int2,
@@ -104,21 +107,6 @@ namespace KlayGE
 
 	private:
 		std::vector<std::string> types_;
-	};
-
-	class render_states_define
-	{
-	public:
-		static render_states_define& instance();
-
-		RenderStateObject::RenderStateType state_code(std::string const & name) const;
-		std::string const & state_name(uint32_t code) const;
-
-	private:
-		render_states_define();
-
-	private:
-		std::vector<std::pair<std::string, std::string> > states_;
 	};
 
 	struct shader_desc

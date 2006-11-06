@@ -46,9 +46,10 @@ namespace KlayGE
 	{
 		for (int i = 0; i < ST_NumShaderTypes; ++ i)
 		{
-			for (size_t j = 0; j < param_descs_[i].size(); ++ j)
+			for (parameter_descs_t::iterator iter = param_descs_[i].begin();
+				iter != param_descs_[i].end(); ++ iter)
 			{
-				cgDestroyParameter(param_descs_[i][j].second);
+				cgDestroyParameter(iter->second);
 			}
 
 			cgDestroyProgram(shaders_[i]);
@@ -118,7 +119,7 @@ namespace KlayGE
 				&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param)))
 			{
 				std::pair<std::string, CGparameter> p_desc;
-				param_descs_[type].push_back(std::make_pair(cgGetParameterName(cg_param), cg_param));
+				param_descs_[type].insert(std::make_pair(cgGetParameterName(cg_param), cg_param));
 			}
 
 			cg_param = cgGetNextParameter(cg_param);
@@ -185,24 +186,17 @@ namespace KlayGE
 
 	bool OGLShaderObject::HasParameter(ShaderType type, std::string const & name) const
 	{
-		for (parameter_descs_t::const_iterator iter = param_descs_[type].begin();
-			iter != param_descs_[type].end(); ++ iter)
-		{
-			if (name == iter->first)
-			{
-				return true;
-			}
-		}
-		return false;
+		return param_descs_[type].find(name) != param_descs_[type].end();
 	}
 
 	int32_t OGLShaderObject::AttribIndex(VertexElementUsage usage, uint8_t usage_index)
 	{
 		std::pair<VertexElementUsage, uint8_t> p = std::make_pair(usage, usage_index);
 
-		if (vertex_varyings_.find(p) != vertex_varyings_.end())
+		vertex_varyings_t::iterator iter = vertex_varyings_.find(p);
+		if (iter != vertex_varyings_.end())
 		{
-			return vertex_varyings_[p];
+			return iter->second;
 		}
 		else
 		{
@@ -215,17 +209,11 @@ namespace KlayGE
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ShaderType type = static_cast<ShaderType>(i);
-			cgGLBindProgram(shaders_[type]);
-			cgGLEnableProfile(profiles_[type]);
 
-			for (parameter_descs_t::iterator iter = param_descs_[type].begin();
-				iter != param_descs_[type].end(); ++ iter)
+			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			if (iter != param_descs_[type].end())
 			{
-				if (name == iter->first)
-				{
-					cgSetParameter1i(iter->second, value);
-					break;
-				}
+				cgSetParameter1i(iter->second, value);
 			}
 		}
 	}
@@ -235,17 +223,11 @@ namespace KlayGE
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ShaderType type = static_cast<ShaderType>(i);
-			cgGLBindProgram(shaders_[type]);
-			cgGLEnableProfile(profiles_[type]);
 
-			for (parameter_descs_t::iterator iter = param_descs_[type].begin();
-				iter != param_descs_[type].end(); ++ iter)
+			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			if (iter != param_descs_[type].end())
 			{
-				if (name == iter->first)
-				{
-					cgSetParameter1i(iter->second, value);
-					break;
-				}
+				cgSetParameter1i(iter->second, value);
 			}
 		}
 	}
@@ -255,17 +237,11 @@ namespace KlayGE
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ShaderType type = static_cast<ShaderType>(i);
-			cgGLBindProgram(shaders_[type]);
-			cgGLEnableProfile(profiles_[type]);
 
-			for (parameter_descs_t::iterator iter = param_descs_[type].begin();
-				iter != param_descs_[type].end(); ++ iter)
+			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			if (iter != param_descs_[type].end())
 			{
-				if (name == iter->first)
-				{
-					cgSetParameter1f(iter->second, value);
-					break;
-				}
+				cgSetParameter1f(iter->second, value);
 			}
 		}
 	}
@@ -275,17 +251,11 @@ namespace KlayGE
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ShaderType type = static_cast<ShaderType>(i);
-			cgGLBindProgram(shaders_[type]);
-			cgGLEnableProfile(profiles_[type]);
 
-			for (parameter_descs_t::iterator iter = param_descs_[type].begin();
-				iter != param_descs_[type].end(); ++ iter)
+			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			if (iter != param_descs_[type].end())
 			{
-				if (name == iter->first)
-				{
-					cgSetParameter4fv(iter->second, &value[0]);
-					break;
-				}
+				cgSetParameter4fv(iter->second, &value[0]);
 			}
 		}
 	}
@@ -295,17 +265,11 @@ namespace KlayGE
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ShaderType type = static_cast<ShaderType>(i);
-			cgGLBindProgram(shaders_[type]);
-			cgGLEnableProfile(profiles_[type]);
 
-			for (parameter_descs_t::iterator iter = param_descs_[type].begin();
-				iter != param_descs_[type].end(); ++ iter)
+			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			if (iter != param_descs_[type].end())
 			{
-				if (name == iter->first)
-				{
-					cgGLSetMatrixParameterfr(iter->second, &value[0]);
-					break;
-				}
+				cgGLSetMatrixParameterfr(iter->second, &value[0]);
 			}
 		}
 	}
@@ -315,18 +279,12 @@ namespace KlayGE
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ShaderType type = static_cast<ShaderType>(i);
-			cgGLBindProgram(shaders_[type]);
-			cgGLEnableProfile(profiles_[type]);
 
-			for (parameter_descs_t::iterator iter = param_descs_[type].begin();
-				iter != param_descs_[type].end(); ++ iter)
+			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			if (iter != param_descs_[type].end())
 			{
-				if (name == iter->first)
-				{
-					std::vector<int> tmp(value.begin(), value.end());
-					cgSetParameterValueir(iter->second, static_cast<int>(tmp.size()), &tmp[0]);
-					break;
-				}
+				std::vector<int> tmp(value.begin(), value.end());
+				cgSetParameterValueir(iter->second, static_cast<int>(tmp.size()), &tmp[0]);
 			}
 		}
 	}
@@ -336,17 +294,11 @@ namespace KlayGE
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ShaderType type = static_cast<ShaderType>(i);
-			cgGLBindProgram(shaders_[type]);
-			cgGLEnableProfile(profiles_[type]);
 
-			for (parameter_descs_t::iterator iter = param_descs_[type].begin();
-				iter != param_descs_[type].end(); ++ iter)
+			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			if (iter != param_descs_[type].end())
 			{
-				if (name == iter->first)
-				{
-					cgSetParameterValueir(iter->second, static_cast<int>(value.size()), &value[0]);
-					break;
-				}
+				cgSetParameterValueir(iter->second, static_cast<int>(value.size()), &value[0]);
 			}
 		}
 	}
@@ -356,17 +308,11 @@ namespace KlayGE
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ShaderType type = static_cast<ShaderType>(i);
-			cgGLBindProgram(shaders_[type]);
-			cgGLEnableProfile(profiles_[type]);
 
-			for (parameter_descs_t::iterator iter = param_descs_[type].begin();
-				iter != param_descs_[type].end(); ++ iter)
+			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			if (iter != param_descs_[type].end())
 			{
-				if (name == iter->first)
-				{
-					cgGLSetParameterArray1f(iter->second, 0, static_cast<int>(value.size()), &value[0]);
-					break;
-				}
+				cgGLSetParameterArray1f(iter->second, 0, static_cast<int>(value.size()), &value[0]);
 			}
 		}
 	}
@@ -376,17 +322,11 @@ namespace KlayGE
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ShaderType type = static_cast<ShaderType>(i);
-			cgGLBindProgram(shaders_[type]);
-			cgGLEnableProfile(profiles_[type]);
 
-			for (parameter_descs_t::iterator iter = param_descs_[type].begin();
-				iter != param_descs_[type].end(); ++ iter)
+			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			if (iter != param_descs_[type].end())
 			{
-				if (name == iter->first)
-				{
-					cgGLSetParameterArray4f(iter->second, 0, static_cast<long>(value.size()), &value[0][0]);
-					break;
-				}
+				cgGLSetParameterArray4f(iter->second, 0, static_cast<long>(value.size()), &value[0][0]);
 			}
 		}
 	}
@@ -396,17 +336,11 @@ namespace KlayGE
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ShaderType type = static_cast<ShaderType>(i);
-			cgGLBindProgram(shaders_[type]);
-			cgGLEnableProfile(profiles_[type]);
 
-			for (parameter_descs_t::iterator iter = param_descs_[type].begin();
-				iter != param_descs_[type].end(); ++ iter)
+			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			if (iter != param_descs_[type].end())
 			{
-				if (name == iter->first)
-				{
-					cgGLSetMatrixParameterArrayfr(iter->second, 0, static_cast<long>(value.size()), &value[0][0]);
-					break;
-				}
+				cgGLSetMatrixParameterArrayfr(iter->second, 0, static_cast<long>(value.size()), &value[0][0]);
 			}
 		}
 	}
@@ -416,20 +350,14 @@ namespace KlayGE
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ShaderType type = static_cast<ShaderType>(i);
-			cgGLBindProgram(shaders_[type]);
-			cgGLEnableProfile(profiles_[type]);
 
-			for (parameter_descs_t::iterator iter = param_descs_[type].begin();
-				iter != param_descs_[type].end(); ++ iter)
+			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			if (iter != param_descs_[type].end())
 			{
-				if (name == iter->first)
-				{
-					uint32_t index = cgGLGetTextureEnum(iter->second) - GL_TEXTURE0;
+				uint32_t index = cgGLGetTextureEnum(iter->second) - GL_TEXTURE0;
 
-					BOOST_ASSERT(index < samplers_[type].size());
-					samplers_[type][index] = value;
-					break;
-				}
+				BOOST_ASSERT(index < samplers_[type].size());
+				samplers_[type][index] = value;
 			}
 		}
 	}

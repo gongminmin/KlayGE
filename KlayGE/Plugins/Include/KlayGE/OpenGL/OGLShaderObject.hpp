@@ -72,10 +72,11 @@ namespace KlayGE
 		boost::array<CGprogram, ST_NumShaderTypes> shaders_;
 		boost::array<CGprofile, ST_NumShaderTypes> profiles_;
 
-		typedef std::vector<std::pair<std::string, CGparameter> > parameter_descs_t;
+		typedef MapVector<std::string, CGparameter> parameter_descs_t;
 		boost::array<parameter_descs_t, ST_NumShaderTypes> param_descs_;
 
-		MapVector<std::pair<VertexElementUsage, uint8_t>, uint8_t> vertex_varyings_;
+		typedef MapVector<std::pair<VertexElementUsage, uint8_t>, uint8_t> vertex_varyings_t;
+		vertex_varyings_t vertex_varyings_;
 
 		boost::array<std::vector<SamplerPtr>, ST_NumShaderTypes> samplers_;
 	};

@@ -92,35 +92,38 @@ namespace
 			}
 			break;
 
-		case type_define::TC_sampler:
+		case type_define::TC_sampler1D:
+		case type_define::TC_sampler2D:
+		case type_define::TC_sampler3D:
+		case type_define::TC_samplerCUBE:
 			{
 				var.reset(new RenderVariableSampler);
 				SamplerPtr s(new Sampler);
 
 				uint32_t tmp_int;
 				source->read(reinterpret_cast<char*>(&tmp_int), sizeof(tmp_int));
-				s->Filtering(static_cast<Sampler::TexFilterOp>(tmp_int));
+				s->filter = static_cast<Sampler::TexFilterOp>(tmp_int);
 
 				source->read(reinterpret_cast<char*>(&tmp_int), sizeof(tmp_int));
-				s->AddressingMode(Sampler::TAT_Addr_U, static_cast<Sampler::TexAddressingMode>(tmp_int));
+				s->addr_mode_u = static_cast<Sampler::TexAddressingMode>(tmp_int);
 				source->read(reinterpret_cast<char*>(&tmp_int), sizeof(tmp_int));
-				s->AddressingMode(Sampler::TAT_Addr_V, static_cast<Sampler::TexAddressingMode>(tmp_int));
+				s->addr_mode_v = static_cast<Sampler::TexAddressingMode>(tmp_int);
 				source->read(reinterpret_cast<char*>(&tmp_int), sizeof(tmp_int));
-				s->AddressingMode(Sampler::TAT_Addr_W, static_cast<Sampler::TexAddressingMode>(tmp_int));
+				s->addr_mode_w = static_cast<Sampler::TexAddressingMode>(tmp_int);
 
 				source->read(reinterpret_cast<char*>(&tmp_int), sizeof(tmp_int));
-				s->Anisotropy(tmp_int);
+				s->anisotropy = static_cast<uint8_t>(tmp_int);
 
 				source->read(reinterpret_cast<char*>(&tmp_int), sizeof(tmp_int));
-				s->MaxMipLevel(tmp_int);
+				s->max_mip_level = static_cast<uint8_t>(tmp_int);
 
 				float tmp_float;
 				source->read(reinterpret_cast<char*>(&tmp_float), sizeof(tmp_float));
-				s->MipMapLodBias(tmp_float);
+				s->mip_map_lod_bias = tmp_float;
 
 				Color border_clr;
 				source->read(reinterpret_cast<char*>(&border_clr), sizeof(border_clr));
-				s->BorderColor(border_clr);
+				s->border_clr = border_clr;
 				
 				*var = s;
 			}
@@ -222,7 +225,10 @@ namespace KlayGE
 		types_.push_back("bool");
 		types_.push_back("dword");
 		types_.push_back("string");
-		types_.push_back("sampler");
+		types_.push_back("sampler1D");
+		types_.push_back("sampler2D");
+		types_.push_back("sampler3D");
+		types_.push_back("samplerCUBE");
 		types_.push_back("shader");
 		types_.push_back("int");
 		types_.push_back("int2");
@@ -272,85 +278,6 @@ namespace KlayGE
 		return "";
 	}
 
-	render_states_define::render_states_define()
-	{
-		states_.push_back(std::make_pair("polygon_mode", "int"));
-		states_.push_back(std::make_pair("shade_mode", "int"));
-		states_.push_back(std::make_pair("cull_mode", "int"));
-
-		states_.push_back(std::make_pair("alpha_to_coverage_enable", "bool"));
-		states_.push_back(std::make_pair("blend_enable", "bool"));
-		states_.push_back(std::make_pair("blend_op", "int"));
-		states_.push_back(std::make_pair("src_blend", "int"));
-		states_.push_back(std::make_pair("dest_blend", "int"));
-		states_.push_back(std::make_pair("blend_op_alpha", "int"));
-		states_.push_back(std::make_pair("src_blend_alpha", "int"));
-		states_.push_back(std::make_pair("dest_blend_alpha", "int"));
-
-		states_.push_back(std::make_pair("depth_enable", "bool"));
-		states_.push_back(std::make_pair("depth_write_enable", "bool"));
-		states_.push_back(std::make_pair("depth_func", "int"));
-		states_.push_back(std::make_pair("slope_scale_depth_bias", "float"));
-		states_.push_back(std::make_pair("depth_bias", "float"));
-
-		states_.push_back(std::make_pair("front_stencil_enable", "bool"));
-		states_.push_back(std::make_pair("front_stencil_func", "int"));
-		states_.push_back(std::make_pair("front_stencil_ref", "int"));
-		states_.push_back(std::make_pair("front_stencil_mask", "int"));
-		states_.push_back(std::make_pair("front_stencil_fail", "int"));
-		states_.push_back(std::make_pair("front_stencil_depth_fail", "int"));
-		states_.push_back(std::make_pair("front_stencil_pass", "int"));
-		states_.push_back(std::make_pair("front_stencil_write_mask", "int"));
-		states_.push_back(std::make_pair("back_stencil_enable", "bool"));
-		states_.push_back(std::make_pair("back_stencil_func", "int"));
-		states_.push_back(std::make_pair("back_stencil_ref", "int"));
-		states_.push_back(std::make_pair("back_stencil_mask", "int"));
-		states_.push_back(std::make_pair("back_stencil_fail", "int"));
-		states_.push_back(std::make_pair("back_stencil_depth_fail", "int"));
-		states_.push_back(std::make_pair("back_stencil_pass", "int"));
-		states_.push_back(std::make_pair("back_stencil_write_mask", "int"));
-
-		states_.push_back(std::make_pair("scissor_enable", "bool"));
-
-		states_.push_back(std::make_pair("color_mask_0", "int"));
-		states_.push_back(std::make_pair("color_mask_1", "int"));
-		states_.push_back(std::make_pair("color_mask_2", "int"));
-		states_.push_back(std::make_pair("color_mask_3", "int"));
-
-		states_.push_back(std::make_pair("pixel_shader", "shader"));
-		states_.push_back(std::make_pair("vertex_shader", "shader"));
-	}
-
-	render_states_define& render_states_define::instance()
-	{
-		static render_states_define ret;
-		return ret;
-	}
-
-	RenderStateObject::RenderStateType render_states_define::state_code(std::string const & name) const
-	{
-		for (std::vector<std::pair<std::string, std::string> >::const_iterator iter = states_.begin();
-			iter != states_.end(); ++ iter)
-		{
-			if (iter->first == name)
-			{
-				return static_cast<RenderStateObject::RenderStateType>(std::distance(states_.begin(), iter));
-			}
-		}
-		assert(false);
-
-		return static_cast<RenderStateObject::RenderStateType>(0xFFFFFFFF);
-	}
-
-	std::string const & render_states_define::state_name(uint32_t code) const
-	{
-		if (code < states_.size())
-		{
-			return states_[code].first;
-		}
-		assert(false);
-		return "";
-	}
 
 	void RenderEffectAnnotation::Load(ResIdentifierPtr const & source)
 	{
@@ -566,8 +493,6 @@ namespace KlayGE
 
 			if (type_define::TC_shader != type)
 			{
-				RenderStateObject::RenderStateType state = render_states_define::instance().state_code(state_name);
-
 				uint32_t state_val;
 				switch (type)
 				{
@@ -601,7 +526,159 @@ namespace KlayGE
 					break;
 				}
 
-				render_state_obj_->SetRenderState(state, state_val);
+				if ("polygon_mode" == state_name)
+				{
+					render_state_obj_->polygon_mode = static_cast<RenderStateObject::PolygonMode>(state_val);
+				}
+				if ("shade_mode" == state_name)
+				{
+					render_state_obj_->shade_mode = static_cast<RenderStateObject::ShadeMode>(state_val);
+				}
+				if ("cull_mode" == state_name)
+				{
+					render_state_obj_->cull_mode = static_cast<RenderStateObject::CullMode>(state_val);
+				}
+
+				if ("alpha_to_coverage_enable" == state_name)
+				{
+					render_state_obj_->alpha_to_coverage_enable = state_val ? true : false;
+				}
+				if ("blend_enable" == state_name)
+				{
+					render_state_obj_->blend_enable = state_val ? true : false;
+				}
+				if ("blend_op" == state_name)
+				{
+					render_state_obj_->blend_op = static_cast<RenderStateObject::BlendOperation>(state_val);
+				}
+				if ("src_blend" == state_name)
+				{
+					render_state_obj_->src_blend = static_cast<RenderStateObject::AlphaBlendFactor>(state_val);
+				}
+				if ("dest_blend" == state_name)
+				{
+					render_state_obj_->dest_blend = static_cast<RenderStateObject::AlphaBlendFactor>(state_val);
+				}
+				if ("blend_op_alpha" == state_name)
+				{
+					render_state_obj_->blend_op_alpha = static_cast<RenderStateObject::BlendOperation>(state_val);
+				}
+				if ("src_blend_alpha" == state_name)
+				{
+					render_state_obj_->src_blend_alpha = static_cast<RenderStateObject::AlphaBlendFactor>(state_val);
+				}
+				if ("dest_blend_alpha" == state_name)
+				{
+					render_state_obj_->dest_blend_alpha = static_cast<RenderStateObject::AlphaBlendFactor>(state_val);
+				}
+
+				if ("depth_enable" == state_name)
+				{
+					render_state_obj_->depth_enable = state_val ? true : false;
+				}
+				if ("depth_mask" == state_name)
+				{
+					render_state_obj_->depth_mask = state_val ? true : false;
+				}
+				if ("depth_func" == state_name)
+				{
+					render_state_obj_->depth_func = static_cast<RenderStateObject::CompareFunction>(state_val);
+				}
+				if ("polygon_offset_factor" == state_name)
+				{
+					render_state_obj_->polygon_offset_factor = uint32_to_float(state_val);
+				}
+				if ("polygon_offset_units" == state_name)
+				{
+					render_state_obj_->polygon_offset_units = uint32_to_float(state_val);
+				}
+
+				if ("front_stencil_enable" == state_name)
+				{
+					render_state_obj_->front_stencil_enable = state_val ? true : false;
+				}
+				if ("front_stencil_func" == state_name)
+				{
+					render_state_obj_->front_stencil_func = static_cast<RenderStateObject::CompareFunction>(state_val);
+				}
+				if ("front_stencil_ref" == state_name)
+				{
+					render_state_obj_->front_stencil_ref = static_cast<uint16_t>(state_val);
+				}
+				if ("front_stencil_mask" == state_name)
+				{
+					render_state_obj_->front_stencil_mask = static_cast<uint16_t>(state_val);
+				}
+				if ("front_stencil_fail" == state_name)
+				{
+					render_state_obj_->front_stencil_fail = static_cast<RenderStateObject::StencilOperation>(state_val);
+				}
+				if ("front_stencil_depth_fail" == state_name)
+				{
+					render_state_obj_->front_stencil_depth_fail = static_cast<RenderStateObject::StencilOperation>(state_val);
+				}
+				if ("front_stencil_pass" == state_name)
+				{
+					render_state_obj_->front_stencil_pass = static_cast<RenderStateObject::StencilOperation>(state_val);
+				}
+				if ("front_stencil_write_mask" == state_name)
+				{
+					render_state_obj_->front_stencil_write_mask = static_cast<uint16_t>(state_val);
+				}
+				if ("back_stencil_enable" == state_name)
+				{
+					render_state_obj_->back_stencil_enable = state_val ? true : false;
+				}
+				if ("back_stencil_func" == state_name)
+				{
+					render_state_obj_->back_stencil_func = static_cast<RenderStateObject::CompareFunction>(state_val);
+				}
+				if ("back_stencil_ref" == state_name)
+				{
+					render_state_obj_->back_stencil_ref = static_cast<uint16_t>(state_val);
+				}
+				if ("back_stencil_mask" == state_name)
+				{
+					render_state_obj_->back_stencil_mask = static_cast<uint16_t>(state_val);
+				}
+				if ("back_stencil_fail" == state_name)
+				{
+					render_state_obj_->back_stencil_fail = static_cast<RenderStateObject::StencilOperation>(state_val);
+				}
+				if ("back_stencil_depth_fail" == state_name)
+				{
+					render_state_obj_->back_stencil_depth_fail = static_cast<RenderStateObject::StencilOperation>(state_val);
+				}
+				if ("back_stencil_pass" == state_name)
+				{
+					render_state_obj_->back_stencil_pass = static_cast<RenderStateObject::StencilOperation>(state_val);
+				}
+				if ("back_stencil_write_mask" == state_name)
+				{
+					render_state_obj_->back_stencil_write_mask = static_cast<uint16_t>(state_val);
+				}
+
+				if ("scissor_enable" == state_name)
+				{
+					render_state_obj_->scissor_enable = state_val ? true : false;
+				}
+
+				if ("color_mask_0" == state_name)
+				{
+					render_state_obj_->color_mask_0 = static_cast<uint8_t>(state_val);
+				}
+				if ("color_mask_1" == state_name)
+				{
+					render_state_obj_->color_mask_1 = static_cast<uint8_t>(state_val);
+				}
+				if ("color_mask_2" == state_name)
+				{
+					render_state_obj_->color_mask_2 = static_cast<uint8_t>(state_val);
+				}
+				if ("color_mask_3" == state_name)
+				{
+					render_state_obj_->color_mask_3 = static_cast<uint8_t>(state_val);
+				}
 			}
 			else
 			{
@@ -744,7 +821,10 @@ namespace KlayGE
 						}
 						break;
 
-					case type_define::TC_sampler:
+					case type_define::TC_sampler1D:
+					case type_define::TC_sampler2D:
+					case type_define::TC_sampler3D:
+					case type_define::TC_samplerCUBE:
 						{
 							SamplerPtr tmp;
 							param->Value(tmp);
@@ -1001,7 +1081,7 @@ namespace KlayGE
 		var_->Value(s);
 		BOOST_ASSERT(s);
 
-		s->SetTexture(value);
+		s->texture = value;
 		return *this;
 	}
 

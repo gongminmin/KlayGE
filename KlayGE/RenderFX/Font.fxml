@@ -6,7 +6,7 @@
 
 	<parameter type="float4x4" name="mvp"/>
 
-	<parameter type="sampler" name="texFontSampler">
+	<parameter type="sampler2D" name="texFontSampler">
 		<state name="filtering" value="point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>

@@ -3,12 +3,12 @@
 <effect>
 	<include name="../../../RenderFX/PostProcess.fxml"/>
 
-	<parameter type="sampler" name="src_sampler">
+	<parameter type="sampler2D" name="src_sampler">
 		<state name="filtering" value="point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
-	<parameter type="sampler" name="lums_sampler">
+	<parameter type="sampler2D" name="lums_sampler">
 		<state name="filtering" value="bilinear"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
