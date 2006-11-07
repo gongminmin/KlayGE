@@ -75,9 +75,9 @@ float4 SkinnedMeshPS(float2 uv : TEXCOORD0,
 				float3 L	: TEXCOORD1,
 				float3 H	: TEXCOORD2) : COLOR
 {
-	half3 bump_normal = decompress_normal(tex2D(normal_map, uv));	
-	half3 diffuse = tex2D(diffuse_map, uv);
-	half3 specular = tex2D(specular_map, uv);
+	half3 bump_normal = decompress_normal(tex2D(normal_map, uv)).rgb;	
+	half3 diffuse = tex2D(diffuse_map, uv).rgb;
+	half3 specular = tex2D(specular_map, uv).rgb;
 	
 	half3 light_vec = normalize(L);
 	half diffuse_factor = dot(light_vec, bump_normal);

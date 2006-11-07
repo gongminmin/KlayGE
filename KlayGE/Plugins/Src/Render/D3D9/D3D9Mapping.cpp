@@ -436,15 +436,15 @@ namespace KlayGE
 			
 		RenderDeviceCaps ret;
 
-		ret.max_shader_model		= std::min((d3d_caps.VertexShaderVersion & 0xFF00) >> 8,
-													(d3d_caps.PixelShaderVersion & 0xFF00) >> 8);
+		ret.max_shader_model		= static_cast<uint8_t>(std::min((d3d_caps.VertexShaderVersion & 0xFF00) >> 8,
+													(d3d_caps.PixelShaderVersion & 0xFF00) >> 8));
 
 		ret.max_texture_width		= d3d_caps.MaxTextureWidth;
 		ret.max_texture_height		= d3d_caps.MaxTextureHeight;
 		ret.max_texture_depth		= d3d_caps.MaxVolumeExtent;
 		ret.max_texture_cube_size	= d3d_caps.MaxTextureWidth;
 		ret.max_texture_units		= 16;
-		ret.max_texture_anisotropy	= d3d_caps.MaxAnisotropy;
+		ret.max_texture_anisotropy	= static_cast<uint8_t>(d3d_caps.MaxAnisotropy);
 
 		if (S_OK == re.D3DObject()->CheckDeviceFormat(D3DADAPTER_DEFAULT,
 				D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, D3DUSAGE_QUERY_VERTEXTEXTURE, D3DRTYPE_TEXTURE,
@@ -457,7 +457,7 @@ namespace KlayGE
 			ret.max_vertex_texture_units = 0;
 		}
 
-		ret.max_simultaneous_rts	= d3d_caps.NumSimultaneousRTs;
+		ret.max_simultaneous_rts	= static_cast<uint8_t>(d3d_caps.NumSimultaneousRTs);
 
 		ret.max_vertices = d3d_caps.MaxPrimitiveCount > 0xFFFF ? d3d_caps.MaxPrimitiveCount : d3d_caps.MaxPrimitiveCount * 3;
 		ret.max_indices = d3d_caps.MaxVertexIndex;

@@ -363,14 +363,14 @@ namespace KlayGE
 			dev_type.push_back(std::make_pair(D3DDEVTYPE_HAL, std::wstring(L"HAL")));
 			dev_type.push_back(std::make_pair(D3DDEVTYPE_REF, std::wstring(L"REF")));
 
-			IDirect3DDevice9* d3dDevice(NULL);
+			IDirect3DDevice9* d3d_device(NULL);
 			for (DevTypeType::iterator dev_iter = dev_type.begin();
-				(dev_iter != dev_type.end()) && (NULL == d3dDevice); ++ dev_iter)
+				(dev_iter != dev_type.end()) && (NULL == d3d_device); ++ dev_iter)
 			{
 				for (BehaviorType::iterator beh_iter = behavior.begin(); beh_iter != behavior.end(); ++ beh_iter)
 				{
-					if (SUCCEEDED(d3d_->CreateDevice(adapter_.AdapterNo(), dev_iter->first, hWnd_,
-						beh_iter->first, &d3dpp_, &d3dDevice)))
+					if (SUCCEEDED(d3d_->CreateDevice(adapter_.AdapterNo(), dev_iter->first,
+						hWnd_, beh_iter->first, &d3dpp_, &d3d_device)))
 					{
 						// Check for ATI instancing support
 						if (D3D_OK == d3d_->CheckDeviceFormat(D3DADAPTER_DEFAULT,
@@ -378,15 +378,15 @@ namespace KlayGE
 							static_cast<D3DFORMAT>(MakeFourCC<'I', 'N', 'S', 'T'>::value)))
 						{
 							// Notify the driver that instancing support is expected
-							d3dDevice->SetRenderState(D3DRS_POINTSIZE, MakeFourCC<'I', 'N', 'S', 'T'>::value);
+							d3d_device->SetRenderState(D3DRS_POINTSIZE, MakeFourCC<'I', 'N', 'S', 'T'>::value);
 						}
 
 						D3DCAPS9 d3d_caps;
-						d3dDevice->GetDeviceCaps(&d3d_caps);
+						d3d_device->GetDeviceCaps(&d3d_caps);
 						if (settings.ConfirmDevice && !settings.ConfirmDevice(D3D9Mapping::Mapping(d3d_caps)))
 						{
-							d3dDevice->Release();
-							d3dDevice = NULL;
+							d3d_device->Release();
+							d3d_device = NULL;
 						}
 						else
 						{
@@ -397,8 +397,8 @@ namespace KlayGE
 				}
 			}
 
-			Verify(d3dDevice != NULL);
-			d3dDevice_ = MakeCOMPtr(d3dDevice);
+			Verify(d3d_device != NULL);
+			d3dDevice_ = MakeCOMPtr(d3d_device);
 
 			IDirect3DSwapChain9* sc = NULL;
 			d3dDevice_->GetSwapChain(0, &sc);
