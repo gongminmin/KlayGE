@@ -10,9 +10,9 @@
 		<Option compiler="0"/>
 		<Build>
 			<Target title="Debug">
-				<Option output="..\..\lib\libKlayGE_RenderEngine_OpenGL_d.a"/>
+				<Option output="..\..\lib\Win32\libKlayGE_RenderEngine_OpenGL_d.a"/>
 				<Option working_dir=""/>
-				<Option object_output="..\..\Debug"/>
+				<Option object_output="..\..\Debug\Win32"/>
 				<Option deps_output=".deps"/>
 				<Option type="2"/>
 				<Option compiler="0"/>
@@ -29,9 +29,9 @@
 				</Compiler>
 			</Target>
 			<Target title="Release">
-				<Option output="..\..\lib\libKlayGE_RenderEngine_OpenGL.a"/>
+				<Option output="..\..\lib\Win32\libKlayGE_RenderEngine_OpenGL.a"/>
 				<Option working_dir=""/>
-				<Option object_output="..\..\Release"/>
+				<Option object_output="..\..\Release\Win32"/>
 				<Option deps_output=".deps"/>
 				<Option type="2"/>
 				<Option compiler="0"/>
@@ -75,13 +75,6 @@
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
-		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderEffect.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
 		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderEngine.hpp">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
@@ -117,6 +110,13 @@
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
+		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLShaderObject.hpp">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
 		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLTexture.hpp">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
@@ -144,11 +144,6 @@
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
-		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLRenderEffect.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
 		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLRenderEngine.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Debug"/>
@@ -165,6 +160,11 @@
 			<Option target="Release"/>
 		</Unit>
 		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLRenderWindow.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLShaderObject.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Debug"/>
 			<Option target="Release"/>

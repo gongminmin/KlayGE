@@ -10,9 +10,9 @@
 		<Option compiler="0"/>
 		<Build>
 			<Target title="Debug">
-				<Option output="..\..\lib\libKlayGE_FileSystem_PackedFile_d.a"/>
+				<Option output="..\..\lib\Win32\libKlayGE_FileSystem_PackedFile_d.a"/>
 				<Option working_dir=""/>
-				<Option object_output="..\..\Debug"/>
+				<Option object_output="..\..\Debug\Win32"/>
 				<Option deps_output=".deps"/>
 				<Option type="2"/>
 				<Option compiler="0"/>
@@ -29,9 +29,9 @@
 				</Compiler>
 			</Target>
 			<Target title="Release">
-				<Option output="..\..\lib\libKlayGE_FileSystem_PackedFile.a"/>
+				<Option output="..\..\lib\Win32\libKlayGE_FileSystem_PackedFile.a"/>
 				<Option working_dir=""/>
-				<Option object_output="..\..\Release"/>
+				<Option object_output="..\..\Release\Win32"/>
 				<Option deps_output=".deps"/>
 				<Option type="2"/>
 				<Option compiler="0"/>
