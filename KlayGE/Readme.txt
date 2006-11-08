@@ -366,7 +366,7 @@ __________________________________________________________________
 
 编译器支持
 
-- 推荐使用Visual Studio.NET 2003编译
-- KlayGE是用Visual Studio.NET 2003开发和编译的，还提供了Visual Studio.NET 2003的sln文件。
+- 推荐使用Visual Studio.NET 2005编译
+- KlayGE是用Visual Studio.NET 2005开发和编译的，还提供了Visual Studio.NET 2005的sln文件。
 - KlayGE不保证能在Visual Studio.NET以前的版本中编译通过。
 
