@@ -184,8 +184,8 @@ int main()
 
 Fractal::Fractal()
 {
-	ResLoader::Instance().AddPath("../media/Common");
-	ResLoader::Instance().AddPath("../media/Fractal");
+	ResLoader::Instance().AddPath("../../media/Common");
+	ResLoader::Instance().AddPath("../../media/Fractal");
 }
 
 void Fractal::InitObjects()

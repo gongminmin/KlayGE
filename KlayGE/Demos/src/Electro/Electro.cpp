@@ -163,8 +163,8 @@ int main()
 
 Electro::Electro()
 {
-	ResLoader::Instance().AddPath("../media/Common");
-	ResLoader::Instance().AddPath("../media/Electro");
+	ResLoader::Instance().AddPath("../../media/Common");
+	ResLoader::Instance().AddPath("../../media/Electro");
 }
 
 void Electro::InitObjects()

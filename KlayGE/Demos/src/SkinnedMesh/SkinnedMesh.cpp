@@ -80,8 +80,8 @@ int main()
 
 SkinnedMeshApp::SkinnedMeshApp()
 {
-	ResLoader::Instance().AddPath("../media/Common");
-	ResLoader::Instance().AddPath("../media/SkinnedMesh");
+	ResLoader::Instance().AddPath("../../media/Common");
+	ResLoader::Instance().AddPath("../../media/SkinnedMesh");
 }
 
 void SkinnedMeshApp::InitObjects()

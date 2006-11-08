@@ -320,8 +320,8 @@ int main()
 
 ShadowCubeMap::ShadowCubeMap()
 {
-	ResLoader::Instance().AddPath("../media/Common");
-	ResLoader::Instance().AddPath("../media/ShadowCubeMap");
+	ResLoader::Instance().AddPath("../../media/Common");
+	ResLoader::Instance().AddPath("../../media/ShadowCubeMap");
 }
 
 void ShadowCubeMap::InitObjects()

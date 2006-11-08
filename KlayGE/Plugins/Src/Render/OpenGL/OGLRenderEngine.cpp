@@ -669,12 +669,12 @@ namespace KlayGE
 				uint32_t const size = rl.VertexSize(i);
 				vertex_elements_type const & vertex_stream_fmt = rl.VertexStreamFormat(i);
 
-				uint32_t elem_offset = 0;
+				uint8_t* elem_offset = NULL;
 				for (vertex_elements_type::const_iterator vs_iter = vertex_stream_fmt.begin();
 					vs_iter != vertex_stream_fmt.end(); ++ vs_iter)
 				{
 					vertex_element const & vs_elem = *vs_iter;
-					GLvoid* offset = reinterpret_cast<GLvoid*>(elem_offset);
+					GLvoid* offset = static_cast<GLvoid*>(elem_offset);
 					GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
 					GLenum const type = IsFloatFormat(vs_elem.format) ? GL_FLOAT : GL_UNSIGNED_BYTE;
 
@@ -793,14 +793,14 @@ namespace KlayGE
 			OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(rl.GetVertexStream(i)));
 			uint32_t const size = rl.VertexSize(i);
 
-			uint32_t elem_offset = 0;
+			uint8_t* elem_offset = NULL;
 			for (uint32_t j = 0; j < rl.VertexStreamFormat(i).size(); ++ j)
 			{
 				vertex_element const & vs_elem = rl.VertexStreamFormat(i)[j];
 				int32_t const index = ogl_shader_object->AttribIndex(vs_elem.usage, vs_elem.usage_index);
 				if (index >= 0)
 				{
-					GLvoid* offset = reinterpret_cast<GLvoid*>(elem_offset);
+					GLvoid* offset = static_cast<GLvoid*>(elem_offset);
 					GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
 					GLenum const type = IsFloatFormat(vs_elem.format) ? GL_FLOAT : GL_UNSIGNED_BYTE;
 

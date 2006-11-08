@@ -206,8 +206,8 @@ int main()
 
 Instancing::Instancing()
 {
-	ResLoader::Instance().AddPath("../media/Common");
-	ResLoader::Instance().AddPath("../media/Instancing");
+	ResLoader::Instance().AddPath("../../media/Common");
+	ResLoader::Instance().AddPath("../../media/Instancing");
 }
 
 void Instancing::InitObjects()

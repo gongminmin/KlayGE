@@ -171,8 +171,8 @@ int main()
 
 Cartoon::Cartoon()
 {
-	ResLoader::Instance().AddPath("../media/Common");
-	ResLoader::Instance().AddPath("../media/Cartoon");
+	ResLoader::Instance().AddPath("../../media/Common");
+	ResLoader::Instance().AddPath("../../media/Cartoon");
 }
 
 void Cartoon::InitObjects()

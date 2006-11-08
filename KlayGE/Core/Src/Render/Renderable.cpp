@@ -118,7 +118,7 @@ namespace KlayGE
 
 			uint32_t const size = rl->InstanceSize();
 
-			inst_stream->Resize(size * instances_.size());
+			inst_stream->Resize(static_cast<uint32_t>(size * instances_.size()));
 			{
 				GraphicsBuffer::Mapper mapper(*inst_stream, BA_Write_Only);
 				for (size_t i = 0; i < instances_.size(); ++ i)

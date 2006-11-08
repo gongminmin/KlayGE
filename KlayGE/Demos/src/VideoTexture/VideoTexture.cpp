@@ -131,8 +131,8 @@ int main()
 
 VideoTextureApp::VideoTextureApp()
 {
-	ResLoader::Instance().AddPath("../media/Common");
-	ResLoader::Instance().AddPath("../media/VideoTexture");
+	ResLoader::Instance().AddPath("../../media/Common");
+	ResLoader::Instance().AddPath("../../media/VideoTexture");
 }
 
 void VideoTextureApp::InitObjects()

@@ -210,8 +210,8 @@ int main()
 
 DistanceMapping::DistanceMapping()
 {
-	ResLoader::Instance().AddPath("../media/Common");
-	ResLoader::Instance().AddPath("../media/DistanceMapping");
+	ResLoader::Instance().AddPath("../../media/Common");
+	ResLoader::Instance().AddPath("../../media/DistanceMapping");
 }
 
 void DistanceMapping::InitObjects()

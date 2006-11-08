@@ -146,8 +146,8 @@ int main()
 
 Parallax::Parallax()
 {
-	ResLoader::Instance().AddPath("../media/Common");
-	ResLoader::Instance().AddPath("../media/Parallax");
+	ResLoader::Instance().AddPath("../../media/Common");
+	ResLoader::Instance().AddPath("../../media/Parallax");
 }
 
 void Parallax::InitObjects()

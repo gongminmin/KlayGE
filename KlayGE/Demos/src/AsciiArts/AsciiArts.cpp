@@ -234,8 +234,8 @@ int main()
 AsciiArtsApp::AsciiArtsApp()
 			: show_ascii_(true)
 {
-	ResLoader::Instance().AddPath("../media/Common");
-	ResLoader::Instance().AddPath("../media/AsciiArts");
+	ResLoader::Instance().AddPath("../../media/Common");
+	ResLoader::Instance().AddPath("../../media/AsciiArts");
 }
 
 void AsciiArtsApp::BuildAsciiLumsTex()

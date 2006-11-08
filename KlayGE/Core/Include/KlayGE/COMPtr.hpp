@@ -18,7 +18,9 @@
 
 #include <boost/smart_ptr.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
+#ifdef KLAYGE_PLATFORM_WIN32
 #define BOOST_MEM_FN_ENABLE_STDCALL
+#endif
 #endif
 #include <boost/mem_fn.hpp>
 

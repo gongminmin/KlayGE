@@ -332,8 +332,8 @@ int main()
 
 ParticleSystemApp::ParticleSystemApp()
 {
-	ResLoader::Instance().AddPath("../media/Common");
-	ResLoader::Instance().AddPath("../media/ParticleSystem");
+	ResLoader::Instance().AddPath("../../media/Common");
+	ResLoader::Instance().AddPath("../../media/ParticleSystem");
 }
 
 void ParticleSystemApp::InitObjects()

@@ -131,8 +131,8 @@ int main()
 
 VertexDisplacement::VertexDisplacement()
 {
-	ResLoader::Instance().AddPath("../media/Common");
-	ResLoader::Instance().AddPath("../media/VertexDisplacement");
+	ResLoader::Instance().AddPath("../../media/Common");
+	ResLoader::Instance().AddPath("../../media/VertexDisplacement");
 }
 
 void VertexDisplacement::InitObjects()
