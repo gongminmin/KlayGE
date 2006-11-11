@@ -53,22 +53,21 @@ namespace KlayGE
 
 		enum TexFilterOp
 		{
-			TFO_None = 1UL << 0,
-			TFO_Point = 1UL << 1,
-			TFO_Bilinear = 1UL << 2,
-			TFO_Trilinear = 1UL << 3,
-			TFO_Anisotropic = 1UL << 4
+			TFO_Point,
+			TFO_Bilinear,
+			TFO_Trilinear,
+			TFO_Anisotropic
 		};
 
 		TexturePtr texture;
 
 		Color border_clr;
 
-		TexAddressingMode addr_mode_u : 3;
-		TexAddressingMode addr_mode_v : 3;
-		TexAddressingMode addr_mode_w : 3;
+		TexAddressingMode addr_mode_u : 4;
+		TexAddressingMode addr_mode_v : 4;
+		TexAddressingMode addr_mode_w : 4;
 
-		TexFilterOp filter : 7;
+		TexFilterOp filter : 4;
 
 		uint8_t anisotropy;
 		uint8_t max_mip_level;

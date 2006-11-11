@@ -242,6 +242,11 @@ namespace KlayGE
 			glClampColorARB(GL_CLAMP_READ_COLOR_ARB, GL_TRUE);
 		}
 
+		if (glloader_WGL_EXT_swap_control())
+		{
+			wglSwapIntervalEXT(0);
+		}
+
 		viewport_.left = 0;
 		viewport_.top = 0;
 		viewport_.width = width_;

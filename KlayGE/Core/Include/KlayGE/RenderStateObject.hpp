@@ -119,44 +119,44 @@ namespace KlayGE
 		};
 
 		
-		PolygonMode			polygon_mode : 2;
-		ShadeMode			shade_mode : 2;
-		CullMode			cull_mode : 2;
+		PolygonMode			polygon_mode;
+		ShadeMode			shade_mode;
+		CullMode			cull_mode;
 
-		bool				alpha_to_coverage_enable : 1;
-		bool				blend_enable : 1;
-		BlendOperation		blend_op : 3;
-		AlphaBlendFactor	src_blend : 4;
-		AlphaBlendFactor	dest_blend : 4;
-		BlendOperation		blend_op_alpha : 3;
-		AlphaBlendFactor	src_blend_alpha : 4;
-		AlphaBlendFactor	dest_blend_alpha : 4;
+		bool				alpha_to_coverage_enable;
+		bool				blend_enable;
+		BlendOperation		blend_op;
+		AlphaBlendFactor	src_blend;
+		AlphaBlendFactor	dest_blend;
+		BlendOperation		blend_op_alpha;
+		AlphaBlendFactor	src_blend_alpha;
+		AlphaBlendFactor	dest_blend_alpha;
 
-		bool				depth_enable : 1;
-		bool				depth_mask : 1;
-		CompareFunction		depth_func : 3;
+		bool				depth_enable;
+		bool				depth_mask;
+		CompareFunction		depth_func;
 		float				polygon_offset_factor;
 		float				polygon_offset_units;
 
-		bool				front_stencil_enable : 1;
-		CompareFunction		front_stencil_func : 3;
+		bool				front_stencil_enable;
+		CompareFunction		front_stencil_func;
 		uint16_t			front_stencil_ref;
 		uint16_t			front_stencil_mask;
-		StencilOperation	front_stencil_fail : 3;
-		StencilOperation	front_stencil_depth_fail : 3;
-		StencilOperation	front_stencil_pass : 3;
+		StencilOperation	front_stencil_fail;
+		StencilOperation	front_stencil_depth_fail;
+		StencilOperation	front_stencil_pass;
 		uint16_t			front_stencil_write_mask;
 
-		bool				back_stencil_enable : 1;
-		CompareFunction		back_stencil_func : 3;
+		bool				back_stencil_enable;
+		CompareFunction		back_stencil_func;
 		uint16_t			back_stencil_ref;
 		uint16_t			back_stencil_mask;
-		StencilOperation	back_stencil_fail : 3;
-		StencilOperation	back_stencil_depth_fail : 3;
-		StencilOperation	back_stencil_pass : 3;
+		StencilOperation	back_stencil_fail;
+		StencilOperation	back_stencil_depth_fail;
+		StencilOperation	back_stencil_pass;
 		uint16_t			back_stencil_write_mask;
 
-		bool				scissor_enable : 1;
+		bool				scissor_enable;
 
 		uint8_t				color_mask_0 : 4;
 		uint8_t				color_mask_1 : 4;

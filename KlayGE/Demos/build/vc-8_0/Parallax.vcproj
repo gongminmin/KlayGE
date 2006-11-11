@@ -375,17 +375,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx&#x0D;&#x0A;"
-						Outputs="$(InputDir)\$(InputName).kfx"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Compiling $(InputPath)"
-						CommandLine="$(TargetDir)..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx&#x0D;&#x0A;"
+						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
 						Outputs="$(InputDir)\$(InputName).kfx"
 					/>
 				</FileConfiguration>
@@ -395,17 +385,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx&#x0D;&#x0A;"
-						Outputs="$(InputDir)\$(InputName).kfx"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Compiling $(InputPath)"
-						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx&#x0D;&#x0A;"
+						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
 						Outputs="$(InputDir)\$(InputName).kfx"
 					/>
 				</FileConfiguration>

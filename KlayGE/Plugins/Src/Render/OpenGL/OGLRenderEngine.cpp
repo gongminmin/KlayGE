@@ -430,7 +430,6 @@ namespace KlayGE
 						GLint tmp;
 						switch (sampler->filter)
 						{
-						case Sampler::TFO_None:
 						case Sampler::TFO_Point:
 							glGetTexParameteriv(tex_type, GL_TEXTURE_MAG_FILTER, &tmp);
 							if (tmp != GL_NEAREST)
@@ -555,11 +554,11 @@ namespace KlayGE
 					void const * addr = &buffer[instance * instance_size + elem_offset];
 					GLfloat const * float_addr = static_cast<GLfloat const *>(addr);
 					GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
-					BOOST_ASSERT(IsFloatFormat(vs_elem.format));
 
 					switch (vs_elem.usage)
 					{
 					case VEU_Position:
+						BOOST_ASSERT(IsFloatFormat(vs_elem.format));
 						switch (num_components)
 						{
 						case 2:
@@ -581,6 +580,7 @@ namespace KlayGE
 						break;
 
 					case VEU_Normal:
+						BOOST_ASSERT(IsFloatFormat(vs_elem.format));
 						switch (num_components)
 						{
 						case 3:
@@ -594,36 +594,73 @@ namespace KlayGE
 						break;
 
 					case VEU_Diffuse:
-						switch (num_components)
+						if (IsFloatFormat(vs_elem.format))
 						{
-						case 3:
-							glColor3fv(float_addr);
-							break;
+							switch (num_components)
+							{
+							case 3:
+								glColor3fv(float_addr);
+								break;
 
-						case 4:
-							glColor4fv(float_addr);
-							break;
+							case 4:
+								glColor4fv(float_addr);
+								break;
 
-						default:
-							BOOST_ASSERT(false);
-							break;
+							default:
+								BOOST_ASSERT(false);
+								break;
+							}
+						}
+						else
+						{
+							switch (num_components)
+							{
+							case 3:
+								glColor3ubv(static_cast<GLubyte const *>(addr));
+								break;
+
+							case 4:
+								glColor4ubv(static_cast<GLubyte const *>(addr));
+								break;
+
+							default:
+								BOOST_ASSERT(false);
+								break;
+							}
 						}
 						break;
 
 					case VEU_Specular:
-						switch (num_components)
+						if (IsFloatFormat(vs_elem.format))
 						{
-						case 3:
-							glSecondaryColor3fv(float_addr);
-							break;
+							switch (num_components)
+							{
+							case 3:
+								glSecondaryColor3fv(float_addr);
+								break;
 
-						default:
-							BOOST_ASSERT(false);
-							break;
+							default:
+								BOOST_ASSERT(false);
+								break;
+							}
+						}
+						else
+						{
+							switch (num_components)
+							{
+							case 3:
+								glSecondaryColor3ubv(static_cast<GLubyte const *>(addr));
+								break;
+
+							default:
+								BOOST_ASSERT(false);
+								break;
+							}
 						}
 						break;
 
 					case VEU_TextureCoord:
+						BOOST_ASSERT(IsFloatFormat(vs_elem.format));
 						{
 							GLenum target = GL_TEXTURE0 + vs_elem.usage_index;
 							glActiveTexture(target);

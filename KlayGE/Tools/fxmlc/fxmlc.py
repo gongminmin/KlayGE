@@ -72,11 +72,10 @@ color_mask_enum = {
 }
 
 texture_filter_enum = {
-	"none" : 0,
-	"point" : 1,
-	"bilinear" : 2,
-	"trilinear" : 3,
-	"anisotropic" : 4,
+	"point" : 0,
+	"bilinear" : 1,
+	"trilinear" : 2,
+	"anisotropic" : 3,
 }
 
 texture_addressing_mode_enum = {
@@ -451,7 +450,7 @@ class parameter:
 			self.annotations.append(annotation(ann))
 
 		if self.type in ['sampler1D', 'sampler2D', 'sampler3D', 'samplerCUBE']:
-			self.filtering = texture_filter_enum['none']
+			self.filtering = texture_filter_enum['point']
 			self.address_u = texture_addressing_mode_enum['wrap']
 			self.address_v = texture_addressing_mode_enum['wrap']
 			self.address_w = texture_addressing_mode_enum['wrap']
