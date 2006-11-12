@@ -89,9 +89,8 @@ private:
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 
 	KlayGE::FontPtr font_;
-	boost::shared_ptr<KlayGE::Renderable> renderInstance_;
 
-	std::vector<KlayGE::SceneObjectPtr> scene_objs_;
+	KlayGE::SceneObjectPtr particles_;
 	KlayGE::SceneObjectPtr terrain_;
 
 	KlayGE::FirstPersonCameraController fpcController_;

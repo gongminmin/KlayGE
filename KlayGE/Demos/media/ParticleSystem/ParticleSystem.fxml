@@ -33,8 +33,8 @@
 
 	<shader>
 		<![CDATA[
-void ParticleVS(float4 pos			: POSITION,
-					float2 tex			: TEXCOORD0,
+void ParticleVS(float4 pos			: TEXCOORD0,
+					float2 tex			: POSITION,
 					out float4 oPos		: POSITION,
 					out float4 oClr     : COLOR0,
 					out float2 oTex		: TEXCOORD0,

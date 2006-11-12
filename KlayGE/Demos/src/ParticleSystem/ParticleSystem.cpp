@@ -15,6 +15,7 @@
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/Texture.hpp>
+#include <KlayGE/RenderLayout.hpp>
 
 #include <KlayGE/Heightmap/Heightmap.hpp>
 
@@ -164,47 +165,19 @@ namespace
 
 	int const NUM_PARTICLE = 8192;
 
-	class ParticleObject : public SceneObjectHelper
+	class RenderParticles : public RenderableHelper
 	{
 	public:
-		ParticleObject()
-			: SceneObjectHelper(SOA_Cullable | SOA_ShortAge)
-		{
-			instance_format_.push_back(vertex_element(VEU_Position, 0, EF_ABGR32F));
-		}
-
-		void Instance(Particle const & particle)
-		{
-			par_info_.x() = particle.pos.x();
-			par_info_.y() = particle.pos.y();
-			par_info_.z() = particle.pos.z();
-			par_info_.w() = particle.life;
-		}
-
-		void const * InstanceData() const
-		{
-			return &par_info_;
-		}
-
-		void SetRenderable(RenderablePtr ra)
-		{
-			renderable_ = ra;
-		}
-
-	private:
-		float4 par_info_;
-	};
-
-	class RenderParticle : public RenderableHelper
-	{
-	public:
-		RenderParticle()
-			: RenderableHelper(L"Particle")
+		RenderParticles()
+			: RenderableHelper(L"Particles")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleFan);
-			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Static), boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
+			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Static), boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Dynamic),
+				boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_ABGR32F)),
+				RenderLayout::ST_Instance);
 			rl_->BindIndexStream(rf.MakeIndexBuffer(BU_Static), EF_R16);
 
 			float2 texs[] =
@@ -281,6 +254,16 @@ namespace
 		TexturePtr scene_tex_; 
 	};
 
+	class ParticlesObject : public SceneObjectHelper
+	{
+	public:
+		ParticlesObject()
+			: SceneObjectHelper(SOA_Cullable)
+		{
+			renderable_.reset(new RenderParticles);
+		}
+	};
+
 	class CopyPostProcess : public PostProcess
 	{
 	public:
@@ -320,7 +303,7 @@ int main()
 	settings.width = 800;
 	settings.height = 600;
 	settings.color_fmt = EF_ARGB8;
-	settings.full_screen = false;
+	settings.full_screen = true;
 	settings.ConfirmDevice = ConfirmDevice;
 
 	ParticleSystemApp app;
@@ -356,14 +339,7 @@ void ParticleSystemApp::InitObjects()
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	height_img_.reset(new HeightImg(-2, -2, 2, 2, LoadTexture("grcanyon.dds"), 1));
-
-	renderInstance_.reset(new RenderParticle);
-	for (int i = 0; i < NUM_PARTICLE; ++ i)
-	{
-		SceneObjectPtr so(new ParticleObject);
-		checked_pointer_cast<ParticleObject>(so)->SetRenderable(renderInstance_);
-		scene_objs_.push_back(so);
-	}
+	particles_.reset(new ParticlesObject);
 
 	std::vector<float3> vertices;
 	std::vector<uint16_t> indices;
@@ -401,7 +377,7 @@ void ParticleSystemApp::OnResize(uint32_t width, uint32_t height)
 	scene_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*scene_tex_, 0));
 	scene_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));
 
-	checked_pointer_cast<RenderParticle>(renderInstance_)->SceneTexture(scene_tex_);
+	checked_pointer_cast<RenderParticles>(particles_->GetRenderable())->SceneTexture(scene_tex_);
 
 	copy_pp_->Source(scene_tex_, scene_buffer_->RequiresFlipping());
 }
@@ -459,6 +435,12 @@ void ParticleSystemApp::DoUpdate(uint32_t pass)
 
 		copy_pp_->Apply();
 
+		float4x4 mat = MathLib::rotation_x(PI / 6) * MathLib::rotation_y(clock() / 300.0f) * MathLib::translation(0.0f, 0.8f, 0.0f);
+		ps_->ModelMatrix(mat);
+
+		ps_->Update(static_cast<float>(timer_.elapsed()));
+		timer_.restart();
+
 		std::vector<Particle> active_particles;
 		for (uint32_t i = 0; i < ps_->NumParticles(); ++ i)
 		{
@@ -467,18 +449,32 @@ void ParticleSystemApp::DoUpdate(uint32_t pass)
 				active_particles.push_back(ps_->GetParticle(i));
 			}
 		}
-		std::sort(active_particles.begin(), active_particles.end(), particle_cmp);
-		for (uint32_t i = 0; i < active_particles.size(); ++ i)
+		if (!active_particles.empty())
 		{
-			checked_pointer_cast<ParticleObject>(scene_objs_[i])->Instance(active_particles[i]);
-			scene_objs_[i]->AddToSceneManager();
+			std::sort(active_particles.begin(), active_particles.end(), particle_cmp);
+
+			uint32_t const num_pars = static_cast<uint32_t>(active_particles.size());
+			RenderLayoutPtr rl = particles_->GetRenderable()->GetRenderLayout();
+			rl->InstanceStream()->Resize(sizeof(float4) * num_pars);
+			{
+				GraphicsBuffer::Mapper mapper(*rl->InstanceStream(), BA_Write_Only);
+				float4* instance_data = mapper.Pointer<float4>();
+				for (uint32_t i = 0; i < num_pars; ++ i, ++ instance_data)
+				{
+					instance_data->x() = active_particles[i].pos.x();
+					instance_data->y() = active_particles[i].pos.y();
+					instance_data->z() = active_particles[i].pos.z();
+					instance_data->w() = active_particles[i].life;
+				}
+			}
+
+			for (uint32_t i = 0; i < rl->NumVertexStreams(); ++ i)
+			{
+				rl->VertexStreamFrequencyDivider(i, RenderLayout::ST_Geometry, num_pars);
+			}
+
+			particles_->AddToSceneManager();
 		}
-
-		float4x4 mat = MathLib::rotation_x(PI / 6) * MathLib::rotation_y(clock() / 300.0f) * MathLib::translation(0.0f, 0.8f, 0.0f);
-		ps_->ModelMatrix(mat);
-
-		ps_->Update(static_cast<float>(timer_.elapsed()));
-		timer_.restart();
 
 		std::wostringstream stream;
 		stream << this->FPS();
