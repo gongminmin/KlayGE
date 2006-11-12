@@ -346,7 +346,7 @@ namespace KlayGE
 	{
 	}
 
-    void OGLRenderWindow::DoResize(uint32_t /*width*/, uint32_t /*height*/)
+	void OGLRenderWindow::DoResize(uint32_t /*width*/, uint32_t /*height*/)
 	{
 	}
 
