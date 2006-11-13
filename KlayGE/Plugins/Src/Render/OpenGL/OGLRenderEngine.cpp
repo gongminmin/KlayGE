@@ -366,11 +366,11 @@ namespace KlayGE
 		{
 			std::vector<SamplerPtr> const & samplers = ogl_shader_obj.Samplers(static_cast<ShaderObject::ShaderType>(i));
 
-			for (uint32_t stage = 0; stage < samplers.size(); ++ stage)
+			for (uint32_t stage = 0, num_stage = samplers.size(); stage < num_stage; ++ stage)
 			{
 				glActiveTexture(GL_TEXTURE0 + stage);
 
-				SamplerPtr sampler = samplers[stage];
+				SamplerPtr const & sampler = samplers[stage];
 				if (!sampler || !sampler->texture)
 				{
 					glBindTexture(GL_TEXTURE_2D, 0);
