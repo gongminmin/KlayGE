@@ -228,9 +228,6 @@ namespace
 
 			*(technique_->Effect().ParameterByName("View")) = view;
 			*(technique_->Effect().ParameterByName("Proj")) = proj;
-			*(technique_->Effect().ParameterByName("WVP")) = view * proj;
-			*(technique_->Effect().ParameterByName("InvWVP")) = MathLib::inverse(view * proj);
-			*(technique_->Effect().ParameterByName("InvProj")) = MathLib::inverse(proj);
 
 			*(technique_->Effect().ParameterByName("point_radius")) = 0.04f;
 
@@ -303,7 +300,7 @@ int main()
 	settings.width = 800;
 	settings.height = 600;
 	settings.color_fmt = EF_ARGB8;
-	settings.full_screen = true;
+	settings.full_screen = false;
 	settings.ConfirmDevice = ConfirmDevice;
 
 	ParticleSystemApp app;
@@ -399,13 +396,14 @@ uint32_t ParticleSystemApp::NumPasses() const
 
 bool particle_cmp(Particle const & lhs, Particle const & rhs)
 {
-	App3DFramework const & app = Context::Instance().AppInstance();
-	float4x4 view = app.ActiveCamera().ViewMatrix();
+	float4x4 const & view = Context::Instance().AppInstance().ActiveCamera().ViewMatrix();
 
-	float3 l_v = MathLib::transform_coord(lhs.pos, view);
-	float3 r_v = MathLib::transform_coord(rhs.pos, view);
+	float l_v = (lhs.pos.x() * view(0, 2) + lhs.pos.y() * view(1, 2) + lhs.pos.z() * view(2, 2) + view(3, 2))
+		/ (lhs.pos.x() * view(0, 3) + lhs.pos.y() * view(1, 3) + lhs.pos.z() * view(2, 3) + view(3, 3));
+	float r_v = (rhs.pos.x() * view(0, 2) + rhs.pos.y() * view(1, 2) + rhs.pos.z() * view(2, 2) + view(3, 2))
+		/ (rhs.pos.x() * view(0, 3) + rhs.pos.y() * view(1, 3) + rhs.pos.z() * view(2, 3) + view(3, 3));
 
-	return l_v.z() > r_v.z();
+	return l_v > r_v;
 }
 
 void ParticleSystemApp::DoUpdate(uint32_t pass)

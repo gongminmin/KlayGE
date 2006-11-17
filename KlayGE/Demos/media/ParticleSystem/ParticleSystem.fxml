@@ -3,11 +3,8 @@
 <effect>
 	<include name="../../../RenderFX/PostProcess.fxml"/>
 
-	<parameter type="float4x4" name="InvWVP"/>
-	<parameter type="float4x4" name="WVP"/>
 	<parameter type="float4x4" name="View"/>
 	<parameter type="float4x4" name="Proj"/>
-	<parameter type="float4x4" name="InvProj"/>
 
 	<parameter type="float" name="point_radius"/>
 
@@ -57,10 +54,12 @@ float4 ParticlePS(float4 clr    : COLOR0,
 {
 	CenterView /= CenterView.w;
 	PosSS /= PosSS.w;
-	float4 view_pos = mul(PosSS, InvProj);
-	view_pos /= view_pos.w;
+	float3 view_dir = lerp(lerp(lower_left, lower_right, PosSS.x / 2 + 0.5f),
+						lerp(upper_left, upper_right, PosSS.x / 2 + 0.5f),
+						PosSS.y / 2 + 0.5f);
+	float dir = view_dir.z;
+	view_dir = normalize(view_dir);
 	
-	float3 view_dir = normalize(view_pos.xyz);
 	float v = dot(CenterView.xyz, view_dir);
 	float disc = point_radius * point_radius - (dot(CenterView.xyz, CenterView.xyz) - v * v);
 	if (disc < 0)
@@ -75,10 +74,7 @@ float4 ParticlePS(float4 clr    : COLOR0,
 		tex_coord = tex_coord / 2 + 0.5f;
 
 		float depth = tex2D(scene_sampler, tex_coord).a;
-		float dir = lerp(lerp(upper_left.z, upper_right.z, tex_coord.x),
-							lerp(lower_left.z, lower_right.z, tex_coord.x),
-							tex_coord.y);
-							
+
 		float3 intersect = (v - sqrt(disc)) * view_dir;
 		clr *= tex2D(particle_sampler, (intersect.xy - CenterView.xy) / point_radius / 2 + 0.5);
 		clr.a *= saturate((dir * depth - intersect.z) * 5);
