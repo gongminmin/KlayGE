@@ -1,0 +1,20 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_packed_float">
+	<Tokens>
+		<Token name="GL_R11F_G11F_B10F_EXT" value="0x8C3A"/>
+		<Token name="GL_UNSIGNED_INT_10F_11F_11F_REV_EXT" value="0x8C3B"/>
+		<Token name="GL_RGBA_SIGNED_COMPONENTS_EXT" value="0x8C3C"/>
+		<Token name="WGL_TYPE_RGBA_UNSIGNED_FLOAT_EXT" value="0x20A8"/>
+		<Token name="GLX_RGBA_UNSIGNED_FLOAT_TYPE_EXT" value="0x20B1"/>
+		<Token name="GLX_RGBA_UNSIGNED_FLOAT_BIT_EXT" value="0x00000008"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_packed_float"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>

@@ -1,0 +1,17 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_texture_shared_exponent">
+	<Tokens>
+		<Token name="GL_RGB9_E5_EXT" value="0x8C3D"/>
+		<Token name="GL_UNSIGNED_INT_5_9_9_9_REV_EXT" value="0x8C3E"/>
+		<Token name="GL_TEXTURE_SHARED_SIZE_EXT" value="0x8C3F"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_texture_shared_exponent"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>

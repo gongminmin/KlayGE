@@ -1,0 +1,50 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_draw_buffers2">
+	<Functions>
+		<Function name="glColorMaskIndexedEXT" return="void">
+			<Param type="GLuint" name="buf"/>
+			<Param type="GLboolean" name="r"/>
+			<Param type="GLboolean" name="g"/>
+			<Param type="GLboolean" name="b"/>
+			<Param type="GLboolean" name="a"/>
+		</Function>
+		<Function name="glGetBooleanIndexedvEXT" return="void">
+			<Param type="GLenum" name="value"/>
+			<Param type="GLuint" name="index"/>
+			<Param type="GLboolean*" name="data"/>
+		</Function>
+		<Function name="glGetIntegerIndexedvEXT" return="void">
+			<Param type="GLenum" name="value"/>
+			<Param type="GLuint" name="index"/>
+			<Param type="GLint*" name="data"/>
+		</Function>
+		<Function name="glEnableIndexedEXT" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLuint" name="index"/>
+		</Function>
+		<Function name="glDisableIndexedEXT" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLuint" name="index"/>
+		</Function>
+		<Function name="glIsEnabledIndexedEXT" return="GLboolean">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLuint" name="index"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_draw_buffers2">
+			<Name name="glColorMaskIndexedEXT"/>
+			<Name name="glGetBooleanIndexedvEXT"/>
+			<Name name="glGetIntegerIndexedvEXT"/>
+			<Name name="glEnableIndexedEXT"/>
+			<Name name="glDisableIndexedEXT"/>
+			<Name name="glIsEnabledIndexedEXT"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>
