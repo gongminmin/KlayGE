@@ -101,12 +101,6 @@ namespace KlayGE
 			}
 			break;
 
-		case WM_GETMINMAXINFO:
-			// Prevent the window from going smaller than some minimu size
-			reinterpret_cast<MINMAXINFO*>(lParam)->ptMinTrackSize.x = 100;
-			reinterpret_cast<MINMAXINFO*>(lParam)->ptMinTrackSize.y = 100;
-			break;
-
 		case WM_CLOSE:
 			::DestroyWindow(hWnd_);
 			closed_ = true;
@@ -247,6 +241,9 @@ namespace KlayGE
 			wglSwapIntervalEXT(0);
 		}
 
+		glPixelStorei(GL_PACK_ALIGNMENT, 1);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
 		viewport_.left = 0;
 		viewport_.top = 0;
 		viewport_.width = width_;
@@ -295,7 +292,7 @@ namespace KlayGE
 	void OGLRenderWindow::WindowMovedOrResized()
 	{
 		::RECT rect;
-		::GetWindowRect(hWnd_, &rect);
+		::GetClientRect(hWnd_, &rect);
 
 		uint32_t new_left = rect.left;
 		uint32_t new_top = rect.top;

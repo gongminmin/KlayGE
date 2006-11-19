@@ -886,7 +886,14 @@ namespace KlayGE
 		{
 			if (caps_.max_vertex_texture_units != 0)
 			{
-				caps_.max_shader_model = 3;
+				if (glloader_GL_EXT_gpu_shader4())
+				{
+					caps_.max_shader_model = 4;
+				}
+				else
+				{
+					caps_.max_shader_model = 3;
+				}
 			}
 			else
 			{
