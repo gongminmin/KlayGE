@@ -1,0 +1,26 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_NV_geometry_program4">
+	<Tokens>
+		<Token name="GL_GEOMETRY_PROGRAM_NV" value="0x8C26"/>
+		<Token name="GL_MAX_PROGRAM_OUTPUT_VERTICES_NV" value="0x8C27"/>
+		<Token name="GL_MAX_PROGRAM_TOTAL_OUTPUT_COMPONENTS_NV" value="0x8C28"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glProgramVertexLimitNV" return="void">
+			<Param type="GLenum" name="target"/>
+			<Param type="GLint" name="limit"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_NV" string="GL_NV_geometry_program4">
+			<Name name="glProgramVertexLimitNV"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_NV"/>
+	</InitPath>
+</GLExtension>

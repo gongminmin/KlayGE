@@ -1,0 +1,36 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_NV_depth_buffer_float">
+	<Tokens>
+		<Token name="GL_DEPTH_COMPONENT32F_NV" value="0x8DAB"/>
+		<Token name="GL_DEPTH32F_STENCIL8_NV" value="0x8DAC"/>
+		<Token name="GL_FLOAT_32_UNSIGNED_INT_24_8_REV_NV" value="0x8DAD"/>
+		<Token name="GL_DEPTH_BUFFER_FLOAT_MODE_NV" value="0x8DAF"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glDepthRangedNV" return="void">
+			<Param type="GLdouble" name="n"/>
+			<Param type="GLdouble" name="f"/>
+		</Function>
+		<Function name="glClearDepthdNV" return="void">
+			<Param type="GLdouble" name="d"/>
+		</Function>
+		<Function name="glDepthBoundsdNV" return="void">
+			<Param type="GLdouble" name="zmin"/>
+			<Param type="GLdouble" name="zmax"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_NV" string="GL_NV_depth_buffer_float">
+			<Name name="glDepthRangedNV"/>
+			<Name name="glClearDepthdNV"/>
+			<Name name="glDepthBoundsdNV"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_NV"/>
+	</InitPath>
+</GLExtension>
