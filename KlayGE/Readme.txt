@@ -55,7 +55,7 @@ __________________________________________________________________
 编译
 
 编译KlayGE内核需要一些第三方库：Python 2.5.0、Boost 1.33.1、FreeType 2.2.1，分别在http://www.python.org、http://www.boost.org和http://freetype.sourceforge.net下载。
-编译DX相关插件需要DirectX 9.0 SDK Auguest 2006，在http://msdn.microsoft.com/directx下载。
+编译DX相关插件需要DirectX 9.0 SDK October 2006，在http://msdn.microsoft.com/directx下载。
 编译OggWav插件需要Vorbis SDK，在http://xiph.org/downloads/下载，需要自己编译static库，并把runtime library选择成Multi-threaded DLL/Multi-threaded Debug DLL。
 编译OpenAL插件需要OpenAL SDK，在http://www.openal.org/downloads.html下载。
 编译OpenGL插件需要NVIDIA Cg，在http://developer.nvidia.com/object/cg_toolkit.html下载。
