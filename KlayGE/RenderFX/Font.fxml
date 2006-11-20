@@ -47,7 +47,7 @@ void Font3DVS(float2 offset : POSITION,
 	base_pos.xy += offset * pos_width_height;
 	oTexCoord = tex_width_height.xy + offset * tex_width_height.zw;
 	   
-	oPosition = mul(base_pos, mvp);
+	oPosition = mul(float4(base_pos, 1), mvp);
 
 	oColor = color;
 }

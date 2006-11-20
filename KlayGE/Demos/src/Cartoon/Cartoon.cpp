@@ -103,6 +103,9 @@ namespace
 			*(effect_->ParameterByName("toonmap_sampler")) = toon_tex_;
 			*(effect_->ParameterByName("normal_depth_sampler")) = normal_depth_tex_;
 			*(effect_->ParameterByName("flipping")) = flipping_ ? -1 : +1;
+
+			*(effect_->ParameterByName("depth_min")) = app.ActiveCamera().NearPlane();
+			*(effect_->ParameterByName("inv_depth_range")) = 1 / (app.ActiveCamera().FarPlane() - app.ActiveCamera().NearPlane());
 		}
 
 	private:

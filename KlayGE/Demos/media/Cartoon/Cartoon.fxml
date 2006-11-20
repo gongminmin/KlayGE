@@ -5,6 +5,9 @@
 	<parameter type="float4x4" name="proj"/>
 	<parameter type="float3" name="light_in_model"/>
 
+	<parameter type="float" name="depth_min"/>
+	<parameter type="float" name="inv_depth_range"/>
+
 	<shader>
 		<![CDATA[
 void NormalDepthVS(float4 pos : POSITION,
@@ -15,13 +18,13 @@ void NormalDepthVS(float4 pos : POSITION,
 {
 	oPos = mul(mul(pos, model_view), proj);
 	oNormal = mul(normal, (float3x3)model_view);
-	oDepth = oPos.zw;
+	oDepth = mul(pos, model_view).zw;
 }
 
 half4 NormalDepthPS(float3 normal : TEXCOORD0, float2 depth : TEXCOORD1) : COLOR
 {
 	normal = normalize(normal);
-	return half4(normal, depth.x / depth.y);
+	return half4(normal, (depth.x / depth.y - depth_min) * inv_depth_range);
 }
 		]]>
 	</shader>
@@ -65,7 +68,7 @@ void PostToonVS(float4 pos : POSITION,
 {
 	oPos = mul(mul(pos, model_view), proj);
 	
-	oTc0 = oPos.xy / oPos.w + offset;
+	oTc0 = oPos.xy / oPos.w - offset;
 	oTc0.y *= flipping;
 	oTc0 = oTc0 / 2 + 0.5f;
 

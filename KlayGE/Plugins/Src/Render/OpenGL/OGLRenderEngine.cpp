@@ -1,8 +1,11 @@
 // OGLRenderEngine.cpp
 // KlayGE OpenGL渲染引擎类 实现文件
-// Ver 3.0.0
+// Ver 3.5.0
 // 版权所有(C) 龚敏敏, 2004-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.5.0
+// 支持新的对象模型 (2006.11.19)
 //
 // 3.0.0
 // 去掉了固定流水线 (2005.8.18)
@@ -160,6 +163,26 @@ namespace KlayGE
 		this->BindRenderTarget(win);
 
 		return win;
+	}
+
+	void OGLRenderEngine::TexParameter(GLenum target, GLenum pname, GLint param)
+	{
+		GLint tmp;
+		glGetTexParameteriv(target, pname, &tmp);
+		if (tmp != param)
+		{
+			glTexParameteri(target, GL_TEXTURE_WRAP_S, param);
+		}
+	}
+
+	void OGLRenderEngine::TexEnv(GLenum target, GLenum pname, GLfloat param)
+	{
+		GLfloat tmp;
+		glGetTexEnvfv(target, pname, &tmp);
+		if (tmp != param)
+		{
+			glTexEnvf(target, pname, param);
+		}
 	}
 
 	// 设置当前渲染状态对象
@@ -366,7 +389,7 @@ namespace KlayGE
 		{
 			std::vector<SamplerPtr> const & samplers = ogl_shader_obj.Samplers(static_cast<ShaderObject::ShaderType>(i));
 
-			for (uint32_t stage = 0, num_stage = samplers.size(); stage < num_stage; ++ stage)
+			for (uint32_t stage = 0, num_stage = static_cast<uint32_t>(samplers.size()); stage < num_stage; ++ stage)
 			{
 				glActiveTexture(GL_TEXTURE0 + stage);
 
@@ -383,36 +406,9 @@ namespace KlayGE
 					glEnable(tex_type);
 					glBindTexture(tex_type, gl_tex.GLTexture());
 
-					{
-						GLint new_state = OGLMapping::Mapping(sampler->addr_mode_u);
-
-						GLint tmp;
-						glGetTexParameteriv(tex_type, GL_TEXTURE_WRAP_S, &tmp);
-						if (tmp != new_state)
-						{
-							glTexParameteri(tex_type, GL_TEXTURE_WRAP_S, new_state);
-						}
-					}
-					{
-						GLint new_state = OGLMapping::Mapping(sampler->addr_mode_v);
-
-						GLint tmp;
-						glGetTexParameteriv(tex_type, GL_TEXTURE_WRAP_T, &tmp);
-						if (tmp != new_state)
-						{
-							glTexParameteri(tex_type, GL_TEXTURE_WRAP_T, new_state);
-						}
-					}
-					{
-						GLint new_state = OGLMapping::Mapping(sampler->addr_mode_w);
-
-						GLint tmp;
-						glGetTexParameteriv(tex_type, GL_TEXTURE_WRAP_R, &tmp);
-						if (tmp != new_state)
-						{
-							glTexParameteri(tex_type, GL_TEXTURE_WRAP_R, new_state);
-						}
-					}
+					this->TexParameter(tex_type, GL_TEXTURE_WRAP_S, OGLMapping::Mapping(sampler->addr_mode_u));
+					this->TexParameter(tex_type, GL_TEXTURE_WRAP_T, OGLMapping::Mapping(sampler->addr_mode_v));
+					this->TexParameter(tex_type, GL_TEXTURE_WRAP_R, OGLMapping::Mapping(sampler->addr_mode_w));
 
 					{
 						float tmp[4];
@@ -426,82 +422,32 @@ namespace KlayGE
 						}
 					}
 
+					switch (sampler->filter)
 					{
-						GLint tmp;
-						switch (sampler->filter)
-						{
-						case Sampler::TFO_Point:
-							glGetTexParameteriv(tex_type, GL_TEXTURE_MAG_FILTER, &tmp);
-							if (tmp != GL_NEAREST)
-							{
-								glTexParameteri(tex_type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-							}
-							glGetTexParameteriv(tex_type, GL_TEXTURE_MIN_FILTER, &tmp);
-							if (tmp != GL_NEAREST)
-							{
-								glTexParameteri(tex_type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-							}
-							break;
+					case Sampler::TFO_Point:
+						this->TexParameter(tex_type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+						this->TexParameter(tex_type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+						break;
 
-						case Sampler::TFO_Bilinear:
-							glGetTexParameteriv(tex_type, GL_TEXTURE_MAG_FILTER, &tmp);
-							if (tmp != GL_LINEAR)
-							{
-								glTexParameteri(tex_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-							}
-							glGetTexParameteriv(tex_type, GL_TEXTURE_MIN_FILTER, &tmp);
-							if (tmp != GL_LINEAR_MIPMAP_NEAREST)
-							{
-								glTexParameteri(tex_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-							}
-							break;
+					case Sampler::TFO_Bilinear:
+						this->TexParameter(tex_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+						this->TexParameter(tex_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+						break;
 
-						case Sampler::TFO_Trilinear:
-						case Sampler::TFO_Anisotropic:
-							glGetTexParameteriv(tex_type, GL_TEXTURE_MAG_FILTER, &tmp);
-							if (tmp != GL_LINEAR)
-							{
-								glTexParameteri(tex_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-							}
-							glGetTexParameteriv(tex_type, GL_TEXTURE_MIN_FILTER, &tmp);
-							if (tmp != GL_LINEAR_MIPMAP_LINEAR)
-							{
-								glTexParameteri(tex_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-							}
-							break;
+					case Sampler::TFO_Trilinear:
+					case Sampler::TFO_Anisotropic:
+						this->TexParameter(tex_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+						this->TexParameter(tex_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+						break;
 
-						default:
-							BOOST_ASSERT(false);
-							break;
-						}
+					default:
+						BOOST_ASSERT(false);
+						break;
 					}
 
-					{
-						GLint tmp;
-						glGetTexParameteriv(tex_type, GL_TEXTURE_MAX_ANISOTROPY_EXT, &tmp);
-						if (tmp != sampler->anisotropy)
-						{
-							glTexParameteri(tex_type, GL_TEXTURE_MAX_ANISOTROPY_EXT, sampler->anisotropy);
-						}
-					}
-
-					{
-						GLint tmp;
-						glGetTexParameteriv(tex_type, GL_TEXTURE_MAX_LEVEL, &tmp);
-						if (tmp != sampler->max_mip_level)
-						{
-							glTexParameteri(tex_type, GL_TEXTURE_MAX_LEVEL, sampler->max_mip_level);
-						}
-					}
-
-					{
-						GLfloat tmp;
-						glGetTexEnvfv(tex_type, GL_MAX_TEXTURE_LOD_BIAS, &tmp);
-						if (tmp != sampler->mip_map_lod_bias)
-						{
-							glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, sampler->mip_map_lod_bias);
-						}
-					}
+					this->TexParameter(tex_type, GL_TEXTURE_MAX_ANISOTROPY_EXT, sampler->anisotropy);
+					this->TexParameter(tex_type, GL_TEXTURE_MAX_LEVEL, sampler->max_mip_level);
+					this->TexEnv(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, sampler->mip_map_lod_bias);
 				}
 			}
 		}
