@@ -45,7 +45,7 @@ __________________________________________________________________
 	2.1 打开“Tools”->“Options”->“Projects and Solutions”->"VC++ Directories"，在“Show directories for:”下拉框中选择“Include files”，
 		在下面添加F:\KlayGE\Core\Include、F:\KlayGE\AppLayer\Include和F:\KlayGE\Plugins\Include
 	2.2 在“Show directories for:”下拉框中选择"Library files"，
-		在下面添加F:\KlayGE\Lib
+		在下面添加F:\KlayGE\Lib\Win32 (如果要用x64的版本，就把Win32换成x64)
 	2.3 点“确定”按钮，建议关闭VS 2005 IDE以保存设置
 
 __________________________________________________________________
