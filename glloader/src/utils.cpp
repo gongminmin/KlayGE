@@ -242,18 +242,18 @@ void* glloader_get_gl_proc_address(const char* name)
 	CFURLRef bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
 		CFSTR("/System/Library/Frameworks/OpenGL.framework"), kCFURLPOSIXPathStyle, true);
 
-    CFStringRef functionName = CFStringCreateWithCString(kCFAllocatorDefault, extname, kCFStringEncodingASCII);
+	CFStringRef functionName = CFStringCreateWithCString(kCFAllocatorDefault, extname, kCFStringEncodingASCII);
 
-    CFBundleRef bundle = CFBundleCreate(kCFAllocatorDefault, bundleURL);
-    BOOST_ASSERT(bundle != NULL);
+	CFBundleRef bundle = CFBundleCreate(kCFAllocatorDefault, bundleURL);
+	BOOST_ASSERT(bundle != NULL);
 
-    void* function = CFBundleGetFunctionPointerForName(bundle, functionName);
+	void* function = CFBundleGetFunctionPointerForName(bundle, functionName);
 
-    CFRelease(bundleURL);
-    CFRelease(functionName);
-    CFRelease(bundle);
+	CFRelease(bundleURL);
+	CFRelease(functionName);
+	CFRelease(bundle);
 
-    return function;
+	return function;
 #else
 	return (void*)(::glXGetProcAddress(reinterpret_cast<const GLubyte*>(name)));
 #endif
