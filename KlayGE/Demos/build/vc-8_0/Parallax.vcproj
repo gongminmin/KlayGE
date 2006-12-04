@@ -380,7 +380,27 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Compiling $(InputPath)"
+						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						Outputs="$(InputDir)\$(InputName).kfx"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
 					>
 					<Tool
 						Name="VCCustomBuildTool"
