@@ -40,7 +40,7 @@ namespace
 
 			technique_ = rf.LoadEffect("Fractal.kfx")->TechniqueByName("Mandelbrot");
 
-			float4 const & offset = rf.RenderEngineInstance().TexelToPixelOffset();
+			float4 const & offset = rf.RenderEngineInstance().TexelToPixelOffset() * 2;
 
 			float3 xyzs[] =
 			{

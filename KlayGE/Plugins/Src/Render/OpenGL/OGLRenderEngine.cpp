@@ -687,6 +687,18 @@ namespace KlayGE
 						glSecondaryColorPointer(num_components, type, size, offset);
 						break;
 
+					case VEU_BlendWeight:
+						glEnableVertexAttribArray(1);
+						stream.Active();
+						glVertexAttribPointer(1, num_components, type, GL_FALSE, size, offset);
+						break;
+
+					case VEU_BlendIndex:
+						glEnableVertexAttribArray(7);
+						stream.Active();
+						glVertexAttribPointer(7, num_components, type, GL_FALSE, size, offset);
+						break;
+
 					case VEU_TextureCoord:
 						glClientActiveTexture(GL_TEXTURE0 + vs_elem.usage_index);
 						glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -694,7 +706,20 @@ namespace KlayGE
 						glTexCoordPointer(num_components, type, size, offset);
 						break;
 
+					case VEU_Tangent:
+						glEnableVertexAttribArray(14);
+						stream.Active();
+						glVertexAttribPointer(14, num_components, type, GL_FALSE, size, offset);
+						break;
+
+					case VEU_Binormal:
+						glEnableVertexAttribArray(15);
+						stream.Active();
+						glVertexAttribPointer(15, num_components, type, GL_FALSE, size, offset);
+						break;
+
 					default:
+						BOOST_ASSERT(false);
 						break;
 					}
 
@@ -731,12 +756,8 @@ namespace KlayGE
 					RenderPassPtr pass = render_tech_->Pass(i);
 
 					pass->Begin();
-
-					this->AttachAttribs(rl, pass);
-
 					glDrawElements(mode, static_cast<GLsizei>(rl.NumIndices()),
 						index_type, 0);
-
 					pass->End();
 				}
 			}
@@ -747,11 +768,7 @@ namespace KlayGE
 					RenderPassPtr pass = render_tech_->Pass(i);
 
 					pass->Begin();
-
-					this->AttachAttribs(rl, pass);
-
 					glDrawArrays(mode, 0, static_cast<GLsizei>(rl.NumVertices()));
-
 					pass->End();
 				}
 			}
@@ -764,37 +781,6 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::EndFrame()
 	{
-	}
-
-	void OGLRenderEngine::AttachAttribs(RenderLayout const & rl, RenderPassPtr pass)
-	{
-		OGLShaderObjectPtr ogl_shader_object = checked_pointer_cast<OGLShaderObject>(pass->GetShaderObject());
-
-		// Geometry streams
-		for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
-		{
-			OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(rl.GetVertexStream(i)));
-			uint32_t const size = rl.VertexSize(i);
-
-			uint8_t* elem_offset = NULL;
-			for (uint32_t j = 0; j < rl.VertexStreamFormat(i).size(); ++ j)
-			{
-				vertex_element const & vs_elem = rl.VertexStreamFormat(i)[j];
-				int32_t const index = ogl_shader_object->AttribIndex(vs_elem.usage, vs_elem.usage_index);
-				if (index >= 0)
-				{
-					GLvoid* offset = static_cast<GLvoid*>(elem_offset);
-					GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
-					GLenum const type = IsFloatFormat(vs_elem.format) ? GL_FLOAT : GL_UNSIGNED_BYTE;
-
-					glEnableVertexAttribArray(index);
-					stream.Active();
-					glVertexAttribPointer(index, num_components, type, GL_FALSE, size, offset);
-				}
-
-				elem_offset += vs_elem.element_size();
-			}
-		}
 	}
 
 	// 设置模板位数

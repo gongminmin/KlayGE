@@ -125,48 +125,6 @@ namespace KlayGE
 			cg_param = cgGetNextParameter(cg_param);
 		}
 
-		if (ST_VertexShader == type)
-		{
-			using namespace boost::assign;
-			std::vector<std::pair<std::string, VertexElementUsage> > pre_define_semantics; 
-			pre_define_semantics += std::make_pair(std::string("BLENDWEIGHT"), VEU_BlendWeight),
-				std::make_pair(std::string("BLENDINDICES"), VEU_BlendIndex),
-				std::make_pair(std::string("TANGENT"), VEU_Tangent),
-				std::make_pair(std::string("BINORMAL"), VEU_Binormal);
-
-			CGparameter cg_param = cgGetFirstParameter(shaders_[ST_VertexShader], CG_PROGRAM);
-			while (cg_param)
-			{
-				if ((CG_VARYING == cgGetParameterVariability(cg_param))
-					&& (CG_IN == cgGetParameterDirection(cg_param)))
-				{
-					std::string semantic = cgGetParameterSemantic(cg_param);
-
-					for (size_t j = 0; j < pre_define_semantics.size(); ++ j)
-					{
-						if (0 == semantic.find(pre_define_semantics[j].first))
-						{
-							VertexElementUsage usage = pre_define_semantics[j].second;
-							uint8_t usage_index = 0;
-
-							semantic.erase(0, pre_define_semantics[j].first.size());
-							if (!semantic.empty())
-							{
-								usage_index = static_cast<uint8_t>(boost::lexical_cast<int>(semantic));
-							}
-
-							vertex_varyings_.insert(std::make_pair(std::make_pair(usage, usage_index),
-								static_cast<uint8_t>(cgGetParameterResourceIndex(cg_param))));
-
-							break;
-						}
-					}
-				}
-
-				cg_param = cgGetNextParameter(cg_param);
-			}
-		}
-
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		switch (type)
 		{
@@ -187,21 +145,6 @@ namespace KlayGE
 	bool OGLShaderObject::HasParameter(ShaderType type, std::string const & name) const
 	{
 		return param_descs_[type].find(name) != param_descs_[type].end();
-	}
-
-	int32_t OGLShaderObject::AttribIndex(VertexElementUsage usage, uint8_t usage_index)
-	{
-		std::pair<VertexElementUsage, uint8_t> p = std::make_pair(usage, usage_index);
-
-		vertex_varyings_t::iterator iter = vertex_varyings_.find(p);
-		if (iter != vertex_varyings_.end())
-		{
-			return iter->second;
-		}
-		else
-		{
-			return -1;
-		}
 	}
 
 	void OGLShaderObject::SetParameter(std::string const & name, bool value)

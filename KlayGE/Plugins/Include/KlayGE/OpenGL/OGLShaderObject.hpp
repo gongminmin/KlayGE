@@ -43,8 +43,6 @@ namespace KlayGE
 		void SetParameter(std::string const & name, std::vector<float4> const & value);
 		void SetParameter(std::string const & name, std::vector<float4x4> const & value);
 
-		int32_t AttribIndex(VertexElementUsage usage, uint8_t usage_index);
-
 		CGprogram VertexShader() const
 		{
 			return shaders_[ST_VertexShader];
@@ -74,9 +72,6 @@ namespace KlayGE
 
 		typedef MapVector<std::string, CGparameter> parameter_descs_t;
 		boost::array<parameter_descs_t, ST_NumShaderTypes> param_descs_;
-
-		typedef MapVector<std::pair<VertexElementUsage, uint8_t>, uint8_t> vertex_varyings_t;
-		vertex_varyings_t vertex_varyings_;
 
 		boost::array<std::vector<SamplerPtr>, ST_NumShaderTypes> samplers_;
 	};

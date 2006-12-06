@@ -101,6 +101,12 @@ namespace KlayGE
 			}
 			break;
 
+		case WM_GETMINMAXINFO:
+			// Prevent the window from going smaller than some minimu size
+			reinterpret_cast<MINMAXINFO*>(lParam)->ptMinTrackSize.x = 100;
+			reinterpret_cast<MINMAXINFO*>(lParam)->ptMinTrackSize.y = 100;
+			break;
+
 		case WM_CLOSE:
 			::DestroyWindow(hWnd_);
 			closed_ = true;

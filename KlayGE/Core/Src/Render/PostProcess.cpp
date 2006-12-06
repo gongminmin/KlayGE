@@ -84,8 +84,8 @@ namespace KlayGE
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		float4 texel_to_pixel = re.TexelToPixelOffset();
-		texel_to_pixel.x() /= render_target_->Width();
-		texel_to_pixel.y() /= render_target_->Height();
+		texel_to_pixel.x() /= render_target_->Width() / 2;
+		texel_to_pixel.y() /= render_target_->Height() / 2;
 		*(technique_->Effect().ParameterByName("texel_to_pixel_offset")) = texel_to_pixel;
 
 		*(technique_->Effect().ParameterByName("flipping")) = flipping_ ? -1 : +1;
