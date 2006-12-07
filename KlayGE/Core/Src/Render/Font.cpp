@@ -89,7 +89,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleList);
+			rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleFan);
 
 			RenderEngine const & renderEngine = rf.RenderEngineInstance();
 			RenderDeviceCaps const & caps = renderEngine.DeviceCaps();
@@ -119,15 +119,13 @@ namespace
 				RenderLayout::ST_Instance, 1);
 
 			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static);
-			ib->Resize(6 * sizeof(uint16_t));
+			ib->Resize(4 * sizeof(uint16_t));
 			{
 				GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
 				mapper.Pointer<uint16_t>()[0] = 0;
 				mapper.Pointer<uint16_t>()[1] = 1;
 				mapper.Pointer<uint16_t>()[2] = 2;
-				mapper.Pointer<uint16_t>()[3] = 2;
-				mapper.Pointer<uint16_t>()[4] = 3;
-				mapper.Pointer<uint16_t>()[5] = 0;
+				mapper.Pointer<uint16_t>()[3] = 3;
 			}
 			rl_->BindIndexStream(ib, EF_R16);
 
