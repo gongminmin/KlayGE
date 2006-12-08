@@ -1,11 +1,8 @@
 // Font.cpp
 // KlayGE Font类 实现文件
-// Ver 3.5.0
+// Ver 3.4.0
 // 版权所有(C) 龚敏敏, 2003-2006
 // Homepage: http://klayge.sourceforge.net
-//
-// 3.5.0
-// 试用Instance来实现 (2006.11.12)
 //
 // 3.4.0
 // 优化了顶点缓冲区 (2006.9.20)
@@ -89,7 +86,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleFan);
+			rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleList);
 
 			RenderEngine const & renderEngine = rf.RenderEngineInstance();
 			RenderDeviceCaps const & caps = renderEngine.DeviceCaps();
@@ -99,35 +96,13 @@ namespace
 			effect_ = rf.LoadEffect("Font.kfx");
 			*(effect_->ParameterByName("texFontSampler")) = theTexture_;
 
-			GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static);
-			vb->Resize(4 * sizeof(float2));
-			{
-				GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
-				mapper.Pointer<float2>()[0] = float2(0, 0);
-				mapper.Pointer<float2>()[1] = float2(1, 0);
-				mapper.Pointer<float2>()[2] = float2(1, 1);
-				mapper.Pointer<float2>()[3] = float2(0, 1);
-			}
-			rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+			vb_ = rf.MakeVertexBuffer(BU_Dynamic);
+			rl_->BindVertexStream(vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
+											vertex_element(VEU_Diffuse, 0, EF_ARGB8),
+											vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 
-			instancing_ = rf.MakeVertexBuffer(BU_Dynamic);
-			rl_->BindVertexStream(instancing_,
-				boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_BGR32F),
-										vertex_element(VEU_TextureCoord, 1, EF_GR32F),
-										vertex_element(VEU_TextureCoord, 2, EF_ABGR32F),
-										vertex_element(VEU_Diffuse, 0, EF_ARGB8)),
-				RenderLayout::ST_Instance, 1);
-
-			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static);
-			ib->Resize(4 * sizeof(uint16_t));
-			{
-				GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
-				mapper.Pointer<uint16_t>()[0] = 0;
-				mapper.Pointer<uint16_t>()[1] = 1;
-				mapper.Pointer<uint16_t>()[2] = 2;
-				mapper.Pointer<uint16_t>()[3] = 3;
-			}
-			rl_->BindIndexStream(ib, EF_R16);
+			ib_ = rf.MakeIndexBuffer(BU_Dynamic);
+			rl_->BindIndexStream(ib_, EF_R16);
 
 			box_ = Box(float3(0, 0, 0), float3(0, 0, 0));
 
@@ -146,15 +121,16 @@ namespace
 
 		void OnRenderBegin()
 		{
-			instancing_->Resize(static_cast<uint32_t>(font_instances_.size() * sizeof(font_instances_[0])));
+			vb_->Resize(static_cast<uint32_t>(vertices_.size() * sizeof(vertices_[0])));
 			{
-				GraphicsBuffer::Mapper mapper(*instancing_, BA_Write_Only);
-				std::copy(font_instances_.begin(), font_instances_.end(), mapper.Pointer<FontVert>());
+				GraphicsBuffer::Mapper mapper(*vb_, BA_Write_Only);
+				std::copy(vertices_.begin(), vertices_.end(), mapper.Pointer<FontVert>());
 			}
 
-			for (uint32_t i = 0; i < rl_->NumVertexStreams(); ++ i)
+			ib_->Resize(static_cast<uint32_t>(indices_.size() * sizeof(indices_[0])));
 			{
-				rl_->VertexStreamFrequencyDivider(i, RenderLayout::ST_Geometry, static_cast<uint32_t>(font_instances_.size()));
+				GraphicsBuffer::Mapper mapper(*rl_->GetIndexStream(), BA_Write_Only);
+				std::copy(indices_.begin(), indices_.end(), mapper.Pointer<uint16_t>());
 			}
 
 			if (!three_dim_)
@@ -175,7 +151,8 @@ namespace
 
 		void OnRenderEnd()
 		{
-			font_instances_.resize(0);
+			vertices_.resize(0);
+			indices_.resize(0);
 
 			box_ = Box(float3(0, 0, 0), float3(0, 0, 0));
 		}
@@ -223,8 +200,10 @@ namespace
 			float x(sx), y(sy);
 			float maxx(sx), maxy(sy);
 
-			font_instances_.reserve(font_instances_.size() + maxSize);
+			vertices_.reserve(vertices_.size() + maxSize * 4);
+			indices_.reserve(indices_.size() + maxSize * 6);
 
+			uint16_t lastIndex(static_cast<uint16_t>(vertices_.size()));
 			for (std::wstring::const_iterator citer = text.begin(); citer != text.end(); ++ citer)
 			{
 				wchar_t const & ch(*citer);
@@ -233,8 +212,28 @@ namespace
 
 				if (ch != L'\n')
 				{
-					font_instances_.push_back(FontVert(float3(x, y, sz), float2(w, h),
-						cmiter->second.tex_width_height, clr32));
+					Rect_T<float> const & texRect(cmiter->second.texRect);
+
+					vertices_.push_back(FontVert(float3(x + 0, y + 0, sz),
+											clr32,
+											float2(texRect.left(), texRect.top())));
+					vertices_.push_back(FontVert(float3(x + w, y + 0, sz),
+											clr32,
+											float2(texRect.right(), texRect.top())));
+					vertices_.push_back(FontVert(float3(x + w, y + h, sz),
+											clr32,
+											float2(texRect.right(), texRect.bottom())));
+					vertices_.push_back(FontVert(float3(x + 0, y + h, sz),
+											clr32,
+											float2(texRect.left(), texRect.bottom())));
+
+					indices_.push_back(lastIndex + 0);
+					indices_.push_back(lastIndex + 1);
+					indices_.push_back(lastIndex + 2);
+					indices_.push_back(lastIndex + 2);
+					indices_.push_back(lastIndex + 3);
+					indices_.push_back(lastIndex + 0);
+					lastIndex += 4;
 
 					x += w;
 
@@ -307,14 +306,14 @@ namespace
 							// 纹理还有空间
 							charRect.left	= curX_;
 							charRect.top	= curY_;
-							charRect.right	= width;
-							charRect.bottom = max_height;
+							charRect.right	= curX_ + width;
+							charRect.bottom = curY_ + max_height;
 
-							charInfo.tex_width_height.x()	= static_cast<float>(charRect.left) / tex_width;
-							charInfo.tex_width_height.y()	= static_cast<float>(charRect.top) / tex_height;
-							charInfo.tex_width_height.z()	= static_cast<float>(charRect.right) / tex_width;
-							charInfo.tex_width_height.w()	= static_cast<float>(charRect.bottom) / tex_height;
-							charInfo.width					= width;
+							charInfo.texRect.left()		= static_cast<float>(charRect.left) / tex_width;
+							charInfo.texRect.top()		= static_cast<float>(charRect.top) / tex_height;
+							charInfo.texRect.right()	= static_cast<float>(charRect.right) / tex_width;
+							charInfo.texRect.bottom()	= static_cast<float>(charRect.bottom) / tex_height;
+							charInfo.width				= width;
 
 							curX_ += width;
 						}
@@ -325,14 +324,14 @@ namespace
 							BOOST_ASSERT(iter != charInfoMap_.end());
 
 							// 用当前字符替换
-							charInfo.tex_width_height	= iter->second.tex_width_height;
-							charInfo.width				= width;
+							charInfo.texRect	= iter->second.texRect;
+							charInfo.width		= width;
 
 							charLRU_.pop_back();
 							charInfoMap_.erase(iter);
 
-							charRect.left	= static_cast<long>(charInfo.tex_width_height.x() * tex_width);
-							charRect.top	= static_cast<long>(charInfo.tex_width_height.y() * tex_height);
+							charRect.left	= static_cast<long>(charInfo.texRect.left() * tex_width);
+							charRect.top	= static_cast<long>(charInfo.texRect.top() * tex_height);
 							charRect.right	= charRect.left + width;
 							charRect.bottom	= charRect.top + max_height;
 						}
@@ -365,24 +364,21 @@ namespace
 #endif
 		struct CharInfo
 		{
-			float4		tex_width_height;
-			uint32_t	width;
+			Rect_T<float>	texRect;
+			uint32_t		width;
 		};
 
 		struct FontVert
 		{
 			float3 pos;
-			float2 pos_width_height;
-			float4 tex_width_height;
 			uint32_t clr;
+			float2 tex;
 
 			FontVert()
 			{
 			}
-			FontVert(float3 const & pos, float2 const & pos_width_height,
-				float4 const & tex_width_height, uint32_t clr)
-				: pos(pos), pos_width_height(pos_width_height),
-					tex_width_height(tex_width_height), clr(clr)
+			FontVert(float3 const & pos, uint32_t clr, float2 const & tex)
+				: pos(pos), clr(clr), tex(tex)
 			{
 			}
 		};
@@ -403,9 +399,11 @@ namespace
 
 		uint32_t fontHeight_;
 
-		std::vector<FontVert>	font_instances_;
+		std::vector<FontVert>	vertices_;
+		std::vector<uint16_t>	indices_;
 
-		GraphicsBufferPtr instancing_;
+		GraphicsBufferPtr vb_;
+		GraphicsBufferPtr ib_;
 
 		TexturePtr		theTexture_;
 

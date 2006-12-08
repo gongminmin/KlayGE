@@ -14,42 +14,34 @@
 
 	<shader>
 		<![CDATA[
-void Font2DVS(float2 offset : POSITION,
+void Font2DVS(float4 position : POSITION,
 			float4 color : COLOR0,
-			float3 base_pos : TEXCOORD0,
-			float2 pos_width_height : TEXCOORD1,
-			float4 tex_width_height : TEXCOORD2,
+			float2 texCoord : TEXCOORD0,
 
 			out float4 oPosition : POSITION,
 			out float2 oTexCoord : TEXCOORD0,
 			out float4 oColor : COLOR)
 {
-	base_pos.xy += offset * pos_width_height;
-	oTexCoord = tex_width_height.xy + offset * tex_width_height.zw;
-	   
-	oPosition.x = (base_pos.x - halfWidth) / halfWidth;
-	oPosition.y = (halfHeight - base_pos.y) / halfHeight;
-	oPosition.zw = float2(base_pos.z, 1);
+	oPosition.x = (position.x - halfWidth) / halfWidth;
+	oPosition.y = (halfHeight - position.y) / halfHeight;
+	oPosition.zw = position.zw;
 
 	oColor = color;
+	oTexCoord = texCoord;
 }
 
-void Font3DVS(float2 offset : POSITION,
+void Font3DVS(float4 position : POSITION,
 			float4 color : COLOR0,
-			float3 base_pos : TEXCOORD0,
-			float2 pos_width_height : TEXCOORD1,
-			float4 tex_width_height : TEXCOORD2,
+			float2 texCoord : TEXCOORD0,
 
 			out float4 oPosition : POSITION,
 			out float2 oTexCoord : TEXCOORD0,
 			out float4 oColor : COLOR)
 {
-	base_pos.xy += offset * pos_width_height;
-	oTexCoord = tex_width_height.xy + offset * tex_width_height.zw;
-	   
-	oPosition = mul(float4(base_pos, 1), mvp);
+	oPosition = mul(position, mvp);
 
 	oColor = color;
+	oTexCoord = texCoord;
 }
 
 float4 FontPS(float4 clr : COLOR, float2 texCoord : TEXCOORD0) : COLOR0
