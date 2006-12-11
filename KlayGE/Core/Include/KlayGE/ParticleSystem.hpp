@@ -90,12 +90,12 @@ namespace KlayGE
 
 		ParticleType const & GetParticle(uint32_t i) const
 		{
-			assert(i < particles_.size());
+			BOOST_ASSERT(i < particles_.size());
 			return particles_[i];
 		}
 		ParticleType& GetParticle(uint32_t i)
 		{
-			assert(i < particles_.size());
+			BOOST_ASSERT(i < particles_.size());
 			return particles_[i];
 		}
 

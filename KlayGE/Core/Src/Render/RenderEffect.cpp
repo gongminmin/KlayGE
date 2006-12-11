@@ -46,6 +46,102 @@ namespace
 {
 	using namespace KlayGE;
 
+	class type_define
+	{
+	public:
+		enum code
+		{
+			TC_bool = 0,
+			TC_dword,
+			TC_string,
+			TC_sampler1D,
+			TC_sampler2D,
+			TC_sampler3D,
+			TC_samplerCUBE,
+			TC_shader,
+			TC_int,
+			TC_int2,
+			TC_int3,
+			TC_int4,
+			TC_float,
+			TC_float2,
+			TC_float2x2,
+			TC_float2x3,
+			TC_float2x4,
+			TC_float3,
+			TC_float3x2,
+			TC_float3x3,
+			TC_float3x4,
+			TC_float4,
+			TC_float4x2,
+			TC_float4x3,
+			TC_float4x4
+		};
+
+	public:
+		static type_define& instance()
+		{
+			static type_define ret;
+			return ret;
+		}
+
+		uint32_t type_define::type_code(std::string const & name) const
+		{
+			for (uint32_t i = 0; i < types_.size(); ++ i)
+			{
+				if (types_[i] == name)
+				{
+					return i;
+				}
+			}
+			BOOST_ASSERT(false);
+			return 0xFFFFFFFF;
+		}
+
+		std::string const & type_define::type_name(uint32_t code) const
+		{
+			if (code < types_.size())
+			{
+				return types_[code];
+			}
+			BOOST_ASSERT(false);
+			return "";
+		}
+
+	private:
+		type_define()
+		{
+			types_.push_back("bool");
+			types_.push_back("dword");
+			types_.push_back("string");
+			types_.push_back("sampler1D");
+			types_.push_back("sampler2D");
+			types_.push_back("sampler3D");
+			types_.push_back("samplerCUBE");
+			types_.push_back("shader");
+			types_.push_back("int");
+			types_.push_back("int2");
+			types_.push_back("int3");
+			types_.push_back("int4");
+			types_.push_back("float");
+			types_.push_back("float2");
+			types_.push_back("float2x2");
+			types_.push_back("float2x3");
+			types_.push_back("float2x4");
+			types_.push_back("float3");
+			types_.push_back("float3x2");
+			types_.push_back("float3x3");
+			types_.push_back("float3x4");
+			types_.push_back("float4");
+			types_.push_back("float4x2");
+			types_.push_back("float4x3");
+			types_.push_back("float4x4");
+		}
+
+	private:
+		std::vector<std::string> types_;
+	};
+
 	std::string read_short_string(ResIdentifierPtr const & source)
 	{
 		uint8_t len;
@@ -210,7 +306,7 @@ namespace
 			break;
 
 		default:
-			assert(false);
+			BOOST_ASSERT(false);
 			break;
 		}
 
@@ -220,65 +316,6 @@ namespace
 
 namespace KlayGE
 {
-	type_define::type_define()
-	{
-		types_.push_back("bool");
-		types_.push_back("dword");
-		types_.push_back("string");
-		types_.push_back("sampler1D");
-		types_.push_back("sampler2D");
-		types_.push_back("sampler3D");
-		types_.push_back("samplerCUBE");
-		types_.push_back("shader");
-		types_.push_back("int");
-		types_.push_back("int2");
-		types_.push_back("int3");
-		types_.push_back("int4");
-		types_.push_back("float");
-		types_.push_back("float2");
-		types_.push_back("float2x2");
-		types_.push_back("float2x3");
-		types_.push_back("float2x4");
-		types_.push_back("float3");
-		types_.push_back("float3x2");
-		types_.push_back("float3x3");
-		types_.push_back("float3x4");
-		types_.push_back("float4");
-		types_.push_back("float4x2");
-		types_.push_back("float4x3");
-		types_.push_back("float4x4");
-	}
-
-	type_define& type_define::instance()
-	{
-		static type_define ret;
-		return ret;
-	}
-
-	uint32_t type_define::type_code(std::string const & name) const
-	{
-		for (uint32_t i = 0; i < types_.size(); ++ i)
-		{
-			if (types_[i] == name)
-			{
-				return i;
-			}
-		}
-		assert(false);
-		return 0xFFFFFFFF;
-	}
-
-	std::string const & type_define::type_name(uint32_t code) const
-	{
-		if (code < types_.size())
-		{
-			return types_[code];
-		}
-		assert(false);
-		return "";
-	}
-
-
 	void RenderEffectAnnotation::Load(ResIdentifierPtr const & source)
 	{
 		source->read(reinterpret_cast<char*>(&type_), sizeof(type_));

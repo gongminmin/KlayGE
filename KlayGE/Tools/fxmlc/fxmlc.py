@@ -729,6 +729,18 @@ class technique:
 		for rp in rps:
 			self.render_passes.append(render_pass(rp, render_state_blocks))
 
+		for p in self.render_passes:
+			self.weight += len(p.render_states)
+
+		blend = False
+		for p in self.render_passes:
+			for rs in p.render_states:
+				if ('blend_enable' == rs.name) and rs.value:
+					blend = True
+					break
+		if blend:
+			self.weight += 10000
+
 	def write(self, stream):
 		write_short_string(stream, self.name)
 		stream.write(struct.pack('f', self.weight))

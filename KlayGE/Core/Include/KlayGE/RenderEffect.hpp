@@ -64,51 +64,6 @@
 
 namespace KlayGE
 {
-	class type_define
-	{
-	public:
-		enum code
-		{
-			TC_bool = 0,
-			TC_dword,
-			TC_string,
-			TC_sampler1D,
-			TC_sampler2D,
-			TC_sampler3D,
-			TC_samplerCUBE,
-			TC_shader,
-			TC_int,
-			TC_int2,
-			TC_int3,
-			TC_int4,
-			TC_float,
-			TC_float2,
-			TC_float2x2,
-			TC_float2x3,
-			TC_float2x4,
-			TC_float3,
-			TC_float3x2,
-			TC_float3x3,
-			TC_float3x4,
-			TC_float4,
-			TC_float4x2,
-			TC_float4x3,
-			TC_float4x4
-		};
-
-	public:
-		static type_define& instance();
-
-		uint32_t type_code(std::string const & name) const;
-		std::string const & type_name(uint32_t code) const;
-
-	private:
-		type_define();
-
-	private:
-		std::vector<std::string> types_;
-	};
-
 	struct shader_desc
 	{
 		std::string profile;
