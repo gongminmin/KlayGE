@@ -85,7 +85,7 @@ namespace
 			return ret;
 		}
 
-		uint32_t type_define::type_code(std::string const & name) const
+		uint32_t type_code(std::string const & name) const
 		{
 			for (uint32_t i = 0; i < types_.size(); ++ i)
 			{
@@ -98,7 +98,7 @@ namespace
 			return 0xFFFFFFFF;
 		}
 
-		std::string const & type_define::type_name(uint32_t code) const
+		std::string const & type_name(uint32_t code) const
 		{
 			if (code < types_.size())
 			{
@@ -220,7 +220,7 @@ namespace
 				Color border_clr;
 				source->read(reinterpret_cast<char*>(&border_clr), sizeof(border_clr));
 				s->border_clr = border_clr;
-				
+
 				*var = s;
 			}
 			break;
