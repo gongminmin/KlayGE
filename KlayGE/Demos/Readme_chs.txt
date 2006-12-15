@@ -174,7 +174,7 @@ Vertex displacement
 1) 顶点偏移
 2) 通过导函数直接计算法线
 
-需求：Geforce 4以上或Radeon 9200以上。
+需求：Geforce 4 Ti以上或Radeon 9200以上。
 渲染引擎支持：D3D9/OpenGL。
 
 ====================================================================================
@@ -185,5 +185,5 @@ Video texture
 技术点：
 1) DirectShow解码到纹理
 
-需求：Geforce 4以上或Radeon 9200以上。
+需求：Geforce 4 Ti以上或Radeon 9200以上。
 渲染引擎支持：D3D9/OpenGL。

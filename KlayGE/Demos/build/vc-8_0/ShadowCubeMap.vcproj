@@ -200,7 +200,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;STRICT;_CRT_SECURE_NO_DEPRECATE;_SECURE_SCL=0"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;STRICT;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;_SECURE_SCL=0"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				EnableFunctionLevelLinking="true"
@@ -375,7 +375,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx&#x0D;&#x0A;"
 						Outputs="$(InputDir)\$(InputName).kfx"
 					/>
 				</FileConfiguration>
@@ -385,7 +385,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx&#x0D;&#x0A;"
 						Outputs="$(InputDir)\$(InputName).kfx"
 					/>
 				</FileConfiguration>
@@ -395,7 +395,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx&#x0D;&#x0A;"
 						Outputs="$(InputDir)\$(InputName).kfx"
 					/>
 				</FileConfiguration>
@@ -405,7 +405,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx&#x0D;&#x0A;"
 						Outputs="$(InputDir)\$(InputName).kfx"
 					/>
 				</FileConfiguration>

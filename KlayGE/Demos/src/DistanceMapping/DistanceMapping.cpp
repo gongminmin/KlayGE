@@ -27,8 +27,6 @@
 #include <sstream>
 #include <ctime>
 #include <boost/bind.hpp>
-#include <iostream>
-using namespace std;
 
 #include "DistanceMapping.hpp"
 
@@ -244,10 +242,7 @@ void DistanceMapping::InputHandler(InputEngine const & /*sender*/, InputAction c
 	switch (action.first)
 	{
 	case Exit:
-		cout << "a" << endl;
-		cout.flush();
 		this->Quit();
-		cout << "b" << endl;
 		break;
 	}
 }
