@@ -328,6 +328,18 @@
 				Name="Í·ÎÄ¼þ"
 				>
 				<File
+					RelativePath="..\..\Core\Include\KlayGE\aligned_allocator.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\config\auto_link.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\COMPtr.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Include\KlayGE\Config.hpp"
 					>
 				</File>

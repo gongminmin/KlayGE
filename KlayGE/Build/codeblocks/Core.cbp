@@ -537,6 +537,13 @@
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
+		<Unit filename="..\..\Core\Include\KlayGE\aligned_allocator.hpp">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
 		<Unit filename="..\..\Core\Include\KlayGE\config\auto_link.hpp">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
