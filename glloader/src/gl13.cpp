@@ -38,6 +38,55 @@ namespace
 	{
 		glloader_GL_VERSION_1_3 = _glloader_GL_VERSION_1_3;
 
+		{
+			glActiveTexture = NULL;
+			glClientActiveTexture = NULL;
+			glMultiTexCoord1d = NULL;
+			glMultiTexCoord1dv = NULL;
+			glMultiTexCoord1f = NULL;
+			glMultiTexCoord1fv = NULL;
+			glMultiTexCoord1i = NULL;
+			glMultiTexCoord1iv = NULL;
+			glMultiTexCoord1s = NULL;
+			glMultiTexCoord1sv = NULL;
+			glMultiTexCoord2d = NULL;
+			glMultiTexCoord2dv = NULL;
+			glMultiTexCoord2f = NULL;
+			glMultiTexCoord2fv = NULL;
+			glMultiTexCoord2i = NULL;
+			glMultiTexCoord2iv = NULL;
+			glMultiTexCoord2s = NULL;
+			glMultiTexCoord2sv = NULL;
+			glMultiTexCoord3d = NULL;
+			glMultiTexCoord3dv = NULL;
+			glMultiTexCoord3f = NULL;
+			glMultiTexCoord3fv = NULL;
+			glMultiTexCoord3i = NULL;
+			glMultiTexCoord3iv = NULL;
+			glMultiTexCoord3s = NULL;
+			glMultiTexCoord3sv = NULL;
+			glMultiTexCoord4d = NULL;
+			glMultiTexCoord4dv = NULL;
+			glMultiTexCoord4f = NULL;
+			glMultiTexCoord4fv = NULL;
+			glMultiTexCoord4i = NULL;
+			glMultiTexCoord4iv = NULL;
+			glMultiTexCoord4s = NULL;
+			glMultiTexCoord4sv = NULL;
+			glLoadTransposeMatrixf = NULL;
+			glLoadTransposeMatrixd = NULL;
+			glMultTransposeMatrixf = NULL;
+			glMultTransposeMatrixd = NULL;
+			glSampleCoverage = NULL;
+			glCompressedTexImage3D = NULL;
+			glCompressedTexImage2D = NULL;
+			glCompressedTexImage1D = NULL;
+			glCompressedTexSubImage3D = NULL;
+			glCompressedTexSubImage2D = NULL;
+			glCompressedTexSubImage1D = NULL;
+			glGetCompressedTexImage = NULL;
+		}
+
 		if (glloader_is_supported("GL_VERSION_1_3"))
 		{
 			_GL_VERSION_1_3 = true;

@@ -38,6 +38,47 @@ namespace
 	{
 		glloader_GL_VERSION_1_2 = _glloader_GL_VERSION_1_2;
 
+		{
+			glBlendColor = NULL;
+			glBlendEquation = NULL;
+			glDrawRangeElements = NULL;
+			glColorTable = NULL;
+			glColorTableParameterfv = NULL;
+			glColorTableParameteriv = NULL;
+			glCopyColorTable = NULL;
+			glGetColorTable = NULL;
+			glGetColorTableParameterfv = NULL;
+			glGetColorTableParameteriv = NULL;
+			glColorSubTable = NULL;
+			glCopyColorSubTable = NULL;
+			glConvolutionFilter1D = NULL;
+			glConvolutionFilter2D = NULL;
+			glConvolutionParameterf = NULL;
+			glConvolutionParameterfv = NULL;
+			glConvolutionParameteri = NULL;
+			glConvolutionParameteriv = NULL;
+			glCopyConvolutionFilter1D = NULL;
+			glCopyConvolutionFilter2D = NULL;
+			glGetConvolutionFilter = NULL;
+			glGetConvolutionParameterfv = NULL;
+			glGetConvolutionParameteriv = NULL;
+			glGetSeparableFilter = NULL;
+			glSeparableFilter2D = NULL;
+			glGetHistogram = NULL;
+			glGetHistogramParameterfv = NULL;
+			glGetHistogramParameteriv = NULL;
+			glGetMinmax = NULL;
+			glGetMinmaxParameterfv = NULL;
+			glGetMinmaxParameteriv = NULL;
+			glHistogram = NULL;
+			glMinmax = NULL;
+			glResetHistogram = NULL;
+			glResetMinmax = NULL;
+			glTexImage3D = NULL;
+			glTexSubImage3D = NULL;
+			glCopyTexSubImage3D = NULL;
+		}
+
 		if (glloader_is_supported("GL_VERSION_1_2"))
 		{
 			_GL_VERSION_1_2 = true;

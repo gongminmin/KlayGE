@@ -38,6 +38,54 @@ namespace
 	{
 		glloader_GL_VERSION_1_4 = _glloader_GL_VERSION_1_4;
 
+		{
+			glBlendFuncSeparate = NULL;
+			glFogCoordf = NULL;
+			glFogCoordfv = NULL;
+			glFogCoordd = NULL;
+			glFogCoorddv = NULL;
+			glFogCoordPointer = NULL;
+			glMultiDrawArrays = NULL;
+			glMultiDrawElements = NULL;
+			glPointParameterf = NULL;
+			glPointParameterfv = NULL;
+			glPointParameteri = NULL;
+			glPointParameteriv = NULL;
+			glSecondaryColor3b = NULL;
+			glSecondaryColor3bv = NULL;
+			glSecondaryColor3d = NULL;
+			glSecondaryColor3dv = NULL;
+			glSecondaryColor3f = NULL;
+			glSecondaryColor3fv = NULL;
+			glSecondaryColor3i = NULL;
+			glSecondaryColor3iv = NULL;
+			glSecondaryColor3s = NULL;
+			glSecondaryColor3sv = NULL;
+			glSecondaryColor3ub = NULL;
+			glSecondaryColor3ubv = NULL;
+			glSecondaryColor3ui = NULL;
+			glSecondaryColor3uiv = NULL;
+			glSecondaryColor3us = NULL;
+			glSecondaryColor3usv = NULL;
+			glSecondaryColorPointer = NULL;
+			glWindowPos2d = NULL;
+			glWindowPos2dv = NULL;
+			glWindowPos2f = NULL;
+			glWindowPos2fv = NULL;
+			glWindowPos2i = NULL;
+			glWindowPos2iv = NULL;
+			glWindowPos2s = NULL;
+			glWindowPos2sv = NULL;
+			glWindowPos3d = NULL;
+			glWindowPos3dv = NULL;
+			glWindowPos3f = NULL;
+			glWindowPos3fv = NULL;
+			glWindowPos3i = NULL;
+			glWindowPos3iv = NULL;
+			glWindowPos3s = NULL;
+			glWindowPos3sv = NULL;
+		}
+
 		if (glloader_is_supported("GL_VERSION_1_4"))
 		{
 			_GL_VERSION_1_4 = true;

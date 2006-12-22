@@ -42,6 +42,28 @@ namespace
 		{
 			_GL_VERSION_1_5 = true;
 
+			{
+				glGenQueries = NULL;
+				glDeleteQueries = NULL;
+				glIsQuery = NULL;
+				glBeginQuery = NULL;
+				glEndQuery = NULL;
+				glGetQueryiv = NULL;
+				glGetQueryObjectiv = NULL;
+				glGetQueryObjectuiv = NULL;
+				glBindBuffer = NULL;
+				glDeleteBuffers = NULL;
+				glGenBuffers = NULL;
+				glIsBuffer = NULL;
+				glBufferData = NULL;
+				glBufferSubData = NULL;
+				glGetBufferSubData = NULL;
+				glMapBuffer = NULL;
+				glUnmapBuffer = NULL;
+				glGetBufferParameteriv = NULL;
+				glGetBufferPointerv = NULL;
+			}
+
 			entries_t entries;
 			{
 				entries.push_back(reinterpret_cast<void**>(&glGenQueries));

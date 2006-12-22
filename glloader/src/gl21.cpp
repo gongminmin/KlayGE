@@ -38,6 +38,15 @@ namespace
 	{
 		glloader_GL_VERSION_2_1 = _glloader_GL_VERSION_2_1;
 
+		{
+			glUniformMatrix2x3fv = NULL;
+			glUniformMatrix3x2fv = NULL;
+			glUniformMatrix2x4fv = NULL;
+			glUniformMatrix4x2fv = NULL;
+			glUniformMatrix3x4fv = NULL;
+			glUniformMatrix4x3fv = NULL;
+		}
+
 		if (glloader_is_supported("GL_VERSION_2_1"))
 		{
 			_GL_VERSION_2_1 = true;
