@@ -171,7 +171,7 @@ namespace KlayGE
 		wc.style			= CS_HREDRAW | CS_VREDRAW;
 		wc.lpfnWndProc		= WndProc;
 		wc.cbClsExtra		= 0;
-		wc.cbWndExtra		= 4;
+		wc.cbWndExtra		= sizeof(this);
 		wc.hInstance		= hInst;
 		wc.hIcon			= NULL;
 		wc.hCursor			= ::LoadCursor(NULL, IDC_ARROW);

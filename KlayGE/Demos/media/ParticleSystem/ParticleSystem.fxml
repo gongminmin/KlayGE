@@ -30,13 +30,25 @@
 
 	<shader>
 		<![CDATA[
+float3 texcoord_to_view(float2 tex)
+{
+	return lerp(lerp(upper_left, upper_right, tex.x),
+				lerp(lower_left, lower_right, tex.x),
+				tex.y);
+}
+		]]>
+	</shader>
+	
+	<shader>
+		<![CDATA[
 void ParticleVS(float4 pos			: TEXCOORD0,
 					float2 tex			: POSITION,
 					out float4 oPos		: POSITION,
 					out float4 oClr     : COLOR0,
 					out float2 oTex		: TEXCOORD0,
 					out float4 oPosSS	: TEXCOORD1,
-					out float4 oCenterView : TEXCOORD2)
+					out float4 oCenterView : TEXCOORD2,
+					out float3 oViewDir : TEXCOORD3)
 {
 	oCenterView = mul(float4(pos.xyz, 1), View);
 	float4 view_pos = oCenterView;
@@ -44,19 +56,18 @@ void ParticleVS(float4 pos			: TEXCOORD0,
 	oPos = mul(view_pos, Proj);
 	oTex = tex;
 	oClr = float4(1, 1, 1, pos.w);
-	oPosSS = oPos;
+	oPosSS = oPos / oPos.w;
+	   
+	oViewDir = texcoord_to_view(float2(oPosSS.x, -oPosSS.y) / 2 + 0.5f);
 }
 
 float4 ParticlePS(float4 clr    : COLOR0,
 						float2 tex : TEXCOORD0,
 						float4 PosSS : TEXCOORD1,
-						float4 CenterView : TEXCOORD2) : COLOR
+						float4 CenterView : TEXCOORD2,
+						float3 view_dir : TEXCOORD3) : COLOR
 {
 	CenterView /= CenterView.w;
-	PosSS /= PosSS.w;
-	float3 view_dir = lerp(lerp(lower_left, lower_right, PosSS.x / 2 + 0.5f),
-						lerp(upper_left, upper_right, PosSS.x / 2 + 0.5f),
-						PosSS.y / 2 + 0.5f);
 	float dir = view_dir.z;
 	view_dir = normalize(view_dir);
 	
@@ -148,16 +159,23 @@ float4 TerrainPS(float2 tex0 : TEXCOORD0,
 	
 	<shader>
 		<![CDATA[
+void CopyVS(float4 pos : POSITION,
+					out float4 oPos : POSITION,
+					out float2 oTex : TEXCOORD0,
+					out float3 oDir : TEXCOORD1)
+{
+	PostProcessVS(pos, oPos, oTex);
+	oDir = texcoord_to_view(oTex);
+}
+
 void CopyPS(float2 tex : TEXCOORD0,
+				float3 dir : TEXCOORD1,
 				out float4 clr : COLOR0,
 				out float depth : DEPTH)
 {
 	float4 s = tex2D(src_sampler, tex);
 	clr = float4(s.rgb, 1);
 	
-	float3 dir = lerp(lerp(upper_left, upper_right, tex.x),
-							lerp(lower_left, lower_right, tex.x),
-							tex.y);
 	float4 pos_ps = mul(float4(dir * s.a, 1), Proj);
 	depth = pos_ps.z / pos_ps.w;
 }
@@ -166,7 +184,7 @@ void CopyPS(float2 tex : TEXCOORD0,
 	
 	<technique name="Copy">
 		<pass name="p0">
-			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="vertex_shader" value="CopyVS()"/>
 			<state name="pixel_shader" value="CopyPS()"/>
 		</pass>
 	</technique>

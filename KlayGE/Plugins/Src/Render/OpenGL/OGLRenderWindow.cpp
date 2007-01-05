@@ -24,11 +24,6 @@
 
 #include <KlayGE/OpenGL/OGLRenderWindow.hpp>
 
-namespace
-{
-	std::map<HWND, KlayGE::OGLRenderWindow*> winMap;
-}
-
 namespace KlayGE
 {
 	// Window procedure callback
@@ -36,11 +31,9 @@ namespace KlayGE
 	// OGLRenderWindow instance in the window data GetWindowLog/SetWindowLog
 	LRESULT OGLRenderWindow::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
-		if (winMap.find(hWnd) != winMap.end())
+		OGLRenderWindow* win(reinterpret_cast<OGLRenderWindow*>(::GetWindowLongPtrW(hWnd, 0)));
+		if (win != NULL)
 		{
-			OGLRenderWindow* win(winMap[hWnd]);
-			BOOST_ASSERT(win != NULL);
-
 			return win->MsgProc(hWnd, uMsg, wParam, lParam);
 		}
 		else
@@ -146,7 +139,7 @@ namespace KlayGE
 		wc.style			= CS_HREDRAW | CS_VREDRAW;
 		wc.lpfnWndProc		= WndProc;
 		wc.cbClsExtra		= 0;
-		wc.cbWndExtra		= 0;
+		wc.cbWndExtra		= sizeof(this);
 		wc.hInstance		= hInst;
 		wc.hIcon			= NULL;
 		wc.hCursor			= ::LoadCursor(NULL, IDC_ARROW);
@@ -191,7 +184,7 @@ namespace KlayGE
 			style, settings.left, settings.top,
 			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, NULL);
 
-		winMap.insert(std::make_pair(hWnd_, this));
+		::SetWindowLongPtrW(hWnd_, 0, reinterpret_cast<LONG_PTR>(this));
 
 		::ShowWindow(hWnd_, SW_SHOWNORMAL);
 		::UpdateWindow(hWnd_);
