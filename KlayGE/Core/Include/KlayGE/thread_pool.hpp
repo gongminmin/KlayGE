@@ -1,8 +1,11 @@
 // thread_pool.hpp
 // KlayGE 线程池 头文件
-// Ver 3.2.0
-// 版权所有(C) 龚敏敏, 2006
+// Ver 3.5.0
+// 版权所有(C) 龚敏敏, 2006-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.5.0
+// 修正了死锁的bug (2007.1.10)
 //
 // 3.2.0
 // 初次建立 (2006.4.28)
@@ -24,8 +27,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
 #include <vector>
-#include <deque>
-#include <set>
+#include <list>
 
 namespace KlayGE
 {
@@ -39,34 +41,53 @@ namespace KlayGE
 		uint32_t max_num_threads() const;
 		void max_num_threads(uint32_t max_num_threads);
 
+		bool finished(uint32_t task_id) const;
+
 		uint32_t add_thread(boost::function0<void> const & thread_func);
-		bool finished(boost::uint32_t thread_id);
-		void join(uint32_t thread_id);
+		void join(uint32_t task_id);
 		void join_all();
 
 	private:
 		void working_thread_func();
 
-		struct thread_desc
+		enum thread_state
 		{
-			thread_desc(uint32_t thread_id, boost::function0<void> const & thread_func)
-				: thread_id(thread_id), func(thread_func)
+			TS_READY,
+			TS_BUSY,
+			TS_FINISHED
+		};
+
+		struct task_desc
+		{
+			task_desc()
 			{
 			}
+			task_desc(uint32_t task_id, boost::function0<void> const & thread_func)
+				: task_id(task_id), func(thread_func)
+			{
+				mutex_finish.reset(new boost::mutex);
+				cond_finish.reset(new boost::condition);
 
-			uint32_t thread_id;
+				state = TS_READY;
+			}
+
+			uint32_t task_id;
 			boost::function0<void> func;
+
+			boost::shared_ptr<boost::mutex> mutex_finish;
+			boost::shared_ptr<boost::condition> cond_finish;
+
+			thread_state state;
 		};
 
 		std::vector<boost::shared_ptr<boost::thread> > threads_;
-		std::deque<thread_desc> ready_queue_;
-		std::set<uint32_t> busy_queue_;
-		boost::mutex mutex_threads_;
+		std::list<task_desc> queue_;
 
+		boost::mutex add_mutex_;
+		boost::mutex queue_mutex_;
 		boost::condition cond_start_;
-		boost::condition cond_finish_;
 
-		uint32_t last_thread_id_;
+		uint32_t last_task_id_;
 	};
 }
 

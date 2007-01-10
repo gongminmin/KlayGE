@@ -1,8 +1,11 @@
 // thread_pool.cpp
 // KlayGE 线程池 实现文件
-// Ver 3.2.0
-// 版权所有(C) 龚敏敏, 2006
+// Ver 3.5.0
+// 版权所有(C) 龚敏敏, 2006-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.5.0
+// 修正了死锁的bug (2007.1.10)
 //
 // 3.2.0
 // 初次建立 (2006.4.28)
@@ -19,21 +22,22 @@
 namespace KlayGE
 {
 	thread_pool::thread_pool()
-					: last_thread_id_(0)
+					: last_task_id_(0)
 	{
 	}
 
 	thread_pool::thread_pool(uint32_t max_num_threads)
-					: last_thread_id_(0)
+					: last_task_id_(0)
 	{
 		this->max_num_threads(max_num_threads);
 	}
 
 	thread_pool::~thread_pool()
 	{
+		this->join_all();
+
 		threads_.clear();
-		ready_queue_.clear();
-		busy_queue_.clear();
+		queue_.clear();
 	}
 
 	uint32_t thread_pool::max_num_threads() const
@@ -51,67 +55,74 @@ namespace KlayGE
 		}
 	}
 
+	bool thread_pool::finished(uint32_t task_id) const
+	{
+		for (std::list<task_desc>::const_iterator iter = queue_.begin(); iter != queue_.end(); ++ iter)
+		{
+			boost::mutex::scoped_lock lock(*(iter->mutex_finish));
+			if (iter->task_id == task_id)
+			{
+				return (TS_FINISHED == iter->state);
+			}
+		}
+		return true;
+	}
+
 	uint32_t thread_pool::add_thread(boost::function0<void> const & thread_func)
 	{
+		boost::mutex::scoped_lock lock(add_mutex_);
 		{
-			boost::mutex::scoped_lock lock(mutex_threads_);
+			boost::mutex::scoped_lock lock(queue_mutex_);
 
-			++ last_thread_id_;
-			ready_queue_.push_back(thread_desc(last_thread_id_, thread_func));
+			++ last_task_id_;
+			queue_.push_back(task_desc(last_task_id_, thread_func));
 		}
 
 		cond_start_.notify_one();
 
-		return last_thread_id_;
+		return last_task_id_;
 	}
 
-	bool thread_pool::finished(boost::uint32_t thread_id)
+	void thread_pool::join(uint32_t task_id)
 	{
-		boost::mutex::scoped_lock lock(mutex_threads_);
+		boost::mutex::scoped_lock lock(add_mutex_);
 
-		if (busy_queue_.find(thread_id) == busy_queue_.end())
+		for (std::list<task_desc>::iterator iter = queue_.begin(); iter != queue_.end(); ++ iter)
 		{
-			for (std::deque<thread_desc>::iterator iter = ready_queue_.begin(); iter != ready_queue_.end(); ++ iter)
+			boost::mutex::scoped_lock lock(*(iter->mutex_finish));
+			if (iter->task_id == task_id)
 			{
-				if (iter->thread_id == thread_id)
+				if (iter->state != TS_FINISHED)
 				{
-					return false;
+					iter->cond_finish->wait(lock);
+					break;
+				}
+				else
+				{
+					lock.unlock();
+					queue_.erase(iter);
+					break;
 				}
 			}
-
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-
-	void thread_pool::join(uint32_t thread_id)
-	{
-		for (;;)
-		{
-			if (this->finished(thread_id))
-			{
-				break;
-			}
-
-			boost::mutex::scoped_lock lock(mutex_threads_);
-			cond_finish_.wait(lock);
 		}
 	}
 
 	void thread_pool::join_all()
 	{
-		for (;;)
-		{
-			boost::mutex::scoped_lock lock(mutex_threads_);
-			if (ready_queue_.empty() && busy_queue_.empty())
-			{
-				break;
-			}
+		boost::mutex::scoped_lock lock(add_mutex_);
 
-			cond_finish_.wait(lock);
+		for (std::list<task_desc>::iterator iter = queue_.begin(); iter != queue_.end(); ++ iter)
+		{
+			boost::mutex::scoped_lock lock(*(iter->mutex_finish));
+			if (iter->state != TS_FINISHED)
+			{
+				iter->cond_finish->wait(lock);
+			}
+		}
+
+		{
+			boost::mutex::scoped_lock lock(queue_mutex_);
+			queue_.clear();
 		}
 	}
 
@@ -119,25 +130,28 @@ namespace KlayGE
 	{
 		for (;;)
 		{
-			boost::mutex::scoped_lock lock(mutex_threads_);
-
-			if (!ready_queue_.empty())
+			bool run = false;
+			boost::mutex::scoped_lock lock(queue_mutex_);
+			for (std::list<task_desc>::iterator iter = queue_.begin(); iter != queue_.end(); ++ iter)
 			{
-				boost::function0<void> thread_func = ready_queue_.front().func;
-				uint32_t cur_id = ready_queue_.front().thread_id;
-				busy_queue_.insert(cur_id);
-				ready_queue_.pop_front();
-				lock.unlock();
+				if (TS_READY == iter->state)
+				{
+					boost::mutex::scoped_lock ilock(*(iter->mutex_finish));
+					iter->state = TS_BUSY;
+					lock.unlock();
 
-				thread_func();
+					iter->func();
 
-				lock.lock();
-				busy_queue_.erase(cur_id);
-				lock.unlock();
+					lock.lock();
+					iter->state = TS_FINISHED;
+					iter->cond_finish->notify_one();
+					run = true;
 
-				cond_finish_.notify_one();
+					break;
+				}
 			}
-			else
+
+			if (!run)
 			{
 				cond_start_.wait(lock);
 			}
