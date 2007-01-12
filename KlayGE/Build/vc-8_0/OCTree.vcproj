@@ -4,6 +4,7 @@
 	Version="8.00"
 	Name="八叉树场景管理-OCTree"
 	ProjectGUID="{6D03BA3A-EDF0-47EF-A008-23A87502AD55}"
+	RootNamespace="八叉树场景管理-OCTree"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -20,7 +21,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="../../lib/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)\$(PlatformName)"
+			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="4"
 			CharacterSet="1"
 			>
@@ -83,7 +84,7 @@
 		<Configuration
 			Name="Debug|x64"
 			OutputDirectory="../../lib/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)\$(PlatformName)"
+			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="4"
 			CharacterSet="1"
 			>
@@ -147,7 +148,7 @@
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="../../lib/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)\$(PlatformName)"
+			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="4"
 			CharacterSet="1"
 			WholeProgramOptimization="0"
@@ -217,7 +218,7 @@
 		<Configuration
 			Name="Release|x64"
 			OutputDirectory="../../lib/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)\$(PlatformName)"
+			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="4"
 			CharacterSet="1"
 			WholeProgramOptimization="0"

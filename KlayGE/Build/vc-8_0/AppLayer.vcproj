@@ -4,6 +4,7 @@
 	Version="8.00"
 	Name="应用程序层"
 	ProjectGUID="{E76027F9-0E7B-4B3D-80C9-50E64E0BC5AD}"
+	RootNamespace="应用程序层"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -20,7 +21,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="../../lib/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)\$(PlatformName)"
+			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="4"
 			CharacterSet="1"
 			>
@@ -83,7 +84,7 @@
 		<Configuration
 			Name="Debug|x64"
 			OutputDirectory="../../lib/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)\$(PlatformName)"
+			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="4"
 			CharacterSet="1"
 			>
@@ -147,7 +148,7 @@
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="../../lib/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)\$(PlatformName)"
+			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="4"
 			CharacterSet="1"
 			WholeProgramOptimization="0"
@@ -217,7 +218,7 @@
 		<Configuration
 			Name="Release|x64"
 			OutputDirectory="../../lib/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)\$(PlatformName)"
+			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="4"
 			CharacterSet="1"
 			WholeProgramOptimization="0"

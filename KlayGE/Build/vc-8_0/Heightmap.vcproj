@@ -4,6 +4,7 @@
 	Version="8.00"
 	Name="地形生成-HeightMap"
 	ProjectGUID="{B1258855-1C3E-4882-91FF-2E2CA9DA7104}"
+	RootNamespace="地形生成-HeightMap"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -20,7 +21,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="../../lib/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)\$(PlatformName)"
+			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="4"
 			CharacterSet="1"
 			>
@@ -84,7 +85,7 @@
 		<Configuration
 			Name="Debug|x64"
 			OutputDirectory="../../lib/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)\$(PlatformName)"
+			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="4"
 			CharacterSet="1"
 			>
@@ -149,7 +150,7 @@
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="../../lib/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)\$(PlatformName)"
+			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="4"
 			CharacterSet="1"
 			WholeProgramOptimization="0"
@@ -218,7 +219,7 @@
 		<Configuration
 			Name="Release|x64"
 			OutputDirectory="../../lib/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)\$(PlatformName)"
+			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="4"
 			CharacterSet="1"
 			WholeProgramOptimization="0"
