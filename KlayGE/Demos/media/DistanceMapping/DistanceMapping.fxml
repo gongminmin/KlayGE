@@ -2,6 +2,7 @@
 
 <effect>
 	<include name="../../../RenderFX/util.fxml"/>
+	<include name="../../../RenderFX/Lighting.fxml"/>
 
 	<parameter type="float4x4" name="worldviewproj" semantic="WORLDVIEWPROJECTION"/>
 	<parameter type="float3" name="light_pos"/>
@@ -74,11 +75,11 @@ half4 DistanceMappingPS(half3 texCoord0	: TEXCOORD0,
 
 	half3 diffuse = tex2D(diffuseMap, texUV.xy, dx, dy).rgb;
 
-	half3 bumpNormal = decompress_normal(tex2D(normalMap, texUV.xy, dx, dy));
-	half3 lightVec = normalize(L);
-	half diffuseFactor = dot(lightVec, bumpNormal);
-	
-	return half4(diffuse * diffuseFactor, 1);
+	half3 bump_normal = decompress_normal(tex2D(normalMap, texUV.xy, dx, dy));
+	half3 light_vec = normalize(L);
+	half diffuse_factor = diffuse_lighting(light_vec, bump_normal);
+
+	return half4(diffuse * diffuse_factor, 1);
 }
 
 half4 DistanceMappingPS_20(half3 texCoord0	: TEXCOORD0,
@@ -97,11 +98,11 @@ half4 DistanceMappingPS_20(half3 texCoord0	: TEXCOORD0,
 
 	half3 diffuse = tex2D(diffuseMap, texUV.xy);
 
-	half3 bumpNormal = decompress_normal(tex2D(normalMap, texUV.xy));
-	half3 lightVec = normalize(L);
-	half diffuseFactor = dot(lightVec, bumpNormal);
+	half3 bump_normal = decompress_normal(tex2D(normalMap, texUV.xy));
+	half3 light_vec = normalize(L);
+	half diffuse_factor = diffuse_lighting(light_vec, bump_normal);
 
-	return half4(diffuse * diffuseFactor, 1);
+	return half4(diffuse * diffuse_factor, 1);
 }
 		]]>
 	</shader>

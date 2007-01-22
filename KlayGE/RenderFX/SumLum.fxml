@@ -61,7 +61,7 @@ float4 SumLum4x4IterativePS(float4 iTex[2] : TEXCOORD) : COLOR
 	return s / 4;
 }
 
-float4 AdaptedLumPS(float2 oTex : TEXCOORD0) : COLOR
+float4 AdaptedLumPS() : COLOR
 {
 	float adapted_lum = tex2D(last_lum_sampler, float2(0.5f, 0.5f)).r;
 	float current_lum = exp(tex2D(src_sampler, float2(0.5f, 0.5f)).r);

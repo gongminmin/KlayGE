@@ -1,8 +1,11 @@
 // PostProcess.hpp
 // KlayGE 后期处理类 头文件
-// Ver 3.3.0
-// 版权所有(C) 龚敏敏, 2006
+// Ver 3.5.0
+// 版权所有(C) 龚敏敏, 2006-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.5.0
+// 增加了GammaCorrectionProcess (2007.1.22)
 //
 // 3.3.0
 // 初次建立 (2006.6.23)
@@ -40,6 +43,18 @@ namespace KlayGE
 		RenderTargetPtr render_target_;
 
 		GraphicsBufferPtr pos_vb_;
+	};
+
+	class GammaCorrectionProcess : public PostProcess
+	{
+	public:
+		explicit GammaCorrectionProcess();
+
+		void Gamma(float gamma);
+		void OnRenderBegin();
+
+	private:
+		float inv_gamma_;
 	};
 }
 

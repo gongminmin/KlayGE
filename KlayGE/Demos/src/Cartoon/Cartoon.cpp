@@ -87,6 +87,8 @@ namespace
 
 			*(effect_->ParameterByName("light_in_model")) = MathLib::transform_coord(float3(2, 2, -3),
 																	MathLib::inverse(model_mat_));
+			*(effect_->ParameterByName("eye_in_model")) = MathLib::transform_coord(app.ActiveCamera().EyePos(),
+																	MathLib::inverse(model_mat_));
 
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2;

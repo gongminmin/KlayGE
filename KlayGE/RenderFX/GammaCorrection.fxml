@@ -3,6 +3,7 @@
 <effect>
 	<include name="PostProcess.fxml"/>
 
+	<parameter type='float' name='inv_gamma'/>
 	<parameter type="sampler2D" name="src_sampler">
 		<state name="filtering" value="bilinear"/>
 		<state name="address_u" value="clamp"/>
@@ -11,32 +12,19 @@
 
 	<shader>
 		<![CDATA[
-half4 BrightPass(half4 c)
+float4 GammaCorrectionPS(float2 tex : TEXCOORD0) : COLOR
 {
-	const float BRIGHT_THRESHOLD = 0.5f;
-	if (any(c.rgb > BRIGHT_THRESHOLD))
-	{
-		return c;
-	}
-	else
-	{
-		return 0;
-	}
-}
-
-float4 DownsamplePS(float2 tex : TEXCOORD0) : COLOR
-{
-	return BrightPass(tex2D(src_sampler, tex));
+	return pow(tex2D(src_sampler, tex), inv_gamma);
 }
 		]]>
 	</shader>
-	
-	<technique name="Downsample">
+
+	<technique name="GammaCorrection">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="DownsamplePS()"/>
+			<state name="pixel_shader" value="GammaCorrectionPS()"/>
 		</pass>
 	</technique>
 </effect>

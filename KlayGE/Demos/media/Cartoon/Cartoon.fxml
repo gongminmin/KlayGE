@@ -1,9 +1,12 @@
 <?xml version='1.0'?>
 
 <effect>
+	<include name="../../../RenderFX/Lighting.fxml"/>
+
 	<parameter type="float4x4" name="model_view"/>
 	<parameter type="float4x4" name="proj"/>
 	<parameter type="float3" name="light_in_model"/>
+	<parameter type="float3" name="eye_in_model"/>
 
 	<parameter type="float" name="depth_min"/>
 	<parameter type="float" name="inv_depth_range"/>
@@ -64,7 +67,8 @@ void PostToonVS(float4 pos : POSITION,
 				out float4 oTc2 : TEXCOORD2, // right top / left bottom
 				out float4 oTc3 : TEXCOORD3, // left / right
 				out float4 oTc4 : TEXCOORD4, // top / bottom
-				out float oToon : TEXCOORD5)
+				out float3 oLightVec : TEXCOORD5,
+				out float3 oViewVec : TEXCOORD6)
 {
 	oPos = mul(mul(pos, model_view), proj);
 	
@@ -77,8 +81,8 @@ void PostToonVS(float4 pos : POSITION,
 	oTc3 = oTc0.xyxy + float4(-inv_width, 0, +inv_width, 0);
 	oTc4 = oTc0.xyxy + float4(0, -inv_height, 0, +inv_height);
 
-	half3 L = normalize(light_in_model - pos.xyz);
-	oToon = dot(normalize(normal), L);
+	oLightVec = light_in_model - pos.xyz;
+	oViewVec = eye_in_model - pos.xyz;
 }
 
 float4 PostToonPS(float2 tc0 : TEXCOORD0,
@@ -86,8 +90,12 @@ float4 PostToonPS(float2 tc0 : TEXCOORD0,
 				float4 tc2 : TEXCOORD2,
 				float4 tc3 : TEXCOORD3,
 				float4 tc4 : TEXCOORD4,
-				float toon : TEXCOORD5) : COLOR
+				float3 light_vec : TEXCOORD5,
+				float3 view_vec : TEXCOORD6) : COLOR
 {
+	light_vec = normalize(light_vec);
+	view_vec = normalize(view_vec);
+
 	half4 s1 = tex2D(normal_depth_sampler, tc1.xy);
 	half4 s2 = tex2D(normal_depth_sampler, tc1.zw);
 	half4 s3 = tex2D(normal_depth_sampler, tc2.xy);
@@ -118,7 +126,9 @@ float4 PostToonPS(float2 tc0 : TEXCOORD0,
 	dd.z = (dd.z > 0) ? 1 : 0;
 	dd.w = (dd.w > 0) ? 1 : 0;
 	half de = (dot(dd, e_weights.y).x < 1) ? 1 : 0;
-
+	   
+	half toon = diffuse_lighting(light_vec, ndc.xyz) * 0.7
+					+ specular_lighting(light_vec, view_vec, ndc.xyz, 8) * 0.3;
 	return tex2D(toonmap_sampler, float2(toon, 0.5f)) * de * ne;
 }
 		]]>

@@ -404,6 +404,11 @@ namespace KlayGE
 			d3dDevice_->GetSwapChain(0, &sc);
 			d3d_swap_chain_ = MakeCOMPtr(sc);
 
+			if (d3dpp_.MultiSampleType != D3DMULTISAMPLE_NONE)
+			{
+				d3dDevice_->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, true);
+			}
+
 			main_wnd_ = true;
 		}
 

@@ -1,8 +1,11 @@
 // SceneManager.cpp
 // KlayGE 场景管理器类 实现文件
-// Ver 3.1.0
-// 版权所有(C) 龚敏敏, 2003-2005
+// Ver 3.5.0
+// 版权所有(C) 龚敏敏, 2003-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.5.0
+// 增加了根据technique权重的排序 (2007.1.14)
 //
 // 3.1.0
 // 自动处理Instance (2005.11.13)
@@ -37,9 +40,33 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/SceneObject.hpp>
 
+#include <algorithm>
 #include <boost/bind.hpp>
 
 #include <KlayGE/SceneManager.hpp>
+
+namespace
+{
+	template <typename T>
+	bool cmp_weight(T const & lhs, T const & rhs)
+	{
+		if (!lhs.first)
+		{
+			return true;
+		}
+		else
+		{
+			if (!rhs.first)
+			{
+				return false;
+			}
+			else
+			{
+				return lhs.first->Weight() < rhs.first->Weight();
+			}
+		}
+	}
+}
 
 namespace KlayGE
 {
@@ -179,6 +206,8 @@ namespace KlayGE
 			ra.AssignInstances(iter->second.begin(), iter->second.end());
 			ra.AddToRenderQueue();
 		}
+
+		std::sort(render_queue_.begin(), render_queue_.end(), cmp_weight<std::pair<RenderTechniquePtr, RenderItemsType> >);
 
 		for (RenderQueueType::iterator queueIter = render_queue_.begin();
 			queueIter != render_queue_.end(); ++ queueIter)

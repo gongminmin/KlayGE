@@ -291,6 +291,11 @@ namespace KlayGE
 			return is_validate_;
 		}
 
+		float Weight() const
+		{
+			return weight_;
+		}
+
 	protected:
 		RenderEffect& effect_;
 		std::string name_;

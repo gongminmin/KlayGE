@@ -3,14 +3,29 @@
 <effect>
 	<shader>
 		<![CDATA[
-float DirectionalLighting(float3 lightDir, float3 normal)
+float directional_lighting(float3 lightDir, float3 normal)
 {
 	return dot(-lightDir, normal);
 }
 
-float PointLighting(float3 lightPos, float3 pos, float3 normal)
+float point_lighting(float3 lightPos, float3 pos, float3 normal)
 {
 	return dot(lightPos - pos, normal);
+}
+
+float diffuse_lighting(float3 light_vec, float3 normal)
+{
+	return dot(light_vec, normal);
+}
+
+float specular_lighting(float3 halfway_vec, float3 normal, float power)
+{
+	return pow(dot(halfway_vec, normal), power);
+}
+
+float specular_lighting(float3 light_vec, float3 eye_vec, float3 normal, float power)
+{
+	return specular_lighting(normalize(light_vec + eye_vec), normal, power);
 }
     ]]>
 	</shader>

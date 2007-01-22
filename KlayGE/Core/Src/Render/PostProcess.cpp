@@ -1,8 +1,11 @@
 // PostProcess.cpp
 // KlayGE 后期处理类 实现文件
-// Ver 3.3.0
-// 版权所有(C) 龚敏敏, 2006
+// Ver 3.5.0
+// 版权所有(C) 龚敏敏, 2006-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.5.0
+// 增加了GammaCorrectionProcess (2007.1.22)
 //
 // 3.3.0
 // 初次建立 (2006.6.23)
@@ -84,10 +87,28 @@ namespace KlayGE
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		float4 texel_to_pixel = re.TexelToPixelOffset();
-		texel_to_pixel.x() /= render_target_->Width() / 2;
-		texel_to_pixel.y() /= render_target_->Height() / 2;
+		texel_to_pixel.x() /= render_target_->Width() / 2.0f;
+		texel_to_pixel.y() /= render_target_->Height() / 2.0f;
 		*(technique_->Effect().ParameterByName("texel_to_pixel_offset")) = texel_to_pixel;
 
 		*(technique_->Effect().ParameterByName("flipping")) = flipping_ ? -1 : +1;
+	}
+
+
+	GammaCorrectionProcess::GammaCorrectionProcess()
+		: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("GammaCorrection.kfx")->TechniqueByName("GammaCorrection"))
+	{
+	}
+
+	void GammaCorrectionProcess::Gamma(float gamma)
+	{
+		inv_gamma_ = gamma;
+	}
+
+	void GammaCorrectionProcess::OnRenderBegin()
+	{
+		PostProcess::OnRenderBegin();
+
+		*(technique_->Effect().ParameterByName("inv_gamma")) = inv_gamma_;
 	}
 }
