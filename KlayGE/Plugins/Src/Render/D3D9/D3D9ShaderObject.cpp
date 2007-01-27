@@ -212,15 +212,15 @@ namespace KlayGE
 				switch (p_handle.register_set)
 				{
 				case D3DXRS_BOOL:
-					bool_registers_[p_handle.shader_type][p_handle.register_index * 4] = value;
+					bool_registers_[p_handle.shader_type][(p_handle.register_index - bool_start_[p_handle.shader_type]) * 4] = value;
 					break;
 
 				case D3DXRS_INT4:
-					int_registers_[p_handle.shader_type][p_handle.register_index * 4] = value;
+					int_registers_[p_handle.shader_type][(p_handle.register_index - int_start_[p_handle.shader_type]) * 4] = value;
 					break;
 
 				case D3DXRS_FLOAT4:
-					float_registers_[p_handle.shader_type][p_handle.register_index * 4] = value;
+					float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4] = value;
 					break;
 
 				default:
@@ -245,15 +245,15 @@ namespace KlayGE
 				switch (p_handle.register_set)
 				{
 				case D3DXRS_BOOL:
-					bool_registers_[p_handle.shader_type][p_handle.register_index * 4] = value;
+					bool_registers_[p_handle.shader_type][(p_handle.register_index - bool_start_[p_handle.shader_type]) * 4] = value;
 					break;
 
 				case D3DXRS_INT4:
-					int_registers_[p_handle.shader_type][p_handle.register_index * 4] = value;
+					int_registers_[p_handle.shader_type][(p_handle.register_index - int_start_[p_handle.shader_type]) * 4] = value;
 					break;
 
 				case D3DXRS_FLOAT4:
-					float_registers_[p_handle.shader_type][p_handle.register_index * 4] = static_cast<float>(value);
+					float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4] = static_cast<float>(value);
 					break;
 
 				default:
@@ -276,7 +276,7 @@ namespace KlayGE
 				D3D9ShaderParameterHandle const & p_handle = iter->second;
 				BOOST_ASSERT(D3DXRS_FLOAT4 == p_handle.register_set);
 
-				float_registers_[p_handle.shader_type][p_handle.register_index * 4] = value;
+				float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4] = value;
 			}
 		}
 	}
@@ -293,7 +293,7 @@ namespace KlayGE
 				D3D9ShaderParameterHandle const & p_handle = iter->second;
 				BOOST_ASSERT(D3DXRS_FLOAT4 == p_handle.register_set);
 
-				memcpy(&float_registers_[p_handle.shader_type][p_handle.register_index * 4], &value[0], sizeof(value));
+				memcpy(&float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4], &value[0], sizeof(value));
 			}
 		}
 	}
@@ -311,7 +311,7 @@ namespace KlayGE
 				BOOST_ASSERT(D3DXRS_FLOAT4 == p_handle.register_set);
 
 				float4x4 tmp = MathLib::transpose(value);
-				memcpy(&float_registers_[p_handle.shader_type][p_handle.register_index * 4], &tmp[0], p_handle.register_count * sizeof(float4));
+				memcpy(&float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4], &tmp[0], p_handle.register_count * sizeof(float4));
 			}
 		}
 	}
@@ -332,21 +332,21 @@ namespace KlayGE
 				case D3DXRS_BOOL:
 					for (size_t i = 0; i < value.size(); ++ i)
 					{
-						bool_registers_[p_handle.shader_type][(p_handle.register_index + i) * 4] = value[i];
+						bool_registers_[p_handle.shader_type][(p_handle.register_index - bool_start_[p_handle.shader_type] + i) * 4] = value[i];
 					}
 					break;
 
 				case D3DXRS_INT4:
 					for (size_t i = 0; i < value.size(); ++ i)
 					{
-						int_registers_[p_handle.shader_type][(p_handle.register_index + i) * 4] = value[i];
+						int_registers_[p_handle.shader_type][(p_handle.register_index - int_start_[p_handle.shader_type] + i) * 4] = value[i];
 					}
 					break;
 
 				case D3DXRS_FLOAT4:
 					for (size_t i = 0; i < value.size(); ++ i)
 					{
-						float_registers_[p_handle.shader_type][(p_handle.register_index + i) * 4] = value[i];
+						float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type] + i) * 4] = value[i];
 					}
 					break;
 
@@ -374,21 +374,21 @@ namespace KlayGE
 				case D3DXRS_BOOL:
 					for (size_t i = 0; i < value.size(); ++ i)
 					{
-						bool_registers_[p_handle.shader_type][(p_handle.register_index + i) * 4] = value[i];
+						bool_registers_[p_handle.shader_type][(p_handle.register_index - bool_start_[p_handle.shader_type] + i) * 4] = value[i];
 					}
 					break;
 
 				case D3DXRS_INT4:
 					for (size_t i = 0; i < value.size(); ++ i)
 					{
-						int_registers_[p_handle.shader_type][(p_handle.register_index + i) * 4] = value[i];
+						int_registers_[p_handle.shader_type][(p_handle.register_index - int_start_[p_handle.shader_type] + i) * 4] = value[i];
 					}
 					break;
 
 				case D3DXRS_FLOAT4:
 					for (size_t i = 0; i < value.size(); ++ i)
 					{
-						float_registers_[p_handle.shader_type][(p_handle.register_index + i) * 4] = static_cast<float>(value[i]);
+						float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type] + i) * 4] = static_cast<float>(value[i]);
 					}
 					break;
 
@@ -414,7 +414,7 @@ namespace KlayGE
 
 				for (size_t i = 0; i < value.size(); ++ i)
 				{
-					float_registers_[p_handle.shader_type][(p_handle.register_index + i) * 4] = value[i];
+					float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type] + i) * 4] = value[i];
 				}
 			}
 		}
@@ -431,7 +431,7 @@ namespace KlayGE
 			{
 				D3D9ShaderParameterHandle const & p_handle = iter->second;
 
-				memcpy(&float_registers_[p_handle.shader_type][p_handle.register_index * 4], &value[0],
+				memcpy(&float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4], &value[0],
 					std::min(p_handle.register_count, static_cast<uint16_t>(value.size())) * sizeof(float4));
 			}
 		}
@@ -453,7 +453,7 @@ namespace KlayGE
 				for (std::vector<float4x4>::iterator iter = tmp.begin(); iter != tmp.end(); ++ iter)
 				{
 					*iter = MathLib::transpose(*iter);
-					memcpy(&float_registers_[p_handle.shader_type][start * 4], &(*iter)[0], p_handle.rows * sizeof(float4));
+					memcpy(&float_registers_[p_handle.shader_type][(start - float_start_[p_handle.shader_type]) * 4], &(*iter)[0], p_handle.rows * sizeof(float4));
 					start += p_handle.rows;
 				}
 			}
