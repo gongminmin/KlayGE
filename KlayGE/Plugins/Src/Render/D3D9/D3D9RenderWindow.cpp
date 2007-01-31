@@ -1,8 +1,11 @@
 // D3D9RenderWindow.cpp
 // KlayGE D3D9渲染窗口类 实现文件
-// Ver 3.4.0
-// 版权所有(C) 龚敏敏, 2003-2006
+// Ver 3.5.0
+// 版权所有(C) 龚敏敏, 2003-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.5.0
+// 支持NVPerfHUD (2007.1.31)
 //
 // 3.4.0
 // 支持REF设备 (2006.9.20)
@@ -351,17 +354,41 @@ namespace KlayGE
 		}
 		else
 		{
+			UINT adapter_to_use = adapter_.AdapterNo();
+			bool use_nvperfhud = false;
+			for (UINT adapter = 0; adapter < d3d->GetAdapterCount(); ++ adapter)
+			{
+				D3DADAPTER_IDENTIFIER9 identifier;
+				d3d->GetAdapterIdentifier(adapter, 0, &identifier);
+				if (strstr(identifier.Description, "NVPerfHUD") != 0)
+				{
+					use_nvperfhud = true;
+					adapter_to_use = adapter;
+					break;
+				}
+			}
+
 			typedef std::vector<std::pair<uint32_t, std::wstring> > BehaviorType;
 			BehaviorType behavior;
-			behavior.push_back(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_PUREDEVICE, std::wstring(L"(pure hw vp)")));
-			behavior.push_back(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING, std::wstring(L"(hw vp)")));
-			behavior.push_back(std::make_pair(D3DCREATE_MIXED_VERTEXPROCESSING, std::wstring(L"(mix vp)")));
-			behavior.push_back(std::make_pair(D3DCREATE_SOFTWARE_VERTEXPROCESSING, std::wstring(L"(sw vp)")));
 
 			typedef std::vector<std::pair<D3DDEVTYPE, std::wstring> > DevTypeType;
 			DevTypeType dev_type;
-			dev_type.push_back(std::make_pair(D3DDEVTYPE_HAL, std::wstring(L"HAL")));
-			dev_type.push_back(std::make_pair(D3DDEVTYPE_REF, std::wstring(L"REF")));
+
+			if (use_nvperfhud)
+			{
+				behavior.push_back(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING, std::wstring(L"(hw vp)")));	
+				dev_type.push_back(std::make_pair(D3DDEVTYPE_REF, std::wstring(L"REF")));
+			}
+			else
+			{
+				behavior.push_back(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_PUREDEVICE, std::wstring(L"(pure hw vp)")));
+				behavior.push_back(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING, std::wstring(L"(hw vp)")));
+				behavior.push_back(std::make_pair(D3DCREATE_MIXED_VERTEXPROCESSING, std::wstring(L"(mix vp)")));
+				behavior.push_back(std::make_pair(D3DCREATE_SOFTWARE_VERTEXPROCESSING, std::wstring(L"(sw vp)")));
+
+				dev_type.push_back(std::make_pair(D3DDEVTYPE_HAL, std::wstring(L"HAL")));
+				dev_type.push_back(std::make_pair(D3DDEVTYPE_REF, std::wstring(L"REF")));
+			}
 
 			IDirect3DDevice9* d3d_device(NULL);
 			for (DevTypeType::iterator dev_iter = dev_type.begin();
@@ -369,7 +396,7 @@ namespace KlayGE
 			{
 				for (BehaviorType::iterator beh_iter = behavior.begin(); beh_iter != behavior.end(); ++ beh_iter)
 				{
-					if (SUCCEEDED(d3d_->CreateDevice(adapter_.AdapterNo(), dev_iter->first,
+					if (SUCCEEDED(d3d_->CreateDevice(adapter_to_use, dev_iter->first,
 						hWnd_, beh_iter->first, &d3dpp_, &d3d_device)))
 					{
 						// Check for ATI instancing support
