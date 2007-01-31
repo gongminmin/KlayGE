@@ -1351,7 +1351,7 @@ namespace KlayGE
 		inline Plane_T<T>
 		from_point_normal(Vector_T<T, 3> const & point, Vector_T<T, 3> const & normal)
 		{
-			return Plane(normal.x(), normal.y(), normal.z(), -Dot(point, normal));
+			return Plane(normal.x(), normal.y(), normal.z(), -dot(point, normal));
 		}
 		template <typename T>
 		inline Plane_T<T>
