@@ -192,7 +192,7 @@ namespace KlayGE
 			static void DoSwap(T lhs[N], T rhs[N])
 			{
 				std::swap(lhs[0], rhs[0]);
-				return vector_helper<T, 1>::DoSwap(lhs + 1, rhs + 1);
+				return vector_helper<T, N - 1>::DoSwap(lhs + 1, rhs + 1);
 			}
 		};
 		template <typename T>
