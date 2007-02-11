@@ -47,6 +47,7 @@
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
+				EnableFunctionLevelLinking="true"
 				ProgramDataBaseFileName="$(IntDir)\$(TargetFileName).pdb"
 				WarningLevel="4"
 				Detect64BitPortabilityProblems="true"
@@ -111,6 +112,7 @@
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
+				EnableFunctionLevelLinking="true"
 				ProgramDataBaseFileName="$(IntDir)\$(TargetFileName).pdb"
 				WarningLevel="4"
 				Detect64BitPortabilityProblems="true"
@@ -177,7 +179,6 @@
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;STRICT;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;_SECURE_SCL=0"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
-				EnableFunctionLevelLinking="true"
 				EnableEnhancedInstructionSet="1"
 				FloatingPointModel="2"
 				ProgramDataBaseFileName="$(IntDir)\$(TargetFileName).pdb"
@@ -247,7 +248,6 @@
 				PreprocessorDefinitions="WIN64;NDEBUG;_LIB;STRICT;_CRT_SECURE_NO_DEPRECATE;_SECURE_SCL=0"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
-				EnableFunctionLevelLinking="true"
 				FloatingPointModel="2"
 				ProgramDataBaseFileName="$(IntDir)\$(TargetFileName).pdb"
 				WarningLevel="4"
@@ -782,7 +782,7 @@
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx&#x0D;&#x0A;"
 							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 						/>
 					</FileConfiguration>
@@ -792,7 +792,7 @@
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx&#x0D;&#x0A;"
 							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 						/>
 					</FileConfiguration>
@@ -802,7 +802,7 @@
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx&#x0D;&#x0A;"
 							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 						/>
 					</FileConfiguration>
@@ -812,7 +812,7 @@
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx"
+							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Demos\media\Common\$(InputName).kfx&#x0D;&#x0A;"
 							Outputs="$(InputDir)\..\Demos\media\Common\$(InputName).kfx"
 						/>
 					</FileConfiguration>
