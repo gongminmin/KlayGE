@@ -1,8 +1,11 @@
 // ElementFormat.hpp
 // KlayGE 元素格式 头文件
-// Ver 3.4.0
-// 版权所有(C) 龚敏敏, 2006
+// Ver 3.5.0
+// 版权所有(C) 龚敏敏, 2006-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.5.0
+// 支持有符号格式 (2007.2.12)
 //
 // 3.4.0
 // 增加了MakeSRGB/MakeNonSRGB (2006.9.6)
@@ -46,29 +49,55 @@ namespace KlayGE
 		EF_R5G6B5,
 		// 16-bit element format, 4 bits for alpha, red, green and blue.
 		EF_ARGB4,
+		// 16-bit element format, 8 bits for red, green.
+		EF_RG8,
+		// 16-bit element format, 8 bits for signed red, green.
+		EF_SIGNED_GR8,
 		// 24-bit element format, 8 bits for red, green and blue.
 		EF_RGB8,
+		// 24-bit element format, 8 bits for signed red, green and blue.
+		EF_SIGNED_BGR8,
 		// 32-bit element format, 8 bits for alpha, red, green and blue.
 		EF_ARGB8,
+		// 32-bit element format, 8 bits for signed alpha, red, green and blue.
+		EF_SIGNED_ABGR8,
 		// 32-bit element format, 2 bits for alpha, 10 bits for red, green and blue.
 		EF_A2RGB10,
+		// 32-bit element format, 2 bits for alpha, 10 bits for signed red, green and blue.
+		EF_SIGNED_A2RGB10,
 
-		// 32-bit element format, 16 bits for red and green.
+		// 16-bit element format, 16 bits for red.
 		EF_R16,
+		// 16-bit element format, 16 bits for signed red.
+		EF_SIGNED_R16,
 		// 32-bit element format, 16 bits for red and green.
 		EF_GR16,
+		// 32-bit element format, 16 bits for signed red and green.
+		EF_SIGNED_GR16,
 		// 48-bit element format, 16 bits for alpha, blue, green and red.
 		EF_BGR16,
+		// 48-bit element format, 16 bits for signed alpha, blue, green and red.
+		EF_SIGNED_BGR16,
 		// 64-bit element format, 16 bits for alpha, blue, green and red.
 		EF_ABGR16,
+		// 64-bit element format, 16 bits for signed alpha, blue, green and red.
+		EF_SIGNED_ABGR16,
 		// 32-bit element format, 32 bits for red.
 		EF_R32,
+		// 32-bit element format, 32 bits for signed red.
+		EF_SIGNED_R32,
 		// 64-bit element format, 16 bits for red and green.
 		EF_GR32,
+		// 64-bit element format, 16 bits for signed red and green.
+		EF_SIGNED_GR32,
 		// 96-bit element format, 16 bits for alpha, blue, green and red.
 		EF_BGR32,
+		// 96-bit element format, 16 bits for signed_alpha, blue, green and red.
+		EF_SIGNED_BGR32,
 		// 128-bit element format, 16 bits for alpha, blue, green and red.
 		EF_ABGR32,
+		// 128-bit element format, 16 bits for signed alpha, blue, green and red.
+		EF_SIGNED_ABGR32,
 
 		// 16-bit element format, 16 bits floating-point for red.
 		EF_R16F,
@@ -133,7 +162,10 @@ namespace KlayGE
 		case EF_AL8:
 		case EF_R5G6B5:
 		case EF_ARGB4:
+		case EF_RG8:
+		case EF_SIGNED_GR8:
 		case EF_R16:
+		case EF_SIGNED_R16:
 		case EF_R16F:
 		case EF_BC1:
 		case EF_BC1_SRGB:
@@ -141,15 +173,20 @@ namespace KlayGE
 			return 16;
 
 		case EF_RGB8:
+		case EF_SIGNED_BGR8:
 			return 24;
 
 		case EF_AL16:
 		case EF_ARGB8:
+		case EF_SIGNED_ABGR8:
 		case EF_ARGB8_SRGB:
 		case EF_A2RGB10:
+		case EF_SIGNED_A2RGB10:
 		case EF_GR16:
+		case EF_SIGNED_GR16:
 		case EF_GR16F:
 		case EF_R32:
+		case EF_SIGNED_R32:
 		case EF_R32F:
 		case EF_BC2:
 		case EF_BC3:
@@ -160,20 +197,25 @@ namespace KlayGE
 			return 32;
 
 		case EF_BGR16:
+		case EF_SIGNED_BGR16:
 		case EF_BGR16F:
 			return 48;
 
 		case EF_ABGR16:
+		case EF_SIGNED_ABGR16:
 		case EF_ABGR16F:
 		case EF_GR32:
+		case EF_SIGNED_GR32:
 		case EF_GR32F:
 			return 64;
 
 		case EF_BGR32:
+		case EF_SIGNED_BGR32:
 		case EF_BGR32F:
 			return 96;
 
 		case EF_ABGR32:
+		case EF_SIGNED_ABGR32:
 		case EF_ABGR32F:
 			return 128;
 
@@ -271,6 +313,30 @@ namespace KlayGE
 		}
 	}
 
+	inline bool
+	IsSigned(ElementFormat format)
+	{
+		switch (format)
+		{
+		case EF_SIGNED_GR8:
+		case EF_SIGNED_BGR8:
+		case EF_SIGNED_ABGR8:
+		case EF_SIGNED_A2RGB10:
+		case EF_SIGNED_R16:
+		case EF_SIGNED_GR16:
+		case EF_SIGNED_BGR16:
+		case EF_SIGNED_ABGR16:
+		case EF_SIGNED_R32:
+		case EF_SIGNED_GR32:
+		case EF_SIGNED_BGR32:
+		case EF_SIGNED_ABGR32:
+			return true;
+
+		default:
+			return false;
+		}
+	}
+
 	inline ElementFormat
 	MakeSRGB(ElementFormat format)
 	{
@@ -309,6 +375,98 @@ namespace KlayGE
 
 		case EF_BC3_SRGB:
 			return EF_BC3;
+
+		default:
+			return format;
+		}
+	}
+
+	inline ElementFormat
+	MakeSigned(ElementFormat format)
+	{
+		switch (format)
+		{
+		case EF_RG8:
+			return EF_SIGNED_GR8;
+
+		case EF_RGB8:
+			return EF_SIGNED_BGR8;
+
+		case EF_ARGB8:
+			return EF_SIGNED_ABGR8;
+
+		case EF_A2RGB10:
+			return EF_SIGNED_A2RGB10;
+
+		case EF_R16:
+			return EF_SIGNED_R16;
+
+		case EF_GR16:
+			return EF_SIGNED_GR16;
+
+		case EF_BGR16:
+			return EF_SIGNED_BGR16;
+
+		case EF_ABGR16:
+			return EF_SIGNED_ABGR16;
+
+		case EF_R32:
+			return EF_SIGNED_R32;
+
+		case EF_GR32:
+			return EF_SIGNED_GR32;
+
+		case EF_BGR32:
+			return EF_SIGNED_BGR32;
+
+		case EF_ABGR32:
+			return EF_SIGNED_ABGR32;
+
+		default:
+			return format;
+		}
+	}
+
+	inline ElementFormat
+	MakeUnsigned(ElementFormat format)
+	{
+		switch (format)
+		{
+		case EF_SIGNED_GR8:
+			return EF_RG8;
+
+		case EF_SIGNED_BGR8:
+			return EF_RGB8;
+
+		case EF_SIGNED_ABGR8:
+			return EF_ARGB8;
+
+		case EF_SIGNED_A2RGB10:
+			return EF_A2RGB10;
+
+		case EF_SIGNED_R16:
+			return EF_R16;
+
+		case EF_SIGNED_GR16:
+			return EF_GR16;
+
+		case EF_SIGNED_BGR16:
+			return EF_BGR16;
+
+		case EF_SIGNED_ABGR16:
+			return EF_ABGR16;
+
+		case EF_SIGNED_R32:
+			return EF_R32;
+
+		case EF_SIGNED_GR32:
+			return EF_GR32;
+
+		case EF_SIGNED_BGR32:
+			return EF_BGR32;
+
+		case EF_SIGNED_ABGR32:
+			return EF_ABGR32;
 
 		default:
 			return format;
@@ -356,7 +514,9 @@ namespace KlayGE
 		case EF_A8:
 		case EF_L16:
 		case EF_R16:
+		case EF_SIGNED_R16:
 		case EF_R32:
+		case EF_SIGNED_R32:
 		case EF_R16F:
 		case EF_R32F:
 		case EF_D16:
@@ -366,8 +526,12 @@ namespace KlayGE
 		case EF_AL4:
 		case EF_AL8:
 		case EF_AL16:
+		case EF_RG8:
+		case EF_SIGNED_GR8:
 		case EF_GR16:
+		case EF_SIGNED_GR16:
 		case EF_GR32:
+		case EF_SIGNED_GR32:
 		case EF_GR16F:
 		case EF_GR32F:
 		case EF_D24S8:
@@ -375,16 +539,22 @@ namespace KlayGE
 
 		case EF_R5G6B5:
 		case EF_BGR16:
+		case EF_SIGNED_BGR16:
 		case EF_BGR32:
+		case EF_SIGNED_BGR32:
 		case EF_BGR16F:
 		case EF_BGR32F:
 			return 3;
 
 		case EF_ARGB4:
 		case EF_ARGB8:
+		case EF_SIGNED_ABGR8:
 		case EF_A2RGB10:
+		case EF_SIGNED_A2RGB10:
 		case EF_ABGR16:
+		case EF_SIGNED_ABGR16:
 		case EF_ABGR32:
+		case EF_SIGNED_ABGR32:
 		case EF_ABGR16F:
 		case EF_ABGR32F:
 		case EF_BC1:
@@ -414,14 +584,19 @@ namespace KlayGE
 		case EF_L8:
 		case EF_A8:
 		case EF_AL8:
+		case EF_RG8:
+		case EF_SIGNED_GR8:
 		case EF_ARGB8:
+		case EF_SIGNED_ABGR8:
 		case EF_ARGB8_SRGB:
 			return 8;
 
 		case EF_L16:
 		case EF_AL16:
 		case EF_GR16:
+		case EF_SIGNED_GR16:
 		case EF_ABGR16:
+		case EF_SIGNED_ABGR16:
 		case EF_R16F:
 		case EF_GR16F:
 		case EF_BGR16F:

@@ -582,18 +582,33 @@ namespace KlayGE
 		case EF_ARGB4:
 			return D3DFMT_A4R4G4B4;
 
+		case EF_SIGNED_GR8:
+			return D3DFMT_V8U8;
+
 		case EF_ARGB8:
 		case EF_ARGB8_SRGB:
 			return D3DFMT_A8R8G8B8;
 
+		case EF_SIGNED_ABGR8:
+			return D3DFMT_Q8W8V8U8;
+
 		case EF_A2RGB10:
 			return D3DFMT_A2B10G10R10;
+
+		case EF_SIGNED_A2RGB10:
+			return D3DFMT_A2W10V10U10;
 
 		case EF_GR16:
 			return D3DFMT_G16R16;
 
+		case EF_SIGNED_GR16:
+			return D3DFMT_V16U16;
+
 		case EF_ABGR16:
 			return D3DFMT_A16B16G16R16;
+
+		case EF_SIGNED_ABGR16:
+			return D3DFMT_Q16W16V16U16;
 
 		case EF_R16F:
 			return D3DFMT_R16F;
@@ -670,14 +685,29 @@ namespace KlayGE
 		case D3DFMT_A8R8G8B8:
 			return EF_ARGB8;
 
+		case D3DFMT_V8U8:
+			return EF_SIGNED_GR8;
+
+		case D3DFMT_Q8W8V8U8:
+			return EF_SIGNED_ABGR8;
+
 		case D3DFMT_A2B10G10R10:
 			return EF_A2RGB10;
+
+		case D3DFMT_A2W10V10U10:
+			return EF_SIGNED_A2RGB10;
 
 		case D3DFMT_G16R16:
 			return EF_GR16;
 
+		case D3DFMT_V16U16:
+			return EF_SIGNED_GR16;
+
 		case D3DFMT_A16B16G16R16:
 			return EF_ABGR16;
+
+		case D3DFMT_Q16W16V16U16:
+			return EF_SIGNED_ABGR16;
 
 		case D3DFMT_R16F:
 			return EF_R16F;

@@ -1,8 +1,11 @@
 // Texture.cpp
 // KlayGE 纹理类 实现文件
-// Ver 3.3.0
-// 版权所有(C) 龚敏敏, 2005-2006
+// Ver 3.5.0
+// 版权所有(C) 龚敏敏, 2005-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.5.0
+// 支持有符号格式 (2007.2.12)
 //
 // 3.3.0
 // 支持GR16和ABGR16 (2006.6.7)
@@ -47,6 +50,9 @@ namespace
 		// Use this flag for luminance-only or luminance+alpha surfaces,
 		// the bit depth is then ddpf.dwLuminanceBitCount.
 		DDSPF_LUMINANCE = 0x00020000,
+
+		// Bump map dUdV data in the pixel format is valid.
+		DDSPF_BUMPDUDV = 0x00080000
 	};
 
 	struct DDSPIXELFORMAT
@@ -179,6 +185,10 @@ namespace KlayGE
 			{
 			case 36:
 				format = EF_ABGR16;
+				break;
+
+			case 110:
+				format = EF_SIGNED_ABGR16;
 				break;
 
 			case 111:
@@ -323,13 +333,77 @@ namespace KlayGE
 				}
 				else
 				{
-					if ((desc.pixel_format.flags & DDSPF_ALPHAPIXELS) != 0)
+					if ((desc.pixel_format.flags & DDSPF_BUMPDUDV) != 0)
 					{
-						format = EF_A8;
+						switch (desc.pixel_format.rgb_bit_count)
+						{
+						case 16:
+							if ((0x000000FF == desc.pixel_format.r_bit_mask)
+								&& (0x0000FF00 == desc.pixel_format.g_bit_mask))
+							{
+								format = EF_SIGNED_GR8;
+							}
+							else
+							{
+								if (0x0000FFFF == desc.pixel_format.r_bit_mask)
+								{
+									format = EF_SIGNED_R16;
+								}
+								else
+								{
+									BOOST_ASSERT(false);
+								}
+							}
+							break;
+
+						case 32:
+							if ((0x000000FF == desc.pixel_format.r_bit_mask)
+								&& (0x0000FF00 == desc.pixel_format.g_bit_mask)
+								&& (0x00FF0000 == desc.pixel_format.b_bit_mask))
+							{
+								format = EF_SIGNED_ABGR8;
+							}
+							else
+							{
+								if ((0xC0000000 == desc.pixel_format.rgb_alpha_bit_mask)
+									&& (0x3FF00000 == desc.pixel_format.r_bit_mask)
+									&& (0x000FFC00 == desc.pixel_format.g_bit_mask)
+									&& (0x000003FF == desc.pixel_format.b_bit_mask))
+								{
+									format = EF_SIGNED_A2RGB10;
+								}
+								else
+								{
+									if ((0x00000000 == desc.pixel_format.rgb_alpha_bit_mask)
+										&& (0x0000FFFF == desc.pixel_format.r_bit_mask)
+										&& (0xFFFF0000 == desc.pixel_format.g_bit_mask)
+										&& (0x00000000 == desc.pixel_format.b_bit_mask))
+									{
+										format = EF_SIGNED_GR16;
+									}
+									else
+									{
+										BOOST_ASSERT(false);
+									}
+								}
+							}
+							break;
+
+						default:
+							BOOST_ASSERT(false);
+							break;
+						}
 					}
 					else
 					{
-						BOOST_ASSERT(false);
+						if ((desc.pixel_format.flags & DDSPF_ALPHAPIXELS) != 0)
+						{
+							format = EF_A8;
+						}
+						else
+						{
+							BOOST_ASSERT(false);
+						}
 					}
 				}
 			}
@@ -587,6 +661,10 @@ namespace KlayGE
 				desc.pixel_format.four_cc = 36;
 				break;
 
+			case EF_SIGNED_ABGR16:
+				desc.pixel_format.four_cc = 110;
+				break;
+
 			case EF_R16F:
 				desc.pixel_format.four_cc = 111;
 				break;
@@ -656,6 +734,26 @@ namespace KlayGE
 				desc.pixel_format.b_bit_mask = 0x0000000F;
 				break;
 
+			case EF_SIGNED_GR8:
+				desc.pixel_format.flags |= DDSPF_BUMPDUDV;
+				desc.pixel_format.rgb_bit_count = 16;
+
+				desc.pixel_format.rgb_alpha_bit_mask = 0x00000000;
+				desc.pixel_format.r_bit_mask = 0x000000FF;
+				desc.pixel_format.g_bit_mask = 0x0000FF00;
+				desc.pixel_format.b_bit_mask = 0x00000000;
+				break;
+
+			case EF_SIGNED_R16:
+				desc.pixel_format.flags |= DDSPF_BUMPDUDV;
+				desc.pixel_format.rgb_bit_count = 16;
+
+				desc.pixel_format.rgb_alpha_bit_mask = 0x00000000;
+				desc.pixel_format.r_bit_mask = 0x0000FFFF;
+				desc.pixel_format.g_bit_mask = 0x00000000;
+				desc.pixel_format.b_bit_mask = 0x00000000;
+				break;
+
 			case EF_ARGB8:
 			case EF_ARGB8_SRGB:
 				desc.pixel_format.flags |= DDSPF_RGB;
@@ -668,8 +766,30 @@ namespace KlayGE
 				desc.pixel_format.b_bit_mask = 0x000000FF;
 				break;
 
+			case EF_SIGNED_ABGR8:
+				desc.pixel_format.flags |= DDSPF_BUMPDUDV;
+				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
+				desc.pixel_format.rgb_bit_count = 32;
+
+				desc.pixel_format.rgb_alpha_bit_mask = 0xFF00000;
+				desc.pixel_format.r_bit_mask = 0x000000FF;
+				desc.pixel_format.g_bit_mask = 0x0000FF00;
+				desc.pixel_format.b_bit_mask = 0x00FF0000;
+				break;
+
 			case EF_A2RGB10:
 				desc.pixel_format.flags |= DDSPF_RGB;
+				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
+				desc.pixel_format.rgb_bit_count = 32;
+
+				desc.pixel_format.rgb_alpha_bit_mask = 0xC0000000;
+				desc.pixel_format.r_bit_mask = 0x3FF00000;
+				desc.pixel_format.g_bit_mask = 0x000FFC00;
+				desc.pixel_format.b_bit_mask = 0x000003FF;
+				break;
+
+			case EF_SIGNED_A2RGB10:
+				desc.pixel_format.flags |= DDSPF_BUMPDUDV;
 				desc.pixel_format.rgb_bit_count = 32;
 
 				desc.pixel_format.rgb_alpha_bit_mask = 0xC0000000;
@@ -680,6 +800,16 @@ namespace KlayGE
 
 			case EF_GR16:
 				desc.pixel_format.flags |= DDSPF_RGB;
+				desc.pixel_format.rgb_bit_count = 32;
+
+				desc.pixel_format.rgb_alpha_bit_mask = 0x00000000;
+				desc.pixel_format.r_bit_mask = 0x0000FFFF;
+				desc.pixel_format.g_bit_mask = 0xFFFF0000;
+				desc.pixel_format.b_bit_mask = 0x00000000;
+				break;
+
+			case EF_SIGNED_GR16:
+				desc.pixel_format.flags |= DDSPF_BUMPDUDV;
 				desc.pixel_format.rgb_bit_count = 32;
 
 				desc.pixel_format.rgb_alpha_bit_mask = 0x00000000;

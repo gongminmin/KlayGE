@@ -89,6 +89,7 @@ OpenGL插件可以检测Shader Model 4
 增加了aligned_allocator
 修正了thread_pool死锁的bug（感谢Roy报告此bug）
 支持NVPerfHUD
+增加了有符号元素格式
 
 3.4.0 (2006.9.22)
 导出插件支持骨骼的导出
