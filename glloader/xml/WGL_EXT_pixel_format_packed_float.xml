@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+
+<GLExtension name="WGL_EXT_pixel_format_packed_float">
+	<Tokens>
+		<Token name="WGL_TYPE_RGBA_UNSIGNED_FLOAT_EXT" value="0x20A8"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="WGL_EXT" string="WGL_EXT_pixel_format_packed_float"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="WGL_EXT"/>
+	</InitPath>
+</GLExtension>

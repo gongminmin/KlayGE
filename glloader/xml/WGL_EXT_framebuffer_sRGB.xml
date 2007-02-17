@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+
+<GLExtension name="WGL_EXT_framebuffer_sRGB">
+	<Tokens>
+		<Token name="WGL_FRAMEBUFFER_SRGB_CAPABLE_EXT" value="0x20A9"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="WGL_EXT" string="WGL_EXT_framebuffer_sRGB"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="WGL_EXT"/>
+	</InitPath>
+</GLExtension>
