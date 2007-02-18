@@ -20,12 +20,12 @@ GPLNotice = """// glloader
 """
 
 class Typedef:
-	def __init__(self, type, synonym):
-		self.type = type
+	def __init__(self, type_name, synonym):
+		self.type_name = type_name
 		self.synonym = synonym
 
 	def __str__(self):
-		return "typedef %s %s;" % (self.type, self.synonym)
+		return "typedef %s %s;" % (self.type_name, self.synonym)
 
 class Token:
 	def __init__(self, name, value):
@@ -36,12 +36,12 @@ class Token:
 		return "#define %s %s" % (self.name, self.value)
 
 class Param:
-	def __init__(self, type, name):
-		self.type = type
+	def __init__(self, type_name, name):
+		self.type_name = type_name
 		self.name = name
 
 	def __str__(self):
-		return "%s %s" % (self.type, self.name)
+		return "%s %s" % (self.type_name, self.name)
 
 class Function:
 	def __init__(self, return_type, name, params):
