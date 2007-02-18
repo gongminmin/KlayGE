@@ -29,9 +29,14 @@
 			<Name name="glMultiDrawArraysEXT"/>
 			<Name name="glMultiDrawElementsEXT"/>
 		</Vendor>
+		<Vendor name="GL_SUN" string="GL_SUN_multi_draw_arrays">
+			<Name name="glMultiDrawArraysSUN"/>
+			<Name name="glMultiDrawElementsSUN"/>
+		</Vendor>
 	</Vendors>
 
 	<InitPath>
 		<Init name="GL_EXT"/>
+		<Init name="GL_SUN"/>
 	</InitPath>
 </GLExtension>

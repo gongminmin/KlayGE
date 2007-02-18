@@ -17,16 +17,6 @@
 		<Token name="GL_TEXTURE_FLOAT_COMPONENTS_NV" value="0x888C"/>
 		<Token name="GL_FLOAT_CLEAR_COLOR_VALUE_NV" value="0x888D"/>
 		<Token name="GL_FLOAT_RGBA_MODE_NV" value="0x888E"/>
-
-		<Token name="WGL_FLOAT_COMPONENTS_NV" value="0x20B0"/>
-		<Token name="WGL_BIND_TO_TEXTURE_RECTANGLE_FLOAT_R_NV" value="0x20B1"/>
-		<Token name="WGL_BIND_TO_TEXTURE_RECTANGLE_FLOAT_RG_NV" value="0x20B2"/>
-		<Token name="WGL_BIND_TO_TEXTURE_RECTANGLE_FLOAT_RGB_NV" value="0x20B3"/>
-		<Token name="WGL_BIND_TO_TEXTURE_RECTANGLE_FLOAT_RGBA_NV" value="0x20B4"/>
-		<Token name="WGL_TEXTURE_FLOAT_R_NV" value="0x20B5"/>
-		<Token name="WGL_TEXTURE_FLOAT_RG_NV" value="0x20B6"/>
-		<Token name="WGL_TEXTURE_FLOAT_RGB_NV" value="0x20B7"/>
-		<Token name="WGL_TEXTURE_FLOAT_RGBA_NV" value="0x20B8"/>
 	</Tokens>
 
 	<Vendors>

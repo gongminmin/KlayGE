@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GLX_ARB_fbconfig_float">
+	<Tokens>
+		<Token name="GLX_RGBA_FLOAT_TYPE" value="0x20B9"/>
+		<Token name="GLX_RGBA_FLOAT_BIT" value="0x00000004"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GLX_ARB" string="GLX_ARB_fbconfig_float"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GLX_ARB"/>
+	</InitPath>
+</GLExtension>

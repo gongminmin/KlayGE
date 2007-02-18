@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+
+<GLExtension name="WGL_ARB_pixel_format_float">
+	<Tokens>
+		<Token name="WGL_TYPE_RGBA_FLOAT_ARB" value="0x21A0"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="WGL_ARB" string="WGL_ARB_pixel_format_float"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="WGL_ARB"/>
+	</InitPath>
+</GLExtension>

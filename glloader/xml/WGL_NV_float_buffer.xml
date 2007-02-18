@@ -1,0 +1,23 @@
+<?xml version='1.0'?>
+
+<GLExtension name="WGL_NV_float_buffer">
+	<Tokens>
+		<Token name="WGL_FLOAT_COMPONENTS_NV" value="0x20B0"/>
+		<Token name="WGL_BIND_TO_TEXTURE_RECTANGLE_FLOAT_R_NV" value="0x20B1"/>
+		<Token name="WGL_BIND_TO_TEXTURE_RECTANGLE_FLOAT_RG_NV" value="0x20B2"/>
+		<Token name="WGL_BIND_TO_TEXTURE_RECTANGLE_FLOAT_RGB_NV" value="0x20B3"/>
+		<Token name="WGL_BIND_TO_TEXTURE_RECTANGLE_FLOAT_RGBA_NV" value="0x20B4"/>
+		<Token name="WGL_TEXTURE_FLOAT_R_NV" value="0x20B5"/>
+		<Token name="WGL_TEXTURE_FLOAT_RG_NV" value="0x20B6"/>
+		<Token name="WGL_TEXTURE_FLOAT_RGB_NV" value="0x20B7"/>
+		<Token name="WGL_TEXTURE_FLOAT_RGBA_NV" value="0x20B8"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="WGL_NV" string="WGL_NV_float_buffer"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="WGL_NV"/>
+	</InitPath>
+</GLExtension>
