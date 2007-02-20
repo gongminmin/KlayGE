@@ -118,14 +118,24 @@ namespace KlayGE
 
 		// BC1 compression element format, DXT1
 		EF_BC1,
+		// BC1 compression element format, signed DXT1
+		EF_SIGNED_BC1,
 		// BC2 compression element format, DXT3
 		EF_BC2,
+		// BC2 compression element format, signed DXT3
+		EF_SIGNED_BC2,
 		// BC3 compression element format, DXT5
 		EF_BC3,
+		// BC3 compression element format, signed DXT5
+		EF_SIGNED_BC3,
 		// BC4 compression element format, 1 channel
 		EF_BC4,
+		// BC4 compression element format, 1 channel signed
+		EF_SIGNED_BC4,
 		// BC5 compression element format, 2 channels
 		EF_BC5,
+		// BC5 compression element format, 2 channels signed
+		EF_SIGNED_BC5,
 
 		// 16-bit element format, 16 bits depth
 		EF_D16,
@@ -168,7 +178,11 @@ namespace KlayGE
 		case EF_SIGNED_R16:
 		case EF_R16F:
 		case EF_BC1:
+		case EF_SIGNED_BC1:
 		case EF_BC1_SRGB:
+		case EF_BC4:
+		case EF_SIGNED_BC4:
+		case EF_BC4_SRGB:
 		case EF_D16:
 			return 16;
 
@@ -189,9 +203,14 @@ namespace KlayGE
 		case EF_SIGNED_R32:
 		case EF_R32F:
 		case EF_BC2:
-		case EF_BC3:
+		case EF_SIGNED_BC2:
 		case EF_BC2_SRGB:
+		case EF_BC3:
+		case EF_SIGNED_BC3:
 		case EF_BC3_SRGB:
+		case EF_BC5:
+		case EF_SIGNED_BC5:
+		case EF_BC5_SRGB:
 		case EF_D24S8:
 		case EF_D32:
 			return 32;
@@ -259,6 +278,13 @@ namespace KlayGE
 		case EF_BC1:
 		case EF_BC2:
 		case EF_BC3:
+		case EF_BC4:
+		case EF_BC5:
+		case EF_SIGNED_BC1:
+		case EF_SIGNED_BC2:
+		case EF_SIGNED_BC3:
+		case EF_SIGNED_BC4:
+		case EF_SIGNED_BC5:
 		case EF_BC1_SRGB:
 		case EF_BC2_SRGB:
 		case EF_BC3_SRGB:
@@ -330,6 +356,11 @@ namespace KlayGE
 		case EF_SIGNED_GR32:
 		case EF_SIGNED_BGR32:
 		case EF_SIGNED_ABGR32:
+		case EF_SIGNED_BC1:
+		case EF_SIGNED_BC2:
+		case EF_SIGNED_BC3:
+		case EF_SIGNED_BC4:
+		case EF_SIGNED_BC5:
 			return true;
 
 		default:
@@ -422,6 +453,21 @@ namespace KlayGE
 		case EF_ABGR32:
 			return EF_SIGNED_ABGR32;
 
+		case EF_BC1:
+			return EF_SIGNED_BC1;
+
+		case EF_BC2:
+			return EF_SIGNED_BC2;
+
+		case EF_BC3:
+			return EF_SIGNED_BC3;
+
+		case EF_BC4:
+			return EF_SIGNED_BC4;
+
+		case EF_BC5:
+			return EF_SIGNED_BC5;
+
 		default:
 			return format;
 		}
@@ -467,6 +513,21 @@ namespace KlayGE
 
 		case EF_SIGNED_ABGR32:
 			return EF_ABGR32;
+
+		case EF_SIGNED_BC1:
+			return EF_BC1;
+
+		case EF_SIGNED_BC2:
+			return EF_BC2;
+
+		case EF_SIGNED_BC3:
+			return EF_BC3;
+
+		case EF_SIGNED_BC4:
+			return EF_BC4;
+
+		case EF_SIGNED_BC5:
+			return EF_BC5;
 
 		default:
 			return format;
@@ -558,8 +619,11 @@ namespace KlayGE
 		case EF_ABGR16F:
 		case EF_ABGR32F:
 		case EF_BC1:
+		case EF_SIGNED_BC1:
 		case EF_BC2:
+		case EF_SIGNED_BC2:
 		case EF_BC3:
+		case EF_SIGNED_BC3:
 		case EF_ARGB8_SRGB:
 		case EF_BC1_SRGB:
 		case EF_BC2_SRGB:
