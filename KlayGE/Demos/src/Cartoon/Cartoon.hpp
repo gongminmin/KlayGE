@@ -23,8 +23,6 @@ private:
 	KlayGE::FontPtr font_;
 	KlayGE::SceneObjectPtr torus_;
 
-	boost::shared_ptr<KlayGE::Renderable> renderQuad_;
-
 	KlayGE::FirstPersonCameraController fpcController_;
 
 	KlayGE::FrameBufferPtr normal_depth_buffer_;
