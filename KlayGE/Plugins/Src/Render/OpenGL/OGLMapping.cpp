@@ -424,13 +424,13 @@ namespace KlayGE
 			break;
 
 		case EF_BC4:
-			internalFormat = GL_COMPRESSED_LUMINANCE;
+			internalFormat = GL_COMPRESSED_LUMINANCE_LATC1_EXT;
 			glformat = GL_COMPRESSED_LUMINANCE;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case EF_BC5:
-			internalFormat = GL_COMPRESSED_LUMINANCE_ALPHA;
+			internalFormat = GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT;
 			glformat = GL_COMPRESSED_LUMINANCE_ALPHA;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
