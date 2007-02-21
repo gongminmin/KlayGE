@@ -122,6 +122,8 @@ namespace KlayGE
 	typedef boost::shared_ptr<PostProcess> PostProcessPtr;
 	class Downsampler2x2PostProcess;
 	typedef boost::shared_ptr<Downsampler2x2PostProcess> Downsampler2x2PostProcessPtr;
+	class BrightPassDownsampler2x2PostProcess;
+	typedef boost::shared_ptr<BrightPassDownsampler2x2PostProcess> BrightPassDownsampler2x2PostProcessPtr;
 	class BlurPostProcess;
 	typedef boost::shared_ptr<BlurPostProcess> BlurPostProcessPtr;
 	class BlurXPostProcess;

@@ -30,6 +30,11 @@ namespace KlayGE
 	{
 	}
 
+	BrightPassDownsampler2x2PostProcess::BrightPassDownsampler2x2PostProcess()
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Downsample.kfx")->TechniqueByName("BrightPassDownsample"))
+	{
+	}
+
 
 	BlurPostProcess::BlurPostProcess(std::string const & tech, int kernel_radius, float multiplier)
 			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Blur.kfx")->TechniqueByName(tech)),
@@ -249,7 +254,7 @@ namespace KlayGE
 		: PostProcess(RenderTechniquePtr())
 	{
 		tone_mapping_.reset(new ToneMappingPostProcess);
-		downsampler_.reset(new Downsampler2x2PostProcess);
+		downsampler_.reset(new BrightPassDownsampler2x2PostProcess);
 		blur_x_.reset(new BlurXPostProcess(8, 2));
 		blur_y_.reset(new BlurYPostProcess(8, 2));
 		sum_lums_.resize(NUM_TONEMAP_TEXTURES + 1);

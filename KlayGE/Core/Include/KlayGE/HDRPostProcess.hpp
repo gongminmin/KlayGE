@@ -27,6 +27,12 @@ namespace KlayGE
 		Downsampler2x2PostProcess();
 	};
 
+	class BrightPassDownsampler2x2PostProcess : public PostProcess
+	{
+	public:
+		BrightPassDownsampler2x2PostProcess();
+	};
+
 	class BlurPostProcess : public PostProcess
 	{
 	public:
