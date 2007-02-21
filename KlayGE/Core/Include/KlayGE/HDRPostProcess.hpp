@@ -39,15 +39,13 @@ namespace KlayGE
 		BlurPostProcess(std::string const & tech, int kernel_radius, float multiplier);
 		virtual ~BlurPostProcess();
 
-		void Source(TexturePtr const & src_tex, bool flipping);
-
 		void OnRenderBegin();
 
-	private:
+	protected:
 		float GaussianDistribution(float x, float y, float rho);
 		void CalSampleOffsets(uint32_t tex_size, float deviation);
 
-	private:
+	protected:
 		std::vector<float> color_weight_;
 		std::vector<float> tex_coord_offset_;
 
@@ -59,12 +57,16 @@ namespace KlayGE
 	{
 	public:
 		BlurXPostProcess(int length, float multiplier);
+
+		void Source(TexturePtr const & src_tex, bool flipping);
 	};
 
 	class BlurYPostProcess : public BlurPostProcess
 	{
 	public:
 		BlurYPostProcess(int length, float multiplier);
+
+		void Source(TexturePtr const & src_tex, bool flipping);
 	};
 
 	class SumLumPostProcess : public PostProcess

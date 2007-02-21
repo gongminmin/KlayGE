@@ -50,7 +50,7 @@ namespace KlayGE
 		// submit a 4k block to libvorbis' Ogg layer
 		char* buffer(ogg_sync_buffer(&oy_, READSIZE));
 		oggFile_->read(buffer, READSIZE);
-		int bytes(oggFile_->gcount());
+		int bytes(static_cast<int>(oggFile_->gcount()));
 		ogg_sync_wrote(&oy_, bytes);
 
 		// Get the first page
@@ -109,7 +109,7 @@ namespace KlayGE
 			// no harm in not checking before adding more
 			buffer = ogg_sync_buffer(&oy_, READSIZE);
 			oggFile_->read(buffer, READSIZE);
-			bytes = oggFile_->gcount();
+			bytes = static_cast<int>(oggFile_->gcount());
 			ogg_sync_wrote(&oy_, bytes);
 		}
 
@@ -230,7 +230,7 @@ namespace KlayGE
 			{
 				char* buffer(ogg_sync_buffer(&oy_, READSIZE));
 				oggFile_->read(buffer, READSIZE);
-				int bytes(oggFile_->gcount());
+				int bytes(static_cast<int>(oggFile_->gcount()));
 
 				if (oggFile_->fail())
 				{

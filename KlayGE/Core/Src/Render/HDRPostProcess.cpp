@@ -48,13 +48,6 @@ namespace KlayGE
 	{
 	}
 
-	void BlurPostProcess::Source(TexturePtr const & src_tex, bool flipping)
-	{
-		PostProcess::Source(src_tex, flipping);
-
-		this->CalSampleOffsets(src_texture_->Width(0), 3);
-	}
-
 	void BlurPostProcess::OnRenderBegin()
 	{
 		PostProcess::OnRenderBegin();
@@ -80,7 +73,7 @@ namespace KlayGE
 		float sum_weight = 0;
 		for (int i = 0; i < 2 * kernel_radius_; ++ i)
 		{
-			float weight = this->GaussianDistribution(i - kernel_radius_ + 0.5f, 0, deviation);
+			float weight = this->GaussianDistribution(i - kernel_radius_ + 0.5f, 0, kernel_radius_ / deviation);
 			tmp_weights[i] = weight;
 			sum_weight += weight;
 		}
@@ -117,9 +110,23 @@ namespace KlayGE
 	{
 	}
 
+	void BlurXPostProcess::Source(TexturePtr const & src_tex, bool flipping)
+	{
+		BlurPostProcess::Source(src_tex, flipping);
+
+		this->CalSampleOffsets(src_texture_->Width(0), 3);
+	}
+
 	BlurYPostProcess::BlurYPostProcess(int length, float multiplier)
 			: BlurPostProcess("BlurY", length, multiplier)
 	{
+	}
+
+	void BlurYPostProcess::Source(TexturePtr const & src_tex, bool flipping)
+	{
+		BlurPostProcess::Source(src_tex, flipping);
+
+		this->CalSampleOffsets(src_texture_->Height(0), 3);
 	}
 
 

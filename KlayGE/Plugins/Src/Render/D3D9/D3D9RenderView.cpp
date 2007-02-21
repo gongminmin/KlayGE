@@ -295,7 +295,7 @@ namespace KlayGE
 	{
 		size_t const format_size = NumFormatBytes(pf_);
 
-		gbuffer_.Resize(width_ * height_ * format_size);
+		gbuffer_.Resize(static_cast<uint32_t>(width_ * height_ * format_size));
 
 		D3DLOCKED_RECT locked_rect;
 		TIF(surface_->LockRect(&locked_rect, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
