@@ -86,7 +86,7 @@ namespace KlayGE
 		for (int i = 0; i < kernel_radius_; ++ i)
 		{
 			tmp_offset[i]                  = static_cast<float>(i - kernel_radius_);
-			tmp_offset[i + kernel_radius_] = static_cast<float>(i + 1);
+			tmp_offset[i + kernel_radius_] = static_cast<float>(i);
 		}
 
 		color_weight_.resize(kernel_radius_);
