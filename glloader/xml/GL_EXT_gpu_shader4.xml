@@ -201,7 +201,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_gpu_shader4">
+		<Vendor name="GL_EXT" string="GL_EXT_gpu_shader4" reg_no="326">
 			<Name name="glVertexAttribI1iEXT"/>
 			<Name name="glVertexAttribI2iEXT"/>
 			<Name name="glVertexAttribI3iEXT"/>

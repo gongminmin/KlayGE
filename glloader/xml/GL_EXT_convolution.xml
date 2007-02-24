@@ -114,7 +114,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_convolution">
+		<Vendor name="GL_EXT" string="GL_EXT_convolution" reg_no="12">
 			<Name name="glConvolutionFilter1DEXT"/>
 			<Name name="glConvolutionFilter2DEXT"/>
 			<Name name="glConvolutionParameterfEXT"/>

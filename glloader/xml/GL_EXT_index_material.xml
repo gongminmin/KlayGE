@@ -15,7 +15,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_index_material">
+		<Vendor name="GL_EXT" string="GL_EXT_index_material" reg_no="94">
 			<Name name="glIndexMaterialEXT"/>
 		</Vendor>
 	</Vendors>

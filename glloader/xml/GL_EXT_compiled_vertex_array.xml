@@ -15,7 +15,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_compiled_vertex_array">
+		<Vendor name="GL_EXT" string="GL_EXT_compiled_vertex_array" reg_no="97">
 			<Name name="glLockArraysEXT"/>
 			<Name name="glUnlockArraysEXT"/>
 		</Vendor>

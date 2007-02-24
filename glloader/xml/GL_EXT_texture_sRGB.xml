@@ -21,7 +21,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_texture_sRGB"/>
+		<Vendor name="GL_EXT" string="GL_EXT_texture_sRGB" reg_no="315"/>
 	</Vendors>
 
 	<InitPath>

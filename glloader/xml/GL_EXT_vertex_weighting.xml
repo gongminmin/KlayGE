@@ -33,7 +33,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_vertex_weighting">
+		<Vendor name="GL_EXT" string="GL_EXT_vertex_weighting" reg_no="188">
 			<Name name="glVertexWeightfEXT"/>
 			<Name name="glVertexWeightfvEXT"/>
 			<Name name="glVertexWeightPointerEXT"/>

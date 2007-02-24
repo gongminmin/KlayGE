@@ -6,7 +6,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_shared_texture_palette"/>
+		<Vendor name="GL_EXT" string="GL_EXT_shared_texture_palette" reg_no="141"/>
 	</Vendors>
 
 	<InitPath>

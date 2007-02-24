@@ -87,7 +87,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_texture_integer">
+		<Vendor name="GL_EXT" string="GL_EXT_texture_integer" reg_no="343">
 			<Name name="glClearColorIiEXT"/>
 			<Name name="glClearColorIuiEXT"/>
 			<Name name="glTexParameterIivEXT"/>

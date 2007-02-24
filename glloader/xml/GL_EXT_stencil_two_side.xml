@@ -13,7 +13,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_stencil_two_side">
+		<Vendor name="GL_EXT" string="GL_EXT_stencil_two_side" reg_no="268">
 			<Name name="glActiveStencilFaceEXT"/>
 		</Vendor>
 	</Vendors>

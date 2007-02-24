@@ -8,7 +8,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_texture_mirror_clamp"/>
+		<Vendor name="GL_EXT" string="GL_EXT_texture_mirror_clamp" reg_no="298"/>
 	</Vendors>
 
 	<InitPath>

@@ -25,7 +25,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_subtexture">
+		<Vendor name="GL_EXT" string="GL_EXT_subtexture" reg_no="9">
 			<Name name="glTexSubImage1DEXT"/>
 			<Name name="glTexSubImage2DEXT"/>
 		</Vendor>

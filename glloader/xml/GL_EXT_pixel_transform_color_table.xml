@@ -2,7 +2,7 @@
 
 <GLExtension name="GL_EXT_pixel_transform_color_table">
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_pixel_transform_color_table"/>
+		<Vendor name="GL_EXT" string="GL_EXT_pixel_transform_color_table" reg_no="139"/>
 	</Vendors>
 
 	<InitPath>

@@ -8,7 +8,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_separate_specular_color"/>
+		<Vendor name="GL_EXT" string="GL_EXT_separate_specular_color" reg_no="144"/>
 	</Vendors>
 
 	<InitPath>

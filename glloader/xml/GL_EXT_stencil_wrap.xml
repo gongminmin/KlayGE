@@ -7,7 +7,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_stencil_wrap"/>
+		<Vendor name="GL_EXT" string="GL_EXT_stencil_wrap" reg_no="176"/>
 	</Vendors>
 
 	<InitPath>

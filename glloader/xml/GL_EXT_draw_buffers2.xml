@@ -34,7 +34,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_draw_buffers2">
+		<Vendor name="GL_EXT" string="GL_EXT_draw_buffers2" reg_no="340">
 			<Name name="glColorMaskIndexedEXT"/>
 			<Name name="glGetBooleanIndexedvEXT"/>
 			<Name name="glGetIntegerIndexedvEXT"/>

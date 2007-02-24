@@ -25,11 +25,11 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_multi_draw_arrays">
+		<Vendor name="GL_EXT" string="GL_EXT_multi_draw_arrays" reg_no="148">
 			<Name name="glMultiDrawArraysEXT"/>
 			<Name name="glMultiDrawElementsEXT"/>
 		</Vendor>
-		<Vendor name="GL_SUN" string="GL_SUN_multi_draw_arrays">
+		<Vendor name="GL_SUN" string="GL_SUN_multi_draw_arrays" reg_no="148">
 			<Name name="glMultiDrawArraysSUN"/>
 			<Name name="glMultiDrawElementsSUN"/>
 		</Vendor>

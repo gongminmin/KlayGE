@@ -7,7 +7,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_texture_compression_dxt1"/>
+		<Vendor name="GL_EXT" string="GL_EXT_texture_compression_dxt1" reg_no="309"/>
 	</Vendors>
 
 	<InitPath>

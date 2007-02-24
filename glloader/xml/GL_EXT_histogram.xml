@@ -73,7 +73,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_histogram">
+		<Vendor name="GL_EXT" string="GL_EXT_histogram" reg_no="11">
 			<Name name="glHistogramEXT"/>
 			<Name name="glResetHistogramEXT"/>
 			<Name name="glGetHistogramEXT"/>

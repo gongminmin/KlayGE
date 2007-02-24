@@ -54,7 +54,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_texture3D">
+		<Vendor name="GL_EXT" string="GL_EXT_texture3D" reg_no="6">
 			<Name name="glTexImage3DEXT"/>
 			<Name name="glTexSubImage3DEXT"/>
 			<Name name="glCopyTexSubImage3DEXT"/>

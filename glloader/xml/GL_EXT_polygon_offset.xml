@@ -18,7 +18,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_polygon_offset">
+		<Vendor name="GL_EXT" string="GL_EXT_polygon_offset" reg_no="3">
 			<Name name="glPolygonOffsetEXT"/>
 		</Vendor>
 	</Vendors>

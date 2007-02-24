@@ -2,7 +2,7 @@
 
 <GLExtension name="GL_EXT_index_texture">
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_index_texture"/>
+		<Vendor name="GL_EXT" string="GL_EXT_index_texture" reg_no="93"/>
 	</Vendors>
 
 	<InitPath>

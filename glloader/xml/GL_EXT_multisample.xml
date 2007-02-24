@@ -1,0 +1,44 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_multisample">
+	<Tokens>
+		<Token name="GL_MULTISAMPLE_EXT" value="0x809D"/>
+		<Token name="GL_SAMPLE_ALPHA_TO_MASK_EXT" value="0x809E"/>
+		<Token name="GL_SAMPLE_ALPHA_TO_ONE_EXT" value="0x809F"/>
+		<Token name="GL_SAMPLE_MASK_EXT" value="0x80A0"/>
+		<Token name="GL_1PASS_EXT" value="0x80A1"/>
+		<Token name="GL_2PASS_0_EXT" value="0x80A2"/>
+		<Token name="GL_2PASS_1_EXT" value="0x80A3"/>
+		<Token name="GL_4PASS_0_EXT" value="0x80A4"/>
+		<Token name="GL_4PASS_1_EXT" value="0x80A5"/>
+		<Token name="GL_4PASS_2_EXT" value="0x80A6"/>
+		<Token name="GL_4PASS_3_EXT" value="0x80A7"/>
+		<Token name="GL_SAMPLE_BUFFERS_EXT" value="0x80A8"/>
+		<Token name="GL_SAMPLES_EXT" value="0x80A9"/>
+		<Token name="GL_SAMPLE_MASK_VALUE_EXT" value="0x80AA"/>
+		<Token name="GL_SAMPLE_MASK_INVERT_EXT" value="0x80AB"/>
+		<Token name="GL_SAMPLE_PATTERN_EXT" value="0x80AC"/>
+		<Token name="GL_MULTISAMPLE_BIT_EXT" value="0x20000000"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glSampleMaskEXT" return="void">
+			<Param type="GLclampf" name="value"/>
+			<Param type="GLboolean" name="invert"/>
+		</Function>
+		<Function name="glSamplePatternEXT" return="void">
+			<Param type="GLenum" name="pattern"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_multisample" reg_no="209">
+			<Name name="glSampleMaskEXT"/>
+			<Name name="glSamplePatternEXT"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>

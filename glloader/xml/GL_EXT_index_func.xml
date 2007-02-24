@@ -15,7 +15,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_index_func">
+		<Vendor name="GL_EXT" string="GL_EXT_index_func" reg_no="95">
 			<Name name="glIndexFuncEXT"/>
 		</Vendor>
 	</Vendors>

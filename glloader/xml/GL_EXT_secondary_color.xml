@@ -85,7 +85,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_secondary_color">
+		<Vendor name="GL_EXT" string="GL_EXT_secondary_color" reg_no="145">
 			<Name name="glSecondaryColor3bEXT"/>
 			<Name name="glSecondaryColor3bvEXT"/>
 			<Name name="glSecondaryColor3dEXT"/>

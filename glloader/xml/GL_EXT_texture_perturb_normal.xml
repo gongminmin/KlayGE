@@ -13,7 +13,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_texture_perturb_normal">
+		<Vendor name="GL_EXT" string="GL_EXT_texture_perturb_normal" reg_no="147">
 			<Name name="glTextureNormalEXT"/>
 		</Vendor>
 	</Vendors>

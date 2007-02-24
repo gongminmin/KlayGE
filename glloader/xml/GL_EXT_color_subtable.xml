@@ -20,7 +20,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_color_subtable">
+		<Vendor name="GL_EXT" string="GL_EXT_color_subtable" reg_no="74">
 			<Name name="glColorSubTableEXT"/>
 			<Name name="glCopyColorSubTableEXT"/>
 		</Vendor>

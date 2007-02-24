@@ -33,7 +33,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_fog_coord">
+		<Vendor name="GL_EXT" string="GL_EXT_fog_coord" reg_no="149">
 			<Name name="glFogCoordfEXT"/>
 			<Name name="glFogCoordfvEXT"/>
 			<Name name="glFogCoorddEXT"/>

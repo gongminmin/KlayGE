@@ -8,7 +8,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_texture_lod_bias"/>
+		<Vendor name="GL_EXT" string="GL_EXT_texture_lod_bias" reg_no="186"/>
 	</Vendors>
 
 	<InitPath>

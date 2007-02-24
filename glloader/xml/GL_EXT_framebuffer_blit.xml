@@ -24,7 +24,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_framebuffer_blit">
+		<Vendor name="GL_EXT" string="GL_EXT_framebuffer_blit" reg_no="316">
 			<Name name="glBlitFramebufferEXT"/>
 		</Vendor>
 	</Vendors>

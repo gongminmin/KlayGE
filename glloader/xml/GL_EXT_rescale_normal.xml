@@ -6,7 +6,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_rescale_normal"/>
+		<Vendor name="GL_EXT" string="GL_EXT_rescale_normal" reg_no="27"/>
 	</Vendors>
 
 	<InitPath>

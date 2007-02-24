@@ -9,7 +9,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_packed_depth_stencil"/>
+		<Vendor name="GL_EXT" string="GL_EXT_packed_depth_stencil" reg_no="312"/>
 	</Vendors>
 
 	<InitPath>

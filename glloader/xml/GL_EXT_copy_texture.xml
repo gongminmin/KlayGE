@@ -42,7 +42,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_copy_texture">
+		<Vendor name="GL_EXT" string="GL_EXT_copy_texture" reg_no="10">
 			<Name name="glCopyTexImage1DEXT"/>
 			<Name name="glCopyTexImage2DEXT"/>
 			<Name name="glCopyTexSubImage1DEXT"/>

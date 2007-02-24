@@ -13,7 +13,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_index_array_formats"/>
+		<Vendor name="GL_EXT" string="GL_EXT_index_array_formats" reg_no="96"/>
 	</Vendors>
 
 	<InitPath>

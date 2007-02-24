@@ -39,7 +39,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_paletted_texture">
+		<Vendor name="GL_EXT" string="GL_EXT_paletted_texture" reg_no="78">
 			<Name name="glColorTableEXT"/>
 			<Name name="glGetColorTableEXT"/>
 			<Name name="glGetColorTableParameterivEXT"/>

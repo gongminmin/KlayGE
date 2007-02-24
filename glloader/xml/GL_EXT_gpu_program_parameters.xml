@@ -17,7 +17,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_gpu_program_parameters">
+		<Vendor name="GL_EXT" string="GL_EXT_gpu_program_parameters" reg_no="320">
 			<Name name="glProgramEnvParameters4fvEXT"/>
 			<Name name="glProgramLocalParameters4fvEXT"/>
 		</Vendor>

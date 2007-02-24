@@ -8,7 +8,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_packed_float"/>
+		<Vendor name="GL_EXT" string="GL_EXT_packed_float" reg_no="328"/>
 	</Vendors>
 
 	<InitPath>

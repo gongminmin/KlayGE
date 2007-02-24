@@ -112,7 +112,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_fragment_lighting">
+		<Vendor name="GL_EXT" string="GL_EXT_fragment_lighting" reg_no="102">
 			<Name name="glFragmentColorMaterialEXT"/>
 			<Name name="glFragmentLightfEXT"/>
 			<Name name="glFragmentLightfvEXT"/>

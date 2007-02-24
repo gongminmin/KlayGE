@@ -53,7 +53,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_geometry_shader4">
+		<Vendor name="GL_EXT" string="GL_EXT_geometry_shader4" reg_no="324">
 			<Name name="glProgramParameteriEXT"/>
 			<Name name="glFramebufferTextureEXT"/>
 			<Name name="glFramebufferTextureLayerEXT"/>

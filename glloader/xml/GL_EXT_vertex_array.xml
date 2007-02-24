@@ -79,7 +79,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_vertex_array">
+		<Vendor name="GL_EXT" string="GL_EXT_vertex_array" reg_no="30">
 			<Name name="glArrayElementEXT"/>
 			<Name name="glDrawArraysEXT"/>
 			<Name name="glVertexPointerEXT"/>
