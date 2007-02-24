@@ -29,7 +29,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GLX_EXT" string="GLX_EXT_import_context">
+		<Vendor name="GLX_EXT" string="GLX_EXT_import_context" reg_no="47">
 			<Name name="glXGetCurrentDisplayEXT"/>
 			<Name name="glXQueryContextInfoEXT"/>
 			<Name name="glXGetContextIDEXT"/>

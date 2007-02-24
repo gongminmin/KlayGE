@@ -71,7 +71,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GLX_SGIX" string="GLX_SGIX_hyperpipe">
+		<Vendor name="GLX_SGIX" string="GLX_SGIX_hyperpipe" reg_no="307">
 			<Name name="glXQueryHyperpipeNetworkSGIX"/>
 			<Name name="glXHyperpipeConfigSGIX"/>
 			<Name name="glXQueryHyperpipeConfigSGIX"/>

@@ -13,7 +13,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GLX_SGI" string="GLX_SGI_video_sync">
+		<Vendor name="GLX_SGI" string="GLX_SGI_video_sync" reg_no="41">
 			<Name name="glXGetVideoSyncSGI"/>
 			<Name name="glXWaitVideoSyncSGI"/>
 		</Vendor>

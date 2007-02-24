@@ -21,7 +21,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GLX_EXT" string="GLX_EXT_visual_info"/>
+		<Vendor name="GLX_EXT" string="GLX_EXT_visual_info" reg_no="28"/>
 	</Vendors>
 
 	<InitPath>

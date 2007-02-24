@@ -43,7 +43,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GLX_OML" string="GLX_OML_sync_control">
+		<Vendor name="GLX_OML" string="GLX_OML_sync_control" reg_no="238">
 			<Name name="glXGetSyncValuesOML"/>
 			<Name name="glXGetMscRateOML"/>
 			<Name name="glXSwapBuffersMscOML"/>

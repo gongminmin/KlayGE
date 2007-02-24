@@ -6,7 +6,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GLX_SGIS" string="GLX_SGIS_blended_overlay"/>
+		<Vendor name="GLX_SGIS" string="GLX_SGIS_blended_overlay" reg_no="142"/>
 	</Vendors>
 
 	<InitPath>

@@ -10,7 +10,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GLX_SGIX" string="GLX_SGIX_swap_group">
+		<Vendor name="GLX_SGIX" string="GLX_SGIX_swap_group" reg_no="91">
 			<Name name="glXJoinSwapGroupSGIX"/>
 		</Vendor>
 	</Vendors>

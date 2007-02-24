@@ -11,7 +11,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GLX_MESA" string="GLX_MESA_pixmap_colormap">
+		<Vendor name="GLX_MESA" string="GLX_MESA_pixmap_colormap" reg_no="216">
 			<Name name="glXCreateGLXPixmapMESA"/>
 		</Vendor>
 	</Vendors>

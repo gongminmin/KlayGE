@@ -12,7 +12,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GLX_ARB" string="GLX_ARB_get_proc_address">
+		<Vendor name="GLX_ARB" string="GLX_ARB_get_proc_address" reg_no="2">
 			<Name name="glXGetProcAddressARB"/>
 		</Vendor>
 	</Vendors>

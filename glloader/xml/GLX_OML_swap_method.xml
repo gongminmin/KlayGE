@@ -9,7 +9,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GLX_OML" string="GLX_OML_swap_method"/>
+		<Vendor name="GLX_OML" string="GLX_OML_swap_method" reg_no="237"/>
 	</Vendors>
 
 	<InitPath>

@@ -8,7 +8,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GLX_EXT" string="GLX_EXT_visual_rating"/>
+		<Vendor name="GLX_EXT" string="GLX_EXT_visual_rating" reg_no="44"/>
 	</Vendors>
 
 	<InitPath>

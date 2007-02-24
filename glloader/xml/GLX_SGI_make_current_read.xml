@@ -12,7 +12,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GLX_SGI" string="GLX_SGI_make_current_read">
+		<Vendor name="GLX_SGI" string="GLX_SGI_make_current_read" reg_no="42">
 			<Name name="glXMakeCurrentReadSGI"/>
 			<Name name="glXGetCurrentReadDrawableSGI"/>
 		</Vendor>

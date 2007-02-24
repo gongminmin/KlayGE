@@ -65,7 +65,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GLX_SGIX" string="GLX_SGIX_pbuffer">
+		<Vendor name="GLX_SGIX" string="GLX_SGIX_pbuffer" reg_no="50">
 			<Name name="glXCreateGLXPbufferSGIX"/>
 			<Name name="glXDestroyGLXPbufferSGIX"/>
 			<Name name="glXQueryGLXPbufferSGIX"/>

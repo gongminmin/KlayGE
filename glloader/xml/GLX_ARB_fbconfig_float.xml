@@ -7,7 +7,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GLX_ARB" string="GLX_ARB_fbconfig_float"/>
+		<Vendor name="GLX_ARB" string="GLX_ARB_fbconfig_float" reg_no="39"/>
 	</Vendors>
 
 	<InitPath>

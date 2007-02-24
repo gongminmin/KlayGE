@@ -13,7 +13,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GLX_MESA" string="GLX_MESA_set_3dfx_mode">
+		<Vendor name="GLX_MESA" string="GLX_MESA_set_3dfx_mode" reg_no="218">
 			<Name name="glXSet3DfxModeMESA"/>
 		</Vendor>
 	</Vendors>

@@ -6,7 +6,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GLX_SGIS" string="GLX_SGIX_visual_select_group"/>
+		<Vendor name="GLX_SGIS" string="GLX_SGIX_visual_select_group" reg_no="234"/>
 	</Vendors>
 
 	<InitPath>

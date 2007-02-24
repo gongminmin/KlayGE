@@ -10,7 +10,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GLX_SGI" string="GLX_SGI_cushion">
+		<Vendor name="GLX_SGI" string="GLX_SGI_cushion" reg_no="62">
 			<Name name="glXCushionSGI"/>
 		</Vendor>
 	</Vendors>

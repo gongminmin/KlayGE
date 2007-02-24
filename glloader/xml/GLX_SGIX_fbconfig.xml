@@ -55,7 +55,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GLX_SGIX" string="GLX_SGIX_fbconfig">
+		<Vendor name="GLX_SGIX" string="GLX_SGIX_fbconfig" reg_no="49">
 			<Name name="glXGetFBConfigAttribSGIX"/>
 			<Name name="glXChooseFBConfigSGIX"/>
 			<Name name="glXCreateGLXPixmapWithConfigSGIX"/>

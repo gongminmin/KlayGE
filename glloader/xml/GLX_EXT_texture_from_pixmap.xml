@@ -57,7 +57,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GLX_EXT" string="GLX_EXT_texture_from_pixmap">
+		<Vendor name="GLX_EXT" string="GLX_EXT_texture_from_pixmap" reg_no="344">
 			<Name name="glXBindTexImageEXT"/>
 			<Name name="glXReleaseTexImageEXT"/>
 		</Vendor>

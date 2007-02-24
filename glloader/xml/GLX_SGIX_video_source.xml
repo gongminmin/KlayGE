@@ -21,7 +21,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GLX_SGIX" string="GLX_SGIX_video_source">
+		<Vendor name="GLX_SGIX" string="GLX_SGIX_video_source" reg_no="43">
 			<Name name="glXCreateGLXVideoSourceSGIX"/>
 			<Name name="glXDestroyGLXVideoSourceSGIX"/>
 		</Vendor>

@@ -13,7 +13,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GLX_MESA" string="GLX_MESA_copy_sub_buffer">
+		<Vendor name="GLX_MESA" string="GLX_MESA_copy_sub_buffer" reg_no="215">
 			<Name name="glXCopySubBufferMESA"/>
 		</Vendor>
 	</Vendors>
