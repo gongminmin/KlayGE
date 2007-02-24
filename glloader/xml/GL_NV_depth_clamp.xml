@@ -6,7 +6,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_depth_clamp"/>
+		<Vendor name="GL_NV" string="GL_NV_depth_clamp" reg_no="260"/>
 	</Vendors>
 
 	<InitPath>

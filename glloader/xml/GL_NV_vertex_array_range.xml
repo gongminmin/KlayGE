@@ -18,7 +18,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_vertex_array_range">
+		<Vendor name="GL_NV" string="GL_NV_vertex_array_range" reg_no="190">
 			<Name name="glVertexArrayRangeNV"/>
 			<Name name="glFlushVertexArrayRangeNV"/>
 		</Vendor>

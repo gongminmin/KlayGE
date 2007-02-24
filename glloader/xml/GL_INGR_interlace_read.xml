@@ -6,7 +6,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_INGR" string="GL_INGR_interlace_read"/>
+		<Vendor name="GL_INGR" string="GL_INGR_interlace_read" reg_no="175"/>
 	</Vendors>
 
 	<InitPath>

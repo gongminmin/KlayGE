@@ -2,7 +2,7 @@
 
 <GLExtension name="GL_NV_blend_square">
 	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_blend_square"/>
+		<Vendor name="GL_NV" string="GL_NV_blend_square" reg_no="194"/>
 	</Vendors>
 
 	<InitPath>

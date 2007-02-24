@@ -6,7 +6,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_MESA" string="GL_MESA_pack_invert"/>
+		<Vendor name="GL_MESA" string="GL_MESA_pack_invert" reg_no="300"/>
 	</Vendors>
 
 	<InitPath>

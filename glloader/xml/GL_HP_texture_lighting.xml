@@ -8,7 +8,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_HP" string="GL_HP_texture_lighting"/>
+		<Vendor name="GL_HP" string="GL_HP_texture_lighting" reg_no="111"/>
 	</Vendors>
 
 	<InitPath>

@@ -6,7 +6,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_texture_expand_normal"/>
+		<Vendor name="GL_NV" string="GL_NV_texture_expand_normal" reg_no="286"/>
 	</Vendors>
 
 	<InitPath>

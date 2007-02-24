@@ -101,7 +101,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_MESA" string="GL_MESA_window_pos">
+		<Vendor name="GL_MESA" string="GL_MESA_window_pos" reg_no="197">
 			<Name name="glWindowPos2d"/>
 			<Name name="glWindowPos2dv"/>
 			<Name name="glWindowPos2f"/>

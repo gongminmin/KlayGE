@@ -53,7 +53,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_HP" string="GL_HP_image_transform">
+		<Vendor name="GL_HP" string="GL_HP_image_transform" reg_no="66">
 			<Name name="glImageTransformParameteriHP"/>
 			<Name name="glImageTransformParameterfHP"/>
 			<Name name="glImageTransformParameterivHP"/>

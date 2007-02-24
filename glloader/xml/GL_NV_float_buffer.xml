@@ -20,7 +20,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_float_buffer"/>
+		<Vendor name="GL_NV" string="GL_NV_float_buffer" reg_no="281"/>
 	</Vendors>
 
 	<InitPath>

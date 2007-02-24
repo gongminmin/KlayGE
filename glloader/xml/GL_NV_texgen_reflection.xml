@@ -7,7 +7,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_texgen_reflection"/>
+		<Vendor name="GL_NV" string="GL_NV_texgen_reflection" reg_no="179"/>
 	</Vendors>
 
 	<InitPath>

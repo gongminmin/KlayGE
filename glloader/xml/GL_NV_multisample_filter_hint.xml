@@ -6,7 +6,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_multisample_filter_hint"/>
+		<Vendor name="GL_NV" string="GL_NV_multisample_filter_hint" reg_no="259"/>
 	</Vendors>
 
 	<InitPath>

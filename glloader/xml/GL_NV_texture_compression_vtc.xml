@@ -2,7 +2,7 @@
 
 <GLExtension name="GL_NV_texture_compression_vtc">
 	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_texture_compression_vtc"/>
+		<Vendor name="GL_NV" string="GL_NV_texture_compression_vtc" reg_no="228"/>
 	</Vendors>
 
 	<InitPath>

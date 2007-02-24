@@ -22,7 +22,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_texture_shader3"/>
+		<Vendor name="GL_NV" string="GL_NV_texture_shader3" reg_no="265"/>
 	</Vendors>
 
 	<InitPath>

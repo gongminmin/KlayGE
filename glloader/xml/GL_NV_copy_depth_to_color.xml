@@ -7,7 +7,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_copy_depth_to_color"/>
+		<Vendor name="GL_NV" string="GL_NV_copy_depth_to_color" reg_no="243"/>
 	</Vendors>
 
 	<InitPath>

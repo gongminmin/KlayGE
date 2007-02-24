@@ -2,7 +2,7 @@
 
 <GLExtension name="GL_INTEL_texture_scissor">
 	<Vendors>
-		<Vendor name="GL_INTEL" string="GL_INTEL_texture_scissor"/>
+		<Vendor name="GL_INTEL" string="GL_INTEL_texture_scissor" reg_no="135"/>
 	</Vendors>
 
 	<InitPath>

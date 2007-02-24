@@ -9,7 +9,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_GREMEDY" string="GL_GREMEDY_string_marker">
+		<Vendor name="GL_GREMEDY" string="GL_GREMEDY_string_marker" reg_no="311">
 			<Name name="glStringMarkerGREMEDY"/>
 		</Vendor>
 	</Vendors>

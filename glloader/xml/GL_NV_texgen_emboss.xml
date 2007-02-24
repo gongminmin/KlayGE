@@ -8,7 +8,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_texgen_emboss"/>
+		<Vendor name="GL_NV" string="GL_NV_texgen_emboss" reg_no="193"/>
 	</Vendors>
 
 	<InitPath>

@@ -75,7 +75,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_IBM" string="GL_IBM_vertex_array_lists">
+		<Vendor name="GL_IBM" string="GL_IBM_vertex_array_lists" reg_no="201">
 			<Name name="glColorPointerListIBM"/>
 			<Name name="glSecondaryColorPointerListIBM"/>
 			<Name name="glEdgeFlagPointerListIBM"/>

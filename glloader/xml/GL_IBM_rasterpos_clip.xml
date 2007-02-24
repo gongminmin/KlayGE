@@ -6,7 +6,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_IBM" string="GL_IBM_rasterpos_clip"/>
+		<Vendor name="GL_IBM" string="GL_IBM_rasterpos_clip" reg_no="110"/>
 	</Vendors>
 
 	<InitPath>

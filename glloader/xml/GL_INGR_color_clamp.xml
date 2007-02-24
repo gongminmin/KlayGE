@@ -13,7 +13,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_INGR" string="GL_INGR_color_clamp"/>
+		<Vendor name="GL_INGR" string="GL_INGR_color_clamp" reg_no="174"/>
 	</Vendors>
 
 	<InitPath>

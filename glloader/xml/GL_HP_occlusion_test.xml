@@ -7,7 +7,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_HP" string="GL_HP_occlusion_test"/>
+		<Vendor name="GL_HP" string="GL_HP_occlusion_test" reg_no="137"/>
 	</Vendors>
 
 	<InitPath>

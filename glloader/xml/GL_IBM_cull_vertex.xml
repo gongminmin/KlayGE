@@ -6,7 +6,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_IBM" string="GL_IBM_cull_vertex"/>
+		<Vendor name="GL_IBM" string="GL_IBM_cull_vertex" reg_no="199"/>
 	</Vendors>
 
 	<InitPath>

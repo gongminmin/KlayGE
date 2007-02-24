@@ -10,7 +10,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_fragment_program2"/>
+		<Vendor name="GL_NV" string="GL_NV_fragment_program2" reg_no="304"/>
 	</Vendors>
 
 	<InitPath>

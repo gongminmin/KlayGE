@@ -8,7 +8,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_fog_distance"/>
+		<Vendor name="GL_NV" string="GL_NV_fog_distance" reg_no="192"/>
 	</Vendors>
 
 	<InitPath>

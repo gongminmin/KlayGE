@@ -8,7 +8,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_MESA" string="GL_MESA_ycbcr_texture"/>
+		<Vendor name="GL_MESA" string="GL_MESA_ycbcr_texture" reg_no="301"/>
 	</Vendors>
 
 	<InitPath>

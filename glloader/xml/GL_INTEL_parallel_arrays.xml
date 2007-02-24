@@ -32,7 +32,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_INTEL" string="GL_INTEL_parallel_arrays">
+		<Vendor name="GL_INTEL" string="GL_INTEL_parallel_arrays" reg_no="136">
 			<Name name="glVertexPointervINTEL"/>
 			<Name name="glNormalPointervINTEL"/>
 			<Name name="glColorPointervINTEL"/>

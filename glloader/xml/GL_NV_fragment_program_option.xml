@@ -2,7 +2,7 @@
 
 <GLExtension name="GL_NV_fragment_program_option">
 	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_fragment_program_option"/>
+		<Vendor name="GL_NV" string="GL_NV_fragment_program_option" reg_no="303"/>
 	</Vendors>
 
 	<InitPath>

@@ -2,7 +2,7 @@
 
 <GLExtension name="GL_NV_vertex_program4">
 	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_vertex_program4"/>
+		<Vendor name="GL_NV" string="GL_NV_vertex_program4" reg_no="325"/>
 	</Vendors>
 
 	<InitPath>

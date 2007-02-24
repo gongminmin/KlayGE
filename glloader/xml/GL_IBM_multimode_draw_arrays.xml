@@ -20,7 +20,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_IBM" string="GL_IBM_multimode_draw_arrays">
+		<Vendor name="GL_IBM" string="GL_IBM_multimode_draw_arrays" reg_no="200">
 			<Name name="glMultiModeDrawArraysIBM"/>
 			<Name name="glMultiModeDrawElementsIBM"/>
 		</Vendor>

@@ -11,7 +11,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_MESAX" string="GL_MESAX_texture_stack"/>
+		<Vendor name="GL_MESAX" string="GL_MESAX_texture_stack" reg_no="318"/>
 	</Vendors>
 
 	<InitPath>

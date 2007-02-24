@@ -415,7 +415,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_vertex_program">
+		<Vendor name="GL_NV" string="GL_NV_vertex_program" reg_no="233">
 			<Name name="glAreProgramsResidentNV"/>
 			<Name name="glBindProgramNV"/>
 			<Name name="glDeleteProgramsNV"/>

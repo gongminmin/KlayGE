@@ -6,7 +6,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_MESA" string="GL_MESA_resize_buffers">
+		<Vendor name="GL_MESA" string="GL_MESA_resize_buffers" reg_no="196">
 			<Name name="glResizeBuffersMESA"/>
 		</Vendor>
 	</Vendors>
