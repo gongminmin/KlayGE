@@ -7,7 +7,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_OES" string="GL_OES_read_format"/>
+		<Vendor name="GL_OES" string="GL_OES_read_format" reg_no="295"/>
 	</Vendors>
 
 	<InitPath>

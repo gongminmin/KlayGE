@@ -7,7 +7,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_SGIX" string="GL_SGIX_async_histogram"/>
+		<Vendor name="GL_SGIX" string="GL_SGIX_async_histogram" reg_no="134"/>
 	</Vendors>
 
 	<InitPath>

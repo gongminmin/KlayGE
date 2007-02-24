@@ -7,7 +7,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_SGIS" string="GL_SGIS_generate_mipmap"/>
+		<Vendor name="GL_SGIS" string="GL_SGIS_generate_mipmap" reg_no="32"/>
 	</Vendors>
 
 	<InitPath>

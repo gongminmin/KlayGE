@@ -7,7 +7,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_SGIX" string="GL_SGIX_blend_alpha_minmax"/>
+		<Vendor name="GL_SGIX" string="GL_SGIX_blend_alpha_minmax" reg_no="119"/>
 	</Vendors>
 
 	<InitPath>

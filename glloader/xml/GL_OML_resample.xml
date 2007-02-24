@@ -11,7 +11,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_OML" string="GL_OML_resample"/>
+		<Vendor name="GL_OML" string="GL_OML_resample" reg_no="241"/>
 	</Vendors>
 
 	<InitPath>

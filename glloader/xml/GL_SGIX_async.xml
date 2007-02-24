@@ -28,7 +28,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_SGIX" string="GL_SGIX_async">
+		<Vendor name="GL_SGIX" string="GL_SGIX_async" reg_no="132">
 			<Name name="glAsyncMarkerSGIX"/>
 			<Name name="glFinishAsyncSGIX"/>
 			<Name name="glPollAsyncSGIX"/>

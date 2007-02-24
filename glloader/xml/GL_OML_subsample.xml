@@ -7,7 +7,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_OML" string="GL_OML_subsample"/>
+		<Vendor name="GL_OML" string="GL_OML_subsample" reg_no="240"/>
 	</Vendors>
 
 	<InitPath>

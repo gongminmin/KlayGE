@@ -9,7 +9,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_SGIX" string="GL_SGIX_shadow"/>
+		<Vendor name="GL_SGIX" string="GL_SGIX_shadow" reg_no="34"/>
 	</Vendors>
 
 	<InitPath>

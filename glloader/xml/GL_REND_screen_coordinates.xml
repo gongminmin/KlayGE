@@ -7,7 +7,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_REND" string="GL_REND_screen_coordinatese"/>
+		<Vendor name="GL_REND" string="GL_REND_screen_coordinates" reg_no="155"/>
 	</Vendors>
 
 	<InitPath>

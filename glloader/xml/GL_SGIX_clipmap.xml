@@ -17,7 +17,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_SGIX" string="GL_SGIX_clipmap"/>
+		<Vendor name="GL_SGIX" string="GL_SGIX_clipmap" reg_no="33"/>
 	</Vendors>
 
 	<InitPath>

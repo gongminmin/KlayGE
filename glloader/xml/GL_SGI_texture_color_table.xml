@@ -7,7 +7,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_SGI" string="GL_SGI_texture_color_table"/>
+		<Vendor name="GL_SGI" string="GL_SGI_texture_color_table" reg_no="17"/>
 	</Vendors>
 
 	<InitPath>

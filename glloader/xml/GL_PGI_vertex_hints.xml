@@ -27,7 +27,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_PGI" string="GL_PGI_vertex_hints"/>
+		<Vendor name="GL_PGI" string="GL_PGI_vertex_hints" reg_no="76"/>
 	</Vendors>
 
 	<InitPath>

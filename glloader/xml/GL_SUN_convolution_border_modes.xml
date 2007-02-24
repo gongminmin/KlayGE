@@ -6,7 +6,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_SUN" string="GL_SUN_convolution_border_modes"/>
+		<Vendor name="GL_SUN" string="GL_SUN_convolution_border_modes" reg_no="182"/>
 	</Vendors>
 
 	<InitPath>

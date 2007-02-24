@@ -46,7 +46,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_SGIS" string="GL_SGIS_texture4D">
+		<Vendor name="GL_SGIS" string="GL_SGIS_texture4D" reg_no="16">
 			<Name name="glTexImage4DSGIS"/>
 			<Name name="glTexSubImage4DSGIS"/>
 		</Vendor>

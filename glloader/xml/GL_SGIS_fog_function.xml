@@ -18,7 +18,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_SGIS" string="GL_SGIS_fog_function">
+		<Vendor name="GL_SGIS" string="GL_SGIS_fog_function" reg_no="64">
 			<Name name="glFogFuncSGIS"/>
 			<Name name="glGetFogFuncSGIS"/>
 		</Vendor>

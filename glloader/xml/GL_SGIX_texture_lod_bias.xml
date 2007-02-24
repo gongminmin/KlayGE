@@ -8,7 +8,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_SGIX" string="GL_SGIX_texture_lod_bias"/>
+		<Vendor name="GL_SGIX" string="GL_SGIX_texture_lod_bias" reg_no="84"/>
 	</Vendors>
 
 	<InitPath>

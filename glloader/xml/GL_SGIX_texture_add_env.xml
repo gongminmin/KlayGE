@@ -6,7 +6,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_SGIX" string="GL_SGIX_texture_add_env"/>
+		<Vendor name="GL_SGIX" string="GL_SGIX_texture_add_env" reg_no="69"/>
 	</Vendors>
 
 	<InitPath>

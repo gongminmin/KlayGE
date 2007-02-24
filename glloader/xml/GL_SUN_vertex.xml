@@ -309,7 +309,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_SUN" string="GL_SUN_vertex">
+		<Vendor name="GL_SUN" string="GL_SUN_vertex" reg_no="166">
 			<Name name="glColor4ubVertex2fSUN"/>
 			<Name name="glColor4ubVertex2fvSUN"/>
 			<Name name="glColor4ubVertex3fSUN"/>

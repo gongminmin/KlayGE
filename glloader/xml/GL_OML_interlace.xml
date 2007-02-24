@@ -7,7 +7,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_OML" string="GL_OML_interlace"/>
+		<Vendor name="GL_OML" string="GL_OML_interlace" reg_no="239"/>
 	</Vendors>
 
 	<InitPath>

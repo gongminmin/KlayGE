@@ -25,7 +25,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_SGIX" string="GL_SGIX_instruments">
+		<Vendor name="GL_SGIX" string="GL_SGIX_instruments" reg_no="55">
 			<Name name="glGetInstrumentsSGIX"/>
 			<Name name="glInstrumentsBufferSGIX"/>
 			<Name name="glPollInstrumentsSGIX"/>

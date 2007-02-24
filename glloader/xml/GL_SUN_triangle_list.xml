@@ -48,7 +48,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_SUN" string="GL_SUN_triangle_list">
+		<Vendor name="GL_SUN" string="GL_SUN_triangle_list" reg_no="165">
 			<Name name="glReplacementCodeuiSUN"/>
 			<Name name="glReplacementCodeusSUN"/>
 			<Name name="glReplacementCodeubSUN"/>

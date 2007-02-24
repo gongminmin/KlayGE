@@ -9,7 +9,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_SGIS" string="GL_SGIS_texture_lod"/>
+		<Vendor name="GL_SGIS" string="GL_SGIS_texture_lod" reg_no="24"/>
 	</Vendors>
 
 	<InitPath>

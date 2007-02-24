@@ -21,7 +21,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_SGIS" string="GL_SGIS_texture_filter4">
+		<Vendor name="GL_SGIS" string="GL_SGIS_texture_filter4" reg_no="7">
 			<Name name="glGetTexFilterFuncSGIS"/>
 			<Name name="glTexFilterFuncSGIS"/>
 		</Vendor>

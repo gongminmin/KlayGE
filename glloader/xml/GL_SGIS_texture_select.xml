@@ -27,7 +27,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_SGIS" string="GL_SGIS_texture_select"/>
+		<Vendor name="GL_SGIS" string="GL_SGIS_texture_select" reg_no="51"/>
 	</Vendors>
 
 	<InitPath>

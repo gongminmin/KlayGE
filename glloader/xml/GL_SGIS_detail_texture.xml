@@ -25,7 +25,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_SGIS" string="GL_SGIS_detail_texture">
+		<Vendor name="GL_SGIS" string="GL_SGIS_detail_texture" reg_no="21">
 			<Name name="glDetailTexFuncSGIS"/>
 			<Name name="glGetDetailTexFuncSGIS"/>
 		</Vendor>

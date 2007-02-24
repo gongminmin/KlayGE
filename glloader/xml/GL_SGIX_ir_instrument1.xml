@@ -6,7 +6,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_SGIX" string="GL_SGIX_ir_instrument1"/>
+		<Vendor name="GL_SGIX" string="GL_SGIX_ir_instrument1" reg_no="81"/>
 	</Vendors>
 
 	<InitPath>

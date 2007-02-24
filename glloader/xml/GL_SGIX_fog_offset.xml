@@ -7,7 +7,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_SGIX" string="GL_SGIX_fog_offset"/>
+		<Vendor name="GL_SGIX" string="GL_SGIX_fog_offset" reg_no="65"/>
 	</Vendors>
 
 	<InitPath>

@@ -32,7 +32,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_PGI" string="GL_PGI_misc_hints">
+		<Vendor name="GL_PGI" string="GL_PGI_misc_hints" reg_no="77">
 			<Name name="glHintPGI"/>
 		</Vendor>
 	</Vendors>

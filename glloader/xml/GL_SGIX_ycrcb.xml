@@ -7,7 +7,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_SGIX" string="GL_SGIX_ycrcb"/>
+		<Vendor name="GL_SGIX" string="GL_SGIX_ycrcb" reg_no="101"/>
 	</Vendors>
 
 	<InitPath>

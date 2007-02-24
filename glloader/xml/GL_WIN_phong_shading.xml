@@ -7,7 +7,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_WIN" string="GL_WIN_phong_shading"/>
+		<Vendor name="GL_WIN" string="GL_WIN_phong_shading" reg_no="113"/>
 	</Vendors>
 
 	<InitPath>

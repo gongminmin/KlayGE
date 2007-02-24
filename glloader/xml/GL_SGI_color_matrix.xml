@@ -16,7 +16,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_SGI" string="GL_SGI_color_matrix"/>
+		<Vendor name="GL_SGI" string="GL_SGI_color_matrix" reg_no="13"/>
 	</Vendors>
 
 	<InitPath>

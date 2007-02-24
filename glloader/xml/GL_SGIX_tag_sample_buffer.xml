@@ -6,7 +6,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_SGIX" string="GL_SGIX_tag_sample_buffer">
+		<Vendor name="GL_SGIX" string="GL_SGIX_tag_sample_buffer" reg_no="58">
 			<Name name="glTagSampleBufferSGIX"/>
 		</Vendor>
 	</Vendors>

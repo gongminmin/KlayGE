@@ -13,7 +13,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_SGIX" string="GL_SGIX_reference_plane">
+		<Vendor name="GL_SGIX" string="GL_SGIX_reference_plane" reg_no="60">
 			<Name name="glReferencePlaneSGIX"/>
 		</Vendor>
 	</Vendors>

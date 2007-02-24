@@ -21,7 +21,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_SGIS" string="GL_SGIS_sharpen_texture">
+		<Vendor name="GL_SGIS" string="GL_SGIS_sharpen_texture" reg_no="22">
 			<Name name="glSharpenTexFuncSGIS"/>
 			<Name name="glGetSharpenTexFuncSGIS"/>
 		</Vendor>

@@ -6,7 +6,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_SGIX" string="GL_SGIX_interlace"/>
+		<Vendor name="GL_SGIX" string="GL_SGIX_interlace" reg_no="45"/>
 	</Vendors>
 
 	<InitPath>

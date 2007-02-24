@@ -6,7 +6,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_SUN" string="GL_SUN_slice_accum"/>
+		<Vendor name="GL_SUN" string="GL_SUN_slice_accum" reg_no="258"/>
 	</Vendors>
 
 	<InitPath>

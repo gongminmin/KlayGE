@@ -9,7 +9,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_SGIX" string="GL_SGIX_texture_scale_bias"/>
+		<Vendor name="GL_SGIX" string="GL_SGIX_texture_scale_bias" reg_no="56"/>
 	</Vendors>
 
 	<InitPath>

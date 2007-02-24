@@ -6,7 +6,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_WIN" string="GL_WIN_specular_fog"/>
+		<Vendor name="GL_WIN" string="GL_WIN_specular_fog" reg_no="114"/>
 	</Vendors>
 
 	<InitPath>

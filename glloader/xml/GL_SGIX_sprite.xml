@@ -31,7 +31,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_SGIX" string="GL_SGIX_sprite">
+		<Vendor name="GL_SGIX" string="GL_SGIX_sprite" reg_no="52">
 			<Name name="glSpriteParameterfSGIX"/>
 			<Name name="glSpriteParameterfvSGIX"/>
 			<Name name="glSpriteParameteriSGIX"/>

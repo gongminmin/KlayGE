@@ -9,7 +9,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_S3" string="GL_S3_s3tc"/>
+		<Vendor name="GL_S3" string="GL_S3_s3tc" reg_no="276"/>
 	</Vendors>
 
 	<InitPath>

@@ -8,7 +8,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_SGIX" string="GL_SGIX_texture_coordinate_clamp"/>
+		<Vendor name="GL_SGIX" string="GL_SGIX_texture_coordinate_clamp" reg_no="235"/>
 	</Vendors>
 
 	<InitPath>

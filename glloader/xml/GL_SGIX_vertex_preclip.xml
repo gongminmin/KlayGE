@@ -7,7 +7,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_SGIX" string="GL_SGIX_vertex_preclip"/>
+		<Vendor name="GL_SGIX" string="GL_SGIX_vertex_preclip" reg_no="210"/>
 	</Vendors>
 
 	<InitPath>

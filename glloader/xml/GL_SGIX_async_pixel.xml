@@ -11,7 +11,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_SGIX" string="GL_SGIX_async_pixel"/>
+		<Vendor name="GL_SGIX" string="GL_SGIX_async_pixel" reg_no="133"/>
 	</Vendors>
 
 	<InitPath>
