@@ -19,7 +19,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_blend_color">
+		<Vendor name="GL_EXT" string="GL_EXT_blend_color" reg_no="2">
 			<Name name="glBlendColorEXT"/>
 		</Vendor>
 	</Vendors>

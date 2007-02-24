@@ -231,7 +231,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_ATI" string="GL_ATI_vertex_streams">
+		<Vendor name="GL_ATI" string="GL_ATI_vertex_streams" reg_no="249">
 			<Name name="glVertexStream1sATI"/>
 			<Name name="glVertexStream1svATI"/>
 			<Name name="glVertexStream1iATI"/>

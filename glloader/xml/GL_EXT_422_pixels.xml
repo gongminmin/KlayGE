@@ -9,7 +9,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_422_pixels"/>
+		<Vendor name="GL_EXT" string="GL_EXT_422_pixels" reg_no="178"/>
 	</Vendors>
 
 	<InitPath>

@@ -6,7 +6,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_clip_volume_hint"/>
+		<Vendor name="GL_EXT" string="GL_EXT_clip_volume_hint" reg_no="79"/>
 	</Vendors>
 
 	<InitPath>

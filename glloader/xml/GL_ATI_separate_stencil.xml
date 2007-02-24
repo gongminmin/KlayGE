@@ -40,7 +40,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_ATI" string="GL_ATI_separate_stencil">
+		<Vendor name="GL_ATI" string="GL_ATI_separate_stencil" reg_no="289">
 			<Name name="glStencilFuncSeparateATI"/>
 			<Name name="glStencilOpSeparateATI"/>
 		</Vendor>

@@ -6,7 +6,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_ATI" string="GL_ATI_text_fragment_shader"/>
+		<Vendor name="GL_ATI" string="GL_ATI_text_fragment_shader" reg_no="269"/>
 	</Vendors>
 
 	<InitPath>

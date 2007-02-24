@@ -15,7 +15,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_blend_minmax">
+		<Vendor name="GL_EXT" string="GL_EXT_blend_minmax" reg_no="37">
 			<Name name="glBlendEquationEXT"/>
 		</Vendor>
 	</Vendors>

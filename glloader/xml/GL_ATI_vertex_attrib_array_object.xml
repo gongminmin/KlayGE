@@ -24,7 +24,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_ATI" string="GL_ATI_vertex_attrib_array_object">
+		<Vendor name="GL_ATI" string="GL_ATI_vertex_attrib_array_object" reg_no="290">
 			<Name name="glVertexAttribArrayObjectATI"/>
 			<Name name="glGetVertexAttribArrayObjectfvATI"/>
 			<Name name="glGetVertexAttribArrayObjectivATI"/>

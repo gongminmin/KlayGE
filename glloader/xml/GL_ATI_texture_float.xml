@@ -17,7 +17,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_ATI" string="GL_ATI_texture_float"/>
+		<Vendor name="GL_ATI" string="GL_ATI_texture_float" reg_no="280"/>
 	</Vendors>
 
 	<InitPath>

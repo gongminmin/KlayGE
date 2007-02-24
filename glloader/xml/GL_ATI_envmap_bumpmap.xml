@@ -32,7 +32,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_ATI" string="GL_ATI_envmap_bumpmap">
+		<Vendor name="GL_ATI" string="GL_ATI_envmap_bumpmap" reg_no="244">
 			<Name name="glTexBumpParameterivATI"/>
 			<Name name="glTexBumpParameterfvATI"/>
 			<Name name="glGetTexBumpParameterivATI"/>

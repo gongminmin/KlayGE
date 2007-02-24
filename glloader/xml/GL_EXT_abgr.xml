@@ -6,7 +6,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_abgr"/>
+		<Vendor name="GL_EXT" string="GL_EXT_abgr" reg_no="1"/>
 	</Vendors>
 
 	<InitPath>

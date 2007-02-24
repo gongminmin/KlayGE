@@ -7,7 +7,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_ATI" string="GL_ATI_texture_mirror_once"/>
+		<Vendor name="GL_ATI" string="GL_ATI_texture_mirror_once" reg_no="221"/>
 	</Vendors>
 
 	<InitPath>

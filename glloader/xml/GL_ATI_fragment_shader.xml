@@ -209,7 +209,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_ATI" string="GL_ATI_fragment_shader">
+		<Vendor name="GL_ATI" string="GL_ATI_fragment_shader" reg_no="245">
 			<Name name="glGenFragmentShadersATI"/>
 			<Name name="glBindFragmentShaderATI"/>
 			<Name name="glDeleteFragmentShaderATI"/>

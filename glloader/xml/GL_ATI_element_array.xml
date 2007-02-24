@@ -25,7 +25,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_ATI" string="GL_ATI_element_array">
+		<Vendor name="GL_ATI" string="GL_ATI_element_array" reg_no="256">
 			<Name name="glElementPointerATI"/>
 			<Name name="glDrawElementArrayATI"/>
 			<Name name="glDrawRangeElementArrayATI"/>

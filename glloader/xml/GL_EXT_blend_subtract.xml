@@ -7,7 +7,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_blend_subtract"/>
+		<Vendor name="GL_EXT" string="GL_EXT_blend_subtract" reg_no="38"/>
 	</Vendors>
 
 	<InitPath>

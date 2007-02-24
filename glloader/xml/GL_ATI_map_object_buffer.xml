@@ -11,7 +11,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_ATI" string="GL_ATI_map_object_buffer">
+		<Vendor name="GL_ATI" string="GL_ATI_map_object_buffer" reg_no="288">
 			<Name name="glMapObjectBufferATI"/>
 			<Name name="glUnmapObjectBufferATI"/>
 		</Vendor>
