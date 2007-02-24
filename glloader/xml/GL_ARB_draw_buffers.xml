@@ -29,11 +29,11 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_draw_buffers">
+		<Vendor name="GL_ARB" string="GL_ARB_draw_buffers" reg_no="37">
 			<Name name="glDrawBuffersARB"/>
 		</Vendor>
 
-		<Vendor name="GL_ATI" string="GL_ATI_draw_buffers">
+		<Vendor name="GL_ATI" string="GL_ATI_draw_buffers" reg_no="277">
 			<Name name="glDrawBuffersATI"/>
 		</Vendor>
 	</Vendors>

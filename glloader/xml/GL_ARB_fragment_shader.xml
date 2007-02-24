@@ -7,7 +7,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_fragment_shader"/>
+		<Vendor name="GL_ARB" string="GL_ARB_fragment_shader" reg_no="32"/>
 	</Vendors>
 
 	<InitPath>

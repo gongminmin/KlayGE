@@ -41,7 +41,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_APPLE" string="GL_APPLE_element_array">
+		<Vendor name="GL_APPLE" string="GL_APPLE_element_array" reg_no="271">
 			<Name name="glElementPointerAPPLE"/>
 			<Name name="glDrawElementArrayAPPLE"/>
 			<Name name="glDrawRangeElementArrayAPPLE"/>

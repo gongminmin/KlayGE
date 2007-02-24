@@ -8,7 +8,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_APPLE" string="GL_APPLE_ycbcr_422"/>
+		<Vendor name="GL_APPLE" string="GL_APPLE_ycbcr_422" reg_no="275"/>
 	</Vendors>
 
 	<InitPath>

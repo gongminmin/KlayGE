@@ -20,7 +20,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_fragment_program"/>
+		<Vendor name="GL_ARB" string="GL_ARB_fragment_program" reg_no="27"/>
 	</Vendors>
 
 	<InitPath>

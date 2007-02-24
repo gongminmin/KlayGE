@@ -25,7 +25,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_texture_float"/>
+		<Vendor name="GL_ARB" string="GL_ARB_texture_float" reg_no="41"/>
 	</Vendors>
 
 	<InitPath>

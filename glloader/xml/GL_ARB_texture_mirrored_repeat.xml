@@ -6,8 +6,8 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_texture_mirrored_repeat"/>
-		<Vendor name="GL_IBM" string="GL_IBM_texture_mirrored_repeat"/>
+		<Vendor name="GL_ARB" string="GL_ARB_texture_mirrored_repeat" reg_no="21"/>
+		<Vendor name="GL_IBM" string="GL_IBM_texture_mirrored_repeat" reg_no="224"/>
 	</Vendors>
 
 	<InitPath>

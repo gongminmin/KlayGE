@@ -7,7 +7,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_point_sprite"/>
+		<Vendor name="GL_ARB" string="GL_ARB_point_sprite" reg_no="35"/>
 	</Vendors>
 
 	<InitPath>

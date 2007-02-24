@@ -8,7 +8,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_3DFX" string="GL_3DFX_tbuffer">
+		<Vendor name="GL_3DFX" string="GL_3DFX_tbuffer" reg_no="208">
 			<Name name="glTbufferMask3DFX"/>
 		</Vendor>
 	</Vendors>

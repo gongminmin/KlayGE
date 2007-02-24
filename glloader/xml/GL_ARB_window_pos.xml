@@ -65,7 +65,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_window_pos">
+		<Vendor name="GL_ARB" string="GL_ARB_window_pos" reg_no="25">
 			<Name name="glWindowPos2dARB"/>
 			<Name name="glWindowPos2fARB"/>
 			<Name name="glWindowPos2iARB"/>

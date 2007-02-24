@@ -39,7 +39,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_matrix_palette">
+		<Vendor name="GL_ARB" string="GL_ARB_matrix_palette" reg_no="16">
 			<Name name="glCurrentPaletteMatrixARB"/>
 			<Name name="glMatrixIndexubvARB"/>
 			<Name name="glMatrixIndexusvARB"/>

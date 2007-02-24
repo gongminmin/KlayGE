@@ -223,7 +223,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_shader_objects">
+		<Vendor name="GL_ARB" string="GL_ARB_shader_objects" reg_no="30">
 			<Name name="glDeleteObjectARB"/>
 			<Name name="glGetHandleARB"/>
 			<Name name="glDetachObjectARB"/>

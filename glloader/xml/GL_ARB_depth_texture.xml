@@ -10,8 +10,8 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_depth_texture"/>
-		<Vendor name="GL_SGIX" string="GL_SGIX_depth_texture"/>
+		<Vendor name="GL_ARB" string="GL_ARB_depth_texture" reg_no="22"/>
+		<Vendor name="GL_SGIX" string="GL_SGIX_depth_texture" reg_no="63"/>
 	</Vendors>
 
 	<InitPath>

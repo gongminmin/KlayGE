@@ -38,7 +38,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_APPLE" string="GL_APPLE_fence">
+		<Vendor name="GL_APPLE" string="GL_APPLE_fence" reg_no="272">
 			<Name name="glGenFencesAPPLE"/>
 			<Name name="glDeleteFencesAPPLE"/>
 			<Name name="glSetFenceAPPLE"/>

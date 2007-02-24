@@ -9,8 +9,8 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_pixel_buffer_object"/>
-		<Vendor name="GL_EXT" string="GL_EXT_pixel_buffer_object"/>
+		<Vendor name="GL_ARB" string="GL_ARB_pixel_buffer_object" reg_no="42"/>
+		<Vendor name="GL_EXT" string="GL_EXT_pixel_buffer_object" reg_no="302"/>
 	</Vendors>
 
 	<InitPath>

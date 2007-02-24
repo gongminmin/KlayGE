@@ -6,8 +6,8 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_shadow_ambient"/>
-		<Vendor name="GL_SGIX" string="GL_SGIX_shadow_ambient"/>
+		<Vendor name="GL_ARB" string="GL_ARB_shadow_ambient" reg_no="24"/>
+		<Vendor name="GL_SGIX" string="GL_SGIX_shadow_ambient" reg_no="90"/>
 	</Vendors>
 
 	<InitPath>

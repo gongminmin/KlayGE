@@ -6,7 +6,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_APPLE" string="GL_APPLE_transform_hint"/>
+		<Vendor name="GL_APPLE" string="GL_APPLE_transform_hint" reg_no="160"/>
 	</Vendors>
 
 	<InitPath>

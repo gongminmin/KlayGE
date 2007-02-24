@@ -17,7 +17,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_texture_cube_map"/>
+		<Vendor name="GL_ARB" string="GL_ARB_texture_cube_map" reg_no="7"/>
 	</Vendors>
 
 	<InitPath>

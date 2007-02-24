@@ -201,7 +201,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_multitexture">
+		<Vendor name="GL_ARB" string="GL_ARB_multitexture" reg_no="1">
 			<Name name="glActiveTextureARB"/>
 			<Name name="glClientActiveTextureARB"/>
 			<Name name="glMultiTexCoord1dARB"/>

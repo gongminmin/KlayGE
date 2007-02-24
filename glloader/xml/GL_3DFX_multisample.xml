@@ -9,7 +9,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_3DFX" string="GL_3DFX_multisample"/>
+		<Vendor name="GL_3DFX" string="GL_3DFX_multisample" reg_no="207"/>
 	</Vendors>
 
 	<InitPath>

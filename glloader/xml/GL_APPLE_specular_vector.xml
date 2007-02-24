@@ -6,7 +6,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_APPLE" string="GL_APPLE_specular_vector"/>
+		<Vendor name="GL_APPLE" string="GL_APPLE_specular_vector" reg_no="159"/>
 	</Vendors>
 
 	<InitPath>

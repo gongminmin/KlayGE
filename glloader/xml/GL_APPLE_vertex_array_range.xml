@@ -26,7 +26,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_APPLE" string="GL_APPLE_vertex_array_range">
+		<Vendor name="GL_APPLE" string="GL_APPLE_vertex_array_range" reg_no="274">
 			<Name name="glVertexArrayRangeAPPLE"/>
 			<Name name="glFlushVertexArrayRangeAPPLE"/>
 			<Name name="glVertexArrayParameteriAPPLE"/>

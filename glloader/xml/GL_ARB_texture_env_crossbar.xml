@@ -2,7 +2,7 @@
 
 <GLExtension name="GL_ARB_texture_env_crossbar">
 	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_texture_env_crossbar"/>
+		<Vendor name="GL_ARB" string="GL_ARB_texture_env_crossbar" reg_no="18"/>
 	</Vendors>
 
 	<InitPath>

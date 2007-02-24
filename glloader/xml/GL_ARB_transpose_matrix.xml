@@ -24,7 +24,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_transpose_matrix">
+		<Vendor name="GL_ARB" string="GL_ARB_transpose_matrix" reg_no="3">
 			<Name name="glLoadTransposeMatrixdARB"/>
 			<Name name="glLoadTransposeMatrixfARB"/>
 			<Name name="glMultTransposeMatrixdARB"/>

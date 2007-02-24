@@ -21,7 +21,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_multisample">
+		<Vendor name="GL_ARB" string="GL_ARB_multisample" reg_no="5">
 			<Name name="glSampleCoverageARB"/>
 		</Vendor>
 	</Vendors>

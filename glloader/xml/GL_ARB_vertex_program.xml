@@ -389,7 +389,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_vertex_program">
+		<Vendor name="GL_ARB" string="GL_ARB_vertex_program" reg_no="26">
 			<Name name="glVertexAttrib1sARB"/>
 			<Name name="glVertexAttrib1fARB"/>
 			<Name name="glVertexAttrib1dARB"/>

@@ -2,7 +2,7 @@
 
 <GLExtension name="GL_ARB_shading_language_100">
 	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_shading_language_100"/>
+		<Vendor name="GL_ARB" string="GL_ARB_shading_language_100" reg_no="33"/>
 	</Vendors>
 
 	<InitPath>

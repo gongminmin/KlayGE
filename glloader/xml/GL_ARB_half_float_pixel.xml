@@ -10,7 +10,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_half_float_pixel"/>
+		<Vendor name="GL_ARB" string="GL_ARB_half_float_pixel" reg_no="40"/>
 	</Vendors>
 
 	<InitPath>

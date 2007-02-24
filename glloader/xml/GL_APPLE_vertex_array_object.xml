@@ -23,7 +23,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GL_APPLE" string="GL_APPLE_vertex_array_object">
+		<Vendor name="GL_APPLE" string="GL_APPLE_vertex_array_object" reg_no="273">
 			<Name name="glBindVertexArrayAPPLE"/>
 			<Name name="glDeleteVertexArraysAPPLE"/>
 			<Name name="glGenVertexArraysAPPLE"/>

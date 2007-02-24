@@ -8,7 +8,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_shadow"/>
+		<Vendor name="GL_ARB" string="GL_ARB_shadow" reg_no="23"/>
 	</Vendors>
 
 	<InitPath>
