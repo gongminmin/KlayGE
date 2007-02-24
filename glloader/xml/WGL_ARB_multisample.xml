@@ -7,7 +7,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="WGL_ARB" string="WGL_ARB_multisample"/>
+		<Vendor name="WGL_ARB" string="WGL_ARB_multisample" reg_no="5"/>
 	</Vendors>
 
 	<InitPath>

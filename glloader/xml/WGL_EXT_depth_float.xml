@@ -6,7 +6,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="EXT" string="WGL_EXT_depth_float"/>
+		<Vendor name="EXT" string="WGL_EXT_depth_float" reg_no="177"/>
 	</Vendors>
 
 	<InitPath>

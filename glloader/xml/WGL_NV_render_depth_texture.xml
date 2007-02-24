@@ -10,7 +10,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="WGL_NV" string="WGL_NV_render_depth_texture"/>
+		<Vendor name="WGL_NV" string="WGL_NV_render_depth_texture" reg_no="263"/>
 	</Vendors>
 
 	<InitPath>

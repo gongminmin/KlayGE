@@ -14,7 +14,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="WGL_NV" string="WGL_NV_float_buffer"/>
+		<Vendor name="WGL_NV" string="WGL_NV_float_buffer" reg_no="281"/>
 	</Vendors>
 
 	<InitPath>

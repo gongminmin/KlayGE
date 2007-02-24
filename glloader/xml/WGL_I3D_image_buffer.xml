@@ -31,7 +31,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="WGL_I3D" string="WGL_I3D_image_buffer">
+		<Vendor name="WGL_I3D" string="WGL_I3D_image_buffer" reg_no="253">
 			<Name name="wglCreateImageBufferI3D"/>
 			<Name name="wglDestroyImageBufferI3D"/>
 			<Name name="wglAssociateImageBufferEventsI3D"/>

@@ -6,21 +6,8 @@
 		<Token name="WGL_SAMPLES_EXT" value="0x2042"/>
 	</Tokens>
 
-	<Functions>
-		<Function name="wglSampleMaskEXT" return="void">
-			<Param type="GLclampf" name="value"/>
-			<Param type="GLboolean" name="invert"/>
-		</Function>
-		<Function name="wglSamplePatternEXT" return="void">
-			<Param type="GLenum" name="pattern"/>
-		</Function>
-	</Functions>
-
 	<Vendors>
-		<Vendor name="WGL_EXT" string="WGL_EXT_multisample">
-			<Name name="wglSampleMaskEXT"/>
-			<Name name="wglSamplePatternEXT"/>
-		</Vendor>
+		<Vendor name="WGL_EXT" string="WGL_EXT_multisample" reg_no="209"/>
 	</Vendors>
 
 	<InitPath>

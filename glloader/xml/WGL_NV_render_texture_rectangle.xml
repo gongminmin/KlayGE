@@ -8,7 +8,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="WGL_NV" string="WGL_NV_render_texture_rectangle"/>
+		<Vendor name="WGL_NV" string="WGL_NV_render_texture_rectangle" reg_no="264"/>
 	</Vendors>
 
 	<InitPath>

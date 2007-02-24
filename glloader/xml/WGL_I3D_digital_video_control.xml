@@ -22,7 +22,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="WGL_I3D" string="WGL_I3D_digital_video_control">
+		<Vendor name="WGL_I3D" string="WGL_I3D_digital_video_control" reg_no="250">
 			<Name name="wglGetDigitalVideoParametersI3D"/>
 			<Name name="wglSetDigitalVideoParametersI3D"/>
 		</Vendor>

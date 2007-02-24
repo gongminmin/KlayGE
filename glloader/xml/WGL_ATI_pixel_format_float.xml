@@ -6,7 +6,7 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="WGL_ATI" string="WGL_ATI_pixel_format_float"/>
+		<Vendor name="WGL_ATI" string="WGL_ATI_pixel_format_float" reg_no="278"/>
 	</Vendors>
 
 	<InitPath>

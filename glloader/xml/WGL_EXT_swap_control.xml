@@ -9,7 +9,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="WGL_EXT" string="WGL_EXT_swap_control">
+		<Vendor name="WGL_EXT" string="WGL_EXT_swap_control" reg_no="172">
 			<Name name="wglSwapIntervalEXT"/>
 			<Name name="wglGetSwapIntervalEXT"/>
 		</Vendor>

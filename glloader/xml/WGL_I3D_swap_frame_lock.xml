@@ -13,7 +13,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="WGL_I3D" string="WGL_I3D_swap_frame_lock">
+		<Vendor name="WGL_I3D" string="WGL_I3D_swap_frame_lock" reg_no="254">
 			<Name name="wglEnableFrameLockI3D"/>
 			<Name name="wglDisableFrameLockI3D"/>
 			<Name name="wglIsEnabledFrameLockI3D"/>

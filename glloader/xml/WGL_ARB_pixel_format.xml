@@ -82,13 +82,13 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="WGL_ARB" string="WGL_ARB_pixel_format">
+		<Vendor name="WGL_ARB" string="WGL_ARB_pixel_format" reg_no="9">
 			<Name name="wglGetPixelFormatAttribivARB"/>
 			<Name name="wglGetPixelFormatAttribfvARB"/>
 			<Name name="wglChoosePixelFormatARB"/>
 		</Vendor>
 
-		<Vendor name="WGL_EXT" string="WGL_EXT_pixel_format">
+		<Vendor name="WGL_EXT" string="WGL_EXT_pixel_format" reg_no="170">
 			<Name name="wglGetPixelFormatAttribivEXT"/>
 			<Name name="wglGetPixelFormatAttribfvEXT"/>
 			<Name name="wglChoosePixelFormatEXT"/>

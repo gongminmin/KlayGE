@@ -18,7 +18,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="WGL_EXT" string="WGL_EXT_display_color_table">
+		<Vendor name="WGL_EXT" string="WGL_EXT_display_color_table" reg_no="167">
 			<Name name="wglCreateDisplayColorTableEXT"/>
 			<Name name="wglLoadDisplayColorTableEXT"/>
 			<Name name="wglBindDisplayColorTableEXT"/>

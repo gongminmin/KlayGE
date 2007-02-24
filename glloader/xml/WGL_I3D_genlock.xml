@@ -64,7 +64,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="WGL_I3D" string="WGL_I3D_genlock">
+		<Vendor name="WGL_I3D" string="WGL_I3D_genlock" reg_no="252">
 			<Name name="wglEnableGenlockI3D"/>
 			<Name name="wglDisableGenlockI3D"/>
 			<Name name="wglIsEnabledGenlockI3D"/>

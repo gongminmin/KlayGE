@@ -15,7 +15,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="WGL_I3D" string="WGL_I3D_swap_frame_usage">
+		<Vendor name="WGL_I3D" string="WGL_I3D_swap_frame_usage" reg_no="255">
 			<Name name="wglGetFrameUsageI3D"/>
 			<Name name="wglBeginFrameTrackingI3D"/>
 			<Name name="wglEndFrameTrackingI3D"/>

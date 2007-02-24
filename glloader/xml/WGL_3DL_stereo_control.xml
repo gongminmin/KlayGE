@@ -16,7 +16,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="WGL_3DL" string="WGL_3DL_stereo_control">
+		<Vendor name="WGL_3DL" string="WGL_3DL_stereo_control" reg_no="313">
 			<Name name="wglSetStereoEmitterState3DL"/>
 		</Vendor>
 	</Vendors>

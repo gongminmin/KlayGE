@@ -58,7 +58,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="WGL_ARB" string="WGL_ARB_render_texture">
+		<Vendor name="WGL_ARB" string="WGL_ARB_render_texture" reg_no="20">
 			<Name name="wglBindTexImageARB"/>
 			<Name name="wglReleaseTexImageARB"/>
 			<Name name="wglSetPbufferAttribARB"/>

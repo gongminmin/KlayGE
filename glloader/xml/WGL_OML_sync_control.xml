@@ -45,7 +45,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="WGL_OML" string="WGL_OML_sync_control">
+		<Vendor name="WGL_OML" string="WGL_OML_sync_control" reg_no="242">
 			<Name name="wglGetSyncValuesOML"/>
 			<Name name="wglGetMscRateOML"/>
 			<Name name="wglSwapBuffersMscOML"/>
