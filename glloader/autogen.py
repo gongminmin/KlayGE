@@ -111,13 +111,16 @@ class Extension:
 		for init in initpath:
 			for vendor in vendors:
 				if init.getAttribute("name") == vendor.getAttribute("name"):
+					assert (vendor.getAttributeNode("string") != None)
+
+					if vendor.getAttributeNode("reg_no") == None:
+						print "\tWarning:", vendor.getAttribute("string"), "is not in the OpenGL Extension Registry."
+
 					names = []
 					for name in vendor.getElementsByTagName("Name"):
 						assert (name.getAttributeNode("name") != None)
 						names.append(name.getAttribute("name"))
-
 					assert (len(names) == len(self.functions))
-					assert (vendor.getAttributeNode("string") != None)
 
 					self.exts.append(Ext(vendor.getAttribute("string"), names))
 
