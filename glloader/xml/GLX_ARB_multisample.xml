@@ -7,8 +7,8 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GLX_ARB" string="GLX_ARB_multisample"/>
-		<Vendor name="GLX_SGIS" string="GLX_SGIS_multisample"/>
+		<Vendor name="GLX_ARB" string="GLX_ARB_multisample" reg_no="5"/>
+		<Vendor name="GLX_SGIS" string="GLX_SGIS_multisample" reg_no="25"/>
 	</Vendors>
 
 	<InitPath>

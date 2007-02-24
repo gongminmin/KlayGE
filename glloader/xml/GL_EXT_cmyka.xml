@@ -1,0 +1,18 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_EXT_cmyka">
+	<Tokens>
+		<Token name="CMYK_EXT" value="0x800C"/>
+		<Token name="CMYKA_EXT" value="0x800D"/>
+		<Token name="PACK_CMYK_HINT_EXT" value="0x800E"/>
+		<Token name="UNPACK_CMYK_HINT_EXT" value="0x800F"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_EXT" string="GL_EXT_cmyka" reg_no="18"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_EXT"/>
+	</InitPath>
+</GLExtension>
