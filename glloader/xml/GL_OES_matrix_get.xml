@@ -1,0 +1,17 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_OES_matrix_get">
+	<Tokens>
+		<Token name="GL_MODELVIEW_MATRIX_FLOAT_AS_INT_BITS_OES" value="0x898D"/>
+		<Token name="GL_PROJECTION_MATRIX_FLOAT_AS_INT_BITS_OES" value="0x898E"/>
+		<Token name="GL_TEXTURE_MATRIX_FLOAT_AS_INT_BITS_OES" value="0x898F"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_OES" string="GL_OES_matrix_get"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_OES"/>
+	</InitPath>
+</GLExtension>

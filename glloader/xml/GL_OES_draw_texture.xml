@@ -1,0 +1,67 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_OES_draw_texture">
+	<Tokens>
+		<Token name="GL_TEXTURE_CROP_RECT_OES" value="0x8B9D"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glDrawTexsOES" return="void">
+			<Param type="GLshort" name="x"/>
+			<Param type="GLshort" name="y"/>
+			<Param type="GLshort" name="z"/>
+			<Param type="GLshort" name="width"/>
+			<Param type="GLshort" name="height"/>
+		</Function>
+		<Function name="glDrawTexiOES" return="void">
+			<Param type="GLint" name="x"/>
+			<Param type="GLint" name="y"/>
+			<Param type="GLint" name="z"/>
+			<Param type="GLint" name="width"/>
+			<Param type="GLint" name="height"/>
+		</Function>
+		<Function name="glDrawTexxOES" return="void">
+			<Param type="GLfixed" name="x"/>
+			<Param type="GLfixed" name="y"/>
+			<Param type="GLfixed" name="z"/>
+			<Param type="GLfixed" name="width"/>
+			<Param type="GLfixed" name="height"/>
+		</Function>
+		<Function name="glDrawTexsvOES" return="void">
+			<Param type="const GLshort*" name="coords"/>
+		</Function>
+		<Function name="glDrawTexivOES" return="void">
+			<Param type="const GLint*" name="coords"/>
+		</Function>
+		<Function name="glDrawTexxvOES" return="void">
+			<Param type="const GLfixed*" name="coords"/>
+		</Function>
+		<Function name="glDrawTexfOES" return="void">
+			<Param type="GLfloat" name="x"/>
+			<Param type="GLfloat" name="y"/>
+			<Param type="GLfloat" name="z"/>
+			<Param type="GLfloat" name="width"/>
+			<Param type="GLfloat" name="height"/>
+		</Function>
+		<Function name="glDrawTexfvOES" return="void">
+			<Param type="const GLfloat*" name="coords"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_OES" string="GL_OES_draw_texture">
+			<Name name="glDrawTexsOES"/>
+			<Name name="glDrawTexiOES"/>
+			<Name name="glDrawTexxOES"/>
+			<Name name="glDrawTexsvOES"/>
+			<Name name="glDrawTexivOES"/>
+			<Name name="glDrawTexxvOES"/>
+			<Name name="glDrawTexfOES"/>
+			<Name name="glDrawTexfvOES"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_OES"/>
+	</InitPath>
+</GLExtension>

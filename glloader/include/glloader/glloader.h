@@ -139,6 +139,8 @@ typedef float			GLfloat;
 typedef float			GLclampf;
 typedef double			GLdouble;
 typedef double			GLclampd;
+typedef int             GLfixed;
+typedef int             GLclampx;
 
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 	#include <inttypes.h>

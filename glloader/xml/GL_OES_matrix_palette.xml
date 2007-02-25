@@ -1,0 +1,53 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_OES_matrix_palette">
+	<Tokens>
+		<Token name="GL_MAX_VERTEX_UNITS_OES" value="0x86A4"/>
+		<Token name="GL_MAX_PALETTE_MATRICES_OES" value="0x8842"/>
+		<Token name="GL_MATRIX_PALETTE_OES" value="0x8840"/>
+		<Token name="GL_MATRIX_INDEX_ARRAY_OES" value="0x8844"/>
+		<Token name="GL_WEIGHT_ARRAY_OES" value="0x86AD"/>
+		<Token name="GL_MATRIX_INDEX_ARRAY_SIZE_OES" value="0x8846"/>
+		<Token name="GL_MATRIX_INDEX_ARRAY_TYPE_OES" value="0x8847"/>
+		<Token name="GL_MATRIX_INDEX_ARRAY_STRIDE_OES" value="0x8848"/>
+		<Token name="GL_MATRIX_INDEX_ARRAY_POINTER_OES" value="0x8849"/>
+		<Token name="GL_MATRIX_INDEX_ARRAY_BUFFER_BINDING_OES" value="0x8B9E"/>
+		<Token name="GL_WEIGHT_ARRAY_SIZE_OES" value="0x86AB"/>
+		<Token name="GL_WEIGHT_ARRAY_TYPE_OES" value="0x86A9"/>
+		<Token name="GL_WEIGHT_ARRAY_STRIDE_OES" value="0x86AA"/>
+		<Token name="GL_WEIGHT_ARRAY_POINTER_OES" value="0x86AC"/>
+		<Token name="GL_WEIGHT_ARRAY_BUFFER_BINDING_OES" value="0x889E"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glCurrentPaletteMatrixOES" return="void">
+			<Param type="GLuint" name="matrixpaletteindex"/>
+		</Function>
+		<Function name="glLoadPaletteFromModelViewMatrixOES" return="void"/>
+		<Function name="glMatrixIndexPointerOES" return="void">
+			<Param type="GLint" name="size"/>
+			<Param type="GLenum" name="type"/>
+			<Param type="GLsizei" name="stride"/>
+			<Param type="const GLvoid*" name="pointer"/>
+		</Function>
+		<Function name="glWeightPointerOES" return="void">
+			<Param type="GLint" name="size"/>
+			<Param type="GLenum" name="type"/>
+			<Param type="GLsizei" name="stride"/>
+			<Param type="const GLvoid*" name="pointer"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_OES" string="GL_OES_matrix_palette">
+			<Name name="glCurrentPaletteMatrixOES"/>
+			<Name name="glLoadPaletteFromModelViewMatrixOES"/>
+			<Name name="glMatrixIndexPointerOES"/>
+			<Name name="glWeightPointerOES"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_OES"/>
+	</InitPath>
+</GLExtension>
