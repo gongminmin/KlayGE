@@ -11,7 +11,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Util.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -21,115 +20,11 @@
 
 #include <boost/assert.hpp>
 
+#include <KlayGE/PostProcess.hpp>
 #include <KlayGE/HDRPostProcess.hpp>
 
 namespace KlayGE
 {
-	Downsampler2x2PostProcess::Downsampler2x2PostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Downsample.kfx")->TechniqueByName("Downsample"))
-	{
-	}
-
-	BrightPassDownsampler2x2PostProcess::BrightPassDownsampler2x2PostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Downsample.kfx")->TechniqueByName("BrightPassDownsample"))
-	{
-	}
-
-
-	BlurPostProcess::BlurPostProcess(std::string const & tech, int kernel_radius, float multiplier)
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Blur.kfx")->TechniqueByName(tech)),
-				color_weight_(8, 0), tex_coord_offset_(8, 0),
-				kernel_radius_(kernel_radius), multiplier_(multiplier)
-	{
-		BOOST_ASSERT((kernel_radius > 0) && (kernel_radius <= 8));
-	}
-
-	BlurPostProcess::~BlurPostProcess()
-	{
-	}
-
-	void BlurPostProcess::OnRenderBegin()
-	{
-		PostProcess::OnRenderBegin();
-
-		*(technique_->Effect().ParameterByName("color_weight")) = color_weight_;
-		*(technique_->Effect().ParameterByName("tex_coord_offset")) = tex_coord_offset_;
-	}
-
-	float BlurPostProcess::GaussianDistribution(float x, float y, float rho)
-	{
-		float g = 1.0f / sqrt(2.0f * PI * rho * rho);
-		g *= exp(-(x * x + y * y) / (2 * rho * rho));
-		return g;
-	}
-
-	void BlurPostProcess::CalSampleOffsets(uint32_t tex_size, float deviation)
-	{
-		std::vector<float> tmp_weights(kernel_radius_ * 2, 0);
-		std::vector<float> tmp_offset(kernel_radius_ * 2, 0);
-
-		float const tu = 1.0f / tex_size;
-
-		float sum_weight = 0;
-		for (int i = 0; i < 2 * kernel_radius_; ++ i)
-		{
-			float weight = this->GaussianDistribution(i - kernel_radius_ + 0.5f, 0, kernel_radius_ / deviation);
-			tmp_weights[i] = weight;
-			sum_weight += weight;
-		}
-		for (int i = 0; i < 2 * kernel_radius_; ++ i)
-		{
-			tmp_weights[i] /= sum_weight;
-		}
-
-		// Fill the offsets
-		for (int i = 0; i < kernel_radius_; ++ i)
-		{
-			tmp_offset[i]                  = static_cast<float>(i - kernel_radius_);
-			tmp_offset[i + kernel_radius_] = static_cast<float>(i);
-		}
-
-		color_weight_.resize(kernel_radius_);
-		tex_coord_offset_.resize(kernel_radius_);
-
-		// Bilinear filtering taps 
-		// Ordering is left to right.
-		for (int i = 0; i < kernel_radius_; ++ i)
-		{
-			float const scale = tmp_weights[i * 2] + tmp_weights[i * 2 + 1];
-			float const frac = tmp_weights[i * 2] / scale;
-
-			tex_coord_offset_[i] = (tmp_offset[i * 2] + (1 - frac)) * tu;
-			color_weight_[i] = multiplier_ * scale;
-		}
-	}
-
-
-	BlurXPostProcess::BlurXPostProcess(int length, float multiplier)
-			: BlurPostProcess("BlurX", length, multiplier)
-	{
-	}
-
-	void BlurXPostProcess::Source(TexturePtr const & src_tex, bool flipping)
-	{
-		BlurPostProcess::Source(src_tex, flipping);
-
-		this->CalSampleOffsets(src_texture_->Width(0), 3);
-	}
-
-	BlurYPostProcess::BlurYPostProcess(int length, float multiplier)
-			: BlurPostProcess("BlurY", length, multiplier)
-	{
-	}
-
-	void BlurYPostProcess::Source(TexturePtr const & src_tex, bool flipping)
-	{
-		BlurPostProcess::Source(src_tex, flipping);
-
-		this->CalSampleOffsets(src_texture_->Height(0), 3);
-	}
-
-
 	SumLumPostProcess::SumLumPostProcess(std::string const & tech)
 			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.kfx")->TechniqueByName(tech))
 	{
@@ -258,19 +153,10 @@ namespace KlayGE
 
 
 	HDRPostProcess::HDRPostProcess()
-		: PostProcess(RenderTechniquePtr())
+		: PostProcess(RenderTechniquePtr()),
+			blur_x_(8, 2), blur_y_(8, 2)
 	{
-		tone_mapping_.reset(new ToneMappingPostProcess);
-		downsampler_.reset(new BrightPassDownsampler2x2PostProcess);
-		blur_x_.reset(new BlurXPostProcess(8, 2));
-		blur_y_.reset(new BlurYPostProcess(8, 2));
-		sum_lums_.resize(NUM_TONEMAP_TEXTURES + 1);
-		sum_lums_[0].reset(new SumLumLogPostProcess);
-		for (int i = 1; i < NUM_TONEMAP_TEXTURES + 1; ++ i)
-		{
-			sum_lums_[i].reset(new SumLumIterativePostProcess);
-		}
-		adapted_lum_.reset(new AdaptedLumPostProcess);
+		sum_lums_.resize(NUM_TONEMAP_TEXTURES);
 	}
 
 	void HDRPostProcess::Source(TexturePtr const & tex, bool flipping)
@@ -288,7 +174,7 @@ namespace KlayGE
 
 		lum_texs_.clear();
 		int len = 1;
-		for (int i = 0; i < NUM_TONEMAP_TEXTURES + 1; ++ i)
+		for (int i = 0; i < sum_lums_.size() + 1; ++ i)
 		{
 			lum_texs_.push_back(rf.MakeTexture2D(len, len, 1, EF_GR16F));
 			len *= 4;
@@ -299,78 +185,79 @@ namespace KlayGE
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*downsample_tex_, 0));
-			downsampler_->Source(src_texture_, flipping);
-			downsampler_->Destinate(fb);
+			downsampler_.Source(src_texture_, flipping);
+			downsampler_.Destinate(fb);
 			tmp_flipping = fb->RequiresFlipping();
 		}
 
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blurx_tex_, 0));
-			blur_x_->Source(downsample_tex_, tmp_flipping);
-			blur_x_->Destinate(fb);
+			blur_x_.Source(downsample_tex_, tmp_flipping);
+			blur_x_.Destinate(fb);
 			tmp_flipping = fb->RequiresFlipping();
 		}
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blury_tex_, 0));
-			blur_y_->Source(blurx_tex_, tmp_flipping);
-			blur_y_->Destinate(fb);
+			blur_y_.Source(blurx_tex_, tmp_flipping);
+			blur_y_.Destinate(fb);
 			tmp_flipping = fb->RequiresFlipping();
 		}
 
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[0], 0));
-			sum_lums_[0]->Source(src_texture_, tmp_flipping);
-			sum_lums_[0]->Destinate(fb);
+			sum_lums_1st_.Source(src_texture_, tmp_flipping);
+			sum_lums_1st_.Destinate(fb);
 			tmp_flipping = fb->RequiresFlipping();
 		}
-		for (int i = 1; i < NUM_TONEMAP_TEXTURES + 1; ++ i)
+		for (int i = 0; i < sum_lums_.size(); ++ i)
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
-			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[i], 0));
-			sum_lums_[i]->Source(lum_texs_[i - 1], tmp_flipping);
-			sum_lums_[i]->Destinate(fb);
+			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[i + 1], 0));
+			sum_lums_[i].Source(lum_texs_[i], tmp_flipping);
+			sum_lums_[i].Destinate(fb);
 			tmp_flipping = fb->RequiresFlipping();
 		}
 
 		{
-			adapted_lum_->Source(lum_texs_[NUM_TONEMAP_TEXTURES], tmp_flipping);
+			adapted_lum_.Source(lum_texs_[sum_lums_.size()], tmp_flipping);
 		}
 
 		{
-			tone_mapping_->Source(src_texture_, flipping);
-			tone_mapping_->Destinate(render_target_);
+			tone_mapping_.Source(src_texture_, flipping);
 		}
+	}
+
+	void HDRPostProcess::Destinate(RenderTargetPtr const & rt)
+	{
+		tone_mapping_.Destinate(rt);
 	}
 
 	void HDRPostProcess::Apply()
 	{
 		// 降采样
-		downsampler_->Apply();
+		downsampler_.Apply();
 		// Blur X
-		blur_x_->Apply();
+		blur_x_.Apply();
 		// Blur Y
-		blur_y_->Apply();
+		blur_y_.Apply();
 
 		// 降采样4x4 log
-		sum_lums_[0]->Apply();
-		for (size_t i = 1; i < sum_lums_.size() - 1; ++ i)
+		sum_lums_1st_.Apply();
+		for (size_t i = 0; i < sum_lums_.size(); ++ i)
 		{
 			// 降采样4x4
-			sum_lums_[i]->Apply();
+			sum_lums_[i].Apply();
 		}
-		// 降采样4x4 exp
-		sum_lums_[sum_lums_.size() - 1]->Apply();
 
-		adapted_lum_->Apply();
+		adapted_lum_.Apply();
 
 		{
 			// Tone mapping
-			ToneMappingPostProcessPtr ppor = checked_pointer_cast<ToneMappingPostProcess>(tone_mapping_);
-			ppor->SetTexture(checked_pointer_cast<AdaptedLumPostProcess>(adapted_lum_)->AdaptedLum(), blury_tex_);
-			ppor->Apply();
+			tone_mapping_.SetTexture(adapted_lum_.AdaptedLum(), blury_tex_);
+			tone_mapping_.Apply();
 		}
 	}
 }

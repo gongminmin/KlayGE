@@ -21,54 +21,6 @@
 
 namespace KlayGE
 {
-	class Downsampler2x2PostProcess : public PostProcess
-	{
-	public:
-		Downsampler2x2PostProcess();
-	};
-
-	class BrightPassDownsampler2x2PostProcess : public PostProcess
-	{
-	public:
-		BrightPassDownsampler2x2PostProcess();
-	};
-
-	class BlurPostProcess : public PostProcess
-	{
-	public:
-		BlurPostProcess(std::string const & tech, int kernel_radius, float multiplier);
-		virtual ~BlurPostProcess();
-
-		void OnRenderBegin();
-
-	protected:
-		float GaussianDistribution(float x, float y, float rho);
-		void CalSampleOffsets(uint32_t tex_size, float deviation);
-
-	protected:
-		std::vector<float> color_weight_;
-		std::vector<float> tex_coord_offset_;
-
-		int kernel_radius_;
-		float multiplier_;
-	};
-
-	class BlurXPostProcess : public BlurPostProcess
-	{
-	public:
-		BlurXPostProcess(int length, float multiplier);
-
-		void Source(TexturePtr const & src_tex, bool flipping);
-	};
-
-	class BlurYPostProcess : public BlurPostProcess
-	{
-	public:
-		BlurYPostProcess(int length, float multiplier);
-
-		void Source(TexturePtr const & src_tex, bool flipping);
-	};
-
 	class SumLumPostProcess : public PostProcess
 	{
 	public:
@@ -142,6 +94,7 @@ namespace KlayGE
 		HDRPostProcess();
 
 		void Source(TexturePtr const & tex, bool flipping);
+		void Destinate(RenderTargetPtr const & rt);
 		void Apply();
 
 	private:
@@ -150,12 +103,13 @@ namespace KlayGE
 		TexturePtr blury_tex_;
 		std::vector<TexturePtr> lum_texs_;
 
-		PostProcessPtr tone_mapping_;
-		PostProcessPtr downsampler_;
-		PostProcessPtr blur_x_;
-		PostProcessPtr blur_y_;
-		std::vector<PostProcessPtr> sum_lums_;
-		PostProcessPtr adapted_lum_;
+		BrightPassDownsampler2x2PostProcess downsampler_;
+		BlurXPostProcess blur_x_;
+		BlurYPostProcess blur_y_;
+		SumLumLogPostProcess sum_lums_1st_;
+		std::vector<SumLumIterativePostProcess> sum_lums_;
+		AdaptedLumPostProcess adapted_lum_;
+		ToneMappingPostProcess tone_mapping_;
 	};
 }
 

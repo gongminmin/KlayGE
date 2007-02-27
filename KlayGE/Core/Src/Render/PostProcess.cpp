@@ -111,4 +111,110 @@ namespace KlayGE
 
 		*(technique_->Effect().ParameterByName("inv_gamma")) = inv_gamma_;
 	}
+
+
+	Downsampler2x2PostProcess::Downsampler2x2PostProcess()
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Downsample.kfx")->TechniqueByName("Downsample"))
+	{
+	}
+
+
+	BrightPassDownsampler2x2PostProcess::BrightPassDownsampler2x2PostProcess()
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Downsample.kfx")->TechniqueByName("BrightPassDownsample"))
+	{
+	}
+
+
+	SeparableBlurPostProcess::SeparableBlurPostProcess(std::string const & tech, int kernel_radius, float multiplier)
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Blur.kfx")->TechniqueByName(tech)),
+				color_weight_(8, 0), tex_coord_offset_(8, 0),
+				kernel_radius_(kernel_radius), multiplier_(multiplier)
+	{
+		BOOST_ASSERT((kernel_radius > 0) && (kernel_radius <= 8));
+	}
+
+	SeparableBlurPostProcess::~SeparableBlurPostProcess()
+	{
+	}
+
+	void SeparableBlurPostProcess::OnRenderBegin()
+	{
+		PostProcess::OnRenderBegin();
+
+		*(technique_->Effect().ParameterByName("color_weight")) = color_weight_;
+		*(technique_->Effect().ParameterByName("tex_coord_offset")) = tex_coord_offset_;
+	}
+
+	float SeparableBlurPostProcess::GaussianDistribution(float x, float y, float rho)
+	{
+		float g = 1.0f / sqrt(2.0f * PI * rho * rho);
+		g *= exp(-(x * x + y * y) / (2 * rho * rho));
+		return g;
+	}
+
+	void SeparableBlurPostProcess::CalSampleOffsets(uint32_t tex_size, float deviation)
+	{
+		std::vector<float> tmp_weights(kernel_radius_ * 2, 0);
+		std::vector<float> tmp_offset(kernel_radius_ * 2, 0);
+
+		float const tu = 1.0f / tex_size;
+
+		float sum_weight = 0;
+		for (int i = 0; i < 2 * kernel_radius_; ++ i)
+		{
+			float weight = this->GaussianDistribution(i - kernel_radius_ + 0.5f, 0, kernel_radius_ / deviation);
+			tmp_weights[i] = weight;
+			sum_weight += weight;
+		}
+		for (int i = 0; i < 2 * kernel_radius_; ++ i)
+		{
+			tmp_weights[i] /= sum_weight;
+		}
+
+		// Fill the offsets
+		for (int i = 0; i < kernel_radius_; ++ i)
+		{
+			tmp_offset[i]                  = static_cast<float>(i - kernel_radius_);
+			tmp_offset[i + kernel_radius_] = static_cast<float>(i);
+		}
+
+		color_weight_.resize(kernel_radius_);
+		tex_coord_offset_.resize(kernel_radius_);
+
+		// Bilinear filtering taps 
+		// Ordering is left to right.
+		for (int i = 0; i < kernel_radius_; ++ i)
+		{
+			float const scale = tmp_weights[i * 2] + tmp_weights[i * 2 + 1];
+			float const frac = tmp_weights[i * 2] / scale;
+
+			tex_coord_offset_[i] = (tmp_offset[i * 2] + (1 - frac)) * tu;
+			color_weight_[i] = multiplier_ * scale;
+		}
+	}
+
+
+	BlurXPostProcess::BlurXPostProcess(int length, float multiplier)
+			: SeparableBlurPostProcess("BlurX", length, multiplier)
+	{
+	}
+
+	void BlurXPostProcess::Source(TexturePtr const & src_tex, bool flipping)
+	{
+		SeparableBlurPostProcess::Source(src_tex, flipping);
+
+		this->CalSampleOffsets(src_texture_->Width(0), 3);
+	}
+
+	BlurYPostProcess::BlurYPostProcess(int length, float multiplier)
+			: SeparableBlurPostProcess("BlurY", length, multiplier)
+	{
+	}
+
+	void BlurYPostProcess::Source(TexturePtr const & src_tex, bool flipping)
+	{
+		SeparableBlurPostProcess::Source(src_tex, flipping);
+
+		this->CalSampleOffsets(src_texture_->Height(0), 3);
+	}
 }

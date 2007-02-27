@@ -56,6 +56,54 @@ namespace KlayGE
 	private:
 		float inv_gamma_;
 	};
+	
+	class SeparableBlurPostProcess : public PostProcess
+	{
+	public:
+		SeparableBlurPostProcess(std::string const & tech, int kernel_radius, float multiplier);
+		virtual ~SeparableBlurPostProcess();
+
+		void OnRenderBegin();
+
+	protected:
+		float GaussianDistribution(float x, float y, float rho);
+		void CalSampleOffsets(uint32_t tex_size, float deviation);
+
+	protected:
+		std::vector<float> color_weight_;
+		std::vector<float> tex_coord_offset_;
+
+		int kernel_radius_;
+		float multiplier_;
+	};
+
+	class Downsampler2x2PostProcess : public PostProcess
+	{
+	public:
+		Downsampler2x2PostProcess();
+	};
+
+	class BrightPassDownsampler2x2PostProcess : public PostProcess
+	{
+	public:
+		BrightPassDownsampler2x2PostProcess();
+	};
+
+	class BlurXPostProcess : public SeparableBlurPostProcess
+	{
+	public:
+		BlurXPostProcess(int length, float multiplier);
+
+		void Source(TexturePtr const & src_tex, bool flipping);
+	};
+
+	class BlurYPostProcess : public SeparableBlurPostProcess
+	{
+	public:
+		BlurYPostProcess(int length, float multiplier);
+
+		void Source(TexturePtr const & src_tex, bool flipping);
+	};
 }
 
 #endif		// _POSTPROCESS_HPP
