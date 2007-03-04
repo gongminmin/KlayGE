@@ -63,17 +63,17 @@ namespace KlayGE
 		ID3DXConstantTable* constant_table;
 
 		ID3DXBuffer* code;
-		ID3DXBuffer* pErrMsg;
+		ID3DXBuffer* err_msg;
 		D3DXCompileShader(text.c_str(), static_cast<UINT>(text.size()), NULL, NULL,
 			name.c_str(), shader_profile.c_str(),
-			0, &code, &pErrMsg, &constant_table);
-		if (pErrMsg != NULL)
+			0, &code, &err_msg, &constant_table);
+		if (err_msg != NULL)
 		{
 #ifdef KLAYGE_DEBUG
 			std::cerr << text << std::endl;
-			std::cerr << static_cast<char*>(pErrMsg->GetBufferPointer()) << std::endl;
+			std::cerr << static_cast<char*>(err_msg->GetBufferPointer()) << std::endl;
 #endif
-			pErrMsg->Release();
+			err_msg->Release();
 		}
 
 		if (NULL == code)
