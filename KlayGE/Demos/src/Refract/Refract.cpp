@@ -246,7 +246,7 @@ void Refract::InitObjects()
 
 	re.Clear(RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
-	this->LookAt(float3(0.36f, 0.11f, -0.39f), float3(0, 0, 0));
+	this->LookAt(float3(0.36f, 0.11f, -0.39f), float3(0, 0.11f, 0));
 	this->Proj(0.05f, 100);
 
 	fpcController_.AttachCamera(this->ActiveCamera());

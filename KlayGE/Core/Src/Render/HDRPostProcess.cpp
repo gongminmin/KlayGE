@@ -174,7 +174,7 @@ namespace KlayGE
 
 		lum_texs_.clear();
 		int len = 1;
-		for (int i = 0; i < sum_lums_.size() + 1; ++ i)
+		for (size_t i = 0; i < sum_lums_.size() + 1; ++ i)
 		{
 			lum_texs_.push_back(rf.MakeTexture2D(len, len, 1, EF_GR16F));
 			len *= 4;
@@ -212,7 +212,7 @@ namespace KlayGE
 			sum_lums_1st_.Destinate(fb);
 			tmp_flipping = fb->RequiresFlipping();
 		}
-		for (int i = 0; i < sum_lums_.size(); ++ i)
+		for (size_t i = 0; i < sum_lums_.size(); ++ i)
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[i + 1], 0));

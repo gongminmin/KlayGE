@@ -4,8 +4,8 @@ Homepage: http://klayge.sourceforge.net
 E-Mail:	  enginedev@163.com
 QQ:       33611210
 
-由于我编译这些demo所用的编译器是VS2005，在没有安装VS2005的机器上直接运行demo的exe
-需要安装VS2005的重发布包：
+由于我编译这些demo所用的编译器是VS2005 sp1，在没有安装VS2005 sp1的机器上直接运行demo的exe
+需要安装VS2005 sp1的重发布包：
 x86版本vcredist_x86.exe
 http://www.microsoft.com/downloads/details.aspx?FamilyID=32bc1bee-a3f9-4c13-9c99-220b62a191ee
 x64版本vcredist_x64.exe
