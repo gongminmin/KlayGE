@@ -35,7 +35,8 @@
 <!ELEMENT Vendor (Name*)>
 <!ATTLIST Vendor
 	name ID #REQUIRED
-	string CDATA #REQUIRED>
+	string CDATA #REQUIRED
+	reg_no CDATA>
 
 <!ELEMENT Name EMPTY>
 <!ATTLIST Name

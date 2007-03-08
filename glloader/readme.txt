@@ -5,11 +5,11 @@ The GLLoader's primary selling point is that it offers a initializing path of an
 After setting include and lib directories, all you need to do is add #include <glloader/glloader.h> into your code.
 The GLLoader is licensed under GPL. See gpl.txt.
 
-2.5.0
+2.5.0 (2007.3.9)
 Support OpenGL 2.1 and Geforce 8's new extensions
 No more vs2003 project files
 
-2.4.0
+2.4.0 (2006.5.20)
 Support more extensions
 x64 is supported
 
