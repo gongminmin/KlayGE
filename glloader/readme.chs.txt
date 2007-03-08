@@ -7,6 +7,7 @@ GLLoader遵循GPL协议。协议的内容可以参考附带的gpl.txt
 
 2.5.0
 支持OpenGL 2.1和Geforce 8的新扩展
+不再提供vs2003的工程文件
 
 2.4.0
 增加了一些扩展

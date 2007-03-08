@@ -7,6 +7,7 @@ The GLLoader is licensed under GPL. See gpl.txt.
 
 2.5.0
 Support OpenGL 2.1 and Geforce 8's new extensions
+No more vs2003 project files
 
 2.4.0
 Support more extensions
