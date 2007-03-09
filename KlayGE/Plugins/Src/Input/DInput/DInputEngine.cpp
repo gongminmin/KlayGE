@@ -87,7 +87,10 @@ namespace KlayGE
 			break;
 		}
 
-		inputEng.devices_.push_back(device);
+		if (device)
+		{
+			inputEng.devices_.push_back(device);
+		}
 
 		return DIENUM_CONTINUE;
 	}
