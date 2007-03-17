@@ -1,8 +1,11 @@
 // OGLTexture3D.hpp
 // KlayGE OpenGL 3D纹理类 实现文件
-// Ver 3.2.0
-// 版权所有(C) 龚敏敏, 2006
+// Ver 3.6.0
+// 版权所有(C) 龚敏敏, 2006-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.6.0
+// 用pbo加速 (2007.3.13)
 //
 // 3.2.0
 // 初次建立 (2006.4.30)
@@ -84,13 +87,20 @@ namespace KlayGE
 				}
 
 				GLsizei const image_size = ((width + 3) / 4) * ((height + 3) / 4) * depth * block_size;
-				std::vector<uint8_t> data(image_size, 0);
+
+				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_);
+				glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW_ARB);
+				uint8_t* p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
+				memset(p, 0, image_size);
+				glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
 				glCompressedTexImage3D(GL_TEXTURE_3D, level, glinternalFormat,
-					width, height, depth, 0, image_size, &data[0]);
+					width, height, depth, 0, image_size, NULL);
 			}
 			else
 			{
+				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
 				glTexImage3D(GL_TEXTURE_3D, level, glinternalFormat,
 					width, height, depth, 0, glformat, gltype, NULL);
 			}
@@ -212,13 +222,27 @@ namespace KlayGE
 
 			GLsizei const image_size = ((dst_width + 3) / 4) * ((dst_height + 3) / 4) * ((dst_depth + 3) / 4) * block_size;
 
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_);
+			glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW_ARB);
+			uint8_t* p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
+			memcpy(p, data, image_size);
+			glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+
 			glCompressedTexSubImage3D(GL_TEXTURE_3D, level, dst_xOffset, dst_yOffset, dst_zOffset,
-				dst_width, dst_height, dst_depth, glformat, image_size, data);
+				dst_width, dst_height, dst_depth, glformat, image_size, NULL);
 		}
 		else
 		{
+			uint32_t data_size = dst_width * dst_height * dst_depth * NumFormatBytes(pf);
+		
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_);
+			glBufferData(GL_PIXEL_UNPACK_BUFFER, data_size, NULL, GL_STREAM_DRAW_ARB);
+			uint8_t* p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
+			memcpy(p, data, data_size);
+			glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+
 			glTexSubImage3D(GL_TEXTURE_3D, level, dst_xOffset, dst_yOffset, dst_zOffset,
-				dst_width, dst_height, dst_depth, glformat, gltype, data);
+				dst_width, dst_height, dst_depth, glformat, gltype, NULL);
 		}
 	}
 

@@ -1,8 +1,11 @@
 // OGLTexture2D.hpp
 // KlayGE OpenGL 2D纹理类 实现文件
-// Ver 3.2.0
-// 版权所有(C) 龚敏敏, 2006
+// Ver 3.6.0
+// 版权所有(C) 龚敏敏, 2006-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.6.0
+// 用pbo加速 (2007.3.13)
 //
 // 3.2.0
 // 初次建立 (2006.4.30)
@@ -83,13 +86,20 @@ namespace KlayGE
 				}
 
 				GLsizei const image_size = ((width + 3) / 4) * ((height + 3) / 4) * block_size;
-				std::vector<uint8_t> data(image_size, 0);
+
+				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_);
+				glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW_ARB);
+				uint8_t* p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
+				memset(p, 0, image_size);
+				glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
 				glCompressedTexImage2D(GL_TEXTURE_2D, level, glinternalFormat,
-					width, height, 0, image_size, &data[0]);
+					width, height, 0, image_size, NULL);
 			}
 			else
 			{
+				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
 				glTexImage2D(GL_TEXTURE_2D, level, glinternalFormat,
 					width, height, 0, glformat, gltype, NULL);
 			}
@@ -183,9 +193,11 @@ namespace KlayGE
 
 		glBindTexture(GL_TEXTURE_2D, texture_);
 
+		uint32_t data_size = dst_width * dst_height * NumFormatBytes(pf);
 		std::vector<uint8_t> tmp;
 		if ((dst_width != src_width) || (dst_height != src_height))
 		{
+			tmp.resize(data_size);
 			gluScaleImage(glformat, src_width, src_height, gltype, data,
 				dst_width, dst_height, gltype, &tmp[0]);
 			data = &tmp[0];
@@ -205,13 +217,25 @@ namespace KlayGE
 
 			GLsizei const image_size = ((dst_width + 3) / 4) * ((dst_height + 3) / 4) * block_size;
 
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_);
+			glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW_ARB);
+			uint8_t* p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
+			memcpy(p, data, image_size);
+			glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+
 			glCompressedTexSubImage2D(GL_TEXTURE_2D, level, dst_xOffset, dst_yOffset,
-				dst_width, dst_height, glformat, image_size, data);
+				dst_width, dst_height, glformat, image_size, NULL);
 		}
 		else
 		{
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_);
+			glBufferData(GL_PIXEL_UNPACK_BUFFER, data_size, NULL, GL_STREAM_DRAW_ARB);
+			uint8_t* p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
+			memcpy(p, data, data_size);
+			glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+
 			glTexSubImage2D(GL_TEXTURE_2D, level, dst_xOffset, dst_yOffset,
-				dst_width, dst_height, glformat, gltype, data);
+				dst_width, dst_height, glformat, gltype, NULL);
 		}
 	}
 

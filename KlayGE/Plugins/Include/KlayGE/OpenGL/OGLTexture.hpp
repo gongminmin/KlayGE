@@ -1,8 +1,11 @@
 // OGLTexture.hpp
 // KlayGE OpenGL纹理类 头文件
-// Ver 2.7.0
-// 版权所有(C) 龚敏敏, 2003-2005
+// Ver 3.6.0
+// 版权所有(C) 龚敏敏, 2003-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.6.0
+// 用pbo加速 (2007.3.13)
 //
 // 2.7.0
 // 增加了AddressingMode, Filtering和Anisotropy (2005.6.27)
@@ -79,6 +82,7 @@ namespace KlayGE
 
 	protected:
 		GLuint texture_;
+		GLuint pbo_;
 		GLenum target_type_;
 	};
 

@@ -171,7 +171,7 @@ namespace KlayGE
 		glGetTexParameteriv(target, pname, &tmp);
 		if (tmp != param)
 		{
-			glTexParameteri(target, GL_TEXTURE_WRAP_S, param);
+			glTexParameteri(target, pname, param);
 		}
 	}
 
