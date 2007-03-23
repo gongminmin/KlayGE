@@ -1,8 +1,11 @@
 // OGLRenderWindow.cpp
 // KlayGE OpenGL渲染窗口类 实现文件
-// Ver 2.8.0
+// Ver 3.6.0
 // 版权所有(C) 龚敏敏, 2004-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.6.0
+// 修正了在Vista下从全屏模式退出时crash的bug (2007.3.23)
 //
 // 2.8.0
 // 只支持OpenGL 1.5及以上 (2005.8.12)
@@ -312,18 +315,18 @@ namespace KlayGE
 	{
 		if (hWnd_ != NULL)
 		{
-			if (isFullScreen_)
-			{
-				::ChangeDisplaySettings(NULL, 0);
-				ShowCursor(TRUE);
-			}
-
 			::wglMakeCurrent(NULL, NULL);
 			::wglDeleteContext(hRC_);
 			::ReleaseDC(hWnd_, hDC_);
 
 			::DestroyWindow(hWnd_);
 			hWnd_ = NULL;
+
+			if (isFullScreen_)
+			{
+				::ChangeDisplaySettings(NULL, 0);
+				ShowCursor(TRUE);
+			}
 		}
 	}
 
