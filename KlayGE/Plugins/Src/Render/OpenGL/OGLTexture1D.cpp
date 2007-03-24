@@ -171,7 +171,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLTexture1D::CopyMemoryToTexture1D(int level, void* data, ElementFormat pf,
+	void OGLTexture1D::CopyMemoryToTexture1D(int level, void const * data, ElementFormat pf,
 		uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width)
 	{
 		BOOST_ASSERT(src_width != 0);

@@ -145,7 +145,7 @@ namespace KlayGE
 		this->CopySurfaceToMemory(surface, data);
 	}
 
-	void D3D9Texture1D::CopyMemoryToTexture1D(int level, void* data, ElementFormat pf,
+	void D3D9Texture1D::CopyMemoryToTexture1D(int level, void const * data, ElementFormat pf,
 		uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width)
 	{
 		IDirect3DSurface9* temp;

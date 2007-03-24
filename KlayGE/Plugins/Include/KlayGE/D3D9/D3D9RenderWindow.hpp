@@ -1,8 +1,11 @@
 // D3D9RenderWindow.hpp
 // KlayGE D3D9渲染窗口类 头文件
-// Ver 2.7.0
-// 版权所有(C) 龚敏敏, 2003-2005
+// Ver 3.6.0
+// 版权所有(C) 龚敏敏, 2003-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.6.0
+// 支持动态切换全屏/窗口模式 (2007.3.24)
 //
 // 2.7.0
 // 增加了ResetDevice (2005.7.1)
@@ -68,6 +71,7 @@ namespace KlayGE
 
 		void DoReposition(uint32_t left, uint32_t top);
 		void DoResize(uint32_t width, uint32_t height);
+		void DoFullScreen(bool fs);
 
 	private:
 		std::string	name_;
@@ -95,6 +99,8 @@ namespace KlayGE
 		ID3D9SurfacePtr			renderZBuffer_;
 
 		std::wstring			description_;
+
+		uint32_t				fs_color_depth_;
 	};
 
 	typedef boost::shared_ptr<D3D9RenderWindow> D3D9RenderWindowPtr;

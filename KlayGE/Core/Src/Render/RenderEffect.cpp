@@ -105,7 +105,9 @@ namespace
 				return types_[code];
 			}
 			BOOST_ASSERT(false);
-			return "";
+
+			static std::string empty_str("");
+			return empty_str;
 		}
 
 	private:

@@ -99,13 +99,11 @@ namespace KlayGE
 
 	private:
 		TexturePtr downsample_tex_;
-		TexturePtr blurx_tex_;
-		TexturePtr blury_tex_;
+		TexturePtr blur_tex_;
 		std::vector<TexturePtr> lum_texs_;
 
 		BrightPassDownsampler2x2PostProcess downsampler_;
-		BlurXPostProcess blur_x_;
-		BlurYPostProcess blur_y_;
+		BlurPostProcess blur_;
 		SumLumLogPostProcess sum_lums_1st_;
 		std::vector<SumLumIterativePostProcess> sum_lums_;
 		AdaptedLumPostProcess adapted_lum_;

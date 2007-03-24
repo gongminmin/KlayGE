@@ -21,6 +21,7 @@
 
 #include <KlayGE/Viewport.hpp>
 #include <KlayGE/Timer.hpp>
+#include <KlayGE/ElementFormat.hpp>
 
 namespace KlayGE
 {
@@ -37,6 +38,7 @@ namespace KlayGE
 		virtual uint32_t ColorDepth() const;
 		virtual uint32_t DepthBits() const;
 		virtual uint32_t StencilBits() const;
+		virtual ElementFormat Format() const;
 
 		virtual void Update();
 
@@ -60,6 +62,7 @@ namespace KlayGE
 		uint32_t	width_;
 		uint32_t	height_;
 		uint32_t	colorDepth_;
+		ElementFormat format_;
 
 		bool		isDepthBuffered_;
 		uint32_t	depthBits_;

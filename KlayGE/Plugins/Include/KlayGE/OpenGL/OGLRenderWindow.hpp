@@ -1,3 +1,15 @@
+// OGLRenderWindow.hpp
+// KlayGE OpenGL渲染窗口类 头文件
+// Ver 3.6.0
+// 版权所有(C) 龚敏敏, 2004-2007
+// Homepage: http://klayge.sourceforge.net
+//
+// 3.6.0
+// 支持动态切换全屏/窗口模式 (2007.3.24)
+//
+// 修改记录
+//////////////////////////////////////////////////////////////////////////////////
+
 #ifndef _OGLRENDERWINDOW_HPP
 #define _OGLRENDERWINDOW_HPP
 
@@ -47,6 +59,7 @@ namespace KlayGE
 	private:
 		void DoReposition(uint32_t left, uint32_t top);
 		void DoResize(uint32_t width, uint32_t height);
+		void DoFullScreen(bool fs);
 
 	protected:
 		std::string	name_;
@@ -62,6 +75,8 @@ namespace KlayGE
 			WPARAM wParam, LPARAM lParam );
 
 		std::wstring			description_;
+
+		uint32_t				fs_color_depth_;
 	};
 }
 

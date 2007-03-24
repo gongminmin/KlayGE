@@ -1104,22 +1104,22 @@ namespace KlayGE
 		{
 		}
 
-		void CopyMemoryToTexture1D(int /*level*/, void* /*data*/, ElementFormat /*pf*/,
+		void CopyMemoryToTexture1D(int /*level*/, void const * /*data*/, ElementFormat /*pf*/,
 			uint32_t /*dst_width*/, uint32_t /*dst_xOffset*/, uint32_t /*src_width*/)
 		{
 		}
-		void CopyMemoryToTexture2D(int /*level*/, void* /*data*/, ElementFormat /*pf*/,
+		void CopyMemoryToTexture2D(int /*level*/, void const * /*data*/, ElementFormat /*pf*/,
 			uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/,
 			uint32_t /*src_width*/, uint32_t /*src_height*/)
 		{
 		}
-		void CopyMemoryToTexture3D(int /*level*/, void* /*data*/, ElementFormat /*pf*/,
+		void CopyMemoryToTexture3D(int /*level*/, void const * /*data*/, ElementFormat /*pf*/,
 			uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_depth*/,
 			uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/, uint32_t /*dst_zOffset*/,
 			uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_depth*/)
 		{
 		}
-		void CopyMemoryToTextureCube(CubeFaces /*face*/, int /*level*/, void* /*data*/, ElementFormat /*pf*/,
+		void CopyMemoryToTextureCube(CubeFaces /*face*/, int /*level*/, void const * /*data*/, ElementFormat /*pf*/,
 			uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/,
 			uint32_t /*src_width*/, uint32_t /*dst_height*/)
 		{

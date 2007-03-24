@@ -176,7 +176,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLTextureCube::CopyMemoryToTextureCube(CubeFaces face, int level, void* data, ElementFormat pf,
+	void OGLTextureCube::CopyMemoryToTextureCube(CubeFaces face, int level, void const * data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height)
 	{

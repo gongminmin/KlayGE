@@ -154,7 +154,7 @@ namespace KlayGE
 
 	HDRPostProcess::HDRPostProcess()
 		: PostProcess(RenderTechniquePtr()),
-			blur_x_(8, 2), blur_y_(8, 2)
+			blur_(8, 2)
 	{
 		sum_lums_.resize(NUM_TONEMAP_TEXTURES);
 	}
@@ -169,8 +169,7 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		downsample_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, EF_ABGR16F);
-		blurx_tex_ = rf.MakeTexture2D(width / 4, height / 4, 1, EF_ABGR16F);
-		blury_tex_ = rf.MakeTexture2D(width / 4, height / 4, 1, EF_ABGR16F);
+		blur_tex_ = rf.MakeTexture2D(width / 4, height / 4, 1, EF_ABGR16F);
 
 		lum_texs_.clear();
 		int len = 1;
@@ -192,16 +191,9 @@ namespace KlayGE
 
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
-			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blurx_tex_, 0));
-			blur_x_.Source(downsample_tex_, tmp_flipping);
-			blur_x_.Destinate(fb);
-			tmp_flipping = fb->RequiresFlipping();
-		}
-		{
-			FrameBufferPtr fb = rf.MakeFrameBuffer();
-			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blury_tex_, 0));
-			blur_y_.Source(blurx_tex_, tmp_flipping);
-			blur_y_.Destinate(fb);
+			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blur_tex_, 0));
+			blur_.Source(downsample_tex_, tmp_flipping);
+			blur_.Destinate(fb);
 			tmp_flipping = fb->RequiresFlipping();
 		}
 
@@ -239,10 +231,8 @@ namespace KlayGE
 	{
 		// 降采样
 		downsampler_.Apply();
-		// Blur X
-		blur_x_.Apply();
-		// Blur Y
-		blur_y_.Apply();
+		// Blur
+		blur_.Apply();
 
 		// 降采样4x4 log
 		sum_lums_1st_.Apply();
@@ -256,7 +246,7 @@ namespace KlayGE
 
 		{
 			// Tone mapping
-			tone_mapping_.SetTexture(adapted_lum_.AdaptedLum(), blury_tex_);
+			tone_mapping_.SetTexture(adapted_lum_.AdaptedLum(), blur_tex_);
 			tone_mapping_.Apply();
 		}
 	}

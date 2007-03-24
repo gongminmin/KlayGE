@@ -1,8 +1,11 @@
 // PostProcess.cpp
 // KlayGE 后期处理类 实现文件
-// Ver 3.5.0
+// Ver 3.6.0
 // 版权所有(C) 龚敏敏, 2006-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.6.0
+// 增加了BlurPostProcess (2007.3.24)
 //
 // 3.5.0
 // 增加了GammaCorrectionProcess (2007.1.22)
@@ -216,5 +219,34 @@ namespace KlayGE
 		SeparableBlurPostProcess::Source(src_tex, flipping);
 
 		this->CalSampleOffsets(src_texture_->Height(0), 3);
+	}
+
+
+	BlurPostProcess::BlurPostProcess(int kernel_radius, float multiplier)
+		: PostProcess(RenderTechniquePtr()),
+			blur_x_(kernel_radius, multiplier), blur_y_(kernel_radius, multiplier)
+	{
+	}
+
+	void BlurPostProcess::Destinate(RenderTargetPtr const & rt)
+	{
+		PostProcess::Destinate(rt);
+
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		blurx_tex_ = rf.MakeTexture2D(render_target_->Width(), render_target_->Height(), 1, render_target_->Format());
+
+		FrameBufferPtr fb = rf.MakeFrameBuffer();
+		fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blurx_tex_, 0));
+		blur_x_.Source(src_texture_, flipping_);
+		blur_x_.Destinate(fb);
+		blur_y_.Source(blurx_tex_, fb->RequiresFlipping());
+		blur_y_.Destinate(render_target_);
+	}
+
+	void BlurPostProcess::Apply()
+	{
+		blur_x_.Apply();
+		blur_y_.Apply();
 	}
 }

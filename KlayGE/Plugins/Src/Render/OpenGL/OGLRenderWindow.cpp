@@ -1,11 +1,12 @@
 // OGLRenderWindow.cpp
 // KlayGE OpenGL渲染窗口类 实现文件
 // Ver 3.6.0
-// 版权所有(C) 龚敏敏, 2004-2005
+// 版权所有(C) 龚敏敏, 2004-2007
 // Homepage: http://klayge.sourceforge.net
 //
 // 3.6.0
 // 修正了在Vista下从全屏模式退出时crash的bug (2007.3.23)
+// 支持动态切换全屏/窗口模式 (2007.3.24)
 //
 // 2.8.0
 // 只支持OpenGL 1.5及以上 (2005.8.12)
@@ -124,6 +125,7 @@ namespace KlayGE
 		isDepthBuffered_	= IsDepthFormat(settings.depth_stencil_fmt);
 		depthBits_			= NumDepthBits(settings.depth_stencil_fmt);
 		stencilBits_		= NumStencilBits(settings.depth_stencil_fmt);
+		format_				= settings.color_fmt;
 		isFullScreen_		= settings.full_screen;
 
 		HINSTANCE hInst(::GetModuleHandle(NULL));
@@ -151,10 +153,12 @@ namespace KlayGE
 		wc.lpszClassName	= wname.c_str();
 		::RegisterClassW(&wc);
 
+		fs_color_depth_ = NumFormatBits(settings.color_fmt);
+
 		uint32_t style;
 		if (isFullScreen_)
 		{
-			colorDepth_ = NumFormatBits(settings.color_fmt);
+			colorDepth_ = fs_color_depth_;
 			left_ = 0;
 			top_ = 0;
 
@@ -204,14 +208,13 @@ namespace KlayGE
 		pfd.dwFlags		= PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
 		pfd.iPixelType	= PFD_TYPE_RGBA;
 		pfd.cColorBits	= static_cast<BYTE>(colorDepth_);
-		pfd.cDepthBits	= 16;
+		pfd.cDepthBits	= static_cast<BYTE>(depthBits_);
 		pfd.iLayerType	= PFD_MAIN_PLANE;
 
 		int pixelFormat(::ChoosePixelFormat(hDC_, &pfd));
 		BOOST_ASSERT(pixelFormat != 0);
 
 		::SetPixelFormat(hDC_, pixelFormat, &pfd);
-
 		::DescribePixelFormat(hDC_, pixelFormat, sizeof(pfd), &pfd);
 
 		hRC_ = ::wglCreateContext(hDC_);
@@ -347,6 +350,45 @@ namespace KlayGE
 
 	void OGLRenderWindow::DoResize(uint32_t /*width*/, uint32_t /*height*/)
 	{
+	}
+
+	void OGLRenderWindow::DoFullScreen(bool fs)
+	{
+		if (isFullScreen_ != fs)
+		{
+			left_ = 0;
+			top_ = 0;
+
+			uint32_t style;
+			if (fs)
+			{
+				colorDepth_ = fs_color_depth_;
+
+				DEVMODE devMode;
+				devMode.dmSize = sizeof(devMode);
+				devMode.dmBitsPerPel = colorDepth_;
+				devMode.dmPelsWidth = width_;
+				devMode.dmPelsHeight = height_;
+				devMode.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
+				::ChangeDisplaySettings(&devMode, CDS_FULLSCREEN);
+
+				style = WS_POPUP;
+			}
+			else
+			{
+				colorDepth_ = ::GetDeviceCaps(hDC_, BITSPIXEL);
+
+				style = WS_OVERLAPPEDWINDOW;
+			}
+
+			::SetWindowLongPtrW(hWnd_, GWL_STYLE, style);
+
+			RECT rc = { 0, 0, width_, height_ };
+			::AdjustWindowRect(&rc, style, false);
+			::SetWindowPos(hWnd_, NULL, left_, top_, rc.right - rc.left, rc.bottom - rc.top, SWP_NOZORDER);
+
+			isFullScreen_ = fs;
+		}
 	}
 
 	void OGLRenderWindow::OnBind()

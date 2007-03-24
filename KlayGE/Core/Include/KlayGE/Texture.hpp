@@ -123,16 +123,16 @@ namespace KlayGE
 		virtual void CopyToMemory3D(int level, void* data) = 0;
 		virtual void CopyToMemoryCube(CubeFaces face, int level, void* data) = 0;
 
-		virtual void CopyMemoryToTexture1D(int level, void* data, ElementFormat pf,
+		virtual void CopyMemoryToTexture1D(int level, void const * data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width) = 0;
-		virtual void CopyMemoryToTexture2D(int level, void* data, ElementFormat pf,
+		virtual void CopyMemoryToTexture2D(int level, void const * data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height) = 0;
-		virtual void CopyMemoryToTexture3D(int level, void* data, ElementFormat pf,
+		virtual void CopyMemoryToTexture3D(int level, void const * data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
 			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
 			uint32_t src_width, uint32_t src_height, uint32_t src_depth) = 0;
-		virtual void CopyMemoryToTextureCube(CubeFaces face, int level, void* data, ElementFormat pf,
+		virtual void CopyMemoryToTextureCube(CubeFaces face, int level, void const * data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height) = 0;
 

@@ -1,8 +1,11 @@
 // D3D9RenderWindow.cpp
 // KlayGE D3D9渲染窗口类 实现文件
-// Ver 3.5.0
+// Ver 3.6.0
 // 版权所有(C) 龚敏敏, 2003-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.6.0
+// 支持动态切换全屏/窗口模式 (2007.3.24)
 //
 // 3.5.0
 // 支持NVPerfHUD (2007.1.31)
@@ -156,6 +159,7 @@ namespace KlayGE
 		isDepthBuffered_	= IsDepthFormat(settings.depth_stencil_fmt);
 		depthBits_			= NumDepthBits(settings.depth_stencil_fmt);
 		stencilBits_		= NumStencilBits(settings.depth_stencil_fmt);
+		format_				= settings.color_fmt;
 		isFullScreen_		= settings.full_screen;
 
 		HINSTANCE hInst(::GetModuleHandle(NULL));
@@ -197,9 +201,11 @@ namespace KlayGE
 		::ShowWindow(hWnd_, SW_SHOWNORMAL);
 		::UpdateWindow(hWnd_);
 
+		fs_color_depth_ = NumFormatBits(settings.color_fmt);
+
 		if (this->FullScreen())
 		{
-			colorDepth_ = NumFormatBits(settings.color_fmt);
+			colorDepth_ = fs_color_depth_;
 			left_ = 0;
 			top_ = 0;
 		}
@@ -222,13 +228,13 @@ namespace KlayGE
 		d3dpp_.SwapEffect				= D3DSWAPEFFECT_DISCARD;
 		d3dpp_.PresentationInterval		= D3DPRESENT_INTERVAL_IMMEDIATE;
 
-		if (!this->FullScreen())
+		if (this->FullScreen())
 		{
-			d3dpp_.BackBufferFormat	= adapter_.DesktopMode().Format;
+			d3dpp_.BackBufferFormat = D3DFMT_X8R8G8B8;
 		}
 		else
 		{
-			d3dpp_.BackBufferFormat = D3DFMT_X8R8G8B8;
+			d3dpp_.BackBufferFormat	= adapter_.DesktopMode().Format;
 		}
 
 		// Depth-stencil format
@@ -542,6 +548,36 @@ namespace KlayGE
 
 	void D3D9RenderWindow::DoResize(uint32_t /*width*/, uint32_t /*height*/)
 	{
+	}
+
+	void D3D9RenderWindow::DoFullScreen(bool fs)
+	{
+		if (isFullScreen_ != fs)
+		{
+			left_ = 0;
+			top_ = 0;
+
+			d3dpp_.Windowed = !fs;
+
+			if (fs)
+			{
+				colorDepth_ = fs_color_depth_;
+				d3dpp_.BackBufferFormat = D3DFMT_X8R8G8B8;
+			}
+			else
+			{
+				// Get colour depth from display
+				HDC hdc(::GetDC(hWnd_));
+				colorDepth_ = ::GetDeviceCaps(hdc, BITSPIXEL);
+				::ReleaseDC(hWnd_, hdc);
+
+				d3dpp_.BackBufferFormat	= adapter_.DesktopMode().Format;
+			}
+
+			isFullScreen_ = fs;
+
+			this->ResetDevice();
+		}
 	}
 
 	void D3D9RenderWindow::UpdateSurfacesPtrs()

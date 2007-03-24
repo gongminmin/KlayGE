@@ -263,20 +263,20 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void D3D9Texture::CopyMemoryToTexture1D(int /*level*/, void* /*data*/, ElementFormat /*pf*/,
+	void D3D9Texture::CopyMemoryToTexture1D(int /*level*/, void const * /*data*/, ElementFormat /*pf*/,
 		uint32_t /*dst_width*/, uint32_t /*dst_xOffset*/, uint32_t /*src_width*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void D3D9Texture::CopyMemoryToTexture2D(int /*level*/, void* /*data*/, ElementFormat /*pf*/,
+	void D3D9Texture::CopyMemoryToTexture2D(int /*level*/, void const * /*data*/, ElementFormat /*pf*/,
 		uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/,
 		uint32_t /*src_width*/, uint32_t /*src_height*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void D3D9Texture::CopyMemoryToTexture3D(int /*level*/, void* /*data*/, ElementFormat /*pf*/,
+	void D3D9Texture::CopyMemoryToTexture3D(int /*level*/, void const * /*data*/, ElementFormat /*pf*/,
 			uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_depth*/,
 			uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/, uint32_t /*dst_zOffset*/,
 			uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_depth*/)
@@ -284,7 +284,7 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void D3D9Texture::CopyMemoryToTextureCube(CubeFaces /*face*/, int /*level*/, void* /*data*/, ElementFormat /*pf*/,
+	void D3D9Texture::CopyMemoryToTextureCube(CubeFaces /*face*/, int /*level*/, void const * /*data*/, ElementFormat /*pf*/,
 			uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/,
 			uint32_t /*src_width*/, uint32_t /*src_height*/)
 	{

@@ -352,22 +352,30 @@ namespace KlayGE
 
 			ElementFormat const ef = D3D9Mapping::MappingFormat(desc.Format);
 			uint32_t const line_size = desc.Width * NumFormatBytes(ef);
-			std::vector<uint8_t, boost::pool_allocator<uint8_t> > data(line_size * desc.Height);
 
 			D3DLOCKED_RECT d3dlocked_rc;
 			cache_surf_->LockRect(&d3dlocked_rc, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY);
 			uint8_t const * src = static_cast<uint8_t const *>(d3dlocked_rc.pBits);
-			uint8_t* dst = &data[0];
-			for (uint32_t y = 0; y < desc.Height; ++ y)
+			if (line_size == static_cast<uint32_t>(d3dlocked_rc.Pitch))
 			{
-				std::copy(src, src + line_size, dst);
-				src += d3dlocked_rc.Pitch;
-				dst += line_size;
+				present_tex_->CopyMemoryToTexture2D(0, src, ef,
+					present_tex_->Width(0), present_tex_->Height(0), 0, 0, desc.Width, desc.Height);
+			}
+			else
+			{
+				std::vector<uint8_t, boost::pool_allocator<uint8_t> > data(line_size * desc.Height);
+				uint8_t* dst = &data[0];
+				for (uint32_t y = 0; y < desc.Height; ++ y)
+				{
+					std::copy(src, src + line_size, dst);
+					src += d3dlocked_rc.Pitch;
+					dst += line_size;
+				}
+
+				present_tex_->CopyMemoryToTexture2D(0, &data[0], ef,
+					present_tex_->Width(0), present_tex_->Height(0), 0, 0, desc.Width, desc.Height);
 			}
 			cache_surf_->UnlockRect();
-
-			present_tex_->CopyMemoryToTexture2D(0, &data[0], ef,
-				present_tex_->Width(0), present_tex_->Height(0), 0, 0, desc.Width, desc.Height);
 		}
 
 		return present_tex_;

@@ -26,7 +26,7 @@ namespace KlayGE
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderTarget::RenderTarget()
-					: left_(0), top_(0), width_(0), height_(0), colorDepth_(0),
+					: left_(0), top_(0), width_(0), height_(0), colorDepth_(0), format_(EF_Unknown),
 						isDepthBuffered_(false), depthBits_(0), stencilBits_(0),
 						active_(false)
 	{
@@ -85,6 +85,13 @@ namespace KlayGE
 	uint32_t RenderTarget::StencilBits() const
 	{
 		return stencilBits_;
+	}
+
+	// 渲染目标的元素格式
+	/////////////////////////////////////////////////////////////////////////////////
+	ElementFormat RenderTarget::Format() const
+	{
+		return format_;
 	}
 
 	// 刷新渲染目标

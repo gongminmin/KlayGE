@@ -168,7 +168,7 @@ int main()
 	settings.ConfirmDevice = ConfirmDevice;
 
 	Cartoon app;
-	app.Create("ø®Õ®‰÷»æ≤‚ ‘", settings);
+	app.Create("ø®Õ®‰÷»æ", settings);
 	app.Run();
 
 	return 0;
@@ -258,7 +258,7 @@ void Cartoon::DoUpdate(uint32_t pass)
 
 		RenderWindow& rw = *checked_pointer_cast<RenderWindow>(renderEngine.CurRenderTarget());
 
-		font_->RenderText(0, 0, Color(1, 1, 0, 1), L"ø®Õ®‰÷»æ≤‚ ‘");
+		font_->RenderText(0, 0, Color(1, 1, 0, 1), L"ø®Õ®‰÷»æ");
 		font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description());
 
 		std::wostringstream stream;

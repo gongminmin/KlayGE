@@ -1,8 +1,11 @@
 // PostProcess.hpp
 // KlayGE 后期处理类 头文件
-// Ver 3.5.0
+// Ver 3.6.0
 // 版权所有(C) 龚敏敏, 2006-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.6.0
+// 增加了BlurPostProcess (2007.3.24)
 //
 // 3.5.0
 // 增加了GammaCorrectionProcess (2007.1.22)
@@ -92,7 +95,7 @@ namespace KlayGE
 	class BlurXPostProcess : public SeparableBlurPostProcess
 	{
 	public:
-		BlurXPostProcess(int length, float multiplier);
+		BlurXPostProcess(int kernel_radius, float multiplier);
 
 		void Source(TexturePtr const & src_tex, bool flipping);
 	};
@@ -100,9 +103,25 @@ namespace KlayGE
 	class BlurYPostProcess : public SeparableBlurPostProcess
 	{
 	public:
-		BlurYPostProcess(int length, float multiplier);
+		BlurYPostProcess(int kernel_radius, float multiplier);
 
 		void Source(TexturePtr const & src_tex, bool flipping);
+	};
+
+	class BlurPostProcess : public PostProcess
+	{
+	public:
+		BlurPostProcess(int kernel_radius, float multiplier);
+
+		void Destinate(RenderTargetPtr const & rt);
+
+		void Apply();
+
+	private:
+		BlurXPostProcess blur_x_;
+		BlurYPostProcess blur_y_;
+
+		TexturePtr blurx_tex_;
 	};
 }
 

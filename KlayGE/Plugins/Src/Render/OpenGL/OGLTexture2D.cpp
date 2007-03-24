@@ -177,7 +177,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLTexture2D::CopyMemoryToTexture2D(int level, void* data, ElementFormat pf,
+	void OGLTexture2D::CopyMemoryToTexture2D(int level, void const * data, ElementFormat pf,
 		uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 		uint32_t src_width, uint32_t src_height)
 	{

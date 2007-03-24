@@ -52,6 +52,10 @@ namespace KlayGE
 		{
 		}
 
+		void DoFullScreen(bool /*fs*/)
+		{
+		}
+
 		bool RequiresFlipping() const
 		{
 			return false;
@@ -83,6 +87,13 @@ namespace KlayGE
 	bool RenderWindow::FullScreen() const
 	{
 		return isFullScreen_;
+	}
+
+	// 设置是否是全屏状态
+	/////////////////////////////////////////////////////////////////////////////////
+	void RenderWindow::FullScreen(bool fs)
+	{
+		this->DoFullScreen(fs);
 	}
 
 	// 改变窗口大小
