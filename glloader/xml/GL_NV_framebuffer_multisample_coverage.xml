@@ -7,7 +7,7 @@
 	</Tokens>
 
 	<Functions>
-		<Function name="glRenderbufferStorageMultsampleCoverageNV" return="void">
+		<Function name="glRenderbufferStorageMultisampleCoverageNV" return="void">
 			<Param type="GLenum" name="target"/>
 			<Param type="GLsizei" name="coverageSamples"/>
 			<Param type="GLsizei" name="colorSamples"/>
