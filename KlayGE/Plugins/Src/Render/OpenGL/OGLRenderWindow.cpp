@@ -377,6 +377,7 @@ namespace KlayGE
 			else
 			{
 				colorDepth_ = ::GetDeviceCaps(hDC_, BITSPIXEL);
+				::ChangeDisplaySettings(NULL, 0);
 
 				style = WS_OVERLAPPEDWINDOW;
 			}
@@ -385,9 +386,13 @@ namespace KlayGE
 
 			RECT rc = { 0, 0, width_, height_ };
 			::AdjustWindowRect(&rc, style, false);
-			::SetWindowPos(hWnd_, NULL, left_, top_, rc.right - rc.left, rc.bottom - rc.top, SWP_NOZORDER);
+			width_ = rc.right - rc.left;
+			height_ = rc.bottom - rc.top;
 
 			isFullScreen_ = fs;
+
+			::ShowWindow(hWnd_, SW_SHOWNORMAL);
+			::UpdateWindow(hWnd_);
 		}
 	}
 

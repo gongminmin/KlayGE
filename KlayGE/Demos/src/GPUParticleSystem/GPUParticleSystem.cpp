@@ -149,7 +149,7 @@ namespace
 
 		void PosTexture(TexturePtr particle_pos_tex)
 		{
-			checked_cast<RenderParticles*>(renderable_.get())->PosTexture(particle_pos_tex);
+			checked_pointer_cast<RenderParticles>(renderable_)->PosTexture(particle_pos_tex);
 		}
 	};
 
@@ -475,7 +475,7 @@ void GPUParticleSystemApp::DoUpdate(uint32_t /*pass*/)
 	gpu_ps->Update(static_cast<float>(timer_.elapsed()));
 	timer_.restart();
 
-	checked_cast<ParticlesObject*>(particles_.get())->PosTexture(gpu_ps->PosTexture());
+	checked_pointer_cast<ParticlesObject>(particles_)->PosTexture(gpu_ps->PosTexture());
 
 	re.BindRenderTarget(RenderTargetPtr());
 	re.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);

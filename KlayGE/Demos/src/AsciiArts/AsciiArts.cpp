@@ -190,12 +190,14 @@ namespace
 	{
 		Switch,
 		Exit,
+		FullScreen,
 	};
 
 	InputActionDefine actions[] = 
 	{
 		InputActionDefine(Switch, KS_Space),
 		InputActionDefine(Exit, KS_Escape),
+		InputActionDefine(FullScreen, KS_Enter)
 	};
 
 	bool ConfirmDevice(RenderDeviceCaps const & caps)
@@ -319,6 +321,17 @@ void AsciiArtsApp::InputHandler(InputEngine const & /*sender*/, InputAction cons
 	case Switch:
 		show_ascii_ = !show_ascii_;
 		KlayGE::Sleep(150);
+		break;
+
+	case FullScreen:
+		{
+			RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			renderEngine.EndFrame();
+			RenderWindowPtr render_win = checked_pointer_cast<RenderWindow>(renderEngine.DefaultRenderTarget());
+			render_win->Resize(WIDTH, HEIGHT);
+			render_win->FullScreen(!render_win->FullScreen());
+			renderEngine.BeginFrame();
+		}
 		break;
 
 	case Exit:

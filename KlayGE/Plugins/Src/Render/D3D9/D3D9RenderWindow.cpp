@@ -559,10 +559,13 @@ namespace KlayGE
 
 			d3dpp_.Windowed = !fs;
 
+			uint32_t style;
 			if (fs)
 			{
 				colorDepth_ = fs_color_depth_;
 				d3dpp_.BackBufferFormat = D3DFMT_X8R8G8B8;
+
+				style = WS_POPUP;
 			}
 			else
 			{
@@ -572,11 +575,24 @@ namespace KlayGE
 				::ReleaseDC(hWnd_, hdc);
 
 				d3dpp_.BackBufferFormat	= adapter_.DesktopMode().Format;
+
+				style = WS_OVERLAPPEDWINDOW;
 			}
+
+			::SetWindowLongPtrW(hWnd_, GWL_STYLE, style);
+
+			RECT rc = { 0, 0, width_, height_ };
+			::AdjustWindowRect(&rc, style, false);
+			width_ = rc.right - rc.left;
+			height_ = rc.bottom - rc.top;
+			::SetWindowPos(hWnd_, NULL, left_, top_, width_, height_, SWP_NOZORDER);
 
 			isFullScreen_ = fs;
 
 			this->ResetDevice();
+
+			::ShowWindow(hWnd_, SW_SHOWNORMAL);
+			::UpdateWindow(hWnd_);
 		}
 	}
 
@@ -606,7 +622,8 @@ namespace KlayGE
 			renderSurface_.reset();
 			renderZBuffer_.reset();
 
-			while (d3dDevice_->TestCooperativeLevel() != D3DERR_DEVICENOTRESET)
+			HRESULT hr = d3dDevice_->TestCooperativeLevel();
+			while ((hr != S_OK) && (hr != D3DERR_DEVICENOTRESET))
 			{
 				Sleep(10);
 			}

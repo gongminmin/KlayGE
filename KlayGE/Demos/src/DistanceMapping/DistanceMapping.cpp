@@ -4,6 +4,7 @@
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
+#include <KlayGE/RenderWindow.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -168,11 +169,13 @@ namespace
 	enum
 	{
 		Exit,
+		FullScreen,
 	};
 
 	InputActionDefine actions[] = 
 	{
 		InputActionDefine(Exit, KS_Escape),
+		InputActionDefine(FullScreen, KS_Enter),
 	};
 
 	bool ConfirmDevice(RenderDeviceCaps const & caps)
@@ -241,6 +244,17 @@ void DistanceMapping::InputHandler(InputEngine const & /*sender*/, InputAction c
 {
 	switch (action.first)
 	{
+	case FullScreen:
+		{
+			RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			renderEngine.EndFrame();
+			RenderWindowPtr render_win = checked_pointer_cast<RenderWindow>(renderEngine.DefaultRenderTarget());
+			render_win->Resize(800, 600);
+			render_win->FullScreen(!render_win->FullScreen());
+			renderEngine.BeginFrame();
+		}
+		break;
+
 	case Exit:
 		this->Quit();
 		break;
