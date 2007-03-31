@@ -554,6 +554,17 @@ namespace KlayGE
 			}
 		}
 
+		if (D3D_OK == re.D3DObject()->CheckDeviceFormat(D3DADAPTER_DEFAULT,
+			D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE,
+			static_cast<D3DFORMAT>(MakeFourCC<'R', '2', 'V', 'B'>::value)))
+		{
+			ret.hw_r2vb_support = true;
+		}
+		else
+		{
+			ret.hw_r2vb_support = false;
+		}
+
 		return ret;
 	}
 
