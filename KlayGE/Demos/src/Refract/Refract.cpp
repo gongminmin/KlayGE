@@ -266,11 +266,12 @@ void Refract::InitObjects()
 	render_buffer_->GetViewport().camera = hdr_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
 
 	hdr_.reset(new HDRPostProcess);
-	hdr_->Destinate(RenderTargetPtr());
 }
 
 void Refract::OnResize(uint32_t width, uint32_t height)
 {
+	App3DFramework::OnResize(width, height);
+
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 	render_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F);
@@ -282,6 +283,7 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 	hdr_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));
 
 	hdr_->Source(hdr_tex_, hdr_buffer_->RequiresFlipping());
+	hdr_->Destinate(RenderTargetPtr());
 }
 
 void Refract::InputHandler(InputEngine const & /*sender*/, InputAction const & action)

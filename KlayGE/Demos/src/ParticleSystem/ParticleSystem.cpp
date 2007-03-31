@@ -363,11 +363,12 @@ void ParticleSystemApp::InitObjects()
 	scene_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
 
 	copy_pp_.reset(new CopyPostProcess);
-	copy_pp_->Destinate(RenderTargetPtr());
 }
 
 void ParticleSystemApp::OnResize(uint32_t width, uint32_t height)
 {
+	App3DFramework::OnResize(width, height);
+
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 	scene_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F);
@@ -377,6 +378,7 @@ void ParticleSystemApp::OnResize(uint32_t width, uint32_t height)
 	checked_pointer_cast<RenderParticles>(particles_->GetRenderable())->SceneTexture(scene_tex_);
 
 	copy_pp_->Source(scene_tex_, scene_buffer_->RequiresFlipping());
+	copy_pp_->Destinate(RenderTargetPtr());
 }
 
 void ParticleSystemApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)

@@ -548,6 +548,7 @@ namespace KlayGE
 
 	void D3D9RenderWindow::DoResize(uint32_t /*width*/, uint32_t /*height*/)
 	{
+		this->ResetDevice();
 	}
 
 	void D3D9RenderWindow::DoFullScreen(bool fs)

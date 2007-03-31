@@ -207,6 +207,8 @@ void Cartoon::InitObjects()
 
 void Cartoon::OnResize(uint32_t width, uint32_t height)
 {
+	App3DFramework::OnResize(width, height);
+
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	normal_depth_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F);
 	normal_depth_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*normal_depth_tex_, 0));

@@ -140,6 +140,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void App3DFramework::OnResize(uint32_t /*width*/, uint32_t /*height*/)
 	{
+		this->Proj(this->ActiveCamera().NearPlane(), this->ActiveCamera().FarPlane());
 	}
 
 	// ¸üÐÂ×´Ì¬

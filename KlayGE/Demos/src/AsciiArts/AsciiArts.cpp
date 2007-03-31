@@ -279,12 +279,13 @@ void AsciiArtsApp::InitObjects()
 	downsampler_.reset(new Downsampler8x8);
 
 	ascii_arts_.reset(new AsciiArts);
-	ascii_arts_->Destinate(RenderTargetPtr());
 	checked_pointer_cast<AsciiArts>(ascii_arts_)->SetLumsTex(ascii_lums_tex_);
 }
 
 void AsciiArtsApp::OnResize(uint32_t width, uint32_t height)
 {
+	App3DFramework::OnResize(width, height);
+
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 	rendered_tex_ = rf.MakeTexture2D(width, height, 1, EF_ARGB8);
@@ -300,6 +301,7 @@ void AsciiArtsApp::OnResize(uint32_t width, uint32_t height)
 	downsampler_->Destinate(fb);
 
 	ascii_arts_->Source(downsample_tex_, fb->RequiresFlipping());
+	ascii_arts_->Destinate(RenderTargetPtr());
 }
 
 uint32_t AsciiArtsApp::NumPasses() const

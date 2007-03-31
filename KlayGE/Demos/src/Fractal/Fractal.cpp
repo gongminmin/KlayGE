@@ -205,6 +205,8 @@ void Fractal::InitObjects()
 
 void Fractal::OnResize(uint32_t width, uint32_t height)
 {
+	App3DFramework::OnResize(width, height);
+
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 	rendered_tex_[0] = rf.MakeTexture2D(width, height, 1, EF_GR16F);
