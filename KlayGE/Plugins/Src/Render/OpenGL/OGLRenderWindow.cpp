@@ -220,7 +220,8 @@ namespace KlayGE
 		hRC_ = ::wglCreateContext(hDC_);
 		::wglMakeCurrent(hDC_, hRC_);
 
-		if (!glloader_GL_VERSION_2_0() || !glloader_GL_EXT_framebuffer_object())
+		if (!glloader_GL_VERSION_2_0() || !glloader_GL_EXT_framebuffer_object()
+			|| !glloader_GL_ARB_pixel_buffer_object())
 		{
 			THR(E_FAIL);
 		}

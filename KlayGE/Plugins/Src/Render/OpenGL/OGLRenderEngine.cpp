@@ -886,5 +886,6 @@ namespace KlayGE
 		caps_.texture_cube_filter_caps = caps_.texture_2d_filter_caps;
 
 		caps_.hw_instancing_support = true;
+		caps_.hw_r2vb_support = true;
 	}
 }
