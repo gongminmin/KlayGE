@@ -19,7 +19,7 @@
 
 	<Vendors>
 		<Vendor name="GL_NV" string="GL_NV_framebuffer_multisample_coverage" reg_no="336">
-			<Name name="glRenderbufferStorageMultsampleCoverageNV"/>
+			<Name name="glRenderbufferStorageMultisampleCoverageNV"/>
 		</Vendor>
 	</Vendors>
 
