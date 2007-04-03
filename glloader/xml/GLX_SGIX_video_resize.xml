@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GLX_SGIX_pbuffer">
+<GLExtension name="GLX_SGIX_video_resize">
 	<Tokens>
 		<Token name="GLX_SYNC_FRAME_SGIX" value="0x00000000"/>
 		<Token name="GLX_SYNC_SWAP_SGIX" value="0x00000001"/>
@@ -49,7 +49,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GLX_SGIX" string="GLX_SGIX_pbuffer" reg_no="50">
+		<Vendor name="GLX_SGIX" string="GLX_SGIX_video_resize" reg_no="83">
 			<Name name="glXBindChannelToWindowSGIX"/>
 			<Name name="glXChannelRectSGIX"/>
 			<Name name="glXQueryChannelRectSGIX"/>
