@@ -6,10 +6,10 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="EXT" string="WGL_EXT_depth_float" reg_no="177"/>
+		<Vendor name="WGL_EXT" string="WGL_EXT_depth_float" reg_no="177"/>
 	</Vendors>
 
 	<InitPath>
-		<Init name="EXT"/>
+		<Init name="WGL_EXT"/>
 	</InitPath>
 </GLExtension>

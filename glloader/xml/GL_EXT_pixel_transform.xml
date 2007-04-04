@@ -15,34 +15,34 @@
 
 	<Functions>
 		<Function name="glPixelTransformParameteriEXT" return="void">
-			<Params type="GLenum" name="target"/>
-			<Params type="GLenum" name="pname"/>
-			<Params type="const GLint" name="param"/>
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="const GLint" name="param"/>
 		</Function>
 		<Function name="glPixelTransformParameterfEXT" return="void">
-			<Params type="GLenum" name="target"/>
-			<Params type="GLenum" name="pname"/>
-			<Params type="const GLfloat" name="param"/>
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="const GLfloat" name="param"/>
 		</Function>
 		<Function name="glPixelTransformParameterivEXT" return="void">
-			<Params type="GLenum" name="target"/>
-			<Params type="GLenum" name="pname"/>
-			<Params type="const GLint*" name="params"/>
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="const GLint*" name="params"/>
 		</Function>
 		<Function name="glPixelTransformParameterfvEXT" return="void">
-			<Params type="GLenum" name="target"/>
-			<Params type="GLenum" name="pname"/>
-			<Params type="const GLfloat*" name="params"/>
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="const GLfloat*" name="params"/>
 		</Function>
 		<Function name="glGetPixelTransformParameterivEXT" return="void">
-			<Params type="GLenum" name="target"/>
-			<Params type="GLenum" name="pname"/>
-			<Params type="const GLint*" name="params"/>
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="const GLint*" name="params"/>
 		</Function>
 		<Function name="glGetPixelTransformParameterfvEXT" return="void">
-			<Params type="GLenum" name="target"/>
-			<Params type="GLenum" name="pname"/>
-			<Params type="const GLfloat*" name="params"/>
+			<Param type="GLenum" name="target"/>
+			<Param type="GLenum" name="pname"/>
+			<Param type="const GLfloat*" name="params"/>
 		</Function>
 	</Functions>
 

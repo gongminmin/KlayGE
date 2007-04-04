@@ -51,7 +51,6 @@
 			<Name name="wglDestroyPbufferARB"/>
 			<Name name="wglQueryPbufferARB"/>
 		</Vendor>
-
 		<Vendor name="WGL_EXT" string="WGL_EXT_pbuffer" reg_no="171">
 			<Name name="wglCreatePbufferEXT"/>
 			<Name name="wglGetPbufferDCEXT"/>

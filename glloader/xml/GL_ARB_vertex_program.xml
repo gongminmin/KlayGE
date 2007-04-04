@@ -429,7 +429,7 @@
 			<Name name="glVertexAttribPointerARB"/>
 			<Name name="glEnableVertexAttribArrayARB"/>
 			<Name name="glDisableVertexAttribArrayARB"/>
-			<Name name="glProgramStringARB"/> 
+			<Name name="glProgramStringARB"/>
 			<Name name="glBindProgramARB"/>
 			<Name name="glDeleteProgramsARB"/>
 			<Name name="glGenProgramsARB"/>

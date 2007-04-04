@@ -87,7 +87,6 @@
 			<Name name="wglGetPixelFormatAttribfvARB"/>
 			<Name name="wglChoosePixelFormatARB"/>
 		</Vendor>
-
 		<Vendor name="WGL_EXT" string="WGL_EXT_pixel_format" reg_no="170">
 			<Name name="wglGetPixelFormatAttribivEXT"/>
 			<Name name="wglGetPixelFormatAttribfvEXT"/>

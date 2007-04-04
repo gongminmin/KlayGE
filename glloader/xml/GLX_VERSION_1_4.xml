@@ -17,12 +17,12 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GLX_CORE" string="GLX_VERSION_1_4">
+		<Vendor name="GLX_VERSION" string="GLX_VERSION_1_4">
 			<Name name="glXGetProcAddress"/>
 		</Vendor>
 	</Vendors>
 
 	<InitPath>
-		<Init name="GLX_CORE"/>
+		<Init name="GLX_VERSION"/>
 	</InitPath>
 </GLExtension>

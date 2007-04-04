@@ -6,10 +6,10 @@
 	</Tokens>
 
 	<Vendors>
-		<Vendor name="GLX_SGIS" string="GLX_SGIX_visual_select_group" reg_no="234"/>
+		<Vendor name="GLX_SGIX" string="GLX_SGIX_visual_select_group" reg_no="234"/>
 	</Vendors>
 
 	<InitPath>
-		<Init name="GLX_SGIS"/>
+		<Init name="GLX_SGIX"/>
 	</InitPath>
 </GLExtension>

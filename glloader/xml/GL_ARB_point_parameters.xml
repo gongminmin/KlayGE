@@ -24,7 +24,6 @@
 			<Name name="glPointParameterfARB"/>
 			<Name name="glPointParameterfvARB"/>
 		</Vendor>
-
 		<Vendor name="GL_EXT" string="GL_EXT_point_parameters" reg_no="54">
 			<Name name="glPointParameterfEXT"/>
 			<Name name="glPointParameterfvEXT"/>

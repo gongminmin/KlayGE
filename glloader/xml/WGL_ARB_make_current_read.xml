@@ -20,7 +20,6 @@
 			<Name name="wglMakeContextCurrentARB"/>
 			<Name name="wglGetCurrentReadDCARB"/>
 		</Vendor>
-
 		<Vendor name="WGL_EXT" string="WGL_EXT_make_current_read" reg_no="169">
 			<Name name="wglMakeContextCurrentEXT"/>
 			<Name name="wglGetCurrentReadDCEXT"/>

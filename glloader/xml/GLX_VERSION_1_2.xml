@@ -6,12 +6,12 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GLX_CORE" string="GLX_VERSION_1_2">
+		<Vendor name="GLX_VERSION" string="GLX_VERSION_1_2">
 			<Name name="glXGetCurrentDisplay"/>
 		</Vendor>
 	</Vendors>
 
 	<InitPath>
-		<Init name="GLX_CORE"/>
+		<Init name="GLX_VERSION"/>
 	</InitPath>
 </GLExtension>

@@ -158,7 +158,7 @@
 	</Functions>
 
 	<Vendors>
-		<Vendor name="GLX_CORE" string="GLX_VERSION_1_3">
+		<Vendor name="GLX_VERSION" string="GLX_VERSION_1_3">
 			<Name name="glXChooseFBConfig"/>
 			<Name name="glXGetFBConfigs"/>
 			<Name name="glXGetVisualFromFBConfig"/>
@@ -180,6 +180,6 @@
 	</Vendors>
 
 	<InitPath>
-		<Init name="GLX_CORE"/>
+		<Init name="GLX_VERSION"/>
 	</InitPath>
 </GLExtension>
