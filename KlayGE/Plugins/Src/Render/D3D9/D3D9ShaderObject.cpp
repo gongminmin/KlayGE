@@ -69,11 +69,43 @@ namespace KlayGE
 			0, &code, &err_msg, &constant_table);
 		if (err_msg != NULL)
 		{
+#ifdef D3DXSHADER_USE_LEGACY_D3DX9_31_DLL
+			ID3DXConstantTable* constant_table_legacy;
+			ID3DXBuffer* code_legacy;
+			ID3DXBuffer* err_msg_legacy;
+			D3DXCompileShader(text.c_str(), static_cast<UINT>(text.size()), NULL, NULL,
+				name.c_str(), shader_profile.c_str(),
+				D3DXSHADER_USE_LEGACY_D3DX9_31_DLL, &code_legacy, &err_msg_legacy, &constant_table_legacy);
+			if (err_msg_legacy != NULL)
+			{
+#ifdef KLAYGE_DEBUG
+				std::cerr << text << std::endl;
+				std::cerr << static_cast<char*>(err_msg_legacy->GetBufferPointer()) << std::endl;
+#endif
+
+				constant_table_legacy->Release();
+				code_legacy->Release();
+				err_msg_legacy->Release();
+				
+				err_msg->Release();
+			}
+			else
+			{
+				code->Release();
+				constant_table->Release();
+				err_msg->Release();
+
+				code = code_legacy;
+				constant_table = constant_table_legacy;
+			}
+#else
 #ifdef KLAYGE_DEBUG
 			std::cerr << text << std::endl;
 			std::cerr << static_cast<char*>(err_msg->GetBufferPointer()) << std::endl;
 #endif
+
 			err_msg->Release();
+#endif
 		}
 
 		if (NULL == code)
