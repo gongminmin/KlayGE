@@ -48,7 +48,6 @@ namespace KlayGE
 		uint8_t max_texture_anisotropy;
 
 		bool hw_instancing_support;
-		bool hw_r2vb_support;
 	};
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #pragma pack(pop)

@@ -131,7 +131,20 @@ namespace KlayGE
 
 	FontPtr RenderFactory::MakeFont(std::string const & fontName, uint32_t fontHeight, uint32_t flags)
 	{
-		return FontPtr(new Font(fontName, fontHeight, flags));
+		FontPtr ret;
+
+		font_pool_type::iterator fiter = font_pool_.find(std::make_pair(fontName, fontHeight));
+		if (fiter == font_pool_.end())
+		{
+			ret.reset(new Font(fontName, fontHeight, flags));
+			font_pool_.insert(std::make_pair(std::make_pair(fontName, fontHeight), ret));
+		}
+		else
+		{
+			ret = fiter->second;
+		}
+
+		return ret;
 	}
 
 	RenderEffectPtr RenderFactory::LoadEffect(std::string const & effectName)
@@ -147,7 +160,7 @@ namespace KlayGE
 		}
 		else
 		{
-			ret = RenderEffectPtr(eiter->second);
+			ret = eiter->second;
 		}
 
 		return ret;

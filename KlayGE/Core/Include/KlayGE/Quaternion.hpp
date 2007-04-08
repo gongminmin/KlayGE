@@ -27,6 +27,9 @@ namespace KlayGE
 						boost::multipliable2<Quaternion_T<T>, T,
 						boost::equality_comparable<Quaternion_T<T> > > > > > >
 	{
+		template <typename U>
+		friend class Quaternion_T;
+
 	public:
 		typedef T					value_type;
 
@@ -59,7 +62,7 @@ namespace KlayGE
 			{ }
 		template <typename U>
 		Quaternion_T(Quaternion_T<U> const & rhs)
-			: quat_(reinterpret_cast<const Quaternion_T<T> >(rhs).quat_)
+			: quat_(rhs.quat_)
 			{ }
 		Quaternion_T(T const & x, T const & y, T const & z, T const & w)
 		{

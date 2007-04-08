@@ -29,6 +29,9 @@ namespace KlayGE
 						boost::dividable2<Vector_T<T, N>, T,
 						boost::multipliable2<Vector_T<T, N>, T> > > > > >
 	{
+		template <typename U, int M>
+		friend class Vector_T;
+
 		typedef boost::array<T, N>	DetailType;
 
 	public:

@@ -24,6 +24,9 @@ namespace KlayGE
 						boost::subtractable<Size_T<T>,
 						boost::equality_comparable<Size_T<T> > > >
 	{
+		template <typename U>
+		friend class Size_T;
+
 	public:
 		typedef T					value_type;
 
