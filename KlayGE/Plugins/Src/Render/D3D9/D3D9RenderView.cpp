@@ -360,11 +360,15 @@ namespace KlayGE
 
 	void D3D9DepthStencilRenderView::OnAttached(FrameBuffer& /*fb*/, uint32_t att)
 	{
+		UNREF_PARAM(att);
+
 		BOOST_ASSERT(FrameBuffer::ATT_DepthStencil == att);
 	}
 
 	void D3D9DepthStencilRenderView::OnDetached(FrameBuffer& /*fb*/, uint32_t att)
 	{
+		UNREF_PARAM(att);
+
 		BOOST_ASSERT(FrameBuffer::ATT_DepthStencil == att);
 	}
 

@@ -1,8 +1,11 @@
 // Util.hpp
 // KlayGE 实用函数库 头文件
-// Ver 3.4.0
-// 版权所有(C) 龚敏敏, 2003-2006
+// Ver 3.6.0
+// 版权所有(C) 龚敏敏, 2003-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.6.0
+// 增加了identity, project1st和project2nd (2007.4.15)
 //
 // 3.4.0
 // 增加了checked_pointer_cast (2006.8.17)
@@ -32,6 +35,8 @@
 #include <boost/assert.hpp>
 #include <boost/smart_ptr.hpp>
 
+#define UNREF_PARAM(x) (x)
+
 namespace KlayGE
 {
 	// 设第n bit为1
@@ -51,7 +56,7 @@ namespace KlayGE
 	// 置数中的第 n bit为1
 	inline uint32_t
 	SetBit(uint32_t x, uint32_t n)
-		{ return x & SetMask(n); }
+		{ return x | SetMask(n); }
 
 	// 取低字节
 	inline uint16_t
@@ -80,10 +85,10 @@ namespace KlayGE
 	HI_LO_SwapU16(uint32_t x)
 		{ return (LO_U16(x) << 16) | HI_U16(x); }
 
-	// 获得某一位是1的掩码
+	// 获得n位都是1的掩码
 	inline uint32_t
-	MakeMask(uint32_t dw)
-		{ return (1UL << (dw + 1)) - 1; }
+	MakeMask(uint32_t n)
+		{ return (1UL << (n + 1)) - 1; }
 
 	// 产生FourCC常量
 	template <unsigned char ch0, unsigned char ch1, unsigned char ch2, unsigned char ch3>
@@ -118,14 +123,14 @@ namespace KlayGE
 	#ifdef KLAYGE_LITTLE_ENDIAN
 		EndianSwitch<size>(p);
 	#else
-		p = p;
+		UNREF_PARAM(p);
 	#endif
 	}
 	template <int size>
 	void NativeToLittleEndian(void* p)
 	{
 	#ifdef KLAYGE_LITTLE_ENDIAN
-		p = p;
+		UNREF_PARAM(p);
 	#else
 		EndianSwitch<size>(p);
 	#endif
@@ -161,20 +166,33 @@ namespace KlayGE
 
 	uint32_t LastError();
 
+#ifdef _IDENTITY_SUPPORT
+	template <typename arg_type>
+	struct identity : public std::unary_function<arg_type, arg_type>
+	{
+		arg_type const & operator()(arg_type const & x) const
+		{
+			return x;
+		}
+	};
+#else
+	using std::identity;
+#endif		// _IDENTITY_SUPPORT
+
 #ifdef _SELECT1ST2ND_SUPPORT
 	template <typename pair_type>
-	struct select1st : public std::unary_function<pair_type const &, typename pair_type::first_type const &>
+	struct select1st : public std::unary_function<pair_type, typename pair_type::first_type>
 	{
-		const typename pair_type::first_type& operator()(pair_type const & x) const
+		typename pair_type::first_type const & operator()(pair_type const & x) const
 		{
 			return x.first;
 		}
 	};
 
 	template <typename pair_type>
-	struct select2nd : public std::unary_function<pair_type const &, typename pair_type::second_type const &>
+	struct select2nd : public std::unary_function<pair_type, typename pair_type::second_type>
 	{
-		const typename pair_type::second_type& operator()(pair_type const & x) const
+		typename pair_type::second_type const & operator()(pair_type const & x) const
 		{
 			return x.second;
 		}
@@ -183,6 +201,29 @@ namespace KlayGE
 	using std::select1st;
 	using std::select2nd;
 #endif		// _SELECT1ST2ND_SUPPORT
+
+#ifdef _PROJECT1ST2ND_SUPPORT
+	template <typename arg1_type, typename arg2_type>
+	struct project1st : public std::binary_function<arg1_type, arg2_type, arg1_type>
+	{
+		arg1_type operator()(arg1_type const & x, arg2_type const & /*y*/) const
+		{
+			return x;
+		}
+	};
+
+	template <typename arg1_type, typename arg2_type>
+	struct project2nd : public std::binary_function<arg1_type, arg2_type, arg2_type>
+	{
+		arg2_type operator()(arg1_type const & /*x*/, arg2_type const & y) const
+		{
+			return y;
+		}
+	};
+#else
+	using std::project1st;
+	using std::project2nd;
+#endif		// _PROJECT1ST2ND_SUPPORT
 
 #ifdef _COPYIF_SUPPORT
 	template<typename InputIterator, typename OutputIterator, typename Predicate>

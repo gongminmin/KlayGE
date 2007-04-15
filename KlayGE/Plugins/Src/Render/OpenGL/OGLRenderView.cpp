@@ -599,6 +599,8 @@ namespace KlayGE
 
 	void OGLDepthStencilRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
+		UNREF_PARAM(att);
+
 		BOOST_ASSERT(FrameBuffer::ATT_DepthStencil == att);
 
 		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
@@ -620,6 +622,8 @@ namespace KlayGE
 
 	void OGLDepthStencilRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
 	{
+		UNREF_PARAM(att);
+
 		BOOST_ASSERT(FrameBuffer::ATT_DepthStencil == att);
 
 		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();

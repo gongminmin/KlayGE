@@ -19,6 +19,7 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/Context.hpp>
+#include <KlayGE/Util.hpp>
 
 #include <cstring>
 
@@ -190,6 +191,10 @@ namespace KlayGE
 			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
 			uint32_t src_width, uint32_t src_height, uint32_t src_depth)
 	{
+		UNREF_PARAM(src_width);
+		UNREF_PARAM(src_height);
+		UNREF_PARAM(src_depth);
+
 		BOOST_ASSERT(src_width != 0);
 		BOOST_ASSERT(src_height != 0);
 		BOOST_ASSERT(src_depth != 0);

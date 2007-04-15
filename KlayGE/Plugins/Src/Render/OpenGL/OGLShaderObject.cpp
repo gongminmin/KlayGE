@@ -105,6 +105,8 @@ namespace KlayGE
 			{
 				std::cerr << cgGetLastListing(render_factory.CGContext()) << std::endl;
 			}
+#else
+			UNREF_PARAM(err_string);
 #endif
 
 			is_validate_ = false;

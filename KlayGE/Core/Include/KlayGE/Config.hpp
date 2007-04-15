@@ -23,11 +23,6 @@
 		#error Unknown compiler.
 	#endif
 #elif defined(_MSC_VER)
-	// Microsoft Visual C++
-	//
-	// Must remain the last #elif since some other vendors (Metrowerks, for example)
-	// also #define _MSC_VER
-
 	#define KLAYGE_COMPILER_MSVC
 
 	#if _MSC_VER >= 1400
@@ -97,7 +92,9 @@
 #endif
 
 // 定义各种编译期选项
+#define _IDENTITY_SUPPORT
 #define _SELECT1ST2ND_SUPPORT
+#define _PROJECT1ST2ND_SUPPORT
 #define _COPYIF_SUPPORT
 
 #endif		// _CONFIG_HPP
