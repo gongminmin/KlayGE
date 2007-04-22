@@ -1,1 +1,1 @@
-准备开发用于Python的PyGLLoader。支持自初始化，也就是在第一次调用时初始化，而不需要显式调用初始化函数。
+准备开发用于Python的PyGLLoader。
