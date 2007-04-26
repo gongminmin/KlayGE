@@ -1,0 +1,143 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="../../../RenderFX/Lighting.fxml"/>
+
+	<parameter type="float4x4" name="model_view"/>
+	<parameter type="float4x4" name="proj"/>
+	<parameter type="float3" name="light_in_model"/>
+	<parameter type="float3" name="eye_in_model"/>
+
+	<parameter type="float" name="depth_min"/>
+	<parameter type="float" name="inv_depth_range"/>
+
+	<shader>
+		<![CDATA[
+void NormalDepthVS(float4 pos : POSITION,
+			float3 normal : NORMAL,
+			out float4 oPos : POSITION,
+			out float3 oNormal : TEXCOORD0,
+			out float2 oDepth : TEXCOORD1)
+{
+	oPos = mul(mul(pos, model_view), proj);
+	oNormal = mul(normal, (float3x3)model_view);
+	oDepth = mul(pos, model_view).zw;
+}
+
+half4 NormalDepthPS(float3 normal : TEXCOORD0, float2 depth : TEXCOORD1) : COLOR
+{
+	normal = normalize(normal);
+	return half4(normal, (depth.x / depth.y - depth_min) * inv_depth_range);
+}
+		]]>
+	</shader>
+
+	<technique name="NormalDepth">
+		<pass name="p0">
+			<state name="vertex_shader" value="NormalDepthVS()"/>
+			<state name="pixel_shader" value="NormalDepthPS()"/>
+		</pass>
+	</technique>
+
+	<parameter type="float" name="inv_width"/>
+	<parameter type="float" name="inv_height"/>
+	<parameter type="float2" name="offset"/>
+	<parameter type="int" name="flipping"/>
+
+	<parameter type="sampler2D" name="toonmap_sampler">
+		<state name="filtering" value="point"/>
+		<state name="address_u" value="clamp"/>
+	</parameter>
+	<parameter type="sampler2D" name="normal_depth_sampler">
+		<state name="filtering" value="point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="float2" name="e_barrier" x="0.8" y="0.1"/>
+	<parameter type="float2" name="e_weights" x="0.25" y="0.5"/>
+
+	<shader>
+		<![CDATA[
+void PostToonVS(float4 pos : POSITION,
+				float3 normal : NORMAL,
+				out float4 oPos : POSITION,
+				out float2 oTc0 : TEXCOORD0, // center
+				out float4 oTc1 : TEXCOORD1, // left top / right bottom
+				out float4 oTc2 : TEXCOORD2, // right top / left bottom
+				out float4 oTc3 : TEXCOORD3, // left / right
+				out float4 oTc4 : TEXCOORD4, // top / bottom
+				out float3 oLightVec : TEXCOORD5,
+				out float3 oViewVec : TEXCOORD6)
+{
+	oPos = mul(mul(pos, model_view), proj);
+	
+	oTc0 = oPos.xy / oPos.w - offset;
+	oTc0.y *= flipping;
+	oTc0 = oTc0 / 2 + 0.5f;
+
+	oTc1 = oTc0.xyxy + float4(-inv_width, -inv_height, +inv_width, +inv_height);
+	oTc2 = oTc0.xyxy + float4(+inv_width, -inv_height, -inv_width, +inv_height);
+	oTc3 = oTc0.xyxy + float4(-inv_width, 0, +inv_width, 0);
+	oTc4 = oTc0.xyxy + float4(0, -inv_height, 0, +inv_height);
+
+	oLightVec = light_in_model - pos.xyz;
+	oViewVec = eye_in_model - pos.xyz;
+}
+
+float4 PostToonPS(float2 tc0 : TEXCOORD0,
+				float4 tc1 : TEXCOORD1,
+				float4 tc2 : TEXCOORD2,
+				float4 tc3 : TEXCOORD3,
+				float4 tc4 : TEXCOORD4,
+				float3 light_vec : TEXCOORD5,
+				float3 view_vec : TEXCOORD6) : COLOR
+{
+	light_vec = normalize(light_vec);
+	view_vec = normalize(view_vec);
+
+	half4 s1 = tex2D(normal_depth_sampler, tc1.xy);
+	half4 s2 = tex2D(normal_depth_sampler, tc1.zw);
+	half4 s3 = tex2D(normal_depth_sampler, tc2.xy);
+	half4 s4 = tex2D(normal_depth_sampler, tc2.zw);
+	half4 s5 = tex2D(normal_depth_sampler, tc3.xy);
+	half4 s6 = tex2D(normal_depth_sampler, tc3.zw);
+	half4 s7 = tex2D(normal_depth_sampler, tc4.xy);
+	half4 s8 = tex2D(normal_depth_sampler, tc4.zw);
+
+	// Normal discontinuity filter
+	half4 ndc = tex2D(normal_depth_sampler, tc0);
+	half4 nd = half4(dot(ndc.xyz, s1.xyz),
+				dot(ndc.xyz, s2.xyz),
+				dot(ndc.xyz, s3.xyz),
+				dot(ndc.xyz, s4.xyz));
+	nd -= e_barrier.x;
+	nd.x = (nd.x > 0) ? 1 : 0;
+	nd.y = (nd.y > 0) ? 1 : 0;
+	nd.z = (nd.z > 0) ? 1 : 0;
+	nd.w = (nd.w > 0) ? 1 : 0;
+	half ne = (dot(nd, e_weights.x).x < 1) ? 0 : 1;
+
+	// Depth filter : compute gradiental difference:
+	half4 dd = half4(s1.w + s2.w, s3.w + s4.w, s5.w + s6.w, s7.w + s8.w);
+	dd = abs(2 * ndc.w - dd) - e_barrier.y;
+	dd.x = (dd.x > 0) ? 1 : 0;
+	dd.y = (dd.y > 0) ? 1 : 0;
+	dd.z = (dd.z > 0) ? 1 : 0;
+	dd.w = (dd.w > 0) ? 1 : 0;
+	half de = (dot(dd, e_weights.y).x < 1) ? 1 : 0;
+	   
+	half toon = diffuse_lighting(light_vec, ndc.xyz) * 0.7
+					+ specular_lighting(light_vec, view_vec, ndc.xyz, 8) * 0.3;
+	return tex2D(toonmap_sampler, float2(toon, 0.5f)) * de * ne;
+}
+		]]>
+	</shader>
+
+	<technique name="Cartoon">
+		<pass name="p0">
+			<state name="vertex_shader" value="PostToonVS()"/>
+			<state name="pixel_shader" value="PostToonPS()"/>
+		</pass>
+	</technique>
+</effect>

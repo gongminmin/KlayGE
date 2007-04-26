@@ -1,0 +1,69 @@
+<?xml version='1.0'?>
+
+<effect>
+	<parameter type="sampler2D" name="fractal_sampler">
+		<state name="filtering" value="point"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+void MandelbrotVS(float4 pos : POSITION,
+			float2 texcoord0 : TEXCOORD0,
+
+			out float4 oPos			: POSITION,
+			out float2 oTexcoord0	: TEXCOORD0,
+			out float2 oTexcoord1	: TEXCOORD1)
+{
+	oPos = pos;
+	oTexcoord0 = texcoord0;
+	oTexcoord1 = texcoord0 * 2.4 - float2(1.8, 1.2);
+}
+
+half4 MandelbrotPS(float2 texcoord0 : TEXCOORD0,
+				float2 texcoord1 : TEXCOORD1) : COLOR
+{
+	half2 z = tex2D(fractal_sampler, texcoord0).rg;
+	half2 c = texcoord1;
+
+	z = half2(z.x * z.x - z.y * z.y, z.x * z.y + z.y * z.x) + c;
+
+	return half4(z.xy, 0, 1);
+}
+		]]>
+	</shader>
+
+	<technique name="Mandelbrot">
+		<pass name="p0">
+			<state name="vertex_shader" value="MandelbrotVS()"/>
+			<state name="pixel_shader" value="MandelbrotPS()"/>
+		</pass>
+	</technique>
+
+	<shader>
+		<![CDATA[
+void ShowVS(float4 pos : POSITION,
+		float2 texcoord0 : TEXCOORD0,
+		out float4 oPos : POSITION,
+		out float3 oTexcoord0 : TEXCOORD0)
+{
+	oPos = pos;
+	oTexcoord0 = float3(texcoord0, 1);
+}
+
+float4 ShowPS(float3 texCoord0 : TEXCOORD0) : COLOR
+{
+	half2 z = tex2D(fractal_sampler, texCoord0).rg;
+	return float4((dot(z, z) >= 4) * texCoord0, 1);
+}
+		]]>
+	</shader>
+
+	<technique name="Show">
+		<pass name="p0">
+			<state name="vertex_shader" value="ShowVS()"/>
+			<state name="pixel_shader" value="ShowPS()"/>
+		</pass>
+	</technique>
+</effect>

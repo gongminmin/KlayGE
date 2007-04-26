@@ -1,0 +1,202 @@
+<?xml version='1.0'?>
+
+<effect>
+	<parameter type="sampler2D" name="particle_pos_sampler">
+		<state name="filtering" value="point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+	
+	<parameter type="float4x4" name="View"/>
+	<parameter type="float4x4" name="Proj"/>
+	<parameter type="float" name="point_radius"/>
+	
+	<parameter type="sampler2D" name="particle_sampler">
+		<state name="filtering" value="bilinear"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+void ParticlesVS(float2 tex_pos		: POSITION,
+					float2 tex			: TEXCOORD0,
+					out float4 oPos		: POSITION,
+					out float2 oTex		: TEXCOORD0,
+					out float4 oClr     : COLOR0)
+{
+	float4 pos = tex2Dlod(particle_pos_sampler, float4(tex_pos, 0, 1));
+
+	if (pos.w <= 0)
+	{
+		oPos = 0;
+	}
+	else
+	{
+		float4 center_view = mul(float4(pos.xyz, 1), View);
+		float4 view_pos = center_view;
+		view_pos.xy += (float2(tex.x, 1 - tex.y) * 2 - 1) * point_radius * center_view.w;
+		oPos = mul(view_pos, Proj);
+	}
+
+	oTex = tex;
+	oClr = float4(1, 1, 1, pos.w);
+}
+
+float4 ParticlesPS(float2 tex : TEXCOORD0,
+						float4 clr    : COLOR0) : COLOR
+{
+	clr *= tex2D(particle_sampler, tex);
+	clip(clr.a - 0.2);
+	return clr;
+}
+		]]>
+	</shader>
+	
+	<technique name="Particles">
+		<pass name="p0">
+			<state name="vertex_shader" value="ParticlesVS()"/>
+			<state name="pixel_shader" value="ParticlesPS()"/>
+		</pass>
+	</technique>
+
+	<parameter type="float4x4" name="ps_model_mat"/>
+	<parameter type="float4" name="init_pos_life"/>
+
+	<parameter type="sampler2D" name="particle_vel_sampler">
+		<state name="filtering" value="point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+	
+	<parameter type="float" name="accumulate_time"/>
+	<parameter type="float" name="elapse_time"/>
+
+	<parameter type="sampler2D" name="particle_init_vel_sampler">
+		<state name="filtering" value="point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+	<parameter type="sampler2D" name="particle_birth_time_sampler">
+		<state name="filtering" value="point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+	
+	<parameter type="sampler2D" name="height_map_sampler">
+		<state name="filtering" value="point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+	<parameter type="sampler2D" name="normal_map_sampler">
+		<state name="filtering" value="bilinear"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+void UpdateVS(float4 pos			: POSITION,
+					float2 tex			: TEXCOORD0,
+					out float4 oPos		: POSITION,
+					out float2 oTex		: TEXCOORD0)
+{
+	oPos = pos;
+	oTex = float2(tex.x, 1 - tex.y);
+}
+
+void UpdatePS(float2 tex : TEXCOORD0,
+				out float4 out_pos : COLOR0,
+				out float4 out_vel : COLOR1)
+{
+	float4 cur_pos = tex2D(particle_pos_sampler, tex);
+	if (cur_pos.w > 0)
+	{
+		float3 cur_vel = tex2D(particle_vel_sampler, tex);
+
+		cur_vel += float3(0, -0.1f, 0) * elapse_time;
+		cur_pos.xyz += cur_vel * elapse_time;
+		cur_pos.w -= elapse_time;
+		
+		float2 tex_pos = cur_pos.xz / 4 + 0.5;
+		tex_pos.y = 1 - tex_pos.y;
+		float height = tex2D(height_map_sampler, tex_pos).r;
+		if (cur_pos.y < height)
+		{
+			cur_vel = reflect(cur_vel, tex2D(normal_map_sampler, tex_pos).rbg * 2 - 1) * 0.99f;
+		}
+		
+		out_pos = cur_pos;
+		out_vel = float4(cur_vel, 1);
+	}
+	else
+	{
+		float t = accumulate_time - tex2D(particle_birth_time_sampler, tex).r;
+		if ((t > 0) && (t < elapse_time))
+		{
+			float4 pos = mul(float4(init_pos_life.xyz, 1), ps_model_mat);
+			pos /= pos.w;
+
+			float3 vel = tex2D(particle_init_vel_sampler, tex + cur_pos.xz).xyz;
+			vel = mul(vel, (float3x3)ps_model_mat);
+
+			out_pos = float4(pos.xyz, init_pos_life.w);
+			out_vel = float4(vel, 1);
+		}
+		else
+		{
+			clip(-1);
+		}
+	}
+}
+		]]>
+	</shader>
+
+	<technique name="Update">
+		<pass name="p0">
+			<state name="vertex_shader" value="UpdateVS()"/>
+			<state name="pixel_shader" value="UpdatePS()"/>
+		</pass>
+	</technique>
+
+	<parameter type="float3" name="LightPos" x="0" y="10" z="3"/>
+	<parameter type="sampler2D" name="grass_sampler">
+		<state name="filtering" value="bilinear"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+void TerrainVS(float4 pos			: POSITION,
+					float2 tex			: TEXCOORD0,
+					out float4 oPos		: POSITION,
+					out float4 oTex  : TEXCOORD0,
+					out float3 oPosOS : TEXCOORD1)
+{
+	oTex.xy = float2(tex.x, 1 - tex.y);
+	oTex.zw = oTex.xy * 2;
+
+	pos = pos.xzyw;
+	pos.y += tex2Dlod(height_map_sampler, float4(oTex.xy, 0, 0)).r;
+	
+	oPosOS = pos;
+	
+	oPos = mul(mul(pos, View), Proj);
+}
+
+float4 TerrainPS(float4 tex : TEXCOORD0, float3 pos : TEXCOORD1) : COLOR0
+{
+	float3 normal = normalize(tex2D(normal_map_sampler, tex.xy).xzy * 2 - 1);
+	return float4(tex2D(grass_sampler, tex.zw).rgb * dot(normalize(LightPos - pos), normal), 1);
+}
+		]]>
+	</shader>
+
+	<technique name="Terrain">
+		<pass name="p0">
+			<state name="vertex_shader" value="TerrainVS()"/>
+			<state name="pixel_shader" value="TerrainPS()"/>
+		</pass>
+	</technique>
+</effect>
