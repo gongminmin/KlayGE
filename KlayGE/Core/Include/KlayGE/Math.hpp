@@ -1068,14 +1068,14 @@ namespace KlayGE
 		inline Quaternion_T<T>
 		unit_axis_to_unit_axis(Vector_T<T, 3> const & from, Vector_T<T, 3> const & to)
 		{
-			T dot = Abs(dot(from, to));
-			if (equal(dot, T(1)))
+			T const cos_theta = dot(from, to);
+			if (equal(cos_theta, T(1)))
 			{
 				return Quaternion_T<T>::Identity();
 			}
 			else
 			{
-				if (equal(dot, T(-1)))
+				if (equal(cos_theta, T(-1)))
 				{
 					return Quaternion_T<T>(1, 0, 0, 0);
 				}
@@ -1083,7 +1083,6 @@ namespace KlayGE
 				{
 					Vector_T<T, 3> axis = cross(from, to);
 
-					T const cos_theta = dot(from, to);
 					T const sin_theta = sqrt(1 - cos_theta * cos_theta);
 					T const sin_half_theta = sqrt((1 - cos_theta) / 2);
 					T const cos_half_theta = sin_theta / (2 * sin_half_theta);
