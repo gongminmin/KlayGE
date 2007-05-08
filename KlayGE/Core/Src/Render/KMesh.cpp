@@ -29,6 +29,8 @@
 
 #include <fstream>
 #include <boost/assert.hpp>
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
 
 #include <KlayGE/KMesh.hpp>
 
@@ -293,9 +295,9 @@ namespace KlayGE
 			skinned->FrameRate(header.frame_rate);
 		}
 
-		for (MeshesType::iterator iter = meshes.begin(); iter != meshes.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(meshes)::reference mesh, meshes)
 		{
-			(*iter)->BuildMeshInfo();
+			mesh->BuildMeshInfo();
 		}
 		ret->AssignMeshes(meshes.begin(), meshes.end());
 

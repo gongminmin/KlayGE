@@ -42,6 +42,8 @@
 
 #include <algorithm>
 #include <boost/bind.hpp>
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
 
 #include <KlayGE/SceneManager.hpp>
 
@@ -134,8 +136,8 @@ namespace KlayGE
 	void SceneManager::AddRenderable(RenderablePtr const & obj)
 	{
 		RenderTechniquePtr const & tech = obj->GetRenderTechnique();
-		RenderQueueType::iterator iter = std::find_if(render_queue_.begin(), render_queue_.end(),
-			boost::bind(select1st<RenderQueueType::value_type>(), _1) == tech);
+		BOOST_AUTO(iter, std::find_if(render_queue_.begin(), render_queue_.end(),
+			boost::bind(select1st<RenderQueueType::value_type>(), _1) == tech));
 		if (iter != render_queue_.end())
 		{
 			iter->second.push_back(obj);
@@ -178,11 +180,10 @@ namespace KlayGE
 		this->ClipScene(app.ActiveCamera());
 		numObjectsRendered_ = visible_objs_.size();
 
-		typedef std::vector<std::pair<RenderablePtr, SceneObjectsType> > renderables_type;
-		renderables_type renderables;
-		for (SceneObjectsType::iterator iter = visible_objs_.begin(); iter != visible_objs_.end(); ++ iter)
+		std::vector<std::pair<RenderablePtr, SceneObjectsType> > renderables;
+		BOOST_FOREACH(BOOST_TYPEOF(visible_objs_)::const_reference so, visible_objs_)
 		{
-			RenderablePtr const & renderable = (*iter)->GetRenderable();
+			RenderablePtr const & renderable = so->GetRenderable();
 
 			size_t i = 0;
 			while ((i < renderables.size()) && (renderables[i].first != renderable))
@@ -192,37 +193,31 @@ namespace KlayGE
 
 			if (i < renderables.size())
 			{
-				renderables[i].second.push_back(*iter);
+				renderables[i].second.push_back(so);
 			}
 			else
 			{
-				renderables.push_back(std::make_pair(renderable, SceneObjectsType(1, *iter)));
+				renderables.push_back(std::make_pair(renderable, SceneObjectsType(1, so)));
 			}
 		}
-		for (renderables_type::iterator iter = renderables.begin();
-			iter != renderables.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(renderables)::const_reference renderable, renderables)
 		{
-			Renderable& ra(*(iter->first));
-			ra.AssignInstances(iter->second.begin(), iter->second.end());
+			Renderable& ra(*renderable.first);
+			ra.AssignInstances(renderable.second.begin(), renderable.second.end());
 			ra.AddToRenderQueue();
 		}
 
 		std::sort(render_queue_.begin(), render_queue_.end(), cmp_weight<std::pair<RenderTechniquePtr, RenderItemsType> >);
 
-		for (RenderQueueType::iterator queueIter = render_queue_.begin();
-			queueIter != render_queue_.end(); ++ queueIter)
+		BOOST_FOREACH(BOOST_TYPEOF(render_queue_)::reference items, render_queue_)
 		{
-			renderEngine.SetRenderTechnique(queueIter->first);
+			renderEngine.SetRenderTechnique(items.first);
 
-			for (RenderItemsType::iterator itemIter = queueIter->second.begin();
-				itemIter != queueIter->second.end(); ++ itemIter)
+			BOOST_FOREACH(BOOST_TYPEOF(items.second)::reference item, items.second)
 			{
-				Renderable& ra(*(*itemIter));
+				item->Render();
 
 				++ numRenderablesRendered_;
-
-				ra.Render();
-
 				numPrimitivesRendered_ += renderEngine.NumPrimitivesJustRendered();
 				numVerticesRendered_ += renderEngine.NumVerticesJustRendered();
 			}
@@ -230,8 +225,7 @@ namespace KlayGE
 		visible_objs_.resize(0);
 		render_queue_.resize(0);
 
-		for (SceneObjectsType::iterator iter = scene_objs_.begin();
-			iter != scene_objs_.end();)
+		for (BOOST_AUTO(iter, scene_objs_.begin()); iter != scene_objs_.end();)
 		{
 			if ((*iter)->ShortAge())
 			{

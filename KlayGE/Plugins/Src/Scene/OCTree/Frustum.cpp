@@ -16,6 +16,9 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Math.hpp>
 
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
+
 #include <KlayGE/OCTree/Frustum.hpp>
 
 namespace KlayGE
@@ -35,9 +38,9 @@ namespace KlayGE
 		planes_[5] = column4 + column3;  // far
 
 		// Loop through each side of the frustum and normalize it.
-		for (planes_t::iterator iter = planes_.begin(); iter != planes_.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(planes_)::reference plane, planes_)
 		{
-			*iter = MathLib::normalize(*iter);
+			plane = MathLib::normalize(plane);
 		}
 
 		//  build a bit-field that will tell us the indices for the nearest and farthest vertices from each plane...

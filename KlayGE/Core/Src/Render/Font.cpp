@@ -58,6 +58,8 @@
 #include <cstring>
 #include <boost/assert.hpp>
 #include <boost/mem_fn.hpp>
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
 
 #include <KlayGE/Font.hpp>
 
@@ -204,9 +206,9 @@ namespace
 			indices_.reserve(indices_.size() + maxSize * 6);
 
 			uint16_t lastIndex(static_cast<uint16_t>(vertices_.size()));
-			for (std::wstring::const_iterator citer = text.begin(); citer != text.end(); ++ citer)
+
+			BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
 			{
-				wchar_t const & ch(*citer);
 				CharInfoMapType::const_iterator cmiter = charInfoMap_.find(ch);
 				float const w(cmiter->second.width * xScale);
 
@@ -261,15 +263,13 @@ namespace
 		/////////////////////////////////////////////////////////////////////////////////
 		void UpdateTexture(std::wstring const & text)
 		{
-			for (std::wstring::const_iterator citer = text.begin(); citer != text.end(); ++ citer)
+			BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
 			{
-				wchar_t const ch = *citer;
-
 				if (charInfoMap_.find(ch) != charInfoMap_.end())
 				{
 					// 在现有纹理中找到了
 
-					CharLRUType::iterator lruIter = std::find(charLRU_.begin(), charLRU_.end(), ch);
+					BOOST_AUTO(lruIter, std::find(charLRU_.begin(), charLRU_.end(), ch));
 					if (lruIter != charLRU_.begin())
 					{
 						charLRU_.splice(charLRU_.begin(), charLRU_, lruIter);
@@ -320,7 +320,7 @@ namespace
 						else
 						{
 							// 找到使用最长时间没有使用的字
-							CharInfoMapType::iterator iter(charInfoMap_.find(charLRU_.back()));
+							BOOST_AUTO(iter, charInfoMap_.find(charLRU_.back()));
 							BOOST_ASSERT(iter != charInfoMap_.end());
 
 							// 用当前字符替换

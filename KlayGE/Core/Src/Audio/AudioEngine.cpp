@@ -17,6 +17,8 @@
 
 #include <boost/assert.hpp>
 #include <boost/bind.hpp>
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
 
 #include <KlayGE/Audio.hpp>
 
@@ -142,11 +144,11 @@ namespace KlayGE
 	{
 		soundVol_ = vol;
 
-		for (AudioBufsIter iter = audioBufs_.begin(); iter != audioBufs_.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(audioBufs_)::reference ab, audioBufs_)
 		{
-			if (iter->second->IsSound())
+			if (ab.second->IsSound())
 			{
-				iter->second->Volume(vol);
+				ab.second->Volume(vol);
 			}
 		}
 	}
@@ -164,11 +166,11 @@ namespace KlayGE
 	{
 		musicVol_ = vol;
 
-		for (AudioBufsIter iter = audioBufs_.begin(); iter != audioBufs_.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(audioBufs_)::reference ab, audioBufs_)
 		{
-			if (!(iter->second->IsSound()))
+			if (!(ab.second->IsSound()))
 			{
-				iter->second->Volume(vol);
+				ab.second->Volume(vol);
 			}
 		}
 	}

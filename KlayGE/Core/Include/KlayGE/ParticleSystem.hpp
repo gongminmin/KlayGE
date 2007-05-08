@@ -17,6 +17,8 @@
 #include <KlayGE/Math.hpp>
 
 #include <vector>
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
 
 namespace KlayGE
 {
@@ -49,10 +51,9 @@ namespace KlayGE
 			inv_emit_freq_ = 1.0f / freq;
 
 			float time = 0;
-			for (std::vector<ParticleType>::iterator iter = particles_.begin();
-				iter != particles_.end(); ++ iter)
+			BOOST_FOREACH(BOOST_TYPEOF(particles_)::reference particle, particles_)
 			{
-				iter->birth_time = time;
+				particle.birth_time = time;
 				time += inv_emit_freq_;
 			}
 		}
@@ -65,19 +66,18 @@ namespace KlayGE
 				accumulate_time_ = 0;
 			}
 
-			for (std::vector<ParticleType>::iterator iter = particles_.begin();
-				iter != particles_.end(); ++ iter)
+			BOOST_FOREACH(BOOST_TYPEOF(particles_)::reference particle, particles_)
 			{
-				if (iter->life > 0)
+				if (particle.life > 0)
 				{
-					update_func_(*iter, elapse_time);
+					update_func_(particle, elapse_time);
 				}
 				else
 				{
-					float const t = accumulate_time_ - iter->birth_time;
+					float const t = accumulate_time_ - particle.birth_time;
 					if ((t >= 0) && (t < elapse_time))
 					{
-						gen_func_(*iter, model_mat_);
+						gen_func_(particle, model_mat_);
 					}
 				}
 			}

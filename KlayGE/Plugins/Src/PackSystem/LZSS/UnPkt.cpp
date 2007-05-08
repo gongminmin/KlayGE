@@ -42,6 +42,7 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
+#include <boost/typeof/typeof.hpp>
 
 #include <KlayGE/LZSS/LZSS.hpp>
 
@@ -217,7 +218,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void UnPkt::LocateFile(std::string const & pathName)
 	{
-		DirTable::iterator iter = dirTable_.find(pathName);
+		BOOST_AUTO(iter, dirTable_.find(pathName));
 		BOOST_ASSERT(iter != dirTable_.end());
 
 		curFile_ = iter;

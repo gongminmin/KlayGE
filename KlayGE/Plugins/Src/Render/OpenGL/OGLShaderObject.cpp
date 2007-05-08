@@ -34,6 +34,8 @@
 #pragma warning(pop)
 #endif
 #include <boost/assign/std/vector.hpp>
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
 
 #include <KlayGE/OpenGL/OGLRenderFactory.hpp>
 #include <KlayGE/OpenGL/OGLRenderEngine.hpp>
@@ -46,10 +48,9 @@ namespace KlayGE
 	{
 		for (int i = 0; i < ST_NumShaderTypes; ++ i)
 		{
-			for (parameter_descs_t::iterator iter = param_descs_[i].begin();
-				iter != param_descs_[i].end(); ++ iter)
+			BOOST_FOREACH(BOOST_TYPEOF(param_descs_[i])::reference desc, param_descs_[i])
 			{
-				cgDestroyParameter(iter->second);
+				cgDestroyParameter(desc.second);
 			}
 
 			cgDestroyProgram(shaders_[i]);
@@ -155,7 +156,7 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 
-			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			BOOST_AUTO(iter, param_descs_[type].find(name));
 			if (iter != param_descs_[type].end())
 			{
 				cgSetParameter1i(iter->second, value);
@@ -169,7 +170,7 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 
-			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			BOOST_AUTO(iter, param_descs_[type].find(name));
 			if (iter != param_descs_[type].end())
 			{
 				cgSetParameter1i(iter->second, value);
@@ -183,7 +184,7 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 
-			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			BOOST_AUTO(iter, param_descs_[type].find(name));
 			if (iter != param_descs_[type].end())
 			{
 				cgSetParameter1f(iter->second, value);
@@ -197,7 +198,7 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 
-			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			BOOST_AUTO(iter, param_descs_[type].find(name));
 			if (iter != param_descs_[type].end())
 			{
 				cgSetParameter4fv(iter->second, &value[0]);
@@ -211,7 +212,7 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 
-			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			BOOST_AUTO(iter, param_descs_[type].find(name));
 			if (iter != param_descs_[type].end())
 			{
 				cgGLSetMatrixParameterfr(iter->second, &value[0]);
@@ -225,7 +226,7 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 
-			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			BOOST_AUTO(iter, param_descs_[type].find(name));
 			if (iter != param_descs_[type].end())
 			{
 				std::vector<int> tmp(value.begin(), value.end());
@@ -240,7 +241,7 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 
-			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			BOOST_AUTO(iter, param_descs_[type].find(name));
 			if (iter != param_descs_[type].end())
 			{
 				cgSetParameterValueir(iter->second, static_cast<int>(value.size()), &value[0]);
@@ -254,7 +255,7 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 
-			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			BOOST_AUTO(iter, param_descs_[type].find(name));
 			if (iter != param_descs_[type].end())
 			{
 				cgGLSetParameterArray1f(iter->second, 0, static_cast<int>(value.size()), &value[0]);
@@ -268,7 +269,7 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 
-			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			BOOST_AUTO(iter, param_descs_[type].find(name));
 			if (iter != param_descs_[type].end())
 			{
 				cgGLSetParameterArray4f(iter->second, 0, static_cast<long>(value.size()), &value[0][0]);
@@ -282,7 +283,7 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 
-			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			BOOST_AUTO(iter, param_descs_[type].find(name));
 			if (iter != param_descs_[type].end())
 			{
 				cgGLSetMatrixParameterArrayfr(iter->second, 0, static_cast<long>(value.size()), &value[0][0]);
@@ -296,7 +297,7 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 
-			parameter_descs_t::iterator iter = param_descs_[type].find(name);
+			BOOST_AUTO(iter, param_descs_[type].find(name));
 			if (iter != param_descs_[type].end())
 			{
 				uint32_t index = cgGLGetTextureEnum(iter->second) - GL_TEXTURE0;

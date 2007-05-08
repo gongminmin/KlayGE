@@ -28,6 +28,8 @@
 #include <KlayGE/SetVector.hpp>
 
 #include <functional>
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
 
 #include <KlayGE/OCTree/Frustum.hpp>
 #include <KlayGE/OCTree/OCTree.hpp>
@@ -41,15 +43,15 @@ namespace KlayGE
 
 	void OCTree::ClipScene(Camera const & camera)
 	{
-		for (linear_octree_t::iterator iter = octree_.begin(); iter != octree_.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(octree_)::reference subtree, octree_)
 		{
-			SceneObjectsType& objs = iter->second;
+			SceneObjectsType& objs = subtree.second;
 
-			for (SceneObjectsType::iterator obj_iter = objs.begin(); obj_iter != objs.end();)
+			for (BOOST_AUTO(obj_iter, objs.begin()); obj_iter != objs.end();)
 			{
 				if ((*obj_iter)->Moveable())
 				{
-					if (!this->InsideChild(iter->first, *obj_iter))
+					if (!this->InsideChild(subtree.first, *obj_iter))
 					{
 						obj_iter = objs.erase(obj_iter);
 					}
@@ -65,15 +67,15 @@ namespace KlayGE
 			}
 		}
 
-		for (SceneObjectsType::iterator iter = scene_objs_.begin(); iter != scene_objs_.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(scene_objs_)::reference obj, scene_objs_)
 		{
-			if ((*iter)->Cullable() && (*iter)->Moveable())
+			if (obj->Cullable() && obj->Moveable())
 			{
-				this->InsertSceneObject("0", *iter);
+				this->InsertSceneObject("0", obj);
 			}
 		}
 
-		for (linear_octree_t::iterator iter = octree_.begin(); iter != octree_.end();)
+		for (BOOST_AUTO(iter, octree_.begin()); iter != octree_.end();)
 		{
 			SceneObjectsType& objs = iter->second;
 			if (objs.empty())
@@ -90,7 +92,7 @@ namespace KlayGE
 
 		SetVector<tree_id_t> nodes;
 		SetVector<SceneObjectPtr> visables;
-		for (linear_octree_t::iterator iter = octree_.begin(); iter != octree_.end(); ++ iter)
+		for (BOOST_AUTO(iter, octree_.begin()); iter != octree_.end(); ++ iter)
 		{
 			for (size_t i = 1; i <= iter->first.size(); ++ i)
 			{
@@ -138,19 +140,19 @@ namespace KlayGE
 			}
 		}
 
-		for (SceneObjectsType::iterator iter = scene_objs_.begin(); iter != scene_objs_.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(scene_objs_)::reference obj, scene_objs_)
 		{
-			if ((*iter)->Cullable())
+			if (obj->Cullable())
 			{
-				if (visables.find(*iter) != visables.end())
+				if (visables.find(obj) != visables.end())
 				{
-					visables.erase(*iter);
-					visible_objs_.push_back(*iter);
+					visables.erase(obj);
+					visible_objs_.push_back(obj);
 				}
 			}
 			else
 			{
-				visible_objs_.push_back(*iter);
+				visible_objs_.push_back(obj);
 			}
 		}
 	}
@@ -173,12 +175,10 @@ namespace KlayGE
 
 	SceneManager::SceneObjectsType::iterator OCTree::DoDelSceneObject(SceneManager::SceneObjectsType::iterator iter)
 	{
-		for (linear_octree_t::iterator tree_iter = octree_.begin();
-			tree_iter != octree_.end();)
+		for (BOOST_AUTO(tree_iter, octree_.begin()); tree_iter != octree_.end();)
 		{
 			SceneObjectsType& objs = tree_iter->second;
-			for (SceneObjectsType::iterator obj_iter = objs.begin();
-				obj_iter != objs.end();)
+			for (BOOST_AUTO(obj_iter, objs.begin()); obj_iter != objs.end();)
 			{
 				if (*obj_iter == *iter)
 				{
@@ -218,7 +218,7 @@ namespace KlayGE
 	{
 		Box ret = root_box_;
 
-		for (tree_id_t::const_iterator iter = id.begin() + 1; iter != id.end(); ++ iter)
+		for (BOOST_AUTO(iter, id.begin() + 1); iter != id.end(); ++ iter)
 		{
 			float3 const & min = ret.Min();
 			float3 const & max = ret.Max();
@@ -293,8 +293,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(this->InsideChild(id, obj));
 
-		linear_octree_t::iterator node = octree_.find(id);
-
+		BOOST_AUTO(node, octree_.find(id));
 		if (node == octree_.end())
 		{
 			octree_.insert(std::make_pair(id, SceneObjectsType(1, obj)));
@@ -311,16 +310,15 @@ namespace KlayGE
 			{
 				SceneObjectsType const & old_objs = node->second;
 
-				for (SceneObjectsType::const_iterator iter = old_objs.begin();
-					iter != old_objs.end(); ++ iter)
+				BOOST_FOREACH(BOOST_TYPEOF(old_objs)::const_reference old_obj, old_objs)
 				{
 					for (int i = 0; i < 8; ++ i)
 					{
 						tree_id_t const child_id = this->Child(id, i);
 
-						if (this->InsideChild(child_id, *iter))
+						if (this->InsideChild(child_id, old_obj))
 						{
-							this->InsertSceneObject(child_id, *iter);
+							this->InsertSceneObject(child_id, old_obj);
 						}
 
 						if (this->InsideChild(child_id, obj))

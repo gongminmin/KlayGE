@@ -30,6 +30,8 @@
 #pragma warning(pop)
 #endif
 #include <boost/bind.hpp>
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
 
 #include <KlayGE/DSound/DSAudio.hpp>
 
@@ -79,10 +81,10 @@ namespace KlayGE
 		sources_[0] = DSBufferType(temp);
 
 		// 复制缓冲区，使所有缓冲区使用同一段数据
-		for (SourcesIter iter = sources_.begin() + 1; iter != sources_.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(sources_)::reference source, sources_)
 		{
 			TIF(dsound->DuplicateSoundBuffer(sources_[0].get(), &temp));
-			*iter = DSBufferType(temp);
+			source = DSBufferType(temp);
 		}
 
 		// 锁定缓冲区
@@ -136,12 +138,11 @@ namespace KlayGE
 
 	// 返回空闲的缓冲区
 	/////////////////////////////////////////////////////////////////////////////////
-	DSSoundBuffer::SourcesIter DSSoundBuffer::FreeSource()
+	std::vector<DSBufferType>::iterator DSSoundBuffer::FreeSource()
 	{
 		BOOST_ASSERT(!sources_.empty());
 
-		SourcesIter iter(std::find_if(sources_.begin(), sources_.end(), IsSourceFree));
-
+		BOOST_AUTO(iter, std::find_if(sources_.begin(), sources_.end(), IsSourceFree));
 		if (iter == sources_.end())
 		{
 			iter = sources_.begin();
@@ -155,7 +156,7 @@ namespace KlayGE
 
 	// 返回3D缓冲区的接口
 	/////////////////////////////////////////////////////////////////////////////////
-	boost::shared_ptr<IDirectSound3DBuffer> DSSoundBuffer::Get3DBufferInterface(SourcesIter iter)
+	boost::shared_ptr<IDirectSound3DBuffer> DSSoundBuffer::Get3DBufferInterface(std::vector<DSBufferType>::iterator iter)
 	{
 		IDirectSound3DBuffer* ds3DBuffer;
 		(*iter)->QueryInterface(IID_IDirectSound3DBuffer, reinterpret_cast<void**>(&ds3DBuffer));
@@ -167,9 +168,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void DSSoundBuffer::Play(bool loop)
 	{
-		SourcesIter iter(this->FreeSource());
-
-		boost::shared_ptr<IDirectSound3DBuffer> ds3DBuf(this->Get3DBufferInterface(iter));
+		BOOST_AUTO(iter, FreeSource());
+		BOOST_AUTO(ds3DBuf, Get3DBufferInterface(iter));
 		if (ds3DBuf)
 		{
 			ds3DBuf->SetPosition(pos_[0], pos_[1], pos_[2], DS3D_IMMEDIATE);

@@ -41,6 +41,8 @@
 #include <vector>
 #include <cstring>
 #include <boost/assert.hpp>
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
 
 #include <d3d9.h>
 
@@ -374,36 +376,31 @@ namespace KlayGE
 				}
 			}
 
-			typedef std::vector<std::pair<uint32_t, std::wstring> > BehaviorType;
-			BehaviorType behavior;
-
-			typedef std::vector<std::pair<D3DDEVTYPE, std::wstring> > DevTypeType;
-			DevTypeType dev_type;
-
+			std::vector<std::pair<uint32_t, std::wstring> > behaviors;
+			std::vector<std::pair<D3DDEVTYPE, std::wstring> > dev_types;
 			if (use_nvperfhud)
 			{
-				behavior.push_back(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING, std::wstring(L"(hw vp)")));	
-				dev_type.push_back(std::make_pair(D3DDEVTYPE_REF, std::wstring(L"REF")));
+				behaviors.push_back(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING, std::wstring(L"(hw vp)")));	
+				dev_types.push_back(std::make_pair(D3DDEVTYPE_REF, std::wstring(L"REF")));
 			}
 			else
 			{
-				behavior.push_back(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_PUREDEVICE, std::wstring(L"(pure hw vp)")));
-				behavior.push_back(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING, std::wstring(L"(hw vp)")));
-				behavior.push_back(std::make_pair(D3DCREATE_MIXED_VERTEXPROCESSING, std::wstring(L"(mix vp)")));
-				behavior.push_back(std::make_pair(D3DCREATE_SOFTWARE_VERTEXPROCESSING, std::wstring(L"(sw vp)")));
+				behaviors.push_back(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_PUREDEVICE, std::wstring(L"(pure hw vp)")));
+				behaviors.push_back(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING, std::wstring(L"(hw vp)")));
+				behaviors.push_back(std::make_pair(D3DCREATE_MIXED_VERTEXPROCESSING, std::wstring(L"(mix vp)")));
+				behaviors.push_back(std::make_pair(D3DCREATE_SOFTWARE_VERTEXPROCESSING, std::wstring(L"(sw vp)")));
 
-				dev_type.push_back(std::make_pair(D3DDEVTYPE_HAL, std::wstring(L"HAL")));
-				dev_type.push_back(std::make_pair(D3DDEVTYPE_REF, std::wstring(L"REF")));
+				dev_types.push_back(std::make_pair(D3DDEVTYPE_HAL, std::wstring(L"HAL")));
+				dev_types.push_back(std::make_pair(D3DDEVTYPE_REF, std::wstring(L"REF")));
 			}
 
 			IDirect3DDevice9* d3d_device(NULL);
-			for (DevTypeType::iterator dev_iter = dev_type.begin();
-				(dev_iter != dev_type.end()) && (NULL == d3d_device); ++ dev_iter)
+			BOOST_FOREACH(BOOST_TYPEOF(dev_types)::reference dev, dev_types)
 			{
-				for (BehaviorType::iterator beh_iter = behavior.begin(); beh_iter != behavior.end(); ++ beh_iter)
+				BOOST_FOREACH(BOOST_TYPEOF(behaviors)::reference beh, behaviors)
 				{
-					if (SUCCEEDED(d3d_->CreateDevice(adapter_to_use, dev_iter->first,
-						hWnd_, beh_iter->first, &d3dpp_, &d3d_device)))
+					if (SUCCEEDED(d3d_->CreateDevice(adapter_to_use, dev.first,
+						hWnd_, beh.first, &d3dpp_, &d3d_device)))
 					{
 						// Check for ATI instancing support
 						if (D3D_OK == d3d_->CheckDeviceFormat(D3DADAPTER_DEFAULT,
@@ -423,10 +420,15 @@ namespace KlayGE
 						}
 						else
 						{
-							description_ += dev_iter->second + L" " + beh_iter->second;
+							description_ += dev.second + L" " + beh.second;
 							break;
 						}
 					}
+				}
+
+				if (d3d_device != NULL)
+				{
+					break;
 				}
 			}
 

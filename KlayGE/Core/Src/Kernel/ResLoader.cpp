@@ -3,6 +3,8 @@
 
 #include <fstream>
 #include <sstream>
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
 
 #include <KlayGE/ResLoader.hpp>
 
@@ -33,9 +35,9 @@ namespace KlayGE
 
 	std::string ResLoader::Locate(std::string const & name)
 	{
-		for (std::vector<std::string>::iterator iter = pathes_.begin(); iter != pathes_.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(pathes_)::const_reference path, pathes_)
 		{
-			std::string const resName(*iter + name);
+			std::string const resName(path + name);
 
 			std::ifstream ifs(resName.c_str(), std::ios_base::binary);
 
@@ -65,9 +67,9 @@ namespace KlayGE
 
 	ResIdentifierPtr ResLoader::Load(std::string const & name)
 	{
-		for (std::vector<std::string>::iterator iter = pathes_.begin(); iter != pathes_.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(pathes_)::const_reference path, pathes_)
 		{
-			std::string const resName(*iter + name);
+			std::string const resName(path + name);
 
 			ResIdentifierPtr ret(new std::ifstream(resName.c_str(), std::ios_base::binary));
 

@@ -23,6 +23,8 @@
 
 #include <boost/assert.hpp>
 #include <boost/bind.hpp>
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
 
 #include <KlayGE/Input.hpp>
 
@@ -78,10 +80,9 @@ namespace KlayGE
 		// 对当前设备应用新的动作映射
 		for (uint32_t id = 0; id < action_handlers_.size(); ++ id)
 		{
-			for (InputDevicesType::iterator iter = devices_.begin();
-				iter != devices_.end(); ++ iter)
+			BOOST_FOREACH(BOOST_TYPEOF(devices_)::reference device, devices_)
 			{
-				(*iter)->ActionMap(id, action_handlers_[id].first);
+				device->ActionMap(id, action_handlers_[id].first);
 			}
 		}
 	}
@@ -99,23 +100,22 @@ namespace KlayGE
 	{
 		for (uint32_t id = 0; id < action_handlers_.size(); ++ id)
 		{
-			typedef MapVector<uint16_t, long> ActionSetType;
-			ActionSetType actions;
+			MapVector<uint16_t, long> actions;
 
 			// 访问所有设备
-			for (InputDevicesType::iterator iter = devices_.begin(); iter != devices_.end(); ++ iter)
+			BOOST_FOREACH(BOOST_TYPEOF(devices_)::reference device, devices_)
 			{
-				InputActionsType const theAction((*iter)->Update(id));
+				InputActionsType const theAction(device->Update(id));
 
 				// 去掉重复的动作
-				for (InputActionsType::const_iterator i = theAction.begin(); i != theAction.end(); ++ i)
+				BOOST_FOREACH(BOOST_TYPEOF(theAction)::const_reference act, theAction)
 				{
-					if (actions.find(i->first) == actions.end())
+					if (actions.find(act.first) == actions.end())
 					{
-						actions.insert(*i);
+						actions.insert(act);
 
 						// 处理动作
-						action_handlers_[id].second(*i);
+						action_handlers_[id].second(act);
 					}
 				}
 			}

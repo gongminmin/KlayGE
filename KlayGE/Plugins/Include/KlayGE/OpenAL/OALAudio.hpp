@@ -85,11 +85,6 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	class OALMusicBuffer : boost::noncopyable, public MusicBuffer
 	{
-	private:
-		typedef std::vector<ALuint>		Buffers;
-		typedef Buffers::iterator		BuffersIter;
-		typedef Buffers::const_iterator	BuffersConstIter;
-
 	public:
 		OALMusicBuffer(AudioDataSourcePtr const & dataSource, uint32_t bufferSeconds, float volume);
 		~OALMusicBuffer();
@@ -113,8 +108,8 @@ namespace KlayGE
 		void DoStop();
 
 	private:
-		ALuint		source_;
-		Buffers		bufferQueue_;
+		ALuint					source_;
+		std::vector<ALuint>		bufferQueue_;
 
 		bool		loop_;
 

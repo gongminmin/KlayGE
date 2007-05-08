@@ -21,6 +21,8 @@
 #include <KlayGE/Font.hpp>
 #include <KlayGE/ShaderObject.hpp>
 
+#include <boost/typeof/typeof.hpp>
+
 #include <KlayGE/RenderFactory.hpp>
 
 namespace KlayGE
@@ -133,7 +135,7 @@ namespace KlayGE
 	{
 		FontPtr ret;
 
-		font_pool_type::iterator fiter = font_pool_.find(std::make_pair(fontName, fontHeight));
+		BOOST_AUTO(fiter, font_pool_.find(std::make_pair(fontName, fontHeight)));
 		if (fiter == font_pool_.end())
 		{
 			ret.reset(new Font(fontName, fontHeight, flags));
@@ -151,7 +153,7 @@ namespace KlayGE
 	{
 		RenderEffectPtr ret;
 
-		effect_pool_type::iterator eiter = effect_pool_.find(effectName);
+		BOOST_AUTO(eiter, effect_pool_.find(effectName));
 		if (eiter == effect_pool_.end())
 		{
 			ret.reset(new RenderEffect);

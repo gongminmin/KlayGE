@@ -27,6 +27,8 @@
 #include <algorithm>
 #include <boost/mem_fn.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
 
 #include <KlayGE/Mesh.hpp>
 
@@ -50,6 +52,15 @@ namespace KlayGE
 	void RenderModel::OnRenderEnd()
 	{
 		std::for_each(meshes_.begin(), meshes_.end(), boost::mem_fn(&StaticMesh::OnRenderEnd));
+	}
+
+	void RenderModel::UpdateBoundBox()
+	{
+		box_ = Box(float3(0, 0, 0), float3(0, 0, 0));
+		BOOST_FOREACH(BOOST_TYPEOF(meshes_)::const_reference mesh, meshes_)
+		{
+			box_ |= mesh->GetBound();
+		}
 	}
 
 
@@ -130,10 +141,8 @@ namespace KlayGE
 	
 	void SkinnedModel::BuildBones(uint32_t frame)
 	{
-		for (JointsType::iterator iter = joints_.begin(); iter != joints_.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(joints_)::reference joint, joints_)
 		{
-			Joint& joint(*iter);
-
 			KeyFrames const & kf = key_frames_->find(joint.name)->second;
 			float3 const & key_pos = kf.FramePos(frame);
 			Quaternion const & key_quat = kf.FrameQuat(frame);

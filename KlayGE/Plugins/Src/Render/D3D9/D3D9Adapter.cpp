@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <cstring>
 #include <boost/assert.hpp>
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
 
 #include <KlayGE/D3D9/D3D9Adapter.hpp>
 
@@ -55,8 +57,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9Adapter::Enumerate(ID3D9Ptr const & d3d)
 	{
-		typedef std::vector<D3DFORMAT> FormatType;
-		FormatType formats;
+		std::vector<D3DFORMAT> formats;
 		formats.push_back(D3DFMT_X8R8G8B8);
 		formats.push_back(D3DFMT_A8R8G8B8);
 		formats.push_back(D3DFMT_A2R10G10B10);
@@ -64,14 +65,14 @@ namespace KlayGE
 		formats.push_back(D3DFMT_A1R5G5B5);
 		formats.push_back(D3DFMT_R5G6B5);
 
-		for (FormatType::iterator iter = formats.begin(); iter != formats.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(formats)::reference format, formats)
 		{
-			uint32_t const modeCount(d3d->GetAdapterModeCount(adapterNo_, *iter));
+			uint32_t const modeCount(d3d->GetAdapterModeCount(adapterNo_, format));
 			for (uint32_t i = 0; i < modeCount; ++ i)
 			{
 				// 获取显示模式属性
 				D3DDISPLAYMODE d3dDisplayMode;
-				d3d->EnumAdapterModes(adapterNo_, *iter, i, &d3dDisplayMode);
+				d3d->EnumAdapterModes(adapterNo_, format, i, &d3dDisplayMode);
 
 				// 过滤出低分辨率模式
 				if ((d3dDisplayMode.Width < 640) || (d3dDisplayMode.Height < 400))

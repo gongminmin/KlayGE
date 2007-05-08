@@ -38,11 +38,6 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	class DSSoundBuffer : boost::noncopyable, public SoundBuffer
 	{
-	private:
-		typedef std::vector<DSBufferType>	Sources;
-		typedef Sources::iterator			SourcesIter;
-		typedef Sources::const_iterator		SourcesConstIter;
-
 	public:
 		DSSoundBuffer(AudioDataSourcePtr const & dataSource, uint32_t numSource, float volume);
 		~DSSoundBuffer();
@@ -62,13 +57,13 @@ namespace KlayGE
 		void Direction(float3 const & v);
 
 	private:
-		boost::shared_ptr<IDirectSound3DBuffer> Get3DBufferInterface(SourcesIter iter);
+		boost::shared_ptr<IDirectSound3DBuffer> Get3DBufferInterface(std::vector<DSBufferType>::iterator iter);
 
 		void DoReset();
-		SourcesIter FreeSource();
+		std::vector<DSBufferType>::iterator FreeSource();
 
 	private:
-		Sources		sources_;
+		std::vector<DSBufferType>		sources_;
 
 		float3		pos_;
 		float3		vel_;

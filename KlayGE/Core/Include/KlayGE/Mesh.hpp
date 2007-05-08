@@ -122,12 +122,7 @@ namespace KlayGE
 		{
 			meshes_.assign(first, last);
 
-			box_ = Box(float3(0, 0, 0), float3(0, 0, 0));
-			for (StaticMeshesPtrType::iterator iter = meshes_.begin();
-				iter != meshes_.end(); ++ iter)
-			{
-				box_ |= (*iter)->GetBound();
-			}
+			this->UpdateBoundBox();
 		}
 
 		StaticMeshPtr Mesh(size_t id)
@@ -170,6 +165,9 @@ namespace KlayGE
 		}
 
 		void AddToRenderQueue();
+
+	protected:
+		void UpdateBoundBox();
 
 	protected:
 		std::wstring name_;

@@ -49,6 +49,8 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
 
 #include <KlayGE/LZSS/LZSS.hpp>
 
@@ -71,7 +73,7 @@ namespace
 												// codeBuf[0] works as eight flags, "1" representing that the unit
 												// is an unencoded letter (1 byte), "0" a position-and-length pair
 												// (2 bytes).  Thus, eight units require at most 16 bytes of code.
-			std::vector<uint8_t, boost::pool_allocator<uint8_t> >::iterator codeBufPtr = codeBuf.begin() + 1;
+			BOOST_AUTO(codeBufPtr, codeBuf.begin() + 1);
 
 			uint8_t mask = 1;
 
@@ -343,13 +345,13 @@ namespace
 
 	// Êä³öÄ¿Â¼±í
 	/////////////////////////////////////////////////////////////////////////////////
-	void WriteDirTable(std::ostream& out, KlayGE::DirTable const & dirTable)
+	void WriteDirTable(std::ostream& out, DirTable const & dirTable)
 	{
-		for (DirTable::const_iterator iter = dirTable.begin(); iter != dirTable.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(dirTable)::const_reference dir, dirTable)
 		{
-			FileDes const & fd(iter->second);
+			FileDes const & fd(dir.second);
 
-			std::string const & fileName(iter->first);
+			std::string const & fileName(dir.first);
 			uint32_t const temp(static_cast<uint32_t>(fileName.length()));
 			out.write(reinterpret_cast<const char*>(&temp), sizeof(temp));
 			out.write(&fileName[0], temp);
@@ -365,11 +367,11 @@ namespace
 	{
 		uint32_t curPos(0);
 
-		for (std::vector<std::string, boost::pool_allocator<std::string> >::const_iterator iter = files.begin(); iter != files.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(files)::const_reference fn, files)
 		{
 			boost::crc_32_type crc32;
 
-			std::ifstream in((rootName + '/' + *iter).c_str(), std::ios_base::binary);
+			std::ifstream in((rootName + '/' + fn).c_str(), std::ios_base::binary);
 			BOOST_ASSERT(in);
 
 			do
@@ -401,7 +403,7 @@ namespace
 			fd.start	= curPos;
 			curPos += fd.length;
 
-			dirTable.insert(std::make_pair(*iter, fd));
+			dirTable.insert(std::make_pair(fn, fd));
 
 			p->seekg(0);
 			std::vector<char, boost::pool_allocator<char> > temp(fd.length);
@@ -448,11 +450,11 @@ namespace KlayGE
 	std::string& TransPathName(std::string& out, std::string const & in)
 	{
 		out = in;
-		for (std::string::iterator iter = out.begin(); iter != out.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(out)::reference ch, out)
 		{
-			if ('\\' == *iter)
+			if ('\\' == ch)
 			{
-				*iter = '/';
+				ch = '/';
 			}
 		}
 

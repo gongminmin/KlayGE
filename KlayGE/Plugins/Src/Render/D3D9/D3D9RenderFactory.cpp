@@ -16,6 +16,8 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
 
+#include <boost/typeof/typeof.hpp>
+
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 #include <KlayGE/D3D9/D3D9FrameBuffer.hpp>
@@ -144,8 +146,7 @@ namespace KlayGE
 
 	void D3D9RenderFactory::OnLostDevice()
 	{
-		for (std::vector<boost::weak_ptr<D3D9Resource> >::iterator iter = resource_pool_.begin();
-			iter != resource_pool_.end();)
+		for (BOOST_AUTO(iter, resource_pool_.begin()); iter != resource_pool_.end();)
 		{
 			D3D9ResourcePtr res = iter->lock();
 			if (res)
@@ -168,8 +169,7 @@ namespace KlayGE
 		D3D9RenderEngine& engine = *checked_cast<D3D9RenderEngine*>(&this->RenderEngineInstance());
 		engine.OnResetDevice();
 
-		for (std::vector<boost::weak_ptr<D3D9Resource> >::iterator iter = resource_pool_.begin();
-			iter != resource_pool_.end();)
+		for (BOOST_AUTO(iter, resource_pool_.begin()); iter != resource_pool_.end();)
 		{
 			D3D9ResourcePtr res = iter->lock();
 			if (res)

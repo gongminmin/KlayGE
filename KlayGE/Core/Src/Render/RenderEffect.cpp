@@ -39,6 +39,8 @@
 #include <KlayGE/ShaderObject.hpp>
 
 #include <sstream>
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
 
 #include <KlayGE/RenderEffect.hpp>
 
@@ -391,11 +393,11 @@ namespace KlayGE
 
 	RenderEffectParameterPtr RenderEffect::ParameterByName(std::string const & name)
 	{
-		for (params_type::iterator iter = params_.begin(); iter != params_.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(params_)::const_reference param, params_)
 		{
-			if (name == (*iter)->Name())
+			if (name == param->Name())
 			{
-				return *iter;
+				return param;
 			}
 		}
 		return RenderEffectParameter::NullObject();
@@ -403,11 +405,11 @@ namespace KlayGE
 
 	RenderEffectParameterPtr RenderEffect::ParameterBySemantic(std::string const & semantic)
 	{
-		for (params_type::iterator iter = params_.begin(); iter != params_.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(params_)::const_reference param, params_)
 		{
-			if (semantic == (*iter)->Semantic())
+			if (semantic == param->Semantic())
 			{
-				return *iter;
+				return param;
 			}
 		}
 		return RenderEffectParameter::NullObject();
@@ -415,11 +417,11 @@ namespace KlayGE
 
 	RenderTechniquePtr RenderEffect::TechniqueByName(std::string const & name)
 	{
-		for (techniques_type::iterator iter = techniques_.begin(); iter != techniques_.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(techniques_)::const_reference tech, techniques_)
 		{
-			if (name == (*iter)->Name())
+			if (name == tech->Name())
 			{
-				return *iter;
+				return tech;
 			}
 		}
 		return RenderTechnique::NullObject();

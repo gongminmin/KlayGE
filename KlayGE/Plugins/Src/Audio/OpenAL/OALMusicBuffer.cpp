@@ -26,6 +26,8 @@
 
 #include <boost/assert.hpp>
 #include <boost/bind.hpp>
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
 
 #include <KlayGE/OpenAL/OALAudio.hpp>
 
@@ -137,10 +139,10 @@ namespace KlayGE
 		dataSource_->Reset();
 
 		// 每个缓冲区中装1 / PreSecond秒的数据
-		for (BuffersIter iter = bufferQueue_.begin(); iter != bufferQueue_.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(bufferQueue_)::reference buf, bufferQueue_)
 		{
 			dataSource_->Read(&data[0], data.size());
-			alBufferData(static_cast<ALuint>(*iter), format, &data[0],
+			alBufferData(buf, format, &data[0],
 				static_cast<ALuint>(data.size()), static_cast<ALuint>(freq_));
 		}
 

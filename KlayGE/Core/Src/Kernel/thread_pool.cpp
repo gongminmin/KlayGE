@@ -16,6 +16,8 @@
 #include <KlayGE/KlayGE.hpp>
 
 #include <boost/bind.hpp>
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
 
 #include <KlayGE/thread_pool.hpp>
 
@@ -57,12 +59,12 @@ namespace KlayGE
 
 	bool thread_pool::finished(uint32_t task_id) const
 	{
-		for (std::list<task_desc>::const_iterator iter = queue_.begin(); iter != queue_.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(queue_)::const_reference task, queue_)
 		{
-			boost::mutex::scoped_lock lock(*(iter->mutex_finish));
-			if (iter->task_id == task_id)
+			boost::mutex::scoped_lock lock(*task.mutex_finish);
+			if (task.task_id == task_id)
 			{
-				return (TS_FINISHED == iter->state);
+				return (TS_FINISHED == task.state);
 			}
 		}
 		return true;
@@ -87,7 +89,7 @@ namespace KlayGE
 	{
 		boost::mutex::scoped_lock lock(add_mutex_);
 
-		for (std::list<task_desc>::iterator iter = queue_.begin(); iter != queue_.end(); ++ iter)
+		for (BOOST_AUTO(iter, queue_.begin()); iter != queue_.end(); ++ iter)
 		{
 			boost::mutex::scoped_lock lock(*(iter->mutex_finish));
 			if (iter->task_id == task_id)
@@ -111,12 +113,12 @@ namespace KlayGE
 	{
 		boost::mutex::scoped_lock lock(add_mutex_);
 
-		for (std::list<task_desc>::iterator iter = queue_.begin(); iter != queue_.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(queue_)::reference task, queue_)
 		{
-			boost::mutex::scoped_lock lock(*(iter->mutex_finish));
-			if (iter->state != TS_FINISHED)
+			boost::mutex::scoped_lock lock(*task.mutex_finish);
+			if (task.state != TS_FINISHED)
 			{
-				iter->cond_finish->wait(lock);
+				task.cond_finish->wait(lock);
 			}
 		}
 
@@ -132,19 +134,19 @@ namespace KlayGE
 		{
 			bool run = false;
 			boost::mutex::scoped_lock lock(queue_mutex_);
-			for (std::list<task_desc>::iterator iter = queue_.begin(); iter != queue_.end(); ++ iter)
+			BOOST_FOREACH(BOOST_TYPEOF(queue_)::reference task, queue_)
 			{
-				if (TS_READY == iter->state)
+				if (TS_READY == task.state)
 				{
-					boost::mutex::scoped_lock ilock(*(iter->mutex_finish));
-					iter->state = TS_BUSY;
+					boost::mutex::scoped_lock ilock(*task.mutex_finish);
+					task.state = TS_BUSY;
 					lock.unlock();
 
-					iter->func();
+					task.func();
 
 					lock.lock();
-					iter->state = TS_FINISHED;
-					iter->cond_finish->notify_one();
+					task.state = TS_FINISHED;
+					task.cond_finish->notify_one();
 					run = true;
 
 					break;

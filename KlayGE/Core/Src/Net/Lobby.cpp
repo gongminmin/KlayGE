@@ -16,6 +16,8 @@
 #include <algorithm>
 #include <ctime>
 #include <cstring>
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
 
 #include <KlayGE/NetMsg.hpp>
 #include <KlayGE/Lobby.hpp>
@@ -38,7 +40,7 @@ namespace KlayGE
 
 	Lobby::PlayerAddrsIter Lobby::ID(SOCKADDR_IN const & addr)
 	{
-		for (PlayerAddrsIter iter = this->players_.begin(); iter != this->players_.end(); ++ iter)
+		for (BOOST_AUTO(iter, players_.begin()); iter != players_.end(); ++ iter)
 		{
 			if (0 == std::memcmp(&addr, &(iter->second.addr), sizeof(addr)))
 			{
@@ -46,7 +48,7 @@ namespace KlayGE
 			}
 		}
 
-		return this->players_.end();
+		return players_.end();
 	}
 
 	// 建立游戏大厅
@@ -101,20 +103,17 @@ namespace KlayGE
 			}
 
 			// 发送信息
-			for (PlayerAddrs::iterator iter = players_.begin(); iter != players_.end(); ++ iter)
+			BOOST_FOREACH(BOOST_TYPEOF(players_)::reference player, players_)
 			{
-				SendQueueType& msgs = iter->second.msgs;
-				for (SendQueueType::iterator msgiter = msgs.begin();
-					msgiter != msgs.end(); ++ msgiter)
+				SendQueueType& msgs = player.second.msgs;
+				BOOST_FOREACH(BOOST_TYPEOF(msgs)::reference msg, msgs)
 				{
-					std::vector<char>& msg = *msgiter;
-
-					socket_.SendTo(&msg[0], static_cast<int>(msg.size()), iter->second.addr);
+					socket_.SendTo(&msg[0], static_cast<int>(msg.size()), player.second.addr);
 				}
 			}
 
 			// 检查是否有在线用户超时
-			for (PlayerAddrs::iterator iter = players_.begin(); iter != players_.end();)
+			for (BOOST_AUTO(iter, players_.begin()); iter != players_.end();)
 			{
 				// 大于20秒
 				if (std::time(NULL) - iter->second.time >= 20 * 1000)
@@ -134,10 +133,9 @@ namespace KlayGE
 	char Lobby::NumPlayer() const
 	{
 		char n = 0;
-		for (PlayerAddrs::const_iterator iter = this->players_.begin();
-			iter != this->players_.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(players_)::const_reference player, players_)
 		{
-			if (iter->first != 0)
+			if (player.first != 0)
 			{
 				++ n;
 			}
@@ -171,13 +169,12 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void Lobby::MaxPlayers(char maxPlayers)
 	{
-		this->players_.resize(maxPlayers);
-		PlayerAddrs(this->players_).swap(this->players_);
+		players_.resize(maxPlayers);
+		PlayerAddrs(players_).swap(players_);
 
-		for (PlayerAddrsIter iter = this->players_.begin();
-						iter != this->players_.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(players_)::reference player, players_)
 		{
-			iter->first = 0;
+			player.first = 0;
 		}
 	}
 
@@ -216,8 +213,8 @@ namespace KlayGE
 		// 命令格式:
 		//			Player名字		16 字节
 
-		char id(1);
-		PlayerAddrsIter iter(this->players_.begin());
+		char id = 1;
+		BOOST_AUTO(iter, players_.begin());
 		for (; iter != this->players_.end(); ++ iter, ++ id)
 		{
 			if (0 == iter->first)
@@ -241,7 +238,7 @@ namespace KlayGE
 		//			Player ID		1 字节
 
 		// 已经满了
-		if (iter == this->players_.end())
+		if (iter == players_.end())
 		{
 			sendBuf[0] = 1;
 		}

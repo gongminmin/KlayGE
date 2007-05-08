@@ -47,6 +47,8 @@
 #include <algorithm>
 #include <cstring>
 #include <boost/assert.hpp>
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
 
 #include <KlayGE/OpenGL/OGLMapping.hpp>
 #include <KlayGE/OpenGL/OGLRenderWindow.hpp>
@@ -653,10 +655,8 @@ namespace KlayGE
 				vertex_elements_type const & vertex_stream_fmt = rl.VertexStreamFormat(i);
 
 				uint8_t* elem_offset = NULL;
-				for (vertex_elements_type::const_iterator vs_iter = vertex_stream_fmt.begin();
-					vs_iter != vertex_stream_fmt.end(); ++ vs_iter)
+				BOOST_FOREACH(BOOST_TYPEOF(vertex_stream_fmt)::const_reference vs_elem, vertex_stream_fmt)
 				{
-					vertex_element const & vs_elem = *vs_iter;
 					GLvoid* offset = static_cast<GLvoid*>(elem_offset);
 					GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
 					GLenum const type = IsFloatFormat(vs_elem.format) ? GL_FLOAT : GL_UNSIGNED_BYTE;
