@@ -29,7 +29,7 @@
 
 namespace KlayGE
 {
-	typedef boost::shared_ptr<IDirectSoundBuffer> DSBufferType;
+	typedef boost::shared_ptr<IDirectSoundBuffer> IDSBufferPtr;
 
 	WAVEFORMATEX WaveFormatEx(AudioDataSourcePtr const & dataSource);
 	long LinearGainToDB(float vol);
@@ -57,13 +57,13 @@ namespace KlayGE
 		void Direction(float3 const & v);
 
 	private:
-		boost::shared_ptr<IDirectSound3DBuffer> Get3DBufferInterface(std::vector<DSBufferType>::iterator iter);
+		boost::shared_ptr<IDirectSound3DBuffer> Get3DBufferInterface(std::vector<IDSBufferPtr>::iterator iter);
 
 		void DoReset();
-		std::vector<DSBufferType>::iterator FreeSource();
+		std::vector<IDSBufferPtr>::iterator FreeSource();
 
 	private:
-		std::vector<DSBufferType>		sources_;
+		std::vector<IDSBufferPtr>		sources_;
 
 		float3		pos_;
 		float3		vel_;
@@ -97,7 +97,7 @@ namespace KlayGE
 		void DoStop();
 
 	private:
-		DSBufferType	buffer_;
+		IDSBufferPtr	buffer_;
 		uint32_t		fillSize_;
 		uint32_t		fillCount_;
 		uint32_t		writePos_;

@@ -39,7 +39,7 @@ namespace
 {
 	// 检查一个音频缓冲区是否空闲
 	/////////////////////////////////////////////////////////////////////////////////
-	bool IsSourceFree(KlayGE::DSBufferType pDSB)
+	bool IsSourceFree(KlayGE::IDSBufferPtr pDSB)
 	{
 		if (pDSB)
 		{
@@ -78,13 +78,13 @@ namespace KlayGE
 		// DirectSound只能播放 PCM 数据。其他格式可能不能工作。
 		IDirectSoundBuffer* temp;
 		TIF(dsound->CreateSoundBuffer(&dsbd, &temp, NULL));
-		sources_[0] = DSBufferType(temp);
+		sources_[0] = IDSBufferPtr(temp);
 
 		// 复制缓冲区，使所有缓冲区使用同一段数据
 		BOOST_FOREACH(BOOST_TYPEOF(sources_)::reference source, sources_)
 		{
 			TIF(dsound->DuplicateSoundBuffer(sources_[0].get(), &temp));
-			source = DSBufferType(temp);
+			source = IDSBufferPtr(temp);
 		}
 
 		// 锁定缓冲区
@@ -138,7 +138,7 @@ namespace KlayGE
 
 	// 返回空闲的缓冲区
 	/////////////////////////////////////////////////////////////////////////////////
-	std::vector<DSBufferType>::iterator DSSoundBuffer::FreeSource()
+	std::vector<IDSBufferPtr>::iterator DSSoundBuffer::FreeSource()
 	{
 		BOOST_ASSERT(!sources_.empty());
 
@@ -156,7 +156,7 @@ namespace KlayGE
 
 	// 返回3D缓冲区的接口
 	/////////////////////////////////////////////////////////////////////////////////
-	boost::shared_ptr<IDirectSound3DBuffer> DSSoundBuffer::Get3DBufferInterface(std::vector<DSBufferType>::iterator iter)
+	boost::shared_ptr<IDirectSound3DBuffer> DSSoundBuffer::Get3DBufferInterface(std::vector<IDSBufferPtr>::iterator iter)
 	{
 		IDirectSound3DBuffer* ds3DBuffer;
 		(*iter)->QueryInterface(IID_IDirectSound3DBuffer, reinterpret_cast<void**>(&ds3DBuffer));
