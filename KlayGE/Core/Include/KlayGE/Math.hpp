@@ -1,8 +1,11 @@
 // Math.hpp
 // KlayGE 数学函数库 头文件
-// Ver 3.4.0
-// 版权所有(C) 龚敏敏, 2003-2006
+// Ver 3.6.0
+// 版权所有(C) 龚敏敏, 2003-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.6.0
+// 重写了intersect_ray (2007.5.11)
 //
 // 3.4.0
 // 增加了refract和fresnel_term (2006.8.22)
@@ -1373,8 +1376,7 @@ namespace KlayGE
 		// 求直线和平面的交点，直线orig + t * dir
 		template <typename T>
 		inline T
-		intersect_line(Plane_T<T> const & p,
-			Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir)
+		intersect_ray(Plane_T<T> const & p, Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir)
 		{
 			T deno(dot(dir, p.Normal()));
 			if (equal(deno, T(0)))
@@ -1417,7 +1419,7 @@ namespace KlayGE
 
 		template <typename T>
 		inline bool
-		bound_probe(Sphere_T<T> const & sphere, Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir)
+		intersect_ray(Sphere_T<T> const & sphere, Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir)
 		{
 			T const a = length_sq(dir);
 			T const b = 2 * dot(dir, orig - sphere.Center());
@@ -1441,47 +1443,47 @@ namespace KlayGE
 
 		template <typename T>
 		inline bool
-		bound_probe(Box_T<T> const & box, Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir)
+		intersect_ray(Box_T<T> const & box, Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir)
 		{
-			Vector_T<T, 3> const leftBottomNear(box.LeftBottomNear());
-			Vector_T<T, 3> const leftTopNear(box.LeftTopNear());
-			Vector_T<T, 3> const rightTopNear(box.RightTopNear());
-			Vector_T<T, 3> const leftTopFar(box.LeftTopFar());
+			float t_near = -1e10f;
+			float t_far = +1e10f;
 
-			Plane_T<T> pNear(FromPoints(leftBottomNear, leftTopNear, rightTopNear));
-			Plane_T<T> pTop(FromPoints(leftTopNear, leftTopFar, rightTopNear));
-			Plane_T<T> pLeft(FromPoints(leftTopFar, leftTopNear, leftBottomNear));
-
-			T t = intersect_line(pNear, orig, dir);
-			if (t >= 0)
+			for (int i = 0; i < 3; ++ i)
 			{
-				Vector_T<T, 3> vec = orig + t * dir;
-				if (!(in_bound(vec.x(), leftBottomNear.x(), rightTopNear.x())
-					&& in_bound(vec.y(), leftBottomNear.y(), leftTopNear.y())))
+				if (equal(dir[i], T(0)))
 				{
-					return false;
+					if ((dir[i] < box.Min()[i]) || (dir[i] > box.Max()[i]))
+					{
+						return false;
+					}
 				}
-			}
-
-			t = intersect_line(pTop, orig, dir);
-			if (t >= 0)
-			{
-				Vector_T<T, 3> vec = orig + t * dir;
-				if (!(in_bound(vec.x(), leftTopNear.x(), rightTopNear.x())
-					&& in_bound(vec.z(), leftTopNear.z(), leftTopFar.z())))
+				else
 				{
-					return false;
-				}
-			}
+					float t1 = (box.Min()[i] - orig[i]) / dir[i];
+					float t2 = (box.Max()[i] - orig[i]) / dir[i];
+					if (t1 > t2)
+					{
+						std::swap(t1, t2);
+					}
+					if (t1 > t_near)
+					{
+						t_near = t1;
+					}
+					if (t2 < t_far)
+					{
+						t_far = t2;
+					}
 
-			t = intersect_line(pLeft, orig, dir);
-			if (t >= 0)
-			{
-				Vector_T<T, 3> vec = orig + t * dir;
-				if (!(in_bound(vec.y(), leftBottomNear.y(), leftTopNear.y())
-					&& in_bound(vec.z(), leftBottomNear.z(), leftTopFar.z())))
-				{
-					return false;
+					if (t_near > t_far)
+					{
+						// box is missed
+						return false;
+					}
+					if (t_far < 0)
+					{
+						// box is behind ray
+						return false;
+					}
 				}
 			}
 
