@@ -1,0 +1,363 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>KlayGE Readme</title>
+</head>
+<body>
+<h1>粘土游戏引擎(KlayGE) 3.6.0 Readme</h1>
+<p>龚敏敏<br />
+	Homepage: http://klayge.sourceforge.net<br />
+	E-Mail:	  enginedev@163.com<br />
+	QQ:       33611210</p>
+<p>欢迎使用粘土游戏引擎 3.6.0<br />
+	压缩包中包含的组件：KlayGE头文件，KlayGE源代码，KlayGE的构建工程文件</p>
+<p>KlayGE是一个开放源代码的，跨平台的，基于插件结构的游戏引擎。</p>
+<p>本引擎的设计目的是用最先进的技术武装引擎，它所提供框架使游戏的开发、测试、移植得到简化。</p>
+<p>KlayGE的目标平台是今年发布的最高硬件到上一年发布的最低硬件。</p>
+<h2><a id="menu">目录</a></h2>
+<ul>
+	<li><a href="#license">使用协议</a></li>
+	<li><a href="#installation">安装</a></li>
+	<li><a href="#third_part">第三方库</a></li>
+	<li><a href="#plan">下步计划</a></li>
+	<li><a href="#history">发展历程</a></li>
+	<li><a href="#structure">目录结构</a></li>
+	<li><a href="#compiler">编译器支持</a></li>
+</ul>
+<hr />
+<h2><a id="license">使用协议</a></h2>
+<p>KlayGE版权归龚敏敏所有，从2.7.0开始遵循GPL协议。您任意地使用它，但必须保证使用KlayGE的项目也遵循GPL协议。如果您再开发过程中发现bug，请麻烦您告诉我。</p>
+<p><a href="#menu">^返回目录</a></p>
+<hr />
+<h2><a id="installation">安装</a></h2>
+<ol>
+	<li> 把KlayGE.7z解压缩到一个目录，比如说 F:\KlayGE</li>
+	<li> 设置路径。这里拿VS 2005举例，其他环境请参考它们的帮助文件。
+		<ol>
+			<li>打开“Tools”-&gt;“Options”-&gt;“Projects and Solutions”-&gt;&quot;VC++ Directories&quot;，在“Show directories for:”下拉框中选择“Include files”，在下面添加F:\KlayGE\Core\Include、F:\KlayGE\AppLayer\Include和F:\KlayGE\Plugins\Include</li>
+			<li>在“Show directories for:”下拉框中选择&quot;Library files&quot;，在下面添加F:\KlayGE\Lib\Win32 (如果要用x64的版本，就把Win32换成x64)</li>
+			<li>点“确定”按钮，建议关闭VS 2005 IDE以保存设置</li>
+		</ol>
+	</li>
+</ol>
+<p><a href="#menu">^返回目录</a></p>
+<hr />
+<h2><a id="third_part">第三方库</a></h2>
+<p>在编译KlayGE的之前，需要先安装下列第三方库。</p>
+<h4>内核需要：</h4>
+<ul>
+	<li>Python 2.5.1，http://www.python.org</li>
+	<li>Boost 1.34.0，http://www.boost.org。1.34.0的typeof不能在vc8下工作，解决方案是从CVS HEAD中获得boost\typeof\msvc\typeof_impl.hpp和boost\typeof\typeof.hpp，并覆盖掉原有的对应文件。</li>
+	<li>FreeType 2.3.4，http://freetype.sourceforge.net</li>
+</ul>
+<h4>渲染引擎-D3D和音频引擎-DSound需要：</h4>
+<ul>
+	<li>DirectX 9.0 SDK April 2007，http://msdn.microsoft.com/directx下载</li>
+</ul>
+<h4>播放引擎-DShow需要：</h4>
+<ul>
+	<li>Windows(R) Server 2003 R2 Platform SDK，http://msdn.microsoft.com/platformsdk</li>
+</ul>
+<h4>音频数据源-Ogg Wav需要：</h4>
+<ul>
+	<li>Vorbis SDK，http://xiph.org/downloads/，需要自己编译static库，并把runtime library选择成Multi-threaded DLL/Multi-threaded Debug DLL。</li>
+</ul>
+<h4>音频引擎-OpenAL需要：</h4>
+<ul>
+	<li>OpenAL SDK，http://www.openal.org/downloads.html</li>
+</ul>
+<h4>渲染引擎-OpenGL需要：</h4>
+<ul>
+	<li>NVIDIA Cg，http://developer.nvidia.com/object/cg_toolkit.html</li>
+</ul>
+<p>由于KlayGE在VC下使用的运行库是多线程的DLL，所以需要把所有连接到KlayGE的exe项目的运行库改为多线程DLL（Project-&gt;Properties-&gt;Configuration Properties-&gt;C/C++-&gt;Code Generation-&gt;RuntimeLibrary，选择Multi-threaded Debug DLL/Multi-threaded DLL）。</p>
+<p>另外，用VC编译Release版的Boost和FreeType需要定义_SECURE_SCL=0宏（在Project-&gt;Properties-&gt;Configuration Properties-&gt;C/C++-&gt;Preprocessor-&gt;Preprocessor Definitions中添加）。</p>
+<hr />
+<h2><a id="plan">下步计划</a></h2>
+<ul>
+	<li>加强特效脚本化</li>
+	<li>加强OpenGL插件</li>
+</ul>
+<p><a href="#menu">^返回目录</a></p>
+<hr />
+<h2><a id="history">发展历程</a></h2>
+<p><strong>3.6.0</strong><br />
+	兼容Vista 32/64<br />
+	使用pbo加速纹理填充</p>
+<p><strong>3.5.0 (2007.3.9)</strong><br />
+	支持Alpha to coverage<br />
+	改用基于xml的特效格式<br />
+	全新的特效系统，支持所有的状态缓存<br />
+	增加了RenderStateObject和ShaderObject<br />
+	支持x64系统<br />
+	OpenGL插件可以检测Shader Model 4<br />
+	增加了基于GPU的粒子系统<br />
+	增加了aligned_allocator<br />
+	修正了thread_pool死锁的bug（感谢Roy报告此bug）<br />
+	支持NVPerfHUD<br />
+	增加了有符号元素格式<br />
+	不再提供VS2003的工程文件</p>
+<p><strong>3.4.0 (2006.9.22)</strong><br />
+	导出插件支持骨骼的导出<br />
+	支持normal map的压缩<br />
+	支持HDR纹理的压缩<br />
+	加入了粒子系统<br />
+	重写的播放引擎，现在通过图形引擎播放视频<br />
+	重写了height map地形生成器<br />
+	增加了HDRPostProcess</p>
+<p><strong>3.3.0 (2006.6.30)</strong><br />
+	Font支持渲染到3D位置<br />
+	统一了渲染引擎的状态设置<br />
+	OpenGL插件要求硬件支持OpenGL 2.0和FBO<br />
+	增加了FrameBuffer和RenderView的结构<br />
+	使用以Technique为单位的渲染<br />
+	支持渲染到3D Texture的一个片<br />
+	增加了多种纹理格式<br />
+	统一了元素格式的使用<br />
+	DistanceMap生成器支持直接对Volume的计算<br />
+	增加了PostProcess</p>
+<p><strong>3.2.0 (2006.5.15)</strong><br />
+	增加了高精度计时器<br />
+	完整地支持骨骼动画<br />
+	渲染部分的结构有了较大的调整<br />
+	把IndexStream和VertexStream合并成GraphicsBuffer<br />
+	增加了RenderLayout<br />
+	支持sRGB纹理<br />
+	支持ATI的instancing方法<br />
+	增加了与平台无关的线程池</p>
+<p><strong>3.1.0 (2005.11.27)</strong><br />
+	增加了SceneObject<br />
+	简化了Instancing的使用<br />
+	支持Visual Studio 2005<br />
+	分离了实例和几何顶点流</p>
+<p><strong>3.0.0 (2005.10.26)</strong><br />
+	去掉了固定流水线<br />
+	增加了Occlusion Query<br />
+	增加了Point sprite<br />
+	支持Instancing<br />
+	支持Vertex Texture<br />
+	增强了KMesh和3dsmax导出插件<br />
+	优化了RenderEffect<br />
+	InputEngine改为使用Event形式处理消息<br />
+	支持全场景的多遍渲染<br />
+	支持顶点流的合并和拼接<br />
+	增加了RenderablePlane</p>
+<p><strong>2.8.0 (2005.8.14)</strong><br />
+	增加了RenderDeviceCaps<br />
+	增加了OpenGL兼容性检测工具<br />
+	增加了Sampler<br />
+	重写了RenderEffect<br />
+	只支持OpenGL 1.5及以上<br />
+	简化了RenderEngine<br />
+	DInputDevice改为多继承结构<br />
+	增加了RenderToVertexStream</p>
+<p><strong>2.7.1 (2005.7.15)</strong><br />
+	美化了字体显示效果<br />
+	LoadKMesh可以使用自定义类<br />
+	增加了RenderableHelper基类<br />
+	RenderEngine::ViewMatrix和ProjectionMatrix改为const</p>
+<p><strong>2.7.0 (2005.7.2)</strong><br />
+	改成GPL协议<br />
+	增加了KMesh<br />
+	去掉了RenderEngine::TextureCoordSet<br />
+	AddressingMode, Filtering和Anisotropy从RenderEngine移到Texture中<br />
+	Texture增加了MaxMipLevel和MipMapLodBias<br />
+	App3D增加了Quit<br />
+	支持OpenGL 1.5</p>
+<p><strong>2.6.0 (2005.6.2)</strong><br />
+	修正了SceneManager类CanBeCulled的bug<br />
+	增加了half类型<br />
+	D3D9Texture增加了对surface的检查<br />
+	增加了RenderableSkyBox<br />
+	支持HDR</p>
+<p><strong>2.5.0 (2005.5.2)</strong><br />
+	增加了3DSMax导出插件<br />
+	可以同时使用多个输入动作表<br />
+	MathLib改为使用返回值返回结果<br />
+	改进了CameraController<br />
+	增加了RenderableHelper<br />
+	视锥裁减改为使用LUT实现</p>
+<p><strong>2.4.0 (2005.3.28)</strong><br />
+	支持纹理压缩<br />
+	增加了D3D9Resource<br />
+	支持DDS格式的载入和保存<br />
+	八叉树改为线性实现<br />
+	支持深度纹理</p>
+<p><strong>2.3.0 (2005.3.2)</strong><br />
+	使用FreeType实现Font<br />
+	修正了几个内存泄漏<br />
+	增加了对浮点纹理的支持<br />
+	增加了CopyToMemory<br />
+	增加了视锥裁减插件<br />
+	D3D9插件增加了OnLostDevice和OnResetDevice</p>
+<p><strong>2.2.0 (2004.11.20)</strong><br />
+	修正了DSound插件的音量问题<br />
+	去掉了ManagerBase、FileSystem、Crc32、alloc、Timer、Random<br />
+	使用boost 1.32.0<br />
+	增加了Trace</p>
+<p><strong>2.1.3 (2004.10.19)</strong><br />
+	增加了以boost::tuple为参数的ScriptEngine::Call<br />
+	修正了一些关于STL的问题<br />
+	修正了Pkt的CRC错误<br />
+	去掉了MemoryLib</p>
+<p><strong>2.1.2 (2004.9.5)</strong><br />
+	增加了BoneMesh<br />
+	增加了RenderEffectParameter<br />
+	支持DX 9.0c SDK<br />
+	修正了DiskFile::Seek的Bug<br />
+	把const T&amp;改为更规则的T const &amp;<br />
+	InputEngine改用Bridge实现</p>
+<p><strong>2.1.1 (2004.5.25)</strong><br />
+	大量使用boost<br />
+	数学库都采用泛型实现<br />
+	增加了Parallax的Demo<br />
+	增加了ResLocator</p>
+<p><strong>2.1.0 (2004.4.20)</strong><br />
+	增强了OpenGL<br />
+	去掉了汇编代码<br />
+	直接支持单独的Shader<br />
+	简化了打包文件目录表的表示法</p>
+<p><strong>2.0.5 (2004.4.13)</strong><br />
+	增强了OpenGL<br />
+	修正了WindowMovedOrResized的bug<br />
+	MemFile改用stringstream实现<br />
+	提高了代码安全性</p>
+<p><strong>2.0.4 (2004.4.7)</strong><br />
+	修正了OALMusicBuffer无法loop的bug<br />
+	DSMusicBuffer改用timeSetEvent实现<br />
+	改进了VertexBuffer<br />
+	Audio部分增加了NullObject<br />
+	增加了Demo</p>
+<p><strong>2.0.3 (2004.3.12)</strong><br />
+	简化了VertexBuffer<br />
+	去掉了软件顶点混合</p>
+<p><strong>2.0.2 (2003.12.28)</strong><br />
+	改进了渲染队列<br />
+	使用Python做脚本语言<br />
+	DiskFile改为用标准C++流实现</p>
+<p><strong>2.0.1 (2003.10.17)</strong><br />
+	去掉了DX8的支持 <br />
+	增加了一些工具</p>
+<p><strong>2.0.0 (2003.10.1)</strong><br />
+	正式版发布</p>
+<p><strong>2.0.0 Beta (2003.9.5)</strong><br />
+	初次发布<br />
+</p>
+<p><a href="#menu">^返回目录</a></p>
+<hr />
+<h2><a id="structure">目录结构</a></h2>
+<p>下面是关于完整的KlayGE目录的主要描述。</p>
+<pre>
+\Core
+	内核文件
+
+	\Include
+		内核头文件
+
+	\Src
+		内核源文件
+
+		\Audio
+			音频引擎内核的源文件
+		\Input
+			输入引擎内核的源文件
+		\Kernel
+			核心源文件
+		\Net
+			网络引擎的源文件
+		\Render
+			渲染系统内核的源文件
+		\Scene
+			场景管理器内核的源文件
+		\Script
+			脚本引擎的源文件
+		\Show
+			播放引擎内核的源文件
+
+\Demos
+	演示
+
+\Doc
+	文档
+
+\AppLayer
+	应用程序层
+
+	\Include
+		应用程序层的头文件
+
+	\Src
+		应用程序层的源文件
+
+\Plugins
+	插件文件
+
+	\Include
+		插件头文件
+
+	\Src
+		插件源代码
+
+		\Audio
+			音频引擎插件的源文件
+		\AudioDataSource
+			音频数据源插件的源文件
+		\Input
+			输入引擎插件的源文件
+		\PackSystem
+			文件打包系统的源文件
+		\Render
+			渲染系统插件的源文件
+		\Scene
+			场景管理器插件的源文件
+		\Show
+			播放引擎插件的源文件
+		\Terrain
+			地形插件的源文件
+
+\RenderFX
+	渲染特效脚本
+
+\Tools
+	工具文件
+
+	\Bin
+		编译生成的工具文件
+	\DistanceMapCreator
+		从height map建立distance map的工具
+	\GLCompatibility
+		OpenGL兼容性测试工具
+	\HDRCompressor
+		HDR纹理压缩器
+	\MeshML2KMesh
+		从.MeshML编译为.KModel的工具
+	\NormalizerCubeMap
+		生成归一化Cube map的工具
+	\NormalMapCompressor
+		Normal map压缩器
+	\NormalMapGen
+		从height map建立normal map的工具
+	\Pkt
+		文件打包工具
+
+\Lib
+		存放编译后的静态连接库
+
+\Exporters
+	\3DSMax
+		\MeshML
+			3ds max的导出插件
+</pre>
+<p><a href="#menu">^返回目录</a></p>
+<hr />
+<h2><a id="compiler">编译器支持</a></h2>
+<ul>
+	<li>推荐使用Visual Studio.NET 2005编译</li>
+	<li>KlayGE是用Visual Studio.NET 2005开发和编译的，还提供了Visual Studio.NET 2005的sln文件。</li>
+	<li>KlayGE不保证能在Visual Studio.NET以前的版本中编译通过。</li>
+</ul>
+<p><a href="#menu">^返回目录</a></p>
+<hr />
+</body>
+</html>
