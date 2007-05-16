@@ -23,7 +23,6 @@ void MeshVS(float4 pos	: POSITION,
 	oPos = mul(pos, modelviewproj);
 	oTex0 = tex0;
 	oClr = float4(dot(normal, light - pos.xyz).xxx, 1);
-	normal = mul(normal, (float3x3)modelIT);
 }
 
 float4 MeshPS(float4 clr : COLOR0, float2 uv : TEXCOORD0) : COLOR

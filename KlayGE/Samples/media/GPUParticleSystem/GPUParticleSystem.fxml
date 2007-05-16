@@ -35,7 +35,7 @@ void ParticlesVS(float2 tex_pos		: POSITION,
 	{
 		float4 center_view = mul(float4(pos.xyz, 1), View);
 		float4 view_pos = center_view;
-		view_pos.xy += (float2(tex.x, 1 - tex.y) * 2 - 1) * point_radius * center_view.w;
+		view_pos.xy += (float2(tex.x, 1 - tex.y) * 2 - 1) * point_radius;
 		oPos = mul(view_pos, Proj);
 	}
 
