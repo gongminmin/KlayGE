@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="渲染引擎-OpenGL"
+	Name="OpenGL Rendering System"
 	ProjectGUID="{AA8D3D21-A029-4416-81B1-9E5A792CE091}"
-	RootNamespace="渲染引擎-OpenGL"
+	RootNamespace="OpenGL Rendering System"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -288,7 +288,7 @@
 	</References>
 	<Files>
 		<Filter
-			Name="源文件"
+			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
@@ -350,7 +350,7 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="头文件"
+			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>

@@ -23,9 +23,9 @@
 #include <KlayGE/Types.hpp>
 
 #define KLAYGE_VER_MAJOR	3
-#define KLAYGE_VER_MINOR	5
+#define KLAYGE_VER_MINOR	6
 #define KLAYGE_VER_RELEASE	0
-#define KLAYGE_VER_STR		"KlayGE 3.5.0"
+#define KLAYGE_VER_STR		"KlayGE 3.6.0"
 
 #include <boost/config/requires_threads.hpp>
 

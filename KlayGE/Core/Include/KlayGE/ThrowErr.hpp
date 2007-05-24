@@ -16,7 +16,12 @@
 #include <string>
 #include <exception>
 
+#ifdef KLAYGE_PLATFORM_WINDOWS
 #include <windows.h>
+#else
+typedef long HRESULT;
+#define FAILED(Status) (static_cast<HRESULT>(Status) < 0)
+#endif
 
 namespace KlayGE
 {

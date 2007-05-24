@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="音频引擎-DSound"
+	Name="DSound Audio System"
 	ProjectGUID="{6736FD10-E323-48D3-A59E-8C10B25F42CF}"
-	RootNamespace="音频引擎-DSound"
+	RootNamespace="DSound Audio System"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -288,7 +288,7 @@
 	</References>
 	<Files>
 		<Filter
-			Name="源文件"
+			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm"
 			>
 			<File
@@ -309,7 +309,7 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="头文件"
+			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc"
 			>
 			<File

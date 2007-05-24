@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="地形生成-HeightMap"
+	Name="HeightMap Terrain"
 	ProjectGUID="{B1258855-1C3E-4882-91FF-2E2CA9DA7104}"
-	RootNamespace="地形生成-HeightMap"
+	RootNamespace="HeightMap Terrain"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -290,7 +290,7 @@
 	</References>
 	<Files>
 		<Filter
-			Name="源文件"
+			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
@@ -300,7 +300,7 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="头文件"
+			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>

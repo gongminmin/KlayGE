@@ -1,5 +1,17 @@
+// ResLoader.cpp
+// KlayGE 资源载入器 实现文件
+// Ver 3.6.0
+// 版权所有(C) 龚敏敏, 2006-2007
+// Homepage: http://klayge.sourceforge.net
+//
+// 3.6.0
+// 使用新的kpk格式 (2007.5.24)
+//
+// 修改记录
+/////////////////////////////////////////////////////////////////////////////////
+
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/LZSS/LZSS.hpp>
+#include <KlayGE/Extract7z.hpp>
 
 #include <fstream>
 #include <sstream>
@@ -47,7 +59,7 @@ namespace KlayGE
 			}
 			else
 			{
-				std::string::size_type const offset(resName.rfind(".pkt/"));
+				std::string::size_type const offset(resName.rfind(".7z/"));
 				if (offset != std::string::npos)
 				{
 					std::string const pktName(resName.substr(0, offset + 4));
@@ -79,7 +91,7 @@ namespace KlayGE
 			}
 			else
 			{
-				std::string::size_type const offset(resName.rfind(".pkt/"));
+				std::string::size_type const offset(resName.rfind(".7z/"));
 				if (offset != std::string::npos)
 				{
 					std::string const pktName(resName.substr(0, offset + 4));
@@ -88,17 +100,8 @@ namespace KlayGE
 					boost::shared_ptr<std::istream> pktFile(new std::ifstream(pktName.c_str(), std::ios_base::binary));
 					if (!pktFile->fail())
 					{
-						UnPkt unPkt;
-						unPkt.Open(pktFile);
-
-						unPkt.LocateFile(fileName);
-
-						std::vector<char> data(unPkt.CurFileSize());
-						unPkt.ReadCurFile(&data[0]);
-
 						boost::shared_ptr<std::iostream> packetFile(new std::stringstream);
-						packetFile->write(&data[0], static_cast<std::streamsize>(data.size()));
-
+						Extract7z(pktFile, "", fileName, packetFile);
 						return packetFile;
 					}
 				}

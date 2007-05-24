@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="引擎内核"
+	Name="Core"
 	ProjectGUID="{6683CE2B-0296-477C-AB39-C32AA8F659D5}"
-	RootNamespace="引擎内核"
+	RootNamespace="Core"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -288,10 +288,10 @@
 	</References>
 	<Files>
 		<Filter
-			Name="渲染系统"
+			Name="Rendering System"
 			>
 			<Filter
-				Name="源文件"
+				Name="Source Files"
 				>
 				<File
 					RelativePath="..\..\Core\Src\Render\Camera.cpp"
@@ -387,7 +387,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="头文件"
+				Name="Header Files"
 				>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\Camera.hpp"
@@ -507,7 +507,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="特效脚本文件"
+				Name="Effect Script Files"
 				>
 				<File
 					RelativePath="..\..\RenderFX\2D.fxml"
@@ -1216,10 +1216,10 @@
 			</Filter>
 		</Filter>
 		<Filter
-			Name="核心"
+			Name="Kernel"
 			>
 			<Filter
-				Name="源文件"
+				Name="Source Files"
 				>
 				<File
 					RelativePath="..\..\Core\Src\Kernel\ResLoader.cpp"
@@ -1239,7 +1239,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="头文件"
+				Name="Header Files"
 				>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\aligned_allocator.hpp"
@@ -1312,10 +1312,10 @@
 			</Filter>
 		</Filter>
 		<Filter
-			Name="音频系统"
+			Name="Audio System"
 			>
 			<Filter
-				Name="源文件"
+				Name="Source Files"
 				>
 				<File
 					RelativePath="..\..\Core\Src\Audio\AudioBuffer.cpp"
@@ -1343,7 +1343,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="头文件"
+				Name="Header Files"
 				>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\Audio.hpp"
@@ -1360,14 +1360,14 @@
 			</Filter>
 		</Filter>
 		<Filter
-			Name="数学库"
+			Name="Math Library"
 			>
 			<Filter
-				Name="源文件"
+				Name="Source Files"
 				>
 			</Filter>
 			<Filter
-				Name="头文件"
+				Name="Header Files"
 				>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\Bound.hpp"
@@ -1428,10 +1428,10 @@
 			</Filter>
 		</Filter>
 		<Filter
-			Name="网络系统"
+			Name="Network System"
 			>
 			<Filter
-				Name="源文件"
+				Name="Source Files"
 				>
 				<File
 					RelativePath="..\..\Core\Src\Net\Lobby.cpp"
@@ -1447,7 +1447,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="头文件"
+				Name="Header Files"
 				>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\Lobby.hpp"
@@ -1464,10 +1464,10 @@
 			</Filter>
 		</Filter>
 		<Filter
-			Name="脚本系统"
+			Name="Script System"
 			>
 			<Filter
-				Name="源文件"
+				Name="Source Files"
 				>
 				<File
 					RelativePath="..\..\Core\Src\Script\Script.cpp"
@@ -1475,7 +1475,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="头文件"
+				Name="Header Files"
 				>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\Script.hpp"
@@ -1484,10 +1484,10 @@
 			</Filter>
 		</Filter>
 		<Filter
-			Name="播放系统"
+			Name="Show System"
 			>
 			<Filter
-				Name="源文件"
+				Name="Source Files"
 				>
 				<File
 					RelativePath="..\..\Core\Src\Show\ShowEngine.cpp"
@@ -1499,7 +1499,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="头文件"
+				Name="Header Files"
 				>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\Show.hpp"
@@ -1512,10 +1512,10 @@
 			</Filter>
 		</Filter>
 		<Filter
-			Name="输入系统"
+			Name="Input System"
 			>
 			<Filter
-				Name="源文件"
+				Name="Source Files"
 				>
 				<File
 					RelativePath="..\..\Core\Src\Input\InputActionMap.cpp"
@@ -1547,7 +1547,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="头文件"
+				Name="Header Files"
 				>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\Input.hpp"
@@ -1560,10 +1560,10 @@
 			</Filter>
 		</Filter>
 		<Filter
-			Name="场景管理"
+			Name="Scene Management"
 			>
 			<Filter
-				Name="源文件"
+				Name="Source Files"
 				>
 				<File
 					RelativePath="..\..\Core\Src\Scene\SceneManager.cpp"
@@ -1579,7 +1579,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="头文件"
+				Name="Header Files"
 				>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\SceneManager.hpp"
@@ -1595,6 +1595,86 @@
 				</File>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\SceneObjectHelper.hpp"
+					>
+				</File>
+			</Filter>
+		</Filter>
+		<Filter
+			Name="Packing System"
+			>
+			<Filter
+				Name="Header Files"
+				>
+				<File
+					RelativePath="..\..\Core\Src\Pack\ArchiveExtractCallback.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Src\Pack\ArchiveOpenCallback.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Src\Pack\BaseDefines.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Src\Pack\BSTR.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Src\Pack\Dll.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\Extract7z.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Src\Pack\IArchive.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Src\Pack\IPassword.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Src\Pack\IProgress.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Src\Pack\IStream.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Src\Pack\Streams.hpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Source Files"
+				>
+				<File
+					RelativePath="..\..\Core\Src\Pack\ArchiveExtractCallback.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Src\Pack\ArchiveOpenCallback.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Src\Pack\BSTR.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Src\Pack\Dll.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Src\Pack\Extract7z.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Src\Pack\Streams.cpp"
 					>
 				</File>
 			</Filter>
