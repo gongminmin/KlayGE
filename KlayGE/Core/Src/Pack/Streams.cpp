@@ -36,7 +36,7 @@ namespace KlayGE
 		is_->read(static_cast<char*>(data), size);
 		if (processedSize)
 		{
-			*processedSize = is_->gcount();
+			*processedSize = static_cast<uint32_t>(is_->gcount());
 		}
 
 		return (*is_ != NULL) ? S_OK: E_FAIL;
