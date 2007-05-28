@@ -49,26 +49,29 @@ namespace KlayGE
 	{
 		BOOST_FOREACH(BOOST_TYPEOF(pathes_)::const_reference path, pathes_)
 		{
-			std::string const resName(path + name);
+			std::string const res_name(path + name);
 
-			std::ifstream ifs(resName.c_str(), std::ios_base::binary);
+			std::ifstream ifs(res_name.c_str(), std::ios_base::binary);
 
 			if (!ifs.fail())
 			{
-				return resName;
+				return res_name;
 			}
 			else
 			{
-				std::string::size_type const offset(resName.rfind(".7z/"));
-				if (offset != std::string::npos)
+				std::string::size_type const pkt_offset(res_name.find("//"));
+				if (pkt_offset != std::string::npos)
 				{
-					std::string const pktName(resName.substr(0, offset + 4));
-					std::string const fileName(resName.substr(offset + 5));
+					std::string pkt_name = res_name.substr(0, pkt_offset - 1);
+					std::string::size_type const password_offset = pkt_name.find("|");
+					std::string password = pkt_name.substr(password_offset + 1);
+					pkt_name = pkt_name.substr(0, password_offset - 1);
+					std::string const file_name = res_name.substr(pkt_offset + 2);
 
-					boost::shared_ptr<std::istream> pktFile(new std::ifstream(pktName.c_str(), std::ios_base::binary));
-					if (!pktFile->fail())
+					boost::shared_ptr<std::istream> pkt_file(new std::ifstream(pkt_name.c_str(), std::ios_base::binary));
+					if (!pkt_file->fail())
 					{
-						return resName;
+						return res_name;
 					}
 				}
 			}
@@ -81,9 +84,9 @@ namespace KlayGE
 	{
 		BOOST_FOREACH(BOOST_TYPEOF(pathes_)::const_reference path, pathes_)
 		{
-			std::string const resName(path + name);
+			std::string const res_name(path + name);
 
-			ResIdentifierPtr ret(new std::ifstream(resName.c_str(), std::ios_base::binary));
+			ResIdentifierPtr ret(new std::ifstream(res_name.c_str(), std::ios_base::binary));
 
 			if (!ret->fail())
 			{
@@ -91,18 +94,21 @@ namespace KlayGE
 			}
 			else
 			{
-				std::string::size_type const offset(resName.rfind(".7z/"));
-				if (offset != std::string::npos)
+				std::string::size_type const pkt_offset(res_name.find("//"));
+				if (pkt_offset != std::string::npos)
 				{
-					std::string const pktName(resName.substr(0, offset + 4));
-					std::string const fileName(resName.substr(offset + 5));
+					std::string pkt_name = res_name.substr(0, pkt_offset - 1);
+					std::string::size_type const password_offset = pkt_name.find("|");
+					std::string password = pkt_name.substr(password_offset + 1);
+					pkt_name = pkt_name.substr(0, password_offset - 1);
+					std::string const file_name = res_name.substr(pkt_offset + 2);
 
-					boost::shared_ptr<std::istream> pktFile(new std::ifstream(pktName.c_str(), std::ios_base::binary));
-					if (!pktFile->fail())
+					boost::shared_ptr<std::istream> pkt_file(new std::ifstream(pkt_name.c_str(), std::ios_base::binary));
+					if (!pkt_file->fail())
 					{
-						boost::shared_ptr<std::iostream> packetFile(new std::stringstream);
-						Extract7z(pktFile, "", fileName, packetFile);
-						return packetFile;
+						boost::shared_ptr<std::iostream> packet_file(new std::stringstream);
+						Extract7z(pkt_file, password, file_name, packet_file);
+						return packet_file;
 					}
 				}
 			}
