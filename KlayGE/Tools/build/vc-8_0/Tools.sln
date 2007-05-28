@@ -1,7 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pkt", "Pkt.vcproj", "{5E60B2D1-9F1E-4983-AC26-A54DF51876E9}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NormalMapGen", "NormalMapGen.vcproj", "{7526CFD8-84DB-4A4C-AA3C-D9FC7FF32DCF}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DistanceMapCreator", "DistanceMapCreator.vcproj", "{A7A4F2AC-4B47-4685-8D7F-7675F246A87C}"
@@ -22,14 +20,6 @@ Global
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{5E60B2D1-9F1E-4983-AC26-A54DF51876E9}.Debug|Win32.ActiveCfg = Debug|Win32
-		{5E60B2D1-9F1E-4983-AC26-A54DF51876E9}.Debug|Win32.Build.0 = Debug|Win32
-		{5E60B2D1-9F1E-4983-AC26-A54DF51876E9}.Debug|x64.ActiveCfg = Debug|x64
-		{5E60B2D1-9F1E-4983-AC26-A54DF51876E9}.Debug|x64.Build.0 = Debug|x64
-		{5E60B2D1-9F1E-4983-AC26-A54DF51876E9}.Release|Win32.ActiveCfg = Release|Win32
-		{5E60B2D1-9F1E-4983-AC26-A54DF51876E9}.Release|Win32.Build.0 = Release|Win32
-		{5E60B2D1-9F1E-4983-AC26-A54DF51876E9}.Release|x64.ActiveCfg = Release|x64
-		{5E60B2D1-9F1E-4983-AC26-A54DF51876E9}.Release|x64.Build.0 = Release|x64
 		{7526CFD8-84DB-4A4C-AA3C-D9FC7FF32DCF}.Debug|Win32.ActiveCfg = Debug|Win32
 		{7526CFD8-84DB-4A4C-AA3C-D9FC7FF32DCF}.Debug|Win32.Build.0 = Debug|Win32
 		{7526CFD8-84DB-4A4C-AA3C-D9FC7FF32DCF}.Debug|x64.ActiveCfg = Debug|x64
