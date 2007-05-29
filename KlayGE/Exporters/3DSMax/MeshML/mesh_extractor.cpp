@@ -215,12 +215,12 @@ namespace KlayGE
 			}
 		}
 
-        if (obj_info.texture_slots.empty())
-        {
-            std::stringstream ss;
-            ss << "Mesh " << obj_info.name << " needs at least one texture.";
-            MessageBoxA(NULL, ss.str().c_str(), "Error", MB_OK); 
-        }
+		if (obj_info.texture_slots.empty())
+		{
+			std::stringstream ss;
+			ss << "Mesh " << obj_info.name << " needs at least one texture.";
+			MessageBoxA(NULL, ss.str().c_str(), "Error", MB_OK); 
+		}
 
 		Object* obj = node->EvalWorldState(cur_time_).obj;
 		if ((obj != NULL) && obj->CanConvertToType(Class_ID(TRIOBJ_CLASS_ID, 0)))
@@ -535,24 +535,53 @@ namespace KlayGE
 									INode* joint_node = phy_rigid_ver->GetNode();
 									std::string joint_name = tstr_to_str(joint_node->GetName());
 
-									joints_t::iterator joint_iter = joints_.find(joint_name);
-									if (joint_iter == joints_.end())
+									if (joints_.find(joint_name) == joints_.end())
 									{
-										Matrix3 tm = joint_node->GetNodeTM(0);
-
 										joint_t joint;
-										joint.pos = this->point_from_matrix(tm);
-										joint.quat = this->quat_from_matrix(tm);
+										Matrix3 joint_tm;
 
 										INode* parent_node = joint_node->GetParentNode();
 										if (is_bone(parent_node))
 										{
+											Matrix3 parent_tm = parent_node->GetNodeTM(0);
+											joint_tm = Inverse(parent_tm) * joint_node->GetNodeTM(0);
 											joint.parent_name = tstr_to_str(parent_node->GetName());
+
+											while (is_bone(parent_node))
+											{
+												INode* grant_node = parent_node->GetParentNode();
+												joint_t parent_joint;
+												Matrix3 parent_tm;
+												std::string parent_name = tstr_to_str(parent_node->GetName());
+
+												if (is_bone(grant_node))
+												{
+													Matrix3 grant_tm = grant_node->GetNodeTM(0);
+													parent_tm = Inverse(grant_tm) * parent_node->GetNodeTM(0);
+													parent_joint.parent_name = tstr_to_str(grant_node->GetName());
+												}
+												else
+												{
+													parent_tm = parent_node->GetNodeTM(0);
+													parent_joint.parent_name = root_name;
+												}
+
+												parent_joint.pos = this->point_from_matrix(parent_tm);
+												parent_joint.quat = this->quat_from_matrix(parent_tm);
+
+												joints_[parent_name] = parent_joint;
+
+												parent_node = grant_node;
+											}
 										}
 										else
 										{
+											joint_tm = joint_node->GetNodeTM(0);
 											joint.parent_name = root_name;
 										}
+
+										joint.pos = this->point_from_matrix(joint_tm);
+										joint.quat = this->quat_from_matrix(joint_tm);
 
 										joints_[joint_name] = joint;
 									}
@@ -570,24 +599,53 @@ namespace KlayGE
 										INode* joint_node = phy_blended_rigid_ver->GetNode(i);
 										std::string joint_name = tstr_to_str(joint_node->GetName());
 
-										joints_t::iterator joint_iter = joints_.find(joint_name);
-										if (joint_iter == joints_.end())
+										if (joints_.find(joint_name) == joints_.end())
 										{
-											Matrix3 tm = joint_node->GetNodeTM(0);
-
 											joint_t joint;
-											joint.pos = this->point_from_matrix(tm);
-											joint.quat = this->quat_from_matrix(tm);
+											Matrix3 joint_tm;
 
 											INode* parent_node = joint_node->GetParentNode();
 											if (is_bone(parent_node))
 											{
+												Matrix3 parent_tm = parent_node->GetNodeTM(0);
+												joint_tm = Inverse(parent_tm) * joint_node->GetNodeTM(0);
 												joint.parent_name = tstr_to_str(parent_node->GetName());
+
+												while (is_bone(parent_node))
+												{
+													INode* grant_node = parent_node->GetParentNode();
+													joint_t parent_joint;
+													Matrix3 parent_tm;
+													std::string parent_name = tstr_to_str(parent_node->GetName());
+
+													if (is_bone(grant_node))
+													{
+														Matrix3 grant_tm = grant_node->GetNodeTM(0);
+														parent_tm = Inverse(grant_tm) * parent_node->GetNodeTM(0);
+														parent_joint.parent_name = tstr_to_str(grant_node->GetName());
+													}
+													else
+													{
+														parent_tm = parent_node->GetNodeTM(0);
+														parent_joint.parent_name = root_name;
+													}
+
+													parent_joint.pos = this->point_from_matrix(parent_tm);
+													parent_joint.quat = this->quat_from_matrix(parent_tm);
+
+													joints_[parent_name] = parent_joint;
+
+													parent_node = grant_node;
+												}
 											}
 											else
 											{
+												joint_tm = joint_node->GetNodeTM(0);
 												joint.parent_name = root_name;
 											}
+
+											joint.pos = this->point_from_matrix(joint_tm);
+											joint.quat = this->quat_from_matrix(joint_tm);
 
 											joints_[joint_name] = joint;
 										}
@@ -648,27 +706,57 @@ namespace KlayGE
 						INode* joint_node = skin->GetBone(i);
 						std::string joint_name = tstr_to_str(joint_node->GetName());
 
-						Matrix3 joint_init_mat;
-						skin->GetBoneInitTM(joint_node, joint_init_mat, false);
-
-						joints_t::iterator joint_iter = joints_.find(joint_name);
-						if (joint_iter == joints_.end())
+						if (joints_.find(joint_name) == joints_.end())
 						{
-							Matrix3 tm = joint_node->GetNodeTM(0);
-
 							joint_t joint;
-							joint.pos = this->point_from_matrix(tm);
-							joint.quat = this->quat_from_matrix(tm);
+							Matrix3 joint_tm;
 
 							INode* parent_node = joint_node->GetParentNode();
 							if (is_bone(parent_node))
 							{
+								Matrix3 parent_tm;
+								skin->GetBoneInitTM(parent_node, parent_tm, false);
+								skin->GetBoneInitTM(joint_node, joint_tm, false);
+								joint_tm = Inverse(parent_tm) * joint_tm;
 								joint.parent_name = tstr_to_str(parent_node->GetName());
+
+								while (is_bone(parent_node))
+								{
+									INode* grant_node = parent_node->GetParentNode();
+									joint_t parent_joint;
+									Matrix3 parent_tm;
+									std::string parent_name = tstr_to_str(parent_node->GetName());
+
+									if (is_bone(grant_node))
+									{
+										Matrix3 grant_tm;
+										skin->GetBoneInitTM(grant_node, grant_tm, false);
+										skin->GetBoneInitTM(parent_node, parent_tm, false);
+										parent_tm = Inverse(grant_tm) * parent_tm;
+										parent_joint.parent_name = tstr_to_str(grant_node->GetName());
+									}
+									else
+									{
+										skin->GetBoneInitTM(parent_node, parent_tm, false);
+										parent_joint.parent_name = root_name;
+									}
+
+									parent_joint.pos = this->point_from_matrix(parent_tm);
+									parent_joint.quat = this->quat_from_matrix(parent_tm);
+
+									joints_[parent_name] = parent_joint;
+
+									parent_node = grant_node;
+								}
 							}
 							else
 							{
+								skin->GetBoneInitTM(joint_node, joint_tm, false);
 								joint.parent_name = root_name;
 							}
+
+							joint.pos = this->point_from_matrix(joint_tm);
+							joint.quat = this->quat_from_matrix(joint_tm);
 
 							joints_[joint_name] = joint;
 						}
