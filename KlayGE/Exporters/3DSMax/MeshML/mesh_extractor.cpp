@@ -16,10 +16,15 @@
 #include <max.h>
 #include <iparamb2.h>
 #include <modstack.h>
+#if VERSION_3DSMAX >= 7 << 16
+#include <CS/phyexp.h>
+#else
 #include <phyexp.h>
+#endif
 #include <iskin.h>
 #include <stdmat.h>
 
+#include <sstream>
 #include <algorithm>
 #include <set>
 #include <vector>
@@ -209,6 +214,13 @@ namespace KlayGE
 				}
 			}
 		}
+
+        if (obj_info.texture_slots.empty())
+        {
+            std::stringstream ss;
+            ss << "Mesh " << obj_info.name << " needs at least one texture.";
+            MessageBoxA(NULL, ss.str().c_str(), "Error", MB_OK); 
+        }
 
 		Object* obj = node->EvalWorldState(cur_time_).obj;
 		if ((obj != NULL) && obj->CanConvertToType(Class_ID(TRIOBJ_CLASS_ID, 0)))

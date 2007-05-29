@@ -11,7 +11,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <max.h>
+#if VERSION_3DSMAX >= 7 << 16
+#include <CS/bipexp.h>
+#else
 #include <bipexp.h>
+#endif
 
 #include "util.hpp"
 
