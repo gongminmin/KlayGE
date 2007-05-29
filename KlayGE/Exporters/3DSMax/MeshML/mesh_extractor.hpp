@@ -131,11 +131,14 @@ namespace KlayGE
 
 		Point3 point_from_matrix(Matrix3 const & mat);
 		Quat quat_from_matrix(Matrix3 const & mat);
-		Modifier* find_modifier(INode* node, Class_ID const & class_id);
-		void physique_modifier(INode* node, std::string const & root_name,
-			std::vector<std::pair<Point3, binds_t> >& positions);
-		void skin_modifier(INode* node, std::string const & root_name,
-			std::vector<std::pair<Point3, binds_t> >& positions);
+		void physique_modifier(Modifier* mod, INode* node, std::string const & root_name,
+			std::vector<std::pair<Point3, binds_t> >& positions,
+			std::map<std::string, Matrix3>& skin_init_tms,
+			std::map<std::string, Matrix3>& init_node_tms);
+		void skin_modifier(Modifier* mod, INode* node, std::string const & root_name,
+			std::vector<std::pair<Point3, binds_t> >& positions,
+			std::map<std::string, Matrix3>& skin_init_tms,
+			std::map<std::string, Matrix3>& init_node_tms);
 
 	private:
 		typedef std::vector<object_info_t> objects_info_t;
