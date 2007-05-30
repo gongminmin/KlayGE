@@ -149,7 +149,7 @@ namespace KlayGE
 
 			if (joint.parent != -1)
 			{
-				Joint& parent(joints_[joint.parent]);
+				Joint const & parent(joints_[joint.parent]);
 
 				joint.bind_quat = key_quat * parent.bind_quat;
 				joint.bind_pos = MathLib::transform_quat(key_pos, parent.bind_quat) + parent.bind_pos;

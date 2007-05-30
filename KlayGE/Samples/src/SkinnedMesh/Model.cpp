@@ -124,9 +124,6 @@ void MD5SkinnedMesh::SetEyePos(const KlayGE::float3& eye_pos)
 MD5SkinnedModel::MD5SkinnedModel()
 		: SkinnedModel(L"MD5SkinnedModel")
 {
-	this->StartFrame(0);
-	this->EndFrame(51);
-	this->FrameRate(24);
 }
 
 void MD5SkinnedModel::SetEyePos(const KlayGE::float3& eye_pos)

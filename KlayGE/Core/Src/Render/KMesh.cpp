@@ -257,11 +257,8 @@ namespace KlayGE
 			file->read(reinterpret_cast<char*>(&joint.bind_pos), sizeof(joint.bind_pos));
 			file->read(reinterpret_cast<char*>(&joint.bind_quat), sizeof(joint.bind_quat));
 
-			float4x4 origin_mat = MathLib::to_matrix(joint.bind_quat);
-			origin_mat *= MathLib::translation(joint.bind_pos);
-			float4x4 inverse_origin_mat = MathLib::inverse(origin_mat);
-			joint.inverse_origin_quat = MathLib::to_quaternion(inverse_origin_mat);
-			joint.inverse_origin_pos = float3(inverse_origin_mat(3, 0), inverse_origin_mat(3, 1), inverse_origin_mat(3, 2));
+			joint.inverse_origin_quat = MathLib::inverse(joint.bind_quat);
+			joint.inverse_origin_pos = MathLib::transform_quat(-joint.bind_pos, joint.inverse_origin_quat);
 
 			joints.push_back(joint);
 		}
