@@ -188,7 +188,7 @@ namespace KlayGE
 							int const joint_per_ver = ::SendMessage(::GetDlgItem(wnd, IDC_SPIN_JOINT_PER_VER), UDM_GETPOS32, NULL, NULL);
 							Interval const se_ticks = instance->max_interface_->GetAnimRange();
 							TimeValue const cur_time = instance->max_interface_->GetTime();
-							meshml_extractor extractor(joint_per_ver, cur_time,
+							meshml_extractor extractor(instance->max_interface_, joint_per_ver, cur_time,
 								se_ticks.Start() / GetTicksPerFrame(), se_ticks.End() / GetTicksPerFrame());
 
 							std::vector<int> sel_items(num_sel);

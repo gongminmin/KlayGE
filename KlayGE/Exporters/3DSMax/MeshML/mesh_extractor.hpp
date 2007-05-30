@@ -18,6 +18,14 @@
 #include <string>
 #include <map>
 
+#include <iparamb2.h>
+#if VERSION_3DSMAX >= 7 << 16
+#include <CS/phyexp.h>
+#else
+#include <phyexp.h>
+#endif
+#include <iskin.h>
+
 #include "meshml.hpp"
 
 namespace KlayGE
@@ -119,7 +127,7 @@ namespace KlayGE
 	class meshml_extractor
 	{
 	public:
-		meshml_extractor(int joints_per_ver, int cur_time, int start_frame, int end_frame);
+		meshml_extractor(Interface* max_interface, int joints_per_ver, int cur_time, int start_frame, int end_frame);
 
 		void export_objects(std::vector<INode*> const & nodes);
 		void write_xml(std::basic_string<TCHAR> const & file_name);
@@ -131,6 +139,13 @@ namespace KlayGE
 
 		Point3 point_from_matrix(Matrix3 const & mat);
 		Quat quat_from_matrix(Matrix3 const & mat);
+		void find_joints(INode* node);
+		void extract_all_joint_tms(IPhysiqueExport* phy_exp, ISkin* skin,
+			std::string const & root_name,
+			std::map<std::string, Matrix3>& skin_init_tms,
+			std::map<std::string, Matrix3>& init_node_tms);
+		void add_joint_weight(binds_t& bind, std::string const & joint_name, float weight);
+
 		void physique_modifier(Modifier* mod, INode* node, std::string const & root_name,
 			std::vector<std::pair<Point3, binds_t> >& positions,
 			std::map<std::string, Matrix3>& skin_init_tms,
@@ -143,10 +158,14 @@ namespace KlayGE
 	private:
 		typedef std::vector<object_info_t> objects_info_t;
 
+		Interface* max_interface_;
+
 		objects_info_t objs_info_;
 
 		joints_t joints_;
 		int joints_per_ver_;
+
+		std::map<std::string, INode*> joint_nodes_;
 
 		int cur_time_;
 		int start_frame_;

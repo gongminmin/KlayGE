@@ -14,14 +14,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <max.h>
-#include <iparamb2.h>
 #include <modstack.h>
-#if VERSION_3DSMAX >= 7 << 16
-#include <CS/phyexp.h>
-#else
-#include <phyexp.h>
-#endif
-#include <iskin.h>
 #include <stdmat.h>
 
 #include <sstream>
@@ -115,22 +108,38 @@ namespace
 
 namespace KlayGE
 {
-	meshml_extractor::meshml_extractor(int joints_per_ver, int cur_time, int start_frame, int end_frame)
-						: joints_per_ver_(joints_per_ver),
+	meshml_extractor::meshml_extractor(Interface* max_interface, int joints_per_ver, int cur_time, int start_frame, int end_frame)
+						: max_interface_(max_interface),
+							joints_per_ver_(joints_per_ver),
 							cur_time_(cur_time),
 							start_frame_(start_frame), end_frame_(end_frame),
 							frame_rate_(GetFrameRate())
 	{
 	}
 
+	void meshml_extractor::find_joints(INode* node)
+	{
+		if (is_bone(node))
+		{
+			std::string joint_name = tstr_to_str(node->GetName());
+			joint_nodes_[joint_name] = node;
+		}
+		for (int i = 0; i < node->NumberOfChildren(); ++ i)
+		{
+			this->find_joints(node->GetChildNode(i));
+		}
+	}
+
 	void meshml_extractor::export_objects(std::vector<INode*> const & nodes)
 	{
-		if (joints_per_ver_ != 0)
+		if (joints_per_ver_ > 0)
 		{
 			// root bone
 			joint_t root;
-			root.pos = Point3(0, 0, 0);
-			root.quat.Identity();
+			INode* root_node = max_interface_->GetRootNode();
+			Matrix3 root_tm = root_node->GetNodeTM(0);
+			root.pos = this->point_from_matrix(root_tm);
+			root.quat = this->quat_from_matrix(root_tm);
 			root.parent_name = "";
 			joints_.insert(std::make_pair("root", root));
 
@@ -138,13 +147,12 @@ namespace KlayGE
 			kf.joint = "root";
 			for (int i = start_frame_; i < end_frame_; ++ i)
 			{
-				Matrix3 tm;
-				tm.IdentityMatrix();
-
-				kf.positions.push_back(point_from_matrix(tm));
-				kf.quaternions.push_back(quat_from_matrix(tm));
+				kf.positions.push_back(root.pos);
+				kf.quaternions.push_back(root.quat);
 			}
 			kfs_.push_back(kf);
+
+			this->find_joints(root_node);
 		}
 
 		for (size_t i = 0; i < nodes.size(); ++ i)
@@ -343,54 +351,95 @@ namespace KlayGE
 		}
 
 		bool skin_mesh = false;
-		Object* obj_ref = node->GetObjectRef();
-		while ((obj_ref != NULL) && (GEN_DERIVOB_CLASS_ID == obj_ref->SuperClassID()))
+		if (joints_per_ver_ > 0)
 		{
-			IDerivedObject* DerivedObjectPtr = static_cast<IDerivedObject*>(obj_ref);
-
-			// Iterate over all entries of the modifier stack.
-			for (int mod_stack_index = 0; mod_stack_index < DerivedObjectPtr->NumModifiers(); ++ mod_stack_index)
+			Object* obj_ref = node->GetObjectRef();
+			while ((obj_ref != NULL) && (GEN_DERIVOB_CLASS_ID == obj_ref->SuperClassID()))
 			{
-				std::map<std::string, Matrix3> skin_init_tms;
-				std::map<std::string, Matrix3> init_node_tms;
+				IDerivedObject* DerivedObjectPtr = static_cast<IDerivedObject*>(obj_ref);
 
-				Modifier* mod = DerivedObjectPtr->GetModifier(mod_stack_index);
-				if (Class_ID(PHYSIQUE_CLASS_ID_A, PHYSIQUE_CLASS_ID_B) == mod->ClassID())
+				// Iterate over all entries of the modifier stack.
+				for (int mod_stack_index = 0; mod_stack_index < DerivedObjectPtr->NumModifiers(); ++ mod_stack_index)
 				{
-					this->physique_modifier(mod, node, "root", positions, skin_init_tms, init_node_tms);
-					skin_mesh = true;
+					std::map<std::string, Matrix3> skin_init_tms;
+					std::map<std::string, Matrix3> init_node_tms;
+
+					Modifier* mod = DerivedObjectPtr->GetModifier(mod_stack_index);
+					if (Class_ID(PHYSIQUE_CLASS_ID_A, PHYSIQUE_CLASS_ID_B) == mod->ClassID())
+					{
+						this->physique_modifier(mod, node, "root", positions, skin_init_tms, init_node_tms);
+						skin_mesh = true;
+					}
+					else
+					{
+						if (SKIN_CLASSID == mod->ClassID())
+						{
+							this->skin_modifier(mod, node, "root", positions, skin_init_tms, init_node_tms);
+							skin_mesh = true;
+						}
+					}
+
+					if (skin_mesh)
+					{
+						for (std::vector<std::pair<Point3, binds_t> >::iterator iter = positions.begin();
+							iter != positions.end(); ++ iter)
+						{
+							Point3 v0 = iter->first * node->GetNodeTM(0);
+							Point3 init(0, 0, 0);
+							for (size_t i = 0 ; i < iter->second.size(); ++ i)
+							{
+								assert(init_node_tms.find(iter->second[i].first) != init_node_tms.end());
+								assert(skin_init_tms.find(iter->second[i].first) != skin_init_tms.end());
+
+								Matrix3 mesh_init_matrix = Inverse(init_node_tms[iter->second[i].first])
+									* skin_init_tms[iter->second[i].first];
+								init += iter->second[i].second * (v0 * mesh_init_matrix);
+							}
+							iter->first = init;
+						}
+					}
+				}
+
+				obj_ref = DerivedObjectPtr->GetObjRef();
+			}
+		
+			for (std::vector<std::pair<Point3, binds_t> >::iterator iter = positions.begin();
+				iter != positions.end(); ++ iter)
+			{
+				binds_t binds = iter->second;
+
+				if (binds.empty())
+				{
+					binds.push_back(std::make_pair("root", 1));
+				}
+
+				if (binds.size() > joints_per_ver_)
+				{
+					std::nth_element(binds.begin(), binds.begin() + joints_per_ver_, binds.end(), bind_cmp);
+					binds.resize(joints_per_ver_);
+
+					float sum_weight = 0;
+					for (int j = 0; j < joints_per_ver_; ++ j)
+					{
+						sum_weight += binds[j].second;
+					}
+					assert(sum_weight > 0);
+
+					for (int j = 0; j < joints_per_ver_; ++ j)
+					{
+						binds[j].second /= sum_weight;
+					}
 				}
 				else
 				{
-					if (SKIN_CLASSID == mod->ClassID())
+					for (int j = static_cast<int>(binds.size()); j < joints_per_ver_; ++ j)
 					{
-						this->skin_modifier(mod, node, "root", positions, skin_init_tms, init_node_tms);
-						skin_mesh = true;
+						binds.push_back(std::make_pair("root", 0));
 					}
 				}
 
-				if (skin_mesh)
-				{
-					for (std::vector<std::pair<Point3, binds_t> >::iterator iter = positions.begin();
-						iter != positions.end(); ++ iter)
-					{
-						Point3 v0 = iter->first * node->GetObjTMAfterWSM(0);
-						Point3 init(0, 0, 0);
-						for (size_t i = 0 ; i < iter->second.size(); ++ i)
-						{
-							assert(init_node_tms.find(iter->second[i].first) != init_node_tms.end());
-							assert(skin_init_tms.find(iter->second[i].first) != skin_init_tms.end());
-
-							Matrix3 mesh_init_matrix = Inverse(init_node_tms[iter->second[i].first])
-								* skin_init_tms[iter->second[i].first];
-							init += iter->second[i].second * v0 * mesh_init_matrix;
-						}
-						iter->first = init;
-					}
-				}
+				iter->second = binds;
 			}
-
-			obj_ref = DerivedObjectPtr->GetObjRef();
 		}
 
 		if (!skin_mesh)
@@ -400,43 +449,6 @@ namespace KlayGE
 			{
 				iter->first = iter->first * obj_matrix;
 			}
-		}
-
-		for (std::vector<std::pair<Point3, binds_t> >::iterator iter = positions.begin();
-			iter != positions.end(); ++ iter)
-		{
-			binds_t binds = iter->second;
-
-			if (binds.empty())
-			{
-				binds.push_back(std::make_pair("root", 1));
-			}
-
-			if (binds.size() > joints_per_ver_)
-			{
-				std::nth_element(binds.begin(), binds.begin() + joints_per_ver_, binds.end(), bind_cmp);
-				binds.resize(joints_per_ver_);
-
-				float totalweight = 0;
-				for (int j = 0; j < joints_per_ver_; ++ j)
-				{
-					totalweight += binds[j].second;
-				}
-
-				for (int j = 0; j < joints_per_ver_; ++ j)
-				{
-					binds[j].second /= totalweight;
-				}
-			}
-			else
-			{
-				for (int j = static_cast<int>(binds.size()); j < joints_per_ver_; ++ j)
-				{
-					binds.push_back(std::make_pair("root", 0));
-				}
-			}
-
-			iter->second = binds;
 		}
 
 		obj_info.vertices.resize(vertex_indices.size());
@@ -505,12 +517,18 @@ namespace KlayGE
 		key_frame_t kf;
 		kf.joint = tstr_to_str(node->GetName());
 
+		INode* parent_node = node->GetParentNode();
+		if (!is_bone(parent_node))
+		{
+			parent_node = max_interface_->GetRootNode();
+		}
+
 		for (int i = start_frame_; i < end_frame_; ++ i)
 		{
-			Matrix3 tm = node->GetNodeTM(i * tpf);
+			Matrix3 local_tm = node->GetNodeTM(i * tpf) * Inverse(parent_node->GetNodeTM(i * tpf));
 
-			kf.positions.push_back(point_from_matrix(tm));
-			kf.quaternions.push_back(quat_from_matrix(tm));
+			kf.positions.push_back(this->point_from_matrix(local_tm));
+			kf.quaternions.push_back(this->quat_from_matrix(local_tm));
 		}
 
 		kfs_.push_back(kf);
@@ -526,10 +544,74 @@ namespace KlayGE
 
 	Quat meshml_extractor::quat_from_matrix(Matrix3 const & mat)
 	{
-		Quat quat(mat);
-		std::swap(quat.y, quat.z);
+		Matrix3 tmp_mat = mat;
+		tmp_mat.SetRow(1, mat.GetRow(2));
+		tmp_mat.SetRow(2, mat.GetRow(1));
 
+		Quat quat(mat);
 		return quat;
+	}
+
+	void meshml_extractor::extract_all_joint_tms(IPhysiqueExport* phy_exp, ISkin* skin,
+			std::string const & root_name,
+			std::map<std::string, Matrix3>& skin_init_tms,
+			std::map<std::string, Matrix3>& init_node_tms)
+	{
+		for (std::map<std::string, INode*>::iterator iter = joint_nodes_.begin();
+					iter != joint_nodes_.end(); ++ iter)
+		{
+			joint_t joint;
+
+			INode* parent_node = iter->second->GetParentNode();
+			if (is_bone(parent_node))
+			{
+				joint.parent_name = tstr_to_str(parent_node->GetName());
+			}
+			else
+			{
+				parent_node = max_interface_->GetRootNode();
+				joint.parent_name = root_name;
+			}
+
+			Matrix3 joint_local_tm = iter->second->GetNodeTM(0) * Inverse(parent_node->GetNodeTM(0));
+			joint.pos = this->point_from_matrix(joint_local_tm);
+			joint.quat = this->quat_from_matrix(joint_local_tm);
+
+			joints_[iter->first] = joint;
+
+			if (phy_exp != NULL)
+			{
+				phy_exp->GetInitNodeTM(iter->second, skin_init_tms[iter->first]);
+			}
+			else
+			{
+				assert(skin != NULL);
+				skin->GetBoneInitTM(iter->second, skin_init_tms[iter->first], false);
+			}
+
+			init_node_tms[iter->first] = iter->second->GetNodeTM(0);
+		}
+	}
+
+	void meshml_extractor::add_joint_weight(binds_t& bind, std::string const & joint_name, float weight)
+	{
+		if (weight > 0)
+		{
+			bool repeat = false;
+			for (binds_t::iterator biter = bind.begin(); biter != bind.end(); ++ biter)
+			{
+				if (biter->first == joint_name)
+				{
+					biter->second += weight;
+					repeat = true;
+					break;
+				}
+			}
+			if (!repeat)
+			{
+				bind.push_back(std::make_pair(joint_name, weight));
+			}
+		}
 	}
 
 	void meshml_extractor::physique_modifier(Modifier* mod, INode* node, std::string const & root_name,
@@ -547,6 +629,8 @@ namespace KlayGE
 		IPhysiqueExport* phy_exp = static_cast<IPhysiqueExport*>(mod->GetInterface(I_PHYINTERFACE));
 		if (phy_exp != NULL)
 		{
+			this->extract_all_joint_tms(phy_exp, NULL, root_name, skin_init_tms, init_node_tms);
+
 			// create a ModContext Export Interface for the specific node of the Physique Modifier
 			IPhyContextExport* mod_context = phy_exp->GetContextInterface(node);
 			if (mod_context != NULL)
@@ -560,7 +644,6 @@ namespace KlayGE
 				for (int i = 0; i < mod_context->GetNumberVertices(); ++ i)
 				{
 					IPhyVertexExport* phy_ver_exp = mod_context->GetVertexInterface(i);
-
 					if (phy_ver_exp != NULL)
 					{
 						switch (phy_ver_exp->GetVertexType())
@@ -568,138 +651,19 @@ namespace KlayGE
 						case RIGID_NON_BLENDED_TYPE:
 							{
 								IPhyRigidVertex* phy_rigid_ver = static_cast<IPhyRigidVertex*>(phy_ver_exp);
-
-								INode* joint_node = phy_rigid_ver->GetNode();
-								std::string joint_name = tstr_to_str(joint_node->GetName());
-
-								if (joints_.find(joint_name) == joints_.end())
-								{
-									joint_t joint;
-									Matrix3 joint_tm;
-
-									INode* parent_node = joint_node->GetParentNode();
-									if (is_bone(parent_node))
-									{
-										Matrix3 parent_tm = parent_node->GetNodeTM(0);
-										joint_tm = joint_node->GetNodeTM(0) * Inverse(parent_tm);
-										joint.parent_name = tstr_to_str(parent_node->GetName());
-
-										while (is_bone(parent_node))
-										{
-											INode* grant_node = parent_node->GetParentNode();
-											joint_t parent_joint;
-											Matrix3 parent_tm;
-											std::string parent_name = tstr_to_str(parent_node->GetName());
-
-											if (is_bone(grant_node))
-											{
-												Matrix3 grant_tm = grant_node->GetNodeTM(0);
-												parent_tm = parent_node->GetNodeTM(0) * Inverse(grant_tm);
-												parent_joint.parent_name = tstr_to_str(grant_node->GetName());
-											}
-											else
-											{
-												parent_tm = parent_node->GetNodeTM(0);
-												parent_joint.parent_name = root_name;
-											}
-
-											parent_joint.pos = this->point_from_matrix(parent_tm);
-											parent_joint.quat = this->quat_from_matrix(parent_tm);
-
-											joints_[parent_name] = parent_joint;
-											phy_exp->GetInitNodeTM(parent_node, skin_init_tms[parent_name]);
-											init_node_tms[parent_name] = parent_node->GetNodeTM(0);
-
-											parent_node = grant_node;
-										}
-									}
-									else
-									{
-										joint_tm = joint_node->GetNodeTM(0);
-										joint.parent_name = root_name;
-									}
-
-									joint.pos = this->point_from_matrix(joint_tm);
-									joint.quat = this->quat_from_matrix(joint_tm);
-
-									joints_[joint_name] = joint;
-									phy_exp->GetInitNodeTM(joint_node, skin_init_tms[joint_name]);
-									init_node_tms[joint_name] = joint_node->GetNodeTM(0);
-								}
-
-								positions[i].second.push_back(std::make_pair(joint_name, 1));
+								this->add_joint_weight(positions[i].second,
+									tstr_to_str(phy_rigid_ver->GetNode()->GetName()), 1);
 							}
 							break;
 
 						case RIGID_BLENDED_TYPE:
 							{
 								IPhyBlendedRigidVertex* phy_blended_rigid_ver = static_cast<IPhyBlendedRigidVertex*>(phy_ver_exp);
-
-								for (int i = 0; i < phy_blended_rigid_ver->GetNumberNodes(); ++ i)
+								for (int j = 0; j < phy_blended_rigid_ver->GetNumberNodes(); ++ j)
 								{
-									INode* joint_node = phy_blended_rigid_ver->GetNode(i);
-									std::string joint_name = tstr_to_str(joint_node->GetName());
-
-									if (joints_.find(joint_name) == joints_.end())
-									{
-										joint_t joint;
-										Matrix3 joint_tm;
-
-										INode* parent_node = joint_node->GetParentNode();
-										if (is_bone(parent_node))
-										{
-											Matrix3 parent_tm = parent_node->GetNodeTM(0);
-											joint_tm = joint_node->GetNodeTM(0) * Inverse(parent_tm);
-											joint.parent_name = tstr_to_str(parent_node->GetName());
-
-											while (is_bone(parent_node))
-											{
-												INode* grant_node = parent_node->GetParentNode();
-												joint_t parent_joint;
-												Matrix3 parent_tm;
-												std::string parent_name = tstr_to_str(parent_node->GetName());
-
-												if (is_bone(grant_node))
-												{
-													Matrix3 grant_tm = grant_node->GetNodeTM(0);
-													parent_tm = parent_node->GetNodeTM(0) * Inverse(grant_tm);
-													parent_joint.parent_name = tstr_to_str(grant_node->GetName());
-												}
-												else
-												{
-													parent_tm = parent_node->GetNodeTM(0);
-													parent_joint.parent_name = root_name;
-												}
-
-												parent_joint.pos = this->point_from_matrix(parent_tm);
-												parent_joint.quat = this->quat_from_matrix(parent_tm);
-
-												joints_[parent_name] = parent_joint;
-												phy_exp->GetInitNodeTM(parent_node, skin_init_tms[parent_name]);
-												init_node_tms[parent_name] = parent_node->GetNodeTM(0);
-
-												parent_node = grant_node;
-											}
-										}
-										else
-										{
-											joint_tm = joint_node->GetNodeTM(0);
-											joint.parent_name = root_name;
-										}
-
-										joint.pos = this->point_from_matrix(joint_tm);
-										joint.quat = this->quat_from_matrix(joint_tm);
-
-										joints_[joint_name] = joint;
-										phy_exp->GetInitNodeTM(joint_node, skin_init_tms[joint_name]);
-										init_node_tms[joint_name] = joint_node->GetNodeTM(0);
-									}
-
-									float const weight = phy_blended_rigid_ver->GetWeight(i);
-									if (weight > 0)
-									{
-										positions[i].second.push_back(std::make_pair(joint_name, weight));
-									}
+									this->add_joint_weight(positions[i].second,
+										tstr_to_str(phy_blended_rigid_ver->GetNode(j)->GetName()),
+										phy_blended_rigid_ver->GetWeight(j));
 								}
 							}
 							break;
@@ -729,83 +693,18 @@ namespace KlayGE
 		ISkin* skin = static_cast<ISkin*>(mod->GetInterface(I_SKIN));
 		if (skin != NULL)
 		{
-			ISkinContextData* skin_cd = skin->GetContextInterface(node);
+			this->extract_all_joint_tms(NULL, skin, root_name, skin_init_tms, init_node_tms);
 
+			ISkinContextData* skin_cd = skin->GetContextInterface(node);
 			if (skin_cd != NULL)
 			{
 				for (int i = 0; i < skin_cd->GetNumPoints(); ++ i)
 				{
 					for (int j = 0; j < skin_cd->GetNumAssignedBones(i); ++ j)
 					{
-						INode* joint_node = skin->GetBone(skin_cd->GetAssignedBone(i, j));
-						std::string const joint_name = tstr_to_str(joint_node->GetName());
-
-						float const weight = skin_cd->GetBoneWeight(i, j);
-						if (weight > 0)
-						{
-							positions[i].second.push_back(std::make_pair(joint_name, weight));
-						}
-					}
-				}
-
-				for (int i = 0; i < skin->GetNumBones(); ++ i)
-				{
-					INode* joint_node = skin->GetBone(i);
-					std::string joint_name = tstr_to_str(joint_node->GetName());
-
-					if (joints_.find(joint_name) == joints_.end())
-					{
-						joint_t joint;
-						Matrix3 joint_tm;
-
-						INode* parent_node = joint_node->GetParentNode();
-						if (is_bone(parent_node))
-						{
-							Matrix3 parent_tm = parent_node->GetNodeTM(0);
-							joint_tm = joint_node->GetNodeTM(0) * Inverse(parent_tm);
-							joint.parent_name = tstr_to_str(parent_node->GetName());
-
-							while (is_bone(parent_node))
-							{
-								INode* grant_node = parent_node->GetParentNode();
-								joint_t parent_joint;
-								Matrix3 parent_tm;
-								std::string parent_name = tstr_to_str(parent_node->GetName());
-
-								if (is_bone(grant_node))
-								{
-									Matrix3 grant_tm = grant_node->GetNodeTM(0);
-									parent_tm = parent_node->GetNodeTM(0) * Inverse(grant_tm);
-									parent_joint.parent_name = tstr_to_str(grant_node->GetName());
-								}
-								else
-								{
-									parent_tm = parent_node->GetNodeTM(0);
-									parent_joint.parent_name = root_name;
-								}
-
-								parent_joint.pos = this->point_from_matrix(parent_tm);
-								parent_joint.quat = this->quat_from_matrix(parent_tm);
-
-								joints_[parent_name] = parent_joint;
-								skin->GetBoneInitTM(parent_node, skin_init_tms[parent_name], false);
-								init_node_tms[parent_name] = parent_node->GetNodeTM(0);
-
-								parent_node = grant_node;
-							}
-						}
-						else
-						{
-							joint_tm = joint_node->GetNodeTM(0);
-							joint.parent_name = root_name;
-						}
-
-						joint.pos = this->point_from_matrix(joint_tm);
-						joint.quat = this->quat_from_matrix(joint_tm);
-
-						joints_[joint_name] = joint;
-						skin->GetBoneInitTM(joint_node, skin_init_tms[joint_name], false);
-						init_node_tms[joint_name] = joint_node->GetNodeTM(0);
+						this->add_joint_weight(positions[i].second,
+							tstr_to_str(skin->GetBone(skin_cd->GetAssignedBone(i, j))->GetName()),
+							skin_cd->GetBoneWeight(i, j));
 					}
 				}
 			}
@@ -912,6 +811,7 @@ namespace KlayGE
 			{
 				assert(joints_name_to_id.find(joints_[*iter].parent_name) != joints_name_to_id.end());
 				parent_id = joints_name_to_id[joints_[*iter].parent_name];
+				assert(parent_id < joints_name_to_id[*iter]);
 			}
 
 			ofs << "\t\t<bone name=\'" << *iter
