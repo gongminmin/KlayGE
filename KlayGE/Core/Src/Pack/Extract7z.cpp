@@ -248,14 +248,12 @@ namespace
     };
 
     SevenZipLoader loader;
-}
 
-namespace KlayGE
-{
-	void Extract7z(boost::shared_ptr<std::istream> const & archive_is,
-							   std::string const & password,
-							   std::string const & extractFilePath,
-							   boost::shared_ptr<std::ostream> const & os)
+
+	std::pair<boost::shared_ptr<IInArchive>, uint32_t> GetArchiveIndex(
+								boost::shared_ptr<std::istream> const & archive_is,
+								std::string const & password,
+								std::string const & extract_file_path)
 	{
 		BOOST_ASSERT(archive_is);
 
@@ -273,53 +271,84 @@ namespace KlayGE
 		checked_pointer_cast<CArchiveOpenCallback>(ocb)->Init(password);
 		TIF(archive->Open(file.get(), 0, ocb.get()));
 
-		uint32_t realIndex = static_cast<uint32_t>(-1);
-		uint32_t numItems;
-		TIF(archive->GetNumberOfItems(&numItems));
+		uint32_t real_index = 0xFFFFFFFF;
+		uint32_t num_items;
+		TIF(archive->GetNumberOfItems(&num_items));
 
-		for (uint32_t i = 0; i < numItems; ++i)
+		for (uint32_t i = 0; i < num_items; ++i)
 		{
-			bool isFolder;
-			TIF(IsArchiveItemFolder(archive, i, isFolder));
-			if (!isFolder)
+			bool is_folder;
+			TIF(IsArchiveItemFolder(archive, i, is_folder));
+			if (!is_folder)
 			{
-				std::string filePath;
-				TIF(GetArchiveItemPath(archive, i, filePath));
-				std::replace(filePath.begin(), filePath.end(), L'\\', L'/');
-				if (!boost::algorithm::ilexicographical_compare(extractFilePath, filePath)
-					&& !boost::algorithm::ilexicographical_compare(filePath, extractFilePath))
+				std::string file_path;
+				TIF(GetArchiveItemPath(archive, i, file_path));
+				std::replace(file_path.begin(), file_path.end(), L'\\', L'/');
+				if (!boost::algorithm::ilexicographical_compare(extract_file_path, file_path)
+					&& !boost::algorithm::ilexicographical_compare(file_path, extract_file_path))
 				{
-					realIndex = i;
+					real_index = i;
 					break;
 				}
 			}
 		}
-		Verify(realIndex != static_cast<uint32_t>(-1));
-
-		boost::shared_ptr<ISequentialOutStream> outStreamLoc = MakeCOMPtr(new COutStream);
-		checked_pointer_cast<COutStream>(outStreamLoc)->Attach(os);
-
-		boost::shared_ptr<IArchiveExtractCallback> extractCallback = MakeCOMPtr(new CArchiveExtractCallback);
-		checked_pointer_cast<CArchiveExtractCallback>(extractCallback)->Init(password, outStreamLoc);
-
+		if (real_index != 0xFFFFFFFF)
 		{
 			PROPVARIANT prop;
 			prop.vt = VT_EMPTY;
-			TIF(archive->GetProperty(realIndex, kpidPosition, &prop));
-			if (prop.vt != VT_EMPTY)
+			TIF(archive->GetProperty(real_index, kpidIsAnti, &prop));
+			if ((VT_BOOL == prop.vt) && (VARIANT_FALSE == prop.boolVal))
 			{
-				BOOST_ASSERT(VT_UI8 == prop.vt);
-				BOOST_ASSERT(0 == prop.uhVal.QuadPart);
+				prop.vt = VT_EMPTY;
+				TIF(archive->GetProperty(real_index, kpidPosition, &prop));
+				if (prop.vt != VT_EMPTY)
+				{
+					if ((prop.vt != VT_UI8) || (prop.uhVal.QuadPart != 0))
+					{
+						real_index = 0xFFFFFFFF;
+					}
+				}
+			}
+			else
+			{
+				real_index = 0xFFFFFFFF;
 			}
 		}
-		{
-			PROPVARIANT prop;
-			prop.vt = VT_EMPTY;
-			TIF(archive->GetProperty(realIndex, kpidIsAnti, &prop));
-			BOOST_ASSERT(VT_BOOL == prop.vt);
-			BOOST_ASSERT(VARIANT_FALSE == prop.boolVal);
-		}
 
-		TIF(archive->Extract(&realIndex, 1, false, extractCallback.get()));
+		return std::make_pair(archive, real_index);
+	}
+}
+
+namespace KlayGE
+{
+	uint32_t Find7z(boost::shared_ptr<std::istream> const & archive_is,
+								std::string const & password,
+								std::string const & extract_file_path)
+	{
+		return GetArchiveIndex(archive_is, password, extract_file_path).second;
+	}
+
+	void Extract7z(boost::shared_ptr<std::istream> const & archive_is,
+							   std::string const & password,
+							   std::string const & extract_file_path,
+							   boost::shared_ptr<std::ostream> const & os)
+	{
+		boost::shared_ptr<IInArchive> archive;
+		uint32_t real_index;
+		{
+			std::pair<boost::shared_ptr<IInArchive>, uint32_t> ret = GetArchiveIndex(archive_is, password, extract_file_path);
+			archive = ret.first;
+			real_index = ret.second;
+		}
+		if (real_index != 0xFFFFFFFF)
+		{
+			boost::shared_ptr<ISequentialOutStream> out_stream = MakeCOMPtr(new COutStream);
+			checked_pointer_cast<COutStream>(out_stream)->Attach(os);
+
+			boost::shared_ptr<IArchiveExtractCallback> ecb = MakeCOMPtr(new CArchiveExtractCallback);
+			checked_pointer_cast<CArchiveExtractCallback>(ecb)->Init(password, out_stream);
+
+			TIF(archive->Extract(&real_index, 1, false, ecb.get()));
+		}
 	}
 }

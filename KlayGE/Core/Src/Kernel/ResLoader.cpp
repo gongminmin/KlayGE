@@ -69,9 +69,12 @@ namespace KlayGE
 					std::string const file_name = res_name.substr(pkt_offset + 2);
 
 					boost::shared_ptr<std::istream> pkt_file(new std::ifstream(pkt_name.c_str(), std::ios_base::binary));
-					if (!pkt_file->fail())
+					if (*pkt_file)
 					{
-						return res_name;
+						if (Find7z(pkt_file, password, file_name))
+						{
+							return res_name;
+						}
 					}
 				}
 			}
@@ -104,7 +107,7 @@ namespace KlayGE
 					std::string const file_name = res_name.substr(pkt_offset + 2);
 
 					boost::shared_ptr<std::istream> pkt_file(new std::ifstream(pkt_name.c_str(), std::ios_base::binary));
-					if (!pkt_file->fail())
+					if (*pkt_file)
 					{
 						boost::shared_ptr<std::iostream> packet_file(new std::stringstream);
 						Extract7z(pkt_file, password, file_name, packet_file);
