@@ -485,7 +485,7 @@ namespace KlayGE
 				obj_info.triangles[iter->ref_triangle[i] / 3].vertex_index[iter->ref_triangle[i] % 3] = ver_index;
 			}
 
-			obj_info.vertices[ver_index].binds = positions[iter->pos_index].second;
+			vertex.binds = positions[iter->pos_index].second;
 		}
 
 		obj_info.vertex_elements.push_back(vertex_element_t(VEU_Position, 0, 3));
@@ -573,12 +573,6 @@ namespace KlayGE
 				joint.parent_name = root_name;
 			}
 
-			Matrix3 joint_local_tm = iter->second->GetNodeTM(0) * Inverse(parent_node->GetNodeTM(0));
-			joint.pos = this->point_from_matrix(joint_local_tm);
-			joint.quat = this->quat_from_matrix(joint_local_tm);
-
-			joints_[iter->first] = joint;
-
 			if (phy_exp != NULL)
 			{
 				phy_exp->GetInitNodeTM(iter->second, skin_init_tms[iter->first]);
@@ -590,6 +584,11 @@ namespace KlayGE
 			}
 
 			init_node_tms[iter->first] = iter->second->GetNodeTM(0);
+
+			joint.pos = this->point_from_matrix(skin_init_tms[iter->first]);
+			joint.quat = this->quat_from_matrix(skin_init_tms[iter->first]);
+
+			joints_[iter->first] = joint;
 		}
 	}
 
