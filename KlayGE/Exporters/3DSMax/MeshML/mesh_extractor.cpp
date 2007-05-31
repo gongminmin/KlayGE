@@ -122,7 +122,9 @@ namespace KlayGE
 		if (is_bone(node))
 		{
 			std::string joint_name = tstr_to_str(node->GetName());
-			joint_nodes_[joint_name] = node;
+			joint_and_tms_t jat;
+			jat.joint_node = node;
+			joint_nodes_[joint_name] = jat;
 		}
 		for (int i = 0; i < node->NumberOfChildren(); ++ i)
 		{
@@ -137,22 +139,65 @@ namespace KlayGE
 			// root bone
 			joint_t root;
 			INode* root_node = max_interface_->GetRootNode();
-			Matrix3 root_tm = root_node->GetNodeTM(0);
-			root.pos = this->point_from_matrix(root_tm);
-			root.quat = this->quat_from_matrix(root_tm);
+			root.pos = Point3(0, 0, 0);
+			root.quat.Identity();
 			root.parent_name = "";
 			joints_.insert(std::make_pair("root", root));
+
+			int tpf = GetTicksPerFrame();
 
 			key_frame_t kf;
 			kf.joint = "root";
 			for (int i = start_frame_; i < end_frame_; ++ i)
 			{
-				kf.positions.push_back(root.pos);
-				kf.quaternions.push_back(root.quat);
+				Matrix3 root_tm = root_node->GetNodeTM(i * tpf);
+
+				kf.positions.push_back(this->point_from_matrix(root_tm));
+				kf.quaternions.push_back(this->quat_from_matrix(root_tm));
 			}
 			kfs_.push_back(kf);
 
 			this->find_joints(root_node);
+
+
+			for (size_t i = 0; i < nodes.size(); ++ i)
+			{
+				if (is_mesh(nodes[i]))
+				{
+					Object* obj_ref = nodes[i]->GetObjectRef();
+					while ((obj_ref != NULL) && (GEN_DERIVOB_CLASS_ID == obj_ref->SuperClassID()))
+					{
+						IDerivedObject* DerivedObjectPtr = static_cast<IDerivedObject*>(obj_ref);
+
+						// Iterate over all entries of the modifier stack.
+						for (int mod_stack_index = 0; mod_stack_index < DerivedObjectPtr->NumModifiers(); ++ mod_stack_index)
+						{
+							Modifier* mod = DerivedObjectPtr->GetModifier(mod_stack_index);
+							if (Class_ID(PHYSIQUE_CLASS_ID_A, PHYSIQUE_CLASS_ID_B) == mod->ClassID())
+							{
+								IPhysiqueExport* phy_exp = static_cast<IPhysiqueExport*>(mod->GetInterface(I_PHYINTERFACE));
+								if (phy_exp != NULL)
+								{
+									this->extract_all_joint_tms(phy_exp, NULL, "root");
+								}
+							}
+							else
+							{
+								if (SKIN_CLASSID == mod->ClassID())
+								{
+									ISkin* skin = static_cast<ISkin*>(mod->GetInterface(I_SKIN));
+									if (skin != NULL)
+									{
+										this->extract_all_joint_tms(NULL, skin, "root");
+									}
+								}
+							}
+						}
+
+						obj_ref = DerivedObjectPtr->GetObjRef();
+					}
+				}
+			}
 		}
 
 		for (size_t i = 0; i < nodes.size(); ++ i)
@@ -361,88 +406,88 @@ namespace KlayGE
 				// Iterate over all entries of the modifier stack.
 				for (int mod_stack_index = 0; mod_stack_index < DerivedObjectPtr->NumModifiers(); ++ mod_stack_index)
 				{
-					std::map<std::string, Matrix3> skin_init_tms;
-					std::map<std::string, Matrix3> init_node_tms;
-
 					Modifier* mod = DerivedObjectPtr->GetModifier(mod_stack_index);
 					if (Class_ID(PHYSIQUE_CLASS_ID_A, PHYSIQUE_CLASS_ID_B) == mod->ClassID())
 					{
-						this->physique_modifier(mod, node, "root", positions, skin_init_tms, init_node_tms);
+						this->physique_modifier(mod, node, "root", positions);
 						skin_mesh = true;
 					}
 					else
 					{
 						if (SKIN_CLASSID == mod->ClassID())
 						{
-							this->skin_modifier(mod, node, "root", positions, skin_init_tms, init_node_tms);
+							this->skin_modifier(mod, node, "root", positions);
 							skin_mesh = true;
-						}
-					}
-
-					if (skin_mesh)
-					{
-						for (std::vector<std::pair<Point3, binds_t> >::iterator iter = positions.begin();
-							iter != positions.end(); ++ iter)
-						{
-							Point3 v0 = iter->first * node->GetNodeTM(0);
-							Point3 init(0, 0, 0);
-							for (size_t i = 0 ; i < iter->second.size(); ++ i)
-							{
-								assert(init_node_tms.find(iter->second[i].first) != init_node_tms.end());
-								assert(skin_init_tms.find(iter->second[i].first) != skin_init_tms.end());
-
-								Matrix3 mesh_init_matrix = Inverse(init_node_tms[iter->second[i].first])
-									* skin_init_tms[iter->second[i].first];
-								init += iter->second[i].second * (v0 * mesh_init_matrix);
-							}
-							iter->first = init;
 						}
 					}
 				}
 
 				obj_ref = DerivedObjectPtr->GetObjRef();
 			}
-		
+
+			Matrix3 tm = node->GetNodeTM(0);
 			for (std::vector<std::pair<Point3, binds_t> >::iterator iter = positions.begin();
 				iter != positions.end(); ++ iter)
 			{
-				binds_t binds = iter->second;
-
-				if (binds.empty())
+				if (iter->second.empty())
 				{
-					binds.push_back(std::make_pair("root", 1));
+					INode* parent_node = node->GetParentNode();
+					while ((parent_node != max_interface_->GetRootNode()) && !is_bone(parent_node))
+					{
+						parent_node = parent_node->GetParentNode();
+					}
+
+					std::string parent_name;
+					if (is_bone(parent_node))
+					{
+						parent_name = tstr_to_str(parent_node->GetName());
+					}
+					else
+					{
+						parent_name = "root";
+					}
+
+					iter->second.push_back(std::make_pair(parent_name, 1));
 				}
 
-				if (binds.size() > joints_per_ver_)
+				Point3 v0 = iter->first * tm;
+				iter->first = Point3(0, 0, 0);
+				for (size_t i = 0 ; i < iter->second.size(); ++ i)
 				{
-					std::nth_element(binds.begin(), binds.begin() + joints_per_ver_, binds.end(), bind_cmp);
-					binds.resize(joints_per_ver_);
+					assert(joint_nodes_.find(iter->second[i].first) != joint_nodes_.end());
+
+					Matrix3 mesh_init_matrix = Inverse(joint_nodes_[iter->second[i].first].init_node_tm)
+						* joint_nodes_[iter->second[i].first].skin_init_tm;
+					iter->first += iter->second[i].second * (v0 * mesh_init_matrix);
+				}
+
+				if (iter->second.size() > joints_per_ver_)
+				{
+					std::nth_element(iter->second.begin(), iter->second.begin() + joints_per_ver_, iter->second.end(), bind_cmp);
+					iter->second.resize(joints_per_ver_);
 
 					float sum_weight = 0;
 					for (int j = 0; j < joints_per_ver_; ++ j)
 					{
-						sum_weight += binds[j].second;
+						sum_weight += iter->second[j].second;
 					}
 					assert(sum_weight > 0);
 
 					for (int j = 0; j < joints_per_ver_; ++ j)
 					{
-						binds[j].second /= sum_weight;
+						iter->second[j].second /= sum_weight;
 					}
 				}
 				else
 				{
-					for (int j = static_cast<int>(binds.size()); j < joints_per_ver_; ++ j)
+					for (int j = static_cast<int>(iter->second.size()); j < joints_per_ver_; ++ j)
 					{
-						binds.push_back(std::make_pair("root", 0));
+						iter->second.push_back(std::make_pair("root", 0));
 					}
 				}
-
-				iter->second = binds;
 			}
 		}
-
-		if (!skin_mesh)
+		else
 		{
 			for (std::vector<std::pair<Point3, binds_t> >::iterator iter = positions.begin();
 				iter != positions.end(); ++ iter)
@@ -544,25 +589,21 @@ namespace KlayGE
 
 	Quat meshml_extractor::quat_from_matrix(Matrix3 const & mat)
 	{
-		Matrix3 tmp_mat = mat;
-		tmp_mat.SetRow(1, mat.GetRow(2));
-		tmp_mat.SetRow(2, mat.GetRow(1));
-
 		Quat quat(mat);
+		std::swap(quat.y, quat.z);
+
 		return quat;
 	}
 
 	void meshml_extractor::extract_all_joint_tms(IPhysiqueExport* phy_exp, ISkin* skin,
-			std::string const & root_name,
-			std::map<std::string, Matrix3>& skin_init_tms,
-			std::map<std::string, Matrix3>& init_node_tms)
+			std::string const & root_name)
 	{
-		for (std::map<std::string, INode*>::iterator iter = joint_nodes_.begin();
+		for (std::map<std::string, joint_and_tms_t>::iterator iter = joint_nodes_.begin();
 					iter != joint_nodes_.end(); ++ iter)
 		{
 			joint_t joint;
 
-			INode* parent_node = iter->second->GetParentNode();
+			INode* parent_node = iter->second.joint_node->GetParentNode();
 			if (is_bone(parent_node))
 			{
 				joint.parent_name = tstr_to_str(parent_node->GetName());
@@ -575,18 +616,18 @@ namespace KlayGE
 
 			if (phy_exp != NULL)
 			{
-				phy_exp->GetInitNodeTM(iter->second, skin_init_tms[iter->first]);
+				phy_exp->GetInitNodeTM(iter->second.joint_node, iter->second.skin_init_tm);
 			}
 			else
 			{
 				assert(skin != NULL);
-				skin->GetBoneInitTM(iter->second, skin_init_tms[iter->first], false);
+				skin->GetBoneInitTM(iter->second.joint_node, iter->second.skin_init_tm, false);
 			}
 
-			init_node_tms[iter->first] = iter->second->GetNodeTM(0);
+			iter->second.init_node_tm = iter->second.joint_node->GetNodeTM(0);
 
-			joint.pos = this->point_from_matrix(skin_init_tms[iter->first]);
-			joint.quat = this->quat_from_matrix(skin_init_tms[iter->first]);
+			joint.pos = this->point_from_matrix(iter->second.skin_init_tm);
+			joint.quat = this->quat_from_matrix(iter->second.skin_init_tm);
 
 			joints_[iter->first] = joint;
 		}
@@ -614,22 +655,15 @@ namespace KlayGE
 	}
 
 	void meshml_extractor::physique_modifier(Modifier* mod, INode* node, std::string const & root_name,
-										std::vector<std::pair<Point3, binds_t> >& positions,
-										std::map<std::string, Matrix3>& skin_init_tms,
-										std::map<std::string, Matrix3>& init_node_tms)
+										std::vector<std::pair<Point3, binds_t> >& positions)
 	{
 		assert(mod != NULL);
 		// Is this Physique?
 		assert(Class_ID(PHYSIQUE_CLASS_ID_A, PHYSIQUE_CLASS_ID_B) == mod->ClassID());
 
-		skin_init_tms.clear();
-		init_node_tms.clear();
-
 		IPhysiqueExport* phy_exp = static_cast<IPhysiqueExport*>(mod->GetInterface(I_PHYINTERFACE));
 		if (phy_exp != NULL)
 		{
-			this->extract_all_joint_tms(phy_exp, NULL, root_name, skin_init_tms, init_node_tms);
-
 			// create a ModContext Export Interface for the specific node of the Physique Modifier
 			IPhyContextExport* mod_context = phy_exp->GetContextInterface(node);
 			if (mod_context != NULL)
@@ -678,22 +712,15 @@ namespace KlayGE
 	}
 
 	void meshml_extractor::skin_modifier(Modifier* mod, INode* node, std::string const & root_name,
-									std::vector<std::pair<Point3, binds_t> >& positions,
-									std::map<std::string, Matrix3>& skin_init_tms,
-									std::map<std::string, Matrix3>& init_node_tms)
+									std::vector<std::pair<Point3, binds_t> >& positions)
 	{
 		assert(mod != NULL);
 		// Is this Skin?
 		assert(SKIN_CLASSID == mod->ClassID());
 
-		skin_init_tms.clear();
-		init_node_tms.clear();
-
 		ISkin* skin = static_cast<ISkin*>(mod->GetInterface(I_SKIN));
 		if (skin != NULL)
 		{
-			this->extract_all_joint_tms(NULL, skin, root_name, skin_init_tms, init_node_tms);
-
 			ISkinContextData* skin_cd = skin->GetContextInterface(node);
 			if (skin_cd != NULL)
 			{

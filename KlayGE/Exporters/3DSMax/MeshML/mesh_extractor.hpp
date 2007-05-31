@@ -124,6 +124,13 @@ namespace KlayGE
 		vertex_elements_t vertex_elements;
 	};
 
+	struct joint_and_tms_t
+	{
+		INode* joint_node;
+		Matrix3 skin_init_tm;
+		Matrix3 init_node_tm;
+	};
+
 	class meshml_extractor
 	{
 	public:
@@ -141,19 +148,13 @@ namespace KlayGE
 		Quat quat_from_matrix(Matrix3 const & mat);
 		void find_joints(INode* node);
 		void extract_all_joint_tms(IPhysiqueExport* phy_exp, ISkin* skin,
-			std::string const & root_name,
-			std::map<std::string, Matrix3>& skin_init_tms,
-			std::map<std::string, Matrix3>& init_node_tms);
+			std::string const & root_name);
 		void add_joint_weight(binds_t& bind, std::string const & joint_name, float weight);
 
 		void physique_modifier(Modifier* mod, INode* node, std::string const & root_name,
-			std::vector<std::pair<Point3, binds_t> >& positions,
-			std::map<std::string, Matrix3>& skin_init_tms,
-			std::map<std::string, Matrix3>& init_node_tms);
+			std::vector<std::pair<Point3, binds_t> >& positions);
 		void skin_modifier(Modifier* mod, INode* node, std::string const & root_name,
-			std::vector<std::pair<Point3, binds_t> >& positions,
-			std::map<std::string, Matrix3>& skin_init_tms,
-			std::map<std::string, Matrix3>& init_node_tms);
+			std::vector<std::pair<Point3, binds_t> >& positions);
 
 	private:
 		typedef std::vector<object_info_t> objects_info_t;
@@ -165,7 +166,7 @@ namespace KlayGE
 		joints_t joints_;
 		int joints_per_ver_;
 
-		std::map<std::string, INode*> joint_nodes_;
+		std::map<std::string, joint_and_tms_t> joint_nodes_;
 
 		int cur_time_;
 		int start_frame_;
