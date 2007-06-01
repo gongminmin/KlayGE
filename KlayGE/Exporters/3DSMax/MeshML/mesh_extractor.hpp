@@ -13,20 +13,12 @@
 #ifndef _MESHML_EXTRACTOR_HPP
 #define _MESHML_EXTRACTOR_HPP
 
-#include <fstream>
 #include <vector>
 #include <string>
 #include <map>
 
-#include <iparamb2.h>
-#if VERSION_3DSMAX >= 7 << 16
-#include <CS/phyexp.h>
-#else
-#include <phyexp.h>
-#endif
-#include <iskin.h>
-
-#include "meshml.hpp"
+class IPhysiqueExport;
+class ISkin;
 
 namespace KlayGE
 {
@@ -137,7 +129,7 @@ namespace KlayGE
 		meshml_extractor(INode* root_node, int joints_per_ver, int cur_time, int start_frame, int end_frame);
 
 		void export_objects(std::vector<INode*> const & nodes);
-		void write_xml(std::basic_string<TCHAR> const & file_name);
+		void write_xml(std::string const & file_name);
 
 	private:
 		void extract_object(INode* node);

@@ -10,8 +10,10 @@
 // ÐÞ¸Ä¼ÇÂ¼
 /////////////////////////////////////////////////////////////////////////////////
 
+#pragma conform(forScope, push, i, off)
 #include <max.h>
 #include <Interval.h>
+#pragma conform(forScope, pop, i)
 
 #include <vector>
 #include <sstream>
@@ -103,7 +105,7 @@ namespace KlayGE
 	int meshml_export::DoExport(TCHAR const * name, ExpInterface* exp_interface, Interface* max_interface,
 							BOOL suppress_prompts, DWORD options)
 	{
-		file_name_ = name;
+		file_name_ = tstr_to_str(name);
 
 		max_interface_ = max_interface;
 		HWND max_wnd = max_interface->GetMAXHWnd();

@@ -44,7 +44,7 @@ namespace KlayGE
 		void enum_node(HWND wnd, INode* node);
 
 	private:
-		std::basic_string<TCHAR> file_name_;
+		std::string file_name_;
 		HWND dlg_wnd_;
 
 		Interface* max_interface_;

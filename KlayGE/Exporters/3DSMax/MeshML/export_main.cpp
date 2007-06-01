@@ -10,7 +10,9 @@
 // ÐÞ¸Ä¼ÇÂ¼
 /////////////////////////////////////////////////////////////////////////////////
 
+#pragma conform(forScope, push, i, off)
 #include <max.h>
+#pragma conform(forScope, pop, i)
 
 #include "meshml.hpp"
 #include "export_main.hpp"

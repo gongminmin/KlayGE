@@ -13,10 +13,20 @@
 // ÐÞ¸Ä¼ÇÂ¼
 /////////////////////////////////////////////////////////////////////////////////
 
+#pragma conform(forScope, push, i, off)
 #include <max.h>
 #include <modstack.h>
 #include <stdmat.h>
+#include <iparamb2.h>
+#if VERSION_3DSMAX >= 7 << 16
+#include <CS/phyexp.h>
+#else
+#include <phyexp.h>
+#endif
+#include <iskin.h>
+#pragma conform(forScope, pop, i)
 
+#include <fstream>
 #include <sstream>
 #include <algorithm>
 #include <set>
@@ -760,9 +770,9 @@ namespace KlayGE
 		}
 	}
 
-	void meshml_extractor::write_xml(std::basic_string<TCHAR> const & file_name)
+	void meshml_extractor::write_xml(std::string const & file_name)
 	{
-		std::ofstream ofs(tstr_to_str(file_name).c_str());
+		std::ofstream ofs(file_name.c_str());
 		if (!ofs)
 		{
 			return;
