@@ -108,8 +108,8 @@ namespace
 
 namespace KlayGE
 {
-	meshml_extractor::meshml_extractor(Interface* max_interface, int joints_per_ver, int cur_time, int start_frame, int end_frame)
-						: max_interface_(max_interface),
+	meshml_extractor::meshml_extractor(INode* root_node, int joints_per_ver, int cur_time, int start_frame, int end_frame)
+						: root_node_(root_node),
 							joints_per_ver_(joints_per_ver),
 							cur_time_(cur_time),
 							start_frame_(start_frame), end_frame_(end_frame),
@@ -138,26 +138,26 @@ namespace KlayGE
 		{
 			// root bone
 			joint_t root;
-			INode* root_node = max_interface_->GetRootNode();
 			root.pos = Point3(0, 0, 0);
 			root.quat.Identity();
 			root.parent_name = "";
-			joints_.insert(std::make_pair("root", root));
+			std::string root_name = tstr_to_str(root_node_->GetName());
+			joints_.insert(std::make_pair(root_name, root));
 
 			int tpf = GetTicksPerFrame();
 
 			key_frame_t kf;
-			kf.joint = "root";
+			kf.joint = root_name;
 			for (int i = start_frame_; i < end_frame_; ++ i)
 			{
-				Matrix3 root_tm = root_node->GetNodeTM(i * tpf);
+				Matrix3 root_tm = root_node_->GetNodeTM(i * tpf);
 
 				kf.positions.push_back(this->point_from_matrix(root_tm));
 				kf.quaternions.push_back(this->quat_from_matrix(root_tm));
 			}
 			kfs_.push_back(kf);
 
-			this->find_joints(root_node);
+			this->find_joints(root_node_);
 
 
 			for (size_t i = 0; i < nodes.size(); ++ i)
@@ -178,7 +178,7 @@ namespace KlayGE
 								IPhysiqueExport* phy_exp = static_cast<IPhysiqueExport*>(mod->GetInterface(I_PHYINTERFACE));
 								if (phy_exp != NULL)
 								{
-									this->extract_all_joint_tms(phy_exp, NULL, "root");
+									this->extract_all_joint_tms(phy_exp, NULL);
 								}
 							}
 							else
@@ -188,7 +188,7 @@ namespace KlayGE
 									ISkin* skin = static_cast<ISkin*>(mod->GetInterface(I_SKIN));
 									if (skin != NULL)
 									{
-										this->extract_all_joint_tms(NULL, skin, "root");
+										this->extract_all_joint_tms(NULL, skin);
 									}
 								}
 							}
@@ -409,14 +409,14 @@ namespace KlayGE
 					Modifier* mod = DerivedObjectPtr->GetModifier(mod_stack_index);
 					if (Class_ID(PHYSIQUE_CLASS_ID_A, PHYSIQUE_CLASS_ID_B) == mod->ClassID())
 					{
-						this->physique_modifier(mod, node, "root", positions);
+						this->physique_modifier(mod, node, positions);
 						skin_mesh = true;
 					}
 					else
 					{
 						if (SKIN_CLASSID == mod->ClassID())
 						{
-							this->skin_modifier(mod, node, "root", positions);
+							this->skin_modifier(mod, node, positions);
 							skin_mesh = true;
 						}
 					}
@@ -432,22 +432,12 @@ namespace KlayGE
 				if (iter->second.empty())
 				{
 					INode* parent_node = node->GetParentNode();
-					while ((parent_node != max_interface_->GetRootNode()) && !is_bone(parent_node))
+					while ((parent_node != root_node_) && !is_bone(parent_node))
 					{
 						parent_node = parent_node->GetParentNode();
 					}
 
-					std::string parent_name;
-					if (is_bone(parent_node))
-					{
-						parent_name = tstr_to_str(parent_node->GetName());
-					}
-					else
-					{
-						parent_name = "root";
-					}
-
-					iter->second.push_back(std::make_pair(parent_name, 1));
+					iter->second.push_back(std::make_pair(tstr_to_str(parent_node->GetName()), 1));
 				}
 
 				Point3 v0 = iter->first * tm;
@@ -482,7 +472,7 @@ namespace KlayGE
 				{
 					for (int j = static_cast<int>(iter->second.size()); j < joints_per_ver_; ++ j)
 					{
-						iter->second.push_back(std::make_pair("root", 0));
+						iter->second.push_back(std::make_pair(tstr_to_str(root_node_->GetName()), 0));
 					}
 				}
 			}
@@ -565,7 +555,7 @@ namespace KlayGE
 		INode* parent_node = node->GetParentNode();
 		if (!is_bone(parent_node))
 		{
-			parent_node = max_interface_->GetRootNode();
+			parent_node = root_node_;
 		}
 
 		for (int i = start_frame_; i < end_frame_; ++ i)
@@ -595,8 +585,7 @@ namespace KlayGE
 		return quat;
 	}
 
-	void meshml_extractor::extract_all_joint_tms(IPhysiqueExport* phy_exp, ISkin* skin,
-			std::string const & root_name)
+	void meshml_extractor::extract_all_joint_tms(IPhysiqueExport* phy_exp, ISkin* skin)
 	{
 		for (std::map<std::string, joint_and_tms_t>::iterator iter = joint_nodes_.begin();
 					iter != joint_nodes_.end(); ++ iter)
@@ -604,15 +593,11 @@ namespace KlayGE
 			joint_t joint;
 
 			INode* parent_node = iter->second.joint_node->GetParentNode();
-			if (is_bone(parent_node))
+			if (!is_bone(parent_node))
 			{
-				joint.parent_name = tstr_to_str(parent_node->GetName());
+				parent_node = root_node_;
 			}
-			else
-			{
-				parent_node = max_interface_->GetRootNode();
-				joint.parent_name = root_name;
-			}
+			joint.parent_name = tstr_to_str(parent_node->GetName());
 
 			if (phy_exp != NULL)
 			{
@@ -654,7 +639,7 @@ namespace KlayGE
 		}
 	}
 
-	void meshml_extractor::physique_modifier(Modifier* mod, INode* node, std::string const & root_name,
+	void meshml_extractor::physique_modifier(Modifier* mod, INode* node,
 										std::vector<std::pair<Point3, binds_t> >& positions)
 	{
 		assert(mod != NULL);
@@ -711,7 +696,7 @@ namespace KlayGE
 		mod->ReleaseInterface(I_PHYINTERFACE, phy_exp);
 	}
 
-	void meshml_extractor::skin_modifier(Modifier* mod, INode* node, std::string const & root_name,
+	void meshml_extractor::skin_modifier(Modifier* mod, INode* node,
 									std::vector<std::pair<Point3, binds_t> >& positions)
 	{
 		assert(mod != NULL);

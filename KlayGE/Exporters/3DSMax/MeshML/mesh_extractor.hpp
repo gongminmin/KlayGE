@@ -134,7 +134,7 @@ namespace KlayGE
 	class meshml_extractor
 	{
 	public:
-		meshml_extractor(Interface* max_interface, int joints_per_ver, int cur_time, int start_frame, int end_frame);
+		meshml_extractor(INode* root_node, int joints_per_ver, int cur_time, int start_frame, int end_frame);
 
 		void export_objects(std::vector<INode*> const & nodes);
 		void write_xml(std::basic_string<TCHAR> const & file_name);
@@ -146,22 +146,21 @@ namespace KlayGE
 
 		Point3 point_from_matrix(Matrix3 const & mat);
 		Quat quat_from_matrix(Matrix3 const & mat);
+
 		void find_joints(INode* node);
-		void extract_all_joint_tms(IPhysiqueExport* phy_exp, ISkin* skin,
-			std::string const & root_name);
+		void extract_all_joint_tms(IPhysiqueExport* phy_exp, ISkin* skin);
 		void add_joint_weight(binds_t& bind, std::string const & joint_name, float weight);
 
-		void physique_modifier(Modifier* mod, INode* node, std::string const & root_name,
+		void physique_modifier(Modifier* mod, INode* node,
 			std::vector<std::pair<Point3, binds_t> >& positions);
-		void skin_modifier(Modifier* mod, INode* node, std::string const & root_name,
+		void skin_modifier(Modifier* mod, INode* node,
 			std::vector<std::pair<Point3, binds_t> >& positions);
 
 	private:
 		typedef std::vector<object_info_t> objects_info_t;
-
-		Interface* max_interface_;
-
 		objects_info_t objs_info_;
+
+		INode* root_node_;
 
 		joints_t joints_;
 		int joints_per_ver_;
