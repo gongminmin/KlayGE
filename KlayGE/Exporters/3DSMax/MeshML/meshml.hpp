@@ -14,6 +14,7 @@
 #define _MESHML_HPP
 
 #include <string>
+#include <vector>
 
 namespace KlayGE
 {
@@ -40,14 +41,12 @@ namespace KlayGE
 	private:
 		static INT_PTR WINAPI export_wnd_proc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
-		void refresh_node_list(HWND wnd);
-		void enum_node(HWND wnd, INode* node);
+		void enum_node(INode* node);
 
 	private:
 		std::string file_name_;
-		HWND dlg_wnd_;
-
 		Interface* max_interface_;
+		std::vector<INode*> export_nodes_;
 	};
 
 	class meshml_class_desc : public ClassDesc

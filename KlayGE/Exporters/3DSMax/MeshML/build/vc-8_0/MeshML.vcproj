@@ -62,7 +62,7 @@
 				AdditionalDependencies="core.lib maxutil.lib geom.lib mesh.lib"
 				OutputFile="D:\3ds Max 9\plugins\MeshML.dle"
 				LinkIncremental="2"
-				ModuleDefinitionFile="..\..\Export.def"
+				ModuleDefinitionFile="..\..\export.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/MeshML.pdb"
 				SubSystem="2"
@@ -141,7 +141,7 @@
 				AdditionalDependencies="core.lib maxutil.lib geom.lib mesh.lib"
 				OutputFile="D:\3ds Max 9\plugins\MeshML.dle"
 				LinkIncremental="1"
-				ModuleDefinitionFile="..\..\Export.def"
+				ModuleDefinitionFile="..\..\export.def"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -183,7 +183,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\Export.def"
+				RelativePath="..\..\export.def"
 				>
 			</File>
 			<File

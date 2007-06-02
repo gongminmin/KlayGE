@@ -3,12 +3,8 @@
 // Used by meshml.rc
 //
 #define IDD_MESHML_EXPORT               1002
-#define IDC_HIDDEN                      1004
-#define IDC_SEL_ALL                     1006
 #define IDC_JOINT_PER_VER               1007
 #define IDC_SPIN_JOINT_PER_VER          1008
-#define IDC_NODE_LIST                   1015
-#define IDC_FLIP_NORMALS                1016
 
 // Next default values for new objects
 // 

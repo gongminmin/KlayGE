@@ -1,8 +1,11 @@
 // meshml.cpp
 // KlayGE meshml导出类 实现文件
-// Ver 2.5.0
-// 版权所有(C) 龚敏敏, 2005
+// Ver 3.6.0
+// 版权所有(C) 龚敏敏, 2005-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.6.0
+// 简化了对话框 (2007.6.2)
 //
 // 2.5.0
 // 初次建立 (2005.5.1)
@@ -67,7 +70,7 @@ namespace KlayGE
 
 	TCHAR const * meshml_export::CopyrightMessage()
 	{
-		return TEXT("Copyright 2005");
+		return TEXT("Copyright 2005-2007");
 	}
 
 	TCHAR const * meshml_export::OtherMessage1()
@@ -87,7 +90,7 @@ namespace KlayGE
 
 	void meshml_export::ShowAbout(HWND hWnd)
 	{
-		::MessageBox(hWnd, TEXT("Minmin Gong, Copyright 2005"), TEXT("About"), MB_OK);
+		::MessageBox(hWnd, TEXT("Minmin Gong, Copyright 2005-2007"), TEXT("About"), MB_OK);
 	}
 
 	BOOL meshml_export::SupportsOptions(int ext, DWORD options)
@@ -108,6 +111,27 @@ namespace KlayGE
 		file_name_ = tstr_to_str(name);
 
 		max_interface_ = max_interface;
+
+		export_nodes_.clear();
+		if (options & SCENE_EXPORT_SELECTED)
+		{
+			int count = max_interface_->GetSelNodeCount();
+			for (int i = 0; i < count; ++ i)
+			{
+				this->enum_node(max_interface_->GetSelNode(i));
+			}
+		}
+		else
+		{
+			this->export_nodes_.clear();
+			INode* root_node = this->max_interface_->GetRootNode();
+			int const num_children = root_node->NumberOfChildren();
+			for (int i = 0; i < num_children; ++ i)
+			{
+				this->enum_node(root_node->GetChildNode(i));
+			}
+		}
+
 		HWND max_wnd = max_interface->GetMAXHWnd();
 		if (::DialogBoxParam(dll_instance, MAKEINTRESOURCE(IDD_MESHML_EXPORT), max_wnd,
 			export_wnd_proc, reinterpret_cast<LPARAM>(this)))
@@ -118,31 +142,17 @@ namespace KlayGE
 		return 1;
 	}
 
-	void meshml_export::refresh_node_list(HWND dlg_wnd)
+	void meshml_export::enum_node(INode* node)
 	{
-		::SendMessage(::GetDlgItem(dlg_wnd, IDC_NODE_LIST), LB_RESETCONTENT, NULL, NULL);
-		INode* root_node = max_interface_->GetRootNode();
-		int const num_children = root_node->NumberOfChildren();
-		for (int i = 0; i < num_children; ++ i)
+		if (!node->IsNodeHidden())
 		{
-			this->enum_node(dlg_wnd, root_node->GetChildNode(i));
-		}
-	}
-
-	void meshml_export::enum_node(HWND dlg_wnd, INode* node)
-	{
-		if (!node->IsNodeHidden()
-			|| (BST_CHECKED == SendMessage(GetDlgItem(dlg_wnd, IDC_HIDDEN), BM_GETCHECK, NULL, NULL)))
-		{
-			HWND node_list_wnd = ::GetDlgItem(dlg_wnd, IDC_NODE_LIST);
-			int i = ::SendMessage(node_list_wnd, LB_ADDSTRING, NULL, reinterpret_cast<LPARAM>(node->GetName()));
-			::SendMessage(node_list_wnd, LB_SETITEMDATA, i, reinterpret_cast<LPARAM>(node));
+			export_nodes_.push_back(node);
 		}
 
 		int num_children = node->NumberOfChildren();
 		for (int i = 0; i < num_children; ++ i)
 		{
-			this->enum_node(dlg_wnd, node->GetChildNode(i));
+			this->enum_node(node->GetChildNode(i));
 		}
 	}
 
@@ -154,12 +164,6 @@ namespace KlayGE
 			assert(instance != NULL);
 
 			::SetWindowLongPtr(wnd, GWL_USERDATA, reinterpret_cast<LONG_PTR>(instance));
-
-			instance->dlg_wnd_ = wnd;
-
-			::SendMessage(::GetDlgItem(wnd, IDC_HIDDEN), BM_SETCHECK, BST_UNCHECKED, NULL);
-
-			instance->refresh_node_list(wnd);
 		}
 		else
 		{
@@ -170,46 +174,18 @@ namespace KlayGE
 			case WM_COMMAND:
 				switch (LOWORD(wparam))
 				{
-				case IDC_SEL_ALL:
-					::SendMessage(::GetDlgItem(wnd, IDC_NODE_LIST), LB_SETSEL, TRUE, -1);
-					break;
-
-				case IDC_HIDDEN:
-					assert(instance != NULL);
-					instance->refresh_node_list(wnd);
-					break;
-
 				case IDOK:
 					{
 						assert(instance != NULL);
 
-						HWND node_list_wnd = ::GetDlgItem(wnd, IDC_NODE_LIST);
-						int num_sel = ::SendMessage(node_list_wnd, LB_GETSELCOUNT, NULL, NULL);
-						if (num_sel > 0)
-						{
-							int const joint_per_ver = ::SendMessage(::GetDlgItem(wnd, IDC_SPIN_JOINT_PER_VER), UDM_GETPOS32, NULL, NULL);
-							Interval const se_ticks = instance->max_interface_->GetAnimRange();
-							meshml_extractor extractor(instance->max_interface_->GetRootNode(), joint_per_ver,
-								instance->max_interface_->GetTime(),
-								se_ticks.Start() / GetTicksPerFrame(), se_ticks.End() / GetTicksPerFrame());
+						int const joint_per_ver = ::SendMessage(::GetDlgItem(wnd, IDC_SPIN_JOINT_PER_VER), UDM_GETPOS32, NULL, NULL);
+						Interval const se_ticks = instance->max_interface_->GetAnimRange();
+						meshml_extractor extractor(instance->max_interface_->GetRootNode(), joint_per_ver,
+							instance->max_interface_->GetTime(),
+							se_ticks.Start() / GetTicksPerFrame(), se_ticks.End() / GetTicksPerFrame());
 
-							std::vector<int> sel_items(num_sel);
-							::SendMessage(node_list_wnd, LB_GETSELITEMS, num_sel, reinterpret_cast<LPARAM>(&sel_items[0]));
-
-							std::vector<INode*> nodes;
-							for (size_t i = 0; i < sel_items.size(); ++ i)
-							{
-								nodes.push_back(reinterpret_cast<INode*>(::SendMessage(node_list_wnd,
-									LB_GETITEMDATA, sel_items[i], NULL)));
-							}
-
-							extractor.export_objects(nodes);
-							extractor.write_xml(instance->file_name_);
-						}
-						else
-						{
-							::MessageBox(wnd, TEXT("Please select something."), TEXT("MeshML Export"), MB_OK);
-						}
+						extractor.export_objects(instance->export_nodes_);
+						extractor.write_xml(instance->file_name_);
 
 						::EndDialog(wnd, 1);
 					}

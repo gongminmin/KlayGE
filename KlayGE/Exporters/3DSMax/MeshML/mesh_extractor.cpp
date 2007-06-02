@@ -1,8 +1,11 @@
 // mesh_extractor.cpp
 // KlayGE 3DSMax网格数据析取类 实现文件
-// Ver 3.0.0
-// 版权所有(C) 龚敏敏, 2005
+// Ver 3.6.0
+// 版权所有(C) 龚敏敏, 2005-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.6.0
+// 能导出骨骼动画 (2007.6.2)
 //
 // 3.0.0
 // 导出顶点格式 (2005.10.25)
