@@ -36,6 +36,9 @@
 #include <vector>
 #include <limits>
 
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
+
 #include "util.hpp"
 #include "mesh_extractor.hpp"
 
@@ -79,6 +82,14 @@ namespace
 		std::pair<std::string, float> const& rhs)
 	{
 		return lhs.second > rhs.second;
+	}
+
+	Point3 compute_normal(Point3 const & v0XYZ, Point3 const & v1XYZ, Point3 const & v2XYZ)
+	{
+		Point3 v1v0 = v1XYZ - v0XYZ;
+		Point3 v2v0 = v2XYZ - v0XYZ;
+
+		return CrossProd(v1v0, v2v0);
 	}
 
 	Point3 compute_tangent(Point3 const & v0XYZ, Point3 const & v1XYZ, Point3 const & v2XYZ,
@@ -173,11 +184,11 @@ namespace KlayGE
 			this->find_joints(root_node_);
 
 
-			for (size_t i = 0; i < nodes.size(); ++ i)
+			BOOST_FOREACH(BOOST_TYPEOF(nodes)::const_reference node, nodes)
 			{
-				if (is_mesh(nodes[i]))
+				if (is_mesh(node))
 				{
-					Object* obj_ref = nodes[i]->GetObjectRef();
+					Object* obj_ref = node->GetObjectRef();
 					while ((obj_ref != NULL) && (GEN_DERIVOB_CLASS_ID == obj_ref->SuperClassID()))
 					{
 						IDerivedObject* derived_obj = static_cast<IDerivedObject*>(obj_ref);
@@ -216,25 +227,24 @@ namespace KlayGE
 		std::vector<INode*> jnodes;
 		std::vector<INode*> mnodes;
 
-		for (std::map<std::string, joint_and_mat_t>::iterator iter = joint_nodes_.begin();
-			iter != joint_nodes_.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(joint_nodes_)::const_reference jn, joint_nodes_)
 		{
-			if (is_bone(iter->second.joint_node))
+			if (is_bone(jn.second.joint_node))
 			{
-				jnodes.push_back(iter->second.joint_node);
+				jnodes.push_back(jn.second.joint_node);
 			}
 		}
-		for (size_t i = 0; i < nodes.size(); ++ i)
+		BOOST_FOREACH(BOOST_TYPEOF(nodes)::const_reference node, nodes)
 		{
-			if (is_bone(nodes[i]))
+			if (is_bone(node))
 			{
-				jnodes.push_back(nodes[i]);
+				jnodes.push_back(node);
 			}
 			else
 			{
-				if (is_mesh(nodes[i]))
+				if (is_mesh(node))
 				{
-					mnodes.push_back(nodes[i]);
+					mnodes.push_back(node);
 				}
 			}
 		}
@@ -244,14 +254,14 @@ namespace KlayGE
 		std::sort(mnodes.begin(), mnodes.end());
 		mnodes.erase(std::unique(mnodes.begin(), mnodes.end()), mnodes.end());
 
-		for (size_t i = 0; i < jnodes.size(); ++ i)
+		BOOST_FOREACH(BOOST_TYPEOF(jnodes)::const_reference jnode, jnodes)
 		{
-			this->extract_bone(jnodes[i]);
+			this->extract_bone(jnode);
 		}
 		
-		for (size_t i = 0; i < mnodes.size(); ++ i)
+		BOOST_FOREACH(BOOST_TYPEOF(mnodes)::const_reference mnode, mnodes)
 		{
-			this->extract_object(mnodes[i]);
+			this->extract_object(mnode);
 		}
 	}
 
@@ -269,9 +279,6 @@ namespace KlayGE
 		normal_matrix.NoTrans();
 
 		std::vector<std::pair<Point3, binds_t> > positions;
-		std::vector<Point3> normals;
-		std::vector<Point3> tangents;
-		std::vector<Point3> binormals;
 		std::map<int, std::vector<Point2> > texs;
 		std::vector<int> pos_indices;
 		std::map<int, std::vector<int> > tex_indices;
@@ -327,9 +334,7 @@ namespace KlayGE
 			}
 
 			Mesh& mesh = tri->GetMesh();
-			mesh.buildNormals();
 
-			std::vector<std::vector<int> > vertex_triangle_list(mesh.getNumVerts());
 			obj_info.triangles.resize(mesh.getNumFaces());
 
 			for (int channel = 1; channel < MAX_MESHMAPS; channel ++)
@@ -370,25 +375,11 @@ namespace KlayGE
 				for (int j = 2; j >= 0; -- j)
 				{
 					pos_indices.push_back(mesh.faces[i].v[j]);
-					vertex_triangle_list[mesh.faces[i].v[j]].push_back(i);
 				}
-
-				TVFace* tv_faces = mesh.mapFaces(1);
-				obj_info.triangles[i].tangent = compute_tangent(mesh.verts[mesh.faces[i].v[0]], mesh.verts[mesh.faces[i].v[1]], mesh.verts[mesh.faces[i].v[2]],
-					texs[1][tv_faces[i].t[0]], texs[1][tv_faces[i].t[1]], texs[1][tv_faces[i].t[2]],
-					mesh.FaceNormal(i, true));
 			}
 			for (int i = 0; i < mesh.getNumVerts(); ++ i)
 			{
 				positions.push_back(std::make_pair(mesh.getVert(i), binds_t()));
-				normals.push_back(mesh.getNormal(i));
-
-				Point3 tangent(0, 0, 0);
-				for (size_t j = 0; j < vertex_triangle_list[i].size(); ++ j)
-				{
-					tangent += obj_info.triangles[vertex_triangle_list[i][j]].tangent;
-				}
-				tangents.push_back(tangent);
 			}
 
 			if (need_delete)
@@ -415,10 +406,9 @@ namespace KlayGE
 				}
 
 				vertex_index.pos_index = pos_indices[offset];
-				for (std::map<int, std::vector<int> >::iterator iter = tex_indices.begin();
-					iter != tex_indices.end(); ++ iter)
+				BOOST_FOREACH(BOOST_TYPEOF(tex_indices)::const_reference tex_index, tex_indices)
 				{
-					vertex_index.tex_indices.push_back(iter->second[offset]);
+					vertex_index.tex_indices.push_back(tex_index.second[offset]);
 				}
 
 				std::set<vertex_index_t>::iterator v_iter = vertex_indices.find(vertex_index);
@@ -465,10 +455,9 @@ namespace KlayGE
 			}
 
 			Matrix3 tm = node->GetObjTMAfterWSM(0);
-			for (std::vector<std::pair<Point3, binds_t> >::iterator iter = positions.begin();
-				iter != positions.end(); ++ iter)
+			BOOST_FOREACH(BOOST_TYPEOF(positions)::reference pos_binds, positions)
 			{
-				if (iter->second.empty())
+				if (pos_binds.second.empty())
 				{
 					INode* parent_node = node->GetParentNode();
 					while ((parent_node != root_node_) && !is_bone(parent_node))
@@ -476,66 +465,83 @@ namespace KlayGE
 						parent_node = parent_node->GetParentNode();
 					}
 
-					iter->second.push_back(std::make_pair(tstr_to_str(parent_node->GetName()), 1));
+					pos_binds.second.push_back(std::make_pair(tstr_to_str(parent_node->GetName()), 1));
 				}
 
-				Point3 v0 = iter->first * tm;
-				iter->first = Point3(0, 0, 0);
-				for (size_t i = 0 ; i < iter->second.size(); ++ i)
+				Point3 v0 = pos_binds.first * tm;
+				pos_binds.first = Point3(0, 0, 0);
+				for (size_t i = 0 ; i < pos_binds.second.size(); ++ i)
 				{
-					assert(joint_nodes_.find(iter->second[i].first) != joint_nodes_.end());
+					assert(joint_nodes_.find(pos_binds.second[i].first) != joint_nodes_.end());
 
-					iter->first += iter->second[i].second
-						* (v0 * joint_nodes_[iter->second[i].first].mesh_init_matrix);
+					pos_binds.first += pos_binds.second[i].second
+						* (v0 * joint_nodes_[pos_binds.second[i].first].mesh_init_matrix);
 				}
 
-				if (iter->second.size() > joints_per_ver_)
+				if (pos_binds.second.size() > joints_per_ver_)
 				{
-					std::nth_element(iter->second.begin(), iter->second.begin() + joints_per_ver_, iter->second.end(), bind_cmp);
-					iter->second.resize(joints_per_ver_);
+					std::nth_element(pos_binds.second.begin(), pos_binds.second.begin() + joints_per_ver_, pos_binds.second.end(), bind_cmp);
+					pos_binds.second.resize(joints_per_ver_);
 
 					float sum_weight = 0;
 					for (int j = 0; j < joints_per_ver_; ++ j)
 					{
-						sum_weight += iter->second[j].second;
+						sum_weight += pos_binds.second[j].second;
 					}
 					assert(sum_weight > 0);
 
 					for (int j = 0; j < joints_per_ver_; ++ j)
 					{
-						iter->second[j].second /= sum_weight;
+						pos_binds.second[j].second /= sum_weight;
 					}
 				}
 				else
 				{
-					for (int j = static_cast<int>(iter->second.size()); j < joints_per_ver_; ++ j)
+					for (int j = static_cast<int>(pos_binds.second.size()); j < joints_per_ver_; ++ j)
 					{
-						iter->second.push_back(std::make_pair(tstr_to_str(root_node_->GetName()), 0));
+						pos_binds.second.push_back(std::make_pair(tstr_to_str(root_node_->GetName()), 0));
 					}
 				}
 			}
 		}
 		else
 		{
-			for (std::vector<std::pair<Point3, binds_t> >::iterator iter = positions.begin();
-				iter != positions.end(); ++ iter)
+			BOOST_FOREACH(BOOST_TYPEOF(positions)::reference pos_binds, positions)
 			{
-				iter->first = iter->first * obj_matrix;
+				pos_binds.first = pos_binds.first * obj_matrix;
 			}
+		}
+
+		std::vector<Point3> normals(positions.size(), Point3(0, 0, 0));
+		std::vector<Point3> tangents(positions.size(), Point3(0, 0, 0));
+		for (int i = 0; i < pos_indices.size() / 3; ++ i)
+		{
+			Point3 face_normal = compute_normal(positions[pos_indices[i * 3 + 2]].first,
+				positions[pos_indices[i * 3 + 1]].first, positions[pos_indices[i * 3 + 0]].first);
+			Point3 face_tangent = compute_tangent(positions[pos_indices[i * 3 + 2]].first,
+				positions[pos_indices[i * 3 + 1]].first, positions[pos_indices[i * 3 + 0]].first,
+				texs[1][tex_indices[1][i * 3 + 2]], texs[1][tex_indices[1][i * 3 + 1]], texs[1][tex_indices[1][i * 3 + 0]],
+				face_normal);
+
+			normals[pos_indices[i * 3 + 0]] += face_normal;
+			normals[pos_indices[i * 3 + 1]] += face_normal;
+			normals[pos_indices[i * 3 + 2]] += face_normal;
+			tangents[pos_indices[i * 3 + 0]] += face_tangent;
+			tangents[pos_indices[i * 3 + 1]] += face_tangent;
+			tangents[pos_indices[i * 3 + 2]] += face_tangent;
 		}
 
 		obj_info.vertices.resize(vertex_indices.size());
 		int ver_index = 0;
-		for (std::set<vertex_index_t>::iterator iter = vertex_indices.begin();
-			iter != vertex_indices.end(); ++ iter, ++ ver_index)
+		BOOST_FOREACH(BOOST_TYPEOF(vertex_indices)::reference vertex_index, vertex_indices)
 		{
 			vertex_t& vertex = obj_info.vertices[ver_index];
 
-			vertex.pos = positions[iter->pos_index].first;
+			vertex.pos = positions[vertex_index.pos_index].first;
 			std::swap(vertex.pos.y, vertex.pos.z);
 
-			Point3 normal = normals[iter->pos_index] * normal_matrix;
-			Point3 tangent = tangents[iter->pos_index] * normal_matrix;
+			Point3 normal = normals[vertex_index.pos_index];
+			Point3 tangent = tangents[vertex_index.pos_index];
 			if (flip_normals)
 			{
 				normal = -normal;
@@ -549,16 +555,18 @@ namespace KlayGE
 			for (std::map<int, std::vector<Point2> >::iterator uv_iter = texs.begin();
 				uv_iter != texs.end(); ++ uv_iter, ++ uv_layer)
 			{
-				Point2 tex = uv_iter->second[iter->tex_indices[uv_layer]];
+				Point2 tex = uv_iter->second[vertex_index.tex_indices[uv_layer]];
 				obj_info.vertices[ver_index].tex.push_back(Point2(tex.x, 1 - tex.y));
 			}
 
-			for (size_t i = 0; i < iter->ref_triangle.size(); ++ i)
+			for (size_t i = 0; i < vertex_index.ref_triangle.size(); ++ i)
 			{
-				obj_info.triangles[iter->ref_triangle[i] / 3].vertex_index[iter->ref_triangle[i] % 3] = ver_index;
+				obj_info.triangles[vertex_index.ref_triangle[i] / 3].vertex_index[vertex_index.ref_triangle[i] % 3] = ver_index;
 			}
 
-			vertex.binds = positions[iter->pos_index].second;
+			vertex.binds = positions[vertex_index.pos_index].second;
+
+			++ ver_index;
 		}
 
 		obj_info.vertex_elements.push_back(vertex_element_t(VEU_Position, 0, 3));
@@ -625,12 +633,11 @@ namespace KlayGE
 
 	void meshml_extractor::extract_all_joint_tms(IPhysiqueExport* phy_exp, ISkin* skin)
 	{
-		for (std::map<std::string, joint_and_mat_t>::iterator iter = joint_nodes_.begin();
-					iter != joint_nodes_.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(joint_nodes_)::reference jn, joint_nodes_)
 		{
 			joint_t joint;
 
-			INode* parent_node = iter->second.joint_node->GetParentNode();
+			INode* parent_node = jn.second.joint_node->GetParentNode();
 			if (!is_bone(parent_node))
 			{
 				parent_node = root_node_;
@@ -640,7 +647,7 @@ namespace KlayGE
 			Matrix3 skin_init_tm;
 			if (phy_exp != NULL)
 			{
-				if (phy_exp->GetInitNodeTM(iter->second.joint_node, skin_init_tm) != MATRIX_RETURNED)
+				if (phy_exp->GetInitNodeTM(jn.second.joint_node, skin_init_tm) != MATRIX_RETURNED)
 				{
 					skin_init_tm.IdentityMatrix();
 				}
@@ -648,38 +655,38 @@ namespace KlayGE
 			else
 			{
 				assert(skin != NULL);
-				if (skin->GetBoneInitTM(iter->second.joint_node, skin_init_tm, false) != MATRIX_RETURNED)
+				if (skin->GetBoneInitTM(jn.second.joint_node, skin_init_tm, false) != MATRIX_RETURNED)
 				{
 					skin_init_tm.IdentityMatrix();
 				}
 			}
 
-			iter->second.mesh_init_matrix = Inverse(iter->second.joint_node->GetNodeTM(0)) * skin_init_tm;
+			jn.second.mesh_init_matrix = Inverse(jn.second.joint_node->GetNodeTM(0)) * skin_init_tm;
 
 			joint.pos = this->point_from_matrix(skin_init_tm);
 			joint.quat = this->quat_from_matrix(skin_init_tm);
 
-			joints_[iter->first] = joint;
+			joints_[jn.first] = joint;
 		}
 	}
 
-	void meshml_extractor::add_joint_weight(binds_t& bind, std::string const & joint_name, float weight)
+	void meshml_extractor::add_joint_weight(binds_t& binds, std::string const & joint_name, float weight)
 	{
 		if (weight > 0)
 		{
 			bool repeat = false;
-			for (binds_t::iterator biter = bind.begin(); biter != bind.end(); ++ biter)
+			BOOST_FOREACH(BOOST_TYPEOF(binds)::reference bind, binds)
 			{
-				if (biter->first == joint_name)
+				if (bind.first == joint_name)
 				{
-					biter->second += weight;
+					bind.second += weight;
 					repeat = true;
 					break;
 				}
 			}
 			if (!repeat)
 			{
-				bind.push_back(std::make_pair(joint_name, weight));
+				binds.push_back(std::make_pair(joint_name, weight));
 			}
 		}
 	}
@@ -772,27 +779,26 @@ namespace KlayGE
 	void meshml_extractor::remove_redundant_joints()
 	{
 		std::set<std::string> joints_used;
-		for (size_t i = 0; i < objs_info_.size(); ++ i)
+		BOOST_FOREACH(BOOST_TYPEOF(objs_info_)::const_reference obj_info, objs_info_)
 		{
-			for (size_t j = 0; j < objs_info_[i].vertices.size(); ++ j)
+			BOOST_FOREACH(BOOST_TYPEOF(obj_info.vertices)::const_reference vertex, obj_info.vertices)
 			{
-				for (binds_t::iterator k = objs_info_[i].vertices[j].binds.begin();
-					k != objs_info_[i].vertices[j].binds.end(); ++ k)
+				BOOST_FOREACH(BOOST_TYPEOF(vertex.binds)::const_reference bind, vertex.binds)
 				{
-					joints_used.insert(k->first);
+					joints_used.insert(bind.first);
 				}
 			}
 		}
 
-		for (joints_t::iterator iter = joints_.begin(); iter != joints_.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(joints_)::const_reference joint, joints_)
 		{
-			if (joints_used.find(iter->first) != joints_used.end())
+			if (joints_used.find(joint.first) != joints_used.end())
 			{
-				joints_used.insert(iter->second.parent_name);
+				joints_used.insert(joint.second.parent_name);
 			}
 		}
 
-		for (joints_t::iterator iter = joints_.begin(); iter != joints_.end();)
+		for (BOOST_AUTO(iter, joints_.begin()); iter != joints_.end();)
 		{
 			if (joints_used.find(iter->first) == joints_used.end())
 			{
@@ -818,9 +824,9 @@ namespace KlayGE
 		std::map<std::string, int> joints_name_to_id;
 		std::vector<std::string> joints_id_to_name;
 		{
-			for (joints_t::const_iterator iter = joints_.begin(); iter != joints_.end(); ++ iter)
+			BOOST_FOREACH(BOOST_TYPEOF(joints_)::const_reference joint, joints_)
 			{
-				joints_id_to_name.push_back(iter->first);
+				joints_id_to_name.push_back(joint.first);
 			}
 
 			bool swapped = true;
@@ -860,21 +866,21 @@ namespace KlayGE
 		ofs << "<model version=\'3\'>" << endl;
 
 		ofs << "\t<bones_chunk>" << endl;
-		for (std::vector<std::string>::const_iterator iter = joints_id_to_name.begin(); iter != joints_id_to_name.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(joints_id_to_name)::const_reference joint_name, joints_id_to_name)
 		{
 			int parent_id = -1;
-			if (!joints_[*iter].parent_name.empty())
+			if (!joints_[joint_name].parent_name.empty())
 			{
-				assert(joints_name_to_id.find(joints_[*iter].parent_name) != joints_name_to_id.end());
-				parent_id = joints_name_to_id[joints_[*iter].parent_name];
-				assert(parent_id < joints_name_to_id[*iter]);
+				assert(joints_name_to_id.find(joints_[joint_name].parent_name) != joints_name_to_id.end());
+				parent_id = joints_name_to_id[joints_[joint_name].parent_name];
+				assert(parent_id < joints_name_to_id[joint_name]);
 			}
 
-			ofs << "\t\t<bone name=\'" << *iter
+			ofs << "\t\t<bone name=\'" << joint_name
 				<< "\' parent=\'" << parent_id
 				<< "\'>" << endl;
 
-			joint_t& joint = joints_[*iter];
+			joint_t const & joint = joints_[joint_name];
 
 			ofs << "\t\t\t<bind_pos x=\'" << joint.pos.x
 				<< "\' y=\'" << joint.pos.y
@@ -890,62 +896,57 @@ namespace KlayGE
 		ofs << "\t</bones_chunk>" << endl << endl;
 
 		ofs << "\t<meshes_chunk>" << endl;
-		for (objects_info_t::const_iterator oi_iter = objs_info_.begin(); oi_iter != objs_info_.end(); ++ oi_iter)
+		BOOST_FOREACH(BOOST_TYPEOF(objs_info_)::const_reference obj_info, objs_info_)
 		{
-			ofs << "\t\t<mesh name=\'" + oi_iter->name + "\'>" << endl;
+			ofs << "\t\t<mesh name=\'" + obj_info.name + "\'>" << endl;
 
 			ofs << "\t\t\t<vertex_elements_chunk>" << endl;
-			for (vertex_elements_t::const_iterator ve_iter = oi_iter->vertex_elements.begin();
-				ve_iter != oi_iter->vertex_elements.end(); ++ ve_iter)
+			BOOST_FOREACH(BOOST_TYPEOF(obj_info.vertex_elements)::const_reference ve, obj_info.vertex_elements)
 			{
-				ofs << "\t\t\t\t<vertex_element usage=\'" << ve_iter->usage
-					<< "\' usage_index=\'" << int(ve_iter->usage_index)
-					<< "\' num_components=\'" << int(ve_iter->num_components) << "\'/>" << endl;
+				ofs << "\t\t\t\t<vertex_element usage=\'" << ve.usage
+					<< "\' usage_index=\'" << int(ve.usage_index)
+					<< "\' num_components=\'" << int(ve.num_components) << "\'/>" << endl;
 			}
 			ofs << "\t\t\t</vertex_elements_chunk>" << endl << endl;
 
 			ofs << "\t\t\t<textures_chunk>" << endl;
-			for (texture_slots_t::const_iterator ts_iter = oi_iter->texture_slots.begin();
-				ts_iter != oi_iter->texture_slots.end(); ++ ts_iter)
+			BOOST_FOREACH(BOOST_TYPEOF(obj_info.texture_slots)::const_reference ts, obj_info.texture_slots)
 			{
-				ofs << "\t\t\t\t<texture type=\'" << ts_iter->first
-					<< "\' name=\'" << ts_iter->second << "\'/>" << endl;
+				ofs << "\t\t\t\t<texture type=\'" << ts.first
+					<< "\' name=\'" << ts.second << "\'/>" << endl;
 			}
 			ofs << "\t\t\t</textures_chunk>" << endl << endl;
 
 			ofs << "\t\t\t<vertices_chunk>" << endl;
-			for (vertices_t::const_iterator v_iter = oi_iter->vertices.begin();
-				v_iter != oi_iter->vertices.end(); ++ v_iter)
+			BOOST_FOREACH(BOOST_TYPEOF(obj_info.vertices)::const_reference vertex, obj_info.vertices)
 			{
-				ofs << "\t\t\t\t<vertex x=\'" << v_iter->pos.x
-					<< "\' y=\'" << v_iter->pos.y
-					<< "\' z=\'" << v_iter->pos.z << "\'>" << endl;
+				ofs << "\t\t\t\t<vertex x=\'" << vertex.pos.x
+					<< "\' y=\'" << vertex.pos.y
+					<< "\' z=\'" << vertex.pos.z << "\'>" << endl;
 
-				ofs << "\t\t\t\t\t<normal x=\'" << v_iter->normal.x
-					<< "\' y=\'" << v_iter->normal.y
-					<< "\' z=\'" << v_iter->normal.z << "\'/>" << endl;
+				ofs << "\t\t\t\t\t<normal x=\'" << vertex.normal.x
+					<< "\' y=\'" << vertex.normal.y
+					<< "\' z=\'" << vertex.normal.z << "\'/>" << endl;
 
-				ofs << "\t\t\t\t\t<tangent x=\'" << v_iter->tangent.x
-					<< "\' y=\'" << v_iter->tangent.y
-					<< "\' z=\'" << v_iter->tangent.z << "\'/>" << endl;
+				ofs << "\t\t\t\t\t<tangent x=\'" << vertex.tangent.x
+					<< "\' y=\'" << vertex.tangent.y
+					<< "\' z=\'" << vertex.tangent.z << "\'/>" << endl;
 
-				ofs << "\t\t\t\t\t<binormal x=\'" << v_iter->binormal.x
-					<< "\' y=\'" << v_iter->binormal.y
-					<< "\' z=\'" << v_iter->binormal.z << "\'/>" << endl;
+				ofs << "\t\t\t\t\t<binormal x=\'" << vertex.binormal.x
+					<< "\' y=\'" << vertex.binormal.y
+					<< "\' z=\'" << vertex.binormal.z << "\'/>" << endl;
 
-				for (std::vector<Point2>::const_iterator t_iter = v_iter->tex.begin();
-					t_iter != v_iter->tex.end(); ++ t_iter)
+				BOOST_FOREACH(BOOST_TYPEOF(vertex.tex)::const_reference tex, vertex.tex)
 				{
-					ofs << "\t\t\t\t\t<tex_coord u=\'" << t_iter->x
-						<< "\' v=\'" << t_iter->y << "\'/>" << endl;
+					ofs << "\t\t\t\t\t<tex_coord u=\'" << tex.x
+						<< "\' v=\'" << tex.y << "\'/>" << endl;
 				}
 
-				for (binds_t::const_iterator b_iter = v_iter->binds.begin();
-					b_iter != v_iter->binds.end(); ++ b_iter)
+				BOOST_FOREACH(BOOST_TYPEOF(vertex.binds)::const_reference bind, vertex.binds)
 				{
-					assert(joints_name_to_id.find(b_iter->first) != joints_name_to_id.end());
-					ofs << "\t\t\t\t\t<weight bone_index=\'" << joints_name_to_id[b_iter->first]
-						<< "\' weight=\'" << b_iter->second << "\'/>" << endl;
+					assert(joints_name_to_id.find(bind.first) != joints_name_to_id.end());
+					ofs << "\t\t\t\t\t<weight bone_index=\'" << joints_name_to_id[bind.first]
+						<< "\' weight=\'" << bind.second << "\'/>" << endl;
 				}
 
 				ofs << "\t\t\t\t</vertex>" << endl;
@@ -953,12 +954,11 @@ namespace KlayGE
 			ofs << "\t\t\t</vertices_chunk>" << endl << endl;
 
 			ofs << "\t\t\t<triangles_chunk>" << endl;
-			for (triangles_t::const_iterator t_iter = oi_iter->triangles.begin();
-				t_iter != oi_iter->triangles.end(); ++ t_iter)
+			BOOST_FOREACH(BOOST_TYPEOF(obj_info.triangles)::const_reference tri, obj_info.triangles)
 			{
-				ofs << "\t\t\t\t<triangle a=\'" << t_iter->vertex_index[0]
-					<< "\' b=\'" << t_iter->vertex_index[1]
-					<< "\' c=\'" << t_iter->vertex_index[2] << "\'/>" << endl;
+				ofs << "\t\t\t\t<triangle a=\'" << tri.vertex_index[0]
+					<< "\' b=\'" << tri.vertex_index[1]
+					<< "\' c=\'" << tri.vertex_index[2] << "\'/>" << endl;
 			}
 			ofs << "\t\t\t</triangles_chunk>" << endl;
 
@@ -969,24 +969,24 @@ namespace KlayGE
 		ofs << "\t<key_frames_chunk start_frame=\'" << start_frame_
 			<< "\' end_frame=\'" << end_frame_
 			<< "\' frame_rate=\'" << frame_rate_ << "\'>" << endl;
-		for (key_frames_t::const_iterator iter = kfs_.begin(); iter != kfs_.end(); ++ iter)
+		BOOST_FOREACH(BOOST_TYPEOF(kfs_)::const_reference kf, kfs_)
 		{
-			assert(iter->positions.size() == iter->quaternions.size());
+			assert(kf.positions.size() == kf.quaternions.size());
 
-			ofs << "\t\t<key_frame joint=\'" << iter->joint << "\'>" << endl;
+			ofs << "\t\t<key_frame joint=\'" << kf.joint << "\'>" << endl;
 
-			for (size_t i = 0; i < iter->positions.size(); ++ i)
+			for (size_t i = 0; i < kf.positions.size(); ++ i)
 			{
 				ofs << "\t\t\t<key>" << endl;
 
-				ofs << "\t\t\t\t<pos x=\'" << iter->positions[i].x
-					<< "\' y=\'" << iter->positions[i].y
-					<< "\' z=\'" << iter->positions[i].z << "\'/>" << endl;
+				ofs << "\t\t\t\t<pos x=\'" << kf.positions[i].x
+					<< "\' y=\'" << kf.positions[i].y
+					<< "\' z=\'" << kf.positions[i].z << "\'/>" << endl;
 
-				ofs << "\t\t\t\t<quat x=\'" << iter->quaternions[i].x
-					<< "\' y=\'" << iter->quaternions[i].y
-					<< "\' z=\'" << iter->quaternions[i].z
-					<< "\' w=\'" << iter->quaternions[i].w << "\'/>" << endl;
+				ofs << "\t\t\t\t<quat x=\'" << kf.quaternions[i].x
+					<< "\' y=\'" << kf.quaternions[i].y
+					<< "\' z=\'" << kf.quaternions[i].z
+					<< "\' w=\'" << kf.quaternions[i].w << "\'/>" << endl;
 
 				ofs << "\t\t\t</key>" << endl;
 			}

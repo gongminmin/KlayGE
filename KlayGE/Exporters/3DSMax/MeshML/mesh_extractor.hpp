@@ -74,7 +74,6 @@ namespace KlayGE
 	struct triangle_t
 	{
 		int	vertex_index[3];
-		Point3 tangent;
 	};
 
 	typedef std::vector<triangle_t> triangles_t;
@@ -140,7 +139,7 @@ namespace KlayGE
 
 		void find_joints(INode* node);
 		void extract_all_joint_tms(IPhysiqueExport* phy_exp, ISkin* skin);
-		void add_joint_weight(binds_t& bind, std::string const & joint_name, float weight);
+		void add_joint_weight(binds_t& binds, std::string const & joint_name, float weight);
 
 		void physique_modifier(Modifier* mod, INode* node,
 			std::vector<std::pair<Point3, binds_t> >& positions);
