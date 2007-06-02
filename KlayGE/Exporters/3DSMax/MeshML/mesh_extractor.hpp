@@ -116,11 +116,10 @@ namespace KlayGE
 		vertex_elements_t vertex_elements;
 	};
 
-	struct joint_and_tms_t
+	struct joint_and_mat_t
 	{
 		INode* joint_node;
-		Matrix3 skin_init_tm;
-		Matrix3 init_node_tm;
+		Matrix3 mesh_init_matrix;
 	};
 
 	class meshml_extractor
@@ -157,7 +156,7 @@ namespace KlayGE
 		joints_t joints_;
 		int joints_per_ver_;
 
-		std::map<std::string, joint_and_tms_t> joint_nodes_;
+		std::map<std::string, joint_and_mat_t> joint_nodes_;
 
 		int cur_time_;
 		int start_frame_;

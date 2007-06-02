@@ -132,9 +132,9 @@ namespace KlayGE
 		if (is_bone(node))
 		{
 			std::string joint_name = tstr_to_str(node->GetName());
-			joint_and_tms_t jat;
-			jat.joint_node = node;
-			joint_nodes_[joint_name] = jat;
+			joint_and_mat_t jam;
+			jam.joint_node = node;
+			joint_nodes_[joint_name] = jam;
 		}
 		for (int i = 0; i < node->NumberOfChildren(); ++ i)
 		{
@@ -177,12 +177,12 @@ namespace KlayGE
 					Object* obj_ref = nodes[i]->GetObjectRef();
 					while ((obj_ref != NULL) && (GEN_DERIVOB_CLASS_ID == obj_ref->SuperClassID()))
 					{
-						IDerivedObject* DerivedObjectPtr = static_cast<IDerivedObject*>(obj_ref);
+						IDerivedObject* derived_obj = static_cast<IDerivedObject*>(obj_ref);
 
 						// Iterate over all entries of the modifier stack.
-						for (int mod_stack_index = 0; mod_stack_index < DerivedObjectPtr->NumModifiers(); ++ mod_stack_index)
+						for (int mod_stack_index = 0; mod_stack_index < derived_obj->NumModifiers(); ++ mod_stack_index)
 						{
-							Modifier* mod = DerivedObjectPtr->GetModifier(mod_stack_index);
+							Modifier* mod = derived_obj->GetModifier(mod_stack_index);
 							if (Class_ID(PHYSIQUE_CLASS_ID_A, PHYSIQUE_CLASS_ID_B) == mod->ClassID())
 							{
 								IPhysiqueExport* phy_exp = static_cast<IPhysiqueExport*>(mod->GetInterface(I_PHYINTERFACE));
@@ -204,25 +204,51 @@ namespace KlayGE
 							}
 						}
 
-						obj_ref = DerivedObjectPtr->GetObjRef();
+						obj_ref = derived_obj->GetObjRef();
 					}
 				}
 			}
 		}
 
+		std::vector<INode*> jnodes;
+		std::vector<INode*> mnodes;
+
+		for (std::map<std::string, joint_and_mat_t>::iterator iter = joint_nodes_.begin();
+			iter != joint_nodes_.end(); ++ iter)
+		{
+			if (is_bone(iter->second.joint_node))
+			{
+				jnodes.push_back(iter->second.joint_node);
+			}
+		}
 		for (size_t i = 0; i < nodes.size(); ++ i)
 		{
 			if (is_bone(nodes[i]))
 			{
-				this->extract_bone(nodes[i]);
+				jnodes.push_back(nodes[i]);
 			}
 			else
 			{
 				if (is_mesh(nodes[i]))
 				{
-					this->extract_object(nodes[i]);
+					mnodes.push_back(nodes[i]);
 				}
 			}
+		}
+
+		std::sort(jnodes.begin(), jnodes.end());
+		jnodes.erase(std::unique(jnodes.begin(), jnodes.end()), jnodes.end());
+		std::sort(mnodes.begin(), mnodes.end());
+		mnodes.erase(std::unique(mnodes.begin(), mnodes.end()), mnodes.end());
+
+		for (size_t i = 0; i < jnodes.size(); ++ i)
+		{
+			this->extract_bone(jnodes[i]);
+		}
+		
+		for (size_t i = 0; i < mnodes.size(); ++ i)
+		{
+			this->extract_object(mnodes[i]);
 		}
 	}
 
@@ -282,7 +308,7 @@ namespace KlayGE
 		{
 			std::stringstream ss;
 			ss << "Mesh " << obj_info.name << " needs at least one texture.";
-			MessageBoxA(NULL, ss.str().c_str(), "Error", MB_OK); 
+			MessageBoxA(NULL, ss.str().c_str(), "MeshML Error", MB_OK); 
 		}
 
 		Object* obj = node->EvalWorldState(cur_time_).obj;
@@ -411,12 +437,12 @@ namespace KlayGE
 			Object* obj_ref = node->GetObjectRef();
 			while ((obj_ref != NULL) && (GEN_DERIVOB_CLASS_ID == obj_ref->SuperClassID()))
 			{
-				IDerivedObject* DerivedObjectPtr = static_cast<IDerivedObject*>(obj_ref);
+				IDerivedObject* derived_obj = static_cast<IDerivedObject*>(obj_ref);
 
 				// Iterate over all entries of the modifier stack.
-				for (int mod_stack_index = 0; mod_stack_index < DerivedObjectPtr->NumModifiers(); ++ mod_stack_index)
+				for (int mod_stack_index = 0; mod_stack_index < derived_obj->NumModifiers(); ++ mod_stack_index)
 				{
-					Modifier* mod = DerivedObjectPtr->GetModifier(mod_stack_index);
+					Modifier* mod = derived_obj->GetModifier(mod_stack_index);
 					if (Class_ID(PHYSIQUE_CLASS_ID_A, PHYSIQUE_CLASS_ID_B) == mod->ClassID())
 					{
 						this->physique_modifier(mod, node, positions);
@@ -432,10 +458,10 @@ namespace KlayGE
 					}
 				}
 
-				obj_ref = DerivedObjectPtr->GetObjRef();
+				obj_ref = derived_obj->GetObjRef();
 			}
 
-			Matrix3 tm = node->GetNodeTM(0);
+			Matrix3 tm = node->GetObjTMAfterWSM(0);
 			for (std::vector<std::pair<Point3, binds_t> >::iterator iter = positions.begin();
 				iter != positions.end(); ++ iter)
 			{
@@ -456,9 +482,8 @@ namespace KlayGE
 				{
 					assert(joint_nodes_.find(iter->second[i].first) != joint_nodes_.end());
 
-					Matrix3 mesh_init_matrix = Inverse(joint_nodes_[iter->second[i].first].init_node_tm)
-						* joint_nodes_[iter->second[i].first].skin_init_tm;
-					iter->first += iter->second[i].second * (v0 * mesh_init_matrix);
+					iter->first += iter->second[i].second
+						* (v0 * joint_nodes_[iter->second[i].first].mesh_init_matrix);
 				}
 
 				if (iter->second.size() > joints_per_ver_)
@@ -597,7 +622,7 @@ namespace KlayGE
 
 	void meshml_extractor::extract_all_joint_tms(IPhysiqueExport* phy_exp, ISkin* skin)
 	{
-		for (std::map<std::string, joint_and_tms_t>::iterator iter = joint_nodes_.begin();
+		for (std::map<std::string, joint_and_mat_t>::iterator iter = joint_nodes_.begin();
 					iter != joint_nodes_.end(); ++ iter)
 		{
 			joint_t joint;
@@ -609,20 +634,27 @@ namespace KlayGE
 			}
 			joint.parent_name = tstr_to_str(parent_node->GetName());
 
+			Matrix3 skin_init_tm;
 			if (phy_exp != NULL)
 			{
-				phy_exp->GetInitNodeTM(iter->second.joint_node, iter->second.skin_init_tm);
+				if (phy_exp->GetInitNodeTM(iter->second.joint_node, skin_init_tm) != MATRIX_RETURNED)
+				{
+					skin_init_tm.IdentityMatrix();
+				}
 			}
 			else
 			{
 				assert(skin != NULL);
-				skin->GetBoneInitTM(iter->second.joint_node, iter->second.skin_init_tm, false);
+				if (skin->GetBoneInitTM(iter->second.joint_node, skin_init_tm, false) != MATRIX_RETURNED)
+				{
+					skin_init_tm.IdentityMatrix();
+				}
 			}
 
-			iter->second.init_node_tm = iter->second.joint_node->GetNodeTM(0);
+			iter->second.mesh_init_matrix = Inverse(iter->second.joint_node->GetNodeTM(0)) * skin_init_tm;
 
-			joint.pos = this->point_from_matrix(iter->second.skin_init_tm);
-			joint.quat = this->quat_from_matrix(iter->second.skin_init_tm);
+			joint.pos = this->point_from_matrix(skin_init_tm);
+			joint.quat = this->quat_from_matrix(skin_init_tm);
 
 			joints_[iter->first] = joint;
 		}
