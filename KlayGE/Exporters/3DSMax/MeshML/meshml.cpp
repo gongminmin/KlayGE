@@ -163,11 +163,11 @@ namespace KlayGE
 			meshml_export* instance = reinterpret_cast<meshml_export*>(lparam);
 			assert(instance != NULL);
 
-			::SetWindowLongPtr(wnd, GWL_USERDATA, reinterpret_cast<LONG_PTR>(instance));
+			::SetWindowLongPtr(wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(instance));
 		}
 		else
 		{
-			meshml_export* instance = reinterpret_cast<meshml_export*>(::GetWindowLongPtr(wnd, GWL_USERDATA));
+			meshml_export* instance = reinterpret_cast<meshml_export*>(::GetWindowLongPtr(wnd, GWLP_USERDATA));
 
 			switch (msg)
 			{
