@@ -16,14 +16,7 @@
 #ifndef _THREADPOOL_HPP
 #define _THREADPOOL_HPP
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4127 4189)
-#endif
 #include <boost/thread.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
 #include <vector>
