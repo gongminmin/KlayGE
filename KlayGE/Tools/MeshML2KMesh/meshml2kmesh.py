@@ -83,6 +83,11 @@ class key:
 	def __init__(self, pos, quat):
 		self.pos = pos
 		self.quat = quat
+		
+class key_frame:
+	def __init__(self, name, keys):
+		self.name = name
+		self.keys = keys
 
 class model:
 	def __init__(self):
@@ -99,6 +104,9 @@ class model:
 def parse_model(dom):
 	ret = model()
 
+	from sys import	getfilesystemencoding
+	encoding = getfilesystemencoding()
+
 	ret.version = int(dom.documentElement.getAttribute('version'))
 	if ret.version != 3:
 		print "model version must be 3"
@@ -108,7 +116,7 @@ def parse_model(dom):
 		bones_chunk_tag = dom.documentElement.getElementsByTagName('bones_chunk')[0]
 		bone_tags = bones_chunk_tag.getElementsByTagName('bone')
 		for bone_tag in bone_tags:
-			name = bone_tag.getAttribute('name')
+			name = bone_tag.getAttribute('name').encode(encoding)
 			parent = bone_tag.getAttribute('parent')
 
 			bind_pos_tag = bone_tag.getElementsByTagName('bind_pos')[0]
@@ -121,7 +129,7 @@ def parse_model(dom):
 	meshes_chunk_tag = dom.documentElement.getElementsByTagName('meshes_chunk')[0]
 	mesh_tags = meshes_chunk_tag.getElementsByTagName('mesh')
 	for mesh_tag in mesh_tags:
-		name = mesh_tag.getAttribute('name')
+		name = mesh_tag.getAttribute('name').encode(encoding)
 
 		vertex_elems = []
 		vertex_elems_chunk_tag = mesh_tag.getElementsByTagName('vertex_elements_chunk')[0]
@@ -133,7 +141,7 @@ def parse_model(dom):
 		textures_chunk_tag = mesh_tag.getElementsByTagName('textures_chunk')[0]
 		texture_tags = textures_chunk_tag.getElementsByTagName('texture')
 		for texture_tag in texture_tags:
-			textures.append(texture(texture_tag.getAttribute('type'), texture_tag.getAttribute('name')))
+			textures.append(texture(texture_tag.getAttribute('type').encode(encoding), texture_tag.getAttribute('name').encode(encoding)))
 
 		vertices = []
 		vertices_chunk_tag = mesh_tag.getElementsByTagName('vertices_chunk')[0]
@@ -195,7 +203,7 @@ def parse_model(dom):
 
 		key_frame_tags = key_frames_chunk_tag.getElementsByTagName('key_frame')
 		for key_frame_tag in key_frame_tags:
-			joint_name = key_frame_tag.getAttribute('joint')
+			joint_name = key_frame_tag.getAttribute('joint').encode(encoding)
 
 			keys = []
 			key_tags = key_frame_tag.getElementsByTagName('key')
@@ -207,7 +215,7 @@ def parse_model(dom):
 
 				keys.append(key(pos, quat))
 
-			ret.key_frames.append([joint_name, keys])
+			ret.key_frames.append(key_frame(joint_name, keys))
 
 	return ret
 
@@ -251,16 +259,12 @@ if __name__ == '__main__':
 	ofs.write(pack('L', model.start_frame))
 	ofs.write(pack('L', model.end_frame))
 	ofs.write(pack('L', model.frame_rate))
-	
-	encoding = sys.getfilesystemencoding()
 
 	for mesh in model.meshes:
-		mesh_name = mesh.name.encode(encoding)
+		print "Compiling mesh:", mesh.name
 
-		print "Compiling mesh:", mesh_name
-
-		ofs.write(pack('B', len(mesh_name)))
-		ofs.write(mesh_name)
+		ofs.write(pack('B', len(mesh.name)))
+		ofs.write(mesh.name)
 
 		ofs.write(pack('B', len(mesh.vertex_elems)))
 		for vertex_elem in mesh.vertex_elems:
@@ -268,12 +272,10 @@ if __name__ == '__main__':
 
 		ofs.write(pack('B', len(mesh.textures)))
 		for texture in mesh.textures:
-			texture_type = texture.type.encode(encoding)
-			ofs.write(pack('B', len(texture_type)))
-			ofs.write(texture_type)
-			texture_name = texture.name.encode(encoding)
-			ofs.write(pack('B', len(texture_name)))
-			ofs.write(texture_name)
+			ofs.write(pack('B', len(texture.type)))
+			ofs.write(texture.type)
+			ofs.write(pack('B', len(texture.name)))
+			ofs.write(texture.name)
 
 		ofs.write(pack('L', len(mesh.vertices)))
 		for vertex_elem in mesh.vertex_elems:
@@ -318,29 +320,25 @@ if __name__ == '__main__':
 			ofs.write(pack('HHH', triangle.a, triangle.b, triangle.c))
 
 	for jo in model.joints:
-		jo_name = jo.name.encode(encoding)
+		print "Compiling joint:", jo.name
 
-		print "Compiling joint:", jo_name
-
-		ofs.write(pack('B', len(jo_name)))
-		ofs.write(jo_name)
+		ofs.write(pack('B', len(jo.name)))
+		ofs.write(jo.name)
 
 		ofs.write(pack('h', jo.parent))
 		ofs.write(pack('fff', jo.bind_pos.x, jo.bind_pos.y, jo.bind_pos.z))
 		ofs.write(pack('ffff', jo.bind_quat.x, jo.bind_quat.y, jo.bind_quat.z, jo.bind_quat.w))
 
 	for key_frame in model.key_frames:
-		key_frame_name = key_frame[0].encode(encoding)
+		print "Compiling key frame:", key_frame.name
 
-		print "Compiling key frame:", key_frame_name
+		ofs.write(pack('B', len(key_frame.name)))
+		ofs.write(key_frame.name)
 
-		ofs.write(pack('B', len(key_frame_name)))
-		ofs.write(key_frame_name)
-
-		for key in key_frame[1]:
+		for key in key_frame.keys:
 			ofs.write(pack('fff', key.pos.x, key.pos.y, key.pos.z))
-		for key in key_frame[1]:
+		for key in key_frame.keys:
 			ofs.write(pack('ffff', key.quat.x, key.quat.y, key.quat.z, key.quat.w))
 
-	print "Done"
+	print "DONE!!"
 

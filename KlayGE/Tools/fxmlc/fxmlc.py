@@ -834,11 +834,14 @@ def preprocess(file_name):
 	
 	from xml.dom.minidom import parse
 	dom = parse(file_name)
+	
+	from sys import	getfilesystemencoding
+	encoding = getfilesystemencoding()
 
 	include_files = dom.documentElement.getElementsByTagName('include')
 	while len(include_files) != 0:
 		for include_file in include_files:
-			include_name = include_file.getAttribute('name')
+			include_name = include_file.getAttribute('name').encode(encoding)
 			if len(include_name) != 0:
 				include_dom = parse(dir + include_name)
 				for child in include_dom.documentElement.childNodes:
