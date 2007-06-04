@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*- coding: mbcs -*-
+#-*- coding: utf-8 -*-
 
 VEU_Position = 0
 VEU_Normal = 1
@@ -73,7 +73,7 @@ class mesh:
 
 class joint:
 	def __init__(self, name, parent, bind_pos, bind_quat):
-		self.name = str(name)
+		self.name = name
 		self.parent = int(parent)
 
 		self.bind_pos = bind_pos
@@ -251,12 +251,16 @@ if __name__ == '__main__':
 	ofs.write(pack('L', model.start_frame))
 	ofs.write(pack('L', model.end_frame))
 	ofs.write(pack('L', model.frame_rate))
+	
+	encoding = sys.getfilesystemencoding()
 
 	for mesh in model.meshes:
-		print "Compiling mesh:", mesh.name
+		mesh_name = mesh.name.encode(encoding)
 
-		ofs.write(pack('B', len(mesh.name)))
-		ofs.write(mesh.name)
+		print "Compiling mesh:", mesh_name
+
+		ofs.write(pack('B', len(mesh_name)))
+		ofs.write(mesh_name)
 
 		ofs.write(pack('B', len(mesh.vertex_elems)))
 		for vertex_elem in mesh.vertex_elems:
@@ -264,10 +268,12 @@ if __name__ == '__main__':
 
 		ofs.write(pack('B', len(mesh.textures)))
 		for texture in mesh.textures:
-			ofs.write(pack('B', len(texture.type)))
-			ofs.write(texture.type)
-			ofs.write(pack('B', len(texture.name)))
-			ofs.write(texture.name)
+			texture_type = texture.type.encode(encoding)
+			ofs.write(pack('B', len(texture_type)))
+			ofs.write(texture_type)
+			texture_name = texture.name.encode(encoding)
+			ofs.write(pack('B', len(texture_name)))
+			ofs.write(texture_name)
 
 		ofs.write(pack('L', len(mesh.vertices)))
 		for vertex_elem in mesh.vertex_elems:
@@ -312,20 +318,24 @@ if __name__ == '__main__':
 			ofs.write(pack('HHH', triangle.a, triangle.b, triangle.c))
 
 	for jo in model.joints:
-		print "Compiling joint:", jo.name
+		jo_name = jo.name.encode(encoding)
 
-		ofs.write(pack('B', len(jo.name)))
-		ofs.write(jo.name)
+		print "Compiling joint:", jo_name
+
+		ofs.write(pack('B', len(jo_name)))
+		ofs.write(jo_name)
 
 		ofs.write(pack('h', jo.parent))
 		ofs.write(pack('fff', jo.bind_pos.x, jo.bind_pos.y, jo.bind_pos.z))
 		ofs.write(pack('ffff', jo.bind_quat.x, jo.bind_quat.y, jo.bind_quat.z, jo.bind_quat.w))
 
 	for key_frame in model.key_frames:
-		print "Compiling key frame:", key_frame[0]
+		key_frame_name = key_frame[0].encode(encoding)
 
-		ofs.write(pack('B', len(key_frame[0])))
-		ofs.write(key_frame[0])
+		print "Compiling key frame:", key_frame_name
+
+		ofs.write(pack('B', len(key_frame_name)))
+		ofs.write(key_frame_name)
 
 		for key in key_frame[1]:
 			ofs.write(pack('fff', key.pos.x, key.pos.y, key.pos.z))
