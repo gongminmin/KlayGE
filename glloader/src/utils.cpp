@@ -25,7 +25,14 @@
 
 #include <boost/assert.hpp>
 #include <boost/bind.hpp>
+#ifdef WIN32
+#pragma warning(push)
+#pragma warning(disable : 4819)
+#endif
 #include <boost/algorithm/string/split.hpp>
+#ifdef WIN32
+#pragma warning(pop)
+#endif
 
 #ifdef GLLOADER_DEBUG
 #include <iostream>

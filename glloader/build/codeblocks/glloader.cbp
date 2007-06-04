@@ -11,7 +11,7 @@
 			<Target title="Release">
 				<Option output="..\..\lib\libglloader.a"/>
 				<Option working_dir=""/>
-				<Option object_output=".objs"/>
+				<Option object_output="..\..\Release\objs"/>
 				<Option deps_output=".deps"/>
 				<Option type="2"/>
 				<Option compiler="0"/>
@@ -29,7 +29,7 @@
 			<Target title="Debug">
 				<Option output="..\..\lib\libglloader_d.a"/>
 				<Option working_dir=""/>
-				<Option object_output=".objs_d"/>
+				<Option object_output="..\..\Debug\objs"/>
 				<Option deps_output=".deps"/>
 				<Option type="2"/>
 				<Option compiler="0"/>
