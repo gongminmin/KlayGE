@@ -231,7 +231,7 @@ namespace
     public:
         SevenZipLoader()
         {
-			dll_loader_.Load("7z.dll");
+			dll_loader_.Load("7za.dll");
 			createObjectFunc_ = (CreateObjectFunc)dll_loader_.GetProcAddress("CreateObject");
 
 	        BOOST_ASSERT(createObjectFunc_);

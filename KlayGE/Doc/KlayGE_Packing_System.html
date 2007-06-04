@@ -8,7 +8,7 @@
 <body>
 <h1>KlayGE打包系统</h1>
 <h2>编译</h2>
-<p>从KlayGE 3.6开始，打包系统使用了7zip作为打包格式。在编译打包系统之前，需要先从<a href="http://sourceforge.net/projects/sevenzip/" target="_blank">http://sourceforge.net/projects/sevenzip/</a>下载7zip的源代码（目前使用的是7zip 4.47 Beta），打开7z447/CPP/7zip/Bundles/Format7zF/Format7z.dsw，编译生成7z.dll。如果要使用x64版本，可以新建一个x64的配置并编译。</p>
+<p>从KlayGE 3.6开始，打包系统使用了7zip作为打包格式。在编译打包系统之前，需要先编译Tools下的7za，生成7za.dll。</p>
 <h2>使用</h2>
 <p>KlayGE打包系统可以统一地通过ResLoader来调用。命名规则是用“//”来区分压缩包路径和包内路径。如果压缩包有密码，则可以在它的路径之后加上“|”和密码。例如，有一个folder/example.7z的压缩包，它的密码是abcd，包中有文件ex1/ex2/test.cpp，那么它的全路径就是：</p>
 <blockquote>
