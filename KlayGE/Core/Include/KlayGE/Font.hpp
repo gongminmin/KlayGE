@@ -1,8 +1,11 @@
 // Font.hpp
 // KlayGE Font类 头文件
-// Ver 3.3.0
-// 版权所有(C) 龚敏敏, 2003-2006
+// Ver 3.6.0
+// 版权所有(C) 龚敏敏, 2003-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.6.0
+// 增加了Rect对齐的方式 (2007.6.5)
 //
 // 3.3.0
 // 支持渲染到3D位置 (2006.5.20)
@@ -61,7 +64,18 @@ namespace KlayGE
 			FS_Strikeout	= 1UL << 3,
 
 			FS_TwoSided		= 1UL << 4,
-			FS_Cullable		= 1UL << 5,
+			FS_Cullable		= 1UL << 5
+		};
+
+		enum FontAlign
+		{
+			FA_Hor_Left		= 1UL << 0,
+			FA_Hor_Center	= 1UL << 1,
+			FA_Hor_Right	= 1UL << 2,
+
+			FA_Ver_Top		= 1UL << 3,
+			FA_Ver_Middle	= 1UL << 4,
+			FA_Ver_Bottom	= 1UL << 5
 		};
 
 	public:
@@ -71,6 +85,8 @@ namespace KlayGE
 			std::wstring const & text);
 		void RenderText(float x, float y, float z, float xScale, float yScale, Color const & clr, 
 			std::wstring const & text);
+		void RenderText(Rect const & rc, float z, float xScale, float yScale, Color const & clr, 
+			std::wstring const & text, uint32_t align);
 		void RenderText(float4x4 const & mvp, Color const & clr, std::wstring const & text);
 
 		uint32_t FontHeight() const;

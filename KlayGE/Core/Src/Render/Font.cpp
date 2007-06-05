@@ -1,8 +1,11 @@
 // Font.cpp
 // KlayGE Font类 实现文件
-// Ver 3.4.0
-// 版权所有(C) 龚敏敏, 2003-2006
+// Ver 3.6.0
+// 版权所有(C) 龚敏敏, 2003-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.6.0
+// 增加了Rect对齐的方式 (2007.6.5)
 //
 // 3.4.0
 // 优化了顶点缓冲区 (2006.9.20)
@@ -181,6 +184,14 @@ namespace
 			this->AddText(fontHeight, sx, sy, sz, xScale, yScale, clr, text);
 		}
 
+		void AddText2D(uint32_t fontHeight, Rect const & rc, float sz,
+			float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t align)
+		{
+			three_dim_ = false;
+
+			this->AddText(fontHeight, rc, sz, xScale, yScale, clr, text, align);
+		}
+
 		void AddText3D(uint32_t fontHeight, float4x4 const & mvp, Color const & clr,
 			std::wstring const & text)
 		{
@@ -191,6 +202,89 @@ namespace
 		}
 
 	private:
+		void AddText(uint32_t fontHeight, Rect const & rc, float sz,
+			float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t align)
+		{
+			float const h(fontHeight * yScale);
+
+			std::vector<std::pair<float, std::wstring> > lines(1, std::make_pair(0.0f, L""));
+
+			BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
+			{
+				CharInfoMapType::const_iterator cmiter = charInfoMap_.find(ch);
+				float const w(cmiter->second.width * xScale);
+
+				if (ch != L'\n')
+				{
+					lines.back().first += w;
+					lines.back().second.push_back(ch);
+				}
+				else
+				{
+					lines.push_back(std::make_pair(0.0f, L""));
+				}
+			}
+
+			std::vector<float> sx;
+			sx.reserve(lines.size());
+			std::vector<float> sy;
+			sy.reserve(lines.size());
+
+			if (align & Font::FA_Hor_Left)
+			{
+				sx.resize(lines.size(), rc.left());
+			}
+			else
+			{
+				if (align & Font::FA_Hor_Right)
+				{
+					BOOST_FOREACH(BOOST_TYPEOF(lines)::const_reference p, lines)
+					{
+						sx.push_back(rc.Width() - p.first);
+					}
+				}
+				else
+				{
+					// Font::FA_Hor_Center
+					BOOST_FOREACH(BOOST_TYPEOF(lines)::const_reference p, lines)
+					{
+						sx.push_back(rc.Width() / 2 - p.first / 2);
+					}
+				}
+			}
+
+			if (align & Font::FA_Ver_Top)
+			{
+				for (BOOST_AUTO(iter, lines.begin()); iter != lines.end(); ++ iter)
+				{
+					sy.push_back(rc.top() + (iter - lines.begin()) * h);
+				}
+			}
+			else
+			{
+				if (align & Font::FA_Ver_Bottom)
+				{
+					for (BOOST_AUTO(iter, lines.begin()); iter != lines.end(); ++ iter)
+					{
+						sy.push_back(rc.bottom() - (lines.size() - (iter - lines.begin())) * h);
+					}
+				}
+				else
+				{
+					// Font::FA_Ver_Middle
+					for (BOOST_AUTO(iter, lines.begin()); iter != lines.end(); ++ iter)
+					{
+						sy.push_back(rc.Height() / 2 - (lines.size() / 2 - (iter - lines.begin())) * h);
+					}
+				}
+			}
+
+			for (size_t i = 0; i < sx.size(); ++ i)
+			{
+				this->AddText(fontHeight, sx[i], sy[i], sz, xScale, yScale, clr, lines[i].second);
+			}
+		}
+
 		void AddText(uint32_t fontHeight, float sx, float sy, float sz,
 			float xScale, float yScale, Color const & clr, std::wstring const & text)
 		{
@@ -455,7 +549,7 @@ namespace KlayGE
 
 	// 在指定位置画出放缩的文字
 	/////////////////////////////////////////////////////////////////////////////////
-	void Font::RenderText(float sx, float sy, float sz,
+	void Font::RenderText(float x, float y, float z,
 		float xScale, float yScale, Color const & clr,
 		std::wstring const & text)
 	{
@@ -463,7 +557,22 @@ namespace KlayGE
 		{
 			boost::shared_ptr<FontObject> font_obj(new FontObject(font_renderable_, fso_attrib_));
 			checked_pointer_cast<FontRenderable>(font_renderable_)->AddText2D(this->FontHeight(),
-				sx, sy, sz, xScale, yScale, clr, text);
+				x, y, z, xScale, yScale, clr, text);
+			font_obj->AddToSceneManager();
+		}
+	}
+
+	// 在指定矩形区域内画出放缩的文字
+	/////////////////////////////////////////////////////////////////////////////////
+	void Font::RenderText(Rect const & rc, float z,
+		float xScale, float yScale, Color const & clr, 
+		std::wstring const & text, uint32_t align)
+	{
+		if (!text.empty())
+		{
+			boost::shared_ptr<FontObject> font_obj(new FontObject(font_renderable_, fso_attrib_));
+			checked_pointer_cast<FontRenderable>(font_renderable_)->AddText2D(this->FontHeight(),
+				rc, z, xScale, yScale, clr, text, align);
 			font_obj->AddToSceneManager();
 		}
 	}
