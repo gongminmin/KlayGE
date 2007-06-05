@@ -273,10 +273,8 @@ namespace KlayGE
 
 		obj_info.name = tstr_to_str(node->GetName());
 
-		Matrix3 obj_matrix = node->GetObjectTM(cur_time_);
+		Matrix3 obj_matrix = node->GetObjTMAfterWSM(cur_time_);
 		bool flip_normals = obj_matrix.Parity() ? true : false;
-		Matrix3 normal_matrix = obj_matrix;
-		normal_matrix.NoTrans();
 
 		std::vector<std::pair<Point3, binds_t> > positions;
 		std::map<int, std::vector<Point2> > texs;
@@ -424,7 +422,6 @@ namespace KlayGE
 			}
 		}
 
-		bool skin_mesh = false;
 		if (joints_per_ver_ > 0)
 		{
 			Object* obj_ref = node->GetObjectRef();
@@ -439,14 +436,12 @@ namespace KlayGE
 					if (Class_ID(PHYSIQUE_CLASS_ID_A, PHYSIQUE_CLASS_ID_B) == mod->ClassID())
 					{
 						this->physique_modifier(mod, node, positions);
-						skin_mesh = true;
 					}
 					else
 					{
 						if (SKIN_CLASSID == mod->ClassID())
 						{
 							this->skin_modifier(mod, node, positions);
-							skin_mesh = true;
 						}
 					}
 				}
