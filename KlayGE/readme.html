@@ -20,7 +20,6 @@
 	<li><a href="#license">使用协议</a></li>
 	<li><a href="#installation">安装</a></li>
 	<li><a href="#third_part">第三方库</a></li>
-	<li><a href="#plan">下步计划</a></li>
 	<li><a href="#history">发展历程</a></li>
 	<li><a href="#structure">目录结构</a></li>
 	<li><a href="#compiler">编译器支持</a></li>
@@ -53,7 +52,7 @@
 </ul>
 <h4>渲染引擎-D3D和音频引擎-DSound需要：</h4>
 <ul>
-	<li>DirectX 9.0 SDK April 2007，http://msdn.microsoft.com/directx下载</li>
+	<li>DirectX 9.0 SDK June 2007，http://msdn.microsoft.com/directx下载</li>
 </ul>
 <h4>播放引擎-DShow需要：</h4>
 <ul>
@@ -71,15 +70,8 @@
 <ul>
 	<li>NVIDIA Cg，http://developer.nvidia.com/object/cg_toolkit.html</li>
 </ul>
-<p>由于KlayGE在VC下使用的运行库是多线程的DLL，所以需要把所有连接到KlayGE的exe项目的运行库改为多线程DLL（Project-&gt;Properties-&gt;Configuration Properties-&gt;C/C++-&gt;Code Generation-&gt;RuntimeLibrary，选择Multi-threaded Debug DLL/Multi-threaded DLL）。</p>
+<p>由于KlayGE在VC下使用的运行库是多线程的DLL，所以需要把<strong>所有</strong>连接到exe的lib的运行库改为多线程DLL（Project-  &gt;Properties-&gt;Configuration Properties-&gt;C/C++-&gt;Code  Generation-&gt;RuntimeLibrary，选择Multi-threaded Debug DLL/Multi-threaded  DLL）。</p>
 <p>另外，用VC编译Release版的Boost和FreeType需要定义_SECURE_SCL=0宏（在Project-&gt;Properties-&gt;Configuration Properties-&gt;C/C++-&gt;Preprocessor-&gt;Preprocessor Definitions中添加）。</p>
-<hr />
-<h2><a id="plan">下步计划</a></h2>
-<ul>
-	<li>加强特效脚本化</li>
-	<li>加强OpenGL插件</li>
-</ul>
-<p><a href="#menu">^返回目录</a></p>
 <hr />
 <h2><a id="history">发展历程</a></h2>
 <p><strong>3.6.0</strong><br />

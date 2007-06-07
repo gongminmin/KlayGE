@@ -157,7 +157,7 @@ namespace KlayGE
 			else
 			{
 				joint.bind_quat = key_quat;
-				joint.bind_pos = MathLib::transform_quat(key_pos, key_quat);
+				joint.bind_pos = key_pos;
 			}
 		}
 
