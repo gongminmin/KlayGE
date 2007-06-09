@@ -99,7 +99,6 @@ namespace
 				caps.max_texture_height, 1, TEX_FORMAT);
 
 			effect_ = rf.LoadEffect("Font.kfx");
-			*(effect_->ParameterByName("texFontSampler")) = theTexture_;
 
 			vb_ = rf.MakeVertexBuffer(BU_Dynamic);
 			rl_->BindVertexStream(vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
@@ -124,6 +123,18 @@ namespace
 			::FT_Done_FreeType(ftLib_);
 		}
 
+		RenderTechniquePtr GetRenderTechnique() const
+		{
+			if (three_dim_)
+			{
+				return effect_->TechniqueByName("Font3DTec");
+			}
+			else
+			{
+				return effect_->TechniqueByName("Font2DTec");
+			}
+		}
+
 		void OnRenderBegin()
 		{
 			vb_->Resize(static_cast<uint32_t>(vertices_.size() * sizeof(vertices_[0])));
@@ -138,18 +149,15 @@ namespace
 				std::copy(indices_.begin(), indices_.end(), mapper.Pointer<uint16_t>());
 			}
 
+			*(effect_->ParameterByName("texFontSampler")) = theTexture_;
 			if (!three_dim_)
 			{
-				technique_ = effect_->TechniqueByName("Font2DTec");
-
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 				*(effect_->ParameterByName("halfWidth")) = static_cast<int>(re.CurRenderTarget()->Width() / 2);
 				*(effect_->ParameterByName("halfHeight")) = static_cast<int>(re.CurRenderTarget()->Height() / 2);
 			}
 			else
 			{
-				technique_ = effect_->TechniqueByName("Font3DTec");
-
 				*(effect_->ParameterByName("mvp")) = mvp_;
 			}
 		}
@@ -205,14 +213,16 @@ namespace
 		void AddText(uint32_t fontHeight, Rect const & rc, float sz,
 			float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t align)
 		{
-			float const h(fontHeight * yScale);
+			this->UpdateTexture(text);
+
+			float const h = fontHeight * yScale;
 
 			std::vector<std::pair<float, std::wstring> > lines(1, std::make_pair(0.0f, L""));
 
 			BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
 			{
 				CharInfoMapType::const_iterator cmiter = charInfoMap_.find(ch);
-				float const w(cmiter->second.width * xScale);
+				float const w = cmiter->second.Width() * theTexture_->Width(0) * xScale;
 
 				if (ch != L'\n')
 				{
@@ -240,7 +250,7 @@ namespace
 				{
 					BOOST_FOREACH(BOOST_TYPEOF(lines)::const_reference p, lines)
 					{
-						sx.push_back(rc.Width() - p.first);
+						sx.push_back(rc.right() - p.first);
 					}
 				}
 				else
@@ -248,7 +258,7 @@ namespace
 					// Font::FA_Hor_Center
 					BOOST_FOREACH(BOOST_TYPEOF(lines)::const_reference p, lines)
 					{
-						sx.push_back(rc.Width() / 2 - p.first / 2);
+						sx.push_back((rc.left() + rc.right()) / 2 - p.first / 2);
 					}
 				}
 			}
@@ -274,7 +284,8 @@ namespace
 					// Font::FA_Ver_Middle
 					for (BOOST_AUTO(iter, lines.begin()); iter != lines.end(); ++ iter)
 					{
-						sy.push_back(rc.Height() / 2 - (lines.size() / 2 - (iter - lines.begin())) * h);
+						sy.push_back((rc.top() + rc.bottom()) / 2
+							- lines.size() * h / 2 + (iter - lines.begin()) * h);
 					}
 				}
 			}
@@ -291,10 +302,10 @@ namespace
 			this->UpdateTexture(text);
 
 			uint32_t clr32 = clr.ABGR();
-			float const h(fontHeight * yScale);
-			size_t const maxSize(text.length() - std::count(text.begin(), text.end(), L'\n'));
-			float x(sx), y(sy);
-			float maxx(sx), maxy(sy);
+			float const h = fontHeight * yScale;
+			size_t const maxSize = text.length() - std::count(text.begin(), text.end(), L'\n');
+			float x = sx, y = sy;
+			float maxx = sx, maxy = sy;
 
 			vertices_.reserve(vertices_.size() + maxSize * 4);
 			indices_.reserve(indices_.size() + maxSize * 6);
@@ -304,11 +315,11 @@ namespace
 			BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
 			{
 				CharInfoMapType::const_iterator cmiter = charInfoMap_.find(ch);
-				float const w(cmiter->second.width * xScale);
+				float const w = cmiter->second.Width() * theTexture_->Width(0) * xScale;
 
 				if (ch != L'\n')
 				{
-					Rect_T<float> const & texRect(cmiter->second.texRect);
+					Rect_T<float> const & texRect(cmiter->second);
 
 					vertices_.push_back(FontVert(float3(x + 0, y + 0, sz),
 											clr32,
@@ -388,7 +399,6 @@ namespace
 						uint32_t const tex_height = theTexture_->Height(0);
 
 						::RECT charRect;
-						CharInfo charInfo;
 						if ((curX_ < tex_width) && (curY_ < tex_height) && (curY_ + max_height < tex_height))
 						{
 							if (curX_ + width > tex_width)
@@ -403,12 +413,6 @@ namespace
 							charRect.right	= curX_ + width;
 							charRect.bottom = curY_ + max_height;
 
-							charInfo.texRect.left()		= static_cast<float>(charRect.left) / tex_width;
-							charInfo.texRect.top()		= static_cast<float>(charRect.top) / tex_height;
-							charInfo.texRect.right()	= static_cast<float>(charRect.right) / tex_width;
-							charInfo.texRect.bottom()	= static_cast<float>(charRect.bottom) / tex_height;
-							charInfo.width				= width;
-
 							curX_ += width;
 						}
 						else
@@ -417,19 +421,21 @@ namespace
 							BOOST_AUTO(iter, charInfoMap_.find(charLRU_.back()));
 							BOOST_ASSERT(iter != charInfoMap_.end());
 
-							// ÓÃµ±Ç°×Ö·ûÌæ»»
-							charInfo.texRect	= iter->second.texRect;
-							charInfo.width		= width;
+							charRect.left	= static_cast<long>(iter->second.left() * tex_width);
+							charRect.top	= static_cast<long>(iter->second.top() * tex_height);
+							charRect.right	= charRect.left + width;
+							charRect.bottom	= charRect.top + max_height;
 
 							charLRU_.pop_back();
 							charInfoMap_.erase(iter);
-
-							charRect.left	= static_cast<long>(charInfo.texRect.left() * tex_width);
-							charRect.top	= static_cast<long>(charInfo.texRect.top() * tex_height);
-							charRect.right	= charRect.left + width;
-							charRect.bottom	= charRect.top + max_height;
 						}
 
+						CharInfo charInfo;
+						charInfo.left()		= static_cast<float>(charRect.left) / tex_width;
+						charInfo.top()		= static_cast<float>(charRect.top) / tex_height;
+						charInfo.right()	= static_cast<float>(charRect.right) / tex_width;
+						charInfo.bottom()	= static_cast<float>(charRect.bottom) / tex_height;
+						
 						int const buf_width = slot_->bitmap.width;
 						int const buf_height = slot_->bitmap.rows;
 						int const y_start = std::max<int>(max_height * 3 / 4 - slot_->bitmap_top, 0);
@@ -456,11 +462,7 @@ namespace
 #ifdef KLAYGE_PLATFORM_WINDOWS
 	#pragma pack(push, 1)
 #endif
-		struct CharInfo
-		{
-			Rect_T<float>	texRect;
-			uint32_t		width;
-		};
+		typedef Rect_T<float> CharInfo;
 
 		struct FontVert
 		{

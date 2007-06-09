@@ -89,13 +89,16 @@ namespace KlayGE
 		template <typename U>
 		Rect_T const & operator+=(Vector_T<U, 2> const & rhs)
 		{
-			rect_ += rhs;
+			this->left() += rhs.x();
+			this->right() += rhs.x();
+			this->top() += rhs.y();
+			this->bottom() += rhs.y();
 			return *this;
 		}
 		template <typename U>
 		Rect_T const & operator-=(Vector_T<U, 2> const & rhs)
 		{
-			rect_ -= rhs;
+			*this += -rhs;
 			return *this;
 		}
 		template <typename U>

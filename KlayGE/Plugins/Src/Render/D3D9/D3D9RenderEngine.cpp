@@ -60,6 +60,8 @@
 #include <algorithm>
 #include <boost/assert.hpp>
 #include <boost/bind.hpp>
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 
@@ -811,6 +813,14 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::OnLostDevice()
 	{
+		cur_render_state_obj_ = RenderStateObject();
+		BOOST_FOREACH(BOOST_TYPEOF(cur_samplers_)::reference samplers, cur_samplers_)
+		{
+			BOOST_FOREACH(BOOST_TYPEOF(samplers)::reference sampler, samplers)
+			{
+				sampler = Sampler();
+			}
+		}
 	}
 
 	// 响应设备复位
