@@ -174,6 +174,7 @@ namespace KlayGE
 
 		boost::shared_ptr<RenderVariable> var_;
 	};
+	typedef boost::shared_ptr<RenderEffectAnnotation> RenderEffectAnnotationPtr;
 
 	class RenderShaderFunc
 	{
@@ -193,10 +194,6 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	class RenderEffect
 	{
-	protected:
-		typedef std::vector<RenderEffectParameterPtr> params_type;
-		typedef std::vector<RenderTechniquePtr> techniques_type;
-
 	public:
 		RenderEffect();
 
@@ -212,7 +209,7 @@ namespace KlayGE
 		RenderEffectParameterPtr ParameterByName(std::string const & name);
 		RenderEffectParameterPtr ParameterByIndex(uint32_t n)
 		{
-			BOOST_ASSERT(n < params_.size());
+			BOOST_ASSERT(n < this->NumParameters());
 			return params_[n];
 		}
 
@@ -223,25 +220,25 @@ namespace KlayGE
 		RenderTechniquePtr TechniqueByName(std::string const & name);
 		RenderTechniquePtr TechniqueByIndex(uint32_t n)
 		{
-			BOOST_ASSERT(n < techniques_.size());
+			BOOST_ASSERT(n < this->NumTechniques());
 			return techniques_[n];
 		}
 
 		uint32_t NumShaders() const
 		{
-			return static_cast<uint32_t>(shaders_.size());
+			return shaders_ ? static_cast<uint32_t>(shaders_->size()) : 0;
 		}
 		RenderShaderFunc ShaderByIndex(uint32_t n)
 		{
-			BOOST_ASSERT(n < shaders_.size());
-			return shaders_[n];
+			BOOST_ASSERT(n < this->NumShaders());
+			return (*shaders_)[n];
 		}
 
 	protected:
-		params_type params_;
-		techniques_type techniques_;
+		std::vector<RenderEffectParameterPtr> params_;
+		std::vector<RenderTechniquePtr> techniques_;
 
-		std::vector<RenderShaderFunc> shaders_;
+		boost::shared_ptr<std::vector<RenderShaderFunc> > shaders_;
 	};
 
 	class RenderTechnique : boost::noncopyable
@@ -258,12 +255,22 @@ namespace KlayGE
 
 		std::string const & Name() const
 		{
-			return name_;
+			return *name_;
 		}
 
 		RenderEffect& Effect() const
 		{
 			return effect_;
+		}
+
+		uint32_t NumAnnotations() const
+		{
+			return annotations_ ? static_cast<uint32_t>(annotations_->size()) : 0;
+		}
+		RenderEffectAnnotationPtr Annotation(uint32_t n)
+		{
+			BOOST_ASSERT(n < this->NumAnnotations());
+			return (*annotations_)[n];
 		}
 
 		uint32_t NumPasses() const
@@ -272,7 +279,7 @@ namespace KlayGE
 		}
 		RenderPassPtr Pass(uint32_t n)
 		{
-			BOOST_ASSERT(n < passes_.size());
+			BOOST_ASSERT(n < this->NumPasses());
 			return passes_[n];
 		}
 
@@ -291,12 +298,11 @@ namespace KlayGE
 
 	protected:
 		RenderEffect& effect_;
-		std::string name_;
+		boost::shared_ptr<std::string> name_;
 
-		typedef std::vector<RenderPassPtr> passes_type;
-		passes_type passes_;
+		std::vector<RenderPassPtr> passes_;
+		boost::shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
 
-		std::vector<boost::shared_ptr<RenderEffectAnnotation> > annotations_;
 		float weight_;
 
 		bool is_validate_;
@@ -316,7 +322,7 @@ namespace KlayGE
 
 		std::string const & Name() const
 		{
-			return name_;
+			return *name_;
 		}
 
 		void Begin();
@@ -336,14 +342,24 @@ namespace KlayGE
 			return shader_obj_;
 		}
 
+		uint32_t NumAnnotations() const
+		{
+			return annotations_ ? static_cast<uint32_t>(annotations_->size()) : 0;
+		}
+		RenderEffectAnnotationPtr Annotation(uint32_t n)
+		{
+			BOOST_ASSERT(n < this->NumAnnotations());
+			return (*annotations_)[n];
+		}
+
 	private:
 		std::string GenShaderText() const;
 
 	protected:
 		RenderEffect& effect_;
 
-		std::string name_;
-		std::vector<boost::shared_ptr<RenderEffectAnnotation> > annotations_;
+		boost::shared_ptr<std::string> name_;
+		boost::shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
 
 		RenderStateObjectPtr render_state_obj_;
 		ShaderObjectPtr shader_obj_;
@@ -380,11 +396,21 @@ namespace KlayGE
 
 		std::string const & Name() const
 		{
-			return name_;
+			return *name_;
 		}
 		std::string const & Semantic() const
 		{
-			return semantic_;
+			return *semantic_;
+		}
+
+		uint32_t NumAnnotations() const
+		{
+			return annotations_ ? static_cast<uint32_t>(annotations_->size()) : 0;
+		}
+		RenderEffectAnnotationPtr Annotation(uint32_t n)
+		{
+			BOOST_ASSERT(n < this->NumAnnotations());
+			return (*annotations_)[n];
 		}
 
 		void Dirty(bool dirty)
@@ -426,14 +452,15 @@ namespace KlayGE
 
 	protected:
 		RenderEffect& effect_;
-		std::string name_;
-		std::string semantic_;
+		
+		boost::shared_ptr<std::string> name_;
+		boost::shared_ptr<std::string> semantic_;
 
 		uint32_t type_;
 		boost::shared_ptr<RenderVariable> var_;
 		uint32_t array_size_;
 
-		std::vector<boost::shared_ptr<RenderEffectAnnotation> > annotations_;
+		boost::shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
 	};
 }
 

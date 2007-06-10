@@ -371,10 +371,14 @@ namespace KlayGE
 				params_[i]->Load(source);
 			}
 
-			for (uint32_t i = 0; i < header.num_shaders; ++ i)
+			if (header.num_shaders > 0)
 			{
-				shaders_.push_back(RenderShaderFunc());
-				shaders_[i].Load(source);
+				shaders_.reset(new BOOST_TYPEOF(*shaders_));
+				for (uint32_t i = 0; i < header.num_shaders; ++ i)
+				{
+					shaders_->push_back(RenderShaderFunc());
+					(*shaders_)[i].Load(source);
+				}
 			}
 
 			for (uint32_t i = 0; i < header.num_techniques; ++ i)
@@ -459,15 +463,19 @@ namespace KlayGE
 
 	void RenderTechnique::Load(ResIdentifierPtr const & source)
 	{
-		name_ = read_short_string(source);
+		name_.reset(new BOOST_TYPEOF(*name_)(read_short_string(source)));
 		source->read(reinterpret_cast<char*>(&weight_), sizeof(weight_));
 
 		uint32_t len;
 		source->read(reinterpret_cast<char*>(&len), sizeof(len));
-		for (size_t i = 0; i < len; ++ i)
+		if (len > 0)
 		{
-			annotations_.push_back(boost::shared_ptr<RenderEffectAnnotation>(new RenderEffectAnnotation));
-			annotations_[i]->Load(source);
+			annotations_.reset(new BOOST_TYPEOF(*annotations_));
+			for (size_t i = 0; i < len; ++ i)
+			{
+				annotations_->push_back(RenderEffectAnnotationPtr(new RenderEffectAnnotation));
+				(*annotations_)[i]->Load(source);
+			}
 		}
 
 		is_validate_ = true;
@@ -511,14 +519,18 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		name_ = read_short_string(source);
+		name_.reset(new BOOST_TYPEOF(*name_)(read_short_string(source)));
 
 		uint32_t len;
 		source->read(reinterpret_cast<char*>(&len), sizeof(len));
-		for (size_t i = 0; i < len; ++ i)
+		if (len > 0)
 		{
-			annotations_.push_back(boost::shared_ptr<RenderEffectAnnotation>(new RenderEffectAnnotation));
-			annotations_[i]->Load(source);
+			annotations_.reset(new BOOST_TYPEOF(*annotations_));
+			for (size_t i = 0; i < len; ++ i)
+			{
+				annotations_->push_back(RenderEffectAnnotationPtr(new RenderEffectAnnotation));
+				(*annotations_)[i]->Load(source);
+			}
 		}
 
 		render_state_obj_.reset(new RenderStateObject);
@@ -1054,18 +1066,22 @@ namespace KlayGE
 	{
 		source->read(reinterpret_cast<char*>(&array_size_), sizeof(array_size_));
 		source->read(reinterpret_cast<char*>(&type_), sizeof(type_));
-		name_ = read_short_string(source);
+		name_.reset(new BOOST_TYPEOF(*name_)(read_short_string(source)));
 		var_ = read_var(source, type_, array_size_);
 
 		uint32_t len;
 		source->read(reinterpret_cast<char*>(&len), sizeof(len));
-		for (size_t i = 0; i < len; ++ i)
+		if (len > 0)
 		{
-			annotations_.push_back(boost::shared_ptr<RenderEffectAnnotation>(new RenderEffectAnnotation));
-			annotations_[i]->Load(source);
+			annotations_.reset(new BOOST_TYPEOF(*annotations_));
+			for (size_t i = 0; i < len; ++ i)
+			{
+				annotations_->push_back(RenderEffectAnnotationPtr(new RenderEffectAnnotation));
+				(*annotations_)[i]->Load(source);
+			}
 		}
 
-		semantic_ = read_short_string(source);
+		semantic_.reset(new BOOST_TYPEOF(*semantic_)(read_short_string(source)));
 	}
 
 	RenderEffectParameterPtr RenderEffectParameter::NullObject()
