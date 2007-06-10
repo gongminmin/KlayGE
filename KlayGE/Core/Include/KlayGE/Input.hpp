@@ -194,6 +194,10 @@ namespace KlayGE
 		MS_Button1			= 0x104,
 		MS_Button2			= 0x105,
 		MS_Button3			= 0x106,
+		MS_Button4			= 0x107,
+		MS_Button5			= 0x108,
+		MS_Button6			= 0x109,
+		MS_Button7			= 0x10A,
 	};
 
 	// ÓÎÏ·¸Ë¶¯×÷
@@ -295,7 +299,7 @@ namespace KlayGE
 		void ActionMap(InputActionMap const & actionMap,
 			action_handler_t handler, bool reenumerate = false);
 
-		size_t NumDevice() const;
+		size_t NumDevices() const;
 		InputDevicePtr Device(size_t index) const;
 
 	protected:
@@ -326,6 +330,7 @@ namespace KlayGE
 	class InputKeyboard : public InputDevice
 	{
 	public:
+		size_t NumKeys() const;
 		bool Key(size_t n) const;
 
 		void ActionMap(uint32_t id, InputActionMap const & actionMap);
@@ -341,12 +346,17 @@ namespace KlayGE
 	class InputMouse : public InputDevice
 	{
 	public:
+		long AbsX() const;
+		long AbsY() const;
+
 		long X() const;
 		long Y() const;
 		long Z() const;
 		bool LeftButton() const;
 		bool RightButton() const;
 		bool MiddleButton() const;
+
+		size_t NumButtons() const;
 		bool Button(size_t index) const;
 
 		void ActionMap(uint32_t id, InputActionMap const & actionMap);
@@ -355,7 +365,8 @@ namespace KlayGE
 		InputActionsType DoUpdate(uint32_t id);
 
 	protected:
-		Vector_T<long, 3> pos_;
+		Vector_T<long, 2> abs_pos_;
+		Vector_T<long, 3> offset_;
 
 		typedef boost::array<bool, 8> ButtonsType;
 		ButtonsType buttons_;
@@ -372,7 +383,11 @@ namespace KlayGE
 		long XRot() const;
 		long YRot() const;
 		long ZRot() const;
+		
+		size_t NumSliders() const;
 		long Slider(size_t index) const;
+		
+		size_t NumButtons() const;
 		bool Button(size_t index) const;
 
 		void ActionMap(uint32_t id, InputActionMap const & actionMap);

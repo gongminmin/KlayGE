@@ -165,8 +165,11 @@ namespace KlayGE
 	class InputDevice;
 	typedef boost::shared_ptr<InputDevice> InputDevicePtr;
 	class InputKeyboard;
+	typedef boost::shared_ptr<InputKeyboard> InputKeyboardPtr;
 	class InputMouse;
+	typedef boost::shared_ptr<InputMouse> InputMousePtr;
 	class InputJoystick;
+	typedef boost::shared_ptr<InputJoystick> InputJoystickPtr;
 	class InputFactory;
 	typedef boost::shared_ptr<InputFactory> InputFactoryPtr;
 

@@ -21,6 +21,13 @@
 
 namespace KlayGE
 {
+	// 获取键的数量
+	//////////////////////////////////////////////////////////////////////////////////
+	size_t InputKeyboard::NumKeys() const
+	{
+		return keys_.size();
+	}
+
 	// 获取某键是否按下
 	//////////////////////////////////////////////////////////////////////////////////
 	bool InputKeyboard::Key(size_t n) const
@@ -36,7 +43,7 @@ namespace KlayGE
 	{
 		InputActionMap& iam = actionMaps_[id];
 
-		for (uint16_t i = 0; i < static_cast<uint16_t>(keys_.size()); ++ i)
+		for (uint16_t i = 0; i < this->NumKeys(); ++ i)
 		{
 			if (actionMap.HasAction(i))
 			{
@@ -53,7 +60,7 @@ namespace KlayGE
 
 		InputActionMap& iam = actionMaps_[id];
 
-		for (uint16_t i = 0; i < static_cast<uint16_t>(keys_.size()); ++ i)
+		for (uint16_t i = 0; i < this->NumKeys(); ++ i)
 		{
 			if (this->Key(i))
 			{

@@ -20,7 +20,7 @@
 #include <boost/function.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable: 4103 4512)
+#pragma warning(disable: 4103 4251 4275 4512)
 #endif
 #include <boost/signal.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
@@ -38,7 +38,7 @@ namespace KlayGE
 		typedef typename event_signal::slot_type event_handler;
 
 	public:
-		Event(Sender const & sender)
+		explicit Event(Sender const & sender)
 			: sender_(&sender),
 				handlers_(new boost::signal<void(Sender const &, EventArg const &)>)
 		{

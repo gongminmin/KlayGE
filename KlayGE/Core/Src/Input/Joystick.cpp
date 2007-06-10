@@ -69,6 +69,13 @@ namespace KlayGE
 		return rot_.z();
 	}
 
+	// 获取滑杆的数量
+	//////////////////////////////////////////////////////////////////////////////////
+	size_t InputJoystick::NumSliders() const
+	{
+		return slider_.size();
+	}
+	
 	// 获取滑杆的值
 	/////////////////////////////////////////////////////////////////////////////////
 	long InputJoystick::Slider(size_t index) const
@@ -78,6 +85,13 @@ namespace KlayGE
 		return slider_[index];
 	}
 
+	// 获取键的数量
+	//////////////////////////////////////////////////////////////////////////////////
+	size_t InputJoystick::NumButtons() const
+	{
+		return buttons_.size();
+	}
+	
 	// 获取指定键是否按下
 	/////////////////////////////////////////////////////////////////////////////////
 	bool InputJoystick::Button(size_t index) const
@@ -93,7 +107,7 @@ namespace KlayGE
 	{
 		InputActionMap& iam = actionMaps_[id];
 
-		for (uint16_t i = JS_XPos; i < JS_Button31; ++ i)
+		for (uint16_t i = JS_XPos; i < JS_Button0 + this->NumButtons(); ++ i)
 		{
 			if (actionMap.HasAction(i))
 			{
@@ -115,11 +129,11 @@ namespace KlayGE
 		actionMaps_[id].UpdateInputActions(ret, JS_YRot, this->YRot());
 		actionMaps_[id].UpdateInputActions(ret, JS_ZRot, this->ZRot());
 
-		for (uint16_t i = 0; i < static_cast<uint16_t>(slider_.size()); ++ i)
+		for (uint16_t i = 0; i < this->NumSliders(); ++ i)
 		{
 			actionMaps_[id].UpdateInputActions(ret, static_cast<uint16_t>(JS_Slider0 + i), this->Slider(i));
 		}
-		for (uint16_t i = 0; i < static_cast<uint16_t>(buttons_.size()); ++ i)
+		for (uint16_t i = 0; i < this->NumButtons(); ++ i)
 		{
 			if (this->Button(i))
 			{

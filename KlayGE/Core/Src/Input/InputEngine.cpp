@@ -89,7 +89,7 @@ namespace KlayGE
 
 	// 获取输入设备个数
 	//////////////////////////////////////////////////////////////////////////////////
-	size_t InputEngine::NumDevice() const
+	size_t InputEngine::NumDevices() const
 	{
 		return devices_.size();
 	}
@@ -126,7 +126,7 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	InputDevicePtr InputEngine::Device(size_t index) const
 	{
-		BOOST_ASSERT(index < this->NumDevice());
+		BOOST_ASSERT(index < this->NumDevices());
 
 		return devices_[index];
 	}

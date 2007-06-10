@@ -84,7 +84,11 @@ namespace KlayGE
 		DIMOUSESTATE diMouseState;
 		this->DeviceState(&diMouseState, sizeof(diMouseState));
 
-		pos_ = Vector_T<long, 3>(diMouseState.lX, diMouseState.lY, diMouseState.lZ);
+		POINT pt;
+		GetCursorPos(&pt);
+		ScreenToClient(::GetActiveWindow(), &pt);
+		abs_pos_ = Vector_T<long, 2>(pt.x, pt.y);
+		offset_ = Vector_T<long, 3>(diMouseState.lX, diMouseState.lY, diMouseState.lZ);
 
 		std::transform(diMouseState.rgbButtons, diMouseState.rgbButtons + buttons_.size(),
 			buttons_.begin(), boost::lambda::_1 != 0);

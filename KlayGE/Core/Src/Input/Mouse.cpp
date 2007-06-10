@@ -22,25 +22,39 @@
 
 namespace KlayGE
 {
+	// 窗口坐标的X
+	//////////////////////////////////////////////////////////////////////////////////
+	long InputMouse::AbsX() const
+	{
+		return abs_pos_.x();
+	}
+
+	// 窗口坐标的Y
+	//////////////////////////////////////////////////////////////////////////////////
+	long InputMouse::AbsY() const
+	{
+		return abs_pos_.y();
+	}
+
 	// X轴
 	//////////////////////////////////////////////////////////////////////////////////
 	long InputMouse::X() const
 	{
-		return pos_.x();
+		return offset_.x();
 	}
 
 	// Y轴
 	//////////////////////////////////////////////////////////////////////////////////
 	long InputMouse::Y() const
 	{
-		return pos_.y();
+		return offset_.y();
 	}
 
 	// Z轴，也就是滚轮
 	//////////////////////////////////////////////////////////////////////////////////
 	long InputMouse::Z() const
 	{
-		return pos_.z();
+		return offset_.z();
 	}
 
 	// 左键
@@ -64,6 +78,13 @@ namespace KlayGE
 		return this->Button(2);
 	}
 
+	// 获取键的数量
+	//////////////////////////////////////////////////////////////////////////////////
+	size_t InputMouse::NumButtons() const
+	{
+		return buttons_.size();
+	}
+
 	// 获取某按钮是否按下
 	//////////////////////////////////////////////////////////////////////////////////
 	bool InputMouse::Button(size_t index) const
@@ -79,7 +100,7 @@ namespace KlayGE
 	{
 		InputActionMap& iam = actionMaps_[id];
 
-		for (uint16_t i = MS_X; i < MS_Button3; ++ i)
+		for (uint16_t i = MS_X; i < MS_Button0 + this->NumButtons(); ++ i)
 		{
 			if (actionMap.HasAction(i))
 			{
@@ -108,7 +129,7 @@ namespace KlayGE
 		{
 			iam.UpdateInputActions(ret, MS_Z, this->Z());
 		}
-		for (uint16_t i = 0; i < static_cast<uint16_t>(buttons_.size()); ++ i)
+		for (uint16_t i = 0; i < this->NumButtons(); ++ i)
 		{
 			if (this->Button(i))
 			{

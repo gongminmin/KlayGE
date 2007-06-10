@@ -9,7 +9,7 @@
     #define KLAYGE_DEBUG
 #endif
 
-// 定义编译器
+// Defines supported compilers
 #if defined(__GNUC__)
 	// GNU C++
 
@@ -35,7 +35,7 @@
 	#endif
 #endif
 
-// 定义操作平台
+// Defines supported platforms
 #if defined(_XBOX_VER)
 	#if _XBOX_VER >= 200
 		#define KLAYGE_PLATFORM_XBOX360
@@ -51,7 +51,10 @@
 		#define KLAYGE_PLATFORM_WIN32
 	#endif
 
-	// 关闭windows.h的min/max
+	// Forces all boost's libraries to be linked as dll
+	#define BOOST_ALL_DYN_LINK
+
+	// Shut min/max in windows.h
 	#define NOMINMAX
 
 	#if defined(__MINGW32__)
@@ -65,7 +68,7 @@
 	#error Unknown platform.
 #endif
 
-// 定义CPU类型
+// Defines supported CPUs
 #if defined(KLAYGE_COMPILER_MSVC)
 	#if defined(_M_X64)
 		#define KLAYGE_CPU_X64
@@ -84,14 +87,14 @@
 	#endif
 #endif
 
-// 定义本地的endian方式
+// Defines the native endian
 #if defined(KLAYGE_CPU_X86) || defined(KLAYGE_CPU_X64) || defined(KLAYGE_PLATFORM_WINDOWS)
 	#define KLAYGE_LITTLE_ENDIAN
 #else
 	#define KLAYGE_BIG_ENDIAN
 #endif
 
-// 定义各种编译期选项
+// Defines some MACRO from compile options
 #define _IDENTITY_SUPPORT
 #define _SELECT1ST2ND_SUPPORT
 #define _PROJECT1ST2ND_SUPPORT
