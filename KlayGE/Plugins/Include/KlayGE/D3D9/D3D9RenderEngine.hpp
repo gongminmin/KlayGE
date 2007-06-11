@@ -87,14 +87,14 @@ namespace KlayGE
 
 	private:
 		void DoBindRenderTarget(RenderTargetPtr rt);
-		void DoRender(RenderLayout const & rl);
+		void DoRender(RenderTechnique const & tech, RenderLayout const & rl);
 
 		void FillRenderDeviceCaps();
 
-		void DoRenderSWInstance(RenderLayout const & rl);
-		void DoRenderHWInstance(RenderLayout const & rl);
-		void RenderRLSWInstance(RenderLayout const & rl);
-		void RenderRL(RenderLayout const & rl);
+		void DoRenderSWInstance(RenderTechnique const & tech, RenderLayout const & rl);
+		void DoRenderHWInstance(RenderTechnique const & tech, RenderLayout const & rl);
+		void RenderRLSWInstance(RenderTechnique const & tech, RenderLayout const & rl);
+		void RenderRL(RenderTechnique const & tech, RenderLayout const & rl);
 
 	private:
 		D3D9AdapterList const & D3DAdapters() const;
@@ -111,7 +111,7 @@ namespace KlayGE
 
 		uint32_t last_num_vertex_stream_;
 
-		boost::function<void (RenderLayout const &)> RenderInstance;
+		boost::function<void (RenderTechnique const &, RenderLayout const &)> RenderInstance;
 
 		RenderStateObject cur_render_state_obj_;
 		boost::array<std::vector<Sampler>, ShaderObject::ST_NumShaderTypes> cur_samplers_;

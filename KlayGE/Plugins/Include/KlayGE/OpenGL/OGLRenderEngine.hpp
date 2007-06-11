@@ -74,7 +74,7 @@ namespace KlayGE
 
 	private:
 		void DoBindRenderTarget(RenderTargetPtr renderTarget);
-		void DoRender(RenderLayout const & rl);
+		void DoRender(RenderTechnique const & tech, RenderLayout const & rl);
 
 		void FillRenderDeviceCaps();
 

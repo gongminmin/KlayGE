@@ -478,7 +478,7 @@ namespace KlayGE
 
 	// äÖÈ¾
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::DoRender(RenderLayout const & rl)
+	void OGLRenderEngine::DoRender(RenderTechnique const & tech, RenderLayout const & rl)
 	{
 		glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
 
@@ -735,7 +735,7 @@ namespace KlayGE
 			numPrimitivesJustRendered_ += primCount;
 			numVerticesJustRendered_ += vertexCount;
 
-			uint32_t num_passes = render_tech_->NumPasses();
+			uint32_t num_passes = tech.NumPasses();
 			if (rl.UseIndices())
 			{
 				OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(rl.GetIndexStream()));
@@ -753,7 +753,7 @@ namespace KlayGE
 
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
-					RenderPassPtr pass = render_tech_->Pass(i);
+					RenderPassPtr pass = tech.Pass(i);
 
 					pass->Begin();
 					glDrawElements(mode, static_cast<GLsizei>(rl.NumIndices()),
@@ -765,7 +765,7 @@ namespace KlayGE
 			{
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
-					RenderPassPtr pass = render_tech_->Pass(i);
+					RenderPassPtr pass = tech.Pass(i);
 
 					pass->Begin();
 					glDrawArrays(mode, 0, static_cast<GLsizei>(rl.NumVertices()));

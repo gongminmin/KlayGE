@@ -222,71 +222,86 @@ namespace KlayGE
 
 	void OGLShaderObject::SetParameter(std::string const & name, std::vector<bool> const & value)
 	{
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
+		if (!value.empty())
 		{
-			ShaderType type = static_cast<ShaderType>(i);
-
-			BOOST_AUTO(iter, param_descs_[type].find(name));
-			if (iter != param_descs_[type].end())
+			for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 			{
-				std::vector<int> tmp(value.begin(), value.end());
-				cgSetParameterValueir(iter->second, static_cast<int>(tmp.size()), &tmp[0]);
+				ShaderType type = static_cast<ShaderType>(i);
+
+				BOOST_AUTO(iter, param_descs_[type].find(name));
+				if (iter != param_descs_[type].end())
+				{
+					std::vector<int> tmp(value.begin(), value.end());
+					cgSetParameterValueir(iter->second, static_cast<int>(tmp.size()), &tmp[0]);
+				}
 			}
 		}
 	}
 
 	void OGLShaderObject::SetParameter(std::string const & name, std::vector<int> const & value)
 	{
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
+		if (!value.empty())
 		{
-			ShaderType type = static_cast<ShaderType>(i);
-
-			BOOST_AUTO(iter, param_descs_[type].find(name));
-			if (iter != param_descs_[type].end())
+			for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 			{
-				cgSetParameterValueir(iter->second, static_cast<int>(value.size()), &value[0]);
+				ShaderType type = static_cast<ShaderType>(i);
+
+				BOOST_AUTO(iter, param_descs_[type].find(name));
+				if (iter != param_descs_[type].end())
+				{
+					cgSetParameterValueir(iter->second, static_cast<int>(value.size()), &value[0]);
+				}
 			}
 		}
 	}
 
 	void OGLShaderObject::SetParameter(std::string const & name, std::vector<float> const & value)
 	{
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
+		if (!value.empty())
 		{
-			ShaderType type = static_cast<ShaderType>(i);
-
-			BOOST_AUTO(iter, param_descs_[type].find(name));
-			if (iter != param_descs_[type].end())
+			for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 			{
-				cgGLSetParameterArray1f(iter->second, 0, static_cast<int>(value.size()), &value[0]);
+				ShaderType type = static_cast<ShaderType>(i);
+
+				BOOST_AUTO(iter, param_descs_[type].find(name));
+				if (iter != param_descs_[type].end())
+				{
+					cgGLSetParameterArray1f(iter->second, 0, static_cast<int>(value.size()), &value[0]);
+				}
 			}
 		}
 	}
 
 	void OGLShaderObject::SetParameter(std::string const & name, std::vector<float4> const & value)
 	{
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
+		if (!value.empty())
 		{
-			ShaderType type = static_cast<ShaderType>(i);
-
-			BOOST_AUTO(iter, param_descs_[type].find(name));
-			if (iter != param_descs_[type].end())
+			for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 			{
-				cgGLSetParameterArray4f(iter->second, 0, static_cast<long>(value.size()), &value[0][0]);
+				ShaderType type = static_cast<ShaderType>(i);
+
+				BOOST_AUTO(iter, param_descs_[type].find(name));
+				if (iter != param_descs_[type].end())
+				{
+					cgGLSetParameterArray4f(iter->second, 0, static_cast<long>(value.size()), &value[0][0]);
+				}
 			}
 		}
 	}
 
 	void OGLShaderObject::SetParameter(std::string const & name, std::vector<float4x4> const & value)
 	{
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
+		if (!value.empty())
 		{
-			ShaderType type = static_cast<ShaderType>(i);
-
-			BOOST_AUTO(iter, param_descs_[type].find(name));
-			if (iter != param_descs_[type].end())
+			for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 			{
-				cgGLSetMatrixParameterArrayfr(iter->second, 0, static_cast<long>(value.size()), &value[0][0]);
+				ShaderType type = static_cast<ShaderType>(i);
+
+				BOOST_AUTO(iter, param_descs_[type].find(name));
+				if (iter != param_descs_[type].end())
+				{
+					cgGLSetMatrixParameterArrayfr(iter->second, 0, static_cast<long>(value.size()), &value[0][0]);
+				}
 			}
 		}
 	}

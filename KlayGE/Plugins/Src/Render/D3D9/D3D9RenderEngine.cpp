@@ -88,7 +88,6 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D9RenderEngine::~D3D9RenderEngine()
 	{
-		render_tech_.reset();
 		cur_render_target_.reset();
 
 		d3dDevice_.reset();
@@ -210,11 +209,11 @@ namespace KlayGE
 
 		if (caps_.hw_instancing_support)
 		{
-			RenderInstance = boost::bind(&D3D9RenderEngine::DoRenderHWInstance, this, _1);
+			RenderInstance = boost::bind(&D3D9RenderEngine::DoRenderHWInstance, this, _1, _2);
 		}
 		else
 		{
-			RenderInstance = boost::bind(&D3D9RenderEngine::DoRenderSWInstance, this, _1);
+			RenderInstance = boost::bind(&D3D9RenderEngine::DoRenderSWInstance, this, _1, _2);
 		}
 
 		return win;
@@ -587,19 +586,19 @@ namespace KlayGE
 
 	// äÖÈ¾
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DoRender(RenderLayout const & rl)
+	void D3D9RenderEngine::DoRender(RenderTechnique const & tech, RenderLayout const & rl)
 	{
 		if (rl.InstanceStream() && !rl.UseIndices())
 		{
-			this->DoRenderSWInstance(rl);
+			this->DoRenderSWInstance(tech, rl);
 		}
 		else
 		{
-			this->RenderInstance(rl);
+			this->RenderInstance(tech, rl);
 		}
 	}
 
-	void D3D9RenderEngine::DoRenderSWInstance(RenderLayout const & rl)
+	void D3D9RenderEngine::DoRenderSWInstance(RenderTechnique const & tech, RenderLayout const & rl)
 	{
 		BOOST_ASSERT(d3dDevice_);
 		BOOST_ASSERT(rl.NumVertexStreams() != 0);
@@ -627,21 +626,21 @@ namespace KlayGE
 				tmp_rl->BindIndexStream(rl.GetIndexStream(), rl.IndexStreamFormat());
 			}
 
-			this->RenderRLSWInstance(*tmp_rl);
+			this->RenderRLSWInstance(tech, *tmp_rl);
 
 			for (uint32_t i = 1; i < num_instance; ++ i)
 			{
 				rl.ExpandInstance(tmp_inst_vs, i);
-				this->RenderRLSWInstance(*tmp_rl);
+				this->RenderRLSWInstance(tech, *tmp_rl);
 			}
 		}
 		else
 		{
-			this->RenderRLSWInstance(rl);
+			this->RenderRLSWInstance(tech, rl);
 		}
 	}
 
-	void D3D9RenderEngine::DoRenderHWInstance(RenderLayout const & rl)
+	void D3D9RenderEngine::DoRenderHWInstance(RenderTechnique const & tech, RenderLayout const & rl)
 	{
 		uint32_t this_num_vertex_stream = rl.NumVertexStreams();
 		for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
@@ -686,10 +685,10 @@ namespace KlayGE
 
 		last_num_vertex_stream_ = this_num_vertex_stream;
 
-		this->RenderRL(rl);
+		this->RenderRL(tech, rl);
 	}
 
-	void D3D9RenderEngine::RenderRLSWInstance(RenderLayout const & rl)
+	void D3D9RenderEngine::RenderRLSWInstance(RenderTechnique const & tech, RenderLayout const & rl)
 	{
 		uint32_t this_num_vertex_stream = rl.NumVertexStreams();
 		for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
@@ -708,10 +707,10 @@ namespace KlayGE
 
 		last_num_vertex_stream_ = this_num_vertex_stream;
 
-		this->RenderRL(rl);
+		this->RenderRL(tech, rl);
 	}
 
-	void D3D9RenderEngine::RenderRL(RenderLayout const & rl)
+	void D3D9RenderEngine::RenderRL(RenderTechnique const & tech, RenderLayout const & rl)
 	{
 		D3DPRIMITIVETYPE primType;
 		uint32_t primCount;
@@ -723,7 +722,7 @@ namespace KlayGE
 		D3D9RenderLayout const & d3d9_rl(*checked_cast<D3D9RenderLayout const *>(&rl));
 		TIF(d3dDevice_->SetVertexDeclaration(d3d9_rl.VertexDeclaration().get()));
 
-		uint32_t num_passes = render_tech_->NumPasses();
+		uint32_t num_passes = tech.NumPasses();
 		if (rl.UseIndices())
 		{
 			D3D9IndexBuffer& d3dib(*checked_pointer_cast<D3D9IndexBuffer>(rl.GetIndexStream()));
@@ -732,7 +731,7 @@ namespace KlayGE
 
 			for (uint32_t i = 0; i < num_passes; ++ i)
 			{
-				RenderPassPtr pass = render_tech_->Pass(i);
+				RenderPassPtr pass = tech.Pass(i);
 
 				pass->Begin();
 				TIF(d3dDevice_->DrawIndexedPrimitive(primType, 0, 0,
@@ -746,7 +745,7 @@ namespace KlayGE
 
 			for (uint32_t i = 0; i < num_passes; ++ i)
 			{
-				RenderPassPtr pass = render_tech_->Pass(i);
+				RenderPassPtr pass = tech.Pass(i);
 
 				pass->Begin();
 				TIF(d3dDevice_->DrawPrimitive(primType, 0, primCount));

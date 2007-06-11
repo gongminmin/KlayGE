@@ -456,17 +456,20 @@ namespace KlayGE
 
 	void D3D9ShaderObject::SetParameter(std::string const & name, std::vector<float4> const & value)
 	{
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
+		if (!value.empty())
 		{
-			ShaderType type = static_cast<ShaderType>(i);
-			
-			BOOST_AUTO(iter, param_descs_[type].find(name));
-			if (iter != param_descs_[type].end())
+			for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 			{
-				D3D9ShaderParameterHandle const & p_handle = iter->second;
+				ShaderType type = static_cast<ShaderType>(i);
+				
+				BOOST_AUTO(iter, param_descs_[type].find(name));
+				if (iter != param_descs_[type].end())
+				{
+					D3D9ShaderParameterHandle const & p_handle = iter->second;
 
-				memcpy(&float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4], &value[0],
-					std::min(p_handle.register_count, static_cast<uint16_t>(value.size())) * sizeof(float4));
+					memcpy(&float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4], &value[0],
+						std::min(p_handle.register_count, static_cast<uint16_t>(value.size())) * sizeof(float4));
+				}
 			}
 		}
 	}

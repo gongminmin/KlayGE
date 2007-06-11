@@ -22,7 +22,7 @@
 namespace KlayGE
 {
 #ifdef KLAYGE_PLATFORM_WINDOWS
-#pragma pack(push, 1)
+#pragma pack(push, 2)
 #endif
 	struct D3D9ShaderParameterHandle
 	{
