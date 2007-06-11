@@ -72,11 +72,9 @@ namespace KlayGE
 		virtual ShaderObjectPtr MakeShaderObject() = 0;
 
 	protected:
-		typedef std::map<std::string, RenderEffectPtr> effect_pool_type;
-		effect_pool_type effect_pool_;
+		std::map<std::string, std::vector<RenderEffectPtr> > effect_pool_;
 
-		typedef std::map<std::pair<std::string, uint32_t>, FontPtr> font_pool_type;
-		font_pool_type font_pool_;
+		std::map<std::pair<std::string, uint32_t>, FontPtr> font_pool_;
 	};
 
 	template <typename RenderEngineType, typename TextureType, typename FrameBufferType,

@@ -99,6 +99,7 @@ namespace
 				caps.max_texture_height, 1, TEX_FORMAT);
 
 			effect_ = rf.LoadEffect("Font.kfx");
+			*(effect_->ParameterByName("texFontSampler")) = theTexture_;
 
 			vb_ = rf.MakeVertexBuffer(BU_Dynamic);
 			rl_->BindVertexStream(vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
@@ -149,16 +150,11 @@ namespace
 				std::copy(indices_.begin(), indices_.end(), mapper.Pointer<uint16_t>());
 			}
 
-			*(effect_->ParameterByName("texFontSampler")) = theTexture_;
 			if (!three_dim_)
 			{
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 				*(effect_->ParameterByName("halfWidth")) = static_cast<int>(re.CurRenderTarget()->Width() / 2);
 				*(effect_->ParameterByName("halfHeight")) = static_cast<int>(re.CurRenderTarget()->Height() / 2);
-			}
-			else
-			{
-				*(effect_->ParameterByName("mvp")) = mvp_;
 			}
 		}
 
@@ -175,7 +171,7 @@ namespace
 			RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 			this->OnRenderBegin();
-			renderEngine.Render(*rl_);
+			renderEngine.Render(*this->GetRenderTechnique(), *rl_);
 			this->OnRenderEnd();
 		}
 
@@ -204,7 +200,7 @@ namespace
 			std::wstring const & text)
 		{
 			three_dim_ = true;
-			mvp_ = mvp;
+			*(effect_->ParameterByName("mvp")) = mvp;
 
 			this->AddText(fontHeight, 0, 0, 0, 1, 1, clr, text);
 		}
@@ -491,7 +487,6 @@ namespace
 		uint32_t curX_, curY_;
 
 		bool three_dim_;
-		float4x4 mvp_;
 
 		uint32_t fontHeight_;
 

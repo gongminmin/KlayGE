@@ -151,19 +151,24 @@ namespace KlayGE
 
 	RenderEffectPtr RenderFactory::LoadEffect(std::string const & effectName)
 	{
-		RenderEffectPtr ret;
+		RenderEffectPtr prototype;
 
-		BOOST_AUTO(eiter, effect_pool_.find(effectName));
-		if (eiter == effect_pool_.end())
+		BOOST_AUTO(iter, effect_pool_.find(effectName));
+		if (iter == effect_pool_.end())
 		{
-			ret.reset(new RenderEffect);
-			ret->Load(ResLoader::Instance().Load(effectName));
-			effect_pool_.insert(std::make_pair(effectName, ret));
+			prototype.reset(new RenderEffect);
+			prototype->Load(ResLoader::Instance().Load(effectName));
+			effect_pool_[effectName].push_back(prototype);
 		}
 		else
 		{
-			ret = eiter->second;
+			BOOST_ASSERT(!iter->second.empty());
+			prototype = iter->second[0];
 		}
+
+		RenderEffectPtr ret = prototype->Clone();
+		ret->PrototypeEffect(prototype);
+		effect_pool_[effectName].push_back(ret);
 
 		return ret;
 	}

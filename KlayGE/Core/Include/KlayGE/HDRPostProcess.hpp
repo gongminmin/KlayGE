@@ -29,8 +29,6 @@ namespace KlayGE
 
 		void Source(TexturePtr const & src_tex, bool flipping);
 
-		void OnRenderBegin();
-
 	private:
 		void GetSampleOffsets4x4(uint32_t width, uint32_t height);
 
@@ -74,12 +72,6 @@ namespace KlayGE
 		ToneMappingPostProcess();
 
 		void SetTexture(TexturePtr const & lum_tex, TexturePtr const & bloom_tex);
-
-		void OnRenderBegin();
-
-	private:
-		TexturePtr lum_texture_;
-		TexturePtr bloom_texture_;
 	};
 
 

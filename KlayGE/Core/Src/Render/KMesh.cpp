@@ -80,14 +80,16 @@ namespace KlayGE
 
 	void KMesh::BuildMeshInfo()
 	{
+		TexturePtr tex;
 		if (!texture_slots_.empty())
 		{
-			tex_ = LoadTexture(texture_slots_[0].second);
+			tex = LoadTexture(texture_slots_[0].second);
 		}
 
-		if (tex_)
+		if (tex)
 		{
 			technique_ = technique_->Effect().TechniqueByName("KMeshTec");
+			*(technique_->Effect().ParameterByName("texSampler")) = tex;
 		}
 		else
 		{
@@ -101,14 +103,12 @@ namespace KlayGE
 		Camera const & camera = app.ActiveCamera();
 
 		*(technique_->Effect().ParameterByName("modelviewproj")) = model_ * camera.ViewMatrix() * camera.ProjMatrix();
-		*(technique_->Effect().ParameterByName("modelIT")) = MathLib::transpose(MathLib::inverse(model_));
-
-		*(technique_->Effect().ParameterByName("texSampler")) = tex_;
 	}
 
 	void KMesh::SetModelMatrix(float4x4 const & model)
 	{
 		model_ = model;
+		*(technique_->Effect().ParameterByName("modelIT")) = MathLib::transpose(MathLib::inverse(model_));
 	}
 
 

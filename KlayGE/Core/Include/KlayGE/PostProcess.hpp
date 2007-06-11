@@ -54,10 +54,6 @@ namespace KlayGE
 		explicit GammaCorrectionProcess();
 
 		void Gamma(float gamma);
-		void OnRenderBegin();
-
-	private:
-		float inv_gamma_;
 	};
 	
 	class SeparableBlurPostProcess : public PostProcess
@@ -66,16 +62,11 @@ namespace KlayGE
 		SeparableBlurPostProcess(std::string const & tech, int kernel_radius, float multiplier);
 		virtual ~SeparableBlurPostProcess();
 
-		void OnRenderBegin();
-
 	protected:
 		float GaussianDistribution(float x, float y, float rho);
 		void CalSampleOffsets(uint32_t tex_size, float deviation);
 
 	protected:
-		std::vector<float> color_weight_;
-		std::vector<float> tex_coord_offset_;
-
 		int kernel_radius_;
 		float multiplier_;
 	};

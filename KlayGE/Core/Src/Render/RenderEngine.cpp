@@ -91,7 +91,7 @@ namespace KlayGE
 		{
 		}
 
-		void DoRender(RenderLayout const & /*rl*/)
+		void DoRender(RenderTechnique const & /*tech*/, RenderLayout const & /*rl*/)
 		{
 		}
 
@@ -103,7 +103,6 @@ namespace KlayGE
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderEngine::RenderEngine()
-		: render_tech_(RenderTechnique::NullObject())
 	{
 	}
 
@@ -158,27 +157,11 @@ namespace KlayGE
 		return default_render_target_;
 	}
 
-	// 设置渲染特效
-	/////////////////////////////////////////////////////////////////////////////////
-	void RenderEngine::SetRenderTechnique(RenderTechniquePtr const & tech)
-	{
-		render_tech_ = (!tech) ? RenderTechnique::NullObject() : tech;
-	}
-
-	// 获取渲染特效
-	/////////////////////////////////////////////////////////////////////////////////
-	RenderTechniquePtr RenderEngine::GetRenderTechnique() const
-	{
-		return render_tech_;
-	}
-
 	// 渲染一个vb
 	/////////////////////////////////////////////////////////////////////////////////
-	void RenderEngine::Render(RenderLayout const & rl)
+	void RenderEngine::Render(RenderTechnique const & tech, RenderLayout const & rl)
 	{
-		render_tech_->Begin();
-		this->DoRender(rl);
-		render_tech_->End();
+		this->DoRender(tech, rl);
 	}
 
 	// 上次Render()所渲染的图元数

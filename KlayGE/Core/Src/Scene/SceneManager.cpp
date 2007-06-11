@@ -135,7 +135,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::AddRenderable(RenderablePtr const & obj)
 	{
-		RenderTechniquePtr const & tech = obj->GetRenderTechnique();
+		RenderTechniquePtr const & tech = obj->GetRenderTechnique()->Effect().PrototypeEffect()->TechniqueByName(obj->GetRenderTechnique()->Name());
 		BOOST_AUTO(iter, std::find_if(render_queue_.begin(), render_queue_.end(),
 			boost::bind(select1st<RenderQueueType::value_type>(), _1) == tech));
 		if (iter != render_queue_.end())
@@ -211,8 +211,6 @@ namespace KlayGE
 
 		BOOST_FOREACH(BOOST_TYPEOF(render_queue_)::reference items, render_queue_)
 		{
-			renderEngine.SetRenderTechnique(items.first);
-
 			BOOST_FOREACH(BOOST_TYPEOF(items.second)::reference item, items.second)
 			{
 				item->Render();

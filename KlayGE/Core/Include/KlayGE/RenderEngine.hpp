@@ -90,11 +90,8 @@ namespace KlayGE
 
 		virtual void StartRendering() = 0;
 
-		void SetRenderTechnique(RenderTechniquePtr const & tech);
-		RenderTechniquePtr GetRenderTechnique() const;
-
 		virtual void BeginFrame() = 0;
-		void Render(RenderLayout const & rl);
+		void Render(RenderTechnique const & tech, RenderLayout const & rl);
 		virtual void EndFrame() = 0;
 
 		size_t NumPrimitivesJustRendered();
@@ -124,15 +121,13 @@ namespace KlayGE
 
 	protected:
 		virtual void DoBindRenderTarget(RenderTargetPtr rt) = 0;
-		virtual void DoRender(RenderLayout const & rl) = 0;
+		virtual void DoRender(RenderTechnique const & tech, RenderLayout const & rl) = 0;
 
 		virtual void FillRenderDeviceCaps() = 0;
 
 	protected:
 		RenderTargetPtr cur_render_target_;
 		RenderTargetPtr default_render_target_;
-
-		RenderTechniquePtr render_tech_;
 
 		size_t numPrimitivesJustRendered_;
 		size_t numVerticesJustRendered_;

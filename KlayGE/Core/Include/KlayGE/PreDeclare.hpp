@@ -80,8 +80,10 @@ namespace KlayGE
 	typedef boost::shared_ptr<RenderPass> RenderPassPtr;
 	class RenderEffectParameter;
 	typedef boost::shared_ptr<RenderEffectParameter> RenderEffectParameterPtr;
-	class RenderEffectState;
-	typedef boost::shared_ptr<RenderEffectState> RenderEffectStatePtr;
+	class RenderVariable;
+	typedef boost::shared_ptr<RenderVariable> RenderVariablePtr;
+	class RenderEffectAnnotation;
+	typedef boost::shared_ptr<RenderEffectAnnotation> RenderEffectAnnotationPtr;
 	struct RenderStateObject;
 	typedef boost::shared_ptr<RenderStateObject> RenderStateObjectPtr;
 	class ShaderObject;

@@ -86,14 +86,13 @@ namespace KlayGE
 
 	void PostProcess::OnRenderBegin()
 	{
-		*(technique_->Effect().ParameterByName("src_sampler")) = src_texture_;
-
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		float4 texel_to_pixel = re.TexelToPixelOffset();
 		texel_to_pixel.x() /= render_target_->Width() / 2.0f;
 		texel_to_pixel.y() /= render_target_->Height() / 2.0f;
 		*(technique_->Effect().ParameterByName("texel_to_pixel_offset")) = texel_to_pixel;
 
+		*(technique_->Effect().ParameterByName("src_sampler")) = src_texture_;
 		*(technique_->Effect().ParameterByName("flipping")) = flipping_ ? -1 : +1;
 	}
 
@@ -105,14 +104,7 @@ namespace KlayGE
 
 	void GammaCorrectionProcess::Gamma(float gamma)
 	{
-		inv_gamma_ = gamma;
-	}
-
-	void GammaCorrectionProcess::OnRenderBegin()
-	{
-		PostProcess::OnRenderBegin();
-
-		*(technique_->Effect().ParameterByName("inv_gamma")) = inv_gamma_;
+		*(technique_->Effect().ParameterByName("inv_gamma")) = 1 / gamma;
 	}
 
 
@@ -130,7 +122,6 @@ namespace KlayGE
 
 	SeparableBlurPostProcess::SeparableBlurPostProcess(std::string const & tech, int kernel_radius, float multiplier)
 			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Blur.kfx")->TechniqueByName(tech)),
-				color_weight_(8, 0), tex_coord_offset_(8, 0),
 				kernel_radius_(kernel_radius), multiplier_(multiplier)
 	{
 		BOOST_ASSERT((kernel_radius > 0) && (kernel_radius <= 8));
@@ -138,14 +129,6 @@ namespace KlayGE
 
 	SeparableBlurPostProcess::~SeparableBlurPostProcess()
 	{
-	}
-
-	void SeparableBlurPostProcess::OnRenderBegin()
-	{
-		PostProcess::OnRenderBegin();
-
-		*(technique_->Effect().ParameterByName("color_weight")) = color_weight_;
-		*(technique_->Effect().ParameterByName("tex_coord_offset")) = tex_coord_offset_;
 	}
 
 	float SeparableBlurPostProcess::GaussianDistribution(float x, float y, float rho)
@@ -157,6 +140,9 @@ namespace KlayGE
 
 	void SeparableBlurPostProcess::CalSampleOffsets(uint32_t tex_size, float deviation)
 	{
+		std::vector<float> color_weight(kernel_radius_, 0);
+		std::vector<float> tex_coord_offset(kernel_radius_, 0);
+
 		std::vector<float> tmp_weights(kernel_radius_ * 2, 0);
 		std::vector<float> tmp_offset(kernel_radius_ * 2, 0);
 
@@ -181,9 +167,6 @@ namespace KlayGE
 			tmp_offset[i + kernel_radius_] = static_cast<float>(i);
 		}
 
-		color_weight_.resize(kernel_radius_);
-		tex_coord_offset_.resize(kernel_radius_);
-
 		// Bilinear filtering taps 
 		// Ordering is left to right.
 		for (int i = 0; i < kernel_radius_; ++ i)
@@ -191,9 +174,12 @@ namespace KlayGE
 			float const scale = tmp_weights[i * 2] + tmp_weights[i * 2 + 1];
 			float const frac = tmp_weights[i * 2] / scale;
 
-			tex_coord_offset_[i] = (tmp_offset[i * 2] + (1 - frac)) * tu;
-			color_weight_[i] = multiplier_ * scale;
+			tex_coord_offset[i] = (tmp_offset[i * 2] + (1 - frac)) * tu;
+			color_weight[i] = multiplier_ * scale;
 		}
+
+		*(technique_->Effect().ParameterByName("color_weight")) = color_weight;
+		*(technique_->Effect().ParameterByName("tex_coord_offset")) = tex_coord_offset;
 	}
 
 

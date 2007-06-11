@@ -60,13 +60,11 @@ namespace KlayGE
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-		re.SetRenderTechnique(this->GetRenderTechnique());
-
 		GraphicsBufferPtr inst_stream = this->GetRenderLayout()->InstanceStream();
 		if (inst_stream)
 		{
 			this->OnRenderBegin();
-			re.Render(*this->GetRenderLayout());
+			re.Render(*this->GetRenderTechnique(), *this->GetRenderLayout());
 			this->OnRenderEnd();
 		}
 		else
@@ -74,14 +72,14 @@ namespace KlayGE
 			this->OnRenderBegin();
 			if (instances_.empty())
 			{
-				re.Render(*this->GetRenderLayout());
+				re.Render(*this->GetRenderTechnique(), *this->GetRenderLayout());
 			}
 			else
 			{
 				for (uint32_t i = 0; i < instances_.size(); ++ i)
 				{
 					this->OnInstanceBegin(i);
-					re.Render(*this->GetRenderLayout());
+					re.Render(*this->GetRenderTechnique(), *this->GetRenderLayout());
 					this->OnInstanceEnd(i);
 				}
 			}

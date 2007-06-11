@@ -41,16 +41,9 @@ namespace KlayGE
 		this->GetSampleOffsets4x4(src_tex->Width(0), src_tex->Height(0));
 	}
 
-	void SumLumPostProcess::OnRenderBegin()
-	{
-		PostProcess::OnRenderBegin();
-
-		*(technique_->Effect().ParameterByName("tex_coord_offset")) = tex_coord_offset_;
-	}
-
 	void SumLumPostProcess::GetSampleOffsets4x4(uint32_t width, uint32_t height)
 	{
-		tex_coord_offset_.resize(2);
+		std::vector<float4> tex_coord_offset(2);
 
 		float const tu = 1.0f / width;
 		float const tv = 1.0f / height;
@@ -61,14 +54,16 @@ namespace KlayGE
 		{
 			for (int x = -1; x <= 2; x += 4)
 			{
-				tex_coord_offset_[index].x() = (x + 0) * tu;
-				tex_coord_offset_[index].y() = y * tv;
-				tex_coord_offset_[index].z() = (x + 2) * tu;
-				tex_coord_offset_[index].w() = y * tv;
+				tex_coord_offset[index].x() = (x + 0) * tu;
+				tex_coord_offset[index].y() = y * tv;
+				tex_coord_offset[index].z() = (x + 2) * tu;
+				tex_coord_offset[index].w() = y * tv;
 
 				++ index;
 			}
 		}
+
+		*(technique_->Effect().ParameterByName("tex_coord_offset")) = tex_coord_offset;
 	}
 
 
@@ -139,16 +134,8 @@ namespace KlayGE
 
 	void ToneMappingPostProcess::SetTexture(TexturePtr const & lum_tex, TexturePtr const & bloom_tex)
 	{
-		lum_texture_ = lum_tex;
-		bloom_texture_ = bloom_tex;
-	}
-
-	void ToneMappingPostProcess::OnRenderBegin()
-	{
-		PostProcess::OnRenderBegin();
-
-		*(technique_->Effect().ParameterByName("lum_sampler")) = lum_texture_;
-		*(technique_->Effect().ParameterByName("bloom_sampler")) = bloom_texture_;
+		*(technique_->Effect().ParameterByName("lum_sampler")) = lum_tex;
+		*(technique_->Effect().ParameterByName("bloom_sampler")) = bloom_tex;
 	}
 
 

@@ -41,7 +41,6 @@ namespace KlayGE
 		void SetModelMatrix(float4x4 const & model);
 
 	private:
-		TexturePtr tex_;
 		float4x4 model_;
 	};
 

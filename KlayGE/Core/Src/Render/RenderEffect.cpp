@@ -1,8 +1,11 @@
 // RenderEffect.cpp
 // KlayGE 渲染效果类 实现文件
-// Ver 3.5.0
-// 版权所有(C) 龚敏敏, 2003-2006
+// Ver 3.6.0
+// 版权所有(C) 龚敏敏, 2003-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.6.0
+// 增加了Clone (2007.6.11)
 //
 // 3.5.0
 // 改用基于xml的特效格式 (2006.10.21)
@@ -156,9 +159,9 @@ namespace
 		return ret;
 	}
 
-	boost::shared_ptr<RenderVariable> read_var(ResIdentifierPtr const & source, uint32_t type, uint32_t array_size)
+	RenderVariablePtr read_var(ResIdentifierPtr const & source, uint32_t type, uint32_t array_size)
 	{
-		boost::shared_ptr<RenderVariable> var;
+		RenderVariablePtr var;
 
 		switch (type)
 		{
@@ -389,13 +392,35 @@ namespace KlayGE
 		}
 	}
 
+	RenderEffectPtr RenderEffect::Clone()
+	{
+		RenderEffectPtr ret(new RenderEffect);
+
+		ret->prototype_effect_ = prototype_effect_;
+		ret->shaders_ = shaders_;
+
+		ret->params_.resize(params_.size());
+		for (size_t i = 0; i < params_.size(); ++ i)
+		{
+			ret->params_[i] = params_[i]->Clone(*ret);
+		}
+
+		ret->techniques_.resize(techniques_.size());
+		for (size_t i = 0; i < techniques_.size(); ++ i)
+		{
+			ret->techniques_[i] = techniques_[i]->Clone(*ret);
+		}
+
+		return ret;
+	}
+
 	RenderEffectPtr RenderEffect::NullObject()
 	{
 		static RenderEffectPtr obj(new NullRenderEffect);
 		return obj;
 	}
 
-	RenderEffectParameterPtr RenderEffect::ParameterByName(std::string const & name)
+	RenderEffectParameterPtr RenderEffect::ParameterByName(std::string const & name) const
 	{
 		BOOST_FOREACH(BOOST_TYPEOF(params_)::const_reference param, params_)
 		{
@@ -407,7 +432,7 @@ namespace KlayGE
 		return RenderEffectParameter::NullObject();
 	}
 
-	RenderEffectParameterPtr RenderEffect::ParameterBySemantic(std::string const & semantic)
+	RenderEffectParameterPtr RenderEffect::ParameterBySemantic(std::string const & semantic) const
 	{
 		BOOST_FOREACH(BOOST_TYPEOF(params_)::const_reference param, params_)
 		{
@@ -419,7 +444,7 @@ namespace KlayGE
 		return RenderEffectParameter::NullObject();
 	}
 
-	RenderTechniquePtr RenderEffect::TechniqueByName(std::string const & name)
+	RenderTechniquePtr RenderEffect::TechniqueByName(std::string const & name) const
 	{
 		BOOST_FOREACH(BOOST_TYPEOF(techniques_)::const_reference tech, techniques_)
 		{
@@ -490,12 +515,23 @@ namespace KlayGE
 		}
 	}
 
-	void RenderTechnique::Begin()
+	RenderTechniquePtr RenderTechnique::Clone(RenderEffect& effect)
 	{
-	}
+		RenderTechniquePtr ret(new RenderTechnique(effect));
 
-	void RenderTechnique::End()
-	{
+		ret->name_ = name_;
+
+		ret->annotations_ = annotations_;
+		ret->weight_ = weight_;
+		ret->is_validate_ = is_validate_;
+
+		ret->passes_.resize(passes_.size());
+		for (size_t i = 0; i < passes_.size(); ++ i)
+		{
+			ret->passes_[i] = passes_[i]->Clone(effect);
+		}
+
+		return ret;
 	}
 
 
@@ -536,13 +572,16 @@ namespace KlayGE
 		render_state_obj_.reset(new RenderStateObject);
 		shader_obj_ = rf.MakeShaderObject();
 
+		shader_descs_.reset(new BOOST_TYPEOF(*shader_descs_));
+		shader_descs_->resize(ShaderObject::ST_NumShaderTypes);
+
 		source->read(reinterpret_cast<char*>(&len), sizeof(len));
 		for (size_t i = 0; i < len; ++ i)
 		{
 			uint32_t type;
 			source->read(reinterpret_cast<char*>(&type), sizeof(type));
 			std::string state_name = read_short_string(source);
-			boost::shared_ptr<RenderVariable> var = read_var(source, type, 0);
+			RenderVariablePtr var = read_var(source, type, 0);
 
 			if (type_define::TC_shader != type)
 			{
@@ -737,14 +776,14 @@ namespace KlayGE
 			{
 				if ("vertex_shader" == state_name)
 				{
-					shader_desc sd;
+					shader_desc& sd = (*shader_descs_)[ShaderObject::ST_VertexShader];
 					var->Value(sd);
 
 					shader_obj_->SetShader(ShaderObject::ST_VertexShader, sd.profile, sd.func_name, this->GenShaderText());
 				}
 				if ("pixel_shader" == state_name)
 				{
-					shader_desc sd;
+					shader_desc& sd = (*shader_descs_)[ShaderObject::ST_PixelShader];
 					var->Value(sd);
 
 					shader_obj_->SetShader(ShaderObject::ST_PixelShader, sd.profile, sd.func_name, this->GenShaderText());
@@ -767,6 +806,44 @@ namespace KlayGE
 				}
 			}
 		}
+	}
+
+	RenderPassPtr RenderPass::Clone(RenderEffect& effect)
+	{
+		RenderPassPtr ret(new RenderPass(effect));
+
+		ret->name_ = name_;
+		ret->annotations_ = annotations_;
+		ret->shader_descs_ = shader_descs_;
+
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		
+		ret->render_state_obj_ = render_state_obj_;
+		ret->shader_obj_ = rf.MakeShaderObject();
+		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
+		{
+			ShaderObject::ShaderType type = static_cast<ShaderObject::ShaderType>(i);
+			shader_desc const & sd = (*shader_descs_)[type];
+			ret->shader_obj_->SetShader(type, sd.profile, sd.func_name, ret->GenShaderText());
+		}
+
+		ret->is_validate_ = is_validate_;
+
+		for (uint32_t i = 0; i < ret->effect_.NumParameters(); ++ i)
+		{
+			for (size_t j = 0; j < ShaderObject::ST_NumShaderTypes; ++ j)
+			{
+				ShaderObject::ShaderType type = static_cast<ShaderObject::ShaderType>(j);
+
+				RenderEffectParameterPtr param = ret->effect_.ParameterByIndex(i);
+				if (ret->shader_obj_->HasParameter(type, param->Name()))
+				{
+					ret->param_descs_[type].push_back(param);
+				}
+			}
+		}
+
+		return ret;
 	}
 
 	void RenderPass::Begin()
@@ -1082,6 +1159,22 @@ namespace KlayGE
 		}
 
 		semantic_.reset(new BOOST_TYPEOF(*semantic_)(read_short_string(source)));
+	}
+
+	RenderEffectParameterPtr RenderEffectParameter::Clone(RenderEffect& effect)
+	{
+		RenderEffectParameterPtr ret(new RenderEffectParameter(effect));
+
+		ret->name_ = name_;
+		ret->semantic_ = semantic_;
+
+		ret->type_ = type_;
+		ret->var_ = var_->Clone();
+		ret->array_size_ = array_size_;
+
+		ret->annotations_ = annotations_;
+
+		return ret;
 	}
 
 	RenderEffectParameterPtr RenderEffectParameter::NullObject()

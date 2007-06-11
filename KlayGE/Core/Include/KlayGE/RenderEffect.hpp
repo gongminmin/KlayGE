@@ -1,8 +1,11 @@
 // RenderEffect.hpp
 // KlayGE 渲染效果脚本类 头文件
-// Ver 3.5.0
-// 版权所有(C) 龚敏敏, 2003-2006
+// Ver 3.6.0
+// 版权所有(C) 龚敏敏, 2003-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.6.0
+// 增加了Clone (2007.6.11)
 //
 // 3.5.0
 // 改用基于xml的特效格式 (2006.10.21)
@@ -49,6 +52,7 @@
 #include <string>
 #include <algorithm>
 
+#include <boost/type_traits.hpp>
 #include <boost/utility.hpp>
 
 #include <KlayGE/RenderEngine.hpp>
@@ -77,6 +81,8 @@ namespace KlayGE
 	public:
 		RenderVariable();
 		virtual ~RenderVariable() = 0;
+
+		virtual RenderVariablePtr Clone() = 0;
 
 		void Dirty(bool dirty)
 		{
@@ -127,6 +133,29 @@ namespace KlayGE
 	class RenderVariableConcrete : public RenderVariable
 	{
 	public:
+		RenderVariablePtr Clone()
+		{
+			return this->Clone(boost::is_same<T, SamplerPtr>());
+		}
+
+		RenderVariablePtr Clone(boost::true_type)
+		{
+			RenderVariablePtr ret(new RenderVariableConcrete<T>);
+			SamplerPtr val;
+			this->Value(val);
+			SamplerPtr new_sampler(new Sampler(*val));
+			*ret = new_sampler;
+			return ret;
+		}
+		RenderVariablePtr Clone(boost::false_type)
+		{
+			RenderVariablePtr ret(new RenderVariableConcrete<T>);
+			T val;
+			this->Value(val);
+			*ret = val;
+			return ret;
+		}
+
 		RenderVariableConcrete& operator=(T const & value)
 		{
 			if (val_ != value)
@@ -174,7 +203,6 @@ namespace KlayGE
 
 		boost::shared_ptr<RenderVariable> var_;
 	};
-	typedef boost::shared_ptr<RenderEffectAnnotation> RenderEffectAnnotationPtr;
 
 	class RenderShaderFunc
 	{
@@ -198,6 +226,16 @@ namespace KlayGE
 		RenderEffect();
 
 		void Load(ResIdentifierPtr const & source);
+		RenderEffectPtr Clone();
+
+		void PrototypeEffect(RenderEffectPtr prototype_effect)
+		{
+			prototype_effect_ = prototype_effect;
+		}
+		RenderEffectPtr PrototypeEffect() const
+		{
+			return prototype_effect_;
+		}
 
 		static RenderEffectPtr NullObject();
 
@@ -205,9 +243,9 @@ namespace KlayGE
 		{
 			return static_cast<uint32_t>(params_.size());
 		}
-		RenderEffectParameterPtr ParameterBySemantic(std::string const & semantic);
-		RenderEffectParameterPtr ParameterByName(std::string const & name);
-		RenderEffectParameterPtr ParameterByIndex(uint32_t n)
+		RenderEffectParameterPtr ParameterBySemantic(std::string const & semantic) const;
+		RenderEffectParameterPtr ParameterByName(std::string const & name) const;
+		RenderEffectParameterPtr ParameterByIndex(uint32_t n) const
 		{
 			BOOST_ASSERT(n < this->NumParameters());
 			return params_[n];
@@ -217,8 +255,8 @@ namespace KlayGE
 		{
 			return static_cast<uint32_t>(techniques_.size());
 		}
-		RenderTechniquePtr TechniqueByName(std::string const & name);
-		RenderTechniquePtr TechniqueByIndex(uint32_t n)
+		RenderTechniquePtr TechniqueByName(std::string const & name) const;
+		RenderTechniquePtr TechniqueByIndex(uint32_t n) const
 		{
 			BOOST_ASSERT(n < this->NumTechniques());
 			return techniques_[n];
@@ -228,7 +266,7 @@ namespace KlayGE
 		{
 			return shaders_ ? static_cast<uint32_t>(shaders_->size()) : 0;
 		}
-		RenderShaderFunc ShaderByIndex(uint32_t n)
+		RenderShaderFunc ShaderByIndex(uint32_t n) const
 		{
 			BOOST_ASSERT(n < this->NumShaders());
 			return (*shaders_)[n];
@@ -239,6 +277,8 @@ namespace KlayGE
 		std::vector<RenderTechniquePtr> techniques_;
 
 		boost::shared_ptr<std::vector<RenderShaderFunc> > shaders_;
+
+		RenderEffectPtr prototype_effect_;
 	};
 
 	class RenderTechnique : boost::noncopyable
@@ -250,6 +290,7 @@ namespace KlayGE
 		}
 
 		void Load(ResIdentifierPtr const & source);
+		RenderTechniquePtr Clone(RenderEffect& effect);
 
 		static RenderTechniquePtr NullObject();
 
@@ -267,7 +308,7 @@ namespace KlayGE
 		{
 			return annotations_ ? static_cast<uint32_t>(annotations_->size()) : 0;
 		}
-		RenderEffectAnnotationPtr Annotation(uint32_t n)
+		RenderEffectAnnotationPtr Annotation(uint32_t n) const
 		{
 			BOOST_ASSERT(n < this->NumAnnotations());
 			return (*annotations_)[n];
@@ -277,14 +318,11 @@ namespace KlayGE
 		{
 			return static_cast<uint32_t>(passes_.size());
 		}
-		RenderPassPtr Pass(uint32_t n)
+		RenderPassPtr Pass(uint32_t n) const
 		{
 			BOOST_ASSERT(n < this->NumPasses());
 			return passes_[n];
 		}
-
-		void Begin();
-		void End();
 
 		bool Validate() const
 		{
@@ -319,6 +357,7 @@ namespace KlayGE
 		static RenderPassPtr NullObject();
 
 		void Load(ResIdentifierPtr const & source);
+		RenderPassPtr Clone(RenderEffect& effect);
 
 		std::string const & Name() const
 		{
@@ -346,7 +385,7 @@ namespace KlayGE
 		{
 			return annotations_ ? static_cast<uint32_t>(annotations_->size()) : 0;
 		}
-		RenderEffectAnnotationPtr Annotation(uint32_t n)
+		RenderEffectAnnotationPtr Annotation(uint32_t n) const
 		{
 			BOOST_ASSERT(n < this->NumAnnotations());
 			return (*annotations_)[n];
@@ -360,6 +399,7 @@ namespace KlayGE
 
 		boost::shared_ptr<std::string> name_;
 		boost::shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
+		boost::shared_ptr<std::vector<shader_desc> > shader_descs_;
 
 		RenderStateObjectPtr render_state_obj_;
 		ShaderObjectPtr shader_obj_;
@@ -378,13 +418,14 @@ namespace KlayGE
 		static RenderEffectParameterPtr NullObject();
 
 		void Load(ResIdentifierPtr const & source);
+		RenderEffectParameterPtr Clone(RenderEffect& effect);
 
 		uint32_t type() const
 		{
 			return type_;
 		}
 
-		boost::shared_ptr<RenderVariable> const & var() const
+		RenderVariablePtr const & var() const
 		{
 			return var_;
 		}

@@ -61,9 +61,6 @@ namespace KlayGE
 		}
 
 		void OnRenderBegin();
-
-	protected:
-		float4 clr_;
 	};
 
 	class RenderableLine : public RenderableHelper
@@ -75,9 +72,6 @@ namespace KlayGE
 		}
 
 		void OnRenderBegin();
-
-	protected:
-		float4 clr_;
 	};
 
 	class RenderableTriangle : public RenderableHelper
@@ -89,9 +83,6 @@ namespace KlayGE
 		}
 
 		void OnRenderBegin();
-
-	protected:
-		float4 clr_;
 	};
 
 	class RenderableBox : public RenderableHelper
@@ -103,9 +94,6 @@ namespace KlayGE
 		}
 
 		void OnRenderBegin();
-
-	protected:
-		float4 clr_;
 	};
 
 	class RenderableSkyBox : public RenderableHelper
@@ -119,9 +107,6 @@ namespace KlayGE
 		void CubeMap(TexturePtr const & cube);
 
 		void OnRenderBegin();
-
-	protected:
-		TexturePtr cube_tex_;
 	};
 
 	class RenderablePlane : public RenderableHelper
