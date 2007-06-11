@@ -76,11 +76,12 @@ namespace
 				turbBuffer[i] = static_cast<uint8_t>((255 * (turbBuffer[i] - min)) / (max - min));
 			}
 
-			electro_tex_ = rf.MakeTexture3D(XSIZE, YSIZE, ZSIZE, 1, EF_L8);
-			electro_tex_->CopyMemoryToTexture3D(0, &turbBuffer[0], EF_L8, XSIZE, YSIZE, ZSIZE, 0, 0, 0,
+			TexturePtr electro_tex = rf.MakeTexture3D(XSIZE, YSIZE, ZSIZE, 1, EF_L8);
+			electro_tex->CopyMemoryToTexture3D(0, &turbBuffer[0], EF_L8, XSIZE, YSIZE, ZSIZE, 0, 0, 0,
 				XSIZE, YSIZE, ZSIZE);
 
 			technique_ = rf.LoadEffect("Electro.kfx")->TechniqueByName("Electro");
+			*(technique_->Effect().ParameterByName("electroSampler")) = electro_tex;
 
 			float3 xyzs[] =
 			{
@@ -125,12 +126,7 @@ namespace
 
 			*(technique_->Effect().ParameterByName("y")) = t * 2;
 			*(technique_->Effect().ParameterByName("z")) = t;
-
-			*(technique_->Effect().ParameterByName("electroSampler")) = electro_tex_;
 		}
-
-	private:
-		TexturePtr electro_tex_;
 	};
 
 	bool ConfirmDevice(RenderDeviceCaps const & caps)

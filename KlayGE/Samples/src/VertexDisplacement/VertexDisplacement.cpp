@@ -46,16 +46,15 @@ namespace
 
 			technique_ = rf.LoadEffect("VertexDisplacement.kfx")->TechniqueByName("VertexDisplacement");
 
-			flag_tex_ = LoadTexture("Flag.dds");
+			*(technique_->Effect().ParameterByName("half_length")) = LENGTH / 2.0f;
+			*(technique_->Effect().ParameterByName("half_width")) = WIDTH / 2.0f;
+			*(technique_->Effect().ParameterByName("flagSampler")) = LoadTexture("Flag.dds");
 		}
 
 		void OnRenderBegin()
 		{
 			float currentAngle(clock() / 400.0f);
 			*(technique_->Effect().ParameterByName("currentAngle")) = currentAngle;
-
-			*(technique_->Effect().ParameterByName("half_length")) = LENGTH / 2.0f;
-			*(technique_->Effect().ParameterByName("half_width")) = WIDTH / 2.0f;
 
 			App3DFramework const & app = Context::Instance().AppInstance();
 
@@ -67,12 +66,7 @@ namespace
 			*(technique_->Effect().ParameterByName("proj")) = proj;
 
 			*(technique_->Effect().ParameterByName("modelviewIT")) = MathLib::transpose(MathLib::inverse(modelView));
-
-			*(technique_->Effect().ParameterByName("flagSampler")) = flag_tex_;
 		}
-
-	private:
-		TexturePtr flag_tex_;
 	};
 
 	class FlagObject : public SceneObjectHelper

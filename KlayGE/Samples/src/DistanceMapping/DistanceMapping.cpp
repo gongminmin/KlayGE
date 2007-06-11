@@ -52,9 +52,9 @@ namespace
 				technique_ = effect->TechniqueByName("DistanceMapping20");
 			}
 
-			diffuse_tex_ = LoadTexture("diffuse.dds");
-			normal_tex_ = LoadTexture("normal.dds");
-			distance_tex_ = LoadTexture("distance.dds");
+			*(technique_->Effect().ParameterByName("diffuseMap")) = LoadTexture("diffuse.dds");
+			*(technique_->Effect().ParameterByName("normalMap")) = LoadTexture("normal.dds");
+			*(technique_->Effect().ParameterByName("distanceMap")) = LoadTexture("distance.dds");
 
 			float3 xyzs[] =
 			{
@@ -146,14 +146,7 @@ namespace
 			float4x4 matRot(MathLib::rotation_z(degree));
 			lightPos = MathLib::transform_coord(lightPos, matRot);
 			*(technique_->Effect().ParameterByName("light_pos")) = lightPos;
-
-			*(technique_->Effect().ParameterByName("diffuseMap")) = diffuse_tex_;
-			*(technique_->Effect().ParameterByName("normalMap")) = normal_tex_;
-			*(technique_->Effect().ParameterByName("distanceMap")) = distance_tex_;
 		}
-
-	private:
-		TexturePtr diffuse_tex_, normal_tex_, distance_tex_;
 	};
 
 	class PolygonObject : public SceneObjectHelper

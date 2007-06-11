@@ -61,16 +61,12 @@ namespace
 			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
 			*(technique_->Effect().ParameterByName("mvp")) = view * proj;
-			*(technique_->Effect().ParameterByName("video_sampler")) = video_tex_;
 		}
 
 		void VideoTexture(TexturePtr video_tex)
 		{
-			video_tex_ = video_tex;
+			*(technique_->Effect().ParameterByName("video_sampler")) = video_tex;
 		}
-
-	private:
-		TexturePtr video_tex_;
 	};
 
 	class TeapotObject : public SceneObjectHelper

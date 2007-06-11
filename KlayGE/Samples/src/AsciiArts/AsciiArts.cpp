@@ -65,17 +65,10 @@ namespace
 			this->GetSampleOffsets8x8(src_tex->Width(0), src_tex->Height(0));
 		}
 
-		void OnRenderBegin()
-		{
-			PostProcess::OnRenderBegin();
-
-			*(technique_->Effect().ParameterByName("tex_coord_offset")) = tex_coord_offset_;
-		}
-
 	private:
 		void GetSampleOffsets8x8(uint32_t width, uint32_t height)
 		{
-			tex_coord_offset_.resize(8);
+			std::vector<float4> tex_coord_offset(8);
 
 			float const tu = 1.0f / width;
 			float const tv = 1.0f / height;
@@ -86,18 +79,17 @@ namespace
 			{
 				for (int x = -3; x <= 4; x += 4)
 				{
-					tex_coord_offset_[index].x() = (x + 0) * tu;
-					tex_coord_offset_[index].y() = y * tv;
-					tex_coord_offset_[index].z() = (x + 2) * tu;
-					tex_coord_offset_[index].w() = y * tv;
+					tex_coord_offset[index].x() = (x + 0) * tu;
+					tex_coord_offset[index].y() = y * tv;
+					tex_coord_offset[index].z() = (x + 2) * tu;
+					tex_coord_offset[index].w() = y * tv;
 
 					++ index;
 				}
 			}
-		}
 
-	private:
-		std::vector<float4> tex_coord_offset_;
+			*(technique_->Effect().ParameterByName("tex_coord_offset")) = tex_coord_offset;
+		}
 	};
 
 	class AsciiArts : public PostProcess
@@ -110,7 +102,7 @@ namespace
 
 		void SetLumsTex(TexturePtr const & lums_tex)
 		{
-			lums_texture_ = lums_tex;
+			*(technique_->Effect().ParameterByName("lums_sampler")) = lums_tex;
 		}
 
 		void OnRenderBegin()
@@ -125,11 +117,7 @@ namespace
 						static_cast<float>(CELL_HEIGHT) / renderTarget.Height());
 
 			*(technique_->Effect().ParameterByName("src_sampler")) = src_texture_;
-			*(technique_->Effect().ParameterByName("lums_sampler")) = lums_texture_;
 		}
-
-	private:
-		TexturePtr lums_texture_;
 	};
 
 	std::vector<ascii_tile_type> LoadFromTexture(std::string const & tex_name)

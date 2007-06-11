@@ -47,9 +47,9 @@ namespace
 
 			technique_ = rf.LoadEffect("parallax.kfx")->TechniqueByName("Parallax");
 
-			diffuse_tex_ = LoadTexture("diffuse.dds");
-			normal_tex_ = LoadTexture("normal.dds");
-			height_tex_ = LoadTexture("height.dds");
+			*(technique_->Effect().ParameterByName("diffuseMapSampler")) = LoadTexture("diffuse.dds");
+			*(technique_->Effect().ParameterByName("normalMapSampler")) = LoadTexture("normal.dds");
+			*(technique_->Effect().ParameterByName("heightMapSampler")) = LoadTexture("height.dds");
 		}
 
 		void BuildMeshInfo()
@@ -66,19 +66,12 @@ namespace
 
 			*(technique_->Effect().ParameterByName("mvp")) = model * view * proj;
 			*(technique_->Effect().ParameterByName("eyePos")) = app.ActiveCamera().EyePos();
-
-			*(technique_->Effect().ParameterByName("diffuseMapSampler")) = diffuse_tex_;
-			*(technique_->Effect().ParameterByName("normalMapSampler")) = normal_tex_;
-			*(technique_->Effect().ParameterByName("heightMapSampler")) = height_tex_;
 		}
 
 		void LightPos(float3 const & light_pos)
 		{
 			*(technique_->Effect().ParameterByName("lightPos")) = light_pos;
 		}
-
-	private:
-		TexturePtr diffuse_tex_, normal_tex_, height_tex_;
 	};
 
 	class PolygonObject : public SceneObjectHelper

@@ -77,15 +77,15 @@ void MD5SkinnedMesh::BuildMeshInfo()
 	{
 		if ("DiffuseMap" == iter->first)
 		{
-			diffuse_map_ = LoadTexture(iter->second);
+			*(technique_->Effect().ParameterByName("diffuse_map")) = LoadTexture(iter->second);
 		}
 		if ("NormalMap" == iter->first)
 		{
-			normal_map_ = LoadTexture(iter->second);
+			*(technique_->Effect().ParameterByName("normal_map")) = LoadTexture(iter->second);
 		}
 		if ("SpecularMap" == iter->first)
 		{
-			specular_map_ = LoadTexture(iter->second);
+			*(technique_->Effect().ParameterByName("specular_map")) = LoadTexture(iter->second);
 		}
 	}
 }
@@ -95,12 +95,6 @@ void MD5SkinnedMesh::OnRenderBegin()
 	App3DFramework& app = Context::Instance().AppInstance();
 	float4x4 worldview(world_ * app.ActiveCamera().ViewMatrix());
 	*(technique_->Effect().ParameterByName("worldviewproj")) = worldview * app.ActiveCamera().ProjMatrix();
-
-	*(technique_->Effect().ParameterByName("diffuse_map")) = diffuse_map_;
-	*(technique_->Effect().ParameterByName("normal_map")) = normal_map_;
-	*(technique_->Effect().ParameterByName("specular_map")) = specular_map_;
-
-	*(technique_->Effect().ParameterByName("eye_pos")) = eye_pos_;
 
 	boost::shared_ptr<RenderModel> model = model_.lock();
 	if (model)
@@ -117,7 +111,7 @@ void MD5SkinnedMesh::SetWorld(const float4x4& mat)
 
 void MD5SkinnedMesh::SetEyePos(const KlayGE::float3& eye_pos)
 {
-	eye_pos_ = eye_pos;
+	*(technique_->Effect().ParameterByName("eye_pos")) = eye_pos;
 }
 
 

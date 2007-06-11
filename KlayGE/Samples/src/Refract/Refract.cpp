@@ -91,6 +91,7 @@ namespace
 			back_face_tech_ = effect->TechniqueByName("RefractBackFace");
 
 			technique_ = back_face_tech_;
+			*(technique_->Effect().ParameterByName("eta_ratio")) = float3(1 / 1.1f, 1 / 1.1f - 0.003f, 1 / 1.1f - 0.006f);
 		}
 
 		void BuildMeshInfo()
@@ -117,13 +118,13 @@ namespace
 
 		void BackFaceTexture(TexturePtr const & bf_tex)
 		{
-			bf_tex_ = bf_tex;
+			*(technique_->Effect().ParameterByName("BackFace_Sampler")) = bf_tex;
 		}
 
 		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)
 		{
-			y_tex_ = y_cube;
-			c_tex_ = c_cube;
+			*(technique_->Effect().ParameterByName("skybox_YcubeMapSampler")) = y_cube;
+			*(technique_->Effect().ParameterByName("skybox_CcubeMapSampler")) = c_cube;
 		}
 
 		void OnRenderBegin()
@@ -144,20 +145,9 @@ namespace
 			*(technique_->Effect().ParameterByName("eye_pos")) = app.ActiveCamera().EyePos();
 
 			*(technique_->Effect().ParameterByName("inv_vp")) = MathLib::inverse(view * proj);
-
-			*(technique_->Effect().ParameterByName("eta_ratio")) = float3(1 / 1.1f, 1 / 1.1f - 0.003f, 1 / 1.1f - 0.006f);
-
-			*(technique_->Effect().ParameterByName("skybox_YcubeMapSampler")) = y_tex_;
-			*(technique_->Effect().ParameterByName("skybox_CcubeMapSampler")) = c_tex_;
-			*(technique_->Effect().ParameterByName("BackFace_Sampler")) = bf_tex_;
 		}
 
 	private:
-		TexturePtr y_tex_;
-		TexturePtr c_tex_;
-
-		TexturePtr bf_tex_;
-
 		RenderTechniquePtr back_face_tech_;
 		RenderTechniquePtr front_face_tech_;
 	};

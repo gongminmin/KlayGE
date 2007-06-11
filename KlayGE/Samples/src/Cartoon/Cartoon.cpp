@@ -46,7 +46,7 @@ namespace
 
 			effect_ = rf.LoadEffect("Cartoon.kfx");
 
-			toon_tex_ = LoadTexture("toon.dds");
+			*(effect_->ParameterByName("toonmap_sampler")) = LoadTexture("toon.dds");
 		}
 
 		void Pass(int i)
@@ -71,8 +71,14 @@ namespace
 
 		void UpdateTexture(TexturePtr const & normal_depth_tex, bool flipping)
 		{
-			normal_depth_tex_ = normal_depth_tex;
-			flipping_ = flipping;
+			*(effect_->ParameterByName("normal_depth_sampler")) = normal_depth_tex;
+			if (normal_depth_tex)
+			{
+				*(effect_->ParameterByName("inv_width")) = 2.0f / normal_depth_tex->Width(0);
+				*(effect_->ParameterByName("inv_height")) = 2.0f / normal_depth_tex->Height(0);
+			}
+
+			*(effect_->ParameterByName("flipping")) = flipping ? -1 : +1;
 		}
 
 		void OnRenderBegin()
@@ -96,25 +102,11 @@ namespace
 			float const y_offset = texel_to_pixel.y() / re.CurRenderTarget()->Height();
 			*(effect_->ParameterByName("offset")) = float2(x_offset, y_offset);
 
-			if (normal_depth_tex_)
-			{
-				*(effect_->ParameterByName("inv_width")) = 2.0f / normal_depth_tex_->Width(0);
-				*(effect_->ParameterByName("inv_height")) = 2.0f / normal_depth_tex_->Height(0);
-			}
-
-			*(effect_->ParameterByName("toonmap_sampler")) = toon_tex_;
-			*(effect_->ParameterByName("normal_depth_sampler")) = normal_depth_tex_;
-			*(effect_->ParameterByName("flipping")) = flipping_ ? -1 : +1;
-
 			*(effect_->ParameterByName("depth_min")) = app.ActiveCamera().NearPlane();
 			*(effect_->ParameterByName("inv_depth_range")) = 1 / (app.ActiveCamera().FarPlane() - app.ActiveCamera().NearPlane());
 		}
 
 	private:
-		TexturePtr toon_tex_;
-		TexturePtr normal_depth_tex_;
-		bool flipping_;
-
 		float4x4 model_mat_;
 
 		RenderEffectPtr effect_;

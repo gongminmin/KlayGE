@@ -28,10 +28,6 @@ public:
 
 private:
 	KlayGE::float4x4 world_;
-
-	KlayGE::TexturePtr diffuse_map_, normal_map_, specular_map_;
-
-	KlayGE::float3 eye_pos_;
 };
 
 #endif		// _MODEL_HPP

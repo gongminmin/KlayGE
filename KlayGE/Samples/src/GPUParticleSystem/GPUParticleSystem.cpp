@@ -162,7 +162,6 @@ namespace
 				tex_width_(256), tex_height_(max_num_particles / 256),
 				model_mat_(float4x4::Identity()),
 				rt_index_(true), accumulate_time_(0),
-				init_pos_(0, 0, 0), init_life_(8),
 				random_gen_(boost::lagged_fibonacci607(), boost::uniform_real<float>(-0.05f, 0.05f))
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -193,29 +192,31 @@ namespace
 				= screen_buffer->GetViewport().camera;
 
 			particle_birth_time_ = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_R32F);
+			*(technique_->Effect().ParameterByName("particle_birth_time_sampler")) = particle_birth_time_;
 
-			particle_init_vel_ = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F);
+			TexturePtr particle_init_vel;
+			particle_init_vel = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F);
 			std::vector<float4> vel_init(max_num_particles);
 			for (size_t i = 0; i < vel_init.size(); ++ i)
 			{
 				vel_init[i] = float4(random_gen_(), 0.2f + abs(random_gen_()) * 3, random_gen_(), 0);
 			}
-			particle_init_vel_->CopyMemoryToTexture2D(0, &vel_init[0], EF_ABGR32F,
+			particle_init_vel->CopyMemoryToTexture2D(0, &vel_init[0], EF_ABGR32F,
 				tex_width_, tex_height_, 0, 0, tex_width_, tex_height_);
+			*(technique_->Effect().ParameterByName("particle_init_vel_sampler")) = particle_init_vel;
 
-			ps_model_mat_param_ = technique_->Effect().ParameterByName("ps_model_mat");
-			init_pos_life_param_ = technique_->Effect().ParameterByName("init_pos_life");
 			particle_pos_sampler_param_ = technique_->Effect().ParameterByName("particle_pos_sampler");
 			particle_vel_sampler_param_ = technique_->Effect().ParameterByName("particle_vel_sampler");
-			particle_init_vel_sampler_param_ = technique_->Effect().ParameterByName("particle_init_vel_sampler");
-			particle_birth_time_sampler_param_ = technique_->Effect().ParameterByName("particle_birth_time_sampler");
 			accumulate_time_param_ = technique_->Effect().ParameterByName("accumulate_time");
 			elapse_time_param_ = technique_->Effect().ParameterByName("elapse_time");
+
+			*(technique_->Effect().ParameterByName("init_pos_life")) = float4(0, 0, 0, 8);
 		}
 
 		void ModelMatrix(float4x4 const & model)
 		{
 			model_mat_ = model;
+			*(technique_->Effect().ParameterByName("ps_model_mat")) = model;
 		}
 
 		float4x4 const & ModelMatrix() const
@@ -243,13 +244,17 @@ namespace
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			re.BindRenderTarget(pos_vel_rt_buffer_[rt_index_]);
 
-			elapse_time_ = elapse_time;
-
 			accumulate_time_ += elapse_time;
 			if (accumulate_time_ >= max_num_particles_ * inv_emit_freq_)
 			{
 				accumulate_time_ = 0;
 			}
+
+			*elapse_time_param_ = elapse_time;
+			*accumulate_time_param_ = accumulate_time_;
+
+			*particle_pos_sampler_param_ = this->PosTexture();
+			*particle_vel_sampler_param_ = this->VelTexture();
 
 			this->Render();
 
@@ -266,21 +271,6 @@ namespace
 			return particle_vel_texture_[!rt_index_];
 		}
 
-		void OnRenderBegin()
-		{
-			*ps_model_mat_param_ = model_mat_;
-			*init_pos_life_param_ = float4(init_pos_.x(), init_pos_.y(), init_pos_.z(), init_life_);
-
-			*particle_pos_sampler_param_ = this->PosTexture();
-			*particle_vel_sampler_param_ = this->VelTexture();
-
-			*particle_init_vel_sampler_param_ = particle_init_vel_;
-			*particle_birth_time_sampler_param_ = particle_birth_time_;
-
-			*accumulate_time_param_ = accumulate_time_;
-			*elapse_time_param_ = elapse_time_;
-		}
-
 	private:
 		int max_num_particles_;
 		int tex_width_, tex_height_;
@@ -295,24 +285,15 @@ namespace
 		bool rt_index_;
 
 		TexturePtr particle_birth_time_;
-		TexturePtr particle_init_vel_;
 
 		float accumulate_time_;
-		float elapse_time_;
 		float inv_emit_freq_;
-
-		float3 init_pos_;
-		float init_life_;
 
 		boost::variate_generator<boost::lagged_fibonacci607, boost::uniform_real<float> > random_gen_;
 
-		RenderEffectParameterPtr ps_model_mat_param_;
-		RenderEffectParameterPtr init_pos_life_param_;
 		RenderEffectParameterPtr vel_offset_param_;
 		RenderEffectParameterPtr particle_pos_sampler_param_;
 		RenderEffectParameterPtr particle_vel_sampler_param_;
-		RenderEffectParameterPtr particle_init_vel_sampler_param_;
-		RenderEffectParameterPtr particle_birth_time_sampler_param_;
 		RenderEffectParameterPtr accumulate_time_param_;
 		RenderEffectParameterPtr elapse_time_param_;
 	};
@@ -330,10 +311,10 @@ namespace
 			TexturePtr height_32f = rf.MakeTexture2D(height_map->Width(0), height_map->Height(0), 1, EF_R32F);
 			height_map->CopyToTexture(*height_32f);
 
-			height_map_tex_ = height_32f;
-			normal_map_tex_ = normal_map;
+			*(technique_->Effect().ParameterByName("height_map_sampler")) = height_32f;
+			*(technique_->Effect().ParameterByName("normal_map_sampler")) = normal_map;
 
-			grass_tex_ = LoadTexture("grass.dds");
+			*(technique_->Effect().ParameterByName("grass_sampler")) = LoadTexture("grass.dds");
 		}
 
 		void OnRenderBegin()
@@ -345,20 +326,10 @@ namespace
 
 			*(technique_->Effect().ParameterByName("View")) = view;
 			*(technique_->Effect().ParameterByName("Proj")) = proj;
-
-			*(technique_->Effect().ParameterByName("height_map_sampler")) = height_map_tex_;
-			*(technique_->Effect().ParameterByName("normal_map_sampler")) = normal_map_tex_;
-
-			*(technique_->Effect().ParameterByName("grass_sampler")) = grass_tex_;
 		}
 
 	private:
 		float4x4 model_;
-
-		TexturePtr height_map_tex_;
-		TexturePtr normal_map_tex_;
-
-		TexturePtr grass_tex_;
 	};
 
 	class TerrainObject : public SceneObjectHelper

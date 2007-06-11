@@ -132,7 +132,7 @@ namespace
 
 			box_ = MathLib::compute_bounding_box<float>(&vertices[0], &vertices[0] + vertices.size());
 
-			grass_tex_ = LoadTexture("grass.dds");
+			*(technique_->Effect().ParameterByName("grass_sampler")) = LoadTexture("grass.dds");
 		}
 
 		void OnRenderBegin()
@@ -145,13 +145,10 @@ namespace
 			*(technique_->Effect().ParameterByName("View")) = view;
 			*(technique_->Effect().ParameterByName("Proj")) = proj;
 
-			*(technique_->Effect().ParameterByName("grass_sampler")) = grass_tex_;
+			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
+			*(technique_->Effect().ParameterByName("depth_min")) = camera.NearPlane();
+			*(technique_->Effect().ParameterByName("inv_depth_range")) = 1 / (camera.FarPlane() - camera.NearPlane());
 		}
-
-	private:
-		float4x4 model_;
-
-		TexturePtr grass_tex_;
 	};
 
 	class TerrainObject : public SceneObjectHelper
@@ -207,19 +204,17 @@ namespace
 
 			technique_ = rf.LoadEffect("ParticleSystem.kfx")->TechniqueByName("Particle");
 
-			particle_tex_ = LoadTexture("particle.dds");
+			*(technique_->Effect().ParameterByName("point_radius")) = 0.04f;
+			*(technique_->Effect().ParameterByName("particle_sampler")) = LoadTexture("particle.dds");
 		}
 
 		void SceneTexture(TexturePtr tex)
 		{
-			scene_tex_ = tex;
+			*(technique_->Effect().ParameterByName("scene_sampler")) = tex;
 		}
 
 		void OnRenderBegin()
 		{
-			*(technique_->Effect().ParameterByName("particle_sampler")) = particle_tex_;
-			*(technique_->Effect().ParameterByName("scene_sampler")) = scene_tex_;
-
 			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 
 			float4x4 const & view = camera.ViewMatrix();
@@ -228,8 +223,6 @@ namespace
 
 			*(technique_->Effect().ParameterByName("View")) = view;
 			*(technique_->Effect().ParameterByName("Proj")) = proj;
-
-			*(technique_->Effect().ParameterByName("point_radius")) = 0.04f;
 
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2;
@@ -245,10 +238,6 @@ namespace
 			*(technique_->Effect().ParameterByName("depth_min")) = camera.NearPlane();
 			*(technique_->Effect().ParameterByName("inv_depth_range")) = 1 / (camera.FarPlane() - camera.NearPlane());
 		}
-
-	private:
-		TexturePtr particle_tex_;
-		TexturePtr scene_tex_; 
 	};
 
 	class ParticlesObject : public SceneObjectHelper
@@ -267,6 +256,23 @@ namespace
 		CopyPostProcess()
 			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("ParticleSystem.kfx")->TechniqueByName("Copy"))
 		{
+		}
+
+		void OnRenderBegin()
+		{
+			PostProcess::OnRenderBegin();
+
+			App3DFramework const & app = Context::Instance().AppInstance();
+
+			float4x4 proj = app.ActiveCamera().ProjMatrix();
+			float4x4 const inv_proj = MathLib::inverse(proj);
+
+			*(technique_->Effect().ParameterByName("Proj")) = proj;
+
+			*(technique_->Effect().ParameterByName("upper_left")) = MathLib::transform_coord(float3(-1, 1, 1), inv_proj);
+			*(technique_->Effect().ParameterByName("upper_right")) = MathLib::transform_coord(float3(1, 1, 1), inv_proj);
+			*(technique_->Effect().ParameterByName("lower_left")) = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
+			*(technique_->Effect().ParameterByName("lower_right")) = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
 		}
 	};
 

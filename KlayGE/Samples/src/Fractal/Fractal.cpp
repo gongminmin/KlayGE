@@ -79,18 +79,10 @@ namespace
 			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 		}
 
-		void OnRenderBegin()
-		{
-			*(technique_->Effect().ParameterByName("fractal_sampler")) = tex_;
-		}
-
 		void SetTexture(TexturePtr texture)
 		{
-			tex_ = texture;
+			*(technique_->Effect().ParameterByName("fractal_sampler")) = texture;
 		}
-
-	private:
-		TexturePtr tex_;
 	};
 
 	class RenderPlane : public RenderableHelper
@@ -140,18 +132,10 @@ namespace
 			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 		}
 
-		void OnRenderBegin()
-		{
-			*(technique_->Effect().ParameterByName("fractal_sampler")) = tex_;
-		}
-
 		void SetTexture(TexturePtr texture)
 		{
-			tex_ = texture;
+			*(technique_->Effect().ParameterByName("fractal_sampler")) = texture;
 		}
-
-	private:
-		TexturePtr tex_;
 	};
 
 	bool ConfirmDevice(RenderDeviceCaps const & caps)
