@@ -171,6 +171,12 @@ namespace KlayGE
 			return rect_ == rhs.rect_;
 		}
 
+		bool PtInRect(Vector_T<T, 2> const & pt) const
+		{
+			return MathLib::in_bound(pt.x(), this->left(), this->right())
+				&& MathLib::in_bound(pt.y(), this->top(), this->bottom());
+		}
+
 	private:
 		Vector_T<T, elem_num> rect_;
 	};
