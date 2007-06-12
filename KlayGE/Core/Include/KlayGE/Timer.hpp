@@ -56,7 +56,6 @@ namespace KlayGE
 			return 1.0 / this->clocks_per_sec();
 		}
 
-	private:
 		double current_time() const
 		{
 #ifdef KLAYGE_PLATFORM_WINDOWS
@@ -68,6 +67,7 @@ namespace KlayGE
 #endif
 		}
 
+	private:
 		uint64_t clocks_per_sec() const
 		{
 #ifdef KLAYGE_PLATFORM_WINDOWS

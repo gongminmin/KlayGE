@@ -1161,6 +1161,41 @@ namespace KlayGE
 
 		template <typename T>
 		inline void
+		to_yaw_pitch_roll(T& yaw, T& pitch, T& roll, Quaternion_T<T> const & quat)
+		{
+			T sqx = quat.x() * quat.x();
+			T sqy = quat.y() * quat.y();
+			T sqz = quat.z() * quat.z();
+			T sqw = quat.w() * quat.w();
+			T unit = sqx + sqy + sqz + sqw;
+			T test = quat.x() * quat.y() + quat.z() * quat.w();
+			if (test > T(0.499) * unit)
+			{
+				// singularity at north pole
+				roll = 2 * atan2(quat.x(), quat.w());
+				yaw = PI / 2;
+				pitch = 0;
+			}
+			else
+			{
+				if (test < -T(0.499) * unit)
+				{
+					// singularity at south pole
+					roll = -2 * atan2(quat.x(), quat.w());
+					yaw = -PI / 2;
+					pitch = 0;
+				}
+				else
+				{
+					roll = atan2(2 * quat.y() * quat.w() - 2 * quat.x() * quat.z(), sqx - sqy - sqz + sqw);
+					yaw = asin(2 * test / unit);
+					pitch = atan2(2 * quat.x() * quat.w() - 2 * quat.y() * quat.z(), -sqx + sqy - sqz + sqw)
+				}
+			}
+		}
+
+		template <typename T>
+		inline void
 		to_axis_angle(Vector_T<T, 3>& vec, T& ang, Quaternion_T<T> const & quat)
 		{
 			T const tw(acos(quat.w()));
