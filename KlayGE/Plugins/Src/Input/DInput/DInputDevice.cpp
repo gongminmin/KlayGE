@@ -29,7 +29,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	DInputDevice::DInputDevice(REFGUID guid, InputEngine const & inputEng)
 	{
-		DInputEngine const & dinputEng(*checked_cast<DInputEngine const *>(&inputEng));
+		DInputEngine const & dinputEng = *checked_cast<DInputEngine const *>(&inputEng);
 
 		IDirectInputDevice8W* device;
 		dinputEng.DInput()->CreateDevice(guid, &device, NULL);

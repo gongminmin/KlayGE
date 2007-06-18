@@ -19,6 +19,8 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
+#include <KlayGE/Util.hpp>
+#include <KlayGE/Context.hpp>
 
 #include <algorithm>
 #ifdef KLAYGE_COMPILER_MSVC
@@ -42,8 +44,8 @@ namespace KlayGE
 	DInputMouse::DInputMouse(REFGUID guid, InputEngine const & inputEng)
 					: DInputDevice(guid, inputEng)
 	{
-		this->DataFormat(c_dfDIMouse);
-		this->CooperativeLevel(::GetActiveWindow(), DISCL_NONEXCLUSIVE | DISCL_FOREGROUND);
+		this->DataFormat(c_dfDIMouse2);
+		this->CooperativeLevel(checked_cast<DInputEngine const *>(&inputEng)->HWnd(), DISCL_NONEXCLUSIVE | DISCL_FOREGROUND);
 
 		// 把鼠标的设为相对模式
 		DIPROPDWORD dipdw;
@@ -81,12 +83,12 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	void DInputMouse::UpdateInputs()
 	{
-		DIMOUSESTATE diMouseState;
+		DIMOUSESTATE2 diMouseState;
 		this->DeviceState(&diMouseState, sizeof(diMouseState));
 
 		POINT pt;
 		GetCursorPos(&pt);
-		ScreenToClient(::GetActiveWindow(), &pt);
+		ScreenToClient(checked_cast<DInputEngine const *>(&Context::Instance().InputFactoryInstance().InputEngineInstance())->HWnd(), &pt);
 		abs_pos_ = Vector_T<long, 2>(pt.x, pt.y);
 		offset_ = Vector_T<long, 3>(diMouseState.lX, diMouseState.lY, diMouseState.lZ);
 

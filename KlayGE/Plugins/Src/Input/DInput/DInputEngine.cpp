@@ -49,6 +49,13 @@ namespace KlayGE
 		return dinput_;
 	}
 
+	// 获取窗口句柄
+	/////////////////////////////////////////////////////////////////////////////////
+	HWND DInputEngine::HWnd() const
+	{
+		return hwnd_;
+	}
+
 	// 输入引擎名称
 	/////////////////////////////////////////////////////////////////////////////////
 	std::wstring const & DInputEngine::Name() const
@@ -62,6 +69,7 @@ namespace KlayGE
 	void DInputEngine::EnumDevices()
 	{
 		TIF(dinput_->EnumDevices(DI8DEVCLASS_ALL, EnumDevicesCB, this, DIEDFL_ALLDEVICES));
+		hwnd_ = ::GetActiveWindow();
 	}
 
 	// 枚举设备的回调函数

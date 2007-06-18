@@ -37,6 +37,11 @@ namespace KlayGE
 		return keys_[n];
 	}
 
+	bool const * InputKeyboard::Keys() const
+	{
+		return &keys_[0];
+	}
+
 	// 实现动作映射
 	//////////////////////////////////////////////////////////////////////////////////
 	void InputKeyboard::ActionMap(uint32_t id, InputActionMap const & actionMap)

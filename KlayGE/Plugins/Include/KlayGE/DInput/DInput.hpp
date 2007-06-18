@@ -45,9 +45,11 @@ namespace KlayGE
 		void EnumDevices();
 
 		boost::shared_ptr<IDirectInput8W> const & DInput() const;
+		HWND HWnd() const;
 
 	private:
 		boost::shared_ptr<IDirectInput8W> dinput_;
+		HWND hwnd_;
 
 	private:
 		static BOOL CALLBACK EnumDevicesCB(LPCDIDEVICEINSTANCEW didi, void* pvRef);

@@ -17,6 +17,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 
 #include <boost/assert.hpp>
 #include <boost/array.hpp>
@@ -40,7 +41,7 @@ namespace KlayGE
 						: DInputDevice(guid, inputEng)
 	{
 		this->DataFormat(c_dfDIKeyboard);
-		this->CooperativeLevel(::GetActiveWindow(), DISCL_NONEXCLUSIVE | DISCL_BACKGROUND);
+		this->CooperativeLevel(checked_cast<DInputEngine const *>(&inputEng)->HWnd(), DISCL_NONEXCLUSIVE | DISCL_BACKGROUND);
 	}
 
 	// Éè±¸Ãû³Æ

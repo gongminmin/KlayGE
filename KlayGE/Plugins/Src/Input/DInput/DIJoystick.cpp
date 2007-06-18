@@ -14,6 +14,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 
 #include <algorithm>
 #ifdef KLAYGE_COMPILER_MSVC
@@ -36,7 +37,7 @@ namespace KlayGE
 						: DInputDevice(guid, inputEng)
 	{
 		this->DataFormat(c_dfDIJoystick);
-		this->CooperativeLevel(::GetActiveWindow(), DISCL_EXCLUSIVE | DISCL_BACKGROUND);
+		this->CooperativeLevel(checked_cast<DInputEngine const *>(&inputEng)->HWnd(), DISCL_EXCLUSIVE | DISCL_BACKGROUND);
 
 		// Set the X-axis range (-1000 to +1000)
 		DIPROPRANGE diprg;
