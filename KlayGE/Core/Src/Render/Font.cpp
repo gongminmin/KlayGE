@@ -180,6 +180,33 @@ namespace
 			return fontHeight_;
 		}
 
+		Size_T<uint32_t> CalcSize(uint32_t fontHeight, std::wstring const & text)
+		{
+			this->UpdateTexture(text);
+
+			int32_t const h = fontHeight;
+
+			std::vector<uint32_t> lines(1, 0);
+
+			BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
+			{
+				CharInfoMapType::const_iterator cmiter = charInfoMap_.find(ch);
+				uint32_t const w = static_cast<uint32_t>(cmiter->second.Width() * theTexture_->Width(0));
+
+				if (ch != L'\n')
+				{
+					lines.back() += w;
+				}
+				else
+				{
+					lines.push_back(0);
+				}
+			}
+
+			return Size_T<uint32_t>(*std::max_element(lines.begin(), lines.end()),
+				static_cast<uint32_t>(h * lines.size()));
+		}
+
 		void AddText2D(uint32_t fontHeight, float sx, float sy, float sz,
 			float xScale, float yScale, Color const & clr, std::wstring const & text)
 		{
@@ -534,6 +561,20 @@ namespace KlayGE
 	uint32_t Font::FontHeight() const
 	{
 		return checked_pointer_cast<FontRenderable>(font_renderable_)->FontHeight();
+	}
+
+	// 计算文字大小
+	/////////////////////////////////////////////////////////////////////////////////
+	Size_T<uint32_t> Font::CalcSize(std::wstring const & text)
+	{
+		if (!text.empty())
+		{
+			return checked_pointer_cast<FontRenderable>(font_renderable_)->CalcSize(this->FontHeight(), text);
+		}
+		else
+		{
+			return Size_T<int32_t>(0, 0);
+		}
 	}
 
 	// 在指定位置画出文字

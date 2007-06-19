@@ -81,6 +81,7 @@ namespace KlayGE
 	public:
 		Font(std::string const & fontName, uint32_t fontHeight = 16, uint32_t flags = 0);
 
+		Size_T<uint32_t> CalcSize(std::wstring const & text);
 		void RenderText(float x, float y, Color const & clr,
 			std::wstring const & text);
 		void RenderText(float x, float y, float z, float xScale, float yScale, Color const & clr, 
