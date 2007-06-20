@@ -26,12 +26,12 @@
 
 #include <vector>
 
+#include <KlayGE/Viewport.hpp>
 #include <KlayGE/RenderView.hpp>
-#include <KlayGE/RenderTarget.hpp>
 
 namespace KlayGE
 {
-	class FrameBuffer : public RenderTarget
+	class FrameBuffer
 	{
 	public:
 		enum ATTACHMENT
@@ -44,21 +44,56 @@ namespace KlayGE
 		};
 
 	public:
-		virtual ~FrameBuffer() = 0;
+		FrameBuffer();
+		virtual ~FrameBuffer();
 
 		static FrameBufferPtr NullObject();
 
+		virtual uint32_t Left() const;
+		virtual uint32_t Top() const;
+		virtual uint32_t Width() const;
+		virtual uint32_t Height() const;
+		virtual uint32_t ColorDepth() const;
+		virtual uint32_t DepthBits() const;
+		virtual uint32_t StencilBits() const;
+		virtual ElementFormat Format() const;
+
+		virtual Viewport const & GetViewport() const;
+		virtual Viewport& GetViewport();
+		virtual void SetViewport(Viewport const & viewport);
+
+		virtual bool Active() const;
+		virtual void Active(bool state);
+
+		virtual bool RequiresFlipping() const = 0;
+
 		void Attach(uint32_t att, RenderViewPtr view);
 		void Detach(uint32_t att);
+		RenderViewPtr Attached(uint32_t att);
 
-		void OnBind();
-		void OnUnbind();
+		virtual void OnBind();
+		virtual void OnUnbind();
 
-		void SwapBuffers()
+		virtual void SwapBuffers()
 		{
 		}
 
 	protected:
+		uint32_t	left_;
+		uint32_t	top_;
+		uint32_t	width_;
+		uint32_t	height_;
+		uint32_t	colorDepth_;
+		ElementFormat format_;
+
+		bool		isDepthBuffered_;
+		uint32_t	depthBits_;
+		uint32_t	stencilBits_;
+
+		bool	active_;	// Is active i.e. visible
+
+		Viewport viewport_;
+
 		std::vector<RenderViewPtr> clr_views_;
 		RenderViewPtr rs_view_;
 	};

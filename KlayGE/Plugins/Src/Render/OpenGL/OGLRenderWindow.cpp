@@ -17,7 +17,9 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/Context.hpp>
 #include <KlayGE/RenderSettings.hpp>
+#include <KlayGE/App3D.hpp>
 
 #include <map>
 #include <boost/assert.hpp>
@@ -67,7 +69,8 @@ namespace KlayGE
 			// of the current frame.
 			if (this->Active() && this->Ready())
 			{
-				this->Update();
+				Context::Instance().SceneManagerInstance().Update();
+				this->SwapBuffers();
 			}
 			break;
 
@@ -115,7 +118,8 @@ namespace KlayGE
 	}
 
 	OGLRenderWindow::OGLRenderWindow(std::string const & name, RenderSettings const & settings)
-						: hWnd_(NULL),
+						: OGLFrameBuffer(false),
+							hWnd_(NULL),
 							ready_(false), closed_(false)
 	{
 		// Store info
@@ -295,6 +299,82 @@ namespace KlayGE
 		return description_;
 	}
 
+	// 改变窗口大小
+	/////////////////////////////////////////////////////////////////////////////////
+	void OGLRenderWindow::Resize(uint32_t width, uint32_t height)
+	{
+		width_ = width;
+		height_ = height;
+
+		// Notify viewports of resize
+		viewport_.width = width;
+		viewport_.height = height;
+
+		App3DFramework& app = Context::Instance().AppInstance();
+		app.OnResize(width, height);
+	}
+
+	// 改变窗口位置
+	/////////////////////////////////////////////////////////////////////////////////
+	void OGLRenderWindow::Reposition(uint32_t left, uint32_t top)
+	{
+		left_ = left;
+		top_ = top;
+	}
+
+	// 获取是否是全屏状态
+	/////////////////////////////////////////////////////////////////////////////////
+	bool OGLRenderWindow::FullScreen() const
+	{
+		return isFullScreen_;
+	}
+
+	// 设置是否是全屏状态
+	/////////////////////////////////////////////////////////////////////////////////
+	void OGLRenderWindow::FullScreen(bool fs)
+	{
+		if (isFullScreen_ != fs)
+		{
+			left_ = 0;
+			top_ = 0;
+
+			uint32_t style;
+			if (fs)
+			{
+				colorDepth_ = fs_color_depth_;
+
+				DEVMODE devMode;
+				devMode.dmSize = sizeof(devMode);
+				devMode.dmBitsPerPel = colorDepth_;
+				devMode.dmPelsWidth = width_;
+				devMode.dmPelsHeight = height_;
+				devMode.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
+				::ChangeDisplaySettings(&devMode, CDS_FULLSCREEN);
+
+				style = WS_POPUP;
+			}
+			else
+			{
+				colorDepth_ = ::GetDeviceCaps(hDC_, BITSPIXEL);
+				::ChangeDisplaySettings(NULL, 0);
+
+				style = WS_OVERLAPPEDWINDOW;
+			}
+
+			::SetWindowLongPtrW(hWnd_, GWL_STYLE, style);
+
+			RECT rc = { 0, 0, width_, height_ };
+			::AdjustWindowRect(&rc, style, false);
+			width_ = rc.right - rc.left;
+			height_ = rc.bottom - rc.top;
+
+			isFullScreen_ = fs;
+
+			::ShowWindow(hWnd_, SW_SHOWNORMAL);
+			::UpdateWindow(hWnd_);
+		}
+	}
+
 	void OGLRenderWindow::WindowMovedOrResized()
 	{
 		::RECT rect;
@@ -343,62 +423,5 @@ namespace KlayGE
 	void OGLRenderWindow::CustomAttribute(std::string const & /*name*/, void* /*pData*/)
 	{
 		BOOST_ASSERT(false);
-	}
-
-	void OGLRenderWindow::DoReposition(uint32_t /*left*/, uint32_t /*top*/)
-	{
-	}
-
-	void OGLRenderWindow::DoResize(uint32_t /*width*/, uint32_t /*height*/)
-	{
-	}
-
-	void OGLRenderWindow::DoFullScreen(bool fs)
-	{
-		if (isFullScreen_ != fs)
-		{
-			left_ = 0;
-			top_ = 0;
-
-			uint32_t style;
-			if (fs)
-			{
-				colorDepth_ = fs_color_depth_;
-
-				DEVMODE devMode;
-				devMode.dmSize = sizeof(devMode);
-				devMode.dmBitsPerPel = colorDepth_;
-				devMode.dmPelsWidth = width_;
-				devMode.dmPelsHeight = height_;
-				devMode.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
-				::ChangeDisplaySettings(&devMode, CDS_FULLSCREEN);
-
-				style = WS_POPUP;
-			}
-			else
-			{
-				colorDepth_ = ::GetDeviceCaps(hDC_, BITSPIXEL);
-				::ChangeDisplaySettings(NULL, 0);
-
-				style = WS_OVERLAPPEDWINDOW;
-			}
-
-			::SetWindowLongPtrW(hWnd_, GWL_STYLE, style);
-
-			RECT rc = { 0, 0, width_, height_ };
-			::AdjustWindowRect(&rc, style, false);
-			width_ = rc.right - rc.left;
-			height_ = rc.bottom - rc.top;
-
-			isFullScreen_ = fs;
-
-			::ShowWindow(hWnd_, SW_SHOWNORMAL);
-			::UpdateWindow(hWnd_);
-		}
-	}
-
-	void OGLRenderWindow::OnBind()
-	{
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
 }

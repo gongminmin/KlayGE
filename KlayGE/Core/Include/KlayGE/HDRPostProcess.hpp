@@ -17,6 +17,7 @@
 
 #include <vector>
 
+#include <KlayGE/Timer.hpp>
 #include <KlayGE/PostProcess.hpp>
 
 namespace KlayGE
@@ -86,7 +87,7 @@ namespace KlayGE
 		HDRPostProcess();
 
 		void Source(TexturePtr const & tex, bool flipping);
-		void Destinate(RenderTargetPtr const & rt);
+		void Destinate(FrameBufferPtr const & fb);
 		void Apply();
 
 	private:

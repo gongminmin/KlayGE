@@ -54,7 +54,7 @@ namespace KlayGE
 
 		void Clear(uint32_t masks, Color const & clr, float depth, int32_t stencil);
 
-		RenderWindowPtr CreateRenderWindow(std::string const & name, RenderSettings const & settings);
+		void CreateRenderWindow(std::string const & name, RenderSettings const & settings);
 		
 		void SetStateObjects(RenderStateObject const & rs_obj, ShaderObject const & shader_obj);
 
@@ -72,8 +72,12 @@ namespace KlayGE
 			return float4(0, 0, 0, 0);
 		}
 
+		void Resize(uint32_t width, uint32_t height);
+		bool FullScreen() const;
+		void FullScreen(bool fs);
+
 	private:
-		void DoBindRenderTarget(RenderTargetPtr renderTarget);
+		void DoBindFrameBuffer(FrameBufferPtr fb);
 		void DoRender(RenderTechnique const & tech, RenderLayout const & rl);
 
 		void FillRenderDeviceCaps();

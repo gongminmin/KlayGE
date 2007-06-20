@@ -1,11 +1,14 @@
 // RenderEngine.hpp
 // KlayGE 渲染引擎类 实现文件
-// Ver 3.5.0
-// 版权所有(C) 龚敏敏, 2003-2006
+// Ver 3.6.0
+// 版权所有(C) 龚敏敏, 2003-2007
 // Homepage: http://klayge.sourceforge.net
 //
+// 3.6.0
+// 去掉了RenderTarget，直接使用FrameBuffer (2007.6.20)
+//
 // 3.5.0
-// 支持Alpha to Coverage (2006.9.34)
+// 支持Alpha to Coverage (2006.9.24)
 //
 // 3.4.0
 // 增加了TexelToPixelOffset (2006.8.27)
@@ -59,7 +62,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderStateObject.hpp>
-#include <KlayGE/RenderTarget.hpp>
+#include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/RenderDeviceCaps.hpp>
@@ -99,13 +102,13 @@ namespace KlayGE
 
 		virtual void Clear(uint32_t masks, Color const & clr, float depth, int32_t stencil) = 0;
 
-		virtual RenderWindowPtr CreateRenderWindow(std::string const & name, RenderSettings const & settings) = 0;
+		virtual void CreateRenderWindow(std::string const & name, RenderSettings const & settings) = 0;
 
 		virtual void SetStateObjects(RenderStateObject const & rs_obj, ShaderObject const & shader_obj) = 0;
 
-		void BindRenderTarget(RenderTargetPtr rt);
-		RenderTargetPtr CurRenderTarget() const;
-		RenderTargetPtr DefaultRenderTarget() const;
+		void BindFrameBuffer(FrameBufferPtr fb);
+		FrameBufferPtr CurFrameBuffer() const;
+		FrameBufferPtr DefaultFrameBuffer() const;
 
 		// Determines the bit depth of the hardware accelerated stencil buffer, if supported.
 		virtual uint16_t StencilBufferBitDepth() = 0;
@@ -119,15 +122,19 @@ namespace KlayGE
 		// Return the appropiate offsets as full coordinates in the texture values.
 		virtual float4 TexelToPixelOffset() const = 0;
 
+		virtual void Resize(uint32_t width, uint32_t height) = 0;
+		virtual bool FullScreen() const = 0;
+		virtual void FullScreen(bool fs) = 0;
+
 	protected:
-		virtual void DoBindRenderTarget(RenderTargetPtr rt) = 0;
+		virtual void DoBindFrameBuffer(FrameBufferPtr fb) = 0;
 		virtual void DoRender(RenderTechnique const & tech, RenderLayout const & rl) = 0;
 
 		virtual void FillRenderDeviceCaps() = 0;
 
 	protected:
-		RenderTargetPtr cur_render_target_;
-		RenderTargetPtr default_render_target_;
+		FrameBufferPtr cur_frame_buffer_;
+		FrameBufferPtr default_frame_buffer_;
 
 		size_t numPrimitivesJustRendered_;
 		size_t numVerticesJustRendered_;

@@ -33,7 +33,6 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Viewport.hpp>
-#include <KlayGE/RenderTarget.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Renderable.hpp>

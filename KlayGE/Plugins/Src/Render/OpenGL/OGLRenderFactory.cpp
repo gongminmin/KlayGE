@@ -58,7 +58,7 @@ namespace KlayGE
 
 	FrameBufferPtr OGLRenderFactory::MakeFrameBuffer()
 	{
-		return FrameBufferPtr(new OGLFrameBuffer);
+		return FrameBufferPtr(new OGLFrameBuffer(true));
 	}
 
 	RenderLayoutPtr OGLRenderFactory::MakeRenderLayout(RenderLayout::buffer_type type)

@@ -181,7 +181,7 @@ void Fractal::InitObjects()
 	render_buffer_[0] = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
 	render_buffer_[1] = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
 	render_buffer_[0]->GetViewport().camera
-		= render_buffer_[1]->GetViewport().camera = renderEngine.CurRenderTarget()->GetViewport().camera;
+		= render_buffer_[1]->GetViewport().camera = renderEngine.CurFrameBuffer()->GetViewport().camera;
 
 	renderFractal_.reset(new RenderFractal);
 	renderPlane_.reset(new RenderPlane);
@@ -219,7 +219,7 @@ void Fractal::DoUpdate(uint32_t pass)
 	switch (pass)
 	{
 	case 0:
-		renderEngine.BindRenderTarget(render_buffer_[!odd]);
+		renderEngine.BindFrameBuffer(render_buffer_[!odd]);
 		renderEngine.Clear(RenderEngine::CBM_Color, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 		checked_pointer_cast<RenderFractal>(renderFractal_)->SetTexture(rendered_tex_[odd]);
@@ -227,7 +227,7 @@ void Fractal::DoUpdate(uint32_t pass)
 		break;
 
 	case 1:
-		renderEngine.BindRenderTarget(RenderTargetPtr());
+		renderEngine.BindFrameBuffer(FrameBufferPtr());
 		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 		checked_pointer_cast<RenderPlane>(renderPlane_)->SetTexture(rendered_tex_[!odd]);

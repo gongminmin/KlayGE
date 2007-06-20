@@ -159,32 +159,19 @@ float4 TerrainPS(float2 tex0 : TEXCOORD0,
 	
 	<shader>
 		<![CDATA[
-void CopyVS(float4 pos : POSITION,
-					out float4 oPos : POSITION,
-					out float2 oTex : TEXCOORD0,
-					out float3 oDir : TEXCOORD1)
-{
-	PostProcessVS(pos, oPos, oTex);
-	oDir = texcoord_to_view(oTex);
-}
-
-void CopyPS(float2 tex : TEXCOORD0,
-				float3 dir : TEXCOORD1,
-				out float4 clr : COLOR0,
-				out float depth : DEPTH)
+float4 CopyPS(float2 tex : TEXCOORD0) : COLOR
 {
 	float4 s = tex2D(src_sampler, tex);
-	clr = float4(s.rgb, 1);
-	
-	float4 pos_ps = mul(float4(dir * s.a, 1), Proj);
-	depth = pos_ps.z / pos_ps.w;
+	return float4(s.rgb, 1);
 }
 		]]>
 	</shader>
 	
 	<technique name="Copy">
 		<pass name="p0">
-			<state name="vertex_shader" value="CopyVS()"/>
+			<state name="depth_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="CopyPS()"/>
 		</pass>
 	</technique>

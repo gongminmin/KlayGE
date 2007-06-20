@@ -252,7 +252,7 @@ void Refract::InitObjects()
 
 	render_buffer_ = rf.MakeFrameBuffer();
 	hdr_buffer_ = rf.MakeFrameBuffer();
-	RenderTargetPtr screen_buffer = re.CurRenderTarget();
+	FrameBufferPtr screen_buffer = re.CurFrameBuffer();
 	render_buffer_->GetViewport().camera = hdr_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
 
 	hdr_.reset(new HDRPostProcess);
@@ -273,7 +273,7 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 	hdr_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));
 
 	hdr_->Source(hdr_tex_, hdr_buffer_->RequiresFlipping());
-	hdr_->Destinate(RenderTargetPtr());
+	hdr_->Destinate(FrameBufferPtr());
 }
 
 void Refract::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -302,7 +302,7 @@ void Refract::DoUpdate(uint32_t pass)
 		fpcController_.Update();
 
 		// 第一遍，渲染背面
-		re.BindRenderTarget(render_buffer_);
+		re.BindFrameBuffer(render_buffer_);
 		re.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0, 0, 0, 1), 0, 0);
 
 		checked_pointer_cast<RefractorObject>(refractor_)->Pass(0);
@@ -311,7 +311,7 @@ void Refract::DoUpdate(uint32_t pass)
 
 	case 1:
 		// 第二遍，渲染正面
-		re.BindRenderTarget(hdr_buffer_);
+		re.BindFrameBuffer(hdr_buffer_);
 		re.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 		checked_pointer_cast<RefractorObject>(refractor_)->Pass(1);
@@ -325,7 +325,7 @@ void Refract::DoUpdate(uint32_t pass)
 
 		hdr_->Apply();
 
-		re.BindRenderTarget(RenderTargetPtr());
+		re.BindFrameBuffer(FrameBufferPtr());
 
 		std::wostringstream stream;
 		stream << this->FPS() << " FPS";

@@ -362,15 +362,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Render\RenderTarget.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\Core\Src\Render\RenderView.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\Core\Src\Render\RenderWindow.cpp"
 					>
 				</File>
 				<File
@@ -478,15 +470,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\RenderTarget.hpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\Core\Include\KlayGE\RenderView.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\Core\Include\KlayGE\RenderWindow.hpp"
 					>
 				</File>
 				<File

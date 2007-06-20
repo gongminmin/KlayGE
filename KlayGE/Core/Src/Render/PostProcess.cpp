@@ -58,17 +58,17 @@ namespace KlayGE
 		flipping_ = flipping;
 	}
 
-	void PostProcess::Destinate(RenderTargetPtr const & rt)
+	void PostProcess::Destinate(FrameBufferPtr const & fb)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		
-		if (rt)
+		if (fb)
 		{
-			render_target_ = rt;
+			frame_buffer_ = fb;
 		}
 		else
 		{
-			render_target_ = re.DefaultRenderTarget();
+			frame_buffer_ = re.DefaultFrameBuffer();
 		}
 	}
 
@@ -76,20 +76,20 @@ namespace KlayGE
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-		RenderTargetPtr backup_rt = re.CurRenderTarget();
-		re.BindRenderTarget(render_target_);
+		FrameBufferPtr backup_fb = re.CurFrameBuffer();
+		re.BindFrameBuffer(frame_buffer_);
 
 		this->Render();
 
-		re.BindRenderTarget(backup_rt);
+		re.BindFrameBuffer(backup_fb);
 	}
 
 	void PostProcess::OnRenderBegin()
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		float4 texel_to_pixel = re.TexelToPixelOffset();
-		texel_to_pixel.x() /= render_target_->Width() / 2.0f;
-		texel_to_pixel.y() /= render_target_->Height() / 2.0f;
+		texel_to_pixel.x() /= frame_buffer_->Width() / 2.0f;
+		texel_to_pixel.y() /= frame_buffer_->Height() / 2.0f;
 		*(technique_->Effect().ParameterByName("texel_to_pixel_offset")) = texel_to_pixel;
 
 		*(technique_->Effect().ParameterByName("src_sampler")) = src_texture_;
@@ -214,20 +214,20 @@ namespace KlayGE
 	{
 	}
 
-	void BlurPostProcess::Destinate(RenderTargetPtr const & rt)
+	void BlurPostProcess::Destinate(FrameBufferPtr const & fb)
 	{
-		PostProcess::Destinate(rt);
+		PostProcess::Destinate(fb);
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		blurx_tex_ = rf.MakeTexture2D(render_target_->Width(), render_target_->Height(), 1, render_target_->Format());
+		blurx_tex_ = rf.MakeTexture2D(frame_buffer_->Width(), frame_buffer_->Height(), 1, frame_buffer_->Format());
 
-		FrameBufferPtr fb = rf.MakeFrameBuffer();
-		fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blurx_tex_, 0));
+		FrameBufferPtr blur_x_fb = rf.MakeFrameBuffer();
+		blur_x_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blurx_tex_, 0));
 		blur_x_.Source(src_texture_, flipping_);
-		blur_x_.Destinate(fb);
-		blur_y_.Source(blurx_tex_, fb->RequiresFlipping());
-		blur_y_.Destinate(render_target_);
+		blur_x_.Destinate(blur_x_fb);
+		blur_y_.Source(blurx_tex_, blur_x_fb->RequiresFlipping());
+		blur_y_.Destinate(fb);
 	}
 
 	void BlurPostProcess::Apply()

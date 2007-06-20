@@ -5,7 +5,6 @@
 #include <KlayGE/Font.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderableHelper.hpp>
-#include <KlayGE/RenderWindow.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/SceneManager.hpp>
@@ -98,8 +97,8 @@ namespace
 
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2;
-			float const x_offset = texel_to_pixel.x() / re.CurRenderTarget()->Width();
-			float const y_offset = texel_to_pixel.y() / re.CurRenderTarget()->Height();
+			float const x_offset = texel_to_pixel.x() / re.CurFrameBuffer()->Width();
+			float const y_offset = texel_to_pixel.y() / re.CurFrameBuffer()->Height();
 			*(effect_->ParameterByName("offset")) = float2(x_offset, y_offset);
 
 			*(effect_->ParameterByName("depth_min")) = app.ActiveCamera().NearPlane();
@@ -183,7 +182,7 @@ void Cartoon::InitObjects()
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	normal_depth_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
-	normal_depth_buffer_->GetViewport().camera = renderEngine.CurRenderTarget()->GetViewport().camera;
+	normal_depth_buffer_->GetViewport().camera = renderEngine.CurFrameBuffer()->GetViewport().camera;
 
 	fpcController_.AttachCamera(this->ActiveCamera());
 	fpcController_.Scalers(0.05f, 0.5f);
@@ -232,7 +231,7 @@ void Cartoon::DoUpdate(uint32_t pass)
 	case 0:
 		fpcController_.Update();
 
-		renderEngine.BindRenderTarget(normal_depth_buffer_);
+		renderEngine.BindFrameBuffer(normal_depth_buffer_);
 		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 		sceneMgr.Clear();
@@ -241,7 +240,7 @@ void Cartoon::DoUpdate(uint32_t pass)
 		break;
 	
 	case 1:
-		renderEngine.BindRenderTarget(RenderTargetPtr());
+		renderEngine.BindFrameBuffer(FrameBufferPtr());
 		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 		sceneMgr.Clear();
@@ -250,10 +249,10 @@ void Cartoon::DoUpdate(uint32_t pass)
 		checked_pointer_cast<RenderTorus>(torus_->GetRenderable())->Pass(1);
 		torus_->AddToSceneManager();
 
-		RenderWindow& rw = *checked_pointer_cast<RenderWindow>(renderEngine.CurRenderTarget());
+		FrameBuffer& rw = *checked_pointer_cast<FrameBuffer>(renderEngine.CurFrameBuffer());
 
 		font_->RenderText(0, 0, Color(1, 1, 0, 1), L"¿¨Í¨äÖÈ¾");
-		font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description());
+		font_->RenderText(0, 18, Color(1, 1, 0, 1), renderEngine.Name());
 
 		std::wostringstream stream;
 		stream << rw.DepthBits() << " bits depth " << rw.StencilBits() << " bits stencil";

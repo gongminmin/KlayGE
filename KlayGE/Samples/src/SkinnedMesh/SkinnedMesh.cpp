@@ -4,7 +4,6 @@
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/Renderable.hpp>
-#include <KlayGE/RenderWindow.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
@@ -134,9 +133,5 @@ void SkinnedMeshApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 	model_->AddToRenderQueue();
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), renderEngine.Name());
-
-	RenderWindow& win(*checked_pointer_cast<RenderWindow>(renderEngine.CurRenderTarget()));
-	font_->RenderText(0, 18, Color(1, 1, 0, 1), win.Description());
-
-	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str());
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());
 }

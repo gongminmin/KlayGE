@@ -187,7 +187,7 @@ namespace
 			pos_vel_rt_buffer_[1]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*particle_pos_texture_[1], 0));
 			pos_vel_rt_buffer_[1]->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*particle_vel_texture_[1], 0));
 
-			RenderTargetPtr screen_buffer = re.CurRenderTarget();
+			FrameBufferPtr screen_buffer = re.CurFrameBuffer();
 			pos_vel_rt_buffer_[0]->GetViewport().camera = pos_vel_rt_buffer_[1]->GetViewport().camera
 				= screen_buffer->GetViewport().camera;
 
@@ -242,7 +242,7 @@ namespace
 		void Update(float elapse_time)
 		{
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			re.BindRenderTarget(pos_vel_rt_buffer_[rt_index_]);
+			re.BindFrameBuffer(pos_vel_rt_buffer_[rt_index_]);
 
 			accumulate_time_ += elapse_time;
 			if (accumulate_time_ >= max_num_particles_ * inv_emit_freq_)
@@ -448,7 +448,7 @@ void GPUParticleSystemApp::DoUpdate(uint32_t /*pass*/)
 
 	checked_pointer_cast<ParticlesObject>(particles_)->PosTexture(gpu_ps->PosTexture());
 
-	re.BindRenderTarget(RenderTargetPtr());
+	re.BindFrameBuffer(FrameBufferPtr());
 	re.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 	fpcController_.Update();

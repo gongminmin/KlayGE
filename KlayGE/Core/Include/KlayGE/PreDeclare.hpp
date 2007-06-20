@@ -65,11 +65,7 @@ namespace KlayGE
 	typedef boost::shared_ptr<Font> FontPtr;
 	class RenderEngine;
 	typedef boost::shared_ptr<RenderEngine> RenderEnginePtr;
-	class RenderTarget;
-	typedef boost::shared_ptr<RenderTarget> RenderTargetPtr;
 	struct RenderSettings;
-	class RenderWindow;
-	typedef boost::shared_ptr<RenderWindow> RenderWindowPtr;
 	class Renderable;
 	typedef boost::shared_ptr<Renderable> RenderablePtr;
 	class RenderEffect;

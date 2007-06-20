@@ -46,9 +46,21 @@ namespace KlayGE
 	protected:
 		ID3D9SurfacePtr surface_;
 	};
-
 	typedef boost::shared_ptr<D3D9RenderView> D3D9RenderViewPtr;
 
+	class D3D9SurfaceRenderView : public D3D9RenderView, boost::noncopyable
+	{
+	public:
+		explicit D3D9SurfaceRenderView(ID3D9SurfacePtr surf);
+
+		void OnAttached(FrameBuffer& fb, uint32_t att);
+		void OnDetached(FrameBuffer& fb, uint32_t att);
+
+	private:
+		void DoOnLostDevice();
+		void DoOnResetDevice();
+	};
+	typedef boost::shared_ptr<D3D9SurfaceRenderView> D3D9SurfaceRenderViewPtr;
 
 	class D3D9Texture1DRenderView : public D3D9RenderView, boost::noncopyable
 	{
@@ -66,9 +78,7 @@ namespace KlayGE
 		D3D9Texture1D& texture_1d_;
 		int level_;
 	};
-
 	typedef boost::shared_ptr<D3D9Texture1DRenderView> D3D9Texture1DRenderViewPtr;
-
 
 	class D3D9Texture2DRenderView : public D3D9RenderView, boost::noncopyable
 	{
@@ -86,9 +96,7 @@ namespace KlayGE
 		D3D9Texture2D& texture_2d_;
 		int level_;
 	};
-
 	typedef boost::shared_ptr<D3D9Texture2DRenderView> D3D9Texture2DRenderViewPtr;
-
 	
 	class D3D9Texture3DRenderView : public D3D9RenderView, boost::noncopyable
 	{
@@ -112,9 +120,7 @@ namespace KlayGE
 		uint32_t slice_;
 		int level_;
 	};
-
 	typedef boost::shared_ptr<D3D9Texture3DRenderView> D3D9Texture3DRenderViewPtr;
-
 
 	class D3D9TextureCubeRenderView : public D3D9RenderView, boost::noncopyable
 	{
@@ -133,9 +139,7 @@ namespace KlayGE
 		Texture::CubeFaces face_;
 		int level_;
 	};
-
 	typedef boost::shared_ptr<D3D9TextureCubeRenderView> D3D9TextureCubeRenderViewPtr;
-
 
 	class D3D9GraphicsBufferRenderView : public D3D9RenderView, boost::noncopyable
 	{
@@ -159,9 +163,7 @@ namespace KlayGE
 	private:
 		GraphicsBuffer& gbuffer_;
 	};
-
 	typedef boost::shared_ptr<D3D9GraphicsBufferRenderView> D3D9GraphicsBufferRenderViewPtr;
-
 
 	class D3D9DepthStencilRenderView : public D3D9RenderView, boost::noncopyable
 	{
@@ -182,7 +184,6 @@ namespace KlayGE
 	private:
 		D3DMULTISAMPLE_TYPE multi_sample_;
 	};
-
 	typedef boost::shared_ptr<D3D9DepthStencilRenderView> D3D9DepthStencilRenderViewPtr;
 }
 

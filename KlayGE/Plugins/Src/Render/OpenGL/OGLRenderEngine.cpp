@@ -37,9 +37,10 @@
 #include <KlayGE/Viewport.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/RenderLayout.hpp>
-#include <KlayGE/RenderTarget.hpp>
+#include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderSettings.hpp>
+#include <KlayGE/Context.hpp>
 #include <KlayGE/Util.hpp>
 
 #include <glloader/glloader.h>
@@ -99,12 +100,12 @@ namespace KlayGE
 
 		::PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
 
-		RenderTarget& renderTarget = *this->CurRenderTarget();
+		FrameBuffer& fb = *this->CurFrameBuffer();
 		while (WM_QUIT != msg.message)
 		{
 			// 如果窗口是激活的，用 PeekMessage()以便我们可以用空闲时间渲染场景
 			// 不然, 用 GetMessage() 减少 CPU 占用率
-			if (renderTarget.Active())
+			if (fb.Active())
 			{
 				gotMsg = ::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) ? true : false;
 			}
@@ -121,9 +122,10 @@ namespace KlayGE
 			else
 			{
 				// 在空余时间渲染帧 (没有等待的消息)
-				if (renderTarget.Active())
+				if (fb.Active())
 				{
-					renderTarget.Update();
+					Context::Instance().SceneManagerInstance().Update();
+					fb.SwapBuffers();
 				}
 			}
 		}
@@ -155,16 +157,14 @@ namespace KlayGE
 
 	// 建立渲染窗口
 	/////////////////////////////////////////////////////////////////////////////////
-	RenderWindowPtr OGLRenderEngine::CreateRenderWindow(std::string const & name,
+	void OGLRenderEngine::CreateRenderWindow(std::string const & name,
 		RenderSettings const & settings)
 	{
-		RenderWindowPtr win(new OGLRenderWindow(name, settings));
-		default_render_target_ = win;
+		FrameBufferPtr win(new OGLRenderWindow(name, settings));
+		default_frame_buffer_ = win;
 
 		this->FillRenderDeviceCaps();
-		this->BindRenderTarget(win);
-
-		return win;
+		this->BindFrameBuffer(win);
 	}
 
 	void OGLRenderEngine::TexParameter(GLenum target, GLenum pname, GLint param)
@@ -457,11 +457,11 @@ namespace KlayGE
 
 	// 设置当前渲染目标
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::DoBindRenderTarget(RenderTargetPtr rt)
+	void OGLRenderEngine::DoBindFrameBuffer(FrameBufferPtr fb)
 	{
-		BOOST_ASSERT(rt);
+		BOOST_ASSERT(fb);
 
-		Viewport const & vp(rt->GetViewport());
+		Viewport const & vp(fb->GetViewport());
 		glViewport(vp.left, vp.top, vp.width, vp.height);
 
 		glEnable(GL_CULL_FACE);
@@ -795,6 +795,21 @@ namespace KlayGE
 	void OGLRenderEngine::ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 	{
 		glScissor(x, y, width, height);
+	}
+
+	void OGLRenderEngine::Resize(uint32_t width, uint32_t height)
+	{
+		checked_pointer_cast<OGLRenderWindow>(default_frame_buffer_)->Resize(width, height);
+	}
+
+	bool OGLRenderEngine::FullScreen() const
+	{
+		return checked_pointer_cast<OGLRenderWindow>(default_frame_buffer_)->FullScreen();
+	}
+
+	void OGLRenderEngine::FullScreen(bool fs)
+	{
+		checked_pointer_cast<OGLRenderWindow>(default_frame_buffer_)->FullScreen(fs);
 	}
 
 	// 填充设备能力

@@ -226,8 +226,8 @@ namespace
 
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2;
-			float const x_offset = texel_to_pixel.x() / re.CurRenderTarget()->Width();
-			float const y_offset = texel_to_pixel.y() / re.CurRenderTarget()->Height();
+			float const x_offset = texel_to_pixel.x() / re.CurFrameBuffer()->Width();
+			float const y_offset = texel_to_pixel.y() / re.CurFrameBuffer()->Height();
 			*(technique_->Effect().ParameterByName("offset")) = float2(x_offset, y_offset);
 
 			*(technique_->Effect().ParameterByName("upper_left")) = MathLib::transform_coord(float3(-1, 1, 1), inv_proj);
@@ -365,7 +365,7 @@ void ParticleSystemApp::InitObjects()
 	RenderEngine& re = rf.RenderEngineInstance();
 
 	scene_buffer_ = rf.MakeFrameBuffer();
-	RenderTargetPtr screen_buffer = re.CurRenderTarget();
+	FrameBufferPtr screen_buffer = re.CurFrameBuffer();
 	scene_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
 
 	copy_pp_.reset(new CopyPostProcess);
@@ -376,15 +376,16 @@ void ParticleSystemApp::OnResize(uint32_t width, uint32_t height)
 	App3DFramework::OnResize(width, height);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderEngine& re = rf.RenderEngineInstance();
 
 	scene_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F);
 	scene_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*scene_tex_, 0));
-	scene_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));
+	scene_buffer_->Attach(FrameBuffer::ATT_DepthStencil, re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil));
 
 	checked_pointer_cast<RenderParticles>(particles_->GetRenderable())->SceneTexture(scene_tex_);
 
 	copy_pp_->Source(scene_tex_, scene_buffer_->RequiresFlipping());
-	copy_pp_->Destinate(RenderTargetPtr());
+	copy_pp_->Destinate(FrameBufferPtr());
 }
 
 void ParticleSystemApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -427,7 +428,7 @@ void ParticleSystemApp::DoUpdate(uint32_t pass)
 
 		sm.Clear();
 
-		re.BindRenderTarget(scene_buffer_);
+		re.BindFrameBuffer(scene_buffer_);
 		re.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 		
 		terrain_->AddToSceneManager();
@@ -436,8 +437,8 @@ void ParticleSystemApp::DoUpdate(uint32_t pass)
 	case 1:
 		sm.Clear();
 
-		re.BindRenderTarget(RenderTargetPtr());
-		re.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
+		re.BindFrameBuffer(FrameBufferPtr());
+		re.Clear(RenderEngine::CBM_Color, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 		copy_pp_->Apply();
 

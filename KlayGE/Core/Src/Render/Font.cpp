@@ -42,7 +42,7 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/Viewport.hpp>
-#include <KlayGE/RenderTarget.hpp>
+#include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -153,8 +153,8 @@ namespace
 			if (!three_dim_)
 			{
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-				*(effect_->ParameterByName("halfWidth")) = static_cast<int>(re.CurRenderTarget()->Width() / 2);
-				*(effect_->ParameterByName("halfHeight")) = static_cast<int>(re.CurRenderTarget()->Height() / 2);
+				*(effect_->ParameterByName("halfWidth")) = static_cast<int>(re.CurFrameBuffer()->Width() / 2);
+				*(effect_->ParameterByName("halfHeight")) = static_cast<int>(re.CurFrameBuffer()->Height() / 2);
 			}
 		}
 

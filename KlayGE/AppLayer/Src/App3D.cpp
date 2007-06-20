@@ -21,7 +21,6 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/RenderWindow.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderSettings.hpp>
@@ -69,9 +68,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	Camera const & App3DFramework::ActiveCamera() const
 	{
-		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		RenderTarget& activeRenderTarget(*renderEngine.CurRenderTarget());
-		CameraPtr camera = activeRenderTarget.GetViewport().camera;
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		CameraPtr camera = re.CurFrameBuffer()->GetViewport().camera;
 		BOOST_ASSERT(camera);
 
 		return *camera;
@@ -79,9 +77,8 @@ namespace KlayGE
 
 	Camera& App3DFramework::ActiveCamera()
 	{
-		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		RenderTarget& activeRenderTarget(*renderEngine.CurRenderTarget());
-		CameraPtr camera = activeRenderTarget.GetViewport().camera;
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		CameraPtr camera = re.CurFrameBuffer()->GetViewport().camera;
 		BOOST_ASSERT(camera);
 
 		return *camera;
@@ -103,10 +100,10 @@ namespace KlayGE
 		BOOST_ASSERT(farPlane != 0);
 		BOOST_ASSERT(farPlane > nearPlane);
 
-		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		RenderTarget& activeRenderTarget(*renderEngine.CurRenderTarget());
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		FrameBuffer& fb = *re.CurFrameBuffer();
 
-		this->ActiveCamera().ProjParams(PI / 4, static_cast<float>(activeRenderTarget.Width()) / activeRenderTarget.Height(),
+		this->ActiveCamera().ProjParams(PI / 4, static_cast<float>(fb.Width()) / fb.Height(),
 			nearPlane, farPlane);
  	}
 

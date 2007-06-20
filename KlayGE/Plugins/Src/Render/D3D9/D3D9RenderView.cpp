@@ -31,6 +31,35 @@ namespace KlayGE
 	}
 
 
+	D3D9SurfaceRenderView::D3D9SurfaceRenderView(ID3D9SurfacePtr surf)
+	{
+		surface_ = surf;
+
+		D3DSURFACE_DESC desc;
+		surface_->GetDesc(&desc);
+
+		width_ = desc.Width;
+		height_ = desc.Height;
+		pf_ = D3D9Mapping::MappingFormat(desc.Format);
+	}
+
+	void D3D9SurfaceRenderView::OnAttached(FrameBuffer& /*fb*/, uint32_t /*att*/)
+	{
+	}
+
+	void D3D9SurfaceRenderView::OnDetached(FrameBuffer& /*fb*/, uint32_t /*att*/)
+	{
+	}
+
+	void D3D9SurfaceRenderView::DoOnLostDevice()
+	{
+	}
+	
+	void D3D9SurfaceRenderView::DoOnResetDevice()
+	{
+	}
+
+
 	D3D9Texture1DRenderView::D3D9Texture1DRenderView(Texture& texture_1d, int level)
 		: texture_1d_(*checked_cast<D3D9Texture1D*>(&texture_1d)),
 			level_(level)

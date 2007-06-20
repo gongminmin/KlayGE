@@ -37,6 +37,7 @@
 #include <KlayGE/COMPtr.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderSettings.hpp>
+#include <KlayGE/App3D.hpp>
 
 #include <vector>
 #include <cstring>
@@ -86,7 +87,8 @@ namespace KlayGE
 			// of the current frame.
 			if (this->Active() && this->Ready())
 			{
-				this->Update();
+				Context::Instance().SceneManagerInstance().Update();
+				this->SwapBuffers();
 			}
 			break;
 
@@ -483,77 +485,41 @@ namespace KlayGE
 		return description_;
 	}
 
-	D3D9Adapter const & D3D9RenderWindow::Adapter() const
+	// 改变窗口大小
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9RenderWindow::Resize(uint32_t width, uint32_t height)
 	{
-		return adapter_;
-	}
+		width_ = width;
+		height_ = height;
 
-	ID3D9DevicePtr D3D9RenderWindow::D3DDevice() const
-	{
-		return d3dDevice_;
-	}
+		// Notify viewports of resize
+		viewport_.width = width;
+		viewport_.height = height;
 
-	ID3D9SurfacePtr D3D9RenderWindow::D3DRenderSurface(uint32_t n) const
-	{
-		if (0 == n)
-		{
-			return renderSurface_;
-		}
-		else
-		{
-			return ID3D9SurfacePtr();
-		}
-	}
-
-	ID3D9SurfacePtr D3D9RenderWindow::D3DRenderZBuffer() const
-	{
-		return renderZBuffer_;
-	}
-
-	void D3D9RenderWindow::WindowMovedOrResized()
-	{
-		::RECT rect;
-		::GetClientRect(hWnd_, &rect);
-
-		uint32_t new_left = rect.left;
-		uint32_t new_top = rect.top;
-		if ((new_left != left_) || (new_top != top_))
-		{
-			this->Reposition(new_left, new_top);
-		}
-
-		uint32_t new_width = rect.right - rect.left;
-		uint32_t new_height = rect.bottom - rect.top;
-		if ((new_width != width_) || (new_height != height_))
-		{
-			this->Resize(new_width, new_height);
-		}
-	}
-
-	void D3D9RenderWindow::Destroy()
-	{
-		renderZBuffer_.reset();
-		renderSurface_.reset();
-		d3dDevice_.reset();
-		d3d_.reset();
-
-		if (hWnd_ != NULL)
-		{
-			::DestroyWindow(hWnd_);
-			hWnd_ = NULL;
-		}
-	}
-
-	void D3D9RenderWindow::DoReposition(uint32_t /*left*/, uint32_t /*top*/)
-	{
-	}
-
-	void D3D9RenderWindow::DoResize(uint32_t /*width*/, uint32_t /*height*/)
-	{
 		this->ResetDevice();
+
+		App3DFramework& app = Context::Instance().AppInstance();
+		app.OnResize(width, height);
 	}
 
-	void D3D9RenderWindow::DoFullScreen(bool fs)
+	// 改变窗口位置
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9RenderWindow::Reposition(uint32_t left, uint32_t top)
+	{
+		left_ = left;
+		top_ = top;
+	}
+
+	// 获取是否是全屏状态
+	/////////////////////////////////////////////////////////////////////////////////
+	bool D3D9RenderWindow::FullScreen() const
+	{
+		return isFullScreen_;
+	}
+
+	// 设置是否是全屏状态
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9RenderWindow::FullScreen(bool fs)
 	{
 		if (isFullScreen_ != fs)
 		{
@@ -599,16 +565,60 @@ namespace KlayGE
 		}
 	}
 
+	D3D9Adapter const & D3D9RenderWindow::Adapter() const
+	{
+		return adapter_;
+	}
+
+	ID3D9DevicePtr D3D9RenderWindow::D3DDevice() const
+	{
+		return d3dDevice_;
+	}
+
+	void D3D9RenderWindow::WindowMovedOrResized()
+	{
+		::RECT rect;
+		::GetClientRect(hWnd_, &rect);
+
+		uint32_t new_left = rect.left;
+		uint32_t new_top = rect.top;
+		if ((new_left != left_) || (new_top != top_))
+		{
+			this->Reposition(new_left, new_top);
+		}
+
+		uint32_t new_width = rect.right - rect.left;
+		uint32_t new_height = rect.bottom - rect.top;
+		if ((new_width != width_) || (new_height != height_))
+		{
+			this->Resize(new_width, new_height);
+		}
+	}
+
+	void D3D9RenderWindow::Destroy()
+	{
+		renderZBuffer_.reset();
+		renderSurface_.reset();
+		d3dDevice_.reset();
+		d3d_.reset();
+
+		if (hWnd_ != NULL)
+		{
+			::DestroyWindow(hWnd_);
+			hWnd_ = NULL;
+		}
+	}
+
 	void D3D9RenderWindow::UpdateSurfacesPtrs()
 	{
 		IDirect3DSurface9* renderSurface;
 		d3d_swap_chain_->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &renderSurface);
 		renderSurface_ = MakeCOMPtr(renderSurface);
 
-		if (isDepthBuffered_)
+		IDirect3DSurface9* renderZBuffer;
+		d3dDevice_->GetDepthStencilSurface(&renderZBuffer);
+		if (renderZBuffer != NULL)
 		{
-			IDirect3DSurface9* renderZBuffer;
-			d3dDevice_->GetDepthStencilSurface(&renderZBuffer);
 			renderZBuffer_ = MakeCOMPtr(renderZBuffer);
 		}
 	}
@@ -624,6 +634,8 @@ namespace KlayGE
 
 			renderSurface_.reset();
 			renderZBuffer_.reset();
+			this->Detach(ATT_Color0);
+			this->Detach(ATT_DepthStencil);
 
 			HRESULT hr = d3dDevice_->TestCooperativeLevel();
 			while ((hr != S_OK) && (hr != D3DERR_DEVICENOTRESET))
@@ -646,14 +658,11 @@ namespace KlayGE
 			}
 			d3d_swap_chain_ = MakeCOMPtr(sc);
 
-			IDirect3DSurface9* surface;
-			d3d_swap_chain_->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &surface);
-			renderSurface_ = MakeCOMPtr(surface);
-
-			if (isDepthBuffered_)
+			this->UpdateSurfacesPtrs();
+			this->Attach(ATT_Color0, D3D9SurfaceRenderViewPtr(new D3D9SurfaceRenderView(renderSurface_)));
+			if (renderZBuffer_)
 			{
-				d3dDevice_->GetDepthStencilSurface(&surface);
-				renderZBuffer_ = MakeCOMPtr(surface);
+				this->Attach(ATT_DepthStencil, D3D9SurfaceRenderViewPtr(new D3D9SurfaceRenderView(renderZBuffer_)));
 			}
 
 			factory.OnResetDevice();
@@ -669,17 +678,5 @@ namespace KlayGE
 				this->ResetDevice();
 			}
 		}
-	}
-
-	void D3D9RenderWindow::OnBind()
-	{
-		D3D9RenderEngine& re(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		ID3D9DevicePtr d3dDevice = re.D3DDevice();
-
-		for (uint32_t i = 0; i < re.DeviceCaps().max_simultaneous_rts; ++ i)
-		{
-			TIF(d3dDevice->SetRenderTarget(i, this->D3DRenderSurface(i).get()));
-		}
-		TIF(d3dDevice->SetDepthStencilSurface(this->D3DRenderZBuffer().get()));
 	}
 }

@@ -43,6 +43,10 @@ namespace KlayGE
 		viewport_.top	= top_;
 	}
 
+	D3D9FrameBuffer::~D3D9FrameBuffer()
+	{
+	}
+
 	ID3D9SurfacePtr D3D9FrameBuffer::D3DRenderSurface(uint32_t n) const
 	{
 		if (n < clr_views_.size())

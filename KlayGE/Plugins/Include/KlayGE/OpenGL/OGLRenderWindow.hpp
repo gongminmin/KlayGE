@@ -17,13 +17,13 @@
 #include <KlayGE/config/auto_link.hpp>
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/RenderWindow.hpp>
+#include <KlayGE/OpenGL/OGLFrameBuffer.hpp>
 
 namespace KlayGE
 {
 	struct RenderSettings;
 
-	class OGLRenderWindow : public RenderWindow
+	class OGLRenderWindow : public OGLFrameBuffer
 	{
 	public:
 		OGLRenderWindow(std::string const & name, RenderSettings const & settings);
@@ -44,22 +44,21 @@ namespace KlayGE
 
 		std::wstring const & Description() const;
 
+		void Resize(uint32_t width, uint32_t height);
+		void Reposition(uint32_t left, uint32_t top);
+
+		bool FullScreen() const;
+		void FullScreen(bool fs);
+
 		void CustomAttribute(std::string const & name, void* pData);
 
 		// Method for dealing with resize / move & 3d library
 		void WindowMovedOrResized();
 
-		void OnBind();
-
 		bool RequiresFlipping() const
 		{
 			return false;
 		}
-		
-	private:
-		void DoReposition(uint32_t left, uint32_t top);
-		void DoResize(uint32_t width, uint32_t height);
-		void DoFullScreen(bool fs);
 
 	protected:
 		std::string	name_;
@@ -70,6 +69,7 @@ namespace KlayGE
 
 		bool	ready_;				// Is ready i.e. available for update
 		bool	closed_;
+		bool	isFullScreen_;
 
 		static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg,
 			WPARAM wParam, LPARAM lParam );

@@ -26,6 +26,7 @@
 #include <KlayGE/config/auto_link.hpp>
 
 #include <KlayGE/Camera.hpp>
+#include <KlayGE/Timer.hpp>
 #include <KlayGE/RenderEngine.hpp>
 
 namespace KlayGE

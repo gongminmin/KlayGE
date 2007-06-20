@@ -1,8 +1,11 @@
 // RenderEngine.cpp
 // KlayGE 渲染引擎类 实现文件
-// Ver 3.3.0
-// 版权所有(C) 龚敏敏, 2003-2006
+// Ver 3.6.0
+// 版权所有(C) 龚敏敏, 2003-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.6.0
+// 去掉了RenderTarget，直接使用FrameBuffer (2007.6.20)
 //
 // 3.3.0
 // 统一了RenderState (2006.5.21)
@@ -30,10 +33,9 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Viewport.hpp>
-#include <KlayGE/RenderTarget.hpp>
+#include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/RenderEffect.hpp>
-#include <KlayGE/RenderWindow.hpp>
 
 #include <KlayGE/RenderEngine.hpp>
 
@@ -63,9 +65,8 @@ namespace KlayGE
 		{
 		}
 
-		RenderWindowPtr CreateRenderWindow(std::string const & /*name*/, RenderSettings const & /*settings*/)
+		void CreateRenderWindow(std::string const & /*name*/, RenderSettings const & /*settings*/)
 		{
-			return RenderWindow::NullObject();
 		}
 
 		void SetStateObjects(RenderStateObject const & /*rs_obj*/, ShaderObject const & /*shader_obj*/)
@@ -86,8 +87,21 @@ namespace KlayGE
 			return float4(0, 0, 0, 0);
 		}
 
+		void Resize(uint32_t /*width*/, uint32_t /*height*/)
+		{
+		}
+
+		bool FullScreen() const
+		{
+			return false;
+		}
+
+		void FullScreen(bool /*fs*/)
+		{
+		}
+
 	private:
-		void DoBindRenderTarget(RenderTargetPtr /*rt*/)
+		void DoBindFrameBuffer(FrameBufferPtr /*fb*/)
 		{
 		}
 
@@ -122,39 +136,39 @@ namespace KlayGE
 
 	// 设置当前渲染目标
 	/////////////////////////////////////////////////////////////////////////////////
-	void RenderEngine::BindRenderTarget(RenderTargetPtr rt)
+	void RenderEngine::BindFrameBuffer(FrameBufferPtr fb)
 	{
-		if (cur_render_target_)
+		if (cur_frame_buffer_)
 		{
-			cur_render_target_->OnUnbind();
+			cur_frame_buffer_->OnUnbind();
 		}
 
-		if (!rt)
+		if (!fb)
 		{
-			cur_render_target_ = default_render_target_;
+			cur_frame_buffer_ = default_frame_buffer_;
 		}
 		else
 		{
-			cur_render_target_ = rt;
+			cur_frame_buffer_ = fb;
 		}
 
-		cur_render_target_->OnBind();
+		cur_frame_buffer_->OnBind();
 
-		this->DoBindRenderTarget(cur_render_target_);
+		this->DoBindFrameBuffer(cur_frame_buffer_);
 	}
 
 	// 获取当前渲染目标
 	/////////////////////////////////////////////////////////////////////////////////
-	RenderTargetPtr RenderEngine::CurRenderTarget() const
+	FrameBufferPtr RenderEngine::CurFrameBuffer() const
 	{
-		return cur_render_target_;
+		return cur_frame_buffer_;
 	}
 
 	// 获取默认渲染目标
 	/////////////////////////////////////////////////////////////////////////////////
-	RenderTargetPtr RenderEngine::DefaultRenderTarget() const
+	FrameBufferPtr RenderEngine::DefaultFrameBuffer() const
 	{
-		return default_render_target_;
+		return default_frame_buffer_;
 	}
 
 	// 渲染一个vb

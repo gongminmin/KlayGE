@@ -21,14 +21,14 @@
 
 #include <d3d9.h>
 #include <boost/smart_ptr.hpp>
-#include <KlayGE/RenderWindow.hpp>
+#include <KlayGE/D3D9/D3D9FrameBuffer.hpp>
 #include <KlayGE/D3D9/D3D9Adapter.hpp>
 
 namespace KlayGE
 {
 	struct RenderSettings;
 
-	class D3D9RenderWindow : public RenderWindow
+	class D3D9RenderWindow : public D3D9FrameBuffer
 	{
 	public:
 		D3D9RenderWindow(ID3D9Ptr const & d3d, D3D9Adapter const & adapter,
@@ -50,15 +50,25 @@ namespace KlayGE
 
 		std::wstring const & Description() const;
 
+		void Resize(uint32_t width, uint32_t height);
+		void Reposition(uint32_t left, uint32_t top);
+
+		bool FullScreen() const;
+		void FullScreen(bool fs);
+
 		D3D9Adapter const & Adapter() const;
 		ID3D9DevicePtr D3DDevice() const;
-		ID3D9SurfacePtr D3DRenderSurface(uint32_t n) const;
-		ID3D9SurfacePtr D3DRenderZBuffer() const;
+		ID3D9SurfacePtr D3DBackBuffer() const
+		{
+			return renderSurface_;
+		}
+		ID3D9SurfacePtr D3DDepthStencilBuffer() const
+		{
+			return renderZBuffer_;
+		}
 
 		// Method for dealing with resize / move & 3d library
 		void WindowMovedOrResized();
-
-		void OnBind();
 
 		bool RequiresFlipping() const
 		{
@@ -69,16 +79,13 @@ namespace KlayGE
 		void UpdateSurfacesPtrs();
 		void ResetDevice();
 
-		void DoReposition(uint32_t left, uint32_t top);
-		void DoResize(uint32_t width, uint32_t height);
-		void DoFullScreen(bool fs);
-
 	private:
 		std::string	name_;
 
 		HWND	hWnd_;				// Win32 Window handle
 		bool	ready_;				// Is ready i.e. available for update
 		bool	closed_;
+		bool	isFullScreen_;
 
 		D3DMULTISAMPLE_TYPE multiSample_;
 

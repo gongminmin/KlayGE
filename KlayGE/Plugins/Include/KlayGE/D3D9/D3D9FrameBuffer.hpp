@@ -32,11 +32,12 @@ namespace KlayGE
 	{
 	public:
 		D3D9FrameBuffer();
+		virtual ~D3D9FrameBuffer();
 
 		ID3D9SurfacePtr D3DRenderSurface(uint32_t n) const;
 		ID3D9SurfacePtr D3DRenderZBuffer() const;
 
-		void OnBind();
+		virtual void OnBind();
 
 		bool RequiresFlipping() const
 		{

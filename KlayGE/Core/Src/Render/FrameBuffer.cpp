@@ -34,6 +34,13 @@ namespace KlayGE
 		}
 	};
 
+	FrameBuffer::FrameBuffer()
+					: left_(0), top_(0), width_(0), height_(0), colorDepth_(0), format_(EF_Unknown),
+						isDepthBuffered_(false), depthBits_(0), stencilBits_(0),
+						active_(false)
+	{
+	}
+
 	FrameBuffer::~FrameBuffer()
 	{
 	}
@@ -42,6 +49,95 @@ namespace KlayGE
 	{
 		static FrameBufferPtr obj(new NullFrameBuffer);
 		return obj;
+	}
+
+	// 渲染目标的左坐标
+	/////////////////////////////////////////////////////////////////////////////////
+	uint32_t FrameBuffer::Left() const
+	{
+		return left_;
+	}
+
+	// 渲染目标的顶坐标
+	/////////////////////////////////////////////////////////////////////////////////
+	uint32_t FrameBuffer::Top() const
+	{
+		return top_;
+	}
+
+	// 渲染目标的宽度
+	/////////////////////////////////////////////////////////////////////////////////
+	uint32_t FrameBuffer::Width() const
+	{
+		return width_;
+	}
+
+	// 渲染目标的高度
+	/////////////////////////////////////////////////////////////////////////////////
+	uint32_t FrameBuffer::Height() const
+	{
+		return height_;
+	}
+
+	// 渲染目标的颜色深度
+	/////////////////////////////////////////////////////////////////////////////////
+	uint32_t FrameBuffer::ColorDepth() const
+	{
+		return colorDepth_;
+	}
+
+	// 渲染目标的深度位数
+	/////////////////////////////////////////////////////////////////////////////////
+	uint32_t FrameBuffer::DepthBits() const
+	{
+		return depthBits_;
+	}
+
+	// 渲染目标的模板位数
+	/////////////////////////////////////////////////////////////////////////////////
+	uint32_t FrameBuffer::StencilBits() const
+	{
+		return stencilBits_;
+	}
+
+	// 渲染目标的元素格式
+	/////////////////////////////////////////////////////////////////////////////////
+	ElementFormat FrameBuffer::Format() const
+	{
+		return format_;
+	}
+
+	// 获取视口
+	/////////////////////////////////////////////////////////////////////////////////
+	Viewport const & FrameBuffer::GetViewport() const
+	{
+		return viewport_;
+	}
+
+	Viewport& FrameBuffer::GetViewport()
+	{
+		return viewport_;
+	}
+
+	// 设置视口
+	/////////////////////////////////////////////////////////////////////////////////
+	void FrameBuffer::SetViewport(Viewport const & viewport)
+	{
+		viewport_ = viewport;
+	}
+
+	// 获取该渲染目标是否处于活动状态
+	/////////////////////////////////////////////////////////////////////////////////
+	bool FrameBuffer::Active() const
+	{
+		return active_;
+	}
+
+	// 设置该渲染目标是否处于活动状态
+	/////////////////////////////////////////////////////////////////////////////////
+	void FrameBuffer::Active(bool state)
+	{
+		active_ = state;
 	}
 
 	void FrameBuffer::Attach(uint32_t att, RenderViewPtr view)
@@ -162,13 +258,40 @@ namespace KlayGE
 				}
 
 				uint32_t clr_id = att - ATT_Color0;
-
-				BOOST_ASSERT(clr_id < clr_views_.size());
-
-				clr_views_[clr_id]->OnDetached(*this, att);
-				clr_views_[clr_id].reset();
+				if (clr_views_.size() < clr_id + 1)
+				{
+					clr_views_.resize(clr_id + 1);
+				}
+				
+				if (clr_views_[clr_id])
+				{
+					clr_views_[clr_id]->OnDetached(*this, att);
+					clr_views_[clr_id].reset();
+				}
 			}
 			break;
+		}
+	}
+
+	RenderViewPtr FrameBuffer::Attached(uint32_t att)
+	{
+		switch (att)
+		{
+		case ATT_DepthStencil:
+			return rs_view_;
+
+		default:
+			{
+				uint32_t clr_id = att - ATT_Color0;
+				if (clr_views_.size() < clr_id + 1)
+				{
+					return RenderViewPtr();
+				}
+				else
+				{
+					return clr_views_[clr_id];
+				}
+			}
 		}
 	}
 

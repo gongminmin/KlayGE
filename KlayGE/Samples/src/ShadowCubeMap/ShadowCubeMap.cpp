@@ -423,7 +423,7 @@ void ShadowCubeMap::DoUpdate(uint32_t pass)
 	case 4:
 	case 5:
 		{
-			renderEngine.BindRenderTarget(shadow_buffers_[pass]);
+			renderEngine.BindFrameBuffer(shadow_buffers_[pass]);
 			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->LightMatrices(light_model_);
@@ -433,7 +433,7 @@ void ShadowCubeMap::DoUpdate(uint32_t pass)
 
 	case 6:
 		{
-			renderEngine.BindRenderTarget(RenderTargetPtr());
+			renderEngine.BindFrameBuffer(FrameBufferPtr());
 			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 			//SaveTexture(shadow_cube_tex_, "shadow_tex.dds");

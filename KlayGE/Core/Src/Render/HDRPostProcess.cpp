@@ -209,9 +209,9 @@ namespace KlayGE
 		}
 	}
 
-	void HDRPostProcess::Destinate(RenderTargetPtr const & rt)
+	void HDRPostProcess::Destinate(FrameBufferPtr const & fb)
 	{
-		tone_mapping_.Destinate(rt);
+		tone_mapping_.Destinate(fb);
 	}
 
 	void HDRPostProcess::Apply()

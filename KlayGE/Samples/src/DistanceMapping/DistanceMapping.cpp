@@ -4,7 +4,6 @@
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
-#include <KlayGE/RenderWindow.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -241,9 +240,8 @@ void DistanceMapping::InputHandler(InputEngine const & /*sender*/, InputAction c
 		{
 			RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			renderEngine.EndFrame();
-			RenderWindowPtr render_win = checked_pointer_cast<RenderWindow>(renderEngine.DefaultRenderTarget());
-			render_win->Resize(800, 600);
-			render_win->FullScreen(!render_win->FullScreen());
+			renderEngine.Resize(800, 600);
+			renderEngine.FullScreen(!renderEngine.FullScreen());
 			renderEngine.BeginFrame();
 		}
 		break;

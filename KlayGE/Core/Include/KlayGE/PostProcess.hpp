@@ -33,7 +33,7 @@ namespace KlayGE
 		}
 
 		virtual void Source(TexturePtr const & tex, bool flipping);
-		virtual void Destinate(RenderTargetPtr const & rt);
+		virtual void Destinate(FrameBufferPtr const & fb);
 
 		virtual void Apply();
 
@@ -43,7 +43,7 @@ namespace KlayGE
 		TexturePtr src_texture_;
 		bool flipping_;
 
-		RenderTargetPtr render_target_;
+		FrameBufferPtr frame_buffer_;
 
 		GraphicsBufferPtr pos_vb_;
 	};
@@ -104,7 +104,7 @@ namespace KlayGE
 	public:
 		BlurPostProcess(int kernel_radius, float multiplier);
 
-		void Destinate(RenderTargetPtr const & rt);
+		void Destinate(FrameBufferPtr const & fb);
 
 		void Apply();
 

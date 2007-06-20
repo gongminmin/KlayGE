@@ -27,8 +27,8 @@ namespace KlayGE
 	class OGLFrameBuffer : public FrameBuffer
 	{
 	public:
-		OGLFrameBuffer();
-		~OGLFrameBuffer();
+		explicit OGLFrameBuffer(bool off_screen);
+		virtual ~OGLFrameBuffer();
 
 		void OnBind();
 
@@ -42,7 +42,7 @@ namespace KlayGE
 			return fbo_;
 		}
 
-	private:
+	protected:
 		GLuint fbo_;
 	};
 

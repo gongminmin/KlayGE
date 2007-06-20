@@ -5,7 +5,6 @@
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderableHelper.hpp>
-#include <KlayGE/RenderWindow.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/FrameBuffer.hpp>
@@ -109,12 +108,12 @@ namespace
 		{
 			PostProcess::OnRenderBegin();
 
-			RenderEngine const & renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			RenderTarget const & renderTarget(*renderEngine.CurRenderTarget());
+			RenderEngine const & re(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			FrameBuffer const & fb(*re.CurFrameBuffer());
 
 			*(technique_->Effect().ParameterByName("cell_per_row_line")) =
-				float2(static_cast<float>(CELL_WIDTH) / renderTarget.Width(),
-						static_cast<float>(CELL_HEIGHT) / renderTarget.Height());
+				float2(static_cast<float>(CELL_WIDTH) / fb.Width(),
+						static_cast<float>(CELL_HEIGHT) / fb.Height());
 
 			*(technique_->Effect().ParameterByName("src_sampler")) = src_texture_;
 		}
@@ -254,7 +253,7 @@ void AsciiArtsApp::InitObjects()
 	this->BuildAsciiLumsTex();
 
 	render_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
-	render_buffer_->GetViewport().camera = renderEngine.CurRenderTarget()->GetViewport().camera;
+	render_buffer_->GetViewport().camera = renderEngine.CurFrameBuffer()->GetViewport().camera;
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
@@ -289,7 +288,7 @@ void AsciiArtsApp::OnResize(uint32_t width, uint32_t height)
 	downsampler_->Destinate(fb);
 
 	ascii_arts_->Source(downsample_tex_, fb->RequiresFlipping());
-	ascii_arts_->Destinate(RenderTargetPtr());
+	ascii_arts_->Destinate(FrameBufferPtr());
 }
 
 uint32_t AsciiArtsApp::NumPasses() const
@@ -317,9 +316,8 @@ void AsciiArtsApp::InputHandler(InputEngine const & /*sender*/, InputAction cons
 		{
 			RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			renderEngine.EndFrame();
-			RenderWindowPtr render_win = checked_pointer_cast<RenderWindow>(renderEngine.DefaultRenderTarget());
-			render_win->Resize(WIDTH, HEIGHT);
-			render_win->FullScreen(!render_win->FullScreen());
+			renderEngine.Resize(WIDTH, HEIGHT);
+			renderEngine.FullScreen(!renderEngine.FullScreen());
 			renderEngine.BeginFrame();
 		}
 		break;
@@ -346,7 +344,7 @@ void AsciiArtsApp::DoUpdate(uint32_t pass)
 		{
 		case 0:
 			// Õý³£äÖÈ¾
-			renderEngine.BindRenderTarget(render_buffer_);
+			renderEngine.BindFrameBuffer(render_buffer_);
 			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 			obj_->AddToSceneManager();
@@ -367,7 +365,7 @@ void AsciiArtsApp::DoUpdate(uint32_t pass)
 	}
 	else
 	{
-		renderEngine.BindRenderTarget(RenderTargetPtr());
+		renderEngine.BindFrameBuffer(FrameBufferPtr());
 		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 		sceneMgr.Clear();
@@ -377,7 +375,7 @@ void AsciiArtsApp::DoUpdate(uint32_t pass)
 	if ((!show_ascii_ && (0 == pass))
 		|| (show_ascii_ && (1 == pass)))
 	{
-		renderEngine.BindRenderTarget(RenderTargetPtr());
+		renderEngine.BindFrameBuffer(FrameBufferPtr());
 
 		std::wostringstream stream;
 		stream << this->FPS();

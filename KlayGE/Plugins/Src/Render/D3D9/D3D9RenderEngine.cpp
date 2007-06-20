@@ -44,7 +44,7 @@
 #include <KlayGE/Viewport.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/RenderLayout.hpp>
-#include <KlayGE/RenderTarget.hpp>
+#include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderStateObject.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderSettings.hpp>
@@ -88,7 +88,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D9RenderEngine::~D3D9RenderEngine()
 	{
-		cur_render_target_.reset();
+		cur_frame_buffer_.reset();
 
 		d3dDevice_.reset();
 		d3d_.reset();
@@ -139,12 +139,12 @@ namespace KlayGE
 
 		::PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
 
-		RenderTarget& renderTarget(*this->CurRenderTarget());
+		FrameBuffer& fb = *this->CurFrameBuffer();
 		while (WM_QUIT != msg.message)
 		{
 			// 如果窗口是激活的，用 PeekMessage()以便我们可以用空闲时间渲染场景
 			// 不然, 用 GetMessage() 减少 CPU 占用率
-			if (renderTarget.Active())
+			if (fb.Active())
 			{
 				gotMsg = (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) != 0);
 			}
@@ -161,9 +161,10 @@ namespace KlayGE
 			else
 			{
 				// 在空余时间渲染帧 (没有等待的消息)
-				if (renderTarget.Active())
+				if (fb.Active())
 				{
-					renderTarget.Update();
+					Context::Instance().SceneManagerInstance().Update();
+					fb.SwapBuffers();
 				}
 			}
 		}
@@ -194,18 +195,25 @@ namespace KlayGE
 
 	// 建立渲染窗口
 	/////////////////////////////////////////////////////////////////////////////////
-	RenderWindowPtr D3D9RenderEngine::CreateRenderWindow(std::string const & name,
+	void D3D9RenderEngine::CreateRenderWindow(std::string const & name,
 		RenderSettings const & settings)
 	{
 		D3D9RenderWindowPtr win(new D3D9RenderWindow(d3d_, this->ActiveAdapter(),
 			name, settings));
-		default_render_target_ = win;
+		default_frame_buffer_ = win;
 
 		d3dDevice_ = win->D3DDevice();
 		Verify(d3dDevice_ != ID3D9DevicePtr());
 
 		this->FillRenderDeviceCaps();
-		this->BindRenderTarget(win);
+
+		win->Attach(FrameBuffer::ATT_Color0, D3D9SurfaceRenderViewPtr(new D3D9SurfaceRenderView(win->D3DBackBuffer())));
+		if (win->D3DDepthStencilBuffer())
+		{
+			win->Attach(FrameBuffer::ATT_DepthStencil, D3D9SurfaceRenderViewPtr(new D3D9SurfaceRenderView(win->D3DDepthStencilBuffer())));
+		}
+
+		this->BindFrameBuffer(win);
 
 		if (caps_.hw_instancing_support)
 		{
@@ -215,8 +223,6 @@ namespace KlayGE
 		{
 			RenderInstance = boost::bind(&D3D9RenderEngine::DoRenderSWInstance, this, _1, _2);
 		}
-
-		return win;
 	}
 
 	// 设置当前渲染状态对象
@@ -569,10 +575,10 @@ namespace KlayGE
 
 	// 设置当前渲染目标
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DoBindRenderTarget(RenderTargetPtr rt)
+	void D3D9RenderEngine::DoBindFrameBuffer(FrameBufferPtr fb)
 	{
 		BOOST_ASSERT(d3dDevice_);
-		BOOST_ASSERT(rt);
+		BOOST_ASSERT(fb);
 	}
 
 	// 开始一帧
@@ -793,6 +799,21 @@ namespace KlayGE
 		d3dDevice_->SetScissorRect(&rc);
 	}
 
+	void D3D9RenderEngine::Resize(uint32_t width, uint32_t height)
+	{
+		checked_pointer_cast<D3D9RenderWindow>(default_frame_buffer_)->Resize(width, height);
+	}
+
+	bool D3D9RenderEngine::FullScreen() const
+	{
+		return checked_pointer_cast<D3D9RenderWindow>(default_frame_buffer_)->FullScreen();
+	}
+
+	void D3D9RenderEngine::FullScreen(bool fs)
+	{
+		checked_pointer_cast<D3D9RenderWindow>(default_frame_buffer_)->FullScreen(fs);
+	}
+
 	// 填充设备能力
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::FillRenderDeviceCaps()
@@ -826,6 +847,6 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::OnResetDevice()
 	{
-		this->BindRenderTarget(cur_render_target_);
+		this->BindFrameBuffer(cur_frame_buffer_);
 	}
 }

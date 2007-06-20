@@ -29,17 +29,27 @@
 
 namespace KlayGE
 {
-	OGLFrameBuffer::OGLFrameBuffer()
+	OGLFrameBuffer::OGLFrameBuffer(bool off_screen)
 	{
 		left_ = 0;
 		top_ = 0;
 
-		glGenFramebuffersEXT(1, &fbo_);
+		if (off_screen)
+		{
+			glGenFramebuffersEXT(1, &fbo_);
+		}
+		else
+		{
+			fbo_ = 0;
+		}
 	}
 
 	OGLFrameBuffer::~OGLFrameBuffer()
 	{
-		glDeleteFramebuffersEXT(1, &fbo_);
+		if (fbo_ != 0)
+		{
+			glDeleteFramebuffersEXT(1, &fbo_);
+		}
 	}
 
 	void OGLFrameBuffer::OnBind()
