@@ -6,6 +6,7 @@
 //
 // 3.6.0
 // 重写了intersect_ray (2007.5.11)
+// 来自Quake III的recip_sqrt (2007.6.22)
 //
 // 3.4.0
 // 增加了refract和fresnel_term (2006.8.22)
@@ -306,10 +307,21 @@ namespace KlayGE
 		{
 			return std::sqrt(x);
 		}
+		// From Quake III. But the magic number is from http://www.lomont.org/Math/Papers/2003/InvSqrt.pdf
 		inline float
-		recip_sqrt(float x)
+		recip_sqrt(float number)
 		{
-			return 1.0f / sqrt(x);
+			float const threehalfs = 1.5f;
+
+			float x2 = number * 0.5f;
+			float y = number;
+			long i = *reinterpret_cast<long*>(&y);		// evil floating point bit level hacking
+			i = 0x5f375a86 - (i >> 1);					// what the fuck?
+			y = *reinterpret_cast<float*>(&i);
+			y = y * (threehalfs - (x2 * y * y));		// 1st iteration
+			//y = y * (threehalfs - (x2 * y * y));		// 2nd iteration, this can be removed
+
+			return y;
 		}
 
 		inline float
@@ -1159,6 +1171,7 @@ namespace KlayGE
 				sx * sy * sz + cx * cy * cz);
 		}
 
+		// From http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/index.htm
 		template <typename T>
 		inline void
 		to_yaw_pitch_roll(T& yaw, T& pitch, T& roll, Quaternion_T<T> const & quat)
@@ -1172,8 +1185,8 @@ namespace KlayGE
 			if (test > T(0.499) * unit)
 			{
 				// singularity at north pole
-				roll = 2 * atan2(quat.x(), quat.w());
-				yaw = PI / 2;
+				yaw = 2 * atan2(quat.x(), quat.w());
+				roll = PI / 2;
 				pitch = 0;
 			}
 			else
@@ -1181,15 +1194,15 @@ namespace KlayGE
 				if (test < -T(0.499) * unit)
 				{
 					// singularity at south pole
-					roll = -2 * atan2(quat.x(), quat.w());
-					yaw = -PI / 2;
+					yaw = -2 * atan2(quat.x(), quat.w());
+					roll = -PI / 2;
 					pitch = 0;
 				}
 				else
 				{
-					roll = atan2(2 * quat.y() * quat.w() - 2 * quat.x() * quat.z(), sqx - sqy - sqz + sqw);
-					yaw = asin(2 * test / unit);
-					pitch = atan2(2 * quat.x() * quat.w() - 2 * quat.y() * quat.z(), -sqx + sqy - sqz + sqw)
+					yaw = atan2(2 * (quat.y() * quat.w() - quat.x() * quat.z()), sqx - sqy - sqz + sqw);
+					roll = asin(2 * test / unit);
+					pitch = atan2(2 * (quat.x() * quat.w() - quat.y() * quat.z()), -sqx + sqy - sqz + sqw);
 				}
 			}
 		}
