@@ -617,7 +617,8 @@ namespace KlayGE
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			RenderLayoutPtr tmp_rl = rf.MakeRenderLayout(rl.Type());
+			RenderLayoutPtr tmp_rl = rf.MakeRenderLayout();
+			tmp_rl->TopologyType(rl.TopologyType());
 			GraphicsBufferPtr tmp_inst_vs;
 
 			rl.ExpandInstance(tmp_inst_vs, 0);

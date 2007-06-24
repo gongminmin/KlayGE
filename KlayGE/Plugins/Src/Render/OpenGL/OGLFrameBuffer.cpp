@@ -52,6 +52,12 @@ namespace KlayGE
 		}
 	}
 
+	std::wstring const & OGLFrameBuffer::Description() const
+	{
+		static std::wstring const desc(L"OpenGL Frame Buffer Object");
+		return desc;
+	}
+
 	void OGLFrameBuffer::OnBind()
 	{
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);

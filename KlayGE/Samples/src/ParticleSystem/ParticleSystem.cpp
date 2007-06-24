@@ -99,7 +99,8 @@ namespace
 
 			technique_ = rf.LoadEffect("ParticleSystem.kfx")->TechniqueByName("Terrain");
 
-			rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleList);
+			rl_ = rf.MakeRenderLayout();
+			rl_->TopologyType(RenderLayout::TT_TriangleList);
 
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static);
 			pos_vb->Resize(static_cast<uint32_t>(vertices.size() * sizeof(vertices[0])));
@@ -170,7 +171,8 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleFan);
+			rl_ = rf.MakeRenderLayout();
+			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Static), boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Dynamic),
 				boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_ABGR32F)),
@@ -181,8 +183,8 @@ namespace
 			{
 				float2(0.0f, 0.0f),
 				float2(1.0f, 0.0f),
-				float2(1.0f, 1.0f),
 				float2(0.0f, 1.0f),
+				float2(1.0f, 1.0f),
 			};
 
 			uint16_t indices[] =

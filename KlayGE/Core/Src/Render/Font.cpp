@@ -91,7 +91,8 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleList);
+			rl_ = rf.MakeRenderLayout();
+			rl_->TopologyType(RenderLayout::TT_TriangleList);
 
 			RenderEngine const & renderEngine = rf.RenderEngineInstance();
 			RenderDeviceCaps const & caps = renderEngine.DeviceCaps();
@@ -313,9 +314,55 @@ namespace
 				}
 			}
 
+			uint32_t const clr32 = clr.ABGR();
+			float const width_scale = theTexture_->Width(0) * xScale;
 			for (size_t i = 0; i < sx.size(); ++ i)
 			{
-				this->AddText(fontHeight, sx[i], sy[i], sz, xScale, yScale, clr, lines[i].second);
+				size_t const maxSize = lines[i].second.length();
+				float x = sx[i], y = sy[i];
+
+				vertices_.reserve(vertices_.size() + maxSize * 4);
+				indices_.reserve(indices_.size() + maxSize * 6);
+
+				uint16_t lastIndex(static_cast<uint16_t>(vertices_.size()));
+
+				BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
+				{
+					CharInfoMapType::const_iterator cmiter = charInfoMap_.find(ch);
+					float const w = cmiter->second.Width() * width_scale;
+
+					Rect_T<float> const & texRect(cmiter->second);
+
+					Rect_T<float> pos_rc(x, y, x + w, y + h);
+					Rect_T<float> intersect_rc = pos_rc & rc;
+					if ((intersect_rc.Width() > 0) && (intersect_rc.Height() > 0))
+					{
+						vertices_.push_back(FontVert(float3(pos_rc.left(), pos_rc.top(), sz),
+												clr32,
+												float2(texRect.left(), texRect.top())));
+						vertices_.push_back(FontVert(float3(pos_rc.right(), pos_rc.top(), sz),
+												clr32,
+												float2(texRect.right(), texRect.top())));
+						vertices_.push_back(FontVert(float3(pos_rc.right(), pos_rc.bottom(), sz),
+												clr32,
+												float2(texRect.right(), texRect.bottom())));
+						vertices_.push_back(FontVert(float3(pos_rc.left(), pos_rc.bottom(), sz),
+												clr32,
+												float2(texRect.left(), texRect.bottom())));
+
+						indices_.push_back(lastIndex + 0);
+						indices_.push_back(lastIndex + 1);
+						indices_.push_back(lastIndex + 2);
+						indices_.push_back(lastIndex + 2);
+						indices_.push_back(lastIndex + 3);
+						indices_.push_back(lastIndex + 0);
+						lastIndex += 4;
+					}
+
+					x += w;
+				}
+			
+				box_ |= Box(float3(sx[i], sy[i], sz), float3(sx[i] + lines[i].first, sy[i] + h, sz + 0.1f));
 			}
 		}
 
@@ -324,7 +371,8 @@ namespace
 		{
 			this->UpdateTexture(text);
 
-			uint32_t clr32 = clr.ABGR();
+			uint32_t const clr32 = clr.ABGR();
+			float const width_scale = theTexture_->Width(0) * xScale;
 			float const h = fontHeight * yScale;
 			size_t const maxSize = text.length() - std::count(text.begin(), text.end(), L'\n');
 			float x = sx, y = sy;
@@ -338,7 +386,7 @@ namespace
 			BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
 			{
 				CharInfoMapType::const_iterator cmiter = charInfoMap_.find(ch);
-				float const w = cmiter->second.Width() * theTexture_->Width(0) * xScale;
+				float const w = cmiter->second.Width() * width_scale;
 
 				if (ch != L'\n')
 				{

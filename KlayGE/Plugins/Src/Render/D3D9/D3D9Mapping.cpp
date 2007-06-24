@@ -314,35 +314,30 @@ namespace KlayGE
 	void D3D9Mapping::Mapping(D3DPRIMITIVETYPE& primType, uint32_t& primCount, RenderLayout const & rl)
 	{
 		uint32_t const vertexCount(static_cast<uint32_t>(rl.UseIndices() ? rl.NumIndices() : rl.NumVertices()));
-		switch (rl.Type())
+		switch (rl.TopologyType())
 		{
-		case RenderLayout::BT_PointList:
+		case RenderLayout::TT_PointList:
 			primType = D3DPT_POINTLIST;
 			primCount = vertexCount;
 			break;
 
-		case RenderLayout::BT_LineList:
+		case RenderLayout::TT_LineList:
 			primType = D3DPT_LINELIST;
 			primCount = vertexCount / 2;
 			break;
 
-		case RenderLayout::BT_LineStrip:
+		case RenderLayout::TT_LineStrip:
 			primType = D3DPT_LINESTRIP;
 			primCount = vertexCount - 1;
 			break;
 
-		case RenderLayout::BT_TriangleList:
+		case RenderLayout::TT_TriangleList:
 			primType = D3DPT_TRIANGLELIST;
 			primCount = vertexCount / 3;
 			break;
 
-		case RenderLayout::BT_TriangleStrip:
+		case RenderLayout::TT_TriangleStrip:
 			primType = D3DPT_TRIANGLESTRIP;
-			primCount = vertexCount - 2;
-			break;
-
-		case RenderLayout::BT_TriangleFan:
-			primType = D3DPT_TRIANGLEFAN;
 			primCount = vertexCount - 2;
 			break;
 

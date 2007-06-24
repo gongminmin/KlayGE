@@ -34,7 +34,8 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleFan);
+		rl_ = rf.MakeRenderLayout();
+		rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
 		pos_vb_ = rf.MakeVertexBuffer(BU_Static);
 		pos_vb_->Resize(sizeof(float2) * 4);
@@ -43,8 +44,8 @@ namespace KlayGE
 			float2* addr = mapper.Pointer<float2>();
 			addr[0] = float2(-1, +1);
 			addr[1] = float2(+1, +1);
-			addr[2] = float2(+1, -1);
-			addr[3] = float2(-1, -1);
+			addr[2] = float2(-1, -1);
+			addr[3] = float2(+1, -1);
 			box_ = Box(float3(-1, -1, -1), float3(1, 1, 1));
 		}
 		rl_->BindVertexStream(pos_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));

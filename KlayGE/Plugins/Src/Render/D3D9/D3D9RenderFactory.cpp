@@ -70,9 +70,9 @@ namespace KlayGE
 		return ret;
 	}
 
-	RenderLayoutPtr D3D9RenderFactory::MakeRenderLayout(RenderLayout::buffer_type type)
+	RenderLayoutPtr D3D9RenderFactory::MakeRenderLayout()
 	{
-		return RenderLayoutPtr(new D3D9RenderLayout(type));
+		return RenderLayoutPtr(new D3D9RenderLayout);
 	}
 
 	GraphicsBufferPtr D3D9RenderFactory::MakeVertexBuffer(BufferUsage usage)

@@ -55,7 +55,7 @@ namespace KlayGE
 {
 	LRESULT D3D9RenderWindow::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
-		D3D9RenderWindow* win(reinterpret_cast<D3D9RenderWindow*>(::GetWindowLongPtrW(hWnd, 0)));
+		D3D9RenderWindow* win(reinterpret_cast<D3D9RenderWindow*>(::GetWindowLongPtrW(hWnd, GWLP_USERDATA)));
 		if (win != NULL)
 		{
 			return win->MsgProc(hWnd, uMsg, wParam, lParam);
@@ -178,7 +178,8 @@ namespace KlayGE
 		Convert(wname, name);
 
 		// Register the window class
-		WNDCLASSW wc;
+		WNDCLASSEXW wc;
+		wc.cbSize			= sizeof(wc);
 		wc.style			= CS_HREDRAW | CS_VREDRAW;
 		wc.lpfnWndProc		= WndProc;
 		wc.cbClsExtra		= 0;
@@ -189,7 +190,8 @@ namespace KlayGE
 		wc.hbrBackground	= static_cast<HBRUSH>(::GetStockObject(BLACK_BRUSH));
 		wc.lpszMenuName		= NULL;
 		wc.lpszClassName	= wname.c_str();
-		::RegisterClassW(&wc);
+		wc.hIconSm			= NULL;
+		::RegisterClassExW(&wc);
 
 		RECT rc = { 0, 0, width_, height_ };
 		::AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, false);
@@ -200,7 +202,7 @@ namespace KlayGE
 			WS_OVERLAPPEDWINDOW, settings.left, settings.top,
 			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, NULL);
 
-		::SetWindowLongPtrW(hWnd_, 0, reinterpret_cast<LONG_PTR>(this));
+		::SetWindowLongPtrW(hWnd_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
 		::ShowWindow(hWnd_, SW_SHOWNORMAL);
 		::UpdateWindow(hWnd_);

@@ -25,15 +25,14 @@ namespace KlayGE
 	{
 	public:
 		NullRenderLayout()
-			: RenderLayout(BT_PointList)
 		{
 		}
 	};
 
-	RenderLayout::RenderLayout(buffer_type type)
-			: type_(type)
+	RenderLayout::RenderLayout()
+			: topo_type_(TT_PointList)
 	{
-		vertex_streams_.reserve(8);
+		vertex_streams_.reserve(4);
 	}
 
 	RenderLayout::~RenderLayout()
@@ -44,11 +43,6 @@ namespace KlayGE
 	{
 		static RenderLayoutPtr obj(new NullRenderLayout);
 		return obj;
-	}
-
-	RenderLayout::buffer_type RenderLayout::Type() const
-	{
-		return type_;
 	}
 
 	uint32_t RenderLayout::NumVertices() const

@@ -237,35 +237,30 @@ namespace KlayGE
 		uint32_t const vertexCount = static_cast<uint32_t>(rl.UseIndices() ? rl.NumIndices() : rl.NumVertices());
 		primType = GL_POINTS;
 		primCount = vertexCount;
-		switch (rl.Type())
+		switch (rl.TopologyType())
 		{
-		case RenderLayout::BT_PointList:
+		case RenderLayout::TT_PointList:
 			primType = GL_POINTS;
 			primCount = vertexCount;
 			break;
 
-		case RenderLayout::BT_LineList:
+		case RenderLayout::TT_LineList:
 			primType = GL_LINES;
 			primCount = vertexCount / 2;
 			break;
 
-		case RenderLayout::BT_LineStrip:
+		case RenderLayout::TT_LineStrip:
 			primType = GL_LINE_STRIP;
 			primCount = vertexCount - 1;
 			break;
 
-		case RenderLayout::BT_TriangleList:
+		case RenderLayout::TT_TriangleList:
 			primType = GL_TRIANGLES;
 			primCount = vertexCount / 3;
 			break;
 
-		case RenderLayout::BT_TriangleStrip:
+		case RenderLayout::TT_TriangleStrip:
 			primType = GL_TRIANGLE_STRIP;
-			primCount = vertexCount - 2;
-			break;
-
-		case RenderLayout::BT_TriangleFan:
-			primType = GL_TRIANGLE_FAN;
 			primCount = vertexCount - 2;
 			break;
 

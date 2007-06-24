@@ -68,7 +68,8 @@ namespace KlayGE
 		technique_ = rf.LoadEffect("RenderableHelper.kfx")->TechniqueByName("PointTec");
 		*(technique_->Effect().ParameterByName("color")) = float4(clr.r(), clr.g(), clr.b(), clr.a());
 
-		rl_ = rf.MakeRenderLayout(RenderLayout::BT_PointList);
+		rl_ = rf.MakeRenderLayout();
+		rl_->TopologyType(RenderLayout::TT_PointList);
 
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static);
 		vb->Resize(sizeof(v));
@@ -104,7 +105,8 @@ namespace KlayGE
 			v0, v1
 		};
 
-		rl_ = rf.MakeRenderLayout(RenderLayout::BT_LineList);
+		rl_ = rf.MakeRenderLayout();
+		rl_->TopologyType(RenderLayout::TT_LineList);
 
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static);
 		vb->Resize(sizeof(xyzs));
@@ -140,7 +142,8 @@ namespace KlayGE
 			v0, v1, v2
 		};
 
-		rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleList);
+		rl_ = rf.MakeRenderLayout();
+		rl_->TopologyType(RenderLayout::TT_TriangleList);
 
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static);
 		vb->Resize(sizeof(xyzs));
@@ -188,7 +191,8 @@ namespace KlayGE
 			3, 2, 6, 6, 7, 3,
 		};
 
-		rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleList);
+		rl_ = rf.MakeRenderLayout();
+		rl_->TopologyType(RenderLayout::TT_TriangleList);
 
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static);
 		vb->Resize(sizeof(xyzs));
@@ -228,11 +232,12 @@ namespace KlayGE
 		{
 			float3(1.0f, 1.0f, 1.0f),
 			float3(1.0f, -1.0f, 1.0f),
-			float3(-1.0f, -1.0f, 1.0f),
 			float3(-1.0f, 1.0f, 1.0f),
+			float3(-1.0f, -1.0f, 1.0f),
 		};
 
-		rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleFan);
+		rl_ = rf.MakeRenderLayout();
+		rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static);
 		vb->Resize(sizeof(xyzs));
@@ -268,7 +273,8 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleList);
+		rl_ = rf.MakeRenderLayout();
+		rl_->TopologyType(RenderLayout::TT_TriangleList);
 
 		std::vector<float3> pos;
 		for (int y = 0; y < width_segs + 1; ++ y)

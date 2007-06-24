@@ -67,7 +67,8 @@ namespace KlayGE
 	StaticMesh::StaticMesh(RenderModelPtr model, std::wstring const & name)
 		: name_(name), model_(model)
 	{
-		rl_ = Context::Instance().RenderFactoryInstance().MakeRenderLayout(RenderLayout::BT_TriangleList);
+		rl_ = Context::Instance().RenderFactoryInstance().MakeRenderLayout();
+		rl_->TopologyType(RenderLayout::TT_TriangleList);
 	}
 
 	StaticMesh::~StaticMesh()

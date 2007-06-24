@@ -30,7 +30,7 @@ namespace KlayGE
 	class D3D9RenderLayout : public RenderLayout, public D3D9Resource
 	{
 	public:
-		explicit D3D9RenderLayout(buffer_type type);
+		D3D9RenderLayout();
 		~D3D9RenderLayout();
 		
 		ID3D9VertexDeclarationPtr VertexDeclaration() const;

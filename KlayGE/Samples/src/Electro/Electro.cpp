@@ -87,19 +87,20 @@ namespace
 			{
 				float3(-0.8f, 0.8f, 1),
 				float3(0.8f, 0.8f, 1),
-				float3(0.8f, -0.8f, 1),
 				float3(-0.8f, -0.8f, 1),
+				float3(0.8f, -0.8f, 1),
 			};
 
 			float3 texs[] =
 			{
 				float3(-1, 0, 0),
 				float3(1, 0, 0),
-				float3(1, -1, 0),
 				float3(-1, -1, 0),
+				float3(1, -1, 0),
 			};
 
-			rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleFan);
+			rl_ = rf.MakeRenderLayout();
+			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static);
 			pos_vb->Resize(sizeof(xyzs));

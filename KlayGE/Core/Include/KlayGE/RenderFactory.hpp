@@ -55,7 +55,7 @@ namespace KlayGE
 
 		RenderEffectPtr LoadEffect(std::string const & effectName);
 
-		virtual RenderLayoutPtr MakeRenderLayout(RenderLayout::buffer_type type) = 0;
+		virtual RenderLayoutPtr MakeRenderLayout() = 0;
 
 		virtual GraphicsBufferPtr MakeVertexBuffer(BufferUsage usage) = 0;
 		virtual GraphicsBufferPtr MakeIndexBuffer(BufferUsage usage) = 0;

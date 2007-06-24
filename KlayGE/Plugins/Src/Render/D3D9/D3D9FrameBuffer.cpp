@@ -73,6 +73,12 @@ namespace KlayGE
 		}
 	}
 
+	std::wstring const & D3D9FrameBuffer::Description() const
+	{
+		static std::wstring const desc(L"Direct3D9 Render To Texture");
+		return desc;
+	}
+
 	void D3D9FrameBuffer::OnBind()
 	{
 		D3D9RenderEngine& re(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));

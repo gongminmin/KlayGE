@@ -62,7 +62,7 @@ namespace KlayGE
 			ElementFormat format);
 		FrameBufferPtr MakeFrameBuffer();
 
-		RenderLayoutPtr MakeRenderLayout(RenderLayout::buffer_type type);
+		RenderLayoutPtr MakeRenderLayout();
 		GraphicsBufferPtr MakeVertexBuffer(BufferUsage usage);
 		GraphicsBufferPtr MakeIndexBuffer(BufferUsage usage);
 

@@ -46,19 +46,20 @@ namespace
 			{
 				float3(-1 + offset.x() / WIDTH, +1 + offset.y() / HEIGHT, 0.5f),
 				float3(+1 + offset.x() / WIDTH, +1 + offset.y() / HEIGHT, 0.5f),
-				float3(+1 + offset.x() / WIDTH, -1 + offset.y() / HEIGHT, 0.5f),
 				float3(-1 + offset.x() / WIDTH, -1 + offset.y() / HEIGHT, 0.5f),
+				float3(+1 + offset.x() / WIDTH, -1 + offset.y() / HEIGHT, 0.5f),
 			};
 
 			float2 texs[] =
 			{
 				float2(0, 0),
 				float2(1, 0),
-				float2(1, 1),
 				float2(0, 1),
+				float2(1, 1),
 			};
 
-			rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleFan);
+			rl_ = rf.MakeRenderLayout();
+			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static);
 			pos_vb->Resize(sizeof(xyzs));
@@ -99,19 +100,20 @@ namespace
 			{
 				float3(-1, +1, 0.5f),
 				float3(+1, +1, 0.5f),
-				float3(+1, -1, 0.5f),
 				float3(-1, -1, 0.5f),
+				float3(+1, -1, 0.5f),
 			};
 
 			float2 texs[] =
 			{
 				float2(0, 0),
 				float2(1, 0),
-				float2(1, 1),
 				float2(0, 1),
+				float2(1, 1),
 			};
 
-			rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleFan);
+			rl_ = rf.MakeRenderLayout();
+			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static);
 			pos_vb->Resize(sizeof(xyzs));

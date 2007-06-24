@@ -28,6 +28,12 @@ namespace KlayGE
 		{
 		}
 
+		std::wstring const & Description() const
+		{
+			static std::wstring const desc(L"Null Frame Buffer");
+			return desc;
+		}
+
 		bool RequiresFlipping() const
 		{
 			return false;

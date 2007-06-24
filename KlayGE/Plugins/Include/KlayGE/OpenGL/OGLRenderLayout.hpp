@@ -23,11 +23,6 @@ namespace KlayGE
 	class OGLRenderLayout : public RenderLayout
 	{
 	public:
-		explicit OGLRenderLayout(buffer_type type)
-			: RenderLayout(type)
-		{
-		}
-
 		~OGLRenderLayout()
 		{
 		}

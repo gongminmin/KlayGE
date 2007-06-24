@@ -37,6 +37,8 @@ namespace KlayGE
 		ID3D9SurfacePtr D3DRenderSurface(uint32_t n) const;
 		ID3D9SurfacePtr D3DRenderZBuffer() const;
 
+		virtual std::wstring const & Description() const;
+
 		virtual void OnBind();
 
 		bool RequiresFlipping() const

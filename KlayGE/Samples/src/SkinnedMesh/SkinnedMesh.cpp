@@ -133,5 +133,9 @@ void SkinnedMeshApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 	model_->AddToRenderQueue();
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), renderEngine.Name());
-	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());
+
+	FrameBuffer& rw(*checked_pointer_cast<FrameBuffer>(renderEngine.CurFrameBuffer()));
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description());
+
+	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str());
 }

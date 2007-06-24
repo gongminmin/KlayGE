@@ -66,7 +66,8 @@ namespace
 			GraphicsBufferPtr pos = rf.MakeVertexBuffer(BU_Static);
 			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static);
 
-			rl_ = rf.MakeRenderLayout(RenderLayout::BT_TriangleFan);
+			rl_ = rf.MakeRenderLayout();
+			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 			rl_->BindVertexStream(tex0, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)),
 									RenderLayout::ST_Geometry, max_num_particles);
 			rl_->BindVertexStream(pos, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)),
@@ -77,8 +78,8 @@ namespace
 			{
 				float2(0.0f, 0.0f),
 				float2(1.0f, 0.0f),
-				float2(1.0f, 1.0f),
 				float2(0.0f, 1.0f),
+				float2(1.0f, 1.0f),
 			};
 
 			uint16_t indices[] =
@@ -156,7 +157,7 @@ namespace
 	class GPUParticleSystem : public RenderablePlane
 	{
 	public:
-		explicit GPUParticleSystem(int max_num_particles)
+		GPUParticleSystem(int max_num_particles, TexturePtr terrain_height_map, TexturePtr terrain_normal_map)
 			: RenderablePlane(2, 2, 1, 1, true),
 				max_num_particles_(max_num_particles),
 				tex_width_(256), tex_height_(max_num_particles / 256),
@@ -211,6 +212,8 @@ namespace
 			elapse_time_param_ = technique_->Effect().ParameterByName("elapse_time");
 
 			*(technique_->Effect().ParameterByName("init_pos_life")) = float4(0, 0, 0, 8);
+			*(technique_->Effect().ParameterByName("height_map_sampler")) = terrain_height_map;
+			*(technique_->Effect().ParameterByName("normal_map_sampler")) = terrain_normal_map;
 		}
 
 		void ModelMatrix(float4x4 const & model)
@@ -413,10 +416,13 @@ void GPUParticleSystemApp::InitObjects()
 	particles_.reset(new ParticlesObject(NUM_PARTICLE));
 	particles_->AddToSceneManager();
 
-	gpu_ps.reset(new GPUParticleSystem(NUM_PARTICLE));
+	TexturePtr terrain_height = LoadTexture("terrain_height.dds");
+	TexturePtr terrain_normal = LoadTexture("terrain_normal.dds");
+
+	gpu_ps.reset(new GPUParticleSystem(NUM_PARTICLE, terrain_height, terrain_normal));
 	gpu_ps->AutoEmit(500);
 
-	terrain_.reset(new TerrainObject(LoadTexture("terrain_height.dds"), LoadTexture("terrain_normal.dds")));
+	terrain_.reset(new TerrainObject(terrain_height, terrain_normal));
 	terrain_->AddToSceneManager();
 }
 

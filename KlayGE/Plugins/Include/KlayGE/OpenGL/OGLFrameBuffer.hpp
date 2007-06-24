@@ -30,6 +30,8 @@ namespace KlayGE
 		explicit OGLFrameBuffer(bool off_screen);
 		virtual ~OGLFrameBuffer();
 
+		virtual std::wstring const & Description() const;
+
 		void OnBind();
 
 		bool RequiresFlipping() const

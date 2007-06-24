@@ -28,9 +28,8 @@
 
 namespace KlayGE
 {
-	D3D9RenderLayout::D3D9RenderLayout(buffer_type type)
-		: RenderLayout(type),
-			dirty_decl_(true)
+	D3D9RenderLayout::D3D9RenderLayout()
+		: dirty_decl_(true)
 	{
 	}
 

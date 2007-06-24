@@ -65,7 +65,7 @@ namespace KlayGE
 			return FrameBuffer::NullObject();
 		}
 
-		RenderLayoutPtr MakeRenderLayout(RenderLayout::buffer_type /*type*/)
+		RenderLayoutPtr MakeRenderLayout()
 		{
 			return RenderLayout::NullObject();
 		}
