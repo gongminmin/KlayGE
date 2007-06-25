@@ -181,18 +181,17 @@ namespace
 			return fontHeight_;
 		}
 
-		Size_T<uint32_t> CalcSize(uint32_t fontHeight, std::wstring const & text)
+		Size_T<uint32_t> CalcSize(std::wstring const & text)
 		{
 			this->UpdateTexture(text);
 
-			int32_t const h = fontHeight;
-
+			uint32_t const tex_width = theTexture_->Width(0);
 			std::vector<uint32_t> lines(1, 0);
 
 			BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
 			{
-				CharInfoMapType::const_iterator cmiter = charInfoMap_.find(ch);
-				uint32_t const w = static_cast<uint32_t>(cmiter->second.Width() * theTexture_->Width(0));
+				BOOST_AUTO(cmiter, charInfoMap_.find(ch));
+				uint32_t const w = static_cast<uint32_t>(cmiter->second.Width() * tex_width);
 
 				if (ch != L'\n')
 				{
@@ -205,48 +204,49 @@ namespace
 			}
 
 			return Size_T<uint32_t>(*std::max_element(lines.begin(), lines.end()),
-				static_cast<uint32_t>(h * lines.size()));
+				static_cast<uint32_t>(fontHeight_ * lines.size()));
 		}
 
-		void AddText2D(uint32_t fontHeight, float sx, float sy, float sz,
+		void AddText2D(float sx, float sy, float sz,
 			float xScale, float yScale, Color const & clr, std::wstring const & text)
 		{
 			three_dim_ = false;
 
-			this->AddText(fontHeight, sx, sy, sz, xScale, yScale, clr, text);
+			this->AddText(sx, sy, sz, xScale, yScale, clr, text);
 		}
 
-		void AddText2D(uint32_t fontHeight, Rect const & rc, float sz,
+		void AddText2D(Rect const & rc, float sz,
 			float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t align)
 		{
 			three_dim_ = false;
 
-			this->AddText(fontHeight, rc, sz, xScale, yScale, clr, text, align);
+			this->AddText(rc, sz, xScale, yScale, clr, text, align);
 		}
 
-		void AddText3D(uint32_t fontHeight, float4x4 const & mvp, Color const & clr,
+		void AddText3D(float4x4 const & mvp, Color const & clr,
 			std::wstring const & text)
 		{
 			three_dim_ = true;
 			*(effect_->ParameterByName("mvp")) = mvp;
 
-			this->AddText(fontHeight, 0, 0, 0, 1, 1, clr, text);
+			this->AddText(0, 0, 0, 1, 1, clr, text);
 		}
 
 	private:
-		void AddText(uint32_t fontHeight, Rect const & rc, float sz,
+		void AddText(Rect const & rc, float sz,
 			float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t align)
 		{
 			this->UpdateTexture(text);
 
-			float const h = fontHeight * yScale;
+			float const h = fontHeight_ * yScale;
+			float const width_scale = theTexture_->Width(0) * xScale;
 
 			std::vector<std::pair<float, std::wstring> > lines(1, std::make_pair(0.0f, L""));
 
 			BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
 			{
-				CharInfoMapType::const_iterator cmiter = charInfoMap_.find(ch);
-				float const w = cmiter->second.Width() * theTexture_->Width(0) * xScale;
+				BOOST_AUTO(cmiter, charInfoMap_.find(ch));
+				float const w = cmiter->second.Width() * width_scale;
 
 				if (ch != L'\n')
 				{
@@ -315,7 +315,6 @@ namespace
 			}
 
 			uint32_t const clr32 = clr.ABGR();
-			float const width_scale = theTexture_->Width(0) * xScale;
 			for (size_t i = 0; i < sx.size(); ++ i)
 			{
 				size_t const maxSize = lines[i].second.length();
@@ -328,7 +327,7 @@ namespace
 
 				BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
 				{
-					CharInfoMapType::const_iterator cmiter = charInfoMap_.find(ch);
+					BOOST_AUTO(cmiter, charInfoMap_.find(ch));
 					float const w = cmiter->second.Width() * width_scale;
 
 					Rect_T<float> const & texRect(cmiter->second);
@@ -366,14 +365,14 @@ namespace
 			}
 		}
 
-		void AddText(uint32_t fontHeight, float sx, float sy, float sz,
+		void AddText(float sx, float sy, float sz,
 			float xScale, float yScale, Color const & clr, std::wstring const & text)
 		{
 			this->UpdateTexture(text);
 
 			uint32_t const clr32 = clr.ABGR();
 			float const width_scale = theTexture_->Width(0) * xScale;
-			float const h = fontHeight * yScale;
+			float const h = fontHeight_ * yScale;
 			size_t const maxSize = text.length() - std::count(text.begin(), text.end(), L'\n');
 			float x = sx, y = sy;
 			float maxx = sx, maxy = sy;
@@ -385,7 +384,7 @@ namespace
 
 			BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
 			{
-				CharInfoMapType::const_iterator cmiter = charInfoMap_.find(ch);
+				BOOST_AUTO(cmiter, charInfoMap_.find(ch));
 				float const w = cmiter->second.Width() * width_scale;
 
 				if (ch != L'\n')
@@ -469,7 +468,8 @@ namespace
 						uint32_t const tex_width = theTexture_->Width(0);
 						uint32_t const tex_height = theTexture_->Height(0);
 
-						::RECT charRect;
+						Vector_T<int32_t, 2> char_pos;
+						CharInfo charInfo;
 						if ((curX_ < tex_width) && (curY_ < tex_height) && (curY_ + max_height < tex_height))
 						{
 							if (curX_ + width > tex_width)
@@ -479,10 +479,12 @@ namespace
 							}
 
 							// 纹理还有空间
-							charRect.left	= curX_;
-							charRect.top	= curY_;
-							charRect.right	= curX_ + width;
-							charRect.bottom = curY_ + max_height;
+							char_pos = Vector_T<int32_t, 2>(curX_, curY_);
+
+							charInfo.left()		= (curX_ + 0.1f) / tex_width;
+							charInfo.top()		= (curY_ + 0.1f) / tex_height;
+							charInfo.right()	= (curX_ + width + 0.1f) / tex_width;
+							charInfo.bottom()	= (curY_ + max_height + 0.1f) / tex_height;
 
 							curX_ += width;
 						}
@@ -492,24 +494,21 @@ namespace
 							BOOST_AUTO(iter, charInfoMap_.find(charLRU_.back()));
 							BOOST_ASSERT(iter != charInfoMap_.end());
 
-							charRect.left	= static_cast<long>(iter->second.left() * tex_width);
-							charRect.top	= static_cast<long>(iter->second.top() * tex_height);
-							charRect.right	= charRect.left + width;
-							charRect.bottom	= charRect.top + max_height;
+							char_pos.x() = static_cast<int32_t>(iter->second.left() * tex_width);
+							char_pos.y() = static_cast<int32_t>(iter->second.top() * tex_height);
+
+							charInfo.left()		= iter->second.left();
+							charInfo.top()		= iter->second.top();
+							charInfo.right()	= charInfo.left() + static_cast<float>(width) / tex_width;
+							charInfo.bottom()	= charInfo.top() + static_cast<float>(max_height) / tex_height;
 
 							charLRU_.pop_back();
 							charInfoMap_.erase(iter);
 						}
-
-						CharInfo charInfo;
-						charInfo.left()		= static_cast<float>(charRect.left) / tex_width;
-						charInfo.top()		= static_cast<float>(charRect.top) / tex_height;
-						charInfo.right()	= static_cast<float>(charRect.right) / tex_width;
-						charInfo.bottom()	= static_cast<float>(charRect.bottom) / tex_height;
 						
 						int const buf_width = slot_->bitmap.width;
 						int const buf_height = slot_->bitmap.rows;
-						int const y_start = std::max<int>(max_height * 3 / 4 - slot_->bitmap_top, 0);
+						int const y_start = std::max<int>(max_height * 3 / 4 - slot_->metrics.horiBearingY / 64, 0);
 						std::vector<uint8_t> dest(max_width * max_height, 0);
 						for (int y = 0; y < buf_height; ++ y)
 						{
@@ -519,7 +518,7 @@ namespace
 							}
 						}
 						theTexture_->CopyMemoryToTexture2D(0, &dest[0], TEX_FORMAT,
-								max_width, max_height, charRect.left, charRect.top,
+								max_width, max_height, char_pos.x(), char_pos.y(),
 								max_width, max_height);
 
 						charInfoMap_.insert(std::make_pair(ch, charInfo));
@@ -530,11 +529,11 @@ namespace
 		}
 
 	private:
+		typedef Rect_T<float> CharInfo;
+
 #ifdef KLAYGE_PLATFORM_WINDOWS
 	#pragma pack(push, 1)
 #endif
-		typedef Rect_T<float> CharInfo;
-
 		struct FontVert
 		{
 			float3 pos;
@@ -553,11 +552,9 @@ namespace
 	#pragma pack(pop)
 #endif
 
-		typedef std::map<wchar_t, CharInfo, std::less<wchar_t>, boost::fast_pool_allocator<std::pair<wchar_t, CharInfo> > > CharInfoMapType;
-		typedef std::list<wchar_t, boost::fast_pool_allocator<wchar_t> > CharLRUType;
-
-		CharInfoMapType		charInfoMap_;
-		CharLRUType			charLRU_;
+		std::map<wchar_t, CharInfo, std::less<wchar_t>,
+			boost::fast_pool_allocator<std::pair<wchar_t, CharInfo> > > charInfoMap_;
+		std::list<wchar_t, boost::fast_pool_allocator<wchar_t> > charLRU_;
 
 		uint32_t curX_, curY_;
 
@@ -617,7 +614,7 @@ namespace KlayGE
 	{
 		if (!text.empty())
 		{
-			return checked_pointer_cast<FontRenderable>(font_renderable_)->CalcSize(this->FontHeight(), text);
+			return checked_pointer_cast<FontRenderable>(font_renderable_)->CalcSize(text);
 		}
 		else
 		{
@@ -642,7 +639,7 @@ namespace KlayGE
 		if (!text.empty())
 		{
 			boost::shared_ptr<FontObject> font_obj(new FontObject(font_renderable_, fso_attrib_));
-			checked_pointer_cast<FontRenderable>(font_renderable_)->AddText2D(this->FontHeight(),
+			checked_pointer_cast<FontRenderable>(font_renderable_)->AddText2D(
 				x, y, z, xScale, yScale, clr, text);
 			font_obj->AddToSceneManager();
 		}
@@ -657,7 +654,7 @@ namespace KlayGE
 		if (!text.empty())
 		{
 			boost::shared_ptr<FontObject> font_obj(new FontObject(font_renderable_, fso_attrib_));
-			checked_pointer_cast<FontRenderable>(font_renderable_)->AddText2D(this->FontHeight(),
+			checked_pointer_cast<FontRenderable>(font_renderable_)->AddText2D(
 				rc, z, xScale, yScale, clr, text, align);
 			font_obj->AddToSceneManager();
 		}
@@ -670,8 +667,7 @@ namespace KlayGE
 		if (!text.empty())
 		{
 			boost::shared_ptr<FontObject> font_obj(new FontObject(font_renderable_, fso_attrib_));
-			checked_pointer_cast<FontRenderable>(font_renderable_)->AddText3D(this->FontHeight(),
-				mvp, clr, text);
+			checked_pointer_cast<FontRenderable>(font_renderable_)->AddText3D(mvp, clr, text);
 			font_obj->AddToSceneManager();
 		}
 	}
