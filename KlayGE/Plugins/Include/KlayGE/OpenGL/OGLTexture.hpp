@@ -38,8 +38,6 @@ namespace KlayGE
 
 		std::wstring const & Name() const;
 
-		void CustomAttribute(std::string const & name, void* data);
-
 		virtual uint32_t Width(int level) const;
 		virtual uint32_t Height(int level) const;
 		virtual uint32_t Depth(int level) const;

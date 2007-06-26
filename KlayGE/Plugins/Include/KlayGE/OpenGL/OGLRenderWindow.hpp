@@ -29,8 +29,6 @@ namespace KlayGE
 		OGLRenderWindow(std::string const & name, RenderSettings const & settings);
 		~OGLRenderWindow();
 
-		LRESULT MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
 		void Destroy();
 
 		bool Closed() const;
@@ -40,8 +38,6 @@ namespace KlayGE
 
 		void SwapBuffers();
 
-		HWND WindowHandle() const;
-
 		std::wstring const & Description() const;
 
 		void Resize(uint32_t width, uint32_t height);
@@ -49,8 +45,6 @@ namespace KlayGE
 
 		bool FullScreen() const;
 		void FullScreen(bool fs);
-
-		void CustomAttribute(std::string const & name, void* pData);
 
 		// Method for dealing with resize / move & 3d library
 		void WindowMovedOrResized();
@@ -60,7 +54,15 @@ namespace KlayGE
 			return false;
 		}
 
-	protected:
+	private:
+		void OnActive(Window const & win, bool active);
+		void OnPaint(Window const & win);
+		void OnEnterSizeMove(Window const & win);
+		void OnExitSizeMove(Window const & win);
+		void OnSize(Window const & win, bool active);
+		void OnClose(Window const & win);
+
+	private:
 		std::string	name_;
 
 		HWND	hWnd_;
@@ -70,9 +72,6 @@ namespace KlayGE
 		bool	ready_;				// Is ready i.e. available for update
 		bool	closed_;
 		bool	isFullScreen_;
-
-		static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg,
-			WPARAM wParam, LPARAM lParam );
 
 		std::wstring			description_;
 

@@ -13,6 +13,8 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/COMPtr.hpp>
+#include <KlayGE/Context.hpp>
+#include <KlayGE/App3D.hpp>
 
 #include <KlayGE/DInput/DInput.hpp>
 
@@ -69,7 +71,7 @@ namespace KlayGE
 	void DInputEngine::EnumDevices()
 	{
 		TIF(dinput_->EnumDevices(DI8DEVCLASS_ALL, EnumDevicesCB, this, DIEDFL_ALLDEVICES));
-		hwnd_ = ::GetActiveWindow();
+		hwnd_ = static_cast<HWND>(Context::Instance().AppInstance().MainWnd()->WindowHandle());
 	}
 
 	// 枚举设备的回调函数

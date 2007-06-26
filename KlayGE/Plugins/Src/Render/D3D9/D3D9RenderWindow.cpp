@@ -38,10 +38,12 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/App3D.hpp>
+#include <KlayGE/Window.hpp>
 
 #include <vector>
 #include <cstring>
 #include <boost/assert.hpp>
+#include <boost/bind.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
 
@@ -53,92 +55,6 @@
 
 namespace KlayGE
 {
-	LRESULT D3D9RenderWindow::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-	{
-		D3D9RenderWindow* win(reinterpret_cast<D3D9RenderWindow*>(::GetWindowLongPtrW(hWnd, GWLP_USERDATA)));
-		if (win != NULL)
-		{
-			return win->MsgProc(hWnd, uMsg, wParam, lParam);
-		}
-		else
-		{
-			return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
-		}
-	}
-
-	LRESULT D3D9RenderWindow::MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-	{
-		switch (uMsg)
-		{
-		case WM_ACTIVATE:
-			if (WA_INACTIVE == LOWORD(wParam))
-			{
-				active_ = false;
-			}
-			else
-			{
-				active_ = true;
-			}
-			break;
-
-		case WM_PAINT:
-			// If we get WM_PAINT messges, it usually means our window was
-			// comvered up, so we need to refresh it by re-showing the contents
-			// of the current frame.
-			if (this->Active() && this->Ready())
-			{
-				Context::Instance().SceneManagerInstance().Update();
-				this->SwapBuffers();
-			}
-			break;
-
-		case WM_ENTERSIZEMOVE:
-			// Previent rendering while moving / sizing
-			this->Ready(false);
-			break;
-
-		case WM_EXITSIZEMOVE:
-			this->WindowMovedOrResized();
-			this->Ready(true);
-			break;
-
-		case WM_SIZE:
-			// Check to see if we are losing or gaining our window.  Set the
-			// active flag to match
-			if ((SIZE_MAXHIDE == wParam) || (SIZE_MINIMIZED == wParam))
-			{
-				active_ = false;
-			}
-			else
-			{
-				active_ = true;
-				if (this->Ready())
-				{
-					this->WindowMovedOrResized();
-				}
-			}
-			break;
-
-		case WM_GETMINMAXINFO:
-			// Prevent the window from going smaller than some minimu size
-			reinterpret_cast<MINMAXINFO*>(lParam)->ptMinTrackSize.x = 100;
-			reinterpret_cast<MINMAXINFO*>(lParam)->ptMinTrackSize.y = 100;
-			break;
-
-		case WM_SETCURSOR:
-		    d3dDevice_->ShowCursor(true);
-			break;
-
-		case WM_CLOSE:
-			this->Destroy();
-			closed_ = true;
-			::PostQuitMessage(0);
-			return 0;
-		}
-
-		return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
-	}
-
 	D3D9RenderWindow::D3D9RenderWindow(ID3D9Ptr const & d3d,
 										D3D9Adapter const & adapter, std::string const & name,
 										RenderSettings const & settings)
@@ -166,46 +82,21 @@ namespace KlayGE
 		format_				= settings.color_fmt;
 		isFullScreen_		= settings.full_screen;
 
-		HINSTANCE hInst(::GetModuleHandle(NULL));
-
 		// Destroy current window if any
 		if (hWnd_ != NULL)
 		{
 			this->Destroy();
 		}
 
-		std::wstring wname;
-		Convert(wname, name);
-
-		// Register the window class
-		WNDCLASSEXW wc;
-		wc.cbSize			= sizeof(wc);
-		wc.style			= CS_HREDRAW | CS_VREDRAW;
-		wc.lpfnWndProc		= WndProc;
-		wc.cbClsExtra		= 0;
-		wc.cbWndExtra		= sizeof(this);
-		wc.hInstance		= hInst;
-		wc.hIcon			= NULL;
-		wc.hCursor			= ::LoadCursor(NULL, IDC_ARROW);
-		wc.hbrBackground	= static_cast<HBRUSH>(::GetStockObject(BLACK_BRUSH));
-		wc.lpszMenuName		= NULL;
-		wc.lpszClassName	= wname.c_str();
-		wc.hIconSm			= NULL;
-		::RegisterClassExW(&wc);
-
-		RECT rc = { 0, 0, width_, height_ };
-		::AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, false);
-
-		// Create our main window
-		// Pass pointer to self
-		hWnd_ = ::CreateWindowW(wname.c_str(), wname.c_str(),
-			WS_OVERLAPPEDWINDOW, settings.left, settings.top,
-			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, NULL);
-
-		::SetWindowLongPtrW(hWnd_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
-
-		::ShowWindow(hWnd_, SW_SHOWNORMAL);
-		::UpdateWindow(hWnd_);
+		WindowPtr main_wnd = Context::Instance().AppInstance().MainWnd();
+		hWnd_ = static_cast<HWND>(main_wnd->WindowHandle());
+		main_wnd->OnActive().connect(boost::bind(&D3D9RenderWindow::OnActive, this, _1, _2));
+		main_wnd->OnPaint().connect(boost::bind(&D3D9RenderWindow::OnPaint, this, _1));
+		main_wnd->OnEnterSizeMove().connect(boost::bind(&D3D9RenderWindow::OnEnterSizeMove, this, _1));
+		main_wnd->OnExitSizeMove().connect(boost::bind(&D3D9RenderWindow::OnExitSizeMove, this, _1));
+		main_wnd->OnSize().connect(boost::bind(&D3D9RenderWindow::OnSize, this, _1, _2));
+		main_wnd->OnSetCursor().connect(boost::bind(&D3D9RenderWindow::OnSetCursor, this, _1));
+		main_wnd->OnClose().connect(boost::bind(&D3D9RenderWindow::OnClose, this, _1));
 
 		fs_color_depth_ = NumFormatBits(settings.color_fmt);
 
@@ -477,11 +368,6 @@ namespace KlayGE
 		ready_ = ready;
 	}
 
-	HWND D3D9RenderWindow::WindowHandle() const
-	{
-		return hWnd_;
-	}
-
 	std::wstring const & D3D9RenderWindow::Description() const
 	{
 		return description_;
@@ -603,12 +489,6 @@ namespace KlayGE
 		renderSurface_.reset();
 		d3dDevice_.reset();
 		d3d_.reset();
-
-		if (hWnd_ != NULL)
-		{
-			::DestroyWindow(hWnd_);
-			hWnd_ = NULL;
-		}
 	}
 
 	void D3D9RenderWindow::UpdateSurfacesPtrs()
@@ -680,5 +560,61 @@ namespace KlayGE
 				this->ResetDevice();
 			}
 		}
+	}
+
+	void D3D9RenderWindow::OnActive(Window const & /*win*/, bool active)
+	{
+		active_ = active;
+	}
+
+	void D3D9RenderWindow::OnPaint(Window const & /*win*/)
+	{
+		// If we get WM_PAINT messges, it usually means our window was
+		// comvered up, so we need to refresh it by re-showing the contents
+		// of the current frame.
+		if (this->Active() && this->Ready())
+		{
+			Context::Instance().SceneManagerInstance().Update();
+			this->SwapBuffers();
+		}
+	}
+
+	void D3D9RenderWindow::OnEnterSizeMove(Window const & /*win*/)
+	{
+		// Previent rendering while moving / sizing
+		this->Ready(false);
+	}
+
+	void D3D9RenderWindow::OnExitSizeMove(Window const & /*win*/)
+	{
+		this->WindowMovedOrResized();
+		this->Ready(true);
+	}
+
+	void D3D9RenderWindow::OnSize(Window const & /*win*/, bool active)
+	{
+		if (active)
+		{
+			active_ = false;
+		}
+		else
+		{
+			active_ = true;
+			if (this->Ready())
+			{
+				this->WindowMovedOrResized();
+			}
+		}
+	}
+
+	void D3D9RenderWindow::OnSetCursor(Window const & /*win*/)
+	{
+		d3dDevice_->ShowCursor(true);
+	}
+
+	void D3D9RenderWindow::OnClose(Window const & /*win*/)
+	{
+		this->Destroy();
+		closed_ = true;
 	}
 }

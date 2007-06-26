@@ -35,8 +35,6 @@ namespace KlayGE
 			std::string const & name, RenderSettings const & settings);
 		~D3D9RenderWindow();
 
-		LRESULT MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
 		void Destroy();
 
 		bool Closed() const;
@@ -45,8 +43,6 @@ namespace KlayGE
 		void Ready(bool ready);
 
 		void SwapBuffers();
-
-		HWND WindowHandle() const;
 
 		std::wstring const & Description() const;
 
@@ -76,6 +72,15 @@ namespace KlayGE
 		}
 
 	private:
+		void OnActive(Window const & win, bool active);
+		void OnPaint(Window const & win);
+		void OnEnterSizeMove(Window const & win);
+		void OnExitSizeMove(Window const & win);
+		void OnSize(Window const & win, bool active);
+		void OnSetCursor(Window const & win);
+		void OnClose(Window const & win);
+
+	private:
 		void UpdateSurfacesPtrs();
 		void ResetDevice();
 
@@ -88,9 +93,6 @@ namespace KlayGE
 		bool	isFullScreen_;
 
 		D3DMULTISAMPLE_TYPE multiSample_;
-
-		static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg,
-			WPARAM wParam, LPARAM lParam );
 
 
 		D3D9Adapter				adapter_;

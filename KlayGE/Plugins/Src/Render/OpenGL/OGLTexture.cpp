@@ -160,11 +160,6 @@ namespace KlayGE
 		}
 	}
 
-	void OGLTexture::CustomAttribute(std::string const & /*name*/, void* /*data*/)
-	{
-		BOOST_ASSERT(false);
-	}
-
 	void OGLTexture::GLBindTexture()
 	{
 		glBindTexture(target_type_, texture_);
