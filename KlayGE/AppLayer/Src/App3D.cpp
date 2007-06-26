@@ -1,8 +1,11 @@
 // App3D.cpp
 // KlayGE App3D类 实现文件
-// Ver 3.1.0
-// 版权所有(C) 龚敏敏, 2003-2005
+// Ver 3.6.0
+// 版权所有(C) 龚敏敏, 2003-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.6.0
+// 增加了MakeWindow (2007.6.26)
 //
 // 3.1.0
 // 增加了OnResize (2005.11.20)
@@ -36,10 +39,13 @@ namespace KlayGE
 {
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
-	App3DFramework::App3DFramework()
-						: fps_(0), accumulate_time_(0), num_frames_(0)
+	App3DFramework::App3DFramework(std::string const & name, RenderSettings const & settings)
+						: name_(name), settings_(settings),
+							fps_(0), accumulate_time_(0), num_frames_(0)
 	{
 		Context::Instance().AppInstance(*this);
+
+		main_wnd_ = this->MakeWindow(name, settings.left, settings.top, settings.width, settings.height);
 	}
 
 	App3DFramework::~App3DFramework()
@@ -47,14 +53,20 @@ namespace KlayGE
 		this->DelObjects();
 	}
 
-	// 建立应用程序窗口和D3D接口
+	// 建立应用程序主窗口
 	/////////////////////////////////////////////////////////////////////////////////
-	void App3DFramework::Create(std::string const & name, RenderSettings const & settings)
+	void App3DFramework::Create()
 	{
-		Context::Instance().RenderFactoryInstance().RenderEngineInstance().CreateRenderWindow(name, settings);
+		Context::Instance().RenderFactoryInstance().RenderEngineInstance().CreateRenderWindow(name_, settings_);
 
 		this->InitObjects();
-		this->OnResize(settings.width, settings.height);
+		this->OnResize(settings_.width, settings_.height);
+	}
+
+	WindowPtr App3DFramework::MakeWindow(std::string const & name, int32_t left, int32_t top,
+			uint32_t width, uint32_t height)
+	{
+		return WindowPtr(new Window(name, left, top, width, height));
 	}
 
 	void App3DFramework::Run()

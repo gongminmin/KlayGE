@@ -1,8 +1,11 @@
-// App3Dp.hpp
+// App3D.hpp
 // KlayGE App3D类 头文件
-// Ver 3.1.0
-// 版权所有(C) 龚敏敏, 2003-2005
+// Ver 3.6.0
+// 版权所有(C) 龚敏敏, 2003-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.6.0
+// 增加了MakeWindow (2007.6.26)
 //
 // 3.1.0
 // 增加了OnResize (2005.11.20)
@@ -25,9 +28,11 @@
 #define KLAYGE_LIB_NAME KlayGE_AppLayer
 #include <KlayGE/config/auto_link.hpp>
 
+#include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/Timer.hpp>
-#include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/RenderSettings.hpp>
+#include <KlayGE/Window.hpp>
 
 namespace KlayGE
 {
@@ -44,10 +49,17 @@ namespace KlayGE
 		friend class SceneManager;
 
 	public:
-		App3DFramework();
+		App3DFramework(std::string const & name, RenderSettings const & settings);
 		virtual ~App3DFramework();
 
-		virtual void Create(std::string const & name, RenderSettings const & settings);
+		virtual void Create();
+
+		WindowPtr MakeWindow(std::string const & name, int32_t left, int32_t top,
+			uint32_t width, uint32_t height);
+		WindowPtr MainWnd() const
+		{
+			return main_wnd_;
+		}
 
 		Camera const & ActiveCamera() const;
 		Camera& ActiveCamera();
@@ -85,6 +97,9 @@ namespace KlayGE
 		}
 
 	protected:
+		std::string name_;
+		RenderSettings settings_;
+
 		// Stats
 		float	fps_;
 		float	frame_time_;
@@ -92,6 +107,8 @@ namespace KlayGE
 		uint32_t num_frames_;
 
 		Timer timer_;
+
+		WindowPtr main_wnd_;
 	};
 }
 
