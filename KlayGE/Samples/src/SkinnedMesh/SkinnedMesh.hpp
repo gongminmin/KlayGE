@@ -9,7 +9,7 @@
 class SkinnedMeshApp : public KlayGE::App3DFramework
 {
 public:
-	SkinnedMeshApp();
+	SkinnedMeshApp(std::string const & name, KlayGE::RenderSettings const & settings);
 
 private:
 	void InitObjects();

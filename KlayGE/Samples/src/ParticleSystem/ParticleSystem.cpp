@@ -311,14 +311,15 @@ int main()
 	settings.full_screen = false;
 	settings.ConfirmDevice = ConfirmDevice;
 
-	ParticleSystemApp app;
-	app.Create("Particle System", settings);
+	ParticleSystemApp app("Particle System", settings);
+	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-ParticleSystemApp::ParticleSystemApp()
+ParticleSystemApp::ParticleSystemApp(std::string const & name, RenderSettings const & settings)
+					: App3DFramework(name, settings)
 {
 	ResLoader::Instance().AddPath("../../media/Common");
 	ResLoader::Instance().AddPath("../../media/ParticleSystem");
@@ -339,8 +340,8 @@ void ParticleSystemApp::InitObjects()
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
-	action_handler_t input_handler(inputEngine);
-	input_handler += boost::bind(&ParticleSystemApp::InputHandler, this, _1, _2);
+	action_handler_t input_handler(new input_signal);
+	input_handler->connect(boost::bind(&ParticleSystemApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	height_img_.reset(new HeightImg(-2, -2, 2, 2, LoadTexture("grcanyon.dds"), 1));

@@ -213,15 +213,16 @@ int main()
 	settings.full_screen = false;
 	settings.ConfirmDevice = ConfirmDevice;
 
-	AsciiArtsApp app;
-	app.Create("ASCII Arts", settings);
+	AsciiArtsApp app("ASCII Arts", settings);
+	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-AsciiArtsApp::AsciiArtsApp()
-			: show_ascii_(true)
+AsciiArtsApp::AsciiArtsApp(std::string const & name, RenderSettings const & settings)
+			: App3DFramework(name, settings),
+				show_ascii_(true)
 {
 	ResLoader::Instance().AddPath("../../media/Common");
 	ResLoader::Instance().AddPath("../../media/AsciiArts");
@@ -259,8 +260,8 @@ void AsciiArtsApp::InitObjects()
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
-	action_handler_t input_handler(inputEngine);
-	input_handler += boost::bind(&AsciiArtsApp::InputHandler, this, _1, _2);
+	action_handler_t input_handler(new input_signal);
+	input_handler->connect(boost::bind(&AsciiArtsApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	downsampler_.reset(new Downsampler8x8);

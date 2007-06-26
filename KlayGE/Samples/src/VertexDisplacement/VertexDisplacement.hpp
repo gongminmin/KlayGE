@@ -8,7 +8,7 @@
 class VertexDisplacement : public KlayGE::App3DFramework
 {
 public:
-	VertexDisplacement();
+	VertexDisplacement(std::string const & name, KlayGE::RenderSettings const & settings);
 
 private:
 	void InitObjects();

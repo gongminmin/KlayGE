@@ -312,14 +312,15 @@ int main()
 	settings.full_screen = false;
 	settings.ConfirmDevice = ConfirmDevice;
 
-	ShadowCubeMap app;
-	app.Create("ShadowCubeMap", settings);
+	ShadowCubeMap app("ShadowCubeMap", settings);
+	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-ShadowCubeMap::ShadowCubeMap()
+ShadowCubeMap::ShadowCubeMap(std::string const & name, RenderSettings const & settings)
+				: App3DFramework(name, settings)
 {
 	ResLoader::Instance().AddPath("../../media/Common");
 	ResLoader::Instance().AddPath("../../media/ShadowCubeMap");
@@ -366,8 +367,8 @@ void ShadowCubeMap::InitObjects()
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
-	action_handler_t input_handler(inputEngine);
-	input_handler += boost::bind(&ShadowCubeMap::InputHandler, this, _1, _2);
+	action_handler_t input_handler(new input_signal);
+	input_handler->connect(boost::bind(&ShadowCubeMap::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 }
 

@@ -8,7 +8,7 @@
 class AsciiArtsApp : public KlayGE::App3DFramework
 {
 public:
-	AsciiArtsApp();
+	AsciiArtsApp(std::string const & name, KlayGE::RenderSettings const & settings);
 
 private:
 	void InitObjects();

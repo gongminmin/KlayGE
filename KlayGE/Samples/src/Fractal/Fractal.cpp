@@ -161,14 +161,15 @@ int main()
 	settings.full_screen = false;
 	settings.ConfirmDevice = ConfirmDevice;
 
-	Fractal app;
-	app.Create("Fractal", settings);
+	Fractal app("Fractal", settings);
+	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-Fractal::Fractal()
+Fractal::Fractal(std::string const & name, RenderSettings const & settings)
+			: App3DFramework(name, settings)
 {
 	ResLoader::Instance().AddPath("../../media/Common");
 	ResLoader::Instance().AddPath("../../media/Fractal");

@@ -8,7 +8,7 @@
 class Electro : public KlayGE::App3DFramework
 {
 public:
-	Electro();
+	Electro(std::string const & name, KlayGE::RenderSettings const & settings);
 
 private:
 	void InitObjects();

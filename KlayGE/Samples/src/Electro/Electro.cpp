@@ -151,14 +151,15 @@ int main()
 	settings.full_screen = false;
 	settings.ConfirmDevice = ConfirmDevice;
 
-	Electro app;
-	app.Create("Electro", settings);
+	Electro app("Electro", settings);
+	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-Electro::Electro()
+Electro::Electro(std::string const & name, RenderSettings const & settings)
+			: App3DFramework(name, settings)
 {
 	ResLoader::Instance().AddPath("../../media/Common");
 	ResLoader::Instance().AddPath("../../media/Electro");

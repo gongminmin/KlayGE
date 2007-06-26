@@ -78,7 +78,7 @@ private:
 class ParticleSystemApp : public KlayGE::App3DFramework
 {
 public:
-	ParticleSystemApp();
+	ParticleSystemApp(std::string const & name, KlayGE::RenderSettings const & settings);
 
 private:
 	void InitObjects();

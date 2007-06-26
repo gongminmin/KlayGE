@@ -8,7 +8,7 @@
 class Parallax : public KlayGE::App3DFramework
 {
 public:
-	Parallax();
+	Parallax(std::string const & name, KlayGE::RenderSettings const & settings);
 
 private:
 	void InitObjects();

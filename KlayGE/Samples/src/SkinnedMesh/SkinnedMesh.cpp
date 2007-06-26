@@ -61,8 +61,6 @@ int main()
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().InputFactoryInstance(DInputFactoryInstance());
 
-	SkinnedMeshApp app;
-
 	RenderSettings settings;
 	settings.width = 800;
 	settings.height = 600;
@@ -71,13 +69,15 @@ int main()
 	settings.full_screen = false;
 	settings.ConfirmDevice = ConfirmDevice;
 
-	app.Create("SkinnedMesh", settings);
+	SkinnedMeshApp app("SkinnedMesh", settings);
+	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-SkinnedMeshApp::SkinnedMeshApp()
+SkinnedMeshApp::SkinnedMeshApp(std::string const & name, RenderSettings const & settings)
+					: App3DFramework(name, settings)
 {
 	ResLoader::Instance().AddPath("../../media/Common");
 	ResLoader::Instance().AddPath("../../media/SkinnedMesh");
@@ -100,8 +100,8 @@ void SkinnedMeshApp::InitObjects()
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
-	action_handler_t input_handler(inputEngine);
-	input_handler += boost::bind(&SkinnedMeshApp::InputHandler, this, _1, _2);
+	action_handler_t input_handler(new input_signal);
+	input_handler->connect(boost::bind(&SkinnedMeshApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 }
 

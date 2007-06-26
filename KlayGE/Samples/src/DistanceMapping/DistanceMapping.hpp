@@ -8,7 +8,7 @@
 class DistanceMapping : public KlayGE::App3DFramework
 {
 public:
-	DistanceMapping();
+	DistanceMapping(std::string const & name, KlayGE::RenderSettings const & settings);
 
 private:
 	void InitObjects();

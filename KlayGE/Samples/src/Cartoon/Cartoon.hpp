@@ -8,7 +8,7 @@
 class Cartoon : public KlayGE::App3DFramework
 {
 public:
-	Cartoon();
+	Cartoon(std::string const & name, KlayGE::RenderSettings const & settings);
 
 private:
 	void InitObjects();

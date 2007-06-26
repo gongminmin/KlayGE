@@ -158,14 +158,15 @@ int main()
 	settings.full_screen = false;
 	settings.ConfirmDevice = ConfirmDevice;
 
-	Cartoon app;
-	app.Create("¿¨Í¨äÖÈ¾", settings);
+	Cartoon app("¿¨Í¨äÖÈ¾", settings);
+	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-Cartoon::Cartoon()
+Cartoon::Cartoon(std::string const & name, RenderSettings const & settings)
+			: App3DFramework(name, settings)
 {
 	ResLoader::Instance().AddPath("../../media/Common");
 	ResLoader::Instance().AddPath("../../media/Cartoon");
@@ -191,8 +192,8 @@ void Cartoon::InitObjects()
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
-	action_handler_t input_handler(inputEngine);
-	input_handler += boost::bind(&Cartoon::InputHandler, this, _1, _2);
+	action_handler_t input_handler(new input_signal);
+	input_handler->connect(boost::bind(&Cartoon::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 }
 

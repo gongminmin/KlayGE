@@ -8,7 +8,7 @@
 class Instancing : public KlayGE::App3DFramework
 {
 public:
-	Instancing();
+	Instancing(std::string const & name, KlayGE::RenderSettings const & settings);
 
 private:
 	void InitObjects();
