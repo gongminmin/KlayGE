@@ -26,7 +26,14 @@
 
 #include <KlayGE/Vector.hpp>
 #include <KlayGE/MapVector.hpp>
-#include <KlayGE/Event.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4103 4251 4275 4512)
+#endif
+#include <boost/signal.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #include <vector>
 #include <string>
@@ -275,7 +282,8 @@ namespace KlayGE
 		MapVector<uint16_t, uint16_t> actionMap_;
 	};
 
-	typedef Event<InputEngine, InputAction> action_handler_t;
+	typedef boost::signal<void(InputEngine const &, InputAction const &)> input_signal;
+	typedef boost::shared_ptr<input_signal> action_handler_t;
 	typedef MapVector<uint32_t, InputActionMap> action_maps_t;
 
 

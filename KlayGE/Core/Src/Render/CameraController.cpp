@@ -31,6 +31,7 @@
 #endif
 #include <boost/assign/std/vector.hpp>
 #include <boost/bind.hpp>
+#include <boost/typeof/typeof.hpp>
 
 #include <KlayGE/CameraController.hpp>
 
@@ -88,8 +89,8 @@ namespace KlayGE
 		KlayGE::InputActionMap actionMap;
 		actionMap.AddActions(actions.begin(), actions.end());
 
-		action_handler_t input_handler(inputEngine);
-		input_handler += boost::bind(&FirstPersonCameraController::InputHandler, this, _1, _2);
+		action_handler_t input_handler(new input_signal);
+		input_handler->connect(boost::bind(&FirstPersonCameraController::InputHandler, this, _1, _2));
 		inputEngine.ActionMap(actionMap, input_handler, true);
 	}
 

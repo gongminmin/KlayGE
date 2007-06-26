@@ -157,6 +157,8 @@ namespace KlayGE
 	typedef boost::shared_ptr<AudioFactory> AudioFactoryPtr;
 
 	class App3DFramework;
+	class Window;
+	typedef boost::shared_ptr<Window> WindowPtr;
 
 	class InputEngine;
 	typedef boost::shared_ptr<InputEngine> InputEnginePtr;

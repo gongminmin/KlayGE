@@ -115,7 +115,7 @@ namespace KlayGE
 						actions.insert(act);
 
 						// 处理动作
-						action_handlers_[id].second(act);
+						(*action_handlers_[id].second)(*this, act);
 					}
 				}
 			}
