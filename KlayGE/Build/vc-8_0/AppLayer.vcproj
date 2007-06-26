@@ -296,6 +296,10 @@
 				RelativePath="..\..\AppLayer\Src\App3D.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\..\AppLayer\Src\Window.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -304,6 +308,10 @@
 			>
 			<File
 				RelativePath="..\..\AppLayer\Include\KlayGE\App3D.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\AppLayer\Include\KlayGE\Window.hpp"
 				>
 			</File>
 		</Filter>
