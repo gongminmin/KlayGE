@@ -175,6 +175,11 @@ namespace
 
 	enum
 	{
+		Switch_AscII
+	};
+
+	enum
+	{
 		Switch,
 		Exit,
 		FullScreen,
@@ -268,6 +273,12 @@ void AsciiArtsApp::InitObjects()
 
 	ascii_arts_.reset(new AsciiArts);
 	checked_pointer_cast<AsciiArts>(ascii_arts_)->SetLumsTex(ascii_lums_tex_);
+
+	dialog_ = UIManager::Instance().MakeDialog();
+	dialog_->AddControl(UIControlPtr(new UICheckBox(dialog_, Switch_AscII, L"AscII filter",
+                            60, 550, 350, 24, false, 0, false)));
+	dialog_->Control<UICheckBox>(Switch_AscII)->SetChecked(true);
+	dialog_->Control<UICheckBox>(Switch_AscII)->OnChangedEvent().connect(boost::bind(&AsciiArtsApp::CheckBoxHandler, this, _1));
 }
 
 void AsciiArtsApp::OnResize(uint32_t width, uint32_t height)
@@ -290,6 +301,8 @@ void AsciiArtsApp::OnResize(uint32_t width, uint32_t height)
 
 	ascii_arts_->Source(downsample_tex_, fb->RequiresFlipping());
 	ascii_arts_->Destinate(FrameBufferPtr());
+
+	dialog_->GetControl(Switch_AscII)->SetLocation(60, height - 50);
 }
 
 uint32_t AsciiArtsApp::NumPasses() const
@@ -329,11 +342,17 @@ void AsciiArtsApp::InputHandler(InputEngine const & /*sender*/, InputAction cons
 	}
 }
 
+void AsciiArtsApp::CheckBoxHandler(UICheckBox const & /*sender*/)
+{
+	show_ascii_ = dialog_->Control<UICheckBox>(Switch_AscII)->GetChecked();
+}
+
 void AsciiArtsApp::DoUpdate(uint32_t pass)
 {
 	if (0 == pass)
 	{
 		fpcController_.Update();
+		UIManager::Instance().HandleInput();
 	}
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -377,6 +396,8 @@ void AsciiArtsApp::DoUpdate(uint32_t pass)
 		|| (show_ascii_ && (1 == pass)))
 	{
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
+
+		UIManager::Instance().Render();
 
 		std::wostringstream stream;
 		stream << this->FPS();

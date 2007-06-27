@@ -1663,6 +1663,90 @@
 				</File>
 			</Filter>
 		</Filter>
+		<Filter
+			Name="UI System"
+			>
+			<Filter
+				Name="Header Files"
+				>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\UI.hpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Source Files"
+				>
+				<File
+					RelativePath="..\..\Core\Src\UI\UI.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Src\UI\UIButton.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Src\UI\UICheckBox.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Src\UI\UIRadioButton.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Src\UI\UIStatic.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Effect Files"
+				>
+				<File
+					RelativePath="..\..\RenderFX\UI.fxml"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|x64"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|x64"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Compiling effect file $(InputPath)"
+							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+						/>
+					</FileConfiguration>
+				</File>
+			</Filter>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

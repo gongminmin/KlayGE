@@ -68,6 +68,11 @@ namespace
 			}
 		}
 
+		void CartoonStyle(bool cs)
+		{
+			*(effect_->ParameterByName("cartoon_style")) = cs;
+		}
+
 		void UpdateTexture(TexturePtr const & normal_depth_tex, bool flipping)
 		{
 			*(effect_->ParameterByName("normal_depth_sampler")) = normal_depth_tex;
@@ -124,6 +129,12 @@ namespace
 
 	enum
 	{
+		Switch_Cartoon
+	};
+
+
+	enum
+	{
 		Exit,
 	};
 
@@ -166,7 +177,8 @@ int main()
 }
 
 Cartoon::Cartoon(std::string const & name, RenderSettings const & settings)
-			: App3DFramework(name, settings)
+			: App3DFramework(name, settings),
+				cartoon_style_(true)
 {
 	ResLoader::Instance().AddPath("../../media/Common");
 	ResLoader::Instance().AddPath("../../media/Cartoon");
@@ -195,6 +207,12 @@ void Cartoon::InitObjects()
 	action_handler_t input_handler(new input_signal);
 	input_handler->connect(boost::bind(&Cartoon::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
+
+	dialog_ = UIManager::Instance().MakeDialog();
+	dialog_->AddControl(UIControlPtr(new UICheckBox(dialog_, Switch_Cartoon, L"Cartoon style",
+                            60, 550, 350, 24, false, 0, false)));
+	dialog_->Control<UICheckBox>(Switch_Cartoon)->SetChecked(true);
+	dialog_->Control<UICheckBox>(Switch_Cartoon)->OnChangedEvent().connect(boost::bind(&Cartoon::CheckBoxHandler, this, _1));
 }
 
 void Cartoon::OnResize(uint32_t width, uint32_t height)
@@ -205,6 +223,8 @@ void Cartoon::OnResize(uint32_t width, uint32_t height)
 	normal_depth_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F);
 	normal_depth_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*normal_depth_tex_, 0));
 	normal_depth_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));
+
+	dialog_->GetControl(Switch_Cartoon)->SetLocation(60, height - 50);
 }
 
 void Cartoon::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -215,6 +235,11 @@ void Cartoon::InputHandler(InputEngine const & /*sender*/, InputAction const & a
 		this->Quit();
 		break;
 	}
+}
+
+void Cartoon::CheckBoxHandler(UICheckBox const & /*sender*/)
+{
+	cartoon_style_ = dialog_->Control<UICheckBox>(Switch_Cartoon)->GetChecked();
 }
 
 uint32_t Cartoon::NumPasses() const
@@ -232,6 +257,8 @@ void Cartoon::DoUpdate(uint32_t pass)
 	case 0:
 		fpcController_.Update();
 
+		UIManager::Instance().HandleInput();
+
 		renderEngine.BindFrameBuffer(normal_depth_buffer_);
 		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
@@ -248,7 +275,10 @@ void Cartoon::DoUpdate(uint32_t pass)
 		checked_pointer_cast<RenderTorus>(torus_->GetRenderable())->UpdateTexture(normal_depth_tex_,
 			normal_depth_buffer_->RequiresFlipping());
 		checked_pointer_cast<RenderTorus>(torus_->GetRenderable())->Pass(1);
+		checked_pointer_cast<RenderTorus>(torus_->GetRenderable())->CartoonStyle(cartoon_style_);
 		torus_->AddToSceneManager();
+
+		UIManager::Instance().Render();
 
 		FrameBuffer& rw = *checked_pointer_cast<FrameBuffer>(renderEngine.CurFrameBuffer());
 

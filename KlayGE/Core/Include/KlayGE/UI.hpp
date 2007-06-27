@@ -1,0 +1,863 @@
+// UI.hpp
+// KlayGE 图形用户界面 头文件
+// Ver 3.6.0
+// 版权所有(C) 龚敏敏, 2007
+// Homepage: http://klayge.sourceforge.net
+//
+// 3.6.0
+// 初次建立 (2007.6.27)
+//
+// 修改记录
+/////////////////////////////////////////////////////////////////////////////////
+
+
+#ifndef _UI_HPP
+#define _UI_HPP
+
+#include <KlayGE/Font.hpp>
+#include <KlayGE/Timer.hpp>
+
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4103 4251 4275 4512)
+#endif
+#include <boost/signal.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
+
+namespace KlayGE
+{
+	enum UI_Control_State
+	{
+		UICS_Normal = 0,
+		UICS_Disabled,
+		UICS_Hidden,
+		UICS_Focus,
+		UICS_MouseOver,
+		UICS_Pressed,
+
+		UICS_Num_Control_States
+	};
+
+	enum UI_Control_Type 
+	{
+		UICT_Button, 
+		UICT_Static, 
+		UICT_CheckBox,
+		UICT_RadioButton
+	};
+
+	struct VertexFormat
+	{
+		float3 pos;
+		float4 clr;
+		float2 tex;
+
+		VertexFormat()
+		{
+		}
+		VertexFormat(float3 const & p, float4 const & c, float2 const & t)
+			: pos(p), clr(c), tex(t)
+		{
+		}
+	};
+
+	struct UIStatesColor
+	{
+		void Init(Color const & default_color,
+			Color const & disabled_color = Color(0.5f, 0.5f, 0.5f, 0.78f),
+			Color const & hidden_color = Color(0, 0, 0, 0));
+
+		void SetState(UI_Control_State state);
+	    
+		Color States[UICS_Num_Control_States]; // Modulate colors for all possible control states
+		Color Current;
+	};
+
+	class UIElement;
+	typedef boost::shared_ptr<UIElement> UIElementPtr;
+	class UIControl;
+	typedef boost::shared_ptr<UIControl> UIControlPtr;
+	class UIDialog;
+	typedef boost::shared_ptr<UIDialog> UIDialogPtr;
+	class UIManager;	
+	typedef boost::shared_ptr<UIManager> UIManagerPtr;
+
+	class UIElement
+	{
+	public:
+		void SetTexture(uint32_t tex_index, Rect_T<int32_t> const & tex_rect, Color const & default_texture_color = Color(1, 1, 1, 1));
+
+		void SetFont(uint32_t font_index, Color const & default_font_color = Color(1, 1, 1, 1),
+			uint32_t text_align = Font::FA_Hor_Center | Font::FA_Ver_Middle);
+
+		void Refresh();
+
+		uint32_t TextureIndex() const
+		{
+			return tex_index_;
+		}
+
+		uint32_t FontIndex() const
+		{
+			return font_index_;
+		}
+
+		uint32_t TextAlign() const
+		{
+			return text_align_;
+		}
+
+		Rect_T<int32_t> const & TexRect() const
+		{
+			return tex_rect_;
+		}
+
+		UIStatesColor const & TextureColor() const
+		{
+			return texture_color_;
+		}
+		UIStatesColor& TextureColor()
+		{
+			return texture_color_;
+		}
+
+		UIStatesColor const & FontColor() const
+		{
+			return font_color_;
+		}
+		UIStatesColor& FontColor()
+		{
+			return font_color_;
+		}
+
+	private:
+		uint32_t tex_index_;
+		uint32_t font_index_;
+		uint32_t text_align_;
+
+		Rect_T<int32_t> tex_rect_;
+	    
+		UIStatesColor texture_color_;
+		UIStatesColor font_color_;
+	};
+
+	class UIControl : public boost::enable_shared_from_this<UIControl>
+	{
+	public:
+		UIControl(uint32_t type, UIDialogPtr dialog)
+			: type_(type),
+					dialog_(dialog),
+					id_(0), index_(0),
+					enabled_(true), visible_(true),
+					is_mouse_over_(false), has_focus_(false), is_default_(false),
+					x_(0), y_(0), width_(0), height_(0),
+					bounding_box_(0, 0, 0, 0)
+		{
+			BOOST_ASSERT(dialog);
+		}
+		virtual ~UIControl()
+		{
+		}
+
+		virtual void Refresh()
+		{
+			is_mouse_over_ = false;
+			has_focus_ = false;
+
+			for (size_t i = 0; i < elements_.size(); ++ i)
+			{
+				elements_[i]->Refresh();
+			}
+		}
+
+
+		virtual void Render() = 0;
+
+		virtual void HandleInput()
+		{
+		}
+
+		virtual bool CanHaveFocus() const
+		{
+			return false;
+		}
+		virtual bool HasFocus() const
+		{
+			return has_focus_;
+		}
+		virtual void OnFocusIn()
+		{
+			has_focus_ = true;
+		}
+		virtual void OnFocusOut()
+		{
+			has_focus_ = false;
+		}
+		virtual void OnMouseEnter()
+		{
+			is_mouse_over_ = true;
+		}
+		virtual void OnMouseLeave()
+		{
+			is_mouse_over_ = false;
+		}
+
+		Rect_T<int32_t> const & BoundingBoxRect() const
+		{
+			return bounding_box_;
+		}
+		virtual bool ContainsPoint(Vector_T<int32_t, 2> const & pt) const
+		{
+			return bounding_box_.PtInRect(pt);
+		}
+
+		virtual void SetEnabled(bool bEnabled)
+		{
+			enabled_ = bEnabled;
+		}
+		virtual bool GetEnabled() const
+		{
+			return enabled_;
+		}
+		virtual void SetVisible(bool bVisible)
+		{
+			visible_ = bVisible;
+		}
+		virtual bool GetVisible() const
+		{
+			return visible_;
+		}
+
+		uint32_t GetType() const
+		{
+			return type_;
+		}
+
+		int  GetID() const
+		{
+			return id_;
+		}
+		void SetID(int ID)
+		{
+			id_ = ID;
+		}
+
+		void SetLocation(int x, int y)
+		{
+			x_ = x;
+			y_ = y;
+			this->UpdateRects();
+		}
+		void SetSize(int width, int height)
+		{
+			width_ = width;
+			height_ = height;
+			this->UpdateRects();
+		}
+
+		void SetHotkey(uint32_t nHotkey)
+		{
+			hotkey_ = nHotkey;
+		}
+		uint32_t GetHotkey() const
+		{
+			return hotkey_;
+		}
+
+		virtual void SetTextColor(Color const & color)
+		{
+			UIElementPtr element = elements_[0];
+
+			if (element)
+			{
+				element->FontColor().States[UICS_Normal] = color;
+			}
+		}
+		UIElementPtr GetElement(uint32_t iElement) const
+		{
+			return elements_[iElement];
+		}
+		void SetElement(uint32_t iElement, UIElementPtr element)
+		{
+			// Make certain the array is this large
+			for (uint32_t i = static_cast<uint32_t>(elements_.size()); i <= iElement; ++ i)
+			{
+				elements_.push_back(UIElementPtr(new UIElement));
+			}
+
+			// Update the data
+			*elements_[iElement] = *element;
+		}
+
+		bool GetIsDefault() const
+		{
+			return is_default_;
+		}
+		void SetIsDefault(bool bIsDefault)
+		{
+			is_default_ = bIsDefault;
+		}
+		uint32_t GetIndex() const
+		{
+			return index_;
+		}
+		void SetIndex(uint32_t Index)
+		{
+			index_ = Index;
+		}
+		UIDialogPtr GetDialog() const
+		{
+			return dialog_.lock();
+		}
+
+	protected:
+		bool visible_;                // Shown/hidden flag
+		bool is_mouse_over_;              // Mouse pointer is above control
+		bool has_focus_;               // Control has input focus
+		bool is_default_;              // Is the default control
+
+		// Size, scale, and positioning members
+		int x_, y_;
+		int width_, height_;
+
+		// These members are set by the container
+		boost::weak_ptr<UIDialog> dialog_;    // Parent container
+		uint32_t index_;              // Index within the control list
+	    
+		std::vector<UIElementPtr> elements_;  // All display elements
+
+	public:
+		struct KeyEventArg
+		{
+			bool const * all_keys;
+			uint8_t key;
+		};
+
+		enum MouseButtons
+		{
+			MB_None = 0,
+			MB_Left = 1UL << 0,
+			MB_Right = 1UL << 1,
+			MB_Middle = 1UL << 2
+		};
+		enum MouseFlags
+		{
+			MF_None = 0,
+			MF_Shift = 1UL << 0,
+			MF_Ctrl = 1UL << 1,
+			MF_Alt = 1UL << 2
+		};
+		struct MouseEventArg
+		{
+			uint32_t buttons;
+			Vector_T<int32_t, 2> location;
+			int32_t z_delta;
+			uint32_t flags;
+		};
+
+		typedef boost::signal<void(UIDialog const &, KeyEventArg const &)> KeyEvent;
+		typedef boost::signal<void(UIDialog const &, MouseEventArg const &)> MouseEvent;
+
+		KeyEvent& GetKeyDownEvent()
+		{
+			return key_down_event_;
+		}
+		KeyEvent& GetKeyUpEvent()
+		{
+			return key_up_event_;
+		}
+
+		MouseEvent& GetMouseOverEvent()
+		{
+			return mouse_over_event_;
+		}
+		MouseEvent& GetMouseDownEvent()
+		{
+			return mouse_down_event_;
+		}
+		MouseEvent& GetMouseUpEvent()
+		{
+			return mouse_up_event_;
+		}
+		MouseEvent& GetMouseWheelEvent()
+		{
+			return mouse_wheel_event_;
+		}
+
+	protected:
+		KeyEvent key_down_event_;
+		KeyEvent key_up_event_;
+
+		MouseEvent mouse_over_event_;
+		MouseEvent mouse_down_event_;
+		MouseEvent mouse_up_event_;
+		MouseEvent mouse_wheel_event_;
+
+	protected:
+		virtual void UpdateRects()
+		{
+			bounding_box_ = Rect_T<int32_t>(x_, y_, x_ + width_, y_ + height_);
+		}
+
+		int  id_;                 // ID number
+		uint32_t type_;  // Control type, set once in constructor  
+		uint32_t hotkey_;            // Virtual key code for this control's hotkey
+	    
+		bool enabled_;           // Enabled/disabled flag
+	    
+		Rect_T<int32_t> bounding_box_;      // Rectangle defining the active region of the control
+	};
+
+	class UIDialog
+	{
+		friend class UIManager;
+
+	public:
+		explicit UIDialog(TexturePtr control_tex = TexturePtr());
+		~UIDialog();
+
+		void HandleInput();
+
+		void AddControl(UIControlPtr control);
+		void InitControl(UIControl& control);
+
+		// Control retrieval
+		template <typename T>
+		boost::shared_ptr<T> Control(int ID) const
+		{
+			return checked_pointer_cast<T>(this->GetControl(ID, T::Type));
+		}
+
+		UIControlPtr GetControl(int ID) const;
+		UIControlPtr GetControl(int ID, uint32_t type) const;
+		UIControlPtr GetControlAtPoint(Vector_T<int32_t, 2> const & pt) const;
+
+		bool GetControlEnabled(int ID) const;
+		void SetControlEnabled(int ID, bool enabled);
+
+		void ClearRadioButtonGroup(uint32_t nGroup);
+
+		void Render();
+
+		void RequestFocus(UIControl& control);
+		void ClearFocus();
+
+		// Attributes
+		bool GetVisible() const
+		{
+			return visible_;
+		}
+		void SetVisible(bool bVisible)
+		{
+			visible_ = bVisible;
+		}
+		bool GetMinimized() const
+		{
+			return minimized_;
+		}
+		void SetMinimized(bool bMinimized)
+		{
+			minimized_ = bMinimized;
+		}
+		void SetBackgroundColors(Color const & colorAllCorners);
+		void SetBackgroundColors(Color const & colorTopLeft, Color const & colorTopRight,
+			Color const & colorBottomLeft, Color const & colorBottomRight);
+		void EnableCaption(bool bEnable)
+		{
+			show_caption_ = bEnable;
+		}
+		bool IsCaptionEnabled() const
+		{
+			return show_caption_;
+		}
+		int GetCaptionHeight() const
+		{
+			return caption_height_;
+		}
+		void SetCaptionHeight(int nHeight)
+		{
+			caption_height_ = nHeight;
+		}
+		void SetCaptionText(std::wstring const & strText)
+		{
+			caption_ = strText;
+		}
+		Vector_T<int32_t, 2> GetLocation() const
+		{
+			return Vector_T<int32_t, 2>(x_, y_);
+		}
+		void SetLocation(int x, int y)
+		{
+			x_ = x; y_ = y;
+		}
+		void SetSize(int width, int height)
+		{
+			width_ = width; height_ = height;
+		}
+		int GetWidth() const
+		{
+			return width_;
+		}
+		int GetHeight() const
+		{
+			return height_;
+		}
+
+		UIControlPtr GetNextControl(UIControlPtr control) const;
+		UIControlPtr GetPrevControl(UIControlPtr control) const;
+
+		void RemoveControl(int ID);
+		void RemoveAllControls();
+
+		void EnableKeyboardInput(bool bEnable)
+		{
+			keyboard_input_ = bEnable;
+		}
+		void EnableMouseInput(bool bEnable)
+		{
+			mouse_input_ = bEnable;
+		}
+		bool IsKeyboardInputEnabled() const
+		{
+			return keyboard_input_;
+		}
+
+		// Device state notification
+		void Refresh();
+
+		// Shared resource access. Indexed fonts and textures are shared among
+		// all the controls.
+		void SetFont(size_t index, FontPtr font);
+		FontPtr GetFont(size_t index) const;
+
+		void SetTexture(size_t index, TexturePtr texture);
+		TexturePtr GetTexture(size_t index) const;
+
+		void FocusDefaultControl();
+
+		void DrawRect(Rect_T<int32_t> const & rc, float depth, Color const & clr);
+		void DrawSprite(UIElement const & element, Rect_T<int32_t> const & rcDest);
+		void DrawText(std::wstring const & strText, UIElement const & uie, Rect_T<int32_t> const & rc, bool bShadow = false);
+
+	private:
+		bool keyboard_input_;
+		bool mouse_input_;
+
+		int default_control_id_;
+
+		// Initialize default Elements
+		void InitDefaultElements();
+
+		// Control events
+		bool OnCycleFocus(bool bForward);
+
+		boost::weak_ptr<UIControl> control_focus_;				// The control which has focus
+		boost::weak_ptr<UIControl> control_mouse_over_;			// The control which is hovered over
+
+		bool visible_;
+		bool show_caption_;
+		bool minimized_;
+		bool drag_;
+		std::wstring caption_;
+
+		int x_;
+		int y_;
+		int width_;
+		int height_;
+		int caption_height_;
+
+		Color top_left_clr_;
+		Color top_right_clr_;
+		Color bottom_left_clr_;
+		Color bottom_right_clr_;
+
+		std::vector<int> textures_;   // Index into m_TextureCache;
+		std::vector<int> fonts_;      // Index into m_FontCache;
+
+		std::vector<UIControlPtr> controls_;
+
+		UIElement cap_element_;  // Element for the caption
+
+		float depth_base_;
+	};
+
+	class UIManager
+	{
+	public:
+		static UIManager& Instance();
+
+		UIDialogPtr MakeDialog(TexturePtr control_tex = TexturePtr());
+
+		size_t AddTexture(TexturePtr texture)
+		{
+			texture_cache_.push_back(texture);
+			return texture_cache_.size() - 1;
+		}
+		size_t AddFont(FontPtr font)
+		{
+			font_cache_.push_back(font);
+			return font_cache_.size() - 1;
+		}
+
+		TexturePtr GetTexture(size_t index) const
+		{
+			return texture_cache_[index];
+		}
+		FontPtr GetFont(size_t index) const
+		{
+			return font_cache_[index];
+		}
+
+		bool RegisterDialog(UIDialogPtr dialog);
+		void UnregisterDialog(UIDialogPtr dialog);
+		void EnableKeyboardInputForAllDialogs();
+
+		RenderEffectPtr GetEffect() const
+		{
+			return effect_;
+		}
+
+		std::vector<UIDialogPtr> const & GetDialogs() const
+		{
+			return dialogs_;
+		}
+
+		UIDialogPtr GetNextDialog(UIDialogPtr dialog) const;
+		UIDialogPtr GetPrevDialog(UIDialogPtr dialog) const;
+
+		void Render();
+
+		void DrawRect(float3 const & pos, float width, float height, Color const * clrs,
+			Rect_T<int32_t> const & rcTexture, TexturePtr texture);
+		void DrawText(std::wstring const & strText, uint32_t font_index,
+			Rect_T<int32_t> const & rc, float depth, Color const & clr, uint32_t align);
+
+		void HandleInput();
+
+		bool GetLastKey(size_t i) const
+		{
+			assert(i < last_key_states_.size());
+			return last_key_states_[i];
+		}
+		bool GetLastMouseButton(size_t i) const
+		{
+			assert(i < last_mouse_states_.size());
+			return last_mouse_states_[i];
+		}
+
+	private:
+		UIManager();
+
+		// Shared between all dialogs
+		RenderEffectPtr effect_;
+
+		std::vector<UIDialogPtr> dialogs_;            // Dialogs registered
+
+		std::vector<TexturePtr> texture_cache_;   // Shared textures
+		std::vector<FontPtr> font_cache_;         // Shared fonts
+
+		boost::array<bool, 256> last_key_states_;
+		boost::array<bool, 8> last_mouse_states_;
+
+		std::map<TexturePtr,
+			std::pair<std::vector<VertexFormat>, std::vector<uint16_t> > > rects_;
+
+		struct string_cache
+		{
+			Rect rc;
+			float depth;
+			Color clr;
+			std::wstring text;
+			uint32_t align;
+		};
+		std::map<FontPtr, std::vector<string_cache> > strings_;
+	};
+
+	class UIStatic : public UIControl
+	{
+	public:
+		enum
+		{
+			Type = UICT_Static
+		};
+
+	public:
+		explicit UIStatic(UIDialogPtr dialog);
+		UIStatic(uint32_t type, UIDialogPtr dialog);
+		UIStatic(UIDialogPtr dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, bool bIsDefault = false);
+		virtual ~UIStatic() {}
+
+		virtual void Render();
+		virtual bool ContainsPoint(Vector_T<int32_t, 2> const & /*pt*/) const { return false; }
+
+		std::wstring const & GetText() const { return text_; }
+		void SetText(std::wstring const & strText);
+
+	protected:
+		virtual void InitDefaultElements();
+
+		std::wstring text_;      // Window text  
+	};
+
+	class UIButton : public UIControl
+	{
+	public:
+		enum
+		{
+			Type = UICT_Button
+		};
+
+	public:
+		explicit UIButton(UIDialogPtr dialog);
+		UIButton(uint32_t type, UIDialogPtr dialog);
+		UIButton(UIDialogPtr dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, uint32_t nHotkey = 0, bool bIsDefault = false);
+		virtual ~UIButton() {}
+	    
+		virtual bool CanHaveFocus() const { return (visible_ && enabled_); }
+
+		virtual void Render();
+
+		std::wstring const & GetText() const;
+		void SetText(std::wstring const & strText);
+
+	public:
+		typedef boost::signal<void(UIButton const &)> ClickedEvent;
+		ClickedEvent& OnClickedEvent()
+		{
+			return clicked_event_;
+		}
+
+	protected:
+		void KeyDownHandler(UIDialog const & sender, KeyEventArg const & arg);
+		void KeyUpHandler(UIDialog const & sender, KeyEventArg const & arg);
+		void MouseDownHandler(UIDialog const & sender, MouseEventArg const & arg);
+		void MouseUpHandler(UIDialog const & sender, MouseEventArg const & arg);
+
+	protected:
+		ClickedEvent clicked_event_;
+
+	protected:
+		virtual void InitDefaultElements();
+
+		bool pressed_;
+
+		std::wstring text_;      // Window text  
+	};
+
+	class UICheckBox : public UIControl
+	{
+	public:
+		enum
+		{
+			Type = UICT_CheckBox
+		};
+
+	public:
+		explicit UICheckBox(UIDialogPtr dialog);
+		UICheckBox(uint32_t type, UIDialogPtr dialog);
+		UICheckBox(UIDialogPtr dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, bool bChecked = false, uint32_t nHotkey = 0, bool bIsDefault = false);
+		virtual ~UICheckBox() {}
+
+		virtual bool CanHaveFocus() const { return (visible_ && enabled_); }
+		virtual void UpdateRects(); 
+
+		virtual void Render();
+
+		bool GetChecked() const { return checked_; }
+		void SetChecked(bool bChecked) { this->SetCheckedInternal(bChecked); }
+
+		std::wstring const & GetText() const;
+		void SetText(std::wstring const & strText);
+
+	public:
+		typedef boost::signal<void(UICheckBox const &)> ChangedEvent;
+		ChangedEvent& OnChangedEvent()
+		{
+			return changed_event_;
+		}
+
+	protected:
+		void KeyDownHandler(UIDialog const & sender, KeyEventArg const & arg);
+		void KeyUpHandler(UIDialog const & sender, KeyEventArg const & arg);
+		void MouseDownHandler(UIDialog const & sender, MouseEventArg const & arg);
+		void MouseUpHandler(UIDialog const & sender, MouseEventArg const & arg);
+
+	protected:
+		ChangedEvent changed_event_;
+
+	protected:
+		virtual void SetCheckedInternal(bool bChecked);
+		virtual void InitDefaultElements();
+
+		bool checked_;
+		Rect_T<int32_t> button_rc_;
+		Rect_T<int32_t> text_rc_;
+
+		bool pressed_;
+
+		std::wstring text_;      // Window text
+	};
+
+	class UIRadioButton : public UIControl
+	{
+	public:
+		enum
+		{
+			Type = UICT_RadioButton
+		};
+
+	public:
+		explicit UIRadioButton(UIDialogPtr dialog);
+		UIRadioButton(uint32_t type, UIDialogPtr dialog);
+		UIRadioButton(UIDialogPtr dialog, int ID, uint32_t nButtonGroup, std::wstring const & strText, int x, int y, int width, int height, bool bChecked = false, uint32_t nHotkey = 0, bool bIsDefault = false);
+		virtual ~UIRadioButton() {}
+	    
+		void SetChecked(bool bChecked, bool bClearGroup = true) { this->SetCheckedInternal(bChecked, bClearGroup); }
+		void SetButtonGroup(uint32_t nButtonGroup) { button_group_ = nButtonGroup; }
+		uint32_t GetButtonGroup() const { return button_group_; }
+
+		virtual bool CanHaveFocus() const { return (visible_ && enabled_); }
+		virtual void UpdateRects();
+
+		virtual void Render();
+
+		bool GetChecked() const { return checked_; }
+
+		std::wstring const & GetText() const;
+		void SetText(std::wstring const & strText);
+
+	public:
+		typedef boost::signal<void(UIRadioButton const &)> ChangedEvent;
+		ChangedEvent& OnChangedEvent()
+		{
+			return changed_event_;
+		}
+
+	protected:
+		void KeyDownHandler(UIDialog const & sender, KeyEventArg const & arg);
+		void KeyUpHandler(UIDialog const & sender, KeyEventArg const & arg);
+		void MouseDownHandler(UIDialog const & sender, MouseEventArg const & arg);
+		void MouseUpHandler(UIDialog const & sender, MouseEventArg const & arg);
+
+	protected:
+		ChangedEvent changed_event_;
+
+	protected:
+		virtual void SetCheckedInternal(bool bChecked, bool bClearGroup);
+		virtual void InitDefaultElements();
+
+		uint32_t button_group_;
+
+		bool checked_;
+		Rect_T<int32_t> button_rc_;
+		Rect_T<int32_t> text_rc_;
+
+		bool pressed_;
+
+		std::wstring text_;      // Window text
+	};
+}
+
+#endif		// _UI_HPP

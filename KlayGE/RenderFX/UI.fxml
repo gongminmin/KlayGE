@@ -1,0 +1,65 @@
+<?xml version='1.0'?>
+
+<effect>
+	<parameter type="int" name="halfWidth"/>
+	<parameter type="int" name="halfHeight"/>
+
+	<parameter type="sampler2D" name="texUISampler">
+		<state name="filtering" value="bilinear"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+void UIVS(float4 position : POSITION,
+			float4 color : COLOR0,
+			float2 texCoord : TEXCOORD0,
+
+			out float4 oPosition : POSITION,
+			out float2 oTexCoord : TEXCOORD0,
+			out float4 oColor : COLOR)
+{
+	oPosition.x = (position.x - halfWidth) / halfWidth;
+	oPosition.y = (halfHeight - position.y) / halfHeight;
+	oPosition.zw = position.zw;
+
+	oColor = color;
+	oTexCoord = texCoord;
+}
+
+float4 UIPS(float4 clr : COLOR, float2 texCoord : TEXCOORD0) : COLOR0
+{
+	clr *= tex2D(texUISampler, texCoord);
+	return clr;
+}
+
+float4 UINoTexPS(float4 clr : COLOR) : COLOR0
+{
+	return clr;
+}
+		]]>
+	</shader>
+
+	<technique name="UITec">
+		<pass name="p0">
+			<state name="blend_enable" value="true"/>
+			<state name="src_blend" value="src_alpha"/>
+			<state name="dest_blend" value="inv_src_alpha"/>
+			
+			<state name="vertex_shader" value="UIVS()"/>
+			<state name="pixel_shader" value="UIPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="UITecNoTex">
+		<pass name="p0">
+			<state name="blend_enable" value="true"/>
+			<state name="src_blend" value="src_alpha"/>
+			<state name="dest_blend" value="inv_src_alpha"/>
+
+			<state name="vertex_shader" value="UIVS()"/>
+			<state name="pixel_shader" value="UINoTexPS()"/>
+		</pass>
+	</technique>
+</effect>

@@ -4,6 +4,7 @@
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/CameraController.hpp>
+#include <KlayGE/UI.hpp>
 
 class AsciiArtsApp : public KlayGE::App3DFramework
 {
@@ -22,6 +23,7 @@ private:
 	void RenderInfos();
 
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
+	void CheckBoxHandler(KlayGE::UICheckBox const & sender);
 
 private:
 	KlayGE::FontPtr font_;
@@ -40,6 +42,8 @@ private:
 	KlayGE::PostProcessPtr ascii_arts_;
 
 	bool show_ascii_;
+
+	KlayGE::UIDialogPtr dialog_;
 };
 
 #endif		// _ASCIIARTS_HPP
