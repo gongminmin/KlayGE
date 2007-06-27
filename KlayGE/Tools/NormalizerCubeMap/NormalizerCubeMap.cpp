@@ -105,6 +105,11 @@ TexturePtr CreateCubeMap(int cube_size)
 class EmptyApp : public KlayGE::App3DFramework
 {
 public:
+	EmptyApp(std::string const & name, KlayGE::RenderSettings const & settings)
+		: App3DFramework(name, settings)
+	{
+	}
+
 	void DoUpdate(uint32_t /*pass*/)
 	{
 	}
@@ -125,7 +130,6 @@ int main(int argc, char* argv[])
 		ss >> size;
 	}
 
-	EmptyApp app;
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 
@@ -135,7 +139,8 @@ int main(int argc, char* argv[])
 	settings.color_fmt = EF_ARGB8;
 	settings.full_screen = false;
 
-	app.Create("NormalizerCubeMap", settings);
+	EmptyApp app("NormalizerCubeMap", settings);
+	app.Create();
 
 	TexturePtr cube = CreateCubeMap(size);
 	SaveTexture(cube, cube_name);

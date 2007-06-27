@@ -72,6 +72,11 @@ namespace
 class EmptyApp : public KlayGE::App3DFramework
 {
 public:
+	EmptyApp(std::string const & name, KlayGE::RenderSettings const & settings)
+		: App3DFramework(name, settings)
+	{
+	}
+
 	void DoUpdate(uint32_t /*pass*/)
 	{
 	}
@@ -87,8 +92,6 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	EmptyApp app;
-
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 
 	RenderSettings settings;
@@ -97,7 +100,8 @@ int main(int argc, char* argv[])
 	settings.color_fmt = EF_ARGB8;
 	settings.full_screen = false;
 
-	app.Create("NormalMapGen", settings);
+	EmptyApp app("NormalMapGen", settings);
+	app.Create();
 
 	TexturePtr temp = LoadTexture(argv[1]);
 	TexturePtr height_map = Context::Instance().RenderFactoryInstance().MakeTexture2D(temp->Width(0), temp->Height(0), 1, EF_L8);

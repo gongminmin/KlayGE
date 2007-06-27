@@ -464,11 +464,31 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\7za\CPP\Common\MyException.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\7za\CPP\Common\MyInitGuid.h"
 				>
 			</File>
 			<File
+				RelativePath="..\..\7za\CPP\Common\MyString.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\7za\CPP\Common\MyString.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\7za\CPP\Common\MyUnknown.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\7za\CPP\Common\MyVector.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\7za\CPP\Common\MyVector.h"
 				>
 			</File>
 			<File
@@ -492,14 +512,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\7za\CPP\Common\String.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\7za\CPP\Common\String.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\7za\CPP\Common\StringConvert.cpp"
 				>
 			</File>
@@ -517,14 +529,6 @@
 			</File>
 			<File
 				RelativePath="..\..\7za\CPP\Common\Types.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\7za\CPP\Common\Vector.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\7za\CPP\Common\Vector.h"
 				>
 			</File>
 			<File
@@ -600,6 +604,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\7za\CPP\Windows\System.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\7za\CPP\Windows\System.h"
 				>
 			</File>
@@ -633,6 +641,14 @@
 			</File>
 			<File
 				RelativePath="..\..\7za\CPP\7zip\Archive\Common\CrossThreadProgress.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\7za\CPP\7zip\Archive\Common\HandlerOut.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\7za\CPP\7zip\Archive\Common\HandlerOut.h"
 				>
 			</File>
 			<File
@@ -1091,7 +1107,23 @@
 				Name="Hash"
 				>
 				<File
+					RelativePath="..\..\7za\CPP\7zip\Crypto\Hash\RandGen.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\7za\CPP\7zip\Crypto\Hash\RandGen.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\7za\CPP\7zip\Crypto\Hash\RotateDefs.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\7za\CPP\7zip\Crypto\Hash\Sha1.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\7za\CPP\7zip\Crypto\Hash\Sha1.h"
 					>
 				</File>
 				<File
@@ -1304,6 +1336,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\7za\CPP\7zip\Common\MethodProps.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\7za\CPP\7zip\Common\MethodProps.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\7za\CPP\7zip\Common\MSBFDecoder.h"
 				>
 			</File>
@@ -1361,6 +1401,14 @@
 			</File>
 			<File
 				RelativePath="..\..\7za\CPP\7zip\Common\StreamUtils.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\7za\CPP\7zip\Common\VirtThread.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\7za\CPP\7zip\Common\VirtThread.h"
 				>
 			</File>
 		</Filter>
