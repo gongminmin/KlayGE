@@ -861,12 +861,10 @@ namespace KlayGE
 		this->SetFont(0, Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 12));
 
 		UIElement Element;
-		Rect_T<int32_t> rcTexture;
 
 		// Element for the caption
 		cap_element_.SetFont(0);
-		rcTexture = Rect_T<int32_t>(17, 269, 241, 287);
-		cap_element_.SetTexture(0, rcTexture);
+		cap_element_.SetTexture(0, Rect_T<int32_t>(17, 269, 241, 287));
 		cap_element_.TextureColor().States[UICS_Normal] = Color(1, 1, 1, 1);
 		cap_element_.FontColor().States[UICS_Normal] = Color(1, 1, 1, 1);
 		cap_element_.SetFont(0, Color(1, 1, 1, 1), Font::FA_Hor_Left | Font::FA_Ver_Middle);

@@ -45,7 +45,11 @@ namespace KlayGE
 		UICT_Button, 
 		UICT_Static, 
 		UICT_CheckBox,
-		UICT_RadioButton
+		UICT_RadioButton,
+		UICT_ComboBox,
+		UICT_Slider,
+		UICT_ListBox,
+		UICT_ScrollBar
 	};
 
 	struct VertexFormat
@@ -857,6 +861,317 @@ namespace KlayGE
 		bool pressed_;
 
 		std::wstring text_;      // Window text
+	};
+
+	class UISlider : public UIControl
+	{
+	public:
+		enum
+		{
+			Type = UICT_Slider
+		};
+
+	public:
+		explicit UISlider(UIDialogPtr dialog);
+		UISlider(uint32_t type, UIDialogPtr dialog);
+		UISlider(UIDialogPtr dialog, int ID, int x, int y, int width, int height, int min = 0, int max = 100, int value = 50, bool bIsDefault = false);
+		virtual ~UISlider() {}
+
+		virtual bool CanHaveFocus() const { return (visible_ && enabled_); }
+
+		virtual void UpdateRects(); 
+
+		virtual void Render();
+
+		void SetValue(int nValue) { this->SetValueInternal(nValue); }
+		int  GetValue() const { return value_; };
+
+		void GetRange(int &nMin, int &nMax) const { nMin = min_; nMax = max_; }
+		void SetRange(int nMin, int nMax);
+
+	public:
+		typedef boost::signal<void(UISlider const &)> ValueChangedEvent;
+		ValueChangedEvent& OnValueChangedEvent()
+		{
+			return value_changed_event_;
+		}
+
+	protected:
+		void KeyDownHandler(UIDialog const & sender, KeyEventArg const & arg);
+		void MouseOverHandler(UIDialog const & sender, MouseEventArg const & arg);
+		void MouseDownHandler(UIDialog const & sender, MouseEventArg const & arg);
+		void MouseUpHandler(UIDialog const & sender, MouseEventArg const & arg);
+		void MouseWheelHandler(UIDialog const & sender, MouseEventArg const & arg);
+
+	protected:
+		ValueChangedEvent value_changed_event_;
+
+	protected:
+		virtual void InitDefaultElements();
+
+		void SetValueInternal(int nValue);
+		int ValueFromPos(int x); 
+
+		int value_;
+
+		int min_;
+		int max_;
+
+		int drag_x_;      // Mouse position at start of drag
+		int drag_offset_; // Drag offset from the center of the button
+		int button_x_;
+
+		bool pressed_;
+
+		Rect_T<int32_t> button_rc_;
+		Rect_T<int32_t> slider_rc_;
+	};
+
+	class UIScrollBar : public UIControl
+	{
+	public:
+		enum
+		{
+			Type = UICT_ScrollBar
+		};
+
+	public:
+		explicit UIScrollBar(UIDialogPtr dialog);
+		UIScrollBar(uint32_t type, UIDialogPtr dialog);
+		UIScrollBar(UIDialogPtr dialog, int ID, int x, int y, int width, int height, int nTrackStart = 0, int nTrackEnd = 1, int nTrackPos = 0, int nPageSize = 1);
+		virtual ~UIScrollBar();
+
+		virtual void Render();
+		virtual void UpdateRects();
+
+		void SetTrackRange(size_t nStart, size_t nEnd);
+		size_t GetTrackPos() const { return position_; }
+		void SetTrackPos(size_t nPosition) { position_ = nPosition; this->Cap(); this->UpdateThumbRect(); }
+		size_t GetPageSize() const { return page_size_; }
+		void SetPageSize(size_t nPageSize) { page_size_ = nPageSize; this->Cap(); this->UpdateThumbRect(); }
+
+		void Scroll(int nDelta);    // Scroll by nDelta items (plus or minus)
+		void ShowItem(size_t nIndex);  // Ensure that item nIndex is displayed, scroll if necessary
+
+	protected:
+		void MouseOverHandler(UIDialog const & sender, MouseEventArg const & arg);
+		void MouseDownHandler(UIDialog const & sender, MouseEventArg const & arg);
+		void MouseUpHandler(UIDialog const & sender, MouseEventArg const & arg);
+
+	protected:
+		virtual void InitDefaultElements();
+
+		// ARROWSTATE indicates the state of the arrow buttons.
+		enum ARROWSTATE
+		{
+			CLEAR,			// No arrow is down.
+			CLICKED_UP,		// Up arrow is clicked.
+			CLICKED_DOWN,	// Down arrow is clicked.
+			HELD_UP,		// Up arrow is held down for sustained period.
+			HELD_DOWN		// Down arrow is held down for sustained period.
+		};
+
+		void UpdateThumbRect();
+		void Cap();  // Clips position at boundaries. Ensures it stays within legal range.
+
+		bool show_thumb_;
+		bool drag_;
+		Rect_T<int32_t> up_button_rc_;
+		Rect_T<int32_t> down_button_rc_;
+		Rect_T<int32_t> track_rc_;
+		Rect_T<int32_t> thumb_rc_;
+		size_t position_;  // Position of the first displayed item
+		size_t page_size_;  // How many items are displayable in one page
+		size_t start_;     // First item
+		size_t end_;       // The index after the last item
+		Vector_T<int32_t, 2> last_mouse_;// Last mouse position
+		ARROWSTATE arrow_; // State of the arrows
+		double arrow_ts_;  // Timestamp of last arrow event.
+		int thumb_offset_y_;
+
+		static Timer timer_;
+	};
+
+	struct UIListBoxItem
+	{
+		std::wstring strText;
+		void*  pData;
+
+		Rect_T<int32_t>  rcActive;
+		bool  bSelected;
+	};
+
+	class UIListBox : public UIControl
+	{
+	public:
+		enum
+		{
+			Type = UICT_ListBox
+		};
+
+	public:
+		enum STYLE
+		{
+			SINGLE_SELECTION = 0,
+			MULTI_SELECTION = 1
+		};
+
+		explicit UIListBox(UIDialogPtr dialog);
+		UIListBox(uint32_t type, UIDialogPtr dialog);
+		UIListBox(UIDialogPtr dialog, int ID, int x, int y, int width, int height, STYLE dwStyle = SINGLE_SELECTION);
+		virtual ~UIListBox();
+
+		virtual bool    CanHaveFocus() const { return (visible_ && enabled_); }
+		
+		virtual void    Render();
+		virtual void    UpdateRects();
+
+		STYLE GetStyle() const { return style_; }
+		uint32_t GetSize() const { return static_cast<uint32_t>(items_.size()); }
+		void SetStyle(STYLE dwStyle) { style_ = dwStyle; }
+		int  GetScrollBarWidth() const { return sb_width_; }
+		void SetScrollBarWidth(int nWidth) { sb_width_ = nWidth; this->UpdateRects(); }
+		void SetBorder(int nBorder, int nMargin) { border_ = nBorder; margin_ = nMargin; }
+		void AddItem(std::wstring const & strText, void* pData);
+		void InsertItem(int nIndex, std::wstring const & strText, void* pData);
+		void RemoveItem(int nIndex);
+		void RemoveAllItems();
+
+		boost::shared_ptr<UIListBoxItem> GetItem(int nIndex) const;
+		int GetSelectedIndex(int nPreviousSelected = -1) const;
+		boost::shared_ptr<UIListBoxItem> GetSelectedItem(int nPreviousSelected = -1) const { return this->GetItem(this->GetSelectedIndex(nPreviousSelected)); }
+		void SelectItem(int nNewIndex);
+
+	public:
+		typedef boost::signal<void(UIListBox const &)> SelectionEvent;
+		SelectionEvent& OnSelectionEvent()
+		{
+			return selection_event_;
+		}
+		SelectionEvent& OnSelectionEndEvent()
+		{
+			return selection_end_event_;
+		}
+
+	protected:
+		void KeyDownHandler(UIDialog const & sender, KeyEventArg const & arg);
+		void KeyUpHandler(UIDialog const & sender, KeyEventArg const & arg);
+		void MouseOverHandler(UIDialog const & sender, MouseEventArg const & arg);
+		void MouseDownHandler(UIDialog const & sender, MouseEventArg const & arg);
+		void MouseUpHandler(UIDialog const & sender, MouseEventArg const & arg);
+		void MouseWheelHandler(UIDialog const & sender, MouseEventArg const & arg);
+
+	protected:
+		SelectionEvent selection_event_;
+		SelectionEvent selection_end_event_;
+
+	protected:
+		virtual void InitDefaultElements();
+
+		Rect_T<int32_t> text_rc_;      // Text rendering bound
+		Rect_T<int32_t> selection_rc_; // Selection box bound
+		UIScrollBar scroll_bar_;
+		int sb_width_;
+		int border_;
+		int margin_;
+		int text_height_;  // Height of a single line of text
+		STYLE style_;    // List box style
+		int selected_;    // Index of the selected item for single selection list box
+		int sel_start_;    // Index of the item where selection starts (for handling multi-selection)
+		bool drag_;       // Whether the user is dragging the mouse to select
+
+		std::vector<boost::shared_ptr<UIListBoxItem> > items_;
+	};
+
+	struct UIComboBoxItem
+	{
+		std::wstring strText;
+		void*  pData;
+
+		Rect_T<int32_t>  rcActive;
+		bool  bVisible;
+	};
+
+	class UIComboBox : public UIControl
+	{
+	public:
+		enum
+		{
+			Type = UICT_ComboBox
+		};
+
+	public:
+		explicit UIComboBox(UIDialogPtr dialog);
+		UIComboBox(uint32_t type, UIDialogPtr dialog);
+		UIComboBox(UIDialogPtr dialog, int ID, int x, int y, int width, int height, uint32_t nHotKey = 0, bool bIsDefault = false);
+		virtual ~UIComboBox();
+	    
+		virtual void SetTextColor(Color const & color);
+
+		virtual bool CanHaveFocus() const { return (visible_ && enabled_); }
+		virtual void OnFocusOut();
+		virtual void Render();
+
+		virtual void UpdateRects(); 
+
+		void	AddItem(std::wstring const & strText, void* pData);
+		void    RemoveAllItems();
+		void    RemoveItem(uint32_t index);
+		bool    ContainsItem(std::wstring const & strText, uint32_t iStart = 0) const;
+		int     FindItem(std::wstring const & strText, uint32_t iStart = 0) const;
+		void*   GetItemData(std::wstring const & strText) const;
+		void*   GetItemData(int nIndex) const;
+		void    SetDropHeight(uint32_t nHeight) { drop_height_ = nHeight; this->UpdateRects(); }
+		int     GetScrollBarWidth() const { return sb_width_; }
+		void    SetScrollBarWidth(int nWidth) { sb_width_ = nWidth; this->UpdateRects(); }
+
+		void*   GetSelectedData() const;
+		boost::shared_ptr<UIComboBoxItem> GetSelectedItem() const;
+
+		uint32_t   GetNumItems() const { return static_cast<uint32_t>(items_.size()); }
+		boost::shared_ptr<UIComboBoxItem> GetItem(uint32_t index) const { return items_[index]; }
+
+		void SetSelectedByIndex(uint32_t index);
+		void SetSelectedByText(std::wstring const & strText);
+		void SetSelectedByData(void* pData);
+
+	public:
+		typedef boost::signal<void(UIComboBox const &)> SelectionChangedEvent;
+		SelectionChangedEvent& OnSelectionChangedEvent()
+		{
+			return selection_changed_event_;
+		}
+
+	protected:
+		void KeyDownHandler(UIDialog const & sender, KeyEventArg const & arg);
+		void KeyUpHandler(UIDialog const & sender, KeyEventArg const & arg);
+		void MouseOverHandler(UIDialog const & sender, MouseEventArg const & arg);
+		void MouseDownHandler(UIDialog const & sender, MouseEventArg const & arg);
+		void MouseUpHandler(UIDialog const & sender, MouseEventArg const & arg);
+		void MouseWheelHandler(UIDialog const & sender, MouseEventArg const & arg);
+
+	protected:
+		SelectionChangedEvent selection_changed_event_;
+
+	protected:
+		virtual void InitDefaultElements();
+
+		int     selected_;
+		int     focused_;
+		int     drop_height_;
+		UIScrollBar scroll_bar_;
+		int     sb_width_;
+
+		bool    opened_;
+
+		Rect_T<int32_t> text_rc_;
+		Rect_T<int32_t> button_rc_;
+		Rect_T<int32_t> dropdown_rc_;
+		Rect_T<int32_t> dropdown_text_rc_;
+	    
+		std::vector<boost::shared_ptr<UIComboBoxItem> > items_;
+
+		bool pressed_;
 	};
 }
 

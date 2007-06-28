@@ -1690,7 +1690,23 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Src\UI\UIComboBox.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Src\UI\UIListBox.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Src\UI\UIRadioButton.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Src\UI\UIScrollBar.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Src\UI\UISlider.cpp"
 					>
 				</File>
 				<File
@@ -1710,7 +1726,7 @@
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
 							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
 						/>
 					</FileConfiguration>
@@ -1720,7 +1736,7 @@
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
 							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
 						/>
 					</FileConfiguration>
@@ -1730,7 +1746,7 @@
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
 							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
 						/>
 					</FileConfiguration>
@@ -1740,7 +1756,7 @@
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
 							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
 						/>
 					</FileConfiguration>
