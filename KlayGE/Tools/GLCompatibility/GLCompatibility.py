@@ -165,37 +165,42 @@ class information:
 					else:
 						unsupported.append(feature_name)
 
-			info.feature_infos.append((ogl_ver_db[i], (supported, unsupported)))
+			self.feature_infos.append((ogl_ver_db[i], (supported, unsupported)))
+
+def gl_compatibility(info_name):
+	from xml.dom.minidom import parse
+
+	dom = parse(info_name)
+
+	vendor = dom.documentElement.getAttribute('vendor')
+	renderer = dom.documentElement.getAttribute('renderer')
+	major_ver = int(dom.documentElement.getAttribute('major_ver'))
+	minor_ver = int(dom.documentElement.getAttribute('minor_ver'))
+	glsl_major_ver = int(dom.documentElement.getAttribute('glsl_major_ver'))
+	glsl_minor_ver = int(dom.documentElement.getAttribute('glsl_minor_ver'))
+
+	exts = []
+	ext_tags = dom.documentElement.getElementsByTagName('extension')
+	for ext in ext_tags:
+		exts.append(ext.getAttribute('name'))
+
+	print 'OpenGL Compatibility Viewer'
+	print 'Copyright(C) 2004-2006 Minmin Gong\n'
+
+	info = information()
+	info.make_reports(vendor, renderer, major_ver, minor_ver, glsl_major_ver, glsl_minor_ver, exts)
+
+	report_file_name = 'report.xml'
+
+	info.to_xml(open(report_file_name, 'w'))
+
+	print 'The results are saved in the file ' + report_file_name
+
 
 if __name__ == '__main__':
-	from xml.dom.minidom import parse
 	import sys
 
 	if len(sys.argv) >= 2:
-		dom = parse(sys.argv[1])
-
-		vendor = dom.documentElement.getAttribute('vendor')
-		renderer = dom.documentElement.getAttribute('renderer')
-		major_ver = int(dom.documentElement.getAttribute('major_ver'))
-		minor_ver = int(dom.documentElement.getAttribute('minor_ver'))
-		glsl_major_ver = int(dom.documentElement.getAttribute('glsl_major_ver'))
-		glsl_minor_ver = int(dom.documentElement.getAttribute('glsl_minor_ver'))
-
-		exts = []
-		ext_tags = dom.documentElement.getElementsByTagName('extension')
-		for ext in ext_tags:
-			exts.append(ext.getAttribute('name'))
-
-		print 'OpenGL Compatibility Viewer'
-		print 'Copyright(C) 2004-2006 Minmin Gong\n'
-
-		info = information()
-		info.make_reports(vendor, renderer, major_ver, minor_ver, glsl_major_ver, glsl_minor_ver, exts)
-
-		report_file_name = 'report.xml'
-
-		info.to_xml(open(report_file_name, 'w'))
-
-		print 'The results are saved in the file ' + report_file_name
+		gl_compatibility(sys.argv[1])
 	else:
 		print 'Usage: GLCompatibility.py info.xml'

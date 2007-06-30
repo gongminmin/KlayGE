@@ -4,6 +4,7 @@
 	Version="8.00"
 	Name="GLCompatibility"
 	ProjectGUID="{A004459D-F259-44EE-960B-CF6EEDCECC08}"
+	RootNamespace="GLCompatibility"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -345,6 +346,50 @@
 			<File
 				RelativePath="..\..\GLCompatibility\GLCompatibility.cpp"
 				>
+			</File>
+			<File
+				RelativePath="..\..\GLCompatibility\GLCompatibility.py"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Copying python script"
+						CommandLine="copy &quot;$(InputPath)&quot; &quot;$(OutDir)&quot; /Y"
+						Outputs="$(OutDir)/$(InputFileName)"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Copying python script"
+						CommandLine="copy &quot;$(InputPath)&quot; &quot;$(OutDir)&quot; /Y"
+						Outputs="$(OutDir)/$(InputFileName)"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Copying python script"
+						CommandLine="copy &quot;$(InputPath)&quot; &quot;$(OutDir)&quot; /Y"
+						Outputs="$(OutDir)/$(InputFileName)"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Copying python script"
+						CommandLine="copy &quot;$(InputPath)&quot; &quot;$(OutDir)&quot; /Y"
+						Outputs="$(OutDir)/$(InputFileName)"
+					/>
+				</FileConfiguration>
 			</File>
 		</Filter>
 		<Filter

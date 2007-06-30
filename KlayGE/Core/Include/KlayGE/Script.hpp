@@ -26,13 +26,17 @@
 
 namespace KlayGE
 {
-	void PyObjDeleter(PyObject* p)
+	class PyObjDeleter
 	{
-		if (p != 0)
+	public:
+		void operator()(PyObject* p)
 		{
-			Py_DECREF(p);
+			if (p != NULL)
+			{
+				Py_DECREF(p);
+			}
 		}
-	}
+	};
 
 	typedef boost::shared_ptr<PyObject> PyObjectPtr;
 
@@ -41,7 +45,7 @@ namespace KlayGE
 	inline PyObjectPtr
 	MakePyObjectPtr(PyObject* p)
 	{
-		return PyObjectPtr(p, PyObjDeleter);
+		return PyObjectPtr(p, PyObjDeleter());
 	};
 
 	// 从一个.py载入模块

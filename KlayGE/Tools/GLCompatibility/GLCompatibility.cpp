@@ -1,4 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Script.hpp>
 
 #include <iostream>
 #include <vector>
@@ -97,7 +98,11 @@ int main(int argc, char* argv[])
 	std::ofstream ofs(info_file_name.c_str());
 	ofs << info;
 
-	system((std::string("GLCompatibility.py ") + info_file_name).c_str());
+	KlayGE::ScriptEngine scriptEng;
+	KlayGE::ScriptModule module("GLCompatibility");
+
+	module.Call("gl_compatibility",
+		boost::make_tuple(KlayGE::PyObjectPtr(Py_BuildValue("s", info_file_name.c_str()))));
 
 	std::cout << "Press Enter key to exit...";
 	std::cin.get();
