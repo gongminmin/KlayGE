@@ -1694,6 +1694,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Src\UI\UIEditBox.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Src\UI\UIListBox.cpp"
 					>
 				</File>

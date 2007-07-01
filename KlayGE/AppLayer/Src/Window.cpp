@@ -134,6 +134,18 @@ namespace KlayGE
 		    this->OnSetCursor()(*this);
 			break;
 
+		case WM_CHAR:
+			this->OnChar()(*this, static_cast<wchar_t>(wParam));
+			break;
+
+		case WM_KEYDOWN:
+			this->OnKeyDown()(*this, static_cast<wchar_t>(wParam));
+			break;
+
+		case WM_KEYUP:
+			this->OnKeyUp()(*this, static_cast<wchar_t>(wParam));
+			break;
+
 		case WM_CLOSE:
 			this->OnClose()(*this);
 			::PostQuitMessage(0);

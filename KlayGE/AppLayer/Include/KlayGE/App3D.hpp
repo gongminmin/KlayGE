@@ -32,11 +32,10 @@
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/Timer.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/Window.hpp>
 
 namespace KlayGE
 {
-	// 一个用于创建3D应用程序框架的基类。要建立一个D3D应用程序只要继承这个类，
+	// 一个用于创建3D应用程序框架的基类。建立一个3D应用程序需要继承这个类，
 	//			然后重载以下函数:
 	//
 	//			InitObjects()			- 初始化3D设备

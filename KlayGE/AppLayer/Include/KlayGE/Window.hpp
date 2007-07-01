@@ -50,6 +50,9 @@ namespace KlayGE
 		typedef boost::signal<void(Window const &)> ExitSizeMoveEvent;
 		typedef boost::signal<void(Window const &, bool)> SizeEvent;
 		typedef boost::signal<void(Window const &)> SetCursorEvent;
+		typedef boost::signal<void(Window const &, wchar_t)> CharEvent;
+		typedef boost::signal<void(Window const &, wchar_t)> KeyDownEvent;
+		typedef boost::signal<void(Window const &, wchar_t)> KeyUpEvent;
 		typedef boost::signal<void(Window const &)> CloseEvent;
 
 		ActiveEvent& OnActive()
@@ -76,6 +79,18 @@ namespace KlayGE
 		{
 			return set_cursor_event_;
 		}
+		CharEvent& OnChar()
+		{
+			return char_event_;
+		}
+		KeyDownEvent& OnKeyDown()
+		{
+			return key_down_event_;
+		}
+		KeyUpEvent& OnKeyUp()
+		{
+			return key_up_event_;
+		}
 		CloseEvent& OnClose()
 		{
 			return close_event_;
@@ -88,6 +103,9 @@ namespace KlayGE
 		ExitSizeMoveEvent exit_size_move_event_;
 		SizeEvent size_event_;
 		SetCursorEvent set_cursor_event_;
+		CharEvent char_event_;
+		KeyDownEvent key_down_event_;
+		KeyUpEvent key_up_event_;
 		CloseEvent close_event_;
 
 	private:

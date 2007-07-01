@@ -29,6 +29,7 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Input.hpp>
 #include <KlayGE/InputFactory.hpp>
+#include <KlayGE/Window.hpp>
 
 #include <boost/assert.hpp>
 #include <windows.h>
