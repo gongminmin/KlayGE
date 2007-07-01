@@ -17,6 +17,7 @@
 #include <KlayGE/COMPtr.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/App3D.hpp>
+#include <KlayGE/Window.hpp>
 
 #include <boost/assert.hpp>
 #include <uuids.h>

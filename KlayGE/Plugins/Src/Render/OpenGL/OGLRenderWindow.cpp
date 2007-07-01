@@ -336,7 +336,7 @@ namespace KlayGE
 
 	void OGLRenderWindow::OnSize(Window const & /*win*/, bool active)
 	{
-		if (active)
+		if (!active)
 		{
 			active_ = false;
 		}

@@ -593,7 +593,7 @@ namespace KlayGE
 
 	void D3D9RenderWindow::OnSize(Window const & /*win*/, bool active)
 	{
-		if (active)
+		if (!active)
 		{
 			active_ = false;
 		}
