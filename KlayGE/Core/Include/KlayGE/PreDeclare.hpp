@@ -141,6 +141,23 @@ namespace KlayGE
 	template <typename ParticleType>
 	class ParticleSystem;
 
+	class UIManager;
+	class UIElement;
+	typedef boost::shared_ptr<UIElement> UIElementPtr;
+	class UIControl;
+	typedef boost::shared_ptr<UIControl> UIControlPtr;
+	class UIDialog;
+	typedef boost::shared_ptr<UIDialog> UIDialogPtr;
+	class UIStatic;
+	class UIButton;
+	class UICheckBox;
+	class UIRadioButton;
+	class UISlider;
+	class UIScrollBar;
+	class UIListBox;
+	class UIComboBox;
+	class UIEditBox;
+
 	class Socket;
 	class Lobby;
 	class Player;

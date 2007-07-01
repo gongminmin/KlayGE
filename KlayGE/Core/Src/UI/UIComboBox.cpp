@@ -44,7 +44,7 @@ namespace KlayGE
 		this->GetDialog()->InitControl(scroll_bar_);
 	}
 
-	UIComboBox::UIComboBox(UIDialogPtr dialog, int ID, int x, int y, int width, int height, uint32_t nHotkey, bool bIsDefault)
+	UIComboBox::UIComboBox(UIDialogPtr dialog, int ID, int x, int y, int width, int height, uint8_t hotkey, bool bIsDefault)
 						: UIControl(UIComboBox::Type, dialog),
 							scroll_bar_(dialog),
 							pressed_(false),
@@ -59,7 +59,7 @@ namespace KlayGE
 		this->SetID(ID); 
 		this->SetLocation(x, y);
 		this->SetSize(width, height);
-		this->SetHotkey(nHotkey);
+		this->SetHotkey(hotkey);
 		this->SetIsDefault(bIsDefault);
 	}
 
@@ -151,7 +151,9 @@ namespace KlayGE
 	{
 		UIControl::UpdateRects();
 
-		text_rc_ = button_rc_ = Rect_T<int32_t>(x_, y_, x_ + width_, y_ + height_);
+		show_rc_ = Rect_T<int32_t>(x_, y_, x_ + width_, y_ + height_);
+
+		text_rc_ = button_rc_ = show_rc_;
 		button_rc_.left() = button_rc_.right() - button_rc_.Height();
 		text_rc_.right() = button_rc_.left();
 
@@ -181,11 +183,11 @@ namespace KlayGE
 				scroll_bar_.ShowItem(selected_);
 			}
 
-			bounding_box_ = button_rc_ | text_rc_ | dropdown_rc_ | dropdown_text_rc_ | scroll_bar_.BoundingBoxRect();
+			bounding_box_ = show_rc_ | button_rc_ | text_rc_ | dropdown_rc_ | dropdown_text_rc_ | scroll_bar_.BoundingBoxRect();
 		}
 		else
 		{
-			bounding_box_ = button_rc_ | text_rc_;
+			bounding_box_ = show_rc_ | button_rc_ | text_rc_;
 		}		
 	}
 
@@ -288,7 +290,7 @@ namespace KlayGE
 
 		if (arg.buttons & UIControl::MB_Left)
 		{
-			if (this->ContainsPoint(arg.location))
+			if (show_rc_.PtInRect(arg.location))
 			{
 				// Pressed while inside the control
 				pressed_ = true;
@@ -325,31 +327,12 @@ namespace KlayGE
 					boost::shared_ptr<UIComboBoxItem> pItem = items_[i];
 					if (pItem -> bVisible && pItem->rcActive.PtInRect(arg.location))
 					{
-						focused_ = selected_ = static_cast<int>(i);
-						this->OnSelectionChangedEvent()(*this);
-						opened_ = false;
-						this->UpdateRects();
-
-						if (!this->GetDialog()->IsKeyboardInputEnabled())
-						{
-							this->GetDialog()->ClearFocus();
-						}
-
+						focused_ = static_cast<int>(i);
 						break;
 					}
 				}
 
 				return;
-			}
-
-			// Mouse click not on main control or in dropdown, fire an event if needed
-			if (opened_)
-			{
-				focused_ = selected_;
-
-				this->OnSelectionChangedEvent()(*this);
-				opened_ = false;
-				this->UpdateRects();
 			}
 
 			// Make sure the control is no longer in a pressed state
@@ -368,6 +351,26 @@ namespace KlayGE
 
 		if (arg.buttons & UIControl::MB_Left)
 		{
+			// Perhaps this click is within the dropdown
+			if (opened_ && dropdown_rc_.PtInRect(arg.location))
+			{
+				selected_ = focused_;
+
+				this->OnSelectionChangedEvent()(*this);
+				opened_ = false;
+				this->UpdateRects();
+
+				pressed_ = false;
+			}
+			else
+			{
+				if (opened_ && !this->ContainsPoint(arg.location))
+				{
+					opened_ = false;
+					this->UpdateRects();
+				}
+			}
+
 			if (pressed_ && this->ContainsPoint(arg.location))
 			{
 				// Button click
@@ -724,5 +727,33 @@ namespace KlayGE
 				this->SetSelectedByIndex(static_cast<uint32_t>(i));
 			}
 		}
+	}
+
+	void UIComboBox::OnHotkey()
+	{
+		if (opened_)
+		{
+			return;
+		}
+
+		if (-1 == selected_)
+		{
+			return;
+		}
+
+		if (this->GetDialog()->IsKeyboardInputEnabled())
+		{
+			this->GetDialog()->RequestFocus(*this);
+		}
+
+		++ selected_;
+
+		if (selected_ >= static_cast<int>(items_.size()))
+		{
+			selected_ = 0;
+		}
+
+		focused_ = selected_;
+		this->OnSelectionChangedEvent()(*this);
 	}
 }

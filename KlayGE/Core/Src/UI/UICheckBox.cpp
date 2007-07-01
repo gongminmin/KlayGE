@@ -38,7 +38,7 @@ namespace KlayGE
 		this->InitDefaultElements();
 	}
 
-	UICheckBox::UICheckBox(UIDialogPtr dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, bool bChecked, uint32_t nHotkey, bool bIsDefault)
+	UICheckBox::UICheckBox(UIDialogPtr dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, bool bChecked, uint8_t hotkey, bool bIsDefault)
 					: UIControl(UICheckBox::Type, dialog),
 						checked_(bChecked), pressed_(false),
 						text_(strText)
@@ -49,7 +49,7 @@ namespace KlayGE
 		this->SetID(ID); 
 		this->SetLocation(x, y);
 		this->SetSize(width, height);
-		this->SetHotkey(nHotkey);
+		this->SetHotkey(hotkey);
 		this->SetIsDefault(bIsDefault);
 	}
 
@@ -209,5 +209,15 @@ namespace KlayGE
 	void UICheckBox::SetText(std::wstring const & strText)
 	{
 		text_ = strText;
+	}
+
+	void UICheckBox::OnHotkey()
+	{
+		if (this->GetDialog()->IsKeyboardInputEnabled())
+		{
+			this->GetDialog()->RequestFocus(*this);
+		}
+
+		this->SetCheckedInternal(!checked_);
 	}
 }

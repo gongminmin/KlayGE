@@ -20,6 +20,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/Window.hpp>
 
 #include <KlayGE/Input.hpp>
 
@@ -34,7 +35,7 @@ namespace KlayGE
 	class UIRectRenderable : public RenderableHelper
 	{
 	public:
-		UIRectRenderable(std::vector<VertexFormat> const & vertices, std::vector<uint16_t> const & indices, TexturePtr texture, RenderEffectPtr effect)
+		UIRectRenderable(std::vector<UIManager::VertexFormat> const & vertices, std::vector<uint16_t> const & indices, TexturePtr texture, RenderEffectPtr effect)
 			: RenderableHelper(L"UIRect")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -45,7 +46,7 @@ namespace KlayGE
 			vb->Resize(static_cast<uint32_t>(vertices.size() * sizeof(vertices[0])));
 			{
 				GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
-				std::copy(vertices.begin(), vertices.end(), mapper.Pointer<VertexFormat>());
+				std::copy(vertices.begin(), vertices.end(), mapper.Pointer<UIManager::VertexFormat>());
 			}
 			rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
 												vertex_element(VEU_Diffuse, 0, EF_ABGR32F),
@@ -277,34 +278,35 @@ namespace KlayGE
 		Rect texcoord;
 		if (texture)
 		{
-			texcoord = Rect(static_cast<float>(rcTexture.left()) / texture->Width(0),
-				static_cast<float>(rcTexture.top()) / texture->Height(0),
-				static_cast<float>(rcTexture.right()) / texture->Width(0),
-				static_cast<float>(rcTexture.bottom()) / texture->Height(0));
+			texcoord = Rect((rcTexture.left() + 0.5f) / texture->Width(0),
+				(rcTexture.top() + 0.5f) / texture->Height(0),
+				(rcTexture.right() + 0.5f) / texture->Width(0),
+				(rcTexture.bottom() + 0.5f) / texture->Height(0));
 		}
 		else
 		{
 			texcoord = Rect(0, 0, 0, 0);
 		}
 
-		std::pair<std::vector<VertexFormat>, std::vector<uint16_t> >& rect = rects_[texture];
-		rect.second.push_back(static_cast<uint16_t>(rect.first.size()) + 0);
-		rect.second.push_back(static_cast<uint16_t>(rect.first.size()) + 1);
-		rect.second.push_back(static_cast<uint16_t>(rect.first.size()) + 2);
-		rect.second.push_back(static_cast<uint16_t>(rect.first.size()) + 2);
-		rect.second.push_back(static_cast<uint16_t>(rect.first.size()) + 3);
-		rect.second.push_back(static_cast<uint16_t>(rect.first.size()) + 0);
+		std::pair<std::vector<UIManager::VertexFormat>, std::vector<uint16_t> >& rect = rects_[texture];
+		uint16_t const last_index = static_cast<uint16_t>(rect.first.size());
+		rect.second.push_back(last_index + 0);
+		rect.second.push_back(last_index + 1);
+		rect.second.push_back(last_index + 2);
+		rect.second.push_back(last_index + 2);
+		rect.second.push_back(last_index + 3);
+		rect.second.push_back(last_index + 0);
 
-		rect.first.push_back(VertexFormat(pos + float3(0, 0, 0),
+		rect.first.push_back(UIManager::VertexFormat(pos + float3(0, 0, 0),
 			float4(&clrs[0].r()),
 			float2(texcoord.left(), texcoord.top())));
-		rect.first.push_back(VertexFormat(pos + float3(width, 0, 0),
+		rect.first.push_back(UIManager::VertexFormat(pos + float3(width, 0, 0),
 			float4(&clrs[1].r()),
 			float2(texcoord.right(), texcoord.top())));
-		rect.first.push_back(VertexFormat(pos + float3(width, height, 0),
+		rect.first.push_back(UIManager::VertexFormat(pos + float3(width, height, 0),
 			float4(&clrs[2].r()),
 			float2(texcoord.right(), texcoord.bottom())));
-		rect.first.push_back(VertexFormat(pos + float3(0, height, 0),
+		rect.first.push_back(UIManager::VertexFormat(pos + float3(0, height, 0),
 			float4(&clrs[3].r()),
 			float2(texcoord.left(), texcoord.bottom())));
 	}
@@ -935,6 +937,61 @@ namespace KlayGE
 						}
 					}
 				}
+				else
+				{
+					bool handled = false;
+					if (!control_focus_.lock() || (control_focus_.lock()->GetType() != UICT_EditBox))
+					{
+						for (size_t j = 0; j < key_board->NumKeys(); ++ j)
+						{
+							if (!UIManager::Instance().GetLastKey(j) && key_board->Key(j))
+							{
+								// See if this matches a control's hotkey
+								// Activate the hotkey if the focus doesn't belong to an
+								// edit box.
+								BOOST_FOREACH(BOOST_TYPEOF(controls_)::reference control, controls_)
+								{
+									if (control->GetHotkey() == static_cast<uint8_t>(j))
+									{
+										control->OnHotkey();
+										handled = true;
+										break;
+									}
+								}
+							}
+						}
+					}
+
+					// Not yet handled, check for focus messages
+					if (!handled)
+					{
+						// If keyboard input is not enabled, this message should be ignored
+						if (keyboard_input_)
+						{
+							if (key_board->Key(KS_RightArrow) || key_board->Key(KS_DownArrow))
+							{
+								if (control_focus_.lock())
+								{
+									this->OnCycleFocus(true);
+								}
+							}
+
+							if (key_board->Key(KS_LeftArrow) || key_board->Key(KS_UpArrow))
+							{
+								if (control_focus_.lock())
+								{
+									this->OnCycleFocus(false);
+								}
+							}
+
+							if (key_board->Key(KS_Tab)) 
+							{
+								bool shift_down = key_board->Key(KS_LeftShift) | key_board->Key(KS_RightShift);
+								this->OnCycleFocus(!shift_down);
+							}
+						}
+					}
+				}
 			}
 			if (mouse)
 			{
@@ -980,7 +1037,6 @@ namespace KlayGE
 					}
 				}
 
-				// Figure out which control the mouse is over now
 				UIControlPtr control;
 				if (control_focus_.lock() && control_focus_.lock()->GetEnabled()
 					&& control_focus_.lock()->ContainsPoint(arg.location))
@@ -989,6 +1045,7 @@ namespace KlayGE
 				}
 				else
 				{
+					// Figure out which control the mouse is over now
 					control = this->GetControlAtPoint(arg.location);
 
 					if (control_mouse_over_.lock() != control)

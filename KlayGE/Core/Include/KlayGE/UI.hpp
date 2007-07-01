@@ -14,6 +14,10 @@
 #ifndef _UI_HPP
 #define _UI_HPP
 
+#define KLAYGE_LIB_NAME KlayGE_Core
+#include <KlayGE/config/auto_link.hpp>
+
+#include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/Timer.hpp>
 
@@ -49,22 +53,10 @@ namespace KlayGE
 		UICT_ComboBox,
 		UICT_Slider,
 		UICT_ListBox,
-		UICT_ScrollBar
-	};
+		UICT_ScrollBar,
+		UICT_EditBox,
 
-	struct VertexFormat
-	{
-		float3 pos;
-		float4 clr;
-		float2 tex;
-
-		VertexFormat()
-		{
-		}
-		VertexFormat(float3 const & p, float4 const & c, float2 const & t)
-			: pos(p), clr(c), tex(t)
-		{
-		}
+		UICT_Num_Control_Types
 	};
 
 	struct UIStatesColor
@@ -78,15 +70,6 @@ namespace KlayGE
 		Color States[UICS_Num_Control_States]; // Modulate colors for all possible control states
 		Color Current;
 	};
-
-	class UIElement;
-	typedef boost::shared_ptr<UIElement> UIElementPtr;
-	class UIControl;
-	typedef boost::shared_ptr<UIControl> UIControlPtr;
-	class UIDialog;
-	typedef boost::shared_ptr<UIDialog> UIDialogPtr;
-	class UIManager;	
-	typedef boost::shared_ptr<UIManager> UIManagerPtr;
 
 	class UIElement
 	{
@@ -207,6 +190,9 @@ namespace KlayGE
 		{
 			is_mouse_over_ = false;
 		}
+		virtual void OnHotkey()
+		{
+		}
 
 		Rect_T<int32_t> const & BoundingBoxRect() const
 		{
@@ -261,11 +247,11 @@ namespace KlayGE
 			this->UpdateRects();
 		}
 
-		void SetHotkey(uint32_t nHotkey)
+		void SetHotkey(uint8_t hotkey)
 		{
-			hotkey_ = nHotkey;
+			hotkey_ = hotkey;
 		}
-		uint32_t GetHotkey() const
+		uint8_t GetHotkey() const
 		{
 			return hotkey_;
 		}
@@ -407,7 +393,7 @@ namespace KlayGE
 
 		int  id_;                 // ID number
 		uint32_t type_;  // Control type, set once in constructor  
-		uint32_t hotkey_;            // Virtual key code for this control's hotkey
+		uint8_t hotkey_;            // Virtual key code for this control's hotkey
 	    
 		bool enabled_;           // Enabled/disabled flag
 	    
@@ -590,6 +576,22 @@ namespace KlayGE
 	class UIManager
 	{
 	public:
+		struct VertexFormat
+		{
+			float3 pos;
+			float4 clr;
+			float2 tex;
+
+			VertexFormat()
+			{
+			}
+			VertexFormat(float3 const & p, float4 const & c, float2 const & t)
+				: pos(p), clr(c), tex(t)
+			{
+			}
+		};
+
+
 		static UIManager& Instance();
 
 		UIDialogPtr MakeDialog(TexturePtr control_tex = TexturePtr());
@@ -716,10 +718,11 @@ namespace KlayGE
 	public:
 		explicit UIButton(UIDialogPtr dialog);
 		UIButton(uint32_t type, UIDialogPtr dialog);
-		UIButton(UIDialogPtr dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, uint32_t nHotkey = 0, bool bIsDefault = false);
+		UIButton(UIDialogPtr dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, uint8_t hotkey = 0, bool bIsDefault = false);
 		virtual ~UIButton() {}
 	    
 		virtual bool CanHaveFocus() const { return (visible_ && enabled_); }
+		virtual void OnHotkey();
 
 		virtual void Render();
 
@@ -761,10 +764,11 @@ namespace KlayGE
 	public:
 		explicit UICheckBox(UIDialogPtr dialog);
 		UICheckBox(uint32_t type, UIDialogPtr dialog);
-		UICheckBox(UIDialogPtr dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, bool bChecked = false, uint32_t nHotkey = 0, bool bIsDefault = false);
+		UICheckBox(UIDialogPtr dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, bool bChecked = false, uint8_t hotkey = 0, bool bIsDefault = false);
 		virtual ~UICheckBox() {}
 
 		virtual bool CanHaveFocus() const { return (visible_ && enabled_); }
+		virtual void OnHotkey();
 		virtual void UpdateRects(); 
 
 		virtual void Render();
@@ -815,7 +819,7 @@ namespace KlayGE
 	public:
 		explicit UIRadioButton(UIDialogPtr dialog);
 		UIRadioButton(uint32_t type, UIDialogPtr dialog);
-		UIRadioButton(UIDialogPtr dialog, int ID, uint32_t nButtonGroup, std::wstring const & strText, int x, int y, int width, int height, bool bChecked = false, uint32_t nHotkey = 0, bool bIsDefault = false);
+		UIRadioButton(UIDialogPtr dialog, int ID, uint32_t nButtonGroup, std::wstring const & strText, int x, int y, int width, int height, bool bChecked = false, uint8_t hotkey = 0, bool bIsDefault = false);
 		virtual ~UIRadioButton() {}
 	    
 		void SetChecked(bool bChecked, bool bClearGroup = true) { this->SetCheckedInternal(bChecked, bClearGroup); }
@@ -823,6 +827,7 @@ namespace KlayGE
 		uint32_t GetButtonGroup() const { return button_group_; }
 
 		virtual bool CanHaveFocus() const { return (visible_ && enabled_); }
+		virtual void OnHotkey();
 		virtual void UpdateRects();
 
 		virtual void Render();
@@ -995,7 +1000,7 @@ namespace KlayGE
 	struct UIListBoxItem
 	{
 		std::wstring strText;
-		void*  pData;
+		void* pData;
 
 		Rect_T<int32_t>  rcActive;
 		bool  bSelected;
@@ -1086,7 +1091,7 @@ namespace KlayGE
 	struct UIComboBoxItem
 	{
 		std::wstring strText;
-		void*  pData;
+		void* pData;
 
 		Rect_T<int32_t>  rcActive;
 		bool  bVisible;
@@ -1103,12 +1108,13 @@ namespace KlayGE
 	public:
 		explicit UIComboBox(UIDialogPtr dialog);
 		UIComboBox(uint32_t type, UIDialogPtr dialog);
-		UIComboBox(UIDialogPtr dialog, int ID, int x, int y, int width, int height, uint32_t nHotKey = 0, bool bIsDefault = false);
+		UIComboBox(UIDialogPtr dialog, int ID, int x, int y, int width, int height, uint8_t hotkey = 0, bool bIsDefault = false);
 		virtual ~UIComboBox();
 	    
 		virtual void SetTextColor(Color const & color);
 
 		virtual bool CanHaveFocus() const { return (visible_ && enabled_); }
+		virtual void OnHotkey();
 		virtual void OnFocusOut();
 		virtual void Render();
 
@@ -1164,6 +1170,7 @@ namespace KlayGE
 
 		bool    opened_;
 
+		Rect_T<int32_t> show_rc_;
 		Rect_T<int32_t> text_rc_;
 		Rect_T<int32_t> button_rc_;
 		Rect_T<int32_t> dropdown_rc_;
@@ -1172,6 +1179,130 @@ namespace KlayGE
 		std::vector<boost::shared_ptr<UIComboBoxItem> > items_;
 
 		bool pressed_;
+	};
+
+	// CUniBuffer class for the edit control
+	class CUniBuffer
+	{
+	public:
+		explicit CUniBuffer(int nInitialSize = 1);
+
+		uint32_t GetTextSize() const  { return static_cast<uint32_t>(buffer_.size()); }
+		std::wstring& GetBuffer() { return buffer_; }
+		std::wstring const & GetBuffer() const { return buffer_; }
+		wchar_t const & operator[](size_t n) const { return buffer_[n]; }
+		wchar_t& operator[](size_t n);
+		FontPtr GetFont() const { return font_; }
+		void SetFont(FontPtr font) { font_ = font; }
+		void Clear();
+
+		void InsertChar(size_t index, wchar_t wChar); // Inserts the char at specified index
+		void RemoveChar(size_t index);  // Removes the char at specified index
+		void InsertString(size_t index, std::wstring const & str);  // Inserts the first nCount characters of the string pStr at specified index.
+		void SetText(std::wstring const & strText);
+
+		// Uniscribe
+		int CPtoX(int nCP, bool bTrail);
+		int XtoCP(int nX, bool& bTrail);
+		int GetPriorItemPos(int nCP) const;
+		int GetNextItemPos(int nCP) const;
+
+	private:
+		bool Analyse();      // Uniscribe -- Analyse() analyses the string in the buffer
+
+		std::wstring buffer_;	// Buffer to hold text
+		std::vector<int> char_width_;
+
+		// Uniscribe-specific
+		FontPtr font_;				// Font node for the font that this buffer uses
+		bool analyse_required_;			// True if the string has changed since last analysis.
+	};
+
+	// EditBox control
+	class UIEditBox : public UIControl
+	{
+	public:
+		enum
+		{
+			Type = UICT_EditBox
+		};
+
+	public:
+		explicit UIEditBox(UIDialogPtr dialog);
+		UIEditBox(uint32_t type, UIDialogPtr dialog);
+		UIEditBox(UIDialogPtr dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, bool bIsDefault = false);
+		virtual ~UIEditBox();
+
+		virtual void UpdateRects();
+		virtual bool CanHaveFocus() const { return visible_ && enabled_; }
+		virtual void OnFocusIn();
+		virtual void Render();
+
+		void SetText(std::wstring const & wszText, bool bSelected = false);
+		std::wstring const & GetText() const { return buffer_.GetBuffer(); }
+		int GetTextLength() const { return buffer_.GetTextSize(); }  // Returns text length in chars excluding NULL.
+		void ClearText();
+		virtual void SetTextColor(Color const & Color) { text_color_ = Color; }  // Text color
+		void SetSelectedTextColor(Color const & Color) { sel_text_color_ = Color; }  // Selected text color
+		void SetSelectedBackColor(Color const & Color) { sel_bk_color_ = Color; }  // Selected background color
+		void SetCaretColor(Color const & Color) { caret_color_ = Color; }  // Caret color
+		void SetBorderWidth(int nBorder) { border_ = nBorder; UpdateRects(); }  // Border of the window
+		void SetSpacing(int nSpacing) { spacing_ = nSpacing; UpdateRects(); }
+
+	public:
+		typedef boost::signal<void(UIEditBox const &)> EditBoxEvent;
+		EditBoxEvent& OnChangedEvent()
+		{
+			return changed_event_;
+		}
+		EditBoxEvent& OnStringEvent()
+		{
+			return string_event_;
+		}
+
+	protected:
+		void KeyDownHandler(UIDialog const & sender, KeyEventArg const & arg);
+		void MouseOverHandler(UIDialog const & sender, MouseEventArg const & arg);
+		void MouseDownHandler(UIDialog const & sender, MouseEventArg const & arg);
+		void MouseUpHandler(UIDialog const & sender, MouseEventArg const & arg);
+		void CharHandler(Window const & win, wchar_t ch);
+
+	protected:
+		EditBoxEvent changed_event_;
+		EditBoxEvent string_event_;
+
+	protected:
+		virtual void InitDefaultElements();
+
+		void PlaceCaret(int nCP);
+		void DeleteSelectionText();
+		void ResetCaretBlink();
+		void CopyToClipboard();
+		void PasteFromClipboard();
+
+		CUniBuffer buffer_;     // Buffer to hold text
+		int      border_;      // Border of the window
+		int      spacing_;     // Spacing between the text and the edge of border
+		Rect_T<int32_t>     text_rc_;       // Bounding rectangle for the text
+		Rect_T<int32_t>     render_rc_[9];  // Convenient rectangles for rendering elements
+		double   blink_time_;      // Caret blink time in milliseconds
+		double   last_blink_time_;  // Last timestamp of caret blink
+		bool     caret_on_;     // Flag to indicate whether caret is currently visible
+		int      caret_pos_;       // Caret position, in characters
+		bool     insert_mode_;  // If true, control is in insert mode. Else, overwrite mode.
+		int      sel_start_;    // Starting position of the selection. The caret marks the end.
+		int      first_visible_;// First visible character in the edit control
+		Color	text_color_;    // Text color
+		Color	sel_text_color_; // Selected text color
+		Color	sel_bk_color_;   // Selected background color
+		Color	caret_color_;   // Caret color
+
+		// Mouse-specific
+		bool mouse_drag_;       // True to indicate drag in progress
+
+		// Static
+		static bool hide_caret_;   // If true, we don't render the caret.
+		static Timer timer_;
 	};
 }
 

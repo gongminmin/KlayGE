@@ -38,7 +38,7 @@ namespace KlayGE
 		this->InitDefaultElements();
 	}
 
-	UIButton::UIButton(UIDialogPtr dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, uint32_t nHotkey, bool bIsDefault)
+	UIButton::UIButton(UIDialogPtr dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, uint8_t hotkey, bool bIsDefault)
 					: UIControl(UIButton::Type, dialog),
 						pressed_(false),
 						text_(strText)
@@ -49,7 +49,7 @@ namespace KlayGE
 		this->SetID(ID); 
 		this->SetLocation(x, y);
 		this->SetSize(width, height);
-		this->SetHotkey(nHotkey);
+		this->SetHotkey(hotkey);
 		this->SetIsDefault(bIsDefault);
 	}
 
@@ -215,5 +215,15 @@ namespace KlayGE
 	void UIButton::SetText(std::wstring const & strText)
 	{
 		text_ = strText;
+	}
+
+	void UIButton::OnHotkey()
+	{
+		if (this->GetDialog()->IsKeyboardInputEnabled())
+		{
+			this->GetDialog()->RequestFocus(*this);
+		}
+
+		this->OnClickedEvent()(*this);
 	}
 }
