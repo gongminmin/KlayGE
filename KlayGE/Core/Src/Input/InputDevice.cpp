@@ -24,13 +24,4 @@ namespace KlayGE
 	InputDevice::~InputDevice()
 	{
 	}
-
-	// 更新动作
-	//////////////////////////////////////////////////////////////////////////////////
-	InputActionsType InputDevice::Update(uint32_t id)
-	{
-		this->UpdateInputs();
-
-		return this->DoUpdate(id);
-	}
 }

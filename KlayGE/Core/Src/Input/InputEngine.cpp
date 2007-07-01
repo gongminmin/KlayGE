@@ -98,6 +98,11 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	void InputEngine::Update()
 	{
+		BOOST_FOREACH(BOOST_TYPEOF(devices_)::reference device, devices_)
+		{
+			device->UpdateInputs();
+		}
+
 		for (uint32_t id = 0; id < action_handlers_.size(); ++ id)
 		{
 			MapVector<uint16_t, long> actions;
@@ -105,7 +110,7 @@ namespace KlayGE
 			// 访问所有设备
 			BOOST_FOREACH(BOOST_TYPEOF(devices_)::reference device, devices_)
 			{
-				InputActionsType const theAction(device->Update(id));
+				InputActionsType const theAction(device->UpdateActionMap(id));
 
 				// 去掉重复的动作
 				BOOST_FOREACH(BOOST_TYPEOF(theAction)::const_reference act, theAction)

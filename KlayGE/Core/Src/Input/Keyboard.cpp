@@ -59,7 +59,7 @@ namespace KlayGE
 
 	// 更新键盘动作
 	//////////////////////////////////////////////////////////////////////////////////
-	InputActionsType InputKeyboard::DoUpdate(uint32_t id)
+	InputActionsType InputKeyboard::UpdateActionMap(uint32_t id)
 	{
 		InputActionsType ret;
 

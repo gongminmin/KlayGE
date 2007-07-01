@@ -259,55 +259,55 @@ namespace KlayGE
 
 		// Assign the style
 		{
-			Element.SetTexture(0, Rect_T<int32_t>(14, 90, 241, 113));
+			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 0));
 
 			elements_.push_back(UIElementPtr(new UIElement(Element)));
 		}
 
 		{
-			Element.SetTexture(0, Rect_T<int32_t>(8, 82, 14, 90));
-
-			elements_.push_back(UIElementPtr(new UIElement(Element)));
-		}
-		
-		{
-			Element.SetTexture(0, Rect_T<int32_t>(14, 82, 241, 90));
-
-			elements_.push_back(UIElementPtr(new UIElement(Element)));
-		}
-
-		{
-			Element.SetTexture(0, Rect_T<int32_t>(241, 82, 246, 90));
+			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 1));
 
 			elements_.push_back(UIElementPtr(new UIElement(Element)));
 		}
 		
 		{
-			Element.SetTexture(0, Rect_T<int32_t>(8, 90, 14, 113));
+			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 2));
+
+			elements_.push_back(UIElementPtr(new UIElement(Element)));
+		}
+
+		{
+			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 3));
 
 			elements_.push_back(UIElementPtr(new UIElement(Element)));
 		}
 		
 		{
-			Element.SetTexture(0, Rect_T<int32_t>(241, 90, 246, 113));
+			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 4));
 
 			elements_.push_back(UIElementPtr(new UIElement(Element)));
 		}
 		
 		{
-			Element.SetTexture(0, Rect_T<int32_t>(8, 113, 14, 121));
+			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 5));
+
+			elements_.push_back(UIElementPtr(new UIElement(Element)));
+		}
+		
+		{
+			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 6));
 
 			elements_.push_back(UIElementPtr(new UIElement(Element)));
 		}
 
 		{
-			Element.SetTexture(0, Rect_T<int32_t>(14, 113, 241, 121));
+			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 7));
 
 			elements_.push_back(UIElementPtr(new UIElement(Element)));
 		}
 
 		{
-			Element.SetTexture(0, Rect_T<int32_t>(241, 113, 246, 121));
+			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 8));
 
 			elements_.push_back(UIElementPtr(new UIElement(Element)));
 		}

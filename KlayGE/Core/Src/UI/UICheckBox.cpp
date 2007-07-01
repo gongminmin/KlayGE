@@ -59,7 +59,7 @@ namespace KlayGE
 
 		// Box
 		{
-			Element.SetTexture(0, Rect_T<int32_t>(0, 54, 27, 81));
+			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_CheckBox, 0));
 			Element.SetFont(0, Color(1, 1, 1, 1), Font::FA_Hor_Left | Font::FA_Ver_Middle);
 			Element.FontColor().States[UICS_Disabled] = Color(200.0f / 255, 200.0f / 255, 200.0f / 255, 200.0f / 255);
 			Element.TextureColor().States[UICS_Normal] = Color(1, 1, 1, 150.0f / 255);
@@ -71,7 +71,7 @@ namespace KlayGE
 
 		// Check
 		{
-			Element.SetTexture(0, Rect_T<int32_t>(27, 54, 54, 81));
+			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_CheckBox, 1));
 
 			elements_.push_back(UIElementPtr(new UIElement(Element)));
 		}

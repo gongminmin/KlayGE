@@ -111,7 +111,7 @@ namespace KlayGE
 
 	// 更新鼠标动作
 	//////////////////////////////////////////////////////////////////////////////////
-	InputActionsType InputMouse::DoUpdate(uint32_t id)
+	InputActionsType InputMouse::UpdateActionMap(uint32_t id)
 	{
 		InputActionsType ret;
 

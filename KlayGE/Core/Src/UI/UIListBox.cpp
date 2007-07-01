@@ -70,7 +70,7 @@ namespace KlayGE
 		
 		// Main
 		{
-			Element.SetTexture(0, Rect_T<int32_t>(13, 123, 241, 160));
+			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ListBox, 0));
 			Element.SetFont(0, Color(0, 0, 0, 1), Font::FA_Hor_Left | Font::FA_Ver_Top);
 
 			elements_.push_back(UIElementPtr(new UIElement(Element)));
@@ -78,7 +78,7 @@ namespace KlayGE
 
 		// Selection
 		{
-			Element.SetTexture(0, Rect_T<int32_t>(16, 166, 240, 183));
+			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ListBox, 1));
 			Element.SetFont(0, Color(1, 1, 1, 1), Font::FA_Hor_Left | Font::FA_Ver_Top);
 
 			elements_.push_back(UIElementPtr(new UIElement(Element)));
@@ -589,8 +589,7 @@ namespace KlayGE
 		scroll_bar_.GetMouseWheelEvent()(sender, arg);
 
 		int const WHEELSCROLLLINES = 3;
-		int nScrollAmount = arg.z_delta * WHEELSCROLLLINES;
-		scroll_bar_.Scroll(-nScrollAmount);
+		scroll_bar_.Scroll(-arg.z_delta / 120 * WHEELSCROLLLINES);
 	}
 
 	void UIListBox::Render()

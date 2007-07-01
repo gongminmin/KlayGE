@@ -35,8 +35,6 @@
 #include <KlayGE/DInput/DInput.hpp>
 #include <KlayGE/DInput/DInputDevice.hpp>
 
-#include <iostream>
-
 namespace KlayGE
 {
 	// ¹¹Ôìº¯Êý

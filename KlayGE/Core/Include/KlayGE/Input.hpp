@@ -324,12 +324,10 @@ namespace KlayGE
 
 		virtual std::wstring const & Name() const = 0;
 
-		InputActionsType Update(uint32_t id);
-		virtual void ActionMap(uint32_t id, InputActionMap const & actionMap) = 0;
-
-	protected:
 		virtual void UpdateInputs() = 0;
-		virtual InputActionsType DoUpdate(uint32_t id) = 0;
+		virtual InputActionsType UpdateActionMap(uint32_t id) = 0;
+
+		virtual void ActionMap(uint32_t id, InputActionMap const & actionMap) = 0;
 
 	protected:
 		action_maps_t actionMaps_;
@@ -342,10 +340,8 @@ namespace KlayGE
 		bool Key(size_t n) const;
 		bool const * Keys() const;
 
+		InputActionsType UpdateActionMap(uint32_t id);
 		void ActionMap(uint32_t id, InputActionMap const & actionMap);
-
-	private:
-		InputActionsType DoUpdate(uint32_t id);
 
 	protected:
 		boost::array<bool, 256> keys_;
@@ -367,10 +363,8 @@ namespace KlayGE
 		size_t NumButtons() const;
 		bool Button(size_t index) const;
 
+		InputActionsType UpdateActionMap(uint32_t id);
 		void ActionMap(uint32_t id, InputActionMap const & actionMap);
-
-	private:
-		InputActionsType DoUpdate(uint32_t id);
 
 	protected:
 		Vector_T<long, 2> abs_pos_;
@@ -397,10 +391,8 @@ namespace KlayGE
 		size_t NumButtons() const;
 		bool Button(size_t index) const;
 
+		InputActionsType UpdateActionMap(uint32_t id);
 		void ActionMap(uint32_t id, InputActionMap const & actionMap);
-
-	private:
-		InputActionsType DoUpdate(uint32_t id);
 
 	protected:
 		Vector_T<long, 3> pos_;		// x, y, z axis position

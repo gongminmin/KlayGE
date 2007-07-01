@@ -118,7 +118,7 @@ namespace KlayGE
 
 	// 更新游戏杆动作
 	/////////////////////////////////////////////////////////////////////////////////
-	InputActionsType InputJoystick::DoUpdate(uint32_t id)
+	InputActionsType InputJoystick::UpdateActionMap(uint32_t id)
 	{
 		InputActionsType ret;
 

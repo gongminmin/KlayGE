@@ -83,12 +83,9 @@ namespace KlayGE
 	{
 		UIElement Element;
 
-		int const nScrollBarStartX = 196;
-		int const nScrollBarStartY = 191;
-		
 		// Track
 		{
-			Element.SetTexture(0, Rect_T<int32_t>(nScrollBarStartX + 0, nScrollBarStartY + 21, nScrollBarStartX + 22, nScrollBarStartY + 32));
+			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ScrollBar, 0));
 			Element.TextureColor().States[UICS_Disabled] = Color(200.0f / 255, 200.0f / 255, 200.0f / 255, 1);
 
 			elements_.push_back(UIElementPtr(new UIElement(Element)));
@@ -96,7 +93,7 @@ namespace KlayGE
 
 		// Up Arrow
 		{
-			Element.SetTexture(0, Rect_T<int32_t>(nScrollBarStartX + 0, nScrollBarStartY + 1, nScrollBarStartX + 22, nScrollBarStartY + 21));
+			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ScrollBar, 1));
 			Element.TextureColor().States[UICS_Disabled] = Color(200.0f / 255, 200.0f / 255, 200.0f / 255, 1);
 
 			elements_.push_back(UIElementPtr(new UIElement(Element)));
@@ -104,7 +101,7 @@ namespace KlayGE
 
 		// Down Arrow
 		{
-			Element.SetTexture(0, Rect_T<int32_t>(nScrollBarStartX + 0, nScrollBarStartY + 32, nScrollBarStartX + 22, nScrollBarStartY + 53));
+			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ScrollBar, 2));
 			Element.TextureColor().States[UICS_Disabled] = Color(200.0f / 255, 200.0f / 255, 200.0f / 255, 1);
 
 			elements_.push_back(UIElementPtr(new UIElement(Element)));
@@ -112,7 +109,7 @@ namespace KlayGE
 
 		// Button
 		{
-			Element.SetTexture(0, Rect_T<int32_t>(220, 192, 238, 234));
+			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ScrollBar, 3));
 
 			elements_.push_back(UIElementPtr(new UIElement(Element)));
 		}
@@ -170,7 +167,8 @@ namespace KlayGE
 	void UIScrollBar::Scroll(int nDelta)
 	{
 		// Perform scroll
-		position_ += nDelta;
+		int new_pos = position_ + nDelta;
+		position_ = MathLib::clamp(new_pos, 0, static_cast<int>(end_) - 1);
 
 		// Cap position
 		this->Cap();

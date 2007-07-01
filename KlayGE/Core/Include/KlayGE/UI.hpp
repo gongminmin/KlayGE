@@ -46,14 +46,14 @@ namespace KlayGE
 
 	enum UI_Control_Type 
 	{
-		UICT_Button, 
 		UICT_Static, 
+		UICT_Button, 
 		UICT_CheckBox,
 		UICT_RadioButton,
-		UICT_ComboBox,
 		UICT_Slider,
-		UICT_ListBox,
 		UICT_ScrollBar,
+		UICT_ListBox,
+		UICT_ComboBox,
 		UICT_EditBox,
 
 		UICT_Num_Control_Types
@@ -653,6 +653,8 @@ namespace KlayGE
 			return last_mouse_states_[i];
 		}
 
+		Rect_T<int32_t> const & ElementTextureRect(uint32_t ctrl, uint32_t elem_index);
+
 	private:
 		UIManager();
 
@@ -666,6 +668,8 @@ namespace KlayGE
 
 		boost::array<bool, 256> last_key_states_;
 		boost::array<bool, 8> last_mouse_states_;
+
+		boost::array<std::vector<Rect_T<int32_t> >, UICT_Num_Control_Types> elem_texture_rcs_;
 
 		std::map<TexturePtr,
 			std::pair<std::vector<VertexFormat>, std::vector<uint16_t> > > rects_;

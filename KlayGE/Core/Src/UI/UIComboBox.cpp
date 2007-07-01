@@ -69,7 +69,7 @@ namespace KlayGE
 
 		// Main
 		{
-			Element.SetTexture(0, Rect_T<int32_t>(7, 81, 247, 123));
+			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ComboBox, 0));
 			Element.SetFont(0);
 			Element.TextureColor().States[UICS_Normal] = Color(200.0f / 255, 200.0f / 255, 200.0f / 255, 150.0f / 255);
 			Element.TextureColor().States[UICS_Focus] = Color(230.0f / 255, 230.0f / 255, 230.0f / 255, 170.0f / 255);
@@ -83,7 +83,7 @@ namespace KlayGE
 
 		// Button
 		{
-			Element.SetTexture(0, Rect_T<int32_t>(98, 189, 151, 238));
+			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ComboBox, 1));
 			Element.TextureColor().States[UICS_Normal] = Color(1, 1, 1, 150.0f / 255);
 			Element.TextureColor().States[UICS_Pressed] = Color(150.0f / 255, 150.0f / 255, 150.0f / 255, 1);
 			Element.TextureColor().States[UICS_Focus] = Color(1, 1, 1, 200.0f / 255);
@@ -94,7 +94,7 @@ namespace KlayGE
 
 		// Dropdown
 		{
-			Element.SetTexture(0, Rect_T<int32_t>(13, 123, 241, 160));
+			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ComboBox, 2));
 			Element.SetFont(0, Color(0, 0, 0, 1), Font::FA_Hor_Left | Font::FA_Ver_Top);
 
 			elements_.push_back(UIElementPtr(new UIElement(Element)));
@@ -102,7 +102,7 @@ namespace KlayGE
 
 		// Selection
 		{
-			Element.SetTexture(0, Rect_T<int32_t>(12, 163, 239, 183));
+			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ComboBox, 3));
 			Element.SetFont(0, Color(1, 1, 1, 1), Font::FA_Hor_Left | Font::FA_Ver_Top);
 
 			elements_.push_back(UIElementPtr(new UIElement(Element)));
@@ -386,7 +386,7 @@ namespace KlayGE
 		if (opened_)
 		{
 			int const WHEELSCROLLLINES = 3;
-			scroll_bar_.Scroll(-arg.z_delta * WHEELSCROLLLINES);
+			scroll_bar_.Scroll(-arg.z_delta / 120 * WHEELSCROLLLINES);
 		}
 		else
 		{

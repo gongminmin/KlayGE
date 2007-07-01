@@ -150,6 +150,41 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		effect_ = rf.LoadEffect("UI.kfx");
+
+		elem_texture_rcs_[UICT_Button].push_back(Rect_T<int32_t>(0, 0, 136, 54));
+		elem_texture_rcs_[UICT_Button].push_back(Rect_T<int32_t>(136, 0, 252, 54));
+
+		elem_texture_rcs_[UICT_CheckBox].push_back(Rect_T<int32_t>(0, 54, 27, 81));
+		elem_texture_rcs_[UICT_CheckBox].push_back(Rect_T<int32_t>(27, 54, 54, 81));
+
+		elem_texture_rcs_[UICT_RadioButton].push_back(Rect_T<int32_t>(54, 54, 81, 81));
+		elem_texture_rcs_[UICT_RadioButton].push_back(Rect_T<int32_t>(81, 54, 108, 81));
+
+		elem_texture_rcs_[UICT_Slider].push_back(Rect_T<int32_t>(1, 187, 93, 228));
+		elem_texture_rcs_[UICT_Slider].push_back(Rect_T<int32_t>(151, 193, 192, 234));
+
+		elem_texture_rcs_[UICT_ScrollBar].push_back(Rect_T<int32_t>(196, 212, 218, 223));
+		elem_texture_rcs_[UICT_ScrollBar].push_back(Rect_T<int32_t>(196, 192, 218, 212));
+		elem_texture_rcs_[UICT_ScrollBar].push_back(Rect_T<int32_t>(196, 223, 218, 244));
+		elem_texture_rcs_[UICT_ScrollBar].push_back(Rect_T<int32_t>(220, 192, 238, 234));
+
+		elem_texture_rcs_[UICT_ListBox].push_back(Rect_T<int32_t>(13, 123, 241, 160));
+		elem_texture_rcs_[UICT_ListBox].push_back(Rect_T<int32_t>(16, 166, 240, 183));
+
+		elem_texture_rcs_[UICT_ComboBox].push_back(Rect_T<int32_t>(7, 81, 247, 123));
+		elem_texture_rcs_[UICT_ComboBox].push_back(Rect_T<int32_t>(98, 189, 151, 238));
+		elem_texture_rcs_[UICT_ComboBox].push_back(Rect_T<int32_t>(13, 123, 241, 160));
+		elem_texture_rcs_[UICT_ComboBox].push_back(Rect_T<int32_t>(12, 163, 239, 183));
+
+		elem_texture_rcs_[UICT_EditBox].push_back(Rect_T<int32_t>(14, 90, 241, 113));
+		elem_texture_rcs_[UICT_EditBox].push_back(Rect_T<int32_t>(8, 82, 14, 90));
+		elem_texture_rcs_[UICT_EditBox].push_back(Rect_T<int32_t>(14, 82, 241, 90));
+		elem_texture_rcs_[UICT_EditBox].push_back(Rect_T<int32_t>(241, 82, 246, 90));
+		elem_texture_rcs_[UICT_EditBox].push_back(Rect_T<int32_t>(8, 90, 14, 113));
+		elem_texture_rcs_[UICT_EditBox].push_back(Rect_T<int32_t>(241, 90, 246, 113));
+		elem_texture_rcs_[UICT_EditBox].push_back(Rect_T<int32_t>(8, 113, 14, 121));
+		elem_texture_rcs_[UICT_EditBox].push_back(Rect_T<int32_t>(14, 113, 241, 121));
+		elem_texture_rcs_[UICT_EditBox].push_back(Rect_T<int32_t>(241, 113, 246, 121));
 	}
 
 	UIDialogPtr UIManager::MakeDialog(TexturePtr control_tex)
@@ -354,6 +389,14 @@ namespace KlayGE
 				}
 			}
 		}
+	}
+
+	Rect_T<int32_t> const & UIManager::ElementTextureRect(uint32_t ctrl, uint32_t elem_index)
+	{
+		BOOST_ASSERT(ctrl < elem_texture_rcs_.size());
+		BOOST_ASSERT(elem_index < elem_texture_rcs_[ctrl].size());
+
+		return elem_texture_rcs_[ctrl][elem_index];
 	}
 
 	
