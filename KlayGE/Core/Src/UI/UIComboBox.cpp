@@ -586,14 +586,14 @@ namespace KlayGE
 		}
 	}
 
-	void UIComboBox::AddItem(std::wstring const & strText, void* pData)
+	void UIComboBox::AddItem(std::wstring const & strText, boost::any const & data)
 	{
 		assert(!strText.empty());
 
 		// Create a new item and set the data
 		boost::shared_ptr<UIComboBoxItem> pItem(new UIComboBoxItem);
 		pItem->strText = strText;
-		pItem->pData = pData;
+		pItem->data = data;
 		pItem->rcActive = Rect_T<int32_t>(0, 0, 0, 0);
 		pItem->bVisible = false;
 
@@ -651,14 +651,14 @@ namespace KlayGE
 		return -1;
 	}
 
-	void* UIComboBox::GetSelectedData() const
+	boost::any const UIComboBox::GetSelectedData() const
 	{
 		if (selected_ < 0)
 		{
-			return NULL;
+			return boost::any();
 		}
 
-		return items_[selected_]->pData;
+		return items_[selected_]->data;
 	}
 
 	boost::shared_ptr<UIComboBoxItem> UIComboBox::GetSelectedItem() const
@@ -671,31 +671,28 @@ namespace KlayGE
 		return items_[selected_];
 	}
 
-	void* UIComboBox::GetItemData(std::wstring const & strText) const
+	boost::any const UIComboBox::GetItemData(std::wstring const & strText) const
 	{
 		int index = this->FindItem(strText);
 		if (index == -1)
 		{
-			return NULL;
+			return boost::any();
 		}
 
 		boost::shared_ptr<UIComboBoxItem> pItem = items_[index];
 		if (!pItem)
 		{
-			return NULL;
+			return boost::any();
 		}
 
-		return pItem->pData;
+		return pItem->data;
 	}
 
-	void* UIComboBox::GetItemData(int nIndex) const
+	boost::any const UIComboBox::GetItemData(int nIndex) const
 	{
-		if ((nIndex < 0) || (nIndex >= static_cast<int>(items_.size())))
-		{
-			return NULL;
-		}
+		BOOST_ASSERT((nIndex >= 0) && (nIndex < static_cast<int>(items_.size())));
 
-		return items_[nIndex]->pData;
+		return items_[nIndex]->data;
 	}
 
 	void UIComboBox::SetSelectedByIndex(uint32_t index)
@@ -714,19 +711,6 @@ namespace KlayGE
 		assert(index != -1);
 
 		this->SetSelectedByIndex(index);
-	}
-
-	void UIComboBox::SetSelectedByData(void* pData)
-	{
-		for (size_t i = 0; i < items_.size(); ++ i)
-		{
-			boost::shared_ptr<UIComboBoxItem> pItem = items_[i];
-
-			if (pItem->pData == pData)
-			{
-				this->SetSelectedByIndex(static_cast<uint32_t>(i));
-			}
-		}
 	}
 
 	void UIComboBox::OnHotkey()

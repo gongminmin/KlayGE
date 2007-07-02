@@ -124,11 +124,11 @@ namespace KlayGE
 		bounding_box_ = selection_rc_ | text_rc_ | scroll_bar_.BoundingBoxRect();
 	}
 
-	void UIListBox::AddItem(std::wstring const & strText, void* pData)
+	void UIListBox::AddItem(std::wstring const & strText, boost::any const & data)
 	{
 		boost::shared_ptr<UIListBoxItem> pNewItem(new UIListBoxItem);
 		pNewItem->strText = strText;
-		pNewItem->pData = pData;
+		pNewItem->data = data;
 		pNewItem->rcActive = Rect_T<int32_t>(0, 0, 0, 0);
 		pNewItem->bSelected = false;
 
@@ -136,11 +136,11 @@ namespace KlayGE
 		scroll_bar_.SetTrackRange(0, items_.size());
 	}
 
-	void UIListBox::InsertItem(int nIndex, std::wstring const & strText, void* pData)
+	void UIListBox::InsertItem(int nIndex, std::wstring const & strText, boost::any const & data)
 	{
 		boost::shared_ptr<UIListBoxItem> pNewItem(new UIListBoxItem);
 		pNewItem->strText = strText;
-		pNewItem->pData = pData;
+		pNewItem->data = data;
 		pNewItem->rcActive = Rect_T<int32_t>(0, 0, 0, 0);
 		pNewItem->bSelected = false;
 

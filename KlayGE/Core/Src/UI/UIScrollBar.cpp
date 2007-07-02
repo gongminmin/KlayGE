@@ -167,7 +167,7 @@ namespace KlayGE
 	void UIScrollBar::Scroll(int nDelta)
 	{
 		// Perform scroll
-		int new_pos = position_ + nDelta;
+		int new_pos = static_cast<int>(position_) + nDelta;
 		position_ = MathLib::clamp(new_pos, 0, static_cast<int>(end_) - 1);
 
 		// Cap position

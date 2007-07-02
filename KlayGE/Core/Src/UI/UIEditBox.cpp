@@ -11,14 +11,14 @@
 
 namespace KlayGE
 {
-	CUniBuffer::CUniBuffer(int nInitialSize)
+	UniBuffer::UniBuffer(int nInitialSize)
 	{
 		analyse_required_ = true;
 
 		buffer_.reserve(nInitialSize);
 	}
 
-	wchar_t& CUniBuffer::operator[](size_t n)  // No param checking
+	wchar_t& UniBuffer::operator[](size_t n)  // No param checking
 	{
 		// This version of operator[] is called only
 		// if we are asking for write access, so
@@ -27,14 +27,14 @@ namespace KlayGE
 		return buffer_[n];
 	}
 
-	void CUniBuffer::Clear()
+	void UniBuffer::Clear()
 	{
 		buffer_.clear();
 		analyse_required_ = true;
 	}
 
 	// Inserts the char at specified index.
-	void CUniBuffer::InsertChar(size_t index, wchar_t wChar)
+	void UniBuffer::InsertChar(size_t index, wchar_t wChar)
 	{
 		assert(index <= buffer_.size());
 
@@ -43,7 +43,7 @@ namespace KlayGE
 	}
 
 	// Removes the char at specified index.
-	void CUniBuffer::RemoveChar(size_t index)
+	void UniBuffer::RemoveChar(size_t index)
 	{
 		assert(index <= buffer_.size());
 
@@ -52,7 +52,7 @@ namespace KlayGE
 	}
 
 	// Inserts the first nCount characters of the string pStr at specified index.
-	void CUniBuffer::InsertString(size_t index, std::wstring const & str)
+	void UniBuffer::InsertString(size_t index, std::wstring const & str)
 	{
 		assert(index <= buffer_.size());
 
@@ -60,14 +60,14 @@ namespace KlayGE
 		analyse_required_ = true;
 	}
 
-	void CUniBuffer::SetText(std::wstring const & strText)
+	void UniBuffer::SetText(std::wstring const & strText)
 	{
 		buffer_ = strText;
 		analyse_required_ = true;
 	}
 
 	// Uniscribe -- Analyse() analyses the string in the buffer
-	bool CUniBuffer::Analyse()
+	bool UniBuffer::Analyse()
 	{
 		if (font_)
 		{
@@ -91,7 +91,7 @@ namespace KlayGE
 		}
 	}
 
-	int CUniBuffer::CPtoX(int nCP, bool bTrail)
+	int UniBuffer::CPtoX(int nCP, bool bTrail)
 	{
 		if (bTrail)
 		{
@@ -114,7 +114,7 @@ namespace KlayGE
 		}
 	}
 
-	int CUniBuffer::XtoCP(int nX, bool& bTrail)
+	int UniBuffer::XtoCP(int nX, bool& bTrail)
 	{
 		int CP = 0;
 		bTrail = false;  // Default
@@ -150,12 +150,12 @@ namespace KlayGE
 		return CP;
 	}
 
-	int CUniBuffer::GetPriorItemPos(int nCP) const
+	int UniBuffer::GetPriorItemPos(int nCP) const
 	{
 		return std::max(nCP - 1, 0);
 	}
 
-	int CUniBuffer::GetNextItemPos(int nCP) const
+	int UniBuffer::GetNextItemPos(int nCP) const
 	{
 		return std::min(nCP + 1, static_cast<int>(buffer_.size() - 1));
 	}

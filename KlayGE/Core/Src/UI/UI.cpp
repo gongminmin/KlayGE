@@ -399,6 +399,12 @@ namespace KlayGE
 		return elem_texture_rcs_[ctrl][elem_index];
 	}
 
+	size_t UIManager::NumElementTextureRect(uint32_t ctrl) const
+	{
+		BOOST_ASSERT(ctrl < elem_texture_rcs_.size());
+		return elem_texture_rcs_[ctrl].size();
+	}
+
 	
 	UIDialog::UIDialog(TexturePtr control_tex)
 			: x_(0), y_(0), width_(0), height_(0),

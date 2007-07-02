@@ -222,11 +222,6 @@ namespace KlayGE
 		nValue = std::max(min_, nValue);
 		nValue = std::min(max_, nValue);
 
-		if (nValue == value_)
-		{
-			return;
-		}
-
 		value_ = nValue;
 		this->UpdateRects();
 

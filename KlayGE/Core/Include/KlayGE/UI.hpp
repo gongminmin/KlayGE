@@ -29,6 +29,7 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
+#include <boost/any.hpp>
 
 namespace KlayGE
 {
@@ -225,7 +226,7 @@ namespace KlayGE
 			return type_;
 		}
 
-		int  GetID() const
+		int GetID() const
 		{
 			return id_;
 		}
@@ -654,6 +655,7 @@ namespace KlayGE
 		}
 
 		Rect_T<int32_t> const & ElementTextureRect(uint32_t ctrl, uint32_t elem_index);
+		size_t NumElementTextureRect(uint32_t ctrl) const;
 
 	private:
 		UIManager();
@@ -1004,7 +1006,7 @@ namespace KlayGE
 	struct UIListBoxItem
 	{
 		std::wstring strText;
-		void* pData;
+		boost::any data;
 
 		Rect_T<int32_t>  rcActive;
 		bool  bSelected;
@@ -1041,8 +1043,8 @@ namespace KlayGE
 		int  GetScrollBarWidth() const { return sb_width_; }
 		void SetScrollBarWidth(int nWidth) { sb_width_ = nWidth; this->UpdateRects(); }
 		void SetBorder(int nBorder, int nMargin) { border_ = nBorder; margin_ = nMargin; }
-		void AddItem(std::wstring const & strText, void* pData);
-		void InsertItem(int nIndex, std::wstring const & strText, void* pData);
+		void AddItem(std::wstring const & strText, boost::any const & data);
+		void InsertItem(int nIndex, std::wstring const & strText, boost::any const & data);
 		void RemoveItem(int nIndex);
 		void RemoveAllItems();
 
@@ -1095,7 +1097,7 @@ namespace KlayGE
 	struct UIComboBoxItem
 	{
 		std::wstring strText;
-		void* pData;
+		boost::any data;
 
 		Rect_T<int32_t>  rcActive;
 		bool  bVisible;
@@ -1124,26 +1126,25 @@ namespace KlayGE
 
 		virtual void UpdateRects(); 
 
-		void	AddItem(std::wstring const & strText, void* pData);
+		void	AddItem(std::wstring const & strText, boost::any const & data);
 		void    RemoveAllItems();
 		void    RemoveItem(uint32_t index);
 		bool    ContainsItem(std::wstring const & strText, uint32_t iStart = 0) const;
 		int     FindItem(std::wstring const & strText, uint32_t iStart = 0) const;
-		void*   GetItemData(std::wstring const & strText) const;
-		void*   GetItemData(int nIndex) const;
+		boost::any const GetItemData(std::wstring const & strText) const;
+		boost::any const GetItemData(int nIndex) const;
 		void    SetDropHeight(uint32_t nHeight) { drop_height_ = nHeight; this->UpdateRects(); }
 		int     GetScrollBarWidth() const { return sb_width_; }
 		void    SetScrollBarWidth(int nWidth) { sb_width_ = nWidth; this->UpdateRects(); }
 
-		void*   GetSelectedData() const;
+		boost::any const GetSelectedData() const;
 		boost::shared_ptr<UIComboBoxItem> GetSelectedItem() const;
 
-		uint32_t   GetNumItems() const { return static_cast<uint32_t>(items_.size()); }
+		uint32_t GetNumItems() const { return static_cast<uint32_t>(items_.size()); }
 		boost::shared_ptr<UIComboBoxItem> GetItem(uint32_t index) const { return items_[index]; }
 
 		void SetSelectedByIndex(uint32_t index);
 		void SetSelectedByText(std::wstring const & strText);
-		void SetSelectedByData(void* pData);
 
 	public:
 		typedef boost::signal<void(UIComboBox const &)> SelectionChangedEvent;
@@ -1185,11 +1186,11 @@ namespace KlayGE
 		bool pressed_;
 	};
 
-	// CUniBuffer class for the edit control
-	class CUniBuffer
+	// UniBuffer class for the edit control
+	class UniBuffer
 	{
 	public:
-		explicit CUniBuffer(int nInitialSize = 1);
+		explicit UniBuffer(int nInitialSize = 1);
 
 		uint32_t GetTextSize() const  { return static_cast<uint32_t>(buffer_.size()); }
 		std::wstring& GetBuffer() { return buffer_; }
@@ -1284,7 +1285,7 @@ namespace KlayGE
 		void CopyToClipboard();
 		void PasteFromClipboard();
 
-		CUniBuffer buffer_;     // Buffer to hold text
+		UniBuffer buffer_;     // Buffer to hold text
 		int      border_;      // Border of the window
 		int      spacing_;     // Spacing between the text and the edge of border
 		Rect_T<int32_t>     text_rc_;       // Bounding rectangle for the text
