@@ -1149,7 +1149,8 @@ namespace KlayGE
 				}
 				else
 				{
-					if (!UIManager::Instance().GetLastMouseButton(0) && mouse->LeftButton()
+					if (((!UIManager::Instance().GetLastMouseButton(0) && mouse->LeftButton())
+						|| (UIManager::Instance().GetLastMouseButton(0) && !mouse->LeftButton()))
 						&& control_focus_.lock())
 					{
 						control_focus_.lock()->OnFocusOut();

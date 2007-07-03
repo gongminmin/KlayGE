@@ -727,7 +727,15 @@ namespace KlayGE
 		UIButton(UIDialogPtr dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, uint8_t hotkey = 0, bool bIsDefault = false);
 		virtual ~UIButton() {}
 	    
-		virtual bool CanHaveFocus() const { return (visible_ && enabled_); }
+		virtual bool CanHaveFocus() const
+		{
+			return visible_ && enabled_;
+		}
+		virtual void OnFocusOut()
+		{
+			UIControl::OnFocusOut();
+			pressed_ = false;
+		}
 		virtual void OnHotkey();
 
 		virtual void Render();
@@ -773,7 +781,15 @@ namespace KlayGE
 		UICheckBox(UIDialogPtr dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, bool bChecked = false, uint8_t hotkey = 0, bool bIsDefault = false);
 		virtual ~UICheckBox() {}
 
-		virtual bool CanHaveFocus() const { return (visible_ && enabled_); }
+		virtual bool CanHaveFocus() const
+		{
+			return (visible_ && enabled_);
+		}
+		virtual void OnFocusOut()
+		{
+			UIControl::OnFocusOut();
+			pressed_ = false;
+		}
 		virtual void OnHotkey();
 		virtual void UpdateRects(); 
 
@@ -832,7 +848,15 @@ namespace KlayGE
 		void SetButtonGroup(uint32_t nButtonGroup) { button_group_ = nButtonGroup; }
 		uint32_t GetButtonGroup() const { return button_group_; }
 
-		virtual bool CanHaveFocus() const { return (visible_ && enabled_); }
+		virtual bool CanHaveFocus() const
+		{
+			return visible_ && enabled_;
+		}
+		virtual void OnFocusOut()
+		{
+			UIControl::OnFocusOut();
+			pressed_ = false;
+		}
 		virtual void OnHotkey();
 		virtual void UpdateRects();
 
@@ -888,7 +912,15 @@ namespace KlayGE
 		UISlider(UIDialogPtr dialog, int ID, int x, int y, int width, int height, int min = 0, int max = 100, int value = 50, bool bIsDefault = false);
 		virtual ~UISlider() {}
 
-		virtual bool CanHaveFocus() const { return (visible_ && enabled_); }
+		virtual bool CanHaveFocus() const
+		{
+			return visible_ && enabled_;
+		}
+		virtual void OnFocusOut()
+		{
+			UIControl::OnFocusOut();
+			pressed_ = false;
+		}
 
 		virtual void UpdateRects(); 
 
@@ -951,6 +983,12 @@ namespace KlayGE
 		UIScrollBar(uint32_t type, UIDialogPtr dialog);
 		UIScrollBar(UIDialogPtr dialog, int ID, int x, int y, int width, int height, int nTrackStart = 0, int nTrackEnd = 1, int nTrackPos = 0, int nPageSize = 1);
 		virtual ~UIScrollBar();
+
+		virtual void OnFocusOut()
+		{
+			UIControl::OnFocusOut();
+			drag_ = false;
+		}
 
 		virtual void Render();
 		virtual void UpdateRects();
@@ -1032,8 +1070,16 @@ namespace KlayGE
 		UIListBox(UIDialogPtr dialog, int ID, int x, int y, int width, int height, STYLE dwStyle = SINGLE_SELECTION);
 		virtual ~UIListBox();
 
-		virtual bool    CanHaveFocus() const { return (visible_ && enabled_); }
-		
+		virtual bool CanHaveFocus() const
+		{
+			return visible_ && enabled_;
+		}
+		virtual void OnFocusOut()
+		{
+			UIControl::OnFocusOut();
+			drag_ = false;
+		}
+
 		virtual void    Render();
 		virtual void    UpdateRects();
 
@@ -1119,7 +1165,10 @@ namespace KlayGE
 	    
 		virtual void SetTextColor(Color const & color);
 
-		virtual bool CanHaveFocus() const { return (visible_ && enabled_); }
+		virtual bool CanHaveFocus() const
+		{
+			return visible_ && enabled_;
+		}
 		virtual void OnHotkey();
 		virtual void OnFocusOut();
 		virtual void Render();
@@ -1145,6 +1194,20 @@ namespace KlayGE
 
 		void SetSelectedByIndex(uint32_t index);
 		void SetSelectedByText(std::wstring const & strText);
+
+		template <typename T>
+		void SetSelectedByData(T const & data)
+		{
+			for (uint32_t i = 0; i < items_.size(); ++ i)
+			{
+				boost::shared_ptr<UIComboBoxItem> pItem = items_[i];
+
+				if ((pItem->data.type() == typeid(data)) && (boost::any_cast<T>(pItem->data) == data))
+				{
+					this->SetSelectedByIndex(static_cast<uint32_t>(i));
+				}
+			}
+		}
 
 	public:
 		typedef boost::signal<void(UIComboBox const &)> SelectionChangedEvent;
@@ -1241,6 +1304,11 @@ namespace KlayGE
 		virtual void UpdateRects();
 		virtual bool CanHaveFocus() const { return visible_ && enabled_; }
 		virtual void OnFocusIn();
+		virtual void OnFocusOut()
+		{
+			UIControl::OnFocusOut();
+			mouse_drag_ = false;
+		}
 		virtual void Render();
 
 		void SetText(std::wstring const & wszText, bool bSelected = false);

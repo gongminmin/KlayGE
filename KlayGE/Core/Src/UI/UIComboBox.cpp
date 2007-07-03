@@ -143,6 +143,7 @@ namespace KlayGE
 	{
 		UIControl::OnFocusOut();
 
+		pressed_ = false;
 		opened_ = false;
 		this->UpdateRects();
 	}
