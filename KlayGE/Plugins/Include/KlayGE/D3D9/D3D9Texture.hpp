@@ -50,6 +50,20 @@ namespace KlayGE
 
 		std::wstring const & Name() const;
 
+		virtual void CopyToTexture1D(Texture& target, int level,
+			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width, uint32_t src_xOffset);
+		virtual void CopyToTexture2D(Texture& target, int level,
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
+			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset);
+		virtual void CopyToTexture3D(Texture& target, int level,
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
+			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
+			uint32_t src_width, uint32_t src_height, uint32_t src_depth,
+			uint32_t src_xOffset, uint32_t src_yOffset, uint32_t src_zOffset);
+		virtual void CopyToTextureCube(Texture& target, CubeFaces face, int level,
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
+			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset);
+
 		virtual uint32_t Width(int level) const;
 		virtual uint32_t Height(int level) const;
 		virtual uint32_t Depth(int level) const;
@@ -60,17 +74,21 @@ namespace KlayGE
 		virtual void CopyToMemoryCube(CubeFaces face, int level, void* data);
 
 		virtual void CopyMemoryToTexture1D(int level, void const * data, ElementFormat pf,
-			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_widtht);
+			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width, uint32_t src_xOffset);
 		virtual void CopyMemoryToTexture2D(int level, void const * data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
-			uint32_t src_width, uint32_t src_height);
+			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset,
+			uint32_t src_row_pitch);
 		virtual void CopyMemoryToTexture3D(int level, void const * data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
 			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
-			uint32_t src_width, uint32_t src_height, uint32_t src_depth);
+			uint32_t src_width, uint32_t src_height, uint32_t src_depth,
+			uint32_t src_xOffset, uint32_t src_yOffset, uint32_t src_zOffset,
+			uint32_t src_row_pitch, uint32_t src_slice_pitch);
 		virtual void CopyMemoryToTextureCube(CubeFaces face, int level, void const * data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
-			uint32_t src_width, uint32_t src_height);
+			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset,
+			uint32_t src_row_pitch);
 
 		ID3D9BaseTexturePtr D3DBaseTexture() const
 			{ return d3dBaseTexture_; }
@@ -96,11 +114,13 @@ namespace KlayGE
 		uint32_t Width(int level) const;
 
 		void CopyToTexture(Texture& target);
-		
+		void CopyToTexture1D(Texture& target, int level,
+			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width, uint32_t src_xOffset);
+
 		void CopyToMemory1D(int level, void* data);
 
 		void CopyMemoryToTexture1D(int level, void const * data, ElementFormat pf,
-			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_widtht);
+			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width, uint32_t src_xOffset);
 
 		void BuildMipSubLevels();
 
@@ -136,12 +156,16 @@ namespace KlayGE
 		uint32_t Height(int level) const;
 
 		void CopyToTexture(Texture& target);
-		
+		void CopyToTexture2D(Texture& target, int level,
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
+			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset);
+
 		void CopyToMemory2D(int level, void* data);
 
 		void CopyMemoryToTexture2D(int level, void const * data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
-			uint32_t src_width, uint32_t src_height);
+			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset,
+			uint32_t src_row_pitch);
 
 		void BuildMipSubLevels();
 
@@ -179,13 +203,20 @@ namespace KlayGE
 		uint32_t Depth(int level) const;
 
 		void CopyToTexture(Texture& target);
-		
+		void CopyToTexture3D(Texture& target, int level,
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
+			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
+			uint32_t src_width, uint32_t src_height, uint32_t src_depth,
+			uint32_t src_xOffset, uint32_t src_yOffset, uint32_t src_zOffset);
+
 		void CopyToMemory3D(int level, void* data);
 
 		void CopyMemoryToTexture3D(int level, void const * data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
 			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
-			uint32_t src_width, uint32_t src_height, uint32_t src_depth);
+			uint32_t src_width, uint32_t src_height, uint32_t src_depth,
+			uint32_t src_xOffset, uint32_t src_yOffset, uint32_t src_zOffset,
+			uint32_t src_row_pitch, uint32_t src_slice_pitch);
 
 		void BuildMipSubLevels();
 
@@ -223,12 +254,16 @@ namespace KlayGE
 		uint32_t Height(int level) const;
 
 		void CopyToTexture(Texture& target);
-		
+		void CopyToTextureCube(Texture& target, CubeFaces face, int level,
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
+			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset);
+
 		void CopyToMemoryCube(CubeFaces face, int level, void* data);
 
 		void CopyMemoryToTextureCube(CubeFaces face, int level, void const * data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
-			uint32_t src_width, uint32_t src_height);
+			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset,
+			uint32_t src_row_pitch);
 
 		void BuildMipSubLevels();
 

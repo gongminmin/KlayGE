@@ -73,8 +73,6 @@ namespace KlayGE
 
 		D3D9Texture1D& other(*checked_cast<D3D9Texture1D*>(&target));
 
-		BOOST_ASSERT(target.Type() == type_);
-
 		uint32_t maxLevel = 1;
 		if (this->NumMipMaps() == target.NumMipMaps())
 		{
@@ -111,7 +109,43 @@ namespace KlayGE
 		if (this->NumMipMaps() != target.NumMipMaps())
 		{
 			target.BuildMipSubLevels();
-		}		
+		}
+	}
+
+	void D3D9Texture1D::CopyToTexture1D(Texture& target, int level,
+			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width, uint32_t src_xOffset)
+	{
+		BOOST_ASSERT(type_ == target.Type());
+
+		D3D9Texture1D& other(*checked_cast<D3D9Texture1D*>(&target));
+
+		DWORD filter = D3DX_FILTER_LINEAR;
+		if (IsSRGB(format_))
+		{
+			filter |= D3DX_FILTER_SRGB_IN;
+		}
+		if (IsSRGB(target.Format()))
+		{
+			filter |= D3DX_FILTER_SRGB_OUT;
+		}
+				
+		ID3D9SurfacePtr src, dst;
+		{
+			IDirect3DSurface9* temp;
+
+			TIF(d3dTexture1D_->GetSurfaceLevel(level, &temp));
+			src = MakeCOMPtr(temp);
+
+			TIF(other.d3dTexture1D_->GetSurfaceLevel(level, &temp));
+			dst = MakeCOMPtr(temp);
+
+			RECT srcRc = { src_xOffset, 0, src_xOffset + src_width, 1 };
+			RECT dstRc = { dst_xOffset, 0, dst_xOffset + dst_width, 1 };
+			if (FAILED(d3dDevice_->StretchRect(src.get(), &srcRc, dst.get(), &dstRc, D3DTEXF_LINEAR)))
+			{
+				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, &dstRc, src.get(), NULL, &srcRc, filter, 0));
+			}
+		}
 	}
 
 	void D3D9Texture1D::CopyToMemory1D(int level, void* data)
@@ -146,7 +180,7 @@ namespace KlayGE
 	}
 
 	void D3D9Texture1D::CopyMemoryToTexture1D(int level, void const * data, ElementFormat pf,
-		uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width)
+		uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width, uint32_t src_xOffset)
 	{
 		IDirect3DSurface9* temp;
 		TIF(d3dTexture1D_->GetSurfaceLevel(level, &temp));
@@ -164,7 +198,7 @@ namespace KlayGE
 				filter |= D3DX_FILTER_SRGB_OUT;
 			}
 
-			RECT srcRc = { 0, 0, src_width, 1 };
+			RECT srcRc = { src_xOffset, 0, src_xOffset + src_width, 1 };
 			RECT dstRc = { dst_xOffset, 0, dst_xOffset + dst_width, 1 };
 			TIF(D3DXLoadSurfaceFromMemory(surface.get(), NULL, &dstRc, data, D3D9Mapping::MappingFormat(pf),
 					src_width * NumFormatBytes(pf), NULL, &srcRc, filter, 0));

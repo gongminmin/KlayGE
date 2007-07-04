@@ -82,8 +82,6 @@ namespace KlayGE
 
 		D3D9Texture2D& other(*checked_cast<D3D9Texture2D*>(&target));
 
-		BOOST_ASSERT(target.Type() == type_);
-
 		uint32_t maxLevel = 1;
 		if (this->NumMipMaps() == target.NumMipMaps())
 		{
@@ -123,6 +121,43 @@ namespace KlayGE
 		}		
 	}
 
+	void D3D9Texture2D::CopyToTexture2D(Texture& target, int level,
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
+			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset)
+	{
+		BOOST_ASSERT(type_ == target.Type());
+
+		D3D9Texture2D& other(*checked_cast<D3D9Texture2D*>(&target));
+
+		DWORD filter = D3DX_FILTER_LINEAR;
+		if (IsSRGB(format_))
+		{
+			filter |= D3DX_FILTER_SRGB_IN;
+		}
+		if (IsSRGB(target.Format()))
+		{
+			filter |= D3DX_FILTER_SRGB_OUT;
+		}
+
+		ID3D9SurfacePtr src, dst;
+		{
+			IDirect3DSurface9* temp;
+
+			TIF(d3dTexture2D_->GetSurfaceLevel(level, &temp));
+			src = MakeCOMPtr(temp);
+
+			TIF(other.d3dTexture2D_->GetSurfaceLevel(level, &temp));
+			dst = MakeCOMPtr(temp);
+
+			RECT srcRc = { src_xOffset, src_yOffset, src_xOffset + src_width, src_yOffset + src_height };
+			RECT dstRc = { dst_xOffset, dst_yOffset, dst_xOffset + dst_width, dst_yOffset + dst_height };
+			if (FAILED(d3dDevice_->StretchRect(src.get(), &srcRc, dst.get(), NULL, D3DTEXF_LINEAR)))
+			{
+				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, &dstRc, src.get(), NULL, &srcRc, filter, 0));
+			}
+		}
+	}
+
 	void D3D9Texture2D::CopyToMemory2D(int level, void* data)
 	{
 		BOOST_ASSERT(level < numMipMaps_);
@@ -156,7 +191,8 @@ namespace KlayGE
 
 	void D3D9Texture2D::CopyMemoryToTexture2D(int level, void const * data, ElementFormat pf,
 		uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
-		uint32_t src_width, uint32_t src_height)
+		uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset,
+		uint32_t src_row_pitch)
 	{
 		IDirect3DSurface9* temp;
 		TIF(d3dTexture2D_->GetSurfaceLevel(level, &temp));
@@ -174,10 +210,10 @@ namespace KlayGE
 				filter |= D3DX_FILTER_SRGB_OUT;
 			}
 
-			RECT srcRc = { 0, 0, src_width, src_height };
+			RECT srcRc = { src_xOffset, src_yOffset, src_xOffset + src_width, src_yOffset + src_height };
 			RECT dstRc = { dst_xOffset, dst_yOffset, dst_xOffset + dst_width, dst_yOffset + dst_height };
 			TIF(D3DXLoadSurfaceFromMemory(surface.get(), NULL, &dstRc, data, D3D9Mapping::MappingFormat(pf),
-					src_width * NumFormatBytes(pf), NULL, &srcRc, filter, 0));
+					src_row_pitch, NULL, &srcRc, filter, 0));
 		}
 	}
 

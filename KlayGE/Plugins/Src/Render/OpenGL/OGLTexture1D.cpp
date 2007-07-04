@@ -135,21 +135,39 @@ namespace KlayGE
 		GLenum gl_target_type;
 		OGLMapping::MappingFormat(gl_target_internal_format, gl_target_format, gl_target_type, target.Format());
 
-		std::vector<uint8_t> data_in;
-		std::vector<uint8_t> data_out;
+		std::vector<uint8_t> data;
 		for (int level = 0; level < numMipMaps_; ++ level)
 		{
-			data_in.resize(this->Width(level) * bpp_ / 8);
-			data_out.resize(target.Width(level) * target.Bpp() / 8);
+			data.resize(this->Width(level) * bpp_ / 8);
 
-			this->CopyToMemory1D(level, &data_in[0]);
-
-			gluScaleImage(gl_format, this->Width(level), 1, GL_UNSIGNED_BYTE, &data_in[0],
-				other.Width(0), 1, gl_type, &data_out[0]);
-
-			other.CopyMemoryToTexture1D(level, &data_out[0], format_,
-				target.Width(level), 0, target.Width(level));
+			this->CopyToMemory1D(level, &data[0]);
+			other.CopyMemoryToTexture1D(level, &data[0], format_,
+				target.Width(level), 0, this->Width(level), 0);
 		}
+	}
+
+	void OGLTexture1D::CopyToTexture1D(Texture& target, int level,
+			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width, uint32_t src_xOffset)
+	{
+		BOOST_ASSERT(type_ == target.Type());
+
+		OGLTexture1D& other = static_cast<OGLTexture1D&>(target);
+
+		GLint gl_internalFormat;
+		GLenum gl_format;
+		GLenum gl_type;
+		OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
+
+		GLint gl_target_internal_format;
+		GLenum gl_target_format;
+		GLenum gl_target_type;
+		OGLMapping::MappingFormat(gl_target_internal_format, gl_target_format, gl_target_type, target.Format());
+
+		std::vector<uint8_t> data(src_width * bpp_ / 8);
+
+		this->CopyToMemory1D(level, &data[0]);
+		other.CopyMemoryToTexture1D(level, &data[0], format_,
+			dst_width, dst_xOffset, src_width, src_xOffset);
 	}
 
 	void OGLTexture1D::CopyToMemory1D(int level, void* data)
@@ -172,7 +190,7 @@ namespace KlayGE
 	}
 
 	void OGLTexture1D::CopyMemoryToTexture1D(int level, void const * data, ElementFormat pf,
-		uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width)
+		uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width, uint32_t src_xOffset)
 	{
 		BOOST_ASSERT(src_width != 0);
 		BOOST_ASSERT(dst_width != 0);
@@ -185,13 +203,14 @@ namespace KlayGE
 		glBindTexture(GL_TEXTURE_1D, texture_);
 
 		uint32_t data_size = dst_width * NumFormatBytes(pf);
+		uint8_t const * resized_data = static_cast<uint8_t const *>(data) + src_xOffset * NumFormatBytes(pf);
 		std::vector<uint8_t> tmp;
 		if (dst_width != src_width)
 		{
 			tmp.resize(data_size);
-			gluScaleImage(glformat, src_width, 1, gltype, data,
+			gluScaleImage(glformat, src_width, 1, gltype, resized_data,
 				dst_width, 1, gltype, &tmp[0]);
-			data = &tmp[0];
+			resized_data = &tmp[0];
 		}
 
 		if (IsCompressedFormat(format_))
@@ -211,7 +230,7 @@ namespace KlayGE
 			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_);
 			glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW_ARB);
 			uint8_t* p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
-			memcpy(p, data, image_size);
+			memcpy(p, resized_data, image_size);
 			glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
 			glCompressedTexSubImage1D(GL_TEXTURE_1D, level, dst_xOffset,
@@ -222,7 +241,7 @@ namespace KlayGE
 			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_);
 			glBufferData(GL_PIXEL_UNPACK_BUFFER, data_size, NULL, GL_STREAM_DRAW_ARB);
 			uint8_t* p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
-			memcpy(p, data, data_size);
+			memcpy(p, resized_data, data_size);
 			glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
 			glTexSubImage1D(GL_TEXTURE_1D, level, dst_xOffset,

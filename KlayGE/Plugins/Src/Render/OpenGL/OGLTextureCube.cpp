@@ -136,25 +136,43 @@ namespace KlayGE
 		GLenum gl_target_type;
 		OGLMapping::MappingFormat(gl_target_internal_format, gl_target_format, gl_target_type, target.Format());
 
-		std::vector<uint8_t> data_in;
-		std::vector<uint8_t> data_out;
+		size_t const size = NumFormatBytes(format_);
+		std::vector<uint8_t> data;
 		for (int level = 0; level < numMipMaps_; ++ level)
 		{
-			data_in.resize(this->Width(level) * this->Height(level) * bpp_ / 8);
-			data_out.resize(target.Width(level) * target.Height(level) * target.Bpp() / 8);
+			data.resize(this->Width(level) * this->Height(level) * bpp_ / 8);
 
 			for (int face = 0; face < 6; ++ face)
 			{
-				this->CopyToMemoryCube(static_cast<CubeFaces>(face), level, &data_in[0]);
-
-				gluScaleImage(gl_format, this->Width(level), this->Height(level), GL_UNSIGNED_BYTE, &data_in[0],
-					target.Width(0), target.Height(0), gl_type, &data_out[0]);
-
-				target.CopyMemoryToTextureCube(static_cast<CubeFaces>(face), level, &data_out[0], format_,
+				this->CopyToMemoryCube(static_cast<CubeFaces>(face), level, &data[0]);
+				target.CopyMemoryToTextureCube(static_cast<CubeFaces>(face), level, &data[0], format_,
 					target.Width(level), target.Height(level), 0, 0,
-					target.Width(level), target.Height(level));
+					this->Width(level), this->Height(level), 0, 0,
+					this->Width(level) * size);
 			}
 		}
+	}
+
+	void OGLTextureCube::CopyToTextureCube(Texture& target, CubeFaces face, int level,
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
+			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset)
+	{
+		GLint gl_internalFormat;
+		GLenum gl_format;
+		GLenum gl_type;
+		OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
+
+		GLint gl_target_internal_format;
+		GLenum gl_target_format;
+		GLenum gl_target_type;
+		OGLMapping::MappingFormat(gl_target_internal_format, gl_target_format, gl_target_type, target.Format());
+
+		std::vector<uint8_t> data(src_width * src_height * bpp_ / 8);
+		this->CopyToMemoryCube(static_cast<CubeFaces>(face), level, &data[0]);
+		target.CopyMemoryToTextureCube(static_cast<CubeFaces>(face), level, &data[0], format_,
+			dst_width, dst_height, dst_xOffset, dst_yOffset,
+			src_width, src_height, src_xOffset, src_yOffset,
+			this->Width(level) * NumFormatBytes(format_));
 	}
 
 	void OGLTextureCube::CopyToMemoryCube(CubeFaces face, int level, void* data)
@@ -178,7 +196,8 @@ namespace KlayGE
 
 	void OGLTextureCube::CopyMemoryToTextureCube(CubeFaces face, int level, void const * data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
-			uint32_t src_width, uint32_t src_height)
+			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset,
+			uint32_t src_row_pitch)
 	{
 		BOOST_ASSERT(src_width != 0);
 		BOOST_ASSERT(src_height != 0);
@@ -191,16 +210,6 @@ namespace KlayGE
 		OGLMapping::MappingFormat(glinternalFormat, glformat, gltype, pf);
 
 		glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
-
-		uint32_t data_size = dst_width * dst_height * NumFormatBytes(pf);
-		std::vector<uint8_t> tmp;
-		if ((dst_width != src_width) || (dst_height != src_height))
-		{
-			tmp.resize(data_size);
-			gluScaleImage(glformat, src_width, src_height, gltype, data,
-				dst_width, dst_height, gltype, &tmp[0]);
-			data = &tmp[0];
-		}
 
 		if (IsCompressedFormat(format_))
 		{
@@ -227,10 +236,32 @@ namespace KlayGE
 		}
 		else
 		{
+			size_t num_bytes_pf = NumFormatBytes(pf);
+
+			std::vector<uint8_t> resized_data(src_width * src_height * num_bytes_pf);
+			{
+				uint8_t const * src = static_cast<uint8_t const *>(data) + (src_yOffset * src_width + src_xOffset) * num_bytes_pf;
+				uint8_t* dst = &resized_data[0];
+				for (size_t i = 0; i < src_height; ++ i)
+				{
+					memcpy(dst, src, src_width * num_bytes_pf);
+					src += src_row_pitch;
+					dst += src_width * num_bytes_pf;
+				}
+			}
+			uint32_t data_size = dst_width * dst_height * num_bytes_pf;
+			if ((dst_width != src_width) || (dst_height != src_height))
+			{
+				std::vector<uint8_t> tmp(data_size);
+				gluScaleImage(glformat, src_width, src_height, gltype, &resized_data[0],
+					dst_width, dst_height, gltype, &tmp[0]);
+				resized_data = tmp;
+			}
+
 			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_);
 			glBufferData(GL_PIXEL_UNPACK_BUFFER, data_size, NULL, GL_STREAM_DRAW_ARB);
 			uint8_t* p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
-			memcpy(p, data, data_size);
+			memcpy(p, &resized_data[0], data_size);
 			glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
 			glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, dst_xOffset, dst_yOffset,

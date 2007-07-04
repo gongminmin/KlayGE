@@ -144,27 +144,44 @@ namespace KlayGE
 		GLenum gl_target_type;
 		OGLMapping::MappingFormat(gl_target_internal_format, gl_target_format, gl_target_type, target.Format());
 
-		std::vector<uint8_t> data_in;
-		std::vector<uint8_t> data_out;
+		size_t const size = NumFormatBytes(format_);
+		std::vector<uint8_t> data;
 		for (int level = 0; level < numMipMaps_; ++ level)
 		{
-			data_in.resize(this->Width(level) * this->Height(level) * this->Depth(level) * bpp_ / 8);
-			data_out.resize(target.Width(level) * target.Height(level) * target.Depth(level) * target.Bpp() / 8);
+			data.resize(this->Width(level) * this->Height(level) * this->Depth(level) * bpp_ / 8);
 
-			this->CopyToMemory3D(level, &data_in[0]);
-
-			for (uint32_t i = 0; i < this->Depth(level); ++ i)
-			{
-				gluScaleImage(gl_format, this->Width(level), this->Height(level), GL_UNSIGNED_BYTE,
-					&data_in[this->Width(level) * this->Height(level) * bpp_ / 8 * i],
-					target.Width(0), target.Height(0), gl_type,
-					&data_out[target.Width(level) * target.Height(level) * bpp_ / 8 * i]);
-			}
-
-			target.CopyMemoryToTexture3D(level, &data_out[0], format_,
+			this->CopyToMemory3D(level, &data[0]);
+			target.CopyMemoryToTexture3D(level, &data[0], format_,
 				target.Width(level), target.Height(level), target.Depth(level), 0, 0, 0,
-				target.Width(level), target.Height(level), target.Depth(level));
+				this->Width(level), this->Height(level), this->Depth(level), 0, 0, 0,
+				this->Width(level) * size, this->Width(level) * this->Height(level) * size);
 		}
+	}
+
+	void OGLTexture3D::CopyToTexture3D(Texture& target, int level,
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
+			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
+			uint32_t src_width, uint32_t src_height, uint32_t src_depth,
+			uint32_t src_xOffset, uint32_t src_yOffset, uint32_t src_zOffset)
+	{
+		GLint gl_internalFormat;
+		GLenum gl_format;
+		GLenum gl_type;
+		OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
+
+		GLint gl_target_internal_format;
+		GLenum gl_target_format;
+		GLenum gl_target_type;
+		OGLMapping::MappingFormat(gl_target_internal_format, gl_target_format, gl_target_type, target.Format());
+
+		std::vector<uint8_t> data(this->Width(level) * this->Height(level) * this->Depth(level) * bpp_ / 8);
+
+		size_t const size = NumFormatBytes(format_);
+		this->CopyToMemory3D(level, &data[0]);
+		target.CopyMemoryToTexture3D(level, &data[0], format_,
+			dst_width, dst_height, dst_depth, dst_xOffset, dst_yOffset, dst_zOffset,
+			src_width, src_height, src_depth, src_xOffset, src_yOffset, src_zOffset,
+			this->Width(level) * size, this->Width(level) * this->Height(level) * size);
 	}
 
 	void OGLTexture3D::CopyToMemory3D(int level, void* data)
@@ -189,7 +206,9 @@ namespace KlayGE
 	void OGLTexture3D::CopyMemoryToTexture3D(int level, void const * data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
 			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
-			uint32_t src_width, uint32_t src_height, uint32_t src_depth)
+			uint32_t src_width, uint32_t src_height, uint32_t src_depth,
+			uint32_t src_xOffset, uint32_t src_yOffset, uint32_t src_zOffset,
+			uint32_t src_row_pitch, uint32_t src_slice_pitch)
 	{
 		UNREF_PARAM(src_width);
 		UNREF_PARAM(src_height);
@@ -238,12 +257,40 @@ namespace KlayGE
 		}
 		else
 		{
-			uint32_t data_size = dst_width * dst_height * dst_depth * NumFormatBytes(pf);
+			size_t num_bytes_pf = NumFormatBytes(pf);
+
+			std::vector<uint8_t> resized_data(src_width * src_height * src_depth * num_bytes_pf);
+			{
+				uint8_t const * src = static_cast<uint8_t const *>(data) + (src_zOffset * src_width * src_height + src_yOffset * src_width + src_xOffset) * num_bytes_pf;
+				uint8_t* dst = &resized_data[0];
+				for (size_t i = 0; i < src_depth; ++ i)
+				{
+					for (size_t j = 0; j < src_height; ++ j)
+					{
+						memcpy(dst, src, src_width * num_bytes_pf);
+						src += src_row_pitch;
+						dst += src_width * num_bytes_pf;
+					}
+					src += src_slice_pitch - src_row_pitch * src_height;
+				}
+			}
+			uint32_t data_size = dst_width * dst_height * dst_depth * num_bytes_pf;
+			if ((dst_width != src_width) || (dst_height != src_height))
+			{
+				std::vector<uint8_t> tmp(data_size);
+				for (uint32_t i = 0; i < dst_depth; ++ i)
+				{
+					gluScaleImage(glformat, dst_width, dst_height, GL_UNSIGNED_BYTE,
+						&resized_data[0], dst_width, dst_height, gltype,
+						&tmp[i * dst_width * dst_height * num_bytes_pf]);
+				}
+				resized_data = tmp;
+			}
 		
 			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_);
 			glBufferData(GL_PIXEL_UNPACK_BUFFER, data_size, NULL, GL_STREAM_DRAW_ARB);
 			uint8_t* p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
-			memcpy(p, data, data_size);
+			memcpy(p, &resized_data[0], data_size);
 			glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
 			glTexSubImage3D(GL_TEXTURE_3D, level, dst_xOffset, dst_yOffset, dst_zOffset,
