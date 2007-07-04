@@ -519,7 +519,7 @@ namespace
 						}
 						theTexture_->CopyMemoryToTexture2D(0, &dest[0], TEX_FORMAT,
 								max_width, max_height, char_pos.x(), char_pos.y(),
-								max_width, max_height);
+								max_width, max_height, 0, 0, max_width * NumFormatBytes(TEX_FORMAT));
 
 						charInfoMap_.insert(std::make_pair(ch, charInfo));
 						charLRU_.push_front(ch);

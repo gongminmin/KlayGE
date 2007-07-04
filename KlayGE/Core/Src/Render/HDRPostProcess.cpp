@@ -88,7 +88,7 @@ namespace KlayGE
 		{
 			TexturePtr tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(1, 1, 1, EF_R32F);
 			float data = 0;
-			tex->CopyMemoryToTexture2D(0, &data, EF_R32F, 1, 1, 0, 0, 1, 1);
+			tex->CopyMemoryToTexture2D(0, &data, EF_R32F, 1, 1, 0, 0, 1, 1, 0, 0, 4);
 			adapted_textures_[i] = tex;
 
 			fb_[i] = rf.MakeFrameBuffer();

@@ -4,6 +4,9 @@
 // 版权所有(C) 龚敏敏, 2003-2006
 // Homepage: http://klayge.sourceforge.net
 //
+// 3.6.0
+// 增加了可以控制范围的CopyToTexture (2007.7.4)
+//
 // 3.3.0
 // 使用ElementFormat (2006.6.8)
 //
@@ -117,6 +120,19 @@ namespace KlayGE
 
 		// Copies (and maybe scales to fit) the contents of this texture to another texture.
 		virtual void CopyToTexture(Texture& target) = 0;
+		virtual void CopyToTexture1D(Texture& target, int level,
+			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width, uint32_t src_xOffset) = 0;
+		virtual void CopyToTexture2D(Texture& target, int level,
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
+			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset) = 0;
+		virtual void CopyToTexture3D(Texture& target, int level,
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
+			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
+			uint32_t src_width, uint32_t src_height, uint32_t src_depth,
+			uint32_t src_xOffset, uint32_t src_yOffset, uint32_t src_zOffset) = 0;
+		virtual void CopyToTextureCube(Texture& target, CubeFaces face, int level,
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
+			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset) = 0;
 
 		virtual void CopyToMemory1D(int level, void* data) = 0;
 		virtual void CopyToMemory2D(int level, void* data) = 0;
@@ -124,17 +140,21 @@ namespace KlayGE
 		virtual void CopyToMemoryCube(CubeFaces face, int level, void* data) = 0;
 
 		virtual void CopyMemoryToTexture1D(int level, void const * data, ElementFormat pf,
-			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width) = 0;
+			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width, uint32_t src_xOffset) = 0;
 		virtual void CopyMemoryToTexture2D(int level, void const * data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
-			uint32_t src_width, uint32_t src_height) = 0;
+			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset,
+			uint32_t src_row_pitch) = 0;
 		virtual void CopyMemoryToTexture3D(int level, void const * data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
 			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
-			uint32_t src_width, uint32_t src_height, uint32_t src_depth) = 0;
+			uint32_t src_width, uint32_t src_height, uint32_t src_depth,
+			uint32_t src_xOffset, uint32_t src_yOffset, uint32_t src_zOffset,
+			uint32_t src_row_pitch, uint32_t src_slice_pitch) = 0;
 		virtual void CopyMemoryToTextureCube(CubeFaces face, int level, void const * data, ElementFormat pf,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
-			uint32_t src_width, uint32_t src_height) = 0;
+			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset,
+			uint32_t src_row_pitch) = 0;
 
 		virtual void BuildMipSubLevels() = 0;
 

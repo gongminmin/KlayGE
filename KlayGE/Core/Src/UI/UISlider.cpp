@@ -230,9 +230,6 @@ namespace KlayGE
 
 	void UISlider::Render()
 	{
-		int nOffsetX = 0;
-		int nOffsetY = 0;
-
 		UI_Control_State iState = UICS_Normal;
 
 		if (!visible_)
@@ -250,18 +247,12 @@ namespace KlayGE
 				if (pressed_)
 				{
 					iState = UICS_Pressed;
-
-					nOffsetX = 1;
-					nOffsetY = 2;
 				}
 				else
 				{
 					if (is_mouse_over_)
 					{
 						iState = UICS_MouseOver;
-
-						nOffsetX = -1;
-						nOffsetY = -2;
 					}
 					else
 					{

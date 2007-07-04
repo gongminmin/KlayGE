@@ -509,9 +509,6 @@ namespace KlayGE
 			}
 		}
 
-		int nOffsetX = 0;
-		int nOffsetY = 0;
-
 		iState = UICS_Normal;
 
 		if (!visible_)
@@ -529,18 +526,12 @@ namespace KlayGE
 				if (pressed_)
 				{
 					iState = UICS_Pressed;
-
-					nOffsetX = 1;
-					nOffsetY = 2;
 				}
 				else
 				{
 					if (is_mouse_over_)
 					{
 						iState = UICS_MouseOver;
-
-						nOffsetX = -1;
-						nOffsetY = -2;
 					}
 					else
 					{
@@ -560,7 +551,6 @@ namespace KlayGE
 		pElement->TextureColor().SetState(iState);
 
 		Rect_T<int32_t> rcWindow = button_rc_;
-		rcWindow += Vector_T<int32_t, 2>(nOffsetX, nOffsetY);
 		this->GetDialog()->DrawSprite(*pElement, rcWindow);
 
 		if (opened_)

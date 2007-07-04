@@ -138,9 +138,6 @@ namespace KlayGE
 
 	void UIButton::Render()
 	{
-		int nOffsetX = 0;
-		int nOffsetY = 0;
-
 		UI_Control_State iState = UICS_Normal;
 
 		if (!visible_)
@@ -158,18 +155,12 @@ namespace KlayGE
 				if (pressed_)
 				{
 					iState = UICS_Pressed;
-
-					nOffsetX = 1;
-					nOffsetY = 2;
 				}
 				else
 				{
 					if (is_mouse_over_)
 					{
 						iState = UICS_MouseOver;
-
-						nOffsetX = -1;
-						nOffsetY = -2;
 					}
 					else
 					{
@@ -186,7 +177,7 @@ namespace KlayGE
 		//TODO: remove magic numbers
 		UIElementPtr pElement = elements_[0];
 
-		Rect_T<int32_t> rcWindow = bounding_box_ + Vector_T<int32_t, 2>(nOffsetX, nOffsetY);
+		Rect_T<int32_t> rcWindow = bounding_box_;
 
 		// Blend current color
 		pElement->TextureColor().SetState(iState);
