@@ -201,8 +201,10 @@ void Fractal::OnResize(uint32_t width, uint32_t height)
 
 	std::vector<float4> data(width * height);
 	std::fill(data.begin(), data.end(), float4(0, 0, 0, 0));
-	rendered_tex_[0]->CopyMemoryToTexture2D(0, &data[0], EF_ABGR32F, width, height, 0, 0, width, height);
-	rendered_tex_[1]->CopyMemoryToTexture2D(0, &data[0], EF_ABGR32F, width, height, 0, 0, width, height);
+	rendered_tex_[0]->CopyMemoryToTexture2D(0, &data[0], EF_ABGR32F, width, height, 0, 0,
+		width, height, 0, 0, width * 16);
+	rendered_tex_[1]->CopyMemoryToTexture2D(0, &data[0], EF_ABGR32F, width, height, 0, 0,
+		width, height, 0, 0, width * 16);
 
 	render_buffer_[0]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_[0], 0));
 	render_buffer_[1]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_[1], 0));

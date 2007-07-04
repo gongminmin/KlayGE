@@ -78,7 +78,7 @@ namespace
 
 			TexturePtr electro_tex = rf.MakeTexture3D(XSIZE, YSIZE, ZSIZE, 1, EF_L8);
 			electro_tex->CopyMemoryToTexture3D(0, &turbBuffer[0], EF_L8, XSIZE, YSIZE, ZSIZE, 0, 0, 0,
-				XSIZE, YSIZE, ZSIZE);
+				XSIZE, YSIZE, ZSIZE, 0, 0, 0, XSIZE, XSIZE * YSIZE);
 
 			technique_ = rf.LoadEffect("Electro.kfx")->TechniqueByName("Electro");
 			*(technique_->Effect().ParameterByName("electroSampler")) = electro_tex;

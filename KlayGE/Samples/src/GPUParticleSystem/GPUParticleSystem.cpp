@@ -176,9 +176,11 @@ namespace
 			particle_vel_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F);
 			std::vector<float4> pos_init(max_num_particles, float4(0, 0, 0, 0));
 			particle_pos_texture_[0]->CopyMemoryToTexture2D(0, &pos_init[0], EF_ABGR32F,
-				tex_width_, tex_height_, 0, 0, tex_width_, tex_height_);
+				tex_width_, tex_height_, 0, 0, tex_width_, tex_height_, 0, 0,
+				tex_width_ * 16);
 			particle_pos_texture_[1]->CopyMemoryToTexture2D(0, &pos_init[0], EF_ABGR32F,
-				tex_width_, tex_height_, 0, 0, tex_width_, tex_height_);
+				tex_width_, tex_height_, 0, 0, tex_width_, tex_height_, 0, 0,
+				tex_width_ * 16);
 
 			pos_vel_rt_buffer_[0] = rf.MakeFrameBuffer();
 			pos_vel_rt_buffer_[0]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*particle_pos_texture_[0], 0));
@@ -203,7 +205,8 @@ namespace
 				vel_init[i] = float4(random_gen_(), 0.2f + abs(random_gen_()) * 3, random_gen_(), 0);
 			}
 			particle_init_vel->CopyMemoryToTexture2D(0, &vel_init[0], EF_ABGR32F,
-				tex_width_, tex_height_, 0, 0, tex_width_, tex_height_);
+				tex_width_, tex_height_, 0, 0, tex_width_, tex_height_, 0, 0,
+				tex_width_ * 16);
 			*(technique_->Effect().ParameterByName("particle_init_vel_sampler")) = particle_init_vel;
 
 			particle_pos_sampler_param_ = technique_->Effect().ParameterByName("particle_pos_sampler");
@@ -239,7 +242,8 @@ namespace
 				time += inv_emit_freq_;
 			}
 			particle_birth_time_->CopyMemoryToTexture2D(0, &birth_time_init[0], EF_R32F,
-				tex_width_, tex_height_, 0, 0, tex_width_, tex_height_);
+				tex_width_, tex_height_, 0, 0, tex_width_, tex_height_, 0, 0,
+				tex_width_ * 4);
 		}
 
 		void Update(float elapse_time)
