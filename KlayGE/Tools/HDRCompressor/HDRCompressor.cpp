@@ -116,9 +116,9 @@ namespace
 			CompressHDR(y_data, c_data, hdr_data, size, size);
 			
 			y_cube_map->CopyMemoryToTextureCube(static_cast<Texture::CubeFaces>(i), 0,
-				&y_data[0], EF_L16, size, size, 0, 0, size, size);
+				&y_data[0], EF_L16, size, size, 0, 0, size, size, 0, 0, size * 2);
 			c_cube_map->CopyMemoryToTextureCube(static_cast<Texture::CubeFaces>(i), 0,
-				&c_data[0], EF_ARGB8, size / 2, size / 2, 0, 0, size / 2, size / 2);
+				&c_data[0], EF_ARGB8, size / 2, size / 2, 0, 0, size / 2, size / 2, 0, 0, size / 2 * 4);
 		}
 
 		return std::make_pair(y_cube_map, c_cube_map);
@@ -139,8 +139,8 @@ namespace
 		tex->CopyToMemory2D(0, &hdr_data[0]);
 		CompressHDR(y_data, c_data, hdr_data, width, height);
 
-		y_cube_map->CopyMemoryToTexture2D(0, &y_data[0], EF_L16, width, height, 0, 0, width, height);
-		c_cube_map->CopyMemoryToTexture2D(0, &c_data[0], EF_ARGB8, width / 2, height / 2, 0, 0, width / 2, height / 2);
+		y_cube_map->CopyMemoryToTexture2D(0, &y_data[0], EF_L16, width, height, 0, 0, width, height, 0, 0, width * 2);
+		c_cube_map->CopyMemoryToTexture2D(0, &c_data[0], EF_ARGB8, width / 2, height / 2, 0, 0, width / 2, height / 2, 0, 0, width / 2 * 4);
 
 		return std::make_pair(y_cube_map, c_cube_map);
 	}

@@ -39,7 +39,7 @@ namespace
 			normal_map->CopyToMemoryCube(static_cast<Texture::CubeFaces>(i), 0, &normals[0]);
 			CompressNormal(normals);
 			new_normal_map->CopyMemoryToTextureCube(static_cast<Texture::CubeFaces>(i), 0,
-				&normals[0], EF_ARGB8, size, size, 0, 0, size, size);
+				&normals[0], EF_ARGB8, size, size, 0, 0, size, size, 0, 0, size * 4);
 		}
 
 		return new_normal_map;
@@ -56,7 +56,7 @@ namespace
 			normal_map->CopyToMemory2D(0, &normals[0]);
 			CompressNormal(normals);
 			new_normal_map->CopyMemoryToTexture2D(0, &normals[0], EF_ARGB8,
-				width, height, 0, 0, width, height);
+				width, height, 0, 0, width, height, 0, 0, width * 4);
 		}
 
 		return new_normal_map;

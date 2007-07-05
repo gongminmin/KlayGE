@@ -64,7 +64,7 @@ namespace
 		}
 
 		TexturePtr normal_map = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, EF_ARGB8);
-		normal_map->CopyMemoryToTexture2D(0, &normals[0], EF_ARGB8, width, height, 0, 0, width, height);
+		normal_map->CopyMemoryToTexture2D(0, &normals[0], EF_ARGB8, width, height, 0, 0, width, height, 0, 0, width * 4);
 		return normal_map;
 	}
 }

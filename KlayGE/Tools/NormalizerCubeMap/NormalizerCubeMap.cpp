@@ -96,7 +96,7 @@ TexturePtr CreateCubeMap(int cube_size)
 		}
 
 		cube->CopyMemoryToTextureCube(static_cast<Texture::CubeFaces>(face), 0, &data[0], EF_ARGB8,
-			cube_size, cube_size, 0, 0, cube_size, cube_size);
+			cube_size, cube_size, 0, 0, cube_size, cube_size, 0, 0, cube_size * 4);
 	}
 
 	return cube;

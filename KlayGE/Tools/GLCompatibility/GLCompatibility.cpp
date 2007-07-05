@@ -101,8 +101,7 @@ int main(int argc, char* argv[])
 	KlayGE::ScriptEngine scriptEng;
 	KlayGE::ScriptModule module("GLCompatibility");
 
-	module.Call("gl_compatibility",
-		boost::make_tuple(KlayGE::PyObjectPtr(Py_BuildValue("s", info_file_name.c_str()))));
+	module.Call("gl_compatibility", boost::make_tuple(info_file_name));
 
 	std::cout << "Press Enter key to exit...";
 	std::cin.get();
