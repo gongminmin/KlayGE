@@ -79,7 +79,7 @@
 			<Param type="GLenum" name="pname"/>
 			<Param type="GLint*" name="params"/>
 		</Function>
-		<Function name="glGetTexParameterIiuvEXT" return="void">
+		<Function name="glGetTexParameterIuivEXT" return="void">
 			<Param type="GLenum" name="target"/>
 			<Param type="GLenum" name="pname"/>
 			<Param type="GLuint*" name="params"/>
@@ -93,7 +93,7 @@
 			<Name name="glTexParameterIivEXT"/>
 			<Name name="glTexParameterIuivEXT"/>
 			<Name name="glGetTexParameterIivEXT"/>
-			<Name name="glGetTexParameterIiuvEXT"/>
+			<Name name="glGetTexParameterIuivEXT"/>
 		</Vendor>
 	</Vendors>
 
