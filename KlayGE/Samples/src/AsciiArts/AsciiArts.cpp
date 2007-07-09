@@ -129,7 +129,15 @@ namespace
 		std::vector<ascii_tile_type> ret(INPUT_NUM_ASCII);
 
 		std::vector<uint8_t> ascii_tex_data(INPUT_NUM_ASCII * ASCII_WIDTH * ASCII_HEIGHT);
-		ascii_tex->CopyToMemory2D(0, &ascii_tex_data[0]);
+		uint8_t* data;
+		uint32_t row_pitch;
+		ascii_tex->Map2D(0, TMA_Read_Only, 0, 0, INPUT_NUM_ASCII * ASCII_WIDTH, ASCII_HEIGHT, reinterpret_cast<void*&>(data), row_pitch);
+		for (uint32_t y = 0; y < ASCII_HEIGHT; ++ y)
+		{
+			memcpy(&ascii_tex_data[y * INPUT_NUM_ASCII * ASCII_WIDTH], data, INPUT_NUM_ASCII * ASCII_WIDTH);
+			data += row_pitch;
+		}
+		ascii_tex->Unmap2D(0);
 
 		for (size_t i = 0; i < ret.size(); ++ i)
 		{
@@ -168,8 +176,15 @@ namespace
 
 		TexturePtr ret = Context::Instance().RenderFactoryInstance().MakeTexture2D(OUTPUT_NUM_ASCII * ASCII_WIDTH,
 			ASCII_HEIGHT, 1, EF_L8);
-		ret->CopyMemoryToTexture2D(0, &temp_data[0], EF_L8, OUTPUT_NUM_ASCII * ASCII_WIDTH, ASCII_HEIGHT, 0, 0,
-			OUTPUT_NUM_ASCII * ASCII_WIDTH, ASCII_HEIGHT, 0, 0, OUTPUT_NUM_ASCII * ASCII_WIDTH);
+		uint8_t* data;
+		uint32_t row_pitch;
+		ret->Map2D(0, TMA_Write_Only, 0, 0, ASCII_HEIGHT, ASCII_HEIGHT, reinterpret_cast<void*&>(data), row_pitch);
+		for (uint32_t y = 0; y < ASCII_HEIGHT; ++ y)
+		{
+			memcpy(data, &temp_data[y * OUTPUT_NUM_ASCII * ASCII_WIDTH], OUTPUT_NUM_ASCII * ASCII_WIDTH);
+			data += row_pitch;
+		}
+		ret->Unmap2D(0);
 		return ret;
 	}
 

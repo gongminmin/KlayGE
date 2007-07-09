@@ -29,7 +29,15 @@ public:
 		hm_height_ = img->Height(0);
 		heights_.resize(hm_width_ * hm_height_);
 
-		img->CopyToMemory2D(0, &heights_[0]);
+		KlayGE::uint8_t* data;
+		KlayGE::uint32_t row_pitch;
+		img->Map2D(0, KlayGE::TMA_Read_Only, 0, 0, hm_width_, hm_height_, reinterpret_cast<void*&>(data), row_pitch);
+		for (KlayGE::uint32_t y = 0; y < hm_height_; ++ y)
+		{
+			memcpy(&heights_[y * hm_width_], data, hm_width_);
+			data += row_pitch;
+		}
+		img->Unmap2D(0);
 	}
 
 	float operator()(float x, float y)

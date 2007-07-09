@@ -157,65 +157,21 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9TextureCube::CopyToMemoryCube(CubeFaces face, int level, void* data)
+	void D3D9TextureCube::MapCube(CubeFaces face, int level, TextureMapAccess tma,
+			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
+			void*& data, uint32_t& row_pitch)
 	{
-		BOOST_ASSERT(level < numMipMaps_);
-		BOOST_ASSERT(data != NULL);
-
-		ID3D9SurfacePtr surface;
-		{
-			IDirect3DSurface9* tmp_surface;
-			d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &tmp_surface);
-			surface = MakeCOMPtr(tmp_surface);
-		}
-		if (TU_RenderTarget == usage_)
-		{
-			IDirect3DSurface9* tmp_surface;
-			d3dDevice_->CreateOffscreenPlainSurface(this->Width(level), this->Height(level),
-				D3D9Mapping::MappingFormat(format_), D3DPOOL_SYSTEMMEM, &tmp_surface, NULL);
-
-			DWORD filter = D3DX_FILTER_NONE;
-			if (IsSRGB(format_))
-			{
-				filter |= D3DX_FILTER_SRGB;
-			}
-
-			TIF(D3DXLoadSurfaceFromSurface(tmp_surface, NULL, NULL, surface.get(), NULL, NULL, filter, 0));
-
-			surface = MakeCOMPtr(tmp_surface);
-		}
-
-		this->CopySurfaceToMemory(surface, data);
+		RECT rc = { x_offset, y_offset, x_offset + width, y_offset + height };
+		D3DLOCKED_RECT locked_rc;
+		d3dTextureCube_->LockRect(static_cast<D3DCUBEMAP_FACES>(D3DCUBEMAP_FACE_POSITIVE_X + face), level,
+			&locked_rc, &rc, TMA_Read_Only == tma ? D3DLOCK_READONLY : 0);
+		data = locked_rc.pBits;
+		row_pitch = locked_rc.Pitch;
 	}
 
-	void D3D9TextureCube::CopyMemoryToTextureCube(CubeFaces face, int level, void const * data, ElementFormat pf,
-			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
-			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset,
-			uint32_t src_row_pitch)
+	void D3D9TextureCube::UnmapCube(CubeFaces face, int level)
 	{
-		BOOST_ASSERT(TT_Cube == type_);
-
-		IDirect3DSurface9* temp;
-		TIF(d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &temp));
-		ID3D9SurfacePtr surface = MakeCOMPtr(temp);
-
-		if (surface)
-		{
-			DWORD filter = D3DX_FILTER_LINEAR;
-			if (IsSRGB(pf))
-			{
-				filter |= D3DX_FILTER_SRGB_IN;
-			}
-			if (IsSRGB(format_))
-			{
-				filter |= D3DX_FILTER_SRGB_OUT;
-			}
-
-			RECT srcRc = { src_xOffset, src_yOffset, src_xOffset + src_width, src_yOffset + src_height };
-			RECT dstRc = { dst_xOffset, dst_yOffset, dst_xOffset + dst_width, dst_yOffset + dst_height };
-			TIF(D3DXLoadSurfaceFromMemory(surface.get(), NULL, &dstRc, data, D3D9Mapping::MappingFormat(pf),
-					src_row_pitch, NULL, &srcRc, filter, 0));
-		}
+		d3dTextureCube_->UnlockRect(static_cast<D3DCUBEMAP_FACES>(D3DCUBEMAP_FACE_POSITIVE_X + face), level);
 	}
 
 	void D3D9TextureCube::BuildMipSubLevels()

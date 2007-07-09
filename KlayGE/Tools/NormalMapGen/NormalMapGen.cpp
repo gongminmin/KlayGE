@@ -23,7 +23,17 @@ namespace
 		uint32_t const height = height_map->Height(0);
 
 		std::vector<uint8_t> heights(width * height);
-		height_map->CopyToMemory2D(0, &heights[0]);
+
+		uint8_t* data;
+		uint32_t row_pitch;
+		height_map->Map2D(0, TMA_Read_Only, 0, 0, width, height,
+			reinterpret_cast<void*&>(data), row_pitch);
+		for (uint32_t y = 0; y < height; ++ y)
+		{
+			memcpy(&heights[y * width], data, width * height_map->Bpp() / 8);
+			data += row_pitch;
+		}
+		height_map->Unmap2D(0);
 
 		std::vector<char> dx;
 		dx.resize(heights.size());
@@ -64,7 +74,14 @@ namespace
 		}
 
 		TexturePtr normal_map = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, EF_ARGB8);
-		normal_map->CopyMemoryToTexture2D(0, &normals[0], EF_ARGB8, width, height, 0, 0, width, height, 0, 0, width * 4);
+		normal_map->Map2D(0, TMA_Write_Only, 0, 0, width, height,
+			reinterpret_cast<void*&>(data), row_pitch);
+		for (uint32_t y = 0; y < height; ++ y)
+		{
+			memcpy(data, &normals[y * width * 4], width * normal_map->Bpp() / 8);
+			data += row_pitch;
+		}
+		normal_map->Unmap2D(0);
 		return normal_map;
 	}
 }

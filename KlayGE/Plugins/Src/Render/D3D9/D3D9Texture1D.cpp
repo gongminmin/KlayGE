@@ -148,61 +148,19 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9Texture1D::CopyToMemory1D(int level, void* data)
+	void D3D9Texture1D::Map1D(int level, TextureMapAccess tma,
+			uint32_t x_offset, uint32_t width,
+			void*& data)
 	{
-		BOOST_ASSERT(level < numMipMaps_);
-		BOOST_ASSERT(data != NULL);
-
-		ID3D9SurfacePtr surface;
-		{
-			IDirect3DSurface9* tmp_surface;
-			TIF(d3dTexture1D_->GetSurfaceLevel(level, &tmp_surface));
-			surface = MakeCOMPtr(tmp_surface);
-		}
-		if (TU_RenderTarget == usage_)
-		{
-			IDirect3DSurface9* tmp_surface;
-			TIF(d3dDevice_->CreateOffscreenPlainSurface(this->Width(level), this->Height(level),
-				D3D9Mapping::MappingFormat(format_), D3DPOOL_SYSTEMMEM, &tmp_surface, NULL));
-
-			DWORD filter = D3DX_FILTER_NONE;
-			if (IsSRGB(format_))
-			{
-				filter |= D3DX_FILTER_SRGB;
-			}
-
-			TIF(D3DXLoadSurfaceFromSurface(tmp_surface, NULL, NULL, surface.get(), NULL, NULL, filter, 0));
-
-			surface = MakeCOMPtr(tmp_surface);
-		}
-
-		this->CopySurfaceToMemory(surface, data);
+		RECT rc = { x_offset, 0, x_offset + width, 1 };
+		D3DLOCKED_RECT locked_rc;
+		d3dTexture1D_->LockRect(level, &locked_rc, &rc, TMA_Read_Only == tma ? D3DLOCK_READONLY : 0);
+		data = locked_rc.pBits;
 	}
 
-	void D3D9Texture1D::CopyMemoryToTexture1D(int level, void const * data, ElementFormat pf,
-		uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width, uint32_t src_xOffset)
+	void D3D9Texture1D::Unmap1D(int level)
 	{
-		IDirect3DSurface9* temp;
-		TIF(d3dTexture1D_->GetSurfaceLevel(level, &temp));
-		ID3D9SurfacePtr surface = MakeCOMPtr(temp);
-
-		if (surface)
-		{
-			DWORD filter = D3DX_FILTER_LINEAR;
-			if (IsSRGB(pf))
-			{
-				filter |= D3DX_FILTER_SRGB_IN;
-			}
-			if (IsSRGB(format_))
-			{
-				filter |= D3DX_FILTER_SRGB_OUT;
-			}
-
-			RECT srcRc = { src_xOffset, 0, src_xOffset + src_width, 1 };
-			RECT dstRc = { dst_xOffset, 0, dst_xOffset + dst_width, 1 };
-			TIF(D3DXLoadSurfaceFromMemory(surface.get(), NULL, &dstRc, data, D3D9Mapping::MappingFormat(pf),
-					src_width * NumFormatBytes(pf), NULL, &srcRc, filter, 0));
-		}
+		d3dTexture1D_->UnlockRect(level);
 	}
 
 	void D3D9Texture1D::BuildMipSubLevels()

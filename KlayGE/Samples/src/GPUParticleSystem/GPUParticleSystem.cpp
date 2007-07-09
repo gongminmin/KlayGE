@@ -160,7 +160,7 @@ namespace
 		GPUParticleSystem(int max_num_particles, TexturePtr terrain_height_map, TexturePtr terrain_normal_map)
 			: RenderablePlane(2, 2, 1, 1, true),
 				max_num_particles_(max_num_particles),
-				tex_width_(256), tex_height_(max_num_particles / 256),
+				tex_width_(256), tex_height_((max_num_particles + 255) / 256),
 				model_mat_(float4x4::Identity()),
 				rt_index_(true), accumulate_time_(0),
 				random_gen_(boost::lagged_fibonacci607(), boost::uniform_real<float>(-0.05f, 0.05f))
@@ -174,13 +174,34 @@ namespace
 			particle_pos_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F);
 			particle_vel_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F);
 			particle_vel_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F);
-			std::vector<float4> pos_init(max_num_particles, float4(0, 0, 0, 0));
-			particle_pos_texture_[0]->CopyMemoryToTexture2D(0, &pos_init[0], EF_ABGR32F,
-				tex_width_, tex_height_, 0, 0, tex_width_, tex_height_, 0, 0,
-				tex_width_ * 16);
-			particle_pos_texture_[1]->CopyMemoryToTexture2D(0, &pos_init[0], EF_ABGR32F,
-				tex_width_, tex_height_, 0, 0, tex_width_, tex_height_, 0, 0,
-				tex_width_ * 16);
+			{
+				float4* pos_init;
+				uint32_t row_pitch;
+				particle_pos_texture_[0]->Map2D(0, TMA_Write_Only, 0, 0, tex_width_, tex_height_, reinterpret_cast<void*&>(pos_init), row_pitch);
+				for (int y = 0; y < tex_height_; ++ y)
+				{
+					for (int x = 0; x < tex_width_; ++ x)
+					{
+						pos_init[x] = float4(0, 0, 0, 0);
+					}
+					pos_init += row_pitch / sizeof(pos_init[0]);
+				}
+				particle_pos_texture_[0]->Unmap2D(0);
+			}
+			{
+				float4* pos_init;
+				uint32_t row_pitch;
+				particle_pos_texture_[1]->Map2D(0, TMA_Write_Only, 0, 0, tex_width_, tex_height_, reinterpret_cast<void*&>(pos_init), row_pitch);
+				for (int y = 0; y < tex_height_; ++ y)
+				{
+					for (int x = 0; x < tex_width_; ++ x)
+					{
+						pos_init[x] = float4(0, 0, 0, 0);
+					}
+					pos_init += row_pitch / sizeof(pos_init[0]);
+				}
+				particle_pos_texture_[1]->Unmap2D(0);
+			}
 
 			pos_vel_rt_buffer_[0] = rf.MakeFrameBuffer();
 			pos_vel_rt_buffer_[0]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*particle_pos_texture_[0], 0));
@@ -199,14 +220,20 @@ namespace
 
 			TexturePtr particle_init_vel;
 			particle_init_vel = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F);
-			std::vector<float4> vel_init(max_num_particles);
-			for (size_t i = 0; i < vel_init.size(); ++ i)
 			{
-				vel_init[i] = float4(random_gen_(), 0.2f + abs(random_gen_()) * 3, random_gen_(), 0);
+				float4* vel_init;
+				uint32_t row_pitch;
+				particle_init_vel->Map2D(0, TMA_Write_Only, 0, 0, tex_width_, tex_height_, reinterpret_cast<void*&>(vel_init), row_pitch);
+				for (int y = 0; y < tex_height_; ++ y)
+				{
+					for (int x = 0; x < tex_width_; ++ x)
+					{
+						vel_init[x] = float4(random_gen_(), 0.2f + abs(random_gen_()) * 3, random_gen_(), 0);
+					}
+					vel_init += row_pitch / sizeof(vel_init[0]);
+				}
+				particle_init_vel->Unmap2D(0);
 			}
-			particle_init_vel->CopyMemoryToTexture2D(0, &vel_init[0], EF_ABGR32F,
-				tex_width_, tex_height_, 0, 0, tex_width_, tex_height_, 0, 0,
-				tex_width_ * 16);
 			*(technique_->Effect().ParameterByName("particle_init_vel_sampler")) = particle_init_vel;
 
 			particle_pos_sampler_param_ = technique_->Effect().ParameterByName("particle_pos_sampler");
@@ -235,15 +262,19 @@ namespace
 			inv_emit_freq_ = 1.0f / freq;
 
 			float time = 0;
-			std::vector<float> birth_time_init(max_num_particles_);
-			for (size_t i = 0; i < birth_time_init.size(); ++ i)
+			float* birth_time_init;
+			uint32_t row_pitch;
+			particle_birth_time_->Map2D(0, TMA_Write_Only, 0, 0, tex_width_, tex_height_, reinterpret_cast<void*&>(birth_time_init), row_pitch);
+			for (int y = 0; y < tex_height_; ++ y)
 			{
-				birth_time_init[i] = time;
-				time += inv_emit_freq_;
+				for (int x = 0; x < tex_width_; ++ x)
+				{
+					birth_time_init[x] = time;
+					time += inv_emit_freq_;
+				}
+				birth_time_init += row_pitch / sizeof(birth_time_init[0]);
 			}
-			particle_birth_time_->CopyMemoryToTexture2D(0, &birth_time_init[0], EF_R32F,
-				tex_width_, tex_height_, 0, 0, tex_width_, tex_height_, 0, 0,
-				tex_width_ * 4);
+			particle_birth_time_->Unmap2D(0);
 		}
 
 		void Update(float elapse_time)

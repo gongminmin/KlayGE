@@ -509,17 +509,19 @@ namespace
 						int const buf_width = slot_->bitmap.width;
 						int const buf_height = slot_->bitmap.rows;
 						int const y_start = std::max<int>(max_height * 3 / 4 - slot_->metrics.horiBearingY / 64, 0);
-						std::vector<uint8_t> dest(max_width * max_height, 0);
+
+						uint8_t* tex_data;
+						uint32_t row_pitch;
+						theTexture_->Map2D(0, TMA_Write_Only, char_pos.x(), char_pos.y() + y_start,
+							max_width, max_height,  reinterpret_cast<void*&>(tex_data), row_pitch);
+
 						for (int y = 0; y < buf_height; ++ y)
 						{
-							for (int x = 0; x < buf_width; ++ x)
-							{
-								dest[(y + y_start) * max_width + x] = slot_->bitmap.buffer[y * buf_width + x];
-							}
+							memcpy(tex_data, &slot_->bitmap.buffer[y * buf_width], buf_width);
+							tex_data += row_pitch;
 						}
-						theTexture_->CopyMemoryToTexture2D(0, &dest[0], TEX_FORMAT,
-								max_width, max_height, char_pos.x(), char_pos.y(),
-								max_width, max_height, 0, 0, max_width * NumFormatBytes(TEX_FORMAT));
+
+						theTexture_->Unmap2D(0);
 
 						charInfoMap_.insert(std::make_pair(ch, charInfo));
 						charLRU_.push_front(ch);

@@ -36,10 +36,27 @@ namespace
 
 		for (int i = 0; i < 6; ++ i)
 		{
-			normal_map->CopyToMemoryCube(static_cast<Texture::CubeFaces>(i), 0, &normals[0]);
+			uint8_t* data;
+			uint32_t row_pitch;
+			normal_map->MapCube(static_cast<Texture::CubeFaces>(i), 0, TMA_Read_Only, 0, 0, size, size,
+				reinterpret_cast<void*&>(data), row_pitch);
+			for (uint32_t y = 0; y < size; ++ y)
+			{
+				memcpy(&normals[y * size * 4], data, size * normal_map->Bpp() / 8);
+				data += row_pitch;
+			}
+			normal_map->UnmapCube(static_cast<Texture::CubeFaces>(i), 0);
+
 			CompressNormal(normals);
-			new_normal_map->CopyMemoryToTextureCube(static_cast<Texture::CubeFaces>(i), 0,
-				&normals[0], EF_ARGB8, size, size, 0, 0, size, size, 0, 0, size * 4);
+
+			new_normal_map->MapCube(static_cast<Texture::CubeFaces>(i), 0, TMA_Write_Only, 0, 0, size, size,
+				reinterpret_cast<void*&>(data), row_pitch);
+			for (uint32_t y = 0; y < size; ++ y)
+			{
+				memcpy(data, &normals[y * size * 4], size * new_normal_map->Bpp() / 8);
+				data += row_pitch;
+			}
+			new_normal_map->UnmapCube(static_cast<Texture::CubeFaces>(i), 0);
 		}
 
 		return new_normal_map;
@@ -53,10 +70,27 @@ namespace
 		std::vector<uint8_t> normals(width * height * 4);
 
 		{
-			normal_map->CopyToMemory2D(0, &normals[0]);
+			uint8_t* data;
+			uint32_t row_pitch;
+			normal_map->Map2D(0, TMA_Read_Only, 0, 0, width, height,
+				reinterpret_cast<void*&>(data), row_pitch);
+			for (uint32_t y = 0; y < height; ++ y)
+			{
+				memcpy(&normals[y * width * 4], data, width * normal_map->Bpp() / 8);
+				data += row_pitch;
+			}
+			normal_map->Unmap2D(0);
+
 			CompressNormal(normals);
-			new_normal_map->CopyMemoryToTexture2D(0, &normals[0], EF_ARGB8,
-				width, height, 0, 0, width, height, 0, 0, width * 4);
+
+			new_normal_map->Map2D(0, TMA_Write_Only, 0, 0, width, height,
+				reinterpret_cast<void*&>(data), row_pitch);
+			for (uint32_t y = 0; y < height; ++ y)
+			{
+				memcpy(data, &normals[y * width * 4], width * new_normal_map->Bpp() / 8);
+				data += row_pitch;
+			}
+			new_normal_map->Unmap2D(0);
 		}
 
 		return new_normal_map;

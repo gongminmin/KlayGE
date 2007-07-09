@@ -65,13 +65,11 @@ namespace KlayGE
 			target_type_ = GL_TEXTURE_1D;
 			break;
 		}
-
-		glGenBuffers(1, &pbo_);
 	}
 
 	OGLTexture::~OGLTexture()
 	{
-		glDeleteBuffers(1, &pbo_);
+		glDeleteBuffers(static_cast<GLsizei>(pbos_.size()), &pbos_[0]);
 		glDeleteTextures(1, &texture_);
 	}
 
@@ -128,54 +126,51 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void OGLTexture::CopyToMemory1D(int /*level*/, void* /*data*/)
+	void OGLTexture::Map1D(int /*level*/, TextureMapAccess /*tma*/,
+		uint32_t /*x_offset*/, uint32_t /*width*/, void*& /*data*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void OGLTexture::CopyToMemory2D(int /*level*/, void* /*data*/)
+	void OGLTexture::Map2D(int /*level*/, TextureMapAccess /*tma*/,
+		uint32_t /*x_offset*/, uint32_t /*y_offset*/,
+		uint32_t /*width*/, uint32_t /*height*/,
+		void*& /*data*/, uint32_t& /*row_pitch*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void OGLTexture::CopyToMemory3D(int /*level*/, void* /*data*/)
+	void OGLTexture::Map3D(int /*level*/, TextureMapAccess /*tma*/,
+		uint32_t /*x_offset*/, uint32_t /*y_offset*/, uint32_t /*z_offset*/,
+		uint32_t /*width*/, uint32_t /*height*/, uint32_t /*depth*/,
+		void*& /*data*/, uint32_t& /*row_pitch*/, uint32_t& /*slice_pitch*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void OGLTexture::CopyToMemoryCube(CubeFaces /*face*/, int /*level*/, void* /*data*/)
+	void OGLTexture::MapCube(CubeFaces /*face*/, int /*level*/, TextureMapAccess /*tma*/,
+		uint32_t /*x_offset*/, uint32_t /*y_offset*/, uint32_t /*width*/, uint32_t /*height*/,
+		void*& /*data*/, uint32_t& /*row_pitch*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void OGLTexture::CopyMemoryToTexture1D(int /*level*/, void const * /*data*/, ElementFormat /*pf*/,
-		uint32_t /*dst_width*/, uint32_t /*dst_xOffset*/, uint32_t /*src_width*/, uint32_t /*src_xOffset*/)
+	void OGLTexture::Unmap1D(int /*level*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void OGLTexture::CopyMemoryToTexture2D(int /*level*/, void const * /*data*/, ElementFormat /*pf*/,
-		uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/,
-		uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_xOffset*/, uint32_t /*src_yOffset*/,
-		uint32_t /*src_row_pitch*/)
+	void OGLTexture::Unmap2D(int /*level*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void OGLTexture::CopyMemoryToTexture3D(int /*level*/, void const * /*data*/, ElementFormat /*pf*/,
-			uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_depth*/,
-			uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/, uint32_t /*dst_zOffset*/,
-			uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_depth*/,
-			uint32_t /*src_xOffset*/, uint32_t /*src_yOffset*/, uint32_t /*src_zOffset*/,
-			uint32_t /*src_row_pitch*/, uint32_t /*src_slice_pitch*/)
+	void OGLTexture::Unmap3D(int /*level*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void OGLTexture::CopyMemoryToTextureCube(CubeFaces /*face*/, int /*level*/, void const * /*data*/, ElementFormat /*pf*/,
-			uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/,
-			uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_xOffset*/, uint32_t /*src_yOffset*/,
-			uint32_t /*src_row_pitch*/)
+	void OGLTexture::UnmapCube(CubeFaces /*face*/, int /*level*/)
 	{
 		BOOST_ASSERT(false);
 	}

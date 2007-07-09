@@ -350,15 +350,24 @@ namespace KlayGE
 			D3DSURFACE_DESC desc;
 			surfaces_[cur_surf_index_]->GetDesc(&desc);
 
-			ElementFormat const ef = D3D9Mapping::MappingFormat(desc.Format);
-
 			D3DLOCKED_RECT d3dlocked_rc;
 			cache_surf_->LockRect(&d3dlocked_rc, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY);
+
+			uint32_t const width = present_tex_->Width(0);
+			uint32_t const height = present_tex_->Height(0);
+
 			uint8_t const * src = static_cast<uint8_t const *>(d3dlocked_rc.pBits);
-			present_tex_->CopyMemoryToTexture2D(0, src, ef,
-					present_tex_->Width(0), present_tex_->Height(0), 0, 0,
-					desc.Width, desc.Height, 0, 0,
-					d3dlocked_rc.Pitch);
+			uint8_t* dst;
+			uint32_t row_pitch;
+			present_tex_->Map2D(0, TMA_Write_Only, 0, 0, width, height, reinterpret_cast<void*&>(dst), row_pitch);
+			for (uint32_t y = 0; y < height; ++ y)
+			{
+				memcpy(dst, src, width * present_tex_->Bpp() / 8);
+				dst += row_pitch;
+				src += d3dlocked_rc.Pitch;
+			}
+			present_tex_->Unmap2D(0);
+
 			cache_surf_->UnlockRect();
 		}
 

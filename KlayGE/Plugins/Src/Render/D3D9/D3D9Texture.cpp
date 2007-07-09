@@ -272,54 +272,51 @@ namespace KlayGE
 		dst->UnlockRect();
 	}
 
-	void D3D9Texture::CopyToMemory1D(int /*level*/, void* /*data*/)
+	void D3D9Texture::Map1D(int /*level*/, TextureMapAccess /*tma*/,
+			uint32_t /*x_offset*/, uint32_t /*width*/,
+			void*& /*data*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void D3D9Texture::CopyToMemory2D(int /*level*/, void* /*data*/)
+	void D3D9Texture::Map2D(int /*level*/, TextureMapAccess /*tma*/,
+			uint32_t /*x_offset*/, uint32_t /*y_offset*/, uint32_t /*width*/, uint32_t /*height*/,
+			void*& /*data*/, uint32_t& /*row_pitch*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void D3D9Texture::CopyToMemory3D(int /*level*/, void* /*data*/)
+	void D3D9Texture::Map3D(int /*level*/, TextureMapAccess /*tma*/,
+			uint32_t /*x_offset*/, uint32_t /*y_offset*/, uint32_t /*z_offset*/,
+			uint32_t /*width*/, uint32_t /*height*/, uint32_t /*depth*/,
+			void*& /*data*/, uint32_t& /*row_pitch*/, uint32_t& /*slice_pitch*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void D3D9Texture::CopyToMemoryCube(CubeFaces /*face*/, int /*level*/, void* /*data*/)
+	void D3D9Texture::MapCube(CubeFaces /*face*/, int /*level*/, TextureMapAccess /*tma*/,
+			uint32_t /*x_offset*/, uint32_t /*y_offset*/, uint32_t /*width*/, uint32_t /*height*/,
+			void*& /*data*/, uint32_t& /*row_pitch*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void D3D9Texture::CopyMemoryToTexture1D(int /*level*/, void const * /*data*/, ElementFormat /*pf*/,
-		uint32_t /*dst_width*/, uint32_t /*dst_xOffset*/, uint32_t /*src_width*/, uint32_t /*src_xOffset*/)
+	void D3D9Texture::Unmap1D(int /*level*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void D3D9Texture::CopyMemoryToTexture2D(int /*level*/, void const * /*data*/, ElementFormat /*pf*/,
-		uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/,
-		uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_xOffset*/, uint32_t /*src_yOffset*/,
-		uint32_t /*src_row_pitch*/)
+	void D3D9Texture::Unmap2D(int /*level*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void D3D9Texture::CopyMemoryToTexture3D(int /*level*/, void const * /*data*/, ElementFormat /*pf*/,
-			uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_depth*/,
-			uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/, uint32_t /*dst_zOffset*/,
-			uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_depth*/,
-			uint32_t /*src_xOffset*/, uint32_t /*src_yOffset*/, uint32_t /*src_zOffset*/,
-			uint32_t /*src_row_pitch*/, uint32_t /*src_slice_pitch*/)
+	void D3D9Texture::Unmap3D(int /*level*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void D3D9Texture::CopyMemoryToTextureCube(CubeFaces /*face*/, int /*level*/, void const * /*data*/, ElementFormat /*pf*/,
-			uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/,
-			uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_xOffset*/, uint32_t /*src_yOffset*/,
-			uint32_t /*src_row_pitch*/)
+	void D3D9Texture::UnmapCube(CubeFaces /*face*/, int /*level*/)
 	{
 		BOOST_ASSERT(false);
 	}

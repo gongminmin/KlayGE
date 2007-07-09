@@ -199,12 +199,34 @@ void Fractal::OnResize(uint32_t width, uint32_t height)
 	rendered_tex_[0] = rf.MakeTexture2D(width, height, 1, EF_GR16F);
 	rendered_tex_[1] = rf.MakeTexture2D(width, height, 1, EF_GR16F);
 
-	std::vector<float4> data(width * height);
-	std::fill(data.begin(), data.end(), float4(0, 0, 0, 0));
-	rendered_tex_[0]->CopyMemoryToTexture2D(0, &data[0], EF_ABGR32F, width, height, 0, 0,
-		width, height, 0, 0, width * 16);
-	rendered_tex_[1]->CopyMemoryToTexture2D(0, &data[0], EF_ABGR32F, width, height, 0, 0,
-		width, height, 0, 0, width * 16);
+	{
+		uint8_t* data;
+		uint32_t row_pitch;
+		rendered_tex_[0]->Map2D(0, TMA_Write_Only, 0, 0, width, height, reinterpret_cast<void*&>(data), row_pitch);
+		for (uint32_t y = 0; y < height; ++ y)
+		{
+			for (uint32_t x = 0; x < width * 4; ++ x)
+			{
+				data[x] = 0;
+			}
+			data += row_pitch;
+		}
+		rendered_tex_[0]->Unmap2D(0);
+	}
+	{
+		uint8_t* data;
+		uint32_t row_pitch;
+		rendered_tex_[1]->Map2D(0, TMA_Write_Only, 0, 0, width, height, reinterpret_cast<void*&>(data), row_pitch);
+		for (uint32_t y = 0; y < height; ++ y)
+		{
+			for (uint32_t x = 0; x < width * 4; ++ x)
+			{
+				data[x] = 0;
+			}
+			data += row_pitch;
+		}
+		rendered_tex_[1]->Unmap2D(0);
+	}
 
 	render_buffer_[0]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_[0], 0));
 	render_buffer_[1]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_[1], 0));

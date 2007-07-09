@@ -166,54 +166,22 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9Texture3D::CopyToMemory3D(int level, void* data)
+	void D3D9Texture3D::Map3D(int level, TextureMapAccess tma,
+			uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
+			uint32_t width, uint32_t height, uint32_t depth,
+			void*& data, uint32_t& row_pitch, uint32_t& slice_pitch)
 	{
-		BOOST_ASSERT(level < numMipMaps_);
-		BOOST_ASSERT(data != NULL);
-		BOOST_ASSERT(TT_3D == type_);
-
-		ID3D9VolumePtr volume;
-		{
-			IDirect3DVolume9* tmp_vol;
-			TIF(d3dTexture3D_->GetVolumeLevel(level, &tmp_vol));
-			volume = MakeCOMPtr(tmp_vol);
-		}
-
-		this->CopyVolumeToMemory(volume, data);
+		D3DBOX box = { x_offset, y_offset, x_offset + width, y_offset + height, z_offset, z_offset + depth };
+		D3DLOCKED_BOX locked_box;
+		d3dTexture3D_->LockBox(level, &locked_box, &box, TMA_Read_Only == tma ? D3DLOCK_READONLY : 0);
+		data = locked_box.pBits;
+		row_pitch = locked_box.RowPitch;
+		slice_pitch = locked_box.SlicePitch;
 	}
 
-	void D3D9Texture3D::CopyMemoryToTexture3D(int level, void const * data, ElementFormat pf,
-			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
-			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
-			uint32_t src_width, uint32_t src_height, uint32_t src_depth,
-			uint32_t src_xOffset, uint32_t src_yOffset, uint32_t src_zOffset,
-			uint32_t src_row_pitch, uint32_t src_slice_pitch)
+	void D3D9Texture3D::Unmap3D(int level)
 	{
-		BOOST_ASSERT(TT_3D == type_);
-
-		IDirect3DVolume9* temp;
-		TIF(d3dTexture3D_->GetVolumeLevel(level, &temp));
-		ID3D9VolumePtr volume = MakeCOMPtr(temp);
-
-		if (volume)
-		{
-			DWORD filter = D3DX_FILTER_LINEAR;
-			if (IsSRGB(pf))
-			{
-				filter |= D3DX_FILTER_SRGB_IN;
-			}
-			if (IsSRGB(format_))
-			{
-				filter |= D3DX_FILTER_SRGB_OUT;
-			}
-
-			D3DBOX srcBox = { src_xOffset, src_yOffset, src_xOffset + src_width, src_yOffset + src_height,
-				src_zOffset, src_zOffset + src_depth };
-			D3DBOX dstBox = { dst_xOffset, dst_yOffset, dst_xOffset + dst_width, dst_yOffset + dst_height,
-				dst_zOffset, dst_zOffset + dst_depth };
-			TIF(D3DXLoadVolumeFromMemory(volume.get(), NULL, &dstBox, data, D3D9Mapping::MappingFormat(pf),
-					src_row_pitch, src_slice_pitch, NULL, &srcBox, filter, 0));
-		}
+		d3dTexture3D_->UnlockBox(level);
 	}
 
 	void D3D9Texture3D::BuildMipSubLevels()

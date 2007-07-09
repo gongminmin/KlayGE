@@ -95,8 +95,16 @@ TexturePtr CreateCubeMap(int cube_size)
 			}
 		}
 
-		cube->CopyMemoryToTextureCube(static_cast<Texture::CubeFaces>(face), 0, &data[0], EF_ARGB8,
-			cube_size, cube_size, 0, 0, cube_size, cube_size, 0, 0, cube_size * 4);
+		uint8_t* p;
+		uint32_t row_pitch;
+		cube->MapCube(static_cast<Texture::CubeFaces>(face), 0, TMA_Write_Only, 0, 0, cube_size, cube_size,
+			reinterpret_cast<void*&>(p), row_pitch);
+		for (int y = 0; y < cube_size; ++ y)
+		{
+			memcpy(p, &data[y * cube_size * 4], cube_size * cube->Bpp() / 8);
+			p += row_pitch;
+		}
+		cube->UnmapCube(static_cast<Texture::CubeFaces>(face), 0);
 	}
 
 	return cube;
