@@ -488,13 +488,11 @@ namespace KlayGE
 						image_size = main_image_size / (1UL << (level * 2));
 					}
 
-					void* data;
-					texture->Map1D(level, TMA_Write_Only, 0, texture->Width(level), data);
-
-					file->read(reinterpret_cast<char*>(data), static_cast<std::streamsize>(image_size));
-					BOOST_ASSERT(file->gcount() == static_cast<int>(image_size));
-
-					texture->Unmap1D(level);
+					{
+						Texture::Mapper mapper(*texture, level, TMA_Write_Only, 0, texture->Width(level));
+						file->read(mapper.Pointer<char>(), static_cast<std::streamsize>(image_size));
+						BOOST_ASSERT(file->gcount() == static_cast<int>(image_size));
+					}
 				}
 			}
 			break;
@@ -520,34 +518,27 @@ namespace KlayGE
 
 						uint32_t image_size = ((texture->Width(level) + 3) / 4) * ((texture->Height(level) + 3) / 4) * block_size;
 
-						void* data;
-						uint32_t row_pitch;
-						texture->Map2D(level, TMA_Write_Only, 0, 0, width, height, data, row_pitch);
-
-						file->read(reinterpret_cast<char*>(data), static_cast<std::streamsize>(image_size));
-						BOOST_ASSERT(file->gcount() == static_cast<int>(image_size));
-
-						texture->Unmap2D(level);
+						{
+							Texture::Mapper mapper(*texture, level, TMA_Write_Only, 0, 0, width, height);
+							file->read(mapper.Pointer<char>(), static_cast<std::streamsize>(image_size));
+							BOOST_ASSERT(file->gcount() == static_cast<int>(image_size));
+						}
 					}
 					else
 					{
-						void* data;
-						uint32_t row_pitch;
-						texture->Map2D(level, TMA_Write_Only, 0, 0, width, height, data, row_pitch);
+						Texture::Mapper mapper(*texture, level, TMA_Write_Only, 0, 0, width, height);
+						char* data = mapper.Pointer<char>();
 
-						char* p = static_cast<char*>(data);
 						for (uint32_t y = 0; y < height; ++ y)
 						{
-							file->read(p, static_cast<std::streamsize>(width * format_size));
+							file->read(data, static_cast<std::streamsize>(width * format_size));
 							if ((desc.flags & DDSD_PITCH)
 								&& (width * format_size != static_cast<uint32_t>(desc.pitch)))
 							{
 								file->seekg(desc.pitch - width * format_size, std::ios_base::cur);
 							}
-							p += row_pitch;
+							data += mapper.RowPitch();
 						}
-
-						texture->Unmap2D(level);
 					}
 				}
 			}
@@ -575,39 +566,32 @@ namespace KlayGE
 
 						uint32_t image_size = ((width + 3) / 4) * ((height + 3) / 4) * depth * block_size;
 
-						void* data;
-						uint32_t row_pitch, slice_pitch;
-						texture->Map3D(level, TMA_Write_Only, 0, 0, 0, width, height, depth, data, row_pitch, slice_pitch);
-
-						file->read(reinterpret_cast<char*>(data), static_cast<std::streamsize>(image_size));
-						BOOST_ASSERT(file->gcount() == static_cast<int>(image_size));
-
-						texture->Unmap3D(level);
+						{
+							Texture::Mapper mapper(*texture, level, TMA_Write_Only, 0, 0, 0, width, height, depth);
+							file->read(mapper.Pointer<char>(), static_cast<std::streamsize>(image_size));
+							BOOST_ASSERT(file->gcount() == static_cast<int>(image_size));
+						}
 					}
 					else
 					{
-						void* data;
-						uint32_t row_pitch, slice_pitch;
-						texture->Map3D(level, TMA_Write_Only, 0, 0, 0, width, height, depth, data, row_pitch, slice_pitch);
+						Texture::Mapper mapper(*texture, level, TMA_Write_Only, 0, 0, 0, width, height, depth);
+						char* data = mapper.Pointer<char>();
 
-						char* p = static_cast<char*>(data);
 						for (uint32_t z = 0; z < depth; ++ z)
 						{
 							for (uint32_t y = 0; y < height; ++ y)
 							{
-								file->read(p, static_cast<std::streamsize>(width * format_size));
+								file->read(data, static_cast<std::streamsize>(width * format_size));
 								if ((desc.flags & DDSD_PITCH)
 									&& (width * format_size != static_cast<uint32_t>(desc.pitch)))
 								{
 									file->seekg(desc.pitch - width * format_size, std::ios_base::cur);
 								}
-								p += row_pitch;
+								data += mapper.RowPitch();
 							}
 
-							p += slice_pitch - row_pitch * height;
+							data += mapper.SlicePitch() - mapper.RowPitch() * height;
 						}
-
-						texture->Unmap3D(level);
 					}	
 				}
 			}
@@ -636,34 +620,27 @@ namespace KlayGE
 
 							uint32_t image_size = ((width + 3) / 4) * ((height + 3) / 4) * block_size;
 
-							void* data;
-							uint32_t row_pitch;
-							texture->MapCube(static_cast<Texture::CubeFaces>(face), level, TMA_Write_Only, 0, 0, width, height, data, row_pitch);
-
-							file->read(reinterpret_cast<char*>(data), static_cast<std::streamsize>(image_size));
-							BOOST_ASSERT(file->gcount() == static_cast<int>(image_size));
-
-							texture->UnmapCube(static_cast<Texture::CubeFaces>(face), level);
+							{
+								Texture::Mapper mapper(*texture, static_cast<Texture::CubeFaces>(face), level, TMA_Write_Only, 0, 0, width, height);
+								file->read(mapper.Pointer<char>(), static_cast<std::streamsize>(image_size));
+								BOOST_ASSERT(file->gcount() == static_cast<int>(image_size));
+							}
 						}
 						else
 						{
-							void* data;
-							uint32_t row_pitch;
-							texture->MapCube(static_cast<Texture::CubeFaces>(face), level, TMA_Write_Only, 0, 0, width, height, data, row_pitch);
+							Texture::Mapper mapper(*texture, static_cast<Texture::CubeFaces>(face), level, TMA_Write_Only, 0, 0, width, height);
+							char* data = mapper.Pointer<char>();
 
-							char* p = static_cast<char*>(data);
 							for (uint32_t y = 0; y < height; ++ y)
 							{
-								file->read(p, static_cast<std::streamsize>(width * format_size));
+								file->read(data, static_cast<std::streamsize>(width * format_size));
 								if ((desc.flags & DDSD_PITCH)
 									&& (width * format_size != static_cast<uint32_t>(desc.pitch)))
 								{
 									file->seekg(desc.pitch - width * format_size, std::ios_base::cur);
 								}
-								p += row_pitch;
+								data += mapper.RowPitch();
 							}
-
-							texture->UnmapCube(static_cast<Texture::CubeFaces>(face), level);
 						}
 					}
 				}
@@ -1004,12 +981,10 @@ namespace KlayGE
 						image_size = main_image_size / (1UL << (level * 2));
 					}
 
-					void* data;
-					texture->Map1D(level, TMA_Read_Only, 0, texture->Width(level), data);
-
-					file.write(reinterpret_cast<char*>(data), static_cast<std::streamsize>(image_size));
-
-					texture->Unmap1D(level);
+					{
+						Texture::Mapper mapper(*texture, level, TMA_Read_Only, 0, texture->Width(level));
+						file.write(mapper.Pointer<char>(), static_cast<std::streamsize>(image_size));
+					}
 				}
 			}
 			break;
@@ -1035,28 +1010,21 @@ namespace KlayGE
 
 						uint32_t image_size = ((width + 3) / 4) * ((height + 3) / 4) * block_size;
 
-						void* data;
-						uint32_t row_pitch;
-						texture->Map2D(level, TMA_Read_Only, 0, 0, width, height, data, row_pitch);
-
-						file.write(reinterpret_cast<char*>(data), static_cast<std::streamsize>(image_size));
-
-						texture->Unmap2D(level);
+						{
+							Texture::Mapper mapper(*texture, level, TMA_Read_Only, 0, 0, width, height);
+							file.write(mapper.Pointer<char>(), static_cast<std::streamsize>(image_size));
+						}
 					}
 					else
 					{
-						void* data;
-						uint32_t row_pitch;
-						texture->Map2D(level, TMA_Read_Only, 0, 0, width, height, data, row_pitch);
+						Texture::Mapper mapper(*texture, level, TMA_Read_Only, 0, 0, width, height);
+						char* data = mapper.Pointer<char>();
 
-						char* p = static_cast<char*>(data);
 						for (uint32_t y = 0; y < height; ++ y)
 						{
-							file.write(p, static_cast<std::streamsize>(width * format_size));
-							p += row_pitch;
+							file.write(data, static_cast<std::streamsize>(width * format_size));
+							data += mapper.RowPitch();
 						}
-
-						texture->Unmap2D(level);
 					}
 				}
 			}
@@ -1084,33 +1052,26 @@ namespace KlayGE
 
 						uint32_t image_size = ((width + 3) / 4) * ((height + 3) / 4) * depth * block_size;
 
-						void* data;
-						uint32_t row_pitch, slice_pitch;
-						texture->Map3D(level, TMA_Read_Only, 0, 0, 0, width, height, depth, data, row_pitch, slice_pitch);
-
-						file.write(reinterpret_cast<char*>(data), static_cast<std::streamsize>(image_size));
-
-						texture->Unmap3D(level);
+						{
+							Texture::Mapper mapper(*texture, level, TMA_Read_Only, 0, 0, 0, width, height, depth);
+							file.write(mapper.Pointer<char>(), static_cast<std::streamsize>(image_size));
+						}
 					}
 					else
 					{
-						void* data;
-						uint32_t row_pitch, slice_pitch;
-						texture->Map3D(level, TMA_Read_Only, 0, 0, 0, width, height, depth, data, row_pitch, slice_pitch);
+						Texture::Mapper mapper(*texture, level, TMA_Read_Only, 0, 0, 0, width, height, depth);
+						char* data = mapper.Pointer<char>();
 
-						char* p = static_cast<char*>(data);
 						for (uint32_t z = 0; z < depth; ++ z)
 						{
 							for (uint32_t y = 0; y < height; ++ y)
 							{
-								file.write(p, static_cast<std::streamsize>(width * format_size));
-								p += row_pitch;
+								file.write(data, static_cast<std::streamsize>(width * format_size));
+								data += mapper.RowPitch();
 							}
 
-							p += slice_pitch - row_pitch * height;
+							data += mapper.SlicePitch() - mapper.RowPitch() * height;
 						}
-
-						texture->Unmap3D(level);
 					}
 				}
 			}
@@ -1139,28 +1100,21 @@ namespace KlayGE
 
 							uint32_t image_size = ((width + 3) / 4) * ((height + 3) / 4) * block_size;
 
-							void* data;
-							uint32_t row_pitch;
-							texture->MapCube(static_cast<Texture::CubeFaces>(face), level, TMA_Read_Only, 0, 0, width, height, data, row_pitch);
-
-							file.write(reinterpret_cast<char*>(data), static_cast<std::streamsize>(image_size));
-
-							texture->UnmapCube(static_cast<Texture::CubeFaces>(face), level);
+							{
+								Texture::Mapper mapper(*texture, static_cast<Texture::CubeFaces>(face), level, TMA_Read_Only, 0, 0, width, height);
+								file.write(mapper.Pointer<char>(), static_cast<std::streamsize>(image_size));
+							}
 						}
 						else
 						{
-							void* data;
-							uint32_t row_pitch;
-							texture->MapCube(static_cast<Texture::CubeFaces>(face), level, TMA_Read_Only, 0, 0, width, height, data, row_pitch);
+							Texture::Mapper mapper(*texture, static_cast<Texture::CubeFaces>(face), level, TMA_Read_Only, 0, 0, width, height);
+							char* data = mapper.Pointer<char>();
 
-							char* p = static_cast<char*>(data);
 							for (uint32_t y = 0; y < height; ++ y)
 							{
-								file.write(p, static_cast<std::streamsize>(width * format_size));
-								p += row_pitch;
+								file.write(data, static_cast<std::streamsize>(width * format_size));
+								data += mapper.RowPitch();
 							}
-
-							texture->UnmapCube(static_cast<Texture::CubeFaces>(face), level);
 						}
 					}
 				}

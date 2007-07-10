@@ -277,16 +277,15 @@ int main(int argc, char* argv[])
 		src_texture->CopyToTexture(*height_map_texture);
 		
 		std::vector<uint8_t> height_map(height * width);
-		uint8_t* data;
-		uint32_t row_pitch;
-		height_map_texture->Map2D(0, TMA_Read_Only, 0, 0, width, height,
-			reinterpret_cast<void*&>(data), row_pitch);
-		for (int y = 0; y < height; ++ y)
 		{
-			memcpy(&height_map[y * width], data, width * height_map_texture->Bpp() / 8);
-			data += row_pitch;
+			Texture::Mapper mapper(*height_map_texture, 0, TMA_Read_Only, 0, 0, width, height);
+			uint8_t* data = mapper.Pointer<uint8_t>();
+			for (int y = 0; y < height; ++ y)
+			{
+				memcpy(&height_map[y * width], data, width * height_map_texture->Bpp() / 8);
+				data += mapper.RowPitch();
+			}
 		}
-		height_map_texture->Unmap2D(0);
 
 		for (int z = 0; z < depth; ++ z)
 		{
@@ -313,20 +312,17 @@ int main(int argc, char* argv[])
 		TexturePtr vol_map_texture = render_factory.MakeTexture3D(width, height, depth, 1, EF_L8);
 		src_texture->CopyToTexture(*vol_map_texture);
 
-		uint8_t* data;
-		uint32_t row_pitch, slice_pitch;
-		vol_map_texture->Map3D(0, TMA_Read_Only, 0, 0, 0, width, height, depth,
-			reinterpret_cast<void*&>(data), row_pitch, slice_pitch);
+		Texture::Mapper mapper(*vol_map_texture, 0, TMA_Read_Only, 0, 0, 0, width, height, depth);
+		uint8_t* data = mapper.Pointer<uint8_t>();
 		for (int z = 0; z < depth; ++ z)
 		{
 			for (int y = 0; y < height; ++ y)
 			{
 				memcpy(&volume[z * width * height + y * width], data, width * vol_map_texture->Bpp() / 8);
-				data += row_pitch;
+				data += mapper.RowPitch();
 			}
-			data += slice_pitch - row_pitch * height;
+			data += mapper.SlicePitch() - mapper.RowPitch() * height;
 		}
-		vol_map_texture->Unmap3D(0);
 	}
 
 	clock_t start = clock();
@@ -337,21 +333,20 @@ int main(int argc, char* argv[])
 	cout << endl << "Computing time: " << clock() - start << " ms" << endl;
 
 	TexturePtr distance_map_texture = render_factory.MakeTexture3D(width, height, depth, 1, EF_L8);
-	
-	uint8_t* data;
-	uint32_t row_pitch, slice_pitch;
-	distance_map_texture->Map3D(0, TMA_Write_Only, 0, 0, 0, width, height, depth,
-		reinterpret_cast<void*&>(data), row_pitch, slice_pitch);
-	for (int z = 0; z < depth; ++ z)
+
 	{
-		for (int y = 0; y < height; ++ y)
+		Texture::Mapper mapper(*distance_map_texture, 0, TMA_Write_Only, 0, 0, 0, width, height, depth);
+		uint8_t* data = mapper.Pointer<uint8_t>();
+		for (int z = 0; z < depth; ++ z)
 		{
-			memcpy(data, &distances[z * width * height + y * width], width * distance_map_texture->Bpp() / 8);
-			data += row_pitch;
+			for (int y = 0; y < height; ++ y)
+			{
+				memcpy(data, &distances[z * width * height + y * width], width * distance_map_texture->Bpp() / 8);
+				data += mapper.RowPitch();
+			}
+			data += mapper.SlicePitch() - mapper.RowPitch() * height;
 		}
-		data += slice_pitch - row_pitch * height;
 	}
-	distance_map_texture->Unmap3D(0);
 
 	SaveTexture(distance_map_texture, distance_name);
 

@@ -159,18 +159,19 @@ namespace KlayGE
 
 		std::vector<uint8_t> data_in(src_width * this->Bpp() / 8);
 		std::vector<uint8_t> data_out(dst_width * other.Bpp() / 8);
-		
-		void* p;
-		this->Map1D(level, TMA_Read_Only, src_xOffset, src_width, p);
-		memcpy(&data_in[0], static_cast<uint8_t*>(p), data_in.size() * sizeof(data_in[0]));
-		this->Unmap1D(level);
+
+		{
+			Texture::Mapper mapper(*this, level, TMA_Read_Only, src_xOffset, src_width);
+			memcpy(&data_in[0], mapper.Pointer<uint8_t*>(), data_in.size() * sizeof(data_in[0]));
+		}
 
 		gluScaleImage(gl_format, src_width, 1, gl_type, &data_in[0],
 			dst_width, 1, gl_target_type, &data_out[0]);
 
-		other.Map1D(level, TMA_Write_Only, dst_xOffset, dst_width, p);
-		memcpy(static_cast<uint8_t*>(p), &data_out[0], data_out.size() * sizeof(data_out[0]));
-		other.Unmap1D(level);
+		{
+			Texture::Mapper mapper(other, level, TMA_Write_Only, dst_xOffset, dst_width);
+			memcpy(mapper.Pointer<uint8_t*>(), &data_out[0], data_out.size() * sizeof(data_out[0]));
+		}
 	}
 
 	void OGLTexture1D::Map1D(int level, TextureMapAccess tma, uint32_t x_offset, uint32_t width, void*& data)
@@ -207,7 +208,7 @@ namespace KlayGE
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[level]);
 				std::vector<uint8_t> zero(width * size_fmt);
-				glBufferData(GL_PIXEL_UNPACK_BUFFER, width * size_fmt, &zero[0], GL_STREAM_DRAW);
+				glBufferSubData(GL_PIXEL_UNPACK_BUFFER, 0, width * size_fmt, &zero[0]);
 				data = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
 			}
 			break;

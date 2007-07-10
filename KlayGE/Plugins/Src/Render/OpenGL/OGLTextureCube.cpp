@@ -170,35 +170,35 @@ namespace KlayGE
 
 		std::vector<uint8_t> data_in(src_width * src_height * src_format_size);
 		std::vector<uint8_t> data_out(dst_width * dst_height * dst_format_size);
-		
-		void* p;
-		uint32_t row_pitch;
-		this->MapCube(face, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height, p, row_pitch);
-		uint8_t* s = static_cast<uint8_t*>(p);
-		uint8_t* d = &data_in[0];
-		for (uint32_t y = 0; y < src_height; ++ y)
-		{
-			memcpy(d, s, src_width * src_format_size);
 
-			s += row_pitch;
-			d += src_width * src_format_size;
+		{
+			Texture::Mapper mapper(*this, face, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
+			uint8_t const * s = mapper.Pointer<uint8_t>();
+			uint8_t* d = &data_in[0];
+			for (uint32_t y = 0; y < src_height; ++ y)
+			{
+				memcpy(d, s, src_width * src_format_size);
+
+				s += mapper.RowPitch();
+				d += src_width * src_format_size;
+			}
 		}
-		this->UnmapCube(face, level);
 
 		gluScaleImage(gl_format, src_width, src_height, gl_type, &data_in[0],
 			dst_width, dst_height, gl_target_type, &data_out[0]);
 
-		target.MapCube(face, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height, p, row_pitch);
-		s = &data_out[0];
-		d = static_cast<uint8_t*>(p);
-		for (uint32_t y = 0; y < src_height; ++ y)
 		{
-			memcpy(d, s, src_width * src_format_size);
+			Texture::Mapper mapper(target, face, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
+			uint8_t const * s = &data_out[0];
+			uint8_t* d = mapper.Pointer<uint8_t>();
+			for (uint32_t y = 0; y < src_height; ++ y)
+			{
+				memcpy(d, s, src_width * src_format_size);
 
-			s += src_width * src_format_size;
-			d += row_pitch;
+				s += src_width * src_format_size;
+				d += mapper.RowPitch();
+			}
 		}
-		target.UnmapCube(face, level);
 	}
 
 	void OGLTextureCube::MapCube(CubeFaces face, int level, TextureMapAccess tma,
@@ -239,7 +239,7 @@ namespace KlayGE
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[face * numMipMaps_ + level]);
 				std::vector<uint8_t> zero(width * height * size_fmt);
-				glBufferData(GL_PIXEL_UNPACK_BUFFER, width * height * size_fmt, &zero[0], GL_STREAM_DRAW);
+				glBufferSubData(GL_PIXEL_UNPACK_BUFFER, 0, width * height * size_fmt, &zero[0]);
 				data = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
 			}
 			break;

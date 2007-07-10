@@ -508,20 +508,19 @@ namespace
 						
 						int const buf_width = slot_->bitmap.width;
 						int const buf_height = slot_->bitmap.rows;
-						int const y_start = std::max<int>(max_height * 3 / 4 - slot_->metrics.horiBearingY / 64, 0);
-
-						uint8_t* tex_data;
-						uint32_t row_pitch;
-						theTexture_->Map2D(0, TMA_Write_Only, char_pos.x(), char_pos.y() + y_start,
-							max_width, max_height,  reinterpret_cast<void*&>(tex_data), row_pitch);
-
-						for (int y = 0; y < buf_height; ++ y)
+						if ((buf_width > 0) && (buf_height > 0))
 						{
-							memcpy(tex_data, &slot_->bitmap.buffer[y * buf_width], buf_width);
-							tex_data += row_pitch;
-						}
+							int const y_start = std::max<int>(max_height * 3 / 4 - slot_->metrics.horiBearingY / 64, 0);
 
-						theTexture_->Unmap2D(0);
+							Texture::Mapper mapper(*theTexture_, 0, TMA_Write_Only,
+								char_pos.x(), char_pos.y() + y_start, buf_width, buf_height);
+							uint8_t* tex_data = mapper.Pointer<uint8_t>();
+							for (int y = 0; y < buf_height; ++ y)
+							{
+								memcpy(tex_data, &slot_->bitmap.buffer[y * buf_width], buf_width);
+								tex_data += mapper.RowPitch();
+							}
+						}
 
 						charInfoMap_.insert(std::make_pair(ch, charInfo));
 						charLRU_.push_front(ch);

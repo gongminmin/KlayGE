@@ -77,19 +77,19 @@ namespace
 			}
 
 			TexturePtr electro_tex = rf.MakeTexture3D(XSIZE, YSIZE, ZSIZE, 1, EF_L8);
-			uint8_t* data;
-			uint32_t row_pitch, slice_pitch;
-			electro_tex->Map3D(0, TMA_Write_Only, 0, 0, 0, XSIZE, YSIZE, ZSIZE, reinterpret_cast<void*&>(data), row_pitch, slice_pitch);
-			for (uint32_t z = 0; z < ZSIZE; ++ z)
 			{
-				for (uint32_t y = 0; y < YSIZE; ++ y)
+				Texture::Mapper mapper(*electro_tex, 0, TMA_Write_Only, 0, 0, 0, XSIZE, YSIZE, ZSIZE);
+				uint8_t* data = mapper.Pointer<uint8_t>();
+				for (uint32_t z = 0; z < ZSIZE; ++ z)
 				{
-					memcpy(data, &turbBuffer[z * XSIZE * YSIZE + y * XSIZE], XSIZE);
-					data += row_pitch;
+					for (uint32_t y = 0; y < YSIZE; ++ y)
+					{
+						memcpy(data, &turbBuffer[z * XSIZE * YSIZE + y * XSIZE], XSIZE);
+						data += mapper.RowPitch();
+					}
+					data += mapper.SlicePitch() - mapper.RowPitch() * YSIZE;
 				}
-				data += slice_pitch - row_pitch * YSIZE;
 			}
-			electro_tex->Unmap3D(0);
 
 			technique_ = rf.LoadEffect("Electro.kfx")->TechniqueByName("Electro");
 			*(technique_->Effect().ParameterByName("electroSampler")) = electro_tex;

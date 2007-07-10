@@ -196,36 +196,20 @@ void Fractal::OnResize(uint32_t width, uint32_t height)
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	rendered_tex_[0] = rf.MakeTexture2D(width, height, 1, EF_GR16F);
-	rendered_tex_[1] = rf.MakeTexture2D(width, height, 1, EF_GR16F);
+	for (int i = 0; i < 2; ++ i)
+	{
+		rendered_tex_[i] = rf.MakeTexture2D(width, height, 1, EF_GR16F);
 
-	{
-		uint8_t* data;
-		uint32_t row_pitch;
-		rendered_tex_[0]->Map2D(0, TMA_Write_Only, 0, 0, width, height, reinterpret_cast<void*&>(data), row_pitch);
+		Texture::Mapper mapper(*rendered_tex_[i], 0, TMA_Write_Only, 0, 0, width, height);
+		uint8_t* data = mapper.Pointer<uint8_t>();
 		for (uint32_t y = 0; y < height; ++ y)
 		{
 			for (uint32_t x = 0; x < width * 4; ++ x)
 			{
 				data[x] = 0;
 			}
-			data += row_pitch;
+			data += mapper.RowPitch();
 		}
-		rendered_tex_[0]->Unmap2D(0);
-	}
-	{
-		uint8_t* data;
-		uint32_t row_pitch;
-		rendered_tex_[1]->Map2D(0, TMA_Write_Only, 0, 0, width, height, reinterpret_cast<void*&>(data), row_pitch);
-		for (uint32_t y = 0; y < height; ++ y)
-		{
-			for (uint32_t x = 0; x < width * 4; ++ x)
-			{
-				data[x] = 0;
-			}
-			data += row_pitch;
-		}
-		rendered_tex_[1]->Unmap2D(0);
 	}
 
 	render_buffer_[0]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_[0], 0));

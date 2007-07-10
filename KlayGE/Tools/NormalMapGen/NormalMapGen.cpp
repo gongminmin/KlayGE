@@ -24,16 +24,15 @@ namespace
 
 		std::vector<uint8_t> heights(width * height);
 
-		uint8_t* data;
-		uint32_t row_pitch;
-		height_map->Map2D(0, TMA_Read_Only, 0, 0, width, height,
-			reinterpret_cast<void*&>(data), row_pitch);
-		for (uint32_t y = 0; y < height; ++ y)
 		{
-			memcpy(&heights[y * width], data, width * height_map->Bpp() / 8);
-			data += row_pitch;
+			Texture::Mapper mapper(*height_map, 0, TMA_Read_Only, 0, 0, width, height);
+			uint8_t* data = mapper.Pointer<uint8_t>();
+			for (uint32_t y = 0; y < height; ++ y)
+			{
+				memcpy(&heights[y * width], data, width * height_map->Bpp() / 8);
+				data += mapper.RowPitch();
+			}
 		}
-		height_map->Unmap2D(0);
 
 		std::vector<char> dx;
 		dx.resize(heights.size());
@@ -74,14 +73,16 @@ namespace
 		}
 
 		TexturePtr normal_map = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, EF_ARGB8);
-		normal_map->Map2D(0, TMA_Write_Only, 0, 0, width, height,
-			reinterpret_cast<void*&>(data), row_pitch);
-		for (uint32_t y = 0; y < height; ++ y)
 		{
-			memcpy(data, &normals[y * width * 4], width * normal_map->Bpp() / 8);
-			data += row_pitch;
+			Texture::Mapper mapper(*normal_map, 0, TMA_Write_Only, 0, 0, width, height);
+			uint8_t* data = mapper.Pointer<uint8_t>();
+			for (uint32_t y = 0; y < height; ++ y)
+			{
+				memcpy(data, &normals[y * width * 4], width * normal_map->Bpp() / 8);
+				data += mapper.RowPitch();
+			}
 		}
-		normal_map->Unmap2D(0);
+
 		return normal_map;
 	}
 }

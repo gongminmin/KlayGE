@@ -87,11 +87,11 @@ namespace KlayGE
 		for (int i = 0; i < 2; ++ i)
 		{
 			TexturePtr tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(1, 1, 1, EF_R32F);
-			void* data;
-			uint32_t row_pitch;
-			tex->Map2D(0, TMA_Write_Only, 1, 1, 0, 0, data, row_pitch);
-			*static_cast<float*>(data) = 0;
-			tex->Unmap2D(0);
+			
+			{
+				Texture::Mapper mapper(*tex, 0, TMA_Write_Only, 0, 0, 1, 1);
+				*mapper.Pointer<float>() = 0;
+			}
 			adapted_textures_[i] = tex;
 
 			fb_[i] = rf.MakeFrameBuffer();

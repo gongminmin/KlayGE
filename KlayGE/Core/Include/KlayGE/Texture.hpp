@@ -44,6 +44,7 @@
 
 #include <string>
 #include <boost/assert.hpp>
+#include <boost/utility.hpp>
 
 namespace KlayGE
 {
@@ -92,6 +93,99 @@ namespace KlayGE
 			CF_Negative_Y = 3,
 			CF_Positive_Z = 4,
 			CF_Negative_Z = 5,
+		};
+
+	public:
+		class Mapper : boost::noncopyable
+		{
+		public:
+			Mapper(Texture& tex, int level, TextureMapAccess tma,
+						uint32_t x_offset, uint32_t width)
+				: tex_(tex),
+					mapped_level_(level)
+			{
+				tex_.Map1D(level, tma, x_offset, width, data_);
+				row_pitch_ = slice_pitch_ = width * tex.Bpp() / 8;
+			}
+			Mapper(Texture& tex, int level, TextureMapAccess tma,
+						uint32_t x_offset, uint32_t y_offset,
+						uint32_t width, uint32_t height)
+				: tex_(tex),
+					mapped_level_(level)
+			{
+				tex_.Map2D(level, tma, x_offset, y_offset, width, height, data_, row_pitch_);
+				slice_pitch_ = row_pitch_ * height;
+			}
+			Mapper(Texture& tex, int level, TextureMapAccess tma,
+						uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
+						uint32_t width, uint32_t height, uint32_t depth)
+				: tex_(tex),
+					mapped_level_(level)
+			{
+				tex_.Map3D(level, tma, x_offset, y_offset, z_offset, width, height, depth, data_, row_pitch_, slice_pitch_);
+			}
+			Mapper(Texture& tex, CubeFaces face, int level, TextureMapAccess tma,
+						uint32_t x_offset, uint32_t y_offset,
+						uint32_t width, uint32_t height)
+				: tex_(tex),
+					mapped_face_(face),
+					mapped_level_(level)
+			{
+				tex_.MapCube(face, level, tma, x_offset, y_offset, width, height, data_, row_pitch_);
+				slice_pitch_ = row_pitch_ * height;
+			}
+
+			~Mapper()
+			{
+				switch (tex_.Type())
+				{
+				case TT_1D:
+					tex_.Unmap1D(mapped_level_);
+					break;
+
+				case TT_2D:
+					tex_.Unmap2D(mapped_level_);
+					break;
+
+				case TT_3D:
+					tex_.Unmap3D(mapped_level_);
+					break;
+
+				case TT_Cube:
+					tex_.UnmapCube(mapped_face_, mapped_level_);
+					break;
+				}
+			}
+
+			template <typename T>
+			const T* Pointer() const
+			{
+				return static_cast<T*>(data_);
+			}
+			template <typename T>
+			T* Pointer()
+			{
+				return static_cast<T*>(data_);
+			}
+
+			uint32_t RowPitch() const
+			{
+				return row_pitch_;
+			}
+
+			uint32_t SlicePitch() const
+			{
+				return slice_pitch_;
+			}
+
+		private:
+			Texture& tex_;
+
+			void* data_;
+			uint32_t row_pitch_, slice_pitch_;
+
+			CubeFaces mapped_face_;
+			int mapped_level_;
 		};
 
 	public:

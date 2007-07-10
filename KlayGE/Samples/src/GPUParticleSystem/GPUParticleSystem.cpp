@@ -174,33 +174,18 @@ namespace
 			particle_pos_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F);
 			particle_vel_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F);
 			particle_vel_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F);
+			for (int i = 0; i < 2; ++ i)
 			{
-				float4* pos_init;
-				uint32_t row_pitch;
-				particle_pos_texture_[0]->Map2D(0, TMA_Write_Only, 0, 0, tex_width_, tex_height_, reinterpret_cast<void*&>(pos_init), row_pitch);
+				Texture::Mapper mapper(*particle_pos_texture_[i], 0, TMA_Write_Only, 0, 0, tex_width_, tex_height_);
+				float4* pos_init = mapper.Pointer<float4>();
 				for (int y = 0; y < tex_height_; ++ y)
 				{
 					for (int x = 0; x < tex_width_; ++ x)
 					{
 						pos_init[x] = float4(0, 0, 0, 0);
 					}
-					pos_init += row_pitch / sizeof(pos_init[0]);
+					pos_init += mapper.RowPitch() / sizeof(pos_init[0]);
 				}
-				particle_pos_texture_[0]->Unmap2D(0);
-			}
-			{
-				float4* pos_init;
-				uint32_t row_pitch;
-				particle_pos_texture_[1]->Map2D(0, TMA_Write_Only, 0, 0, tex_width_, tex_height_, reinterpret_cast<void*&>(pos_init), row_pitch);
-				for (int y = 0; y < tex_height_; ++ y)
-				{
-					for (int x = 0; x < tex_width_; ++ x)
-					{
-						pos_init[x] = float4(0, 0, 0, 0);
-					}
-					pos_init += row_pitch / sizeof(pos_init[0]);
-				}
-				particle_pos_texture_[1]->Unmap2D(0);
 			}
 
 			pos_vel_rt_buffer_[0] = rf.MakeFrameBuffer();
@@ -221,18 +206,16 @@ namespace
 			TexturePtr particle_init_vel;
 			particle_init_vel = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F);
 			{
-				float4* vel_init;
-				uint32_t row_pitch;
-				particle_init_vel->Map2D(0, TMA_Write_Only, 0, 0, tex_width_, tex_height_, reinterpret_cast<void*&>(vel_init), row_pitch);
+				Texture::Mapper mapper(*particle_init_vel, 0, TMA_Write_Only, 0, 0, tex_width_, tex_height_);
+				float4* vel_init = mapper.Pointer<float4>();
 				for (int y = 0; y < tex_height_; ++ y)
 				{
 					for (int x = 0; x < tex_width_; ++ x)
 					{
 						vel_init[x] = float4(random_gen_(), 0.2f + abs(random_gen_()) * 3, random_gen_(), 0);
 					}
-					vel_init += row_pitch / sizeof(vel_init[0]);
+					vel_init += mapper.RowPitch() / sizeof(vel_init[0]);
 				}
-				particle_init_vel->Unmap2D(0);
 			}
 			*(technique_->Effect().ParameterByName("particle_init_vel_sampler")) = particle_init_vel;
 
@@ -262,9 +245,9 @@ namespace
 			inv_emit_freq_ = 1.0f / freq;
 
 			float time = 0;
-			float* birth_time_init;
-			uint32_t row_pitch;
-			particle_birth_time_->Map2D(0, TMA_Write_Only, 0, 0, tex_width_, tex_height_, reinterpret_cast<void*&>(birth_time_init), row_pitch);
+
+			Texture::Mapper mapper(*particle_birth_time_, 0, TMA_Write_Only, 0, 0, tex_width_, tex_height_);
+			float* birth_time_init = mapper.Pointer<float>();
 			for (int y = 0; y < tex_height_; ++ y)
 			{
 				for (int x = 0; x < tex_width_; ++ x)
@@ -272,9 +255,8 @@ namespace
 					birth_time_init[x] = time;
 					time += inv_emit_freq_;
 				}
-				birth_time_init += row_pitch / sizeof(birth_time_init[0]);
+				birth_time_init += mapper.RowPitch() / sizeof(birth_time_init[0]);
 			}
-			particle_birth_time_->Unmap2D(0);
 		}
 
 		void Update(float elapse_time)

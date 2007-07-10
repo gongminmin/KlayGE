@@ -93,6 +93,13 @@ namespace KlayGE
 		main_wnd->OnSize().connect(boost::bind(&OGLRenderWindow::OnSize, this, _1, _2));
 		main_wnd->OnClose().connect(boost::bind(&OGLRenderWindow::OnClose, this, _1));
 
+		RECT rc = { 0, 0, width_, height_ };
+		::AdjustWindowRect(&rc, style, false);
+
+		::SetWindowLongPtrW(hWnd_, GWL_STYLE, style);
+		::SetWindowPos(hWnd_, NULL, settings.left, settings.top, rc.right - rc.left, rc.bottom - rc.top,
+			SWP_SHOWWINDOW | SWP_NOZORDER);
+
 
 		hDC_ = ::GetDC(hWnd_);
 

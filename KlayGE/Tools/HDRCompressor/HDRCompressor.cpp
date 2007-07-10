@@ -112,35 +112,36 @@ namespace
 
 		for (int i = 0; i < 6; ++ i)
 		{
-			uint8_t* data;
-			uint32_t row_pitch;
-			tex->MapCube(static_cast<Texture::CubeFaces>(i), 0, TMA_Read_Only, 0, 0, size, size,
-				reinterpret_cast<void*&>(data), row_pitch);
-			for (uint32_t y = 0; y < size; ++ y)
 			{
-				memcpy(&hdr_data[y * size * 4], data, size * tex->Bpp() / 8);
-				data += row_pitch;
+				Texture::Mapper mapper(*tex, static_cast<Texture::CubeFaces>(i), 0, TMA_Read_Only, 0, 0, size, size);
+				uint8_t* data = mapper.Pointer<uint8_t>();
+				for (uint32_t y = 0; y < size; ++ y)
+				{
+					memcpy(&hdr_data[y * size * 4], data, size * tex->Bpp() / 8);
+					data += mapper.RowPitch();
+				}
 			}
-			tex->UnmapCube(static_cast<Texture::CubeFaces>(i), 0);
+
 			CompressHDR(y_data, c_data, hdr_data, size, size);
 
-			y_cube_map->MapCube(static_cast<Texture::CubeFaces>(i), 0, TMA_Write_Only, 0, 0, size, size,
-				reinterpret_cast<void*&>(data), row_pitch);
-			for (uint32_t y = 0; y < size; ++ y)
 			{
-				memcpy(data, &y_data[y * size], size * y_cube_map->Bpp() / 8);
-				data += row_pitch;
+				Texture::Mapper mapper(*y_cube_map, static_cast<Texture::CubeFaces>(i), 0, TMA_Write_Only, 0, 0, size, size);
+				uint8_t* data = mapper.Pointer<uint8_t>();
+				for (uint32_t y = 0; y < size; ++ y)
+				{
+					memcpy(data, &y_data[y * size], size * y_cube_map->Bpp() / 8);
+					data += mapper.RowPitch();
+				}
 			}
-			y_cube_map->UnmapCube(static_cast<Texture::CubeFaces>(i), 0);
-
-			c_cube_map->MapCube(static_cast<Texture::CubeFaces>(i), 0, TMA_Write_Only, 0, 0, size / 2, size / 2,
-				reinterpret_cast<void*&>(data), row_pitch);
-			for (uint32_t y = 0; y < size; ++ y)
 			{
-				memcpy(data, &c_data[y * size / 2 * 4], size / 2 * c_cube_map->Bpp() / 8);
-				data += row_pitch;
+				Texture::Mapper mapper(*c_cube_map, static_cast<Texture::CubeFaces>(i), 0, TMA_Write_Only, 0, 0, size / 2, size / 2);
+				uint8_t* data = mapper.Pointer<uint8_t>();
+				for (uint32_t y = 0; y < size; ++ y)
+				{
+					memcpy(data, &c_data[y * size / 2 * 4], size / 2 * c_cube_map->Bpp() / 8);
+					data += mapper.RowPitch();
+				}
 			}
-			c_cube_map->UnmapCube(static_cast<Texture::CubeFaces>(i), 0);
 		}
 
 		return std::make_pair(y_cube_map, c_cube_map);
@@ -158,33 +159,34 @@ namespace
 		std::vector<uint16_t> y_data(width * height);
 		std::vector<uint8_t> c_data(width / 2 * height / 2 * 4);
 
-		uint8_t* data;
-		uint32_t row_pitch;
-		tex->Map2D(0, TMA_Read_Only, 0, 0, width, height, reinterpret_cast<void*&>(data), row_pitch);
-		for (uint32_t y = 0; y < height; ++ y)
 		{
-			memcpy(&hdr_data[y * width * 4], data, width * tex->Bpp() / 8);
-			data += row_pitch;
+			Texture::Mapper mapper(*tex, 0, TMA_Read_Only, 0, 0, width, height);
+			uint8_t* data = mapper.Pointer<uint8_t>();
+			for (uint32_t y = 0; y < height; ++ y)
+			{
+				memcpy(&hdr_data[y * width * 4], data, width * tex->Bpp() / 8);
+				data += mapper.RowPitch();
+			}
 		}
-		tex->Unmap2D(0);
 
-		y_map->Map2D(0, TMA_Write_Only, 0, 0, width, height,
-			reinterpret_cast<void*&>(data), row_pitch);
-		for (uint32_t y = 0; y < height; ++ y)
 		{
-			memcpy(data, &y_data[y * width], width * y_map->Bpp() / 8);
-			data += row_pitch;
+			Texture::Mapper mapper(*y_map, 0, TMA_Write_Only, 0, 0, width, height);
+			uint8_t* data = mapper.Pointer<uint8_t>();
+			for (uint32_t y = 0; y < height; ++ y)
+			{
+				memcpy(data, &y_data[y * width], width * y_map->Bpp() / 8);
+				data += mapper.RowPitch();
+			}
 		}
-		y_map->Unmap2D(0);
-
-		c_map->Map2D(0, TMA_Write_Only, 0, 0, width / 2, height / 2,
-			reinterpret_cast<void*&>(data), row_pitch);
-		for (uint32_t y = 0; y < height; ++ y)
 		{
-			memcpy(data, &c_data[y * width / 2 * 4], width / 2 * c_map->Bpp() / 8);
-			data += row_pitch;
+			Texture::Mapper mapper(*c_map, 0, TMA_Write_Only, 0, 0, width / 2, height / 2);
+			uint8_t* data = mapper.Pointer<uint8_t>();
+			for (uint32_t y = 0; y < height; ++ y)
+			{
+				memcpy(data, &c_data[y * width / 2 * 4], width / 2 * c_map->Bpp() / 8);
+				data += mapper.RowPitch();
+			}
 		}
-		c_map->Unmap2D(0);
 
 		return std::make_pair(y_map, c_map);
 	}
