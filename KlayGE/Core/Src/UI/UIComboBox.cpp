@@ -161,9 +161,8 @@ namespace KlayGE
 		if (opened_)
 		{
 			dropdown_rc_ = text_rc_;
-			dropdown_rc_ += Vector_T<int32_t, 2>(0, static_cast<int32_t>(0.90f * text_rc_.Height()));
+			dropdown_rc_ += Vector_T<int32_t, 2>(2, text_rc_.Height());
 			dropdown_rc_.bottom() += drop_height_;
-			dropdown_rc_.right() -= sb_width_;
 
 			dropdown_text_rc_ = dropdown_rc_;
 			dropdown_text_rc_.left() += static_cast<int32_t>(0.1f * dropdown_rc_.Width());

@@ -1,0 +1,99 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="../../../RenderFX/Lighting.fxml"/>
+	<include name="../../../RenderFX/PostProcess.fxml"/>
+
+	<parameter type="float4x4" name="view"/>
+	<parameter type="float4x4" name="view_proj"/>
+	<parameter type="float3" name="light_in_world"/>
+	<parameter type="float3" name="eye_in_world"/>
+	<parameter type="float" name="depth_min"/>
+	<parameter type="float" name="inv_depth_range"/>
+
+	<shader>
+		<![CDATA[
+void ColorDepthVS(float4 pos			: POSITION,
+					float3 normal		: NORMAL,
+
+					float4 row0			: TEXCOORD1,
+					float4 row1			: TEXCOORD2,
+					float4 row2			: TEXCOORD3,
+					float3 clr			: COLOR0,
+
+					out float4 oPos		: POSITION,
+					out float3 oClr		: COLOR,
+					out float3 oNormal : TEXCOORD0,
+					out float2 oDepth : TEXCOORD1,
+					out float3 oLightVec : TEXCOORD2,
+					out float3 oViewVec : TEXCOORD3)
+{
+	float4x4 model = { row0, row1, row2, float4(0, 0, 0, 1) };
+	model = transpose(model);
+
+	float4 pos_ws = mul(pos, model);
+	oPos = mul(pos_ws, view_proj);
+	oClr = clr;
+	oNormal = mul(normal, (float3x3)model);
+	oDepth = mul(pos_ws, view).zw;
+	oLightVec = light_in_world - pos_ws.xyz;
+	oViewVec = eye_in_world - pos_ws.xyz;
+}
+
+float4 ColorDepthPS(float3 normal	: TEXCOORD0,
+				float3 clr0 : COLOR,
+				float2 depth : TEXCOORD1,
+				float3 light_vec : TEXCOORD2,
+				float3 view_vec : TEXCOORD3) : COLOR
+{
+	normal = normalize(normal);
+	light_vec = normalize(light_vec);
+	view_vec = normalize(view_vec);
+
+	float3 clr = clr0 * (diffuse_lighting(light_vec, normal) * 0.7
+					+ specular_lighting(light_vec, view_vec, normal, 8) * 0.3);
+	return float4(clr, (depth.x / depth.y - depth_min) * inv_depth_range);
+}
+		]]>
+	</shader>
+
+	<technique name="ColorDepth">
+		<pass name="p0">
+			<state name="vertex_shader" value="ColorDepthVS()"/>
+			<state name="pixel_shader" value="ColorDepthPS()"/>
+		</pass>
+	</technique>
+
+
+	<parameter type="float" name="focus_plane"/>
+	<parameter type="float" name="inv_focus_range"/>
+	<parameter type="sampler2D" name="src_sampler">
+		<state name="filtering" value="point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+	<parameter type="sampler2D" name="blur_sampler">
+		<state name="filtering" value="bilinear"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+float4 DepthOfFieldPS(float2 tex_coord0 : TEXCOORD0) : COLOR
+{
+	float4 clr_depth = tex2D(src_sampler, tex_coord0);
+	float3 blur_clr = tex2D(blur_sampler, tex_coord0);
+	return float4(lerp(clr_depth.rgb, blur_clr, saturate(abs(clr_depth.a - focus_plane) * inv_focus_range)), 1);
+}
+		]]>
+	</shader>
+	<technique name="DepthOfField">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="DepthOfFieldPS()"/>
+		</pass>
+	</technique>
+</effect>

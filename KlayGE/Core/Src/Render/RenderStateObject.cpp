@@ -32,7 +32,7 @@ namespace KlayGE
 			dest_blend_alpha(ABF_Zero),
 			depth_enable(true),
 			depth_mask(true),
-			depth_func(CF_LessEqual),
+			depth_func(CF_Less),
 			polygon_offset_factor(0),
 			polygon_offset_units(0),
 			front_stencil_enable(false),

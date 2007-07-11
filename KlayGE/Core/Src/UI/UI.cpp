@@ -88,16 +88,6 @@ namespace KlayGE
 		}
 	};
 
-	class UIRectObject : public SceneObjectHelper
-	{
-	public:
-		explicit UIRectObject(RenderablePtr renderable)
-			: SceneObjectHelper(renderable, SceneObject::SOA_ShortAge)
-		{
-		}
-	};
-
-
 	void UIStatesColor::Init(Color const & default_color,
 			Color const & disabled_color,
 			Color const & hidden_color)
@@ -293,9 +283,8 @@ namespace KlayGE
 		{
 			if (!rect.second.first.empty() && !rect.second.second.empty())
 			{
-				boost::shared_ptr<UIRectObject> rect_obj(new UIRectObject(
-					boost::shared_ptr<UIRectRenderable>(new UIRectRenderable(rect.second.first, rect.second.second, rect.first, effect_))));
-				rect_obj->AddToSceneManager();
+				boost::shared_ptr<UIRectRenderable> rect_renderable(new UIRectRenderable(rect.second.first, rect.second.second, rect.first, effect_));
+				rect_renderable->AddToRenderQueue();
 			}
 		}
 		BOOST_FOREACH(BOOST_TYPEOF(strings_)::reference string, strings_)
