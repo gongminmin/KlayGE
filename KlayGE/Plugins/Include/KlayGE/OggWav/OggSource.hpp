@@ -1,8 +1,11 @@
 // OggSource.hpp
 // KlayGE Ogg音频数据源 头文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
+// Ver 3.6.0
+// 版权所有(C) 龚敏敏, 2003-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.6.0
+// 用vorbisfile重写，可以返回原始大小 (2007.7.12)
 //
 // 2.0.0
 // 初次建立 (2003.7.7)
@@ -21,6 +24,7 @@
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <vorbis/codec.h>
+#include <vorbis/vorbisfile.h>
 
 namespace KlayGE
 {
@@ -36,18 +40,16 @@ namespace KlayGE
 		void Reset();
 
 	private:
+		static size_t VorbisRead(void* ptr, size_t byteSize, size_t sizeToRead, void* datasource);
+		static int VorbisSeek(void* datasource, ogg_int64_t offset, int whence);
+		static int VorbisClose(void* datasource);
+		static long VorbisTell(void* datasource);
+
+	private:
 		ResIdentifierPtr		oggFile_;
-		std::istream::off_type	dataOffset_;
+		std::istream::pos_type	length_;
 
-		ogg_sync_state   oy_;	// sync and verify incoming physical bitstream
-		ogg_stream_state os_;	// take physical pages, weld into a logical stream of packets
-		ogg_page         og_;	// one Ogg bitstream page.  Vorbis packets are inside
-		ogg_packet       op_;	// one raw packet of data for decode
-
-		vorbis_info      vi_;	// struct that stores all the static vorbis bitstream settings
-		vorbis_comment   vc_;	// struct that stores all the bitstream user comments
-		vorbis_dsp_state vd_;	// central working state for the packet->PCM decoder
-		vorbis_block     vb_;	// local working space for packet->PCM decode
+		OggVorbis_File vf_;
 	};
 }
 

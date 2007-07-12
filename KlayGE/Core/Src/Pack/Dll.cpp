@@ -35,10 +35,12 @@ namespace KlayGE
 
 	void DllLoader::Load(std::string const & dll_name)
 	{
+		std::string name = ResLoader::Instance().Locate(dll_name);
+
 	#ifdef KLAYGE_PLATFORM_WINDOWS
-		dll_handle_ = static_cast<void*>(::LoadLibraryA(dll_name.c_str()));
+		dll_handle_ = static_cast<void*>(::LoadLibraryA(name.c_str()));
 	#else
-		dll_handle_ = ::dlopen(dll_name.c_str(), RTLD_LAZY | RTLD_GLOBAL);
+		dll_handle_ = ::dlopen(name.c_str(), RTLD_LAZY | RTLD_GLOBAL);
 	#endif
 	}
 

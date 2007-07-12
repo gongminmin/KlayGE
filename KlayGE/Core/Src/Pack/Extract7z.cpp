@@ -229,7 +229,19 @@ namespace
     class SevenZipLoader
     {
     public:
-        SevenZipLoader()
+		static SevenZipLoader& Instance()
+		{
+			static SevenZipLoader ret;
+			return ret;
+		}
+
+        HRESULT CreateObject(const GUID* clsID, const GUID* interfaceID, void** outObject)
+        {
+            return createObjectFunc_(clsID, interfaceID, outObject);
+        }
+
+	private:
+		SevenZipLoader()
         {
 			dll_loader_.Load("7za.dll");
 			createObjectFunc_ = (CreateObjectFunc)dll_loader_.GetProcAddress("CreateObject");
@@ -237,17 +249,10 @@ namespace
 	        BOOST_ASSERT(createObjectFunc_);
         }
 
-        HRESULT CreateObject(const GUID* clsID, const GUID* interfaceID, void** outObject)
-        {
-            return createObjectFunc_(clsID, interfaceID, outObject);
-        }
-
     private:
 		DllLoader dll_loader_;
         CreateObjectFunc createObjectFunc_;
     };
-
-    SevenZipLoader loader;
 
 
 	std::pair<boost::shared_ptr<IInArchive>, uint32_t> GetArchiveIndex(
@@ -260,7 +265,7 @@ namespace
 		boost::shared_ptr<IInArchive> archive;
 		{
 			IInArchive* tmp;
-			TIF(loader.CreateObject(&CLSID_CFormat7z, &IID_IInArchive, reinterpret_cast<void**>(&tmp)));
+			TIF(SevenZipLoader::Instance().CreateObject(&CLSID_CFormat7z, &IID_IInArchive, reinterpret_cast<void**>(&tmp)));
 			archive = MakeCOMPtr(tmp);
 		}
 
