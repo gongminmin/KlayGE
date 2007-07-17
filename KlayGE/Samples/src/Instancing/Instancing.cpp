@@ -161,16 +161,16 @@ namespace
 
 	enum
 	{
-		UseInstance,
-		UseNormal,
+		UseInstanceing
+	};
 
+	enum
+	{
 		Exit
 	};
 
 	InputActionDefine actions[] = 
 	{
-		InputActionDefine(UseInstance, KS_1),
-		InputActionDefine(UseNormal, KS_2),
 		InputActionDefine(Exit, KS_Escape)
 	};
 
@@ -250,48 +250,53 @@ void Instancing::InitObjects()
 	action_handler_t input_handler(new input_signal);
 	input_handler->connect(boost::bind(&Instancing::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
+
+	dialog_ = UIManager::Instance().MakeDialog();
+	dialog_->AddControl(UIControlPtr(new UICheckBox(dialog_, UseInstanceing, L"Use instancing",
+                            60, 550, 350, 24, false, 0, false)));
+	dialog_->Control<UICheckBox>(UseInstanceing)->SetChecked(true);
+	dialog_->Control<UICheckBox>(UseInstanceing)->OnChangedEvent().connect(boost::bind(&Instancing::CheckBoxHandler, this, _1));
 }
 
 void Instancing::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
 {
 	switch (action.first)
 	{
-	case UseInstance:
-		if (!use_instance_)
-		{
-			for (int i = 0; i < NUM_INSTANCE; ++ i)
-			{
-				checked_pointer_cast<Teapot>(scene_objs_[i])->SetRenderable(renderInstance_);
-			}
-
-			use_instance_ = true;
-		}
-		break;
-
-	case UseNormal:
-		if (use_instance_)
-		{
-			for (int i = 0; i < NUM_INSTANCE; ++ i)
-			{
-				checked_pointer_cast<Teapot>(scene_objs_[i])->SetRenderable(renderMesh_);
-			}
-
-			use_instance_ = false;
-		}
-		break;
-
 	case Exit:
 		this->Quit();
 		break;
 	}
 }
 
+void Instancing::CheckBoxHandler(UICheckBox const & /*sender*/)
+{
+	use_instance_ = dialog_->Control<UICheckBox>(UseInstanceing)->GetChecked();
+
+	if (use_instance_)
+	{
+		for (int i = 0; i < NUM_INSTANCE; ++ i)
+		{
+			checked_pointer_cast<Teapot>(scene_objs_[i])->SetRenderable(renderMesh_);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < NUM_INSTANCE; ++ i)
+		{
+			checked_pointer_cast<Teapot>(scene_objs_[i])->SetRenderable(renderInstance_);
+		}
+	}
+}
+
 void Instancing::DoUpdate(uint32_t /*pass*/)
 {
 	fpcController_.Update();
+	UIManager::Instance().HandleInput();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
+
+	UIManager::Instance().Render();
 
 	std::wostringstream stream;
 	stream << this->FPS();
@@ -315,6 +320,4 @@ void Instancing::DoUpdate(uint32_t /*pass*/)
 	{
 		font_->RenderText(0, 54, Color(1, 1, 1, 1), L"Instancing is disabled");
 	}
-
-	font_->RenderText(0, 72, Color(1, 1, 1, 1), L"Press '1' to enable instancing, '2' to disable it");
 }
