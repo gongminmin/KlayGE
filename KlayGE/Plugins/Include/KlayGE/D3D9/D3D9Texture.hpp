@@ -68,6 +68,10 @@ namespace KlayGE
 		virtual uint32_t Height(int level) const;
 		virtual uint32_t Depth(int level) const;
 
+		ID3D9BaseTexturePtr D3DBaseTexture() const
+			{ return d3dBaseTexture_; }
+
+	private:
 		virtual void Map1D(int level, TextureMapAccess tma,
 			uint32_t width, uint32_t x_offset,
 			void*& data);
@@ -86,9 +90,6 @@ namespace KlayGE
 		virtual void Unmap2D(int level);
 		virtual void Unmap3D(int level);
 		virtual void UnmapCube(CubeFaces face, int level);
-
-		ID3D9BaseTexturePtr D3DBaseTexture() const
-			{ return d3dBaseTexture_; }
 
 	protected:
 		void CopySurfaceToMemory(ID3D9SurfacePtr const & surface, void* data);
@@ -114,10 +115,6 @@ namespace KlayGE
 		void CopyToTexture1D(Texture& target, int level,
 			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width, uint32_t src_xOffset);
 
-		void Map1D(int level, TextureMapAccess tma,
-			uint32_t x_offset, uint32_t width, void*& data);
-		void Unmap1D(int level);
-
 		void BuildMipSubLevels();
 
 		using Texture::Usage;
@@ -125,6 +122,11 @@ namespace KlayGE
 
 		ID3D9TexturePtr D3DTexture1D() const
 			{ return d3dTexture1D_; }
+
+	private:
+		void Map1D(int level, TextureMapAccess tma,
+			uint32_t x_offset, uint32_t width, void*& data);
+		void Unmap1D(int level);
 
 	private:
 		void DoOnLostDevice();
@@ -156,11 +158,6 @@ namespace KlayGE
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset);
 
-		void Map2D(int level, TextureMapAccess tma,
-			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
-			void*& data, uint32_t& row_pitch);
-		void Unmap2D(int level);
-
 		void BuildMipSubLevels();
 
 		using Texture::Usage;
@@ -168,6 +165,12 @@ namespace KlayGE
 
 		ID3D9TexturePtr D3DTexture2D() const
 			{ return d3dTexture2D_; }
+
+	private:
+		void Map2D(int level, TextureMapAccess tma,
+			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
+			void*& data, uint32_t& row_pitch);
+		void Unmap2D(int level);
 
 	private:
 		void DoOnLostDevice();
@@ -203,12 +206,6 @@ namespace KlayGE
 			uint32_t src_width, uint32_t src_height, uint32_t src_depth,
 			uint32_t src_xOffset, uint32_t src_yOffset, uint32_t src_zOffset);
 
-		void Map3D(int level, TextureMapAccess tma,
-			uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
-			uint32_t width, uint32_t height, uint32_t depth,
-			void*& data, uint32_t& row_pitch, uint32_t& slice_pitch);
-		void Unmap3D(int level);
-
 		void BuildMipSubLevels();
 
 		using Texture::Usage;
@@ -216,6 +213,13 @@ namespace KlayGE
 
 		ID3D9VolumeTexturePtr D3DTexture3D() const
 			{ return d3dTexture3D_; }
+
+	private:
+		void Map3D(int level, TextureMapAccess tma,
+			uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
+			uint32_t width, uint32_t height, uint32_t depth,
+			void*& data, uint32_t& row_pitch, uint32_t& slice_pitch);
+		void Unmap3D(int level);
 
 	private:
 		void DoOnLostDevice();
@@ -249,11 +253,6 @@ namespace KlayGE
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset);
 
-		void MapCube(CubeFaces face, int level, TextureMapAccess tma,
-			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
-			void*& data, uint32_t& row_pitch);
-		void UnmapCube(CubeFaces face, int level);
-
 		void BuildMipSubLevels();
 
 		using Texture::Usage;
@@ -261,6 +260,12 @@ namespace KlayGE
 
 		ID3D9CubeTexturePtr D3DTextureCube() const
 			{ return d3dTextureCube_; }
+
+	private:
+		void MapCube(CubeFaces face, int level, TextureMapAccess tma,
+			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
+			void*& data, uint32_t& row_pitch);
+		void UnmapCube(CubeFaces face, int level);
 
 	private:
 		void DoOnLostDevice();

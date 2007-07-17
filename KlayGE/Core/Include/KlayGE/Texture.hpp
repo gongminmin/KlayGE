@@ -98,6 +98,8 @@ namespace KlayGE
 	public:
 		class Mapper : boost::noncopyable
 		{
+			friend class Texture;
+
 		public:
 			Mapper(Texture& tex, int level, TextureMapAccess tma,
 						uint32_t x_offset, uint32_t width)
@@ -235,6 +237,9 @@ namespace KlayGE
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset) = 0;
 
+		virtual void BuildMipSubLevels() = 0;
+
+	private:
 		virtual void Map1D(int level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t width,
 			void*& data) = 0;
@@ -253,8 +258,6 @@ namespace KlayGE
 		virtual void Unmap2D(int level) = 0;
 		virtual void Unmap3D(int level) = 0;
 		virtual void UnmapCube(CubeFaces face, int level) = 0;
-
-		virtual void BuildMipSubLevels() = 0;
 
 	protected:
 		uint32_t		bpp_;

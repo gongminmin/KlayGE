@@ -63,6 +63,8 @@ namespace KlayGE
 	public:
 		class Mapper : boost::noncopyable
 		{
+			friend class GraphicsBuffer;
+
 		public:
 			Mapper(GraphicsBuffer& buffer, BufferAccess ba)
 				: buffer_(buffer)
@@ -107,13 +109,13 @@ namespace KlayGE
 			return usage_;
 		}
 
-		virtual void* Map(BufferAccess ba) = 0;
-		virtual void Unmap() = 0;
-
 		void CopyToBuffer(GraphicsBuffer& rhs);
 
 	private:
 		virtual void DoResize() = 0;
+
+		virtual void* Map(BufferAccess ba) = 0;
+		virtual void Unmap() = 0;
 
 	protected:
 		BufferUsage usage_;

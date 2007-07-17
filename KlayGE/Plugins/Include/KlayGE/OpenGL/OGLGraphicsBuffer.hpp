@@ -39,9 +39,6 @@ namespace KlayGE
 		explicit OGLGraphicsBuffer(BufferUsage usage, GLenum target);
 		~OGLGraphicsBuffer();
 
-		void* Map(BufferAccess ba);
-		void Unmap();
-
 		void Active();
 
 		GLuint OGLvbo() const
@@ -51,6 +48,9 @@ namespace KlayGE
 
 	private:
 		void DoResize();
+
+		void* Map(BufferAccess ba);
+		void Unmap();
 
 	private:
 		GLuint vb_;

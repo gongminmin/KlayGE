@@ -52,14 +52,14 @@ namespace KlayGE
 	public:
 		explicit D3D9IndexBuffer(BufferUsage usage);
 
-		void* Map(BufferAccess ba);
-		void Unmap();
-
 		ID3D9IndexBufferPtr D3D9Buffer() const;
 		void SwitchFormat(ElementFormat format);
 
 	private:
 		void DoResize();
+
+		void* Map(BufferAccess ba);
+		void Unmap();
 
 	private:
 		void DoOnLostDevice();
@@ -79,13 +79,13 @@ namespace KlayGE
 	public:
 		explicit D3D9VertexBuffer(BufferUsage usage);
 
-		void* Map(BufferAccess ba);
-		void Unmap();
-
 		ID3D9VertexBufferPtr D3D9Buffer() const;
 
 	private:
 		void DoResize();
+
+		void* Map(BufferAccess ba);
+		void Unmap();
 
 	private:
 		void DoOnLostDevice();

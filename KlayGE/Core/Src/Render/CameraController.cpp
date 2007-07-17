@@ -163,11 +163,14 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(camera_ != NULL);
 
-		float4x4 rot(MathLib::rotation_matrix_yaw_pitch_roll(yaw * rotationScaler_,
-			pitch * rotationScaler_, roll * rotationScaler_));
+		float4x4 rot(MathLib::rotation_matrix_yaw_pitch_roll(-yaw * rotationScaler_,
+			-pitch * rotationScaler_, -roll * rotationScaler_));
 
-		camera_->ViewParams(camera_->EyePos(),
-			MathLib::transform_coord(float3(rot(2, 0), rot(2, 1), rot(2, 2)), world_),
-			camera_->UpVec());
+		float4x4 mat = camera_->ViewMatrix() * rot;
+		world_ = MathLib::inverse(mat);
+
+		camera_->ViewParams(MathLib::transform_coord(float3(0, 0, 0), world_),
+			MathLib::transform_coord(float3(0, 0, 1), world_),
+			MathLib::transform_normal(float3(0, 1, 0), world_));
 	}
 }

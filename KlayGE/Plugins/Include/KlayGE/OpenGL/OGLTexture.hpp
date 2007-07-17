@@ -56,6 +56,22 @@ namespace KlayGE
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset);
 
+		void BuildMipSubLevels();
+
+		using Texture::Usage;
+		void Usage(TextureUsage usage);
+
+		void GLBindTexture();
+		GLuint GLTexture() const
+		{
+			return texture_;
+		}
+		GLenum GLType() const
+		{
+			return target_type_;
+		}
+
+	private:
 		virtual void Map1D(int level, TextureMapAccess tma,
 			uint32_t width, uint32_t x_offset,
 			void*& data);
@@ -74,21 +90,6 @@ namespace KlayGE
 		virtual void Unmap2D(int level);
 		virtual void Unmap3D(int level);
 		virtual void UnmapCube(CubeFaces face, int level);
-
-		void BuildMipSubLevels();
-
-		using Texture::Usage;
-		void Usage(TextureUsage usage);
-
-		void GLBindTexture();
-		GLuint GLTexture() const
-		{
-			return texture_;
-		}
-		GLenum GLType() const
-		{
-			return target_type_;
-		}
 
 	protected:
 		ElementFormat SRGBToRGB(ElementFormat pf);
@@ -114,6 +115,7 @@ namespace KlayGE
 		void CopyToTexture1D(Texture& target, int level,
 			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width, uint32_t src_xOffset);
 
+	private:
 		void Map1D(int level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t width, void*& data);
 		void Unmap1D(int level);
@@ -141,6 +143,7 @@ namespace KlayGE
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset);
 
+	private:
 		void Map2D(int level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
 			void*& data, uint32_t& row_pitch);
@@ -173,6 +176,7 @@ namespace KlayGE
 			uint32_t src_width, uint32_t src_height, uint32_t src_depth,
 			uint32_t src_xOffset, uint32_t src_yOffset, uint32_t src_zOffset);
 
+	private:
 		void Map3D(int level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
 			uint32_t width, uint32_t height, uint32_t depth,
@@ -204,6 +208,7 @@ namespace KlayGE
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset);
 
+	private:
 		void MapCube(CubeFaces face, int level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
 			void*& data, uint32_t& row_pitch);
