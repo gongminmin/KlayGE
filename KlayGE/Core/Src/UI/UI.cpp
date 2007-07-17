@@ -357,27 +357,6 @@ namespace KlayGE
 				dialogs_[i]->HandleInput();
 			}
 		}
-
-		InputEngine& ie = Context::Instance().InputFactoryInstance().InputEngineInstance();
-		for (uint32_t i = 0; i < ie.NumDevices(); ++ i)
-		{
-			InputKeyboardPtr key_board = boost::dynamic_pointer_cast<InputKeyboard>(ie.Device(i));
-			InputMousePtr mouse = boost::dynamic_pointer_cast<InputMouse>(ie.Device(i));
-			if (key_board)
-			{
-				for (size_t j = 0; j < last_key_states_.size(); ++ j)
-				{
-					last_key_states_[j] = key_board->Key(j);
-				}
-			}
-			if (mouse)
-			{
-				for (size_t j = 0; j < last_mouse_states_.size(); ++ j)
-				{
-					last_mouse_states_[j] = mouse->Button(j);
-				}
-			}
-		}
 	}
 
 	Rect_T<int32_t> const & UIManager::ElementTextureRect(uint32_t ctrl, uint32_t elem_index)
@@ -965,11 +944,11 @@ namespace KlayGE
 					for (size_t j = 0; j < key_board->NumKeys(); ++ j)
 					{
 						arg.key = static_cast<uint8_t>(j);
-						if (!UIManager::Instance().GetLastKey(j) && key_board->Key(j))
+						if (key_board->KeyDown(j))
 						{
 							control_focus_.lock()->GetKeyDownEvent()(*this, arg);
 						}
-						if (UIManager::Instance().GetLastKey(j) && !key_board->Key(j))
+						if (key_board->KeyUp(j))
 						{
 							control_focus_.lock()->GetKeyUpEvent()(*this, arg);
 						}
@@ -982,7 +961,7 @@ namespace KlayGE
 					{
 						for (size_t j = 0; j < key_board->NumKeys(); ++ j)
 						{
-							if (!UIManager::Instance().GetLastKey(j) && key_board->Key(j))
+							if (key_board->KeyDown(j))
 							{
 								// See if this matches a control's hotkey
 								// Activate the hotkey if the focus doesn't belong to an
@@ -1107,22 +1086,20 @@ namespace KlayGE
 				{
 					control->GetMouseOverEvent()(*this, arg);
 
-					if ((!UIManager::Instance().GetLastMouseButton(0) && mouse->LeftButton())
-						|| (!UIManager::Instance().GetLastMouseButton(1) && mouse->RightButton())
-						|| (!UIManager::Instance().GetLastMouseButton(2) && mouse->MiddleButton()))
+					if (mouse->ButtonDown(0) || mouse->ButtonDown(1) || mouse->ButtonDown(2))
 					{
 						control->GetMouseDownEvent()(*this, arg);
 					}
 					arg.buttons = UIControl::MB_None;
-					if (UIManager::Instance().GetLastMouseButton(0) && !mouse->LeftButton())
+					if (mouse->ButtonUp(0))
 					{
 						arg.buttons |= UIControl::MB_Left;
 					}
-					if (UIManager::Instance().GetLastMouseButton(1) && !mouse->RightButton())
+					if (mouse->ButtonUp(1))
 					{
 						arg.buttons |= UIControl::MB_Right;
 					}
-					if (UIManager::Instance().GetLastMouseButton(2) && !mouse->MiddleButton())
+					if (mouse->ButtonUp(2))
 					{
 						arg.buttons |= UIControl::MB_Middle;
 					}
@@ -1138,9 +1115,7 @@ namespace KlayGE
 				}
 				else
 				{
-					if (((!UIManager::Instance().GetLastMouseButton(0) && mouse->LeftButton())
-						|| (UIManager::Instance().GetLastMouseButton(0) && !mouse->LeftButton()))
-						&& control_focus_.lock())
+					if ((mouse->ButtonDown(0) || mouse->ButtonUp(0)) && control_focus_.lock())
 					{
 						control_focus_.lock()->OnFocusOut();
 						control_focus_.reset();

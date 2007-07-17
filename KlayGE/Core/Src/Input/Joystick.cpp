@@ -21,6 +21,11 @@
 
 namespace KlayGE
 {
+	InputJoystick::InputJoystick()
+		: index_(false)
+	{
+	}
+
 	// 析构函数
 	/////////////////////////////////////////////////////////////////////////////////
 	InputJoystick::~InputJoystick()
@@ -89,16 +94,30 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	size_t InputJoystick::NumButtons() const
 	{
-		return buttons_.size();
+		return buttons_[index_].size();
 	}
 	
 	// 获取指定键是否按下
 	/////////////////////////////////////////////////////////////////////////////////
-	bool InputJoystick::Button(size_t index) const
+	bool InputJoystick::Button(size_t n) const
 	{
-		BOOST_ASSERT(index < buttons_.size());
+		BOOST_ASSERT(n < buttons_[index_].size());
 
-		return buttons_[index];
+		return buttons_[index_][n];
+	}
+
+	bool InputJoystick::ButtonDown(size_t n) const
+	{
+		BOOST_ASSERT(n < buttons_[index_].size());
+
+		return (buttons_[index_][n] && !buttons_[!index_][n]);
+	}
+
+	bool InputJoystick::ButtonUp(size_t n) const
+	{
+		BOOST_ASSERT(n < buttons_[index_].size());
+
+		return (!buttons_[index_][n] && buttons_[!index_][n]);
 	}
 
 	// 实现动作映射

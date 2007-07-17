@@ -73,7 +73,8 @@ namespace KlayGE
 		boost::array<uint8_t, 256> keys;
 		this->DeviceState(&keys[0], keys.size());
 
-		std::transform(keys.begin(), keys.end(), keys_.begin(),
+		index_ = !index_;
+		std::transform(keys.begin(), keys.end(), keys_[index_].begin(),
 			(boost::lambda::_1 & 0x80) != 0);
 	}
 }

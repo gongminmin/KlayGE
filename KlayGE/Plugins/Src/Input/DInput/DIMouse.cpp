@@ -90,7 +90,8 @@ namespace KlayGE
 		abs_pos_ = Vector_T<long, 2>(pt.x, pt.y);
 		offset_ = Vector_T<long, 3>(diMouseState.lX, diMouseState.lY, diMouseState.lZ);
 
-		std::transform(diMouseState.rgbButtons, diMouseState.rgbButtons + buttons_.size(),
-			buttons_.begin(), boost::lambda::_1 != 0);
+		index_ = !index_;
+		std::transform(diMouseState.rgbButtons, diMouseState.rgbButtons + buttons_[index_].size(),
+			buttons_[index_].begin(), boost::lambda::_1 != 0);
 	}
 }

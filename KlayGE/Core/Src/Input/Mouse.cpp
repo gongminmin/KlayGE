@@ -22,6 +22,15 @@
 
 namespace KlayGE
 {
+	InputMouse::InputMouse()
+		: index_(false)
+	{
+	}
+
+	InputMouse::~InputMouse()
+	{
+	}
+
 	// 窗口坐标的X
 	//////////////////////////////////////////////////////////////////////////////////
 	long InputMouse::AbsX() const
@@ -82,16 +91,30 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	size_t InputMouse::NumButtons() const
 	{
-		return buttons_.size();
+		return buttons_[index_].size();
 	}
 
 	// 获取某按钮是否按下
 	//////////////////////////////////////////////////////////////////////////////////
-	bool InputMouse::Button(size_t index) const
+	bool InputMouse::Button(size_t n) const
 	{
-		BOOST_ASSERT(index < buttons_.size());
+		BOOST_ASSERT(n < buttons_[index_].size());
 
-		return buttons_[index];
+		return buttons_[index_][n];
+	}
+
+	bool InputMouse::ButtonDown(size_t n) const
+	{
+		BOOST_ASSERT(n < buttons_[index_].size());
+
+		return (buttons_[index_][n] && !buttons_[!index_][n]);
+	}
+
+	bool InputMouse::ButtonUp(size_t n) const
+	{
+		BOOST_ASSERT(n < buttons_[index_].size());
+
+		return (!buttons_[index_][n] && buttons_[!index_][n]);
 	}
 
 	// 实现动作映射

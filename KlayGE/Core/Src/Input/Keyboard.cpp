@@ -21,25 +21,48 @@
 
 namespace KlayGE
 {
+	InputKeyboard::InputKeyboard()
+		: index_(false)
+	{
+	}
+
+	InputKeyboard::~InputKeyboard()
+	{
+	}
+
 	// 获取键的数量
 	//////////////////////////////////////////////////////////////////////////////////
 	size_t InputKeyboard::NumKeys() const
 	{
-		return keys_.size();
+		return keys_[index_].size();
 	}
 
 	// 获取某键是否按下
 	//////////////////////////////////////////////////////////////////////////////////
 	bool InputKeyboard::Key(size_t n) const
 	{
-		BOOST_ASSERT(n < keys_.size());
+		BOOST_ASSERT(n < keys_[index_].size());
 
-		return keys_[n];
+		return keys_[index_][n];
 	}
 
 	bool const * InputKeyboard::Keys() const
 	{
-		return &keys_[0];
+		return &keys_[index_][0];
+	}
+
+	bool InputKeyboard::KeyDown(size_t n) const
+	{
+		BOOST_ASSERT(n < keys_[index_].size());
+
+		return (keys_[index_][n] && !keys_[!index_][n]);
+	}
+
+	bool InputKeyboard::KeyUp(size_t n) const
+	{
+		BOOST_ASSERT(n < keys_[index_].size());
+
+		return (!keys_[index_][n] && keys_[!index_][n]);
 	}
 
 	// 实现动作映射

@@ -101,8 +101,9 @@ namespace KlayGE
 		pos_ = Vector_T<long, 3>(diJoyState.lX, diJoyState.lY, diJoyState.lZ);
 		rot_ = Vector_T<long, 3>(diJoyState.lRx, diJoyState.lRy, diJoyState.lRz);
 
+		index_ = !index_;
 		std::copy(diJoyState.rglSlider, diJoyState.rglSlider + slider_.size(), slider_.begin());
-		std::transform(diJoyState.rgbButtons, diJoyState.rgbButtons + buttons_.size(),
-			buttons_.begin(), boost::lambda::_1 != 0);
+		std::transform(diJoyState.rgbButtons, diJoyState.rgbButtons + buttons_[index_].size(),
+			buttons_[index_].begin(), boost::lambda::_1 != 0);
 	}
 }

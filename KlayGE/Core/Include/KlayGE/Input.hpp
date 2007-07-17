@@ -336,20 +336,30 @@ namespace KlayGE
 	class InputKeyboard : public InputDevice
 	{
 	public:
+		InputKeyboard();
+		virtual ~InputKeyboard();
+
 		size_t NumKeys() const;
 		bool Key(size_t n) const;
 		bool const * Keys() const;
+
+		bool KeyDown(size_t n) const;
+		bool KeyUp(size_t n) const;
 
 		InputActionsType UpdateActionMap(uint32_t id);
 		void ActionMap(uint32_t id, InputActionMap const & actionMap);
 
 	protected:
-		boost::array<bool, 256> keys_;
+		boost::array<boost::array<bool, 256>, 2> keys_;
+		bool index_;
 	};
 
 	class InputMouse : public InputDevice
 	{
 	public:
+		InputMouse();
+		virtual ~InputMouse();
+
 		long AbsX() const;
 		long AbsY() const;
 
@@ -361,7 +371,10 @@ namespace KlayGE
 		bool MiddleButton() const;
 
 		size_t NumButtons() const;
-		bool Button(size_t index) const;
+		bool Button(size_t n) const;
+
+		bool ButtonDown(size_t n) const;
+		bool ButtonUp(size_t n) const;
 
 		InputActionsType UpdateActionMap(uint32_t id);
 		void ActionMap(uint32_t id, InputActionMap const & actionMap);
@@ -370,12 +383,14 @@ namespace KlayGE
 		Vector_T<long, 2> abs_pos_;
 		Vector_T<long, 3> offset_;
 
-		boost::array<bool, 8> buttons_;
+		boost::array<boost::array<bool, 8>, 2> buttons_;
+		bool index_;
 	};
 
 	class InputJoystick : public InputDevice
 	{
 	public:
+		InputJoystick();
 		virtual ~InputJoystick();
 
 		long XPos() const;
@@ -389,7 +404,10 @@ namespace KlayGE
 		long Slider(size_t index) const;
 		
 		size_t NumButtons() const;
-		bool Button(size_t index) const;
+		bool Button(size_t n) const;
+
+		bool ButtonDown(size_t n) const;
+		bool ButtonUp(size_t n) const;
 
 		InputActionsType UpdateActionMap(uint32_t id);
 		void ActionMap(uint32_t id, InputActionMap const & actionMap);
@@ -400,7 +418,8 @@ namespace KlayGE
 
 		Vector_T<long, 2> slider_;		// extra axes positions
 
-		boost::array<bool, 32> buttons_;	// 32 buttons
+		boost::array<boost::array<bool, 32>, 2> buttons_;	// 32 buttons
+		bool index_;
 	};
 }
 

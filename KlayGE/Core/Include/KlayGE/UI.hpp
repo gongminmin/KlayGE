@@ -643,17 +643,6 @@ namespace KlayGE
 
 		void HandleInput();
 
-		bool GetLastKey(size_t i) const
-		{
-			assert(i < last_key_states_.size());
-			return last_key_states_[i];
-		}
-		bool GetLastMouseButton(size_t i) const
-		{
-			assert(i < last_mouse_states_.size());
-			return last_mouse_states_[i];
-		}
-
 		Rect_T<int32_t> const & ElementTextureRect(uint32_t ctrl, uint32_t elem_index);
 		size_t NumElementTextureRect(uint32_t ctrl) const;
 
@@ -667,9 +656,6 @@ namespace KlayGE
 
 		std::vector<TexturePtr> texture_cache_;   // Shared textures
 		std::vector<FontPtr> font_cache_;         // Shared fonts
-
-		boost::array<bool, 256> last_key_states_;
-		boost::array<bool, 8> last_mouse_states_;
 
 		boost::array<std::vector<Rect_T<int32_t> >, UICT_Num_Control_Types> elem_texture_rcs_;
 
