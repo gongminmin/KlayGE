@@ -137,7 +137,6 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		present_tex_ = rf.MakeTexture2D(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight, 1, EF_ARGB8);
-		present_tex_->Usage(Texture::TU_RenderTarget);
 
 		IDirect3DSurface9* surf;
 		d3d_device_->CreateOffscreenPlainSurface(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight,
@@ -346,9 +345,6 @@ namespace KlayGE
 		if (cur_surf_index_ < surfaces_.size())
 		{
 			TIF(d3d_device_->GetRenderTargetData(surfaces_[cur_surf_index_], cache_surf_.get()));
-
-			D3DSURFACE_DESC desc;
-			surfaces_[cur_surf_index_]->GetDesc(&desc);
 
 			D3DLOCKED_RECT d3dlocked_rc;
 			cache_surf_->LockRect(&d3dlocked_rc, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY);

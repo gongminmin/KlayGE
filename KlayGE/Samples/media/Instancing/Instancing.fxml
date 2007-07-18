@@ -2,7 +2,7 @@
 
 <effect>
 	<parameter type="float4x4" name="ViewProj" semantic="VIEWPROJECTION"/>
-	<parameter type="float4" name="lightPos"/>
+	<parameter type="float3" name="light_in_world"/>
 
 	<shader>
 		<![CDATA[
@@ -20,10 +20,11 @@ void InstanceVS(float4 pos			: POSITION,
 	float4x4 model = { row0, row1, row2, float4(0, 0, 0, 1) };
 	model = transpose(model);
 
-	oPos = mul(mul(pos, model), ViewProj);
+	float4 pos_ws = mul(pos, model);
+	oPos = mul(pos_ws, ViewProj);
 	
 	normal = mul(normal, (float3x3)model);
-	oClr = float4(clr.rgb * dot(normal, lightPos.xyz - pos.xyz), clr.a);
+	oClr = float4(clr.rgb * dot(normal, normalize(light_in_world - pos_ws.xyz)), clr.a);
 }
 
 float4 PS(float4 clr : COLOR) : COLOR
@@ -59,7 +60,7 @@ void NormalMeshVS(float4 pos			: POSITION,
 	oPos = mul(mul(pos, modelmat), ViewProj);
 	
 	normal = mul(normal, (float3x3)modelmat);
-	oClr = float4(color.rgb * dot(normal, lightPos.xyz - pos.xyz), color.a);
+	oClr = float4(color.rgb * dot(normal, light_in_world - pos.xyz), color.a);
 }
 		]]>
 	</shader>

@@ -7,7 +7,6 @@
 	<parameter type="float4x4" name="view"/>
 	<parameter type="float4x4" name="view_proj"/>
 	<parameter type="float3" name="light_in_world"/>
-	<parameter type="float3" name="eye_in_world"/>
 	<parameter type="float" name="depth_min"/>
 	<parameter type="float" name="inv_depth_range"/>
 
@@ -23,35 +22,22 @@ void ColorDepthVS(float4 pos			: POSITION,
 
 					out float4 oPos		: POSITION,
 					out float3 oClr		: COLOR,
-					out float3 oNormal : TEXCOORD0,
-					out float2 oDepth : TEXCOORD1,
-					out float3 oLightVec : TEXCOORD2,
-					out float3 oViewVec : TEXCOORD3)
+					out float2 oDepth : TEXCOORD0)
 {
 	float4x4 model = { row0, row1, row2, float4(0, 0, 0, 1) };
 	model = transpose(model);
 
 	float4 pos_ws = mul(pos, model);
 	oPos = mul(pos_ws, view_proj);
-	oClr = clr;
-	oNormal = mul(normal, (float3x3)model);
 	oDepth = mul(pos_ws, view).zw;
-	oLightVec = light_in_world - pos_ws.xyz;
-	oViewVec = eye_in_world - pos_ws.xyz;
+   
+	normal = mul(normal, (float3x3)model);
+	oClr = clr.rgb * dot(normal, normalize(light_in_world - pos_ws.xyz));
 }
 
-float4 ColorDepthPS(float3 normal	: TEXCOORD0,
-				float3 clr0 : COLOR,
-				float2 depth : TEXCOORD1,
-				float3 light_vec : TEXCOORD2,
-				float3 view_vec : TEXCOORD3) : COLOR
+float4 ColorDepthPS(float3 clr : COLOR,
+				float2 depth : TEXCOORD0) : COLOR
 {
-	normal = normalize(normal);
-	light_vec = normalize(light_vec);
-	view_vec = normalize(view_vec);
-
-	float3 clr = clr0 * (diffuse_lighting(light_vec, normal) * 0.7
-					+ specular_lighting(light_vec, view_vec, normal, 8) * 0.3);
 	return float4(clr, (depth.x / depth.y - depth_min) * inv_depth_range);
 }
 		]]>

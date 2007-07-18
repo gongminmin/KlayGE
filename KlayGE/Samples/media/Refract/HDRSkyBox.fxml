@@ -40,6 +40,8 @@ float4 HDRSkyBoxPS(float3 texCoord0 : TEXCOORD0) : COLOR
 	<technique name="HDRSkyBoxTec">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
+			<state name="depth_mask" value="0"/>
+			<state name="depth_func" value="equal"/>
 
 			<state name="vertex_shader" value="SkyBoxVS()"/>
 			<state name="pixel_shader" value="HDRSkyBoxPS()"/>

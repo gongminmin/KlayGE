@@ -102,7 +102,7 @@ namespace
 			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
 			*(technique_->Effect().ParameterByName("ViewProj")) = model * view * proj;
-			*(technique_->Effect().ParameterByName("lightPos")) = float4(-1, 0, -1, 1);
+			*(technique_->Effect().ParameterByName("light_in_world")) = float3(2, 2, -3);
 		}
 	};
 
@@ -136,7 +136,7 @@ namespace
 			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
 			*(technique_->Effect().ParameterByName("ViewProj")) = view * proj;
-			*(technique_->Effect().ParameterByName("lightPos")) = float4(-1, 0, -1, 1);
+			*(technique_->Effect().ParameterByName("light_in_world")) = float3(2, 2, -3);
 		}
 
 		void OnInstanceBegin(uint32_t id)
@@ -256,6 +256,13 @@ void Instancing::InitObjects()
                             60, 550, 350, 24, false, 0, false)));
 	dialog_->Control<UICheckBox>(UseInstanceing)->SetChecked(true);
 	dialog_->Control<UICheckBox>(UseInstanceing)->OnChangedEvent().connect(boost::bind(&Instancing::CheckBoxHandler, this, _1));
+}
+
+void Instancing::OnResize(uint32_t width, uint32_t height)
+{
+	App3DFramework::OnResize(width, height);
+
+	dialog_->GetControl(UseInstanceing)->SetLocation(60, height - 50);
 }
 
 void Instancing::InputHandler(InputEngine const & /*sender*/, InputAction const & action)

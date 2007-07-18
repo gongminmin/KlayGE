@@ -184,6 +184,6 @@ namespace KlayGE
 	long OggSource::VorbisTell(void* datasource)
 	{
 		OggSource* vorbis_data = static_cast<OggSource*>(datasource);
-		return vorbis_data->oggFile_->tellg();
+		return static_cast<long>(vorbis_data->oggFile_->tellg());
 	}
 }

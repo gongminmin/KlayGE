@@ -77,12 +77,8 @@ namespace KlayGE
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-		FrameBufferPtr backup_fb = re.CurFrameBuffer();
 		re.BindFrameBuffer(frame_buffer_);
-
 		this->Render();
-
-		re.BindFrameBuffer(backup_fb);
 	}
 
 	void PostProcess::OnRenderBegin()

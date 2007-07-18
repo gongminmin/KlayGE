@@ -271,7 +271,7 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 
 	hdr_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F);
 	hdr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0));
-	hdr_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));
+	hdr_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.RenderEngineInstance().CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil));
 
 	hdr_->Source(hdr_tex_, hdr_buffer_->RequiresFlipping());
 	hdr_->Destinate(FrameBufferPtr());

@@ -15,6 +15,8 @@ private:
 	void InitObjects();
 	void DoUpdate(KlayGE::uint32_t pass);
 
+	void OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height);
+
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 	void CheckBoxHandler(KlayGE::UICheckBox const & sender);
 

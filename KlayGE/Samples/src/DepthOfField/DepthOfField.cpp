@@ -107,7 +107,6 @@ namespace
 			*(technique_->Effect().ParameterByName("view_proj")) = view * proj;
 
 			*(technique_->Effect().ParameterByName("light_in_world")) = float3(2, 2, -3);
-			*(technique_->Effect().ParameterByName("eye_in_world")) = app.ActiveCamera().EyePos();
 
 			*(technique_->Effect().ParameterByName("depth_min")) = app.ActiveCamera().NearPlane();
 			*(technique_->Effect().ParameterByName("inv_depth_range")) = 1 / (app.ActiveCamera().FarPlane() - app.ActiveCamera().NearPlane());
@@ -330,6 +329,7 @@ void DepthOfFieldApp::OnResize(uint32_t width, uint32_t height)
 	clr_depth_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));
 
 	depth_of_field_->Source(clr_depth_tex_, clr_depth_buffer_->RequiresFlipping());
+	depth_of_field_->Destinate(FrameBufferPtr());
 
 	dialog_->GetControl(FocusPlaneStatic)->SetLocation(width - 120, 280);
 	dialog_->GetControl(FocusPlaneSlider)->SetLocation(width - 120, 300);
