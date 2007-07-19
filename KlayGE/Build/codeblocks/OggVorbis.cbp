@@ -3,14 +3,14 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="1"/>
 	<Project>
-		<Option title="ÒôÆµÊý¾ÝÔ´-Ogg Wav"/>
+		<Option title="OggVorbis Audio Datasource"/>
 		<Option makefile="Makefile"/>
 		<Option makefile_is_custom="0"/>
 		<Option default_target="-1"/>
 		<Option compiler="0"/>
 		<Build>
 			<Target title="Debug">
-				<Option output="..\..\lib\Win32\libKlayGE_AudioDataSource_OggWav_d.a"/>
+				<Option output="..\..\lib\Win32\libKlayGE_AudioDataSource_OggVorbis_d.a"/>
 				<Option working_dir=""/>
 				<Option object_output="..\..\Debug\Win32"/>
 				<Option deps_output=".deps"/>
@@ -29,7 +29,7 @@
 				</Compiler>
 			</Target>
 			<Target title="Release">
-				<Option output="..\..\lib\Win32\libKlayGE_AudioDataSource_OggWav.a"/>
+				<Option output="..\..\lib\Win32\libKlayGE_AudioDataSource_OggVorbis.a"/>
 				<Option working_dir=""/>
 				<Option object_output="..\..\Release\Win32"/>
 				<Option deps_output=".deps"/>
@@ -47,26 +47,14 @@
 				</Compiler>
 			</Target>
 		</Build>
-		<Unit filename="..\..\Plugins\Include\KlayGE\OggWav\OggSource.hpp">
+		<Unit filename="..\..\Plugins\Include\KlayGE\OggVorbis\OggSource.hpp">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
-		<Unit filename="..\..\Plugins\Include\KlayGE\OggWav\WaveSource.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Src\AudioDataSource\OggWav\OggSource.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Src\AudioDataSource\OggWav\WaveSource.cpp">
+		<Unit filename="..\..\Plugins\Src\AudioDataSource\OggVorbis\OggSource.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Debug"/>
 			<Option target="Release"/>

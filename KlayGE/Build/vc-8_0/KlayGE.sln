@@ -8,7 +8,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DInput Input System", "DInp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DShow Show System", "DShow.vcproj", "{88AE3603-38C0-48D1-BCC2-34ABC261788E}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Ogg Wav Audio Datasource", "OggWav.vcproj", "{166D9F36-D985-45FA-B467-8E19554F6A94}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OggVorbis Audio Datasource", "OggVorbis.vcproj", "{166D9F36-D985-45FA-B467-8E19554F6A94}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "App Layer", "AppLayer.vcproj", "{E76027F9-0E7B-4B3D-80C9-50E64E0BC5AD}"
 EndProject

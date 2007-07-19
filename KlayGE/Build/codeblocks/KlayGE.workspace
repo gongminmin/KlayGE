@@ -6,13 +6,12 @@
 		<Project filename="OpenAL.cbp"/>
 		<Project filename="DInput.cbp"/>
 		<Project filename="DShow.cbp"/>
-		<Project filename="OggWav.cbp"/>
+		<Project filename="OggVorbis.cbp"/>
 		<Project filename="AppLayer.cbp"/>
 		<Project filename="DSound.cbp"/>
 		<Project filename="D3D9.cbp"/>
 		<Project filename="OpenGL.cbp"/>
 		<Project filename="OCTree.cbp"/>
-		<Project filename="LZSS.cbp"/>
 		<Project filename="Heightmap.cbp"/>
 	</Workspace>
 </CodeBlocks_workspace_file>

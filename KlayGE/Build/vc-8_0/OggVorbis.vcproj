@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="Ogg Wav Audio Datasource"
+	Name="OggVorbis Audio Datasource"
 	ProjectGUID="{166D9F36-D985-45FA-B467-8E19554F6A94}"
 	RootNamespace="Ogg Wav Audio Datasource"
 	Keyword="Win32Proj"
@@ -64,7 +64,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_AudioDataSource_OggWav_d.lib"
+				OutputFile="$(OutDir)/KlayGE_AudioDataSource_OggVorbis_d.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -129,7 +129,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_AudioDataSource_OggWav_d.lib"
+				OutputFile="$(OutDir)/KlayGE_AudioDataSource_OggVorbis_d.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -197,7 +197,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_AudioDataSource_OggWav.lib"
+				OutputFile="$(OutDir)/KlayGE_AudioDataSource_OggVorbis.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -265,7 +265,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_AudioDataSource_OggWav.lib"
+				OutputFile="$(OutDir)/KlayGE_AudioDataSource_OggVorbis.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -292,11 +292,7 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm"
 			>
 			<File
-				RelativePath="..\..\Plugins\Src\AudioDataSource\OggWav\OggSource.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Plugins\Src\AudioDataSource\OggWav\WaveSource.cpp"
+				RelativePath="..\..\Plugins\Src\AudioDataSource\OggVorbis\OggSource.cpp"
 				>
 			</File>
 		</Filter>
@@ -305,11 +301,7 @@
 			Filter="h;hpp;hxx;hm;inl;inc"
 			>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\OggWav\OggSource.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\OggWav\WaveSource.hpp"
+				RelativePath="..\..\Plugins\Include\KlayGE\OggVorbis\OggSource.hpp"
 				>
 			</File>
 		</Filter>
