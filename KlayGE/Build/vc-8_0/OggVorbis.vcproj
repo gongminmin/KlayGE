@@ -292,7 +292,7 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm"
 			>
 			<File
-				RelativePath="..\..\Plugins\Src\AudioDataSource\OggVorbis\OggSource.cpp"
+				RelativePath="..\..\Plugins\Src\AudioDataSource\OggVorbis\OggVorbisSource.cpp"
 				>
 			</File>
 		</Filter>
@@ -301,7 +301,7 @@
 			Filter="h;hpp;hxx;hm;inl;inc"
 			>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\OggVorbis\OggSource.hpp"
+				RelativePath="..\..\Plugins\Include\KlayGE\OggVorbis\OggVorbisSource.hpp"
 				>
 			</File>
 		</Filter>

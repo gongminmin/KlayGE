@@ -47,14 +47,14 @@
 				</Compiler>
 			</Target>
 		</Build>
-		<Unit filename="..\..\Plugins\Include\KlayGE\OggVorbis\OggSource.hpp">
+		<Unit filename="..\..\Plugins\Include\KlayGE\OggVorbis\OggVorbisSource.hpp">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
-		<Unit filename="..\..\Plugins\Src\AudioDataSource\OggVorbis\OggSource.cpp">
+		<Unit filename="..\..\Plugins\Src\AudioDataSource\OggVorbis\OggVorbisSource.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Debug"/>
 			<Option target="Release"/>

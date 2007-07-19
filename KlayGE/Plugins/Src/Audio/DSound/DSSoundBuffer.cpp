@@ -81,10 +81,10 @@ namespace KlayGE
 		sources_[0] = IDSBufferPtr(temp);
 
 		// 复制缓冲区，使所有缓冲区使用同一段数据
-		BOOST_FOREACH(BOOST_TYPEOF(sources_)::reference source, sources_)
+		for (BOOST_AUTO(iter, sources_.begin() + 1); iter != sources_.end(); ++ iter)
 		{
 			TIF(dsound->DuplicateSoundBuffer(sources_[0].get(), &temp));
-			source = IDSBufferPtr(temp);
+			*iter = IDSBufferPtr(temp);
 		}
 
 		// 锁定缓冲区
