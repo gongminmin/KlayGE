@@ -59,79 +59,85 @@ namespace KlayGE
 		template <>
 		PyObjectPtr CppType2PyObjectPtr<std::string>(std::string const & t)
 		{
-			return KlayGE::PyObjectPtr(Py_BuildValue("s", t.c_str()));
+			return MakePyObjectPtr(Py_BuildValue("s", t.c_str()));
 		}
 
 		template <>
 		PyObjectPtr CppType2PyObjectPtr<char*>(char* const & t)
 		{
-			return KlayGE::PyObjectPtr(Py_BuildValue("s", t));
+			return MakePyObjectPtr(Py_BuildValue("s", t));
 		}
 
 		template <>
 		PyObjectPtr CppType2PyObjectPtr<wchar_t*>(wchar_t* const & t)
 		{
-			return KlayGE::PyObjectPtr(Py_BuildValue("u", t));
+			return MakePyObjectPtr(Py_BuildValue("u", t));
 		}
 
 		template <>
 		PyObjectPtr CppType2PyObjectPtr<int8_t>(int8_t const & t)
 		{
-			return KlayGE::PyObjectPtr(Py_BuildValue("b", t));
+			return MakePyObjectPtr(Py_BuildValue("b", t));
 		}
 
 		template <>
 		PyObjectPtr CppType2PyObjectPtr<int16_t>(int16_t const & t)
 		{
-			return KlayGE::PyObjectPtr(Py_BuildValue("h", t));
+			return MakePyObjectPtr(Py_BuildValue("h", t));
 		}
 
 		template <>
 		PyObjectPtr CppType2PyObjectPtr<int32_t>(int32_t const & t)
 		{
-			return KlayGE::PyObjectPtr(Py_BuildValue("i", t));
+			return MakePyObjectPtr(Py_BuildValue("i", t));
 		}
 
 		template <>
 		PyObjectPtr CppType2PyObjectPtr<int64_t>(int64_t const & t)
 		{
-			return KlayGE::PyObjectPtr(Py_BuildValue("L", t));
+			return MakePyObjectPtr(Py_BuildValue("L", t));
 		}
 
 		template <>
 		PyObjectPtr CppType2PyObjectPtr<uint8_t>(uint8_t const & t)
 		{
-			return KlayGE::PyObjectPtr(Py_BuildValue("B", t));
+			return MakePyObjectPtr(Py_BuildValue("B", t));
 		}
 
 		template <>
 		PyObjectPtr CppType2PyObjectPtr<uint16_t>(uint16_t const & t)
 		{
-			return KlayGE::PyObjectPtr(Py_BuildValue("H", t));
+			return MakePyObjectPtr(Py_BuildValue("H", t));
 		}
 
 		template <>
 		PyObjectPtr CppType2PyObjectPtr<uint32_t>(uint32_t const & t)
 		{
-			return KlayGE::PyObjectPtr(Py_BuildValue("I", t));
+			return MakePyObjectPtr(Py_BuildValue("I", t));
 		}
 
 		template <>
 		PyObjectPtr CppType2PyObjectPtr<uint64_t>(uint64_t const & t)
 		{
-			return KlayGE::PyObjectPtr(Py_BuildValue("K", t));
+			return MakePyObjectPtr(Py_BuildValue("K", t));
 		}
 
 		template <>
 		PyObjectPtr CppType2PyObjectPtr<double>(double const & t)
 		{
-			return KlayGE::PyObjectPtr(Py_BuildValue("d", t));
+			return MakePyObjectPtr(Py_BuildValue("d", t));
 		}
 
 		template <>
 		PyObjectPtr CppType2PyObjectPtr<float>(float const & t)
 		{
-			return KlayGE::PyObjectPtr(Py_BuildValue("f", t));
+			return MakePyObjectPtr(Py_BuildValue("f", t));
+		}
+
+		template <>
+		PyObjectPtr CppType2PyObjectPtr<PyObject*>(PyObject* const & t)
+		{
+			return MakePyObjectPtr(t);
 		}
 
 		template <>
@@ -154,8 +160,9 @@ namespace KlayGE
 
 	public:
 		explicit ScriptModule(std::string const & name);
+		~ScriptModule();
 
-		boost::shared_ptr<PyObject> Value(std::string const & name);
+		PyObjectPtr Value(std::string const & name);
 
 		template <typename TupleType>
 		PyObjectPtr Call(std::string const & funcName, const TupleType& t)
@@ -172,6 +179,7 @@ namespace KlayGE
 
 			for (ForwardIterator iter = first; iter != last; ++ iter)
 			{
+				Py_INCREF(iter->get());
 				PyTuple_SetItem(args.get(), iter - first, iter->get());
 			}
 

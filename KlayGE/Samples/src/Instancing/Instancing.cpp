@@ -14,6 +14,7 @@
 #include <KlayGE/Sampler.hpp>
 #include <KlayGE/KMesh.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/Script.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 #include <KlayGE/OpenGL/OGLRenderFactory.hpp>
@@ -33,7 +34,7 @@ using namespace KlayGE;
 
 namespace
 {
-	int const NUM_INSTANCE = 400;
+	int32_t const NUM_INSTANCE = 400;
 
 	class Teapot : public SceneObjectHelper
 	{
@@ -216,17 +217,31 @@ void Instancing::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
+	ScriptEngine scriptEng;
+	ScriptModule module("Instancing_init");
+
 	renderInstance_ = LoadKModel("teapot.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderInstance>())->Mesh(0);
-	for (int i = 0; i < 10; ++ i)
+	for (int32_t i = 0; i < 10; ++ i)
 	{
-		for (int j = 0; j < NUM_INSTANCE / 10; ++ j)
+		for (int32_t j = 0; j < NUM_INSTANCE / 10; ++ j)
 		{
-			float const s = sin(2 * PI * j / (NUM_INSTANCE / 10));
-			float const c = cos(2 * PI * j / (NUM_INSTANCE / 10));
+			PyObjectPtr py_pos = module.Call("get_pos", boost::make_tuple(i, j, NUM_INSTANCE));
+
+			float3 pos;
+			pos.x() = PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 0));
+			pos.y() = PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 1));
+			pos.z() = PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 2));
+
+			PyObjectPtr py_clr = module.Call("get_clr", boost::make_tuple(i, j, NUM_INSTANCE));
+
+			Color clr;
+			clr.r() = PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 0));
+			clr.g() = PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 1));
+			clr.b() = PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 2));
+			clr.a() = PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 3));
 
 			SceneObjectPtr so(new Teapot);
-			checked_pointer_cast<Teapot>(so)->Instance(
-				MathLib::translation(s, i / 10.0f, c), Color(s, c, 0, 1));
+			checked_pointer_cast<Teapot>(so)->Instance(MathLib::translation(pos), clr);
 
 			checked_pointer_cast<Teapot>(so)->SetRenderable(renderInstance_);
 			so->AddToSceneManager();

@@ -356,6 +356,50 @@
 				RelativePath="..\..\src\Instancing\Instancing.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\..\media\Instancing\Instancing_init.py"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Copying $(InputFileName)"
+						CommandLine="copy /Y &quot;$(InputPath)&quot; &quot;$(OutDir)&quot;"
+						Outputs="$(OutDir)/$(InputFileName)"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Copying $(InputFileName)"
+						CommandLine="copy /Y &quot;$(InputPath)&quot; &quot;$(OutDir)&quot;"
+						Outputs="$(OutDir)/$(InputFileName)"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Copying $(InputFileName)"
+						CommandLine="copy /Y &quot;$(InputPath)&quot; &quot;$(OutDir)&quot;"
+						Outputs="$(OutDir)/$(InputFileName)"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Copying $(InputFileName)"
+						CommandLine="copy /Y &quot;$(InputPath)&quot; &quot;$(OutDir)&quot;"
+						Outputs="$(OutDir)/$(InputFileName)"
+					/>
+				</FileConfiguration>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -379,7 +423,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx&#x0D;&#x0A;"
 						Outputs="$(InputDir)\$(InputName).kfx"
 					/>
 				</FileConfiguration>
@@ -389,7 +433,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx&#x0D;&#x0A;"
 						Outputs="$(InputDir)\$(InputName).kfx"
 					/>
 				</FileConfiguration>
@@ -399,7 +443,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx&#x0D;&#x0A;"
 						Outputs="$(InputDir)\$(InputName).kfx"
 					/>
 				</FileConfiguration>
@@ -409,7 +453,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Compiling $(InputPath)"
-						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx"
+						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx&#x0D;&#x0A;"
 						Outputs="$(InputDir)\$(InputName).kfx"
 					/>
 				</FileConfiguration>
