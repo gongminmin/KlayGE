@@ -738,12 +738,10 @@ namespace KlayGE
 
 			for (uint32_t i = 0; i < num_passes; ++ i)
 			{
-				RenderPassPtr pass = tech.Pass(i);
+				tech.Pass(i)->Apply();
 
-				pass->Begin();
 				TIF(d3dDevice_->DrawIndexedPrimitive(primType, 0, 0,
 					static_cast<UINT>(rl.NumVertices()), 0, primCount));
-				pass->End();
 			}
 		}
 		else
@@ -752,11 +750,9 @@ namespace KlayGE
 
 			for (uint32_t i = 0; i < num_passes; ++ i)
 			{
-				RenderPassPtr pass = tech.Pass(i);
+				tech.Pass(i)->Apply();
 
-				pass->Begin();
 				TIF(d3dDevice_->DrawPrimitive(primType, 0, primCount));
-				pass->End();
 			}
 		}
 	}

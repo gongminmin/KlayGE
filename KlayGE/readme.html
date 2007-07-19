@@ -7,17 +7,17 @@
 <body>
 <h1>粘土游戏引擎(KlayGE) 3.6.0 Readme</h1>
 <p>龚敏敏<br />
-	Homepage: http://klayge.sourceforge.net<br />
-	E-Mail:	  enginedev@163.com<br />
+	Homepage: <a href="http://klayge.sourceforge.net" target="_blank">http://klayge.sourceforge.net</a><br />
+	E-Mail:	  <a href="mailto:enginedev@163.com">enginedev@163.com</a><br />
 	QQ:       33611210</p>
 <p>欢迎使用粘土游戏引擎 3.6.0<br />
 	压缩包中包含的组件：KlayGE头文件，KlayGE源代码，KlayGE的构建工程文件</p>
 <p>KlayGE是一个开放源代码的，跨平台的，基于插件结构的游戏引擎。</p>
 <p>本引擎的设计目的是用最先进的技术武装引擎，它所提供框架使游戏的开发、测试、移植得到简化。</p>
-<p>KlayGE的目标平台是今年发布的最高硬件到上一年发布的最低硬件。</p>
+<p>KlayGE的目标平台是引擎发布当年的出现的最高硬件到上一年出现的最低硬件。</p>
 <h2><a id="menu">目录</a></h2>
 <ul>
-	<li><a href="#license">使用协议</a></li>
+	<li><a href="#license">协议</a></li>
 	<li><a href="#installation">安装</a></li>
 	<li><a href="#third_part">第三方库</a></li>
 	<li><a href="#history">发展历程</a></li>
@@ -25,14 +25,15 @@
 	<li><a href="#compiler">编译器支持</a></li>
 </ul>
 <hr />
-<h2><a id="license">使用协议</a></h2>
-<p>KlayGE版权归龚敏敏所有，从2.7.0开始遵循GPL协议。您任意地使用它，但必须保证使用KlayGE的项目也遵循GPL协议。如果您再开发过程中发现bug，请麻烦您告诉我。</p>
+<h2><a id="license">协议</a></h2>
+<p>KlayGE按照GPL 2.0协议发布。这意味着所有人都可以用它，而且可以访问到它全部的源代码，但必须保证用到KlayGE的项目也必须按照GPL 2.0协议进行发布。</p>
+<p>开放源代码是一种很强大的开发方式，它鼓励散布、合作开发和用户的自由。开放源代码软件的源代码是100%可见的，不会暗藏流氓软件，间谍软件和病毒。</p>
 <p><a href="#menu">^返回目录</a></p>
 <hr />
 <h2><a id="installation">安装</a></h2>
 <ol>
-	<li> 把KlayGE.7z解压缩到一个目录，比如说 F:\KlayGE</li>
-	<li> 设置路径。这里拿VS 2005举例，其他环境请参考它们的帮助文件。
+	<li>把KlayGE.7z解压缩到一个目录，比如说 F:\KlayGE</li>
+	<li>设置路径。这里拿VS 2005举例，其他环境请参考它们的帮助文件。
 		<ol>
 			<li>打开“Tools”-&gt;“Options”-&gt;“Projects and Solutions”-&gt;&quot;VC++ Directories&quot;，在“Show directories for:”下拉框中选择“Include files”，在下面添加F:\KlayGE\Core\Include、F:\KlayGE\AppLayer\Include和F:\KlayGE\Plugins\Include</li>
 			<li>在“Show directories for:”下拉框中选择&quot;Library files&quot;，在下面添加F:\KlayGE\Lib\Win32 (如果要用x64的版本，就把Win32换成x64)</li>
@@ -44,31 +45,31 @@
 <hr />
 <h2><a id="third_part">第三方库</a></h2>
 <p>在编译KlayGE的之前，需要先安装下列第三方库。</p>
-<h4>内核需要：</h4>
+<h4>Core需要：</h4>
 <ul>
 	<li>Python 2.5.1，http://www.python.org</li>
 	<li>Boost 1.34.0，http://www.boost.org。1.34.0的typeof不能在vc8下工作，解决方案是从CVS HEAD中获得boost\typeof\msvc\typeof_impl.hpp和boost\typeof\typeof.hpp，并覆盖掉原有的对应文件。</li>
-	<li>FreeType 2.3.4，http://freetype.sourceforge.net</li>
+	<li>FreeType 2.3.5，http://freetype.sourceforge.net。编译它的Debug和Release两个solution configuration。</li>
 </ul>
-<h4>渲染引擎-D3D和音频引擎-DSound需要：</h4>
+<h4>D3D9 Rendering System和DSound Audio System需要：</h4>
 <ul>
-	<li>DirectX 9.0 SDK June 2007，http://msdn.microsoft.com/directx下载</li>
+	<li>DirectX SDK June 2007，从<a href="http://msdn.microsoft.com/directx" target="_blank">http://msdn.microsoft.com/directx</a>下载</li>
 </ul>
-<h4>播放引擎-DShow需要：</h4>
+<h4>DShow Show System需要：</h4>
 <ul>
-	<li>Windows(R) Server 2003 R2 Platform SDK，http://msdn.microsoft.com/platformsdk</li>
+	<li>Windows(R) Server 2003 R2 Platform SDK，从<a href="http://msdn.microsoft.com/platformsdk" target="_blank">http://msdn.microsoft.com/platformsdk</a>下载</li>
 </ul>
-<h4>音频数据源-Ogg Wav需要：</h4>
+<h4>Ogg Wav Audio Datasource需要：</h4>
 <ul>
-	<li>Vorbis SDK，http://xiph.org/downloads/，需要自己编译static库，并把runtime library选择成Multi-threaded DLL/Multi-threaded Debug DLL。</li>
+	<li>Vorbis SDK，从<a href="http://xiph.org/downloads/" target="_blank">http://xiph.org/downloads/</a>下载，需要把它编译成static库。</li>
 </ul>
-<h4>音频引擎-OpenAL需要：</h4>
+<h4>OpenAL Audio System需要：</h4>
 <ul>
-	<li>OpenAL SDK，http://www.openal.org/downloads.html</li>
+	<li>OpenAL SDK，从<a href="http://www.openal.org/downloads.html" target="_blank">http://www.openal.org/downloads.html</a>下载</li>
 </ul>
-<h4>渲染引擎-OpenGL需要：</h4>
+<h4>OpenGL Rendering System需要：</h4>
 <ul>
-	<li>NVIDIA Cg，http://developer.nvidia.com/object/cg_toolkit.html</li>
+	<li>NVIDIA Cg，从<a href="http://developer.nvidia.com/object/cg_toolkit.html" target="_blank">http://developer.nvidia.com/object/cg_toolkit.html</a>下载</li>
 </ul>
 <p>由于KlayGE在VC下使用的运行库是多线程的DLL，所以需要把<strong>所有</strong>连接到exe的lib的运行库改为多线程DLL（Project-  &gt;Properties-&gt;Configuration Properties-&gt;C/C++-&gt;Code  Generation-&gt;RuntimeLibrary，选择Multi-threaded Debug DLL/Multi-threaded  DLL）。</p>
 <p>另外，用VC编译Release版的Boost和FreeType需要定义_SECURE_SCL=0宏（在Project-&gt;Properties-&gt;Configuration Properties-&gt;C/C++-&gt;Preprocessor-&gt;Preprocessor Definitions中添加）。</p>
@@ -82,7 +83,7 @@
 	RenderEffect增加了Clone方法<br />
 	去掉了RenderTarget和RenderWindow<br />
 	去掉了Triangle fan的拓扑方式<br />
-	增加了UI系统
+	增加了UI系统<br />
 	增加了Depth of field例子</p>
 <p><strong>3.5.0 (2007.3.9)</strong><br />
 	支持Alpha to coverage<br />
@@ -265,6 +266,8 @@
 			核心源文件
 		\Net
 			网络引擎的源文件
+		\Pack
+			文件打包系统的源文件
 		\Render
 			渲染系统内核的源文件
 		\Scene
@@ -304,8 +307,6 @@
 			音频数据源插件的源文件
 		\Input
 			输入引擎插件的源文件
-		\PackSystem
-			文件打包系统的源文件
 		\Render
 			渲染系统插件的源文件
 		\Scene
@@ -358,5 +359,6 @@
 </ul>
 <p><a href="#menu">^返回目录</a></p>
 <hr />
+<p>最后更新：2007-7-19</p>
 </body>
 </html>

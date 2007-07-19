@@ -412,12 +412,8 @@ void DepthOfFieldApp::DoUpdate(uint32_t pass)
 		font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description());
 
 		std::wostringstream stream;
-		stream << rw.DepthBits() << " bits depth " << rw.StencilBits() << " bits stencil";
-		font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str());
-
-		stream.str(L"");
 		stream << this->FPS() << " FPS";
-		font_->RenderText(0, 54, Color(1, 1, 0, 1), stream.str());
+		font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str());
 		break;
 	}
 }

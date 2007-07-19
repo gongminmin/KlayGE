@@ -846,7 +846,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	void RenderPass::Begin()
+	void RenderPass::Apply()
 	{
 		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
 		{
@@ -974,10 +974,6 @@ namespace KlayGE
 
 		RenderEngine& render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		render_eng.SetStateObjects(*render_state_obj_, *shader_obj_);
-	}
-
-	void RenderPass::End()
-	{
 	}
 
 	std::string RenderPass::GenShaderText() const

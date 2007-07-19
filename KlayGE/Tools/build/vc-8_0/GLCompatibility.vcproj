@@ -202,7 +202,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;_SECURE_SCL=0"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				FloatingPointModel="2"
@@ -281,7 +281,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="WIN64;NDEBUG;_CONSOLE;STRICT"
+				PreprocessorDefinitions="WIN64;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;_SECURE_SCL=0"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				FloatingPointModel="2"
@@ -356,7 +356,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Copying python script"
-						CommandLine="copy &quot;$(InputPath)&quot; &quot;$(OutDir)&quot; /Y"
+						CommandLine="copy &quot;$(InputPath)&quot; &quot;$(OutDir)&quot; /Y&#x0D;&#x0A;"
 						Outputs="$(OutDir)/$(InputFileName)"
 					/>
 				</FileConfiguration>
@@ -366,7 +366,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Copying python script"
-						CommandLine="copy &quot;$(InputPath)&quot; &quot;$(OutDir)&quot; /Y"
+						CommandLine="copy &quot;$(InputPath)&quot; &quot;$(OutDir)&quot; /Y&#x0D;&#x0A;"
 						Outputs="$(OutDir)/$(InputFileName)"
 					/>
 				</FileConfiguration>
@@ -376,7 +376,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Copying python script"
-						CommandLine="copy &quot;$(InputPath)&quot; &quot;$(OutDir)&quot; /Y"
+						CommandLine="copy &quot;$(InputPath)&quot; &quot;$(OutDir)&quot; /Y&#x0D;&#x0A;"
 						Outputs="$(OutDir)/$(InputFileName)"
 					/>
 				</FileConfiguration>
@@ -386,7 +386,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Copying python script"
-						CommandLine="copy &quot;$(InputPath)&quot; &quot;$(OutDir)&quot; /Y"
+						CommandLine="copy &quot;$(InputPath)&quot; &quot;$(OutDir)&quot; /Y&#x0D;&#x0A;"
 						Outputs="$(OutDir)/$(InputFileName)"
 					/>
 				</FileConfiguration>

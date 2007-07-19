@@ -68,9 +68,9 @@
 
 #ifdef KLAYGE_COMPILER_MSVC
 #ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "freetype234_D.lib")
+	#pragma comment(lib, "freetype235_D.lib")
 #else
-	#pragma comment(lib, "freetype234.lib")
+	#pragma comment(lib, "freetype235.lib")
 #endif
 #endif
 

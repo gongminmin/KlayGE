@@ -364,8 +364,7 @@ namespace KlayGE
 			return *name_;
 		}
 
-		void Begin();
-		void End();
+		void Apply();
 
 		bool Validate() const
 		{
