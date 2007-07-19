@@ -250,6 +250,18 @@
 <h2><a id="structure">目录结构</a></h2>
 <p>下面是关于完整的KlayGE目录的主要描述。</p>
 <pre>
+\AppLayer
+	应用程序层
+
+	\Include
+		应用程序层的头文件
+
+	\Src
+		应用程序层的源文件
+
+\Build
+	工程文件
+
 \Core
 	内核文件
 
@@ -278,20 +290,13 @@
 		\Show
 			播放引擎内核的源文件
 
-\Demos
-	演示
-
 \Doc
 	文档
 
-\AppLayer
-	应用程序层
-
-	\Include
-		应用程序层的头文件
-
-	\Src
-		应用程序层的源文件
+\Exporters
+	\3DSMax
+		\MeshML
+			3ds max的导出插件
 
 \Plugins
 	插件文件
@@ -320,6 +325,9 @@
 \RenderFX
 	渲染特效脚本
 
+\Samples
+	例子
+
 \Tools
 	工具文件
 
@@ -339,16 +347,10 @@
 		Normal map压缩器
 	\NormalMapGen
 		从height map建立normal map的工具
-	\Pkt
-		文件打包工具
 
 \Lib
-		存放编译后的静态连接库
+	存放编译后的静态连接库
 
-\Exporters
-	\3DSMax
-		\MeshML
-			3ds max的导出插件
 </pre>
 <p><a href="#menu">^返回目录</a></p>
 <hr />
