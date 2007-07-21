@@ -138,7 +138,7 @@ namespace KlayGE
 		}
 
 		receiveLoop_ = true;
-		receiveThread_.reset(new boost::thread(ReceiveThreadFunc(this)));
+		receiveThread_ = create_thread(ReceiveThreadFunc(this));
 
 		return true;
 	}
@@ -153,8 +153,7 @@ namespace KlayGE
 			socket_.Send(&msg, sizeof(msg));
 
 			receiveLoop_ = false;
-			receiveThread_->join();
-			receiveThread_.reset();
+			receiveThread_();
 		}
 	}
 

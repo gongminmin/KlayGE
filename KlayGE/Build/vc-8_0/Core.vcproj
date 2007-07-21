@@ -1210,10 +1210,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Kernel\thread_pool.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\Core\Src\Kernel\ThrowErr.cpp"
 					>
 				</File>
@@ -1246,10 +1242,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Event.hpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\Core\Include\KlayGE\KlayGE.hpp"
 					>
 				</File>
@@ -1270,7 +1262,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\thread_pool.hpp"
+					RelativePath="..\..\Core\Include\KlayGE\thread.hpp"
 					>
 				</File>
 				<File

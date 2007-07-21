@@ -42,8 +42,6 @@ namespace KlayGE
 								bufferQueue_(bufferSeconds * PreSecond),
 								stopped_(true)
 	{
-		play_thread_.reset(new boost::thread(boost::bind(&OALMusicBuffer::LoopUpdateBuffer, this)));
-
 		alGenBuffers(static_cast<ALsizei>(bufferQueue_.size()), &bufferQueue_[0]);
 
 		alGenSources(1, &source_);
@@ -155,6 +153,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OALMusicBuffer::DoPlay(bool loop)
 	{
+		play_thread_ = create_thread(boost::bind(&OALMusicBuffer::LoopUpdateBuffer, this));
+
 		stopped_ = false;
 		play_cond_.notify_one();
 
@@ -171,7 +171,7 @@ namespace KlayGE
 		if (!stopped_)
 		{
 			stopped_ = true;
-			play_thread_->join();
+			play_thread_();
 		}
 
 		alSourceStopv(1, &source_);

@@ -23,8 +23,8 @@
 #include <vector>
 
 #include <boost/smart_ptr.hpp>
-#include <boost/thread/thread.hpp>
 
+#include <KlayGE/thread.hpp>
 #include <KlayGE/Socket.hpp>
 
 namespace KlayGE
@@ -63,8 +63,8 @@ namespace KlayGE
 		char		playerID_;
 		std::string	name_;
 
-		boost::shared_ptr<boost::thread>	receiveThread_;
-		bool		receiveLoop_;
+		joiner<void>	receiveThread_;
+		bool			receiveLoop_;
 
 		typedef std::list<std::vector<char> > SendQueueType;
 		SendQueueType	sendQueue_;

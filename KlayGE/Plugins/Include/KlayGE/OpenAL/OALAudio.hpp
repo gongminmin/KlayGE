@@ -20,6 +20,7 @@
 #include <KlayGE/config/auto_link.hpp>
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KlayGE/thread.hpp>
 
 #include <al/al.h>
 #include <al/alc.h>
@@ -29,7 +30,6 @@
 
 #include <boost/utility.hpp>
 #include <boost/smart_ptr.hpp>
-#include <boost/thread.hpp>
 
 #include <KlayGE/Audio.hpp>
 
@@ -109,7 +109,7 @@ namespace KlayGE
 		bool stopped_;
 		boost::condition play_cond_;
 		boost::mutex play_mutex_;
-		boost::shared_ptr<boost::thread> play_thread_;
+		joiner<void> play_thread_;
 	};
 
 	// π‹¿Ì“Ù∆µ≤•∑≈
