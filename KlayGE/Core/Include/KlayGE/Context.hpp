@@ -28,6 +28,7 @@
 #include <KlayGE/AudioFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/ShowFactory.hpp>
+#include <KlayGE/thread.hpp>
 
 #include <boost/assert.hpp>
 
@@ -90,8 +91,14 @@ namespace KlayGE
 			return *showFactory_;
 		}
 
+		thread_pool& GlobalThreadPool()
+		{
+			return thread_pool_;
+		}
+
 	private:
 		Context()
+			: thread_pool_(1, 15)
 		{
 #ifdef KLAYGE_COMPILER_MSVC
 #ifdef KLAYGE_DEBUG
@@ -115,6 +122,8 @@ namespace KlayGE
 		AudioFactory*	audioFactory_;
 		InputFactory*	inputFactory_;
 		ShowFactory*    showFactory_;
+
+		thread_pool thread_pool_;
 	};
 }
 

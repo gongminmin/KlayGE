@@ -36,7 +36,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	DSMusicBuffer::DSMusicBuffer(AudioDataSourcePtr const & dataSource, uint32_t bufferSeconds, float volume)
 					: MusicBuffer(dataSource),
-						writePos_(0)
+						writePos_(0),
+						stopped_(true)
 	{
 		WAVEFORMATEX wfx(WaveFormatEx(dataSource));
 		fillSize_	= wfx.nAvgBytesPerSec / PreSecond;
@@ -89,49 +90,51 @@ namespace KlayGE
 		this->Stop();
 	}
 
-	// 更新缓冲区
-	/////////////////////////////////////////////////////////////////////////////////
-	void DSMusicBuffer::TimerProc(UINT timerID, UINT /*uMsg*/,
-										DWORD_PTR dwUser, DWORD_PTR /*dw1*/, DWORD_PTR /*dw2*/)
+	void DSMusicBuffer::LoopUpdateBuffer()
 	{
-		DSMusicBuffer* buffer(reinterpret_cast<DSMusicBuffer*>(dwUser));
+		boost::mutex::scoped_lock lock(play_mutex_);
+		play_cond_.wait(lock);
 
-		if (timerID == buffer->timerID_)
+		while (!stopped_)
 		{
-			buffer->FillBuffer();
+			// 锁定缓冲区
+			uint8_t* lockedBuffer;			// 指向缓冲区锁定的内存的指针
+			DWORD lockedBufferSize;		// 锁定的内存大小
+			TIF(buffer_->Lock(fillSize_ * writePos_, fillSize_,
+				reinterpret_cast<void**>(&lockedBuffer), &lockedBufferSize,
+				NULL, NULL, 0));
+
+			std::vector<uint8_t> data(fillSize_);
+			data.resize(dataSource_->Read(&data[0], fillSize_));
+
+			if (data.empty())
+			{
+				if (loop_)
+				{
+					stopped_ = false;
+					this->Reset();
+				}
+				else
+				{
+					stopped_ = true;
+				}
+			}
+			else
+			{
+				std::copy(data.begin(), data.end(), lockedBuffer);
+
+				std::fill_n(lockedBuffer + data.size(), lockedBufferSize - data.size(), 0);
+			}
+
+			// 缓冲区解锁
+			buffer_->Unlock(lockedBuffer, lockedBufferSize, NULL, 0);
+
+			// 形成环形缓冲区
+			++ writePos_;
+			writePos_ %= fillCount_;
+
+			Sleep(1000 / PreSecond);
 		}
-	}
-
-	void DSMusicBuffer::FillBuffer()
-	{
-		// 锁定缓冲区
-		uint8_t* lockedBuffer;			// 指向缓冲区锁定的内存的指针
-		DWORD lockedBufferSize;		// 锁定的内存大小
-		TIF(buffer_->Lock(fillSize_ * writePos_, fillSize_,
-			reinterpret_cast<void**>(&lockedBuffer), &lockedBufferSize,
-			NULL, NULL, 0));
-
-		std::vector<uint8_t> data(fillSize_);
-		data.resize(dataSource_->Read(&data[0], fillSize_));
-
-		if (data.empty())
-		{
-			std::fill_n(lockedBuffer, lockedBufferSize, 0);
-			this->Stop();
-		}
-		else
-		{
-			std::copy(data.begin(), data.end(), lockedBuffer);
-
-			std::fill_n(lockedBuffer + data.size(), lockedBufferSize - data.size(), 0);
-		}
-
-		// 缓冲区解锁
-		buffer_->Unlock(lockedBuffer, lockedBufferSize, NULL, 0);
-
-		// 形成环形缓冲区
-		++ writePos_;
-		writePos_ %= fillCount_;
 	}
 
 	// 缓冲区复位以便于从头播放
@@ -173,19 +176,27 @@ namespace KlayGE
 
 	// 播放音频流
 	/////////////////////////////////////////////////////////////////////////////////
-	void DSMusicBuffer::DoPlay(bool /*loop*/)
+	void DSMusicBuffer::DoPlay(bool loop)
 	{
-		buffer_->Play(0, 0, DSBPLAY_LOOPING);
+		play_thread_ = Context::Instance().GlobalThreadPool()(boost::bind(&DSMusicBuffer::LoopUpdateBuffer, this));
 
-		timerID_ = timeSetEvent(1000 / this->PreSecond, 0, TimerProc,
-								reinterpret_cast<DWORD_PTR>(this), TIME_PERIODIC);
+		loop_ = loop;
+
+		stopped_ = false;
+		play_cond_.notify_one();
+
+		buffer_->Play(0, 0, DSBPLAY_LOOPING);
 	}
 
 	// 停止播放音频流
 	////////////////////////////////////////////////////////////////////////////////
 	void DSMusicBuffer::DoStop()
 	{
-		timeKillEvent(timerID_);
+		if (!stopped_)
+		{
+			stopped_ = true;
+			play_thread_();
+		}
 
 		buffer_->Stop();
 	}

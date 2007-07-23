@@ -17,6 +17,7 @@
 #include <KlayGE/config/auto_link.hpp>
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KlayGE/thread.hpp>
 
 #include <vector>
 #include <windows.h>
@@ -104,11 +105,12 @@ namespace KlayGE
 
 		boost::shared_ptr<IDirectSound3DBuffer> ds3DBuffer_;
 
-		static void WINAPI TimerProc(UINT uTimerID, UINT uMsg,
-			DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2);
-		UINT timerID_;
+		bool		loop_;
 
-		void FillBuffer();
+		bool stopped_;
+		boost::condition play_cond_;
+		boost::mutex play_mutex_;
+		joiner<void> play_thread_;
 	};
 
 	// π‹¿Ì“Ù∆µ≤•∑≈

@@ -22,6 +22,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/Context.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <boost/assert.hpp>
@@ -120,7 +121,7 @@ namespace KlayGE
 			}
 			else
 			{
-				Sleep(500 / this->PreSecond);
+				Sleep(500 / PreSecond);
 			}
 		}
 	}
@@ -153,12 +154,12 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OALMusicBuffer::DoPlay(bool loop)
 	{
-		play_thread_ = create_thread(boost::bind(&OALMusicBuffer::LoopUpdateBuffer, this));
+		play_thread_ = Context::Instance().GlobalThreadPool()(boost::bind(&OALMusicBuffer::LoopUpdateBuffer, this));
+
+		loop_ = loop;
 
 		stopped_ = false;
 		play_cond_.notify_one();
-
-		loop_ = loop;
 
 		alSourcei(source_, AL_LOOPING, false);
 		alSourcePlay(source_);

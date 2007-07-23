@@ -15,6 +15,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Lobby.hpp>
+#include <KlayGE/Context.hpp>
 
 #include <algorithm>
 #include <ctime>
@@ -138,7 +139,7 @@ namespace KlayGE
 		}
 
 		receiveLoop_ = true;
-		receiveThread_ = create_thread(ReceiveThreadFunc(this));
+		receiveThread_ = Context::Instance().GlobalThreadPool()(ReceiveThreadFunc(this));
 
 		return true;
 	}
