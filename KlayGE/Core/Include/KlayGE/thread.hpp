@@ -23,6 +23,7 @@
 #include <boost/type_traits/is_same.hpp>
 #include <boost/type_traits/add_reference.hpp>
 #include <boost/utility/result_of.hpp>
+#include <boost/pool/detail/singleton.hpp>
 #include <exception>
 #include <vector>
 
@@ -30,6 +31,36 @@
 namespace KlayGE
 {
 	typedef boost::thread* thread_id;
+
+	// Threadof operator simulation for threadof(0) expression
+	inline thread_id threadof(int)
+	{  
+		typedef boost::thread_specific_ptr<boost::thread> boost_thread_tss_ptr_t;
+		//Yes, this is complicated but:
+		//->  We don't have access to boost::thread's handles.
+		//->  We must compare 2 boost::thread objects to know if threads are equal
+		//->  boost::thread can't be copied
+		//->  Default constructed boost::thread represents current thread
+		//->  Thread specific data construction is not thread-safe!
+		//
+		// I hate this function but I can't touch Boost.Threads. 
+		// Performance friendly implementation can return just a wrapper
+		// over windows HANDLE or pthread's pthread_t
+		//
+		//We create a default constructed boost::thread (who identifies
+		//current thread) for each thread
+
+		boost_thread_tss_ptr_t& boost_thread_tss_ptr = 
+			boost::details::pool::singleton_default<boost_thread_tss_ptr_t>::instance();
+
+		boost::thread* curthread = boost_thread_tss_ptr.get();
+		if (0 == curthread)
+		{
+			curthread = new boost::thread;
+			boost_thread_tss_ptr.reset(curthread);
+		}
+		return curthread;
+	}
 
 	// Threadof operator simulation for threadof(joiner) expression
 	template <typename Joiner>
@@ -95,6 +126,11 @@ namespace KlayGE
 				// Check if already joined
 				if (!joined_)
 				{
+					if (threadof(*this) == threadof(0))
+					{
+						throw bad_join();
+					}
+
 					this->do_join();
 					joined_ = true;
 				}
@@ -140,7 +176,7 @@ namespace KlayGE
 
 		thread_id get_thread_id() const
 		{
-			return handle_->get_thread_id();
+			return handle_ ? handle_->get_thread_id() : threadof(0);
 		}
 
 	public:
@@ -672,6 +708,12 @@ namespace KlayGE
 	private:
 		boost::shared_ptr<thread_pool_common_data_t> data_;
 	};
+
+	inline thread_pool& GlobalThreadPool()
+	{
+		static thread_pool ret(1, 16);
+		return ret;
+	}
 }
 
 
