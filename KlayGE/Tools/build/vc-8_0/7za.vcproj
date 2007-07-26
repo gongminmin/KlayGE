@@ -1547,6 +1547,18 @@
 					</File>
 				</Filter>
 			</Filter>
+			<Filter
+				Name="Crypto"
+				>
+				<File
+					RelativePath="..\..\7za\C\Crypto\Aes.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\7za\C\Crypto\Aes.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>
