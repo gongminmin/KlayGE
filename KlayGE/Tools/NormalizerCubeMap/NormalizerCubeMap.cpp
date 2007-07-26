@@ -1,3 +1,9 @@
+#include <KlayGE/KlayGE.hpp>
+#include <KlayGE/App3D.hpp>
+#include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/Context.hpp>
+#include <KlayGE/RenderSettings.hpp>
+
 #include <cmath>
 #include <iostream>
 #include <sstream>
@@ -5,12 +11,6 @@
 #include <vector>
 #include <cassert>
 using namespace std;
-
-#include <KlayGE/KlayGE.hpp>
-#include <KlayGE/App3D.hpp>
-#include <KlayGE/RenderFactory.hpp>
-#include <KlayGE/Context.hpp>
-#include <KlayGE/RenderSettings.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 using namespace KlayGE;

@@ -635,6 +635,14 @@ namespace KlayGE
 		case EF_BC3_SRGB:
 			return D3DFMT_DXT5;
 
+		case EF_BC4:
+		case EF_BC4_SRGB:
+			return static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'I', '1'>::value);
+
+		case EF_BC5:
+		case EF_BC5_SRGB:
+			return static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'I', '2'>::value);
+
 		case EF_D16:
 			return D3DFMT_D16;
 
@@ -652,6 +660,10 @@ namespace KlayGE
 
 	ElementFormat D3D9Mapping::MappingFormat(D3DFORMAT format)
 	{
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4063)
+#endif
 		switch (format)
 		{
 		case D3DFMT_L8:
@@ -731,6 +743,12 @@ namespace KlayGE
 		case D3DFMT_DXT5:
 			return EF_BC3;
 
+		case MakeFourCC<'A', 'T', 'I', '1'>::value:
+			return EF_BC4;
+
+		case MakeFourCC<'A', 'T', 'I', '2'>::value:
+			return EF_BC5;
+
 		case D3DFMT_D16:
 			return EF_D16;
 
@@ -745,5 +763,8 @@ namespace KlayGE
 			BOOST_ASSERT(false);
 			return EF_Unknown;
 		}
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 	}
 }
