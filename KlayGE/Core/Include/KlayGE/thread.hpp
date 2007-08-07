@@ -1,8 +1,11 @@
 // thread.hpp
 // KlayGE 线程 头文件
-// Ver 3.6.0
+// Ver 3.7.0
 // 版权所有(C) 龚敏敏, 2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.7.0
+// 增加了num_min_cached_threads和num_max_cached_threads (2007.8.7)
 //
 // 3.6.0
 // 初次建立 (2007.7.21)
@@ -474,7 +477,7 @@ namespace KlayGE
 
 		// A class used to storage information of the thread pool. It stores the pooled thread information container
 		//  and the functor that will envelop users Threadable to return it to the pool.
-		class thread_pool_common_data_t
+		class thread_pool_common_data_t : public boost::enable_shared_from_this<thread_pool_common_data_t>
 		{
 			// This functor is the functor that implements thread pooling logic. Waits until someone fills
 			//  the func_ and thpool_join_info_ using the wake_up(...) function of the pooled thread's info.
@@ -567,7 +570,7 @@ namespace KlayGE
 			}
 
 			// Creates and adds more threads to the pool. Can throw
-			static void add_waiting_threads(boost::shared_ptr<thread_pool_common_data_t>& pdata, size_t number)
+			static void add_waiting_threads(boost::shared_ptr<thread_pool_common_data_t> pdata, size_t number)
 			{
 				boost::mutex::scoped_lock lock(pdata->mut_);
 				add_waiting_threads_no_lock(pdata, number);
@@ -575,7 +578,7 @@ namespace KlayGE
 
 			// Creates and adds more threads to the pool. This function does not lock the pool mutex and that be
 			//  only called when we externally have locked that mutex. Can throw
-			static void add_waiting_threads_no_lock(boost::shared_ptr<thread_pool_common_data_t>& data, size_t number)                      
+			static void add_waiting_threads_no_lock(boost::shared_ptr<thread_pool_common_data_t> data, size_t number)                      
 			{
 				for (size_t i = 0; i < number; ++ i)
 				{
@@ -613,14 +616,47 @@ namespace KlayGE
 				return threads_;
 			}
 
+			size_t num_min_cached_threads() const
+			{
+				return num_min_cached_threads_;
+			}
+			void num_min_cached_threads(size_t num)
+			{
+				boost::mutex::scoped_lock lock(mut_);
+
+				if (num > num_min_cached_threads_)
+				{
+					this->add_waiting_threads_no_lock(this->shared_from_this(), num - num_min_cached_threads_);
+				}
+				else
+				{
+					for (size_t i = 0; i < num_min_cached_threads_ - num; ++ i)
+					{
+						threads_.back()->kill();
+						threads_.pop_back();
+					}
+				}
+
+				num_min_cached_threads_ = num;
+			}
+
+			size_t num_max_cached_threads() const
+			{
+				return num_max_cached_threads_;
+			}
+			void num_max_cached_threads(size_t num)
+			{
+				num_max_cached_threads_ = num;
+			}
+
 		private:
 			// Shared data between thread_pool, all threads and joiners
-			size_t const				  num_min_cached_threads_;
-			size_t const				  num_max_cached_threads_;
-			boost::mutex                  mut_;
-			bool                          general_cleanup_;
-			thread_info_queue_t           threads_;
-			threader                      threader_;
+			size_t						num_min_cached_threads_;
+			size_t 						num_max_cached_threads_;
+			boost::mutex				mut_;
+			bool						general_cleanup_;
+			thread_info_queue_t			threads_;
+			threader					threader_;
 		};
 
 		// This is the implementation of joiner functions created by "create_thread" and "class threader" threaders.
@@ -703,6 +739,24 @@ namespace KlayGE
 				myreturn, boost::bind(&threaded_t::needle, mythreaded)));
 
 			return joiner_t(myjoiner_data);
+		}
+
+		size_t num_min_cached_threads() const
+		{
+			return data_->num_min_cached_threads();
+		}
+		void num_min_cached_threads(size_t num)
+		{
+			data_->num_min_cached_threads(num);
+		}
+
+		size_t num_max_cached_threads() const
+		{
+			return data_->num_max_cached_threads();
+		}
+		void num_max_cached_threads(size_t num)
+		{
+			data_->num_max_cached_threads(num);
 		}
 
 	private:
