@@ -145,6 +145,13 @@
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
+		<Unit filename="..\..\Core\Include\KlayGE\Extract7z.hpp">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
 		<Unit filename="..\..\Core\Include\KlayGE\Font.hpp">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
@@ -355,6 +362,13 @@
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
+		<Unit filename="..\..\Core\Include\KlayGE\RenderStateObject.hpp">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
 		<Unit filename="..\..\Core\Include\KlayGE\RenderTarget.hpp">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
@@ -446,6 +460,13 @@
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
+		<Unit filename="..\..\Core\Include\KlayGE\ShaderObject.hpp">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
 		<Unit filename="..\..\Core\Include\KlayGE\Show.hpp">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
@@ -516,6 +537,13 @@
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
+		<Unit filename="..\..\Core\Include\KlayGE\UI.hpp">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
 		<Unit filename="..\..\Core\Include\KlayGE\Util.hpp">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
@@ -558,7 +586,7 @@
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
-		<Unit filename="..\..\Core\Include\KlayGE\thread_pool.hpp">
+		<Unit filename="..\..\Core\Include\KlayGE\thread.hpp">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
@@ -641,11 +669,6 @@
 			<Option target="Release"/>
 		</Unit>
 		<Unit filename="..\..\Core\Src\Kernel\Util.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Core\Src\Kernel\thread_pool.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Debug"/>
 			<Option target="Release"/>
