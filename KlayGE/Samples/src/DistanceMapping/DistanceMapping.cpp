@@ -254,7 +254,7 @@ void DistanceMapping::InputHandler(InputEngine const & /*sender*/, InputAction c
 	}
 }
 
-void DistanceMapping::DoUpdate(uint32_t /*pass*/)
+uint32_t DistanceMapping::DoUpdate(uint32_t /*pass*/)
 {
 	fpcController_.Update();
 
@@ -267,4 +267,6 @@ void DistanceMapping::DoUpdate(uint32_t /*pass*/)
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Distance Mapping");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), renderEngine.Name());
+
+	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 }

@@ -62,7 +62,7 @@ namespace KlayGE
 			break;
 		}
 
-		ID3DXConstantTable* constant_table;
+		ID3DXConstantTable* constant_table = NULL;
 
 		ID3DXBuffer* code;
 		ID3DXBuffer* err_msg;
@@ -93,9 +93,18 @@ namespace KlayGE
 			}
 			else
 			{
-				code->Release();
-				constant_table->Release();
-				err_msg->Release();
+				if (code)
+				{
+					code->Release();
+				}
+				if (constant_table)
+				{
+					constant_table->Release();
+				}
+				if (err_msg)
+				{
+					err_msg->Release();
+				}
 
 				code = code_legacy;
 				constant_table = constant_table_legacy;

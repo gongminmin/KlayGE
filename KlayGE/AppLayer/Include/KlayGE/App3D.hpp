@@ -1,8 +1,11 @@
 // App3D.hpp
 // KlayGE App3D类 头文件
-// Ver 3.6.0
+// Ver 3.7.0
 // 版权所有(C) 龚敏敏, 2003-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.7.0
+// 改进了Update (2007.8.14)
 //
 // 3.6.0
 // 增加了MakeWindow (2007.6.26)
@@ -39,13 +42,20 @@ namespace KlayGE
 	//			然后重载以下函数:
 	//
 	//			InitObjects()			- 初始化3D设备
-	//			NumPasses()				- 返回场景需要绘制的遍数
 	//			Update()				- 刷新场景
 	//			DelObjects()			- 清除3D场景
 	/////////////////////////////////////////////////////////////////////////////////
 	class App3DFramework
 	{
 		friend class SceneManager;
+
+	public:
+		enum UpdateRetVal
+		{
+			URV_Need_Flush = 1UL << 0,
+			URV_Flushed = 1UL << 1,
+			URV_Finished = 1UL << 2
+		};
 
 	public:
 		App3DFramework(std::string const & name, RenderSettings const & settings);
@@ -79,12 +89,8 @@ namespace KlayGE
 		{
 		}
 
-		virtual uint32_t NumPasses() const
-		{
-			return 1;
-		}
-		void Update(uint32_t pass);
-		virtual void DoUpdate(uint32_t pass) = 0;
+		uint32_t Update(uint32_t pass);
+		virtual uint32_t DoUpdate(uint32_t pass) = 0;
 		void UpdateStats();
 
 		virtual void RenderOver()

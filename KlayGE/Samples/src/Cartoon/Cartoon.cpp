@@ -242,12 +242,7 @@ void Cartoon::CheckBoxHandler(UICheckBox const & /*sender*/)
 	cartoon_style_ = dialog_->Control<UICheckBox>(Switch_Cartoon)->GetChecked();
 }
 
-uint32_t Cartoon::NumPasses() const
-{
-	return 2;
-}
-
-void Cartoon::DoUpdate(uint32_t pass)
+uint32_t Cartoon::DoUpdate(uint32_t pass)
 {
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -265,9 +260,9 @@ void Cartoon::DoUpdate(uint32_t pass)
 		sceneMgr.Clear();
 		checked_pointer_cast<RenderTorus>(torus_->GetRenderable())->Pass(0);
 		torus_->AddToSceneManager();
-		break;
+		return App3DFramework::URV_Need_Flush;
 	
-	case 1:
+	default:
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
 		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
@@ -292,6 +287,6 @@ void Cartoon::DoUpdate(uint32_t pass)
 		stream.str(L"");
 		stream << this->FPS() << " FPS";
 		font_->RenderText(0, 54, Color(1, 1, 0, 1), stream.str());
-		break;
+		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 	}
 }

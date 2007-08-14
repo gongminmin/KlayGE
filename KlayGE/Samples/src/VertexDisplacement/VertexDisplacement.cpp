@@ -162,7 +162,7 @@ void VertexDisplacement::InputHandler(InputEngine const & /*sender*/, InputActio
 	}
 }
 
-void VertexDisplacement::DoUpdate(uint32_t /*pass*/)
+uint32_t VertexDisplacement::DoUpdate(uint32_t /*pass*/)
 {
 	fpcController_.Update();
 
@@ -182,4 +182,6 @@ void VertexDisplacement::DoUpdate(uint32_t /*pass*/)
 		<< sceneMgr.NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str());
 	font_->RenderText(0, 54, Color(1, 1, 0, 1), renderEngine.Name());
+
+	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 }

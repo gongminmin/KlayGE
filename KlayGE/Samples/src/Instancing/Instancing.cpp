@@ -310,7 +310,7 @@ void Instancing::CheckBoxHandler(UICheckBox const & /*sender*/)
 	}
 }
 
-void Instancing::DoUpdate(uint32_t /*pass*/)
+uint32_t Instancing::DoUpdate(uint32_t /*pass*/)
 {
 	fpcController_.Update();
 	UIManager::Instance().HandleInput();
@@ -342,4 +342,6 @@ void Instancing::DoUpdate(uint32_t /*pass*/)
 	{
 		font_->RenderText(0, 54, Color(1, 1, 1, 1), L"Instancing is disabled");
 	}
+
+	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 }

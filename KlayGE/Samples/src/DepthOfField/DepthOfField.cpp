@@ -370,12 +370,7 @@ void DepthOfFieldApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
 	}
 }
 
-uint32_t DepthOfFieldApp::NumPasses() const
-{
-	return 2;
-}
-
-void DepthOfFieldApp::DoUpdate(uint32_t pass)
+uint32_t DepthOfFieldApp::DoUpdate(uint32_t pass)
 {
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -394,7 +389,7 @@ void DepthOfFieldApp::DoUpdate(uint32_t pass)
 		{
 			scene_objs_[i]->AddToSceneManager();
 		}
-		break;
+		return App3DFramework::URV_Need_Flush;
 	
 	case 1:
 		sceneMgr.Clear();
@@ -414,6 +409,6 @@ void DepthOfFieldApp::DoUpdate(uint32_t pass)
 		std::wostringstream stream;
 		stream << this->FPS() << " FPS";
 		font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str());
-		break;
+		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 	}
 }

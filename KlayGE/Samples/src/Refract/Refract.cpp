@@ -287,12 +287,7 @@ void Refract::InputHandler(InputEngine const & /*sender*/, InputAction const & a
 	}
 }
 
-uint32_t Refract::NumPasses() const
-{
-	return 3;
-}
-
-void Refract::DoUpdate(uint32_t pass)
+uint32_t Refract::DoUpdate(uint32_t pass)
 {
 	RenderEngine& re(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	SceneManager& sm(Context::Instance().SceneManagerInstance());
@@ -308,7 +303,7 @@ void Refract::DoUpdate(uint32_t pass)
 
 		checked_pointer_cast<RefractorObject>(refractor_)->Pass(0);
 		refractor_->AddToSceneManager();
-		break;
+		return App3DFramework::URV_Need_Flush;
 
 	case 1:
 		// 第二遍，渲染正面
@@ -319,9 +314,9 @@ void Refract::DoUpdate(uint32_t pass)
 		checked_pointer_cast<RefractorObject>(refractor_)->BackFaceTexture(render_tex_);
 
 		sky_box_->AddToSceneManager();
-		break;
+		return App3DFramework::URV_Need_Flush;
 
-	case 2:
+	default:
 		sm.Clear();
 
 		hdr_->Apply();
@@ -333,6 +328,6 @@ void Refract::DoUpdate(uint32_t pass)
 
 		font_->RenderText(0, 0, Color(1, 1, 0, 1), L"HDR Refract");
 		font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());
-		break;
+		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 	}
 }

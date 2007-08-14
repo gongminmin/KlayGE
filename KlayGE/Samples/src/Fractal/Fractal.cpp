@@ -216,12 +216,7 @@ void Fractal::OnResize(uint32_t width, uint32_t height)
 	render_buffer_[1]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_[1], 0));
 }
 
-uint32_t Fractal::NumPasses() const
-{
-	return 2;
-}
-
-void Fractal::DoUpdate(uint32_t pass)
+uint32_t Fractal::DoUpdate(uint32_t pass)
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
@@ -235,7 +230,7 @@ void Fractal::DoUpdate(uint32_t pass)
 
 		checked_pointer_cast<RenderFractal>(renderFractal_)->SetTexture(rendered_tex_[odd]);
 		renderFractal_->AddToRenderQueue();
-		break;
+		return App3DFramework::URV_Need_Flush;
 
 	case 1:
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
@@ -251,6 +246,6 @@ void Fractal::DoUpdate(uint32_t pass)
 
 		font_->RenderText(0, 0, Color(1, 1, 0, 1), L"GPU¼ÆËã·ÖÐÎ");
 		font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());
-		break;
+		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 	}
 }

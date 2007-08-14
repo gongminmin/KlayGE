@@ -15,8 +15,7 @@ private:
 	void InitObjects();
 	void OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height);
 
-	KlayGE::uint32_t NumPasses() const;
-	void DoUpdate(KlayGE::uint32_t pass);
+	KlayGE::uint32_t DoUpdate(KlayGE::uint32_t pass);
 
 	void BuildAsciiLumsTex();
 

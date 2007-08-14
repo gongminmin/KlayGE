@@ -155,10 +155,17 @@ namespace KlayGE
 		renderEngine.BeginFrame();
 
 		App3DFramework& app = Context::Instance().AppInstance();
-		for (uint32_t i = 0; i < app.NumPasses(); ++ i)
+		for (uint32_t pass = 0;; ++ pass)
 		{
-			app.Update(i);
-			this->Flush();
+			uint32_t urt = app.Update(pass);
+			if (urt & App3DFramework::URV_Need_Flush)
+			{
+				this->Flush();
+			}
+			if (urt & App3DFramework::URV_Finished)
+			{
+				break;
+			}
 		}
 
 		renderEngine.EndFrame();

@@ -382,12 +382,7 @@ void ShadowCubeMap::InputHandler(InputEngine const & /*sender*/, InputAction con
 	}
 }
 
-uint32_t ShadowCubeMap::NumPasses() const
-{
-	return 7;
-}
-
-void ShadowCubeMap::DoUpdate(uint32_t pass)
+uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 {
 	RenderEngine& renderEngine = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
@@ -431,9 +426,9 @@ void ShadowCubeMap::DoUpdate(uint32_t pass)
 			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->LightMatrices(light_model_);
 			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->LightMatrices(light_model_);
 		}
-		break;
+		return App3DFramework::URV_Need_Flush;
 
-	case 6:
+	default:
 		{
 			renderEngine.BindFrameBuffer(FrameBufferPtr());
 			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
@@ -452,6 +447,6 @@ void ShadowCubeMap::DoUpdate(uint32_t pass)
 			font_->RenderText(0, 0, Color(1, 1, 0, 1), L"ShadowCubeMap");
 			font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());
 		}
-		break;
+		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 	}
 }

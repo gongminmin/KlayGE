@@ -320,18 +320,6 @@ void AsciiArtsApp::OnResize(uint32_t width, uint32_t height)
 	dialog_->GetControl(Switch_AscII)->SetLocation(60, height - 50);
 }
 
-uint32_t AsciiArtsApp::NumPasses() const
-{
-	if (show_ascii_)
-	{
-		return 2;
-	}
-	else
-	{
-		return 1;
-	}
-}
-
 void AsciiArtsApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
 {
 	switch (action.first)
@@ -362,7 +350,7 @@ void AsciiArtsApp::CheckBoxHandler(UICheckBox const & /*sender*/)
 	show_ascii_ = dialog_->Control<UICheckBox>(Switch_AscII)->GetChecked();
 }
 
-void AsciiArtsApp::DoUpdate(uint32_t pass)
+uint32_t AsciiArtsApp::DoUpdate(uint32_t pass)
 {
 	if (0 == pass)
 	{
@@ -383,7 +371,7 @@ void AsciiArtsApp::DoUpdate(uint32_t pass)
 			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 			obj_->AddToSceneManager();
-			break;
+			return App3DFramework::URV_Need_Flush;
 
 		case 1:
 			//SaveTexture(rendered_tex_, "rendered_tex.dds");
@@ -426,4 +414,6 @@ void AsciiArtsApp::DoUpdate(uint32_t pass)
 			<< sceneMgr.NumVerticesRendered() << " Vertices";
 		font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str());
 	}
+
+	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 }

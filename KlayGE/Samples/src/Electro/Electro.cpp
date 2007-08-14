@@ -183,7 +183,7 @@ void Electro::InitObjects()
 	renderElectro_.reset(new RenderElectro);
 }
 
-void Electro::DoUpdate(uint32_t /*pass*/)
+uint32_t Electro::DoUpdate(uint32_t /*pass*/)
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
@@ -196,4 +196,6 @@ void Electro::DoUpdate(uint32_t /*pass*/)
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"电流效果");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());
+
+	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 }

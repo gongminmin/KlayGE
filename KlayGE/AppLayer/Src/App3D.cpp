@@ -1,8 +1,11 @@
 // App3D.cpp
 // KlayGE App3D类 实现文件
-// Ver 3.6.0
+// Ver 3.7.0
 // 版权所有(C) 龚敏敏, 2003-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.7.0
+// 改进了Update (2007.8.14)
 //
 // 3.6.0
 // 增加了MakeWindow (2007.6.26)
@@ -133,7 +136,7 @@ namespace KlayGE
 
 	// 更新场景
 	/////////////////////////////////////////////////////////////////////////////////
-	void App3DFramework::Update(uint32_t pass)
+	uint32_t App3DFramework::Update(uint32_t pass)
 	{
 		if (0 == pass)
 		{
@@ -143,7 +146,7 @@ namespace KlayGE
 			inputEngine.Update();
 		}
 
-		this->DoUpdate(pass);
+		return this->DoUpdate(pass);
 	}
 
 	// 响应窗口大小变化

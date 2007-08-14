@@ -12,7 +12,7 @@ public:
 
 private:
 	void InitObjects();
-	void DoUpdate(KlayGE::uint32_t pass);
+	KlayGE::uint32_t DoUpdate(KlayGE::uint32_t pass);
 
 	KlayGE::FontPtr font_;
 	boost::shared_ptr<KlayGE::Renderable> renderElectro_;

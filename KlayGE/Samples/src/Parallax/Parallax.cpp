@@ -177,7 +177,7 @@ void Parallax::InputHandler(InputEngine const & /*sender*/, InputAction const & 
 	}
 }
 
-void Parallax::DoUpdate(uint32_t /*pass*/)
+uint32_t Parallax::DoUpdate(uint32_t /*pass*/)
 {
 	fpcController_.Update();
 
@@ -202,4 +202,6 @@ void Parallax::DoUpdate(uint32_t /*pass*/)
 		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
 		<< sceneMgr.NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str());
+
+	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 }

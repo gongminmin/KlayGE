@@ -454,12 +454,7 @@ void GPUParticleSystemApp::InputHandler(InputEngine const & /*sender*/, InputAct
 	}
 }
 
-uint32_t GPUParticleSystemApp::NumPasses() const
-{
-	return 1;
-}
-
-void GPUParticleSystemApp::DoUpdate(uint32_t /*pass*/)
+uint32_t GPUParticleSystemApp::DoUpdate(uint32_t /*pass*/)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
@@ -482,4 +477,6 @@ void GPUParticleSystemApp::DoUpdate(uint32_t /*pass*/)
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"GPU Particle System");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());
+
+	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 }

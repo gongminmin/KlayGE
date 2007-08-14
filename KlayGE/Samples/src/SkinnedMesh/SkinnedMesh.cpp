@@ -115,7 +115,7 @@ void SkinnedMeshApp::InputHandler(InputEngine const & /*sender*/, InputAction co
 	}
 }
 
-void SkinnedMeshApp::DoUpdate(KlayGE::uint32_t /*pass*/)
+uint32_t SkinnedMeshApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 {
 	fpsController_.Update();
 
@@ -138,4 +138,6 @@ void SkinnedMeshApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description());
 
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str());
+
+	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 }

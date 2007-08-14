@@ -401,11 +401,6 @@ void ParticleSystemApp::InputHandler(InputEngine const & /*sender*/, InputAction
 	}
 }
 
-uint32_t ParticleSystemApp::NumPasses() const
-{
-	return 2;
-}
-
 bool particle_cmp(Particle const & lhs, Particle const & rhs)
 {
 	float4x4 const & view = Context::Instance().AppInstance().ActiveCamera().ViewMatrix();
@@ -418,7 +413,7 @@ bool particle_cmp(Particle const & lhs, Particle const & rhs)
 	return l_v > r_v;
 }
 
-void ParticleSystemApp::DoUpdate(uint32_t pass)
+uint32_t ParticleSystemApp::DoUpdate(uint32_t pass)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
@@ -435,9 +430,9 @@ void ParticleSystemApp::DoUpdate(uint32_t pass)
 		re.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 		
 		terrain_->AddToSceneManager();
-		break;
+		return App3DFramework::URV_Need_Flush;
 
-	case 1:
+	default:
 		sm.Clear();
 
 		re.BindFrameBuffer(FrameBufferPtr());
@@ -491,6 +486,6 @@ void ParticleSystemApp::DoUpdate(uint32_t pass)
 
 		font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Particle System");
 		font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());
-		break;
+		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 	}
 }

@@ -168,12 +168,7 @@ void VideoTextureApp::InputHandler(InputEngine const & /*sender*/, InputAction c
 	}
 }
 
-uint32_t VideoTextureApp::NumPasses() const
-{
-	return 1;
-}
-
-void VideoTextureApp::DoUpdate(uint32_t /*pass*/)
+uint32_t VideoTextureApp::DoUpdate(uint32_t /*pass*/)
 {
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 	ShowEngine& se = Context::Instance().ShowFactoryInstance().ShowEngineInstance();
@@ -190,4 +185,6 @@ void VideoTextureApp::DoUpdate(uint32_t /*pass*/)
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Video Texture");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());
+
+	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 }

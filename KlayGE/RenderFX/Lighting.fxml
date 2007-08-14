@@ -10,7 +10,7 @@ float directional_lighting(float3 lightDir, float3 normal)
 
 float point_lighting(float3 lightPos, float3 pos, float3 normal)
 {
-	return dot(lightPos - pos, normal);
+	return dot(normalize(lightPos - pos), normal);
 }
 
 float diffuse_lighting(float3 light_vec, float3 normal)
