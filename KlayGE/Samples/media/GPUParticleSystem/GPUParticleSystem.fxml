@@ -29,7 +29,9 @@ void ParticlesVS(float2 tex_pos		: POSITION,
 
 	if (pos.w <= 0)
 	{
-		oPos = 0;
+		oPos = float4(-1, -1, 0, 0);
+		oTex = 0;
+		oClr = 0;
 	}
 	else
 	{
@@ -37,10 +39,10 @@ void ParticlesVS(float2 tex_pos		: POSITION,
 		float4 view_pos = center_view;
 		view_pos.xy += (float2(tex.x, 1 - tex.y) * 2 - 1) * point_radius;
 		oPos = mul(view_pos, Proj);
+			  
+		oTex = tex;
+		oClr = float4(1, 1, 1, pos.w);
 	}
-
-	oTex = tex;
-	oClr = float4(1, 1, 1, pos.w);
 }
 
 float4 ParticlesPS(float2 tex : TEXCOORD0,
@@ -175,7 +177,7 @@ void TerrainVS(float4 pos			: POSITION,
 					out float3 oPosOS : TEXCOORD1)
 {
 	oTex.xy = float2(tex.x, 1 - tex.y);
-	oTex.zw = oTex.xy * 2;
+	oTex.zw = oTex.xy * 4;
 
 	pos = pos.xzyw;
 	pos.y += tex2Dlod(height_map_sampler, float4(oTex.xy, 0, 0)).r;
