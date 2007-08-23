@@ -382,7 +382,8 @@ uint32_t DepthOfFieldApp::DoUpdate(uint32_t pass)
 		UIManager::Instance().HandleInput();
 
 		renderEngine.BindFrameBuffer(clr_depth_buffer_);
-		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
+		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
+		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
 
 		sceneMgr.Clear();
 		for (size_t i = 0; i < scene_objs_.size(); ++ i)
@@ -391,11 +392,11 @@ uint32_t DepthOfFieldApp::DoUpdate(uint32_t pass)
 		}
 		return App3DFramework::URV_Need_Flush;
 	
-	case 1:
+	default:
 		sceneMgr.Clear();
 
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
-		renderEngine.Clear(RenderEngine::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
+		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
 
 		depth_of_field_->Apply();
 

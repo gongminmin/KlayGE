@@ -30,6 +30,114 @@ namespace KlayGE
 	{
 	}
 
+	void D3D9RenderView::Clear(Color const & clr)
+	{
+		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
+
+		std::vector<IDirect3DSurface9*> old_rt(render_eng.DeviceCaps().max_simultaneous_rts);
+		for (uint32_t i = 0; i < old_rt.size(); ++ i)
+		{
+			d3d_device->GetRenderTarget(i, &old_rt[i]);
+		}
+		IDirect3DSurface9* old_ds;
+		d3d_device->GetDepthStencilSurface(&old_ds);
+
+		d3d_device->SetRenderTarget(0, surface_.get());
+		for (uint32_t i = 1; i < old_rt.size(); ++ i)
+		{
+			d3d_device->SetRenderTarget(i, NULL);
+		}
+		d3d_device->SetDepthStencilSurface(NULL);
+
+		TIF(d3d_device->Clear(0, NULL, D3DCLEAR_TARGET,
+			D3DCOLOR_COLORVALUE(clr.r(), clr.g(), clr.b(), clr.a()), 0, 0));
+
+		for (uint32_t i = 0; i < old_rt.size(); ++ i)
+		{
+			d3d_device->SetRenderTarget(i, old_rt[i]);
+			if (old_rt[i] != NULL)
+			{
+				old_rt[i]->Release();
+			}
+		}
+		d3d_device->SetDepthStencilSurface(old_ds);
+		old_ds->Release();
+	}
+
+	void D3D9RenderView::Clear(float depth)
+	{
+		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
+
+		IDirect3DSurface9* old_ds;
+		d3d_device->GetDepthStencilSurface(&old_ds);
+		if (old_ds != surface_.get())
+		{
+			d3d_device->SetDepthStencilSurface(surface_.get());
+		}
+
+		TIF(d3d_device->Clear(0, NULL, D3DCLEAR_ZBUFFER, 0, depth, 0));
+
+		if (old_ds != surface_.get())
+		{
+			d3d_device->SetDepthStencilSurface(old_ds);
+		}
+		old_ds->Release();
+	}
+
+	void D3D9RenderView::Clear(int32_t stencil)
+	{
+		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
+
+		IDirect3DSurface9* old_ds;
+		d3d_device->GetDepthStencilSurface(&old_ds);
+		if (old_ds != surface_.get())
+		{
+			d3d_device->SetDepthStencilSurface(surface_.get());
+		}
+
+		TIF(d3d_device->Clear(0, NULL, D3DCLEAR_STENCIL, 0, 0, stencil));
+
+		if (old_ds != surface_.get())
+		{
+			d3d_device->SetDepthStencilSurface(old_ds);
+		}
+		old_ds->Release();
+	}
+
+	void D3D9RenderView::Clear(float depth, int32_t stencil)
+	{
+		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
+
+		IDirect3DSurface9* old_ds;
+		d3d_device->GetDepthStencilSurface(&old_ds);
+		if (old_ds != surface_.get())
+		{
+			d3d_device->SetDepthStencilSurface(surface_.get());
+		}
+
+		uint32_t flags = 0;
+		if (IsDepthFormat(pf_))
+		{
+			flags |= D3DCLEAR_ZBUFFER;
+		}
+		if (IsStencilFormat(pf_))
+		{
+			flags |= D3DCLEAR_STENCIL;
+		}
+
+		TIF(d3d_device->Clear(0, NULL, flags, 0, depth, stencil));
+
+		if (old_ds != surface_.get())
+		{
+			d3d_device->SetDepthStencilSurface(old_ds);
+		}
+		old_ds->Release();
+	}
+
 
 	D3D9SurfaceRenderView::D3D9SurfaceRenderView(ID3D9SurfacePtr surf)
 	{

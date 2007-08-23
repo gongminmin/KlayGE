@@ -427,7 +427,8 @@ uint32_t ParticleSystemApp::DoUpdate(uint32_t pass)
 		sm.Clear();
 
 		re.BindFrameBuffer(scene_buffer_);
-		re.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
+		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
+		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
 		
 		terrain_->AddToSceneManager();
 		return App3DFramework::URV_Need_Flush;
@@ -436,7 +437,7 @@ uint32_t ParticleSystemApp::DoUpdate(uint32_t pass)
 		sm.Clear();
 
 		re.BindFrameBuffer(FrameBufferPtr());
-		re.Clear(RenderEngine::CBM_Color, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
+		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
 
 		copy_pp_->Apply();
 

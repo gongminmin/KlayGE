@@ -52,8 +52,6 @@ namespace KlayGE
 
 		std::wstring const & Name() const;
 
-		void Clear(uint32_t masks, Color const & clr, float depth, int32_t stencil);
-
 		void CreateRenderWindow(std::string const & name, RenderSettings const & settings);
 		
 		void SetStateObjects(RenderStateObject const & rs_obj, ShaderObject const & shader_obj);

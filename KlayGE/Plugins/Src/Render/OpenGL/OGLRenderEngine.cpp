@@ -54,6 +54,7 @@
 #include <KlayGE/OpenGL/OGLMapping.hpp>
 #include <KlayGE/OpenGL/OGLRenderWindow.hpp>
 #include <KlayGE/OpenGL/OGLFrameBuffer.hpp>
+#include <KlayGE/OpenGL/OGLRenderView.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 #include <KlayGE/OpenGL/OGLGraphicsBuffer.hpp>
 #include <KlayGE/OpenGL/OGLRenderLayout.hpp>
@@ -131,30 +132,6 @@ namespace KlayGE
 		}
 	}
 
-	// 清空缓冲区
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::Clear(uint32_t masks, Color const & clr, float depth, int32_t stencil)
-	{
-		uint32_t flags = 0;
-		if (masks & CBM_Color)
-		{
-			flags |= GL_COLOR_BUFFER_BIT;
-		}
-		if (masks & CBM_Depth)
-		{
-			flags |= GL_DEPTH_BUFFER_BIT;
-		}
-		if (masks & CBM_Stencil)
-		{
-			flags |= GL_STENCIL_BUFFER_BIT;
-		}
-
-		glClearColor(clr.r(), clr.g(), clr.b(), clr.a());
-		glClearDepth(depth);
-		glClearStencil(stencil);
-		glClear(flags);
-	}
-
 	// 建立渲染窗口
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::CreateRenderWindow(std::string const & name,
@@ -164,6 +141,15 @@ namespace KlayGE
 		default_frame_buffer_ = win;
 
 		this->FillRenderDeviceCaps();
+
+		win->Attach(FrameBuffer::ATT_Color0,
+			OGLScreenColorRenderViewPtr(new OGLScreenColorRenderView(win->Width(), win->Height(), win->Format())));
+		if (win->DepthBits() > 0)
+		{
+			win->Attach(FrameBuffer::ATT_DepthStencil,
+				OGLScreenDepthStencilRenderViewPtr(new OGLScreenDepthStencilRenderView(win->Width(), win->Height(), settings.depth_stencil_fmt)));
+		}
+
 		this->BindFrameBuffer(win);
 	}
 

@@ -47,8 +47,135 @@ namespace
 
 namespace KlayGE
 {
+	OGLRenderView::OGLRenderView()
+		: tex_(0), fbo_(0)
+	{
+	}
+
 	OGLRenderView::~OGLRenderView()
 	{
+	}
+
+	void OGLRenderView::Clear(float depth)
+	{
+		this->DoClear(GL_DEPTH_BUFFER_BIT, Color(), depth, 0);
+	}
+
+	void OGLRenderView::Clear(int32_t stencil)
+	{
+		this->DoClear(GL_STENCIL_BUFFER_BIT, Color(), 0, stencil);
+	}
+
+	void OGLRenderView::Clear(float depth, int32_t stencil)
+	{
+		uint32_t flags = 0;
+		if (IsDepthFormat(pf_))
+		{
+			flags |= GL_DEPTH_BUFFER_BIT;
+		}
+		if (IsStencilFormat(pf_))
+		{
+			flags |= GL_STENCIL_BUFFER_BIT;
+		}
+
+		this->DoClear(flags, Color(), depth, stencil);
+	}
+
+	void OGLRenderView::DoClear(uint32_t flags, Color const & clr, float depth, int32_t stencil)
+	{
+		GLint old_fbo;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &old_fbo);
+
+		if (old_fbo != fbo_)
+		{
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
+		}
+
+		glClearColor(clr.r(), clr.g(), clr.b(), clr.a());
+		glClearDepth(depth);
+		glClearStencil(stencil);
+		glClear(flags);
+
+		if (old_fbo != fbo_)
+		{
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, old_fbo);
+		}
+	}
+
+
+	OGLScreenColorRenderView::OGLScreenColorRenderView(uint32_t width, uint32_t height, ElementFormat pf)
+	{
+		width_ = width;
+		height_ = height;
+		pf_ = pf;
+	}
+
+	void OGLScreenColorRenderView::Clear(Color const & clr)
+	{
+		this->DoClear(GL_COLOR_BUFFER_BIT, clr, 0, 0);
+	}
+
+	void OGLScreenColorRenderView::Clear(float /*depth*/)
+	{
+		BOOST_ASSERT(false);
+	}
+
+	void OGLScreenColorRenderView::Clear(int32_t /*stencil*/)
+	{
+		BOOST_ASSERT(false);
+	}
+
+	void OGLScreenColorRenderView::Clear(float /*depth*/, int32_t /*stencil*/)
+	{
+		BOOST_ASSERT(false);
+	}
+
+	void OGLScreenColorRenderView::OnAttached(FrameBuffer& fb, uint32_t /*att*/)
+	{
+		UNREF_PARAM(fb);
+
+		BOOST_ASSERT(0 == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	}
+
+	void OGLScreenColorRenderView::OnDetached(FrameBuffer& fb, uint32_t /*att*/)
+	{
+		UNREF_PARAM(fb);
+
+		BOOST_ASSERT(0 == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	}
+
+
+	OGLScreenDepthStencilRenderView::OGLScreenDepthStencilRenderView(uint32_t width, uint32_t height,
+									ElementFormat pf)
+	{
+		BOOST_ASSERT(IsDepthFormat(pf));
+
+		width_ = width;
+		height_ = height;
+		pf_ = pf;
+	}
+
+	void OGLScreenDepthStencilRenderView::Clear(Color const & /*clr*/)
+	{
+		BOOST_ASSERT(false);
+	}
+
+	void OGLScreenDepthStencilRenderView::OnAttached(FrameBuffer& fb, uint32_t /*att*/)
+	{
+		UNREF_PARAM(fb);
+
+		BOOST_ASSERT(0 == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	}
+
+	void OGLScreenDepthStencilRenderView::OnDetached(FrameBuffer& fb, uint32_t /*att*/)
+	{
+		UNREF_PARAM(fb);
+
+		BOOST_ASSERT(0 == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
 
 
@@ -65,6 +192,21 @@ namespace KlayGE
 		pf_ = texture_1d_.Format();
 	}
 
+	void OGLTexture1DRenderView::Clear(Color const & clr)
+	{
+		if (fbo_ != 0)
+		{
+			this->DoClear(GL_COLOR_BUFFER_BIT, clr, 0, 0);
+		}
+		else
+		{
+			glBindTexture(GL_TEXTURE_1D, tex_);
+
+			std::vector<Color> mem_clr(width_, clr);
+			glTexSubImage1D(GL_TEXTURE_1D, level_, 0, width_, GL_RGBA, GL_FLOAT, &mem_clr[0]);
+		}
+	}
+
 	void OGLTexture1DRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
 		if (Texture::TU_RenderTarget != texture_1d_.Usage())
@@ -72,8 +214,8 @@ namespace KlayGE
 			texture_1d_.Usage(Texture::TU_RenderTarget);
 		}
 
-		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+		fbo_ = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
 		switch (att)
 		{
@@ -102,8 +244,10 @@ namespace KlayGE
 
 	void OGLTexture1DRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
 	{
-		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+		UNREF_PARAM(fb);
+
+		BOOST_ASSERT(fbo_ == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
 		switch (att)
 		{
@@ -143,6 +287,21 @@ namespace KlayGE
 		pf_ = texture_2d_.Format();
 	}
 
+	void OGLTexture2DRenderView::Clear(Color const & clr)
+	{
+		if (fbo_ != 0)
+		{
+			this->DoClear(GL_COLOR_BUFFER_BIT, clr, 0, 0);
+		}
+		else
+		{
+			glBindTexture(GL_TEXTURE_2D, tex_);
+
+			std::vector<Color> mem_clr(width_ * height_, clr);
+			glTexSubImage2D(GL_TEXTURE_2D, level_, 0, 0, width_, height_, GL_RGBA, GL_FLOAT, &mem_clr[0]);
+		}
+	}
+
 	void OGLTexture2DRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
 		if (Texture::TU_RenderTarget != texture_2d_.Usage())
@@ -150,8 +309,8 @@ namespace KlayGE
 			texture_2d_.Usage(Texture::TU_RenderTarget);
 		}
 
-		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+		fbo_ = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
 		switch (att)
 		{
@@ -180,8 +339,10 @@ namespace KlayGE
 
 	void OGLTexture2DRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
 	{
-		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+		UNREF_PARAM(fb);
+
+		BOOST_ASSERT(fbo_ == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
 		switch (att)
 		{
@@ -230,6 +391,13 @@ namespace KlayGE
 		}
 	}
 
+	void OGLTexture3DRenderView::Clear(Color const & clr)
+	{
+		BOOST_ASSERT(fbo_ != 0);
+
+		this->DoClear(GL_COLOR_BUFFER_BIT, clr, 0, 0);
+	}
+
 	void OGLTexture3DRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
 		if (Texture::TU_RenderTarget != texture_3d_.Usage())
@@ -237,8 +405,8 @@ namespace KlayGE
 			texture_3d_.Usage(Texture::TU_RenderTarget);
 		}
 
-		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+		fbo_ = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
 		if (0 == copy_to_tex_)
 		{
@@ -322,8 +490,10 @@ namespace KlayGE
 
 	void OGLTexture3DRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
 	{
-		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+		UNREF_PARAM(fb);
+
+		BOOST_ASSERT(fbo_ == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
 		BOOST_ASSERT(copy_to_tex_ != 0);
 		if (1 == copy_to_tex_)
@@ -422,6 +592,22 @@ namespace KlayGE
 		pf_ = texture_cube_.Format();
 	}
 
+	void OGLTextureCubeRenderView::Clear(Color const & clr)
+	{
+		if (fbo_ != 0)
+		{
+			this->DoClear(GL_COLOR_BUFFER_BIT, clr, 0, 0);
+		}
+		else
+		{
+			glBindTexture(GL_TEXTURE_CUBE_MAP, tex_);
+
+			std::vector<Color> mem_clr(width_ * height_, clr);
+			glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X,
+				level_, 0, 0, width_, height_, GL_RGBA, GL_FLOAT, &mem_clr[0]);
+		}
+	}
+
 	void OGLTextureCubeRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
 		if (Texture::TU_RenderTarget != texture_cube_.Usage())
@@ -429,8 +615,8 @@ namespace KlayGE
 			texture_cube_.Usage(Texture::TU_RenderTarget);
 		}
 
-		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+		fbo_ = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
 		GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X;
 		switch (att)
@@ -461,8 +647,10 @@ namespace KlayGE
 
 	void OGLTextureCubeRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
 	{
-		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+		UNREF_PARAM(fb);
+
+		BOOST_ASSERT(fbo_ == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 		
 		GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X;
 		switch (att)
@@ -515,12 +703,27 @@ namespace KlayGE
 		glDeleteTextures(1, &tex_);
 	}
 
+	void OGLGraphicsBufferRenderView::Clear(Color const & clr)
+	{
+		if (fbo_ != 0)
+		{
+			this->DoClear(GL_COLOR_BUFFER_BIT, clr, 0, 0);
+		}
+		else
+		{
+			glBindTexture(GL_TEXTURE_2D, tex_);
+
+			std::vector<Color> mem_clr(width_ * height_, clr);
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width_, height_, GL_RGBA, GL_FLOAT, &mem_clr[0]);
+		}
+	}
+
 	void OGLGraphicsBufferRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
 		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
 
-		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+		fbo_ = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
 		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
 				GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
@@ -532,8 +735,10 @@ namespace KlayGE
 
 	void OGLGraphicsBufferRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
 	{
-		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+		UNREF_PARAM(fb);
+
+		BOOST_ASSERT(fbo_ == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
 		this->CopyToGB(att);
 
@@ -546,10 +751,12 @@ namespace KlayGE
 
 	void OGLGraphicsBufferRenderView::OnUnbind(FrameBuffer& fb, uint32_t att)
 	{
+		UNREF_PARAM(fb);
+
 		gbuffer_.Resize(width_ * height_ * 4 * sizeof(GL_FLOAT));
 
-		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+		BOOST_ASSERT(fbo_ == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
 		this->CopyToGB(att);
 
@@ -597,14 +804,19 @@ namespace KlayGE
 		glDeleteRenderbuffersEXT(1, &rbo_);
 	}
 
+	void OGLDepthStencilRenderView::Clear(Color const & /*clr*/)
+	{
+		BOOST_ASSERT(false);
+	}
+
 	void OGLDepthStencilRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
 		UNREF_PARAM(att);
 
 		BOOST_ASSERT(FrameBuffer::ATT_DepthStencil == att);
 
-		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+		fbo_ = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
 		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
 								GL_DEPTH_ATTACHMENT_EXT,
@@ -622,12 +834,13 @@ namespace KlayGE
 
 	void OGLDepthStencilRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
 	{
+		UNREF_PARAM(fb);
 		UNREF_PARAM(att);
 
 		BOOST_ASSERT(FrameBuffer::ATT_DepthStencil == att);
 
-		GLuint fbo = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+		BOOST_ASSERT(fbo_ == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
 		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
 								GL_DEPTH_ATTACHMENT_EXT,

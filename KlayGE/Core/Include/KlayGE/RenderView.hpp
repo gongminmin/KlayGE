@@ -1,8 +1,11 @@
 // RenderView.hpp
 // KlayGE 渲染视图类 头文件
-// Ver 3.3.0
-// 版权所有(C) 龚敏敏, 2006
+// Ver 3.7.0
+// 版权所有(C) 龚敏敏, 2006-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.7.0
+// 增加了Clear (2007.8.23)
 //
 // 3.3.0
 // 初次建立 (2006.5.31)
@@ -46,6 +49,11 @@ namespace KlayGE
 		{
 			return NumFormatBits(pf_);
 		}
+
+		virtual void Clear(Color const & clr) = 0;
+		virtual void Clear(float depth) = 0;
+		virtual void Clear(int32_t stencil) = 0;
+		virtual void Clear(float depth, int32_t stencil) = 0;
 
 		virtual void OnAttached(FrameBuffer& fb, uint32_t att) = 0;
 		virtual void OnDetached(FrameBuffer& fb, uint32_t att) = 0;

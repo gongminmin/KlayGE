@@ -235,8 +235,6 @@ void Refract::InitObjects()
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 
-	re.Clear(RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
-
 	this->LookAt(float3(0.36f, 0.11f, -0.39f), float3(0, 0.11f, 0));
 	this->Proj(0.05f, 100);
 
@@ -299,7 +297,8 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 
 		// 第一遍，渲染背面
 		re.BindFrameBuffer(render_buffer_);
-		re.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0, 0, 0, 1), 0, 0);
+		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0, 0, 0, 1));
+		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(0.0f);
 
 		checked_pointer_cast<RefractorObject>(refractor_)->Pass(0);
 		refractor_->AddToSceneManager();
@@ -308,7 +307,8 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 	case 1:
 		// 第二遍，渲染正面
 		re.BindFrameBuffer(hdr_buffer_);
-		re.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
+		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
+		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
 
 		checked_pointer_cast<RefractorObject>(refractor_)->Pass(1);
 		checked_pointer_cast<RefractorObject>(refractor_)->BackFaceTexture(render_tex_);

@@ -266,8 +266,6 @@ void AsciiArtsApp::InitObjects()
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-	renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
-
 	obj_.reset(new SceneObjectHelper(LoadKModel("teapot.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<KMesh>()),
 		SceneObject::SOA_Cullable | SceneObject::SOA_ShortAge));
 
@@ -368,7 +366,8 @@ uint32_t AsciiArtsApp::DoUpdate(uint32_t pass)
 		case 0:
 			// Õý³£äÖÈ¾
 			renderEngine.BindFrameBuffer(render_buffer_);
-			renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
+			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
+			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
 
 			obj_->AddToSceneManager();
 			return App3DFramework::URV_Need_Flush;
@@ -389,7 +388,8 @@ uint32_t AsciiArtsApp::DoUpdate(uint32_t pass)
 	else
 	{
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
-		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
+		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
+		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
 
 		sceneMgr.Clear();
 		obj_->AddToSceneManager();

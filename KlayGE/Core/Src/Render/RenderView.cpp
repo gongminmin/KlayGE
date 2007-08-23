@@ -18,6 +18,22 @@ namespace KlayGE
 	class NullRenderView : public RenderView
 	{
 	public:
+		void Clear(Color const & /*clr*/)
+		{
+		}
+
+		void Clear(float /*depth*/)
+		{
+		}
+		
+		void Clear(int32_t /*stencil*/)
+		{
+		}
+
+		void Clear(float /*depth*/, int32_t /*stencil*/)
+		{
+		}
+
 		void OnAttached(FrameBuffer& /*fb*/, uint32_t /*att*/)
 		{
 		}

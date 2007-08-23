@@ -255,7 +255,8 @@ uint32_t Cartoon::DoUpdate(uint32_t pass)
 		UIManager::Instance().HandleInput();
 
 		renderEngine.BindFrameBuffer(normal_depth_buffer_);
-		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
+		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
+		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
 
 		sceneMgr.Clear();
 		checked_pointer_cast<RenderTorus>(torus_->GetRenderable())->Pass(0);
@@ -264,7 +265,8 @@ uint32_t Cartoon::DoUpdate(uint32_t pass)
 	
 	default:
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
-		renderEngine.Clear(RenderEngine::CBM_Color | RenderEngine::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
+		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
+		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
 
 		sceneMgr.Clear();
 		checked_pointer_cast<RenderTorus>(torus_->GetRenderable())->UpdateTexture(normal_depth_tex_,

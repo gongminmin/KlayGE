@@ -76,14 +76,6 @@ namespace KlayGE
 	class RenderEngine
 	{
 	public:
-		enum ClearBufferMask
-		{
-			CBM_Color   = 1UL << 0,
-			CBM_Depth   = 1UL << 1,
-			CBM_Stencil = 1UL << 2
-		};
-
-	public:
 		RenderEngine();
 		virtual ~RenderEngine();
 
@@ -99,8 +91,6 @@ namespace KlayGE
 
 		size_t NumPrimitivesJustRendered();
 		size_t NumVerticesJustRendered();
-
-		virtual void Clear(uint32_t masks, Color const & clr, float depth, int32_t stencil) = 0;
 
 		virtual void CreateRenderWindow(std::string const & name, RenderSettings const & settings) = 0;
 

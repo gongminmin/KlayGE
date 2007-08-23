@@ -170,29 +170,6 @@ namespace KlayGE
 		}
 	}
 
-	// 清空缓冲区
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::Clear(uint32_t masks, Color const & clr, float depth, int32_t stencil)
-	{
-		uint32_t flags = 0;
-		if (masks & CBM_Color)
-		{
-			flags |= D3DCLEAR_TARGET;
-		}
-		if (masks & CBM_Depth)
-		{
-			flags |= D3DCLEAR_ZBUFFER;
-		}
-		if (masks & CBM_Stencil)
-		{
-			flags |= D3DCLEAR_STENCIL;
-		}
-
-		TIF(d3dDevice_->Clear(0, NULL, flags,
-			D3DCOLOR_COLORVALUE(clr.r(), clr.g(), clr.b(), clr.a()),
-			depth, stencil));
-	}
-
 	// 建立渲染窗口
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::CreateRenderWindow(std::string const & name,
