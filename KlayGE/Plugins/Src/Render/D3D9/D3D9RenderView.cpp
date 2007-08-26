@@ -174,6 +174,11 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(Texture::TT_1D == texture_1d.Type());
 
+		if (Texture::TU_RenderTarget != texture_1d_.Usage())
+		{
+			texture_1d_.Usage(Texture::TU_RenderTarget);
+		}
+
 		IDirect3DSurface9* surface;
 		texture_1d_.D3DTexture1D()->GetSurfaceLevel(level_, &surface);
 		surface_ = MakeCOMPtr(surface);
@@ -185,14 +190,6 @@ namespace KlayGE
 
 	void D3D9Texture1DRenderView::OnAttached(FrameBuffer& /*fb*/, uint32_t /*att*/)
 	{
-		if (Texture::TU_RenderTarget != texture_1d_.Usage())
-		{
-			texture_1d_.Usage(Texture::TU_RenderTarget);
-
-			IDirect3DSurface9* surface;
-			texture_1d_.D3DTexture1D()->GetSurfaceLevel(level_, &surface);
-			surface_ = MakeCOMPtr(surface);
-		}
 	}
 
 	void D3D9Texture1DRenderView::OnDetached(FrameBuffer& /*fb*/, uint32_t /*att*/)
@@ -218,6 +215,11 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(Texture::TT_2D == texture_2d.Type());
 
+		if (Texture::TU_RenderTarget != texture_2d_.Usage())
+		{
+			texture_2d_.Usage(Texture::TU_RenderTarget);
+		}
+
 		IDirect3DSurface9* surface;
 		texture_2d_.D3DTexture2D()->GetSurfaceLevel(level_, &surface);
 		surface_ = MakeCOMPtr(surface);
@@ -229,14 +231,6 @@ namespace KlayGE
 
 	void D3D9Texture2DRenderView::OnAttached(FrameBuffer& /*fb*/, uint32_t /*n*/)
 	{
-		if (Texture::TU_RenderTarget != texture_2d_.Usage())
-		{
-			texture_2d_.Usage(Texture::TU_RenderTarget);
-
-			IDirect3DSurface9* surface;
-			texture_2d_.D3DTexture2D()->GetSurfaceLevel(level_, &surface);
-			surface_ = MakeCOMPtr(surface);
-		}
 	}
 
 	void D3D9Texture2DRenderView::OnDetached(FrameBuffer& /*fb*/, uint32_t /*n*/)
@@ -345,6 +339,11 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(Texture::TT_Cube == texture_cube.Type());
 
+		if (Texture::TU_RenderTarget != texture_cube_.Usage())
+		{
+			texture_cube_.Usage(Texture::TU_RenderTarget);
+		}
+
 		IDirect3DSurface9* surface;
 		texture_cube_.D3DTextureCube()->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face_), level_, &surface);
 		surface_ = MakeCOMPtr(surface);
@@ -356,14 +355,6 @@ namespace KlayGE
 
 	void D3D9TextureCubeRenderView::OnAttached(FrameBuffer& /*fb*/, uint32_t /*att*/)
 	{
-		if (Texture::TU_RenderTarget != texture_cube_.Usage())
-		{
-			texture_cube_.Usage(Texture::TU_RenderTarget);
-
-			IDirect3DSurface9* surface;
-			texture_cube_.D3DTextureCube()->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face_), level_, &surface);
-			surface_ = MakeCOMPtr(surface);
-		}
 	}
 
 	void D3D9TextureCubeRenderView::OnDetached(FrameBuffer& /*fb*/, uint32_t /*att*/)

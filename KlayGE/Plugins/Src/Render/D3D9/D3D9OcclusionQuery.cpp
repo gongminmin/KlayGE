@@ -47,7 +47,7 @@ namespace KlayGE
 	uint32_t D3D9OcclusionQuery::SamplesPassed()
 	{
 		uint32_t ret;
-		TIF(query_->GetData(&ret, sizeof(ret), D3DGETDATA_FLUSH));
+		while (S_FALSE == query_->GetData(&ret, sizeof(ret), D3DGETDATA_FLUSH));
 		return ret;
 	}
 }
