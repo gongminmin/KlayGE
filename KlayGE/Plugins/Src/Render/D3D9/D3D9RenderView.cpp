@@ -43,12 +43,12 @@ namespace KlayGE
 		IDirect3DSurface9* old_ds;
 		d3d_device->GetDepthStencilSurface(&old_ds);
 
-		d3d_device->SetRenderTarget(0, surface_.get());
 		for (uint32_t i = 1; i < old_rt.size(); ++ i)
 		{
 			d3d_device->SetRenderTarget(i, NULL);
 		}
 		d3d_device->SetDepthStencilSurface(NULL);
+		d3d_device->SetRenderTarget(0, surface_.get());
 
 		TIF(d3d_device->Clear(0, NULL, D3DCLEAR_TARGET,
 			D3DCOLOR_COLORVALUE(clr.r(), clr.g(), clr.b(), clr.a()), 0, 0));
