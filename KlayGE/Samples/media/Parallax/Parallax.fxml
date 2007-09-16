@@ -5,8 +5,10 @@
 	<include name="../../../RenderFX/Lighting.fxml"/>
 
 	<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>
-	<parameter type="float3" name="lightPos"/>
-	<parameter type="float3" name="eyePos"/>
+	<parameter type="float3" name="light_pos"/>
+	<parameter type="float3" name="eye_pos"/>
+	<parameter type="float" name="parallax_scale"/>
+	<parameter type="float" name="parallax_bias"/>
 
 	<parameter type="sampler2D" name="diffuseMapSampler">
 		<state name="filtering" value="bilinear"/>
@@ -44,8 +46,8 @@ void ParallaxVS(float4 pos				: POSITION,
 	objToTangentSpace[1] = B;
 	objToTangentSpace[2] = cross(T, B);
 
-	float3 lightVec = lightPos - pos.xyz;
-	float3 viewVec = eyePos - pos.xyz;
+	float3 lightVec = light_pos - pos.xyz;
+	float3 viewVec = eye_pos - pos.xyz;
 	float3 halfVec = lightVec + viewVec;
 
 	oL = mul(objToTangentSpace, lightVec);
@@ -60,7 +62,7 @@ half4 ParallaxPS(float2 texCoord0	: TEXCOORD0,
 {
 	half3 view = normalize(V);
 
-	half height = tex2D(heightMapSampler, texCoord0).r * 0.06 - 0.02;
+	half height = tex2D(heightMapSampler, texCoord0).r * parallax_scale - parallax_bias;
 	half2 texUV = texCoord0 + (view.xy * height);
 
 	half3 diffuse = tex2D(diffuseMapSampler, texUV).rgb;
