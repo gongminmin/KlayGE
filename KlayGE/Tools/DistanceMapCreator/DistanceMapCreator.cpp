@@ -221,8 +221,9 @@ public:
 	{
 	}
 
-	void DoUpdate(uint32_t /*pass*/)
+	uint32_t DoUpdate(uint32_t /*pass*/)
 	{
+		return URV_Finished;
 	}
 };
 

@@ -1043,34 +1043,6 @@
 				Name="AES"
 				>
 				<File
-					RelativePath="..\..\7za\CPP\7zip\Crypto\AES\aes.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\7za\CPP\7zip\Crypto\AES\AES_CBC.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\7za\CPP\7zip\Crypto\AES\aescpp.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\7za\CPP\7zip\Crypto\AES\aescrypt.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\7za\CPP\7zip\Crypto\AES\aeskey.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\7za\CPP\7zip\Crypto\AES\aesopt.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\7za\CPP\7zip\Crypto\AES\aestab.c"
-					>
-				</File>
-				<File
 					RelativePath="..\..\7za\CPP\7zip\Crypto\AES\MyAES.cpp"
 					>
 				</File>
