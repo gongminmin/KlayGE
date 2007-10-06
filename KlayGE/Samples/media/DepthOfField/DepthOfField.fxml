@@ -53,6 +53,7 @@ float4 ColorDepthPS(float3 clr : COLOR,
 
 	<parameter type="float" name="focus_plane"/>
 	<parameter type="float" name="inv_focus_range"/>
+	<parameter type="bool" name="show_blur_factor"/>
 	<parameter type="sampler2D" name="src_sampler">
 		<state name="filtering" value="point"/>
 		<state name="address_u" value="clamp"/>
@@ -70,7 +71,15 @@ float4 DepthOfFieldPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 {
 	float4 clr_depth = tex2D(src_sampler, tex_coord0);
 	float3 blur_clr = tex2D(blur_sampler, tex_coord0);
-	return float4(lerp(clr_depth.rgb, blur_clr, saturate(abs(clr_depth.a - focus_plane) * inv_focus_range)), 1);
+	float blur_factor = saturate(abs(clr_depth.a - focus_plane) * inv_focus_range);
+	if (show_blur_factor)
+	{
+		return blur_factor;
+	}
+	else
+	{
+		return float4(lerp(clr_depth.rgb, blur_clr, blur_factor), 1);
+	}
 }
 		]]>
 	</shader>

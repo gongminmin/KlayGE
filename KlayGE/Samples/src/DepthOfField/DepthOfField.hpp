@@ -20,6 +20,7 @@ private:
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 	void FocusPlaneChangedHandler(KlayGE::UISlider const & sender);
 	void FocusRangeChangedHandler(KlayGE::UISlider const & sender);
+	void BlurFactorHandler(KlayGE::UICheckBox const & sender);
 	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;

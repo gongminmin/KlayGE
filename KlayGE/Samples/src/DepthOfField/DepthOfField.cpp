@@ -119,7 +119,7 @@ namespace
 	public:
 		DepthOfField()
 			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfField.kfx")->TechniqueByName("DepthOfField")),
-				blur_(8, 1)
+				blur_(6, 1)
 		{
 		}
 
@@ -139,6 +139,16 @@ namespace
 		float FocusRange() const
 		{
 			return focus_range_;
+		}
+
+		void ShowBlurFactor(bool show)
+		{
+			show_blur_factor_ = show;
+			*(technique_->Effect().ParameterByName("show_blur_factor")) = show_blur_factor_;
+		}
+		bool ShowBlurFactor() const
+		{
+			return show_blur_factor_;
 		}
 
 		void Source(TexturePtr const & tex, bool flipping)
@@ -200,6 +210,7 @@ namespace
 
 		float focus_plane_;
 		float focus_range_;
+		bool show_blur_factor_;
 	};
 
 
@@ -209,6 +220,7 @@ namespace
 		FocusPlaneStatic,
 		FocusRangeSlider,
 		FocusRangeStatic,
+		BlurFactor,
 		CtrlCamera,
 	};
 
@@ -309,16 +321,22 @@ void DepthOfFieldApp::InitObjects()
 	dialog_->Control<UISlider>(FocusPlaneSlider)->OnValueChangedEvent().connect(boost::bind(&DepthOfFieldApp::FocusPlaneChangedHandler, this, _1));
 	
 	dialog_->AddControl(UIControlPtr(new UIStatic(dialog_, FocusRangeStatic, L"Focus range:", 60, 348, 100, 24, false)));
-	dialog_->AddControl(UIControlPtr(new UISlider(dialog_, FocusRangeSlider, 60, 368, 100, 24, 0, 200, 100, false)));
+	dialog_->AddControl(UIControlPtr(new UISlider(dialog_, FocusRangeSlider, 60, 368, 100, 24, 0, 100, 50, false)));
 	dialog_->Control<UISlider>(FocusRangeSlider)->OnValueChangedEvent().connect(boost::bind(&DepthOfFieldApp::FocusRangeChangedHandler, this, _1));
 
+	dialog_->AddControl(UIControlPtr(new UICheckBox(dialog_, BlurFactor, L"Blur factor",
+                            60, 436, 350, 24, false, 0, false)));
+	dialog_->Control<UICheckBox>(BlurFactor)->SetChecked(false);
+	dialog_->Control<UICheckBox>(BlurFactor)->OnChangedEvent().connect(boost::bind(&DepthOfFieldApp::BlurFactorHandler, this, _1));
+
 	dialog_->AddControl(UIControlPtr(new UICheckBox(dialog_, CtrlCamera, L"Control camera",
-                            60, 550, 350, 24, false, 0, false)));
+                            60, 504, 350, 24, false, 0, false)));
 	dialog_->Control<UICheckBox>(CtrlCamera)->SetChecked(false);
 	dialog_->Control<UICheckBox>(CtrlCamera)->OnChangedEvent().connect(boost::bind(&DepthOfFieldApp::CtrlCameraHandler, this, _1));
 
-	checked_pointer_cast<DepthOfField>(depth_of_field_)->FocusPlane(dialog_->Control<UISlider>(FocusPlaneSlider)->GetValue() / 50.0f);
-	checked_pointer_cast<DepthOfField>(depth_of_field_)->FocusRange(dialog_->Control<UISlider>(FocusRangeSlider)->GetValue() / 50.0f);
+	this->FocusPlaneChangedHandler(*dialog_->Control<UISlider>(FocusPlaneSlider));
+	this->FocusRangeChangedHandler(*dialog_->Control<UISlider>(FocusRangeSlider));
+	this->BlurFactorHandler(*dialog_->Control<UICheckBox>(BlurFactor));
 }
 
 void DepthOfFieldApp::OnResize(uint32_t width, uint32_t height)
@@ -335,7 +353,8 @@ void DepthOfFieldApp::OnResize(uint32_t width, uint32_t height)
 	dialog_->GetControl(FocusPlaneSlider)->SetLocation(width - 120, 300);
 	dialog_->GetControl(FocusRangeStatic)->SetLocation(width - 120, 348);
 	dialog_->GetControl(FocusRangeSlider)->SetLocation(width - 120, 368);
-	dialog_->GetControl(CtrlCamera)->SetLocation(width - 120, 416);
+	dialog_->GetControl(BlurFactor)->SetLocation(width - 120, 436);
+	dialog_->GetControl(CtrlCamera)->SetLocation(width - 120, 504);
 }
 
 void DepthOfFieldApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -356,6 +375,11 @@ void DepthOfFieldApp::FocusPlaneChangedHandler(KlayGE::UISlider const & sender)
 void DepthOfFieldApp::FocusRangeChangedHandler(KlayGE::UISlider const & sender)
 {
 	checked_pointer_cast<DepthOfField>(depth_of_field_)->FocusRange(sender.GetValue() / 50.0f);
+}
+
+void DepthOfFieldApp::BlurFactorHandler(KlayGE::UICheckBox const & sender)
+{
+	checked_pointer_cast<DepthOfField>(depth_of_field_)->ShowBlurFactor(sender.GetChecked());
 }
 
 void DepthOfFieldApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
