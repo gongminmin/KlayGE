@@ -113,13 +113,113 @@ namespace
 		}
 	};
 
+	class ScanPostProcess : public PostProcess
+	{
+	public:
+		ScanPostProcess(RenderTechniquePtr tech)
+			: PostProcess(tech)
+		{
+		}
+
+		void Length(uint32_t length)
+		{
+			length_ = length;
+			*(technique_->Effect().ParameterByName("length")) = length_;
+		}
+
+		void Pass(uint32_t pass)
+		{
+			*(technique_->Effect().ParameterByName("start_offset")) = ((1UL << pass) + 0.5f) / length_;
+			*(technique_->Effect().ParameterByName("addr_offset")) = static_cast<float>(1UL << pass) / length_;
+		}
+
+	private:
+		int length_;
+	};
+
+	class SummedAreaTablePostProcess : public PostProcess
+	{
+	public:
+		SummedAreaTablePostProcess()
+			: PostProcess(RenderTechniquePtr()),
+				scan_x_(Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.kfx")->TechniqueByName("ScanX")),
+				scan_y_(Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.kfx")->TechniqueByName("ScanY"))
+		{
+		}
+
+		void Source(TexturePtr const & tex, bool flipping)
+		{
+			PostProcess::Source(tex, flipping);
+
+			uint32_t const width = tex->Width(0);
+			uint32_t const height = tex->Height(0);
+
+			scan_x_.Length(width);
+			scan_y_.Length(height);
+
+			num_pass_x_ = static_cast<uint32_t>(log(static_cast<float>(width)) / log(2.0f));
+			num_pass_y_ = static_cast<uint32_t>(log(static_cast<float>(height)) / log(2.0f));
+
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+			inter_tex_[0] = rf.MakeTexture2D(width, height, 1, EF_ABGR32F);
+			inter_tex_[1] = rf.MakeTexture2D(width, height, 1, EF_ABGR32F);
+
+			inter_fb_[0] = rf.MakeFrameBuffer();
+			inter_fb_[0]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*inter_tex_[0], 0));
+			inter_fb_[1] = rf.MakeFrameBuffer();
+			inter_fb_[1]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*inter_tex_[1], 0));
+		}
+
+		void Apply()
+		{
+			scan_x_.Pass(0);
+			scan_x_.Source(src_texture_, flipping_);
+			scan_x_.Destinate(inter_fb_[0]);
+			scan_x_.Apply();
+
+			index_ = true;
+			for (uint32_t i = 1; i < num_pass_x_; ++ i)
+			{
+				scan_x_.Pass(i);
+				scan_x_.Source(inter_tex_[!index_], inter_fb_[!index_]->RequiresFlipping());
+				scan_x_.Destinate(inter_fb_[index_]);
+				scan_x_.Apply();
+
+				index_ = !index_;
+			}
+
+			for (uint32_t i = 0; i < num_pass_y_; ++ i)
+			{
+				scan_y_.Pass(i);
+				scan_y_.Source(inter_tex_[!index_], inter_fb_[!index_]->RequiresFlipping());
+				scan_y_.Destinate(inter_fb_[index_]);
+				scan_y_.Apply();
+
+				index_ = !index_;
+			}
+		}
+
+		TexturePtr SATTexture()
+		{
+			return inter_tex_[!index_];
+		}
+
+	private:
+		uint32_t num_pass_x_, num_pass_y_;
+		TexturePtr inter_tex_[2];
+		FrameBufferPtr inter_fb_[2];
+		bool index_;
+
+		ScanPostProcess scan_x_;
+		ScanPostProcess scan_y_;
+	};
 
 	class DepthOfField : public PostProcess
 	{
 	public:
 		DepthOfField()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfField.kfx")->TechniqueByName("DepthOfField")),
-				blur_(6, 1)
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfField.kfx")->TechniqueByName("DepthOfField"))
 		{
 		}
 
@@ -158,34 +258,16 @@ namespace
 			uint32_t const width = tex->Width(0);
 			uint32_t const height = tex->Height(0);
 
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			sat_.Source(src_texture_, flipping);
 
-			downsample_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, EF_ABGR16F);
-			blur_tex_ = rf.MakeTexture2D(width / 4, height / 4, 1, EF_ABGR16F);
-
-			bool tmp_flipping;
-			{
-				FrameBufferPtr fb = rf.MakeFrameBuffer();
-				fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*downsample_tex_, 0));
-				downsampler_.Source(src_texture_, flipping);
-				downsampler_.Destinate(fb);
-				tmp_flipping = fb->RequiresFlipping();
-			}
-
-			{
-				FrameBufferPtr fb = rf.MakeFrameBuffer();
-				fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blur_tex_, 0));
-				blur_.Source(downsample_tex_, tmp_flipping);
-				blur_.Destinate(fb);
-			}
-
-			*(technique_->Effect().ParameterByName("blur_sampler")) = blur_tex_;
+			*(technique_->Effect().ParameterByName("sat_size")) = float4(static_cast<float>(width),
+				static_cast<float>(height), 1.0f / width, 1.0f / height);
 		}
 
 		void Apply()
 		{
-			downsampler_.Apply();
-			blur_.Apply();
+			sat_.Apply();
+			*(technique_->Effect().ParameterByName("sat_sampler")) = sat_.SATTexture();
 
 			PostProcess::Apply();
 		}
@@ -202,11 +284,7 @@ namespace
 		}
 
 	private:
-		TexturePtr downsample_tex_;
-		TexturePtr blur_tex_;
-
-		Downsampler2x2PostProcess downsampler_;
-		BlurPostProcess blur_;
+		SummedAreaTablePostProcess sat_;
 
 		float focus_plane_;
 		float focus_range_;
@@ -252,8 +330,8 @@ int main()
 	Context::Instance().InputFactoryInstance(DInputFactoryInstance());
 
 	RenderSettings settings;
-	settings.width = 800;
-	settings.height = 600;
+	settings.width = 512;
+	settings.height = 512;
 	settings.color_fmt = EF_ARGB8;
 	settings.full_screen = false;
 	settings.ConfirmDevice = ConfirmDevice;
@@ -316,21 +394,21 @@ void DepthOfFieldApp::InitObjects()
 
 	dialog_ = UIManager::Instance().MakeDialog();
 	
-	dialog_->AddControl(UIControlPtr(new UIStatic(dialog_, FocusPlaneStatic, L"Focus plane:", 60, 280, 100, 24, false)));
-	dialog_->AddControl(UIControlPtr(new UISlider(dialog_, FocusPlaneSlider, 60, 300, 100, 24, 0, 200, 100, false)));
+	dialog_->AddControl(UIControlPtr(new UIStatic(dialog_, FocusPlaneStatic, L"Focus plane:", 60, 200, 100, 24, false)));
+	dialog_->AddControl(UIControlPtr(new UISlider(dialog_, FocusPlaneSlider, 60, 220, 100, 24, 0, 200, 100, false)));
 	dialog_->Control<UISlider>(FocusPlaneSlider)->OnValueChangedEvent().connect(boost::bind(&DepthOfFieldApp::FocusPlaneChangedHandler, this, _1));
 	
-	dialog_->AddControl(UIControlPtr(new UIStatic(dialog_, FocusRangeStatic, L"Focus range:", 60, 348, 100, 24, false)));
-	dialog_->AddControl(UIControlPtr(new UISlider(dialog_, FocusRangeSlider, 60, 368, 100, 24, 0, 100, 50, false)));
+	dialog_->AddControl(UIControlPtr(new UIStatic(dialog_, FocusRangeStatic, L"Focus range:", 60, 268, 100, 24, false)));
+	dialog_->AddControl(UIControlPtr(new UISlider(dialog_, FocusRangeSlider, 60, 288, 100, 24, 0, 100, 50, false)));
 	dialog_->Control<UISlider>(FocusRangeSlider)->OnValueChangedEvent().connect(boost::bind(&DepthOfFieldApp::FocusRangeChangedHandler, this, _1));
 
 	dialog_->AddControl(UIControlPtr(new UICheckBox(dialog_, BlurFactor, L"Blur factor",
-                            60, 436, 350, 24, false, 0, false)));
+                            60, 356, 350, 24, false, 0, false)));
 	dialog_->Control<UICheckBox>(BlurFactor)->SetChecked(false);
 	dialog_->Control<UICheckBox>(BlurFactor)->OnChangedEvent().connect(boost::bind(&DepthOfFieldApp::BlurFactorHandler, this, _1));
 
 	dialog_->AddControl(UIControlPtr(new UICheckBox(dialog_, CtrlCamera, L"Control camera",
-                            60, 504, 350, 24, false, 0, false)));
+                            60, 424, 350, 24, false, 0, false)));
 	dialog_->Control<UICheckBox>(CtrlCamera)->SetChecked(false);
 	dialog_->Control<UICheckBox>(CtrlCamera)->OnChangedEvent().connect(boost::bind(&DepthOfFieldApp::CtrlCameraHandler, this, _1));
 
@@ -349,12 +427,12 @@ void DepthOfFieldApp::OnResize(uint32_t width, uint32_t height)
 	depth_of_field_->Source(clr_depth_tex_, clr_depth_buffer_->RequiresFlipping());
 	depth_of_field_->Destinate(FrameBufferPtr());
 
-	dialog_->GetControl(FocusPlaneStatic)->SetLocation(width - 120, 280);
-	dialog_->GetControl(FocusPlaneSlider)->SetLocation(width - 120, 300);
-	dialog_->GetControl(FocusRangeStatic)->SetLocation(width - 120, 348);
-	dialog_->GetControl(FocusRangeSlider)->SetLocation(width - 120, 368);
-	dialog_->GetControl(BlurFactor)->SetLocation(width - 120, 436);
-	dialog_->GetControl(CtrlCamera)->SetLocation(width - 120, 504);
+	dialog_->GetControl(FocusPlaneStatic)->SetLocation(width - 120, 200);
+	dialog_->GetControl(FocusPlaneSlider)->SetLocation(width - 120, 220);
+	dialog_->GetControl(FocusRangeStatic)->SetLocation(width - 120, 268);
+	dialog_->GetControl(FocusRangeSlider)->SetLocation(width - 120, 288);
+	dialog_->GetControl(BlurFactor)->SetLocation(width - 120, 356);
+	dialog_->GetControl(CtrlCamera)->SetLocation(width - 120, 424);
 }
 
 void DepthOfFieldApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)

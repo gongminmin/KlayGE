@@ -53,14 +53,15 @@ float4 ColorDepthPS(float3 clr : COLOR,
 
 	<parameter type="float" name="focus_plane"/>
 	<parameter type="float" name="inv_focus_range"/>
+	<parameter type="float4" name="sat_size"/>
 	<parameter type="bool" name="show_blur_factor"/>
 	<parameter type="sampler2D" name="src_sampler">
 		<state name="filtering" value="point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
-	<parameter type="sampler2D" name="blur_sampler">
-		<state name="filtering" value="bilinear"/>
+	<parameter type="sampler2D" name="sat_sampler">
+		<state name="filtering" value="point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
@@ -69,16 +70,21 @@ float4 ColorDepthPS(float3 clr : COLOR,
 		<![CDATA[
 float4 DepthOfFieldPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 {
-	float4 clr_depth = tex2D(src_sampler, tex_coord0);
-	float3 blur_clr = tex2D(blur_sampler, tex_coord0);
-	float blur_factor = saturate(abs(clr_depth.a - focus_plane) * inv_focus_range);
+	float blur_factor = saturate(abs(tex2D(src_sampler, tex_coord0).a - focus_plane) * inv_focus_range);
 	if (show_blur_factor)
 	{
 		return blur_factor;
 	}
 	else
 	{
-		return float4(lerp(clr_depth.rgb, blur_clr, blur_factor), 1);
+		int2 rect = clamp(blur_factor * 0.01f * sat_size.xy + 0.5f, 1, 8);
+		float4 corner = tex_coord0.xyxy + float4(rect - 1, -rect) * sat_size.zwzw;
+		float2 left_top = max(0, corner.zw);
+		float2 right_bottom = min(1 - 0.5f * sat_size.zw, corner.xy);
+		int2 width_height = (right_bottom - left_top) * sat_size.xy;
+		return (tex2D(sat_sampler, corner.xy) - tex2D(sat_sampler, corner.zy)
+				- tex2D(sat_sampler, corner.xw) + tex2D(sat_sampler, corner.zw))
+					/ (width_height.x * width_height.y);
 	}
 }
 		]]>
