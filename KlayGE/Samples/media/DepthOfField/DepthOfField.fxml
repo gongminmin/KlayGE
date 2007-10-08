@@ -30,7 +30,7 @@ void ColorDepthVS(float4 pos			: POSITION,
 	float4 pos_ws = mul(pos, model);
 	oPos = mul(pos_ws, view_proj);
 	oDepth = mul(pos_ws, view).zw;
-   
+
 	normal = mul(normal, (float3x3)model);
 	oClr = clr.rgb * dot(normal, normalize(light_in_world - pos_ws.xyz));
 }

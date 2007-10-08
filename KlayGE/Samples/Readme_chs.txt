@@ -39,10 +39,11 @@ Depth of field
 
 技术点：
 1) Depth of field
-2) Instanceing
-3) UI
+2) Summed-Area Table
+3) Instanceing
+4) UI
 
-需求：Geforce FX以上或Radeon 9500以上。推荐使用Geforce 6以上。
+需求：Geforce 6600以上或Radeon 9500以上。
 渲染引擎支持：D3D9。
 
 ====================================================================================

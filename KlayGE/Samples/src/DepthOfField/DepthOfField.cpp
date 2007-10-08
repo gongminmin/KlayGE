@@ -124,13 +124,11 @@ namespace
 		void Length(uint32_t length)
 		{
 			length_ = length;
-			*(technique_->Effect().ParameterByName("length")) = length_;
 		}
 
 		void Pass(uint32_t pass)
 		{
-			*(technique_->Effect().ParameterByName("start_offset")) = ((1UL << pass) + 0.5f) / length_;
-			*(technique_->Effect().ParameterByName("addr_offset")) = static_cast<float>(1UL << pass) / length_;
+			*(technique_->Effect().ParameterByName("addr_offset")) = pow(8.0f, static_cast<float>(pass)) / length_;
 		}
 
 	private:
@@ -157,8 +155,8 @@ namespace
 			scan_x_.Length(width);
 			scan_y_.Length(height);
 
-			num_pass_x_ = static_cast<uint32_t>(log(static_cast<float>(width)) / log(2.0f));
-			num_pass_y_ = static_cast<uint32_t>(log(static_cast<float>(height)) / log(2.0f));
+			num_pass_x_ = static_cast<uint32_t>(log(static_cast<float>(width)) / log(8.0f));
+			num_pass_y_ = static_cast<uint32_t>(log(static_cast<float>(height)) / log(8.0f));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -266,8 +264,11 @@ namespace
 
 		void Apply()
 		{
-			sat_.Apply();
-			*(technique_->Effect().ParameterByName("sat_sampler")) = sat_.SATTexture();
+			if (!show_blur_factor_)
+			{
+				sat_.Apply();
+				*(technique_->Effect().ParameterByName("sat_sampler")) = sat_.SATTexture();
+			}
 
 			PostProcess::Apply();
 		}

@@ -1,0 +1,55 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="../../../RenderFX/PostProcess.fxml"/>
+
+	<parameter type="float" name="addr_offset"/>
+
+	<parameter type="sampler2D" name="src_sampler">
+		<state name="filtering" value="point"/>
+		<state name="address_u" value="border"/>
+		<state name="address_v" value="border"/>
+		<state name="border_clr" r="0" g="0" b="0" a="0"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+float4 ScanXPS(float2 tex_coord0 : TEXCOORD0) : COLOR
+{
+	float4 clr = tex2D(src_sampler, tex_coord0);
+	for (int i = 1; i < 8; ++ i)
+	{
+		clr += tex2D(src_sampler, tex_coord0 - float2(i * addr_offset, 0));
+	}
+	return clr;
+}
+
+float4 ScanYPS(float2 tex_coord0 : TEXCOORD0) : COLOR
+{
+	float4 clr = tex2D(src_sampler, tex_coord0);
+	for (int i = 1; i < 8; ++ i)
+	{
+		clr += tex2D(src_sampler, tex_coord0 - float2(0, i * addr_offset));
+	}
+	return clr;
+}
+		]]>
+	</shader>
+	<technique name="ScanX">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="ScanXPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ScanY">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="ScanYPS()"/>
+		</pass>
+	</technique>
+</effect>
