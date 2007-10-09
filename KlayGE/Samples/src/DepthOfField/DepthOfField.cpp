@@ -128,7 +128,7 @@ namespace
 
 		void Pass(uint32_t pass)
 		{
-			*(technique_->Effect().ParameterByName("addr_offset")) = pow(8.0f, static_cast<float>(pass)) / length_;
+			*(technique_->Effect().ParameterByName("addr_offset")) = pow(4.0f, static_cast<float>(pass)) / length_;
 		}
 
 	private:
@@ -155,8 +155,8 @@ namespace
 			scan_x_.Length(width);
 			scan_y_.Length(height);
 
-			num_pass_x_ = static_cast<uint32_t>(log(static_cast<float>(width)) / log(8.0f));
-			num_pass_y_ = static_cast<uint32_t>(log(static_cast<float>(height)) / log(8.0f));
+			num_pass_x_ = static_cast<uint32_t>(ceil(log(static_cast<float>(width)) / log(4.0f)));
+			num_pass_y_ = static_cast<uint32_t>(ceil(log(static_cast<float>(height)) / log(4.0f)));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -331,8 +331,8 @@ int main()
 	Context::Instance().InputFactoryInstance(DInputFactoryInstance());
 
 	RenderSettings settings;
-	settings.width = 512;
-	settings.height = 512;
+	settings.width = 800;
+	settings.height = 600;
 	settings.color_fmt = EF_ARGB8;
 	settings.full_screen = false;
 	settings.ConfirmDevice = ConfirmDevice;

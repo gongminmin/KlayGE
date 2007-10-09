@@ -78,10 +78,10 @@ float4 DepthOfFieldPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 	else
 	{
 		int2 rect = clamp(blur_factor * 0.01f * sat_size.xy + 0.5f, 1, 8);
-		float4 corner = tex_coord0.xyxy + float4(rect - 1, -rect) * sat_size.zwzw;
-		float2 left_top = max(0, corner.zw);
-		float2 right_bottom = min(1 - 0.5f * sat_size.zw, corner.xy);
-		int2 width_height = (right_bottom - left_top) * sat_size.xy;
+		float4 corner = (floor(tex_coord0 * sat_size.xy).xyxy + float4(rect - 1, -rect) + 0.5f) * sat_size.zwzw;
+		float2 left_top = max(0, corner.zw * sat_size.xy - 0.5f);
+		float2 right_bottom = min(sat_size.xy - 1, corner.xy * sat_size.xy - 0.5f);
+		float2 width_height = right_bottom - left_top;
 		return (tex2D(sat_sampler, corner.xy) - tex2D(sat_sampler, corner.zy)
 				- tex2D(sat_sampler, corner.xw) + tex2D(sat_sampler, corner.zw))
 					/ (width_height.x * width_height.y);
