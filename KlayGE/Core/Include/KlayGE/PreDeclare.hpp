@@ -118,10 +118,18 @@ namespace KlayGE
 	typedef boost::shared_ptr<OcclusionQuery> OcclusionQueryPtr;
 	class PostProcess;
 	typedef boost::shared_ptr<PostProcess> PostProcessPtr;
+	class GammaCorrectionProcess;
+	typedef boost::shared_ptr<GammaCorrectionProcess> GammaCorrectionProcessPtr;
+	class SeparableBlurPostProcess;
+	typedef boost::shared_ptr<SeparableBlurPostProcess> SeparableBlurPostProcessPtr;
 	class Downsampler2x2PostProcess;
 	typedef boost::shared_ptr<Downsampler2x2PostProcess> Downsampler2x2PostProcessPtr;
 	class BrightPassDownsampler2x2PostProcess;
 	typedef boost::shared_ptr<BrightPassDownsampler2x2PostProcess> BrightPassDownsampler2x2PostProcessPtr;
+	class BlurXPostProcess;
+	typedef boost::shared_ptr<BlurXPostProcess> BlurXPostProcessPtr;
+	class BlurYPostProcess;
+	typedef boost::shared_ptr<BlurYPostProcess> BlurYPostProcessPtr;
 	class BlurPostProcess;
 	typedef boost::shared_ptr<BlurPostProcess> BlurPostProcessPtr;
 	class SumLumPostProcess;
@@ -130,14 +138,20 @@ namespace KlayGE
 	typedef boost::shared_ptr<SumLumLogPostProcess> SumLumLogPostProcessPtr;
 	class SumLumIterativePostProcess;
 	typedef boost::shared_ptr<SumLumIterativePostProcess> SumLumIterativePostProcessPtr;
-	class SumLumExpPostProcess;
-	typedef boost::shared_ptr<SumLumExpPostProcess> SumLumExpPostProcessPtr;
 	class AdaptedLumPostProcess;
 	typedef boost::shared_ptr<AdaptedLumPostProcess> AdaptedLumPostProcessPtr;
 	class ToneMappingPostProcess;
 	typedef boost::shared_ptr<ToneMappingPostProcess> ToneMappingPostProcessPtr;
 	class HDRPostProcess;
 	typedef boost::shared_ptr<HDRPostProcess> HDRPostProcessPtr;
+	class SATSeparableScanPostProcess;
+	typedef boost::shared_ptr<SATSeparableScanPostProcess> SATSeparableScanPostProcessPtr;
+	class SATScanXPostProcess;
+	typedef boost::shared_ptr<SATScanXPostProcess> SATScanXPostProcessPtr;
+	class SATScanYPostProcess;
+	typedef boost::shared_ptr<SATScanYPostProcess> SATScanYPostProcessPtr;
+	class SummedAreaTablePostProcess;
+	typedef boost::shared_ptr<SummedAreaTablePostProcess> SummedAreaTablePostProcessPtr;
 	template <typename ParticleType>
 	class ParticleSystem;
 

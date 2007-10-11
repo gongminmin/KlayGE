@@ -31,8 +31,7 @@ void ColorDepthVS(float4 pos			: POSITION,
 	oPos = mul(pos_ws, view_proj);
 	oDepth = mul(pos_ws, view).zw;
 
-	normal = mul(normal, (float3x3)model);
-	oClr = clr.rgb * dot(normal, normalize(light_in_world - pos_ws.xyz));
+	oClr = saturate(clr.rgb * point_lighting(light_in_world, pos_ws.xyz, mul(normal, (float3x3)model))) - 0.5f;
 }
 
 float4 ColorDepthPS(float3 clr : COLOR,
@@ -79,11 +78,13 @@ float4 DepthOfFieldPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 	{
 		int2 rect = clamp(blur_factor * 0.01f * sat_size.xy + 0.5f, 1, 8);
 		float4 corner = (floor(tex_coord0 * sat_size.xy).xyxy + float4(rect - 1, -rect) + 0.5f) * sat_size.zwzw;
-		float2 left_top = max(0, corner.zw * sat_size.xy - 0.5f);
-		float2 right_bottom = min(sat_size.xy - 1, corner.xy * sat_size.xy - 0.5f);
-		float2 width_height = right_bottom - left_top;
-		return (tex2D(sat_sampler, corner.xy) - tex2D(sat_sampler, corner.zy)
-				- tex2D(sat_sampler, corner.xw) + tex2D(sat_sampler, corner.zw))
+		float2 left_top = max(0.5f * sat_size.zw, corner.zw);
+		float2 right_bottom = min(1 - 0.5f * sat_size.zw, corner.xy);
+		float2 width_height = (right_bottom - left_top) * sat_size.xy;
+		return (tex2D(sat_sampler, corner.xy) + 0.5 * right_bottom.x * sat_size.x * right_bottom.y * sat_size.y
+				- tex2D(sat_sampler, corner.zy) - 0.5 * left_top.x * sat_size.x * right_bottom.y * sat_size.y
+				- tex2D(sat_sampler, corner.xw) - 0.5 * right_bottom.x * sat_size.x * left_top.y * sat_size.y
+				+ tex2D(sat_sampler, corner.zw) + 0.5 * left_top.x * sat_size.x * left_top.y * sat_size.y)
 					/ (width_height.x * width_height.y);
 	}
 }
@@ -95,6 +96,24 @@ float4 DepthOfFieldPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="DepthOfFieldPS()"/>
+		</pass>
+	</technique>
+
+	<parameter type="float4" name="clear_clr"/>
+	<shader>
+		<![CDATA[
+float4 ClearFloatPS() : COLOR
+{
+	return clear_clr;
+}
+		]]>
+	</shader>
+	<technique name="ClearFloat">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="ClearFloatPS()"/>
 		</pass>
 	</technique>
 </effect>

@@ -32,6 +32,7 @@ private:
 	KlayGE::FrameBufferPtr clr_depth_buffer_;
 	KlayGE::TexturePtr clr_depth_tex_;
 
+	KlayGE::PostProcessPtr clear_float_;
 	KlayGE::PostProcessPtr depth_of_field_;
 
 	KlayGE::UIDialogPtr dialog_;

@@ -61,10 +61,6 @@ namespace KlayGE
 		{
 		}
 
-		void Clear(uint32_t /*masks*/, Color const & /*clr*/, float /*depth*/, int32_t /*stencil*/)
-		{
-		}
-
 		void CreateRenderWindow(std::string const & /*name*/, RenderSettings const & /*settings*/)
 		{
 		}

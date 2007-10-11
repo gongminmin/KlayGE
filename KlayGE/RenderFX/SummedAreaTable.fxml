@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="../../../RenderFX/PostProcess.fxml"/>
+	<include name="PostProcess.fxml"/>
 
 	<parameter type="float" name="addr_offset"/>
 
@@ -14,7 +14,7 @@
 
 	<shader>
 		<![CDATA[
-float4 ScanXPS(float2 tex_coord0 : TEXCOORD0) : COLOR
+float4 SATScanXPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 {
 	float4 clr = tex2D(src_sampler, tex_coord0);
 	for (int i = 1; i < 4; ++ i)
@@ -24,7 +24,7 @@ float4 ScanXPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 	return clr;
 }
 
-float4 ScanYPS(float2 tex_coord0 : TEXCOORD0) : COLOR
+float4 SATScanYPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 {
 	float4 clr = tex2D(src_sampler, tex_coord0);
 	for (int i = 1; i < 4; ++ i)
@@ -35,21 +35,21 @@ float4 ScanYPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 }
 		]]>
 	</shader>
-	<technique name="ScanX">
+	<technique name="SATScanX">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="ScanXPS()"/>
+			<state name="pixel_shader" value="SATScanXPS()"/>
 		</pass>
 	</technique>
 
-	<technique name="ScanY">
+	<technique name="SATScanY">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="ScanYPS()"/>
+			<state name="pixel_shader" value="SATScanYPS()"/>
 		</pass>
 	</technique>
 </effect>

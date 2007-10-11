@@ -16,6 +16,7 @@
 #include <KlayGE/KMesh.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
+#include <KlayGE/SATPostProcess.hpp>
 #include <KlayGE/Util.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
@@ -113,104 +114,22 @@ namespace
 		}
 	};
 
-	class ScanPostProcess : public PostProcess
+	class ClearFloatPostProcess : public PostProcess
 	{
 	public:
-		ScanPostProcess(RenderTechniquePtr tech)
-			: PostProcess(tech)
+		ClearFloatPostProcess()
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfField.kfx")->TechniqueByName("ClearFloat"))
 		{
 		}
 
-		void Length(uint32_t length)
+		void ClearColor(float4 const & clr)
 		{
-			length_ = length;
+			*(technique_->Effect().ParameterByName("clear_clr")) = clr;
 		}
 
-		void Pass(uint32_t pass)
-		{
-			*(technique_->Effect().ParameterByName("addr_offset")) = pow(4.0f, static_cast<float>(pass)) / length_;
-		}
-
-	private:
-		int length_;
-	};
-
-	class SummedAreaTablePostProcess : public PostProcess
-	{
-	public:
-		SummedAreaTablePostProcess()
-			: PostProcess(RenderTechniquePtr()),
-				scan_x_(Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.kfx")->TechniqueByName("ScanX")),
-				scan_y_(Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.kfx")->TechniqueByName("ScanY"))
+		void OnRenderBegin()
 		{
 		}
-
-		void Source(TexturePtr const & tex, bool flipping)
-		{
-			PostProcess::Source(tex, flipping);
-
-			uint32_t const width = tex->Width(0);
-			uint32_t const height = tex->Height(0);
-
-			scan_x_.Length(width);
-			scan_y_.Length(height);
-
-			num_pass_x_ = static_cast<uint32_t>(ceil(log(static_cast<float>(width)) / log(4.0f)));
-			num_pass_y_ = static_cast<uint32_t>(ceil(log(static_cast<float>(height)) / log(4.0f)));
-
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			inter_tex_[0] = rf.MakeTexture2D(width, height, 1, EF_ABGR32F);
-			inter_tex_[1] = rf.MakeTexture2D(width, height, 1, EF_ABGR32F);
-
-			inter_fb_[0] = rf.MakeFrameBuffer();
-			inter_fb_[0]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*inter_tex_[0], 0));
-			inter_fb_[1] = rf.MakeFrameBuffer();
-			inter_fb_[1]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*inter_tex_[1], 0));
-		}
-
-		void Apply()
-		{
-			scan_x_.Pass(0);
-			scan_x_.Source(src_texture_, flipping_);
-			scan_x_.Destinate(inter_fb_[0]);
-			scan_x_.Apply();
-
-			index_ = true;
-			for (uint32_t i = 1; i < num_pass_x_; ++ i)
-			{
-				scan_x_.Pass(i);
-				scan_x_.Source(inter_tex_[!index_], inter_fb_[!index_]->RequiresFlipping());
-				scan_x_.Destinate(inter_fb_[index_]);
-				scan_x_.Apply();
-
-				index_ = !index_;
-			}
-
-			for (uint32_t i = 0; i < num_pass_y_; ++ i)
-			{
-				scan_y_.Pass(i);
-				scan_y_.Source(inter_tex_[!index_], inter_fb_[!index_]->RequiresFlipping());
-				scan_y_.Destinate(inter_fb_[index_]);
-				scan_y_.Apply();
-
-				index_ = !index_;
-			}
-		}
-
-		TexturePtr SATTexture()
-		{
-			return inter_tex_[!index_];
-		}
-
-	private:
-		uint32_t num_pass_x_, num_pass_y_;
-		TexturePtr inter_tex_[2];
-		FrameBufferPtr inter_fb_[2];
-		bool index_;
-
-		ScanPostProcess scan_x_;
-		ScanPostProcess scan_y_;
 	};
 
 	class DepthOfField : public PostProcess
@@ -256,7 +175,7 @@ namespace
 			uint32_t const width = tex->Width(0);
 			uint32_t const height = tex->Height(0);
 
-			sat_.Source(src_texture_, flipping);
+			sat_.Source(tex, flipping);
 
 			*(technique_->Effect().ParameterByName("sat_size")) = float4(static_cast<float>(width),
 				static_cast<float>(height), 1.0f / width, 1.0f / height);
@@ -393,6 +312,9 @@ void DepthOfFieldApp::InitObjects()
 	depth_of_field_.reset(new DepthOfField);
 	depth_of_field_->Destinate(FrameBufferPtr());
 
+	clear_float_.reset(new ClearFloatPostProcess);
+	checked_pointer_cast<ClearFloatPostProcess>(clear_float_)->ClearColor(float4(0.2f - 0.5f, 0.4f - 0.5f, 0.6f - 0.5f, 1 - 0.5f));
+
 	dialog_ = UIManager::Instance().MakeDialog();
 	
 	dialog_->AddControl(UIControlPtr(new UIStatic(dialog_, FocusPlaneStatic, L"Focus plane:", 60, 200, 100, 24, false)));
@@ -427,6 +349,8 @@ void DepthOfFieldApp::OnResize(uint32_t width, uint32_t height)
 
 	depth_of_field_->Source(clr_depth_tex_, clr_depth_buffer_->RequiresFlipping());
 	depth_of_field_->Destinate(FrameBufferPtr());
+
+	clear_float_->Destinate(clr_depth_buffer_);
 
 	dialog_->GetControl(FocusPlaneStatic)->SetLocation(width - 120, 200);
 	dialog_->GetControl(FocusPlaneSlider)->SetLocation(width - 120, 220);
@@ -485,7 +409,7 @@ uint32_t DepthOfFieldApp::DoUpdate(uint32_t pass)
 		UIManager::Instance().HandleInput();
 
 		renderEngine.BindFrameBuffer(clr_depth_buffer_);
-		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
+		clear_float_->Apply();
 		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
 
 		sceneMgr.Clear();
