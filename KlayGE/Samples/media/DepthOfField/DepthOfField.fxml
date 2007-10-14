@@ -81,11 +81,9 @@ float4 DepthOfFieldPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 		float2 left_top = max(0.5f * sat_size.zw, corner.zw);
 		float2 right_bottom = min(1 - 0.5f * sat_size.zw, corner.xy);
 		float2 width_height = (right_bottom - left_top) * sat_size.xy;
-		return (tex2D(sat_sampler, corner.xy) + 0.5 * right_bottom.x * sat_size.x * right_bottom.y * sat_size.y
-				- tex2D(sat_sampler, corner.zy) - 0.5 * left_top.x * sat_size.x * right_bottom.y * sat_size.y
-				- tex2D(sat_sampler, corner.xw) - 0.5 * right_bottom.x * sat_size.x * left_top.y * sat_size.y
-				+ tex2D(sat_sampler, corner.zw) + 0.5 * left_top.x * sat_size.x * left_top.y * sat_size.y)
-					/ (width_height.x * width_height.y);
+		return (tex2D(sat_sampler, corner.xy) - tex2D(sat_sampler, corner.zy)
+				- tex2D(sat_sampler, corner.xw) + tex2D(sat_sampler, corner.zw))
+							/ (width_height.x * width_height.y) + 0.5f;
 	}
 }
 		]]>

@@ -322,7 +322,7 @@ void DepthOfFieldApp::InitObjects()
 	dialog_->Control<UISlider>(FocusPlaneSlider)->OnValueChangedEvent().connect(boost::bind(&DepthOfFieldApp::FocusPlaneChangedHandler, this, _1));
 	
 	dialog_->AddControl(UIControlPtr(new UIStatic(dialog_, FocusRangeStatic, L"Focus range:", 60, 268, 100, 24, false)));
-	dialog_->AddControl(UIControlPtr(new UISlider(dialog_, FocusRangeSlider, 60, 288, 100, 24, 0, 100, 50, false)));
+	dialog_->AddControl(UIControlPtr(new UISlider(dialog_, FocusRangeSlider, 60, 288, 100, 24, 0, 200, 100, false)));
 	dialog_->Control<UISlider>(FocusRangeSlider)->OnValueChangedEvent().connect(boost::bind(&DepthOfFieldApp::FocusRangeChangedHandler, this, _1));
 
 	dialog_->AddControl(UIControlPtr(new UICheckBox(dialog_, BlurFactor, L"Blur factor",
