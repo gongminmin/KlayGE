@@ -113,6 +113,8 @@ namespace KlayGE
 	// ¹¹Ôìº¯Êý
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderEngine::RenderEngine()
+		: numPrimitivesJustRendered_(0),
+			numVerticesJustRendered_(0)
 	{
 	}
 

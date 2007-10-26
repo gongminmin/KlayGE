@@ -166,8 +166,8 @@ namespace KlayGE
 	}
 
 
-	RenderableBox::RenderableBox(Box const & box, Color const & clr)
-		: RenderableHelper(L"Box")
+	RenderableTriBox::RenderableTriBox(Box const & box, Color const & clr)
+		: RenderableHelper(L"TriBox")
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -183,12 +183,12 @@ namespace KlayGE
 
 		uint16_t indices[] =
 		{
-			0, 1, 2, 2, 3, 0,
-			7, 6, 5, 5, 4, 7,
-			4, 0, 3, 3, 7, 4,
-			4, 5, 1, 1, 0, 4,
-			1, 5, 6, 6, 2, 1,
-			3, 2, 6, 6, 7, 3,
+			0, 2, 3, 3, 1, 0,
+			5, 7, 6, 6, 4, 5,
+			4, 0, 1, 1, 5, 4,
+			4, 6, 2, 2, 0, 4,
+			2, 6, 7, 7, 3, 1,
+			1, 3, 7, 7, 5, 1,
 		};
 
 		rl_ = rf.MakeRenderLayout();
@@ -211,7 +211,59 @@ namespace KlayGE
 		rl_->BindIndexStream(ib, EF_R16);
 	}
 
-	void RenderableBox::OnRenderBegin()
+	void RenderableTriBox::OnRenderBegin()
+	{
+		App3DFramework const & app = Context::Instance().AppInstance();
+		Camera const & camera = app.ActiveCamera();
+
+		float4x4 view_proj = camera.ViewMatrix() * camera.ProjMatrix();
+		*(technique_->Effect().ParameterByName("matViewProj")) = view_proj;
+	}
+
+
+	RenderableLineBox::RenderableLineBox(Box const & box, Color const & clr)
+		: RenderableHelper(L"LineBox")
+	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		box_ = box;
+
+		technique_ = rf.LoadEffect("RenderableHelper.kfx")->TechniqueByName("BoxTec");
+		*(technique_->Effect().ParameterByName("color")) = float4(clr.r(), clr.g(), clr.b(), clr.a());
+
+		float3 xyzs[] =
+		{
+			box[0], box[1], box[2], box[3], box[4], box[5], box[6], box[7]
+		};
+
+		uint16_t indices[] =
+		{
+			0, 1, 1, 3, 3, 2, 2, 0,
+			4, 5, 5, 7, 7, 6, 6, 4,
+			0, 4, 1, 5, 2, 6, 3, 7
+		};
+
+		rl_ = rf.MakeRenderLayout();
+		rl_->TopologyType(RenderLayout::TT_LineList);
+
+		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static);
+		vb->Resize(sizeof(xyzs));
+		{
+			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
+			std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
+		}
+		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+
+		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static);
+		ib->Resize(sizeof(indices));
+		{
+			GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
+			std::copy(indices, indices + sizeof(indices) / sizeof(indices[0]), mapper.Pointer<uint16_t>());
+		}
+		rl_->BindIndexStream(ib, EF_R16);
+	}
+
+	void RenderableLineBox::OnRenderBegin()
 	{
 		App3DFramework const & app = Context::Instance().AppInstance();
 		Camera const & camera = app.ActiveCamera();

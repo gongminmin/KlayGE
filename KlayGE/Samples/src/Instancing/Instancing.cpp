@@ -16,6 +16,8 @@
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/Script.hpp>
 
+#include <KlayGE/OCTree/OCTree.hpp>
+
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 #include <KlayGE/OpenGL/OGLRenderFactory.hpp>
 
@@ -57,6 +59,7 @@ namespace
 
 		void Instance(float4x4 const & mat, Color const & clr)
 		{
+			mat_ = mat;
 			float4x4 matT = MathLib::transpose(mat);
 
 			inst_.col[0] = matT.Row(0);
@@ -75,8 +78,14 @@ namespace
 			renderable_ = ra;
 		}
 
+		float4x4 GetModelMatrix() const
+		{
+			return mat_;
+		}
+
 	private:
 		InstData inst_;
+		float4x4 mat_;
 	};
 
 	class RenderInstance : public KMesh
@@ -188,7 +197,11 @@ namespace
 
 int main()
 {
+	OCTree sceneMgr(3);
+
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
+	Context::Instance().SceneManagerInstance(sceneMgr);
+
 	Context::Instance().InputFactoryInstance(DInputFactoryInstance());
 
 	RenderSettings settings;

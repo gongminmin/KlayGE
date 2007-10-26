@@ -111,36 +111,38 @@ namespace KlayGE
 
 		Vector_T<T, 3> operator[](size_t i) const
 		{
-			switch (i)
+			BOOST_ASSERT(i < 8);
+
+			Vector_T<T, 3> ret;
+			
+			if (i & 1UL)
 			{
-			case 0:
-				return this->LeftBottomNear();
-
-			case 1:
-				return this->LeftTopNear();
-
-			case 2:
-				return this->RightTopNear();
-
-			case 3:
-				return this->RightBottomNear();
-
-			case 4:
-				return this->LeftBottomFar();
-
-			case 5:
-				return this->LeftTopFar();
-
-			case 6:
-				return this->RightTopFar();
-
-			case 7:
-				return this->RightBottomFar();
-
-			default:
-				BOOST_ASSERT(false);
-				return Vector_T<T, 3>::Zero();
+				ret.x() = this->Max().x();
 			}
+			else
+			{
+				ret.x() = this->Min().x();
+			}
+
+			if (i & 2UL)
+			{
+				ret.y() = this->Max().y();
+			}
+			else
+			{
+				ret.y() = this->Min().y();
+			}
+
+			if (i & 4UL)
+			{
+				ret.z() = this->Max().z();
+			}
+			else
+			{
+				ret.z() = this->Min().z();
+			}
+
+			return ret;
 		}
 
 		//  Ù–‘
@@ -214,6 +216,10 @@ namespace KlayGE
 		{
 			return (min_ + max_) / 2;
 		}
+		Vector_T<T, 3> HalfSize() const
+		{
+			return (max_ - min_) / 2;
+		}
 
 		bool VecInBound(Vector_T<T, 3> const & v) const
 		{
@@ -222,6 +228,13 @@ namespace KlayGE
 		T MaxRadiusSq() const
 		{
 			return std::max<T>(MathLib::length_sq(this->Max()), MathLib::length_sq(this->Min()));
+		}
+
+		bool Overlap(Box_T<T> const & rhs) const
+		{
+			float3 const t = rhs.Center() - this->Center();
+			float3 const e = this->HalfSize() + rhs.HalfSize();
+			return (abs(t.x()) <= e.x()) && (abs(t.y()) <= e.y()) && (abs(t.y()) <= e.y());
 		}
 
 	private:

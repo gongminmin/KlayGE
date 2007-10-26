@@ -34,110 +34,198 @@
 #include <KlayGE/OCTree/Frustum.hpp>
 #include <KlayGE/OCTree/OCTree.hpp>
 
+namespace
+{
+	KlayGE::OCTree::tree_id_t const ROOT_ID = 0x0FFFFFFFFFFFFFFFULL;
+	int const NUM_BITS = sizeof(KlayGE::OCTree::tree_id_t) * 8;
+}
+
 namespace KlayGE
 {
-	OCTree::OCTree(Box const & box, uint32_t maxNumObjInANode)
-		: root_box_(box), maxNumObjInANode_(maxNumObjInANode)
+	OCTree::OCTree(uint32_t max_tree_depth)
+		: root_box_(Box(float3(0, 0, 0), float3(0, 0, 0))),
+			max_tree_depth_(std::min(max_tree_depth, 16UL)),
+			rebuild_tree_(false)
 	{
 	}
 
 	void OCTree::ClipScene(Camera const & camera)
 	{
-		BOOST_FOREACH(BOOST_TYPEOF(octree_)::reference subtree, octree_)
+		if (rebuild_tree_)
 		{
-			SceneObjectsType& objs = subtree.second;
-
-			for (BOOST_AUTO(obj_iter, objs.begin()); obj_iter != objs.end();)
+			octree_.clear();
+			root_box_ = Box(float3(0, 0, 0), float3(0, 0, 0));
+			BOOST_FOREACH(BOOST_TYPEOF(scene_objs_)::reference obj, scene_objs_)
 			{
-				if ((*obj_iter)->Moveable())
+				if (obj->Cullable() && !obj->ShortAge())
 				{
-					if (!this->InsideChild(subtree.first, *obj_iter))
+					Box const & box = obj->GetBound();
+					float4x4 const & mat = obj->GetModelMatrix();
+
+					float3 min(1e10f, 1e10f, 1e10f), max(-1e10f, -1e10f, -1e10f);
+					for (size_t i = 0; i < 8; ++ i)
 					{
-						obj_iter = objs.erase(obj_iter);
+						float3 vec = MathLib::transform_coord(box[i], mat);
+						min = MathLib::minimize(min, vec);
+						max = MathLib::maximize(max, vec);
+					}
+
+					Box bb_in_ws(min, max);
+
+					root_box_ |= bb_in_ws;
+					octree_[ROOT_ID].objs.push_back(obj);
+					octree_[ROOT_ID].bbs_in_ws.push_back(bb_in_ws);
+				}
+			}
+			{
+				float3 const & size = root_box_.Max() - root_box_.Min();
+				float max_dim = std::max(std::max(size.x(), size.y()), size.z()) / 2;
+				float3 const & center = root_box_.Center();
+				root_box_ = Box(center - float3(max_dim, max_dim, max_dim),
+					center + float3(max_dim, max_dim, max_dim));
+			}
+
+			for (uint32_t d = 0; d < max_tree_depth_; ++ d)
+			{
+				for (BOOST_AUTO(iter, octree_.begin()); iter != octree_.end();)
+				{
+					if (iter->second.objs.size() > 1)
+					{
+						tree_id_t old_id = iter->first;
+						SceneObjectsType& old_objs = iter->second.objs;
+						BoxesTypes& old_bbs = iter->second.bbs_in_ws;
+
+						int offset = NUM_BITS - 8;
+						while (0 == ((old_id >> offset) & 0x8))
+						{
+							offset -= 4;
+						}
+
+						for (tree_id_t i = 0; i < 8; ++ i)
+						{
+							tree_id_t id = old_id & (~(tree_id_t(0xF) << offset)) | (i << offset);
+							Box const & old_box = this->AreaBox(id);
+							float3 const & old_center = old_box.Center();
+							float3 const & old_half_size = old_box.HalfSize();
+
+							octree_.insert(std::make_pair(id, octree_node_t()));
+							octree_node_t& new_node = octree_[id];
+
+							for (size_t j = 0; j < old_objs.size(); ++ j)
+							{
+								SceneObjectPtr const & old_obj = old_objs[j];
+								Box const & bb = old_bbs[j];
+
+								float3 const t = bb.Center() - old_center;
+								float3 const e = bb.HalfSize() + old_half_size;
+								if ((abs(t.x()) <= e.x()) && (abs(t.y()) <= e.y()) && (abs(t.y()) <= e.y()))
+								{
+									new_node.objs.push_back(old_obj);
+									new_node.bbs_in_ws.push_back(bb);
+								}
+							}
+						}
+
+						iter = octree_.erase(iter);
 					}
 					else
 					{
-						++ obj_iter;
+						++ iter;
 					}
+				}
+			}
+
+			for (BOOST_AUTO(iter, octree_.begin()); iter != octree_.end();)
+			{
+				SceneObjectsType& objs = iter->second.objs;
+				if (objs.empty())
+				{
+					octree_.erase(iter ++);
 				}
 				else
 				{
-					++ obj_iter;
+					++ iter;
 				}
 			}
+
+			rebuild_tree_ = false;
 		}
 
-		BOOST_FOREACH(BOOST_TYPEOF(scene_objs_)::reference obj, scene_objs_)
+		std::vector<tree_id_t, boost::pool_allocator<tree_id_t> > id_in_tree;
+		for (BOOST_AUTO(iter, octree_.begin()); iter != octree_.end(); ++ iter)
 		{
-			if (obj->Cullable() && obj->Moveable())
-			{
-				this->InsertSceneObject("0", obj);
-			}
-		}
-
-		for (BOOST_AUTO(iter, octree_.begin()); iter != octree_.end();)
-		{
-			SceneObjectsType& objs = iter->second;
-			if (objs.empty())
-			{
-				octree_.erase(iter ++);
-			}
-			else
-			{
-				++ iter;
-			}
+			id_in_tree.push_back(iter->first);
 		}
 
 		Frustum frustum(camera.ViewMatrix() * camera.ProjMatrix());
 
-		SetVector<tree_id_t> nodes;
-		SetVector<SceneObjectPtr> visables;
-		for (BOOST_AUTO(iter, octree_.begin()); iter != octree_.end(); ++ iter)
+		std::vector<tree_id_t, boost::pool_allocator<tree_id_t> > filter_queue(1, ROOT_ID);
+		for (uint32_t d = 0; d < max_tree_depth_; ++ d)
 		{
-			for (size_t i = 1; i <= iter->first.size(); ++ i)
+			int const offset = NUM_BITS - 8 - 4 * d;
+			size_t original_size = filter_queue.size();
+			for (size_t i = 0; i < original_size; ++ i)
 			{
-				tree_id_t id = iter->first.substr(0, i);
-
-				if (nodes.find(id) == nodes.end())
+				for (tree_id_t j = 0; j < 8; ++ j)
 				{
-					Box const & box = this->AreaBox(id);
+					filter_queue.push_back(filter_queue[i] & (~(tree_id_t(0xF) << offset)) | (j << offset));
+				}
+			}
+			filter_queue.erase(filter_queue.begin(), filter_queue.begin() + original_size);
 
-					Frustum::VIS const vis = frustum.Visiable(box);
-					if ((Frustum::VIS_YES == vis)
-						|| ((Frustum::VIS_PART == vis) && (i == iter->first.size())))
+			for (BOOST_AUTO(iter, filter_queue.begin()); iter != filter_queue.end();)
+			{
+				Box const & box = this->AreaBox(*iter);
+
+				Frustum::VIS const vis = frustum.Visiable(box);
+				if (Frustum::VIS_NO == vis)
+				{
+					BOOST_AUTO(end_iter, std::lower_bound(id_in_tree.begin(), id_in_tree.end(), *iter));
+					if ((end_iter != id_in_tree.end()) && (*end_iter == *iter))
 					{
-						// 全部看见树或部分看见叶子
+						++ end_iter;
+					}
 
-						visables.insert(iter->second.begin(), iter->second.end());
-						nodes.insert(id);
-
-#ifdef KLAYGE_DEBUG
-						RenderablePtr box_helper(new RenderableBox(box, Color(1, 1, 1, 1)));
-						box_helper->AddToRenderQueue();
-#endif
+					tree_id_t beg_id = *iter;
+					for (uint32_t i = d + 1; i < max_tree_depth_; ++ i)
+					{
+						beg_id = beg_id & (~(tree_id_t(0xF) << ((NUM_BITS - 8 - 4 * i) - 4)));
+					}
+					BOOST_AUTO(beg_iter, std::lower_bound(id_in_tree.begin(), id_in_tree.end(), beg_id));
+					if (beg_iter != id_in_tree.end())
+					{
+						if ((end_iter == id_in_tree.end())
+							|| ((end_iter != id_in_tree.end()) && (*beg_iter < *end_iter)))
+						{
+							id_in_tree.erase(beg_iter, end_iter);
+							iter = filter_queue.erase(iter);
+						}
+						else
+						{
+							 ++ iter;
+						}
 					}
 					else
 					{
-						if (Frustum::VIS_NO == vis)
-						{
-							// 跳过此树下的所有子树
-
-							++ iter;
-							while ((iter != octree_.end()) && (iter->first.substr(0, i) == id))
-							{
-								++ iter;
-							}
-							-- iter;
-
-							break;
-						}
+						 ++ iter;
 					}
 				}
 				else
 				{
-					visables.insert(iter->second.begin(), iter->second.end());
+					 ++ iter;
 				}
 			}
+		}
+
+		SetVector<SceneObjectPtr, std::less<SceneObjectPtr>, boost::pool_allocator<SceneObjectPtr> > visables;
+		BOOST_FOREACH(BOOST_TYPEOF(id_in_tree)::reference node_id, id_in_tree)
+		{
+			visables.insert(octree_[node_id].objs.begin(), octree_[node_id].objs.end());
+
+#ifdef KLAYGE_DEBUG
+			RenderablePtr box_helper(new RenderableLineBox(this->AreaBox(node_id), Color(1, 1, 1, 1)));
+			box_helper->AddToRenderQueue();
+#endif
 		}
 
 		BOOST_FOREACH(BOOST_TYPEOF(scene_objs_)::reference obj, scene_objs_)
@@ -166,170 +254,60 @@ namespace KlayGE
 	void OCTree::DoAddSceneObject(SceneObjectPtr const & obj)
 	{
 		scene_objs_.push_back(obj);
-
-		if (obj->Cullable())
+		if (obj->Cullable() && !obj->ShortAge())
 		{
-			this->InsertSceneObject("0", obj);
+			rebuild_tree_ = true;
 		}
 	}
 
 	SceneManager::SceneObjectsType::iterator OCTree::DoDelSceneObject(SceneManager::SceneObjectsType::iterator iter)
 	{
-		for (BOOST_AUTO(tree_iter, octree_.begin()); tree_iter != octree_.end();)
+		if ((*iter)->Cullable() && !(*iter)->ShortAge())
 		{
-			SceneObjectsType& objs = tree_iter->second;
-			for (BOOST_AUTO(obj_iter, objs.begin()); obj_iter != objs.end();)
-			{
-				if (*obj_iter == *iter)
-				{
-					obj_iter = objs.erase(obj_iter);
-				}
-				else
-				{
-					++ obj_iter;
-				}
-			}
-
-			if (objs.empty())
-			{
-				octree_.erase(tree_iter ++);
-			}
-			else
-			{
-				++ tree_iter;
-			}
+			rebuild_tree_ = true;
 		}
-
 		return scene_objs_.erase(iter);
-	}
-
-	OCTree::tree_id_t OCTree::Child(tree_id_t const & id, int child_no)
-	{
-		BOOST_ASSERT(child_no >= 0);
-		BOOST_ASSERT(child_no < 8);
-
-		tree_id_t child_id = id;
-		child_id.push_back(static_cast<char>(child_no + '0'));
-
-		return child_id;
 	}
 
 	Box OCTree::AreaBox(tree_id_t const & id)
 	{
 		Box ret = root_box_;
 
-		for (BOOST_AUTO(iter, id.begin() + 1); iter != id.end(); ++ iter)
+		int offset = NUM_BITS - 8;
+		while (0 == ((id >> offset) & 0x8))
 		{
-			float3 const & min = ret.Min();
-			float3 const & max = ret.Max();
+			int mark = static_cast<int>((id >> offset) & 0x7);
+
 			float3 const & center = ret.Center();
 
-			switch (*iter - '0')
+			if (mark & 1)
 			{
-			case 0:
-				ret = Box(min, center);
-				break;
-
-			case 1:
-				ret = Box(float3(center.x(), min.y(), min.z()),
-					float3(max.x(), center.y(), center.z()));
-				break;
-
-			case 2:
-				ret = Box(float3(min.x(), center.y(), min.z()),
-					float3(center.x(), max.y(), center.z()));
-				break;
-
-			case 3:
-				ret = Box(float3(center.x(), center.y(), min.z()),
-					float3(max.x(), max.y(), center.z()));
-				break;
-
-			case 4:
-				ret = Box(float3(min.x(), min.y(), center.z()),
-					float3(center.x(), center.y(), max.z()));
-				break;
-
-			case 5:
-				ret = Box(float3(center.x(), min.y(), center.z()),
-					float3(max.x(), center.y(), max.z()));
-				break;
-
-			case 6:
-				ret = Box(float3(min.x(), center.y(), center.z()),
-					float3(center.x(), max.y(), max.z()));
-				break;
-
-			case 7:
-				ret = Box(center, max);
-				break;
-
-			default:
-				BOOST_ASSERT(false);
-				break;
-			}
-		}
-
-		return ret;
-	}
-
-	bool OCTree::InsideChild(tree_id_t const & id, SceneObjectPtr const & obj)
-	{
-		Box const & area_box = this->AreaBox(id);
-		Box const & box(obj->GetBound());
-
-		for (size_t i = 0; i < 8; ++ i)
-		{
-			float3 vec(MathLib::transform_coord(box[i], obj->GetModelMatrix()));
-			if (MathLib::vec_in_box(area_box, vec))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
-	void OCTree::InsertSceneObject(tree_id_t const & id, SceneObjectPtr const & obj)
-	{
-		BOOST_ASSERT(this->InsideChild(id, obj));
-
-		BOOST_AUTO(node, octree_.find(id));
-		if (node == octree_.end())
-		{
-			octree_.insert(std::make_pair(id, SceneObjectsType(1, obj)));
-
-			BOOST_ASSERT(octree_[id].front() == obj);
-		}
-		else
-		{
-			if (node->second.size() < maxNumObjInANode_)
-			{
-				node->second.push_back(obj);
+				ret.Min().x() = center.x();
 			}
 			else
 			{
-				SceneObjectsType const & old_objs = node->second;
-
-				BOOST_FOREACH(BOOST_TYPEOF(old_objs)::const_reference old_obj, old_objs)
-				{
-					for (int i = 0; i < 8; ++ i)
-					{
-						tree_id_t const child_id = this->Child(id, i);
-
-						if (this->InsideChild(child_id, old_obj))
-						{
-							this->InsertSceneObject(child_id, old_obj);
-						}
-
-						if (this->InsideChild(child_id, obj))
-						{
-							this->InsertSceneObject(child_id, obj);
-						}
-					}
-				}
-
-				octree_.erase(node);
+				ret.Max().x() = center.x();
 			}
+			if (mark & 2)
+			{
+				ret.Min().y() = center.y();
+			}
+			else
+			{
+				ret.Max().y() = center.y();
+			}
+			if (mark & 4)
+			{
+				ret.Min().z() = center.z();
+			}
+			else
+			{
+				ret.Max().z() = center.z();
+			}
+
+			offset -= 4;
 		}
+
+		return ret;
 	}
 }

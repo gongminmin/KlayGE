@@ -106,6 +106,10 @@ namespace KlayGE
 	// ¹¹Ôìº¯Êı
 	/////////////////////////////////////////////////////////////////////////////////
 	SceneManager::SceneManager()
+		: numObjectsRendered_(0),
+			numRenderablesRendered_(0),
+			numPrimitivesRendered_(0),
+			numVerticesRendered_(0)
 	{
 	}
 

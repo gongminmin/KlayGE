@@ -26,6 +26,14 @@
 #include <KlayGE/SceneNode.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Box.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4127)
+#endif
+#include <boost/pool/pool_alloc.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #include <vector>
 #include <map>
@@ -36,19 +44,16 @@ namespace KlayGE
 	class OCTree : public SceneManager
 	{
 	public:
-		typedef std::string tree_id_t;
+		typedef uint64_t tree_id_t;
 
 	public:
-		OCTree(Box const & box, uint32_t maxNumObjInANode);
+		explicit OCTree(uint32_t max_tree_depth);
 
 	private:
 		void ClipScene(Camera const & camera);
 		void Clear();
 
-		tree_id_t Child(tree_id_t const & id, int child_no);
 		Box AreaBox(tree_id_t const & id);
-		bool InsideChild(tree_id_t const & id, SceneObjectPtr const & renderable);
-		void InsertSceneObject(tree_id_t const & id, SceneObjectPtr const & renderable);
 
 		void DoAddSceneObject(SceneObjectPtr const & obj);
 		SceneObjectsType::iterator DoDelSceneObject(SceneObjectsType::iterator iter);
@@ -58,11 +63,21 @@ namespace KlayGE
 		OCTree& operator=(OCTree const & rhs);
 
 	private:
-		typedef std::map<tree_id_t, SceneObjectsType> linear_octree_t;
+		typedef std::vector<Box> BoxesTypes;
+		struct octree_node_t
+		{
+			SceneObjectsType objs;
+			BoxesTypes bbs_in_ws;
+		};
+
+		typedef std::map<tree_id_t, octree_node_t, std::less<tree_id_t>,
+			boost::fast_pool_allocator<std::pair<const tree_id_t, octree_node_t> > > linear_octree_t;
 		linear_octree_t octree_;
 		Box root_box_;
 
-		uint32_t maxNumObjInANode_;
+		uint32_t max_tree_depth_;
+
+		bool rebuild_tree_;
 	};
 }
 

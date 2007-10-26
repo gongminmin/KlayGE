@@ -154,7 +154,7 @@ namespace
 
 int main()
 {
-	OCTree sceneMgr(Box(float3(-5, -5, -5), float3(5, 5, 5)), 3);
+	OCTree sceneMgr(3);
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
 

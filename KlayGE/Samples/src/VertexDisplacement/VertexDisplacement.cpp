@@ -102,7 +102,7 @@ namespace
 
 int main()
 {
-	OCTree sceneMgr(Box(float3(-10, -10, -10), float3(10, 10, 10)), 3);
+	OCTree sceneMgr(3);
 
 	Context::Instance().RenderFactoryInstance(OGLRenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);

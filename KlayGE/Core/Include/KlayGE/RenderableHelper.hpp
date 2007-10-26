@@ -85,11 +85,22 @@ namespace KlayGE
 		void OnRenderBegin();
 	};
 
-	class RenderableBox : public RenderableHelper
+	class RenderableTriBox : public RenderableHelper
 	{
 	public:
-		explicit RenderableBox(Box const & box, Color const & clr);
-		virtual ~RenderableBox()
+		explicit RenderableTriBox(Box const & box, Color const & clr);
+		virtual ~RenderableTriBox()
+		{
+		}
+
+		void OnRenderBegin();
+	};
+
+	class RenderableLineBox : public RenderableHelper
+	{
+	public:
+		explicit RenderableLineBox(Box const & box, Color const & clr);
+		virtual ~RenderableLineBox()
 		{
 		}
 

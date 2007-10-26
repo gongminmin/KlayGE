@@ -219,7 +219,7 @@ namespace
 
 int main()
 {
-	OCTree sceneMgr(Box(float3(-1, -1, -1), float3(1, 1, 1)), 3);
+	OCTree sceneMgr(3);
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
