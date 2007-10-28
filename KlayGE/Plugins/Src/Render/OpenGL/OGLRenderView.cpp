@@ -86,7 +86,7 @@ namespace KlayGE
 		GLint old_fbo;
 		glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &old_fbo);
 
-		if (old_fbo != fbo_)
+		if (static_cast<GLuint>(old_fbo) != fbo_)
 		{
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 		}
@@ -96,7 +96,7 @@ namespace KlayGE
 		glClearStencil(stencil);
 		glClear(flags);
 
-		if (old_fbo != fbo_)
+		if (static_cast<GLuint>(old_fbo) != fbo_)
 		{
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, old_fbo);
 		}

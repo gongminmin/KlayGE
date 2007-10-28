@@ -25,8 +25,8 @@
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/SceneObject.hpp>
 #include <KlayGE/RenderableHelper.hpp>
-#include <KlayGE/SetVector.hpp>
 
+#include <set>
 #include <functional>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
@@ -70,11 +70,11 @@ namespace KlayGE
 						max = MathLib::maximize(max, vec);
 					}
 
-					Box bb_in_ws(min, max);
+					Box aabb_in_ws(min, max);
 
-					root_box_ |= bb_in_ws;
+					root_box_ |= aabb_in_ws;
 					octree_[ROOT_ID].objs.push_back(obj);
-					octree_[ROOT_ID].bbs_in_ws.push_back(bb_in_ws);
+					octree_[ROOT_ID].aabbs_in_ws.push_back(aabb_in_ws);
 				}
 			}
 			{
@@ -93,7 +93,7 @@ namespace KlayGE
 					{
 						tree_id_t old_id = iter->first;
 						SceneObjectsType& old_objs = iter->second.objs;
-						BoxesTypes& old_bbs = iter->second.bbs_in_ws;
+						AABBsTypes& old_aabbs = iter->second.aabbs_in_ws;
 
 						int offset = NUM_BITS - 8;
 						while (0 == ((old_id >> offset) & 0x8))
@@ -114,14 +114,14 @@ namespace KlayGE
 							for (size_t j = 0; j < old_objs.size(); ++ j)
 							{
 								SceneObjectPtr const & old_obj = old_objs[j];
-								Box const & bb = old_bbs[j];
+								Box const & bb = old_aabbs[j];
 
 								float3 const t = bb.Center() - old_center;
 								float3 const e = bb.HalfSize() + old_half_size;
 								if ((abs(t.x()) <= e.x()) && (abs(t.y()) <= e.y()) && (abs(t.y()) <= e.y()))
 								{
 									new_node.objs.push_back(old_obj);
-									new_node.bbs_in_ws.push_back(bb);
+									new_node.aabbs_in_ws.push_back(bb);
 								}
 							}
 						}
@@ -217,7 +217,7 @@ namespace KlayGE
 			}
 		}
 
-		SetVector<SceneObjectPtr, std::less<SceneObjectPtr>, boost::pool_allocator<SceneObjectPtr> > visables;
+		std::set<SceneObjectPtr, std::less<SceneObjectPtr>, boost::fast_pool_allocator<SceneObjectPtr> > visables;
 		BOOST_FOREACH(BOOST_TYPEOF(id_in_tree)::reference node_id, id_in_tree)
 		{
 			visables.insert(octree_[node_id].objs.begin(), octree_[node_id].objs.end());

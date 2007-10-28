@@ -63,11 +63,11 @@ namespace KlayGE
 		OCTree& operator=(OCTree const & rhs);
 
 	private:
-		typedef std::vector<Box> BoxesTypes;
+		typedef std::vector<Box, boost::pool_allocator<Box> > AABBsTypes;
 		struct octree_node_t
 		{
 			SceneObjectsType objs;
-			BoxesTypes bbs_in_ws;
+			AABBsTypes aabbs_in_ws;
 		};
 
 		typedef std::map<tree_id_t, octree_node_t, std::less<tree_id_t>,
