@@ -64,50 +64,50 @@ namespace
 				glGetBufferPointerv = NULL;
 			}
 
-			entries_t entries;
+			entries_t entries(19);
 			{
-				entries.push_back(reinterpret_cast<void**>(&glGenQueries));
-				entries.push_back(reinterpret_cast<void**>(&glDeleteQueries));
-				entries.push_back(reinterpret_cast<void**>(&glIsQuery));
-				entries.push_back(reinterpret_cast<void**>(&glBeginQuery));
-				entries.push_back(reinterpret_cast<void**>(&glEndQuery));
-				entries.push_back(reinterpret_cast<void**>(&glGetQueryiv));
-				entries.push_back(reinterpret_cast<void**>(&glGetQueryObjectiv));
-				entries.push_back(reinterpret_cast<void**>(&glGetQueryObjectuiv));
-				entries.push_back(reinterpret_cast<void**>(&glBindBuffer));
-				entries.push_back(reinterpret_cast<void**>(&glDeleteBuffers));
-				entries.push_back(reinterpret_cast<void**>(&glGenBuffers));
-				entries.push_back(reinterpret_cast<void**>(&glIsBuffer));
-				entries.push_back(reinterpret_cast<void**>(&glBufferData));
-				entries.push_back(reinterpret_cast<void**>(&glBufferSubData));
-				entries.push_back(reinterpret_cast<void**>(&glGetBufferSubData));
-				entries.push_back(reinterpret_cast<void**>(&glMapBuffer));
-				entries.push_back(reinterpret_cast<void**>(&glUnmapBuffer));
-				entries.push_back(reinterpret_cast<void**>(&glGetBufferParameteriv));
-				entries.push_back(reinterpret_cast<void**>(&glGetBufferPointerv));
+				entries[0] = reinterpret_cast<void**>(&glGenQueries);
+				entries[1] = reinterpret_cast<void**>(&glDeleteQueries);
+				entries[2] = reinterpret_cast<void**>(&glIsQuery);
+				entries[3] = reinterpret_cast<void**>(&glBeginQuery);
+				entries[4] = reinterpret_cast<void**>(&glEndQuery);
+				entries[5] = reinterpret_cast<void**>(&glGetQueryiv);
+				entries[6] = reinterpret_cast<void**>(&glGetQueryObjectiv);
+				entries[7] = reinterpret_cast<void**>(&glGetQueryObjectuiv);
+				entries[8] = reinterpret_cast<void**>(&glBindBuffer);
+				entries[9] = reinterpret_cast<void**>(&glDeleteBuffers);
+				entries[10] = reinterpret_cast<void**>(&glGenBuffers);
+				entries[11] = reinterpret_cast<void**>(&glIsBuffer);
+				entries[12] = reinterpret_cast<void**>(&glBufferData);
+				entries[13] = reinterpret_cast<void**>(&glBufferSubData);
+				entries[14] = reinterpret_cast<void**>(&glGetBufferSubData);
+				entries[15] = reinterpret_cast<void**>(&glMapBuffer);
+				entries[16] = reinterpret_cast<void**>(&glUnmapBuffer);
+				entries[17] = reinterpret_cast<void**>(&glGetBufferParameteriv);
+				entries[18] = reinterpret_cast<void**>(&glGetBufferPointerv);
 			}
 
-			funcs_names_t names;
+			funcs_names_t names(19);
 			{
-				names.push_back("glGenQueries");
-				names.push_back("glDeleteQueries");
-				names.push_back("glIsQuery");
-				names.push_back("glBeginQuery");
-				names.push_back("glEndQuery");
-				names.push_back("glGetQueryiv");
-				names.push_back("glGetQueryObjectiv");
-				names.push_back("glGetQueryObjectuiv");
-				names.push_back("glBindBuffer");
-				names.push_back("glDeleteBuffers");
-				names.push_back("glGenBuffers");
-				names.push_back("glIsBuffer");
-				names.push_back("glBufferData");
-				names.push_back("glBufferSubData");
-				names.push_back("glGetBufferSubData");
-				names.push_back("glMapBuffer");
-				names.push_back("glUnmapBuffer");
-				names.push_back("glGetBufferParameteriv");
-				names.push_back("glGetBufferPointerv");
+				names[0] = "glGenQueries";
+				names[1] = "glDeleteQueries";
+				names[2] = "glIsQuery";
+				names[3] = "glBeginQuery";
+				names[4] = "glEndQuery";
+				names[5] = "glGetQueryiv";
+				names[6] = "glGetQueryObjectiv";
+				names[7] = "glGetQueryObjectuiv";
+				names[8] = "glBindBuffer";
+				names[9] = "glDeleteBuffers";
+				names[10] = "glGenBuffers";
+				names[11] = "glIsBuffer";
+				names[12] = "glBufferData";
+				names[13] = "glBufferSubData";
+				names[14] = "glGetBufferSubData";
+				names[15] = "glMapBuffer";
+				names[16] = "glUnmapBuffer";
+				names[17] = "glGetBufferParameteriv";
+				names[18] = "glGetBufferPointerv";
 			}
 
 			load_funcs(entries, names);

@@ -51,24 +51,24 @@ namespace
 		{
 			_GL_VERSION_2_1 = true;
 
-			entries_t entries;
+			entries_t entries(6);
 			{
-				entries.push_back(reinterpret_cast<void**>(&glUniformMatrix2x3fv));
-				entries.push_back(reinterpret_cast<void**>(&glUniformMatrix3x2fv));
-				entries.push_back(reinterpret_cast<void**>(&glUniformMatrix2x4fv));
-				entries.push_back(reinterpret_cast<void**>(&glUniformMatrix4x2fv));
-				entries.push_back(reinterpret_cast<void**>(&glUniformMatrix3x4fv));
-				entries.push_back(reinterpret_cast<void**>(&glUniformMatrix4x3fv));
+				entries[0] = reinterpret_cast<void**>(&glUniformMatrix2x3fv);
+				entries[1] = reinterpret_cast<void**>(&glUniformMatrix3x2fv);
+				entries[2] = reinterpret_cast<void**>(&glUniformMatrix2x4fv);
+				entries[3] = reinterpret_cast<void**>(&glUniformMatrix4x2fv);
+				entries[4] = reinterpret_cast<void**>(&glUniformMatrix3x4fv);
+				entries[5] = reinterpret_cast<void**>(&glUniformMatrix4x3fv);
 			}
 
-			funcs_names_t names;
+			funcs_names_t names(6);
 			{
-				names.push_back("glUniformMatrix2x3fv");
-				names.push_back("glUniformMatrix3x2fv");
-				names.push_back("glUniformMatrix2x4fv");
-				names.push_back("glUniformMatrix4x2fv");
-				names.push_back("glUniformMatrix3x4fv");
-				names.push_back("glUniformMatrix4x3fv");
+				names[0] = "glUniformMatrix2x3fv";
+				names[1] = "glUniformMatrix3x2fv";
+				names[2] = "glUniformMatrix2x4fv";
+				names[3] = "glUniformMatrix4x2fv";
+				names[4] = "glUniformMatrix3x4fv";
+				names[5] = "glUniformMatrix4x3fv";
 			}
 
 			load_funcs(entries, names);

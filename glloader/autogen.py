@@ -251,11 +251,11 @@ def create_source(prefix, extensions):
 			sourceFile.write("\t\t}\n\n")
 
 		if (len(extension.functions) != 0):
-			sourceFile.write("\t\tentries_t entries;\n")
+			sourceFile.write("\t\tentries_t entries(%d);\n" % len(extension.functions))
 			sourceFile.write("\t\t{\n")
 
-			for function in extension.functions:
-				sourceFile.write("\t\t\tentries.push_back(reinterpret_cast<void**>(&%s));\n" % function.name)
+			for i in range(0, len(extension.functions)):
+				sourceFile.write("\t\t\tentries[%d] = reinterpret_cast<void**>(&%s);\n" % (i, extension.functions[i].name))
 
 			sourceFile.write("\t\t}\n\n")
 
@@ -268,10 +268,10 @@ def create_source(prefix, extensions):
 				sourceFile.write("\t\t\tgl_features_extractor::instance().promote(\"%s\", \"%s\");\n" % (ext.string, extension.exts[0].string))
 
 			if (len(extension.functions) != 0):
-				sourceFile.write("\n\t\t\tfuncs_names_t names;\n\n")
+				sourceFile.write("\n\t\t\tfuncs_names_t names(%d);\n\n" % len(extension.functions))
 
-				for name in ext.names:
-					sourceFile.write("\t\t\tnames.push_back(\"%s\");\n" % name)
+				for i in range(0, len(extension.functions)):
+					sourceFile.write("\t\t\tnames[%d] = \"%s\";\n" % (i, ext.names[i]))
 
 				sourceFile.write("\n\t\t\tload_funcs(entries, names);\n\n")
 				sourceFile.write("\t\t\treturn;\n")
