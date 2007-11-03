@@ -261,13 +261,6 @@ namespace KlayGE
 	};
 
 	template <class Key, class Type, class Traits, class Allocator>
-	inline void
-	swap(MapVector<Key, Type, Traits, Allocator>& lhs, MapVector<Key, Type, Traits, Allocator>& rhs)
-	{
-		lhs.swap(rhs);
-	}
-
-	template <class Key, class Type, class Traits, class Allocator>
 	inline bool
 	operator!=(MapVector<Key, Type, Traits, Allocator> const & lhs,
 					MapVector<Key, Type, Traits, Allocator> const & rhs)
@@ -297,6 +290,16 @@ namespace KlayGE
 					MapVector<Key, Type, Traits, Allocator> const & rhs)
 	{
 		return !(rhs < lhs);
+	}
+}
+
+namespace std
+{
+	template <class Key, class Type, class Traits, class Allocator>
+	inline void
+	swap(KlayGE::MapVector<Key, Type, Traits, Allocator>& lhs, KlayGE::MapVector<Key, Type, Traits, Allocator>& rhs)
+	{
+		lhs.swap(rhs);
 	}
 }
 

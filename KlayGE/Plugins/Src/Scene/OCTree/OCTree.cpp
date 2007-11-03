@@ -26,7 +26,6 @@
 #include <KlayGE/SceneObject.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 
-#include <set>
 #include <functional>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
@@ -217,10 +216,11 @@ namespace KlayGE
 			}
 		}
 
-		std::set<SceneObjectPtr, std::less<SceneObjectPtr>, boost::fast_pool_allocator<SceneObjectPtr> > visables;
+		visables_set_.clear_no_resize();
 		BOOST_FOREACH(BOOST_TYPEOF(id_in_tree)::reference node_id, id_in_tree)
 		{
-			visables.insert(octree_[node_id].objs.begin(), octree_[node_id].objs.end());
+			SceneObjectsType const & objs = octree_[node_id].objs;
+			visables_set_.insert(objs.begin(), objs.end());
 
 #ifdef KLAYGE_DEBUG
 			RenderablePtr box_helper(new RenderableLineBox(this->AreaBox(node_id), Color(1, 1, 1, 1)));
@@ -232,9 +232,10 @@ namespace KlayGE
 		{
 			if (obj->Cullable())
 			{
-				if (visables.find(obj) != visables.end())
+				BOOST_AUTO(iter, visables_set_.find(obj));
+				if (iter != visables_set_.end())
 				{
-					visables.erase(obj);
+					visables_set_.erase(iter);
 					visible_objs_.push_back(obj);
 				}
 			}

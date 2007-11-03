@@ -26,11 +26,22 @@
 #include <KlayGE/SceneNode.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Box.hpp>
+#include <KlayGE/ClosedHashSet.hpp>
+
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4127)
 #endif
 #include <boost/pool/pool_alloc.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
+
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4244)
+#endif
+#include <boost/functional/hash.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
@@ -71,13 +82,25 @@ namespace KlayGE
 		};
 
 		typedef std::map<tree_id_t, octree_node_t, std::less<tree_id_t>,
-			boost::fast_pool_allocator<std::pair<const tree_id_t, octree_node_t> > > linear_octree_t;
+			boost::fast_pool_allocator<std::pair<tree_id_t const, octree_node_t> > > linear_octree_t;
 		linear_octree_t octree_;
 		Box root_box_;
 
 		uint32_t max_tree_depth_;
 
 		bool rebuild_tree_;
+
+		template <typename T>
+		struct hash_shared_ptr : public std::unary_function<T, std::size_t>
+		{
+			std::size_t operator()(T const & v) const
+			{
+				return boost::hash<T::element_type*>()(v.get());
+			}
+		};
+
+		closed_hash_set<SceneObjectPtr, hash_shared_ptr<SceneObjectPtr>, std::equal_to<SceneObjectPtr>,
+			boost::pool_allocator<SceneObjectPtr> > visables_set_;
 	};
 }
 

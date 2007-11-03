@@ -216,13 +216,6 @@ namespace KlayGE
 	};
 
 	template <class Key, class Traits, class Allocator>
-	inline void
-	swap(SetVector<Key, Traits, Allocator>& lhs, SetVector<Key, Traits, Allocator>& rhs)
-	{
-		lhs.swap(rhs);
-	}
-
-	template <class Key, class Traits, class Allocator>
 	inline bool
 	operator!=(SetVector<Key, Traits, Allocator> const & lhs,
 					SetVector<Key, Traits, Allocator> const & rhs)
@@ -252,6 +245,16 @@ namespace KlayGE
 					SetVector<Key, Traits, Allocator> const & rhs)
 	{
 		return !(rhs < lhs);
+	}
+}
+
+namespace std
+{
+	template <class Key, class Traits, class Allocator>
+	inline void
+	swap(KlayGE::SetVector<Key, Traits, Allocator>& lhs, KlayGE::SetVector<Key, Traits, Allocator>& rhs)
+	{
+		lhs.swap(rhs);
 	}
 }
 

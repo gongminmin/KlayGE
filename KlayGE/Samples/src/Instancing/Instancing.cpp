@@ -241,17 +241,17 @@ void Instancing::InitObjects()
 			PyObjectPtr py_pos = module.Call("get_pos", boost::make_tuple(i, j, NUM_INSTANCE));
 
 			float3 pos;
-			pos.x() = PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 0));
-			pos.y() = PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 1));
-			pos.z() = PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 2));
+			pos.x() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 0)));
+			pos.y() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 1)));
+			pos.z() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 2)));
 
 			PyObjectPtr py_clr = module.Call("get_clr", boost::make_tuple(i, j, NUM_INSTANCE));
 
 			Color clr;
-			clr.r() = PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 0));
-			clr.g() = PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 1));
-			clr.b() = PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 2));
-			clr.a() = PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 3));
+			clr.r() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 0)));
+			clr.g() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 1)));
+			clr.b() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 2)));
+			clr.a() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 3)));
 
 			SceneObjectPtr so(new Teapot);
 			checked_pointer_cast<Teapot>(so)->Instance(MathLib::translation(pos), clr);
