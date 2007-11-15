@@ -27,6 +27,7 @@
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Box.hpp>
 #include <KlayGE/ClosedHashSet.hpp>
+#include <KlayGE/OCTree/Frustum.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
@@ -55,19 +56,16 @@ namespace KlayGE
 	class OCTree : public SceneManager
 	{
 	public:
-		typedef uint64_t tree_id_t;
-
-	public:
 		explicit OCTree(uint32_t max_tree_depth);
 
 	private:
 		void ClipScene(Camera const & camera);
 		void Clear();
 
-		Box AreaBox(tree_id_t const & id);
-
 		void DoAddSceneObject(SceneObjectPtr const & obj);
 		SceneObjectsType::iterator DoDelSceneObject(SceneObjectsType::iterator iter);
+
+		void Visit(size_t index, Frustum const & frustum);
 
 	private:
 		OCTree(OCTree const & rhs);
@@ -77,14 +75,17 @@ namespace KlayGE
 		typedef std::vector<Box, boost::pool_allocator<Box> > AABBsTypes;
 		struct octree_node_t
 		{
+			Box bounding_box;
+
 			SceneObjectsType objs;
 			AABBsTypes aabbs_in_ws;
+
+			int parent_index;
+			int first_child_index;
 		};
 
-		typedef std::map<tree_id_t, octree_node_t, std::less<tree_id_t>,
-			boost::fast_pool_allocator<std::pair<tree_id_t const, octree_node_t> > > linear_octree_t;
-		linear_octree_t octree_;
-		Box root_box_;
+		std::vector<octree_node_t, boost::pool_allocator<octree_node_t> > octree_;
+		std::vector<size_t, boost::pool_allocator<size_t> > base_address_;
 
 		uint32_t max_tree_depth_;
 
