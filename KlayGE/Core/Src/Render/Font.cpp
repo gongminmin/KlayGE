@@ -55,6 +55,7 @@
 #include <KlayGE/Sampler.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/Math.hpp>
+#include <KlayGE/ClosedHashMap.hpp>
 
 #include <algorithm>
 #include <vector>
@@ -63,6 +64,15 @@
 #include <boost/mem_fn.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
+
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4244)
+#endif
+#include <boost/functional/hash.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #include <KlayGE/Font.hpp>
 
@@ -553,8 +563,8 @@ namespace
 	#pragma pack(pop)
 #endif
 
-		std::map<wchar_t, CharInfo, std::less<wchar_t>,
-			boost::fast_pool_allocator<std::pair<wchar_t, CharInfo> > > charInfoMap_;
+		closed_hash_map<wchar_t, CharInfo, boost::hash<wchar_t>, std::equal_to<wchar_t>,
+			boost::pool_allocator<std::pair<wchar_t, CharInfo> > > charInfoMap_;
 		std::list<wchar_t, boost::fast_pool_allocator<wchar_t> > charLRU_;
 
 		uint32_t curX_, curY_;

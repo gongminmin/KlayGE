@@ -72,13 +72,13 @@ namespace KlayGE
 		OCTree& operator=(OCTree const & rhs);
 
 	private:
+		typedef std::vector<size_t, boost::pool_allocator<size_t> > ObjIndicesTypes;
 		typedef std::vector<Box, boost::pool_allocator<Box> > AABBsTypes;
 		struct octree_node_t
 		{
 			Box bounding_box;
 
-			SceneObjectsType objs;
-			AABBsTypes aabbs_in_ws;
+			ObjIndicesTypes obj_indices;
 
 			int parent_index;
 			int first_child_index;
@@ -86,22 +86,13 @@ namespace KlayGE
 
 		std::vector<octree_node_t, boost::pool_allocator<octree_node_t> > octree_;
 		std::vector<size_t, boost::pool_allocator<size_t> > base_address_;
+		AABBsTypes aabbs_in_ws_;
 
 		uint32_t max_tree_depth_;
 
 		bool rebuild_tree_;
 
-		template <typename T>
-		struct hash_shared_ptr : public std::unary_function<T, std::size_t>
-		{
-			std::size_t operator()(T const & v) const
-			{
-				return boost::hash<T::element_type*>()(v.get());
-			}
-		};
-
-		closed_hash_set<SceneObjectPtr, hash_shared_ptr<SceneObjectPtr>, std::equal_to<SceneObjectPtr>,
-			boost::pool_allocator<SceneObjectPtr> > visables_set_;
+		closed_hash_set<size_t, boost::hash<size_t>, std::equal_to<size_t>, boost::pool_allocator<size_t> > visables_set_;
 	};
 }
 

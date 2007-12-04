@@ -48,17 +48,19 @@ namespace KlayGE
 			octree_[0].bounding_box = Box(float3(0, 0, 0), float3(0, 0, 0));
 			octree_[0].parent_index = -1;
 			octree_[0].first_child_index = -1;
-			BOOST_FOREACH(BOOST_TYPEOF(scene_objs_)::reference obj, scene_objs_)
+			aabbs_in_ws_.resize(scene_objs_.size());
+			for (size_t i = 0; i < scene_objs_.size(); ++ i)
 			{
+				SceneObjectPtr const & obj = scene_objs_[i];
 				if (obj->Cullable() && !obj->ShortAge())
 				{
 					Box const & box = obj->GetBound();
 					float4x4 const & mat = obj->GetModelMatrix();
 
 					float3 min(1e10f, 1e10f, 1e10f), max(-1e10f, -1e10f, -1e10f);
-					for (size_t i = 0; i < 8; ++ i)
+					for (size_t j = 0; j < 8; ++ j)
 					{
-						float3 vec = MathLib::transform_coord(box[i], mat);
+						float3 vec = MathLib::transform_coord(box[j], mat);
 						min = MathLib::minimize(min, vec);
 						max = MathLib::maximize(max, vec);
 					}
@@ -66,8 +68,9 @@ namespace KlayGE
 					Box aabb_in_ws(min, max);
 
 					octree_[0].bounding_box |= aabb_in_ws;
-					octree_[0].objs.push_back(obj);
-					octree_[0].aabbs_in_ws.push_back(aabb_in_ws);
+					octree_[0].obj_indices.push_back(i);
+
+					aabbs_in_ws_[i] = aabb_in_ws;
 				}
 			}
 			{
@@ -80,16 +83,16 @@ namespace KlayGE
 			base_address_.push_back(0);
 			base_address_.push_back(1);
 
+			std::vector<octree_node_t, boost::pool_allocator<octree_node_t> > level;
 			for (uint32_t d = 1; d <= max_tree_depth_; ++ d)
 			{
-				std::vector<octree_node_t, boost::pool_allocator<octree_node_t> > level;
+				level.resize(0);
 				for (size_t i = base_address_[d - 1]; i < base_address_[d]; ++ i)
 				{
-					if (octree_[i].objs.size() > 1)
+					if (octree_[i].obj_indices.size() > 1)
 					{
 						Box& parent_bb = octree_[i].bounding_box;
-						SceneObjectsType& parent_objs = octree_[i].objs;
-						AABBsTypes& parent_aabbs = octree_[i].aabbs_in_ws;
+						ObjIndicesTypes& parent_obj_indices = octree_[i].obj_indices;
 						float3 const & parent_center = parent_bb.Center();
 						octree_[i].first_child_index = static_cast<int>(base_address_[d] + level.size());
 
@@ -129,23 +132,20 @@ namespace KlayGE
 							float3 const & node_center = new_node.bounding_box.Center();
 							float3 const & node_half_size = new_node.bounding_box.HalfSize();
 
-							for (size_t k = 0; k < parent_objs.size(); ++ k)
+							BOOST_FOREACH(size_t obj_index, parent_obj_indices)
 							{
-								SceneObjectPtr const & old_obj = parent_objs[k];
-								Box const & obj_bb = parent_aabbs[k];
+								Box const & obj_bb = aabbs_in_ws_[obj_index];
 
 								float3 const t = obj_bb.Center() - node_center;
 								float3 const e = obj_bb.HalfSize() + node_half_size;
 								if ((abs(t.x()) <= e.x()) && (abs(t.y()) <= e.y()) && (abs(t.y()) <= e.y()))
 								{
-									new_node.objs.push_back(old_obj);
-									new_node.aabbs_in_ws.push_back(obj_bb);
+									new_node.obj_indices.push_back(obj_index);
 								}
 							}
 						}
 
-						parent_objs.clear();
-						parent_aabbs.clear();
+						parent_obj_indices.clear();
 					}
 				}
 
@@ -160,11 +160,12 @@ namespace KlayGE
 		Frustum frustum(camera.ViewMatrix() * camera.ProjMatrix());
 		this->Visit(0, frustum);
 
-		BOOST_FOREACH(BOOST_TYPEOF(scene_objs_)::reference obj, scene_objs_)
+		for (size_t i = 0; i < scene_objs_.size(); ++ i)
 		{
+			SceneObjectPtr const & obj = scene_objs_[i];
 			if (obj->Cullable())
 			{
-				BOOST_AUTO(iter, visables_set_.find(obj));
+				BOOST_AUTO(iter, visables_set_.find(i));
 				if (iter != visables_set_.end())
 				{
 					visables_set_.erase(iter);
@@ -208,8 +209,8 @@ namespace KlayGE
 		Frustum::VIS const vis = frustum.Visiable(node.bounding_box);
 		if (vis != Frustum::VIS_NO)
 		{
-			SceneObjectsType const & objs = node.objs;
-			if (objs.empty())
+			ObjIndicesTypes const & obj_indices = node.obj_indices;
+			if (obj_indices.empty())
 			{
 				if (node.first_child_index != -1)
 				{
@@ -221,7 +222,7 @@ namespace KlayGE
 			}
 			else
 			{
-				visables_set_.insert(objs.begin(), objs.end());
+				visables_set_.insert(obj_indices.begin(), obj_indices.end());
 
 #ifdef KLAYGE_DEBUG
 				RenderablePtr box_helper(new RenderableLineBox(node.bounding_box, Color(1, 1, 1, 1)));
