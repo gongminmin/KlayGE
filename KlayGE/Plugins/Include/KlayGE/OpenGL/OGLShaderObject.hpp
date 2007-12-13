@@ -27,7 +27,9 @@ namespace KlayGE
 	public:
 		~OGLShaderObject();
 
-		void SetShader(ShaderType type, std::string const & profile, std::string const & name, std::string const & text);
+		void SetShader(ShaderType type, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs,
+			boost::shared_ptr<std::string> const & shader_text);
+		ShaderObjectPtr Clone();
 
 		bool HasParameter(ShaderType type, std::string const & name) const;
 
@@ -67,10 +69,25 @@ namespace KlayGE
 		}
 
 	private:
+		struct less_shared_ptr_string
+			: public std::binary_function<boost::shared_ptr<std::string>, boost::shared_ptr<std::string>, bool>
+		{
+			bool operator()(boost::shared_ptr<std::string> lhs, boost::shared_ptr<std::string> rhs) const
+			{
+				return *lhs < *rhs;
+			}
+		};
+		
+		typedef MapVector<boost::shared_ptr<std::string>, CGparameter, less_shared_ptr_string> parameter_descs_t;
+		parameter_descs_t::const_iterator FindParam(ShaderType type, std::string const & name) const;
+
+	private:
+		boost::shared_ptr<std::vector<shader_desc> > shader_descs_;
+		boost::shared_ptr<std::string> shader_text_;
+
 		boost::array<CGprogram, ST_NumShaderTypes> shaders_;
 		boost::array<CGprofile, ST_NumShaderTypes> profiles_;
 
-		typedef MapVector<std::string, CGparameter> parameter_descs_t;
 		boost::array<parameter_descs_t, ST_NumShaderTypes> param_descs_;
 
 		boost::array<std::vector<SamplerPtr>, ST_NumShaderTypes> samplers_;

@@ -17,6 +17,21 @@
 
 namespace KlayGE
 {
+	struct shader_desc
+	{
+		std::string profile;
+		std::string func_name;
+
+		friend bool operator==(shader_desc const & lhs, shader_desc const & rhs)
+		{
+			return (lhs.profile == rhs.profile) && (lhs.func_name == rhs.func_name);
+		}
+		friend bool operator!=(shader_desc const & lhs, shader_desc const & rhs)
+		{
+			return !(lhs == rhs);
+		}
+	};
+
 	class ShaderObject
 	{
 	public:
@@ -35,7 +50,9 @@ namespace KlayGE
 
 		static ShaderObjectPtr NullObject();
 
-		virtual void SetShader(ShaderType type, std::string const & profile, std::string const & name, std::string const & text) = 0;
+		virtual void SetShader(ShaderType type, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs,
+			boost::shared_ptr<std::string> const & shader_text) = 0;
+		virtual ShaderObjectPtr Clone() = 0;
 
 		virtual bool HasParameter(ShaderType type, std::string const & name) const = 0;
 

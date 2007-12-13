@@ -157,13 +157,16 @@ namespace KlayGE
 		}
 
 		visables_set_.clear_no_resize();
-		Frustum frustum(camera.ViewMatrix() * camera.ProjMatrix());
-		this->Visit(0, frustum);
+		if (!octree_.empty())
+		{
+			Frustum frustum(camera.ViewMatrix() * camera.ProjMatrix());
+			this->Visit(0, frustum);
+		}
 
 		for (size_t i = 0; i < scene_objs_.size(); ++ i)
 		{
 			SceneObjectPtr const & obj = scene_objs_[i];
-			if (obj->Cullable())
+			if (obj->Cullable() && !obj->ShortAge())
 			{
 				BOOST_AUTO(iter, visables_set_.find(i));
 				if (iter != visables_set_.end())
@@ -205,6 +208,8 @@ namespace KlayGE
 
 	void OCTree::Visit(size_t index, Frustum const & frustum)
 	{
+		assert(!octree_.empty());
+
 		octree_node_t const & node = octree_[index];
 		Frustum::VIS const vis = frustum.Visiable(node.bounding_box);
 		if (vis != Frustum::VIS_NO)

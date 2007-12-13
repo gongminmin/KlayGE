@@ -22,9 +22,15 @@ namespace KlayGE
 	class NullShaderObject : public ShaderObject
 	{
 	public:
-		void SetShader(ShaderType /*type*/, std::string const & /*profile*/, std::string const & /*name*/, std::string const & /*text*/)
+		void SetShader(ShaderType /*type*/, boost::shared_ptr<std::vector<shader_desc> > const & /*shader_descs*/,
+			boost::shared_ptr<std::string> const & /*shader_text*/)
 		{
 			is_validate_ = true;
+		}
+
+		ShaderObjectPtr Clone()
+		{
+			return ShaderObject::NullObject();
 		}
 
 		bool HasParameter(ShaderType /*type*/, std::string const & /*name*/) const

@@ -57,10 +57,15 @@ namespace KlayGE
 		}
 	}
 
-	void OGLShaderObject::SetShader(ShaderType type, std::string const & profile, std::string const & name, std::string const & text)
+	void OGLShaderObject::SetShader(ShaderType type, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs,
+			boost::shared_ptr<std::string> const & shader_text)
 	{
 		is_validate_ = true;
 
+		shader_descs_ = shader_descs;
+		shader_text_ = shader_text;
+
+		std::string profile = (*shader_descs_)[type].profile;
 		switch (type)
 		{
 		case ST_VertexShader:
@@ -93,14 +98,14 @@ namespace KlayGE
 		OGLRenderFactory& render_factory(*checked_cast<OGLRenderFactory*>(&Context::Instance().RenderFactoryInstance()));
 
 		shaders_[type] = cgCreateProgram(render_factory.CGContext(),
-				CG_SOURCE, text.c_str(), profiles_[type], name.c_str(), NULL);
+				CG_SOURCE, shader_text->c_str(), profiles_[type], (*shader_descs_)[type].func_name.c_str(), NULL);
 
 		CGerror error;
 		char const * err_string = cgGetLastErrorString(&error);
 		if (error != CG_NO_ERROR)
 		{
 #ifdef KLAYGE_DEBUG
-			std::cerr << text << std::endl;
+			std::cerr << *shader_text << std::endl;
 			std::cerr << err_string << std::endl;
 			if (CG_COMPILER_ERROR == error)
 			{
@@ -121,8 +126,7 @@ namespace KlayGE
 			if (cgIsParameterUsed(cg_param, shaders_[type])
 				&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param)))
 			{
-				std::pair<std::string, CGparameter> p_desc;
-				param_descs_[type].insert(std::make_pair(cgGetParameterName(cg_param), cg_param));
+				param_descs_[type].insert(std::make_pair(new std::string(cgGetParameterName(cg_param)), cg_param));
 			}
 
 			cg_param = cgGetNextParameter(cg_param);
@@ -145,9 +149,70 @@ namespace KlayGE
 		}
 	}
 
+	ShaderObjectPtr OGLShaderObject::Clone()
+	{
+		OGLShaderObjectPtr ret(new OGLShaderObject);
+
+		ret->shader_descs_ = shader_descs_;
+		ret->shader_text_ = shader_text_;
+		ret->profiles_ = profiles_;
+
+		ret->is_validate_ = true;
+
+		OGLRenderFactory& render_factory(*checked_cast<OGLRenderFactory*>(&Context::Instance().RenderFactoryInstance()));
+		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
+		{
+			ret->shaders_[i] = cgCreateProgram(render_factory.CGContext(),
+					CG_SOURCE, ret->shader_text_->c_str(), ret->profiles_[i],
+					(*ret->shader_descs_)[i].func_name.c_str(), NULL);
+
+			CGerror error;
+			char const * err_string = cgGetLastErrorString(&error);
+			if (error != CG_NO_ERROR)
+			{
+#ifdef KLAYGE_DEBUG
+				std::cerr << *ret->shader_text_ << std::endl;
+				std::cerr << err_string << std::endl;
+				if (CG_COMPILER_ERROR == error)
+				{
+					std::cerr << cgGetLastListing(render_factory.CGContext()) << std::endl;
+				}
+#else
+				UNREF_PARAM(err_string);
+#endif
+
+				ret->is_validate_ = false;
+			}
+
+			cgGLLoadProgram(ret->shaders_[i]);
+
+			CGparameter cg_param = cgGetFirstParameter(ret->shaders_[i], CG_GLOBAL);
+			while (cg_param)
+			{
+				if (cgIsParameterUsed(cg_param, ret->shaders_[i])
+					&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param)))
+				{
+					ret->param_descs_[i].insert(std::make_pair(new std::string(cgGetParameterName(cg_param)), cg_param));
+				}
+
+				cg_param = cgGetNextParameter(cg_param);
+			}
+
+			ret->samplers_[i].resize(samplers_[i].size());
+		}
+
+		return ret;
+	}
+
+	OGLShaderObject::parameter_descs_t::const_iterator OGLShaderObject::FindParam(ShaderType type, std::string const & name) const
+	{
+		boost::shared_ptr<std::string> name_ptr(new std::string(name));
+		return param_descs_[type].find(name_ptr);
+	}
+
 	bool OGLShaderObject::HasParameter(ShaderType type, std::string const & name) const
 	{
-		return param_descs_[type].find(name) != param_descs_[type].end();
+		return (this->FindParam(type, name) != param_descs_[type].end());
 	}
 
 	void OGLShaderObject::SetParameter(std::string const & name, bool value)
@@ -156,7 +221,7 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 
-			BOOST_AUTO(iter, param_descs_[type].find(name));
+			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 			if (iter != param_descs_[type].end())
 			{
 				cgSetParameter1i(iter->second, value);
@@ -170,7 +235,7 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 
-			BOOST_AUTO(iter, param_descs_[type].find(name));
+			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 			if (iter != param_descs_[type].end())
 			{
 				cgSetParameter1i(iter->second, value);
@@ -184,7 +249,7 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 
-			BOOST_AUTO(iter, param_descs_[type].find(name));
+			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 			if (iter != param_descs_[type].end())
 			{
 				cgSetParameter1f(iter->second, value);
@@ -198,7 +263,7 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 
-			BOOST_AUTO(iter, param_descs_[type].find(name));
+			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 			if (iter != param_descs_[type].end())
 			{
 				cgSetParameter4fv(iter->second, &value[0]);
@@ -212,7 +277,7 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 
-			BOOST_AUTO(iter, param_descs_[type].find(name));
+			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 			if (iter != param_descs_[type].end())
 			{
 				cgGLSetMatrixParameterfr(iter->second, &value[0]);
@@ -228,7 +293,7 @@ namespace KlayGE
 			{
 				ShaderType type = static_cast<ShaderType>(i);
 
-				BOOST_AUTO(iter, param_descs_[type].find(name));
+				parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 				if (iter != param_descs_[type].end())
 				{
 					std::vector<int> tmp(value.begin(), value.end());
@@ -246,7 +311,7 @@ namespace KlayGE
 			{
 				ShaderType type = static_cast<ShaderType>(i);
 
-				BOOST_AUTO(iter, param_descs_[type].find(name));
+				parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 				if (iter != param_descs_[type].end())
 				{
 					cgSetParameterValueir(iter->second, static_cast<int>(value.size()), &value[0]);
@@ -263,7 +328,7 @@ namespace KlayGE
 			{
 				ShaderType type = static_cast<ShaderType>(i);
 
-				BOOST_AUTO(iter, param_descs_[type].find(name));
+				parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 				if (iter != param_descs_[type].end())
 				{
 					cgGLSetParameterArray1f(iter->second, 0, static_cast<int>(value.size()), &value[0]);
@@ -280,7 +345,7 @@ namespace KlayGE
 			{
 				ShaderType type = static_cast<ShaderType>(i);
 
-				BOOST_AUTO(iter, param_descs_[type].find(name));
+				parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 				if (iter != param_descs_[type].end())
 				{
 					cgGLSetParameterArray4f(iter->second, 0, static_cast<long>(value.size()), &value[0][0]);
@@ -297,7 +362,7 @@ namespace KlayGE
 			{
 				ShaderType type = static_cast<ShaderType>(i);
 
-				BOOST_AUTO(iter, param_descs_[type].find(name));
+				parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 				if (iter != param_descs_[type].end())
 				{
 					cgGLSetMatrixParameterArrayfr(iter->second, 0, static_cast<long>(value.size()), &value[0][0]);
@@ -312,7 +377,7 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 
-			BOOST_AUTO(iter, param_descs_[type].find(name));
+			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 			if (iter != param_descs_[type].end())
 			{
 				uint32_t index = cgGLGetTextureEnum(iter->second) - GL_TEXTURE0;

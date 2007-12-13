@@ -778,17 +778,19 @@ namespace KlayGE
 				{
 					shader_desc& sd = (*shader_descs_)[ShaderObject::ST_VertexShader];
 					var->Value(sd);
-
-					shader_obj_->SetShader(ShaderObject::ST_VertexShader, sd.profile, sd.func_name, this->GenShaderText());
 				}
 				if ("pixel_shader" == state_name)
 				{
 					shader_desc& sd = (*shader_descs_)[ShaderObject::ST_PixelShader];
-					var->Value(sd);
-
-					shader_obj_->SetShader(ShaderObject::ST_PixelShader, sd.profile, sd.func_name, this->GenShaderText());
+					var->Value(sd);				
 				}
 			}
+		}
+
+		shader_text_.reset(new BOOST_TYPEOF(*shader_text_)(this->GenShaderText()));
+		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
+		{
+			shader_obj_->SetShader(static_cast<ShaderObject::ShaderType>(i), shader_descs_, shader_text_);
 		}
 
 		is_validate_ = shader_obj_->Validate();
@@ -815,17 +817,10 @@ namespace KlayGE
 		ret->name_ = name_;
 		ret->annotations_ = annotations_;
 		ret->shader_descs_ = shader_descs_;
+		ret->shader_text_ = shader_text_;
 
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		
 		ret->render_state_obj_ = render_state_obj_;
-		ret->shader_obj_ = rf.MakeShaderObject();
-		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
-		{
-			ShaderObject::ShaderType type = static_cast<ShaderObject::ShaderType>(i);
-			shader_desc const & sd = (*shader_descs_)[type];
-			ret->shader_obj_->SetShader(type, sd.profile, sd.func_name, ret->GenShaderText());
-		}
+		ret->shader_obj_ = shader_obj_->Clone();
 
 		ret->is_validate_ = is_validate_;
 

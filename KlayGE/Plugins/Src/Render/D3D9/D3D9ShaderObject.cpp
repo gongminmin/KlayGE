@@ -33,25 +33,26 @@
 
 namespace KlayGE
 {
-	void D3D9ShaderObject::SetShader(ShaderType type, std::string const & profile, std::string const & name, std::string const & text)
+	void D3D9ShaderObject::SetShader(ShaderType type, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs,
+			boost::shared_ptr<std::string> const & shader_text)
 	{
 		is_validate_ = true;
 
 		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
 
-		std::string shader_profile = profile;
+		std::string shader_profile = (*shader_descs)[type].profile;
 		switch (type)
 		{
 		case ST_VertexShader:
-			if ("auto" == profile)
+			if ("auto" == shader_profile)
 			{
 				shader_profile = D3DXGetVertexShaderProfile(d3d_device.get());
 			}
 			break;
 
 		case ST_PixelShader:
-			if ("auto" == profile)
+			if ("auto" == shader_profile)
 			{
 				shader_profile = D3DXGetPixelShaderProfile(d3d_device.get());
 			}
@@ -66,8 +67,8 @@ namespace KlayGE
 
 		ID3DXBuffer* code;
 		ID3DXBuffer* err_msg;
-		D3DXCompileShader(text.c_str(), static_cast<UINT>(text.size()), NULL, NULL,
-			name.c_str(), shader_profile.c_str(),
+		D3DXCompileShader(shader_text->c_str(), static_cast<UINT>(shader_text->size()), NULL, NULL,
+			(*shader_descs)[type].func_name.c_str(), shader_profile.c_str(),
 			0, &code, &err_msg, &constant_table);
 		if (err_msg != NULL)
 		{
@@ -75,13 +76,13 @@ namespace KlayGE
 			ID3DXConstantTable* constant_table_legacy;
 			ID3DXBuffer* code_legacy;
 			ID3DXBuffer* err_msg_legacy;
-			D3DXCompileShader(text.c_str(), static_cast<UINT>(text.size()), NULL, NULL,
-				name.c_str(), shader_profile.c_str(),
+			D3DXCompileShader(shader_text->c_str(), static_cast<UINT>(shader_text->size()), NULL, NULL,
+				(*shader_descs)[type].func_name.c_str(), shader_profile.c_str(),
 				D3DXSHADER_USE_LEGACY_D3DX9_31_DLL, &code_legacy, &err_msg_legacy, &constant_table_legacy);
 			if (err_msg_legacy != NULL)
 			{
 #ifdef KLAYGE_DEBUG
-				std::cerr << text << std::endl;
+				std::cerr << *shader_text << std::endl;
 				std::cerr << static_cast<char*>(err_msg_legacy->GetBufferPointer()) << std::endl;
 #endif
 
@@ -111,7 +112,7 @@ namespace KlayGE
 			}
 #else
 #ifdef KLAYGE_DEBUG
-			std::cerr << text << std::endl;
+			std::cerr << *shader_text << std::endl;
 			std::cerr << static_cast<char*>(err_msg->GetBufferPointer()) << std::endl;
 #endif
 
@@ -197,7 +198,7 @@ namespace KlayGE
 				p_handle.rows = static_cast<uint8_t>(constant_desc.Rows);
 				p_handle.columns = static_cast<uint8_t>(constant_desc.Columns);
 
-				param_descs_[type].insert(std::make_pair(constant_desc.Name, p_handle));
+				param_descs_[type].insert(std::make_pair(new std::string(constant_desc.Name), p_handle));
 			}
 
 			if (bool_end > bool_begin)
@@ -236,9 +237,35 @@ namespace KlayGE
 		}
 	}
 
+	ShaderObjectPtr D3D9ShaderObject::Clone()
+	{
+		D3D9ShaderObjectPtr ret(new D3D9ShaderObject);
+		ret->param_descs_ = param_descs_;
+		ret->vertex_shader_ = vertex_shader_;
+		ret->pixel_shader_ = pixel_shader_;
+		ret->bool_start_ = bool_start_;
+		ret->int_start_ = int_start_;
+		ret->float_start_ = float_start_;
+		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
+		{
+			ret->bool_registers_[i].resize(bool_registers_[i].size());
+			ret->int_registers_[i].resize(int_registers_[i].size());
+			ret->float_registers_[i].resize(float_registers_[i].size());
+			ret->samplers_[i].resize(samplers_[i].size());
+		}
+
+		return ret;
+	}
+
+	D3D9ShaderObject::parameter_descs_t::const_iterator D3D9ShaderObject::FindParam(ShaderType type, std::string const & name) const
+	{
+		boost::shared_ptr<std::string> name_ptr(new std::string(name));
+		return param_descs_[type].find(name_ptr);
+	}
+
 	bool D3D9ShaderObject::HasParameter(ShaderType type, std::string const & name) const
 	{
-		return param_descs_[type].find(name) != param_descs_[type].end();
+		return (this->FindParam(type, name) != param_descs_[type].end());
 	}
 
 	void D3D9ShaderObject::SetParameter(std::string const & name, bool value)
@@ -247,7 +274,7 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 
-			BOOST_AUTO(iter, param_descs_[type].find(name));
+			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 			if (iter != param_descs_[type].end())
 			{
 				D3D9ShaderParameterHandle const & p_handle = iter->second;
@@ -280,7 +307,7 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 			
-			BOOST_AUTO(iter, param_descs_[type].find(name));
+			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 			if (iter != param_descs_[type].end())
 			{
 				D3D9ShaderParameterHandle const & p_handle = iter->second;
@@ -313,7 +340,7 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 			
-			BOOST_AUTO(iter, param_descs_[type].find(name));
+			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 			if (iter != param_descs_[type].end())
 			{
 				D3D9ShaderParameterHandle const & p_handle = iter->second;
@@ -330,7 +357,7 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 			
-			BOOST_AUTO(iter, param_descs_[type].find(name));
+			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 			if (iter != param_descs_[type].end())
 			{
 				D3D9ShaderParameterHandle const & p_handle = iter->second;
@@ -347,7 +374,7 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 			
-			BOOST_AUTO(iter, param_descs_[type].find(name));
+			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 			if (iter != param_descs_[type].end())
 			{
 				D3D9ShaderParameterHandle const & p_handle = iter->second;
@@ -365,7 +392,7 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 			
-			BOOST_AUTO(iter, param_descs_[type].find(name));
+			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 			if (iter != param_descs_[type].end())
 			{
 				D3D9ShaderParameterHandle const & p_handle = iter->second;
@@ -407,7 +434,7 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 			
-			BOOST_AUTO(iter, param_descs_[type].find(name));
+			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 			if (iter != param_descs_[type].end())
 			{
 				D3D9ShaderParameterHandle const & p_handle = iter->second;
@@ -449,7 +476,7 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 			
-			BOOST_AUTO(iter, param_descs_[type].find(name));
+			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 			if (iter != param_descs_[type].end())
 			{
 				D3D9ShaderParameterHandle const & p_handle = iter->second;
@@ -471,7 +498,7 @@ namespace KlayGE
 			{
 				ShaderType type = static_cast<ShaderType>(i);
 				
-				BOOST_AUTO(iter, param_descs_[type].find(name));
+				parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 				if (iter != param_descs_[type].end())
 				{
 					D3D9ShaderParameterHandle const & p_handle = iter->second;
@@ -489,7 +516,7 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 			
-			BOOST_AUTO(iter, param_descs_[type].find(name));
+			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 			if (iter != param_descs_[type].end())
 			{
 				D3D9ShaderParameterHandle const & p_handle = iter->second;
@@ -512,7 +539,7 @@ namespace KlayGE
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 			
-			BOOST_AUTO(iter, param_descs_[type].find(name));
+			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 			if (iter != param_descs_[type].end())
 			{
 				D3D9ShaderParameterHandle const & p_handle = iter->second;

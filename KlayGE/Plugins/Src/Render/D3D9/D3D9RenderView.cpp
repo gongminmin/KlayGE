@@ -62,7 +62,10 @@ namespace KlayGE
 			}
 		}
 		d3d_device->SetDepthStencilSurface(old_ds);
-		old_ds->Release();
+		if (old_ds != NULL)
+		{
+			old_ds->Release();
+		}
 	}
 
 	void D3D9RenderView::Clear(float depth)

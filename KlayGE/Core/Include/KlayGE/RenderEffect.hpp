@@ -61,21 +61,6 @@
 
 namespace KlayGE
 {
-	struct shader_desc
-	{
-		std::string profile;
-		std::string func_name;
-
-		friend bool operator==(shader_desc const & lhs, shader_desc const & rhs)
-		{
-			return (lhs.profile == rhs.profile) && (lhs.func_name == rhs.func_name);
-		}
-		friend bool operator!=(shader_desc const & lhs, shader_desc const & rhs)
-		{
-			return !(lhs == rhs);
-		}
-	};
-
 	class RenderVariable
 	{
 	public:
@@ -399,6 +384,7 @@ namespace KlayGE
 		boost::shared_ptr<std::string> name_;
 		boost::shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
 		boost::shared_ptr<std::vector<shader_desc> > shader_descs_;
+		boost::shared_ptr<std::string> shader_text_;
 
 		RenderStateObjectPtr render_state_obj_;
 		ShaderObjectPtr shader_obj_;
