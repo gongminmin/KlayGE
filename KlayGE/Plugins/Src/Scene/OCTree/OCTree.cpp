@@ -156,28 +156,19 @@ namespace KlayGE
 			rebuild_tree_ = false;
 		}
 
-		visables_set_.clear_no_resize();
+		visible_marks_.assign(scene_objs_.size(), 0);
 		if (!octree_.empty())
 		{
 			Frustum frustum(camera.ViewMatrix() * camera.ProjMatrix());
 			this->Visit(0, frustum);
 		}
 
-		for (size_t i = 0; i < scene_objs_.size(); ++ i)
+		for (size_t i = start_index_; i < scene_objs_.size(); ++ i)
 		{
 			SceneObjectPtr const & obj = scene_objs_[i];
-			if (obj->Cullable() && !obj->ShortAge())
+			if (!obj->Cullable() || obj->ShortAge())
 			{
-				BOOST_AUTO(iter, visables_set_.find(i));
-				if (iter != visables_set_.end())
-				{
-					visables_set_.erase(iter);
-					visible_objs_.push_back(obj);
-				}
-			}
-			else
-			{
-				visible_objs_.push_back(obj);
+				visible_marks_[i] = 1;
 			}
 		}
 	}
@@ -227,7 +218,10 @@ namespace KlayGE
 			}
 			else
 			{
-				visables_set_.insert(obj_indices.begin(), obj_indices.end());
+				BOOST_FOREACH(BOOST_TYPEOF(obj_indices)::const_reference index, obj_indices)
+				{
+					visible_marks_[index] = 1;
+				}
 
 #ifdef KLAYGE_DEBUG
 				RenderablePtr box_helper(new RenderableLineBox(node.bounding_box, Color(1, 1, 1, 1)));

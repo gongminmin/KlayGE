@@ -80,7 +80,7 @@ namespace KlayGE
 
 		void ClipScene(Camera const & /*camera*/)
 		{
-			visible_objs_ = scene_objs_;
+			visible_marks_.assign(scene_objs_.size(), 1);
 		}
 
 		void Clear()
@@ -161,7 +161,17 @@ namespace KlayGE
 		App3DFramework& app = Context::Instance().AppInstance();
 		for (uint32_t pass = 0;; ++ pass)
 		{
+			size_t num_objs = scene_objs_.size();
+
 			uint32_t urt = app.Update(pass);
+			if (urt & App3DFramework::URV_Only_New_Objs)
+			{
+				start_index_ = num_objs;
+			}
+			else
+			{
+				start_index_ = 0;
+			}
 			if (urt & App3DFramework::URV_Need_Flush)
 			{
 				this->Flush();
@@ -188,26 +198,33 @@ namespace KlayGE
 		App3DFramework& app = Context::Instance().AppInstance();
 
 		this->ClipScene(app.ActiveCamera());
-		numObjectsRendered_ = visible_objs_.size();
 
+		numObjectsRendered_ = 0;
 		std::vector<std::pair<RenderablePtr, SceneObjectsType> > renderables;
-		BOOST_FOREACH(BOOST_TYPEOF(visible_objs_)::const_reference so, visible_objs_)
+		for (size_t i = start_index_; i < visible_marks_.size(); ++ i)
 		{
-			RenderablePtr const & renderable = so->GetRenderable();
+			if (visible_marks_[i])
+			{
+				SceneObjectPtr so = scene_objs_[i];
 
-			size_t i = 0;
-			while ((i < renderables.size()) && (renderables[i].first != renderable))
-			{
-				++ i;
-			}
+				RenderablePtr const & renderable = so->GetRenderable();
 
-			if (i < renderables.size())
-			{
-				renderables[i].second.push_back(so);
-			}
-			else
-			{
-				renderables.push_back(std::make_pair(renderable, SceneObjectsType(1, so)));
+				size_t j = 0;
+				while ((j < renderables.size()) && (renderables[j].first != renderable))
+				{
+					++ j;
+				}
+
+				if (j < renderables.size())
+				{
+					renderables[j].second.push_back(so);
+				}
+				else
+				{
+					renderables.push_back(std::make_pair(renderable, SceneObjectsType(1, so)));
+				}
+
+				++ numObjectsRendered_;
 			}
 		}
 		BOOST_FOREACH(BOOST_TYPEOF(renderables)::const_reference renderable, renderables)
@@ -230,7 +247,6 @@ namespace KlayGE
 				numVerticesRendered_ += renderEngine.NumVerticesJustRendered();
 			}
 		}
-		visible_objs_.resize(0);
 		render_queue_.resize(0);
 
 		for (BOOST_AUTO(iter, scene_objs_.begin()); iter != scene_objs_.end();)

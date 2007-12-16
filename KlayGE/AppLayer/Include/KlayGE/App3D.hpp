@@ -54,7 +54,8 @@ namespace KlayGE
 		{
 			URV_Need_Flush = 1UL << 0,
 			URV_Flushed = 1UL << 1,
-			URV_Finished = 1UL << 2
+			URV_Finished = 1UL << 2,
+			URV_Only_New_Objs = 1UL << 3
 		};
 
 	public:

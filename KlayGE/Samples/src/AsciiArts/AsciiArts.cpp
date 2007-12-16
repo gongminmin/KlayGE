@@ -267,7 +267,8 @@ void AsciiArtsApp::InitObjects()
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 	obj_.reset(new SceneObjectHelper(LoadKModel("teapot.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<KMesh>()),
-		SceneObject::SOA_Cullable | SceneObject::SOA_ShortAge));
+		SceneObject::SOA_Cullable));
+	obj_->AddToSceneManager();
 
 	this->BuildAsciiLumsTex();
 
@@ -368,8 +369,6 @@ uint32_t AsciiArtsApp::DoUpdate(uint32_t pass)
 			renderEngine.BindFrameBuffer(render_buffer_);
 			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
 			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
-
-			obj_->AddToSceneManager();
 			return App3DFramework::URV_Need_Flush;
 
 		case 1:
@@ -390,30 +389,30 @@ uint32_t AsciiArtsApp::DoUpdate(uint32_t pass)
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
 		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
 		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
-
-		sceneMgr.Clear();
-		obj_->AddToSceneManager();
 	}
 
-	if ((!show_ascii_ && (0 == pass))
-		|| (show_ascii_ && (1 == pass)))
+	renderEngine.BindFrameBuffer(FrameBufferPtr());
+
+	UIManager::Instance().Render();
+
+	std::wostringstream stream;
+	stream << this->FPS();
+
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"ASCII艺术");
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());
+
+	stream.str(L"");
+	stream << sceneMgr.NumRenderablesRendered() << " Renderables "
+		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
+		<< sceneMgr.NumVerticesRendered() << " Vertices";
+	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str());
+
+	if (!show_ascii_ && (0 == pass))
 	{
-		renderEngine.BindFrameBuffer(FrameBufferPtr());
-
-		UIManager::Instance().Render();
-
-		std::wostringstream stream;
-		stream << this->FPS();
-
-		font_->RenderText(0, 0, Color(1, 1, 0, 1), L"ASCII艺术");
-		font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());
-
-		stream.str(L"");
-		stream << sceneMgr.NumRenderablesRendered() << " Renderables "
-			<< sceneMgr.NumPrimitivesRendered() << " Primitives "
-			<< sceneMgr.NumVerticesRendered() << " Vertices";
-		font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str());
+		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 	}
-
-	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+	else
+	{
+		return App3DFramework::URV_Only_New_Objs | App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+	}
 }

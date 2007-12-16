@@ -193,6 +193,7 @@ void DepthPeelingApp::InitObjects()
 
 	polygon_.reset(new PolygonObject);
 	checked_pointer_cast<PolygonObject>(polygon_)->LightPos(float3(0, 2, -1));
+	polygon_->AddToSceneManager();
 
 	this->LookAt(float3(-0.3f, 0.4f, -0.3f), float3(0, 0, 0));
 	this->Proj(0.01f, 100);
@@ -276,9 +277,6 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 	case 0:
 		fpcController_.Update();
 
-		sceneMgr.Clear();
-		polygon_->AddToSceneManager();
-
 		num_layers_ = 1;
 
 		checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(true);
@@ -330,8 +328,6 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 			blend_pp_->Apply();
 		}
 
-		sceneMgr.Clear();
-
 		std::wostringstream stream;
 		stream << this->FPS();
 
@@ -344,6 +340,6 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 			<< sceneMgr.NumVerticesRendered() << " Vertices";
 		font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str());
 
-		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+		return App3DFramework::URV_Only_New_Objs | App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 	}
 }

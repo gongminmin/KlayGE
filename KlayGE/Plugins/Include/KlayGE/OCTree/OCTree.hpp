@@ -26,7 +26,6 @@
 #include <KlayGE/SceneNode.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Box.hpp>
-#include <KlayGE/ClosedHashSet.hpp>
 #include <KlayGE/OCTree/Frustum.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
@@ -34,15 +33,6 @@
 #pragma warning(disable: 4127)
 #endif
 #include <boost/pool/pool_alloc.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4244)
-#endif
-#include <boost/functional/hash.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
@@ -91,8 +81,6 @@ namespace KlayGE
 		uint32_t max_tree_depth_;
 
 		bool rebuild_tree_;
-
-		closed_hash_set<size_t, boost::hash<size_t>, std::equal_to<size_t>, boost::pool_allocator<size_t> > visables_set_;
 	};
 }
 

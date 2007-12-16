@@ -18,7 +18,6 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Texture.hpp>
-#include <KlayGE/Context.hpp>
 
 #include <cstring>
 

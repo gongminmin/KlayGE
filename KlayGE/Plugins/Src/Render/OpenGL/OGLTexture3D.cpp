@@ -18,7 +18,6 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Texture.hpp>
-#include <KlayGE/Context.hpp>
 #include <KlayGE/Util.hpp>
 
 #include <cstring>
@@ -161,6 +160,8 @@ namespace KlayGE
 			uint32_t src_width, uint32_t src_height, uint32_t src_depth,
 			uint32_t src_xOffset, uint32_t src_yOffset, uint32_t src_zOffset)
 	{
+		UNREF_PARAM(dst_depth);
+
 		BOOST_ASSERT(type_ == target.Type());
 		// fix me
 		BOOST_ASSERT(src_depth == dst_depth);

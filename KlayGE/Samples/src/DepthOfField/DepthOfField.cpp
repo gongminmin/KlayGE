@@ -246,7 +246,10 @@ namespace
 
 int main()
 {
+	OCTree sceneMgr(3);
+
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
+	Context::Instance().SceneManagerInstance(sceneMgr);
 	Context::Instance().InputFactoryInstance(DInputFactoryInstance());
 
 	RenderSettings settings;
@@ -274,7 +277,7 @@ void DepthOfFieldApp::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
-	renderInstance_ = LoadKModel("teapot.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderInstance>())->Mesh(0);
+	boost::shared_ptr<KlayGE::Renderable> renderInstance = LoadKModel("teapot.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderInstance>())->Mesh(0);
 	for (int i = 0; i < 10; ++ i)
 	{
 		for (int j = 0; j < NUM_INSTANCE / 10; ++ j)
@@ -286,9 +289,8 @@ void DepthOfFieldApp::InitObjects()
 			checked_pointer_cast<Teapot>(so)->Instance(
 				MathLib::translation(s, i / 10.0f, c), Color(s, c, 0, 1));
 
-			checked_pointer_cast<Teapot>(so)->SetRenderable(renderInstance_);
+			checked_pointer_cast<Teapot>(so)->SetRenderable(renderInstance);
 			so->AddToSceneManager();
-			scene_objs_.push_back(so);
 		}
 	}
 
@@ -399,7 +401,6 @@ void DepthOfFieldApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
 
 uint32_t DepthOfFieldApp::DoUpdate(uint32_t pass)
 {
-	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 	switch (pass)
@@ -411,17 +412,9 @@ uint32_t DepthOfFieldApp::DoUpdate(uint32_t pass)
 		renderEngine.BindFrameBuffer(clr_depth_buffer_);
 		clear_float_->Apply();
 		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
-
-		sceneMgr.Clear();
-		for (size_t i = 0; i < scene_objs_.size(); ++ i)
-		{
-			scene_objs_[i]->AddToSceneManager();
-		}
 		return App3DFramework::URV_Need_Flush;
 	
 	default:
-		sceneMgr.Clear();
-
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
 		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
 
@@ -437,6 +430,6 @@ uint32_t DepthOfFieldApp::DoUpdate(uint32_t pass)
 		std::wostringstream stream;
 		stream << this->FPS() << " FPS";
 		font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str());
-		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+		return App3DFramework::URV_Only_New_Objs | App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 	}
 }

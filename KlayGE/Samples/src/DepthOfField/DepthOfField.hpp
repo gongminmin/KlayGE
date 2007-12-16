@@ -24,8 +24,6 @@ private:
 	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
-	boost::shared_ptr<KlayGE::Renderable> renderInstance_;
-	std::vector<KlayGE::SceneObjectPtr> scene_objs_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
