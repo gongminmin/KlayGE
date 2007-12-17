@@ -1,8 +1,11 @@
 // OCTree.cpp
 // KlayGE 八叉树类 实现文件
-// Ver 3.0.0
-// 版权所有(C) 龚敏敏, 2004-2005
+// Ver 3.7.0
+// 版权所有(C) 龚敏敏, 2004-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.7.0
+// 提升了遍历速度 (2007.12.18)
 //
 // 3.0.0
 // 保证了绘制顺序 (2005.8.17)
@@ -44,21 +47,24 @@ namespace KlayGE
 	{
 		if (rebuild_tree_)
 		{
+			typedef std::vector<size_t> ObjIndicesTypes;
+			std::vector<ObjIndicesTypes> obj_indices(1);
 			octree_.resize(1);
 			octree_[0].bounding_box = Box(float3(0, 0, 0), float3(0, 0, 0));
 			octree_[0].parent_index = -1;
 			octree_[0].first_child_index = -1;
-			aabbs_in_ws_.resize(scene_objs_.size());
+			std::vector<Box> aabbs_in_ws(scene_objs_.size());
 			for (size_t i = 0; i < scene_objs_.size(); ++ i)
 			{
 				SceneObjectPtr const & obj = scene_objs_[i];
-				if (obj->Cullable() && !obj->ShortAge())
+				if (obj->Cullable() && !obj->ShortAge() && !obj->Moveable())
 				{
 					Box const & box = obj->GetBound();
 					float4x4 const & mat = obj->GetModelMatrix();
 
-					float3 min(1e10f, 1e10f, 1e10f), max(-1e10f, -1e10f, -1e10f);
-					for (size_t j = 0; j < 8; ++ j)
+					float3 min, max;
+					min = max = MathLib::transform_coord(box[0], mat);
+					for (size_t j = 1; j < 8; ++ j)
 					{
 						float3 vec = MathLib::transform_coord(box[j], mat);
 						min = MathLib::minimize(min, vec);
@@ -68,9 +74,9 @@ namespace KlayGE
 					Box aabb_in_ws(min, max);
 
 					octree_[0].bounding_box |= aabb_in_ws;
-					octree_[0].obj_indices.push_back(i);
+					obj_indices[0].push_back(i);
 
-					aabbs_in_ws_[i] = aabb_in_ws;
+					aabbs_in_ws[i] = aabb_in_ws;
 				}
 			}
 			{
@@ -89,10 +95,9 @@ namespace KlayGE
 				level.resize(0);
 				for (size_t i = base_address_[d - 1]; i < base_address_[d]; ++ i)
 				{
-					if (octree_[i].obj_indices.size() > 1)
+					if (obj_indices[i].size() > 1)
 					{
 						Box& parent_bb = octree_[i].bounding_box;
-						ObjIndicesTypes& parent_obj_indices = octree_[i].obj_indices;
 						float3 const & parent_center = parent_bb.Center();
 						octree_[i].first_child_index = static_cast<int>(base_address_[d] + level.size());
 
@@ -102,6 +107,9 @@ namespace KlayGE
 							octree_node_t& new_node = level.back();
 							new_node.parent_index = static_cast<int>(i);
 							new_node.first_child_index = -1;
+							obj_indices.push_back(ObjIndicesTypes());
+							ObjIndicesTypes& new_node_obj_indices = obj_indices.back();
+							ObjIndicesTypes& parent_obj_indices = obj_indices[i];
 
 							new_node.bounding_box = parent_bb;
 							if (j & 1)
@@ -134,18 +142,18 @@ namespace KlayGE
 
 							BOOST_FOREACH(size_t obj_index, parent_obj_indices)
 							{
-								Box const & obj_bb = aabbs_in_ws_[obj_index];
+								Box const & obj_bb = aabbs_in_ws[obj_index];
 
 								float3 const t = obj_bb.Center() - node_center;
 								float3 const e = obj_bb.HalfSize() + node_half_size;
 								if ((abs(t.x()) <= e.x()) && (abs(t.y()) <= e.y()) && (abs(t.y()) <= e.y()))
 								{
-									new_node.obj_indices.push_back(obj_index);
+									new_node_obj_indices.push_back(obj_index);
 								}
 							}
 						}
 
-						parent_obj_indices.clear();
+						obj_indices[i].clear();
 					}
 				}
 
@@ -156,19 +164,42 @@ namespace KlayGE
 			rebuild_tree_ = false;
 		}
 
-		visible_marks_.assign(scene_objs_.size(), 0);
 		if (!octree_.empty())
 		{
 			Frustum frustum(camera.ViewMatrix() * camera.ProjMatrix());
-			this->Visit(0, frustum);
+			this->NodeVisible(0, frustum);
 		}
 
+		visible_marks_.resize(scene_objs_.size());
 		for (size_t i = start_index_; i < scene_objs_.size(); ++ i)
 		{
 			SceneObjectPtr const & obj = scene_objs_[i];
-			if (!obj->Cullable() || obj->ShortAge())
+			if (obj->Visible())
 			{
-				visible_marks_[i] = 1;
+				if (obj->Cullable() && !obj->ShortAge())
+				{
+					Box const & box = obj->GetBound();
+					float4x4 const & mat = obj->GetModelMatrix();
+
+					float3 min, max;
+					min = max = MathLib::transform_coord(box[0], mat);
+					for (size_t j = 1; j < 8; ++ j)
+					{
+						float3 vec = MathLib::transform_coord(box[j], mat);
+						min = MathLib::minimize(min, vec);
+						max = MathLib::maximize(max, vec);
+					}
+
+					visible_marks_[i] = this->BBVisible(0, Box(min, max));
+				}
+				else
+				{
+					visible_marks_[i] = 1;
+				}
+			}
+			else
+			{
+				visible_marks_[i] = 0;
 			}
 		}
 	}
@@ -177,12 +208,13 @@ namespace KlayGE
 	{
 		scene_objs_.resize(0);
 		octree_.clear();
+		rebuild_tree_ = true;
 	}
 
 	void OCTree::DoAddSceneObject(SceneObjectPtr const & obj)
 	{
 		scene_objs_.push_back(obj);
-		if (obj->Cullable() && !obj->ShortAge())
+		if (obj->Cullable() && !obj->ShortAge() && !obj->Moveable())
 		{
 			rebuild_tree_ = true;
 		}
@@ -190,44 +222,88 @@ namespace KlayGE
 
 	SceneManager::SceneObjectsType::iterator OCTree::DoDelSceneObject(SceneManager::SceneObjectsType::iterator iter)
 	{
-		if ((*iter)->Cullable() && !(*iter)->ShortAge())
+		if ((*iter)->Cullable() && !(*iter)->ShortAge() && !(*iter)->Moveable())
 		{
 			rebuild_tree_ = true;
 		}
 		return scene_objs_.erase(iter);
 	}
 
-	void OCTree::Visit(size_t index, Frustum const & frustum)
+	void OCTree::NodeVisible(size_t index, Frustum const & frustum)
 	{
-		assert(!octree_.empty());
+		assert(index < octree_.size());
 
-		octree_node_t const & node = octree_[index];
+		octree_node_t& node = octree_[index];
 		Frustum::VIS const vis = frustum.Visiable(node.bounding_box);
-		if (vis != Frustum::VIS_NO)
+		node.visible = vis;
+		if (Frustum::VIS_PART == vis)
 		{
-			ObjIndicesTypes const & obj_indices = node.obj_indices;
-			if (obj_indices.empty())
+			if (node.first_child_index != -1)
 			{
-				if (node.first_child_index != -1)
+				for (int i = 0; i < 8; ++ i)
 				{
-					for (int i = 0; i < 8; ++ i)
-					{
-						this->Visit(node.first_child_index + i, frustum);
-					}
+					this->NodeVisible(node.first_child_index + i, frustum);
 				}
 			}
-			else
-			{
-				BOOST_FOREACH(BOOST_TYPEOF(obj_indices)::const_reference index, obj_indices)
-				{
-					visible_marks_[index] = 1;
-				}
+		}
 
 #ifdef KLAYGE_DEBUG
-				RenderablePtr box_helper(new RenderableLineBox(node.bounding_box, Color(1, 1, 1, 1)));
-				box_helper->AddToRenderQueue();
+		if ((vis != Frustum::VIS_NO) && (-1 == node.first_child_index))
+		{
+			RenderablePtr box_helper(new RenderableLineBox(node.bounding_box, Color(1, 1, 1, 1)));
+			box_helper->AddToRenderQueue();
+		}
 #endif
+	}
+
+	bool OCTree::BBVisible(size_t index, Box const & bb)
+	{
+		assert(index < octree_.size());
+
+		octree_node_t const & node = octree_[index];
+		float3 const node_center = node.bounding_box.Center();
+		float3 const node_half_size = node.bounding_box.HalfSize();
+		float3 const t = bb.Center() - node_center;
+		float3 const e = bb.HalfSize() + node_half_size;
+		if ((abs(t.x()) <= e.x()) && (abs(t.y()) <= e.y()) && (abs(t.y()) <= e.y()))
+		{
+			Frustum::VIS const vis = node.visible;
+			switch (vis)
+			{
+			case Frustum::VIS_YES:
+				return true;
+
+			case Frustum::VIS_NO:
+				return false;
+
+			case Frustum::VIS_PART:
+				{
+					if (node.first_child_index != -1)
+					{
+						for (int i = node.first_child_index, i_end = node.first_child_index + 8; i < i_end; ++ i)
+						{
+							if (this->BBVisible(i, bb))
+							{
+								return true;
+							}
+						}
+						return false;
+					}
+					else
+					{
+						return true;
+					}
+				}
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				return false;
 			}
+		}
+		else
+		{
+			return false;
 		}
 	}
 }

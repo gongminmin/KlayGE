@@ -73,7 +73,7 @@ namespace
 	{
 	public:
 		TeapotObject()
-			: SceneObjectHelper(SOA_Cullable | SOA_ShortAge)
+			: SceneObjectHelper(SOA_Cullable)
 		{
 			renderable_ = LoadKModel("teapot.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderTeapot>())->Mesh(0);
 		}
@@ -152,7 +152,8 @@ void VideoTextureApp::InitObjects()
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	ground_.reset(new TeapotObject);
-	
+	ground_->AddToSceneManager();
+
 	ShowEngine& se = Context::Instance().ShowFactoryInstance().ShowEngineInstance();
 	se.Load(ResLoader::Instance().Locate("planete.avi"));
 	se.Play();
@@ -177,7 +178,6 @@ uint32_t VideoTextureApp::DoUpdate(uint32_t /*pass*/)
 	re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
 
 	checked_pointer_cast<TeapotObject>(ground_)->VideoTexture(se.PresentTexture());
-	ground_->AddToSceneManager();
 
 	fpcController_.Update();
 

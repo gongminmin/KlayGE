@@ -30,7 +30,8 @@ namespace KlayGE
 		{
 			SOA_Cullable = 1UL << 0,
 			SOA_ShortAge = 1UL << 1,
-			SOA_Moveable = 1UL << 2
+			SOA_Moveable = 1UL << 2,
+			SOA_Unvisible = 1UL << 3
 		};
 
 	public:
@@ -47,6 +48,8 @@ namespace KlayGE
 		bool Cullable() const;
 		bool ShortAge() const;
 		bool Moveable() const;
+		bool Visible() const;
+		void Visible(bool vis);
 
 		vertex_elements_type const & InstanceFormat() const;
 		virtual void const * InstanceData() const;

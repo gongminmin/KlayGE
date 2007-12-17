@@ -80,7 +80,11 @@ namespace KlayGE
 
 		void ClipScene(Camera const & /*camera*/)
 		{
-			visible_marks_.assign(scene_objs_.size(), 1);
+			visible_marks_.resize(scene_objs_.size());
+			for (size_t i = 0; i < scene_objs_.size(); ++ i)
+			{
+				visible_marks_[i] = scene_objs_[i]->Visible();
+			}
 		}
 
 		void Clear()

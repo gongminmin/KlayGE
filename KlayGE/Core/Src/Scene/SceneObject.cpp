@@ -64,6 +64,23 @@ namespace KlayGE
 		return ((attrib_ & SOA_Moveable) != 0);
 	}
 
+	bool SceneObject::Visible() const
+	{
+		return (0 == (attrib_ & SOA_Unvisible));
+	}
+
+	void SceneObject::Visible(bool vis)
+	{
+		if (vis)
+		{
+			attrib_ &= ~SOA_Unvisible;
+		}
+		else
+		{
+			attrib_ |= SOA_Unvisible;
+		}
+	}
+
 	vertex_elements_type const & SceneObject::InstanceFormat() const
 	{
 		return instance_format_;

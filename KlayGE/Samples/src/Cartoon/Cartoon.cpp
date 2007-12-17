@@ -120,7 +120,7 @@ namespace
 	{
 	public:
 		TorusObject()
-			: SceneObjectHelper(SOA_Cullable | SOA_ShortAge)
+			: SceneObjectHelper(SOA_Cullable)
 		{
 			renderable_ = LoadKModel("torus.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderTorus>())->Mesh(0);
 		}
@@ -189,6 +189,7 @@ void Cartoon::InitObjects()
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
 
 	torus_.reset(new TorusObject);
+	torus_->AddToSceneManager();
 
 	this->LookAt(float3(0, 0, -6), float3(0, 0, 0));
 	this->Proj(0.1f, 20.0f);
@@ -244,7 +245,6 @@ void Cartoon::CheckBoxHandler(UICheckBox const & /*sender*/)
 
 uint32_t Cartoon::DoUpdate(uint32_t pass)
 {
-	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 	switch (pass)
@@ -257,24 +257,21 @@ uint32_t Cartoon::DoUpdate(uint32_t pass)
 		renderEngine.BindFrameBuffer(normal_depth_buffer_);
 		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
 		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
-
-		sceneMgr.Clear();
 		checked_pointer_cast<RenderTorus>(torus_->GetRenderable())->Pass(0);
-		torus_->AddToSceneManager();
 		return App3DFramework::URV_Need_Flush;
-	
-	default:
+
+	case 1:
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
 		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
 		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
 
-		sceneMgr.Clear();
 		checked_pointer_cast<RenderTorus>(torus_->GetRenderable())->UpdateTexture(normal_depth_tex_,
 			normal_depth_buffer_->RequiresFlipping());
 		checked_pointer_cast<RenderTorus>(torus_->GetRenderable())->Pass(1);
 		checked_pointer_cast<RenderTorus>(torus_->GetRenderable())->CartoonStyle(cartoon_style_);
-		torus_->AddToSceneManager();
+		return App3DFramework::URV_Need_Flush;
 
+	default:
 		UIManager::Instance().Render();
 
 		FrameBuffer& rw = *checked_pointer_cast<FrameBuffer>(renderEngine.CurFrameBuffer());
@@ -289,6 +286,6 @@ uint32_t Cartoon::DoUpdate(uint32_t pass)
 		stream.str(L"");
 		stream << this->FPS() << " FPS";
 		font_->RenderText(0, 54, Color(1, 1, 0, 1), stream.str());
-		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+		return App3DFramework::URV_Only_New_Objs | App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 	}
 }

@@ -197,7 +197,7 @@ namespace
 
 int main()
 {
-	OCTree sceneMgr(3);
+	OCTree sceneMgr(5);
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);

@@ -346,12 +346,14 @@ void ParticleSystemApp::InitObjects()
 
 	height_img_.reset(new HeightImg(-2, -2, 2, 2, LoadTexture("grcanyon.dds"), 1));
 	particles_.reset(new ParticlesObject);
+	particles_->AddToSceneManager();
 
 	std::vector<float3> vertices;
 	std::vector<uint16_t> indices;
 	HeightMap hm;
 	hm.BuildTerrain(-2, -2, 2, 2, 4.0f / 64, 4.0f / 64, vertices, indices, *height_img_);
 	terrain_.reset(new TerrainObject(vertices, indices));
+	terrain_->AddToSceneManager();
 
 
 	std::vector<float3> normal(vertices.size());
@@ -417,25 +419,21 @@ uint32_t ParticleSystemApp::DoUpdate(uint32_t pass)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
-	SceneManager& sm = Context::Instance().SceneManagerInstance();
 
 	switch (pass)
 	{
 	case 0:
 		fpcController_.Update();
 
-		sm.Clear();
-
 		re.BindFrameBuffer(scene_buffer_);
 		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
 		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
-		
-		terrain_->AddToSceneManager();
+
+		terrain_->Visible(true);
+		particles_->Visible(false);
 		return App3DFramework::URV_Need_Flush;
 
 	default:
-		sm.Clear();
-
 		re.BindFrameBuffer(FrameBufferPtr());
 		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
 
@@ -479,8 +477,9 @@ uint32_t ParticleSystemApp::DoUpdate(uint32_t pass)
 				rl->VertexStreamFrequencyDivider(i, RenderLayout::ST_Geometry, num_pars);
 			}
 
-			particles_->AddToSceneManager();
+			particles_->Visible(true);
 		}
+		terrain_->Visible(false);
 
 		std::wostringstream stream;
 		stream << this->FPS();

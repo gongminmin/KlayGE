@@ -228,9 +228,11 @@ void Refract::InitObjects()
 	c_cube_map_ = LoadTexture("uffizi_cross_c.dds");
 
 	refractor_.reset(new RefractorObject(y_cube_map_, c_cube_map_));
+	refractor_->AddToSceneManager();
 
 	sky_box_.reset(new HDRSceneObjectSkyBox);
 	checked_pointer_cast<HDRSceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map_, c_cube_map_);
+	sky_box_->AddToSceneManager();
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
@@ -288,7 +290,6 @@ void Refract::InputHandler(InputEngine const & /*sender*/, InputAction const & a
 uint32_t Refract::DoUpdate(uint32_t pass)
 {
 	RenderEngine& re(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-	SceneManager& sm(Context::Instance().SceneManagerInstance());
 
 	switch (pass)
 	{
@@ -301,7 +302,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(0.0f);
 
 		checked_pointer_cast<RefractorObject>(refractor_)->Pass(0);
-		refractor_->AddToSceneManager();
+		sky_box_->Visible(false);
 		return App3DFramework::URV_Need_Flush;
 
 	case 1:
@@ -313,12 +314,10 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 		checked_pointer_cast<RefractorObject>(refractor_)->Pass(1);
 		checked_pointer_cast<RefractorObject>(refractor_)->BackFaceTexture(render_tex_);
 
-		sky_box_->AddToSceneManager();
+		sky_box_->Visible(true);
 		return App3DFramework::URV_Need_Flush;
 
 	default:
-		sm.Clear();
-
 		hdr_->Apply();
 
 		re.BindFrameBuffer(FrameBufferPtr());
@@ -328,6 +327,6 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 
 		font_->RenderText(0, 0, Color(1, 1, 0, 1), L"HDR Refract");
 		font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());
-		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+		return App3DFramework::URV_Only_New_Objs | App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 	}
 }
