@@ -65,8 +65,8 @@ int main()
 	settings.width = 800;
 	settings.height = 600;
 	settings.color_fmt = EF_ARGB8;
-	settings.depth_stencil_fmt = EF_D24S8;
-	settings.full_screen = false;
+	settings.depth_stencil_fmt = EF_D16;
+	settings.full_screen = true;
 	settings.ConfirmDevice = ConfirmDevice;
 
 	SkinnedMeshApp app("SkinnedMesh", settings);
@@ -88,7 +88,7 @@ void SkinnedMeshApp::InitObjects()
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.TTF", 16);
 
 	this->LookAt(float3(250.0f, 0.0f, 48.0f), float3(0.0f, 0.0f, 48.0f), float3(0.0f, 0.0f, 1.0f));
-	this->Proj(0.1f, 1000);
+	this->Proj(10, 500);
 
 	fpsController_.AttachCamera(this->ActiveCamera());
 	fpsController_.Scalers(0.1f, 10);
