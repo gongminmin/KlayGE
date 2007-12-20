@@ -50,7 +50,7 @@ namespace KlayGE
 			typedef std::vector<size_t> ObjIndicesTypes;
 			std::vector<ObjIndicesTypes> obj_indices(1);
 			octree_.resize(1);
-			octree_[0].bounding_box = Box(float3(0, 0, 0), float3(0, 0, 0));
+			Box bb_root(float3(0, 0, 0), float3(0, 0, 0));
 			octree_[0].parent_index = -1;
 			octree_[0].first_child_index = -1;
 			std::vector<float3> aabbs_center_in_ws(scene_objs_.size());
@@ -74,7 +74,7 @@ namespace KlayGE
 
 					Box aabb_in_ws(min, max);
 
-					octree_[0].bounding_box |= aabb_in_ws;
+					bb_root |= aabb_in_ws;
 					obj_indices[0].push_back(i);
 
 					aabbs_center_in_ws[i] = aabb_in_ws.Center();
@@ -82,11 +82,10 @@ namespace KlayGE
 				}
 			}
 			{
-				float3 const & size = octree_[0].bounding_box.Max() - octree_[0].bounding_box.Min();
+				float3 const & size = bb_root.Max() - bb_root.Min();
 				float max_dim = std::max(std::max(size.x(), size.y()), size.z()) / 2;
-				float3 const & center = octree_[0].bounding_box.Center();
-				octree_[0].bounding_box = Box(center - float3(max_dim, max_dim, max_dim),
-					center + float3(max_dim, max_dim, max_dim));
+				octree_[0].bb_center = bb_root.Center();
+				octree_[0].bb_half_size = float3(max_dim, max_dim, max_dim);
 			}
 			base_address_.push_back(0);
 			base_address_.push_back(1);
@@ -98,8 +97,8 @@ namespace KlayGE
 				{
 					if (obj_indices[i].size() > 1)
 					{
-						Box& parent_bb = octree_[i].bounding_box;
-						float3 const & parent_center = parent_bb.Center();
+						float3 const parent_center = octree_[i].bb_center;
+						float3 const new_half_size = octree_[i].bb_half_size / 2;
 						octree_[i].first_child_index = static_cast<int>(base_address_[d] + octree_.size() - original_size);
 
 						for (size_t j = 0; j < 8; ++ j)
@@ -108,43 +107,40 @@ namespace KlayGE
 							octree_node_t& new_node = octree_.back();
 							new_node.parent_index = static_cast<int>(i);
 							new_node.first_child_index = -1;
+							new_node.bb_half_size = new_half_size;
 							obj_indices.push_back(ObjIndicesTypes());
 							ObjIndicesTypes& new_node_obj_indices = obj_indices.back();
 							ObjIndicesTypes& parent_obj_indices = obj_indices[i];
 
-							new_node.bounding_box = parent_bb;
 							if (j & 1)
 							{
-								new_node.bounding_box.Min().x() = parent_center.x();
+								new_node.bb_center.x() = parent_center.x() + new_half_size.x();
 							}
 							else
 							{
-								new_node.bounding_box.Max().x() = parent_center.x();
+								new_node.bb_center.x() = parent_center.x() - new_half_size.x();
 							}
 							if (j & 2)
 							{
-								new_node.bounding_box.Min().y() = parent_center.y();
+								new_node.bb_center.y() = parent_center.y() + new_half_size.y();
+							}							 
+							else						 
+							{							 
+								new_node.bb_center.y() = parent_center.y() - new_half_size.y();
+							}							 
+							if (j & 4)					 
+							{							 
+								new_node.bb_center.z() = parent_center.z() + new_half_size.z();
+							}							 
+							else						 
+							{							 
+								new_node.bb_center.z() = parent_center.z() - new_half_size.z();
 							}
-							else
-							{
-								new_node.bounding_box.Max().y() = parent_center.y();
-							}
-							if (j & 4)
-							{
-								new_node.bounding_box.Min().z() = parent_center.z();
-							}
-							else
-							{
-								new_node.bounding_box.Max().z() = parent_center.z();
-							}
-
-							float3 const & node_center = new_node.bounding_box.Center();
-							float3 const & node_half_size = new_node.bounding_box.HalfSize();
 
 							BOOST_FOREACH(size_t obj_index, parent_obj_indices)
 							{
-								float3 const t = aabbs_center_in_ws[obj_index] - node_center;
-								float3 const e = aabbs_half_size_in_ws[obj_index] + node_half_size;
+								float3 const t = aabbs_center_in_ws[obj_index] - new_node.bb_center;
+								float3 const e = aabbs_half_size_in_ws[obj_index] + new_node.bb_half_size;
 								if ((abs(t.x()) <= e.x()) && (abs(t.y()) <= e.y()) && (abs(t.y()) <= e.y()))
 								{
 									new_node_obj_indices.push_back(obj_index);
@@ -188,7 +184,7 @@ namespace KlayGE
 						max = MathLib::maximize(max, vec);
 					}
 
-					visible_marks_[i] = this->BBVisible(0, Box(min, max));
+					visible_marks_[i] = this->BBVisible(0, (max + min) / 2, (max - min) / 2);
 				}
 				else
 				{
@@ -232,7 +228,7 @@ namespace KlayGE
 		assert(index < octree_.size());
 
 		octree_node_t& node = octree_[index];
-		Frustum::VIS const vis = frustum.Visiable(node.bounding_box);
+		Frustum::VIS const vis = frustum.Visiable(Box(node.bb_center - node.bb_half_size, node.bb_center + node.bb_half_size));
 		node.visible = vis;
 		if (Frustum::VIS_PART == vis)
 		{
@@ -248,21 +244,19 @@ namespace KlayGE
 #ifdef KLAYGE_DEBUG
 		if ((vis != Frustum::VIS_NO) && (-1 == node.first_child_index))
 		{
-			RenderablePtr box_helper(new RenderableLineBox(node.bounding_box, Color(1, 1, 1, 1)));
+			RenderablePtr box_helper(new RenderableLineBox(Box(node.bb_center - node.bb_half_size, node.bb_center + node.bb_half_size), Color(1, 1, 1, 1)));
 			box_helper->AddToRenderQueue();
 		}
 #endif
 	}
 
-	bool OCTree::BBVisible(size_t index, Box const & bb)
+	bool OCTree::BBVisible(size_t index, float3 const & bb_center, float3 const & bb_half_size)
 	{
 		assert(index < octree_.size());
 
 		octree_node_t const & node = octree_[index];
-		float3 const node_center = node.bounding_box.Center();
-		float3 const node_half_size = node.bounding_box.HalfSize();
-		float3 const t = bb.Center() - node_center;
-		float3 const e = bb.HalfSize() + node_half_size;
+		float3 const t = bb_center - node.bb_center;
+		float3 const e = bb_half_size + node.bb_half_size;
 		if ((abs(t.x()) <= e.x()) && (abs(t.y()) <= e.y()) && (abs(t.y()) <= e.y()))
 		{
 			Frustum::VIS const vis = node.visible;
@@ -280,7 +274,7 @@ namespace KlayGE
 					{
 						for (int i = node.first_child_index, i_end = node.first_child_index + 8; i < i_end; ++ i)
 						{
-							if (this->BBVisible(i, bb))
+							if (this->BBVisible(i, bb_center, bb_half_size))
 							{
 								return true;
 							}
