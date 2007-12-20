@@ -11,7 +11,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderEffect.hpp>

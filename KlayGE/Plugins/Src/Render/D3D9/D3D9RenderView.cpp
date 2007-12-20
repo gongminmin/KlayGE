@@ -14,6 +14,7 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/COMPtr.hpp>
 #include <KlayGE/ThrowErr.hpp>
+#include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGe/FrameBuffer.hpp>
 

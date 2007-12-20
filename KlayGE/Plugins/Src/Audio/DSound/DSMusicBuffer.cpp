@@ -19,6 +19,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/AudioFactory.hpp>
 #include <KlayGE/AudioDataSource.hpp>
+#include <KlayGE/Util.hpp>
 
 #include <algorithm>
 #include <cstring>
@@ -45,7 +46,7 @@ namespace KlayGE
 
 		bool const mono(1 == wfx.nChannels);
 
-		boost::shared_ptr<IDirectSound> const & dsound(static_cast<DSAudioEngine&>(Context::Instance().AudioFactoryInstance().AudioEngineInstance()).DSound());
+		boost::shared_ptr<IDirectSound> const & dsound = checked_cast<DSAudioEngine const *>(&Context::Instance().AudioFactoryInstance().AudioEngineInstance())->DSound();
 
 		// 建立 DirectSound 缓冲区，要尽量减少使用建立标志，
 		// 因为使用太多不必要的标志会影响硬件加速性能

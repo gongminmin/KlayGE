@@ -21,6 +21,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Vector.hpp>

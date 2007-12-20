@@ -11,6 +11,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/FrameBuffer.hpp>

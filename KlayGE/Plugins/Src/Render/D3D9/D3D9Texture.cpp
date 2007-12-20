@@ -40,7 +40,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Texture.hpp>

@@ -53,7 +53,8 @@ namespace KlayGE
 			octree_[0].bounding_box = Box(float3(0, 0, 0), float3(0, 0, 0));
 			octree_[0].parent_index = -1;
 			octree_[0].first_child_index = -1;
-			std::vector<Box> aabbs_in_ws(scene_objs_.size());
+			std::vector<float3> aabbs_center_in_ws(scene_objs_.size());
+			std::vector<float3> aabbs_half_size_in_ws(scene_objs_.size());
 			for (size_t i = 0; i < scene_objs_.size(); ++ i)
 			{
 				SceneObjectPtr const & obj = scene_objs_[i];
@@ -76,7 +77,8 @@ namespace KlayGE
 					octree_[0].bounding_box |= aabb_in_ws;
 					obj_indices[0].push_back(i);
 
-					aabbs_in_ws[i] = aabb_in_ws;
+					aabbs_center_in_ws[i] = aabb_in_ws.Center();
+					aabbs_half_size_in_ws[i] = aabb_in_ws.HalfSize();
 				}
 			}
 			{
@@ -89,22 +91,21 @@ namespace KlayGE
 			base_address_.push_back(0);
 			base_address_.push_back(1);
 
-			std::vector<octree_node_t, boost::pool_allocator<octree_node_t> > level;
 			for (uint32_t d = 1; d <= max_tree_depth_; ++ d)
 			{
-				level.resize(0);
+				size_t const original_size = octree_.size();
 				for (size_t i = base_address_[d - 1]; i < base_address_[d]; ++ i)
 				{
 					if (obj_indices[i].size() > 1)
 					{
 						Box& parent_bb = octree_[i].bounding_box;
 						float3 const & parent_center = parent_bb.Center();
-						octree_[i].first_child_index = static_cast<int>(base_address_[d] + level.size());
+						octree_[i].first_child_index = static_cast<int>(base_address_[d] + octree_.size() - original_size);
 
 						for (size_t j = 0; j < 8; ++ j)
 						{
-							level.push_back(octree_node_t());
-							octree_node_t& new_node = level.back();
+							octree_.push_back(octree_node_t());
+							octree_node_t& new_node = octree_.back();
 							new_node.parent_index = static_cast<int>(i);
 							new_node.first_child_index = -1;
 							obj_indices.push_back(ObjIndicesTypes());
@@ -142,10 +143,8 @@ namespace KlayGE
 
 							BOOST_FOREACH(size_t obj_index, parent_obj_indices)
 							{
-								Box const & obj_bb = aabbs_in_ws[obj_index];
-
-								float3 const t = obj_bb.Center() - node_center;
-								float3 const e = obj_bb.HalfSize() + node_half_size;
+								float3 const t = aabbs_center_in_ws[obj_index] - node_center;
+								float3 const e = aabbs_half_size_in_ws[obj_index] + node_half_size;
 								if ((abs(t.x()) <= e.x()) && (abs(t.y()) <= e.y()) && (abs(t.y()) <= e.y()))
 								{
 									new_node_obj_indices.push_back(obj_index);
@@ -157,8 +156,7 @@ namespace KlayGE
 					}
 				}
 
-				octree_.insert(octree_.end(), level.begin(), level.end());
-				base_address_.push_back(base_address_.back() + level.size());
+				base_address_.push_back(base_address_.back() + octree_.size() - original_size);
 			}
 
 			rebuild_tree_ = false;

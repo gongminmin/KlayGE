@@ -20,7 +20,6 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderView.hpp>
 #include <KlayGE/MapVector.hpp>

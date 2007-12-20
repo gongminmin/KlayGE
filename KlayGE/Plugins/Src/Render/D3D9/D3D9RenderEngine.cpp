@@ -39,6 +39,7 @@
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/COMPtr.hpp>
+#include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Viewport.hpp>

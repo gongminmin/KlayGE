@@ -403,17 +403,27 @@ void ParticleSystemApp::InputHandler(InputEngine const & /*sender*/, InputAction
 	}
 }
 
-bool particle_cmp(Particle const & lhs, Particle const & rhs)
+class particle_cmp
 {
-	float4x4 const & view = Context::Instance().AppInstance().ActiveCamera().ViewMatrix();
+public:
+	explicit particle_cmp(float4x4 const & view)
+		: view_(view)
+	{
+	}
 
-	float l_v = (lhs.pos.x() * view(0, 2) + lhs.pos.y() * view(1, 2) + lhs.pos.z() * view(2, 2) + view(3, 2))
-		/ (lhs.pos.x() * view(0, 3) + lhs.pos.y() * view(1, 3) + lhs.pos.z() * view(2, 3) + view(3, 3));
-	float r_v = (rhs.pos.x() * view(0, 2) + rhs.pos.y() * view(1, 2) + rhs.pos.z() * view(2, 2) + view(3, 2))
-		/ (rhs.pos.x() * view(0, 3) + rhs.pos.y() * view(1, 3) + rhs.pos.z() * view(2, 3) + view(3, 3));
+	bool operator()(Particle const & lhs, Particle const & rhs) const
+	{
+		float l_v = (lhs.pos.x() * view_(0, 2) + lhs.pos.y() * view_(1, 2) + lhs.pos.z() * view_(2, 2) + view_(3, 2))
+			/ (lhs.pos.x() * view_(0, 3) + lhs.pos.y() * view_(1, 3) + lhs.pos.z() * view_(2, 3) + view_(3, 3));
+		float r_v = (rhs.pos.x() * view_(0, 2) + rhs.pos.y() * view_(1, 2) + rhs.pos.z() * view_(2, 2) + view_(3, 2))
+			/ (rhs.pos.x() * view_(0, 3) + rhs.pos.y() * view_(1, 3) + rhs.pos.z() * view_(2, 3) + view_(3, 3));
 
-	return l_v > r_v;
-}
+		return l_v > r_v;
+	}
+
+private:
+	float4x4 view_;
+};
 
 uint32_t ParticleSystemApp::DoUpdate(uint32_t pass)
 {
@@ -455,7 +465,7 @@ uint32_t ParticleSystemApp::DoUpdate(uint32_t pass)
 		}
 		if (!active_particles.empty())
 		{
-			std::sort(active_particles.begin(), active_particles.end(), particle_cmp);
+			std::sort(active_particles.begin(), active_particles.end(), particle_cmp(Context::Instance().AppInstance().ActiveCamera().ViewMatrix()));
 
 			uint32_t const num_pars = static_cast<uint32_t>(active_particles.size());
 			RenderLayoutPtr rl = particles_->GetRenderable()->GetRenderLayout();

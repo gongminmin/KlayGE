@@ -40,6 +40,7 @@
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderSettings.hpp>
+#include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Util.hpp>
 

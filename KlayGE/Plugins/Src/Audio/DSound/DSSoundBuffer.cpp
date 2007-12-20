@@ -16,6 +16,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/AudioFactory.hpp>
 #include <KlayGE/AudioDataSource.hpp>
+#include <KlayGE/Util.hpp>
 
 #include <algorithm>
 #include <cstring>
@@ -73,7 +74,7 @@ namespace KlayGE
 		dsbd.dwBufferBytes		= static_cast<uint32_t>(dataSource->Size());
 		dsbd.lpwfxFormat		= &wfx;
 
-		boost::shared_ptr<IDirectSound> const & dsound(static_cast<DSAudioEngine&>(Context::Instance().AudioFactoryInstance().AudioEngineInstance()).DSound());
+		boost::shared_ptr<IDirectSound> const & dsound = checked_cast<DSAudioEngine const *>(&Context::Instance().AudioFactoryInstance().AudioEngineInstance())->DSound();
 
 		// DirectSound只能播放 PCM 数据。其他格式可能不能工作。
 		IDirectSoundBuffer* temp;
