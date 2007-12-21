@@ -51,7 +51,6 @@ namespace KlayGE
 			std::vector<ObjIndicesTypes> obj_indices(1);
 			octree_.resize(1);
 			Box bb_root(float3(0, 0, 0), float3(0, 0, 0));
-			octree_[0].parent_index = -1;
 			octree_[0].first_child_index = -1;
 			std::vector<float3> aabbs_center_in_ws(scene_objs_.size());
 			std::vector<float3> aabbs_half_size_in_ws(scene_objs_.size());
@@ -105,7 +104,6 @@ namespace KlayGE
 						{
 							octree_.push_back(octree_node_t());
 							octree_node_t& new_node = octree_.back();
-							new_node.parent_index = static_cast<int>(i);
 							new_node.first_child_index = -1;
 							new_node.bb_half_size = new_half_size;
 							obj_indices.push_back(ObjIndicesTypes());

@@ -131,7 +131,7 @@ namespace KlayGE
 		inline T
 		floor(T const & x)
 		{
-			return static_cast<T>(static_cast<int>(x));
+			return static_cast<T>(static_cast<int>(x > 0 ? x : (x - 1)));
 		}
 
 		// 取x的小数部分
@@ -139,7 +139,7 @@ namespace KlayGE
 		inline T
 		frac(T const & x)
 		{
-			return x - floor(x);
+			return x - static_cast<int>(x);
 		}
 
 		// 四舍五入
@@ -617,8 +617,8 @@ namespace KlayGE
 			temp.z() = 2 * (winVec.z() - nearPlane) / (farPlane - nearPlane) - 1;
 			temp.w() = clipW;
 
-			Matrix4_T<T> mat(Inverse(world * view * proj));
-			temp = Transform(temp, mat);
+			Matrix4_T<T> mat(inverse(world * view * proj));
+			temp = transform(temp, mat);
 
 			return Vector_T<T, 3>(temp.x(), temp.y(), temp.z()) / temp.w();
 		}

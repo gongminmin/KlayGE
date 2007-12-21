@@ -21,6 +21,8 @@
 
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Bound.hpp>
+
+#include <boost/assert.hpp>
 #include <boost/operators.hpp>
 
 namespace KlayGE
@@ -38,9 +40,11 @@ namespace KlayGE
 		{
 		}
 		Box_T(Vector_T<T, 3> const & vMin, Vector_T<T, 3> const & vMax)
+			: min_(vMin), max_(vMax)
 		{
-			min_ = MathLib::minimize(vMin, vMax);
-			max_ = MathLib::maximize(vMin, vMax);
+			BOOST_ASSERT(vMin.x() <= vMax.x());
+			BOOST_ASSERT(vMin.y() <= vMax.y());
+			BOOST_ASSERT(vMin.z() <= vMax.z());
 		}
 		Box_T(Box_T const & rhs)
 			: Bound_T<T>(rhs),
@@ -106,43 +110,16 @@ namespace KlayGE
 		}
 		Box_T const operator-() const
 		{
-			return Box_T(-this->Min(), -this->Max());
+			return Box_T(-this->Max(), -this->Min());
 		}
 
 		Vector_T<T, 3> operator[](size_t i) const
 		{
 			BOOST_ASSERT(i < 8);
 
-			Vector_T<T, 3> ret;
-			
-			if (i & 1UL)
-			{
-				ret.x() = this->Max().x();
-			}
-			else
-			{
-				ret.x() = this->Min().x();
-			}
-
-			if (i & 2UL)
-			{
-				ret.y() = this->Max().y();
-			}
-			else
-			{
-				ret.y() = this->Min().y();
-			}
-
-			if (i & 4UL)
-			{
-				ret.z() = this->Max().z();
-			}
-			else
-			{
-				ret.z() = this->Min().z();
-			}
-
-			return ret;
+			return Vector_T<T, 3>((i & 1UL) ? this->Max().x() : this->Min().x(),
+				(i & 2UL) ? this->Max().y() : this->Min().y(),
+				(i & 4UL) ? this->Max().z() : this->Min().z());
 		}
 
 		//  Ù–‘

@@ -71,7 +71,6 @@ namespace KlayGE
 			float3 bb_center;
 			float3 bb_half_size;
 
-			int parent_index;
 			int first_child_index;
 
 			Frustum::VIS visible;
