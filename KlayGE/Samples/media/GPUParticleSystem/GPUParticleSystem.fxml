@@ -25,7 +25,7 @@ void ParticlesVS(float2 tex_pos		: POSITION,
 					out float2 oTex		: TEXCOORD0,
 					out float4 oClr     : COLOR0)
 {
-	float4 pos = tex2Dlod(particle_pos_sampler, float4(tex_pos, 0, 1));
+	float4 pos = tex2Dlod(particle_pos_sampler, float4(tex_pos, 0, 0));
 
 	if (pos.w <= 0)
 	{

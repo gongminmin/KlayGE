@@ -107,4 +107,27 @@ float4 BlendPS(float2 tex : TEXCOORD0) : COLOR
 			<state name="pixel_shader" value="BlendPS()"/>
 		</pass>
 	</technique>
+
+	<shader>
+		<![CDATA[
+void NoDepthPeelingPS(float4 clr : COLOR0,
+					out float4 oClr : COLOR0)
+{
+	oClr = clr;
+}
+		]]>
+	</shader>
+
+	<technique name="NoDepthPeeling">
+		<pass name="p0">
+			<state name="blend_enable" value="true"/>
+			<state name="src_blend" value="src_alpha"/>
+			<state name="dest_blend" value="inv_src_alpha"/>
+
+			<state name="depth_mask" value="false"/>
+
+			<state name="vertex_shader" value="DepthPeelingVS()"/>
+			<state name="pixel_shader" value="NoDepthPeelingPS()"/>
+		</pass>
+	</technique>
 </effect>

@@ -1,6 +1,8 @@
 <?xml version='1.0'?>
 
 <effect>
+	<include name="../../../RenderFX/Lighting.fxml"/>
+	
 	<parameter type="float4x4" name="ViewProj" semantic="VIEWPROJECTION"/>
 	<parameter type="float3" name="light_in_world"/>
 
@@ -24,7 +26,7 @@ void InstanceVS(float4 pos			: POSITION,
 	oPos = mul(pos_ws, ViewProj);
 	
 	normal = mul(normal, (float3x3)model);
-	oClr = float4(clr.rgb * dot(normal, normalize(light_in_world - pos_ws.xyz)), clr.a);
+	oClr = float4(clr.rgb * point_lighting(light_in_world, pos_ws, normal), clr.a);
 }
 
 float4 PS(float4 clr : COLOR) : COLOR
@@ -49,18 +51,14 @@ float4 PS(float4 clr : COLOR) : COLOR
 void NormalMeshVS(float4 pos			: POSITION,
 					float3 normal		: NORMAL,
 
-					float4 row0			: TEXCOORD1,
-					float4 row1			: TEXCOORD2,
-					float4 row2			: TEXCOORD3,
-					float4 clr			: COLOR0,
-
 					out float4 oPos		: POSITION,
 					out float4 oClr		: COLOR)
 {
-	oPos = mul(mul(pos, modelmat), ViewProj);
+	float4 pos_ws = mul(pos, modelmat);
+	oPos = mul(pos_ws, ViewProj);
 	
 	normal = mul(normal, (float3x3)modelmat);
-	oClr = float4(color.rgb * dot(normal, light_in_world - pos.xyz), color.a);
+	oClr = float4(color.rgb * point_lighting(light_in_world, pos_ws, normal), color.a);
 }
 		]]>
 	</shader>

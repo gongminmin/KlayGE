@@ -107,11 +107,10 @@ namespace
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
 
-			float4x4 const & model = float4x4::Identity();
 			float4x4 const & view = app.ActiveCamera().ViewMatrix();
 			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
-			*(technique_->Effect().ParameterByName("ViewProj")) = model * view * proj;
+			*(technique_->Effect().ParameterByName("ViewProj")) = view * proj;
 			*(technique_->Effect().ParameterByName("light_in_world")) = float3(2, 2, -3);
 		}
 	};
@@ -310,14 +309,14 @@ void Instancing::CheckBoxHandler(UICheckBox const & /*sender*/)
 	{
 		for (int i = 0; i < NUM_INSTANCE; ++ i)
 		{
-			checked_pointer_cast<Teapot>(scene_objs_[i])->SetRenderable(renderMesh_);
+			checked_pointer_cast<Teapot>(scene_objs_[i])->SetRenderable(renderInstance_);
 		}
 	}
 	else
 	{
 		for (int i = 0; i < NUM_INSTANCE; ++ i)
 		{
-			checked_pointer_cast<Teapot>(scene_objs_[i])->SetRenderable(renderInstance_);
+			checked_pointer_cast<Teapot>(scene_objs_[i])->SetRenderable(renderMesh_);
 		}
 	}
 }

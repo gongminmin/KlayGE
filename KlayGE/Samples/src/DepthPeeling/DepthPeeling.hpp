@@ -4,6 +4,7 @@
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/CameraController.hpp>
+#include <KlayGE/UI.hpp>
 #include <boost/array.hpp>
 
 class DepthPeelingApp : public KlayGE::App3DFramework
@@ -18,6 +19,7 @@ private:
 	KlayGE::uint32_t DoUpdate(KlayGE::uint32_t pass);
 
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
+	void CheckBoxHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
 	KlayGE::SceneObjectPtr polygon_;
@@ -38,6 +40,9 @@ private:
 	KlayGE::PostProcessPtr blend_pp_;
 
 	KlayGE::uint32_t num_layers_;
+
+	bool use_depth_peeling_;
+	KlayGE::UIDialogPtr dialog_;
 };
 
 #endif		// _DEPTHPEELING_HPP

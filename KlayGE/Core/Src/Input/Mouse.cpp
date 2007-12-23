@@ -25,6 +25,8 @@ namespace KlayGE
 	InputMouse::InputMouse()
 		: index_(false)
 	{
+		buttons_[0].assign(false);
+		buttons_[1].assign(false);
 	}
 
 	InputMouse::~InputMouse()

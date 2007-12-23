@@ -52,6 +52,14 @@ namespace
 		{
 		}
 
+		void DepthPeelingEnabled(bool dp)
+		{
+			if (!dp)
+			{
+				technique_ = technique_->Effect().TechniqueByName("NoDepthPeeling");
+			}
+		}
+
 		void FirstPass(bool fp)
 		{
 			if (fp)
@@ -110,6 +118,15 @@ namespace
 			}
 		}
 
+		void DepthPeelingEnabled(bool dp)
+		{
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			{
+				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->DepthPeelingEnabled(dp);
+			}
+		}
+
 		void FirstPass(bool fp)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
@@ -138,6 +155,11 @@ namespace
 		}
 	};
 
+
+	enum
+	{
+		UseDepthPeeling
+	};
 
 	enum
 	{
@@ -227,6 +249,12 @@ void DepthPeelingApp::InitObjects()
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	blend_pp_.reset(new BlendPostProcess);
+
+	dialog_ = UIManager::Instance().MakeDialog();
+	dialog_->AddControl(UIControlPtr(new UICheckBox(dialog_, UseDepthPeeling, L"Depth peeling",
+                            60, 550, 350, 24, false, 0, false)));
+	dialog_->Control<UICheckBox>(UseDepthPeeling)->SetChecked(true);
+	dialog_->Control<UICheckBox>(UseDepthPeeling)->OnChangedEvent().connect(boost::bind(&DepthPeelingApp::CheckBoxHandler, this, _1));
 }
 
 void DepthPeelingApp::OnResize(uint32_t width, uint32_t height)
@@ -254,6 +282,8 @@ void DepthPeelingApp::OnResize(uint32_t width, uint32_t height)
 	}
 
 	blend_pp_->Destinate(FrameBufferPtr());
+
+	dialog_->GetControl(UseDepthPeeling)->SetLocation(60, height - 50);
 }
 
 void DepthPeelingApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -266,6 +296,11 @@ void DepthPeelingApp::InputHandler(InputEngine const & /*sender*/, InputAction c
 	}
 }
 
+void DepthPeelingApp::CheckBoxHandler(UICheckBox const & /*sender*/)
+{
+	use_depth_peeling_ = dialog_->Control<UICheckBox>(UseDepthPeeling)->GetChecked();
+}
+
 uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 {
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
@@ -276,15 +311,43 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 	{
 	case 0:
 		fpcController_.Update();
+		UIManager::Instance().HandleInput();
 
-		num_layers_ = 1;
+		if (use_depth_peeling_)
+		{
+			num_layers_ = 1;
 
-		checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(true);
-		re.BindFrameBuffer(peeling_fbs_[0]);
-		peeled_views_[0]->Clear(Color(0, 0, 0, 0));
-		depth_view_->Clear(Color(0, 0, 0, 0));
-		default_depth_view_->Clear(1.0f);
-		return App3DFramework::URV_Need_Flush;
+			checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(true);
+			re.BindFrameBuffer(peeling_fbs_[0]);
+			peeled_views_[0]->Clear(Color(0, 0, 0, 0));
+			depth_view_->Clear(Color(0, 0, 0, 0));
+			default_depth_view_->Clear(1.0f);
+			return App3DFramework::URV_Need_Flush;
+		}
+		else
+		{
+			checked_pointer_cast<PolygonObject>(polygon_)->DepthPeelingEnabled(false);
+
+			re.BindFrameBuffer(FrameBufferPtr());
+			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
+			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+
+			UIManager::Instance().Render();
+
+			std::wostringstream stream;
+			stream << this->FPS();
+
+			font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Depth Peeling");
+			font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());
+
+			stream.str(L"");
+			stream << sceneMgr.NumRenderablesRendered() << " Renderables "
+				<< sceneMgr.NumPrimitivesRendered() << " Primitives "
+				<< sceneMgr.NumVerticesRendered() << " Vertices";
+			font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str());
+
+			return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+		}
 
 	case 1:
 		checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(false);
@@ -327,6 +390,8 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 				peeling_fbs_[num_layers_ - 1 - i]->RequiresFlipping());
 			blend_pp_->Apply();
 		}
+
+		UIManager::Instance().Render();
 
 		std::wostringstream stream;
 		stream << this->FPS();
