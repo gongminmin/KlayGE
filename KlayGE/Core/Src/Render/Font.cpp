@@ -335,7 +335,7 @@ namespace
 
 				uint16_t lastIndex(static_cast<uint16_t>(vertices_.size()));
 
-				BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
+				BOOST_FOREACH(BOOST_TYPEOF(lines[i].second)::const_reference ch, lines[i].second)
 				{
 					BOOST_AUTO(cmiter, charInfoMap_.find(ch));
 					float const w = cmiter->second.Width() * width_scale;

@@ -276,9 +276,9 @@ namespace KlayGE
 			string.second.clear();
 		}
 
-		for (size_t i = 0; i < dialogs_.size(); ++ i)
+		BOOST_FOREACH(BOOST_TYPEOF(dialogs_)::reference dialog, dialogs_)
 		{
-			dialogs_[i]->Render();
+			dialog->Render();
 		}
 
 		BOOST_FOREACH(BOOST_TYPEOF(rects_)::reference rect, rects_)
@@ -315,6 +315,9 @@ namespace KlayGE
 		}
 
 		std::pair<std::vector<UIManager::VertexFormat>, std::vector<uint16_t> >& rect = rects_[texture];
+		rect.first.reserve(rect.first.size() + 4);
+		rect.second.reserve(rect.second.size() + 6);
+
 		uint16_t const last_index = static_cast<uint16_t>(rect.first.size());
 		rect.second.push_back(last_index + 0);
 		rect.second.push_back(last_index + 1);
@@ -324,16 +327,16 @@ namespace KlayGE
 		rect.second.push_back(last_index + 0);
 
 		rect.first.push_back(UIManager::VertexFormat(pos + float3(0, 0, 0),
-			float4(&clrs[0].r()),
+			*reinterpret_cast<float4 const *>(&clrs[0]),
 			float2(texcoord.left(), texcoord.top())));
 		rect.first.push_back(UIManager::VertexFormat(pos + float3(width, 0, 0),
-			float4(&clrs[1].r()),
+			*reinterpret_cast<float4 const *>(&clrs[1]),
 			float2(texcoord.right(), texcoord.top())));
 		rect.first.push_back(UIManager::VertexFormat(pos + float3(width, height, 0),
-			float4(&clrs[2].r()),
+			*reinterpret_cast<float4 const *>(&clrs[2]),
 			float2(texcoord.right(), texcoord.bottom())));
 		rect.first.push_back(UIManager::VertexFormat(pos + float3(0, height, 0),
-			float4(&clrs[3].r()),
+			*reinterpret_cast<float4 const *>(&clrs[3]),
 			float2(texcoord.left(), texcoord.bottom())));
 	}
 
@@ -342,8 +345,7 @@ namespace KlayGE
 	{
 		strings_[font_cache_[font_index]].push_back(string_cache());
 		string_cache& sc = strings_[font_cache_[font_index]].back();
-		sc.rc = Rect(static_cast<float>(rc.left()),
-			static_cast<float>(rc.top()), static_cast<float>(rc.right()), static_cast<float>(rc.bottom()));
+		sc.rc = rc;
 		sc.depth = depth;
 		sc.clr = clr;
 		sc.text = strText;
@@ -352,11 +354,11 @@ namespace KlayGE
 
 	void UIManager::HandleInput()
 	{
-		for (size_t i = 0; i < dialogs_.size(); ++ i)
+		BOOST_FOREACH(BOOST_TYPEOF(dialogs_)::reference dialog, dialogs_)
 		{
-			if (dialogs_[i]->GetVisible())
+			if (dialog->GetVisible())
 			{
-				dialogs_[i]->HandleInput();
+				dialog->HandleInput();
 			}
 		}
 	}

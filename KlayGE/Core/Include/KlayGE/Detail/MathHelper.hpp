@@ -138,7 +138,7 @@ namespace KlayGE
 			template <typename U>
 			static void DoCopy(T out[N], U const rhs[N])
 			{
-				out[0] = rhs[0];
+				out[0] = static_cast<T>(rhs[0]);
 				vector_helper<T, N - 1>::DoCopy(out + 1, rhs + 1);
 			}
 
@@ -201,7 +201,7 @@ namespace KlayGE
 			template <typename U>
 			static void DoCopy(T out[1], U const rhs[1])
 			{
-				out[0] = rhs[0];
+				out[0] = static_cast<T>(rhs[0]);
 			}
 
 			static void DoAssign(T out[1], T const & rhs)

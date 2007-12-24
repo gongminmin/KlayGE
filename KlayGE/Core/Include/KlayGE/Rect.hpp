@@ -143,10 +143,7 @@ namespace KlayGE
 		template <typename U>
 		Rect_T& operator=(Rect_T<U> const & rhs)
 		{
-			if (this != &rhs)
-			{
-				rect_ = rhs.rect_;
-			}
+			rect_ = rhs.rect_;
 			return *this;
 		}
 
