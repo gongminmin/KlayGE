@@ -53,7 +53,7 @@
 </ul>
 <h4>D3D9 Rendering System和DSound Audio System需要：</h4>
 <ul>
-	<li>DirectX SDK June 2007，从<a href="http://msdn.microsoft.com/directx" target="_blank">http://msdn.microsoft.com/directx</a>下载</li>
+	<li>DirectX SDK November 2007，从<a href="http://msdn.microsoft.com/directx" target="_blank">http://msdn.microsoft.com/directx</a>下载</li>
 </ul>
 <h4>DShow Show System需要：</h4>
 <ul>
@@ -61,15 +61,15 @@
 </ul>
 <h4>OggVorbis Audio Datasource需要：</h4>
 <ul>
-	<li>libogg和libvorbis，从<a href="http://xiph.org/downloads/" target="_blank">http://xiph.org/downloads/</a>下载，需要把它编译成static库。</li>
+	<li>libogg 1.1.3和libvorbis 1.2.0，从<a href="http://xiph.org/downloads/" target="_blank">http://xiph.org/downloads/</a>下载，需要把它编译成static库。</li>
 </ul>
 <h4>OpenAL Audio System需要：</h4>
 <ul>
-	<li>OpenAL SDK，从<a href="http://www.openal.org/downloads.html" target="_blank">http://www.openal.org/downloads.html</a>下载</li>
+	<li>OpenAL SDK 1.1，从<a href="http://www.openal.org/downloads.html" target="_blank">http://www.openal.org/downloads.html</a>下载</li>
 </ul>
 <h4>OpenGL Rendering System需要：</h4>
 <ul>
-	<li>NVIDIA Cg，从<a href="http://developer.nvidia.com/object/cg_toolkit.html" target="_blank">http://developer.nvidia.com/object/cg_toolkit.html</a>下载</li>
+	<li>NVIDIA Cg 2.0，从<a href="http://developer.nvidia.com/object/cg_toolkit.html" target="_blank">http://developer.nvidia.com/object/cg_toolkit.html</a>下载</li>
 </ul>
 <p>由于KlayGE在VC下使用的运行库是多线程的DLL，所以需要把<strong>所有</strong>连接到exe的lib的运行库改为多线程DLL（Project-  &gt;Properties-&gt;Configuration Properties-&gt;C/C++-&gt;Code Generation-&gt;RuntimeLibrary，选择Multi-threaded Debug DLL/Multi-threaded DLL）。</p>
 <p>另外，用VC编译Release版的Boost和FreeType需要定义_SECURE_SCL=0宏（在Project-&gt;Properties-&gt;Configuration Properties-&gt;C/C++-&gt;Preprocessor-&gt;Preprocessor Definitions中添加）。</p>
