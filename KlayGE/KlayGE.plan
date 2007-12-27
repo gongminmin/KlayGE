@@ -1,8 +1,8 @@
-Will show up in KlayGE 3.6:
-GUI
-More script-related support
+Will show up in KlayGE 3.7:
+Depth peeling
 
 TBD:
 Deferred shading
-Depth peeling
 Vector texture font
+Show system's audio output
+Tessellator

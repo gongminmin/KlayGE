@@ -5,7 +5,7 @@
 	<parameter type="float4x4" name="proj"/>
 	<parameter type="float4x4" name="modelviewIT"/>
 	<parameter type="float" name="currentAngle"/>
-	<parameter type="float3" name="lightDir" x="0" y="0" z="1"/>
+	<parameter type="float3" name="lightDir"/>
 
 	<parameter type="float" name="half_length"/>
 	<parameter type="float" name="half_width"/>

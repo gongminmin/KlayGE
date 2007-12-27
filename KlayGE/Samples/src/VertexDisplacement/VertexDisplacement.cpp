@@ -49,6 +49,7 @@ namespace
 			*(technique_->Effect().ParameterByName("half_length")) = LENGTH / 2.0f;
 			*(technique_->Effect().ParameterByName("half_width")) = WIDTH / 2.0f;
 			*(technique_->Effect().ParameterByName("flagSampler")) = LoadTexture("Flag.dds");
+			*(technique_->Effect().ParameterByName("lightDir")) = float3(0, 0, 1);
 		}
 
 		void OnRenderBegin()
