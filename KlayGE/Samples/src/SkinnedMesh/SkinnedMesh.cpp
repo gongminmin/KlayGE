@@ -66,7 +66,7 @@ int main()
 	settings.height = 600;
 	settings.color_fmt = EF_ARGB8;
 	settings.depth_stencil_fmt = EF_D16;
-	settings.full_screen = true;
+	settings.full_screen = false;
 	settings.ConfirmDevice = ConfirmDevice;
 
 	SkinnedMeshApp app("SkinnedMesh", settings);

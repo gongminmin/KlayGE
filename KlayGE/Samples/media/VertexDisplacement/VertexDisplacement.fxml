@@ -1,6 +1,8 @@
 <?xml version='1.0'?>
 
 <effect>
+	<include name="../../../RenderFX/Lighting.fxml"/>
+
 	<parameter type="float4x4" name="modelview" semantic="WORLDVIEW"/>
 	<parameter type="float4x4" name="proj"/>
 	<parameter type="float4x4" name="modelviewIT"/>
@@ -33,7 +35,7 @@ void VertexDisplacementVS(float4 pos			: POSITION,
 	float3 normal = mul(normalize(cross(x_dir, y_dir)), (float3x3)modelviewIT);
 
 	oPos = mul(mul(v, modelview), proj);
-	oClr = float4(max(0, dot(lightDir, normal)).xxx, 1);
+	oClr = float4(directional_lighting(lightDir, normal).xxx, 1);
 	oTexcoord0 = texcoord0;
 }
 

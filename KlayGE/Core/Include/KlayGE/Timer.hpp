@@ -27,6 +27,14 @@ namespace KlayGE
 	public:
 		Timer()
 		{
+#ifdef KLAYGE_PLATFORM_WINDOWS
+			LARGE_INTEGER frequency;
+			QueryPerformanceFrequency(&frequency);
+			cps_ = static_cast<uint64_t>(frequency.QuadPart);
+#else
+			cps_ = CLOCKS_PER_SEC;
+#endif
+
 			this->restart();
 		} // postcondition: elapsed()==0
 		void restart()
@@ -70,17 +78,12 @@ namespace KlayGE
 	private:
 		uint64_t clocks_per_sec() const
 		{
-#ifdef KLAYGE_PLATFORM_WINDOWS
-			LARGE_INTEGER frequency;
-			QueryPerformanceFrequency(&frequency);
-			return static_cast<uint64_t>(frequency.QuadPart);
-#else
-			return CLOCKS_PER_SEC;
-#endif
+			return cps_;
 		}
 
 	private:
 		double start_time_;
+		uint64_t cps_;
 	};
 }
 
