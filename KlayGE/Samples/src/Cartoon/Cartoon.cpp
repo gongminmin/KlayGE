@@ -14,6 +14,7 @@
 #include <KlayGE/Sampler.hpp>
 #include <KlayGE/KMesh.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Util.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
@@ -43,77 +44,33 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			effect_ = rf.LoadEffect("Cartoon.kfx");
-
-			*(effect_->ParameterByName("toonmap_sampler")) = LoadTexture("toon.dds");
+			technique_ = rf.LoadEffect("Cartoon.kfx")->TechniqueByName("NormalDepth");
 		}
 
-		void Pass(int i)
+		void BuildMeshInfo()
 		{
-			switch (i)
-			{
-			case 0:
-				{
-					float rotX(std::clock() / 700.0f);
-					float rotY(std::clock() / 700.0f);
-
-					model_mat_ = MathLib::rotation_x(rotX) * MathLib::rotation_y(rotY);
-				}
-				technique_ = effect_->TechniqueByName("NormalDepth");
-				break;
-
-			case 1:
-				technique_ = effect_->TechniqueByName("Cartoon");
-				break;
-			}
-		}
-
-		void CartoonStyle(bool cs)
-		{
-			*(effect_->ParameterByName("cartoon_style")) = cs;
-		}
-
-		void UpdateTexture(TexturePtr const & normal_depth_tex, bool flipping)
-		{
-			*(effect_->ParameterByName("normal_depth_sampler")) = normal_depth_tex;
-			if (normal_depth_tex)
-			{
-				*(effect_->ParameterByName("inv_width")) = 2.0f / normal_depth_tex->Width(0);
-				*(effect_->ParameterByName("inv_height")) = 2.0f / normal_depth_tex->Height(0);
-			}
-
-			*(effect_->ParameterByName("flipping")) = flipping ? -1 : +1;
 		}
 
 		void OnRenderBegin()
 		{
-			App3DFramework const & app = Context::Instance().AppInstance();
+			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 
-			float4x4 const & view = app.ActiveCamera().ViewMatrix();
-			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
+			float rotX(std::clock() / 700.0f);
+			float rotY(std::clock() / 700.0f);
+			model_mat_ = MathLib::rotation_x(rotX) * MathLib::rotation_y(rotY);
 
-			*(effect_->ParameterByName("model_view")) = model_mat_ * view;
-			*(effect_->ParameterByName("proj")) = proj;
+			float4x4 const & view = camera.ViewMatrix();
+			float4x4 const & proj = camera.ProjMatrix();
 
-			*(effect_->ParameterByName("light_in_model")) = MathLib::transform_coord(float3(2, 2, -3),
-																	MathLib::inverse(model_mat_));
-			*(effect_->ParameterByName("eye_in_model")) = MathLib::transform_coord(app.ActiveCamera().EyePos(),
-																	MathLib::inverse(model_mat_));
+			*(technique_->Effect().ParameterByName("model_view")) = model_mat_ * view;
+			*(technique_->Effect().ParameterByName("proj")) = proj;
 
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2;
-			float const x_offset = texel_to_pixel.x() / re.CurFrameBuffer()->Width();
-			float const y_offset = texel_to_pixel.y() / re.CurFrameBuffer()->Height();
-			*(effect_->ParameterByName("offset")) = float2(x_offset, y_offset);
-
-			*(effect_->ParameterByName("depth_min")) = app.ActiveCamera().NearPlane();
-			*(effect_->ParameterByName("inv_depth_range")) = 1 / (app.ActiveCamera().FarPlane() - app.ActiveCamera().NearPlane());
+			*(technique_->Effect().ParameterByName("depth_min")) = camera.NearPlane();
+			*(technique_->Effect().ParameterByName("inv_depth_range")) = 1 / (camera.FarPlane() - camera.NearPlane());
 		}
 
 	private:
 		float4x4 model_mat_;
-
-		RenderEffectPtr effect_;
 	};
 
 	class TorusObject : public SceneObjectHelper
@@ -123,6 +80,46 @@ namespace
 			: SceneObjectHelper(SOA_Cullable)
 		{
 			renderable_ = LoadKModel("torus.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderTorus>())->Mesh(0);
+		}
+	};
+
+
+	class CartoonPostProcess : public PostProcess
+	{
+	public:
+		CartoonPostProcess()
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Cartoon.kfx")->TechniqueByName("Cartoon"))
+		{
+			*(technique_->Effect().ParameterByName("toonmap_sampler")) = LoadTexture("toon.dds");
+		}
+
+		void Source(TexturePtr const & tex, bool flipping)
+		{
+			PostProcess::Source(tex, flipping);
+			if (tex)
+			{
+				*(technique_->Effect().ParameterByName("inv_width")) = 2.0f / tex->Width(0);
+				*(technique_->Effect().ParameterByName("inv_height")) = 2.0f / tex->Height(0);
+			}
+		}
+
+		void OnRenderBegin()
+		{
+			PostProcess::OnRenderBegin();
+
+			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
+
+			float4x4 const & view = camera.ViewMatrix();
+			float4x4 const & proj = camera.ProjMatrix();
+			float4x4 const inv_proj = MathLib::inverse(proj);
+			*(technique_->Effect().ParameterByName("upper_left")) = MathLib::transform_coord(float3(-1, 1, 1), inv_proj);
+			*(technique_->Effect().ParameterByName("upper_right")) = MathLib::transform_coord(float3(1, 1, 1), inv_proj);
+			*(technique_->Effect().ParameterByName("lower_left")) = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
+			*(technique_->Effect().ParameterByName("lower_right")) = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
+
+			*(technique_->Effect().ParameterByName("depth_min")) = camera.NearPlane();
+			*(technique_->Effect().ParameterByName("depth_range")) = camera.FarPlane() - camera.NearPlane();
+			*(technique_->Effect().ParameterByName("light_in_view")) = MathLib::transform_coord(float3(2, 2, -3), view);
 		}
 	};
 
@@ -209,6 +206,8 @@ void Cartoon::InitObjects()
 	input_handler->connect(boost::bind(&Cartoon::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
+	cartoon_.reset(new CartoonPostProcess);
+
 	dialog_ = UIManager::Instance().MakeDialog();
 	dialog_->AddControl(UIControlPtr(new UICheckBox(dialog_, Switch_Cartoon, L"Cartoon style",
                             60, 550, 350, 24, false, 0, false)));
@@ -224,6 +223,9 @@ void Cartoon::OnResize(uint32_t width, uint32_t height)
 	normal_depth_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F);
 	normal_depth_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*normal_depth_tex_, 0));
 	normal_depth_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));
+
+	cartoon_->Source(normal_depth_tex_, normal_depth_buffer_->RequiresFlipping());
+	cartoon_->Destinate(FrameBufferPtr());
 
 	dialog_->GetControl(Switch_Cartoon)->SetLocation(60, height - 50);
 }
@@ -245,47 +247,59 @@ void Cartoon::CheckBoxHandler(UICheckBox const & /*sender*/)
 
 uint32_t Cartoon::DoUpdate(uint32_t pass)
 {
+	if (0 == pass)
+	{
+		fpcController_.Update();
+		UIManager::Instance().HandleInput();
+	}
+
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-	switch (pass)
+	if (cartoon_style_)
 	{
-	case 0:
-		fpcController_.Update();
+		switch (pass)
+		{
+		case 0:
+			renderEngine.BindFrameBuffer(normal_depth_buffer_);
+			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
+			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+			return App3DFramework::URV_Need_Flush;
 
-		UIManager::Instance().HandleInput();
-
-		renderEngine.BindFrameBuffer(normal_depth_buffer_);
-		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
-		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
-		checked_pointer_cast<RenderTorus>(torus_->GetRenderable())->Pass(0);
-		return App3DFramework::URV_Need_Flush;
-
-	case 1:
+		case 1:
+			renderEngine.BindFrameBuffer(FrameBufferPtr());
+			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+			cartoon_->Apply();
+			break;
+		}
+	}
+	else
+	{
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
 		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
 		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+	}
 
-		checked_pointer_cast<RenderTorus>(torus_->GetRenderable())->UpdateTexture(normal_depth_tex_,
-			normal_depth_buffer_->RequiresFlipping());
-		checked_pointer_cast<RenderTorus>(torus_->GetRenderable())->Pass(1);
-		checked_pointer_cast<RenderTorus>(torus_->GetRenderable())->CartoonStyle(cartoon_style_);
-		return App3DFramework::URV_Need_Flush;
+	UIManager::Instance().Render();
 
-	default:
-		UIManager::Instance().Render();
+	FrameBuffer& rw = *checked_pointer_cast<FrameBuffer>(renderEngine.CurFrameBuffer());
 
-		FrameBuffer& rw = *checked_pointer_cast<FrameBuffer>(renderEngine.CurFrameBuffer());
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"¿¨Í¨äÖÈ¾");
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description());
 
-		font_->RenderText(0, 0, Color(1, 1, 0, 1), L"¿¨Í¨äÖÈ¾");
-		font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description());
+	std::wostringstream stream;
+	stream << rw.DepthBits() << " bits depth " << rw.StencilBits() << " bits stencil";
+	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str());
 
-		std::wostringstream stream;
-		stream << rw.DepthBits() << " bits depth " << rw.StencilBits() << " bits stencil";
-		font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str());
+	stream.str(L"");
+	stream << this->FPS() << " FPS";
+	font_->RenderText(0, 54, Color(1, 1, 0, 1), stream.str());
 
-		stream.str(L"");
-		stream << this->FPS() << " FPS";
-		font_->RenderText(0, 54, Color(1, 1, 0, 1), stream.str());
+	if (!cartoon_style_ && (0 == pass))
+	{
+		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+	}
+	else
+	{
 		return App3DFramework::URV_Only_New_Objs | App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 	}
 }

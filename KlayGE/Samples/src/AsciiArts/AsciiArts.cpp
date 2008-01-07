@@ -380,6 +380,8 @@ uint32_t AsciiArtsApp::DoUpdate(uint32_t pass)
 			//SaveTexture(downsample_tex_, "downsample_tex.dds");
 
 			// Æ¥Åä£¬×îÖÕäÖÈ¾
+			renderEngine.BindFrameBuffer(FrameBufferPtr());
+			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
 			ascii_arts_->Apply();
 			break;
 		}
@@ -390,8 +392,6 @@ uint32_t AsciiArtsApp::DoUpdate(uint32_t pass)
 		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
 		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
 	}
-
-	renderEngine.BindFrameBuffer(FrameBufferPtr());
 
 	UIManager::Instance().Render();
 

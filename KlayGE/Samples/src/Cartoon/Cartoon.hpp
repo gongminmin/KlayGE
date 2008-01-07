@@ -28,6 +28,7 @@ private:
 
 	KlayGE::FrameBufferPtr normal_depth_buffer_;
 	KlayGE::TexturePtr normal_depth_tex_;
+	KlayGE::PostProcessPtr cartoon_;
 
 	bool cartoon_style_;
 
