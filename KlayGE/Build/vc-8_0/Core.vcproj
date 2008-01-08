@@ -1270,6 +1270,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Src\Kernel\Timer.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Src\Kernel\Util.cpp"
 					>
 				</File>

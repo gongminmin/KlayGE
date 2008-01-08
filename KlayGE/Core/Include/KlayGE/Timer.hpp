@@ -27,13 +27,16 @@ namespace KlayGE
 	public:
 		Timer()
 		{
+			if (0 == cps_)
+			{
 #ifdef KLAYGE_PLATFORM_WINDOWS
-			LARGE_INTEGER frequency;
-			QueryPerformanceFrequency(&frequency);
-			cps_ = static_cast<uint64_t>(frequency.QuadPart);
+				LARGE_INTEGER frequency;
+				QueryPerformanceFrequency(&frequency);
+				cps_ = static_cast<uint64_t>(frequency.QuadPart);
 #else
-			cps_ = CLOCKS_PER_SEC;
+				cps_ = CLOCKS_PER_SEC;
 #endif
+			}
 
 			this->restart();
 		} // postcondition: elapsed()==0
@@ -52,16 +55,16 @@ namespace KlayGE
 		double elapsed_max() const   
 		{
 #ifdef KLAYGE_PLATFORM_WINDOWS
-			return static_cast<double>(std::numeric_limits<uint64_t>::max()) / this->clocks_per_sec() - start_time_;
+			return static_cast<double>(std::numeric_limits<uint64_t>::max()) / cps_ - start_time_;
 #else
-			return static_cast<double>(std::numeric_limits<std::clock_t>::max()) / this->clocks_per_sec() - start_time_;
+			return static_cast<double>(std::numeric_limits<std::clock_t>::max()) / cps_ - start_time_;
 #endif
 		}
 
 		// return minimum value for elapsed()
 		double elapsed_min() const
 		{
-			return 1.0 / this->clocks_per_sec();
+			return 1.0 / cps_;
 		}
 
 		double current_time() const
@@ -69,21 +72,16 @@ namespace KlayGE
 #ifdef KLAYGE_PLATFORM_WINDOWS
 			LARGE_INTEGER count;
 			QueryPerformanceCounter(&count);
-			return static_cast<double>(count.QuadPart) / this->clocks_per_sec();
+			return static_cast<double>(count.QuadPart) / cps_;
 #else
-			return std::clock() / this->clocks_per_sec();
+			return std::clock() / cps_;
 #endif
 		}
 
 	private:
-		uint64_t clocks_per_sec() const
-		{
-			return cps_;
-		}
-
-	private:
 		double start_time_;
-		uint64_t cps_;
+
+		static uint64_t cps_;
 	};
 }
 

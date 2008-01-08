@@ -468,8 +468,7 @@ uint32_t GPUParticleSystemApp::DoUpdate(uint32_t /*pass*/)
 	checked_pointer_cast<ParticlesObject>(particles_)->PosTexture(gpu_ps->PosTexture());
 
 	re.BindFrameBuffer(FrameBufferPtr());
-	re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
-	re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+	re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
 	fpcController_.Update();
 

@@ -90,7 +90,7 @@ GPU Particle System
 2) GPU多遍计算
 3) Vertex texture fetch
 
-需求：Geforce 6以上。
+需求：Geforce 6以上或Radeon HD 2400以上。
 渲染引擎支持：D3D9。
 
 ====================================================================================

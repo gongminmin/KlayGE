@@ -421,8 +421,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 	case 5:
 		{
 			renderEngine.BindFrameBuffer(shadow_buffers_[pass]);
-			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
-			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+			renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
 			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->LightMatrices(light_model_);
 			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->LightMatrices(light_model_);
@@ -432,8 +431,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 	default:
 		{
 			renderEngine.BindFrameBuffer(FrameBufferPtr());
-			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
-			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+			renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
 			//SaveTexture(shadow_cube_tex_, "shadow_tex.dds");
 

@@ -61,4 +61,39 @@ namespace KlayGE
 	{
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 	}
+
+	void OGLFrameBuffer::Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil)
+	{
+		GLbitfield ogl_flags = 0;
+		if (flags & CBM_Color)
+		{
+			ogl_flags |= GL_COLOR_BUFFER_BIT;
+		}
+		if (flags & CBM_Depth)
+		{
+			ogl_flags |= GL_DEPTH_BUFFER_BIT;
+		}
+		if (flags & CBM_Stencil)
+		{
+			ogl_flags |= GL_STENCIL_BUFFER_BIT;
+		}
+
+		GLint old_fbo;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &old_fbo);
+
+		if (static_cast<GLuint>(old_fbo) != fbo_)
+		{
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
+		}
+
+		glClearColor(clr.r(), clr.g(), clr.b(), clr.a());
+		glClearDepth(depth);
+		glClearStencil(stencil);
+		glClear(ogl_flags);
+
+		if (static_cast<GLuint>(old_fbo) != fbo_)
+		{
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, old_fbo);
+		}
+	}
 }

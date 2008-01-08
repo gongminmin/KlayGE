@@ -103,6 +103,74 @@ namespace KlayGE
 		TIF(d3dDevice->SetDepthStencilSurface(this->D3DRenderZBuffer().get()));
 	}
 
+	void D3D9FrameBuffer::Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil)
+	{	
+		DWORD d3d_flags = 0;
+		if (flags & CBM_Color)
+		{
+			d3d_flags |= D3DCLEAR_TARGET;
+		}
+		if (flags & CBM_Depth)
+		{
+			d3d_flags |= D3DCLEAR_ZBUFFER;
+		}
+		if (flags & CBM_Stencil)
+		{
+			d3d_flags |= D3DCLEAR_STENCIL;
+		}
+
+		RenderEngine const & re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&re)->D3DDevice();
+
+		std::vector<IDirect3DSurface9*> old_rt(re.DeviceCaps().max_simultaneous_rts, NULL);
+		if (flags & CBM_Color)
+		{
+			for (uint32_t i = 0; i < old_rt.size(); ++ i)
+			{
+				d3d_device->GetRenderTarget(i, &old_rt[i]);
+			}
+			for (uint32_t i = 0; i < re.DeviceCaps().max_simultaneous_rts; ++ i)
+			{
+				TIF(d3d_device->SetRenderTarget(i, this->D3DRenderSurface(i).get()));
+			}
+		}
+		IDirect3DSurface9* old_ds = NULL;
+		if (flags & CBM_Depth | flags & CBM_Stencil)
+		{
+			d3d_device->GetDepthStencilSurface(&old_ds);
+			if (old_ds != this->D3DRenderZBuffer().get())
+			{
+				TIF(d3d_device->SetDepthStencilSurface(this->D3DRenderZBuffer().get()));
+			}
+		}
+
+		TIF(d3d_device->Clear(0, NULL, d3d_flags,
+			D3DCOLOR_COLORVALUE(clr.r(), clr.g(), clr.b(), clr.a()), depth, stencil));
+
+		if (flags & CBM_Color)
+		{
+			for (uint32_t i = 0; i < old_rt.size(); ++ i)
+			{
+				d3d_device->SetRenderTarget(i, old_rt[i]);
+				if (old_rt[i] != NULL)
+				{
+					old_rt[i]->Release();
+				}
+			}
+		}
+		if (flags & CBM_Depth | flags & CBM_Stencil)
+		{
+			if (old_ds != this->D3DRenderZBuffer().get())
+			{
+				TIF(d3d_device->SetDepthStencilSurface(old_ds));
+			}
+			if (old_ds != NULL)
+			{
+				old_ds->Release();
+			}
+		}
+	}
+
 	void D3D9FrameBuffer::DoOnLostDevice()
 	{
 	}

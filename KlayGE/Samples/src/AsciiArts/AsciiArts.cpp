@@ -367,8 +367,7 @@ uint32_t AsciiArtsApp::DoUpdate(uint32_t pass)
 		case 0:
 			// Õý³£äÖÈ¾
 			renderEngine.BindFrameBuffer(render_buffer_);
-			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
-			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+			renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 			return App3DFramework::URV_Need_Flush;
 
 		case 1:
@@ -389,8 +388,7 @@ uint32_t AsciiArtsApp::DoUpdate(uint32_t pass)
 	else
 	{
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
-		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
-		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 	}
 
 	UIManager::Instance().Render();

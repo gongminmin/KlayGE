@@ -327,8 +327,7 @@ uint32_t Instancing::DoUpdate(uint32_t /*pass*/)
 	UIManager::Instance().HandleInput();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-	renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
-	renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+	renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
 	UIManager::Instance().Render();
 

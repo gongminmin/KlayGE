@@ -46,6 +46,8 @@ namespace KlayGE
 			return true;
 		}
 
+		void Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil);
+
 	private:
 		void DoOnLostDevice();
 		void DoOnResetDevice();

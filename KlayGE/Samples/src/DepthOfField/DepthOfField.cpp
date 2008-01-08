@@ -411,12 +411,12 @@ uint32_t DepthOfFieldApp::DoUpdate(uint32_t pass)
 
 		renderEngine.BindFrameBuffer(clr_depth_buffer_);
 		clear_float_->Apply();
-		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Depth, Color(), 1.0f, 0);
 		return App3DFramework::URV_Need_Flush;
 	
 	default:
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
-		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Depth, Color(), 1.0f, 0);
 
 		depth_of_field_->Apply();
 

@@ -226,7 +226,7 @@ uint32_t Fractal::DoUpdate(uint32_t pass)
 	{
 	case 0:
 		renderEngine.BindFrameBuffer(render_buffer_[!odd]);
-		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
+		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
 		checked_pointer_cast<RenderFractal>(renderFractal_)->SetTexture(rendered_tex_[odd]);
 		renderFractal_->AddToRenderQueue();
@@ -234,8 +234,7 @@ uint32_t Fractal::DoUpdate(uint32_t pass)
 
 	default:
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
-		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
-		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
 		checked_pointer_cast<RenderPlane>(renderPlane_)->SetTexture(rendered_tex_[!odd]);
 		renderPlane_->AddToRenderQueue();

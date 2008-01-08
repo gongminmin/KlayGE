@@ -155,6 +155,7 @@ int main()
 	OCTree sceneMgr(3);
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
+	//Context::Instance().RenderFactoryInstance(OGLRenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
 
 	Context::Instance().InputFactoryInstance(DInputFactoryInstance());
@@ -261,13 +262,12 @@ uint32_t Cartoon::DoUpdate(uint32_t pass)
 		{
 		case 0:
 			renderEngine.BindFrameBuffer(normal_depth_buffer_);
-			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
-			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+			renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 			return App3DFramework::URV_Need_Flush;
 
 		case 1:
 			renderEngine.BindFrameBuffer(FrameBufferPtr());
-			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+			renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 			cartoon_->Apply();
 			break;
 		}
@@ -275,8 +275,7 @@ uint32_t Cartoon::DoUpdate(uint32_t pass)
 	else
 	{
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
-		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
-		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 	}
 
 	UIManager::Instance().Render();

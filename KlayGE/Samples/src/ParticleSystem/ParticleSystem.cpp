@@ -436,8 +436,7 @@ uint32_t ParticleSystemApp::DoUpdate(uint32_t pass)
 		fpcController_.Update();
 
 		re.BindFrameBuffer(scene_buffer_);
-		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
-		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
 		terrain_->Visible(true);
 		particles_->Visible(false);

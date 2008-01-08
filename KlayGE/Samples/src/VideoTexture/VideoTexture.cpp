@@ -174,8 +174,7 @@ uint32_t VideoTextureApp::DoUpdate(uint32_t /*pass*/)
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 	ShowEngine& se = Context::Instance().ShowFactoryInstance().ShowEngineInstance();
 
-	re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
-	re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+	re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
 	checked_pointer_cast<TeapotObject>(ground_)->VideoTexture(se.PresentTexture());
 

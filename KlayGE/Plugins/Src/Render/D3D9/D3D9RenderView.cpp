@@ -36,7 +36,7 @@ namespace KlayGE
 		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
 
-		std::vector<IDirect3DSurface9*> old_rt(render_eng.DeviceCaps().max_simultaneous_rts);
+		std::vector<IDirect3DSurface9*> old_rt(render_eng.DeviceCaps().max_simultaneous_rts, NULL);
 		for (uint32_t i = 0; i < old_rt.size(); ++ i)
 		{
 			d3d_device->GetRenderTarget(i, &old_rt[i]);

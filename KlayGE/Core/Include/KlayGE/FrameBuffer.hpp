@@ -1,8 +1,11 @@
 // FrameBuffer.hpp
 // KlayGE 渲染到纹理类 头文件
-// Ver 3.3.0
-// 版权所有(C) 龚敏敏, 2006
+// Ver 3.7.0
+// 版权所有(C) 龚敏敏, 2006-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.7.0
+// 增加了Clear (2008.1.9)
 //
 // 3.3.0
 // 改为FrameBuffer (2006.5.30)
@@ -34,13 +37,20 @@ namespace KlayGE
 	class FrameBuffer
 	{
 	public:
-		enum ATTACHMENT
+		enum Attachment
 		{
 			ATT_DepthStencil,
 			ATT_Color0,
 			ATT_Color1,
 			ATT_Color2,
 			ATT_Color3
+		};
+
+		enum ClearBufferMask
+		{
+			CBM_Color   = 1UL << 0,
+			CBM_Depth   = 1UL << 1,
+			CBM_Stencil = 1UL << 2
 		};
 
 	public:
@@ -72,6 +82,8 @@ namespace KlayGE
 		void Attach(uint32_t att, RenderViewPtr view);
 		void Detach(uint32_t att);
 		RenderViewPtr Attached(uint32_t att);
+
+		virtual void Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil) = 0;
 
 		virtual void OnBind();
 		virtual void OnUnbind();
