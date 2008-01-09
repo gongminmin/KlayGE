@@ -67,6 +67,8 @@ namespace
 
 			*(technique_->Effect().ParameterByName("depth_min")) = camera.NearPlane();
 			*(technique_->Effect().ParameterByName("inv_depth_range")) = 1 / (camera.FarPlane() - camera.NearPlane());
+			*(technique_->Effect().ParameterByName("light_in_model")) = MathLib::transform_coord(float3(2, 2, -3), MathLib::inverse(model_mat_));
+			*(technique_->Effect().ParameterByName("eye_in_model")) = MathLib::transform_coord(float3(0, 0, 0), MathLib::inverse(model_mat_ * view));
 		}
 
 	private:
@@ -103,23 +105,9 @@ namespace
 			}
 		}
 
-		void OnRenderBegin()
+		void ColorTex(TexturePtr const & tex)
 		{
-			PostProcess::OnRenderBegin();
-
-			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-
-			float4x4 const & view = camera.ViewMatrix();
-			float4x4 const & proj = camera.ProjMatrix();
-			float4x4 const inv_proj = MathLib::inverse(proj);
-			*(technique_->Effect().ParameterByName("upper_left")) = MathLib::transform_coord(float3(-1, 1, 1), inv_proj);
-			*(technique_->Effect().ParameterByName("upper_right")) = MathLib::transform_coord(float3(1, 1, 1), inv_proj);
-			*(technique_->Effect().ParameterByName("lower_left")) = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
-			*(technique_->Effect().ParameterByName("lower_right")) = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
-
-			*(technique_->Effect().ParameterByName("depth_min")) = camera.NearPlane();
-			*(technique_->Effect().ParameterByName("depth_range")) = camera.FarPlane() - camera.NearPlane();
-			*(technique_->Effect().ParameterByName("light_in_view")) = MathLib::transform_coord(float3(2, 2, -3), view);
+			*(technique_->Effect().ParameterByName("color_sampler")) = tex;
 		}
 	};
 
@@ -193,8 +181,8 @@ void Cartoon::InitObjects()
 	this->Proj(0.1f, 20.0f);
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-	normal_depth_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
-	normal_depth_buffer_->GetViewport().camera = renderEngine.CurFrameBuffer()->GetViewport().camera;
+	g_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
+	g_buffer_->GetViewport().camera = renderEngine.CurFrameBuffer()->GetViewport().camera;
 
 	fpcController_.AttachCamera(this->ActiveCamera());
 	fpcController_.Scalers(0.05f, 0.5f);
@@ -221,11 +209,14 @@ void Cartoon::OnResize(uint32_t width, uint32_t height)
 	App3DFramework::OnResize(width, height);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	color_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F);
 	normal_depth_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F);
-	normal_depth_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*normal_depth_tex_, 0));
-	normal_depth_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));
+	g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*color_tex_, 0));
+	g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*normal_depth_tex_, 0));
+	g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));
 
-	cartoon_->Source(normal_depth_tex_, normal_depth_buffer_->RequiresFlipping());
+	cartoon_->Source(normal_depth_tex_, g_buffer_->RequiresFlipping());
+	checked_pointer_cast<CartoonPostProcess>(cartoon_)->ColorTex(color_tex_);
 	cartoon_->Destinate(FrameBufferPtr());
 
 	dialog_->GetControl(Switch_Cartoon)->SetLocation(60, height - 50);
@@ -261,7 +252,7 @@ uint32_t Cartoon::DoUpdate(uint32_t pass)
 		switch (pass)
 		{
 		case 0:
-			renderEngine.BindFrameBuffer(normal_depth_buffer_);
+			renderEngine.BindFrameBuffer(g_buffer_);
 			renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 			return App3DFramework::URV_Need_Flush;
 
