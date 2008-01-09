@@ -48,7 +48,7 @@
 <h4>Core需要：</h4>
 <ul>
 	<li>Python 2.5.1，<a href="http://www.python.org" target="_blank">http://www.python.org</a></li>
-	<li>Boost 1.34.1，<a href="http://www.boost.org" target="_blank">http://www.boost.org</a>。1.34.1的typeof不兼容于vc8，解决方案是从CVS HEAD中获得boost\typeof\msvc\typeof_impl.hpp和boost\typeof\typeof.hpp，并覆盖掉原有的对应文件。</li>
+	<li>Boost 1.34.1，<a href="http://www.boost.org" target="_blank">http://www.boost.org</a>。1.34.1的typeof在vc8上无法使用native模式，解决方案是从SVN HEAD中获得boost\typeof\目录，覆盖掉原有文件。</li>
 	<li>FreeType 2.3.5，<a href="http://freetype.sourceforge.net" target="_blank">http://freetype.sourceforge.net</a>。编译它的Debug和Release两个solution configuration。</li>
 </ul>
 <h4>D3D9 Rendering System和DSound Audio System需要：</h4>
@@ -367,6 +367,6 @@
 </ul>
 <p><a href="#menu">^返回目录</a></p>
 <hr />
-<p>最后更新：2007-7-19</p>
+<p>最后更新：2008-1-10</p>
 </body>
 </html>

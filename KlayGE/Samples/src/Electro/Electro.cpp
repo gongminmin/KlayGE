@@ -96,10 +96,10 @@ namespace
 
 			float3 xyzs[] =
 			{
-				float3(-0.8f, 0.8f, 1),
-				float3(0.8f, 0.8f, 1),
-				float3(-0.8f, -0.8f, 1),
-				float3(0.8f, -0.8f, 1),
+				float3(-0.8f, 0.8f, 0.5f),
+				float3(0.8f, 0.8f, 0.5f),
+				float3(-0.8f, -0.8f, 0.5f),
+				float3(0.8f, -0.8f, 0.5f),
 			};
 
 			float3 texs[] =

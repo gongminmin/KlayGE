@@ -79,6 +79,7 @@ namespace KlayGE
 		void DoRender(RenderTechnique const & tech, RenderLayout const & rl);
 
 		void FillRenderDeviceCaps();
+		void InitRenderStates();
 
 		void TexParameter(GLenum target, GLenum pname, GLint param);
 		void TexEnv(GLenum target, GLenum pname, GLfloat param);

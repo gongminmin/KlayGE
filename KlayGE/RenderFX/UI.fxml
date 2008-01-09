@@ -46,6 +46,7 @@ float4 UINoTexPS(float4 clr : COLOR) : COLOR0
 			<state name="blend_enable" value="true"/>
 			<state name="src_blend" value="src_alpha"/>
 			<state name="dest_blend" value="inv_src_alpha"/>
+			<state name="depth_func" value="less_equal"/>
 			
 			<state name="vertex_shader" value="UIVS()"/>
 			<state name="pixel_shader" value="UIPS()"/>
@@ -57,6 +58,7 @@ float4 UINoTexPS(float4 clr : COLOR) : COLOR0
 			<state name="blend_enable" value="true"/>
 			<state name="src_blend" value="src_alpha"/>
 			<state name="dest_blend" value="inv_src_alpha"/>
+			<state name="depth_func" value="less_equal"/>
 
 			<state name="vertex_shader" value="UIVS()"/>
 			<state name="pixel_shader" value="UINoTexPS()"/>

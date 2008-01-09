@@ -92,6 +92,7 @@ namespace KlayGE
 		void DoRender(RenderTechnique const & tech, RenderLayout const & rl);
 
 		void FillRenderDeviceCaps();
+		void InitRenderStates();
 
 		void DoRenderSWInstance(RenderTechnique const & tech, RenderLayout const & rl);
 		void DoRenderHWInstance(RenderTechnique const & tech, RenderLayout const & rl);

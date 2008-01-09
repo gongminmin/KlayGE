@@ -39,9 +39,7 @@ void NormalDepthPS(float3 normal : TEXCOORD0, float2 depth : TEXCOORD1,
 	
 	light_vec = normalize(light_vec);
 	view_vec = normalize(view_vec);
-	clr = diffuse_lighting(light_vec, normal) * 0.7
-				+ specular_lighting(light_vec, view_vec, normal, 8) * 0.3;
-	
+	clr = diffuse_lighting(light_vec, normal);	
 }
 		]]>
 	</shader>

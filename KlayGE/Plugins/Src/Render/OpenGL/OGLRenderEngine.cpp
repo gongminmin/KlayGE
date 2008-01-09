@@ -142,6 +142,7 @@ namespace KlayGE
 		default_frame_buffer_ = win;
 
 		this->FillRenderDeviceCaps();
+		this->InitRenderStates();
 
 		win->Attach(FrameBuffer::ATT_Color0,
 			OGLScreenColorRenderViewPtr(new OGLScreenColorRenderView(win->Width(), win->Height(), win->Format())));
@@ -152,6 +153,112 @@ namespace KlayGE
 		}
 
 		this->BindFrameBuffer(win);
+	}
+
+	void OGLRenderEngine::InitRenderStates()
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, OGLMapping::Mapping(cur_render_state_obj_.polygon_mode));
+		glShadeModel(OGLMapping::Mapping(cur_render_state_obj_.shade_mode));
+		switch (cur_render_state_obj_.cull_mode)
+		{
+		case RenderStateObject::CM_None:
+			glDisable(GL_CULL_FACE);
+			break;
+
+		case RenderStateObject::CM_Clockwise:
+			glEnable(GL_CULL_FACE);
+			glFrontFace(GL_CCW);
+			break;
+
+		case RenderStateObject::CM_AntiClockwise:
+			glEnable(GL_CULL_FACE);
+			glFrontFace(GL_CW);
+			break;
+		}			
+
+		if (cur_render_state_obj_.alpha_to_coverage_enable)
+		{
+			glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+		}
+		else
+		{
+			glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+		}
+		if (cur_render_state_obj_.blend_enable)
+		{
+			glEnable(GL_BLEND);
+		}
+		else
+		{
+			glDisable(GL_BLEND);
+		}
+		glBlendEquationSeparate(OGLMapping::Mapping(cur_render_state_obj_.blend_op), OGLMapping::Mapping(cur_render_state_obj_.blend_op_alpha));
+		glBlendFuncSeparate(OGLMapping::Mapping(cur_render_state_obj_.src_blend), OGLMapping::Mapping(cur_render_state_obj_.dest_blend),
+				OGLMapping::Mapping(cur_render_state_obj_.src_blend_alpha), OGLMapping::Mapping(cur_render_state_obj_.dest_blend_alpha));
+
+		if (cur_render_state_obj_.depth_enable)
+		{
+			glEnable(GL_DEPTH_TEST);
+		}
+		else
+		{
+			glDisable(GL_DEPTH_TEST);
+		}
+		glDepthMask(cur_render_state_obj_.depth_mask ? GL_TRUE : GL_FALSE);
+		glDepthFunc(OGLMapping::Mapping(cur_render_state_obj_.depth_func));
+
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		glEnable(GL_POLYGON_OFFSET_POINT);
+		glEnable(GL_POLYGON_OFFSET_LINE);
+		// Bias is in {0, 16}, scale the unit addition appropriately
+		glPolygonOffset(cur_render_state_obj_.polygon_offset_factor, cur_render_state_obj_.polygon_offset_units);
+
+		glStencilFuncSeparate(GL_FRONT, OGLMapping::Mapping(cur_render_state_obj_.front_stencil_func),
+			cur_render_state_obj_.front_stencil_ref, cur_render_state_obj_.front_stencil_mask);
+		glStencilOpSeparate(GL_FRONT, OGLMapping::Mapping(cur_render_state_obj_.front_stencil_fail),
+			OGLMapping::Mapping(cur_render_state_obj_.front_stencil_depth_fail), OGLMapping::Mapping(cur_render_state_obj_.front_stencil_pass));
+		glStencilMaskSeparate(GL_FRONT, cur_render_state_obj_.front_stencil_write_mask);
+
+		glStencilFuncSeparate(GL_BACK, OGLMapping::Mapping(cur_render_state_obj_.back_stencil_func),
+			cur_render_state_obj_.back_stencil_ref, cur_render_state_obj_.back_stencil_mask);
+		glStencilOpSeparate(GL_BACK, OGLMapping::Mapping(cur_render_state_obj_.back_stencil_fail),
+			OGLMapping::Mapping(cur_render_state_obj_.back_stencil_depth_fail), OGLMapping::Mapping(cur_render_state_obj_.back_stencil_pass));
+		glStencilMaskSeparate(GL_BACK, cur_render_state_obj_.back_stencil_write_mask);
+
+		if (cur_render_state_obj_.front_stencil_enable || cur_render_state_obj_.back_stencil_enable)
+		{
+			glEnable(GL_STENCIL_TEST);
+		}
+		else
+		{
+			glDisable(GL_STENCIL_TEST);
+		}
+
+		if (cur_render_state_obj_.scissor_enable)
+		{
+			glEnable(GL_SCISSOR_TEST);
+		}
+		else
+		{
+			glDisable(GL_SCISSOR_TEST);
+		}
+
+		glColorMask((cur_render_state_obj_.color_mask_0 & RenderStateObject::CMASK_Red) != 0,
+				(cur_render_state_obj_.color_mask_0 & RenderStateObject::CMASK_Green) != 0,
+				(cur_render_state_obj_.color_mask_0 & RenderStateObject::CMASK_Blue) != 0,
+				(cur_render_state_obj_.color_mask_0 & RenderStateObject::CMASK_Alpha) != 0);
+		glColorMask((cur_render_state_obj_.color_mask_1 & RenderStateObject::CMASK_Red) != 0,
+				(cur_render_state_obj_.color_mask_1 & RenderStateObject::CMASK_Green) != 0,
+				(cur_render_state_obj_.color_mask_1 & RenderStateObject::CMASK_Blue) != 0,
+				(cur_render_state_obj_.color_mask_1 & RenderStateObject::CMASK_Alpha) != 0);
+		glColorMask((cur_render_state_obj_.color_mask_2 & RenderStateObject::CMASK_Red) != 0,
+				(cur_render_state_obj_.color_mask_2 & RenderStateObject::CMASK_Green) != 0,
+				(cur_render_state_obj_.color_mask_2 & RenderStateObject::CMASK_Blue) != 0,
+				(cur_render_state_obj_.color_mask_2 & RenderStateObject::CMASK_Alpha) != 0);
+		glColorMask((cur_render_state_obj_.color_mask_3 & RenderStateObject::CMASK_Red) != 0,
+				(cur_render_state_obj_.color_mask_3 & RenderStateObject::CMASK_Green) != 0,
+				(cur_render_state_obj_.color_mask_3 & RenderStateObject::CMASK_Blue) != 0,
+				(cur_render_state_obj_.color_mask_3 & RenderStateObject::CMASK_Alpha) != 0);
 	}
 
 	void OGLRenderEngine::TexParameter(GLenum target, GLenum pname, GLint param)
@@ -712,6 +819,20 @@ namespace KlayGE
 
 					elem_offset += vs_elem.element_size();
 				}
+			}
+
+			FrameBufferPtr fb = this->CurFrameBuffer();
+			if (fb != this->DefaultFrameBuffer())
+			{
+				std::vector<GLenum> targets;
+				for (uint8_t i = 0; i < caps_.max_simultaneous_rts; ++ i)
+				{
+					if (fb->Attached(FrameBuffer::ATT_Color0 + i))
+					{
+						targets.push_back(GL_COLOR_ATTACHMENT0_EXT + i);
+					}
+				}
+				glDrawBuffers(static_cast<GLsizei>(targets.size()), &targets[0]);
 			}
 
 			size_t const vertexCount = rl.UseIndices() ? rl.NumIndices() : rl.NumVertices();
