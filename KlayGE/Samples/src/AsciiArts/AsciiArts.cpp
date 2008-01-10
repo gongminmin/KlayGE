@@ -222,6 +222,7 @@ int main()
 	OCTree sceneMgr(3);
 
 	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
+	//Context::Instance().RenderFactoryInstance(OGLRenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
 
 	Context::Instance().InputFactoryInstance(DInputFactoryInstance());
