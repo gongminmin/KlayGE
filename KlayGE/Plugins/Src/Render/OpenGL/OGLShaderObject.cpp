@@ -204,18 +204,17 @@ namespace KlayGE
 		return ret;
 	}
 
-	OGLShaderObject::parameter_descs_t::const_iterator OGLShaderObject::FindParam(ShaderType type, std::string const & name) const
+	OGLShaderObject::parameter_descs_t::const_iterator OGLShaderObject::FindParam(ShaderType type, boost::shared_ptr<std::string> const & name) const
 	{
-		boost::shared_ptr<std::string> name_ptr(new std::string(name));
-		return param_descs_[type].find(name_ptr);
+		return param_descs_[type].find(name);
 	}
 
-	bool OGLShaderObject::HasParameter(ShaderType type, std::string const & name) const
+	bool OGLShaderObject::HasParameter(ShaderType type, boost::shared_ptr<std::string> const & name) const
 	{
 		return (this->FindParam(type, name) != param_descs_[type].end());
 	}
 
-	void OGLShaderObject::SetParameter(std::string const & name, bool value)
+	void OGLShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, bool value)
 	{
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
@@ -229,7 +228,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLShaderObject::SetParameter(std::string const & name, int value)
+	void OGLShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, int value)
 	{
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
@@ -243,7 +242,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLShaderObject::SetParameter(std::string const & name, float value)
+	void OGLShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, float value)
 	{
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
@@ -257,7 +256,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLShaderObject::SetParameter(std::string const & name, float4 const & value)
+	void OGLShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, float4 const & value)
 	{
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
@@ -271,7 +270,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLShaderObject::SetParameter(std::string const & name, float4x4 const & value)
+	void OGLShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, float4x4 const & value)
 	{
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
@@ -285,7 +284,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLShaderObject::SetParameter(std::string const & name, std::vector<bool> const & value)
+	void OGLShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, std::vector<bool> const & value)
 	{
 		if (!value.empty())
 		{
@@ -303,7 +302,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLShaderObject::SetParameter(std::string const & name, std::vector<int> const & value)
+	void OGLShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, std::vector<int> const & value)
 	{
 		if (!value.empty())
 		{
@@ -320,7 +319,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLShaderObject::SetParameter(std::string const & name, std::vector<float> const & value)
+	void OGLShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float> const & value)
 	{
 		if (!value.empty())
 		{
@@ -337,7 +336,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLShaderObject::SetParameter(std::string const & name, std::vector<float4> const & value)
+	void OGLShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float4> const & value)
 	{
 		if (!value.empty())
 		{
@@ -354,7 +353,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLShaderObject::SetParameter(std::string const & name, std::vector<float4x4> const & value)
+	void OGLShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float4x4> const & value)
 	{
 		if (!value.empty())
 		{
@@ -371,7 +370,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLShaderObject::SetParameter(std::string const & name, SamplerPtr const & value)
+	void OGLShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, SamplerPtr const & value)
 	{
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{

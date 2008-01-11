@@ -420,13 +420,13 @@ namespace KlayGE
 			return array_size_;
 		}
 
-		std::string const & Name() const
+		boost::shared_ptr<std::string> const & Name() const
 		{
-			return *name_;
+			return name_;
 		}
-		std::string const & Semantic() const
+		boost::shared_ptr<std::string> const & Semantic() const
 		{
-			return *semantic_;
+			return semantic_;
 		}
 
 		uint32_t NumAnnotations() const

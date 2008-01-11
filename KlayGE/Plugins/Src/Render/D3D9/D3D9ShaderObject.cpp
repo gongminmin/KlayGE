@@ -257,18 +257,17 @@ namespace KlayGE
 		return ret;
 	}
 
-	D3D9ShaderObject::parameter_descs_t::const_iterator D3D9ShaderObject::FindParam(ShaderType type, std::string const & name) const
+	D3D9ShaderObject::parameter_descs_t::const_iterator D3D9ShaderObject::FindParam(ShaderType type, boost::shared_ptr<std::string> const & name) const
 	{
-		boost::shared_ptr<std::string> name_ptr(new std::string(name));
-		return param_descs_[type].find(name_ptr);
+		return param_descs_[type].find(name);
 	}
 
-	bool D3D9ShaderObject::HasParameter(ShaderType type, std::string const & name) const
+	bool D3D9ShaderObject::HasParameter(ShaderType type, boost::shared_ptr<std::string> const & name) const
 	{
 		return (this->FindParam(type, name) != param_descs_[type].end());
 	}
 
-	void D3D9ShaderObject::SetParameter(std::string const & name, bool value)
+	void D3D9ShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, bool value)
 	{
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
@@ -301,7 +300,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9ShaderObject::SetParameter(std::string const & name, int value)
+	void D3D9ShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, int value)
 	{
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
@@ -334,7 +333,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9ShaderObject::SetParameter(std::string const & name, float value)
+	void D3D9ShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, float value)
 	{
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
@@ -351,7 +350,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9ShaderObject::SetParameter(std::string const & name, float4 const & value)
+	void D3D9ShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, float4 const & value)
 	{
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
@@ -368,7 +367,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9ShaderObject::SetParameter(std::string const & name, float4x4 const & value)
+	void D3D9ShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, float4x4 const & value)
 	{
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
@@ -386,7 +385,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9ShaderObject::SetParameter(std::string const & name, std::vector<bool> const & value)
+	void D3D9ShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, std::vector<bool> const & value)
 	{
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
@@ -428,7 +427,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9ShaderObject::SetParameter(std::string const & name, std::vector<int> const & value)
+	void D3D9ShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, std::vector<int> const & value)
 	{
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
@@ -470,7 +469,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9ShaderObject::SetParameter(std::string const & name, std::vector<float> const & value)
+	void D3D9ShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float> const & value)
 	{
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
@@ -490,7 +489,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9ShaderObject::SetParameter(std::string const & name, std::vector<float4> const & value)
+	void D3D9ShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float4> const & value)
 	{
 		if (!value.empty())
 		{
@@ -510,7 +509,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9ShaderObject::SetParameter(std::string const & name, std::vector<float4x4> const & value)
+	void D3D9ShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float4x4> const & value)
 	{
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
@@ -533,7 +532,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9ShaderObject::SetParameter(std::string const & name, SamplerPtr const & value)
+	void D3D9ShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, SamplerPtr const & value)
 	{
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{

@@ -33,42 +33,42 @@ namespace KlayGE
 			return ShaderObject::NullObject();
 		}
 
-		bool HasParameter(ShaderType /*type*/, std::string const & /*name*/) const
+		bool HasParameter(ShaderType /*type*/, boost::shared_ptr<std::string> const & /*name*/) const
 		{
 			return false;
 		}
 
-		void SetParameter(std::string const & /*name*/, bool /*value*/)
+		void SetParameter(boost::shared_ptr<std::string> const & /*name*/, bool /*value*/)
 		{
 		}
-		void SetParameter(std::string const & /*name*/, int /*value*/)
+		void SetParameter(boost::shared_ptr<std::string> const & /*name*/, int /*value*/)
 		{
 		}
-		void SetParameter(std::string const & /*name*/, float /*value*/)
+		void SetParameter(boost::shared_ptr<std::string> const & /*name*/, float /*value*/)
 		{
 		}
-		void SetParameter(std::string const & /*name*/, float4 const & /*value*/)
+		void SetParameter(boost::shared_ptr<std::string> const & /*name*/, float4 const & /*value*/)
 		{
 		}
-		void SetParameter(std::string const & /*name*/, float4x4 const & /*value*/)
+		void SetParameter(boost::shared_ptr<std::string> const & /*name*/, float4x4 const & /*value*/)
 		{
 		}
-		void SetParameter(std::string const & /*name*/, SamplerPtr const & /*value*/)
+		void SetParameter(boost::shared_ptr<std::string> const & /*name*/, SamplerPtr const & /*value*/)
 		{
 		}
-		void SetParameter(std::string const & /*name*/, std::vector<bool> const & /*value*/)
+		void SetParameter(boost::shared_ptr<std::string> const & /*name*/, std::vector<bool> const & /*value*/)
 		{
 		}
-		void SetParameter(std::string const & /*name*/, std::vector<int> const & /*value*/)
+		void SetParameter(boost::shared_ptr<std::string> const & /*name*/, std::vector<int> const & /*value*/)
 		{
 		}
-		void SetParameter(std::string const & /*name*/, std::vector<float> const & /*value*/)
+		void SetParameter(boost::shared_ptr<std::string> const & /*name*/, std::vector<float> const & /*value*/)
 		{
 		}
-		void SetParameter(std::string const & /*name*/, std::vector<float4> const & /*value*/)
+		void SetParameter(boost::shared_ptr<std::string> const & /*name*/, std::vector<float4> const & /*value*/)
 		{
 		}
-		void SetParameter(std::string const & /*name*/, std::vector<float4x4> const & /*value*/)
+		void SetParameter(boost::shared_ptr<std::string> const & /*name*/, std::vector<float4x4> const & /*value*/)
 		{
 		}
 	};

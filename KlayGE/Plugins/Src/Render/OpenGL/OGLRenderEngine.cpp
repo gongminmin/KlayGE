@@ -487,19 +487,20 @@ namespace KlayGE
 
 			for (uint32_t stage = 0, num_stage = static_cast<uint32_t>(samplers.size()); stage < num_stage; ++ stage)
 			{
-				glActiveTexture(GL_TEXTURE0 + stage);
-
 				SamplerPtr const & sampler = samplers[stage];
 				if (!sampler || !sampler->texture)
 				{
+					glActiveTexture(GL_TEXTURE0 + stage);
+					
 					glBindTexture(GL_TEXTURE_2D, 0);
 				}
 				else
 				{
+					glActiveTexture(GL_TEXTURE0 + stage);
+
 					OGLTexture& gl_tex = *checked_pointer_cast<OGLTexture>(sampler->texture);
 					GLenum tex_type = gl_tex.GLType();
 
-					glEnable(tex_type);
 					glBindTexture(tex_type, gl_tex.GLTexture());
 
 					this->TexParameter(tex_type, GL_TEXTURE_WRAP_S, OGLMapping::Mapping(sampler->addr_mode_u));
@@ -833,6 +834,11 @@ namespace KlayGE
 					}
 				}
 				glDrawBuffers(static_cast<GLsizei>(targets.size()), &targets[0]);
+			}
+			else
+			{
+				GLenum targets[] = { GL_BACK };
+				glDrawBuffers(1, &targets[0]);
 			}
 
 			size_t const vertexCount = rl.UseIndices() ? rl.NumIndices() : rl.NumVertices();

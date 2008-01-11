@@ -424,7 +424,7 @@ namespace KlayGE
 	{
 		BOOST_FOREACH(BOOST_TYPEOF(params_)::const_reference param, params_)
 		{
-			if (name == param->Name())
+			if (name == *param->Name())
 			{
 				return param;
 			}
@@ -436,7 +436,7 @@ namespace KlayGE
 	{
 		BOOST_FOREACH(BOOST_TYPEOF(params_)::const_reference param, params_)
 		{
-			if (semantic == param->Semantic())
+			if (semantic == *param->Semantic())
 			{
 				return param;
 			}
@@ -978,7 +978,7 @@ namespace KlayGE
 		{
 			RenderEffectParameter& param = *effect_.ParameterByIndex(i);
 
-			ss << type_define::instance().type_name(param.type()) << " " << param.Name();
+			ss << type_define::instance().type_name(param.type()) << " " << *param.Name();
 			if (param.ArraySize() != 0)
 			{
 				ss << "[" << param.ArraySize() << "]";

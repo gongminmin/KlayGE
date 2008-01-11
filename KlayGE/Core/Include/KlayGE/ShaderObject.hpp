@@ -54,19 +54,19 @@ namespace KlayGE
 			boost::shared_ptr<std::string> const & shader_text) = 0;
 		virtual ShaderObjectPtr Clone() = 0;
 
-		virtual bool HasParameter(ShaderType type, std::string const & name) const = 0;
+		virtual bool HasParameter(ShaderType type, boost::shared_ptr<std::string> const & name) const = 0;
 
-		virtual void SetParameter(std::string const & name, bool value) = 0;
-		virtual void SetParameter(std::string const & name, int value) = 0;
-		virtual void SetParameter(std::string const & name, float value) = 0;
-		virtual void SetParameter(std::string const & name, float4 const & value) = 0;
-		virtual void SetParameter(std::string const & name, float4x4 const & value) = 0;
-		virtual void SetParameter(std::string const & name, SamplerPtr const & value) = 0;
-		virtual void SetParameter(std::string const & name, std::vector<bool> const & value) = 0;
-		virtual void SetParameter(std::string const & name, std::vector<int> const & value) = 0;
-		virtual void SetParameter(std::string const & name, std::vector<float> const & value) = 0;
-		virtual void SetParameter(std::string const & name, std::vector<float4> const & value) = 0;
-		virtual void SetParameter(std::string const & name, std::vector<float4x4> const & value) = 0;
+		virtual void SetParameter(boost::shared_ptr<std::string> const & name, bool value) = 0;
+		virtual void SetParameter(boost::shared_ptr<std::string> const & name, int value) = 0;
+		virtual void SetParameter(boost::shared_ptr<std::string> const & name, float value) = 0;
+		virtual void SetParameter(boost::shared_ptr<std::string> const & name, float4 const & value) = 0;
+		virtual void SetParameter(boost::shared_ptr<std::string> const & name, float4x4 const & value) = 0;
+		virtual void SetParameter(boost::shared_ptr<std::string> const & name, SamplerPtr const & value) = 0;
+		virtual void SetParameter(boost::shared_ptr<std::string> const & name, std::vector<bool> const & value) = 0;
+		virtual void SetParameter(boost::shared_ptr<std::string> const & name, std::vector<int> const & value) = 0;
+		virtual void SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float> const & value) = 0;
+		virtual void SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float4> const & value) = 0;
+		virtual void SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float4x4> const & value) = 0;
 
 		bool Validate() const
 		{
