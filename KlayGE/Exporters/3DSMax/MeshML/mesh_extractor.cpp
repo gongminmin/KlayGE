@@ -312,13 +312,6 @@ namespace KlayGE
 			}
 		}
 
-		if (obj_info.texture_slots.empty())
-		{
-			std::stringstream ss;
-			ss << "Mesh " << obj_info.name << " needs at least one texture.";
-			MessageBoxA(NULL, ss.str().c_str(), "MeshML Error", MB_OK); 
-		}
-
 		Object* obj = node->EvalWorldState(cur_time_).obj;
 		if ((obj != NULL) && obj->CanConvertToType(Class_ID(TRIOBJ_CLASS_ID, 0)))
 		{
@@ -384,6 +377,12 @@ namespace KlayGE
 			{
 				delete tri;
 			}
+		}
+
+		if (tex_indices.empty())
+		{
+			tex_indices[1] = pos_indices;
+			texs[1].resize(positions.size(), Point2(0.0f, 0.0f));
 		}
 
 		std::set<vertex_index_t> vertex_indices;

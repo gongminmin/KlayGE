@@ -237,7 +237,7 @@ if __name__ == '__main__':
 	else:
 		out_file_name = sys.argv[2]
 
-	print "Prasing:", in_file_name
+	print "Parsing:", in_file_name
 	from xml.dom.minidom import parse
 	model = parse_model(parse(in_file_name))
 
