@@ -312,6 +312,8 @@ namespace KlayGE
 			}
 		}
 
+		std::vector<unsigned int> face_sm_group;
+
 		Object* obj = node->EvalWorldState(cur_time_).obj;
 		if ((obj != NULL) && obj->CanConvertToType(Class_ID(TRIOBJ_CLASS_ID, 0)))
 		{
@@ -506,23 +508,17 @@ namespace KlayGE
 			}
 		}
 
-		std::vector<Point3> normals(positions.size(), Point3(0, 0, 0));
-		std::vector<Point3> tangents(positions.size(), Point3(0, 0, 0));
-		for (int i = 0; i < pos_indices.size() / 3; ++ i)
+		std::vector<Point3> face_normals(obj_info.triangles.size());
+		std::vector<Point3> face_tangents(obj_info.triangles.size());
+		for (size_t i = 0; i < face_normals.size(); ++ i)
 		{
-			Point3 face_normal = compute_normal(positions[pos_indices[i * 3 + 2]].first,
+			face_normals[i] = compute_normal(positions[pos_indices[i * 3 + 2]].first,
 				positions[pos_indices[i * 3 + 1]].first, positions[pos_indices[i * 3 + 0]].first);
-			Point3 face_tangent = compute_tangent(positions[pos_indices[i * 3 + 2]].first,
+
+			face_tangents[i] = compute_tangent(positions[pos_indices[i * 3 + 2]].first,
 				positions[pos_indices[i * 3 + 1]].first, positions[pos_indices[i * 3 + 0]].first,
 				texs[1][tex_indices[1][i * 3 + 2]], texs[1][tex_indices[1][i * 3 + 1]], texs[1][tex_indices[1][i * 3 + 0]],
-				face_normal);
-
-			normals[pos_indices[i * 3 + 0]] += face_normal;
-			normals[pos_indices[i * 3 + 1]] += face_normal;
-			normals[pos_indices[i * 3 + 2]] += face_normal;
-			tangents[pos_indices[i * 3 + 0]] += face_tangent;
-			tangents[pos_indices[i * 3 + 1]] += face_tangent;
-			tangents[pos_indices[i * 3 + 2]] += face_tangent;
+				face_normals[i]);
 		}
 
 		obj_info.vertices.resize(vertex_indices.size());
@@ -534,8 +530,13 @@ namespace KlayGE
 			vertex.pos = positions[vertex_index.pos_index].first;
 			std::swap(vertex.pos.y, vertex.pos.z);
 
-			Point3 normal = normals[vertex_index.pos_index];
-			Point3 tangent = tangents[vertex_index.pos_index];
+			Point3 normal(0, 0, 0);
+			Point3 tangent(0, 0, 0);
+			for (size_t i = 0; i < vertex_index.ref_triangle.size(); ++ i)
+			{
+				normal += face_normals[vertex_index.ref_triangle[i] / 3];
+				tangent += face_tangents[vertex_index.ref_triangle[i] / 3];
+			}
 			if (flip_normals)
 			{
 				normal = -normal;
