@@ -26,7 +26,6 @@
 #include <al/alc.h>
 
 #include <vector>
-#include <windows.h>
 
 #include <boost/utility.hpp>
 #include <boost/smart_ptr.hpp>

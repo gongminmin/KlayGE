@@ -21,7 +21,6 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/AudioFactory.hpp>
-#include <KlayGE/OpenAL/OALAudio.hpp>
 
 namespace KlayGE
 {

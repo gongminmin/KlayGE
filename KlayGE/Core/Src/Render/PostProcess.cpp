@@ -24,6 +24,7 @@
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/Sampler.hpp>
 #include <KlayGE/FrameBuffer.hpp>
+#include <KlayGE/RenderLayout.hpp>
 
 #include <KlayGE/PostProcess.hpp>
 

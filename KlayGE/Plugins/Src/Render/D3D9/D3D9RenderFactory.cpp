@@ -24,14 +24,28 @@
 #include <KlayGE/D3D9/D3D9RenderLayout.hpp>
 #include <KlayGE/D3D9/D3D9GraphicsBuffer.hpp>
 #include <KlayGE/D3D9/D3D9OcclusionQuery.hpp>
+#include <KlayGE/D3D9/D3D9Resource.hpp>
+#include <KlayGE/D3D9/D3D9RenderView.hpp>
+#include <KlayGE/D3D9/D3D9ShaderObject.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 
 namespace KlayGE
 {
 	D3D9RenderFactory::D3D9RenderFactory()
-		: D3D9RenderFactoryBase(L"Direct3D9 Render Factory")
 	{
+	}
+
+	std::wstring const & D3D9RenderFactory::Name() const
+	{
+		static std::wstring const name(L"Direct3D9 Render Factory");
+		return name;
+	}
+
+	RenderEngine& D3D9RenderFactory::RenderEngineInstance()
+	{
+		static D3D9RenderEngine renderEngine;
+		return renderEngine;
 	}
 
 	TexturePtr D3D9RenderFactory::MakeTexture1D(uint32_t width, uint16_t numMipMaps,

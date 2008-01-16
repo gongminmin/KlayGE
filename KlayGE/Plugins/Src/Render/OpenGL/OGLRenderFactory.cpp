@@ -13,6 +13,15 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
 
+#include <KlayGE/OpenGL/OGLRenderEngine.hpp>
+#include <KlayGE/OpenGL/OGLTexture.hpp>
+#include <KlayGE/OpenGL/OGLFrameBuffer.hpp>
+#include <KlayGE/OpenGL/OGLRenderLayout.hpp>
+#include <KlayGE/OpenGL/OGLGraphicsBuffer.hpp>
+#include <KlayGE/OpenGL/OGLOcclusionQuery.hpp>
+#include <KlayGE/OpenGL/OGLRenderView.hpp>
+#include <KlayGE/OpenGL/OGLShaderObject.hpp>
+
 #include <KlayGE/OpenGL/OGLRenderFactory.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
@@ -23,7 +32,6 @@
 namespace KlayGE
 {
 	OGLRenderFactory::OGLRenderFactory()
-			: OGLRenderFactoryBase(L"OpenGL Render Factory")
 	{
 		context_ = cgCreateContext();
 	}
@@ -31,6 +39,18 @@ namespace KlayGE
 	CGcontext OGLRenderFactory::CGContext() const
 	{
 		return context_;
+	}
+
+	std::wstring const & OGLRenderFactory::Name() const
+	{
+		static std::wstring const name(L"OpenGL Render Factory");
+		return name;
+	}
+
+	RenderEngine& OGLRenderFactory::RenderEngineInstance()
+	{
+		static OGLRenderEngine renderEngine;
+		return renderEngine;
 	}
 
 	TexturePtr OGLRenderFactory::MakeTexture1D(uint32_t width, uint16_t numMipMaps, ElementFormat format)

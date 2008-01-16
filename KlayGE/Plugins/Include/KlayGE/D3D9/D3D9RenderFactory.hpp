@@ -28,29 +28,22 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderFactory.hpp>
 
-#include <d3d9.h>
-#include <d3dx9.h>
-#include <boost/weak_ptr.hpp>
-
 #include <KlayGE/D3D9/D3D9Resource.hpp>
-#include <KlayGE/D3D9/D3D9RenderEngine.hpp>
-#include <KlayGE/D3D9/D3D9Texture.hpp>
-#include <KlayGE/D3D9/D3D9FrameBuffer.hpp>
-#include <KlayGE/D3D9/D3D9GraphicsBuffer.hpp>
-#include <KlayGE/D3D9/D3D9RenderView.hpp>
-#include <KlayGE/D3D9/D3D9ShaderObject.hpp>
+
+#include <boost/weak_ptr.hpp>
 
 namespace KlayGE
 {
 	RenderFactory& D3D9RenderFactoryInstance();
 
-	typedef ConcreteRenderFactory<D3D9RenderEngine, D3D9Texture, D3D9FrameBuffer,
-			D3D9RenderView> D3D9RenderFactoryBase;
-
-	class D3D9RenderFactory : public D3D9RenderFactoryBase
+	class D3D9RenderFactory : public RenderFactory
 	{
 	public:
 		D3D9RenderFactory();
+
+		std::wstring const & Name() const;
+
+		RenderEngine& RenderEngineInstance();
 
 		TexturePtr MakeTexture1D(uint32_t width, uint16_t numMipMaps,
 			ElementFormat format);

@@ -25,7 +25,6 @@
 
 #include <KlayGE/Texture.hpp>
 
-#include <windows.h>
 #include <glloader/glloader.h>
 
 namespace KlayGE

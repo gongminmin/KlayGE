@@ -17,10 +17,10 @@
 #include <KlayGE/config/auto_link.hpp>
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/RenderStateObject.hpp>
+#include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/Sampler.hpp>
 
-#include <windows.h>
 #include <glloader/glloader.h>
 
 namespace KlayGE

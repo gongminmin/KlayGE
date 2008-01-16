@@ -19,6 +19,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/ShaderObject.hpp>
+#include <KlayGE/RenderLayout.hpp>
 
 #include <boost/typeof/typeof.hpp>
 

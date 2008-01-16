@@ -19,19 +19,6 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderFactory.hpp>
 
-#include <KlayGE/OpenGL/OGLRenderEngine.hpp>
-#include <KlayGE/OpenGL/OGLTexture.hpp>
-#include <KlayGE/OpenGL/OGLFrameBuffer.hpp>
-#include <KlayGE/OpenGL/OGLRenderLayout.hpp>
-#include <KlayGE/OpenGL/OGLGraphicsBuffer.hpp>
-#include <KlayGE/OpenGL/OGLOcclusionQuery.hpp>
-#include <KlayGE/OpenGL/OGLRenderView.hpp>
-#include <KlayGE/OpenGL/OGLShaderObject.hpp>
-
-#include <windows.h>
-#include <glloader/glloader.h>
-#include <gl/glu.h>
-
 #include <Cg/cg.h>
 #include <Cg/cgGL.h>
 
@@ -39,15 +26,16 @@ namespace KlayGE
 {
 	RenderFactory& OGLRenderFactoryInstance();
 
-	typedef ConcreteRenderFactory<OGLRenderEngine, OGLTexture, OGLFrameBuffer,
-				OGLRenderView> OGLRenderFactoryBase;
-
-	class OGLRenderFactory : public OGLRenderFactoryBase
+	class OGLRenderFactory : public RenderFactory
 	{
 	public:
 		OGLRenderFactory();
 
 		CGcontext CGContext() const;
+
+		std::wstring const & Name() const;
+
+		RenderEngine& RenderEngineInstance();
 
 		TexturePtr MakeTexture1D(uint32_t width, uint16_t numMipMaps,
 				ElementFormat format);

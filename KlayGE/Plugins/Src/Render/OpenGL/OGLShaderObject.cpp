@@ -37,6 +37,8 @@
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
 
+#include <glloader/glloader.h>
+
 #include <KlayGE/OpenGL/OGLRenderFactory.hpp>
 #include <KlayGE/OpenGL/OGLRenderEngine.hpp>
 #include <KlayGE/OpenGL/OGLMapping.hpp>

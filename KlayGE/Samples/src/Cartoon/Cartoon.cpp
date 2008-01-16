@@ -7,6 +7,7 @@
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
@@ -55,24 +56,17 @@ namespace
 		{
 			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 
-			float rotX(std::clock() / 700.0f);
-			float rotY(std::clock() / 700.0f);
-			model_mat_ = MathLib::rotation_x(rotX) * MathLib::rotation_y(rotY);
-
 			float4x4 const & view = camera.ViewMatrix();
 			float4x4 const & proj = camera.ProjMatrix();
 
-			*(technique_->Effect().ParameterByName("model_view")) = model_mat_ * view;
+			*(technique_->Effect().ParameterByName("model_view")) = view;
 			*(technique_->Effect().ParameterByName("proj")) = proj;
 
 			*(technique_->Effect().ParameterByName("depth_min")) = camera.NearPlane();
 			*(technique_->Effect().ParameterByName("inv_depth_range")) = 1 / (camera.FarPlane() - camera.NearPlane());
-			*(technique_->Effect().ParameterByName("light_in_model")) = MathLib::transform_coord(float3(2, 2, -3), MathLib::inverse(model_mat_));
-			*(technique_->Effect().ParameterByName("eye_in_model")) = MathLib::transform_coord(float3(0, 0, 0), MathLib::inverse(model_mat_ * view));
+			*(technique_->Effect().ParameterByName("light_in_model")) = float3(2, 2, -3);
+			*(technique_->Effect().ParameterByName("eye_in_model")) = MathLib::transform_coord(float3(0, 0, 0), MathLib::inverse(view));
 		}
-
-	private:
-		float4x4 model_mat_;
 	};
 
 	class TorusObject : public SceneObjectHelper
@@ -81,7 +75,7 @@ namespace
 		TorusObject()
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadKModel("torus.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderTorus>())->Mesh(0);
+			renderable_ = LoadKModel("dino50.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderTorus>())->Mesh(0);
 		}
 	};
 
@@ -100,14 +94,24 @@ namespace
 			PostProcess::Source(tex, flipping);
 			if (tex)
 			{
-				*(technique_->Effect().ParameterByName("inv_width")) = 2.0f / tex->Width(0);
-				*(technique_->Effect().ParameterByName("inv_height")) = 2.0f / tex->Height(0);
+				*(technique_->Effect().ParameterByName("inv_width")) = 1.0f / tex->Width(0);
+				*(technique_->Effect().ParameterByName("inv_height")) = 1.0f / tex->Height(0);
 			}
 		}
 
 		void ColorTex(TexturePtr const & tex)
 		{
 			*(technique_->Effect().ParameterByName("color_sampler")) = tex;
+		}
+
+		void OnRenderBegin()
+		{
+			PostProcess::OnRenderBegin();
+
+			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
+
+			float depth_range = camera.FarPlane() - camera.NearPlane();
+			*(technique_->Effect().ParameterByName("e_barrier")) = float2(0.8f, 0.1f / depth_range);
 		}
 	};
 
@@ -181,8 +185,8 @@ void Cartoon::InitObjects()
 	torus_.reset(new TorusObject);
 	torus_->AddToSceneManager();
 
-	this->LookAt(float3(0, 0, -6), float3(0, 0, 0));
-	this->Proj(0.1f, 20.0f);
+	this->LookAt(float3(0, 0, -2), float3(0, 0, 0));
+	this->Proj(0.1f, 10.0f);
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	g_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();

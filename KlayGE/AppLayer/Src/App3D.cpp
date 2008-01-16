@@ -30,6 +30,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderSettings.hpp>
+#include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/Input.hpp>
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/Window.hpp>

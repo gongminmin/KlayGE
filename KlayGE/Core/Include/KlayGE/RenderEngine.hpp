@@ -62,7 +62,6 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderStateObject.hpp>
-#include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/RenderDeviceCaps.hpp>

@@ -36,7 +36,6 @@
 #include <vector>
 #include <map>
 
-#include <windows.h>
 #include <glloader/glloader.h>
 
 #include <KlayGE/RenderEngine.hpp>

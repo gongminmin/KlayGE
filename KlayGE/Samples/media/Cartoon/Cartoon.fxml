@@ -88,8 +88,8 @@ void NormalDepthPS(float3 normal : TEXCOORD0, float2 depth : TEXCOORD1,
 		<state name="address_v" value="clamp"/>
 	</parameter>
 
-	<parameter type="float2" name="e_barrier" x="0.8" y="0.1"/>
-	<parameter type="float2" name="e_weights" x="0.25" y="0.5"/>
+	<parameter type="float2" name="e_barrier"/>
+	<parameter type="float2" name="e_weights" x="0.25" y="1.0"/>
 
 	<shader>
 		<![CDATA[
@@ -116,7 +116,7 @@ float4 PostToonPS(float2 tc0 : TEXCOORD0,
 				float4 tc4 : TEXCOORD4) : COLOR
 {
 	half4 ndc = tex2D(src_sampler, tc0);
-	if (ndc.w == 1)
+	if (1 == ndc.w)
 	{
 		clip(-1);
 	}
@@ -138,12 +138,12 @@ float4 PostToonPS(float2 tc0 : TEXCOORD0,
 				dot(ndc.xyz, s2.xyz),
 				dot(ndc.xyz, s3.xyz),
 				dot(ndc.xyz, s4.xyz));
-	nd = step(e_barrier.xxxx, nd);
+	nd = step(e_barrier.x, nd);
 	half ne = (dot(nd, e_weights.x).x < 1) ? 0 : 1;
 
 	// Depth filter : compute gradiental difference:
 	half4 dd = half4(s1.w + s2.w, s3.w + s4.w, s5.w + s6.w, s7.w + s8.w);
-	dd = step(e_barrier.yyyy, abs(2 * ndc.w - dd));
+	dd = step(e_barrier.y, abs(2 * ndc.w - dd));
 	half de = (dot(dd, e_weights.y).x < 1) ? 1 : 0;
 
 	return tex2D(toonmap_sampler, float2(toon, 0.5f)) * de * ne;

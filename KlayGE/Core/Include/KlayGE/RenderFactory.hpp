@@ -22,7 +22,6 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
-#include <KlayGE/RenderLayout.hpp>
 
 #include <string>
 #include <map>
@@ -75,30 +74,6 @@ namespace KlayGE
 		std::map<std::string, std::vector<RenderEffectPtr> > effect_pool_;
 
 		std::map<std::pair<std::string, uint32_t>, FontPtr> font_pool_;
-	};
-
-	template <typename RenderEngineType, typename TextureType, typename FrameBufferType,
-		typename RenderViewType>
-	class ConcreteRenderFactory : boost::noncopyable, public RenderFactory
-	{
-	public:
-		explicit ConcreteRenderFactory(std::wstring const & name)
-				: name_(name)
-			{ }
-		virtual ~ConcreteRenderFactory()
-			{ }
-
-		std::wstring const & Name() const
-			{ return name_; }
-
-		RenderEngine& RenderEngineInstance()
-		{
-			static RenderEngineType renderEngine;
-			return renderEngine;
-		}
-
-	private:
-		std::wstring const name_;
 	};
 }
 
