@@ -1181,11 +1181,11 @@ namespace KlayGE
 			T sqz = quat.z() * quat.z();
 			T sqw = quat.w() * quat.w();
 			T unit = sqx + sqy + sqz + sqw;
-			T test = quat.x() * quat.y() + quat.z() * quat.w();
+			T test = quat.w() * quat.x() - quat.y() * quat.z();
 			if (test > T(0.499) * unit)
 			{
 				// singularity at north pole
-				yaw = 2 * atan2(quat.x(), quat.w());
+				yaw = 2 * atan2(quat.z(), quat.w());
 				roll = PI / 2;
 				pitch = 0;
 			}
@@ -1194,15 +1194,15 @@ namespace KlayGE
 				if (test < -T(0.499) * unit)
 				{
 					// singularity at south pole
-					yaw = -2 * atan2(quat.x(), quat.w());
+					yaw = -2 * atan2(quat.z(), quat.w());
 					roll = -PI / 2;
 					pitch = 0;
 				}
 				else
 				{
-					yaw = atan2(2 * (quat.y() * quat.w() - quat.x() * quat.z()), sqx - sqy - sqz + sqw);
-					roll = asin(2 * test / unit);
-					pitch = atan2(2 * (quat.x() * quat.w() - quat.y() * quat.z()), -sqx + sqy - sqz + sqw);
+					yaw = atan2(2 * (quat.y() * quat.w() + quat.x() * quat.z()), -sqx - sqy + sqz + sqw);
+					pitch = asin(2 * test / unit);
+					roll = atan2(2 * (quat.z() * quat.w() + quat.x() * quat.y()), -sqx + sqy - sqz + sqw);
 				}
 			}
 		}

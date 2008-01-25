@@ -36,7 +36,7 @@ namespace KlayGE
 
 		void Scalers(float rotationScaler, float moveScaler);
 
-		void AttachCamera(Camera& camera);
+		virtual void AttachCamera(Camera& camera);
 		void DetachCamera();
 
 		virtual void Update();
@@ -55,19 +55,25 @@ namespace KlayGE
 	public:
 		FirstPersonCameraController();
 
+		void AttachCamera(Camera& camera);
 		void Update();
 
 		void Move(float x, float y, float z);
 		void Rotate(float yaw, float pitch, float roll);
 
 	private:
-		float4x4		world_;				// World matrix of the camera (inverse of the view matrix)
-		float elapsed_time_;
+		float4x4	world_;				// World matrix of the camera (inverse of the view matrix)
+		float		elapsed_time_;
+		float2		rot_x_;
+		float2		rot_y_;
+		float2		rot_z_;
 
 		enum
 		{
 			TurnLeftRight,
 			TurnUpDown,
+			RollLeft,
+			RollRight,
 
 			Forward,
 			Backward,

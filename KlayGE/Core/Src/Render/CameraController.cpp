@@ -35,6 +35,8 @@
 
 #include <KlayGE/CameraController.hpp>
 
+#include <iostream>
+
 namespace KlayGE
 {
 	CameraController::CameraController()
@@ -77,6 +79,8 @@ namespace KlayGE
 		std::vector<InputActionDefine> actions;
 		actions += InputActionDefine(TurnLeftRight, MS_X),
 					InputActionDefine(TurnUpDown, MS_Y),
+					InputActionDefine(RollLeft, KS_Q),
+					InputActionDefine(RollRight, KS_E),
 					InputActionDefine(Forward, KS_W),
 					InputActionDefine(Backward, KS_S),
 					InputActionDefine(MoveLeft, KS_A),
@@ -111,6 +115,14 @@ namespace KlayGE
 				this->Rotate(0, action.second * scaler, 0);
 				break;
 
+			case RollLeft:
+				this->Rotate(0, 0, -scaler);
+				break;
+
+			case RollRight:
+				this->Rotate(0, 0, scaler);
+				break;
+
 			case Forward:
 				this->Move(0, 0, scaler);
 				break;
@@ -130,11 +142,54 @@ namespace KlayGE
 		}
 	}
 
+	void FirstPersonCameraController::AttachCamera(Camera& camera)
+	{
+		Quaternion quat = MathLib::to_quaternion(camera.ViewMatrix());
+		float sqx = quat.x() * quat.x();
+		float sqy = quat.y() * quat.y();
+		float sqz = quat.z() * quat.z();
+		float sqw = quat.w() * quat.w();
+		float unit = sqx + sqy + sqz + sqw;
+		float test = quat.w() * quat.x() + quat.y() * quat.z();
+		float yaw, pitch, roll;
+		if (test > 0.499f * unit)
+		{
+			// singularity at north pole
+			yaw = 2 * atan2(quat.z(), quat.w());
+			pitch = PI / 2;
+			roll = 0;
+		}
+		else
+		{
+			if (test < -0.499f * unit)
+			{
+				// singularity at south pole
+				yaw = -2 * atan2(quat.z(), quat.w());
+				pitch = -PI / 2;
+				roll = 0;
+			}
+			else
+			{
+				yaw = atan2(2 * (quat.y() * quat.w() - quat.x() * quat.z()), -sqx - sqy + sqz + sqw);
+				pitch = asin(2 * test / unit);
+				roll = atan2(2 * (quat.z() * quat.w() - quat.x() * quat.y()), -sqx + sqy - sqz + sqw);
+			}
+		}
+
+		MathLib::sin_cos(pitch / 2, rot_x_.x(), rot_x_.y());
+		MathLib::sin_cos(yaw / 2, rot_y_.x(), rot_y_.y());
+		MathLib::sin_cos(roll / 2, rot_z_.x(), rot_z_.y());
+
+		CameraController::AttachCamera(camera);
+	}
+
 	void FirstPersonCameraController::Update()
 	{
 		if (camera_)
 		{
-			world_ = MathLib::inverse(camera_->ViewMatrix());
+			float4x4 mat = camera_->ViewMatrix();
+
+			world_ = MathLib::inverse(mat);
 
 			elapsed_time_ = static_cast<float>(timer_.elapsed());
 			if (elapsed_time_ > 0.01f)
@@ -163,14 +218,28 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(camera_ != NULL);
 
-		float4x4 rot(MathLib::rotation_matrix_yaw_pitch_roll(-yaw * rotationScaler_,
-			-pitch * rotationScaler_, -roll * rotationScaler_));
+		pitch *= -rotationScaler_ / 2;
+		yaw *= -rotationScaler_ / 2;
+		roll *= -rotationScaler_ / 2;
 
-		float4x4 mat = camera_->ViewMatrix() * rot;
-		world_ = MathLib::inverse(mat);
+		float2 delta_x, delta_y, delta_z;
+		MathLib::sin_cos(pitch, delta_x.x(), delta_x.y());
+		MathLib::sin_cos(yaw, delta_y.x(), delta_y.y());
+		MathLib::sin_cos(roll, delta_z.x(), delta_z.y());
 
-		camera_->ViewParams(MathLib::transform_coord(float3(0, 0, 0), world_),
-			MathLib::transform_coord(float3(0, 0, 1), world_),
-			MathLib::transform_normal(float3(0, 1, 0), world_));
+		Quaternion quat_x = Quaternion(rot_x_.x() * delta_x.y() + rot_x_.y() * delta_x.x(), 0, 0, rot_x_.y() * delta_x.y() - rot_x_.x() * delta_x.x());
+		Quaternion quat_y = Quaternion(0, rot_y_.x() * delta_y.y() + rot_y_.y() * delta_y.x(), 0, rot_y_.y() * delta_y.y() - rot_y_.x() * delta_y.x());
+		Quaternion quat_z = Quaternion(0, 0, rot_z_.x() * delta_z.y() + rot_z_.y() * delta_z.x(), rot_z_.y() * delta_z.y() - rot_z_.x() * delta_z.x());
+
+		rot_x_ = float2(quat_x.x(), quat_x.w());
+		rot_y_ = float2(quat_y.y(), quat_y.w());
+		rot_z_ = float2(quat_z.z(), quat_z.w());
+
+		float4x4 rot = MathLib::to_matrix(quat_y * quat_x * quat_z);
+		float4x4 inv_rot = MathLib::inverse(rot);
+		float3 view_vec = MathLib::transform_normal(float3(0, 0, 1), inv_rot);
+		float3 up_vec = MathLib::transform_normal(float3(0, 1, 0), inv_rot);
+
+		camera_->ViewParams(camera_->EyePos(), camera_->EyePos() + view_vec, up_vec);
 	}
 }
