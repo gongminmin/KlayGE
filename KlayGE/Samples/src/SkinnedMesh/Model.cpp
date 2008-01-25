@@ -9,6 +9,7 @@
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Sampler.hpp>
+#include <KlayGE/Camera.hpp>
 
 #include "Model.hpp"
 

@@ -34,6 +34,7 @@
 #include <KlayGE/Input.hpp>
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/Window.hpp>
+#include <KlayGE/Camera.hpp>
 
 #include <boost/assert.hpp>
 #include <windows.h>
@@ -103,6 +104,11 @@ namespace KlayGE
 
 	// ÉèÖÃ¹Û²ì¾ØÕó
 	/////////////////////////////////////////////////////////////////////////////////
+	void App3DFramework::LookAt(float3 const & vEye, float3 const & vLookAt)
+	{
+		this->ActiveCamera().ViewParams(vEye, vLookAt, float3(0, 1, 0));
+	}
+
 	void App3DFramework::LookAt(float3 const & vEye, float3 const & vLookAt,
 												float3 const & vUp)
 	{

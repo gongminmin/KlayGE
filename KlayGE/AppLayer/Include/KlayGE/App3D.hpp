@@ -32,7 +32,6 @@
 #include <KlayGE/config/auto_link.hpp>
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/Camera.hpp>
 #include <KlayGE/Timer.hpp>
 #include <KlayGE/RenderSettings.hpp>
 
@@ -82,7 +81,8 @@ namespace KlayGE
 		virtual void OnResize(uint32_t width, uint32_t height);
 
 	protected:
-		void LookAt(float3 const & eye, float3 const & lookAt, float3 const & up = float3(0, 1, 0));
+		void LookAt(float3 const & eye, float3 const & lookAt);
+		void LookAt(float3 const & eye, float3 const & lookAt, float3 const & up);
 		void Proj(float nearPlane, float farPlane);
 
 	protected:

@@ -40,8 +40,6 @@ namespace KlayGE
 		
 		viewVec_ = MathLib::normalize(lookat_ - eyePos_);
 		viewMat_ = MathLib::look_at_lh(eyePos_, lookat_, upVec);
-
-		reEvalBillboard_ = true;
 	}
 
 	// 设置摄像机的投射矩阵
@@ -56,21 +54,5 @@ namespace KlayGE
 		farPlane_	= farPlane;
 
 		projMat_ = MathLib::perspective_fov_lh(FOV, aspect, nearPlane, farPlane);
-	}
-
-	// 公告牌技术所需要的矩阵
-	//////////////////////////////////////////////////////////////////////////////////
-	float4x4 const & Camera::BillboardMatrix()
-	{
-		if (reEvalBillboard_)
-		{
-			billboardMat_ = MathLib::inverse(viewMat_);
-
-			billboardMat_(3, 0) = 0;
-			billboardMat_(3, 1) = 0;
-			billboardMat_(3, 2) = 0;
-		}
-
-		return billboardMat_;
 	}
 }

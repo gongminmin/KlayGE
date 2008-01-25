@@ -1,8 +1,11 @@
 // CameraController.hpp
 // KlayGE 摄像机控制器类 头文件
-// Ver 2.8.0
-// 版权所有(C) 龚敏敏, 2005
+// Ver 3.7.0
+// 版权所有(C) 龚敏敏, 2005-2005
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.7.0
+// FirstPersonCameraController去掉了死角的限制 (2008.1.25)
 //
 // 2.8.0
 // 增加了timer (2005.8.2)
@@ -62,11 +65,11 @@ namespace KlayGE
 		void Rotate(float yaw, float pitch, float roll);
 
 	private:
-		float4x4	world_;				// World matrix of the camera (inverse of the view matrix)
 		float		elapsed_time_;
 		float2		rot_x_;
 		float2		rot_y_;
 		float2		rot_z_;
+		Quaternion	inv_rot_;
 
 		enum
 		{

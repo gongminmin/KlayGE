@@ -28,6 +28,7 @@
 #include <KlayGE/Sampler.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/RenderLayout.hpp>
+#include <KlayGE/Camera.hpp>
 
 #include <boost/tuple/tuple.hpp>
 

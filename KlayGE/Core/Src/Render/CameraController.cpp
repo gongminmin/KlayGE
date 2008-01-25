@@ -1,8 +1,11 @@
 // CameraController.cpp
 // KlayGE 摄像机控制器类 实现文件
-// Ver 2.8.0
-// 版权所有(C) 龚敏敏, 2005
+// Ver 3.7.0
+// 版权所有(C) 龚敏敏, 2005-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.7.0
+// FirstPersonCameraController去掉了死角的限制 (2008.1.25)
 //
 // 2.8.0
 // 增加了timer (2005.8.2)
@@ -34,8 +37,6 @@
 #include <boost/typeof/typeof.hpp>
 
 #include <KlayGE/CameraController.hpp>
-
-#include <iostream>
 
 namespace KlayGE
 {
@@ -180,6 +181,8 @@ namespace KlayGE
 		MathLib::sin_cos(yaw / 2, rot_y_.x(), rot_y_.y());
 		MathLib::sin_cos(roll / 2, rot_z_.x(), rot_z_.y());
 
+		inv_rot_ = MathLib::inverse(quat);
+
 		CameraController::AttachCamera(camera);
 	}
 
@@ -187,10 +190,6 @@ namespace KlayGE
 	{
 		if (camera_)
 		{
-			float4x4 mat = camera_->ViewMatrix();
-
-			world_ = MathLib::inverse(mat);
-
 			elapsed_time_ = static_cast<float>(timer_.elapsed());
 			if (elapsed_time_ > 0.01f)
 			{
@@ -206,12 +205,9 @@ namespace KlayGE
 		float3 movement(x, y, z);
 		movement *= moveScaler_;
 
-		float3 eyePos = camera_->EyePos();
-		float3 viewVec = camera_->ViewVec();
+		float3 new_eye_pos = camera_->EyePos() + MathLib::transform_quat(movement, inv_rot_);
 
-		eyePos = MathLib::transform_coord(movement, world_);
-
-		camera_->ViewParams(eyePos, eyePos + viewVec, camera_->UpVec());
+		camera_->ViewParams(new_eye_pos, new_eye_pos + camera_->ViewVec(), camera_->UpVec());
 	}
 
 	void FirstPersonCameraController::Rotate(float yaw, float pitch, float roll)
@@ -235,10 +231,9 @@ namespace KlayGE
 		rot_y_ = float2(quat_y.y(), quat_y.w());
 		rot_z_ = float2(quat_z.z(), quat_z.w());
 
-		float4x4 rot = MathLib::to_matrix(quat_y * quat_x * quat_z);
-		float4x4 inv_rot = MathLib::inverse(rot);
-		float3 view_vec = MathLib::transform_normal(float3(0, 0, 1), inv_rot);
-		float3 up_vec = MathLib::transform_normal(float3(0, 1, 0), inv_rot);
+		inv_rot_ = MathLib::inverse(quat_y * quat_x * quat_z);
+		float3 view_vec = MathLib::transform_quat(float3(0, 0, 1), inv_rot_);
+		float3 up_vec = MathLib::transform_quat(float3(0, 1, 0), inv_rot_);
 
 		camera_->ViewParams(camera_->EyePos(), camera_->EyePos() + view_vec, up_vec);
 	}

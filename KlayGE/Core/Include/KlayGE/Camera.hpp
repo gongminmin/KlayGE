@@ -46,7 +46,6 @@ namespace KlayGE
 
 		float4x4 const & ViewMatrix() const
 			{ return this->viewMat_; }
-		float4x4 const & BillboardMatrix();
 		float4x4 const & ProjMatrix() const
 			{ return this->projMat_; }
 
@@ -62,9 +61,6 @@ namespace KlayGE
 		float3		upVec_;
 		float3		viewVec_;
 		float4x4	viewMat_;
-
-		bool		reEvalBillboard_;
-		float4x4	billboardMat_;
 
 		float		FOV_;			// Í¶Éä¾ØÕóµÄÊôĞÔ
 		float		aspect_;
