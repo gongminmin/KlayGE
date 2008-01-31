@@ -63,10 +63,14 @@
 	#endif
 
 	// Forces all boost's libraries to be linked as dll
-	#define BOOST_ALL_DYN_LINK
+	#ifndef BOOST_ALL_DYN_LINK
+		#define BOOST_ALL_DYN_LINK
+	#endif
 
 	// Shut min/max in windows.h
-	#define NOMINMAX
+	#ifndef NOMINMAX
+		#define NOMINMAX
+	#endif
 
 	#if defined(__MINGW32__)
 		#include <_mingw.h>

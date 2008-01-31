@@ -14,7 +14,7 @@ def support_one(feature_names):
 	return False
 
 ogl_ver_db = ['1.1', '1.2', '1.3', '1.4', '1.5', '2.0', '2.1']
-glsl_ver_db = ['1.1', '1.2' ]
+glsl_ver_db = ['0.0', '1.1', '1.2' ]
 
 features_db = {
 	'1.1' : {
@@ -93,7 +93,7 @@ features_db = {
 		},
 
 	'2.1' : {
-			'OpenGL Shading Language 1.20' : lambda : support_one(['GLSL_1_2'], ['GL_ATI_shader_texture_lod']),
+			'OpenGL Shading Language 1.20' : lambda : support_one(['GLSL_1_2', 'GL_ATI_shader_texture_lod']),
 			'Pixel buffer object' : lambda : support_one(['GL_ARB_pixel_buffer_object', 'GL_EXT_pixel_buffer_object']),
 			'sRGB texture' : lambda : support_one(['GL_EXT_texture_sRGB']),
 		}
@@ -145,9 +145,9 @@ class information:
 
 		is_supported.exts = exts
 
-		if glsl_ver_index >= 0:
-			is_supported.exts.append('GLSL_1_1')
 		if glsl_ver_index >= 1:
+			is_supported.exts.append('GLSL_1_1')
+		if glsl_ver_index >= 2:
 			is_supported.exts.append('GLSL_1_2')
 
 		for i in range(0, len(ogl_ver_db)):

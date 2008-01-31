@@ -142,9 +142,9 @@ namespace KlayGE
 
 		if (glloader_GL_ARB_color_buffer_float())
 		{
-			glClampColorARB(GL_CLAMP_VERTEX_COLOR_ARB, GL_TRUE);
-			glClampColorARB(GL_CLAMP_FRAGMENT_COLOR_ARB, GL_TRUE);
-			glClampColorARB(GL_CLAMP_READ_COLOR_ARB, GL_TRUE);
+			glClampColorARB(GL_CLAMP_VERTEX_COLOR_ARB, GL_FALSE);
+			glClampColorARB(GL_CLAMP_FRAGMENT_COLOR_ARB, GL_FALSE);
+			glClampColorARB(GL_CLAMP_READ_COLOR_ARB, GL_FALSE);
 		}
 
 		if (glloader_WGL_EXT_swap_control())

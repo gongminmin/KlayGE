@@ -45,9 +45,6 @@
 #pragma warning(pop)
 #endif
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-
 namespace KlayGE
 {
 	// 在3D环境中画出文字

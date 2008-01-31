@@ -74,6 +74,9 @@
 #pragma warning(pop)
 #endif
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 #include <KlayGE/Font.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC

@@ -35,10 +35,19 @@ namespace
 			major_ver_ = ver[dot_pos - 1] - '0';
 			minor_ver_ = ver[dot_pos + 1] - '0';
 
-			std::string const glsl_ver(reinterpret_cast<char const *>(::glGetString(GL_SHADING_LANGUAGE_VERSION)));
-			std::string::size_type const glsl_dot_pos(ver.find("."));
-			glsl_major_ver_ = glsl_ver[glsl_dot_pos - 1] - '0';
-			glsl_minor_ver_ = glsl_ver[glsl_dot_pos + 1] - '0';
+			char const * glsl_ver_str = reinterpret_cast<char const *>(::glGetString(GL_SHADING_LANGUAGE_VERSION));
+			if (glsl_ver_str != NULL)
+			{
+				std::string const glsl_ver(glsl_ver_str);
+				std::string::size_type const glsl_dot_pos(ver.find("."));
+				glsl_major_ver_ = glsl_ver[glsl_dot_pos - 1] - '0';
+				glsl_minor_ver_ = glsl_ver[glsl_dot_pos + 1] - '0';
+			}
+			else
+			{
+				glsl_major_ver_ = 0;
+				glsl_minor_ver_ = 0;
+			}
 
 			std::string const extension_str(reinterpret_cast<char const *>(::glGetString(GL_EXTENSIONS)));
 			boost::algorithm::split(extensions_, extension_str,
