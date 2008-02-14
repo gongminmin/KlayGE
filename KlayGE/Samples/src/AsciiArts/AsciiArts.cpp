@@ -257,7 +257,7 @@ void AsciiArtsApp::BuildAsciiLumsTex()
 
 void AsciiArtsApp::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont", 16);
 
 	this->LookAt(float3(0.0f, 0.3f, -0.2f), float3(0.0f, 0.1f, 0.0f));
 	this->Proj(0.1f, 100.0f);

@@ -180,7 +180,7 @@ Cartoon::Cartoon(std::string const & name, RenderSettings const & settings)
 
 void Cartoon::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont", 16);
 
 	torus_.reset(new TorusObject);
 	torus_->AddToSceneManager();

@@ -180,7 +180,7 @@ Electro::Electro(std::string const & name, RenderSettings const & settings)
 
 void Electro::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont", 16);
 
 	renderElectro_.reset(new RenderElectro);
 }

@@ -136,7 +136,7 @@ VideoTextureApp::VideoTextureApp(std::string const & name, RenderSettings const 
 void VideoTextureApp::InitObjects()
 {
 	// ½¨Á¢×ÖÌå
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont", 16);
 
 	this->LookAt(float3(-0.2f, 0.3f, -0.2f), float3(0, 0, 0));
 	this->Proj(0.01f, 100);

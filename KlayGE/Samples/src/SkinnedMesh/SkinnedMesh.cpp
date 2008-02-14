@@ -86,7 +86,7 @@ SkinnedMeshApp::SkinnedMeshApp(std::string const & name, RenderSettings const & 
 
 void SkinnedMeshApp::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.TTF", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont", 16);
 
 	this->LookAt(float3(250.0f, 0.0f, 48.0f), float3(0.0f, 0.0f, 48.0f), float3(0.0f, 0.0f, 1.0f));
 	this->Proj(10, 500);

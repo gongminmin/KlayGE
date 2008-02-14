@@ -275,7 +275,7 @@ DepthOfFieldApp::DepthOfFieldApp(std::string const & name, RenderSettings const 
 
 void DepthOfFieldApp::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont", 16);
 
 	boost::shared_ptr<KlayGE::Renderable> renderInstance = LoadKModel("teapot.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderInstance>())->Mesh(0);
 	for (int i = 0; i < 10; ++ i)

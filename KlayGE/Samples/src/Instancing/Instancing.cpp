@@ -227,7 +227,7 @@ Instancing::Instancing(std::string const & name, RenderSettings const & settings
 void Instancing::InitObjects()
 {
 	// ½¨Á¢×ÖÌå
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont", 16);
 
 	ScriptEngine scriptEng;
 	ScriptModule module("Instancing_init");

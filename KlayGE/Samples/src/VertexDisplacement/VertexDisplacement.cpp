@@ -134,7 +134,7 @@ VertexDisplacement::VertexDisplacement(std::string const & name, RenderSettings 
 
 void VertexDisplacement::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont", 16);
 
 	flag_.reset(new FlagObject(8 * 2, 6 * 2));
 	flag_->AddToSceneManager();

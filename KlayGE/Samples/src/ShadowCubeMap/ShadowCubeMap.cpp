@@ -332,7 +332,7 @@ void ShadowCubeMap::InitObjects()
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 	// ½¨Á¢×ÖÌå
-	font_ = rf.MakeFont("gkai00mp.ttf", 16);
+	font_ = rf.MakeFont("gkai00mp.kfont", 16);
 
 	ground_.reset(new GroundObject);
 	ground_->AddToSceneManager();

@@ -223,7 +223,7 @@ Refract::Refract(std::string const & name, RenderSettings const & settings)
 void Refract::InitObjects()
 {
 	// ½¨Á¢×ÖÌå
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont", 16);
 
 	y_cube_map_ = LoadTexture("uffizi_cross_y.dds");
 	c_cube_map_ = LoadTexture("uffizi_cross_c.dds");

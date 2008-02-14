@@ -416,7 +416,7 @@ GPUParticleSystemApp::GPUParticleSystemApp(std::string const & name, RenderSetti
 
 void GPUParticleSystemApp::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont", 16);
 
 	this->LookAt(float3(-1.2f, 2.2f, -1.2f), float3(0, 0.5f, 0));
 	this->Proj(0.01f, 100);
