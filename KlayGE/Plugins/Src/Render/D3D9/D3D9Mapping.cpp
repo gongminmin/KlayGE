@@ -61,7 +61,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	D3DVECTOR D3D9Mapping::Mapping(float3 const & vec)
 	{
-		return D3DXVECTOR3(vec.x(), vec.y(), vec.z());
+		return *reinterpret_cast<D3DVECTOR const *>(&vec);
 	}
 
 	// 从KlayGE的Color转换到D3DCOLORVALUE
@@ -75,7 +75,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	D3DCOLORVALUE D3D9Mapping::MappingToFloat4Color(Color const & clr)
 	{
-		return D3DXCOLOR(clr.r(), clr.g(), clr.b(), clr.a());
+		return *reinterpret_cast<D3DCOLORVALUE const *>(&clr);
 	}
 
 	// 从KlayGE的ColorMask转换到D3DCOLORWRITEENABLE所使用的格式

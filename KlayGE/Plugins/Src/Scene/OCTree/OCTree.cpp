@@ -29,6 +29,7 @@
 #include <KlayGE/SceneObject.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 
+#include <algorithm>
 #include <functional>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
@@ -38,7 +39,7 @@
 namespace KlayGE
 {
 	OCTree::OCTree(uint32_t max_tree_depth)
-		: max_tree_depth_(std::min(max_tree_depth, 16UL)),
+		: max_tree_depth_(std::min<uint32_t>(max_tree_depth, 16UL)),
 			rebuild_tree_(false)
 	{
 	}
@@ -121,17 +122,17 @@ namespace KlayGE
 							if (j & 2)
 							{
 								new_node.bb_center.y() = parent_center.y() + new_half_size.y();
-							}							 
-							else						 
-							{							 
+							}
+							else
+							{
 								new_node.bb_center.y() = parent_center.y() - new_half_size.y();
-							}							 
-							if (j & 4)					 
-							{							 
+							}
+							if (j & 4)
+							{
 								new_node.bb_center.z() = parent_center.z() + new_half_size.z();
-							}							 
-							else						 
-							{							 
+							}
+							else
+							{
 								new_node.bb_center.z() = parent_center.z() - new_half_size.z();
 							}
 

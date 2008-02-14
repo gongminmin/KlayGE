@@ -18,6 +18,7 @@
 #include <KlayGE/Math.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
+#include <ios>
 #include <vector>
 #include <cstring>
 #include <boost/assert.hpp>
@@ -82,7 +83,7 @@ namespace KlayGE
 		while (cur_size < size)
 		{
 			int result = ov_read(&vf_, pcm + cur_size, static_cast<int>(size - cur_size), 0, 2, 1, &section);
-	    
+
 			if (result > 0)
 			{
 				cur_size += result;
@@ -131,7 +132,7 @@ namespace KlayGE
 		{
 			actual_size_to_read = space_to_eof;
 		}
-		
+
 		// A simple copy of the data from memory to the datastruct that the vorbis libs will use
 		if (actual_size_to_read > 0)
 		{
@@ -146,7 +147,7 @@ namespace KlayGE
 	{
 		OggVorbisSource* vorbis_data = static_cast<OggVorbisSource*>(datasource);
 
-		std::ios_base::seek_dir dir;
+		std::ios_base::seekdir dir;
 		switch (whence)
 		{
 		case SEEK_SET: // Seek to the start of the data file

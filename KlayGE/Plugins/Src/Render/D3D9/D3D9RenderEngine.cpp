@@ -47,6 +47,7 @@
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderStateObject.hpp>
+#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderSettings.hpp>
 
@@ -226,7 +227,7 @@ namespace KlayGE
 			}
 		}
 		d3dDevice_->SetRenderState(D3DRS_ALPHABLENDENABLE, cur_render_state_obj_.blend_enable);
-		d3dDevice_->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, cur_render_state_obj_.blend_enable);		
+		d3dDevice_->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, cur_render_state_obj_.blend_enable);
 		d3dDevice_->SetRenderState(D3DRS_BLENDOP, D3D9Mapping::Mapping(cur_render_state_obj_.blend_op));
 		d3dDevice_->SetRenderState(D3DRS_SRCBLEND, D3D9Mapping::Mapping(cur_render_state_obj_.src_blend));
 		d3dDevice_->SetRenderState(D3DRS_DESTBLEND, D3D9Mapping::Mapping(cur_render_state_obj_.dest_blend));
@@ -272,7 +273,7 @@ namespace KlayGE
 		d3dDevice_->SetRenderState(D3DRS_STENCILPASS, D3D9Mapping::Mapping(cur_render_state_obj_.front_stencil_pass));
 		d3dDevice_->SetRenderState(D3DRS_STENCILWRITEMASK, cur_render_state_obj_.front_stencil_write_mask);
 
-		d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFUNC, D3D9Mapping::Mapping(cur_render_state_obj_.back_stencil_func));	
+		d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFUNC, D3D9Mapping::Mapping(cur_render_state_obj_.back_stencil_func));
 		d3dDevice_->SetRenderState(D3DRS_STENCILREF, cur_render_state_obj_.back_stencil_ref);
 		d3dDevice_->SetRenderState(D3DRS_STENCILMASK, cur_render_state_obj_.back_stencil_ref);
 		d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFAIL, D3D9Mapping::Mapping(cur_render_state_obj_.back_stencil_fail));
@@ -304,7 +305,7 @@ namespace KlayGE
 			if (cur_render_state_obj_.cull_mode != rs_obj.cull_mode)
 			{
 				d3dDevice_->SetRenderState(D3DRS_CULLMODE, D3D9Mapping::Mapping(rs_obj.cull_mode));
-			}			
+			}
 
 			if (cur_render_state_obj_.alpha_to_coverage_enable != rs_obj.alpha_to_coverage_enable)
 			{
@@ -327,7 +328,7 @@ namespace KlayGE
 			if (cur_render_state_obj_.blend_enable != rs_obj.blend_enable)
 			{
 				d3dDevice_->SetRenderState(D3DRS_ALPHABLENDENABLE, rs_obj.blend_enable);
-				d3dDevice_->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, rs_obj.blend_enable);		
+				d3dDevice_->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, rs_obj.blend_enable);
 			}
 			if (cur_render_state_obj_.blend_op != rs_obj.blend_op)
 			{
@@ -434,7 +435,7 @@ namespace KlayGE
 
 			if (cur_render_state_obj_.back_stencil_func != rs_obj.back_stencil_func)
 			{
-				d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFUNC, D3D9Mapping::Mapping(rs_obj.back_stencil_func));	
+				d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFUNC, D3D9Mapping::Mapping(rs_obj.back_stencil_func));
 			}
 			if (cur_render_state_obj_.back_stencil_ref != rs_obj.back_stencil_ref)
 			{

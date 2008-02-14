@@ -38,6 +38,7 @@
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/FrameBuffer.hpp>
+#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/SceneManager.hpp>
@@ -174,7 +175,7 @@ namespace KlayGE
 			glEnable(GL_CULL_FACE);
 			glFrontFace(GL_CW);
 			break;
-		}			
+		}
 
 		if (cur_render_state_obj_.alpha_to_coverage_enable)
 		{
@@ -312,7 +313,7 @@ namespace KlayGE
 					glFrontFace(GL_CW);
 					break;
 				}
-			}			
+			}
 
 			if (cur_render_state_obj_.alpha_to_coverage_enable != rs_obj.alpha_to_coverage_enable)
 			{
@@ -359,7 +360,7 @@ namespace KlayGE
 				else
 				{
 					glDisable(GL_DEPTH_TEST);
-				}	
+				}
 			}
 			if (cur_render_state_obj_.depth_mask != rs_obj.depth_mask)
 			{
@@ -491,7 +492,7 @@ namespace KlayGE
 				if (!sampler || !sampler->texture)
 				{
 					glActiveTexture(GL_TEXTURE0 + stage);
-					
+
 					glBindTexture(GL_TEXTURE_2D, 0);
 				}
 				else
