@@ -18,11 +18,11 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Context.hpp>
+#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderableHelper.hpp>
-#include <KlayGE/Sampler.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderLayout.hpp>
 
@@ -63,7 +63,7 @@ namespace KlayGE
 	void PostProcess::Destinate(FrameBufferPtr const & fb)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		
+
 		if (fb)
 		{
 			frame_buffer_ = fb;
@@ -165,7 +165,7 @@ namespace KlayGE
 			tmp_offset[i + kernel_radius_] = static_cast<float>(i);
 		}
 
-		// Bilinear filtering taps 
+		// Bilinear filtering taps
 		// Ordering is left to right.
 		for (int i = 0; i < kernel_radius_; ++ i)
 		{

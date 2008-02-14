@@ -19,12 +19,12 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Texture.hpp>
+#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/ResLoader.hpp>
-#include <KlayGE/Sampler.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Camera.hpp>
 
@@ -329,7 +329,7 @@ namespace KlayGE
 			header.start_frame = 0;
 			header.end_frame = 0;
 			header.frame_rate = 0;
-		} 
+		}
 
 		uint32_t header_size = sizeof(header);
 		file.write(reinterpret_cast<char*>(&header_size), sizeof(header_size));

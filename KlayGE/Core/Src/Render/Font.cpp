@@ -1,8 +1,11 @@
 // Font.cpp
 // KlayGE Font类 实现文件
-// Ver 3.6.0
-// 版权所有(C) 龚敏敏, 2003-2007
+// Ver 3.7.0
+// 版权所有(C) 龚敏敏, 2003-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.7.0
+// 新的基于distance的字体格式 (2008.2.13)
 //
 // 3.6.0
 // 增加了Rect对齐的方式 (2007.6.5)
@@ -44,6 +47,7 @@
 #include <KlayGE/Viewport.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/Texture.hpp>
+#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Renderable.hpp>
@@ -60,6 +64,7 @@
 #include <algorithm>
 #include <vector>
 #include <cstring>
+#include <fstream>
 #include <boost/assert.hpp>
 #include <boost/mem_fn.hpp>
 #include <boost/typeof/typeof.hpp>
@@ -74,18 +79,7 @@
 #pragma warning(pop)
 #endif
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-
 #include <KlayGE/Font.hpp>
-
-#ifdef KLAYGE_COMPILER_MSVC
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "freetype235_D.lib")
-#else
-	#pragma comment(lib, "freetype235.lib")
-#endif
-#endif
 
 namespace
 {
@@ -93,14 +87,29 @@ namespace
 
 	ElementFormat const TEX_FORMAT = EF_L8;
 
+#ifdef KLAYGE_PLATFORM_WINDOWS
+	#pragma pack(push, 1)
+#endif
+	struct kfont_header
+	{
+		uint32_t fourcc;
+		uint32_t version;
+		uint32_t start_ptr;
+		uint32_t non_empty_chars;
+		uint32_t char_size;
+	};
+#ifdef KLAYGE_PLATFORM_WINDOWS
+	#pragma pack(pop)
+#endif
+
+
 	class FontRenderable : public RenderableHelper
 	{
 	public:
-		FontRenderable(std::string const & fontName, uint32_t fontHeight, uint32_t /*flags*/)
+		explicit FontRenderable(std::string const & fontName)
 			: RenderableHelper(L"Font"),
 				curX_(0), curY_(0),
-				three_dim_(false),
-				fontHeight_(fontHeight)
+				three_dim_(false)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -125,17 +134,27 @@ namespace
 
 			box_ = Box(float3(0, 0, 0), float3(0, 0, 0));
 
-			::FT_Init_FreeType(&ftLib_);
-			::FT_New_Face(ftLib_, ResLoader::Instance().Locate(fontName).c_str(), 0, &face_);
-			::FT_Set_Pixel_Sizes(face_, 0, fontHeight);
-			::FT_Select_Charmap(face_, FT_ENCODING_UNICODE);
-			slot_ = face_->glyph;
-		}
+			std::ifstream kfont_input(ResLoader::Instance().Locate(fontName).c_str(), std::ios_base::binary);
+			BOOST_ASSERT(kfont_input);
 
-		~FontRenderable()
-		{
-			::FT_Done_Face(face_);
-			::FT_Done_FreeType(ftLib_);
+			kfont_header header;
+			kfont_input.read(reinterpret_cast<char*>(&header), sizeof(header));
+			BOOST_ASSERT((MakeFourCC<'K', 'F', 'N', 'T'>::value == header.fourcc));
+			BOOST_ASSERT((1 == header.version));
+
+			kfont_char_size_ = header.char_size;
+
+			kfont_input.seekg(header.start_ptr, std::ios_base::beg);
+
+			char_width_.resize(65536);
+			char_index_.resize(65536);
+			char_dist_.resize(header.non_empty_chars * header.char_size * header.char_size);
+			kfont_input.read(reinterpret_cast<char*>(&char_width_[0]),
+				static_cast<std::streamsize>(char_width_.size() * sizeof(char_width_[0])));
+			kfont_input.read(reinterpret_cast<char*>(&char_index_[0]),
+				static_cast<std::streamsize>(char_index_.size() * sizeof(char_index_[0])));
+			kfont_input.read(reinterpret_cast<char*>(&char_dist_[0]),
+				static_cast<std::streamsize>(char_dist_.size() * sizeof(char_dist_[0])));
 		}
 
 		RenderTechniquePtr GetRenderTechnique() const
@@ -189,12 +208,7 @@ namespace
 			this->OnRenderEnd();
 		}
 
-		uint32_t FontHeight() const
-		{
-			return fontHeight_;
-		}
-
-		Size_T<uint32_t> CalcSize(std::wstring const & text)
+		Size_T<uint32_t> CalcSize(std::wstring const & text, uint32_t font_height)
 		{
 			this->UpdateTexture(text);
 
@@ -204,7 +218,8 @@ namespace
 			BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
 			{
 				BOOST_AUTO(cmiter, charInfoMap_.find(ch));
-				uint32_t const w = static_cast<uint32_t>(cmiter->second.Width() * tex_width);
+				uint32_t const w = static_cast<uint32_t>(static_cast<float>(cmiter->second.Width())
+					* font_height / kfont_char_size_ * tex_width);
 
 				if (ch != L'\n')
 				{
@@ -217,41 +232,40 @@ namespace
 			}
 
 			return Size_T<uint32_t>(*std::max_element(lines.begin(), lines.end()),
-				static_cast<uint32_t>(fontHeight_ * lines.size()));
+				static_cast<uint32_t>(font_height * lines.size()));
 		}
 
 		void AddText2D(float sx, float sy, float sz,
-			float xScale, float yScale, Color const & clr, std::wstring const & text)
+			float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t font_height)
 		{
 			three_dim_ = false;
 
-			this->AddText(sx, sy, sz, xScale, yScale, clr, text);
+			this->AddText(sx, sy, sz, xScale, yScale, clr, text, font_height);
 		}
 
 		void AddText2D(Rect const & rc, float sz,
-			float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t align)
+			float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t font_height, uint32_t align)
 		{
 			three_dim_ = false;
 
-			this->AddText(rc, sz, xScale, yScale, clr, text, align);
+			this->AddText(rc, sz, xScale, yScale, clr, text, font_height, align);
 		}
 
-		void AddText3D(float4x4 const & mvp, Color const & clr,
-			std::wstring const & text)
+		void AddText3D(float4x4 const & mvp, Color const & clr, std::wstring const & text, uint32_t font_height)
 		{
 			three_dim_ = true;
 			*(effect_->ParameterByName("mvp")) = mvp;
 
-			this->AddText(0, 0, 0, 1, 1, clr, text);
+			this->AddText(0, 0, 0, 1, 1, clr, text, font_height);
 		}
 
 	private:
 		void AddText(Rect const & rc, float sz,
-			float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t align)
+			float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t font_height, uint32_t align)
 		{
 			this->UpdateTexture(text);
 
-			float const h = fontHeight_ * yScale;
+			float const h = font_height * yScale;
 			float const width_scale = theTexture_->Width(0) * xScale;
 
 			std::vector<std::pair<float, std::wstring> > lines(1, std::make_pair(0.0f, L""));
@@ -259,7 +273,7 @@ namespace
 			BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
 			{
 				BOOST_AUTO(cmiter, charInfoMap_.find(ch));
-				float const w = cmiter->second.Width() * width_scale;
+				float const w = static_cast<float>(cmiter->second.Width()) * font_height / kfont_char_size_ * width_scale;
 
 				if (ch != L'\n')
 				{
@@ -341,7 +355,7 @@ namespace
 				BOOST_FOREACH(BOOST_TYPEOF(lines[i].second)::const_reference ch, lines[i].second)
 				{
 					BOOST_AUTO(cmiter, charInfoMap_.find(ch));
-					float const w = cmiter->second.Width() * width_scale;
+					float const w = static_cast<float>(cmiter->second.Width()) * font_height / kfont_char_size_ * width_scale;
 
 					Rect_T<float> const & texRect(cmiter->second);
 
@@ -373,19 +387,19 @@ namespace
 
 					x += w;
 				}
-			
+
 				box_ |= Box(float3(sx[i], sy[i], sz), float3(sx[i] + lines[i].first, sy[i] + h, sz + 0.1f));
 			}
 		}
 
 		void AddText(float sx, float sy, float sz,
-			float xScale, float yScale, Color const & clr, std::wstring const & text)
+			float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t font_height)
 		{
 			this->UpdateTexture(text);
 
 			uint32_t const clr32 = clr.ABGR();
 			float const width_scale = theTexture_->Width(0) * xScale;
-			float const h = fontHeight_ * yScale;
+			float const h = font_height * yScale;
 			size_t const maxSize = text.length() - std::count(text.begin(), text.end(), L'\n');
 			float x = sx, y = sy;
 			float maxx = sx, maxy = sy;
@@ -398,7 +412,7 @@ namespace
 			BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
 			{
 				BOOST_AUTO(cmiter, charInfoMap_.find(ch));
-				float const w = cmiter->second.Width() * width_scale;
+				float const w = static_cast<float>(cmiter->second.Width()) * font_height / kfont_char_size_ * width_scale;
 
 				if (ch != L'\n')
 				{
@@ -470,13 +484,9 @@ namespace
 					if (ch != L'\n')
 					{
 						int max_width, max_height;
-						max_width = max_height = fontHeight_;
+						max_width = max_height = kfont_char_size_;
 
-						// convert character code to glyph index
-						::FT_Load_Char(face_, ch, FT_LOAD_RENDER);
-
-						uint32_t const width = std::min<uint32_t>(max_width,
-							(0 != slot_->bitmap.width) ? slot_->bitmap.width : max_width / 2);
+						uint32_t const width = char_width_[ch];
 
 						uint32_t const tex_width = theTexture_->Width(0);
 						uint32_t const tex_height = theTexture_->Height(0);
@@ -499,7 +509,7 @@ namespace
 							charInfo.right()	= (curX_ + width + 0.1f) / tex_width;
 							charInfo.bottom()	= (curY_ + max_height + 0.1f) / tex_height;
 
-							curX_ += width;
+							curX_ += kfont_char_size_;
 						}
 						else
 						{
@@ -518,20 +528,28 @@ namespace
 							charLRU_.pop_back();
 							charInfoMap_.erase(iter);
 						}
-						
-						int const buf_width = slot_->bitmap.width;
-						int const buf_height = slot_->bitmap.rows;
-						if ((buf_width > 0) && (buf_height > 0))
-						{
-							int const y_start = std::max<int>(max_height * 3 / 4 - slot_->metrics.horiBearingY / 64, 0);
 
+						{
 							Texture::Mapper mapper(*theTexture_, 0, TMA_Write_Only,
-								char_pos.x(), char_pos.y() + y_start, buf_width, buf_height);
+								char_pos.x(), char_pos.y(), kfont_char_size_, kfont_char_size_);
 							uint8_t* tex_data = mapper.Pointer<uint8_t>();
-							for (int y = 0; y < buf_height; ++ y)
+							if (char_index_[ch] != -1)
 							{
-								memcpy(tex_data, &slot_->bitmap.buffer[y * buf_width], buf_width);
-								tex_data += mapper.RowPitch();
+								uint8_t const * char_data = &char_dist_[char_index_[ch] * kfont_char_size_ * kfont_char_size_];
+								for (uint32_t y = 0; y < kfont_char_size_; ++ y)
+								{
+									std::memcpy(tex_data, char_data, kfont_char_size_);
+									tex_data += mapper.RowPitch();
+									char_data += kfont_char_size_;
+								}
+							}
+							else
+							{
+								for (uint32_t y = 0; y < kfont_char_size_; ++ y)
+								{
+									std::memset(tex_data, 0, kfont_char_size_);
+									tex_data += mapper.RowPitch();
+								}
 							}
 						}
 
@@ -574,8 +592,6 @@ namespace
 
 		bool three_dim_;
 
-		uint32_t fontHeight_;
-
 		std::vector<FontVert>	vertices_;
 		std::vector<uint16_t>	indices_;
 
@@ -583,12 +599,12 @@ namespace
 		GraphicsBufferPtr ib_;
 
 		TexturePtr		theTexture_;
-
-		::FT_Library	ftLib_;
-		::FT_Face		face_;
-		::FT_GlyphSlot	slot_;
-
 		RenderEffectPtr	effect_;
+
+		uint32_t kfont_char_size_;
+		std::vector<uint8_t> char_width_;
+		std::vector<int32_t> char_index_;
+		std::vector<uint8_t> char_dist_;
 	};
 
 	class FontObject : public SceneObjectHelper
@@ -599,6 +615,43 @@ namespace
 		{
 		}
 	};
+
+
+	class FontRenderableSet
+	{
+	public:
+		static FontRenderableSet& Instance()
+		{
+			static FontRenderableSet ret;
+			return ret;
+		}
+
+		RenderablePtr LookupFontRenderable(std::string const & font_name)
+		{
+			BOOST_AUTO(iter, font_renderables_.find(font_name));
+			if (iter != font_renderables_.end())
+			{
+				return iter->second;
+			}
+			else
+			{
+				RenderablePtr ret(new FontRenderable(font_name));
+				font_renderables_.insert(std::make_pair(font_name, ret));
+				return ret;
+			}
+		}
+
+	private:
+		FontRenderableSet()
+		{
+		}
+
+		FontRenderableSet(FontRenderableSet const &);
+		FontRenderableSet& operator=(FontRenderableSet const &);
+
+	private:
+		std::map<std::string, RenderablePtr> font_renderables_;
+	};
 }
 
 namespace KlayGE
@@ -606,7 +659,8 @@ namespace KlayGE
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	Font::Font(std::string const & fontName, uint32_t height, uint32_t flags)
-				: font_renderable_(new FontRenderable(fontName, height, flags))
+			: font_renderable_(FontRenderableSet::Instance().LookupFontRenderable(fontName)),
+					font_height_(height)
 	{
 		fso_attrib_ = SceneObject::SOA_ShortAge;
 		if (flags & Font::FS_Cullable)
@@ -619,7 +673,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	uint32_t Font::FontHeight() const
 	{
-		return checked_pointer_cast<FontRenderable>(font_renderable_)->FontHeight();
+		return font_height_;
 	}
 
 	// 计算文字大小
@@ -628,7 +682,7 @@ namespace KlayGE
 	{
 		if (!text.empty())
 		{
-			return checked_pointer_cast<FontRenderable>(font_renderable_)->CalcSize(text);
+			return checked_pointer_cast<FontRenderable>(font_renderable_)->CalcSize(text, font_height_);
 		}
 		else
 		{
@@ -654,7 +708,7 @@ namespace KlayGE
 		{
 			boost::shared_ptr<FontObject> font_obj(new FontObject(font_renderable_, fso_attrib_));
 			checked_pointer_cast<FontRenderable>(font_renderable_)->AddText2D(
-				x, y, z, xScale, yScale, clr, text);
+				x, y, z, xScale, yScale, clr, text, font_height_);
 			font_obj->AddToSceneManager();
 		}
 	}
@@ -662,14 +716,14 @@ namespace KlayGE
 	// 在指定矩形区域内画出放缩的文字
 	/////////////////////////////////////////////////////////////////////////////////
 	void Font::RenderText(Rect const & rc, float z,
-		float xScale, float yScale, Color const & clr, 
+		float xScale, float yScale, Color const & clr,
 		std::wstring const & text, uint32_t align)
 	{
 		if (!text.empty())
 		{
 			boost::shared_ptr<FontObject> font_obj(new FontObject(font_renderable_, fso_attrib_));
 			checked_pointer_cast<FontRenderable>(font_renderable_)->AddText2D(
-				rc, z, xScale, yScale, clr, text, align);
+				rc, z, xScale, yScale, clr, text, font_height_, align);
 			font_obj->AddToSceneManager();
 		}
 	}
@@ -681,7 +735,7 @@ namespace KlayGE
 		if (!text.empty())
 		{
 			boost::shared_ptr<FontObject> font_obj(new FontObject(font_renderable_, fso_attrib_));
-			checked_pointer_cast<FontRenderable>(font_renderable_)->AddText3D(mvp, clr, text);
+			checked_pointer_cast<FontRenderable>(font_renderable_)->AddText3D(mvp, clr, text, font_height_);
 			font_obj->AddToSceneManager();
 		}
 	}

@@ -13,6 +13,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Texture.hpp>
+#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/Query.hpp>
@@ -39,7 +40,7 @@ namespace KlayGE
 		{
 			return *RenderEngine::NullObject();
 		}
-		
+
 		TexturePtr MakeTexture1D(uint32_t /*width*/, uint16_t /*numMipMaps*/,
 			ElementFormat /*format*/)
 		{

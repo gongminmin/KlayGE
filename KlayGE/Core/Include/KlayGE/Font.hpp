@@ -1,8 +1,11 @@
 // Font.hpp
 // KlayGE Font类 头文件
-// Ver 3.6.0
-// 版权所有(C) 龚敏敏, 2003-2007
+// Ver 3.7.0
+// 版权所有(C) 龚敏敏, 2003-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.7.0
+// 新的基于distance的字体格式 (2008.2.13)
 //
 // 3.6.0
 // 增加了Rect对齐的方式 (2007.6.5)
@@ -55,13 +58,8 @@ namespace KlayGE
 		// 字体建立标志
 		enum FontStyle
 		{
-			FS_Bold			= 1UL << 0,
-			FS_Italic		= 1UL << 1,
-			FS_Underline	= 1UL << 2,
-			FS_Strikeout	= 1UL << 3,
-
-			FS_TwoSided		= 1UL << 4,
-			FS_Cullable		= 1UL << 5
+			FS_TwoSided		= 1UL << 0,
+			FS_Cullable		= 1UL << 1
 		};
 
 		enum FontAlign
@@ -91,6 +89,7 @@ namespace KlayGE
 
 	private:
 		RenderablePtr	font_renderable_;
+		uint32_t		font_height_;
 		uint32_t		fso_attrib_;
 	};
 }

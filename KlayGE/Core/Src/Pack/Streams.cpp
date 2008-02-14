@@ -12,6 +12,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 
+#include <ios>
 #include <boost/assert.hpp>
 
 #define INITGUID

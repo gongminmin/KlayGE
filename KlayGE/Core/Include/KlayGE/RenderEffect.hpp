@@ -478,7 +478,7 @@ namespace KlayGE
 
 	protected:
 		RenderEffect& effect_;
-		
+
 		boost::shared_ptr<std::string> name_;
 		boost::shared_ptr<std::string> semantic_;
 

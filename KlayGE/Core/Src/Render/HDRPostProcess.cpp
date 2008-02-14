@@ -12,10 +12,10 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Context.hpp>
+#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
-#include <KlayGE/Sampler.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 
 #include <boost/assert.hpp>
@@ -87,7 +87,7 @@ namespace KlayGE
 		for (int i = 0; i < 2; ++ i)
 		{
 			TexturePtr tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(1, 1, 1, EF_R32F);
-			
+
 			{
 				Texture::Mapper mapper(*tex, 0, TMA_Write_Only, 0, 0, 1, 1);
 				*mapper.Pointer<float>() = 0;

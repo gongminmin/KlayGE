@@ -48,104 +48,104 @@ namespace KlayGE
 		return PyObjectPtr(p, PyObjDeleter());
 	};
 
+	template <typename T>
+	PyObjectPtr CppType2PyObjectPtr(T const &);
+
+	template <>
+	inline PyObjectPtr CppType2PyObjectPtr<std::string>(std::string const & t)
+	{
+		return MakePyObjectPtr(Py_BuildValue("s", t.c_str()));
+	}
+
+	template <>
+	inline PyObjectPtr CppType2PyObjectPtr<char*>(char* const & t)
+	{
+		return MakePyObjectPtr(Py_BuildValue("s", t));
+	}
+
+	template <>
+	inline PyObjectPtr CppType2PyObjectPtr<wchar_t*>(wchar_t* const & t)
+	{
+		return MakePyObjectPtr(Py_BuildValue("u", t));
+	}
+
+	template <>
+	inline PyObjectPtr CppType2PyObjectPtr<int8_t>(int8_t const & t)
+	{
+		return MakePyObjectPtr(Py_BuildValue("b", t));
+	}
+
+	template <>
+	inline PyObjectPtr CppType2PyObjectPtr<int16_t>(int16_t const & t)
+	{
+		return MakePyObjectPtr(Py_BuildValue("h", t));
+	}
+
+	template <>
+	inline PyObjectPtr CppType2PyObjectPtr<int32_t>(int32_t const & t)
+	{
+		return MakePyObjectPtr(Py_BuildValue("i", t));
+	}
+
+	template <>
+	inline PyObjectPtr CppType2PyObjectPtr<int64_t>(int64_t const & t)
+	{
+		return MakePyObjectPtr(Py_BuildValue("L", t));
+	}
+
+	template <>
+	inline PyObjectPtr CppType2PyObjectPtr<uint8_t>(uint8_t const & t)
+	{
+		return MakePyObjectPtr(Py_BuildValue("B", t));
+	}
+
+	template <>
+	inline PyObjectPtr CppType2PyObjectPtr<uint16_t>(uint16_t const & t)
+	{
+		return MakePyObjectPtr(Py_BuildValue("H", t));
+	}
+
+	template <>
+	inline PyObjectPtr CppType2PyObjectPtr<uint32_t>(uint32_t const & t)
+	{
+		return MakePyObjectPtr(Py_BuildValue("I", t));
+	}
+
+	template <>
+	inline PyObjectPtr CppType2PyObjectPtr<uint64_t>(uint64_t const & t)
+	{
+		return MakePyObjectPtr(Py_BuildValue("K", t));
+	}
+
+	template <>
+	inline PyObjectPtr CppType2PyObjectPtr<double>(double const & t)
+	{
+		return MakePyObjectPtr(Py_BuildValue("d", t));
+	}
+
+	template <>
+	inline PyObjectPtr CppType2PyObjectPtr<float>(float const & t)
+	{
+		return MakePyObjectPtr(Py_BuildValue("f", t));
+	}
+
+	template <>
+	inline PyObjectPtr CppType2PyObjectPtr<PyObject*>(PyObject* const & t)
+	{
+		return MakePyObjectPtr(t);
+	}
+
+	template <>
+	inline PyObjectPtr CppType2PyObjectPtr<PyObjectPtr>(PyObjectPtr const & t)
+	{
+		return t;
+	}
+
 	// 从一个.py载入模块
 	/////////////////////////////////////////////////////////////////////////////////
 	class ScriptModule
 	{
 	private:
-		template <typename T>
-		PyObjectPtr CppType2PyObjectPtr(T const &);
-
-		template <>
-		PyObjectPtr CppType2PyObjectPtr<std::string>(std::string const & t)
-		{
-			return MakePyObjectPtr(Py_BuildValue("s", t.c_str()));
-		}
-
-		template <>
-		PyObjectPtr CppType2PyObjectPtr<char*>(char* const & t)
-		{
-			return MakePyObjectPtr(Py_BuildValue("s", t));
-		}
-
-		template <>
-		PyObjectPtr CppType2PyObjectPtr<wchar_t*>(wchar_t* const & t)
-		{
-			return MakePyObjectPtr(Py_BuildValue("u", t));
-		}
-
-		template <>
-		PyObjectPtr CppType2PyObjectPtr<int8_t>(int8_t const & t)
-		{
-			return MakePyObjectPtr(Py_BuildValue("b", t));
-		}
-
-		template <>
-		PyObjectPtr CppType2PyObjectPtr<int16_t>(int16_t const & t)
-		{
-			return MakePyObjectPtr(Py_BuildValue("h", t));
-		}
-
-		template <>
-		PyObjectPtr CppType2PyObjectPtr<int32_t>(int32_t const & t)
-		{
-			return MakePyObjectPtr(Py_BuildValue("i", t));
-		}
-
-		template <>
-		PyObjectPtr CppType2PyObjectPtr<int64_t>(int64_t const & t)
-		{
-			return MakePyObjectPtr(Py_BuildValue("L", t));
-		}
-
-		template <>
-		PyObjectPtr CppType2PyObjectPtr<uint8_t>(uint8_t const & t)
-		{
-			return MakePyObjectPtr(Py_BuildValue("B", t));
-		}
-
-		template <>
-		PyObjectPtr CppType2PyObjectPtr<uint16_t>(uint16_t const & t)
-		{
-			return MakePyObjectPtr(Py_BuildValue("H", t));
-		}
-
-		template <>
-		PyObjectPtr CppType2PyObjectPtr<uint32_t>(uint32_t const & t)
-		{
-			return MakePyObjectPtr(Py_BuildValue("I", t));
-		}
-
-		template <>
-		PyObjectPtr CppType2PyObjectPtr<uint64_t>(uint64_t const & t)
-		{
-			return MakePyObjectPtr(Py_BuildValue("K", t));
-		}
-
-		template <>
-		PyObjectPtr CppType2PyObjectPtr<double>(double const & t)
-		{
-			return MakePyObjectPtr(Py_BuildValue("d", t));
-		}
-
-		template <>
-		PyObjectPtr CppType2PyObjectPtr<float>(float const & t)
-		{
-			return MakePyObjectPtr(Py_BuildValue("f", t));
-		}
-
-		template <>
-		PyObjectPtr CppType2PyObjectPtr<PyObject*>(PyObject* const & t)
-		{
-			return MakePyObjectPtr(t);
-		}
-
-		template <>
-		PyObjectPtr CppType2PyObjectPtr<PyObjectPtr>(PyObjectPtr const & t)
-		{
-			return t;
-		}
-
 		template <typename TupleType>
 		std::vector<PyObjectPtr> Tuple2Vector(TupleType const & t)
 		{

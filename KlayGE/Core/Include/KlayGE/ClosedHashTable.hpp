@@ -216,7 +216,7 @@ namespace KlayGE
 			local_iterator()
 			{
 			}
-			
+
 			reference operator*() const
 			{
 				return *pos_;
@@ -304,7 +304,7 @@ namespace KlayGE
 				: ht_(rhs.ht_), pos_(rhs.pos_), end_(rhs.end_)
 			{
 			}
-			
+
 			reference operator*() const
 			{
 				return *pos_;
@@ -376,7 +376,7 @@ namespace KlayGE
 		typedef value_type&			reference;
 		typedef value_type const &	const_reference;
 
-	public:		
+	public:
 		explicit closed_hash_table(size_type n = 0, HashFunc const & hf = HashFunc(),
 				EqualKey const & eql = EqualKey(), ExtractKey const & ext = ExtractKey())
 			: hash_(hf), equals_(eql), get_key_(ext),
@@ -720,10 +720,10 @@ namespace KlayGE
 			}
 			else
 			{
-				for (closed_hash_table::const_iterator it = lhs.begin(); it != lhs.end(); ++ it)
+				for (typename closed_hash_table::const_iterator it = lhs.begin(); it != lhs.end(); ++ it)
 				{
-					const_iterator it2 = rhs.find(get_key_(*it));
-					if ((it2 == ht.end()) || (*it != *it2))
+					const_iterator it2 = rhs.find(lhs.get_key_(*it));
+					if ((it2 == rhs.end()) || (*it != *it2))
 					{
 						return false;
 					}
@@ -734,7 +734,7 @@ namespace KlayGE
 		}
 		friend bool operator!=(closed_hash_table const & lhs, closed_hash_table const & rhs)
 		{
-			return !(*this == rhs);
+			return !(lhs == rhs);
 		}
 
 	private:
@@ -992,7 +992,7 @@ namespace KlayGE
 			return this->get_tag(iter.pos_ - data_table_);
 		}
 
-	private:		
+	private:
 		// How full we let the table get before we resize.  Knuth says .8 is
 		// good -- higher causes us to probe too much, though saves memory
 		static const float HT_OCCUPANCY_FLT;	// = 0.8;

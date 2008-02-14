@@ -38,7 +38,7 @@ namespace KlayGE
 
 	// Threadof operator simulation for threadof(0) expression
 	inline thread_id threadof(int)
-	{  
+	{
 		typedef boost::thread_specific_ptr<boost::thread> boost_thread_tss_ptr_t;
 		//Yes, this is complicated but:
 		//->  We don't have access to boost::thread's handles.
@@ -47,14 +47,14 @@ namespace KlayGE
 		//->  Default constructed boost::thread represents current thread
 		//->  Thread specific data construction is not thread-safe!
 		//
-		// I hate this function but I can't touch Boost.Threads. 
+		// I hate this function but I can't touch Boost.Threads.
 		// Performance friendly implementation can return just a wrapper
 		// over windows HANDLE or pthread's pthread_t
 		//
 		//We create a default constructed boost::thread (who identifies
 		//current thread) for each thread
 
-		boost_thread_tss_ptr_t& boost_thread_tss_ptr = 
+		boost_thread_tss_ptr_t& boost_thread_tss_ptr =
 			boost::details::pool::singleton_default<boost_thread_tss_ptr_t>::instance();
 
 		boost::thread* curthread = boost_thread_tss_ptr.get();
@@ -77,7 +77,7 @@ namespace KlayGE
 	class bad_join : public std::exception
 	{
 	public:
-		const char* what() const
+		const char* what() const throw()
 		{
 			return "bad join";
 		}
@@ -90,9 +90,9 @@ namespace KlayGE
 	{
 	public:
 		// Representation of the storage to hold the return type:
-		//	if result_type == void 
+		//	if result_type == void
 		//		boost::optional<boost::mpl::void_>
-		//	else  
+		//	else
 		//		boost::optional<result_type>
 		typedef boost::optional<
 			typename boost::mpl::if_c<boost::is_same<result_type, void>::value,
@@ -201,7 +201,7 @@ namespace KlayGE
 		joiner& operator=(joiner const & other)
 		{
 			handle_ = other.handle_;
-			return *this;  
+			return *this;
 		}
 
 		const_result_type_ref operator()()
@@ -262,7 +262,7 @@ namespace KlayGE
 			typedef boost::mpl::void_								void_t;
 			typedef boost::optional<void_t>							void_optional_t;
 
-			//Helper function to construct the optional from the 
+			//Helper function to construct the optional from the
 			//return value and handle void return types
 			template <typename MainFunctionHolder, typename OptionalOut>
 			static void construct_result(MainFunctionHolder& in, OptionalOut& out)
@@ -278,7 +278,7 @@ namespace KlayGE
 			}
 
 		public:
-			threaded(Threadable const & main, 
+			threaded(Threadable const & main,
 						boost::shared_ptr<result_opt> const & result)
 				: main_(main), result_(result)
 			{
@@ -314,12 +314,12 @@ namespace KlayGE
 		class joiner_simple_thread_impl : public joiner_impl_base<result_type>
 		{
 		public:
-			joiner_simple_thread_impl(boost::shared_ptr<result_opt> const & result_op,
+			joiner_simple_thread_impl(boost::shared_ptr<typename joiner_impl_base<result_type>::result_opt> const & result_op,
 											boost::function0<void> const & func)
 				: thread_(func)
 			{
-				result_ = result_op;
-				id_ = &thread_;
+				joiner_impl_base<result_type>::result_ = result_op;
+				joiner_impl_base<result_type>::id_ = &thread_;
 			}
 
 		private:
@@ -531,9 +531,9 @@ namespace KlayGE
 
 						// Reset synchronization object
 						info_->thpool_join_info_.reset();
-			           
+
 						// Locked code to try to insert the thread again in the thread pool
-						{  
+						{
 							boost::mutex::scoped_lock lock(info_->data_->mut_);
 
 							// If there is a general cleanup request, finish
@@ -579,7 +579,7 @@ namespace KlayGE
 
 			// Creates and adds more threads to the pool. This function does not lock the pool mutex and that be
 			//  only called when we externally have locked that mutex. Can throw
-			static void add_waiting_threads_no_lock(boost::shared_ptr<thread_pool_common_data_t> data, size_t number)                      
+			static void add_waiting_threads_no_lock(boost::shared_ptr<thread_pool_common_data_t> data, size_t number)
 			{
 				for (size_t i = 0; i < number; ++ i)
 				{
@@ -669,11 +669,11 @@ namespace KlayGE
 		public:
 			template <typename Threadable>
 			joiner_thread_pool_impl(boost::shared_ptr<thread_pool_common_data_t> data,
-						boost::shared_ptr<result_opt> const & result_op,
+						boost::shared_ptr<typename joiner_impl_base<result_type>::result_opt> const & result_op,
 						Threadable const & func)
 				: thread_pool_join_info_(new thread_pool_join_info)
 			{
-				result_ = result_op;
+				joiner_impl_base<result_type>::result_ = result_op;
 
 				boost::shared_ptr<thread_pool_thread_info> th_info;
 				boost::mutex::scoped_lock lock(data->mut());
@@ -684,13 +684,13 @@ namespace KlayGE
 					thread_pool_common_data_t::add_waiting_threads_no_lock(data, 1);
 				}
 				th_info = data->threads().front();
-				id_ = th_info->get_thread_id();
+				joiner_impl_base<result_type>::id_ = th_info->get_thread_id();
 				data->threads().erase(data->threads().begin());
 				th_info->wake_up(func, thread_pool_join_info_);
 			}
 
 			~joiner_thread_pool_impl()
-			{  
+			{
 				try
 				{
 					thread_pool_join_info_->recycle();

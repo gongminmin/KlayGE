@@ -882,7 +882,7 @@ namespace KlayGE
 	// Initialize default Elements
 	void UIDialog::InitDefaultElements()
 	{
-		this->SetFont(0, Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.ttf", 12));
+		this->SetFont(0, Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont", 12));
 
 		UIElement Element;
 
