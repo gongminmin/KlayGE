@@ -66,17 +66,15 @@ int main(int argc, char* argv[])
 	std::string kfont_name;
 	int start_code;
 	int end_code;
-	uint32_t char_size;
 
 	boost::program_options::options_description desc("Allowed options");
 	desc.add_options()
-		("help", "Produce help message")
+		("help,H", "Produce help message")
 		("input-name,I", boost::program_options::value<std::string>(), "Input font name.")
 		("output-name,O", boost::program_options::value<std::string>(), "Output font name. Optional.")
 		("start-code,S", boost::program_options::value<int>(&start_code)->default_value(0), "Start code.")
 		("end-code,E", boost::program_options::value<int>(&end_code)->default_value(65536), "End code.")
-		("char-size,C", boost::program_options::value<uint32_t>(&char_size)->default_value(32), "Character size.");
-	header.char_size = char_size;
+		("char-size,C", boost::program_options::value<uint32_t>(&header.char_size)->default_value(32), "Character size.");
 
 	boost::program_options::variables_map vm;
 	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
@@ -179,7 +177,7 @@ int main(int argc, char* argv[])
 		int const buf_width = std::min(ft_slot->bitmap.width, INTERNAL_CHAR_SIZE - 2);
 		int const buf_height = std::min(ft_slot->bitmap.rows, INTERNAL_CHAR_SIZE - 2);
 		
-		char_width[ch] = static_cast<uint8_t>(std::min(char_size, 
+		char_width[ch] = static_cast<uint8_t>(std::min(header.char_size, 
 			static_cast<uint32_t>(((0 != buf_width) ? buf_width : INTERNAL_CHAR_SIZE / 2) * header.char_size / static_cast<float>(INTERNAL_CHAR_SIZE) + 2.5f)));
 
 		std::fill(char_bitmap.begin(), char_bitmap.end(), 0);
