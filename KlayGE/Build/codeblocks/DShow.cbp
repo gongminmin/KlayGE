@@ -3,7 +3,7 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="1"/>
 	<Project>
-		<Option title="²¥·ÅÒýÇæ-DShow"/>
+		<Option title="DShow Show System"/>
 		<Option makefile="Makefile"/>
 		<Option makefile_is_custom="0"/>
 		<Option default_target="-1"/>
