@@ -14,6 +14,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HDRCompressor", "HDRCompres
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "7za", "7za.vcproj", "{54EEE696-C1DC-4721-9D61-41D96352F0FB}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KFontGen", "KFontGen.vcproj", "{70E59123-49E0-41B1-B0CB-F92FA8FD0659}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -78,6 +80,14 @@ Global
 		{54EEE696-C1DC-4721-9D61-41D96352F0FB}.Release|Win32.Build.0 = Release|Win32
 		{54EEE696-C1DC-4721-9D61-41D96352F0FB}.Release|x64.ActiveCfg = Release|x64
 		{54EEE696-C1DC-4721-9D61-41D96352F0FB}.Release|x64.Build.0 = Release|x64
+		{70E59123-49E0-41B1-B0CB-F92FA8FD0659}.Debug|Win32.ActiveCfg = Debug|Win32
+		{70E59123-49E0-41B1-B0CB-F92FA8FD0659}.Debug|Win32.Build.0 = Debug|Win32
+		{70E59123-49E0-41B1-B0CB-F92FA8FD0659}.Debug|x64.ActiveCfg = Debug|x64
+		{70E59123-49E0-41B1-B0CB-F92FA8FD0659}.Debug|x64.Build.0 = Debug|x64
+		{70E59123-49E0-41B1-B0CB-F92FA8FD0659}.Release|Win32.ActiveCfg = Release|Win32
+		{70E59123-49E0-41B1-B0CB-F92FA8FD0659}.Release|Win32.Build.0 = Release|Win32
+		{70E59123-49E0-41B1-B0CB-F92FA8FD0659}.Release|x64.ActiveCfg = Release|x64
+		{70E59123-49E0-41B1-B0CB-F92FA8FD0659}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
