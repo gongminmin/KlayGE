@@ -13,7 +13,7 @@ private:
 
 	struct greater_neighbor_type : public std::binary_function<neighbor_type, neighbor_type, bool>
 	{
-		bool operator()(const neighbor_type& lhs, const neighbor_type& rhs) const
+		bool operator()(neighbor_type const & lhs, neighbor_type const & rhs) const
 		{
 			return lhs.second > rhs.second;
 		}

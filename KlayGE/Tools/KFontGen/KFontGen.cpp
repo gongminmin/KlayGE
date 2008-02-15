@@ -17,6 +17,8 @@
 #pragma warning(pop)
 #endif
 
+#include <emmintrin.h>
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
@@ -52,6 +54,12 @@ struct kfont_header
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #pragma pack(pop)
 #endif
+
+int bitwhere(uint64_t v)
+{
+	float f = static_cast<float>(v);
+	return (*reinterpret_cast<uint32_t*>(&f) >> 23) - 127;
+}
 
 int main(int argc, char* argv[])
 {
@@ -159,62 +167,105 @@ int main(int argc, char* argv[])
 
 	::FT_Init_FreeType(&ft_lib);
 	::FT_New_Memory_Face(ft_lib, &ttf[0], static_cast<FT_Long>(ttf.size()), 0, &ft_face);
-	::FT_Set_Pixel_Sizes(ft_face, 0, INTERNAL_CHAR_SIZE - 2);
+	::FT_Set_Pixel_Sizes(ft_face, 0, INTERNAL_CHAR_SIZE);
 	::FT_Select_Charmap(ft_face, FT_ENCODING_UNICODE);
 	ft_slot = ft_face->glyph;
 
 	Timer timer;
-	double start_time = timer.current_time();
 
-	int const dxdy[] = { 0, -1,  -1, 0,  +1, 0,  0, +1 };
-
-	std::vector<uint8_t> char_bitmap(INTERNAL_CHAR_SIZE * INTERNAL_CHAR_SIZE);
+	std::vector<uint8_t> char_bitmap(INTERNAL_CHAR_SIZE / 8 * INTERNAL_CHAR_SIZE);
 	std::vector<int2> edge_points;
 	for (int ch = start_code; ch < end_code; ++ ch)
 	{
 		::FT_Load_Char(ft_face, ch, FT_LOAD_RENDER);
 
-		int const buf_width = std::min(ft_slot->bitmap.width, INTERNAL_CHAR_SIZE - 2);
-		int const buf_height = std::min(ft_slot->bitmap.rows, INTERNAL_CHAR_SIZE - 2);
+		int const buf_width = std::min(ft_slot->bitmap.width, INTERNAL_CHAR_SIZE);
+		int const buf_height = std::min(ft_slot->bitmap.rows, INTERNAL_CHAR_SIZE);
 		
 		char_width[ch] = static_cast<uint8_t>(std::min(header.char_size, 
-			static_cast<uint32_t>(((0 != buf_width) ? buf_width : INTERNAL_CHAR_SIZE / 2) * header.char_size / static_cast<float>(INTERNAL_CHAR_SIZE) + 2.5f)));
+			static_cast<uint32_t>(ft_slot->advance.x / 64.0f * header.char_size / INTERNAL_CHAR_SIZE)));
 
 		std::fill(char_bitmap.begin(), char_bitmap.end(), 0);
 
-		int const y_start = std::max<int>(INTERNAL_CHAR_SIZE * 3 / 4 - ft_slot->metrics.horiBearingY / 64, 0) + 1;
+		int const y_start = std::max<int>(INTERNAL_CHAR_SIZE * 3 / 4 - ft_slot->bitmap_top, 0);
 		if ((buf_width > 0) && (buf_height > 0))
 		{
-			uint8_t* font_data = &char_bitmap[y_start * INTERNAL_CHAR_SIZE + 1];
+			uint8_t* font_data = &char_bitmap[(y_start * INTERNAL_CHAR_SIZE + ft_slot->bitmap_left) / 8];
+			uint8_t const * src_data = ft_slot->bitmap.buffer;
 			for (int y = 0; y < buf_height; ++ y)
 			{
-				for (int x = 0; x < buf_width; ++ x)
+#ifdef KLAYGE_PLATFORM_WIN64
+				for (int x = 0, x_end = buf_width & ~0xF; x < x_end; x += 16)
 				{
-					if (ft_slot->bitmap.buffer[y * buf_width + x] >= 128)
+					__m128i mask = _mm_loadu_si128(reinterpret_cast<__m128i const *>(&src_data[x]));
+					*reinterpret_cast<uint16_t*>(&font_data[x / 8]) = static_cast<uint16_t>(_mm_movemask_epi8(mask));
+				}
+				for (int x = buf_width & ~0xF; x < buf_width; ++ x)
+				{
+					if (src_data[x] >= 128)
 					{
-						font_data[x] = 255;
+						font_data[x / 8] |= 1UL << (x & 0x7);
 					}
 				}
-				font_data += INTERNAL_CHAR_SIZE;
+#else
+				for (int x = 0, x_end = buf_width & ~0x7; x < x_end; x += 8)
+				{
+					uint64_t mask = *reinterpret_cast<uint64_t const *>(&src_data[x]) & 0x8080808080808080ULL;
+					uint8_t d = 0;
+					while (mask != 0)
+					{
+						d |= 1UL << (bitwhere(mask & -mask) / 8);
+						mask &= mask - 1;
+					}
+					font_data[x / 8] = d;				
+				}
+				for (int x = buf_width & ~0x7; x < buf_width; ++ x)
+				{
+					if (src_data[x] >= 128)
+					{
+						font_data[x / 8] |= 1UL << (x & 0x7);
+					}
+				}
+#endif
+				font_data += INTERNAL_CHAR_SIZE / 8;
+				src_data += ft_slot->bitmap.pitch;
 			}
 		}
 
 		edge_points.resize(0);
 		for (int y = y_start, y_end = buf_height + y_start; y < y_end; ++ y)
 		{
-			for (int x = 1; x < buf_width + 1; ++ x)
+			for (int x = ft_slot->bitmap_left, x_end = ft_slot->bitmap_left + buf_width; x < x_end; x += sizeof(uint64_t) * 8)
 			{
-				if (char_bitmap[y * INTERNAL_CHAR_SIZE + x] != 0)
+				uint64_t center = *reinterpret_cast<uint64_t*>(&char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8]);
+				if (center != 0)
 				{
-					for (int i = 0; i < 4; ++ i)
+					uint64_t up = 0;
+					if (y != 0)
 					{
-						int const dx = x + dxdy[i * 2 + 0];
-						int const dy = y + dxdy[i * 2 + 1];
-						if (0 == char_bitmap[dy * INTERNAL_CHAR_SIZE + dx])
-						{
-							edge_points.push_back(int2(x, y));
-							break;
-						}
+						up = *reinterpret_cast<uint64_t*>(&char_bitmap[((y - 1) * INTERNAL_CHAR_SIZE + x) / 8]);
+					}
+					uint64_t down = 0;
+					if (y != INTERNAL_CHAR_SIZE - 1)
+					{
+						down = *reinterpret_cast<uint64_t*>(&char_bitmap[((y + 1) * INTERNAL_CHAR_SIZE + x) / 8]);
+					}
+					uint64_t left = center << 1;
+					if (x != 0)
+					{
+						left |= char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8 - 1] >> 7;
+					}
+					uint64_t right = center >> 1;
+					if (x != INTERNAL_CHAR_SIZE - 1)
+					{
+						right |= static_cast<uint64_t>(char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8 + sizeof(uint64_t)] & 0x1) << (sizeof(uint64_t) * 8 - 1);
+					}
+					uint64_t mask = center & up & down & left & right;
+					mask = center & (center ^ mask);
+					while (mask != 0)
+					{
+						edge_points.push_back(int2(x + bitwhere(mask & -mask), y));
+						mask &= mask - 1;
 					}
 				}
 			}
@@ -231,18 +282,25 @@ int main(int argc, char* argv[])
 
 			kdtree<int2> kd(&edge_points[0], edge_points.size());
 
-			uint32_t start_pos = char_index[ch] * header.char_size * header.char_size;
-			int max_dist_sq = 2 * INTERNAL_CHAR_SIZE * INTERNAL_CHAR_SIZE;
+			uint32_t const start_pos = char_index[ch] * header.char_size * header.char_size;
+			int const max_dist_sq = 2 * INTERNAL_CHAR_SIZE * INTERNAL_CHAR_SIZE;
 			for (uint32_t y = 0; y < header.char_size; ++ y)
 			{
 				for (uint32_t x = 0; x < header.char_size; ++ x)
 				{
 					int const map_x = x * INTERNAL_CHAR_SIZE / header.char_size + INTERNAL_CHAR_SIZE / header.char_size / 2;
 					int const map_y = y * INTERNAL_CHAR_SIZE / header.char_size + INTERNAL_CHAR_SIZE / header.char_size / 2;
-					kd.query_position(int2(map_x, map_y), 1);
-					float v = MathLib::sqrt(static_cast<float>(kd.squared_distance(0)) / max_dist_sq);
-					float value = MathLib::clamp(v * SCALE, 0.0f, 1.0f);
-					if (0 == char_bitmap[map_y * INTERNAL_CHAR_SIZE + map_x])
+					float value;
+					if (kd.query_position(int2(map_x, map_y), 1) > 0)
+					{
+						float v = MathLib::sqrt(static_cast<float>(kd.squared_distance(0)) / max_dist_sq);
+						value = MathLib::clamp(v * SCALE, 0.0f, 1.0f);
+					}
+					else
+					{
+						value = 1.0f;
+					}
+					if (0 == ((char_bitmap[(map_y * INTERNAL_CHAR_SIZE + map_x) / 8] >> (map_x & 0x7)) & 0x1))
 					{
 						value = -value;
 					}
@@ -253,7 +311,7 @@ int main(int argc, char* argv[])
 		}
 
 		static double last_disp_time = 0;
-		double this_disp_time = timer.current_time();
+		double this_disp_time = timer.elapsed();
 		if ((ch == end_code - 1) || (this_disp_time - last_disp_time > 1))
 		{
 			cout << '\r';
@@ -263,14 +321,14 @@ int main(int argc, char* argv[])
 			cout << end_code - start_code;
 			cout.precision(2);
 			cout << "  Time remaining (estimated): "
-				<< fixed << (timer.current_time() - start_time) / (ch - start_code + 1) * (end_code - ch - 1) << " s     ";
+				<< fixed << this_disp_time / (ch - start_code + 1) * (end_code - ch - 1) << " s     ";
 
 			last_disp_time = this_disp_time;
 		}
 	}
 	cout << endl;
 
-	cout << "Time elapsed: " << timer.current_time() - start_time << " s" << endl;
+	cout << "Time elapsed: " << timer.elapsed() << " s" << endl;
 
 	{
 		ofstream kfont_output(kfont_name.c_str(), ios_base::binary);
