@@ -208,18 +208,7 @@ int main(int argc, char* argv[])
 					}
 				}
 #else
-				for (int x = 0, x_end = buf_width & ~0x7; x < x_end; x += 8)
-				{
-					uint64_t mask = *reinterpret_cast<uint64_t const *>(&src_data[x]) & 0x8080808080808080ULL;
-					uint8_t d = 0;
-					while (mask != 0)
-					{
-						d |= 1UL << (bitwhere(mask & -mask) / 8);
-						mask &= mask - 1;
-					}
-					font_data[x / 8] = d;				
-				}
-				for (int x = buf_width & ~0x7; x < buf_width; ++ x)
+				for (int x = 0; x < buf_width; ++ x)
 				{
 					if (src_data[x] >= 128)
 					{
@@ -235,6 +224,73 @@ int main(int argc, char* argv[])
 		edge_points.resize(0);
 		for (int y = y_start, y_end = buf_height + y_start; y < y_end; ++ y)
 		{
+#ifdef KLAYGE_PLATFORM_WIN64
+			for (int x = ft_slot->bitmap_left, x_end = ft_slot->bitmap_left + buf_width; x < x_end; x += sizeof(__m128i) * 8)
+			{
+				__m128i center = _mm_loadu_si128(reinterpret_cast<__m128i*>(&char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8]));
+				if (_mm_movemask_epi8(_mm_cmpeq_epi32(center, _mm_set1_epi8(0))) != 0xFFFF)
+				{
+					__m128i up;
+					if (y != 0)
+					{
+						up = _mm_loadu_si128(reinterpret_cast<__m128i*>(&char_bitmap[((y - 1) * INTERNAL_CHAR_SIZE + x) / 8]));
+					}
+					else
+					{
+						up = _mm_set1_epi8(0);
+					}
+					__m128i down;
+					if (y != INTERNAL_CHAR_SIZE - 1)
+					{
+						down = _mm_loadu_si128(reinterpret_cast<__m128i*>(&char_bitmap[((y + 1) * INTERNAL_CHAR_SIZE + x) / 8]));
+					}
+					else
+					{
+						down = _mm_set1_epi8(0);
+					}
+					__m128i left = _mm_slli_epi64(center, 1);
+					if (x != 0)
+					{
+						__m128i t = _mm_loadu_si128(reinterpret_cast<__m128i*>(&char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8 - 8]));
+						left = _mm_or_si128(left, _mm_srli_epi64(t, 63));
+					}
+					else
+					{
+						__m128i t = _mm_srli_si128(center, 8);
+						left = _mm_or_si128(left, _mm_srli_epi64(t, 63));
+					}
+					__m128i right = _mm_srli_epi64(center, 1);
+					if (x != INTERNAL_CHAR_SIZE - 1)
+					{
+						__m128i t = _mm_loadu_si128(reinterpret_cast<__m128i*>(&char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8 + 8]));
+						right = _mm_or_si128(right, _mm_slli_epi64(t, 63));
+					}
+					else
+					{
+						__m128i t = _mm_slli_si128(center, 8);
+						right = _mm_or_si128(right, _mm_slli_epi64(t, 63));
+					}
+					__m128i mask = _mm_and_si128(center, up);
+					mask = _mm_and_si128(mask, down);
+					mask = _mm_and_si128(mask, left);
+					mask = _mm_and_si128(mask, right);
+					mask = _mm_xor_si128(center, mask);
+					mask = _mm_and_si128(center, mask);
+					uint64_t m64[2];
+					_mm_storeu_si128(reinterpret_cast<__m128i*>(m64), mask);
+					while (m64[0] != 0)
+					{
+						edge_points.push_back(int2(x + bitwhere(m64[0] & -m64[0]), y));
+						m64[0] &= m64[0] - 1;
+					}
+					while (m64[1] != 0)
+					{
+						edge_points.push_back(int2(x + bitwhere(m64[1] & -m64[1]) + 64, y));
+						m64[1] &= m64[1] - 1;
+					}
+				}
+			}
+#else
 			for (int x = ft_slot->bitmap_left, x_end = ft_slot->bitmap_left + buf_width; x < x_end; x += sizeof(uint64_t) * 8)
 			{
 				uint64_t center = *reinterpret_cast<uint64_t*>(&char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8]);
@@ -269,6 +325,7 @@ int main(int argc, char* argv[])
 					}
 				}
 			}
+#endif
 		}
 
 		if (!edge_points.empty())

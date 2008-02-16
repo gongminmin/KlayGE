@@ -105,6 +105,10 @@ private:
 					typename T::value_type sqr_dist = MathLib::length_sq(point[i].pos - query_position);
 					if (sqr_dist < query_priority_queue.top().second)
 					{
+						if (query_priority_queue.size() >= num_neighbors)
+						{
+							query_priority_queue.pop();
+						}
 						query_priority_queue.push(neighbor_type(point[i].index, sqr_dist));
 					}
 				}
@@ -133,7 +137,11 @@ public:
 	{
 		assert(num_neighbors != 0);
 
-		T query_offsets = T::Zero();
+		T query_offsets;
+		for (size_t dim = 0; dim < query_offsets.size(); ++ dim)
+		{
+			query_offsets[dim] = 0;
+		}
 		pqueue query_priority_queue;
 		neighbors_.resize(num_neighbors);
 		query_priority_queue.push(std::make_pair(-1, std::numeric_limits<typename T::value_type>::max()));
@@ -145,7 +153,7 @@ public:
 			query_priority_queue.pop();
 		}
 
-		size_t num_found_neighbors = std::min(query_priority_queue.size(), num_neighbors);
+		size_t num_found_neighbors = query_priority_queue.size();
 		for (int i = static_cast<int>(num_found_neighbors - 1); i >= 0; -- i)
 		{
 			neighbors_[i] = query_priority_queue.top();
