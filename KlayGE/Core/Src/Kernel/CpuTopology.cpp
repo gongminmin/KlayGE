@@ -90,6 +90,7 @@ namespace
 		static GetLogicalProcessorInformationPtr GetGlpiFn()
 		{
 			OSVERSIONINFO os_ver_info;
+			os_ver_info.dwOSVersionInfoSize = sizeof(os_ver_info);
 			::GetVersionEx(&os_ver_info);
 
 			// There is a bug with the implementation of GetLogicalProcessorInformation
