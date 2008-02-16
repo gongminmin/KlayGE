@@ -1262,6 +1262,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Src\Kernel\CpuTopology.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Src\Kernel\ResLoader.cpp"
 					>
 				</File>
@@ -1311,6 +1315,10 @@
 				</File>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\Context.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\CpuTopology.hpp"
 					>
 				</File>
 				<File
