@@ -67,12 +67,12 @@ class ttf_to_dist
 {
 public:
 	ttf_to_dist(FT_Library ft_lib, FT_Face ft_face, kfont_header& header, int start_code, int end_code,
-				boost::mutex& ch_mutex, boost::mutex& disp_mutex,
-				std::vector<uint8_t>& char_width, std::vector<int32_t>& char_index, std::vector<uint8_t>& char_dist,
+				boost::mutex& disp_mutex,
+				std::vector<uint8_t>& char_width, std::vector<int32_t>& char_index, std::vector<std::vector<uint8_t> >& char_dist,
 				Timer& timer, double& last_disp_time,
 				int& cur_num_char, int total_chars)
 		: ft_lib_(ft_lib), ft_face_(ft_face), header_(&header), start_code_(start_code), end_code_(end_code),
-			ch_mutex_(&ch_mutex), disp_mutex_(&disp_mutex),
+			disp_mutex_(&disp_mutex),
 			char_width_(&char_width), char_index_(&char_index), char_dist_(&char_dist),
 			timer_(&timer), last_disp_time_(&last_disp_time),
 			cur_num_char_(&cur_num_char), total_chars_(total_chars)
@@ -206,12 +206,12 @@ public:
 						_mm_storeu_si128(reinterpret_cast<__m128i*>(m64), mask);
 						while (m64[0] != 0)
 						{
-							edge_points.push_back(int2(x + bitwhere(m64[0] & -m64[0]), y));
+							edge_points.push_back(int2(x + bitwhere(m64[0] & (~m64[0] + 1)), y));
 							m64[0] &= m64[0] - 1;
 						}
 						while (m64[1] != 0)
 						{
-							edge_points.push_back(int2(x + bitwhere(m64[1] & -m64[1]) + 64, y));
+							edge_points.push_back(int2(x + bitwhere(m64[1] & (~m64[1] + 1)) + 64, y));
 							m64[1] &= m64[1] - 1;
 						}
 					}
@@ -246,7 +246,7 @@ public:
 						mask = center & (center ^ mask);
 						while (mask != 0)
 						{
-							edge_points.push_back(int2(x + bitwhere(mask & -mask), y));
+							edge_points.push_back(int2(x + bitwhere(mask & (~mask + 1)), y));
 							mask &= mask - 1;
 						}
 					}
@@ -256,18 +256,10 @@ public:
 
 			if (!edge_points.empty())
 			{
-				if (-1 == (*char_index_)[ch])
-				{
-					boost::mutex::scoped_lock lock(*ch_mutex_);
-
-					(*char_index_)[ch] = header_->non_empty_chars;
-					++ header_->non_empty_chars;
-					char_dist_->resize(char_dist_->size() + header_->char_size * header_->char_size);
-				}
+				(*char_dist_)[ch].resize(header_->char_size * header_->char_size);
 
 				kdtree<int2> kd(&edge_points[0], edge_points.size());
 
-				uint32_t const start_pos = (*char_index_)[ch] * header_->char_size * header_->char_size;
 				int const max_dist_sq = 2 * INTERNAL_CHAR_SIZE * INTERNAL_CHAR_SIZE;
 				for (uint32_t y = 0; y < header_->char_size; ++ y)
 				{
@@ -290,7 +282,7 @@ public:
 							value = -value;
 						}
 
-						(*char_dist_)[start_pos + y * header_->char_size + x] = static_cast<uint8_t>((value / 2 + 0.5f) * 255);
+						(*char_dist_)[ch][y * header_->char_size + x] = static_cast<uint8_t>((value / 2 + 0.5f) * 255);
 					}
 				}
 			}
@@ -324,11 +316,10 @@ private:
 	kfont_header* header_;
 	int start_code_;
 	int end_code_;
-	boost::mutex* ch_mutex_;
 	boost::mutex* disp_mutex_;
 	std::vector<uint8_t>* char_width_;
 	std::vector<int32_t>* char_index_;
-	std::vector<uint8_t>* char_dist_;
+	std::vector<std::vector<uint8_t> >* char_dist_;
 	Timer* timer_;
 	double* last_disp_time_;
 	int* cur_num_char_;
@@ -385,16 +376,9 @@ int main(int argc, char* argv[])
 		kfont_name = ttf_name.substr(0, ttf_name.find_last_of('.')) + ".kfont";
 	}
 
-	cout << "\tInput font name: " << ttf_name << endl;
-	cout << "\tOutput font name: " << kfont_name << endl;
-	cout << "\tStart code: " << start_code << endl;
-	cout << "\tEnd code: " << end_code << endl;
-	cout << "\tCharacter size: " << header.char_size << endl;
-	cout << endl;
-
 	std::vector<uint8_t> char_width(NUM_CHARS, 0);
 	std::vector<int32_t> char_index(NUM_CHARS, -1);
-	std::vector<uint8_t> char_dist;
+	std::vector<std::vector<uint8_t> > char_dist(NUM_CHARS);
 	{
 		ifstream kfont_input(kfont_name.c_str(), ios_base::binary);
 		if (kfont_input)
@@ -419,11 +403,35 @@ int main(int argc, char* argv[])
 			kfont_input.read(reinterpret_cast<char*>(&char_index[0]),
 				static_cast<std::streamsize>(char_index.size() * sizeof(char_index[0])));
 
-			char_dist.resize(header.non_empty_chars * header.char_size * header.char_size);
-			kfont_input.read(reinterpret_cast<char*>(&char_dist[0]),
-				static_cast<std::streamsize>(char_dist.size() * sizeof(char_dist[0])));
+			std::vector<uint8_t> tmp_char_dist(header.non_empty_chars * header.char_size * header.char_size);
+			kfont_input.read(reinterpret_cast<char*>(&tmp_char_dist[0]),
+				static_cast<std::streamsize>(tmp_char_dist.size() * sizeof(tmp_char_dist[0])));
+
+			for (int ch = 0; ch < NUM_CHARS; ++ ch)
+			{
+				if (char_index[ch] != -1)
+				{
+					char_dist[ch].assign(tmp_char_dist.begin() + char_index[ch] * header.char_size * header.char_size,
+						tmp_char_dist.begin() + (char_index[ch] + 1) * header.char_size * header.char_size);
+				}
+			}
 		}
 	}
+
+	CpuTopology cpu;
+	int num_threads = cpu.NumHWThreads();
+	thread_pool tp(1, num_threads);
+
+	cout << "\tInput font name: " << ttf_name << endl;
+	cout << "\tOutput font name: " << kfont_name << endl;
+	cout << "\tStart code: " << start_code << endl;
+	cout << "\tEnd code: " << end_code << endl;
+	cout << "\tCharacter size: " << header.char_size << endl;
+	cout << "\tNumber of threads: " << num_threads << endl;
+	cout << endl;
+
+	int const total_chars = end_code - start_code;
+	int const num_chars_per_thread = (total_chars + num_threads - 1) / num_threads;
 
 	std::vector<uint8_t> ttf;
 	{
@@ -435,19 +443,11 @@ int main(int argc, char* argv[])
 			static_cast<std::streamsize>(ttf.size() * sizeof(ttf[0])));
 	}
 
-	boost::mutex ch_mutex;
 	boost::mutex disp_mutex;
 	double last_disp_time = 0;
 	int cur_num_char = 0;
 
-	CpuTopology cpu;
-	int num_threads = cpu.NumHWThreads();
-	thread_pool tp(1, num_threads);
-
 	Timer timer;
-
-	int total_chars = end_code - start_code;
-	int num_chars_per_thread = (total_chars + num_threads - 1) / num_threads;
 
 	std::vector<FT_Library> ft_libs(num_threads);
 	std::vector<FT_Face> ft_faces(num_threads);
@@ -463,7 +463,7 @@ int main(int argc, char* argv[])
 		int end_code_thread = std::min(start_code + (i + 1) * num_chars_per_thread, end_code);
 
 		joiners[i] = tp(ttf_to_dist(ft_libs[i], ft_faces[i], header, start_code_thread, end_code_thread,
-					ch_mutex, disp_mutex,
+					disp_mutex,
 					char_width, char_index, char_dist,
 					timer, last_disp_time,
 					cur_num_char, total_chars));
@@ -474,6 +474,17 @@ int main(int argc, char* argv[])
 
 		FT_Done_Face(ft_faces[i]);
 		FT_Done_FreeType(ft_libs[i]);
+	}
+
+	std::fill(char_index.begin(), char_index.end(), -1);
+	header.non_empty_chars = 0;
+	for (size_t i = 0; i < char_dist.size(); ++ i)
+	{
+		if (!char_dist[i].empty())
+		{
+			char_index[i] = header.non_empty_chars;
+			++ header.non_empty_chars;
+		}
 	}
 	cout << endl;
 
@@ -489,8 +500,18 @@ int main(int argc, char* argv[])
 				static_cast<std::streamsize>(char_width.size() * sizeof(char_width[0])));
 			kfont_output.write(reinterpret_cast<char*>(&char_index[0]),
 				static_cast<std::streamsize>(char_index.size() * sizeof(char_index[0])));
-			kfont_output.write(reinterpret_cast<char*>(&char_dist[0]),
-				static_cast<std::streamsize>(char_dist.size() * sizeof(char_dist[0])));
+
+			std::vector<uint8_t> tmp_char_dist(header.non_empty_chars * header.char_size * header.char_size);
+			for (size_t i = 0; i < char_index.size(); ++ i)
+			{
+				if (char_index[i] != -1)
+				{
+					std::copy(char_dist[i].begin(), char_dist[i].end(),
+						tmp_char_dist.begin() + char_index[i] * header.char_size * header.char_size);
+				}
+			}
+			kfont_output.write(reinterpret_cast<char*>(&tmp_char_dist[0]),
+				static_cast<std::streamsize>(tmp_char_dist.size() * sizeof(tmp_char_dist[0])));
 		}
 	}
 }

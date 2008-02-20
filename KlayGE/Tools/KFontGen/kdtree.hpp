@@ -4,6 +4,7 @@
 #include <vector>
 #include <queue>
 #include <functional>
+#include <boost/assert.hpp>
 
 template <typename T>
 class kdtree
@@ -135,7 +136,7 @@ public:
 
 	size_t query_position(T const & position, size_t num_neighbors)
 	{
-		assert(num_neighbors != 0);
+		BOOST_ASSERT(num_neighbors != 0);
 
 		T query_offsets;
 		for (size_t dim = 0; dim < query_offsets.size(); ++ dim)
