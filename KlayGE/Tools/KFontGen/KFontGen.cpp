@@ -104,7 +104,7 @@ public:
 				uint8_t const * src_data = ft_slot->bitmap.buffer;
 				for (int y = 0; y < buf_height; ++ y)
 				{
-#ifdef KLAYGE_PLATFORM_WIN64
+#ifdef _SSE2_SUPPORT
 					for (int x = 0, x_end = buf_width & ~0xF; x < x_end; x += 16)
 					{
 						__m128i mask = _mm_loadu_si128(reinterpret_cast<__m128i const *>(&src_data[x]));
@@ -117,7 +117,7 @@ public:
 							font_data[x / 8] |= 1UL << (x & 0x7);
 						}
 					}
-#elif defined KLAYGE_PLATFORM_WIN32
+#elif defined _MMX_SUPPORT
 					for (int x = 0, x_end = buf_width & ~0x7; x < x_end; x += 8)
 					{
 						__m64 mask = *reinterpret_cast<__m64 const *>(&src_data[x]);
@@ -143,14 +143,14 @@ public:
 					src_data += ft_slot->bitmap.pitch;
 				}
 			}
-#ifdef KLAYGE_PLATFORM_WIN32
+#ifdef _MMX_SUPPORT
 			_m_empty();
 #endif
 
 			edge_points.resize(0);
 			for (int y = y_start, y_end = buf_height + y_start; y < y_end; ++ y)
 			{
-#ifdef KLAYGE_PLATFORM_WIN64
+#ifdef _SSE2_SUPPORT
 				for (int x = ft_slot->bitmap_left, x_end = ft_slot->bitmap_left + buf_width; x < x_end; x += sizeof(__m128i) * 8)
 				{
 					__m128i center = _mm_loadu_si128(reinterpret_cast<__m128i*>(&char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8]));

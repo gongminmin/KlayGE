@@ -25,7 +25,9 @@
 #elif defined(_MSC_VER)
 	#define KLAYGE_COMPILER_MSVC
 
-	#if _MSC_VER >= 1400
+	#if _MSC_VER >= 1500
+		#define KLAYGE_COMPILER_VERSION 9.0
+	#elif _MSC_VER >= 1400
 		#define KLAYGE_COMPILER_VERSION 8.0
 		#pragma warning(disable: 4819)
 
@@ -109,10 +111,39 @@
 	#define KLAYGE_BIG_ENDIAN
 #endif
 
-// Defines some MACRO from compile options
 #define _IDENTITY_SUPPORT
 #define _SELECT1ST2ND_SUPPORT
 #define _PROJECT1ST2ND_SUPPORT
 #define _COPYIF_SUPPORT
+
+// Defines some MACROs from compile options
+#ifdef KLAYGE_CPU_X64
+	#define _SSE_SUPPORT
+	#define _SSE2_SUPPORT
+	#define _X64_SUPPORT
+#elif defined KLAYGE_CPU_X86
+	#if defined(KLAYGE_COMPILER_MSVC)
+		#if _M_IX86 == 600
+			#define _MMX_SUPPORT
+		#endif
+
+		#if _M_IX86_FP == 1
+			#define _SSE_SUPPORT
+		#elif _M_IX86_FP == 2
+			#define _SSE_SUPPORT
+			#define _SSE2_SUPPORT
+		#endif
+	#elif defined(KLAYGE_COMPILER_GCC)
+		#ifdef __MMX__
+			#define _MMX_SUPPORT
+		#endif
+		#ifdef __SSE__
+			#define _SSE_SUPPORT
+		#endif
+		#ifdef __SSE2__
+			#define _SSE2_SUPPORT
+		#endif
+	#endif
+#endif
 
 #endif		// _CONFIG_HPP
