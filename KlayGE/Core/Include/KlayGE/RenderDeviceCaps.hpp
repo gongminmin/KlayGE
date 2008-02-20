@@ -22,9 +22,6 @@
 
 namespace KlayGE
 {
-#ifdef KLAYGE_PLATFORM_WINDOWS
-#pragma pack(push, 1)
-#endif
 	struct RenderDeviceCaps
 	{
 		uint8_t max_shader_model;
@@ -49,9 +46,6 @@ namespace KlayGE
 
 		bool hw_instancing_support;
 	};
-#ifdef KLAYGE_PLATFORM_WINDOWS
-#pragma pack(pop)
-#endif
 }
 
 #endif			// _RENDERDEVICECAPS_HPP

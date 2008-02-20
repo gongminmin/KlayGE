@@ -19,7 +19,6 @@
 #include <boost/function.hpp>
 
 #include <KlayGE/ElementFormat.hpp>
-#include <KlayGE/RenderDeviceCaps.hpp>
 
 namespace KlayGE
 {

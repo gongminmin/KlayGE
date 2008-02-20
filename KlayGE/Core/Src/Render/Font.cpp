@@ -118,8 +118,8 @@ namespace
 
 			RenderEngine const & renderEngine = rf.RenderEngineInstance();
 			RenderDeviceCaps const & caps = renderEngine.DeviceCaps();
-			theTexture_ = rf.MakeTexture2D(caps.max_texture_width,
-				caps.max_texture_height, 1, TEX_FORMAT);
+			theTexture_ = rf.MakeTexture2D(std::min(2048UL, caps.max_texture_width),
+				std::min(2048UL, caps.max_texture_height), 1, TEX_FORMAT);
 
 			effect_ = rf.LoadEffect("Font.kfx");
 			*(effect_->ParameterByName("texFontSampler")) = theTexture_;
