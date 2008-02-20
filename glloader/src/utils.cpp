@@ -184,7 +184,7 @@ namespace glloader
 #endif		// GLLOADER_WGL
 	}
 
-	// Return the version of GLX in current system	
+	// Return the version of GLX in current system
 	void gl_features_extractor::glx_version(int& major, int& minor)
 	{
 #ifdef GLLOADER_GLX
@@ -244,7 +244,7 @@ void glloader_init()
 void* glloader_get_gl_proc_address(const char* name)
 {
 #ifdef GLLOADER_WGL
-	return (void*)(::wglGetProcAddress(name));
+	return reinterpret_cast<void*>(::wglGetProcAddress(name));
 #elif defined GLLOADER_AGL
 	CFURLRef bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
 		CFSTR("/System/Library/Frameworks/OpenGL.framework"), kCFURLPOSIXPathStyle, true);
@@ -262,7 +262,7 @@ void* glloader_get_gl_proc_address(const char* name)
 
 	return function;
 #else
-	return (void*)(::glXGetProcAddress(reinterpret_cast<const GLubyte*>(name)));
+	return reinterpret_cast<void*>(::glXGetProcAddress(reinterpret_cast<const GLubyte*>(name)));
 #endif
 }
 
