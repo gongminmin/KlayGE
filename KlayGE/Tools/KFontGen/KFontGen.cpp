@@ -69,13 +69,11 @@ public:
 	ttf_to_dist(FT_Library ft_lib, FT_Face ft_face, kfont_header& header, int start_code, int end_code,
 				boost::mutex& disp_mutex,
 				std::vector<uint8_t>& char_width, std::vector<int32_t>& char_index, std::vector<std::vector<uint8_t> >& char_dist,
-				Timer& timer, double& last_disp_time,
-				int& cur_num_char, int total_chars)
+				int& cur_num_char)
 		: ft_lib_(ft_lib), ft_face_(ft_face), header_(&header), start_code_(start_code), end_code_(end_code),
 			disp_mutex_(&disp_mutex),
 			char_width_(&char_width), char_index_(&char_index), char_dist_(&char_dist),
-			timer_(&timer), last_disp_time_(&last_disp_time),
-			cur_num_char_(&cur_num_char), total_chars_(total_chars)
+			cur_num_char_(&cur_num_char)
 	{
 	}
 
@@ -289,23 +287,7 @@ public:
 
 			{
 				boost::mutex::scoped_lock lock(*disp_mutex_);
-
 				++ *cur_num_char_;
-
-				double this_disp_time = timer_->elapsed();
-				if ((*cur_num_char_ == total_chars_) || (this_disp_time - *last_disp_time_ > 1))
-				{
-					cout << '\r';
-					cout.width(5);
-					cout << *cur_num_char_ << " / ";
-					cout.width(5);
-					cout << total_chars_;
-					cout.precision(2);
-					cout << "  Time remaining (estimated): "
-						<< fixed << this_disp_time / *cur_num_char_ * (total_chars_ - *cur_num_char_) << " s     ";
-
-					*last_disp_time_ = this_disp_time;
-				}
 			}
 		}
 	}
@@ -320,10 +302,7 @@ private:
 	std::vector<uint8_t>* char_width_;
 	std::vector<int32_t>* char_index_;
 	std::vector<std::vector<uint8_t> >* char_dist_;
-	Timer* timer_;
-	double* last_disp_time_;
 	int* cur_num_char_;
-	int total_chars_;
 };
 
 int main(int argc, char* argv[])
@@ -444,7 +423,6 @@ int main(int argc, char* argv[])
 	}
 
 	boost::mutex disp_mutex;
-	double last_disp_time = 0;
 	int cur_num_char = 0;
 
 	Timer timer;
@@ -465,9 +443,43 @@ int main(int argc, char* argv[])
 		joiners[i] = tp(ttf_to_dist(ft_libs[i], ft_faces[i], header, start_code_thread, end_code_thread,
 					disp_mutex,
 					char_width, char_index, char_dist,
-					timer, last_disp_time,
-					cur_num_char, total_chars));
+					cur_num_char));
 	}
+
+	double last_disp_time = 0;
+	for (;;)
+	{
+		int disp_cur_num_char;
+		{
+			boost::mutex::scoped_lock lock(disp_mutex);
+			disp_cur_num_char = cur_num_char;
+		}
+
+		double this_disp_time = timer.elapsed();
+		if ((disp_cur_num_char == total_chars) || (this_disp_time - last_disp_time > 1))
+		{
+			cout << '\r';
+			cout.width(5);
+			cout << disp_cur_num_char << " / ";
+			cout.width(5);
+			cout << total_chars;
+			cout.precision(2);
+			cout << "  Time remaining (estimated): "
+				<< fixed << this_disp_time / disp_cur_num_char * (total_chars - disp_cur_num_char) << " s     ";
+
+			last_disp_time = this_disp_time;
+
+			if (disp_cur_num_char == total_chars)
+			{
+				break;
+			}
+		}
+		else
+		{
+			KlayGE::Sleep(500);
+		}
+	}
+
 	for (int i = 0; i < num_threads; ++ i)
 	{
 		joiners[i]();

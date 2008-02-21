@@ -1281,6 +1281,54 @@
 					RelativePath="..\..\Core\Src\Kernel\Util.cpp"
 					>
 				</File>
+				<Filter
+					Name="asm"
+					>
+					<File
+						RelativePath="..\..\Core\Src\Kernel\asm\CpuID.asm"
+						>
+						<FileConfiguration
+							Name="Debug|Win32"
+							>
+							<Tool
+								Name="VCCustomBuildTool"
+								Description="Assembly $(InputPath)"
+								CommandLine="yasm -Xvc -fwin32 -DWIN32 -DKLAYGE_CPU_X86 -o &quot;$(IntDir)\$(InputName)&quot;.obj &quot;$(InputPath)&quot;"
+								Outputs="$(IntDir)\$(InputName).obj"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Debug|x64"
+							>
+							<Tool
+								Name="VCCustomBuildTool"
+								Description="Assembly $(InputPath)"
+								CommandLine="yasm -Xvc -fx64 -DWIN64 -DKLAYGE_CPU_X64 -o &quot;$(IntDir)\$(InputName)&quot;.obj &quot;$(InputPath)&quot;"
+								Outputs="&quot;$(IntDir)\$(InputName)&quot;.obj"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32"
+							>
+							<Tool
+								Name="VCCustomBuildTool"
+								Description="Assembly $(InputPath)"
+								CommandLine="yasm -Xvc -fwin32 -DWIN32 -DKLAYGE_CPU_X86 -o &quot;$(IntDir)\$(InputName)&quot;.obj &quot;$(InputPath)&quot;"
+								Outputs="$(IntDir)\$(InputName).obj"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|x64"
+							>
+							<Tool
+								Name="VCCustomBuildTool"
+								Description="Assembly $(InputPath)"
+								CommandLine="yasm -Xvc -fx64 -DWIN64 -DKLAYGE_CPU_X64 -o &quot;$(IntDir)\$(InputName)&quot;.obj &quot;$(InputPath)&quot;"
+								Outputs="&quot;$(IntDir)\$(InputName)&quot;.obj"
+							/>
+						</FileConfiguration>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="Header Files"

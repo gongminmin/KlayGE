@@ -22,10 +22,15 @@
 
 #include <KlayGE/CpuTopology.hpp>
 
+// from CpuID.asm
+extern "C"
+{
+	extern KlayGE::uint32_t get_cpuid(int op, KlayGE::uint32_t* eax, KlayGE::uint32_t* ebx, KlayGE::uint32_t* ecx, KlayGE::uint32_t* edx);
+}
+
 namespace
 {
 	using namespace KlayGE;
-
 
 	class ICpuTopology
 	{
@@ -112,8 +117,6 @@ namespace
 		std::vector<SYSTEM_LOGICAL_PROCESSOR_INFORMATION> slpi_;
 	};
 
-
-#ifdef KLAYGE_PLATFORM_WIN32
 	class ApicExtractor
 	{
 	public:
@@ -232,7 +235,7 @@ namespace
 		{
 			if (this->IsFnSupported(fn_set, fn))
 			{
-				this->UncheckedCall(fn_set, fn);
+				this->UncheckedCall(fn_set | fn);
 				return true;
 			}
 			return false;
@@ -272,23 +275,12 @@ namespace
 	private:
 		explicit Cpuid(FnSet fn_set)
 		{
-			this->UncheckedCall(fn_set, 0);
+			this->UncheckedCall(fn_set);
 		}
 
-		void UncheckedCall(FnSet fn_set, uint32_t fn)
+		void UncheckedCall(uint32_t fn)
 		{
-			__asm
-			{
-				mov ecx, 0
-				mov eax, fn
-				or  eax, fn_set
-				cpuid
-				mov edi, this
-				mov [edi].eax_, eax
-				mov [edi].ebx_, ebx
-				mov [edi].ecx_, ecx
-				mov [edi].edx_, edx
-			}
+			get_cpuid(fn, &eax_, &ebx_, &ecx_, &edx_);
 		}
 
 	private:
@@ -507,7 +499,6 @@ namespace
 	char const CpuidImpl::GenuineIntel[] = "GenuineIntel";
 	char const CpuidImpl::AuthenticAMD[] = "AuthenticAMD";
 #endif
-#endif
 
 	boost::shared_ptr<ICpuTopology> cpu_topo_impl;
 }
@@ -517,10 +508,7 @@ namespace KlayGE
 {
 	CpuTopology::CpuTopology(bool force_cpuid)
 	{
-		UNREF_PARAM(force_cpuid);
-
 #ifdef KLAYGE_PLATFORM_WINDOWS
-#ifdef KLAYGE_PLATFORM_WIN32
 		if (!force_cpuid && GlpiImpl::IsSupported())
 		{
 			cpu_topo_impl.reset(new GlpiImpl);
@@ -536,9 +524,6 @@ namespace KlayGE
 				cpu_topo_impl.reset(new DefaultImpl);
 			}
 		}
-#elif defined KLAYGE_PLATFORM_WIN64
-		cpu_topo_impl.reset(new GlpiImpl);
-#endif
 #else
 		cpu_topo_impl.reset(new DefaultImpl);
 #endif

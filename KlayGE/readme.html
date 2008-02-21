@@ -43,36 +43,37 @@
 </ol>
 <p><a href="#menu">^返回目录</a></p>
 <hr />
-<h2><a id="third_part">第三方库</a></h2>
-<p>在编译KlayGE的之前，需要先安装下列第三方库。</p>
+<h2><a id="third_part">第三方库</a>和工具</h2>
+<p>在编译KlayGE的之前，需要先安装下列第三方库和工具。</p>
 <h4>Core需要：</h4>
 <ul>
-	<li>Python 2.5.1，<a href="http://www.python.org" target="_blank">http://www.python.org</a></li>
-	<li>Boost 1.34.1，<a href="http://www.boost.org" target="_blank">http://www.boost.org</a>。1.34.1的typeof在vc8上无法使用native模式，解决方案是从SVN HEAD中获得boost\typeof\目录，覆盖掉原有文件。</li>
+	<li><a href="http://www.python.org" target="_blank">Python 2.5.1</a>。</li>
+	<li><a href="http://www.boost.org" target="_blank">Boost 1.34.1</a>。1.34.1的typeof在vc8上无法使用native模式，解决方案是从SVN HEAD中获得boost\typeof\目录，覆盖掉原有文件。</li>
+	<li><a href="http://www.tortall.net/projects/yasm/" target="_blank">Yasm 0.6.2</a>。</li>
 </ul>
 <h4>D3D9 Rendering System和DSound Audio System需要：</h4>
 <ul>
-	<li>DirectX SDK November 2007，从<a href="http://msdn.microsoft.com/directx" target="_blank">http://msdn.microsoft.com/directx</a>下载</li>
+	<li><a href="http://msdn.microsoft.com/directx" target="_blank">DirectX SDK November 2007</a>。</li>
 </ul>
 <h4>DShow Show System需要：</h4>
 <ul>
-	<li>Windows(R) Server 2003 R2 Platform SDK，从<a href="http://www.microsoft.com/downloads/details.aspx?FamilyID=484269e2-3b89-47e3-8eb7-1f2be6d7123a&amp;displaylang=en" target="_blank">http://www.microsoft.com/downloads/details.aspx?FamilyID=484269e2-3b89-47e3-8eb7-1f2be6d7123a&amp;displaylang=en</a>下载</li>
+	<li><a href="http://www.microsoft.com/downloads/details.aspx?FamilyID=484269e2-3b89-47e3-8eb7-1f2be6d7123a&amp;displaylang=en" target="_blank">Windows(R) Server 2003 R2 Platform SDK</a>。</li>
 </ul>
 <h4>OggVorbis Audio Datasource需要：</h4>
 <ul>
-	<li>libogg 1.1.3和libvorbis 1.2.0，从<a href="http://xiph.org/downloads/" target="_blank">http://xiph.org/downloads/</a>下载，需要把它编译成static库。</li>
+	<li><a href="http://xiph.org/downloads/" target="_blank">libogg 1.1.3</a>和<a href="http://xiph.org/downloads/" target="_blank">libvorbis 1.2.0</a>，需要把它编译成static库。</li>
 </ul>
 <h4>OpenAL Audio System需要：</h4>
 <ul>
-	<li>OpenAL SDK 1.1，从<a href="http://www.openal.org/downloads.html" target="_blank">http://www.openal.org/downloads.html</a>下载</li>
+	<li><a href="http://www.openal.org/downloads.html" target="_blank">OpenAL SDK 1.1</a>。</li>
 </ul>
 <h4>OpenGL Rendering System需要：</h4>
 <ul>
-	<li>NVIDIA Cg 2.0，从<a href="http://developer.nvidia.com/object/cg_toolkit.html" target="_blank">http://developer.nvidia.com/object/cg_toolkit.html</a>下载</li>
+	<li><a href="http://developer.nvidia.com/object/cg_toolkit.html" target="_blank">NVIDIA Cg 2.0</a>。</li>
 </ul>
 <h4>KFontGen工具需要：</h4>
 <ul>
-	<li>FreeType 2.3.5，<a href="http://freetype.sourceforge.net" target="_blank">http://freetype.sourceforge.net</a>。编译它的Debug和Release两个solution configuration</li>
+	<li><a href="http://freetype.sourceforge.net" target="_blank">FreeType 2.3.5</a>，编译它的Debug和Release两个solution configuration。</li>
 </ul>
 <p>由于KlayGE在VC下使用的运行库是多线程的DLL，所以需要把<strong>所有</strong>连接到exe的lib的运行库改为多线程DLL（Project-  &gt;Properties-&gt;Configuration Properties-&gt;C/C++-&gt;Code Generation-&gt;RuntimeLibrary，选择Multi-threaded Debug DLL/Multi-threaded DLL）。</p>
 <p>另外，用VC编译Release版的Boost和FreeType需要定义_SECURE_SCL=0宏（在Project-&gt;Properties-&gt;Configuration Properties-&gt;C/C++-&gt;Preprocessor-&gt;Preprocessor Definitions中添加）。</p>
@@ -349,6 +350,8 @@
 		OpenGL兼容性测试工具
 	\HDRCompressor
 		HDR纹理压缩器
+	\KFontGen
+		字库转换工具
 	\MeshML2KMesh
 		从.MeshML编译为.KModel的工具
 	\NormalizerCubeMap
@@ -366,12 +369,13 @@
 <hr />
 <h2><a id="compiler">编译器支持</a></h2>
 <ul>
-	<li>推荐使用Visual Studio.NET 2005编译</li>
+	<li>推荐使用Visual Studio.NET 2005编译。</li>
+	<li>工程中的.asm使用Yasm编译。</li>
 	<li>KlayGE是用Visual Studio.NET 2005开发和编译的，还提供了Visual Studio.NET 2005的sln文件。</li>
 	<li>KlayGE不保证能在Visual Studio.NET以前的版本中编译通过。</li>
 </ul>
 <p><a href="#menu">^返回目录</a></p>
 <hr />
-<p>最后更新：2008-1-10</p>
+<p>最后更新：2008-2-21</p>
 </body>
 </html>
