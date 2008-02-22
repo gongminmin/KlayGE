@@ -69,7 +69,7 @@ public:
 	ttf_to_dist(FT_Library ft_lib, FT_Face ft_face, kfont_header& header, int start_code, int end_code,
 				boost::mutex& disp_mutex,
 				std::vector<uint8_t>& char_width, std::vector<int32_t>& char_index, std::vector<std::vector<uint8_t> >& char_dist,
-				int& cur_num_char)
+				int volatile & cur_num_char)
 		: ft_lib_(ft_lib), ft_face_(ft_face), header_(&header), start_code_(start_code), end_code_(end_code),
 			disp_mutex_(&disp_mutex),
 			char_width_(&char_width), char_index_(&char_index), char_dist_(&char_dist),
@@ -302,7 +302,7 @@ private:
 	std::vector<uint8_t>* char_width_;
 	std::vector<int32_t>* char_index_;
 	std::vector<std::vector<uint8_t> >* char_dist_;
-	int* cur_num_char_;
+	int volatile * cur_num_char_;
 };
 
 int main(int argc, char* argv[])
@@ -318,6 +318,9 @@ int main(int argc, char* argv[])
 	std::string kfont_name;
 	int start_code;
 	int end_code;
+	int num_threads;
+
+	CpuTopology cpu;
 
 	boost::program_options::options_description desc("Allowed options");
 	desc.add_options()
@@ -326,7 +329,8 @@ int main(int argc, char* argv[])
 		("output-name,O", boost::program_options::value<std::string>(), "Output font name. Optional.")
 		("start-code,S", boost::program_options::value<int>(&start_code)->default_value(0), "Start code.")
 		("end-code,E", boost::program_options::value<int>(&end_code)->default_value(65536), "End code.")
-		("char-size,C", boost::program_options::value<uint32_t>(&header.char_size)->default_value(32), "Character size.");
+		("char-size,C", boost::program_options::value<uint32_t>(&header.char_size)->default_value(32), "Character size.")
+		("threads,T", boost::program_options::value<int>(&num_threads)->default_value(cpu.NumHWThreads()), "Number of Threads.");
 
 	boost::program_options::variables_map vm;
 	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
@@ -397,8 +401,6 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	CpuTopology cpu;
-	int num_threads = cpu.NumHWThreads();
 	thread_pool tp(1, num_threads);
 
 	cout << "\tInput font name: " << ttf_name << endl;
@@ -423,7 +425,7 @@ int main(int argc, char* argv[])
 	}
 
 	boost::mutex disp_mutex;
-	int cur_num_char = 0;
+	int volatile cur_num_char = 0;
 
 	Timer timer;
 
@@ -449,35 +451,27 @@ int main(int argc, char* argv[])
 	double last_disp_time = 0;
 	for (;;)
 	{
-		int disp_cur_num_char;
-		{
-			boost::mutex::scoped_lock lock(disp_mutex);
-			disp_cur_num_char = cur_num_char;
-		}
-
 		double this_disp_time = timer.elapsed();
-		if ((disp_cur_num_char == total_chars) || (this_disp_time - last_disp_time > 1))
+		if ((cur_num_char == total_chars) || (this_disp_time - last_disp_time > 1))
 		{
 			cout << '\r';
 			cout.width(5);
-			cout << disp_cur_num_char << " / ";
+			cout << cur_num_char << " / ";
 			cout.width(5);
 			cout << total_chars;
 			cout.precision(2);
 			cout << "  Time remaining (estimated): "
-				<< fixed << this_disp_time / disp_cur_num_char * (total_chars - disp_cur_num_char) << " s     ";
+				<< fixed << this_disp_time / cur_num_char * (total_chars - cur_num_char) << " s     ";
 
 			last_disp_time = this_disp_time;
 
-			if (disp_cur_num_char == total_chars)
+			if (cur_num_char == total_chars)
 			{
 				break;
 			}
 		}
-		else
-		{
-			KlayGE::Sleep(500);
-		}
+
+		KlayGE::Sleep(500);
 	}
 
 	for (int i = 0; i < num_threads; ++ i)
