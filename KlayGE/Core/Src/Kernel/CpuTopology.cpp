@@ -508,7 +508,8 @@ namespace KlayGE
 {
 	CpuTopology::CpuTopology(bool force_cpuid)
 	{
-#ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_PLATFORM_XBOX360
+#elif defined KLAYGE_PLATFORM_WINDOWS
 		if (!force_cpuid && GlpiImpl::IsSupported())
 		{
 			cpu_topo_impl.reset(new GlpiImpl);
@@ -535,6 +536,8 @@ namespace KlayGE
 		SYSTEM_INFO si = { 0 };
 		::GetSystemInfo(&si);
 		return si.dwNumberOfProcessors;
+#elif defined KLAYGE_PLATFORM_XBOX360
+		return 6;
 #else
 		return 1;
 #endif
@@ -542,6 +545,10 @@ namespace KlayGE
 
 	int CpuTopology::NumCores() const
 	{
+#ifdef KLAYGE_PLATFORM_XBOX360
+		return 3;
+#else
 		return cpu_topo_impl->NumCores();
+#endif
 	}
 }

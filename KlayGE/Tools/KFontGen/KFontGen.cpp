@@ -1,5 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/atomic.hpp>
 #include <KlayGE/Timer.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/thread.hpp>
@@ -67,11 +68,9 @@ class ttf_to_dist
 {
 public:
 	ttf_to_dist(FT_Library ft_lib, FT_Face ft_face, kfont_header& header, int start_code, int end_code,
-				boost::mutex& disp_mutex,
 				std::vector<uint8_t>& char_width, std::vector<int32_t>& char_index, std::vector<std::vector<uint8_t> >& char_dist,
-				int volatile & cur_num_char)
+				atomic<int32_t>& cur_num_char)
 		: ft_lib_(ft_lib), ft_face_(ft_face), header_(&header), start_code_(start_code), end_code_(end_code),
-			disp_mutex_(&disp_mutex),
 			char_width_(&char_width), char_index_(&char_index), char_dist_(&char_dist),
 			cur_num_char_(&cur_num_char)
 	{
@@ -285,10 +284,7 @@ public:
 				}
 			}
 
-			{
-				boost::mutex::scoped_lock lock(*disp_mutex_);
-				++ *cur_num_char_;
-			}
+			++ *cur_num_char_;
 		}
 	}
 
@@ -298,11 +294,10 @@ private:
 	kfont_header* header_;
 	int start_code_;
 	int end_code_;
-	boost::mutex* disp_mutex_;
 	std::vector<uint8_t>* char_width_;
 	std::vector<int32_t>* char_index_;
 	std::vector<std::vector<uint8_t> >* char_dist_;
-	int volatile * cur_num_char_;
+	atomic<int32_t>* cur_num_char_;
 };
 
 int main(int argc, char* argv[])
@@ -424,8 +419,7 @@ int main(int argc, char* argv[])
 			static_cast<std::streamsize>(ttf.size() * sizeof(ttf[0])));
 	}
 
-	boost::mutex disp_mutex;
-	int volatile cur_num_char = 0;
+	atomic<int32_t> cur_num_char(0);
 
 	Timer timer;
 
@@ -443,7 +437,6 @@ int main(int argc, char* argv[])
 		int end_code_thread = std::min(start_code + (i + 1) * num_chars_per_thread, end_code);
 
 		joiners[i] = tp(ttf_to_dist(ft_libs[i], ft_faces[i], header, start_code_thread, end_code_thread,
-					disp_mutex,
 					char_width, char_index, char_dist,
 					cur_num_char));
 	}
@@ -451,21 +444,23 @@ int main(int argc, char* argv[])
 	double last_disp_time = 0;
 	for (;;)
 	{
+		int32_t dist_cur_num_char = cur_num_char.value();
+
 		double this_disp_time = timer.elapsed();
-		if ((cur_num_char == total_chars) || (this_disp_time - last_disp_time > 1))
+		if ((dist_cur_num_char == total_chars) || (this_disp_time - last_disp_time > 1))
 		{
 			cout << '\r';
 			cout.width(5);
-			cout << cur_num_char << " / ";
+			cout << dist_cur_num_char << " / ";
 			cout.width(5);
 			cout << total_chars;
 			cout.precision(2);
 			cout << "  Time remaining (estimated): "
-				<< fixed << this_disp_time / cur_num_char * (total_chars - cur_num_char) << " s     ";
+				<< fixed << this_disp_time / dist_cur_num_char * (total_chars - dist_cur_num_char) << " s     ";
 
 			last_disp_time = this_disp_time;
 
-			if (cur_num_char == total_chars)
+			if (dist_cur_num_char == total_chars)
 			{
 				break;
 			}

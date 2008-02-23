@@ -1293,7 +1293,7 @@
 							<Tool
 								Name="VCCustomBuildTool"
 								Description="Assembly $(InputPath)"
-								CommandLine="yasm -Xvc -fwin32 -DWIN32 -DKLAYGE_CPU_X86 -o &quot;$(IntDir)\$(InputName)&quot;.obj &quot;$(InputPath)&quot;"
+								CommandLine="yasm -Xvc -fwin32 -DWIN32 -DKLAYGE_CPU_X86 -o &quot;$(IntDir)\$(InputName)&quot;.obj &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 								Outputs="$(IntDir)\$(InputName).obj"
 							/>
 						</FileConfiguration>
@@ -1303,7 +1303,7 @@
 							<Tool
 								Name="VCCustomBuildTool"
 								Description="Assembly $(InputPath)"
-								CommandLine="yasm -Xvc -fx64 -DWIN64 -DKLAYGE_CPU_X64 -o &quot;$(IntDir)\$(InputName)&quot;.obj &quot;$(InputPath)&quot;"
+								CommandLine="yasm -Xvc -fx64 -DWIN64 -DKLAYGE_CPU_X64 -o &quot;$(IntDir)\$(InputName)&quot;.obj &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 								Outputs="&quot;$(IntDir)\$(InputName)&quot;.obj"
 							/>
 						</FileConfiguration>
@@ -1313,7 +1313,7 @@
 							<Tool
 								Name="VCCustomBuildTool"
 								Description="Assembly $(InputPath)"
-								CommandLine="yasm -Xvc -fwin32 -DWIN32 -DKLAYGE_CPU_X86 -o &quot;$(IntDir)\$(InputName)&quot;.obj &quot;$(InputPath)&quot;"
+								CommandLine="yasm -Xvc -fwin32 -DWIN32 -DKLAYGE_CPU_X86 -o &quot;$(IntDir)\$(InputName)&quot;.obj &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 								Outputs="$(IntDir)\$(InputName).obj"
 							/>
 						</FileConfiguration>
@@ -1323,7 +1323,7 @@
 							<Tool
 								Name="VCCustomBuildTool"
 								Description="Assembly $(InputPath)"
-								CommandLine="yasm -Xvc -fx64 -DWIN64 -DKLAYGE_CPU_X64 -o &quot;$(IntDir)\$(InputName)&quot;.obj &quot;$(InputPath)&quot;"
+								CommandLine="yasm -Xvc -fx64 -DWIN64 -DKLAYGE_CPU_X64 -o &quot;$(IntDir)\$(InputName)&quot;.obj &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 								Outputs="&quot;$(IntDir)\$(InputName)&quot;.obj"
 							/>
 						</FileConfiguration>
@@ -1335,6 +1335,10 @@
 				>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\aligned_allocator.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\atomic.hpp"
 					>
 				</File>
 				<File
