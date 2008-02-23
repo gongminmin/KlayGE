@@ -54,6 +54,58 @@ namespace
 
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
+
+#ifndef _LOGICAL_PROCESSOR_RELATIONSHIP
+	typedef enum _LOGICAL_PROCESSOR_RELATIONSHIP
+	{
+		RelationProcessorCore,
+		RelationNumaNode,
+		RelationCache
+	} LOGICAL_PROCESSOR_RELATIONSHIP;
+#endif
+
+#ifndef _PROCESSOR_CACHE_TYPE
+	typedef enum _PROCESSOR_CACHE_TYPE
+	{
+		CacheUnified,
+		CacheInstruction,
+		CacheData,
+		CacheTrace
+	} PROCESSOR_CACHE_TYPE;
+#endif
+
+#ifndef _CACHE_DESCRIPTOR
+	typedef struct _CACHE_DESCRIPTOR
+	{
+		BYTE   Level;
+		BYTE   Associativity;
+		WORD   LineSize;
+		DWORD  Size;
+		PROCESSOR_CACHE_TYPE Type;
+	} CACHE_DESCRIPTOR, *PCACHE_DESCRIPTOR;
+#endif
+
+#ifndef _SYSTEM_LOGICAL_PROCESSOR_INFORMATION
+	typedef struct _SYSTEM_LOGICAL_PROCESSOR_INFORMATION
+	{
+		ULONG_PTR   ProcessorMask;
+		LOGICAL_PROCESSOR_RELATIONSHIP Relationship;
+		union
+		{
+			struct
+			{
+				BYTE  Flags;
+			} ProcessorCore;
+			struct
+			{
+				DWORD NodeNumber;
+			} NumaNode;
+			CACHE_DESCRIPTOR Cache;
+			ULONGLONG  Reserved[2];
+		};
+	} SYSTEM_LOGICAL_PROCESSOR_INFORMATION, *PSYSTEM_LOGICAL_PROCESSOR_INFORMATION;
+#endif
+
 	class GlpiImpl : public ICpuTopology
 	{
 	public:
@@ -90,7 +142,7 @@ namespace
 		}
 
 	private:
-		typedef BOOL (WINAPI* GetLogicalProcessorInformationPtr)(SYSTEM_LOGICAL_PROCESSOR_INFORMATION*, PDWORD);
+		typedef BOOL (WINAPI* GetLogicalProcessorInformationPtr)(SYSTEM_LOGICAL_PROCESSOR_INFORMATION*, uint32_t*);
 
 		static GetLogicalProcessorInformationPtr GetGlpiFn()
 		{
@@ -243,7 +295,7 @@ namespace
 
 		static bool IsVendor(char const * vendor)
 		{
-			Cpuid const cpu(FS_Std);  
+			Cpuid const cpu(FS_Std);
 			return (cpu.Ebx() == *reinterpret_cast<uint32_t const *>(vendor))
 				&& (cpu.Ecx() == *reinterpret_cast<uint32_t const *>(vendor + 8))
 				&& (cpu.Edx() == *reinterpret_cast<uint32_t const *>(vendor + 4));
@@ -469,7 +521,7 @@ namespace
 
 					if (supported && (system_affinity > 1))
 					{
-						// Attempt to set the thread affinity 
+						// Attempt to set the thread affinity
 						HANDLE thread_handle = ::GetCurrentThread();
 						DWORD_PTR thread_affinity = ::SetThreadAffinityMask(thread_handle, process_affinity);
 						if (thread_affinity)
@@ -533,7 +585,7 @@ namespace KlayGE
 	int CpuTopology::NumHWThreads() const
 	{
 #ifdef KLAYGE_PLATFORM_WINDOWS
-		SYSTEM_INFO si = { 0 };
+		SYSTEM_INFO si;
 		::GetSystemInfo(&si);
 		return si.dwNumberOfProcessors;
 #elif defined KLAYGE_PLATFORM_XBOX360
