@@ -33,6 +33,7 @@
 				<Option createDefFile="1" />
 				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
+					<Add option="-march=pentium3" />
 					<Add option="-O3" />
 					<Add option="-W" />
 					<Add option="-DWIN32" />
@@ -142,6 +143,9 @@
 		<Unit filename="..\..\Core\Src\Kernel\ResLoader.cpp" />
 		<Unit filename="..\..\Core\Src\Kernel\ThrowErr.cpp" />
 		<Unit filename="..\..\Core\Src\Kernel\Util.cpp" />
+		<Unit filename="..\..\Core\Src\Kernel\asm\CpuID.asm">
+			<Option compiler="gcc" use="1" buildCommand="yasm -Xgnu -fwin32 -DWIN32 -DKLAYGE_CPU_X86 -o $object $file\n" />
+		</Unit>
 		<Unit filename="..\..\Core\Src\Net\Lobby.cpp" />
 		<Unit filename="..\..\Core\Src\Net\Player.cpp" />
 		<Unit filename="..\..\Core\Src\Net\Socket.cpp" />

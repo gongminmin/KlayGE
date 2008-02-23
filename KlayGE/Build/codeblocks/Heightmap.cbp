@@ -35,6 +35,7 @@
 				<Option createDefFile="1" />
 				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
+					<Add option="-march=pentium3" />
 					<Add option="-O3" />
 					<Add option="-W" />
 					<Add option="-DWIN32" />
