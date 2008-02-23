@@ -1,258 +1,89 @@
-<?xml version="1.0"?>
-<!DOCTYPE CodeBlocks_project_file>
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_project_file>
-	<FileVersion major="1" minor="1"/>
+	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="D3D9 Rendering System"/>
-		<Option makefile="Makefile"/>
-		<Option makefile_is_custom="0"/>
-		<Option default_target="-1"/>
-		<Option compiler="0"/>
+		<Option title="D3D9 Rendering System" />
+		<Option pch_mode="0" />
+		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="..\..\lib\Win32\libKlayGE_RenderEngine_D3D9_d.a"/>
-				<Option working_dir=""/>
-				<Option object_output="..\..\Debug\Win32"/>
-				<Option deps_output=".deps"/>
-				<Option type="2"/>
-				<Option compiler="0"/>
-				<Option createDefFile="1"/>
-				<Option projectResourceIncludeDirsRelation="2"/>
+				<Option output="..\..\lib\Win32\libKlayGE_RenderEngine_D3D9_d.a" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="..\..\Debug\Win32" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
-					<Add option="-Wall"/>
-					<Add option="-g"/>
-					<Add option="-O0"/>
-					<Add option="-DWIN32"/>
-					<Add option="-D_DEBUG"/>
-					<Add option="-D_LIB"/>
-					<Add option="-DSTRICT"/>
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-O0" />
+					<Add option="-DWIN32" />
+					<Add option="-D_DEBUG" />
+					<Add option="-D_LIB" />
+					<Add option="-DSTRICT" />
 				</Compiler>
 			</Target>
 			<Target title="Release">
-				<Option output="..\..\lib\Win32\libKlayGE_RenderEngine_D3D9.a"/>
-				<Option working_dir=""/>
-				<Option object_output="..\..\Release\Win32"/>
-				<Option deps_output=".deps"/>
-				<Option type="2"/>
-				<Option compiler="0"/>
-				<Option createDefFile="1"/>
-				<Option projectResourceIncludeDirsRelation="2"/>
+				<Option output="..\..\lib\Win32\libKlayGE_RenderEngine_D3D9.a" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="..\..\Release\Win32" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
-					<Add option="-O3"/>
-					<Add option="-W"/>
-					<Add option="-DWIN32"/>
-					<Add option="-DNDEBUG"/>
-					<Add option="-D_LIB"/>
-					<Add option="-DSTRICT"/>
+					<Add option="-O3" />
+					<Add option="-W" />
+					<Add option="-DWIN32" />
+					<Add option="-DNDEBUG" />
+					<Add option="-D_LIB" />
+					<Add option="-DSTRICT" />
 				</Compiler>
 			</Target>
 		</Build>
-		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9Adapter.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9AdapterList.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9FrameBuffer.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9GraphicsBuffer.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9Mapping.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9OcclusionQuery.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9RenderEngine.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9RenderFactory.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9RenderLayout.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9RenderView.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9RenderWindow.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9Resource.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9ShaderObject.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9Texture.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9Typedefs.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9VideoMode.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9Adapter.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9AdapterList.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9FrameBuffer.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9IndexBuffer.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9Mapping.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9OcclusionQuery.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9RenderEngine.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9RenderFactory.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9RenderLayout.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9RenderView.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9RenderWindow.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9ShaderObject.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9Texture.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9Texture1D.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9Texture2D.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9Texture3D.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9TextureCube.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9VertexBuffer.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9VideoMode.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
+		<VirtualTargets>
+			<Add alias="All" targets="Debug;Release;" />
+		</VirtualTargets>
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9Adapter.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9AdapterList.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9FrameBuffer.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9GraphicsBuffer.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9Mapping.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9OcclusionQuery.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9RenderEngine.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9RenderFactory.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9RenderLayout.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9RenderView.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9RenderWindow.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9Resource.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9ShaderObject.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9Texture.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9Typedefs.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9VideoMode.hpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9Adapter.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9AdapterList.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9FrameBuffer.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9IndexBuffer.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9Mapping.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9OcclusionQuery.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9RenderEngine.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9RenderFactory.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9RenderLayout.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9RenderView.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9RenderWindow.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9ShaderObject.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9Texture.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9Texture1D.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9Texture2D.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9Texture3D.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9TextureCube.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9VertexBuffer.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9VideoMode.cpp" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
 	</Project>
 </CodeBlocks_project_file>

@@ -1,87 +1,60 @@
-<?xml version="1.0"?>
-<!DOCTYPE CodeBlocks_project_file>
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_project_file>
-	<FileVersion major="1" minor="1"/>
+	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="DShow Show System"/>
-		<Option makefile="Makefile"/>
-		<Option makefile_is_custom="0"/>
-		<Option default_target="-1"/>
-		<Option compiler="0"/>
+		<Option title="DShow Show System" />
+		<Option pch_mode="0" />
+		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="..\..\lib\Win32\libKlayGE_ShowEngine_DShow_d.a"/>
-				<Option working_dir=""/>
-				<Option object_output="..\..\Debug\Win32"/>
-				<Option deps_output=".deps"/>
-				<Option type="2"/>
-				<Option compiler="0"/>
-				<Option createDefFile="1"/>
-				<Option projectResourceIncludeDirsRelation="2"/>
+				<Option output="..\..\lib\Win32\libKlayGE_ShowEngine_DShow_d.a" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="..\..\Debug\Win32" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
-					<Add option="-Wall"/>
-					<Add option="-g"/>
-					<Add option="-O0"/>
-					<Add option="-DWIN32"/>
-					<Add option="-D_DEBUG"/>
-					<Add option="-D_LIB"/>
-					<Add option="-DSTRICT"/>
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-O0" />
+					<Add option="-DWIN32" />
+					<Add option="-D_DEBUG" />
+					<Add option="-D_LIB" />
+					<Add option="-DSTRICT" />
 				</Compiler>
 			</Target>
 			<Target title="Release">
-				<Option output="..\..\lib\Win32\libKlayGE_ShowEngine_DShow.a"/>
-				<Option working_dir=""/>
-				<Option object_output="..\..\Release\Win32"/>
-				<Option deps_output=".deps"/>
-				<Option type="2"/>
-				<Option compiler="0"/>
-				<Option createDefFile="1"/>
-				<Option projectResourceIncludeDirsRelation="2"/>
+				<Option output="..\..\lib\Win32\libKlayGE_ShowEngine_DShow.a" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="..\..\Release\Win32" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
-					<Add option="-O3"/>
-					<Add option="-W"/>
-					<Add option="-DWIN32"/>
-					<Add option="-DNDEBUG"/>
-					<Add option="-D_LIB"/>
-					<Add option="-DSTRICT"/>
+					<Add option="-O3" />
+					<Add option="-W" />
+					<Add option="-DWIN32" />
+					<Add option="-DNDEBUG" />
+					<Add option="-D_LIB" />
+					<Add option="-DSTRICT" />
 				</Compiler>
 			</Target>
 		</Build>
-		<Unit filename="..\..\Plugins\Include\KlayGE\DShow\DShow.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Include\KlayGE\DShow\DShowFactory.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Include\KlayGE\DShow\DShowVMR9Allocator.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Src\Show\DShow\DShowEngine.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Src\Show\DShow\DShowFactory.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\Plugins\Src\Show\DShow\DShowVMR9Allocator.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
+		<VirtualTargets>
+			<Add alias="All" targets="Debug;Release;" />
+		</VirtualTargets>
+		<Unit filename="..\..\Plugins\Include\KlayGE\DShow\DShow.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\DShow\DShowFactory.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\DShow\DShowVMR9Allocator.hpp" />
+		<Unit filename="..\..\Plugins\Src\Show\DShow\DShowEngine.cpp" />
+		<Unit filename="..\..\Plugins\Src\Show\DShow\DShowFactory.cpp" />
+		<Unit filename="..\..\Plugins\Src\Show\DShow\DShowVMR9Allocator.cpp" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
 	</Project>
 </CodeBlocks_project_file>
