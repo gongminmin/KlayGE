@@ -1,198 +1,79 @@
-<?xml version="1.0"?>
-<!DOCTYPE CodeBlocks_project_file>
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_project_file>
-	<FileVersion major="1" minor="1"/>
+	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="glloader"/>
-		<Option makefile="Makefile"/>
-		<Option makefile_is_custom="0"/>
-		<Option compiler="0"/>
+		<Option title="glloader" />
+		<Option pch_mode="0" />
+		<Option compiler="gcc" />
 		<Build>
 			<Target title="Release">
-				<Option output="..\..\lib\libglloader.a"/>
-				<Option working_dir=""/>
-				<Option object_output="..\..\Release\objs"/>
-				<Option deps_output=".deps"/>
-				<Option type="2"/>
-				<Option compiler="0"/>
-				<Option projectResourceIncludeDirsRelation="2"/>
+				<Option output="..\..\lib\libglloader.a" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="..\..\Release\objs" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
-					<Add option="-O3"/>
-					<Add option="-O2"/>
-					<Add option="-O1"/>
-					<Add option="-O"/>
+					<Add option="-O3" />
+					<Add option="-O2" />
+					<Add option="-O1" />
+					<Add option="-O" />
 				</Compiler>
 				<Linker>
-					<Add option="-s"/>
+					<Add option="-s" />
 				</Linker>
 			</Target>
 			<Target title="Debug">
-				<Option output="..\..\lib\libglloader_d.a"/>
-				<Option working_dir=""/>
-				<Option object_output="..\..\Debug\objs"/>
-				<Option deps_output=".deps"/>
-				<Option type="2"/>
-				<Option compiler="0"/>
-				<Option projectResourceIncludeDirsRelation="2"/>
+				<Option output="..\..\lib\libglloader_d.a" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="..\..\Debug\objs" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
-					<Add option="-Wall"/>
-					<Add option="-g"/>
+					<Add option="-Wall" />
+					<Add option="-g" />
 				</Compiler>
 			</Target>
 		</Build>
+		<VirtualTargets>
+			<Add alias="All" targets="Release;Debug;" />
+		</VirtualTargets>
 		<Compiler>
-			<Add option="-O3"/>
-			<Add option="-O2"/>
-			<Add option="-O1"/>
-			<Add option="-O"/>
+			<Add option="-O3" />
+			<Add option="-O2" />
+			<Add option="-O1" />
+			<Add option="-O" />
 		</Compiler>
-		<Unit filename="..\..\include\glloader\gl10.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Release"/>
-			<Option target="Debug"/>
-		</Unit>
-		<Unit filename="..\..\include\glloader\gl11.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Release"/>
-			<Option target="Debug"/>
-		</Unit>
-		<Unit filename="..\..\include\glloader\gl12.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Release"/>
-			<Option target="Debug"/>
-		</Unit>
-		<Unit filename="..\..\include\glloader\gl13.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Release"/>
-			<Option target="Debug"/>
-		</Unit>
-		<Unit filename="..\..\include\glloader\gl14.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Release"/>
-			<Option target="Debug"/>
-		</Unit>
-		<Unit filename="..\..\include\glloader\gl15.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Release"/>
-			<Option target="Debug"/>
-		</Unit>
-		<Unit filename="..\..\include\glloader\gl20.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Release"/>
-			<Option target="Debug"/>
-		</Unit>
-		<Unit filename="..\..\include\glloader\gl21.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Release"/>
-			<Option target="Debug"/>
-		</Unit>
-		<Unit filename="..\..\include\glloader\glloader.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Release"/>
-			<Option target="Debug"/>
-		</Unit>
-		<Unit filename="..\..\include\glloader\glloader_gl.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Release"/>
-			<Option target="Debug"/>
-		</Unit>
-		<Unit filename="..\..\include\glloader\glloader_glx.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Release"/>
-			<Option target="Debug"/>
-		</Unit>
-		<Unit filename="..\..\include\glloader\glloader_wgl.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Release"/>
-			<Option target="Debug"/>
-		</Unit>
-		<Unit filename="..\..\include\glloader\glx11.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Release"/>
-			<Option target="Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\gl12.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Release"/>
-			<Option target="Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\gl13.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Release"/>
-			<Option target="Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\gl14.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Release"/>
-			<Option target="Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\gl15.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Release"/>
-			<Option target="Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\gl20.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Release"/>
-			<Option target="Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\gl21.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Release"/>
-			<Option target="Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\glloader_gl.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Release"/>
-			<Option target="Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\glloader_glx.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Release"/>
-			<Option target="Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\glloader_wgl.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Release"/>
-			<Option target="Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\utils.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Release"/>
-			<Option target="Debug"/>
-		</Unit>
-		<Unit filename="..\..\src\utils.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Release"/>
-			<Option target="Debug"/>
-		</Unit>
+		<Unit filename="..\..\include\glloader\gl10.h" />
+		<Unit filename="..\..\include\glloader\gl11.h" />
+		<Unit filename="..\..\include\glloader\gl12.h" />
+		<Unit filename="..\..\include\glloader\gl13.h" />
+		<Unit filename="..\..\include\glloader\gl14.h" />
+		<Unit filename="..\..\include\glloader\gl15.h" />
+		<Unit filename="..\..\include\glloader\gl20.h" />
+		<Unit filename="..\..\include\glloader\gl21.h" />
+		<Unit filename="..\..\include\glloader\glloader.h" />
+		<Unit filename="..\..\include\glloader\glloader_gl.h" />
+		<Unit filename="..\..\include\glloader\glloader_glx.h" />
+		<Unit filename="..\..\include\glloader\glloader_wgl.h" />
+		<Unit filename="..\..\include\glloader\glx11.h" />
+		<Unit filename="..\..\src\gl12.cpp" />
+		<Unit filename="..\..\src\gl13.cpp" />
+		<Unit filename="..\..\src\gl14.cpp" />
+		<Unit filename="..\..\src\gl15.cpp" />
+		<Unit filename="..\..\src\gl20.cpp" />
+		<Unit filename="..\..\src\gl21.cpp" />
+		<Unit filename="..\..\src\glloader_gl.cpp" />
+		<Unit filename="..\..\src\glloader_glx.cpp" />
+		<Unit filename="..\..\src\glloader_wgl.cpp" />
+		<Unit filename="..\..\src\utils.cpp" />
+		<Unit filename="..\..\src\utils.hpp" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
 	</Project>
 </CodeBlocks_project_file>
