@@ -407,23 +407,10 @@ void ParticleSystemApp::InputHandler(InputEngine const & /*sender*/, InputAction
 class particle_cmp
 {
 public:
-	explicit particle_cmp(float4x4 const & view)
-		: view_(view)
+	bool operator()(std::pair<Particle, float> const & lhs, std::pair<Particle, float> const & rhs) const
 	{
+		return lhs.second > rhs.second;
 	}
-
-	bool operator()(Particle const & lhs, Particle const & rhs) const
-	{
-		float l_v = (lhs.pos.x() * view_(0, 2) + lhs.pos.y() * view_(1, 2) + lhs.pos.z() * view_(2, 2) + view_(3, 2))
-			/ (lhs.pos.x() * view_(0, 3) + lhs.pos.y() * view_(1, 3) + lhs.pos.z() * view_(2, 3) + view_(3, 3));
-		float r_v = (rhs.pos.x() * view_(0, 2) + rhs.pos.y() * view_(1, 2) + rhs.pos.z() * view_(2, 2) + view_(3, 2))
-			/ (rhs.pos.x() * view_(0, 3) + rhs.pos.y() * view_(1, 3) + rhs.pos.z() * view_(2, 3) + view_(3, 3));
-
-		return l_v > r_v;
-	}
-
-private:
-	float4x4 view_;
 };
 
 uint32_t ParticleSystemApp::DoUpdate(uint32_t pass)
@@ -455,17 +442,22 @@ uint32_t ParticleSystemApp::DoUpdate(uint32_t pass)
 		ps_->Update(static_cast<float>(timer_.elapsed()));
 		timer_.restart();
 
-		std::vector<Particle> active_particles;
+		float4x4 view_mat = Context::Instance().AppInstance().ActiveCamera().ViewMatrix();
+		std::vector<std::pair<Particle, float> > active_particles;
 		for (uint32_t i = 0; i < ps_->NumParticles(); ++ i)
 		{
 			if (ps_->GetParticle(i).life > 0)
 			{
-				active_particles.push_back(ps_->GetParticle(i));
+				float3 pos = ps_->GetParticle(i).pos;
+				float p_to_v = (pos.x() * view_mat(0, 2) + pos.y() * view_mat(1, 2) + pos.z() * view_mat(2, 2) + view_mat(3, 2))
+					/ (pos.x() * view_mat(0, 3) + pos.y() * view_mat(1, 3) + pos.z() * view_mat(2, 3) + view_mat(3, 3));
+
+				active_particles.push_back(std::make_pair(ps_->GetParticle(i), p_to_v));
 			}
 		}
 		if (!active_particles.empty())
 		{
-			std::sort(active_particles.begin(), active_particles.end(), particle_cmp(Context::Instance().AppInstance().ActiveCamera().ViewMatrix()));
+			std::sort(active_particles.begin(), active_particles.end(), particle_cmp());
 
 			uint32_t const num_pars = static_cast<uint32_t>(active_particles.size());
 			RenderLayoutPtr rl = particles_->GetRenderable()->GetRenderLayout();
@@ -475,10 +467,10 @@ uint32_t ParticleSystemApp::DoUpdate(uint32_t pass)
 				float4* instance_data = mapper.Pointer<float4>();
 				for (uint32_t i = 0; i < num_pars; ++ i, ++ instance_data)
 				{
-					instance_data->x() = active_particles[i].pos.x();
-					instance_data->y() = active_particles[i].pos.y();
-					instance_data->z() = active_particles[i].pos.z();
-					instance_data->w() = active_particles[i].life;
+					instance_data->x() = active_particles[i].first.pos.x();
+					instance_data->y() = active_particles[i].first.pos.y();
+					instance_data->z() = active_particles[i].first.pos.z();
+					instance_data->w() = active_particles[i].first.life;
 				}
 			}
 
