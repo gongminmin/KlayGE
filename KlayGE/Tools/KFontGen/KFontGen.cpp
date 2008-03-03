@@ -4,7 +4,7 @@
 #include <KlayGE/Timer.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/thread.hpp>
-#include <KlayGE/CpuTopology.hpp>
+#include <KlayGE/CpuInfo.hpp>
 
 #include <iostream>
 #include <string>
@@ -361,7 +361,7 @@ int main(int argc, char* argv[])
 	int end_code;
 	int num_threads;
 
-	CpuTopology cpu;
+	CPUInfo cpu;
 
 	boost::program_options::options_description desc("Allowed options");
 	desc.add_options()

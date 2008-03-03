@@ -1843,51 +1843,29 @@ namespace KlayGE
 {
 	namespace MathLib
 	{
-#ifdef _SSE_SUPPORT
-		template <>
-		float2 maximize<float2>(float2 const & lhs, float2 const & rhs);
-		template <>
-		float2 minimize<float2>(float2 const & lhs, float2 const & rhs);
-		template <>
-		float3 maximize<float3>(float3 const & lhs, float3 const & rhs);
-		template <>
-		float3 minimize<float3>(float3 const & lhs, float3 const & rhs);
-		template <>
-		float4 maximize<float4>(float4 const & lhs, float4 const & rhs);
-		template <>
-		float4 minimize<float4>(float4 const & lhs, float4 const & rhs);
+		float2 maximize(float2 const & lhs, float2 const & rhs);
+		float2 minimize(float2 const & lhs, float2 const & rhs);
+		float3 maximize(float3 const & lhs, float3 const & rhs);
+		float3 minimize(float3 const & lhs, float3 const & rhs);
+		float4 maximize(float4 const & lhs, float4 const & rhs);
+		float4 minimize(float4 const & lhs, float4 const & rhs);
 
-		template <>
-		float2 normalize<float2>(float2 const & rhs);
-		template <>
-		float3 normalize<float3>(float3 const & rhs);
-		template <>
-		float4 normalize<float4>(float4 const & rhs);
+		float2 normalize(float2 const & rhs);
+		float3 normalize(float3 const & rhs);
+		float4 normalize(float4 const & rhs);
 
-		template <>
-		float2::value_type dot<float2>(float2 const & lhs, float2 const & rhs);
-		template <>
-		float3::value_type dot<float3>(float3 const & lhs, float3 const & rhs);
-		template <>
-		float4::value_type dot<float4>(float4 const & lhs, float4 const & rhs);
+		float dot(float2 const & lhs, float2 const & rhs);
+		float dot(float3 const & lhs, float3 const & rhs);
+		float dot(float4 const & lhs, float4 const & rhs);
 
-		template <>
-		float4 transform<float4>(float4 const & v, float4x4 const & mat);
-		template <>
-		float4 transform<float3>(float3 const & v, float4x4 const & mat);
+		float4 transform(float4 const & v, float4x4 const & mat);
+		float4 transform(float3 const & v, float4x4 const & mat);
+		float3 transform_coord(float3 const & v, float4x4 const & mat);
+		float3 transform_normal(float3 const & v, float4x4 const & mat);
 
-		template <>
-		float3 transform_coord<float3>(float3 const & v, float4x4 const & mat);
+		float4x4 mul(float4x4 const & lhs, float4x4 const & rhs);
 
-		template <>
-		float3 transform_normal<float3>(float3 const & v, float4x4 const & mat);
-
-		template <>
-		float4x4 mul<float>(float4x4 const & lhs, float4x4 const & rhs);
-
-		template <>
-		float4x4 transpose<float>(float4x4 const & rhs);
-#endif
+		float4x4 transpose(float4x4 const & rhs);
 	}
 }
 

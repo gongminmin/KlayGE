@@ -1474,7 +1474,11 @@
 				Name="Source Files"
 				>
 				<File
-					RelativePath="..\..\Core\Src\Math\Math.cpp"
+					RelativePath="..\..\Core\Src\Math\MathSpecialized.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Src\Math\MathSpecializedSSE.cpp"
 					>
 				</File>
 			</Filter>
@@ -1499,10 +1503,6 @@
 				</File>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\Math.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\Core\Include\KlayGE\Detail\MathHelper.hpp"
 					>
 				</File>
 				<File
@@ -1537,6 +1537,18 @@
 					RelativePath="..\..\Core\Include\KlayGE\Vector.hpp"
 					>
 				</File>
+				<Filter
+					Name="detail"
+					>
+					<File
+						RelativePath="..\..\Core\Include\KlayGE\Detail\MathHelper.hpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\Core\Include\KlayGE\Detail\MathSpecialized.hpp"
+						>
+					</File>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter

@@ -13,6 +13,8 @@
 #ifndef _CPU_INFO_HPP
 #define _CPU_INFO_HPP
 
+#include <string>
+
 namespace KlayGE
 {
 	class CPUInfo
