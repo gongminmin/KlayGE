@@ -14,7 +14,6 @@
 #define _RENDERSTATEOBJECT_HPP
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/Math.hpp>
 
 #include <vector>
 

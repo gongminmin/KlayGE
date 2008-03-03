@@ -23,6 +23,7 @@
 
 #include <KlayGE/AudioDataSource.hpp>
 
+#include <istream>
 #include <vorbis/codec.h>
 #include <vorbis/vorbisfile.h>
 

@@ -30,7 +30,8 @@
 #define KLAYGE_LIB_NAME KlayGE_RenderEngine_D3D9
 #include <KlayGE/config/auto_link.hpp>
 
-#include <boost/smart_ptr.hpp>
+#include <KlayGE/Vector.hpp>
+
 #include <KlayGE/D3D9/D3D9AdapterList.hpp>
 
 #include <d3d9.h>
@@ -39,6 +40,7 @@
 
 #include <vector>
 #include <boost/function.hpp>
+#include <boost/smart_ptr.hpp>
 
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/ShaderObject.hpp>

@@ -39,7 +39,6 @@
 #include <KlayGE/config/auto_link.hpp>
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/Math.hpp>
 #include <KlayGE/ElementFormat.hpp>
 
 #include <string>

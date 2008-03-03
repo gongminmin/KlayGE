@@ -63,12 +63,7 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderStateObject.hpp>
 #include <KlayGE/Texture.hpp>
-#include <KlayGE/Math.hpp>
 #include <KlayGE/RenderDeviceCaps.hpp>
-
-#include <vector>
-#include <list>
-#include <boost/array.hpp>
 
 namespace KlayGE
 {

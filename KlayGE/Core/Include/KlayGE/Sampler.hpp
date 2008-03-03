@@ -26,7 +26,7 @@
 #include <KlayGE/config/auto_link.hpp>
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/Math.hpp>
+#include <KlayGE/Color.hpp>
 
 #include <string>
 #include <boost/assert.hpp>

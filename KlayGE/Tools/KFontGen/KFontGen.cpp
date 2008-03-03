@@ -20,6 +20,7 @@
 #pragma warning(pop)
 #endif
 
+#include <mmintrin.h>
 #include <emmintrin.h>
 
 #include <ft2build.h>
@@ -42,6 +43,7 @@ float const SCALE = 60;
 int const INTERNAL_CHAR_SIZE = 4096;
 int const RESTORE_SIZE = 12;
 int const NUM_CHARS = 65536;
+int const NUM_PACKAGE = 10;
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #pragma pack(push, 1)
@@ -63,6 +65,51 @@ int bitwhere(uint64_t v)
 	float f = static_cast<float>(v);
 	return (*reinterpret_cast<uint32_t*>(&f) >> 23) - 127;
 }
+
+class disp_thread
+{
+public:
+	disp_thread(Timer& timer, atomic<int32_t>& cur_num_char, int total_chars)
+		: timer_(&timer), cur_num_char_(&cur_num_char), total_chars_(total_chars)
+	{
+	}
+
+	void operator()()
+	{
+		double last_disp_time = 0;
+		for (;;)
+		{
+			int32_t dist_cur_num_char = cur_num_char_->value();
+
+			double this_disp_time = timer_->elapsed();
+			if ((dist_cur_num_char == total_chars_) || (this_disp_time - last_disp_time > 1))
+			{
+				cout << '\r';
+				cout.width(5);
+				cout << dist_cur_num_char << " / ";
+				cout.width(5);
+				cout << total_chars_;
+				cout.precision(2);
+				cout << "  Time remaining (estimated): "
+					<< fixed << this_disp_time / dist_cur_num_char * (total_chars_ - dist_cur_num_char) << " s     ";
+
+				last_disp_time = this_disp_time;
+
+				if (dist_cur_num_char == total_chars_)
+				{
+					break;
+				}
+			}
+
+			KlayGE::Sleep(500);
+		}
+	}
+
+private:
+	Timer* timer_;
+	atomic<int32_t>* cur_num_char_;
+	int total_chars_;
+};
 
 class ttf_to_dist
 {
@@ -262,10 +309,9 @@ public:
 				{
 					for (uint32_t x = 0; x < header_->char_size; ++ x)
 					{
-						int const map_x = x * INTERNAL_CHAR_SIZE / header_->char_size + INTERNAL_CHAR_SIZE / header_->char_size / 2;
-						int const map_y = y * INTERNAL_CHAR_SIZE / header_->char_size + INTERNAL_CHAR_SIZE / header_->char_size / 2;
+						int2 const map_xy = int2(x, y) * (INTERNAL_CHAR_SIZE / header_->char_size) + INTERNAL_CHAR_SIZE / header_->char_size / 2;
 						float value;
-						if (kd.query_position(int2(map_x, map_y), 1) > 0)
+						if (kd.query_position(map_xy) > 0)
 						{
 							float v = MathLib::sqrt(static_cast<float>(kd.squared_distance(0)) / max_dist_sq);
 							value = MathLib::clamp(v * SCALE, 0.0f, 1.0f);
@@ -274,7 +320,7 @@ public:
 						{
 							value = 1.0f;
 						}
-						if (0 == ((char_bitmap[(map_y * INTERNAL_CHAR_SIZE + map_x) / 8] >> (map_x & 0x7)) & 0x1))
+						if (0 == ((char_bitmap[(map_xy.y() * INTERNAL_CHAR_SIZE + map_xy.x()) / 8] >> (map_xy.x() & 0x7)) & 0x1))
 						{
 							value = -value;
 						}
@@ -396,7 +442,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	thread_pool tp(1, num_threads);
+	thread_pool tp(1, num_threads + 1);
 
 	cout << "\tInput font name: " << ttf_name << endl;
 	cout << "\tOutput font name: " << kfont_name << endl;
@@ -407,7 +453,7 @@ int main(int argc, char* argv[])
 	cout << endl;
 
 	int const total_chars = end_code - start_code;
-	int const num_chars_per_thread = (total_chars + num_threads - 1) / num_threads;
+	int const num_chars_per_package = (total_chars + num_threads * NUM_PACKAGE - 1) / (num_threads * NUM_PACKAGE);
 
 	std::vector<uint8_t> ttf;
 	{
@@ -426,56 +472,37 @@ int main(int argc, char* argv[])
 	std::vector<FT_Library> ft_libs(num_threads);
 	std::vector<FT_Face> ft_faces(num_threads);
 	std::vector<joiner<void> > joiners(num_threads);
+	
+	joiner<void> disp_joiner = tp(disp_thread(timer, cur_num_char, total_chars));
 	for (int i = 0; i < num_threads; ++ i)
 	{
 		FT_Init_FreeType(&ft_libs[i]);
 		FT_New_Memory_Face(ft_libs[i], &ttf[0], static_cast<FT_Long>(ttf.size()), 0, &ft_faces[i]);
 		FT_Set_Pixel_Sizes(ft_faces[i], 0, INTERNAL_CHAR_SIZE);
 		FT_Select_Charmap(ft_faces[i], FT_ENCODING_UNICODE);
-
-		int start_code_thread = start_code + i * num_chars_per_thread;
-		int end_code_thread = std::min(start_code + (i + 1) * num_chars_per_thread, end_code);
-
-		joiners[i] = tp(ttf_to_dist(ft_libs[i], ft_faces[i], header, start_code_thread, end_code_thread,
-					char_width, char_index, char_dist,
-					cur_num_char));
 	}
-
-	double last_disp_time = 0;
-	for (;;)
+	for (int j = 0; j < NUM_PACKAGE; ++ j)
 	{
-		int32_t dist_cur_num_char = cur_num_char.value();
-
-		double this_disp_time = timer.elapsed();
-		if ((dist_cur_num_char == total_chars) || (this_disp_time - last_disp_time > 1))
+		for (int i = 0; i < num_threads; ++ i)
 		{
-			cout << '\r';
-			cout.width(5);
-			cout << dist_cur_num_char << " / ";
-			cout.width(5);
-			cout << total_chars;
-			cout.precision(2);
-			cout << "  Time remaining (estimated): "
-				<< fixed << this_disp_time / dist_cur_num_char * (total_chars - dist_cur_num_char) << " s     ";
+			int start_code_thread = start_code + (j * num_threads + i) * num_chars_per_package;
+			int end_code_thread = std::min(start_code + (j * num_threads + i + 1) * num_chars_per_package, end_code);
 
-			last_disp_time = this_disp_time;
-
-			if (dist_cur_num_char == total_chars)
-			{
-				break;
-			}
+			joiners[i] = tp(ttf_to_dist(ft_libs[i], ft_faces[i], header, start_code_thread, end_code_thread,
+						char_width, char_index, char_dist,
+						cur_num_char));
 		}
-
-		KlayGE::Sleep(500);
+		for (int i = 0; i < num_threads; ++ i)
+		{
+			joiners[i]();
+		}
 	}
-
 	for (int i = 0; i < num_threads; ++ i)
 	{
-		joiners[i]();
-
 		FT_Done_Face(ft_faces[i]);
 		FT_Done_FreeType(ft_libs[i]);
 	}
+	disp_joiner();
 
 	std::fill(char_index.begin(), char_index.end(), -1);
 	header.non_empty_chars = 0;

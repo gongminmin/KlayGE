@@ -27,7 +27,9 @@ namespace KlayGE
 						boost::multipliable<Vector_T<T, N>,
 						boost::dividable<Vector_T<T, N>,
 						boost::dividable2<Vector_T<T, N>, T,
-						boost::multipliable2<Vector_T<T, N>, T> > > > > >
+						boost::multipliable2<Vector_T<T, N>, T,
+						boost::addable2<Vector_T<T, N>, T,
+						boost::subtractable2<Vector_T<T, N>, T> > > > > > > >
 	{
 		template <typename U, int M>
 		friend class Vector_T;
@@ -189,9 +191,21 @@ namespace KlayGE
 			return *this;
 		}
 		template <typename U>
+		Vector_T const & operator+=(U const & rhs)
+		{
+			detail::vector_helper<T, N>::DoAdd(&vec_[0], &vec_[0], rhs);
+			return *this;
+		}
+		template <typename U>
 		Vector_T const & operator-=(Vector_T<U, N> const & rhs)
 		{
 			detail::vector_helper<T, N>::DoSub(&vec_[0], &vec_[0], &rhs.vec_[0]);
+			return *this;
+		}
+		template <typename U>
+		Vector_T const & operator-=(U const & rhs)
+		{
+			detail::vector_helper<T, N>::DoSub(&vec_[0], &vec_[0], rhs);
 			return *this;
 		}
 		template <typename U>

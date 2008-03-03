@@ -2,7 +2,6 @@
 #define _KDTREE_HPP
 
 #include <vector>
-#include <queue>
 #include <functional>
 #include <boost/assert.hpp>
 
@@ -12,15 +11,13 @@ class kdtree
 private:
 	typedef std::pair<size_t, typename T::value_type> neighbor_type;
 
-	struct greater_neighbor_type : public std::binary_function<neighbor_type, neighbor_type, bool>
+	struct less_neighbor_type : public std::binary_function<neighbor_type, neighbor_type, bool>
 	{
 		bool operator()(neighbor_type const & lhs, neighbor_type const & rhs) const
 		{
-			return lhs.second > rhs.second;
+			return lhs.second < rhs.second;
 		}
 	};
-
-	typedef std::priority_queue<neighbor_type, std::vector<neighbor_type>, greater_neighbor_type> pqueue;
 
 	
 	struct kdtree_point
@@ -69,7 +66,7 @@ private:
 			}
 		}
 
-		void query_node(typename T::value_type rd, pqueue& query_priority_queue, size_t num_neighbors, T const & query_position, T& query_offsets)
+		void query_node(typename T::value_type rd, std::vector<neighbor_type>& neighbors, size_t num_neighbors, T const & query_position, T& query_offsets)
 		{
 			if (!is_leaf)
 			{
@@ -77,23 +74,23 @@ private:
 				typename T::value_type new_off = query_position[node_data.dim] - node_data.cut_val;
 				if (new_off < 0)
 				{
-					node_data.children[0]->query_node(rd, query_priority_queue, num_neighbors, query_position, query_offsets);
+					node_data.children[0]->query_node(rd, neighbors, num_neighbors, query_position, query_offsets);
 					rd += new_off * new_off - old_off * old_off;
-					if (rd < query_priority_queue.top().second)
+					if (rd < neighbors.back().second)
 					{
 		  				query_offsets[node_data.dim] = new_off;
-		  				node_data.children[1]->query_node(rd, query_priority_queue, num_neighbors, query_position, query_offsets);
+		  				node_data.children[1]->query_node(rd, neighbors, num_neighbors, query_position, query_offsets);
 		  				query_offsets[node_data.dim] = old_off;
 					}
 				}
 				else
 				{
-					node_data.children[1]->query_node(rd, query_priority_queue, num_neighbors, query_position, query_offsets);
+					node_data.children[1]->query_node(rd, neighbors, num_neighbors, query_position, query_offsets);
 					rd += new_off * new_off - old_off * old_off;
-					if (rd < query_priority_queue.top().second)
+					if (rd < neighbors.back().second)
 					{
 		  				query_offsets[node_data.dim] = new_off;
-		  				node_data.children[0]->query_node(rd, query_priority_queue, num_neighbors, query_position, query_offsets);
+		  				node_data.children[0]->query_node(rd, neighbors, num_neighbors, query_position, query_offsets);
 		  				query_offsets[node_data.dim] = old_off;
 					}
 				}
@@ -104,13 +101,60 @@ private:
 				for (unsigned int i = 0; i < leaf_data.num_elements; ++ i)
 				{
 					typename T::value_type sqr_dist = MathLib::length_sq(point[i].pos - query_position);
-					if (sqr_dist < query_priority_queue.top().second)
+					if (sqr_dist < neighbors.back().second)
 					{
-						if (query_priority_queue.size() >= num_neighbors)
+						if (neighbors.size() >= num_neighbors)
 						{
-							query_priority_queue.pop();
+							neighbors.pop_back();
 						}
-						query_priority_queue.push(neighbor_type(point[i].index, sqr_dist));
+
+						neighbor_type new_neighbor(point[i].index, sqr_dist);
+						std::vector<neighbor_type>::iterator iter = std::lower_bound(neighbors.begin(), neighbors.end(),
+							new_neighbor, less_neighbor_type());
+						neighbors.insert(iter, new_neighbor);
+					}
+				}
+			}
+		}
+
+		void query_node(typename T::value_type rd, neighbor_type& neighbor, T const & query_position, T& query_offsets)
+		{
+			if (!is_leaf)
+			{
+				typename T::value_type old_off = query_offsets[node_data.dim];
+				typename T::value_type new_off = query_position[node_data.dim] - node_data.cut_val;
+				if (new_off < 0)
+				{
+					node_data.children[0]->query_node(rd, neighbor, query_position, query_offsets);
+					rd += new_off * new_off - old_off * old_off;
+					if (rd < neighbor.second)
+					{
+		  				query_offsets[node_data.dim] = new_off;
+		  				node_data.children[1]->query_node(rd, neighbor, query_position, query_offsets);
+		  				query_offsets[node_data.dim] = old_off;
+					}
+				}
+				else
+				{
+					node_data.children[1]->query_node(rd, neighbor, query_position, query_offsets);
+					rd += new_off * new_off - old_off * old_off;
+					if (rd < neighbor.second)
+					{
+		  				query_offsets[node_data.dim] = new_off;
+		  				node_data.children[0]->query_node(rd, neighbor, query_position, query_offsets);
+		  				query_offsets[node_data.dim] = old_off;
+					}
+				}
+			}
+  			else
+			{
+				kdtree_point const * point = leaf_data.points;
+				for (unsigned int i = 0; i < leaf_data.num_elements; ++ i)
+				{
+					typename T::value_type sqr_dist = MathLib::length_sq(point[i].pos - query_position);
+					if (sqr_dist < neighbor.second)
+					{
+						neighbor = neighbor_type(point[i].index, sqr_dist);
 					}
 				}
 			}
@@ -143,25 +187,37 @@ public:
 		{
 			query_offsets[dim] = 0;
 		}
-		pqueue query_priority_queue;
-		neighbors_.resize(num_neighbors);
-		query_priority_queue.push(std::make_pair(-1, std::numeric_limits<typename T::value_type>::max()));
+		neighbors_.assign(1, std::make_pair(-1, std::numeric_limits<typename T::value_type>::max()));
 		typename T::value_type sqr_dist = this->compute_box_sqr_distance(position, bbox_low_corner_, bbox_high_corner_, query_offsets);
-		root_.query_node(sqr_dist, query_priority_queue, num_neighbors, position, query_offsets);
+		root_.query_node(sqr_dist, neighbors_, num_neighbors, position, query_offsets);
 
-		if (-1 == query_priority_queue.top().first)
+		if (-1 == neighbors_.back().first)
 		{
-			query_priority_queue.pop();
+			neighbors_.pop_back();
 		}
 
-		size_t num_found_neighbors = query_priority_queue.size();
-		for (int i = static_cast<int>(num_found_neighbors - 1); i >= 0; -- i)
+		return neighbors_.size();
+	}
+
+	size_t query_position(T const & position)
+	{
+		BOOST_ASSERT(num_neighbors != 0);
+
+		T query_offsets;
+		for (size_t dim = 0; dim < query_offsets.size(); ++ dim)
 		{
-			neighbors_[i] = query_priority_queue.top();
-			query_priority_queue.pop();
+			query_offsets[dim] = 0;
+		}
+		neighbors_.assign(1, std::make_pair(-1, std::numeric_limits<typename T::value_type>::max()));
+		typename T::value_type sqr_dist = this->compute_box_sqr_distance(position, bbox_low_corner_, bbox_high_corner_, query_offsets);
+		root_.query_node(sqr_dist, neighbors_[0], position, query_offsets);
+
+		if (-1 == neighbors_.back().first)
+		{
+			neighbors_.pop_back();
 		}
 
-		return num_found_neighbors;
+		return neighbors_.size();
 	}
 
 	size_t neighbor_position_index(unsigned int i) const

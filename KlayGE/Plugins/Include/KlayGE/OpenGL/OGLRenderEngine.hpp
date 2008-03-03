@@ -33,6 +33,8 @@
 #define KLAYGE_LIB_NAME KlayGE_RenderEngine_OpenGL
 #include <KlayGE/config/auto_link.hpp>
 
+#include <KlayGE/Vector.hpp>
+
 #include <vector>
 #include <map>
 

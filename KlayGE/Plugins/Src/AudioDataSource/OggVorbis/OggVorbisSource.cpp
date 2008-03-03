@@ -15,7 +15,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/Math.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <ios>

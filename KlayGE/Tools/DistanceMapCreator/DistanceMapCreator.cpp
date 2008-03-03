@@ -7,6 +7,7 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderSettings.hpp>
+#include <KlayGE/Math.hpp>
 
 #include <cmath>
 #include <iostream>

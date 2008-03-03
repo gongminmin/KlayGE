@@ -434,42 +434,42 @@ namespace KlayGE
 			return lhs + (rhs - lhs) * s;
 		}
 
-		template <typename T, int N>
-		inline Vector_T<T, N>
-		maximize(Vector_T<T, N> const & lhs, Vector_T<T, N> const & rhs)
+		template <typename T>
+		inline T
+		maximize(T const & lhs, T const & rhs)
 		{
-			Vector_T<T, N> ret;
-			detail::max_minimize_helper<T, N>::DoMax(&ret[0], &lhs[0], &rhs[0]);
+			T ret;
+			detail::max_minimize_helper<typename T::value_type, T::elem_num>::DoMax(&ret[0], &lhs[0], &rhs[0]);
 			return ret;
 		}
 
-		template <typename T, int N>
-		inline Vector_T<T, N>
-		minimize(Vector_T<T, N> const & lhs, Vector_T<T, N> const & rhs)
+		template <typename T>
+		inline T
+		minimize(T const & lhs, T const & rhs)
 		{
-			Vector_T<T, N> ret;
-			detail::max_minimize_helper<T, N>::DoMin(&ret[0], &lhs[0], &rhs[0]);
+			T ret;
+			detail::max_minimize_helper<typename T::value_type, T::elem_num>::DoMin(&ret[0], &lhs[0], &rhs[0]);
 			return ret;
 		}
 
-		template <typename T, int N>
-		inline Vector_T<T, 4>
-		transform(Vector_T<T, N> const & v, Matrix4_T<T> const & mat)
+		template <typename T>
+		inline Vector_T<typename T::value_type, 4>
+		transform(T const & v, Matrix4_T<typename T::value_type> const & mat)
 		{
-			return detail::transform_helper<T, N>::Do(v, mat);
+			return detail::transform_helper<typename T::value_type, T::elem_num>::Do(v, mat);
 		}
 
-		template <typename T, int N>
-		inline Vector_T<T, N>
-		transform_coord(Vector_T<T, N> const & v, Matrix4_T<T> const & mat)
+		template <typename T>
+		inline T
+		transform_coord(T const & v, Matrix4_T<typename T::value_type> const & mat)
 		{
-			BOOST_STATIC_ASSERT(N < 4);
+			BOOST_STATIC_ASSERT(T::elem_num < 4);
 
-			Vector_T<T, 4> temp(detail::transform_helper<T, N>::Do(v, mat));
-			Vector_T<T, N> ret = Vector_T<T, N>(&temp[0]);
-			if (equal(temp.w(), T(0)))
+			Vector_T<typename T::value_type, 4> temp(detail::transform_helper<typename T::value_type, T::elem_num>::Do(v, mat));
+			Vector_T<typename T::value_type, T::elem_num> ret(&temp[0]);
+			if (equal(temp.w(), T::value_type(0)))
 			{
-				ret = Vector_T<T, N>::Zero();
+				ret = T::Zero();
 			}
 			else
 			{
@@ -478,18 +478,18 @@ namespace KlayGE
 			return ret;
 		}
 
-		template <typename T, int N>
-		inline Vector_T<T, N>
-		transform_normal(Vector_T<T, N> const & v, Matrix4_T<T> const & mat)
+		template <typename T>
+		inline T
+		transform_normal(T const & v, Matrix4_T<typename T::value_type> const & mat)
 		{
-			BOOST_STATIC_ASSERT(N < 4);
+			BOOST_STATIC_ASSERT(T::elem_num < 4);
 
-			return detail::transform_normal_helper<T, N>::Do(v, mat);
+			return detail::transform_normal_helper<typename T::value_type, T::elem_num>::Do(v, mat);
 		}
 
-		template <typename T, int N>
-		inline Vector_T<T, N>
-		bary_centric(Vector_T<T, N> const & v1, Vector_T<T, N> const & v2, Vector_T<T, N> const & v3,
+		template <typename T>
+		inline T
+		bary_centric(T const & v1, T const & v2, T const & v3,
 			T const & f, T const & g)
 		{
 			return (1 - f - g) * v1 + f * v2 + g * v3;
@@ -502,24 +502,24 @@ namespace KlayGE
 			return rhs * recip_sqrt(length_sq(rhs));
 		}
 
-		template <typename T, int N>
-		inline Vector_T<T, N>
-		reflect(Vector_T<T, N> const & incident, Vector_T<T, N> const & normal)
+		template <typename T>
+		inline T
+		reflect(T const & incident, T const & normal)
 		{
 			return incident - 2 * dot(incident, normal) * normal;
 		}
 
-		template <typename T, int N>
-		inline Vector_T<T, N>
-		refract(Vector_T<T, N> const & incident, Vector_T<T, N> const & normal, T const & refraction_index)
+		template <typename T>
+		inline T
+		refract(T const & incident, T const & normal, typename T::value_type const & refraction_index)
 		{
 			T t = dot(incident, normal);
-			T r = T(1) - refraction_index * refraction_index * (T(1) - t * t);
+			T r = T(1) - refraction_index * refraction_index * (T::value_type(1) - t * t);
 
 			if (r < T(0))
 			{
 				// Total internal reflection
-				return Vector_T<T, N>::Zero();
+				return T::Zero();
 			}
 			else
 			{
@@ -1825,7 +1825,7 @@ namespace KlayGE
 			}
 			return true;
 		}
-	};
+	}
 }
 
 #include <KlayGE/Vector.hpp>
@@ -1838,5 +1838,57 @@ namespace KlayGE
 #include <KlayGE/Bound.hpp>
 #include <KlayGE/Sphere.hpp>
 #include <KlayGE/Box.hpp>
+
+namespace KlayGE
+{
+	namespace MathLib
+	{
+#ifdef _SSE_SUPPORT
+		template <>
+		float2 maximize<float2>(float2 const & lhs, float2 const & rhs);
+		template <>
+		float2 minimize<float2>(float2 const & lhs, float2 const & rhs);
+		template <>
+		float3 maximize<float3>(float3 const & lhs, float3 const & rhs);
+		template <>
+		float3 minimize<float3>(float3 const & lhs, float3 const & rhs);
+		template <>
+		float4 maximize<float4>(float4 const & lhs, float4 const & rhs);
+		template <>
+		float4 minimize<float4>(float4 const & lhs, float4 const & rhs);
+
+		template <>
+		float2 normalize<float2>(float2 const & rhs);
+		template <>
+		float3 normalize<float3>(float3 const & rhs);
+		template <>
+		float4 normalize<float4>(float4 const & rhs);
+
+		template <>
+		float2::value_type dot<float2>(float2 const & lhs, float2 const & rhs);
+		template <>
+		float3::value_type dot<float3>(float3 const & lhs, float3 const & rhs);
+		template <>
+		float4::value_type dot<float4>(float4 const & lhs, float4 const & rhs);
+
+		template <>
+		float4 transform<float4>(float4 const & v, float4x4 const & mat);
+		template <>
+		float4 transform<float3>(float3 const & v, float4x4 const & mat);
+
+		template <>
+		float3 transform_coord<float3>(float3 const & v, float4x4 const & mat);
+
+		template <>
+		float3 transform_normal<float3>(float3 const & v, float4x4 const & mat);
+
+		template <>
+		float4x4 mul<float>(float4x4 const & lhs, float4x4 const & rhs);
+
+		template <>
+		float4x4 transpose<float>(float4x4 const & rhs);
+#endif
+	}
+}
 
 #endif		// _MATH_HPP

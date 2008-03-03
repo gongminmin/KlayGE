@@ -15,8 +15,8 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/COMPtr.hpp>
 #include <KlayGE/Context.hpp>
+#include <KlayGE/Matrix.hpp>
 #include <KlayGE/RenderEngine.hpp>
-#include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Sampler.hpp>
 
 #include <string>
@@ -40,7 +40,6 @@
 #include <glloader/glloader.h>
 
 #include <KlayGE/OpenGL/OGLRenderFactory.hpp>
-#include <KlayGE/OpenGL/OGLRenderEngine.hpp>
 #include <KlayGE/OpenGL/OGLMapping.hpp>
 #include <KlayGE/OpenGL/OGLShaderObject.hpp>
 

@@ -60,7 +60,7 @@
 		<Unit filename="..\..\Core\Include\KlayGE\Color.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\Config.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\Context.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\CpuTopology.hpp" />
+		<Unit filename="..\..\Core\Include\KlayGE\CpuInfo.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\Detail\MathHelper.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\ElementFormat.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\Extract7z.hpp" />
@@ -139,13 +139,14 @@
 		<Unit filename="..\..\Core\Src\Input\Joystick.cpp" />
 		<Unit filename="..\..\Core\Src\Input\Keyboard.cpp" />
 		<Unit filename="..\..\Core\Src\Input\Mouse.cpp" />
-		<Unit filename="..\..\Core\Src\Kernel\CpuTopology.cpp" />
+		<Unit filename="..\..\Core\Src\Kernel\CpuInfo.cpp" />
 		<Unit filename="..\..\Core\Src\Kernel\ResLoader.cpp" />
 		<Unit filename="..\..\Core\Src\Kernel\ThrowErr.cpp" />
 		<Unit filename="..\..\Core\Src\Kernel\Util.cpp" />
 		<Unit filename="..\..\Core\Src\Kernel\asm\CpuID.asm">
 			<Option compiler="gcc" use="1" buildCommand="yasm -Xgnu -fwin32 -DWIN32 -DKLAYGE_CPU_X86 -o $object $file\n" />
 		</Unit>
+		<Unit filename="..\..\Core\Src\Math\Math.cpp" />
 		<Unit filename="..\..\Core\Src\Net\Lobby.cpp" />
 		<Unit filename="..\..\Core\Src\Net\Player.cpp" />
 		<Unit filename="..\..\Core\Src\Net\Socket.cpp" />
