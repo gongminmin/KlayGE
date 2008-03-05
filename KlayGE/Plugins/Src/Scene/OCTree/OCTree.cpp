@@ -24,6 +24,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Vector.hpp>
+#include <KlayGE/Matrix.hpp>
 #include <KlayGE/Plane.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/SceneObject.hpp>

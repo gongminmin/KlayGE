@@ -15,7 +15,6 @@
 
 #include <boost/operators.hpp>
 
-#include <KlayGE/Math.hpp>
 #include <KlayGE/Vector.hpp>
 
 namespace KlayGE

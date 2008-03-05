@@ -16,64 +16,28 @@ namespace KlayGE
 {
 	namespace detail
 	{
-		class MathSpecialized
-		{
-		public:
-			virtual ~MathSpecialized();
+		float2 maximize_float2_sse(float2 const & lhs, float2 const & rhs);
+		float2 minimize_float2_sse(float2 const & lhs, float2 const & rhs);
+		float3 maximize_float3_sse(float3 const & lhs, float3 const & rhs);
+		float3 minimize_float3_sse(float3 const & lhs, float3 const & rhs);
+		float4 maximize_float4_sse(float4 const & lhs, float4 const & rhs);
+		float4 minimize_float4_sse(float4 const & lhs, float4 const & rhs);
 
-			virtual float2 maximize(float2 const & lhs, float2 const & rhs);
-			virtual float2 minimize(float2 const & lhs, float2 const & rhs);
-			virtual float3 maximize(float3 const & lhs, float3 const & rhs);
-			virtual float3 minimize(float3 const & lhs, float3 const & rhs);
-			virtual float4 maximize(float4 const & lhs, float4 const & rhs);
-			virtual float4 minimize(float4 const & lhs, float4 const & rhs);
+		float2 normalize_float2_sse(float2 const & rhs);
+		float3 normalize_float3_sse(float3 const & rhs);
+		float4 normalize_float4_sse(float4 const & rhs);
 
-			virtual float2 normalize(float2 const & rhs);
-			virtual float3 normalize(float3 const & rhs);
-			virtual float4 normalize(float4 const & rhs);
+		float dot_float2_sse(float2 const & lhs, float2 const & rhs);
+		float dot_float3_sse(float3 const & lhs, float3 const & rhs);
+		float dot_float4_sse(float4 const & lhs, float4 const & rhs);
 
-			virtual float dot(float2 const & lhs, float2 const & rhs);
-			virtual float dot(float3 const & lhs, float3 const & rhs);
-			virtual float dot(float4 const & lhs, float4 const & rhs);
+		float4 transform_float4_sse(float4 const & v, float4x4 const & mat);
+		float4 transform_float3_sse(float3 const & v, float4x4 const & mat);
+		float3 transform_coord_float3_sse(float3 const & v, float4x4 const & mat);
+		float3 transform_normal_float3_sse(float3 const & v, float4x4 const & mat);
 
-			virtual float4 transform(float4 const & v, float4x4 const & mat);
-			virtual float4 transform(float3 const & v, float4x4 const & mat);
-			virtual float3 transform_coord(float3 const & v, float4x4 const & mat);
-			virtual float3 transform_normal(float3 const & v, float4x4 const & mat);
+		float4x4 mul_float4x4_sse(float4x4 const & lhs, float4x4 const & rhs);
 
-			virtual float4x4 mul(float4x4 const & lhs, float4x4 const & rhs);
-
-			virtual float4x4 transpose(float4x4 const & rhs);
-		};
-
-		class MathSpecializedSSE : public MathSpecialized
-		{
-		public:
-			virtual ~MathSpecializedSSE();
-
-			virtual float2 maximize(float2 const & lhs, float2 const & rhs);
-			virtual float2 minimize(float2 const & lhs, float2 const & rhs);
-			virtual float3 maximize(float3 const & lhs, float3 const & rhs);
-			virtual float3 minimize(float3 const & lhs, float3 const & rhs);
-			virtual float4 maximize(float4 const & lhs, float4 const & rhs);
-			virtual float4 minimize(float4 const & lhs, float4 const & rhs);
-
-			virtual float2 normalize(float2 const & rhs);
-			virtual float3 normalize(float3 const & rhs);
-			virtual float4 normalize(float4 const & rhs);
-
-			virtual float dot(float2 const & lhs, float2 const & rhs);
-			virtual float dot(float3 const & lhs, float3 const & rhs);
-			virtual float dot(float4 const & lhs, float4 const & rhs);
-
-			virtual float4 transform(float4 const & v, float4x4 const & mat);
-			virtual float4 transform(float3 const & v, float4x4 const & mat);
-			virtual float3 transform_coord(float3 const & v, float4x4 const & mat);
-			virtual float3 transform_normal(float3 const & v, float4x4 const & mat);
-
-			virtual float4x4 mul(float4x4 const & lhs, float4x4 const & rhs);
-
-			virtual float4x4 transpose(float4x4 const & rhs);
-		};
+		float4x4 transpose_float4x4_sse(float4x4 const & rhs);
 	}
 }

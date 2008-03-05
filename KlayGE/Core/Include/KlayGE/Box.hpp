@@ -19,7 +19,7 @@
 #ifndef _BOX_HPP
 #define _BOX_HPP
 
-#include <KlayGE/Math.hpp>
+#include <KlayGE/Vector.hpp>
 #include <KlayGE/Bound.hpp>
 
 #include <boost/assert.hpp>

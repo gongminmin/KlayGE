@@ -23,6 +23,7 @@
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/FrameBuffer.hpp>
+#include <KlayGE/Color.hpp>
 
 #include <d3d9.h>
 

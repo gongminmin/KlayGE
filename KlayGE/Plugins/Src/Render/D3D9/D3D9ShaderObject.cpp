@@ -18,7 +18,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Sampler.hpp>
-#include <KlayGE/Matrix.hpp>
+#include <KlayGE/Math.hpp>
 
 #include <string>
 #include <algorithm>

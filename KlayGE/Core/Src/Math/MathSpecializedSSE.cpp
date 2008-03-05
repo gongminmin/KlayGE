@@ -1,4 +1,4 @@
-// MathSSE.cpp
+// MathSpecializedSSE.cpp
 // KlayGE 数学函数库SSE优化版 实现文件
 // Ver 3.7.0
 // 版权所有(C) 龚敏敏, 2008
@@ -21,11 +21,7 @@ namespace KlayGE
 {
 	namespace detail
 	{
-		MathSpecializedSSE::~MathSpecializedSSE()
-		{
-		}
-
-		float2 MathSpecializedSSE::maximize(float2 const & lhs, float2 const & rhs)
+		float2 maximize_float2_sse(float2 const & lhs, float2 const & rhs)
 		{
 			__m128 l = _mm_set_ps(0, 0, lhs.y(), lhs.x());
 			__m128 r = _mm_set_ps(0, 0, rhs.y(), rhs.x());
@@ -36,7 +32,7 @@ namespace KlayGE
 			return float2(ret.x(), ret.y());
 		}
 
-		float2 MathSpecializedSSE::minimize(float2 const & lhs, float2 const & rhs)
+		float2 minimize_float2_sse(float2 const & lhs, float2 const & rhs)
 		{
 			__m128 l = _mm_set_ps(0, 0, lhs.y(), lhs.x());
 			__m128 r = _mm_set_ps(0, 0, rhs.y(), rhs.x());
@@ -47,7 +43,7 @@ namespace KlayGE
 			return float2(ret.x(), ret.y());
 		}
 
-		float3 MathSpecializedSSE::maximize(float3 const & lhs, float3 const & rhs)
+		float3 maximize_float3_sse(float3 const & lhs, float3 const & rhs)
 		{
 			__m128 l = _mm_set_ps(0, lhs.z(), lhs.y(), lhs.x());
 			__m128 r = _mm_set_ps(0, rhs.z(), rhs.y(), rhs.x());
@@ -58,7 +54,7 @@ namespace KlayGE
 			return float3(ret.x(), ret.y(), ret.z());
 		}
 
-		float3 MathSpecializedSSE::minimize(float3 const & lhs, float3 const & rhs)
+		float3 minimize_float3_sse(float3 const & lhs, float3 const & rhs)
 		{
 			__m128 l = _mm_set_ps(0, lhs.z(), lhs.y(), lhs.x());
 			__m128 r = _mm_set_ps(0, rhs.z(), rhs.y(), rhs.x());
@@ -69,7 +65,7 @@ namespace KlayGE
 			return float3(ret.x(), ret.y(), ret.z());
 		}
 
-		float4 MathSpecializedSSE::maximize(float4 const & lhs, float4 const & rhs)
+		float4 maximize_float4_sse(float4 const & lhs, float4 const & rhs)
 		{
 			__m128 l = _mm_loadu_ps(&lhs[0]);
 			__m128 r = _mm_loadu_ps(&rhs[0]);
@@ -80,7 +76,7 @@ namespace KlayGE
 			return ret;
 		}
 
-		float4 MathSpecializedSSE::minimize(float4 const & lhs, float4 const & rhs)
+		float4 minimize_float4_sse(float4 const & lhs, float4 const & rhs)
 		{
 			__m128 l = _mm_loadu_ps(&lhs[0]);
 			__m128 r = _mm_loadu_ps(&rhs[0]);
@@ -91,7 +87,7 @@ namespace KlayGE
 			return ret;
 		}
 
-		float2 MathSpecializedSSE::normalize(float2 const & rhs)
+		float2 normalize_float2_sse(float2 const & rhs)
 		{
 			__m128 r = _mm_set_ps(0, 0, rhs.y(), rhs.x());
 
@@ -109,7 +105,7 @@ namespace KlayGE
 			return float2(ret.x(), ret.y());
 		}
 
-		float3 MathSpecializedSSE::normalize(float3 const & rhs)
+		float3 normalize_float3_sse(float3 const & rhs)
 		{
 			__m128 r = _mm_set_ps(0, rhs.z(), rhs.y(), rhs.x());
 
@@ -127,7 +123,7 @@ namespace KlayGE
 			return float3(ret.x(), ret.y(), ret.z());
 		}
 
-		float4 MathSpecializedSSE::normalize(float4 const & rhs)
+		float4 normalize_float4_sse(float4 const & rhs)
 		{
 			__m128 r = _mm_loadu_ps(&rhs[0]);
 
@@ -145,7 +141,7 @@ namespace KlayGE
 			return ret;
 		}
 
-		float MathSpecializedSSE::dot(float2 const & lhs, float2 const & rhs)
+		float dot_float2_sse(float2 const & lhs, float2 const & rhs)
 		{
 			__m128 l = _mm_set_ps(0, 0, lhs.y(), lhs.x());
 			__m128 r = _mm_set_ps(0, 0, rhs.y(), rhs.x());
@@ -160,7 +156,7 @@ namespace KlayGE
 			return ret;
 		}
 
-		float MathSpecializedSSE::dot(float3 const & lhs, float3 const & rhs)
+		float dot_float3_sse(float3 const & lhs, float3 const & rhs)
 		{
 			__m128 l = _mm_set_ps(0, lhs.z(), lhs.y(), lhs.x());
 			__m128 r = _mm_set_ps(0, rhs.z(), rhs.y(), rhs.x());
@@ -175,7 +171,7 @@ namespace KlayGE
 			return ret;
 		}
 
-		float MathSpecializedSSE::dot(float4 const & lhs, float4 const & rhs)
+		float dot_float4_sse(float4 const & lhs, float4 const & rhs)
 		{
 			__m128 l = _mm_loadu_ps(&lhs[0]);
 			__m128 r = _mm_loadu_ps(&rhs[0]);
@@ -190,7 +186,7 @@ namespace KlayGE
 			return ret;
 		}
 
-		float4 MathSpecializedSSE::transform(float4 const & v, float4x4 const & mat)
+		float4 transform_float4_sse(float4 const & v, float4x4 const & mat)
 		{
 			__m128 r0 = _mm_loadu_ps(&mat[0]);
 			__m128 r1 = _mm_loadu_ps(&mat[4]);
@@ -212,7 +208,7 @@ namespace KlayGE
 			return ret;
 		}
 
-		float4 MathSpecializedSSE::transform(float3 const & v, float4x4 const & mat)
+		float4 transform_float3_sse(float3 const & v, float4x4 const & mat)
 		{
 			__m128 r0 = _mm_loadu_ps(&mat[0]);
 			__m128 r1 = _mm_loadu_ps(&mat[4]);
@@ -233,7 +229,7 @@ namespace KlayGE
 			return ret;
 		}
 
-		float3 MathSpecializedSSE::transform_coord(float3 const & v, float4x4 const & mat)
+		float3 transform_coord_float3_sse(float3 const & v, float4x4 const & mat)
 		{
 			__m128 r0 = _mm_loadu_ps(&mat[0]);
 			__m128 r1 = _mm_loadu_ps(&mat[4]);
@@ -257,18 +253,21 @@ namespace KlayGE
 			return float3(ret.x(), ret.y(), ret.z());
 		}
 
-		float3 MathSpecializedSSE::transform_normal(float3 const & v, float4x4 const & mat)
+		float3 transform_normal_float3_sse(float3 const & v, float4x4 const & mat)
 		{
 			__m128 r0 = _mm_loadu_ps(&mat[0]);
 			__m128 r1 = _mm_loadu_ps(&mat[4]);
 			__m128 r2 = _mm_loadu_ps(&mat[8]);
 
-			__m128 l = _mm_set_ps(0, v.z(), v.y(), v.x());
+			__m128 l = _mm_set1_ps(v.x());
+			__m128 m0 = _mm_mul_ps(l, r0);	// l0 * r00 | l0 * r01 | l0 * r02 | l0 * r03
 
-			__m128 m0 = _mm_mul_ps(_mm_shuffle_ps(l, l, _MM_SHUFFLE(0, 0, 0, 0)), r0);		// l0 * r00 | l0 * r01 | l0 * r02 | l0 * r03
-			__m128 m1 = _mm_mul_ps(_mm_shuffle_ps(l, l, _MM_SHUFFLE(1, 1, 1, 1)), r1);		// l1 * r10 | l1 * r11 | l1 * r12 | l1 * r13
+			l = _mm_set1_ps(v.y());
+			__m128 m1 = _mm_mul_ps(l, r1);	// l1 * r10 | l1 * r11 | l1 * r12 | l1 * r13
 			m0 = _mm_add_ps(m0, m1);		// l0 * r00 + l1 * r10 | l0 * r01 + l1 * r11 | l0 * r02 + l1 * r12 | l0 * r03 + l1 * r13
-			__m128 m2 = _mm_mul_ps(_mm_shuffle_ps(l, l, _MM_SHUFFLE(2, 2, 2, 2)), r2);		// l2 * r20 | l2 * r21 | l2 * r22 | l2 * r23
+
+			l = _mm_set1_ps(v.z());
+			__m128 m2 = _mm_mul_ps(l, r2);	// l2 * r20 | l2 * r21 | l2 * r22 | l2 * r23
 			__m128 e = _mm_add_ps(m0, m2);	// l0 * r00 + l1 * r10 + l2 * r20 | l0 * r01 + l1 * r11 + l2 * r21 | l0 * r02 + l1 * r12 + l2 * r22 | l0 * r03 + l1 * r13 + l2 * r23
 
 			float4 ret;
@@ -276,7 +275,7 @@ namespace KlayGE
 			return float3(ret.x(), ret.y(), ret.z());
 		}
 
-		float4x4 MathSpecializedSSE::mul(float4x4 const & lhs, float4x4 const & rhs)
+		float4x4 mul_float4x4_sse(float4x4 const & lhs, float4x4 const & rhs)
 		{
 			__m128 r0 = _mm_loadu_ps(&rhs[0]);
 			__m128 r1 = _mm_loadu_ps(&rhs[4]);
@@ -331,7 +330,7 @@ namespace KlayGE
 			return ret;
 		}
 
-		float4x4 MathSpecializedSSE::transpose(float4x4 const & rhs)
+		float4x4 transpose_float4x4_sse(float4x4 const & rhs)
 		{
 			__m128 r0 = _mm_loadu_ps(&rhs[0]);
 			__m128 r1 = _mm_loadu_ps(&rhs[4]);

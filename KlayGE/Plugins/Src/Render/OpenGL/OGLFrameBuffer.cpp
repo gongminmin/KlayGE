@@ -20,6 +20,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/Color.hpp>
 
 #include <glloader/glloader.h>
 
