@@ -63,8 +63,9 @@ struct kfont_header
 #pragma pack(pop)
 #endif
 
-int bitwhere(uint64_t v)
+int bsf(uint64_t v)
 {
+	v &= ~v + 1;
 	float f = static_cast<float>(v);
 	return (*reinterpret_cast<uint32_t*>(&f) >> 23) - 127;
 }
@@ -124,6 +125,7 @@ public:
 			char_width_(&char_width), char_index_(&char_index), char_dist_(&char_dist),
 			cur_num_char_(&cur_num_char)
 	{
+#ifndef KLAYGE_CPU_X64
 		CPUInfo cpu;
 		if (cpu.IsFeatureSupport(CPUInfo::CF_SSE2))
 		{
@@ -133,15 +135,21 @@ public:
 		else
 		{
 			edge_extract = boost::bind(&ttf_to_dist::edge_extract_cpp, this, _1, _2, _3, _4, _5);
+			
 			if (cpu.IsFeatureSupport(CPUInfo::CF_MMX))
 			{
 				binary_font_extract = boost::bind(&ttf_to_dist::binary_font_extract_mmx, this, _1, _2, _3);
+
 			}
 			else
 			{
 				binary_font_extract = boost::bind(&ttf_to_dist::binary_font_extract_cpp, this, _1, _2, _3);
 			}
 		}
+#else
+		binary_font_extract = boost::bind(&ttf_to_dist::binary_font_extract_sse2, this, _1, _2, _3);
+		edge_extract = boost::bind(&ttf_to_dist::edge_extract_sse2, this, _1, _2, _3, _4, _5);
+#endif
 	}
 
 	void operator()()
@@ -230,6 +238,7 @@ private:
 		}
 	}
 
+#ifndef KLAYGE_CPU_X64
 	void binary_font_extract_mmx(uint8_t* dst_data, uint8_t const * src_data, int size)
 	{
 		for (int x = 0, x_end = size & ~0x7; x < x_end; x += 8)
@@ -246,6 +255,7 @@ private:
 		}
 		_m_empty();
 	}
+#endif
 
 	void binary_font_extract_sse2(uint8_t* dst_data, uint8_t const * src_data, int size)
 	{
@@ -265,10 +275,11 @@ private:
 
 	void edge_extract_sse2(std::vector<int2>& edge_points, int start, int end, std::vector<uint8_t> const & char_bitmap, int y)
 	{
+		__m128i zero = _mm_set1_epi8(0);
 		for (int x = start; x < end; x += sizeof(__m128i) * 8)
 		{
 			__m128i center = _mm_loadu_si128(reinterpret_cast<__m128i const *>(&char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8]));
-			if (_mm_movemask_epi8(_mm_cmpeq_epi32(center, _mm_set1_epi8(0))) != 0xFFFF)
+			if (_mm_movemask_epi8(_mm_cmpeq_epi32(center, zero)) != 0xFFFF)
 			{
 				__m128i up;
 				if (y != 0)
@@ -277,7 +288,7 @@ private:
 				}
 				else
 				{
-					up = _mm_set1_epi8(0);
+					up = zero;
 				}
 				__m128i down;
 				if (y != INTERNAL_CHAR_SIZE - 1)
@@ -286,7 +297,7 @@ private:
 				}
 				else
 				{
-					down = _mm_set1_epi8(0);
+					down = zero;
 				}
 				__m128i left = _mm_slli_epi64(center, 1);
 				if (x != 0)
@@ -320,12 +331,12 @@ private:
 				_mm_storeu_si128(reinterpret_cast<__m128i*>(m64), mask);
 				while (m64[0] != 0)
 				{
-					edge_points.push_back(int2(x + bitwhere(m64[0] & (~m64[0] + 1)), y));
+					edge_points.push_back(int2(x + bsf(m64[0]), y));
 					m64[0] &= m64[0] - 1;
 				}
 				while (m64[1] != 0)
 				{
-					edge_points.push_back(int2(x + bitwhere(m64[1] & (~m64[1] + 1)) + 64, y));
+					edge_points.push_back(int2(x + bsf(m64[1]) + 64, y));
 					m64[1] &= m64[1] - 1;
 				}
 			}
@@ -363,7 +374,7 @@ private:
 				mask = center & (center ^ mask);
 				while (mask != 0)
 				{
-					edge_points.push_back(int2(x + bitwhere(mask & (~mask + 1)), y));
+					edge_points.push_back(int2(x + bsf(mask), y));
 					mask &= mask - 1;
 				}
 			}
@@ -501,6 +512,7 @@ int main(int argc, char* argv[])
 			cout << "MMX is used." << endl;
 		}
 	}
+	cout << endl;
 
 	int const total_chars = end_code - start_code;
 	int const num_chars_per_package = (total_chars + num_threads * NUM_PACKAGE - 1) / (num_threads * NUM_PACKAGE);
