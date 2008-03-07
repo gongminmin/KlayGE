@@ -20,6 +20,9 @@
 #pragma warning(pop)
 #endif
 
+#include <boost/bind.hpp>
+#include <boost/function.hpp>
+
 #include <mmintrin.h>
 #include <emmintrin.h>
 
@@ -121,6 +124,24 @@ public:
 			char_width_(&char_width), char_index_(&char_index), char_dist_(&char_dist),
 			cur_num_char_(&cur_num_char)
 	{
+		CPUInfo cpu;
+		if (cpu.IsFeatureSupport(CPUInfo::CF_SSE2))
+		{
+			binary_font_extract = boost::bind(&ttf_to_dist::binary_font_extract_sse2, this, _1, _2, _3);
+			edge_extract = boost::bind(&ttf_to_dist::edge_extract_sse2, this, _1, _2, _3, _4, _5);
+		}
+		else
+		{
+			edge_extract = boost::bind(&ttf_to_dist::edge_extract_cpp, this, _1, _2, _3, _4, _5);
+			if (cpu.IsFeatureSupport(CPUInfo::CF_MMX))
+			{
+				binary_font_extract = boost::bind(&ttf_to_dist::binary_font_extract_mmx, this, _1, _2, _3);
+			}
+			else
+			{
+				binary_font_extract = boost::bind(&ttf_to_dist::binary_font_extract_cpp, this, _1, _2, _3);
+			}
+		}
 	}
 
 	void operator()()
@@ -148,154 +169,17 @@ public:
 				uint8_t const * src_data = ft_slot->bitmap.buffer;
 				for (int y = 0; y < buf_height; ++ y)
 				{
-#ifdef _SSE2_SUPPORT
-					for (int x = 0, x_end = buf_width & ~0xF; x < x_end; x += 16)
-					{
-						__m128i mask = _mm_loadu_si128(reinterpret_cast<__m128i const *>(&src_data[x]));
-						*reinterpret_cast<uint16_t*>(&font_data[x / 8]) = static_cast<uint16_t>(_mm_movemask_epi8(mask));
-					}
-					for (int x = buf_width & ~0xF; x < buf_width; ++ x)
-					{
-						if (src_data[x] >= 128)
-						{
-							font_data[x / 8] |= 1UL << (x & 0x7);
-						}
-					}
-#elif defined _MMX_SUPPORT
-					for (int x = 0, x_end = buf_width & ~0x7; x < x_end; x += 8)
-					{
-						__m64 mask = *reinterpret_cast<__m64 const *>(&src_data[x]);
-						font_data[x / 8] = static_cast<uint8_t>(_mm_movemask_pi8(mask));
-					}
-					for (int x = buf_width & ~0x7; x < buf_width; ++ x)
-					{
-						if (src_data[x] >= 128)
-						{
-							font_data[x / 8] |= 1UL << (x & 0x7);
-						}
-					}
-#else
-					for (int x = 0; x < buf_width; ++ x)
-					{
-						if (src_data[x] >= 128)
-						{
-							font_data[x / 8] |= 1UL << (x & 0x7);
-						}
-					}
-#endif
+					binary_font_extract(font_data, src_data, buf_width);
+
 					font_data += INTERNAL_CHAR_SIZE / 8;
 					src_data += ft_slot->bitmap.pitch;
 				}
 			}
-#ifdef _MMX_SUPPORT
-			_m_empty();
-#endif
 
 			edge_points.resize(0);
 			for (int y = y_start, y_end = buf_height + y_start; y < y_end; ++ y)
 			{
-#ifdef _SSE2_SUPPORT
-				for (int x = ft_slot->bitmap_left, x_end = ft_slot->bitmap_left + buf_width; x < x_end; x += sizeof(__m128i) * 8)
-				{
-					__m128i center = _mm_loadu_si128(reinterpret_cast<__m128i*>(&char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8]));
-					if (_mm_movemask_epi8(_mm_cmpeq_epi32(center, _mm_set1_epi8(0))) != 0xFFFF)
-					{
-						__m128i up;
-						if (y != 0)
-						{
-							up = _mm_loadu_si128(reinterpret_cast<__m128i*>(&char_bitmap[((y - 1) * INTERNAL_CHAR_SIZE + x) / 8]));
-						}
-						else
-						{
-							up = _mm_set1_epi8(0);
-						}
-						__m128i down;
-						if (y != INTERNAL_CHAR_SIZE - 1)
-						{
-							down = _mm_loadu_si128(reinterpret_cast<__m128i*>(&char_bitmap[((y + 1) * INTERNAL_CHAR_SIZE + x) / 8]));
-						}
-						else
-						{
-							down = _mm_set1_epi8(0);
-						}
-						__m128i left = _mm_slli_epi64(center, 1);
-						if (x != 0)
-						{
-							__m128i t = _mm_loadu_si128(reinterpret_cast<__m128i*>(&char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8 - 8]));
-							left = _mm_or_si128(left, _mm_srli_epi64(t, 63));
-						}
-						else
-						{
-							__m128i t = _mm_srli_si128(center, 8);
-							left = _mm_or_si128(left, _mm_srli_epi64(t, 63));
-						}
-						__m128i right = _mm_srli_epi64(center, 1);
-						if (x != INTERNAL_CHAR_SIZE - 1)
-						{
-							__m128i t = _mm_loadu_si128(reinterpret_cast<__m128i*>(&char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8 + 8]));
-							right = _mm_or_si128(right, _mm_slli_epi64(t, 63));
-						}
-						else
-						{
-							__m128i t = _mm_slli_si128(center, 8);
-							right = _mm_or_si128(right, _mm_slli_epi64(t, 63));
-						}
-						__m128i mask = _mm_and_si128(center, up);
-						mask = _mm_and_si128(mask, down);
-						mask = _mm_and_si128(mask, left);
-						mask = _mm_and_si128(mask, right);
-						mask = _mm_xor_si128(center, mask);
-						mask = _mm_and_si128(center, mask);
-						uint64_t m64[2];
-						_mm_storeu_si128(reinterpret_cast<__m128i*>(m64), mask);
-						while (m64[0] != 0)
-						{
-							edge_points.push_back(int2(x + bitwhere(m64[0] & (~m64[0] + 1)), y));
-							m64[0] &= m64[0] - 1;
-						}
-						while (m64[1] != 0)
-						{
-							edge_points.push_back(int2(x + bitwhere(m64[1] & (~m64[1] + 1)) + 64, y));
-							m64[1] &= m64[1] - 1;
-						}
-					}
-				}
-#else
-				for (int x = ft_slot->bitmap_left, x_end = ft_slot->bitmap_left + buf_width; x < x_end; x += sizeof(uint64_t) * 8)
-				{
-					uint64_t center = *reinterpret_cast<uint64_t*>(&char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8]);
-					if (center != 0)
-					{
-						uint64_t up = 0;
-						if (y != 0)
-						{
-							up = *reinterpret_cast<uint64_t*>(&char_bitmap[((y - 1) * INTERNAL_CHAR_SIZE + x) / 8]);
-						}
-						uint64_t down = 0;
-						if (y != INTERNAL_CHAR_SIZE - 1)
-						{
-							down = *reinterpret_cast<uint64_t*>(&char_bitmap[((y + 1) * INTERNAL_CHAR_SIZE + x) / 8]);
-						}
-						uint64_t left = center << 1;
-						if (x != 0)
-						{
-							left |= char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8 - 1] >> 7;
-						}
-						uint64_t right = center >> 1;
-						if (x != INTERNAL_CHAR_SIZE - 1)
-						{
-							right |= static_cast<uint64_t>(char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8 + sizeof(uint64_t)] & 0x1) << (sizeof(uint64_t) * 8 - 1);
-						}
-						uint64_t mask = center & up & down & left & right;
-						mask = center & (center ^ mask);
-						while (mask != 0)
-						{
-							edge_points.push_back(int2(x + bitwhere(mask & (~mask + 1)), y));
-							mask &= mask - 1;
-						}
-					}
-				}
-#endif
+				edge_extract(edge_points, ft_slot->bitmap_left, ft_slot->bitmap_left + buf_width, char_bitmap, y);
 			}
 
 			if (!edge_points.empty())
@@ -335,6 +219,158 @@ public:
 	}
 
 private:
+	void binary_font_extract_cpp(uint8_t* dst_data, uint8_t const * src_data, int size)
+	{
+		for (int x = 0; x < size; ++ x)
+		{
+			if (src_data[x] >= 128)
+			{
+				dst_data[x / 8] |= 1UL << (x & 0x7);
+			}
+		}
+	}
+
+	void binary_font_extract_mmx(uint8_t* dst_data, uint8_t const * src_data, int size)
+	{
+		for (int x = 0, x_end = size & ~0x7; x < x_end; x += 8)
+		{
+			__m64 mask = *reinterpret_cast<__m64 const *>(&src_data[x]);
+			dst_data[x / 8] = static_cast<uint8_t>(_mm_movemask_pi8(mask));
+		}
+		for (int x = size & ~0x7; x < size; ++ x)
+		{
+			if (src_data[x] >= 128)
+			{
+				dst_data[x / 8] |= 1UL << (x & 0x7);
+			}
+		}
+		_m_empty();
+	}
+
+	void binary_font_extract_sse2(uint8_t* dst_data, uint8_t const * src_data, int size)
+	{
+		for (int x = 0, x_end = size & ~0xF; x < x_end; x += 16)
+		{
+			__m128i mask = _mm_loadu_si128(reinterpret_cast<__m128i const *>(&src_data[x]));
+			*reinterpret_cast<uint16_t*>(&dst_data[x / 8]) = static_cast<uint16_t>(_mm_movemask_epi8(mask));
+		}
+		for (int x = size & ~0xF; x < size; ++ x)
+		{
+			if (src_data[x] >= 128)
+			{
+				dst_data[x / 8] |= 1UL << (x & 0x7);
+			}
+		}
+	}
+
+	void edge_extract_sse2(std::vector<int2>& edge_points, int start, int end, std::vector<uint8_t> const & char_bitmap, int y)
+	{
+		for (int x = start; x < end; x += sizeof(__m128i) * 8)
+		{
+			__m128i center = _mm_loadu_si128(reinterpret_cast<__m128i const *>(&char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8]));
+			if (_mm_movemask_epi8(_mm_cmpeq_epi32(center, _mm_set1_epi8(0))) != 0xFFFF)
+			{
+				__m128i up;
+				if (y != 0)
+				{
+					up = _mm_loadu_si128(reinterpret_cast<__m128i const *>(&char_bitmap[((y - 1) * INTERNAL_CHAR_SIZE + x) / 8]));
+				}
+				else
+				{
+					up = _mm_set1_epi8(0);
+				}
+				__m128i down;
+				if (y != INTERNAL_CHAR_SIZE - 1)
+				{
+					down = _mm_loadu_si128(reinterpret_cast<__m128i const *>(&char_bitmap[((y + 1) * INTERNAL_CHAR_SIZE + x) / 8]));
+				}
+				else
+				{
+					down = _mm_set1_epi8(0);
+				}
+				__m128i left = _mm_slli_epi64(center, 1);
+				if (x != 0)
+				{
+					__m128i t = _mm_loadu_si128(reinterpret_cast<__m128i const *>(&char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8 - 8]));
+					left = _mm_or_si128(left, _mm_srli_epi64(t, 63));
+				}
+				else
+				{
+					__m128i t = _mm_srli_si128(center, 8);
+					left = _mm_or_si128(left, _mm_srli_epi64(t, 63));
+				}
+				__m128i right = _mm_srli_epi64(center, 1);
+				if (x != INTERNAL_CHAR_SIZE - 1)
+				{
+					__m128i t = _mm_loadu_si128(reinterpret_cast<__m128i const *>(&char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8 + 8]));
+					right = _mm_or_si128(right, _mm_slli_epi64(t, 63));
+				}
+				else
+				{
+					__m128i t = _mm_slli_si128(center, 8);
+					right = _mm_or_si128(right, _mm_slli_epi64(t, 63));
+				}
+				__m128i mask = _mm_and_si128(center, up);
+				mask = _mm_and_si128(mask, down);
+				mask = _mm_and_si128(mask, left);
+				mask = _mm_and_si128(mask, right);
+				mask = _mm_xor_si128(center, mask);
+				mask = _mm_and_si128(center, mask);
+				uint64_t m64[2];
+				_mm_storeu_si128(reinterpret_cast<__m128i*>(m64), mask);
+				while (m64[0] != 0)
+				{
+					edge_points.push_back(int2(x + bitwhere(m64[0] & (~m64[0] + 1)), y));
+					m64[0] &= m64[0] - 1;
+				}
+				while (m64[1] != 0)
+				{
+					edge_points.push_back(int2(x + bitwhere(m64[1] & (~m64[1] + 1)) + 64, y));
+					m64[1] &= m64[1] - 1;
+				}
+			}
+		}
+	}
+
+	void edge_extract_cpp(std::vector<int2>& edge_points, int start, int end, std::vector<uint8_t> const & char_bitmap, int y)
+	{
+		for (int x = start; x < end; x += sizeof(uint64_t) * 8)
+		{
+			uint64_t center = *reinterpret_cast<uint64_t const *>(&char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8]);
+			if (center != 0)
+			{
+				uint64_t up = 0;
+				if (y != 0)
+				{
+					up = *reinterpret_cast<uint64_t const *>(&char_bitmap[((y - 1) * INTERNAL_CHAR_SIZE + x) / 8]);
+				}
+				uint64_t down = 0;
+				if (y != INTERNAL_CHAR_SIZE - 1)
+				{
+					down = *reinterpret_cast<uint64_t const *>(&char_bitmap[((y + 1) * INTERNAL_CHAR_SIZE + x) / 8]);
+				}
+				uint64_t left = center << 1;
+				if (x != 0)
+				{
+					left |= char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8 - 1] >> 7;
+				}
+				uint64_t right = center >> 1;
+				if (x != INTERNAL_CHAR_SIZE - 1)
+				{
+					right |= static_cast<uint64_t>(char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8 + sizeof(uint64_t)] & 0x1) << (sizeof(uint64_t) * 8 - 1);
+				}
+				uint64_t mask = center & up & down & left & right;
+				mask = center & (center ^ mask);
+				while (mask != 0)
+				{
+					edge_points.push_back(int2(x + bitwhere(mask & (~mask + 1)), y));
+					mask &= mask - 1;
+				}
+			}
+		}
+	}
+
+private:
 	FT_Library ft_lib_;
 	FT_Face ft_face_;
 	kfont_header* header_;
@@ -344,6 +380,9 @@ private:
 	std::vector<int32_t>* char_index_;
 	std::vector<std::vector<uint8_t> >* char_dist_;
 	atomic<int32_t>* cur_num_char_;
+
+	boost::function<void(uint8_t*, uint8_t const *, int)> binary_font_extract;
+	boost::function<void(std::vector<int2>&, int, int, std::vector<uint8_t> const &, int)> edge_extract;
 };
 
 int main(int argc, char* argv[])
@@ -451,6 +490,17 @@ int main(int argc, char* argv[])
 	cout << "\tCharacter size: " << header.char_size << endl;
 	cout << "\tNumber of threads: " << num_threads << endl;
 	cout << endl;
+	if (cpu.IsFeatureSupport(CPUInfo::CF_SSE2))
+	{
+		cout << "SSE2 is used." << endl;
+	}
+	else
+	{
+		if (cpu.IsFeatureSupport(CPUInfo::CF_MMX))
+		{
+			cout << "MMX is used." << endl;
+		}
+	}
 
 	int const total_chars = end_code - start_code;
 	int const num_chars_per_package = (total_chars + num_threads * NUM_PACKAGE - 1) / (num_threads * NUM_PACKAGE);
