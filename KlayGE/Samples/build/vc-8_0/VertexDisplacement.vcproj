@@ -207,7 +207,6 @@
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
-				EnableEnhancedInstructionSet="1"
 				FloatingPointModel="2"
 				ProgramDataBaseFileName="$(IntDir)\$(TargetFileName).pdb"
 				WarningLevel="4"

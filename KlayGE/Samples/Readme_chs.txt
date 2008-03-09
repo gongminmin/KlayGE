@@ -4,9 +4,9 @@ Homepage: http://klayge.sourceforge.net
 E-Mail:	  enginedev@163.com
 QQ:       33611210
 
-由于我编译这些demo所用的编译器是VS2005 sp1，而目前microsoft还没有提供VS2005 sp1的重发布包下载，
-所以请安装VS2005 sp1，或者从安装过VS2005 sp1的机器上得到相应文件（vcredist_x86.exe, vcredist_x64.exe），
-安装后运行demo。
+注意：在运行二进制版本的Demo之前，需要先安装Microsoft Visual C++ 8.0 SP1 runtime。
+x86版本可以从http://www.microsoft.com/downloads/details.aspx?FamilyID=200b2fd9-ae1a-4a14-984d-389c36f85647&DisplayLang=en下载。
+x64版本可以从http://www.microsoft.com/downloads/details.aspx?FamilyID=eb4ebe2d-33c0-4a47-9dd4-b9a6d7bd44da&DisplayLang=en下载。
 
 ====================================================================================
 AsciiArts

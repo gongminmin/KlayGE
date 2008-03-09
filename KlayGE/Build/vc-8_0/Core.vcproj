@@ -179,7 +179,6 @@
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
-				EnableEnhancedInstructionSet="1"
 				FloatingPointModel="2"
 				ProgramDataBaseFileName="$(IntDir)\$(TargetFileName).pdb"
 				WarningLevel="4"
@@ -1473,14 +1472,6 @@
 			<Filter
 				Name="Source Files"
 				>
-				<File
-					RelativePath="..\..\Core\Src\Math\MathSpecialized.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\Core\Src\Math\MathSpecializedSSE.cpp"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="Header Files"
@@ -1542,10 +1533,6 @@
 					>
 					<File
 						RelativePath="..\..\Core\Include\KlayGE\Detail\MathHelper.hpp"
-						>
-					</File>
-					<File
-						RelativePath="..\..\Core\Include\KlayGE\Detail\MathSpecialized.hpp"
 						>
 					</File>
 				</Filter>

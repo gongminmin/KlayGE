@@ -27,6 +27,18 @@
 
 	#if _MSC_VER >= 1500
 		#define KLAYGE_COMPILER_VERSION 9.0
+		#pragma warning(disable: 4819)
+
+		#ifndef _CRT_SECURE_NO_DEPRECATE
+			#define _CRT_SECURE_NO_DEPRECATE
+		#endif
+		#ifndef _SCL_SECURE_NO_DEPRECATE
+			#define _SCL_SECURE_NO_DEPRECATE
+		#endif
+
+		#ifndef KLAYGE_DEBUG
+			#define _SECURE_SCL 0
+		#endif
 	#elif _MSC_VER >= 1400
 		#define KLAYGE_COMPILER_VERSION 8.0
 		#pragma warning(disable: 4819)
