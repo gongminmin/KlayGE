@@ -1,12 +1,12 @@
-粘土游戏引擎(KlayGE) 3.5.0 Demo
+粘土游戏引擎(KlayGE) 3.7.0 Demo
 
 Homepage: http://klayge.sourceforge.net
 E-Mail:	  enginedev@163.com
 QQ:       33611210
 
-注意：在运行二进制版本的Demo之前，需要先安装Microsoft Visual C++ 8.0 SP1 runtime。
-x86版本可以从http://www.microsoft.com/downloads/details.aspx?FamilyID=200b2fd9-ae1a-4a14-984d-389c36f85647&DisplayLang=en下载。
-x64版本可以从http://www.microsoft.com/downloads/details.aspx?FamilyID=eb4ebe2d-33c0-4a47-9dd4-b9a6d7bd44da&DisplayLang=en下载。
+注意：如果要在没有安装Microsoft Visual C++ 2008的机器上运行二进制版本的Demo，就需要事先安装Microsoft Visual C++ 2008 Redistributable Package。
+x86版本可以从http://www.microsoft.com/downloads/details.aspx?familyid=9B2DA534-3E03-4391-8A4D-074B9F2BC1BF&displaylang=en下载。
+x64版本可以从http://www.microsoft.com/downloads/details.aspx?FamilyID=bd2a6171-e2d6-4230-b809-9a8d7548c1b6&DisplayLang=en下载。
 
 ====================================================================================
 AsciiArts
