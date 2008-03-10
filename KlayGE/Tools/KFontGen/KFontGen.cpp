@@ -118,10 +118,10 @@ private:
 class ttf_to_dist
 {
 public:
-	ttf_to_dist(FT_Library ft_lib, FT_Face ft_face, kfont_header& header, int start_code, int end_code,
+	ttf_to_dist(FT_Library ft_lib, FT_Face ft_face, kfont_header& header, std::vector<std::pair<int, int> >& task,
 				std::vector<uint8_t>& char_width, std::vector<int32_t>& char_index, std::vector<std::vector<uint8_t> >& char_dist,
 				atomic<int32_t>& cur_num_char)
-		: ft_lib_(ft_lib), ft_face_(ft_face), header_(&header), start_code_(start_code), end_code_(end_code),
+		: ft_lib_(ft_lib), ft_face_(ft_face), header_(&header), task_(&task),
 			char_width_(&char_width), char_index_(&char_index), char_dist_(&char_dist),
 			cur_num_char_(&cur_num_char)
 	{
@@ -158,71 +158,76 @@ public:
 
 		std::vector<uint8_t> char_bitmap(INTERNAL_CHAR_SIZE / 8 * INTERNAL_CHAR_SIZE);
 		std::vector<int2> edge_points;
-		for (int ch = start_code_; ch < end_code_; ++ ch)
+		for (size_t i = 0; i < task_->size(); ++ i)
 		{
-			std::fill(char_bitmap.begin(), char_bitmap.end(), 0);
-
-			FT_Load_Char(ft_face_, ch, FT_LOAD_RENDER);
-
-			(*char_width_)[ch] = static_cast<uint8_t>(std::min(header_->char_size, 
-					static_cast<uint32_t>(ft_slot->advance.x / 64.0f * header_->char_size / INTERNAL_CHAR_SIZE)));
-
-			int const buf_width = std::min(ft_slot->bitmap.width, INTERNAL_CHAR_SIZE);
-			int const buf_height = std::min(ft_slot->bitmap.rows, INTERNAL_CHAR_SIZE);
-			
-			int const y_start = std::max<int>(INTERNAL_CHAR_SIZE * 3 / 4 - ft_slot->bitmap_top, 0);
-			if ((buf_width > 0) && (buf_height > 0))
+			int const start_code = (*task_)[i].first;
+			int const end_code = (*task_)[i].second;
+			for (int ch = start_code; ch < end_code; ++ ch)
 			{
-				uint8_t* font_data = &char_bitmap[(y_start * INTERNAL_CHAR_SIZE + ft_slot->bitmap_left) / 8];
-				uint8_t const * src_data = ft_slot->bitmap.buffer;
-				for (int y = 0; y < buf_height; ++ y)
+				std::fill(char_bitmap.begin(), char_bitmap.end(), 0);
+
+				FT_Load_Char(ft_face_, ch, FT_LOAD_RENDER);
+
+				(*char_width_)[ch] = static_cast<uint8_t>(std::min(header_->char_size, 
+						static_cast<uint32_t>(ft_slot->advance.x / 64.0f * header_->char_size / INTERNAL_CHAR_SIZE)));
+
+				int const buf_width = std::min(ft_slot->bitmap.width, INTERNAL_CHAR_SIZE);
+				int const buf_height = std::min(ft_slot->bitmap.rows, INTERNAL_CHAR_SIZE);
+				
+				int const y_start = std::max<int>(INTERNAL_CHAR_SIZE * 3 / 4 - ft_slot->bitmap_top, 0);
+				if ((buf_width > 0) && (buf_height > 0))
 				{
-					binary_font_extract(font_data, src_data, buf_width);
-
-					font_data += INTERNAL_CHAR_SIZE / 8;
-					src_data += ft_slot->bitmap.pitch;
-				}
-			}
-
-			edge_points.resize(0);
-			for (int y = y_start, y_end = buf_height + y_start; y < y_end; ++ y)
-			{
-				edge_extract(edge_points, ft_slot->bitmap_left, ft_slot->bitmap_left + buf_width, char_bitmap, y);
-			}
-
-			if (!edge_points.empty())
-			{
-				(*char_dist_)[ch].resize(header_->char_size * header_->char_size);
-
-				kdtree<int2> kd(&edge_points[0], edge_points.size());
-
-				int const max_dist_sq = 2 * INTERNAL_CHAR_SIZE * INTERNAL_CHAR_SIZE;
-				for (uint32_t y = 0; y < header_->char_size; ++ y)
-				{
-					for (uint32_t x = 0; x < header_->char_size; ++ x)
+					uint8_t* font_data = &char_bitmap[(y_start * INTERNAL_CHAR_SIZE + ft_slot->bitmap_left) / 8];
+					uint8_t const * src_data = ft_slot->bitmap.buffer;
+					for (int y = 0; y < buf_height; ++ y)
 					{
-						int2 const map_xy = int2(x, y) * (INTERNAL_CHAR_SIZE / header_->char_size) + INTERNAL_CHAR_SIZE / header_->char_size / 2;
-						float value;
-						if (kd.query_position(map_xy) > 0)
-						{
-							float v = MathLib::sqrt(static_cast<float>(kd.squared_distance(0)) / max_dist_sq);
-							value = MathLib::clamp(v * SCALE, 0.0f, 1.0f);
-						}
-						else
-						{
-							value = 1.0f;
-						}
-						if (0 == ((char_bitmap[(map_xy.y() * INTERNAL_CHAR_SIZE + map_xy.x()) / 8] >> (map_xy.x() & 0x7)) & 0x1))
-						{
-							value = -value;
-						}
+						binary_font_extract(font_data, src_data, buf_width);
 
-						(*char_dist_)[ch][y * header_->char_size + x] = static_cast<uint8_t>((value / 2 + 0.5f) * 255);
+						font_data += INTERNAL_CHAR_SIZE / 8;
+						src_data += ft_slot->bitmap.pitch;
 					}
 				}
-			}
 
-			++ *cur_num_char_;
+				edge_points.resize(0);
+				for (int y = y_start, y_end = buf_height + y_start; y < y_end; ++ y)
+				{
+					edge_extract(edge_points, ft_slot->bitmap_left, ft_slot->bitmap_left + buf_width, char_bitmap, y);
+				}
+
+				if (!edge_points.empty())
+				{
+					(*char_dist_)[ch].resize(header_->char_size * header_->char_size);
+
+					kdtree<int2> kd(&edge_points[0], edge_points.size());
+
+					int const max_dist_sq = 2 * INTERNAL_CHAR_SIZE * INTERNAL_CHAR_SIZE;
+					for (uint32_t y = 0; y < header_->char_size; ++ y)
+					{
+						for (uint32_t x = 0; x < header_->char_size; ++ x)
+						{
+							int2 const map_xy = int2(x, y) * (INTERNAL_CHAR_SIZE / header_->char_size) + INTERNAL_CHAR_SIZE / header_->char_size / 2;
+							float value;
+							if (kd.query_position(map_xy) > 0)
+							{
+								float v = MathLib::sqrt(static_cast<float>(kd.squared_distance(0)) / max_dist_sq);
+								value = MathLib::clamp(v * SCALE, 0.0f, 1.0f);
+							}
+							else
+							{
+								value = 1.0f;
+							}
+							if (0 == ((char_bitmap[(map_xy.y() * INTERNAL_CHAR_SIZE + map_xy.x()) / 8] >> (map_xy.x() & 0x7)) & 0x1))
+							{
+								value = -value;
+							}
+
+							(*char_dist_)[ch][y * header_->char_size + x] = static_cast<uint8_t>((value / 2 + 0.5f) * 255);
+						}
+					}
+				}
+
+				++ *cur_num_char_;
+			}
 		}
 	}
 
@@ -385,8 +390,7 @@ private:
 	FT_Library ft_lib_;
 	FT_Face ft_face_;
 	kfont_header* header_;
-	int start_code_;
-	int end_code_;
+	std::vector<std::pair<int, int> >* task_;
 	std::vector<uint8_t>* char_width_;
 	std::vector<int32_t>* char_index_;
 	std::vector<std::vector<uint8_t> >* char_dist_;
@@ -543,24 +547,26 @@ int main(int argc, char* argv[])
 		FT_Set_Pixel_Sizes(ft_faces[i], 0, INTERNAL_CHAR_SIZE);
 		FT_Select_Charmap(ft_faces[i], FT_ENCODING_UNICODE);
 	}
-	for (int j = 0; j < NUM_PACKAGE; ++ j)
+	std::vector<std::vector<std::pair<int, int> > > packages(num_threads);
+	for (int i = 0; i < num_threads; ++ i)
 	{
-		for (int i = 0; i < num_threads; ++ i)
+		packages[i].resize(NUM_PACKAGE);
+		for (int j = 0; j < NUM_PACKAGE; ++ j)
 		{
-			int start_code_thread = start_code + (j * num_threads + i) * num_chars_per_package;
-			int end_code_thread = std::min(start_code + (j * num_threads + i + 1) * num_chars_per_package, end_code);
-
-			joiners[i] = tp(ttf_to_dist(ft_libs[i], ft_faces[i], header, start_code_thread, end_code_thread,
-						char_width, char_index, char_dist,
-						cur_num_char));
-		}
-		for (int i = 0; i < num_threads; ++ i)
-		{
-			joiners[i]();
+			packages[i][j].first = start_code + (j * num_threads + i) * num_chars_per_package;
+			packages[i][j].second = std::min(packages[i][j].first + num_chars_per_package, end_code);			
 		}
 	}
 	for (int i = 0; i < num_threads; ++ i)
 	{
+		joiners[i] = tp(ttf_to_dist(ft_libs[i], ft_faces[i], header, packages[i],
+						char_width, char_index, char_dist,
+						cur_num_char));
+	}
+	for (int i = 0; i < num_threads; ++ i)
+	{
+		joiners[i]();
+
 		FT_Done_Face(ft_faces[i]);
 		FT_Done_FreeType(ft_libs[i]);
 	}
