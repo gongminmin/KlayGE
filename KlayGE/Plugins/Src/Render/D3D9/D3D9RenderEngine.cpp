@@ -212,7 +212,7 @@ namespace KlayGE
 		d3dDevice_->SetRenderState(D3DRS_CULLMODE, D3D9Mapping::Mapping(cur_render_state_obj_.cull_mode));
 
 		// NVIDIA's Transparency Multisampling
-		if (S_OK == d3d_->CheckDeviceFormat(D3DADAPTER_DEFAULT,
+		if (S_OK == d3d_->CheckDeviceFormat(this->ActiveAdapter().AdapterNo(),
 			D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE,
 			static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'O', 'C'>::value)))
 		{
@@ -310,7 +310,7 @@ namespace KlayGE
 			if (cur_render_state_obj_.alpha_to_coverage_enable != rs_obj.alpha_to_coverage_enable)
 			{
 				// NVIDIA's Transparency Multisampling
-				if (S_OK == d3d_->CheckDeviceFormat(D3DADAPTER_DEFAULT,
+				if (S_OK == d3d_->CheckDeviceFormat(this->ActiveAdapter().AdapterNo(),
 					D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE,
 					static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'O', 'C'>::value)))
 				{
@@ -884,7 +884,8 @@ namespace KlayGE
 		D3DCAPS9 d3d_caps;
 		d3dDevice_->GetDeviceCaps(&d3d_caps);
 
-		caps_ = D3D9Mapping::Mapping(d3d_caps);
+		caps_ = D3D9Mapping::Mapping(d3d_caps, this->ActiveAdapter().AdapterNo(),
+			checked_pointer_cast<D3D9RenderWindow>(default_frame_buffer_)->DeviceType());
 
 		cur_samplers_[ShaderObject::ST_VertexShader].resize(caps_.max_vertex_texture_units);
 		cur_samplers_[ShaderObject::ST_PixelShader].resize(caps_.max_texture_units);

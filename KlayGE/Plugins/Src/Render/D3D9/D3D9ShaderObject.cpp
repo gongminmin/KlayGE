@@ -49,6 +49,12 @@ namespace KlayGE
 			if ("auto" == shader_profile)
 			{
 				shader_profile = D3DXGetVertexShaderProfile(d3d_device.get());
+
+				if ((2 == render_eng.DeviceCaps().max_shader_model) && ("vs_3_0" == shader_profile))
+				{
+					// Fix for Intel DAMN on-board GPUs
+					shader_profile = "vs_2_0";
+				}
 			}
 			break;
 
@@ -87,11 +93,31 @@ namespace KlayGE
 				std::cerr << static_cast<char*>(err_msg_legacy->GetBufferPointer()) << std::endl;
 #endif
 
-				constant_table_legacy->Release();
-				code_legacy->Release();
-				err_msg_legacy->Release();
-				
-				err_msg->Release();
+				if (code_legacy)
+				{
+					code_legacy->Release();
+				}
+				if (constant_table_legacy)
+				{
+					constant_table_legacy->Release();
+				}
+				if (err_msg_legacy)
+				{
+					err_msg_legacy->Release();
+				}
+
+				if (code)
+				{
+					code->Release();
+				}
+				if (constant_table)
+				{
+					constant_table->Release();
+				}
+				if (err_msg)
+				{
+					err_msg->Release();
+				}
 			}
 			else
 			{

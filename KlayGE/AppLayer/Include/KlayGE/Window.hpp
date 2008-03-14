@@ -43,6 +43,24 @@ namespace KlayGE
 			return wnd_handle_;
 		}
 
+		int32_t Left() const
+		{
+			return left_;
+		}
+		int32_t Top() const
+		{
+			return top_;
+		}
+
+		uint32_t Width() const
+		{
+			return width_;
+		}
+		uint32_t Height() const
+		{
+			return height_;
+		}
+
 	public:
 		typedef boost::signal<void(Window const &, bool)> ActiveEvent;
 		typedef boost::signal<void(Window const &)> PaintEvent;
@@ -116,6 +134,10 @@ namespace KlayGE
 
 	private:
 		void* wnd_handle_;
+		int32_t left_;
+		int32_t top_;
+		uint32_t width_;
+		uint32_t height_;
 	};
 }
 

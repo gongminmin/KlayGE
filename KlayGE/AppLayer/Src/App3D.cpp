@@ -51,7 +51,11 @@ namespace KlayGE
 	{
 		Context::Instance().AppInstance(*this);
 
-		main_wnd_ = this->MakeWindow(name, settings.left, settings.top, settings.width, settings.height);
+		main_wnd_ = this->MakeWindow(name, settings_.left, settings_.top, settings_.width, settings_.height);
+		settings_.left = main_wnd_->Left();
+		settings_.top = main_wnd_->Top();
+		settings_.width = main_wnd_->Width();
+		settings_.height = main_wnd_->Height();
 	}
 
 	App3DFramework::~App3DFramework()

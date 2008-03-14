@@ -37,8 +37,6 @@
 using namespace KlayGE;
 using namespace std;
 
-int const WIDTH = 800;
-int const HEIGHT = 600;
 int const CELL_WIDTH = 8;
 int const CELL_HEIGHT = 8;
 int const INPUT_NUM_ASCII = 128;
@@ -130,11 +128,11 @@ namespace
 
 		std::vector<uint8_t> ascii_tex_data(INPUT_NUM_ASCII * ASCII_WIDTH * ASCII_HEIGHT);
 		{
-			Texture::Mapper mapper(*ascii_tex, 0, TMA_Read_Only, 0, 0, INPUT_NUM_ASCII * ASCII_WIDTH, ASCII_HEIGHT);
+			Texture::Mapper mapper(*ascii_tex, 0, TMA_Read_Only, 0, 0, ASCII_IN_A_ROW * ASCII_WIDTH, INPUT_NUM_ASCII / ASCII_IN_A_ROW * ASCII_HEIGHT);
 			uint8_t* data = mapper.Pointer<uint8_t>();
-			for (uint32_t y = 0; y < ASCII_HEIGHT; ++ y)
+			for (uint32_t y = 0; y < INPUT_NUM_ASCII / ASCII_IN_A_ROW * ASCII_HEIGHT; ++ y)
 			{
-				memcpy(&ascii_tex_data[y * INPUT_NUM_ASCII * ASCII_WIDTH], data, INPUT_NUM_ASCII * ASCII_WIDTH);
+				memcpy(&ascii_tex_data[y * ASCII_IN_A_ROW * ASCII_WIDTH], data, ASCII_IN_A_ROW * ASCII_WIDTH);
 				data += mapper.RowPitch();
 			}
 		}
@@ -228,8 +226,8 @@ int main()
 	Context::Instance().InputFactoryInstance(DInputFactoryInstance());
 
 	RenderSettings settings;
-	settings.width = WIDTH;
-	settings.height = HEIGHT;
+	settings.width = 800;
+	settings.height = 600;
 	settings.color_fmt = EF_ARGB8;
 	settings.full_screen = false;
 	settings.ConfirmDevice = ConfirmDevice;
@@ -326,6 +324,7 @@ void AsciiArtsApp::InputHandler(InputEngine const & /*sender*/, InputAction cons
 	{
 	case Switch:
 		show_ascii_ = !show_ascii_;
+		dialog_->Control<UICheckBox>(Switch_AscII)->SetChecked(show_ascii_);
 		KlayGE::Sleep(150);
 		break;
 
@@ -333,7 +332,7 @@ void AsciiArtsApp::InputHandler(InputEngine const & /*sender*/, InputAction cons
 		{
 			RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			renderEngine.EndFrame();
-			renderEngine.Resize(WIDTH, HEIGHT);
+			renderEngine.Resize(800, 600);
 			renderEngine.FullScreen(!renderEngine.FullScreen());
 			renderEngine.BeginFrame();
 		}

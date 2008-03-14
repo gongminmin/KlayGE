@@ -205,8 +205,8 @@ int main()
 DepthPeelingApp::DepthPeelingApp(std::string const & name, RenderSettings const & settings)
 			: App3DFramework(name, settings)
 {
-	ResLoader::Instance().AddPath("D:/KlayGE/Samples/media/Common");
-	ResLoader::Instance().AddPath("D:/KlayGE/Samples/media/DepthPeeling");
+	ResLoader::Instance().AddPath("../../media/Common");
+	ResLoader::Instance().AddPath("../../media/DepthPeeling");
 }
 
 void DepthPeelingApp::InitObjects()

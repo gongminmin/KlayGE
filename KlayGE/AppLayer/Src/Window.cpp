@@ -65,6 +65,12 @@ namespace KlayGE
 			WS_OVERLAPPEDWINDOW, left, top,
 			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, NULL);
 
+		::GetClientRect(hWnd, &rc);
+		left_ = left;
+		top_ = top;
+		width_ = rc.right - rc.left;
+		height_ = rc.bottom - rc.top;
+
 		::SetWindowLongPtrW(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
 		::ShowWindow(hWnd, SW_SHOWNORMAL);

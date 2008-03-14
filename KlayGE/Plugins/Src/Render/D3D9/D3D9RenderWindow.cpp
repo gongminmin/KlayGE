@@ -301,8 +301,8 @@ namespace KlayGE
 						hWnd_, beh.first, &d3dpp_, &d3d_device)))
 					{
 						// Check for ATI instancing support
-						if (D3D_OK == d3d_->CheckDeviceFormat(D3DADAPTER_DEFAULT,
-							D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE,
+						if (D3D_OK == d3d_->CheckDeviceFormat(this->ActiveAdapter().AdapterNo(),
+							dev.first, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE,
 							static_cast<D3DFORMAT>(MakeFourCC<'I', 'N', 'S', 'T'>::value)))
 						{
 							// Notify the driver that instancing support is expected
@@ -311,13 +311,14 @@ namespace KlayGE
 
 						D3DCAPS9 d3d_caps;
 						d3d_device->GetDeviceCaps(&d3d_caps);
-						if (settings.ConfirmDevice && !settings.ConfirmDevice(D3D9Mapping::Mapping(d3d_caps)))
+						if (settings.ConfirmDevice && !settings.ConfirmDevice(D3D9Mapping::Mapping(d3d_caps, adapter_to_use, dev.first)))
 						{
 							d3d_device->Release();
 							d3d_device = NULL;
 						}
 						else
 						{
+							device_type_ = dev.first;
 							description_ += dev.second + L" " + beh.second;
 							break;
 						}
