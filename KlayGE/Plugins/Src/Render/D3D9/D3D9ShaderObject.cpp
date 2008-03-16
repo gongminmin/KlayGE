@@ -34,10 +34,15 @@
 
 namespace KlayGE
 {
+	D3D9ShaderObject::D3D9ShaderObject()
+	{
+		is_shader_validate_.assign(true);
+	}
+
 	void D3D9ShaderObject::SetShader(ShaderType type, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs,
 			boost::shared_ptr<std::string> const & shader_text)
 	{
-		is_validate_ = true;
+		is_shader_validate_[type] = true;
 
 		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
@@ -149,7 +154,7 @@ namespace KlayGE
 
 		if (NULL == code)
 		{
-			is_validate_ = false;
+			is_shader_validate_[type] = false;
 		}
 		else
 		{
@@ -159,7 +164,7 @@ namespace KlayGE
 				IDirect3DVertexShader9* vs;
 				if (FAILED(d3d_device->CreateVertexShader(static_cast<DWORD*>(code->GetBufferPointer()), &vs)))
 				{
-					is_validate_ = false;
+					is_shader_validate_[type] = false;
 				}
 				vertex_shader_ = MakeCOMPtr(vs);
 				break;
@@ -168,7 +173,7 @@ namespace KlayGE
 				IDirect3DPixelShader9* ps;
 				if (FAILED(d3d_device->CreatePixelShader(static_cast<DWORD*>(code->GetBufferPointer()), &ps)))
 				{
-					is_validate_ = false;
+					is_shader_validate_[type] = false;
 				}
 				pixel_shader_ = MakeCOMPtr(ps);
 				break;
@@ -262,12 +267,20 @@ namespace KlayGE
 			BOOST_ASSERT(false);
 			break;
 		}
+
+		is_validate_ = true;
+		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
+		{
+			is_validate_ &= is_shader_validate_[i];
+		}
 	}
 
 	ShaderObjectPtr D3D9ShaderObject::Clone()
 	{
 		D3D9ShaderObjectPtr ret(new D3D9ShaderObject);
+		ret->is_validate_ = is_validate_;
 		ret->param_descs_ = param_descs_;
+		ret->is_shader_validate_ = is_shader_validate_;
 		ret->vertex_shader_ = vertex_shader_;
 		ret->pixel_shader_ = pixel_shader_;
 		ret->bool_start_ = bool_start_;

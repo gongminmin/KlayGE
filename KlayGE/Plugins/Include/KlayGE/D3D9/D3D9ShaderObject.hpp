@@ -42,6 +42,8 @@ namespace KlayGE
 	class D3D9ShaderObject : public ShaderObject
 	{
 	public:
+		D3D9ShaderObject();
+
 		void SetShader(ShaderType type, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs,
 			boost::shared_ptr<std::string> const & shader_text);
 		ShaderObjectPtr Clone();
@@ -115,6 +117,7 @@ namespace KlayGE
 
 	private:
 		boost::array<parameter_descs_t, ST_NumShaderTypes> param_descs_;
+		boost::array<bool, ST_NumShaderTypes> is_shader_validate_;
 
 		ID3D9VertexShaderPtr vertex_shader_;
 		ID3D9PixelShaderPtr pixel_shader_;

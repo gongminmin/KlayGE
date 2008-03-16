@@ -301,7 +301,7 @@ namespace KlayGE
 						hWnd_, beh.first, &d3dpp_, &d3d_device)))
 					{
 						// Check for ATI instancing support
-						if (D3D_OK == d3d_->CheckDeviceFormat(this->ActiveAdapter().AdapterNo(),
+						if (D3D_OK == d3d_->CheckDeviceFormat(adapter_to_use,
 							dev.first, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE,
 							static_cast<D3DFORMAT>(MakeFourCC<'I', 'N', 'S', 'T'>::value)))
 						{

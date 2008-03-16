@@ -45,6 +45,11 @@
 
 namespace KlayGE
 {
+	OGLShaderObject::OGLShaderObject()
+	{
+		is_shader_validate_.assign(true);
+	}
+
 	OGLShaderObject::~OGLShaderObject()
 	{
 		for (int i = 0; i < ST_NumShaderTypes; ++ i)
@@ -61,7 +66,7 @@ namespace KlayGE
 	void OGLShaderObject::SetShader(ShaderType type, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs,
 			boost::shared_ptr<std::string> const & shader_text)
 	{
-		is_validate_ = true;
+		is_shader_validate_[type] = true;
 
 		shader_descs_ = shader_descs;
 		shader_text_ = shader_text;
@@ -116,7 +121,7 @@ namespace KlayGE
 			UNREF_PARAM(err_string);
 #endif
 
-			is_validate_ = false;
+			is_shader_validate_[type] = false;
 		}
 
 		cgGLLoadProgram(shaders_[type]);
@@ -148,6 +153,12 @@ namespace KlayGE
 			BOOST_ASSERT(false);
 			break;
 		}
+
+		is_validate_ = true;
+		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
+		{
+			is_validate_ &= is_shader_validate_[i];
+		}
 	}
 
 	ShaderObjectPtr OGLShaderObject::Clone()
@@ -158,11 +169,11 @@ namespace KlayGE
 		ret->shader_text_ = shader_text_;
 		ret->profiles_ = profiles_;
 
-		ret->is_validate_ = true;
-
 		OGLRenderFactory& render_factory(*checked_cast<OGLRenderFactory*>(&Context::Instance().RenderFactoryInstance()));
 		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
 		{
+			ret->is_shader_validate_[i] = true;
+
 			ret->shaders_[i] = cgCreateProgram(render_factory.CGContext(),
 					CG_SOURCE, ret->shader_text_->c_str(), ret->profiles_[i],
 					(*ret->shader_descs_)[i].func_name.c_str(), NULL);
@@ -182,7 +193,7 @@ namespace KlayGE
 				UNREF_PARAM(err_string);
 #endif
 
-				ret->is_validate_ = false;
+				ret->is_shader_validate_[i] = false;
 			}
 
 			cgGLLoadProgram(ret->shaders_[i]);
@@ -200,6 +211,12 @@ namespace KlayGE
 			}
 
 			ret->samplers_[i].resize(samplers_[i].size());
+		}
+
+		ret->is_validate_ = true;
+		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
+		{
+			ret->is_validate_ &= ret->is_shader_validate_[i];
 		}
 
 		return ret;

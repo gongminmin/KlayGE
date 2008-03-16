@@ -25,6 +25,7 @@ namespace KlayGE
 	class OGLShaderObject : public ShaderObject
 	{
 	public:
+		OGLShaderObject();
 		~OGLShaderObject();
 
 		void SetShader(ShaderType type, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs,
@@ -89,6 +90,7 @@ namespace KlayGE
 		boost::array<CGprofile, ST_NumShaderTypes> profiles_;
 
 		boost::array<parameter_descs_t, ST_NumShaderTypes> param_descs_;
+		boost::array<bool, ST_NumShaderTypes> is_shader_validate_;
 
 		boost::array<std::vector<SamplerPtr>, ST_NumShaderTypes> samplers_;
 	};

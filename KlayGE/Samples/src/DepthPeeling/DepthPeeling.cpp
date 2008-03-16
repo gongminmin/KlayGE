@@ -178,6 +178,10 @@ namespace
 		{
 			return false;
 		}
+		if (caps.max_simultaneous_rts < 2)
+		{
+			return false;
+		}
 		return true;
 	}
 }
