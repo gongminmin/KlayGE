@@ -172,8 +172,11 @@ namespace
 		InputActionDefine(Exit, KS_Escape),
 	};
 
-	bool ConfirmDevice(RenderDeviceCaps const & caps)
+	bool ConfirmDevice()
 	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderEngine& re = rf.RenderEngineInstance();
+		RenderDeviceCaps const & caps = re.DeviceCaps();
 		if (caps.max_shader_model < 2)
 		{
 			return false;
@@ -182,6 +185,17 @@ namespace
 		{
 			return false;
 		}
+
+		try
+		{
+			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, EF_R32F);
+			rf.Make2DRenderView(*temp_tex, 0);
+		}
+		catch (...)
+		{
+			return false;
+		}
+
 		return true;
 	}
 }

@@ -292,11 +292,11 @@ namespace KlayGE
 				dev_types.push_back(std::make_pair(D3DDEVTYPE_REF, std::wstring(L"REF")));
 			}
 
-			IDirect3DDevice9* d3d_device(NULL);
 			BOOST_FOREACH(BOOST_TYPEOF(dev_types)::reference dev, dev_types)
 			{
 				BOOST_FOREACH(BOOST_TYPEOF(behaviors)::reference beh, behaviors)
 				{
+					IDirect3DDevice9* d3d_device = NULL;
 					if (SUCCEEDED(d3d_->CreateDevice(adapter_to_use, dev.first,
 						hWnd_, beh.first, &d3dpp_, &d3d_device)))
 					{
@@ -309,12 +309,12 @@ namespace KlayGE
 							d3d_device->SetRenderState(D3DRS_POINTSIZE, MakeFourCC<'I', 'N', 'S', 'T'>::value);
 						}
 
-						D3DCAPS9 d3d_caps;
-						d3d_device->GetDeviceCaps(&d3d_caps);
-						if (settings.ConfirmDevice && !settings.ConfirmDevice(D3D9Mapping::Mapping(d3d_caps, adapter_to_use, dev.first)))
+						d3dDevice_ = MakeCOMPtr(d3d_device);
+						re.AttachD3DDevice(d3dDevice_, dev.first);
+
+						if (settings.ConfirmDevice && !settings.ConfirmDevice())
 						{
-							d3d_device->Release();
-							d3d_device = NULL;
+							d3dDevice_.reset();
 						}
 						else
 						{
@@ -325,14 +325,13 @@ namespace KlayGE
 					}
 				}
 
-				if (d3d_device != NULL)
+				if (d3dDevice_)
 				{
 					break;
 				}
 			}
 
-			Verify(d3d_device != NULL);
-			d3dDevice_ = MakeCOMPtr(d3d_device);
+			Verify(d3dDevice_);
 
 			IDirect3DSwapChain9* sc = NULL;
 			d3dDevice_->GetSwapChain(0, &sc);

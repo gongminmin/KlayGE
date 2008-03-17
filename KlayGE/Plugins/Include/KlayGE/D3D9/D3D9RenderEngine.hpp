@@ -62,6 +62,7 @@ namespace KlayGE
 
 		ID3D9Ptr const & D3DObject() const;
 		ID3D9DevicePtr const & D3DDevice() const;
+		void AttachD3DDevice(ID3D9DevicePtr const & device, D3DDEVTYPE dev_type);
 
 		void CreateRenderWindow(std::string const & name, RenderSettings const & settings);
 		void SetStateObjects(RenderStateObject const & rs_obj, ShaderObject const & shader_obj);
@@ -93,7 +94,7 @@ namespace KlayGE
 		void DoBindFrameBuffer(FrameBufferPtr fb);
 		void DoRender(RenderTechnique const & tech, RenderLayout const & rl);
 
-		void FillRenderDeviceCaps();
+		void FillRenderDeviceCaps(D3DDEVTYPE dev_type);
 		void InitRenderStates();
 
 		void DoRenderSWInstance(RenderTechnique const & tech, RenderLayout const & rl);

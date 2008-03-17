@@ -143,8 +143,10 @@ namespace
 		}
 	};
 
-	bool ConfirmDevice(RenderDeviceCaps const & caps)
+	bool ConfirmDevice()
 	{
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		RenderDeviceCaps const & caps = re.DeviceCaps();
 		if (caps.max_shader_model < 2)
 		{
 			return false;

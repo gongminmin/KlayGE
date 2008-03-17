@@ -105,10 +105,6 @@ namespace KlayGE
 		void DoRender(RenderTechnique const & /*tech*/, RenderLayout const & /*rl*/)
 		{
 		}
-
-		void FillRenderDeviceCaps()
-		{
-		}
 	};
 
 	// ¹¹Ôìº¯Êý

@@ -1,8 +1,11 @@
-// RenderEngine.hpp
-// KlayGE 渲染引擎类 实现文件
-// Ver 2.8.0
-// 版权所有(C) 龚敏敏, 2003-2005
+// RenderSettings.hpp
+// KlayGE 渲染设置类 实现文件
+// Ver 3.7.0
+// 版权所有(C) 龚敏敏, 2005-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.7.0
+// 去掉了ConfirmDevice的参数 (2008.3.17)
 //
 // 2.8.0
 // 加入了ConfirmDevice (2005.7.17)
@@ -33,7 +36,7 @@ namespace KlayGE
 		{
 		}
 
-		boost::function<bool (RenderDeviceCaps const &)> ConfirmDevice;
+		boost::function<bool ()> ConfirmDevice;
 
 		bool	full_screen;
 		int		left;

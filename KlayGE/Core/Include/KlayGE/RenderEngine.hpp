@@ -114,8 +114,6 @@ namespace KlayGE
 		virtual void DoBindFrameBuffer(FrameBufferPtr fb) = 0;
 		virtual void DoRender(RenderTechnique const & tech, RenderLayout const & rl) = 0;
 
-		virtual void FillRenderDeviceCaps() = 0;
-
 	protected:
 		FrameBufferPtr cur_frame_buffer_;
 		FrameBufferPtr default_frame_buffer_;

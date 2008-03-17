@@ -181,12 +181,6 @@ namespace KlayGE
 			name, settings));
 		default_frame_buffer_ = win;
 
-		d3dDevice_ = win->D3DDevice();
-		Verify(d3dDevice_ != ID3D9DevicePtr());
-
-		this->FillRenderDeviceCaps();
-		this->InitRenderStates();
-
 		win->Attach(FrameBuffer::ATT_Color0, D3D9SurfaceRenderViewPtr(new D3D9SurfaceRenderView(win->D3DBackBuffer())));
 		if (win->D3DDepthStencilBuffer())
 		{
@@ -194,6 +188,15 @@ namespace KlayGE
 		}
 
 		this->BindFrameBuffer(win);
+	}
+
+	void D3D9RenderEngine::AttachD3DDevice(ID3D9DevicePtr const & device, D3DDEVTYPE dev_type)
+	{
+		d3dDevice_ = device;
+		Verify(d3dDevice_ != ID3D9DevicePtr());
+
+		this->FillRenderDeviceCaps(dev_type);
+		this->InitRenderStates();
 
 		if (caps_.hw_instancing_support)
 		{
@@ -877,15 +880,14 @@ namespace KlayGE
 
 	// 填充设备能力
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::FillRenderDeviceCaps()
+	void D3D9RenderEngine::FillRenderDeviceCaps(D3DDEVTYPE dev_type)
 	{
 		BOOST_ASSERT(d3dDevice_);
 
 		D3DCAPS9 d3d_caps;
 		d3dDevice_->GetDeviceCaps(&d3d_caps);
 
-		caps_ = D3D9Mapping::Mapping(d3d_caps, this->ActiveAdapter().AdapterNo(),
-			checked_pointer_cast<D3D9RenderWindow>(default_frame_buffer_)->DeviceType());
+		caps_ = D3D9Mapping::Mapping(d3d_caps, this->ActiveAdapter().AdapterNo(), dev_type);
 
 		cur_samplers_[ShaderObject::ST_VertexShader].resize(caps_.max_vertex_texture_units);
 		cur_samplers_[ShaderObject::ST_PixelShader].resize(caps_.max_texture_units);

@@ -290,12 +290,26 @@ namespace
 		InputActionDefine(Exit, KS_Escape),
 	};
 
-	bool ConfirmDevice(RenderDeviceCaps const & caps)
+	bool ConfirmDevice()
 	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderEngine& re = rf.RenderEngineInstance();
+		RenderDeviceCaps const & caps = re.DeviceCaps();
 		if (caps.max_shader_model < 2)
 		{
 			return false;
 		}
+
+		try
+		{
+			rf.MakeDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, EF_D16, 0);
+			rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, EF_GR16F);
+		}
+		catch (...)
+		{
+			return false;
+		}
+
 		return true;
 	}
 }
