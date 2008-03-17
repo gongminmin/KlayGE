@@ -52,22 +52,32 @@ namespace KlayGE
 
 	void DShowVMR9Allocator::CreateDevice()
 	{
-		D3DDISPLAYMODE dm;
-		d3d_->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &dm);
-
 		memset(&d3dpp_, 0, sizeof(d3dpp_));
 		d3dpp_.Windowed = true;
 		d3dpp_.hDeviceWindow = wnd_;
 		d3dpp_.SwapEffect = D3DSWAPEFFECT_DISCARD;
 		d3dpp_.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 
+		D3DCAPS9 caps;
+		d3d_->GetDeviceCaps(0, D3DDEVTYPE_HAL, &caps);
+		uint32_t vp_mode;
+		if ((caps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT) != 0)
+		{
+			vp_mode = D3DCREATE_HARDWARE_VERTEXPROCESSING;
+			if ((caps.DevCaps & D3DDEVCAPS_PUREDEVICE) != 0)
+			{
+				vp_mode |= D3DCREATE_PUREDEVICE;
+			}
+		}
+		else
+		{
+			vp_mode = D3DCREATE_SOFTWARE_VERTEXPROCESSING;
+		}
+
 		IDirect3DDevice9* d3d_device;
-		d3d_->CreateDevice(D3DADAPTER_DEFAULT,
-								D3DDEVTYPE_HAL,
-								wnd_,
-								D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_PUREDEVICE | D3DCREATE_MULTITHREADED,
-								&d3dpp_,
-								&d3d_device);
+		TIF(d3d_->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL,
+								wnd_, vp_mode | D3DCREATE_MULTITHREADED,
+								&d3dpp_, &d3d_device));
 		d3d_device_ = MakeCOMPtr(d3d_device);
 	}
 
@@ -139,8 +149,8 @@ namespace KlayGE
 		present_tex_ = rf.MakeTexture2D(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight, 1, EF_ARGB8);
 
 		IDirect3DSurface9* surf;
-		d3d_device_->CreateOffscreenPlainSurface(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight,
-			D3DFMT_X8R8G8B8, D3DPOOL_SYSTEMMEM, &surf, NULL);
+		TIF(d3d_device_->CreateOffscreenPlainSurface(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight,
+			D3DFMT_X8R8G8B8, D3DPOOL_SYSTEMMEM, &surf, NULL));
 		cache_surf_ = MakeCOMPtr(surf);
 
 		return S_OK;
@@ -347,7 +357,7 @@ namespace KlayGE
 			TIF(d3d_device_->GetRenderTargetData(surfaces_[cur_surf_index_], cache_surf_.get()));
 
 			D3DLOCKED_RECT d3dlocked_rc;
-			cache_surf_->LockRect(&d3dlocked_rc, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY);
+			TIF(cache_surf_->LockRect(&d3dlocked_rc, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
 
 			uint32_t const width = present_tex_->Width(0);
 			uint32_t const height = present_tex_->Height(0);
@@ -362,7 +372,7 @@ namespace KlayGE
 				src += d3dlocked_rc.Pitch;
 			}
 
-			cache_surf_->UnlockRect();
+			TIF(cache_surf_->UnlockRect());
 		}
 
 		return present_tex_;

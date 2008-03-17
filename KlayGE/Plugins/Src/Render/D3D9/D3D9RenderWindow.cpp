@@ -45,6 +45,7 @@
 #include <cstring>
 #include <boost/assert.hpp>
 #include <boost/bind.hpp>
+#include <boost/tuple/tuple.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
 
@@ -274,60 +275,62 @@ namespace KlayGE
 				}
 			}
 
-			std::vector<std::pair<uint32_t, std::wstring> > behaviors;
-			std::vector<std::pair<D3DDEVTYPE, std::wstring> > dev_types;
+			std::vector<boost::tuple<D3DDEVTYPE, uint32_t, std::wstring> > dev_type_behaviors;
 			if (use_nvperfhud)
 			{
-				behaviors.push_back(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING, std::wstring(L"(hw vp)")));	
-				dev_types.push_back(std::make_pair(D3DDEVTYPE_REF, std::wstring(L"REF")));
+				dev_type_behaviors.push_back(boost::make_tuple(D3DDEVTYPE_REF, D3DCREATE_HARDWARE_VERTEXPROCESSING, std::wstring(L"REF (hw vp)")));
 			}
 			else
 			{
-				behaviors.push_back(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_PUREDEVICE, std::wstring(L"(pure hw vp)")));
-				behaviors.push_back(std::make_pair(D3DCREATE_HARDWARE_VERTEXPROCESSING, std::wstring(L"(hw vp)")));
-				behaviors.push_back(std::make_pair(D3DCREATE_MIXED_VERTEXPROCESSING, std::wstring(L"(mix vp)")));
-				behaviors.push_back(std::make_pair(D3DCREATE_SOFTWARE_VERTEXPROCESSING, std::wstring(L"(sw vp)")));
-
-				dev_types.push_back(std::make_pair(D3DDEVTYPE_HAL, std::wstring(L"HAL")));
-				dev_types.push_back(std::make_pair(D3DDEVTYPE_REF, std::wstring(L"REF")));
-			}
-
-			BOOST_FOREACH(BOOST_TYPEOF(dev_types)::reference dev, dev_types)
-			{
-				BOOST_FOREACH(BOOST_TYPEOF(behaviors)::reference beh, behaviors)
+				D3DCAPS9 caps;
+				d3d->GetDeviceCaps(0, D3DDEVTYPE_HAL, &caps);
+				if ((caps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT) != 0)
 				{
-					IDirect3DDevice9* d3d_device = NULL;
-					if (SUCCEEDED(d3d_->CreateDevice(adapter_to_use, dev.first,
-						hWnd_, beh.first, &d3dpp_, &d3d_device)))
+					if ((caps.DevCaps & D3DDEVCAPS_PUREDEVICE) != 0)
 					{
-						// Check for ATI instancing support
-						if (D3D_OK == d3d_->CheckDeviceFormat(adapter_to_use,
-							dev.first, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE,
-							static_cast<D3DFORMAT>(MakeFourCC<'I', 'N', 'S', 'T'>::value)))
-						{
-							// Notify the driver that instancing support is expected
-							d3d_device->SetRenderState(D3DRS_POINTSIZE, MakeFourCC<'I', 'N', 'S', 'T'>::value);
-						}
-
-						d3dDevice_ = MakeCOMPtr(d3d_device);
-						re.AttachD3DDevice(d3dDevice_, dev.first);
-
-						if (settings.ConfirmDevice && !settings.ConfirmDevice())
-						{
-							d3dDevice_.reset();
-						}
-						else
-						{
-							device_type_ = dev.first;
-							description_ += dev.second + L" " + beh.second;
-							break;
-						}
+						dev_type_behaviors.push_back(boost::make_tuple(D3DDEVTYPE_HAL, D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_PUREDEVICE, std::wstring(L"HAL (pure hw vp)")));
+					}
+					else
+					{
+						dev_type_behaviors.push_back(boost::make_tuple(D3DDEVTYPE_HAL, D3DCREATE_HARDWARE_VERTEXPROCESSING, std::wstring(L"HAL (hw vp)")));
 					}
 				}
-
-				if (d3dDevice_)
+				else
 				{
-					break;
+					dev_type_behaviors.push_back(boost::make_tuple(D3DDEVTYPE_HAL, D3DCREATE_MIXED_VERTEXPROCESSING, std::wstring(L"HAL (mix vp)")));
+					dev_type_behaviors.push_back(boost::make_tuple(D3DDEVTYPE_HAL, D3DCREATE_SOFTWARE_VERTEXPROCESSING, std::wstring(L"HAL (sw vp)")));
+				}
+
+				dev_type_behaviors.push_back(boost::make_tuple(D3DDEVTYPE_REF, D3DCREATE_SOFTWARE_VERTEXPROCESSING, std::wstring(L"REF (sw vp)")));
+			}
+
+			BOOST_FOREACH(BOOST_TYPEOF(dev_type_behaviors)::reference dev_type_beh, dev_type_behaviors)
+			{
+				IDirect3DDevice9* d3d_device = NULL;
+				if (SUCCEEDED(d3d_->CreateDevice(adapter_to_use, boost::get<0>(dev_type_beh),
+					hWnd_, boost::get<1>(dev_type_beh), &d3dpp_, &d3d_device)))
+				{
+					// Check for ATI instancing support
+					if (D3D_OK == d3d_->CheckDeviceFormat(adapter_to_use,
+						boost::get<0>(dev_type_beh), D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE,
+						static_cast<D3DFORMAT>(MakeFourCC<'I', 'N', 'S', 'T'>::value)))
+					{
+						// Notify the driver that instancing support is expected
+						d3d_device->SetRenderState(D3DRS_POINTSIZE, MakeFourCC<'I', 'N', 'S', 'T'>::value);
+					}
+
+					d3dDevice_ = MakeCOMPtr(d3d_device);
+					re.D3DDevice(d3dDevice_);
+
+					if (settings.ConfirmDevice && !settings.ConfirmDevice())
+					{
+						d3dDevice_.reset();
+					}
+					else
+					{
+						description_ += boost::get<2>(dev_type_beh);
+						break;
+					}
 				}
 			}
 

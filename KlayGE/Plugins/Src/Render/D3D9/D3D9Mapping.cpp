@@ -426,7 +426,7 @@ namespace KlayGE
 		}
 	}
 
-	RenderDeviceCaps D3D9Mapping::Mapping(D3DCAPS9 const & d3d_caps, uint32_t adaptor_no, D3DDEVTYPE device_type)
+	RenderDeviceCaps D3D9Mapping::Mapping(D3DCAPS9 const & d3d_caps)
 	{
 		D3D9RenderEngine& re = *checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			
@@ -442,8 +442,8 @@ namespace KlayGE
 		ret.max_texture_units		= 16;
 		ret.max_texture_anisotropy	= static_cast<uint8_t>(d3d_caps.MaxAnisotropy);
 
-		if (S_OK == re.D3DObject()->CheckDeviceFormat(adaptor_no,
-				device_type, D3DFMT_X8R8G8B8, D3DUSAGE_QUERY_VERTEXTEXTURE, D3DRTYPE_TEXTURE,
+		if (S_OK == re.D3DObject()->CheckDeviceFormat(d3d_caps.AdapterOrdinal,
+				d3d_caps.DeviceType, D3DFMT_X8R8G8B8, D3DUSAGE_QUERY_VERTEXTEXTURE, D3DRTYPE_TEXTURE,
 				D3DFMT_A32B32G32R32F))
 		{
 			ret.max_vertex_texture_units = 4;
@@ -538,8 +538,8 @@ namespace KlayGE
 		else
 		{
 			// Check for ATI instancing support
-			if (D3D_OK == re.D3DObject()->CheckDeviceFormat(adaptor_no,
-				device_type, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE,
+			if (D3D_OK == re.D3DObject()->CheckDeviceFormat(d3d_caps.AdapterOrdinal,
+				d3d_caps.DeviceType, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE,
 				static_cast<D3DFORMAT>(MakeFourCC<'I', 'N', 'S', 'T'>::value)))
 			{
 				ret.hw_instancing_support = true;

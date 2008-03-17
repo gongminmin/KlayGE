@@ -35,11 +35,6 @@ namespace KlayGE
 			std::string const & name, RenderSettings const & settings);
 		~D3D9RenderWindow();
 
-		D3DDEVTYPE DeviceType() const
-		{
-			return device_type_;
-		}
-
 		void Destroy();
 
 		bool Closed() const;
@@ -101,7 +96,6 @@ namespace KlayGE
 
 
 		D3D9Adapter				adapter_;
-		D3DDEVTYPE				device_type_;
 
 		// Pointer to the 3D device specific for this window
 		ID3D9Ptr				d3d_;
