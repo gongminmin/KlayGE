@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
 
 #include <boost/bind.hpp>
@@ -181,11 +182,6 @@ namespace KlayGE
 	{
 		// Cap the index
 
-		if (nIndex < 0)
-		{
-			nIndex = 0;
-		}
-
 		if (nIndex >= end_)
 		{
 			nIndex = end_ - 1;
@@ -339,6 +335,10 @@ namespace KlayGE
 						arrow_ts_ = dCurrTime;
 					}
 					break;
+
+                default:
+                    BOOST_ASSERT(false);
+					break;
 				}
 			}
 			else
@@ -363,6 +363,10 @@ namespace KlayGE
 							arrow_ts_ = dCurrTime;
 						}
 						break;
+
+                    default:
+                        BOOST_ASSERT(false);
+                        break;
 					}
 				}
 			}

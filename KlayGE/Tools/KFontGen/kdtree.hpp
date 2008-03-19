@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <functional>
+#include <algorithm>
 #include <boost/assert.hpp>
 
 template <typename T>
@@ -19,7 +20,7 @@ private:
 		}
 	};
 
-	
+
 	struct kdtree_point
 	{
 		T			pos;
@@ -37,7 +38,7 @@ private:
 			{
 				kd_node* children[2];
 				typename T::value_type cut_val;
-				unsigned char dim;			
+				unsigned char dim;
 			} node_data;
 
 			struct
@@ -100,7 +101,7 @@ private:
 				kdtree_point const * point = leaf_data.points;
 				for (unsigned int i = 0; i < leaf_data.num_elements; ++ i)
 				{
-					typename T::value_type sqr_dist = MathLib::length_sq(point[i].pos - query_position);
+					typename T::value_type sqr_dist = KlayGE::MathLib::length_sq(point[i].pos - query_position);
 					if (sqr_dist < neighbors.back().second)
 					{
 						if (neighbors.size() >= num_neighbors)
@@ -109,7 +110,7 @@ private:
 						}
 
 						neighbor_type new_neighbor(point[i].index, sqr_dist);
-						std::vector<neighbor_type>::iterator iter = std::lower_bound(neighbors.begin(), neighbors.end(),
+						typename std::vector<neighbor_type>::iterator iter = std::lower_bound(neighbors.begin(), neighbors.end(),
 							new_neighbor, less_neighbor_type());
 						neighbors.insert(iter, new_neighbor);
 					}
@@ -151,7 +152,7 @@ private:
 				kdtree_point const * point = leaf_data.points;
 				for (unsigned int i = 0; i < leaf_data.num_elements; ++ i)
 				{
-					typename T::value_type sqr_dist = MathLib::length_sq(point[i].pos - query_position);
+					typename T::value_type sqr_dist = KlayGE::MathLib::length_sq(point[i].pos - query_position);
 					if (sqr_dist < neighbor.second)
 					{
 						neighbor = neighbor_type(point[i].index, sqr_dist);
@@ -191,7 +192,7 @@ public:
 		typename T::value_type sqr_dist = this->compute_box_sqr_distance(position, bbox_low_corner_, bbox_high_corner_, query_offsets);
 		root_.query_node(sqr_dist, neighbors_, num_neighbors, position, query_offsets);
 
-		if (-1 == neighbors_.back().first)
+		if (static_cast<size_t>(-1) == neighbors_.back().first)
 		{
 			neighbors_.pop_back();
 		}
@@ -201,8 +202,6 @@ public:
 
 	size_t query_position(T const & position)
 	{
-		BOOST_ASSERT(num_neighbors != 0);
-
 		T query_offsets;
 		for (size_t dim = 0; dim < query_offsets.size(); ++ dim)
 		{
@@ -212,7 +211,7 @@ public:
 		typename T::value_type sqr_dist = this->compute_box_sqr_distance(position, bbox_low_corner_, bbox_high_corner_, query_offsets);
 		root_.query_node(sqr_dist, neighbors_[0], position, query_offsets);
 
-		if (-1 == neighbors_.back().first)
+		if (static_cast<size_t>(-1) == neighbors_.back().first)
 		{
 			neighbors_.pop_back();
 		}
@@ -258,7 +257,7 @@ private:
 
 	void compute_enclosing_bounding_box(T& low_corner, T& hi_corner) const
 	{
-		hi_corner = low_corner = points_[0].pos;	
+		hi_corner = low_corner = points_[0].pos;
 		for (size_t i = 1; i < points_.size(); ++ i)
 		{
 			T const & tmp = points_[i].pos;
@@ -276,7 +275,7 @@ private:
 					}
 				}
 			}
-		}		 
+		}
 	}
 
 	void create_tree(kd_node& node, int start, int end, T& maximum, T& minimum)
@@ -315,7 +314,7 @@ private:
 
 		int br1, br2;
 		// permute points accordingly
-		this->split_at_mid(&points_[start], n, dim, node.node_data.cut_val, br1, br2);	
+		this->split_at_mid(&points_[start], n, dim, node.node_data.cut_val, br1, br2);
 
 		int	mid;
 		if (best_cut < mmin)
@@ -366,7 +365,7 @@ private:
 			this->create_tree(*child, start, mid, maximum, minimum);
 			maximum[dim] = old_max;
 		}
-		
+
 		if (end - mid <= bucket_size_)
 		{
 			// new leaf
@@ -430,7 +429,7 @@ private:
 				break;
 			}
 			std::swap(points[l], points[r]);
-			++ l; 
+			++ l;
 			-- r;
 		}
 		br1 = l;			// now: points[0..br1-1] < cutVal <= points[br1..n-1]
@@ -446,12 +445,12 @@ private:
 			{
 				-- r;
 			}
-			if (l > r) 
+			if (l > r)
 			{
 				break;
 			}
 			std::swap(points[l], points[r]);
-			++ l; 
+			++ l;
 			-- r;
 		}
 		br2 = l;			// now: points[br1..br2-1] == cutVal < points[br2..n-1]

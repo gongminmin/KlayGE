@@ -22,12 +22,24 @@ namespace KlayGE
 	inline uint32_t
 	float_to_uint32(float v)
 	{
-		return *reinterpret_cast<uint32_t*>(&v);
+		union
+		{
+			float f;
+			uint32_t u;
+		} fnu;
+		fnu.f = v;
+		return fnu.u;
 	}
 	inline float
 	uint32_to_float(uint32_t v)
 	{
-		return *reinterpret_cast<float*>(&v);
+		union
+		{
+			uint32_t u;
+			float f;
+		} unf;
+		unf.u = v;
+		return unf.f;
 	}
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
@@ -117,7 +129,7 @@ namespace KlayGE
 			CMASK_All   = CMASK_Red | CMASK_Green | CMASK_Blue | CMASK_Alpha
 		};
 
-		
+
 		PolygonMode			polygon_mode;
 		ShadeMode			shade_mode;
 		CullMode			cull_mode;

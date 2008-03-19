@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Input.hpp>
 
@@ -22,14 +23,14 @@ namespace KlayGE
 {
 	UISlider::UISlider(UIDialogPtr dialog)
 					: UIControl(UISlider::Type, dialog),
-						min_(0), max_(100), value_(50),
+                        value_(50), min_(0), max_(100),
 						pressed_(false)
 	{
 	}
 
 	UISlider::UISlider(uint32_t type, UIDialogPtr dialog)
 					: UIControl(type, dialog),
-						min_(0), max_(100), value_(50),
+                        value_(50), min_(0), max_(100),
 						pressed_(false)
 	{
 		this->InitDefaultElements();
@@ -37,13 +38,13 @@ namespace KlayGE
 
 	UISlider::UISlider(UIDialogPtr dialog, int ID, int x, int y, int width, int height, int min, int max, int value, bool bIsDefault)
 					: UIControl(UISlider::Type, dialog),
-						min_(min), max_(max), value_(value),
+						value_(value), min_(min), max_(max),
 						pressed_(false)
 	{
 		this->InitDefaultElements();
 
 		// Set the ID and list index
-		this->SetID(ID); 
+		this->SetID(ID);
 		this->SetLocation(x, y);
 		this->SetSize(width, height);
 		this->SetIsDefault(bIsDefault);
@@ -54,7 +55,7 @@ namespace KlayGE
 	void UISlider::InitDefaultElements()
 	{
 		UIElement Element;
-		
+
 		// Track
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_Slider, 0));
@@ -87,7 +88,7 @@ namespace KlayGE
 		case KS_Home:
 			this->SetValueInternal(min_);
 			break;
-		
+
 		case KS_End:
 			this->SetValueInternal(max_);
 			break;
@@ -146,7 +147,7 @@ namespace KlayGE
 			if (slider_rc_.PtInRect(arg.location))
 			{
 				drag_x_ = arg.location.x();
-				drag_offset_ = 0;               
+				drag_offset_ = 0;
 				pressed_ = true;
 
 				if (!has_focus_)
@@ -205,10 +206,10 @@ namespace KlayGE
 	int UISlider::ValueFromPos(int x)
 	{
 		float fValuePerPixel = static_cast<float>(max_ - min_) / slider_rc_.Width();
-		return static_cast<int>(0.5f + min_ + fValuePerPixel * (x - slider_rc_.left())) ; 
+		return static_cast<int>(0.5f + min_ + fValuePerPixel * (x - slider_rc_.left())) ;
 	}
 
-	void UISlider::SetRange(int nMin, int nMax) 
+	void UISlider::SetRange(int nMin, int nMax)
 	{
 		min_ = nMin;
 		max_ = nMax;

@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Input.hpp>
 
@@ -23,10 +24,10 @@ namespace KlayGE
 	UIListBox::UIListBox(UIDialogPtr dialog)
 						: UIControl(UIListBox::Type, dialog),
 							scroll_bar_(dialog),
-							style_(SINGLE_SELECTION), sb_width_(16),
+							sb_width_(16), border_(6), margin_(5), text_height_(0),
+							style_(SINGLE_SELECTION),
 							selected_(-1), sel_start_(0),
-							drag_(false),
-							border_(6), margin_(5), text_height_(0)
+							drag_(false)
 	{
 		this->InitDefaultElements();
 
@@ -36,10 +37,10 @@ namespace KlayGE
 	UIListBox::UIListBox(uint32_t type, UIDialogPtr dialog)
 						: UIControl(type, dialog),
 							scroll_bar_(dialog),
-							style_(SINGLE_SELECTION), sb_width_(16),
+							sb_width_(16), border_(6), margin_(5), text_height_(0),
+							style_(SINGLE_SELECTION),
 							selected_(-1), sel_start_(0),
-							drag_(false),
-							border_(6), margin_(5), text_height_(0)
+							drag_(false)
 	{
 		this->InitDefaultElements();
 
@@ -49,10 +50,11 @@ namespace KlayGE
 	UIListBox::UIListBox(UIDialogPtr dialog, int ID, int x, int y, int width, int height, STYLE dwStyle)
 						: UIControl(UIListBox::Type, dialog),
 							scroll_bar_(dialog),
-							style_(dwStyle), sb_width_(16),
+							sb_width_(16), border_(6), margin_(5), text_height_(0),
+							style_(dwStyle),
 							selected_(-1), sel_start_(0),
-							drag_(false),
-							border_(6), margin_(5), text_height_(0)
+							drag_(false)
+
 	{
 		this->InitDefaultElements();
 
@@ -67,7 +69,7 @@ namespace KlayGE
 	void UIListBox::InitDefaultElements()
 	{
 		UIElement Element;
-		
+
 		// Main
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ListBox, 0));
@@ -277,7 +279,7 @@ namespace KlayGE
 				case KS_UpArrow:
 					-- selected_;
 					break;
-				
+
 				case KS_DownArrow:
 					++ selected_;
 					break;
@@ -285,7 +287,7 @@ namespace KlayGE
 				case KS_PageDown:
 					selected_ += static_cast<int>(scroll_bar_.GetPageSize() - 1);
 					break;
-				
+
 				case KS_PageUp:
 					selected_ -= static_cast<int>(scroll_bar_.GetPageSize() - 1);
 					break;

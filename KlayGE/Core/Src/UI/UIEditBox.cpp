@@ -1,4 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Input.hpp>
 #include <KlayGE/Context.hpp>
@@ -160,7 +161,7 @@ namespace KlayGE
 		return std::min(nCP + 1, static_cast<int>(buffer_.size() - 1));
 	}
 
-	
+
 	// Static member initialization
 	bool UIEditBox::hide_caret_;   // If true, we don't render the caret.
 	Timer UIEditBox::timer_;
@@ -173,16 +174,17 @@ namespace KlayGE
 					: UIControl(UIEditBox::Type, dialog),
 						border_(5),	// Default border width
 						spacing_(4),	// Default spacing
-						caret_on_(true),
 						blink_time_(GetCaretBlinkTime() * 0.001f),
 						last_blink_time_(timer_.current_time()),
+						caret_on_(true),
+						caret_pos_(0),
+						insert_mode_(true),
+						sel_start_(0),
 						first_visible_(0),
 						text_color_(16.0f / 255, 16.0f / 255, 16.0f / 255, 1),
 						sel_text_color_(1, 1, 1, 1),
 						sel_bk_color_(40.0f / 255, 50.0f / 255, 92.0f / 255, 1),
 						caret_color_(0, 0, 0, 1),
-						caret_pos_(0), sel_start_(0),
-						insert_mode_(true), 
 						mouse_drag_(false)
 	{
 		hide_caret_ = false;
@@ -194,16 +196,17 @@ namespace KlayGE
 					: UIControl(type, dialog),
 						border_(5),	// Default border width
 						spacing_(4),	// Default spacing
-						caret_on_(true),
 						blink_time_(GetCaretBlinkTime() * 0.001f),
 						last_blink_time_(timer_.current_time()),
+						caret_on_(true),
+						caret_pos_(0),
+						insert_mode_(true),
+						sel_start_(0),
 						first_visible_(0),
 						text_color_(16.0f / 255, 16.0f / 255, 16.0f / 255, 1),
 						sel_text_color_(1, 1, 1, 1),
 						sel_bk_color_(40.0f / 255, 50.0f / 255, 92.0f / 255, 1),
 						caret_color_(0, 0, 0, 1),
-						caret_pos_(0), sel_start_(0),
-						insert_mode_(true), 
 						mouse_drag_(false)
 	{
 		hide_caret_ = false;
@@ -215,16 +218,17 @@ namespace KlayGE
 					: UIControl(UIEditBox::Type, dialog),
 						border_(5),	// Default border width
 						spacing_(4),	// Default spacing
-						caret_on_(true),
 						blink_time_(GetCaretBlinkTime() * 0.001f),
 						last_blink_time_(timer_.current_time()),
+						caret_on_(true),
+						caret_pos_(0),
+						insert_mode_(true),
+						sel_start_(0),
 						first_visible_(0),
 						text_color_(16.0f / 255, 16.0f / 255, 16.0f / 255, 1),
 						sel_text_color_(1, 1, 1, 1),
 						sel_bk_color_(40.0f / 255, 50.0f / 255, 92.0f / 255, 1),
 						caret_color_(0, 0, 0, 1),
-						caret_pos_(0), sel_start_(0),
-						insert_mode_(true), 
 						mouse_drag_(false)
 	{
 		hide_caret_ = false;
@@ -232,7 +236,7 @@ namespace KlayGE
 		this->InitDefaultElements();
 
 		// Set the ID and position
-		this->SetID(ID); 
+		this->SetID(ID);
 		this->SetLocation(x, y);
 		this->SetSize(width, height);
 		this->SetIsDefault(bIsDefault);
@@ -269,7 +273,7 @@ namespace KlayGE
 
 			elements_.push_back(UIElementPtr(new UIElement(Element)));
 		}
-		
+
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 2));
 
@@ -281,19 +285,19 @@ namespace KlayGE
 
 			elements_.push_back(UIElementPtr(new UIElement(Element)));
 		}
-		
+
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 4));
 
 			elements_.push_back(UIElementPtr(new UIElement(Element)));
 		}
-		
+
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 5));
 
 			elements_.push_back(UIElementPtr(new UIElement(Element)));
 		}
-		
+
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 6));
 
@@ -664,29 +668,29 @@ namespace KlayGE
 				break;
 
 				// Junk characters we don't want in the string
-			case 26:  // Ctrl Z
-			case 2:   // Ctrl B
-			case 14:  // Ctrl N
-			case 19:  // Ctrl S
-			case 4:   // Ctrl D
-			case 6:   // Ctrl F
-			case 7:   // Ctrl G
-			case 10:  // Ctrl J
-			case 11:  // Ctrl K
-			case 12:  // Ctrl L
-			case 17:  // Ctrl Q
-			case 23:  // Ctrl W
-			case 5:   // Ctrl E
-			case 18:  // Ctrl R
-			case 20:  // Ctrl T
-			case 25:  // Ctrl Y
-			case 21:  // Ctrl U
-			case 9:   // Ctrl I
-			case 15:  // Ctrl O
-			case 16:  // Ctrl P
-			case 27:  // Ctrl [
-			case 29:  // Ctrl ]
-			case 28:  // Ctrl \ 
+			case 26:  // Ctrl 'Z'
+			case 2:   // Ctrl 'B'
+			case 14:  // Ctrl 'N'
+			case 19:  // Ctrl 'S'
+			case 4:   // Ctrl 'D'
+			case 6:   // Ctrl 'F'
+			case 7:   // Ctrl 'G'
+			case 10:  // Ctrl 'J'
+			case 11:  // Ctrl 'K'
+			case 12:  // Ctrl 'L'
+			case 17:  // Ctrl 'Q'
+			case 23:  // Ctrl 'W'
+			case 5:   // Ctrl 'E'
+			case 18:  // Ctrl 'R'
+			case 20:  // Ctrl 'T'
+			case 25:  // Ctrl 'Y'
+			case 21:  // Ctrl 'U'
+			case 9:   // Ctrl 'I'
+			case 15:  // Ctrl 'O'
+			case 16:  // Ctrl 'P'
+			case 27:  // Ctrl '['
+			case 29:  // Ctrl ']'
+			case 28:  // Ctrl '\'
 				break;
 
 			default:

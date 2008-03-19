@@ -105,7 +105,7 @@ struct PROPVARIANT
 	PROPVAR_PAD1 wReserved1;
 	PROPVAR_PAD2 wReserved2;
 	PROPVAR_PAD3 wReserved3;
-	union 
+	union
 	{
 		KlayGE::int8_t cVal;
 		KlayGE::uint8_t bVal;
@@ -140,13 +140,13 @@ enum
 	kpidCreationTime,
 	kpidLastAccessTime,
 	kpidLastWriteTime,
-	kpidSolid, 
-	kpidCommented, 
-	kpidEncrypted, 
-	kpidSplitBefore, 
-	kpidSplitAfter, 
-	kpidDictionarySize, 
-	kpidCRC, 
+	kpidSolid,
+	kpidCommented,
+	kpidEncrypted,
+	kpidSplitBefore,
+	kpidSplitAfter,
+	kpidDictionarySize,
+	kpidCRC,
 	kpidType,
 	kpidIsAnti,
 	kpidMethod,
@@ -160,7 +160,7 @@ enum
 	kpidPrefix,
 
 	kpidTotalSize = 0x1100,
-	kpidFreeSpace, 
+	kpidFreeSpace,
 	kpidClusterSize,
 	kpidVolumeName,
 
@@ -170,40 +170,42 @@ enum
 	kpidUserDefined = 0x10000
 };
 
+#ifndef WINAPI
 #ifdef _MSC_VER
 #define WINAPI __stdcall
 #else
 #define WINAPI
+#endif
 #endif
 
 namespace
 {
 	using namespace KlayGE;
 
-    // {23170F69-40C1-278A-1000-000110070000}
-    DEFINE_GUID(CLSID_CFormat7z, 
+	// {23170F69-40C1-278A-1000-000110070000}
+	DEFINE_GUID(CLSID_CFormat7z,
 			0x23170F69, 0x40C1, 0x278A, 0x10, 0x00, 0x00, 0x01, 0x10, 0x07, 0x00, 0x00);
 
-    typedef KlayGE::uint32_t (WINAPI *CreateObjectFunc)(const GUID* clsID, const GUID* interfaceID, void** outObject);
+	typedef KlayGE::uint32_t (WINAPI *CreateObjectFunc)(const GUID* clsID, const GUID* interfaceID, void** outObject);
 
 	HRESULT GetArchiveItemPath(boost::shared_ptr<IInArchive> const & archive, uint32_t index, std::string& result)
 	{
 		PROPVARIANT prop;
 		prop.vt = VT_EMPTY;
 		TIF(archive->GetProperty(index, kpidPath, &prop));
-        switch (prop.vt)
+		switch (prop.vt)
 		{
-        case VT_BSTR:
-            Convert(result, prop.bstrVal);
-            return S_OK;
+		case VT_BSTR:
+			Convert(result, prop.bstrVal);
+			return S_OK;
 
-        case VT_EMPTY:
+		case VT_EMPTY:
 			result.clear();
-            return S_OK;
+			return S_OK;
 
-        default:
+		default:
 			return E_FAIL;
-        }
+		}
 	}
 
 	HRESULT IsArchiveItemFolder(boost::shared_ptr<IInArchive> const & archive, uint32_t index, bool &result)
@@ -211,48 +213,48 @@ namespace
 		PROPVARIANT prop;
 		prop.vt = VT_EMPTY;
 		TIF(archive->GetProperty(index, kpidIsFolder, &prop));
-        switch (prop.vt)
-        {
-        case VT_BOOL:
-            result = (prop.boolVal != VARIANT_FALSE);
-            return S_OK;
+		switch (prop.vt)
+		{
+		case VT_BOOL:
+			result = (prop.boolVal != VARIANT_FALSE);
+			return S_OK;
 
-        case VT_EMPTY:
-            result = false;
-            return S_OK;
+		case VT_EMPTY:
+			result = false;
+			return S_OK;
 
-        default:
-            return E_FAIL;
-        }
+		default:
+			return E_FAIL;
+		}
 	}
 
-    class SevenZipLoader
-    {
-    public:
+	class SevenZipLoader
+	{
+	public:
 		static SevenZipLoader& Instance()
 		{
 			static SevenZipLoader ret;
 			return ret;
 		}
 
-        HRESULT CreateObject(const GUID* clsID, const GUID* interfaceID, void** outObject)
-        {
-            return createObjectFunc_(clsID, interfaceID, outObject);
-        }
+		HRESULT CreateObject(const GUID* clsID, const GUID* interfaceID, void** outObject)
+		{
+			return createObjectFunc_(clsID, interfaceID, outObject);
+		}
 
 	private:
 		SevenZipLoader()
-        {
+		{
 			dll_loader_.Load("7za.dll");
 			createObjectFunc_ = (CreateObjectFunc)dll_loader_.GetProcAddress("CreateObject");
 
-	        BOOST_ASSERT(createObjectFunc_);
-        }
+			BOOST_ASSERT(createObjectFunc_);
+		}
 
-    private:
+	private:
 		DllLoader dll_loader_;
-        CreateObjectFunc createObjectFunc_;
-    };
+		CreateObjectFunc createObjectFunc_;
+	};
 
 
 	std::pair<boost::shared_ptr<IInArchive>, uint32_t> GetArchiveIndex(

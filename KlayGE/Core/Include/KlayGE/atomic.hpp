@@ -13,9 +13,8 @@
 #ifndef _ATOMIC_HPP
 #define _ATOMIC_HPP
 
-#ifdef KLAYGE_COMPILER_MSVC
+#ifdef KLAYGE_PLATFORM_WINDOWS
 #include <windows.h>
-#include <intrin.h>
 #endif
 
 namespace KlayGE
@@ -44,7 +43,7 @@ namespace KlayGE
 		bool compare_swap(T const & old_val, T const & new_val);
 	};
 
-#ifdef KLAYGE_COMPILER_MSVC
+#ifdef KLAYGE_PLATFORM_WINDOWS
 	template <>
 	class atomic<int32_t>
 	{
@@ -55,7 +54,7 @@ namespace KlayGE
 
 		explicit atomic(int32_t rhs)
 		{
-			InterlockedExchange(&value_, rhs);
+			InterlockedExchange(reinterpret_cast<long*>(&value_), rhs);
 		}
 
 		int32_t value() const
@@ -65,18 +64,18 @@ namespace KlayGE
 
 		atomic& operator=(int32_t const & rhs)
 		{
-			InterlockedExchange(&value_, rhs);
+			InterlockedExchange(reinterpret_cast<long*>(&value_), rhs);
 			return *this;
 		}
 		atomic& operator=(atomic const & rhs)
 		{
-			InterlockedExchange(&value_, rhs.value_);
+			InterlockedExchange(reinterpret_cast<long*>(&value_), rhs.value_);
 			return *this;
 		}
 
 		bool compare_swap(int32_t const & old_val, int32_t const & new_val)
 		{
-			return old_val == InterlockedCompareExchange(&value_, new_val, old_val);
+			return old_val == InterlockedCompareExchange(reinterpret_cast<long*>(&value_), new_val, old_val);
 		}
 
 		bool operator<(int32_t const & rhs) const
@@ -132,18 +131,18 @@ namespace KlayGE
 
 		atomic& operator+=(int32_t const & rhs)
 		{
-			InterlockedExchangeAdd(&value_, rhs);
+			InterlockedExchangeAdd(reinterpret_cast<long*>(&value_), rhs);
 			return *this;
 		}
 		atomic& operator+=(atomic const & rhs)
 		{
-			InterlockedExchangeAdd(&value_, rhs.value_);
+			InterlockedExchangeAdd(reinterpret_cast<long*>(&value_), rhs.value_);
 			return *this;
 		}
 
 		atomic& operator-=(int32_t const & rhs)
 		{
-			InterlockedExchangeAdd(&value_, -rhs);
+			InterlockedExchangeAdd(reinterpret_cast<long*>(&value_), -rhs);
 			return *this;
 		}
 
@@ -153,10 +152,10 @@ namespace KlayGE
 			int32_t exchange;
 			do
 			{
-				comperand = value_;  
+				comperand = value_;
 				exchange = comperand * rhs;
 			}
-			while (comperand != InterlockedCompareExchange(&value_, exchange, comperand));
+			while (comperand != InterlockedCompareExchange(reinterpret_cast<long*>(&value_), exchange, comperand));
 			return *this;
 		}
 
@@ -166,10 +165,10 @@ namespace KlayGE
 			int32_t exchange;
 			do
 			{
-				comperand = value_;  
+				comperand = value_;
 				exchange = comperand / rhs;
 			}
-			while (comperand != InterlockedCompareExchange(&value_, exchange, comperand));
+			while (comperand != InterlockedCompareExchange(reinterpret_cast<long*>(&value_), exchange, comperand));
 			return *this;
 		}
 
@@ -179,40 +178,61 @@ namespace KlayGE
 			int32_t exchange;
 			do
 			{
-				comperand = value_;  
+				comperand = value_;
 				exchange = comperand % rhs;
 			}
-			while (comperand != InterlockedCompareExchange(&value_, exchange, comperand));
+			while (comperand != InterlockedCompareExchange(reinterpret_cast<long*>(&value_), exchange, comperand));
 			return *this;
 		}
 
 		atomic& operator&=(int32_t const & rhs)
 		{
-			_InterlockedAnd(&value_, rhs);
+			int32_t comperand;
+			int32_t exchange;
+			do
+			{
+				comperand = value_;
+				exchange = comperand & rhs;
+			}
+			while (comperand != InterlockedCompareExchange(reinterpret_cast<long*>(&value_), exchange, comperand));
 			return *this;
 		}
 
 		atomic& operator|=(int32_t const & rhs)
 		{
-			_InterlockedOr(&value_, rhs);
+			int32_t comperand;
+			int32_t exchange;
+			do
+			{
+				comperand = value_;
+				exchange = comperand | rhs;
+			}
+			while (comperand != InterlockedCompareExchange(reinterpret_cast<long*>(&value_), exchange, comperand));
 			return *this;
 		}
 
 		atomic& operator^=(int32_t const & rhs)
 		{
-			_InterlockedXor(&value_, rhs);
+			int32_t comperand;
+			int32_t exchange;
+			do
+			{
+				comperand = value_;
+				exchange = comperand ^ rhs;
+			}
+			while (comperand != InterlockedCompareExchange(reinterpret_cast<long*>(&value_), exchange, comperand));
 			return *this;
 		}
 
 		atomic const & operator++()
 		{
-			InterlockedIncrement(&value_);
+			InterlockedIncrement(reinterpret_cast<long*>(&value_));
 			return *this;
 		}
 
 		atomic const & operator--()
 		{
-			InterlockedDecrement(&value_);
+			InterlockedDecrement(reinterpret_cast<long*>(&value_));
 			return *this;
 		}
 

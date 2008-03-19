@@ -314,14 +314,17 @@ namespace KlayGE
 			float const threehalfs = 1.5f;
 
 			float x2 = number * 0.5f;
-			float y = number;
-			long i = *reinterpret_cast<long*>(&y);		// evil floating point bit level hacking
-			i = 0x5f375a86 - (i >> 1);					// what the fuck?
-			y = *reinterpret_cast<float*>(&i);
-			y = y * (threehalfs - (x2 * y * y));		// 1st iteration
-			//y = y * (threehalfs - (x2 * y * y));		// 2nd iteration, this can be removed
+			union
+			{
+				float y;
+				long i;
+			} fnl;
+			fnl.y = number;											// evil floating point bit level hacking
+			fnl.i = 0x5f375a86 - (fnl.i >> 1);						// what the fuck?
+			fnl.y = fnl.y * (threehalfs - (x2 * fnl.y * fnl.y));	// 1st iteration
+			//fnl.y = y * (threehalfs - (x2 * fnl.y * fnl.y));		// 2nd iteration, this can be removed
 
-			return y;
+			return fnl.y;
 		}
 
 		inline float

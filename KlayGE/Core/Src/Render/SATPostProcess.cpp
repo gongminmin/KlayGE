@@ -13,6 +13,8 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
+#include <KlayGE/Math.hpp>
+#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 
@@ -34,7 +36,7 @@ namespace KlayGE
 
 	void SATSeparableScanPostProcess::Pass(uint32_t pass)
 	{
-		*(technique_->Effect().ParameterByName("addr_offset")) = pow(4.0f, static_cast<float>(pass)) / length_;
+		*(technique_->Effect().ParameterByName("addr_offset")) = static_cast<float>(pow(4.0f, static_cast<float>(pass)) / length_);
 	}
 
 	void SATSeparableScanPostProcess::Length(uint32_t length)

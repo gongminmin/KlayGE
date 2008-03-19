@@ -2,58 +2,59 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="App Layer" />
-		<Option pch_mode="0" />
+		<Option title="KFontGen" />
+		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="..\..\lib\Win32\libKlayGE_AppLayer_d.a" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="" />
+				<Option output="..\..\bin\Win32\KFontGen_d" prefix_auto="1" extension_auto="1" />
 				<Option object_output="..\..\Debug\Win32" />
-				<Option type="2" />
+				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option createDefFile="1" />
-				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
+					<Add option="-march=pentium4" />
 					<Add option="-Wall" />
 					<Add option="-g" />
-					<Add option="-O0" />
 					<Add option="-DWIN32" />
 					<Add option="-D_DEBUG" />
-					<Add option="-D_LIB" />
-					<Add option="-DSTRICT" />
+					<Add option="-D_CONSOLE" />
 				</Compiler>
+				<Linker>
+					<Add library="libKlayGE_Core_d.a" />
+					<Add library="libfreetype.a" />
+					<Add library="boost_program_options-mgw43-mt-d" />
+					<Add library="boost_thread-mgw43-mt-d" />
+				</Linker>
 			</Target>
 			<Target title="Release">
-				<Option output="..\..\lib\Win32\libKlayGE_AppLayer.a" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="" />
+				<Option output="..\..\bin\Win32\KFontGen" prefix_auto="1" extension_auto="1" />
 				<Option object_output="..\..\Release\Win32" />
-				<Option type="2" />
+				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option createDefFile="1" />
-				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
 					<Add option="-march=pentium4" />
 					<Add option="-fexpensive-optimizations" />
 					<Add option="-O3" />
 					<Add option="-Wall" />
-					<Add option="-DWIN32" />
+                                        <Add option="-DWIN32" />
 					<Add option="-DNDEBUG" />
-					<Add option="-D_LIB" />
-					<Add option="-DSTRICT" />
+					<Add option="-D_CONSOLE" />
 				</Compiler>
+				<Linker>
+					<Add library="libKlayGE_Core.a" />
+					<Add library="libfreetype.a" />
+					<Add library="boost_program_options-mgw43-mt" />
+					<Add library="boost_thread-mgw43-mt" />
+				</Linker>
 			</Target>
 		</Build>
 		<VirtualTargets>
 			<Add alias="All" targets="Debug;Release;" />
 		</VirtualTargets>
-		<Unit filename="..\..\AppLayer\Include\KlayGE\App3D.hpp" />
-		<Unit filename="..\..\AppLayer\Include\KlayGE\Window.hpp" />
-		<Unit filename="..\..\AppLayer\Src\App3D.cpp" />
-		<Unit filename="..\..\AppLayer\Src\Window.cpp" />
+		<Unit filename="..\..\KFontGen\KFontGen.cpp" />
+		<Unit filename="..\..\KFontGen\kdtree.hpp" />
 		<Extensions>
 			<code_completion />
-			<envvars />
 			<debugger />
 		</Extensions>
 	</Project>

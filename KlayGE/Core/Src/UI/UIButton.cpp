@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Input.hpp>
 
@@ -46,7 +47,7 @@ namespace KlayGE
 		this->InitDefaultElements();
 
 		// Set the ID and list index
-		this->SetID(ID); 
+		this->SetID(ID);
 		this->SetLocation(x, y);
 		this->SetSize(width, height);
 		this->SetHotkey(hotkey);
@@ -56,7 +57,7 @@ namespace KlayGE
 	void UIButton::InitDefaultElements()
 	{
 		UIElement Element;
-		
+
 		// Button
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_Button, 0));

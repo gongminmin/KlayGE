@@ -59,7 +59,7 @@ namespace KlayGE
 	void* DllLoader::GetProcAddress(std::string const & proc_name)
 	{
 	#ifdef KLAYGE_PLATFORM_WINDOWS
-		return ::GetProcAddress(static_cast<HMODULE>(dll_handle_), proc_name.c_str());
+		return reinterpret_cast<void*>(::GetProcAddress(static_cast<HMODULE>(dll_handle_), proc_name.c_str()));
 	#else
 		return ::dlsym(dll_handle_, proc_name.c_str());
 	#endif

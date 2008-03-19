@@ -75,7 +75,7 @@ namespace KlayGE
 			QueryPerformanceCounter(&count);
 			return static_cast<double>(count.QuadPart) / cps_;
 #else
-			return std::clock() / cps_;
+			return static_cast<double>(std::clock()) / cps_;
 #endif
 		}
 

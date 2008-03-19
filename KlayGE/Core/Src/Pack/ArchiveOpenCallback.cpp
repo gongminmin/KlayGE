@@ -13,7 +13,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
 
-#define INITGUID
 #include "BaseDefines.hpp"
 
 #include "BSTR.hpp"

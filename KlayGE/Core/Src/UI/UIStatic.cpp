@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
 
 #include <KlayGE/UI.hpp>
@@ -36,7 +37,7 @@ namespace KlayGE
 		this->InitDefaultElements();
 
 		// Set the ID and list index
-		this->SetID(ID); 
+		this->SetID(ID);
 		this->SetLocation(x, y);
 		this->SetSize(width, height);
 		this->SetIsDefault(bIsDefault);
@@ -55,7 +56,7 @@ namespace KlayGE
 	}
 
 	void UIStatic::Render()
-	{    
+	{
 		if (!visible_)
 		{
 			return;

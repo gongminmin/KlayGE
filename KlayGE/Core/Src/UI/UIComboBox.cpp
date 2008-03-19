@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Input.hpp>
 
@@ -22,10 +23,10 @@ namespace KlayGE
 {
 	UIComboBox::UIComboBox(UIDialogPtr dialog)
 						: UIControl(UIComboBox::Type, dialog),
-							scroll_bar_(dialog),
-							pressed_(false),
-							drop_height_(100),
-							sb_width_(16), opened_(false), selected_(-1), focused_(-1)
+							selected_(-1), focused_(-1),
+							drop_height_(100), scroll_bar_(dialog),
+                            sb_width_(16), opened_(false),
+							pressed_(false)
 	{
 		this->InitDefaultElements();
 
@@ -34,10 +35,10 @@ namespace KlayGE
 
 	UIComboBox::UIComboBox(uint32_t type, UIDialogPtr dialog)
 						: UIControl(type, dialog),
-							scroll_bar_(dialog),
-							pressed_(false),
-							drop_height_(100),
-							sb_width_(16), opened_(false), selected_(-1), focused_(-1)
+							selected_(-1), focused_(-1),
+							drop_height_(100), scroll_bar_(dialog),
+                            sb_width_(16), opened_(false),
+							pressed_(false)
 	{
 		this->InitDefaultElements();
 
@@ -46,17 +47,17 @@ namespace KlayGE
 
 	UIComboBox::UIComboBox(UIDialogPtr dialog, int ID, int x, int y, int width, int height, uint8_t hotkey, bool bIsDefault)
 						: UIControl(UIComboBox::Type, dialog),
-							scroll_bar_(dialog),
-							pressed_(false),
-							drop_height_(100),
-							sb_width_(16), opened_(false), selected_(-1), focused_(-1)
+							selected_(-1), focused_(-1),
+							drop_height_(100), scroll_bar_(dialog),
+							sb_width_(16), opened_(false),
+							pressed_(false)
 	{
 		this->InitDefaultElements();
 
 		this->GetDialog()->InitControl(scroll_bar_);
 
 		// Set the ID and list index
-		this->SetID(ID); 
+		this->SetID(ID);
 		this->SetLocation(x, y);
 		this->SetSize(width, height);
 		this->SetHotkey(hotkey);
@@ -188,7 +189,7 @@ namespace KlayGE
 		else
 		{
 			bounding_box_ = show_rc_ | button_rc_ | text_rc_;
-		}		
+		}
 	}
 
 	void UIComboBox::KeyDownHandler(UIDialog const & sender, KeyEventArg const & arg)
@@ -395,20 +396,20 @@ namespace KlayGE
 				if (focused_ > 0)
 				{
 					-- focused_;
-					selected_ = focused_;     
+					selected_ = focused_;
 
 					if (!opened_)
 					{
 						this->OnSelectionChangedEvent()(*this);
 					}
-				}          
+				}
 			}
 			else
 			{
 				if (focused_ + 1 < (int)GetNumItems())
 				{
 					++ focused_;
-					selected_ = focused_;   
+					selected_ = focused_;
 
 					if (!opened_)
 					{

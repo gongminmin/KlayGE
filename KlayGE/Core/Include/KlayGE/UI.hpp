@@ -45,10 +45,10 @@ namespace KlayGE
 		UICS_Num_Control_States
 	};
 
-	enum UI_Control_Type 
+	enum UI_Control_Type
 	{
-		UICT_Static, 
-		UICT_Button, 
+		UICT_Static,
+		UICT_Button,
 		UICT_CheckBox,
 		UICT_RadioButton,
 		UICT_Slider,
@@ -67,7 +67,7 @@ namespace KlayGE
 			Color const & hidden_color = Color(0, 0, 0, 0));
 
 		void SetState(UI_Control_State state);
-	    
+
 		Color States[UICS_Num_Control_States]; // Modulate colors for all possible control states
 		Color Current;
 	};
@@ -126,7 +126,7 @@ namespace KlayGE
 		uint32_t text_align_;
 
 		Rect_T<int32_t> tex_rect_;
-	    
+
 		UIStatesColor texture_color_;
 		UIStatesColor font_color_;
 	};
@@ -135,12 +135,11 @@ namespace KlayGE
 	{
 	public:
 		UIControl(uint32_t type, UIDialogPtr dialog)
-			: type_(type),
-					dialog_(dialog),
-					id_(0), index_(0),
-					enabled_(true), visible_(true),
+			: visible_(true),
 					is_mouse_over_(false), has_focus_(false), is_default_(false),
 					x_(0), y_(0), width_(0), height_(0),
+					dialog_(dialog), index_(0),
+					id_(0), type_(type), enabled_(true),
 					bounding_box_(0, 0, 0, 0)
 		{
 			BOOST_ASSERT(dialog);
@@ -316,7 +315,7 @@ namespace KlayGE
 		// These members are set by the container
 		boost::weak_ptr<UIDialog> dialog_;    // Parent container
 		uint32_t index_;              // Index within the control list
-	    
+
 		std::vector<UIElementPtr> elements_;  // All display elements
 
 	public:
@@ -392,13 +391,13 @@ namespace KlayGE
 			bounding_box_ = Rect_T<int32_t>(x_, y_, x_ + width_, y_ + height_);
 		}
 
-		int  id_;                 // ID number
-		uint32_t type_;  // Control type, set once in constructor  
-		uint8_t hotkey_;            // Virtual key code for this control's hotkey
-	    
-		bool enabled_;           // Enabled/disabled flag
-	    
-		Rect_T<int32_t> bounding_box_;      // Rectangle defining the active region of the control
+		int  id_;				// ID number
+		uint32_t type_;			// Control type, set once in constructor
+		uint8_t hotkey_;		// Virtual key code for this control's hotkey
+
+		bool enabled_;			// Enabled/disabled flag
+
+		Rect_T<int32_t> bounding_box_;		// Rectangle defining the active region of the control
 	};
 
 	class UIDialog
@@ -696,7 +695,7 @@ namespace KlayGE
 	protected:
 		virtual void InitDefaultElements();
 
-		std::wstring text_;      // Window text  
+		std::wstring text_;			// Window text
 	};
 
 	class UIButton : public UIControl
@@ -712,7 +711,7 @@ namespace KlayGE
 		UIButton(uint32_t type, UIDialogPtr dialog);
 		UIButton(UIDialogPtr dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, uint8_t hotkey = 0, bool bIsDefault = false);
 		virtual ~UIButton() {}
-	    
+
 		virtual bool CanHaveFocus() const
 		{
 			return visible_ && enabled_;
@@ -750,7 +749,7 @@ namespace KlayGE
 
 		bool pressed_;
 
-		std::wstring text_;      // Window text  
+		std::wstring text_;			// Window text
 	};
 
 	class UICheckBox : public UIControl
@@ -777,7 +776,7 @@ namespace KlayGE
 			pressed_ = false;
 		}
 		virtual void OnHotkey();
-		virtual void UpdateRects(); 
+		virtual void UpdateRects();
 
 		virtual void Render();
 
@@ -829,7 +828,7 @@ namespace KlayGE
 		UIRadioButton(uint32_t type, UIDialogPtr dialog);
 		UIRadioButton(UIDialogPtr dialog, int ID, uint32_t nButtonGroup, std::wstring const & strText, int x, int y, int width, int height, bool bChecked = false, uint8_t hotkey = 0, bool bIsDefault = false);
 		virtual ~UIRadioButton() {}
-	    
+
 		void SetChecked(bool bChecked, bool bClearGroup = true) { this->SetCheckedInternal(bChecked, bClearGroup); }
 		void SetButtonGroup(uint32_t nButtonGroup) { button_group_ = nButtonGroup; }
 		uint32_t GetButtonGroup() const { return button_group_; }
@@ -908,7 +907,7 @@ namespace KlayGE
 			pressed_ = false;
 		}
 
-		virtual void UpdateRects(); 
+		virtual void UpdateRects();
 
 		virtual void Render();
 
@@ -939,7 +938,7 @@ namespace KlayGE
 		virtual void InitDefaultElements();
 
 		void SetValueInternal(int nValue);
-		int ValueFromPos(int x); 
+		int ValueFromPos(int x);
 
 		int value_;
 
@@ -1148,7 +1147,7 @@ namespace KlayGE
 		UIComboBox(uint32_t type, UIDialogPtr dialog);
 		UIComboBox(UIDialogPtr dialog, int ID, int x, int y, int width, int height, uint8_t hotkey = 0, bool bIsDefault = false);
 		virtual ~UIComboBox();
-	    
+
 		virtual void SetTextColor(Color const & color);
 
 		virtual bool CanHaveFocus() const
@@ -1159,7 +1158,7 @@ namespace KlayGE
 		virtual void OnFocusOut();
 		virtual void Render();
 
-		virtual void UpdateRects(); 
+		virtual void UpdateRects();
 
 		void	AddItem(std::wstring const & strText, boost::any const & data);
 		void    RemoveAllItems();
@@ -1229,7 +1228,7 @@ namespace KlayGE
 		Rect_T<int32_t> button_rc_;
 		Rect_T<int32_t> dropdown_rc_;
 		Rect_T<int32_t> dropdown_text_rc_;
-	    
+
 		std::vector<boost::shared_ptr<UIComboBoxItem> > items_;
 
 		bool pressed_;

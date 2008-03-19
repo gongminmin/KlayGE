@@ -15,7 +15,6 @@
 #include <ios>
 #include <boost/assert.hpp>
 
-#define INITGUID
 #include "BaseDefines.hpp"
 
 #include "Streams.hpp"
@@ -98,7 +97,7 @@ namespace KlayGE
 
 		return (*os_ != NULL) ? S_OK: E_FAIL;
 	}
-	  
+
 	STDMETHODIMP COutStream::Seek(int64_t offset, uint32_t seekOrigin, uint64_t* newPosition)
 	{
 		std::ios_base::seekdir way;

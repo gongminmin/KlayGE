@@ -33,9 +33,10 @@
 				<Option createDefFile="1" />
 				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
-					<Add option="-march=pentium3" />
+					<<Add option="-march=pentium4" />
+					<Add option="-fexpensive-optimizations" />
 					<Add option="-O3" />
-					<Add option="-W" />
+					<Add option="-Wall" />
 					<Add option="-DWIN32" />
 					<Add option="-DNDEBUG" />
 					<Add option="-D_LIB" />

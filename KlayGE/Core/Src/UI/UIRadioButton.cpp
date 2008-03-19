@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Input.hpp>
 
@@ -40,14 +41,13 @@ namespace KlayGE
 
 	UIRadioButton::UIRadioButton(UIDialogPtr dialog, int ID, uint32_t nButtonGroup, std::wstring const & strText, int x, int y, int width, int height, bool bChecked, uint8_t hotkey, bool bIsDefault)
 						: UIControl(UIRadioButton::Type, dialog),
-							checked_(bChecked), pressed_(false),
-							text_(strText),
-							button_group_(nButtonGroup)
+							button_group_(nButtonGroup),
+							checked_(bChecked), pressed_(false), text_(strText)
 	{
 		this->InitDefaultElements();
 
 		// Set the ID and list index
-		this->SetID(ID); 
+		this->SetID(ID);
 		this->SetLocation(x, y);
 		this->SetSize(width, height);
 		this->SetHotkey(hotkey);

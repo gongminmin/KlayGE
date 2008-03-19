@@ -37,7 +37,7 @@ namespace KlayGE
 		eyePos_		= eyePos;
 		lookat_		= lookat;
 		upVec_		= upVec;
-		
+
 		viewVec_ = MathLib::normalize(lookat_ - eyePos_);
 		viewMat_ = MathLib::look_at_lh(eyePos_, lookat_, upVec);
 	}

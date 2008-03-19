@@ -33,9 +33,10 @@
 				<Option createDefFile="1" />
 				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
-					<Add option="-march=pentium3" />
+					<Add option="-march=pentium4" />
+					<Add option="-fexpensive-optimizations" />
 					<Add option="-O3" />
-					<Add option="-W" />
+					<Add option="-Wall" />
 					<Add option="-DWIN32" />
 					<Add option="-DNDEBUG" />
 					<Add option="-D_LIB" />
@@ -139,9 +140,11 @@
 		<Unit filename="..\..\Core\Src\Input\Joystick.cpp" />
 		<Unit filename="..\..\Core\Src\Input\Keyboard.cpp" />
 		<Unit filename="..\..\Core\Src\Input\Mouse.cpp" />
+		<Unit filename="..\..\Core\Src\Kernel\Context.cpp" />
 		<Unit filename="..\..\Core\Src\Kernel\CpuInfo.cpp" />
 		<Unit filename="..\..\Core\Src\Kernel\ResLoader.cpp" />
 		<Unit filename="..\..\Core\Src\Kernel\ThrowErr.cpp" />
+		<Unit filename="..\..\Core\Src\Kernel\Timer.cpp" />
 		<Unit filename="..\..\Core\Src\Kernel\Util.cpp" />
 		<Unit filename="..\..\Core\Src\Kernel\asm\CpuID.asm">
 			<Option compiler="gcc" use="1" buildCommand="yasm -Xgnu -fwin32 -DWIN32 -DKLAYGE_CPU_X86 -o $object $file\n" />
@@ -149,6 +152,22 @@
 		<Unit filename="..\..\Core\Src\Net\Lobby.cpp" />
 		<Unit filename="..\..\Core\Src\Net\Player.cpp" />
 		<Unit filename="..\..\Core\Src\Net\Socket.cpp" />
+		<Unit filename="..\..\Core\Src\Pack\ArchiveExtractCallback.cpp" />
+		<Unit filename="..\..\Core\Src\Pack\ArchiveExtractCallback.hpp" />
+		<Unit filename="..\..\Core\Src\Pack\ArchiveOpenCallback.cpp" />
+		<Unit filename="..\..\Core\Src\Pack\ArchiveOpenCallback.hpp" />
+		<Unit filename="..\..\Core\Src\Pack\BSTR.cpp" />
+		<Unit filename="..\..\Core\Src\Pack\BSTR.hpp" />
+		<Unit filename="..\..\Core\Src\Pack\BaseDefines.hpp" />
+		<Unit filename="..\..\Core\Src\Pack\Dll.cpp" />
+		<Unit filename="..\..\Core\Src\Pack\Dll.hpp" />
+		<Unit filename="..\..\Core\Src\Pack\Extract7z.cpp" />
+		<Unit filename="..\..\Core\Src\Pack\IArchive.hpp" />
+		<Unit filename="..\..\Core\Src\Pack\IPassword.hpp" />
+		<Unit filename="..\..\Core\Src\Pack\IProgress.hpp" />
+		<Unit filename="..\..\Core\Src\Pack\IStream.hpp" />
+		<Unit filename="..\..\Core\Src\Pack\Streams.cpp" />
+		<Unit filename="..\..\Core\Src\Pack\Streams.hpp" />
 		<Unit filename="..\..\Core\Src\Render\Camera.cpp" />
 		<Unit filename="..\..\Core\Src\Render\CameraController.cpp" />
 		<Unit filename="..\..\Core\Src\Render\Font.cpp" />
@@ -163,10 +182,13 @@
 		<Unit filename="..\..\Core\Src\Render\RenderEngine.cpp" />
 		<Unit filename="..\..\Core\Src\Render\RenderFactory.cpp" />
 		<Unit filename="..\..\Core\Src\Render\RenderLayout.cpp" />
+		<Unit filename="..\..\Core\Src\Render\RenderStateObject.cpp" />
 		<Unit filename="..\..\Core\Src\Render\RenderView.cpp" />
 		<Unit filename="..\..\Core\Src\Render\Renderable.cpp" />
 		<Unit filename="..\..\Core\Src\Render\RenderableHelper.cpp" />
+		<Unit filename="..\..\Core\Src\Render\SATPostProcess.cpp" />
 		<Unit filename="..\..\Core\Src\Render\Sampler.cpp" />
+		<Unit filename="..\..\Core\Src\Render\ShaderObject.cpp" />
 		<Unit filename="..\..\Core\Src\Render\Texture.cpp" />
 		<Unit filename="..\..\Core\Src\Scene\SceneManager.cpp" />
 		<Unit filename="..\..\Core\Src\Scene\SceneObject.cpp" />
@@ -174,6 +196,16 @@
 		<Unit filename="..\..\Core\Src\Script\Script.cpp" />
 		<Unit filename="..\..\Core\Src\Show\ShowEngine.cpp" />
 		<Unit filename="..\..\Core\Src\Show\ShowFactory.cpp" />
+		<Unit filename="..\..\Core\Src\UI\UI.cpp" />
+		<Unit filename="..\..\Core\Src\UI\UIButton.cpp" />
+		<Unit filename="..\..\Core\Src\UI\UICheckBox.cpp" />
+		<Unit filename="..\..\Core\Src\UI\UIComboBox.cpp" />
+		<Unit filename="..\..\Core\Src\UI\UIEditBox.cpp" />
+		<Unit filename="..\..\Core\Src\UI\UIListBox.cpp" />
+		<Unit filename="..\..\Core\Src\UI\UIRadioButton.cpp" />
+		<Unit filename="..\..\Core\Src\UI\UIScrollBar.cpp" />
+		<Unit filename="..\..\Core\Src\UI\UISlider.cpp" />
+		<Unit filename="..\..\Core\Src\UI\UIStatic.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

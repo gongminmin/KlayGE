@@ -11,10 +11,12 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/FrameBuffer.hpp>
@@ -125,7 +127,7 @@ namespace KlayGE
 		text_align_ = text_align;
 		font_color_.Init(default_font_color);
 	}
-	
+
 	void UIElement::Refresh()
 	{
 		texture_color_.SetState(UICS_Hidden);
@@ -378,16 +380,15 @@ namespace KlayGE
 		return elem_texture_rcs_[ctrl].size();
 	}
 
-	
+
 	UIDialog::UIDialog(TexturePtr control_tex)
-			: x_(0), y_(0), width_(0), height_(0),
+			: keyboard_input_(false), mouse_input_(true), default_control_id_(0xFFFF),
 					visible_(true), show_caption_(false),
 					minimized_(false), drag_(false),
+					x_(0), y_(0), width_(0), height_(0),
 					caption_height_(18),
 					top_left_clr_(0, 0, 0, 0), top_right_clr_(0, 0, 0, 0),
-					bottom_left_clr_(0, 0, 0, 0), bottom_right_clr_(0, 0, 0, 0),
-					default_control_id_(0xFFFF),
-					keyboard_input_(false), mouse_input_(true)
+					bottom_left_clr_(0, 0, 0, 0), bottom_right_clr_(0, 0, 0, 0)
 	{
 		if (!control_tex)
 		{
@@ -397,7 +398,7 @@ namespace KlayGE
 		this->SetTexture(0, control_tex);
 		this->InitDefaultElements();
 	}
-	
+
 	UIDialog::~UIDialog()
 	{
 		this->RemoveAllControls();
@@ -410,7 +411,7 @@ namespace KlayGE
 		// Add to the list
 		controls_.push_back(control);
 	}
-	
+
 	void UIDialog::InitControl(UIControl& control)
 	{
 		control.SetIndex(static_cast<uint32_t>(controls_.size()));
@@ -431,7 +432,7 @@ namespace KlayGE
 		// Not found
 		return UIControlPtr();
 	}
-	
+
 	UIControlPtr UIDialog::GetControl(int ID, uint32_t type) const
 	{
 		// Try to find the control with the given ID
@@ -621,7 +622,7 @@ namespace KlayGE
 	{
 		this->SetBackgroundColors(colorAllCorners, colorAllCorners, colorAllCorners, colorAllCorners);
 	}
-	
+
 	void UIDialog::SetBackgroundColors(Color const & colorTopLeft, Color const & colorTopRight,
 		Color const & colorBottomLeft, Color const & colorBottomRight)
 	{
@@ -678,7 +679,7 @@ namespace KlayGE
 			index = static_cast<int>(dialog->controls_.size() - 1);
 		}
 
-		return dialog->controls_[index];    
+		return dialog->controls_[index];
 	}
 
 	void UIDialog::ClearRadioButtonGroup(uint32_t nButtonGroup)
@@ -724,7 +725,7 @@ namespace KlayGE
 			}
 		}
 	}
-	
+
 	void UIDialog::RemoveAllControls()
 	{
 		if (control_focus_.lock() && (control_focus_.lock()->GetDialog().get() == this))
@@ -1006,7 +1007,7 @@ namespace KlayGE
 								}
 							}
 
-							if (key_board->Key(KS_Tab)) 
+							if (key_board->Key(KS_Tab))
 							{
 								bool shift_down = key_board->Key(KS_LeftShift) | key_board->Key(KS_RightShift);
 								this->OnCycleFocus(!shift_down);

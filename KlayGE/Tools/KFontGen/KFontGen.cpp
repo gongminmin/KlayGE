@@ -135,7 +135,7 @@ public:
 		else
 		{
 			edge_extract = boost::bind(&ttf_to_dist::edge_extract_cpp, this, _1, _2, _3, _4, _5);
-			
+
 			if (cpu.IsFeatureSupport(CPUInfo::CF_MMX))
 			{
 				binary_font_extract = boost::bind(&ttf_to_dist::binary_font_extract_mmx, this, _1, _2, _3);
@@ -168,12 +168,12 @@ public:
 
 				FT_Load_Char(ft_face_, ch, FT_LOAD_RENDER);
 
-				(*char_width_)[ch] = static_cast<uint8_t>(std::min(header_->char_size, 
+				(*char_width_)[ch] = static_cast<uint8_t>(std::min(header_->char_size,
 						static_cast<uint32_t>(ft_slot->advance.x / 64.0f * header_->char_size / INTERNAL_CHAR_SIZE)));
 
 				int const buf_width = std::min(ft_slot->bitmap.width, INTERNAL_CHAR_SIZE);
 				int const buf_height = std::min(ft_slot->bitmap.rows, INTERNAL_CHAR_SIZE);
-				
+
 				int const y_start = std::max<int>(INTERNAL_CHAR_SIZE * 3 / 4 - ft_slot->bitmap_top, 0);
 				if ((buf_width > 0) && (buf_height > 0))
 				{
@@ -538,7 +538,7 @@ int main(int argc, char* argv[])
 	std::vector<FT_Library> ft_libs(num_threads);
 	std::vector<FT_Face> ft_faces(num_threads);
 	std::vector<joiner<void> > joiners(num_threads);
-	
+
 	joiner<void> disp_joiner = tp(disp_thread(timer, cur_num_char, total_chars));
 	for (int i = 0; i < num_threads; ++ i)
 	{
@@ -554,7 +554,7 @@ int main(int argc, char* argv[])
 		for (int j = 0; j < NUM_PACKAGE; ++ j)
 		{
 			packages[i][j].first = start_code + (j * num_threads + i) * num_chars_per_package;
-			packages[i][j].second = std::min(packages[i][j].first + num_chars_per_package, end_code);			
+			packages[i][j].second = std::min(packages[i][j].first + num_chars_per_package, end_code);
 		}
 	}
 	for (int i = 0; i < num_threads; ++ i)

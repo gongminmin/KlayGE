@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="NormalizerCubeMap" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="..\..\bin\Win32\NormalizerCubeMap_d" prefix_auto="1" extension_auto="1" />
+				<Option object_output="..\..\Debug\Win32" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-DWIN32" />
+					<Add option="-D_DEBUG" />
+					<Add option="-D_CONSOLE" />
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-O0" />
+				</Compiler>
+				<Linker>
+					<Add library="libKlayGE_RenderEngine_D3D9_d.a" />
+					<Add library="libKlayGE_AppLayer_d.a" />
+					<Add library="libKlayGE_Core_d.a" />
+					<Add library="liboleaut32.a" />
+					<Add library="libgdi32.a" />
+					<Add library="boost_signals-mgw43-mt-d" />
+					<Add library="boost_system-mgw43-mt-d" />
+					<Add library="boost_thread-mgw43-mt-d" />
+					<Add library="libdxguid.a" />
+					<Add library="libd3d9.a" />
+					<Add library="libd3dx9.a" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="..\..\bin\Win32\NormalizerCubeMap" prefix_auto="1" extension_auto="1" />
+				<Option object_output="..\..\Release\Win32" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-march=pentium4" />
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-O3" />
+					<Add option="-Wall" />
+                                        <Add option="-DWIN32" />
+					<Add option="-DNDEBUG" />
+					<Add option="-D_CONSOLE" />
+				</Compiler>
+				<Linker>
+					<Add library="libKlayGE_RenderEngine_D3D9.a" />
+					<Add library="libKlayGE_AppLayer.a" />
+					<Add library="libKlayGE_Core.a" />
+					<Add library="libdxguid.a" />
+					<Add library="liboleaut32.a" />
+					<Add library="boost_signals-mgw43-mt" />
+					<Add library="boost_system-mgw43-mt" />
+					<Add library="boost_thread-mgw43-mt" />
+					<Add library="libd3d9.a" />
+					<Add library="libd3dx9.a" />
+					<Add library="libgdi32.a" />
+				</Linker>
+			</Target>
+		</Build>
+		<VirtualTargets>
+			<Add alias="All" targets="Debug;Release;" />
+		</VirtualTargets>
+		<Unit filename="..\..\NormalizerCubeMap\NormalizerCubeMap.cpp" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

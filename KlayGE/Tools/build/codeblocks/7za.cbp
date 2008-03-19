@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="7za" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="..\..\bin\Win32\7za" prefix_auto="1" extension_auto="1" />
+				<Option object_output="..\..\Debug\Win32" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-D_DEBUG" />
+					<Add option="-DWIN32" />
+					<Add option="-D_WINDOWS" />
+					<Add option="-D_USRDLL" />
+					<Add option="-DMY7Z_EXPORTS" />
+					<Add option="-DEXCLUDE_COM" />
+					<Add option="-DNO_REGISTRY" />
+					<Add option="-DFORMAT_7Z" />
+					<Add option="-DCOMPRESS_LZMA" />
+					<Add option="-DCOMPRESS_BCJ_X86" />
+					<Add option="-DCOMPRESS_BCJ2" />
+					<Add option="-DCOMPRESS_COPY" />
+					<Add option="-DCOMPRESS_MF_MT" />
+					<Add option="-DCOMPRESS_PPMD" />
+					<Add option="-DCOMPRESS_DEFLATE_DECODER" />
+					<Add option="-DCOMPRESS_BZIP2_DECODER" />
+					<Add option="-DCRYPTO_7ZAES" />
+					<Add option="-DCRYPTO_AES" />
+					<Add option="-DCOMPRESS_MT" />
+					<Add option="-DCOMPRESS_BZIP2_MT" />
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-O0" />
+					<Add directory="..\..\7za\CPP" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="..\..\7za\CPP" />
+				</ResourceCompiler>
+			</Target>
+			<Target title="Release">
+				<Option output="..\..\bin\Win32\7za" prefix_auto="1" extension_auto="1" />
+				<Option object_output="..\..\Release\Win32" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-DNDEBUG" />
+					<Add option="-DWIN32" />
+					<Add option="-D_WINDOWS" />
+					<Add option="-D_USRDLL" />
+					<Add option="-DMY7Z_EXPORTS" />
+					<Add option="-DEXCLUDE_COM" />
+					<Add option="-DNO_REGISTRY" />
+					<Add option="-DFORMAT_7Z" />
+					<Add option="-DCOMPRESS_LZMA" />
+					<Add option="-DCOMPRESS_BCJ_X86" />
+					<Add option="-DCOMPRESS_BCJ2" />
+					<Add option="-DCOMPRESS_COPY" />
+					<Add option="-DCOMPRESS_MF_MT" />
+					<Add option="-DCOMPRESS_PPMD" />
+					<Add option="-DCOMPRESS_DEFLATE_DECODER" />
+					<Add option="-DCOMPRESS_BZIP2_DECODER" />
+					<Add option="-DCRYPTO_7ZAES" />
+					<Add option="-DCRYPTO_AES" />
+					<Add option="-DCOMPRESS_MT" />
+					<Add option="-DCOMPRESS_BZIP2_MT" />
+					<Add option="-Wall" />
+					<Add option="-O1" />
+					<Add directory="..\..\7za\CPP" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="..\..\7za\CPP" />
+				</ResourceCompiler>
+			</Target>
+		</Build>
+		<VirtualTargets>
+			<Add alias="All" targets="Debug;Release;" />
+		</VirtualTargets>
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7z.ico" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zCompressionMode.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zCompressionMode.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zDecode.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zDecode.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zEncode.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zEncode.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zExtract.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zFolderInStream.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zFolderInStream.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zFolderOutStream.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zFolderOutStream.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zHandler.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zHandler.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zHandlerOut.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zHeader.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zHeader.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zIn.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zIn.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zItem.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zOut.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zOut.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zProperties.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zProperties.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zRegister.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zSpecStream.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zSpecStream.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zUpdate.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\7zUpdate.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\7z\StdAfx.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\Archive2.def" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\ArchiveExports.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\Common\CoderMixer2.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\Common\CoderMixer2.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\Common\CoderMixer2MT.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\Common\CoderMixer2MT.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\Common\CrossThreadProgress.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\Common\CrossThreadProgress.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\Common\HandlerOut.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\Common\HandlerOut.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\Common\InStreamWithCRC.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\Common\InStreamWithCRC.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\Common\ItemNameUtils.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\Common\ItemNameUtils.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\Common\OutStreamWithCRC.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\Common\OutStreamWithCRC.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\Common\ParseProperties.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\Common\ParseProperties.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\Common\StdAfx.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Archive\DllExports2.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Bundles\Format7z\resource.rc">
+			<Option compilerVar="WINDRES" />
+		</Unit>
+		<Unit filename="..\..\7za\CPP\7zip\Common\CreateCoder.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\CreateCoder.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\FilterCoder.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\FilterCoder.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\InBuffer.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\InBuffer.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\InOutTempBuffer.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\InOutTempBuffer.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\LSBFDecoder.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\LSBFDecoder.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\LSBFEncoder.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\LSBFEncoder.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\LimitedStreams.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\LimitedStreams.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\LockedStream.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\LockedStream.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\MSBFDecoder.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\MSBFEncoder.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\MethodId.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\MethodId.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\MethodProps.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\MethodProps.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\OutBuffer.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\OutBuffer.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\ProgressUtils.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\ProgressUtils.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\RegisterArc.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\RegisterCodec.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\StdAfx.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\StreamBinder.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\StreamBinder.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\StreamObjects.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\StreamObjects.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\StreamUtils.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\StreamUtils.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\VirtThread.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Common\VirtThread.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\BWT\BlockSort.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\BWT\BlockSort.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\BWT\Mtf8.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\BWT\StdAfx.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\BZip2\BZip2CRC.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\BZip2\BZip2CRC.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\BZip2\BZip2Const.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\BZip2\BZip2Decoder.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\BZip2\BZip2Decoder.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\BZip2\BZip2Encoder.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\BZip2\BZip2Encoder.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\BZip2\BZip2Register.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\BZip2\StdAfx.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Branch\ARM.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Branch\ARM.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Branch\ARMThumb.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Branch\ARMThumb.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Branch\BCJ2Register.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Branch\BCJRegister.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Branch\BranchCoder.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Branch\BranchCoder.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Branch\BranchRegister.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Branch\IA64.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Branch\IA64.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Branch\PPC.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Branch\PPC.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Branch\SPARC.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Branch\SPARC.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Branch\StdAfx.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Branch\x86.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Branch\x86.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Branch\x86_2.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Branch\x86_2.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\ByteSwap\ByteSwap.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\ByteSwap\ByteSwap.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\ByteSwap\ByteSwapRegister.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\ByteSwap\StdAfx.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\CodecExports.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Copy\CopyCoder.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Copy\CopyCoder.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Copy\CopyRegister.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Copy\StdAfx.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Deflate\DeflateConst.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Deflate\DeflateDecoder.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Deflate\DeflateDecoder.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Deflate\DeflateEncoder.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Deflate\DeflateEncoder.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Deflate\DeflateExtConst.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Deflate\DeflateRegister.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\Deflate\StdAfx.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\LZMA\LZMA.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\LZMA\LZMADecoder.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\LZMA\LZMADecoder.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\LZMA\LZMAEncoder.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\LZMA\LZMAEncoder.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\LZMA\LZMARegister.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\LZMA\StdAfx.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\LZ\LZOutWindow.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\LZ\LZOutWindow.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\LZ\StdAfx.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\PPMD\PPMDContext.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\PPMD\PPMDDecode.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\PPMD\PPMDDecoder.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\PPMD\PPMDDecoder.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\PPMD\PPMDEncode.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\PPMD\PPMDEncoder.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\PPMD\PPMDEncoder.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\PPMD\PPMDRegister.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\PPMD\PPMDSubAlloc.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\PPMD\PPMDType.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\PPMD\StdAfx.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\RangeCoder\RangeCoder.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\RangeCoder\RangeCoderBit.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\RangeCoder\RangeCoderBit.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\RangeCoder\RangeCoderBitTree.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\RangeCoder\RangeCoderOpt.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Compress\RangeCoder\StdAfx.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Crypto\7zAES\7zAES.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Crypto\7zAES\7zAES.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Crypto\7zAES\7zAESRegister.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Crypto\7zAES\StdAfx.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Crypto\AES\MyAES.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Crypto\AES\MyAES.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Crypto\AES\StdAfx.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Crypto\Hash\RandGen.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Crypto\Hash\RandGen.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Crypto\Hash\RotateDefs.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Crypto\Hash\Sha1.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Crypto\Hash\Sha1.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Crypto\Hash\Sha256.cpp" />
+		<Unit filename="..\..\7za\CPP\7zip\Crypto\Hash\Sha256.h" />
+		<Unit filename="..\..\7za\CPP\7zip\Crypto\Hash\StdAfx.h" />
+		<Unit filename="..\..\7za\CPP\Common\AutoPtr.h" />
+		<Unit filename="..\..\7za\CPP\Common\Buffer.h" />
+		<Unit filename="..\..\7za\CPP\Common\CRC.cpp" />
+		<Unit filename="..\..\7za\CPP\Common\ComTry.h" />
+		<Unit filename="..\..\7za\CPP\Common\Defs.h" />
+		<Unit filename="..\..\7za\CPP\Common\DynamicBuffer.h" />
+		<Unit filename="..\..\7za\CPP\Common\IntToString.cpp" />
+		<Unit filename="..\..\7za\CPP\Common\IntToString.h" />
+		<Unit filename="..\..\7za\CPP\Common\MyCom.h" />
+		<Unit filename="..\..\7za\CPP\Common\MyException.h" />
+		<Unit filename="..\..\7za\CPP\Common\MyInitGuid.h" />
+		<Unit filename="..\..\7za\CPP\Common\MyString.cpp" />
+		<Unit filename="..\..\7za\CPP\Common\MyString.h" />
+		<Unit filename="..\..\7za\CPP\Common\MyUnknown.h" />
+		<Unit filename="..\..\7za\CPP\Common\MyVector.cpp" />
+		<Unit filename="..\..\7za\CPP\Common\MyVector.h" />
+		<Unit filename="..\..\7za\CPP\Common\MyWindows.cpp" />
+		<Unit filename="..\..\7za\CPP\Common\MyWindows.h" />
+		<Unit filename="..\..\7za\CPP\Common\NewHandler.cpp" />
+		<Unit filename="..\..\7za\CPP\Common\NewHandler.h" />
+		<Unit filename="..\..\7za\CPP\Common\StdAfx.h" />
+		<Unit filename="..\..\7za\CPP\Common\StringConvert.cpp" />
+		<Unit filename="..\..\7za\CPP\Common\StringConvert.h" />
+		<Unit filename="..\..\7za\CPP\Common\StringToInt.cpp" />
+		<Unit filename="..\..\7za\CPP\Common\StringToInt.h" />
+		<Unit filename="..\..\7za\CPP\Common\Types.h" />
+		<Unit filename="..\..\7za\CPP\Common\Wildcard.cpp" />
+		<Unit filename="..\..\7za\CPP\Common\Wildcard.h" />
+		<Unit filename="..\..\7za\CPP\Windows\Defs.h" />
+		<Unit filename="..\..\7za\CPP\Windows\FileDir.cpp" />
+		<Unit filename="..\..\7za\CPP\Windows\FileDir.h" />
+		<Unit filename="..\..\7za\CPP\Windows\FileFind.cpp" />
+		<Unit filename="..\..\7za\CPP\Windows\FileFind.h" />
+		<Unit filename="..\..\7za\CPP\Windows\FileIO.cpp" />
+		<Unit filename="..\..\7za\CPP\Windows\FileIO.h" />
+		<Unit filename="..\..\7za\CPP\Windows\FileName.cpp" />
+		<Unit filename="..\..\7za\CPP\Windows\FileName.h" />
+		<Unit filename="..\..\7za\CPP\Windows\Handle.h" />
+		<Unit filename="..\..\7za\CPP\Windows\PropVariant.cpp" />
+		<Unit filename="..\..\7za\CPP\Windows\PropVariant.h" />
+		<Unit filename="..\..\7za\CPP\Windows\StdAfx.h" />
+		<Unit filename="..\..\7za\CPP\Windows\Synchronization.cpp" />
+		<Unit filename="..\..\7za\CPP\Windows\Synchronization.h" />
+		<Unit filename="..\..\7za\CPP\Windows\System.cpp" />
+		<Unit filename="..\..\7za\CPP\Windows\System.h" />
+		<Unit filename="..\..\7za\CPP\Windows\Thread.h" />
+		<Unit filename="..\..\7za\C\7zCrc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\7za\C\7zCrc.h" />
+		<Unit filename="..\..\7za\C\Alloc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\7za\C\Alloc.h" />
+		<Unit filename="..\..\7za\C\Compress\Branch\BranchARM.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\7za\C\Compress\Branch\BranchARM.h" />
+		<Unit filename="..\..\7za\C\Compress\Branch\BranchARMThumb.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\7za\C\Compress\Branch\BranchARMThumb.h" />
+		<Unit filename="..\..\7za\C\Compress\Branch\BranchIA64.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\7za\C\Compress\Branch\BranchIA64.h" />
+		<Unit filename="..\..\7za\C\Compress\Branch\BranchPPC.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\7za\C\Compress\Branch\BranchPPC.h" />
+		<Unit filename="..\..\7za\C\Compress\Branch\BranchSPARC.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\7za\C\Compress\Branch\BranchSPARC.h" />
+		<Unit filename="..\..\7za\C\Compress\Branch\BranchTypes.h" />
+		<Unit filename="..\..\7za\C\Compress\Branch\BranchX86.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\7za\C\Compress\Branch\BranchX86.h" />
+		<Unit filename="..\..\7za\C\Compress\Huffman\HuffmanEncode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\7za\C\Compress\Huffman\HuffmanEncode.h" />
+		<Unit filename="..\..\7za\C\Compress\Lz\LzHash.h" />
+		<Unit filename="..\..\7za\C\Compress\Lz\MatchFinder.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\7za\C\Compress\Lz\MatchFinder.h" />
+		<Unit filename="..\..\7za\C\Compress\Lz\MatchFinderMt.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\7za\C\Compress\Lz\MatchFinderMt.h" />
+		<Unit filename="..\..\7za\C\Crypto\Aes.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\7za\C\Crypto\Aes.h" />
+		<Unit filename="..\..\7za\C\IStream.h" />
+		<Unit filename="..\..\7za\C\Sort.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\7za\C\Sort.h" />
+		<Unit filename="..\..\7za\C\Threads.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\7za\C\Threads.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
