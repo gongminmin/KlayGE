@@ -23,6 +23,7 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Vector.hpp>
 #include <KlayGE/Matrix.hpp>
@@ -396,7 +397,7 @@ namespace KlayGE
 					element.Type = D3DDECLTYPE_UBYTE4N;
 				}
 				break;
-			
+
 			// Blend Weights
 			case VEU_BlendWeight:
 				element.Usage = D3DDECLUSAGE_BLENDWEIGHT;
@@ -429,7 +430,7 @@ namespace KlayGE
 	RenderDeviceCaps D3D9Mapping::Mapping(D3DCAPS9 const & d3d_caps)
 	{
 		D3D9RenderEngine& re = *checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			
+
 		RenderDeviceCaps ret;
 
 		ret.max_shader_model		= static_cast<uint8_t>(std::min((d3d_caps.VertexShaderVersion & 0xFF00) >> 8,

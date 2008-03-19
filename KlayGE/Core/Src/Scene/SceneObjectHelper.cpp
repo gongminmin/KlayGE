@@ -21,8 +21,8 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
-#include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/Math.hpp>
+#include <KlayGE/RenderableHelper.hpp>
 
 #include <boost/tuple/tuple.hpp>
 

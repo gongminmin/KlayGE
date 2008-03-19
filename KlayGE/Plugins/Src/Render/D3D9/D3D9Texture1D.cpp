@@ -17,6 +17,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/Texture.hpp>
 
 #include <cstring>
@@ -88,7 +89,7 @@ namespace KlayGE
 		{
 			filter |= D3DX_FILTER_SRGB_OUT;
 		}
-				
+
 		ID3D9SurfacePtr src, dst;
 		for (uint32_t level = 0; level < maxLevel; ++ level)
 		{
@@ -135,7 +136,7 @@ namespace KlayGE
 		{
 			filter |= D3DX_FILTER_SRGB_OUT;
 		}
-				
+
 		ID3D9SurfacePtr src, dst;
 		{
 			IDirect3DSurface9* temp;
@@ -192,7 +193,7 @@ namespace KlayGE
 			{
 				filter |= D3DX_FILTER_SRGB;
 			}
-	
+
 			if (TU_RenderTarget == usage_)
 			{
 				ID3D9TexturePtr d3dTexture1D = this->CreateTexture1D(D3DUSAGE_AUTOGENMIPMAP | D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
@@ -309,7 +310,7 @@ namespace KlayGE
 			case TU_Default:
 				d3dTmpTexture1D = this->CreateTexture1D(0, D3DPOOL_MANAGED);
 				break;
-				
+
 			case TU_RenderTarget:
 				d3dTmpTexture1D = this->CreateTexture1D(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
 				break;

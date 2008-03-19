@@ -23,6 +23,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Util.hpp>
 
+#include <cstring>
 #include <fstream>
 
 #include <KlayGE/Texture.hpp>
@@ -592,7 +593,7 @@ namespace KlayGE
 
 							data += mapper.SlicePitch() - mapper.RowPitch() * height;
 						}
-					}	
+					}
 				}
 			}
 			break;
@@ -1201,7 +1202,7 @@ namespace KlayGE
 		{
 		}
 		void MapCube(CubeFaces /*level*/, int /*level*/, TextureMapAccess /*level*/,
-			uint32_t /*x_offset*/, uint32_t /*y_offset*/, uint32_t /*width*/, uint32_t /*height*/, 
+			uint32_t /*x_offset*/, uint32_t /*y_offset*/, uint32_t /*width*/, uint32_t /*height*/,
 			void*& /*data*/, uint32_t& /*row_pitch*/)
 		{
 		}

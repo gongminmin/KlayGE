@@ -36,6 +36,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Context.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderStateObject.hpp>
@@ -782,7 +783,7 @@ namespace KlayGE
 				if ("pixel_shader" == state_name)
 				{
 					shader_desc& sd = (*shader_descs_)[ShaderObject::ST_PixelShader];
-					var->Value(sd);				
+					var->Value(sd);
 				}
 			}
 		}

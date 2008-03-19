@@ -13,6 +13,7 @@
 #ifndef _TIMER_HPP
 #define _TIMER_HPP
 
+#include <limits>
 #ifdef KLAYGE_PLATFORM_WINDOWS
 	#include <windows.h>
 #else
@@ -52,7 +53,7 @@ namespace KlayGE
 		}
 
 		// return estimated maximum value for elapsed()
-		double elapsed_max() const   
+		double elapsed_max() const
 		{
 #ifdef KLAYGE_PLATFORM_WINDOWS
 			return static_cast<double>(std::numeric_limits<uint64_t>::max()) / cps_ - start_time_;

@@ -17,6 +17,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/Sampler.hpp>
 #include <KlayGE/Math.hpp>
 
@@ -345,7 +346,7 @@ namespace KlayGE
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ShaderType type = static_cast<ShaderType>(i);
-			
+
 			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 			if (iter != param_descs_[type].end())
 			{
@@ -378,7 +379,7 @@ namespace KlayGE
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ShaderType type = static_cast<ShaderType>(i);
-			
+
 			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 			if (iter != param_descs_[type].end())
 			{
@@ -395,7 +396,7 @@ namespace KlayGE
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ShaderType type = static_cast<ShaderType>(i);
-			
+
 			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 			if (iter != param_descs_[type].end())
 			{
@@ -412,7 +413,7 @@ namespace KlayGE
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ShaderType type = static_cast<ShaderType>(i);
-			
+
 			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 			if (iter != param_descs_[type].end())
 			{
@@ -430,7 +431,7 @@ namespace KlayGE
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ShaderType type = static_cast<ShaderType>(i);
-			
+
 			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 			if (iter != param_descs_[type].end())
 			{
@@ -472,7 +473,7 @@ namespace KlayGE
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ShaderType type = static_cast<ShaderType>(i);
-			
+
 			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 			if (iter != param_descs_[type].end())
 			{
@@ -514,7 +515,7 @@ namespace KlayGE
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ShaderType type = static_cast<ShaderType>(i);
-			
+
 			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 			if (iter != param_descs_[type].end())
 			{
@@ -536,7 +537,7 @@ namespace KlayGE
 			for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 			{
 				ShaderType type = static_cast<ShaderType>(i);
-				
+
 				parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 				if (iter != param_descs_[type].end())
 				{
@@ -554,7 +555,7 @@ namespace KlayGE
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ShaderType type = static_cast<ShaderType>(i);
-			
+
 			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 			if (iter != param_descs_[type].end())
 			{
@@ -577,7 +578,7 @@ namespace KlayGE
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ShaderType type = static_cast<ShaderType>(i);
-			
+
 			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
 			if (iter != param_descs_[type].end())
 			{

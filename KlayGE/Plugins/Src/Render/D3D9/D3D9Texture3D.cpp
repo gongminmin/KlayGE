@@ -17,6 +17,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/Texture.hpp>
 
 #include <cstring>
@@ -124,7 +125,7 @@ namespace KlayGE
 		if (this->NumMipMaps() != target.NumMipMaps())
 		{
 			target.BuildMipSubLevels();
-		}		
+		}
 	}
 
 	void D3D9Texture3D::CopyToTexture3D(Texture& target, int level,
@@ -320,7 +321,7 @@ namespace KlayGE
 			case TU_Default:
 				d3dTmpTexture3D = this->CreateTexture3D(0, D3DPOOL_MANAGED);
 				break;
-				
+
 			case TU_RenderTarget:
 				d3dTmpTexture3D = this->CreateTexture3D(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
 				break;

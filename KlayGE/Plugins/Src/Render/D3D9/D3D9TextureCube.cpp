@@ -17,6 +17,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/Texture.hpp>
 
 #include <cstring>
@@ -93,7 +94,7 @@ namespace KlayGE
 		{
 			filter |= D3DX_FILTER_SRGB_OUT;
 		}
-			
+
 		ID3D9SurfacePtr src, dst;
 		for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face <= D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
 		{
@@ -124,7 +125,7 @@ namespace KlayGE
 		if (this->NumMipMaps() != target.NumMipMaps())
 		{
 			target.BuildMipSubLevels();
-		}		
+		}
 	}
 
 	void D3D9TextureCube::CopyToTextureCube(Texture& target, CubeFaces face, int level,
@@ -144,7 +145,7 @@ namespace KlayGE
 		{
 			filter |= D3DX_FILTER_SRGB_OUT;
 		}
-			
+
 		ID3D9SurfacePtr src, dst;
 		{
 			IDirect3DSurface9* temp;
@@ -325,7 +326,7 @@ namespace KlayGE
 			case TU_Default:
 				d3dTmpTextureCube = this->CreateTextureCube(0, D3DPOOL_MANAGED);
 				break;
-				
+
 			case TU_RenderTarget:
 				d3dTmpTextureCube = this->CreateTextureCube(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
 				break;

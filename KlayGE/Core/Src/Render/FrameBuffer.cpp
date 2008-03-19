@@ -14,6 +14,7 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 
@@ -273,7 +274,7 @@ namespace KlayGE
 				{
 					clr_views_.resize(clr_id + 1);
 				}
-				
+
 				if (clr_views_[clr_id])
 				{
 					clr_views_[clr_id]->OnDetached(*this, att);

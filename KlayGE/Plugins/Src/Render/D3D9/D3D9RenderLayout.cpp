@@ -14,6 +14,7 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/COMPtr.hpp>
 #include <KlayGE/ThrowErr.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
@@ -42,7 +43,7 @@ namespace KlayGE
 	{
 		dirty_decl_ = true;
 	}
-	
+
 	void D3D9RenderLayout::DoOnResetDevice()
 	{
 		dirty_decl_ = true;

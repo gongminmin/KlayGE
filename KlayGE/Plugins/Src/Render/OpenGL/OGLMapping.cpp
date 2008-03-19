@@ -15,6 +15,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/Vector.hpp>
 #include <KlayGE/Matrix.hpp>
 #include <KlayGE/Color.hpp>

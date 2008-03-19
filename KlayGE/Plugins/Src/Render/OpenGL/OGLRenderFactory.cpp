@@ -12,6 +12,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/Math.hpp>
 
 #include <KlayGE/OpenGL/OGLRenderEngine.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>
@@ -35,7 +36,7 @@ namespace KlayGE
 	{
 		context_ = cgCreateContext();
 	}
-	
+
 	CGcontext OGLRenderFactory::CGContext() const
 	{
 		return context_;
@@ -57,7 +58,7 @@ namespace KlayGE
 	{
 		return TexturePtr(new OGLTexture1D(width, numMipMaps, format));
 	}
-	
+
 	TexturePtr OGLRenderFactory::MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps,
 				ElementFormat format)
 	{
@@ -69,7 +70,7 @@ namespace KlayGE
 	{
 		return TexturePtr(new OGLTexture3D(width, height, depth, numMipMaps, format));
 	}
-	
+
 	TexturePtr OGLRenderFactory::MakeTextureCube(uint32_t size, uint16_t numMipMaps,
 				ElementFormat format)
 	{

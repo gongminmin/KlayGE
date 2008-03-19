@@ -22,6 +22,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/Color.hpp>
 
@@ -60,7 +61,7 @@ namespace KlayGE
 			return ID3D9SurfacePtr();
 		}
 	}
-	
+
 	ID3D9SurfacePtr D3D9FrameBuffer::D3DRenderZBuffer() const
 	{
 		if (rs_view_)
@@ -105,7 +106,7 @@ namespace KlayGE
 	}
 
 	void D3D9FrameBuffer::Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil)
-	{	
+	{
 		DWORD d3d_flags = 0;
 		if (flags & CBM_Color)
 		{
@@ -175,7 +176,7 @@ namespace KlayGE
 	void D3D9FrameBuffer::DoOnLostDevice()
 	{
 	}
-	
+
 	void D3D9FrameBuffer::DoOnResetDevice()
 	{
 	}

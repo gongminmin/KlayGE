@@ -19,6 +19,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Texture.hpp>
@@ -83,7 +84,7 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 		return 0;
 	}
-	
+
 	uint32_t OGLTexture::Height(int /*level*/) const
 	{
 		BOOST_ASSERT(false);

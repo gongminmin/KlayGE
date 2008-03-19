@@ -15,6 +15,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Texture.hpp>
@@ -219,7 +220,7 @@ namespace KlayGE
 				GLenum gl_format;
 				GLenum gl_type;
 				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
-				
+
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[level]);
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
@@ -276,7 +277,7 @@ namespace KlayGE
 					}
 
 					GLsizei const image_size = ((last_width_ + 3) / 4) * block_size;
-				
+
 					glCompressedTexSubImage1D(GL_TEXTURE_1D, level, last_x_offset_,
 						last_width_, gl_format, image_size, NULL);
 				}
@@ -315,7 +316,7 @@ namespace KlayGE
 					}
 
 					GLsizei const image_size = ((last_width_ + 3) / 4) * block_size;
-				
+
 					glCompressedTexSubImage1D(GL_TEXTURE_1D, level, last_x_offset_,
 						last_width_, gl_format, image_size, NULL);
 				}
@@ -338,7 +339,7 @@ namespace KlayGE
 		GLint w;
 
 		widths_.resize(numMipMaps_);
-		
+
 		glBindTexture(GL_TEXTURE_1D, texture_);
 		for (uint16_t level = 0; level < numMipMaps_; ++ level)
 		{

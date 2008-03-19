@@ -18,6 +18,7 @@
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Color.hpp>

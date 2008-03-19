@@ -14,6 +14,7 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/COMPtr.hpp>
 #include <KlayGE/ThrowErr.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGe/FrameBuffer.hpp>
@@ -166,7 +167,7 @@ namespace KlayGE
 	void D3D9SurfaceRenderView::DoOnLostDevice()
 	{
 	}
-	
+
 	void D3D9SurfaceRenderView::DoOnResetDevice()
 	{
 	}

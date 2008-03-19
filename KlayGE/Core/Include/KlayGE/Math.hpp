@@ -467,7 +467,7 @@ namespace KlayGE
 
 			Vector_T<typename T::value_type, 4> temp(detail::transform_helper<typename T::value_type, T::elem_num>::Do(v, mat));
 			Vector_T<typename T::value_type, T::elem_num> ret(&temp[0]);
-			if (equal(temp.w(), T::value_type(0)))
+			if (equal(temp.w(), typename T::value_type(0)))
 			{
 				ret = T::Zero();
 			}

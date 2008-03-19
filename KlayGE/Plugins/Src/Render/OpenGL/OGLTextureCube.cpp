@@ -15,6 +15,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Texture.hpp>
@@ -109,7 +110,7 @@ namespace KlayGE
 					uint8_t* p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
 					memset(p, 0, image_size);
 					glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-					
+
 					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glinternalFormat,
 						size, size, 0, glformat, gltype, NULL);
 				}
@@ -127,7 +128,7 @@ namespace KlayGE
 
 		return static_cast<GLint>(widths_[level]);
 	}
-	
+
 	uint32_t OGLTextureCube::Height(int level) const
 	{
 		return this->Width(level);
@@ -250,7 +251,7 @@ namespace KlayGE
 				GLenum gl_format;
 				GLenum gl_type;
 				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
-				
+
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[face * numMipMaps_ + level]);
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
@@ -308,7 +309,7 @@ namespace KlayGE
 					}
 
 					GLsizei const image_size = ((this->Width(level) + 3) / 4) * ((this->Height(level) + 3) / 4) * block_size;
-				
+
 					glCompressedTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level,
 						last_x_offset_, last_y_offset_, last_width_, last_height_, gl_format, image_size, NULL);
 				}
@@ -348,7 +349,7 @@ namespace KlayGE
 					}
 
 					GLsizei const image_size = ((this->Width(level) + 3) / 4) * ((this->Height(level) + 3) / 4) * block_size;
-				
+
 					glCompressedTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level,
 						last_x_offset_, last_y_offset_, last_width_, last_height_, gl_format, image_size, NULL);
 				}

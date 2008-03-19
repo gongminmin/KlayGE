@@ -15,6 +15,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/Math.hpp>
 
 #include <boost/typeof/typeof.hpp>
 
@@ -62,7 +63,7 @@ namespace KlayGE
 		resource_pool_.push_back(ret);
 		return ret;
 	}
-	TexturePtr D3D9RenderFactory::MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth, 
+	TexturePtr D3D9RenderFactory::MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth,
 			uint16_t numMipMaps, ElementFormat format)
 	{
 		D3D9TexturePtr ret(new D3D9Texture3D(width, height, depth, numMipMaps, format));

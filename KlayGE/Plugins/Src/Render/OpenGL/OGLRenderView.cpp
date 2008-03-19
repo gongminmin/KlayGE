@@ -13,6 +13,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/ThrowErr.hpp>
+#include <KlayGE/Math.hpp>
 
 #include <boost/assert.hpp>
 
@@ -650,7 +651,7 @@ namespace KlayGE
 
 		BOOST_ASSERT(fbo_ == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
-		
+
 		GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X;
 		switch (att)
 		{

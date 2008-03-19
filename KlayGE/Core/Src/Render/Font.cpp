@@ -44,6 +44,7 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/RenderLayout.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/Viewport.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/Texture.hpp>
@@ -58,7 +59,6 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Sampler.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
-#include <KlayGE/Math.hpp>
 #include <KlayGE/ClosedHashMap.hpp>
 
 #include <algorithm>
