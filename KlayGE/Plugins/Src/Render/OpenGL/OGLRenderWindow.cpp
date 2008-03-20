@@ -98,7 +98,7 @@ namespace KlayGE
 		RECT rc = { 0, 0, width_, height_ };
 		::AdjustWindowRect(&rc, style, false);
 
-		::SetWindowLongPtrW(hWnd_, GWL_STYLE, style);
+		::SetWindowLongPtrA(hWnd_, GWL_STYLE, style);
 		::SetWindowPos(hWnd_, NULL, settings.left, settings.top, rc.right - rc.left, rc.bottom - rc.top,
 			SWP_SHOWWINDOW | SWP_NOZORDER);
 
@@ -258,7 +258,7 @@ namespace KlayGE
 				style = WS_OVERLAPPEDWINDOW;
 			}
 
-			::SetWindowLongPtrW(hWnd_, GWL_STYLE, style);
+			::SetWindowLongPtrA(hWnd_, GWL_STYLE, style);
 
 			RECT rc = { 0, 0, width_, height_ };
 			::AdjustWindowRect(&rc, style, false);
