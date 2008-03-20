@@ -1,8 +1,10 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>

@@ -22,8 +22,6 @@
 					<Add option="-D_DEBUG" />
 					<Add option="-D_LIB" />
 					<Add option="-DSTRICT" />
-					<Add option="-D_CRT_SECURE_NO_DEPRECATE" />
-					<Add option="-D_SCL_SECURE_NO_DEPRECATE" />
 				</Compiler>
 			</Target>
 			<Target title="Release">
@@ -35,17 +33,17 @@
 				<Option createDefFile="1" />
 				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
-					<Add option="-march=pentium4" />
 					<Add option="-fexpensive-optimizations" />
-					<Add option="-O3" />
+					<Add option="-O2" />
 					<Add option="-Wall" />
 					<Add option="-DWIN32" />
 					<Add option="-DNDEBUG" />
 					<Add option="-D_LIB" />
 					<Add option="-DSTRICT" />
-					<Add option="-D_CRT_SECURE_NO_DEPRECATE" />
-					<Add option="-D_SECURE_SCL=0" />
 				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
 			</Target>
 		</Build>
 		<VirtualTargets>

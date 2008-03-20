@@ -91,6 +91,7 @@ namespace KlayGE
 	D3D9RenderEngine::~D3D9RenderEngine()
 	{
 		cur_frame_buffer_.reset();
+		default_frame_buffer_.reset();
 
 		d3dDevice_.reset();
 		d3d_.reset();

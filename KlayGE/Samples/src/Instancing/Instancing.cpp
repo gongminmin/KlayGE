@@ -6,13 +6,13 @@
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/Sampler.hpp>
 #include <KlayGE/KMesh.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/Script.hpp>
@@ -179,7 +179,7 @@ namespace
 		Exit
 	};
 
-	InputActionDefine actions[] = 
+	InputActionDefine actions[] =
 	{
 		InputActionDefine(Exit, KS_Escape)
 	};
@@ -337,7 +337,7 @@ uint32_t Instancing::DoUpdate(uint32_t /*pass*/)
 	std::wostringstream stream;
 	stream << this->FPS();
 
-	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"几何体实例化");
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Instancing");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());
 
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());

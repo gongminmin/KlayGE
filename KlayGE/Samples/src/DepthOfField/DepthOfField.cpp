@@ -7,12 +7,12 @@
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/Sampler.hpp>
 #include <KlayGE/KMesh.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
@@ -227,7 +227,7 @@ namespace
 		Exit,
 	};
 
-	InputActionDefine actions[] = 
+	InputActionDefine actions[] =
 	{
 		InputActionDefine(CtrlCamera, KS_LeftCtrl),
 		InputActionDefine(CtrlCamera, KS_RightCtrl),
@@ -333,11 +333,11 @@ void DepthOfFieldApp::InitObjects()
 	checked_pointer_cast<ClearFloatPostProcess>(clear_float_)->ClearColor(float4(0.2f - 0.5f, 0.4f - 0.5f, 0.6f - 0.5f, 1 - 0.5f));
 
 	dialog_ = UIManager::Instance().MakeDialog();
-	
+
 	dialog_->AddControl(UIControlPtr(new UIStatic(dialog_, FocusPlaneStatic, L"Focus plane:", 60, 200, 100, 24, false)));
 	dialog_->AddControl(UIControlPtr(new UISlider(dialog_, FocusPlaneSlider, 60, 220, 100, 24, 0, 200, 100, false)));
 	dialog_->Control<UISlider>(FocusPlaneSlider)->OnValueChangedEvent().connect(boost::bind(&DepthOfFieldApp::FocusPlaneChangedHandler, this, _1));
-	
+
 	dialog_->AddControl(UIControlPtr(new UIStatic(dialog_, FocusRangeStatic, L"Focus range:", 60, 268, 100, 24, false)));
 	dialog_->AddControl(UIControlPtr(new UISlider(dialog_, FocusRangeSlider, 60, 288, 100, 24, 0, 200, 100, false)));
 	dialog_->Control<UISlider>(FocusRangeSlider)->OnValueChangedEvent().connect(boost::bind(&DepthOfFieldApp::FocusRangeChangedHandler, this, _1));
@@ -426,14 +426,14 @@ uint32_t DepthOfFieldApp::DoUpdate(uint32_t pass)
 
 		renderEngine.BindFrameBuffer(clr_depth_buffer_);
 		clear_float_->Apply();
-		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Depth, Color(), 1.0f, 0);
+		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
 		return App3DFramework::URV_Need_Flush;
-	
-	default:
-		renderEngine.BindFrameBuffer(FrameBufferPtr());
-		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Depth, Color(), 1.0f, 0);
 
+	default:
 		depth_of_field_->Apply();
+
+		renderEngine.BindFrameBuffer(FrameBufferPtr());
+		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
 
 		UIManager::Instance().Render();
 

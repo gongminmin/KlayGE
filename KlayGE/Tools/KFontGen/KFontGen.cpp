@@ -66,8 +66,13 @@ struct kfont_header
 int bsf(uint64_t v)
 {
 	v &= ~v + 1;
-	float f = static_cast<float>(v);
-	return (*reinterpret_cast<uint32_t*>(&f) >> 23) - 127;
+	union
+	{
+        float f;
+        uint32_t u;
+	} fnu;
+	fnu.f = static_cast<float>(v);
+	return (fnu.u >> 23) - 127;
 }
 
 class disp_thread

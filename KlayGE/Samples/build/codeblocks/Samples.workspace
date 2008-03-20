@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="Samples workspace">
+		<Project filename="Cartoon.cbp" />
+		<Project filename="Parallax.cbp" />
+		<Project filename="VertexDisplacement.cbp" />
+		<Project filename="DistanceMapping.cbp" />
+		<Project filename="Electro.cbp" />
+		<Project filename="Fractal.cbp" />
+		<Project filename="Refract.cbp" />
+		<Project filename="AsciiArts.cbp" />
+		<Project filename="ShadowCubeMap.cbp" />
+		<Project filename="Instancing.cbp" />
+		<Project filename="SkinnedMesh.cbp" />
+		<Project filename="VideoTexture.cbp" />
+		<Project filename="ParticleSystem.cbp" />
+		<Project filename="GPUParticleSystem.cbp" />
+		<Project filename="DepthOfField.cbp" />
+		<Project filename="DepthPeeling.cbp" active="1" />
+	</Workspace>
+</CodeBlocks_workspace_file>

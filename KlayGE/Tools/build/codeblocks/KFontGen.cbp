@@ -34,13 +34,14 @@
 				<Compiler>
 					<Add option="-march=pentium4" />
 					<Add option="-fexpensive-optimizations" />
-					<Add option="-O3" />
+					<Add option="-O2" />
 					<Add option="-Wall" />
-                                        <Add option="-DWIN32" />
+					<Add option="-DWIN32" />
 					<Add option="-DNDEBUG" />
 					<Add option="-D_CONSOLE" />
 				</Compiler>
 				<Linker>
+					<Add option="-s" />
 					<Add library="libKlayGE_Core.a" />
 					<Add library="libfreetype.a" />
 					<Add library="boost_program_options-mgw43-mt" />

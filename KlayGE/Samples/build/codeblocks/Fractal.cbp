@@ -2,13 +2,13 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="NormalMapGen" />
+		<Option title="Fractal" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="..\..\bin\Win32\NormalMapGen_d" prefix_auto="1" extension_auto="1" />
-				<Option object_output="..\..\Debug\Win32\" />
+				<Option output="..\..\bin\Win32\Fractal_d" prefix_auto="1" extension_auto="1" />
+				<Option object_output="..\..\Debug\Win32" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -22,19 +22,22 @@
 				<Linker>
 					<Add library="libKlayGE_RenderEngine_D3D9_d.a" />
 					<Add library="libKlayGE_AppLayer_d.a" />
+					<Add library="libKlayGE_InputEngine_DInput_d.a" />
 					<Add library="libKlayGE_Core_d.a" />
-					<Add library="liboleaut32.a" />
-					<Add library="libgdi32.a" />
+					<Add library="libKlayGE_Scene_OCTree_d.a" />
 					<Add library="boost_signals-mgw43-mt-d" />
 					<Add library="boost_system-mgw43-mt-d" />
 					<Add library="boost_thread-mgw43-mt-d" />
-					<Add library="libdxguid.a" />
 					<Add library="libd3d9.a" />
 					<Add library="libd3dx9.a" />
+					<Add library="libdxguid.a" />
+					<Add library="libgdi32.a" />
+					<Add library="liboleaut32.a" />
+					<Add library="libdinput8.a" />
 				</Linker>
 			</Target>
 			<Target title="Release">
-				<Option output="..\..\bin\Win32\NormalMapGen" prefix_auto="1" extension_auto="1" />
+				<Option output="..\..\bin\Win32\Fractal" prefix_auto="1" extension_auto="1" />
 				<Option object_output="..\..\Release\Win32" />
 				<Option type="1" />
 				<Option compiler="gcc" />
@@ -50,22 +53,30 @@
 					<Add option="-s" />
 					<Add library="libKlayGE_RenderEngine_D3D9.a" />
 					<Add library="libKlayGE_AppLayer.a" />
+					<Add library="libKlayGE_InputEngine_DInput.a" />
 					<Add library="libKlayGE_Core.a" />
-					<Add library="libdxguid.a" />
-					<Add library="liboleaut32.a" />
+					<Add library="libKlayGE_Scene_OCTree.a" />
 					<Add library="boost_signals-mgw43-mt" />
 					<Add library="boost_system-mgw43-mt" />
 					<Add library="boost_thread-mgw43-mt" />
 					<Add library="libd3d9.a" />
 					<Add library="libd3dx9.a" />
+					<Add library="libdxguid.a" />
 					<Add library="libgdi32.a" />
+					<Add library="liboleaut32.a" />
+					<Add library="libdinput8.a" />
 				</Linker>
 			</Target>
 		</Build>
 		<VirtualTargets>
 			<Add alias="All" targets="Debug;Release;" />
 		</VirtualTargets>
-		<Unit filename="..\..\NormalMapGen\NormalMapGen.cpp" />
+		<Unit filename="..\..\media\Fractal\Fractal.fxml">
+			<Option compile="1" />
+			<Option compiler="gcc" use="1" buildCommand="python $file_dir\..\..\..\Tools\fxmlc\fxmlc.py $file $file_dir\$file_name.kfx" />
+		</Unit>
+		<Unit filename="..\..\src\Fractal\Fractal.cpp" />
+		<Unit filename="..\..\src\Fractal\Fractal.hpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />

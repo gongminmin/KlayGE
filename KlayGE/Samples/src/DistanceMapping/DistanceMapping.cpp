@@ -7,13 +7,13 @@
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/Sampler.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
@@ -72,7 +72,7 @@ namespace
 				float2(0, 1)
 			};
 
-			uint16_t indices[] = 
+			uint16_t indices[] =
 			{
 				0, 1, 2, 2, 3, 0
 			};
@@ -166,7 +166,7 @@ namespace
 		FullScreen,
 	};
 
-	InputActionDefine actions[] = 
+	InputActionDefine actions[] =
 	{
 		InputActionDefine(Exit, KS_Escape),
 		InputActionDefine(FullScreen, KS_Enter),
@@ -188,8 +188,8 @@ int main()
 {
 	OCTree sceneMgr(3);
 
-	//Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
-	Context::Instance().RenderFactoryInstance(OGLRenderFactoryInstance());
+	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
+	//Context::Instance().RenderFactoryInstance(OGLRenderFactoryInstance());
 	Context::Instance().SceneManagerInstance(sceneMgr);
 
 	Context::Instance().InputFactoryInstance(DInputFactoryInstance());

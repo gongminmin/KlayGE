@@ -296,7 +296,7 @@ uint32_t Cartoon::DoUpdate(uint32_t pass)
 
 	FrameBuffer& rw = *checked_pointer_cast<FrameBuffer>(renderEngine.CurFrameBuffer());
 
-	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"¿¨Í¨äÖÈ¾");
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Cartoon Rendering");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description());
 
 	std::wostringstream stream;

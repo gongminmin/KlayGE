@@ -29,8 +29,8 @@ namespace KlayGE
 		ParticleSystem(uint32_t max_num_particles,
 						boost::function<void(ParticleType& par, float4x4 const & mat)> const & gen_func,
 						boost::function<void(ParticleType& par, float elapse_time)> const & update_func)
-			: particles_(max_num_particles),
-				gen_func_(gen_func), update_func_(update_func),
+			: gen_func_(gen_func), update_func_(update_func),
+				particles_(max_num_particles),
 				inv_emit_freq_(0), accumulate_time_(0),
 				model_mat_(float4x4::Identity())
 		{
@@ -51,7 +51,7 @@ namespace KlayGE
 			inv_emit_freq_ = 1.0f / freq;
 
 			float time = 0;
-			BOOST_FOREACH(BOOST_TYPEOF(particles_)::reference particle, particles_)
+			BOOST_FOREACH(typename BOOST_TYPEOF(particles_)::reference particle, particles_)
 			{
 				particle.birth_time = time;
 				time += inv_emit_freq_;
@@ -66,7 +66,7 @@ namespace KlayGE
 				accumulate_time_ = 0;
 			}
 
-			BOOST_FOREACH(BOOST_TYPEOF(particles_)::reference particle, particles_)
+			BOOST_FOREACH(typename BOOST_TYPEOF(particles_)::reference particle, particles_)
 			{
 				if (particle.life > 0)
 				{

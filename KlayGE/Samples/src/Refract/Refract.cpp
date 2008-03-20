@@ -5,6 +5,7 @@
 #include <KlayGE/Font.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/SceneManager.hpp>
@@ -14,7 +15,6 @@
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/KMesh.hpp>
-#include <KlayGE/Sampler.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/HDRPostProcess.hpp>
 
@@ -160,7 +160,7 @@ namespace
 			: SceneObjectHelper(SOA_Cullable)
 		{
 			renderable_ = LoadKModel("teapot.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RefractorRenderable>())->Mesh(0);
-			checked_pointer_cast<RefractorRenderable>(renderable_)->CompressedCubeMap(y_cube, c_cube);	
+			checked_pointer_cast<RefractorRenderable>(renderable_)->CompressedCubeMap(y_cube, c_cube);
 		}
 
 		void Pass(int pass)
@@ -179,7 +179,7 @@ namespace
 		Exit,
 	};
 
-	InputActionDefine actions[] = 
+	InputActionDefine actions[] =
 	{
 		InputActionDefine(Exit, KS_Escape),
 	};
@@ -335,6 +335,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 		hdr_->Apply();
 
 		re.BindFrameBuffer(FrameBufferPtr());
+		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
 
 		std::wostringstream stream;
 		stream << this->FPS() << " FPS";

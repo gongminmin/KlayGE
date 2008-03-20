@@ -5,13 +5,13 @@
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/Sampler.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
@@ -87,7 +87,7 @@ namespace
 		Exit,
 	};
 
-	InputActionDefine actions[] = 
+	InputActionDefine actions[] =
 	{
 		InputActionDefine(Exit, KS_Escape),
 	};
@@ -176,7 +176,7 @@ uint32_t VertexDisplacement::DoUpdate(uint32_t /*pass*/)
 	std::wostringstream stream;
 	stream << this->FPS();
 
-	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"¶¥µãÎ»ÒÆ");
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Vertex displacement");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());
 
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());

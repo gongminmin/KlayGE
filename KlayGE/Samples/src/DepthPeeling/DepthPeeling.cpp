@@ -6,13 +6,13 @@
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/Sampler.hpp>
 #include <KlayGE/KMesh.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
@@ -167,7 +167,7 @@ namespace
 		Exit,
 	};
 
-	InputActionDefine actions[] = 
+	InputActionDefine actions[] =
 	{
 		InputActionDefine(Exit, KS_Escape),
 	};
@@ -289,7 +289,7 @@ void DepthPeelingApp::OnResize(uint32_t width, uint32_t height)
 	depth_texs_[1]->Usage(Texture::TU_RenderTarget);
 
 	default_depth_view_ = re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil);
-	
+
 	for (size_t i = 0; i < peeling_fbs_.size(); ++ i)
 	{
 		peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, EF_ARGB8);

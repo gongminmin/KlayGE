@@ -78,6 +78,7 @@ float4 BlurPS(float4 iTex0 : TEXCOORD0,
 	<technique name="BlurX">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
+			<state name="depth_mask" value="0"/>
 
 			<state name="vertex_shader" value="BlurXVS()"/>
 			<state name="pixel_shader" value="BlurPS()"/>
@@ -87,6 +88,7 @@ float4 BlurPS(float4 iTex0 : TEXCOORD0,
 	<technique name="BlurY">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
+			<state name="depth_mask" value="0"/>
 
 			<state name="vertex_shader" value="BlurYVS()"/>
 			<state name="pixel_shader" value="BlurPS()"/>

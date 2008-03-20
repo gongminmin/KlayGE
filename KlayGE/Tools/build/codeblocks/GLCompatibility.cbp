@@ -33,15 +33,15 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-march=pentium4" />
 					<Add option="-fexpensive-optimizations" />
-					<Add option="-O3" />
+					<Add option="-O2" />
 					<Add option="-Wall" />
-                                        <Add option="-DWIN32" />
+					<Add option="-DWIN32" />
 					<Add option="-DNDEBUG" />
 					<Add option="-D_CONSOLE" />
 				</Compiler>
 				<Linker>
+					<Add option="-s" />
 					<Add library="libglloader.a" />
 					<Add library="libKlayGE_Core.a" />
 					<Add library="libopengl32.a" />

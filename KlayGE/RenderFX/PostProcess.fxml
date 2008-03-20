@@ -3,7 +3,7 @@
 <effect>
 	<parameter type='float4' name='texel_to_pixel_offset'/>
 	<parameter type='int' name='flipping'/>
-	
+
 	<shader>
 		<![CDATA[
 float4 AdjustPos(float4 pos)

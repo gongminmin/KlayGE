@@ -59,13 +59,13 @@ public:
 	int GetImgX(float x) const
 	{
 		float normalized_x = (x - start_x_) / (end_x_ - start_x_);
-		return KlayGE::MathLib::clamp(static_cast<KlayGE::uint32_t>(normalized_x * hm_width_ + 0.5f), 0UL, hm_width_ - 1);
+		return KlayGE::MathLib::clamp<KlayGE::uint32_t>(static_cast<KlayGE::uint32_t>(normalized_x * hm_width_ + 0.5f), 0UL, hm_width_ - 1);
 	}
 
 	int GetImgY(float y) const
 	{
 		float normalized_y = (y - start_y_) / (end_y_ - start_y_);
-		return KlayGE::MathLib::clamp(static_cast<KlayGE::uint32_t>(normalized_y * hm_height_ + 0.5f), 0UL, hm_height_ - 1);
+		return KlayGE::MathLib::clamp<KlayGE::uint32_t>(static_cast<KlayGE::uint32_t>(normalized_y * hm_height_ + 0.5f), 0UL, hm_height_ - 1);
 	}
 
 private:

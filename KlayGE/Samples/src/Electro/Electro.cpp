@@ -6,6 +6,7 @@
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/FrameBuffer.hpp>
@@ -14,7 +15,6 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/Sampler.hpp>
 #include <KlayGE/PerlinNoise.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
@@ -198,7 +198,7 @@ uint32_t Electro::DoUpdate(uint32_t /*pass*/)
 	std::wostringstream stream;
 	stream << this->FPS();
 
-	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"电流效果");
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Electro Effect");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());
 
 	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;

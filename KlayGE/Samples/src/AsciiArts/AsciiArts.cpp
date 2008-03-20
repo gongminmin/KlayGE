@@ -6,13 +6,13 @@
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/Sampler.hpp>
 #include <KlayGE/KMesh.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
@@ -40,10 +40,10 @@ using namespace std;
 int const CELL_WIDTH = 8;
 int const CELL_HEIGHT = 8;
 int const INPUT_NUM_ASCII = 128;
-int const ASCII_WIDTH = 16;
-int const ASCII_HEIGHT = 16;
+size_t const ASCII_WIDTH = 16;
+size_t const ASCII_HEIGHT = 16;
 
-int const OUTPUT_NUM_ASCII = 32;
+size_t const OUTPUT_NUM_ASCII = 32;
 
 namespace
 {
@@ -70,7 +70,7 @@ namespace
 			float const tu = 1.0f / width;
 			float const tv = 1.0f / height;
 
-			// Sample from the 64 surrounding points. 
+			// Sample from the 64 surrounding points.
 			int index = 0;
 			for (int y = -3; y <= 4; y += 2)
 			{
@@ -140,9 +140,9 @@ namespace
 		for (size_t i = 0; i < ret.size(); ++ i)
 		{
 			ret[i].resize(ASCII_WIDTH * ASCII_HEIGHT);
-			for (int y = 0; y < ASCII_HEIGHT; ++ y)
+			for (size_t y = 0; y < ASCII_HEIGHT; ++ y)
 			{
-				for (int x = 0; x < ASCII_WIDTH; ++ x)
+				for (size_t x = 0; x < ASCII_WIDTH; ++ x)
 				{
 					ret[i][y * ASCII_WIDTH + x]
 						= ascii_tex_data[((i / ASCII_IN_A_ROW) * ASCII_HEIGHT + y) * ASCII_IN_A_ROW * ASCII_WIDTH
@@ -198,7 +198,7 @@ namespace
 		FullScreen,
 	};
 
-	InputActionDefine actions[] = 
+	InputActionDefine actions[] =
 	{
 		InputActionDefine(Switch, KS_Space),
 		InputActionDefine(Exit, KS_Escape),
@@ -398,7 +398,7 @@ uint32_t AsciiArtsApp::DoUpdate(uint32_t pass)
 	std::wostringstream stream;
 	stream << this->FPS();
 
-	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"ASCIIÒÕÊõ");
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"ASCII Arts");
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());
 
 	stream.str(L"");
