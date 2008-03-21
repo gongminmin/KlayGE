@@ -68,7 +68,10 @@ half4 DistanceMappingPS(half3 texCoord0	: TEXCOORD0,
 		texUV += view * tex3D(distanceMap, texUV).r;
 	}
 
-	clip(half4(texUV.xy, 1 - texUV.xy));
+	if ((texUV.x < 0) || (texUV.y < 0) || (texUV.x > 1) || (texUV.y > 1))
+	{
+		clip(-1);
+	}
 
 	half2 dx = ddx(texCoord0.xy);
 	half2 dy = ddy(texCoord0.xy);
@@ -94,7 +97,10 @@ half4 DistanceMappingPS_20(half3 texCoord0	: TEXCOORD0,
 		texUV += view * tex3D(distanceMap, texUV).r;
 	}
 	
-	clip(half4(texUV.xy, 1 - texUV.xy));
+	if ((texUV.x < 0) || (texUV.y < 0) || (texUV.x > 1) || (texUV.y > 1))
+	{
+		clip(-1);
+	}
 
 	half3 diffuse = tex2D(diffuseMap, texUV.xy);
 
