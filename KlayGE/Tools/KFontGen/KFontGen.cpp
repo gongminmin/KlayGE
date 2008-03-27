@@ -120,14 +120,31 @@ private:
 	int total_chars_;
 };
 
+struct font_info
+{
+	int16_t advance_x;
+	int16_t advance_y;
+
+	int16_t top;
+	int16_t left;
+	int16_t width;
+	int16_t height;
+
+	int16_t base;
+	int16_t scale;
+
+	std::vector<uint8_t> dist;
+};
+
 class ttf_to_dist
 {
 public:
 	ttf_to_dist(FT_Library ft_lib, FT_Face ft_face, kfont_header& header, std::vector<std::pair<int, int> >& task,
-				std::vector<uint8_t>& char_width, std::vector<int32_t>& char_index, std::vector<std::vector<uint8_t> >& char_dist,
+				std::vector<int32_t>& char_index,
+				std::vector<font_info>& char_info,
 				atomic<int32_t>& cur_num_char)
 		: ft_lib_(ft_lib), ft_face_(ft_face), header_(&header), task_(&task),
-			char_width_(&char_width), char_index_(&char_index), char_dist_(&char_dist),
+			char_index_(&char_index), char_info_(&char_info),
 			cur_num_char_(&cur_num_char)
 	{
 #ifndef KLAYGE_CPU_X64
@@ -161,6 +178,9 @@ public:
 	{
 		FT_GlyphSlot ft_slot = ft_face_->glyph;
 
+		int const max_dist_sq = 2 * INTERNAL_CHAR_SIZE * INTERNAL_CHAR_SIZE;
+
+		std::vector<float> char_dist_float(header_->char_size * header_->char_size);
 		std::vector<uint8_t> char_bitmap(INTERNAL_CHAR_SIZE / 8 * INTERNAL_CHAR_SIZE);
 		std::vector<int2> edge_points;
 		for (size_t i = 0; i < task_->size(); ++ i)
@@ -173,16 +193,12 @@ public:
 
 				FT_Load_Char(ft_face_, ch, FT_LOAD_RENDER);
 
-				(*char_width_)[ch] = static_cast<uint8_t>(std::min(header_->char_size,
-						static_cast<uint32_t>(ft_slot->advance.x / 64.0f * header_->char_size / INTERNAL_CHAR_SIZE)));
-
 				int const buf_width = std::min(ft_slot->bitmap.width, INTERNAL_CHAR_SIZE);
 				int const buf_height = std::min(ft_slot->bitmap.rows, INTERNAL_CHAR_SIZE);
 
-				int const y_start = std::max<int>(INTERNAL_CHAR_SIZE * 3 / 4 - ft_slot->bitmap_top, 0);
 				if ((buf_width > 0) && (buf_height > 0))
 				{
-					uint8_t* font_data = &char_bitmap[(y_start * INTERNAL_CHAR_SIZE + ft_slot->bitmap_left) / 8];
+					uint8_t* font_data = &char_bitmap[0];
 					uint8_t const * src_data = ft_slot->bitmap.buffer;
 					for (int y = 0; y < buf_height; ++ y)
 					{
@@ -193,29 +209,35 @@ public:
 					}
 				}
 
+				(*char_info_)[ch].advance_x = static_cast<uint16_t>(ft_slot->advance.x / 64.0f * header_->char_size / INTERNAL_CHAR_SIZE + 0.5f);
+				(*char_info_)[ch].advance_y = static_cast<uint16_t>(ft_slot->advance.y / 64.0f * header_->char_size / INTERNAL_CHAR_SIZE + 0.5f);
+
 				edge_points.resize(0);
-				for (int y = y_start, y_end = buf_height + y_start; y < y_end; ++ y)
+				for (int y = 0; y < buf_height; ++ y)
 				{
-					edge_extract(edge_points, ft_slot->bitmap_left, ft_slot->bitmap_left + buf_width, char_bitmap, y);
+					edge_extract(edge_points, 0, buf_width, char_bitmap, y);
 				}
 
 				if (!edge_points.empty())
 				{
-					(*char_dist_)[ch].resize(header_->char_size * header_->char_size);
-
 					kdtree<int2> kd(&edge_points[0], edge_points.size());
 
-					int const max_dist_sq = 2 * INTERNAL_CHAR_SIZE * INTERNAL_CHAR_SIZE;
+					(*char_info_)[ch].left = static_cast<uint16_t>(static_cast<float>(ft_slot->bitmap_left) * header_->char_size / INTERNAL_CHAR_SIZE);
+					(*char_info_)[ch].top = std::max<uint16_t>(0, static_cast<uint16_t>(header_->char_size * 3 / 4.0f - static_cast<float>(ft_slot->bitmap_top) * header_->char_size / INTERNAL_CHAR_SIZE));
+					(*char_info_)[ch].width = std::min<uint16_t>(header_->char_size, static_cast<uint16_t>(static_cast<float>(buf_width) * header_->char_size / INTERNAL_CHAR_SIZE) + 2);
+					(*char_info_)[ch].height = std::min<uint16_t>(header_->char_size, static_cast<uint16_t>(static_cast<float>(buf_height) * header_->char_size / INTERNAL_CHAR_SIZE) + 2);
+
+					float max_value = -1;
+					float min_value = 1;
 					for (uint32_t y = 0; y < header_->char_size; ++ y)
 					{
 						for (uint32_t x = 0; x < header_->char_size; ++ x)
 						{
-							int2 const map_xy = int2(x, y) * (INTERNAL_CHAR_SIZE / header_->char_size) + INTERNAL_CHAR_SIZE / header_->char_size / 2;
 							float value;
+							int2 const map_xy = int2(x, y) * (INTERNAL_CHAR_SIZE / header_->char_size) + INTERNAL_CHAR_SIZE / header_->char_size / 2;
 							if (kd.query_position(map_xy) > 0)
 							{
-								float v = MathLib::sqrt(static_cast<float>(kd.squared_distance(0)) / max_dist_sq);
-								value = MathLib::clamp(v * SCALE, 0.0f, 1.0f);
+								value = MathLib::sqrt(static_cast<float>(kd.squared_distance(0)) / max_dist_sq);
 							}
 							else
 							{
@@ -226,7 +248,24 @@ public:
 								value = -value;
 							}
 
-							(*char_dist_)[ch][y * header_->char_size + x] = static_cast<uint8_t>((value / 2 + 0.5f) * 255);
+							min_value = std::min(min_value, value);
+							max_value = std::max(max_value, value);
+
+							char_dist_float[y * header_->char_size + x] = value;
+						}
+					}
+
+					float scale = max_value - min_value;
+					(*char_info_)[ch].base = static_cast<int16_t>(min_value * 32768);
+					(*char_info_)[ch].scale = static_cast<int16_t>((scale - 1) * 32768);
+
+					(*char_info_)[ch].dist.resize(header_->char_size * header_->char_size);
+					for (uint32_t y = 0; y < header_->char_size; ++ y)
+					{
+						for (uint32_t x = 0; x < header_->char_size; ++ x)
+						{
+							(*char_info_)[ch].dist[y * header_->char_size + x]
+								= static_cast<uint8_t>(MathLib::clamp(static_cast<int>((char_dist_float[y * header_->char_size + x] - min_value) / scale * 255), 0, 255));
 						}
 					}
 				}
@@ -396,9 +435,8 @@ private:
 	FT_Face ft_face_;
 	kfont_header* header_;
 	std::vector<std::pair<int, int> >* task_;
-	std::vector<uint8_t>* char_width_;
 	std::vector<int32_t>* char_index_;
-	std::vector<std::vector<uint8_t> >* char_dist_;
+	std::vector<font_info>* char_info_;
 	atomic<int32_t>* cur_num_char_;
 
 	boost::function<void(uint8_t*, uint8_t const *, int)> binary_font_extract;
@@ -459,9 +497,8 @@ int main(int argc, char* argv[])
 		kfont_name = ttf_name.substr(0, ttf_name.find_last_of('.')) + ".kfont";
 	}
 
-	std::vector<uint8_t> char_width(NUM_CHARS, 0);
 	std::vector<int32_t> char_index(NUM_CHARS, -1);
-	std::vector<std::vector<uint8_t> > char_dist(NUM_CHARS);
+	std::vector<font_info> char_info(NUM_CHARS);
 	{
 		ifstream kfont_input(kfont_name.c_str(), ios_base::binary);
 		if (kfont_input)
@@ -481,21 +518,29 @@ int main(int argc, char* argv[])
 
 			kfont_input.seekg(header.start_ptr, ios_base::beg);
 
-			kfont_input.read(reinterpret_cast<char*>(&char_width[0]),
-				static_cast<std::streamsize>(char_width.size() * sizeof(char_width[0])));
 			kfont_input.read(reinterpret_cast<char*>(&char_index[0]),
 				static_cast<std::streamsize>(char_index.size() * sizeof(char_index[0])));
 
-			std::vector<uint8_t> tmp_char_dist(header.non_empty_chars * header.char_size * header.char_size);
-			kfont_input.read(reinterpret_cast<char*>(&tmp_char_dist[0]),
-				static_cast<std::streamsize>(tmp_char_dist.size() * sizeof(tmp_char_dist[0])));
+			for (int ch = 0; ch < NUM_CHARS; ++ ch)
+			{
+				kfont_input.read(reinterpret_cast<char*>(&char_info[ch].advance_x), sizeof(char_info[ch].advance_x));
+				kfont_input.read(reinterpret_cast<char*>(&char_info[ch].advance_y), sizeof(char_info[ch].advance_y));					
+			}
 
 			for (int ch = 0; ch < NUM_CHARS; ++ ch)
 			{
 				if (char_index[ch] != -1)
 				{
-					char_dist[ch].assign(tmp_char_dist.begin() + char_index[ch] * header.char_size * header.char_size,
-						tmp_char_dist.begin() + (char_index[ch] + 1) * header.char_size * header.char_size);
+					kfont_input.read(reinterpret_cast<char*>(&char_info[ch].top), sizeof(char_info[ch].top));
+					kfont_input.read(reinterpret_cast<char*>(&char_info[ch].left), sizeof(char_info[ch].left));
+					kfont_input.read(reinterpret_cast<char*>(&char_info[ch].width), sizeof(char_info[ch].width));
+					kfont_input.read(reinterpret_cast<char*>(&char_info[ch].height), sizeof(char_info[ch].height));
+					kfont_input.read(reinterpret_cast<char*>(&char_info[ch].base), sizeof(char_info[ch].base));
+					kfont_input.read(reinterpret_cast<char*>(&char_info[ch].scale), sizeof(char_info[ch].scale));
+
+					char_info[ch].dist.resize(header.char_size * header.char_size);
+					kfont_input.read(reinterpret_cast<char*>(&char_info[ch].dist[0]),
+						static_cast<std::streamsize>(char_info[ch].dist.size() * sizeof(char_info[ch].dist[0])));
 				}
 			}
 		}
@@ -565,7 +610,7 @@ int main(int argc, char* argv[])
 	for (int i = 0; i < num_threads; ++ i)
 	{
 		joiners[i] = tp(ttf_to_dist(ft_libs[i], ft_faces[i], header, packages[i],
-						char_width, char_index, char_dist,
+						char_index, char_info,
 						cur_num_char));
 	}
 	for (int i = 0; i < num_threads; ++ i)
@@ -579,9 +624,9 @@ int main(int argc, char* argv[])
 
 	std::fill(char_index.begin(), char_index.end(), -1);
 	header.non_empty_chars = 0;
-	for (size_t i = 0; i < char_dist.size(); ++ i)
+	for (size_t i = 0; i < char_info.size(); ++ i)
 	{
-		if (!char_dist[i].empty())
+		if (!char_info[i].dist.empty())
 		{
 			char_index[i] = header.non_empty_chars;
 			++ header.non_empty_chars;
@@ -597,22 +642,33 @@ int main(int argc, char* argv[])
 		{
 			kfont_output.write(reinterpret_cast<char*>(&header), sizeof(header));
 
-			kfont_output.write(reinterpret_cast<char*>(&char_width[0]),
-				static_cast<std::streamsize>(char_width.size() * sizeof(char_width[0])));
 			kfont_output.write(reinterpret_cast<char*>(&char_index[0]),
 				static_cast<std::streamsize>(char_index.size() * sizeof(char_index[0])));
 
+			for (size_t i = 0; i < char_info.size(); ++ i)
+			{
+				kfont_output.write(reinterpret_cast<char*>(&char_info[i].advance_x), sizeof(char_info[i].advance_x));
+				kfont_output.write(reinterpret_cast<char*>(&char_info[i].advance_y), sizeof(char_info[i].advance_y));
+			}
+
+			std::vector<std::pair<int16_t, int16_t> > tmp_char_base_scale(header.non_empty_chars);
 			std::vector<uint8_t> tmp_char_dist(header.non_empty_chars * header.char_size * header.char_size);
+
 			for (size_t i = 0; i < char_index.size(); ++ i)
 			{
 				if (char_index[i] != -1)
 				{
-					std::copy(char_dist[i].begin(), char_dist[i].end(),
-						tmp_char_dist.begin() + char_index[i] * header.char_size * header.char_size);
+					kfont_output.write(reinterpret_cast<char*>(&char_info[i].top), sizeof(char_info[i].top));
+					kfont_output.write(reinterpret_cast<char*>(&char_info[i].left), sizeof(char_info[i].left));
+					kfont_output.write(reinterpret_cast<char*>(&char_info[i].width), sizeof(char_info[i].width));
+					kfont_output.write(reinterpret_cast<char*>(&char_info[i].height), sizeof(char_info[i].height));
+					kfont_output.write(reinterpret_cast<char*>(&char_info[i].base), sizeof(char_info[i].base));
+					kfont_output.write(reinterpret_cast<char*>(&char_info[i].scale), sizeof(char_info[i].scale));
+
+					kfont_output.write(reinterpret_cast<char*>(&char_info[i].dist[0]),
+						static_cast<std::streamsize>(char_info[i].dist.size() * sizeof(char_info[i].dist[0])));
 				}
 			}
-			kfont_output.write(reinterpret_cast<char*>(&tmp_char_dist[0]),
-				static_cast<std::streamsize>(tmp_char_dist.size() * sizeof(tmp_char_dist[0])));
 		}
 	}
 }

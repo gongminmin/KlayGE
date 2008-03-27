@@ -65,6 +65,7 @@
 #include <vector>
 #include <cstring>
 #include <fstream>
+#include <iostream>
 #include <boost/assert.hpp>
 #include <boost/mem_fn.hpp>
 #include <boost/typeof/typeof.hpp>
@@ -81,11 +82,11 @@
 
 #include <KlayGE/Font.hpp>
 
+using namespace std;
+
 namespace
 {
 	using namespace KlayGE;
-
-	ElementFormat const TEX_FORMAT = EF_L8;
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 	#pragma pack(push, 1)
@@ -101,6 +102,19 @@ namespace
 #ifdef KLAYGE_PLATFORM_WINDOWS
 	#pragma pack(pop)
 #endif
+
+	struct font_info
+	{
+		int16_t top;
+		int16_t left;
+		int16_t width;
+		int16_t height;
+
+		int16_t base;
+		int16_t scale;
+
+		std::vector<uint8_t> dist;
+	};
 
 
 	class FontRenderable : public RenderableHelper
@@ -118,11 +132,11 @@ namespace
 
 			RenderEngine const & renderEngine = rf.RenderEngineInstance();
 			RenderDeviceCaps const & caps = renderEngine.DeviceCaps();
-			theTexture_ = rf.MakeTexture2D(std::min<uint32_t>(2048, caps.max_texture_width),
-				std::min<uint32_t>(2048, caps.max_texture_height), 1, TEX_FORMAT);
+			dist_texture_ = rf.MakeTexture2D(std::min<uint32_t>(2048, caps.max_texture_width),
+				std::min<uint32_t>(2048, caps.max_texture_height), 1, EF_L8);
 
 			effect_ = rf.LoadEffect("Font.kfx");
-			*(effect_->ParameterByName("texFontSampler")) = theTexture_;
+			*(effect_->ParameterByName("distance_sampler")) = dist_texture_;
 
 			vb_ = rf.MakeVertexBuffer(BU_Dynamic);
 			rl_->BindVertexStream(vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
@@ -146,15 +160,32 @@ namespace
 
 			kfont_input.seekg(header.start_ptr, std::ios_base::beg);
 
-			char_width_.resize(65536);
 			char_index_.resize(65536);
-			char_dist_.resize(header.non_empty_chars * header.char_size * header.char_size);
-			kfont_input.read(reinterpret_cast<char*>(&char_width_[0]),
-				static_cast<std::streamsize>(char_width_.size() * sizeof(char_width_[0])));
 			kfont_input.read(reinterpret_cast<char*>(&char_index_[0]),
 				static_cast<std::streamsize>(char_index_.size() * sizeof(char_index_[0])));
-			kfont_input.read(reinterpret_cast<char*>(&char_dist_[0]),
-				static_cast<std::streamsize>(char_dist_.size() * sizeof(char_dist_[0])));
+
+			char_advance_.resize(65536);
+			kfont_input.read(reinterpret_cast<char*>(&char_advance_[0]),
+				static_cast<std::streamsize>(char_advance_.size() * sizeof(char_advance_[0])));
+
+			char_info_.resize(header.non_empty_chars);
+			for (uint32_t ch = 0; ch < header.non_empty_chars; ++ ch)
+			{
+				kfont_input.read(reinterpret_cast<char*>(&char_info_[ch].top), sizeof(char_info_[ch].top));
+				kfont_input.read(reinterpret_cast<char*>(&char_info_[ch].left), sizeof(char_info_[ch].left));
+				kfont_input.read(reinterpret_cast<char*>(&char_info_[ch].width), sizeof(char_info_[ch].width));
+				kfont_input.read(reinterpret_cast<char*>(&char_info_[ch].height), sizeof(char_info_[ch].height));
+				kfont_input.read(reinterpret_cast<char*>(&char_info_[ch].base), sizeof(char_info_[ch].base));
+				kfont_input.read(reinterpret_cast<char*>(&char_info_[ch].scale), sizeof(char_info_[ch].scale));
+
+				char_info_[ch].dist.resize(header.char_size * header.char_size);
+				kfont_input.read(reinterpret_cast<char*>(&char_info_[ch].dist[0]),
+					static_cast<std::streamsize>(char_info_[ch].dist.size() * sizeof(char_info_[ch].dist[0])));
+			}
+
+			base_scale_texture_ = rf.MakeTexture2D(std::min<uint32_t>(2048, caps.max_texture_width) / kfont_char_size_,
+				std::min<uint32_t>(2048, caps.max_texture_height) / kfont_char_size_, 1, EF_SIGNED_GR16);
+			*(effect_->ParameterByName("base_scale_sampler")) = base_scale_texture_;
 		}
 
 		RenderTechniquePtr GetRenderTechnique() const
@@ -212,18 +243,13 @@ namespace
 		{
 			this->UpdateTexture(text);
 
-			uint32_t const tex_width = theTexture_->Width(0);
 			std::vector<uint32_t> lines(1, 0);
 
 			BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
 			{
-				BOOST_AUTO(cmiter, charInfoMap_.find(ch));
-				uint32_t const w = static_cast<uint32_t>(static_cast<float>(cmiter->second.Width())
-					* font_height / kfont_char_size_ * tex_width);
-
 				if (ch != L'\n')
 				{
-					lines.back() += w;
+					lines.back() += static_cast<uint32_t>(static_cast<float>(char_advance_[ch].x()) * font_height / kfont_char_size_);
 				}
 				else
 				{
@@ -266,18 +292,14 @@ namespace
 			this->UpdateTexture(text);
 
 			float const h = font_height * yScale;
-			float const width_scale = theTexture_->Width(0) * xScale;
 
 			std::vector<std::pair<float, std::wstring> > lines(1, std::make_pair(0.0f, L""));
 
 			BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
 			{
-				BOOST_AUTO(cmiter, charInfoMap_.find(ch));
-				float const w = static_cast<float>(cmiter->second.Width()) * font_height / kfont_char_size_ * width_scale;
-
 				if (ch != L'\n')
 				{
-					lines.back().first += w;
+					lines.back().first += static_cast<float>(char_advance_[ch].x()) * font_height / kfont_char_size_ * xScale;
 					lines.back().second.push_back(ch);
 				}
 				else
@@ -354,15 +376,82 @@ namespace
 
 				BOOST_FOREACH(BOOST_TYPEOF(lines[i].second)::const_reference ch, lines[i].second)
 				{
-					BOOST_AUTO(cmiter, charInfoMap_.find(ch));
-					float const w = static_cast<float>(cmiter->second.Width()) * font_height / kfont_char_size_ * width_scale;
-
-					Rect_T<float> const & texRect(cmiter->second);
-
-					Rect_T<float> pos_rc(x, y, x + w, y + h);
-					Rect_T<float> intersect_rc = pos_rc & rc;
-					if ((intersect_rc.Width() > 0) && (intersect_rc.Height() > 0))
+					if (char_index_[ch] != -1)
 					{
+						float left = static_cast<float>(char_info_[char_index_[ch]].left) * font_height / kfont_char_size_ * xScale;
+						float top = static_cast<float>(char_info_[char_index_[ch]].top) * font_height / kfont_char_size_ * yScale;
+						float width = static_cast<float>(char_info_[char_index_[ch]].width) * font_height / kfont_char_size_ * xScale;
+						float height = static_cast<float>(char_info_[char_index_[ch]].height) * font_height / kfont_char_size_ * yScale;
+					
+						BOOST_AUTO(cmiter, charInfoMap_.find(ch));
+						Rect_T<float> const & texRect(cmiter->second);
+
+						Rect_T<float> pos_rc(x + left, y + top, x + left + width, y + top + height);
+						Rect_T<float> intersect_rc = pos_rc & rc;
+						if ((intersect_rc.Width() > 0) && (intersect_rc.Height() > 0))
+						{
+							vertices_.push_back(FontVert(float3(pos_rc.left(), pos_rc.top(), sz),
+													clr32,
+													float2(texRect.left(), texRect.top())));
+							vertices_.push_back(FontVert(float3(pos_rc.right(), pos_rc.top(), sz),
+													clr32,
+													float2(texRect.right(), texRect.top())));
+							vertices_.push_back(FontVert(float3(pos_rc.right(), pos_rc.bottom(), sz),
+													clr32,
+													float2(texRect.right(), texRect.bottom())));
+							vertices_.push_back(FontVert(float3(pos_rc.left(), pos_rc.bottom(), sz),
+													clr32,
+													float2(texRect.left(), texRect.bottom())));
+
+							indices_.push_back(lastIndex + 0);
+							indices_.push_back(lastIndex + 1);
+							indices_.push_back(lastIndex + 2);
+							indices_.push_back(lastIndex + 2);
+							indices_.push_back(lastIndex + 3);
+							indices_.push_back(lastIndex + 0);
+							lastIndex += 4;
+						}
+					}
+
+					x += static_cast<float>(char_advance_[ch].x()) * font_height / kfont_char_size_ * xScale;
+					y += static_cast<float>(char_advance_[ch].y()) * font_height / kfont_char_size_ * yScale;
+				}
+
+				box_ |= Box(float3(sx[i], sy[i], sz), float3(sx[i] + lines[i].first, sy[i] + h, sz + 0.1f));
+			}
+		}
+
+		void AddText(float sx, float sy, float sz,
+			float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t font_height)
+		{
+			this->UpdateTexture(text);
+
+			uint32_t const clr32 = clr.ABGR();
+			float const h = font_height * yScale;
+			size_t const maxSize = text.length() - std::count(text.begin(), text.end(), L'\n');
+			float x = sx, y = sy;
+			float maxx = sx, maxy = sy;
+
+			vertices_.reserve(vertices_.size() + maxSize * 4);
+			indices_.reserve(indices_.size() + maxSize * 6);
+
+			uint16_t lastIndex(static_cast<uint16_t>(vertices_.size()));
+
+			BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
+			{
+				if (ch != L'\n')
+				{
+					if (char_index_[ch] != -1)
+					{
+						float left = static_cast<float>(char_info_[char_index_[ch]].left) * font_height / kfont_char_size_ * xScale;
+						float top = static_cast<float>(char_info_[char_index_[ch]].top) * font_height / kfont_char_size_ * yScale;
+						float width = static_cast<float>(char_info_[char_index_[ch]].width) * font_height / kfont_char_size_ * xScale;
+						float height = static_cast<float>(char_info_[char_index_[ch]].height) * font_height / kfont_char_size_ * yScale;
+
+						BOOST_AUTO(cmiter, charInfoMap_.find(ch));
+						Rect_T<float> const & texRect(cmiter->second);
+						Rect_T<float> pos_rc(x + left, y + top, x + left + width, y + top + height);
+
 						vertices_.push_back(FontVert(float3(pos_rc.left(), pos_rc.top(), sz),
 												clr32,
 												float2(texRect.left(), texRect.top())));
@@ -385,61 +474,8 @@ namespace
 						lastIndex += 4;
 					}
 
-					x += w;
-				}
-
-				box_ |= Box(float3(sx[i], sy[i], sz), float3(sx[i] + lines[i].first, sy[i] + h, sz + 0.1f));
-			}
-		}
-
-		void AddText(float sx, float sy, float sz,
-			float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t font_height)
-		{
-			this->UpdateTexture(text);
-
-			uint32_t const clr32 = clr.ABGR();
-			float const width_scale = theTexture_->Width(0) * xScale;
-			float const h = font_height * yScale;
-			size_t const maxSize = text.length() - std::count(text.begin(), text.end(), L'\n');
-			float x = sx, y = sy;
-			float maxx = sx, maxy = sy;
-
-			vertices_.reserve(vertices_.size() + maxSize * 4);
-			indices_.reserve(indices_.size() + maxSize * 6);
-
-			uint16_t lastIndex(static_cast<uint16_t>(vertices_.size()));
-
-			BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
-			{
-				BOOST_AUTO(cmiter, charInfoMap_.find(ch));
-				float const w = static_cast<float>(cmiter->second.Width()) * font_height / kfont_char_size_ * width_scale;
-
-				if (ch != L'\n')
-				{
-					Rect_T<float> const & texRect(cmiter->second);
-
-					vertices_.push_back(FontVert(float3(x + 0, y + 0, sz),
-											clr32,
-											float2(texRect.left(), texRect.top())));
-					vertices_.push_back(FontVert(float3(x + w, y + 0, sz),
-											clr32,
-											float2(texRect.right(), texRect.top())));
-					vertices_.push_back(FontVert(float3(x + w, y + h, sz),
-											clr32,
-											float2(texRect.right(), texRect.bottom())));
-					vertices_.push_back(FontVert(float3(x + 0, y + h, sz),
-											clr32,
-											float2(texRect.left(), texRect.bottom())));
-
-					indices_.push_back(lastIndex + 0);
-					indices_.push_back(lastIndex + 1);
-					indices_.push_back(lastIndex + 2);
-					indices_.push_back(lastIndex + 2);
-					indices_.push_back(lastIndex + 3);
-					indices_.push_back(lastIndex + 0);
-					lastIndex += 4;
-
-					x += w;
+					x += static_cast<float>(char_advance_[ch].x()) * font_height / kfont_char_size_ * xScale;
+					y += static_cast<float>(char_advance_[ch].y()) * font_height / kfont_char_size_ * yScale;
 
 					if (x > maxx)
 					{
@@ -465,49 +501,49 @@ namespace
 		/////////////////////////////////////////////////////////////////////////////////
 		void UpdateTexture(std::wstring const & text)
 		{
+			uint32_t const tex_width = dist_texture_->Width(0);
+			uint32_t const tex_height = dist_texture_->Height(0);
+
 			BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
 			{
-				if (charInfoMap_.find(ch) != charInfoMap_.end())
+				if (char_index_[ch] != -1)
 				{
-					// 在现有纹理中找到了
-
-					BOOST_AUTO(lruIter, std::find(charLRU_.begin(), charLRU_.end(), ch));
-					if (lruIter != charLRU_.begin())
+					if (charInfoMap_.find(ch) != charInfoMap_.end())
 					{
-						charLRU_.splice(charLRU_.begin(), charLRU_, lruIter);
+						// 在现有纹理中找到了
+
+						BOOST_AUTO(lruIter, std::find(charLRU_.begin(), charLRU_.end(), ch));
+						if (lruIter != charLRU_.begin())
+						{
+							charLRU_.splice(charLRU_.begin(), charLRU_, lruIter);
+						}
 					}
-				}
-				else
-				{
-					// 在现有纹理中找不到，所以得在现有纹理中添加新字
-
-					if (ch != L'\n')
+					else
 					{
-						int max_width, max_height;
-						max_width = max_height = kfont_char_size_;
+						// 在现有纹理中找不到，所以得在现有纹理中添加新字
 
-						uint32_t const width = char_width_[ch];
+						font_info& ci = char_info_[char_index_[ch]];
 
-						uint32_t const tex_width = theTexture_->Width(0);
-						uint32_t const tex_height = theTexture_->Height(0);
+						uint32_t width = ci.width;
+						uint32_t height = ci.height;
 
 						Vector_T<int32_t, 2> char_pos;
 						CharInfo charInfo;
-						if ((curX_ < tex_width) && (curY_ < tex_height) && (curY_ + max_height < tex_height))
+						if ((curX_ < tex_width) && (curY_ < tex_height) && (curY_ + kfont_char_size_ < tex_height))
 						{
 							if (curX_ + width > tex_width)
 							{
 								curX_ = 0;
-								curY_ += max_height;
+								curY_ += kfont_char_size_;
 							}
 
 							// 纹理还有空间
 							char_pos = Vector_T<int32_t, 2>(curX_, curY_);
 
-							charInfo.left()		= (curX_ + 0.1f) / tex_width;
-							charInfo.top()		= (curY_ + 0.1f) / tex_height;
-							charInfo.right()	= (curX_ + width + 0.1f) / tex_width;
-							charInfo.bottom()	= (curY_ + max_height + 0.1f) / tex_height;
+							charInfo.left()		= (curX_ + 0.5f) / tex_width;
+							charInfo.top()		= (curY_ + 0.5f) / tex_height;
+							charInfo.right()	= (curX_ + width + 0.5f) / tex_width;
+							charInfo.bottom()	= (curY_ + height + 0.5f) / tex_height;
 
 							curX_ += kfont_char_size_;
 						}
@@ -523,19 +559,19 @@ namespace
 							charInfo.left()		= iter->second.left();
 							charInfo.top()		= iter->second.top();
 							charInfo.right()	= charInfo.left() + static_cast<float>(width) / tex_width;
-							charInfo.bottom()	= charInfo.top() + static_cast<float>(max_height) / tex_height;
+							charInfo.bottom()	= charInfo.top() + static_cast<float>(height) / tex_height;
 
 							charLRU_.pop_back();
 							charInfoMap_.erase(iter);
 						}
 
 						{
-							Texture::Mapper mapper(*theTexture_, 0, TMA_Write_Only,
+							Texture::Mapper mapper(*dist_texture_, 0, TMA_Write_Only,
 								char_pos.x(), char_pos.y(), kfont_char_size_, kfont_char_size_);
 							uint8_t* tex_data = mapper.Pointer<uint8_t>();
 							if (char_index_[ch] != -1)
 							{
-								uint8_t const * char_data = &char_dist_[char_index_[ch] * kfont_char_size_ * kfont_char_size_];
+								uint8_t const * char_data = &ci.dist[0];
 								for (uint32_t y = 0; y < kfont_char_size_; ++ y)
 								{
 									std::memcpy(tex_data, char_data, kfont_char_size_);
@@ -543,13 +579,19 @@ namespace
 									char_data += kfont_char_size_;
 								}
 							}
+						}
+						{
+							Texture::Mapper mapper(*base_scale_texture_, 0, TMA_Write_Only,
+								char_pos.x() / kfont_char_size_, char_pos.y() / kfont_char_size_, 1, 1);
+							int16_t* tex_data = mapper.Pointer<int16_t>();
+							if (char_index_[ch] != -1)
+							{
+								tex_data[0] = ci.base;
+								tex_data[1] = ci.scale;
+							}
 							else
 							{
-								for (uint32_t y = 0; y < kfont_char_size_; ++ y)
-								{
-									std::memset(tex_data, 0, kfont_char_size_);
-									tex_data += mapper.RowPitch();
-								}
+								tex_data[0] = tex_data[1] = -32768;
 							}
 						}
 
@@ -598,13 +640,14 @@ namespace
 		GraphicsBufferPtr vb_;
 		GraphicsBufferPtr ib_;
 
-		TexturePtr		theTexture_;
+		TexturePtr		dist_texture_;
+		TexturePtr		base_scale_texture_;
 		RenderEffectPtr	effect_;
 
 		uint32_t kfont_char_size_;
-		std::vector<uint8_t> char_width_;
 		std::vector<int32_t> char_index_;
-		std::vector<uint8_t> char_dist_;
+		std::vector<Vector_T<int16_t, 2> > char_advance_;
+		std::vector<font_info> char_info_;
 	};
 
 	class FontObject : public SceneObjectHelper
