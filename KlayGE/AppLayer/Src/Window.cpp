@@ -21,7 +21,7 @@ namespace KlayGE
 {
 	LRESULT Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
-		Window* win = reinterpret_cast<Window*>(::GetWindowLongPtrA(hWnd, GWLP_USERDATA));
+		Window* win = reinterpret_cast<Window*>(::GetWindowLongPtrW(hWnd, GWLP_USERDATA));
 		if (win != NULL)
 		{
 			return win->MsgProc(hWnd, uMsg, wParam, lParam);
@@ -37,8 +37,15 @@ namespace KlayGE
 	{
 		HINSTANCE hInst = ::GetModuleHandle(NULL);
 
+		std::wstring wname;
+		Convert(wname, name);
+
 		// Register the window class
+#ifdef KLAYGE_COMPILER_GCC
 		WNDCLASSEXA wc;
+#else
+		WNDCLASSEXW wc;
+#endif
 		wc.cbSize			= sizeof(wc);
 		wc.style			= CS_HREDRAW | CS_VREDRAW;
 		wc.lpfnWndProc		= WndProc;
@@ -49,18 +56,32 @@ namespace KlayGE
 		wc.hCursor			= ::LoadCursor(NULL, IDC_ARROW);
 		wc.hbrBackground	= static_cast<HBRUSH>(::GetStockObject(BLACK_BRUSH));
 		wc.lpszMenuName		= NULL;
+#ifdef KLAYGE_COMPILER_GCC
 		wc.lpszClassName	= name.c_str();
+#else
+		wc.lpszClassName	= wname.c_str();
+#endif
 		wc.hIconSm			= NULL;
+#ifdef KLAYGE_COMPILER_GCC
 		::RegisterClassExA(&wc);
+#else
+		::RegisterClassExW(&wc);
+#endif
 
 		RECT rc = { 0, 0, width, height };
 		::AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, false);
 
 		// Create our main window
 		// Pass pointer to self
+#ifdef KLAYGE_COMPILER_GCC
 		HWND hWnd = ::CreateWindowA(name.c_str(), name.c_str(),
 			WS_OVERLAPPEDWINDOW, left, top,
 			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, NULL);
+#else
+		HWND hWnd = ::CreateWindowW(wname.c_str(), wname.c_str(),
+			WS_OVERLAPPEDWINDOW, left, top,
+			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, NULL);
+#endif
 
 		::GetClientRect(hWnd, &rc);
 		left_ = left;
@@ -68,7 +89,7 @@ namespace KlayGE
 		width_ = rc.right - rc.left;
 		height_ = rc.bottom - rc.top;
 
-		::SetWindowLongPtrA(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+		::SetWindowLongPtrW(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
 		::ShowWindow(hWnd, SW_SHOWNORMAL);
 		::UpdateWindow(hWnd);

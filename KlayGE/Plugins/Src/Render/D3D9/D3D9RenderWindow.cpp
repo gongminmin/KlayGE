@@ -443,7 +443,7 @@ namespace KlayGE
 				style = WS_OVERLAPPEDWINDOW;
 			}
 
-			::SetWindowLongPtrA(hWnd_, GWL_STYLE, style);
+			::SetWindowLongPtrW(hWnd_, GWL_STYLE, style);
 
 			RECT rc = { 0, 0, width_, height_ };
 			::AdjustWindowRect(&rc, style, false);
