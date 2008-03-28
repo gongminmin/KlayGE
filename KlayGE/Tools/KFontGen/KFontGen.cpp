@@ -222,10 +222,10 @@ public:
 				{
 					kdtree<int2> kd(&edge_points[0], edge_points.size());
 
-					(*char_info_)[ch].left = static_cast<uint16_t>(static_cast<float>(ft_slot->bitmap_left) * header_->char_size / INTERNAL_CHAR_SIZE);
-					(*char_info_)[ch].top = std::max<uint16_t>(0, static_cast<uint16_t>(header_->char_size * 3 / 4.0f - static_cast<float>(ft_slot->bitmap_top) * header_->char_size / INTERNAL_CHAR_SIZE));
-					(*char_info_)[ch].width = std::min<uint16_t>(header_->char_size, static_cast<uint16_t>(static_cast<float>(buf_width) * header_->char_size / INTERNAL_CHAR_SIZE) + 2);
-					(*char_info_)[ch].height = std::min<uint16_t>(header_->char_size, static_cast<uint16_t>(static_cast<float>(buf_height) * header_->char_size / INTERNAL_CHAR_SIZE) + 2);
+					(*char_info_)[ch].left = static_cast<int16_t>(static_cast<float>(ft_slot->bitmap_left) * header_->char_size / INTERNAL_CHAR_SIZE);
+					(*char_info_)[ch].top = static_cast<int16_t>(header_->char_size * 3 / 4.0f - static_cast<float>(ft_slot->bitmap_top) * header_->char_size / INTERNAL_CHAR_SIZE);
+					(*char_info_)[ch].width = std::min<int16_t>(header_->char_size, static_cast<uint16_t>(static_cast<float>(buf_width) * header_->char_size / INTERNAL_CHAR_SIZE) + 2);
+					(*char_info_)[ch].height = std::min<int16_t>(header_->char_size, static_cast<uint16_t>(static_cast<float>(buf_height) * header_->char_size / INTERNAL_CHAR_SIZE) + 2);
 
 					float max_value = -1;
 					float min_value = 1;
