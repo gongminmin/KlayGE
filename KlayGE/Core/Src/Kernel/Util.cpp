@@ -18,7 +18,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 
-#include <boost/thread/xtime.hpp>
+#include <boost/date_time.hpp>
 #include <boost/thread/thread.hpp>
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
@@ -102,18 +102,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void Sleep(uint32_t ms)
 	{
-		int const MILLISECONDS_PER_SECOND = 1000;
-		int const NANOSECONDS_PER_MILLISECOND = 1000000;
-
-		boost::xtime xt;
-
-		boost::xtime_get(&xt, boost::TIME_UTC);
-		xt.sec += ms / MILLISECONDS_PER_SECOND;
-		boost::thread::sleep(xt);
-
-		boost::xtime_get(&xt, boost::TIME_UTC);
-		xt.nsec += (ms % MILLISECONDS_PER_SECOND) * NANOSECONDS_PER_MILLISECOND;
-		boost::thread::sleep(xt);
+		boost::thread::sleep(boost::date_time::microsec_clock<boost::posix_time::ptime>::universal_time() + boost::posix_time::millisec(ms));
 	}
 
 	// EndianµÄÇÐ»»

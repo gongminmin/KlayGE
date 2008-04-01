@@ -34,36 +34,12 @@
 
 namespace KlayGE
 {
-	typedef boost::thread* thread_id;
+	typedef boost::thread::id thread_id;
 
 	// Threadof operator simulation for threadof(0) expression
 	inline thread_id threadof(int)
 	{
-		typedef boost::thread_specific_ptr<boost::thread> boost_thread_tss_ptr_t;
-		//Yes, this is complicated but:
-		//->  We don't have access to boost::thread's handles.
-		//->  We must compare 2 boost::thread objects to know if threads are equal
-		//->  boost::thread can't be copied
-		//->  Default constructed boost::thread represents current thread
-		//->  Thread specific data construction is not thread-safe!
-		//
-		// I hate this function but I can't touch Boost.Threads.
-		// Performance friendly implementation can return just a wrapper
-		// over windows HANDLE or pthread's pthread_t
-		//
-		//We create a default constructed boost::thread (who identifies
-		//current thread) for each thread
-
-		boost_thread_tss_ptr_t& boost_thread_tss_ptr =
-			boost::details::pool::singleton_default<boost_thread_tss_ptr_t>::instance();
-
-		boost::thread* curthread = boost_thread_tss_ptr.get();
-		if (0 == curthread)
-		{
-			curthread = new boost::thread;
-			boost_thread_tss_ptr.reset(curthread);
-		}
-		return curthread;
+		return boost::this_thread::get_id();
 	}
 
 	// Threadof operator simulation for threadof(joiner) expression
@@ -319,7 +295,7 @@ namespace KlayGE
 				: thread_(func)
 			{
 				joiner_impl_base<result_type>::result_ = result_op;
-				joiner_impl_base<result_type>::id_ = &thread_;
+				joiner_impl_base<result_type>::id_ = thread_.get_id();
 			}
 
 		private:
@@ -430,7 +406,7 @@ namespace KlayGE
 		struct thread_pool_thread_info
 		{
 			explicit thread_pool_thread_info(boost::shared_ptr<thread_pool_common_data_t> const & pdata)
-				:  wake_up_(false), data_(pdata), id_(0)
+				:  wake_up_(false), data_(pdata)
 			{
 			}
 
@@ -468,11 +444,11 @@ namespace KlayGE
 			}
 
 			boost::shared_ptr<thread_pool_join_info> thpool_join_info_;
-			boost::function0<void>  func_;
-			bool                    wake_up_;
-			boost::mutex            wake_up_mut_;
-			boost::condition        wake_up_cond_;
-			boost::shared_ptr<thread_pool_common_data_t> data_;
+			boost::function0<void>	func_;
+			bool					wake_up_;
+			boost::mutex			wake_up_mut_;
+			boost::condition		wake_up_cond_;
+			boost::shared_ptr<thread_pool_common_data_t>	data_;
 			thread_id				id_;
 		};
 
@@ -653,7 +629,7 @@ namespace KlayGE
 		private:
 			// Shared data between thread_pool, all threads and joiners
 			size_t						num_min_cached_threads_;
-			size_t 						num_max_cached_threads_;
+			size_t						num_max_cached_threads_;
 			boost::mutex				mut_;
 			bool						general_cleanup_;
 			thread_info_queue_t			threads_;
