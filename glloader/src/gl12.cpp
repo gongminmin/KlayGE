@@ -171,6 +171,69 @@ namespace
 		}
 		else
 		{
+			if (glloader_GL_EXT_blend_color())
+			{
+				glBlendColor = glBlendColorEXT;
+			}
+			if (glloader_GL_EXT_blend_minmax() || glloader_GL_EXT_blend_subtract())
+			{
+				glBlendEquation = glBlendEquationEXT;
+			}
+			if (glloader_GL_EXT_draw_range_elements())
+			{
+				glDrawRangeElements = glDrawRangeElementsEXT;
+			}
+			if (glloader_GL_SGI_color_table())
+			{
+				glColorTable = glColorTableSGI;
+				glColorTableParameterfv = glColorTableParameterfvSGI;
+				glColorTableParameteriv = glColorTableParameterivSGI;
+				glCopyColorTable = glCopyColorTableSGI;
+				glGetColorTable = glGetColorTableSGI;
+				glGetColorTableParameterfv = glGetColorTableParameterfvSGI;
+				glGetColorTableParameteriv = glGetColorTableParameterivSGI;
+			}
+			if (glloader_GL_EXT_color_subtable())
+			{
+				glColorSubTable = glColorSubTableEXT;
+				glCopyColorSubTable = glCopyColorSubTableEXT;
+			}
+			if (glloader_GL_EXT_convolution())
+			{
+				glConvolutionFilter1D = glConvolutionFilter1DEXT;
+				glConvolutionFilter2D = glConvolutionFilter2DEXT;
+				glConvolutionParameterf = glConvolutionParameterfEXT;
+				glConvolutionParameterfv = glConvolutionParameterfvEXT;
+				glConvolutionParameteri = glConvolutionParameteriEXT;
+				glConvolutionParameteriv = glConvolutionParameterivEXT;
+				glCopyConvolutionFilter1D = glCopyConvolutionFilter1DEXT;
+				glCopyConvolutionFilter2D = glCopyConvolutionFilter2DEXT;
+				glGetConvolutionFilter = glGetConvolutionFilterEXT;
+				glGetConvolutionParameterfv = glGetConvolutionParameterfvEXT;
+				glGetConvolutionParameteriv = glGetConvolutionParameterivEXT;
+				glGetSeparableFilter = glGetSeparableFilterEXT;
+				glSeparableFilter2D = glSeparableFilter2DEXT;
+			}
+			if (glloader_GL_EXT_histogram())
+			{
+				glGetHistogram = glGetHistogramEXT;
+				glGetHistogramParameterfv = glGetHistogramParameterfvEXT;
+				glGetHistogramParameteriv = glGetHistogramParameterivEXT;
+				glGetMinmax = glGetMinmaxEXT;
+				glGetMinmaxParameterfv = glGetMinmaxParameterfvEXT;
+				glGetMinmaxParameteriv = glGetMinmaxParameterivEXT;
+				glHistogram = glHistogramEXT;
+				glMinmax = glMinmaxEXT;
+				glResetHistogram = glResetHistogramEXT;
+				glResetMinmax = glResetMinmaxEXT;
+			}
+			if (glloader_GL_EXT_texture3D())
+			{
+				glTexImage3D = glTexImage3DEXT;
+				glTexSubImage3D = glTexSubImage3DEXT;
+				glCopyTexSubImage3D = glCopyTexSubImage3DEXT;
+			}
+
 			if (glloader_GL_EXT_texture3D()
 				&& glloader_GL_EXT_bgra()
 				&& glloader_GL_EXT_packed_pixels()
@@ -189,45 +252,6 @@ namespace
 			{
 				_GL_VERSION_1_2 = true;
 				gl_features_extractor::instance().promote("GL_VERSION_1_2");
-
-				glBlendColor = glBlendColorEXT;
-				glBlendEquation = glBlendEquationEXT;
-				glDrawRangeElements = glDrawRangeElementsEXT;
-				glColorTable = glColorTableSGI;
-				glColorTableParameterfv = glColorTableParameterfvSGI;
-				glColorTableParameteriv = glColorTableParameterivSGI;
-				glCopyColorTable = glCopyColorTableSGI;
-				glGetColorTable = glGetColorTableSGI;
-				glGetColorTableParameterfv = glGetColorTableParameterfvSGI;
-				glGetColorTableParameteriv = glGetColorTableParameterivSGI;
-				glColorSubTable = glColorSubTableEXT;
-				glCopyColorSubTable = glCopyColorSubTableEXT;
-				glConvolutionFilter1D = glConvolutionFilter1DEXT;
-				glConvolutionFilter2D = glConvolutionFilter2DEXT;
-				glConvolutionParameterf = glConvolutionParameterfEXT;
-				glConvolutionParameterfv = glConvolutionParameterfvEXT;
-				glConvolutionParameteri = glConvolutionParameteriEXT;
-				glConvolutionParameteriv = glConvolutionParameterivEXT;
-				glCopyConvolutionFilter1D = glCopyConvolutionFilter1DEXT;
-				glCopyConvolutionFilter2D = glCopyConvolutionFilter2DEXT;
-				glGetConvolutionFilter = glGetConvolutionFilterEXT;
-				glGetConvolutionParameterfv = glGetConvolutionParameterfvEXT;
-				glGetConvolutionParameteriv = glGetConvolutionParameterivEXT;
-				glGetSeparableFilter = glGetSeparableFilterEXT;
-				glSeparableFilter2D = glSeparableFilter2DEXT;
-				glGetHistogram = glGetHistogramEXT;
-				glGetHistogramParameterfv = glGetHistogramParameterfvEXT;
-				glGetHistogramParameteriv = glGetHistogramParameterivEXT;
-				glGetMinmax = glGetMinmaxEXT;
-				glGetMinmaxParameterfv = glGetMinmaxParameterfvEXT;
-				glGetMinmaxParameteriv = glGetMinmaxParameterivEXT;
-				glHistogram = glHistogramEXT;
-				glMinmax = glMinmaxEXT;
-				glResetHistogram = glResetHistogramEXT;
-				glResetMinmax = glResetMinmaxEXT;
-				glTexImage3D = glTexImage3DEXT;
-				glTexSubImage3D = glTexSubImage3DEXT;
-				glCopyTexSubImage3D = glCopyTexSubImage3DEXT;
 			}
 		}
 	}

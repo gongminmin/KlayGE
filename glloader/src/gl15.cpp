@@ -114,14 +114,8 @@ namespace
 		}
 		else
 		{
-			if (glloader_GL_ARB_vertex_buffer_object()
-				&& glloader_GL_ARB_occlusion_query()
-				&& glloader_GL_ARB_depth_texture()
-				&& glloader_GL_EXT_shadow_funcs())
+			if (glloader_GL_ARB_occlusion_query())
 			{
-				_GL_VERSION_1_5 = true;
-				gl_features_extractor::instance().promote("GL_VERSION_1_5");
-
 				glGenQueries = glGenQueriesARB;
 				glDeleteQueries = glDeleteQueriesARB;
 				glIsQuery = glIsQueryARB;
@@ -130,6 +124,9 @@ namespace
 				glGetQueryiv = glGetQueryivARB;
 				glGetQueryObjectiv = glGetQueryObjectivARB;
 				glGetQueryObjectuiv = glGetQueryObjectuivARB;
+			}
+			if (glloader_GL_ARB_vertex_buffer_object())
+			{
 				glBindBuffer = glBindBufferARB;
 				glDeleteBuffers = glDeleteBuffersARB;
 				glGenBuffers = glGenBuffersARB;
@@ -141,6 +138,15 @@ namespace
 				glUnmapBuffer = glUnmapBufferARB;
 				glGetBufferParameteriv = glGetBufferParameterivARB;
 				glGetBufferPointerv = glGetBufferPointervARB;
+			}
+
+			if (glloader_GL_ARB_vertex_buffer_object()
+				&& glloader_GL_ARB_occlusion_query()
+				&& glloader_GL_ARB_depth_texture()
+				&& glloader_GL_EXT_shadow_funcs())
+			{
+				_GL_VERSION_1_5 = true;
+				gl_features_extractor::instance().promote("GL_VERSION_1_5");
 			}
 		}
 	}

@@ -195,19 +195,8 @@ namespace
 		}
 		else
 		{
-			if (glloader_GL_ARB_texture_compression()
-				&& glloader_GL_ARB_texture_cube_map()
-				&& glloader_GL_ARB_multisample()
-				&& glloader_GL_ARB_multitexture()
-				&& glloader_GL_ARB_texture_env_add()
-				&& glloader_GL_ARB_texture_env_combine()
-				&& (glloader_GL_ARB_texture_env_dot3() ||  glloader_GL_EXT_texture_env_dot3())
-				&& glloader_GL_ARB_texture_border_clamp()
-				&& glloader_GL_ARB_transpose_matrix())
+			if (glloader_GL_ARB_multitexture())
 			{
-				_GL_VERSION_1_3 = true;
-				gl_features_extractor::instance().promote("GL_VERSION_1_3");
-
 				glActiveTexture = glActiveTextureARB;
 				glClientActiveTexture = glClientActiveTextureARB;
 				glMultiTexCoord1d = glMultiTexCoord1dARB;
@@ -242,11 +231,20 @@ namespace
 				glMultiTexCoord4iv = glMultiTexCoord4ivARB;
 				glMultiTexCoord4s = glMultiTexCoord4sARB;
 				glMultiTexCoord4sv = glMultiTexCoord4svARB;
+			}
+			if (glloader_GL_ARB_transpose_matrix())
+			{
 				glLoadTransposeMatrixf = glLoadTransposeMatrixfARB;
 				glLoadTransposeMatrixd = glLoadTransposeMatrixdARB;
 				glMultTransposeMatrixf = glMultTransposeMatrixfARB;
 				glMultTransposeMatrixd = glMultTransposeMatrixdARB;
+			}
+			if (glloader_GL_ARB_multisample())
+			{
 				glSampleCoverage = glSampleCoverageARB;
+			}
+			if (glloader_GL_ARB_texture_compression())
+			{
 				glCompressedTexImage3D = glCompressedTexImage3DARB;
 				glCompressedTexImage2D = glCompressedTexImage2DARB;
 				glCompressedTexImage1D = glCompressedTexImage1DARB;
@@ -254,6 +252,20 @@ namespace
 				glCompressedTexSubImage2D = glCompressedTexSubImage2DARB;
 				glCompressedTexSubImage1D = glCompressedTexSubImage1DARB;
 				glGetCompressedTexImage = glGetCompressedTexImageARB;
+			}
+
+			if (glloader_GL_ARB_texture_compression()
+				&& glloader_GL_ARB_texture_cube_map()
+				&& glloader_GL_ARB_multisample()
+				&& glloader_GL_ARB_multitexture()
+				&& glloader_GL_ARB_texture_env_add()
+				&& glloader_GL_ARB_texture_env_combine()
+				&& (glloader_GL_ARB_texture_env_dot3() ||  glloader_GL_EXT_texture_env_dot3())
+				&& glloader_GL_ARB_texture_border_clamp()
+				&& glloader_GL_ARB_transpose_matrix())
+			{
+				_GL_VERSION_1_3 = true;
+				gl_features_extractor::instance().promote("GL_VERSION_1_3");
 			}
 		}
 	}

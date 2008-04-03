@@ -25,12 +25,12 @@
 
 #include <boost/assert.hpp>
 #include <boost/bind.hpp>
-#ifdef WIN32
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4819)
 #endif
 #include <boost/algorithm/string/split.hpp>
-#ifdef WIN32
+#ifdef _MSC_VER
 #pragma warning(pop)
 #endif
 
@@ -190,7 +190,7 @@ namespace glloader
 #ifdef GLLOADER_GLX
 		::glXQueryVersion(::glXGetCurrentDisplay(), &major, &minor);
 #else
-		major; minor;
+		major = minor = 0;
 #endif		// GLLOADER_GLX
 	}
 

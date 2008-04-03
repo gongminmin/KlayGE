@@ -192,36 +192,35 @@ namespace
 		}
 		else
 		{
-			if (glloader_GL_SGIS_generate_mipmap()
-				&& glloader_GL_NV_blend_square()
-				&& glloader_GL_ARB_depth_texture()
-				&& (glloader_GL_ARB_shadow() || glloader_GL_SGIX_shadow())
-				&& glloader_GL_EXT_fog_coord()
-				&& glloader_GL_EXT_multi_draw_arrays()
-				&& (glloader_GL_ARB_point_parameters() && glloader_GL_NV_point_sprite())
-				&& glloader_GL_EXT_secondary_color()
-				&& glloader_GL_EXT_blend_func_separate()
-				&& glloader_GL_EXT_stencil_wrap()
-				&& (glloader_GL_ARB_texture_env_crossbar() || glloader_GL_NV_texture_env_combine4())
-				&& glloader_GL_EXT_texture_lod_bias()
-				&& glloader_GL_ARB_texture_mirrored_repeat()
-				&& (glloader_GL_ARB_window_pos() || glloader_GL_MESA_window_pos()))
+			if (glloader_GL_EXT_blend_func_separate())
 			{
-				_GL_VERSION_1_4 = true;
-				gl_features_extractor::instance().promote("GL_VERSION_1_4");
-
 				glBlendFuncSeparate = glBlendFuncSeparateEXT;
+			}
+			if (glloader_GL_EXT_fog_coord())
+			{
 				glFogCoordf = glFogCoordfEXT;
 				glFogCoordfv = glFogCoordfvEXT;
 				glFogCoordd = glFogCoorddEXT;
 				glFogCoorddv = glFogCoorddvEXT;
 				glFogCoordPointer = glFogCoordPointerEXT;
+			}
+			if (glloader_GL_EXT_multi_draw_arrays())
+			{
 				glMultiDrawArrays = glMultiDrawArraysEXT;
 				glMultiDrawElements = glMultiDrawElementsEXT;
+			}
+			if (glloader_GL_ARB_point_parameters())
+			{
 				glPointParameterf = glPointParameterfARB;
 				glPointParameterfv = glPointParameterfvARB;
+			}
+			if (glloader_GL_NV_point_sprite())
+			{
 				glPointParameteri = glPointParameteriNV;
 				glPointParameteriv = glPointParameterivNV;
+			}
+			if (glloader_GL_EXT_secondary_color())
+			{
 				glSecondaryColor3b = glSecondaryColor3bEXT;
 				glSecondaryColor3bv = glSecondaryColor3bvEXT;
 				glSecondaryColor3d = glSecondaryColor3dEXT;
@@ -239,47 +238,66 @@ namespace
 				glSecondaryColor3us = glSecondaryColor3usEXT;
 				glSecondaryColor3usv = glSecondaryColor3usvEXT;
 				glSecondaryColorPointer = glSecondaryColorPointerEXT;
-				if (glloader_GL_ARB_window_pos())
+			}
+			if (glloader_GL_ARB_window_pos())
+			{
+				glWindowPos2d = glWindowPos2dARB;
+				glWindowPos2dv = glWindowPos2dvARB;
+				glWindowPos2f = glWindowPos2fARB;
+				glWindowPos2fv = glWindowPos2fvARB;
+				glWindowPos2i = glWindowPos2iARB;
+				glWindowPos2iv = glWindowPos2ivARB;
+				glWindowPos2s = glWindowPos2sARB;
+				glWindowPos2sv = glWindowPos2svARB;
+				glWindowPos3d = glWindowPos3dARB;
+				glWindowPos3dv = glWindowPos3dvARB;
+				glWindowPos3f = glWindowPos3fARB;
+				glWindowPos3fv = glWindowPos3fvARB;
+				glWindowPos3i = glWindowPos3iARB;
+				glWindowPos3iv = glWindowPos3ivARB;
+				glWindowPos3s = glWindowPos3sARB;
+				glWindowPos3sv = glWindowPos3svARB;
+			}
+			else
+			{
+				if (glloader_GL_MESA_window_pos())
 				{
-					glWindowPos2d = glWindowPos2dARB;
-					glWindowPos2dv = glWindowPos2dvARB;
-					glWindowPos2f = glWindowPos2fARB;
-					glWindowPos2fv = glWindowPos2fvARB;
-					glWindowPos2i = glWindowPos2iARB;
-					glWindowPos2iv = glWindowPos2ivARB;
-					glWindowPos2s = glWindowPos2sARB;
-					glWindowPos2sv = glWindowPos2svARB;
-					glWindowPos3d = glWindowPos3dARB;
-					glWindowPos3dv = glWindowPos3dvARB;
-					glWindowPos3f = glWindowPos3fARB;
-					glWindowPos3fv = glWindowPos3fvARB;
-					glWindowPos3i = glWindowPos3iARB;
-					glWindowPos3iv = glWindowPos3ivARB;
-					glWindowPos3s = glWindowPos3sARB;
-					glWindowPos3sv = glWindowPos3svARB;
+					glWindowPos2d = glWindowPos2dMESA;
+					glWindowPos2dv = glWindowPos2dvMESA;
+					glWindowPos2f = glWindowPos2fMESA;
+					glWindowPos2fv = glWindowPos2fvMESA;
+					glWindowPos2i = glWindowPos2iMESA;
+					glWindowPos2iv = glWindowPos2ivMESA;
+					glWindowPos2s = glWindowPos2sMESA;
+					glWindowPos2sv = glWindowPos2svMESA;
+					glWindowPos3d = glWindowPos3dMESA;
+					glWindowPos3dv = glWindowPos3dvMESA;
+					glWindowPos3f = glWindowPos3fMESA;
+					glWindowPos3fv = glWindowPos3fvMESA;
+					glWindowPos3i = glWindowPos3iMESA;
+					glWindowPos3iv = glWindowPos3ivMESA;
+					glWindowPos3s = glWindowPos3sMESA;
+					glWindowPos3sv = glWindowPos3svMESA;
 				}
-				else
-				{
-					if (glloader_GL_MESA_window_pos())
-					{
-						glWindowPos2d = glWindowPos2dMESA;
-						glWindowPos2dv = glWindowPos2dvMESA;
-						glWindowPos2f = glWindowPos2fMESA;
-						glWindowPos2fv = glWindowPos2fvMESA;
-						glWindowPos2i = glWindowPos2iMESA;
-						glWindowPos2iv = glWindowPos2ivMESA;
-						glWindowPos2s = glWindowPos2sMESA;
-						glWindowPos2sv = glWindowPos2svMESA;
-						glWindowPos3d = glWindowPos3dMESA;
-						glWindowPos3dv = glWindowPos3dvMESA;
-						glWindowPos3f = glWindowPos3fMESA;
-						glWindowPos3fv = glWindowPos3fvMESA;
-						glWindowPos3i = glWindowPos3iMESA;
-						glWindowPos3iv = glWindowPos3ivMESA;
-						glWindowPos3s = glWindowPos3sMESA;
-						glWindowPos3sv = glWindowPos3svMESA;
-					}
-				}
+			}
+
+			if (glloader_GL_SGIS_generate_mipmap()
+				&& glloader_GL_NV_blend_square()
+				&& glloader_GL_ARB_depth_texture()
+				&& (glloader_GL_ARB_shadow() || glloader_GL_SGIX_shadow())
+				&& glloader_GL_EXT_fog_coord()
+				&& glloader_GL_EXT_multi_draw_arrays()
+				&& (glloader_GL_ARB_point_parameters() && glloader_GL_NV_point_sprite())
+				&& glloader_GL_EXT_secondary_color()
+				&& glloader_GL_EXT_blend_func_separate()
+				&& glloader_GL_EXT_stencil_wrap()
+				&& (glloader_GL_ARB_texture_env_crossbar() || glloader_GL_NV_texture_env_combine4())
+				&& glloader_GL_EXT_texture_lod_bias()
+				&& glloader_GL_ARB_texture_mirrored_repeat()
+				&& (glloader_GL_ARB_window_pos() || glloader_GL_MESA_window_pos()))
+			{
+				_GL_VERSION_1_4 = true;
+				gl_features_extractor::instance().promote("GL_VERSION_1_4");
 			}
 		}
 	}
