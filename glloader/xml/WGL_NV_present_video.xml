@@ -1,0 +1,40 @@
+<?xml version='1.0'?>
+
+<GLExtension name="WGL_NV_present_video">
+	<Typedefs>
+		<Typedef type="void*" synonym="HVIDEOOUTPUTDEVICENV"/>
+	</Typedefs>
+
+	<Tokens>
+		<Token name="WGL_NUM_VIDEO_SLOTS_NV" value="0x20F0"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="wglEnumerateVideoDevicesNV" return="int">
+			<Param type="HDC" name="hDc"/>
+			<Param type="HVIDEOOUTPUTDEVICENV*" name="phDeviceList"/>
+		</Function>
+		<Function name="wglBindVideoDeviceNV" return="BOOL">
+			<Param type="HDC" name="hDc"/>
+			<Param type="unsigned int" name="uVideoSlot"/>
+			<Param type="HVIDEOOUTPUTDEVICENV" name="hVideoDevice"/>
+			<Param type="const int*" name="piAttribList"/>
+		</Function>
+		<Function name="wglQueryCurrentContextNV" return="BOOL">
+			<Param type="int" name="iAttribute"/>
+			<Param type="int*" name="piValue"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="WGL_NV" string="WGL_NV_present_video" reg_no="347">
+			<Name name="wglEnumerateVideoDevicesNV"/>
+			<Name name="wglBindVideoDeviceNV"/>
+			<Name name="wglQueryCurrentContextNV"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="WGL_NV"/>
+	</InitPath>
+</GLExtension>

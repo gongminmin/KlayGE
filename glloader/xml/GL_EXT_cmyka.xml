@@ -2,10 +2,10 @@
 
 <GLExtension name="GL_EXT_cmyka">
 	<Tokens>
-		<Token name="CMYK_EXT" value="0x800C"/>
-		<Token name="CMYKA_EXT" value="0x800D"/>
-		<Token name="PACK_CMYK_HINT_EXT" value="0x800E"/>
-		<Token name="UNPACK_CMYK_HINT_EXT" value="0x800F"/>
+		<Token name="GL_CMYK_EXT" value="0x800C"/>
+		<Token name="GL_CMYKA_EXT" value="0x800D"/>
+		<Token name="GL_PACK_CMYK_HINT_EXT" value="0x800E"/>
+		<Token name="GL_UNPACK_CMYK_HINT_EXT" value="0x800F"/>
 	</Tokens>
 
 	<Vendors>

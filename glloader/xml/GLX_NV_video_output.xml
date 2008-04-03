@@ -1,0 +1,73 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GLX_NV_video_output">
+	<Typedefs>
+		<Typedef type="unsigned int" synonym="GLXVideoDeviceNV"/>
+	</Typedefs>
+
+	<Tokens>
+		<Token name="GLX_VIDEO_OUT_COLOR_NV" value="0x20C3"/>
+		<Token name="GLX_VIDEO_OUT_ALPHA_NV" value="0x20C4"/>
+		<Token name="GLX_VIDEO_OUT_DEPTH_NV" value="0x20C5"/>
+		<Token name="GLX_VIDEO_OUT_COLOR_AND_ALPHA_NV" value="0x20C6"/>
+		<Token name="GLX_VIDEO_OUT_COLOR_AND_DEPTH_NV" value="0x20C7"/>
+		<Token name="GLX_VIDEO_OUT_FRAME_NV" value="0x20C8"/>
+		<Token name="GLX_VIDEO_OUT_FIELD_1_NV" value="0x20C9"/>
+		<Token name="GLX_VIDEO_OUT_FIELD_2_NV" value="0x20CA"/>
+		<Token name="GLX_VIDEO_OUT_STACKED_FIELDS_1_2_NV" value="0x20CB"/>
+		<Token name="GLX_VIDEO_OUT_STACKED_FIELDS_2_1_NV" value="0x20CC"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glXGetVideoDeviceNV" return="GLint">
+			<Param type="Display*" name="dpy"/>
+			<Param type="int" name="screen"/>
+			<Param type="int" name="numVideoDevices"/>
+			<Param type="GLXVideoDeviceNV*" name="pVideoDevice"/>
+		</Function>
+		<Function name="glXReleaseVideoDeviceNV" return="GLint">
+			<Param type="Display*" name="dpy"/>
+			<Param type="int" name="screen"/>
+			<Param type="GLXVideoDeviceNV" name="VideoDevice"/>
+		</Function>
+		<Function name="glXBindVideoImageNV" return="GLint">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXVideoDeviceNV" name="VideoDevice"/>
+			<Param type="GLXPbuffer" name="pbuf"/>
+			<Param type="int" name="iVideoBuffer"/>
+		</Function>
+		<Function name="glXReleaseVideoImageNV" return="GLint">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXPbuffer" name="pbuf"/>
+		</Function>
+		<Function name="glXSendPbufferToVideoNV" return="GLint">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXPbuffer" name="pbuf"/>
+			<Param type="int" name="iBufferType"/>
+			<Param type="unsigned long*" name="pulCounterPbuffer"/>
+			<Param type="GLboolean" name="bBlock"/>
+		</Function>
+		<Function name="glXGetVideoInfoNV" return="GLint">
+			<Param type="Display*" name="dpy"/>
+			<Param type="int" name="screen"/>
+			<Param type="GLXVideoDeviceNV" name="VideoDevice"/>
+			<Param type="unsigned long*" name="pulCounterOutputPbuffer"/>
+			<Param type="unsigned long*" name="pulCounterOutputVideo"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GLX_NV" string="GLX_NV_video_output" reg_no="348">
+			<Name name="glXGetVideoDeviceNV"/>
+			<Name name="glXReleaseVideoDeviceNV"/>
+			<Name name="glXBindVideoImageNV"/>
+			<Name name="glXReleaseVideoImageNV"/>
+			<Name name="glXSendPbufferToVideoNV"/>
+			<Name name="glXGetVideoInfoNV"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GLX_NV"/>
+	</InitPath>
+</GLExtension>

@@ -84,7 +84,7 @@
 		<Token name="GL_VERTEX_SHADER_INSTRUCTIONS_EXT" value="0x87CF"/>
 		<Token name="GL_VERTEX_SHADER_VARIANTS_EXT" value="0x87D0"/>
 		<Token name="GL_VERTEX_SHADER_INVARIANTS_EXT" value="0x87D1"/>
-		<Token name="GL_VERTEX_SHADER_LOCAL_CONSTANTS_EXT0x87D2" value=""/>
+		<Token name="GL_VERTEX_SHADER_LOCAL_CONSTANTS_EXT" value="0x87D2"/>
 		<Token name="GL_VERTEX_SHADER_LOCALS_EXT" value="0x87D3"/>
 		<Token name="GL_VERTEX_SHADER_OPTIMIZED_EXT" value="0x87D4"/>
 		<Token name="GL_X_EXT" value="0x87D5"/>

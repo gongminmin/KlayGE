@@ -1,10 +1,15 @@
 <?xml version='1.0'?>
 
 <GLExtension name="GL_APPLE_flush_buffer_range">
+	<Tokens>
+		<Token name="GL_BUFFER_SERIALIZED_MODIFY_APPLE" value="0x8A12"/>
+		<Token name="GL_BUFFER_FLUSHING_UNMAP_APPLE" value="0x8A13"/>
+	</Tokens>
+
 	<Functions>
 		<Function name="glBufferParameteriAPPLE" return="void">
 			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="name"/>
+			<Param type="GLenum" name="pname"/>
 			<Param type="GLint" name="param"/>
 		</Function>
 		<Function name="glFlushMappedBufferRangeAPPLE" return="void">

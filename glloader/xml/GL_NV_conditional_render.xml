@@ -1,0 +1,29 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_NV_conditional_render">
+	<Tokens>
+		<Token name="GL_QUERY_WAIT_NV" value="0x8E13"/>
+		<Token name="GL_QUERY_NO_WAIT_NV" value="0x8E14"/>
+		<Token name="GL_QUERY_BY_REGION_WAIT_NV" value="0x8E15"/>
+		<Token name="GL_QUERY_BY_REGION_NO_WAIT_NV" value="0x8E16"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glBeginConditionalRenderNV" return="void">
+			<Param type="GLuint" name="id"/>
+			<Param type="GLenum" name="mode"/>
+		</Function>
+		<Function name="glEndConditionalRenderNV" return="void"/>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GL_NV" string="GL_NV_conditional_render" reg_no="346">
+			<Name name="glBeginConditionalRenderNV"/>
+			<Name name="glEndConditionalRenderNV"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_NV"/>
+	</InitPath>
+</GLExtension>

@@ -4,6 +4,7 @@
 	<Tokens>
 		<Token name="GL_POLYGON_OFFSET_EXT" value="0x8037"/>
 		<Token name="GL_POLYGON_OFFSET_FACTOR_EXT" value="0x8038"/>
+		<Token name="GL_POLYGON_OFFSET_BIAS_EXT" value="0x8039"/>
 		<Token name="GL_POLYGON_OFFSET_UNITS_EXT" value="0x2A00"/>
 		<Token name="GL_POLYGON_OFFSET_POINT_EXT" value="0x2A01"/>
 		<Token name="GL_POLYGON_OFFSET_LINE_EXT" value="0x2A02"/>
@@ -13,7 +14,7 @@
 	<Functions>
 		<Function name="glPolygonOffsetEXT" return="void">
 			<Param type="GLfloat" name="factor"/>
-			<Param type="GLfloat" name="units"/>
+			<Param type="GLfloat" name="bias"/>
 		</Function>
 	</Functions>
 

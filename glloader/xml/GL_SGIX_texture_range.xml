@@ -1,0 +1,42 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_SGIX_texture_range">
+	<Tokens>
+		<Token name="GL_RGB_SIGNED_SGIX" value="0x85E0"/>
+		<Token name="GL_RGBA_SIGNED_SGIX" value="0x85E1"/>
+		<Token name="GL_ALPHA_SIGNED_SGIX" value="0x85E2"/>
+		<Token name="GL_LUMINANCE_SIGNED_SGIX" value="0x85E3"/>
+		<Token name="GL_INTENSITY_SIGNED_SGIX" value="0x85E4"/>
+		<Token name="GL_LUMINANCE_ALPHA_SIGNED_SGIX" value="0x85E5"/>
+		<Token name="GL_RGB16_SIGNED_SGIX" value="0x85E6"/>
+		<Token name="GL_RGBA16_SIGNED_SGIX" value="0x85E7"/>
+		<Token name="GL_ALPHA16_SIGNED_SGIX" value="0x85E8"/>
+		<Token name="GL_LUMINANCE16_SIGNED_SGIX" value="0x85E9"/>
+		<Token name="GL_INTENSITY16_SIGNED_SGIX" value="0x85EA"/>
+		<Token name="GL_LUMINANCE16_ALPHA16_SIGNED_SGIX" value="0x85EB"/>
+		<Token name="GL_RGB_EXTENDED_RANGE_SGIX" value="0x85EC"/>
+		<Token name="GL_RGBA_EXTENDED_RANGE_SGIX" value="0x85ED"/>
+		<Token name="GL_ALPHA_EXTENDED_RANGE_SGIX" value="0x85EE"/>
+		<Token name="GL_LUMINANCE_EXTENDED_RANGE_SGIX" value="0x85EF"/>
+		<Token name="GL_INTENSITY_EXTENDED_RANGE_SGIX" value="0x85F0"/>
+		<Token name="GL_LUMINANCE_ALPHA_EXTENDED_RANGE_SGIX" value="0x85F1"/>
+		<Token name="GL_RGB16_EXTENDED_RANGE_SGIX" value="0x85F2"/>
+		<Token name="GL_RGBA16_EXTENDED_RANGE_SGIX" value="0x85F3"/>
+		<Token name="GL_ALPHA16_EXTENDED_RANGE_SGIX" value="0x85F4"/>
+		<Token name="GL_LUMINANCE16_EXTENDED_RANGE_SGIX" value="0x85F5"/>
+		<Token name="GL_INTENSITY16_EXTENDED_RANGE_SGIX" value="0x85F6"/>
+		<Token name="GL_LUMINANCE16_ALPHA16_EXTENDED_RANGE_SGIX" value="0x85F7"/>
+		<Token name="GL_MIN_LUMINANCE_SGIS" value="0x85F8"/>
+		<Token name="GL_MAX_LUMINANCE_SGIS" value="0x85F9"/>
+		<Token name="GL_MIN_INTENSITY_SGIS" value="0x85FA"/>
+		<Token name="GL_MAX_INTENSITY_SGIS" value="0x85FB"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GL_SGIX" string="GL_SGIX_texture_range" reg_no="181"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_SGIX"/>
+	</InitPath>
+</GLExtension>

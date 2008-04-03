@@ -4,7 +4,7 @@
 	<Tokens>
 		<Token name="WGL_BIND_TO_TEXTURE_RECTANGLE_RGB_NV" value="0x20A0"/>
 		<Token name="WGL_BIND_TO_TEXTURE_RECTANGLE_RGBA_NV" value="0x20A1"/>
-		<Token name="WGL_TEXTURE_RECTANGLE_NV " value="0x20A2"/>
+		<Token name="WGL_TEXTURE_RECTANGLE_NV" value="0x20A2"/>
 	</Tokens>
 
 	<Vendors>

@@ -25,7 +25,7 @@
 			<Param type="const GLfloat*" name="weight"/>
 		</Function>
 		<Function name="glVertexWeightPointerEXT" return="void">
-			<Param type="GLsizei" name="size"/>
+			<Param type="GLint" name="size"/>
 			<Param type="GLenum" name="type"/>
 			<Param type="GLsizei" name="stride"/>
 			<Param type="const GLvoid*" name="pointer"/>

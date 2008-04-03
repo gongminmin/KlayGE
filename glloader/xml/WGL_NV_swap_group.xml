@@ -1,0 +1,46 @@
+<?xml version='1.0'?>
+
+<GLExtension name="WGL_NV_swap_group">
+	<Functions>
+		<Function name="wglJoinSwapGroupNV" return="BOOL">
+			<Param type="HDC" name="hDC"/>
+			<Param type="GLuint" name="group"/>
+		</Function>
+		<Function name="wglBindSwapBarrierNV" return="BOOL">
+			<Param type="GLuint" name="group"/>
+			<Param type="GLuint" name="barrier"/>
+		</Function>
+		<Function name="wglQuerySwapGroupNV" return="BOOL">
+			<Param type="HDC" name="hDC"/>
+			<Param type="GLuint*" name="group"/>
+			<Param type="GLuint*" name="barrier"/>
+		</Function>
+		<Function name="wglQueryMaxSwapGroupsNV" return="BOOL">
+			<Param type="HDC" name="hDC"/>
+			<Param type="GLuint*" name="maxGroups"/>
+			<Param type="GLuint*" name="maxBarriers"/>
+		</Function>
+		<Function name="wglQueryFrameCountNV" return="BOOL">
+			<Param type="HDC" name="hDC"/>
+			<Param type="GLuint*" name="count"/>
+		</Function>
+		<Function name="wglResetFrameCountNV" return="BOOL">
+			<Param type="HDC" name="hDC"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="WGL_NV" string="WGL_NV_swap_group" reg_no="351">
+			<Name name="wglJoinSwapGroupNV"/>
+			<Name name="wglBindSwapBarrierNV"/>
+			<Name name="wglQuerySwapGroupNV"/>
+			<Name name="wglQueryMaxSwapGroupsNV"/>
+			<Name name="wglQueryFrameCountNV"/>
+			<Name name="wglResetFrameCountNV"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="WGL_NV"/>
+	</InitPath>
+</GLExtension>

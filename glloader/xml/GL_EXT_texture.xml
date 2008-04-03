@@ -22,6 +22,7 @@
 		<Token name="GL_INTENSITY12_EXT" value="0x804C"/>
 		<Token name="GL_INTENSITY16_EXT" value="0x804D"/>
 		<Token name="GL_R3_G3_B2_EXT" value="0x2A10"/>
+		<Token name="GL_RGB2_EXT" value="0x804E"/>
 		<Token name="GL_RGB4_EXT" value="0x804F"/>
 		<Token name="GL_RGB5_EXT" value="0x8050"/>
 		<Token name="GL_RGB8_EXT" value="0x8051"/>
@@ -41,6 +42,7 @@
 		<Token name="GL_TEXTURE_ALPHA_SIZE_EXT" value="0x805F"/>
 		<Token name="GL_TEXTURE_LUMINANCE_SIZE_EXT" value="0x8060"/>
 		<Token name="GL_TEXTURE_INTENSITY_SIZE_EXT" value="0x8061"/>
+		<Token name="GL_REPLACE_EXT" value="0x8062"/>
 		<Token name="GL_PROXY_TEXTURE_1D_EXT" value="0x8063"/>
 		<Token name="GL_PROXY_TEXTURE_2D_EXT" value="0x8064"/>
 		<Token name="GL_TEXTURE_TOO_LARGE_EXT" value="0x8065"/>

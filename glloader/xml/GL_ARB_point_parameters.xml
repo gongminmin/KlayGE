@@ -5,7 +5,7 @@
 		<Token name="GL_POINT_SIZE_MIN_ARB" value="0x8126"/>
 		<Token name="GL_POINT_SIZE_MAX_ARB" value="0x8127"/>
 		<Token name="GL_POINT_FADE_THRESHOLD_SIZE_ARB" value="0x8128"/>
-		<Token name="GL_DISTANCE_ATTENUATION_ARB" value="0x8129"/>
+		<Token name="GL_POINT_DISTANCE_ATTENUATION_ARB" value="0x8129"/>
 	</Tokens>
 
 	<Functions>

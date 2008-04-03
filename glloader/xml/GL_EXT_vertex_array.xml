@@ -2,27 +2,33 @@
 
 <GLExtension name="GL_EXT_vertex_array">
 	<Tokens>
-		<Token name="GL_DOUBLE_EXT" value="0x140A"/>
 		<Token name="GL_VERTEX_ARRAY_EXT" value="0x8074"/>
 		<Token name="GL_NORMAL_ARRAY_EXT" value="0x8075"/>
 		<Token name="GL_COLOR_ARRAY_EXT" value="0x8076"/>
 		<Token name="GL_INDEX_ARRAY_EXT" value="0x8077"/>
 		<Token name="GL_TEXTURE_COORD_ARRAY_EXT" value="0x8078"/>
 		<Token name="GL_EDGE_FLAG_ARRAY_EXT" value="0x8079"/>
+		<Token name="GL_DOUBLE_EXT" value="0x140A"/>
 		<Token name="GL_VERTEX_ARRAY_SIZE_EXT" value="0x807A"/>
 		<Token name="GL_VERTEX_ARRAY_TYPE_EXT" value="0x807B"/>
 		<Token name="GL_VERTEX_ARRAY_STRIDE_EXT" value="0x807C"/>
+		<Token name="GL_VERTEX_ARRAY_COUNT_EXT" value="0x807D"/>
 		<Token name="GL_NORMAL_ARRAY_TYPE_EXT" value="0x807E"/>
 		<Token name="GL_NORMAL_ARRAY_STRIDE_EXT" value="0x807F"/>
+		<Token name="GL_NORMAL_ARRAY_COUNT_EXT" value="0x8080"/>
 		<Token name="GL_COLOR_ARRAY_SIZE_EXT" value="0x8081"/>
 		<Token name="GL_COLOR_ARRAY_TYPE_EXT" value="0x8082"/>
 		<Token name="GL_COLOR_ARRAY_STRIDE_EXT" value="0x8083"/>
+		<Token name="GL_COLOR_ARRAY_COUNT_EXT" value="0x8084"/>
 		<Token name="GL_INDEX_ARRAY_TYPE_EXT" value="0x8085"/>
 		<Token name="GL_INDEX_ARRAY_STRIDE_EXT" value="0x8086"/>
+		<Token name="GL_INDEX_ARRAY_COUNT_EXT" value="0x8087"/>
 		<Token name="GL_TEXTURE_COORD_ARRAY_SIZE_EXT" value="0x8088"/>
 		<Token name="GL_TEXTURE_COORD_ARRAY_TYPE_EXT" value="0x8089"/>
 		<Token name="GL_TEXTURE_COORD_ARRAY_STRIDE_EXT" value="0x808A"/>
+		<Token name="GL_TEXTURE_COORD_ARRAY_COUNT_EXT" value="0x808B"/>
 		<Token name="GL_EDGE_FLAG_ARRAY_STRIDE_EXT" value="0x808C"/>
+		<Token name="GL_EDGE_FLAG_ARRAY_COUNT_EXT" value="0x808D"/>
 		<Token name="GL_VERTEX_ARRAY_POINTER_EXT" value="0x808E"/>
 		<Token name="GL_NORMAL_ARRAY_POINTER_EXT" value="0x808F"/>
 		<Token name="GL_COLOR_ARRAY_POINTER_EXT" value="0x8090"/>
@@ -44,32 +50,38 @@
 			<Param type="GLint" name="size"/>
 			<Param type="GLenum" name="type"/>
 			<Param type="GLsizei" name="stride"/>
+			<Param type="GLsizei" name="count"/>
 			<Param type="const GLvoid*" name="pointer"/>
 		</Function>
 		<Function name="glNormalPointerEXT" return="void">
 			<Param type="GLenum" name="type"/>
 			<Param type="GLsizei" name="stride"/>
+			<Param type="GLsizei" name="count"/>
 			<Param type="const GLvoid*" name="pointer"/>
 		</Function>
 		<Function name="glColorPointerEXT" return="void">
 			<Param type="GLint" name="size"/>
 			<Param type="GLenum" name="type"/>
 			<Param type="GLsizei" name="stride"/>
+			<Param type="GLsizei" name="count"/>
 			<Param type="const GLvoid*" name="pointer"/>
 		</Function>
 		<Function name="glIndexPointerEXT" return="void">
 			<Param type="GLenum" name="type"/>
 			<Param type="GLsizei" name="stride"/>
+			<Param type="GLsizei" name="count"/>
 			<Param type="const GLvoid*" name="pointer"/>
 		</Function>
 		<Function name="glTexCoordPointerEXT" return="void">
 			<Param type="GLint" name="size"/>
 			<Param type="GLenum" name="type"/>
 			<Param type="GLsizei" name="stride"/>
+			<Param type="GLsizei" name="count"/>
 			<Param type="const GLvoid*" name="pointer"/>
 		</Function>
 		<Function name="glEdgeFlagPointerEXT" return="void">
 			<Param type="GLsizei" name="stride"/>
+			<Param type="GLsizei" name="count"/>
 			<Param type="const GLboolean*" name="pointer"/>
 		</Function>
 		<Function name="glGetPointervEXT" return="void">

@@ -1,0 +1,32 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GLX_NV_present_video">
+	<Tokens>
+		<Token name="GLX_NUM_VIDEO_SLOTS_NV" value="0x20F0"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="glXEnumerateVideoDevicesNV" return="unsigned int*">
+			<Param type="Display*" name="dpy"/>
+			<Param type="int" name="screen"/>
+			<Param type="int*" name="nelements"/>
+		</Function>
+		<Function name="glXBindVideoDeviceNV" return="int">
+			<Param type="Display*" name="dpy"/>
+			<Param type="unsigned int" name="video_slot"/>
+			<Param type="unsigned int" name="video_device"/>
+			<Param type="const int*" name="attrib_list"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GLX_NV" string="GLX_NV_present_video" reg_no="347">
+			<Name name="glXEnumerateVideoDevicesNV"/>
+			<Name name="glXBindVideoDeviceNV"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GLX_NV"/>
+	</InitPath>
+</GLExtension>

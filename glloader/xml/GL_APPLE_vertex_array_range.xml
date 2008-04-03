@@ -5,6 +5,7 @@
 		<Token name="GL_VERTEX_ARRAY_RANGE_APPLE" value="0x851D"/>
 		<Token name="GL_VERTEX_ARRAY_RANGE_LENGTH_APPLE" value="0x851E"/>
 		<Token name="GL_VERTEX_ARRAY_STORAGE_HINT_APPLE" value="0x851F"/>
+		<Token name="GL_MAX_VERTEX_ARRAY_RANGE_ELEMENT_APPLE" value="0x8520"/>
 		<Token name="GL_VERTEX_ARRAY_RANGE_POINTER_APPLE" value="0x8521"/>
 		<Token name="GL_STORAGE_CACHED_APPLE" value="0x85BE"/>
 		<Token name="GL_STORAGE_SHARED_APPLE" value="0x85BF"/>

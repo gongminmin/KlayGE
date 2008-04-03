@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GLX_NV_float_buffer">
+	<Tokens>
+		<Token name="GLX_FLOAT_COMPONENTS_NV" value="0x20B0"/>
+	</Tokens>
+
+	<Vendors>
+		<Vendor name="GLX_NV" string="GLX_NV_float_buffer" reg_no="281"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GLX_NV"/>
+	</InitPath>
+</GLExtension>

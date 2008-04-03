@@ -6,6 +6,8 @@
 		<Token name="GL_RGB4_S3TC" value="0x83A1"/>
 		<Token name="GL_RGBA_S3TC" value="0x83A2"/>
 		<Token name="GL_RGBA4_S3TC" value="0x83A3"/>
+		<Token name="GL_RGBA_DXT5_S3TC" value="0x83A4"/>
+		<Token name="GL_RGBA4_DXT5_S3TC" value="0x83A5"/>
 	</Tokens>
 
 	<Vendors>

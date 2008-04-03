@@ -4,6 +4,8 @@
 	<Tokens>
 		<Token name="GL_RENDERBUFFER_COVERAGE_SAMPLES_NV" value="0x8CAB"/>
 		<Token name="GL_RENDERBUFFER_COLOR_SAMPLES_NV" value="0x8E10"/>
+		<Token name="GL_MAX_MULTISAMPLE_COVERAGE_MODES_NV" value="0x8E11"/>
+		<Token name="GL_MULITSAMPLE_COVERAGE_MODES_NV" value="0x8E12"/>
 	</Tokens>
 
 	<Functions>

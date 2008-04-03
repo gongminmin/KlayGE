@@ -1,0 +1,52 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GLX_NV_swap_group">
+	<Functions>
+		<Function name="glXJoinSwapGroupNV" return="Bool">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXDrawable" name="drawable"/>
+			<Param type="GLuint" name="group"/>
+		</Function>
+		<Function name="glXBindSwapBarrierNV" return="Bool">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLuint" name="group"/>
+			<Param type="GLuint" name="barrier"/>
+		</Function>
+		<Function name="glXQuerySwapGroupNV" return="Bool">
+			<Param type="Display*" name="dpy"/>
+			<Param type="GLXDrawable" name="drawable"/>
+			<Param type="GLuint*" name="group"/>
+			<Param type="GLuint*" name="barrier"/>
+		</Function>
+		<Function name="glXQueryMaxSwapGroupsNV" return="Bool">
+			<Param type="Display*" name="dpy"/>
+			<Param type="int" name="screen"/>
+			<Param type="GLuint*" name="maxGroups"/>
+			<Param type="GLuint*" name="maxBarriers"/>
+		</Function>
+		<Function name="glXQueryFrameCountNV" return="Bool">
+			<Param type="Display*" name="dpy"/>
+			<Param type="int" name="screen"/>
+			<Param type="GLuint*" name="count"/>
+		</Function>
+		<Function name="glXResetFrameCountNV" return="Bool">
+			<Param type="Display*" name="dpy"/>
+			<Param type="int" name="screen"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="GLX_NV" string="GLX_NV_swap_group" reg_no="350">
+			<Name name="glXJoinSwapGroupNV"/>
+			<Name name="glXBindSwapBarrierNV"/>
+			<Name name="glXQuerySwapGroupNV"/>
+			<Name name="glXQueryMaxSwapGroupsNV"/>
+			<Name name="glXQueryFrameCountNV"/>
+			<Name name="glXResetFrameCountNV"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GLX_NV"/>
+	</InitPath>
+</GLExtension>

@@ -169,7 +169,6 @@
 		<Function name="glAlphaFragmentOp1ATI" return="void">
 			<Param type="GLenum" name="op"/>
 			<Param type="GLuint" name="dst"/>
-			<Param type="GLuint" name="dstMask"/>
 			<Param type="GLuint" name="dstMod"/>
 			<Param type="GLuint" name="arg1"/>
 			<Param type="GLuint" name="arg1Rep"/>
@@ -178,7 +177,6 @@
 		<Function name="glAlphaFragmentOp2ATI" return="void">
 			<Param type="GLenum" name="op"/>
 			<Param type="GLuint" name="dst"/>
-			<Param type="GLuint" name="dstMask"/>
 			<Param type="GLuint" name="dstMod"/>
 			<Param type="GLuint" name="arg1"/>
 			<Param type="GLuint" name="arg1Rep"/>
@@ -190,7 +188,6 @@
 		<Function name="glAlphaFragmentOp3ATI" return="void">
 			<Param type="GLenum" name="op"/>
 			<Param type="GLuint" name="dst"/>
-			<Param type="GLuint" name="dstMask"/>
 			<Param type="GLuint" name="dstMod"/>
 			<Param type="GLuint" name="arg1"/>
 			<Param type="GLuint" name="arg1Rep"/>
