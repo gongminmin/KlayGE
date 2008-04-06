@@ -71,14 +71,7 @@
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4244)
-#endif
 #include <boost/functional/hash.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
 #include <KlayGE/Font.hpp>
 

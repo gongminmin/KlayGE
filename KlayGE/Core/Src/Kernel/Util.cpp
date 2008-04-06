@@ -18,7 +18,14 @@
 
 #include <KlayGE/KlayGE.hpp>
 
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4244 4512)
+#endif
 #include <boost/date_time.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 #include <boost/thread/thread.hpp>
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
@@ -43,7 +50,7 @@ namespace KlayGE
 	std::string& Convert(std::string& dest, std::wstring const & src)
 	{
 #ifdef KLAYGE_PLATFORM_WINDOWS
-		size_t const mbs_len = WideCharToMultiByte(CP_ACP, 0, src.c_str(), -1, NULL, 0, NULL, NULL);
+		int const mbs_len = WideCharToMultiByte(CP_ACP, 0, src.c_str(), -1, NULL, 0, NULL, NULL);
 		std::vector<char> tmp(mbs_len + 1);
 		WideCharToMultiByte(CP_ACP, 0, src.c_str(), -1, &tmp[0], mbs_len, NULL, NULL);
 #else
@@ -73,7 +80,7 @@ namespace KlayGE
 	std::wstring& Convert(std::wstring& dest, std::string const & src)
 	{
 #ifdef KLAYGE_PLATFORM_WINDOWS
-		size_t const wcs_len = MultiByteToWideChar(CP_ACP, 0, src.c_str(), -1, NULL, 0);
+		int const wcs_len = MultiByteToWideChar(CP_ACP, 0, src.c_str(), -1, NULL, 0);
 		std::vector<wchar_t> tmp(wcs_len + 1);
 		MultiByteToWideChar(CP_ACP, 0, src.c_str(), -1, &tmp[0], wcs_len);
 #else
