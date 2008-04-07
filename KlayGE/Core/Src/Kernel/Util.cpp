@@ -50,9 +50,9 @@ namespace KlayGE
 	std::string& Convert(std::string& dest, std::wstring const & src)
 	{
 #ifdef KLAYGE_PLATFORM_WINDOWS
-		int const mbs_len = WideCharToMultiByte(CP_ACP, 0, src.c_str(), -1, NULL, 0, NULL, NULL);
+		int const mbs_len = WideCharToMultiByte(CP_ACP, 0, src.c_str(), src.length(), NULL, 0, NULL, NULL);
 		std::vector<char> tmp(mbs_len + 1);
-		WideCharToMultiByte(CP_ACP, 0, src.c_str(), -1, &tmp[0], mbs_len, NULL, NULL);
+		WideCharToMultiByte(CP_ACP, 0, src.c_str(), src.length(), &tmp[0], mbs_len, NULL, NULL);
 #else
 		std::setlocale(LC_CTYPE, "");
 
@@ -80,9 +80,9 @@ namespace KlayGE
 	std::wstring& Convert(std::wstring& dest, std::string const & src)
 	{
 #ifdef KLAYGE_PLATFORM_WINDOWS
-		int const wcs_len = MultiByteToWideChar(CP_ACP, 0, src.c_str(), -1, NULL, 0);
+		int const wcs_len = MultiByteToWideChar(CP_ACP, 0, src.c_str(), src.length(), NULL, 0);
 		std::vector<wchar_t> tmp(wcs_len + 1);
-		MultiByteToWideChar(CP_ACP, 0, src.c_str(), -1, &tmp[0], wcs_len);
+		MultiByteToWideChar(CP_ACP, 0, src.c_str(), src.length(), &tmp[0], wcs_len);
 #else
 		std::setlocale(LC_CTYPE, "");
 
