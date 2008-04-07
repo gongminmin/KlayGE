@@ -100,13 +100,13 @@ namespace KlayGE
 		this->Init();
 
 		IGraphBuilder* graph;
-		::CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_ALL,
-			IID_IGraphBuilder, reinterpret_cast<void**>(&graph));
+		TIF(::CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_ALL,
+			IID_IGraphBuilder, reinterpret_cast<void**>(&graph)));
 		graph_ = MakeCOMPtr(graph);
 
 		IBaseFilter* filter;
-		::CoCreateInstance(CLSID_VideoMixingRenderer9, NULL, CLSCTX_INPROC_SERVER,
-			IID_IBaseFilter, reinterpret_cast<void**>(&filter));
+		TIF(::CoCreateInstance(CLSID_VideoMixingRenderer9, NULL, CLSCTX_INPROC_SERVER,
+			IID_IBaseFilter, reinterpret_cast<void**>(&filter)));
 		filter_ = MakeCOMPtr(filter);
 
 		boost::shared_ptr<IVMRFilterConfig9> filter_config;
@@ -136,13 +136,16 @@ namespace KlayGE
 
 		TIF(graph_->AddFilter(filter_.get(), L"Video Mixing Renderer 9"));
 
-		IMediaControl* media_control;
-		TIF(graph_->QueryInterface(IID_IMediaControl, reinterpret_cast<void**>(&media_control)));
-		media_control_ = MakeCOMPtr(media_control);
-
-		IMediaEvent* media_event;
-		TIF(graph_->QueryInterface(IID_IMediaEvent, reinterpret_cast<void**>(&media_event)));
-		media_event_ = MakeCOMPtr(media_event);
+		{
+			IMediaControl* tmp;
+			TIF(graph_->QueryInterface(IID_IMediaControl, reinterpret_cast<void**>(&tmp)));
+			media_control_ = MakeCOMPtr(tmp);
+		}
+		{
+			IMediaEvent* tmp;
+			TIF(graph_->QueryInterface(IID_IMediaEvent, reinterpret_cast<void**>(&tmp)));
+			media_event_ = MakeCOMPtr(tmp);
+		}
 
 		std::wstring fn;
 		Convert(fn, fileName);
