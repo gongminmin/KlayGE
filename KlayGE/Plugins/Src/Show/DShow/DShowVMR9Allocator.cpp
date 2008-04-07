@@ -13,6 +13,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/COMPtr.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/ElementFormat.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Texture.hpp>
@@ -36,8 +37,7 @@
 namespace KlayGE
 {
 	DShowVMR9Allocator::DShowVMR9Allocator(HWND wnd)
-					: ref_count_(1),
-						wnd_(wnd),
+					: wnd_(wnd), ref_count_(1),
 						cur_surf_index_(0xFFFFFFFF)
 	{
 		d3d_ = MakeCOMPtr(::Direct3DCreate9(D3D_SDK_VERSION));
@@ -88,7 +88,7 @@ namespace KlayGE
 		// clear out the private texture
 		cache_surf_.reset();
 
-		for (size_t i = 0; i < surfaces_.size(); ++ i) 
+		for (size_t i = 0; i < surfaces_.size(); ++ i)
 		{
 			if (surfaces_[i] != NULL)
 			{
@@ -129,14 +129,14 @@ namespace KlayGE
 		surfaces_.resize(*lpNumBuffers);
 		hr = vmr_surf_alloc_notify_->AllocateSurfaceHelper(lpAllocInfo, lpNumBuffers, &surfaces_[0]);
 
-		// If we couldn't create a texture surface and 
+		// If we couldn't create a texture surface and
 		// the format is not an alpha format,
 		// then we probably cannot create a texture.
 		// So what we need to do is create a private texture
 		// and copy the decoded images onto it.
 		if (FAILED(hr) && !(lpAllocInfo->dwFlags & VMR9AllocFlag_3DRenderTarget))
 		{
-			this->DeleteSurfaces();            
+			this->DeleteSurfaces();
 
 			lpAllocInfo->dwFlags &= ~VMR9AllocFlag_TextureSurface;
 			lpAllocInfo->dwFlags |= VMR9AllocFlag_OffscreenSurface;
@@ -155,7 +155,7 @@ namespace KlayGE
 
 		return S_OK;
 	}
-	            
+
 	HRESULT DShowVMR9Allocator::TerminateDevice(DWORD_PTR dwID)
 	{
 		if (dwID != USER_ID)
@@ -166,7 +166,7 @@ namespace KlayGE
 		this->DeleteSurfaces();
 		return S_OK;
 	}
-	    
+
 	HRESULT DShowVMR9Allocator::GetSurface(DWORD_PTR dwUserID,
 			DWORD SurfaceIndex, DWORD /*SurfaceFlags*/, IDirect3DSurface9** lplpSurface)
 	{
@@ -181,7 +181,7 @@ namespace KlayGE
 			return E_POINTER;
 		}
 
-		if (SurfaceIndex >= surfaces_.size()) 
+		if (SurfaceIndex >= surfaces_.size())
 		{
 			return E_FAIL;
 		}
@@ -192,7 +192,7 @@ namespace KlayGE
 		(*lplpSurface)->AddRef();
 		return S_OK;
 	}
-	    
+
 	HRESULT DShowVMR9Allocator::AdviseNotify(IVMRSurfaceAllocatorNotify9* lpIVMRSurfAllocNotify)
 	{
 		boost::mutex::scoped_lock lock(mutex_);
@@ -269,7 +269,7 @@ namespace KlayGE
 		{
 			cache_surf_.reset();
 
-			for (size_t i = 0; i < surfaces_.size(); ++ i) 
+			for (size_t i = 0; i < surfaces_.size(); ++ i)
 			{
 				if (surfaces_[i] != NULL)
 				{
@@ -295,7 +295,7 @@ namespace KlayGE
 		if (NULL == ppvObject)
 		{
 			hr = E_POINTER;
-		} 
+		}
 		else
 		{
 			if (IID_IVMRSurfaceAllocator9 == riid)
@@ -303,7 +303,7 @@ namespace KlayGE
 				*ppvObject = static_cast<IVMRSurfaceAllocator9*>(this);
 				this->AddRef();
 				hr = S_OK;
-			} 
+			}
 			else
 			{
 				if (IID_IVMRImagePresenter9 == riid)
@@ -311,14 +311,14 @@ namespace KlayGE
 					*ppvObject = static_cast<IVMRImagePresenter9*>(this);
 					this->AddRef();
 					hr = S_OK;
-				} 
+				}
 				else
 				{
 					if (IID_IUnknown == riid)
 					{
 						*ppvObject = static_cast<IUnknown*>(static_cast<IVMRSurfaceAllocator9*>(this));
 						this->AddRef();
-						hr = S_OK;    
+						hr = S_OK;
 					}
 				}
 			}
