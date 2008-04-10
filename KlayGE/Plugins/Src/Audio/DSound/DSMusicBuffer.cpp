@@ -38,7 +38,7 @@ namespace KlayGE
 	DSMusicBuffer::DSMusicBuffer(AudioDataSourcePtr const & dataSource, uint32_t bufferSeconds, float volume)
 					: MusicBuffer(dataSource),
 						writePos_(0),
-						stopped_(true)
+						played_(false), stopped_(true)
 	{
 		WAVEFORMATEX wfx(WaveFormatEx(dataSource));
 		fillSize_	= wfx.nAvgBytesPerSec / PreSecond;
@@ -94,7 +94,11 @@ namespace KlayGE
 	void DSMusicBuffer::LoopUpdateBuffer()
 	{
 		boost::mutex::scoped_lock lock(play_mutex_);
-		play_cond_.wait(lock);
+		while (!played_)
+		{
+			play_cond_.wait(lock);
+		}
+		played_ = false;
 
 		while (!stopped_)
 		{
@@ -184,6 +188,10 @@ namespace KlayGE
 		loop_ = loop;
 
 		stopped_ = false;
+		{
+			boost::mutex::scoped_lock lock(play_mutex_);
+			played_ = true;
+		}
 		play_cond_.notify_one();
 
 		buffer_->Play(0, 0, DSBPLAY_LOOPING);

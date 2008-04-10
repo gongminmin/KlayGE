@@ -20,7 +20,14 @@
 #include <vmr9.h>
 #include <vector>
 
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4244)
+#endif
 #include <boost/thread/mutex.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #include <KlayGE/D3D9/D3D9Typedefs.hpp>
 

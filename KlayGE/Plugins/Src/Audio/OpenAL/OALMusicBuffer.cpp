@@ -40,7 +40,7 @@ namespace KlayGE
 	OALMusicBuffer::OALMusicBuffer(AudioDataSourcePtr const & dataSource, uint32_t bufferSeconds, float volume)
 							: MusicBuffer(dataSource),
 								bufferQueue_(bufferSeconds * PreSecond),
-								stopped_(true)
+								played_(false), stopped_(true)
 	{
 		alGenBuffers(static_cast<ALsizei>(bufferQueue_.size()), &bufferQueue_[0]);
 
@@ -71,7 +71,11 @@ namespace KlayGE
 	void OALMusicBuffer::LoopUpdateBuffer()
 	{
 		boost::mutex::scoped_lock lock(play_mutex_);
-		play_cond_.wait(lock);
+		while (!played_)
+		{
+			play_cond_.wait(lock);
+		}
+		played_ = false;
 
 		ALint processed;
 		size_t buffersInQueue(bufferQueue_.size());
@@ -158,6 +162,10 @@ namespace KlayGE
 		loop_ = loop;
 
 		stopped_ = false;
+		{
+			boost::mutex::scoped_lock lock(play_mutex_);
+			played_ = true;
+		}
 		play_cond_.notify_one();
 
 		alSourcei(source_, AL_LOOPING, false);

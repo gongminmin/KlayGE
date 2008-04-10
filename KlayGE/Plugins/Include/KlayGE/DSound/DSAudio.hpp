@@ -107,6 +107,7 @@ namespace KlayGE
 
 		bool		loop_;
 
+		bool played_;
 		bool stopped_;
 		boost::condition play_cond_;
 		boost::mutex play_mutex_;
