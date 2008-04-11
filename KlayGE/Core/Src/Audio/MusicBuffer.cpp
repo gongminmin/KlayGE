@@ -55,8 +55,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void MusicBuffer::Play(bool loop)
 	{
-		this->Stop();
-
+		this->DoStop();
 		this->DoPlay(loop);
 	}
 
@@ -65,7 +64,6 @@ namespace KlayGE
 	void MusicBuffer::Stop()
 	{
 		this->DoStop();
-
 		dataSource_->Reset();
 	}
 }

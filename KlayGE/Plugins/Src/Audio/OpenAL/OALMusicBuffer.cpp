@@ -77,12 +77,9 @@ namespace KlayGE
 		}
 		played_ = false;
 
-		ALint processed;
-		size_t buffersInQueue(bufferQueue_.size());
-		ALuint buf;
-
 		while (!stopped_)
 		{
+			ALint processed;
 			alGetSourcei(source_, AL_BUFFERS_PROCESSED, &processed);
 			if (processed > 0)
 			{
@@ -90,6 +87,7 @@ namespace KlayGE
 				{
 					-- processed;
 
+					ALuint buf;
 					alSourceUnqueueBuffers(source_, 1, &buf);
 
 					std::vector<uint8_t> data(READSIZE);
@@ -102,22 +100,16 @@ namespace KlayGE
 					}
 					else
 					{
-						-- buffersInQueue;
-
-						if (0 == buffersInQueue)
+						if (loop_)
 						{
-							if (loop_)
-							{
-								stopped_ = false;
-								buffersInQueue = bufferQueue_.size();
-								this->Reset();
-							}
-							else
-							{
-								stopped_ = true;
-							}
-
-							break;
+							stopped_ = false;
+							alSourceStopv(1, &source_);
+							this->DoReset();
+							alSourcePlay(source_);
+						}
+						else
+						{
+							stopped_ = true;
 						}
 					}
 				}
@@ -133,7 +125,13 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OALMusicBuffer::DoReset()
 	{
-		alSourceUnqueueBuffers(source_, static_cast<ALsizei>(bufferQueue_.size()), &bufferQueue_[0]);
+		ALint queued_;
+		alGetSourcei(source_, AL_BUFFERS_QUEUED, &queued_);
+		if (queued_ > 0)
+		{
+			std::vector<ALuint> cur_queue(queued_);
+			alSourceUnqueueBuffers(source_, queued_, &cur_queue[0]);
+		}
 
 		ALenum const format(Convert(format_));
 		std::vector<uint8_t> data(READSIZE);
@@ -143,7 +141,7 @@ namespace KlayGE
 		// 每个缓冲区中装1 / PreSecond秒的数据
 		BOOST_FOREACH(BOOST_TYPEOF(bufferQueue_)::reference buf, bufferQueue_)
 		{
-			dataSource_->Read(&data[0], data.size());
+			data.resize(dataSource_->Read(&data[0], data.size()));
 			alBufferData(buf, format, &data[0],
 				static_cast<ALuint>(data.size()), static_cast<ALuint>(freq_));
 		}

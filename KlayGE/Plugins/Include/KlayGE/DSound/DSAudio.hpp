@@ -109,7 +109,7 @@ namespace KlayGE
 
 		bool played_;
 		bool stopped_;
-		boost::condition play_cond_;
+		boost::condition_variable play_cond_;
 		boost::mutex play_mutex_;
 		joiner<void> play_thread_;
 	};

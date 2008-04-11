@@ -403,7 +403,7 @@ namespace KlayGE
 		private:
 			volatile bool     join_now_;
 			volatile bool     can_recycle_thread_;
-			boost::condition  cond_;
+			boost::condition_variable  cond_;
 			boost::mutex      join_mut_;
 		};
 
@@ -454,7 +454,7 @@ namespace KlayGE
 			boost::function0<void>	func_;
 			bool					wake_up_;
 			boost::mutex			wake_up_mut_;
-			boost::condition		wake_up_cond_;
+			boost::condition_variable		wake_up_cond_;
 			boost::shared_ptr<thread_pool_common_data_t>	data_;
 			thread_id				id_;
 		};
