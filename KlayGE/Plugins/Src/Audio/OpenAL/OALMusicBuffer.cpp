@@ -138,15 +138,24 @@ namespace KlayGE
 
 		dataSource_->Reset();
 
+		ALsizei non_empty_buf = 0;
 		// 每个缓冲区中装1 / PreSecond秒的数据
 		BOOST_FOREACH(BOOST_TYPEOF(bufferQueue_)::reference buf, bufferQueue_)
 		{
 			data.resize(dataSource_->Read(&data[0], data.size()));
-			alBufferData(buf, format, &data[0],
-				static_cast<ALuint>(data.size()), static_cast<ALuint>(freq_));
+			if (!data.empty())
+			{
+				++ non_empty_buf;
+				alBufferData(buf, format, &data[0],
+					static_cast<ALuint>(data.size()), static_cast<ALuint>(freq_));
+			}
+			else
+			{
+				break;
+			}
 		}
 
-		alSourceQueueBuffers(source_, static_cast<ALsizei>(bufferQueue_.size()), &bufferQueue_[0]);
+		alSourceQueueBuffers(source_, non_empty_buf, &bufferQueue_[0]);
 
 		alSourceRewindv(1, &source_);
 	}
