@@ -55,7 +55,7 @@
 #define GLLOADER_DEBUG
 #endif
 
-#if defined(_WIN32) || defined(__MINGW32__)
+#if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
 	#define GLLOADER_WGL
 #endif
 #if defined(__APPLE__) || defined(__APPLE_CC__)
@@ -225,7 +225,6 @@ void* glloader_get_gl_proc_address(const char* name);
 #ifdef GLLOADER_GLX
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include <X11/Xmd.h>
 
 typedef XID GLXContextID;
 typedef XID GLXPixmap;
