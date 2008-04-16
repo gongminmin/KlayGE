@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GLX_SGIX_video_source">
+<GLExtension name="GLX_SGIX_video_source" predefined="_VL_H">
 	<Typedefs>
 		<Typedef type="XID" synonym="GLXVideoSourceSGIX"/>
 	</Typedefs>

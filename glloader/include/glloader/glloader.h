@@ -55,13 +55,15 @@
 #define GLLOADER_DEBUG
 #endif
 
-#if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
+#if defined(_WIN32) || defined(__MINGW32__)
 	#define GLLOADER_WGL
-#elif defined(__APPLE__) || defined(__APPLE_CC__)
+#endif
+#if defined(__APPLE__) || defined(__APPLE_CC__)
 	#define GLLOADER_AGL
-#else
+#endif
+#if defined(linux) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__)
 	#define GLLOADER_GLX
-#endif		/* _WIN32 */
+#endif
 
 #define GLLOADER_GL
 
@@ -224,6 +226,13 @@ void* glloader_get_gl_proc_address(const char* name);
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xmd.h>
+
+typedef XID GLXContextID;
+typedef XID GLXPixmap;
+typedef XID GLXDrawable;
+typedef XID GLXPbuffer;
+typedef XID GLXWindow;
+typedef XID GLXFBConfigID;
 
 #include <glloader/glx11.h>
 #include <glloader/glloader_glx.h>

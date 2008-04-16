@@ -244,8 +244,9 @@ void glloader_init()
 void* glloader_get_gl_proc_address(const char* name)
 {
 #ifdef GLLOADER_WGL
-	return reinterpret_cast<void*>(::wglGetProcAddress(name));
-#elif defined GLLOADER_AGL
+	return (void*)(::wglGetProcAddress(name));
+#endif
+#ifdef GLLOADER_AGL
 	CFURLRef bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
 		CFSTR("/System/Library/Frameworks/OpenGL.framework"), kCFURLPOSIXPathStyle, true);
 
@@ -261,8 +262,9 @@ void* glloader_get_gl_proc_address(const char* name)
 	CFRelease(bundle);
 
 	return function;
-#else
-	return reinterpret_cast<void*>(::glXGetProcAddress(reinterpret_cast<const GLubyte*>(name)));
+#endif
+#ifdef GLLOADER_GLX
+	return (void*)(::glXGetProcAddress(reinterpret_cast<const GLubyte*>(name)));
 #endif
 }
 

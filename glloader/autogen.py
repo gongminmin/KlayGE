@@ -75,6 +75,10 @@ class Ext:
 class Extension:
 	def __init__(self, dom):
 		self.name = dom.documentElement.getAttribute("name")
+		if dom.documentElement.hasAttribute("predefined"):
+			self.predefined = dom.documentElement.getAttribute("predefined")
+		else:
+			self.predefined = None
 
 		self.typedefs = []
 		typedefsTag = dom.documentElement.getElementsByTagName("Typedefs")
@@ -139,16 +143,18 @@ def create_header(prefix, extensions):
 	for extension in extensions:
 		headerFile.write("#ifndef %s\n" % extension.name)
 		headerFile.write("#define %s 1\n\n" % extension.name)
-
-		if (len(extension.typedefs) != 0):
-			for typedef in extension.typedefs:
-				headerFile.write(str(typedef) + "\n")
-
-			headerFile.write("\n")
+		if extension.predefined != None:
+			headerFile.write("#ifdef %s\n\n" % extension.predefined)
 
 		if (len(extension.tokens) != 0):
 			for token in extension.tokens:
 				headerFile.write(str(token) + "\n")
+
+			headerFile.write("\n")
+
+		if (len(extension.typedefs) != 0):
+			for typedef in extension.typedefs:
+				headerFile.write(str(typedef) + "\n")
 
 			headerFile.write("\n")
 
@@ -163,6 +169,9 @@ def create_header(prefix, extensions):
 				headerFile.write("extern %sFUNC %s;\n" % (function.name, function.name))
 
 			headerFile.write("\n")
+
+		if extension.predefined != None:
+			headerFile.write("#endif\n\n")
 
 		headerFile.write("#endif\n\n")
 
@@ -198,6 +207,9 @@ def create_source(prefix, extensions):
 	sourceFile.write("}\n\n")
 
 	for extension in extensions:
+		if extension.predefined != None:
+			sourceFile.write("#ifdef %s\n\n" % extension.predefined)
+
 		sourceFile.write("namespace\n")
 		sourceFile.write("{\n")
 		sourceFile.write("\tchar APIENTRY _glloader_%s()\n" % extension.name)
@@ -233,10 +245,16 @@ def create_source(prefix, extensions):
 
 			sourceFile.write("\n#endif\n\n")
 
+		if extension.predefined != None:
+			sourceFile.write("#endif\n\n")
+
 	sourceFile.write("namespace\n")
 	sourceFile.write("{\n");
 
 	for extension in extensions:
+		if extension.predefined != None:
+			sourceFile.write("#ifdef %s\n\n" % extension.predefined)
+
 		sourceFile.write("\tvoid init_%s()\n" % extension.name)
 		sourceFile.write("\t{\n")
 
@@ -280,13 +298,23 @@ def create_source(prefix, extensions):
 
 		sourceFile.write("\t}\n\n")
 
+		if extension.predefined != None:
+			sourceFile.write("#endif\n\n")
+
 	sourceFile.write("}\n\n");
 
 	sourceFile.write("void glloader::%s_init()\n" % prefix.lower())
 	sourceFile.write("{\n")
 
 	for extension in extensions:
+		if extension.predefined != None:
+			sourceFile.write("#ifdef %s\n\n" % extension.predefined)
+
 		sourceFile.write("\tinit_%s();\n" % extension.name)
+
+		if extension.predefined != None:
+			sourceFile.write("#endif\n\n")
+
 
 	sourceFile.write("}\n\n")
 
