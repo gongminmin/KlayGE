@@ -28,7 +28,7 @@
 			<Param type="GLenum" name="target"/>
 			<Param type="GLuint" name="buffer"/>
 			<Param type="GLuint" name="index"/>
-			<Param type="GLuint" name="count"/>
+			<Param type="GLsizei" name="count"/>
 			<Param type="const GLuint*" name="params"/>
 		</Function>
 	</Functions>
