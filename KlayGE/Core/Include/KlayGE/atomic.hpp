@@ -39,7 +39,6 @@ namespace KlayGE
 		atomic& operator|=(T const & rhs);
 		atomic& operator^=(T const & rhs);
 
-		void swap(T const & rhs);
 		bool compare_swap(T const & old_val, T const & new_val);
 	};
 
@@ -155,7 +154,7 @@ namespace KlayGE
 				comperand = value_;
 				exchange = comperand * rhs;
 			}
-			while (comperand != InterlockedCompareExchange(reinterpret_cast<long*>(&value_), exchange, comperand));
+			while (!this->compare_swap(comperand, exchange));
 			return *this;
 		}
 
@@ -168,7 +167,7 @@ namespace KlayGE
 				comperand = value_;
 				exchange = comperand / rhs;
 			}
-			while (comperand != InterlockedCompareExchange(reinterpret_cast<long*>(&value_), exchange, comperand));
+			while (!this->compare_swap(comperand, exchange));
 			return *this;
 		}
 
@@ -181,7 +180,7 @@ namespace KlayGE
 				comperand = value_;
 				exchange = comperand % rhs;
 			}
-			while (comperand != InterlockedCompareExchange(reinterpret_cast<long*>(&value_), exchange, comperand));
+			while (!this->compare_swap(comperand, exchange));
 			return *this;
 		}
 
@@ -194,7 +193,7 @@ namespace KlayGE
 				comperand = value_;
 				exchange = comperand & rhs;
 			}
-			while (comperand != InterlockedCompareExchange(reinterpret_cast<long*>(&value_), exchange, comperand));
+			while (!this->compare_swap(comperand, exchange));
 			return *this;
 		}
 
@@ -207,7 +206,7 @@ namespace KlayGE
 				comperand = value_;
 				exchange = comperand | rhs;
 			}
-			while (comperand != InterlockedCompareExchange(reinterpret_cast<long*>(&value_), exchange, comperand));
+			while (!this->compare_swap(comperand, exchange));
 			return *this;
 		}
 
@@ -220,7 +219,7 @@ namespace KlayGE
 				comperand = value_;
 				exchange = comperand ^ rhs;
 			}
-			while (comperand != InterlockedCompareExchange(reinterpret_cast<long*>(&value_), exchange, comperand));
+			while (!this->compare_swap(comperand, exchange));
 			return *this;
 		}
 
