@@ -17,16 +17,16 @@
 
 	#if __GNUC__ >= 4
 		#if __GNUC_MINOR__ >= 3
-			#define KLAYGE_COMPILER_VERSION 4.3
+			#define KLAYGE_COMPILER_VERSION 43
 		#elif __GNUC_MINOR__ >= 2
-			#define KLAYGE_COMPILER_VERSION 4.2
+			#define KLAYGE_COMPILER_VERSION 42
 		#elif __GNUC_MINOR__ >= 1
-			#define KLAYGE_COMPILER_VERSION 4.1
+			#define KLAYGE_COMPILER_VERSION 41
 		#elif __GNUC_MINOR__ >= 0
-			#define KLAYGE_COMPILER_VERSION 4.0
+			#define KLAYGE_COMPILER_VERSION 40
 		#endif
 	#elif __GNUC__ >= 3
-		#define KLAYGE_COMPILER_VERSION 3.0
+		#define KLAYGE_COMPILER_VERSION 30
 	#else
 		#error Unknown compiler.
 	#endif
@@ -34,7 +34,7 @@
 	#define KLAYGE_COMPILER_MSVC
 
 	#if _MSC_VER >= 1500
-		#define KLAYGE_COMPILER_VERSION 9.0
+		#define KLAYGE_COMPILER_VERSION 90
 		#pragma warning(disable: 4819)
 
 		#ifndef _CRT_SECURE_NO_DEPRECATE
@@ -48,7 +48,7 @@
 			#define _SECURE_SCL 0
 		#endif
 	#elif _MSC_VER >= 1400
-		#define KLAYGE_COMPILER_VERSION 8.0
+		#define KLAYGE_COMPILER_VERSION 80
 		#pragma warning(disable: 4819)
 
 		#ifndef _CRT_SECURE_NO_DEPRECATE
@@ -62,7 +62,7 @@
 			#define _SECURE_SCL 0
 		#endif
 	#elif _MSC_VER >= 1310
-		#define KLAYGE_COMPILER_VERSION 7.1
+		#define KLAYGE_COMPILER_VERSION 71
 	#else
 		#error Unknown compiler.
 	#endif

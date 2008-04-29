@@ -83,7 +83,7 @@ namespace KlayGE
 		{
 #ifdef KLAYGE_PLATFORM_WINDOWS
 			return value_;
-#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 4.1
+#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 41
 			return __sync_fetch_and_add(&value_, 0);
 #elif defined(__GLIBCPP__) || defined(__GLIBCXX__)
 			return __gnu_cxx::__exchange_and_add(&value_, 0);
@@ -94,7 +94,7 @@ namespace KlayGE
 		{
 #ifdef KLAYGE_PLATFORM_WINDOWS
 			InterlockedExchange(reinterpret_cast<long*>(&value_), rhs);
-#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 4.1
+#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 41
 			value_ = rhs;
 			__sync_synchronize();
 #elif defined(__GLIBCPP__) || defined(__GLIBCXX__)
@@ -117,7 +117,7 @@ namespace KlayGE
 		{
 #ifdef KLAYGE_PLATFORM_WINDOWS
 			return old_val == InterlockedCompareExchange(reinterpret_cast<long*>(&value_), new_val, old_val);
-#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 4.1
+#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 41
 			return __sync_bool_compare_and_swap(&value_, old_val, new_val);
 #else
 			boost::mutex::scoped_lock lock(mutex_);
@@ -188,7 +188,7 @@ namespace KlayGE
 		{
 #ifdef KLAYGE_PLATFORM_WINDOWS
 			InterlockedExchangeAdd(reinterpret_cast<long*>(&value_), rhs);
-#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 4.1
+#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 41
 			__sync_add_and_fetch(&value_, rhs);
 #elif defined(__GLIBCPP__) || defined(__GLIBCXX__)
 			__gnu_cxx::__exchange_and_add(&value_, rhs);
@@ -207,7 +207,7 @@ namespace KlayGE
 		{
 #ifdef KLAYGE_PLATFORM_WINDOWS
 			InterlockedExchangeAdd(reinterpret_cast<long*>(&value_), rhs.value_);
-#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 4.1
+#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 41
 			__sync_add_and_fetch(&value_, rhs.value_);
 #elif defined(__GLIBCPP__) || defined(__GLIBCXX__)
 			__gnu_cxx::__exchange_and_add(&value_, rhs.value_);
@@ -227,7 +227,7 @@ namespace KlayGE
 		{
 #ifdef KLAYGE_PLATFORM_WINDOWS
 			InterlockedExchangeAdd(reinterpret_cast<long*>(&value_), -rhs);
-#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 4.1
+#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 41
 			__sync_sub_and_fetch(&value_, rhs);
 #elif defined(__GLIBCPP__) || defined(__GLIBCXX__)
 			__gnu_cxx::__exchange_and_add(&value_, -rhs);
@@ -246,7 +246,7 @@ namespace KlayGE
 		{
 #ifdef KLAYGE_PLATFORM_WINDOWS
 			InterlockedExchangeAdd(reinterpret_cast<long*>(&value_), -rhs.value_);
-#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 4.1
+#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 41
 			__sync_add_and_fetch(&value_, -rhs.value_);
 #elif defined(__GLIBCPP__) || defined(__GLIBCXX__)
 			__gnu_cxx::__exchange_and_add(&value_, -rhs.value_);
@@ -338,7 +338,7 @@ namespace KlayGE
 		{
 #ifdef KLAYGE_PLATFORM_WINDOWS
 			InterlockedIncrement(reinterpret_cast<long*>(&value_));
-#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 4.1
+#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 41
 			__sync_add_and_fetch(&value_, 1);
 #elif defined(__GLIBCPP__) || defined(__GLIBCXX__)
 			__gnu_cxx::__exchange_and_add(&value_, 1);
@@ -352,7 +352,7 @@ namespace KlayGE
 		{
 #ifdef KLAYGE_PLATFORM_WINDOWS
 			InterlockedDecrement(reinterpret_cast<long*>(&value_));
-#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 4.1
+#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 41
 			__sync_sub_and_fetch(&value_, 1);
 #elif defined(__GLIBCPP__) || defined(__GLIBCXX__)
 			__gnu_cxx::__exchange_and_add(&value_, -1);
@@ -378,15 +378,15 @@ namespace KlayGE
 
 	private:
 #ifdef KLAYGE_PLATFORM_WINDOWS
-		int32_t value_;
-#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 4.1
-		int32_t value_;
+		mutable int32_t value_;
+#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 41
+		mutable int32_t value_;
 #elif defined(__GLIBCPP__) || defined(__GLIBCXX__)
 		boost::mutex mutex_;
-		_Atomic_word value_;
+		mutable _Atomic_word value_;
 #else
 		boost::mutex mutex_;
-		int32_t value_;
+		mutable int32_t value_;
 #endif
 	};
 }
