@@ -23,10 +23,29 @@ namespace KlayGE
 	class atomic
 	{
 	public:
-		atomic(T const & rhs);
+		explicit atomic(T const & rhs);
+		atomic(atomic const & rhs);
 
-		operator T();
+		T value() const;
+		void value(T const & rhs);
+
 		atomic& operator=(T const & rhs);
+		atomic& operator=(atomic const & rhs);
+
+		bool operator<(T const & rhs) const;
+		bool operator<(atomic const & rhs) const;
+		bool operator<=(int32_t const & rhs) const;
+		bool operator<=(T const & rhs) const;
+		bool operator>(T const & rhs) const;
+		bool operator>(atomic const & rhs) const;
+		bool operator>=(T const & rhs) const;
+		bool operator>=(atomic const & rhs) const;
+
+		bool operator==(T const & rhs) const;
+		bool operator==(atomic const & rhs) const;
+
+		bool operator!=(T const & rhs) const;
+		bool operator!=(atomic const & rhs) const;
 
 		atomic const & operator++();
 		atomic const & operator--();
@@ -34,15 +53,19 @@ namespace KlayGE
 		atomic operator--(int);
 
 		atomic& operator+=(T const & rhs);
+		atomic& operator+=(atomic const & rhs);
 		atomic& operator-=(T const & rhs);
+		atomic& operator-=(atomic const & rhs);
 		atomic& operator&=(T const & rhs);
+		atomic& operator&=(atomic const & rhs);
 		atomic& operator|=(T const & rhs);
+		atomic& operator|=(atomic const & rhs);
 		atomic& operator^=(T const & rhs);
+		atomic& operator^=(atomic const & rhs);
 
-		bool compare_swap(T const & old_val, T const & new_val);
+		bool cas(T const & old_val, T const & new_val);
 	};
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
 	template <>
 	class atomic<int32_t>
 	{
@@ -53,95 +76,189 @@ namespace KlayGE
 
 		explicit atomic(int32_t rhs)
 		{
-			InterlockedExchange(reinterpret_cast<long*>(&value_), rhs);
+			this->value(rhs);
 		}
 
 		int32_t value() const
 		{
+#ifdef KLAYGE_PLATFORM_WINDOWS
 			return value_;
+#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 4.1
+			return __sync_fetch_and_add(&value_, 0);
+#elif defined(__GLIBCPP__) || defined(__GLIBCXX__)
+			return __gnu_cxx::__exchange_and_add(&value_, 0);
+#endif
+		}
+
+		void value(int32_t const & rhs)
+		{
+#ifdef KLAYGE_PLATFORM_WINDOWS
+			InterlockedExchange(reinterpret_cast<long*>(&value_), rhs);
+#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 4.1
+			value_ = rhs;
+			__sync_synchronize();
+#elif defined(__GLIBCPP__) || defined(__GLIBCXX__)
+			value_ = rhs;
+#endif
 		}
 
 		atomic& operator=(int32_t const & rhs)
 		{
-			InterlockedExchange(reinterpret_cast<long*>(&value_), rhs);
+			this->value(rhs);
 			return *this;
 		}
 		atomic& operator=(atomic const & rhs)
 		{
-			InterlockedExchange(reinterpret_cast<long*>(&value_), rhs.value_);
+			this->value(rhs.value_);
 			return *this;
 		}
 
-		bool compare_swap(int32_t const & old_val, int32_t const & new_val)
+		bool cas(int32_t const & old_val, int32_t const & new_val)
 		{
+#ifdef KLAYGE_PLATFORM_WINDOWS
 			return old_val == InterlockedCompareExchange(reinterpret_cast<long*>(&value_), new_val, old_val);
+#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 4.1
+			return __sync_bool_compare_and_swap(&value_, old_val, new_val);
+#else
+			boost::mutex::scoped_lock lock(mutex_);
+			if (value_ == old_val)
+			{
+				value_ = new_val;
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+#endif
 		}
 
 		bool operator<(int32_t const & rhs) const
 		{
-			return value_ < rhs;
+			return this->value() < rhs;
 		}
 		bool operator<(atomic const & rhs) const
 		{
-			return value_ < rhs.value_;
+			return this->value() < rhs.value();
 		}
 		bool operator<=(int32_t const & rhs) const
 		{
-			return value_ <= rhs;
+			return this->value() <= rhs;
 		}
 		bool operator<=(atomic const & rhs) const
 		{
-			return value_ <= rhs.value_;
+			return this->value() <= rhs.value();
 		}
 		bool operator>(int32_t const & rhs) const
 		{
-			return value_ > rhs;
+			return this->value() > rhs;
 		}
 		bool operator>(atomic const & rhs) const
 		{
-			return value_ > rhs.value_;
+			return this->value() > rhs.value();
 		}
 		bool operator>=(int32_t const & rhs) const
 		{
-			return value_ >= rhs;
+			return this->value() >= rhs;
 		}
 		bool operator>=(atomic const & rhs) const
 		{
-			return value_ >= rhs.value_;
+			return this->value() >= rhs.value();
 		}
 
 		bool operator==(int32_t const & rhs) const
 		{
-			return value_ == rhs;
+			return this->value() == rhs;
 		}
 		bool operator==(atomic const & rhs) const
 		{
-			return value_ == rhs.value_;
+			return this->value() == rhs.value();
 		}
 
 		bool operator!=(int32_t const & rhs) const
 		{
-			return value_ != rhs;
+			return this->value() != rhs;
 		}
 		bool operator!=(atomic const & rhs) const
 		{
-			return value_ != rhs.value_;
+			return this->value() != rhs.value();
 		}
 
 		atomic& operator+=(int32_t const & rhs)
 		{
+#ifdef KLAYGE_PLATFORM_WINDOWS
 			InterlockedExchangeAdd(reinterpret_cast<long*>(&value_), rhs);
+#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 4.1
+			__sync_add_and_fetch(&value_, rhs);
+#elif defined(__GLIBCPP__) || defined(__GLIBCXX__)
+			__gnu_cxx::__exchange_and_add(&value_, rhs);
+#else
+			int32_t comperand;
+			int32_t exchange;
+			do
+			{
+				comperand = value_;
+				exchange = comperand + rhs;
+			} while (!this->cas(comperand, exchange));
+#endif
 			return *this;
 		}
 		atomic& operator+=(atomic const & rhs)
 		{
+#ifdef KLAYGE_PLATFORM_WINDOWS
 			InterlockedExchangeAdd(reinterpret_cast<long*>(&value_), rhs.value_);
+#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 4.1
+			__sync_add_and_fetch(&value_, rhs.value_);
+#elif defined(__GLIBCPP__) || defined(__GLIBCXX__)
+			__gnu_cxx::__exchange_and_add(&value_, rhs.value_);
+#else
+			int32_t comperand;
+			int32_t exchange;
+			do
+			{
+				comperand = value_;
+				exchange = comperand + rhs.value_;
+			} while (!this->cas(comperand, exchange));
+#endif
 			return *this;
 		}
 
 		atomic& operator-=(int32_t const & rhs)
 		{
+#ifdef KLAYGE_PLATFORM_WINDOWS
 			InterlockedExchangeAdd(reinterpret_cast<long*>(&value_), -rhs);
+#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 4.1
+			__sync_sub_and_fetch(&value_, rhs);
+#elif defined(__GLIBCPP__) || defined(__GLIBCXX__)
+			__gnu_cxx::__exchange_and_add(&value_, -rhs);
+#else
+			int32_t comperand;
+			int32_t exchange;
+			do
+			{
+				comperand = value_;
+				exchange = comperand - rhs;
+			} while (!this->cas(comperand, exchange));
+#endif
+			return *this;
+		}
+		atomic& operator-=(atomic const & rhs)
+		{
+#ifdef KLAYGE_PLATFORM_WINDOWS
+			InterlockedExchangeAdd(reinterpret_cast<long*>(&value_), -rhs.value_);
+#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 4.1
+			__sync_add_and_fetch(&value_, -rhs.value_);
+#elif defined(__GLIBCPP__) || defined(__GLIBCXX__)
+			__gnu_cxx::__exchange_and_add(&value_, -rhs.value_);
+#else
+			int32_t comperand;
+			int32_t exchange;
+			do
+			{
+				comperand = value_;
+				exchange = comperand - rhs.value_;
+			} while (!this->cas(comperand, exchange));
+#endif
 			return *this;
 		}
 
@@ -153,8 +270,7 @@ namespace KlayGE
 			{
 				comperand = value_;
 				exchange = comperand * rhs;
-			}
-			while (!this->compare_swap(comperand, exchange));
+			} while (!this->cas(comperand, exchange));
 			return *this;
 		}
 
@@ -166,8 +282,7 @@ namespace KlayGE
 			{
 				comperand = value_;
 				exchange = comperand / rhs;
-			}
-			while (!this->compare_swap(comperand, exchange));
+			} while (!this->cas(comperand, exchange));
 			return *this;
 		}
 
@@ -179,8 +294,7 @@ namespace KlayGE
 			{
 				comperand = value_;
 				exchange = comperand % rhs;
-			}
-			while (!this->compare_swap(comperand, exchange));
+			} while (!this->cas(comperand, exchange));
 			return *this;
 		}
 
@@ -192,8 +306,7 @@ namespace KlayGE
 			{
 				comperand = value_;
 				exchange = comperand & rhs;
-			}
-			while (!this->compare_swap(comperand, exchange));
+			} while (!this->cas(comperand, exchange));
 			return *this;
 		}
 
@@ -205,8 +318,7 @@ namespace KlayGE
 			{
 				comperand = value_;
 				exchange = comperand | rhs;
-			}
-			while (!this->compare_swap(comperand, exchange));
+			} while (!this->cas(comperand, exchange));
 			return *this;
 		}
 
@@ -218,20 +330,35 @@ namespace KlayGE
 			{
 				comperand = value_;
 				exchange = comperand ^ rhs;
-			}
-			while (!this->compare_swap(comperand, exchange));
+			} while (!this->cas(comperand, exchange));
 			return *this;
 		}
 
 		atomic const & operator++()
 		{
+#ifdef KLAYGE_PLATFORM_WINDOWS
 			InterlockedIncrement(reinterpret_cast<long*>(&value_));
+#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 4.1
+			__sync_add_and_fetch(&value_, 1);
+#elif defined(__GLIBCPP__) || defined(__GLIBCXX__)
+			__gnu_cxx::__exchange_and_add(&value_, 1);
+#else
+			this->operator+=(1);
+#endif
 			return *this;
 		}
 
 		atomic const & operator--()
 		{
+#ifdef KLAYGE_PLATFORM_WINDOWS
 			InterlockedDecrement(reinterpret_cast<long*>(&value_));
+#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 4.1
+			__sync_sub_and_fetch(&value_, 1);
+#elif defined(__GLIBCPP__) || defined(__GLIBCXX__)
+			__gnu_cxx::__exchange_and_add(&value_, -1);
+#else
+			this->operator-=(1);
+#endif
 			return *this;
 		}
 
@@ -250,9 +377,18 @@ namespace KlayGE
 		}
 
 	private:
+#ifdef KLAYGE_PLATFORM_WINDOWS
 		int32_t value_;
-	};
+#elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 4.1
+		int32_t value_;
+#elif defined(__GLIBCPP__) || defined(__GLIBCXX__)
+		boost::mutex mutex_;
+		_Atomic_word value_;
+#else
+		boost::mutex mutex_;
+		int32_t value_;
 #endif
+	};
 }
 
 #endif		// _ATOMIC_HPP

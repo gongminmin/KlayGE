@@ -16,7 +16,15 @@
 	#define KLAYGE_COMPILER_GCC
 
 	#if __GNUC__ >= 4
-		#define KLAYGE_COMPILER_VERSION 4.0
+		#if __GNUC_MINOR__ >= 3
+			#define KLAYGE_COMPILER_VERSION 4.3
+		#elif __GNUC_MINOR__ >= 2
+			#define KLAYGE_COMPILER_VERSION 4.2
+		#elif __GNUC_MINOR__ >= 1
+			#define KLAYGE_COMPILER_VERSION 4.1
+		#elif __GNUC_MINOR__ >= 0
+			#define KLAYGE_COMPILER_VERSION 4.0
+		#endif
 	#elif __GNUC__ >= 3
 		#define KLAYGE_COMPILER_VERSION 3.0
 	#else

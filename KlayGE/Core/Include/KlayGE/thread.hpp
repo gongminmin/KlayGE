@@ -19,7 +19,7 @@
 #include <boost/assert.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable: 4244 4512)
+#pragma warning(disable: 4244 4512 4702)
 #endif
 #include <boost/thread.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
