@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*- coding: mbcs -*-
+#-*- coding: ascii -*-
 
 GPLNotice = """// glloader
 // Copyright (C) 2004-2005 Minmin Gong
@@ -203,7 +203,14 @@ def create_source(prefix, extensions):
 	sourceFile.write("namespace\n")
 	sourceFile.write("{\n")
 	for extension in extensions:
+		if extension.predefined != None:
+			sourceFile.write("#ifdef %s\n" % extension.predefined)
+
 		sourceFile.write("\tbool _%s = false;\n" % extension.name)
+
+		if extension.predefined != None:
+			sourceFile.write("#endif\n")
+
 	sourceFile.write("}\n\n")
 
 	for extension in extensions:
@@ -253,7 +260,7 @@ def create_source(prefix, extensions):
 
 	for extension in extensions:
 		if extension.predefined != None:
-			sourceFile.write("#ifdef %s\n\n" % extension.predefined)
+			sourceFile.write("#ifdef %s\n" % extension.predefined)
 
 		sourceFile.write("\tvoid init_%s()\n" % extension.name)
 		sourceFile.write("\t{\n")
@@ -296,10 +303,12 @@ def create_source(prefix, extensions):
 
 			sourceFile.write("\t\t}\n")
 
-		sourceFile.write("\t}\n\n")
+		sourceFile.write("\t}\n")
 
 		if extension.predefined != None:
-			sourceFile.write("#endif\n\n")
+			sourceFile.write("#endif\n")
+
+		sourceFile.write("\n")
 
 	sourceFile.write("}\n\n");
 
@@ -308,12 +317,12 @@ def create_source(prefix, extensions):
 
 	for extension in extensions:
 		if extension.predefined != None:
-			sourceFile.write("#ifdef %s\n\n" % extension.predefined)
+			sourceFile.write("#ifdef %s\n" % extension.predefined)
 
 		sourceFile.write("\tinit_%s();\n" % extension.name)
 
 		if extension.predefined != None:
-			sourceFile.write("#endif\n\n")
+			sourceFile.write("#endif\n")
 
 
 	sourceFile.write("}\n\n")
