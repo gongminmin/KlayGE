@@ -120,16 +120,7 @@ namespace KlayGE
 #elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 41
 			return __sync_bool_compare_and_swap(&value_, old_val, new_val);
 #else
-			boost::mutex::scoped_lock lock(mutex_);
-			if (value_ == old_val)
-			{
-				value_ = new_val;
-				return true;
-			}
-			else
-			{
-				return false;
-			}
+			return old_val == __cmpxchg(&value_, old_val, new_val, sizeof(old_val));
 #endif
 		}
 
@@ -382,10 +373,8 @@ namespace KlayGE
 #elif defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION >= 41
 		mutable int32_t value_;
 #elif defined(__GLIBCPP__) || defined(__GLIBCXX__)
-		boost::mutex mutex_;
 		mutable _Atomic_word value_;
 #else
-		boost::mutex mutex_;
 		mutable int32_t value_;
 #endif
 	};
