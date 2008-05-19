@@ -94,7 +94,7 @@ namespace KlayGE
 		}
 
 		WindowPtr main_wnd = Context::Instance().AppInstance().MainWnd();
-		hWnd_ = static_cast<HWND>(main_wnd->WindowHandle());
+		hWnd_ = main_wnd->HWnd();
 		main_wnd->OnActive().connect(boost::bind(&D3D9RenderWindow::OnActive, this, _1, _2));
 		main_wnd->OnPaint().connect(boost::bind(&D3D9RenderWindow::OnPaint, this, _1));
 		main_wnd->OnEnterSizeMove().connect(boost::bind(&D3D9RenderWindow::OnEnterSizeMove, this, _1));

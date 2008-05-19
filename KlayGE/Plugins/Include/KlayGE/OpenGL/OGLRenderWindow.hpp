@@ -1,8 +1,11 @@
 // OGLRenderWindow.hpp
 // KlayGE OpenGL渲染窗口类 头文件
-// Ver 3.6.0
-// 版权所有(C) 龚敏敏, 2004-2007
+// Ver 3.7.0
+// 版权所有(C) 龚敏敏, 2004-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.7.0
+// 实验性的linux支持 (2008.5.19)
 //
 // 3.6.0
 // 支持动态切换全屏/窗口模式 (2007.3.24)
@@ -65,9 +68,15 @@ namespace KlayGE
 	private:
 		std::string	name_;
 
+#if defined KLAYGE_PLATFORM_WINDOWS
 		HWND	hWnd_;
 		HGLRC	hRC_;
 		HDC		hDC_;
+#elif defined KLAYGE_PLATFORM_LINUX
+		::Display x_display_;
+		::Window x_window_;
+		::GLXContext x_context_;
+#endif
 
 		bool	ready_;				// Is ready i.e. available for update
 		bool	closed_;

@@ -1,8 +1,11 @@
 // OGLRenderWindow.cpp
 // KlayGE OpenGL渲染窗口类 实现文件
-// Ver 3.6.0
-// 版权所有(C) 龚敏敏, 2004-2007
+// Ver 3.7.0
+// 版权所有(C) 龚敏敏, 2004-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.7.0
+// 实验性的linux支持 (2008.5.19)
 //
 // 3.6.0
 // 修正了在Vista下从全屏模式退出时crash的bug (2007.3.23)
@@ -51,14 +54,17 @@ namespace KlayGE
 		format_				= settings.color_fmt;
 		isFullScreen_		= settings.full_screen;
 
-		// Destroy current window if any
-		if (hWnd_ != NULL)
-		{
-			this->Destroy();
-		}
-
 		fs_color_depth_ = NumFormatBits(settings.color_fmt);
 
+		WindowPtr main_wnd = Context::Instance().AppInstance().MainWnd();
+		main_wnd->OnActive().connect(boost::bind(&OGLRenderWindow::OnActive, this, _1, _2));
+		main_wnd->OnPaint().connect(boost::bind(&OGLRenderWindow::OnPaint, this, _1));
+		main_wnd->OnEnterSizeMove().connect(boost::bind(&OGLRenderWindow::OnEnterSizeMove, this, _1));
+		main_wnd->OnExitSizeMove().connect(boost::bind(&OGLRenderWindow::OnExitSizeMove, this, _1));
+		main_wnd->OnSize().connect(boost::bind(&OGLRenderWindow::OnSize, this, _1, _2));
+		main_wnd->OnClose().connect(boost::bind(&OGLRenderWindow::OnClose, this, _1));
+
+#if defined KLAYGE_PLATFORM_WINDOWS
 		uint32_t style;
 		if (isFullScreen_)
 		{
@@ -86,14 +92,7 @@ namespace KlayGE
 			style = WS_OVERLAPPEDWINDOW;
 		}
 
-		WindowPtr main_wnd = Context::Instance().AppInstance().MainWnd();
-		hWnd_ = static_cast<HWND>(main_wnd->WindowHandle());
-		main_wnd->OnActive().connect(boost::bind(&OGLRenderWindow::OnActive, this, _1, _2));
-		main_wnd->OnPaint().connect(boost::bind(&OGLRenderWindow::OnPaint, this, _1));
-		main_wnd->OnEnterSizeMove().connect(boost::bind(&OGLRenderWindow::OnEnterSizeMove, this, _1));
-		main_wnd->OnExitSizeMove().connect(boost::bind(&OGLRenderWindow::OnExitSizeMove, this, _1));
-		main_wnd->OnSize().connect(boost::bind(&OGLRenderWindow::OnSize, this, _1, _2));
-		main_wnd->OnClose().connect(boost::bind(&OGLRenderWindow::OnClose, this, _1));
+		hWnd_ = main_wnd->HWnd();
 
 		RECT rc = { 0, 0, width_, height_ };
 		::AdjustWindowRect(&rc, style, false);
@@ -125,6 +124,41 @@ namespace KlayGE
 
 		hRC_ = ::wglCreateContext(hDC_);
 		::wglMakeCurrent(hDC_, hRC_);
+#elif defined KLAYGE_PLATFORM_LINUX
+		if (isFullScreen_)
+		{
+			colorDepth_ = fs_color_depth_;
+			left_ = 0;
+			top_ = 0;
+		}
+		else
+		{
+			colorDepth_ = fs_color_depth_;
+			top_ = settings.top;
+			left_ = settings.left;
+		}
+
+		std::vector<int> visual_attr;
+		visual_attr.push_back(GLX_RGBA);			// Needs to support OpenGL
+		visual_attr.push_back(GLX_DOUBLEBUFFER);	// Needs to support double-buffering
+		if (isDepthBuffered_)
+		{
+			visual_attr.push_back(GLX_DEPTH_SIZE);	// Needs to support a depth buffer
+			visual_attr.push_back(depthBits_);
+		}
+		visual_attr.push_back(None);				// end of list
+
+		x_display_ = main_wnd.XDisplay();
+		x_window_ = main_wnd.XWindow();
+		XVisualInfo* visual_info = glXChooseVisual(x_display, DefaultScreen(x_display), &visual_attr[0]);
+
+		// Create an OpenGL rendering context
+		x_context_ = glXCreateContext(x_display, visual_info, 
+					NULL,		// No sharing of display lists
+					GL_TRUE);	// Direct rendering if possible
+
+		glXMakeCurrent(x_display_, x_window_, x_context_);
+#endif
 
 		if (!glloader_GL_VERSION_2_0() || !glloader_GL_EXT_framebuffer_object()
 			|| !glloader_GL_ARB_pixel_buffer_object())
@@ -148,10 +182,17 @@ namespace KlayGE
 			glClampColorARB(GL_CLAMP_READ_COLOR_ARB, GL_FALSE);
 		}
 
+#if defined KLAYGE_PLATFORM_WINDOWS
 		if (glloader_WGL_EXT_swap_control())
 		{
 			wglSwapIntervalEXT(0);
 		}
+#elif defined KLAYGE_PLATFORM_LINUX
+		if (glloader_GLX_SGI_swap_control())
+		{
+			glXSwapIntervalSGI(0);
+		}
+#endif
 
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -235,6 +276,7 @@ namespace KlayGE
 			left_ = 0;
 			top_ = 0;
 
+#if defined KLAYGE_PLATFORM_WINDOWS
 			uint32_t style;
 			if (fs)
 			{
@@ -269,6 +311,11 @@ namespace KlayGE
 
 			::ShowWindow(hWnd_, SW_SHOWNORMAL);
 			::UpdateWindow(hWnd_);
+#elif defined KLAYGE_PLATFORM_LINUX
+			colorDepth_ = fs_color_depth_;
+			isFullScreen_ = fs;
+			XFlush(x_display_);
+#endif
 		}
 	}
 
@@ -296,6 +343,7 @@ namespace KlayGE
 	{
 		if (hWnd_ != NULL)
 		{
+#if defined KLAYGE_PLATFORM_WINDOWS
 			::wglMakeCurrent(NULL, NULL);
 			::wglDeleteContext(hRC_);
 			::ReleaseDC(hWnd_, hDC_);
@@ -305,13 +353,20 @@ namespace KlayGE
 				::ChangeDisplaySettings(NULL, 0);
 				ShowCursor(TRUE);
 			}
+#elif defined KLAYGE_PLATFORM_LINUX
+			glXDestroyContext(x_display_, x_context_);
+#endif
 		}
 	}
 
 	void OGLRenderWindow::SwapBuffers()
 	{
 		::glFlush();
+#if defined KLAYGE_PLATFORM_WINDOWS
 		::SwapBuffers(hDC_);
+#elif defined KLAYGE_PLATFORM_LINUX
+		::glXSwapBuffers(x_display_, x_window_);
+#endif
 	}
 
 	void OGLRenderWindow::OnActive(Window const & /*win*/, bool active)

@@ -1,8 +1,11 @@
 // Window.hpp
 // KlayGE Window类 头文件
-// Ver 3.6.0
-// 版权所有(C) 龚敏敏, 2007
+// Ver 3.7.0
+// 版权所有(C) 龚敏敏, 2007-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.7.0
+// 实验性的linux支持 (2008.5.19)
 //
 // 3.6.0
 // 初次建立 (2007.6.26)
@@ -27,6 +30,11 @@
 #pragma warning(pop)
 #endif
 
+#if defined KLAYGE_PLATFORM_WINDOWS
+#include <windows.h>
+#elif defined KLAYGE_PLATFORM_LINUX
+#include <glloader/glloader.h>
+#endif
 #include <string>
 
 namespace KlayGE
@@ -38,10 +46,22 @@ namespace KlayGE
 			uint32_t width, uint32_t height);
 		~Window();
 
-		void* WindowHandle() const
+#if defined KLAYGE_PLATFORM_WINDOWS
+		HWND HWnd() const
 		{
-			return wnd_handle_;
+			return wnd_;
 		}
+#elif defined KLAYGE_PLATFORM_LINUX
+		::Display* XDisplay() const
+		{
+			return x_display_;
+		}
+
+		::Window* XWindow() const
+		{
+			return x_window_;
+		}
+#endif
 
 		int32_t Left() const
 		{
@@ -126,18 +146,30 @@ namespace KlayGE
 		KeyUpEvent key_up_event_;
 		CloseEvent close_event_;
 
+#if defined KLAYGE_PLATFORM_WINDOWS
 	private:
 		static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg,
 			WPARAM wParam, LPARAM lParam);
 
 		LRESULT MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+#elif defined KLAYGE_PLATFORM_LINUX
+	public:
+		void MsgProc(XEvent const & event);
+#endif
 
 	private:
-		void* wnd_handle_;
 		int32_t left_;
 		int32_t top_;
 		uint32_t width_;
 		uint32_t height_;
+
+#if defined KLAYGE_PLATFORM_WINDOWS
+		HWND wnd_;
+#elif defined KLAYGE_PLATFORM_LINUX
+		::Display* x_display_;
+		::Window x_window_;
+		::Atom wm_delete_window_;
+#endif
 	};
 }
 

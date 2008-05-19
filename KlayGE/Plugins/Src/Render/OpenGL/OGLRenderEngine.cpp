@@ -1,8 +1,11 @@
 // OGLRenderEngine.cpp
 // KlayGE OpenGL渲染引擎类 实现文件
-// Ver 3.5.0
-// 版权所有(C) 龚敏敏, 2004-2005
+// Ver 3.7.0
+// 版权所有(C) 龚敏敏, 2004-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.7.0
+// 实验性的linux支持 (2008.5.19)
 //
 // 3.5.0
 // 支持新的对象模型 (2006.11.19)
@@ -98,6 +101,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::StartRendering()
 	{
+#if defined KLAYGE_PLATFORM_WINDOWS
 		bool gotMsg;
 		MSG  msg;
 
@@ -132,6 +136,26 @@ namespace KlayGE
 				}
 			}
 		}
+#elif defined KLAYGE_PLATFORM_LINUX
+		WindowPtr main_wnd = Context::Instance().AppInstance().MainWnd();
+		::Display x_display = main_wnd.XDisplay();
+		XEvent event;
+		for (;;)
+		{
+			do
+			{
+				XNextEvent(x_display, &event);
+				main_wnd.MsgProc(event);
+			} while(XPending(x_display));
+
+			FrameBuffer& fb = *this->CurFrameBuffer();
+			if (fb.Active())
+			{
+				Context::Instance().SceneManagerInstance().Update();
+				fb.SwapBuffers();
+			}
+		}
+#endif
 	}
 
 	// 建立渲染窗口

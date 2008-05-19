@@ -127,7 +127,7 @@ namespace KlayGE
 		}
 
 		// create our surface allocator
-		vmr_allocator_ = MakeCOMPtr(new DShowVMR9Allocator(static_cast<HWND>(Context::Instance().AppInstance().MainWnd()->WindowHandle())));
+		vmr_allocator_ = MakeCOMPtr(new DShowVMR9Allocator(Context::Instance().AppInstance().MainWnd()->HWnd()));
 
 		// let the allocator and the notify know about each other
 		TIF(vmr_surf_alloc_notify->AdviseSurfaceAllocator(static_cast<DWORD_PTR>(DShowVMR9Allocator::USER_ID),

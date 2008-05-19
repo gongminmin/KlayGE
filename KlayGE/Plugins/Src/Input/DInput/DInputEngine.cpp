@@ -72,7 +72,7 @@ namespace KlayGE
 	void DInputEngine::EnumDevices()
 	{
 		TIF(dinput_->EnumDevices(DI8DEVCLASS_ALL, EnumDevicesCB, this, DIEDFL_ALLDEVICES));
-		hwnd_ = static_cast<HWND>(Context::Instance().AppInstance().MainWnd()->WindowHandle());
+		hwnd_ = Context::Instance().AppInstance().MainWnd()->HWnd();
 	}
 
 	// 枚举设备的回调函数
