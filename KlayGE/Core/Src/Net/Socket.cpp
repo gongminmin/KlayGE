@@ -25,24 +25,29 @@
 #pragma comment(lib, "wsock32.lib")
 #endif
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
-// 初始化Winsock
-/////////////////////////////////////////////////////////////////////////////////
-class WSAIniter
-{
-public:
-	WSAIniter()
+#if defined KLAYGE_PLATFORM_WINDOWS
+	// 初始化Winsock
+	/////////////////////////////////////////////////////////////////////////////////
+	class WSAIniter
 	{
-		WSADATA wsaData;
+	public:
+		WSAIniter()
+		{
+			WSADATA wsaData;
 
-		WSAStartup(MAKEWORD(2, 0), &wsaData);
-	}
+			WSAStartup(MAKEWORD(2, 0), &wsaData);
+		}
 
-	~WSAIniter()
-	{
-		WSACleanup();
-	}
-} wsaInit;
+		~WSAIniter()
+		{
+			WSACleanup();
+		}
+	} wsaInit;
+#elif defined KLAYGE_PLATFORM_LINUX
+	typedef hostent HOSTENT;
+	typedef hostent* LPHOSTENT;
+	#define INVALID_SOCKET 0
+	#define SOCKET_ERROR -1
 #endif
 
 namespace KlayGE
@@ -100,7 +105,11 @@ namespace KlayGE
 		if (0 == gethostname(host, sizeof(host)))
 		{
 			HOSTENT* pHostEnt = gethostbyname(host);
+#if defined KLAYGE_PLATFORM_WINDOWS
 			std::memcpy(&addr.S_un.S_addr, pHostEnt->h_addr_list[0], pHostEnt->h_length);
+#elif defined KLAYGE_PLATFORM_LINUX
+			std::memcpy(&addr.s_addr, pHostEnt->h_addr_list[0], pHostEnt->h_length);
+#endif
 		}
 
 		return addr;
@@ -152,7 +161,7 @@ namespace KlayGE
 	{
 		connectedSocket.Close();
 
-		int len(sizeof(sockAddr));
+		size_t len(sizeof(sockAddr));
 		connectedSocket.socket_ = accept(this->socket_,
 			reinterpret_cast<SOCKADDR*>(&sockAddr), &len);
 	}
@@ -180,9 +189,9 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
-	#ifdef KLAYGE_PLATFORM_WINDOWS
+	#if defined KLAYGE_PLATFORM_WINDOWS
 		Verify(ioctlsocket(this->socket_, command, reinterpret_cast<u_long*>(argument)) != SOCKET_ERROR);
-	#else
+	#elif defined KLAYGE_PLATFORM_LINUX
 		Verify(ioctl(this->socket_, command, argument) != SOCKET_ERROR);
 	#endif
 	}
@@ -225,7 +234,7 @@ namespace KlayGE
 
 	// 有连接的情况下获取点名称
 	/////////////////////////////////////////////////////////////////////////////////
-	void Socket::PeerName(SOCKADDR_IN& sockAddr, int& len)
+	void Socket::PeerName(SOCKADDR_IN& sockAddr, size_t& len)
 	{
 		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
@@ -235,7 +244,7 @@ namespace KlayGE
 
 	// 获取套接字名称
 	/////////////////////////////////////////////////////////////////////////////////
-	void Socket::SockName(SOCKADDR_IN& sockAddr, int& len)
+	void Socket::SockName(SOCKADDR_IN& sockAddr, size_t& len)
 	{
 		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
@@ -245,7 +254,7 @@ namespace KlayGE
 
 	// 设置套接字参数
 	/////////////////////////////////////////////////////////////////////////////////
-	void Socket::SetSockOpt(int optionName, void const * optionValue, int optionLen, int level)
+	void Socket::SetSockOpt(int optionName, void const * optionValue, size_t optionLen, int level)
 	{
 		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
@@ -255,7 +264,7 @@ namespace KlayGE
 
 	// 获取套接字参数
 	/////////////////////////////////////////////////////////////////////////////////
-	void Socket::GetSockOpt(int optionName, void* optionValue, int& optionLen, int level)
+	void Socket::GetSockOpt(int optionName, void* optionValue, size_t& optionLen, int level)
 	{
 		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
@@ -269,7 +278,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
-		int fromLen(sizeof(sockFrom));
+		size_t fromLen(sizeof(sockFrom));
 		return recvfrom(this->socket_, static_cast<char*>(buf), len, flags,
 			reinterpret_cast<SOCKADDR*>(&sockFrom), &fromLen);
 	}
@@ -312,9 +321,9 @@ namespace KlayGE
 	uint32_t Socket::TimeOut()
 	{
 		timeval timeOut;
-		int len(sizeof(timeOut));
+		size_t len(sizeof(timeOut));
 
-		GetSockOpt(SO_RCVTIMEO, &timeOut, len);
+		this->GetSockOpt(SO_RCVTIMEO, &timeOut, len);
 
 		return timeOut.tv_sec * 1000 + timeOut.tv_usec;
 	}

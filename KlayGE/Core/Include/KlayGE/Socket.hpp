@@ -21,12 +21,21 @@
 
 #include <string>
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS
 	#ifndef _WINSOCKAPI_
 	#include <winsock.h>
 	#endif
-#else
+#elif defined KLAYGE_PLATFORM_LINUX
+	#include <sys/types.h>
 	#include <sys/socket.h>
+	#include <netinet/in.h>
+	#include <arpa/inet.h>
+	#include <sys/ioctl.h>
+	#include <netdb.h>
+	typedef sockaddr SOCKADDR;
+	typedef sockaddr_in SOCKADDR_IN;
+	typedef in_addr IN_ADDR;
+	typedef int SOCKET;
 #endif
 
 namespace KlayGE
@@ -69,13 +78,13 @@ namespace KlayGE
 		};
 		void ShutDown(ShutDownMode how = SDM_Sends);
 
-		void PeerName(SOCKADDR_IN& sockAddr, int& len);
-		void SockName(SOCKADDR_IN& sockAddr, int& len);
+		void PeerName(SOCKADDR_IN& sockAddr, size_t& len);
+		void SockName(SOCKADDR_IN& sockAddr, size_t& len);
 
 		void SetSockOpt(int optionName, void const * optionValue,
-			int optionLen, int level = SOL_SOCKET);
+			size_t optionLen, int level = SOL_SOCKET);
 		void GetSockOpt(int optionName, void* optionValue,
-			int& optionLen, int level = SOL_SOCKET);
+			size_t& optionLen, int level = SOL_SOCKET);
 
 		void NonBlock(bool nonBlock)
 		{

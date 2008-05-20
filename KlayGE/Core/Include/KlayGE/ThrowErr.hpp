@@ -21,6 +21,7 @@
 #else
 typedef long HRESULT;
 #define FAILED(Status) (static_cast<HRESULT>(Status) < 0)
+#define E_FAIL (0x80004005)
 #endif
 
 namespace KlayGE
