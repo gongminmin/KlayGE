@@ -55,11 +55,41 @@ inline int operator!=(REFGUID g1, REFGUID g2)
 	extern "C" const GUID name = { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }
 #else
 #define DEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
-    extern "C" const GUID name
+	extern "C" const GUID name
 #endif
 
 
+typedef char CHAR;
+typedef unsigned char UCHAR;
+typedef short SHORT;
+typedef unsigned short USHORT;
+typedef int INT;
+typedef boost::int32_t INT32;
+typedef unsigned int UINT;
+typedef boost::uint32_t UINT32;
+typedef boost::int32_t LONG;   // LONG, ULONG and DWORD must be 32-bit
 typedef boost::uint32_t ULONG;
+typedef boost::int64_t LONGLONG;
+typedef boost::uint64_t ULONGLONG;
+typedef short VARIANT_BOOL;
+typedef LONG SCODE;
+typedef wchar_t* BSTR;
+
+struct LARGE_INTEGER
+{
+	LONGLONG QuadPart;
+};
+
+struct ULARGE_INTEGER
+{
+	ULONGLONG QuadPart;
+};
+
+struct FILETIME
+{
+	boost::uint32_t dwLowDateTime;
+	boost::uint32_t dwHighDateTime;
+};
 
 typedef long HRESULT;
 #define FAILED(Status) ((HRESULT)(Status)<0)
@@ -99,6 +129,34 @@ struct IUnknown
 };
 
 typedef unsigned short VARTYPE;
+typedef unsigned short PROPVAR_PAD1;
+typedef unsigned short PROPVAR_PAD2;
+typedef unsigned short PROPVAR_PAD3;
+
+struct PROPVARIANT
+{
+	VARTYPE vt;
+	PROPVAR_PAD1 wReserved1;
+	PROPVAR_PAD2 wReserved2;
+	PROPVAR_PAD3 wReserved3;
+	union 
+	{
+		CHAR cVal;
+		UCHAR bVal;
+		SHORT iVal;
+		USHORT uiVal;
+		LONG lVal;
+		ULONG ulVal;
+		INT intVal;
+		UINT uintVal;
+		LARGE_INTEGER hVal;
+		ULARGE_INTEGER uhVal;
+		VARIANT_BOOL boolVal;
+		SCODE scode;
+		FILETIME filetime;
+		BSTR bstrVal;
+	};
+};
 
 #endif
 

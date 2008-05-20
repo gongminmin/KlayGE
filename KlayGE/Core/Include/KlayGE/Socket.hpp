@@ -25,6 +25,7 @@
 	#ifndef _WINSOCKAPI_
 	#include <winsock.h>
 	#endif
+	typedef int socklen_t;
 #elif defined KLAYGE_PLATFORM_LINUX
 	#include <sys/types.h>
 	#include <sys/socket.h>
@@ -78,13 +79,13 @@ namespace KlayGE
 		};
 		void ShutDown(ShutDownMode how = SDM_Sends);
 
-		void PeerName(SOCKADDR_IN& sockAddr, size_t& len);
-		void SockName(SOCKADDR_IN& sockAddr, size_t& len);
+		void PeerName(SOCKADDR_IN& sockAddr, socklen_t& len);
+		void SockName(SOCKADDR_IN& sockAddr, socklen_t& len);
 
 		void SetSockOpt(int optionName, void const * optionValue,
-			size_t optionLen, int level = SOL_SOCKET);
+			socklen_t optionLen, int level = SOL_SOCKET);
 		void GetSockOpt(int optionName, void* optionValue,
-			size_t& optionLen, int level = SOL_SOCKET);
+			socklen_t& optionLen, int level = SOL_SOCKET);
 
 		void NonBlock(bool nonBlock)
 		{

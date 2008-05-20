@@ -146,11 +146,11 @@ namespace KlayGE
 	{
 		if (this->socket_ != INVALID_SOCKET)
 		{
-	#ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_PLATFORM_WINDOWS
 			closesocket(this->socket_);
-	#else
+#else
 			close(this->socket_);
-	#endif
+#endif
 			this->socket_ = INVALID_SOCKET;
 		}
 	}
@@ -161,7 +161,7 @@ namespace KlayGE
 	{
 		connectedSocket.Close();
 
-		size_t len(sizeof(sockAddr));
+		socklen_t len(sizeof(sockAddr));
 		connectedSocket.socket_ = accept(this->socket_,
 			reinterpret_cast<SOCKADDR*>(&sockAddr), &len);
 	}
@@ -189,11 +189,11 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
-	#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS
 		Verify(ioctlsocket(this->socket_, command, reinterpret_cast<u_long*>(argument)) != SOCKET_ERROR);
-	#elif defined KLAYGE_PLATFORM_LINUX
+#elif defined KLAYGE_PLATFORM_LINUX
 		Verify(ioctl(this->socket_, command, argument) != SOCKET_ERROR);
-	#endif
+#endif
 	}
 
 	// 服务端监听
@@ -234,7 +234,7 @@ namespace KlayGE
 
 	// 有连接的情况下获取点名称
 	/////////////////////////////////////////////////////////////////////////////////
-	void Socket::PeerName(SOCKADDR_IN& sockAddr, size_t& len)
+	void Socket::PeerName(SOCKADDR_IN& sockAddr, socklen_t& len)
 	{
 		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
@@ -244,7 +244,7 @@ namespace KlayGE
 
 	// 获取套接字名称
 	/////////////////////////////////////////////////////////////////////////////////
-	void Socket::SockName(SOCKADDR_IN& sockAddr, size_t& len)
+	void Socket::SockName(SOCKADDR_IN& sockAddr, socklen_t& len)
 	{
 		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
@@ -254,7 +254,7 @@ namespace KlayGE
 
 	// 设置套接字参数
 	/////////////////////////////////////////////////////////////////////////////////
-	void Socket::SetSockOpt(int optionName, void const * optionValue, size_t optionLen, int level)
+	void Socket::SetSockOpt(int optionName, void const * optionValue, socklen_t optionLen, int level)
 	{
 		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
@@ -264,7 +264,7 @@ namespace KlayGE
 
 	// 获取套接字参数
 	/////////////////////////////////////////////////////////////////////////////////
-	void Socket::GetSockOpt(int optionName, void* optionValue, size_t& optionLen, int level)
+	void Socket::GetSockOpt(int optionName, void* optionValue, socklen_t& optionLen, int level)
 	{
 		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
@@ -278,7 +278,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
-		size_t fromLen(sizeof(sockFrom));
+		socklen_t fromLen(sizeof(sockFrom));
 		return recvfrom(this->socket_, static_cast<char*>(buf), len, flags,
 			reinterpret_cast<SOCKADDR*>(&sockFrom), &fromLen);
 	}
@@ -321,7 +321,7 @@ namespace KlayGE
 	uint32_t Socket::TimeOut()
 	{
 		timeval timeOut;
-		size_t len(sizeof(timeOut));
+		socklen_t len(sizeof(timeOut));
 
 		this->GetSockOpt(SO_RCVTIMEO, &timeOut, len);
 
