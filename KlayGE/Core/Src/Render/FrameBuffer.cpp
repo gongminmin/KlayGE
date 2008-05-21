@@ -196,7 +196,7 @@ namespace KlayGE
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 				if (att >= static_cast<uint32_t>(ATT_Color0 + re.DeviceCaps().max_simultaneous_rts))
 				{
-					THR(E_FAIL);
+					THR(boost::system::posix_error::not_supported);
 				}
 
 				uint32_t clr_id = att - ATT_Color0;
@@ -266,7 +266,7 @@ namespace KlayGE
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 				if (att >= static_cast<uint32_t>(ATT_Color0 + re.DeviceCaps().max_simultaneous_rts))
 				{
-					THR(E_FAIL);
+					THR(boost::system::posix_error::not_supported);
 				}
 
 				uint32_t clr_id = att - ATT_Color0;

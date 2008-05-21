@@ -184,7 +184,7 @@ namespace KlayGE
 		}
 		else
 		{
-			THR(E_FAIL);
+			THR(boost::system::posix_error::not_supported);
 		}
 	}
 

@@ -1,10 +1,13 @@
 // ThrowErr.cpp
 // KlayGE 抛出错误 实现文件
-// Ver 3.4.0
-// 版权所有(C) 龚敏敏, 2006
+// Ver 3.7.0
+// 版权所有(C) 龚敏敏, 2006-2008
 // Homepage: http://klayge.sourceforge.net
 //
-// Ver 3.4.0
+// 3.7.0
+// 改用Boost.System的异常 (2008.5.21)
+//
+// 3.4.0
 // 初次建立 (2006.9.5)
 //
 // 修改记录
@@ -18,12 +21,10 @@
 
 namespace KlayGE
 {
-	Exception::Exception(std::string const & errFile, uint32_t errLine, int32_t errCode, std::string const & msg) throw()
-			: errFile_(errFile), errLine_(errLine),
-				errCode_(errCode)
+	std::string CombineFileLine(std::string const & file, int line)
 	{
-		std::ostringstream ss;
-		ss << "File: " << errFile << " Line: " << errLine << " ErrCode: " << errCode << " Msg: " << msg;
-		msg_ = ss.str();
+		std::stringstream ss;
+		ss << file << ": " << line;
+		return ss.str();
 	}
 }

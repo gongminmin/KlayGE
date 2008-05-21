@@ -22,9 +22,9 @@ namespace KlayGE
 {
 	BSTR AllocBSTR(std::wstring const & sz)
 	{
-	#ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_PLATFORM_WINDOWS
 		return ::SysAllocString(sz.c_str());
-	#else
+#else
 		if (sz.empty())
 		{
 			return NULL;
@@ -37,20 +37,20 @@ namespace KlayGE
 		BSTR bstr = reinterpret_cast<BSTR>(p + sizeof(strLen));
 		memmove(bstr, sz.c_str(), len);
 		return bstr;
-	#endif
+#endif
 	}
 
 	void FreeBSTR(BSTR bstr)
 	{
-	#ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_PLATFORM_WINDOWS
 		::SysFreeString(bstr);
-	#else
+#else
 		if (bstr)
 		{
 			char* p = reinterpret_cast<char*>(bstr);
 			p -= sizeof(uint32_t);
 			delete[] p;
 		}
-	#endif
+#endif
 	}
 }

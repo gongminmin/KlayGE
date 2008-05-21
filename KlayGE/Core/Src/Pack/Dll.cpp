@@ -37,31 +37,31 @@ namespace KlayGE
 	{
 		std::string name = ResLoader::Instance().Locate(dll_name);
 
-	#ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_PLATFORM_WINDOWS
 		dll_handle_ = static_cast<void*>(::LoadLibraryA(name.c_str()));
-	#else
+#else
 		dll_handle_ = ::dlopen(name.c_str(), RTLD_LAZY | RTLD_GLOBAL);
-	#endif
+#endif
 	}
 
 	void DllLoader::Free()
 	{
 		if (dll_handle_)
 		{
-	#ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_PLATFORM_WINDOWS
 			::FreeLibrary(static_cast<HMODULE>(dll_handle_));
-	#else
+#else
 			::dlclose(dll_handle_);
-	#endif
+#endif
 		}
 	}
 
 	void* DllLoader::GetProcAddress(std::string const & proc_name)
 	{
-	#ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_PLATFORM_WINDOWS
 		return reinterpret_cast<void*>(::GetProcAddress(static_cast<HMODULE>(dll_handle_), proc_name.c_str()));
-	#else
+#else
 		return ::dlsym(dll_handle_, proc_name.c_str());
-	#endif
+#endif
 	}
 }

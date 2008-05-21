@@ -21,10 +21,10 @@
 
 struct GUID
 {
-	boost::uint32_t Data1;
-	boost::uint16_t Data2;
-	boost::uint16_t Data3;
-	boost::uint8_t Data4[8];
+	KlayGE::uint32_t Data1;
+	KlayGE::uint16_t Data2;
+	KlayGE::uint16_t Data3;
+	KlayGE::uint8_t Data4[8];
 };
 
 typedef GUID const & REFGUID;
@@ -34,7 +34,7 @@ inline int operator==(REFGUID g1, REFGUID g2)
 {
 	for (size_t i = 0; i < sizeof(g1); ++ i)
 	{
-		if (reinterpret_cast<boost::uint8_t const *>(&g1)[i] != reinterpret_cast<boost::uint8_t const *>(&g2)[i])
+		if (reinterpret_cast<KlayGE::::uint8_t const *>(&g1)[i] != reinterpret_cast<KlayGE::uint8_t const *>(&g2)[i])
 		{
 			return 0;
 		}
@@ -64,36 +64,34 @@ typedef unsigned char UCHAR;
 typedef short SHORT;
 typedef unsigned short USHORT;
 typedef int INT;
-typedef boost::int32_t INT32;
+typedef KlayGE::int32_t INT32;
 typedef unsigned int UINT;
-typedef boost::uint32_t UINT32;
-typedef boost::int32_t LONG;   // LONG, ULONG and DWORD must be 32-bit
-typedef boost::uint32_t ULONG;
-typedef boost::int64_t LONGLONG;
-typedef boost::uint64_t ULONGLONG;
-typedef short VARIANT_BOOL;
-typedef LONG SCODE;
+typedef KlayGE::uint32_t UINT32;
+typedef KlayGE::int32_t LONG;   // LONG, ULONG and DWORD must be 32-bit
+typedef KlayGE::uint32_t ULONG;
+typedef KlayGE::int64_t LONGLONG;
+typedef KlayGE::uint64_t ULONGLONG;
+typedef KlayGE::int32_t SCODE;
 typedef wchar_t* BSTR;
 
 struct LARGE_INTEGER
 {
-	LONGLONG QuadPart;
+	KlayGE::int64_t QuadPart;
 };
-
 struct ULARGE_INTEGER
 {
-	ULONGLONG QuadPart;
+	KlayGE::uint64_t QuadPart;
 };
 
 struct FILETIME
 {
-	boost::uint32_t dwLowDateTime;
-	boost::uint32_t dwHighDateTime;
+	KlayGE::uint32_t dwLowDateTime;
+	KlayGE::uint32_t dwHighDateTime;
 };
 
 typedef long HRESULT;
 #define FAILED(Status) ((HRESULT)(Status)<0)
-typedef boost::uint32_t PROPID;
+typedef KlayGE::uint32_t PROPID;
 
 #define S_OK    ((HRESULT)0x00000000L)
 #define S_FALSE ((HRESULT)0x00000001L)
@@ -128,10 +126,44 @@ struct IUnknown
 #endif
 };
 
+typedef short VARIANT_BOOL;
+#define VARIANT_TRUE ((VARIANT_BOOL)-1)
+#define VARIANT_FALSE ((VARIANT_BOOL)0)
+
+enum VARENUM
+{
+	VT_EMPTY = 0,
+	VT_NULL = 1,
+	VT_I2 = 2,
+	VT_I4 = 3,
+	VT_R4 = 4,
+	VT_R8 = 5,
+	VT_CY = 6,
+	VT_DATE = 7,
+	VT_BSTR = 8,
+	VT_DISPATCH = 9,
+	VT_ERROR = 10,
+	VT_BOOL = 11,
+	VT_VARIANT = 12,
+	VT_UNKNOWN = 13,
+	VT_DECIMAL = 14,
+	VT_I1 = 16,
+	VT_UI1 = 17,
+	VT_UI2 = 18,
+	VT_UI4 = 19,
+	VT_I8 = 20,
+	VT_UI8 = 21,
+	VT_INT = 22,
+	VT_UINT = 23,
+	VT_VOID = 24,
+	VT_HRESULT = 25,
+	VT_FILETIME = 64
+};
+
 typedef unsigned short VARTYPE;
-typedef unsigned short PROPVAR_PAD1;
-typedef unsigned short PROPVAR_PAD2;
-typedef unsigned short PROPVAR_PAD3;
+typedef KlayGE::uint16_t PROPVAR_PAD1;
+typedef KlayGE::uint16_t PROPVAR_PAD2;
+typedef KlayGE::uint16_t PROPVAR_PAD3;
 
 struct PROPVARIANT
 {
@@ -139,16 +171,16 @@ struct PROPVARIANT
 	PROPVAR_PAD1 wReserved1;
 	PROPVAR_PAD2 wReserved2;
 	PROPVAR_PAD3 wReserved3;
-	union 
+	union
 	{
-		CHAR cVal;
-		UCHAR bVal;
-		SHORT iVal;
-		USHORT uiVal;
-		LONG lVal;
-		ULONG ulVal;
-		INT intVal;
-		UINT uintVal;
+		KlayGE::int8_t cVal;
+		KlayGE::uint8_t bVal;
+		KlayGE::int16_t iVal;
+		KlayGE::uint16_t uiVal;
+		KlayGE::int32_t lVal;
+		KlayGE::uint32_t ulVal;
+		KlayGE::int32_t intVal;
+		KlayGE::uint32_t uintVal;
 		LARGE_INTEGER hVal;
 		ULARGE_INTEGER uhVal;
 		VARIANT_BOOL boolVal;

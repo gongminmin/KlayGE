@@ -163,7 +163,7 @@ namespace KlayGE
 		if (!glloader_GL_VERSION_2_0() || !glloader_GL_EXT_framebuffer_object()
 			|| !glloader_GL_ARB_pixel_buffer_object())
 		{
-			THR(E_FAIL);
+			THR(boost::system::posix_error::not_supported);
 		}
 
 		glEnable(GL_COLOR_MATERIAL);
