@@ -19,7 +19,14 @@
 #include <string>
 #include <stdexcept>
 
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4103)
+#endif
 #include <boost/system/error_code.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 #include <boost/system/system_error.hpp>
 
 #ifndef _HRESULT_DEFINED

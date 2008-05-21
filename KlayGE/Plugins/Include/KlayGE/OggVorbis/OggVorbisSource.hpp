@@ -25,7 +25,14 @@
 
 #include <istream>
 #include <vorbis/codec.h>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4244)
+#endif
 #include <vorbis/vorbisfile.h>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 namespace KlayGE
 {
