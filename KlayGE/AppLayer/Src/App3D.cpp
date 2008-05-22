@@ -37,7 +37,6 @@
 #include <KlayGE/Camera.hpp>
 
 #include <boost/assert.hpp>
-#include <windows.h>
 
 #include <KlayGE/App3D.hpp>
 

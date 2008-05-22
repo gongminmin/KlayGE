@@ -13,7 +13,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Vector.hpp>
 
-#include <KlayGE/HeightMap/HeightMap.hpp>
+#include <KlayGE/Heightmap/Heightmap.hpp>
 
 namespace KlayGE
 {

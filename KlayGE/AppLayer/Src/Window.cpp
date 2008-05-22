@@ -16,8 +16,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
 
-#include <windows.h>
-
 #include <KlayGE/Window.hpp>
 
 namespace KlayGE
@@ -197,24 +195,25 @@ namespace KlayGE
 								| PointerMotionMask
 								| StructureNotifyMask
 								| SubstructureNotifyMask
-								| FocusChangeMask;
+								| FocusChangeMask
+								| ResizeRedirectMask;
 		x_window_ = XCreateWindow(x_display_, XDefaultRootWindow(x_display_),
 					left, top, width, height, 0, XDefaultDepth(x_display_, 0),
 					InputOutput, CopyFromParent, CWBorderPixel | CWColormap | CWEventMask, &attr);
 		XStoreName(x_display_, x_window_, name.c_str());
-		
+
 		XMapWindow(x_display_, x_window_);
 		XFlush(x_display_);
 
 		XWindowAttributes win_attr;
 		XGetWindowAttributes(x_display_, x_window_, &win_attr);
-		left_ = win_left;
-		top_ = win_top;
-		width_ = win_width;
-		height_ = win_height;
+		left_ = win_attr.x;
+		top_ = win_attr.y;
+		width_ = win_attr.width;
+		height_ = win_attr.height;
 
 		wm_delete_window_ = XInternAtom(x_display_, "WM_DELETE_WINDOW", false);
-		XSetWMProtocols(x_display_, x_window_, &wm_delete_window, 1);
+		XSetWMProtocols(x_display_, x_window_, &wm_delete_window_, 1);
 	}
 
 	Window::~Window()
@@ -239,11 +238,10 @@ namespace KlayGE
 			this->OnPaint()(*this);
 			break;
 
-		case ConfigureNotify:
+		case ResizeRequest:
 			{
-				XWindowAttributes attr;
-				XGetWindowAttributes(x_display_, x_window_, &attr);
-				if ((0 == attr.width) || (0 == attr.false))
+				XResizeRequestEvent const & resize_ev = reinterpret_cast<XResizeRequestEvent const &>(event);
+				if ((0 == resize_ev.width) || (0 == resize_ev.height))
 				{
 					this->OnSize()(*this, false);
 				}
@@ -255,22 +253,28 @@ namespace KlayGE
 			break;
 
 		case KeyPress:
-			this->OnKeyDown()(*this, static_cast<wchar_t>(event.keycode));
+			{
+				XKeyEvent const & key_ev = reinterpret_cast<XKeyEvent const &>(event);
+				this->OnKeyDown()(*this, static_cast<wchar_t>(key_ev.keycode));
+			}
 			break;
 
 		case KeyRelease:
-			this->OnKeyUp()(*this, static_cast<wchar_t>(event.keycode));
+			{
+				XKeyEvent const & key_ev = reinterpret_cast<XKeyEvent const &>(event);
+				this->OnKeyUp()(*this, static_cast<wchar_t>(key_ev.keycode));
+			}
 			break;
 
 		case ClientMessage:
-			if (wm_delete_window == event.xclient.data.l[0])
+			if (wm_delete_window_ == event.xclient.data.l[0])
 			{
 				this->OnClose()(*this);
 				XDestroyWindow(x_display_, x_window_);
 				XCloseDisplay(x_display_);
 				exit(0);
 			}
-			return 0;
+			break;
 		}
 	}
 #endif
