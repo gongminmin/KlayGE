@@ -3,13 +3,15 @@
 	<FileVersion major="1" minor="6" />
 	<Project>
 		<Option title="D3D9 Rendering System" />
+		<Option platforms="Windows;" />
 		<Option pch_mode="0" />
 		<Option compiler="gcc" />
 		<Build>
-			<Target title="Debug">
-				<Option output="..\..\lib\Win32\libKlayGE_RenderEngine_D3D9_d.a" prefix_auto="0" extension_auto="0" />
+			<Target title="Debug_win_x86">
+				<Option platforms="Windows;" />
+				<Option output="..\..\lib\win\x86\libKlayGE_RenderEngine_D3D9_d.a" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="" />
-				<Option object_output="..\..\Debug\Win32" />
+				<Option object_output="..\..\Debug\win\x86" />
 				<Option type="2" />
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
@@ -24,10 +26,11 @@
 					<Add option="-DSTRICT" />
 				</Compiler>
 			</Target>
-			<Target title="Release">
-				<Option output="..\..\lib\Win32\libKlayGE_RenderEngine_D3D9.a" prefix_auto="0" extension_auto="0" />
+			<Target title="Release_win_x86">
+				<Option platforms="Windows;" />
+				<Option output="..\..\lib\win\x86\libKlayGE_RenderEngine_D3D9.a" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="" />
-				<Option object_output="..\..\Release\Win32" />
+				<Option object_output="..\..\Release\win\x86" />
 				<Option type="2" />
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
@@ -47,7 +50,7 @@
 			</Target>
 		</Build>
 		<VirtualTargets>
-			<Add alias="All" targets="Debug;Release;" />
+			<Add alias="All_Win" targets="Debug_win_x86;Release_win_x86;" />
 		</VirtualTargets>
 		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9Adapter.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9AdapterList.hpp" />
