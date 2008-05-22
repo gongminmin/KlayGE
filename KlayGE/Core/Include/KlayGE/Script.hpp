@@ -16,7 +16,7 @@
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
 
-#include <python.h>
+#include <Python.h>
 #include <vector>
 #include <string>
 

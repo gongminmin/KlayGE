@@ -25,7 +25,6 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/Util.hpp>
-#include <KlayGE/Window.hpp>
 
 #include <KlayGE/Input.hpp>
 

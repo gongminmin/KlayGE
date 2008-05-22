@@ -10,6 +10,7 @@
 
 #include <KlayGE/UI.hpp>
 
+#ifdef KLAYGE_PLATFORM_WINDOWS
 namespace KlayGE
 {
 	UniBuffer::UniBuffer(int nInitialSize)
@@ -885,3 +886,4 @@ namespace KlayGE
 		}
 	}
 }
+#endif

@@ -32,9 +32,10 @@ typedef REFGUID REFIID;
 
 inline int operator==(REFGUID g1, REFGUID g2)
 {
+	using KlayGE::uint8_t;
 	for (size_t i = 0; i < sizeof(g1); ++ i)
 	{
-		if (reinterpret_cast<KlayGE::::uint8_t const *>(&g1)[i] != reinterpret_cast<KlayGE::uint8_t const *>(&g2)[i])
+		if (reinterpret_cast<uint8_t const *>(&g1)[i] != reinterpret_cast<uint8_t const *>(&g2)[i])
 		{
 			return 0;
 		}
@@ -102,9 +103,9 @@ typedef KlayGE::uint32_t PROPID;
 #define STG_E_INVALIDFUNCTION ((HRESULT)0x80030001L)
 
 #ifdef _MSC_VER
-#define STDMETHODCALLTYPE	__stdcall 
+#define STDMETHODCALLTYPE	__stdcall
 #else
-#define STDMETHODCALLTYPE 
+#define STDMETHODCALLTYPE
 #endif
 
 #define STDMETHOD_(t, f) virtual t STDMETHODCALLTYPE f

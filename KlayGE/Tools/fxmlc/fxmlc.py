@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*- coding: mbcs -*-
+#-*- coding: ascii -*-
 
 import StringIO
 import struct

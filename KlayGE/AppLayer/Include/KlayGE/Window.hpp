@@ -57,7 +57,7 @@ namespace KlayGE
 			return x_display_;
 		}
 
-		::Window* XWindow() const
+		::Window XWindow() const
 		{
 			return x_window_;
 		}
