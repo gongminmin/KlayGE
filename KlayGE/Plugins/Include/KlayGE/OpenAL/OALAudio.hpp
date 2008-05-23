@@ -22,8 +22,8 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/thread.hpp>
 
-#include <al/al.h>
-#include <al/alc.h>
+#include <AL/al.h>
+#include <AL/alc.h>
 
 #include <vector>
 
