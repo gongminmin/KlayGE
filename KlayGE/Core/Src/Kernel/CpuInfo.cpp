@@ -32,7 +32,6 @@ namespace
 {
 	using namespace KlayGE;
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
 #if defined(KLAYGE_CPU_X86) || defined(KLAYGE_CPU_X64)
 	enum CPUIDFeatureMask
 	{
@@ -237,7 +236,6 @@ namespace
 	char const GenuineIntel[] = "GenuineIntel";
 	char const AuthenticAMD[] = "AuthenticAMD";
 #endif
-#endif
 }
 
 
@@ -246,10 +244,9 @@ namespace KlayGE
 	CPUInfo::CPUInfo()
 		: feature_mask_(0)
 	{
-#ifdef KLAYGE_PLATFORM_XBOX360
-		num_hw_threads_ = 6;
-		num_cores_ = 3;
-#elif defined KLAYGE_PLATFORM_WINDOWS
+		num_hw_threads_ = 1;
+		num_cores_ = 1;
+
 #if defined(KLAYGE_CPU_X86) || defined(KLAYGE_CPU_X64)
 		Cpuid cpuid;
 
@@ -313,13 +310,20 @@ namespace KlayGE
 				*reinterpret_cast<uint32_t*>(&cpu_brand_string_[44]) = cpuid.Edx();
 			}
 		}
-
+#if defined KLAYGE_PLATFORM_WINDOWS
 		{
 			SYSTEM_INFO si;
 			::GetSystemInfo(&si);
 			num_hw_threads_ = si.dwNumberOfProcessors;
 		}
+#elif defined KLAYGE_PLATFORM_LINUX
+		// Linux doesn't easily allow us to look at the Affinity Bitmask directly,
+		// but it does provide an API to test affinity maskbits of the current process 
+		// against each logical processor visible under OS.
+		num_hw_threads_ = sysconf(_SC_NPROCESSORS_CONF);	// This will tell us how many CPUs are currently enabled.
+#endif
 
+#if defined KLAYGE_PLATFORM_WINDOWS
 		GetLogicalProcessorInformationPtr glpi = NULL;
 		{
 			OSVERSIONINFO os_ver_info;
@@ -403,6 +407,10 @@ namespace KlayGE
 					}
 				}
 			}
+#elif defined KLAYGE_PLATFORM_LINUX
+		{
+			bool supported = (GenuineIntel == cpu_string_) || (AuthenticAMD == cpu_string_);
+#endif
 
 			if (supported)
 			{
@@ -468,6 +476,7 @@ namespace KlayGE
 				ApicExtractor apic_extractor;
 				apic_extractor.SetPackageTopology(log_procs_per_pkg, cores_per_pkg);
 
+#if defined KLAYGE_PLATFORM_WINDOWS
 				DWORD_PTR process_affinity, system_affinity;
 				HANDLE process_handle = ::GetCurrentProcess();
 				HANDLE thread_handle = ::GetCurrentThread();
@@ -522,6 +531,40 @@ namespace KlayGE
 					::SetThreadAffinityMask(thread_handle, prev_thread_affinity);
 					::Sleep(0);
 				}
+#elif defined KLAYGE_PLATFORM_LINUX
+				cpu_set_t backup_cpu;
+				sched_getaffinity(0, sizeof(backup_cpu), &backup_cpu);
+				if (1 == backup_cpu)
+				{
+					// Since we only have 1 logical processor present on the system, we
+					// can explicitly set a single APIC ID to zero.
+					BOOST_ASSERT(1 == log_procs_per_pkg);
+					apic_ids.push_back(0);
+				}
+				else
+				{
+					cpu_set_t current_cpu;
+					// Call cpuid on each active logical processor in the system affinity.
+					for (int j = 0; j < num_hw_threads_; ++ j)
+					{
+						CPU_ZERO(&current_cpu);
+						CPU_SET(j, &current_cpu);
+						if (0 == sched_setaffinity(0, sizeof(current_cpu), &current_cpu))
+						{
+							// Allow the thread to switch to masked logical processor.
+							sleep(0);
+
+							// Store the APIC ID
+							cpuid.Call(1);
+							apic_ids.push_back(static_cast<uint8_t>((cpuid.Ebx() & CFM_ApicId_Intel) >> 24));
+						}
+					}
+
+					// Restore the previous process and thread affinity state.
+					sched_setaffinity(0, sizeof(backup_cpu), &backup_cpu);
+					sleep(0);
+				}
+#endif
 
 				std::vector<uint8_t> pkg_core_ids(apic_ids.size());
 				for (size_t i = 0; i < apic_ids.size(); ++ i)
@@ -532,19 +575,12 @@ namespace KlayGE
 				pkg_core_ids.erase(std::unique(pkg_core_ids.begin(), pkg_core_ids.end()), pkg_core_ids.end());
 				num_cores_ = static_cast<int>(pkg_core_ids.size());
 			}
-			else
-			{
-				num_hw_threads_ = 1;
-				num_cores_ = 1;
-			}
 		}
-#else
-		num_hw_threads_ = 1;
-		num_cores_ = 1;
+#elif defined(KLAYGE_CPU_PPC)
+#ifdef KLAYGE_PLATFORM_XBOX360
+		num_hw_threads_ = 6;
+		num_cores_ = 3;
 #endif
-#else
-		num_hw_threads_ = 1;
-		num_cores_ = 1;
 #endif
 	}
 }

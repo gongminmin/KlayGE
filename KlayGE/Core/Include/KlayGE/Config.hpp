@@ -107,7 +107,9 @@
 
 // Defines supported CPUs
 #if defined(KLAYGE_COMPILER_MSVC)
-	#if defined(_M_X64)
+	#if defined(KLAYGE_PLATFORM_XBOX360)
+		#define KLAYGE_CPU_PPC
+	#elif defined(_M_X64)
 		#define KLAYGE_CPU_X64
 	#elif defined(_M_IX86)
 		#define KLAYGE_CPU_X86
@@ -125,7 +127,9 @@
 #endif
 
 // Defines the native endian
-#if defined(KLAYGE_CPU_X86) || defined(KLAYGE_CPU_X64) || defined(KLAYGE_PLATFORM_WINDOWS)
+#if defined(KLAYGE_CPU_PPC)
+	#define KLAYGE_BIG_ENDIAN
+#elif defined(KLAYGE_CPU_X86) || defined(KLAYGE_CPU_X64) || defined(KLAYGE_PLATFORM_WINDOWS)
 	#define KLAYGE_LITTLE_ENDIAN
 #else
 	#define KLAYGE_BIG_ENDIAN
