@@ -268,8 +268,8 @@ int main()
 	Context::Instance().InputFactoryInstance(DInputFactoryInstance());
 
 	RenderSettings settings;
-	settings.width = 800;
-	settings.height = 600;
+	settings.width = 512;
+	settings.height = 512;
 	settings.color_fmt = EF_ARGB8;
 	settings.full_screen = false;
 	settings.ConfirmDevice = ConfirmDevice;

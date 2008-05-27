@@ -25,39 +25,31 @@
 
 namespace KlayGE
 {
-	SATSeparableScanPostProcess::SATSeparableScanPostProcess(RenderTechniquePtr tech)
-			: PostProcess(tech)
+	SATSeparableScanSweepPostProcess::SATSeparableScanSweepPostProcess(RenderTechniquePtr tech, bool dir)
+			: PostProcess(tech),
+				dir_(dir)
 	{
 	}
 
-	SATSeparableScanPostProcess::~SATSeparableScanPostProcess()
+	void SATSeparableScanSweepPostProcess::Step(int step)
 	{
+		*(technique_->Effect().ParameterByName("addr_offset")) = static_cast<float>(step) / length_ * (dir_ ? 0.5f : 1);
+		*(technique_->Effect().ParameterByName("step")) = step;
 	}
 
-	void SATSeparableScanPostProcess::Pass(uint32_t pass)
-	{
-		*(technique_->Effect().ParameterByName("addr_offset")) = static_cast<float>(pow(4.0f, static_cast<float>(pass)) / length_);
-	}
-
-	void SATSeparableScanPostProcess::Length(uint32_t length)
+	void SATSeparableScanSweepPostProcess::Length(int length)
 	{
 		length_ = length;
-	}
-
-
-	SATScanXPostProcess::SATScanXPostProcess()
-			: SATSeparableScanPostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.kfx")->TechniqueByName("SATScanX"))
-	{
-	}
-
-	SATScanYPostProcess::SATScanYPostProcess()
-			: SATSeparableScanPostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.kfx")->TechniqueByName("SATScanY"))
-	{
+		*(technique_->Effect().ParameterByName("length")) = length;
 	}
 
 
 	SummedAreaTablePostProcess::SummedAreaTablePostProcess()
-		: PostProcess(RenderTechniquePtr())
+		: PostProcess(RenderTechniquePtr()),
+			scan_x_up_(Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.kfx")->TechniqueByName("SATScanXUpSweep"), true),
+			scan_x_down_(Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.kfx")->TechniqueByName("SATScanXDownSweep"), false),
+			scan_y_up_(Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.kfx")->TechniqueByName("SATScanYUpSweep"), true),
+			scan_y_down_(Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.kfx")->TechniqueByName("SATScanYDownSweep"), false)
 	{
 	}
 
@@ -68,11 +60,10 @@ namespace KlayGE
 		uint32_t const width = tex->Width(0);
 		uint32_t const height = tex->Height(0);
 
-		scan_x_.Length(width);
-		scan_y_.Length(height);
-
-		num_pass_x_ = static_cast<uint32_t>(ceil(log(static_cast<float>(width)) / log(4.0f)));
-		num_pass_y_ = static_cast<uint32_t>(ceil(log(static_cast<float>(height)) / log(4.0f)));
+		scan_x_up_.Length(width);
+		scan_x_down_.Length(width);
+		scan_y_up_.Length(height);
+		scan_y_down_.Length(height);
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -87,31 +78,65 @@ namespace KlayGE
 
 	void SummedAreaTablePostProcess::Apply()
 	{
-		scan_x_.Pass(0);
-		scan_x_.Source(src_texture_, flipping_);
-		scan_x_.Destinate(inter_fb_[0]);
-		scan_x_.Apply();
-
 		index_ = true;
-		for (uint32_t i = 1; i < num_pass_x_; ++ i)
+		uint32_t step = 2;
+		do
 		{
-			scan_x_.Pass(i);
-			scan_x_.Source(inter_tex_[!index_], inter_fb_[!index_]->RequiresFlipping());
-			scan_x_.Destinate(inter_fb_[index_]);
-			scan_x_.Apply();
+			scan_x_up_.Step(step);
+			if (2 == step)
+			{
+				scan_x_up_.Source(src_texture_, flipping_);
+			}
+			else
+			{
+				scan_x_up_.Source(inter_tex_[!index_], inter_fb_[!index_]->RequiresFlipping());
+			}
+			scan_x_up_.Destinate(inter_fb_[index_]);
+			scan_x_up_.Apply();
 
 			index_ = !index_;
-		}
 
-		for (uint32_t i = 0; i < num_pass_y_; ++ i)
+			step *= 2;
+		} while (step <= src_texture_->Width(0));
+
+		step = src_texture_->Width(0) / 2;
+		do
 		{
-			scan_y_.Pass(i);
-			scan_y_.Source(inter_tex_[!index_], inter_fb_[!index_]->RequiresFlipping());
-			scan_y_.Destinate(inter_fb_[index_]);
-			scan_y_.Apply();
+			scan_x_down_.Step(step);
+			scan_x_down_.Source(inter_tex_[!index_], inter_fb_[!index_]->RequiresFlipping());
+			scan_x_down_.Destinate(inter_fb_[index_]);
+			scan_x_down_.Apply();
 
 			index_ = !index_;
-		}
+
+			step /= 2;
+		} while (step >= 1);
+
+		step = 2;
+		do
+		{
+			scan_y_up_.Step(step);
+			scan_y_up_.Source(inter_tex_[!index_], inter_fb_[!index_]->RequiresFlipping());
+			scan_y_up_.Destinate(inter_fb_[index_]);
+			scan_y_up_.Apply();
+
+			index_ = !index_;
+		
+			step *= 2;
+		} while (step <= src_texture_->Height(0));
+
+		step = src_texture_->Height(0) / 2;
+		do
+		{
+			scan_y_down_.Step(step);
+			scan_y_down_.Source(inter_tex_[!index_], inter_fb_[!index_]->RequiresFlipping());
+			scan_y_down_.Destinate(inter_fb_[index_]);
+			scan_y_down_.Apply();
+
+			index_ = !index_;
+
+			step /= 2;
+		} while (step >= 1);
 	}
 
 	TexturePtr SummedAreaTablePostProcess::SATTexture()

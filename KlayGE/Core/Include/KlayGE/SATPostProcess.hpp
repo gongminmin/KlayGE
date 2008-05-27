@@ -19,29 +19,17 @@
 
 namespace KlayGE
 {
-	class SATSeparableScanPostProcess : public PostProcess
+	class SATSeparableScanSweepPostProcess : public PostProcess
 	{
 	public:
-		SATSeparableScanPostProcess(RenderTechniquePtr tech);
-		virtual ~SATSeparableScanPostProcess();
+		SATSeparableScanSweepPostProcess(RenderTechniquePtr tech, bool dir);
 
-		void Length(uint32_t length);
-		void Pass(uint32_t pass);
+		void Length(int length);
+		void Step(int step);
 
 	private:
 		int length_;
-	};
-
-	class SATScanXPostProcess : public SATSeparableScanPostProcess
-	{
-	public:
-		SATScanXPostProcess();
-	};
-
-	class SATScanYPostProcess : public SATSeparableScanPostProcess
-	{
-	public:
-		SATScanYPostProcess();
+		bool dir_;
 	};
 
 	class SummedAreaTablePostProcess : public PostProcess
@@ -55,13 +43,14 @@ namespace KlayGE
 		TexturePtr SATTexture();
 
 	private:
-		uint32_t num_pass_x_, num_pass_y_;
 		TexturePtr inter_tex_[2];
 		FrameBufferPtr inter_fb_[2];
 		bool index_;
 
-		SATScanXPostProcess scan_x_;
-		SATScanYPostProcess scan_y_;
+		SATSeparableScanSweepPostProcess scan_x_up_;
+		SATSeparableScanSweepPostProcess scan_y_up_;
+		SATSeparableScanSweepPostProcess scan_x_down_;
+		SATSeparableScanSweepPostProcess scan_y_down_;
 	};
 }
 

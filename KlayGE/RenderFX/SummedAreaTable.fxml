@@ -4,54 +4,98 @@
 	<include name="PostProcess.fxml"/>
 
 	<parameter type="float" name="addr_offset"/>
+	<parameter type="int" name="length"/>
+	<parameter type="int" name="step"/>
 
 	<parameter type="sampler2D" name="src_sampler">
 		<state name="filtering" value="point"/>
-		<state name="address_u" value="border"/>
-		<state name="address_v" value="border"/>
-		<state name="border_clr" r="0" g="0" b="0" a="0"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
 	</parameter>
 
 	<shader>
 		<![CDATA[
-float4 SATScanXPS(float2 tex_coord0 : TEXCOORD0) : COLOR
+float4 SATScanXUpSweepPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 {
+	float x = floor(tex_coord0.x * length);
 	float4 clr = tex2D(src_sampler, tex_coord0);
-	for (int i = 1; i < 4; ++ i)
+	if (0 == fmod(x + 1, step))
 	{
-		clr += tex2D(src_sampler, tex_coord0 - float2(i * addr_offset, 0));
+		clr += tex2D(src_sampler, tex_coord0 - float2(addr_offset, 0));
 	}
 	return clr;
 }
 
-float4 SATScanYPS(float2 tex_coord0 : TEXCOORD0) : COLOR
+float4 SATScanXDownSweepPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 {
+	float x = floor(tex_coord0.x * length);
 	float4 clr = tex2D(src_sampler, tex_coord0);
-	for (int i = 1; i < 4; ++ i)
+	if ((x > 0) && (0 == fmod(x + 1, step)) && (0 == fmod(floor(x / step), 2)))
 	{
-		clr += tex2D(src_sampler, tex_coord0 - float2(0, i * addr_offset));
+		clr += tex2D(src_sampler, tex_coord0 - float2(addr_offset, 0));
+	}
+	return clr;
+}
+
+float4 SATScanYUpSweepPS(float2 tex_coord0 : TEXCOORD0) : COLOR
+{
+	float y = floor(tex_coord0.y * length);
+	float4 clr = tex2D(src_sampler, tex_coord0);
+	if (0 == fmod(y + 1, step))
+	{
+		clr += tex2D(src_sampler, tex_coord0 - float2(0, addr_offset));
+	}
+	return clr;
+}
+
+float4 SATScanYDownSweepPS(float2 tex_coord0 : TEXCOORD0) : COLOR
+{
+	float y = floor(tex_coord0.y * length);
+	float4 clr = tex2D(src_sampler, tex_coord0);
+	if ((y > 0) && (0 == fmod(y + 1, step)) && (0 == fmod(floor(y / step), 2)))
+	{
+		clr += tex2D(src_sampler, tex_coord0 - float2(0, addr_offset));
 	}
 	return clr;
 }
 		]]>
 	</shader>
-	<technique name="SATScanX">
+	<technique name="SATScanXUpSweep">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
 			<state name="depth_mask" value="0"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="SATScanXPS()"/>
+			<state name="pixel_shader" value="SATScanXUpSweepPS()"/>
+		</pass>
+	</technique>
+	<technique name="SATScanXDownSweep">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="SATScanXDownSweepPS()"/>
+		</pass>
+	</technique>	
+
+	<technique name="SATScanYUpSweep">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="SATScanYUpSweepPS()"/>
 		</pass>
 	</technique>
 
-	<technique name="SATScanY">
+	<technique name="SATScanYDownSweep">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
 			<state name="depth_mask" value="0"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="SATScanYPS()"/>
+			<state name="pixel_shader" value="SATScanYDownSweepPS()"/>
 		</pass>
 	</technique>
 </effect>
