@@ -23,7 +23,7 @@
 #include <cstring>
 
 #include <glloader/glloader.h>
-#include <gl/glu.h>
+#include <GL/glu.h>
 
 #include <KlayGE/OpenGL/OGLMapping.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>

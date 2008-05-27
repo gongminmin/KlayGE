@@ -67,6 +67,7 @@ namespace
 		CFM_ApicIdCoreIdSize_AMD    = 0x0000F000,
 	};
 
+#ifdef KLAYGE_PLATFORM_WINDOWS
 #ifdef KLAYGE_COMPILER_GCC
 	typedef enum _LOGICAL_PROCESSOR_RELATIONSHIP
 	{
@@ -113,6 +114,7 @@ namespace
 #endif
 
 	typedef BOOL (WINAPI* GetLogicalProcessorInformationPtr)(SYSTEM_LOGICAL_PROCESSOR_INFORMATION*, uint32_t*);
+#endif
 
 	class ApicExtractor
 	{
@@ -318,7 +320,7 @@ namespace KlayGE
 		}
 #elif defined KLAYGE_PLATFORM_LINUX
 		// Linux doesn't easily allow us to look at the Affinity Bitmask directly,
-		// but it does provide an API to test affinity maskbits of the current process 
+		// but it does provide an API to test affinity maskbits of the current process
 		// against each logical processor visible under OS.
 		num_hw_threads_ = sysconf(_SC_NPROCESSORS_CONF);	// This will tell us how many CPUs are currently enabled.
 #endif
@@ -532,9 +534,7 @@ namespace KlayGE
 					::Sleep(0);
 				}
 #elif defined KLAYGE_PLATFORM_LINUX
-				cpu_set_t backup_cpu;
-				sched_getaffinity(0, sizeof(backup_cpu), &backup_cpu);
-				if (1 == backup_cpu)
+				if (1 == num_hw_threads_)
 				{
 					// Since we only have 1 logical processor present on the system, we
 					// can explicitly set a single APIC ID to zero.
@@ -543,6 +543,9 @@ namespace KlayGE
 				}
 				else
 				{
+					cpu_set_t backup_cpu;
+					sched_getaffinity(0, sizeof(backup_cpu), &backup_cpu);
+
 					cpu_set_t current_cpu;
 					// Call cpuid on each active logical processor in the system affinity.
 					for (int j = 0; j < num_hw_threads_; ++ j)

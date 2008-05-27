@@ -73,7 +73,7 @@ namespace KlayGE
 		HGLRC	hRC_;
 		HDC		hDC_;
 #elif defined KLAYGE_PLATFORM_LINUX
-		::Display x_display_;
+		::Display* x_display_;
 		::Window x_window_;
 		::GLXContext x_context_;
 #endif

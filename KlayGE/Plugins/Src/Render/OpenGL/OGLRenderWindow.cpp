@@ -33,7 +33,7 @@
 
 #include <glloader/glloader.h>
 
-#include <Cg/CgGL.h>
+#include <Cg/cgGL.h>
 
 #include <KlayGE/OpenGL/OGLRenderWindow.hpp>
 
@@ -41,7 +41,6 @@ namespace KlayGE
 {
 	OGLRenderWindow::OGLRenderWindow(std::string const & name, RenderSettings const & settings)
 						: OGLFrameBuffer(false),
-							hWnd_(NULL),
 							ready_(false), closed_(false)
 	{
 		// Store info
@@ -148,12 +147,12 @@ namespace KlayGE
 		}
 		visual_attr.push_back(None);				// end of list
 
-		x_display_ = main_wnd.XDisplay();
-		x_window_ = main_wnd.XWindow();
-		XVisualInfo* visual_info = glXChooseVisual(x_display, DefaultScreen(x_display), &visual_attr[0]);
+		x_display_ = main_wnd->XDisplay();
+		x_window_ = main_wnd->XWindow();
+		XVisualInfo* visual_info = glXChooseVisual(x_display_, DefaultScreen(x_display_), &visual_attr[0]);
 
 		// Create an OpenGL rendering context
-		x_context_ = glXCreateContext(x_display, visual_info, 
+		x_context_ = glXCreateContext(x_display_, visual_info,
 					NULL,		// No sharing of display lists
 					GL_TRUE);	// Direct rendering if possible
 
@@ -321,6 +320,7 @@ namespace KlayGE
 
 	void OGLRenderWindow::WindowMovedOrResized()
 	{
+#if defined KLAYGE_PLATFORM_WINDOWS
 		::RECT rect;
 		::GetClientRect(hWnd_, &rect);
 
@@ -337,13 +337,15 @@ namespace KlayGE
 		{
 			this->Resize(new_width, new_height);
 		}
+#elif defined KLAYGE_PLATFORM_LINUX
+#endif
 	}
 
 	void OGLRenderWindow::Destroy()
 	{
+#if defined KLAYGE_PLATFORM_WINDOWS
 		if (hWnd_ != NULL)
 		{
-#if defined KLAYGE_PLATFORM_WINDOWS
 			::wglMakeCurrent(NULL, NULL);
 			::wglDeleteContext(hRC_);
 			::ReleaseDC(hWnd_, hDC_);
@@ -353,10 +355,13 @@ namespace KlayGE
 				::ChangeDisplaySettings(NULL, 0);
 				ShowCursor(TRUE);
 			}
-#elif defined KLAYGE_PLATFORM_LINUX
-			glXDestroyContext(x_display_, x_context_);
-#endif
 		}
+#elif defined KLAYGE_PLATFORM_LINUX
+		if (x_display_ != NULL)
+		{
+			glXDestroyContext(x_display_, x_context_);
+		}
+#endif
 	}
 
 	void OGLRenderWindow::SwapBuffers()

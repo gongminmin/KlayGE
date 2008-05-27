@@ -35,6 +35,8 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/App3D.hpp>
+#include <KlayGE/Window.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Viewport.hpp>
@@ -49,6 +51,9 @@
 #include <KlayGE/Util.hpp>
 
 #include <glloader/glloader.h>
+#ifdef Bool
+#undef Bool		// for boost::foreach
+#endif
 
 #include <algorithm>
 #include <cstring>
@@ -138,14 +143,14 @@ namespace KlayGE
 		}
 #elif defined KLAYGE_PLATFORM_LINUX
 		WindowPtr main_wnd = Context::Instance().AppInstance().MainWnd();
-		::Display x_display = main_wnd.XDisplay();
+		::Display* x_display = main_wnd->XDisplay();
 		XEvent event;
 		for (;;)
 		{
 			do
 			{
 				XNextEvent(x_display, &event);
-				main_wnd.MsgProc(event);
+				main_wnd->MsgProc(event);
 			} while(XPending(x_display));
 
 			FrameBuffer& fb = *this->CurFrameBuffer();
