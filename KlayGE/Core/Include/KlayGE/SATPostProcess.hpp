@@ -24,8 +24,10 @@ namespace KlayGE
 	public:
 		SATSeparableScanSweepPostProcess(RenderTechniquePtr tech, bool dir);
 
+		void ChildBuffer(TexturePtr const & tex);
 		void Length(int length);
-		void Step(int step);
+		void AddrOffset(float3 offset);
+		void Scale(float scale);
 
 	private:
 		int length_;
@@ -43,9 +45,14 @@ namespace KlayGE
 		TexturePtr SATTexture();
 
 	private:
-		TexturePtr inter_tex_[2];
-		FrameBufferPtr inter_fb_[2];
-		bool index_;
+		std::vector<TexturePtr> inter_tex_x_up_;
+		std::vector<TexturePtr> inter_tex_x_down_;
+		std::vector<TexturePtr> inter_tex_y_up_;
+		std::vector<TexturePtr> inter_tex_y_down_;
+		std::vector<FrameBufferPtr> inter_fb_x_up_;
+		std::vector<FrameBufferPtr> inter_fb_x_down_;
+		std::vector<FrameBufferPtr> inter_fb_y_up_;
+		std::vector<FrameBufferPtr> inter_fb_y_down_;
 
 		SATSeparableScanSweepPostProcess scan_x_up_;
 		SATSeparableScanSweepPostProcess scan_y_up_;

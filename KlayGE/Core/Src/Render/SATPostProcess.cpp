@@ -31,16 +31,25 @@ namespace KlayGE
 	{
 	}
 
-	void SATSeparableScanSweepPostProcess::Step(int step)
+	void SATSeparableScanSweepPostProcess::ChildBuffer(TexturePtr const & tex)
 	{
-		*(technique_->Effect().ParameterByName("addr_offset")) = static_cast<float>(step) / length_ * (dir_ ? 0.5f : 1);
-		*(technique_->Effect().ParameterByName("step")) = step;
+		*(technique_->Effect().ParameterByName("child_sampler")) = tex;
+	}
+
+	void SATSeparableScanSweepPostProcess::AddrOffset(float3 offset)
+	{
+		*(technique_->Effect().ParameterByName("addr_offset")) = offset;
 	}
 
 	void SATSeparableScanSweepPostProcess::Length(int length)
 	{
 		length_ = length;
 		*(technique_->Effect().ParameterByName("length")) = length;
+	}
+
+	void SATSeparableScanSweepPostProcess::Scale(float scale)
+	{
+		*(technique_->Effect().ParameterByName("scale")) = scale;
 	}
 
 
@@ -57,90 +66,156 @@ namespace KlayGE
 	{
 		PostProcess::Source(tex, flipping);
 
-		uint32_t const width = tex->Width(0);
-		uint32_t const height = tex->Height(0);
-
-		scan_x_up_.Length(width);
-		scan_x_down_.Length(width);
-		scan_y_up_.Length(height);
-		scan_y_down_.Length(height);
+		uint32_t const tex_width = tex->Width(0);
+		uint32_t const tex_height = tex->Height(0);
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		inter_tex_[0] = rf.MakeTexture2D(width, height, 1, EF_ABGR32F);
-		inter_tex_[1] = rf.MakeTexture2D(width, height, 1, EF_ABGR32F);
+		uint32_t width = tex_width;
+		uint32_t height = tex_height;
 
-		inter_fb_[0] = rf.MakeFrameBuffer();
-		inter_fb_[0]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*inter_tex_[0], 0));
-		inter_fb_[1] = rf.MakeFrameBuffer();
-		inter_fb_[1]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*inter_tex_[1], 0));
+		std::vector<uint32_t> widths;
+		while (width >= 1)
+		{
+			widths.push_back(width);
+
+			if (1 == width)
+			{
+				break;
+			}
+			width = (width + 3) / 4;
+		}
+
+		std::vector<uint32_t> heights;
+		while (height >= 1)
+		{
+			heights.push_back(height);
+
+			if (1 == height)
+			{
+				break;
+			}
+			height = (height + 3) / 4;
+		}
+
+		inter_tex_x_up_.resize(widths.size());
+		inter_fb_x_up_.resize(widths.size());
+		inter_tex_x_down_.resize(widths.size());
+		inter_fb_x_down_.resize(widths.size());
+		inter_tex_y_up_.resize(heights.size());
+		inter_fb_y_up_.resize(heights.size());
+		inter_tex_y_down_.resize(heights.size());
+		inter_fb_y_down_.resize(heights.size());
+
+		{
+			inter_tex_x_up_[0] = tex;
+			inter_fb_x_up_[0] = rf.MakeFrameBuffer();
+			inter_fb_x_up_[0]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*inter_tex_x_up_[0], 0));
+		}
+		for (size_t i = 1; i < widths.size(); ++ i)
+		{
+			inter_tex_x_up_[i] = rf.MakeTexture2D(widths[i], tex_height, 1, EF_ABGR32F);
+			inter_fb_x_up_[i] = rf.MakeFrameBuffer();
+			inter_fb_x_up_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*inter_tex_x_up_[i], 0));
+		}
+		{
+			inter_tex_x_down_[0] = inter_tex_x_up_.back();
+			inter_fb_x_down_[0] = inter_fb_x_up_.back();
+		}
+		for (size_t i = 1; i < widths.size(); ++ i)
+		{
+			inter_tex_x_down_[i] = rf.MakeTexture2D(widths[widths.size() - 1 - i], tex_height, 1, EF_ABGR32F);
+			inter_fb_x_down_[i] = rf.MakeFrameBuffer();
+			inter_fb_x_down_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*inter_tex_x_down_[i], 0));
+		}
+		{
+			inter_tex_y_up_[0] = inter_tex_x_down_.back();
+			inter_fb_y_up_[0] = inter_fb_x_down_.back();
+		}
+		for (size_t i = 1; i < heights.size(); ++ i)
+		{
+			inter_tex_y_up_[i] = rf.MakeTexture2D(tex_width, heights[i], 1, EF_ABGR32F);
+			inter_fb_y_up_[i] = rf.MakeFrameBuffer();
+			inter_fb_y_up_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*inter_tex_y_up_[i], 0));
+		}
+		{
+			inter_tex_y_down_[0] = inter_tex_y_up_.back();
+			inter_fb_y_down_[0] = inter_fb_y_up_.back();
+		}
+		for (size_t i = 1; i < heights.size(); ++ i)
+		{
+			inter_tex_y_down_[i] = rf.MakeTexture2D(tex_width, heights[heights.size() - 1 - i], 1, EF_ABGR32F);
+			inter_fb_y_down_[i] = rf.MakeFrameBuffer();
+			inter_fb_y_down_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*inter_tex_y_down_[i], 0));
+		}
 	}
 
 	void SummedAreaTablePostProcess::Apply()
 	{
-		index_ = true;
-		uint32_t step = 2;
-		do
+		for (size_t i = 0; i < inter_tex_x_up_.size() - 1; ++ i)
 		{
-			scan_x_up_.Step(step);
-			if (2 == step)
+			uint32_t const parent_length = inter_tex_x_up_[i + 1]->Width(0);
+			uint32_t const child_length = inter_tex_x_up_[i]->Width(0);
+
+			scan_x_up_.Length(child_length);
+			scan_x_up_.AddrOffset(float3(0.5f / child_length, 1.5f / child_length, 0));
+			scan_x_up_.Scale((parent_length * 4.0f) / child_length);
+			if (0 == i)
 			{
-				scan_x_up_.Source(src_texture_, flipping_);
+				scan_x_up_.Source(inter_tex_x_up_[i], flipping_);
 			}
 			else
 			{
-				scan_x_up_.Source(inter_tex_[!index_], inter_fb_[!index_]->RequiresFlipping());
+				scan_x_up_.Source(inter_tex_x_up_[i], inter_fb_x_up_[i]->RequiresFlipping());
 			}
-			scan_x_up_.Destinate(inter_fb_[index_]);
+			scan_x_up_.Destinate(inter_fb_x_up_[i + 1]);
 			scan_x_up_.Apply();
+		}
 
-			index_ = !index_;
-
-			step *= 2;
-		} while (step <= src_texture_->Width(0));
-
-		step = src_texture_->Width(0) / 2;
-		do
+		for (size_t i = 0; i < inter_tex_x_down_.size() - 1; ++ i)
 		{
-			scan_x_down_.Step(step);
-			scan_x_down_.Source(inter_tex_[!index_], inter_fb_[!index_]->RequiresFlipping());
-			scan_x_down_.Destinate(inter_fb_[index_]);
+			uint32_t const parent_length = inter_tex_x_down_[i]->Width(0);
+			uint32_t const child_length = inter_tex_x_down_[i + 1]->Width(0);
+
+			scan_x_down_.Length(child_length);
+			scan_x_down_.Source(inter_tex_x_down_[i], inter_fb_x_down_[i]->RequiresFlipping());
+			scan_x_down_.ChildBuffer(inter_tex_x_up_[inter_tex_x_down_.size() - 2 - i]);
+			scan_x_down_.AddrOffset(float3(1.0f / parent_length, 1.0f / child_length, 2.0f / child_length));
+			scan_x_down_.Scale(child_length / (parent_length * 4.0f));
+			scan_x_down_.Destinate(inter_fb_x_down_[i + 1]);
 			scan_x_down_.Apply();
+		}
 
-			index_ = !index_;
-
-			step /= 2;
-		} while (step >= 1);
-
-		step = 2;
-		do
+		for (size_t i = 0; i < inter_tex_y_up_.size() - 1; ++ i)
 		{
-			scan_y_up_.Step(step);
-			scan_y_up_.Source(inter_tex_[!index_], inter_fb_[!index_]->RequiresFlipping());
-			scan_y_up_.Destinate(inter_fb_[index_]);
+			uint32_t const parent_length = inter_tex_y_up_[i + 1]->Height(0);
+			uint32_t const child_length = inter_tex_y_up_[i]->Height(0);
+
+			scan_y_up_.Length(child_length);
+			scan_y_up_.AddrOffset(float3(0.5f / child_length, 1.5f / child_length, 0));
+			scan_y_up_.Scale((parent_length * 4.0f) / child_length);
+			scan_y_up_.Source(inter_tex_y_up_[i], inter_fb_y_up_[i]->RequiresFlipping());
+			scan_y_up_.Destinate(inter_fb_y_up_[i + 1]);
 			scan_y_up_.Apply();
+		}
 
-			index_ = !index_;
-		
-			step *= 2;
-		} while (step <= src_texture_->Height(0));
-
-		step = src_texture_->Height(0) / 2;
-		do
+		for (size_t i = 0; i < inter_tex_y_down_.size() - 1; ++ i)
 		{
-			scan_y_down_.Step(step);
-			scan_y_down_.Source(inter_tex_[!index_], inter_fb_[!index_]->RequiresFlipping());
-			scan_y_down_.Destinate(inter_fb_[index_]);
+			uint32_t const parent_length = inter_tex_y_down_[i]->Height(0);
+			uint32_t const child_length = inter_tex_y_down_[i + 1]->Height(0);
+
+			scan_y_down_.Length(child_length);
+			scan_y_down_.Source(inter_tex_y_down_[i], inter_fb_y_down_[i]->RequiresFlipping());
+			scan_y_down_.ChildBuffer(inter_tex_y_up_[inter_tex_y_down_.size() - 2 - i]);
+			scan_y_down_.AddrOffset(float3(1.0f / parent_length, 1.0f / child_length, 2.0f / child_length));
+			scan_y_down_.Scale(child_length / (parent_length * 4.0f));
+			scan_y_down_.Destinate(inter_fb_y_down_[i + 1]);
 			scan_y_down_.Apply();
-
-			index_ = !index_;
-
-			step /= 2;
-		} while (step >= 1);
+		}
 	}
 
 	TexturePtr SummedAreaTablePostProcess::SATTexture()
 	{
-		return inter_tex_[!index_];
+		return inter_tex_y_down_.back();
 	}
 }

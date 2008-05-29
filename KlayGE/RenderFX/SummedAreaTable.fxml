@@ -3,58 +3,96 @@
 <effect>
 	<include name="PostProcess.fxml"/>
 
-	<parameter type="float" name="addr_offset"/>
+	<parameter type="float3" name="addr_offset"/>
 	<parameter type="int" name="length"/>
-	<parameter type="int" name="step"/>
+	<parameter type="float" name="scale"/>
 
 	<parameter type="sampler2D" name="src_sampler">
 		<state name="filtering" value="point"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
+		<state name="address_u" value="border"/>
+		<state name="address_v" value="border"/>
+		<state name="border_clr" r="0" g="0" b="0" a="0"/>
+	</parameter>
+
+	<parameter type="sampler2D" name="child_sampler">
+		<state name="filtering" value="point"/>
+		<state name="address_u" value="border"/>
+		<state name="address_v" value="border"/>
+		<state name="border_clr" r="0" g="0" b="0" a="0"/>
 	</parameter>
 
 	<shader>
 		<![CDATA[
 float4 SATScanXUpSweepPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 {
-	float x = floor(tex_coord0.x * length);
-	float4 clr = tex2D(src_sampler, tex_coord0);
-	if (0 == fmod(x + 1, step))
-	{
-		clr += tex2D(src_sampler, tex_coord0 - float2(addr_offset, 0));
-	}
-	return clr;
+	float tar_x = tex_coord0.x * scale;
+	return tex2D(src_sampler, float2(tar_x - addr_offset.y, tex_coord0.y))
+				+ tex2D(src_sampler, float2(tar_x - addr_offset.x, tex_coord0.y))
+				+ tex2D(src_sampler, float2(tar_x + addr_offset.x, tex_coord0.y))
+				+ tex2D(src_sampler, float2(tar_x + addr_offset.y, tex_coord0.y));
 }
 
 float4 SATScanXDownSweepPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 {
+	float4 clr;
 	float x = floor(tex_coord0.x * length);
-	float4 clr = tex2D(src_sampler, tex_coord0);
-	if ((x > 0) && (0 == fmod(x + 1, step)) && (0 == fmod(floor(x / step), 2)))
+	int r = fmod(x, 4);
+	if (3 == r)
 	{
-		clr += tex2D(src_sampler, tex_coord0 - float2(addr_offset, 0));
+		clr = tex2D(src_sampler, float2(tex_coord0.x * scale, tex_coord0.y));
+	}
+	else
+	{
+		clr = tex2D(child_sampler, tex_coord0);
+		if (x > 3)
+		{
+			clr += tex2D(src_sampler, float2(tex_coord0.x * scale - addr_offset.x, tex_coord0.y));
+		}
+		if (r >= 1)
+		{
+			clr += tex2D(child_sampler, tex_coord0 - float2(addr_offset.y, 0));
+		}
+		if (r >= 2)
+		{
+			clr += tex2D(child_sampler, tex_coord0 - float2(addr_offset.z, 0));
+		}
 	}
 	return clr;
 }
 
 float4 SATScanYUpSweepPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 {
-	float y = floor(tex_coord0.y * length);
-	float4 clr = tex2D(src_sampler, tex_coord0);
-	if (0 == fmod(y + 1, step))
-	{
-		clr += tex2D(src_sampler, tex_coord0 - float2(0, addr_offset));
-	}
-	return clr;
+	float tar_y = tex_coord0.y * scale;
+	return tex2D(src_sampler, float2(tex_coord0.x, tar_y - addr_offset.y))
+				+ tex2D(src_sampler, float2(tex_coord0.x, tar_y - addr_offset.x))
+				+ tex2D(src_sampler, float2(tex_coord0.x, tar_y + addr_offset.x))
+				+ tex2D(src_sampler, float2(tex_coord0.x, tar_y + addr_offset.y));
 }
 
 float4 SATScanYDownSweepPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 {
+	float4 clr;
 	float y = floor(tex_coord0.y * length);
-	float4 clr = tex2D(src_sampler, tex_coord0);
-	if ((y > 0) && (0 == fmod(y + 1, step)) && (0 == fmod(floor(y / step), 2)))
+	int r = fmod(y, 4);
+	if (3 == r)
 	{
-		clr += tex2D(src_sampler, tex_coord0 - float2(0, addr_offset));
+		clr = tex2D(src_sampler, float2(tex_coord0.x, tex_coord0.y * scale));
+	}
+	else
+	{
+		clr = tex2D(child_sampler, tex_coord0);
+		if (y > 3)
+		{
+			clr += tex2D(src_sampler, float2(tex_coord0.x, tex_coord0.y * scale - addr_offset.x));
+		}
+		if (r >= 1)
+		{
+			clr += tex2D(child_sampler, tex_coord0 - float2(0, addr_offset.y));
+		}
+		if (r >= 2)
+		{
+			clr += tex2D(child_sampler, tex_coord0 - float2(0, addr_offset.z));
+		}
 	}
 	return clr;
 }
