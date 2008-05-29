@@ -268,7 +268,7 @@ namespace KlayGE
 			{
 				D3DADAPTER_IDENTIFIER9 identifier;
 				d3d->GetAdapterIdentifier(adapter, 0, &identifier);
-				if (strstr(identifier.Description, "NVPerfHUD") != 0)
+				if (strstr(identifier.Description, "PerfHUD") != 0)
 				{
 					use_nvperfhud = true;
 					adapter_to_use = adapter;
