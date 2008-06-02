@@ -55,8 +55,8 @@ namespace KlayGE
 		std::vector<FrameBufferPtr> inter_fb_y_down_;
 
 		SATSeparableScanSweepPostProcess scan_x_up_;
-		SATSeparableScanSweepPostProcess scan_y_up_;
 		SATSeparableScanSweepPostProcess scan_x_down_;
+		SATSeparableScanSweepPostProcess scan_y_up_;
 		SATSeparableScanSweepPostProcess scan_y_down_;
 	};
 }
