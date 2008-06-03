@@ -78,8 +78,16 @@ namespace KlayGE
 		void OnRenderBegin()
 		{
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			*(technique_->Effect().ParameterByName("halfWidth")) = static_cast<int>(re.CurFrameBuffer()->Width() / 2);
-			*(technique_->Effect().ParameterByName("halfHeight")) = static_cast<int>(re.CurFrameBuffer()->Height() / 2);
+			float const half_width = re.CurFrameBuffer()->Width() / 2.0f;
+			float const half_height = re.CurFrameBuffer()->Height() / 2.0f;
+
+			*(technique_->Effect().ParameterByName("halfWidth")) = half_width;
+			*(technique_->Effect().ParameterByName("halfHeight")) = half_height;
+
+			float4 texel_to_pixel = re.TexelToPixelOffset();
+			texel_to_pixel.x() /= half_width;
+			texel_to_pixel.y() /= half_height;
+			*(technique_->Effect().ParameterByName("texel_to_pixel_offset")) = texel_to_pixel;
 		}
 
 		void Render()

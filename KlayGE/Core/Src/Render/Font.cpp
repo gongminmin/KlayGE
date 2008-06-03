@@ -210,8 +210,16 @@ namespace
 			if (!three_dim_)
 			{
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-				*(effect_->ParameterByName("halfWidth")) = static_cast<int>(re.CurFrameBuffer()->Width() / 2);
-				*(effect_->ParameterByName("halfHeight")) = static_cast<int>(re.CurFrameBuffer()->Height() / 2);
+				float const half_width = re.CurFrameBuffer()->Width() / 2.0f;
+				float const half_height = re.CurFrameBuffer()->Height() / 2.0f;
+
+				*(effect_->ParameterByName("halfWidth")) = half_width;
+				*(effect_->ParameterByName("halfHeight")) = half_height;
+
+				float4 texel_to_pixel = re.TexelToPixelOffset();
+				texel_to_pixel.x() /= half_width;
+				texel_to_pixel.y() /= half_height;
+				*(effect_->ParameterByName("texel_to_pixel_offset")) = texel_to_pixel;
 			}
 		}
 

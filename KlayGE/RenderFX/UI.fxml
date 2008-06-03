@@ -1,8 +1,9 @@
 <?xml version='1.0'?>
 
 <effect>
-	<parameter type="int" name="halfWidth"/>
-	<parameter type="int" name="halfHeight"/>
+	<parameter type="float" name="halfWidth"/>
+	<parameter type="float" name="halfHeight"/>
+	<parameter type="float4" name="texel_to_pixel_offset"/>
 
 	<parameter type="sampler2D" name="texUISampler">
 		<state name="filtering" value="bilinear"/>
@@ -23,6 +24,7 @@ void UIVS(float4 position : POSITION,
 	oPosition.x = (position.x - halfWidth) / halfWidth;
 	oPosition.y = (halfHeight - position.y) / halfHeight;
 	oPosition.zw = position.zw;
+	oPosition += texel_to_pixel_offset;
 
 	oColor = color;
 	oTexCoord = texCoord;
