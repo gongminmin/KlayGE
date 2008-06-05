@@ -43,6 +43,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/half.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Viewport.hpp>
@@ -177,7 +178,7 @@ namespace
 			}
 
 			base_scale_texture_ = rf.MakeTexture2D(std::min<uint32_t>(2048, caps.max_texture_width) / kfont_char_size_,
-				std::min<uint32_t>(2048, caps.max_texture_height) / kfont_char_size_, 1, EF_SIGNED_GR16);
+				std::min<uint32_t>(2048, caps.max_texture_height) / kfont_char_size_, 1, EF_ABGR16F);
 			*(effect_->ParameterByName("base_scale_sampler")) = base_scale_texture_;
 		}
 
@@ -584,15 +585,17 @@ namespace
 						{
 							Texture::Mapper mapper(*base_scale_texture_, 0, TMA_Write_Only,
 								char_pos.x() / kfont_char_size_, char_pos.y() / kfont_char_size_, 1, 1);
-							int16_t* tex_data = mapper.Pointer<int16_t>();
+							half* tex_data = mapper.Pointer<half>();
 							if (char_index_[ch] != -1)
 							{
-								tex_data[0] = ci.base;
-								tex_data[1] = ci.scale;
+								tex_data[0] = half(ci.base / 32768.0f);
+								tex_data[1] = half(ci.scale / 32768.0f);
+								tex_data[2] = half(0.0f);
+								tex_data[3] = half(0.0f);
 							}
 							else
 							{
-								tex_data[0] = tex_data[1] = -32768;
+								tex_data[0] = tex_data[1] = tex_data[2] = tex_data[3] = half(-1.0f);
 							}
 						}
 
