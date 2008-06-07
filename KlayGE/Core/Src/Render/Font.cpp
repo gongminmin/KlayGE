@@ -542,10 +542,10 @@ namespace
 							// 纹理还有空间
 							char_pos = Vector_T<int32_t, 2>(curX_, curY_);
 
-							charInfo.left()		= (curX_ + 0.5f) / tex_width;
-							charInfo.top()		= (curY_ + 0.5f) / tex_height;
-							charInfo.right()	= (curX_ + width + 0.5f) / tex_width;
-							charInfo.bottom()	= (curY_ + height + 0.5f) / tex_height;
+							charInfo.left()		= static_cast<float>(curX_) / tex_width;
+							charInfo.top()		= static_cast<float>(curY_) / tex_height;
+							charInfo.right()	= static_cast<float>(curX_ + width) / tex_width;
+							charInfo.bottom()	= static_cast<float>(curY_ + height) / tex_height;
 
 							curX_ += kfont_char_size_;
 						}
