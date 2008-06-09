@@ -122,13 +122,13 @@ private:
 
 struct font_info
 {
-	int16_t advance_x;
-	int16_t advance_y;
+	uint16_t advance_x;
+	uint16_t advance_y;
 
-	int16_t top;
-	int16_t left;
-	int16_t width;
-	int16_t height;
+	uint16_t top;
+	uint16_t left;
+	uint16_t width;
+	uint16_t height;
 
 	int16_t base;
 	int16_t scale;
@@ -209,8 +209,8 @@ public:
 					}
 				}
 
-				(*char_info_)[ch].advance_x = static_cast<uint16_t>(ft_slot->advance.x / 64.0f * header_->char_size / INTERNAL_CHAR_SIZE + 0.5f);
-				(*char_info_)[ch].advance_y = static_cast<uint16_t>(ft_slot->advance.y / 64.0f * header_->char_size / INTERNAL_CHAR_SIZE + 0.5f);
+				(*char_info_)[ch].advance_x = static_cast<uint16_t>(ft_slot->advance.x / 64.0f / INTERNAL_CHAR_SIZE * header_->char_size);
+				(*char_info_)[ch].advance_y = static_cast<uint16_t>(ft_slot->advance.y / 64.0f / INTERNAL_CHAR_SIZE * header_->char_size);
 
 				edge_points.resize(0);
 				for (int y = 0; y < buf_height; ++ y)
@@ -222,10 +222,10 @@ public:
 				{
 					kdtree<int2> kd(&edge_points[0], edge_points.size());
 
-					(*char_info_)[ch].left = static_cast<int16_t>(static_cast<float>(ft_slot->bitmap_left) * header_->char_size / INTERNAL_CHAR_SIZE);
-					(*char_info_)[ch].top = static_cast<int16_t>(header_->char_size * 3 / 4.0f - static_cast<float>(ft_slot->bitmap_top) * header_->char_size / INTERNAL_CHAR_SIZE);
-					(*char_info_)[ch].width = std::min<int16_t>(header_->char_size, static_cast<uint16_t>(static_cast<float>(buf_width) * header_->char_size / INTERNAL_CHAR_SIZE) + 2);
-					(*char_info_)[ch].height = std::min<int16_t>(header_->char_size, static_cast<uint16_t>(static_cast<float>(buf_height) * header_->char_size / INTERNAL_CHAR_SIZE) + 2);
+					(*char_info_)[ch].left = static_cast<uint16_t>(static_cast<float>(ft_slot->bitmap_left) / INTERNAL_CHAR_SIZE * header_->char_size);
+					(*char_info_)[ch].top = static_cast<uint16_t>((3 / 4.0f - static_cast<float>(ft_slot->bitmap_top) / INTERNAL_CHAR_SIZE) * header_->char_size);
+					(*char_info_)[ch].width = static_cast<uint16_t>(std::min<float>(1.0f, static_cast<float>(buf_width) / INTERNAL_CHAR_SIZE + 0.1f) * header_->char_size);
+					(*char_info_)[ch].height = static_cast<uint16_t>(std::min<float>(1.0f, static_cast<float>(buf_height) / INTERNAL_CHAR_SIZE + 0.1f) * header_->char_size);
 
 					float max_value = -1;
 					float min_value = 1;
@@ -234,7 +234,7 @@ public:
 						for (uint32_t x = 0; x < header_->char_size; ++ x)
 						{
 							float value;
-							int2 const map_xy = int2(x, y) * (INTERNAL_CHAR_SIZE / header_->char_size) + INTERNAL_CHAR_SIZE / header_->char_size / 2;
+							int2 const map_xy = float2(x - 1.0f, y - 1.0f) * (INTERNAL_CHAR_SIZE / static_cast<float>(header_->char_size - 2)) + INTERNAL_CHAR_SIZE / 2.0f / (header_->char_size - 2);
 							if (kd.query_position(map_xy) > 0)
 							{
 								value = MathLib::sqrt(static_cast<float>(kd.squared_distance(0)) / max_dist_sq);
@@ -243,7 +243,14 @@ public:
 							{
 								value = 1.0f;
 							}
-							if (0 == ((char_bitmap[(map_xy.y() * INTERNAL_CHAR_SIZE + map_xy.x()) / 8] >> (map_xy.x() & 0x7)) & 0x1))
+							if ((map_xy.x() > 0) && (map_xy.y() > 0) && (map_xy.x() < INTERNAL_CHAR_SIZE) && (map_xy.y() < INTERNAL_CHAR_SIZE))
+							{
+								if (0 == ((char_bitmap[(map_xy.y() * INTERNAL_CHAR_SIZE + map_xy.x()) / 8] >> (map_xy.x() & 0x7)) & 0x1))
+								{
+									value = -value;
+								}
+							}
+							else
 							{
 								value = -value;
 							}
