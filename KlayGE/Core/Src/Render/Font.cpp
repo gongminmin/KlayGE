@@ -119,29 +119,6 @@ namespace
 				curX_(0), curY_(0),
 				three_dim_(false)
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_TriangleList);
-
-			RenderEngine const & renderEngine = rf.RenderEngineInstance();
-			RenderDeviceCaps const & caps = renderEngine.DeviceCaps();
-			dist_texture_ = rf.MakeTexture2D(std::min<uint32_t>(2048, caps.max_texture_width),
-				std::min<uint32_t>(2048, caps.max_texture_height), 1, EF_L8);
-
-			effect_ = rf.LoadEffect("Font.kfx");
-			*(effect_->ParameterByName("distance_sampler")) = dist_texture_;
-
-			vb_ = rf.MakeVertexBuffer(BU_Dynamic);
-			rl_->BindVertexStream(vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
-											vertex_element(VEU_Diffuse, 0, EF_ARGB8),
-											vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
-
-			ib_ = rf.MakeIndexBuffer(BU_Dynamic);
-			rl_->BindIndexStream(ib_, EF_R16);
-
-			box_ = Box(float3(0, 0, 0), float3(0, 0, 0));
-
 			std::ifstream kfont_input(ResLoader::Instance().Locate(fontName).c_str(), std::ios_base::binary);
 			BOOST_ASSERT(kfont_input);
 
@@ -177,9 +154,31 @@ namespace
 					static_cast<std::streamsize>(char_info_[ch].dist.size() * sizeof(char_info_[ch].dist[0])));
 			}
 
-			base_scale_texture_ = rf.MakeTexture2D(std::min<uint32_t>(2048, caps.max_texture_width) / kfont_char_size_,
-				std::min<uint32_t>(2048, caps.max_texture_height) / kfont_char_size_, 1, EF_ABGR16F);
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+			rl_ = rf.MakeRenderLayout();
+			rl_->TopologyType(RenderLayout::TT_TriangleList);
+
+			RenderEngine const & renderEngine = rf.RenderEngineInstance();
+			RenderDeviceCaps const & caps = renderEngine.DeviceCaps();
+			dist_texture_ = rf.MakeTexture2D(std::min<uint32_t>(2048, caps.max_texture_width) / kfont_char_size_ * kfont_char_size_,
+				std::min<uint32_t>(2048, caps.max_texture_height) / kfont_char_size_ * kfont_char_size_, 1, EF_L8);
+			base_scale_texture_ = rf.MakeTexture2D(dist_texture_->Width(0) / kfont_char_size_,
+				dist_texture_->Height(0) / kfont_char_size_, 1, EF_ABGR16F);
+
+			effect_ = rf.LoadEffect("Font.kfx");
+			*(effect_->ParameterByName("distance_sampler")) = dist_texture_;
 			*(effect_->ParameterByName("base_scale_sampler")) = base_scale_texture_;
+
+			vb_ = rf.MakeVertexBuffer(BU_Dynamic);
+			rl_->BindVertexStream(vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
+											vertex_element(VEU_Diffuse, 0, EF_ARGB8),
+											vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
+
+			ib_ = rf.MakeIndexBuffer(BU_Dynamic);
+			rl_->BindIndexStream(ib_, EF_R16);
+
+			box_ = Box(float3(0, 0, 0), float3(0, 0, 0));
 		}
 
 		RenderTechniquePtr GetRenderTechnique() const
@@ -589,7 +588,7 @@ namespace
 							if (char_index_[ch] != -1)
 							{
 								tex_data[0] = half(ci.base / 32768.0f);
-								tex_data[1] = half(ci.scale / 32768.0f);
+								tex_data[1] = half(ci.scale / 32768.0f + 1.0f);
 								tex_data[2] = half(0.0f);
 								tex_data[3] = half(0.0f);
 							}
