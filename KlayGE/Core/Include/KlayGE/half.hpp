@@ -64,7 +64,13 @@ namespace KlayGE
 
 		explicit half(float f)
 		{
-			int32_t i = *reinterpret_cast<int32_t*>(&f);
+			union
+			{
+				float f;
+				int32_t i;
+			} fni;
+			fni.f = f;
+			int32_t i = fni.i;
 
 			int32_t s = (i >> 16) & 0x00008000;
 			int32_t e = ((i >> 23) & 0x000000FF) - (127 - 15);
@@ -157,7 +163,7 @@ namespace KlayGE
 		}
 
 		// ÌØÊâÖµ
-		
+
 		// returns +infinity
 		static half pos_inf()
 		{
