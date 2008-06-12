@@ -42,9 +42,7 @@
 using namespace std;
 using namespace KlayGE;
 
-float const SCALE = 60;
 int const INTERNAL_CHAR_SIZE = 4096;
-int const RESTORE_SIZE = 12;
 int const NUM_CHARS = 65536;
 int const NUM_PACKAGE = 10;
 
@@ -58,6 +56,9 @@ struct kfont_header
 	uint32_t start_ptr;
 	uint32_t non_empty_chars;
 	uint32_t char_size;
+	
+	int16_t base;
+	int16_t scale;
 };
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #pragma pack(pop)
@@ -130,21 +131,17 @@ struct font_info
 	uint16_t width;
 	uint16_t height;
 
-	int16_t base;
-	int16_t scale;
-
-	std::vector<uint8_t> dist;
+	std::vector<float> dist;
 };
 
 class ttf_to_dist
 {
 public:
 	ttf_to_dist(FT_Library ft_lib, FT_Face ft_face, kfont_header& header, std::vector<std::pair<int, int> >& task,
-				std::vector<int32_t>& char_index,
 				std::vector<font_info>& char_info,
 				atomic<int32_t>& cur_num_char)
 		: ft_lib_(ft_lib), ft_face_(ft_face), header_(&header), task_(&task),
-			char_index_(&char_index), char_info_(&char_info),
+			char_info_(&char_info),
 			cur_num_char_(&cur_num_char)
 	{
 #ifndef KLAYGE_CPU_X64
@@ -180,7 +177,6 @@ public:
 
 		int const max_dist_sq = 2 * INTERNAL_CHAR_SIZE * INTERNAL_CHAR_SIZE;
 
-		std::vector<float> char_dist_float(header_->char_size * header_->char_size);
 		std::vector<uint8_t> char_bitmap(INTERNAL_CHAR_SIZE / 8 * INTERNAL_CHAR_SIZE);
 		std::vector<int2> edge_points;
 		for (size_t i = 0; i < task_->size(); ++ i)
@@ -227,8 +223,7 @@ public:
 					(*char_info_)[ch].width = static_cast<uint16_t>(std::min<float>(1.0f, static_cast<float>(buf_width) / INTERNAL_CHAR_SIZE + 0.1f) * header_->char_size);
 					(*char_info_)[ch].height = static_cast<uint16_t>(std::min<float>(1.0f, static_cast<float>(buf_height) / INTERNAL_CHAR_SIZE + 0.1f) * header_->char_size);
 
-					float max_value = -1;
-					float min_value = 1;
+					(*char_info_)[ch].dist.resize(header_->char_size * header_->char_size);
 					for (uint32_t y = 0; y < header_->char_size; ++ y)
 					{
 						for (uint32_t x = 0; x < header_->char_size; ++ x)
@@ -255,24 +250,7 @@ public:
 								value = -value;
 							}
 
-							min_value = std::min(min_value, value);
-							max_value = std::max(max_value, value);
-
-							char_dist_float[y * header_->char_size + x] = value;
-						}
-					}
-
-					float scale = max_value - min_value;
-					(*char_info_)[ch].base = static_cast<int16_t>(min_value * 32768);
-					(*char_info_)[ch].scale = static_cast<int16_t>((scale - 1) * 32768);
-
-					(*char_info_)[ch].dist.resize(header_->char_size * header_->char_size);
-					for (uint32_t y = 0; y < header_->char_size; ++ y)
-					{
-						for (uint32_t x = 0; x < header_->char_size; ++ x)
-						{
-							(*char_info_)[ch].dist[y * header_->char_size + x]
-								= static_cast<uint8_t>(MathLib::clamp(static_cast<int>((char_dist_float[y * header_->char_size + x] - min_value) / scale * 255), 0, 255));
+							(*char_info_)[ch].dist[y * header_->char_size + x] = value;
 						}
 					}
 				}
@@ -442,13 +420,44 @@ private:
 	FT_Face ft_face_;
 	kfont_header* header_;
 	std::vector<std::pair<int, int> >* task_;
-	std::vector<int32_t>* char_index_;
 	std::vector<font_info>* char_info_;
 	atomic<int32_t>* cur_num_char_;
 
 	boost::function<void(uint8_t*, uint8_t const *, int)> binary_font_extract;
 	boost::function<void(std::vector<int2>&, int, int, std::vector<uint8_t> const &, int)> edge_extract;
 };
+
+void quantizer(std::vector<uint8_t>& uint8_dist, std::vector<int32_t> const & char_index, std::vector<font_info> const & char_info, int16_t& base, int16_t& scale)
+{
+	std::vector<float> dist_block;
+	for (int ch = 0; ch < NUM_CHARS; ++ ch)
+	{
+		if (char_index[ch] != -1)
+		{
+			dist_block.insert(dist_block.end(), char_info[ch].dist.begin(), char_info[ch].dist.end());
+		}
+	}
+
+	float max_value = -1;
+	float min_value = 1;
+	for (size_t i = 0; i < dist_block.size(); ++ i)
+	{
+		float value = dist_block[i];
+
+		min_value = std::min(min_value, value);
+		max_value = std::max(max_value, value);
+	}
+
+	float fscale = max_value - min_value;
+	base = static_cast<int16_t>(min_value * 32768);
+	scale = static_cast<int16_t>((fscale - 1) * 32768);
+
+	uint8_dist.resize(dist_block.size());
+	for (size_t i = 0; i < dist_block.size(); ++ i)
+	{
+		uint8_dist[i] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((dist_block[i] - min_value) / fscale * 255), 0, 255));
+	}
+}
 
 int main(int argc, char* argv[])
 {
@@ -476,6 +485,7 @@ int main(int argc, char* argv[])
 		("end-code,E", boost::program_options::value<int>(&end_code)->default_value(65536), "End code.")
 		("char-size,C", boost::program_options::value<uint32_t>(&header.char_size)->default_value(32), "Character size.")
 		("threads,T", boost::program_options::value<int>(&num_threads)->default_value(cpu.NumHWThreads()), "Number of Threads.");
+		("version,v", "Version.");
 
 	boost::program_options::variables_map vm;
 	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
@@ -484,6 +494,11 @@ int main(int argc, char* argv[])
 	if (vm.count("help"))
 	{
 		cout << desc << endl;
+		return 1;
+	}
+	if (vm.count("version"))
+	{
+		cout << "KlayGE Font Generator, Version 1.0.0" << endl;
 		return 1;
 	}
 	if (vm.count("input-name"))
@@ -542,12 +557,22 @@ int main(int argc, char* argv[])
 					kfont_input.read(reinterpret_cast<char*>(&char_info[ch].left), sizeof(char_info[ch].left));
 					kfont_input.read(reinterpret_cast<char*>(&char_info[ch].width), sizeof(char_info[ch].width));
 					kfont_input.read(reinterpret_cast<char*>(&char_info[ch].height), sizeof(char_info[ch].height));
-					kfont_input.read(reinterpret_cast<char*>(&char_info[ch].base), sizeof(char_info[ch].base));
-					kfont_input.read(reinterpret_cast<char*>(&char_info[ch].scale), sizeof(char_info[ch].scale));
+				}
+			}
 
-					char_info[ch].dist.resize(header.char_size * header.char_size);
-					kfont_input.read(reinterpret_cast<char*>(&char_info[ch].dist[0]),
-						static_cast<std::streamsize>(char_info[ch].dist.size() * sizeof(char_info[ch].dist[0])));
+			for (int ch = 0; ch < NUM_CHARS; ++ ch)
+			{
+				if (char_index[ch] != -1)
+				{
+					std::vector<uint8_t> uint8_dist(header.char_size * header.char_size);
+					kfont_input.read(reinterpret_cast<char*>(&uint8_dist[0]),
+						static_cast<std::streamsize>(uint8_dist.size() * sizeof(uint8_dist[0])));
+
+					char_info[ch].dist.resize(uint8_dist.size());
+					for (size_t i = 0; i < char_info[ch].dist.size(); ++ i)
+					{
+						char_info[ch].dist[i] = uint8_dist[0] / 256.0f * (header.scale / 32768.0f - 1) + header.base / 32768.0f;
+					}
 				}
 			}
 		}
@@ -590,6 +615,8 @@ int main(int argc, char* argv[])
 
 	atomic<int32_t> cur_num_char(0);
 
+	cout << "Compute distance field..." << endl;
+
 	Timer timer;
 
 	std::vector<FT_Library> ft_libs(num_threads);
@@ -617,8 +644,7 @@ int main(int argc, char* argv[])
 	for (int i = 0; i < num_threads; ++ i)
 	{
 		joiners[i] = tp(ttf_to_dist(ft_libs[i], ft_faces[i], header, packages[i],
-						char_index, char_info,
-						cur_num_char));
+						char_info, cur_num_char));
 	}
 	for (int i = 0; i < num_threads; ++ i)
 	{
@@ -628,6 +654,7 @@ int main(int argc, char* argv[])
 		FT_Done_FreeType(ft_libs[i]);
 	}
 	disp_joiner();
+	cout << "\rTime elapsed: " << timer.elapsed() << " s                                        " << endl;
 
 	std::fill(char_index.begin(), char_index.end(), -1);
 	header.non_empty_chars = 0;
@@ -639,8 +666,11 @@ int main(int argc, char* argv[])
 			++ header.non_empty_chars;
 		}
 	}
-	cout << endl;
 
+	cout << "Quantize..." << endl;
+	timer.restart();
+	std::vector<uint8_t> uint8_dist(header.non_empty_chars * header.char_size * header.char_size);
+	quantizer(uint8_dist, char_index, char_info, header.base, header.scale);
 	cout << "Time elapsed: " << timer.elapsed() << " s" << endl;
 
 	{
@@ -658,9 +688,6 @@ int main(int argc, char* argv[])
 				kfont_output.write(reinterpret_cast<char*>(&char_info[i].advance_y), sizeof(char_info[i].advance_y));
 			}
 
-			std::vector<std::pair<int16_t, int16_t> > tmp_char_base_scale(header.non_empty_chars);
-			std::vector<uint8_t> tmp_char_dist(header.non_empty_chars * header.char_size * header.char_size);
-
 			for (size_t i = 0; i < char_index.size(); ++ i)
 			{
 				if (char_index[i] != -1)
@@ -669,13 +696,11 @@ int main(int argc, char* argv[])
 					kfont_output.write(reinterpret_cast<char*>(&char_info[i].left), sizeof(char_info[i].left));
 					kfont_output.write(reinterpret_cast<char*>(&char_info[i].width), sizeof(char_info[i].width));
 					kfont_output.write(reinterpret_cast<char*>(&char_info[i].height), sizeof(char_info[i].height));
-					kfont_output.write(reinterpret_cast<char*>(&char_info[i].base), sizeof(char_info[i].base));
-					kfont_output.write(reinterpret_cast<char*>(&char_info[i].scale), sizeof(char_info[i].scale));
-
-					kfont_output.write(reinterpret_cast<char*>(&char_info[i].dist[0]),
-						static_cast<std::streamsize>(char_info[i].dist.size() * sizeof(char_info[i].dist[0])));
 				}
 			}
+
+			kfont_output.write(reinterpret_cast<char*>(&uint8_dist[0]),
+				static_cast<std::streamsize>(uint8_dist.size() * sizeof(uint8_dist[0])));
 		}
 	}
 }

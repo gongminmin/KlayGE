@@ -92,10 +92,10 @@ namespace
 		uint32_t start_ptr;
 		uint32_t non_empty_chars;
 		uint32_t char_size;
+
+		int16_t base;
+		int16_t scale;
 	};
-#ifdef KLAYGE_PLATFORM_WINDOWS
-	#pragma pack(pop)
-#endif
 
 	struct font_info
 	{
@@ -103,13 +103,10 @@ namespace
 		int16_t left;
 		int16_t width;
 		int16_t height;
-
-		int16_t base;
-		int16_t scale;
-
-		std::vector<uint8_t> dist;
 	};
-
+#ifdef KLAYGE_PLATFORM_WINDOWS
+	#pragma pack(pop)
+#endif
 
 	class FontRenderable : public RenderableHelper
 	{
@@ -128,6 +125,8 @@ namespace
 			BOOST_ASSERT((1 == header.version));
 
 			kfont_char_size_ = header.char_size;
+			dist_base_ = header.base;
+			dist_scale_ = header.scale;
 
 			kfont_input.seekg(header.start_ptr, std::ios_base::beg);
 
@@ -140,19 +139,12 @@ namespace
 				static_cast<std::streamsize>(char_advance_.size() * sizeof(char_advance_[0])));
 
 			char_info_.resize(header.non_empty_chars);
-			for (uint32_t ch = 0; ch < header.non_empty_chars; ++ ch)
-			{
-				kfont_input.read(reinterpret_cast<char*>(&char_info_[ch].top), sizeof(char_info_[ch].top));
-				kfont_input.read(reinterpret_cast<char*>(&char_info_[ch].left), sizeof(char_info_[ch].left));
-				kfont_input.read(reinterpret_cast<char*>(&char_info_[ch].width), sizeof(char_info_[ch].width));
-				kfont_input.read(reinterpret_cast<char*>(&char_info_[ch].height), sizeof(char_info_[ch].height));
-				kfont_input.read(reinterpret_cast<char*>(&char_info_[ch].base), sizeof(char_info_[ch].base));
-				kfont_input.read(reinterpret_cast<char*>(&char_info_[ch].scale), sizeof(char_info_[ch].scale));
+			kfont_input.read(reinterpret_cast<char*>(&char_info_[0]),
+				static_cast<std::streamsize>(char_info_.size() * sizeof(char_info_[0])));
 
-				char_info_[ch].dist.resize(header.char_size * header.char_size);
-				kfont_input.read(reinterpret_cast<char*>(&char_info_[ch].dist[0]),
-					static_cast<std::streamsize>(char_info_[ch].dist.size() * sizeof(char_info_[ch].dist[0])));
-			}
+			distances_.resize(header.non_empty_chars * header.char_size * header.char_size);
+			kfont_input.read(reinterpret_cast<char*>(&distances_[0]),
+				static_cast<std::streamsize>(distances_.size() * sizeof(distances_[0])));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -163,12 +155,10 @@ namespace
 			RenderDeviceCaps const & caps = renderEngine.DeviceCaps();
 			dist_texture_ = rf.MakeTexture2D(std::min<uint32_t>(2048, caps.max_texture_width) / kfont_char_size_ * kfont_char_size_,
 				std::min<uint32_t>(2048, caps.max_texture_height) / kfont_char_size_ * kfont_char_size_, 1, EF_L8);
-			base_scale_texture_ = rf.MakeTexture2D(dist_texture_->Width(0) / kfont_char_size_,
-				dist_texture_->Height(0) / kfont_char_size_, 1, EF_ABGR16F);
 
 			effect_ = rf.LoadEffect("Font.kfx");
 			*(effect_->ParameterByName("distance_sampler")) = dist_texture_;
-			*(effect_->ParameterByName("base_scale_sampler")) = base_scale_texture_;
+			*(effect_->ParameterByName("distance_base_scale")) = float2(dist_base_ / 32768.0f, dist_scale_ / 32768.0f + 1.0f);
 
 			vb_ = rf.MakeVertexBuffer(BU_Dynamic);
 			rl_->BindVertexStream(vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
@@ -572,29 +562,13 @@ namespace
 							uint8_t* tex_data = mapper.Pointer<uint8_t>();
 							if (char_index_[ch] != -1)
 							{
-								uint8_t const * char_data = &ci.dist[0];
+								uint8_t const * char_data = &distances_[char_index_[ch] * kfont_char_size_ * kfont_char_size_];
 								for (uint32_t y = 0; y < kfont_char_size_; ++ y)
 								{
 									std::memcpy(tex_data, char_data, kfont_char_size_);
 									tex_data += mapper.RowPitch();
 									char_data += kfont_char_size_;
 								}
-							}
-						}
-						{
-							Texture::Mapper mapper(*base_scale_texture_, 0, TMA_Write_Only,
-								char_pos.x() / kfont_char_size_, char_pos.y() / kfont_char_size_, 1, 1);
-							half* tex_data = mapper.Pointer<half>();
-							if (char_index_[ch] != -1)
-							{
-								tex_data[0] = half(ci.base / 32768.0f);
-								tex_data[1] = half(ci.scale / 32768.0f + 1.0f);
-								tex_data[2] = half(0.0f);
-								tex_data[3] = half(0.0f);
-							}
-							else
-							{
-								tex_data[0] = tex_data[1] = tex_data[2] = tex_data[3] = half(-1.0f);
 							}
 						}
 
@@ -644,13 +618,15 @@ namespace
 		GraphicsBufferPtr ib_;
 
 		TexturePtr		dist_texture_;
-		TexturePtr		base_scale_texture_;
 		RenderEffectPtr	effect_;
 
 		uint32_t kfont_char_size_;
+		int16_t dist_base_;
+		int16_t dist_scale_;
 		std::vector<int32_t> char_index_;
 		std::vector<Vector_T<int16_t, 2> > char_advance_;
 		std::vector<font_info> char_info_;
+		std::vector<uint8_t> distances_;
 	};
 
 	class FontObject : public SceneObjectHelper

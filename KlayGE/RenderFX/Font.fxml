@@ -12,12 +12,7 @@
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
-
-	<parameter type="sampler2D" name="base_scale_sampler">
-		<state name="filtering" value="point"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
-	</parameter>
+	<parameter type="float2" name="distance_base_scale"/>
 
 	<shader>
 		<![CDATA[
@@ -54,8 +49,7 @@ void Font3DVS(float4 position : POSITION,
 
 float4 FontPS(float4 clr : COLOR, float2 texCoord : TEXCOORD0) : COLOR0
 {
-	float2 base_scale = tex2D(base_scale_sampler, texCoord).rg;
-	clr.a = (tex2D(distance_sampler, texCoord).r * base_scale.y + base_scale.x) * 24 + 1;
+	clr.a = (tex2D(distance_sampler, texCoord).r * distance_base_scale.y + distance_base_scale.x) * 24 + 1;
 	return clr;
 }
 		]]>
