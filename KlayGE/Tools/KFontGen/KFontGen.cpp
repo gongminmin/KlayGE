@@ -185,6 +185,8 @@ public:
 			int const end_code = (*task_)[i].second;
 			for (int ch = start_code; ch < end_code; ++ ch)
 			{
+				font_info& ci = (*char_info_)[ch];
+
 				std::fill(char_bitmap.begin(), char_bitmap.end(), 0);
 
 				FT_Load_Char(ft_face_, ch, FT_LOAD_RENDER);
@@ -205,8 +207,8 @@ public:
 					}
 				}
 
-				(*char_info_)[ch].advance_x = static_cast<uint16_t>(ft_slot->advance.x / 64.0f / INTERNAL_CHAR_SIZE * header_->char_size);
-				(*char_info_)[ch].advance_y = static_cast<uint16_t>(ft_slot->advance.y / 64.0f / INTERNAL_CHAR_SIZE * header_->char_size);
+				ci.advance_x = static_cast<uint16_t>(ft_slot->advance.x / 64.0f / INTERNAL_CHAR_SIZE * header_->char_size);
+				ci.advance_y = static_cast<uint16_t>(ft_slot->advance.y / 64.0f / INTERNAL_CHAR_SIZE * header_->char_size);
 
 				edge_points.resize(0);
 				for (int y = 0; y < buf_height; ++ y)
@@ -218,12 +220,12 @@ public:
 				{
 					kdtree<int2> kd(&edge_points[0], edge_points.size());
 
-					(*char_info_)[ch].left = static_cast<uint16_t>(static_cast<float>(ft_slot->bitmap_left) / INTERNAL_CHAR_SIZE * header_->char_size);
-					(*char_info_)[ch].top = static_cast<uint16_t>((3 / 4.0f - static_cast<float>(ft_slot->bitmap_top) / INTERNAL_CHAR_SIZE) * header_->char_size);
-					(*char_info_)[ch].width = static_cast<uint16_t>(std::min<float>(1.0f, static_cast<float>(buf_width) / INTERNAL_CHAR_SIZE + 0.1f) * header_->char_size);
-					(*char_info_)[ch].height = static_cast<uint16_t>(std::min<float>(1.0f, static_cast<float>(buf_height) / INTERNAL_CHAR_SIZE + 0.1f) * header_->char_size);
+					ci.left = static_cast<uint16_t>(static_cast<float>(ft_slot->bitmap_left) / INTERNAL_CHAR_SIZE * header_->char_size);
+					ci.top = static_cast<uint16_t>((3 / 4.0f - static_cast<float>(ft_slot->bitmap_top) / INTERNAL_CHAR_SIZE) * header_->char_size);
+					ci.width = static_cast<uint16_t>(std::min<float>(1.0f, static_cast<float>(buf_width) / INTERNAL_CHAR_SIZE + 0.1f) * header_->char_size);
+					ci.height = static_cast<uint16_t>(std::min<float>(1.0f, static_cast<float>(buf_height) / INTERNAL_CHAR_SIZE + 0.1f) * header_->char_size);
 
-					(*char_info_)[ch].dist.resize(header_->char_size * header_->char_size);
+					ci.dist.resize(header_->char_size * header_->char_size);
 					for (uint32_t y = 0; y < header_->char_size; ++ y)
 					{
 						for (uint32_t x = 0; x < header_->char_size; ++ x)
@@ -250,7 +252,7 @@ public:
 								value = -value;
 							}
 
-							(*char_info_)[ch].dist[y * header_->char_size + x] = value;
+							ci.dist[y * header_->char_size + x] = value;
 						}
 					}
 				}

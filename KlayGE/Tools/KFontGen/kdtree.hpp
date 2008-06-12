@@ -98,10 +98,10 @@ private:
 			}
   			else
 			{
-				kdtree_point const * point = leaf_data.points;
-				for (unsigned int i = 0; i < leaf_data.num_elements; ++ i)
+				kdtree_point const * point_end = leaf_data.points + leaf_data.num_elements;
+				for (kdtree_point const * point = leaf_data.points; point < point_end; ++ point)
 				{
-					typename T::value_type sqr_dist = KlayGE::MathLib::length_sq(point[i].pos - query_position);
+					typename T::value_type sqr_dist = KlayGE::MathLib::length_sq(point->pos - query_position);
 					if (sqr_dist < neighbors.back().second)
 					{
 						if (neighbors.size() >= num_neighbors)
@@ -109,7 +109,7 @@ private:
 							neighbors.pop_back();
 						}
 
-						neighbor_type new_neighbor(point[i].index, sqr_dist);
+						neighbor_type new_neighbor(point->index, sqr_dist);
 						typename std::vector<neighbor_type>::iterator iter = std::lower_bound(neighbors.begin(), neighbors.end(),
 							new_neighbor, less_neighbor_type());
 						neighbors.insert(iter, new_neighbor);
@@ -149,13 +149,13 @@ private:
 			}
   			else
 			{
-				kdtree_point const * point = leaf_data.points;
-				for (unsigned int i = 0; i < leaf_data.num_elements; ++ i)
+				kdtree_point const * point_end = leaf_data.points + leaf_data.num_elements;
+				for (kdtree_point const * point = leaf_data.points; point < point_end; ++ point)
 				{
-					typename T::value_type sqr_dist = KlayGE::MathLib::length_sq(point[i].pos - query_position);
+					typename T::value_type sqr_dist = KlayGE::MathLib::length_sq(point->pos - query_position);
 					if (sqr_dist < neighbor.second)
 					{
-						neighbor = neighbor_type(point[i].index, sqr_dist);
+						neighbor = neighbor_type(point->index, sqr_dist);
 					}
 				}
 			}
