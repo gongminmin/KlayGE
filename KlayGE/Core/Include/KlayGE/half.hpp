@@ -159,7 +159,14 @@ namespace KlayGE
 			m <<= 13;
 
 			ret = s | (e << 23) | m;
-			return *reinterpret_cast<float*>(&ret);
+
+			union
+			{
+				int32_t i;
+				float f;
+			} inf;
+			inf.i = ret;
+			return inf.f;
 		}
 
 		// ÌØÊâÖµ
