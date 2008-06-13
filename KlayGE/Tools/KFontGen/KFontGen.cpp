@@ -471,7 +471,7 @@ void quantizer(std::vector<uint8_t>& uint8_dist, std::vector<int32_t> const & ch
 		for (size_t j = 0; j < dist_block.size(); ++ j)
 		{
 			float const quantized = (dist_block[j] - min_value) * inv_scale;
-			uint32_t const s = MathLib::clamp(static_cast<uint32_t>(quantized + 0.5f), 0UL, L - 1);
+			uint32_t const s = MathLib::clamp<uint32_t>(static_cast<uint32_t>(quantized + 0.5f), 0, L - 1);
 			if (s < L)
 			{
 				float const diff = dist_block[j] - steps[s];
@@ -480,7 +480,7 @@ void quantizer(std::vector<uint8_t>& uint8_dist, std::vector<int32_t> const & ch
 				f_min += (1 - fs) * diff;
 				d_f_min += (1 - fs) * (1 - fs);
 
-				f_max += fs * diff; 
+				f_max += fs * diff;
 				d_f_max += fs * fs;
 			}
 		}
@@ -599,7 +599,7 @@ int main(int argc, char* argv[])
 			for (int ch = 0; ch < NUM_CHARS; ++ ch)
 			{
 				kfont_input.read(reinterpret_cast<char*>(&char_info[ch].advance_x), sizeof(char_info[ch].advance_x));
-				kfont_input.read(reinterpret_cast<char*>(&char_info[ch].advance_y), sizeof(char_info[ch].advance_y));					
+				kfont_input.read(reinterpret_cast<char*>(&char_info[ch].advance_y), sizeof(char_info[ch].advance_y));
 			}
 
 			for (int ch = 0; ch < NUM_CHARS; ++ ch)

@@ -5,6 +5,7 @@
 #include <functional>
 #include <algorithm>
 #include <boost/assert.hpp>
+#include <boost/pool/singleton_pool.hpp>
 
 template <typename T>
 class kdtree
@@ -62,8 +63,8 @@ private:
 		{
 			if (!is_leaf)
 			{
-				delete node_data.children[0];
-				delete node_data.children[1];
+				kdtree_pool::free(node_data.children[0]);
+				kdtree_pool::free(node_data.children[1]);
 			}
 		}
 
@@ -162,8 +163,14 @@ private:
 		}
 	};
 
+	struct kdtree_pool_tag
+	{
+	};
+
+	typedef boost::singleton_pool<kdtree_pool_tag, sizeof(kd_node)> kdtree_pool;
+
 public:
-	kdtree(T const * positions, size_t num_positions, unsigned int max_bucket_size = 10)
+	kdtree(T const * positions, size_t num_positions, unsigned int max_bucket_size = 40)
 		: points_(num_positions),
 			bucket_size_(max_bucket_size),
 			root_(false)
@@ -350,7 +357,8 @@ private:
 		if (mid - start <= bucket_size_)
 		{
 			// new leaf
-			kd_node* leaf = new kd_node(true);
+			kd_node* leaf = static_cast<kd_node*>(kdtree_pool::malloc());
+			new (leaf) kd_node(true);
 			node.node_data.children[0] = leaf;
 			leaf->leaf_data.points = &points_[start];
 			leaf->leaf_data.num_elements = mid - start;
@@ -358,7 +366,8 @@ private:
 		else
 		{
 			// new node
-			kd_node* child = new kd_node(false);
+			kd_node* child = static_cast<kd_node*>(kdtree_pool::malloc());
+			new (child) kd_node(false);
 			node.node_data.children[0] = child;
 			typename T::value_type old_max = maximum[dim];
 			maximum[dim] = node.node_data.cut_val;
@@ -369,7 +378,8 @@ private:
 		if (end - mid <= bucket_size_)
 		{
 			// new leaf
-			kd_node* leaf = new kd_node(true);
+			kd_node* leaf = static_cast<kd_node*>(kdtree_pool::malloc());
+			new (leaf) kd_node(true);
 			node.node_data.children[1] = leaf;
 			leaf->leaf_data.points = &points_[mid];
 			leaf->leaf_data.num_elements = end - mid;
@@ -378,7 +388,8 @@ private:
 		{
 			// new node
 			minimum[dim] = node.node_data.cut_val;
-			kd_node* child = new kd_node(false);
+			kd_node* child = static_cast<kd_node*>(kdtree_pool::malloc());
+			new (child) kd_node(false);
 			node.node_data.children[1] = child;
 			this->create_tree(*child, mid, end, maximum, minimum);
 		}
