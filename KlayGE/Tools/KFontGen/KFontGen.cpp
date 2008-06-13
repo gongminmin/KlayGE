@@ -31,9 +31,9 @@
 
 #ifdef KLAYGE_COMPILER_MSVC
 #ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "freetype235_D.lib")
+#pragma comment(lib, "freetype235_D.lib")
 #else
-	#pragma comment(lib, "freetype235.lib")
+#pragma comment(lib, "freetype235.lib")
 #endif
 #endif
 
@@ -56,7 +56,7 @@ struct kfont_header
 	uint32_t start_ptr;
 	uint32_t non_empty_chars;
 	uint32_t char_size;
-	
+
 	int16_t base;
 	int16_t scale;
 };
@@ -69,8 +69,8 @@ int bsf(uint64_t v)
 	v &= ~v + 1;
 	union
 	{
-        float f;
-        uint32_t u;
+		float f;
+		uint32_t u;
 	} fnu;
 	fnu.f = static_cast<float>(v);
 	return (fnu.u >> 23) - 127;
@@ -138,11 +138,11 @@ class ttf_to_dist
 {
 public:
 	ttf_to_dist(FT_Library ft_lib, FT_Face ft_face, kfont_header& header, std::vector<std::pair<int, int> >& task,
-				std::vector<font_info>& char_info,
-				atomic<int32_t>& cur_num_char)
+		std::vector<font_info>& char_info,
+		atomic<int32_t>& cur_num_char)
 		: ft_lib_(ft_lib), ft_face_(ft_face), header_(&header), task_(&task),
-			char_info_(&char_info),
-			cur_num_char_(&cur_num_char)
+		char_info_(&char_info),
+		cur_num_char_(&cur_num_char)
 	{
 #ifndef KLAYGE_CPU_X64
 		CPUInfo cpu;
@@ -450,14 +450,65 @@ void quantizer(std::vector<uint8_t>& uint8_dist, std::vector<int32_t> const & ch
 		max_value = std::max(max_value, value);
 	}
 
+	uint32_t const L = 256;
+
+	// Newton's Method
+	float const num_steps = L - 1;
+	for (size_t i = 0; i < 8; ++ i)
+	{
+		float const inv_scale = num_steps / (max_value - min_value);
+
+		float steps[L];
+		for (size_t j = 0; j < L; ++ j)
+		{
+			steps[j] = MathLib::lerp(min_value, max_value, j / num_steps);
+		}
+
+		float f_min = 0;
+		float f_max = 0;
+		float d_f_min = 0;
+		float d_f_max = 0;
+		for (size_t j = 0; j < dist_block.size(); ++ j)
+		{
+			float const quantized = (dist_block[j] - min_value) * inv_scale;
+			uint32_t const s = MathLib::clamp(static_cast<uint32_t>(quantized + 0.5f), 0UL, L - 1);
+			if (s < L)
+			{
+				float const diff = dist_block[j] - steps[s];
+				float const fs = s / num_steps;
+
+				f_min += (1 - fs) * diff;
+				d_f_min += (1 - fs) * (1 - fs);
+
+				f_max += fs * diff; 
+				d_f_max += fs * fs;
+			}
+		}
+
+		if (d_f_min > 0.0f)
+		{
+			min_value -= f_min / d_f_min;
+		}
+		if (d_f_max > 0.0f)
+		{
+			max_value -= f_max / d_f_max;
+		}
+
+		if (min_value > max_value)
+		{
+			std::swap(min_value, max_value);
+		}
+	}
+
 	float fscale = max_value - min_value;
 	base = static_cast<int16_t>(min_value * 32768);
 	scale = static_cast<int16_t>((fscale - 1) * 32768);
+	float inv_scale = 255 / fscale;
 
 	uint8_dist.resize(dist_block.size());
 	for (size_t i = 0; i < dist_block.size(); ++ i)
 	{
-		uint8_dist[i] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((dist_block[i] - min_value) / fscale * 255), 0, 255));
+		uint8_dist[i] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((dist_block[i] - min_value) * inv_scale), 0, 255));
 	}
 }
 
@@ -486,7 +537,7 @@ int main(int argc, char* argv[])
 		("start-code,S", boost::program_options::value<int>(&start_code)->default_value(0), "Start code.")
 		("end-code,E", boost::program_options::value<int>(&end_code)->default_value(65536), "End code.")
 		("char-size,C", boost::program_options::value<uint32_t>(&header.char_size)->default_value(32), "Character size.")
-		("threads,T", boost::program_options::value<int>(&num_threads)->default_value(cpu.NumHWThreads()), "Number of Threads.");
+		("threads,T", boost::program_options::value<int>(&num_threads)->default_value(cpu.NumHWThreads()), "Number of Threads.")
 		("version,v", "Version.");
 
 	boost::program_options::variables_map vm;
@@ -646,7 +697,7 @@ int main(int argc, char* argv[])
 	for (int i = 0; i < num_threads; ++ i)
 	{
 		joiners[i] = tp(ttf_to_dist(ft_libs[i], ft_faces[i], header, packages[i],
-						char_info, cur_num_char));
+			char_info, cur_num_char));
 	}
 	for (int i = 0; i < num_threads; ++ i)
 	{
