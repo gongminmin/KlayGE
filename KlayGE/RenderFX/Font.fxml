@@ -1,8 +1,9 @@
 <?xml version='1.0'?>
 
 <effect>
-	<parameter type="float" name="halfWidth"/>
-	<parameter type="float" name="halfHeight"/>
+	<include name="2D.fxml"/>
+	
+	<parameter type="float2" name="half_width_height"/>
 	<parameter type='float4' name='texel_to_pixel_offset'/>
 
 	<parameter type="float4x4" name="mvp"/>
@@ -24,9 +25,7 @@ void Font2DVS(float4 position : POSITION,
 			out float2 oTexCoord : TEXCOORD0,
 			out float4 oColor : COLOR)
 {
-	oPosition.x = (position.x - halfWidth) / halfWidth;
-	oPosition.y = (halfHeight - position.y) / halfHeight;
-	oPosition.zw = position.zw;
+	oPosition = Transform2D(position, half_width_height);
 	oPosition += texel_to_pixel_offset;
 
 	oColor = color;

@@ -203,8 +203,7 @@ namespace
 				float const half_width = re.CurFrameBuffer()->Width() / 2.0f;
 				float const half_height = re.CurFrameBuffer()->Height() / 2.0f;
 
-				*(effect_->ParameterByName("halfWidth")) = half_width;
-				*(effect_->ParameterByName("halfHeight")) = half_height;
+				*(effect_->ParameterByName("half_width_height")) = float2(half_width, half_height);
 
 				float4 texel_to_pixel = re.TexelToPixelOffset();
 				texel_to_pixel.x() /= half_width;
@@ -234,13 +233,15 @@ namespace
 		{
 			this->UpdateTexture(text);
 
+			float const rel_size = static_cast<float>(font_height) / kfont_char_size_;
+
 			std::vector<uint32_t> lines(1, 0);
 
 			BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
 			{
 				if (ch != L'\n')
 				{
-					lines.back() += static_cast<uint32_t>(static_cast<float>(char_advance_[ch].x()) * font_height / kfont_char_size_);
+					lines.back() += static_cast<uint32_t>(char_advance_[ch].x() * rel_size);
 				}
 				else
 				{
@@ -283,6 +284,7 @@ namespace
 			this->UpdateTexture(text);
 
 			float const h = font_height * yScale;
+			float const rel_size = static_cast<float>(font_height) / kfont_char_size_;
 
 			std::vector<std::pair<float, std::wstring> > lines(1, std::make_pair(0.0f, L""));
 
@@ -290,7 +292,7 @@ namespace
 			{
 				if (ch != L'\n')
 				{
-					lines.back().first += static_cast<float>(char_advance_[ch].x()) * font_height / kfont_char_size_ * xScale;
+					lines.back().first += char_advance_[ch].x() * rel_size * xScale;
 					lines.back().second.push_back(ch);
 				}
 				else
@@ -369,10 +371,12 @@ namespace
 				{
 					if (char_index_[ch] != -1)
 					{
-						float left = static_cast<float>(char_info_[char_index_[ch]].left) * font_height / kfont_char_size_ * xScale;
-						float top = static_cast<float>(char_info_[char_index_[ch]].top) * font_height / kfont_char_size_ * yScale;
-						float width = static_cast<float>(char_info_[char_index_[ch]].width) * font_height / kfont_char_size_ * xScale;
-						float height = static_cast<float>(char_info_[char_index_[ch]].height) * font_height / kfont_char_size_ * yScale;
+						font_info const & ci = char_info_[char_index_[ch]];
+
+						float left = ci.left * rel_size * xScale;
+						float top = ci.top * rel_size * yScale;
+						float width = ci.width * rel_size * xScale;
+						float height = ci.height * rel_size * yScale;
 					
 						BOOST_AUTO(cmiter, charInfoMap_.find(ch));
 						Rect_T<float> const & texRect(cmiter->second);
@@ -404,8 +408,8 @@ namespace
 						}
 					}
 
-					x += static_cast<float>(char_advance_[ch].x()) * font_height / kfont_char_size_ * xScale;
-					y += static_cast<float>(char_advance_[ch].y()) * font_height / kfont_char_size_ * yScale;
+					x += char_advance_[ch].x() * rel_size * xScale;
+					y += char_advance_[ch].y() * rel_size * yScale;
 				}
 
 				box_ |= Box(float3(sx[i], sy[i], sz), float3(sx[i] + lines[i].first, sy[i] + h, sz + 0.1f));
@@ -419,6 +423,7 @@ namespace
 
 			uint32_t const clr32 = clr.ABGR();
 			float const h = font_height * yScale;
+			float const rel_size = static_cast<float>(font_height) / kfont_char_size_;
 			size_t const maxSize = text.length() - std::count(text.begin(), text.end(), L'\n');
 			float x = sx, y = sy;
 			float maxx = sx, maxy = sy;
@@ -434,10 +439,12 @@ namespace
 				{
 					if (char_index_[ch] != -1)
 					{
-						float left = static_cast<float>(char_info_[char_index_[ch]].left) * font_height / kfont_char_size_ * xScale;
-						float top = static_cast<float>(char_info_[char_index_[ch]].top) * font_height / kfont_char_size_ * yScale;
-						float width = static_cast<float>(char_info_[char_index_[ch]].width) * font_height / kfont_char_size_ * xScale;
-						float height = static_cast<float>(char_info_[char_index_[ch]].height) * font_height / kfont_char_size_ * yScale;
+						font_info const & ci = char_info_[char_index_[ch]];
+
+						float left = ci.left * rel_size * xScale;
+						float top = ci.top * rel_size * yScale;
+						float width = ci.width * rel_size * xScale;
+						float height = ci.height * rel_size * yScale;
 
 						BOOST_AUTO(cmiter, charInfoMap_.find(ch));
 						Rect_T<float> const & texRect(cmiter->second);
@@ -465,8 +472,8 @@ namespace
 						lastIndex += 4;
 					}
 
-					x += static_cast<float>(char_advance_[ch].x()) * font_height / kfont_char_size_ * xScale;
-					y += static_cast<float>(char_advance_[ch].y()) * font_height / kfont_char_size_ * yScale;
+					x += char_advance_[ch].x() * rel_size * xScale;
+					y += char_advance_[ch].y() * rel_size * yScale;
 
 					if (x > maxx)
 					{
@@ -513,7 +520,7 @@ namespace
 					{
 						// 在现有纹理中找不到，所以得在现有纹理中添加新字
 
-						font_info& ci = char_info_[char_index_[ch]];
+						font_info const & ci = char_info_[char_index_[ch]];
 
 						uint32_t width = ci.width;
 						uint32_t height = ci.height;

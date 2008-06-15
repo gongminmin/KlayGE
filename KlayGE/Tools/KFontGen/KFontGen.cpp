@@ -44,7 +44,6 @@ using namespace KlayGE;
 
 int const INTERNAL_CHAR_SIZE = 4096;
 int const NUM_CHARS = 65536;
-int const NUM_PACKAGE = 10;
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #pragma pack(push, 1)
@@ -79,7 +78,7 @@ int bsf(uint64_t v)
 class disp_thread
 {
 public:
-	disp_thread(Timer& timer, atomic<int32_t>& cur_num_char, int total_chars)
+	disp_thread(Timer& timer, atomic<int32_t>& cur_num_char, int32_t total_chars)
 		: timer_(&timer), cur_num_char_(&cur_num_char), total_chars_(total_chars)
 	{
 	}
@@ -118,7 +117,7 @@ public:
 private:
 	Timer* timer_;
 	atomic<int32_t>* cur_num_char_;
-	int total_chars_;
+	int32_t total_chars_;
 };
 
 struct font_info
@@ -137,12 +136,12 @@ struct font_info
 class ttf_to_dist
 {
 public:
-	ttf_to_dist(FT_Library ft_lib, FT_Face ft_face, kfont_header& header, std::vector<std::pair<int, int> >& task,
+	ttf_to_dist(FT_Library ft_lib, FT_Face ft_face, uint32_t char_size, std::vector<uint32_t>& validate_chars, uint32_t start_code, uint32_t end_code,
 		std::vector<font_info>& char_info,
 		atomic<int32_t>& cur_num_char)
-		: ft_lib_(ft_lib), ft_face_(ft_face), header_(&header), task_(&task),
-		char_info_(&char_info),
-		cur_num_char_(&cur_num_char)
+		: ft_lib_(ft_lib), ft_face_(ft_face), char_size_(char_size), validate_chars_(&validate_chars), start_code_(start_code), end_code_(end_code),
+			char_info_(&char_info),
+			cur_num_char_(&cur_num_char)
 	{
 #ifndef KLAYGE_CPU_X64
 		CPUInfo cpu;
@@ -179,86 +178,82 @@ public:
 
 		std::vector<uint8_t> char_bitmap(INTERNAL_CHAR_SIZE / 8 * INTERNAL_CHAR_SIZE);
 		std::vector<int2> edge_points;
-		for (size_t i = 0; i < task_->size(); ++ i)
+		for (uint32_t c = start_code_; c < end_code_; ++ c)
 		{
-			int const start_code = (*task_)[i].first;
-			int const end_code = (*task_)[i].second;
-			for (int ch = start_code; ch < end_code; ++ ch)
+			uint32_t const ch = (*validate_chars_)[c];
+			font_info& ci = (*char_info_)[ch];
+
+			std::fill(char_bitmap.begin(), char_bitmap.end(), 0);
+
+			FT_Load_Char(ft_face_, ch, FT_LOAD_RENDER);
+
+			int const buf_width = std::min(ft_slot->bitmap.width, INTERNAL_CHAR_SIZE);
+			int const buf_height = std::min(ft_slot->bitmap.rows, INTERNAL_CHAR_SIZE);
+
+			if ((buf_width > 0) && (buf_height > 0))
 			{
-				font_info& ci = (*char_info_)[ch];
-
-				std::fill(char_bitmap.begin(), char_bitmap.end(), 0);
-
-				FT_Load_Char(ft_face_, ch, FT_LOAD_RENDER);
-
-				int const buf_width = std::min(ft_slot->bitmap.width, INTERNAL_CHAR_SIZE);
-				int const buf_height = std::min(ft_slot->bitmap.rows, INTERNAL_CHAR_SIZE);
-
-				if ((buf_width > 0) && (buf_height > 0))
-				{
-					uint8_t* font_data = &char_bitmap[0];
-					uint8_t const * src_data = ft_slot->bitmap.buffer;
-					for (int y = 0; y < buf_height; ++ y)
-					{
-						binary_font_extract(font_data, src_data, buf_width);
-
-						font_data += INTERNAL_CHAR_SIZE / 8;
-						src_data += ft_slot->bitmap.pitch;
-					}
-				}
-
-				ci.advance_x = static_cast<uint16_t>(ft_slot->advance.x / 64.0f / INTERNAL_CHAR_SIZE * header_->char_size);
-				ci.advance_y = static_cast<uint16_t>(ft_slot->advance.y / 64.0f / INTERNAL_CHAR_SIZE * header_->char_size);
-
-				edge_points.resize(0);
+				uint8_t* font_data = &char_bitmap[0];
+				uint8_t const * src_data = ft_slot->bitmap.buffer;
 				for (int y = 0; y < buf_height; ++ y)
 				{
-					edge_extract(edge_points, 0, buf_width, char_bitmap, y);
+					binary_font_extract(font_data, src_data, buf_width);
+
+					font_data += INTERNAL_CHAR_SIZE / 8;
+					src_data += ft_slot->bitmap.pitch;
 				}
+			}
 
-				if (!edge_points.empty())
+			ci.advance_x = static_cast<uint16_t>(ft_slot->advance.x / 64.0f / INTERNAL_CHAR_SIZE * char_size_);
+			ci.advance_y = static_cast<uint16_t>(ft_slot->advance.y / 64.0f / INTERNAL_CHAR_SIZE * char_size_);
+
+			edge_points.resize(0);
+			for (int y = 0; y < buf_height; ++ y)
+			{
+				edge_extract(edge_points, 0, buf_width, char_bitmap, y);
+			}
+
+			if (!edge_points.empty())
+			{
+				kdtree<int2> kd(&edge_points[0], edge_points.size());
+
+				ci.left = static_cast<uint16_t>(static_cast<float>(ft_slot->bitmap_left) / INTERNAL_CHAR_SIZE * char_size_);
+				ci.top = static_cast<uint16_t>((3 / 4.0f - static_cast<float>(ft_slot->bitmap_top) / INTERNAL_CHAR_SIZE) * char_size_);
+				ci.width = static_cast<uint16_t>(std::min<float>(1.0f, static_cast<float>(buf_width) / INTERNAL_CHAR_SIZE + 0.1f) * char_size_);
+				ci.height = static_cast<uint16_t>(std::min<float>(1.0f, static_cast<float>(buf_height) / INTERNAL_CHAR_SIZE + 0.1f) * char_size_);
+
+				ci.dist.resize(char_size_ * char_size_);
+				for (uint32_t y = 0; y < char_size_; ++ y)
 				{
-					kdtree<int2> kd(&edge_points[0], edge_points.size());
-
-					ci.left = static_cast<uint16_t>(static_cast<float>(ft_slot->bitmap_left) / INTERNAL_CHAR_SIZE * header_->char_size);
-					ci.top = static_cast<uint16_t>((3 / 4.0f - static_cast<float>(ft_slot->bitmap_top) / INTERNAL_CHAR_SIZE) * header_->char_size);
-					ci.width = static_cast<uint16_t>(std::min<float>(1.0f, static_cast<float>(buf_width) / INTERNAL_CHAR_SIZE + 0.1f) * header_->char_size);
-					ci.height = static_cast<uint16_t>(std::min<float>(1.0f, static_cast<float>(buf_height) / INTERNAL_CHAR_SIZE + 0.1f) * header_->char_size);
-
-					ci.dist.resize(header_->char_size * header_->char_size);
-					for (uint32_t y = 0; y < header_->char_size; ++ y)
+					for (uint32_t x = 0; x < char_size_; ++ x)
 					{
-						for (uint32_t x = 0; x < header_->char_size; ++ x)
+						float value;
+						int2 const map_xy = float2(x - 1.0f, y - 1.0f) * (INTERNAL_CHAR_SIZE / static_cast<float>(char_size_ - 2)) + INTERNAL_CHAR_SIZE / 2.0f / (char_size_ - 2);
+						if (kd.query_position(map_xy) > 0)
 						{
-							float value;
-							int2 const map_xy = float2(x - 1.0f, y - 1.0f) * (INTERNAL_CHAR_SIZE / static_cast<float>(header_->char_size - 2)) + INTERNAL_CHAR_SIZE / 2.0f / (header_->char_size - 2);
-							if (kd.query_position(map_xy) > 0)
-							{
-								value = MathLib::sqrt(static_cast<float>(kd.squared_distance(0)) / max_dist_sq);
-							}
-							else
-							{
-								value = 1.0f;
-							}
-							if ((map_xy.x() > 0) && (map_xy.y() > 0) && (map_xy.x() < INTERNAL_CHAR_SIZE) && (map_xy.y() < INTERNAL_CHAR_SIZE))
-							{
-								if (0 == ((char_bitmap[(map_xy.y() * INTERNAL_CHAR_SIZE + map_xy.x()) / 8] >> (map_xy.x() & 0x7)) & 0x1))
-								{
-									value = -value;
-								}
-							}
-							else
+							value = MathLib::sqrt(static_cast<float>(kd.squared_distance(0)) / max_dist_sq);
+						}
+						else
+						{
+							value = 1.0f;
+						}
+						if ((map_xy.x() > 0) && (map_xy.y() > 0) && (map_xy.x() < INTERNAL_CHAR_SIZE) && (map_xy.y() < INTERNAL_CHAR_SIZE))
+						{
+							if (0 == ((char_bitmap[(map_xy.y() * INTERNAL_CHAR_SIZE + map_xy.x()) / 8] >> (map_xy.x() & 0x7)) & 0x1))
 							{
 								value = -value;
 							}
-
-							ci.dist[y * header_->char_size + x] = value;
 						}
+						else
+						{
+							value = -value;
+						}
+
+						ci.dist[y * char_size_ + x] = value;
 					}
 				}
-
-				++ *cur_num_char_;
 			}
+
+			++ *cur_num_char_;
 		}
 	}
 
@@ -420,8 +415,10 @@ private:
 private:
 	FT_Library ft_lib_;
 	FT_Face ft_face_;
-	kfont_header* header_;
-	std::vector<std::pair<int, int> >* task_;
+	uint32_t char_size_;
+	std::vector<uint32_t>* validate_chars_;
+	uint32_t start_code_;
+	uint32_t end_code_;
 	std::vector<font_info>* char_info_;
 	atomic<int32_t>* cur_num_char_;
 
@@ -653,9 +650,6 @@ int main(int argc, char* argv[])
 	}
 	cout << endl;
 
-	int const total_chars = end_code - start_code;
-	int const num_chars_per_package = (total_chars + num_threads * NUM_PACKAGE - 1) / (num_threads * NUM_PACKAGE);
-
 	std::vector<uint8_t> ttf;
 	{
 		ifstream ttf_input(ttf_name.c_str(), ios_base::binary);
@@ -670,13 +664,10 @@ int main(int argc, char* argv[])
 
 	cout << "Compute distance field..." << endl;
 
-	Timer timer;
-
 	std::vector<FT_Library> ft_libs(num_threads);
 	std::vector<FT_Face> ft_faces(num_threads);
 	std::vector<joiner<void> > joiners(num_threads);
 
-	joiner<void> disp_joiner = tp(disp_thread(timer, cur_num_char, total_chars));
 	for (int i = 0; i < num_threads; ++ i)
 	{
 		FT_Init_FreeType(&ft_libs[i]);
@@ -684,20 +675,27 @@ int main(int argc, char* argv[])
 		FT_Set_Pixel_Sizes(ft_faces[i], 0, INTERNAL_CHAR_SIZE);
 		FT_Select_Charmap(ft_faces[i], FT_ENCODING_UNICODE);
 	}
-	std::vector<std::vector<std::pair<int, int> > > packages(num_threads);
-	for (int i = 0; i < num_threads; ++ i)
+
+	std::vector<uint32_t> validate_chars;
+	for (int i = start_code; i <= end_code; ++ i)
 	{
-		packages[i].resize(NUM_PACKAGE);
-		for (int j = 0; j < NUM_PACKAGE; ++ j)
+		uint32_t mapping = FT_Get_Char_Index(ft_faces[0], i);
+		if (mapping > 0)
 		{
-			packages[i][j].first = start_code + (j * num_threads + i) * num_chars_per_package;
-			packages[i][j].second = std::min(packages[i][j].first + num_chars_per_package, end_code);
+			validate_chars.push_back(i);
 		}
 	}
+
+	uint32_t const num_chars_per_package = static_cast<uint32_t>((validate_chars.size() + num_threads - 1) / num_threads);
+
+	Timer timer;
+	joiner<void> disp_joiner = tp(disp_thread(timer, cur_num_char, static_cast<int32_t>(validate_chars.size())));
 	for (int i = 0; i < num_threads; ++ i)
 	{
-		joiners[i] = tp(ttf_to_dist(ft_libs[i], ft_faces[i], header, packages[i],
-			char_info, cur_num_char));
+		uint32_t const sc = start_code + i * num_chars_per_package;
+		uint32_t const ec = std::min<uint32_t>(sc + num_chars_per_package - 1, end_code);
+
+		joiners[i] = tp(ttf_to_dist(ft_libs[i], ft_faces[i], header.char_size, validate_chars, sc, ec, char_info, cur_num_char));
 	}
 	for (int i = 0; i < num_threads; ++ i)
 	{

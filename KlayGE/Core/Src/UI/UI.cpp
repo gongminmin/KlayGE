@@ -81,8 +81,7 @@ namespace KlayGE
 			float const half_width = re.CurFrameBuffer()->Width() / 2.0f;
 			float const half_height = re.CurFrameBuffer()->Height() / 2.0f;
 
-			*(technique_->Effect().ParameterByName("halfWidth")) = half_width;
-			*(technique_->Effect().ParameterByName("halfHeight")) = half_height;
+			*(technique_->Effect().ParameterByName("half_width_height")) = float2(half_width, half_height);
 
 			float4 texel_to_pixel = re.TexelToPixelOffset();
 			texel_to_pixel.x() /= half_width;
