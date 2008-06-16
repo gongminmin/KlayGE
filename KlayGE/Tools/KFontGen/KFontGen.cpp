@@ -110,6 +110,8 @@ public:
 					break;
 				}
 			}
+
+			KlayGE::Sleep(500);
 		}
 	}
 
