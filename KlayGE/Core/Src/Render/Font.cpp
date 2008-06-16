@@ -61,6 +61,7 @@
 #include <KlayGE/Sampler.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/ClosedHashMap.hpp>
+#include <KlayGE/MapVector.hpp>
 
 #include <algorithm>
 #include <vector>
@@ -68,7 +69,6 @@
 #include <fstream>
 #include <iostream>
 #include <boost/assert.hpp>
-#include <boost/mem_fn.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
 
@@ -90,6 +90,7 @@ namespace
 		uint32_t fourcc;
 		uint32_t version;
 		uint32_t start_ptr;
+		uint32_t validate_chars;
 		uint32_t non_empty_chars;
 		uint32_t char_size;
 
@@ -130,13 +131,15 @@ namespace
 
 			kfont_input.seekg(header.start_ptr, std::ios_base::beg);
 
-			char_index_.resize(65536);
-			kfont_input.read(reinterpret_cast<char*>(&char_index_[0]),
-				static_cast<std::streamsize>(char_index_.size() * sizeof(char_index_[0])));
+			std::vector<std::pair<int32_t, int32_t> > temp_char_index(header.non_empty_chars);
+			kfont_input.read(reinterpret_cast<char*>(&temp_char_index[0]),
+				static_cast<std::streamsize>(temp_char_index.size() * sizeof(temp_char_index[0])));
+			char_index_ = MapVector<int32_t, int32_t>(temp_char_index.begin(), temp_char_index.end());
 
-			char_advance_.resize(65536);
-			kfont_input.read(reinterpret_cast<char*>(&char_advance_[0]),
-				static_cast<std::streamsize>(char_advance_.size() * sizeof(char_advance_[0])));
+			std::vector<std::pair<int32_t, Vector_T<uint16_t, 2> > > temp_char_advance(header.validate_chars);
+			kfont_input.read(reinterpret_cast<char*>(&temp_char_advance[0]),
+				static_cast<std::streamsize>(temp_char_advance.size() * sizeof(temp_char_advance[0])));
+			char_advance_ = MapVector<int32_t, Vector_T<uint16_t, 2> >(temp_char_advance.begin(), temp_char_advance.end());
 
 			char_info_.resize(header.non_empty_chars);
 			kfont_input.read(reinterpret_cast<char*>(&char_info_[0]),
@@ -241,7 +244,11 @@ namespace
 			{
 				if (ch != L'\n')
 				{
-					lines.back() += static_cast<uint32_t>(char_advance_[ch].x() * rel_size);
+					BOOST_AUTO(iter, char_advance_.find(ch));
+					if (iter != char_advance_.end())
+					{
+						lines.back() += static_cast<uint32_t>(iter->second.x() * rel_size);
+					}
 				}
 				else
 				{
@@ -292,7 +299,11 @@ namespace
 			{
 				if (ch != L'\n')
 				{
-					lines.back().first += char_advance_[ch].x() * rel_size * xScale;
+					BOOST_AUTO(iter, char_advance_.find(ch));
+					if (iter != char_advance_.end())
+					{
+						lines.back().first += iter->second.x() * rel_size * xScale;
+					}
 					lines.back().second.push_back(ch);
 				}
 				else
@@ -369,9 +380,10 @@ namespace
 
 				BOOST_FOREACH(BOOST_TYPEOF(lines[i].second)::const_reference ch, lines[i].second)
 				{
-					if (char_index_[ch] != -1)
+					BOOST_AUTO(iter, char_index_.find(ch));
+					if (iter != char_index_.end())
 					{
-						font_info const & ci = char_info_[char_index_[ch]];
+						font_info const & ci = char_info_[iter->second];
 
 						float left = ci.left * rel_size * xScale;
 						float top = ci.top * rel_size * yScale;
@@ -408,8 +420,12 @@ namespace
 						}
 					}
 
-					x += char_advance_[ch].x() * rel_size * xScale;
-					y += char_advance_[ch].y() * rel_size * yScale;
+					BOOST_AUTO(aiter, char_advance_.find(ch));
+					if (aiter != char_advance_.end())
+					{
+						x += aiter->second.x() * rel_size * xScale;
+						y += aiter->second.y() * rel_size * yScale;
+					}
 				}
 
 				box_ |= Box(float3(sx[i], sy[i], sz), float3(sx[i] + lines[i].first, sy[i] + h, sz + 0.1f));
@@ -437,9 +453,10 @@ namespace
 			{
 				if (ch != L'\n')
 				{
-					if (char_index_[ch] != -1)
+					BOOST_AUTO(iter, char_index_.find(ch));
+					if (iter != char_index_.end())
 					{
-						font_info const & ci = char_info_[char_index_[ch]];
+						font_info const & ci = char_info_[iter->second];
 
 						float left = ci.left * rel_size * xScale;
 						float top = ci.top * rel_size * yScale;
@@ -472,8 +489,12 @@ namespace
 						lastIndex += 4;
 					}
 
-					x += char_advance_[ch].x() * rel_size * xScale;
-					y += char_advance_[ch].y() * rel_size * yScale;
+					BOOST_AUTO(aiter, char_advance_.find(ch));
+					if (aiter != char_advance_.end())
+					{
+						x += aiter->second.x() * rel_size * xScale;
+						y += aiter->second.y() * rel_size * yScale;
+					}
 
 					if (x > maxx)
 					{
@@ -504,7 +525,8 @@ namespace
 
 			BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
 			{
-				if (char_index_[ch] != -1)
+				BOOST_AUTO(iter, char_index_.find(ch));
+				if (iter != char_index_.end())
 				{
 					if (charInfoMap_.find(ch) != charInfoMap_.end())
 					{
@@ -520,7 +542,7 @@ namespace
 					{
 						// 在现有纹理中找不到，所以得在现有纹理中添加新字
 
-						font_info const & ci = char_info_[char_index_[ch]];
+						font_info const & ci = char_info_[iter->second];
 
 						uint32_t width = ci.width;
 						uint32_t height = ci.height;
@@ -567,15 +589,12 @@ namespace
 							Texture::Mapper mapper(*dist_texture_, 0, TMA_Write_Only,
 								char_pos.x(), char_pos.y(), kfont_char_size_, kfont_char_size_);
 							uint8_t* tex_data = mapper.Pointer<uint8_t>();
-							if (char_index_[ch] != -1)
+							uint8_t const * char_data = &distances_[iter->second * kfont_char_size_ * kfont_char_size_];
+							for (uint32_t y = 0; y < kfont_char_size_; ++ y)
 							{
-								uint8_t const * char_data = &distances_[char_index_[ch] * kfont_char_size_ * kfont_char_size_];
-								for (uint32_t y = 0; y < kfont_char_size_; ++ y)
-								{
-									std::memcpy(tex_data, char_data, kfont_char_size_);
-									tex_data += mapper.RowPitch();
-									char_data += kfont_char_size_;
-								}
+								std::memcpy(tex_data, char_data, kfont_char_size_);
+								tex_data += mapper.RowPitch();
+								char_data += kfont_char_size_;
 							}
 						}
 
@@ -630,8 +649,8 @@ namespace
 		uint32_t kfont_char_size_;
 		int16_t dist_base_;
 		int16_t dist_scale_;
-		std::vector<int32_t> char_index_;
-		std::vector<Vector_T<int16_t, 2> > char_advance_;
+		MapVector<int32_t, int32_t> char_index_;
+		MapVector<int32_t, Vector_T<uint16_t, 2> > char_advance_;
 		std::vector<font_info> char_info_;
 		std::vector<uint8_t> distances_;
 	};

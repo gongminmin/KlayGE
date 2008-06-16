@@ -53,6 +53,7 @@ struct kfont_header
 	uint32_t fourcc;
 	uint32_t version;
 	uint32_t start_ptr;
+	uint32_t validate_chars;
 	uint32_t non_empty_chars;
 	uint32_t char_size;
 
@@ -426,15 +427,13 @@ private:
 	boost::function<void(std::vector<int2>&, int, int, std::vector<uint8_t> const &, int)> edge_extract;
 };
 
-void quantizer(std::vector<uint8_t>& uint8_dist, std::vector<int32_t> const & char_index, std::vector<font_info> const & char_info, int16_t& base, int16_t& scale)
+void quantizer(std::vector<uint8_t>& uint8_dist, std::vector<std::pair<int32_t, int32_t> > const & char_index, std::vector<font_info> const & char_info, int16_t& base, int16_t& scale)
 {
 	std::vector<float> dist_block;
-	for (int ch = 0; ch < NUM_CHARS; ++ ch)
+	for (size_t i = 0; i < char_index.size(); ++ i)
 	{
-		if (char_index[ch] != -1)
-		{
-			dist_block.insert(dist_block.end(), char_info[ch].dist.begin(), char_info[ch].dist.end());
-		}
+		int const ch = char_index[i].first;
+		dist_block.insert(dist_block.end(), char_info[ch].dist.begin(), char_info[ch].dist.end());
 	}
 
 	float max_value = -1;
@@ -569,9 +568,11 @@ int main(int argc, char* argv[])
 		kfont_name = ttf_name.substr(0, ttf_name.find_last_of('.')) + ".kfont";
 	}
 
-	std::vector<int32_t> char_index(NUM_CHARS, -1);
+	std::vector<std::pair<int32_t, int32_t> > char_index;
 	std::vector<font_info> char_info(NUM_CHARS);
 	{
+		memset(&char_info[0], 0, sizeof(char_info[0]) * char_info.size());
+
 		ifstream kfont_input(kfont_name.c_str(), ios_base::binary);
 		if (kfont_input)
 		{
@@ -590,39 +591,43 @@ int main(int argc, char* argv[])
 
 			kfont_input.seekg(header.start_ptr, ios_base::beg);
 
+			char_index.resize(header.non_empty_chars);
 			kfont_input.read(reinterpret_cast<char*>(&char_index[0]),
 				static_cast<std::streamsize>(char_index.size() * sizeof(char_index[0])));
 
-			for (int ch = 0; ch < NUM_CHARS; ++ ch)
+			std::vector<std::pair<int32_t, std::pair<uint16_t, uint16_t> > > advance(header.validate_chars);
+			kfont_input.read(reinterpret_cast<char*>(&advance[0]),
+				static_cast<std::streamsize>(advance.size() * sizeof(advance[0])));
+			for (size_t i = 0; i < advance.size(); ++ i)
 			{
-				kfont_input.read(reinterpret_cast<char*>(&char_info[ch].advance_x), sizeof(char_info[ch].advance_x));
-				kfont_input.read(reinterpret_cast<char*>(&char_info[ch].advance_y), sizeof(char_info[ch].advance_y));
+				int const ch = advance[i].first;
+
+				char_info[ch].advance_x = advance[i].second.first;
+				char_info[ch].advance_y = advance[i].second.second;
 			}
 
-			for (int ch = 0; ch < NUM_CHARS; ++ ch)
+			for (size_t i = 0; i < char_index.size(); ++ i)
 			{
-				if (char_index[ch] != -1)
-				{
-					kfont_input.read(reinterpret_cast<char*>(&char_info[ch].top), sizeof(char_info[ch].top));
-					kfont_input.read(reinterpret_cast<char*>(&char_info[ch].left), sizeof(char_info[ch].left));
-					kfont_input.read(reinterpret_cast<char*>(&char_info[ch].width), sizeof(char_info[ch].width));
-					kfont_input.read(reinterpret_cast<char*>(&char_info[ch].height), sizeof(char_info[ch].height));
-				}
+				int const ch = char_index[i].first;
+
+				kfont_input.read(reinterpret_cast<char*>(&char_info[ch].top), sizeof(char_info[ch].top));
+				kfont_input.read(reinterpret_cast<char*>(&char_info[ch].left), sizeof(char_info[ch].left));
+				kfont_input.read(reinterpret_cast<char*>(&char_info[ch].width), sizeof(char_info[ch].width));
+				kfont_input.read(reinterpret_cast<char*>(&char_info[ch].height), sizeof(char_info[ch].height));
 			}
 
-			for (int ch = 0; ch < NUM_CHARS; ++ ch)
+			for (size_t i = 0; i < char_index.size(); ++ i)
 			{
-				if (char_index[ch] != -1)
-				{
-					std::vector<uint8_t> uint8_dist(header.char_size * header.char_size);
-					kfont_input.read(reinterpret_cast<char*>(&uint8_dist[0]),
-						static_cast<std::streamsize>(uint8_dist.size() * sizeof(uint8_dist[0])));
+				int const ch = char_index[i].first;
 
-					char_info[ch].dist.resize(uint8_dist.size());
-					for (size_t i = 0; i < char_info[ch].dist.size(); ++ i)
-					{
-						char_info[ch].dist[i] = uint8_dist[0] / 256.0f * (header.scale / 32768.0f - 1) + header.base / 32768.0f;
-					}
+				std::vector<uint8_t> uint8_dist(header.char_size * header.char_size);
+				kfont_input.read(reinterpret_cast<char*>(&uint8_dist[0]),
+					static_cast<std::streamsize>(uint8_dist.size() * sizeof(uint8_dist[0])));
+
+				char_info[ch].dist.resize(uint8_dist.size());
+				for (size_t i = 0; i < char_info[ch].dist.size(); ++ i)
+				{
+					char_info[ch].dist[i] = uint8_dist[0] / 256.0f * (header.scale / 32768.0f - 1) + header.base / 32768.0f;
 				}
 			}
 		}
@@ -692,8 +697,8 @@ int main(int argc, char* argv[])
 	joiner<void> disp_joiner = tp(disp_thread(timer, cur_num_char, static_cast<int32_t>(validate_chars.size())));
 	for (int i = 0; i < num_threads; ++ i)
 	{
-		uint32_t const sc = start_code + i * num_chars_per_package;
-		uint32_t const ec = std::min<uint32_t>(sc + num_chars_per_package - 1, end_code);
+		uint32_t const sc = i * num_chars_per_package;
+		uint32_t const ec = std::min<uint32_t>(sc + num_chars_per_package, static_cast<uint32_t>(validate_chars.size()));
 
 		joiners[i] = tp(ttf_to_dist(ft_libs[i], ft_faces[i], header.char_size, validate_chars, sc, ec, char_info, cur_num_char));
 	}
@@ -707,14 +712,25 @@ int main(int argc, char* argv[])
 	disp_joiner();
 	cout << "\rTime elapsed: " << timer.elapsed() << " s                                        " << endl;
 
-	std::fill(char_index.begin(), char_index.end(), -1);
+	char_index.clear();
 	header.non_empty_chars = 0;
 	for (size_t i = 0; i < char_info.size(); ++ i)
 	{
 		if (!char_info[i].dist.empty())
 		{
-			char_index[i] = header.non_empty_chars;
+			char_index.push_back(std::make_pair(static_cast<int32_t>(i), header.non_empty_chars));
 			++ header.non_empty_chars;
+		}
+	}
+
+	std::vector<std::pair<int32_t, std::pair<uint16_t, uint16_t> > > advance;
+	header.validate_chars = 0;
+	for (size_t i = 0; i < char_info.size(); ++ i)
+	{
+		if ((char_info[i].advance_x != 0) || (char_info[i].advance_y != 0))
+		{
+			advance.push_back(std::make_pair(static_cast<int32_t>(i), std::make_pair(char_info[i].advance_x, char_info[i].advance_y)));
+			++ header.validate_chars;
 		}
 	}
 
@@ -733,21 +749,17 @@ int main(int argc, char* argv[])
 			kfont_output.write(reinterpret_cast<char*>(&char_index[0]),
 				static_cast<std::streamsize>(char_index.size() * sizeof(char_index[0])));
 
-			for (size_t i = 0; i < char_info.size(); ++ i)
-			{
-				kfont_output.write(reinterpret_cast<char*>(&char_info[i].advance_x), sizeof(char_info[i].advance_x));
-				kfont_output.write(reinterpret_cast<char*>(&char_info[i].advance_y), sizeof(char_info[i].advance_y));
-			}
+			kfont_output.write(reinterpret_cast<char*>(&advance[0]),
+				static_cast<std::streamsize>(advance.size() * sizeof(advance[0])));
 
 			for (size_t i = 0; i < char_index.size(); ++ i)
 			{
-				if (char_index[i] != -1)
-				{
-					kfont_output.write(reinterpret_cast<char*>(&char_info[i].top), sizeof(char_info[i].top));
-					kfont_output.write(reinterpret_cast<char*>(&char_info[i].left), sizeof(char_info[i].left));
-					kfont_output.write(reinterpret_cast<char*>(&char_info[i].width), sizeof(char_info[i].width));
-					kfont_output.write(reinterpret_cast<char*>(&char_info[i].height), sizeof(char_info[i].height));
-				}
+				int const ch = char_index[i].first;
+
+				kfont_output.write(reinterpret_cast<char*>(&char_info[ch].top), sizeof(char_info[ch].top));
+				kfont_output.write(reinterpret_cast<char*>(&char_info[ch].left), sizeof(char_info[ch].left));
+				kfont_output.write(reinterpret_cast<char*>(&char_info[ch].width), sizeof(char_info[ch].width));
+				kfont_output.write(reinterpret_cast<char*>(&char_info[ch].height), sizeof(char_info[ch].height));
 			}
 
 			kfont_output.write(reinterpret_cast<char*>(&uint8_dist[0]),
