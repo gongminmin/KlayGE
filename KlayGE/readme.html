@@ -73,7 +73,7 @@
 </ul>
 <h4>KFontGen工具需要：</h4>
 <ul>
-	<li><a href="http://freetype.sourceforge.net" target="_blank">FreeType 2.3.5</a>，编译它的Debug和Release两个solution configuration。</li>
+	<li><a href="http://freetype.sourceforge.net" target="_blank">FreeType 2.3.6</a>，编译它的Debug和Release两个solution configuration。</li>
 </ul>
 <p>由于KlayGE在VC下使用的运行库是多线程的DLL，所以需要把<strong>所有</strong>连接到exe的lib的运行库改为多线程DLL（Project-  &gt;Properties-&gt;Configuration Properties-&gt;C/C++-&gt;Code Generation-&gt;Runtime Library，选择Multi-threaded Debug DLL/Multi-threaded DLL）。</p>
 <p>另外，用VC编译Release版的Boost和FreeType需要定义_SECURE_SCL=0宏（在Project-&gt;Properties-&gt;Configuration Properties-&gt;C/C++-&gt;Preprocessor-&gt;Preprocessor Definitions中添加）。</p>

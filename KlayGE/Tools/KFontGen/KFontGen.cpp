@@ -31,9 +31,9 @@
 
 #ifdef KLAYGE_COMPILER_MSVC
 #ifdef KLAYGE_DEBUG
-#pragma comment(lib, "freetype235_D.lib")
+#pragma comment(lib, "freetype236_D.lib")
 #else
-#pragma comment(lib, "freetype235.lib")
+#pragma comment(lib, "freetype236.lib")
 #endif
 #endif
 
@@ -110,8 +110,6 @@ public:
 					break;
 				}
 			}
-
-			KlayGE::Sleep(500);
 		}
 	}
 
@@ -698,7 +696,7 @@ int main(int argc, char* argv[])
 	for (int i = 0; i < num_threads; ++ i)
 	{
 		uint32_t const sc = i * num_chars_per_package;
-		uint32_t const ec = std::min<uint32_t>(sc + num_chars_per_package, static_cast<uint32_t>(validate_chars.size()));
+		uint32_t const ec = std::min(sc + num_chars_per_package, static_cast<uint32_t>(validate_chars.size()));
 
 		joiners[i] = tp(ttf_to_dist(ft_libs[i], ft_faces[i], header.char_size, validate_chars, sc, ec, char_info, cur_num_char));
 	}
