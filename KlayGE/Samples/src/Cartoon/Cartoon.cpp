@@ -59,8 +59,8 @@ namespace
 			float4x4 const & view = camera.ViewMatrix();
 			float4x4 const & proj = camera.ProjMatrix();
 
+			*(technique_->Effect().ParameterByName("model_view_proj")) = view * proj;
 			*(technique_->Effect().ParameterByName("model_view")) = view;
-			*(technique_->Effect().ParameterByName("proj")) = proj;
 
 			*(technique_->Effect().ParameterByName("depth_min")) = camera.NearPlane();
 			*(technique_->Effect().ParameterByName("inv_depth_range")) = 1 / (camera.FarPlane() - camera.NearPlane());
@@ -208,7 +208,7 @@ void Cartoon::InitObjects()
 	g_buffer_->GetViewport().camera = renderEngine.CurFrameBuffer()->GetViewport().camera;
 
 	fpcController_.AttachCamera(this->ActiveCamera());
-	fpcController_.Scalers(0.05f, 0.5f);
+	fpcController_.Scalers(0.05f, 0.1f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
@@ -304,7 +304,8 @@ uint32_t Cartoon::DoUpdate(uint32_t pass)
 	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str());
 
 	stream.str(L"");
-	stream << this->FPS() << " FPS";
+	stream.precision(2);
+	stream << fixed << this->FPS() << " FPS";
 	font_->RenderText(0, 54, Color(1, 1, 0, 1), stream.str());
 
 	if (!cartoon_style_ && (0 == pass))

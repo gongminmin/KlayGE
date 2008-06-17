@@ -4,8 +4,8 @@
 	<include name="../../../RenderFX/Lighting.fxml"/>
 	<include name="../../../RenderFX/PostProcess.fxml"/>
 
+	<parameter type="float4x4" name="model_view_proj"/>
 	<parameter type="float4x4" name="model_view"/>
-	<parameter type="float4x4" name="proj"/>
 	<parameter type="float3" name="light_in_model"/>
 	<parameter type="float3" name="eye_in_model"/>
 
@@ -17,25 +17,24 @@
 void NormalDepthVS(float4 pos : POSITION,
 			float3 normal : NORMAL,
 			out float4 oPos : POSITION,
-			out float3 oNormal : TEXCOORD0,
-			out float2 oDepth : TEXCOORD1,
-			out float3 oLightVec : TEXCOORD2,
-			out float3 oViewVec : TEXCOORD3)
+			out float4 oNormal : TEXCOORD0,
+			out float3 oLightVec : TEXCOORD1,
+			out float3 oViewVec : TEXCOORD2)
 {
-	oPos = mul(mul(pos, model_view), proj);
-	oNormal = mul(normal, (float3x3)model_view);
-	oDepth = mul(pos, model_view).zw;
+	oPos = mul(pos, model_view_proj);
+	oNormal.xyz = mul(normal, (float3x3)model_view);
+	oNormal.w = (oPos.z - depth_min) * inv_depth_range;
 	
 	oLightVec = light_in_model - pos.xyz;
 	oViewVec = eye_in_model - pos.xyz;
 }
 
-void NormalDepthPS(float3 normal : TEXCOORD0, float2 depth : TEXCOORD1,
-			float3 light_vec : TEXCOORD2, float3 view_vec : TEXCOORD3,
-			out half4 clr : COLOR0, out half4 normal_depth : COLOR1)
+void NormalDepthPS(float4 normal : TEXCOORD0,
+			float3 light_vec : TEXCOORD1, float3 view_vec : TEXCOORD2,
+			out half4 oClr : COLOR0, out half4 oNormalDepth : COLOR1)
 {
-	normal = normalize(normal);
-	normal_depth = half4(normal, (depth.x / depth.y - depth_min) * inv_depth_range);
+	normal.xyz = normalize(normal.xyz);
+	oNormalDepth = normal;
 	
 	light_vec = normalize(light_vec);
 	view_vec = normalize(view_vec);
@@ -58,7 +57,7 @@ void NormalDepthPS(float3 normal : TEXCOORD0, float2 depth : TEXCOORD1,
 	{
 		diffuse = 0;
 	}
-	clr = diffuse * 0.7f + specular * 0.3f;
+	oClr = diffuse * 0.7f + specular * 0.3f;
 }
 		]]>
 	</shader>
