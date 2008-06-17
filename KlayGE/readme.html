@@ -43,7 +43,7 @@
 </ol>
 <p><a href="#menu">^返回目录</a></p>
 <hr />
-<h2><a id="third_part">第三方库</a>和工具</h2>
+<h2><a id="third_part">第三方库和工具</a></h2>
 <p>在编译KlayGE的之前，需要先安装下列第三方库和工具。</p>
 <h4>Core需要：</h4>
 <ul>
@@ -76,7 +76,7 @@
 	<li><a href="http://freetype.sourceforge.net" target="_blank">FreeType 2.3.6</a>，编译它的Debug和Release两个solution configuration。</li>
 </ul>
 <p>由于KlayGE在VC下使用的运行库是多线程的DLL，所以需要把<strong>所有</strong>连接到exe的lib的运行库改为多线程DLL（Project-  &gt;Properties-&gt;Configuration Properties-&gt;C/C++-&gt;Code Generation-&gt;Runtime Library，选择Multi-threaded Debug DLL/Multi-threaded DLL）。</p>
-<p>另外，用VC编译Release版的Boost和FreeType需要定义_SECURE_SCL=0宏（在Project-&gt;Properties-&gt;Configuration Properties-&gt;C/C++-&gt;Preprocessor-&gt;Preprocessor Definitions中添加）。</p>
+<p>另外，用VC8及以上编译Release版的Boost需要定义_SECURE_SCL=0宏，比如调用bjam的时候加上define=_SECURE_SCL=0。</p>
 <hr />
 <h2><a id="history">发展历程</a></h2>
 <p><strong>3.7.0</strong><br />
@@ -368,12 +368,18 @@
 </pre>
 <p><a href="#menu">^返回目录</a></p>
 <hr />
-<h2><a id="compiler">编译器支持</a></h2>
+<h2><a id="compiler">支持的编译器</a></h2>
+<p>下列编译器是正式支持的：</p>
 <ul>
-	<li>推荐使用Visual Studio 2005及以上编译。</li>
-	<li>工程中的.asm使用Yasm编译。</li>
-	<li>KlayGE是用Visual Studio 2008开发和编译的，还提供了Visual Studio 2005和Visual Studio 2008的sln文件。</li>
-	<li>KlayGE不保证能在更早的Visual Studio中编译通过。</li>
+	<li>Windows平台上的Microsoft Visual C++ 8.0和9.0（Visual Sudio .NET 2005和2008）。</li>
+	<li>Windows平台上的MinGW GCC 4.2和4.3。</li>
+	<li>Linux平台上的GNU GCC 4.2和4.3。</li>
+</ul>
+<p>还有一些编译器应该也支持，但没有经过测试：</p>
+<ul>
+	<li>Windows平台上的Microsoft Visual C++ 7.1（Visual Sudio .NET 2003）。</li>
+	<li>Windows平台上的Intel C++ 10及以上。</li>
+	<li>Linux平台上的Intel C++ 9及以上。</li>
 </ul>
 <p><a href="#menu">^返回目录</a></p>
 <hr />
