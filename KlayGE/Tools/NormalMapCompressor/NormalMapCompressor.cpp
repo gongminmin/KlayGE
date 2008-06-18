@@ -28,10 +28,26 @@ namespace
 		}
 	}
 
+	void DecompressNormal(std::vector<uint8_t>& res_normals, std::vector<uint8_t>& com_normals)
+	{
+		for (size_t i = 0; i < com_normals.size() / 4; ++ i)
+		{
+			float x = com_normals[i * 4 + 3] / 255.0f * 2 - 1;
+			float y = com_normals[i * 4 + 1] / 255.0f * 2 - 1;
+
+			res_normals[i * 4 + 1] = com_normals[i * 4 + 1];
+			res_normals[i * 4 + 2] = com_normals[i * 4 + 3];
+			res_normals[i * 4 + 0] = static_cast<uint8_t>(MathLib::clamp((sqrt(1 - x * x - y * y) / 2 + 1) * 255, 0.0f, 255.0f));
+			res_normals[i * 4 + 3] = 0;		
+		}
+	}
+
 	TexturePtr CompressNormalMapCube(TexturePtr normal_map, ElementFormat new_format)
 	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
 		uint32_t const size = normal_map->Width(0);
-		TexturePtr new_normal_map = Context::Instance().RenderFactoryInstance().MakeTextureCube(size, 1, new_format);
+		TexturePtr new_normal_map = rf.MakeTextureCube(size, 1, EF_ARGB8);
 		std::vector<uint8_t> normals(size * size * 4);
 
 		for (int i = 0; i < 6; ++ i)
@@ -59,14 +75,66 @@ namespace
 			}
 		}
 
+		TexturePtr com_normal_map = rf.MakeTextureCube(size, 1, new_format);
+		new_normal_map->CopyToTexture(*com_normal_map);
+
+		float mse = 0;
+		{
+			TexturePtr normal_map_restored = rf.MakeTextureCube(size, 1, EF_ARGB8);
+			com_normal_map->CopyToTexture(*normal_map_restored);
+
+			std::vector<uint8_t> restored_normals(size * size * 4);
+
+			for (int i = 0; i < 6; ++ i)
+			{
+				{
+					Texture::Mapper mapper(*normal_map_restored, static_cast<Texture::CubeFaces>(i), 0, TMA_Read_Only, 0, 0, size, size);
+					uint8_t* data = mapper.Pointer<uint8_t>();
+					for (uint32_t y = 0; y < size; ++ y)
+					{
+						memcpy(&normals[y * size * 4], data, size * normal_map->Bpp() / 8);
+						data += mapper.RowPitch();
+					}
+				}
+
+				DecompressNormal(restored_normals, normals);
+
+				{
+					Texture::Mapper mapper(*normal_map, static_cast<Texture::CubeFaces>(i), 0, TMA_Read_Only, 0, 0, size, size);
+					uint8_t* data = mapper.Pointer<uint8_t>();
+					for (uint32_t y = 0; y < size; ++ y)
+					{
+						memcpy(&normals[y * size * 4], data, size * normal_map->Bpp() / 8);
+						data += mapper.RowPitch();
+					}
+				}
+
+				for (uint32_t y = 0; y < size; ++ y)
+				{
+					for (uint32_t x = 0; x < size; ++ x)
+					{
+						float diff_r = (normals[(y * size + x) * 4 + 0] - restored_normals[(y * size + x) * 4 + 0]) / 255.0f;
+						float diff_g = (normals[(y * size + x) * 4 + 1] - restored_normals[(y * size + x) * 4 + 1]) / 255.0f;
+						float diff_b = (normals[(y * size + x) * 4 + 2] - restored_normals[(y * size + x) * 4 + 2]) / 255.0f;
+
+						mse += diff_r * diff_r + diff_g * diff_g + diff_b * diff_b;
+					}
+				}
+			}
+		}
+
+		cout << "MSE: " << mse << endl;
+
 		return new_normal_map;
 	}
 
 	TexturePtr CompressNormalMap2D(TexturePtr normal_map, ElementFormat new_format)
 	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
 		uint32_t const width = normal_map->Width(0);
 		uint32_t const height = normal_map->Height(0);
-		TexturePtr new_normal_map = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, new_format);
+		TexturePtr new_normal_map = rf.MakeTexture2D(width, height, 1, EF_ARGB8);
 		std::vector<uint8_t> normals(width * height * 4);
 
 		{
@@ -93,7 +161,54 @@ namespace
 			}
 		}
 
-		return new_normal_map;
+		TexturePtr com_normal_map = rf.MakeTexture2D(width, height, 1, new_format);
+		new_normal_map->CopyToTexture(*com_normal_map);
+
+		float mse = 0;
+		{
+			TexturePtr normal_map_restored = rf.MakeTexture2D(width, height, 1, EF_ARGB8);
+			com_normal_map->CopyToTexture(*normal_map_restored);
+
+			std::vector<uint8_t> restored_normals(width * height * 4);
+
+			{
+				Texture::Mapper mapper(*normal_map_restored, 0, TMA_Read_Only, 0, 0, width, height);
+				uint8_t* data = mapper.Pointer<uint8_t>();
+				for (uint32_t y = 0; y < height; ++ y)
+				{
+					memcpy(&normals[y * width * 4], data, width * normal_map->Bpp() / 8);
+					data += mapper.RowPitch();
+				}
+			}
+
+			DecompressNormal(restored_normals, normals);
+
+			{
+				Texture::Mapper mapper(*normal_map, 0, TMA_Read_Only, 0, 0, width, height);
+				uint8_t* data = mapper.Pointer<uint8_t>();
+				for (uint32_t y = 0; y < height; ++ y)
+				{
+					memcpy(&normals[y * width * 4], data, width * normal_map->Bpp() / 8);
+					data += mapper.RowPitch();
+				}
+			}
+
+			for (uint32_t y = 0; y < height; ++ y)
+			{
+				for (uint32_t x = 0; x < width; ++ x)
+				{
+					float diff_r = (normals[(y * width + x) * 4 + 0] - restored_normals[(y * width + x) * 4 + 0]) / 255.0f;
+					float diff_g = (normals[(y * width + x) * 4 + 1] - restored_normals[(y * width + x) * 4 + 1]) / 255.0f;
+					float diff_b = (normals[(y * width + x) * 4 + 2] - restored_normals[(y * width + x) * 4 + 2]) / 255.0f;
+
+					mse += diff_r * diff_r + diff_g * diff_g + diff_b * diff_b;
+				}
+			}
+		}
+
+		cout << "MSE: " << mse << endl;
+
+		return com_normal_map;
 	}
 
 	TexturePtr CompressNormalMap(TexturePtr normal_map, ElementFormat new_format)
