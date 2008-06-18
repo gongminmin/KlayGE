@@ -450,7 +450,7 @@ void quantizer(std::vector<uint8_t>& uint8_dist, std::vector<std::pair<int32_t, 
 
 	// Newton's Method
 	float const num_steps = L - 1;
-	for (size_t i = 0; i < 8; ++ i)
+	for (size_t i = 0; i < 32; ++ i)
 	{
 		float const inv_scale = num_steps / (max_value - min_value);
 
@@ -505,6 +505,19 @@ void quantizer(std::vector<uint8_t>& uint8_dist, std::vector<std::pair<int32_t, 
 	for (size_t i = 0; i < dist_block.size(); ++ i)
 	{
 		uint8_dist[i] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((dist_block[i] - min_value) * inv_scale), 0, 255));
+	}
+
+	{
+		float mse = 0;
+
+		std::vector<float> float_dist(uint8_dist.size());
+		for (size_t i = 0; i < dist_block.size(); ++ i)
+		{
+			float r = uint8_dist[i] / 255.0f * (scale / 32768.0f + 1) + base / 32768.0f;
+			mse += (dist_block[i] - r) * (dist_block[i] - r);
+		}
+
+		cout << "Quantize MSE: " << mse << endl;
 	}
 }
 
@@ -627,7 +640,7 @@ int main(int argc, char* argv[])
 				char_info[ch].dist.resize(uint8_dist.size());
 				for (size_t i = 0; i < char_info[ch].dist.size(); ++ i)
 				{
-					char_info[ch].dist[i] = uint8_dist[0] / 256.0f * (header.scale / 32768.0f - 1) + header.base / 32768.0f;
+					char_info[ch].dist[i] = uint8_dist[i] / 255.0f * (header.scale / 32768.0f + 1) + header.base / 32768.0f;
 				}
 			}
 		}
