@@ -64,6 +64,19 @@ struct kfont_header
 #pragma pack(pop)
 #endif
 
+struct font_info
+{
+	uint16_t advance_x;
+	uint16_t advance_y;
+
+	uint16_t top;
+	uint16_t left;
+	uint16_t width;
+	uint16_t height;
+
+	std::vector<float> dist;
+};
+
 int bsf(uint64_t v)
 {
 	v &= ~v + 1;
@@ -119,19 +132,6 @@ private:
 	Timer* timer_;
 	atomic<int32_t>* cur_num_char_;
 	int32_t total_chars_;
-};
-
-struct font_info
-{
-	uint16_t advance_x;
-	uint16_t advance_y;
-
-	uint16_t top;
-	uint16_t left;
-	uint16_t width;
-	uint16_t height;
-
-	std::vector<float> dist;
 };
 
 class ttf_to_dist
@@ -449,6 +449,11 @@ void quantizer(std::vector<uint8_t>& uint8_dist, std::vector<std::pair<int32_t, 
 	uint32_t const L = 256;
 
 	// Newton's Method
+	// x_{n+1} = x_n-\frac{f(x_n)}{f'(x_n)}\,
+	// f_min(x) = \int (1-f)(src-(x(1-f)-bf))\, dx
+	// f_min'(x) = (1-fs)^2
+	// f_max(x) = \int f(src-(a(1-f)-xf))\, * dx
+	// f_max'(x) = fs^2
 	float const num_steps = L - 1;
 	for (size_t i = 0; i < 32; ++ i)
 	{
