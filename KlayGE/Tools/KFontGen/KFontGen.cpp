@@ -430,6 +430,7 @@ private:
 void quantizer(std::vector<uint8_t>& uint8_dist, std::vector<std::pair<int32_t, int32_t> > const & char_index, std::vector<font_info> const & char_info, int16_t& base, int16_t& scale)
 {
 	std::vector<float> dist_block;
+	dist_block.reserve(char_index.size() * char_info[char_index[0].first].dist.size());
 	for (size_t i = 0; i < char_index.size(); ++ i)
 	{
 		int const ch = char_index[i].first;
@@ -451,11 +452,13 @@ void quantizer(std::vector<uint8_t>& uint8_dist, std::vector<std::pair<int32_t, 
 	// Newton's Method
 	// x_{n+1} = x_n-\frac{f(x_n)}{f'(x_n)}\,
 	// f_min(x) = \int (1-f)(src-(x(1-f)-bf))\, dx
-	// f_min'(x) = (1-fs)^2
-	// f_max(x) = \int f(src-(a(1-f)-xf))\, * dx
-	// f_max'(x) = fs^2
+	// f_min'(x) = (1-f)(src-(x(1-f)-bf))
+	// f_min''(x) = (1-fs)^2
+	// f_max(x) = \int f(src-(a(1-f)-xf))\, dx
+	// f_max'(x) = f(src-(a(1-f)-xf))\
+	// f_max''(x) = fs^2
 	float const num_steps = L - 1;
-	for (size_t i = 0; i < 32; ++ i)
+	for (size_t i = 0; i < 16; ++ i)
 	{
 		float const inv_scale = num_steps / (max_value - min_value);
 
@@ -465,51 +468,53 @@ void quantizer(std::vector<uint8_t>& uint8_dist, std::vector<std::pair<int32_t, 
 			steps[j] = MathLib::lerp(min_value, max_value, j / num_steps);
 		}
 
-		float f_min = 0;
-		float f_max = 0;
-		float d_f_min = 0;
-		float d_f_max = 0;
+		float d_min = 0;
+		float d_max = 0;
+		float d_2_min = 0;
+		float d_2_max = 0;
 		for (size_t j = 0; j < dist_block.size(); ++ j)
 		{
-			float const quantized = (dist_block[j] - min_value) * inv_scale;
-			uint32_t const s = MathLib::clamp<uint32_t>(static_cast<uint32_t>(quantized + 0.5f), 0, L - 1);
-			if (s < L)
-			{
-				float const diff = dist_block[j] - steps[s];
-				float const fs = s / num_steps;
+			uint32_t const s = MathLib::clamp<uint32_t>(static_cast<uint32_t>((dist_block[j] - min_value) * inv_scale + 0.5f), 0, L - 1);
+			
+			float const diff = dist_block[j] - steps[s];
+			float const fs = s / num_steps;
 
-				f_min += (1 - fs) * diff;
-				d_f_min += (1 - fs) * (1 - fs);
+			d_min += (1 - fs) * diff;
+			d_2_min += (1 - fs) * (1 - fs);
 
-				f_max += fs * diff;
-				d_f_max += fs * fs;
-			}
+			d_max += fs * diff;
+			d_2_max += fs * fs;
 		}
 
-		if (d_f_min > 0.0f)
+		if (d_2_min > 0.0f)
 		{
-			min_value -= f_min / d_f_min;
+			min_value -= d_min / d_2_min;
 		}
-		if (d_f_max > 0.0f)
+		if (d_2_max > 0.0f)
 		{
-			max_value -= f_max / d_f_max;
+			max_value -= d_max / d_2_max;
 		}
 
 		if (min_value > max_value)
 		{
 			std::swap(min_value, max_value);
 		}
+
+		if ((d_min * d_min < 1.0f / L / L) && (d_max * d_max < 1.0f / L / L))
+		{
+			break;
+		}
 	}
 
 	float fscale = max_value - min_value;
-	base = static_cast<int16_t>(min_value * 32768);
-	scale = static_cast<int16_t>((fscale - 1) * 32768);
+	base = static_cast<int16_t>(min_value * 32768 + 0.5f);
+	scale = static_cast<int16_t>((fscale - 1) * 32768 + 0.5f);
 	float inv_scale = 255 / fscale;
 
 	uint8_dist.resize(dist_block.size());
 	for (size_t i = 0; i < dist_block.size(); ++ i)
 	{
-		uint8_dist[i] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((dist_block[i] - min_value) * inv_scale), 0, 255));
+		uint8_dist[i] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((dist_block[i] - min_value) * inv_scale + 0.5f), 0, 255));
 	}
 
 	{
