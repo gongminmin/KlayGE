@@ -440,6 +440,7 @@ namespace KlayGE
 		ret.max_texture_height		= d3d_caps.MaxTextureHeight;
 		ret.max_texture_depth		= d3d_caps.MaxVolumeExtent;
 		ret.max_texture_cube_size	= d3d_caps.MaxTextureWidth;
+		ret.max_texture_array_length = 0;
 		ret.max_texture_units		= 16;
 		ret.max_texture_anisotropy	= static_cast<uint8_t>(d3d_caps.MaxAnisotropy);
 
@@ -550,6 +551,8 @@ namespace KlayGE
 				ret.hw_instancing_support = false;
 			}
 		}
+
+		ret.stream_output_support = false;
 
 		return ret;
 	}

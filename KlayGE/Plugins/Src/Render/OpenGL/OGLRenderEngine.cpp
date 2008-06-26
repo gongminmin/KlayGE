@@ -1007,6 +1007,8 @@ namespace KlayGE
 		glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &temp);
 		caps_.max_texture_cube_size = temp;
 
+		caps_.max_texture_array_length = 0;
+
 		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &temp);
 		caps_.max_texture_units = static_cast<uint8_t>(temp);
 
@@ -1041,5 +1043,6 @@ namespace KlayGE
 		caps_.texture_cube_filter_caps = caps_.texture_2d_filter_caps;
 
 		caps_.hw_instancing_support = true;
+		caps_.stream_output_support = false;
 	}
 }

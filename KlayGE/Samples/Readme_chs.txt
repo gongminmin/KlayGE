@@ -41,7 +41,7 @@ Depth of field
 技术点：
 1) Depth of field
 2) Summed-Area Table
-3) Instanceing
+3) Instancing
 4) UI
 
 需求：Geforce 6600以上或Radeon 9500以上。
@@ -115,6 +115,7 @@ Instancing
 
 技术点：
 1) 软件/硬件instancing
+2) Script engine
 
 需求：Geforce FX以上或Radeon 9500以上。推荐使用Geforce 6以上。
 渲染引擎支持：D3D9/OpenGL。
@@ -139,7 +140,7 @@ Particle system
 技术点：
 1) 粒子系统
 2) Height map生成和渲染
-3) Soft particle (3.5.0之后)
+3) Soft particle
 
 需求：Geforce FX以上或Radeon 9500以上。
 渲染引擎支持：D3D9。
@@ -152,10 +153,10 @@ Refract
 技术点：
 1) 反射、折射和Fresnel
 2) 色散
-3) HDR渲染 (3.3.0之后)
-4) Tone mapping (3.4.0之后)
-5) HDR纹理压缩 (3.4.0之后)
-6) 双面折射 (3.4.0之后)
+3) HDR渲染
+4) Tone mapping
+5) HDR纹理压缩
+6) 双面折射
 
 需求：Geforce FX以上或Radeon 9500以上。推荐使用Geforce 6以上。
 渲染引擎支持：D3D9。

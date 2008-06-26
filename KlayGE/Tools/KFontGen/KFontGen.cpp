@@ -92,8 +92,8 @@ int bsf(uint64_t v)
 class disp_thread
 {
 public:
-	disp_thread(Timer& timer, atomic<int32_t>& cur_num_char, int32_t total_chars)
-		: timer_(&timer), cur_num_char_(&cur_num_char), total_chars_(total_chars)
+	disp_thread(atomic<int32_t>& cur_num_char, int32_t total_chars)
+		: cur_num_char_(&cur_num_char), total_chars_(total_chars)
 	{
 	}
 
@@ -104,7 +104,7 @@ public:
 		{
 			int32_t dist_cur_num_char = cur_num_char_->value();
 
-			double this_disp_time = timer_->elapsed();
+			double this_disp_time = timer_.elapsed();
 			if ((dist_cur_num_char == total_chars_) || (this_disp_time - last_disp_time > 1))
 			{
 				cout << '\r';
@@ -129,7 +129,7 @@ public:
 	}
 
 private:
-	Timer* timer_;
+	Timer timer_;
 	atomic<int32_t>* cur_num_char_;
 	int32_t total_chars_;
 };
@@ -427,6 +427,55 @@ private:
 	boost::function<void(std::vector<int2>&, int, int, std::vector<uint8_t> const &, int)> edge_extract;
 };
 
+void compute_distance(std::vector<font_info>& char_info,
+					  int num_threads, std::vector<uint8_t> const & ttf, int start_code, int end_code, uint32_t char_size)
+{
+	thread_pool tp(1, num_threads + 1);
+
+	atomic<int32_t> cur_num_char(0);
+
+	std::vector<FT_Library> ft_libs(num_threads);
+	std::vector<FT_Face> ft_faces(num_threads);
+	std::vector<joiner<void> > joiners(num_threads);
+
+	for (int i = 0; i < num_threads; ++ i)
+	{
+		FT_Init_FreeType(&ft_libs[i]);
+		FT_New_Memory_Face(ft_libs[i], &ttf[0], static_cast<FT_Long>(ttf.size()), 0, &ft_faces[i]);
+		FT_Set_Pixel_Sizes(ft_faces[i], 0, INTERNAL_CHAR_SIZE);
+		FT_Select_Charmap(ft_faces[i], FT_ENCODING_UNICODE);
+	}
+
+	std::vector<uint32_t> validate_chars;
+	for (int i = start_code; i <= end_code; ++ i)
+	{
+		uint32_t mapping = FT_Get_Char_Index(ft_faces[0], i);
+		if (mapping > 0)
+		{
+			validate_chars.push_back(i);
+		}
+	}
+
+	uint32_t const num_chars_per_package = static_cast<uint32_t>((validate_chars.size() + num_threads - 1) / num_threads);
+
+	joiner<void> disp_joiner = tp(disp_thread(cur_num_char, static_cast<int32_t>(validate_chars.size())));
+	for (int i = 0; i < num_threads; ++ i)
+	{
+		uint32_t const sc = i * num_chars_per_package;
+		uint32_t const ec = std::min(sc + num_chars_per_package, static_cast<uint32_t>(validate_chars.size()));
+
+		joiners[i] = tp(ttf_to_dist(ft_libs[i], ft_faces[i], char_size, validate_chars, sc, ec, char_info, cur_num_char));
+	}
+	for (int i = 0; i < num_threads; ++ i)
+	{
+		joiners[i]();
+
+		FT_Done_Face(ft_faces[i]);
+		FT_Done_FreeType(ft_libs[i]);
+	}
+	disp_joiner();
+}
+
 void quantizer(std::vector<uint8_t>& uint8_dist, std::vector<std::pair<int32_t, int32_t> > const & char_index, std::vector<font_info> const & char_info, int16_t& base, int16_t& scale)
 {
 	std::vector<float> dist_block;
@@ -656,8 +705,6 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	thread_pool tp(1, num_threads + 1);
-
 	cout << "\tInput font name: " << ttf_name << endl;
 	cout << "\tOutput font name: " << kfont_name << endl;
 	cout << "\tStart code: " << start_code << endl;
@@ -688,51 +735,10 @@ int main(int argc, char* argv[])
 			static_cast<std::streamsize>(ttf.size() * sizeof(ttf[0])));
 	}
 
-	atomic<int32_t> cur_num_char(0);
+	Timer timer;
 
 	cout << "Compute distance field..." << endl;
-
-	std::vector<FT_Library> ft_libs(num_threads);
-	std::vector<FT_Face> ft_faces(num_threads);
-	std::vector<joiner<void> > joiners(num_threads);
-
-	for (int i = 0; i < num_threads; ++ i)
-	{
-		FT_Init_FreeType(&ft_libs[i]);
-		FT_New_Memory_Face(ft_libs[i], &ttf[0], static_cast<FT_Long>(ttf.size()), 0, &ft_faces[i]);
-		FT_Set_Pixel_Sizes(ft_faces[i], 0, INTERNAL_CHAR_SIZE);
-		FT_Select_Charmap(ft_faces[i], FT_ENCODING_UNICODE);
-	}
-
-	std::vector<uint32_t> validate_chars;
-	for (int i = start_code; i <= end_code; ++ i)
-	{
-		uint32_t mapping = FT_Get_Char_Index(ft_faces[0], i);
-		if (mapping > 0)
-		{
-			validate_chars.push_back(i);
-		}
-	}
-
-	uint32_t const num_chars_per_package = static_cast<uint32_t>((validate_chars.size() + num_threads - 1) / num_threads);
-
-	Timer timer;
-	joiner<void> disp_joiner = tp(disp_thread(timer, cur_num_char, static_cast<int32_t>(validate_chars.size())));
-	for (int i = 0; i < num_threads; ++ i)
-	{
-		uint32_t const sc = i * num_chars_per_package;
-		uint32_t const ec = std::min(sc + num_chars_per_package, static_cast<uint32_t>(validate_chars.size()));
-
-		joiners[i] = tp(ttf_to_dist(ft_libs[i], ft_faces[i], header.char_size, validate_chars, sc, ec, char_info, cur_num_char));
-	}
-	for (int i = 0; i < num_threads; ++ i)
-	{
-		joiners[i]();
-
-		FT_Done_Face(ft_faces[i]);
-		FT_Done_FreeType(ft_libs[i]);
-	}
-	disp_joiner();
+	compute_distance(char_info, num_threads, ttf, start_code, end_code, header.char_size);
 	cout << "\rTime elapsed: " << timer.elapsed() << " s                                        " << endl;
 
 	char_index.clear();
