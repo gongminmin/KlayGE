@@ -68,7 +68,7 @@ private:
 			}
 		}
 
-		void query_node(typename T::value_type rd, std::vector<neighbor_type>& neighbors, size_t num_neighbors, T const & query_position, T& query_offsets)
+		void query_node(typename T::value_type rd, std::vector<neighbor_type>& neighbors, size_t num_neighbors, T const & query_position, T& query_offsets) const
 		{
 			if (!is_leaf)
 			{
@@ -119,7 +119,7 @@ private:
 			}
 		}
 
-		void query_node(typename T::value_type rd, neighbor_type& neighbor, T const & query_position, T& query_offsets)
+		void query_node(typename T::value_type rd, neighbor_type& neighbor, T const & query_position, T& query_offsets) const
 		{
 			if (!is_leaf)
 			{

@@ -72,14 +72,14 @@ namespace
 
 			// Sample from the 64 surrounding points.
 			int index = 0;
-			for (int y = -3; y <= 4; y += 2)
+			for (int y = -4; y <= 3; y += 2)
 			{
-				for (int x = -3; x <= 4; x += 4)
+				for (int x = -4; x <= 3; x += 4)
 				{
-					tex_coord_offset[index].x() = (x + 0) * tu;
-					tex_coord_offset[index].y() = y * tv;
-					tex_coord_offset[index].z() = (x + 2) * tu;
-					tex_coord_offset[index].w() = y * tv;
+					tex_coord_offset[index].x() = (x + 0.5f) * tu;
+					tex_coord_offset[index].y() = (y + 0.5f) * tv;
+					tex_coord_offset[index].z() = (x + 2.5f) * tu;
+					tex_coord_offset[index].w() = (y + 0.5f) * tv;
 
 					++ index;
 				}

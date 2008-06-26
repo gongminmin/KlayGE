@@ -134,12 +134,12 @@ namespace
 			std::vector<std::pair<int32_t, int32_t> > temp_char_index(header.non_empty_chars);
 			kfont_input.read(reinterpret_cast<char*>(&temp_char_index[0]),
 				static_cast<std::streamsize>(temp_char_index.size() * sizeof(temp_char_index[0])));
-			char_index_ = MapVector<int32_t, int32_t>(temp_char_index.begin(), temp_char_index.end());
+			char_index_.insert(temp_char_index.begin(), temp_char_index.end());
 
 			std::vector<std::pair<int32_t, Vector_T<uint16_t, 2> > > temp_char_advance(header.validate_chars);
 			kfont_input.read(reinterpret_cast<char*>(&temp_char_advance[0]),
 				static_cast<std::streamsize>(temp_char_advance.size() * sizeof(temp_char_advance[0])));
-			char_advance_ = MapVector<int32_t, Vector_T<uint16_t, 2> >(temp_char_advance.begin(), temp_char_advance.end());
+			char_advance_.insert(temp_char_advance.begin(), temp_char_advance.end());
 
 			char_info_.resize(header.non_empty_chars);
 			kfont_input.read(reinterpret_cast<char*>(&char_info_[0]),
@@ -649,8 +649,10 @@ namespace
 		uint32_t kfont_char_size_;
 		int16_t dist_base_;
 		int16_t dist_scale_;
-		MapVector<int32_t, int32_t> char_index_;
-		MapVector<int32_t, Vector_T<uint16_t, 2> > char_advance_;
+		closed_hash_map<int32_t, int32_t, boost::hash<int32_t>, std::equal_to<int32_t>,
+			boost::pool_allocator<std::pair<int32_t, int32_t> > > char_index_;
+		closed_hash_map<int32_t, Vector_T<uint16_t, 2>, boost::hash<int32_t>, std::equal_to<int32_t>,
+			boost::pool_allocator<std::pair<int32_t, Vector_T<uint16_t, 2> > > > char_advance_;
 		std::vector<font_info> char_info_;
 		std::vector<uint8_t> distances_;
 	};

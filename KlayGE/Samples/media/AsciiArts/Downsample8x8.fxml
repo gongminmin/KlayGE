@@ -13,16 +13,58 @@
 
 	<shader>
 		<![CDATA[
-float4 Downsample8x8PS(float2 oTex : TEXCOORD0) : COLOR
+		
+void Downsample8x8VS(float4 pos : POSITION,
+					out float4 oPos : POSITION,
+					out float4 oTex0 : TEXCOORD0,
+					out float4 oTex1 : TEXCOORD1,
+					out float4 oTex2 : TEXCOORD2,
+					out float4 oTex3 : TEXCOORD3,
+					out float4 oTex4 : TEXCOORD4,
+					out float4 oTex5 : TEXCOORD5,
+					out float4 oTex6 : TEXCOORD6,
+					out float4 oTex7 : TEXCOORD7)
+{
+	float2 tex_base;
+	PostProcessVS(pos, oPos, tex_base);
+	
+	oTex0 = tex_base.xyxy + tex_coord_offset[0];
+	oTex1 = tex_base.xyxy + tex_coord_offset[1];
+	oTex2 = tex_base.xyxy + tex_coord_offset[2];
+	oTex3 = tex_base.xyxy + tex_coord_offset[3];
+	oTex4 = tex_base.xyxy + tex_coord_offset[4];
+	oTex5 = tex_base.xyxy + tex_coord_offset[5];
+	oTex6 = tex_base.xyxy + tex_coord_offset[6];
+	oTex7 = tex_base.xyxy + tex_coord_offset[7];
+}
+
+float4 Downsample8x8PS(float4 oTex0 : TEXCOORD0,
+					float4 oTex1 : TEXCOORD1,
+					float4 oTex2 : TEXCOORD2,
+					float4 oTex3 : TEXCOORD3,
+					float4 oTex4 : TEXCOORD4,
+					float4 oTex5 : TEXCOORD5,
+					float4 oTex6 : TEXCOORD6,
+					float4 oTex7 : TEXCOORD7) : COLOR
 {
 	const half3 rgb_to_lum = half3(0.299, 0.587, 0.114);
 
-	half4 s = 0;
-	for (int i = 0; i < 8; ++ i)
-	{
-		s += tex2D(src_sampler, oTex + tex_coord_offset[i].xy);
-		s += tex2D(src_sampler, oTex + tex_coord_offset[i].zw);
-	}
+	half4 s = tex2D(src_sampler, oTex0.xy)
+				+ tex2D(src_sampler, oTex0.zw)
+				+ tex2D(src_sampler, oTex1.xy)
+				+ tex2D(src_sampler, oTex1.zw)
+				+ tex2D(src_sampler, oTex2.xy)
+				+ tex2D(src_sampler, oTex2.zw)
+				+ tex2D(src_sampler, oTex3.xy)
+				+ tex2D(src_sampler, oTex3.zw)
+				+ tex2D(src_sampler, oTex4.xy)
+				+ tex2D(src_sampler, oTex4.zw)
+				+ tex2D(src_sampler, oTex5.xy)
+				+ tex2D(src_sampler, oTex5.zw)
+				+ tex2D(src_sampler, oTex6.xy)
+				+ tex2D(src_sampler, oTex6.zw)
+				+ tex2D(src_sampler, oTex7.xy)
+				+ tex2D(src_sampler, oTex7.zw);
 
 	return dot(s.rgb / 16, rgb_to_lum);
 }
@@ -33,7 +75,7 @@ float4 Downsample8x8PS(float2 oTex : TEXCOORD0) : COLOR
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
 
-			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="vertex_shader" value="Downsample8x8VS()"/>
 			<state name="pixel_shader" value="Downsample8x8PS()"/>
 		</pass>
 	</technique>
