@@ -1,8 +1,15 @@
-Will show up in KlayGE 3.7:
+Will be added in KlayGE 3.7:
 Depth peeling
+CPU detection
+Atomic operation
+
+Will be added in KlayGE 3.8:
+Deferred shading
+D3D10 plug-in
 
 TBD:
-Deferred shading
-Vector texture font
+Vector texture
 Show system's audio output
 Tessellator
+SSE
+GPU Sort

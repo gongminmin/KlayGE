@@ -162,7 +162,11 @@ namespace
 	private:
 		SevenZipLoader()
 		{
+#ifdef KLAYGE_PLATFORM_WINDOWS
 			dll_loader_.Load("7za.dll");
+#elif defined KLAYGE_PLATFORM_LINUX
+			dll_loader_.Load("7z.so");
+#endif
 			createObjectFunc_ = (CreateObjectFunc)dll_loader_.GetProcAddress("CreateObject");
 
 			BOOST_ASSERT(createObjectFunc_);
