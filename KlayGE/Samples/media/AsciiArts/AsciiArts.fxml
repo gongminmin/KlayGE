@@ -28,7 +28,7 @@ float4 AsciiArtsPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 
 	<technique name="AsciiArts">
 		<pass name="p0">
-			<state name="depth_mask" value="false"/>
+			<state name="depth_write_mask" value="false"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="AsciiArtsPS()"/>

@@ -117,8 +117,13 @@ render_states_define = [
 	("polygon_mode", "int"),
 	("shade_mode", "int"),
 	("cull_mode", "int"),
+	("polygon_offset_factor", "float"),
+	("polygon_offset_units", "float"),
+	("scissor_enable", "bool"),
+	("multisample_enable", "bool"),
 
 	("alpha_to_coverage_enable", "bool"),
+	("independent_blend_enable", "bool"),
 	("blend_enable", "bool"),
 	("blend_op", "int"),
 	("src_blend", "int"),
@@ -126,36 +131,28 @@ render_states_define = [
 	("blend_op_alpha", "int"),
 	("src_blend_alpha", "int"),
 	("dest_blend_alpha", "int"),
+	("color_write_mask", "int"),
 
 	("depth_enable", "bool"),
-	("depth_mask", "bool"),
+	("depth_write_mask", "bool"),
 	("depth_func", "int"),
-	("polygon_offset_factor", "float"),
-	("polygon_offset_units", "float"),
 
 	("front_stencil_enable", "bool"),
 	("front_stencil_func", "int"),
 	("front_stencil_ref", "int"),
-	("front_stencil_mask", "int"),
+	("front_stencil_read_mask", "int"),
+	("front_stencil_write_mask", "int"),
 	("front_stencil_fail", "int"),
 	("front_stencil_depth_fail", "int"),
 	("front_stencil_pass", "int"),
-	("front_stencil_write_mask", "int"),
 	("back_stencil_enable", "bool"),
 	("back_stencil_func", "int"),
 	("back_stencil_ref", "int"),
-	("back_stencil_mask", "int"),
+	("back_stencil_read_mask", "int"),
+	("back_stencil_write_mask", "int"),
 	("back_stencil_fail", "int"),
 	("back_stencil_depth_fail", "int"),
 	("back_stencil_pass", "int"),
-	("back_stencil_write_mask", "int"),
-
-	("scissor_enable", "bool"),
-
-	("color_mask_0", "int"),
-	("color_mask_1", "int"),
-	("color_mask_2", "int"),
-	("color_mask_3", "int"),
 
 	("pixel_shader", "shader"),
 	("vertex_shader", "shader"),
@@ -592,6 +589,8 @@ class render_state:
 				self.value = int(value_str)
 			except:
 				self.value = cull_mode_enum[value_str]
+		elif self.name in ["slope_scale_depth_bias", "depth_bias"]:
+			self.value = float(value_str)
 		elif self.name in ["blend_op", "blend_op_alpha"]:
 			try:
 				self.value = int(value_str)
@@ -607,10 +606,8 @@ class render_state:
 				self.value = int(value_str)
 			except:
 				self.value = compare_function_enum[value_str]
-		elif self.name in ["slope_scale_depth_bias", "depth_bias"]:
-			self.value = float(value_str)
-		elif self.name in ["front_stencil_ref", "front_stencil_mask", "front_stencil_write_mask",
-							"back_stencil_ref", "back_stencil_mask", "back_stencil_write_mask"]:
+		elif self.name in ["front_stencil_ref", "front_stencil_read_mask", "front_stencil_write_mask",
+							"back_stencil_ref", "back_stencil_read_mask", "back_stencil_write_mask"]:
 			self.value = int(value_str)
 		elif self.name in ["front_stencil_fail", "front_stencil_depth_fail", "front_stencil_pass",
 							"back_stencil_fail", "back_stencil_depth_fail", "back_stencil_pass"]:
@@ -618,15 +615,17 @@ class render_state:
 				self.value = int(value_str)
 			except:
 				self.value = stencil_operation_enum[value_str]
-		elif self.name in ["color_mask_0", "color_mask_1",
-							"color_mask_2", "color_mask_3"]:
+		elif "color_mask" == self.name:
 			self.value = int(value_str)
 		else:
 			print "Wrong render state name:", self.name
 			assert False
 
 	def write(self, stream):
-		write_var(stream, self.type, self.name, self)
+		n = self.name
+		if hasattr(self, 'index'):
+			n += '[' + str(self.index) + ']'
+		write_var(stream, self.type, n, self)
 
 	def __str__(self):
 		ret = self.name

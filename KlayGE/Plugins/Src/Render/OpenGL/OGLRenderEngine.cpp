@@ -205,6 +205,19 @@ namespace KlayGE
 			glFrontFace(GL_CW);
 			break;
 		}
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		glEnable(GL_POLYGON_OFFSET_POINT);
+		glEnable(GL_POLYGON_OFFSET_LINE);
+		// Bias is in {0, 16}, scale the unit addition appropriately
+		glPolygonOffset(cur_render_state_obj_.polygon_offset_factor, cur_render_state_obj_.polygon_offset_units);
+		if (cur_render_state_obj_.scissor_enable)
+		{
+			glEnable(GL_SCISSOR_TEST);
+		}
+		else
+		{
+			glDisable(GL_SCISSOR_TEST);
+		}
 
 		if (cur_render_state_obj_.alpha_to_coverage_enable)
 		{
@@ -214,7 +227,7 @@ namespace KlayGE
 		{
 			glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
 		}
-		if (cur_render_state_obj_.blend_enable)
+		if (cur_render_state_obj_.blend_enable[0])
 		{
 			glEnable(GL_BLEND);
 		}
@@ -222,9 +235,13 @@ namespace KlayGE
 		{
 			glDisable(GL_BLEND);
 		}
-		glBlendEquationSeparate(OGLMapping::Mapping(cur_render_state_obj_.blend_op), OGLMapping::Mapping(cur_render_state_obj_.blend_op_alpha));
-		glBlendFuncSeparate(OGLMapping::Mapping(cur_render_state_obj_.src_blend), OGLMapping::Mapping(cur_render_state_obj_.dest_blend),
-				OGLMapping::Mapping(cur_render_state_obj_.src_blend_alpha), OGLMapping::Mapping(cur_render_state_obj_.dest_blend_alpha));
+		glBlendEquationSeparate(OGLMapping::Mapping(cur_render_state_obj_.blend_op[0]), OGLMapping::Mapping(cur_render_state_obj_.blend_op_alpha[0]));
+		glBlendFuncSeparate(OGLMapping::Mapping(cur_render_state_obj_.src_blend[0]), OGLMapping::Mapping(cur_render_state_obj_.dest_blend[0]),
+				OGLMapping::Mapping(cur_render_state_obj_.src_blend_alpha[0]), OGLMapping::Mapping(cur_render_state_obj_.dest_blend_alpha[0]));
+		glColorMask((cur_render_state_obj_.color_write_mask[0] & RenderStateObject::CMASK_Red) != 0,
+				(cur_render_state_obj_.color_write_mask[0] & RenderStateObject::CMASK_Green) != 0,
+				(cur_render_state_obj_.color_write_mask[0] & RenderStateObject::CMASK_Blue) != 0,
+				(cur_render_state_obj_.color_write_mask[0] & RenderStateObject::CMASK_Alpha) != 0);
 
 		if (cur_render_state_obj_.depth_enable)
 		{
@@ -234,23 +251,17 @@ namespace KlayGE
 		{
 			glDisable(GL_DEPTH_TEST);
 		}
-		glDepthMask(cur_render_state_obj_.depth_mask ? GL_TRUE : GL_FALSE);
+		glDepthMask(cur_render_state_obj_.depth_write_mask ? GL_TRUE : GL_FALSE);
 		glDepthFunc(OGLMapping::Mapping(cur_render_state_obj_.depth_func));
 
-		glEnable(GL_POLYGON_OFFSET_FILL);
-		glEnable(GL_POLYGON_OFFSET_POINT);
-		glEnable(GL_POLYGON_OFFSET_LINE);
-		// Bias is in {0, 16}, scale the unit addition appropriately
-		glPolygonOffset(cur_render_state_obj_.polygon_offset_factor, cur_render_state_obj_.polygon_offset_units);
-
 		glStencilFuncSeparate(GL_FRONT, OGLMapping::Mapping(cur_render_state_obj_.front_stencil_func),
-			cur_render_state_obj_.front_stencil_ref, cur_render_state_obj_.front_stencil_mask);
+			cur_render_state_obj_.front_stencil_ref, cur_render_state_obj_.front_stencil_read_mask);
 		glStencilOpSeparate(GL_FRONT, OGLMapping::Mapping(cur_render_state_obj_.front_stencil_fail),
 			OGLMapping::Mapping(cur_render_state_obj_.front_stencil_depth_fail), OGLMapping::Mapping(cur_render_state_obj_.front_stencil_pass));
 		glStencilMaskSeparate(GL_FRONT, cur_render_state_obj_.front_stencil_write_mask);
 
 		glStencilFuncSeparate(GL_BACK, OGLMapping::Mapping(cur_render_state_obj_.back_stencil_func),
-			cur_render_state_obj_.back_stencil_ref, cur_render_state_obj_.back_stencil_mask);
+			cur_render_state_obj_.back_stencil_ref, cur_render_state_obj_.back_stencil_read_mask);
 		glStencilOpSeparate(GL_BACK, OGLMapping::Mapping(cur_render_state_obj_.back_stencil_fail),
 			OGLMapping::Mapping(cur_render_state_obj_.back_stencil_depth_fail), OGLMapping::Mapping(cur_render_state_obj_.back_stencil_pass));
 		glStencilMaskSeparate(GL_BACK, cur_render_state_obj_.back_stencil_write_mask);
@@ -263,32 +274,6 @@ namespace KlayGE
 		{
 			glDisable(GL_STENCIL_TEST);
 		}
-
-		if (cur_render_state_obj_.scissor_enable)
-		{
-			glEnable(GL_SCISSOR_TEST);
-		}
-		else
-		{
-			glDisable(GL_SCISSOR_TEST);
-		}
-
-		glColorMask((cur_render_state_obj_.color_mask_0 & RenderStateObject::CMASK_Red) != 0,
-				(cur_render_state_obj_.color_mask_0 & RenderStateObject::CMASK_Green) != 0,
-				(cur_render_state_obj_.color_mask_0 & RenderStateObject::CMASK_Blue) != 0,
-				(cur_render_state_obj_.color_mask_0 & RenderStateObject::CMASK_Alpha) != 0);
-		glColorMask((cur_render_state_obj_.color_mask_1 & RenderStateObject::CMASK_Red) != 0,
-				(cur_render_state_obj_.color_mask_1 & RenderStateObject::CMASK_Green) != 0,
-				(cur_render_state_obj_.color_mask_1 & RenderStateObject::CMASK_Blue) != 0,
-				(cur_render_state_obj_.color_mask_1 & RenderStateObject::CMASK_Alpha) != 0);
-		glColorMask((cur_render_state_obj_.color_mask_2 & RenderStateObject::CMASK_Red) != 0,
-				(cur_render_state_obj_.color_mask_2 & RenderStateObject::CMASK_Green) != 0,
-				(cur_render_state_obj_.color_mask_2 & RenderStateObject::CMASK_Blue) != 0,
-				(cur_render_state_obj_.color_mask_2 & RenderStateObject::CMASK_Alpha) != 0);
-		glColorMask((cur_render_state_obj_.color_mask_3 & RenderStateObject::CMASK_Red) != 0,
-				(cur_render_state_obj_.color_mask_3 & RenderStateObject::CMASK_Green) != 0,
-				(cur_render_state_obj_.color_mask_3 & RenderStateObject::CMASK_Blue) != 0,
-				(cur_render_state_obj_.color_mask_3 & RenderStateObject::CMASK_Alpha) != 0);
 	}
 
 	void OGLRenderEngine::TexParameter(GLenum target, GLenum pname, GLint param)
@@ -343,6 +328,26 @@ namespace KlayGE
 					break;
 				}
 			}
+			if ((cur_render_state_obj_.polygon_offset_factor != rs_obj.polygon_offset_factor)
+				|| (cur_render_state_obj_.polygon_offset_units != rs_obj.polygon_offset_units))
+			{
+				glEnable(GL_POLYGON_OFFSET_FILL);
+				glEnable(GL_POLYGON_OFFSET_POINT);
+				glEnable(GL_POLYGON_OFFSET_LINE);
+				// Bias is in {0, 16}, scale the unit addition appropriately
+				glPolygonOffset(rs_obj.polygon_offset_factor, rs_obj.polygon_offset_units);
+			}
+			if (cur_render_state_obj_.scissor_enable != rs_obj.scissor_enable)
+			{
+				if (rs_obj.scissor_enable)
+				{
+					glEnable(GL_SCISSOR_TEST);
+				}
+				else
+				{
+					glDisable(GL_SCISSOR_TEST);
+				}
+			}
 
 			if (cur_render_state_obj_.alpha_to_coverage_enable != rs_obj.alpha_to_coverage_enable)
 			{
@@ -355,9 +360,9 @@ namespace KlayGE
 					glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
 				}
 			}
-			if (cur_render_state_obj_.blend_enable != rs_obj.blend_enable)
+			if (cur_render_state_obj_.blend_enable[0] != rs_obj.blend_enable[0])
 			{
-				if (rs_obj.blend_enable)
+				if (rs_obj.blend_enable[0])
 				{
 					glEnable(GL_BLEND);
 				}
@@ -366,18 +371,25 @@ namespace KlayGE
 					glDisable(GL_BLEND);
 				}
 			}
-			if ((cur_render_state_obj_.blend_op != rs_obj.blend_op)
-				|| (cur_render_state_obj_.blend_op_alpha != rs_obj.blend_op_alpha))
+			if ((cur_render_state_obj_.blend_op[0] != rs_obj.blend_op[0])
+				|| (cur_render_state_obj_.blend_op_alpha[0] != rs_obj.blend_op_alpha[0]))
 			{
-				glBlendEquationSeparate(OGLMapping::Mapping(rs_obj.blend_op), OGLMapping::Mapping(rs_obj.blend_op_alpha));
+				glBlendEquationSeparate(OGLMapping::Mapping(rs_obj.blend_op[0]), OGLMapping::Mapping(rs_obj.blend_op_alpha[0]));
 			}
-			if ((cur_render_state_obj_.src_blend != rs_obj.src_blend)
-				|| (cur_render_state_obj_.dest_blend != rs_obj.dest_blend)
-				|| (cur_render_state_obj_.src_blend_alpha != rs_obj.src_blend_alpha)
-				|| (cur_render_state_obj_.dest_blend_alpha != rs_obj.dest_blend_alpha))
+			if ((cur_render_state_obj_.src_blend[0] != rs_obj.src_blend[0])
+				|| (cur_render_state_obj_.dest_blend[0] != rs_obj.dest_blend[0])
+				|| (cur_render_state_obj_.src_blend_alpha[0] != rs_obj.src_blend_alpha[0])
+				|| (cur_render_state_obj_.dest_blend_alpha[0] != rs_obj.dest_blend_alpha[0]))
 			{
-				glBlendFuncSeparate(OGLMapping::Mapping(rs_obj.src_blend), OGLMapping::Mapping(rs_obj.dest_blend),
-					OGLMapping::Mapping(rs_obj.src_blend_alpha), OGLMapping::Mapping(rs_obj.dest_blend_alpha));
+				glBlendFuncSeparate(OGLMapping::Mapping(rs_obj.src_blend[0]), OGLMapping::Mapping(rs_obj.dest_blend[0]),
+					OGLMapping::Mapping(rs_obj.src_blend_alpha[0]), OGLMapping::Mapping(rs_obj.dest_blend_alpha[0]));
+			}
+			if (cur_render_state_obj_.color_write_mask[0] != rs_obj.color_write_mask[0])
+			{
+				glColorMask((rs_obj.color_write_mask[0] & RenderStateObject::CMASK_Red) != 0,
+						(rs_obj.color_write_mask[0] & RenderStateObject::CMASK_Green) != 0,
+						(rs_obj.color_write_mask[0] & RenderStateObject::CMASK_Blue) != 0,
+						(rs_obj.color_write_mask[0] & RenderStateObject::CMASK_Alpha) != 0);
 			}
 
 			if (cur_render_state_obj_.depth_enable != rs_obj.depth_enable)
@@ -391,30 +403,21 @@ namespace KlayGE
 					glDisable(GL_DEPTH_TEST);
 				}
 			}
-			if (cur_render_state_obj_.depth_mask != rs_obj.depth_mask)
+			if (cur_render_state_obj_.depth_write_mask != rs_obj.depth_write_mask)
 			{
-				glDepthMask(rs_obj.depth_mask ? GL_TRUE : GL_FALSE);
+				glDepthMask(rs_obj.depth_write_mask ? GL_TRUE : GL_FALSE);
 			}
 			if (cur_render_state_obj_.depth_func != rs_obj.depth_func)
 			{
 				glDepthFunc(OGLMapping::Mapping(rs_obj.depth_func));
 			}
-			if ((cur_render_state_obj_.polygon_offset_factor != rs_obj.polygon_offset_factor)
-				|| (cur_render_state_obj_.polygon_offset_units != rs_obj.polygon_offset_units))
-			{
-				glEnable(GL_POLYGON_OFFSET_FILL);
-				glEnable(GL_POLYGON_OFFSET_POINT);
-				glEnable(GL_POLYGON_OFFSET_LINE);
-				// Bias is in {0, 16}, scale the unit addition appropriately
-				glPolygonOffset(rs_obj.polygon_offset_factor, rs_obj.polygon_offset_units);
-			}
 
 			if ((cur_render_state_obj_.front_stencil_func != rs_obj.front_stencil_func)
 				|| (cur_render_state_obj_.front_stencil_ref != rs_obj.front_stencil_ref)
-				|| (cur_render_state_obj_.front_stencil_mask != rs_obj.front_stencil_mask))
+				|| (cur_render_state_obj_.front_stencil_read_mask != rs_obj.front_stencil_read_mask))
 			{
 				glStencilFuncSeparate(GL_FRONT, OGLMapping::Mapping(rs_obj.front_stencil_func),
-					rs_obj.front_stencil_ref, rs_obj.front_stencil_mask);
+					rs_obj.front_stencil_ref, rs_obj.front_stencil_read_mask);
 			}
 			if ((cur_render_state_obj_.front_stencil_fail != rs_obj.front_stencil_fail)
 				|| (cur_render_state_obj_.front_stencil_depth_fail != rs_obj.front_stencil_depth_fail)
@@ -430,10 +433,10 @@ namespace KlayGE
 
 			if ((cur_render_state_obj_.back_stencil_func != rs_obj.back_stencil_func)
 				|| (cur_render_state_obj_.back_stencil_ref != rs_obj.back_stencil_ref)
-				|| (cur_render_state_obj_.back_stencil_mask != rs_obj.back_stencil_mask))
+				|| (cur_render_state_obj_.back_stencil_read_mask != rs_obj.back_stencil_read_mask))
 			{
 				glStencilFuncSeparate(GL_BACK, OGLMapping::Mapping(rs_obj.back_stencil_func),
-					rs_obj.back_stencil_ref, rs_obj.back_stencil_mask);
+					rs_obj.back_stencil_ref, rs_obj.back_stencil_read_mask);
 			}
 			if ((cur_render_state_obj_.back_stencil_fail != rs_obj.back_stencil_fail)
 				|| (cur_render_state_obj_.back_stencil_depth_fail != rs_obj.back_stencil_depth_fail)
@@ -458,47 +461,6 @@ namespace KlayGE
 				{
 					glDisable(GL_STENCIL_TEST);
 				}
-			}
-
-			if (cur_render_state_obj_.scissor_enable != rs_obj.scissor_enable)
-			{
-				if (rs_obj.scissor_enable)
-				{
-					glEnable(GL_SCISSOR_TEST);
-				}
-				else
-				{
-					glDisable(GL_SCISSOR_TEST);
-				}
-			}
-
-			if (cur_render_state_obj_.color_mask_0 != rs_obj.color_mask_0)
-			{
-				glColorMask((rs_obj.color_mask_0 & RenderStateObject::CMASK_Red) != 0,
-						(rs_obj.color_mask_0 & RenderStateObject::CMASK_Green) != 0,
-						(rs_obj.color_mask_0 & RenderStateObject::CMASK_Blue) != 0,
-						(rs_obj.color_mask_0 & RenderStateObject::CMASK_Alpha) != 0);
-			}
-			if (cur_render_state_obj_.color_mask_1 != rs_obj.color_mask_1)
-			{
-				glColorMask((rs_obj.color_mask_1 & RenderStateObject::CMASK_Red) != 0,
-						(rs_obj.color_mask_1 & RenderStateObject::CMASK_Green) != 0,
-						(rs_obj.color_mask_1 & RenderStateObject::CMASK_Blue) != 0,
-						(rs_obj.color_mask_1 & RenderStateObject::CMASK_Alpha) != 0);
-			}
-			if (cur_render_state_obj_.color_mask_2 != rs_obj.color_mask_2)
-			{
-				glColorMask((rs_obj.color_mask_2 & RenderStateObject::CMASK_Red) != 0,
-						(rs_obj.color_mask_2 & RenderStateObject::CMASK_Green) != 0,
-						(rs_obj.color_mask_2 & RenderStateObject::CMASK_Blue) != 0,
-						(rs_obj.color_mask_2 & RenderStateObject::CMASK_Alpha) != 0);
-			}
-			if (cur_render_state_obj_.color_mask_3 != rs_obj.color_mask_3)
-			{
-				glColorMask((rs_obj.color_mask_3 & RenderStateObject::CMASK_Red) != 0,
-						(rs_obj.color_mask_3 & RenderStateObject::CMASK_Green) != 0,
-						(rs_obj.color_mask_3 & RenderStateObject::CMASK_Blue) != 0,
-						(rs_obj.color_mask_3 & RenderStateObject::CMASK_Alpha) != 0);
 			}
 
 			cur_render_state_obj_ = rs_obj;

@@ -15,7 +15,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
-#include <vector>
+#include <boost/array.hpp>
 
 namespace KlayGE
 {
@@ -130,49 +130,49 @@ namespace KlayGE
 		};
 
 
+		// Rasterizer states
 		PolygonMode			polygon_mode;
 		ShadeMode			shade_mode;
 		CullMode			cull_mode;
-
-		bool				alpha_to_coverage_enable;
-		bool				blend_enable;
-		BlendOperation		blend_op;
-		AlphaBlendFactor	src_blend;
-		AlphaBlendFactor	dest_blend;
-		BlendOperation		blend_op_alpha;
-		AlphaBlendFactor	src_blend_alpha;
-		AlphaBlendFactor	dest_blend_alpha;
-
-		bool				depth_enable;
-		bool				depth_mask;
-		CompareFunction		depth_func;
 		float				polygon_offset_factor;
 		float				polygon_offset_units;
+		bool				scissor_enable;
+		bool				multisample_enable;
+
+		// blend states
+		bool				alpha_to_coverage_enable;
+		bool				independent_blend_enable;
+		boost::array<bool, 8>				blend_enable;
+		boost::array<BlendOperation, 8>		blend_op;
+		boost::array<AlphaBlendFactor, 8>	src_blend;
+		boost::array<AlphaBlendFactor, 8>	dest_blend;
+		boost::array<BlendOperation, 8>		blend_op_alpha;
+		boost::array<AlphaBlendFactor, 8>	src_blend_alpha;
+		boost::array<AlphaBlendFactor, 8>	dest_blend_alpha;
+		boost::array<uint8_t, 8>			color_write_mask;
+
+		// Depth stencil states
+		bool				depth_enable;
+		bool				depth_write_mask;
+		CompareFunction		depth_func;
 
 		bool				front_stencil_enable;
 		CompareFunction		front_stencil_func;
 		uint16_t			front_stencil_ref;
-		uint16_t			front_stencil_mask;
+		uint16_t			front_stencil_read_mask;
+		uint16_t			front_stencil_write_mask;
 		StencilOperation	front_stencil_fail;
 		StencilOperation	front_stencil_depth_fail;
 		StencilOperation	front_stencil_pass;
-		uint16_t			front_stencil_write_mask;
 
 		bool				back_stencil_enable;
 		CompareFunction		back_stencil_func;
 		uint16_t			back_stencil_ref;
-		uint16_t			back_stencil_mask;
+		uint16_t			back_stencil_read_mask;
+		uint16_t			back_stencil_write_mask;
 		StencilOperation	back_stencil_fail;
 		StencilOperation	back_stencil_depth_fail;
 		StencilOperation	back_stencil_pass;
-		uint16_t			back_stencil_write_mask;
-
-		bool				scissor_enable;
-
-		uint8_t				color_mask_0 : 4;
-		uint8_t				color_mask_1 : 4;
-		uint8_t				color_mask_2 : 4;
-		uint8_t				color_mask_3 : 4;
 
 		RenderStateObject();
 	};

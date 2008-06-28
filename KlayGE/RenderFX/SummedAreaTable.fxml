@@ -101,7 +101,7 @@ float4 SATScanYDownSweepPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 	<technique name="SATScanXUpSweep">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
-			<state name="depth_mask" value="0"/>
+			<state name="depth_write_mask" value="0"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="SATScanXUpSweepPS()"/>
@@ -110,7 +110,7 @@ float4 SATScanYDownSweepPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 	<technique name="SATScanXDownSweep">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
-			<state name="depth_mask" value="0"/>
+			<state name="depth_write_mask" value="0"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="SATScanXDownSweepPS()"/>
@@ -120,7 +120,7 @@ float4 SATScanYDownSweepPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 	<technique name="SATScanYUpSweep">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
-			<state name="depth_mask" value="0"/>
+			<state name="depth_write_mask" value="0"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="SATScanYUpSweepPS()"/>
@@ -130,7 +130,7 @@ float4 SATScanYDownSweepPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 	<technique name="SATScanYDownSweep">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
-			<state name="depth_mask" value="0"/>
+			<state name="depth_write_mask" value="0"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="SATScanYDownSweepPS()"/>
