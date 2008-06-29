@@ -42,32 +42,32 @@ namespace KlayGE
 
 	// 从RenderEngine::CompareFunction转换到GLenum
 	/////////////////////////////////////////////////////////////////////////////////
-	GLenum OGLMapping::Mapping(RenderStateObject::CompareFunction func)
+	GLenum OGLMapping::Mapping(CompareFunction func)
 	{
 		switch (func)
 		{
-		case RenderStateObject::CF_AlwaysFail:
+		case CF_AlwaysFail:
 			return GL_NEVER;
 
-		case RenderStateObject::CF_AlwaysPass:
+		case CF_AlwaysPass:
 			return GL_ALWAYS;
 
-		case RenderStateObject::CF_Less:
+		case CF_Less:
 			return GL_LESS;
 
-		case RenderStateObject::CF_LessEqual:
+		case CF_LessEqual:
 			return GL_LEQUAL;
 
-		case RenderStateObject::CF_Equal:
+		case CF_Equal:
 			return GL_EQUAL;
 
-		case RenderStateObject::CF_NotEqual:
+		case CF_NotEqual:
 			return GL_NOTEQUAL;
 
-		case RenderStateObject::CF_GreaterEqual:
+		case CF_GreaterEqual:
 			return GL_GEQUAL;
 
-		case RenderStateObject::CF_Greater:
+		case CF_Greater:
 			return GL_GREATER;
 
 		default:
@@ -78,41 +78,41 @@ namespace KlayGE
 
 	// 从RenderEngine::AlphaBlendFactor转换到GLenum
 	/////////////////////////////////////////////////////////////////////////////////
-	GLenum OGLMapping::Mapping(RenderStateObject::AlphaBlendFactor factor)
+	GLenum OGLMapping::Mapping(AlphaBlendFactor factor)
 	{
 		switch (factor)
 		{
-		case RenderStateObject::ABF_Zero:
+		case ABF_Zero:
 			return GL_ZERO;
 
-		case RenderStateObject::ABF_One:
+		case ABF_One:
 			return GL_ONE;
 
-		case RenderStateObject::ABF_Src_Alpha:
+		case ABF_Src_Alpha:
 			return GL_SRC_ALPHA;
 
-		case RenderStateObject::ABF_Dst_Alpha:
+		case ABF_Dst_Alpha:
 			return GL_DST_ALPHA;
 
-		case RenderStateObject::ABF_Inv_Src_Alpha:
+		case ABF_Inv_Src_Alpha:
 			return GL_ONE_MINUS_SRC_ALPHA;
 
-		case RenderStateObject::ABF_Inv_Dst_Alpha:
+		case ABF_Inv_Dst_Alpha:
 			return GL_ONE_MINUS_DST_ALPHA;
 
-		case RenderStateObject::ABF_Src_Color:
+		case ABF_Src_Color:
 			return GL_SRC_COLOR;
 
-		case RenderStateObject::ABF_Dst_Color:
+		case ABF_Dst_Color:
 			return GL_DST_COLOR;
 
-		case RenderStateObject::ABF_Inv_Src_Color:
+		case ABF_Inv_Src_Color:
 			return GL_ONE_MINUS_SRC_COLOR;
 
-		case RenderStateObject::ABF_Inv_Dst_Color:
+		case ABF_Inv_Dst_Color:
 			return GL_ONE_MINUS_DST_COLOR;
 
-		case RenderStateObject::ABF_Src_Alpha_Sat:
+		case ABF_Src_Alpha_Sat:
 			return GL_SRC_ALPHA_SATURATE;
 
 		default:
@@ -123,26 +123,26 @@ namespace KlayGE
 
 	// 从RenderEngine::StencilOperation转换到GLenum
 	/////////////////////////////////////////////////////////////////////////////////
-	GLenum OGLMapping::Mapping(RenderStateObject::StencilOperation op)
+	GLenum OGLMapping::Mapping(StencilOperation op)
 	{
 		switch (op)
 		{
-		case RenderStateObject::SOP_Keep:
+		case SOP_Keep:
 			return GL_KEEP;
 
-		case RenderStateObject::SOP_Zero:
+		case SOP_Zero:
 			return GL_ZERO;
 
-		case RenderStateObject::SOP_Replace:
+		case SOP_Replace:
 			return GL_REPLACE;
 
-		case RenderStateObject::SOP_Increment:
+		case SOP_Increment:
 			return GL_INCR;
 
-		case RenderStateObject::SOP_Decrement:
+		case SOP_Decrement:
 			return GL_DECR;
 
-		case RenderStateObject::SOP_Invert:
+		case SOP_Invert:
 			return GL_INVERT;
 
 		default:
@@ -151,17 +151,17 @@ namespace KlayGE
 		};
 	}
 
-	GLenum OGLMapping::Mapping(RenderStateObject::PolygonMode mode)
+	GLenum OGLMapping::Mapping(PolygonMode mode)
 	{
 		switch (mode)
 		{
-		case RenderStateObject::PM_Point:
+		case PM_Point:
 			return GL_POINT;
 
-		case RenderStateObject::PM_Line:
+		case PM_Line:
 			return GL_LINE;
 
-		case RenderStateObject::PM_Fill:
+		case PM_Fill:
 			return GL_FILL;
 
 		default:
@@ -170,14 +170,14 @@ namespace KlayGE
 		}
 	}
 
-	GLenum OGLMapping::Mapping(RenderStateObject::ShadeMode mode)
+	GLenum OGLMapping::Mapping(ShadeMode mode)
 	{
 		switch (mode)
 		{
-		case RenderStateObject::SM_Flat:
+		case SM_Flat:
 			return GL_FLAT;
 
-		case RenderStateObject::SM_Gouraud:
+		case SM_Gouraud:
 			return GL_SMOOTH;
 
 		default:
@@ -186,23 +186,23 @@ namespace KlayGE
 		}
 	}
 
-	GLenum OGLMapping::Mapping(RenderStateObject::BlendOperation bo)
+	GLenum OGLMapping::Mapping(BlendOperation bo)
 	{
 		switch (bo)
 		{
-		case RenderStateObject::BOP_Add:
+		case BOP_Add:
 			return GL_FUNC_ADD;
 
-		case RenderStateObject::BOP_Sub:
+		case BOP_Sub:
 			return GL_FUNC_SUBTRACT;
 
-		case RenderStateObject::BOP_Rev_Sub:
+		case BOP_Rev_Sub:
 			return GL_FUNC_REVERSE_SUBTRACT;
 
-		case RenderStateObject::BOP_Min:
+		case BOP_Min:
 			return GL_MIN;
 
-		case RenderStateObject::BOP_Max:
+		case BOP_Max:
 			return GL_MAX;
 
 		default:

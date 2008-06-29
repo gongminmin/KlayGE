@@ -356,9 +356,17 @@ namespace KlayGE
 			return is_validate_;
 		}
 
-		RenderStateObjectPtr GetRenderStateObject() const
+		RasterizerStateObjectPtr GetRasterizerStateObject() const
 		{
-			return render_state_obj_;
+			return rasterizer_state_obj_;
+		}
+		DepthStencilStateObjectPtr GetDepthStencilStateObject() const
+		{
+			return depth_stencil_state_obj_;
+		}
+		BlendStateObjectPtr GetBlendStateObject() const
+		{
+			return blend_state_obj_;
 		}
 		ShaderObjectPtr GetShaderObject() const
 		{
@@ -386,7 +394,9 @@ namespace KlayGE
 		boost::shared_ptr<std::vector<shader_desc> > shader_descs_;
 		boost::shared_ptr<std::string> shader_text_;
 
-		RenderStateObjectPtr render_state_obj_;
+		RasterizerStateObjectPtr rasterizer_state_obj_;
+		DepthStencilStateObjectPtr depth_stencil_state_obj_;
+		BlendStateObjectPtr blend_state_obj_;
 		ShaderObjectPtr shader_obj_;
 
 		bool is_validate_;

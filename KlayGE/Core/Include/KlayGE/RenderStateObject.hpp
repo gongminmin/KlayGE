@@ -1,8 +1,11 @@
 // RenderStateObject.hpp
 // KlayGE 渲染状态对象类 头文件
-// Ver 3.5.0
-// 版权所有(C) 龚敏敏, 2006
+// Ver 3.7.0
+// 版权所有(C) 龚敏敏, 2006-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.7.0
+// 把RenderStateObject拆成三部分 (2008.6.29)
 //
 // 3.5.0
 // 初次建立 (2006.11.1)
@@ -42,95 +45,93 @@ namespace KlayGE
 		return unf.f;
 	}
 
+	enum PolygonMode
+	{
+		PM_Point,
+		PM_Line,
+		PM_Fill
+	};
+
+	enum ShadeMode
+	{
+		SM_Flat,
+		SM_Gouraud
+	};
+
+	enum CullMode
+	{
+		CM_None,
+		CM_Clockwise,
+		CM_AntiClockwise
+	};
+
+	enum BlendOperation
+	{
+		BOP_Add		= 1,
+		BOP_Sub		= 2,
+		BOP_Rev_Sub	= 3,
+		BOP_Min		= 4,
+		BOP_Max		= 5,
+	};
+
+	enum AlphaBlendFactor
+	{
+		ABF_Zero,
+		ABF_One,
+		ABF_Src_Alpha,
+		ABF_Dst_Alpha,
+		ABF_Inv_Src_Alpha,
+		ABF_Inv_Dst_Alpha,
+		ABF_Src_Color,
+		ABF_Dst_Color,
+		ABF_Inv_Src_Color,
+		ABF_Inv_Dst_Color,
+		ABF_Src_Alpha_Sat
+	};
+
+	enum CompareFunction
+	{
+		CF_AlwaysFail,
+		CF_AlwaysPass,
+		CF_Less,
+		CF_LessEqual,
+		CF_Equal,
+		CF_NotEqual,
+		CF_GreaterEqual,
+		CF_Greater
+	};
+
+	// Enum describing the various actions which can be taken onthe stencil buffer
+	enum StencilOperation
+	{
+		// Leave the stencil buffer unchanged
+		SOP_Keep,
+		// Set the stencil value to zero
+		SOP_Zero,
+		// Set the stencil value to the reference value
+		SOP_Replace,
+		// Increase the stencil value by 1, clamping at the maximum value
+		SOP_Increment,
+		// Decrease the stencil value by 1, clamping at 0
+		SOP_Decrement,
+		// Invert the bits of the stencil buffer
+		SOP_Invert
+	};
+
+	enum ColorMask
+	{
+		CMASK_Red   = 1UL << 3,
+		CMASK_Green = 1UL << 2,
+		CMASK_Blue  = 1UL << 1,
+		CMASK_Alpha = 1UL << 0,
+		CMASK_All   = CMASK_Red | CMASK_Green | CMASK_Blue | CMASK_Alpha
+	};
+
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #pragma pack(push, 1)
 #endif
-	struct RenderStateObject
+	struct RasterizerStateDesc
 	{
-		enum PolygonMode
-		{
-			PM_Point,
-			PM_Line,
-			PM_Fill
-		};
-
-		enum ShadeMode
-		{
-			SM_Flat,
-			SM_Gouraud
-		};
-
-		enum CullMode
-		{
-			CM_None,
-			CM_Clockwise,
-			CM_AntiClockwise
-		};
-
-		enum BlendOperation
-		{
-			BOP_Add		= 1,
-			BOP_Sub		= 2,
-			BOP_Rev_Sub	= 3,
-			BOP_Min		= 4,
-			BOP_Max		= 5,
-		};
-
-		enum AlphaBlendFactor
-		{
-			ABF_Zero,
-			ABF_One,
-			ABF_Src_Alpha,
-			ABF_Dst_Alpha,
-			ABF_Inv_Src_Alpha,
-			ABF_Inv_Dst_Alpha,
-			ABF_Src_Color,
-			ABF_Dst_Color,
-			ABF_Inv_Src_Color,
-			ABF_Inv_Dst_Color,
-			ABF_Src_Alpha_Sat
-		};
-
-		enum CompareFunction
-		{
-			CF_AlwaysFail,
-			CF_AlwaysPass,
-			CF_Less,
-			CF_LessEqual,
-			CF_Equal,
-			CF_NotEqual,
-			CF_GreaterEqual,
-			CF_Greater
-		};
-
-		// Enum describing the various actions which can be taken onthe stencil buffer
-		enum StencilOperation
-		{
-			// Leave the stencil buffer unchanged
-			SOP_Keep,
-			// Set the stencil value to zero
-			SOP_Zero,
-			// Set the stencil value to the reference value
-			SOP_Replace,
-			// Increase the stencil value by 1, clamping at the maximum value
-			SOP_Increment,
-			// Decrease the stencil value by 1, clamping at 0
-			SOP_Decrement,
-			// Invert the bits of the stencil buffer
-			SOP_Invert
-		};
-
-		enum ColorMask
-		{
-			CMASK_Red   = 1UL << 3,
-			CMASK_Green = 1UL << 2,
-			CMASK_Blue  = 1UL << 1,
-			CMASK_Alpha = 1UL << 0,
-			CMASK_All   = CMASK_Red | CMASK_Green | CMASK_Blue | CMASK_Alpha
-		};
-
-
-		// Rasterizer states
 		PolygonMode			polygon_mode;
 		ShadeMode			shade_mode;
 		CullMode			cull_mode;
@@ -139,19 +140,11 @@ namespace KlayGE
 		bool				scissor_enable;
 		bool				multisample_enable;
 
-		// blend states
-		bool				alpha_to_coverage_enable;
-		bool				independent_blend_enable;
-		boost::array<bool, 8>				blend_enable;
-		boost::array<BlendOperation, 8>		blend_op;
-		boost::array<AlphaBlendFactor, 8>	src_blend;
-		boost::array<AlphaBlendFactor, 8>	dest_blend;
-		boost::array<BlendOperation, 8>		blend_op_alpha;
-		boost::array<AlphaBlendFactor, 8>	src_blend_alpha;
-		boost::array<AlphaBlendFactor, 8>	dest_blend_alpha;
-		boost::array<uint8_t, 8>			color_write_mask;
+		RasterizerStateDesc();
+	};
 
-		// Depth stencil states
+	struct DepthStencilStateDesc
+	{
 		bool				depth_enable;
 		bool				depth_write_mask;
 		CompareFunction		depth_func;
@@ -174,11 +167,103 @@ namespace KlayGE
 		StencilOperation	back_stencil_depth_fail;
 		StencilOperation	back_stencil_pass;
 
-		RenderStateObject();
+		DepthStencilStateDesc();
+	};
+
+	struct BlendStateDesc
+	{
+		bool				alpha_to_coverage_enable;
+		bool				independent_blend_enable;
+
+		boost::array<bool, 8>				blend_enable;
+		boost::array<BlendOperation, 8>		blend_op;
+		boost::array<AlphaBlendFactor, 8>	src_blend;
+		boost::array<AlphaBlendFactor, 8>	dest_blend;
+		boost::array<BlendOperation, 8>		blend_op_alpha;
+		boost::array<AlphaBlendFactor, 8>	src_blend_alpha;
+		boost::array<AlphaBlendFactor, 8>	dest_blend_alpha;
+		boost::array<uint8_t, 8>			color_write_mask;
+
+		BlendStateDesc();
 	};
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #pragma pack(pop)
 #endif
+
+	class RasterizerStateObject
+	{
+	public:
+		RasterizerStateObject(RasterizerStateObject const & rhs)
+			: desc_(rhs.desc_)
+		{
+		}
+
+		explicit RasterizerStateObject(RasterizerStateDesc const & desc)
+			: desc_(desc)
+		{
+		}
+
+		RasterizerStateDesc const & GetDesc() const
+		{
+			return desc_;
+		}
+
+	private:
+		RasterizerStateDesc desc_;
+	};
+
+	bool operator==(RasterizerStateObject const & lhs, RasterizerStateObject const & rhs);
+	bool operator!=(RasterizerStateObject const & lhs, RasterizerStateObject const & rhs);
+
+	class DepthStencilStateObject
+	{
+	public:
+		DepthStencilStateObject(DepthStencilStateObject const & rhs)
+			: desc_(rhs.desc_)
+		{
+		}
+
+		explicit DepthStencilStateObject(DepthStencilStateDesc const & desc)
+			: desc_(desc)
+		{
+		}
+
+		DepthStencilStateDesc const & GetDesc() const
+		{
+			return desc_;
+		}
+
+	private:
+		DepthStencilStateDesc desc_;
+	};
+
+	bool operator==(DepthStencilStateObject const & lhs, DepthStencilStateObject const & rhs);
+	bool operator!=(DepthStencilStateObject const & lhs, DepthStencilStateObject const & rhs);
+
+	class BlendStateObject
+	{
+	public:
+		BlendStateObject(BlendStateObject const & rhs)
+			: desc_(rhs.desc_)
+		{
+		}
+
+		explicit BlendStateObject(BlendStateDesc const & desc)
+			: desc_(desc)
+		{
+		}
+
+		BlendStateDesc const & GetDesc() const
+		{
+			return desc_;
+		}
+
+	private:
+		BlendStateDesc desc_;
+	};
+
+	bool operator==(BlendStateObject const & lhs, BlendStateObject const & rhs);
+	bool operator!=(BlendStateObject const & lhs, BlendStateObject const & rhs);
 }
 
 #endif			// _RENDERSTATEOBJECT_HPP

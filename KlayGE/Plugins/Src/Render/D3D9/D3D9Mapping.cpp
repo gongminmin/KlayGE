@@ -84,19 +84,19 @@ namespace KlayGE
 	uint32_t D3D9Mapping::MappingColorMask(uint32_t mask)
 	{
 		uint32_t ret = 0;
-		if (mask & RenderStateObject::CMASK_Red)
+		if (mask & CMASK_Red)
 		{
 			ret |= D3DCOLORWRITEENABLE_RED;
 		}
-		if (mask & RenderStateObject::CMASK_Green)
+		if (mask & CMASK_Green)
 		{
 			ret |= D3DCOLORWRITEENABLE_GREEN;
 		}
-		if (mask & RenderStateObject::CMASK_Blue)
+		if (mask & CMASK_Blue)
 		{
 			ret |= D3DCOLORWRITEENABLE_BLUE;
 		}
-		if (mask & RenderStateObject::CMASK_Alpha)
+		if (mask & CMASK_Alpha)
 		{
 			ret |= D3DCOLORWRITEENABLE_ALPHA;
 		}
@@ -105,32 +105,32 @@ namespace KlayGE
 
 	// 从RenderEngine::CompareFunction转换到D3DCMPFUNC
 	/////////////////////////////////////////////////////////////////////////////////
-	D3DCMPFUNC D3D9Mapping::Mapping(RenderStateObject::CompareFunction func)
+	D3DCMPFUNC D3D9Mapping::Mapping(CompareFunction func)
 	{
 		switch (func)
 		{
-		case RenderStateObject::CF_AlwaysFail:
+		case CF_AlwaysFail:
 			return D3DCMP_NEVER;
 
-		case RenderStateObject::CF_AlwaysPass:
+		case CF_AlwaysPass:
 			return D3DCMP_ALWAYS;
 
-		case RenderStateObject::CF_Less:
+		case CF_Less:
 			return D3DCMP_LESS;
 
-		case RenderStateObject::CF_LessEqual:
+		case CF_LessEqual:
 			return D3DCMP_LESSEQUAL;
 
-		case RenderStateObject::CF_Equal:
+		case CF_Equal:
 			return D3DCMP_EQUAL;
 
-		case RenderStateObject::CF_NotEqual:
+		case CF_NotEqual:
 			return D3DCMP_NOTEQUAL;
 
-		case RenderStateObject::CF_GreaterEqual:
+		case CF_GreaterEqual:
 			return D3DCMP_GREATEREQUAL;
 
-		case RenderStateObject::CF_Greater:
+		case CF_Greater:
 			return D3DCMP_GREATER;
 
 		default:
@@ -141,26 +141,26 @@ namespace KlayGE
 
 	// 从RenderEngine::StencilOperation转换到D3DSTENCILOP
 	/////////////////////////////////////////////////////////////////////////////////
-	D3DSTENCILOP D3D9Mapping::Mapping(RenderStateObject::StencilOperation op)
+	D3DSTENCILOP D3D9Mapping::Mapping(StencilOperation op)
 	{
 		switch (op)
 		{
-		case RenderStateObject::SOP_Keep:
+		case SOP_Keep:
 			return D3DSTENCILOP_KEEP;
 
-		case RenderStateObject::SOP_Zero:
+		case SOP_Zero:
 			return D3DSTENCILOP_ZERO;
 
-		case RenderStateObject::SOP_Replace:
+		case SOP_Replace:
 			return D3DSTENCILOP_REPLACE;
 
-		case RenderStateObject::SOP_Increment:
+		case SOP_Increment:
 			return D3DSTENCILOP_INCR;
 
-		case RenderStateObject::SOP_Decrement:
+		case SOP_Decrement:
 			return D3DSTENCILOP_DECR;
 
-		case RenderStateObject::SOP_Invert:
+		case SOP_Invert:
 			return D3DSTENCILOP_INVERT;
 
 		default:
@@ -169,41 +169,41 @@ namespace KlayGE
 		};
 	}
 
-	uint32_t D3D9Mapping::Mapping(RenderStateObject::AlphaBlendFactor factor)
+	uint32_t D3D9Mapping::Mapping(AlphaBlendFactor factor)
 	{
 		switch (factor)
 		{
-		case RenderStateObject::ABF_Zero:
+		case ABF_Zero:
 			return D3DBLEND_ZERO;
 
-		case RenderStateObject::ABF_One:
+		case ABF_One:
 			return D3DBLEND_ONE;
 
-		case RenderStateObject::ABF_Src_Alpha:
+		case ABF_Src_Alpha:
 			return D3DBLEND_SRCALPHA;
 
-		case RenderStateObject::ABF_Dst_Alpha:
+		case ABF_Dst_Alpha:
 			return D3DBLEND_DESTALPHA;
 
-		case RenderStateObject::ABF_Inv_Src_Alpha:
+		case ABF_Inv_Src_Alpha:
 			return D3DBLEND_INVSRCALPHA;
 
-		case RenderStateObject::ABF_Inv_Dst_Alpha:
+		case ABF_Inv_Dst_Alpha:
 			return D3DBLEND_INVDESTALPHA;
 
-		case RenderStateObject::ABF_Src_Color:
+		case ABF_Src_Color:
 			return D3DBLEND_SRCCOLOR;
 
-		case RenderStateObject::ABF_Dst_Color:
+		case ABF_Dst_Color:
 			return D3DBLEND_DESTCOLOR;
 
-		case RenderStateObject::ABF_Inv_Src_Color:
+		case ABF_Inv_Src_Color:
 			return D3DBLEND_INVSRCCOLOR;
 
-		case RenderStateObject::ABF_Inv_Dst_Color:
+		case ABF_Inv_Dst_Color:
 			return D3DBLEND_INVDESTCOLOR;
 
-		case RenderStateObject::ABF_Src_Alpha_Sat:
+		case ABF_Src_Alpha_Sat:
 			return D3DBLEND_SRCALPHASAT;
 
 		default:
@@ -212,17 +212,17 @@ namespace KlayGE
 		}
 	}
 
-	uint32_t D3D9Mapping::Mapping(RenderStateObject::CullMode mode)
+	uint32_t D3D9Mapping::Mapping(CullMode mode)
 	{
 		switch (mode)
 		{
-		case RenderStateObject::CM_None:
+		case CM_None:
 			return D3DCULL_NONE;
 
-		case RenderStateObject::CM_Clockwise:
+		case CM_Clockwise:
 			return D3DCULL_CW;
 
-		case RenderStateObject::CM_AntiClockwise:
+		case CM_AntiClockwise:
 			return D3DCULL_CCW;
 
 		default:
@@ -231,17 +231,17 @@ namespace KlayGE
 		}
 	}
 
-	uint32_t D3D9Mapping::Mapping(RenderStateObject::PolygonMode mode)
+	uint32_t D3D9Mapping::Mapping(PolygonMode mode)
 	{
 		switch (mode)
 		{
-		case RenderStateObject::PM_Point:
+		case PM_Point:
 			return D3DFILL_POINT;
 
-		case RenderStateObject::PM_Line:
+		case PM_Line:
 			return D3DFILL_WIREFRAME;
 
-		case RenderStateObject::PM_Fill:
+		case PM_Fill:
 			return D3DFILL_SOLID;
 
 		default:
@@ -250,14 +250,14 @@ namespace KlayGE
 		}
 	}
 
-	uint32_t D3D9Mapping::Mapping(RenderStateObject::ShadeMode mode)
+	uint32_t D3D9Mapping::Mapping(ShadeMode mode)
 	{
 		switch (mode)
 		{
-		case RenderStateObject::SM_Flat:
+		case SM_Flat:
 			return D3DSHADE_FLAT;
 
-		case RenderStateObject::SM_Gouraud:
+		case SM_Gouraud:
 			return D3DSHADE_GOURAUD;
 
 		default:
@@ -266,23 +266,23 @@ namespace KlayGE
 		}
 	}
 
-	uint32_t D3D9Mapping::Mapping(RenderStateObject::BlendOperation bo)
+	uint32_t D3D9Mapping::Mapping(BlendOperation bo)
 	{
 		switch (bo)
 		{
-		case RenderStateObject::BOP_Add:
+		case BOP_Add:
 			return D3DBLENDOP_ADD;
 
-		case RenderStateObject::BOP_Sub:
+		case BOP_Sub:
 			return D3DBLENDOP_SUBTRACT;
 
-		case RenderStateObject::BOP_Rev_Sub:
+		case BOP_Rev_Sub:
 			return D3DBLENDOP_REVSUBTRACT;
 
-		case RenderStateObject::BOP_Min:
+		case BOP_Min:
 			return D3DBLENDOP_MIN;
 
-		case RenderStateObject::BOP_Max:
+		case BOP_Max:
 			return D3DBLENDOP_MAX;
 
 		default:

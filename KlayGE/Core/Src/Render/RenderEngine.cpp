@@ -66,7 +66,7 @@ namespace KlayGE
 		{
 		}
 
-		void SetStateObjects(RenderStateObject const & /*rs_obj*/, ShaderObject const & /*shader_obj*/)
+		void SetStateObjects(RasterizerStateObject const & /*rs_obj*/, DepthStencilStateObject const & /*dss_obj*/, BlendStateObject const & /*bs_obj*/, ShaderObject const & /*shader_obj*/)
 		{
 		}
 

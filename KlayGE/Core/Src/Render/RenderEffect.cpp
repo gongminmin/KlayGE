@@ -588,7 +588,9 @@ namespace KlayGE
 			}
 		}
 
-		render_state_obj_.reset(new RenderStateObject);
+		RasterizerStateDesc rs_desc;
+		DepthStencilStateDesc dss_desc;
+		BlendStateDesc bs_desc;
 		shader_obj_ = rf.MakeShaderObject();
 
 		shader_descs_.reset(new BOOST_TYPEOF(*shader_descs_));
@@ -639,150 +641,150 @@ namespace KlayGE
 
 				if ("polygon_mode" == state_name)
 				{
-					render_state_obj_->polygon_mode = static_cast<RenderStateObject::PolygonMode>(state_val);
+					rs_desc.polygon_mode = static_cast<PolygonMode>(state_val);
 				}
 				if ("shade_mode" == state_name)
 				{
-					render_state_obj_->shade_mode = static_cast<RenderStateObject::ShadeMode>(state_val);
+					rs_desc.shade_mode = static_cast<ShadeMode>(state_val);
 				}
 				if ("cull_mode" == state_name)
 				{
-					render_state_obj_->cull_mode = static_cast<RenderStateObject::CullMode>(state_val);
+					rs_desc.cull_mode = static_cast<CullMode>(state_val);
 				}
 				if ("polygon_offset_factor" == state_name)
 				{
-					render_state_obj_->polygon_offset_factor = uint32_to_float(state_val);
+					rs_desc.polygon_offset_factor = uint32_to_float(state_val);
 				}
 				if ("polygon_offset_units" == state_name)
 				{
-					render_state_obj_->polygon_offset_units = uint32_to_float(state_val);
+					rs_desc.polygon_offset_units = uint32_to_float(state_val);
 				}
 				if ("scissor_enable" == state_name)
 				{
-					render_state_obj_->scissor_enable = state_val ? true : false;
+					rs_desc.scissor_enable = state_val ? true : false;
 				}
 				if ("multisample_enable" == state_name)
 				{
-					render_state_obj_->multisample_enable = state_val ? true : false;
+					rs_desc.multisample_enable = state_val ? true : false;
 				}
 
 				if ("alpha_to_coverage_enable" == state_name)
 				{
-					render_state_obj_->alpha_to_coverage_enable = state_val ? true : false;
+					bs_desc.alpha_to_coverage_enable = state_val ? true : false;
 				}
 				if ("independent_blend_enable" == state_name)
 				{
-					render_state_obj_->independent_blend_enable = state_val ? true : false;
+					bs_desc.independent_blend_enable = state_val ? true : false;
 				}
 				if (0 == state_name.find("blend_enable"))
 				{
-					render_state_obj_->blend_enable[get_index_from_state_name(state_name)] = state_val ? true : false;					
+					bs_desc.blend_enable[get_index_from_state_name(state_name)] = state_val ? true : false;					
 				}
 				if (0 == state_name.find("blend_op"))
 				{
-					render_state_obj_->blend_op[get_index_from_state_name(state_name)] = static_cast<RenderStateObject::BlendOperation>(state_val);
+					bs_desc.blend_op[get_index_from_state_name(state_name)] = static_cast<BlendOperation>(state_val);
 				}
 				if (0 == state_name.find("src_blend"))
 				{
-					render_state_obj_->src_blend[get_index_from_state_name(state_name)] = static_cast<RenderStateObject::AlphaBlendFactor>(state_val);
+					bs_desc.src_blend[get_index_from_state_name(state_name)] = static_cast<AlphaBlendFactor>(state_val);
 				}
 				if (0 == state_name.find("dest_blend"))
 				{
-					render_state_obj_->dest_blend[get_index_from_state_name(state_name)] = static_cast<RenderStateObject::AlphaBlendFactor>(state_val);
+					bs_desc.dest_blend[get_index_from_state_name(state_name)] = static_cast<AlphaBlendFactor>(state_val);
 				}
 				if (0 == state_name.find("blend_op_alpha"))
 				{
-					render_state_obj_->blend_op_alpha[get_index_from_state_name(state_name)] = static_cast<RenderStateObject::BlendOperation>(state_val);
+					bs_desc.blend_op_alpha[get_index_from_state_name(state_name)] = static_cast<BlendOperation>(state_val);
 				}
 				if (0 == state_name.find("src_blend_alpha"))
 				{
-					render_state_obj_->src_blend_alpha[get_index_from_state_name(state_name)] = static_cast<RenderStateObject::AlphaBlendFactor>(state_val);
+					bs_desc.src_blend_alpha[get_index_from_state_name(state_name)] = static_cast<AlphaBlendFactor>(state_val);
 				}
 				if (0 == state_name.find("dest_blend_alpha"))
 				{
-					render_state_obj_->dest_blend_alpha[get_index_from_state_name(state_name)] = static_cast<RenderStateObject::AlphaBlendFactor>(state_val);
+					bs_desc.dest_blend_alpha[get_index_from_state_name(state_name)] = static_cast<AlphaBlendFactor>(state_val);
 				}
 				if (0 == state_name.find("color_write_mask"))
 				{
-					render_state_obj_->color_write_mask[get_index_from_state_name(state_name)] = static_cast<uint8_t>(state_val);
+					bs_desc.color_write_mask[get_index_from_state_name(state_name)] = static_cast<uint8_t>(state_val);
 				}
 
 				if ("depth_enable" == state_name)
 				{
-					render_state_obj_->depth_enable = state_val ? true : false;
+					dss_desc.depth_enable = state_val ? true : false;
 				}
 				if ("depth_write_mask" == state_name)
 				{
-					render_state_obj_->depth_write_mask = state_val ? true : false;
+					dss_desc.depth_write_mask = state_val ? true : false;
 				}
 				if ("depth_func" == state_name)
 				{
-					render_state_obj_->depth_func = static_cast<RenderStateObject::CompareFunction>(state_val);
+					dss_desc.depth_func = static_cast<CompareFunction>(state_val);
 				}
 
 				if ("front_stencil_enable" == state_name)
 				{
-					render_state_obj_->front_stencil_enable = state_val ? true : false;
+					dss_desc.front_stencil_enable = state_val ? true : false;
 				}
 				if ("front_stencil_func" == state_name)
 				{
-					render_state_obj_->front_stencil_func = static_cast<RenderStateObject::CompareFunction>(state_val);
+					dss_desc.front_stencil_func = static_cast<CompareFunction>(state_val);
 				}
 				if ("front_stencil_ref" == state_name)
 				{
-					render_state_obj_->front_stencil_ref = static_cast<uint16_t>(state_val);
+					dss_desc.front_stencil_ref = static_cast<uint16_t>(state_val);
 				}
 				if ("front_stencil_read_mask" == state_name)
 				{
-					render_state_obj_->front_stencil_read_mask = static_cast<uint16_t>(state_val);
+					dss_desc.front_stencil_read_mask = static_cast<uint16_t>(state_val);
 				}
 				if ("front_stencil_write_mask" == state_name)
 				{
-					render_state_obj_->front_stencil_write_mask = static_cast<uint16_t>(state_val);
+					dss_desc.front_stencil_write_mask = static_cast<uint16_t>(state_val);
 				}
 				if ("front_stencil_fail" == state_name)
 				{
-					render_state_obj_->front_stencil_fail = static_cast<RenderStateObject::StencilOperation>(state_val);
+					dss_desc.front_stencil_fail = static_cast<StencilOperation>(state_val);
 				}
 				if ("front_stencil_depth_fail" == state_name)
 				{
-					render_state_obj_->front_stencil_depth_fail = static_cast<RenderStateObject::StencilOperation>(state_val);
+					dss_desc.front_stencil_depth_fail = static_cast<StencilOperation>(state_val);
 				}
 				if ("front_stencil_pass" == state_name)
 				{
-					render_state_obj_->front_stencil_pass = static_cast<RenderStateObject::StencilOperation>(state_val);
+					dss_desc.front_stencil_pass = static_cast<StencilOperation>(state_val);
 				}
 				if ("back_stencil_enable" == state_name)
 				{
-					render_state_obj_->back_stencil_enable = state_val ? true : false;
+					dss_desc.back_stencil_enable = state_val ? true : false;
 				}
 				if ("back_stencil_func" == state_name)
 				{
-					render_state_obj_->back_stencil_func = static_cast<RenderStateObject::CompareFunction>(state_val);
+					dss_desc.back_stencil_func = static_cast<CompareFunction>(state_val);
 				}
 				if ("back_stencil_ref" == state_name)
 				{
-					render_state_obj_->back_stencil_ref = static_cast<uint16_t>(state_val);
+					dss_desc.back_stencil_ref = static_cast<uint16_t>(state_val);
 				}
 				if ("back_stencil_read_mask" == state_name)
 				{
-					render_state_obj_->back_stencil_read_mask = static_cast<uint16_t>(state_val);
+					dss_desc.back_stencil_read_mask = static_cast<uint16_t>(state_val);
 				}
 				if ("back_stencil_write_mask" == state_name)
 				{
-					render_state_obj_->back_stencil_write_mask = static_cast<uint16_t>(state_val);
+					dss_desc.back_stencil_write_mask = static_cast<uint16_t>(state_val);
 				}
 				if ("back_stencil_fail" == state_name)
 				{
-					render_state_obj_->back_stencil_fail = static_cast<RenderStateObject::StencilOperation>(state_val);
+					dss_desc.back_stencil_fail = static_cast<StencilOperation>(state_val);
 				}
 				if ("back_stencil_depth_fail" == state_name)
 				{
-					render_state_obj_->back_stencil_depth_fail = static_cast<RenderStateObject::StencilOperation>(state_val);
+					dss_desc.back_stencil_depth_fail = static_cast<StencilOperation>(state_val);
 				}
 				if ("back_stencil_pass" == state_name)
 				{
-					render_state_obj_->back_stencil_pass = static_cast<RenderStateObject::StencilOperation>(state_val);
+					dss_desc.back_stencil_pass = static_cast<StencilOperation>(state_val);
 				}
 			}
 			else
@@ -799,6 +801,10 @@ namespace KlayGE
 				}
 			}
 		}
+
+		rasterizer_state_obj_.reset(new RasterizerStateObject(rs_desc));
+		depth_stencil_state_obj_.reset(new DepthStencilStateObject(dss_desc));
+		blend_state_obj_.reset(new BlendStateObject(bs_desc));
 
 		shader_text_.reset(new BOOST_TYPEOF(*shader_text_)(this->GenShaderText()));
 		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
@@ -832,7 +838,9 @@ namespace KlayGE
 		ret->shader_descs_ = shader_descs_;
 		ret->shader_text_ = shader_text_;
 
-		ret->render_state_obj_ = render_state_obj_;
+		ret->rasterizer_state_obj_ = rasterizer_state_obj_;
+		ret->depth_stencil_state_obj_ = depth_stencil_state_obj_;
+		ret->blend_state_obj_ = blend_state_obj_;
 		ret->shader_obj_ = shader_obj_->Clone();
 
 		ret->is_validate_ = is_validate_;
@@ -981,7 +989,7 @@ namespace KlayGE
 		}
 
 		RenderEngine& render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		render_eng.SetStateObjects(*render_state_obj_, *shader_obj_);
+		render_eng.SetStateObjects(*rasterizer_state_obj_, *depth_stencil_state_obj_, *blend_state_obj_, *shader_obj_);
 	}
 
 	std::string RenderPass::GenShaderText() const

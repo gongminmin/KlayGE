@@ -65,7 +65,7 @@ namespace KlayGE
 		void D3DDevice(ID3D9DevicePtr const & device);
 
 		void CreateRenderWindow(std::string const & name, RenderSettings const & settings);
-		void SetStateObjects(RenderStateObject const & rs_obj, ShaderObject const & shader_obj);
+		void SetStateObjects(RasterizerStateObject const & rs_obj, DepthStencilStateObject const & dss_obj, BlendStateObject const & bs_obj, ShaderObject const & shader_obj);
 
 		void StartRendering();
 
@@ -119,7 +119,9 @@ namespace KlayGE
 
 		boost::function<void (RenderTechnique const &, RenderLayout const &)> RenderInstance;
 
-		RenderStateObject cur_render_state_obj_;
+		RasterizerStateObject cur_rs_obj_;
+		DepthStencilStateObject cur_dss_obj_;
+		BlendStateObject cur_bs_obj_;
 		boost::array<std::vector<Sampler>, ShaderObject::ST_NumShaderTypes> cur_samplers_;
 	};
 

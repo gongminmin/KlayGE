@@ -77,7 +77,10 @@ namespace KlayGE
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D9RenderEngine::D3D9RenderEngine()
-		: last_num_vertex_stream_(0)
+		: last_num_vertex_stream_(0),
+			cur_rs_obj_(RasterizerStateDesc()),
+			cur_dss_obj_(DepthStencilStateDesc()),
+			cur_bs_obj_(BlendStateDesc())
 	{
 		// Create our Direct3D object
 		d3d_ = MakeCOMPtr(Direct3DCreate9(D3D_SDK_VERSION));
@@ -211,209 +214,169 @@ namespace KlayGE
 
 	void D3D9RenderEngine::InitRenderStates()
 	{
-		d3dDevice_->SetRenderState(D3DRS_FILLMODE, D3D9Mapping::Mapping(cur_render_state_obj_.polygon_mode));
-		d3dDevice_->SetRenderState(D3DRS_SHADEMODE, D3D9Mapping::Mapping(cur_render_state_obj_.shade_mode));
-		d3dDevice_->SetRenderState(D3DRS_CULLMODE, D3D9Mapping::Mapping(cur_render_state_obj_.cull_mode));
-		d3dDevice_->SetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, float_to_uint32(cur_render_state_obj_.polygon_offset_factor));
-		d3dDevice_->SetRenderState(D3DRS_DEPTHBIAS, float_to_uint32(cur_render_state_obj_.polygon_offset_units));
-		d3dDevice_->SetRenderState(D3DRS_SCISSORTESTENABLE, cur_render_state_obj_.scissor_enable);
-
-		// NVIDIA's Transparency Multisampling
-		if (S_OK == d3d_->CheckDeviceFormat(this->ActiveAdapter().AdapterNo(),
-			D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE,
-			static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'O', 'C'>::value)))
 		{
-			if (cur_render_state_obj_.alpha_to_coverage_enable)
-			{
-				d3dDevice_->SetRenderState(D3DRS_ADAPTIVETESS_Y,
-					static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'O', 'C'>::value));
-			}
-			else
-			{
-				d3dDevice_->SetRenderState(D3DRS_ADAPTIVETESS_Y, D3DFMT_UNKNOWN);
-			}
+			RasterizerStateDesc const & rs_desc = cur_rs_obj_.GetDesc();
+			
+			d3dDevice_->SetRenderState(D3DRS_FILLMODE, D3D9Mapping::Mapping(rs_desc.polygon_mode));
+			d3dDevice_->SetRenderState(D3DRS_SHADEMODE, D3D9Mapping::Mapping(rs_desc.shade_mode));
+			d3dDevice_->SetRenderState(D3DRS_CULLMODE, D3D9Mapping::Mapping(rs_desc.cull_mode));
+			d3dDevice_->SetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, float_to_uint32(rs_desc.polygon_offset_factor));
+			d3dDevice_->SetRenderState(D3DRS_DEPTHBIAS, float_to_uint32(rs_desc.polygon_offset_units));
+			d3dDevice_->SetRenderState(D3DRS_SCISSORTESTENABLE, rs_desc.scissor_enable);
 		}
-		d3dDevice_->SetRenderState(D3DRS_ALPHABLENDENABLE, cur_render_state_obj_.blend_enable[0]);
-		d3dDevice_->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, cur_render_state_obj_.blend_enable[0]);
-		d3dDevice_->SetRenderState(D3DRS_BLENDOP, D3D9Mapping::Mapping(cur_render_state_obj_.blend_op[0]));
-		d3dDevice_->SetRenderState(D3DRS_SRCBLEND, D3D9Mapping::Mapping(cur_render_state_obj_.src_blend[0]));
-		d3dDevice_->SetRenderState(D3DRS_DESTBLEND, D3D9Mapping::Mapping(cur_render_state_obj_.dest_blend[0]));
-		d3dDevice_->SetRenderState(D3DRS_BLENDOPALPHA, D3D9Mapping::Mapping(cur_render_state_obj_.blend_op_alpha[0]));
-		d3dDevice_->SetRenderState(D3DRS_SRCBLENDALPHA, D3D9Mapping::Mapping(cur_render_state_obj_.src_blend_alpha[0]));
-		d3dDevice_->SetRenderState(D3DRS_DESTBLENDALPHA, D3D9Mapping::Mapping(cur_render_state_obj_.dest_blend_alpha[0]));
-		d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE, D3D9Mapping::MappingColorMask(cur_render_state_obj_.color_write_mask[0]));
-		d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE1, D3D9Mapping::MappingColorMask(cur_render_state_obj_.color_write_mask[1]));
-		d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE2, D3D9Mapping::MappingColorMask(cur_render_state_obj_.color_write_mask[2]));
-		d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE3, D3D9Mapping::MappingColorMask(cur_render_state_obj_.color_write_mask[3]));
 
-		d3dDevice_->SetRenderState(D3DRS_ZENABLE, cur_render_state_obj_.depth_enable ? D3DZB_TRUE : D3DZB_FALSE);
-		d3dDevice_->SetRenderState(D3DRS_ZWRITEENABLE, cur_render_state_obj_.depth_write_mask ? D3DZB_TRUE : D3DZB_FALSE);
-		d3dDevice_->SetRenderState(D3DRS_ZFUNC, D3D9Mapping::Mapping(cur_render_state_obj_.depth_func));
+		{
+			BlendStateDesc const & bs_desc = cur_bs_obj_.GetDesc();
 
-		if (cur_render_state_obj_.front_stencil_enable && cur_render_state_obj_.back_stencil_enable)
-		{
-			d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, true);
-		}
-		else
-		{
-			if (cur_render_state_obj_.front_stencil_enable)
+			// NVIDIA's Transparency Multisampling
+			if (S_OK == d3d_->CheckDeviceFormat(this->ActiveAdapter().AdapterNo(),
+				D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE,
+				static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'O', 'C'>::value)))
 			{
-				d3dDevice_->SetRenderState(D3DRS_STENCILENABLE, true);
-			}
-			else
-			{
-				if (cur_render_state_obj_.back_stencil_enable)
+				if (bs_desc.alpha_to_coverage_enable)
 				{
-					d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, true);
-					d3dDevice_->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
+					d3dDevice_->SetRenderState(D3DRS_ADAPTIVETESS_Y,
+						static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'O', 'C'>::value));
 				}
 				else
 				{
-					d3dDevice_->SetRenderState(D3DRS_STENCILENABLE, false);
-					d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, false);
+					d3dDevice_->SetRenderState(D3DRS_ADAPTIVETESS_Y, D3DFMT_UNKNOWN);
 				}
 			}
+			d3dDevice_->SetRenderState(D3DRS_ALPHABLENDENABLE, bs_desc.blend_enable[0]);
+			d3dDevice_->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, bs_desc.blend_enable[0]);
+			d3dDevice_->SetRenderState(D3DRS_BLENDOP, D3D9Mapping::Mapping(bs_desc.blend_op[0]));
+			d3dDevice_->SetRenderState(D3DRS_SRCBLEND, D3D9Mapping::Mapping(bs_desc.src_blend[0]));
+			d3dDevice_->SetRenderState(D3DRS_DESTBLEND, D3D9Mapping::Mapping(bs_desc.dest_blend[0]));
+			d3dDevice_->SetRenderState(D3DRS_BLENDOPALPHA, D3D9Mapping::Mapping(bs_desc.blend_op_alpha[0]));
+			d3dDevice_->SetRenderState(D3DRS_SRCBLENDALPHA, D3D9Mapping::Mapping(bs_desc.src_blend_alpha[0]));
+			d3dDevice_->SetRenderState(D3DRS_DESTBLENDALPHA, D3D9Mapping::Mapping(bs_desc.dest_blend_alpha[0]));
+			d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE, D3D9Mapping::MappingColorMask(bs_desc.color_write_mask[0]));
+			d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE1, D3D9Mapping::MappingColorMask(bs_desc.color_write_mask[1]));
+			d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE2, D3D9Mapping::MappingColorMask(bs_desc.color_write_mask[2]));
+			d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE3, D3D9Mapping::MappingColorMask(bs_desc.color_write_mask[3]));
 		}
-		d3dDevice_->SetRenderState(D3DRS_STENCILFUNC, D3D9Mapping::Mapping(cur_render_state_obj_.front_stencil_func));
-		d3dDevice_->SetRenderState(D3DRS_STENCILREF, cur_render_state_obj_.front_stencil_ref);
-		d3dDevice_->SetRenderState(D3DRS_STENCILMASK, cur_render_state_obj_.front_stencil_read_mask);
-		d3dDevice_->SetRenderState(D3DRS_STENCILWRITEMASK, cur_render_state_obj_.front_stencil_write_mask);
-		d3dDevice_->SetRenderState(D3DRS_STENCILFAIL, D3D9Mapping::Mapping(cur_render_state_obj_.front_stencil_fail));
-		d3dDevice_->SetRenderState(D3DRS_STENCILZFAIL, D3D9Mapping::Mapping(cur_render_state_obj_.front_stencil_depth_fail));
-		d3dDevice_->SetRenderState(D3DRS_STENCILPASS, D3D9Mapping::Mapping(cur_render_state_obj_.front_stencil_pass));
 
-		d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFUNC, D3D9Mapping::Mapping(cur_render_state_obj_.back_stencil_func));
-		d3dDevice_->SetRenderState(D3DRS_STENCILREF, cur_render_state_obj_.back_stencil_ref);
-		d3dDevice_->SetRenderState(D3DRS_STENCILMASK, cur_render_state_obj_.back_stencil_read_mask);
-		d3dDevice_->SetRenderState(D3DRS_STENCILWRITEMASK, cur_render_state_obj_.back_stencil_write_mask);
-		d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFAIL, D3D9Mapping::Mapping(cur_render_state_obj_.back_stencil_fail));
-		d3dDevice_->SetRenderState(D3DRS_CCW_STENCILZFAIL, D3D9Mapping::Mapping(cur_render_state_obj_.back_stencil_depth_fail));
-		d3dDevice_->SetRenderState(D3DRS_CCW_STENCILPASS, D3D9Mapping::Mapping(cur_render_state_obj_.back_stencil_pass));
+		{
+			DepthStencilStateDesc const & dss_desc = cur_dss_obj_.GetDesc();
+
+			d3dDevice_->SetRenderState(D3DRS_ZENABLE, dss_desc.depth_enable ? D3DZB_TRUE : D3DZB_FALSE);
+			d3dDevice_->SetRenderState(D3DRS_ZWRITEENABLE, dss_desc.depth_write_mask ? D3DZB_TRUE : D3DZB_FALSE);
+			d3dDevice_->SetRenderState(D3DRS_ZFUNC, D3D9Mapping::Mapping(dss_desc.depth_func));
+
+			if (dss_desc.front_stencil_enable && dss_desc.back_stencil_enable)
+			{
+				d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, true);
+			}
+			else
+			{
+				if (dss_desc.front_stencil_enable)
+				{
+					d3dDevice_->SetRenderState(D3DRS_STENCILENABLE, true);
+				}
+				else
+				{
+					if (dss_desc.back_stencil_enable)
+					{
+						d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, true);
+						d3dDevice_->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
+					}
+					else
+					{
+						d3dDevice_->SetRenderState(D3DRS_STENCILENABLE, false);
+						d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, false);
+					}
+				}
+			}
+			d3dDevice_->SetRenderState(D3DRS_STENCILFUNC, D3D9Mapping::Mapping(dss_desc.front_stencil_func));
+			d3dDevice_->SetRenderState(D3DRS_STENCILREF, dss_desc.front_stencil_ref);
+			d3dDevice_->SetRenderState(D3DRS_STENCILMASK, dss_desc.front_stencil_read_mask);
+			d3dDevice_->SetRenderState(D3DRS_STENCILWRITEMASK, dss_desc.front_stencil_write_mask);
+			d3dDevice_->SetRenderState(D3DRS_STENCILFAIL, D3D9Mapping::Mapping(dss_desc.front_stencil_fail));
+			d3dDevice_->SetRenderState(D3DRS_STENCILZFAIL, D3D9Mapping::Mapping(dss_desc.front_stencil_depth_fail));
+			d3dDevice_->SetRenderState(D3DRS_STENCILPASS, D3D9Mapping::Mapping(dss_desc.front_stencil_pass));
+
+			d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFUNC, D3D9Mapping::Mapping(dss_desc.back_stencil_func));
+			d3dDevice_->SetRenderState(D3DRS_STENCILREF, dss_desc.back_stencil_ref);
+			d3dDevice_->SetRenderState(D3DRS_STENCILMASK, dss_desc.back_stencil_read_mask);
+			d3dDevice_->SetRenderState(D3DRS_STENCILWRITEMASK, dss_desc.back_stencil_write_mask);
+			d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFAIL, D3D9Mapping::Mapping(dss_desc.back_stencil_fail));
+			d3dDevice_->SetRenderState(D3DRS_CCW_STENCILZFAIL, D3D9Mapping::Mapping(dss_desc.back_stencil_depth_fail));
+			d3dDevice_->SetRenderState(D3DRS_CCW_STENCILPASS, D3D9Mapping::Mapping(dss_desc.back_stencil_pass));
+		}
 	}
 
 	// 设置当前渲染状态对象
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::SetStateObjects(RenderStateObject const & rs_obj, ShaderObject const & shader_obj)
+	void D3D9RenderEngine::SetStateObjects(RasterizerStateObject const & rs_obj, DepthStencilStateObject const & dss_obj, BlendStateObject const & bs_obj, ShaderObject const & shader_obj)
 	{
+		if (cur_rs_obj_ != rs_obj)
 		{
-			if (cur_render_state_obj_.polygon_mode != rs_obj.polygon_mode)
+			RasterizerStateDesc const & cur_rs_desc = cur_rs_obj_.GetDesc();
+			RasterizerStateDesc const & rs_desc = rs_obj.GetDesc();
+
+			if (cur_rs_desc.polygon_mode != rs_desc.polygon_mode)
 			{
-				d3dDevice_->SetRenderState(D3DRS_FILLMODE, D3D9Mapping::Mapping(rs_obj.polygon_mode));
+				d3dDevice_->SetRenderState(D3DRS_FILLMODE, D3D9Mapping::Mapping(rs_desc.polygon_mode));
 			}
-			if (cur_render_state_obj_.shade_mode != rs_obj.shade_mode)
+			if (cur_rs_desc.shade_mode != rs_desc.shade_mode)
 			{
-				d3dDevice_->SetRenderState(D3DRS_SHADEMODE, D3D9Mapping::Mapping(rs_obj.shade_mode));
+				d3dDevice_->SetRenderState(D3DRS_SHADEMODE, D3D9Mapping::Mapping(rs_desc.shade_mode));
 			}
-			if (cur_render_state_obj_.cull_mode != rs_obj.cull_mode)
+			if (cur_rs_desc.cull_mode != rs_desc.cull_mode)
 			{
-				d3dDevice_->SetRenderState(D3DRS_CULLMODE, D3D9Mapping::Mapping(rs_obj.cull_mode));
+				d3dDevice_->SetRenderState(D3DRS_CULLMODE, D3D9Mapping::Mapping(rs_desc.cull_mode));
 			}
-			if (cur_render_state_obj_.polygon_offset_factor != rs_obj.polygon_offset_factor)
+			if (cur_rs_desc.polygon_offset_factor != rs_desc.polygon_offset_factor)
 			{
-				d3dDevice_->SetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, float_to_uint32(rs_obj.polygon_offset_factor));
+				d3dDevice_->SetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, float_to_uint32(rs_desc.polygon_offset_factor));
 			}
-			if (cur_render_state_obj_.polygon_offset_units != rs_obj.polygon_offset_units)
+			if (cur_rs_desc.polygon_offset_units != rs_desc.polygon_offset_units)
 			{
-				d3dDevice_->SetRenderState(D3DRS_DEPTHBIAS, float_to_uint32(rs_obj.polygon_offset_units));
+				d3dDevice_->SetRenderState(D3DRS_DEPTHBIAS, float_to_uint32(rs_desc.polygon_offset_units));
 			}
-			if (cur_render_state_obj_.scissor_enable != rs_obj.scissor_enable)
+			if (cur_rs_desc.scissor_enable != rs_desc.scissor_enable)
 			{
-				d3dDevice_->SetRenderState(D3DRS_SCISSORTESTENABLE, rs_obj.scissor_enable);
+				d3dDevice_->SetRenderState(D3DRS_SCISSORTESTENABLE, rs_desc.scissor_enable);
 			}
 
-			if (cur_render_state_obj_.alpha_to_coverage_enable != rs_obj.alpha_to_coverage_enable)
+			cur_rs_obj_ = rs_obj;
+		}
+
+		if (cur_dss_obj_ != dss_obj)
+		{
+			DepthStencilStateDesc const & cur_dss_desc = cur_dss_obj_.GetDesc();
+			DepthStencilStateDesc const & dss_desc = dss_obj.GetDesc();
+
+			if (cur_dss_desc.depth_enable != dss_desc.depth_enable)
 			{
-				// NVIDIA's Transparency Multisampling
-				if (S_OK == d3d_->CheckDeviceFormat(this->ActiveAdapter().AdapterNo(),
-					D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE,
-					static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'O', 'C'>::value)))
-				{
-					if (rs_obj.alpha_to_coverage_enable)
-					{
-						d3dDevice_->SetRenderState(D3DRS_ADAPTIVETESS_Y,
-							static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'O', 'C'>::value));
-					}
-					else
-					{
-						d3dDevice_->SetRenderState(D3DRS_ADAPTIVETESS_Y, D3DFMT_UNKNOWN);
-					}
-				}
+				d3dDevice_->SetRenderState(D3DRS_ZENABLE, dss_desc.depth_enable ? D3DZB_TRUE : D3DZB_FALSE);
 			}
-			if (cur_render_state_obj_.blend_enable[0] != rs_obj.blend_enable[0])
+			if (cur_dss_desc.depth_write_mask != dss_desc.depth_write_mask)
 			{
-				d3dDevice_->SetRenderState(D3DRS_ALPHABLENDENABLE, rs_obj.blend_enable[0]);
-				d3dDevice_->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, rs_obj.blend_enable[0]);
+				d3dDevice_->SetRenderState(D3DRS_ZWRITEENABLE, dss_desc.depth_write_mask ? D3DZB_TRUE : D3DZB_FALSE);
 			}
-			if (cur_render_state_obj_.blend_op[0] != rs_obj.blend_op[0])
+			if (cur_dss_desc.depth_func != dss_desc.depth_func)
 			{
-				d3dDevice_->SetRenderState(D3DRS_BLENDOP, D3D9Mapping::Mapping(rs_obj.blend_op[0]));
-			}
-			if (cur_render_state_obj_.src_blend[0] != rs_obj.src_blend[0])
-			{
-				d3dDevice_->SetRenderState(D3DRS_SRCBLEND, D3D9Mapping::Mapping(rs_obj.src_blend[0]));
-			}
-			if (cur_render_state_obj_.dest_blend[0] != rs_obj.dest_blend[0])
-			{
-				d3dDevice_->SetRenderState(D3DRS_DESTBLEND, D3D9Mapping::Mapping(rs_obj.dest_blend[0]));
-			}
-			if (cur_render_state_obj_.blend_op_alpha[0] != rs_obj.blend_op_alpha[0])
-			{
-				d3dDevice_->SetRenderState(D3DRS_BLENDOPALPHA, D3D9Mapping::Mapping(rs_obj.blend_op_alpha[0]));
-			}
-			if (cur_render_state_obj_.src_blend_alpha[0] != rs_obj.src_blend_alpha[0])
-			{
-				d3dDevice_->SetRenderState(D3DRS_SRCBLENDALPHA, D3D9Mapping::Mapping(rs_obj.src_blend_alpha[0]));
-			}
-			if (cur_render_state_obj_.dest_blend_alpha[0] != rs_obj.dest_blend_alpha[0])
-			{
-				d3dDevice_->SetRenderState(D3DRS_DESTBLENDALPHA, D3D9Mapping::Mapping(rs_obj.dest_blend_alpha[0]));
-			}
-			if (cur_render_state_obj_.color_write_mask[0] != rs_obj.color_write_mask[0])
-			{
-				d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE, D3D9Mapping::MappingColorMask(rs_obj.color_write_mask[0]));
-			}
-			if (cur_render_state_obj_.color_write_mask[1] != rs_obj.color_write_mask[1])
-			{
-				d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE1, D3D9Mapping::MappingColorMask(rs_obj.color_write_mask[1]));
-			}
-			if (cur_render_state_obj_.color_write_mask[2] != rs_obj.color_write_mask[2])
-			{
-				d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE2, D3D9Mapping::MappingColorMask(rs_obj.color_write_mask[2]));
-			}
-			if (cur_render_state_obj_.color_write_mask[3] != rs_obj.color_write_mask[3])
-			{
-				d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE3, D3D9Mapping::MappingColorMask(rs_obj.color_write_mask[3]));
+				d3dDevice_->SetRenderState(D3DRS_ZFUNC, D3D9Mapping::Mapping(dss_desc.depth_func));
 			}
 
-			if (cur_render_state_obj_.depth_enable != rs_obj.depth_enable)
+			if ((cur_dss_desc.front_stencil_enable != dss_desc.front_stencil_enable)
+				|| (cur_dss_desc.back_stencil_enable != dss_desc.back_stencil_enable))
 			{
-				d3dDevice_->SetRenderState(D3DRS_ZENABLE, rs_obj.depth_enable ? D3DZB_TRUE : D3DZB_FALSE);
-			}
-			if (cur_render_state_obj_.depth_write_mask != rs_obj.depth_write_mask)
-			{
-				d3dDevice_->SetRenderState(D3DRS_ZWRITEENABLE, rs_obj.depth_write_mask ? D3DZB_TRUE : D3DZB_FALSE);
-			}
-			if (cur_render_state_obj_.depth_func != rs_obj.depth_func)
-			{
-				d3dDevice_->SetRenderState(D3DRS_ZFUNC, D3D9Mapping::Mapping(rs_obj.depth_func));
-			}
-
-			if ((cur_render_state_obj_.front_stencil_enable != rs_obj.front_stencil_enable)
-				|| (cur_render_state_obj_.back_stencil_enable != rs_obj.back_stencil_enable))
-			{
-				if (rs_obj.front_stencil_enable && rs_obj.back_stencil_enable)
+				if (dss_desc.front_stencil_enable && dss_desc.back_stencil_enable)
 				{
 					d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, true);
 				}
 				else
 				{
-					if (rs_obj.front_stencil_enable)
+					if (dss_desc.front_stencil_enable)
 					{
 						d3dDevice_->SetRenderState(D3DRS_STENCILENABLE, true);
 					}
 					else
 					{
-						if (rs_obj.back_stencil_enable)
+						if (dss_desc.back_stencil_enable)
 						{
 							d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, true);
 							d3dDevice_->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
@@ -426,65 +389,137 @@ namespace KlayGE
 					}
 				}
 			}
-			if (cur_render_state_obj_.front_stencil_func != rs_obj.front_stencil_func)
+			if (cur_dss_desc.front_stencil_func != dss_desc.front_stencil_func)
 			{
-				d3dDevice_->SetRenderState(D3DRS_STENCILFUNC, D3D9Mapping::Mapping(rs_obj.front_stencil_func));
+				d3dDevice_->SetRenderState(D3DRS_STENCILFUNC, D3D9Mapping::Mapping(dss_desc.front_stencil_func));
 			}
-			if (cur_render_state_obj_.front_stencil_ref != rs_obj.front_stencil_ref)
+			if (cur_dss_desc.front_stencil_ref != dss_desc.front_stencil_ref)
 			{
-				d3dDevice_->SetRenderState(D3DRS_STENCILREF, rs_obj.front_stencil_ref);
+				d3dDevice_->SetRenderState(D3DRS_STENCILREF, dss_desc.front_stencil_ref);
 			}
-			if (cur_render_state_obj_.front_stencil_read_mask != rs_obj.front_stencil_read_mask)
+			if (cur_dss_desc.front_stencil_read_mask != dss_desc.front_stencil_read_mask)
 			{
-				d3dDevice_->SetRenderState(D3DRS_STENCILMASK, rs_obj.front_stencil_read_mask);
+				d3dDevice_->SetRenderState(D3DRS_STENCILMASK, dss_desc.front_stencil_read_mask);
 			}
-			if (cur_render_state_obj_.front_stencil_fail != rs_obj.front_stencil_fail)
+			if (cur_dss_desc.front_stencil_fail != dss_desc.front_stencil_fail)
 			{
-				d3dDevice_->SetRenderState(D3DRS_STENCILFAIL, D3D9Mapping::Mapping(rs_obj.front_stencil_fail));
+				d3dDevice_->SetRenderState(D3DRS_STENCILFAIL, D3D9Mapping::Mapping(dss_desc.front_stencil_fail));
 			}
-			if (cur_render_state_obj_.front_stencil_depth_fail != rs_obj.front_stencil_depth_fail)
+			if (cur_dss_desc.front_stencil_depth_fail != dss_desc.front_stencil_depth_fail)
 			{
-				d3dDevice_->SetRenderState(D3DRS_STENCILZFAIL, D3D9Mapping::Mapping(rs_obj.front_stencil_depth_fail));
+				d3dDevice_->SetRenderState(D3DRS_STENCILZFAIL, D3D9Mapping::Mapping(dss_desc.front_stencil_depth_fail));
 			}
-			if (cur_render_state_obj_.front_stencil_pass != rs_obj.front_stencil_pass)
+			if (cur_dss_desc.front_stencil_pass != dss_desc.front_stencil_pass)
 			{
-				d3dDevice_->SetRenderState(D3DRS_STENCILPASS, D3D9Mapping::Mapping(rs_obj.front_stencil_pass));
+				d3dDevice_->SetRenderState(D3DRS_STENCILPASS, D3D9Mapping::Mapping(dss_desc.front_stencil_pass));
 			}
-			if (cur_render_state_obj_.front_stencil_write_mask != rs_obj.front_stencil_write_mask)
+			if (cur_dss_desc.front_stencil_write_mask != dss_desc.front_stencil_write_mask)
 			{
-				d3dDevice_->SetRenderState(D3DRS_STENCILWRITEMASK, rs_obj.front_stencil_write_mask);
-			}
-
-			if (cur_render_state_obj_.back_stencil_func != rs_obj.back_stencil_func)
-			{
-				d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFUNC, D3D9Mapping::Mapping(rs_obj.back_stencil_func));
-			}
-			if (cur_render_state_obj_.back_stencil_ref != rs_obj.back_stencil_ref)
-			{
-				d3dDevice_->SetRenderState(D3DRS_STENCILREF, rs_obj.back_stencil_ref);
-			}
-			if (cur_render_state_obj_.back_stencil_read_mask != rs_obj.back_stencil_read_mask)
-			{
-				d3dDevice_->SetRenderState(D3DRS_STENCILMASK, rs_obj.back_stencil_read_mask);
-			}
-			if (cur_render_state_obj_.back_stencil_fail != rs_obj.back_stencil_fail)
-			{
-				d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFAIL, D3D9Mapping::Mapping(rs_obj.back_stencil_fail));
-			}
-			if (cur_render_state_obj_.back_stencil_depth_fail != rs_obj.back_stencil_depth_fail)
-			{
-				d3dDevice_->SetRenderState(D3DRS_CCW_STENCILZFAIL, D3D9Mapping::Mapping(rs_obj.back_stencil_depth_fail));
-			}
-			if (cur_render_state_obj_.back_stencil_pass != rs_obj.back_stencil_pass)
-			{
-				d3dDevice_->SetRenderState(D3DRS_CCW_STENCILPASS, D3D9Mapping::Mapping(rs_obj.back_stencil_pass));
-			}
-			if (cur_render_state_obj_.back_stencil_write_mask != rs_obj.back_stencil_write_mask)
-			{
-				d3dDevice_->SetRenderState(D3DRS_STENCILWRITEMASK, rs_obj.back_stencil_write_mask);
+				d3dDevice_->SetRenderState(D3DRS_STENCILWRITEMASK, dss_desc.front_stencil_write_mask);
 			}
 
-			cur_render_state_obj_ = rs_obj;
+			if (cur_dss_desc.back_stencil_func != dss_desc.back_stencil_func)
+			{
+				d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFUNC, D3D9Mapping::Mapping(dss_desc.back_stencil_func));
+			}
+			if (cur_dss_desc.back_stencil_ref != dss_desc.back_stencil_ref)
+			{
+				d3dDevice_->SetRenderState(D3DRS_STENCILREF, dss_desc.back_stencil_ref);
+			}
+			if (cur_dss_desc.back_stencil_read_mask != dss_desc.back_stencil_read_mask)
+			{
+				d3dDevice_->SetRenderState(D3DRS_STENCILMASK, dss_desc.back_stencil_read_mask);
+			}
+			if (cur_dss_desc.back_stencil_fail != dss_desc.back_stencil_fail)
+			{
+				d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFAIL, D3D9Mapping::Mapping(dss_desc.back_stencil_fail));
+			}
+			if (cur_dss_desc.back_stencil_depth_fail != dss_desc.back_stencil_depth_fail)
+			{
+				d3dDevice_->SetRenderState(D3DRS_CCW_STENCILZFAIL, D3D9Mapping::Mapping(dss_desc.back_stencil_depth_fail));
+			}
+			if (cur_dss_desc.back_stencil_pass != dss_desc.back_stencil_pass)
+			{
+				d3dDevice_->SetRenderState(D3DRS_CCW_STENCILPASS, D3D9Mapping::Mapping(dss_desc.back_stencil_pass));
+			}
+			if (cur_dss_desc.back_stencil_write_mask != dss_desc.back_stencil_write_mask)
+			{
+				d3dDevice_->SetRenderState(D3DRS_STENCILWRITEMASK, dss_desc.back_stencil_write_mask);
+			}
+
+			cur_dss_obj_ = dss_obj;
+		}
+
+		if (cur_bs_obj_ != bs_obj)
+		{
+			BlendStateDesc const & cur_bs_desc = cur_bs_obj_.GetDesc();
+			BlendStateDesc const & bs_desc = bs_obj.GetDesc();
+
+			if (cur_bs_desc.alpha_to_coverage_enable != bs_desc.alpha_to_coverage_enable)
+			{
+				// NVIDIA's Transparency Multisampling
+				if (S_OK == d3d_->CheckDeviceFormat(this->ActiveAdapter().AdapterNo(),
+					D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE,
+					static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'O', 'C'>::value)))
+				{
+					if (bs_desc.alpha_to_coverage_enable)
+					{
+						d3dDevice_->SetRenderState(D3DRS_ADAPTIVETESS_Y,
+							static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'O', 'C'>::value));
+					}
+					else
+					{
+						d3dDevice_->SetRenderState(D3DRS_ADAPTIVETESS_Y, D3DFMT_UNKNOWN);
+					}
+				}
+			}
+			if (cur_bs_desc.blend_enable[0] != bs_desc.blend_enable[0])
+			{
+				d3dDevice_->SetRenderState(D3DRS_ALPHABLENDENABLE, bs_desc.blend_enable[0]);
+				d3dDevice_->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, bs_desc.blend_enable[0]);
+			}
+			if (cur_bs_desc.blend_op[0] != bs_desc.blend_op[0])
+			{
+				d3dDevice_->SetRenderState(D3DRS_BLENDOP, D3D9Mapping::Mapping(bs_desc.blend_op[0]));
+			}
+			if (cur_bs_desc.src_blend[0] != bs_desc.src_blend[0])
+			{
+				d3dDevice_->SetRenderState(D3DRS_SRCBLEND, D3D9Mapping::Mapping(bs_desc.src_blend[0]));
+			}
+			if (cur_bs_desc.dest_blend[0] != bs_desc.dest_blend[0])
+			{
+				d3dDevice_->SetRenderState(D3DRS_DESTBLEND, D3D9Mapping::Mapping(bs_desc.dest_blend[0]));
+			}
+			if (cur_bs_desc.blend_op_alpha[0] != bs_desc.blend_op_alpha[0])
+			{
+				d3dDevice_->SetRenderState(D3DRS_BLENDOPALPHA, D3D9Mapping::Mapping(bs_desc.blend_op_alpha[0]));
+			}
+			if (cur_bs_desc.src_blend_alpha[0] != bs_desc.src_blend_alpha[0])
+			{
+				d3dDevice_->SetRenderState(D3DRS_SRCBLENDALPHA, D3D9Mapping::Mapping(bs_desc.src_blend_alpha[0]));
+			}
+			if (cur_bs_desc.dest_blend_alpha[0] != bs_desc.dest_blend_alpha[0])
+			{
+				d3dDevice_->SetRenderState(D3DRS_DESTBLENDALPHA, D3D9Mapping::Mapping(bs_desc.dest_blend_alpha[0]));
+			}
+			if (cur_bs_desc.color_write_mask[0] != bs_desc.color_write_mask[0])
+			{
+				d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE, D3D9Mapping::MappingColorMask(bs_desc.color_write_mask[0]));
+			}
+			if (cur_bs_desc.color_write_mask[1] != bs_desc.color_write_mask[1])
+			{
+				d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE1, D3D9Mapping::MappingColorMask(bs_desc.color_write_mask[1]));
+			}
+			if (cur_bs_desc.color_write_mask[2] != bs_desc.color_write_mask[2])
+			{
+				d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE2, D3D9Mapping::MappingColorMask(bs_desc.color_write_mask[2]));
+			}
+			if (cur_bs_desc.color_write_mask[3] != bs_desc.color_write_mask[3])
+			{
+				d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE3, D3D9Mapping::MappingColorMask(bs_desc.color_write_mask[3]));
+			}
+
+			cur_bs_obj_ = bs_obj;
 		}
 
 		D3D9ShaderObject const & d3d9_shader_obj = *checked_cast<D3D9ShaderObject const *>(&shader_obj);
@@ -894,7 +929,10 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::OnLostDevice()
 	{
-		cur_render_state_obj_ = RenderStateObject();
+		cur_rs_obj_ = RasterizerStateObject(RasterizerStateDesc());
+		cur_dss_obj_ = DepthStencilStateObject(DepthStencilStateDesc());
+		cur_bs_obj_ = BlendStateObject(BlendStateDesc());
+		this->InitRenderStates();
 		BOOST_FOREACH(BOOST_TYPEOF(cur_samplers_)::reference samplers, cur_samplers_)
 		{
 			BOOST_FOREACH(BOOST_TYPEOF(samplers)::reference sampler, samplers)
