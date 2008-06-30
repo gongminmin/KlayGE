@@ -579,13 +579,13 @@ namespace KlayGE
 		struct VertexFormat
 		{
 			float3 pos;
-			float4 clr;
+			Color clr;
 			float2 tex;
 
 			VertexFormat()
 			{
 			}
-			VertexFormat(float3 const & p, float4 const & c, float2 const & t)
+			VertexFormat(float3 const & p, Color const & c, float2 const & t)
 				: pos(p), clr(c), tex(t)
 			{
 			}

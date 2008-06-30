@@ -78,9 +78,9 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D9RenderEngine::D3D9RenderEngine()
 		: last_num_vertex_stream_(0),
-			cur_rs_obj_(RasterizerStateDesc()),
-			cur_dss_obj_(DepthStencilStateDesc()),
-			cur_bs_obj_(BlendStateDesc())
+			cur_rs_obj_(Context::Instance().RenderFactoryInstance().MakeRasterizerStateObject(RasterizerStateDesc())),
+			cur_dss_obj_(Context::Instance().RenderFactoryInstance().MakeDepthStencilStateObject(DepthStencilStateDesc())),
+			cur_bs_obj_(Context::Instance().RenderFactoryInstance().MakeBlendStateObject(BlendStateDesc()))
 	{
 		// Create our Direct3D object
 		d3d_ = MakeCOMPtr(Direct3DCreate9(D3D_SDK_VERSION));
@@ -215,7 +215,7 @@ namespace KlayGE
 	void D3D9RenderEngine::InitRenderStates()
 	{
 		{
-			RasterizerStateDesc const & rs_desc = cur_rs_obj_.GetDesc();
+			RasterizerStateDesc const & rs_desc = cur_rs_obj_->GetDesc();
 			
 			d3dDevice_->SetRenderState(D3DRS_FILLMODE, D3D9Mapping::Mapping(rs_desc.polygon_mode));
 			d3dDevice_->SetRenderState(D3DRS_SHADEMODE, D3D9Mapping::Mapping(rs_desc.shade_mode));
@@ -226,7 +226,7 @@ namespace KlayGE
 		}
 
 		{
-			BlendStateDesc const & bs_desc = cur_bs_obj_.GetDesc();
+			BlendStateDesc const & bs_desc = cur_bs_obj_->GetDesc();
 
 			// NVIDIA's Transparency Multisampling
 			if (S_OK == d3d_->CheckDeviceFormat(this->ActiveAdapter().AdapterNo(),
@@ -258,7 +258,7 @@ namespace KlayGE
 		}
 
 		{
-			DepthStencilStateDesc const & dss_desc = cur_dss_obj_.GetDesc();
+			DepthStencilStateDesc const & dss_desc = cur_dss_obj_->GetDesc();
 
 			d3dDevice_->SetRenderState(D3DRS_ZENABLE, dss_desc.depth_enable ? D3DZB_TRUE : D3DZB_FALSE);
 			d3dDevice_->SetRenderState(D3DRS_ZWRITEENABLE, dss_desc.depth_write_mask ? D3DZB_TRUE : D3DZB_FALSE);
@@ -308,12 +308,12 @@ namespace KlayGE
 
 	// 设置当前渲染状态对象
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::SetStateObjects(RasterizerStateObject const & rs_obj, DepthStencilStateObject const & dss_obj, BlendStateObject const & bs_obj, ShaderObject const & shader_obj)
+	void D3D9RenderEngine::SetStateObjects(RasterizerStateObjectPtr rs_obj, DepthStencilStateObjectPtr dss_obj, BlendStateObjectPtr bs_obj, ShaderObject const & shader_obj)
 	{
 		if (cur_rs_obj_ != rs_obj)
 		{
-			RasterizerStateDesc const & cur_rs_desc = cur_rs_obj_.GetDesc();
-			RasterizerStateDesc const & rs_desc = rs_obj.GetDesc();
+			RasterizerStateDesc const & cur_rs_desc = cur_rs_obj_->GetDesc();
+			RasterizerStateDesc const & rs_desc = rs_obj->GetDesc();
 
 			if (cur_rs_desc.polygon_mode != rs_desc.polygon_mode)
 			{
@@ -345,8 +345,8 @@ namespace KlayGE
 
 		if (cur_dss_obj_ != dss_obj)
 		{
-			DepthStencilStateDesc const & cur_dss_desc = cur_dss_obj_.GetDesc();
-			DepthStencilStateDesc const & dss_desc = dss_obj.GetDesc();
+			DepthStencilStateDesc const & cur_dss_desc = cur_dss_obj_->GetDesc();
+			DepthStencilStateDesc const & dss_desc = dss_obj->GetDesc();
 
 			if (cur_dss_desc.depth_enable != dss_desc.depth_enable)
 			{
@@ -452,8 +452,8 @@ namespace KlayGE
 
 		if (cur_bs_obj_ != bs_obj)
 		{
-			BlendStateDesc const & cur_bs_desc = cur_bs_obj_.GetDesc();
-			BlendStateDesc const & bs_desc = bs_obj.GetDesc();
+			BlendStateDesc const & cur_bs_desc = cur_bs_obj_->GetDesc();
+			BlendStateDesc const & bs_desc = bs_obj->GetDesc();
 
 			if (cur_bs_desc.alpha_to_coverage_enable != bs_desc.alpha_to_coverage_enable)
 			{
@@ -929,10 +929,12 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::OnLostDevice()
 	{
-		cur_rs_obj_ = RasterizerStateObject(RasterizerStateDesc());
-		cur_dss_obj_ = DepthStencilStateObject(DepthStencilStateDesc());
-		cur_bs_obj_ = BlendStateObject(BlendStateDesc());
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		cur_rs_obj_ = rf.MakeRasterizerStateObject(RasterizerStateDesc());
+		cur_dss_obj_ = rf.MakeDepthStencilStateObject(DepthStencilStateDesc());
+		cur_bs_obj_ = rf.MakeBlendStateObject(BlendStateDesc());
 		this->InitRenderStates();
+
 		BOOST_FOREACH(BOOST_TYPEOF(cur_samplers_)::reference samplers, cur_samplers_)
 		{
 			BOOST_FOREACH(BOOST_TYPEOF(samplers)::reference sampler, samplers)

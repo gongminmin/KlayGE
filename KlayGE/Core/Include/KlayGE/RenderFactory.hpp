@@ -68,12 +68,17 @@ namespace KlayGE
 		virtual RenderViewPtr MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer, uint32_t width, uint32_t height, ElementFormat pf) = 0;
 		virtual RenderViewPtr MakeDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t multi_sample) = 0;
 
+		virtual RasterizerStateObjectPtr MakeRasterizerStateObject(RasterizerStateDesc const & desc);
+		virtual DepthStencilStateObjectPtr MakeDepthStencilStateObject(DepthStencilStateDesc const & desc);
+		virtual BlendStateObjectPtr MakeBlendStateObject(BlendStateDesc const & desc);
 		virtual ShaderObjectPtr MakeShaderObject() = 0;
 
 	protected:
 		std::map<std::string, std::vector<RenderEffectPtr> > effect_pool_;
-
 		std::map<std::pair<std::string, uint32_t>, FontPtr> font_pool_;
+		std::map<RasterizerStateDesc, RasterizerStateObjectPtr> rs_pool_;
+		std::map<DepthStencilStateDesc, DepthStencilStateObjectPtr> dss_pool_;
+		std::map<BlendStateDesc, BlendStateObjectPtr> bs_pool_;
 	};
 }
 

@@ -84,6 +84,9 @@ namespace KlayGE
 	typedef boost::shared_ptr<RenderVariable> RenderVariablePtr;
 	class RenderEffectAnnotation;
 	typedef boost::shared_ptr<RenderEffectAnnotation> RenderEffectAnnotationPtr;
+	struct RasterizerStateDesc;
+	struct DepthStencilStateDesc;
+	struct BlendStateDesc;
 	class RasterizerStateObject;
 	typedef boost::shared_ptr<RasterizerStateObject> RasterizerStateObjectPtr;
 	class DepthStencilStateObject;

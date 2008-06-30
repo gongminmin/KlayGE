@@ -32,18 +32,9 @@ namespace KlayGE
 	{
 	}
 
-	BlendStateDesc::BlendStateDesc()
-		: alpha_to_coverage_enable(false),
-			independent_blend_enable(false)
+	bool operator<(RasterizerStateDesc const & lhs, RasterizerStateDesc const & rhs)
 	{
-		blend_enable.assign(false);
-		blend_op.assign(BOP_Add);
-		src_blend.assign(ABF_One);
-		dest_blend.assign(ABF_Zero);
-		blend_op_alpha.assign(BOP_Add);
-		src_blend_alpha.assign(ABF_One);
-		dest_blend_alpha.assign(ABF_Zero);
-		color_write_mask.assign(CMASK_All);
+		return memcmp(&lhs, &rhs, sizeof(lhs)) < 0;
 	}
 
 	DepthStencilStateDesc::DepthStencilStateDesc()
@@ -69,33 +60,46 @@ namespace KlayGE
 	{
 	}
 
-	bool operator==(RasterizerStateObject const & lhs, RasterizerStateObject const & rhs)
+	bool operator<(DepthStencilStateDesc const & lhs, DepthStencilStateDesc const & rhs)
 	{
-		return 0 == memcmp(&lhs, &rhs, sizeof(lhs));
+		return memcmp(&lhs, &rhs, sizeof(lhs)) < 0;
 	}
 
-	bool operator!=(RasterizerStateObject const & lhs, RasterizerStateObject const & rhs)
+	BlendStateDesc::BlendStateDesc()
+		: alpha_to_coverage_enable(false),
+			independent_blend_enable(false)
 	{
-		return !(lhs == rhs);
+		blend_enable.assign(false);
+		blend_op.assign(BOP_Add);
+		src_blend.assign(ABF_One);
+		dest_blend.assign(ABF_Zero);
+		blend_op_alpha.assign(BOP_Add);
+		src_blend_alpha.assign(ABF_One);
+		dest_blend_alpha.assign(ABF_Zero);
+		color_write_mask.assign(CMASK_All);
 	}
 
-	bool operator==(DepthStencilStateObject const & lhs, DepthStencilStateObject const & rhs)
+	bool operator<(BlendStateDesc const & lhs, BlendStateDesc const & rhs)
 	{
-		return 0 == memcmp(&lhs, &rhs, sizeof(lhs));
+		return memcmp(&lhs, &rhs, sizeof(lhs)) < 0;
 	}
 
-	bool operator!=(DepthStencilStateObject const & lhs, DepthStencilStateObject const & rhs)
+
+	RasterizerStateObjectPtr RasterizerStateObject::NullObject()
 	{
-		return !(lhs == rhs);
+		static RasterizerStateObjectPtr obj(new RasterizerStateObject(RasterizerStateDesc()));
+		return obj;
 	}
 
-	bool operator==(BlendStateObject const & lhs, BlendStateObject const & rhs)
+	DepthStencilStateObjectPtr DepthStencilStateObject::NullObject()
 	{
-		return 0 == memcmp(&lhs, &rhs, sizeof(lhs));
+		static DepthStencilStateObjectPtr obj(new DepthStencilStateObject(DepthStencilStateDesc()));
+		return obj;
 	}
 
-	bool operator!=(BlendStateObject const & lhs, BlendStateObject const & rhs)
+	BlendStateObjectPtr BlendStateObject::NullObject()
 	{
-		return !(lhs == rhs);
+		static BlendStateObjectPtr obj(new BlendStateObject(BlendStateDesc()));
+		return obj;
 	}
 }

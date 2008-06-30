@@ -336,17 +336,13 @@ namespace KlayGE
 		rect.second.push_back(last_index + 0);
 
 		rect.first.push_back(UIManager::VertexFormat(pos + float3(0, 0, 0),
-			*reinterpret_cast<float4 const *>(&clrs[0]),
-			float2(texcoord.left(), texcoord.top())));
+			clrs[0], float2(texcoord.left(), texcoord.top())));
 		rect.first.push_back(UIManager::VertexFormat(pos + float3(width, 0, 0),
-			*reinterpret_cast<float4 const *>(&clrs[1]),
-			float2(texcoord.right(), texcoord.top())));
+			clrs[1], float2(texcoord.right(), texcoord.top())));
 		rect.first.push_back(UIManager::VertexFormat(pos + float3(width, height, 0),
-			*reinterpret_cast<float4 const *>(&clrs[2]),
-			float2(texcoord.right(), texcoord.bottom())));
+			clrs[2], float2(texcoord.right(), texcoord.bottom())));
 		rect.first.push_back(UIManager::VertexFormat(pos + float3(0, height, 0),
-			*reinterpret_cast<float4 const *>(&clrs[3]),
-			float2(texcoord.left(), texcoord.bottom())));
+			clrs[3], float2(texcoord.left(), texcoord.bottom())));
 	}
 
 	void UIManager::DrawText(std::wstring const & strText, uint32_t font_index,

@@ -141,6 +141,8 @@ namespace KlayGE
 		bool				multisample_enable;
 
 		RasterizerStateDesc();
+
+		friend bool operator<(RasterizerStateDesc const & lhs, RasterizerStateDesc const & rhs);
 	};
 
 	struct DepthStencilStateDesc
@@ -168,6 +170,8 @@ namespace KlayGE
 		StencilOperation	back_stencil_pass;
 
 		DepthStencilStateDesc();
+
+		friend bool operator<(DepthStencilStateDesc const & lhs, DepthStencilStateDesc const & rhs);
 	};
 
 	struct BlendStateDesc
@@ -185,6 +189,8 @@ namespace KlayGE
 		boost::array<uint8_t, 8>			color_write_mask;
 
 		BlendStateDesc();
+
+		friend bool operator<(BlendStateDesc const & lhs, BlendStateDesc const & rhs);
 	};
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #pragma pack(pop)
@@ -192,78 +198,69 @@ namespace KlayGE
 
 	class RasterizerStateObject
 	{
+		friend class RenderFactory;
+
 	public:
-		RasterizerStateObject(RasterizerStateObject const & rhs)
-			: desc_(rhs.desc_)
-		{
-		}
-
-		explicit RasterizerStateObject(RasterizerStateDesc const & desc)
-			: desc_(desc)
-		{
-		}
-
 		RasterizerStateDesc const & GetDesc() const
 		{
 			return desc_;
+		}
+
+		static RasterizerStateObjectPtr NullObject();
+
+	private:
+		explicit RasterizerStateObject(RasterizerStateDesc const & desc)
+			: desc_(desc)
+		{
 		}
 
 	private:
 		RasterizerStateDesc desc_;
 	};
 
-	bool operator==(RasterizerStateObject const & lhs, RasterizerStateObject const & rhs);
-	bool operator!=(RasterizerStateObject const & lhs, RasterizerStateObject const & rhs);
-
 	class DepthStencilStateObject
 	{
+		friend class RenderFactory;
+
 	public:
-		DepthStencilStateObject(DepthStencilStateObject const & rhs)
-			: desc_(rhs.desc_)
-		{
-		}
-
-		explicit DepthStencilStateObject(DepthStencilStateDesc const & desc)
-			: desc_(desc)
-		{
-		}
-
 		DepthStencilStateDesc const & GetDesc() const
 		{
 			return desc_;
+		}
+
+		static DepthStencilStateObjectPtr NullObject();
+
+	private:
+		explicit DepthStencilStateObject(DepthStencilStateDesc const & desc)
+			: desc_(desc)
+		{
 		}
 
 	private:
 		DepthStencilStateDesc desc_;
 	};
 
-	bool operator==(DepthStencilStateObject const & lhs, DepthStencilStateObject const & rhs);
-	bool operator!=(DepthStencilStateObject const & lhs, DepthStencilStateObject const & rhs);
-
 	class BlendStateObject
 	{
+		friend class RenderFactory;
+
 	public:
-		BlendStateObject(BlendStateObject const & rhs)
-			: desc_(rhs.desc_)
-		{
-		}
-
-		explicit BlendStateObject(BlendStateDesc const & desc)
-			: desc_(desc)
-		{
-		}
-
 		BlendStateDesc const & GetDesc() const
 		{
 			return desc_;
 		}
 
+		static BlendStateObjectPtr NullObject();
+
+	private:
+		explicit BlendStateObject(BlendStateDesc const & desc)
+			: desc_(desc)
+		{
+		}
+
 	private:
 		BlendStateDesc desc_;
 	};
-
-	bool operator==(BlendStateObject const & lhs, BlendStateObject const & rhs);
-	bool operator!=(BlendStateObject const & lhs, BlendStateObject const & rhs);
 }
 
 #endif			// _RENDERSTATEOBJECT_HPP

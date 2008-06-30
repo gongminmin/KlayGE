@@ -88,7 +88,7 @@ namespace KlayGE
 
 		virtual void CreateRenderWindow(std::string const & name, RenderSettings const & settings) = 0;
 
-		virtual void SetStateObjects(RasterizerStateObject const & rs_obj, DepthStencilStateObject const & dss_obj, BlendStateObject const & bs_obj, ShaderObject const & shader_obj) = 0;
+		virtual void SetStateObjects(RasterizerStateObjectPtr rs_obj, DepthStencilStateObjectPtr dss_obj, BlendStateObjectPtr bs_obj, ShaderObject const & shader_obj) = 0;
 
 		void BindFrameBuffer(FrameBufferPtr fb);
 		FrameBufferPtr CurFrameBuffer() const;

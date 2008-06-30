@@ -49,6 +49,7 @@
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/RenderFactory.hpp>
 
 #include <glloader/glloader.h>
 #ifdef Bool
@@ -85,9 +86,9 @@ namespace KlayGE
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	OGLRenderEngine::OGLRenderEngine()
-		: cur_rs_obj_(RasterizerStateDesc()),
-			cur_dss_obj_(DepthStencilStateDesc()),
-			cur_bs_obj_(BlendStateDesc())
+		: cur_rs_obj_(Context::Instance().RenderFactoryInstance().MakeRasterizerStateObject(RasterizerStateDesc())),
+			cur_dss_obj_(Context::Instance().RenderFactoryInstance().MakeDepthStencilStateObject(DepthStencilStateDesc())),
+			cur_bs_obj_(Context::Instance().RenderFactoryInstance().MakeBlendStateObject(BlendStateDesc()))
 	{
 	}
 
@@ -191,7 +192,7 @@ namespace KlayGE
 	void OGLRenderEngine::InitRenderStates()
 	{
 		{
-			RasterizerStateDesc const & rs_desc = cur_rs_obj_.GetDesc();
+			RasterizerStateDesc const & rs_desc = cur_rs_obj_->GetDesc();
 
 			glPolygonMode(GL_FRONT_AND_BACK, OGLMapping::Mapping(rs_desc.polygon_mode));
 			glShadeModel(OGLMapping::Mapping(rs_desc.shade_mode));
@@ -227,7 +228,7 @@ namespace KlayGE
 		}
 
 		{
-			BlendStateDesc const & bs_desc = cur_bs_obj_.GetDesc();
+			BlendStateDesc const & bs_desc = cur_bs_obj_->GetDesc();
 
 			if (bs_desc.alpha_to_coverage_enable)
 			{
@@ -255,7 +256,7 @@ namespace KlayGE
 		}
 
 		{
-			DepthStencilStateDesc const & dss_desc = cur_dss_obj_.GetDesc();
+			DepthStencilStateDesc const & dss_desc = cur_dss_obj_->GetDesc();
 
 			if (dss_desc.depth_enable)
 			{
@@ -313,11 +314,12 @@ namespace KlayGE
 
 	// 设置当前渲染状态对象
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::SetStateObjects(RasterizerStateObject const & rs_obj, DepthStencilStateObject const & dss_obj, BlendStateObject const & bs_obj, ShaderObject const & shader_obj)
+	void OGLRenderEngine::SetStateObjects(RasterizerStateObjectPtr rs_obj, DepthStencilStateObjectPtr dss_obj, BlendStateObjectPtr bs_obj, ShaderObject const & shader_obj)
 	{
+		if (cur_rs_obj_ != rs_obj)
 		{
-			RasterizerStateDesc const & cur_rs_desc = cur_rs_obj_.GetDesc();
-			RasterizerStateDesc const & rs_desc = rs_obj.GetDesc();
+			RasterizerStateDesc const & cur_rs_desc = cur_rs_obj_->GetDesc();
+			RasterizerStateDesc const & rs_desc = rs_obj->GetDesc();
 
 			if (cur_rs_desc.polygon_mode != rs_desc.polygon_mode)
 			{
@@ -370,9 +372,10 @@ namespace KlayGE
 			cur_rs_obj_ = rs_obj;
 		}
 
+		if (cur_dss_obj_ != dss_obj)
 		{
-			DepthStencilStateDesc const & cur_dss_desc = cur_dss_obj_.GetDesc();
-			DepthStencilStateDesc const & dss_desc = dss_obj.GetDesc();
+			DepthStencilStateDesc const & cur_dss_desc = cur_dss_obj_->GetDesc();
+			DepthStencilStateDesc const & dss_desc = dss_obj->GetDesc();
 
 			if (cur_dss_desc.depth_enable != dss_desc.depth_enable)
 			{
@@ -448,9 +451,10 @@ namespace KlayGE
 			cur_dss_obj_ = dss_obj;
 		}
 
+		if (cur_bs_obj_ != bs_obj)
 		{
-			BlendStateDesc const & cur_bs_desc = cur_bs_obj_.GetDesc();
-			BlendStateDesc const & bs_desc = bs_obj.GetDesc();
+			BlendStateDesc const & cur_bs_desc = cur_bs_obj_->GetDesc();
+			BlendStateDesc const & bs_desc = bs_obj->GetDesc();
 
 			if (cur_bs_desc.alpha_to_coverage_enable != bs_desc.alpha_to_coverage_enable)
 			{

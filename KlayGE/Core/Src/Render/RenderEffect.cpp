@@ -802,9 +802,9 @@ namespace KlayGE
 			}
 		}
 
-		rasterizer_state_obj_.reset(new RasterizerStateObject(rs_desc));
-		depth_stencil_state_obj_.reset(new DepthStencilStateObject(dss_desc));
-		blend_state_obj_.reset(new BlendStateObject(bs_desc));
+		rasterizer_state_obj_ = rf.MakeRasterizerStateObject(rs_desc);
+		depth_stencil_state_obj_ = rf.MakeDepthStencilStateObject(dss_desc);
+		blend_state_obj_ = rf.MakeBlendStateObject(bs_desc);
 
 		shader_text_.reset(new BOOST_TYPEOF(*shader_text_)(this->GenShaderText()));
 		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
@@ -989,7 +989,7 @@ namespace KlayGE
 		}
 
 		RenderEngine& render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		render_eng.SetStateObjects(*rasterizer_state_obj_, *depth_stencil_state_obj_, *blend_state_obj_, *shader_obj_);
+		render_eng.SetStateObjects(rasterizer_state_obj_, depth_stencil_state_obj_, blend_state_obj_, *shader_obj_);
 	}
 
 	std::string RenderPass::GenShaderText() const
