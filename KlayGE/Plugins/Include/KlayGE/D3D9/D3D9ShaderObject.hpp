@@ -111,7 +111,7 @@ namespace KlayGE
 				return *lhs < *rhs;
 			}
 		};
-		
+
 		typedef MapVector<boost::shared_ptr<std::string>, D3D9ShaderParameterHandle, less_shared_ptr_string> parameter_descs_t;
 		parameter_descs_t::const_iterator FindParam(ShaderType type, boost::shared_ptr<std::string> const & name) const;
 

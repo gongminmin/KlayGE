@@ -48,7 +48,6 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <vector>
-#include <map>
 #include <string>
 #include <algorithm>
 
