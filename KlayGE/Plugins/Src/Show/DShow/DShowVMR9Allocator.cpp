@@ -329,18 +329,20 @@ namespace KlayGE
 
 	ULONG DShowVMR9Allocator::AddRef()
 	{
-		return ::InterlockedIncrement(&ref_count_);
+		++ ref_count_;
+		return ref_count_.value();
 	}
 
 	ULONG DShowVMR9Allocator::Release()
 	{
-		ULONG ret = ::InterlockedDecrement(&ref_count_);
-		if (0 == ret)
+		-- ref_count_;
+		if (0 == ref_count_.value())
 		{
 			delete this;
+			return 0;
 		}
 
-		return ret;
+		return ref_count_.value();
 	}
 
 	TexturePtr DShowVMR9Allocator::PresentTexture()

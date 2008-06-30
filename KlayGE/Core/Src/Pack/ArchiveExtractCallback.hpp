@@ -13,6 +13,8 @@
 #ifndef _ARCHIVEEXTRACTCALLBACK_HPP
 #define _ARCHIVEEXTRACTCALLBACK_HPP
 
+#include <KlayGE/atomic.hpp>
+
 #include <string>
 
 #include "IArchive.hpp"
@@ -25,17 +27,18 @@ namespace KlayGE
 	public:
 		STDMETHOD_(ULONG, AddRef)()
 		{
-			return ++ ref_count_;
+			++ ref_count_;
+			return ref_count_.value();
 		}
 		STDMETHOD_(ULONG, Release)()
 		{
 			-- ref_count_;
-			if (0 == ref_count_)
+			if (0 == ref_count_.value())
 			{
 				delete this;
 				return 0;
 			}
-			return ref_count_;
+			return ref_count_.value();
 		}
 
 		STDMETHOD(QueryInterface)(REFGUID iid, void** outObject)
@@ -83,7 +86,7 @@ namespace KlayGE
 		void Init(std::string const & pw, boost::shared_ptr<ISequentialOutStream> const & outFileStream);
 
 	private:
-		uint32_t ref_count_;
+		atomic<int32_t> ref_count_;
 
 		bool password_is_defined_;
 		std::wstring password_;

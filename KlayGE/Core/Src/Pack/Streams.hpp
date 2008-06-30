@@ -13,6 +13,8 @@
 #ifndef _STREAMS_HPP
 #define _STREAMS_HPP
 
+#include <KlayGE/atomic.hpp>
+
 #include <fstream>
 #include <string>
 
@@ -27,17 +29,18 @@ namespace KlayGE
 	public:
 		STDMETHOD_(ULONG, AddRef)()
 		{
-			return ++ ref_count_;
+			++ ref_count_;
+			return ref_count_.value();
 		}
 		STDMETHOD_(ULONG, Release)()
 		{
 			-- ref_count_;
-			if (0 == ref_count_)
+			if (0 == ref_count_.value())
 			{
 				delete this;
 				return 0;
 			}
-			return ref_count_;
+			return ref_count_.value();
 		}
 
 		STDMETHOD(QueryInterface)(REFGUID iid, void** outObject)
@@ -80,7 +83,7 @@ namespace KlayGE
 		STDMETHOD(GetSize)(uint64_t* size);
 
 	private:
-		uint32_t ref_count_;
+		atomic<int32_t> ref_count_;
 
 		boost::shared_ptr<std::istream> is_;
 		uint64_t stream_size_;
@@ -91,17 +94,18 @@ namespace KlayGE
 	public:
 		STDMETHOD_(ULONG, AddRef)()
 		{
-			return ++ ref_count_;
+			++ ref_count_;
+			return ref_count_.value();
 		}
 		STDMETHOD_(ULONG, Release)()
 		{
 			-- ref_count_;
-			if (0 == ref_count_)
+			if (0 == ref_count_.value())
 			{
 				delete this;
 				return 0;
 			}
-			return ref_count_;
+			return ref_count_.value();
 		}
 
 		STDMETHOD(QueryInterface)(REFGUID iid, void** outObject)
@@ -133,7 +137,7 @@ namespace KlayGE
 		STDMETHOD(SetSize)(int64_t newSize);
 
 	private:
-		uint32_t ref_count_;
+		atomic<int32_t> ref_count_;
 
 		boost::shared_ptr<std::ostream> os_;
 	};

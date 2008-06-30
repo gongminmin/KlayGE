@@ -15,6 +15,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 
+#include <cstring>
 #include <boost/assert.hpp>
 
 #include <KlayGE/RenderStateObject.hpp>
@@ -34,7 +35,7 @@ namespace KlayGE
 
 	bool operator<(RasterizerStateDesc const & lhs, RasterizerStateDesc const & rhs)
 	{
-		return memcmp(&lhs, &rhs, sizeof(lhs)) < 0;
+		return std::memcmp(&lhs, &rhs, sizeof(lhs)) < 0;
 	}
 
 	DepthStencilStateDesc::DepthStencilStateDesc()
@@ -62,7 +63,7 @@ namespace KlayGE
 
 	bool operator<(DepthStencilStateDesc const & lhs, DepthStencilStateDesc const & rhs)
 	{
-		return memcmp(&lhs, &rhs, sizeof(lhs)) < 0;
+		return std::memcmp(&lhs, &rhs, sizeof(lhs)) < 0;
 	}
 
 	BlendStateDesc::BlendStateDesc()
@@ -81,7 +82,7 @@ namespace KlayGE
 
 	bool operator<(BlendStateDesc const & lhs, BlendStateDesc const & rhs)
 	{
-		return memcmp(&lhs, &rhs, sizeof(lhs)) < 0;
+		return std::memcmp(&lhs, &rhs, sizeof(lhs)) < 0;
 	}
 
 

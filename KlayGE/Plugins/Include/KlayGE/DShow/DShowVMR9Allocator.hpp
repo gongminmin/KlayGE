@@ -14,6 +14,7 @@
 #define _DSHOWVMR9ALLOCATOR_HPP
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KlayGE/atomic.hpp>
 
 #include <d3d9.h>
 #include <strmif.h>
@@ -93,7 +94,7 @@ namespace KlayGE
 		// needed to make this a thread safe object
 		boost::mutex	mutex_;
 		HWND			wnd_;
-		long			ref_count_;
+		atomic<int32_t>	ref_count_;
 
 		ID3D9Ptr			d3d_;
 		ID3D9DevicePtr		d3d_device_;
