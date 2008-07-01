@@ -64,6 +64,11 @@ namespace KlayGE
 		ShaderObjectPtr MakeShaderObject();
 
 	private:
+		RasterizerStateObjectPtr DoMakeRasterizerStateObject(RasterizerStateDesc const & desc);
+		DepthStencilStateObjectPtr DoMakeDepthStencilStateObject(DepthStencilStateDesc const & desc);
+		BlendStateObjectPtr DoMakeBlendStateObject(BlendStateDesc const & desc);
+
+	private:
 		CGcontext context_;
 
 	private:

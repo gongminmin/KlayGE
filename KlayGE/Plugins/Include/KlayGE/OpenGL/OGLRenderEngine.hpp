@@ -55,7 +55,7 @@ namespace KlayGE
 
 		void CreateRenderWindow(std::string const & name, RenderSettings const & settings);
 		
-		void SetStateObjects(RasterizerStateObjectPtr rs_obj, DepthStencilStateObjectPtr dss_obj, BlendStateObjectPtr bs_obj, ShaderObject const & shader_obj);
+		void SetStateObjects(RasterizerStateObjectPtr rs_obj, DepthStencilStateObjectPtr dss_obj, BlendStateObjectPtr bs_obj, ShaderObjectPtr shader_obj);
 
 		void StartRendering();
 

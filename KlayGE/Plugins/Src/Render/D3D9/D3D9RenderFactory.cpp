@@ -27,6 +27,7 @@
 #include <KlayGE/D3D9/D3D9OcclusionQuery.hpp>
 #include <KlayGE/D3D9/D3D9Resource.hpp>
 #include <KlayGE/D3D9/D3D9RenderView.hpp>
+#include <KlayGE/D3D9/D3D9RenderStateObject.hpp>
 #include <KlayGE/D3D9/D3D9ShaderObject.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
@@ -197,6 +198,21 @@ namespace KlayGE
 				iter = resource_pool_.erase(iter);
 			}
 		}
+	}
+
+	RasterizerStateObjectPtr D3D9RenderFactory::DoMakeRasterizerStateObject(RasterizerStateDesc const & desc)
+	{
+		return RasterizerStateObjectPtr(new D3D9RasterizerStateObject(desc));
+	}
+	
+	DepthStencilStateObjectPtr D3D9RenderFactory::DoMakeDepthStencilStateObject(DepthStencilStateDesc const & desc)
+	{
+		return DepthStencilStateObjectPtr(new D3D9DepthStencilStateObject(desc));
+	}
+
+	BlendStateObjectPtr D3D9RenderFactory::DoMakeBlendStateObject(BlendStateDesc const & desc)
+	{
+		return BlendStateObjectPtr(new D3D9BlendStateObject(desc));
 	}
 
 	RenderFactory& D3D9RenderFactoryInstance()

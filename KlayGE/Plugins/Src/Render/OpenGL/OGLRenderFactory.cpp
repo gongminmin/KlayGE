@@ -21,6 +21,7 @@
 #include <KlayGE/OpenGL/OGLGraphicsBuffer.hpp>
 #include <KlayGE/OpenGL/OGLOcclusionQuery.hpp>
 #include <KlayGE/OpenGL/OGLRenderView.hpp>
+#include <KlayGE/OpenGL/OGLRenderStateObject.hpp>
 #include <KlayGE/OpenGL/OGLShaderObject.hpp>
 
 #include <KlayGE/OpenGL/OGLRenderFactory.hpp>
@@ -135,6 +136,21 @@ namespace KlayGE
 	ShaderObjectPtr OGLRenderFactory::MakeShaderObject()
 	{
 		return ShaderObjectPtr(new OGLShaderObject);
+	}
+
+	RasterizerStateObjectPtr OGLRenderFactory::DoMakeRasterizerStateObject(RasterizerStateDesc const & desc)
+	{
+		return RasterizerStateObjectPtr(new OGLRasterizerStateObject(desc));
+	}
+	
+	DepthStencilStateObjectPtr OGLRenderFactory::DoMakeDepthStencilStateObject(DepthStencilStateDesc const & desc)
+	{
+		return DepthStencilStateObjectPtr(new OGLDepthStencilStateObject(desc));
+	}
+
+	BlendStateObjectPtr OGLRenderFactory::DoMakeBlendStateObject(BlendStateDesc const & desc)
+	{
+		return BlendStateObjectPtr(new OGLBlendStateObject(desc));
 	}
 
 	RenderFactory& OGLRenderFactoryInstance()

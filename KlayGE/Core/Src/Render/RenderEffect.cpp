@@ -989,7 +989,7 @@ namespace KlayGE
 		}
 
 		RenderEngine& render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		render_eng.SetStateObjects(rasterizer_state_obj_, depth_stencil_state_obj_, blend_state_obj_, *shader_obj_);
+		render_eng.SetStateObjects(rasterizer_state_obj_, depth_stencil_state_obj_, blend_state_obj_, shader_obj_);
 	}
 
 	std::string RenderPass::GenShaderText() const

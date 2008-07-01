@@ -63,9 +63,10 @@ namespace KlayGE
 		ID3D9Ptr const & D3DObject() const;
 		ID3D9DevicePtr const & D3DDevice() const;
 		void D3DDevice(ID3D9DevicePtr const & device);
+		uint32_t ActiveAdapterNo() const;
 
 		void CreateRenderWindow(std::string const & name, RenderSettings const & settings);
-		void SetStateObjects(RasterizerStateObjectPtr rs_obj, DepthStencilStateObjectPtr dss_obj, BlendStateObjectPtr bs_obj, ShaderObject const & shader_obj);
+		void SetStateObjects(RasterizerStateObjectPtr rs_obj, DepthStencilStateObjectPtr dss_obj, BlendStateObjectPtr bs_obj, ShaderObjectPtr shader_obj);
 
 		void StartRendering();
 

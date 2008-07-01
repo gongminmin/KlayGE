@@ -14,6 +14,8 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Context.hpp>
+#include <KlayGE/RenderFactory.hpp>
 
 #include <cstring>
 #include <boost/assert.hpp>
@@ -88,19 +90,19 @@ namespace KlayGE
 
 	RasterizerStateObjectPtr RasterizerStateObject::NullObject()
 	{
-		static RasterizerStateObjectPtr obj(new RasterizerStateObject(RasterizerStateDesc()));
+		static RasterizerStateObjectPtr obj(Context::Instance().RenderFactoryInstance().MakeRasterizerStateObject(RasterizerStateDesc()));
 		return obj;
 	}
 
 	DepthStencilStateObjectPtr DepthStencilStateObject::NullObject()
 	{
-		static DepthStencilStateObjectPtr obj(new DepthStencilStateObject(DepthStencilStateDesc()));
+		static DepthStencilStateObjectPtr obj(Context::Instance().RenderFactoryInstance().MakeDepthStencilStateObject(DepthStencilStateDesc()));
 		return obj;
 	}
 
 	BlendStateObjectPtr BlendStateObject::NullObject()
 	{
-		static BlendStateObjectPtr obj(new BlendStateObject(BlendStateDesc()));
+		static BlendStateObjectPtr obj(Context::Instance().RenderFactoryInstance().MakeBlendStateObject(BlendStateDesc()));
 		return obj;
 	}
 }

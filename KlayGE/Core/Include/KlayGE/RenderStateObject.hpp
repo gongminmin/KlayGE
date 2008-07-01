@@ -198,9 +198,16 @@ namespace KlayGE
 
 	class RasterizerStateObject
 	{
-		friend class RenderFactory;
-
 	public:
+		explicit RasterizerStateObject(RasterizerStateDesc const & desc)
+			: desc_(desc)
+		{
+		}
+
+		virtual ~RasterizerStateObject()
+		{
+		}
+
 		RasterizerStateDesc const & GetDesc() const
 		{
 			return desc_;
@@ -208,21 +215,24 @@ namespace KlayGE
 
 		static RasterizerStateObjectPtr NullObject();
 
-	private:
-		explicit RasterizerStateObject(RasterizerStateDesc const & desc)
-			: desc_(desc)
-		{
-		}
+		virtual void SetStates(RasterizerStateObject const & current) = 0;
 
-	private:
+	protected:
 		RasterizerStateDesc desc_;
 	};
 
 	class DepthStencilStateObject
 	{
-		friend class RenderFactory;
-
 	public:
+		explicit DepthStencilStateObject(DepthStencilStateDesc const & desc)
+			: desc_(desc)
+		{
+		}
+
+		virtual ~DepthStencilStateObject()
+		{
+		}
+
 		DepthStencilStateDesc const & GetDesc() const
 		{
 			return desc_;
@@ -230,21 +240,24 @@ namespace KlayGE
 
 		static DepthStencilStateObjectPtr NullObject();
 
-	private:
-		explicit DepthStencilStateObject(DepthStencilStateDesc const & desc)
-			: desc_(desc)
-		{
-		}
+		virtual void SetStates(DepthStencilStateObject const & current) = 0;
 
-	private:
+	protected:
 		DepthStencilStateDesc desc_;
 	};
 
 	class BlendStateObject
 	{
-		friend class RenderFactory;
-
 	public:
+		explicit BlendStateObject(BlendStateDesc const & desc)
+			: desc_(desc)
+		{
+		}
+
+		virtual ~BlendStateObject()
+		{
+		}
+
 		BlendStateDesc const & GetDesc() const
 		{
 			return desc_;
@@ -252,13 +265,9 @@ namespace KlayGE
 
 		static BlendStateObjectPtr NullObject();
 
-	private:
-		explicit BlendStateObject(BlendStateDesc const & desc)
-			: desc_(desc)
-		{
-		}
+		virtual void SetStates(BlendStateObject const & current) = 0;
 
-	private:
+	protected:
 		BlendStateDesc desc_;
 	};
 }

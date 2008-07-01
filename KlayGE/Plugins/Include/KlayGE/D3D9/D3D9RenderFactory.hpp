@@ -74,6 +74,11 @@ namespace KlayGE
 		void OnResetDevice();
 
 	private:
+		RasterizerStateObjectPtr DoMakeRasterizerStateObject(RasterizerStateDesc const & desc);
+		DepthStencilStateObjectPtr DoMakeDepthStencilStateObject(DepthStencilStateDesc const & desc);
+		BlendStateObjectPtr DoMakeBlendStateObject(BlendStateDesc const & desc);
+
+	private:
 		std::vector<boost::weak_ptr<D3D9Resource> > resource_pool_;
 
 	private:

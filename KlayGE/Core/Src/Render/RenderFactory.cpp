@@ -116,24 +116,24 @@ namespace KlayGE
 			return RenderView::NullObject();
 		}
 
-		RasterizerStateObjectPtr MakeRasterizerStateObject(RasterizerStateDesc const & /*desc*/)
+		ShaderObjectPtr MakeShaderObject()
+		{
+			return ShaderObject::NullObject();
+		}
+
+		RasterizerStateObjectPtr DoMakeRasterizerStateObject(RasterizerStateDesc const & /*desc*/)
 		{
 			return RasterizerStateObject::NullObject();
 		}
 
-		DepthStencilStateObjectPtr MakeDepthStencilStateObject(DepthStencilStateDesc const & /*desc*/)
+		DepthStencilStateObjectPtr DoMakeDepthStencilStateObject(DepthStencilStateDesc const & /*desc*/)
 		{
 			return DepthStencilStateObject::NullObject();
 		}
 
-		BlendStateObjectPtr MakeBlendStateObject(BlendStateDesc const & /*desc*/)
+		BlendStateObjectPtr DoMakeBlendStateObject(BlendStateDesc const & /*desc*/)
 		{
 			return BlendStateObject::NullObject();
-		}
-
-		ShaderObjectPtr MakeShaderObject()
-		{
-			return ShaderObject::NullObject();
 		}
 	};
 
@@ -197,7 +197,7 @@ namespace KlayGE
 		BOOST_AUTO(iter, rs_pool_.find(desc));
 		if (iter == rs_pool_.end())
 		{
-			ret.reset(new RasterizerStateObject(desc));
+			ret = this->DoMakeRasterizerStateObject(desc);
 			rs_pool_.insert(std::make_pair(desc, ret));
 		}
 		else
@@ -215,7 +215,7 @@ namespace KlayGE
 		BOOST_AUTO(iter, dss_pool_.find(desc));
 		if (iter == dss_pool_.end())
 		{
-			ret.reset(new DepthStencilStateObject(desc));
+			ret = this->DoMakeDepthStencilStateObject(desc);
 			dss_pool_.insert(std::make_pair(desc, ret));
 		}
 		else
@@ -233,7 +233,7 @@ namespace KlayGE
 		BOOST_AUTO(iter, bs_pool_.find(desc));
 		if (iter == bs_pool_.end())
 		{
-			ret.reset(new BlendStateObject(desc));
+			ret = this->DoMakeBlendStateObject(desc);
 			bs_pool_.insert(std::make_pair(desc, ret));
 		}
 		else

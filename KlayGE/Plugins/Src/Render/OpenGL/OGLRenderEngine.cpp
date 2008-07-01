@@ -314,195 +314,27 @@ namespace KlayGE
 
 	// 设置当前渲染状态对象
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::SetStateObjects(RasterizerStateObjectPtr rs_obj, DepthStencilStateObjectPtr dss_obj, BlendStateObjectPtr bs_obj, ShaderObject const & shader_obj)
+	void OGLRenderEngine::SetStateObjects(RasterizerStateObjectPtr rs_obj, DepthStencilStateObjectPtr dss_obj, BlendStateObjectPtr bs_obj, ShaderObjectPtr shader_obj)
 	{
 		if (cur_rs_obj_ != rs_obj)
 		{
-			RasterizerStateDesc const & cur_rs_desc = cur_rs_obj_->GetDesc();
-			RasterizerStateDesc const & rs_desc = rs_obj->GetDesc();
-
-			if (cur_rs_desc.polygon_mode != rs_desc.polygon_mode)
-			{
-				glPolygonMode(GL_FRONT_AND_BACK, OGLMapping::Mapping(rs_desc.polygon_mode));
-			}
-			if (cur_rs_desc.shade_mode != rs_desc.shade_mode)
-			{
-				glShadeModel(OGLMapping::Mapping(rs_desc.shade_mode));
-			}
-			if (cur_rs_desc.cull_mode != rs_desc.cull_mode)
-			{
-				switch (rs_desc.cull_mode)
-				{
-				case CM_None:
-					glDisable(GL_CULL_FACE);
-					break;
-
-				case CM_Clockwise:
-					glEnable(GL_CULL_FACE);
-					glFrontFace(GL_CCW);
-					break;
-
-				case CM_AntiClockwise:
-					glEnable(GL_CULL_FACE);
-					glFrontFace(GL_CW);
-					break;
-				}
-			}
-			if ((cur_rs_desc.polygon_offset_factor != rs_desc.polygon_offset_factor)
-				|| (cur_rs_desc.polygon_offset_units != rs_desc.polygon_offset_units))
-			{
-				glEnable(GL_POLYGON_OFFSET_FILL);
-				glEnable(GL_POLYGON_OFFSET_POINT);
-				glEnable(GL_POLYGON_OFFSET_LINE);
-				// Bias is in {0, 16}, scale the unit addition appropriately
-				glPolygonOffset(rs_desc.polygon_offset_factor, rs_desc.polygon_offset_units);
-			}
-			if (cur_rs_desc.scissor_enable != rs_desc.scissor_enable)
-			{
-				if (rs_desc.scissor_enable)
-				{
-					glEnable(GL_SCISSOR_TEST);
-				}
-				else
-				{
-					glDisable(GL_SCISSOR_TEST);
-				}
-			}
-
+			rs_obj->SetStates(*cur_rs_obj_);
 			cur_rs_obj_ = rs_obj;
 		}
 
 		if (cur_dss_obj_ != dss_obj)
 		{
-			DepthStencilStateDesc const & cur_dss_desc = cur_dss_obj_->GetDesc();
-			DepthStencilStateDesc const & dss_desc = dss_obj->GetDesc();
-
-			if (cur_dss_desc.depth_enable != dss_desc.depth_enable)
-			{
-				if (dss_desc.depth_enable)
-				{
-					glEnable(GL_DEPTH_TEST);
-				}
-				else
-				{
-					glDisable(GL_DEPTH_TEST);
-				}
-			}
-			if (cur_dss_desc.depth_write_mask != dss_desc.depth_write_mask)
-			{
-				glDepthMask(dss_desc.depth_write_mask ? GL_TRUE : GL_FALSE);
-			}
-			if (cur_dss_desc.depth_func != dss_desc.depth_func)
-			{
-				glDepthFunc(OGLMapping::Mapping(dss_desc.depth_func));
-			}
-
-			if ((cur_dss_desc.front_stencil_func != dss_desc.front_stencil_func)
-				|| (cur_dss_desc.front_stencil_ref != dss_desc.front_stencil_ref)
-				|| (cur_dss_desc.front_stencil_read_mask != dss_desc.front_stencil_read_mask))
-			{
-				glStencilFuncSeparate(GL_FRONT, OGLMapping::Mapping(dss_desc.front_stencil_func),
-					dss_desc.front_stencil_ref, dss_desc.front_stencil_read_mask);
-			}
-			if ((cur_dss_desc.front_stencil_fail != dss_desc.front_stencil_fail)
-				|| (cur_dss_desc.front_stencil_depth_fail != dss_desc.front_stencil_depth_fail)
-				|| (cur_dss_desc.front_stencil_pass != dss_desc.front_stencil_pass))
-			{
-				glStencilOpSeparate(GL_FRONT, OGLMapping::Mapping(dss_desc.front_stencil_fail),
-					OGLMapping::Mapping(dss_desc.front_stencil_depth_fail), OGLMapping::Mapping(dss_desc.front_stencil_pass));
-			}
-			if (cur_dss_desc.front_stencil_write_mask != dss_desc.front_stencil_write_mask)
-			{
-				glStencilMaskSeparate(GL_FRONT, dss_desc.front_stencil_write_mask);
-			}
-
-			if ((cur_dss_desc.back_stencil_func != dss_desc.back_stencil_func)
-				|| (cur_dss_desc.back_stencil_ref != dss_desc.back_stencil_ref)
-				|| (cur_dss_desc.back_stencil_read_mask != dss_desc.back_stencil_read_mask))
-			{
-				glStencilFuncSeparate(GL_BACK, OGLMapping::Mapping(dss_desc.back_stencil_func),
-					dss_desc.back_stencil_ref, dss_desc.back_stencil_read_mask);
-			}
-			if ((cur_dss_desc.back_stencil_fail != dss_desc.back_stencil_fail)
-				|| (cur_dss_desc.back_stencil_depth_fail != dss_desc.back_stencil_depth_fail)
-				|| (cur_dss_desc.back_stencil_pass != dss_desc.back_stencil_pass))
-			{
-				glStencilOpSeparate(GL_BACK, OGLMapping::Mapping(dss_desc.back_stencil_fail),
-					OGLMapping::Mapping(dss_desc.back_stencil_depth_fail), OGLMapping::Mapping(dss_desc.back_stencil_pass));
-			}
-			if (cur_dss_desc.back_stencil_write_mask != dss_desc.back_stencil_write_mask)
-			{
-				glStencilMaskSeparate(GL_BACK, dss_desc.back_stencil_write_mask);
-			}
-
-			if ((cur_dss_desc.front_stencil_enable != dss_desc.front_stencil_enable)
-				|| (cur_dss_desc.back_stencil_enable != dss_desc.back_stencil_enable))
-			{
-				if (dss_desc.front_stencil_enable || dss_desc.back_stencil_enable)
-				{
-					glEnable(GL_STENCIL_TEST);
-				}
-				else
-				{
-					glDisable(GL_STENCIL_TEST);
-				}
-			}
-
+			dss_obj->SetStates(*cur_dss_obj_);
 			cur_dss_obj_ = dss_obj;
 		}
 
 		if (cur_bs_obj_ != bs_obj)
 		{
-			BlendStateDesc const & cur_bs_desc = cur_bs_obj_->GetDesc();
-			BlendStateDesc const & bs_desc = bs_obj->GetDesc();
-
-			if (cur_bs_desc.alpha_to_coverage_enable != bs_desc.alpha_to_coverage_enable)
-			{
-				if (bs_desc.alpha_to_coverage_enable)
-				{
-					glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
-				}
-				else
-				{
-					glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
-				}
-			}
-			if (cur_bs_desc.blend_enable[0] != bs_desc.blend_enable[0])
-			{
-				if (bs_desc.blend_enable[0])
-				{
-					glEnable(GL_BLEND);
-				}
-				else
-				{
-					glDisable(GL_BLEND);
-				}
-			}
-			if ((cur_bs_desc.blend_op[0] != bs_desc.blend_op[0])
-				|| (cur_bs_desc.blend_op_alpha[0] != bs_desc.blend_op_alpha[0]))
-			{
-				glBlendEquationSeparate(OGLMapping::Mapping(bs_desc.blend_op[0]), OGLMapping::Mapping(bs_desc.blend_op_alpha[0]));
-			}
-			if ((cur_bs_desc.src_blend[0] != bs_desc.src_blend[0])
-				|| (cur_bs_desc.dest_blend[0] != bs_desc.dest_blend[0])
-				|| (cur_bs_desc.src_blend_alpha[0] != bs_desc.src_blend_alpha[0])
-				|| (cur_bs_desc.dest_blend_alpha[0] != bs_desc.dest_blend_alpha[0]))
-			{
-				glBlendFuncSeparate(OGLMapping::Mapping(bs_desc.src_blend[0]), OGLMapping::Mapping(bs_desc.dest_blend[0]),
-					OGLMapping::Mapping(bs_desc.src_blend_alpha[0]), OGLMapping::Mapping(bs_desc.dest_blend_alpha[0]));
-			}
-			if (cur_bs_desc.color_write_mask[0] != bs_desc.color_write_mask[0])
-			{
-				glColorMask((bs_desc.color_write_mask[0] & CMASK_Red) != 0,
-						(bs_desc.color_write_mask[0] & CMASK_Green) != 0,
-						(bs_desc.color_write_mask[0] & CMASK_Blue) != 0,
-						(bs_desc.color_write_mask[0] & CMASK_Alpha) != 0);
-			}
-
+			bs_obj->SetStates(*cur_bs_obj_);
 			cur_bs_obj_ = bs_obj;
 		}
 
-		OGLShaderObject const & ogl_shader_obj = *checked_cast<OGLShaderObject const *>(&shader_obj);
+		OGLShaderObject const & ogl_shader_obj = *checked_pointer_cast<OGLShaderObject>(shader_obj);
 
 		cgGLBindProgram(ogl_shader_obj.VertexShader());
 		cgGLEnableProfile(ogl_shader_obj.VertexShaderProfile());
