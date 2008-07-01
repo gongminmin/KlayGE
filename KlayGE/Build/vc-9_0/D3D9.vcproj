@@ -327,6 +327,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9RenderStateObject.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9RenderView.cpp"
 				>
 			</File>
@@ -406,6 +410,10 @@
 			</File>
 			<File
 				RelativePath="..\..\Plugins\Include\KlayGE\D3D9\D3D9RenderLayout.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\D3D9\D3D9RenderStateObject.hpp"
 				>
 			</File>
 			<File

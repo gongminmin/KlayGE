@@ -391,7 +391,7 @@ namespace KlayGE
 				}
 
 				Sampler& cur_sampler = cur_samplers_[type][j];
-				SamplerPtr sampler = d3d9_shader_obj.Samplers(type)[j];
+				SamplerPtr const & sampler = d3d9_shader_obj.Samplers(type)[j];
 				if (!sampler || !sampler->texture)
 				{
 					if (cur_sampler.texture)

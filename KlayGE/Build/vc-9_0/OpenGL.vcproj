@@ -315,6 +315,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderStateObject.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderView.cpp"
 				>
 			</File>
@@ -378,6 +382,10 @@
 			</File>
 			<File
 				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderLayout.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderStateObject.hpp"
 				>
 			</File>
 			<File

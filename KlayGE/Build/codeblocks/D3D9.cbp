@@ -61,6 +61,7 @@
 		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9RenderEngine.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9RenderFactory.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9RenderLayout.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9RenderStateObject.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9RenderView.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9RenderWindow.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9Resource.hpp" />
@@ -77,6 +78,7 @@
 		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9RenderEngine.cpp" />
 		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9RenderFactory.cpp" />
 		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9RenderLayout.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9RenderStateObject.cpp" />
 		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9RenderView.cpp" />
 		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9RenderWindow.cpp" />
 		<Unit filename="..\..\Plugins\Src\Render\D3D9\D3D9ShaderObject.cpp" />
