@@ -215,7 +215,7 @@ namespace KlayGE
 
 		static RasterizerStateObjectPtr NullObject();
 
-		virtual void SetStates(RasterizerStateObject const & current) = 0;
+		virtual void Active() = 0;
 
 	protected:
 		RasterizerStateDesc desc_;
@@ -240,7 +240,7 @@ namespace KlayGE
 
 		static DepthStencilStateObjectPtr NullObject();
 
-		virtual void SetStates(DepthStencilStateObject const & current) = 0;
+		virtual void Active() = 0;
 
 	protected:
 		DepthStencilStateDesc desc_;
@@ -265,7 +265,7 @@ namespace KlayGE
 
 		static BlendStateObjectPtr NullObject();
 
-		virtual void SetStates(BlendStateObject const & current) = 0;
+		virtual void Active() = 0;
 
 	protected:
 		BlendStateDesc desc_;

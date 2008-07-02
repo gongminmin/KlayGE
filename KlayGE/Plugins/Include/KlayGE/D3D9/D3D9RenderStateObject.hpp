@@ -23,7 +23,7 @@ namespace KlayGE
 	public:
 		explicit D3D9RasterizerStateObject(RasterizerStateDesc const & desc);
 
-		void SetStates(RasterizerStateObject const & current);
+		void Active();
 	};
 
 	class D3D9DepthStencilStateObject : public DepthStencilStateObject
@@ -31,7 +31,7 @@ namespace KlayGE
 	public:
 		explicit D3D9DepthStencilStateObject(DepthStencilStateDesc const & desc);
 
-		void SetStates(DepthStencilStateObject const & current);
+		void Active();
 	};
 
 	class D3D9BlendStateObject : public BlendStateObject
@@ -39,7 +39,7 @@ namespace KlayGE
 	public:
 		explicit D3D9BlendStateObject(BlendStateDesc const & desc);
 
-		void SetStates(BlendStateObject const & current);
+		void Active();
 	};
 }
 

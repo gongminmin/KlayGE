@@ -188,105 +188,13 @@ namespace KlayGE
 
 	void OGLRenderEngine::InitRenderStates()
 	{
-		{
-			RasterizerStateDesc const & rs_desc = cur_rs_obj_->GetDesc();
-
-			glPolygonMode(GL_FRONT_AND_BACK, OGLMapping::Mapping(rs_desc.polygon_mode));
-			glShadeModel(OGLMapping::Mapping(rs_desc.shade_mode));
-			switch (rs_desc.cull_mode)
-			{
-			case CM_None:
-				glDisable(GL_CULL_FACE);
-				break;
-
-			case CM_Clockwise:
-				glEnable(GL_CULL_FACE);
-				glFrontFace(GL_CCW);
-				break;
-
-			case CM_AntiClockwise:
-				glEnable(GL_CULL_FACE);
-				glFrontFace(GL_CW);
-				break;
-			}
-			glEnable(GL_POLYGON_OFFSET_FILL);
-			glEnable(GL_POLYGON_OFFSET_POINT);
-			glEnable(GL_POLYGON_OFFSET_LINE);
-			// Bias is in {0, 16}, scale the unit addition appropriately
-			glPolygonOffset(rs_desc.polygon_offset_factor, rs_desc.polygon_offset_units);
-			if (rs_desc.scissor_enable)
-			{
-				glEnable(GL_SCISSOR_TEST);
-			}
-			else
-			{
-				glDisable(GL_SCISSOR_TEST);
-			}
-		}
-
-		{
-			BlendStateDesc const & bs_desc = cur_bs_obj_->GetDesc();
-
-			if (bs_desc.alpha_to_coverage_enable)
-			{
-				glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
-			}
-			else
-			{
-				glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
-			}
-			if (bs_desc.blend_enable[0])
-			{
-				glEnable(GL_BLEND);
-			}
-			else
-			{
-				glDisable(GL_BLEND);
-			}
-			glBlendEquationSeparate(OGLMapping::Mapping(bs_desc.blend_op[0]), OGLMapping::Mapping(bs_desc.blend_op_alpha[0]));
-			glBlendFuncSeparate(OGLMapping::Mapping(bs_desc.src_blend[0]), OGLMapping::Mapping(bs_desc.dest_blend[0]),
-					OGLMapping::Mapping(bs_desc.src_blend_alpha[0]), OGLMapping::Mapping(bs_desc.dest_blend_alpha[0]));
-			glColorMask((bs_desc.color_write_mask[0] & CMASK_Red) != 0,
-					(bs_desc.color_write_mask[0] & CMASK_Green) != 0,
-					(bs_desc.color_write_mask[0] & CMASK_Blue) != 0,
-					(bs_desc.color_write_mask[0] & CMASK_Alpha) != 0);
-		}
-
-		{
-			DepthStencilStateDesc const & dss_desc = cur_dss_obj_->GetDesc();
-
-			if (dss_desc.depth_enable)
-			{
-				glEnable(GL_DEPTH_TEST);
-			}
-			else
-			{
-				glDisable(GL_DEPTH_TEST);
-			}
-			glDepthMask(dss_desc.depth_write_mask ? GL_TRUE : GL_FALSE);
-			glDepthFunc(OGLMapping::Mapping(dss_desc.depth_func));
-
-			glStencilFuncSeparate(GL_FRONT, OGLMapping::Mapping(dss_desc.front_stencil_func),
-				dss_desc.front_stencil_ref, dss_desc.front_stencil_read_mask);
-			glStencilOpSeparate(GL_FRONT, OGLMapping::Mapping(dss_desc.front_stencil_fail),
-				OGLMapping::Mapping(dss_desc.front_stencil_depth_fail), OGLMapping::Mapping(dss_desc.front_stencil_pass));
-			glStencilMaskSeparate(GL_FRONT, dss_desc.front_stencil_write_mask);
-
-			glStencilFuncSeparate(GL_BACK, OGLMapping::Mapping(dss_desc.back_stencil_func),
-				dss_desc.back_stencil_ref, dss_desc.back_stencil_read_mask);
-			glStencilOpSeparate(GL_BACK, OGLMapping::Mapping(dss_desc.back_stencil_fail),
-				OGLMapping::Mapping(dss_desc.back_stencil_depth_fail), OGLMapping::Mapping(dss_desc.back_stencil_pass));
-			glStencilMaskSeparate(GL_BACK, dss_desc.back_stencil_write_mask);
-
-			if (dss_desc.front_stencil_enable || dss_desc.back_stencil_enable)
-			{
-				glEnable(GL_STENCIL_TEST);
-			}
-			else
-			{
-				glDisable(GL_STENCIL_TEST);
-			}
-		}
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		cur_rs_obj_ = rf.MakeRasterizerStateObject(RasterizerStateDesc());
+		cur_dss_obj_ = rf.MakeDepthStencilStateObject(DepthStencilStateDesc());
+		cur_bs_obj_ = rf.MakeBlendStateObject(BlendStateDesc());
+		cur_rs_obj_->Active();
+		cur_dss_obj_->Active();
+		cur_bs_obj_->Active();
 	}
 
 	void OGLRenderEngine::TexParameter(GLenum target, GLenum pname, GLint param)

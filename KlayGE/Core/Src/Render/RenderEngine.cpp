@@ -109,10 +109,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderEngine::RenderEngine()
 		: numPrimitivesJustRendered_(0),
-			numVerticesJustRendered_(0),
-			cur_rs_obj_(Context::Instance().RenderFactoryInstance().MakeRasterizerStateObject(RasterizerStateDesc())),
-			cur_dss_obj_(Context::Instance().RenderFactoryInstance().MakeDepthStencilStateObject(DepthStencilStateDesc())),
-			cur_bs_obj_(Context::Instance().RenderFactoryInstance().MakeBlendStateObject(BlendStateDesc()))
+			numVerticesJustRendered_(0)
 	{
 	}
 
@@ -136,19 +133,19 @@ namespace KlayGE
 	{
 		if (cur_rs_obj_ != rs_obj)
 		{
-			rs_obj->SetStates(*cur_rs_obj_);
+			rs_obj->Active();
 			cur_rs_obj_ = rs_obj;
 		}
 
 		if (cur_dss_obj_ != dss_obj)
 		{
-			dss_obj->SetStates(*cur_dss_obj_);
+			dss_obj->Active();
 			cur_dss_obj_ = dss_obj;
 		}
 
 		if (cur_bs_obj_ != bs_obj)
 		{
-			bs_obj->SetStates(*cur_bs_obj_);
+			bs_obj->Active();
 			cur_bs_obj_ = bs_obj;
 		}
 

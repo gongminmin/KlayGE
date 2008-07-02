@@ -23,7 +23,7 @@ namespace KlayGE
 	public:
 		explicit OGLRasterizerStateObject(RasterizerStateDesc const & desc);
 
-		void SetStates(RasterizerStateObject const & current);
+		void Active();
 	};
 
 	class OGLDepthStencilStateObject : public DepthStencilStateObject
@@ -31,7 +31,7 @@ namespace KlayGE
 	public:
 		explicit OGLDepthStencilStateObject(DepthStencilStateDesc const & desc);
 
-		void SetStates(DepthStencilStateObject const & current);
+		void Active();
 	};
 
 	class OGLBlendStateObject : public BlendStateObject
@@ -39,7 +39,7 @@ namespace KlayGE
 	public:
 		explicit OGLBlendStateObject(BlendStateDesc const & desc);
 
-		void SetStates(BlendStateObject const & current);
+		void Active();
 	};
 }
 
