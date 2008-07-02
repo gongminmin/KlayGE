@@ -42,6 +42,10 @@ namespace KlayGE
 
 	private:
 		float4x4 model_;
+
+		RenderEffectParameterPtr texSampler_ep_;
+		RenderEffectParameterPtr modelviewproj_ep_;
+		RenderEffectParameterPtr modelIT_ep_;
 	};
 
 	template <typename T>

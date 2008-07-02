@@ -53,6 +53,7 @@ namespace
 		Downsampler8x8()
 			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Downsample8x8.kfx")->TechniqueByName("Downsample8x8"))
 		{
+			tex_coord_offset_ep_ = technique_->Effect().ParameterByName("tex_coord_offset");
 		}
 
 		void Source(TexturePtr const & src_tex, bool flipping)
@@ -85,8 +86,11 @@ namespace
 				}
 			}
 
-			*(technique_->Effect().ParameterByName("tex_coord_offset")) = tex_coord_offset;
+			*tex_coord_offset_ep_ = tex_coord_offset;
 		}
+
+	private:
+		RenderEffectParameterPtr tex_coord_offset_ep_;
 	};
 
 	class AsciiArts : public PostProcess
@@ -95,11 +99,13 @@ namespace
 		AsciiArts()
 			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArts.kfx")->TechniqueByName("AsciiArts"))
 		{
+			cell_per_row_line_ep_ = technique_->Effect().ParameterByName("cell_per_row_line");
+			lums_sampler_ep_ = technique_->Effect().ParameterByName("lums_sampler");
 		}
 
 		void SetLumsTex(TexturePtr const & lums_tex)
 		{
-			*(technique_->Effect().ParameterByName("lums_sampler")) = lums_tex;
+			*lums_sampler_ep_ = lums_tex;
 		}
 
 		void OnRenderBegin()
@@ -109,12 +115,12 @@ namespace
 			RenderEngine const & re(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			FrameBuffer const & fb(*re.CurFrameBuffer());
 
-			*(technique_->Effect().ParameterByName("cell_per_row_line")) =
-				float2(static_cast<float>(CELL_WIDTH) / fb.Width(),
-						static_cast<float>(CELL_HEIGHT) / fb.Height());
-
-			*(technique_->Effect().ParameterByName("src_sampler")) = src_texture_;
+			*cell_per_row_line_ep_ = float2(static_cast<float>(CELL_WIDTH) / fb.Width(), static_cast<float>(CELL_HEIGHT) / fb.Height());
 		}
+
+	private:
+		RenderEffectParameterPtr cell_per_row_line_ep_;
+		RenderEffectParameterPtr lums_sampler_ep_;
 	};
 
 	std::vector<ascii_tile_type> LoadFromTexture(std::string const & tex_name)

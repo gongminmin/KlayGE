@@ -68,7 +68,9 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		technique_ = rf.LoadEffect("RenderableHelper.kfx")->TechniqueByName("PointTec");
-		*(technique_->Effect().ParameterByName("color")) = float4(clr.r(), clr.g(), clr.b(), clr.a());
+		color_ep_ = technique_->Effect().ParameterByName("color");
+		matViewProj_ep_ = technique_->Effect().ParameterByName("matViewProj");
+		*color_ep_ = float4(clr.r(), clr.g(), clr.b(), clr.a());
 
 		rl_ = rf.MakeRenderLayout();
 		rl_->TopologyType(RenderLayout::TT_PointList);
@@ -90,7 +92,7 @@ namespace KlayGE
 		Camera const & camera = app.ActiveCamera();
 
 		float4x4 view_proj = camera.ViewMatrix() * camera.ProjMatrix();
-		*(technique_->Effect().ParameterByName("matViewProj")) = view_proj;
+		*matViewProj_ep_ = view_proj;
 	}
 
 
@@ -100,7 +102,9 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		technique_ = rf.LoadEffect("RenderableHelper.kfx")->TechniqueByName("LineTec");
-		*(technique_->Effect().ParameterByName("color")) = float4(clr.r(), clr.g(), clr.b(), clr.a());
+		color_ep_ = technique_->Effect().ParameterByName("color");
+		matViewProj_ep_ = technique_->Effect().ParameterByName("matViewProj");
+		*color_ep_ = float4(clr.r(), clr.g(), clr.b(), clr.a());
 
 		float3 xyzs[] =
 		{
@@ -127,7 +131,7 @@ namespace KlayGE
 		Camera const & camera = app.ActiveCamera();
 
 		float4x4 view_proj = camera.ViewMatrix() * camera.ProjMatrix();
-		*(technique_->Effect().ParameterByName("matViewProj")) = view_proj;
+		*matViewProj_ep_ = view_proj;
 	}
 
 
@@ -137,7 +141,9 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		technique_ = rf.LoadEffect("RenderableHelper.kfx")->TechniqueByName("TriangleTec");
-		*(technique_->Effect().ParameterByName("color")) = float4(clr.r(), clr.g(), clr.b(), clr.a());
+		color_ep_ = technique_->Effect().ParameterByName("color");
+		matViewProj_ep_ = technique_->Effect().ParameterByName("matViewProj");
+		*color_ep_ = float4(clr.r(), clr.g(), clr.b(), clr.a());
 
 		float3 xyzs[] =
 		{
@@ -164,7 +170,7 @@ namespace KlayGE
 		Camera const & camera = app.ActiveCamera();
 
 		float4x4 view_proj = camera.ViewMatrix() * camera.ProjMatrix();
-		*(technique_->Effect().ParameterByName("matViewProj")) = view_proj;
+		*matViewProj_ep_ = view_proj;
 	}
 
 
@@ -176,7 +182,9 @@ namespace KlayGE
 		box_ = box;
 
 		technique_ = rf.LoadEffect("RenderableHelper.kfx")->TechniqueByName("BoxTec");
-		*(technique_->Effect().ParameterByName("color")) = float4(clr.r(), clr.g(), clr.b(), clr.a());
+		color_ep_ = technique_->Effect().ParameterByName("color");
+		matViewProj_ep_ = technique_->Effect().ParameterByName("matViewProj");
+		*color_ep_ = float4(clr.r(), clr.g(), clr.b(), clr.a());
 
 		float3 xyzs[] =
 		{
@@ -219,7 +227,7 @@ namespace KlayGE
 		Camera const & camera = app.ActiveCamera();
 
 		float4x4 view_proj = camera.ViewMatrix() * camera.ProjMatrix();
-		*(technique_->Effect().ParameterByName("matViewProj")) = view_proj;
+		*matViewProj_ep_ = view_proj;
 	}
 
 
@@ -231,7 +239,9 @@ namespace KlayGE
 		box_ = box;
 
 		technique_ = rf.LoadEffect("RenderableHelper.kfx")->TechniqueByName("BoxTec");
-		*(technique_->Effect().ParameterByName("color")) = float4(clr.r(), clr.g(), clr.b(), clr.a());
+		color_ep_ = technique_->Effect().ParameterByName("color");
+		matViewProj_ep_ = technique_->Effect().ParameterByName("matViewProj");
+		*color_ep_ = float4(clr.r(), clr.g(), clr.b(), clr.a());
 
 		float3 xyzs[] =
 		{
@@ -271,7 +281,7 @@ namespace KlayGE
 		Camera const & camera = app.ActiveCamera();
 
 		float4x4 view_proj = camera.ViewMatrix() * camera.ProjMatrix();
-		*(technique_->Effect().ParameterByName("matViewProj")) = view_proj;
+		*matViewProj_ep_ = view_proj;
 	}
 
 
@@ -302,11 +312,14 @@ namespace KlayGE
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 		box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[4]);
+
+		skybox_cubeMapSampler_ep_ = technique_->Effect().ParameterByName("skybox_cubeMapSampler");
+		inv_mvp_ep_ = technique_->Effect().ParameterByName("inv_mvp");
 	}
 
 	void RenderableSkyBox::CubeMap(TexturePtr const & cube)
 	{
-		*(technique_->Effect().ParameterByName("skybox_cubeMapSampler")) = cube;
+		*skybox_cubeMapSampler_ep_ = cube;
 	}
 
 	void RenderableSkyBox::OnRenderBegin()
@@ -318,7 +331,7 @@ namespace KlayGE
 		rot_view(3, 0) = 0;
 		rot_view(3, 1) = 0;
 		rot_view(3, 2) = 0;
-		*(technique_->Effect().ParameterByName("inv_mvp")) = MathLib::inverse(rot_view * camera.ProjMatrix());
+		*inv_mvp_ep_ = MathLib::inverse(rot_view * camera.ProjMatrix());
 	}
 
 	RenderablePlane::RenderablePlane(float length, float width,

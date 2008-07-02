@@ -73,6 +73,10 @@ namespace KlayGE
 		}
 
 		technique_ = effect->TechniqueByName("KMeshNoTexTec");
+
+		texSampler_ep_ = technique_->Effect().ParameterByName("texSampler");
+		modelviewproj_ep_ = technique_->Effect().ParameterByName("modelviewproj");
+		modelIT_ep_ = technique_->Effect().ParameterByName("modelIT");
 	}
 
 	KMesh::~KMesh()
@@ -90,7 +94,7 @@ namespace KlayGE
 		if (tex)
 		{
 			technique_ = technique_->Effect().TechniqueByName("KMeshTec");
-			*(technique_->Effect().ParameterByName("texSampler")) = tex;
+			*texSampler_ep_ = tex;
 		}
 		else
 		{
@@ -103,13 +107,13 @@ namespace KlayGE
 		App3DFramework const & app = Context::Instance().AppInstance();
 		Camera const & camera = app.ActiveCamera();
 
-		*(technique_->Effect().ParameterByName("modelviewproj")) = model_ * camera.ViewMatrix() * camera.ProjMatrix();
+		*modelviewproj_ep_ = model_ * camera.ViewMatrix() * camera.ProjMatrix();
 	}
 
 	void KMesh::SetModelMatrix(float4x4 const & model)
 	{
 		model_ = model;
-		*(technique_->Effect().ParameterByName("modelIT")) = MathLib::transpose(MathLib::inverse(model_));
+		*modelIT_ep_ = MathLib::transpose(MathLib::inverse(model_));
 	}
 
 

@@ -163,6 +163,10 @@ namespace
 			*(effect_->ParameterByName("distance_sampler")) = dist_texture_;
 			*(effect_->ParameterByName("distance_base_scale")) = float2(dist_base_ / 32768.0f, dist_scale_ / 32768.0f + 1.0f);
 
+			half_width_height_ep_ = effect_->ParameterByName("half_width_height");
+			texel_to_pixel_offset_ep_ = effect_->ParameterByName("texel_to_pixel_offset");
+			mvp_ep_ = effect_->ParameterByName("mvp");
+
 			vb_ = rf.MakeVertexBuffer(BU_Dynamic);
 			rl_->BindVertexStream(vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
 											vertex_element(VEU_Diffuse, 0, EF_ARGB8),
@@ -206,12 +210,12 @@ namespace
 				float const half_width = re.CurFrameBuffer()->Width() / 2.0f;
 				float const half_height = re.CurFrameBuffer()->Height() / 2.0f;
 
-				*(effect_->ParameterByName("half_width_height")) = float2(half_width, half_height);
+				*half_width_height_ep_ = float2(half_width, half_height);
 
 				float4 texel_to_pixel = re.TexelToPixelOffset();
 				texel_to_pixel.x() /= half_width;
 				texel_to_pixel.y() /= half_height;
-				*(effect_->ParameterByName("texel_to_pixel_offset")) = texel_to_pixel;
+				*texel_to_pixel_offset_ep_ = texel_to_pixel;
 			}
 		}
 
@@ -279,7 +283,7 @@ namespace
 		void AddText3D(float4x4 const & mvp, Color const & clr, std::wstring const & text, uint32_t font_height)
 		{
 			three_dim_ = true;
-			*(effect_->ParameterByName("mvp")) = mvp;
+			*mvp_ep_ = mvp;
 
 			this->AddText(0, 0, 0, 1, 1, clr, text, font_height);
 		}
@@ -645,6 +649,10 @@ namespace
 
 		TexturePtr		dist_texture_;
 		RenderEffectPtr	effect_;
+
+		RenderEffectParameterPtr half_width_height_ep_;
+		RenderEffectParameterPtr texel_to_pixel_offset_ep_;
+		RenderEffectParameterPtr mvp_ep_;
 
 		uint32_t kfont_char_size_;
 		int16_t dist_base_;

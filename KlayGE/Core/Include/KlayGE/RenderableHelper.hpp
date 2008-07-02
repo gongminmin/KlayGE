@@ -50,6 +50,9 @@ namespace KlayGE
 
 		RenderLayoutPtr rl_;
 		RenderTechniquePtr technique_;
+
+		RenderEffectParameterPtr color_ep_;
+		RenderEffectParameterPtr matViewProj_ep_;
 	};
 
 	class RenderablePoint : public RenderableHelper
@@ -118,6 +121,10 @@ namespace KlayGE
 		void CubeMap(TexturePtr const & cube);
 
 		void OnRenderBegin();
+
+	protected:
+		RenderEffectParameterPtr inv_mvp_ep_;
+		RenderEffectParameterPtr skybox_cubeMapSampler_ep_;
 	};
 
 	class RenderablePlane : public RenderableHelper

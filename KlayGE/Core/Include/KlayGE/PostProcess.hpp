@@ -46,6 +46,10 @@ namespace KlayGE
 		FrameBufferPtr frame_buffer_;
 
 		GraphicsBufferPtr pos_vb_;
+
+		RenderEffectParameterPtr texel_to_pixel_offset_ep_;
+		RenderEffectParameterPtr src_sampler_ep_;
+		RenderEffectParameterPtr flipping_ep_;
 	};
 
 	class GammaCorrectionProcess : public PostProcess
@@ -54,6 +58,9 @@ namespace KlayGE
 		explicit GammaCorrectionProcess();
 
 		void Gamma(float gamma);
+
+	private:
+		RenderEffectParameterPtr inv_gamma_ep_;
 	};
 	
 	class SeparableBlurPostProcess : public PostProcess
@@ -69,6 +76,9 @@ namespace KlayGE
 	protected:
 		int kernel_radius_;
 		float multiplier_;
+
+		RenderEffectParameterPtr color_weight_ep_;
+		RenderEffectParameterPtr tex_coord_offset_ep_;
 	};
 
 	class Downsampler2x2PostProcess : public PostProcess

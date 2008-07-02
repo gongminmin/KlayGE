@@ -53,6 +53,13 @@ namespace KlayGE
 		rl_->BindVertexStream(pos_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
 		technique_ = tech;
+
+		if (technique_)
+		{
+			texel_to_pixel_offset_ep_ = technique_->Effect().ParameterByName("texel_to_pixel_offset");
+			src_sampler_ep_ = technique_->Effect().ParameterByName("src_sampler");
+			flipping_ep_ = technique_->Effect().ParameterByName("flipping");
+		}
 	}
 
 	void PostProcess::Source(TexturePtr const & tex, bool flipping)
@@ -89,21 +96,22 @@ namespace KlayGE
 		float4 texel_to_pixel = re.TexelToPixelOffset();
 		texel_to_pixel.x() /= frame_buffer_->Width() / 2.0f;
 		texel_to_pixel.y() /= frame_buffer_->Height() / 2.0f;
-		*(technique_->Effect().ParameterByName("texel_to_pixel_offset")) = texel_to_pixel;
+		*texel_to_pixel_offset_ep_ = texel_to_pixel;
 
-		*(technique_->Effect().ParameterByName("src_sampler")) = src_texture_;
-		*(technique_->Effect().ParameterByName("flipping")) = flipping_ ? -1 : +1;
+		*src_sampler_ep_ = src_texture_;
+		*flipping_ep_ = flipping_ ? -1 : +1;
 	}
 
 
 	GammaCorrectionProcess::GammaCorrectionProcess()
 		: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("GammaCorrection.kfx")->TechniqueByName("GammaCorrection"))
 	{
+		inv_gamma_ep_ = technique_->Effect().ParameterByName("inv_gamma");
 	}
 
 	void GammaCorrectionProcess::Gamma(float gamma)
 	{
-		*(technique_->Effect().ParameterByName("inv_gamma")) = 1 / gamma;
+		*inv_gamma_ep_ = 1 / gamma;
 	}
 
 
@@ -124,6 +132,9 @@ namespace KlayGE
 				kernel_radius_(kernel_radius), multiplier_(multiplier)
 	{
 		BOOST_ASSERT((kernel_radius > 0) && (kernel_radius <= 8));
+
+		color_weight_ep_ = technique_->Effect().ParameterByName("color_weight");
+		tex_coord_offset_ep_ = technique_->Effect().ParameterByName("tex_coord_offset");
 	}
 
 	SeparableBlurPostProcess::~SeparableBlurPostProcess()
@@ -177,8 +188,8 @@ namespace KlayGE
 			color_weight[i] = multiplier_ * scale;
 		}
 
-		*(technique_->Effect().ParameterByName("color_weight")) = color_weight;
-		*(technique_->Effect().ParameterByName("tex_coord_offset")) = tex_coord_offset;
+		*color_weight_ep_ = color_weight;
+		*tex_coord_offset_ep_ = tex_coord_offset;
 	}
 
 

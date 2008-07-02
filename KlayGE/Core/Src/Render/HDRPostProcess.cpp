@@ -29,6 +29,7 @@ namespace KlayGE
 	SumLumPostProcess::SumLumPostProcess(std::string const & tech)
 			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.kfx")->TechniqueByName(tech))
 	{
+		tex_coord_offset_ep_ = technique_->Effect().ParameterByName("tex_coord_offset");
 	}
 
 	SumLumPostProcess::~SumLumPostProcess()
@@ -64,7 +65,7 @@ namespace KlayGE
 			}
 		}
 
-		*(technique_->Effect().ParameterByName("tex_coord_offset")) = tex_coord_offset;
+		*tex_coord_offset_ep_ = tex_coord_offset;
 	}
 
 
@@ -100,6 +101,9 @@ namespace KlayGE
 		}
 
 		this->Destinate(fb_[last_index_]);
+
+		last_lum_sampler_ep_ = technique_->Effect().ParameterByName("last_lum_sampler");
+		frame_delta_ep_ = technique_->Effect().ParameterByName("frame_delta");
 	}
 
 	void AdaptedLumPostProcess::Apply()
@@ -113,8 +117,8 @@ namespace KlayGE
 	{
 		PostProcess::OnRenderBegin();
 
-		*(technique_->Effect().ParameterByName("last_lum_sampler")) = adapted_textures_[last_index_];
-		*(technique_->Effect().ParameterByName("frame_delta")) = float(timer_.elapsed());
+		*last_lum_sampler_ep_ = adapted_textures_[last_index_];
+		*frame_delta_ep_ = float(timer_.elapsed());
 		timer_.restart();
 
 		last_index_ = !last_index_;
@@ -134,12 +138,15 @@ namespace KlayGE
 		{
 			technique_ = effect.TechniqueByName("ToneMapping30");
 		}
+
+		lum_sampler_ep_ = technique_->Effect().ParameterByName("lum_sampler");
+		bloom_sampler_ep_ = technique_->Effect().ParameterByName("bloom_sampler");
 	}
 
 	void ToneMappingPostProcess::SetTexture(TexturePtr const & lum_tex, TexturePtr const & bloom_tex)
 	{
-		*(technique_->Effect().ParameterByName("lum_sampler")) = lum_tex;
-		*(technique_->Effect().ParameterByName("bloom_sampler")) = bloom_tex;
+		*lum_sampler_ep_ = lum_tex;
+		*bloom_sampler_ep_ = bloom_tex;
 	}
 
 

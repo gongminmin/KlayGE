@@ -29,27 +29,34 @@ namespace KlayGE
 			: PostProcess(tech),
 				dir_(dir)
 	{
+		if (technique_)
+		{
+			child_sampler_ep_ = technique_->Effect().ParameterByName("child_sampler");
+			addr_offset_ep_ = technique_->Effect().ParameterByName("addr_offset");
+			length_ep_ = technique_->Effect().ParameterByName("length");
+			scale_ep_ = technique_->Effect().ParameterByName("scale");
+		}
 	}
 
 	void SATSeparableScanSweepPostProcess::ChildBuffer(TexturePtr const & tex)
 	{
-		*(technique_->Effect().ParameterByName("child_sampler")) = tex;
+		*child_sampler_ep_ = tex;
 	}
 
 	void SATSeparableScanSweepPostProcess::AddrOffset(float3 offset)
 	{
-		*(technique_->Effect().ParameterByName("addr_offset")) = offset;
+		*addr_offset_ep_ = offset;
 	}
 
 	void SATSeparableScanSweepPostProcess::Length(int length)
 	{
 		length_ = length;
-		*(technique_->Effect().ParameterByName("length")) = length;
+		*length_ep_ = length;
 	}
 
 	void SATSeparableScanSweepPostProcess::Scale(float scale)
 	{
-		*(technique_->Effect().ParameterByName("scale")) = scale;
+		*scale_ep_ = scale;
 	}
 
 

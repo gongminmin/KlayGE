@@ -35,6 +35,8 @@ namespace KlayGE
 
 	private:
 		std::vector<float4> tex_coord_offset_;
+
+		RenderEffectParameterPtr tex_coord_offset_ep_;
 	};
 
 	class SumLumLogPostProcess : public SumLumPostProcess
@@ -65,6 +67,9 @@ namespace KlayGE
 		bool last_index_;
 
 		Timer timer_;
+
+		RenderEffectParameterPtr last_lum_sampler_ep_;
+		RenderEffectParameterPtr frame_delta_ep_;
 	};
 
 	class ToneMappingPostProcess : public PostProcess
@@ -73,6 +78,10 @@ namespace KlayGE
 		ToneMappingPostProcess();
 
 		void SetTexture(TexturePtr const & lum_tex, TexturePtr const & bloom_tex);
+
+	private:
+		RenderEffectParameterPtr lum_sampler_ep_;
+		RenderEffectParameterPtr bloom_sampler_ep_;
 	};
 
 

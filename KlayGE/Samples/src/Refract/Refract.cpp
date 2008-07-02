@@ -44,6 +44,10 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			technique_ = rf.LoadEffect("HDRSkyBox.kfx")->TechniqueByName("HDRSkyBoxTec");
+
+			skybox_cubeMapSampler_ep_ = technique_->Effect().ParameterByName("skybox_cubeMapSampler");
+			skybox_CcubeMapSampler_ep_ = technique_->Effect().ParameterByName("skybox_CcubeMapSampler");
+			inv_mvp_ep_ = technique_->Effect().ParameterByName("inv_mvp");
 		}
 
 		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)
@@ -56,13 +60,15 @@ namespace
 		{
 			RenderableSkyBox::OnRenderBegin();
 
-			*(technique_->Effect().ParameterByName("skybox_cubeMapSampler")) = y_tex_;
-			*(technique_->Effect().ParameterByName("skybox_CcubeMapSampler")) = c_tex_;
+			*skybox_cubeMapSampler_ep_ = y_tex_;
+			*skybox_CcubeMapSampler_ep_ = c_tex_;
 		}
 
 	private:
 		TexturePtr y_tex_;
 		TexturePtr c_tex_;
+
+		RenderEffectParameterPtr skybox_CcubeMapSampler_ep_;
 	};
 
 	class HDRSceneObjectSkyBox : public SceneObjectSkyBox

@@ -73,6 +73,9 @@ namespace KlayGE
 			{
 				technique_ = effect->TechniqueByName("UITecNoTex");
 			}
+
+			half_width_height_ep_ = technique_->Effect().ParameterByName("half_width_height");
+			texel_to_pixel_offset_ep_ = technique_->Effect().ParameterByName("texel_to_pixel_offset");
 		}
 
 		void OnRenderBegin()
@@ -81,12 +84,12 @@ namespace KlayGE
 			float const half_width = re.CurFrameBuffer()->Width() / 2.0f;
 			float const half_height = re.CurFrameBuffer()->Height() / 2.0f;
 
-			*(technique_->Effect().ParameterByName("half_width_height")) = float2(half_width, half_height);
+			*half_width_height_ep_ = float2(half_width, half_height);
 
 			float4 texel_to_pixel = re.TexelToPixelOffset();
 			texel_to_pixel.x() /= half_width;
 			texel_to_pixel.y() /= half_height;
-			*(technique_->Effect().ParameterByName("texel_to_pixel_offset")) = texel_to_pixel;
+			*texel_to_pixel_offset_ep_ = texel_to_pixel;
 		}
 
 		void Render()
@@ -97,6 +100,10 @@ namespace KlayGE
 			renderEngine.Render(*this->GetRenderTechnique(), *rl_);
 			this->OnRenderEnd();
 		}
+
+	private:
+		RenderEffectParameterPtr half_width_height_ep_;
+		RenderEffectParameterPtr texel_to_pixel_offset_ep_;
 	};
 
 	void UIStatesColor::Init(Color const & default_color,
