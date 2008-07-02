@@ -46,8 +46,8 @@ namespace KlayGE
 	{
 		is_shader_validate_[type] = true;
 
-		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
+		D3D9RenderEngine const & render_eng = *checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		ID3D9DevicePtr const & d3d_device = render_eng.D3DDevice();
 
 		std::string shader_profile = (*shader_descs)[type].profile;
 		switch (type)
@@ -594,84 +594,80 @@ namespace KlayGE
 	void D3D9ShaderObject::Active()
 	{
 		RenderEngine const & re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&re)->D3DDevice();
+		ID3D9DevicePtr const & d3d_device = checked_cast<D3D9RenderEngine const *>(&re)->D3DDevice();
 
-		d3d_device->SetVertexShader(this->VertexShader().get());
-		d3d_device->SetPixelShader(this->PixelShader().get());
+		d3d_device->SetVertexShader(vertex_shader_.get());
+		d3d_device->SetPixelShader(pixel_shader_.get());
 
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ShaderType type = static_cast<ShaderType>(i);
 
-			if (!this->BoolRegisters(type).empty())
+			if (!bool_registers_[type].empty())
 			{
 				if (ST_VertexShader == type)
 				{
-					d3d_device->SetVertexShaderConstantB(this->BoolStart(type), &this->BoolRegisters(type)[0],
-						static_cast<UINT>(this->BoolRegisters(type).size()) / 4);
+					d3d_device->SetVertexShaderConstantB(bool_start_[type], &bool_registers_[type][0],
+						static_cast<UINT>(bool_registers_[type].size()) / 4);
 				}
 				else
 				{
-					d3d_device->SetPixelShaderConstantB(this->BoolStart(type), &this->BoolRegisters(type)[0],
-						static_cast<UINT>(this->BoolRegisters(type).size()) / 4);
+					d3d_device->SetPixelShaderConstantB(bool_start_[type], &bool_registers_[type][0],
+						static_cast<UINT>(bool_registers_[type].size()) / 4);
 				}
 			}
-			if (!this->IntRegisters(type).empty())
+			if (!int_registers_[type].empty())
 			{
 				if (ST_VertexShader == type)
 				{
-					d3d_device->SetVertexShaderConstantI(this->IntStart(type), &this->IntRegisters(type)[0],
-						static_cast<UINT>(this->IntRegisters(type).size()) / 4);
+					d3d_device->SetVertexShaderConstantI(int_start_[type], &int_registers_[type][0],
+						static_cast<UINT>(int_registers_[type].size()) / 4);
 				}
 				else
 				{
-					d3d_device->SetPixelShaderConstantI(this->IntStart(type), &this->IntRegisters(type)[0],
-						static_cast<UINT>(this->IntRegisters(type).size()) / 4);
+					d3d_device->SetPixelShaderConstantI(int_start_[type], &int_registers_[type][0],
+						static_cast<UINT>(int_registers_[type].size()) / 4);
 				}
 			}
-			if (!this->FloatRegisters(type).empty())
+			if (!float_registers_[type].empty())
 			{
 				if (ST_VertexShader == type)
 				{
-					d3d_device->SetVertexShaderConstantF(this->FloatStart(type), &this->FloatRegisters(type)[0],
-						static_cast<UINT>(this->FloatRegisters(type).size()) / 4);
+					d3d_device->SetVertexShaderConstantF(float_start_[type], &float_registers_[type][0],
+						static_cast<UINT>(float_registers_[type].size()) / 4);
 				}
 				else
 				{
-					d3d_device->SetPixelShaderConstantF(this->FloatStart(type), &this->FloatRegisters(type)[0],
-						static_cast<UINT>(this->FloatRegisters(type).size()) / 4);
+					d3d_device->SetPixelShaderConstantF(float_start_[type], &float_registers_[type][0],
+						static_cast<UINT>(float_registers_[type].size()) / 4);
 				}
 			}
 
-			for (uint32_t j = 0; j < this->Samplers(type).size(); ++ j)
+			for (size_t j = 0, j_end = samplers_[type].size(); j < j_end; ++ j)
 			{
-				uint32_t stage = j;
+				uint32_t stage = static_cast<uint32_t>(j);
 				if (ST_VertexShader == type)
 				{
 					stage += D3DVERTEXTEXTURESAMPLER0;
 				}
 
-				SamplerPtr const & sampler = this->Samplers(type)[j];
+				SamplerPtr const & sampler = samplers_[type][j];
 				if (!sampler || !sampler->texture)
 				{
 					TIF(d3d_device->SetTexture(stage, NULL));
 				}
 				else
 				{
-					D3D9Texture const & d3d9Tex(*checked_pointer_cast<D3D9Texture>(sampler->texture));
+					D3D9Texture const & d3d9Tex = *checked_pointer_cast<D3D9Texture>(sampler->texture);
 					TIF(d3d_device->SetTexture(stage, d3d9Tex.D3DBaseTexture().get()));
 					TIF(d3d_device->SetSamplerState(stage, D3DSAMP_SRGBTEXTURE, IsSRGB(sampler->texture->Format())));
 
-					TIF(d3d_device->SetSamplerState(stage, D3DSAMP_BORDERCOLOR,
-							D3D9Mapping::MappingToUInt32Color(sampler->border_clr)));
+					TIF(d3d_device->SetSamplerState(stage, D3DSAMP_BORDERCOLOR, D3D9Mapping::MappingToUInt32Color(sampler->border_clr)));
 
 					// Set addressing mode
-					TIF(d3d_device->SetSamplerState(stage, D3DSAMP_ADDRESSU,
-							D3D9Mapping::Mapping(sampler->addr_mode_u)));
-					TIF(d3d_device->SetSamplerState(stage, D3DSAMP_ADDRESSV,
-							D3D9Mapping::Mapping(sampler->addr_mode_v)));
-					TIF(d3d_device->SetSamplerState(stage, D3DSAMP_ADDRESSW,
-							D3D9Mapping::Mapping(sampler->addr_mode_w)));
+					TIF(d3d_device->SetSamplerState(stage, D3DSAMP_ADDRESSU, D3D9Mapping::Mapping(sampler->addr_mode_u)));
+					TIF(d3d_device->SetSamplerState(stage, D3DSAMP_ADDRESSV, D3D9Mapping::Mapping(sampler->addr_mode_v)));
+					TIF(d3d_device->SetSamplerState(stage, D3DSAMP_ADDRESSW, D3D9Mapping::Mapping(sampler->addr_mode_w)));
 
 					switch (sampler->filter)
 					{

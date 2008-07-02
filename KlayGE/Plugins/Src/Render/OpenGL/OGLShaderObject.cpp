@@ -412,14 +412,14 @@ namespace KlayGE
 	{
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-		cgGLBindProgram(this->VertexShader());
-		cgGLEnableProfile(this->VertexShaderProfile());
-		cgGLBindProgram(this->PixelShader());
-		cgGLEnableProfile(this->PixelShaderProfile());
+		cgGLBindProgram(shaders_[ST_VertexShader]);
+		cgGLEnableProfile(profiles_[ST_VertexShader]);
+		cgGLBindProgram(shaders_[ST_PixelShader]);
+		cgGLEnableProfile(profiles_[ST_PixelShader]);
 
 		for (int i = 0; i < ST_NumShaderTypes; ++ i)
 		{
-			std::vector<SamplerPtr> const & samplers = this->Samplers(static_cast<ShaderType>(i));
+			std::vector<SamplerPtr> const & samplers = samplers_[static_cast<ShaderType>(i)];
 
 			for (uint32_t stage = 0, num_stage = static_cast<uint32_t>(samplers.size()); stage < num_stage; ++ stage)
 			{

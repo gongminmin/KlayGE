@@ -651,6 +651,10 @@ namespace KlayGE
 				{
 					rs_desc.cull_mode = static_cast<CullMode>(state_val);
 				}
+				if ("front_face_ccw" == state_name)
+				{
+					rs_desc.front_face_ccw = state_val ? true : false;
+				}
 				if ("polygon_offset_factor" == state_name)
 				{
 					rs_desc.polygon_offset_factor = uint32_to_float(state_val);
@@ -732,7 +736,7 @@ namespace KlayGE
 				}
 				if ("front_stencil_ref" == state_name)
 				{
-					dss_desc.front_stencil_ref = static_cast<uint16_t>(state_val);
+					front_stencil_ref_ = static_cast<uint16_t>(state_val);
 				}
 				if ("front_stencil_read_mask" == state_name)
 				{
@@ -764,7 +768,7 @@ namespace KlayGE
 				}
 				if ("back_stencil_ref" == state_name)
 				{
-					dss_desc.back_stencil_ref = static_cast<uint16_t>(state_val);
+					back_stencil_ref_ = static_cast<uint16_t>(state_val);
 				}
 				if ("back_stencil_read_mask" == state_name)
 				{
@@ -866,9 +870,9 @@ namespace KlayGE
 	{
 		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
 		{
-			for (size_t j = 0; j < param_descs_[i].size(); ++ j)
+			for (size_t j = 0, j_end = param_descs_[i].size(); j < j_end; ++ j)
 			{
-				RenderEffectParameterPtr param = param_descs_[i][j];
+				RenderEffectParameterPtr const & param = param_descs_[i][j];
 				if (param->IsDirty())
 				{
 					switch (param->type())
@@ -989,7 +993,7 @@ namespace KlayGE
 		}
 
 		RenderEngine& render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		render_eng.SetStateObjects(rasterizer_state_obj_, depth_stencil_state_obj_, blend_state_obj_, shader_obj_);
+		render_eng.SetStateObjects(rasterizer_state_obj_, depth_stencil_state_obj_, front_stencil_ref_, back_stencil_ref_, blend_state_obj_, shader_obj_);
 	}
 
 	std::string RenderPass::GenShaderText() const

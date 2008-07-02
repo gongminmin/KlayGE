@@ -193,7 +193,7 @@ namespace KlayGE
 		cur_dss_obj_ = rf.MakeDepthStencilStateObject(DepthStencilStateDesc());
 		cur_bs_obj_ = rf.MakeBlendStateObject(BlendStateDesc());
 		cur_rs_obj_->Active();
-		cur_dss_obj_->Active();
+		cur_dss_obj_->Active(0, 0);
 		cur_bs_obj_->Active();
 	}
 

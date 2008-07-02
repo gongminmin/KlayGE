@@ -212,18 +212,32 @@ namespace KlayGE
 		}
 	}
 
-	uint32_t D3D9Mapping::Mapping(CullMode mode)
+	uint32_t D3D9Mapping::Mapping(CullMode mode, bool front_face_ccw)
 	{
 		switch (mode)
 		{
 		case CM_None:
 			return D3DCULL_NONE;
 
-		case CM_Clockwise:
-			return D3DCULL_CW;
+		case CM_Front:
+			if (front_face_ccw)
+			{
+				return D3DCULL_CCW;
+			}
+			else
+			{
+				return D3DCULL_CW;
+			}
 
-		case CM_AntiClockwise:
-			return D3DCULL_CCW;
+		case CM_Back:
+			if (front_face_ccw)
+			{
+				return D3DCULL_CW;
+			}
+			else
+			{
+				return D3DCULL_CCW;
+			}
 
 		default:
 			BOOST_ASSERT(false);

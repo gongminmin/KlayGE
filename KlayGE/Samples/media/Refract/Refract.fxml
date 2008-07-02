@@ -120,7 +120,7 @@ float4 RefractPS(float3 normal			: TEXCOORD0,
 
 	<technique name="Refract">
 		<pass name="p0">
-			<state name="cull_mode" value="anti_clock_wise"/>
+			<state name="cull_mode" value="back"/>
 			<state name="depth_func" value="less_equal"/>
 
 			<state name="vertex_shader" value="RefractVS()"/>
@@ -151,7 +151,7 @@ float4 RefractBackFacePS(float3 normal : TEXCOORD0,
 
 	<technique name="RefractBackFace">
 		<pass name="p0">
-			<state name="cull_mode" value="clock_wise"/>
+			<state name="cull_mode" value="front"/>
 			<state name="depth_func" value="greater"/>
 
 			<state name="vertex_shader" value="RefractBackFaceVS()"/>

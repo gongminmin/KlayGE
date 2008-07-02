@@ -83,8 +83,8 @@ namespace KlayGE
 
 	void D3D9FrameBuffer::OnBind()
 	{
-		D3D9RenderEngine& re(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		ID3D9DevicePtr d3dDevice = re.D3DDevice();
+		D3D9RenderEngine const & re = *checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		ID3D9DevicePtr const & d3dDevice = re.D3DDevice();
 
 		bool srgb = false;
 		for (uint32_t i = 0; i < clr_views_.size(); ++ i)
@@ -122,7 +122,7 @@ namespace KlayGE
 		}
 
 		RenderEngine const & re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&re)->D3DDevice();
+		ID3D9DevicePtr const & d3d_device = checked_cast<D3D9RenderEngine const *>(&re)->D3DDevice();
 
 		std::vector<IDirect3DSurface9*> old_rt(re.DeviceCaps().max_simultaneous_rts, NULL);
 		if (flags & CBM_Color)

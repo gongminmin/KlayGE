@@ -41,7 +41,7 @@ namespace KlayGE
 		static D3DSTENCILOP Mapping(StencilOperation op);
 
 		static uint32_t Mapping(AlphaBlendFactor factor);
-		static uint32_t Mapping(CullMode mode);
+		static uint32_t Mapping(CullMode mode, bool front_face_ccw);
 		static uint32_t Mapping(PolygonMode mode);
 		static uint32_t Mapping(ShadeMode mode);
 		static uint32_t Mapping(BlendOperation bo);

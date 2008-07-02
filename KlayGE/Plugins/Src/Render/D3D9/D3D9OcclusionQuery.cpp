@@ -26,8 +26,8 @@ namespace KlayGE
 {
 	D3D9OcclusionQuery::D3D9OcclusionQuery()
 	{
-		D3D9RenderEngine& render_eng(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		ID3D9DevicePtr d3d_device = render_eng.D3DDevice();
+		D3D9RenderEngine const & render_eng = *checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		ID3D9DevicePtr const & d3d_device = render_eng.D3DDevice();
 
 		IDirect3DQuery9* query;
 		d3d_device->CreateQuery(D3DQUERYTYPE_OCCLUSION, &query);

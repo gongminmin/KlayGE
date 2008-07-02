@@ -22,8 +22,8 @@ compare_function_enum = {
 
 cull_mode_enum = {
 	"none" : 0,
-	"clock_wise" : 1,
-	"anti_clock_wise" : 2,
+	"front" : 1,
+	"back" : 2,
 };
 
 polygon_mode_enum = {
@@ -117,6 +117,7 @@ render_states_define = [
 	("polygon_mode", "int"),
 	("shade_mode", "int"),
 	("cull_mode", "int"),
+	("front_face_ccw", "bool"),
 	("polygon_offset_factor", "float"),
 	("polygon_offset_units", "float"),
 	("scissor_enable", "bool"),

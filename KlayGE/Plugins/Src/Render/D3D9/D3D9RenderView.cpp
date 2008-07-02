@@ -35,7 +35,7 @@ namespace KlayGE
 	void D3D9RenderView::Clear(Color const & clr)
 	{
 		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
+		ID3D9DevicePtr const & d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
 
 		std::vector<IDirect3DSurface9*> old_rt(render_eng.DeviceCaps().max_simultaneous_rts, NULL);
 		for (uint32_t i = 0; i < old_rt.size(); ++ i)
@@ -73,7 +73,7 @@ namespace KlayGE
 	void D3D9RenderView::Clear(float depth)
 	{
 		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
+		ID3D9DevicePtr const & d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
 
 		IDirect3DSurface9* old_ds;
 		d3d_device->GetDepthStencilSurface(&old_ds);
@@ -94,7 +94,7 @@ namespace KlayGE
 	void D3D9RenderView::Clear(int32_t stencil)
 	{
 		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
+		ID3D9DevicePtr const & d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
 
 		IDirect3DSurface9* old_ds;
 		d3d_device->GetDepthStencilSurface(&old_ds);
@@ -115,7 +115,7 @@ namespace KlayGE
 	void D3D9RenderView::Clear(float depth, int32_t stencil)
 	{
 		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
+		ID3D9DevicePtr const & d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
 
 		IDirect3DSurface9* old_ds;
 		d3d_device->GetDepthStencilSurface(&old_ds);
@@ -301,7 +301,7 @@ namespace KlayGE
 		IDirect3DSurface9* surface = NULL;
 
 		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
+		ID3D9DevicePtr const & d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
 		if (D3DPOOL_SYSTEMMEM == pool)
 		{
 			TIF(d3d_device->CreateOffscreenPlainSurface(width_, height_,
@@ -319,7 +319,7 @@ namespace KlayGE
 	void D3D9Texture3DRenderView::DoOnLostDevice()
 	{
 		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
+		ID3D9DevicePtr const & d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
 
 		ID3D9SurfacePtr sys_mem_surf = this->CreateSurface(D3DPOOL_SYSTEMMEM);
 		TIF(d3d_device->GetRenderTargetData(surface_.get(), sys_mem_surf.get()));
@@ -409,7 +409,7 @@ namespace KlayGE
 		IDirect3DSurface9* surface = NULL;
 
 		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
+		ID3D9DevicePtr const & d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
 		if (D3DPOOL_SYSTEMMEM == pool)
 		{
 			TIF(d3d_device->CreateOffscreenPlainSurface(width_, height_,
@@ -451,7 +451,7 @@ namespace KlayGE
 	void D3D9GraphicsBufferRenderView::DoOnLostDevice()
 	{
 		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
+		ID3D9DevicePtr const & d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
 
 		ID3D9SurfacePtr sys_mem_surf = this->CreateGBSurface(D3DPOOL_SYSTEMMEM);
 		TIF(d3d_device->GetRenderTargetData(surface_.get(), sys_mem_surf.get()));
@@ -461,7 +461,7 @@ namespace KlayGE
 	void D3D9GraphicsBufferRenderView::DoOnResetDevice()
 	{
 		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
+		ID3D9DevicePtr const & d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
 
 		ID3D9SurfacePtr default_surf = this->CreateGBSurface(D3DPOOL_DEFAULT);
 		TIF(D3DXLoadSurfaceFromSurface(surface_.get(), NULL, NULL,
@@ -510,7 +510,7 @@ namespace KlayGE
 		IDirect3DSurface9* surface = NULL;
 
 		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
+		ID3D9DevicePtr const & d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
 		TIF(d3d_device->CreateDepthStencilSurface(width_, height_, D3D9Mapping::MappingFormat(pf_),
 			multi_sample_, 0, false, &surface, NULL));
 

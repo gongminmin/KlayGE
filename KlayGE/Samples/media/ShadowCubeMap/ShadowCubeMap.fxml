@@ -87,7 +87,7 @@ float4 RenderScenePS(half3 diffuse : COLOR0,
 
 	<technique name="RenderScene">
 		<pass name="p0">
-			<state name="cull_mode" value="anti_clock_wise"/>
+			<state name="cull_mode" value="back"/>
 
 			<state name="vertex_shader" value="RenderSceneVS()"/>
 			<state name="pixel_shader" value="RenderScenePS()"/>

@@ -37,16 +37,18 @@ namespace KlayGE
 			glDisable(GL_CULL_FACE);
 			break;
 
-		case CM_Clockwise:
+		case CM_Front:
 			glEnable(GL_CULL_FACE);
-			glFrontFace(GL_CCW);
+			glCullFace(GL_FRONT);
 			break;
 
-		case CM_AntiClockwise:
+		case CM_Back:
 			glEnable(GL_CULL_FACE);
-			glFrontFace(GL_CW);
+			glCullFace(GL_BACK);
 			break;
 		}
+
+		glFrontFace(desc_.front_face_ccw ? GL_CCW : GL_CW);
 
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glEnable(GL_POLYGON_OFFSET_POINT);
@@ -80,7 +82,7 @@ namespace KlayGE
 	{
 	}
 
-	void OGLDepthStencilStateObject::Active()
+	void OGLDepthStencilStateObject::Active(uint16_t front_stencil_ref, uint16_t back_stencil_ref)
 	{
 		if (desc_.depth_enable)
 		{
@@ -94,13 +96,13 @@ namespace KlayGE
 		glDepthFunc(OGLMapping::Mapping(desc_.depth_func));
 
 		glStencilFuncSeparate(GL_FRONT, OGLMapping::Mapping(desc_.front_stencil_func),
-				desc_.front_stencil_ref, desc_.front_stencil_read_mask);
+				front_stencil_ref, desc_.front_stencil_read_mask);
 		glStencilOpSeparate(GL_FRONT, OGLMapping::Mapping(desc_.front_stencil_fail),
 				OGLMapping::Mapping(desc_.front_stencil_depth_fail), OGLMapping::Mapping(desc_.front_stencil_pass));
 		glStencilMaskSeparate(GL_FRONT, desc_.front_stencil_write_mask);
 
 		glStencilFuncSeparate(GL_BACK, OGLMapping::Mapping(desc_.back_stencil_func),
-				desc_.back_stencil_ref, desc_.back_stencil_read_mask);
+				back_stencil_ref, desc_.back_stencil_read_mask);
 		glStencilOpSeparate(GL_BACK, OGLMapping::Mapping(desc_.back_stencil_fail),
 				OGLMapping::Mapping(desc_.back_stencil_depth_fail), OGLMapping::Mapping(desc_.back_stencil_pass));
 		glStencilMaskSeparate(GL_BACK, desc_.back_stencil_write_mask);

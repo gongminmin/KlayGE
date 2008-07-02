@@ -48,29 +48,6 @@ namespace KlayGE
 
 		void Active();
 
-		CGprogram VertexShader() const
-		{
-			return shaders_[ST_VertexShader];
-		}
-		CGprogram PixelShader() const
-		{
-			return shaders_[ST_PixelShader];
-		}
-
-		CGprofile VertexShaderProfile() const
-		{
-			return profiles_[ST_VertexShader];
-		}
-		CGprofile PixelShaderProfile() const
-		{
-			return profiles_[ST_PixelShader];
-		}
-
-		std::vector<SamplerPtr> const & Samplers(ShaderType type) const
-		{
-			return samplers_[type];
-		}
-
 	private:
 		struct less_shared_ptr_string
 			: public std::binary_function<boost::shared_ptr<std::string>, boost::shared_ptr<std::string>, bool>

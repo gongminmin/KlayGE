@@ -30,11 +30,11 @@ namespace KlayGE
 	void D3D9RasterizerStateObject::Active()
 	{
 		RenderEngine const & re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&re)->D3DDevice();
+		ID3D9DevicePtr const & d3d_device = checked_cast<D3D9RenderEngine const *>(&re)->D3DDevice();
 
 		d3d_device->SetRenderState(D3DRS_FILLMODE, D3D9Mapping::Mapping(desc_.polygon_mode));
 		d3d_device->SetRenderState(D3DRS_SHADEMODE, D3D9Mapping::Mapping(desc_.shade_mode));
-		d3d_device->SetRenderState(D3DRS_CULLMODE, D3D9Mapping::Mapping(desc_.cull_mode));
+		d3d_device->SetRenderState(D3DRS_CULLMODE, D3D9Mapping::Mapping(desc_.cull_mode, desc_.front_face_ccw));
 		d3d_device->SetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, float_to_uint32(desc_.polygon_offset_factor));
 		d3d_device->SetRenderState(D3DRS_DEPTHBIAS, float_to_uint32(desc_.polygon_offset_units));
 		d3d_device->SetRenderState(D3DRS_SCISSORTESTENABLE, desc_.scissor_enable);
@@ -46,10 +46,10 @@ namespace KlayGE
 	{
 	}
 
-	void D3D9DepthStencilStateObject::Active()
+	void D3D9DepthStencilStateObject::Active(uint16_t front_stencil_ref, uint16_t /*back_stencil_ref*/)
 	{
 		RenderEngine const & re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&re)->D3DDevice();
+		ID3D9DevicePtr const & d3d_device = checked_cast<D3D9RenderEngine const *>(&re)->D3DDevice();
 
 		d3d_device->SetRenderState(D3DRS_ZENABLE, desc_.depth_enable ? D3DZB_TRUE : D3DZB_FALSE);
 		d3d_device->SetRenderState(D3DRS_ZWRITEENABLE, desc_.depth_write_mask ? D3DZB_TRUE : D3DZB_FALSE);
@@ -81,7 +81,7 @@ namespace KlayGE
 		}
 		
 		d3d_device->SetRenderState(D3DRS_STENCILFUNC, D3D9Mapping::Mapping(desc_.front_stencil_func));
-		d3d_device->SetRenderState(D3DRS_STENCILREF, desc_.front_stencil_ref);
+		d3d_device->SetRenderState(D3DRS_STENCILREF, front_stencil_ref);
 		d3d_device->SetRenderState(D3DRS_STENCILMASK, desc_.front_stencil_read_mask);
 		d3d_device->SetRenderState(D3DRS_STENCILFAIL, D3D9Mapping::Mapping(desc_.front_stencil_fail));
 		d3d_device->SetRenderState(D3DRS_STENCILZFAIL, D3D9Mapping::Mapping(desc_.front_stencil_depth_fail));
@@ -89,7 +89,6 @@ namespace KlayGE
 		d3d_device->SetRenderState(D3DRS_STENCILWRITEMASK, desc_.front_stencil_write_mask);
 
 		d3d_device->SetRenderState(D3DRS_CCW_STENCILFUNC, D3D9Mapping::Mapping(desc_.back_stencil_func));
-		d3d_device->SetRenderState(D3DRS_STENCILREF, desc_.back_stencil_ref);
 		d3d_device->SetRenderState(D3DRS_STENCILMASK, desc_.back_stencil_read_mask);
 		d3d_device->SetRenderState(D3DRS_CCW_STENCILFAIL, D3D9Mapping::Mapping(desc_.back_stencil_fail));
 		d3d_device->SetRenderState(D3DRS_CCW_STENCILZFAIL, D3D9Mapping::Mapping(desc_.back_stencil_depth_fail));
@@ -105,8 +104,7 @@ namespace KlayGE
 	void D3D9BlendStateObject::Active()
 	{
 		D3D9RenderEngine const & re = *checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D9Ptr d3d = re.D3DObject();
-		ID3D9DevicePtr d3d_device = re.D3DDevice();
+		ID3D9DevicePtr const & d3d_device = re.D3DDevice();
 
 		if (re.DeviceCaps().alpha_to_coverage_support)
 		{

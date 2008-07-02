@@ -31,7 +31,7 @@ namespace KlayGE
 	public:
 		explicit D3D9DepthStencilStateObject(DepthStencilStateDesc const & desc);
 
-		void Active();
+		void Active(uint16_t front_stencil_ref, uint16_t back_stencil_ref);
 	};
 
 	class D3D9BlendStateObject : public BlendStateObject

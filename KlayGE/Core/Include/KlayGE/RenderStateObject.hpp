@@ -61,8 +61,8 @@ namespace KlayGE
 	enum CullMode
 	{
 		CM_None,
-		CM_Clockwise,
-		CM_AntiClockwise
+		CM_Front,
+		CM_Back
 	};
 
 	enum BlendOperation
@@ -135,6 +135,7 @@ namespace KlayGE
 		PolygonMode			polygon_mode;
 		ShadeMode			shade_mode;
 		CullMode			cull_mode;
+		bool				front_face_ccw;
 		float				polygon_offset_factor;
 		float				polygon_offset_units;
 		bool				scissor_enable;
@@ -153,7 +154,6 @@ namespace KlayGE
 
 		bool				front_stencil_enable;
 		CompareFunction		front_stencil_func;
-		uint16_t			front_stencil_ref;
 		uint16_t			front_stencil_read_mask;
 		uint16_t			front_stencil_write_mask;
 		StencilOperation	front_stencil_fail;
@@ -162,7 +162,6 @@ namespace KlayGE
 
 		bool				back_stencil_enable;
 		CompareFunction		back_stencil_func;
-		uint16_t			back_stencil_ref;
 		uint16_t			back_stencil_read_mask;
 		uint16_t			back_stencil_write_mask;
 		StencilOperation	back_stencil_fail;
@@ -240,7 +239,7 @@ namespace KlayGE
 
 		static DepthStencilStateObjectPtr NullObject();
 
-		virtual void Active() = 0;
+		virtual void Active(uint16_t front_stencil_ref, uint16_t back_stencil_ref) = 0;
 
 	protected:
 		DepthStencilStateDesc desc_;

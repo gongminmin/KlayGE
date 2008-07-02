@@ -31,7 +31,7 @@ namespace KlayGE
 	public:
 		explicit OGLDepthStencilStateObject(DepthStencilStateDesc const & desc);
 
-		void Active();
+		void Active(uint16_t front_stencil_ref, uint16_t back_stencil_ref);
 	};
 
 	class OGLBlendStateObject : public BlendStateObject

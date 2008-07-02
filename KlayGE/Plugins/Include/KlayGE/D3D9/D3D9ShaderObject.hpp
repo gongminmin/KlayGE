@@ -64,46 +64,6 @@ namespace KlayGE
 
 		void Active();
 
-		ID3D9VertexShaderPtr VertexShader() const
-		{
-			return vertex_shader_;
-		}
-		ID3D9PixelShaderPtr PixelShader() const
-		{
-			return pixel_shader_;
-		}
-
-		uint32_t BoolStart(ShaderType type) const
-		{
-			return bool_start_[type];
-		}
-		uint32_t IntStart(ShaderType type) const
-		{
-			return int_start_[type];
-		}
-		uint32_t FloatStart(ShaderType type) const
-		{
-			return float_start_[type];
-		}
-
-		std::vector<BOOL> const & BoolRegisters(ShaderType type) const
-		{
-			return bool_registers_[type];
-		}
-		std::vector<int> const & IntRegisters(ShaderType type) const
-		{
-			return int_registers_[type];
-		}
-		std::vector<float> const & FloatRegisters(ShaderType type) const
-		{
-			return float_registers_[type];
-		}
-
-		std::vector<SamplerPtr> const & Samplers(ShaderType type) const
-		{
-			return samplers_[type];
-		}
-
 	private:
 		struct less_shared_ptr_string
 			: public std::binary_function<boost::shared_ptr<std::string>, boost::shared_ptr<std::string>, bool>

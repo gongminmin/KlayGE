@@ -129,7 +129,8 @@ namespace KlayGE
 
 	// 设置当前渲染状态对象
 	/////////////////////////////////////////////////////////////////////////////////
-	void RenderEngine::SetStateObjects(RasterizerStateObjectPtr rs_obj, DepthStencilStateObjectPtr dss_obj, BlendStateObjectPtr bs_obj, ShaderObjectPtr shader_obj)
+	void RenderEngine::SetStateObjects(RasterizerStateObjectPtr const & rs_obj, DepthStencilStateObjectPtr const & dss_obj, uint16_t front_stencil_ref, uint16_t back_stencil_ref,
+		BlendStateObjectPtr const & bs_obj, ShaderObjectPtr const & shader_obj)
 	{
 		if (cur_rs_obj_ != rs_obj)
 		{
@@ -139,7 +140,7 @@ namespace KlayGE
 
 		if (cur_dss_obj_ != dss_obj)
 		{
-			dss_obj->Active();
+			dss_obj->Active(front_stencil_ref, back_stencil_ref);
 			cur_dss_obj_ = dss_obj;
 		}
 

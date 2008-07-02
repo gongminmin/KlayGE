@@ -54,7 +54,7 @@ namespace KlayGE
 		if (dirty_decl_)
 		{
 			D3D9RenderEngine const & renderEngine(*checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-			ID3D9DevicePtr d3d_device = renderEngine.D3DDevice();
+			ID3D9DevicePtr const & d3d_device = renderEngine.D3DDevice();
 
 			vertex_elems_type elems;
 			elems.reserve(vertex_streams_.size() + 1);
