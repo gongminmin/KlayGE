@@ -212,11 +212,6 @@ namespace KlayGE
 		}
 	}
 
-	uint32_t D3D9RenderEngine::ActiveAdapterNo() const
-	{
-		return this->ActiveAdapter().AdapterNo();
-	}
-
 	void D3D9RenderEngine::InitRenderStates()
 	{
 		{
@@ -228,6 +223,7 @@ namespace KlayGE
 			d3dDevice_->SetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, float_to_uint32(rs_desc.polygon_offset_factor));
 			d3dDevice_->SetRenderState(D3DRS_DEPTHBIAS, float_to_uint32(rs_desc.polygon_offset_units));
 			d3dDevice_->SetRenderState(D3DRS_SCISSORTESTENABLE, rs_desc.scissor_enable);
+			d3dDevice_->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, rs_desc.multisample_enable);
 		}
 
 		{

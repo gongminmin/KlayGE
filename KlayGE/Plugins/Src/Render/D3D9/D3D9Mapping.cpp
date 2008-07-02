@@ -554,6 +554,18 @@ namespace KlayGE
 
 		ret.stream_output_support = false;
 
+		// NVIDIA's Transparency Multisampling
+		if (S_OK == re.D3DObject()->CheckDeviceFormat(d3d_caps.AdapterOrdinal,
+			d3d_caps.DeviceType, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE,
+			static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'O', 'C'>::value)))
+		{
+			ret.alpha_to_coverage_support = true;
+		}
+		else
+		{
+			ret.alpha_to_coverage_support = false;
+		}
+
 		return ret;
 	}
 

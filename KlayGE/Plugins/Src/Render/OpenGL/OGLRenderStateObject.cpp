@@ -15,6 +15,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 
@@ -78,6 +79,19 @@ namespace KlayGE
 			else
 			{
 				glDisable(GL_SCISSOR_TEST);
+			}
+		}
+		if (cur_desc.multisample_enable != desc_.multisample_enable)
+		{
+			if (desc_.multisample_enable)
+			{
+				glEnable(GL_MULTISAMPLE);
+				glEnable(GL_SAMPLE_COVERAGE);
+			}
+			else
+			{
+				glDisable(GL_MULTISAMPLE);
+				glDisable(GL_SAMPLE_COVERAGE);
 			}
 		}
 	}

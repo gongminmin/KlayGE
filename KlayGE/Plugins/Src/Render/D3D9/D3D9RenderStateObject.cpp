@@ -15,6 +15,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 
@@ -35,7 +36,7 @@ namespace KlayGE
 		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&re)->D3DDevice();
 
 		RasterizerStateDesc const & cur_desc = current.GetDesc();
-		
+
 		if (cur_desc.polygon_mode != desc_.polygon_mode)
 		{
 			d3d_device->SetRenderState(D3DRS_FILLMODE, D3D9Mapping::Mapping(desc_.polygon_mode));
@@ -59,6 +60,10 @@ namespace KlayGE
 		if (cur_desc.scissor_enable != desc_.scissor_enable)
 		{
 			d3d_device->SetRenderState(D3DRS_SCISSORTESTENABLE, desc_.scissor_enable);
+		}
+		if (cur_desc.multisample_enable != desc_.multisample_enable)
+		{
+			d3d_device->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, desc_.multisample_enable);
 		}
 	}
 
@@ -189,10 +194,7 @@ namespace KlayGE
 
 		if (cur_desc.alpha_to_coverage_enable != desc_.alpha_to_coverage_enable)
 		{
-			// NVIDIA's Transparency Multisampling
-			if (S_OK == d3d->CheckDeviceFormat(re.ActiveAdapterNo(),
-				D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE,
-				static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'O', 'C'>::value)))
+			if (re.DeviceCaps().alpha_to_coverage_support)
 			{
 				if (desc_.alpha_to_coverage_enable)
 				{

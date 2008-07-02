@@ -874,5 +874,6 @@ namespace KlayGE
 
 		caps_.hw_instancing_support = true;
 		caps_.stream_output_support = false;
+		caps_.alpha_to_coverage_support = true;
 	}
 }
