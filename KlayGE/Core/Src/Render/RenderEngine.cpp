@@ -32,10 +32,12 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Math.hpp>
+#include <KlayGE/Context.hpp>
 #include <KlayGE/Viewport.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/Sampler.hpp>
+#include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEffect.hpp>
 
 #include <KlayGE/RenderEngine.hpp>
@@ -63,10 +65,6 @@ namespace KlayGE
 		}
 
 		void CreateRenderWindow(std::string const & /*name*/, RenderSettings const & /*settings*/)
-		{
-		}
-
-		void SetStateObjects(RasterizerStateObjectPtr /*rs_obj*/, DepthStencilStateObjectPtr /*dss_obj*/, BlendStateObjectPtr /*bs_obj*/, ShaderObjectPtr /*shader_obj*/)
 		{
 		}
 
@@ -111,7 +109,10 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderEngine::RenderEngine()
 		: numPrimitivesJustRendered_(0),
-			numVerticesJustRendered_(0)
+			numVerticesJustRendered_(0),
+			cur_rs_obj_(Context::Instance().RenderFactoryInstance().MakeRasterizerStateObject(RasterizerStateDesc())),
+			cur_dss_obj_(Context::Instance().RenderFactoryInstance().MakeDepthStencilStateObject(DepthStencilStateDesc())),
+			cur_bs_obj_(Context::Instance().RenderFactoryInstance().MakeBlendStateObject(BlendStateDesc()))
 	{
 	}
 
@@ -127,6 +128,31 @@ namespace KlayGE
 	{
 		static RenderEnginePtr obj(new NullRenderEngine);
 		return obj;
+	}
+
+	// 设置当前渲染状态对象
+	/////////////////////////////////////////////////////////////////////////////////
+	void RenderEngine::SetStateObjects(RasterizerStateObjectPtr rs_obj, DepthStencilStateObjectPtr dss_obj, BlendStateObjectPtr bs_obj, ShaderObjectPtr shader_obj)
+	{
+		if (cur_rs_obj_ != rs_obj)
+		{
+			rs_obj->SetStates(*cur_rs_obj_);
+			cur_rs_obj_ = rs_obj;
+		}
+
+		if (cur_dss_obj_ != dss_obj)
+		{
+			dss_obj->SetStates(*cur_dss_obj_);
+			cur_dss_obj_ = dss_obj;
+		}
+
+		if (cur_bs_obj_ != bs_obj)
+		{
+			bs_obj->SetStates(*cur_bs_obj_);
+			cur_bs_obj_ = bs_obj;
+		}
+
+		shader_obj->Active();
 	}
 
 	// 设置当前渲染目标

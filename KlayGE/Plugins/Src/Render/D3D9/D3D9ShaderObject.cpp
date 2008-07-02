@@ -31,6 +31,7 @@
 
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9Mapping.hpp>
+#include <KlayGE/D3D9/D3D9Texture.hpp>
 #include <KlayGE/D3D9/D3D9ShaderObject.hpp>
 
 namespace KlayGE
@@ -270,7 +271,7 @@ namespace KlayGE
 		}
 
 		is_validate_ = true;
-		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
+		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			is_validate_ &= is_shader_validate_[i];
 		}
@@ -287,7 +288,7 @@ namespace KlayGE
 		ret->bool_start_ = bool_start_;
 		ret->int_start_ = int_start_;
 		ret->float_start_ = float_start_;
-		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
+		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ret->bool_registers_[i].resize(bool_registers_[i].size());
 			ret->int_registers_[i].resize(int_registers_[i].size());
@@ -586,6 +587,123 @@ namespace KlayGE
 
 				BOOST_ASSERT(p_handle.register_index < samplers_[p_handle.shader_type].size());
 				samplers_[p_handle.shader_type][p_handle.register_index] = value;
+			}
+		}
+	}
+
+	void D3D9ShaderObject::Active()
+	{
+		RenderEngine const & re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		ID3D9DevicePtr d3d_device = checked_cast<D3D9RenderEngine const *>(&re)->D3DDevice();
+
+		d3d_device->SetVertexShader(this->VertexShader().get());
+		d3d_device->SetPixelShader(this->PixelShader().get());
+
+		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
+		{
+			ShaderType type = static_cast<ShaderType>(i);
+
+			if (!this->BoolRegisters(type).empty())
+			{
+				if (ST_VertexShader == type)
+				{
+					d3d_device->SetVertexShaderConstantB(this->BoolStart(type), &this->BoolRegisters(type)[0],
+						static_cast<UINT>(this->BoolRegisters(type).size()) / 4);
+				}
+				else
+				{
+					d3d_device->SetPixelShaderConstantB(this->BoolStart(type), &this->BoolRegisters(type)[0],
+						static_cast<UINT>(this->BoolRegisters(type).size()) / 4);
+				}
+			}
+			if (!this->IntRegisters(type).empty())
+			{
+				if (ST_VertexShader == type)
+				{
+					d3d_device->SetVertexShaderConstantI(this->IntStart(type), &this->IntRegisters(type)[0],
+						static_cast<UINT>(this->IntRegisters(type).size()) / 4);
+				}
+				else
+				{
+					d3d_device->SetPixelShaderConstantI(this->IntStart(type), &this->IntRegisters(type)[0],
+						static_cast<UINT>(this->IntRegisters(type).size()) / 4);
+				}
+			}
+			if (!this->FloatRegisters(type).empty())
+			{
+				if (ST_VertexShader == type)
+				{
+					d3d_device->SetVertexShaderConstantF(this->FloatStart(type), &this->FloatRegisters(type)[0],
+						static_cast<UINT>(this->FloatRegisters(type).size()) / 4);
+				}
+				else
+				{
+					d3d_device->SetPixelShaderConstantF(this->FloatStart(type), &this->FloatRegisters(type)[0],
+						static_cast<UINT>(this->FloatRegisters(type).size()) / 4);
+				}
+			}
+
+			for (uint32_t j = 0; j < this->Samplers(type).size(); ++ j)
+			{
+				uint32_t stage = j;
+				if (ST_VertexShader == type)
+				{
+					stage += D3DVERTEXTEXTURESAMPLER0;
+				}
+
+				SamplerPtr const & sampler = this->Samplers(type)[j];
+				if (!sampler || !sampler->texture)
+				{
+					TIF(d3d_device->SetTexture(stage, NULL));
+				}
+				else
+				{
+					D3D9Texture const & d3d9Tex(*checked_pointer_cast<D3D9Texture>(sampler->texture));
+					TIF(d3d_device->SetTexture(stage, d3d9Tex.D3DBaseTexture().get()));
+					TIF(d3d_device->SetSamplerState(stage, D3DSAMP_SRGBTEXTURE, IsSRGB(sampler->texture->Format())));
+
+					TIF(d3d_device->SetSamplerState(stage, D3DSAMP_BORDERCOLOR,
+							D3D9Mapping::MappingToUInt32Color(sampler->border_clr)));
+
+					// Set addressing mode
+					TIF(d3d_device->SetSamplerState(stage, D3DSAMP_ADDRESSU,
+							D3D9Mapping::Mapping(sampler->addr_mode_u)));
+					TIF(d3d_device->SetSamplerState(stage, D3DSAMP_ADDRESSV,
+							D3D9Mapping::Mapping(sampler->addr_mode_v)));
+					TIF(d3d_device->SetSamplerState(stage, D3DSAMP_ADDRESSW,
+							D3D9Mapping::Mapping(sampler->addr_mode_w)));
+
+					switch (sampler->filter)
+					{
+					case Sampler::TFO_Point:
+						TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_POINT));
+						TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_POINT));
+						TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT));
+						break;
+
+					case Sampler::TFO_Bilinear:
+						TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_LINEAR));
+						TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR));
+						TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT));
+						break;
+
+					case Sampler::TFO_Trilinear:
+						TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_LINEAR));
+						TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR));
+						TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR));
+						break;
+
+					case Sampler::TFO_Anisotropic:
+						TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC));
+						TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR));
+						TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR));
+						break;
+					}
+
+					TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, sampler->anisotropy));
+					TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MAXMIPLEVEL, sampler->max_mip_level));
+					TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MIPMAPLODBIAS, float_to_uint32(sampler->mip_map_lod_bias)));
+				}
 			}
 		}
 	}

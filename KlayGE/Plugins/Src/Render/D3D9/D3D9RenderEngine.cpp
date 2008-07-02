@@ -77,10 +77,7 @@ namespace KlayGE
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D9RenderEngine::D3D9RenderEngine()
-		: last_num_vertex_stream_(0),
-			cur_rs_obj_(Context::Instance().RenderFactoryInstance().MakeRasterizerStateObject(RasterizerStateDesc())),
-			cur_dss_obj_(Context::Instance().RenderFactoryInstance().MakeDepthStencilStateObject(DepthStencilStateDesc())),
-			cur_bs_obj_(Context::Instance().RenderFactoryInstance().MakeBlendStateObject(BlendStateDesc()))
+		: last_num_vertex_stream_(0)
 	{
 		// Create our Direct3D object
 		d3d_ = MakeCOMPtr(Direct3DCreate9(D3D_SDK_VERSION));
@@ -304,178 +301,6 @@ namespace KlayGE
 			d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFAIL, D3D9Mapping::Mapping(dss_desc.back_stencil_fail));
 			d3dDevice_->SetRenderState(D3DRS_CCW_STENCILZFAIL, D3D9Mapping::Mapping(dss_desc.back_stencil_depth_fail));
 			d3dDevice_->SetRenderState(D3DRS_CCW_STENCILPASS, D3D9Mapping::Mapping(dss_desc.back_stencil_pass));
-		}
-	}
-
-	// 设置当前渲染状态对象
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::SetStateObjects(RasterizerStateObjectPtr rs_obj, DepthStencilStateObjectPtr dss_obj, BlendStateObjectPtr bs_obj, ShaderObjectPtr shader_obj)
-	{
-		if (cur_rs_obj_ != rs_obj)
-		{
-			rs_obj->SetStates(*cur_rs_obj_);
-			cur_rs_obj_ = rs_obj;
-		}
-
-		if (cur_dss_obj_ != dss_obj)
-		{
-			dss_obj->SetStates(*cur_dss_obj_);
-			cur_dss_obj_ = dss_obj;
-		}
-
-		if (cur_bs_obj_ != bs_obj)
-		{
-			bs_obj->SetStates(*cur_bs_obj_);
-			cur_bs_obj_ = bs_obj;
-		}
-
-		D3D9ShaderObject const & d3d9_shader_obj = *checked_pointer_cast<D3D9ShaderObject>(shader_obj);
-
-		d3dDevice_->SetVertexShader(d3d9_shader_obj.VertexShader().get());
-		d3dDevice_->SetPixelShader(d3d9_shader_obj.PixelShader().get());
-
-		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
-		{
-			ShaderObject::ShaderType type = static_cast<ShaderObject::ShaderType>(i);
-
-			if (!d3d9_shader_obj.BoolRegisters(type).empty())
-			{
-				if (ShaderObject::ST_VertexShader == type)
-				{
-					d3dDevice_->SetVertexShaderConstantB(d3d9_shader_obj.BoolStart(type), &d3d9_shader_obj.BoolRegisters(type)[0],
-						static_cast<UINT>(d3d9_shader_obj.BoolRegisters(type).size()) / 4);
-				}
-				else
-				{
-					d3dDevice_->SetPixelShaderConstantB(d3d9_shader_obj.BoolStart(type), &d3d9_shader_obj.BoolRegisters(type)[0],
-						static_cast<UINT>(d3d9_shader_obj.BoolRegisters(type).size()) / 4);
-				}
-			}
-			if (!d3d9_shader_obj.IntRegisters(type).empty())
-			{
-				if (ShaderObject::ST_VertexShader == type)
-				{
-					d3dDevice_->SetVertexShaderConstantI(d3d9_shader_obj.IntStart(type), &d3d9_shader_obj.IntRegisters(type)[0],
-						static_cast<UINT>(d3d9_shader_obj.IntRegisters(type).size()) / 4);
-				}
-				else
-				{
-					d3dDevice_->SetPixelShaderConstantI(d3d9_shader_obj.IntStart(type), &d3d9_shader_obj.IntRegisters(type)[0],
-						static_cast<UINT>(d3d9_shader_obj.IntRegisters(type).size()) / 4);
-				}
-			}
-			if (!d3d9_shader_obj.FloatRegisters(type).empty())
-			{
-				if (ShaderObject::ST_VertexShader == type)
-				{
-					d3dDevice_->SetVertexShaderConstantF(d3d9_shader_obj.FloatStart(type), &d3d9_shader_obj.FloatRegisters(type)[0],
-						static_cast<UINT>(d3d9_shader_obj.FloatRegisters(type).size()) / 4);
-				}
-				else
-				{
-					d3dDevice_->SetPixelShaderConstantF(d3d9_shader_obj.FloatStart(type), &d3d9_shader_obj.FloatRegisters(type)[0],
-						static_cast<UINT>(d3d9_shader_obj.FloatRegisters(type).size()) / 4);
-				}
-			}
-
-			for (uint32_t j = 0; j < d3d9_shader_obj.Samplers(type).size(); ++ j)
-			{
-				uint32_t stage = j;
-				if (ShaderObject::ST_VertexShader == type)
-				{
-					stage += D3DVERTEXTEXTURESAMPLER0;
-				}
-
-				Sampler& cur_sampler = cur_samplers_[type][j];
-				SamplerPtr const & sampler = d3d9_shader_obj.Samplers(type)[j];
-				if (!sampler || !sampler->texture)
-				{
-					if (cur_sampler.texture)
-					{
-						TIF(d3dDevice_->SetTexture(stage, NULL));
-						cur_sampler.texture.reset();
-					}
-				}
-				else
-				{
-					if (cur_sampler.texture != sampler->texture)
-					{
-						D3D9Texture const & d3d9Tex(*checked_pointer_cast<D3D9Texture>(sampler->texture));
-						TIF(d3dDevice_->SetTexture(stage, d3d9Tex.D3DBaseTexture().get()));
-						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_SRGBTEXTURE, IsSRGB(sampler->texture->Format())));
-					}
-
-					if (cur_sampler.border_clr != sampler->border_clr)
-					{
-						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_BORDERCOLOR,
-							D3D9Mapping::MappingToUInt32Color(sampler->border_clr)));
-					}
-
-					// Set addressing mode
-					if (cur_sampler.addr_mode_u != sampler->addr_mode_u)
-					{
-						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSU,
-							D3D9Mapping::Mapping(sampler->addr_mode_u)));
-					}
-					if (cur_sampler.addr_mode_v != sampler->addr_mode_v)
-					{
-						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSV,
-							D3D9Mapping::Mapping(sampler->addr_mode_v)));
-					}
-					if (cur_sampler.addr_mode_w != sampler->addr_mode_w)
-					{
-						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSW,
-							D3D9Mapping::Mapping(sampler->addr_mode_w)));
-					}
-
-					if (cur_sampler.filter != sampler->filter)
-					{
-						switch (sampler->filter)
-						{
-						case Sampler::TFO_Point:
-							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_POINT));
-							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_POINT));
-							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT));
-							break;
-
-						case Sampler::TFO_Bilinear:
-							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_LINEAR));
-							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR));
-							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT));
-							break;
-
-						case Sampler::TFO_Trilinear:
-							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_LINEAR));
-							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR));
-							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR));
-							break;
-
-						case Sampler::TFO_Anisotropic:
-							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC));
-							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR));
-							TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR));
-							break;
-						}
-					}
-
-					if (cur_sampler.anisotropy != sampler->anisotropy)
-					{
-						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, sampler->anisotropy));
-					}
-
-					if (cur_sampler.max_mip_level != sampler->max_mip_level)
-					{
-						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXMIPLEVEL, sampler->max_mip_level));
-					}
-
-					if (cur_sampler.mip_map_lod_bias != sampler->mip_map_lod_bias)
-					{
-						TIF(d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPMAPLODBIAS, float_to_uint32(sampler->mip_map_lod_bias)));
-					}
-
-					cur_sampler = *sampler;
-				}
-			}
 		}
 	}
 
@@ -727,9 +552,6 @@ namespace KlayGE
 		d3dDevice_->GetDeviceCaps(&d3d_caps);
 
 		caps_ = D3D9Mapping::Mapping(d3d_caps);
-
-		cur_samplers_[ShaderObject::ST_VertexShader].resize(caps_.max_vertex_texture_units);
-		cur_samplers_[ShaderObject::ST_PixelShader].resize(caps_.max_texture_units);
 	}
 
 	// 响应设备丢失
@@ -741,14 +563,6 @@ namespace KlayGE
 		cur_dss_obj_ = rf.MakeDepthStencilStateObject(DepthStencilStateDesc());
 		cur_bs_obj_ = rf.MakeBlendStateObject(BlendStateDesc());
 		this->InitRenderStates();
-
-		BOOST_FOREACH(BOOST_TYPEOF(cur_samplers_)::reference samplers, cur_samplers_)
-		{
-			BOOST_FOREACH(BOOST_TYPEOF(samplers)::reference sampler, samplers)
-			{
-				sampler = Sampler();
-			}
-		}
 	}
 
 	// 响应设备复位

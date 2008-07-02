@@ -62,6 +62,8 @@ namespace KlayGE
 		void SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float4> const & value);
 		void SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float4x4> const & value);
 
+		void Active();
+
 		ID3D9VertexShaderPtr VertexShader() const
 		{
 			return vertex_shader_;

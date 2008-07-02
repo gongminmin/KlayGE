@@ -88,7 +88,7 @@ namespace KlayGE
 
 		virtual void CreateRenderWindow(std::string const & name, RenderSettings const & settings) = 0;
 
-		virtual void SetStateObjects(RasterizerStateObjectPtr rs_obj, DepthStencilStateObjectPtr dss_obj, BlendStateObjectPtr bs_obj, ShaderObjectPtr shader_obj) = 0;
+		void SetStateObjects(RasterizerStateObjectPtr rs_obj, DepthStencilStateObjectPtr dss_obj, BlendStateObjectPtr bs_obj, ShaderObjectPtr shader_obj);
 
 		void BindFrameBuffer(FrameBufferPtr fb);
 		FrameBufferPtr CurFrameBuffer() const;
@@ -122,6 +122,10 @@ namespace KlayGE
 		size_t numVerticesJustRendered_;
 
 		RenderDeviceCaps caps_;
+
+		RasterizerStateObjectPtr cur_rs_obj_;
+		DepthStencilStateObjectPtr cur_dss_obj_;
+		BlendStateObjectPtr cur_bs_obj_;
 	};
 }
 

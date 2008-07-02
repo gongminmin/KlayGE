@@ -41,7 +41,9 @@
 #include <glloader/glloader.h>
 
 #include <KlayGE/OpenGL/OGLRenderFactory.hpp>
+#include <KlayGE/OpenGL/OGLRenderEngine.hpp>
 #include <KlayGE/OpenGL/OGLMapping.hpp>
+#include <KlayGE/OpenGL/OGLTexture.hpp>
 #include <KlayGE/OpenGL/OGLShaderObject.hpp>
 
 namespace KlayGE
@@ -156,7 +158,7 @@ namespace KlayGE
 		}
 
 		is_validate_ = true;
-		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
+		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			is_validate_ &= is_shader_validate_[i];
 		}
@@ -171,7 +173,7 @@ namespace KlayGE
 		ret->profiles_ = profiles_;
 
 		OGLRenderFactory& render_factory(*checked_cast<OGLRenderFactory*>(&Context::Instance().RenderFactoryInstance()));
-		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
+		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ret->is_shader_validate_[i] = true;
 
@@ -215,7 +217,7 @@ namespace KlayGE
 		}
 
 		ret->is_validate_ = true;
-		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
+		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ret->is_validate_ &= ret->is_shader_validate_[i];
 		}
@@ -402,6 +404,84 @@ namespace KlayGE
 
 				BOOST_ASSERT(index < samplers_[type].size());
 				samplers_[type][index] = value;
+			}
+		}
+	}
+
+	void OGLShaderObject::Active()
+	{
+		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+		cgGLBindProgram(this->VertexShader());
+		cgGLEnableProfile(this->VertexShaderProfile());
+		cgGLBindProgram(this->PixelShader());
+		cgGLEnableProfile(this->PixelShaderProfile());
+
+		for (int i = 0; i < ST_NumShaderTypes; ++ i)
+		{
+			std::vector<SamplerPtr> const & samplers = this->Samplers(static_cast<ShaderType>(i));
+
+			for (uint32_t stage = 0, num_stage = static_cast<uint32_t>(samplers.size()); stage < num_stage; ++ stage)
+			{
+				SamplerPtr const & sampler = samplers[stage];
+				if (!sampler || !sampler->texture)
+				{
+					glActiveTexture(GL_TEXTURE0 + stage);
+
+					glBindTexture(GL_TEXTURE_2D, 0);
+				}
+				else
+				{
+					glActiveTexture(GL_TEXTURE0 + stage);
+
+					OGLTexture& gl_tex = *checked_pointer_cast<OGLTexture>(sampler->texture);
+					GLenum tex_type = gl_tex.GLType();
+
+					glBindTexture(tex_type, gl_tex.GLTexture());
+
+					re.TexParameter(tex_type, GL_TEXTURE_WRAP_S, OGLMapping::Mapping(sampler->addr_mode_u));
+					re.TexParameter(tex_type, GL_TEXTURE_WRAP_T, OGLMapping::Mapping(sampler->addr_mode_v));
+					re.TexParameter(tex_type, GL_TEXTURE_WRAP_R, OGLMapping::Mapping(sampler->addr_mode_w));
+
+					{
+						float tmp[4];
+						glGetTexParameterfv(tex_type, GL_TEXTURE_BORDER_COLOR, tmp);
+						if ((tmp[0] != sampler->border_clr.r())
+							|| (tmp[1] != sampler->border_clr.g())
+							|| (tmp[2] != sampler->border_clr.b())
+							|| (tmp[3] != sampler->border_clr.a()))
+						{
+							glTexParameterfv(tex_type, GL_TEXTURE_BORDER_COLOR, &sampler->border_clr.r());
+						}
+					}
+
+					switch (sampler->filter)
+					{
+					case Sampler::TFO_Point:
+						re.TexParameter(tex_type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+						re.TexParameter(tex_type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+						break;
+
+					case Sampler::TFO_Bilinear:
+						re.TexParameter(tex_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+						re.TexParameter(tex_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+						break;
+
+					case Sampler::TFO_Trilinear:
+					case Sampler::TFO_Anisotropic:
+						re.TexParameter(tex_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+						re.TexParameter(tex_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+						break;
+
+					default:
+						BOOST_ASSERT(false);
+						break;
+					}
+
+					re.TexParameter(tex_type, GL_TEXTURE_MAX_ANISOTROPY_EXT, sampler->anisotropy);
+					re.TexParameter(tex_type, GL_TEXTURE_MAX_LEVEL, sampler->max_mip_level);
+					re.TexEnv(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, sampler->mip_map_lod_bias);
+				}
 			}
 		}
 	}

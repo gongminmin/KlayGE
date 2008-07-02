@@ -68,6 +68,8 @@ namespace KlayGE
 		virtual void SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float4> const & value) = 0;
 		virtual void SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float4x4> const & value) = 0;
 
+		virtual void Active() = 0;
+
 		bool Validate() const
 		{
 			return is_validate_;

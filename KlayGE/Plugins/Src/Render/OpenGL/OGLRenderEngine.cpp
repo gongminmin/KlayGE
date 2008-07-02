@@ -86,9 +86,6 @@ namespace KlayGE
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	OGLRenderEngine::OGLRenderEngine()
-		: cur_rs_obj_(Context::Instance().RenderFactoryInstance().MakeRasterizerStateObject(RasterizerStateDesc())),
-			cur_dss_obj_(Context::Instance().RenderFactoryInstance().MakeDepthStencilStateObject(DepthStencilStateDesc())),
-			cur_bs_obj_(Context::Instance().RenderFactoryInstance().MakeBlendStateObject(BlendStateDesc()))
 	{
 	}
 
@@ -309,104 +306,6 @@ namespace KlayGE
 		if (tmp != param)
 		{
 			glTexEnvf(target, pname, param);
-		}
-	}
-
-	// 设置当前渲染状态对象
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::SetStateObjects(RasterizerStateObjectPtr rs_obj, DepthStencilStateObjectPtr dss_obj, BlendStateObjectPtr bs_obj, ShaderObjectPtr shader_obj)
-	{
-		if (cur_rs_obj_ != rs_obj)
-		{
-			rs_obj->SetStates(*cur_rs_obj_);
-			cur_rs_obj_ = rs_obj;
-		}
-
-		if (cur_dss_obj_ != dss_obj)
-		{
-			dss_obj->SetStates(*cur_dss_obj_);
-			cur_dss_obj_ = dss_obj;
-		}
-
-		if (cur_bs_obj_ != bs_obj)
-		{
-			bs_obj->SetStates(*cur_bs_obj_);
-			cur_bs_obj_ = bs_obj;
-		}
-
-		OGLShaderObject const & ogl_shader_obj = *checked_pointer_cast<OGLShaderObject>(shader_obj);
-
-		cgGLBindProgram(ogl_shader_obj.VertexShader());
-		cgGLEnableProfile(ogl_shader_obj.VertexShaderProfile());
-		cgGLBindProgram(ogl_shader_obj.PixelShader());
-		cgGLEnableProfile(ogl_shader_obj.PixelShaderProfile());
-
-		for (int i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
-		{
-			std::vector<SamplerPtr> const & samplers = ogl_shader_obj.Samplers(static_cast<ShaderObject::ShaderType>(i));
-
-			for (uint32_t stage = 0, num_stage = static_cast<uint32_t>(samplers.size()); stage < num_stage; ++ stage)
-			{
-				SamplerPtr const & sampler = samplers[stage];
-				if (!sampler || !sampler->texture)
-				{
-					glActiveTexture(GL_TEXTURE0 + stage);
-
-					glBindTexture(GL_TEXTURE_2D, 0);
-				}
-				else
-				{
-					glActiveTexture(GL_TEXTURE0 + stage);
-
-					OGLTexture& gl_tex = *checked_pointer_cast<OGLTexture>(sampler->texture);
-					GLenum tex_type = gl_tex.GLType();
-
-					glBindTexture(tex_type, gl_tex.GLTexture());
-
-					this->TexParameter(tex_type, GL_TEXTURE_WRAP_S, OGLMapping::Mapping(sampler->addr_mode_u));
-					this->TexParameter(tex_type, GL_TEXTURE_WRAP_T, OGLMapping::Mapping(sampler->addr_mode_v));
-					this->TexParameter(tex_type, GL_TEXTURE_WRAP_R, OGLMapping::Mapping(sampler->addr_mode_w));
-
-					{
-						float tmp[4];
-						glGetTexParameterfv(tex_type, GL_TEXTURE_BORDER_COLOR, tmp);
-						if ((tmp[0] != sampler->border_clr.r())
-							|| (tmp[1] != sampler->border_clr.g())
-							|| (tmp[2] != sampler->border_clr.b())
-							|| (tmp[3] != sampler->border_clr.a()))
-						{
-							glTexParameterfv(tex_type, GL_TEXTURE_BORDER_COLOR, &sampler->border_clr.r());
-						}
-					}
-
-					switch (sampler->filter)
-					{
-					case Sampler::TFO_Point:
-						this->TexParameter(tex_type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-						this->TexParameter(tex_type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-						break;
-
-					case Sampler::TFO_Bilinear:
-						this->TexParameter(tex_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-						this->TexParameter(tex_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-						break;
-
-					case Sampler::TFO_Trilinear:
-					case Sampler::TFO_Anisotropic:
-						this->TexParameter(tex_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-						this->TexParameter(tex_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-						break;
-
-					default:
-						BOOST_ASSERT(false);
-						break;
-					}
-
-					this->TexParameter(tex_type, GL_TEXTURE_MAX_ANISOTROPY_EXT, sampler->anisotropy);
-					this->TexParameter(tex_type, GL_TEXTURE_MAX_LEVEL, sampler->max_mip_level);
-					this->TexEnv(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, sampler->mip_map_lod_bias);
-				}
-			}
 		}
 	}
 

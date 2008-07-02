@@ -55,8 +55,6 @@ namespace KlayGE
 
 		void CreateRenderWindow(std::string const & name, RenderSettings const & settings);
 		
-		void SetStateObjects(RasterizerStateObjectPtr rs_obj, DepthStencilStateObjectPtr dss_obj, BlendStateObjectPtr bs_obj, ShaderObjectPtr shader_obj);
-
 		void StartRendering();
 
 		void BeginFrame();
@@ -75,19 +73,15 @@ namespace KlayGE
 		bool FullScreen() const;
 		void FullScreen(bool fs);
 
+		void TexParameter(GLenum target, GLenum pname, GLint param);
+		void TexEnv(GLenum target, GLenum pname, GLfloat param);
+
 	private:
 		void DoBindFrameBuffer(FrameBufferPtr fb);
 		void DoRender(RenderTechnique const & tech, RenderLayout const & rl);
 
 		void FillRenderDeviceCaps();
 		void InitRenderStates();
-
-		void TexParameter(GLenum target, GLenum pname, GLint param);
-		void TexEnv(GLenum target, GLenum pname, GLfloat param);
-
-		RasterizerStateObjectPtr cur_rs_obj_;
-		DepthStencilStateObjectPtr cur_dss_obj_;
-		BlendStateObjectPtr cur_bs_obj_;
 	};
 
 	typedef boost::shared_ptr<OGLRenderEngine> OGLRenderEnginePtr;
