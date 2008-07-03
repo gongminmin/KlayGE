@@ -98,33 +98,46 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	void InputEngine::Update()
 	{
-		BOOST_FOREACH(BOOST_TYPEOF(devices_)::reference device, devices_)
+		elapsed_time_ = static_cast<float>(timer_.elapsed());
+		if (elapsed_time_ > 0.01f)
 		{
-			device->UpdateInputs();
-		}
+			timer_.restart();
 
-		for (uint32_t id = 0; id < action_handlers_.size(); ++ id)
-		{
-			MapVector<uint16_t, long> actions;
-
-			// 访问所有设备
 			BOOST_FOREACH(BOOST_TYPEOF(devices_)::reference device, devices_)
 			{
-				InputActionsType const theAction(device->UpdateActionMap(id));
+				device->UpdateInputs();
+			}
 
-				// 去掉重复的动作
-				BOOST_FOREACH(BOOST_TYPEOF(theAction)::const_reference act, theAction)
+			for (uint32_t id = 0; id < action_handlers_.size(); ++ id)
+			{
+				MapVector<uint16_t, long> actions;
+
+				// 访问所有设备
+				BOOST_FOREACH(BOOST_TYPEOF(devices_)::reference device, devices_)
 				{
-					if (actions.find(act.first) == actions.end())
-					{
-						actions.insert(act);
+					InputActionsType const theAction(device->UpdateActionMap(id));
 
-						// 处理动作
-						(*action_handlers_[id].second)(*this, act);
+					// 去掉重复的动作
+					BOOST_FOREACH(BOOST_TYPEOF(theAction)::const_reference act, theAction)
+					{
+						if (actions.find(act.first) == actions.end())
+						{
+							actions.insert(act);
+
+							// 处理动作
+							(*action_handlers_[id].second)(*this, act);
+						}
 					}
 				}
 			}
 		}
+	}
+
+	// 获取刷新时间间隔
+	//////////////////////////////////////////////////////////////////////////////////
+	float InputEngine::ElapsedTime() const
+	{
+		return elapsed_time_;
 	}
 
 	// 获取设备接口

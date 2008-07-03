@@ -26,6 +26,7 @@
 
 #include <KlayGE/Vector.hpp>
 #include <KlayGE/MapVector.hpp>
+#include <KlayGE/Timer.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4103 4251 4275 4512)
@@ -303,6 +304,7 @@ namespace KlayGE
 		virtual void EnumDevices() = 0;
 
 		void Update();
+		float ElapsedTime() const;
 
 		void ActionMap(InputActionMap const & actionMap,
 			action_handler_t handler, bool reenumerate = false);
@@ -315,6 +317,9 @@ namespace KlayGE
 		InputDevicesType	devices_;
 
 		action_handlers_t action_handlers_;
+
+		Timer timer_;
+		float elapsed_time_;
 	};
 
 	class InputDevice

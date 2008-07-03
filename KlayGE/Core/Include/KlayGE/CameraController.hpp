@@ -47,8 +47,6 @@ namespace KlayGE
 		float		moveScaler_;		// Scaler for movement
 
 		Camera*		camera_;
-
-		Timer timer_;
 	};
 
 	class FirstPersonCameraController : public CameraController
@@ -62,7 +60,6 @@ namespace KlayGE
 		void Rotate(float yaw, float pitch, float roll);
 
 	private:
-		float		elapsed_time_;
 		float2		rot_x_;
 		float2		rot_y_;
 		float2		rot_z_;

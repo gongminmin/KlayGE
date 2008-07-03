@@ -58,7 +58,6 @@ namespace KlayGE
 
 	void CameraController::AttachCamera(Camera& camera)
 	{
-		timer_.restart();
 		camera_ = &camera;
 	}
 
@@ -95,51 +94,46 @@ namespace KlayGE
 		inputEngine.ActionMap(actionMap, input_handler, true);
 	}
 
-	void FirstPersonCameraController::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
+	void FirstPersonCameraController::InputHandler(InputEngine const & ie, InputAction const & action)
 	{
-		elapsed_time_ = static_cast<float>(timer_.elapsed());
-		if (elapsed_time_ > 0.01f)
+		float elapsed_time = ie.ElapsedTime();
+		if (camera_)
 		{
-			timer_.restart();
+			float const scaler = elapsed_time * 10;
 
-			if (camera_)
+			switch (action.first)
 			{
-				float const scaler = elapsed_time_ * 10;
+			case TurnLeftRight:
+				this->Rotate(action.second * scaler, 0, 0);
+				break;
 
-				switch (action.first)
-				{
-				case TurnLeftRight:
-					this->Rotate(action.second * scaler, 0, 0);
-					break;
+			case TurnUpDown:
+				this->Rotate(0, action.second * scaler, 0);
+				break;
 
-				case TurnUpDown:
-					this->Rotate(0, action.second * scaler, 0);
-					break;
+			case RollLeft:
+				this->Rotate(0, 0, -scaler);
+				break;
 
-				case RollLeft:
-					this->Rotate(0, 0, -scaler);
-					break;
+			case RollRight:
+				this->Rotate(0, 0, scaler);
+				break;
 
-				case RollRight:
-					this->Rotate(0, 0, scaler);
-					break;
+			case Forward:
+				this->Move(0, 0, scaler);
+				break;
 
-				case Forward:
-					this->Move(0, 0, scaler);
-					break;
+			case Backward:
+				this->Move(0, 0, -scaler);
+				break;
 
-				case Backward:
-					this->Move(0, 0, -scaler);
-					break;
+			case MoveLeft:
+				this->Move(-scaler, 0, 0);
+				break;
 
-				case MoveLeft:
-					this->Move(-scaler, 0, 0);
-					break;
-
-				case MoveRight:
-					this->Move(scaler, 0, 0);
-					break;
-				}
+			case MoveRight:
+				this->Move(scaler, 0, 0);
+				break;
 			}
 		}
 	}

@@ -851,11 +851,10 @@ namespace KlayGE
 
 		for (uint32_t i = 0; i < ret->effect_.NumParameters(); ++ i)
 		{
+			RenderEffectParameterPtr param = ret->effect_.ParameterByIndex(i);
 			for (size_t j = 0; j < ShaderObject::ST_NumShaderTypes; ++ j)
 			{
 				ShaderObject::ShaderType type = static_cast<ShaderObject::ShaderType>(j);
-
-				RenderEffectParameterPtr param = ret->effect_.ParameterByIndex(i);
 				if (ret->shader_obj_->HasParameter(type, param->Name()))
 				{
 					ret->param_descs_[type].push_back(param);
