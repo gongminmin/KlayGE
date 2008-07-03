@@ -264,7 +264,6 @@ uint32_t Cartoon::DoUpdate(uint32_t pass)
 {
 	if (0 == pass)
 	{
-		fpcController_.Update();
 		UIManager::Instance().HandleInput();
 	}
 

@@ -329,7 +329,6 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 	switch (pass)
 	{
 	case 0:
-		fpcController_.Update();
 		UIManager::Instance().HandleInput();
 
 		if (use_depth_peeling_)

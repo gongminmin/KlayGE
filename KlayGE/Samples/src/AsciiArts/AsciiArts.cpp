@@ -361,7 +361,6 @@ uint32_t AsciiArtsApp::DoUpdate(uint32_t pass)
 {
 	if (0 == pass)
 	{
-		fpcController_.Update();
 		UIManager::Instance().HandleInput();
 	}
 

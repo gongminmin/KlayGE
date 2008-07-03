@@ -120,8 +120,6 @@ void SkinnedMeshApp::InputHandler(InputEngine const & /*sender*/, InputAction co
 
 uint32_t SkinnedMeshApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 {
-	fpsController_.Update();
-
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 	renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);

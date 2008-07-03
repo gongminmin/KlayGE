@@ -316,8 +316,6 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 	switch (pass)
 	{
 	case 0:
-		fpcController_.Update();
-
 		// µÚÒ»±é£¬äÖÈ¾±³Ãæ
 		re.BindFrameBuffer(render_buffer_);
 		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 1), 0.0f, 0);

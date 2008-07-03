@@ -168,8 +168,6 @@ void VertexDisplacement::InputHandler(InputEngine const & /*sender*/, InputActio
 
 uint32_t VertexDisplacement::DoUpdate(uint32_t /*pass*/)
 {
-	fpcController_.Update();
-
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 

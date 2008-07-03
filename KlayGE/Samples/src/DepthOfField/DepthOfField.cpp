@@ -421,7 +421,6 @@ uint32_t DepthOfFieldApp::DoUpdate(uint32_t pass)
 	switch (pass)
 	{
 	case 0:
-		fpcController_.Update();
 		UIManager::Instance().HandleInput();
 
 		renderEngine.BindFrameBuffer(clr_depth_buffer_);

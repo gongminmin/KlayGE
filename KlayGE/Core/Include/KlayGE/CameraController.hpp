@@ -42,8 +42,6 @@ namespace KlayGE
 		virtual void AttachCamera(Camera& camera);
 		void DetachCamera();
 
-		virtual void Update();
-
 	protected:
 		float		rotationScaler_;	// Scaler for rotation
 		float		moveScaler_;		// Scaler for movement
@@ -59,7 +57,6 @@ namespace KlayGE
 		FirstPersonCameraController();
 
 		void AttachCamera(Camera& camera);
-		void Update();
 
 		void Move(float x, float y, float z);
 		void Rotate(float yaw, float pitch, float roll);

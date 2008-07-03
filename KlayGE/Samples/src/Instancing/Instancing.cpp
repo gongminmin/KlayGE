@@ -326,7 +326,6 @@ void Instancing::CheckBoxHandler(UICheckBox const & /*sender*/)
 
 uint32_t Instancing::DoUpdate(uint32_t /*pass*/)
 {
-	fpcController_.Update();
 	UIManager::Instance().HandleInput();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());

@@ -435,8 +435,6 @@ uint32_t ParticleSystemApp::DoUpdate(uint32_t pass)
 	switch (pass)
 	{
 	case 0:
-		fpcController_.Update();
-
 		re.BindFrameBuffer(scene_buffer_);
 		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 

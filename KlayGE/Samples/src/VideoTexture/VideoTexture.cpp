@@ -181,8 +181,6 @@ uint32_t VideoTextureApp::DoUpdate(uint32_t /*pass*/)
 
 	checked_pointer_cast<TeapotObject>(ground_)->VideoTexture(se.PresentTexture());
 
-	fpcController_.Update();
-
 	std::wostringstream stream;
 	stream << this->FPS();
 

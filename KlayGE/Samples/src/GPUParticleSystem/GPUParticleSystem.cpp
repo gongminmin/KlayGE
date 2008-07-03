@@ -492,8 +492,6 @@ uint32_t GPUParticleSystemApp::DoUpdate(uint32_t /*pass*/)
 	re.BindFrameBuffer(FrameBufferPtr());
 	re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
-	fpcController_.Update();
-
 	std::wostringstream stream;
 	stream << this->FPS();
 
