@@ -1,8 +1,11 @@
 // D3D9ShaderObject.cpp
 // KlayGE D3D9 shader对象类 实现文件
-// Ver 3.5.0
-// 版权所有(C) 龚敏敏, 2003-2006
+// Ver 3.7.0
+// 版权所有(C) 龚敏敏, 2006-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.7.0
+// 改为直接传入RenderEffect (2008.7.4)
 //
 // 3.5.0
 // 初次建立 (2006.11.2)
@@ -13,13 +16,13 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/COMPtr.hpp>
 #include <KlayGE/Context.hpp>
+#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
-#include <KlayGE/Math.hpp>
-#include <KlayGE/Sampler.hpp>
-#include <KlayGE/Math.hpp>
+#include <KlayGE/RenderEffect.hpp>
 
 #include <string>
 #include <algorithm>
@@ -41,7 +44,7 @@ namespace KlayGE
 		is_shader_validate_.assign(true);
 	}
 
-	void D3D9ShaderObject::SetShader(ShaderType type, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs,
+	void D3D9ShaderObject::SetShader(RenderEffect& effect, ShaderType type, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs,
 			boost::shared_ptr<std::string> const & shader_text)
 	{
 		is_shader_validate_[type] = true;
@@ -232,7 +235,11 @@ namespace KlayGE
 				p_handle.rows = static_cast<uint8_t>(constant_desc.Rows);
 				p_handle.columns = static_cast<uint8_t>(constant_desc.Columns);
 
-				param_descs_[type].insert(std::make_pair(new std::string(constant_desc.Name), p_handle));
+				RenderEffectParameterPtr const & p = effect.ParameterByName(constant_desc.Name);
+				if (p != RenderEffectParameter::NullObject())
+				{
+					param_descs_[type].insert(std::make_pair(p, p_handle));
+				}
 			}
 
 			if (bool_end > bool_begin)
@@ -277,11 +284,10 @@ namespace KlayGE
 		}
 	}
 
-	ShaderObjectPtr D3D9ShaderObject::Clone()
+	ShaderObjectPtr D3D9ShaderObject::Clone(RenderEffect& effect)
 	{
 		D3D9ShaderObjectPtr ret(new D3D9ShaderObject);
 		ret->is_validate_ = is_validate_;
-		ret->param_descs_ = param_descs_;
 		ret->is_shader_validate_ = is_shader_validate_;
 		ret->vertex_shader_ = vertex_shader_;
 		ret->pixel_shader_ = pixel_shader_;
@@ -294,307 +300,309 @@ namespace KlayGE
 			ret->int_registers_[i].resize(int_registers_[i].size());
 			ret->float_registers_[i].resize(float_registers_[i].size());
 			ret->samplers_[i].resize(samplers_[i].size());
+
+			for (parameter_descs_t::iterator iter = param_descs_[i].begin(); iter != param_descs_[i].end(); ++ iter)
+			{
+				ret->param_descs_[i].insert(std::make_pair(effect.ParameterByName(*(iter->first->Name())), iter->second));
+			}
 		}
 
 		return ret;
 	}
 
-	D3D9ShaderObject::parameter_descs_t::const_iterator D3D9ShaderObject::FindParam(ShaderType type, boost::shared_ptr<std::string> const & name) const
+	void D3D9ShaderObject::SetParameter(D3D9ShaderParameterHandle const & p_handle, bool value)
 	{
-		return param_descs_[type].find(name);
-	}
-
-	bool D3D9ShaderObject::HasParameter(ShaderType type, boost::shared_ptr<std::string> const & name) const
-	{
-		return (this->FindParam(type, name) != param_descs_[type].end());
-	}
-
-	void D3D9ShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, bool value)
-	{
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
+		switch (p_handle.register_set)
 		{
-			ShaderType type = static_cast<ShaderType>(i);
+		case D3DXRS_BOOL:
+			bool_registers_[p_handle.shader_type][(p_handle.register_index - bool_start_[p_handle.shader_type]) * 4] = value;
+			break;
 
-			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
-			if (iter != param_descs_[type].end())
-			{
-				D3D9ShaderParameterHandle const & p_handle = iter->second;
+		case D3DXRS_INT4:
+			int_registers_[p_handle.shader_type][(p_handle.register_index - int_start_[p_handle.shader_type]) * 4] = value;
+			break;
 
-				switch (p_handle.register_set)
-				{
-				case D3DXRS_BOOL:
-					bool_registers_[p_handle.shader_type][(p_handle.register_index - bool_start_[p_handle.shader_type]) * 4] = value;
-					break;
+		case D3DXRS_FLOAT4:
+			float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4] = value;
+			break;
 
-				case D3DXRS_INT4:
-					int_registers_[p_handle.shader_type][(p_handle.register_index - int_start_[p_handle.shader_type]) * 4] = value;
-					break;
-
-				case D3DXRS_FLOAT4:
-					float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4] = value;
-					break;
-
-				default:
-					BOOST_ASSERT(false);
-					break;
-				}
-			}
+		default:
+			BOOST_ASSERT(false);
+			break;
 		}
 	}
 
-	void D3D9ShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, int value)
+	void D3D9ShaderObject::SetParameter(D3D9ShaderParameterHandle const & p_handle, int value)
 	{
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
+		switch (p_handle.register_set)
 		{
-			ShaderType type = static_cast<ShaderType>(i);
+		case D3DXRS_BOOL:
+			bool_registers_[p_handle.shader_type][(p_handle.register_index - bool_start_[p_handle.shader_type]) * 4] = value;
+			break;
 
-			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
-			if (iter != param_descs_[type].end())
-			{
-				D3D9ShaderParameterHandle const & p_handle = iter->second;
+		case D3DXRS_INT4:
+			int_registers_[p_handle.shader_type][(p_handle.register_index - int_start_[p_handle.shader_type]) * 4] = value;
+			break;
 
-				switch (p_handle.register_set)
-				{
-				case D3DXRS_BOOL:
-					bool_registers_[p_handle.shader_type][(p_handle.register_index - bool_start_[p_handle.shader_type]) * 4] = value;
-					break;
+		case D3DXRS_FLOAT4:
+			float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4] = static_cast<float>(value);
+			break;
 
-				case D3DXRS_INT4:
-					int_registers_[p_handle.shader_type][(p_handle.register_index - int_start_[p_handle.shader_type]) * 4] = value;
-					break;
-
-				case D3DXRS_FLOAT4:
-					float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4] = static_cast<float>(value);
-					break;
-
-				default:
-					BOOST_ASSERT(false);
-					break;
-				}
-			}
+		default:
+			BOOST_ASSERT(false);
+			break;
 		}
 	}
 
-	void D3D9ShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, float value)
+	void D3D9ShaderObject::SetParameter(D3D9ShaderParameterHandle const & p_handle, float value)
 	{
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
+		BOOST_ASSERT(D3DXRS_FLOAT4 == p_handle.register_set);
+
+		float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4] = value;
+	}
+
+	void D3D9ShaderObject::SetParameter(D3D9ShaderParameterHandle const & p_handle, float4 const & value)
+	{
+		BOOST_ASSERT(D3DXRS_FLOAT4 == p_handle.register_set);
+
+		memcpy(&float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4], &value[0], sizeof(value));
+	}
+
+	void D3D9ShaderObject::SetParameter(D3D9ShaderParameterHandle const & p_handle, float4x4 const & value)
+	{
+		BOOST_ASSERT(D3DXRS_FLOAT4 == p_handle.register_set);
+
+		float4x4 tmp = MathLib::transpose(value);
+		memcpy(&float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4], &tmp[0], p_handle.register_count * sizeof(float4));
+	}
+
+	void D3D9ShaderObject::SetParameter(D3D9ShaderParameterHandle const & p_handle, std::vector<bool> const & value)
+	{
+		switch (p_handle.register_set)
 		{
-			ShaderType type = static_cast<ShaderType>(i);
-
-			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
-			if (iter != param_descs_[type].end())
+		case D3DXRS_BOOL:
+			for (size_t i = 0; i < value.size(); ++ i)
 			{
-				D3D9ShaderParameterHandle const & p_handle = iter->second;
-				BOOST_ASSERT(D3DXRS_FLOAT4 == p_handle.register_set);
-
-				float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4] = value;
+				bool_registers_[p_handle.shader_type][(p_handle.register_index - bool_start_[p_handle.shader_type] + i) * 4] = value[i];
 			}
+			break;
+
+		case D3DXRS_INT4:
+			for (size_t i = 0; i < value.size(); ++ i)
+			{
+				int_registers_[p_handle.shader_type][(p_handle.register_index - int_start_[p_handle.shader_type] + i) * 4] = value[i];
+			}
+			break;
+
+		case D3DXRS_FLOAT4:
+			for (size_t i = 0; i < value.size(); ++ i)
+			{
+				float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type] + i) * 4] = value[i];
+			}
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
 		}
 	}
 
-	void D3D9ShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, float4 const & value)
+	void D3D9ShaderObject::SetParameter(D3D9ShaderParameterHandle const & p_handle, std::vector<int> const & value)
 	{
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
+		switch (p_handle.register_set)
 		{
-			ShaderType type = static_cast<ShaderType>(i);
-
-			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
-			if (iter != param_descs_[type].end())
+		case D3DXRS_BOOL:
+			for (size_t i = 0; i < value.size(); ++ i)
 			{
-				D3D9ShaderParameterHandle const & p_handle = iter->second;
-				BOOST_ASSERT(D3DXRS_FLOAT4 == p_handle.register_set);
-
-				memcpy(&float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4], &value[0], sizeof(value));
+				bool_registers_[p_handle.shader_type][(p_handle.register_index - bool_start_[p_handle.shader_type] + i) * 4] = value[i];
 			}
+			break;
+
+		case D3DXRS_INT4:
+			for (size_t i = 0; i < value.size(); ++ i)
+			{
+				int_registers_[p_handle.shader_type][(p_handle.register_index - int_start_[p_handle.shader_type] + i) * 4] = value[i];
+			}
+			break;
+
+		case D3DXRS_FLOAT4:
+			for (size_t i = 0; i < value.size(); ++ i)
+			{
+				float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type] + i) * 4] = static_cast<float>(value[i]);
+			}
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
 		}
 	}
 
-	void D3D9ShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, float4x4 const & value)
+	void D3D9ShaderObject::SetParameter(D3D9ShaderParameterHandle const & p_handle, std::vector<float> const & value)
 	{
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
+		BOOST_ASSERT(D3DXRS_FLOAT4 == p_handle.register_set);
+
+		for (size_t i = 0; i < value.size(); ++ i)
 		{
-			ShaderType type = static_cast<ShaderType>(i);
-
-			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
-			if (iter != param_descs_[type].end())
-			{
-				D3D9ShaderParameterHandle const & p_handle = iter->second;
-				BOOST_ASSERT(D3DXRS_FLOAT4 == p_handle.register_set);
-
-				float4x4 tmp = MathLib::transpose(value);
-				memcpy(&float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4], &tmp[0], p_handle.register_count * sizeof(float4));
-			}
+			float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type] + i) * 4] = value[i];
 		}
 	}
 
-	void D3D9ShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, std::vector<bool> const & value)
-	{
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
-		{
-			ShaderType type = static_cast<ShaderType>(i);
-
-			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
-			if (iter != param_descs_[type].end())
-			{
-				D3D9ShaderParameterHandle const & p_handle = iter->second;
-
-				switch (p_handle.register_set)
-				{
-				case D3DXRS_BOOL:
-					for (size_t i = 0; i < value.size(); ++ i)
-					{
-						bool_registers_[p_handle.shader_type][(p_handle.register_index - bool_start_[p_handle.shader_type] + i) * 4] = value[i];
-					}
-					break;
-
-				case D3DXRS_INT4:
-					for (size_t i = 0; i < value.size(); ++ i)
-					{
-						int_registers_[p_handle.shader_type][(p_handle.register_index - int_start_[p_handle.shader_type] + i) * 4] = value[i];
-					}
-					break;
-
-				case D3DXRS_FLOAT4:
-					for (size_t i = 0; i < value.size(); ++ i)
-					{
-						float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type] + i) * 4] = value[i];
-					}
-					break;
-
-				default:
-					BOOST_ASSERT(false);
-					break;
-				}
-			}
-		}
-	}
-
-	void D3D9ShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, std::vector<int> const & value)
-	{
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
-		{
-			ShaderType type = static_cast<ShaderType>(i);
-
-			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
-			if (iter != param_descs_[type].end())
-			{
-				D3D9ShaderParameterHandle const & p_handle = iter->second;
-
-				switch (p_handle.register_set)
-				{
-				case D3DXRS_BOOL:
-					for (size_t i = 0; i < value.size(); ++ i)
-					{
-						bool_registers_[p_handle.shader_type][(p_handle.register_index - bool_start_[p_handle.shader_type] + i) * 4] = value[i];
-					}
-					break;
-
-				case D3DXRS_INT4:
-					for (size_t i = 0; i < value.size(); ++ i)
-					{
-						int_registers_[p_handle.shader_type][(p_handle.register_index - int_start_[p_handle.shader_type] + i) * 4] = value[i];
-					}
-					break;
-
-				case D3DXRS_FLOAT4:
-					for (size_t i = 0; i < value.size(); ++ i)
-					{
-						float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type] + i) * 4] = static_cast<float>(value[i]);
-					}
-					break;
-
-				default:
-					BOOST_ASSERT(false);
-					break;
-				}
-			}
-		}
-	}
-
-	void D3D9ShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float> const & value)
-	{
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
-		{
-			ShaderType type = static_cast<ShaderType>(i);
-
-			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
-			if (iter != param_descs_[type].end())
-			{
-				D3D9ShaderParameterHandle const & p_handle = iter->second;
-				BOOST_ASSERT(D3DXRS_FLOAT4 == p_handle.register_set);
-
-				for (size_t i = 0; i < value.size(); ++ i)
-				{
-					float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type] + i) * 4] = value[i];
-				}
-			}
-		}
-	}
-
-	void D3D9ShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float4> const & value)
+	void D3D9ShaderObject::SetParameter(D3D9ShaderParameterHandle const & p_handle, std::vector<float4> const & value)
 	{
 		if (!value.empty())
 		{
-			for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
-			{
-				ShaderType type = static_cast<ShaderType>(i);
-
-				parameter_descs_t::const_iterator iter = this->FindParam(type, name);
-				if (iter != param_descs_[type].end())
-				{
-					D3D9ShaderParameterHandle const & p_handle = iter->second;
-
-					memcpy(&float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4], &value[0],
+			memcpy(&float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4], &value[0],
 						std::min(p_handle.register_count, static_cast<uint16_t>(value.size())) * sizeof(float4));
-				}
-			}
 		}
 	}
 
-	void D3D9ShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float4x4> const & value)
+	void D3D9ShaderObject::SetParameter(D3D9ShaderParameterHandle const & p_handle, std::vector<float4x4> const & value)
 	{
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
+		uint32_t start = p_handle.register_index;
+		std::vector<float4x4> tmp(value);
+		BOOST_FOREACH(BOOST_TYPEOF(tmp)::reference mat, tmp)
 		{
-			ShaderType type = static_cast<ShaderType>(i);
-
-			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
-			if (iter != param_descs_[type].end())
-			{
-				D3D9ShaderParameterHandle const & p_handle = iter->second;
-
-				uint32_t start = p_handle.register_index;
-				std::vector<float4x4> tmp(value);
-				BOOST_FOREACH(BOOST_TYPEOF(tmp)::reference mat, tmp)
-				{
-					mat = MathLib::transpose(mat);
-					memcpy(&float_registers_[p_handle.shader_type][(start - float_start_[p_handle.shader_type]) * 4], &mat[0], p_handle.rows * sizeof(float4));
-					start += p_handle.rows;
-				}
-			}
+			mat = MathLib::transpose(mat);
+			memcpy(&float_registers_[p_handle.shader_type][(start - float_start_[p_handle.shader_type]) * 4], &mat[0], p_handle.rows * sizeof(float4));
+			start += p_handle.rows;
 		}
 	}
 
-	void D3D9ShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, SamplerPtr const & value)
+	void D3D9ShaderObject::SetParameter(D3D9ShaderParameterHandle const & p_handle, SamplerPtr const & value)
 	{
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
-		{
-			ShaderType type = static_cast<ShaderType>(i);
-
-			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
-			if (iter != param_descs_[type].end())
-			{
-				D3D9ShaderParameterHandle const & p_handle = iter->second;
-
-				BOOST_ASSERT(p_handle.register_index < samplers_[p_handle.shader_type].size());
-				samplers_[p_handle.shader_type][p_handle.register_index] = value;
-			}
-		}
+		BOOST_ASSERT(p_handle.register_index < samplers_[p_handle.shader_type].size());
+		samplers_[p_handle.shader_type][p_handle.register_index] = value;
 	}
 
 	void D3D9ShaderObject::Active()
 	{
 		RenderEngine const & re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		ID3D9DevicePtr const & d3d_device = checked_cast<D3D9RenderEngine const *>(&re)->D3DDevice();
+
+		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
+		{
+			for (parameter_descs_t::iterator iter = param_descs_[i].begin(); iter != param_descs_[i].end(); ++ iter)
+			{
+				RenderEffectParameterPtr const & param = iter->first;
+				if (param->IsDirty())
+				{
+					switch (param->type())
+					{
+					case REDT_bool:
+						if (param->ArraySize() != 0)
+						{
+							std::vector<bool> tmp;
+							param->Value(tmp);
+							this->SetParameter(iter->second, tmp);
+						}
+						else
+						{
+							bool tmp;
+							param->Value(tmp);
+							this->SetParameter(iter->second, tmp);
+						}
+						break;
+
+					case REDT_dword:
+					case REDT_int:
+						if (param->ArraySize() != 0)
+						{
+							std::vector<int> tmp;
+							param->Value(tmp);
+							this->SetParameter(iter->second, tmp);
+						}
+						else
+						{
+							int tmp;
+							param->Value(tmp);
+							this->SetParameter(iter->second, tmp);
+						}
+						break;
+
+					case REDT_float:
+						if (param->ArraySize() != 0)
+						{
+							std::vector<float> tmp;
+							param->Value(tmp);
+							this->SetParameter(iter->second, tmp);
+						}
+						else
+						{
+							float tmp;
+							param->Value(tmp);
+							this->SetParameter(iter->second, tmp);
+						}
+						break;
+
+					case REDT_float2:
+						{
+							float2 tmp;
+							param->Value(tmp);
+							float4 v4(tmp.x(), tmp.y(), 0, 0);
+							this->SetParameter(iter->second, v4);
+						}
+						break;
+
+					case REDT_float3:
+						{
+							float3 tmp;
+							param->Value(tmp);
+							float4 v4(tmp.x(), tmp.y(), tmp.z(), 0);
+							this->SetParameter(iter->second, v4);
+						}
+						break;
+
+					case REDT_float4:
+						if (param->ArraySize() != 0)
+						{
+							std::vector<float4> tmp;
+							param->Value(tmp);
+							this->SetParameter(iter->second, tmp);
+						}
+						else
+						{
+							float4 tmp;
+							param->Value(tmp);
+							this->SetParameter(iter->second, tmp);
+						}
+						break;
+
+					case REDT_float4x4:
+						if (param->ArraySize() != 0)
+						{
+							std::vector<float4x4> tmp;
+							param->Value(tmp);
+							this->SetParameter(iter->second, tmp);
+						}
+						else
+						{
+							float4x4 tmp;
+							param->Value(tmp);
+							this->SetParameter(iter->second, tmp);
+						}
+						break;
+
+					case REDT_sampler1D:
+					case REDT_sampler2D:
+					case REDT_sampler3D:
+					case REDT_samplerCUBE:
+						{
+							SamplerPtr tmp;
+							param->Value(tmp);
+							this->SetParameter(iter->second, tmp);
+						}
+						break;
+
+					default:
+						BOOST_ASSERT(false);
+						break;
+					}
+
+					//param->Dirty(false);
+				}
+			}
+		}
 
 		d3d_device->SetVertexShader(vertex_shader_.get());
 		d3d_device->SetPixelShader(pixel_shader_.get());

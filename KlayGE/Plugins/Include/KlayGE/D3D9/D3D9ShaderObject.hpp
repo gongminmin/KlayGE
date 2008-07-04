@@ -1,8 +1,11 @@
 // D3D9ShaderObject.hpp
 // KlayGE D3D9 shader对象类 头文件
-// Ver 3.5.0
-// 版权所有(C) 龚敏敏, 2006
+// Ver 3.7.0
+// 版权所有(C) 龚敏敏, 2006-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.7.0
+// 改为直接传入RenderEffect (2008.7.4)
 //
 // 3.5.0
 // 初次建立 (2006.11.2)
@@ -44,38 +47,26 @@ namespace KlayGE
 	public:
 		D3D9ShaderObject();
 
-		void SetShader(ShaderType type, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs,
+		void SetShader(RenderEffect& effect, ShaderType type, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs,
 			boost::shared_ptr<std::string> const & shader_text);
-		ShaderObjectPtr Clone();
-
-		bool HasParameter(ShaderType type, boost::shared_ptr<std::string> const & name) const;
-
-		void SetParameter(boost::shared_ptr<std::string> const & name, bool value);
-		void SetParameter(boost::shared_ptr<std::string> const & name, int value);
-		void SetParameter(boost::shared_ptr<std::string> const & name, float value);
-		void SetParameter(boost::shared_ptr<std::string> const & name, float4 const & value);
-		void SetParameter(boost::shared_ptr<std::string> const & name, float4x4 const & value);
-		void SetParameter(boost::shared_ptr<std::string> const & name, SamplerPtr const & value);
-		void SetParameter(boost::shared_ptr<std::string> const & name, std::vector<bool> const & value);
-		void SetParameter(boost::shared_ptr<std::string> const & name, std::vector<int> const & value);
-		void SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float> const & value);
-		void SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float4> const & value);
-		void SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float4x4> const & value);
+		ShaderObjectPtr Clone(RenderEffect& effect);
 
 		void Active();
 
 	private:
-		struct less_shared_ptr_string
-			: public std::binary_function<boost::shared_ptr<std::string>, boost::shared_ptr<std::string>, bool>
-		{
-			bool operator()(boost::shared_ptr<std::string> lhs, boost::shared_ptr<std::string> rhs) const
-			{
-				return *lhs < *rhs;
-			}
-		};
+		typedef MapVector<RenderEffectParameterPtr, D3D9ShaderParameterHandle> parameter_descs_t;
 
-		typedef MapVector<boost::shared_ptr<std::string>, D3D9ShaderParameterHandle, less_shared_ptr_string> parameter_descs_t;
-		parameter_descs_t::const_iterator FindParam(ShaderType type, boost::shared_ptr<std::string> const & name) const;
+		void SetParameter(D3D9ShaderParameterHandle const & p_handle, bool value);
+		void SetParameter(D3D9ShaderParameterHandle const & p_handle, int value);
+		void SetParameter(D3D9ShaderParameterHandle const & p_handle, float value);
+		void SetParameter(D3D9ShaderParameterHandle const & p_handle, float4 const & value);
+		void SetParameter(D3D9ShaderParameterHandle const & p_handle, float4x4 const & value);
+		void SetParameter(D3D9ShaderParameterHandle const & p_handle, SamplerPtr const & value);
+		void SetParameter(D3D9ShaderParameterHandle const & p_handle, std::vector<bool> const & value);
+		void SetParameter(D3D9ShaderParameterHandle const & p_handle, std::vector<int> const & value);
+		void SetParameter(D3D9ShaderParameterHandle const & p_handle, std::vector<float> const & value);
+		void SetParameter(D3D9ShaderParameterHandle const & p_handle, std::vector<float4> const & value);
+		void SetParameter(D3D9ShaderParameterHandle const & p_handle, std::vector<float4x4> const & value);
 
 	private:
 		boost::array<parameter_descs_t, ST_NumShaderTypes> param_descs_;

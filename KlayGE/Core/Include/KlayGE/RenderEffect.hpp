@@ -60,6 +60,35 @@
 
 namespace KlayGE
 {
+	enum RenderEffectDataType
+	{
+		REDT_bool = 0,
+		REDT_dword,
+		REDT_string,
+		REDT_sampler1D,
+		REDT_sampler2D,
+		REDT_sampler3D,
+		REDT_samplerCUBE,
+		REDT_shader,
+		REDT_int,
+		REDT_int2,
+		REDT_int3,
+		REDT_int4,
+		REDT_float,
+		REDT_float2,
+		REDT_float2x2,
+		REDT_float2x3,
+		REDT_float2x4,
+		REDT_float3,
+		REDT_float3x2,
+		REDT_float3x3,
+		REDT_float3x4,
+		REDT_float4,
+		REDT_float4x2,
+		REDT_float4x3,
+		REDT_float4x4
+	};
+
 	class RenderVariable
 	{
 	public:
@@ -400,8 +429,6 @@ namespace KlayGE
 		ShaderObjectPtr shader_obj_;
 
 		bool is_validate_;
-
-		boost::array<std::vector<RenderEffectParameterPtr>, ShaderObject::ST_NumShaderTypes> param_descs_;
 	};
 
 	class RenderEffectParameter : boost::noncopyable

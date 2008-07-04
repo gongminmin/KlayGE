@@ -460,9 +460,6 @@ namespace KlayGE
 
 	void D3D9GraphicsBufferRenderView::DoOnResetDevice()
 	{
-		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		ID3D9DevicePtr const & d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
-
 		ID3D9SurfacePtr default_surf = this->CreateGBSurface(D3DPOOL_DEFAULT);
 		TIF(D3DXLoadSurfaceFromSurface(surface_.get(), NULL, NULL,
 			default_surf.get(), NULL, NULL, D3DX_FILTER_NONE, 0));

@@ -79,7 +79,7 @@ namespace KlayGE
 				}
 			}
 		}
-		
+
 		d3d_device->SetRenderState(D3DRS_STENCILFUNC, D3D9Mapping::Mapping(desc_.front_stencil_func));
 		d3d_device->SetRenderState(D3DRS_STENCILREF, front_stencil_ref);
 		d3d_device->SetRenderState(D3DRS_STENCILMASK, desc_.front_stencil_read_mask);

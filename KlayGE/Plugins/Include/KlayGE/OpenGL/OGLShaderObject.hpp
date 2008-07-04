@@ -1,8 +1,11 @@
 // OGLShaderObject.hpp
 // KlayGE OpenGL shader对象类 头文件
-// Ver 3.5.0
-// 版权所有(C) 龚敏敏, 2006
+// Ver 3.7.0
+// 版权所有(C) 龚敏敏, 2006-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.7.0
+// 改为直接传入RenderEffect (2008.7.4)
 //
 // 3.5.0
 // 初次建立 (2006.11.2)
@@ -28,38 +31,26 @@ namespace KlayGE
 		OGLShaderObject();
 		~OGLShaderObject();
 
-		void SetShader(ShaderType type, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs,
+		void SetShader(RenderEffect& effect, ShaderType type, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs,
 			boost::shared_ptr<std::string> const & shader_text);
-		ShaderObjectPtr Clone();
-
-		bool HasParameter(ShaderType type, boost::shared_ptr<std::string> const & name) const;
-
-		void SetParameter(boost::shared_ptr<std::string> const & name, bool value);
-		void SetParameter(boost::shared_ptr<std::string> const & name, int value);
-		void SetParameter(boost::shared_ptr<std::string> const & name, float value);
-		void SetParameter(boost::shared_ptr<std::string> const & name, float4 const & value);
-		void SetParameter(boost::shared_ptr<std::string> const & name, float4x4 const & value);
-		void SetParameter(boost::shared_ptr<std::string> const & name, SamplerPtr const & value);
-		void SetParameter(boost::shared_ptr<std::string> const & name, std::vector<bool> const & value);
-		void SetParameter(boost::shared_ptr<std::string> const & name, std::vector<int> const & value);
-		void SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float> const & value);
-		void SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float4> const & value);
-		void SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float4x4> const & value);
+		ShaderObjectPtr Clone(RenderEffect& effect);
 
 		void Active();
 
 	private:
-		struct less_shared_ptr_string
-			: public std::binary_function<boost::shared_ptr<std::string>, boost::shared_ptr<std::string>, bool>
-		{
-			bool operator()(boost::shared_ptr<std::string> lhs, boost::shared_ptr<std::string> rhs) const
-			{
-				return *lhs < *rhs;
-			}
-		};
-		
-		typedef MapVector<boost::shared_ptr<std::string>, CGparameter, less_shared_ptr_string> parameter_descs_t;
-		parameter_descs_t::const_iterator FindParam(ShaderType type, boost::shared_ptr<std::string> const & name) const;
+		typedef MapVector<RenderEffectParameterPtr, CGparameter> parameter_descs_t;
+
+		void SetParameter(CGparameter cg_param, bool value);
+		void SetParameter(CGparameter cg_param, int value);
+		void SetParameter(CGparameter cg_param, float value);
+		void SetParameter(CGparameter cg_param, float4 const & value);
+		void SetParameter(CGparameter cg_param, float4x4 const & value);
+		void SetParameter(CGparameter cg_param, ShaderType type, SamplerPtr const & value);
+		void SetParameter(CGparameter cg_param, std::vector<bool> const & value);
+		void SetParameter(CGparameter cg_param, std::vector<int> const & value);
+		void SetParameter(CGparameter cg_param, std::vector<float> const & value);
+		void SetParameter(CGparameter cg_param, std::vector<float4> const & value);
+		void SetParameter(CGparameter cg_param, std::vector<float4x4> const & value);
 
 	private:
 		boost::shared_ptr<std::vector<shader_desc> > shader_descs_;

@@ -1,8 +1,11 @@
 // OGLShaderObject.cpp
 // KlayGE OpenGL shader对象类 实现文件
-// Ver 3.5.0
-// 版权所有(C) 龚敏敏, 2003-2006
+// Ver 3.7.0
+// 版权所有(C) 龚敏敏, 2006-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.7.0
+// 改为直接传入RenderEffect (2008.7.4)
 //
 // 3.5.0
 // 初次建立 (2006.11.2)
@@ -17,8 +20,9 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Matrix.hpp>
-#include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Sampler.hpp>
+#include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/RenderEffect.hpp>
 
 #include <string>
 #include <algorithm>
@@ -66,7 +70,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLShaderObject::SetShader(ShaderType type, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs,
+	void OGLShaderObject::SetShader(RenderEffect& effect, ShaderType type, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs,
 			boost::shared_ptr<std::string> const & shader_text)
 	{
 		is_shader_validate_[type] = true;
@@ -135,7 +139,11 @@ namespace KlayGE
 			if (cgIsParameterUsed(cg_param, shaders_[type])
 				&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param)))
 			{
-				param_descs_[type].insert(std::make_pair(new std::string(cgGetParameterName(cg_param)), cg_param));
+				RenderEffectParameterPtr const & p = effect.ParameterByName(cgGetParameterName(cg_param));
+				if (p != RenderEffectParameter::NullObject())
+				{
+					param_descs_[type].insert(std::make_pair(p, cg_param));
+				}
 			}
 
 			cg_param = cgGetNextParameter(cg_param);
@@ -164,7 +172,7 @@ namespace KlayGE
 		}
 	}
 
-	ShaderObjectPtr OGLShaderObject::Clone()
+	ShaderObjectPtr OGLShaderObject::Clone(RenderEffect& effect)
 	{
 		OGLShaderObjectPtr ret(new OGLShaderObject);
 
@@ -207,7 +215,11 @@ namespace KlayGE
 				if (cgIsParameterUsed(cg_param, ret->shaders_[i])
 					&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param)))
 				{
-					ret->param_descs_[i].insert(std::make_pair(new std::string(cgGetParameterName(cg_param)), cg_param));
+					RenderEffectParameterPtr const & p = effect.ParameterByName(cgGetParameterName(cg_param));
+					if (p != RenderEffectParameter::NullObject())
+					{
+						ret->param_descs_[i].insert(std::make_pair(p, cg_param));
+					}
 				}
 
 				cg_param = cgGetNextParameter(cg_param);
@@ -225,191 +237,206 @@ namespace KlayGE
 		return ret;
 	}
 
-	OGLShaderObject::parameter_descs_t::const_iterator OGLShaderObject::FindParam(ShaderType type, boost::shared_ptr<std::string> const & name) const
+	void OGLShaderObject::SetParameter(CGparameter cg_param, bool value)
 	{
-		return param_descs_[type].find(name);
+		cgSetParameter1i(cg_param, value);
 	}
 
-	bool OGLShaderObject::HasParameter(ShaderType type, boost::shared_ptr<std::string> const & name) const
+	void OGLShaderObject::SetParameter(CGparameter cg_param, int value)
 	{
-		return (this->FindParam(type, name) != param_descs_[type].end());
+		cgSetParameter1i(cg_param, value);
 	}
 
-	void OGLShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, bool value)
+	void OGLShaderObject::SetParameter(CGparameter cg_param, float value)
 	{
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
-		{
-			ShaderType type = static_cast<ShaderType>(i);
-
-			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
-			if (iter != param_descs_[type].end())
-			{
-				cgSetParameter1i(iter->second, value);
-			}
-		}
+		cgSetParameter1f(cg_param, value);
 	}
 
-	void OGLShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, int value)
+	void OGLShaderObject::SetParameter(CGparameter cg_param, float4 const & value)
 	{
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
-		{
-			ShaderType type = static_cast<ShaderType>(i);
-
-			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
-			if (iter != param_descs_[type].end())
-			{
-				cgSetParameter1i(iter->second, value);
-			}
-		}
+		cgSetParameter4fv(cg_param, &value[0]);
 	}
 
-	void OGLShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, float value)
+	void OGLShaderObject::SetParameter(CGparameter cg_param, float4x4 const & value)
 	{
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
-		{
-			ShaderType type = static_cast<ShaderType>(i);
-
-			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
-			if (iter != param_descs_[type].end())
-			{
-				cgSetParameter1f(iter->second, value);
-			}
-		}
+		cgGLSetMatrixParameterfr(cg_param, &value[0]);
 	}
 
-	void OGLShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, float4 const & value)
-	{
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
-		{
-			ShaderType type = static_cast<ShaderType>(i);
-
-			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
-			if (iter != param_descs_[type].end())
-			{
-				cgSetParameter4fv(iter->second, &value[0]);
-			}
-		}
-	}
-
-	void OGLShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, float4x4 const & value)
-	{
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
-		{
-			ShaderType type = static_cast<ShaderType>(i);
-
-			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
-			if (iter != param_descs_[type].end())
-			{
-				cgGLSetMatrixParameterfr(iter->second, &value[0]);
-			}
-		}
-	}
-
-	void OGLShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, std::vector<bool> const & value)
+	void OGLShaderObject::SetParameter(CGparameter cg_param, std::vector<bool> const & value)
 	{
 		if (!value.empty())
 		{
-			for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
-			{
-				ShaderType type = static_cast<ShaderType>(i);
-
-				parameter_descs_t::const_iterator iter = this->FindParam(type, name);
-				if (iter != param_descs_[type].end())
-				{
-					std::vector<int> tmp(value.begin(), value.end());
-					cgSetParameterValueir(iter->second, static_cast<int>(tmp.size()), &tmp[0]);
-				}
-			}
+			std::vector<int> tmp(value.begin(), value.end());
+			cgSetParameterValueir(cg_param, static_cast<int>(tmp.size()), &tmp[0]);
 		}
 	}
 
-	void OGLShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, std::vector<int> const & value)
+	void OGLShaderObject::SetParameter(CGparameter cg_param, std::vector<int> const & value)
 	{
 		if (!value.empty())
 		{
-			for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
-			{
-				ShaderType type = static_cast<ShaderType>(i);
-
-				parameter_descs_t::const_iterator iter = this->FindParam(type, name);
-				if (iter != param_descs_[type].end())
-				{
-					cgSetParameterValueir(iter->second, static_cast<int>(value.size()), &value[0]);
-				}
-			}
+			cgSetParameterValueir(cg_param, static_cast<int>(value.size()), &value[0]);
 		}
 	}
 
-	void OGLShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float> const & value)
+	void OGLShaderObject::SetParameter(CGparameter cg_param, std::vector<float> const & value)
 	{
 		if (!value.empty())
 		{
-			for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
-			{
-				ShaderType type = static_cast<ShaderType>(i);
-
-				parameter_descs_t::const_iterator iter = this->FindParam(type, name);
-				if (iter != param_descs_[type].end())
-				{
-					cgGLSetParameterArray1f(iter->second, 0, static_cast<int>(value.size()), &value[0]);
-				}
-			}
+			cgGLSetParameterArray1f(cg_param, 0, static_cast<int>(value.size()), &value[0]);
 		}
 	}
 
-	void OGLShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float4> const & value)
+	void OGLShaderObject::SetParameter(CGparameter cg_param, std::vector<float4> const & value)
 	{
 		if (!value.empty())
 		{
-			for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
-			{
-				ShaderType type = static_cast<ShaderType>(i);
-
-				parameter_descs_t::const_iterator iter = this->FindParam(type, name);
-				if (iter != param_descs_[type].end())
-				{
-					cgGLSetParameterArray4f(iter->second, 0, static_cast<long>(value.size()), &value[0][0]);
-				}
-			}
+			cgGLSetParameterArray4f(cg_param, 0, static_cast<long>(value.size()), &value[0][0]);
 		}
 	}
 
-	void OGLShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float4x4> const & value)
+	void OGLShaderObject::SetParameter(CGparameter cg_param, std::vector<float4x4> const & value)
 	{
 		if (!value.empty())
 		{
-			for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
-			{
-				ShaderType type = static_cast<ShaderType>(i);
-
-				parameter_descs_t::const_iterator iter = this->FindParam(type, name);
-				if (iter != param_descs_[type].end())
-				{
-					cgGLSetMatrixParameterArrayfr(iter->second, 0, static_cast<long>(value.size()), &value[0][0]);
-				}
-			}
+			cgGLSetMatrixParameterArrayfr(cg_param, 0, static_cast<long>(value.size()), &value[0][0]);
 		}
 	}
 
-	void OGLShaderObject::SetParameter(boost::shared_ptr<std::string> const & name, SamplerPtr const & value)
+	void OGLShaderObject::SetParameter(CGparameter cg_param, ShaderType type, SamplerPtr const & value)
 	{
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
-		{
-			ShaderType type = static_cast<ShaderType>(i);
+		uint32_t index = cgGLGetTextureEnum(cg_param) - GL_TEXTURE0;
 
-			parameter_descs_t::const_iterator iter = this->FindParam(type, name);
-			if (iter != param_descs_[type].end())
-			{
-				uint32_t index = cgGLGetTextureEnum(iter->second) - GL_TEXTURE0;
-
-				BOOST_ASSERT(index < samplers_[type].size());
-				samplers_[type][index] = value;
-			}
-		}
+		BOOST_ASSERT(index < samplers_[type].size());
+		samplers_[type][index] = value;
 	}
 
 	void OGLShaderObject::Active()
 	{
+		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
+		{
+			for (parameter_descs_t::iterator iter = param_descs_[i].begin(); iter != param_descs_[i].end(); ++ iter)
+			{
+				RenderEffectParameterPtr const & param = iter->first;
+				if (param->IsDirty())
+				{
+					switch (param->type())
+					{
+					case REDT_bool:
+						if (param->ArraySize() != 0)
+						{
+							std::vector<bool> tmp;
+							param->Value(tmp);
+							this->SetParameter(iter->second, tmp);
+						}
+						else
+						{
+							bool tmp;
+							param->Value(tmp);
+							this->SetParameter(iter->second, tmp);
+						}
+						break;
+
+					case REDT_dword:
+					case REDT_int:
+						if (param->ArraySize() != 0)
+						{
+							std::vector<int> tmp;
+							param->Value(tmp);
+							this->SetParameter(iter->second, tmp);
+						}
+						else
+						{
+							int tmp;
+							param->Value(tmp);
+							this->SetParameter(iter->second, tmp);
+						}
+						break;
+
+					case REDT_float:
+						if (param->ArraySize() != 0)
+						{
+							std::vector<float> tmp;
+							param->Value(tmp);
+							this->SetParameter(iter->second, tmp);
+						}
+						else
+						{
+							float tmp;
+							param->Value(tmp);
+							this->SetParameter(iter->second, tmp);
+						}
+						break;
+
+					case REDT_float2:
+						{
+							float2 tmp;
+							param->Value(tmp);
+							float4 v4(tmp.x(), tmp.y(), 0, 0);
+							this->SetParameter(iter->second, v4);
+						}
+						break;
+
+					case REDT_float3:
+						{
+							float3 tmp;
+							param->Value(tmp);
+							float4 v4(tmp.x(), tmp.y(), tmp.z(), 0);
+							this->SetParameter(iter->second, v4);
+						}
+						break;
+
+					case REDT_float4:
+						if (param->ArraySize() != 0)
+						{
+							std::vector<float4> tmp;
+							param->Value(tmp);
+							this->SetParameter(iter->second, tmp);
+						}
+						else
+						{
+							float4 tmp;
+							param->Value(tmp);
+							this->SetParameter(iter->second, tmp);
+						}
+						break;
+
+					case REDT_float4x4:
+						if (param->ArraySize() != 0)
+						{
+							std::vector<float4x4> tmp;
+							param->Value(tmp);
+							this->SetParameter(iter->second, tmp);
+						}
+						else
+						{
+							float4x4 tmp;
+							param->Value(tmp);
+							this->SetParameter(iter->second, tmp);
+						}
+						break;
+
+					case REDT_sampler1D:
+					case REDT_sampler2D:
+					case REDT_sampler3D:
+					case REDT_samplerCUBE:
+						{
+							SamplerPtr tmp;
+							param->Value(tmp);
+							this->SetParameter(iter->second, static_cast<ShaderType>(i), tmp);
+						}
+						break;
+
+					default:
+						BOOST_ASSERT(false);
+						break;
+					}
+
+					//param->Dirty(false);
+				}
+			}
+		}
+
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		cgGLBindProgram(shaders_[ST_VertexShader]);

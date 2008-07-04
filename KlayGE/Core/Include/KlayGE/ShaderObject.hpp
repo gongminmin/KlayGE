@@ -1,8 +1,11 @@
 // ShaderObject.hpp
 // KlayGE shader对象类 头文件
-// Ver 3.5.0
-// 版权所有(C) 龚敏敏, 2006
+// Ver 3.7.0
+// 版权所有(C) 龚敏敏, 2006-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.7.0
+// 改为直接传入RenderEffect (2008.7.4)
 //
 // 3.5.0
 // 初次建立 (2006.11.2)
@@ -50,23 +53,9 @@ namespace KlayGE
 
 		static ShaderObjectPtr NullObject();
 
-		virtual void SetShader(ShaderType type, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs,
+		virtual void SetShader(RenderEffect& effect, ShaderType type, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs,
 			boost::shared_ptr<std::string> const & shader_text) = 0;
-		virtual ShaderObjectPtr Clone() = 0;
-
-		virtual bool HasParameter(ShaderType type, boost::shared_ptr<std::string> const & name) const = 0;
-
-		virtual void SetParameter(boost::shared_ptr<std::string> const & name, bool value) = 0;
-		virtual void SetParameter(boost::shared_ptr<std::string> const & name, int value) = 0;
-		virtual void SetParameter(boost::shared_ptr<std::string> const & name, float value) = 0;
-		virtual void SetParameter(boost::shared_ptr<std::string> const & name, float4 const & value) = 0;
-		virtual void SetParameter(boost::shared_ptr<std::string> const & name, float4x4 const & value) = 0;
-		virtual void SetParameter(boost::shared_ptr<std::string> const & name, SamplerPtr const & value) = 0;
-		virtual void SetParameter(boost::shared_ptr<std::string> const & name, std::vector<bool> const & value) = 0;
-		virtual void SetParameter(boost::shared_ptr<std::string> const & name, std::vector<int> const & value) = 0;
-		virtual void SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float> const & value) = 0;
-		virtual void SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float4> const & value) = 0;
-		virtual void SetParameter(boost::shared_ptr<std::string> const & name, std::vector<float4x4> const & value) = 0;
+		virtual ShaderObjectPtr Clone(RenderEffect& effect) = 0;
 
 		virtual void Active() = 0;
 

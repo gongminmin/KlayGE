@@ -56,36 +56,6 @@ namespace
 	class type_define
 	{
 	public:
-		enum code
-		{
-			TC_bool = 0,
-			TC_dword,
-			TC_string,
-			TC_sampler1D,
-			TC_sampler2D,
-			TC_sampler3D,
-			TC_samplerCUBE,
-			TC_shader,
-			TC_int,
-			TC_int2,
-			TC_int3,
-			TC_int4,
-			TC_float,
-			TC_float2,
-			TC_float2x2,
-			TC_float2x3,
-			TC_float2x4,
-			TC_float3,
-			TC_float3x2,
-			TC_float3x3,
-			TC_float3x4,
-			TC_float4,
-			TC_float4x2,
-			TC_float4x3,
-			TC_float4x4
-		};
-
-	public:
 		static type_define& instance()
 		{
 			static type_define ret;
@@ -167,7 +137,7 @@ namespace
 
 		switch (type)
 		{
-		case type_define::TC_bool:
+		case REDT_bool:
 			if (0 == array_size)
 			{
 				var.reset(new RenderVariableBool);
@@ -178,8 +148,8 @@ namespace
 			}
 			break;
 
-		case type_define::TC_dword:
-		case type_define::TC_int:
+		case REDT_dword:
+		case REDT_int:
 			if (0 == array_size)
 			{
 				var.reset(new RenderVariableInt);
@@ -190,17 +160,17 @@ namespace
 			}
 			break;
 
-		case type_define::TC_string:
+		case REDT_string:
 			{
 				var.reset(new RenderVariableString);
 				*var = read_short_string(source);
 			}
 			break;
 
-		case type_define::TC_sampler1D:
-		case type_define::TC_sampler2D:
-		case type_define::TC_sampler3D:
-		case type_define::TC_samplerCUBE:
+		case REDT_sampler1D:
+		case REDT_sampler2D:
+		case REDT_sampler3D:
+		case REDT_samplerCUBE:
 			{
 				var.reset(new RenderVariableSampler);
 				SamplerPtr s(new Sampler);
@@ -234,7 +204,7 @@ namespace
 			}
 			break;
 
-		case type_define::TC_shader:
+		case REDT_shader:
 			{
 				var.reset(new RenderVariableShader);
 
@@ -249,7 +219,7 @@ namespace
 			}
 			break;
 
-		case type_define::TC_float:
+		case REDT_float:
 			if (0 == array_size)
 			{
 				var.reset(new RenderVariableFloat);
@@ -264,7 +234,7 @@ namespace
 			}
 			break;
 
-		case type_define::TC_float2:
+		case REDT_float2:
 			{
 				var.reset(new RenderVariableFloat2);
 
@@ -274,7 +244,7 @@ namespace
 			}
 			break;
 
-		case type_define::TC_float3:
+		case REDT_float3:
 			{
 				var.reset(new RenderVariableFloat3);
 
@@ -284,7 +254,7 @@ namespace
 			}
 			break;
 
-		case type_define::TC_float4:
+		case REDT_float4:
 			if (0 == array_size)
 			{
 				var.reset(new RenderVariableFloat4);
@@ -299,7 +269,7 @@ namespace
 			}
 			break;
 
-		case type_define::TC_float4x4:
+		case REDT_float4x4:
 			if (0 == array_size)
 			{
 				var.reset(new RenderVariableFloat4x4);
@@ -604,12 +574,12 @@ namespace KlayGE
 			std::string state_name = read_short_string(source);
 			RenderVariablePtr var = read_var(source, type, 0);
 
-			if (type_define::TC_shader != type)
+			if (REDT_shader != type)
 			{
 				uint32_t state_val;
 				switch (type)
 				{
-				case type_define::TC_bool:
+				case REDT_bool:
 					{
 						bool tmp;
 						var->Value(tmp);
@@ -617,7 +587,7 @@ namespace KlayGE
 					}
 					break;
 
-				case type_define::TC_int:
+				case REDT_int:
 					{
 						int tmp;
 						var->Value(tmp);
@@ -625,7 +595,7 @@ namespace KlayGE
 					}
 					break;
 
-				case type_define::TC_float:
+				case REDT_float:
 					{
 						float tmp;
 						var->Value(tmp);
@@ -813,24 +783,10 @@ namespace KlayGE
 		shader_text_.reset(new BOOST_TYPEOF(*shader_text_)(this->GenShaderText()));
 		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
 		{
-			shader_obj_->SetShader(static_cast<ShaderObject::ShaderType>(i), shader_descs_, shader_text_);
+			shader_obj_->SetShader(effect_, static_cast<ShaderObject::ShaderType>(i), shader_descs_, shader_text_);
 		}
 
 		is_validate_ = shader_obj_->Validate();
-
-		for (uint32_t i = 0; i < effect_.NumParameters(); ++ i)
-		{
-			for (size_t j = 0; j < ShaderObject::ST_NumShaderTypes; ++ j)
-			{
-				ShaderObject::ShaderType type = static_cast<ShaderObject::ShaderType>(j);
-
-				RenderEffectParameterPtr param = effect_.ParameterByIndex(i);
-				if (shader_obj_->HasParameter(type, param->Name()))
-				{
-					param_descs_[type].push_back(param);
-				}
-			}
-		}
 	}
 
 	RenderPassPtr RenderPass::Clone(RenderEffect& effect)
@@ -845,152 +801,15 @@ namespace KlayGE
 		ret->rasterizer_state_obj_ = rasterizer_state_obj_;
 		ret->depth_stencil_state_obj_ = depth_stencil_state_obj_;
 		ret->blend_state_obj_ = blend_state_obj_;
-		ret->shader_obj_ = shader_obj_->Clone();
+		ret->shader_obj_ = shader_obj_->Clone(effect);
 
 		ret->is_validate_ = is_validate_;
-
-		for (uint32_t i = 0; i < ret->effect_.NumParameters(); ++ i)
-		{
-			RenderEffectParameterPtr param = ret->effect_.ParameterByIndex(i);
-			for (size_t j = 0; j < ShaderObject::ST_NumShaderTypes; ++ j)
-			{
-				ShaderObject::ShaderType type = static_cast<ShaderObject::ShaderType>(j);
-				if (ret->shader_obj_->HasParameter(type, param->Name()))
-				{
-					ret->param_descs_[type].push_back(param);
-				}
-			}
-		}
 
 		return ret;
 	}
 
 	void RenderPass::Apply()
 	{
-		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
-		{
-			for (size_t j = 0, j_end = param_descs_[i].size(); j < j_end; ++ j)
-			{
-				RenderEffectParameterPtr const & param = param_descs_[i][j];
-				if (param->IsDirty())
-				{
-					switch (param->type())
-					{
-					case type_define::TC_bool:
-						if (param->ArraySize() != 0)
-						{
-							std::vector<bool> tmp;
-							param->Value(tmp);
-							shader_obj_->SetParameter(param->Name(), tmp);
-						}
-						else
-						{
-							bool tmp;
-							param->Value(tmp);
-							shader_obj_->SetParameter(param->Name(), tmp);
-						}
-						break;
-
-					case type_define::TC_dword:
-					case type_define::TC_int:
-						if (param->ArraySize() != 0)
-						{
-							std::vector<int> tmp;
-							param->Value(tmp);
-							shader_obj_->SetParameter(param->Name(), tmp);
-						}
-						else
-						{
-							int tmp;
-							param->Value(tmp);
-							shader_obj_->SetParameter(param->Name(), tmp);
-						}
-						break;
-
-					case type_define::TC_float:
-						if (param->ArraySize() != 0)
-						{
-							std::vector<float> tmp;
-							param->Value(tmp);
-							shader_obj_->SetParameter(param->Name(), tmp);
-						}
-						else
-						{
-							float tmp;
-							param->Value(tmp);
-							shader_obj_->SetParameter(param->Name(), tmp);
-						}
-						break;
-
-					case type_define::TC_float2:
-						{
-							float2 tmp;
-							param->Value(tmp);
-							float4 v4(tmp.x(), tmp.y(), 0, 0);
-							shader_obj_->SetParameter(param->Name(), v4);
-						}
-						break;
-
-					case type_define::TC_float3:
-						{
-							float3 tmp;
-							param->Value(tmp);
-							float4 v4(tmp.x(), tmp.y(), tmp.z(), 0);
-							shader_obj_->SetParameter(param->Name(), v4);
-						}
-						break;
-
-					case type_define::TC_float4:
-						if (param->ArraySize() != 0)
-						{
-							std::vector<float4> tmp;
-							param->Value(tmp);
-							shader_obj_->SetParameter(param->Name(), tmp);
-						}
-						else
-						{
-							float4 tmp;
-							param->Value(tmp);
-							shader_obj_->SetParameter(param->Name(), tmp);
-						}
-						break;
-
-					case type_define::TC_float4x4:
-						if (param->ArraySize() != 0)
-						{
-							std::vector<float4x4> tmp;
-							param->Value(tmp);
-							shader_obj_->SetParameter(param->Name(), tmp);
-						}
-						else
-						{
-							float4x4 tmp;
-							param->Value(tmp);
-							shader_obj_->SetParameter(param->Name(), tmp);
-						}
-						break;
-
-					case type_define::TC_sampler1D:
-					case type_define::TC_sampler2D:
-					case type_define::TC_sampler3D:
-					case type_define::TC_samplerCUBE:
-						{
-							SamplerPtr tmp;
-							param->Value(tmp);
-							shader_obj_->SetParameter(param->Name(), tmp);
-						}
-						break;
-
-					default:
-						BOOST_ASSERT(false);
-						break;
-					}
-
-					//param->Dirty(false);
-				}
-			}
-		}
-
 		RenderEngine& render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		render_eng.SetStateObjects(rasterizer_state_obj_, depth_stencil_state_obj_, front_stencil_ref_, back_stencil_ref_, blend_state_obj_, shader_obj_);
 	}

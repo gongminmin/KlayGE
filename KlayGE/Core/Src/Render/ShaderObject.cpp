@@ -22,54 +22,15 @@ namespace KlayGE
 	class NullShaderObject : public ShaderObject
 	{
 	public:
-		void SetShader(ShaderType /*type*/, boost::shared_ptr<std::vector<shader_desc> > const & /*shader_descs*/,
+		void SetShader(RenderEffect& /*effect*/, ShaderType /*type*/, boost::shared_ptr<std::vector<shader_desc> > const & /*shader_descs*/,
 			boost::shared_ptr<std::string> const & /*shader_text*/)
 		{
 			is_validate_ = true;
 		}
 
-		ShaderObjectPtr Clone()
+		ShaderObjectPtr Clone(RenderEffect& /*effect*/)
 		{
 			return ShaderObject::NullObject();
-		}
-
-		bool HasParameter(ShaderType /*type*/, boost::shared_ptr<std::string> const & /*name*/) const
-		{
-			return false;
-		}
-
-		void SetParameter(boost::shared_ptr<std::string> const & /*name*/, bool /*value*/)
-		{
-		}
-		void SetParameter(boost::shared_ptr<std::string> const & /*name*/, int /*value*/)
-		{
-		}
-		void SetParameter(boost::shared_ptr<std::string> const & /*name*/, float /*value*/)
-		{
-		}
-		void SetParameter(boost::shared_ptr<std::string> const & /*name*/, float4 const & /*value*/)
-		{
-		}
-		void SetParameter(boost::shared_ptr<std::string> const & /*name*/, float4x4 const & /*value*/)
-		{
-		}
-		void SetParameter(boost::shared_ptr<std::string> const & /*name*/, SamplerPtr const & /*value*/)
-		{
-		}
-		void SetParameter(boost::shared_ptr<std::string> const & /*name*/, std::vector<bool> const & /*value*/)
-		{
-		}
-		void SetParameter(boost::shared_ptr<std::string> const & /*name*/, std::vector<int> const & /*value*/)
-		{
-		}
-		void SetParameter(boost::shared_ptr<std::string> const & /*name*/, std::vector<float> const & /*value*/)
-		{
-		}
-		void SetParameter(boost::shared_ptr<std::string> const & /*name*/, std::vector<float4> const & /*value*/)
-		{
-		}
-		void SetParameter(boost::shared_ptr<std::string> const & /*name*/, std::vector<float4x4> const & /*value*/)
-		{
 		}
 
 		void Active()
