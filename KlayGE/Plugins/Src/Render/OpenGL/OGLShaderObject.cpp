@@ -41,6 +41,7 @@
 #include <boost/assign/std/vector.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
+#include <boost/bind.hpp>
 
 #include <glloader/glloader.h>
 
@@ -61,9 +62,9 @@ namespace KlayGE
 	{
 		for (int i = 0; i < ST_NumShaderTypes; ++ i)
 		{
-			BOOST_FOREACH(BOOST_TYPEOF(param_descs_[i])::reference desc, param_descs_[i])
+			BOOST_FOREACH(BOOST_TYPEOF(param_binds_[i])::reference pb, param_binds_[i])
 			{
-				cgDestroyParameter(desc.second);
+				cgDestroyParameter(pb.cg_param);
 			}
 
 			cgDestroyProgram(shaders_[i]);
@@ -142,7 +143,7 @@ namespace KlayGE
 				RenderEffectParameterPtr const & p = effect.ParameterByName(cgGetParameterName(cg_param));
 				if (p != RenderEffectParameter::NullObject())
 				{
-					param_descs_[type].insert(std::make_pair(p, cg_param));
+					param_binds_[type].push_back(this->GetBindFunc(cg_param, p, type));
 				}
 			}
 
@@ -218,7 +219,7 @@ namespace KlayGE
 					RenderEffectParameterPtr const & p = effect.ParameterByName(cgGetParameterName(cg_param));
 					if (p != RenderEffectParameter::NullObject())
 					{
-						ret->param_descs_[i].insert(std::make_pair(p, cg_param));
+						ret->param_binds_[i].push_back(ret->GetBindFunc(cg_param, p, static_cast<ShaderType>(i)));
 					}
 				}
 
@@ -237,206 +238,219 @@ namespace KlayGE
 		return ret;
 	}
 
-	void OGLShaderObject::SetParameter(CGparameter cg_param, bool value)
+	void OGLShaderObject::SetBool(CGparameter cg_param, RenderEffectParameterPtr const & param)
 	{
-		cgSetParameter1i(cg_param, value);
+		bool v;
+		param->Value(v);
+
+		cgSetParameter1i(cg_param, v);
 	}
 
-	void OGLShaderObject::SetParameter(CGparameter cg_param, int value)
+	void OGLShaderObject::SetInt(CGparameter cg_param, RenderEffectParameterPtr const & param)
 	{
-		cgSetParameter1i(cg_param, value);
+		int v;
+		param->Value(v);
+
+		cgSetParameter1i(cg_param, v);
 	}
 
-	void OGLShaderObject::SetParameter(CGparameter cg_param, float value)
+	void OGLShaderObject::SetFloat(CGparameter cg_param, RenderEffectParameterPtr const & param)
 	{
-		cgSetParameter1f(cg_param, value);
+		float v;
+		param->Value(v);
+
+		cgSetParameter1f(cg_param, v);
 	}
 
-	void OGLShaderObject::SetParameter(CGparameter cg_param, float4 const & value)
+	void OGLShaderObject::SetFloat2(CGparameter cg_param, RenderEffectParameterPtr const & param)
 	{
-		cgSetParameter4fv(cg_param, &value[0]);
+		float2 v;
+		param->Value(v);
+
+		cgSetParameter2fv(cg_param, &v[0]);
+	}
+	
+	void OGLShaderObject::SetFloat3(CGparameter cg_param, RenderEffectParameterPtr const & param)
+	{
+		float3 v;
+		param->Value(v);
+
+		cgSetParameter3fv(cg_param, &v[0]);
 	}
 
-	void OGLShaderObject::SetParameter(CGparameter cg_param, float4x4 const & value)
+	void OGLShaderObject::SetFloat4(CGparameter cg_param, RenderEffectParameterPtr const & param)
 	{
-		cgGLSetMatrixParameterfr(cg_param, &value[0]);
+		float4 v;
+		param->Value(v);
+
+		cgSetParameter4fv(cg_param, &v[0]);
 	}
 
-	void OGLShaderObject::SetParameter(CGparameter cg_param, std::vector<bool> const & value)
+	void OGLShaderObject::SetFloat4x4(CGparameter cg_param, RenderEffectParameterPtr const & param)
 	{
-		if (!value.empty())
+		float4x4 v;
+		param->Value(v);
+
+		cgGLSetMatrixParameterfr(cg_param, &v[0]);
+	}
+
+	void OGLShaderObject::SetBoolArray(CGparameter cg_param, RenderEffectParameterPtr const & param)
+	{
+		std::vector<bool> v;
+		param->Value(v);
+
+		if (!v.empty())
 		{
-			std::vector<int> tmp(value.begin(), value.end());
+			std::vector<int> tmp(v.begin(), v.end());
 			cgSetParameterValueir(cg_param, static_cast<int>(tmp.size()), &tmp[0]);
 		}
 	}
 
-	void OGLShaderObject::SetParameter(CGparameter cg_param, std::vector<int> const & value)
+	void OGLShaderObject::SetIntArray(CGparameter cg_param, RenderEffectParameterPtr const & param)
 	{
-		if (!value.empty())
+		std::vector<int> v;
+		param->Value(v);
+
+		if (!v.empty())
 		{
-			cgSetParameterValueir(cg_param, static_cast<int>(value.size()), &value[0]);
+			cgSetParameterValueir(cg_param, static_cast<int>(v.size()), &v[0]);
 		}
 	}
 
-	void OGLShaderObject::SetParameter(CGparameter cg_param, std::vector<float> const & value)
+	void OGLShaderObject::SetFloatArray(CGparameter cg_param, RenderEffectParameterPtr const & param)
 	{
-		if (!value.empty())
+		std::vector<float> v;
+		param->Value(v);
+
+		if (!v.empty())
 		{
-			cgGLSetParameterArray1f(cg_param, 0, static_cast<int>(value.size()), &value[0]);
+			cgGLSetParameterArray1f(cg_param, 0, static_cast<int>(v.size()), &v[0]);
 		}
 	}
 
-	void OGLShaderObject::SetParameter(CGparameter cg_param, std::vector<float4> const & value)
+	void OGLShaderObject::SetFloat4Array(CGparameter cg_param, RenderEffectParameterPtr const & param)
 	{
-		if (!value.empty())
+		std::vector<float4> v;
+		param->Value(v);
+
+		if (!v.empty())
 		{
-			cgGLSetParameterArray4f(cg_param, 0, static_cast<long>(value.size()), &value[0][0]);
+			cgGLSetParameterArray4f(cg_param, 0, static_cast<long>(v.size()), &v[0][0]);
 		}
 	}
 
-	void OGLShaderObject::SetParameter(CGparameter cg_param, std::vector<float4x4> const & value)
+	void OGLShaderObject::SetFloat4x4Array(CGparameter cg_param, RenderEffectParameterPtr const & param)
 	{
-		if (!value.empty())
+		std::vector<float4x4> v;
+		param->Value(v);
+
+		if (!v.empty())
 		{
-			cgGLSetMatrixParameterArrayfr(cg_param, 0, static_cast<long>(value.size()), &value[0][0]);
+			cgGLSetMatrixParameterArrayfr(cg_param, 0, static_cast<long>(v.size()), &v[0][0]);
 		}
 	}
 
-	void OGLShaderObject::SetParameter(CGparameter cg_param, ShaderType type, SamplerPtr const & value)
+	void OGLShaderObject::SetSampler(CGparameter cg_param, ShaderType type, RenderEffectParameterPtr const & param)
 	{
 		uint32_t index = cgGLGetTextureEnum(cg_param) - GL_TEXTURE0;
-
 		BOOST_ASSERT(index < samplers_[type].size());
-		samplers_[type][index] = value;
+
+		SamplerPtr v;
+		param->Value(v);
+
+		samplers_[type][index] = v;
+	}
+
+	OGLShaderObject::parameter_bind_t OGLShaderObject::GetBindFunc(CGparameter cg_param, RenderEffectParameterPtr const & param, ShaderType type)
+	{
+		parameter_bind_t ret;
+		ret.param = param;
+		ret.cg_param = cg_param;
+		ret.type = type;
+
+		switch (param->type())
+		{
+		case REDT_bool:
+			if (param->ArraySize() != 0)
+			{
+				ret.func = boost::bind(&OGLShaderObject::SetBoolArray, this, _1, _2);
+			}
+			else
+			{
+				ret.func = boost::bind(&OGLShaderObject::SetBool, this, _1, _2);
+			}
+			break;
+
+		case REDT_dword:
+		case REDT_int:
+			if (param->ArraySize() != 0)
+			{
+				ret.func = boost::bind(&OGLShaderObject::SetIntArray, this, _1, _2);
+			}
+			else
+			{
+				ret.func = boost::bind(&OGLShaderObject::SetInt, this, _1, _2);
+			}
+			break;
+
+		case REDT_float:
+			if (param->ArraySize() != 0)
+			{
+				ret.func = boost::bind(&OGLShaderObject::SetFloatArray, this, _1, _2);
+			}
+			else
+			{
+				ret.func = boost::bind(&OGLShaderObject::SetFloat, this, _1, _2);
+			}
+			break;
+
+		case REDT_float2:
+			ret.func = boost::bind(&OGLShaderObject::SetFloat2, this, _1, _2);
+			break;
+
+		case REDT_float3:
+			ret.func = boost::bind(&OGLShaderObject::SetFloat3, this, _1, _2);
+			break;
+
+		case REDT_float4:
+			if (param->ArraySize() != 0)
+			{
+				ret.func = boost::bind(&OGLShaderObject::SetFloat4Array, this, _1, _2);
+			}
+			else
+			{
+				ret.func = boost::bind(&OGLShaderObject::SetFloat4, this, _1, _2);
+			}
+			break;
+
+		case REDT_float4x4:
+			if (param->ArraySize() != 0)
+			{
+				ret.func = boost::bind(&OGLShaderObject::SetFloat4x4Array, this, _1, _2);
+			}
+			else
+			{
+				ret.func = boost::bind(&OGLShaderObject::SetFloat4x4, this, _1, _2);
+			}
+			break;
+
+		case REDT_sampler1D:
+		case REDT_sampler2D:
+		case REDT_sampler3D:
+		case REDT_samplerCUBE:
+			ret.func = boost::bind(&OGLShaderObject::SetSampler, this, _1, type, _2);
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
+		}
+
+		return ret;
 	}
 
 	void OGLShaderObject::Active()
 	{
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
-		{
-			for (parameter_descs_t::iterator iter = param_descs_[i].begin(); iter != param_descs_[i].end(); ++ iter)
-			{
-				RenderEffectParameterPtr const & param = iter->first;
-				if (param->IsDirty())
-				{
-					switch (param->type())
-					{
-					case REDT_bool:
-						if (param->ArraySize() != 0)
-						{
-							std::vector<bool> tmp;
-							param->Value(tmp);
-							this->SetParameter(iter->second, tmp);
-						}
-						else
-						{
-							bool tmp;
-							param->Value(tmp);
-							this->SetParameter(iter->second, tmp);
-						}
-						break;
-
-					case REDT_dword:
-					case REDT_int:
-						if (param->ArraySize() != 0)
-						{
-							std::vector<int> tmp;
-							param->Value(tmp);
-							this->SetParameter(iter->second, tmp);
-						}
-						else
-						{
-							int tmp;
-							param->Value(tmp);
-							this->SetParameter(iter->second, tmp);
-						}
-						break;
-
-					case REDT_float:
-						if (param->ArraySize() != 0)
-						{
-							std::vector<float> tmp;
-							param->Value(tmp);
-							this->SetParameter(iter->second, tmp);
-						}
-						else
-						{
-							float tmp;
-							param->Value(tmp);
-							this->SetParameter(iter->second, tmp);
-						}
-						break;
-
-					case REDT_float2:
-						{
-							float2 tmp;
-							param->Value(tmp);
-							float4 v4(tmp.x(), tmp.y(), 0, 0);
-							this->SetParameter(iter->second, v4);
-						}
-						break;
-
-					case REDT_float3:
-						{
-							float3 tmp;
-							param->Value(tmp);
-							float4 v4(tmp.x(), tmp.y(), tmp.z(), 0);
-							this->SetParameter(iter->second, v4);
-						}
-						break;
-
-					case REDT_float4:
-						if (param->ArraySize() != 0)
-						{
-							std::vector<float4> tmp;
-							param->Value(tmp);
-							this->SetParameter(iter->second, tmp);
-						}
-						else
-						{
-							float4 tmp;
-							param->Value(tmp);
-							this->SetParameter(iter->second, tmp);
-						}
-						break;
-
-					case REDT_float4x4:
-						if (param->ArraySize() != 0)
-						{
-							std::vector<float4x4> tmp;
-							param->Value(tmp);
-							this->SetParameter(iter->second, tmp);
-						}
-						else
-						{
-							float4x4 tmp;
-							param->Value(tmp);
-							this->SetParameter(iter->second, tmp);
-						}
-						break;
-
-					case REDT_sampler1D:
-					case REDT_sampler2D:
-					case REDT_sampler3D:
-					case REDT_samplerCUBE:
-						{
-							SamplerPtr tmp;
-							param->Value(tmp);
-							this->SetParameter(iter->second, static_cast<ShaderType>(i), tmp);
-						}
-						break;
-
-					default:
-						BOOST_ASSERT(false);
-						break;
-					}
-
-					//param->Dirty(false);
-				}
-			}
-		}
-
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		cgGLBindProgram(shaders_[ST_VertexShader]);
@@ -446,7 +460,12 @@ namespace KlayGE
 
 		for (int i = 0; i < ST_NumShaderTypes; ++ i)
 		{
-			std::vector<SamplerPtr> const & samplers = samplers_[static_cast<ShaderType>(i)];
+			BOOST_FOREACH(BOOST_TYPEOF(param_binds_[i])::reference pb, param_binds_[i])
+			{
+				pb.func(pb.cg_param, pb.param);
+			}
+
+			std::vector<SamplerPtr> const & samplers = samplers_[i];
 
 			for (uint32_t stage = 0, num_stage = static_cast<uint32_t>(samplers.size()); stage < num_stage; ++ stage)
 			{

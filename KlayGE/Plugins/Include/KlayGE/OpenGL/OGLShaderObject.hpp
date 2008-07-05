@@ -20,6 +20,8 @@
 #include <KlayGE/MapVector.hpp>
 #include <KlayGE/ShaderObject.hpp>
 
+#include <boost/function.hpp>
+
 #include <Cg/cg.h>
 #include <Cg/cgGL.h>
 
@@ -38,19 +40,30 @@ namespace KlayGE
 		void Active();
 
 	private:
-		typedef MapVector<RenderEffectParameterPtr, CGparameter> parameter_descs_t;
+		void SetBool(CGparameter cg_param, RenderEffectParameterPtr const & param);
+		void SetInt(CGparameter cg_param, RenderEffectParameterPtr const & param);
+		void SetFloat(CGparameter cg_param, RenderEffectParameterPtr const & param);
+		void SetFloat2(CGparameter cg_param, RenderEffectParameterPtr const & param);
+		void SetFloat3(CGparameter cg_param, RenderEffectParameterPtr const & param);
+		void SetFloat4(CGparameter cg_param, RenderEffectParameterPtr const & param);
+		void SetFloat4x4(CGparameter cg_param, RenderEffectParameterPtr const & param);
+		void SetBoolArray(CGparameter cg_param, RenderEffectParameterPtr const & param);
+		void SetIntArray(CGparameter cg_param, RenderEffectParameterPtr const & param);
+		void SetFloatArray(CGparameter cg_param, RenderEffectParameterPtr const & param);
+		void SetFloat4Array(CGparameter cg_param, RenderEffectParameterPtr const & param);
+		void SetFloat4x4Array(CGparameter cg_param, RenderEffectParameterPtr const & param);
+		void SetSampler(CGparameter cg_param, ShaderType type, RenderEffectParameterPtr const & param);
 
-		void SetParameter(CGparameter cg_param, bool value);
-		void SetParameter(CGparameter cg_param, int value);
-		void SetParameter(CGparameter cg_param, float value);
-		void SetParameter(CGparameter cg_param, float4 const & value);
-		void SetParameter(CGparameter cg_param, float4x4 const & value);
-		void SetParameter(CGparameter cg_param, ShaderType type, SamplerPtr const & value);
-		void SetParameter(CGparameter cg_param, std::vector<bool> const & value);
-		void SetParameter(CGparameter cg_param, std::vector<int> const & value);
-		void SetParameter(CGparameter cg_param, std::vector<float> const & value);
-		void SetParameter(CGparameter cg_param, std::vector<float4> const & value);
-		void SetParameter(CGparameter cg_param, std::vector<float4x4> const & value);
+		struct parameter_bind_t
+		{
+			RenderEffectParameterPtr param;
+			CGparameter cg_param;
+			ShaderType type;
+			boost::function<void(CGparameter cg_param, RenderEffectParameterPtr const & param)> func;
+		};
+		typedef std::vector<parameter_bind_t> parameter_binds_t;
+
+		parameter_bind_t GetBindFunc(CGparameter cg_param, RenderEffectParameterPtr const & param, ShaderType type);
 
 	private:
 		boost::shared_ptr<std::vector<shader_desc> > shader_descs_;
@@ -59,7 +72,7 @@ namespace KlayGE
 		boost::array<CGprogram, ST_NumShaderTypes> shaders_;
 		boost::array<CGprofile, ST_NumShaderTypes> profiles_;
 
-		boost::array<parameter_descs_t, ST_NumShaderTypes> param_descs_;
+		boost::array<parameter_binds_t, ST_NumShaderTypes> param_binds_;
 		boost::array<bool, ST_NumShaderTypes> is_shader_validate_;
 
 		boost::array<std::vector<SamplerPtr>, ST_NumShaderTypes> samplers_;

@@ -48,7 +48,7 @@ void Font3DVS(float4 position : POSITION,
 
 float4 FontPS(float4 clr : COLOR, float2 texCoord : TEXCOORD0) : COLOR0
 {
-	clr.a = (tex2D(distance_sampler, texCoord).r * distance_base_scale.y + distance_base_scale.x) * 24 + 1;
+	clr.a = tex2D(distance_sampler, texCoord).r * distance_base_scale.y + distance_base_scale.x;
 	return clr;
 }
 		]]>

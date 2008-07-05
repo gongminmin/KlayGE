@@ -20,6 +20,8 @@
 #include <KlayGE/ShaderObject.hpp>
 #include <KlayGE/MapVector.hpp>
 
+#include <boost/function.hpp>
+
 #include <KlayGE/D3D9/D3D9Typedefs.hpp>
 
 namespace KlayGE
@@ -54,22 +56,32 @@ namespace KlayGE
 		void Active();
 
 	private:
-		typedef MapVector<RenderEffectParameterPtr, D3D9ShaderParameterHandle> parameter_descs_t;
+		void SetBool(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
+		void SetInt(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
+		void SetFloat(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
+		void SetFloat2(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
+		void SetFloat3(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
+		void SetFloat4(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
+		void SetFloat4x4(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
+		void SetBoolArray(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
+		void SetIntArray(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
+		void SetFloatArray(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
+		void SetFloat4Array(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
+		void SetFloat4x4Array(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
+		void SetSampler(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
 
-		void SetParameter(D3D9ShaderParameterHandle const & p_handle, bool value);
-		void SetParameter(D3D9ShaderParameterHandle const & p_handle, int value);
-		void SetParameter(D3D9ShaderParameterHandle const & p_handle, float value);
-		void SetParameter(D3D9ShaderParameterHandle const & p_handle, float4 const & value);
-		void SetParameter(D3D9ShaderParameterHandle const & p_handle, float4x4 const & value);
-		void SetParameter(D3D9ShaderParameterHandle const & p_handle, SamplerPtr const & value);
-		void SetParameter(D3D9ShaderParameterHandle const & p_handle, std::vector<bool> const & value);
-		void SetParameter(D3D9ShaderParameterHandle const & p_handle, std::vector<int> const & value);
-		void SetParameter(D3D9ShaderParameterHandle const & p_handle, std::vector<float> const & value);
-		void SetParameter(D3D9ShaderParameterHandle const & p_handle, std::vector<float4> const & value);
-		void SetParameter(D3D9ShaderParameterHandle const & p_handle, std::vector<float4x4> const & value);
+		struct parameter_bind_t
+		{
+			RenderEffectParameterPtr param;
+			D3D9ShaderParameterHandle p_handle;
+			boost::function<void(D3D9ShaderParameterHandle const &, RenderEffectParameterPtr const &)> func;
+		};
+		typedef std::vector<parameter_bind_t> parameter_binds_t;
+
+		parameter_bind_t GetBindFunc(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
 
 	private:
-		boost::array<parameter_descs_t, ST_NumShaderTypes> param_descs_;
+		boost::array<parameter_binds_t, ST_NumShaderTypes> param_binds_;
 		boost::array<bool, ST_NumShaderTypes> is_shader_validate_;
 
 		ID3D9VertexShaderPtr vertex_shader_;

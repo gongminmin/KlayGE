@@ -1175,7 +1175,6 @@ namespace KlayGE
 
 
 	RenderVariable::RenderVariable()
-		: dirty_(true)
 	{
 	}
 

@@ -97,15 +97,6 @@ namespace KlayGE
 
 		virtual RenderVariablePtr Clone() = 0;
 
-		void Dirty(bool dirty)
-		{
-			dirty_ = dirty;
-		}
-		bool IsDirty() const
-		{
-			return dirty_;
-		}
-
 		virtual RenderVariable& operator=(bool const & value);
 		virtual RenderVariable& operator=(int const & value);
 		virtual RenderVariable& operator=(float const & value);
@@ -137,9 +128,6 @@ namespace KlayGE
 		virtual void Value(std::vector<float>& val) const;
 		virtual void Value(std::vector<float4>& val) const;
 		virtual void Value(std::vector<float4x4>& val) const;
-
-	protected:
-		bool dirty_;
 	};
 
 	template <typename T>
@@ -171,11 +159,7 @@ namespace KlayGE
 
 		RenderVariableConcrete& operator=(T const & value)
 		{
-			if (val_ != value)
-			{
-				val_ = value;
-				this->Dirty(true);
-			}
+			val_ = value;
 			return *this;
 		}
 
@@ -474,15 +458,6 @@ namespace KlayGE
 		{
 			BOOST_ASSERT(n < this->NumAnnotations());
 			return (*annotations_)[n];
-		}
-
-		void Dirty(bool dirty)
-		{
-			var_->Dirty(dirty);
-		}
-		bool IsDirty() const
-		{
-			return var_->IsDirty();
 		}
 
 		virtual RenderEffectParameter& operator=(bool const & value);

@@ -161,7 +161,7 @@ namespace
 
 			effect_ = rf.LoadEffect("Font.kfx");
 			*(effect_->ParameterByName("distance_sampler")) = dist_texture_;
-			*(effect_->ParameterByName("distance_base_scale")) = float2(dist_base_ / 32768.0f, dist_scale_ / 32768.0f + 1.0f);
+			*(effect_->ParameterByName("distance_base_scale")) = float2(dist_base_ / 32768.0f * 32 + 1, (dist_scale_ / 32768.0f + 1.0f) * 32);
 
 			half_width_height_ep_ = effect_->ParameterByName("half_width_height");
 			texel_to_pixel_offset_ep_ = effect_->ParameterByName("texel_to_pixel_offset");
