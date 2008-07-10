@@ -39,6 +39,7 @@
 #include <dxerr9.h>
 
 #include <vector>
+#include <boost/array.hpp>
 #include <boost/function.hpp>
 #include <boost/smart_ptr.hpp>
 
@@ -89,6 +90,18 @@ namespace KlayGE
 		void OnLostDevice();
 		void OnResetDevice();
 
+		void SetRenderState(D3DRENDERSTATETYPE state, uint32_t value);
+		void SetTexture(uint32_t sampler, IDirect3DBaseTexture9* texture);
+		void SetSamplerState(uint32_t sampler, D3DSAMPLERSTATETYPE type, uint32_t value);
+		void SetVertexShader(IDirect3DVertexShader9* shader);
+		void SetPixelShader(IDirect3DPixelShader9* shader);
+		void SetVertexShaderConstantB(uint32_t start_register, BOOL const * constant_data, uint32_t register_count);
+		void SetPixelShaderConstantB(uint32_t start_register, BOOL const * constant_data, uint32_t register_count);
+		void SetVertexShaderConstantI(uint32_t start_register, int const * constant_data, uint32_t register_count);
+		void SetPixelShaderConstantI(uint32_t start_register, int const * constant_data, uint32_t register_count);
+		void SetVertexShaderConstantF(uint32_t start_register, float const * constant_data, uint32_t register_count);
+		void SetPixelShaderConstantF(uint32_t start_register, float const * constant_data, uint32_t register_count);
+
 	private:
 		void DoBindFrameBuffer(FrameBufferPtr fb);
 		void DoRender(RenderTechnique const & tech, RenderLayout const & rl);
@@ -117,6 +130,11 @@ namespace KlayGE
 		uint32_t last_num_vertex_stream_;
 
 		boost::function<void (RenderTechnique const &, RenderLayout const &)> RenderInstance;
+
+		boost::array<uint32_t, D3DRS_BLENDOPALPHA + 1> render_states_cache_;
+		boost::array<std::vector<std::pair<IDirect3DBaseTexture9*, boost::array<uint32_t, D3DSAMP_SRGBTEXTURE + 1> > >, ShaderObject::ST_NumShaderTypes> samplers_cache_;
+		IDirect3DVertexShader9* vertex_shader_cache_;
+		IDirect3DPixelShader9* pixel_shader_cache_;
 	};
 
 	typedef boost::shared_ptr<D3D9RenderEngine> D3D9RenderEnginePtr;

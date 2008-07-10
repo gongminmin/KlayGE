@@ -77,7 +77,8 @@ namespace KlayGE
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D9RenderEngine::D3D9RenderEngine()
-		: last_num_vertex_stream_(0)
+		: last_num_vertex_stream_(0),
+			vertex_shader_cache_(NULL), pixel_shader_cache_(NULL)
 	{
 		// Create our Direct3D object
 		d3d_ = MakeCOMPtr(Direct3DCreate9(D3D_SDK_VERSION));
@@ -211,13 +212,217 @@ namespace KlayGE
 
 	void D3D9RenderEngine::InitRenderStates()
 	{
+		RasterizerStateDesc default_rs_desc;
+		DepthStencilStateDesc default_dss_desc;
+		BlendStateDesc default_bs_desc;
+
+		d3dDevice_->SetRenderState(D3DRS_FILLMODE, D3D9Mapping::Mapping(default_rs_desc.polygon_mode));
+		d3dDevice_->SetRenderState(D3DRS_SHADEMODE, D3D9Mapping::Mapping(default_rs_desc.shade_mode));
+		d3dDevice_->SetRenderState(D3DRS_CULLMODE, D3D9Mapping::Mapping(default_rs_desc.cull_mode, default_rs_desc.front_face_ccw));
+		d3dDevice_->SetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, float_to_uint32(default_rs_desc.polygon_offset_factor));
+		d3dDevice_->SetRenderState(D3DRS_DEPTHBIAS, float_to_uint32(default_rs_desc.polygon_offset_units));
+		d3dDevice_->SetRenderState(D3DRS_SCISSORTESTENABLE, default_rs_desc.scissor_enable);
+		d3dDevice_->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, default_rs_desc.multisample_enable);
+		render_states_cache_[D3DRS_FILLMODE] = D3D9Mapping::Mapping(default_rs_desc.polygon_mode);
+		render_states_cache_[D3DRS_SHADEMODE] = D3D9Mapping::Mapping(default_rs_desc.shade_mode);
+		render_states_cache_[D3DRS_CULLMODE] = D3D9Mapping::Mapping(default_rs_desc.cull_mode, default_rs_desc.front_face_ccw);
+		render_states_cache_[D3DRS_SLOPESCALEDEPTHBIAS] = float_to_uint32(default_rs_desc.polygon_offset_factor);
+		render_states_cache_[D3DRS_DEPTHBIAS] = float_to_uint32(default_rs_desc.polygon_offset_units);
+		render_states_cache_[D3DRS_SCISSORTESTENABLE] = default_rs_desc.scissor_enable;
+		render_states_cache_[D3DRS_MULTISAMPLEANTIALIAS] = default_rs_desc.multisample_enable;
+
+		d3dDevice_->SetRenderState(D3DRS_ZENABLE, default_dss_desc.depth_enable ? D3DZB_TRUE : D3DZB_FALSE);
+		d3dDevice_->SetRenderState(D3DRS_ZWRITEENABLE, default_dss_desc.depth_write_mask ? D3DZB_TRUE : D3DZB_FALSE);
+		d3dDevice_->SetRenderState(D3DRS_ZFUNC, D3D9Mapping::Mapping(default_dss_desc.depth_func));
+		render_states_cache_[D3DRS_ZENABLE] = default_dss_desc.depth_enable ? D3DZB_TRUE : D3DZB_FALSE;
+		render_states_cache_[D3DRS_ZWRITEENABLE] = default_dss_desc.depth_write_mask ? D3DZB_TRUE : D3DZB_FALSE;
+		render_states_cache_[D3DRS_ZFUNC] = D3D9Mapping::Mapping(default_dss_desc.depth_func);
+
+		if (default_dss_desc.front_stencil_enable && default_dss_desc.back_stencil_enable)
+		{
+			d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, true);
+			render_states_cache_[D3DRS_TWOSIDEDSTENCILMODE] = true;
+		}
+		else
+		{
+			if (default_dss_desc.front_stencil_enable)
+			{
+				d3dDevice_->SetRenderState(D3DRS_STENCILENABLE, true);
+				render_states_cache_[D3DRS_STENCILENABLE] = true;
+			}
+			else
+			{
+				if (default_dss_desc.back_stencil_enable)
+				{
+					d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, true);
+					d3dDevice_->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
+					render_states_cache_[D3DRS_TWOSIDEDSTENCILMODE] = true;
+					render_states_cache_[D3DRS_STENCILFUNC] = D3DCMP_ALWAYS;
+				}
+				else
+				{
+					d3dDevice_->SetRenderState(D3DRS_STENCILENABLE, false);
+					d3dDevice_->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, false);
+					render_states_cache_[D3DRS_STENCILENABLE] = false;
+					render_states_cache_[D3DRS_TWOSIDEDSTENCILMODE] = false;
+				}
+			}
+		}
+
+		d3dDevice_->SetRenderState(D3DRS_STENCILFUNC, D3D9Mapping::Mapping(default_dss_desc.front_stencil_func));
+		d3dDevice_->SetRenderState(D3DRS_STENCILREF, 0);
+		d3dDevice_->SetRenderState(D3DRS_STENCILMASK, default_dss_desc.front_stencil_read_mask);
+		d3dDevice_->SetRenderState(D3DRS_STENCILFAIL, D3D9Mapping::Mapping(default_dss_desc.front_stencil_fail));
+		d3dDevice_->SetRenderState(D3DRS_STENCILZFAIL, D3D9Mapping::Mapping(default_dss_desc.front_stencil_depth_fail));
+		d3dDevice_->SetRenderState(D3DRS_STENCILPASS, D3D9Mapping::Mapping(default_dss_desc.front_stencil_pass));
+		d3dDevice_->SetRenderState(D3DRS_STENCILWRITEMASK, default_dss_desc.front_stencil_write_mask);
+		render_states_cache_[D3DRS_STENCILFUNC] = D3D9Mapping::Mapping(default_dss_desc.front_stencil_func);
+		render_states_cache_[D3DRS_STENCILREF] = 0;
+		render_states_cache_[D3DRS_STENCILMASK] = default_dss_desc.front_stencil_read_mask;
+		render_states_cache_[D3DRS_STENCILFAIL] = D3D9Mapping::Mapping(default_dss_desc.front_stencil_fail);
+		render_states_cache_[D3DRS_STENCILZFAIL] = D3D9Mapping::Mapping(default_dss_desc.front_stencil_depth_fail);
+		render_states_cache_[D3DRS_STENCILPASS] = D3D9Mapping::Mapping(default_dss_desc.front_stencil_pass);
+		render_states_cache_[D3DRS_STENCILWRITEMASK] = default_dss_desc.front_stencil_write_mask;
+
+		d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFUNC, D3D9Mapping::Mapping(default_dss_desc.back_stencil_func));
+		d3dDevice_->SetRenderState(D3DRS_CCW_STENCILFAIL, D3D9Mapping::Mapping(default_dss_desc.back_stencil_fail));
+		d3dDevice_->SetRenderState(D3DRS_CCW_STENCILZFAIL, D3D9Mapping::Mapping(default_dss_desc.back_stencil_depth_fail));
+		d3dDevice_->SetRenderState(D3DRS_CCW_STENCILPASS, D3D9Mapping::Mapping(default_dss_desc.back_stencil_pass));
+		render_states_cache_[D3DRS_CCW_STENCILFUNC] = D3D9Mapping::Mapping(default_dss_desc.back_stencil_func);
+		render_states_cache_[D3DRS_CCW_STENCILFAIL] = D3D9Mapping::Mapping(default_dss_desc.back_stencil_fail);
+		render_states_cache_[D3DRS_CCW_STENCILZFAIL] = D3D9Mapping::Mapping(default_dss_desc.back_stencil_depth_fail);
+		render_states_cache_[D3DRS_CCW_STENCILPASS] = D3D9Mapping::Mapping(default_dss_desc.back_stencil_pass);
+
+		if (this->DeviceCaps().alpha_to_coverage_support)
+		{
+			if (default_bs_desc.alpha_to_coverage_enable)
+			{
+				d3dDevice_->SetRenderState(D3DRS_ADAPTIVETESS_Y,
+					static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'O', 'C'>::value));
+				render_states_cache_[D3DRS_ADAPTIVETESS_Y] = static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'O', 'C'>::value);
+			}
+			else
+			{
+				d3dDevice_->SetRenderState(D3DRS_ADAPTIVETESS_Y, D3DFMT_UNKNOWN);
+				render_states_cache_[D3DRS_ADAPTIVETESS_Y] = D3DFMT_UNKNOWN;
+			}
+		}
+		d3dDevice_->SetRenderState(D3DRS_ALPHABLENDENABLE, default_bs_desc.blend_enable[0]);
+		d3dDevice_->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, true);
+		d3dDevice_->SetRenderState(D3DRS_BLENDOP, D3D9Mapping::Mapping(default_bs_desc.blend_op[0]));
+		d3dDevice_->SetRenderState(D3DRS_SRCBLEND, D3D9Mapping::Mapping(default_bs_desc.src_blend[0]));
+		d3dDevice_->SetRenderState(D3DRS_DESTBLEND, D3D9Mapping::Mapping(default_bs_desc.dest_blend[0]));
+		d3dDevice_->SetRenderState(D3DRS_BLENDOPALPHA, D3D9Mapping::Mapping(default_bs_desc.blend_op_alpha[0]));
+		d3dDevice_->SetRenderState(D3DRS_SRCBLENDALPHA, D3D9Mapping::Mapping(default_bs_desc.src_blend_alpha[0]));
+		d3dDevice_->SetRenderState(D3DRS_DESTBLENDALPHA, D3D9Mapping::Mapping(default_bs_desc.dest_blend_alpha[0]));
+		d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE, D3D9Mapping::MappingColorMask(default_bs_desc.color_write_mask[0]));
+		d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE1, D3D9Mapping::MappingColorMask(default_bs_desc.color_write_mask[1]));
+		d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE2, D3D9Mapping::MappingColorMask(default_bs_desc.color_write_mask[2]));
+		d3dDevice_->SetRenderState(D3DRS_COLORWRITEENABLE3, D3D9Mapping::MappingColorMask(default_bs_desc.color_write_mask[3]));
+		render_states_cache_[D3DRS_ALPHABLENDENABLE] = default_bs_desc.blend_enable[0];
+		render_states_cache_[D3DRS_SEPARATEALPHABLENDENABLE] = true;
+		render_states_cache_[D3DRS_BLENDOP] = D3D9Mapping::Mapping(default_bs_desc.blend_op[0]);
+		render_states_cache_[D3DRS_SRCBLEND] = D3D9Mapping::Mapping(default_bs_desc.src_blend[0]);
+		render_states_cache_[D3DRS_DESTBLEND] = D3D9Mapping::Mapping(default_bs_desc.dest_blend[0]);
+		render_states_cache_[D3DRS_BLENDOPALPHA] = D3D9Mapping::Mapping(default_bs_desc.blend_op_alpha[0]);
+		render_states_cache_[D3DRS_SRCBLENDALPHA] = D3D9Mapping::Mapping(default_bs_desc.src_blend_alpha[0]);
+		render_states_cache_[D3DRS_DESTBLENDALPHA] = D3D9Mapping::Mapping(default_bs_desc.dest_blend_alpha[0]);
+		render_states_cache_[D3DRS_COLORWRITEENABLE] = D3D9Mapping::MappingColorMask(default_bs_desc.color_write_mask[0]);
+		render_states_cache_[D3DRS_COLORWRITEENABLE1] = D3D9Mapping::MappingColorMask(default_bs_desc.color_write_mask[1]);
+		render_states_cache_[D3DRS_COLORWRITEENABLE2] = D3D9Mapping::MappingColorMask(default_bs_desc.color_write_mask[2]);
+		render_states_cache_[D3DRS_COLORWRITEENABLE3] = D3D9Mapping::MappingColorMask(default_bs_desc.color_write_mask[3]);
+
+		Sampler default_sampler;
+		samplers_cache_[0].resize(this->DeviceCaps().max_vertex_texture_units);
+		samplers_cache_[1].resize(this->DeviceCaps().max_texture_units);
+		for (int type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
+		{
+			for (uint32_t i = 0, i_end = static_cast<uint32_t>(samplers_cache_[type].size()); i < i_end; ++ i)
+			{
+				uint32_t stage = i;
+				if (ShaderObject::ST_VertexShader == type)
+				{
+					stage += D3DVERTEXTEXTURESAMPLER0;
+				}
+
+				d3dDevice_->SetTexture(stage, NULL);
+				d3dDevice_->SetSamplerState(stage, D3DSAMP_SRGBTEXTURE, false);
+				d3dDevice_->SetSamplerState(stage, D3DSAMP_BORDERCOLOR, D3D9Mapping::MappingToUInt32Color(default_sampler.border_clr));
+				d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSU, D3D9Mapping::Mapping(default_sampler.addr_mode_u));
+				d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSV, D3D9Mapping::Mapping(default_sampler.addr_mode_v));
+				d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSW, D3D9Mapping::Mapping(default_sampler.addr_mode_w));
+				samplers_cache_[type][i].first = NULL;
+				samplers_cache_[type][i].second[D3DSAMP_SRGBTEXTURE] = false;
+				samplers_cache_[type][i].second[D3DSAMP_BORDERCOLOR] = D3D9Mapping::MappingToUInt32Color(default_sampler.border_clr);
+				samplers_cache_[type][i].second[D3DSAMP_ADDRESSU] = D3D9Mapping::Mapping(default_sampler.addr_mode_u);
+				samplers_cache_[type][i].second[D3DSAMP_ADDRESSV] = D3D9Mapping::Mapping(default_sampler.addr_mode_v);
+				samplers_cache_[type][i].second[D3DSAMP_ADDRESSW] = D3D9Mapping::Mapping(default_sampler.addr_mode_w);
+
+				switch (default_sampler.filter)
+				{
+				case Sampler::TFO_Point:
+					d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+					d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+					d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
+					samplers_cache_[type][i].second[D3DSAMP_MINFILTER] = D3DTEXF_POINT;
+					samplers_cache_[type][i].second[D3DSAMP_MAGFILTER] = D3DTEXF_POINT;
+					samplers_cache_[type][i].second[D3DSAMP_MIPFILTER] = D3DTEXF_POINT;
+					break;
+
+				case Sampler::TFO_Bilinear:
+					d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+					d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+					d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
+					samplers_cache_[type][i].second[D3DSAMP_MINFILTER] = D3DTEXF_LINEAR;
+					samplers_cache_[type][i].second[D3DSAMP_MAGFILTER] = D3DTEXF_LINEAR;
+					samplers_cache_[type][i].second[D3DSAMP_MIPFILTER] = D3DTEXF_POINT;
+					break;
+
+				case Sampler::TFO_Trilinear:
+					d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+					d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+					d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
+					samplers_cache_[type][i].second[D3DSAMP_MINFILTER] = D3DTEXF_LINEAR;
+					samplers_cache_[type][i].second[D3DSAMP_MAGFILTER] = D3DTEXF_LINEAR;
+					samplers_cache_[type][i].second[D3DSAMP_MIPFILTER] = D3DTEXF_LINEAR;
+					break;
+
+				case Sampler::TFO_Anisotropic:
+					d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC);
+					d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+					d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
+					samplers_cache_[type][i].second[D3DSAMP_MINFILTER] = D3DTEXF_ANISOTROPIC;
+					samplers_cache_[type][i].second[D3DSAMP_MAGFILTER] = D3DTEXF_LINEAR;
+					samplers_cache_[type][i].second[D3DSAMP_MIPFILTER] = D3DTEXF_LINEAR;
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+					d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+					d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
+					samplers_cache_[type][i].second[D3DSAMP_MINFILTER] = D3DTEXF_POINT;
+					samplers_cache_[type][i].second[D3DSAMP_MAGFILTER] = D3DTEXF_POINT;
+					samplers_cache_[type][i].second[D3DSAMP_MIPFILTER] = D3DTEXF_POINT;
+					break;
+				}
+
+				d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, default_sampler.anisotropy);
+				d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXMIPLEVEL, default_sampler.max_mip_level);
+				d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPMAPLODBIAS, float_to_uint32(default_sampler.mip_map_lod_bias));
+				samplers_cache_[type][i].second[D3DSAMP_MAXANISOTROPY] = default_sampler.anisotropy;
+				samplers_cache_[type][i].second[D3DSAMP_MAXMIPLEVEL] = default_sampler.max_mip_level;
+				samplers_cache_[type][i].second[D3DSAMP_MIPMAPLODBIAS] = float_to_uint32(default_sampler.mip_map_lod_bias);
+			}
+		}
+
+		vertex_shader_cache_ = NULL;
+		pixel_shader_cache_ = NULL;
+
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		cur_rs_obj_ = rf.MakeRasterizerStateObject(RasterizerStateDesc());
-		cur_dss_obj_ = rf.MakeDepthStencilStateObject(DepthStencilStateDesc());
-		cur_bs_obj_ = rf.MakeBlendStateObject(BlendStateDesc());
-		cur_rs_obj_->Active();
-		cur_dss_obj_->Active(0, 0);
-		cur_bs_obj_->Active();
+		cur_rs_obj_ = rf.MakeRasterizerStateObject(default_rs_desc);
+		cur_dss_obj_ = rf.MakeDepthStencilStateObject(default_dss_desc);
+		cur_bs_obj_ = rf.MakeBlendStateObject(default_bs_desc);
 	}
 
 	// 设置当前渲染目标
@@ -482,5 +687,106 @@ namespace KlayGE
 	void D3D9RenderEngine::OnResetDevice()
 	{
 		this->BindFrameBuffer(cur_frame_buffer_);
+	}
+
+	void D3D9RenderEngine::SetRenderState(D3DRENDERSTATETYPE state, uint32_t value)
+	{
+		if (render_states_cache_[state] != value)
+		{
+			d3dDevice_->SetRenderState(state, value);
+			render_states_cache_[state] = value;
+		}
+	}
+
+	void D3D9RenderEngine::SetTexture(uint32_t sampler, IDirect3DBaseTexture9* texture)
+	{
+		ShaderObject::ShaderType st;
+		uint32_t stage;
+		if (sampler < D3DVERTEXTEXTURESAMPLER0)
+		{
+			st = ShaderObject::ST_PixelShader;
+			stage = sampler;
+		}
+		else
+		{
+			st = ShaderObject::ST_VertexShader;
+			stage = sampler - D3DVERTEXTEXTURESAMPLER0;
+		}
+		
+		if (samplers_cache_[st][stage].first != texture)
+		{
+			d3dDevice_->SetTexture(sampler, texture);
+			samplers_cache_[st][stage].first = texture;
+		}
+	}
+	
+	void D3D9RenderEngine::SetSamplerState(uint32_t sampler, D3DSAMPLERSTATETYPE type, uint32_t value)
+	{
+		ShaderObject::ShaderType st;
+		uint32_t stage;
+		if (sampler < D3DVERTEXTEXTURESAMPLER0)
+		{
+			st = ShaderObject::ST_PixelShader;
+			stage = sampler;
+		}
+		else
+		{
+			st = ShaderObject::ST_VertexShader;
+			stage = sampler - D3DVERTEXTEXTURESAMPLER0;
+		}
+
+		if (samplers_cache_[st][stage].second[type] != value)
+		{
+			d3dDevice_->SetSamplerState(sampler, type, value);
+			samplers_cache_[st][stage].second[type] = value;
+		}
+	}
+
+	void D3D9RenderEngine::SetVertexShader(IDirect3DVertexShader9* shader)
+	{
+		if (vertex_shader_cache_ != shader)
+		{
+			d3dDevice_->SetVertexShader(shader);
+			vertex_shader_cache_ = shader;
+		}
+	}
+
+	void D3D9RenderEngine::SetPixelShader(IDirect3DPixelShader9* shader)
+	{
+		if (pixel_shader_cache_ != shader)
+		{
+			d3dDevice_->SetPixelShader(shader);
+			pixel_shader_cache_ = shader;
+		}
+	}
+
+	void D3D9RenderEngine::SetVertexShaderConstantB(uint32_t start_reg, BOOL const * constant_data, uint32_t reg_count)
+	{
+		d3dDevice_->SetVertexShaderConstantB(start_reg, constant_data, reg_count);
+	}
+	
+	void D3D9RenderEngine::SetPixelShaderConstantB(uint32_t start_reg, BOOL const * constant_data, uint32_t reg_count)
+	{
+		d3dDevice_->SetPixelShaderConstantB(start_reg, constant_data, reg_count);
+	}
+	
+	void D3D9RenderEngine::SetVertexShaderConstantI(uint32_t start_reg, int const * constant_data, uint32_t reg_count)
+	{
+		d3dDevice_->SetVertexShaderConstantI(start_reg, constant_data, reg_count);
+	}
+	
+	void D3D9RenderEngine::SetPixelShaderConstantI(uint32_t start_reg, int const * constant_data, uint32_t reg_count)
+	{
+		d3dDevice_->SetPixelShaderConstantI(start_reg, constant_data, reg_count);
+	}
+
+	void D3D9RenderEngine::SetVertexShaderConstantF(uint32_t start_reg, float const * constant_data, uint32_t reg_count)
+	{
+		d3dDevice_->SetVertexShaderConstantF(start_reg, constant_data, reg_count);
+	}
+	
+	void D3D9RenderEngine::SetPixelShaderConstantF(uint32_t start_reg, float const * constant_data, uint32_t reg_count)
+	{
+		d3dDevice_->SetPixelShaderConstantF(start_reg, constant_data, reg_count);
 	}
 }

@@ -87,12 +87,13 @@ namespace KlayGE
 		ID3D9VertexShaderPtr vertex_shader_;
 		ID3D9PixelShaderPtr pixel_shader_;
 
+		typedef Vector_T<BOOL, 4> BOOL4;
 		boost::array<uint32_t, ST_NumShaderTypes> bool_start_;
 		boost::array<uint32_t, ST_NumShaderTypes> int_start_;
 		boost::array<uint32_t, ST_NumShaderTypes> float_start_;
-		boost::array<std::vector<BOOL>, ST_NumShaderTypes> bool_registers_;
-		boost::array<std::vector<int>, ST_NumShaderTypes> int_registers_;
-		boost::array<std::vector<float>, ST_NumShaderTypes> float_registers_;
+		boost::array<std::vector<BOOL4>, ST_NumShaderTypes> bool_registers_;
+		boost::array<std::vector<int4>, ST_NumShaderTypes> int_registers_;
+		boost::array<std::vector<float4>, ST_NumShaderTypes> float_registers_;
 		boost::array<std::vector<SamplerPtr>, ST_NumShaderTypes> samplers_;
 	};
 

@@ -245,17 +245,17 @@ namespace KlayGE
 
 			if (bool_end > bool_begin)
 			{
-				bool_registers_[type].resize((bool_end - bool_begin) * 4);
+				bool_registers_[type].resize(bool_end - bool_begin);
 				bool_start_[type] = bool_begin;
 			}
 			if (int_end > int_begin)
 			{
-				int_registers_[type].resize((int_end - int_begin) * 4);
+				int_registers_[type].resize(int_end - int_begin);
 				int_start_[type] = int_begin;
 			}
 			if (float_end > float_begin)
 			{
-				float_registers_[type].resize((float_end - float_begin) * 4);
+				float_registers_[type].resize(float_end - float_begin);
 				float_start_[type] = float_begin;
 			}
 
@@ -320,15 +320,15 @@ namespace KlayGE
 		switch (p_handle.register_set)
 		{
 		case D3DXRS_BOOL:
-			bool_registers_[p_handle.shader_type][(p_handle.register_index - bool_start_[p_handle.shader_type]) * 4] = v;
+			bool_registers_[p_handle.shader_type][p_handle.register_index - bool_start_[p_handle.shader_type]].x() = v;
 			break;
 
 		case D3DXRS_INT4:
-			int_registers_[p_handle.shader_type][(p_handle.register_index - int_start_[p_handle.shader_type]) * 4] = v;
+			int_registers_[p_handle.shader_type][p_handle.register_index - int_start_[p_handle.shader_type]].x() = v;
 			break;
 
 		case D3DXRS_FLOAT4:
-			float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4] = v;
+			float_registers_[p_handle.shader_type][p_handle.register_index - float_start_[p_handle.shader_type]].x() = v;
 			break;
 
 		default:
@@ -345,15 +345,15 @@ namespace KlayGE
 		switch (p_handle.register_set)
 		{
 		case D3DXRS_BOOL:
-			bool_registers_[p_handle.shader_type][(p_handle.register_index - bool_start_[p_handle.shader_type]) * 4] = v;
+			bool_registers_[p_handle.shader_type][p_handle.register_index - bool_start_[p_handle.shader_type]].x() = v;
 			break;
 
 		case D3DXRS_INT4:
-			int_registers_[p_handle.shader_type][(p_handle.register_index - int_start_[p_handle.shader_type]) * 4] = v;
+			int_registers_[p_handle.shader_type][p_handle.register_index - int_start_[p_handle.shader_type]].x() = v;
 			break;
 
 		case D3DXRS_FLOAT4:
-			float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4] = static_cast<float>(v);
+			float_registers_[p_handle.shader_type][p_handle.register_index - float_start_[p_handle.shader_type]].x() = static_cast<float>(v);
 			break;
 
 		default:
@@ -369,7 +369,7 @@ namespace KlayGE
 		float v;
 		param->Value(v);
 
-		float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4] = v;
+		float_registers_[p_handle.shader_type][p_handle.register_index - float_start_[p_handle.shader_type]].x() = v;
 	}
 
 	void D3D9ShaderObject::SetFloat2(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
@@ -380,7 +380,7 @@ namespace KlayGE
 		param->Value(v);
 		float4 v4(v.x(), v.y(), 0, 0);
 
-		memcpy(&float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4], &v[0], sizeof(v));
+		float_registers_[p_handle.shader_type][p_handle.register_index - float_start_[p_handle.shader_type]] = v4;
 	}
 
 	void D3D9ShaderObject::SetFloat3(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
@@ -391,7 +391,7 @@ namespace KlayGE
 		param->Value(v);
 		float4 v4(v.x(), v.y(), v.z(), 0);
 
-		memcpy(&float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4], &v[0], sizeof(v));
+		float_registers_[p_handle.shader_type][p_handle.register_index - float_start_[p_handle.shader_type]] = v4;
 	}
 
 	void D3D9ShaderObject::SetFloat4(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
@@ -401,7 +401,7 @@ namespace KlayGE
 		float4 v;
 		param->Value(v);
 
-		memcpy(&float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4], &v[0], sizeof(v));
+		float_registers_[p_handle.shader_type][p_handle.register_index - float_start_[p_handle.shader_type]] = v;
 	}
 
 	void D3D9ShaderObject::SetFloat4x4(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
@@ -412,7 +412,7 @@ namespace KlayGE
 		param->Value(v);
 
 		v = MathLib::transpose(v);
-		memcpy(&float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4], &v[0], p_handle.register_count * sizeof(float4));
+		memcpy(&float_registers_[p_handle.shader_type][p_handle.register_index - float_start_[p_handle.shader_type]], &v[0], p_handle.register_count * sizeof(float4));
 	}
 
 	void D3D9ShaderObject::SetBoolArray(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
@@ -425,21 +425,21 @@ namespace KlayGE
 		case D3DXRS_BOOL:
 			for (size_t i = 0; i < v.size(); ++ i)
 			{
-				bool_registers_[p_handle.shader_type][(p_handle.register_index - bool_start_[p_handle.shader_type] + i) * 4] = v[i];
+				bool_registers_[p_handle.shader_type][p_handle.register_index - bool_start_[p_handle.shader_type] + i].x() = v[i];
 			}
 			break;
 
 		case D3DXRS_INT4:
 			for (size_t i = 0; i < v.size(); ++ i)
 			{
-				int_registers_[p_handle.shader_type][(p_handle.register_index - int_start_[p_handle.shader_type] + i) * 4] = v[i];
+				int_registers_[p_handle.shader_type][p_handle.register_index - int_start_[p_handle.shader_type] + i].x() = v[i];
 			}
 			break;
 
 		case D3DXRS_FLOAT4:
 			for (size_t i = 0; i < v.size(); ++ i)
 			{
-				float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type] + i) * 4] = v[i];
+				float_registers_[p_handle.shader_type][p_handle.register_index - float_start_[p_handle.shader_type] + i].x() = v[i];
 			}
 			break;
 
@@ -459,21 +459,21 @@ namespace KlayGE
 		case D3DXRS_BOOL:
 			for (size_t i = 0; i < v.size(); ++ i)
 			{
-				bool_registers_[p_handle.shader_type][(p_handle.register_index - bool_start_[p_handle.shader_type] + i) * 4] = v[i];
+				bool_registers_[p_handle.shader_type][p_handle.register_index - bool_start_[p_handle.shader_type] + i].x() = v[i];
 			}
 			break;
 
 		case D3DXRS_INT4:
 			for (size_t i = 0; i < v.size(); ++ i)
 			{
-				int_registers_[p_handle.shader_type][(p_handle.register_index - int_start_[p_handle.shader_type] + i) * 4] = v[i];
+				int_registers_[p_handle.shader_type][p_handle.register_index - int_start_[p_handle.shader_type] + i].x() = v[i];
 			}
 			break;
 
 		case D3DXRS_FLOAT4:
 			for (size_t i = 0; i < v.size(); ++ i)
 			{
-				float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type] + i) * 4] = static_cast<float>(v[i]);
+				float_registers_[p_handle.shader_type][p_handle.register_index - float_start_[p_handle.shader_type] + i].x() = static_cast<float>(v[i]);
 			}
 			break;
 
@@ -492,7 +492,7 @@ namespace KlayGE
 
 		for (size_t i = 0; i < v.size(); ++ i)
 		{
-			float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type] + i) * 4] = v[i];
+			float_registers_[p_handle.shader_type][p_handle.register_index - float_start_[p_handle.shader_type] + i].x() = v[i];
 		}
 	}
 
@@ -503,7 +503,7 @@ namespace KlayGE
 							
 		if (!v.empty())
 		{
-			memcpy(&float_registers_[p_handle.shader_type][(p_handle.register_index - float_start_[p_handle.shader_type]) * 4], &v[0],
+			memcpy(&float_registers_[p_handle.shader_type][p_handle.register_index - float_start_[p_handle.shader_type]], &v[0],
 						std::min(p_handle.register_count, static_cast<uint16_t>(v.size())) * sizeof(float4));
 		}
 	}
@@ -518,7 +518,7 @@ namespace KlayGE
 		BOOST_FOREACH(BOOST_TYPEOF(v)::reference mat, v)
 		{
 			mat = MathLib::transpose(mat);
-			memcpy(&float_registers_[p_handle.shader_type][(start - float_start_[p_handle.shader_type]) * 4], &mat[0], p_handle.rows * sizeof(float4));
+			memcpy(&float_registers_[p_handle.shader_type][start - float_start_[p_handle.shader_type]], &mat[0], p_handle.rows * sizeof(float4));
 			start += p_handle.rows;
 		}
 	}
@@ -622,11 +622,10 @@ namespace KlayGE
 
 	void D3D9ShaderObject::Active()
 	{
-		RenderEngine const & re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		ID3D9DevicePtr const & d3d_device = checked_cast<D3D9RenderEngine const *>(&re)->D3DDevice();
+		D3D9RenderEngine& re = *checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-		d3d_device->SetVertexShader(vertex_shader_.get());
-		d3d_device->SetPixelShader(pixel_shader_.get());
+		re.SetVertexShader(vertex_shader_.get());
+		re.SetPixelShader(pixel_shader_.get());
 
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
@@ -641,39 +640,39 @@ namespace KlayGE
 			{
 				if (ST_VertexShader == type)
 				{
-					d3d_device->SetVertexShaderConstantB(bool_start_[type], &bool_registers_[type][0],
-						static_cast<UINT>(bool_registers_[type].size()) / 4);
+					re.SetVertexShaderConstantB(bool_start_[type], &bool_registers_[type][0].x(),
+						static_cast<uint32_t>(bool_registers_[type].size()));
 				}
 				else
 				{
-					d3d_device->SetPixelShaderConstantB(bool_start_[type], &bool_registers_[type][0],
-						static_cast<UINT>(bool_registers_[type].size()) / 4);
+					re.SetPixelShaderConstantB(bool_start_[type], &bool_registers_[type][0].x(),
+						static_cast<uint32_t>(bool_registers_[type].size()));
 				}
 			}
 			if (!int_registers_[type].empty())
 			{
 				if (ST_VertexShader == type)
 				{
-					d3d_device->SetVertexShaderConstantI(int_start_[type], &int_registers_[type][0],
-						static_cast<UINT>(int_registers_[type].size()) / 4);
+					re.SetVertexShaderConstantI(int_start_[type], &int_registers_[type][0].x(),
+						static_cast<uint32_t>(int_registers_[type].size()));
 				}
 				else
 				{
-					d3d_device->SetPixelShaderConstantI(int_start_[type], &int_registers_[type][0],
-						static_cast<UINT>(int_registers_[type].size()) / 4);
+					re.SetPixelShaderConstantI(int_start_[type], &int_registers_[type][0].x(),
+						static_cast<uint32_t>(int_registers_[type].size()));
 				}
 			}
 			if (!float_registers_[type].empty())
 			{
 				if (ST_VertexShader == type)
 				{
-					d3d_device->SetVertexShaderConstantF(float_start_[type], &float_registers_[type][0],
-						static_cast<UINT>(float_registers_[type].size()) / 4);
+					re.SetVertexShaderConstantF(float_start_[type], &float_registers_[type][0].x(),
+						static_cast<uint32_t>(float_registers_[type].size()));
 				}
 				else
 				{
-					d3d_device->SetPixelShaderConstantF(float_start_[type], &float_registers_[type][0],
-						static_cast<UINT>(float_registers_[type].size()) / 4);
+					re.SetPixelShaderConstantF(float_start_[type], &float_registers_[type][0].x(),
+						static_cast<uint32_t>(float_registers_[type].size()));
 				}
 			}
 
@@ -688,51 +687,57 @@ namespace KlayGE
 				SamplerPtr const & sampler = samplers_[type][j];
 				if (!sampler || !sampler->texture)
 				{
-					TIF(d3d_device->SetTexture(stage, NULL));
+					re.SetTexture(stage, NULL);
 				}
 				else
 				{
 					D3D9Texture const & d3d9Tex = *checked_pointer_cast<D3D9Texture>(sampler->texture);
-					TIF(d3d_device->SetTexture(stage, d3d9Tex.D3DBaseTexture().get()));
-					TIF(d3d_device->SetSamplerState(stage, D3DSAMP_SRGBTEXTURE, IsSRGB(sampler->texture->Format())));
+					re.SetTexture(stage, d3d9Tex.D3DBaseTexture().get());
+					re.SetSamplerState(stage, D3DSAMP_SRGBTEXTURE, IsSRGB(sampler->texture->Format()));
 
-					TIF(d3d_device->SetSamplerState(stage, D3DSAMP_BORDERCOLOR, D3D9Mapping::MappingToUInt32Color(sampler->border_clr)));
+					re.SetSamplerState(stage, D3DSAMP_BORDERCOLOR, D3D9Mapping::MappingToUInt32Color(sampler->border_clr));
 
-					// Set addressing mode
-					TIF(d3d_device->SetSamplerState(stage, D3DSAMP_ADDRESSU, D3D9Mapping::Mapping(sampler->addr_mode_u)));
-					TIF(d3d_device->SetSamplerState(stage, D3DSAMP_ADDRESSV, D3D9Mapping::Mapping(sampler->addr_mode_v)));
-					TIF(d3d_device->SetSamplerState(stage, D3DSAMP_ADDRESSW, D3D9Mapping::Mapping(sampler->addr_mode_w)));
+					re.SetSamplerState(stage, D3DSAMP_ADDRESSU, D3D9Mapping::Mapping(sampler->addr_mode_u));
+					re.SetSamplerState(stage, D3DSAMP_ADDRESSV, D3D9Mapping::Mapping(sampler->addr_mode_v));
+					re.SetSamplerState(stage, D3DSAMP_ADDRESSW, D3D9Mapping::Mapping(sampler->addr_mode_w));
 
 					switch (sampler->filter)
 					{
 					case Sampler::TFO_Point:
-						TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_POINT));
-						TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_POINT));
-						TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT));
+						re.SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+						re.SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+						re.SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
 						break;
 
 					case Sampler::TFO_Bilinear:
-						TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_LINEAR));
-						TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR));
-						TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT));
+						re.SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+						re.SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+						re.SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
 						break;
 
 					case Sampler::TFO_Trilinear:
-						TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_LINEAR));
-						TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR));
-						TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR));
+						re.SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+						re.SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+						re.SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
 						break;
 
 					case Sampler::TFO_Anisotropic:
-						TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC));
-						TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR));
-						TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR));
+						re.SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC);
+						re.SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+						re.SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
+						break;
+
+					default:
+						BOOST_ASSERT(false);
+						re.SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+						re.SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+						re.SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
 						break;
 					}
 
-					TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, sampler->anisotropy));
-					TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MAXMIPLEVEL, sampler->max_mip_level));
-					TIF(d3d_device->SetSamplerState(stage, D3DSAMP_MIPMAPLODBIAS, float_to_uint32(sampler->mip_map_lod_bias)));
+					re.SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, sampler->anisotropy);
+					re.SetSamplerState(stage, D3DSAMP_MAXMIPLEVEL, sampler->max_mip_level);
+					re.SetSamplerState(stage, D3DSAMP_MIPMAPLODBIAS, float_to_uint32(sampler->mip_map_lod_bias));
 				}
 			}
 		}
