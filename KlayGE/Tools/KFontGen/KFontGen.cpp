@@ -31,9 +31,9 @@
 
 #ifdef KLAYGE_COMPILER_MSVC
 #ifdef KLAYGE_DEBUG
-#pragma comment(lib, "freetype236_D.lib")
+#pragma comment(lib, "freetype237_D.lib")
 #else
-#pragma comment(lib, "freetype236.lib")
+#pragma comment(lib, "freetype237.lib")
 #endif
 #endif
 
@@ -137,10 +137,10 @@ private:
 class ttf_to_dist
 {
 public:
-	ttf_to_dist(FT_Library ft_lib, FT_Face ft_face, uint32_t char_size, std::vector<uint32_t>& validate_chars, uint32_t start_code, uint32_t end_code,
+	ttf_to_dist(FT_Face ft_face, uint32_t char_size, std::vector<uint32_t>& validate_chars, uint32_t start_code, uint32_t end_code,
 		std::vector<font_info>& char_info,
 		atomic<int32_t>& cur_num_char)
-		: ft_lib_(ft_lib), ft_face_(ft_face), char_size_(char_size), validate_chars_(&validate_chars), start_code_(start_code), end_code_(end_code),
+		: ft_face_(ft_face), char_size_(char_size), validate_chars_(&validate_chars), start_code_(start_code), end_code_(end_code),
 			char_info_(&char_info),
 			cur_num_char_(&cur_num_char)
 	{
@@ -414,7 +414,6 @@ private:
 	}
 
 private:
-	FT_Library ft_lib_;
 	FT_Face ft_face_;
 	uint32_t char_size_;
 	std::vector<uint32_t>* validate_chars_;
@@ -464,7 +463,7 @@ void compute_distance(std::vector<font_info>& char_info,
 		uint32_t const sc = i * num_chars_per_package;
 		uint32_t const ec = std::min(sc + num_chars_per_package, static_cast<uint32_t>(validate_chars.size()));
 
-		joiners[i] = tp(ttf_to_dist(ft_libs[i], ft_faces[i], char_size, validate_chars, sc, ec, char_info, cur_num_char));
+		joiners[i] = tp(ttf_to_dist(ft_faces[i], char_size, validate_chars, sc, ec, char_info, cur_num_char));
 	}
 	for (int i = 0; i < num_threads; ++ i)
 	{
