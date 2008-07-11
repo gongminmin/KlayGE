@@ -23,7 +23,14 @@ namespace KlayGE
 #ifdef KLAYGE_PLATFORM_WINDOWS
 	LRESULT Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4312)
+#endif
 		Window* win = reinterpret_cast<Window*>(::GetWindowLongPtrW(hWnd, GWLP_USERDATA));
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 		if (win != NULL)
 		{
 			return win->MsgProc(hWnd, uMsg, wParam, lParam);
@@ -91,7 +98,14 @@ namespace KlayGE
 		width_ = rc.right - rc.left;
 		height_ = rc.bottom - rc.top;
 
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4244)
+#endif
 		::SetWindowLongPtrW(wnd_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 		::ShowWindow(wnd_, SW_SHOWNORMAL);
 		::UpdateWindow(wnd_);
