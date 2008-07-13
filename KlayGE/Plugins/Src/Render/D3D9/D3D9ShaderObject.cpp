@@ -31,12 +31,327 @@
 #include <boost/assert.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
-#include <boost/bind.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9Mapping.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 #include <KlayGE/D3D9/D3D9ShaderObject.hpp>
+
+namespace
+{
+	using namespace KlayGE;
+
+	template <typename SrcType, typename DstType>
+	class SetD3D9ShaderParameter
+	{
+	};
+
+	template <typename SrcType>
+	class SetD3D9ShaderParameter<SrcType, bool>
+	{
+	public:
+		SetD3D9ShaderParameter(BOOL& bool_reg, RenderEffectParameterPtr const & param)
+			: bool_reg_(&bool_reg), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			SrcType v;
+			param_->Value(v);
+
+			*bool_reg_ = static_cast<BOOL>(v);
+		}
+
+	private:
+		BOOL* bool_reg_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <typename SrcType>
+	class SetD3D9ShaderParameter<SrcType, int>
+	{
+	public:
+		SetD3D9ShaderParameter(int& int_reg, RenderEffectParameterPtr const & param)
+			: int_reg_(&int_reg), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			SrcType v;
+			param_->Value(v);
+
+			*int_reg_ = static_cast<int>(v);
+		}
+
+	private:
+		int* int_reg_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <typename SrcType>
+	class SetD3D9ShaderParameter<SrcType, float>
+	{
+	public:
+		SetD3D9ShaderParameter(float& float_reg, RenderEffectParameterPtr const & param)
+			: float_reg_(&float_reg), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			SrcType v;
+			param_->Value(v);
+
+			*float_reg_ = static_cast<float>(v);
+		}
+
+	private:
+		float* float_reg_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetD3D9ShaderParameter<float2, float>
+	{
+	public:
+		SetD3D9ShaderParameter(float4& float_reg, RenderEffectParameterPtr const & param)
+			: float_reg_(&float_reg), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			float2 v;
+			param_->Value(v);
+
+			float_reg_->x() = v.x();
+			float_reg_->y() = v.y();
+		}
+
+	private:
+		float4* float_reg_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetD3D9ShaderParameter<float3, float>
+	{
+	public:
+		SetD3D9ShaderParameter(float4& float_reg, RenderEffectParameterPtr const & param)
+			: float_reg_(&float_reg), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			float3 v;
+			param_->Value(v);
+
+			float_reg_->x() = v.x();
+			float_reg_->y() = v.y();
+			float_reg_->z() = v.z();
+		}
+
+	private:
+		float4* float_reg_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetD3D9ShaderParameter<float4, float>
+	{
+	public:
+		SetD3D9ShaderParameter(float4& float_reg, RenderEffectParameterPtr const & param)
+			: float_reg_(&float_reg), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			param_->Value(*float_reg_);
+		}
+
+	private:
+		float4* float_reg_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetD3D9ShaderParameter<float4x4, float>
+	{
+	public:
+		SetD3D9ShaderParameter(float4* float_reg, uint16_t reg_count, RenderEffectParameterPtr const & param)
+			: float_reg_(float_reg), reg_size_(reg_count * sizeof(float4)), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			float4x4 v;
+			param_->Value(v);
+
+			v = MathLib::transpose(v);
+			memcpy(float_reg_, &v[0], reg_size_);
+		}
+
+	private:
+		float4* float_reg_;
+		size_t reg_size_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <typename SrcType>
+	class SetD3D9ShaderParameter<SrcType*, bool>
+	{
+	public:
+		SetD3D9ShaderParameter(Vector_T<BOOL, 4>* bool_regs, RenderEffectParameterPtr const & param)
+			: bool_regs_(bool_regs), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<SrcType> v;
+			param_->Value(v);
+
+			for (size_t i = 0; i < v.size(); ++ i)
+			{
+				bool_regs_[i].x() = v[i];
+			}
+		}
+
+	private:
+		Vector_T<BOOL, 4>* bool_regs_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <typename SrcType>
+	class SetD3D9ShaderParameter<SrcType*, int>
+	{
+	public:
+		SetD3D9ShaderParameter(int4* int_regs, RenderEffectParameterPtr const & param)
+			: int_regs_(int_regs), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<SrcType> v;
+			param_->Value(v);
+
+			for (size_t i = 0; i < v.size(); ++ i)
+			{
+				int_regs_[i].x() = v[i];
+			}
+		}
+
+	private:
+		int4* int_regs_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <typename SrcType>
+	class SetD3D9ShaderParameter<SrcType*, float>
+	{
+	public:
+		SetD3D9ShaderParameter(float4* float_regs, RenderEffectParameterPtr const & param)
+			: float_regs_(float_regs), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<SrcType> v;
+			param_->Value(v);
+
+			for (size_t i = 0; i < v.size(); ++ i)
+			{
+				float_regs_[i].x() = static_cast<float>(v[i]);
+			}
+		}
+
+	private:
+		float4* float_regs_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetD3D9ShaderParameter<float4*, float>
+	{
+	public:
+		SetD3D9ShaderParameter(float4* float_regs, uint16_t reg_count, RenderEffectParameterPtr const & param)
+			: float_regs_(float_regs), reg_size_(reg_count * sizeof(float4)), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<float4> v;
+			param_->Value(v);
+
+			if (!v.empty())
+			{
+				memcpy(float_regs_, &v[0], std::min(reg_size_, v.size() * sizeof(float4)));
+			}
+		}
+
+	private:
+		float4* float_regs_;
+		size_t reg_size_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetD3D9ShaderParameter<float4x4*, float>
+	{
+	public:
+		SetD3D9ShaderParameter(float4* float_regs, size_t rows, RenderEffectParameterPtr const & param)
+			: float_regs_(float_regs), rows_(rows), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<float4x4> v;
+			param_->Value(v);
+								
+
+			size_t start = 0;
+			BOOST_FOREACH(BOOST_TYPEOF(v)::reference mat, v)
+			{
+				mat = MathLib::transpose(mat);
+				memcpy(&float_regs_[start], &mat[0], rows_ * sizeof(float4));
+				start += rows_;
+			}
+		}
+
+	private:
+		float4* float_regs_;
+		size_t rows_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetD3D9ShaderParameter<Sampler, Sampler>
+	{
+	public:
+		SetD3D9ShaderParameter(SamplerPtr& sampler, RenderEffectParameterPtr const & param)
+			: sampler_(&sampler), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			param_->Value(*sampler_);
+		}
+
+	private:
+		SamplerPtr* sampler_;
+		RenderEffectParameterPtr param_;
+	};
+}
 
 namespace KlayGE
 {
@@ -192,6 +507,22 @@ namespace KlayGE
 			code->Release();
 		}
 
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		switch (type)
+		{
+		case ST_VertexShader:
+			samplers_[type].resize(re.DeviceCaps().max_vertex_texture_units);
+			break;
+
+		case ST_PixelShader:
+			samplers_[type].resize(re.DeviceCaps().max_texture_units);
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
+		}
+
 		if (constant_table)
 		{
 			uint32_t bool_begin = 0xFFFFFFFF, bool_end = 0;
@@ -287,22 +618,6 @@ namespace KlayGE
 			constant_table->Release();
 		}
 
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		switch (type)
-		{
-		case ST_VertexShader:
-			samplers_[type].resize(re.DeviceCaps().max_vertex_texture_units);
-			break;
-
-		case ST_PixelShader:
-			samplers_[type].resize(re.DeviceCaps().max_texture_units);
-			break;
-
-		default:
-			BOOST_ASSERT(false);
-			break;
-		}
-
 		is_validate_ = true;
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
@@ -337,226 +652,6 @@ namespace KlayGE
 		return ret;
 	}
 
-	void D3D9ShaderObject::SetBoolToBool(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
-	{
-		bool v;
-		param->Value(v);
-
-		bool_registers_[p_handle.shader_type][p_handle.register_index].x() = v;
-	}
-
-	void D3D9ShaderObject::SetBoolToInt(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
-	{
-		bool v;
-		param->Value(v);
-
-		int_registers_[p_handle.shader_type][p_handle.register_index].x() = v;
-	}
-
-	void D3D9ShaderObject::SetBoolToFloat(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
-	{
-		bool v;
-		param->Value(v);
-
-		float_registers_[p_handle.shader_type][p_handle.register_index].x() = v;
-	}
-
-	void D3D9ShaderObject::SetIntToBool(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
-	{
-		int v;
-		param->Value(v);
-
-		bool_registers_[p_handle.shader_type][p_handle.register_index].x() = v;
-	}
-
-	void D3D9ShaderObject::SetIntToInt(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
-	{
-		int v;
-		param->Value(v);
-
-		int_registers_[p_handle.shader_type][p_handle.register_index].x() = v;
-	}
-
-	void D3D9ShaderObject::SetIntToFloat(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
-	{
-		int v;
-		param->Value(v);
-
-		float_registers_[p_handle.shader_type][p_handle.register_index].x() = static_cast<float>(v);
-	}
-
-	void D3D9ShaderObject::SetFloat(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
-	{
-		BOOST_ASSERT(D3DXRS_FLOAT4 == p_handle.register_set);
-
-		float v;
-		param->Value(v);
-
-		float_registers_[p_handle.shader_type][p_handle.register_index].x() = v;
-	}
-
-	void D3D9ShaderObject::SetFloat2(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
-	{
-		BOOST_ASSERT(D3DXRS_FLOAT4 == p_handle.register_set);
-
-		float2 v;
-		param->Value(v);
-
-		float4& v4 = float_registers_[p_handle.shader_type][p_handle.register_index];
-		v4.x() = v.x();
-		v4.y() = v.y();
-	}
-
-	void D3D9ShaderObject::SetFloat3(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
-	{
-		BOOST_ASSERT(D3DXRS_FLOAT4 == p_handle.register_set);
-
-		float3 v;
-		param->Value(v);
-
-		float4& v4 = float_registers_[p_handle.shader_type][p_handle.register_index];
-		v4.x() = v.x();
-		v4.y() = v.y();
-		v4.z() = v.z();
-	}
-
-	void D3D9ShaderObject::SetFloat4(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
-	{
-		BOOST_ASSERT(D3DXRS_FLOAT4 == p_handle.register_set);
-
-		float4 v;
-		param->Value(v);
-
-		float_registers_[p_handle.shader_type][p_handle.register_index] = v;
-	}
-
-	void D3D9ShaderObject::SetFloat4x4(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
-	{
-		BOOST_ASSERT(D3DXRS_FLOAT4 == p_handle.register_set);
-
-		float4x4 v;
-		param->Value(v);
-
-		v = MathLib::transpose(v);
-		memcpy(&float_registers_[p_handle.shader_type][p_handle.register_index], &v[0], p_handle.register_count * sizeof(float4));
-	}
-
-	void D3D9ShaderObject::SetBoolArrayToBool(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
-	{
-		std::vector<bool> v;
-		param->Value(v);
-
-		for (size_t i = 0; i < v.size(); ++ i)
-		{
-			bool_registers_[p_handle.shader_type][p_handle.register_index + i].x() = v[i];
-		}
-	}
-
-	void D3D9ShaderObject::SetBoolArrayToInt(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
-	{
-		std::vector<bool> v;
-		param->Value(v);
-
-		for (size_t i = 0; i < v.size(); ++ i)
-		{
-			int_registers_[p_handle.shader_type][p_handle.register_index + i].x() = v[i];
-		}
-	}
-
-	void D3D9ShaderObject::SetBoolArrayToFloat(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
-	{
-		std::vector<bool> v;
-		param->Value(v);
-
-		for (size_t i = 0; i < v.size(); ++ i)
-		{
-			float_registers_[p_handle.shader_type][p_handle.register_index + i].x() = v[i];
-		}
-	}
-
-	void D3D9ShaderObject::SetIntArrayToBool(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
-	{
-		std::vector<int> v;
-		param->Value(v);
-
-		for (size_t i = 0; i < v.size(); ++ i)
-		{
-			bool_registers_[p_handle.shader_type][p_handle.register_index + i].x() = v[i];
-		}
-	}
-
-	void D3D9ShaderObject::SetIntArrayToInt(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
-	{
-		std::vector<int> v;
-		param->Value(v);
-
-		for (size_t i = 0; i < v.size(); ++ i)
-		{
-			int_registers_[p_handle.shader_type][p_handle.register_index + i].x() = v[i];
-		}
-	}
-
-	void D3D9ShaderObject::SetIntArrayToFloat(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
-	{
-		std::vector<int> v;
-		param->Value(v);
-
-		for (size_t i = 0; i < v.size(); ++ i)
-		{
-			float_registers_[p_handle.shader_type][p_handle.register_index + i].x() = static_cast<float>(v[i]);
-		}
-	}
-
-	void D3D9ShaderObject::SetFloatArray(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
-	{
-		BOOST_ASSERT(D3DXRS_FLOAT4 == p_handle.register_set);
-
-		std::vector<float> v;
-		param->Value(v);
-
-		for (size_t i = 0; i < v.size(); ++ i)
-		{
-			float_registers_[p_handle.shader_type][p_handle.register_index + i].x() = v[i];
-		}
-	}
-
-	void D3D9ShaderObject::SetFloat4Array(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
-	{
-		std::vector<float4> v;
-		param->Value(v);
-							
-		if (!v.empty())
-		{
-			memcpy(&float_registers_[p_handle.shader_type][p_handle.register_index], &v[0],
-						std::min(p_handle.register_count, static_cast<uint16_t>(v.size())) * sizeof(float4));
-		}
-	}
-
-	void D3D9ShaderObject::SetFloat4x4Array(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
-	{
-		std::vector<float4x4> v;
-		param->Value(v);
-							
-
-		uint32_t start = p_handle.register_index;
-		BOOST_FOREACH(BOOST_TYPEOF(v)::reference mat, v)
-		{
-			mat = MathLib::transpose(mat);
-			memcpy(&float_registers_[p_handle.shader_type][start], &mat[0], p_handle.rows * sizeof(float4));
-			start += p_handle.rows;
-		}
-	}
-
-	void D3D9ShaderObject::SetSampler(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
-	{
-		BOOST_ASSERT(p_handle.register_index < samplers_[p_handle.shader_type].size());
-
-		SamplerPtr v;
-		param->Value(v);
-
-		samplers_[p_handle.shader_type][p_handle.register_index] = v;
-	}
-
 	D3D9ShaderObject::parameter_bind_t D3D9ShaderObject::GetBindFunc(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
 	{
 		parameter_bind_t ret;
@@ -571,15 +666,15 @@ namespace KlayGE
 				switch (p_handle.register_set)
 				{
 				case D3DXRS_BOOL:
-					ret.func = boost::bind(&D3D9ShaderObject::SetBoolArrayToBool, this, _1, _2);
+					ret.func = SetD3D9ShaderParameter<bool*, bool>(&bool_registers_[p_handle.shader_type][p_handle.register_index], param);
 					break;
 
 				case D3DXRS_INT4:
-					ret.func = boost::bind(&D3D9ShaderObject::SetBoolArrayToInt, this, _1, _2);
+					ret.func = SetD3D9ShaderParameter<bool*, int>(&int_registers_[p_handle.shader_type][p_handle.register_index], param);
 					break;
 
 				case D3DXRS_FLOAT4:
-					ret.func = boost::bind(&D3D9ShaderObject::SetBoolArrayToFloat, this, _1, _2);
+					ret.func = SetD3D9ShaderParameter<bool*, float>(&float_registers_[p_handle.shader_type][p_handle.register_index], param);
 					break;
 
 				default:
@@ -592,15 +687,15 @@ namespace KlayGE
 				switch (p_handle.register_set)
 				{
 				case D3DXRS_BOOL:
-					ret.func = boost::bind(&D3D9ShaderObject::SetBoolToBool, this, _1, _2);
+					ret.func = SetD3D9ShaderParameter<bool, bool>(bool_registers_[p_handle.shader_type][p_handle.register_index].x(), param);
 					break;
 
 				case D3DXRS_INT4:
-					ret.func = boost::bind(&D3D9ShaderObject::SetBoolToInt, this, _1, _2);
+					ret.func = SetD3D9ShaderParameter<bool, int>(int_registers_[p_handle.shader_type][p_handle.register_index].x(), param);
 					break;
 
 				case D3DXRS_FLOAT4:
-					ret.func = boost::bind(&D3D9ShaderObject::SetBoolToFloat, this, _1, _2);
+					ret.func = SetD3D9ShaderParameter<bool, float>(float_registers_[p_handle.shader_type][p_handle.register_index].x(), param);
 					break;
 
 				default:
@@ -617,15 +712,15 @@ namespace KlayGE
 				switch (p_handle.register_set)
 				{
 				case D3DXRS_BOOL:
-					ret.func = boost::bind(&D3D9ShaderObject::SetIntArrayToBool, this, _1, _2);
+					ret.func = SetD3D9ShaderParameter<int*, bool>(&bool_registers_[p_handle.shader_type][p_handle.register_index], param);
 					break;
 
 				case D3DXRS_INT4:
-					ret.func = boost::bind(&D3D9ShaderObject::SetIntArrayToInt, this, _1, _2);
+					ret.func = SetD3D9ShaderParameter<int*, int>(&int_registers_[p_handle.shader_type][p_handle.register_index], param);
 					break;
 
 				case D3DXRS_FLOAT4:
-					ret.func = boost::bind(&D3D9ShaderObject::SetIntArrayToFloat, this, _1, _2);
+					ret.func = SetD3D9ShaderParameter<int*, float>(&float_registers_[p_handle.shader_type][p_handle.register_index], param);
 					break;
 
 				default:
@@ -638,15 +733,15 @@ namespace KlayGE
 				switch (p_handle.register_set)
 				{
 				case D3DXRS_BOOL:
-					ret.func = boost::bind(&D3D9ShaderObject::SetIntToBool, this, _1, _2);
+					ret.func = SetD3D9ShaderParameter<int, bool>(bool_registers_[p_handle.shader_type][p_handle.register_index].x(), param);
 					break;
 
 				case D3DXRS_INT4:
-					ret.func = boost::bind(&D3D9ShaderObject::SetIntToInt, this, _1, _2);
+					ret.func = SetD3D9ShaderParameter<int, int>(int_registers_[p_handle.shader_type][p_handle.register_index].x(), param);
 					break;
 
 				case D3DXRS_FLOAT4:
-					ret.func = boost::bind(&D3D9ShaderObject::SetIntToFloat, this, _1, _2);
+					ret.func = SetD3D9ShaderParameter<int, float>(float_registers_[p_handle.shader_type][p_handle.register_index].x(), param);
 					break;
 
 				default:
@@ -659,41 +754,42 @@ namespace KlayGE
 		case REDT_float:
 			if (param->ArraySize() != 0)
 			{
-				ret.func = boost::bind(&D3D9ShaderObject::SetFloatArray, this, _1, _2);
+				ret.func = SetD3D9ShaderParameter<float*, float>(&float_registers_[p_handle.shader_type][p_handle.register_index], param);
 			}
 			else
 			{
-				ret.func = boost::bind(&D3D9ShaderObject::SetFloat, this, _1, _2);
+				ret.func = SetD3D9ShaderParameter<float, float>(float_registers_[p_handle.shader_type][p_handle.register_index].x(), param);
 			}
 			break;
 
 		case REDT_float2:
-			ret.func = boost::bind(&D3D9ShaderObject::SetFloat2, this, _1, _2);
+			ret.func = SetD3D9ShaderParameter<float2, float>(float_registers_[p_handle.shader_type][p_handle.register_index], param);
 			break;
 
 		case REDT_float3:
-			ret.func = boost::bind(&D3D9ShaderObject::SetFloat3, this, _1, _2);
+			ret.func = SetD3D9ShaderParameter<float3, float>(float_registers_[p_handle.shader_type][p_handle.register_index], param);
 			break;
 
 		case REDT_float4:
 			if (param->ArraySize() != 0)
 			{
-				ret.func = boost::bind(&D3D9ShaderObject::SetFloat4Array, this, _1, _2);
+				ret.func = SetD3D9ShaderParameter<float4*, float>(&float_registers_[p_handle.shader_type][p_handle.register_index], p_handle.register_count, param);
 			}
 			else
 			{
-				ret.func = boost::bind(&D3D9ShaderObject::SetFloat4, this, _1, _2);
+				ret.func = SetD3D9ShaderParameter<float4, float>(float_registers_[p_handle.shader_type][p_handle.register_index], param);
 			}
 			break;
 
 		case REDT_float4x4:
 			if (param->ArraySize() != 0)
 			{
-				ret.func = boost::bind(&D3D9ShaderObject::SetFloat4x4Array, this, _1, _2);
+				ret.func = SetD3D9ShaderParameter<float4x4*, float>(&float_registers_[p_handle.shader_type][p_handle.register_index], p_handle.rows, param);
 			}
 			else
 			{
-				ret.func = boost::bind(&D3D9ShaderObject::SetFloat4x4, this, _1, _2);
+				BOOST_ASSERT(D3DXRS_FLOAT4 == p_handle.register_set);
+				ret.func = SetD3D9ShaderParameter<float4x4, float>(&float_registers_[p_handle.shader_type][p_handle.register_index], p_handle.register_count, param);
 			}
 			break;
 
@@ -701,7 +797,8 @@ namespace KlayGE
 		case REDT_sampler2D:
 		case REDT_sampler3D:
 		case REDT_samplerCUBE:
-			ret.func = boost::bind(&D3D9ShaderObject::SetSampler, this, _1, _2);
+			BOOST_ASSERT(p_handle.register_index < samplers_[p_handle.shader_type].size());
+			ret.func = SetD3D9ShaderParameter<Sampler, Sampler>(samplers_[p_handle.shader_type][p_handle.register_index], param);
 			break;
 
 		default:
@@ -725,7 +822,7 @@ namespace KlayGE
 
 			BOOST_FOREACH(BOOST_TYPEOF(param_binds_[i])::reference pb, param_binds_[i])
 			{
-				pb.func(pb.p_handle, pb.param);
+				pb.func();
 			}
 
 			if (!bool_registers_[type].empty())

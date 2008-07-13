@@ -51,6 +51,315 @@
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 #include <KlayGE/OpenGL/OGLShaderObject.hpp>
 
+namespace
+{
+	using namespace KlayGE;
+
+	template <typename SrcType>
+	class SetOGLShaderParameter
+	{
+	};
+
+	template <>
+	class SetOGLShaderParameter<bool>
+	{
+	public:
+		SetOGLShaderParameter(CGparameter cg_param, RenderEffectParameterPtr const & param)
+			: cg_param_(cg_param), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			bool v;
+			param_->Value(v);
+
+			cgSetParameter1i(cg_param_, v);
+		}
+
+	private:
+		CGparameter cg_param_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetOGLShaderParameter<int>
+	{
+	public:
+		SetOGLShaderParameter(CGparameter cg_param, RenderEffectParameterPtr const & param)
+			: cg_param_(cg_param), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			int v;
+			param_->Value(v);
+
+			cgSetParameter1i(cg_param_, v);
+		}
+
+	private:
+		CGparameter cg_param_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetOGLShaderParameter<float>
+	{
+	public:
+		SetOGLShaderParameter(CGparameter cg_param, RenderEffectParameterPtr const & param)
+			: cg_param_(cg_param), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			float v;
+			param_->Value(v);
+
+			cgSetParameter1f(cg_param_, v);
+		}
+
+	private:
+		CGparameter cg_param_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetOGLShaderParameter<float2>
+	{
+	public:
+		SetOGLShaderParameter(CGparameter cg_param, RenderEffectParameterPtr const & param)
+			: cg_param_(cg_param), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			float2 v;
+			param_->Value(v);
+
+			cgSetParameter2fv(cg_param_, &v.x());
+		}
+
+	private:
+		CGparameter cg_param_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetOGLShaderParameter<float3>
+	{
+	public:
+		SetOGLShaderParameter(CGparameter cg_param, RenderEffectParameterPtr const & param)
+			: cg_param_(cg_param), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			float3 v;
+			param_->Value(v);
+
+			cgSetParameter3fv(cg_param_, &v.x());
+		}
+
+	private:
+		CGparameter cg_param_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetOGLShaderParameter<float4>
+	{
+	public:
+		SetOGLShaderParameter(CGparameter cg_param, RenderEffectParameterPtr const & param)
+			: cg_param_(cg_param), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			float4 v;
+			param_->Value(v);
+
+			cgSetParameter4fv(cg_param_, &v.x());
+		}
+
+	private:
+		CGparameter cg_param_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetOGLShaderParameter<float4x4>
+	{
+	public:
+		SetOGLShaderParameter(CGparameter cg_param, RenderEffectParameterPtr const & param)
+			: cg_param_(cg_param), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			float4x4 v;
+			param_->Value(v);
+
+			cgGLSetMatrixParameterfr(cg_param_, &v[0]);
+		}
+
+	private:
+		CGparameter cg_param_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetOGLShaderParameter<bool*>
+	{
+	public:
+		SetOGLShaderParameter(CGparameter cg_param, RenderEffectParameterPtr const & param)
+			: cg_param_(cg_param), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<bool> v;
+			param_->Value(v);
+
+			if (!v.empty())
+			{
+				std::vector<int> tmp(v.begin(), v.end());
+				cgSetParameterValueir(cg_param_, static_cast<int>(tmp.size()), &tmp[0]);
+			}
+		}
+
+	private:
+		CGparameter cg_param_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetOGLShaderParameter<int*>
+	{
+	public:
+		SetOGLShaderParameter(CGparameter cg_param, RenderEffectParameterPtr const & param)
+			: cg_param_(cg_param), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<int> v;
+			param_->Value(v);
+
+			if (!v.empty())
+			{
+				cgSetParameterValueir(cg_param_, static_cast<int>(v.size()), &v[0]);
+			}
+		}
+
+	private:
+		CGparameter cg_param_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetOGLShaderParameter<float*>
+	{
+	public:
+		SetOGLShaderParameter(CGparameter cg_param, RenderEffectParameterPtr const & param)
+			: cg_param_(cg_param), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<float> v;
+			param_->Value(v);
+
+			if (!v.empty())
+			{
+				cgGLSetParameterArray1f(cg_param_, 0, static_cast<int>(v.size()), &v[0]);
+			}
+		}
+
+	private:
+		CGparameter cg_param_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetOGLShaderParameter<float4*>
+	{
+	public:
+		SetOGLShaderParameter(CGparameter cg_param, RenderEffectParameterPtr const & param)
+			: cg_param_(cg_param), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<float4> v;
+			param_->Value(v);
+
+			if (!v.empty())
+			{
+				cgGLSetParameterArray4f(cg_param_, 0, static_cast<long>(v.size()), &v[0][0]);
+			}
+		}
+
+	private:
+		CGparameter cg_param_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetOGLShaderParameter<float4x4*>
+	{
+	public:
+		SetOGLShaderParameter(CGparameter cg_param, RenderEffectParameterPtr const & param)
+			: cg_param_(cg_param), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<float4x4> v;
+			param_->Value(v);
+
+			if (!v.empty())
+			{
+				cgGLSetMatrixParameterArrayfr(cg_param_, 0, static_cast<long>(v.size()), &v[0][0]);
+			}
+		}
+
+	private:
+		CGparameter cg_param_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetOGLShaderParameter<Sampler>
+	{
+	public:
+		SetOGLShaderParameter(SamplerPtr& sampler, RenderEffectParameterPtr const & param)
+			: sampler_(&sampler), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			param_->Value(*sampler_);
+		}
+
+	private:
+		SamplerPtr* sampler_;
+		RenderEffectParameterPtr param_;
+	};
+}
+
 namespace KlayGE
 {
 	OGLShaderObject::OGLShaderObject()
@@ -134,22 +443,6 @@ namespace KlayGE
 
 		cgGLLoadProgram(shaders_[type]);
 
-		CGparameter cg_param = cgGetFirstParameter(shaders_[type], CG_GLOBAL);
-		while (cg_param)
-		{
-			if (cgIsParameterUsed(cg_param, shaders_[type])
-				&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param)))
-			{
-				RenderEffectParameterPtr const & p = effect.ParameterByName(cgGetParameterName(cg_param));
-				if (p != RenderEffectParameter::NullObject())
-				{
-					param_binds_[type].push_back(this->GetBindFunc(cg_param, p, type));
-				}
-			}
-
-			cg_param = cgGetNextParameter(cg_param);
-		}
-
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		switch (type)
 		{
@@ -164,6 +457,22 @@ namespace KlayGE
 		default:
 			BOOST_ASSERT(false);
 			break;
+		}
+
+		CGparameter cg_param = cgGetFirstParameter(shaders_[type], CG_GLOBAL);
+		while (cg_param)
+		{
+			if (cgIsParameterUsed(cg_param, shaders_[type])
+				&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param)))
+			{
+				RenderEffectParameterPtr const & p = effect.ParameterByName(cgGetParameterName(cg_param));
+				if (p != RenderEffectParameter::NullObject())
+				{
+					param_binds_[type].push_back(this->GetBindFunc(cg_param, p, type));
+				}
+			}
+
+			cg_param = cgGetNextParameter(cg_param);
 		}
 
 		is_validate_ = true;
@@ -210,6 +519,8 @@ namespace KlayGE
 
 			cgGLLoadProgram(ret->shaders_[i]);
 
+			ret->samplers_[i].resize(samplers_[i].size());
+
 			CGparameter cg_param = cgGetFirstParameter(ret->shaders_[i], CG_GLOBAL);
 			while (cg_param)
 			{
@@ -225,8 +536,6 @@ namespace KlayGE
 
 				cg_param = cgGetNextParameter(cg_param);
 			}
-
-			ret->samplers_[i].resize(samplers_[i].size());
 		}
 
 		ret->is_validate_ = true;
@@ -238,146 +547,22 @@ namespace KlayGE
 		return ret;
 	}
 
-	void OGLShaderObject::SetBool(CGparameter cg_param, RenderEffectParameterPtr const & param)
-	{
-		bool v;
-		param->Value(v);
-
-		cgSetParameter1i(cg_param, v);
-	}
-
-	void OGLShaderObject::SetInt(CGparameter cg_param, RenderEffectParameterPtr const & param)
-	{
-		int v;
-		param->Value(v);
-
-		cgSetParameter1i(cg_param, v);
-	}
-
-	void OGLShaderObject::SetFloat(CGparameter cg_param, RenderEffectParameterPtr const & param)
-	{
-		float v;
-		param->Value(v);
-
-		cgSetParameter1f(cg_param, v);
-	}
-
-	void OGLShaderObject::SetFloat2(CGparameter cg_param, RenderEffectParameterPtr const & param)
-	{
-		float2 v;
-		param->Value(v);
-
-		cgSetParameter2fv(cg_param, &v[0]);
-	}
-	
-	void OGLShaderObject::SetFloat3(CGparameter cg_param, RenderEffectParameterPtr const & param)
-	{
-		float3 v;
-		param->Value(v);
-
-		cgSetParameter3fv(cg_param, &v[0]);
-	}
-
-	void OGLShaderObject::SetFloat4(CGparameter cg_param, RenderEffectParameterPtr const & param)
-	{
-		float4 v;
-		param->Value(v);
-
-		cgSetParameter4fv(cg_param, &v[0]);
-	}
-
-	void OGLShaderObject::SetFloat4x4(CGparameter cg_param, RenderEffectParameterPtr const & param)
-	{
-		float4x4 v;
-		param->Value(v);
-
-		cgGLSetMatrixParameterfr(cg_param, &v[0]);
-	}
-
-	void OGLShaderObject::SetBoolArray(CGparameter cg_param, RenderEffectParameterPtr const & param)
-	{
-		std::vector<bool> v;
-		param->Value(v);
-
-		if (!v.empty())
-		{
-			std::vector<int> tmp(v.begin(), v.end());
-			cgSetParameterValueir(cg_param, static_cast<int>(tmp.size()), &tmp[0]);
-		}
-	}
-
-	void OGLShaderObject::SetIntArray(CGparameter cg_param, RenderEffectParameterPtr const & param)
-	{
-		std::vector<int> v;
-		param->Value(v);
-
-		if (!v.empty())
-		{
-			cgSetParameterValueir(cg_param, static_cast<int>(v.size()), &v[0]);
-		}
-	}
-
-	void OGLShaderObject::SetFloatArray(CGparameter cg_param, RenderEffectParameterPtr const & param)
-	{
-		std::vector<float> v;
-		param->Value(v);
-
-		if (!v.empty())
-		{
-			cgGLSetParameterArray1f(cg_param, 0, static_cast<int>(v.size()), &v[0]);
-		}
-	}
-
-	void OGLShaderObject::SetFloat4Array(CGparameter cg_param, RenderEffectParameterPtr const & param)
-	{
-		std::vector<float4> v;
-		param->Value(v);
-
-		if (!v.empty())
-		{
-			cgGLSetParameterArray4f(cg_param, 0, static_cast<long>(v.size()), &v[0][0]);
-		}
-	}
-
-	void OGLShaderObject::SetFloat4x4Array(CGparameter cg_param, RenderEffectParameterPtr const & param)
-	{
-		std::vector<float4x4> v;
-		param->Value(v);
-
-		if (!v.empty())
-		{
-			cgGLSetMatrixParameterArrayfr(cg_param, 0, static_cast<long>(v.size()), &v[0][0]);
-		}
-	}
-
-	void OGLShaderObject::SetSampler(CGparameter cg_param, ShaderType type, RenderEffectParameterPtr const & param)
-	{
-		uint32_t index = cgGLGetTextureEnum(cg_param) - GL_TEXTURE0;
-		BOOST_ASSERT(index < samplers_[type].size());
-
-		SamplerPtr v;
-		param->Value(v);
-
-		samplers_[type][index] = v;
-	}
-
 	OGLShaderObject::parameter_bind_t OGLShaderObject::GetBindFunc(CGparameter cg_param, RenderEffectParameterPtr const & param, ShaderType type)
 	{
 		parameter_bind_t ret;
 		ret.param = param;
 		ret.cg_param = cg_param;
-		ret.type = type;
 
 		switch (param->type())
 		{
 		case REDT_bool:
 			if (param->ArraySize() != 0)
 			{
-				ret.func = boost::bind(&OGLShaderObject::SetBoolArray, this, _1, _2);
+				ret.func = SetOGLShaderParameter<bool*>(cg_param, param);
 			}
 			else
 			{
-				ret.func = boost::bind(&OGLShaderObject::SetBool, this, _1, _2);
+				ret.func = SetOGLShaderParameter<bool>(cg_param, param);
 			}
 			break;
 
@@ -385,52 +570,52 @@ namespace KlayGE
 		case REDT_int:
 			if (param->ArraySize() != 0)
 			{
-				ret.func = boost::bind(&OGLShaderObject::SetIntArray, this, _1, _2);
+				ret.func = SetOGLShaderParameter<int*>(cg_param, param);
 			}
 			else
 			{
-				ret.func = boost::bind(&OGLShaderObject::SetInt, this, _1, _2);
+				ret.func = SetOGLShaderParameter<int>(cg_param, param);
 			}
 			break;
 
 		case REDT_float:
 			if (param->ArraySize() != 0)
 			{
-				ret.func = boost::bind(&OGLShaderObject::SetFloatArray, this, _1, _2);
+				ret.func = SetOGLShaderParameter<float*>(cg_param, param);
 			}
 			else
 			{
-				ret.func = boost::bind(&OGLShaderObject::SetFloat, this, _1, _2);
+				ret.func = SetOGLShaderParameter<float>(cg_param, param);
 			}
 			break;
 
 		case REDT_float2:
-			ret.func = boost::bind(&OGLShaderObject::SetFloat2, this, _1, _2);
+			ret.func = SetOGLShaderParameter<float2>(cg_param, param);
 			break;
 
 		case REDT_float3:
-			ret.func = boost::bind(&OGLShaderObject::SetFloat3, this, _1, _2);
+			ret.func = SetOGLShaderParameter<float3>(cg_param, param);
 			break;
 
 		case REDT_float4:
 			if (param->ArraySize() != 0)
 			{
-				ret.func = boost::bind(&OGLShaderObject::SetFloat4Array, this, _1, _2);
+				ret.func = SetOGLShaderParameter<float4*>(cg_param, param);
 			}
 			else
 			{
-				ret.func = boost::bind(&OGLShaderObject::SetFloat4, this, _1, _2);
+				ret.func = SetOGLShaderParameter<float4>(cg_param, param);
 			}
 			break;
 
 		case REDT_float4x4:
 			if (param->ArraySize() != 0)
 			{
-				ret.func = boost::bind(&OGLShaderObject::SetFloat4x4Array, this, _1, _2);
+				ret.func = SetOGLShaderParameter<float4x4*>(cg_param, param);
 			}
 			else
 			{
-				ret.func = boost::bind(&OGLShaderObject::SetFloat4x4, this, _1, _2);
+				ret.func = SetOGLShaderParameter<float4x4>(cg_param, param);
 			}
 			break;
 
@@ -438,7 +623,12 @@ namespace KlayGE
 		case REDT_sampler2D:
 		case REDT_sampler3D:
 		case REDT_samplerCUBE:
-			ret.func = boost::bind(&OGLShaderObject::SetSampler, this, _1, type, _2);
+			{
+				uint32_t index = cgGLGetTextureEnum(cg_param) - GL_TEXTURE0;
+				BOOST_ASSERT(index < samplers_[type].size());
+
+				ret.func = SetOGLShaderParameter<Sampler>(samplers_[type][index], param);
+			}
 			break;
 
 		default:
@@ -462,7 +652,7 @@ namespace KlayGE
 		{
 			BOOST_FOREACH(BOOST_TYPEOF(param_binds_[i])::reference pb, param_binds_[i])
 			{
-				pb.func(pb.cg_param, pb.param);
+				pb.func();
 			}
 
 			std::vector<SamplerPtr> const & samplers = samplers_[i];

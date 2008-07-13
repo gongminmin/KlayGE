@@ -40,26 +40,11 @@ namespace KlayGE
 		void Active();
 
 	private:
-		void SetBool(CGparameter cg_param, RenderEffectParameterPtr const & param);
-		void SetInt(CGparameter cg_param, RenderEffectParameterPtr const & param);
-		void SetFloat(CGparameter cg_param, RenderEffectParameterPtr const & param);
-		void SetFloat2(CGparameter cg_param, RenderEffectParameterPtr const & param);
-		void SetFloat3(CGparameter cg_param, RenderEffectParameterPtr const & param);
-		void SetFloat4(CGparameter cg_param, RenderEffectParameterPtr const & param);
-		void SetFloat4x4(CGparameter cg_param, RenderEffectParameterPtr const & param);
-		void SetBoolArray(CGparameter cg_param, RenderEffectParameterPtr const & param);
-		void SetIntArray(CGparameter cg_param, RenderEffectParameterPtr const & param);
-		void SetFloatArray(CGparameter cg_param, RenderEffectParameterPtr const & param);
-		void SetFloat4Array(CGparameter cg_param, RenderEffectParameterPtr const & param);
-		void SetFloat4x4Array(CGparameter cg_param, RenderEffectParameterPtr const & param);
-		void SetSampler(CGparameter cg_param, ShaderType type, RenderEffectParameterPtr const & param);
-
 		struct parameter_bind_t
 		{
 			RenderEffectParameterPtr param;
 			CGparameter cg_param;
-			ShaderType type;
-			boost::function<void(CGparameter cg_param, RenderEffectParameterPtr const & param)> func;
+			boost::function<void()> func;
 		};
 		typedef std::vector<parameter_bind_t> parameter_binds_t;
 

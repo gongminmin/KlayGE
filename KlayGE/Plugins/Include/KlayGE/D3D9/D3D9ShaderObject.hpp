@@ -56,33 +56,11 @@ namespace KlayGE
 		void Active();
 
 	private:
-		void SetBoolToBool(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
-		void SetBoolToInt(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
-		void SetBoolToFloat(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
-		void SetIntToBool(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
-		void SetIntToInt(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
-		void SetIntToFloat(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
-		void SetFloat(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
-		void SetFloat2(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
-		void SetFloat3(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
-		void SetFloat4(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
-		void SetFloat4x4(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
-		void SetBoolArrayToBool(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
-		void SetBoolArrayToInt(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
-		void SetBoolArrayToFloat(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
-		void SetIntArrayToBool(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
-		void SetIntArrayToInt(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
-		void SetIntArrayToFloat(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
-		void SetFloatArray(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
-		void SetFloat4Array(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
-		void SetFloat4x4Array(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
-		void SetSampler(D3D9ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
-
 		struct parameter_bind_t
 		{
 			RenderEffectParameterPtr param;
 			D3D9ShaderParameterHandle p_handle;
-			boost::function<void(D3D9ShaderParameterHandle const &, RenderEffectParameterPtr const &)> func;
+			boost::function<void()> func;
 		};
 		typedef std::vector<parameter_bind_t> parameter_binds_t;
 
