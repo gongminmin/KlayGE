@@ -34,7 +34,7 @@
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable: 4251 4275 4273 4512 4701)
+#pragma warning(disable: 4251 4275 4512 4702)
 #endif
 #include <boost/program_options.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
@@ -283,7 +283,6 @@ int main()
 				Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
 			}
 
-			
 			if (vm.count("context.input_factory"))
 			{
 				std::string if_name = vm["context.input_factory"].as<std::string>();
@@ -295,7 +294,7 @@ int main()
 			else
 			{
 				Context::Instance().InputFactoryInstance(DInputFactoryInstance());
-			}		
+			}
 
 			if (vm.count("context.scene_manager"))
 			{
