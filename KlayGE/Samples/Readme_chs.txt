@@ -142,7 +142,7 @@ Particle system
 2) Height map生成和渲染
 3) Soft particle
 
-需求：Geforce FX以上或Radeon 9500以上。
+需求：Geforce FX以上或Radeon 9500以上。推荐使用Geforce 6以上。
 渲染引擎支持：D3D9。
 
 ====================================================================================
