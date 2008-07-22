@@ -34,7 +34,7 @@ namespace
 			}
 		}
 
-		std::vector<char> dx;
+		std::vector<int> dx;
 		dx.resize(heights.size());
 		for (uint32_t y = 0; y < height; ++ y)
 		{
@@ -45,7 +45,7 @@ namespace
 			dx[y * width + (width - 1)] = 0;
 		}
 
-		std::vector<char> dy;
+		std::vector<int> dy;
 		dy.resize(heights.size());
 		for (uint32_t x = 0; x < width; ++ x)
 		{
@@ -62,12 +62,12 @@ namespace
 		{
 			for (uint32_t x = 0; x < width; ++ x)
 			{
-				float3 normal = MathLib::normalize(float3(dx[y * width + x] / 255.0f, dy[y * width + x] / 255.0f, 1.0f));
+				float3 normal = MathLib::normalize(float3(-dx[y * width + x], -dy[y * width + x], 8));
 				normal = normal * 0.5f + float3(0.5f, 0.5f, 0.5f);
 
-				normals.push_back(static_cast<uint8_t>(normal.z() * 255));
-				normals.push_back(static_cast<uint8_t>(normal.y() * 255));
-				normals.push_back(static_cast<uint8_t>(normal.x() * 255));
+				normals.push_back(static_cast<uint8_t>(MathLib::clamp(static_cast<int>(normal.z() * 255 + 0.5f), 0, 255)));
+				normals.push_back(static_cast<uint8_t>(MathLib::clamp(static_cast<int>(normal.y() * 255 + 0.5f), 0, 255)));
+				normals.push_back(static_cast<uint8_t>(MathLib::clamp(static_cast<int>(normal.x() * 255 + 0.5f), 0, 255)));
 				normals.push_back(255);
 			}
 		}
