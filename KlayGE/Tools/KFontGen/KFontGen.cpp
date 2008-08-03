@@ -69,8 +69,8 @@ struct font_info
 	uint16_t advance_x;
 	uint16_t advance_y;
 
-	uint16_t top;
-	uint16_t left;
+	int16_t top;
+	int16_t left;
 	uint16_t width;
 	uint16_t height;
 

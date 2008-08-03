@@ -102,8 +102,8 @@ namespace
 	{
 		int16_t top;
 		int16_t left;
-		int16_t width;
-		int16_t height;
+		uint16_t width;
+		uint16_t height;
 	};
 #ifdef KLAYGE_PLATFORM_WINDOWS
 	#pragma pack(pop)
@@ -555,7 +555,7 @@ namespace
 						CharInfo charInfo;
 						if ((curX_ < tex_width) && (curY_ < tex_height) && (curY_ + kfont_char_size_ < tex_height))
 						{
-							if (curX_ + width > tex_width)
+							if (curX_ + kfont_char_size_ >= tex_width)
 							{
 								curX_ = 0;
 								curY_ += kfont_char_size_;
@@ -563,11 +563,6 @@ namespace
 
 							// 纹理还有空间
 							char_pos = Vector_T<int32_t, 2>(curX_, curY_);
-
-							charInfo.left()		= static_cast<float>(curX_) / tex_width;
-							charInfo.top()		= static_cast<float>(curY_) / tex_height;
-							charInfo.right()	= static_cast<float>(curX_ + width) / tex_width;
-							charInfo.bottom()	= static_cast<float>(curY_ + height) / tex_height;
 
 							curX_ += kfont_char_size_;
 						}
@@ -580,14 +575,14 @@ namespace
 							char_pos.x() = static_cast<int32_t>(iter->second.left() * tex_width);
 							char_pos.y() = static_cast<int32_t>(iter->second.top() * tex_height);
 
-							charInfo.left()		= iter->second.left();
-							charInfo.top()		= iter->second.top();
-							charInfo.right()	= charInfo.left() + static_cast<float>(width) / tex_width;
-							charInfo.bottom()	= charInfo.top() + static_cast<float>(height) / tex_height;
-
 							charLRU_.pop_back();
 							charInfoMap_.erase(iter);
 						}
+
+						charInfo.left()		= static_cast<float>(char_pos.x()) / tex_width;
+						charInfo.top()		= static_cast<float>(char_pos.y()) / tex_height;
+						charInfo.right()	= charInfo.left() + static_cast<float>(width) / tex_width;
+						charInfo.bottom()	= charInfo.top() + static_cast<float>(height) / tex_height;
 
 						{
 							Texture::Mapper mapper(*dist_texture_, 0, TMA_Write_Only,
