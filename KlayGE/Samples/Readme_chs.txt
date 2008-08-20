@@ -4,9 +4,9 @@ Homepage: http://klayge.sourceforge.net
 E-Mail:	  enginedev@163.com
 QQ:       33611210
 
-注意：如果要在没有安装Microsoft Visual C++ 2008的机器上运行二进制版本的Demo，就需要事先安装Microsoft Visual C++ 2008 Redistributable Package。
-x86版本可以从http://www.microsoft.com/downloads/details.aspx?familyid=9B2DA534-3E03-4391-8A4D-074B9F2BC1BF&displaylang=en下载。
-x64版本可以从http://www.microsoft.com/downloads/details.aspx?FamilyID=bd2a6171-e2d6-4230-b809-9a8d7548c1b6&DisplayLang=en下载。
+注意：如果要在没有安装Microsoft Visual C++ 2008 SP1的机器上运行二进制版本的Demo，就需要事先安装Microsoft Visual C++ 2008 SP1 Redistributable Package。
+x86版本可以从http://www.microsoft.com/downloads/details.aspx?FamilyID=a5c84275-3b97-4ab7-a40d-3802b2af5fc2&DisplayLang=en下载。
+x64版本可以从http://www.microsoft.com/downloads/details.aspx?familyid=BA9257CA-337F-4B40-8C14-157CFDFFEE4E&displaylang=en下载。
 
 ====================================================================================
 AsciiArts

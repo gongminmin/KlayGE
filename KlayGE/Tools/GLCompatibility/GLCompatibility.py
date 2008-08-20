@@ -13,8 +13,8 @@ def support_one(feature_names):
 			return True
 	return False
 
-ogl_ver_db = ['1.1', '1.2', '1.3', '1.4', '1.5', '2.0', '2.1']
-glsl_ver_db = ['0.0', '1.1', '1.2' ]
+ogl_ver_db = ['1.1', '1.2', '1.3', '1.4', '1.5', '2.0', '2.1', '3.0']
+glsl_ver_db = ['0.0', '1.1', '1.2', '1.3' ]
 
 features_db = {
 	'1.1' : {
@@ -96,6 +96,29 @@ features_db = {
 			'OpenGL Shading Language 1.20' : lambda : support_one(['GLSL_1_2', 'GL_ATI_shader_texture_lod']),
 			'Pixel buffer object' : lambda : support_one(['GL_ARB_pixel_buffer_object', 'GL_EXT_pixel_buffer_object']),
 			'sRGB texture' : lambda : support_one(['GL_EXT_texture_sRGB']),
+		},
+		
+	'3.0' : {
+			'OpenGL Shading Language 1.30' : lambda : is_supported('GL_EXT_gpu_shader4'),
+			'Conditional Rendering' : lambda : is_supported('GL_NV_conditional_render'),
+			'Floating-point color buffer' : lambda : is_supported('GL_ARB_color_buffer_float'),
+			'Floating-point depth buffer' : lambda : support_one(['GL_ARB_depth_buffer_float', 'GL_NV_depth_buffer_float']),
+			'Floating-point texture' : lambda : support_one(['GL_ARB_texture_float', 'GL_ATI_texture_float', 'GL_NV_float_buffer']),
+			'Packed float' : lambda : is_supported('GL_EXT_packed_float'),
+			'Shared exponent' : lambda : is_supported('GL_EXT_texture_shared_exponent'),
+			'Frame buffer object' : lambda : support_one(['GL_ARB_framebuffer_object', 'GL_EXT_framebuffer_object']),
+			'Multisample stretch blit' : lambda : support_all(['GL_EXT_framebuffer_multisample', 'GL_EXT_framebuffer_blit']),
+			'Integer texture' : lambda : is_supported('GL_EXT_texture_integer'),
+			'Texture array' : lambda : is_supported('GL_EXT_texture_array'),
+			'Packed depth stencil format' : lambda : is_supported('GL_EXT_packed_depth_stencil'),
+			'Per-color-attachment blend enables and color writemasks' : lambda : is_supported('GL_EXT_draw_buffers2'),
+			'Transform feedback' : lambda : support_one(['GL_EXT_transform_feedback', 'GL_NV_transform_feedback']),
+			'sRGB-encoded framebuffer' : lambda : support_one(['GL_ARB_framebuffer_sRGB', 'GL_EXT_framebuffer_sRGB']),
+			'Half-float data type in vertex' : lambda : is_supported('GL_ARB_half_float_vertex'),
+			'Map buffer range' : lambda : is_supported('GL_ARB_map_buffer_range'),
+			'R and RG texture compression' : lambda : support_one(['GL_ARB_texture_compression_rgtc', 'GL_EXT_texture_compression_rgtc']),
+			'R and RG texture' : lambda : is_supported('GL_ARB_texture_rg'),
+			'Vertex array object' : lambda : support_one(['GL_ARB_vertex_array_object', 'GL_APPLE_vertex_array_object']),
 		}
 }
 
@@ -185,7 +208,7 @@ def gl_compatibility(info_name):
 		exts.append(ext.getAttribute('name'))
 
 	print 'OpenGL Compatibility Viewer'
-	print 'Copyright(C) 2004-2006 Minmin Gong\n'
+	print 'Copyright(C) 2004-2008 Minmin Gong\n'
 
 	info = information()
 	info.make_reports(vendor, renderer, major_ver, minor_ver, glsl_major_ver, glsl_minor_ver, exts)
