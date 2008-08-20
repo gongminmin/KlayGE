@@ -1,0 +1,31 @@
+<?xml version='1.0'?>
+
+<GLExtension name="WGL_ARB_create_context">
+	<Tokens>
+		<Token name="WGL_CONTEXT_MAJOR_VERSION_ARB" value="0x2091"/>
+		<Token name="WGL_CONTEXT_MINOR_VERSION_ARB" value="0x2092"/>
+		<Token name="WGL_CONTEXT_LAYER_PLANE_ARB" value="0x2093"/>
+		<Token name="WGL_CONTEXT_FLAGS_ARB" value="0x2094"/>
+		<Token name="WGL_CONTEXT_DEBUG_BIT_ARB" value="0x0001"/>
+		<Token name="WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB" value="0x0002"/>
+		<Token name="GL_ERROR_INVALID_VERSION_ARB" value="0x2095"/>
+	</Tokens>
+
+	<Functions>
+		<Function name="wglCreateContextAttribsARB" return="HGLRC">
+			<Param type="HDC" name="hDC"/>
+			<Param type="HGLRC" name="hShareContext"/>
+			<Param type="GLint const *" name="attribList"/>
+		</Function>
+	</Functions>
+
+	<Vendors>
+		<Vendor name="WGL_ARB" string="WGL_ARB_create_context" reg_no="55">
+			<Name name="wglCreateContextAttribsARB"/>
+		</Vendor>
+	</Vendors>
+
+	<InitPath>
+		<Init name="WGL_ARB"/>
+	</InitPath>
+</GLExtension>

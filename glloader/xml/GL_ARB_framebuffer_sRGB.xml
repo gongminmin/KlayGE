@@ -1,16 +1,18 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_EXT_framebuffer_sRGB">
+<GLExtension name="GL_ARB_framebuffer_sRGB">
 	<Tokens>
-		<Token name="GL_FRAMEBUFFER_SRGB_EXT" value="0x8DB9"/>
+		<Token name="GL_FRAMEBUFFER_SRGB_ARB" value="0x8DB9"/>
 		<Token name="GL_FRAMEBUFFER_SRGB_CAPABLE_EXT" value="0x8DBA"/>
 	</Tokens>
 
 	<Vendors>
+		<Vendor name="GL_ARB" string="GL_ARB_framebuffer_sRGB" reg_no="46"/>
 		<Vendor name="GL_EXT" string="GL_EXT_framebuffer_sRGB" reg_no="337"/>
 	</Vendors>
 
 	<InitPath>
+		<Init name="GL_ARB"/>
 		<Init name="GL_EXT"/>
 	</InitPath>
 </GLExtension>

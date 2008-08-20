@@ -1,15 +1,17 @@
 <?xml version='1.0'?>
 
-<GLExtension name="WGL_EXT_framebuffer_sRGB">
+<GLExtension name="WGL_ARB_framebuffer_sRGB">
 	<Tokens>
-		<Token name="WGL_FRAMEBUFFER_SRGB_CAPABLE_EXT" value="0x20A9"/>
+		<Token name="WGL_FRAMEBUFFER_SRGB_CAPABLE_ARB" value="0x20A9"/>
 	</Tokens>
 
 	<Vendors>
+		<Vendor name="WGL_ARB" string="WGL_ARB_framebuffer_sRGB" reg_no="46"/>
 		<Vendor name="WGL_EXT" string="WGL_EXT_framebuffer_sRGB" reg_no="337"/>
 	</Vendors>
 
 	<InitPath>
+		<Init name="WGL_ARB"/>
 		<Init name="WGL_EXT"/>
 	</InitPath>
 </GLExtension>

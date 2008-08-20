@@ -1,0 +1,11 @@
+<?xml version='1.0'?>
+
+<GLExtension name="GL_ARB_vertex_array_object">
+	<Vendors>
+		<Vendor name="GL_ARB" string="GL_ARB_vertex_array_object" reg_no="54"/>
+	</Vendors>
+
+	<InitPath>
+		<Init name="GL_ARB"/>
+	</InitPath>
+</GLExtension>

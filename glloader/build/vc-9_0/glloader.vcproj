@@ -311,6 +311,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\gl30.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\glloader_gl.cpp"
 				>
 			</File>
@@ -370,6 +374,10 @@
 			</File>
 			<File
 				RelativePath="..\..\include\glloader\gl21.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\glloader\gl30.h"
 				>
 			</File>
 			<File
