@@ -215,6 +215,7 @@ void* glloader_get_gl_proc_address(const char* name);
 #include <glloader/gl15.h>
 #include <glloader/gl20.h>
 #include <glloader/gl21.h>
+#include <glloader/gl30.h>
 #include <glloader/glloader_gl.h>
 #endif
 

@@ -8,14 +8,14 @@
 		<Token name="WGL_CONTEXT_FLAGS_ARB" value="0x2094"/>
 		<Token name="WGL_CONTEXT_DEBUG_BIT_ARB" value="0x0001"/>
 		<Token name="WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB" value="0x0002"/>
-		<Token name="GL_ERROR_INVALID_VERSION_ARB" value="0x2095"/>
+		<Token name="ERROR_INVALID_VERSION_ARB" value="0x2095"/>
 	</Tokens>
 
 	<Functions>
 		<Function name="wglCreateContextAttribsARB" return="HGLRC">
 			<Param type="HDC" name="hDC"/>
 			<Param type="HGLRC" name="hShareContext"/>
-			<Param type="GLint const *" name="attribList"/>
+			<Param type="int const *" name="attribList"/>
 		</Function>
 	</Functions>
 

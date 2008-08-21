@@ -2,7 +2,7 @@
 
 <GLExtension name="GL_ARB_depth_buffer_float">
 	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_depth_buffer_float" reg_no="43" />
+		<Vendor name="GL_ARB" string="GL_ARB_depth_buffer_float" reg_no="43"/>
 	</Vendors>
 
 	<InitPath>

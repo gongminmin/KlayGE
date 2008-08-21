@@ -87,12 +87,12 @@ extern "C"
 #define GL_SRC_ALPHA_SATURATE							0x0308
 #define GL_TRUE											1
 #define GL_FALSE										0
-#define GL_CLIP_PLANE0									0x3000
-#define GL_CLIP_PLANE1									0x3001
-#define GL_CLIP_PLANE2									0x3002
-#define GL_CLIP_PLANE3									0x3003
-#define GL_CLIP_PLANE4									0x3004
-#define GL_CLIP_PLANE5									0x3005
+#define GL_CLIP_DISTANCE0								0x3000
+#define GL_CLIP_DISTANCE1								0x3001
+#define GL_CLIP_DISTANCE2								0x3002
+#define GL_CLIP_DISTANCE3								0x3003
+#define GL_CLIP_DISTANCE4								0x3004
+#define GL_CLIP_DISTANCE5								0x3005
 #define GL_BYTE											0x1400
 #define GL_UNSIGNED_BYTE								0x1401
 #define GL_SHORT										0x1402
@@ -300,7 +300,7 @@ extern "C"
 #define GL_DEPTH_BIAS									0x0D1F
 #define GL_MAX_EVAL_ORDER								0x0D30
 #define GL_MAX_LIGHTS									0x0D31
-#define GL_MAX_CLIP_PLANES								0x0D32
+#define GL_MAX_CLIP_DISTANCES							0x0D32
 #define GL_MAX_TEXTURE_SIZE								0x0D33
 #define GL_MAX_PIXEL_MAP_TABLE							0x0D34
 #define GL_MAX_ATTRIB_STACK_DEPTH						0x0D35

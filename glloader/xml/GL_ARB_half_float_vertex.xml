@@ -2,7 +2,7 @@
 
 <GLExtension name="GL_ARB_half_float_vertex">
 	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_half_float_vertex" reg_no="48" />
+		<Vendor name="GL_ARB" string="GL_ARB_half_float_vertex" reg_no="48"/>
 	</Vendors>
 
 	<InitPath>

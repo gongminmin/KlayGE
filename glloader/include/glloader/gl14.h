@@ -71,7 +71,7 @@ extern glloader_GL_VERSION_1_4FUNC glloader_GL_VERSION_1_4;
 #define GL_DEPTH_TEXTURE_MODE				0x884B
 #define GL_TEXTURE_COMPARE_MODE				0x884C
 #define GL_TEXTURE_COMPARE_FUNC				0x884D
-#define GL_COMPARE_R_TO_TEXTURE				0x884E
+#define GL_COMPARE_REF_TO_TEXTURE			0x884E
 
 typedef void (APIENTRY *glBlendFuncSeparateFUNC)(GLenum sfactorRGB, GLenum dfactorRGB, GLenum sfactorAlpha, GLenum dfactorAlpha);
 typedef void (APIENTRY *glFogCoordfFUNC)(GLfloat coord);
