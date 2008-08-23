@@ -297,6 +297,10 @@ typedef void (APIENTRY *glBeginTransformFeedbackFUNC)(GLenum primitiveMode);
 typedef void (APIENTRY *glEndTransformFeedbackFUNC)();
 typedef void (APIENTRY *glTransformFeedbackVaryingsFUNC)(GLuint program, GLsizei count, const char** varyings, GLenum bufferMode);
 typedef void (APIENTRY *glGetTransformFeedbackVaryingFUNC)(GLuint program, GLuint index, GLsizei bufSize, GLsizei* length, GLsizei* size, GLenum* type, GLchar* name);
+typedef void (APIENTRY *glClearBufferivFUNC)(GLenum buffer, GLint const * value);
+typedef void (APIENTRY *glClearBufferfvFUNC)(GLenum buffer, GLfloat const * value);
+typedef void (APIENTRY *glClearBufferuivFUNC)(GLenum buffer, GLuint const * value);
+typedef void (APIENTRY *glClearBufferfiFUNC)(GLenum buffer, GLfloat depth, GLint stencil);
 
 extern glMapBufferRangeFUNC glMapBufferRange;
 extern glFlushMappedBufferRangeFUNC glFlushMappedBufferRange;
@@ -353,6 +357,10 @@ extern glBeginTransformFeedbackFUNC glBeginTransformFeedback;
 extern glEndTransformFeedbackFUNC glEndTransformFeedback;
 extern glTransformFeedbackVaryingsFUNC glTransformFeedbackVaryings;
 extern glGetTransformFeedbackVaryingFUNC glGetTransformFeedbackVarying;
+extern glClearBufferivFUNC glClearBufferiv;
+extern glClearBufferfvFUNC glClearBufferfv;
+extern glClearBufferuivFUNC glClearBufferuiv;
+extern glClearBufferfiFUNC glClearBufferfi;
 
 #endif		/* GL_VERSION_3_0 */
 

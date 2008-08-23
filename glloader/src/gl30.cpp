@@ -47,7 +47,7 @@ namespace
 		{
 			_GL_VERSION_3_0 = true;
 
-			entries_t entries(2);
+			entries_t entries(59);
 			{
 				entries[0] = reinterpret_cast<void**>(&glMapBufferRange);
 				entries[1] = reinterpret_cast<void**>(&glFlushMappedBufferRange);
@@ -104,9 +104,13 @@ namespace
 				entries[52] = reinterpret_cast<void**>(&glEndTransformFeedback);
 				entries[53] = reinterpret_cast<void**>(&glTransformFeedbackVaryings);
 				entries[54] = reinterpret_cast<void**>(&glGetTransformFeedbackVarying);
+				entries[55] = reinterpret_cast<void**>(&glClearBufferiv);
+				entries[56] = reinterpret_cast<void**>(&glClearBufferfv);
+				entries[57] = reinterpret_cast<void**>(&glClearBufferuiv);
+				entries[58] = reinterpret_cast<void**>(&glClearBufferfi);
 			}
 
-			funcs_names_t names(6);
+			funcs_names_t names(59);
 			{
 				names[0] = "glMapBufferRange";
 				names[1] = "glFlushMappedBufferRange";
@@ -163,6 +167,10 @@ namespace
 				names[52] = "glEndTransformFeedback";
 				names[53] = "glTransformFeedbackVaryings";
 				names[54] = "glGetTransformFeedbackVarying";
+				names[55] = "glClearBufferiv";
+				names[56] = "glClearBufferfv";
+				names[57] = "glClearBufferuiv";
+				names[58] = "glClearBufferfi";
 			}
 
 			load_funcs(entries, names);
@@ -565,6 +573,27 @@ namespace
 		glloader_init();
 		return glGetTransformFeedbackVarying(program, index, bufSize, length, size, type, name);
 	}
+	void APIENTRY self_init_glClearBufferiv(GLenum buffer, GLint const * value)
+	{
+		glloader_init();
+		return glClearBufferiv(buffer, value);
+	}
+	void APIENTRY self_init_glClearBufferfv(GLenum buffer, GLfloat const * value)
+	{
+		glloader_init();
+		return glClearBufferfv(buffer, value);
+	}
+	void APIENTRY self_init_glClearBufferuiv(GLenum buffer, GLuint const * value)
+	{
+		glloader_init();
+		return glClearBufferuiv(buffer, value);
+	}
+	void APIENTRY self_init_glClearBufferfi(GLenum buffer, GLfloat depth, GLint stencil)
+	{
+		glloader_init();
+		return glClearBufferfi(buffer, depth, stencil);
+	}
+
 }
 
 glMapBufferRangeFUNC glMapBufferRange = self_init_glMapBufferRange;
@@ -621,6 +650,10 @@ glBeginTransformFeedbackFUNC glBeginTransformFeedback = self_init_glBeginTransfo
 glEndTransformFeedbackFUNC glEndTransformFeedback = self_init_glEndTransformFeedback;
 glTransformFeedbackVaryingsFUNC glTransformFeedbackVaryings = self_init_glTransformFeedbackVaryings;
 glGetTransformFeedbackVaryingFUNC glGetTransformFeedbackVarying = self_init_glGetTransformFeedbackVarying;
+glClearBufferivFUNC glClearBufferiv = self_init_glClearBufferiv;
+glClearBufferfvFUNC glClearBufferfv = self_init_glClearBufferfv;
+glClearBufferuivFUNC glClearBufferuiv = self_init_glClearBufferuiv;
+glClearBufferfiFUNC glClearBufferfi = self_init_glClearBufferfi;
 
 #endif		// GL_VERSION_3_0
 
