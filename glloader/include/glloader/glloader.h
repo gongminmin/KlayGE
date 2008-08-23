@@ -139,13 +139,13 @@ typedef unsigned int	GLenum;
 typedef ptrdiff_t		GLintptr;
 typedef ptrdiff_t		GLsizeiptr;
 typedef unsigned int	GLbitfield;
+typedef unsigned short	GLhalf;
 typedef float			GLfloat;
 typedef float			GLclampf;
 typedef double			GLdouble;
 typedef double			GLclampd;
 typedef int             GLfixed;
 typedef int             GLclampx;
-
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 	#include <inttypes.h>
 	typedef int64_t		GLint64;
@@ -187,6 +187,7 @@ typedef int             GLclampx;
 	typedef int64_t		GLint64;
 	typedef uint64_t	GLuint64;
 #endif
+typedef GLint64			GLtime;
 
 #ifdef __cplusplus
 extern "C"
