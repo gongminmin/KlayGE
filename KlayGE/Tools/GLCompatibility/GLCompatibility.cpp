@@ -1,4 +1,8 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Context.hpp>
+#include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/App3D.hpp>
+#include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Script.hpp>
 
 #include <iostream>
@@ -18,7 +22,9 @@
 #endif
 
 #include <glloader/glloader.h>
-#include <gl/glut.h>
+#include <KlayGE/OpenGL/OGLRenderFactory.hpp>
+
+using namespace KlayGE;
 
 namespace
 {
@@ -92,13 +98,34 @@ namespace
 	};
 }
 
-int main(int argc, char* argv[])
+class EmptyApp : public KlayGE::App3DFramework
 {
-	::glutInit(&argc, argv);
-	::glutInitDisplayMode(GLUT_RGB);
-	::glutInitWindowSize(0, 0);
-	::glutInitWindowPosition(0, 0);
-	::glutCreateWindow("GL Compatibility");
+public:
+	EmptyApp(std::string const & name, KlayGE::RenderSettings const & settings)
+		: App3DFramework(name, settings)
+	{
+	}
+
+	uint32_t DoUpdate(uint32_t /*pass*/)
+	{
+		return URV_Finished;
+	}
+};
+
+int main()
+{
+	using namespace KlayGE;
+
+	Context::Instance().RenderFactoryInstance(OGLRenderFactoryInstance());
+
+	RenderSettings settings;
+	settings.width = 800;
+	settings.height = 600;
+	settings.color_fmt = EF_ARGB8;
+	settings.full_screen = false;
+
+	EmptyApp app("GL Compatibility", settings);
+	app.Create();
 
 	std::string const info_file_name("info.xml");
 
@@ -112,6 +139,5 @@ int main(int argc, char* argv[])
 
 	module.Call("gl_compatibility", boost::make_tuple(info_file_name));
 
-	std::cout << "Press Enter key to exit...";
-	std::cin.get();
+	return 0;
 }
