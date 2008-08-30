@@ -1,0 +1,499 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_VERSION_1_2">
+	<tokens>
+		<token name="GL_UNSIGNED_BYTE_3_3_2" value="0x8032"/>
+		<token name="GL_UNSIGNED_SHORT_4_4_4_4" value="0x8033"/>
+		<token name="GL_UNSIGNED_SHORT_5_5_5_1" value="0x8034"/>
+		<token name="GL_UNSIGNED_INT_8_8_8_8" value="0x8035"/>
+		<token name="GL_UNSIGNED_INT_10_10_10_2" value="0x8036"/>
+		<token name="GL_RESCALE_NORMAL" value="0x803A"/>
+		<token name="GL_TEXTURE_BINDING_3D" value="0x806A"/>
+		<token name="GL_PACK_SKIP_IMAGES" value="0x806B"/>
+		<token name="GL_PACK_IMAGE_HEIGHT" value="0x806C"/>
+		<token name="GL_UNPACK_SKIP_IMAGES" value="0x806D"/>
+		<token name="GL_UNPACK_IMAGE_HEIGHT" value="0x806E"/>
+		<token name="GL_TEXTURE_3D" value="0x806F"/>
+		<token name="GL_PROXY_TEXTURE_3D" value="0x8070"/>
+		<token name="GL_TEXTURE_DEPTH" value="0x8071"/>
+		<token name="GL_TEXTURE_WRAP_R" value="0x8072"/>
+		<token name="GL_MAX_3D_TEXTURE_SIZE" value="0x8073"/>
+		<token name="GL_UNSIGNED_BYTE_2_3_3_REV" value="0x8362"/>
+		<token name="GL_UNSIGNED_SHORT_5_6_5" value="0x8363"/>
+		<token name="GL_UNSIGNED_SHORT_5_6_5_REV" value="0x8364"/>
+		<token name="GL_UNSIGNED_SHORT_4_4_4_4_REV" value="0x8365"/>
+		<token name="GL_UNSIGNED_SHORT_1_5_5_5_REV" value="0x8366"/>
+		<token name="GL_UNSIGNED_INT_8_8_8_8_REV" value="0x8367"/>
+		<token name="GL_UNSIGNED_INT_2_10_10_10_REV" value="0x8368"/>
+		<token name="GL_BGR" value="0x80E0"/>
+		<token name="GL_BGRA" value="0x80E1"/>
+		<token name="GL_MAX_ELEMENTS_VERTICES" value="0x80E8"/>
+		<token name="GL_MAX_ELEMENTS_INDICES" value="0x80E9"/>
+		<token name="GL_CLAMP_TO_EDGE" value="0x812F"/>
+		<token name="GL_TEXTURE_MIN_LOD" value="0x813A"/>
+		<token name="GL_TEXTURE_MAX_LOD" value="0x813B"/>
+		<token name="GL_TEXTURE_BASE_LEVEL" value="0x813C"/>
+		<token name="GL_TEXTURE_MAX_LEVEL" value="0x813D"/>
+		<token name="GL_LIGHT_MODEL_COLOR_CONTROL" value="0x81F8"/>
+		<token name="GL_SINGLE_COLOR" value="0x81F9"/>
+		<token name="GL_SEPARATE_SPECULAR_COLOR" value="0x81FA"/>
+		<token name="GL_SMOOTH_POINT_SIZE_RANGE" value="0x0B12"/>
+		<token name="GL_SMOOTH_POINT_SIZE_GRANULARITY" value="0x0B13"/>
+		<token name="GL_SMOOTH_LINE_WIDTH_RANGE" value="0x0B22"/>
+		<token name="GL_SMOOTH_LINE_WIDTH_GRANULARITY" value="0x0B23"/>
+		<token name="GL_ALIASED_POINT_SIZE_RANGE" value="0x846D"/>
+		<token name="GL_ALIASED_LINE_WIDTH_RANGE" value="0x846E"/>
+	</tokens>
+
+	<functions>
+		<function name="glBlendColor" return="void">
+			<params>
+				<param type="GLclampf" name="red"/>
+				<param type="GLclampf" name="green"/>
+				<param type="GLclampf" name="blue"/>
+				<param type="GLclampf" name="alpha"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_blend_color" name="glBlendColorEXT"/>
+			</mappings>
+		</function>
+		<function name="glBlendEquation" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_blend_minmax" name="glBlendEquationEXT"/>
+			</mappings>
+		</function>
+		<function name="glDrawRangeElements" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLuint" name="start"/>
+				<param type="GLuint" name="end"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="indices"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_draw_range_elements" name="glDrawRangeElementsEXT"/>
+			</mappings>
+		</function>
+		<function name="glColorTable" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="table"/>
+			</params>
+			<mappings>
+				<mapping from="GL_SGI_color_table" name="glColorTableSGI"/>
+			</mappings>
+		</function>
+		<function name="glColorTableParameterfv" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GL_SGI_color_table" name="glColorTableParameterfvSGI"/>
+			</mappings>
+		</function>
+		<function name="glColorTableParameteriv" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GL_SGI_color_table" name="glColorTableParameterivSGI"/>
+			</mappings>
+		</function>
+		<function name="glCopyColorTable" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+			</params>
+			<mappings>
+				<mapping from="GL_SGI_color_table" name="glCopyColorTableSGI"/>
+			</mappings>
+		</function>
+		<function name="glGetColorTable" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLvoid*" name="table"/>
+			</params>
+			<mappings>
+				<mapping from="GL_SGI_color_table" name="glGetColorTableSGI"/>
+			</mappings>
+		</function>
+		<function name="glGetColorTableParameterfv" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GL_SGI_color_table" name="glGetColorTableParameterfvSGI"/>
+			</mappings>
+		</function>
+		<function name="glGetColorTableParameteriv" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GL_SGI_color_table" name="glGetColorTableParameterivSGI"/>
+			</mappings>
+		</function>
+		<function name="glColorSubTable" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="start"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="data"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_color_subtable" name="glColorSubTableEXT"/>
+			</mappings>
+		</function>
+		<function name="glCopyColorSubTable" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="start"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_color_subtable" name="glCopyColorSubTableEXT"/>
+			</mappings>
+		</function>
+		<function name="glConvolutionFilter1D" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="image"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_convolution" name="glConvolutionFilter1DEXT"/>
+			</mappings>
+		</function>
+		<function name="glConvolutionFilter2D" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="image"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_convolution" name="glConvolutionFilter2DEXT"/>
+			</mappings>
+		</function>
+		<function name="glConvolutionParameterf" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_convolution" name="glConvolutionParameterfEXT"/>
+			</mappings>
+		</function>
+		<function name="glConvolutionParameterfv" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_convolution" name="glConvolutionParameterfvEXT"/>
+			</mappings>
+		</function>
+		<function name="glConvolutionParameteri" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_convolution" name="glConvolutionParameteriEXT"/>
+			</mappings>
+		</function>
+		<function name="glConvolutionParameteriv" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_convolution" name="glConvolutionParameterivEXT"/>
+			</mappings>
+		</function>
+		<function name="glCopyConvolutionFilter1D" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_convolution" name="glCopyConvolutionFilter1DEXT"/>
+			</mappings>
+		</function>
+		<function name="glCopyConvolutionFilter2D" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_convolution" name="glCopyConvolutionFilter2DEXT"/>
+			</mappings>
+		</function>
+		<function name="glGetConvolutionFilter" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLvoid*" name="image"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_convolution" name="glGetConvolutionFilterEXT"/>
+			</mappings>
+		</function>
+		<function name="glGetConvolutionParameterfv" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_convolution" name="glGetConvolutionParameterfvEXT"/>
+			</mappings>
+		</function>
+		<function name="glGetConvolutionParameteriv" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_convolution" name="glGetConvolutionParameterivEXT"/>
+			</mappings>
+		</function>
+		<function name="glGetSeparableFilter" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLvoid*" name="row"/>
+				<param type="GLvoid*" name="column"/>
+				<param type="GLvoid*" name="span"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_convolution" name="glGetSeparableFilterEXT"/>
+			</mappings>
+		</function>
+		<function name="glSeparableFilter2D" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="row"/>
+				<param type="const GLvoid*" name="column"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_convolution" name="glSeparableFilter2DEXT"/>
+			</mappings>
+		</function>
+		<function name="glGetHistogram" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLboolean" name="reset"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLvoid*" name="values"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_histogram" name="glGetHistogramEXT"/>
+			</mappings>
+		</function>
+		<function name="glGetHistogramParameterfv" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_histogram" name="glGetHistogramParameterfvEXT"/>
+			</mappings>
+		</function>
+		<function name="glGetHistogramParameteriv" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_histogram" name="glGetHistogramParameterivEXT"/>
+			</mappings>
+		</function>
+		<function name="glGetMinmax" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLboolean" name="reset"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLvoid*" name="values"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_histogram" name="glGetMinmaxEXT"/>
+			</mappings>
+		</function>
+		<function name="glGetMinmaxParameterfv" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_histogram" name="glGetMinmaxParameterfvEXT"/>
+			</mappings>
+		</function>
+		<function name="glGetMinmaxParameteriv" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_histogram" name="glGetMinmaxParameterivEXT"/>
+			</mappings>
+		</function>
+		<function name="glHistogram" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLboolean" name="sink"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_histogram" name="glHistogramEXT"/>
+			</mappings>
+		</function>
+		<function name="glMinmax" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLboolean" name="sink"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_histogram" name="glMinmaxEXT"/>
+			</mappings>
+		</function>
+		<function name="glResetHistogram" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_histogram" name="glResetHistogramEXT"/>
+			</mappings>
+		</function>
+		<function name="glResetMinmax" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_histogram" name="glResetMinmaxEXT"/>
+			</mappings>
+		</function>
+		<function name="glTexImage3D" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLenum" name="internalFormat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLint" name="border"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="pixels"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_texture3D" name="glTexImage3DEXT"/>
+			</mappings>
+		</function>
+		<function name="glTexSubImage3D" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="yoffset"/>
+				<param type="GLint" name="zoffset"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="pixels"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_texture3D" name="glTexSubImage3DEXT"/>
+			</mappings>
+		</function>
+		<function name="glCopyTexSubImage3D" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="yoffset"/>
+				<param type="GLint" name="zoffset"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_texture3D" name="glCopyTexSubImage3DEXT"/>
+			</mappings>
+		</function>
+	</functions>
+
+	<additionals>
+		<ext name="GL_EXT_bgra"/>
+		<ext name="GL_EXT_packed_pixels"/>
+		<ext name="GL_EXT_rescale_normal"/>
+		<ext name="GL_EXT_separate_specular_color"/>
+		<ext name="GL_SGIS_texture_edge_clamp"/>
+		<ext name="GL_SGIS_texture_lod"/>
+		<ext name="GL_ARB_imaging"/>
+		<ext name="GL_HP_convolution_border_modes"/>
+		<ext name="GL_SGI_color_matrix"/>
+		<ext name="GL_EXT_blend_subtract"/>
+	</additionals>
+</gl_extension>

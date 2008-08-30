@@ -1,6 +1,11 @@
 <?xml version='1.0'?>
 
 <gl_extension name="GL_ARB_vertex_buffer_object" reg_no="28">
+	<typedefs>
+		<typedef type="ptrdiff_t" synonym="GLintptrARB"/>
+		<typedef type="ptrdiff_t" synonym="GLsizeiptrARB"/>
+	</typedefs>
+
 	<tokens>
 		<token name="GL_ARRAY_BUFFER_ARB" value="0x8892"/>
 		<token name="GL_ELEMENT_ARRAY_BUFFER_ARB" value="0x8893"/>
@@ -45,7 +50,7 @@
 		<function name="glBufferDataARB" return="void">
 			<params>
 				<param type="GLenum" name="target"/>
-				<param type="GLsizeiptr" name="size"/>
+				<param type="GLsizeiptrARB" name="size"/>
 				<param type="const GLvoid*" name="data"/>
 				<param type="GLenum" name="usage"/>
 			</params>
@@ -53,8 +58,8 @@
 		<function name="glBufferSubDataARB" return="void">
 			<params>
 				<param type="GLenum" name="target"/>
-				<param type="GLintptr" name="offset"/>
-				<param type="GLsizeiptr" name="size"/>
+				<param type="GLintptrARB" name="offset"/>
+				<param type="GLsizeiptrARB" name="size"/>
 				<param type="const GLvoid*" name="data"/>
 			</params>
 		</function>
@@ -87,8 +92,8 @@
 		<function name="glGetBufferSubDataARB" return="void">
 			<params>
 				<param type="GLenum" name="target"/>
-				<param type="GLintptr" name="offset"/>
-				<param type="GLsizeiptr" name="size"/>
+				<param type="GLintptrARB" name="offset"/>
+				<param type="GLsizeiptrARB" name="size"/>
 				<param type="GLvoid*" name="data"/>
 			</params>
 		</function>

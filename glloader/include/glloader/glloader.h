@@ -210,13 +210,6 @@ void* glloader_get_gl_proc_address(const char* name);
 #ifdef GLLOADER_GL
 #include <glloader/gl10.h>
 #include <glloader/gl11.h>
-#include <glloader/gl12.h>
-#include <glloader/gl13.h>
-#include <glloader/gl14.h>
-#include <glloader/gl15.h>
-#include <glloader/gl20.h>
-#include <glloader/gl21.h>
-#include <glloader/gl30.h>
 #include <glloader/glloader_gl.h>
 #endif
 

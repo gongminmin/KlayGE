@@ -21,6 +21,9 @@ GPLNotice = """// glloader
 
 class Typedef:
 	def __init__(self, type_name, synonym):
+		assert len(type_name) > 0
+		assert len(synonym) > 0
+
 		self.type_name = type_name
 		self.synonym = synonym
 
@@ -29,6 +32,9 @@ class Typedef:
 
 class Token:
 	def __init__(self, name, value):
+		assert len(name) > 0
+		assert len(value) > 0
+
 		self.name = name
 		self.value = value
 
@@ -37,6 +43,9 @@ class Token:
 
 class Param:
 	def __init__(self, type_name, name):
+		assert len(type_name) > 0
+		assert len(name) > 0
+
 		self.type_name = type_name
 		self.name = name
 
@@ -45,11 +54,17 @@ class Param:
 
 class Mapping:
 	def __init__(self, from_ext, name):
+		assert len(from_ext) > 0
+		assert len(name) > 0
+
 		self.from_ext = from_ext
 		self.name = name
 
 class Function:
 	def __init__(self, return_type, name, params, mappings):
+		assert len(return_type) > 0
+		assert len(name) > 0
+
 		self.return_type = return_type
 		self.name = name
 		self.params = params
@@ -119,6 +134,18 @@ class Extension:
 				self.functions.append(Function(function.getAttribute("return"),
 							function.getAttribute("name"),
 							params, mappings))
+
+		self.additionals = []
+		additionalsTag = dom.documentElement.getElementsByTagName("additionals")
+		if (len(additionalsTag) != 0):
+			for ext_tag in additionalsTag[0].getElementsByTagName("ext"):
+				if ext_tag.parentNode == additionalsTag[0]:
+					self.additionals.append([ext_tag.getAttribute("name")])
+			for one_of_tag in additionalsTag[0].getElementsByTagName("one_of"):
+				one_of = []
+				for ext in one_of_tag.getElementsByTagName("ext"):
+					one_of.append(ext.getAttribute("name"))
+				self.additionals.append(one_of)
 
 def create_header(prefix, extensions):
 	headerFile = open("include/glloader/glloader_%s.h" % prefix.lower(), "w")
@@ -316,43 +343,46 @@ def create_source(prefix, extensions):
 				for i in range(0, len(plan[0])):
 					sourceFile.write("\t\t\t")
 					if i != 0:
-						sourceFile.write("else")
+						sourceFile.write("else ")
 					sourceFile.write("if (glloader_is_supported(\"%s\"))\n" % plan[0][i])
 					sourceFile.write("\t\t\t{\n")
 					for j in range(0, len(plan[1])):
 						sourceFile.write("\t\t\t\tnames[%d] = \"%s\";\n" % (plan[1][j], extension.functions[plan[1][j]].mappings[i].name))
 
-					if all_covered and len(plans) == 1:
+					if all_covered and len(plans) == 1 and len(extension.additionals) == 0:
 						sourceFile.write("\n\t\t\t\t_%s = true;\n" % extension.name)
 						sourceFile.write("\t\t\t\tgl_features_extractor::instance().promote(\"%s\");\n" % extension.name)
 
 					sourceFile.write("\t\t\t}\n")
 
-					if i != len(plan[0]) - 1:
-						sourceFile.write("\n")
-
 			if all_covered and len(plans) > 1:
-				sourceFile.write("\n\t\t\tif (")
-				for i in range(0, len(plans)):
-					plan = plans[i]
+				all_backup_exts = []
+				for plan in plans:
+					all_backup_exts.append(plan[0])
+				for addi in extension.additionals:
+					all_backup_exts.append(addi)
 
-					if len(plan[0]) > 1:
+				sourceFile.write("\n\t\t\tif (")
+				for i in range(0, len(all_backup_exts)):
+					plan = all_backup_exts[i]
+
+					if len(plan) > 1:
 						sourceFile.write("(")
 
-					for j in range(0, len(plan[0])):
-						sourceFile.write("glloader_is_supported(\"%s\")" % plan[0][j])
-						if j != len(plan[0]) - 1:
+					for j in range(0, len(plan)):
+						sourceFile.write("glloader_is_supported(\"%s\")" % plan[j])
+						if j != len(plan) - 1:
 							sourceFile.write(" || ")
 
-					if len(plan[0]) > 1:
+					if len(plan) > 1:
 						sourceFile.write(")")
-					if i != len(plans) - 1:
+					if i != len(all_backup_exts) - 1:
 						sourceFile.write("\n")
 
-					if len(plans) > 1 and i != len(plans) - 1:
+					if len(all_backup_exts) > 1 and i != len(all_backup_exts) - 1:
 						sourceFile.write("\t\t\t\t&& ")
 
-					if i == len(plans) - 1:
+					if i == len(all_backup_exts) - 1:
 						sourceFile.write(")\n")
 				sourceFile.write("\t\t\t{\n")
 				sourceFile.write("\t\t\t\t_%s = true;\n" % extension.name)
@@ -362,7 +392,10 @@ def create_source(prefix, extensions):
 			sourceFile.write("\t\t}\n")
 
 		if (len(extension.functions) != 0):
-			sourceFile.write("\n\t\tload_funcs(entries, names);\n")
+			sourceFile.write("\n\t\tif (_%s)\n" % extension.name)
+			sourceFile.write("\t\t{\n")
+			sourceFile.write("\t\t\tload_funcs(entries, names);\n")
+			sourceFile.write("\t\t}\n")
 
 		sourceFile.write("\t}\n")
 

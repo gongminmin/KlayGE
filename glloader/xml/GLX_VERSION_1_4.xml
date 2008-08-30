@@ -15,6 +15,9 @@
 			<params>
 				<param type="const GLubyte*" name="procName"/>
 			</params>
+			<mappings>
+				<mapping from="GLX_ARB_get_proc_address" name="glXGetProcAddressARB"/>
+			</mappings>
 		</function>
 	</functions>
 </gl_extension>

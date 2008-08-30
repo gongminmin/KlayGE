@@ -1,6 +1,11 @@
 <?xml version='1.0'?>
 
 <gl_extension name="GL_EXT_timer_query" reg_no="319">
+	<typedefs>
+		<typedef type="GLint64" synonym="GLint64EXT"/>
+		<typedef type="GLuint64" synonym="GLuint64EXT"/>
+	</typedefs>
+
 	<tokens>
 		<token name="GL_TIME_ELAPSED_EXT" value="0x88BF"/>
 	</tokens>
@@ -10,14 +15,14 @@
 			<params>
 				<param type="GLuint" name="id"/>
 				<param type="GLenum" name="pname"/>
-				<param type="GLint64*" name="params"/>
+				<param type="GLint64EXT*" name="params"/>
 			</params>
 		</function>
 		<function name="glGetQueryObjectui64vEXT" return="void">
 			<params>
 				<param type="GLuint" name="id"/>
 				<param type="GLenum" name="pname"/>
-				<param type="GLuint64*" name="params"/>
+				<param type="GLuint64EXT*" name="params"/>
 			</params>
 		</function>
 	</functions>

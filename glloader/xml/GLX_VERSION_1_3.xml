@@ -76,6 +76,9 @@
 				<param type="const int*" name="attrib_list"/>
 				<param type="int*" name="nelements"/>
 			</params>
+			<mappings>
+				<mapping from="GLX_SGIX_fbconfig" name="glXChooseFBConfigSGIX"/>
+			</mappings>
 		</function>
 		<function name="glXGetFBConfigs" return="GLXFBConfig*">
 			<params>
@@ -89,6 +92,9 @@
 				<param type="Display*" name="dpy"/>
 				<param type="GLXFBConfig" name="config"/>
 			</params>
+			<mappings>
+				<mapping from="GLX_SGIX_fbconfig" name="glXGetVisualFromFBConfigSGIX"/>
+			</mappings>
 		</function>
 		<function name="glXGetFBConfigAttrib" return="int">
 			<params>
@@ -97,6 +103,9 @@
 				<param type="int" name="attribute"/>
 				<param type="int*" name="value"/>
 			</params>
+			<mappings>
+				<mapping from="GLX_SGIX_fbconfig" name="glXGetFBConfigAttribSGIX"/>
+			</mappings>
 		</function>
 		<function name="glXCreateWindow" return="GLXWindow">
 			<params>
@@ -179,6 +188,9 @@
 				<param type="GLXDrawable" name="draw"/>
 				<param type="unsigned long" name="event_mask"/>
 			</params>
+			<mappings>
+				<mapping from="GLX_SGIX_pbuffer" name="glXSelectEventSGIX"/>
+			</mappings>
 		</function>
 		<function name="glXGetSelectedEvent" return="void">
 			<params>
@@ -186,6 +198,9 @@
 				<param type="GLXDrawable" name="draw"/>
 				<param type="unsigned long*" name="event_mask"/>
 			</params>
+			<mappings>
+				<mapping from="GLX_SGIX_pbuffer" name="glXGetSelectedEventSGIX"/>
+			</mappings>
 		</function>
 	</functions>
 </gl_extension>

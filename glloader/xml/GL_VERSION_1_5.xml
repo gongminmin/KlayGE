@@ -1,0 +1,241 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_VERSION_1_5">
+	<tokens>
+		<token name="GL_BUFFER_SIZE" value="0x8764"/>
+		<token name="GL_BUFFER_USAGE" value="0x8765"/>
+		<token name="GL_QUERY_COUNTER_BITS" value="0x8864"/>
+		<token name="GL_CURRENT_QUERY" value="0x8865"/>
+		<token name="GL_QUERY_RESULT" value="0x8866"/>
+		<token name="GL_QUERY_RESULT_AVAILABLE" value="0x8867"/>
+		<token name="GL_ARRAY_BUFFER" value="0x8892"/>
+		<token name="GL_ELEMENT_ARRAY_BUFFER" value="0x8893"/>
+		<token name="GL_ARRAY_BUFFER_BINDING" value="0x8894"/>
+		<token name="GL_ELEMENT_ARRAY_BUFFER_BINDING" value="0x8895"/>
+		<token name="GL_VERTEX_ARRAY_BUFFER_BINDING" value="0x8896"/>
+		<token name="GL_NORMAL_ARRAY_BUFFER_BINDING" value="0x8897"/>
+		<token name="GL_COLOR_ARRAY_BUFFER_BINDING" value="0x8898"/>
+		<token name="GL_INDEX_ARRAY_BUFFER_BINDING" value="0x8899"/>
+		<token name="GL_TEXTURE_COORD_ARRAY_BUFFER_BINDING" value="0x889A"/>
+		<token name="GL_EDGE_FLAG_ARRAY_BUFFER_BINDING" value="0x889B"/>
+		<token name="GL_SECONDARY_COLOR_ARRAY_BUFFER_BINDING" value="0x889C"/>
+		<token name="GL_FOG_COORD_ARRAY_BUFFER_BINDING" value="0x889D"/>
+		<token name="GL_WEIGHT_ARRAY_BUFFER_BINDING" value="0x889E"/>
+		<token name="GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING" value="0x889F"/>
+		<token name="GL_READ_ONLY" value="0x88B8"/>
+		<token name="GL_WRITE_ONLY" value="0x88B9"/>
+		<token name="GL_READ_WRITE" value="0x88BA"/>
+		<token name="GL_BUFFER_ACCESS" value="0x88BB"/>
+		<token name="GL_BUFFER_MAPPED" value="0x88BC"/>
+		<token name="GL_BUFFER_MAP_POINTER" value="0x88BD"/>
+		<token name="GL_STREAM_DRAW" value="0x88E0"/>
+		<token name="GL_STREAM_READ" value="0x88E1"/>
+		<token name="GL_STREAM_COPY" value="0x88E2"/>
+		<token name="GL_STATIC_DRAW" value="0x88E4"/>
+		<token name="GL_STATIC_READ" value="0x88E5"/>
+		<token name="GL_STATIC_COPY" value="0x88E6"/>
+		<token name="GL_DYNAMIC_DRAW" value="0x88E8"/>
+		<token name="GL_DYNAMIC_READ" value="0x88E9"/>
+		<token name="GL_DYNAMIC_COPY" value="0x88EA"/>
+		<token name="GL_SAMPLES_PASSED" value="0x8914"/>
+		<token name="GL_FOG_COORD_SRC" value="GL_FOG_COORDINATE_SRC"/>
+		<token name="GL_FOG_COORD" value="GL_FOG_COORDINATE"/>
+		<token name="GL_CURRENT_FOG_COORD" value="GL_CURRENT_FOG_COORDINATE"/>
+		<token name="GL_FOG_COORD_ARRAY_TYPE" value="GL_FOG_COORDINATE_ARRAY_TYPE"/>
+		<token name="GL_FOG_COORD_ARRAY_STRIDE" value="GL_FOG_COORDINATE_ARRAY_STRIDE"/>
+		<token name="GL_FOG_COORD_ARRAY_POINTER	" value="GL_FOG_COORDINATE_ARRAY_POINTER"/>
+		<token name="GL_FOG_COORD_ARRAY" value="GL_FOG_COORDINATE_ARRAY"/>
+		<token name="GL_SRC0_RGB" value="GL_SOURCE0_RGB"/>
+		<token name="GL_SRC1_RGB" value="GL_SOURCE1_RGB"/>
+		<token name="GL_SRC2_RGB" value="GL_SOURCE2_RGB"/>
+		<token name="GL_SRC0_ALPHA" value="GL_SOURCE0_ALPHA"/>
+		<token name="GL_SRC1_ALPHA" value="GL_SOURCE1_ALPHA"/>
+		<token name="GL_SRC2_ALPHA" value="GL_SOURCE2_ALPHA"/>
+	</tokens>
+
+	<functions>
+		<function name="glGenQueries" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="ids"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_occlusion_query" name="glGenQueriesARB"/>
+			</mappings>
+		</function>
+		<function name="glDeleteQueries" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="const GLuint*" name="ids"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_occlusion_query" name="glDeleteQueriesARB"/>
+			</mappings>
+		</function>
+		<function name="glIsQuery" return="GLboolean">
+			<params>
+				<param type="GLuint" name="id"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_occlusion_query" name="glIsQueryARB"/>
+			</mappings>
+		</function>
+		<function name="glBeginQuery" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="id"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_occlusion_query" name="glBeginQueryARB"/>
+			</mappings>
+		</function>
+		<function name="glEndQuery" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_occlusion_query" name="glEndQueryARB"/>
+			</mappings>
+		</function>
+		<function name="glGetQueryiv" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="param"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_occlusion_query" name="glGetQueryivARB"/>
+			</mappings>
+		</function>
+		<function name="glGetQueryObjectiv" return="void">
+			<params>
+				<param type="GLuint" name="id"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_occlusion_query" name="glGetQueryObjectivARB"/>
+			</mappings>
+		</function>
+		<function name="glGetQueryObjectuiv" return="void">
+			<params>
+				<param type="GLuint" name="id"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_occlusion_query" name="glGetQueryObjectuivARB"/>
+			</mappings>
+		</function>
+		<function name="glBindBuffer" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="buffer"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_vertex_buffer_object" name="glBindBufferARB"/>
+			</mappings>
+		</function>
+		<function name="glDeleteBuffers" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="const GLuint*" name="buffers"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_vertex_buffer_object" name="glDeleteBuffersARB"/>
+			</mappings>
+		</function>
+		<function name="glGenBuffers" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="buffers"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_vertex_buffer_object" name="glGenBuffersARB"/>
+			</mappings>
+		</function>
+		<function name="glIsBuffer" return="GLboolean">
+			<params>
+				<param type="GLuint" name="buffer"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_vertex_buffer_object" name="glIsBufferARB"/>
+			</mappings>
+		</function>
+		<function name="glBufferData" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizeiptr" name="size"/>
+				<param type="const GLvoid*" name="data"/>
+				<param type="GLenum" name="usage"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_vertex_buffer_object" name="glBufferDataARB"/>
+			</mappings>
+		</function>
+		<function name="glBufferSubData" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLintptr" name="offset"/>
+				<param type="GLsizeiptr" name="size"/>
+				<param type="const GLvoid*" name="data"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_vertex_buffer_object" name="glBufferSubDataARB"/>
+			</mappings>
+		</function>
+		<function name="glGetBufferSubData" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLintptr" name="offset"/>
+				<param type="GLsizeiptr" name="size"/>
+				<param type="GLvoid*" name="data"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_vertex_buffer_object" name="glGetBufferSubDataARB"/>
+			</mappings>
+		</function>
+		<function name="glMapBuffer" return="GLvoid*">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="access"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_vertex_buffer_object" name="glMapBufferARB"/>
+			</mappings>
+		</function>
+		<function name="glUnmapBuffer" return="GLboolean">
+			<params>
+				<param type="GLenum" name="target"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_vertex_buffer_object" name="glUnmapBufferARB"/>
+			</mappings>
+		</function>
+		<function name="glGetBufferParameteriv" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_vertex_buffer_object" name="glGetBufferParameterivARB"/>
+			</mappings>
+		</function>
+		<function name="glGetBufferPointerv" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLvoid**" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_vertex_buffer_object" name="glGetBufferPointervARB"/>
+			</mappings>
+		</function>
+	</functions>
+
+	<additional>
+		<ext name="GL_ARB_depth_texture"/>
+		<ext name="GL_EXT_shadow_funcs"/>
+	</additional>
+</gl_extension>

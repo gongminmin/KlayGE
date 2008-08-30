@@ -287,34 +287,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\src\gl12.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\gl13.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\gl14.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\gl15.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\gl20.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\gl21.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\gl30.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\glloader_gl.cpp"
 				>
 			</File>
@@ -350,34 +322,6 @@
 			</File>
 			<File
 				RelativePath="..\..\include\glloader\gl11.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\glloader\gl12.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\glloader\gl13.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\glloader\gl14.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\glloader\gl15.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\glloader\gl20.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\glloader\gl21.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\glloader\gl30.h"
 				>
 			</File>
 			<File
