@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_IBM_texture_mirrored_repeat" reg_no="224" prefer="GL_ARB_texture_mirrored_repeat">
+	<tokens>
+		<token name="GL_MIRRORED_REPEAT_IBM" value="0x8370"/>
+	</tokens>
+</gl_extension>

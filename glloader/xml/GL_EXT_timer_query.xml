@@ -1,31 +1,24 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_EXT_timer_query">
-	<Tokens>
-		<Token name="GL_TIME_ELAPSED_EXT" value="0x88BF"/>
-	</Tokens>
+<gl_extension name="GL_EXT_timer_query" reg_no="319">
+	<tokens>
+		<token name="GL_TIME_ELAPSED_EXT" value="0x88BF"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glGetQueryObjecti64vEXT" return="void">
-			<Param type="GLuint" name="id"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLint64*" name="params"/>
-		</Function>
-		<Function name="glGetQueryObjectui64vEXT" return="void">
-			<Param type="GLuint" name="id"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLuint64*" name="params"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_timer_query" reg_no="319">
-			<Name name="glGetQueryObjecti64vEXT"/>
-			<Name name="glGetQueryObjectui64vEXT"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_EXT"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glGetQueryObjecti64vEXT" return="void">
+			<params>
+				<param type="GLuint" name="id"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint64*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetQueryObjectui64vEXT" return="void">
+			<params>
+				<param type="GLuint" name="id"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint64*" name="params"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

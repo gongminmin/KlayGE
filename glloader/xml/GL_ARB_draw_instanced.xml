@@ -1,35 +1,29 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_ARB_draw_instanced">
-	<Functions>
-		<Function name="glDrawArraysInstancedARB" return="void">
-			<Param type="GLenum" name="mode"/>
-			<Param type="GLint" name="first"/>
-			<Param type="GLsizei" name="count"/>
-			<Param type="GLsizei" name="primcount"/>
-		</Function>
-		<Function name="glDrawElementsInstancedARB" return="void">
-			<Param type="GLenum" name="mode"/>
-			<Param type="GLsizei" name="count"/>
-			<Param type="GLenum" name="type"/>
-			<Param type="const void*" name="indices"/>
-			<Param type="GLsizei" name="primcount"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_draw_instanced" reg_no="44">
-			<Name name="glDrawArraysInstancedARB"/>
-			<Name name="glDrawElementsInstancedARB"/>
-		</Vendor>
-		<Vendor name="GL_EXT" string="GL_EXT_draw_instanced" reg_no="327">
-			<Name name="glDrawArraysInstancedEXT"/>
-			<Name name="glDrawElementsInstancedEXT"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_ARB"/>
-		<Init name="GL_EXT"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_ARB_draw_instanced" reg_no="44">
+	<functions>
+		<function name="glDrawArraysInstancedARB" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLint" name="first"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLsizei" name="primcount"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_draw_instanced" name="glDrawArraysInstancedEXT"/>
+			</mappings>
+		</function>
+		<function name="glDrawElementsInstancedARB" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLenum" name="type"/>
+				<param type="const void*" name="indices"/>
+				<param type="GLsizei" name="primcount"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_draw_instanced" name="glDrawElementsInstancedEXT"/>
+			</mappings>
+		</function>
+	</functions>
+</gl_extension>

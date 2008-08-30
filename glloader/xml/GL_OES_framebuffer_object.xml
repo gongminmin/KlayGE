@@ -1,158 +1,166 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_OES_framebuffer_object">
-	<Tokens>
-		<Token name="GL_FRAMEBUFFER_OES" value="0x8D40"/>
-		<Token name="GL_RENDERBUFFER_OES" value="0x8D41"/>
-		<Token name="GL_RGB565_OES" value="0x8D62"/>
-		<Token name="GL_STENCIL_INDEX_OES" value="0x8D45"/>
-		<Token name="GL_RENDERBUFFER_WIDTH_OES" value="0x8D42"/>
-		<Token name="GL_RENDERBUFFER_HEIGHT_OES" value="0x8D43"/>
-		<Token name="GL_RENDERBUFFER_INTERNAL_FORMAT_OES" value="0x8D44"/>
-		<Token name="GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE_OES" value="0x8CD0"/>
-		<Token name="GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME_OES" value="0x8CD1"/>
-		<Token name="GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL_OES" value="0x8CD2"/>
-		<Token name="GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE_OES" value="0x8CD3"/>
-		<Token name="GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_3D_ZOFFSET_OES" value="0x8CD4"/>
-		<Token name="GL_COLOR_ATTACHMENT0_OES" value="0x8CE0"/>
-		<Token name="GL_COLOR_ATTACHMENT1_OES" value="0x8CE1"/>
-		<Token name="GL_COLOR_ATTACHMENT2_OES" value="0x8CE2"/>
-		<Token name="GL_COLOR_ATTACHMENT3_OES" value="0x8CE3"/>
-		<Token name="GL_COLOR_ATTACHMENT4_OES" value="0x8CE4"/>
-		<Token name="GL_COLOR_ATTACHMENT5_OES" value="0x8CE5"/>
-		<Token name="GL_COLOR_ATTACHMENT6_OES" value="0x8CE6"/>
-		<Token name="GL_COLOR_ATTACHMENT7_OES" value="0x8CE7"/>
-		<Token name="GL_COLOR_ATTACHMENT8_OES" value="0x8CE8"/>
-		<Token name="GL_COLOR_ATTACHMENT9_OES" value="0x8CE9"/>
-		<Token name="GL_COLOR_ATTACHMENT10_OES" value="0x8CEA"/>
-		<Token name="GL_COLOR_ATTACHMENT11_OES" value="0x8CEB"/>
-		<Token name="GL_COLOR_ATTACHMENT12_OES" value="0x8CEC"/>
-		<Token name="GL_COLOR_ATTACHMENT13_OES" value="0x8CED"/>
-		<Token name="GL_COLOR_ATTACHMENT14_OES" value="0x8CEE"/>
-		<Token name="GL_COLOR_ATTACHMENT15_OES" value="0x8CEF"/>
-		<Token name="GL_DEPTH_ATTACHMENT_OES" value="0x8D00"/>
-		<Token name="GL_STENCIL_ATTACHMENT_OES" value="0x8D20"/>
-		<Token name="GL_FRAMEBUFFER_COMPLETE_OES" value="0x8CD5"/>
-		<Token name="GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_OES" value="0x8CD6"/>
-		<Token name="GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_OES" value="0x8CD7"/>
-		<Token name="GL_FRAMEBUFFER_INCOMPLETE_DUPLICATE_ATTACHMENT_OES" value="0x8CD8"/>
-		<Token name="GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_OES" value="0x8CD9"/>
-		<Token name="GL_FRAMEBUFFER_INCOMPLETE_FORMATS_OES" value="0x8CDA"/>
-		<Token name="GL_FRAMEBUFFER_UNSUPPORTED_OES" value="0x8CDD"/>
-		<Token name="GL_FRAMEBUFFER_STATUS_ERROR_OES" value="0x8CDE"/>
-		<Token name="GL_FRAMEBUFFER_BINDING_OES" value="0x8CA6"/>
-		<Token name="GL_RENDERBUFFER_BINDING_OES" value="0x8CA7"/>
-		<Token name="GL_MAX_COLOR_ATTACHMENTS_OES" value="0x8CDF"/>
-		<Token name="GL_MAX_RENDERBUFFER_SIZE_OES" value="0x84E8"/>
-		<Token name="GL_INVALID_FRAMEBUFFER_OPERATION_OES" value="0x0506"/>
-	</Tokens>
+<gl_extension name="GL_OES_framebuffer_object">
+	<tokens>
+		<token name="GL_FRAMEBUFFER_OES" value="0x8D40"/>
+		<token name="GL_RENDERBUFFER_OES" value="0x8D41"/>
+		<token name="GL_RGB565_OES" value="0x8D62"/>
+		<token name="GL_STENCIL_INDEX_OES" value="0x8D45"/>
+		<token name="GL_RENDERBUFFER_WIDTH_OES" value="0x8D42"/>
+		<token name="GL_RENDERBUFFER_HEIGHT_OES" value="0x8D43"/>
+		<token name="GL_RENDERBUFFER_INTERNAL_FORMAT_OES" value="0x8D44"/>
+		<token name="GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE_OES" value="0x8CD0"/>
+		<token name="GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME_OES" value="0x8CD1"/>
+		<token name="GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL_OES" value="0x8CD2"/>
+		<token name="GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE_OES" value="0x8CD3"/>
+		<token name="GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_3D_ZOFFSET_OES" value="0x8CD4"/>
+		<token name="GL_COLOR_ATTACHMENT0_OES" value="0x8CE0"/>
+		<token name="GL_COLOR_ATTACHMENT1_OES" value="0x8CE1"/>
+		<token name="GL_COLOR_ATTACHMENT2_OES" value="0x8CE2"/>
+		<token name="GL_COLOR_ATTACHMENT3_OES" value="0x8CE3"/>
+		<token name="GL_COLOR_ATTACHMENT4_OES" value="0x8CE4"/>
+		<token name="GL_COLOR_ATTACHMENT5_OES" value="0x8CE5"/>
+		<token name="GL_COLOR_ATTACHMENT6_OES" value="0x8CE6"/>
+		<token name="GL_COLOR_ATTACHMENT7_OES" value="0x8CE7"/>
+		<token name="GL_COLOR_ATTACHMENT8_OES" value="0x8CE8"/>
+		<token name="GL_COLOR_ATTACHMENT9_OES" value="0x8CE9"/>
+		<token name="GL_COLOR_ATTACHMENT10_OES" value="0x8CEA"/>
+		<token name="GL_COLOR_ATTACHMENT11_OES" value="0x8CEB"/>
+		<token name="GL_COLOR_ATTACHMENT12_OES" value="0x8CEC"/>
+		<token name="GL_COLOR_ATTACHMENT13_OES" value="0x8CED"/>
+		<token name="GL_COLOR_ATTACHMENT14_OES" value="0x8CEE"/>
+		<token name="GL_COLOR_ATTACHMENT15_OES" value="0x8CEF"/>
+		<token name="GL_DEPTH_ATTACHMENT_OES" value="0x8D00"/>
+		<token name="GL_STENCIL_ATTACHMENT_OES" value="0x8D20"/>
+		<token name="GL_FRAMEBUFFER_COMPLETE_OES" value="0x8CD5"/>
+		<token name="GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_OES" value="0x8CD6"/>
+		<token name="GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_OES" value="0x8CD7"/>
+		<token name="GL_FRAMEBUFFER_INCOMPLETE_DUPLICATE_ATTACHMENT_OES" value="0x8CD8"/>
+		<token name="GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_OES" value="0x8CD9"/>
+		<token name="GL_FRAMEBUFFER_INCOMPLETE_FORMATS_OES" value="0x8CDA"/>
+		<token name="GL_FRAMEBUFFER_UNSUPPORTED_OES" value="0x8CDD"/>
+		<token name="GL_FRAMEBUFFER_STATUS_ERROR_OES" value="0x8CDE"/>
+		<token name="GL_FRAMEBUFFER_BINDING_OES" value="0x8CA6"/>
+		<token name="GL_RENDERBUFFER_BINDING_OES" value="0x8CA7"/>
+		<token name="GL_MAX_COLOR_ATTACHMENTS_OES" value="0x8CDF"/>
+		<token name="GL_MAX_RENDERBUFFER_SIZE_OES" value="0x84E8"/>
+		<token name="GL_INVALID_FRAMEBUFFER_OPERATION_OES" value="0x0506"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glIsRenderbufferOES" return="GLboolean">
-			<Param type="GLuint" name="renderbuffer"/>
-		</Function>
-		<Function name="glBindRenderbufferOES" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="renderbuffer"/>
-		</Function>
-		<Function name="glDeleteRenderbuffersOES" return="void">
-			<Param type="GLsizei" name="n"/>
-			<Param type="const GLuint*" name="renderbuffers"/>
-		</Function>
-		<Function name="glGenRenderbuffersOES" return="void">
-			<Param type="GLsizei" name="n"/>
-			<Param type="GLuint*" name="renderbuffers"/>
-		</Function>
-		<Function name="glRenderbufferStorageOES" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="internalformat"/>
-			<Param type="GLsizei" name="width"/>
-			<Param type="GLsizei" name="height"/>
-		</Function>
-		<Function name="glGetRenderbufferParameterivOES" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLint*" name="params"/>
-		</Function>
-		<Function name="glGetRenderbufferStorageFormatsivOES" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLint" name="n"/>
-			<Param type="GLint*" name="listofformats"/>
-			<Param type="GLint*" name="numsupportedformats"/>
-		</Function>
-		<Function name="glIsFramebufferOES" return="GLboolean">
-			<Param type="GLuint" name="framebuffer"/>
-		</Function>
-		<Function name="glBindFramebufferOES" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="framebuffer"/>
-		</Function>
-		<Function name="glDeleteFramebuffersOES" return="void">
-			<Param type="GLsizei" name="n"/>
-			<Param type="const GLuint*" name="framebuffers"/>
-		</Function>
-		<Function name="glGenFramebuffersOES" return="void">
-			<Param type="GLsizei" name="n"/>
-			<Param type="GLuint*" name="framebuffers"/>
-		</Function>
-		<Function name="glCheckFramebufferStatusOES" return="GLenum">
-			<Param type="GLenum" name="target"/>
-		</Function>
-		<Function name="glFramebufferTexture2DOES" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="attachment"/>
-			<Param type="GLenum" name="textarget"/>
-			<Param type="GLuint" name="texture"/>
-			<Param type="GLint" name="level"/>
-		</Function>
-		<Function name="glFramebufferTexture3DOES" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="attachment"/>
-			<Param type="GLenum" name="textarget"/>
-			<Param type="GLuint" name="texture"/>
-			<Param type="GLint" name="level"/>
-			<Param type="GLint" name="zoffset"/>
-		</Function>
-		<Function name="glFramebufferRenderbufferOES" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="attachment"/>
-			<Param type="GLenum" name="renderbuffertarget"/>
-			<Param type="GLuint" name="renderbuffer"/>
-		</Function>
-		<Function name="glGetFramebufferAttachmentParameterivOES" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="attachment"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLint*" name="params"/>
-		</Function>
-		<Function name="glGenerateMipmapOES" return="void">
-			<Param type="GLenum" name="target"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_OES" string="GL_OES_framebuffer_object">
-			<Name name="glIsRenderbufferOES"/>
-			<Name name="glBindRenderbufferOES"/>
-			<Name name="glDeleteRenderbuffersOES"/>
-			<Name name="glGenRenderbuffersOES"/>
-			<Name name="glRenderbufferStorageOES"/>
-			<Name name="glGetRenderbufferParameterivOES"/>
-			<Name name="glGetRenderbufferStorageFormatsivOES"/>
-			<Name name="glIsFramebufferOES"/>
-			<Name name="glBindFramebufferOES"/>
-			<Name name="glDeleteFramebuffersOES"/>
-			<Name name="glGenFramebuffersOES"/>
-			<Name name="glCheckFramebufferStatusOES"/>
-			<Name name="glFramebufferTexture2DOES"/>
-			<Name name="glFramebufferTexture3DOES"/>
-			<Name name="glFramebufferRenderbufferOES"/>
-			<Name name="glGetFramebufferAttachmentParameterivOES"/>
-			<Name name="glGenerateMipmapOES"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_OES"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glIsRenderbufferOES" return="GLboolean">
+			<params>
+				<param type="GLuint" name="renderbuffer"/>
+			</params>
+		</function>
+		<function name="glBindRenderbufferOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="renderbuffer"/>
+			</params>
+		</function>
+		<function name="glDeleteRenderbuffersOES" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="const GLuint*" name="renderbuffers"/>
+			</params>
+		</function>
+		<function name="glGenRenderbuffersOES" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="renderbuffers"/>
+			</params>
+		</function>
+		<function name="glRenderbufferStorageOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+		</function>
+		<function name="glGetRenderbufferParameterivOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetRenderbufferStorageFormatsivOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="n"/>
+				<param type="GLint*" name="listofformats"/>
+				<param type="GLint*" name="numsupportedformats"/>
+			</params>
+		</function>
+		<function name="glIsFramebufferOES" return="GLboolean">
+			<params>
+				<param type="GLuint" name="framebuffer"/>
+			</params>
+		</function>
+		<function name="glBindFramebufferOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="framebuffer"/>
+			</params>
+		</function>
+		<function name="glDeleteFramebuffersOES" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="const GLuint*" name="framebuffers"/>
+			</params>
+		</function>
+		<function name="glGenFramebuffersOES" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="framebuffers"/>
+			</params>
+		</function>
+		<function name="glCheckFramebufferStatusOES" return="GLenum">
+			<params>
+				<param type="GLenum" name="target"/>
+			</params>
+		</function>
+		<function name="glFramebufferTexture2DOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="attachment"/>
+				<param type="GLenum" name="textarget"/>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+			</params>
+		</function>
+		<function name="glFramebufferTexture3DOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="attachment"/>
+				<param type="GLenum" name="textarget"/>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="zoffset"/>
+			</params>
+		</function>
+		<function name="glFramebufferRenderbufferOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="attachment"/>
+				<param type="GLenum" name="renderbuffertarget"/>
+				<param type="GLuint" name="renderbuffer"/>
+			</params>
+		</function>
+		<function name="glGetFramebufferAttachmentParameterivOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="attachment"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGenerateMipmapOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,56 +1,52 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_APPLE_element_array">
-	<Tokens>
-		<Token name="GL_ELEMENT_ARRAY_APPLE" value="0x8768"/>
-		<Token name="GL_ELEMENT_ARRAY_TYPE_APPLE" value="0x8769"/>
-		<Token name="GL_ELEMENT_ARRAY_POINTER_APPLE" value="0x876A"/>
-	</Tokens>
+<gl_extension name="GL_APPLE_element_array" reg_no="271">
+	<tokens>
+		<token name="GL_ELEMENT_ARRAY_APPLE" value="0x8768"/>
+		<token name="GL_ELEMENT_ARRAY_TYPE_APPLE" value="0x8769"/>
+		<token name="GL_ELEMENT_ARRAY_POINTER_APPLE" value="0x876A"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glElementPointerAPPLE" return="void">
-			<Param type="GLenum" name="type"/>
-			<Param type="const GLvoid*" name="pointer"/>
-		</Function>
-		<Function name="glDrawElementArrayAPPLE" return="void">
-			<Param type="GLenum" name="mode"/>
-			<Param type="GLint" name="first"/>
-			<Param type="GLsizei" name="count"/>
-		</Function>
-		<Function name="glDrawRangeElementArrayAPPLE" return="void">
-			<Param type="GLenum" name="mode"/>
-			<Param type="GLuint" name="start"/>
-			<Param type="GLuint" name="end"/>
-			<Param type="GLint" name="first"/>
-			<Param type="GLsizei" name="count"/>
-		</Function>
-		<Function name="glMultiDrawElementArrayAPPLE" return="void">
-			<Param type="GLenum" name="mode"/>
-			<Param type="const GLint*" name="first"/>
-			<Param type="const GLsizei*" name="count"/>
-			<Param type="GLsizei" name="primcount"/>
-		</Function>
-		<Function name="glMultiDrawRangeElementArrayAPPLE" return="void">
-			<Param type="GLenum" name="mode"/>
-			<Param type="GLuint" name="start"/>
-			<Param type="GLuint" name="end"/>
-			<Param type="const GLint*" name="first"/>
-			<Param type="const GLsizei*" name="count"/>
-			<Param type="GLsizei" name="primcount"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_APPLE" string="GL_APPLE_element_array" reg_no="271">
-			<Name name="glElementPointerAPPLE"/>
-			<Name name="glDrawElementArrayAPPLE"/>
-			<Name name="glDrawRangeElementArrayAPPLE"/>
-			<Name name="glMultiDrawElementArrayAPPLE"/>
-			<Name name="glMultiDrawRangeElementArrayAPPLE"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_APPLE"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glElementPointerAPPLE" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="pointer"/>
+			</params>
+		</function>
+		<function name="glDrawElementArrayAPPLE" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLint" name="first"/>
+				<param type="GLsizei" name="count"/>
+			</params>
+		</function>
+		<function name="glDrawRangeElementArrayAPPLE" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLuint" name="start"/>
+				<param type="GLuint" name="end"/>
+				<param type="GLint" name="first"/>
+				<param type="GLsizei" name="count"/>
+			</params>
+		</function>
+		<function name="glMultiDrawElementArrayAPPLE" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="const GLint*" name="first"/>
+				<param type="const GLsizei*" name="count"/>
+				<param type="GLsizei" name="primcount"/>
+			</params>
+		</function>
+		<function name="glMultiDrawRangeElementArrayAPPLE" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLuint" name="start"/>
+				<param type="GLuint" name="end"/>
+				<param type="const GLint*" name="first"/>
+				<param type="const GLsizei*" name="count"/>
+				<param type="GLsizei" name="primcount"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

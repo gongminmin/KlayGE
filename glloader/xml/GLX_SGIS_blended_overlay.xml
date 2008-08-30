@@ -1,15 +1,7 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GLX_SGIS_blended_overlay">
-	<Tokens>
-		<Token name="GLX_BLENDED_RGBA_SGIS" value="0x8025"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GLX_SGIS" string="GLX_SGIS_blended_overlay" reg_no="142"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GLX_SGIS"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GLX_SGIS_blended_overlay" reg_no="142">
+	<tokens>
+		<token name="GLX_BLENDED_RGBA_SGIS" value="0x8025"/>
+	</tokens>
+</gl_extension>

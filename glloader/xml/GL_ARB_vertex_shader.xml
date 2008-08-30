@@ -1,46 +1,40 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_ARB_vertex_shader">
-	<Tokens>
-		<Token name="GL_VERTEX_SHADER_ARB" value="0x8B31"/>
-		<Token name="GL_MAX_VERTEX_UNIFORM_COMPONENTS_ARB" value="0x8B4A"/>
-		<Token name="GL_MAX_VARYING_FLOATS_ARB" value="0x8B4B"/>
-		<Token name="GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS_ARB" value="0x8B4C"/>
-		<Token name="GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS_ARB" value="0x8B4D"/>
-		<Token name="GL_OBJECT_ACTIVE_ATTRIBUTES_ARB" value="0x8B89"/>
-		<Token name="GL_OBJECT_ACTIVE_ATTRIBUTE_MAX_LENGTH_ARB" value="0x8B8A"/>
-	</Tokens>
+<gl_extension name="GL_ARB_vertex_shader" reg_no="31">
+	<tokens>
+		<token name="GL_VERTEX_SHADER_ARB" value="0x8B31"/>
+		<token name="GL_MAX_VERTEX_UNIFORM_COMPONENTS_ARB" value="0x8B4A"/>
+		<token name="GL_MAX_VARYING_FLOATS_ARB" value="0x8B4B"/>
+		<token name="GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS_ARB" value="0x8B4C"/>
+		<token name="GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS_ARB" value="0x8B4D"/>
+		<token name="GL_OBJECT_ACTIVE_ATTRIBUTES_ARB" value="0x8B89"/>
+		<token name="GL_OBJECT_ACTIVE_ATTRIBUTE_MAX_LENGTH_ARB" value="0x8B8A"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glBindAttribLocationARB" return="void">
-			<Param type="GLuint" name="programObj"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="const GLchar*" name="name"/>
-		</Function>
-		<Function name="glGetActiveAttribARB" return="void">
-			<Param type="GLuint" name="programObj"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLsizei" name="maxLength"/>
-			<Param type="GLsizei*" name="length"/>
-			<Param type="GLint*" name="size"/>
-			<Param type="GLenum*" name="type"/>
-			<Param type="GLchar*" name="name"/>
-		</Function>
-		<Function name="glGetAttribLocationARB" return="GLint">
-			<Param type="GLuint" name="programObj"/>
-			<Param type="const GLchar*" name="name"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_vertex_shader" reg_no="31">
-			<Name name="glBindAttribLocationARB"/>
-			<Name name="glGetActiveAttribARB"/>
-			<Name name="glGetAttribLocationARB"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_ARB"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glBindAttribLocationARB" return="void">
+			<params>
+				<param type="GLuint" name="programObj"/>
+				<param type="GLuint" name="index"/>
+				<param type="const GLchar*" name="name"/>
+			</params>
+		</function>
+		<function name="glGetActiveAttribARB" return="void">
+			<params>
+				<param type="GLuint" name="programObj"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLsizei" name="maxLength"/>
+				<param type="GLsizei*" name="length"/>
+				<param type="GLint*" name="size"/>
+				<param type="GLenum*" name="type"/>
+				<param type="GLchar*" name="name"/>
+			</params>
+		</function>
+		<function name="glGetAttribLocationARB" return="GLint">
+			<params>
+				<param type="GLuint" name="programObj"/>
+				<param type="const GLchar*" name="name"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

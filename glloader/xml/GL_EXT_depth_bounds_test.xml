@@ -1,25 +1,17 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_EXT_depth_bounds_test">
-	<Tokens>
-		<Token name="GL_DEPTH_BOUNDS_TEST_EXT" value="0x8890"/>
-		<Token name="GL_DEPTH_BOUNDS_EXT" value="0x8891"/>
-	</Tokens>
+<gl_extension name="GL_EXT_depth_bounds_test" reg_no="297">
+	<tokens>
+		<token name="GL_DEPTH_BOUNDS_TEST_EXT" value="0x8890"/>
+		<token name="GL_DEPTH_BOUNDS_EXT" value="0x8891"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glDepthBoundsEXT" return="void">
-			<Param type="GLclampd" name="zmin"/>
-			<Param type="GLclampd" name="zmax"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_depth_bounds_test" reg_no="297">
-			<Name name="glDepthBoundsEXT"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_EXT"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glDepthBoundsEXT" return="void">
+			<params>
+				<param type="GLclampd" name="zmin"/>
+				<param type="GLclampd" name="zmax"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

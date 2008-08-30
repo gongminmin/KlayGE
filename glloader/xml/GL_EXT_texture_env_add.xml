@@ -1,0 +1,4 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_EXT_texture_env_add" reg_no="185" prefer="GL_ARB_texture_env_add">
+</gl_extension>

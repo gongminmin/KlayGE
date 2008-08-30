@@ -1,11 +1,4 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_ARB_texture_non_power_of_two">
-	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_texture_non_power_of_two" reg_no="34"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_ARB"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_ARB_texture_non_power_of_two" reg_no="34">
+</gl_extension>

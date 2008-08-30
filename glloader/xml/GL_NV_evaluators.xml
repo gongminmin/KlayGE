@@ -1,107 +1,107 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_NV_evaluators">
-	<Tokens>
-		<Token name="GL_EVAL_2D_NV" value="0x86C0"/>
-		<Token name="GL_EVAL_TRIANGULAR_2D_NV" value="0x86C1"/>
-		<Token name="GL_MAP_TESSELLATION_NV" value="0x86C2"/>
-		<Token name="GL_MAP_ATTRIB_U_ORDER_NV" value="0x86C3"/>
-		<Token name="GL_MAP_ATTRIB_V_ORDER_NV" value="0x86C4"/>
-		<Token name="GL_EVAL_FRACTIONAL_TESSELLATION_NV" value="0x86C5"/>
-		<Token name="GL_EVAL_VERTEX_ATTRIB0_NV" value="0x86C6"/>
-		<Token name="GL_EVAL_VERTEX_ATTRIB1_NV" value="0x86C7"/>
-		<Token name="GL_EVAL_VERTEX_ATTRIB2_NV" value="0x86C8"/>
-		<Token name="GL_EVAL_VERTEX_ATTRIB3_NV" value="0x86C9"/>
-		<Token name="GL_EVAL_VERTEX_ATTRIB4_NV" value="0x86CA"/>
-		<Token name="GL_EVAL_VERTEX_ATTRIB5_NV" value="0x86CB"/>
-		<Token name="GL_EVAL_VERTEX_ATTRIB6_NV" value="0x86CC"/>
-		<Token name="GL_EVAL_VERTEX_ATTRIB7_NV" value="0x86CD"/>
-		<Token name="GL_EVAL_VERTEX_ATTRIB8_NV" value="0x86CE"/>
-		<Token name="GL_EVAL_VERTEX_ATTRIB9_NV" value="0x86CF"/>
-		<Token name="GL_EVAL_VERTEX_ATTRIB10_NV" value="0x86D0"/>
-		<Token name="GL_EVAL_VERTEX_ATTRIB11_NV" value="0x86D1"/>
-		<Token name="GL_EVAL_VERTEX_ATTRIB12_NV" value="0x86D2"/>
-		<Token name="GL_EVAL_VERTEX_ATTRIB13_NV" value="0x86D3"/>
-		<Token name="GL_EVAL_VERTEX_ATTRIB14_NV" value="0x86D4"/>
-		<Token name="GL_EVAL_VERTEX_ATTRIB15_NV" value="0x86D5"/>
-		<Token name="GL_MAX_MAP_TESSELLATION_NV" value="0x86D6"/>
-		<Token name="GL_MAX_RATIONAL_EVAL_ORDER_NV" value="0x86D7"/>
-	</Tokens>
+<gl_extension name="GL_NV_evaluators" reg_no="225">
+	<tokens>
+		<token name="GL_EVAL_2D_NV" value="0x86C0"/>
+		<token name="GL_EVAL_TRIANGULAR_2D_NV" value="0x86C1"/>
+		<token name="GL_MAP_TESSELLATION_NV" value="0x86C2"/>
+		<token name="GL_MAP_ATTRIB_U_ORDER_NV" value="0x86C3"/>
+		<token name="GL_MAP_ATTRIB_V_ORDER_NV" value="0x86C4"/>
+		<token name="GL_EVAL_FRACTIONAL_TESSELLATION_NV" value="0x86C5"/>
+		<token name="GL_EVAL_VERTEX_ATTRIB0_NV" value="0x86C6"/>
+		<token name="GL_EVAL_VERTEX_ATTRIB1_NV" value="0x86C7"/>
+		<token name="GL_EVAL_VERTEX_ATTRIB2_NV" value="0x86C8"/>
+		<token name="GL_EVAL_VERTEX_ATTRIB3_NV" value="0x86C9"/>
+		<token name="GL_EVAL_VERTEX_ATTRIB4_NV" value="0x86CA"/>
+		<token name="GL_EVAL_VERTEX_ATTRIB5_NV" value="0x86CB"/>
+		<token name="GL_EVAL_VERTEX_ATTRIB6_NV" value="0x86CC"/>
+		<token name="GL_EVAL_VERTEX_ATTRIB7_NV" value="0x86CD"/>
+		<token name="GL_EVAL_VERTEX_ATTRIB8_NV" value="0x86CE"/>
+		<token name="GL_EVAL_VERTEX_ATTRIB9_NV" value="0x86CF"/>
+		<token name="GL_EVAL_VERTEX_ATTRIB10_NV" value="0x86D0"/>
+		<token name="GL_EVAL_VERTEX_ATTRIB11_NV" value="0x86D1"/>
+		<token name="GL_EVAL_VERTEX_ATTRIB12_NV" value="0x86D2"/>
+		<token name="GL_EVAL_VERTEX_ATTRIB13_NV" value="0x86D3"/>
+		<token name="GL_EVAL_VERTEX_ATTRIB14_NV" value="0x86D4"/>
+		<token name="GL_EVAL_VERTEX_ATTRIB15_NV" value="0x86D5"/>
+		<token name="GL_MAX_MAP_TESSELLATION_NV" value="0x86D6"/>
+		<token name="GL_MAX_RATIONAL_EVAL_ORDER_NV" value="0x86D7"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glMapControlPointsNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLenum" name="type"/>
-			<Param type="GLsizei" name="ustride"/>
-			<Param type="GLsizei" name="vstride"/>
-			<Param type="GLint" name="uorder"/>
-			<Param type="GLint" name="vorder"/>
-			<Param type="GLboolean" name="packed"/>
-			<Param type="const GLvoid*" name="points"/>
-		</Function>
-		<Function name="glMapParameterivNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="const GLint*" name="params"/>
-		</Function>
-		<Function name="glMapParameterfvNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="const GLfloat*" name="params"/>
-		</Function>
-		<Function name="glGetMapControlPointsNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLenum" name="type"/>
-			<Param type="GLsizei" name="ustride"/>
-			<Param type="GLsizei" name="vstride"/>
-			<Param type="GLboolean" name="packed"/>
-			<Param type="GLvoid*" name="points"/>
-		</Function>
-		<Function name="glGetMapParameterivNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLint*" name="params"/>
-		</Function>
-		<Function name="glGetMapParameterfvNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLfloat*" name="params"/>
-		</Function>
-		<Function name="glGetMapAttribParameterivNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLint*" name="params"/>
-		</Function>
-		<Function name="glGetMapAttribParameterfvNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLfloat*" name="params"/>
-		</Function>
-		<Function name="glEvalMapsNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="mode"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_evaluators" reg_no="225">
-			<Name name="glMapControlPointsNV"/>
-			<Name name="glMapParameterivNV"/>
-			<Name name="glMapParameterfvNV"/>
-			<Name name="glGetMapControlPointsNV"/>
-			<Name name="glGetMapParameterivNV"/>
-			<Name name="glGetMapParameterfvNV"/>
-			<Name name="glGetMapAttribParameterivNV"/>
-			<Name name="glGetMapAttribParameterfvNV"/>
-			<Name name="glEvalMapsNV"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_NV"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glMapControlPointsNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="ustride"/>
+				<param type="GLsizei" name="vstride"/>
+				<param type="GLint" name="uorder"/>
+				<param type="GLint" name="vorder"/>
+				<param type="GLboolean" name="packed"/>
+				<param type="const GLvoid*" name="points"/>
+			</params>
+		</function>
+		<function name="glMapParameterivNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glMapParameterfvNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetMapControlPointsNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="ustride"/>
+				<param type="GLsizei" name="vstride"/>
+				<param type="GLboolean" name="packed"/>
+				<param type="GLvoid*" name="points"/>
+			</params>
+		</function>
+		<function name="glGetMapParameterivNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetMapParameterfvNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetMapAttribParameterivNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetMapAttribParameterfvNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glEvalMapsNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

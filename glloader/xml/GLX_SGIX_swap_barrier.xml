@@ -1,27 +1,20 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GLX_SGIX_swap_barrier">
-	<Functions>
-		<Function name="glXBindSwapBarrierSGIX" return="void">
-			<Param type="Display*" name="dpy"/>
-			<Param type="GLXDrawable" name="drawable"/>
-			<Param type="int" name="barrier"/>
-		</Function>
-		<Function name="glXQueryMaxSwapBarriersSGIX" return="Bool">
-			<Param type="Display*" name="dpy"/>
-			<Param type="int" name="screen"/>
-			<Param type="int*" name="max"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GLX_SGIX" string="GLX_SGIX_swap_barrier" reg_no="92">
-			<Name name="glXBindSwapBarrierSGIX"/>
-			<Name name="glXQueryMaxSwapBarriersSGIX"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GLX_SGIX"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GLX_SGIX_swap_barrier" reg_no="92">
+	<functions>
+		<function name="glXBindSwapBarrierSGIX" return="void">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="GLXDrawable" name="drawable"/>
+				<param type="int" name="barrier"/>
+			</params>
+		</function>
+		<function name="glXQueryMaxSwapBarriersSGIX" return="Bool">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="int" name="screen"/>
+				<param type="int*" name="max"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

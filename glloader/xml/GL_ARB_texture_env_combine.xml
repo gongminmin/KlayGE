@@ -1,38 +1,28 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_ARB_texture_env_combine">
-	<Tokens>
-		<Token name="GL_COMBINE_ARB" value="0x8570"/>
-		<Token name="GL_COMBINE_RGB_ARB" value="0x8571"/>
-		<Token name="GL_COMBINE_ALPHA_ARB" value="0x8572"/>
-		<Token name="GL_SRC0_RGB_ARB" value="0x8580"/>
-		<Token name="GL_SRC1_RGB_ARB" value="0x8581"/>
-		<Token name="GL_SRC2_RGB_ARB" value="0x8582"/>
-		<Token name="GL_SRC0_ALPHA_ARB" value="0x8588"/>
-		<Token name="GL_SRC1_ALPHA_ARB" value="0x8589"/>
-		<Token name="GL_SRC2_ALPHA_ARB" value="0x858A"/>
-		<Token name="GL_OPERAND0_RGB_ARB" value="0x8590"/>
-		<Token name="GL_OPERAND1_RGB_ARB" value="0x8591"/>
-		<Token name="GL_OPERAND2_RGB_ARB" value="0x8592"/>
-		<Token name="GL_OPERAND0_ALPHA_ARB" value="0x8598"/>
-		<Token name="GL_OPERAND1_ALPHA_ARB" value="0x8599"/>
-		<Token name="GL_OPERAND2_ALPHA_ARB" value="0x859A"/>
-		<Token name="GL_RGB_SCALE_ARB" value="0x8573"/>
-		<Token name="GL_ADD_SIGNED_ARB" value="0x8574"/>
-		<Token name="GL_INTERPOLATE_ARB" value="0x8575"/>
-		<Token name="GL_SUBTRACT_ARB" value="0x84E7"/>
-		<Token name="GL_CONSTANT_ARB" value="0x8576"/>
-		<Token name="GL_PRIMARY_COLOR_ARB" value="0x8577"/>
-		<Token name="GL_PREVIOUS_ARB" value="0x8578"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_texture_env_combine" reg_no="17"/>
-		<Vendor name="GL_EXT" string="GL_EXT_texture_env_combine" reg_no="158"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_ARB"/>
-		<Init name="GL_EXT"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_ARB_texture_env_combine" reg_no="17">
+	<tokens>
+		<token name="GL_COMBINE_ARB" value="0x8570"/>
+		<token name="GL_COMBINE_RGB_ARB" value="0x8571"/>
+		<token name="GL_COMBINE_ALPHA_ARB" value="0x8572"/>
+		<token name="GL_SRC0_RGB_ARB" value="0x8580"/>
+		<token name="GL_SRC1_RGB_ARB" value="0x8581"/>
+		<token name="GL_SRC2_RGB_ARB" value="0x8582"/>
+		<token name="GL_SRC0_ALPHA_ARB" value="0x8588"/>
+		<token name="GL_SRC1_ALPHA_ARB" value="0x8589"/>
+		<token name="GL_SRC2_ALPHA_ARB" value="0x858A"/>
+		<token name="GL_OPERAND0_RGB_ARB" value="0x8590"/>
+		<token name="GL_OPERAND1_RGB_ARB" value="0x8591"/>
+		<token name="GL_OPERAND2_RGB_ARB" value="0x8592"/>
+		<token name="GL_OPERAND0_ALPHA_ARB" value="0x8598"/>
+		<token name="GL_OPERAND1_ALPHA_ARB" value="0x8599"/>
+		<token name="GL_OPERAND2_ALPHA_ARB" value="0x859A"/>
+		<token name="GL_RGB_SCALE_ARB" value="0x8573"/>
+		<token name="GL_ADD_SIGNED_ARB" value="0x8574"/>
+		<token name="GL_INTERPOLATE_ARB" value="0x8575"/>
+		<token name="GL_SUBTRACT_ARB" value="0x84E7"/>
+		<token name="GL_CONSTANT_ARB" value="0x8576"/>
+		<token name="GL_PRIMARY_COLOR_ARB" value="0x8577"/>
+		<token name="GL_PREVIOUS_ARB" value="0x8578"/>
+	</tokens>
+</gl_extension>

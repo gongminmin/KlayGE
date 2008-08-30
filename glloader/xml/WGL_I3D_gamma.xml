@@ -1,48 +1,43 @@
 <?xml version='1.0'?>
 
-<GLExtension name="WGL_I3D_gamma">
-	<Tokens>
-		<Token name="WGL_GAMMA_TABLE_SIZE_I3D" value="0x204E"/>
-		<Token name="WGL_GAMMA_EXCLUDE_DESKTOP_I3D" value="0x204F"/>
-	</Tokens>
+<gl_extension name="WGL_I3D_gamma" reg_no="251">
+	<tokens>
+		<token name="WGL_GAMMA_TABLE_SIZE_I3D" value="0x204E"/>
+		<token name="WGL_GAMMA_EXCLUDE_DESKTOP_I3D" value="0x204F"/>
+	</tokens>
 
-	<Functions>
-		<Function name="wglGetGammaTableParametersI3D" return="BOOL">
-			<Param type="HDC" name="hDC"/>
-			<Param type="int" name="iAttribute"/>
-			<Param type="int*" name="piValue"/>
-		</Function>
-		<Function name="wglSetGammaTableParametersI3D" return="BOOL">
-			<Param type="HDC" name="hDC"/>
-			<Param type="int" name="iAttribute"/>
-			<Param type="const int*" name="piValue"/>
-		</Function>
-		<Function name="wglGetGammaTableI3D" return="BOOL">
-			<Param type="HDC" name="hDC"/>
-			<Param type="int" name="iEntries"/>
-			<Param type="USHORT*" name="puRed"/>
-			<Param type="USHORT*" name="puGreen"/>
-			<Param type="USHORT*" name="puBlue"/>
-		</Function>
-		<Function name="wglSetGammaTableI3D" return="BOOL">
-			<Param type="HDC" name="hDC"/>
-			<Param type="int" name="iEntries"/>
-			<Param type="const USHORT*" name="puRed"/>
-			<Param type="const USHORT*" name="puGreen"/>
-			<Param type="const USHORT*" name="puBlue"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="WGL_I3D" string="WGL_I3D_gamma" reg_no="251">
-			<Name name="wglGetGammaTableParametersI3D"/>
-			<Name name="wglSetGammaTableParametersI3D"/>
-			<Name name="wglGetGammaTableI3D"/>
-			<Name name="wglSetGammaTableI3D"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="WGL_I3D"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="wglGetGammaTableParametersI3D" return="BOOL">
+			<params>
+				<param type="HDC" name="hDC"/>
+				<param type="int" name="iAttribute"/>
+				<param type="int*" name="piValue"/>
+			</params>
+		</function>
+		<function name="wglSetGammaTableParametersI3D" return="BOOL">
+			<params>
+				<param type="HDC" name="hDC"/>
+				<param type="int" name="iAttribute"/>
+				<param type="const int*" name="piValue"/>
+			</params>
+		</function>
+		<function name="wglGetGammaTableI3D" return="BOOL">
+			<params>
+				<param type="HDC" name="hDC"/>
+				<param type="int" name="iEntries"/>
+				<param type="USHORT*" name="puRed"/>
+				<param type="USHORT*" name="puGreen"/>
+				<param type="USHORT*" name="puBlue"/>
+			</params>
+		</function>
+		<function name="wglSetGammaTableI3D" return="BOOL">
+			<params>
+				<param type="HDC" name="hDC"/>
+				<param type="int" name="iEntries"/>
+				<param type="const USHORT*" name="puRed"/>
+				<param type="const USHORT*" name="puGreen"/>
+				<param type="const USHORT*" name="puBlue"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

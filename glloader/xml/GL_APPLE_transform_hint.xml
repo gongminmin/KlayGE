@@ -1,15 +1,7 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_APPLE_transform_hint">
-	<Tokens>
-		<Token name="GL_TRANSFORM_HINT_APPLE" value="0x85B1"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_APPLE" string="GL_APPLE_transform_hint" reg_no="160"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_APPLE"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_APPLE_transform_hint" reg_no="160">
+	<tokens>
+		<token name="GL_TRANSFORM_HINT_APPLE" value="0x85B1"/>
+	</tokens>
+</gl_extension>

@@ -1,19 +1,11 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_NV_texture_env_combine4">
-	<Tokens>
-		<Token name="GL_COMBINE4_NV" value="0x8503"/>
-		<Token name="GL_SOURCE3_RGB_NV" value="0x8583"/>
-		<Token name="GL_SOURCE3_ALPHA_NV" value="0x858B"/>
-		<Token name="GL_OPERAND3_RGB_NV" value="0x8593"/>
-		<Token name="GL_OPERAND3_ALPHA_NV" value="0x859B"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_texture_env_combine4" reg_no="195"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_NV"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_NV_texture_env_combine4" reg_no="195">
+	<tokens>
+		<token name="GL_COMBINE4_NV" value="0x8503"/>
+		<token name="GL_SOURCE3_RGB_NV" value="0x8583"/>
+		<token name="GL_SOURCE3_ALPHA_NV" value="0x858B"/>
+		<token name="GL_OPERAND3_RGB_NV" value="0x8593"/>
+		<token name="GL_OPERAND3_ALPHA_NV" value="0x859B"/>
+	</tokens>
+</gl_extension>

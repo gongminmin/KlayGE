@@ -1,18 +1,8 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GLX_ARB_multisample">
-	<Tokens>
-		<Token name="GLX_SAMPLE_BUFFERS_ARB" value="100000"/>
-		<Token name="GLX_SAMPLES_ARB" value="100001"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GLX_ARB" string="GLX_ARB_multisample" reg_no="5"/>
-		<Vendor name="GLX_SGIS" string="GLX_SGIS_multisample" reg_no="25"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GLX_ARB"/>
-		<Init name="GLX_SGIS"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GLX_ARB_multisample" reg_no="5">
+	<tokens>
+		<token name="GLX_SAMPLE_BUFFERS_ARB" value="100000"/>
+		<token name="GLX_SAMPLES_ARB" value="100001"/>
+	</tokens>
+</gl_extension>

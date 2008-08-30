@@ -1,52 +1,45 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_ATI_separate_stencil">
-	<Tokens>
-		<Token name="GL_KEEP_ATI" value="0x1E00"/>
-		<Token name="GL_REPLACE_ATI" value="0x1E01"/>
-		<Token name="GL_INCR_ATI" value="0x1E02"/>
-		<Token name="GL_DECR_ATI" value="0x1E03"/>
-		<Token name="GL_INVERT_ATI" value="0x150A"/>
-		<Token name="GL_NEVER_ATI" value="0x0200"/>
-		<Token name="GL_LESS_ATI" value="0x0201"/>
-		<Token name="GL_LEQUAL_ATI" value="0x0203"/>
-		<Token name="GL_GREATER_ATI" value="0x0204"/>
-		<Token name="GL_GEQUAL_ATI" value="0x0206"/>
-		<Token name="GL_EQUAL_ATI" value="0x0202"/>
-		<Token name="GL_NOTEQUAL_ATI" value="0x0205"/>
-		<Token name="GL_ALWAYS_ATI" value="0x0207"/>
-		<Token name="GL_FRONT_ATI" value="0x0404"/>
-		<Token name="GL_BACK_ATI" value="0x0405"/>
-		<Token name="GL_FRONT_AND_BACK_ATI" value="0x0408"/>
-		<Token name="GL_STENCIL_BACK_FUNC_ATI" value="0x8800"/>
-		<Token name="GL_STENCIL_BACK_FAIL_ATI" value="0x8801"/>
-		<Token name="GL_STENCIL_BACK_PASS_DEPTH_FAIL_ATI" value="0x8802"/>
-		<Token name="GL_STENCIL_BACK_PASS_DEPTH_PASS_ATI" value="0x8803"/>
-	</Tokens>
+<gl_extension name="GL_ATI_separate_stencil" reg_no="289">
+	<tokens>
+		<token name="GL_KEEP_ATI" value="0x1E00"/>
+		<token name="GL_REPLACE_ATI" value="0x1E01"/>
+		<token name="GL_INCR_ATI" value="0x1E02"/>
+		<token name="GL_DECR_ATI" value="0x1E03"/>
+		<token name="GL_INVERT_ATI" value="0x150A"/>
+		<token name="GL_NEVER_ATI" value="0x0200"/>
+		<token name="GL_LESS_ATI" value="0x0201"/>
+		<token name="GL_LEQUAL_ATI" value="0x0203"/>
+		<token name="GL_GREATER_ATI" value="0x0204"/>
+		<token name="GL_GEQUAL_ATI" value="0x0206"/>
+		<token name="GL_EQUAL_ATI" value="0x0202"/>
+		<token name="GL_NOTEQUAL_ATI" value="0x0205"/>
+		<token name="GL_ALWAYS_ATI" value="0x0207"/>
+		<token name="GL_FRONT_ATI" value="0x0404"/>
+		<token name="GL_BACK_ATI" value="0x0405"/>
+		<token name="GL_FRONT_AND_BACK_ATI" value="0x0408"/>
+		<token name="GL_STENCIL_BACK_FUNC_ATI" value="0x8800"/>
+		<token name="GL_STENCIL_BACK_FAIL_ATI" value="0x8801"/>
+		<token name="GL_STENCIL_BACK_PASS_DEPTH_FAIL_ATI" value="0x8802"/>
+		<token name="GL_STENCIL_BACK_PASS_DEPTH_PASS_ATI" value="0x8803"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glStencilFuncSeparateATI" return="void">
-			<Param type="GLenum" name="face"/>
-			<Param type="GLenum" name="func"/>
-			<Param type="GLint" name="ref"/>
-			<Param type="GLuint" name="mask"/>
-		</Function>
-		<Function name="glStencilOpSeparateATI" return="void">
-			<Param type="GLenum" name="face"/>
-			<Param type="GLenum" name="sfail"/>
-			<Param type="GLenum" name="dpfail"/>
-			<Param type="GLenum" name="dppass"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_ATI" string="GL_ATI_separate_stencil" reg_no="289">
-			<Name name="glStencilFuncSeparateATI"/>
-			<Name name="glStencilOpSeparateATI"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_ATI"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glStencilFuncSeparateATI" return="void">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="func"/>
+				<param type="GLint" name="ref"/>
+				<param type="GLuint" name="mask"/>
+			</params>
+		</function>
+		<function name="glStencilOpSeparateATI" return="void">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="sfail"/>
+				<param type="GLenum" name="dpfail"/>
+				<param type="GLenum" name="dppass"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

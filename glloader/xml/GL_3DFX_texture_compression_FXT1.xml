@@ -1,16 +1,8 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_3DFX_texture_compression_FXT1">
-	<Tokens>
-		<Token name="GL_COMPRESSED_RGB_FXT1_3DFX" value="0x86B0"/>
-		<Token name="GL_COMPRESSED_RGBA_FXT1_3DFX" value="0x86B1"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_3DFX" string="GL_3DFX_texture_compression_FXT1" reg_no="206"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_3DFX"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_3DFX_texture_compression_FXT1" reg_no="206">
+	<tokens>
+		<token name="GL_COMPRESSED_RGB_FXT1_3DFX" value="0x86B0"/>
+		<token name="GL_COMPRESSED_RGBA_FXT1_3DFX" value="0x86B1"/>
+	</tokens>
+</gl_extension>

@@ -1,34 +1,27 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_NV_pixel_data_range">
-	<Tokens>
-		<Token name="GL_WRITE_PIXEL_DATA_RANGE_NV" value="0x8878"/>
-		<Token name="GL_READ_PIXEL_DATA_RANGE_NV" value="0x8879"/>
-		<Token name="GL_WRITE_PIXEL_DATA_RANGE_LENGTH_NV" value="0x887A"/>
-		<Token name="GL_READ_PIXEL_DATA_RANGE_LENGTH_NV" value="0x887B"/>
-		<Token name="GL_WRITE_PIXEL_DATA_RANGE_POINTER_NV" value="0x887C"/>
-		<Token name="GL_READ_PIXEL_DATA_RANGE_POINTER_NV" value="0x887D"/>
-	</Tokens>
+<gl_extension name="GL_NV_pixel_data_range" reg_no="284">
+	<tokens>
+		<token name="GL_WRITE_PIXEL_DATA_RANGE_NV" value="0x8878"/>
+		<token name="GL_READ_PIXEL_DATA_RANGE_NV" value="0x8879"/>
+		<token name="GL_WRITE_PIXEL_DATA_RANGE_LENGTH_NV" value="0x887A"/>
+		<token name="GL_READ_PIXEL_DATA_RANGE_LENGTH_NV" value="0x887B"/>
+		<token name="GL_WRITE_PIXEL_DATA_RANGE_POINTER_NV" value="0x887C"/>
+		<token name="GL_READ_PIXEL_DATA_RANGE_POINTER_NV" value="0x887D"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glPixelDataRangeNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLsizei" name="length"/>
-			<Param type="GLvoid*" name="pointer"/>
-		</Function>
-		<Function name="glFlushPixelDataRangeNV" return="void">
-			<Param type="GLenum" name="target"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_pixel_data_range" reg_no="284">
-			<Name name="glPixelDataRangeNV"/>
-			<Name name="glFlushPixelDataRangeNV"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_NV"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glPixelDataRangeNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="length"/>
+				<param type="GLvoid*" name="pointer"/>
+			</params>
+		</function>
+		<function name="glFlushPixelDataRangeNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

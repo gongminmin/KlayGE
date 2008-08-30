@@ -1,27 +1,18 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_EXT_compiled_vertex_array">
-	<Tokens>
-		<Token name="GL_ARRAY_ELEMENT_LOCK_FIRST_EXT" value="0x81A8"/>
-		<Token name="GL_ARRAY_ELEMENT_LOCK_COUNT_EXT" value="0x81A9"/>
-	</Tokens>
+<gl_extension name="GL_EXT_compiled_vertex_array" reg_no="97">
+	<tokens>
+		<token name="GL_ARRAY_ELEMENT_LOCK_FIRST_EXT" value="0x81A8"/>
+		<token name="GL_ARRAY_ELEMENT_LOCK_COUNT_EXT" value="0x81A9"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glLockArraysEXT" return="void">
-			<Param type="GLint" name="first"/>
-			<Param type="GLsizei" name="count"/>
-		</Function>
-		<Function name="glUnlockArraysEXT" return="void"/>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_compiled_vertex_array" reg_no="97">
-			<Name name="glLockArraysEXT"/>
-			<Name name="glUnlockArraysEXT"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_EXT"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glLockArraysEXT" return="void">
+			<params>
+				<param type="GLint" name="first"/>
+				<param type="GLsizei" name="count"/>
+			</params>
+		</function>
+		<function name="glUnlockArraysEXT" return="void"/>
+	</functions>
+</gl_extension>

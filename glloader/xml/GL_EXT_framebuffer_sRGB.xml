@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_EXT_framebuffer_sRGB" reg_no="337" prefer="GL_ARB_framebuffer_sRGB">
+	<tokens>
+		<token name="GL_FRAMEBUFFER_SRGB_EXT" value="0x8DB9"/>
+		<token name="GL_FRAMEBUFFER_SRGB_CAPABLE_EXT" value="0x8DBA"/>
+	</tokens>
+</gl_extension>

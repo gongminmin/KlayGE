@@ -1,245 +1,270 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_EXT_gpu_shader4">
-	<Tokens>
-		<Token name="GL_VERTEX_ATTRIB_ARRAY_INTEGER_EXT" value="0x88FD"/>
-		<Token name="GL_SAMPLER_1D_ARRAY_EXT" value="0x8DC0"/>
-		<Token name="GL_SAMPLER_2D_ARRAY_EXT" value="0x8DC1"/>
-		<Token name="GL_SAMPLER_BUFFER_EXT" value="0x8DC2"/>
-		<Token name="GL_SAMPLER_1D_ARRAY_SHADOW_EXT" value="0x8DC3"/>
-		<Token name="GL_SAMPLER_2D_ARRAY_SHADOW_EXT" value="0x8DC4"/>
-		<Token name="GL_SAMPLER_CUBE_SHADOW_EXT" value="0x8DC5"/>
-		<Token name="GL_UNSIGNED_INT_VEC2_EXT" value="0x8DC6"/>
-		<Token name="GL_UNSIGNED_INT_VEC3_EXT" value="0x8DC7"/>
-		<Token name="GL_UNSIGNED_INT_VEC4_EXT" value="0x8DC8"/>
-		<Token name="GL_INT_SAMPLER_1D_EXT" value="0x8DC9"/>
-		<Token name="GL_INT_SAMPLER_2D_EXT" value="0x8DCA"/>
-		<Token name="GL_INT_SAMPLER_3D_EXT" value="0x8DCB"/>
-		<Token name="GL_INT_SAMPLER_CUBE_EXT" value="0x8DCC"/>
-		<Token name="GL_INT_SAMPLER_2D_RECT_EXT" value="0x8DCD"/>
-		<Token name="GL_INT_SAMPLER_1D_ARRAY_EXT" value="0x8DCE"/>
-		<Token name="GL_INT_SAMPLER_2D_ARRAY_EXT" value="0x8DCF"/>
-		<Token name="GL_INT_SAMPLER_BUFFER_EXT" value="0x8DD0"/>
-		<Token name="GL_UNSIGNED_INT_SAMPLER_1D_EXT" value="0x8DD1"/>
-		<Token name="GL_UNSIGNED_INT_SAMPLER_2D_EXT" value="0x8DD2"/>
-		<Token name="GL_UNSIGNED_INT_SAMPLER_3D_EXT" value="0x8DD3"/>
-		<Token name="GL_UNSIGNED_INT_SAMPLER_CUBE_EXT" value="0x8DD4"/>
-		<Token name="GL_UNSIGNED_INT_SAMPLER_2D_RECT_EXT" value="0x8DD5"/>
-		<Token name="GL_UNSIGNED_INT_SAMPLER_1D_ARRAY_EXT" value="0x8DD6"/>
-		<Token name="GL_UNSIGNED_INT_SAMPLER_2D_ARRAY_EXT" value="0x8DD7"/>
-		<Token name="GL_UNSIGNED_INT_SAMPLER_BUFFER_EXT" value="0x8DD8"/>
-		<Token name="GL_MIN_PROGRAM_TEXEL_OFFSET_EXT" value="0x8904"/>
-		<Token name="GL_MAX_PROGRAM_TEXEL_OFFSET_EXT" value="0x8905"/>
-	</Tokens>
+<gl_extension name="GL_EXT_gpu_shader4" reg_no="326">
+	<tokens>
+		<token name="GL_VERTEX_ATTRIB_ARRAY_INTEGER_EXT" value="0x88FD"/>
+		<token name="GL_SAMPLER_1D_ARRAY_EXT" value="0x8DC0"/>
+		<token name="GL_SAMPLER_2D_ARRAY_EXT" value="0x8DC1"/>
+		<token name="GL_SAMPLER_BUFFER_EXT" value="0x8DC2"/>
+		<token name="GL_SAMPLER_1D_ARRAY_SHADOW_EXT" value="0x8DC3"/>
+		<token name="GL_SAMPLER_2D_ARRAY_SHADOW_EXT" value="0x8DC4"/>
+		<token name="GL_SAMPLER_CUBE_SHADOW_EXT" value="0x8DC5"/>
+		<token name="GL_UNSIGNED_INT_VEC2_EXT" value="0x8DC6"/>
+		<token name="GL_UNSIGNED_INT_VEC3_EXT" value="0x8DC7"/>
+		<token name="GL_UNSIGNED_INT_VEC4_EXT" value="0x8DC8"/>
+		<token name="GL_INT_SAMPLER_1D_EXT" value="0x8DC9"/>
+		<token name="GL_INT_SAMPLER_2D_EXT" value="0x8DCA"/>
+		<token name="GL_INT_SAMPLER_3D_EXT" value="0x8DCB"/>
+		<token name="GL_INT_SAMPLER_CUBE_EXT" value="0x8DCC"/>
+		<token name="GL_INT_SAMPLER_2D_RECT_EXT" value="0x8DCD"/>
+		<token name="GL_INT_SAMPLER_1D_ARRAY_EXT" value="0x8DCE"/>
+		<token name="GL_INT_SAMPLER_2D_ARRAY_EXT" value="0x8DCF"/>
+		<token name="GL_INT_SAMPLER_BUFFER_EXT" value="0x8DD0"/>
+		<token name="GL_UNSIGNED_INT_SAMPLER_1D_EXT" value="0x8DD1"/>
+		<token name="GL_UNSIGNED_INT_SAMPLER_2D_EXT" value="0x8DD2"/>
+		<token name="GL_UNSIGNED_INT_SAMPLER_3D_EXT" value="0x8DD3"/>
+		<token name="GL_UNSIGNED_INT_SAMPLER_CUBE_EXT" value="0x8DD4"/>
+		<token name="GL_UNSIGNED_INT_SAMPLER_2D_RECT_EXT" value="0x8DD5"/>
+		<token name="GL_UNSIGNED_INT_SAMPLER_1D_ARRAY_EXT" value="0x8DD6"/>
+		<token name="GL_UNSIGNED_INT_SAMPLER_2D_ARRAY_EXT" value="0x8DD7"/>
+		<token name="GL_UNSIGNED_INT_SAMPLER_BUFFER_EXT" value="0x8DD8"/>
+		<token name="GL_MIN_PROGRAM_TEXEL_OFFSET_EXT" value="0x8904"/>
+		<token name="GL_MAX_PROGRAM_TEXEL_OFFSET_EXT" value="0x8905"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glVertexAttribI1iEXT" return="void">
-			<Param type="GLuint" name="index"/>
-			<Param type="GLint" name="x"/>
-		</Function>
-		<Function name="glVertexAttribI2iEXT" return="void">
-			<Param type="GLuint" name="index"/>
-			<Param type="GLint" name="x"/>
-			<Param type="GLint" name="y"/>
-		</Function>
-		<Function name="glVertexAttribI3iEXT" return="void">
-			<Param type="GLuint" name="index"/>
-			<Param type="GLint" name="x"/>
-			<Param type="GLint" name="y"/>
-			<Param type="GLint" name="z"/>
-		</Function>
-		<Function name="glVertexAttribI4iEXT" return="void">
-			<Param type="GLuint" name="index"/>
-			<Param type="GLint" name="x"/>
-			<Param type="GLint" name="y"/>
-			<Param type="GLint" name="z"/>
-			<Param type="GLint" name="w"/>
-		</Function>
-		<Function name="glVertexAttribI1uiEXT" return="void">
-			<Param type="GLuint" name="index"/>
-			<Param type="GLuint" name="x"/>
-		</Function>
-		<Function name="glVertexAttribI2uiEXT" return="void">
-			<Param type="GLuint" name="index"/>
-			<Param type="GLuint" name="x"/>
-			<Param type="GLuint" name="y"/>
-		</Function>
-		<Function name="glVertexAttribI3uiEXT" return="void">
-			<Param type="GLuint" name="index"/>
-			<Param type="GLuint" name="x"/>
-			<Param type="GLuint" name="y"/>
-			<Param type="GLuint" name="z"/>
-		</Function>
-		<Function name="glVertexAttribI4uiEXT" return="void">
-			<Param type="GLuint" name="index"/>
-			<Param type="GLuint" name="x"/>
-			<Param type="GLuint" name="y"/>
-			<Param type="GLuint" name="z"/>
-			<Param type="GLuint" name="w"/>
-		</Function>
-		<Function name="glVertexAttribI1ivEXT" return="void">
-			<Param type="GLuint" name="index"/>
-			<Param type="const GLint*" name="v"/>
-		</Function>
-		<Function name="glVertexAttribI2ivEXT" return="void">
-			<Param type="GLuint" name="index"/>
-			<Param type="const GLint*" name="v"/>
-		</Function>
-		<Function name="glVertexAttribI3ivEXT" return="void">
-			<Param type="GLuint" name="index"/>
-			<Param type="const GLint*" name="v"/>
-		</Function>
-		<Function name="glVertexAttribI4ivEXT" return="void">
-			<Param type="GLuint" name="index"/>
-			<Param type="const GLint*" name="v"/>
-		</Function>
-		<Function name="glVertexAttribI1uivEXT" return="void">
-			<Param type="GLuint" name="index"/>
-			<Param type="const GLuint*" name="v"/>
-		</Function>
-		<Function name="glVertexAttribI2uivEXT" return="void">
-			<Param type="GLuint" name="index"/>
-			<Param type="const GLuint*" name="v"/>
-		</Function>
-		<Function name="glVertexAttribI3uivEXT" return="void">
-			<Param type="GLuint" name="index"/>
-			<Param type="const GLuint*" name="v"/>
-		</Function>
-		<Function name="glVertexAttribI4uivEXT" return="void">
-			<Param type="GLuint" name="index"/>
-			<Param type="const GLuint*" name="v"/>
-		</Function>
-		<Function name="glVertexAttribI4bvEXT" return="void">
-			<Param type="GLuint" name="index"/>
-			<Param type="const GLbyte*" name="v"/>
-		</Function>
-		<Function name="glVertexAttribI4svEXT" return="void">
-			<Param type="GLuint" name="index"/>
-			<Param type="const GLshort*" name="v"/>
-		</Function>
-		<Function name="glVertexAttribI4ubvEXT" return="void">
-			<Param type="GLuint" name="index"/>
-			<Param type="const GLubyte*" name="v"/>
-		</Function>
-		<Function name="glVertexAttribI4usvEXT" return="void">
-			<Param type="GLuint" name="index"/>
-			<Param type="const GLushort*" name="v"/>
-		</Function>
-		<Function name="glVertexAttribIPointerEXT" return="void">
-			<Param type="GLuint" name="index"/>
-			<Param type="GLint" name="size"/>
-			<Param type="GLenum" name="type"/>
-			<Param type="GLsizei" name="stride"/>
-			<Param type="const void*" name="pointer"/>
-		</Function>
-		<Function name="glGetVertexAttribIivEXT" return="void">
-			<Param type="GLuint" name="index"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLint*" name="params"/>
-		</Function>
-		<Function name="glGetVertexAttribIuivEXT" return="void">
-			<Param type="GLuint" name="index"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLuint*" name="params"/>
-		</Function>
-		<Function name="glUniform1uiEXT" return="void">
-			<Param type="GLint" name="location"/>
-			<Param type="GLuint" name="v0"/>
-		</Function>
-		<Function name="glUniform2uiEXT" return="void">
-			<Param type="GLint" name="location"/>
-			<Param type="GLuint" name="v0"/>
-			<Param type="GLuint" name="v1"/>
-		</Function>
-		<Function name="glUniform3uiEXT" return="void">
-			<Param type="GLint" name="location"/>
-			<Param type="GLuint" name="v0"/>
-			<Param type="GLuint" name="v1"/>
-			<Param type="GLuint" name="v2"/>
-		</Function>
-		<Function name="glUniform4uiEXT" return="void">
-			<Param type="GLint" name="location"/>
-			<Param type="GLuint" name="v0"/>
-			<Param type="GLuint" name="v1"/>
-			<Param type="GLuint" name="v2"/>
-			<Param type="GLuint" name="v3"/>
-		</Function>
-		<Function name="glUniform1uivEXT" return="void">
-			<Param type="GLint" name="location"/>
-			<Param type="GLsizei" name="count"/>
-			<Param type="const GLuint*" name="value"/>
-		</Function>
-		<Function name="glUniform2uivEXT" return="void">
-			<Param type="GLint" name="location"/>
-			<Param type="GLsizei" name="count"/>
-			<Param type="const GLuint*" name="value"/>
-		</Function>
-		<Function name="glUniform3uivEXT" return="void">
-			<Param type="GLint" name="location"/>
-			<Param type="GLsizei" name="count"/>
-			<Param type="const GLuint*" name="value"/>
-		</Function>
-		<Function name="glUniform4uivEXT" return="void">
-			<Param type="GLint" name="location"/>
-			<Param type="GLsizei" name="count"/>
-			<Param type="const GLuint*" name="value"/>
-		</Function>
-		<Function name="glGetUniformuivEXT" return="void">
-			<Param type="GLuint" name="program"/>
-			<Param type="GLint" name="location"/>
-			<Param type="GLuint*" name="params"/>
-		</Function>
-		<Function name="glBindFragDataLocationEXT" return="void">
-			<Param type="GLuint" name="program"/>
-			<Param type="GLuint" name="colorNumber"/>
-			<Param type="const GLchar*" name="name"/>
-		</Function>
-		<Function name="glGetFragDataLocationEXT" return="GLint">
-			<Param type="GLuint" name="program"/>
-			<Param type="const GLchar*" name="name"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_gpu_shader4" reg_no="326">
-			<Name name="glVertexAttribI1iEXT"/>
-			<Name name="glVertexAttribI2iEXT"/>
-			<Name name="glVertexAttribI3iEXT"/>
-			<Name name="glVertexAttribI4iEXT"/>
-			<Name name="glVertexAttribI1uiEXT"/>
-			<Name name="glVertexAttribI2uiEXT"/>
-			<Name name="glVertexAttribI3uiEXT"/>
-			<Name name="glVertexAttribI4uiEXT"/>
-			<Name name="glVertexAttribI1ivEXT"/>
-			<Name name="glVertexAttribI2ivEXT"/>
-			<Name name="glVertexAttribI3ivEXT"/>
-			<Name name="glVertexAttribI4ivEXT"/>
-			<Name name="glVertexAttribI1uivEXT"/>
-			<Name name="glVertexAttribI2uivEXT"/>
-			<Name name="glVertexAttribI3uivEXT"/>
-			<Name name="glVertexAttribI4uivEXT"/>
-			<Name name="glVertexAttribI4bvEXT"/>
-			<Name name="glVertexAttribI4svEXT"/>
-			<Name name="glVertexAttribI4ubvEXT"/>
-			<Name name="glVertexAttribI4usvEXT"/>
-			<Name name="glVertexAttribIPointerEXT"/>
-			<Name name="glGetVertexAttribIivEXT"/>
-			<Name name="glGetVertexAttribIuivEXT"/>
-			<Name name="glUniform1uiEXT"/>
-			<Name name="glUniform2uiEXT"/>
-			<Name name="glUniform3uiEXT"/>
-			<Name name="glUniform4uiEXT"/>
-			<Name name="glUniform1uivEXT"/>
-			<Name name="glUniform2uivEXT"/>
-			<Name name="glUniform3uivEXT"/>
-			<Name name="glUniform4uivEXT"/>
-			<Name name="glGetUniformuivEXT"/>
-			<Name name="glBindFragDataLocationEXT"/>
-			<Name name="glGetFragDataLocationEXT"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_EXT"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glVertexAttribI1iEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLint" name="x"/>
+			</params>
+		</function>
+		<function name="glVertexAttribI2iEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+			</params>
+		</function>
+		<function name="glVertexAttribI3iEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLint" name="z"/>
+			</params>
+		</function>
+		<function name="glVertexAttribI4iEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLint" name="z"/>
+				<param type="GLint" name="w"/>
+			</params>
+		</function>
+		<function name="glVertexAttribI1uiEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint" name="x"/>
+			</params>
+		</function>
+		<function name="glVertexAttribI2uiEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint" name="x"/>
+				<param type="GLuint" name="y"/>
+			</params>
+		</function>
+		<function name="glVertexAttribI3uiEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint" name="x"/>
+				<param type="GLuint" name="y"/>
+				<param type="GLuint" name="z"/>
+			</params>
+		</function>
+		<function name="glVertexAttribI4uiEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint" name="x"/>
+				<param type="GLuint" name="y"/>
+				<param type="GLuint" name="z"/>
+				<param type="GLuint" name="w"/>
+			</params>
+		</function>
+		<function name="glVertexAttribI1ivEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttribI2ivEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttribI3ivEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttribI4ivEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttribI1uivEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLuint*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttribI2uivEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLuint*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttribI3uivEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLuint*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttribI4uivEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLuint*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttribI4bvEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLbyte*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttribI4svEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLshort*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttribI4ubvEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLubyte*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttribI4usvEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLushort*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttribIPointerEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+				<param type="const void*" name="pointer"/>
+			</params>
+		</function>
+		<function name="glGetVertexAttribIivEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetVertexAttribIuivEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint*" name="params"/>
+			</params>
+		</function>
+		<function name="glUniform1uiEXT" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLuint" name="v0"/>
+			</params>
+		</function>
+		<function name="glUniform2uiEXT" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLuint" name="v0"/>
+				<param type="GLuint" name="v1"/>
+			</params>
+		</function>
+		<function name="glUniform3uiEXT" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLuint" name="v0"/>
+				<param type="GLuint" name="v1"/>
+				<param type="GLuint" name="v2"/>
+			</params>
+		</function>
+		<function name="glUniform4uiEXT" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLuint" name="v0"/>
+				<param type="GLuint" name="v1"/>
+				<param type="GLuint" name="v2"/>
+				<param type="GLuint" name="v3"/>
+			</params>
+		</function>
+		<function name="glUniform1uivEXT" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniform2uivEXT" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniform3uivEXT" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniform4uivEXT" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint*" name="value"/>
+			</params>
+		</function>
+		<function name="glGetUniformuivEXT" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLuint*" name="params"/>
+			</params>
+		</function>
+		<function name="glBindFragDataLocationEXT" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLuint" name="colorNumber"/>
+				<param type="const GLchar*" name="name"/>
+			</params>
+		</function>
+		<function name="glGetFragDataLocationEXT" return="GLint">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="const GLchar*" name="name"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,33 +1,26 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GLX_SGIX_video_source" predefined="_VL_H">
-	<Typedefs>
-		<Typedef type="XID" synonym="GLXVideoSourceSGIX"/>
-	</Typedefs>
+<gl_extension name="GLX_SGIX_video_source" reg_no="43" predefined="_VL_H">
+	<typedefs>
+		<typedef type="XID" synonym="GLXVideoSourceSGIX"/>
+	</typedefs>
 
-	<Functions>
-		<Function name="glXCreateGLXVideoSourceSGIX" return="GLXVideoSourceSGIX">
-			<Param type="Display*" name="display"/>
-			<Param type="int" name="screen"/>
-			<Param type="VLServer" name="server"/>
-			<Param type="VLPath" name="path"/>
-			<Param type="int" name="nodeClass"/>
-			<Param type="VLNode" name="drainNode"/>
-		</Function>
-		<Function name="glXDestroyGLXVideoSourceSGIX" return="void">
-			<Param type="Display*" name="dpy"/>
-			<Param type="GLXVideoSourceSGIX" name="glxvideosource"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GLX_SGIX" string="GLX_SGIX_video_source" reg_no="43">
-			<Name name="glXCreateGLXVideoSourceSGIX"/>
-			<Name name="glXDestroyGLXVideoSourceSGIX"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GLX_SGIX"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glXCreateGLXVideoSourceSGIX" return="GLXVideoSourceSGIX">
+			<params>
+				<param type="Display*" name="display"/>
+				<param type="int" name="screen"/>
+				<param type="VLServer" name="server"/>
+				<param type="VLPath" name="path"/>
+				<param type="int" name="nodeClass"/>
+				<param type="VLNode" name="drainNode"/>
+			</params>
+		</function>
+		<function name="glXDestroyGLXVideoSourceSGIX" return="void">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="GLXVideoSourceSGIX" name="glxvideosource"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

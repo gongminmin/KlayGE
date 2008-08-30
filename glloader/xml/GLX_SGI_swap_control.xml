@@ -1,19 +1,11 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GLX_SGI_swap_control">
-	<Functions>
-		<Function name="glXSwapIntervalSGI" return="int">
-			<Param type="int" name="interval"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GLX_SGI" string="GLX_SGI_swap_control" reg_no="40">
-			<Name name="glXSwapIntervalSGI"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GLX_SGI"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GLX_SGI_swap_control" reg_no="40">
+	<functions>
+		<function name="glXSwapIntervalSGI" return="int">
+			<params>
+				<param type="int" name="interval"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

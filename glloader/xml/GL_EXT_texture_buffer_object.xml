@@ -1,0 +1,21 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_EXT_texture_buffer_object" reg_no="330" prefer="GL_ARB_texture_buffer_object">
+	<tokens>
+		<token name="GL_TEXTURE_BUFFER_EXT" value="0x8C2A"/>
+		<token name="GL_MAX_TEXTURE_BUFFER_SIZE_EXT" value="0x8C2B"/>
+		<token name="GL_TEXTURE_BINDING_BUFFER_EXT" value="0x8C2C"/>
+		<token name="GL_TEXTURE_BUFFER_DATA_STORE_BINDING_EXT" value="0x8C2D"/>
+		<token name="GL_TEXTURE_BUFFER_FORMAT_EXT" value="0x8C2E"/>
+	</tokens>
+
+	<functions>
+		<function name="glTexBufferEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLuint" name="buffer"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

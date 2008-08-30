@@ -1,16 +1,8 @@
 <?xml version='1.0'?>
 
-<GLExtension name="WGL_3DFX_multisample">
-	<Tokens>
-		<Token name="WGL_SAMPLE_BUFFERS_3DFX" value="0x2060"/>
-		<Token name="WGL_SAMPLES_3DFX" value="0x2061"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="WGL_3DFX" string="WGL_3DFX_multisample" reg_no="207"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="WGL_3DFX"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="WGL_3DFX_multisample" reg_no="207">
+	<tokens>
+		<token name="WGL_SAMPLE_BUFFERS_3DFX" value="0x2060"/>
+		<token name="WGL_SAMPLES_3DFX" value="0x2061"/>
+	</tokens>
+</gl_extension>

@@ -1,41 +1,34 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_SGIX_instruments">
-	<Tokens>
-		<Token name="GL_INSTRUMENT_BUFFER_POINTER_SGIX" value="0x8180"/>
-		<Token name="GL_INSTRUMENT_MEASUREMENTS_SGIX" value="0x8181"/>
-	</Tokens>
+<gl_extension name="GL_SGIX_instruments" reg_no="55">
+	<tokens>
+		<token name="GL_INSTRUMENT_BUFFER_POINTER_SGIX" value="0x8180"/>
+		<token name="GL_INSTRUMENT_MEASUREMENTS_SGIX" value="0x8181"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glGetInstrumentsSGIX" return="GLint"/>
-		<Function name="glInstrumentsBufferSGIX" return="void">
-			<Param type="GLsizei" name="size"/>
-			<Param type="GLint*" name="buffer"/>
-		</Function>
-		<Function name="glPollInstrumentsSGIX" return="GLint">
-			<Param type="GLint*" name="marker_p"/>
-		</Function>
-		<Function name="glReadInstrumentsSGIX" return="void">
-			<Param type="GLint" name="marker"/>
-		</Function>
-		<Function name="glStartInstrumentsSGIX" return="void"/>
-		<Function name="glStopInstrumentsSGIX" return="void">
-			<Param type="GLint" name="marker"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_SGIX" string="GL_SGIX_instruments" reg_no="55">
-			<Name name="glGetInstrumentsSGIX"/>
-			<Name name="glInstrumentsBufferSGIX"/>
-			<Name name="glPollInstrumentsSGIX"/>
-			<Name name="glReadInstrumentsSGIX"/>
-			<Name name="glStartInstrumentsSGIX"/>
-			<Name name="glStopInstrumentsSGIX"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_SGIX"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glGetInstrumentsSGIX" return="GLint"/>
+		<function name="glInstrumentsBufferSGIX" return="void">
+			<params>
+				<param type="GLsizei" name="size"/>
+				<param type="GLint*" name="buffer"/>
+			</params>
+		</function>
+		<function name="glPollInstrumentsSGIX" return="GLint">
+			<params>
+				<param type="GLint*" name="marker_p"/>
+			</params>
+		</function>
+		<function name="glReadInstrumentsSGIX" return="void">
+			<params>
+				<param type="GLint" name="marker"/>
+			</params>
+		</function>
+		<function name="glStartInstrumentsSGIX" return="void"/>
+		<function name="glStopInstrumentsSGIX" return="void">
+			<params>
+				<param type="GLint" name="marker"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

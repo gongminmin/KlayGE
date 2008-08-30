@@ -1,19 +1,11 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_ARB_half_float_pixel">
-	<Typedefs>
-		<Typedef type="unsigned short" synonym="GLhalfARB"/>
-	</Typedefs>
+<gl_extension name="GL_ARB_half_float_pixel" reg_no="40">
+	<typedefs>
+		<typedef type="unsigned short" synonym="GLhalfARB"/>
+	</typedefs>
 
-	<Tokens>
-		<Token name="GL_HALF_FLOAT_ARB" value="0x140B"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_half_float_pixel" reg_no="40"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_ARB"/>
-	</InitPath>
-</GLExtension>
+	<tokens>
+		<token name="GL_HALF_FLOAT_ARB" value="0x140B"/>
+	</tokens>
+</gl_extension>

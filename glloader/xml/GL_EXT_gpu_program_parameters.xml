@@ -1,29 +1,22 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_EXT_gpu_program_parameters">
-	<Functions>
-		<Function name="glProgramEnvParameters4fvEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLsizei" name="count"/>
-			<Param type="const GLfloat*" name="params"/>
-		</Function>
-		<Function name="glProgramLocalParameters4fvEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLsizei" name="count"/>
-			<Param type="const GLfloat*" name="params"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_gpu_program_parameters" reg_no="320">
-			<Name name="glProgramEnvParameters4fvEXT"/>
-			<Name name="glProgramLocalParameters4fvEXT"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_EXT"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_EXT_gpu_program_parameters" reg_no="320">
+	<functions>
+		<function name="glProgramEnvParameters4fvEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glProgramLocalParameters4fvEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -43,11 +43,17 @@ class Param:
 	def __str__(self):
 		return "%s %s" % (self.type_name, self.name)
 
+class Mapping:
+	def __init__(self, from_ext, name):
+		self.from_ext = from_ext
+		self.name = name
+
 class Function:
-	def __init__(self, return_type, name, params):
+	def __init__(self, return_type, name, params, mappings):
 		self.return_type = return_type
 		self.name = name
 		self.params = params
+		self.mappings = mappings
 
 	def params_str(self):
 		ret = ''
@@ -67,11 +73,6 @@ class Function:
 				ret += ', '
 		return ret
 
-class Ext:
-	def __init__(self, string, names):
-		self.string = string
-		self.names = names
-
 class Extension:
 	def __init__(self, dom):
 		self.name = dom.documentElement.getAttribute("name")
@@ -80,57 +81,44 @@ class Extension:
 		else:
 			self.predefined = None
 
+		if dom.documentElement.getAttributeNode("reg_no") == None:
+			print "\tWarning:", dom.documentElement.getAttribute("name"), "is not in the OpenGL Extension Registry."
+
 		self.typedefs = []
-		typedefsTag = dom.documentElement.getElementsByTagName("Typedefs")
+		typedefsTag = dom.documentElement.getElementsByTagName("typedefs")
 		if (len(typedefsTag) != 0):
-			for typedef in typedefsTag[0].getElementsByTagName("Typedef"):
+			for typedef in typedefsTag[0].getElementsByTagName("typedef"):
 				self.typedefs.append(Typedef(typedef.getAttribute("type"),
 								typedef.getAttribute("synonym")))
 
 		self.tokens = []
-		tokensTag = dom.documentElement.getElementsByTagName("Tokens")
+		tokensTag = dom.documentElement.getElementsByTagName("tokens")
 		if (len(tokensTag) != 0):
-			for token in tokensTag[0].getElementsByTagName("Token"):
+			for token in tokensTag[0].getElementsByTagName("token"):
 				self.tokens.append(Token(token.getAttribute("name"),
 								token.getAttribute("value")))
 
 		self.functions = []
-		funcionsTag = dom.documentElement.getElementsByTagName("Functions")
+		funcionsTag = dom.documentElement.getElementsByTagName("functions")
 		if (len(funcionsTag) != 0):
-			for function in funcionsTag[0].getElementsByTagName("Function"):
+			for function in funcionsTag[0].getElementsByTagName("function"):
 				params = []
-				for param in function.getElementsByTagName("Param"):
-					params.append(Param(param.getAttribute("type"),
-							param.getAttribute("name")))
+				paramsTag = function.getElementsByTagName("params")
+				if (len(paramsTag) != 0):
+					for param in paramsTag[0].getElementsByTagName("param"):
+						params.append(Param(param.getAttribute("type"),
+								param.getAttribute("name")))
+
+				mappings = []
+				mappingsTag = function.getElementsByTagName("mappings")
+				if (len(mappingsTag) != 0):
+					for mapping in mappingsTag[0].getElementsByTagName("mapping"):
+						mappings.append(Mapping(mapping.getAttribute("from"),
+								mapping.getAttribute("name")))
 
 				self.functions.append(Function(function.getAttribute("return"),
 							function.getAttribute("name"),
-							params))
-
-
-		initpath = dom.documentElement.getElementsByTagName("InitPath")[0].getElementsByTagName("Init")
-		vendors = dom.documentElement.getElementsByTagName("Vendors")[0].getElementsByTagName("Vendor")
-
-		self.exts = []
-		for init in initpath:
-			for vendor in vendors:
-				if init.getAttribute("name") == vendor.getAttribute("name"):
-					assert (vendor.getAttributeNode("string") != None)
-
-					if vendor.getAttributeNode("reg_no") == None:
-						print "\tWarning:", vendor.getAttribute("string"), "is not in the OpenGL Extension Registry."
-
-					names = []
-					for name in vendor.getElementsByTagName("Name"):
-						assert (name.getAttributeNode("name") != None)
-						names.append(name.getAttribute("name"))
-					assert (len(names) == len(self.functions))
-
-					self.exts.append(Ext(vendor.getAttribute("string"), names))
-
-					break
-			else:
-				assert False
+							params, mappings))
 
 def create_header(prefix, extensions):
 	headerFile = open("include/glloader/glloader_%s.h" % prefix.lower(), "w")
@@ -283,25 +271,98 @@ def create_source(prefix, extensions):
 				sourceFile.write("\t\t\tentries[%d] = reinterpret_cast<void**>(&%s);\n" % (i, extension.functions[i].name))
 
 			sourceFile.write("\t\t}\n\n")
+			sourceFile.write("\t\tfuncs_names_t names(%d);\n" % len(extension.functions))
 
-		for ext in extension.exts:
-			sourceFile.write("\t\tif (glloader_is_supported(\"%s\"))\n" % ext.string)
+		sourceFile.write("\t\tif (glloader_is_supported(\"%s\"))\n" % extension.name)
+		sourceFile.write("\t\t{\n")
+		sourceFile.write("\t\t\t_%s = true;\n" % extension.name)
+		if len(extension.functions) > 0:
+			sourceFile.write("\n")
+		for i in range(0, len(extension.functions)):
+			sourceFile.write("\t\t\tnames[%d] = \"%s\";\n" % (i, extension.functions[i].name))
+		sourceFile.write("\t\t}\n")
+
+		backup = False
+		for function in extension.functions:
+			if len(function.mappings) > 0:
+				backup = True
+				break
+
+		if backup:
+			plans = []
+			for i in range(0, len(extension.functions)):
+				froms = []
+				for m in extension.functions[i].mappings:
+					froms.append(m.from_ext)
+					
+				found = False
+				for plan in plans:
+					if plan[0] == froms:
+						found = True
+						plan[1].append(i)
+						break
+				if not found:
+					plans.append([froms, [i]])
+
+			all_covered = True
+			for function in extension.functions:
+				if len(function.mappings) == 0:
+					all_covered = False
+					break
+
+			sourceFile.write("\t\telse\n")
 			sourceFile.write("\t\t{\n")
+			for plan in plans:
+				for i in range(0, len(plan[0])):
+					sourceFile.write("\t\t\t")
+					if i != 0:
+						sourceFile.write("else")
+					sourceFile.write("if (glloader_is_supported(\"%s\"))\n" % plan[0][i])
+					sourceFile.write("\t\t\t{\n")
+					for j in range(0, len(plan[1])):
+						sourceFile.write("\t\t\t\tnames[%d] = \"%s\";\n" % (plan[1][j], extension.functions[plan[1][j]].mappings[i].name))
 
-			sourceFile.write("\t\t\t_%s = true;\n" % extension.name)
-			if (ext.string != extension.exts[0].string):
-				sourceFile.write("\t\t\tgl_features_extractor::instance().promote(\"%s\", \"%s\");\n" % (ext.string, extension.exts[0].string))
+					if all_covered and len(plans) == 1:
+						sourceFile.write("\n\t\t\t\t_%s = true;\n" % extension.name)
+						sourceFile.write("\t\t\t\tgl_features_extractor::instance().promote(\"%s\");\n" % extension.name)
 
-			if (len(extension.functions) != 0):
-				sourceFile.write("\n\t\t\tfuncs_names_t names(%d);\n\n" % len(extension.functions))
+					sourceFile.write("\t\t\t}\n")
 
-				for i in range(0, len(extension.functions)):
-					sourceFile.write("\t\t\tnames[%d] = \"%s\";\n" % (i, ext.names[i]))
+					if i != len(plan[0]) - 1:
+						sourceFile.write("\n")
 
-				sourceFile.write("\n\t\t\tload_funcs(entries, names);\n\n")
-				sourceFile.write("\t\t\treturn;\n")
+			if all_covered and len(plans) > 1:
+				sourceFile.write("\n\t\t\tif (")
+				for i in range(0, len(plans)):
+					plan = plans[i]
+
+					if len(plan[0]) > 1:
+						sourceFile.write("(")
+
+					for j in range(0, len(plan[0])):
+						sourceFile.write("glloader_is_supported(\"%s\")" % plan[0][j])
+						if j != len(plan[0]) - 1:
+							sourceFile.write(" || ")
+
+					if len(plan[0]) > 1:
+						sourceFile.write(")")
+					if i != len(plans) - 1:
+						sourceFile.write("\n")
+
+					if len(plans) > 1 and i != len(plans) - 1:
+						sourceFile.write("\t\t\t\t&& ")
+
+					if i == len(plans) - 1:
+						sourceFile.write(")\n")
+				sourceFile.write("\t\t\t{\n")
+				sourceFile.write("\t\t\t\t_%s = true;\n" % extension.name)
+				sourceFile.write("\t\t\t\tgl_features_extractor::instance().promote(\"%s\");\n" % extension.name)
+				sourceFile.write("\t\t\t}\n")
 
 			sourceFile.write("\t\t}\n")
+
+		if (len(extension.functions) != 0):
+			sourceFile.write("\n\t\tload_funcs(entries, names);\n")
 
 		sourceFile.write("\t}\n")
 

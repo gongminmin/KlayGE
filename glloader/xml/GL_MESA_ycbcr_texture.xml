@@ -1,17 +1,9 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_MESA_ycbcr_texture">
-	<Tokens>
-		<Token name="GL_UNSIGNED_SHORT_8_8_MESA" value="0x85BA"/>
-		<Token name="GL_UNSIGNED_SHORT_8_8_REV_MESA" value="0x85BB"/>
-		<Token name="GL_YCBCR_MESA" value="0x8757"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_MESA" string="GL_MESA_ycbcr_texture" reg_no="301"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_MESA"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_MESA_ycbcr_texture" reg_no="301">
+	<tokens>
+		<token name="GL_UNSIGNED_SHORT_8_8_MESA" value="0x85BA"/>
+		<token name="GL_UNSIGNED_SHORT_8_8_REV_MESA" value="0x85BB"/>
+		<token name="GL_YCBCR_MESA" value="0x8757"/>
+	</tokens>
+</gl_extension>

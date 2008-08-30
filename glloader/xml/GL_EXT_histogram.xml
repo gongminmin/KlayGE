@@ -1,93 +1,94 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_EXT_histogram">
-	<Tokens>
-		<Token name="GL_HISTOGRAM_EXT" value="0x8024"/>
-		<Token name="GL_PROXY_HISTOGRAM_EXT" value="0x8025"/>
-		<Token name="GL_HISTOGRAM_WIDTH_EXT" value="0x8026"/>
-		<Token name="GL_HISTOGRAM_FORMAT_EXT" value="0x8027"/>
-		<Token name="GL_HISTOGRAM_RED_SIZE_EXT" value="0x8028"/>
-		<Token name="GL_HISTOGRAM_GREEN_SIZE_EXT" value="0x8029"/>
-		<Token name="GL_HISTOGRAM_BLUE_SIZE_EXT" value="0x802A"/>
-		<Token name="GL_HISTOGRAM_ALPHA_SIZE_EXT" value="0x802B"/>
-		<Token name="GL_HISTOGRAM_LUMINANCE_SIZE_EXT" value="0x802C"/>
-		<Token name="GL_HISTOGRAM_SINK_EXT" value="0x802D"/>
-		<Token name="GL_MINMAX_EXT" value="0x802E"/>
-		<Token name="GL_MINMAX_FORMAT_EXT" value="0x802F"/>
-		<Token name="GL_MINMAX_SINK_EXT" value="0x8030"/>
-		<Token name="GL_TABLE_TOO_LARGE_EXT" value="0x8031"/>
-	</Tokens>
+<gl_extension name="GL_EXT_histogram" reg_no="11">
+	<tokens>
+		<token name="GL_HISTOGRAM_EXT" value="0x8024"/>
+		<token name="GL_PROXY_HISTOGRAM_EXT" value="0x8025"/>
+		<token name="GL_HISTOGRAM_WIDTH_EXT" value="0x8026"/>
+		<token name="GL_HISTOGRAM_FORMAT_EXT" value="0x8027"/>
+		<token name="GL_HISTOGRAM_RED_SIZE_EXT" value="0x8028"/>
+		<token name="GL_HISTOGRAM_GREEN_SIZE_EXT" value="0x8029"/>
+		<token name="GL_HISTOGRAM_BLUE_SIZE_EXT" value="0x802A"/>
+		<token name="GL_HISTOGRAM_ALPHA_SIZE_EXT" value="0x802B"/>
+		<token name="GL_HISTOGRAM_LUMINANCE_SIZE_EXT" value="0x802C"/>
+		<token name="GL_HISTOGRAM_SINK_EXT" value="0x802D"/>
+		<token name="GL_MINMAX_EXT" value="0x802E"/>
+		<token name="GL_MINMAX_FORMAT_EXT" value="0x802F"/>
+		<token name="GL_MINMAX_SINK_EXT" value="0x8030"/>
+		<token name="GL_TABLE_TOO_LARGE_EXT" value="0x8031"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glHistogramEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLsizei" name="width"/>
-			<Param type="GLenum" name="internalformat"/>
-			<Param type="GLboolean" name="sink"/>
-		</Function>
-		<Function name="glResetHistogramEXT" return="void">
-			<Param type="GLenum" name="target"/>
-		</Function>
-		<Function name="glGetHistogramEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLboolean" name="reset"/>
-			<Param type="GLenum" name="format"/>
-			<Param type="GLenum" name="type"/>
-			<Param type="GLvoid*" name="values"/>
-		</Function>
-		<Function name="glGetHistogramParameterfvEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLfloat*" name="params"/>
-		</Function>
-		<Function name="glGetHistogramParameterivEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLint*" name="params"/>
-		</Function>
-		<Function name="glMinmaxEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="internalformat"/>
-			<Param type="GLboolean" name="sink"/>
-		</Function>
-		<Function name="glResetMinmaxEXT" return="void">
-			<Param type="GLenum" name="target"/>
-		</Function>
-		<Function name="glGetMinmaxEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLboolean" name="reset"/>
-			<Param type="GLenum" name="format"/>
-			<Param type="GLenum" name="type"/>
-			<Param type="GLvoid*" name="values"/>
-		</Function>
-		<Function name="glGetMinmaxParameterfvEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLfloat*" name="params"/>
-		</Function>
-		<Function name="glGetMinmaxParameterivEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLint*" name="params"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_histogram" reg_no="11">
-			<Name name="glHistogramEXT"/>
-			<Name name="glResetHistogramEXT"/>
-			<Name name="glGetHistogramEXT"/>
-			<Name name="glGetHistogramParameterfvEXT"/>
-			<Name name="glGetHistogramParameterivEXT"/>
-			<Name name="glMinmaxEXT"/>
-			<Name name="glResetMinmaxEXT"/>
-			<Name name="glGetMinmaxEXT"/>
-			<Name name="glGetMinmaxParameterfvEXT"/>
-			<Name name="glGetMinmaxParameterivEXT"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_EXT"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glHistogramEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLboolean" name="sink"/>
+			</params>
+		</function>
+		<function name="glResetHistogramEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+			</params>
+		</function>
+		<function name="glGetHistogramEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLboolean" name="reset"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLvoid*" name="values"/>
+			</params>
+		</function>
+		<function name="glGetHistogramParameterfvEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetHistogramParameterivEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glMinmaxEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLboolean" name="sink"/>
+			</params>
+		</function>
+		<function name="glResetMinmaxEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+			</params>
+		</function>
+		<function name="glGetMinmaxEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLboolean" name="reset"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLvoid*" name="values"/>
+			</params>
+		</function>
+		<function name="glGetMinmaxParameterfvEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetMinmaxParameterivEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

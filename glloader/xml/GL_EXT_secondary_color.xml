@@ -1,112 +1,120 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_EXT_secondary_color">
-	<Tokens>
-		<Token name="GL_COLOR_SUM_EXT" value="0x8458"/>
-		<Token name="GL_CURRENT_SECONDARY_COLOR_EXT" value="0x8459"/>
-		<Token name="GL_SECONDARY_COLOR_ARRAY_SIZE_EXT" value="0x845A"/>
-		<Token name="GL_SECONDARY_COLOR_ARRAY_TYPE_EXT" value="0x845B"/>
-		<Token name="GL_SECONDARY_COLOR_ARRAY_STRIDE_EXT" value="0x845C"/>
-		<Token name="GL_SECONDARY_COLOR_ARRAY_POINTER_EXT" value="0x845D"/>
-		<Token name="GL_SECONDARY_COLOR_ARRAY_EXT" value="0x845E"/>
-	</Tokens>
+<gl_extension name="GL_EXT_secondary_color" reg_no="145">
+	<tokens>
+		<token name="GL_COLOR_SUM_EXT" value="0x8458"/>
+		<token name="GL_CURRENT_SECONDARY_COLOR_EXT" value="0x8459"/>
+		<token name="GL_SECONDARY_COLOR_ARRAY_SIZE_EXT" value="0x845A"/>
+		<token name="GL_SECONDARY_COLOR_ARRAY_TYPE_EXT" value="0x845B"/>
+		<token name="GL_SECONDARY_COLOR_ARRAY_STRIDE_EXT" value="0x845C"/>
+		<token name="GL_SECONDARY_COLOR_ARRAY_POINTER_EXT" value="0x845D"/>
+		<token name="GL_SECONDARY_COLOR_ARRAY_EXT" value="0x845E"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glSecondaryColor3bEXT" return="void">
-			<Param type="GLbyte" name="red"/>
-			<Param type="GLbyte" name="green"/>
-			<Param type="GLbyte" name="blue"/>
-		</Function>
-		<Function name="glSecondaryColor3bvEXT" return="void">
-			<Param type="const GLbyte*" name="v"/>
-		</Function>
-		<Function name="glSecondaryColor3dEXT" return="void">
-			<Param type="GLdouble" name="red"/>
-			<Param type="GLdouble" name="green"/>
-			<Param type="GLdouble" name="blue"/>
-		</Function>
-		<Function name="glSecondaryColor3dvEXT" return="void">
-			<Param type="const GLdouble*" name="v"/>
-		</Function>
-		<Function name="glSecondaryColor3fEXT" return="void">
-			<Param type="GLfloat" name="red"/>
-			<Param type="GLfloat" name="green"/>
-			<Param type="GLfloat" name="blue"/>
-		</Function>
-		<Function name="glSecondaryColor3fvEXT" return="void">
-			<Param type="const GLfloat*" name="v"/>
-		</Function>
-		<Function name="glSecondaryColor3iEXT" return="void">
-			<Param type="GLint" name="red"/>
-			<Param type="GLint" name="green"/>
-			<Param type="GLint" name="blue"/>
-		</Function>
-		<Function name="glSecondaryColor3ivEXT" return="void">
-			<Param type="const GLint*" name="v"/>
-		</Function>
-		<Function name="glSecondaryColor3sEXT" return="void">
-			<Param type="GLshort" name="red"/>
-			<Param type="GLshort" name="green"/>
-			<Param type="GLshort" name="blue"/>
-		</Function>
-		<Function name="glSecondaryColor3svEXT" return="void">
-			<Param type="const GLshort*" name="v"/>
-		</Function>
-		<Function name="glSecondaryColor3ubEXT" return="void">
-			<Param type="GLubyte" name="red"/>
-			<Param type="GLubyte" name="green"/>
-			<Param type="GLubyte" name="blue"/>
-		</Function>
-		<Function name="glSecondaryColor3ubvEXT" return="void">
-			<Param type="const GLubyte*" name="v"/>
-		</Function>
-		<Function name="glSecondaryColor3uiEXT" return="void">
-			<Param type="GLuint" name="red"/>
-			<Param type="GLuint" name="green"/>
-			<Param type="GLuint" name="blue"/>
-		</Function>
-		<Function name="glSecondaryColor3uivEXT" return="void">
-			<Param type="const GLuint*" name="v"/>
-		</Function>
-		<Function name="glSecondaryColor3usEXT" return="void">
-			<Param type="GLushort" name="red"/>
-			<Param type="GLushort" name="green"/>
-			<Param type="GLushort" name="blue"/>
-		</Function>
-		<Function name="glSecondaryColor3usvEXT" return="void">
-			<Param type="const GLushort*" name="v"/>
-		</Function>
-		<Function name="glSecondaryColorPointerEXT" return="void">
-			<Param type="GLint" name="size"/>
-			<Param type="GLenum" name="type"/>
-			<Param type="GLsizei" name="stride"/>
-			<Param type="GLvoid*" name="pointer"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_secondary_color" reg_no="145">
-			<Name name="glSecondaryColor3bEXT"/>
-			<Name name="glSecondaryColor3bvEXT"/>
-			<Name name="glSecondaryColor3dEXT"/>
-			<Name name="glSecondaryColor3dvEXT"/>
-			<Name name="glSecondaryColor3fEXT"/>
-			<Name name="glSecondaryColor3fvEXT"/>
-			<Name name="glSecondaryColor3iEXT"/>
-			<Name name="glSecondaryColor3ivEXT"/>
-			<Name name="glSecondaryColor3sEXT"/>
-			<Name name="glSecondaryColor3svEXT"/>
-			<Name name="glSecondaryColor3ubEXT"/>
-			<Name name="glSecondaryColor3ubvEXT"/>
-			<Name name="glSecondaryColor3uiEXT"/>
-			<Name name="glSecondaryColor3uivEXT"/>
-			<Name name="glSecondaryColor3usEXT"/>
-			<Name name="glSecondaryColor3usvEXT"/>
-			<Name name="glSecondaryColorPointerEXT"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_EXT"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glSecondaryColor3bEXT" return="void">
+			<params>
+				<param type="GLbyte" name="red"/>
+				<param type="GLbyte" name="green"/>
+				<param type="GLbyte" name="blue"/>
+			</params>
+		</function>
+		<function name="glSecondaryColor3bvEXT" return="void">
+			<params>
+				<param type="const GLbyte*" name="v"/>
+			</params>
+		</function>
+		<function name="glSecondaryColor3dEXT" return="void">
+			<params>
+				<param type="GLdouble" name="red"/>
+				<param type="GLdouble" name="green"/>
+				<param type="GLdouble" name="blue"/>
+			</params>
+		</function>
+		<function name="glSecondaryColor3dvEXT" return="void">
+			<params>
+				<param type="const GLdouble*" name="v"/>
+			</params>
+		</function>
+		<function name="glSecondaryColor3fEXT" return="void">
+			<params>
+				<param type="GLfloat" name="red"/>
+				<param type="GLfloat" name="green"/>
+				<param type="GLfloat" name="blue"/>
+			</params>
+		</function>
+		<function name="glSecondaryColor3fvEXT" return="void">
+			<params>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glSecondaryColor3iEXT" return="void">
+			<params>
+				<param type="GLint" name="red"/>
+				<param type="GLint" name="green"/>
+				<param type="GLint" name="blue"/>
+			</params>
+		</function>
+		<function name="glSecondaryColor3ivEXT" return="void">
+			<params>
+				<param type="const GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glSecondaryColor3sEXT" return="void">
+			<params>
+				<param type="GLshort" name="red"/>
+				<param type="GLshort" name="green"/>
+				<param type="GLshort" name="blue"/>
+			</params>
+		</function>
+		<function name="glSecondaryColor3svEXT" return="void">
+			<params>
+				<param type="const GLshort*" name="v"/>
+			</params>
+		</function>
+		<function name="glSecondaryColor3ubEXT" return="void">
+			<params>
+				<param type="GLubyte" name="red"/>
+				<param type="GLubyte" name="green"/>
+				<param type="GLubyte" name="blue"/>
+			</params>
+		</function>
+		<function name="glSecondaryColor3ubvEXT" return="void">
+			<params>
+				<param type="const GLubyte*" name="v"/>
+			</params>
+		</function>
+		<function name="glSecondaryColor3uiEXT" return="void">
+			<params>
+				<param type="GLuint" name="red"/>
+				<param type="GLuint" name="green"/>
+				<param type="GLuint" name="blue"/>
+			</params>
+		</function>
+		<function name="glSecondaryColor3uivEXT" return="void">
+			<params>
+				<param type="const GLuint*" name="v"/>
+			</params>
+		</function>
+		<function name="glSecondaryColor3usEXT" return="void">
+			<params>
+				<param type="GLushort" name="red"/>
+				<param type="GLushort" name="green"/>
+				<param type="GLushort" name="blue"/>
+			</params>
+		</function>
+		<function name="glSecondaryColor3usvEXT" return="void">
+			<params>
+				<param type="const GLushort*" name="v"/>
+			</params>
+		</function>
+		<function name="glSecondaryColorPointerEXT" return="void">
+			<params>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+				<param type="GLvoid*" name="pointer"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

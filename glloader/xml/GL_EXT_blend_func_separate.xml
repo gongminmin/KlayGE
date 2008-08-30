@@ -1,29 +1,21 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_EXT_blend_func_separate">
-	<Tokens>
-		<Token name="GL_BLEND_DST_RGB_EXT" value="0x80C8"/>
-		<Token name="GL_BLEND_SRC_RGB_EXT" value="0x80C9"/>
-		<Token name="GL_BLEND_DST_ALPHA_EXT" value="0x80CA"/>
-		<Token name="GL_BLEND_SRC_ALPHA_EXT" value="0x80CB"/>
-	</Tokens>
+<gl_extension name="GL_EXT_blend_func_separate" reg_no="173">
+	<tokens>
+		<token name="GL_BLEND_DST_RGB_EXT" value="0x80C8"/>
+		<token name="GL_BLEND_SRC_RGB_EXT" value="0x80C9"/>
+		<token name="GL_BLEND_DST_ALPHA_EXT" value="0x80CA"/>
+		<token name="GL_BLEND_SRC_ALPHA_EXT" value="0x80CB"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glBlendFuncSeparateEXT" return="void">
-			<Param type="GLenum" name="sfactorRGB"/>
-			<Param type="GLenum" name="dfactorRGB"/>
-			<Param type="GLenum" name="sfactorAlpha"/>
-			<Param type="GLenum" name="dfactorAlpha"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_blend_func_separate" reg_no="173">
-			<Name name="glBlendFuncSeparateEXT"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_EXT"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glBlendFuncSeparateEXT" return="void">
+			<params>
+				<param type="GLenum" name="sfactorRGB"/>
+				<param type="GLenum" name="dfactorRGB"/>
+				<param type="GLenum" name="sfactorAlpha"/>
+				<param type="GLenum" name="dfactorAlpha"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

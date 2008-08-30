@@ -1,21 +1,13 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GLX_SGIX_swap_group">
-	<Functions>
-		<Function name="glXJoinSwapGroupSGIX" return="void">
-			<Param type="Display*" name="dpy"/>
-			<Param type="GLXDrawable" name="drawable"/>
-			<Param type="GLXDrawable" name="member"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GLX_SGIX" string="GLX_SGIX_swap_group" reg_no="91">
-			<Name name="glXJoinSwapGroupSGIX"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GLX_SGIX"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GLX_SGIX_swap_group" reg_no="91">
+	<functions>
+		<function name="glXJoinSwapGroupSGIX" return="void">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="GLXDrawable" name="drawable"/>
+				<param type="GLXDrawable" name="member"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

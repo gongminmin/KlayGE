@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_SGIS_texture_border_clamp" reg_no="36" prefer="GL_ARB_texture_border_clamp">
+	<tokens>
+		<token name="GL_CLAMP_TO_BORDER_SGIS" value="0x812D"/>
+	</tokens>
+</gl_extension>

@@ -1,31 +1,23 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_NV_texture_shader3">
-	<Tokens>
-		<Token name="GL_OFFSET_PROJECTIVE_TEXTURE_2D_NV" value="0x8850"/>
-		<Token name="GL_OFFSET_PROJECTIVE_TEXTURE_2D_SCALE_NV" value="0x8851"/>
-		<Token name="GL_OFFSET_PROJECTIVE_TEXTURE_RECTANGLE_NV" value="0x8852"/>
-		<Token name="GL_OFFSET_PROJECTIVE_TEXTURE_RECTANGLE_SCALE_NV" value="0x8853"/>
-		<Token name="GL_OFFSET_HILO_TEXTURE_2D_NV" value="0x8854"/>
-		<Token name="GL_OFFSET_HILO_TEXTURE_RECTANGLE_NV" value="0x8855"/>
-		<Token name="GL_OFFSET_HILO_PROJECTIVE_TEXTURE_2D_NV" value="0x8856"/>
-		<Token name="GL_OFFSET_HILO_PROJECTIVE_TEXTURE_RECTANGLE_NV" value="0x8857"/>
-		<Token name="GL_DEPENDENT_HILO_TEXTURE_2D_NV" value="0x8858"/>
-		<Token name="GL_DEPENDENT_RGB_TEXTURE_3D_NV" value="0x8859"/>
-		<Token name="GL_DEPENDENT_RGB_TEXTURE_CUBE_MAP_NV" value="0x885A"/>
-		<Token name="GL_DOT_PRODUCT_PASS_THROUGH_NV" value="0x885B"/>
-		<Token name="GL_DOT_PRODUCT_TEXTURE_1D_NV" value="0x885C"/>
-		<Token name="GL_DOT_PRODUCT_AFFINE_DEPTH_REPLACE_NV" value="0x885D"/>
-		<Token name="GL_HILO8_NV" value="0x885E"/>
-		<Token name="GL_SIGNED_HILO8_NV" value="0x885F"/>
-		<Token name="GL_FORCE_BLUE_TO_ONE_NV" value="0x8860"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_texture_shader3" reg_no="265"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_NV"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_NV_texture_shader3" reg_no="265">
+	<tokens>
+		<token name="GL_OFFSET_PROJECTIVE_TEXTURE_2D_NV" value="0x8850"/>
+		<token name="GL_OFFSET_PROJECTIVE_TEXTURE_2D_SCALE_NV" value="0x8851"/>
+		<token name="GL_OFFSET_PROJECTIVE_TEXTURE_RECTANGLE_NV" value="0x8852"/>
+		<token name="GL_OFFSET_PROJECTIVE_TEXTURE_RECTANGLE_SCALE_NV" value="0x8853"/>
+		<token name="GL_OFFSET_HILO_TEXTURE_2D_NV" value="0x8854"/>
+		<token name="GL_OFFSET_HILO_TEXTURE_RECTANGLE_NV" value="0x8855"/>
+		<token name="GL_OFFSET_HILO_PROJECTIVE_TEXTURE_2D_NV" value="0x8856"/>
+		<token name="GL_OFFSET_HILO_PROJECTIVE_TEXTURE_RECTANGLE_NV" value="0x8857"/>
+		<token name="GL_DEPENDENT_HILO_TEXTURE_2D_NV" value="0x8858"/>
+		<token name="GL_DEPENDENT_RGB_TEXTURE_3D_NV" value="0x8859"/>
+		<token name="GL_DEPENDENT_RGB_TEXTURE_CUBE_MAP_NV" value="0x885A"/>
+		<token name="GL_DOT_PRODUCT_PASS_THROUGH_NV" value="0x885B"/>
+		<token name="GL_DOT_PRODUCT_TEXTURE_1D_NV" value="0x885C"/>
+		<token name="GL_DOT_PRODUCT_AFFINE_DEPTH_REPLACE_NV" value="0x885D"/>
+		<token name="GL_HILO8_NV" value="0x885E"/>
+		<token name="GL_SIGNED_HILO8_NV" value="0x885F"/>
+		<token name="GL_FORCE_BLUE_TO_ONE_NV" value="0x8860"/>
+	</tokens>
+</gl_extension>

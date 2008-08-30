@@ -1,17 +1,7 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_MESA_resize_buffers">
-	<Functions>
-		<Function name="glResizeBuffersMESA" return="void"/>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_MESA" string="GL_MESA_resize_buffers" reg_no="196">
-			<Name name="glResizeBuffersMESA"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_MESA"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_MESA_resize_buffers" reg_no="196">
+	<functions>
+		<function name="glResizeBuffersMESA" return="void"/>
+	</functions>
+</gl_extension>

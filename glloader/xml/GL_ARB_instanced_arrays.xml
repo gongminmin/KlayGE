@@ -1,24 +1,16 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_ARB_instanced_arrays">
-	<Tokens>
-		<Token name="GL_VERTEX_ATTRIB_ARRAY_DIVISOR_ARB" value="0x88FE"/>
-	</Tokens>
+<gl_extension name="GL_ARB_instanced_arrays" reg_no="49">
+	<tokens>
+		<token name="GL_VERTEX_ATTRIB_ARRAY_DIVISOR_ARB" value="0x88FE"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glVertexAttribDivisorARB" return="void">
-			<Param type="GLuint" name="index"/>
-			<Param type="GLuint" name="divisor"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_instanced_arrays" reg_no="49">
-			<Name name="glVertexAttribDivisorARB"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_ARB"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glVertexAttribDivisorARB" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint" name="divisor"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,30 +1,21 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_NV_vertex_array_range">
-	<Tokens>
-		<Token name="GL_VERTEX_ARRAY_RANGE_NV" value="0x851D"/>
-		<Token name="GL_VERTEX_ARRAY_RANGE_LENGTH_NV" value="0x851E"/>
-		<Token name="GL_VERTEX_ARRAY_RANGE_VALID_NV" value="0x851F"/>
-		<Token name="GL_MAX_VERTEX_ARRAY_RANGE_ELEMENT_NV" value="0x8520"/>
-		<Token name="GL_VERTEX_ARRAY_RANGE_POINTER_NV" value="0x8521"/>
-	</Tokens>
+<gl_extension name="GL_NV_vertex_array_range" reg_no="190">
+	<tokens>
+		<token name="GL_VERTEX_ARRAY_RANGE_NV" value="0x851D"/>
+		<token name="GL_VERTEX_ARRAY_RANGE_LENGTH_NV" value="0x851E"/>
+		<token name="GL_VERTEX_ARRAY_RANGE_VALID_NV" value="0x851F"/>
+		<token name="GL_MAX_VERTEX_ARRAY_RANGE_ELEMENT_NV" value="0x8520"/>
+		<token name="GL_VERTEX_ARRAY_RANGE_POINTER_NV" value="0x8521"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glVertexArrayRangeNV" return="void">
-			<Param type="GLsizei" name="length"/>
-			<Param type="GLvoid*" name="pointer"/>
-		</Function>
-		<Function name="glFlushVertexArrayRangeNV" return="void"/>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_vertex_array_range" reg_no="190">
-			<Name name="glVertexArrayRangeNV"/>
-			<Name name="glFlushVertexArrayRangeNV"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_NV"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glVertexArrayRangeNV" return="void">
+			<params>
+				<param type="GLsizei" name="length"/>
+				<param type="GLvoid*" name="pointer"/>
+			</params>
+		</function>
+		<function name="glFlushVertexArrayRangeNV" return="void"/>
+	</functions>
+</gl_extension>

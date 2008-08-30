@@ -1,27 +1,19 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_OES_shader_binary">
-	<Tokens>
-		<Token name="GL_PLATFORM_BINARY_OES" value="0x8D63"/>
-	</Tokens>
+<gl_extension name="GL_OES_shader_binary">
+	<tokens>
+		<token name="GL_PLATFORM_BINARY_OES" value="0x8D63"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glShaderBinaryOES" return="void">
-			<Param type="GLint" name="n"/>
-			<Param type="GLuint*" name="shaders"/>
-			<Param type="GLenum" name="binaryformat"/>
-			<Param type="const void*" name="binary"/>
-			<Param type="GLint" name="length"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_OES" string="GL_OES_shader_binary">
-			<Name name="glShaderBinaryOES"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_OES"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glShaderBinaryOES" return="void">
+			<params>
+				<param type="GLint" name="n"/>
+				<param type="GLuint*" name="shaders"/>
+				<param type="GLenum" name="binaryformat"/>
+				<param type="const void*" name="binary"/>
+				<param type="GLint" name="length"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

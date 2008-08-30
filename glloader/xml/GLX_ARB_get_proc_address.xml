@@ -1,23 +1,15 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GLX_ARB_get_proc_address">
-	<Typedefs>
-		<Typedef type="void" synonym="(*__GLXextFuncPtr)(void)"/>
-	</Typedefs>
+<gl_extension name="GLX_ARB_get_proc_address" reg_no="2">
+	<typedefs>
+		<typedef type="void" synonym="(*__GLXextFuncPtr)(void)"/>
+	</typedefs>
 
-	<Functions>
-		<Function name="glXGetProcAddressARB" return="__GLXextFuncPtr">
-			<Param type="const GLubyte*" name="procName"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GLX_ARB" string="GLX_ARB_get_proc_address" reg_no="2">
-			<Name name="glXGetProcAddressARB"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GLX_ARB"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glXGetProcAddressARB" return="__GLXextFuncPtr">
+			<params>
+				<param type="const GLubyte*" name="procName"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

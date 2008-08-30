@@ -1,24 +1,16 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GLX_MESA_set_3dfx_mode">
-	<Tokens>
-		<Token name="GLX_3DFX_WINDOW_MODE_MESA" value="0x1"/>
-		<Token name="GLX_3DFX_FULLSCREEN_MODE_MESA" value="0x2"/>
-	</Tokens>
+<gl_extension name="GLX_MESA_set_3dfx_mode" reg_no="218">
+	<tokens>
+		<token name="GLX_3DFX_WINDOW_MODE_MESA" value="0x1"/>
+		<token name="GLX_3DFX_FULLSCREEN_MODE_MESA" value="0x2"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glXSet3DfxModeMESA" return="Bool">
-			<Param type="int" name="mode"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GLX_MESA" string="GLX_MESA_set_3dfx_mode" reg_no="218">
-			<Name name="glXSet3DfxModeMESA"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GLX_MESA"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glXSet3DfxModeMESA" return="Bool">
+			<params>
+				<param type="int" name="mode"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,21 +1,13 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GLX_SGI_cushion">
-	<Functions>
-		<Function name="glXCushionSGI" return="void">
-			<Param type="Display*" name="dpy"/>
-			<Param type="Window" name="window"/>
-			<Param type="float" name="cushion"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GLX_SGI" string="GLX_SGI_cushion" reg_no="62">
-			<Name name="glXCushionSGI"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GLX_SGI"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GLX_SGI_cushion" reg_no="62">
+	<functions>
+		<function name="glXCushionSGI" return="void">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="Window" name="window"/>
+				<param type="float" name="cushion"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

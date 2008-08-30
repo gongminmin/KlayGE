@@ -1,58 +1,51 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_SGIS_texture4D">
-	<Tokens>
-		<Token name="GL_PACK_SKIP_VOLUMES_SGIS" value="0x8130"/>
-		<Token name="GL_PACK_IMAGE_DEPTH_SGIS" value="0x8131"/>
-		<Token name="GL_UNPACK_SKIP_VOLUMES_SGIS" value="0x8132"/>
-		<Token name="GL_UNPACK_IMAGE_DEPTH_SGIS" value="0x8133"/>
-		<Token name="GL_TEXTURE_4D_SGIS" value="0x8134"/>
-		<Token name="GL_PROXY_TEXTURE_4D_SGIS" value="0x8135"/>
-		<Token name="GL_TEXTURE_4DSIZE_SGIS" value="0x8136"/>
-		<Token name="GL_TEXTURE_WRAP_Q_SGIS" value="0x8137"/>
-		<Token name="GL_MAX_4D_TEXTURE_SIZE_SGIS" value="0x8138"/>
-		<Token name="GL_TEXTURE_4D_BINDING_SGIS" value="0x814F"/>
-	</Tokens>
+<gl_extension name="GL_SGIS_texture4D" reg_no="16">
+	<tokens>
+		<token name="GL_PACK_SKIP_VOLUMES_SGIS" value="0x8130"/>
+		<token name="GL_PACK_IMAGE_DEPTH_SGIS" value="0x8131"/>
+		<token name="GL_UNPACK_SKIP_VOLUMES_SGIS" value="0x8132"/>
+		<token name="GL_UNPACK_IMAGE_DEPTH_SGIS" value="0x8133"/>
+		<token name="GL_TEXTURE_4D_SGIS" value="0x8134"/>
+		<token name="GL_PROXY_TEXTURE_4D_SGIS" value="0x8135"/>
+		<token name="GL_TEXTURE_4DSIZE_SGIS" value="0x8136"/>
+		<token name="GL_TEXTURE_WRAP_Q_SGIS" value="0x8137"/>
+		<token name="GL_MAX_4D_TEXTURE_SIZE_SGIS" value="0x8138"/>
+		<token name="GL_TEXTURE_4D_BINDING_SGIS" value="0x814F"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glTexImage4DSGIS" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLint" name="level"/>
-			<Param type="GLenum" name="internalformat"/>
-			<Param type="GLsizei" name="width"/>
-			<Param type="GLsizei" name="height"/>
-			<Param type="GLsizei" name="depth"/>
-			<Param type="GLsizei" name="size4d"/>
-			<Param type="GLint" name="border"/>
-			<Param type="GLenum" name="format"/>
-			<Param type="GLenum" name="type"/>
-			<Param type="const GLvoid*" name="pixels"/>
-		</Function>
-		<Function name="glTexSubImage4DSGIS" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLint" name="level"/>
-			<Param type="GLint" name="xoffset"/>
-			<Param type="GLint" name="yoffset"/>
-			<Param type="GLint" name="zoffset"/>
-			<Param type="GLint" name="woffset"/>
-			<Param type="GLsizei" name="width"/>
-			<Param type="GLsizei" name="height"/>
-			<Param type="GLsizei" name="depth"/>
-			<Param type="GLsizei" name="size4d"/>
-			<Param type="GLenum" name="format"/>
-			<Param type="GLenum" name="type"/>
-			<Param type="const GLvoid*" name="pixels"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_SGIS" string="GL_SGIS_texture4D" reg_no="16">
-			<Name name="glTexImage4DSGIS"/>
-			<Name name="glTexSubImage4DSGIS"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_SGIS"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glTexImage4DSGIS" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLsizei" name="size4d"/>
+				<param type="GLint" name="border"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="pixels"/>
+			</params>
+		</function>
+		<function name="glTexSubImage4DSGIS" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="yoffset"/>
+				<param type="GLint" name="zoffset"/>
+				<param type="GLint" name="woffset"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLsizei" name="size4d"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="pixels"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

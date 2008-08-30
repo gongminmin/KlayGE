@@ -1,0 +1,10 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_EXT_pixel_buffer_object" reg_no="302" prefer="GL_ARB_pixel_buffer_object">
+	<tokens>
+		<token name="GL_PIXEL_PACK_BUFFER_EXT" value="0x88EB"/>
+		<token name="GL_PIXEL_UNPACK_BUFFER_EXT" value="0x88EC"/>
+		<token name="GL_PIXEL_PACK_BUFFER_BINDING_EXT" value="0x88ED"/>
+		<token name="GL_PIXEL_UNPACK_BUFFER_BINDING_EXT" value="0x88EF"/>
+	</tokens>
+</gl_extension>

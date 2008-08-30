@@ -1,24 +1,16 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GLX_MESA_copy_sub_buffer">
-	<Functions>
-		<Function name="glXCopySubBufferMESA" return="void">
-			<Param type="Display*" name="dpy"/>
-			<Param type="GLXDrawable" name="drawable"/>
-			<Param type="int" name="x"/>
-			<Param type="int" name="y"/>
-			<Param type="int" name="width"/>
-			<Param type="int" name="height"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GLX_MESA" string="GLX_MESA_copy_sub_buffer" reg_no="215">
-			<Name name="glXCopySubBufferMESA"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GLX_MESA"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GLX_MESA_copy_sub_buffer" reg_no="215">
+	<functions>
+		<function name="glXCopySubBufferMESA" return="void">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="GLXDrawable" name="drawable"/>
+				<param type="int" name="x"/>
+				<param type="int" name="y"/>
+				<param type="int" name="width"/>
+				<param type="int" name="height"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

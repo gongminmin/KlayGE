@@ -1,17 +1,7 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GLX_VERSION_1_2">
-	<Functions>
-		<Function name="glXGetCurrentDisplay" return="Display*"/>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GLX_VERSION" string="GLX_VERSION_1_2">
-			<Name name="glXGetCurrentDisplay"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GLX_VERSION"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GLX_VERSION_1_2">
+	<functions>
+		<function name="glXGetCurrentDisplay" return="Display*"/>
+	</functions>
+</gl_extension>

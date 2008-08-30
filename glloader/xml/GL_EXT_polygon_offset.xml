@@ -1,30 +1,22 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_EXT_polygon_offset">
-	<Tokens>
-		<Token name="GL_POLYGON_OFFSET_EXT" value="0x8037"/>
-		<Token name="GL_POLYGON_OFFSET_FACTOR_EXT" value="0x8038"/>
-		<Token name="GL_POLYGON_OFFSET_BIAS_EXT" value="0x8039"/>
-		<Token name="GL_POLYGON_OFFSET_UNITS_EXT" value="0x2A00"/>
-		<Token name="GL_POLYGON_OFFSET_POINT_EXT" value="0x2A01"/>
-		<Token name="GL_POLYGON_OFFSET_LINE_EXT" value="0x2A02"/>
-		<Token name="GL_POLYGON_OFFSET_FILL_EXT" value="0x8037"/>
-	</Tokens>
+<gl_extension name="GL_EXT_polygon_offset" reg_no="3">
+	<tokens>
+		<token name="GL_POLYGON_OFFSET_EXT" value="0x8037"/>
+		<token name="GL_POLYGON_OFFSET_FACTOR_EXT" value="0x8038"/>
+		<token name="GL_POLYGON_OFFSET_BIAS_EXT" value="0x8039"/>
+		<token name="GL_POLYGON_OFFSET_UNITS_EXT" value="0x2A00"/>
+		<token name="GL_POLYGON_OFFSET_POINT_EXT" value="0x2A01"/>
+		<token name="GL_POLYGON_OFFSET_LINE_EXT" value="0x2A02"/>
+		<token name="GL_POLYGON_OFFSET_FILL_EXT" value="0x8037"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glPolygonOffsetEXT" return="void">
-			<Param type="GLfloat" name="factor"/>
-			<Param type="GLfloat" name="bias"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_polygon_offset" reg_no="3">
-			<Name name="glPolygonOffsetEXT"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_EXT"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glPolygonOffsetEXT" return="void">
+			<params>
+				<param type="GLfloat" name="factor"/>
+				<param type="GLfloat" name="bias"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

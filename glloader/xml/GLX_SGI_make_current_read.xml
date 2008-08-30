@@ -1,24 +1,15 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GLX_SGI_make_current_read">
-	<Functions>
-		<Function name="glXMakeCurrentReadSGI" return="Bool">
-			<Param type="Display*" name="dpy"/>
-			<Param type="GLXDrawable" name="draw"/>
-			<Param type="GLXDrawable" name="read"/>
-			<Param type="GLXContext" name="ctx"/>
-		</Function>
-		<Function name="glXGetCurrentReadDrawableSGI" return="GLXDrawable"/>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GLX_SGI" string="GLX_SGI_make_current_read" reg_no="42">
-			<Name name="glXMakeCurrentReadSGI"/>
-			<Name name="glXGetCurrentReadDrawableSGI"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GLX_SGI"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GLX_SGI_make_current_read" reg_no="42">
+	<functions>
+		<function name="glXMakeCurrentReadSGI" return="Bool">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="GLXDrawable" name="draw"/>
+				<param type="GLXDrawable" name="read"/>
+				<param type="GLXContext" name="ctx"/>
+			</params>
+		</function>
+		<function name="glXGetCurrentReadDrawableSGI" return="GLXDrawable"/>
+	</functions>
+</gl_extension>

@@ -1,42 +1,36 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_EXT_multi_draw_arrays">
-	<Tokens>
-		<Token name="GL_POINT_SIZE_MIN_EXT" value="0x8126"/>
-		<Token name="GL_POINT_SIZE_MAX_EXT" value="0x8127"/>
-		<Token name="GL_POINT_FADE_THRESHOLD_SIZE_EXT" value="0x8128"/>
-		<Token name="GL_POINT_DISTANCE_ATTENUATION_EXT" value="0x8129"/>
-	</Tokens>
+<gl_extension name="GL_EXT_multi_draw_arrays" reg_no="148">
+	<tokens>
+		<token name="GL_POINT_SIZE_MIN_EXT" value="0x8126"/>
+		<token name="GL_POINT_SIZE_MAX_EXT" value="0x8127"/>
+		<token name="GL_POINT_FADE_THRESHOLD_SIZE_EXT" value="0x8128"/>
+		<token name="GL_POINT_DISTANCE_ATTENUATION_EXT" value="0x8129"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glMultiDrawArraysEXT" return="void">
-			<Param type="GLenum" name="mode"/>
-			<Param type="GLint*" name="first"/>
-			<Param type="GLsizei*" name="count"/>
-			<Param type="GLsizei" name="primcount"/>
-		</Function>
-		<Function name="glMultiDrawElementsEXT" return="void">
-			<Param type="GLenum" name="mode"/>
-			<Param type="GLsizei*" name="count"/>
-			<Param type="GLenum" name="type"/>
-			<Param type="const GLvoid**" name="indices"/>
-			<Param type="GLsizei" name="primcount"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_multi_draw_arrays" reg_no="148">
-			<Name name="glMultiDrawArraysEXT"/>
-			<Name name="glMultiDrawElementsEXT"/>
-		</Vendor>
-		<Vendor name="GL_SUN" string="GL_SUN_multi_draw_arrays" reg_no="148">
-			<Name name="glMultiDrawArraysSUN"/>
-			<Name name="glMultiDrawElementsSUN"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_EXT"/>
-		<Init name="GL_SUN"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glMultiDrawArraysEXT" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLint*" name="first"/>
+				<param type="GLsizei*" name="count"/>
+				<param type="GLsizei" name="primcount"/>
+			</params>
+			<mappings>
+				<mapping from="GL_SUN_multi_draw_arrays" name="glMultiDrawArraysSUN"/>
+			</mappings>
+		</function>
+		<function name="glMultiDrawElementsEXT" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLsizei*" name="count"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid**" name="indices"/>
+				<param type="GLsizei" name="primcount"/>
+			</params>
+			<mappings>
+				<mapping from="GL_SUN_multi_draw_arrays" name="glMultiDrawElementsSUN"/>
+			</mappings>
+		</function>
+	</functions>
+</gl_extension>

@@ -120,6 +120,7 @@ namespace glloader
 		BOOST_ASSERT(str != NULL);
 
 		std::vector<std::string> gl_exts = split(reinterpret_cast<char const *>(str));
+		gl_exts.erase(std::remove(gl_exts.begin(), gl_exts.end(), ""), gl_exts.end());
 		features_.insert(features_.end(), gl_exts.begin(), gl_exts.end());
 
 		int major, minor;
@@ -158,6 +159,10 @@ namespace glloader
 		{
 			features_.push_back("GL_VERSION_2_1");
 		}
+		if (ver_code >= 30)
+		{
+			features_.push_back("GL_VERSION_3_0");
+		}
 	}
 
 	void gl_features_extractor::wgl_features()
@@ -180,6 +185,7 @@ namespace glloader
 		}
 
 		std::vector<std::string> wgl_exts = split(exts_str);
+		wgl_exts.erase(std::remove(wgl_exts.begin(), wgl_exts.end(), ""), wgl_exts.end());
 		features_.insert(features_.end(), wgl_exts.begin(), wgl_exts.end());
 #endif		// GLLOADER_WGL
 	}
@@ -198,6 +204,7 @@ namespace glloader
 	{
 #ifdef GLLOADER_GLX
 		std::vector<std::string> glx_exts = split(::glXGetClientString(::glXGetCurrentDisplay(), GLX_EXTENSIONS));
+		glx_exts.erase(std::remove(glx_exts.begin(), glx_exts.end(), ""), glx_exts.end());
 		features_.insert(features_.end(), glx_exts.begin(), glx_exts.end());
 
 		int major, minor;

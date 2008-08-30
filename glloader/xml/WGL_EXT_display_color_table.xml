@@ -1,32 +1,27 @@
 <?xml version='1.0'?>
 
-<GLExtension name="WGL_EXT_display_color_table">
-	<Functions>
-		<Function name="wglCreateDisplayColorTableEXT" return="GLboolean">
-			<Param type="GLushort" name="id"/>
-		</Function>
-		<Function name="wglLoadDisplayColorTableEXT" return="GLboolean">
-			<Param type="const GLushort*" name="table"/>
-			<Param type="GLuint" name="length"/>
-		</Function>
-		<Function name="wglBindDisplayColorTableEXT" return="GLboolean">
-			<Param type="GLushort" name="id"/>
-		</Function>
-		<Function name="wglDestroyDisplayColorTableEXT" return="void">
-			<Param type="GLushort" name="id"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="WGL_EXT" string="WGL_EXT_display_color_table" reg_no="167">
-			<Name name="wglCreateDisplayColorTableEXT"/>
-			<Name name="wglLoadDisplayColorTableEXT"/>
-			<Name name="wglBindDisplayColorTableEXT"/>
-			<Name name="wglDestroyDisplayColorTableEXT"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="WGL_EXT"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="WGL_EXT_display_color_table" reg_no="167">
+	<functions>
+		<function name="wglCreateDisplayColorTableEXT" return="GLboolean">
+			<params>
+				<param type="GLushort" name="id"/>
+			</params>
+		</function>
+		<function name="wglLoadDisplayColorTableEXT" return="GLboolean">
+			<params>
+				<param type="const GLushort*" name="table"/>
+				<param type="GLuint" name="length"/>
+			</params>
+		</function>
+		<function name="wglBindDisplayColorTableEXT" return="GLboolean">
+			<params>
+				<param type="GLushort" name="id"/>
+			</params>
+		</function>
+		<function name="wglDestroyDisplayColorTableEXT" return="void">
+			<params>
+				<param type="GLushort" name="id"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

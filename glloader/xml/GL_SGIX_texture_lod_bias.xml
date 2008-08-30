@@ -1,17 +1,9 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_SGIX_texture_lod_bias">
-	<Tokens>
-		<Token name="GL_TEXTURE_LOD_BIAS_S_SGIX" value="0x818E"/>
-		<Token name="GL_TEXTURE_LOD_BIAS_T_SGIX" value="0x818F"/>
-		<Token name="GL_TEXTURE_LOD_BIAS_R_SGIX" value="0x8190"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_SGIX" string="GL_SGIX_texture_lod_bias" reg_no="84"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_SGIX"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_SGIX_texture_lod_bias" reg_no="84">
+	<tokens>
+		<token name="GL_TEXTURE_LOD_BIAS_S_SGIX" value="0x818E"/>
+		<token name="GL_TEXTURE_LOD_BIAS_T_SGIX" value="0x818F"/>
+		<token name="GL_TEXTURE_LOD_BIAS_R_SGIX" value="0x8190"/>
+	</tokens>
+</gl_extension>

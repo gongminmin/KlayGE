@@ -1,136 +1,143 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_NV_gpu_program4">
-	<Tokens>
-		<Token name="GL_PROGRAM_ATTRIB_COMPONENTS_NV" value="0x8906"/>
-		<Token name="GL_PROGRAM_RESULT_COMPONENTS_NV" value="0x8907"/>
-		<Token name="GL_MAX_PROGRAM_ATTRIB_COMPONENTS_NV" value="0x8908"/>
-		<Token name="GL_MAX_PROGRAM_RESULT_COMPONENTS_NV" value="0x8909"/>
-		<Token name="GL_MAX_PROGRAM_GENERIC_ATTRIBS_NV" value="0x8DA5"/>
-		<Token name="GL_MAX_PROGRAM_GENERIC_RESULTS_NV" value="0x8DA6"/>
-	</Tokens>
+<gl_extension name="GL_NV_gpu_program4" reg_no="322">
+	<tokens>
+		<token name="GL_PROGRAM_ATTRIB_COMPONENTS_NV" value="0x8906"/>
+		<token name="GL_PROGRAM_RESULT_COMPONENTS_NV" value="0x8907"/>
+		<token name="GL_MAX_PROGRAM_ATTRIB_COMPONENTS_NV" value="0x8908"/>
+		<token name="GL_MAX_PROGRAM_RESULT_COMPONENTS_NV" value="0x8909"/>
+		<token name="GL_MAX_PROGRAM_GENERIC_ATTRIBS_NV" value="0x8DA5"/>
+		<token name="GL_MAX_PROGRAM_GENERIC_RESULTS_NV" value="0x8DA6"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glProgramLocalParameterI4iNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLint" name="x"/>
-			<Param type="GLint" name="y"/>
-			<Param type="GLint" name="z"/>
-			<Param type="GLint" name="w"/>
-		</Function>
-		<Function name="glProgramLocalParameterI4ivNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="const GLint*" name="params"/>
-		</Function>
-		<Function name="glProgramLocalParametersI4ivNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLsizei" name="count"/>
-			<Param type="const GLint*" name="params"/>
-		</Function>
-		<Function name="glProgramLocalParameterI4uiNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLuint" name="x"/>
-			<Param type="GLuint" name="y"/>
-			<Param type="GLuint" name="z"/>
-			<Param type="GLuint" name="w"/>
-		</Function>
-		<Function name="glProgramLocalParameterI4uivNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="const GLuint*" name="params"/>
-		</Function>
-		<Function name="glProgramLocalParametersI4uivNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLsizei" name="count"/>
-			<Param type="const GLuint*" name="params"/>
-		</Function>
-		<Function name="glProgramEnvParameterI4iNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLint" name="x"/>
-			<Param type="GLint" name="y"/>
-			<Param type="GLint" name="z"/>
-			<Param type="GLint" name="w"/>
-		</Function>
-		<Function name="glProgramEnvParameterI4ivNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="const GLint*" name="params"/>
-		</Function>
-		<Function name="glProgramEnvParametersI4ivNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLsizei" name="count"/>
-			<Param type="const GLint*" name="params"/>
-		</Function>
-		<Function name="glProgramEnvParameterI4uiNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLuint" name="x"/>
-			<Param type="GLuint" name="y"/>
-			<Param type="GLuint" name="z"/>
-			<Param type="GLuint" name="w"/>
-		</Function>
-		<Function name="glProgramEnvParameterI4uivNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="const GLuint*" name="params"/>
-		</Function>
-		<Function name="glProgramEnvParametersI4uivNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLsizei" name="count"/>
-			<Param type="const GLuint*" name="params"/>
-		</Function>
-		<Function name="glGetProgramLocalParameterIivNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLint*" name="params"/>
-		</Function>
-		<Function name="glGetProgramLocalParameterIuivNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLuint*" name="params"/>
-		</Function>
-		<Function name="glGetProgramEnvParameterIivNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLint*" name="params"/>
-		</Function>
-		<Function name="glGetProgramEnvParameterIuivNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLuint*" name="params"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_gpu_program4" reg_no="322">
-			<Name name="glProgramLocalParameterI4iNV"/>
-			<Name name="glProgramLocalParameterI4ivNV"/>
-			<Name name="glProgramLocalParametersI4ivNV"/>
-			<Name name="glProgramLocalParameterI4uiNV"/>
-			<Name name="glProgramLocalParameterI4uivNV"/>
-			<Name name="glProgramLocalParametersI4uivNV"/>
-			<Name name="glProgramEnvParameterI4iNV"/>
-			<Name name="glProgramEnvParameterI4ivNV"/>
-			<Name name="glProgramEnvParametersI4ivNV"/>
-			<Name name="glProgramEnvParameterI4uiNV"/>
-			<Name name="glProgramEnvParameterI4uivNV"/>
-			<Name name="glProgramEnvParametersI4uivNV"/>
-			<Name name="glGetProgramLocalParameterIivNV"/>
-			<Name name="glGetProgramLocalParameterIuivNV"/>
-			<Name name="glGetProgramEnvParameterIivNV"/>
-			<Name name="glGetProgramEnvParameterIuivNV"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_NV"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glProgramLocalParameterI4iNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLint" name="z"/>
+				<param type="GLint" name="w"/>
+			</params>
+		</function>
+		<function name="glProgramLocalParameterI4ivNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glProgramLocalParametersI4ivNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glProgramLocalParameterI4uiNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint" name="x"/>
+				<param type="GLuint" name="y"/>
+				<param type="GLuint" name="z"/>
+				<param type="GLuint" name="w"/>
+			</params>
+		</function>
+		<function name="glProgramLocalParameterI4uivNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="const GLuint*" name="params"/>
+			</params>
+		</function>
+		<function name="glProgramLocalParametersI4uivNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint*" name="params"/>
+			</params>
+		</function>
+		<function name="glProgramEnvParameterI4iNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLint" name="z"/>
+				<param type="GLint" name="w"/>
+			</params>
+		</function>
+		<function name="glProgramEnvParameterI4ivNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glProgramEnvParametersI4ivNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glProgramEnvParameterI4uiNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint" name="x"/>
+				<param type="GLuint" name="y"/>
+				<param type="GLuint" name="z"/>
+				<param type="GLuint" name="w"/>
+			</params>
+		</function>
+		<function name="glProgramEnvParameterI4uivNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="const GLuint*" name="params"/>
+			</params>
+		</function>
+		<function name="glProgramEnvParametersI4uivNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetProgramLocalParameterIivNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetProgramLocalParameterIuivNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetProgramEnvParameterIivNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetProgramEnvParameterIuivNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint*" name="params"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

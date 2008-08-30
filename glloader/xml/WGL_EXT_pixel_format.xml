@@ -1,0 +1,89 @@
+<?xml version='1.0'?>
+
+<gl_extension name="WGL_EXT_pixel_format" reg_no="170" prefer="WGL_ARB_pixel_format">
+	<tokens>
+		<token name="WGL_NUMBER_PIXEL_FORMATS_EXT" value="0x2000"/>
+		<token name="WGL_DRAW_TO_WINDOW_EXT" value="0x2001"/>
+		<token name="WGL_DRAW_TO_BITMAP_EXT" value="0x2002"/>
+		<token name="WGL_ACCELERATION_EXT" value="0x2003"/>
+		<token name="WGL_NEED_PALETTE_EXT" value="0x2004"/>
+		<token name="WGL_NEED_SYSTEM_PALETTE_EXT" value="0x2005"/>
+		<token name="WGL_SWAP_LAYER_BUFFERS_EXT" value="0x2006"/>
+		<token name="WGL_SWAP_METHOD_EXT" value="0x2007"/>
+		<token name="WGL_NUMBER_OVERLAYS_EXT" value="0x2008"/>
+		<token name="WGL_NUMBER_UNDERLAYS_EXT" value="0x2009"/>
+		<token name="WGL_TRANSPARENT_EXT" value="0x200A"/>
+		<token name="WGL_TRANSPARENT_VALUE_EXT" value="0x200B"/>
+		<token name="WGL_TRANSPARENT_RED_VALUE_EXT" value="0x2037"/>
+		<token name="WGL_TRANSPARENT_GREEN_VALUE_EXT" value="0x2038"/>
+		<token name="WGL_TRANSPARENT_BLUE_VALUE_EXT" value="0x2039"/>
+		<token name="WGL_TRANSPARENT_ALPHA_VALUE_EXT" value="0x203A"/>
+		<token name="WGL_TRANSPARENT_INDEX_VALUE_EXT" value="0x203B"/>
+		<token name="WGL_SHARE_DEPTH_EXT" value="0x200C"/>
+		<token name="WGL_SHARE_STENCIL_EXT" value="0x200D"/>
+		<token name="WGL_SHARE_ACCUM_EXT" value="0x200E"/>
+		<token name="WGL_SUPPORT_GDI_EXT" value="0x200F"/>
+		<token name="WGL_SUPPORT_OPENGL_EXT" value="0x2010"/>
+		<token name="WGL_DOUBLE_BUFFER_EXT" value="0x2011"/>
+		<token name="WGL_STEREO_EXT" value="0x2012"/>
+		<token name="WGL_PIXEL_TYPE_EXT" value="0x2013"/>
+		<token name="WGL_COLOR_BITS_EXT" value="0x2014"/>
+		<token name="WGL_RED_BITS_EXT" value="0x2015"/>
+		<token name="WGL_RED_SHIFT_EXT" value="0x2016"/>
+		<token name="WGL_GREEN_BITS_EXT" value="0x2017"/>
+		<token name="WGL_GREEN_SHIFT_EXT" value="0x2018"/>
+		<token name="WGL_BLUE_BITS_EXT" value="0x2019"/>
+		<token name="WGL_BLUE_SHIFT_EXT" value="0x201A"/>
+		<token name="WGL_ALPHA_BITS_EXT" value="0x201B"/>
+		<token name="WGL_ALPHA_SHIFT_EXT" value="0x201C"/>
+		<token name="WGL_ACCUM_BITS_EXT" value="0x201D"/>
+		<token name="WGL_ACCUM_RED_BITS_EXT" value="0x201E"/>
+		<token name="WGL_ACCUM_GREEN_BITS_EXT" value="0x201F"/>
+		<token name="WGL_ACCUM_BLUE_BITS_EXT" value="0x2020"/>
+		<token name="WGL_ACCUM_ALPHA_BITS_EXT" value="0x2021"/>
+		<token name="WGL_DEPTH_BITS_EXT" value="0x2022"/>
+		<token name="WGL_STENCIL_BITS_EXT" value="0x2023"/>
+		<token name="WGL_AUX_BUFFERS_EXT" value="0x2024"/>
+		<token name="WGL_NO_ACCELERATION_EXT" value="0x2025"/>
+		<token name="WGL_GENERIC_ACCELERATION_EXT" value="0x2026"/>
+		<token name="WGL_FULL_ACCELERATION_EXT" value="0x2027"/>
+		<token name="WGL_SWAP_EXCHANGE_EXT" value="0x2028"/>
+		<token name="WGL_SWAP_COPY_EXT" value="0x2029"/>
+		<token name="WGL_SWAP_UNDEFINED_EXT" value="0x202A"/>
+		<token name="WGL_TYPE_RGBA_EXT" value="0x202B"/>
+		<token name="WGL_TYPE_COLORINDEX_EXT" value="0x202C"/>
+	</tokens>
+
+	<functions>
+		<function name="wglGetPixelFormatAttribivEXT" return="BOOL">
+			<params>
+				<param type="HDC" name="hdc"/>
+				<param type="int" name="iPixelFormat"/>
+				<param type="int" name="iLayerPlane"/>
+				<param type="UINT" name="nAttributes"/>
+				<param type="const int*" name="piAttributes"/>
+				<param type="int*" name="piValues"/>
+			</params>
+		</function>
+		<function name="wglGetPixelFormatAttribfvEXT" return="BOOL">
+			<params>
+				<param type="HDC" name="hdc"/>
+				<param type="int" name="iPixelFormat"/>
+				<param type="int" name="iLayerPlane"/>
+				<param type="UINT" name="nAttributes"/>
+				<param type="const int*" name="piAttributes"/>
+				<param type="FLOAT*" name="pfValues"/>
+			</params>
+		</function>
+		<function name="wglChoosePixelFormatEXT" return="BOOL">
+			<params>
+				<param type="HDC" name="hdc"/>
+				<param type="const int*" name="piAttribIList"/>
+				<param type="const FLOAT*" name="pfAttribFList"/>
+				<param type="UINT" name="nMaxFormats"/>
+				<param type="int*" name="piFormats"/>
+				<param type="UINT*" name="nNumFormats"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

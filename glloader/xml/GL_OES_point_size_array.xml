@@ -1,29 +1,21 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_OES_point_size_array">
-	<Tokens>
-		<Token name="GL_POINT_SIZE_ARRAY_OES" value="0x8B9C"/>
-		<Token name="GL_POINT_SIZE_ARRAY_TYPE_OES" value="0x898A"/>
-		<Token name="GL_POINT_SIZE_ARRAY_STRIDE_OES" value="0x898B"/>
-		<Token name="GL_POINT_SIZE_ARRAY_POINTER_OES" value="0x898C"/>
-		<Token name="GL_POINT_SIZE_ARRAY_BUFFER_BINDING_OES" value="0x8B9F"/>
-	</Tokens>
+<gl_extension name="GL_OES_point_size_array">
+	<tokens>
+		<token name="GL_POINT_SIZE_ARRAY_OES" value="0x8B9C"/>
+		<token name="GL_POINT_SIZE_ARRAY_TYPE_OES" value="0x898A"/>
+		<token name="GL_POINT_SIZE_ARRAY_STRIDE_OES" value="0x898B"/>
+		<token name="GL_POINT_SIZE_ARRAY_POINTER_OES" value="0x898C"/>
+		<token name="GL_POINT_SIZE_ARRAY_BUFFER_BINDING_OES" value="0x8B9F"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glPointSizePointerOES" return="void">
-			<Param type="GLenum" name="type"/>
-			<Param type="GLsizei" name="stride"/>
-			<Param type="const GLvoid*" name="pointer"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_OES" string="GL_OES_point_size_array">
-			<Name name="glPointSizePointerOES"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_OES"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glPointSizePointerOES" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+				<param type="const GLvoid*" name="pointer"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

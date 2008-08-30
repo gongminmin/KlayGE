@@ -1,18 +1,10 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_3DFX_multisample">
-	<Tokens>
-		<Token name="GL_MULTISAMPLE_3DFX" value="0x86B2"/>
-		<Token name="GL_SAMPLE_BUFFERS_3DFX" value="0x86B3"/>
-		<Token name="GL_SAMPLES_3DFX" value="0x86B4"/>
-		<Token name="GL_MULTISAMPLE_BIT_3DFX" value="0x20000000"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_3DFX" string="GL_3DFX_multisample" reg_no="207"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_3DFX"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_3DFX_multisample" reg_no="207">
+	<tokens>
+		<token name="GL_MULTISAMPLE_3DFX" value="0x86B2"/>
+		<token name="GL_SAMPLE_BUFFERS_3DFX" value="0x86B3"/>
+		<token name="GL_SAMPLES_3DFX" value="0x86B4"/>
+		<token name="GL_MULTISAMPLE_BIT_3DFX" value="0x20000000"/>
+	</tokens>
+</gl_extension>

@@ -1,33 +1,26 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_SGIS_sharpen_texture">
-	<Tokens>
-		<Token name="GL_LINEAR_SHARPEN_SGIS" value="0x80AD"/>
-		<Token name="GL_LINEAR_SHARPEN_ALPHA_SGIS" value="0x80AE"/>
-		<Token name="GL_LINEAR_SHARPEN_COLOR_SGIS" value="0x80AF"/>
-		<Token name="GL_SHARPEN_TEXTURE_FUNC_POINTS_SGIS" value="0x80B0"/>
-	</Tokens>
+<gl_extension name="GL_SGIS_sharpen_texture" reg_no="22">
+	<tokens>
+		<token name="GL_LINEAR_SHARPEN_SGIS" value="0x80AD"/>
+		<token name="GL_LINEAR_SHARPEN_ALPHA_SGIS" value="0x80AE"/>
+		<token name="GL_LINEAR_SHARPEN_COLOR_SGIS" value="0x80AF"/>
+		<token name="GL_SHARPEN_TEXTURE_FUNC_POINTS_SGIS" value="0x80B0"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glSharpenTexFuncSGIS" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLsizei" name="n"/>
-			<Param type="const GLfloat*" name="points"/>
-		</Function>
-		<Function name="glGetSharpenTexFuncSGIS" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLfloat*" name="points"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_SGIS" string="GL_SGIS_sharpen_texture" reg_no="22">
-			<Name name="glSharpenTexFuncSGIS"/>
-			<Name name="glGetSharpenTexFuncSGIS"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_SGIS"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glSharpenTexFuncSGIS" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="n"/>
+				<param type="const GLfloat*" name="points"/>
+			</params>
+		</function>
+		<function name="glGetSharpenTexFuncSGIS" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLfloat*" name="points"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

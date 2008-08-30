@@ -1,29 +1,21 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_EXT_framebuffer_multisample">
-	<Tokens>
-		<Token name="GL_RENDERBUFFER_SAMPLES_EXT" value="0x8CAB"/>
-		<Token name="GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_EXT" value="0x8D56"/>
-		<Token name="GL_MAX_SAMPLES_EXT" value="0x8D57"/>
-	</Tokens>
+<gl_extension name="GL_EXT_framebuffer_multisample" reg_no="317">
+	<tokens>
+		<token name="GL_RENDERBUFFER_SAMPLES_EXT" value="0x8CAB"/>
+		<token name="GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_EXT" value="0x8D56"/>
+		<token name="GL_MAX_SAMPLES_EXT" value="0x8D57"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glRenderbufferStorageMultisampleEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLsizei" name="samples"/>
-			<Param type="GLenum" name="internalformat"/>
-			<Param type="GLsizei" name="width"/>
-			<Param type="GLsizei" name="height"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_framebuffer_multisample" reg_no="317">
-			<Name name="glRenderbufferStorageMultisampleEXT"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_EXT"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glRenderbufferStorageMultisampleEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="samples"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

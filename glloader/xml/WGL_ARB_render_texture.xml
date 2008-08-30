@@ -1,70 +1,64 @@
 <?xml version='1.0'?>
 
-<GLExtension name="WGL_ARB_render_texture">
-	<Typedefs>
-		<Typedef type="void*" synonym="HPBUFFERARB"/>
-	</Typedefs>
+<gl_extension name="WGL_ARB_render_texture" reg_no="20">
+	<typedefs>
+		<typedef type="void*" synonym="HPBUFFERARB"/>
+	</typedefs>
 
-	<Tokens>
-		<Token name="WGL_BIND_TO_TEXTURE_RGB_ARB" value="0x2070"/>
-		<Token name="WGL_BIND_TO_TEXTURE_RGBA_ARB" value="0x2071"/>
-		<Token name="WGL_TEXTURE_FORMAT_ARB" value="0x2072"/>
-		<Token name="WGL_TEXTURE_TARGET_ARB" value="0x2073"/>
-		<Token name="WGL_MIPMAP_TEXTURE_ARB" value="0x2074"/>
-		<Token name="WGL_TEXTURE_RGB_ARB" value="0x2075"/>
-		<Token name="WGL_TEXTURE_RGBA_ARB" value="0x2076"/>
-		<Token name="WGL_NO_TEXTURE_ARB" value="0x2077"/>
-		<Token name="WGL_TEXTURE_CUBE_MAP_ARB" value="0x2078"/>
-		<Token name="WGL_TEXTURE_1D_ARB" value="0x2079"/>
-		<Token name="WGL_TEXTURE_2D_ARB" value="0x207A"/>
-		<Token name="WGL_MIPMAP_LEVEL_ARB" value="0x207B"/>
-		<Token name="WGL_CUBE_MAP_FACE_ARB" value="0x207C"/>
-		<Token name="WGL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB" value="0x207D"/>
-		<Token name="WGL_TEXTURE_CUBE_MAP_NEGATIVE_X_ARB" value="0x207E"/>
-		<Token name="WGL_TEXTURE_CUBE_MAP_POSITIVE_Y_ARB" value="0x207F"/>
-		<Token name="WGL_TEXTURE_CUBE_MAP_NEGATIVE_Y_ARB" value="0x2080"/>
-		<Token name="WGL_TEXTURE_CUBE_MAP_POSITIVE_Z_ARB" value="0x2081"/>
-		<Token name="WGL_TEXTURE_CUBE_MAP_NEGATIVE_Z_ARB" value="0x2082"/>
-		<Token name="WGL_FRONT_LEFT_ARB" value="0x2083"/>
-		<Token name="WGL_FRONT_RIGHT_ARB" value="0x2084"/>
-		<Token name="WGL_BACK_LEFT_ARB" value="0x2085"/>
-		<Token name="WGL_BACK_RIGHT_ARB" value="0x2086"/>
-		<Token name="WGL_AUX0_ARB" value="0x2087"/>
-		<Token name="WGL_AUX1_ARB" value="0x2088"/>
-		<Token name="WGL_AUX2_ARB" value="0x2089"/>
-		<Token name="WGL_AUX3_ARB" value="0x208A"/>
-		<Token name="WGL_AUX4_ARB" value="0x208B"/>
-		<Token name="WGL_AUX5_ARB" value="0x208C"/>
-		<Token name="WGL_AUX6_ARB" value="0x208D"/>
-		<Token name="WGL_AUX7_ARB" value="0x208E"/>
-		<Token name="WGL_AUX8_ARB" value="0x208F"/>
-		<Token name="WGL_AUX9_ARB" value="0x2090"/>
-	</Tokens>
+	<tokens>
+		<token name="WGL_BIND_TO_TEXTURE_RGB_ARB" value="0x2070"/>
+		<token name="WGL_BIND_TO_TEXTURE_RGBA_ARB" value="0x2071"/>
+		<token name="WGL_TEXTURE_FORMAT_ARB" value="0x2072"/>
+		<token name="WGL_TEXTURE_TARGET_ARB" value="0x2073"/>
+		<token name="WGL_MIPMAP_TEXTURE_ARB" value="0x2074"/>
+		<token name="WGL_TEXTURE_RGB_ARB" value="0x2075"/>
+		<token name="WGL_TEXTURE_RGBA_ARB" value="0x2076"/>
+		<token name="WGL_NO_TEXTURE_ARB" value="0x2077"/>
+		<token name="WGL_TEXTURE_CUBE_MAP_ARB" value="0x2078"/>
+		<token name="WGL_TEXTURE_1D_ARB" value="0x2079"/>
+		<token name="WGL_TEXTURE_2D_ARB" value="0x207A"/>
+		<token name="WGL_MIPMAP_LEVEL_ARB" value="0x207B"/>
+		<token name="WGL_CUBE_MAP_FACE_ARB" value="0x207C"/>
+		<token name="WGL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB" value="0x207D"/>
+		<token name="WGL_TEXTURE_CUBE_MAP_NEGATIVE_X_ARB" value="0x207E"/>
+		<token name="WGL_TEXTURE_CUBE_MAP_POSITIVE_Y_ARB" value="0x207F"/>
+		<token name="WGL_TEXTURE_CUBE_MAP_NEGATIVE_Y_ARB" value="0x2080"/>
+		<token name="WGL_TEXTURE_CUBE_MAP_POSITIVE_Z_ARB" value="0x2081"/>
+		<token name="WGL_TEXTURE_CUBE_MAP_NEGATIVE_Z_ARB" value="0x2082"/>
+		<token name="WGL_FRONT_LEFT_ARB" value="0x2083"/>
+		<token name="WGL_FRONT_RIGHT_ARB" value="0x2084"/>
+		<token name="WGL_BACK_LEFT_ARB" value="0x2085"/>
+		<token name="WGL_BACK_RIGHT_ARB" value="0x2086"/>
+		<token name="WGL_AUX0_ARB" value="0x2087"/>
+		<token name="WGL_AUX1_ARB" value="0x2088"/>
+		<token name="WGL_AUX2_ARB" value="0x2089"/>
+		<token name="WGL_AUX3_ARB" value="0x208A"/>
+		<token name="WGL_AUX4_ARB" value="0x208B"/>
+		<token name="WGL_AUX5_ARB" value="0x208C"/>
+		<token name="WGL_AUX6_ARB" value="0x208D"/>
+		<token name="WGL_AUX7_ARB" value="0x208E"/>
+		<token name="WGL_AUX8_ARB" value="0x208F"/>
+		<token name="WGL_AUX9_ARB" value="0x2090"/>
+	</tokens>
 
-	<Functions>
-		<Function name="wglBindTexImageARB" return="BOOL">
-			<Param type="HPBUFFERARB" name="hPbuffer"/>
-			<Param type="int" name="iBuffer"/>
-		</Function>
-		<Function name="wglReleaseTexImageARB" return="BOOL">
-			<Param type="HPBUFFERARB" name="hPbuffer"/>
-			<Param type="int" name="iBuffer"/>
-		</Function>
-		<Function name="wglSetPbufferAttribARB" return="BOOL">
-			<Param type="HPBUFFERARB" name="hPbuffer"/>
-			<Param type="const int*" name="piAttribList"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="WGL_ARB" string="WGL_ARB_render_texture" reg_no="20">
-			<Name name="wglBindTexImageARB"/>
-			<Name name="wglReleaseTexImageARB"/>
-			<Name name="wglSetPbufferAttribARB"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="WGL_ARB"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="wglBindTexImageARB" return="BOOL">
+			<params>
+				<param type="HPBUFFERARB" name="hPbuffer"/>
+				<param type="int" name="iBuffer"/>
+			</params>
+		</function>
+		<function name="wglReleaseTexImageARB" return="BOOL">
+			<params>
+				<param type="HPBUFFERARB" name="hPbuffer"/>
+				<param type="int" name="iBuffer"/>
+			</params>
+		</function>
+		<function name="wglSetPbufferAttribARB" return="BOOL">
+			<params>
+				<param type="HPBUFFERARB" name="hPbuffer"/>
+				<param type="const int*" name="piAttribList"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

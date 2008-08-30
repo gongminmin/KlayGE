@@ -1,17 +1,7 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_GREMEDY_frame_terminator">
-	<Functions>
-		<Function name="glFrameTerminatorGREMEDY" return="void"/>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_GREMEDY" string="GL_GREMEDY_frame_terminator" reg_no="345">
-			<Name name="glFrameTerminatorGREMEDY"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_GREMEDY"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_GREMEDY_frame_terminator" reg_no="345">
+	<functions>
+		<function name="glFrameTerminatorGREMEDY" return="void"/>
+	</functions>
+</gl_extension>

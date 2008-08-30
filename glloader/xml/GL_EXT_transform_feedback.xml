@@ -1,77 +1,73 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_EXT_transform_feedback">
-	<Tokens>
-		<Token name="GL_TRANSFORM_FEEDBACK_BUFFER_EXT" value="0x8C8E"/>
-		<Token name="GL_TRANSFORM_FEEDBACK_BUFFER_START_EXT" value="0x8C84"/>
-		<Token name="GL_TRANSFORM_FEEDBACK_BUFFER_SIZE_EXT" value="0x8C85"/>
-		<Token name="GL_TRANSFORM_FEEDBACK_BUFFER_BINDING_EXT" value="0x8C8F"/>
-		<Token name="GL_INTERLEAVED_ATTRIBS_EXT" value="0x8C8C"/>
-		<Token name="GL_SEPARATE_ATTRIBS_EXT" value="0x8C8D"/>
-		<Token name="GL_PRIMITIVES_GENERATED_EXT" value="0x8C87"/>
-		<Token name="GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN_EXT" value="0x8C88"/>
-		<Token name="GL_RASTERIZER_DISCARD_EXT" value="0x8C89"/>
-		<Token name="GL_MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS_EXT" value="0x8C8A"/>
-		<Token name="GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS_EXT" value="0x8C8B"/>
-		<Token name="GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS_EXT" value="0x8C80"/>
-		<Token name="GL_TRANSFORM_FEEDBACK_VARYINGS_EXT" value="0x8C83"/>
-		<Token name="GL_TRANSFORM_FEEDBACK_BUFFER_MODE_EXT" value="0x8C7F"/>
-		<Token name="GL_TRANSFORM_FEEDBACK_VARYING_MAX_LENGTH_EXT" value="0x8C76"/>
-	</Tokens>
+<gl_extension name="GL_EXT_transform_feedback" reg_no="352">
+	<tokens>
+		<token name="GL_TRANSFORM_FEEDBACK_BUFFER_EXT" value="0x8C8E"/>
+		<token name="GL_TRANSFORM_FEEDBACK_BUFFER_START_EXT" value="0x8C84"/>
+		<token name="GL_TRANSFORM_FEEDBACK_BUFFER_SIZE_EXT" value="0x8C85"/>
+		<token name="GL_TRANSFORM_FEEDBACK_BUFFER_BINDING_EXT" value="0x8C8F"/>
+		<token name="GL_INTERLEAVED_ATTRIBS_EXT" value="0x8C8C"/>
+		<token name="GL_SEPARATE_ATTRIBS_EXT" value="0x8C8D"/>
+		<token name="GL_PRIMITIVES_GENERATED_EXT" value="0x8C87"/>
+		<token name="GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN_EXT" value="0x8C88"/>
+		<token name="GL_RASTERIZER_DISCARD_EXT" value="0x8C89"/>
+		<token name="GL_MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS_EXT" value="0x8C8A"/>
+		<token name="GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS_EXT" value="0x8C8B"/>
+		<token name="GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS_EXT" value="0x8C80"/>
+		<token name="GL_TRANSFORM_FEEDBACK_VARYINGS_EXT" value="0x8C83"/>
+		<token name="GL_TRANSFORM_FEEDBACK_BUFFER_MODE_EXT" value="0x8C7F"/>
+		<token name="GL_TRANSFORM_FEEDBACK_VARYING_MAX_LENGTH_EXT" value="0x8C76"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glBindBufferRangeEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLuint" name="buffer"/>
-			<Param type="GLintptr" name="offset"/>
-			<Param type="GLsizeiptr" name="size"/>
-		</Function>
-		<Function name="glBindBufferOffsetEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLuint" name="buffer"/>
-			<Param type="GLintptr" name="offset"/>
-		</Function>
-		<Function name="glBindBufferBaseEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLuint" name="buffer"/>
-		</Function>
-		<Function name="glBeginTransformFeedbackEXT" return="void">
-			<Param type="GLenum" name="primitiveMode"/>
-		</Function>
-		<Function name="glEndTransformFeedbackEXT" return="void"/>
-		<Function name="glTransformFeedbackVaryingsEXT" return="void">
-			<Param type="GLuint" name="program"/>
-			<Param type="GLsizei" name="count"/>
-			<Param type="const char**" name="varyings"/>
-			<Param type="GLenum" name="bufferMode"/>
-		</Function>
-		<Function name="glGetTransformFeedbackVaryingEXT" return="void">
-			<Param type="GLuint" name="program"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLsizei" name="bufSize"/>
-			<Param type="GLsizei*" name="length"/>
-			<Param type="GLsizei*" name="size"/>
-			<Param type="GLenum*" name="type"/>
-			<Param type="GLchar*" name="name"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_transform_feedback" reg_no="352">
-			<Name name="glBindBufferRangeEXT"/>
-			<Name name="glBindBufferOffsetEXT"/>
-			<Name name="glBindBufferBaseEXT"/>
-			<Name name="glBeginTransformFeedbackEXT"/>
-			<Name name="glEndTransformFeedbackEXT"/>
-			<Name name="glTransformFeedbackVaryingsEXT"/>
-			<Name name="glGetTransformFeedbackVaryingEXT"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_EXT"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glBindBufferRangeEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLintptr" name="offset"/>
+				<param type="GLsizeiptr" name="size"/>
+			</params>
+		</function>
+		<function name="glBindBufferOffsetEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLintptr" name="offset"/>
+			</params>
+		</function>
+		<function name="glBindBufferBaseEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint" name="buffer"/>
+			</params>
+		</function>
+		<function name="glBeginTransformFeedbackEXT" return="void">
+			<params>
+				<param type="GLenum" name="primitiveMode"/>
+			</params>
+		</function>
+		<function name="glEndTransformFeedbackEXT" return="void"/>
+		<function name="glTransformFeedbackVaryingsEXT" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const char**" name="varyings"/>
+				<param type="GLenum" name="bufferMode"/>
+			</params>
+		</function>
+		<function name="glGetTransformFeedbackVaryingEXT" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLsizei*" name="length"/>
+				<param type="GLsizei*" name="size"/>
+				<param type="GLenum*" name="type"/>
+				<param type="GLchar*" name="name"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

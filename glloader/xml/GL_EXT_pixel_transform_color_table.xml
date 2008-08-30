@@ -1,11 +1,4 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_EXT_pixel_transform_color_table">
-	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_pixel_transform_color_table" reg_no="139"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_EXT"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_EXT_pixel_transform_color_table" reg_no="139">
+</gl_extension>

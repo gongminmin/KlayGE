@@ -1,11 +1,4 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_OES_fbo_render_mipmap">
-	<Vendors>
-		<Vendor name="GL_OES" string="GL_OES_fbo_render_mipmap"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_OES"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_OES_fbo_render_mipmap">
+</gl_extension>

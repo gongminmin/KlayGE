@@ -1,27 +1,19 @@
 <?xml version='1.0'?>
 
-<GLExtension name="WGL_3DL_stereo_control">
-	<Tokens>
-		<Token name="WGL_STEREO_EMITTER_ENABLE_3DL" value="0x2055"/>
-		<Token name="WGL_STEREO_EMITTER_DISABLE_3DL" value="0x2056"/>
-		<Token name="WGL_STEREO_POLARITY_NORMAL_3DL" value="0x2057"/>
-		<Token name="WGL_STEREO_POLARITY_INVERT_3DL" value="0x2058"/>
-	</Tokens>
+<gl_extension name="WGL_3DL_stereo_control" reg_no="313">
+	<tokens>
+		<token name="WGL_STEREO_EMITTER_ENABLE_3DL" value="0x2055"/>
+		<token name="WGL_STEREO_EMITTER_DISABLE_3DL" value="0x2056"/>
+		<token name="WGL_STEREO_POLARITY_NORMAL_3DL" value="0x2057"/>
+		<token name="WGL_STEREO_POLARITY_INVERT_3DL" value="0x2058"/>
+	</tokens>
 
-	<Functions>
-		<Function name="wglSetStereoEmitterState3DL" return="BOOL">
-			<Param type="HDC" name="hDC"/>
-			<Param type="UINT" name="uState"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="WGL_3DL" string="WGL_3DL_stereo_control" reg_no="313">
-			<Name name="wglSetStereoEmitterState3DL"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="WGL_3DL"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="wglSetStereoEmitterState3DL" return="BOOL">
+			<params>
+				<param type="HDC" name="hDC"/>
+				<param type="UINT" name="uState"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

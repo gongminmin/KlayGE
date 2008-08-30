@@ -1,15 +1,7 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_SUN_convolution_border_modes">
-	<Tokens>
-		<Token name="GL_WRAP_BORDER_SUN" value="0x81D4"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_SUN" string="GL_SUN_convolution_border_modes" reg_no="182"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_SUN"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_SUN_convolution_border_modes" reg_no="182">
+	<tokens>
+		<token name="GL_WRAP_BORDER_SUN" value="0x81D4"/>
+	</tokens>
+</gl_extension>

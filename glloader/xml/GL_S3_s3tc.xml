@@ -1,20 +1,12 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_S3_s3tc">
-	<Tokens>
-		<Token name="GL_RGB_S3TC" value="0x83A0"/>
-		<Token name="GL_RGB4_S3TC" value="0x83A1"/>
-		<Token name="GL_RGBA_S3TC" value="0x83A2"/>
-		<Token name="GL_RGBA4_S3TC" value="0x83A3"/>
-		<Token name="GL_RGBA_DXT5_S3TC" value="0x83A4"/>
-		<Token name="GL_RGBA4_DXT5_S3TC" value="0x83A5"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_S3" string="GL_S3_s3tc" reg_no="276"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_S3"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_S3_s3tc" reg_no="276">
+	<tokens>
+		<token name="GL_RGB_S3TC" value="0x83A0"/>
+		<token name="GL_RGB4_S3TC" value="0x83A1"/>
+		<token name="GL_RGBA_S3TC" value="0x83A2"/>
+		<token name="GL_RGBA4_S3TC" value="0x83A3"/>
+		<token name="GL_RGBA_DXT5_S3TC" value="0x83A4"/>
+		<token name="GL_RGBA4_DXT5_S3TC" value="0x83A5"/>
+	</tokens>
+</gl_extension>

@@ -1,0 +1,55 @@
+<?xml version='1.0'?>
+
+<gl_extension name="WGL_EXT_pbuffer" reg_no="171" prefer="WGL_ARB_pbuffer">
+	<typedefs>
+		<typedef type="void*" synonym="HPBUFFEREXT"/>
+	</typedefs>
+
+	<tokens>
+		<token name="WGL_DRAW_TO_PBUFFER_EXT" value="0x202D"/>
+		<token name="WGL_MAX_PBUFFER_PIXELS_EXT" value="0x202E"/>
+		<token name="WGL_MAX_PBUFFER_WIDTH_EXT" value="0x202F"/>
+		<token name="WGL_MAX_PBUFFER_HEIGHT_EXT" value="0x2030"/>
+		<token name="WGL_OPTIMAL_PBUFFER_WIDTH_EXT" value="0x2031"/>
+		<token name="WGL_OPTIMAL_PBUFFER_HEIGHT_EXT" value="0x2032"/>
+		<token name="WGL_PBUFFER_LARGEST_EXT" value="0x2033"/>
+		<token name="WGL_PBUFFER_WIDTH_EXT" value="0x2034"/>
+		<token name="WGL_PBUFFER_HEIGHT_EXT" value="0x2035"/>
+		<token name="WGL_PBUFFER_LOST_EXT" value="0x2036"/>
+	</tokens>
+
+	<functions>
+		<function name="wglCreatePbufferEXT" return="HPBUFFEREXT">
+			<params>
+				<param type="HDC" name="hDC"/>
+				<param type="int" name="iPixelFormat"/>
+				<param type="int" name="iWidth"/>
+				<param type="int" name="iHeight"/>
+				<param type="const int*" name="piAttribList"/>
+			</params>
+		</function>
+		<function name="wglGetPbufferDCEXT" return="HDC">
+			<params>
+				<param type="HPBUFFEREXT" name="hPbuffer"/>
+			</params>
+		</function>
+		<function name="wglReleasePbufferDCEXT" return="int">
+			<params>
+				<param type="HPBUFFEREXT" name="hPbuffer"/>
+				<param type="HDC" name="hDC"/>
+			</params>
+		</function>
+		<function name="wglDestroyPbufferEXT" return="BOOL">
+			<params>
+				<param type="HPBUFFEREXT" name="hPbuffer"/>
+			</params>
+		</function>
+		<function name="wglQueryPbufferEXT" return="BOOL">
+			<params>
+				<param type="HPBUFFEREXT" name="hPbuffer"/>
+				<param type="int" name="iAttribute"/>
+				<param type="int*" name="piValue"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,11 +1,4 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_ATI_shader_texture_lod">
-	<Vendors>
-		<Vendor name="GL_ATI" string="GL_ATI_shader_texture_lod"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_ATI"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_ATI_shader_texture_lod">
+</gl_extension>

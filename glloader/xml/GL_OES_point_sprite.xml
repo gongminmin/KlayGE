@@ -1,16 +1,8 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_OES_point_sprite">
-	<Tokens>
-		<Token name="GL_POINT_SPRITE_OES" value="0x8861"/>
-		<Token name="GL_COORD_REPLACE_OES" value="0x8862"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_OES" string="GL_OES_point_sprite"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_OES"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_OES_point_sprite">
+	<tokens>
+		<token name="GL_POINT_SPRITE_OES" value="0x8861"/>
+		<token name="GL_COORD_REPLACE_OES" value="0x8862"/>
+	</tokens>
+</gl_extension>

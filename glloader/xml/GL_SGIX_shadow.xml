@@ -1,18 +1,10 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_SGIX_shadow">
-	<Tokens>
-		<Token name="GL_TEXTURE_COMPARE_SGIX" value="0x819A"/>
-		<Token name="GL_TEXTURE_COMPARE_OPERATOR_SGIX" value="0x819B"/>
-		<Token name="GL_TEXTURE_LEQUAL_R_SGIX" value="0x819C"/>
-		<Token name="GL_TEXTURE_GEQUAL_R_SGIX" value="0x819D"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_SGIX" string="GL_SGIX_shadow" reg_no="34"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_SGIX"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_SGIX_shadow" reg_no="34">
+	<tokens>
+		<token name="GL_TEXTURE_COMPARE_SGIX" value="0x819A"/>
+		<token name="GL_TEXTURE_COMPARE_OPERATOR_SGIX" value="0x819B"/>
+		<token name="GL_TEXTURE_LEQUAL_R_SGIX" value="0x819C"/>
+		<token name="GL_TEXTURE_GEQUAL_R_SGIX" value="0x819D"/>
+	</tokens>
+</gl_extension>

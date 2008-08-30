@@ -1,32 +1,25 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_IBM_multimode_draw_arrays">
-	<Functions>
-		<Function name="glMultiModeDrawArraysIBM" return="void">
-			<Param type="const GLenum*" name="mode"/>
-			<Param type="const GLint*" name="first"/>
-			<Param type="const GLsizei*" name="count"/>
-			<Param type="GLsizei" name="primcount"/>
-			<Param type="GLint" name="modestride"/>
-		</Function>
-		<Function name="glMultiModeDrawElementsIBM" return="void">
-			<Param type="const GLenum*" name="mode"/>
-			<Param type="const GLsizei*" name="count"/>
-			<Param type="GLenum" name="type"/>
-			<Param type="const GLvoid* const*" name="indices"/>
-			<Param type="GLsizei" name="primcount"/>
-			<Param type="GLint" name="modestride"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_IBM" string="GL_IBM_multimode_draw_arrays" reg_no="200">
-			<Name name="glMultiModeDrawArraysIBM"/>
-			<Name name="glMultiModeDrawElementsIBM"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_IBM"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_IBM_multimode_draw_arrays" reg_no="200">
+	<functions>
+		<function name="glMultiModeDrawArraysIBM" return="void">
+			<params>
+				<param type="const GLenum*" name="mode"/>
+				<param type="const GLint*" name="first"/>
+				<param type="const GLsizei*" name="count"/>
+				<param type="GLsizei" name="primcount"/>
+				<param type="GLint" name="modestride"/>
+			</params>
+		</function>
+		<function name="glMultiModeDrawElementsIBM" return="void">
+			<params>
+				<param type="const GLenum*" name="mode"/>
+				<param type="const GLsizei*" name="count"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid* const*" name="indices"/>
+				<param type="GLsizei" name="primcount"/>
+				<param type="GLint" name="modestride"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

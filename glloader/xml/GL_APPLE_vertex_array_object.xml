@@ -1,37 +1,32 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_APPLE_vertex_array_object">
-	<Tokens>
-		<Token name="GL_VERTEX_ARRAY_BINDING_APPLE" value="0x85B5"/>
-	</Tokens>
+<gl_extension name="GL_APPLE_vertex_array_object" reg_no="273">
+	<tokens>
+		<token name="GL_VERTEX_ARRAY_BINDING_APPLE" value="0x85B5"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glBindVertexArrayAPPLE" return="void">
-			<Param type="GLuint" name="array"/>
-		</Function>
-		<Function name="glDeleteVertexArraysAPPLE" return="void">
-			<Param type="GLsizei" name="n"/>
-			<Param type="const GLuint*" name="arrays"/>
-		</Function>
-		<Function name="glGenVertexArraysAPPLE" return="void">
-			<Param type="GLsizei" name="n"/>
-			<Param type="const GLuint*" name="arrays"/>
-		</Function>
-		<Function name="glIsVertexArrayAPPLE" return="GLboolean">
-			<Param type="GLuint" name="array"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_APPLE" string="GL_APPLE_vertex_array_object" reg_no="273">
-			<Name name="glBindVertexArrayAPPLE"/>
-			<Name name="glDeleteVertexArraysAPPLE"/>
-			<Name name="glGenVertexArraysAPPLE"/>
-			<Name name="glIsVertexArrayAPPLE"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_APPLE"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glBindVertexArrayAPPLE" return="void">
+			<params>
+				<param type="GLuint" name="array"/>
+			</params>
+		</function>
+		<function name="glDeleteVertexArraysAPPLE" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="const GLuint*" name="arrays"/>
+			</params>
+		</function>
+		<function name="glGenVertexArraysAPPLE" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="const GLuint*" name="arrays"/>
+			</params>
+		</function>
+		<function name="glIsVertexArrayAPPLE" return="GLboolean">
+			<params>
+				<param type="GLuint" name="array"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

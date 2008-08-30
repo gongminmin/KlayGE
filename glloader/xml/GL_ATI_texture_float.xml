@@ -1,26 +1,18 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_ATI_texture_float">
-	<Tokens>
-		<Token name="GL_RGBA_FLOAT32_ATI" value="0x8814"/>
-		<Token name="GL_RGB_FLOAT32_ATI" value="0x8815"/>
-		<Token name="GL_ALPHA_FLOAT32_ATI" value="0x8816"/>
-		<Token name="GL_INTENSITY_FLOAT32_ATI" value="0x8817"/>
-		<Token name="GL_LUMINANCE_FLOAT32_ATI" value="0x8818"/>
-		<Token name="GL_LUMINANCE_ALPHA_FLOAT32_ATI" value="0x8819"/>
-		<Token name="GL_RGBA_FLOAT16_ATI" value="0x881A"/>
-		<Token name="GL_RGB_FLOAT16_ATI" value="0x881B"/>
-		<Token name="GL_ALPHA_FLOAT16_ATI" value="0x881C"/>
-		<Token name="GL_INTENSITY_FLOAT16_ATI" value="0x881D"/>
-		<Token name="GL_LUMINANCE_FLOAT16_ATI" value="0x881E"/>
-		<Token name="GL_LUMINANCE_ALPHA_FLOAT16_ATI" value="0x881F"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_ATI" string="GL_ATI_texture_float" reg_no="280"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_ATI"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_ATI_texture_float" reg_no="280">
+	<tokens>
+		<token name="GL_RGBA_FLOAT32_ATI" value="0x8814"/>
+		<token name="GL_RGB_FLOAT32_ATI" value="0x8815"/>
+		<token name="GL_ALPHA_FLOAT32_ATI" value="0x8816"/>
+		<token name="GL_INTENSITY_FLOAT32_ATI" value="0x8817"/>
+		<token name="GL_LUMINANCE_FLOAT32_ATI" value="0x8818"/>
+		<token name="GL_LUMINANCE_ALPHA_FLOAT32_ATI" value="0x8819"/>
+		<token name="GL_RGBA_FLOAT16_ATI" value="0x881A"/>
+		<token name="GL_RGB_FLOAT16_ATI" value="0x881B"/>
+		<token name="GL_ALPHA_FLOAT16_ATI" value="0x881C"/>
+		<token name="GL_INTENSITY_FLOAT16_ATI" value="0x881D"/>
+		<token name="GL_LUMINANCE_FLOAT16_ATI" value="0x881E"/>
+		<token name="GL_LUMINANCE_ALPHA_FLOAT16_ATI" value="0x881F"/>
+	</tokens>
+</gl_extension>

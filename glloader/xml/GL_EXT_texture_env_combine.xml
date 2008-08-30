@@ -1,0 +1,28 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_EXT_texture_env_combine" reg_no="158" prefer="GL_ARB_texture_env_combine">
+	<tokens>
+		<token name="GL_COMBINE_EXT" value="0x8570"/>
+		<token name="GL_COMBINE_RGB_EXT" value="0x8571"/>
+		<token name="GL_COMBINE_ALPHA_EXT" value="0x8572"/>
+		<token name="GL_SRC0_RGB_EXT" value="0x8580"/>
+		<token name="GL_SRC1_RGB_EXT" value="0x8581"/>
+		<token name="GL_SRC2_RGB_EXT" value="0x8582"/>
+		<token name="GL_SRC0_ALPHA_EXT" value="0x8588"/>
+		<token name="GL_SRC1_ALPHA_EXT" value="0x8589"/>
+		<token name="GL_SRC2_ALPHA_EXT" value="0x858A"/>
+		<token name="GL_OPERAND0_RGB_EXT" value="0x8590"/>
+		<token name="GL_OPERAND1_RGB_EXT" value="0x8591"/>
+		<token name="GL_OPERAND2_RGB_EXT" value="0x8592"/>
+		<token name="GL_OPERAND0_ALPHA_EXT" value="0x8598"/>
+		<token name="GL_OPERAND1_ALPHA_EXT" value="0x8599"/>
+		<token name="GL_OPERAND2_ALPHA_EXT" value="0x859A"/>
+		<token name="GL_RGB_SCALE_EXT" value="0x8573"/>
+		<token name="GL_ADD_SIGNED_EXT" value="0x8574"/>
+		<token name="GL_INTERPOLATE_EXT" value="0x8575"/>
+		<token name="GL_SUBTRACT_EXT" value="0x84E7"/>
+		<token name="GL_CONSTANT_EXT" value="0x8576"/>
+		<token name="GL_PRIMARY_COLOR_EXT" value="0x8577"/>
+		<token name="GL_PREVIOUS_EXT" value="0x8578"/>
+	</tokens>
+</gl_extension>

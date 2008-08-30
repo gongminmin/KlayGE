@@ -1,16 +1,8 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_NV_copy_depth_to_color">
-	<Tokens>
-		<Token name="GL_DEPTH_STENCIL_TO_RGBA_NV" value="0x886E"/>
-		<Token name="GL_DEPTH_STENCIL_TO_BGRA_NV" value="0x886F"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_copy_depth_to_color" reg_no="243"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_NV"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_NV_copy_depth_to_color" reg_no="243">
+	<tokens>
+		<token name="GL_DEPTH_STENCIL_TO_RGBA_NV" value="0x886E"/>
+		<token name="GL_DEPTH_STENCIL_TO_BGRA_NV" value="0x886F"/>
+	</tokens>
+</gl_extension>

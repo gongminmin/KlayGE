@@ -1,71 +1,68 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GLX_SGIX_fbconfig">
-	<Typedefs>
-		<Typedef type="XID" synonym="GLXFBConfigIDSGIX"/>
-		<Typedef type="struct __GLXFBConfigRec*" synonym="GLXFBConfigSGIX"/>
-	</Typedefs>
+<gl_extension name="GLX_SGIX_fbconfig" reg_no="49">
+	<typedefs>
+		<typedef type="XID" synonym="GLXFBConfigIDSGIX"/>
+		<typedef type="struct __GLXFBConfigRec*" synonym="GLXFBConfigSGIX"/>
+	</typedefs>
 
-	<Tokens>
-		<Token name="GLX_WINDOW_BIT_SGIX" value="0x00000001"/>
-		<Token name="GLX_PIXMAP_BIT_SGIX" value="0x00000002"/>
-		<Token name="GLX_RGBA_BIT_SGIX" value="0x00000001"/>
-		<Token name="GLX_COLOR_INDEX_BIT_SGIX" value="0x00000002"/>
-		<Token name="GLX_DRAWABLE_TYPE_SGIX" value="0x8010"/>
-		<Token name="GLX_RENDER_TYPE_SGIX" value="0x8011"/>
-		<Token name="GLX_X_RENDERABLE_SGIX" value="0x8012"/>
-		<Token name="GLX_FBCONFIG_ID_SGIX" value="0x8013"/>
-		<Token name="GLX_RGBA_TYPE_SGIX" value="0x8014"/>
-		<Token name="GLX_COLOR_INDEX_TYPE_SGIX" value="0x8015"/>
-	</Tokens>
+	<tokens>
+		<token name="GLX_WINDOW_BIT_SGIX" value="0x00000001"/>
+		<token name="GLX_PIXMAP_BIT_SGIX" value="0x00000002"/>
+		<token name="GLX_RGBA_BIT_SGIX" value="0x00000001"/>
+		<token name="GLX_COLOR_INDEX_BIT_SGIX" value="0x00000002"/>
+		<token name="GLX_DRAWABLE_TYPE_SGIX" value="0x8010"/>
+		<token name="GLX_RENDER_TYPE_SGIX" value="0x8011"/>
+		<token name="GLX_X_RENDERABLE_SGIX" value="0x8012"/>
+		<token name="GLX_FBCONFIG_ID_SGIX" value="0x8013"/>
+		<token name="GLX_RGBA_TYPE_SGIX" value="0x8014"/>
+		<token name="GLX_COLOR_INDEX_TYPE_SGIX" value="0x8015"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glXGetFBConfigAttribSGIX" return="int">
-			<Param type="Display*" name="dpy"/>
-			<Param type="GLXFBConfigSGIX" name="config"/>
-			<Param type="int" name="attribute"/>
-			<Param type="int*" name="value"/>
-		</Function>
-		<Function name="glXChooseFBConfigSGIX" return="GLXFBConfigSGIX*">
-			<Param type="Display*" name="dpy"/>
-			<Param type="int" name="screen"/>
-			<Param type="int*" name="attrib_list"/>
-			<Param type="int*" name="nelements"/>
-		</Function>
-		<Function name="glXCreateGLXPixmapWithConfigSGIX" return="GLXPixmap">
-			<Param type="Display*" name="dpy"/>
-			<Param type="GLXFBConfigSGIX" name="config"/>
-			<Param type="Pixmap" name="pixmap"/>
-		</Function>
-		<Function name="glXCreateContextWithConfigSGIX" return="GLXContext">
-			<Param type="Display*" name="dpy"/>
-			<Param type="GLXFBConfigSGIX" name="config"/>
-			<Param type="int" name="render_type"/>
-			<Param type="GLXContext" name="share_list"/>
-			<Param type="Bool" name="direct"/>
-		</Function>
-		<Function name="glXGetVisualFromFBConfigSGIX" return="XVisualInfo*">
-			<Param type="Display*" name="dpy"/>
-			<Param type="GLXFBConfigSGIX" name="config"/>
-		</Function>
-		<Function name="glXGetFBConfigFromVisualSGIX" return="GLXFBConfigSGIX">
-			<Param type="Display*" name="dpy"/>
-			<Param type="XVisualInfo*" name="vis"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GLX_SGIX" string="GLX_SGIX_fbconfig" reg_no="49">
-			<Name name="glXGetFBConfigAttribSGIX"/>
-			<Name name="glXChooseFBConfigSGIX"/>
-			<Name name="glXCreateGLXPixmapWithConfigSGIX"/>
-			<Name name="glXCreateContextWithConfigSGIX"/>
-			<Name name="glXGetVisualFromFBConfigSGIX"/>
-			<Name name="glXGetFBConfigFromVisualSGIX"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GLX_SGIX"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glXGetFBConfigAttribSGIX" return="int">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="GLXFBConfigSGIX" name="config"/>
+				<param type="int" name="attribute"/>
+				<param type="int*" name="value"/>
+			</params>
+		</function>
+		<function name="glXChooseFBConfigSGIX" return="GLXFBConfigSGIX*">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="int" name="screen"/>
+				<param type="int*" name="attrib_list"/>
+				<param type="int*" name="nelements"/>
+			</params>
+		</function>
+		<function name="glXCreateGLXPixmapWithConfigSGIX" return="GLXPixmap">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="GLXFBConfigSGIX" name="config"/>
+				<param type="Pixmap" name="pixmap"/>
+			</params>
+		</function>
+		<function name="glXCreateContextWithConfigSGIX" return="GLXContext">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="GLXFBConfigSGIX" name="config"/>
+				<param type="int" name="render_type"/>
+				<param type="GLXContext" name="share_list"/>
+				<param type="Bool" name="direct"/>
+			</params>
+		</function>
+		<function name="glXGetVisualFromFBConfigSGIX" return="XVisualInfo*">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="GLXFBConfigSGIX" name="config"/>
+			</params>
+		</function>
+		<function name="glXGetFBConfigFromVisualSGIX" return="GLXFBConfigSGIX">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="XVisualInfo*" name="vis"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

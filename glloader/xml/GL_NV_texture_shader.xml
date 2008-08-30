@@ -1,87 +1,79 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_NV_texture_shader">
-	<Tokens>
-		<Token name="GL_OFFSET_TEXTURE_RECTANGLE_NV" value="0x864C"/>
-		<Token name="GL_OFFSET_TEXTURE_RECTANGLE_SCALE_NV" value="0x864D"/>
-		<Token name="GL_DOT_PRODUCT_TEXTURE_RECTANGLE_NV" value="0x864E"/>
-		<Token name="GL_RGBA_UNSIGNED_DOT_PRODUCT_MAPPING_NV" value="0x86D9"/>
-		<Token name="GL_UNSIGNED_INT_S8_S8_8_8_NV" value="0x86DA"/>
-		<Token name="GL_UNSIGNED_INT_8_8_S8_S8_REV_NV" value="0x86DB"/>
-		<Token name="GL_DSDT_MAG_INTENSITY_NV" value="0x86DC"/>
-		<Token name="GL_SHADER_CONSISTENT_NV" value="0x86DD"/>
-		<Token name="GL_TEXTURE_SHADER_NV" value="0x86DE"/>
-		<Token name="GL_SHADER_OPERATION_NV" value="0x86DF"/>
-		<Token name="GL_CULL_MODES_NV" value="0x86E0"/>
-		<Token name="GL_OFFSET_TEXTURE_MATRIX_NV" value="0x86E1"/>
-		<Token name="GL_OFFSET_TEXTURE_SCALE_NV" value="0x86E2"/>
-		<Token name="GL_OFFSET_TEXTURE_BIAS_NV" value="0x86E3"/>
-		<Token name="GL_OFFSET_TEXTURE_2D_MATRIX_NV" value="GL_OFFSET_TEXTURE_MATRIX_NV"/>
-		<Token name="GL_OFFSET_TEXTURE_2D_SCALE_NV" value="GL_OFFSET_TEXTURE_SCALE_NV"/>
-		<Token name="GL_OFFSET_TEXTURE_2D_BIAS_NV" value="GL_OFFSET_TEXTURE_BIAS_NV"/>
-		<Token name="GL_PREVIOUS_TEXTURE_INPUT_NV" value="0x86E4"/>
-		<Token name="GL_CONST_EYE_NV" value="0x86E5"/>
-		<Token name="GL_PASS_THROUGH_NV" value="0x86E6"/>
-		<Token name="GL_CULL_FRAGMENT_NV" value="0x86E7"/>
-		<Token name="GL_OFFSET_TEXTURE_2D_NV" value="0x86E8"/>
-		<Token name="GL_DEPENDENT_AR_TEXTURE_2D_NV" value="0x86E9"/>
-		<Token name="GL_DEPENDENT_GB_TEXTURE_2D_NV" value="0x86EA"/>
-		<Token name="GL_DOT_PRODUCT_NV" value="0x86EC"/>
-		<Token name="GL_DOT_PRODUCT_DEPTH_REPLACE_NV" value="0x86ED"/>
-		<Token name="GL_DOT_PRODUCT_TEXTURE_2D_NV" value="0x86EE"/>
-		<Token name="GL_DOT_PRODUCT_TEXTURE_CUBE_MAP_NV" value="0x86F0"/>
-		<Token name="GL_DOT_PRODUCT_DIFFUSE_CUBE_MAP_NV" value="0x86F1"/>
-		<Token name="GL_DOT_PRODUCT_REFLECT_CUBE_MAP_NV" value="0x86F2"/>
-		<Token name="GL_DOT_PRODUCT_CONST_EYE_REFLECT_CUBE_MAP_NV" value="0x86F3"/>
-		<Token name="GL_HILO_NV" value="0x86F4"/>
-		<Token name="GL_DSDT_NV" value="0x86F5"/>
-		<Token name="GL_DSDT_MAG_NV" value="0x86F6"/>
-		<Token name="GL_DSDT_MAG_VIB_NV" value="0x86F7"/>
-		<Token name="GL_HILO16_NV" value="0x86F8"/>
-		<Token name="GL_SIGNED_HILO_NV" value="0x86F9"/>
-		<Token name="GL_SIGNED_HILO16_NV" value="0x86FA"/>
-		<Token name="GL_SIGNED_RGBA_NV" value="0x86FB"/>
-		<Token name="GL_SIGNED_RGBA8_NV" value="0x86FC"/>
-		<Token name="GL_SIGNED_RGB_NV" value="0x86FE"/>
-		<Token name="GL_SIGNED_RGB8_NV" value="0x86FF"/>
-		<Token name="GL_SIGNED_LUMINANCE_NV" value="0x8701"/>
-		<Token name="GL_SIGNED_LUMINANCE8_NV" value="0x8702"/>
-		<Token name="GL_SIGNED_LUMINANCE_ALPHA_NV" value="0x8703"/>
-		<Token name="GL_SIGNED_LUMINANCE8_ALPHA8_NV" value="0x8704"/>
-		<Token name="GL_SIGNED_ALPHA_NV" value="0x8705"/>
-		<Token name="GL_SIGNED_ALPHA8_NV" value="0x8706"/>
-		<Token name="GL_SIGNED_INTENSITY_NV" value="0x8707"/>
-		<Token name="GL_SIGNED_INTENSITY8_NV" value="0x8708"/>
-		<Token name="GL_DSDT8_NV" value="0x8709"/>
-		<Token name="GL_DSDT8_MAG8_NV" value="0x870A"/>
-		<Token name="GL_DSDT8_MAG8_INTENSITY8_NV" value="0x870B"/>
-		<Token name="GL_SIGNED_RGB_UNSIGNED_ALPHA_NV" value="0x870C"/>
-		<Token name="GL_SIGNED_RGB8_UNSIGNED_ALPHA8_NV" value="0x870D"/>
-		<Token name="GL_HI_SCALE_NV" value="0x870E"/>
-		<Token name="GL_LO_SCALE_NV" value="0x870F"/>
-		<Token name="GL_DS_SCALE_NV" value="0x8710"/>
-		<Token name="GL_DT_SCALE_NV" value="0x8711"/>
-		<Token name="GL_MAGNITUDE_SCALE_NV" value="0x8712"/>
-		<Token name="GL_VIBRANCE_SCALE_NV" value="0x8713"/>
-		<Token name="GL_HI_BIAS_NV" value="0x8714"/>
-		<Token name="GL_LO_BIAS_NV" value="0x8715"/>
-		<Token name="GL_DS_BIAS_NV" value="0x8716"/>
-		<Token name="GL_DT_BIAS_NV" value="0x8717"/>
-		<Token name="GL_MAGNITUDE_BIAS_NV" value="0x8718"/>
-		<Token name="GL_VIBRANCE_BIAS_NV" value="0x8719"/>
-		<Token name="GL_TEXTURE_BORDER_VALUES_NV" value="0x871A"/>
-		<Token name="GL_TEXTURE_HI_SIZE_NV" value="0x871B"/>
-		<Token name="GL_TEXTURE_LO_SIZE_NV" value="0x871C"/>
-		<Token name="GL_TEXTURE_DS_SIZE_NV" value="0x871D"/>
-		<Token name="GL_TEXTURE_DT_SIZE_NV" value="0x871E"/>
-		<Token name="GL_TEXTURE_MAG_SIZE_NV" value="0x871F"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_texture_shader" reg_no="230"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_NV"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_NV_texture_shader" reg_no="230">
+	<tokens>
+		<token name="GL_OFFSET_TEXTURE_RECTANGLE_NV" value="0x864C"/>
+		<token name="GL_OFFSET_TEXTURE_RECTANGLE_SCALE_NV" value="0x864D"/>
+		<token name="GL_DOT_PRODUCT_TEXTURE_RECTANGLE_NV" value="0x864E"/>
+		<token name="GL_RGBA_UNSIGNED_DOT_PRODUCT_MAPPING_NV" value="0x86D9"/>
+		<token name="GL_UNSIGNED_INT_S8_S8_8_8_NV" value="0x86DA"/>
+		<token name="GL_UNSIGNED_INT_8_8_S8_S8_REV_NV" value="0x86DB"/>
+		<token name="GL_DSDT_MAG_INTENSITY_NV" value="0x86DC"/>
+		<token name="GL_SHADER_CONSISTENT_NV" value="0x86DD"/>
+		<token name="GL_TEXTURE_SHADER_NV" value="0x86DE"/>
+		<token name="GL_SHADER_OPERATION_NV" value="0x86DF"/>
+		<token name="GL_CULL_MODES_NV" value="0x86E0"/>
+		<token name="GL_OFFSET_TEXTURE_MATRIX_NV" value="0x86E1"/>
+		<token name="GL_OFFSET_TEXTURE_SCALE_NV" value="0x86E2"/>
+		<token name="GL_OFFSET_TEXTURE_BIAS_NV" value="0x86E3"/>
+		<token name="GL_OFFSET_TEXTURE_2D_MATRIX_NV" value="GL_OFFSET_TEXTURE_MATRIX_NV"/>
+		<token name="GL_OFFSET_TEXTURE_2D_SCALE_NV" value="GL_OFFSET_TEXTURE_SCALE_NV"/>
+		<token name="GL_OFFSET_TEXTURE_2D_BIAS_NV" value="GL_OFFSET_TEXTURE_BIAS_NV"/>
+		<token name="GL_PREVIOUS_TEXTURE_INPUT_NV" value="0x86E4"/>
+		<token name="GL_CONST_EYE_NV" value="0x86E5"/>
+		<token name="GL_PASS_THROUGH_NV" value="0x86E6"/>
+		<token name="GL_CULL_FRAGMENT_NV" value="0x86E7"/>
+		<token name="GL_OFFSET_TEXTURE_2D_NV" value="0x86E8"/>
+		<token name="GL_DEPENDENT_AR_TEXTURE_2D_NV" value="0x86E9"/>
+		<token name="GL_DEPENDENT_GB_TEXTURE_2D_NV" value="0x86EA"/>
+		<token name="GL_DOT_PRODUCT_NV" value="0x86EC"/>
+		<token name="GL_DOT_PRODUCT_DEPTH_REPLACE_NV" value="0x86ED"/>
+		<token name="GL_DOT_PRODUCT_TEXTURE_2D_NV" value="0x86EE"/>
+		<token name="GL_DOT_PRODUCT_TEXTURE_CUBE_MAP_NV" value="0x86F0"/>
+		<token name="GL_DOT_PRODUCT_DIFFUSE_CUBE_MAP_NV" value="0x86F1"/>
+		<token name="GL_DOT_PRODUCT_REFLECT_CUBE_MAP_NV" value="0x86F2"/>
+		<token name="GL_DOT_PRODUCT_CONST_EYE_REFLECT_CUBE_MAP_NV" value="0x86F3"/>
+		<token name="GL_HILO_NV" value="0x86F4"/>
+		<token name="GL_DSDT_NV" value="0x86F5"/>
+		<token name="GL_DSDT_MAG_NV" value="0x86F6"/>
+		<token name="GL_DSDT_MAG_VIB_NV" value="0x86F7"/>
+		<token name="GL_HILO16_NV" value="0x86F8"/>
+		<token name="GL_SIGNED_HILO_NV" value="0x86F9"/>
+		<token name="GL_SIGNED_HILO16_NV" value="0x86FA"/>
+		<token name="GL_SIGNED_RGBA_NV" value="0x86FB"/>
+		<token name="GL_SIGNED_RGBA8_NV" value="0x86FC"/>
+		<token name="GL_SIGNED_RGB_NV" value="0x86FE"/>
+		<token name="GL_SIGNED_RGB8_NV" value="0x86FF"/>
+		<token name="GL_SIGNED_LUMINANCE_NV" value="0x8701"/>
+		<token name="GL_SIGNED_LUMINANCE8_NV" value="0x8702"/>
+		<token name="GL_SIGNED_LUMINANCE_ALPHA_NV" value="0x8703"/>
+		<token name="GL_SIGNED_LUMINANCE8_ALPHA8_NV" value="0x8704"/>
+		<token name="GL_SIGNED_ALPHA_NV" value="0x8705"/>
+		<token name="GL_SIGNED_ALPHA8_NV" value="0x8706"/>
+		<token name="GL_SIGNED_INTENSITY_NV" value="0x8707"/>
+		<token name="GL_SIGNED_INTENSITY8_NV" value="0x8708"/>
+		<token name="GL_DSDT8_NV" value="0x8709"/>
+		<token name="GL_DSDT8_MAG8_NV" value="0x870A"/>
+		<token name="GL_DSDT8_MAG8_INTENSITY8_NV" value="0x870B"/>
+		<token name="GL_SIGNED_RGB_UNSIGNED_ALPHA_NV" value="0x870C"/>
+		<token name="GL_SIGNED_RGB8_UNSIGNED_ALPHA8_NV" value="0x870D"/>
+		<token name="GL_HI_SCALE_NV" value="0x870E"/>
+		<token name="GL_LO_SCALE_NV" value="0x870F"/>
+		<token name="GL_DS_SCALE_NV" value="0x8710"/>
+		<token name="GL_DT_SCALE_NV" value="0x8711"/>
+		<token name="GL_MAGNITUDE_SCALE_NV" value="0x8712"/>
+		<token name="GL_VIBRANCE_SCALE_NV" value="0x8713"/>
+		<token name="GL_HI_BIAS_NV" value="0x8714"/>
+		<token name="GL_LO_BIAS_NV" value="0x8715"/>
+		<token name="GL_DS_BIAS_NV" value="0x8716"/>
+		<token name="GL_DT_BIAS_NV" value="0x8717"/>
+		<token name="GL_MAGNITUDE_BIAS_NV" value="0x8718"/>
+		<token name="GL_VIBRANCE_BIAS_NV" value="0x8719"/>
+		<token name="GL_TEXTURE_BORDER_VALUES_NV" value="0x871A"/>
+		<token name="GL_TEXTURE_HI_SIZE_NV" value="0x871B"/>
+		<token name="GL_TEXTURE_LO_SIZE_NV" value="0x871C"/>
+		<token name="GL_TEXTURE_DS_SIZE_NV" value="0x871D"/>
+		<token name="GL_TEXTURE_DT_SIZE_NV" value="0x871E"/>
+		<token name="GL_TEXTURE_MAG_SIZE_NV" value="0x871F"/>
+	</tokens>
+</gl_extension>

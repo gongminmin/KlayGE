@@ -1,72 +1,69 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_NV_fragment_program">
-	<Tokens>
-		<Token name="GL_MAX_FRAGMENT_PROGRAM_LOCAL_PARAMETERS_NV" value="0x8868"/>
-		<Token name="GL_FRAGMENT_PROGRAM_NV" value="0x8870"/>
-		<Token name="GL_MAX_TEXTURE_COORDS_NV" value="0x8871"/>
-		<Token name="GL_MAX_TEXTURE_IMAGE_UNITS_NV" value="0x8872"/>
-		<Token name="GL_FRAGMENT_PROGRAM_BINDING_NV" value="0x8873"/>
-		<Token name="GL_PROGRAM_ERROR_STRING_NV" value="0x8874"/>
-	</Tokens>
+<gl_extension name="GL_NV_fragment_program" reg_no="282">
+	<tokens>
+		<token name="GL_MAX_FRAGMENT_PROGRAM_LOCAL_PARAMETERS_NV" value="0x8868"/>
+		<token name="GL_FRAGMENT_PROGRAM_NV" value="0x8870"/>
+		<token name="GL_MAX_TEXTURE_COORDS_NV" value="0x8871"/>
+		<token name="GL_MAX_TEXTURE_IMAGE_UNITS_NV" value="0x8872"/>
+		<token name="GL_FRAGMENT_PROGRAM_BINDING_NV" value="0x8873"/>
+		<token name="GL_PROGRAM_ERROR_STRING_NV" value="0x8874"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glProgramNamedParameter4fNV" return="void">
-			<Param type="GLuint" name="id"/>
-			<Param type="GLsizei" name="len"/>
-			<Param type="const GLubyte*" name="name"/>
-			<Param type="GLfloat" name="x"/>
-			<Param type="GLfloat" name="y"/>
-			<Param type="GLfloat" name="z"/>
-			<Param type="GLfloat" name="w"/>
-		</Function>
-		<Function name="glProgramNamedParameter4dNV" return="void">
-			<Param type="GLuint" name="id"/>
-			<Param type="GLsizei" name="len"/>
-			<Param type="const GLubyte*" name="name"/>
-			<Param type="GLdouble" name="x"/>
-			<Param type="GLdouble" name="y"/>
-			<Param type="GLdouble" name="z"/>
-			<Param type="GLdouble" name="w"/>
-		</Function>
-		<Function name="glProgramNamedParameter4fvNV" return="void">
-			<Param type="GLuint" name="id"/>
-			<Param type="GLsizei" name="len"/>
-			<Param type="const GLubyte*" name="name"/>
-			<Param type="const GLfloat*" name="v"/>
-		</Function>
-		<Function name="glProgramNamedParameter4dvNV" return="void">
-			<Param type="GLuint" name="id"/>
-			<Param type="GLsizei" name="len"/>
-			<Param type="const GLubyte*" name="name"/>
-			<Param type="const GLdouble*" name="v"/>
-		</Function>
-		<Function name="glGetProgramNamedParameterfvNV" return="void">
-			<Param type="GLuint" name="id"/>
-			<Param type="GLsizei" name="len"/>
-			<Param type="const GLubyte*" name="name"/>
-			<Param type="GLfloat*" name="params"/>
-		</Function>
-		<Function name="glGetProgramNamedParameterdvNV" return="void">
-			<Param type="GLuint" name="id"/>
-			<Param type="GLsizei" name="len"/>
-			<Param type="const GLubyte*" name="name"/>
-			<Param type="GLdouble*" name="params"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_fragment_program" reg_no="282">
-			<Name name="glProgramNamedParameter4fNV"/>
-			<Name name="glProgramNamedParameter4dNV"/>
-			<Name name="glProgramNamedParameter4fvNV"/>
-			<Name name="glProgramNamedParameter4dvNV"/>
-			<Name name="glGetProgramNamedParameterfvNV"/>
-			<Name name="glGetProgramNamedParameterdvNV"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_NV"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glProgramNamedParameter4fNV" return="void">
+			<params>
+				<param type="GLuint" name="id"/>
+				<param type="GLsizei" name="len"/>
+				<param type="const GLubyte*" name="name"/>
+				<param type="GLfloat" name="x"/>
+				<param type="GLfloat" name="y"/>
+				<param type="GLfloat" name="z"/>
+				<param type="GLfloat" name="w"/>
+			</params>
+		</function>
+		<function name="glProgramNamedParameter4dNV" return="void">
+			<params>
+				<param type="GLuint" name="id"/>
+				<param type="GLsizei" name="len"/>
+				<param type="const GLubyte*" name="name"/>
+				<param type="GLdouble" name="x"/>
+				<param type="GLdouble" name="y"/>
+				<param type="GLdouble" name="z"/>
+				<param type="GLdouble" name="w"/>
+			</params>
+		</function>
+		<function name="glProgramNamedParameter4fvNV" return="void">
+			<params>
+				<param type="GLuint" name="id"/>
+				<param type="GLsizei" name="len"/>
+				<param type="const GLubyte*" name="name"/>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glProgramNamedParameter4dvNV" return="void">
+			<params>
+				<param type="GLuint" name="id"/>
+				<param type="GLsizei" name="len"/>
+				<param type="const GLubyte*" name="name"/>
+				<param type="const GLdouble*" name="v"/>
+			</params>
+		</function>
+		<function name="glGetProgramNamedParameterfvNV" return="void">
+			<params>
+				<param type="GLuint" name="id"/>
+				<param type="GLsizei" name="len"/>
+				<param type="const GLubyte*" name="name"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetProgramNamedParameterdvNV" return="void">
+			<params>
+				<param type="GLuint" name="id"/>
+				<param type="GLsizei" name="len"/>
+				<param type="const GLubyte*" name="name"/>
+				<param type="GLdouble*" name="params"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,34 +1,26 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_ARB_texture_float">
-	<Tokens>
-		<Token name="GL_TEXTURE_RED_TYPE_ARB" value="0x8C10"/>
-		<Token name="GL_TEXTURE_GREEN_TYPE_ARB" value="0x8C11"/>
-		<Token name="GL_TEXTURE_BLUE_TYPE_ARB" value="0x8C12"/>
-		<Token name="GL_TEXTURE_ALPHA_TYPE_ARB" value="0x8C13"/>
-		<Token name="GL_TEXTURE_LUMINANCE_TYPE_ARB" value="0x8C14"/>
-		<Token name="GL_TEXTURE_INTENSITY_TYPE_ARB" value="0x8C15"/>
-		<Token name="GL_TEXTURE_DEPTH_TYPE_ARB" value="0x8C16"/>
-		<Token name="GL_UNSIGNED_NORMALIZED_ARB" value="0x8C17"/>
-		<Token name="GL_RGBA32F_ARB" value="0x8814"/>
-		<Token name="GL_RGB32F_ARB" value="0x8815"/>
-		<Token name="GL_ALPHA32F_ARB" value="0x8816"/>
-		<Token name="GL_INTENSITY32F_ARB" value="0x8817"/>
-		<Token name="GL_LUMINANCE32F_ARB" value="0x8818"/>
-		<Token name="GL_LUMINANCE_ALPHA32F_ARB" value="0x8819"/>
-		<Token name="GL_RGBA16F_ARB" value="0x881A"/>
-		<Token name="GL_RGB16F_ARB" value="0x881B"/>
-		<Token name="GL_ALPHA16F_ARB" value="0x881C"/>
-		<Token name="GL_INTENSITY16F_ARB" value="0x881D"/>
-		<Token name="GL_LUMINANCE16F_ARB" value="0x881E"/>
-		<Token name="GL_LUMINANCE_ALPHA16F_ARB" value="0x881F"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_texture_float" reg_no="41"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_ARB"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_ARB_texture_float" reg_no="41">
+	<tokens>
+		<token name="GL_TEXTURE_RED_TYPE_ARB" value="0x8C10"/>
+		<token name="GL_TEXTURE_GREEN_TYPE_ARB" value="0x8C11"/>
+		<token name="GL_TEXTURE_BLUE_TYPE_ARB" value="0x8C12"/>
+		<token name="GL_TEXTURE_ALPHA_TYPE_ARB" value="0x8C13"/>
+		<token name="GL_TEXTURE_LUMINANCE_TYPE_ARB" value="0x8C14"/>
+		<token name="GL_TEXTURE_INTENSITY_TYPE_ARB" value="0x8C15"/>
+		<token name="GL_TEXTURE_DEPTH_TYPE_ARB" value="0x8C16"/>
+		<token name="GL_UNSIGNED_NORMALIZED_ARB" value="0x8C17"/>
+		<token name="GL_RGBA32F_ARB" value="0x8814"/>
+		<token name="GL_RGB32F_ARB" value="0x8815"/>
+		<token name="GL_ALPHA32F_ARB" value="0x8816"/>
+		<token name="GL_INTENSITY32F_ARB" value="0x8817"/>
+		<token name="GL_LUMINANCE32F_ARB" value="0x8818"/>
+		<token name="GL_LUMINANCE_ALPHA32F_ARB" value="0x8819"/>
+		<token name="GL_RGBA16F_ARB" value="0x881A"/>
+		<token name="GL_RGB16F_ARB" value="0x881B"/>
+		<token name="GL_ALPHA16F_ARB" value="0x881C"/>
+		<token name="GL_INTENSITY16F_ARB" value="0x881D"/>
+		<token name="GL_LUMINANCE16F_ARB" value="0x881E"/>
+		<token name="GL_LUMINANCE_ALPHA16F_ARB" value="0x881F"/>
+	</tokens>
+</gl_extension>

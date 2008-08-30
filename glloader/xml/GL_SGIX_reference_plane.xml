@@ -1,24 +1,16 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_SGIX_reference_plane">
-	<Tokens>
-		<Token name="GL_REFERENCE_PLANE_SGIX" value="0x817D"/>
-		<Token name="GL_REFERENCE_PLANE_EQUATION_SGIX" value="0x817E"/>
-	</Tokens>
+<gl_extension name="GL_SGIX_reference_plane" reg_no="60">
+	<tokens>
+		<token name="GL_REFERENCE_PLANE_SGIX" value="0x817D"/>
+		<token name="GL_REFERENCE_PLANE_EQUATION_SGIX" value="0x817E"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glReferencePlaneSGIX" return="void">
-			<Param type="const GLdouble*" name="equation"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_SGIX" string="GL_SGIX_reference_plane" reg_no="60">
-			<Name name="glReferencePlaneSGIX"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_SGIX"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glReferencePlaneSGIX" return="void">
+			<params>
+				<param type="const GLdouble*" name="equation"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

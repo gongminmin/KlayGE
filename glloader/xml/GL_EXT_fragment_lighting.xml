@@ -1,140 +1,149 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_EXT_fragment_lighting">
-	<Tokens>
-		<Token name="GL_FRAGMENT_LIGHTING_EXT" value="0x8400"/>
-		<Token name="GL_FRAGMENT_COLOR_MATERIAL_EXT" value="0x8401"/>
-		<Token name="GL_FRAGMENT_COLOR_MATERIAL_FACE_EXT" value="0x8402"/>
-		<Token name="GL_FRAGMENT_COLOR_MATERIAL_PARAMETER_EXT" value="0x8403"/>
-		<Token name="GL_MAX_FRAGMENT_LIGHTS_EXT" value="0x8404"/>
-		<Token name="GL_MAX_ACTIVE_LIGHTS_EXT" value="0x8405"/>
-		<Token name="GL_CURRENT_RASTER_NORMAL_EXT" value="0x8406"/>
-		<Token name="GL_LIGHT_ENV_MODE_EXT" value="0x8407"/>
-		<Token name="GL_FRAGMENT_LIGHT_MODEL_LOCAL_VIEWER_EXT" value="0x8408"/>
-		<Token name="GL_FRAGMENT_LIGHT_MODEL_TWO_SIDE_EXT" value="0x8409"/>
-		<Token name="GL_FRAGMENT_LIGHT_MODEL_AMBIENT_EXT" value="0x840A"/>
-		<Token name="GL_FRAGMENT_LIGHT_MODEL_NORMAL_INTERPOLATION_EXT" value="0x840B"/>
-		<Token name="GL_FRAGMENT_LIGHT0_EXT" value="0x840C"/>
-		<Token name="GL_FRAGMENT_LIGHT1_EXT" value="0x840D"/>
-		<Token name="GL_FRAGMENT_LIGHT2_EXT" value="0x840E"/>
-		<Token name="GL_FRAGMENT_LIGHT3_EXT" value="0x840F"/>
-		<Token name="GL_FRAGMENT_LIGHT4_EXT" value="0x8410"/>
-		<Token name="GL_FRAGMENT_LIGHT5_EXT" value="0x8411"/>
-		<Token name="GL_FRAGMENT_LIGHT6_EXT" value="0x8412"/>
-		<Token name="GL_FRAGMENT_LIGHT7_EXT" value="0x8413"/>
-	</Tokens>
+<gl_extension name="GL_EXT_fragment_lighting" reg_no="102">
+	<tokens>
+		<token name="GL_FRAGMENT_LIGHTING_EXT" value="0x8400"/>
+		<token name="GL_FRAGMENT_COLOR_MATERIAL_EXT" value="0x8401"/>
+		<token name="GL_FRAGMENT_COLOR_MATERIAL_FACE_EXT" value="0x8402"/>
+		<token name="GL_FRAGMENT_COLOR_MATERIAL_PARAMETER_EXT" value="0x8403"/>
+		<token name="GL_MAX_FRAGMENT_LIGHTS_EXT" value="0x8404"/>
+		<token name="GL_MAX_ACTIVE_LIGHTS_EXT" value="0x8405"/>
+		<token name="GL_CURRENT_RASTER_NORMAL_EXT" value="0x8406"/>
+		<token name="GL_LIGHT_ENV_MODE_EXT" value="0x8407"/>
+		<token name="GL_FRAGMENT_LIGHT_MODEL_LOCAL_VIEWER_EXT" value="0x8408"/>
+		<token name="GL_FRAGMENT_LIGHT_MODEL_TWO_SIDE_EXT" value="0x8409"/>
+		<token name="GL_FRAGMENT_LIGHT_MODEL_AMBIENT_EXT" value="0x840A"/>
+		<token name="GL_FRAGMENT_LIGHT_MODEL_NORMAL_INTERPOLATION_EXT" value="0x840B"/>
+		<token name="GL_FRAGMENT_LIGHT0_EXT" value="0x840C"/>
+		<token name="GL_FRAGMENT_LIGHT1_EXT" value="0x840D"/>
+		<token name="GL_FRAGMENT_LIGHT2_EXT" value="0x840E"/>
+		<token name="GL_FRAGMENT_LIGHT3_EXT" value="0x840F"/>
+		<token name="GL_FRAGMENT_LIGHT4_EXT" value="0x8410"/>
+		<token name="GL_FRAGMENT_LIGHT5_EXT" value="0x8411"/>
+		<token name="GL_FRAGMENT_LIGHT6_EXT" value="0x8412"/>
+		<token name="GL_FRAGMENT_LIGHT7_EXT" value="0x8413"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glFragmentColorMaterialEXT" return="void">
-			<Param type="GLenum" name="face"/>
-			<Param type="GLenum" name="mode"/>
-		</Function>
-		<Function name="glFragmentLightfEXT" return="void">
-			<Param type="GLenum" name="light"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLfloat" name="param"/>
-		</Function>
-		<Function name="glFragmentLightfvEXT" return="void">
-			<Param type="GLenum" name="light"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="const GLfloat*" name="param"/>
-		</Function>
-		<Function name="glFragmentLightiEXT" return="void">
-			<Param type="GLenum" name="light"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLint" name="param"/>
-		</Function>
-		<Function name="glFragmentLightivEXT" return="void">
-			<Param type="GLenum" name="light"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="const GLint*" name="param"/>
-		</Function>
-		<Function name="glFragmentLightModelfEXT" return="void">
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLfloat" name="param"/>
-		</Function>
-		<Function name="glFragmentLightModelfvEXT" return="void">
-			<Param type="GLenum" name="pname"/>
-			<Param type="const GLfloat*" name="params"/>
-		</Function>
-		<Function name="glFragmentLightModeliEXT" return="void">
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLint" name="param"/>
-		</Function>
-		<Function name="glFragmentLightModelivEXT" return="void">
-			<Param type="GLenum" name="pname"/>
-			<Param type="const GLint*" name="params"/>
-		</Function>
-		<Function name="glFragmentMaterialfEXT" return="void">
-			<Param type="GLenum" name="face"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLfloat" name="param"/>
-		</Function>
-		<Function name="glFragmentMaterialfvEXT" return="void">
-			<Param type="GLenum" name="face"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="const GLfloat*" name="params"/>
-		</Function>
-		<Function name="glFragmentMaterialiEXT" return="void">
-			<Param type="GLenum" name="face"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLint" name="param"/>
-		</Function>
-		<Function name="glFragmentMaterialivEXT" return="void">
-			<Param type="GLenum" name="face"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="const GLint*" name="params"/>
-		</Function>
-		<Function name="glGetFragmentLightfvEXT" return="void">
-			<Param type="GLenum" name="light"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLfloat*" name="params"/>
-		</Function>
-		<Function name="glGetFragmentLightivEXT" return="void">
-			<Param type="GLenum" name="light"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLint*" name="params"/>
-		</Function>
-		<Function name="glGetFragmentMaterialfvEXT" return="void">
-			<Param type="GLenum" name="face"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLfloat*" name="params"/>
-		</Function>
-		<Function name="glGetFragmentMaterialivEXT" return="void">
-			<Param type="GLenum" name="face"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLint*" name="params"/>
-		</Function>
-		<Function name="glLightEnviEXT" return="void">
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLint" name="param"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_fragment_lighting" reg_no="102">
-			<Name name="glFragmentColorMaterialEXT"/>
-			<Name name="glFragmentLightfEXT"/>
-			<Name name="glFragmentLightfvEXT"/>
-			<Name name="glFragmentLightiEXT"/>
-			<Name name="glFragmentLightivEXT"/>
-			<Name name="glFragmentLightModelfEXT"/>
-			<Name name="glFragmentLightModelfvEXT"/>
-			<Name name="glFragmentLightModeliEXT"/>
-			<Name name="glFragmentLightModelivEXT"/>
-			<Name name="glFragmentMaterialfEXT"/>
-			<Name name="glFragmentMaterialfvEXT"/>
-			<Name name="glFragmentMaterialiEXT"/>
-			<Name name="glFragmentMaterialivEXT"/>
-			<Name name="glGetFragmentLightfvEXT"/>
-			<Name name="glGetFragmentLightivEXT"/>
-			<Name name="glGetFragmentMaterialfvEXT"/>
-			<Name name="glGetFragmentMaterialivEXT"/>
-			<Name name="glLightEnviEXT"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_EXT"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glFragmentColorMaterialEXT" return="void">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="glFragmentLightfEXT" return="void">
+			<params>
+				<param type="GLenum" name="light"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+		<function name="glFragmentLightfvEXT" return="void">
+			<params>
+				<param type="GLenum" name="light"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="param"/>
+			</params>
+		</function>
+		<function name="glFragmentLightiEXT" return="void">
+			<params>
+				<param type="GLenum" name="light"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glFragmentLightivEXT" return="void">
+			<params>
+				<param type="GLenum" name="light"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="param"/>
+			</params>
+		</function>
+		<function name="glFragmentLightModelfEXT" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+		<function name="glFragmentLightModelfvEXT" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glFragmentLightModeliEXT" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glFragmentLightModelivEXT" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glFragmentMaterialfEXT" return="void">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+		<function name="glFragmentMaterialfvEXT" return="void">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glFragmentMaterialiEXT" return="void">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glFragmentMaterialivEXT" return="void">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetFragmentLightfvEXT" return="void">
+			<params>
+				<param type="GLenum" name="light"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetFragmentLightivEXT" return="void">
+			<params>
+				<param type="GLenum" name="light"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetFragmentMaterialfvEXT" return="void">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetFragmentMaterialivEXT" return="void">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glLightEnviEXT" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

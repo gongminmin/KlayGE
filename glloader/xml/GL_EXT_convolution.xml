@@ -1,137 +1,141 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_EXT_convolution">
-	<Tokens>
-		<Token name="GL_CONVOLUTION_1D_EXT" value="0x8010"/>
-		<Token name="GL_CONVOLUTION_2D_EXT" value="0x8011"/>
-		<Token name="GL_SEPARABLE_2D_EXT" value="0x8012"/>
-		<Token name="GL_CONVOLUTION_BORDER_MODE_EXT" value="0x8013"/>
-		<Token name="GL_CONVOLUTION_FILTER_SCALE_EXT" value="0x8014"/>
-		<Token name="GL_CONVOLUTION_FILTER_BIAS_EXT" value="0x8015"/>
-		<Token name="GL_REDUCE_EXT" value="0x8016"/>
-		<Token name="GL_CONVOLUTION_FORMAT_EXT" value="0x8017"/>
-		<Token name="GL_CONVOLUTION_WIDTH_EXT" value="0x8018"/>
-		<Token name="GL_CONVOLUTION_HEIGHT_EXT" value="0x8019"/>
-		<Token name="GL_MAX_CONVOLUTION_WIDTH_EXT" value="0x801A"/>
-		<Token name="GL_MAX_CONVOLUTION_HEIGHT_EXT" value="0x801B"/>
-		<Token name="GL_POST_CONVOLUTION_RED_SCALE_EXT" value="0x801C"/>
-		<Token name="GL_POST_CONVOLUTION_GREEN_SCALE_EXT" value="0x801D"/>
-		<Token name="GL_POST_CONVOLUTION_BLUE_SCALE_EXT" value="0x801E"/>
-		<Token name="GL_POST_CONVOLUTION_ALPHA_SCALE_EXT" value="0x801F"/>
-		<Token name="GL_POST_CONVOLUTION_RED_BIAS_EXT" value="0x8020"/>
-		<Token name="GL_POST_CONVOLUTION_GREEN_BIAS_EXT" value="0x8021"/>
-		<Token name="GL_POST_CONVOLUTION_BLUE_BIAS_EXT" value="0x8022"/>
-		<Token name="GL_POST_CONVOLUTION_ALPHA_BIAS_EXT" value="0x8023"/>
-	</Tokens>
+<gl_extension name="GL_EXT_convolution" reg_no="12">
+	<tokens>
+		<token name="GL_CONVOLUTION_1D_EXT" value="0x8010"/>
+		<token name="GL_CONVOLUTION_2D_EXT" value="0x8011"/>
+		<token name="GL_SEPARABLE_2D_EXT" value="0x8012"/>
+		<token name="GL_CONVOLUTION_BORDER_MODE_EXT" value="0x8013"/>
+		<token name="GL_CONVOLUTION_FILTER_SCALE_EXT" value="0x8014"/>
+		<token name="GL_CONVOLUTION_FILTER_BIAS_EXT" value="0x8015"/>
+		<token name="GL_REDUCE_EXT" value="0x8016"/>
+		<token name="GL_CONVOLUTION_FORMAT_EXT" value="0x8017"/>
+		<token name="GL_CONVOLUTION_WIDTH_EXT" value="0x8018"/>
+		<token name="GL_CONVOLUTION_HEIGHT_EXT" value="0x8019"/>
+		<token name="GL_MAX_CONVOLUTION_WIDTH_EXT" value="0x801A"/>
+		<token name="GL_MAX_CONVOLUTION_HEIGHT_EXT" value="0x801B"/>
+		<token name="GL_POST_CONVOLUTION_RED_SCALE_EXT" value="0x801C"/>
+		<token name="GL_POST_CONVOLUTION_GREEN_SCALE_EXT" value="0x801D"/>
+		<token name="GL_POST_CONVOLUTION_BLUE_SCALE_EXT" value="0x801E"/>
+		<token name="GL_POST_CONVOLUTION_ALPHA_SCALE_EXT" value="0x801F"/>
+		<token name="GL_POST_CONVOLUTION_RED_BIAS_EXT" value="0x8020"/>
+		<token name="GL_POST_CONVOLUTION_GREEN_BIAS_EXT" value="0x8021"/>
+		<token name="GL_POST_CONVOLUTION_BLUE_BIAS_EXT" value="0x8022"/>
+		<token name="GL_POST_CONVOLUTION_ALPHA_BIAS_EXT" value="0x8023"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glConvolutionFilter1DEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="internalformat"/>
-			<Param type="GLsizei" name="width"/>
-			<Param type="GLenum" name="format"/>
-			<Param type="GLenum" name="type"/>
-			<Param type="const GLvoid*" name="image"/>
-		</Function>
-		<Function name="glConvolutionFilter2DEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="internalformat"/>
-			<Param type="GLsizei" name="width"/>
-			<Param type="GLsizei" name="height"/>
-			<Param type="GLenum" name="format"/>
-			<Param type="GLenum" name="type"/>
-			<Param type="const GLvoid*" name="image"/>
-		</Function>
-		<Function name="glConvolutionParameterfEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLfloat" name="params"/>
-		</Function>
-		<Function name="glConvolutionParameterfvEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="const GLfloat*" name="params"/>
-		</Function>
-		<Function name="glConvolutionParameteriEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLint" name="params"/>
-		</Function>
-		<Function name="glConvolutionParameterivEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="const GLint*" name="params"/>
-		</Function>
-		<Function name="glCopyConvolutionFilter1DEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="internalformat"/>
-			<Param type="GLint" name="x"/>
-			<Param type="GLint" name="y"/>
-			<Param type="GLsizei" name="width"/>
-		</Function>
-		<Function name="glCopyConvolutionFilter2DEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="internalformat"/>
-			<Param type="GLint" name="x"/>
-			<Param type="GLint" name="y"/>
-			<Param type="GLsizei" name="width"/>
-			<Param type="GLsizei" name="height"/>
-		</Function>
-		<Function name="glGetConvolutionFilterEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="format"/>
-			<Param type="GLenum" name="type"/>
-			<Param type="GLvoid*" name="image"/>
-		</Function>
-		<Function name="glGetConvolutionParameterfvEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLfloat*" name="params"/>
-		</Function>
-		<Function name="glGetConvolutionParameterivEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLint*" name="params"/>
-		</Function>
-		<Function name="glSeparableFilter2DEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="internalformat"/>
-			<Param type="GLsizei" name="width"/>
-			<Param type="GLsizei" name="height"/>
-			<Param type="GLenum" name="format"/>
-			<Param type="GLenum" name="type"/>
-			<Param type="const GLvoid*" name="row"/>
-			<Param type="const GLvoid*" name="column"/>
-		</Function>
-		<Function name="glGetSeparableFilterEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="format"/>
-			<Param type="GLenum" name="type"/>
-			<Param type="GLvoid*" name="row"/>
-			<Param type="GLvoid*" name="column"/>
-			<Param type="GLvoid*" name="span"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_convolution" reg_no="12">
-			<Name name="glConvolutionFilter1DEXT"/>
-			<Name name="glConvolutionFilter2DEXT"/>
-			<Name name="glConvolutionParameterfEXT"/>
-			<Name name="glConvolutionParameterfvEXT"/>
-			<Name name="glConvolutionParameteriEXT"/>
-			<Name name="glConvolutionParameterivEXT"/>
-			<Name name="glCopyConvolutionFilter1DEXT"/>
-			<Name name="glCopyConvolutionFilter2DEXT"/>
-			<Name name="glGetConvolutionFilterEXT"/>
-			<Name name="glGetConvolutionParameterfvEXT"/>
-			<Name name="glGetConvolutionParameterivEXT"/>
-			<Name name="glSeparableFilter2DEXT"/>
-			<Name name="glGetSeparableFilterEXT"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_EXT"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glConvolutionFilter1DEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="image"/>
+			</params>
+		</function>
+		<function name="glConvolutionFilter2DEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="image"/>
+			</params>
+		</function>
+		<function name="glConvolutionParameterfEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="params"/>
+			</params>
+		</function>
+		<function name="glConvolutionParameterfvEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glConvolutionParameteriEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="params"/>
+			</params>
+		</function>
+		<function name="glConvolutionParameterivEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glCopyConvolutionFilter1DEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+			</params>
+		</function>
+		<function name="glCopyConvolutionFilter2DEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+		</function>
+		<function name="glGetConvolutionFilterEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLvoid*" name="image"/>
+			</params>
+		</function>
+		<function name="glGetConvolutionParameterfvEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetConvolutionParameterivEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glSeparableFilter2DEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="row"/>
+				<param type="const GLvoid*" name="column"/>
+			</params>
+		</function>
+		<function name="glGetSeparableFilterEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLvoid*" name="row"/>
+				<param type="GLvoid*" name="column"/>
+				<param type="GLvoid*" name="span"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

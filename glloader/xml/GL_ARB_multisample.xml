@@ -1,32 +1,24 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_ARB_multisample">
-	<Tokens>
-		<Token name="GL_MULTISAMPLE_ARB" value="0x809D"/>
-		<Token name="GL_SAMPLE_ALPHA_TO_COVERAGE_ARB" value="0x809E"/>
-		<Token name="GL_SAMPLE_ALPHA_TO_ONE_ARB" value="0x809F"/>
-		<Token name="GL_SAMPLE_COVERAGE_ARB" value="0x80A0"/>
-		<Token name="GL_SAMPLE_BUFFERS_ARB" value="0x80A8"/>
-		<Token name="GL_SAMPLES_ARB" value="0x80A9"/>
-		<Token name="GL_SAMPLE_COVERAGE_VALUE_ARB" value="0x80AA"/>
-		<Token name="GL_SAMPLE_COVERAGE_INVERT_ARB" value="0x80AB"/>
-		<Token name="GL_MULTISAMPLE_BIT_ARB" value="0x20000000"/>
-	</Tokens>
+<gl_extension name="GL_ARB_multisample" reg_no="5">
+	<tokens>
+		<token name="GL_MULTISAMPLE_ARB" value="0x809D"/>
+		<token name="GL_SAMPLE_ALPHA_TO_COVERAGE_ARB" value="0x809E"/>
+		<token name="GL_SAMPLE_ALPHA_TO_ONE_ARB" value="0x809F"/>
+		<token name="GL_SAMPLE_COVERAGE_ARB" value="0x80A0"/>
+		<token name="GL_SAMPLE_BUFFERS_ARB" value="0x80A8"/>
+		<token name="GL_SAMPLES_ARB" value="0x80A9"/>
+		<token name="GL_SAMPLE_COVERAGE_VALUE_ARB" value="0x80AA"/>
+		<token name="GL_SAMPLE_COVERAGE_INVERT_ARB" value="0x80AB"/>
+		<token name="GL_MULTISAMPLE_BIT_ARB" value="0x20000000"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glSampleCoverageARB" return="void">
-			<Param type="GLclampf" name="value"/>
-			<Param type="GLboolean" name="invert"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_multisample" reg_no="5">
-			<Name name="glSampleCoverageARB"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_ARB"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glSampleCoverageARB" return="void">
+			<params>
+				<param type="GLclampf" name="value"/>
+				<param type="GLboolean" name="invert"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

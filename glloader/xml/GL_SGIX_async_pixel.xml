@@ -1,20 +1,12 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_SGIX_async_pixel">
-	<Tokens>
-		<Token name="GL_ASYNC_TEX_IMAGE_SGIX" value="0x835C"/>
-		<Token name="GL_ASYNC_DRAW_PIXELS_SGIX" value="0x835D"/>
-		<Token name="GL_ASYNC_READ_PIXELS_SGIX" value="0x835E"/>
-		<Token name="GL_MAX_ASYNC_TEX_IMAGE_SGIX" value="0x835F"/>
-		<Token name="GL_MAX_ASYNC_DRAW_PIXELS_SGIX" value="0x8360"/>
-		<Token name="GL_MAX_ASYNC_READ_PIXELS_SGIX" value="0x8361"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_SGIX" string="GL_SGIX_async_pixel" reg_no="133"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_SGIX"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_SGIX_async_pixel" reg_no="133">
+	<tokens>
+		<token name="GL_ASYNC_TEX_IMAGE_SGIX" value="0x835C"/>
+		<token name="GL_ASYNC_DRAW_PIXELS_SGIX" value="0x835D"/>
+		<token name="GL_ASYNC_READ_PIXELS_SGIX" value="0x835E"/>
+		<token name="GL_MAX_ASYNC_TEX_IMAGE_SGIX" value="0x835F"/>
+		<token name="GL_MAX_ASYNC_DRAW_PIXELS_SGIX" value="0x8360"/>
+		<token name="GL_MAX_ASYNC_READ_PIXELS_SGIX" value="0x8361"/>
+	</tokens>
+</gl_extension>

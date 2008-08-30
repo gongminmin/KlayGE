@@ -1,25 +1,17 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_SGIX_framezoom">
-	<Tokens>
-		<Token name="GL_FRAMEZOOM_SGIX" value="0x818B"/>
-		<Token name="GL_FRAMEZOOM_FACTOR_SGIX" value="0x818C"/>
-		<Token name="GL_MAX_FRAMEZOOM_FACTOR_SGIX" value="0x818D"/>
-	</Tokens>
+<gl_extension name="GL_SGIX_framezoom" reg_no="57">
+	<tokens>
+		<token name="GL_FRAMEZOOM_SGIX" value="0x818B"/>
+		<token name="GL_FRAMEZOOM_FACTOR_SGIX" value="0x818C"/>
+		<token name="GL_MAX_FRAMEZOOM_FACTOR_SGIX" value="0x818D"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glFrameZoomSGIX" return="void">
-			<Param type="GLint" name="factor"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_SGIX" string="GL_SGIX_framezoom" reg_no="57">
-			<Name name="glFrameZoomSGIX"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_SGIX"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glFrameZoomSGIX" return="void">
+			<params>
+				<param type="GLint" name="factor"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

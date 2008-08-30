@@ -1,11 +1,4 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_OES_depth24">
-	<Vendors>
-		<Vendor name="GL_OES" string="GL_OES_depth24"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_OES"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_OES_depth24">
+</gl_extension>

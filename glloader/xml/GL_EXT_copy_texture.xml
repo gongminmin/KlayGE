@@ -1,56 +1,51 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_EXT_copy_texture">
-	<Functions>
-		<Function name="glCopyTexImage1DEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLint" name="level"/>
-			<Param type="GLenum" name="internalFormat"/>
-			<Param type="GLint" name="x"/>
-			<Param type="GLint" name="y"/>
-			<Param type="GLsizei" name="width"/>
-			<Param type="GLint" name="border"/>
-		</Function>
-		<Function name="glCopyTexImage2DEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLint" name="level"/>
-			<Param type="GLenum" name="internalFormat"/>
-			<Param type="GLint" name="x"/>
-			<Param type="GLint" name="y"/>
-			<Param type="GLsizei" name="width"/>
-			<Param type="GLsizei" name="height"/>
-			<Param type="GLint" name="border"/>
-		</Function>
-		<Function name="glCopyTexSubImage1DEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLint" name="level"/>
-			<Param type="GLint" name="xoffset"/>
-			<Param type="GLint" name="x"/>
-			<Param type="GLint" name="y"/>
-			<Param type="GLsizei" name="width"/>
-		</Function>
-		<Function name="glCopyTexSubImage2DEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLint" name="level"/>
-			<Param type="GLint" name="xoffset"/>
-			<Param type="GLint" name="yoffset"/>
-			<Param type="GLint" name="x"/>
-			<Param type="GLint" name="y"/>
-			<Param type="GLsizei" name="width"/>
-			<Param type="GLsizei" name="height"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_copy_texture" reg_no="10">
-			<Name name="glCopyTexImage1DEXT"/>
-			<Name name="glCopyTexImage2DEXT"/>
-			<Name name="glCopyTexSubImage1DEXT"/>
-			<Name name="glCopyTexSubImage2DEXT"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_EXT"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_EXT_copy_texture" reg_no="10">
+	<functions>
+		<function name="glCopyTexImage1DEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLenum" name="internalFormat"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLint" name="border"/>
+			</params>
+		</function>
+		<function name="glCopyTexImage2DEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLenum" name="internalFormat"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLint" name="border"/>
+			</params>
+		</function>
+		<function name="glCopyTexSubImage1DEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+			</params>
+		</function>
+		<function name="glCopyTexSubImage2DEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="yoffset"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

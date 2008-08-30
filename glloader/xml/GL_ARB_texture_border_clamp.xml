@@ -1,17 +1,7 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_ARB_texture_border_clamp">
-	<Tokens>
-		<Token name="GL_CLAMP_TO_BORDER_ARB" value="0x812D"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_texture_border_clamp" reg_no="13"/>
-		<Vendor name="GL_SGIS" string="GL_SGIS_texture_border_clamp" reg_no="36"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_ARB"/>
-		<Init name="GL_SGIS"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_ARB_texture_border_clamp" reg_no="13">
+	<tokens>
+		<token name="GL_CLAMP_TO_BORDER_ARB" value="0x812D"/>
+	</tokens>
+</gl_extension>

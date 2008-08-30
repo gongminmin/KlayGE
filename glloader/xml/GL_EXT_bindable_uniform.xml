@@ -1,40 +1,34 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_EXT_bindable_uniform">
-	<Tokens>
-		<Token name="GL_MAX_VERTEX_BINDABLE_UNIFORMS_EXT" value="0x8DE2"/>
-		<Token name="GL_MAX_FRAGMENT_BINDABLE_UNIFORMS_EXT" value="0x8DE3"/>
-		<Token name="GL_MAX_GEOMETRY_BINDABLE_UNIFORMS_EXT" value="0x8DE4"/>
-		<Token name="GL_MAX_BINDABLE_UNIFORM_SIZE_EXT" value="0x8DED"/>
-		<Token name="GL_UNIFORM_BUFFER_BINDING_EXT" value="0x8DEF"/>
-		<Token name="GL_UNIFORM_BUFFER_EXT" value="0x8DEE"/>
-	</Tokens>
+<gl_extension name="GL_EXT_bindable_uniform" reg_no="342">
+	<tokens>
+		<token name="GL_MAX_VERTEX_BINDABLE_UNIFORMS_EXT" value="0x8DE2"/>
+		<token name="GL_MAX_FRAGMENT_BINDABLE_UNIFORMS_EXT" value="0x8DE3"/>
+		<token name="GL_MAX_GEOMETRY_BINDABLE_UNIFORMS_EXT" value="0x8DE4"/>
+		<token name="GL_MAX_BINDABLE_UNIFORM_SIZE_EXT" value="0x8DED"/>
+		<token name="GL_UNIFORM_BUFFER_BINDING_EXT" value="0x8DEF"/>
+		<token name="GL_UNIFORM_BUFFER_EXT" value="0x8DEE"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glUniformBufferEXT" return="void">
-			<Param type="GLuint" name="program"/>
-			<Param type="GLint" name="location"/>
-			<Param type="GLuint" name="buffer"/>
-		</Function>
-		<Function name="glGetUniformBufferSizeEXT" return="GLint">
-			<Param type="GLuint" name="program"/>
-			<Param type="GLint" name="location"/>
-		</Function>
-		<Function name="glGetUniformOffsetEXT" return="GLintptr">
-			<Param type="GLuint" name="program"/>
-			<Param type="GLint" name="location"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_bindable_uniform" reg_no="342">
-			<Name name="glUniformBufferEXT"/>
-			<Name name="glGetUniformBufferSizeEXT"/>
-			<Name name="glGetUniformOffsetEXT"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_EXT"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glUniformBufferEXT" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLuint" name="buffer"/>
+			</params>
+		</function>
+		<function name="glGetUniformBufferSizeEXT" return="GLint">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+			</params>
+		</function>
+		<function name="glGetUniformOffsetEXT" return="GLintptr">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

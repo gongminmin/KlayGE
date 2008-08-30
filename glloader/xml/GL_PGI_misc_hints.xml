@@ -1,43 +1,35 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_PGI_misc_hints">
-	<Tokens>
-		<Token name="GL_PREFER_DOUBLEBUFFER_HINT_PGI" value="0x1A1F8"/>
-		<Token name="GL_CONSERVE_MEMORY_HINT_PGI" value="0x1A1FD"/>
-		<Token name="GL_RECLAIM_MEMORY_HINT_PGI" value="0x1A1FE"/>
-		<Token name="GL_NATIVE_GRAPHICS_HANDLE_PGI" value="0x1A202"/>
-		<Token name="GL_NATIVE_GRAPHICS_BEGIN_HINT_PGI" value="0x1A203"/>
-		<Token name="GL_NATIVE_GRAPHICS_END_HINT_PGI" value="0x1A204"/>
-		<Token name="GL_ALWAYS_FAST_HINT_PGI" value="0x1A20C"/>
-		<Token name="GL_ALWAYS_SOFT_HINT_PGI" value="0x1A20D"/>
-		<Token name="GL_ALLOW_DRAW_OBJ_HINT_PGI" value="0x1A20E"/>
-		<Token name="GL_ALLOW_DRAW_WIN_HINT_PGI" value="0x1A20F"/>
-		<Token name="GL_ALLOW_DRAW_FRG_HINT_PGI" value="0x1A210"/>
-		<Token name="GL_ALLOW_DRAW_MEM_HINT_PGI" value="0x1A211"/>
-		<Token name="GL_STRICT_DEPTHFUNC_HINT_PGI" value="0x1A216"/>
-		<Token name="GL_STRICT_LIGHTING_HINT_PGI" value="0x1A217"/>
-		<Token name="GL_STRICT_SCISSOR_HINT_PGI" value="0x1A218"/>
-		<Token name="GL_FULL_STIPPLE_HINT_PGI" value="0x1A219"/>
-		<Token name="GL_CLIP_NEAR_HINT_PGI" value="0x1A220"/>
-		<Token name="GL_CLIP_FAR_HINT_PGI" value="0x1A221"/>
-		<Token name="GL_WIDE_LINE_HINT_PGI" value="0x1A222"/>
-		<Token name="GL_BACK_NORMALS_HINT_PGI" value="0x1A223"/>
-	</Tokens>
+<gl_extension name="GL_PGI_misc_hints" reg_no="77">
+	<tokens>
+		<token name="GL_PREFER_DOUBLEBUFFER_HINT_PGI" value="0x1A1F8"/>
+		<token name="GL_CONSERVE_MEMORY_HINT_PGI" value="0x1A1FD"/>
+		<token name="GL_RECLAIM_MEMORY_HINT_PGI" value="0x1A1FE"/>
+		<token name="GL_NATIVE_GRAPHICS_HANDLE_PGI" value="0x1A202"/>
+		<token name="GL_NATIVE_GRAPHICS_BEGIN_HINT_PGI" value="0x1A203"/>
+		<token name="GL_NATIVE_GRAPHICS_END_HINT_PGI" value="0x1A204"/>
+		<token name="GL_ALWAYS_FAST_HINT_PGI" value="0x1A20C"/>
+		<token name="GL_ALWAYS_SOFT_HINT_PGI" value="0x1A20D"/>
+		<token name="GL_ALLOW_DRAW_OBJ_HINT_PGI" value="0x1A20E"/>
+		<token name="GL_ALLOW_DRAW_WIN_HINT_PGI" value="0x1A20F"/>
+		<token name="GL_ALLOW_DRAW_FRG_HINT_PGI" value="0x1A210"/>
+		<token name="GL_ALLOW_DRAW_MEM_HINT_PGI" value="0x1A211"/>
+		<token name="GL_STRICT_DEPTHFUNC_HINT_PGI" value="0x1A216"/>
+		<token name="GL_STRICT_LIGHTING_HINT_PGI" value="0x1A217"/>
+		<token name="GL_STRICT_SCISSOR_HINT_PGI" value="0x1A218"/>
+		<token name="GL_FULL_STIPPLE_HINT_PGI" value="0x1A219"/>
+		<token name="GL_CLIP_NEAR_HINT_PGI" value="0x1A220"/>
+		<token name="GL_CLIP_FAR_HINT_PGI" value="0x1A221"/>
+		<token name="GL_WIDE_LINE_HINT_PGI" value="0x1A222"/>
+		<token name="GL_BACK_NORMALS_HINT_PGI" value="0x1A223"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glHintPGI" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLint" name="mode"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_PGI" string="GL_PGI_misc_hints" reg_no="77">
-			<Name name="glHintPGI"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_PGI"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glHintPGI" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="mode"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

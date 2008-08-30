@@ -1,22 +1,14 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_EXT_index_array_formats">
-	<Tokens>
-		<Token name="GL_IUI_V2F_EXT" value="0x81AD"/>
-		<Token name="GL_IUI_V3F_EXT" value="0x81AE"/>
-		<Token name="GL_IUI_N3F_V2F_EXT" value="0x81AF"/>
-		<Token name="GL_IUI_N3F_V3F_EXT" value="0x81B0"/>
-		<Token name="GL_T2F_IUI_V2F_EXT" value="0x81B1"/>
-		<Token name="GL_T2F_IUI_V3F_EXT" value="0x81B2"/>
-		<Token name="GL_T2F_IUI_N3F_V2F_EXT" value="0x81B3"/>
-		<Token name="GL_T2F_IUI_N3F_V3F_EXT" value="0x81B4"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_index_array_formats" reg_no="96"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_EXT"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_EXT_index_array_formats" reg_no="96">
+	<tokens>
+		<token name="GL_IUI_V2F_EXT" value="0x81AD"/>
+		<token name="GL_IUI_V3F_EXT" value="0x81AE"/>
+		<token name="GL_IUI_N3F_V2F_EXT" value="0x81AF"/>
+		<token name="GL_IUI_N3F_V3F_EXT" value="0x81B0"/>
+		<token name="GL_T2F_IUI_V2F_EXT" value="0x81B1"/>
+		<token name="GL_T2F_IUI_V3F_EXT" value="0x81B2"/>
+		<token name="GL_T2F_IUI_N3F_V2F_EXT" value="0x81B3"/>
+		<token name="GL_T2F_IUI_N3F_V3F_EXT" value="0x81B4"/>
+	</tokens>
+</gl_extension>

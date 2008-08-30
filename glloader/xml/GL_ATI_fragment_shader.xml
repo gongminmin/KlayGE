@@ -1,230 +1,231 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_ATI_fragment_shader">
-	<Tokens>
-		<Token name="GL_FRAGMENT_SHADER_ATI" value="0x8920"/>
-		<Token name="GL_REG_0_ATI" value="0x8921"/>
-		<Token name="GL_REG_1_ATI" value="0x8922"/>
-		<Token name="GL_REG_2_ATI" value="0x8923"/>
-		<Token name="GL_REG_3_ATI" value="0x8924"/>
-		<Token name="GL_REG_4_ATI" value="0x8925"/>
-		<Token name="GL_REG_5_ATI" value="0x8926"/>
-		<Token name="GL_REG_6_ATI" value="0x8927"/>
-		<Token name="GL_REG_7_ATI" value="0x8928"/>
-		<Token name="GL_REG_8_ATI" value="0x8929"/>
-		<Token name="GL_REG_9_ATI" value="0x892A"/>
-		<Token name="GL_REG_10_ATI" value="0x892B"/>
-		<Token name="GL_REG_11_ATI" value="0x892C"/>
-		<Token name="GL_REG_12_ATI" value="0x892D"/>
-		<Token name="GL_REG_13_ATI" value="0x892E"/>
-		<Token name="GL_REG_14_ATI" value="0x892F"/>
-		<Token name="GL_REG_15_ATI" value="0x8930"/>
-		<Token name="GL_REG_16_ATI" value="0x8931"/>
-		<Token name="GL_REG_17_ATI" value="0x8932"/>
-		<Token name="GL_REG_18_ATI" value="0x8933"/>
-		<Token name="GL_REG_19_ATI" value="0x8934"/>
-		<Token name="GL_REG_20_ATI" value="0x8935"/>
-		<Token name="GL_REG_21_ATI" value="0x8936"/>
-		<Token name="GL_REG_22_ATI" value="0x8937"/>
-		<Token name="GL_REG_23_ATI" value="0x8938"/>
-		<Token name="GL_REG_24_ATI" value="0x8939"/>
-		<Token name="GL_REG_25_ATI" value="0x893A"/>
-		<Token name="GL_REG_26_ATI" value="0x893B"/>
-		<Token name="GL_REG_27_ATI" value="0x893C"/>
-		<Token name="GL_REG_28_ATI" value="0x893D"/>
-		<Token name="GL_REG_29_ATI" value="0x893E"/>
-		<Token name="GL_REG_30_ATI" value="0x893F"/>
-		<Token name="GL_REG_31_ATI" value="0x8940"/>
-		<Token name="GL_CON_0_ATI" value="0x8941"/>
-		<Token name="GL_CON_1_ATI" value="0x8942"/>
-		<Token name="GL_CON_2_ATI" value="0x8943"/>
-		<Token name="GL_CON_3_ATI" value="0x8944"/>
-		<Token name="GL_CON_4_ATI" value="0x8945"/>
-		<Token name="GL_CON_5_ATI" value="0x8946"/>
-		<Token name="GL_CON_6_ATI" value="0x8947"/>
-		<Token name="GL_CON_7_ATI" value="0x8948"/>
-		<Token name="GL_CON_8_ATI" value="0x8949"/>
-		<Token name="GL_CON_9_ATI" value="0x894A"/>
-		<Token name="GL_CON_10_ATI" value="0x894B"/>
-		<Token name="GL_CON_11_ATI" value="0x894C"/>
-		<Token name="GL_CON_12_ATI" value="0x894D"/>
-		<Token name="GL_CON_13_ATI" value="0x894E"/>
-		<Token name="GL_CON_14_ATI" value="0x894F"/>
-		<Token name="GL_CON_15_ATI" value="0x8950"/>
-		<Token name="GL_CON_16_ATI" value="0x8951"/>
-		<Token name="GL_CON_17_ATI" value="0x8952"/>
-		<Token name="GL_CON_18_ATI" value="0x8953"/>
-		<Token name="GL_CON_19_ATI" value="0x8954"/>
-		<Token name="GL_CON_20_ATI" value="0x8955"/>
-		<Token name="GL_CON_21_ATI" value="0x8956"/>
-		<Token name="GL_CON_22_ATI" value="0x8957"/>
-		<Token name="GL_CON_23_ATI" value="0x8958"/>
-		<Token name="GL_CON_24_ATI" value="0x8959"/>
-		<Token name="GL_CON_25_ATI" value="0x895A"/>
-		<Token name="GL_CON_26_ATI" value="0x895B"/>
-		<Token name="GL_CON_27_ATI" value="0x895C"/>
-		<Token name="GL_CON_28_ATI" value="0x895D"/>
-		<Token name="GL_CON_29_ATI" value="0x895E"/>
-		<Token name="GL_CON_30_ATI" value="0x895F"/>
-		<Token name="GL_CON_31_ATI" value="0x8960"/>
-		<Token name="GL_MOV_ATI" value="0x8961"/>
-		<Token name="GL_ADD_ATI" value="0x8963"/>
-		<Token name="GL_MUL_ATI" value="0x8964"/>
-		<Token name="GL_SUB_ATI" value="0x8965"/>
-		<Token name="GL_DOT3_ATI" value="0x8966"/>
-		<Token name="GL_DOT4_ATI" value="0x8967"/>
-		<Token name="GL_MAD_ATI" value="0x8968"/>
-		<Token name="GL_LERP_ATI" value="0x8969"/>
-		<Token name="GL_CND_ATI" value="0x896A"/>
-		<Token name="GL_CND0_ATI" value="0x896B"/>
-		<Token name="GL_DOT2_ADD_ATI" value="0x896C"/>
-		<Token name="GL_SECONDARY_INTERPOLATOR_ATI" value="0x896D"/>
-		<Token name="GL_NUM_FRAGMENT_REGISTERS_ATI" value="0x896E"/>
-		<Token name="GL_NUM_FRAGMENT_CONSTANTS_ATI" value="0x896F"/>
-		<Token name="GL_NUM_PASSES_ATI" value="0x8970"/>
-		<Token name="GL_NUM_INSTRUCTIONS_PER_PASS_ATI" value="0x8971"/>
-		<Token name="GL_NUM_INSTRUCTIONS_TOTAL_ATI" value="0x8972"/>
-		<Token name="GL_NUM_INPUT_INTERPOLATOR_COMPONENTS_ATI" value="0x8973"/>
-		<Token name="GL_NUM_LOOPBACK_COMPONENTS_ATI" value="0x8974"/>
-		<Token name="GL_COLOR_ALPHA_PAIRING_ATI" value="0x8975"/>
-		<Token name="GL_SWIZZLE_STR_ATI" value="0x8976"/>
-		<Token name="GL_SWIZZLE_STQ_ATI" value="0x8977"/>
-		<Token name="GL_SWIZZLE_STR_DR_ATI" value="0x8978"/>
-		<Token name="GL_SWIZZLE_STQ_DQ_ATI" value="0x8979"/>
-		<Token name="GL_SWIZZLE_STRQ_ATI" value="0x897A"/>
-		<Token name="GL_SWIZZLE_STRQ_DQ_ATI" value="0x897B"/>
-		<Token name="GL_RED_BIT_ATI" value="0x00000001"/>
-		<Token name="GL_GREEN_BIT_ATI" value="0x00000002"/>
-		<Token name="GL_BLUE_BIT_ATI" value="0x00000004"/>
-		<Token name="GL_2X_BIT_ATI" value="0x00000001"/>
-		<Token name="GL_4X_BIT_ATI" value="0x00000002"/>
-		<Token name="GL_8X_BIT_ATI" value="0x00000004"/>
-		<Token name="GL_HALF_BIT_ATI" value="0x00000008"/>
-		<Token name="GL_QUARTER_BIT_ATI" value="0x00000010"/>
-		<Token name="GL_EIGHTH_BIT_ATI" value="0x00000020"/>
-		<Token name="GL_SATURATE_BIT_ATI" value="0x00000040"/>
-		<Token name="GL_COMP_BIT_ATI" value="0x00000002"/>
-		<Token name="GL_NEGATE_BIT_ATI" value="0x00000004"/>
-		<Token name="GL_BIAS_BIT_ATI" value="0x00000008"/>
-	</Tokens>
+<gl_extension name="GL_ATI_fragment_shader" reg_no="245">
+	<tokens>
+		<token name="GL_FRAGMENT_SHADER_ATI" value="0x8920"/>
+		<token name="GL_REG_0_ATI" value="0x8921"/>
+		<token name="GL_REG_1_ATI" value="0x8922"/>
+		<token name="GL_REG_2_ATI" value="0x8923"/>
+		<token name="GL_REG_3_ATI" value="0x8924"/>
+		<token name="GL_REG_4_ATI" value="0x8925"/>
+		<token name="GL_REG_5_ATI" value="0x8926"/>
+		<token name="GL_REG_6_ATI" value="0x8927"/>
+		<token name="GL_REG_7_ATI" value="0x8928"/>
+		<token name="GL_REG_8_ATI" value="0x8929"/>
+		<token name="GL_REG_9_ATI" value="0x892A"/>
+		<token name="GL_REG_10_ATI" value="0x892B"/>
+		<token name="GL_REG_11_ATI" value="0x892C"/>
+		<token name="GL_REG_12_ATI" value="0x892D"/>
+		<token name="GL_REG_13_ATI" value="0x892E"/>
+		<token name="GL_REG_14_ATI" value="0x892F"/>
+		<token name="GL_REG_15_ATI" value="0x8930"/>
+		<token name="GL_REG_16_ATI" value="0x8931"/>
+		<token name="GL_REG_17_ATI" value="0x8932"/>
+		<token name="GL_REG_18_ATI" value="0x8933"/>
+		<token name="GL_REG_19_ATI" value="0x8934"/>
+		<token name="GL_REG_20_ATI" value="0x8935"/>
+		<token name="GL_REG_21_ATI" value="0x8936"/>
+		<token name="GL_REG_22_ATI" value="0x8937"/>
+		<token name="GL_REG_23_ATI" value="0x8938"/>
+		<token name="GL_REG_24_ATI" value="0x8939"/>
+		<token name="GL_REG_25_ATI" value="0x893A"/>
+		<token name="GL_REG_26_ATI" value="0x893B"/>
+		<token name="GL_REG_27_ATI" value="0x893C"/>
+		<token name="GL_REG_28_ATI" value="0x893D"/>
+		<token name="GL_REG_29_ATI" value="0x893E"/>
+		<token name="GL_REG_30_ATI" value="0x893F"/>
+		<token name="GL_REG_31_ATI" value="0x8940"/>
+		<token name="GL_CON_0_ATI" value="0x8941"/>
+		<token name="GL_CON_1_ATI" value="0x8942"/>
+		<token name="GL_CON_2_ATI" value="0x8943"/>
+		<token name="GL_CON_3_ATI" value="0x8944"/>
+		<token name="GL_CON_4_ATI" value="0x8945"/>
+		<token name="GL_CON_5_ATI" value="0x8946"/>
+		<token name="GL_CON_6_ATI" value="0x8947"/>
+		<token name="GL_CON_7_ATI" value="0x8948"/>
+		<token name="GL_CON_8_ATI" value="0x8949"/>
+		<token name="GL_CON_9_ATI" value="0x894A"/>
+		<token name="GL_CON_10_ATI" value="0x894B"/>
+		<token name="GL_CON_11_ATI" value="0x894C"/>
+		<token name="GL_CON_12_ATI" value="0x894D"/>
+		<token name="GL_CON_13_ATI" value="0x894E"/>
+		<token name="GL_CON_14_ATI" value="0x894F"/>
+		<token name="GL_CON_15_ATI" value="0x8950"/>
+		<token name="GL_CON_16_ATI" value="0x8951"/>
+		<token name="GL_CON_17_ATI" value="0x8952"/>
+		<token name="GL_CON_18_ATI" value="0x8953"/>
+		<token name="GL_CON_19_ATI" value="0x8954"/>
+		<token name="GL_CON_20_ATI" value="0x8955"/>
+		<token name="GL_CON_21_ATI" value="0x8956"/>
+		<token name="GL_CON_22_ATI" value="0x8957"/>
+		<token name="GL_CON_23_ATI" value="0x8958"/>
+		<token name="GL_CON_24_ATI" value="0x8959"/>
+		<token name="GL_CON_25_ATI" value="0x895A"/>
+		<token name="GL_CON_26_ATI" value="0x895B"/>
+		<token name="GL_CON_27_ATI" value="0x895C"/>
+		<token name="GL_CON_28_ATI" value="0x895D"/>
+		<token name="GL_CON_29_ATI" value="0x895E"/>
+		<token name="GL_CON_30_ATI" value="0x895F"/>
+		<token name="GL_CON_31_ATI" value="0x8960"/>
+		<token name="GL_MOV_ATI" value="0x8961"/>
+		<token name="GL_ADD_ATI" value="0x8963"/>
+		<token name="GL_MUL_ATI" value="0x8964"/>
+		<token name="GL_SUB_ATI" value="0x8965"/>
+		<token name="GL_DOT3_ATI" value="0x8966"/>
+		<token name="GL_DOT4_ATI" value="0x8967"/>
+		<token name="GL_MAD_ATI" value="0x8968"/>
+		<token name="GL_LERP_ATI" value="0x8969"/>
+		<token name="GL_CND_ATI" value="0x896A"/>
+		<token name="GL_CND0_ATI" value="0x896B"/>
+		<token name="GL_DOT2_ADD_ATI" value="0x896C"/>
+		<token name="GL_SECONDARY_INTERPOLATOR_ATI" value="0x896D"/>
+		<token name="GL_NUM_FRAGMENT_REGISTERS_ATI" value="0x896E"/>
+		<token name="GL_NUM_FRAGMENT_CONSTANTS_ATI" value="0x896F"/>
+		<token name="GL_NUM_PASSES_ATI" value="0x8970"/>
+		<token name="GL_NUM_INSTRUCTIONS_PER_PASS_ATI" value="0x8971"/>
+		<token name="GL_NUM_INSTRUCTIONS_TOTAL_ATI" value="0x8972"/>
+		<token name="GL_NUM_INPUT_INTERPOLATOR_COMPONENTS_ATI" value="0x8973"/>
+		<token name="GL_NUM_LOOPBACK_COMPONENTS_ATI" value="0x8974"/>
+		<token name="GL_COLOR_ALPHA_PAIRING_ATI" value="0x8975"/>
+		<token name="GL_SWIZZLE_STR_ATI" value="0x8976"/>
+		<token name="GL_SWIZZLE_STQ_ATI" value="0x8977"/>
+		<token name="GL_SWIZZLE_STR_DR_ATI" value="0x8978"/>
+		<token name="GL_SWIZZLE_STQ_DQ_ATI" value="0x8979"/>
+		<token name="GL_SWIZZLE_STRQ_ATI" value="0x897A"/>
+		<token name="GL_SWIZZLE_STRQ_DQ_ATI" value="0x897B"/>
+		<token name="GL_RED_BIT_ATI" value="0x00000001"/>
+		<token name="GL_GREEN_BIT_ATI" value="0x00000002"/>
+		<token name="GL_BLUE_BIT_ATI" value="0x00000004"/>
+		<token name="GL_2X_BIT_ATI" value="0x00000001"/>
+		<token name="GL_4X_BIT_ATI" value="0x00000002"/>
+		<token name="GL_8X_BIT_ATI" value="0x00000004"/>
+		<token name="GL_HALF_BIT_ATI" value="0x00000008"/>
+		<token name="GL_QUARTER_BIT_ATI" value="0x00000010"/>
+		<token name="GL_EIGHTH_BIT_ATI" value="0x00000020"/>
+		<token name="GL_SATURATE_BIT_ATI" value="0x00000040"/>
+		<token name="GL_COMP_BIT_ATI" value="0x00000002"/>
+		<token name="GL_NEGATE_BIT_ATI" value="0x00000004"/>
+		<token name="GL_BIAS_BIT_ATI" value="0x00000008"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glGenFragmentShadersATI" return="GLuint">
-			<Param type="GLuint" name="range"/>
-		</Function>
-		<Function name="glBindFragmentShaderATI" return="void">
-			<Param type="GLuint" name="id"/>
-		</Function>
-		<Function name="glDeleteFragmentShaderATI" return="void">
-			<Param type="GLuint" name="id"/>
-		</Function>
-		<Function name="glBeginFragmentShaderATI" return="void"/>
-		<Function name="glEndFragmentShaderATI" return="void"/>
-		<Function name="glPassTexCoordATI" return="void">
-			<Param type="GLuint" name="dst"/>
-			<Param type="GLuint" name="coord"/>
-			<Param type="GLenum" name="swizzle"/>
-		</Function>
-		<Function name="glSampleMapATI" return="void">
-			<Param type="GLuint" name="dst"/>
-			<Param type="GLuint" name="interp"/>
-			<Param type="GLenum" name="swizzle"/>
-		</Function>
-		<Function name="glColorFragmentOp1ATI" return="void">
-			<Param type="GLenum" name="op"/>
-			<Param type="GLuint" name="dst"/>
-			<Param type="GLuint" name="dstMask"/>
-			<Param type="GLuint" name="dstMod"/>
-			<Param type="GLuint" name="arg1"/>
-			<Param type="GLuint" name="arg1Rep"/>
-			<Param type="GLuint" name="arg1Mod"/>
-		</Function>
-		<Function name="glColorFragmentOp2ATI" return="void">
-			<Param type="GLenum" name="op"/>
-			<Param type="GLuint" name="dst"/>
-			<Param type="GLuint" name="dstMask"/>
-			<Param type="GLuint" name="dstMod"/>
-			<Param type="GLuint" name="arg1"/>
-			<Param type="GLuint" name="arg1Rep"/>
-			<Param type="GLuint" name="arg1Mod"/>
-			<Param type="GLuint" name="arg2"/>
-			<Param type="GLuint" name="arg2Rep"/>
-			<Param type="GLuint" name="arg2Mod"/>
-		</Function>
-		<Function name="glColorFragmentOp3ATI" return="void">
-			<Param type="GLenum" name="op"/>
-			<Param type="GLuint" name="dst"/>
-			<Param type="GLuint" name="dstMask"/>
-			<Param type="GLuint" name="dstMod"/>
-			<Param type="GLuint" name="arg1"/>
-			<Param type="GLuint" name="arg1Rep"/>
-			<Param type="GLuint" name="arg1Mod"/>
-			<Param type="GLuint" name="arg2"/>
-			<Param type="GLuint" name="arg2Rep"/>
-			<Param type="GLuint" name="arg2Mod"/>
-			<Param type="GLuint" name="arg3"/>
-			<Param type="GLuint" name="arg3Rep"/>
-			<Param type="GLuint" name="arg3Mod"/>
-		</Function>
-		<Function name="glAlphaFragmentOp1ATI" return="void">
-			<Param type="GLenum" name="op"/>
-			<Param type="GLuint" name="dst"/>
-			<Param type="GLuint" name="dstMod"/>
-			<Param type="GLuint" name="arg1"/>
-			<Param type="GLuint" name="arg1Rep"/>
-			<Param type="GLuint" name="arg1Mod"/>
-		</Function>
-		<Function name="glAlphaFragmentOp2ATI" return="void">
-			<Param type="GLenum" name="op"/>
-			<Param type="GLuint" name="dst"/>
-			<Param type="GLuint" name="dstMod"/>
-			<Param type="GLuint" name="arg1"/>
-			<Param type="GLuint" name="arg1Rep"/>
-			<Param type="GLuint" name="arg1Mod"/>
-			<Param type="GLuint" name="arg2"/>
-			<Param type="GLuint" name="arg2Rep"/>
-			<Param type="GLuint" name="arg2Mod"/>
-		</Function>
-		<Function name="glAlphaFragmentOp3ATI" return="void">
-			<Param type="GLenum" name="op"/>
-			<Param type="GLuint" name="dst"/>
-			<Param type="GLuint" name="dstMod"/>
-			<Param type="GLuint" name="arg1"/>
-			<Param type="GLuint" name="arg1Rep"/>
-			<Param type="GLuint" name="arg1Mod"/>
-			<Param type="GLuint" name="arg2"/>
-			<Param type="GLuint" name="arg2Rep"/>
-			<Param type="GLuint" name="arg2Mod"/>
-			<Param type="GLuint" name="arg3"/>
-			<Param type="GLuint" name="arg3Rep"/>
-			<Param type="GLuint" name="arg3Mod"/>
-		</Function>
-		<Function name="glSetFragmentShaderConstantATI" return="void">
-			<Param type="GLuint" name="dst"/>
-			<Param type="const GLfloat*" name="value"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_ATI" string="GL_ATI_fragment_shader" reg_no="245">
-			<Name name="glGenFragmentShadersATI"/>
-			<Name name="glBindFragmentShaderATI"/>
-			<Name name="glDeleteFragmentShaderATI"/>
-			<Name name="glBeginFragmentShaderATI"/>
-			<Name name="glEndFragmentShaderATI"/>
-			<Name name="glPassTexCoordATI"/>
-			<Name name="glSampleMapATI"/>
-			<Name name="glColorFragmentOp1ATI"/>
-			<Name name="glColorFragmentOp2ATI"/>
-			<Name name="glColorFragmentOp3ATI"/>
-			<Name name="glAlphaFragmentOp1ATI"/>
-			<Name name="glAlphaFragmentOp2ATI"/>
-			<Name name="glAlphaFragmentOp3ATI"/>
-			<Name name="glSetFragmentShaderConstantATI"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_ATI"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glGenFragmentShadersATI" return="GLuint">
+			<params>
+				<param type="GLuint" name="range"/>
+			</params>
+		</function>
+		<function name="glBindFragmentShaderATI" return="void">
+			<params>
+				<param type="GLuint" name="id"/>
+			</params>
+		</function>
+		<function name="glDeleteFragmentShaderATI" return="void">
+			<params>
+				<param type="GLuint" name="id"/>
+			</params>
+		</function>
+		<function name="glBeginFragmentShaderATI" return="void"/>
+		<function name="glEndFragmentShaderATI" return="void"/>
+		<function name="glPassTexCoordATI" return="void">
+			<params>
+				<param type="GLuint" name="dst"/>
+				<param type="GLuint" name="coord"/>
+				<param type="GLenum" name="swizzle"/>
+			</params>
+		</function>
+		<function name="glSampleMapATI" return="void">
+			<params>
+				<param type="GLuint" name="dst"/>
+				<param type="GLuint" name="interp"/>
+				<param type="GLenum" name="swizzle"/>
+			</params>
+		</function>
+		<function name="glColorFragmentOp1ATI" return="void">
+			<params>
+				<param type="GLenum" name="op"/>
+				<param type="GLuint" name="dst"/>
+				<param type="GLuint" name="dstMask"/>
+				<param type="GLuint" name="dstMod"/>
+				<param type="GLuint" name="arg1"/>
+				<param type="GLuint" name="arg1Rep"/>
+				<param type="GLuint" name="arg1Mod"/>
+			</params>
+		</function>
+		<function name="glColorFragmentOp2ATI" return="void">
+			<params>
+				<param type="GLenum" name="op"/>
+				<param type="GLuint" name="dst"/>
+				<param type="GLuint" name="dstMask"/>
+				<param type="GLuint" name="dstMod"/>
+				<param type="GLuint" name="arg1"/>
+				<param type="GLuint" name="arg1Rep"/>
+				<param type="GLuint" name="arg1Mod"/>
+				<param type="GLuint" name="arg2"/>
+				<param type="GLuint" name="arg2Rep"/>
+				<param type="GLuint" name="arg2Mod"/>
+			</params>
+		</function>
+		<function name="glColorFragmentOp3ATI" return="void">
+			<params>
+				<param type="GLenum" name="op"/>
+				<param type="GLuint" name="dst"/>
+				<param type="GLuint" name="dstMask"/>
+				<param type="GLuint" name="dstMod"/>
+				<param type="GLuint" name="arg1"/>
+				<param type="GLuint" name="arg1Rep"/>
+				<param type="GLuint" name="arg1Mod"/>
+				<param type="GLuint" name="arg2"/>
+				<param type="GLuint" name="arg2Rep"/>
+				<param type="GLuint" name="arg2Mod"/>
+				<param type="GLuint" name="arg3"/>
+				<param type="GLuint" name="arg3Rep"/>
+				<param type="GLuint" name="arg3Mod"/>
+			</params>
+		</function>
+		<function name="glAlphaFragmentOp1ATI" return="void">
+			<params>
+				<param type="GLenum" name="op"/>
+				<param type="GLuint" name="dst"/>
+				<param type="GLuint" name="dstMod"/>
+				<param type="GLuint" name="arg1"/>
+				<param type="GLuint" name="arg1Rep"/>
+				<param type="GLuint" name="arg1Mod"/>
+			</params>
+		</function>
+		<function name="glAlphaFragmentOp2ATI" return="void">
+			<params>
+				<param type="GLenum" name="op"/>
+				<param type="GLuint" name="dst"/>
+				<param type="GLuint" name="dstMod"/>
+				<param type="GLuint" name="arg1"/>
+				<param type="GLuint" name="arg1Rep"/>
+				<param type="GLuint" name="arg1Mod"/>
+				<param type="GLuint" name="arg2"/>
+				<param type="GLuint" name="arg2Rep"/>
+				<param type="GLuint" name="arg2Mod"/>
+			</params>
+		</function>
+		<function name="glAlphaFragmentOp3ATI" return="void">
+			<params>
+				<param type="GLenum" name="op"/>
+				<param type="GLuint" name="dst"/>
+				<param type="GLuint" name="dstMod"/>
+				<param type="GLuint" name="arg1"/>
+				<param type="GLuint" name="arg1Rep"/>
+				<param type="GLuint" name="arg1Mod"/>
+				<param type="GLuint" name="arg2"/>
+				<param type="GLuint" name="arg2Rep"/>
+				<param type="GLuint" name="arg2Mod"/>
+				<param type="GLuint" name="arg3"/>
+				<param type="GLuint" name="arg3Rep"/>
+				<param type="GLuint" name="arg3Mod"/>
+			</params>
+		</function>
+		<function name="glSetFragmentShaderConstantATI" return="void">
+			<params>
+				<param type="GLuint" name="dst"/>
+				<param type="const GLfloat*" name="value"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

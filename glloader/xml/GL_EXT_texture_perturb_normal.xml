@@ -1,24 +1,16 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_EXT_texture_perturb_normal">
-	<Tokens>
-		<Token name="GL_PERTURB_EXT" value="0x85AE"/>
-		<Token name="GL_TEXTURE_NORMAL_EXT" value="0x85AF"/>
-	</Tokens>
+<gl_extension name="GL_EXT_texture_perturb_normal" reg_no="147">
+	<tokens>
+		<token name="GL_PERTURB_EXT" value="0x85AE"/>
+		<token name="GL_TEXTURE_NORMAL_EXT" value="0x85AF"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glTextureNormalEXT" return="void">
-			<Param type="GLenum" name="mode"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_texture_perturb_normal" reg_no="147">
-			<Name name="glTextureNormalEXT"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_EXT"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glTextureNormalEXT" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

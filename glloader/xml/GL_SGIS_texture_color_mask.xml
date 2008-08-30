@@ -1,26 +1,18 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_SGIS_texture_color_mask">
-	<Tokens>
-		<Token name="GL_TEXTURE_COLOR_WRITEMASK_SGIS" value="0x81EF"/>
-	</Tokens>
+<gl_extension name="GL_SGIS_texture_color_mask" reg_no="214">
+	<tokens>
+		<token name="GL_TEXTURE_COLOR_WRITEMASK_SGIS" value="0x81EF"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glTextureColorMaskSGIS" return="void">
-			<Param type="GLboolean" name="red"/>
-			<Param type="GLboolean" name="green"/>
-			<Param type="GLboolean" name="blue"/>
-			<Param type="GLboolean" name="alpha"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_SGIS" string="GL_SGIS_texture_color_mask" reg_no="214">
-			<Name name="glTextureColorMaskSGIS"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_SGIS"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glTextureColorMaskSGIS" return="void">
+			<params>
+				<param type="GLboolean" name="red"/>
+				<param type="GLboolean" name="green"/>
+				<param type="GLboolean" name="blue"/>
+				<param type="GLboolean" name="alpha"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

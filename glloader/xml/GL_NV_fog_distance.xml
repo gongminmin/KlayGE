@@ -1,17 +1,9 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_NV_fog_distance">
-	<Tokens>
-		<Token name="GL_FOG_DISTANCE_MODE_NV" value="0x855A"/>
-		<Token name="GL_EYE_RADIAL_NV" value="0x855B"/>
-		<Token name="GL_EYE_PLANE_ABSOLUTE_NV" value="0x855C"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_fog_distance" reg_no="192"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_NV"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_NV_fog_distance" reg_no="192">
+	<tokens>
+		<token name="GL_FOG_DISTANCE_MODE_NV" value="0x855A"/>
+		<token name="GL_EYE_RADIAL_NV" value="0x855B"/>
+		<token name="GL_EYE_PLANE_ABSOLUTE_NV" value="0x855C"/>
+	</tokens>
+</gl_extension>

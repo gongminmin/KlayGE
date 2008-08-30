@@ -1,33 +1,26 @@
 <?xml version='1.0'?>
 
-<GLExtension name="WGL_ARB_make_current_read">
-	<Tokens>
-		<Token name="ERROR_INVALID_PIXEL_TYPE_ARB" value="0x2043"/>
-		<Token name="ERROR_INCOMPATIBLE_DEVICE_CONTEXTS_ARB" value="0x2054"/>
-	</Tokens>
+<gl_extension name="WGL_ARB_make_current_read" reg_no="10">
+	<tokens>
+		<token name="ERROR_INVALID_PIXEL_TYPE_ARB" value="0x2043"/>
+		<token name="ERROR_INCOMPATIBLE_DEVICE_CONTEXTS_ARB" value="0x2054"/>
+	</tokens>
 
-	<Functions>
-		<Function name="wglMakeContextCurrentARB" return="BOOL">
-			<Param type="HDC" name="hDrawDC"/>
-			<Param type="HDC" name="hReadDC"/>
-			<Param type="HGLRC" name="hglrc"/>
-		</Function>
-		<Function name="wglGetCurrentReadDCARB" return="HDC"/>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="WGL_ARB" string="WGL_ARB_make_current_read" reg_no="10">
-			<Name name="wglMakeContextCurrentARB"/>
-			<Name name="wglGetCurrentReadDCARB"/>
-		</Vendor>
-		<Vendor name="WGL_EXT" string="WGL_EXT_make_current_read" reg_no="169">
-			<Name name="wglMakeContextCurrentEXT"/>
-			<Name name="wglGetCurrentReadDCEXT"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="WGL_ARB"/>
-		<Init name="WGL_EXT"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="wglMakeContextCurrentARB" return="BOOL">
+			<params>
+				<param type="HDC" name="hDrawDC"/>
+				<param type="HDC" name="hReadDC"/>
+				<param type="HGLRC" name="hglrc"/>
+			</params>
+			<mappings>
+				<mapping from="WGL_EXT_make_current_read" name="wglMakeContextCurrentEXT"/>
+			</mappings>
+		</function>
+		<function name="wglGetCurrentReadDCARB" return="HDC">
+			<mappings>
+				<mapping from="WGL_EXT_make_current_read" name="wglGetCurrentReadDCEXT"/>
+			</mappings>
+		</function>
+	</functions>
+</gl_extension>

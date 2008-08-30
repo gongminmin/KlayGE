@@ -1,65 +1,63 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_SUN_triangle_list">
-	<Tokens>
-		<Token name="GL_RESTART_SUN" value="0x0001"/>
-		<Token name="GL_REPLACE_MIDDLE_SUN" value="0x0002"/>
-		<Token name="GL_REPLACE_OLDEST_SUN" value="0x0003"/>
-		<Token name="GL_TRIANGLE_LIST_SUN" value="0x81D7"/>
-		<Token name="GL_REPLACEMENT_CODE_SUN" value="0x81D8"/>
-		<Token name="GL_REPLACEMENT_CODE_ARRAY_SUN" value="0x85C0"/>
-		<Token name="GL_REPLACEMENT_CODE_ARRAY_TYPE_SUN" value="0x85C1"/>
-		<Token name="GL_REPLACEMENT_CODE_ARRAY_STRIDE_SUN" value="0x85C2"/>
-		<Token name="GL_REPLACEMENT_CODE_ARRAY_POINTER_SUN" value="0x85C3"/>
-		<Token name="GL_R1UI_V3F_SUN" value="0x85C4"/>
-		<Token name="GL_R1UI_C4UB_V3F_SUN" value="0x85C5"/>
-		<Token name="GL_R1UI_C3F_V3F_SUN" value="0x85C6"/>
-		<Token name="GL_R1UI_N3F_V3F_SUN" value="0x85C7"/>
-		<Token name="GL_R1UI_C4F_N3F_V3F_SUN" value="0x85C8"/>
-		<Token name="GL_R1UI_T2F_V3F_SUN" value="0x85C9"/>
-		<Token name="GL_R1UI_T2F_N3F_V3F_SUN" value="0x85CA"/>
-		<Token name="GL_R1UI_T2F_C4F_N3F_V3F_SUN" value="0x85CB"/>
-	</Tokens>
+<gl_extension name="GL_SUN_triangle_list" reg_no="165">
+	<tokens>
+		<token name="GL_RESTART_SUN" value="0x0001"/>
+		<token name="GL_REPLACE_MIDDLE_SUN" value="0x0002"/>
+		<token name="GL_REPLACE_OLDEST_SUN" value="0x0003"/>
+		<token name="GL_TRIANGLE_LIST_SUN" value="0x81D7"/>
+		<token name="GL_REPLACEMENT_CODE_SUN" value="0x81D8"/>
+		<token name="GL_REPLACEMENT_CODE_ARRAY_SUN" value="0x85C0"/>
+		<token name="GL_REPLACEMENT_CODE_ARRAY_TYPE_SUN" value="0x85C1"/>
+		<token name="GL_REPLACEMENT_CODE_ARRAY_STRIDE_SUN" value="0x85C2"/>
+		<token name="GL_REPLACEMENT_CODE_ARRAY_POINTER_SUN" value="0x85C3"/>
+		<token name="GL_R1UI_V3F_SUN" value="0x85C4"/>
+		<token name="GL_R1UI_C4UB_V3F_SUN" value="0x85C5"/>
+		<token name="GL_R1UI_C3F_V3F_SUN" value="0x85C6"/>
+		<token name="GL_R1UI_N3F_V3F_SUN" value="0x85C7"/>
+		<token name="GL_R1UI_C4F_N3F_V3F_SUN" value="0x85C8"/>
+		<token name="GL_R1UI_T2F_V3F_SUN" value="0x85C9"/>
+		<token name="GL_R1UI_T2F_N3F_V3F_SUN" value="0x85CA"/>
+		<token name="GL_R1UI_T2F_C4F_N3F_V3F_SUN" value="0x85CB"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glReplacementCodeuiSUN" return="void">
-			<Param type="GLuint" name="code"/>
-		</Function>
-		<Function name="glReplacementCodeusSUN" return="void">
-			<Param type="GLushort" name="code"/>
-		</Function>
-		<Function name="glReplacementCodeubSUN" return="void">
-			<Param type="GLubyte" name="code"/>
-		</Function>
-		<Function name="glReplacementCodeuivSUN" return="void">
-			<Param type="const GLuint*" name="code"/>
-		</Function>
-		<Function name="glReplacementCodeusvSUN" return="void">
-			<Param type="const GLushort*" name="code"/>
-		</Function>
-		<Function name="glReplacementCodeubvSUN" return="void">
-			<Param type="const GLubyte*" name="code"/>
-		</Function>
-		<Function name="glReplacementCodePointerSUN" return="void">
-			<Param type="GLenum" name="type"/>
-			<Param type="GLsizei" name="stride"/>
-			<Param type="const GLvoid**" name="pointer"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_SUN" string="GL_SUN_triangle_list" reg_no="165">
-			<Name name="glReplacementCodeuiSUN"/>
-			<Name name="glReplacementCodeusSUN"/>
-			<Name name="glReplacementCodeubSUN"/>
-			<Name name="glReplacementCodeuivSUN"/>
-			<Name name="glReplacementCodeusvSUN"/>
-			<Name name="glReplacementCodeubvSUN"/>
-			<Name name="glReplacementCodePointerSUN"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_SUN"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glReplacementCodeuiSUN" return="void">
+			<params>
+				<param type="GLuint" name="code"/>
+			</params>
+		</function>
+		<function name="glReplacementCodeusSUN" return="void">
+			<params>
+				<param type="GLushort" name="code"/>
+			</params>
+		</function>
+		<function name="glReplacementCodeubSUN" return="void">
+			<params>
+				<param type="GLubyte" name="code"/>
+			</params>
+		</function>
+		<function name="glReplacementCodeuivSUN" return="void">
+			<params>
+				<param type="const GLuint*" name="code"/>
+			</params>
+		</function>
+		<function name="glReplacementCodeusvSUN" return="void">
+			<params>
+				<param type="const GLushort*" name="code"/>
+			</params>
+		</function>
+		<function name="glReplacementCodeubvSUN" return="void">
+			<params>
+				<param type="const GLubyte*" name="code"/>
+			</params>
+		</function>
+		<function name="glReplacementCodePointerSUN" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+				<param type="const GLvoid**" name="pointer"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

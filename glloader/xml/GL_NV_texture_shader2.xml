@@ -1,15 +1,7 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_NV_texture_shader2">
-	<Tokens>
-		<Token name="GL_DOT_PRODUCT_TEXTURE_3D_NV" value="0x86EF"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_texture_shader2" reg_no="231"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_NV"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_NV_texture_shader2" reg_no="231">
+	<tokens>
+		<token name="GL_DOT_PRODUCT_TEXTURE_3D_NV" value="0x86EF"/>
+	</tokens>
+</gl_extension>

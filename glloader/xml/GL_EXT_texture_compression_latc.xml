@@ -1,18 +1,10 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_EXT_texture_compression_latc">
-	<Tokens>
-		<Token name="GL_COMPRESSED_LUMINANCE_LATC1_EXT" value="0x8C70"/>
-		<Token name="GL_COMPRESSED_SIGNED_LUMINANCE_LATC1_EXT" value="0x8C71"/>
-		<Token name="GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT" value="0x8C72"/>
-		<Token name="GL_COMPRESSED_SIGNED_LUMINANCE_ALPHA_LATC2_EXT" value="0x8C73"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_texture_compression_latc" reg_no="331"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_EXT"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_EXT_texture_compression_latc" reg_no="331">
+	<tokens>
+		<token name="GL_COMPRESSED_LUMINANCE_LATC1_EXT" value="0x8C70"/>
+		<token name="GL_COMPRESSED_SIGNED_LUMINANCE_LATC1_EXT" value="0x8C71"/>
+		<token name="GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT" value="0x8C72"/>
+		<token name="GL_COMPRESSED_SIGNED_LUMINANCE_ALPHA_LATC2_EXT" value="0x8C73"/>
+	</tokens>
+</gl_extension>

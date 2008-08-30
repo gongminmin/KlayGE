@@ -1,29 +1,21 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_ARB_fragment_program">
-	<Tokens>
-		<Token name="GL_FRAGMENT_PROGRAM_ARB" value="0x8804"/>
-		<Token name="GL_PROGRAM_ALU_INSTRUCTIONS_ARB" value="0x8805"/>
-		<Token name="GL_PROGRAM_TEX_INSTRUCTIONS_ARB" value="0x8806"/>
-		<Token name="GL_PROGRAM_TEX_INDIRECTIONS_ARB" value="0x8807"/>
-		<Token name="GL_PROGRAM_NATIVE_ALU_INSTRUCTIONS_ARB" value="0x8808"/>
-		<Token name="GL_PROGRAM_NATIVE_TEX_INSTRUCTIONS_ARB" value="0x8809"/>
-		<Token name="GL_PROGRAM_NATIVE_TEX_INDIRECTIONS_ARB" value="0x880A"/>
-		<Token name="GL_MAX_PROGRAM_ALU_INSTRUCTIONS_ARB" value="0x880B"/>
-		<Token name="GL_MAX_PROGRAM_TEX_INSTRUCTIONS_ARB" value="0x880C"/>
-		<Token name="GL_MAX_PROGRAM_TEX_INDIRECTIONS_ARB" value="0x880D"/>
-		<Token name="GL_MAX_PROGRAM_NATIVE_ALU_INSTRUCTIONS_ARB" value="0x880E"/>
-		<Token name="GL_MAX_PROGRAM_NATIVE_TEX_INSTRUCTIONS_ARB" value="0x880F"/>
-		<Token name="GL_MAX_PROGRAM_NATIVE_TEX_INDIRECTIONS_ARB" value="0x8810"/>
-		<Token name="GL_MAX_TEXTURE_COORDS_ARB" value="0x8871"/>
-		<Token name="GL_MAX_TEXTURE_IMAGE_UNITS_ARB" value="0x8872"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_fragment_program" reg_no="27"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_ARB"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_ARB_fragment_program" reg_no="27">
+	<tokens>
+		<token name="GL_FRAGMENT_PROGRAM_ARB" value="0x8804"/>
+		<token name="GL_PROGRAM_ALU_INSTRUCTIONS_ARB" value="0x8805"/>
+		<token name="GL_PROGRAM_TEX_INSTRUCTIONS_ARB" value="0x8806"/>
+		<token name="GL_PROGRAM_TEX_INDIRECTIONS_ARB" value="0x8807"/>
+		<token name="GL_PROGRAM_NATIVE_ALU_INSTRUCTIONS_ARB" value="0x8808"/>
+		<token name="GL_PROGRAM_NATIVE_TEX_INSTRUCTIONS_ARB" value="0x8809"/>
+		<token name="GL_PROGRAM_NATIVE_TEX_INDIRECTIONS_ARB" value="0x880A"/>
+		<token name="GL_MAX_PROGRAM_ALU_INSTRUCTIONS_ARB" value="0x880B"/>
+		<token name="GL_MAX_PROGRAM_TEX_INSTRUCTIONS_ARB" value="0x880C"/>
+		<token name="GL_MAX_PROGRAM_TEX_INDIRECTIONS_ARB" value="0x880D"/>
+		<token name="GL_MAX_PROGRAM_NATIVE_ALU_INSTRUCTIONS_ARB" value="0x880E"/>
+		<token name="GL_MAX_PROGRAM_NATIVE_TEX_INSTRUCTIONS_ARB" value="0x880F"/>
+		<token name="GL_MAX_PROGRAM_NATIVE_TEX_INDIRECTIONS_ARB" value="0x8810"/>
+		<token name="GL_MAX_TEXTURE_COORDS_ARB" value="0x8871"/>
+		<token name="GL_MAX_TEXTURE_IMAGE_UNITS_ARB" value="0x8872"/>
+	</tokens>
+</gl_extension>

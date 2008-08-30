@@ -1,24 +1,16 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_IBM_static_data">
-	<Tokens>
-		<Token name="GL_ALL_STATIC_DATA_IBM" value="103060"/>
-		<Token name="GL_STATIC_VERTEX_ARRAY_IBM" value="103061"/>
-	</Tokens>
+<gl_extension name="GL_IBM_static_data" reg_no="223">
+	<tokens>
+		<token name="GL_ALL_STATIC_DATA_IBM" value="103060"/>
+		<token name="GL_STATIC_VERTEX_ARRAY_IBM" value="103061"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glFlushStaticDataIBM" return="void">
-			<Param type="GLenum" name="target"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_IBM" string="GL_IBM_static_data" reg_no="223">
-			<Name name="glFlushStaticDataIBM"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_IBM"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glFlushStaticDataIBM" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

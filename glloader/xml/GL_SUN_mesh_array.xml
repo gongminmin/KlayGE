@@ -1,27 +1,19 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_SUN_mesh_array">
-	<Tokens>
-		<Token name="GL_QUAD_MESH_SUN" value="0x8614"/>
-		<Token name="GL_TRIANGLE_MESH_SUN" value="0x8615"/>
-	</Tokens>
+<gl_extension name="GL_SUN_mesh_array" reg_no="257">
+	<tokens>
+		<token name="GL_QUAD_MESH_SUN" value="0x8614"/>
+		<token name="GL_TRIANGLE_MESH_SUN" value="0x8615"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glDrawMeshArraysSUN" return="void">
-			<Param type="GLenum" name="mode"/>
-			<Param type="GLint" name="first"/>
-			<Param type="GLsizei" name="count"/>
-			<Param type="GLsizei" name="width"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_SUN" string="GL_SUN_mesh_array" reg_no="257">
-			<Name name="glDrawMeshArraysSUN"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_SUN"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glDrawMeshArraysSUN" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLint" name="first"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLsizei" name="width"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

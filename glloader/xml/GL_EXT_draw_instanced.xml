@@ -1,0 +1,23 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_EXT_draw_instanced" reg_no="327" prefer="GL_ARB_draw_instanced">
+	<functions>
+		<function name="glDrawArraysInstancedEXT" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLint" name="first"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLsizei" name="primcount"/>
+			</params>
+		</function>
+		<function name="glDrawElementsInstancedEXT" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLenum" name="type"/>
+				<param type="const void*" name="indices"/>
+				<param type="GLsizei" name="primcount"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

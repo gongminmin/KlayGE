@@ -1,31 +1,23 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_NV_framebuffer_multisample_coverage">
-	<Tokens>
-		<Token name="GL_RENDERBUFFER_COVERAGE_SAMPLES_NV" value="0x8CAB"/>
-		<Token name="GL_RENDERBUFFER_COLOR_SAMPLES_NV" value="0x8E10"/>
-		<Token name="GL_MAX_MULTISAMPLE_COVERAGE_MODES_NV" value="0x8E11"/>
-		<Token name="GL_MULITSAMPLE_COVERAGE_MODES_NV" value="0x8E12"/>
-	</Tokens>
+<gl_extension name="GL_NV_framebuffer_multisample_coverage" reg_no="336">
+	<tokens>
+		<token name="GL_RENDERBUFFER_COVERAGE_SAMPLES_NV" value="0x8CAB"/>
+		<token name="GL_RENDERBUFFER_COLOR_SAMPLES_NV" value="0x8E10"/>
+		<token name="GL_MAX_MULTISAMPLE_COVERAGE_MODES_NV" value="0x8E11"/>
+		<token name="GL_MULITSAMPLE_COVERAGE_MODES_NV" value="0x8E12"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glRenderbufferStorageMultisampleCoverageNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLsizei" name="coverageSamples"/>
-			<Param type="GLsizei" name="colorSamples"/>
-			<Param type="GLenum" name="internalformat"/>
-			<Param type="GLsizei" name="width"/>
-			<Param type="GLsizei" name="height"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_framebuffer_multisample_coverage" reg_no="336">
-			<Name name="glRenderbufferStorageMultisampleCoverageNV"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_NV"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glRenderbufferStorageMultisampleCoverageNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="coverageSamples"/>
+				<param type="GLsizei" name="colorSamples"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

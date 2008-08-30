@@ -1,29 +1,21 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_NV_float_buffer">
-	<Tokens>
-		<Token name="GL_FLOAT_R_NV" value="0x8880"/>
-		<Token name="GL_FLOAT_RG_NV" value="0x8881"/>
-		<Token name="GL_FLOAT_RGB_NV" value="0x8882"/>
-		<Token name="GL_FLOAT_RGBA_NV" value="0x8883"/>
-		<Token name="GL_FLOAT_R16_NV" value="0x8884"/>
-		<Token name="GL_FLOAT_R32_NV" value="0x8885"/>
-		<Token name="GL_FLOAT_RG16_NV" value="0x8886"/>
-		<Token name="GL_FLOAT_RG32_NV" value="0x8887"/>
-		<Token name="GL_FLOAT_RGB16_NV" value="0x8888"/>
-		<Token name="GL_FLOAT_RGB32_NV" value="0x8889"/>
-		<Token name="GL_FLOAT_RGBA16_NV" value="0x888A"/>
-		<Token name="GL_FLOAT_RGBA32_NV" value="0x888B"/>
-		<Token name="GL_TEXTURE_FLOAT_COMPONENTS_NV" value="0x888C"/>
-		<Token name="GL_FLOAT_CLEAR_COLOR_VALUE_NV" value="0x888D"/>
-		<Token name="GL_FLOAT_RGBA_MODE_NV" value="0x888E"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_float_buffer" reg_no="281"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_NV"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_NV_float_buffer" reg_no="281">
+	<tokens>
+		<token name="GL_FLOAT_R_NV" value="0x8880"/>
+		<token name="GL_FLOAT_RG_NV" value="0x8881"/>
+		<token name="GL_FLOAT_RGB_NV" value="0x8882"/>
+		<token name="GL_FLOAT_RGBA_NV" value="0x8883"/>
+		<token name="GL_FLOAT_R16_NV" value="0x8884"/>
+		<token name="GL_FLOAT_R32_NV" value="0x8885"/>
+		<token name="GL_FLOAT_RG16_NV" value="0x8886"/>
+		<token name="GL_FLOAT_RG32_NV" value="0x8887"/>
+		<token name="GL_FLOAT_RGB16_NV" value="0x8888"/>
+		<token name="GL_FLOAT_RGB32_NV" value="0x8889"/>
+		<token name="GL_FLOAT_RGBA16_NV" value="0x888A"/>
+		<token name="GL_FLOAT_RGBA32_NV" value="0x888B"/>
+		<token name="GL_TEXTURE_FLOAT_COMPONENTS_NV" value="0x888C"/>
+		<token name="GL_FLOAT_CLEAR_COLOR_VALUE_NV" value="0x888D"/>
+		<token name="GL_FLOAT_RGBA_MODE_NV" value="0x888E"/>
+	</tokens>
+</gl_extension>

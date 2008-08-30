@@ -1,16 +1,8 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_NV_light_max_exponent">
-	<Tokens>
-		<Token name="GL_MAX_SHININESS_NV" value="0x8504"/>
-		<Token name="GL_MAX_SPOT_EXPONENT_NV" value="0x8505"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_light_max_exponent" reg_no="189"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_NV"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_NV_light_max_exponent" reg_no="189">
+	<tokens>
+		<token name="GL_MAX_SHININESS_NV" value="0x8504"/>
+		<token name="GL_MAX_SPOT_EXPONENT_NV" value="0x8505"/>
+	</tokens>
+</gl_extension>

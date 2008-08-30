@@ -1,53 +1,46 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_OES_matrix_palette">
-	<Tokens>
-		<Token name="GL_MAX_VERTEX_UNITS_OES" value="0x86A4"/>
-		<Token name="GL_MAX_PALETTE_MATRICES_OES" value="0x8842"/>
-		<Token name="GL_MATRIX_PALETTE_OES" value="0x8840"/>
-		<Token name="GL_MATRIX_INDEX_ARRAY_OES" value="0x8844"/>
-		<Token name="GL_WEIGHT_ARRAY_OES" value="0x86AD"/>
-		<Token name="GL_MATRIX_INDEX_ARRAY_SIZE_OES" value="0x8846"/>
-		<Token name="GL_MATRIX_INDEX_ARRAY_TYPE_OES" value="0x8847"/>
-		<Token name="GL_MATRIX_INDEX_ARRAY_STRIDE_OES" value="0x8848"/>
-		<Token name="GL_MATRIX_INDEX_ARRAY_POINTER_OES" value="0x8849"/>
-		<Token name="GL_MATRIX_INDEX_ARRAY_BUFFER_BINDING_OES" value="0x8B9E"/>
-		<Token name="GL_WEIGHT_ARRAY_SIZE_OES" value="0x86AB"/>
-		<Token name="GL_WEIGHT_ARRAY_TYPE_OES" value="0x86A9"/>
-		<Token name="GL_WEIGHT_ARRAY_STRIDE_OES" value="0x86AA"/>
-		<Token name="GL_WEIGHT_ARRAY_POINTER_OES" value="0x86AC"/>
-		<Token name="GL_WEIGHT_ARRAY_BUFFER_BINDING_OES" value="0x889E"/>
-	</Tokens>
+<gl_extension name="GL_OES_matrix_palette">
+	<tokens>
+		<token name="GL_MAX_VERTEX_UNITS_OES" value="0x86A4"/>
+		<token name="GL_MAX_PALETTE_MATRICES_OES" value="0x8842"/>
+		<token name="GL_MATRIX_PALETTE_OES" value="0x8840"/>
+		<token name="GL_MATRIX_INDEX_ARRAY_OES" value="0x8844"/>
+		<token name="GL_WEIGHT_ARRAY_OES" value="0x86AD"/>
+		<token name="GL_MATRIX_INDEX_ARRAY_SIZE_OES" value="0x8846"/>
+		<token name="GL_MATRIX_INDEX_ARRAY_TYPE_OES" value="0x8847"/>
+		<token name="GL_MATRIX_INDEX_ARRAY_STRIDE_OES" value="0x8848"/>
+		<token name="GL_MATRIX_INDEX_ARRAY_POINTER_OES" value="0x8849"/>
+		<token name="GL_MATRIX_INDEX_ARRAY_BUFFER_BINDING_OES" value="0x8B9E"/>
+		<token name="GL_WEIGHT_ARRAY_SIZE_OES" value="0x86AB"/>
+		<token name="GL_WEIGHT_ARRAY_TYPE_OES" value="0x86A9"/>
+		<token name="GL_WEIGHT_ARRAY_STRIDE_OES" value="0x86AA"/>
+		<token name="GL_WEIGHT_ARRAY_POINTER_OES" value="0x86AC"/>
+		<token name="GL_WEIGHT_ARRAY_BUFFER_BINDING_OES" value="0x889E"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glCurrentPaletteMatrixOES" return="void">
-			<Param type="GLuint" name="matrixpaletteindex"/>
-		</Function>
-		<Function name="glLoadPaletteFromModelViewMatrixOES" return="void"/>
-		<Function name="glMatrixIndexPointerOES" return="void">
-			<Param type="GLint" name="size"/>
-			<Param type="GLenum" name="type"/>
-			<Param type="GLsizei" name="stride"/>
-			<Param type="const GLvoid*" name="pointer"/>
-		</Function>
-		<Function name="glWeightPointerOES" return="void">
-			<Param type="GLint" name="size"/>
-			<Param type="GLenum" name="type"/>
-			<Param type="GLsizei" name="stride"/>
-			<Param type="const GLvoid*" name="pointer"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_OES" string="GL_OES_matrix_palette">
-			<Name name="glCurrentPaletteMatrixOES"/>
-			<Name name="glLoadPaletteFromModelViewMatrixOES"/>
-			<Name name="glMatrixIndexPointerOES"/>
-			<Name name="glWeightPointerOES"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_OES"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glCurrentPaletteMatrixOES" return="void">
+			<params>
+				<param type="GLuint" name="matrixpaletteindex"/>
+			</params>
+		</function>
+		<function name="glLoadPaletteFromModelViewMatrixOES" return="void"/>
+		<function name="glMatrixIndexPointerOES" return="void">
+			<params>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+				<param type="const GLvoid*" name="pointer"/>
+			</params>
+		</function>
+		<function name="glWeightPointerOES" return="void">
+			<params>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+				<param type="const GLvoid*" name="pointer"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

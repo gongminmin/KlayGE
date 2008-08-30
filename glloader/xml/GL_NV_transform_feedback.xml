@@ -1,110 +1,110 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_NV_transform_feedback">
-	<Tokens>
-		<Token name="GL_TRANSFORM_FEEDBACK_BUFFER_NV" value="0x8C8E"/>
-		<Token name="GL_TRANSFORM_FEEDBACK_BUFFER_START_NV" value="0x8C84"/>
-		<Token name="GL_TRANSFORM_FEEDBACK_BUFFER_SIZE_NV" value="0x8C85"/>
-		<Token name="GL_TRANSFORM_FEEDBACK_RECORD_NV" value="0x8C86"/>
-		<Token name="GL_TRANSFORM_FEEDBACK_BUFFER_BINDING_NV" value="0x8C8F"/>
-		<Token name="GL_INTERLEAVED_ATTRIBS_NV" value="0x8C8C"/>
-		<Token name="GL_SEPARATE_ATTRIBS_NV" value="0x8C8D"/>
-		<Token name="GL_PRIMITIVES_GENERATED_NV" value="0x8C87"/>
-		<Token name="GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN_NV" value="0x8C88"/>
-		<Token name="GL_RASTERIZER_DISCARD_NV" value="0x8C89"/>
-		<Token name="GL_MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS_NV" value="0x8C8A"/>
-		<Token name="GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS_NV" value="0x8C8B"/>
-		<Token name="GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS_NV" value="0x8C80"/>
-		<Token name="GL_TRANSFORM_FEEDBACK_ATTRIBS_NV" value="0x8C7E"/>
-		<Token name="GL_ACTIVE_VARYINGS_NV" value="0x8C81"/>
-		<Token name="GL_ACTIVE_VARYING_MAX_LENGTH_NV" value="0x8C82"/>
-		<Token name="GL_TRANSFORM_FEEDBACK_VARYINGS_NV" value="0x8C83"/>
-		<Token name="GL_TRANSFORM_FEEDBACK_BUFFER_MODE_NV" value="0x8C7F"/>
-		<Token name="GL_BACK_PRIMARY_COLOR_NV" value="0x8C77"/>
-		<Token name="GL_BACK_SECONDARY_COLOR_NV" value="0x8C78"/>
-		<Token name="GL_TEXTURE_COORD_NV" value="0x8C79"/>
-		<Token name="GL_CLIP_DISTANCE_NV" value="0x8C7A"/>
-		<Token name="GL_VERTEX_ID_NV" value="0x8C7B"/>
-		<Token name="GL_PRIMITIVE_ID_NV" value="0x8C7C"/>
-		<Token name="GL_GENERIC_ATTRIB_NV" value="0x8C7D"/>
-		<Token name="GL_LAYER_NV" value="0x8DAA"/>
-	</Tokens>
+<gl_extension name="GL_NV_transform_feedback" reg_no="341">
+	<tokens>
+		<token name="GL_TRANSFORM_FEEDBACK_BUFFER_NV" value="0x8C8E"/>
+		<token name="GL_TRANSFORM_FEEDBACK_BUFFER_START_NV" value="0x8C84"/>
+		<token name="GL_TRANSFORM_FEEDBACK_BUFFER_SIZE_NV" value="0x8C85"/>
+		<token name="GL_TRANSFORM_FEEDBACK_RECORD_NV" value="0x8C86"/>
+		<token name="GL_TRANSFORM_FEEDBACK_BUFFER_BINDING_NV" value="0x8C8F"/>
+		<token name="GL_INTERLEAVED_ATTRIBS_NV" value="0x8C8C"/>
+		<token name="GL_SEPARATE_ATTRIBS_NV" value="0x8C8D"/>
+		<token name="GL_PRIMITIVES_GENERATED_NV" value="0x8C87"/>
+		<token name="GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN_NV" value="0x8C88"/>
+		<token name="GL_RASTERIZER_DISCARD_NV" value="0x8C89"/>
+		<token name="GL_MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS_NV" value="0x8C8A"/>
+		<token name="GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS_NV" value="0x8C8B"/>
+		<token name="GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS_NV" value="0x8C80"/>
+		<token name="GL_TRANSFORM_FEEDBACK_ATTRIBS_NV" value="0x8C7E"/>
+		<token name="GL_ACTIVE_VARYINGS_NV" value="0x8C81"/>
+		<token name="GL_ACTIVE_VARYING_MAX_LENGTH_NV" value="0x8C82"/>
+		<token name="GL_TRANSFORM_FEEDBACK_VARYINGS_NV" value="0x8C83"/>
+		<token name="GL_TRANSFORM_FEEDBACK_BUFFER_MODE_NV" value="0x8C7F"/>
+		<token name="GL_BACK_PRIMARY_COLOR_NV" value="0x8C77"/>
+		<token name="GL_BACK_SECONDARY_COLOR_NV" value="0x8C78"/>
+		<token name="GL_TEXTURE_COORD_NV" value="0x8C79"/>
+		<token name="GL_CLIP_DISTANCE_NV" value="0x8C7A"/>
+		<token name="GL_VERTEX_ID_NV" value="0x8C7B"/>
+		<token name="GL_PRIMITIVE_ID_NV" value="0x8C7C"/>
+		<token name="GL_GENERIC_ATTRIB_NV" value="0x8C7D"/>
+		<token name="GL_LAYER_NV" value="0x8DAA"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glBindBufferRangeNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLuint" name="buffer"/>
-			<Param type="GLintptr" name="offset"/>
-			<Param type="GLsizeiptr" name="size"/>
-		</Function>
-		<Function name="glBindBufferOffsetNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLuint" name="buffer"/>
-			<Param type="GLintptr" name="offset"/>
-		</Function>
-		<Function name="glBindBufferBaseNV" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLuint" name="buffer"/>
-		</Function>
-		<Function name="glTransformFeedbackAttribsNV" return="void">
-			<Param type="GLsizei" name="count"/>
-			<Param type="const GLint*" name="attribs"/>
-			<Param type="GLenum" name="bufferMode"/>
-		</Function>
-		<Function name="glTransformFeedbackVaryingsNV" return="void">
-			<Param type="GLuint" name="program"/>
-			<Param type="GLsizei" name="count"/>
-			<Param type="const GLint*" name="locations"/>
-			<Param type="GLenum" name="bufferMode"/>
-		</Function>
-		<Function name="glBeginTransformFeedbackNV" return="void">
-			<Param type="GLenum" name="primitiveMode"/>
-		</Function>
-		<Function name="glEndTransformFeedbackNV" return="void"/>
-		<Function name="glGetVaryingLocationNV" return="int">
-			<Param type="GLuint" name="program"/>
-			<Param type="const GLchar*" name="name"/>
-		</Function>
-		<Function name="glGetActiveVaryingNV" return="void">
-			<Param type="GLuint" name="program"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLsizei" name="bufSize"/>
-			<Param type="GLsizei*" name="length"/>
-			<Param type="GLsizei*" name="size"/>
-			<Param type="GLenum*" name="type"/>
-			<Param type="GLchar*" name="name"/>
-		</Function>
-		<Function name="glActiveVaryingNV" return="void">
-			<Param type="GLuint" name="program"/>
-			<Param type="const GLchar*" name="name"/>
-		</Function>
-		<Function name="glGetTransformFeedbackVaryingNV" return="void">
-			<Param type="GLuint" name="program"/>
-			<Param type="GLuint" name="index"/>
-			<Param type="GLint*" name="location"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_transform_feedback" reg_no="341">
-			<Name name="glBindBufferRangeNV"/>
-			<Name name="glBindBufferOffsetNV"/>
-			<Name name="glBindBufferBaseNV"/>
-			<Name name="glTransformFeedbackAttribsNV"/>
-			<Name name="glTransformFeedbackVaryingsNV"/>
-			<Name name="glBeginTransformFeedbackNV"/>
-			<Name name="glEndTransformFeedbackNV"/>
-			<Name name="glGetVaryingLocationNV"/>
-			<Name name="glGetActiveVaryingNV"/>
-			<Name name="glActiveVaryingNV"/>
-			<Name name="glGetTransformFeedbackVaryingNV"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_NV"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glBindBufferRangeNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLintptr" name="offset"/>
+				<param type="GLsizeiptr" name="size"/>
+			</params>
+		</function>
+		<function name="glBindBufferOffsetNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLintptr" name="offset"/>
+			</params>
+		</function>
+		<function name="glBindBufferBaseNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint" name="buffer"/>
+			</params>
+		</function>
+		<function name="glTransformFeedbackAttribsNV" return="void">
+			<params>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLint*" name="attribs"/>
+				<param type="GLenum" name="bufferMode"/>
+			</params>
+		</function>
+		<function name="glTransformFeedbackVaryingsNV" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLint*" name="locations"/>
+				<param type="GLenum" name="bufferMode"/>
+			</params>
+		</function>
+		<function name="glBeginTransformFeedbackNV" return="void">
+			<params>
+				<param type="GLenum" name="primitiveMode"/>
+			</params>
+		</function>
+		<function name="glEndTransformFeedbackNV" return="void"/>
+		<function name="glGetVaryingLocationNV" return="int">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="const GLchar*" name="name"/>
+			</params>
+		</function>
+		<function name="glGetActiveVaryingNV" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLsizei*" name="length"/>
+				<param type="GLsizei*" name="size"/>
+				<param type="GLenum*" name="type"/>
+				<param type="GLchar*" name="name"/>
+			</params>
+		</function>
+		<function name="glActiveVaryingNV" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="const GLchar*" name="name"/>
+			</params>
+		</function>
+		<function name="glGetTransformFeedbackVaryingNV" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLint*" name="location"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

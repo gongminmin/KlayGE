@@ -1,25 +1,17 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_EXT_stencil_clear_tag">
-	<Tokens>
-		<Token name="GL_STENCIL_TAG_BITS_EXT" value="0x88F2"/>
-		<Token name="GL_STENCIL_CLEAR_TAG_VALUE_EXT" value="0x88F3"/>
-	</Tokens>
+<gl_extension name="GL_EXT_stencil_clear_tag" reg_no="314">
+	<tokens>
+		<token name="GL_STENCIL_TAG_BITS_EXT" value="0x88F2"/>
+		<token name="GL_STENCIL_CLEAR_TAG_VALUE_EXT" value="0x88F3"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glStencilClearTagEXT" return="void">
-			<Param type="GLsizei" name="stencilTagBits"/>
-			<Param type="GLuint" name="stencilClearTag"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_stencil_clear_tag" reg_no="314">
-			<Name name="glStencilClearTagEXT"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_EXT"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glStencilClearTagEXT" return="void">
+			<params>
+				<param type="GLsizei" name="stencilTagBits"/>
+				<param type="GLuint" name="stencilClearTag"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

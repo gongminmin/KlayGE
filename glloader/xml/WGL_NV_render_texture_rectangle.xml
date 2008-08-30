@@ -1,17 +1,9 @@
 <?xml version='1.0'?>
 
-<GLExtension name="WGL_NV_render_texture_rectangle">
-	<Tokens>
-		<Token name="WGL_BIND_TO_TEXTURE_RECTANGLE_RGB_NV" value="0x20A0"/>
-		<Token name="WGL_BIND_TO_TEXTURE_RECTANGLE_RGBA_NV" value="0x20A1"/>
-		<Token name="WGL_TEXTURE_RECTANGLE_NV" value="0x20A2"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="WGL_NV" string="WGL_NV_render_texture_rectangle" reg_no="264"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="WGL_NV"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="WGL_NV_render_texture_rectangle" reg_no="264">
+	<tokens>
+		<token name="WGL_BIND_TO_TEXTURE_RECTANGLE_RGB_NV" value="0x20A0"/>
+		<token name="WGL_BIND_TO_TEXTURE_RECTANGLE_RGBA_NV" value="0x20A1"/>
+		<token name="WGL_TEXTURE_RECTANGLE_NV" value="0x20A2"/>
+	</tokens>
+</gl_extension>

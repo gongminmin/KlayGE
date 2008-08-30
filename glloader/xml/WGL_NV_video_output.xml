@@ -1,69 +1,66 @@
 <?xml version='1.0'?>
 
-<GLExtension name="WGL_NV_video_output">
-	<Typedefs>
-		<Typedef type="void*" synonym="HPVIDEODEV"/>
-	</Typedefs>
+<gl_extension name="WGL_NV_video_output" reg_no="349">
+	<typedefs>
+		<typedef type="void*" synonym="HPVIDEODEV"/>
+	</typedefs>
 
-	<Tokens>
-		<Token name="WGL_BIND_TO_VIDEO_RGB_NV" value="0x20C0"/>
-		<Token name="WGL_BIND_TO_VIDEO_RGBA_NV" value="0x20C1"/>
-		<Token name="WGL_BIND_TO_VIDEO_RGB_AND_DEPTH_NV" value="0x20C2"/>
-		<Token name="WGL_VIDEO_OUT_COLOR_NV" value="0x20C3"/>
-		<Token name="WGL_VIDEO_OUT_ALPHA_NV" value="0x20C4"/>
-		<Token name="WGL_VIDEO_OUT_DEPTH_NV" value="0x20C5"/>
-		<Token name="WGL_VIDEO_OUT_COLOR_AND_ALPHA_NV" value="0x20C6"/>
-		<Token name="WGL_VIDEO_OUT_COLOR_AND_DEPTH_NV" value="0x20C7"/>
-		<Token name="WGL_VIDEO_OUT_FRAME" value="0x20C8"/>
-		<Token name="WGL_VIDEO_OUT_FIELD_1" value="0x20C9"/>
-		<Token name="WGL_VIDEO_OUT_FIELD_2" value="0x20CA"/>
-		<Token name="WGL_VIDEO_OUT_STACKED_FIELDS_1_2" value="0x20CB"/>
-		<Token name="WGL_VIDEO_OUT_STACKED_FIELDS_2_1" value="0x20CC"/>
-	</Tokens>
+	<tokens>
+		<token name="WGL_BIND_TO_VIDEO_RGB_NV" value="0x20C0"/>
+		<token name="WGL_BIND_TO_VIDEO_RGBA_NV" value="0x20C1"/>
+		<token name="WGL_BIND_TO_VIDEO_RGB_AND_DEPTH_NV" value="0x20C2"/>
+		<token name="WGL_VIDEO_OUT_COLOR_NV" value="0x20C3"/>
+		<token name="WGL_VIDEO_OUT_ALPHA_NV" value="0x20C4"/>
+		<token name="WGL_VIDEO_OUT_DEPTH_NV" value="0x20C5"/>
+		<token name="WGL_VIDEO_OUT_COLOR_AND_ALPHA_NV" value="0x20C6"/>
+		<token name="WGL_VIDEO_OUT_COLOR_AND_DEPTH_NV" value="0x20C7"/>
+		<token name="WGL_VIDEO_OUT_FRAME" value="0x20C8"/>
+		<token name="WGL_VIDEO_OUT_FIELD_1" value="0x20C9"/>
+		<token name="WGL_VIDEO_OUT_FIELD_2" value="0x20CA"/>
+		<token name="WGL_VIDEO_OUT_STACKED_FIELDS_1_2" value="0x20CB"/>
+		<token name="WGL_VIDEO_OUT_STACKED_FIELDS_2_1" value="0x20CC"/>
+	</tokens>
 
-	<Functions>
-		<Function name="wglGetVideoDeviceNV" return="BOOL">
-			<Param type="HDC" name="hDC"/>
-			<Param type="int" name="numDevices"/>
-			<Param type="HPVIDEODEV*" name="hVideoDevice"/>
-		</Function>
-		<Function name="wglReleaseVideoDeviceNV" return="BOOL">
-			<Param type="HPVIDEODEV" name="hVideoDevice"/>
-		</Function>
-		<Function name="wglBindVideoImageNV" return="BOOL">
-			<Param type="HPVIDEODEV" name="hVideoDevice"/>
-			<Param type="HPBUFFERARB" name="hPbuffer"/>
-			<Param type="int" name="iVideoBuffer"/>
-		</Function>
-		<Function name="wglReleaseVideoImageNV" return="BOOL">
-			<Param type="HPBUFFERARB" name="hPbuffer"/>
-			<Param type="int" name="iVideoBuffer"/>
-		</Function>
-		<Function name="wglSendPbufferToVideoNV" return="BOOL">
-			<Param type="HPBUFFERARB" name="hPbuffer"/>
-			<Param type="int" name="iBufferType"/>
-			<Param type="unsigned long*" name="pulCounterPbuffer"/>
-			<Param type="BOOL" name="bBlock"/>
-		</Function>
-		<Function name="wglGetVideoInfoNV" return="BOOL">
-			<Param type="HPVIDEODEV" name="hpVideoDevice"/>
-			<Param type="unsigned long*" name="pulCounterOutputPbuffer"/>
-			<Param type="unsigned long*" name="pulCounterOutputVideo"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="WGL_NV" string="WGL_NV_video_output" reg_no="349">
-			<Name name="wglGetVideoDeviceNV"/>
-			<Name name="wglReleaseVideoDeviceNV"/>
-			<Name name="wglBindVideoImageNV"/>
-			<Name name="wglReleaseVideoImageNV"/>
-			<Name name="wglSendPbufferToVideoNV"/>
-			<Name name="wglGetVideoInfoNV"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="WGL_NV"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="wglGetVideoDeviceNV" return="BOOL">
+			<params>
+				<param type="HDC" name="hDC"/>
+				<param type="int" name="numDevices"/>
+				<param type="HPVIDEODEV*" name="hVideoDevice"/>
+			</params>
+		</function>
+		<function name="wglReleaseVideoDeviceNV" return="BOOL">
+			<params>
+				<param type="HPVIDEODEV" name="hVideoDevice"/>
+			</params>
+		</function>
+		<function name="wglBindVideoImageNV" return="BOOL">
+			<params>
+				<param type="HPVIDEODEV" name="hVideoDevice"/>
+				<param type="HPBUFFERARB" name="hPbuffer"/>
+				<param type="int" name="iVideoBuffer"/>
+			</params>
+		</function>
+		<function name="wglReleaseVideoImageNV" return="BOOL">
+			<params>
+				<param type="HPBUFFERARB" name="hPbuffer"/>
+				<param type="int" name="iVideoBuffer"/>
+			</params>
+		</function>
+		<function name="wglSendPbufferToVideoNV" return="BOOL">
+			<params>
+				<param type="HPBUFFERARB" name="hPbuffer"/>
+				<param type="int" name="iBufferType"/>
+				<param type="unsigned long*" name="pulCounterPbuffer"/>
+				<param type="BOOL" name="bBlock"/>
+			</params>
+		</function>
+		<function name="wglGetVideoInfoNV" return="BOOL">
+			<params>
+				<param type="HPVIDEODEV" name="hpVideoDevice"/>
+				<param type="unsigned long*" name="pulCounterOutputPbuffer"/>
+				<param type="unsigned long*" name="pulCounterOutputVideo"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

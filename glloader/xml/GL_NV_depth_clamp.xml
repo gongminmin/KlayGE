@@ -1,15 +1,7 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_NV_depth_clamp">
-	<Tokens>
-		<Token name="GL_DEPTH_CLAMP_NV" value="0x864F"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_depth_clamp" reg_no="260"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_NV"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_NV_depth_clamp" reg_no="260">
+	<tokens>
+		<token name="GL_DEPTH_CLAMP_NV" value="0x864F"/>
+	</tokens>
+</gl_extension>

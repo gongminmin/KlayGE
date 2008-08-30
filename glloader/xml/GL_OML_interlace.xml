@@ -1,16 +1,8 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_OML_interlace">
-	<Tokens>
-		<Token name="GL_INTERLACE_OML" value="0x8980"/>
-		<Token name="GL_INTERLACE_READ_OML" value="0x8981"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_OML" string="GL_OML_interlace" reg_no="239"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_OML"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_OML_interlace" reg_no="239">
+	<tokens>
+		<token name="GL_INTERLACE_OML" value="0x8980"/>
+		<token name="GL_INTERLACE_READ_OML" value="0x8981"/>
+	</tokens>
+</gl_extension>

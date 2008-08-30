@@ -1,53 +1,50 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_EXT_texture_object">
-	<Tokens>
-		<Token name="GL_TEXTURE_PRIORITY_EXT" value="0x8066"/>
-		<Token name="GL_TEXTURE_RESIDENT_EXT" value="0x8067"/>
-		<Token name="GL_TEXTURE_BINDING_1D_EXT" value="0x8068"/>
-		<Token name="GL_TEXTURE_BINDING_2D_EXT" value="0x8069"/>
-	</Tokens>
+<gl_extension name="GL_EXT_texture_object" reg_no="20">
+	<tokens>
+		<token name="GL_TEXTURE_PRIORITY_EXT" value="0x8066"/>
+		<token name="GL_TEXTURE_RESIDENT_EXT" value="0x8067"/>
+		<token name="GL_TEXTURE_BINDING_1D_EXT" value="0x8068"/>
+		<token name="GL_TEXTURE_BINDING_2D_EXT" value="0x8069"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glGenTexturesEXT" return="void">
-			<Param type="GLsizei" name="n"/>
-			<Param type="GLuint*" name="textures"/>
-		</Function>
-		<Function name="glDeleteTexturesEXT" return="void">
-			<Param type="GLsizei" name="n"/>
-			<Param type="const GLuint*" name="textures"/>
-		</Function>
-		<Function name="glBindTextureEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLuint" name="texture"/>
-		</Function>
-		<Function name="glPrioritizeTexturesEXT" return="void">
-			<Param type="GLsizei" name="n"/>
-			<Param type="const GLuint*" name="textures"/>
-			<Param type="const GLclampf*" name="priorities"/>
-		</Function>
-		<Function name="glAreTexturesResidentEXT" return="GLboolean">
-			<Param type="GLsizei" name="n"/>
-			<Param type="const GLuint*" name="textures"/>
-			<Param type="GLboolean*" name="residences"/>
-		</Function>
-		<Function name="glIsTextureEXT" return="GLboolean">
-			<Param type="GLuint" name="texture"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_texture_object" reg_no="20">
-			<Name name="glGenTexturesEXT"/>
-			<Name name="glDeleteTexturesEXT"/>
-			<Name name="glBindTextureEXT"/>
-			<Name name="glPrioritizeTexturesEXT"/>
-			<Name name="glAreTexturesResidentEXT"/>
-			<Name name="glIsTextureEXT"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_EXT"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glGenTexturesEXT" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="textures"/>
+			</params>
+		</function>
+		<function name="glDeleteTexturesEXT" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="const GLuint*" name="textures"/>
+			</params>
+		</function>
+		<function name="glBindTextureEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="texture"/>
+			</params>
+		</function>
+		<function name="glPrioritizeTexturesEXT" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="const GLuint*" name="textures"/>
+				<param type="const GLclampf*" name="priorities"/>
+			</params>
+		</function>
+		<function name="glAreTexturesResidentEXT" return="GLboolean">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="const GLuint*" name="textures"/>
+				<param type="GLboolean*" name="residences"/>
+			</params>
+		</function>
+		<function name="glIsTextureEXT" return="GLboolean">
+			<params>
+				<param type="GLuint" name="texture"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,11 +1,4 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_NV_texture_compression_vtc">
-	<Vendors>
-		<Vendor name="GL_NV" string="GL_NV_texture_compression_vtc" reg_no="228"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_NV"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_NV_texture_compression_vtc" reg_no="228">
+</gl_extension>

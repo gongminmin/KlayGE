@@ -1,29 +1,20 @@
 <?xml version='1.0'?>
 
-<GLExtension name="WGL_I3D_swap_frame_usage">
-	<Functions>
-		<Function name="wglGetFrameUsageI3D" return="BOOL">
-			<Param type="float*" name="pUsage"/>
-		</Function>
-		<Function name="wglBeginFrameTrackingI3D" return="BOOL"/>
-		<Function name="wglEndFrameTrackingI3D" return="BOOL"/>
-		<Function name="wglQueryFrameTrackingI3D" return="BOOL">
-			<Param type="DWORD*" name="pFrameCount"/>
-			<Param type="DWORD*" name="pMissedFrames"/>
-			<Param type="float*" name="pLastMissedUsage"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="WGL_I3D" string="WGL_I3D_swap_frame_usage" reg_no="255">
-			<Name name="wglGetFrameUsageI3D"/>
-			<Name name="wglBeginFrameTrackingI3D"/>
-			<Name name="wglEndFrameTrackingI3D"/>
-			<Name name="wglQueryFrameTrackingI3D"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="WGL_I3D"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="WGL_I3D_swap_frame_usage" reg_no="255">
+	<functions>
+		<function name="wglGetFrameUsageI3D" return="BOOL">
+			<params>
+				<param type="float*" name="pUsage"/>
+			</params>
+		</function>
+		<function name="wglBeginFrameTrackingI3D" return="BOOL"/>
+		<function name="wglEndFrameTrackingI3D" return="BOOL"/>
+		<function name="wglQueryFrameTrackingI3D" return="BOOL">
+			<params>
+				<param type="DWORD*" name="pFrameCount"/>
+				<param type="DWORD*" name="pMissedFrames"/>
+				<param type="float*" name="pLastMissedUsage"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

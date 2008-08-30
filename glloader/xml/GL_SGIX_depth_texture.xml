@@ -1,0 +1,11 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_SGIX_depth_texture" reg_no="63" prefer="GL_ARB_depth_texture">
+	<tokens>
+		<token name="GL_DEPTH_COMPONENT16_SGIX" value="0x81A5"/>
+		<token name="GL_DEPTH_COMPONENT24_SGIX" value="0x81A6"/>
+		<token name="GL_DEPTH_COMPONENT32_SGIX" value="0x81A7"/>
+		<token name="GL_TEXTURE_DEPTH_SIZE_SGIX" value="0x884A"/>
+		<token name="GL_DEPTH_TEXTURE_MODE_SGIX" value="0x884B"/>
+	</tokens>
+</gl_extension>

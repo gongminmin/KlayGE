@@ -1,104 +1,102 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_ARB_texture_compression">
-	<Tokens>
-		<Token name="GL_COMPRESSED_ALPHA_ARB" value="0x84E9"/>
-		<Token name="GL_COMPRESSED_LUMINANCE_ARB" value="0x84EA"/>
-		<Token name="GL_COMPRESSED_LUMINANCE_ALPHA_ARB" value="0x84EB"/>
-		<Token name="GL_COMPRESSED_INTENSITY_ARB" value="0x84EC"/>
-		<Token name="GL_COMPRESSED_RGB_ARB" value="0x84ED"/>
-		<Token name="GL_COMPRESSED_RGBA_ARB" value="0x84EE"/>
-		<Token name="GL_TEXTURE_COMPRESSION_HINT_ARB" value="0x84EF"/>
-		<Token name="GL_TEXTURE_COMPRESSED_IMAGE_SIZE_ARB" value="0x86A0"/>
-		<Token name="GL_TEXTURE_COMPRESSED_ARB" value="0x86A1"/>
-		<Token name="GL_NUM_COMPRESSED_TEXTURE_FORMATS_ARB" value="0x86A2"/>
-		<Token name="GL_COMPRESSED_TEXTURE_FORMATS_ARB" value="0x86A3"/>
-	</Tokens>
+<gl_extension name="GL_ARB_texture_compression" reg_no="12">
+	<tokens>
+		<token name="GL_COMPRESSED_ALPHA_ARB" value="0x84E9"/>
+		<token name="GL_COMPRESSED_LUMINANCE_ARB" value="0x84EA"/>
+		<token name="GL_COMPRESSED_LUMINANCE_ALPHA_ARB" value="0x84EB"/>
+		<token name="GL_COMPRESSED_INTENSITY_ARB" value="0x84EC"/>
+		<token name="GL_COMPRESSED_RGB_ARB" value="0x84ED"/>
+		<token name="GL_COMPRESSED_RGBA_ARB" value="0x84EE"/>
+		<token name="GL_TEXTURE_COMPRESSION_HINT_ARB" value="0x84EF"/>
+		<token name="GL_TEXTURE_COMPRESSED_IMAGE_SIZE_ARB" value="0x86A0"/>
+		<token name="GL_TEXTURE_COMPRESSED_ARB" value="0x86A1"/>
+		<token name="GL_NUM_COMPRESSED_TEXTURE_FORMATS_ARB" value="0x86A2"/>
+		<token name="GL_COMPRESSED_TEXTURE_FORMATS_ARB" value="0x86A3"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glCompressedTexImage1DARB" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLint" name="level"/>
-			<Param type="GLenum" name="internalFormat"/>
-			<Param type="GLsizei" name="width"/>
-			<Param type="GLint" name="border"/>
-			<Param type="GLsizei" name="imageSize"/>
-			<Param type="const GLvoid*" name="data"/>
-		</Function>
-		<Function name="glCompressedTexImage2DARB" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLint" name="level"/>
-			<Param type="GLenum" name="internalFormat"/>
-			<Param type="GLsizei" name="width"/>
-			<Param type="GLsizei" name="height"/>
-			<Param type="GLint" name="border"/>
-			<Param type="GLsizei" name="imageSize"/>
-			<Param type="const GLvoid*" name="data"/>
-		</Function>
-		<Function name="glCompressedTexImage3DARB" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLint" name="level"/>
-			<Param type="GLenum" name="internalFormat"/>
-			<Param type="GLsizei" name="width"/>
-			<Param type="GLsizei" name="height"/>
-			<Param type="GLsizei" name="depth"/>
-			<Param type="GLint" name="border"/>
-			<Param type="GLsizei" name="imageSize"/>
-			<Param type="const GLvoid*" name="data"/>
-		</Function>
-		<Function name="glCompressedTexSubImage1DARB" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLint" name="level"/>
-			<Param type="GLint" name="xoffset"/>
-			<Param type="GLsizei" name="width"/>
-			<Param type="GLenum" name="format"/>
-			<Param type="GLsizei" name="imageSize"/>
-			<Param type="const GLvoid*" name="data"/>
-		</Function>
-		<Function name="glCompressedTexSubImage2DARB" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLint" name="level"/>
-			<Param type="GLint" name="xoffset"/>
-			<Param type="GLint" name="yoffset"/>
-			<Param type="GLsizei" name="width"/>
-			<Param type="GLsizei" name="height"/>
-			<Param type="GLenum" name="format"/>
-			<Param type="GLsizei" name="imageSize"/>
-			<Param type="const GLvoid*" name="data"/>
-		</Function>
-		<Function name="glCompressedTexSubImage3DARB" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLint" name="level"/>
-			<Param type="GLint" name="xoffset"/>
-			<Param type="GLint" name="yoffset"/>
-			<Param type="GLint" name="zoffset"/>
-			<Param type="GLsizei" name="width"/>
-			<Param type="GLsizei" name="height"/>
-			<Param type="GLsizei" name="depth"/>
-			<Param type="GLenum" name="format"/>
-			<Param type="GLsizei" name="imageSize"/>
-			<Param type="const GLvoid*" name="data"/>
-		</Function>
-		<Function name="glGetCompressedTexImageARB" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLint" name="lod"/>
-			<Param type="GLvoid*" name="img"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_texture_compression" reg_no="12">
-			<Name name="glCompressedTexImage1DARB"/>
-			<Name name="glCompressedTexImage2DARB"/>
-			<Name name="glCompressedTexImage3DARB"/>
-			<Name name="glCompressedTexSubImage1DARB"/>
-			<Name name="glCompressedTexSubImage2DARB"/>
-			<Name name="glCompressedTexSubImage3DARB"/>
-			<Name name="glGetCompressedTexImageARB"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_ARB"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glCompressedTexImage1DARB" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLenum" name="internalFormat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLint" name="border"/>
+				<param type="GLsizei" name="imageSize"/>
+				<param type="const GLvoid*" name="data"/>
+			</params>
+		</function>
+		<function name="glCompressedTexImage2DARB" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLenum" name="internalFormat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLint" name="border"/>
+				<param type="GLsizei" name="imageSize"/>
+				<param type="const GLvoid*" name="data"/>
+			</params>
+		</function>
+		<function name="glCompressedTexImage3DARB" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLenum" name="internalFormat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLint" name="border"/>
+				<param type="GLsizei" name="imageSize"/>
+				<param type="const GLvoid*" name="data"/>
+			</params>
+		</function>
+		<function name="glCompressedTexSubImage1DARB" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLsizei" name="imageSize"/>
+				<param type="const GLvoid*" name="data"/>
+			</params>
+		</function>
+		<function name="glCompressedTexSubImage2DARB" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="yoffset"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLsizei" name="imageSize"/>
+				<param type="const GLvoid*" name="data"/>
+			</params>
+		</function>
+		<function name="glCompressedTexSubImage3DARB" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="yoffset"/>
+				<param type="GLint" name="zoffset"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLsizei" name="imageSize"/>
+				<param type="const GLvoid*" name="data"/>
+			</params>
+		</function>
+		<function name="glGetCompressedTexImageARB" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="lod"/>
+				<param type="GLvoid*" name="img"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

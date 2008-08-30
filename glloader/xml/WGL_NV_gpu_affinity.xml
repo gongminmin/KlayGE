@@ -1,51 +1,47 @@
 <?xml version='1.0'?>
 
-<GLExtension name="WGL_NV_gpu_affinity">
-	<Typedefs>
-		<Typedef type="struct HGPUNV__ { int unused; }" synonym="*HGPUNV"/>
-		<Typedef type="struct { DWORD cb; CHAR DeviceName[32]; CHAR DeviceString[128]; DWORD Flags; RECT rcVirtualScreen; }" synonym="GPU_DEVICE"/>
-		<Typedef type="GPU_DEVICE*" synonym="PGPU_DEVICE"/>
-	</Typedefs>
+<gl_extension name="WGL_NV_gpu_affinity">
+	<typedefs>
+		<typedef type="struct HGPUNV__ { int unused; }" synonym="*HGPUNV"/>
+		<typedef type="struct { DWORD cb; CHAR DeviceName[32]; CHAR DeviceString[128]; DWORD Flags; RECT rcVirtualScreen; }" synonym="GPU_DEVICE"/>
+		<typedef type="GPU_DEVICE*" synonym="PGPU_DEVICE"/>
+	</typedefs>
 
-	<Tokens>
-		<Token name="WGL_ERROR_INCOMPATIBLE_AFFINITY_MASKS_NV" value="0x20D0"/>
-		<Token name="WGL_ERROR_MISSING_AFFINITY_MASK_NV" value="0x20D1"/>
-	</Tokens>
+	<tokens>
+		<token name="WGL_ERROR_INCOMPATIBLE_AFFINITY_MASKS_NV" value="0x20D0"/>
+		<token name="WGL_ERROR_MISSING_AFFINITY_MASK_NV" value="0x20D1"/>
+	</tokens>
 
-	<Functions>
-		<Function name="wglEnumGpusNV" return="BOOL">
-			<Param type="UINT" name="iGpuIndex"/>
-			<Param type="HGPUNV*" name="phGpu"/>
-		</Function>
-		<Function name="wglEnumGpuDevicesNV" return="BOOL">
-			<Param type="HGPUNV" name="hGpu"/>
-			<Param type="UINT" name="iDeviceIndex"/>
-			<Param type="PGPU_DEVICE" name="lpGpuDevice"/>
-		</Function>
-		<Function name="wglCreateAffinityDCNV" return="HDC">
-			<Param type="const HGPUNV*" name="phGpuList"/>
-		</Function>
-		<Function name="wglEnumGpusFromAffinityDCNV" return="BOOL">
-			<Param type="HDC" name="hAffinityDC"/>
-			<Param type="UINT" name="iGpuIndex"/>
-			<Param type="HGPUNV*" name="hGpu"/>
-		</Function>
-		<Function name="wglDeleteDCNV" return="BOOL">
-			<Param type="HDC" name="hdc"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="WGL_NV" string="WGL_NV_gpu_affinity">
-			<Name name="wglEnumGpusNV"/>
-			<Name name="wglEnumGpuDevicesNV"/>
-			<Name name="wglCreateAffinityDCNV"/>
-			<Name name="wglEnumGpusFromAffinityDCNV"/>
-			<Name name="wglDeleteDCNV"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="WGL_NV"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="wglEnumGpusNV" return="BOOL">
+			<params>
+				<param type="UINT" name="iGpuIndex"/>
+				<param type="HGPUNV*" name="phGpu"/>
+			</params>
+		</function>
+		<function name="wglEnumGpuDevicesNV" return="BOOL">
+			<params>
+				<param type="HGPUNV" name="hGpu"/>
+				<param type="UINT" name="iDeviceIndex"/>
+				<param type="PGPU_DEVICE" name="lpGpuDevice"/>
+			</params>
+		</function>
+		<function name="wglCreateAffinityDCNV" return="HDC">
+			<params>
+				<param type="const HGPUNV*" name="phGpuList"/>
+			</params>
+		</function>
+		<function name="wglEnumGpusFromAffinityDCNV" return="BOOL">
+			<params>
+				<param type="HDC" name="hAffinityDC"/>
+				<param type="UINT" name="iGpuIndex"/>
+				<param type="HGPUNV*" name="hGpu"/>
+			</params>
+		</function>
+		<function name="wglDeleteDCNV" return="BOOL">
+			<params>
+				<param type="HDC" name="hdc"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

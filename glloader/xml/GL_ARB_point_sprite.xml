@@ -1,16 +1,8 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_ARB_point_sprite">
-	<Tokens>
-		<Token name="GL_POINT_SPRITE_ARB" value="0x8861"/>
-		<Token name="GL_COORD_REPLACE_ARB" value="0x8862"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_point_sprite" reg_no="35"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_ARB"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_ARB_point_sprite" reg_no="35">
+	<tokens>
+		<token name="GL_POINT_SPRITE_ARB" value="0x8861"/>
+		<token name="GL_COORD_REPLACE_ARB" value="0x8862"/>
+	</tokens>
+</gl_extension>

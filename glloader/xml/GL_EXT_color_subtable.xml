@@ -1,32 +1,25 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_EXT_color_subtable">
-	<Functions>
-		<Function name="glColorSubTableEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLsizei" name="start"/>
-			<Param type="GLsizei" name="count"/>
-			<Param type="GLenum" name="format"/>
-			<Param type="GLenum" name="type"/>
-			<Param type="const GLvoid*" name="data"/>
-		</Function>
-		<Function name="glCopyColorSubTableEXT" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLsizei" name="start"/>
-			<Param type="GLint" name="x"/>
-			<Param type="GLint" name="y"/>
-			<Param type="GLsizei" name="width"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_color_subtable" reg_no="74">
-			<Name name="glColorSubTableEXT"/>
-			<Name name="glCopyColorSubTableEXT"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_EXT"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_EXT_color_subtable" reg_no="74">
+	<functions>
+		<function name="glColorSubTableEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="start"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="data"/>
+			</params>
+		</function>
+		<function name="glCopyColorSubTableEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="start"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

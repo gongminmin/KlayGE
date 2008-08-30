@@ -1,17 +1,9 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_ARB_shadow">
-	<Tokens>
-		<Token name="GL_TEXTURE_COMPARE_MODE_ARB" value="0x884C"/>
-		<Token name="GL_TEXTURE_COMPARE_FUNC_ARB" value="0x884D"/>
-		<Token name="GL_COMPARE_R_TO_TEXTURE_ARB" value="0x884E"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_shadow" reg_no="23"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_ARB"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_ARB_shadow" reg_no="23">
+	<tokens>
+		<token name="GL_TEXTURE_COMPARE_MODE_ARB" value="0x884C"/>
+		<token name="GL_TEXTURE_COMPARE_FUNC_ARB" value="0x884D"/>
+		<token name="GL_COMPARE_R_TO_TEXTURE_ARB" value="0x884E"/>
+	</tokens>
+</gl_extension>

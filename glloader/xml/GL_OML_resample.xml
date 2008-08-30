@@ -1,20 +1,12 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_OML_resample">
-	<Tokens>
-		<Token name="GL_PACK_RESAMPLE_OML" value="0x8984"/>
-		<Token name="GL_UNPACK_RESAMPLE_OML" value="0x8985"/>
-		<Token name="GL_RESAMPLE_REPLICATE_OML" value="0x8986"/>
-		<Token name="GL_RESAMPLE_ZERO_FILL_OML" value="0x8987"/>
-		<Token name="GL_RESAMPLE_AVERAGE_OML" value="0x8988"/>
-		<Token name="GL_RESAMPLE_DECIMATE_OML" value="0x8989"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_OML" string="GL_OML_resample" reg_no="241"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_OML"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_OML_resample" reg_no="241">
+	<tokens>
+		<token name="GL_PACK_RESAMPLE_OML" value="0x8984"/>
+		<token name="GL_UNPACK_RESAMPLE_OML" value="0x8985"/>
+		<token name="GL_RESAMPLE_REPLICATE_OML" value="0x8986"/>
+		<token name="GL_RESAMPLE_ZERO_FILL_OML" value="0x8987"/>
+		<token name="GL_RESAMPLE_AVERAGE_OML" value="0x8988"/>
+		<token name="GL_RESAMPLE_DECIMATE_OML" value="0x8989"/>
+	</tokens>
+</gl_extension>

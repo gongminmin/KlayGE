@@ -1,54 +1,50 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_ARB_matrix_palette">
-	<Tokens>
-		<Token name="GL_MATRIX_PALETTE_ARB" value="0x8840"/>
-		<Token name="GL_MAX_MATRIX_PALETTE_STACK_DEPTH_ARB" value="0x8841"/>
-		<Token name="GL_MAX_PALETTE_MATRICES_ARB" value="0x8842"/>
-		<Token name="GL_CURRENT_PALETTE_MATRIX_ARB" value="0x8843"/>
-		<Token name="GL_MATRIX_INDEX_ARRAY_ARB" value="0x8844"/>
-		<Token name="GL_CURRENT_MATRIX_INDEX_ARB" value="0x8845"/>
-		<Token name="GL_MATRIX_INDEX_ARRAY_SIZE_ARB" value="0x8846"/>
-		<Token name="GL_MATRIX_INDEX_ARRAY_TYPE_ARB" value="0x8847"/>
-		<Token name="GL_MATRIX_INDEX_ARRAY_STRIDE_ARB" value="0x8848"/>
-		<Token name="GL_MATRIX_INDEX_ARRAY_POINTER_ARB" value="0x8849"/>
-	</Tokens>
+<gl_extension name="GL_ARB_matrix_palette" reg_no="16">
+	<tokens>
+		<token name="GL_MATRIX_PALETTE_ARB" value="0x8840"/>
+		<token name="GL_MAX_MATRIX_PALETTE_STACK_DEPTH_ARB" value="0x8841"/>
+		<token name="GL_MAX_PALETTE_MATRICES_ARB" value="0x8842"/>
+		<token name="GL_CURRENT_PALETTE_MATRIX_ARB" value="0x8843"/>
+		<token name="GL_MATRIX_INDEX_ARRAY_ARB" value="0x8844"/>
+		<token name="GL_CURRENT_MATRIX_INDEX_ARB" value="0x8845"/>
+		<token name="GL_MATRIX_INDEX_ARRAY_SIZE_ARB" value="0x8846"/>
+		<token name="GL_MATRIX_INDEX_ARRAY_TYPE_ARB" value="0x8847"/>
+		<token name="GL_MATRIX_INDEX_ARRAY_STRIDE_ARB" value="0x8848"/>
+		<token name="GL_MATRIX_INDEX_ARRAY_POINTER_ARB" value="0x8849"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glCurrentPaletteMatrixARB" return="void">
-			<Param type="GLint" name="index"/>
-		</Function>
-		<Function name="glMatrixIndexubvARB" return="void">
-			<Param type="GLint" name="size"/>
-			<Param type="GLubyte*" name="indices"/>
-		</Function>
-		<Function name="glMatrixIndexusvARB" return="void">
-			<Param type="GLint" name="size"/>
-			<Param type="GLushort*" name="indices"/>
-		</Function>
-		<Function name="glMatrixIndexuivARB" return="void">
-			<Param type="GLint" name="size"/>
-			<Param type="GLuint*" name="indices"/>
-		</Function>
-		<Function name="glMatrixIndexPointerARB" return="void">
-			<Param type="GLint" name="size"/>
-			<Param type="GLenum" name="type"/>
-			<Param type="GLsizei" name="stride"/>
-			<Param type="GLvoid*" name="pointer"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_matrix_palette" reg_no="16">
-			<Name name="glCurrentPaletteMatrixARB"/>
-			<Name name="glMatrixIndexubvARB"/>
-			<Name name="glMatrixIndexusvARB"/>
-			<Name name="glMatrixIndexuivARB"/>
-			<Name name="glMatrixIndexPointerARB"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_ARB"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glCurrentPaletteMatrixARB" return="void">
+			<params>
+				<param type="GLint" name="index"/>
+			</params>
+		</function>
+		<function name="glMatrixIndexubvARB" return="void">
+			<params>
+				<param type="GLint" name="size"/>
+				<param type="GLubyte*" name="indices"/>
+			</params>
+		</function>
+		<function name="glMatrixIndexusvARB" return="void">
+			<params>
+				<param type="GLint" name="size"/>
+				<param type="GLushort*" name="indices"/>
+			</params>
+		</function>
+		<function name="glMatrixIndexuivARB" return="void">
+			<params>
+				<param type="GLint" name="size"/>
+				<param type="GLuint*" name="indices"/>
+			</params>
+		</function>
+		<function name="glMatrixIndexPointerARB" return="void">
+			<params>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+				<param type="GLvoid*" name="pointer"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

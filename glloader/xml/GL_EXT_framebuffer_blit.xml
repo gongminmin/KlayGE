@@ -1,35 +1,27 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_EXT_framebuffer_blit">
-	<Tokens>
-		<Token name="GL_READ_FRAMEBUFFER_EXT" value="0x8CA8"/>
-		<Token name="GL_DRAW_FRAMEBUFFER_EXT" value="0x8CA9"/>
-		<Token name="GL_DRAW_FRAMEBUFFER_BINDING_EXT" value="0x8CA6"/>
-		<Token name="GL_READ_FRAMEBUFFER_BINDING_EXT" value="0x8CAA"/>
-	</Tokens>
+<gl_extension name="GL_EXT_framebuffer_blit" reg_no="316">
+	<tokens>
+		<token name="GL_READ_FRAMEBUFFER_EXT" value="0x8CA8"/>
+		<token name="GL_DRAW_FRAMEBUFFER_EXT" value="0x8CA9"/>
+		<token name="GL_DRAW_FRAMEBUFFER_BINDING_EXT" value="0x8CA6"/>
+		<token name="GL_READ_FRAMEBUFFER_BINDING_EXT" value="0x8CAA"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glBlitFramebufferEXT" return="void">
-			<Param type="GLint" name="srcX0"/>
-			<Param type="GLint" name="srcY0"/>
-			<Param type="GLint" name="srcX1"/>
-			<Param type="GLint" name="srcY1"/>
-			<Param type="GLint" name="dstX0"/>
-			<Param type="GLint" name="dstY0"/>
-			<Param type="GLint" name="dstX1"/>
-			<Param type="GLint" name="dstY1"/>
-			<Param type="GLbitfield" name="mask"/>
-			<Param type="GLenum" name="filter"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_framebuffer_blit" reg_no="316">
-			<Name name="glBlitFramebufferEXT"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_EXT"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glBlitFramebufferEXT" return="void">
+			<params>
+				<param type="GLint" name="srcX0"/>
+				<param type="GLint" name="srcY0"/>
+				<param type="GLint" name="srcX1"/>
+				<param type="GLint" name="srcY1"/>
+				<param type="GLint" name="dstX0"/>
+				<param type="GLint" name="dstY0"/>
+				<param type="GLint" name="dstX1"/>
+				<param type="GLint" name="dstY1"/>
+				<param type="GLbitfield" name="mask"/>
+				<param type="GLenum" name="filter"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

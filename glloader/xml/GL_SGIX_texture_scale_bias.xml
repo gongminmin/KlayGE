@@ -1,18 +1,10 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_SGIX_texture_scale_bias">
-	<Tokens>
-		<Token name="GL_POST_TEXTURE_FILTER_BIAS_SGIX" value="0x8179"/>
-		<Token name="GL_POST_TEXTURE_FILTER_SCALE_SGIX" value="0x817A"/>
-		<Token name="GL_POST_TEXTURE_FILTER_BIAS_RANGE_SGIX" value="0x817B"/>
-		<Token name="GL_POST_TEXTURE_FILTER_SCALE_RANGE_SGIX" value="0x817C"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_SGIX" string="GL_SGIX_texture_scale_bias" reg_no="56"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_SGIX"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_SGIX_texture_scale_bias" reg_no="56">
+	<tokens>
+		<token name="GL_POST_TEXTURE_FILTER_BIAS_SGIX" value="0x8179"/>
+		<token name="GL_POST_TEXTURE_FILTER_SCALE_SGIX" value="0x817A"/>
+		<token name="GL_POST_TEXTURE_FILTER_BIAS_RANGE_SGIX" value="0x817B"/>
+		<token name="GL_POST_TEXTURE_FILTER_SCALE_RANGE_SGIX" value="0x817C"/>
+	</tokens>
+</gl_extension>

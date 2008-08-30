@@ -1,52 +1,49 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_OES_single_precision">
-	<Functions>
-		<Function name="glDepthRangefOES" return="void">
-			<Param type="GLclampf" name="n"/>
-			<Param type="GLclampf" name="f"/>
-		</Function>
-		<Function name="glFrustumfOES" return="void">
-			<Param type="GLfloat" name="l"/>
-			<Param type="GLfloat" name="r"/>
-			<Param type="GLfloat" name="b"/>
-			<Param type="GLfloat" name="t"/>
-			<Param type="GLfloat" name="n"/>
-			<Param type="GLfloat" name="f"/>
-		</Function>
-		<Function name="glOrthofOES" return="void">
-			<Param type="GLfloat" name="l"/>
-			<Param type="GLfloat" name="r"/>
-			<Param type="GLfloat" name="b"/>
-			<Param type="GLfloat" name="t"/>
-			<Param type="GLfloat" name="n"/>
-			<Param type="GLfloat" name="f"/>
-		</Function>
-		<Function name="glClipPlanefOES" return="void">
-			<Param type="GLenum" name="plane"/>
-			<Param type="const GLfloat*" name="equation"/>
-		</Function>
-		<Function name="glGetClipPlanefOES" return="void">
-			<Param type="GLenum" name="plane"/>
-			<Param type="GLfloat*" name="equation"/>
-		</Function>
-		<Function name="glClearDepthfOES" return="void">
-			<Param type="GLclampd" name="depth"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_OES" string="GL_OES_single_precision" reg_no="293">
-			<Name name="glDepthRangefOES"/>
-			<Name name="glFrustumfOES"/>
-			<Name name="glOrthofOES"/>
-			<Name name="glClipPlanefOES"/>
-			<Name name="glGetClipPlanefOES"/>
-			<Name name="glClearDepthfOES"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_OES"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_OES_single_precision" reg_no="293">
+	<functions>
+		<function name="glDepthRangefOES" return="void">
+			<params>
+				<param type="GLclampf" name="n"/>
+				<param type="GLclampf" name="f"/>
+			</params>
+		</function>
+		<function name="glFrustumfOES" return="void">
+			<params>
+				<param type="GLfloat" name="l"/>
+				<param type="GLfloat" name="r"/>
+				<param type="GLfloat" name="b"/>
+				<param type="GLfloat" name="t"/>
+				<param type="GLfloat" name="n"/>
+				<param type="GLfloat" name="f"/>
+			</params>
+		</function>
+		<function name="glOrthofOES" return="void">
+			<params>
+				<param type="GLfloat" name="l"/>
+				<param type="GLfloat" name="r"/>
+				<param type="GLfloat" name="b"/>
+				<param type="GLfloat" name="t"/>
+				<param type="GLfloat" name="n"/>
+				<param type="GLfloat" name="f"/>
+			</params>
+		</function>
+		<function name="glClipPlanefOES" return="void">
+			<params>
+				<param type="GLenum" name="plane"/>
+				<param type="const GLfloat*" name="equation"/>
+			</params>
+		</function>
+		<function name="glGetClipPlanefOES" return="void">
+			<params>
+				<param type="GLenum" name="plane"/>
+				<param type="GLfloat*" name="equation"/>
+			</params>
+		</function>
+		<function name="glClearDepthfOES" return="void">
+			<params>
+				<param type="GLclampd" name="depth"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

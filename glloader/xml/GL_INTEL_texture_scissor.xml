@@ -1,11 +1,4 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_INTEL_texture_scissor">
-	<Vendors>
-		<Vendor name="GL_INTEL" string="GL_INTEL_texture_scissor" reg_no="135"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_INTEL"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_INTEL_texture_scissor" reg_no="135">
+</gl_extension>

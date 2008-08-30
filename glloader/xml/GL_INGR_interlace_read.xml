@@ -1,15 +1,7 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_INGR_interlace_read">
-	<Tokens>
-		<Token name="GL_INTERLACE_READ_INGR" value="0x8568"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_INGR" string="GL_INGR_interlace_read" reg_no="175"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_INGR"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_INGR_interlace_read" reg_no="175">
+	<tokens>
+		<token name="GL_INTERLACE_READ_INGR" value="0x8568"/>
+	</tokens>
+</gl_extension>

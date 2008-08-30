@@ -1,38 +1,33 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_ARB_transpose_matrix">
-	<Tokens>
-		<Token name="GL_TRANSPOSE_MODELVIEW_MATRIX_ARB" value="0x84E3"/>
-		<Token name="GL_TRANSPOSE_PROJECTION_MATRIX_ARB" value="0x84E4"/>
-		<Token name="GL_TRANSPOSE_TEXTURE_MATRIX_ARB" value="0x84E5"/>
-		<Token name="GL_TRANSPOSE_COLOR_MATRIX_ARB" value="0x84E6"/>
-	</Tokens>
+<gl_extension name="GL_ARB_transpose_matrix" reg_no="3">
+	<tokens>
+		<token name="GL_TRANSPOSE_MODELVIEW_MATRIX_ARB" value="0x84E3"/>
+		<token name="GL_TRANSPOSE_PROJECTION_MATRIX_ARB" value="0x84E4"/>
+		<token name="GL_TRANSPOSE_TEXTURE_MATRIX_ARB" value="0x84E5"/>
+		<token name="GL_TRANSPOSE_COLOR_MATRIX_ARB" value="0x84E6"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glLoadTransposeMatrixdARB" return="void">
-			<Param type="const GLdouble*" name="m"/>
-		</Function>
-		<Function name="glLoadTransposeMatrixfARB" return="void">
-			<Param type="const GLfloat*" name="m"/>
-		</Function>
-		<Function name="glMultTransposeMatrixdARB" return="void">
-			<Param type="const GLdouble*" name="m"/>
-		</Function>
-		<Function name="glMultTransposeMatrixfARB" return="void">
-			<Param type="const GLfloat*" name="m"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_transpose_matrix" reg_no="3">
-			<Name name="glLoadTransposeMatrixdARB"/>
-			<Name name="glLoadTransposeMatrixfARB"/>
-			<Name name="glMultTransposeMatrixdARB"/>
-			<Name name="glMultTransposeMatrixfARB"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_ARB"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glLoadTransposeMatrixdARB" return="void">
+			<params>
+				<param type="const GLdouble*" name="m"/>
+			</params>
+		</function>
+		<function name="glLoadTransposeMatrixfARB" return="void">
+			<params>
+				<param type="const GLfloat*" name="m"/>
+			</params>
+		</function>
+		<function name="glMultTransposeMatrixdARB" return="void">
+			<params>
+				<param type="const GLdouble*" name="m"/>
+			</params>
+		</function>
+		<function name="glMultTransposeMatrixfARB" return="void">
+			<params>
+				<param type="const GLfloat*" name="m"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

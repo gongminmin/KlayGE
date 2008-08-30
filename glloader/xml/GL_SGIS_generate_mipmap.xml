@@ -1,16 +1,8 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_SGIS_generate_mipmap">
-	<Tokens>
-		<Token name="GL_GENERATE_MIPMAP_SGIS" value="0x8191"/>
-		<Token name="GL_GENERATE_MIPMAP_HINT_SGIS" value="0x8192"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_SGIS" string="GL_SGIS_generate_mipmap" reg_no="32"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_SGIS"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_SGIS_generate_mipmap" reg_no="32">
+	<tokens>
+		<token name="GL_GENERATE_MIPMAP_SGIS" value="0x8191"/>
+		<token name="GL_GENERATE_MIPMAP_HINT_SGIS" value="0x8192"/>
+	</tokens>
+</gl_extension>

@@ -1,16 +1,8 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_REND_screen_coordinates">
-	<Tokens>
-		<Token name="GL_SCREEN_COORDINATES_REND" value="0x8490"/>
-		<Token name="GL_INVERTED_SCREEN_W_REND" value="0x8491"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_REND" string="GL_REND_screen_coordinates" reg_no="155"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_REND"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_REND_screen_coordinates" reg_no="155">
+	<tokens>
+		<token name="GL_SCREEN_COORDINATES_REND" value="0x8490"/>
+		<token name="GL_INVERTED_SCREEN_W_REND" value="0x8491"/>
+	</tokens>
+</gl_extension>

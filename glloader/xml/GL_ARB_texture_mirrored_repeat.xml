@@ -1,17 +1,7 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_ARB_texture_mirrored_repeat">
-	<Tokens>
-		<Token name="GL_MIRRORED_REPEAT_ARB" value="0x8370"/>
-	</Tokens>
-
-	<Vendors>
-		<Vendor name="GL_ARB" string="GL_ARB_texture_mirrored_repeat" reg_no="21"/>
-		<Vendor name="GL_IBM" string="GL_IBM_texture_mirrored_repeat" reg_no="224"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_ARB"/>
-		<Init name="GL_IBM"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_ARB_texture_mirrored_repeat" reg_no="21">
+	<tokens>
+		<token name="GL_MIRRORED_REPEAT_ARB" value="0x8370"/>
+	</tokens>
+</gl_extension>

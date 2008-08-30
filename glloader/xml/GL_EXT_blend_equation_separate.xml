@@ -1,25 +1,17 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_EXT_blend_equation_separate">
-	<Tokens>
-		<Token name="GL_BLEND_EQUATION_RGB_EXT" value="GL_BLEND_EQUATION"/>
-		<Token name="GL_BLEND_EQUATION_ALPHA_EXT" value="0x883D"/>
-	</Tokens>
+<gl_extension name="GL_EXT_blend_equation_separate" reg_no="299">
+	<tokens>
+		<token name="GL_BLEND_EQUATION_RGB_EXT" value="GL_BLEND_EQUATION"/>
+		<token name="GL_BLEND_EQUATION_ALPHA_EXT" value="0x883D"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glBlendEquationSeparateEXT" return="void">
-			<Param type="GLenum" name="modeRGB"/>
-			<Param type="GLenum" name="modeAlpha"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_blend_equation_separate" reg_no="299">
-			<Name name="glBlendEquationSeparateEXT"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_EXT"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glBlendEquationSeparateEXT" return="void">
+			<params>
+				<param type="GLenum" name="modeRGB"/>
+				<param type="GLenum" name="modeAlpha"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

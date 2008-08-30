@@ -1,32 +1,25 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_APPLE_flush_buffer_range">
-	<Tokens>
-		<Token name="GL_BUFFER_SERIALIZED_MODIFY_APPLE" value="0x8A12"/>
-		<Token name="GL_BUFFER_FLUSHING_UNMAP_APPLE" value="0x8A13"/>
-	</Tokens>
+<gl_extension name="GL_APPLE_flush_buffer_range" reg_no="321">
+	<tokens>
+		<token name="GL_BUFFER_SERIALIZED_MODIFY_APPLE" value="0x8A12"/>
+		<token name="GL_BUFFER_FLUSHING_UNMAP_APPLE" value="0x8A13"/>
+	</tokens>
 
-	<Functions>
-		<Function name="glBufferParameteriAPPLE" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLenum" name="pname"/>
-			<Param type="GLint" name="param"/>
-		</Function>
-		<Function name="glFlushMappedBufferRangeAPPLE" return="void">
-			<Param type="GLenum" name="target"/>
-			<Param type="GLintptr" name="offset"/>
-			<Param type="GLsizeiptr" name="size"/>
-		</Function>
-	</Functions>
-
-	<Vendors>
-		<Vendor name="GL_APPLE" string="GL_APPLE_flush_buffer_range" reg_no="321">
-			<Name name="glBufferParameteriAPPLE"/>
-			<Name name="glFlushMappedBufferRangeAPPLE"/>
-		</Vendor>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_APPLE"/>
-	</InitPath>
-</GLExtension>
+	<functions>
+		<function name="glBufferParameteriAPPLE" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glFlushMappedBufferRangeAPPLE" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLintptr" name="offset"/>
+				<param type="GLsizeiptr" name="size"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

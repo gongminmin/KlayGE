@@ -1,11 +1,4 @@
 <?xml version='1.0'?>
 
-<GLExtension name="GL_EXT_misc_attribute">
-	<Vendors>
-		<Vendor name="GL_EXT" string="GL_EXT_misc_attribute" reg_no="31"/>
-	</Vendors>
-
-	<InitPath>
-		<Init name="GL_EXT"/>
-	</InitPath>
-</GLExtension>
+<gl_extension name="GL_EXT_misc_attribute" reg_no="31">
+</gl_extension>
