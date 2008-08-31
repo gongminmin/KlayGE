@@ -1,4 +1,7 @@
 <?xml version='1.0'?>
 
 <gl_extension name="GL_ARB_half_float_vertex" reg_no="48">
+	<tokens>
+		<token name="GL_HALF_FLOAT" value="0x140B"/>
+	</tokens>
 </gl_extension>

@@ -25,4 +25,8 @@
 		<token name="GL_PRIMARY_COLOR_ARB" value="0x8577"/>
 		<token name="GL_PREVIOUS_ARB" value="0x8578"/>
 	</tokens>
+
+	<additional>
+		<ext name="GL_EXT_texture_env_combine"/>
+	</additional>
 </gl_extension>

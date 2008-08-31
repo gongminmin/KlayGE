@@ -1,0 +1,289 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_framebuffer_object" reg_no="45">
+	<tokens>
+		<token name="GL_INVALID_FRAMEBUFFER_OPERATION" value="0x0506"/>
+		<token name="GL_FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING" value="0x8210"/>
+		<token name="GL_FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE" value="0x8211"/>
+		<token name="GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE" value="0x8212"/>
+		<token name="GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE" value="0x8213"/>
+		<token name="GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE" value="0x8214"/>
+		<token name="GL_FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE" value="0x8215"/>
+		<token name="GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE" value="0x8216"/>
+		<token name="GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE" value="0x8217"/>
+		<token name="GL_FRAMEBUFFER_DEFAULT" value="0x8218"/>
+		<token name="GL_FRAMEBUFFER_UNDEFINED" value="0x8219"/>
+		<token name="GL_DEPTH_STENCIL_ATTACHMENT" value="0x821A"/>
+		<token name="GL_INDEX" value="0x8222"/>
+		<token name="GL_MAX_RENDERBUFFER_SIZE" value="0x84E8"/>
+		<token name="GL_DEPTH_STENCIL" value="0x84F9"/>
+		<token name="GL_UNSIGNED_INT_24_8" value="0x84FA"/>
+		<token name="GL_DEPTH24_STENCIL8" value="0x88F0"/>
+		<token name="GL_TEXTURE_STENCIL_SIZE" value="0x88F1"/>
+		<token name="GL_FRAMEBUFFER_BINDING" value="0x8CA6"/>
+		<token name="GL_DRAW_FRAMEBUFFER_BINDING" value="0x8CA6"/>
+		<token name="GL_RENDERBUFFER_BINDING" value="0x8CA7"/>
+		<token name="GL_READ_FRAMEBUFFER" value="0x8CA8"/>
+		<token name="GL_DRAW_FRAMEBUFFER" value="0x8CA9"/>
+		<token name="GL_READ_FRAMEBUFFER_BINDING" value="0x8CAA"/>
+		<token name="GL_RENDERBUFFER_SAMPLES" value="0x8CAB"/>
+		<token name="GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE" value="0x8CD0"/>
+		<token name="GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME" value="0x8CD1"/>
+		<token name="GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL" value="0x8CD2"/>
+		<token name="GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE" value="0x8CD3"/>
+		<token name="GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LAYER" value="0x8CD4"/>
+		<token name="GL_FRAMEBUFFER_COMPLETE" value="0x8CD5"/>
+		<token name="GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT" value="0x8CD6"/>
+		<token name="GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT" value="0x8CD7"/>
+		<token name="GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER" value="0x8CDB"/>
+		<token name="GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER" value="0x8CDC"/>
+		<token name="GL_FRAMEBUFFER_UNSUPPORTED" value="0x8CDD"/>
+		<token name="GL_MAX_COLOR_ATTACHMENTS" value="0x8CDF"/>
+		<token name="GL_COLOR_ATTACHMENT0" value="0x8CE0"/>
+		<token name="GL_COLOR_ATTACHMENT1" value="0x8CE1"/>
+		<token name="GL_COLOR_ATTACHMENT2" value="0x8CE2"/>
+		<token name="GL_COLOR_ATTACHMENT3" value="0x8CE3"/>
+		<token name="GL_COLOR_ATTACHMENT4" value="0x8CE4"/>
+		<token name="GL_COLOR_ATTACHMENT5" value="0x8CE5"/>
+		<token name="GL_COLOR_ATTACHMENT6" value="0x8CE6"/>
+		<token name="GL_COLOR_ATTACHMENT7" value="0x8CE7"/>
+		<token name="GL_COLOR_ATTACHMENT8" value="0x8CE8"/>
+		<token name="GL_COLOR_ATTACHMENT9" value="0x8CE9"/>
+		<token name="GL_COLOR_ATTACHMENT10" value="0x8CEA"/>
+		<token name="GL_COLOR_ATTACHMENT11" value="0x8CEB"/>
+		<token name="GL_COLOR_ATTACHMENT12" value="0x8CEC"/>
+		<token name="GL_COLOR_ATTACHMENT13" value="0x8CED"/>
+		<token name="GL_COLOR_ATTACHMENT14" value="0x8CEE"/>
+		<token name="GL_COLOR_ATTACHMENT15" value="0x8CEF"/>
+		<token name="GL_DEPTH_ATTACHMENT" value="0x8D00"/>
+		<token name="GL_STENCIL_ATTACHMENT" value="0x8D20"/>
+		<token name="GL_FRAMEBUFFER" value="0x8D40"/>
+		<token name="GL_RENDERBUFFER" value="0x8D41"/>
+		<token name="GL_RENDERBUFFER_WIDTH" value="0x8D42"/>
+		<token name="GL_RENDERBUFFER_HEIGHT" value="0x8D43"/>
+		<token name="GL_RENDERBUFFER_INTERNAL_FORMAT" value="0x8D44"/>
+		<token name="GL_STENCIL_INDEX1" value="0x8D46"/>
+		<token name="GL_STENCIL_INDEX4" value="0x8D47"/>
+		<token name="GL_STENCIL_INDEX8" value="0x8D48"/>
+		<token name="GL_STENCIL_INDEX16" value="0x8D49"/>
+		<token name="GL_RENDERBUFFER_RED_SIZE" value="0x8D50"/>
+		<token name="GL_RENDERBUFFER_GREEN_SIZE" value="0x8D51"/>
+		<token name="GL_RENDERBUFFER_BLUE_SIZE" value="0x8D52"/>
+		<token name="GL_RENDERBUFFER_ALPHA_SIZE" value="0x8D53"/>
+		<token name="GL_RENDERBUFFER_DEPTH_SIZE" value="0x8D54"/>
+		<token name="GL_RENDERBUFFER_STENCIL_SIZE" value="0x8D55"/>
+		<token name="GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE" value="0x8D56"/>
+		<token name="GL_MAX_SAMPLES" value="0x8D57"/>
+	</tokens>
+
+	<functions>
+		<function name="glIsRenderbuffer" return="GLboolean">
+			<params>
+				<param type="GLuint" name="renderbuffer"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_framebuffer_object" name="glIsRenderbufferEXT"/>
+			</mappings>
+		</function>
+		<function name="glBindRenderbuffer" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="renderbuffer"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_framebuffer_object" name="glBindRenderbufferEXT"/>
+			</mappings>
+		</function>
+		<function name="glDeleteRenderbuffers" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="const GLuint*" name="renderbuffers"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_framebuffer_object" name="glDeleteRenderbuffersEXT"/>
+			</mappings>
+		</function>
+		<function name="glGenRenderbuffers" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="renderbuffers"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_framebuffer_object" name="glGenRenderbuffersEXT"/>
+			</mappings>
+		</function>
+		<function name="glRenderbufferStorage" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_framebuffer_object" name="glRenderbufferStorageEXT"/>
+			</mappings>
+		</function>
+		<function name="glGetRenderbufferParameteriv" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_framebuffer_object" name="glGetRenderbufferParameterivEXT"/>
+			</mappings>
+		</function>
+		<function name="glIsFramebuffer" return="GLboolean">
+			<params>
+				<param type="GLuint" name="framebuffer"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_framebuffer_object" name="glIsFramebufferEXT"/>
+			</mappings>
+		</function>
+		<function name="glBindFramebuffer" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="framebuffer"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_framebuffer_object" name="glBindFramebufferEXT"/>
+			</mappings>
+		</function>
+		<function name="glDeleteFramebuffers" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="const GLuint*" name="framebuffers"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_framebuffer_object" name="glDeleteFramebuffersEXT"/>
+			</mappings>
+		</function>
+		<function name="glGenFramebuffers" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="framebuffers"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_framebuffer_object" name="glGenFramebuffersEXT"/>
+			</mappings>
+		</function>
+		<function name="glCheckFramebufferStatus" return="GLenum">
+			<params>
+				<param type="GLenum" name="target"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_framebuffer_object" name="glCheckFramebufferStatusEXT"/>
+			</mappings>
+		</function>
+		<function name="glFramebufferTexture1D" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="attachment"/>
+				<param type="GLenum" name="textarget"/>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_framebuffer_object" name="glFramebufferTexture1DEXT"/>
+			</mappings>
+		</function>
+		<function name="glFramebufferTexture2D" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="attachment"/>
+				<param type="GLenum" name="textarget"/>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_framebuffer_object" name="glFramebufferTexture2DEXT"/>
+			</mappings>
+		</function>
+		<function name="glFramebufferTexture3D" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="attachment"/>
+				<param type="GLenum" name="textarget"/>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="zoffset"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_framebuffer_object" name="glFramebufferTexture3DEXT"/>
+			</mappings>
+		</function>
+		<function name="glFramebufferRenderbuffer" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="attachment"/>
+				<param type="GLenum" name="renderbuffertarget"/>
+				<param type="GLuint" name="renderbuffer"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_framebuffer_object" name="glFramebufferRenderbufferEXT"/>
+			</mappings>
+		</function>
+		<function name="glGetFramebufferAttachmentParameteriv" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="attachment"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_framebuffer_object" name="glGetFramebufferAttachmentParameterivEXT"/>
+			</mappings>
+		</function>
+		<function name="glGenerateMipmap" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_framebuffer_object" name="glGenerateMipmapEXT"/>
+			</mappings>
+		</function>
+		<function name="glBlitFramebuffer" return="void">
+			<params>
+				<param type="GLint" name="srcX0"/>
+				<param type="GLint" name="srcY0"/>
+				<param type="GLint" name="srcX1"/>
+				<param type="GLint" name="srcY1"/>
+				<param type="GLint" name="dstX0"/>
+				<param type="GLint" name="dstY0"/>
+				<param type="GLint" name="dstX1"/>
+				<param type="GLint" name="dstY1"/>
+				<param type="GLbitfield" name="mask"/>
+				<param type="GLenum" name="filter"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_framebuffer_blit" name="glBlitFramebufferEXT"/>
+			</mappings>
+		</function>
+		<function name="glRenderbufferStorageMultisample" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="samples"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_framebuffer_multisample" name="glRenderbufferStorageMultisampleEXT"/>
+			</mappings>
+		</function>
+		<function name="glFramebufferTextureLayer" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="attachment"/>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="layer"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_geometry_shader4" name="glFramebufferTextureLayerARB"/>
+				<mapping from="GL_EXT_geometry_shader4" name="glFramebufferTextureLayerEXT"/>
+			</mappings>
+		</function>
+	</functions>
+</gl_extension>

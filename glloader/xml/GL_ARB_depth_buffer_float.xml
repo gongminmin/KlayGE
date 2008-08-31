@@ -1,4 +1,9 @@
 <?xml version='1.0'?>
 
 <gl_extension name="GL_ARB_depth_buffer_float" reg_no="43">
+	<tokens>
+		<token name="GL_DEPTH_COMPONENT32F" value="0x8CAC"/>
+		<token name="GL_DEPTH32F_STENCIL8" value="0x8CAD"/>
+		<token name="GL_FLOAT_32_UNSIGNED_INT_24_8_REV" value="0x8DAD"/>
+	</tokens>
 </gl_extension>

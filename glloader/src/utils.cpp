@@ -88,6 +88,9 @@ namespace glloader
 		std::vector<std::string>::iterator iter = std::lower_bound(features_.begin(), features_.end(), high_name);
 		if (*iter != high_name)
 		{
+#ifdef GLLOADER_DEBUG
+			std::cerr << high_name << " is promoted" << std::endl;
+#endif
 			features_.insert(iter, high_name);
 		}
 	}

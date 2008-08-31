@@ -310,10 +310,13 @@ def create_source(prefix, extensions):
 		sourceFile.write("\t\t}\n")
 
 		backup = False
-		for function in extension.functions:
-			if len(function.mappings) > 0:
-				backup = True
-				break
+		if len(extension.additionals) > 0:
+			backup = True
+		else:
+			for function in extension.functions:
+				if len(function.mappings) > 0:
+					backup = True
+					break
 
 		if backup:
 			plans = []
@@ -355,14 +358,16 @@ def create_source(prefix, extensions):
 
 					sourceFile.write("\t\t\t}\n")
 
-			if all_covered and len(plans) > 1:
+			if all_covered and len(plans) != 1:
 				all_backup_exts = []
 				for plan in plans:
 					all_backup_exts.append(plan[0])
 				for addi in extension.additionals:
 					all_backup_exts.append(addi)
 
-				sourceFile.write("\n\t\t\tif (")
+				if len(plans) > 0:
+					sourceFile.write("\n")
+				sourceFile.write("\t\t\tif (")
 				for i in range(0, len(all_backup_exts)):
 					plan = all_backup_exts[i]
 

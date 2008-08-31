@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_EXT_framebuffer_multisample" reg_no="317">
+<gl_extension name="GL_EXT_framebuffer_multisample" reg_no="317" prefer="GL_ARB_framebuffer_object">
 	<tokens>
 		<token name="GL_RENDERBUFFER_SAMPLES_EXT" value="0x8CAB"/>
 		<token name="GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_EXT" value="0x8D56"/>

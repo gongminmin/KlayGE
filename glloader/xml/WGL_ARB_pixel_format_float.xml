@@ -4,4 +4,8 @@
 	<tokens>
 		<token name="WGL_TYPE_RGBA_FLOAT_ARB" value="0x21A0"/>
 	</tokens>
+
+	<additionals>
+		<ext name="WGL_ATI_pixel_format_float"/>
+	</additionals>
 </gl_extension>

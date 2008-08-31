@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="WGL_ATI_pixel_format_float" reg_no="278">
+<gl_extension name="WGL_ATI_pixel_format_float" reg_no="278" prefer="WGL_ARB_pixel_format_float">
 	<tokens>
 		<token name="WGL_TYPE_RGBA_FLOAT_ATI" value="0x21A0"/>
 	</tokens>

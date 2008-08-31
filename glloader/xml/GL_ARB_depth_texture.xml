@@ -8,4 +8,8 @@
 		<token name="GL_TEXTURE_DEPTH_SIZE_ARB" value="0x884A"/>
 		<token name="GL_DEPTH_TEXTURE_MODE_ARB" value="0x884B"/>
 	</tokens>
+
+	<additionals>
+		<ext name="GL_SGIX_depth_texture"/>
+	</additionals>
 </gl_extension>

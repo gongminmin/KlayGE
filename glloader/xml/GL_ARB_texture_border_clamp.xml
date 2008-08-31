@@ -4,4 +4,8 @@
 	<tokens>
 		<token name="GL_CLAMP_TO_BORDER_ARB" value="0x812D"/>
 	</tokens>
+
+	<additionals>
+		<ext name="GL_SGIS_texture_border_clamp"/>
+	</additionals>
 </gl_extension>

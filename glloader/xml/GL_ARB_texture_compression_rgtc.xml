@@ -1,4 +1,14 @@
 <?xml version='1.0'?>
 
 <gl_extension name="GL_ARB_texture_compression_rgtc" reg_no="52">
+	<tokens>
+		<token name="GL_COMPRESSED_RED_RGTC1" value="0x8DBB"/>
+		<token name="GL_COMPRESSED_SIGNED_RED_RGTC1" value="0x8DBC"/>
+		<token name="GL_COMPRESSED_RG_RGTC2" value="0x8DBD"/>
+		<token name="GL_COMPRESSED_SIGNED_RG_RGTC2" value="0x8DBE"/>
+	</tokens>
+
+	<additionals>
+		<ext name="GL_EXT_texture_compression_rgtc"/>
+	</additionals>
 </gl_extension>

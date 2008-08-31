@@ -1,4 +1,44 @@
 <?xml version='1.0'?>
 
 <gl_extension name="GL_ARB_vertex_array_object" reg_no="54">
+	<tokens>
+		<token name="GL_VERTEX_ARRAY_BINDING" value="0x85B5"/>
+	</tokens>
+
+	<functions>
+		<function name="glBindVertexArray" return="void">
+			<params>
+				<param type="GLuint" name="array"/>
+			</params>
+			<mappings>
+				<mapping from="GL_APPLE_vertex_array_object" name="glBindVertexArrayAPPLE"/>
+			</mappings>
+		</function>
+		<function name="glDeleteVertexArrays" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="const GLuint*" name="arrays"/>
+			</params>
+			<mappings>
+				<mapping from="GL_APPLE_vertex_array_object" name="glDeleteVertexArraysAPPLE"/>
+			</mappings>
+		</function>
+		<function name="glGenVertexArrays" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="arrays"/>
+			</params>
+			<mappings>
+				<mapping from="GL_APPLE_vertex_array_object" name="glGenVertexArraysAPPLE"/>
+			</mappings>
+		</function>
+		<function name="glIsVertexArray" return="GLboolean">
+			<params>
+				<param type="GLuint" name="array"/>
+			</params>
+			<mappings>
+				<mapping from="GL_APPLE_vertex_array_object" name="glIsVertexArrayAPPLE"/>
+			</mappings>
+		</function>
+	</functions>
 </gl_extension>

@@ -1,4 +1,28 @@
 <?xml version='1.0'?>
 
 <gl_extension name="GL_ARB_texture_rg" reg_no="53">
+	<tokens>
+		<token name="GL_RG" value="0x8227"/>
+		<token name="GL_RG_INTEGER" value="0x8228"/>
+		<token name="GL_R8" value="0x8229"/>
+		<token name="GL_R16" value="0x822A"/>
+		<token name="GL_RG8" value="0x822B"/>
+		<token name="GL_RG16" value="0x822C"/>
+		<token name="GL_R16F" value="0x822D"/>
+		<token name="GL_R32F" value="0x822E"/>
+		<token name="GL_RG16F" value="0x822F"/>
+		<token name="GL_RG32F" value="0x8230"/>
+		<token name="GL_R8I" value="0x8231"/>
+		<token name="GL_R8UI" value="0x8232"/>
+		<token name="GL_R16I" value="0x8233"/>
+		<token name="GL_R16UI" value="0x8234"/>
+		<token name="GL_R32I" value="0x8235"/>
+		<token name="GL_R32UI" value="0x8236"/>
+		<token name="GL_RG8I" value="0x8237"/>
+		<token name="GL_RG8UI" value="0x8238"/>
+		<token name="GL_RG16I" value="0x8239"/>
+		<token name="GL_RG16UI" value="0x823A"/>
+		<token name="GL_RG32I" value="0x823B"/>
+		<token name="GL_RG32UI" value="0x823C"/>
+	</tokens>
 </gl_extension>

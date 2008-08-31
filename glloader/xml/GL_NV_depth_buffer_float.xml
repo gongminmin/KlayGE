@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_NV_depth_buffer_float" reg_no="334">
+<gl_extension name="GL_NV_depth_buffer_float" reg_no="334" prefer="GL_ARB_depth_buffer_float">
 	<tokens>
 		<token name="GL_DEPTH_COMPONENT32F_NV" value="0x8DAB"/>
 		<token name="GL_DEPTH32F_STENCIL8_NV" value="0x8DAC"/>

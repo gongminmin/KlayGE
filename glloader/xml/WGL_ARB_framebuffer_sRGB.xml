@@ -4,4 +4,8 @@
 	<tokens>
 		<token name="WGL_FRAMEBUFFER_SRGB_CAPABLE_ARB" value="0x20A9"/>
 	</tokens>
+
+	<additionals>
+		<ext name="WGL_EXT_framebuffer_sRGB"/>
+	</additionals>
 </gl_extension>

@@ -4,4 +4,8 @@
 	<tokens>
 		<token name="GL_MIRRORED_REPEAT_ARB" value="0x8370"/>
 	</tokens>
+
+	<additionals>
+		<ext name="GL_IBM_texture_mirrored_repeat"/>
+	</additionals>
 </gl_extension>

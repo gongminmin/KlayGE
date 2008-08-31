@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_EXT_framebuffer_blit" reg_no="316">
+<gl_extension name="GL_EXT_framebuffer_blit" reg_no="316" prefer="GL_ARB_framebuffer_object">
 	<tokens>
 		<token name="GL_READ_FRAMEBUFFER_EXT" value="0x8CA8"/>
 		<token name="GL_DRAW_FRAMEBUFFER_EXT" value="0x8CA9"/>

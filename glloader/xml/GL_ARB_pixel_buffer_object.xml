@@ -7,4 +7,8 @@
 		<token name="GL_PIXEL_PACK_BUFFER_BINDING_ARB" value="0x88ED"/>
 		<token name="GL_PIXEL_UNPACK_BUFFER_BINDING_ARB" value="0x88EF"/>
 	</tokens>
+
+	<additionals>
+		<ext name="GL_EXT_pixel_buffer_object"/>
+	</additionals>
 </gl_extension>

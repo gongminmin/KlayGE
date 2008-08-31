@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_EXT_texture_compression_rgtc" reg_no="332">
+<gl_extension name="GL_EXT_texture_compression_rgtc" reg_no="332" prefer="GL_ARB_texture_compression_rgtc">
 	<tokens>
 		<token name="GL_COMPRESSED_RED_RGTC1_EXT" value="0x8DBB"/>
 		<token name="GL_COMPRESSED_SIGNED_RED_RGTC1_EXT" value="0x8DBC"/>
