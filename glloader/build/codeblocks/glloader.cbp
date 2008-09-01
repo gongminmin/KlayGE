@@ -141,25 +141,11 @@
 		</Compiler>
 		<Unit filename="..\..\include\glloader\gl10.h" />
 		<Unit filename="..\..\include\glloader\gl11.h" />
-		<Unit filename="..\..\include\glloader\gl12.h" />
-		<Unit filename="..\..\include\glloader\gl13.h" />
-		<Unit filename="..\..\include\glloader\gl14.h" />
-		<Unit filename="..\..\include\glloader\gl15.h" />
-		<Unit filename="..\..\include\glloader\gl20.h" />
-		<Unit filename="..\..\include\glloader\gl21.h" />
-		<Unit filename="..\..\include\glloader\gl30.h" />
 		<Unit filename="..\..\include\glloader\glloader.h" />
 		<Unit filename="..\..\include\glloader\glloader_gl.h" />
 		<Unit filename="..\..\include\glloader\glloader_glx.h" />
 		<Unit filename="..\..\include\glloader\glloader_wgl.h" />
 		<Unit filename="..\..\include\glloader\glx11.h" />
-		<Unit filename="..\..\src\gl12.cpp" />
-		<Unit filename="..\..\src\gl13.cpp" />
-		<Unit filename="..\..\src\gl14.cpp" />
-		<Unit filename="..\..\src\gl15.cpp" />
-		<Unit filename="..\..\src\gl20.cpp" />
-		<Unit filename="..\..\src\gl21.cpp" />
-		<Unit filename="..\..\src\gl30.cpp" />
 		<Unit filename="..\..\src\glloader_gl.cpp" />
 		<Unit filename="..\..\src\glloader_glx.cpp" />
 		<Unit filename="..\..\src\glloader_wgl.cpp" />
