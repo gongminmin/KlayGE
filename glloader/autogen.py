@@ -212,7 +212,6 @@ def create_source(prefix, extensions):
 
 	sourceFile.write("#ifdef GLLOADER_%s\n\n" % prefix.upper())
 
-	sourceFile.write("using glloader::load_funcs;\n")
 	sourceFile.write("using glloader::gl_features_extractor;\n\n")
 
 	sourceFile.write("namespace\n")
@@ -290,23 +289,13 @@ def create_source(prefix, extensions):
 
 			sourceFile.write("\t\t}\n\n")
 
-		if (len(extension.functions) != 0):
-			sourceFile.write("\t\tentries_t entries(%d);\n" % len(extension.functions))
-			sourceFile.write("\t\t{\n")
-
-			for i in range(0, len(extension.functions)):
-				sourceFile.write("\t\t\tentries[%d] = reinterpret_cast<void**>(&%s);\n" % (i, extension.functions[i].name))
-
-			sourceFile.write("\t\t}\n\n")
-			sourceFile.write("\t\tfuncs_names_t names(%d);\n" % len(extension.functions))
-
 		sourceFile.write("\t\tif (glloader_is_supported(\"%s\"))\n" % extension.name)
 		sourceFile.write("\t\t{\n")
 		sourceFile.write("\t\t\t_%s = true;\n" % extension.name)
 		if len(extension.functions) > 0:
 			sourceFile.write("\n")
 		for i in range(0, len(extension.functions)):
-			sourceFile.write("\t\t\tnames[%d] = \"%s\";\n" % (i, extension.functions[i].name))
+			sourceFile.write("\t\t\tLOAD_FUNC1(%s);\n" % extension.functions[i].name)
 		sourceFile.write("\t\t}\n")
 
 		backup = False
@@ -350,7 +339,8 @@ def create_source(prefix, extensions):
 					sourceFile.write("if (glloader_is_supported(\"%s\"))\n" % plan[0][i])
 					sourceFile.write("\t\t\t{\n")
 					for j in range(0, len(plan[1])):
-						sourceFile.write("\t\t\t\tnames[%d] = \"%s\";\n" % (plan[1][j], extension.functions[plan[1][j]].mappings[i].name))
+						function = extension.functions[plan[1][j]]
+						sourceFile.write("\t\t\t\tLOAD_FUNC2(%s, %s);\n" % (function.name, function.mappings[i].name))
 
 					if all_covered and len(plans) == 1 and len(extension.additionals) == 0:
 						sourceFile.write("\n\t\t\t\t_%s = true;\n" % extension.name)
@@ -394,12 +384,6 @@ def create_source(prefix, extensions):
 				sourceFile.write("\t\t\t\tgl_features_extractor::instance().promote(\"%s\");\n" % extension.name)
 				sourceFile.write("\t\t\t}\n")
 
-			sourceFile.write("\t\t}\n")
-
-		if (len(extension.functions) != 0):
-			sourceFile.write("\n\t\tif (_%s)\n" % extension.name)
-			sourceFile.write("\t\t{\n")
-			sourceFile.write("\t\t\tload_funcs(entries, names);\n")
 			sourceFile.write("\t\t}\n")
 
 		sourceFile.write("\t}\n")

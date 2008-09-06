@@ -21,8 +21,8 @@
 #include <string>
 #include <vector>
 
-typedef std::vector<std::string> funcs_names_t;
-typedef std::vector<void**> entries_t;
+#define LOAD_FUNC1(f) f = (##f##FUNC)(::glloader_get_gl_proc_address(#f));
+#define LOAD_FUNC2(f, name) f = (##f##FUNC)(::glloader_get_gl_proc_address(#name));
 
 namespace glloader
 {
@@ -47,8 +47,6 @@ namespace glloader
 	private:
 		std::vector<std::string> features_;
 	};
-
-	void load_funcs(entries_t& entries, funcs_names_t const & names);
 
 	void gl_init();
 	void wgl_init();

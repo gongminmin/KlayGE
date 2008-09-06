@@ -253,8 +253,10 @@ void glloader_init()
 
 void* glloader_get_gl_proc_address(const char* name)
 {
+	void* ret;
+
 #ifdef GLLOADER_WGL
-	return (void*)(::wglGetProcAddress(name));
+	ret = (void*)(::wglGetProcAddress(name));
 #endif
 #ifdef GLLOADER_AGL
 	CFURLRef bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
@@ -265,36 +267,24 @@ void* glloader_get_gl_proc_address(const char* name)
 	CFBundleRef bundle = CFBundleCreate(kCFAllocatorDefault, bundleURL);
 	BOOST_ASSERT(bundle != NULL);
 
-	void* function = CFBundleGetFunctionPointerForName(bundle, functionName);
+	ret = CFBundleGetFunctionPointerForName(bundle, functionName);
 
 	CFRelease(bundleURL);
 	CFRelease(functionName);
 	CFRelease(bundle);
-
-	return function;
 #endif
 #ifdef GLLOADER_GLX
-	return (void*)(::glXGetProcAddress(reinterpret_cast<const GLubyte*>(name)));
+	ret = (void*)(::glXGetProcAddress(reinterpret_cast<const GLubyte*>(name)));
 #endif
-}
-
-// Load an OpenGL extension given by 'names'.
-// The functions entries are putted in 'entries'.
-void glloader::load_funcs(entries_t& entries, funcs_names_t const & names)
-{
-	BOOST_ASSERT(names.size() == entries.size());
-
-	for (size_t i = 0; i < entries.size(); ++ i)
-	{
-		*entries[i] = ::glloader_get_gl_proc_address(names[i].c_str());
 
 #ifdef GLLOADER_DEBUG
-		if (NULL == *entries[i])
-		{
-			std::cerr << names[i] << " is missing!" << std::endl;
-		}
-#endif
+	if (NULL == ret)
+	{
+		std::cerr << name << " is missing!" << std::endl;
 	}
+#endif
+
+	return ret;
 }
 
 int glloader_is_supported(char const * name)
