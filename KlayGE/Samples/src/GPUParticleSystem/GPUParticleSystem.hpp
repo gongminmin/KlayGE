@@ -4,6 +4,7 @@
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/CameraController.hpp>
+#include <KlayGE/PostProcess.hpp>
 
 class GPUParticleSystemApp : public KlayGE::App3DFramework
 {
@@ -12,6 +13,7 @@ public:
 
 private:
 	void InitObjects();
+	void OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height);
 
 	KlayGE::uint32_t DoUpdate(KlayGE::uint32_t pass);
 
@@ -25,6 +27,14 @@ private:
 	KlayGE::FirstPersonCameraController fpcController_;
 
 	KlayGE::Timer timer_;
+
+	KlayGE::TexturePtr scene_tex_;
+	KlayGE::FrameBufferPtr scene_buffer_;
+
+	KlayGE::TexturePtr fog_tex_;
+	KlayGE::FrameBufferPtr fog_buffer_;
+
+	KlayGE::PostProcessPtr blend_pp_;
 };
 
 #endif		// _GPUPARTICLESYSTEM_HPP

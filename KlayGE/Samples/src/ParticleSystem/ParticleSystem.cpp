@@ -270,23 +270,6 @@ namespace
 			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("ParticleSystem.kfx")->TechniqueByName("Copy"))
 		{
 		}
-
-		void OnRenderBegin()
-		{
-			PostProcess::OnRenderBegin();
-
-			App3DFramework const & app = Context::Instance().AppInstance();
-
-			float4x4 proj = app.ActiveCamera().ProjMatrix();
-			float4x4 const inv_proj = MathLib::inverse(proj);
-
-			*(technique_->Effect().ParameterByName("Proj")) = proj;
-
-			*(technique_->Effect().ParameterByName("upper_left")) = MathLib::transform_coord(float3(-1, 1, 1), inv_proj);
-			*(technique_->Effect().ParameterByName("upper_right")) = MathLib::transform_coord(float3(1, 1, 1), inv_proj);
-			*(technique_->Effect().ParameterByName("lower_left")) = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
-			*(technique_->Effect().ParameterByName("lower_right")) = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
-		}
 	};
 
 	enum

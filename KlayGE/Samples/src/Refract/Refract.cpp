@@ -108,7 +108,7 @@ namespace
 			back_face_tech_ = effect->TechniqueByName("RefractBackFace");
 
 			technique_ = back_face_tech_;
-			*(technique_->Effect().ParameterByName("eta_ratio")) = float3(1 / 1.1f, 1 / 1.1f - 0.003f, 1 / 1.1f - 0.006f);
+			*(technique_->Effect().ParameterByName("eta_ratio")) = float3(1 / 1.1f, 1 / 1.11f, 1 / 1.12f);
 		}
 
 		void BuildMeshInfo()

@@ -2,70 +2,153 @@
 
 <effect>
 	<include name="../../../RenderFX/util.fxml"/>
-	
+	<include name="../../../RenderFX/PostProcess.fxml"/>
+
 	<parameter type="sampler2D" name="particle_pos_sampler">
 		<state name="filtering" value="point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
-	
+	<parameter type="sampler3D" name="noise_vol_sampler">
+		<state name="filtering" value="bilinear"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+		<state name="address_w" value="wrap"/>
+	</parameter>
+
+	<parameter type="float3" name="LightPos" x="0" y="10" z="3"/>
+
 	<parameter type="float4x4" name="View"/>
 	<parameter type="float4x4" name="Proj"/>
+	<parameter type="float4x4" name="inv_view"/>
 	<parameter type="float" name="point_radius"/>
-	
+	<parameter type="float4" name="init_pos_life"/>
+
+	<parameter type="float3" name="upper_left"/>
+	<parameter type="float3" name="upper_right"/>
+	<parameter type="float3" name="lower_left"/>
+	<parameter type="float3" name="lower_right"/>
+
+	<parameter type="float2" name="offset"/>	
 	<parameter type="sampler2D" name="particle_sampler">
 		<state name="filtering" value="bilinear"/>
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
 	</parameter>
+	<parameter type="sampler2D" name="scene_sampler">
+		<state name="filtering" value="point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
 
+	<shader>
+		<![CDATA[
+float3 texcoord_to_view(float2 tex)
+{
+	return lerp(lerp(upper_left, upper_right, tex.x),
+				lerp(lower_left, lower_right, tex.x),
+				tex.y);
+}
+		]]>
+	</shader>
+	
 	<shader>
 		<![CDATA[
 void ParticlesVS(float2 tex_pos		: POSITION,
 					float2 tex			: TEXCOORD0,
 					out float4 oPos		: POSITION,
-					out float2 oTex		: TEXCOORD0,
-					out float4 oClr     : COLOR0)
+					out float4 oClr     : COLOR0,
+					out float4 oPosSS	: TEXCOORD0,
+					out float4 oCenterView : TEXCOORD1,
+					out float3 oViewDir : TEXCOORD2)
 {
 	float4 pos = tex2Dlod(particle_pos_sampler, float4(tex_pos, 0, 0));
 
 	if (pos.w <= 0)
 	{
 		oPos = float4(-1, -1, 0, 0);
-		oTex = 0;
 		oClr = 0;
+		oCenterView = 0;
+		oPosSS = 0;
+		oViewDir = 0;
 	}
 	else
 	{
-		float4 center_view = mul(float4(pos.xyz, 1), View);
-		float4 view_pos = center_view;
+		oCenterView = mul(float4(pos.xyz, 1), View);
+		float4 view_pos = oCenterView;
 		view_pos.xy += (float2(tex.x, 1 - tex.y) * 2 - 1) * point_radius;
 		oPos = mul(view_pos, Proj);
 			  
-		oTex = tex;
 		oClr = float4(1, 1, 1, pos.w);
+		oPosSS = oPos / oPos.w;
+		
+		oViewDir = texcoord_to_view(float2(oPosSS.x, -oPosSS.y) / 2 + 0.5f);
 	}
 }
 
-float4 ParticlesPS(float2 tex : TEXCOORD0,
-						float4 clr    : COLOR0) : COLOR
+float4 ParticlesPS(float4 clr    : COLOR0,
+						float4 PosSS : TEXCOORD0,
+						float4 CenterView : TEXCOORD1,
+						float3 view_dir : TEXCOORD2) : COLOR
 {
-	clr *= tex2D(particle_sampler, tex);
-	clip(clr.a - 0.2);
-	return clr;
+	CenterView /= CenterView.w;
+	float dir = view_dir.z;
+	view_dir = normalize(view_dir);
+	
+	float v = dot(CenterView.xyz, view_dir);
+	float disc = point_radius * point_radius - (dot(CenterView.xyz, CenterView.xyz) - v * v);
+	if (disc < 0)
+	{
+		return 0;
+	}
+	else
+	{
+		float2 tex_coord = PosSS.xy + offset;
+		tex_coord.y = -tex_coord.y;
+		tex_coord = tex_coord / 2 + 0.5f;
+
+		float depth = tex2D(scene_sampler, tex_coord).a;
+		float3 intersect = (v - sqrt(disc)) * view_dir;
+		float optical_depth = dir * depth - intersect.z;
+		
+		if (optical_depth < 0)
+		{
+			return 0;
+		}
+		else
+		{
+			optical_depth = min(optical_depth, 2 * sqrt(disc) * view_dir.z);
+			float4 intersect_ws = mul(float4(intersect, 1), inv_view);
+			intersect_ws /= intersect_ws.w;
+			float2 dxdy = (intersect.xy - CenterView.xy) / point_radius;
+			float intensity = 5 * exp(-dot(dxdy, dxdy) / 0.125f);
+			float4 n = tex3D(noise_vol_sampler, intersect_ws.rgb / 50);
+			return float4((dot(normalize(LightPos - intersect_ws), n.xyz) / n.w / 100).xxx, optical_depth * intensity * saturate(clr.a / init_pos_life.w));
+		}
+	}
 }
 		]]>
 	</shader>
 	
 	<technique name="Particles">
 		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+			
+			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="one"/>
+			<state name="dest_blend" value="one"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="one"/>
+			<state name="dest_blend_alpha" value="one"/>
+			
 			<state name="vertex_shader" value="ParticlesVS()"/>
 			<state name="pixel_shader" value="ParticlesPS()"/>
 		</pass>
 	</technique>
 
 	<parameter type="float4x4" name="ps_model_mat"/>
-	<parameter type="float4" name="init_pos_life"/>
 
 	<parameter type="sampler2D" name="particle_vel_sampler">
 		<state name="filtering" value="point"/>
@@ -149,7 +232,8 @@ void UpdatePS(float2 tex : TEXCOORD0,
 		}
 		else
 		{
-			clip(-1);
+			out_pos = float4(0, 0, 0, -1);
+			out_vel = 0;
 		}
 	}
 }
@@ -163,7 +247,9 @@ void UpdatePS(float2 tex : TEXCOORD0,
 		</pass>
 	</technique>
 
-	<parameter type="float3" name="LightPos" x="0" y="10" z="3"/>
+	<parameter type="float" name="depth_min"/>
+	<parameter type="float" name="inv_depth_range"/>
+	
 	<parameter type="sampler2D" name="grass_sampler">
 		<state name="filtering" value="bilinear"/>
 		<state name="address_u" value="wrap"/>
@@ -176,7 +262,8 @@ void TerrainVS(float4 pos			: POSITION,
 					float2 tex			: TEXCOORD0,
 					out float4 oPos		: POSITION,
 					out float4 oTex  : TEXCOORD0,
-					out float3 oPosOS : TEXCOORD1)
+					out float3 oPosOS : TEXCOORD1,
+					out float2 oDepth : TEXCOORD2)
 {
 	oTex.xy = float2(tex.x, 1 - tex.y);
 	oTex.zw = oTex.xy * 4;
@@ -186,13 +273,16 @@ void TerrainVS(float4 pos			: POSITION,
 	
 	oPosOS = pos;
 	
-	oPos = mul(mul(pos, View), Proj);
+	float4 pos_es = mul(pos, View);
+	oPos = mul(pos_es, Proj);
+	oDepth = pos_es.zw;
 }
 
-float4 TerrainPS(float4 tex : TEXCOORD0, float3 pos : TEXCOORD1) : COLOR0
+float4 TerrainPS(float4 tex : TEXCOORD0, float3 pos : TEXCOORD1, float2 depth : TEXCOORD2) : COLOR0
 {
 	float3 normal = decompress_normal(tex2D(normal_map_sampler, tex.xy)).xzy;
-	return float4(tex2D(grass_sampler, tex.zw).rgb * dot(normalize(LightPos - pos), normal), 1);
+	return float4(tex2D(grass_sampler, tex.zw).rgb * dot(normalize(LightPos - pos), normal),
+		(depth.x / depth.y - depth_min) * inv_depth_range);
 }
 		]]>
 	</shader>
@@ -201,6 +291,38 @@ float4 TerrainPS(float4 tex : TEXCOORD0, float3 pos : TEXCOORD1) : COLOR0
 		<pass name="p0">
 			<state name="vertex_shader" value="TerrainVS()"/>
 			<state name="pixel_shader" value="TerrainPS()"/>
+		</pass>
+	</technique>
+
+	<parameter type="sampler2D" name="src_sampler">
+		<state name="filtering" value="point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+	<parameter type="sampler2D" name="tex_with_alpha_sampler">
+		<state name="filtering" value="point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+float4 BlendPS(float2 tex : TEXCOORD0) : COLOR
+{
+	float4 a = tex2D(tex_with_alpha_sampler, tex);
+	a.a = saturate(a.a);
+	float4 s = tex2D(src_sampler, tex);
+	return float4(lerp(s.rgb, a.rgb, a.a), 1);
+}
+		]]>
+	</shader>
+
+	<technique name="Blend">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="BlendPS()"/>
 		</pass>
 	</technique>
 </effect>

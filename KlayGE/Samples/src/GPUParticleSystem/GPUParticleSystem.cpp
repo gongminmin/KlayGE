@@ -57,6 +57,81 @@ namespace
 {
 	int const NUM_PARTICLE = 65536;
 
+	float GetDensity(int x, int y, int z, std::vector<uint8_t> const & data, uint32_t vol_size)
+	{
+		if (x < 0)
+		{
+			x += vol_size;
+		}
+		if (y < 0)
+		{
+			y += vol_size;
+		}
+		if (z < 0)
+		{
+			z += vol_size;
+		}
+
+		x = x % vol_size;
+		y = y % vol_size;
+		z = z % vol_size;
+
+		return data[((z * vol_size + y) * vol_size + x) * 4 + 3] / 255.0f - 0.5f;
+	}
+
+	TexturePtr CreateNoiseVolume(uint32_t vol_size)
+	{
+		boost::variate_generator<boost::lagged_fibonacci607, boost::uniform_real<float> > random_gen(boost::lagged_fibonacci607(), boost::uniform_real<float>(0, 255));
+
+		std::vector<uint8_t> data(vol_size * vol_size * vol_size * 4);
+
+		// Gen a bunch of random values
+		for (size_t i = 0; i < data.size() / 4; ++ i)
+		{
+			data[i * 4 + 3] = static_cast<uint8_t>(random_gen());
+		}
+
+		// Generate normals from the density gradient
+		float height_adjust = 0.5f;
+		float3 normal;
+		for (uint32_t z = 0; z < vol_size; ++ z)
+		{
+			for (uint32_t y = 0; y < vol_size; ++ y)
+			{
+				for (uint32_t x = 0; x < vol_size; ++ x)
+				{
+					normal.x() = (GetDensity(x + 1, y, z, data, vol_size) - GetDensity(x - 1, y, z, data, vol_size)) / height_adjust;
+					normal.y() = (GetDensity(x, y + 1, z, data, vol_size) - GetDensity(x, y - 1, z, data, vol_size)) / height_adjust;
+					normal.z() = (GetDensity(x, y, z + 1, data, vol_size) - GetDensity(x, y, z - 1, data, vol_size)) / height_adjust;
+
+					normal = MathLib::normalize(normal);
+
+					data[((z * vol_size + y) * vol_size + x) * 4 + 2] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((normal.x() / 2 + 0.5f) * 255.0f), 0, 255));
+					data[((z * vol_size + y) * vol_size + x) * 4 + 1] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((normal.y() / 2 + 0.5f) * 255.0f), 0, 255));
+					data[((z * vol_size + y) * vol_size + x) * 4 + 0] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((normal.z() / 2 + 0.5f) * 255.0f), 0, 255));
+				}
+			}
+		}
+
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		TexturePtr vol_tex = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, EF_ARGB8);
+		{
+			Texture::Mapper mapper(*vol_tex, 0, TMA_Write_Only, 0, 0, 0, vol_size, vol_size, vol_size);
+			uint8_t* p = mapper.Pointer<uint8_t>();
+			for (uint32_t z = 0; z < vol_size; ++ z)
+			{
+				for (uint32_t y = 0; y < vol_size; ++ y)
+				{
+					memcpy(p, &data[(z * vol_size + y) * vol_size], vol_size * 4);
+					p += mapper.RowPitch();
+				}
+				p += mapper.SlicePitch() - mapper.RowPitch() * vol_size;
+			}
+		}
+
+		return vol_tex;
+	}
+
 	struct Particle
 	{
 		float3 pos;
@@ -121,22 +196,44 @@ namespace
 			technique_ = rf.LoadEffect("GPUParticleSystem.kfx")->TechniqueByName("Particles");
 
 			particle_tex_ = LoadTexture("particle.dds");
+			*(technique_->Effect().ParameterByName("particle_sampler")) = particle_tex_;
+
+			noise_vol_tex_ = CreateNoiseVolume(32);
+			*(technique_->Effect().ParameterByName("noise_vol_sampler")) = noise_vol_tex_;
+		}
+
+		void SceneTexture(TexturePtr tex)
+		{
+			*(technique_->Effect().ParameterByName("scene_sampler")) = tex;
 		}
 
 		void OnRenderBegin()
 		{
-			*(technique_->Effect().ParameterByName("particle_sampler")) = particle_tex_;
 			*(technique_->Effect().ParameterByName("particle_pos_sampler")) = particle_pos_tex_;
 
 			App3DFramework const & app = Context::Instance().AppInstance();
 
 			float4x4 const & view = app.ActiveCamera().ViewMatrix();
 			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
+			float4x4 const inv_proj = MathLib::inverse(proj);
 
 			*(technique_->Effect().ParameterByName("View")) = view;
 			*(technique_->Effect().ParameterByName("Proj")) = proj;
+			*(technique_->Effect().ParameterByName("inv_view")) = MathLib::inverse(view);
 
-			*(technique_->Effect().ParameterByName("point_radius")) = 0.04f;
+			*(technique_->Effect().ParameterByName("point_radius")) = 0.1f;
+			*(technique_->Effect().ParameterByName("init_pos_life")) = float4(0, 0, 0, 8);
+
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2;
+			float const x_offset = texel_to_pixel.x() / re.CurFrameBuffer()->Width();
+			float const y_offset = texel_to_pixel.y() / re.CurFrameBuffer()->Height();
+			*(technique_->Effect().ParameterByName("offset")) = float2(x_offset, y_offset);
+
+			*(technique_->Effect().ParameterByName("upper_left")) = MathLib::transform_coord(float3(-1, 1, 1), inv_proj);
+			*(technique_->Effect().ParameterByName("upper_right")) = MathLib::transform_coord(float3(1, 1, 1), inv_proj);
+			*(technique_->Effect().ParameterByName("lower_left")) = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
+			*(technique_->Effect().ParameterByName("lower_right")) = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
 		}
 
 		void PosTexture(TexturePtr particle_pos_tex)
@@ -149,6 +246,7 @@ namespace
 
 		TexturePtr particle_tex_;
 		TexturePtr particle_pos_tex_;
+		TexturePtr noise_vol_tex_;
 	};
 
 	class ParticlesObject : public SceneObjectHelper
@@ -193,7 +291,7 @@ namespace
 				{
 					for (int x = 0; x < tex_width_; ++ x)
 					{
-						pos_init[x] = float4(0, 0, 0, 0);
+						pos_init[x] = float4(0, 0, 0, -1);
 					}
 					pos_init += mapper.RowPitch() / sizeof(pos_init[0]);
 				}
@@ -223,7 +321,10 @@ namespace
 				{
 					for (int x = 0; x < tex_width_; ++ x)
 					{
-						vel_init[x] = float4(random_gen_(), 0.2f + abs(random_gen_()) * 3, random_gen_(), 0);
+						float const angel = random_gen_() / 0.05f * PI;
+						float const r = random_gen_() * 3;
+
+						vel_init[x] = float4(r * cos(angel), 0.2f + abs(random_gen_()) * 3, r * sin(angel), 0);
 					}
 					vel_init += mapper.RowPitch() / sizeof(vel_init[0]);
 				}
@@ -357,6 +458,10 @@ namespace
 
 			*(technique_->Effect().ParameterByName("View")) = view;
 			*(technique_->Effect().ParameterByName("Proj")) = proj;
+
+			Camera const & camera = app.ActiveCamera();
+			*(technique_->Effect().ParameterByName("depth_min")) = camera.NearPlane();
+			*(technique_->Effect().ParameterByName("inv_depth_range")) = 1 / (camera.FarPlane() - camera.NearPlane());
 		}
 
 	private:
@@ -369,6 +474,20 @@ namespace
 		TerrainObject(TexturePtr height_map, TexturePtr normal_map)
 			: SceneObjectHelper(RenderablePtr(new TerrainRenderable(height_map, normal_map)), SOA_Cullable)
 		{
+		}
+	};
+
+	class BlendPostProcess : public PostProcess
+	{
+	public:
+		BlendPostProcess()
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("GPUParticleSystem.kfx")->TechniqueByName("Blend"))
+		{
+		}
+
+		void TexWithAlpha(TexturePtr const & tex)
+		{
+			*(technique_->Effect().ParameterByName("tex_with_alpha_sampler")) = tex;
 		}
 	};
 
@@ -534,6 +653,39 @@ void GPUParticleSystemApp::InitObjects()
 
 	terrain_.reset(new TerrainObject(terrain_height, terrain_normal));
 	terrain_->AddToSceneManager();
+
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderEngine& re = rf.RenderEngineInstance();
+
+	FrameBufferPtr screen_buffer = re.CurFrameBuffer();
+	
+	scene_buffer_ = rf.MakeFrameBuffer();
+	scene_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
+	fog_buffer_ = rf.MakeFrameBuffer();
+	fog_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
+
+	blend_pp_.reset(new BlendPostProcess);
+}
+
+void GPUParticleSystemApp::OnResize(uint32_t width, uint32_t height)
+{
+	App3DFramework::OnResize(width, height);
+
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderEngine& re = rf.RenderEngineInstance();
+
+	scene_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F);
+	scene_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*scene_tex_, 0));
+	scene_buffer_->Attach(FrameBuffer::ATT_DepthStencil, re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil));
+
+	fog_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F);
+	fog_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*fog_tex_, 0));
+	fog_buffer_->Attach(FrameBuffer::ATT_DepthStencil, re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil));
+
+	checked_pointer_cast<RenderParticles>(particles_->GetRenderable())->SceneTexture(scene_tex_);
+
+	blend_pp_->Source(scene_tex_, scene_buffer_->RequiresFlipping());
+	blend_pp_->Destinate(FrameBufferPtr());
 }
 
 void GPUParticleSystemApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -546,27 +698,59 @@ void GPUParticleSystemApp::InputHandler(InputEngine const & /*sender*/, InputAct
 	}
 }
 
-uint32_t GPUParticleSystemApp::DoUpdate(uint32_t /*pass*/)
+uint32_t GPUParticleSystemApp::DoUpdate(uint32_t pass)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 
-	float4x4 mat = MathLib::rotation_x(PI / 6) * MathLib::rotation_y(clock() / 300.0f) * MathLib::translation(0.0f, 0.7f, 0.0f);
-	gpu_ps->ModelMatrix(mat);
+	switch (pass)
+	{
+	case 0:
+		re.BindFrameBuffer(scene_buffer_);
+		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
-	gpu_ps->Update(static_cast<float>(timer_.elapsed()));
-	timer_.restart();
+		terrain_->Visible(true);
+		particles_->Visible(false);
+		return App3DFramework::URV_Need_Flush;
 
-	checked_pointer_cast<ParticlesObject>(particles_)->PosTexture(gpu_ps->PosTexture());
+	case 1:
+		{
+			terrain_->Visible(false);
+			particles_->Visible(true);
 
-	re.BindFrameBuffer(FrameBufferPtr());
-	re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
+			float4x4 mat = MathLib::translation(0.0f, 0.7f, 0.0f);
+			gpu_ps->ModelMatrix(mat);
 
-	std::wostringstream stream;
-	stream << this->FPS();
+			gpu_ps->Update(static_cast<float>(timer_.elapsed()));
+			timer_.restart();
 
-	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"GPU Particle System");
-	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());
+			checked_pointer_cast<ParticlesObject>(particles_)->PosTexture(gpu_ps->PosTexture());
 
-	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+			re.BindFrameBuffer(fog_buffer_);
+			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1.0f, 0);
+
+			return App3DFramework::URV_Need_Flush;
+		}
+
+	default:
+		{
+			terrain_->Visible(false);
+			particles_->Visible(false);
+
+			checked_pointer_cast<BlendPostProcess>(blend_pp_)->TexWithAlpha(fog_tex_);
+
+			re.BindFrameBuffer(FrameBufferPtr());
+			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
+
+			blend_pp_->Apply();
+
+			std::wostringstream stream;
+			stream << this->FPS();
+
+			font_->RenderText(0, 0, Color(1, 1, 0, 1), L"GPU Particle System");
+			font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());
+
+			return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+		}
+	}
 }

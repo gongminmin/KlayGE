@@ -45,16 +45,14 @@ void ParticleVS(float4 pos			: TEXCOORD0,
 					float2 tex			: POSITION,
 					out float4 oPos		: POSITION,
 					out float4 oClr     : COLOR0,
-					out float2 oTex		: TEXCOORD0,
-					out float4 oPosSS	: TEXCOORD1,
-					out float4 oCenterView : TEXCOORD2,
-					out float3 oViewDir : TEXCOORD3)
+					out float4 oPosSS	: TEXCOORD0,
+					out float4 oCenterView : TEXCOORD1,
+					out float3 oViewDir : TEXCOORD2)
 {
 	oCenterView = mul(float4(pos.xyz, 1), View);
 	float4 view_pos = oCenterView;
 	view_pos.xy += (float2(tex.x, 1 - tex.y) * 2 - 1) * point_radius;
 	oPos = mul(view_pos, Proj);
-	oTex = tex;
 	oClr = float4(1, 1, 1, pos.w);
 	oPosSS = oPos / oPos.w;
 	   
@@ -62,10 +60,9 @@ void ParticleVS(float4 pos			: TEXCOORD0,
 }
 
 float4 ParticlePS(float4 clr    : COLOR0,
-						float2 tex : TEXCOORD0,
-						float4 PosSS : TEXCOORD1,
-						float4 CenterView : TEXCOORD2,
-						float3 view_dir : TEXCOORD3) : COLOR
+						float4 PosSS : TEXCOORD0,
+						float4 CenterView : TEXCOORD1,
+						float3 view_dir : TEXCOORD2) : COLOR
 {
 	CenterView /= CenterView.w;
 	float dir = view_dir.z;
@@ -99,6 +96,9 @@ float4 ParticlePS(float4 clr    : COLOR0,
 	
 	<technique name="Particle">
 		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+			
 			<state name="blend_enable" value="true"/>
 			<state name="src_blend" value="src_alpha"/>
 			<state name="dest_blend" value="inv_src_alpha"/>
