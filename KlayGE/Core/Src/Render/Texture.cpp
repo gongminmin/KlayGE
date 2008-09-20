@@ -158,7 +158,7 @@ namespace
 namespace KlayGE
 {
 	// 载入DDS格式文件
-	TexturePtr LoadTexture(std::string const & tex_name)
+	TexturePtr LoadTexture(std::string const & tex_name, uint32_t access_hint)
 	{
 		boost::shared_ptr<std::istream> file(ResLoader::Instance().Load(tex_name));
 
@@ -445,19 +445,19 @@ namespace KlayGE
 			if ((desc.dds_caps.caps2 & DDSCAPS2_CUBEMAP) != 0)
 			{
 				texture = renderFactory.MakeTextureCube(desc.width,
-						static_cast<uint16_t>(desc.mip_map_count), format);
+						static_cast<uint16_t>(desc.mip_map_count), format, access_hint);
 			}
 			else
 			{
 				if ((desc.dds_caps.caps2 & DDSCAPS2_VOLUME) != 0)
 				{
 					texture = renderFactory.MakeTexture3D(desc.width,
-						desc.height, desc.depth, static_cast<uint16_t>(desc.mip_map_count), format);
+						desc.height, desc.depth, static_cast<uint16_t>(desc.mip_map_count), format, access_hint);
 				}
 				else
 				{
 					texture = renderFactory.MakeTexture2D(desc.width,
-						desc.height, static_cast<uint16_t>(desc.mip_map_count), format);
+						desc.height, static_cast<uint16_t>(desc.mip_map_count), format, access_hint);
 				}
 			}
 		}
@@ -1128,8 +1128,8 @@ namespace KlayGE
 	class NullTexture : public Texture
 	{
 	public:
-		NullTexture(TextureType type)
-			: Texture(type)
+		NullTexture(TextureType type, uint32_t access_hint)
+			: Texture(type, access_hint)
 		{
 		}
 
@@ -1137,10 +1137,6 @@ namespace KlayGE
 		{
 			static std::wstring const name(L"Null Texture");
 			return name;
-		}
-
-		void Usage(TextureUsage /*usage*/)
-		{
 		}
 
         uint32_t Width(int /*level*/) const
@@ -1226,8 +1222,8 @@ namespace KlayGE
 	};
 
 
-	Texture::Texture(Texture::TextureType type)
-			: usage_(TU_Default), type_(type)
+	Texture::Texture(Texture::TextureType type, uint32_t access_hint)
+			: type_(type), access_hint_(access_hint)
 	{
 	}
 
@@ -1237,18 +1233,13 @@ namespace KlayGE
 
 	TexturePtr Texture::NullObject()
 	{
-		static TexturePtr obj(new NullTexture(TT_2D));
+		static TexturePtr obj(new NullTexture(TT_2D, 0));
 		return obj;
 	}
 
 	uint16_t Texture::NumMipMaps() const
 	{
 		return numMipMaps_;
-	}
-
-	Texture::TextureUsage Texture::Usage() const
-	{
-		return usage_;
 	}
 
 	uint32_t Texture::Bpp() const
@@ -1264,5 +1255,10 @@ namespace KlayGE
 	Texture::TextureType Texture::Type() const
 	{
 		return type_;
+	}
+
+	uint32_t Texture::AccessHint() const
+	{
+		return access_hint_;
 	}
 }

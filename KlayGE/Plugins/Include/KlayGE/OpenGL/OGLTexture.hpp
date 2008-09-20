@@ -32,7 +32,7 @@ namespace KlayGE
 	class OGLTexture : public Texture
 	{
 	public:
-		OGLTexture(TextureType type);
+		OGLTexture(TextureType type, uint32_t access_hint);
 		virtual ~OGLTexture();
 
 		std::wstring const & Name() const;
@@ -56,9 +56,6 @@ namespace KlayGE
 			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset);
 
 		void BuildMipSubLevels();
-
-		using Texture::Usage;
-		void Usage(TextureUsage usage);
 
 		void GLBindTexture();
 		GLuint GLTexture() const
@@ -106,7 +103,7 @@ namespace KlayGE
 	class OGLTexture1D : public OGLTexture
 	{
 	public:
-		OGLTexture1D(uint32_t width, uint16_t numMipMaps, ElementFormat format);
+		OGLTexture1D(uint32_t width, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint);
 
 		uint32_t Width(int level) const;
 
@@ -132,7 +129,7 @@ namespace KlayGE
 	class OGLTexture2D : public OGLTexture
 	{
 	public:
-		OGLTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, ElementFormat format);
+		OGLTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
@@ -162,7 +159,7 @@ namespace KlayGE
 	class OGLTexture3D : public OGLTexture
 	{
 	public:
-		OGLTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps, ElementFormat format);
+		OGLTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
@@ -197,7 +194,7 @@ namespace KlayGE
 	class OGLTextureCube : public OGLTexture
 	{
 	public:
-		OGLTextureCube(uint32_t size, uint16_t numMipMaps, ElementFormat format);
+		OGLTextureCube(uint32_t size, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;

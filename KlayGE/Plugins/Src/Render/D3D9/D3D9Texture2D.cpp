@@ -43,8 +43,8 @@
 namespace KlayGE
 {
 	D3D9Texture2D::D3D9Texture2D(uint32_t width, uint32_t height,
-								uint16_t numMipMaps, ElementFormat format)
-					: D3D9Texture(TT_2D),
+								uint16_t numMipMaps, ElementFormat format, uint32_t access_hint)
+					: D3D9Texture(TT_2D, access_hint),
 						auto_gen_mipmaps_(false)
 	{
 		D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
@@ -57,7 +57,19 @@ namespace KlayGE
 
 		bpp_ = NumFormatBits(format);
 
-		d3dTexture2D_ = this->CreateTexture2D(0, D3DPOOL_MANAGED);
+		uint32_t usage;
+		D3DPOOL pool;
+		if (access_hint & EAH_GPU_Write)
+		{
+			usage = D3DUSAGE_RENDERTARGET;
+			pool = D3DPOOL_DEFAULT;
+		}
+		else
+		{
+			usage = 0;
+			pool = D3DPOOL_MANAGED;
+		}
+		d3dTexture2D_ = this->CreateTexture2D(usage, pool);
 
 		this->QueryBaseTexture();
 		this->UpdateParams();
@@ -110,7 +122,7 @@ namespace KlayGE
 			TIF(other.d3dTexture2D_->GetSurfaceLevel(level, &temp));
 			dst = MakeCOMPtr(temp);
 
-			if ((TU_RenderTarget == this->Usage()) && (TU_RenderTarget == target.Usage()))
+			if ((this->AccessHint() & EAH_GPU_Write) && (target.AccessHint() & EAH_GPU_Write))
 			{
 				if (FAILED(d3dDevice_->StretchRect(src.get(), NULL, dst.get(), NULL, D3DTEXF_LINEAR)))
 				{
@@ -159,7 +171,7 @@ namespace KlayGE
 
 			RECT srcRc = { src_xOffset, src_yOffset, src_xOffset + src_width, src_yOffset + src_height };
 			RECT dstRc = { dst_xOffset, dst_yOffset, dst_xOffset + dst_width, dst_yOffset + dst_height };
-			if ((TU_RenderTarget == this->Usage()) && (TU_RenderTarget == target.Usage()))
+			if ((this->AccessHint() & EAH_GPU_Write) && (target.AccessHint() & EAH_GPU_Write))
 			{
 				if (FAILED(d3dDevice_->StretchRect(src.get(), &srcRc, dst.get(), &dstRc, D3DTEXF_LINEAR)))
 				{
@@ -205,7 +217,7 @@ namespace KlayGE
 				filter |= D3DX_FILTER_SRGB;
 			}
 
-			if (TU_RenderTarget == usage_)
+			if (this->AccessHint() & EAH_GPU_Write)
 			{
 				ID3D9TexturePtr d3dTexture2D = this->CreateTexture2D(D3DUSAGE_AUTOGENMIPMAP | D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
 
@@ -248,7 +260,7 @@ namespace KlayGE
 
 	void D3D9Texture2D::DoOnLostDevice()
 	{
-		if (TU_RenderTarget == usage_)
+		if (this->AccessHint() & EAH_GPU_Write)
 		{
 			d3dBaseTexture_.reset();
 			d3dTexture2D_.reset();
@@ -257,7 +269,7 @@ namespace KlayGE
 
 	void D3D9Texture2D::DoOnResetDevice()
 	{
-		if (TU_RenderTarget == usage_)
+		if (this->AccessHint() & EAH_GPU_Write)
 		{
 			d3dTexture2D_ = this->CreateTexture2D(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
 			this->QueryBaseTexture();
@@ -268,8 +280,6 @@ namespace KlayGE
 	{
 		if (IsDepthFormat(format_))
 		{
-			usage_ = TU_RenderTarget;
-
 			usage = D3DUSAGE_DEPTHSTENCIL;
 			pool = D3DPOOL_DEFAULT;
 		}
@@ -314,50 +324,5 @@ namespace KlayGE
 		}
 
 		bpp_	= NumFormatBits(format_);
-	}
-
-	void D3D9Texture2D::Usage(TextureUsage usage)
-	{
-		if (usage != usage_)
-		{
-			ID3D9TexturePtr d3dTmpTexture2D;
-			switch (usage)
-			{
-			case TU_Default:
-				d3dTmpTexture2D = this->CreateTexture2D(0, D3DPOOL_MANAGED);
-				break;
-
-			case TU_RenderTarget:
-				d3dTmpTexture2D = this->CreateTexture2D(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
-				break;
-			}
-
-			DWORD filter = D3DX_FILTER_NONE;
-			if (IsSRGB(format_))
-			{
-				filter |= D3DX_FILTER_SRGB;
-			}
-
-			ID3D9SurfacePtr src_surf, dest_surf;
-			for (uint32_t i = 0; i < d3dTexture2D_->GetLevelCount(); ++ i)
-			{
-				IDirect3DSurface9* pSrcSurf;
-				d3dTexture2D_->GetSurfaceLevel(i, &pSrcSurf);
-				src_surf = MakeCOMPtr(pSrcSurf);
-
-				IDirect3DSurface9* pDestSurf;
-				d3dTmpTexture2D->GetSurfaceLevel(i, &pDestSurf);
-				dest_surf = MakeCOMPtr(pDestSurf);
-
-				TIF(D3DXLoadSurfaceFromSurface(dest_surf.get(), NULL, NULL,
-					src_surf.get(), NULL, NULL, filter, 0));
-			}
-			d3dTexture2D_ = d3dTmpTexture2D;
-
-			this->QueryBaseTexture();
-			this->UpdateParams();
-
-			usage_ = usage;
-		}
 	}
 }

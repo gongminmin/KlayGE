@@ -46,7 +46,7 @@ namespace KlayGE
 			rl_ = rf.MakeRenderLayout();
 			rl_->TopologyType(RenderLayout::TT_TriangleList);
 
-			GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static);
+			GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 			vb->Resize(static_cast<uint32_t>(vertices.size() * sizeof(vertices[0])));
 			{
 				GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
@@ -56,7 +56,7 @@ namespace KlayGE
 												vertex_element(VEU_Diffuse, 0, EF_ABGR32F),
 												vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 
-			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static);
+			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 			ib->Resize(static_cast<uint32_t>(indices.size() * sizeof(indices[0])));
 			{
 				GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
@@ -401,7 +401,7 @@ namespace KlayGE
 	{
 		if (!control_tex)
 		{
-			control_tex = LoadTexture("ui.dds");
+			control_tex = LoadTexture("ui.dds", EAH_CPU_Write | EAH_GPU_Read);
 		}
 
 		this->SetTexture(0, control_tex);

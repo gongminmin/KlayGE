@@ -79,8 +79,8 @@ namespace KlayGE
 			return rl_->NumIndices() / 3;
 		}
 
-		void AddVertexStream(void const * buf, uint32_t size, vertex_element const & ve);
-		void AddIndexStream(void const * buf, uint32_t size, ElementFormat format);
+		void AddVertexStream(void const * buf, uint32_t size, vertex_element const & ve, uint32_t access_hint);
+		void AddIndexStream(void const * buf, uint32_t size, ElementFormat format, uint32_t access_hint);
 
 		void TextureSlots(TextureSlotsType const & ts)
 		{

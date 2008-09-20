@@ -157,7 +157,7 @@ namespace
 			RenderEngine const & renderEngine = rf.RenderEngineInstance();
 			RenderDeviceCaps const & caps = renderEngine.DeviceCaps();
 			dist_texture_ = rf.MakeTexture2D(std::min<uint32_t>(2048, caps.max_texture_width) / kfont_char_size_ * kfont_char_size_,
-				std::min<uint32_t>(2048, caps.max_texture_height) / kfont_char_size_ * kfont_char_size_, 1, EF_L8);
+				std::min<uint32_t>(2048, caps.max_texture_height) / kfont_char_size_ * kfont_char_size_, 1, EF_L8, EAH_CPU_Write | EAH_GPU_Read);
 
 			effect_ = rf.LoadEffect("Font.kfx");
 			*(effect_->ParameterByName("distance_sampler")) = dist_texture_;
@@ -167,12 +167,12 @@ namespace
 			texel_to_pixel_offset_ep_ = effect_->ParameterByName("texel_to_pixel_offset");
 			mvp_ep_ = effect_->ParameterByName("mvp");
 
-			vb_ = rf.MakeVertexBuffer(BU_Dynamic);
+			vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read);
 			rl_->BindVertexStream(vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
 											vertex_element(VEU_Diffuse, 0, EF_ARGB8),
 											vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 
-			ib_ = rf.MakeIndexBuffer(BU_Dynamic);
+			ib_ = rf.MakeIndexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read);
 			rl_->BindIndexStream(ib_, EF_R16);
 
 			box_ = Box(float3(0, 0, 0), float3(0, 0, 0));

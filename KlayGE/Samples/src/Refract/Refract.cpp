@@ -175,7 +175,7 @@ namespace
 		RefractorObject(TexturePtr const & y_cube, TexturePtr const & c_cube)
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadKModel("teapot.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RefractorRenderable>())->Mesh(0);
+			renderable_ = LoadKModel("teapot.kmodel", EAH_CPU_Write | EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RefractorRenderable>())->Mesh(0);
 			checked_pointer_cast<RefractorRenderable>(renderable_)->CompressedCubeMap(y_cube, c_cube);
 		}
 
@@ -212,7 +212,7 @@ namespace
 
 		try
 		{
-			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, EF_ABGR16F);
+			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write);
 			rf.Make2DRenderView(*temp_tex, 0);
 			rf.MakeDepthStencilRenderView(800, 600, EF_D16, 0);
 		}
@@ -328,8 +328,8 @@ void Refract::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont", 16);
 
-	y_cube_map_ = LoadTexture("uffizi_cross_y.dds");
-	c_cube_map_ = LoadTexture("uffizi_cross_c.dds");
+	y_cube_map_ = LoadTexture("uffizi_cross_y.dds", EAH_CPU_Write | EAH_GPU_Read);
+	c_cube_map_ = LoadTexture("uffizi_cross_c.dds", EAH_CPU_Write | EAH_GPU_Read);
 
 	refractor_.reset(new RefractorObject(y_cube_map_, c_cube_map_));
 	refractor_->AddToSceneManager();
@@ -369,11 +369,11 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	render_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F);
+	render_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write);
 	render_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*render_tex_, 0));
 	render_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));
 
-	hdr_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F);
+	hdr_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write);
 	hdr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0));
 	hdr_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.RenderEngineInstance().CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil));
 

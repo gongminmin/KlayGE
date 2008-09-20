@@ -178,7 +178,7 @@ namespace
 		{
 			model_ = MathLib::translation(0.0f, 0.2f, 0.0f);
 
-			renderable_ = LoadKModel("teapot.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<OccluderRenderable>())->Mesh(0);
+			renderable_ = LoadKModel("teapot.kmodel", EAH_CPU_Write | EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<OccluderRenderable>())->Mesh(0);
 			checked_pointer_cast<OccluderRenderable>(renderable_)->SetModelMatrix(model_);
 		}
 
@@ -214,7 +214,7 @@ namespace
 			rl_ = rf.MakeRenderLayout();
 			rl_->TopologyType(RenderLayout::TT_TriangleList);
 
-			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static);
+			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 			pos_vb->Resize(sizeof(xyzs));
 			{
 				GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
@@ -222,7 +222,7 @@ namespace
 			}
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
-			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static);
+			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 			ib->Resize(sizeof(indices));
 			{
 				GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
@@ -235,7 +235,7 @@ namespace
 				&indices[0], &indices[sizeof(indices) / sizeof(uint16_t)],
 				&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
 
-			GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static);
+			GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 			normal_vb->Resize(sizeof(normal));
 			{
 				GraphicsBuffer::Mapper mapper(*normal_vb, BA_Write_Only);
@@ -315,7 +315,7 @@ namespace
 		try
 		{
 			rf.MakeDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, EF_D16, 0);
-			rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, EF_GR16F);
+			rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, EF_GR16F, EAH_GPU_Read | EAH_GPU_Write);
 		}
 		catch (...)
 		{
@@ -441,13 +441,13 @@ void ShadowCubeMap::InitObjects()
 	this->LookAt(float3(1.3f, 0.5f, -0.7f), float3(0, 0, 0));
 	this->Proj(0.01f, 100);
 
-	lamp_tex_ = LoadTexture("lamp.dds");
+	lamp_tex_ = LoadTexture("lamp.dds", EAH_CPU_Write | EAH_GPU_Read);
 
 	checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->LampTexture(lamp_tex_);
 	checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->LampTexture(lamp_tex_);
 
 	RenderViewPtr depth_view = rf.MakeDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, EF_D16, 0);
-	shadow_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, EF_GR16F);
+	shadow_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, EF_GR16F, EAH_GPU_Read | EAH_GPU_Write);
 	for (int i = 0; i < 6; ++ i)
 	{
 		shadow_buffers_[i] = rf.MakeFrameBuffer();

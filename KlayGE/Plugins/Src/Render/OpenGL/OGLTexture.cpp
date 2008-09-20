@@ -39,8 +39,8 @@
 
 namespace KlayGE
 {
-	OGLTexture::OGLTexture(TextureType type)
-					: Texture(type)
+	OGLTexture::OGLTexture(TextureType type, uint32_t access_hint)
+					: Texture(type, access_hint)
 	{
 		switch (type_)
 		{
@@ -191,11 +191,6 @@ namespace KlayGE
 	void OGLTexture::GLBindTexture()
 	{
 		glBindTexture(target_type_, texture_);
-	}
-
-	void OGLTexture::Usage(Texture::TextureUsage usage)
-	{
-		usage_ = usage;
 	}
 
 	ElementFormat OGLTexture::SRGBToRGB(ElementFormat pf)

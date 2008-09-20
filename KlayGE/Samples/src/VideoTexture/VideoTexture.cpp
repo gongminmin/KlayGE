@@ -87,7 +87,7 @@ namespace
 		TeapotObject()
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadKModel("teapot.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderTeapot>())->Mesh(0);
+			renderable_ = LoadKModel("teapot.kmodel", EAH_CPU_Write | EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderTeapot>())->Mesh(0);
 		}
 
 		void VideoTexture(TexturePtr video_tex)

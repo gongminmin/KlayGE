@@ -106,7 +106,7 @@ namespace KlayGE
 			{
 				RenderFactory& rf(Context::Instance().RenderFactoryInstance());
 
-				inst_stream = rf.MakeVertexBuffer(BU_Dynamic);
+				inst_stream = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read);
 				rl->BindVertexStream(inst_stream, instances_[0].lock()->InstanceFormat(), RenderLayout::ST_Instance, 1);
 			}
 			else

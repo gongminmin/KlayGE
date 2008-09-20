@@ -209,11 +209,6 @@ namespace KlayGE
 
 	void OGLTexture1DRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
-		if (Texture::TU_RenderTarget != texture_1d_.Usage())
-		{
-			texture_1d_.Usage(Texture::TU_RenderTarget);
-		}
-
 		fbo_ = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
@@ -304,11 +299,6 @@ namespace KlayGE
 
 	void OGLTexture2DRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
-		if (Texture::TU_RenderTarget != texture_2d_.Usage())
-		{
-			texture_2d_.Usage(Texture::TU_RenderTarget);
-		}
-
 		fbo_ = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
@@ -400,11 +390,6 @@ namespace KlayGE
 
 	void OGLTexture3DRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
-		if (Texture::TU_RenderTarget != texture_3d_.Usage())
-		{
-			texture_3d_.Usage(Texture::TU_RenderTarget);
-		}
-
 		fbo_ = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
@@ -610,11 +595,6 @@ namespace KlayGE
 
 	void OGLTextureCubeRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
-		if (Texture::TU_RenderTarget != texture_cube_.Usage())
-		{
-			texture_cube_.Usage(Texture::TU_RenderTarget);
-		}
-
 		fbo_ = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 

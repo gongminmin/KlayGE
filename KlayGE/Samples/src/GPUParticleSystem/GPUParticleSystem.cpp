@@ -114,7 +114,7 @@ namespace
 		}
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		TexturePtr vol_tex = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, EF_ARGB8);
+		TexturePtr vol_tex = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, EF_ARGB8, EAH_CPU_Write | EAH_GPU_Read);
 		{
 			Texture::Mapper mapper(*vol_tex, 0, TMA_Write_Only, 0, 0, 0, vol_size, vol_size, vol_size);
 			uint8_t* p = mapper.Pointer<uint8_t>();
@@ -148,9 +148,9 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			GraphicsBufferPtr tex0 = rf.MakeVertexBuffer(BU_Static);
-			GraphicsBufferPtr pos = rf.MakeVertexBuffer(BU_Static);
-			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static);
+			GraphicsBufferPtr tex0 = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
+			GraphicsBufferPtr pos = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
+			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 
 			rl_ = rf.MakeRenderLayout();
 			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
@@ -195,7 +195,7 @@ namespace
 
 			technique_ = rf.LoadEffect("GPUParticleSystem.kfx")->TechniqueByName("Particles");
 
-			particle_tex_ = LoadTexture("particle.dds");
+			particle_tex_ = LoadTexture("particle.dds", EAH_CPU_Write | EAH_GPU_Read);
 			*(technique_->Effect().ParameterByName("particle_sampler")) = particle_tex_;
 
 			noise_vol_tex_ = CreateNoiseVolume(32);
@@ -279,22 +279,29 @@ namespace
 
 			technique_ = rf.LoadEffect("GPUParticleSystem.kfx")->TechniqueByName("Update");
 
-			particle_pos_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F);
-			particle_pos_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F);
-			particle_vel_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F);
-			particle_vel_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F);
-			for (int i = 0; i < 2; ++ i)
+			particle_pos_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F, EAH_GPU_Read | EAH_GPU_Write);
+			particle_pos_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F, EAH_GPU_Read | EAH_GPU_Write);
+			particle_vel_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F, EAH_GPU_Read | EAH_GPU_Write);
+			particle_vel_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F, EAH_GPU_Read | EAH_GPU_Write);
 			{
-				Texture::Mapper mapper(*particle_pos_texture_[i], 0, TMA_Write_Only, 0, 0, tex_width_, tex_height_);
-				float4* pos_init = mapper.Pointer<float4>();
-				for (int y = 0; y < tex_height_; ++ y)
+				TexturePtr tmp_texture = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F, EAH_CPU_Write);
 				{
-					for (int x = 0; x < tex_width_; ++ x)
+					Texture::Mapper mapper(*tmp_texture, 0, TMA_Write_Only, 0, 0, tex_width_, tex_height_);
+					float4* pos_init = mapper.Pointer<float4>();
+					for (int y = 0; y < tex_height_; ++ y)
 					{
-						pos_init[x] = float4(0, 0, 0, -1);
+						for (int x = 0; x < tex_width_; ++ x)
+						{
+							pos_init[x] = float4(0, 0, 0, -1);
+						}
+						pos_init += mapper.RowPitch() / sizeof(pos_init[0]);
 					}
-					pos_init += mapper.RowPitch() / sizeof(pos_init[0]);
 				}
+
+				for (int i = 0; i < 2; ++ i)
+				{
+					tmp_texture->CopyToTexture(*particle_pos_texture_[i]);
+				}			
 			}
 
 			pos_vel_rt_buffer_[0] = rf.MakeFrameBuffer();
@@ -309,11 +316,11 @@ namespace
 			pos_vel_rt_buffer_[0]->GetViewport().camera = pos_vel_rt_buffer_[1]->GetViewport().camera
 				= screen_buffer->GetViewport().camera;
 
-			particle_birth_time_ = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_R32F);
+			particle_birth_time_ = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_R32F, EAH_CPU_Write | EAH_GPU_Read);
 			*(technique_->Effect().ParameterByName("particle_birth_time_sampler")) = particle_birth_time_;
 
 			TexturePtr particle_init_vel;
-			particle_init_vel = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F);
+			particle_init_vel = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F, EAH_CPU_Write | EAH_GPU_Read);
 			{
 				Texture::Mapper mapper(*particle_init_vel, 0, TMA_Write_Only, 0, 0, tex_width_, tex_height_);
 				float4* vel_init = mapper.Pointer<float4>();
@@ -440,13 +447,13 @@ namespace
 
 			technique_ = rf.LoadEffect("GPUParticleSystem.kfx")->TechniqueByName("Terrain");
 
-			TexturePtr height_32f = rf.MakeTexture2D(height_map->Width(0), height_map->Height(0), 1, EF_R32F);
+			TexturePtr height_32f = rf.MakeTexture2D(height_map->Width(0), height_map->Height(0), 1, EF_R32F, EAH_CPU_Write | EAH_GPU_Read);
 			height_map->CopyToTexture(*height_32f);
 
 			*(technique_->Effect().ParameterByName("height_map_sampler")) = height_32f;
 			*(technique_->Effect().ParameterByName("normal_map_sampler")) = normal_map;
 
-			*(technique_->Effect().ParameterByName("grass_sampler")) = LoadTexture("grass.dds");
+			*(technique_->Effect().ParameterByName("grass_sampler")) = LoadTexture("grass.dds", EAH_CPU_Write | EAH_GPU_Read);
 		}
 
 		void OnRenderBegin()
@@ -521,10 +528,10 @@ namespace
 
 		try
 		{
-			TexturePtr temp_tex = rf.MakeTexture2D(256, 256, 1, EF_ABGR32F);
+			TexturePtr temp_tex = rf.MakeTexture2D(256, 256, 1, EF_ABGR32F, EAH_GPU_Read | EAH_GPU_Write);
 			rf.Make2DRenderView(*temp_tex, 0);
 
-			temp_tex = rf.MakeTexture2D(256, 256, 1, EF_R32F);
+			temp_tex = rf.MakeTexture2D(256, 256, 1, EF_R32F, EAH_GPU_Read | EAH_GPU_Write);
 			rf.Make2DRenderView(*temp_tex, 0);
 		}
 		catch (...)
@@ -645,8 +652,8 @@ void GPUParticleSystemApp::InitObjects()
 	particles_.reset(new ParticlesObject(NUM_PARTICLE));
 	particles_->AddToSceneManager();
 
-	TexturePtr terrain_height = LoadTexture("terrain_height.dds");
-	TexturePtr terrain_normal = LoadTexture("terrain_normal.dds");
+	TexturePtr terrain_height = LoadTexture("terrain_height.dds", EAH_CPU_Write | EAH_GPU_Read);
+	TexturePtr terrain_normal = LoadTexture("terrain_normal.dds", EAH_CPU_Write | EAH_GPU_Read);
 
 	gpu_ps.reset(new GPUParticleSystem(NUM_PARTICLE, terrain_height, terrain_normal));
 	gpu_ps->AutoEmit(500);
@@ -674,11 +681,11 @@ void GPUParticleSystemApp::OnResize(uint32_t width, uint32_t height)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 
-	scene_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F);
+	scene_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write);
 	scene_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*scene_tex_, 0));
 	scene_buffer_->Attach(FrameBuffer::ATT_DepthStencil, re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil));
 
-	fog_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F);
+	fog_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write);
 	fog_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*fog_tex_, 0));
 	fog_buffer_->Attach(FrameBuffer::ATT_DepthStencil, re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil));
 

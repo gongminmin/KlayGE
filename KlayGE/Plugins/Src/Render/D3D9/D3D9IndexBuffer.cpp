@@ -25,8 +25,8 @@
 
 namespace KlayGE
 {
-	D3D9IndexBuffer::D3D9IndexBuffer(BufferUsage usage)
-						: D3D9GraphicsBuffer(usage),
+	D3D9IndexBuffer::D3D9IndexBuffer(BufferUsage usage, uint32_t access_hint)
+						: D3D9GraphicsBuffer(usage, access_hint),
 							format_(EF_R16)
 	{
 	}
@@ -38,6 +38,12 @@ namespace KlayGE
 
 		if (format_ != format)
 		{
+			uint32_t usage = 0;
+			if ((access_hint_ & EAH_CPU_Write) && !(access_hint_ & EAH_CPU_Read))
+			{
+				usage = D3DUSAGE_WRITEONLY;
+			}
+
 			ElementFormat old_format = format_;
 			format_ = format;
 
@@ -45,7 +51,7 @@ namespace KlayGE
 			{
 				IDirect3DIndexBuffer9* buffer;
 				TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->Size() * (sizeof(uint32_t) / sizeof(uint16_t))), 
-					0, (EF_R32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_MANAGED, &buffer, NULL));
+					usage, (EF_R32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_MANAGED, &buffer, NULL));
 
 				uint16_t* src;
 				uint32_t* dest;
@@ -68,7 +74,7 @@ namespace KlayGE
 
 				IDirect3DIndexBuffer9* buffer;
 				TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->Size() / (sizeof(uint32_t) / sizeof(uint16_t))), 
-					0, (EF_R32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_MANAGED, &buffer, NULL));
+					usage, (EF_R32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_MANAGED, &buffer, NULL));
 
 				uint32_t* src;
 				uint16_t* dest;
@@ -94,12 +100,18 @@ namespace KlayGE
 
 		if (this->Size() > hw_buf_size_)
 		{
+			uint32_t usage = 0;
+			if ((access_hint_ & EAH_CPU_Write) && !(access_hint_ & EAH_CPU_Read))
+			{
+				usage = D3DUSAGE_WRITEONLY;
+			}
+
 			D3D9RenderEngine const & renderEngine(*checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 			d3d_device_ = renderEngine.D3DDevice();
 
 			IDirect3DIndexBuffer9* buffer;
 			TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->Size()), 
-				0, (EF_R32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_MANAGED, &buffer, NULL));
+				usage, (EF_R32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_MANAGED, &buffer, NULL));
 			buffer_ = MakeCOMPtr(buffer);
 			hw_buf_size_ = this->Size();
 		}

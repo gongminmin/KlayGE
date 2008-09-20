@@ -1,8 +1,11 @@
 // Texture.hpp
 // KlayGE 纹理类 头文件
-// Ver 3.6.0
-// 版权所有(C) 龚敏敏, 2003-2007
+// Ver 3.8.0
+// 版权所有(C) 龚敏敏, 2003-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.8.0
+// 增加了access_hint (2008.9.20)
 //
 // 3.6.0
 // 可以通过Map直接访问纹理内容 (2007.7.7)
@@ -64,13 +67,6 @@ namespace KlayGE
 	class Texture
 	{
 	public:
-		// Enum identifying the texture usage
-		enum TextureUsage
-		{
-			TU_Default		= 0,	// default usage
-			TU_RenderTarget = 1,	// this texture will be a render target, ie. used as a target for render to texture
-		};
-
 		// Enum identifying the texture type
 		enum TextureType
 		{
@@ -190,7 +186,7 @@ namespace KlayGE
 		};
 
 	public:
-		explicit Texture(TextureType type);
+		explicit Texture(TextureType type, uint32_t access_hint);
 		virtual ~Texture();
 
 		static TexturePtr NullObject();
@@ -200,10 +196,6 @@ namespace KlayGE
 
 		// Gets the number of mipmaps to be used for this texture.
 		uint16_t NumMipMaps() const;
-
-		// Returns the TextureUsage indentifier for this Texture
-		TextureUsage Usage() const;
-		virtual void Usage(TextureUsage usage) = 0;
 
 		// Returns the width of the texture.
 		virtual uint32_t Width(int level) const = 0;
@@ -219,6 +211,8 @@ namespace KlayGE
 
 		// Returns the texture type of the texture.
 		TextureType Type() const;
+
+		uint32_t AccessHint() const;
 
 		// Copies (and maybe scales to fit) the contents of this texture to another texture.
 		virtual void CopyToTexture(Texture& target) = 0;
@@ -264,11 +258,11 @@ namespace KlayGE
 		uint16_t		numMipMaps_;
 
 		ElementFormat	format_;
-		TextureUsage	usage_;
 		TextureType		type_;
+		uint32_t		access_hint_;
 	};
 
-	TexturePtr LoadTexture(std::string const & tex_name);
+	TexturePtr LoadTexture(std::string const & tex_name, uint32_t access_hint);
 	void SaveTexture(TexturePtr texture, std::string const & tex_name);
 
 	// 返回立方环境映射的lookat和up向量

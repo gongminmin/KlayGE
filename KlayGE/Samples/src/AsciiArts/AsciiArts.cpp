@@ -137,7 +137,7 @@ namespace
 	{
 		int const ASCII_IN_A_ROW = 16;
 
-		TexturePtr ascii_tex = LoadTexture(tex_name);
+		TexturePtr ascii_tex = LoadTexture(tex_name, EAH_CPU_Write | EAH_GPU_Read);
 		BOOST_ASSERT(EF_L8 == ascii_tex->Format());
 
 		std::vector<ascii_tile_type> ret(INPUT_NUM_ASCII);
@@ -189,7 +189,7 @@ namespace
 		}
 
 		TexturePtr ret = Context::Instance().RenderFactoryInstance().MakeTexture2D(OUTPUT_NUM_ASCII * ASCII_WIDTH,
-			ASCII_HEIGHT, 1, EF_L8);
+			ASCII_HEIGHT, 1, EF_L8, EAH_CPU_Write | EAH_GPU_Read);
 		{
 			Texture::Mapper mapper(*ret, 0, TMA_Write_Only, 0, 0, OUTPUT_NUM_ASCII * ASCII_WIDTH, ASCII_HEIGHT);
 			uint8_t* data = mapper.Pointer<uint8_t>();
@@ -350,7 +350,7 @@ void AsciiArtsApp::InitObjects()
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-	obj_.reset(new SceneObjectHelper(LoadKModel("teapot.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<KMesh>()),
+	obj_.reset(new SceneObjectHelper(LoadKModel("teapot.kmodel", EAH_CPU_Write | EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<KMesh>()),
 		SceneObject::SOA_Cullable));
 	obj_->AddToSceneManager();
 
@@ -385,12 +385,12 @@ void AsciiArtsApp::OnResize(uint32_t width, uint32_t height)
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	rendered_tex_ = rf.MakeTexture2D(width, height, 1, EF_ARGB8);
+	rendered_tex_ = rf.MakeTexture2D(width, height, 1, EF_ARGB8, EAH_GPU_Read | EAH_GPU_Write);
 	render_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_, 0));
 	render_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));
 
 	downsample_tex_ = rf.MakeTexture2D(width / CELL_WIDTH, height / CELL_HEIGHT,
-		1, EF_ARGB8);
+		1, EF_ARGB8, EAH_GPU_Read | EAH_GPU_Write);
 
 	FrameBufferPtr fb = rf.MakeFrameBuffer();
 	fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*downsample_tex_, 0));

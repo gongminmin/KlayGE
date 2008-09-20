@@ -1,8 +1,11 @@
 // ElementFormat.hpp
 // KlayGE 元素格式 头文件
-// Ver 3.5.0
-// 版权所有(C) 龚敏敏, 2006-2007
+// Ver 3.8.0
+// 版权所有(C) 龚敏敏, 2006-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.8.0
+// 增加了access_hint的标志 (2008.9.20)
 //
 // 3.5.0
 // 支持有符号格式 (2007.2.12)
@@ -680,6 +683,15 @@ namespace KlayGE
 			return 0;
 		}
 	}
+
+
+	enum ElementAccessHint
+	{
+		EAH_CPU_Read = 1UL << 0,
+		EAH_CPU_Write = 1UL << 1,
+		EAH_GPU_Read = 1UL << 2,
+		EAH_GPU_Write = 1UL << 3,
+	};
 }
 
 #endif			// _ELEMENTFORMAT_HPP

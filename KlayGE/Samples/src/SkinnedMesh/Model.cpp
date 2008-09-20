@@ -70,9 +70,9 @@ void MD5SkinnedMesh::BuildMeshInfo()
 		positions.begin(), positions.end(),
 		texcoords.begin(), normals.begin());
 	this->AddVertexStream(&tangents[0], static_cast<uint32_t>(sizeof(tangents[0]) * tangents.size()),
-			vertex_element(VEU_Tangent, 0, EF_BGR32F));
+			vertex_element(VEU_Tangent, 0, EF_BGR32F), EAH_CPU_Write | EAH_GPU_Read);
 	this->AddVertexStream(&binormals[0], static_cast<uint32_t>(sizeof(binormals[0]) * binormals.size()),
-			vertex_element(VEU_Binormal, 0, EF_BGR32F));
+			vertex_element(VEU_Binormal, 0, EF_BGR32F), EAH_CPU_Write | EAH_GPU_Read);
 
 	// ½¨Á¢ÎÆÀí
 	for (StaticMesh::TextureSlotsType::iterator iter = texture_slots_.begin();
@@ -80,15 +80,15 @@ void MD5SkinnedMesh::BuildMeshInfo()
 	{
 		if ("DiffuseMap" == iter->first)
 		{
-			*(technique_->Effect().ParameterByName("diffuse_map")) = LoadTexture(iter->second);
+			*(technique_->Effect().ParameterByName("diffuse_map")) = LoadTexture(iter->second, EAH_CPU_Write | EAH_GPU_Read);
 		}
 		if ("NormalMap" == iter->first)
 		{
-			*(technique_->Effect().ParameterByName("normal_map")) = LoadTexture(iter->second);
+			*(technique_->Effect().ParameterByName("normal_map")) = LoadTexture(iter->second, EAH_CPU_Write | EAH_GPU_Read);
 		}
 		if ("SpecularMap" == iter->first)
 		{
-			*(technique_->Effect().ParameterByName("specular_map")) = LoadTexture(iter->second);
+			*(technique_->Effect().ParameterByName("specular_map")) = LoadTexture(iter->second, EAH_CPU_Write | EAH_GPU_Read);
 		}
 	}
 }

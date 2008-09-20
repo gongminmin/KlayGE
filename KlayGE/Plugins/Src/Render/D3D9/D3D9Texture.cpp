@@ -45,6 +45,7 @@
 #include <KlayGE/Texture.hpp>
 
 #include <cstring>
+#include <boost/assert.hpp>
 
 #include <d3dx9.h>
 #include <d3dx9.h>
@@ -63,9 +64,14 @@
 
 namespace KlayGE
 {
-	D3D9Texture::D3D9Texture(TextureType type)
-					: Texture(type)
+	D3D9Texture::D3D9Texture(TextureType type, uint32_t access_hint)
+					: Texture(type, access_hint)
 	{
+		if (access_hint & EAH_GPU_Write)
+		{
+			BOOST_ASSERT(!(access_hint & EAH_CPU_Read));
+			BOOST_ASSERT(!(access_hint & EAH_CPU_Write));
+		}
 	}
 
 	D3D9Texture::~D3D9Texture()

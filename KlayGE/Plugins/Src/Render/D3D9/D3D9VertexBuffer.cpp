@@ -26,8 +26,8 @@
 
 namespace KlayGE
 {
-	D3D9VertexBuffer::D3D9VertexBuffer(BufferUsage usage)
-			: D3D9GraphicsBuffer(usage)
+	D3D9VertexBuffer::D3D9VertexBuffer(BufferUsage usage, uint32_t access_hint)
+			: D3D9GraphicsBuffer(usage, access_hint)
 	{
 	}
 
@@ -37,12 +37,18 @@ namespace KlayGE
 
 		if (this->Size() > hw_buf_size_)
 		{
+			uint32_t usage = 0;
+			if ((access_hint_ & EAH_CPU_Write) && !(access_hint_ & EAH_CPU_Read))
+			{
+				usage = D3DUSAGE_WRITEONLY;
+			}
+
 			D3D9RenderEngine const & renderEngine(*checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 			d3d_device_ = renderEngine.D3DDevice();
 
 			IDirect3DVertexBuffer9* buffer;
 			TIF(d3d_device_->CreateVertexBuffer(static_cast<UINT>(this->Size()),
-					0, 0, D3DPOOL_MANAGED, &buffer, NULL));
+					usage, 0, D3DPOOL_MANAGED, &buffer, NULL));
 			buffer_ = MakeCOMPtr(buffer);
 			hw_buf_size_ = this->Size();
 		}

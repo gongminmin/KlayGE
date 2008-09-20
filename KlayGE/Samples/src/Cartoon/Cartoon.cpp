@@ -84,7 +84,7 @@ namespace
 		TorusObject()
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadKModel("dino50.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderTorus>())->Mesh(0);
+			renderable_ = LoadKModel("dino50.kmodel", EAH_CPU_Write | EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderTorus>())->Mesh(0);
 		}
 	};
 
@@ -95,7 +95,7 @@ namespace
 		CartoonPostProcess()
 			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Cartoon.kfx")->TechniqueByName("Cartoon"))
 		{
-			*(technique_->Effect().ParameterByName("toonmap_sampler")) = LoadTexture("toon.dds");
+			*(technique_->Effect().ParameterByName("toonmap_sampler")) = LoadTexture("toon.dds", EAH_CPU_Write | EAH_GPU_Read);
 		}
 
 		void Source(TexturePtr const & tex, bool flipping)
@@ -157,7 +157,7 @@ namespace
 
 		try
 		{
-			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, EF_ABGR16F);
+			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write);
 			rf.Make2DRenderView(*temp_tex, 0);
 			rf.MakeDepthStencilRenderView(800, 600, EF_D16, 0);
 		}
@@ -308,8 +308,8 @@ void Cartoon::OnResize(uint32_t width, uint32_t height)
 	App3DFramework::OnResize(width, height);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	color_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F);
-	normal_depth_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F);
+	color_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write);
+	normal_depth_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write);
 	g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*color_tex_, 0));
 	g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*normal_depth_tex_, 0));
 	g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));

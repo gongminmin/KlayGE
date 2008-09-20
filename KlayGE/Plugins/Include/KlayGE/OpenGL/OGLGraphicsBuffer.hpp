@@ -36,7 +36,7 @@ namespace KlayGE
 	class OGLGraphicsBuffer : public GraphicsBuffer
 	{
 	public:
-		explicit OGLGraphicsBuffer(BufferUsage usage, GLenum target);
+		explicit OGLGraphicsBuffer(BufferUsage usage, uint32_t access_hint, GLenum target);
 		~OGLGraphicsBuffer();
 
 		void Active();

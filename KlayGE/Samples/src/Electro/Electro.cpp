@@ -87,7 +87,7 @@ namespace
 				turbBuffer[i] = static_cast<uint8_t>((255 * (turbBuffer[i] - min)) / (max - min));
 			}
 
-			TexturePtr electro_tex = rf.MakeTexture3D(XSIZE, YSIZE, ZSIZE, 1, EF_L8);
+			TexturePtr electro_tex = rf.MakeTexture3D(XSIZE, YSIZE, ZSIZE, 1, EF_L8, EAH_CPU_Write | EAH_GPU_Read);
 			{
 				Texture::Mapper mapper(*electro_tex, 0, TMA_Write_Only, 0, 0, 0, XSIZE, YSIZE, ZSIZE);
 				uint8_t* data = mapper.Pointer<uint8_t>();
@@ -124,13 +124,13 @@ namespace
 			rl_ = rf.MakeRenderLayout();
 			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
-			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static);
+			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 			pos_vb->Resize(sizeof(xyzs));
 			{
 				GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
 				std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
 			}
-			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static);
+			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 			tex0_vb->Resize(sizeof(texs));
 			{
 				GraphicsBuffer::Mapper mapper(*tex0_vb, BA_Write_Only);

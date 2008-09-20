@@ -1,8 +1,11 @@
 // GraphicsBuffer.hpp
 // KlayGE 图形缓冲区类 头文件
-// Ver 3.2.0
-// 版权所有(C) 龚敏敏, 2003-2006
+// Ver 3.8.0
+// 版权所有(C) 龚敏敏, 2003-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.8.0
+// 增加了access_hint (2008.9.20)
 //
 // 3.2.0
 // 把IndexStream和VertexStream合并成GraphicsBuffer (2006.1.9)
@@ -93,7 +96,7 @@ namespace KlayGE
 		};
 
 	public:
-		explicit GraphicsBuffer(BufferUsage usage);
+		explicit GraphicsBuffer(BufferUsage usage, uint32_t access_hint);
 		virtual ~GraphicsBuffer();
 
 		static GraphicsBufferPtr NullObject();
@@ -119,6 +122,7 @@ namespace KlayGE
 
 	protected:
 		BufferUsage usage_;
+		uint32_t access_hint_;
 
 		uint32_t size_in_byte_;
 	};

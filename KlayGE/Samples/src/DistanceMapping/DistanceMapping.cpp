@@ -61,9 +61,9 @@ namespace
 				technique_ = effect->TechniqueByName("DistanceMapping20");
 			}
 
-			*(technique_->Effect().ParameterByName("diffuseMap")) = LoadTexture("diffuse.dds");
-			*(technique_->Effect().ParameterByName("normalMap")) = LoadTexture("normal.dds");
-			*(technique_->Effect().ParameterByName("distanceMap")) = LoadTexture("distance.dds");
+			*(technique_->Effect().ParameterByName("diffuseMap")) = LoadTexture("diffuse.dds", EAH_CPU_Write | EAH_GPU_Read);
+			*(technique_->Effect().ParameterByName("normalMap")) = LoadTexture("normal.dds", EAH_CPU_Write | EAH_GPU_Read);
+			*(technique_->Effect().ParameterByName("distanceMap")) = LoadTexture("distance.dds", EAH_CPU_Write | EAH_GPU_Read);
 
 			float3 xyzs[] =
 			{
@@ -99,25 +99,25 @@ namespace
 			rl_ = rf.MakeRenderLayout();
 			rl_->TopologyType(RenderLayout::TT_TriangleList);
 
-			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static);
+			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 			pos_vb->Resize(sizeof(xyzs));
 			{
 				GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
 				std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
 			}
-			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static);
+			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 			tex0_vb->Resize(sizeof(texs));
 			{
 				GraphicsBuffer::Mapper mapper(*tex0_vb, BA_Write_Only);
 				std::copy(&texs[0], &texs[0] + sizeof(texs) / sizeof(texs[0]), mapper.Pointer<float2>());
 			}
-			GraphicsBufferPtr tan_vb = rf.MakeVertexBuffer(BU_Static);
+			GraphicsBufferPtr tan_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 			tan_vb->Resize(sizeof(t));
 			{
 				GraphicsBuffer::Mapper mapper(*tan_vb, BA_Write_Only);
 				std::copy(&t[0], &t[0] + sizeof(t) / sizeof(t[0]), mapper.Pointer<float3>());
 			}
-			GraphicsBufferPtr binormal_vb = rf.MakeVertexBuffer(BU_Static);
+			GraphicsBufferPtr binormal_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 			binormal_vb->Resize(sizeof(b));
 			{
 				GraphicsBuffer::Mapper mapper(*binormal_vb, BA_Write_Only);
@@ -129,7 +129,7 @@ namespace
 			rl_->BindVertexStream(tan_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_BGR32F)));
 			rl_->BindVertexStream(binormal_vb, boost::make_tuple(vertex_element(VEU_Binormal, 0, EF_BGR32F)));
 
-			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static);
+			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 			ib->Resize(sizeof(indices));
 			{
 				GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);

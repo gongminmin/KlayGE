@@ -83,7 +83,7 @@ namespace KlayGE
 #pragma pack(pop)
 #endif
 
-	RenderModelPtr LoadKModel(std::string const & kmodel_name,
+	RenderModelPtr LoadKModel(std::string const & kmodel_name, uint32_t access_hint,
 		boost::function<RenderModelPtr (std::wstring const &)> CreateModelFactoryFunc = CreateKModelFactory<RenderModel>(),
 		boost::function<StaticMeshPtr (RenderModelPtr, std::wstring const &)> CreateMeshFactoryFunc = CreateKMeshFactory<StaticMesh>());
 	void SaveKModel(RenderModelPtr model, std::string const & kmodel_name);

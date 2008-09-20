@@ -88,13 +88,14 @@ namespace KlayGE
 
 		for (int i = 0; i < 2; ++ i)
 		{
-			TexturePtr tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(1, 1, 1, EF_R32F);
-
+			TexturePtr tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(1, 1, 1, EF_R32F, EAH_CPU_Write);
 			{
 				Texture::Mapper mapper(*tex, 0, TMA_Write_Only, 0, 0, 1, 1);
 				*mapper.Pointer<float>() = 0;
 			}
-			adapted_textures_[i] = tex;
+
+			adapted_textures_[i] = Context::Instance().RenderFactoryInstance().MakeTexture2D(1, 1, 1, EF_R32F, EAH_GPU_Read | EAH_GPU_Write);
+			tex->CopyToTexture(*adapted_textures_[i]);
 
 			fb_[i] = rf.MakeFrameBuffer();
 			fb_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*adapted_textures_[i], 0));
@@ -166,14 +167,14 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		downsample_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, EF_ABGR16F);
-		blur_tex_ = rf.MakeTexture2D(width / 4, height / 4, 1, EF_ABGR16F);
+		downsample_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write);
+		blur_tex_ = rf.MakeTexture2D(width / 4, height / 4, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write);
 
 		lum_texs_.clear();
 		int len = 1;
 		for (size_t i = 0; i < sum_lums_.size() + 1; ++ i)
 		{
-			lum_texs_.push_back(rf.MakeTexture2D(len, len, 1, EF_GR16F));
+			lum_texs_.push_back(rf.MakeTexture2D(len, len, 1, EF_GR16F, EAH_GPU_Read | EAH_GPU_Write));
 			len *= 4;
 		}
 		std::reverse(lum_texs_.begin(), lum_texs_.end());

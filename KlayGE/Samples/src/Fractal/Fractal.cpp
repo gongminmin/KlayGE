@@ -73,13 +73,13 @@ namespace
 			rl_ = rf.MakeRenderLayout();
 			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
-			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static);
+			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 			pos_vb->Resize(sizeof(xyzs));
 			{
 				GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
 				std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
 			}
-			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static);
+			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 			tex0_vb->Resize(sizeof(texs));
 			{
 				GraphicsBuffer::Mapper mapper(*tex0_vb, BA_Write_Only);
@@ -127,13 +127,13 @@ namespace
 			rl_ = rf.MakeRenderLayout();
 			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
-			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static);
+			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 			pos_vb->Resize(sizeof(xyzs));
 			{
 				GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
 				std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
 			}
-			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static);
+			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 			tex0_vb->Resize(sizeof(texs));
 			{
 				GraphicsBuffer::Mapper mapper(*tex0_vb, BA_Write_Only);
@@ -164,7 +164,7 @@ namespace
 
 		try
 		{
-			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, EF_GR16F);
+			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, EF_GR16F, EAH_GPU_Read | EAH_GPU_Write);
 			rf.Make2DRenderView(*temp_tex, 0);
 		}
 		catch (...)
@@ -271,11 +271,9 @@ void Fractal::OnResize(uint32_t width, uint32_t height)
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	for (int i = 0; i < 2; ++ i)
+	TexturePtr tmp_texture = rf.MakeTexture2D(width, height, 1, EF_GR16F, EAH_CPU_Write);
 	{
-		rendered_tex_[i] = rf.MakeTexture2D(width, height, 1, EF_GR16F);
-
-		Texture::Mapper mapper(*rendered_tex_[i], 0, TMA_Write_Only, 0, 0, width, height);
+		Texture::Mapper mapper(*tmp_texture, 0, TMA_Write_Only, 0, 0, width, height);
 		uint8_t* data = mapper.Pointer<uint8_t>();
 		for (uint32_t y = 0; y < height; ++ y)
 		{
@@ -287,8 +285,12 @@ void Fractal::OnResize(uint32_t width, uint32_t height)
 		}
 	}
 
-	render_buffer_[0]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_[0], 0));
-	render_buffer_[1]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_[1], 0));
+	for (int i = 0; i < 2; ++ i)
+	{
+		rendered_tex_[i] = rf.MakeTexture2D(width, height, 1, EF_GR16F, EAH_GPU_Read | EAH_GPU_Write);
+		tmp_texture->CopyToTexture(*rendered_tex_[i]);
+		render_buffer_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_[i], 0));
+	}
 }
 
 uint32_t Fractal::DoUpdate(uint32_t pass)

@@ -31,8 +31,8 @@ namespace KlayGE
 	class D3D9GraphicsBuffer : public GraphicsBuffer, public D3D9Resource
 	{
 	public:
-		explicit D3D9GraphicsBuffer(BufferUsage usage)
-			: GraphicsBuffer(usage),
+		explicit D3D9GraphicsBuffer(BufferUsage usage, uint32_t access_hint)
+			: GraphicsBuffer(usage, access_hint),
 				hw_buf_size_(0)
 		{
 		}
@@ -50,7 +50,7 @@ namespace KlayGE
 	class D3D9IndexBuffer : public D3D9GraphicsBuffer
 	{
 	public:
-		explicit D3D9IndexBuffer(BufferUsage usage);
+		explicit D3D9IndexBuffer(BufferUsage usage, uint32_t access_hint);
 
 		ID3D9IndexBufferPtr D3D9Buffer() const;
 		void SwitchFormat(ElementFormat format);
@@ -77,7 +77,7 @@ namespace KlayGE
 	class D3D9VertexBuffer : public D3D9GraphicsBuffer
 	{
 	public:
-		explicit D3D9VertexBuffer(BufferUsage usage);
+		explicit D3D9VertexBuffer(BufferUsage usage, uint32_t access_hint);
 
 		ID3D9VertexBufferPtr D3D9Buffer() const;
 

@@ -43,22 +43,22 @@ namespace KlayGE
 		}
 
 		TexturePtr MakeTexture1D(uint32_t /*width*/, uint16_t /*numMipMaps*/,
-			ElementFormat /*format*/)
+			ElementFormat /*format*/, uint32_t /*access_hint*/)
 		{
 			return Texture::NullObject();
 		}
 		TexturePtr MakeTexture2D(uint32_t /*width*/, uint32_t /*height*/, uint16_t /*numMipMaps*/,
-			ElementFormat /*format*/)
+			ElementFormat /*format*/, uint32_t /*access_hint*/)
 		{
 			return Texture::NullObject();
 		}
 		TexturePtr MakeTexture3D(uint32_t /*width*/, uint32_t /*height*/, uint32_t /*depth*/, uint16_t /*numMipMaps*/,
-			ElementFormat /*format*/)
+			ElementFormat /*format*/, uint32_t /*access_hint*/)
 		{
 			return Texture::NullObject();
 		}
 		TexturePtr MakeTextureCube(uint32_t /*size*/, uint16_t /*numMipMaps*/,
-			ElementFormat /*format*/)
+			ElementFormat /*format*/, uint32_t /*access_hint*/)
 		{
 			return Texture::NullObject();
 		}
@@ -72,11 +72,11 @@ namespace KlayGE
 			return RenderLayout::NullObject();
 		}
 
-		GraphicsBufferPtr MakeVertexBuffer(BufferUsage /*usage*/)
+		GraphicsBufferPtr MakeVertexBuffer(BufferUsage /*usage*/, uint32_t /*access_hint*/)
 		{
 			return GraphicsBuffer::NullObject();
 		}
-		GraphicsBufferPtr MakeIndexBuffer(BufferUsage /*usage*/)
+		GraphicsBufferPtr MakeIndexBuffer(BufferUsage /*usage*/, uint32_t /*access_hint*/)
 		{
 			return GraphicsBuffer::NullObject();
 		}

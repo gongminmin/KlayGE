@@ -43,8 +43,8 @@
 namespace KlayGE
 {
 	D3D9Texture3D::D3D9Texture3D(uint32_t width, uint32_t height, uint32_t depth,
-								uint16_t numMipMaps, ElementFormat format)
-					: D3D9Texture(TT_3D),
+								uint16_t numMipMaps, ElementFormat format, uint32_t access_hint)
+					: D3D9Texture(TT_3D, access_hint),
 						auto_gen_mipmaps_(false)
 	{
 		D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
@@ -58,7 +58,19 @@ namespace KlayGE
 
 		bpp_ = NumFormatBits(format);
 
-		d3dTexture3D_ = this->CreateTexture3D(0, D3DPOOL_MANAGED);
+		uint32_t usage;
+		D3DPOOL pool;
+		if (access_hint & EAH_GPU_Write)
+		{
+			usage = D3DUSAGE_RENDERTARGET;
+			pool = D3DPOOL_DEFAULT;
+		}
+		else
+		{
+			usage = 0;
+			pool = D3DPOOL_MANAGED;
+		}
+		d3dTexture3D_ = this->CreateTexture3D(usage, pool);
 
 		this->QueryBaseTexture();
 		this->UpdateParams();
@@ -201,7 +213,7 @@ namespace KlayGE
 				filter |= D3DX_FILTER_SRGB;
 			}
 
-			if (TU_RenderTarget == usage_)
+			if (this->AccessHint() & EAH_GPU_Write)
 			{
 				ID3D9VolumeTexturePtr d3dTexture3D = this->CreateTexture3D(D3DUSAGE_AUTOGENMIPMAP | D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
 
@@ -244,7 +256,7 @@ namespace KlayGE
 
 	void D3D9Texture3D::DoOnLostDevice()
 	{
-		if (TU_RenderTarget == usage_)
+		if (this->AccessHint() & EAH_GPU_Write)
 		{
 			d3dBaseTexture_.reset();
 			d3dTexture3D_.reset();
@@ -253,7 +265,7 @@ namespace KlayGE
 
 	void D3D9Texture3D::DoOnResetDevice()
 	{
-		if (TU_RenderTarget == usage_)
+		if (this->AccessHint() & EAH_GPU_Write)
 		{
 			d3dTexture3D_ = this->CreateTexture3D(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
 			this->QueryBaseTexture();
@@ -309,50 +321,5 @@ namespace KlayGE
 		}
 
 		bpp_	= NumFormatBits(format_);
-	}
-
-	void D3D9Texture3D::Usage(TextureUsage usage)
-	{
-		if (usage != usage_)
-		{
-			ID3D9VolumeTexturePtr d3dTmpTexture3D;
-			switch (usage)
-			{
-			case TU_Default:
-				d3dTmpTexture3D = this->CreateTexture3D(0, D3DPOOL_MANAGED);
-				break;
-
-			case TU_RenderTarget:
-				d3dTmpTexture3D = this->CreateTexture3D(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
-				break;
-			}
-
-			DWORD filter = D3DX_FILTER_NONE;
-			if (IsSRGB(format_))
-			{
-				filter |= D3DX_FILTER_SRGB;
-			}
-
-			ID3D9VolumePtr src_vol, dest_vol;
-			for (uint32_t i = 0; i < d3dTexture3D_->GetLevelCount(); ++ i)
-			{
-				IDirect3DVolume9* pSrcVol;
-				d3dTexture3D_->GetVolumeLevel(i, &pSrcVol);
-				src_vol = MakeCOMPtr(pSrcVol);
-
-				IDirect3DVolume9* pDestVol;
-				d3dTmpTexture3D->GetVolumeLevel(i, &pDestVol);
-				dest_vol = MakeCOMPtr(pDestVol);
-
-				TIF(D3DXLoadVolumeFromVolume(dest_vol.get(), NULL, NULL,
-					src_vol.get(), NULL, NULL, filter, 0));
-			}
-			d3dTexture3D_ = d3dTmpTexture3D;
-
-			this->QueryBaseTexture();
-			this->UpdateParams();
-
-			usage_ = usage;
-		}
 	}
 }

@@ -42,8 +42,8 @@
 
 namespace KlayGE
 {
-	D3D9TextureCube::D3D9TextureCube(uint32_t size, uint16_t numMipMaps, ElementFormat format)
-					: D3D9Texture(TT_Cube),
+	D3D9TextureCube::D3D9TextureCube(uint32_t size, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint)
+					: D3D9Texture(TT_Cube, access_hint),
 						auto_gen_mipmaps_(false)
 	{
 		D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
@@ -55,7 +55,19 @@ namespace KlayGE
 
 		bpp_ = NumFormatBits(format);
 
-		d3dTextureCube_ = this->CreateTextureCube(0, D3DPOOL_MANAGED);
+		uint32_t usage;
+		D3DPOOL pool;
+		if (access_hint & EAH_GPU_Write)
+		{
+			usage = D3DUSAGE_RENDERTARGET;
+			pool = D3DPOOL_DEFAULT;
+		}
+		else
+		{
+			usage = 0;
+			pool = D3DPOOL_MANAGED;
+		}
+		d3dTextureCube_ = this->CreateTextureCube(usage, pool);
 
 		this->QueryBaseTexture();
 		this->UpdateParams();
@@ -108,7 +120,7 @@ namespace KlayGE
 				TIF(other.d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &temp));
 				dst = MakeCOMPtr(temp);
 
-				if ((TU_RenderTarget == this->Usage()) && (TU_RenderTarget == target.Usage()))
+				if ((this->AccessHint() & EAH_GPU_Write) && (target.AccessHint() & EAH_GPU_Write))
 				{
 					if (FAILED(d3dDevice_->StretchRect(src.get(), NULL, dst.get(), NULL, D3DTEXF_LINEAR)))
 					{
@@ -158,7 +170,7 @@ namespace KlayGE
 
 			RECT srcRc = { src_xOffset, src_yOffset, src_xOffset + src_width, src_yOffset + src_height };
 			RECT dstRc = { dst_xOffset, dst_yOffset, dst_xOffset + dst_width, dst_yOffset + dst_height };
-			if ((TU_RenderTarget == this->Usage()) && (TU_RenderTarget == target.Usage()))
+			if ((this->AccessHint() & EAH_GPU_Write) && (target.AccessHint() & EAH_GPU_Write))
 			{
 				if (FAILED(d3dDevice_->StretchRect(src.get(), &srcRc, dst.get(), &dstRc, D3DTEXF_LINEAR)))
 				{
@@ -205,7 +217,7 @@ namespace KlayGE
 				filter |= D3DX_FILTER_SRGB;
 			}
 
-			if (TU_RenderTarget == usage_)
+			if (this->AccessHint() & EAH_GPU_Write)
 			{
 				ID3D9CubeTexturePtr d3dTextureCube = this->CreateTextureCube(D3DUSAGE_AUTOGENMIPMAP | D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
 
@@ -254,7 +266,7 @@ namespace KlayGE
 
 	void D3D9TextureCube::DoOnLostDevice()
 	{
-		if (TU_RenderTarget == usage_)
+		if (this->AccessHint() & EAH_GPU_Write)
 		{
 			d3dBaseTexture_.reset();
 			d3dTextureCube_.reset();
@@ -263,7 +275,7 @@ namespace KlayGE
 
 	void D3D9TextureCube::DoOnResetDevice()
 	{
-		if (TU_RenderTarget == usage_)
+		if (this->AccessHint() & EAH_GPU_Write)
 		{
 			d3dTextureCube_ = this->CreateTextureCube(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
 			this->QueryBaseTexture();
@@ -274,7 +286,8 @@ namespace KlayGE
 	{
 		if (IsDepthFormat(format_))
 		{
-			usage |= D3DUSAGE_DEPTHSTENCIL;
+			usage = D3DUSAGE_DEPTHSTENCIL;
+			pool = D3DPOOL_DEFAULT;
 		}
 
 		IDirect3DCubeTexture9* d3dTextureCube;
@@ -314,53 +327,5 @@ namespace KlayGE
 		}
 
 		bpp_	= NumFormatBits(format_);
-	}
-
-	void D3D9TextureCube::Usage(TextureUsage usage)
-	{
-		if (usage != usage_)
-		{
-			ID3D9CubeTexturePtr d3dTmpTextureCube;
-			switch (usage)
-			{
-			case TU_Default:
-				d3dTmpTextureCube = this->CreateTextureCube(0, D3DPOOL_MANAGED);
-				break;
-
-			case TU_RenderTarget:
-				d3dTmpTextureCube = this->CreateTextureCube(D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
-				break;
-			}
-
-			DWORD filter = D3DX_FILTER_NONE;
-			if (IsSRGB(format_))
-			{
-				filter |= D3DX_FILTER_SRGB;
-			}
-
-			ID3D9SurfacePtr src_surf, dest_surf;
-			for (int face = 0; face < 6; ++ face)
-			{
-				for (uint32_t i = 0; i < d3dTextureCube_->GetLevelCount(); ++ i)
-				{
-					IDirect3DSurface9* pSrcSurf;
-					d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), i, &pSrcSurf);
-					src_surf = MakeCOMPtr(pSrcSurf);
-
-					IDirect3DSurface9* pDestSurf;
-					d3dTmpTextureCube->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), i, &pDestSurf);
-					dest_surf = MakeCOMPtr(pDestSurf);
-
-					TIF(D3DXLoadSurfaceFromSurface(dest_surf.get(), NULL, NULL,
-						src_surf.get(), NULL, NULL, filter, 0));
-				}
-			}
-			d3dTextureCube_ = d3dTmpTextureCube;
-
-			this->QueryBaseTexture();
-			this->UpdateParams();
-
-			usage_ = usage;
-		}
 	}
 }

@@ -178,11 +178,7 @@ namespace KlayGE
 			level_(level)
 	{
 		BOOST_ASSERT(Texture::TT_1D == texture_1d.Type());
-
-		if (Texture::TU_RenderTarget != texture_1d_.Usage())
-		{
-			texture_1d_.Usage(Texture::TU_RenderTarget);
-		}
+		BOOST_ASSERT(texture_1d_.AccessHint() & EAH_GPU_Write);
 
 		IDirect3DSurface9* surface;
 		texture_1d_.D3DTexture1D()->GetSurfaceLevel(level_, &surface);
@@ -219,11 +215,7 @@ namespace KlayGE
 			level_(level)
 	{
 		BOOST_ASSERT(Texture::TT_2D == texture_2d.Type());
-
-		if (Texture::TU_RenderTarget != texture_2d_.Usage())
-		{
-			texture_2d_.Usage(Texture::TU_RenderTarget);
-		}
+		BOOST_ASSERT(texture_2d_.AccessHint() & EAH_GPU_Write);
 
 		IDirect3DSurface9* surface;
 		texture_2d_.D3DTexture2D()->GetSurfaceLevel(level_, &surface);
@@ -343,11 +335,7 @@ namespace KlayGE
 			face_(face), level_(level)
 	{
 		BOOST_ASSERT(Texture::TT_Cube == texture_cube.Type());
-
-		if (Texture::TU_RenderTarget != texture_cube_.Usage())
-		{
-			texture_cube_.Usage(Texture::TU_RenderTarget);
-		}
+		BOOST_ASSERT(texture_cube_.AccessHint() & EAH_GPU_Write);
 
 		IDirect3DSurface9* surface;
 		texture_cube_.D3DTextureCube()->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face_), level_, &surface);

@@ -88,7 +88,7 @@ namespace KlayGE
 		TexturePtr tex;
 		if (!texture_slots_.empty())
 		{
-			tex = LoadTexture(texture_slots_[0].second);
+			tex = LoadTexture(texture_slots_[0].second, EAH_CPU_Write | EAH_GPU_Read);
 		}
 
 		if (tex)
@@ -117,7 +117,7 @@ namespace KlayGE
 	}
 
 
-	RenderModelPtr LoadKModel(std::string const & kmodel_name,
+	RenderModelPtr LoadKModel(std::string const & kmodel_name, uint32_t access_hint,
 		boost::function<RenderModelPtr (std::wstring const &)> CreateModelFactoryFunc,
 		boost::function<StaticMeshPtr (RenderModelPtr, std::wstring const &)> CreateMeshFactoryFunc)
 	{
@@ -237,7 +237,7 @@ namespace KlayGE
 				std::vector<uint8_t> buf(num_vertices * vertex_elements[k].element_size());
 				file->read(reinterpret_cast<char*>(&buf[0]), static_cast<std::streamsize>(sizeof(buf[0]) * buf.size()));
 
-				mesh->AddVertexStream(&buf[0], static_cast<uint32_t>(buf.size()), vertex_elements[k]);
+				mesh->AddVertexStream(&buf[0], static_cast<uint32_t>(buf.size()), vertex_elements[k], access_hint);
 			}
 
 			uint32_t num_triangles;
@@ -247,7 +247,7 @@ namespace KlayGE
 				file->read(reinterpret_cast<char*>(&indices[0]),
 					static_cast<std::streamsize>(sizeof(indices[0]) * indices.size()));
 
-				mesh->AddIndexStream(&indices[0], static_cast<uint32_t>(indices.size() * sizeof(indices[0])), EF_R16);
+				mesh->AddIndexStream(&indices[0], static_cast<uint32_t>(indices.size() * sizeof(indices[0])), EF_R16, access_hint);
 			}
 
 			meshes.push_back(mesh);

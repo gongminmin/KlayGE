@@ -34,7 +34,7 @@ namespace KlayGE
 	{
 	public:
 		NullGraphicsBuffer()
-			: GraphicsBuffer(BU_Static)
+			: GraphicsBuffer(BU_Static, 0)
 		{
 		}
 
@@ -57,8 +57,8 @@ namespace KlayGE
 		}
 	};
 
-	GraphicsBuffer::GraphicsBuffer(BufferUsage usage)
-			: usage_(usage), size_in_byte_(0)
+	GraphicsBuffer::GraphicsBuffer(BufferUsage usage, uint32_t access_hint)
+			: usage_(usage), access_hint_(access_hint), size_in_byte_(0)
 	{
 	}
 

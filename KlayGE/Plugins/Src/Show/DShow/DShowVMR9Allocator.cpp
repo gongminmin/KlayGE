@@ -146,7 +146,7 @@ namespace KlayGE
 
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		present_tex_ = rf.MakeTexture2D(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight, 1, EF_ARGB8);
+		present_tex_ = rf.MakeTexture2D(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight, 1, EF_ARGB8, EAH_CPU_Write | EAH_GPU_Read);
 
 		IDirect3DSurface9* surf;
 		TIF(d3d_device_->CreateOffscreenPlainSurface(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight,

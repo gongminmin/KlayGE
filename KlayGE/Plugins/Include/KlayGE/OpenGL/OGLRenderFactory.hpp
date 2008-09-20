@@ -38,19 +38,19 @@ namespace KlayGE
 		RenderEngine& RenderEngineInstance();
 
 		TexturePtr MakeTexture1D(uint32_t width, uint16_t numMipMaps,
-				ElementFormat format);
+				ElementFormat format, uint32_t access_hint);
 		TexturePtr MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps,
-				ElementFormat format);
+				ElementFormat format, uint32_t access_hint);
 		TexturePtr MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth,
-				uint16_t numMipMaps, ElementFormat format);
+				uint16_t numMipMaps, ElementFormat format, uint32_t access_hint);
 		TexturePtr MakeTextureCube(uint32_t size, uint16_t numMipMaps,
-				ElementFormat format);
+				ElementFormat format, uint32_t access_hint);
 
 		FrameBufferPtr MakeFrameBuffer();
 
 		RenderLayoutPtr MakeRenderLayout();
-		GraphicsBufferPtr MakeVertexBuffer(BufferUsage usage);
-		GraphicsBufferPtr MakeIndexBuffer(BufferUsage usage);
+		GraphicsBufferPtr MakeVertexBuffer(BufferUsage usage, uint32_t access_hint);
+		GraphicsBufferPtr MakeIndexBuffer(BufferUsage usage, uint32_t access_hint);
 
 		QueryPtr MakeOcclusionQuery();
 

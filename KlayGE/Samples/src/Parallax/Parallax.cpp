@@ -57,9 +57,9 @@ namespace
 
 			technique_ = rf.LoadEffect("parallax.kfx")->TechniqueByName("Parallax");
 
-			*(technique_->Effect().ParameterByName("diffuseMapSampler")) = LoadTexture("diffuse.dds");
-			*(technique_->Effect().ParameterByName("normalMapSampler")) = LoadTexture("normal.dds");
-			*(technique_->Effect().ParameterByName("heightMapSampler")) = LoadTexture("height.dds");
+			*(technique_->Effect().ParameterByName("diffuseMapSampler")) = LoadTexture("diffuse.dds", EAH_CPU_Write | EAH_GPU_Read);
+			*(technique_->Effect().ParameterByName("normalMapSampler")) = LoadTexture("normal.dds", EAH_CPU_Write | EAH_GPU_Read);
+			*(technique_->Effect().ParameterByName("heightMapSampler")) = LoadTexture("height.dds", EAH_CPU_Write | EAH_GPU_Read);
 		}
 
 		void BuildMeshInfo()
@@ -100,7 +100,7 @@ namespace
 		PolygonObject()
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadKModel("teapot.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderPolygon>());
+			renderable_ = LoadKModel("teapot.kmodel", EAH_CPU_Write | EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderPolygon>());
 		}
 
 		void LightPos(float3 const & light_pos)

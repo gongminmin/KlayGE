@@ -37,8 +37,8 @@
 namespace KlayGE
 {
 	OGLTexture3D::OGLTexture3D(uint32_t width, uint32_t height, uint32_t depth,
-								uint16_t numMipMaps, ElementFormat format)
-					: OGLTexture(TT_3D)
+								uint16_t numMipMaps, ElementFormat format, uint32_t access_hint)
+					: OGLTexture(TT_3D, access_hint)
 	{
 		if (!glloader_GL_EXT_texture_sRGB())
 		{

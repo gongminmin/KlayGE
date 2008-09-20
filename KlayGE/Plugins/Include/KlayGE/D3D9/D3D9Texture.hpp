@@ -45,7 +45,7 @@ namespace KlayGE
 	class D3D9Texture : public Texture, public D3D9Resource
 	{
 	public:
-		explicit D3D9Texture(TextureType type);
+		explicit D3D9Texture(TextureType type, uint32_t access_hint);
 		virtual ~D3D9Texture();
 
 		std::wstring const & Name() const;
@@ -107,7 +107,7 @@ namespace KlayGE
 	class D3D9Texture1D : public D3D9Texture
 	{
 	public:
-		D3D9Texture1D(uint32_t width, uint16_t numMipMaps, ElementFormat format);
+		D3D9Texture1D(uint32_t width, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint);
 
 		uint32_t Width(int level) const;
 
@@ -116,9 +116,6 @@ namespace KlayGE
 			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width, uint32_t src_xOffset);
 
 		void BuildMipSubLevels();
-
-		using Texture::Usage;
-		void Usage(TextureUsage usage);
 
 		ID3D9TexturePtr D3DTexture1D() const
 			{ return d3dTexture1D_; }
@@ -148,7 +145,7 @@ namespace KlayGE
 	class D3D9Texture2D : public D3D9Texture
 	{
 	public:
-		D3D9Texture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, ElementFormat format);
+		D3D9Texture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
@@ -159,9 +156,6 @@ namespace KlayGE
 			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset);
 
 		void BuildMipSubLevels();
-
-		using Texture::Usage;
-		void Usage(TextureUsage usage);
 
 		ID3D9TexturePtr D3DTexture2D() const
 			{ return d3dTexture2D_; }
@@ -193,7 +187,7 @@ namespace KlayGE
 	class D3D9Texture3D : public D3D9Texture
 	{
 	public:
-		D3D9Texture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps, ElementFormat format);
+		D3D9Texture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
@@ -207,9 +201,6 @@ namespace KlayGE
 			uint32_t src_xOffset, uint32_t src_yOffset, uint32_t src_zOffset);
 
 		void BuildMipSubLevels();
-
-		using Texture::Usage;
-		void Usage(TextureUsage usage);
 
 		ID3D9VolumeTexturePtr D3DTexture3D() const
 			{ return d3dTexture3D_; }
@@ -243,7 +234,7 @@ namespace KlayGE
 	class D3D9TextureCube : public D3D9Texture
 	{
 	public:
-		D3D9TextureCube(uint32_t size, uint16_t numMipMaps, ElementFormat format);
+		D3D9TextureCube(uint32_t size, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
@@ -254,9 +245,6 @@ namespace KlayGE
 			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset);
 
 		void BuildMipSubLevels();
-
-		using Texture::Usage;
-		void Usage(TextureUsage usage);
 
 		ID3D9CubeTexturePtr D3DTextureCube() const
 			{ return d3dTextureCube_; }

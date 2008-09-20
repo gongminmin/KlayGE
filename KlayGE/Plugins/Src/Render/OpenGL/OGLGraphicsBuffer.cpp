@@ -31,8 +31,8 @@
 
 namespace KlayGE
 {
-	OGLGraphicsBuffer::OGLGraphicsBuffer(BufferUsage usage, GLenum target)
-			: GraphicsBuffer(usage),
+	OGLGraphicsBuffer::OGLGraphicsBuffer(BufferUsage usage, uint32_t access_hint, GLenum target)
+			: GraphicsBuffer(usage, access_hint),
 				target_(target)
 	{
 		BOOST_ASSERT((GL_ARRAY_BUFFER == target) || (GL_ELEMENT_ARRAY_BUFFER == target));

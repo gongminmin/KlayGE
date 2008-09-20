@@ -118,7 +118,7 @@ namespace
 		PolygonObject()
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadKModel("teapot.kmodel", CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderPolygon>());
+			renderable_ = LoadKModel("teapot.kmodel", EAH_CPU_Write | EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderPolygon>());
 		}
 
 		void LightPos(float3 const & light_pos)
@@ -199,7 +199,7 @@ namespace
 
 		try
 		{
-			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, EF_R32F);
+			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, EF_R32F, EAH_GPU_Read | EAH_GPU_Write);
 			rf.Make2DRenderView(*temp_tex, 0);
 		}
 		catch (...)
@@ -366,16 +366,15 @@ void DepthPeelingApp::OnResize(uint32_t width, uint32_t height)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 
-	depth_texs_[0] = rf.MakeTexture2D(width, height, 1, EF_R32F);
-	depth_texs_[1] = rf.MakeTexture2D(width, height, 1, EF_R32F);
+	depth_texs_[0] = rf.MakeTexture2D(width, height, 1, EF_R32F, EAH_GPU_Read | EAH_GPU_Write);
+	depth_texs_[1] = rf.MakeTexture2D(width, height, 1, EF_R32F, EAH_GPU_Read | EAH_GPU_Write);
 	depth_view_ = rf.Make2DRenderView(*depth_texs_[0], 0);
-	depth_texs_[1]->Usage(Texture::TU_RenderTarget);
 
 	default_depth_view_ = re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil);
 
 	for (size_t i = 0; i < peeling_fbs_.size(); ++ i)
 	{
-		peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, EF_ARGB8);
+		peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, EF_ARGB8, EAH_GPU_Read | EAH_GPU_Write);
 		peeled_views_[i] = rf.Make2DRenderView(*peeled_texs_[i], 0);
 
 		peeling_fbs_[i]->Attach(FrameBuffer::ATT_Color0, peeled_views_[i]);

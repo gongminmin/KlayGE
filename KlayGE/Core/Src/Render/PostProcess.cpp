@@ -39,7 +39,7 @@ namespace KlayGE
 		rl_ = rf.MakeRenderLayout();
 		rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
-		pos_vb_ = rf.MakeVertexBuffer(BU_Static);
+		pos_vb_ = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 		pos_vb_->Resize(sizeof(float2) * 4);
 		{
 			GraphicsBuffer::Mapper mapper(*pos_vb_, BA_Write_Only);
@@ -230,7 +230,7 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		blurx_tex_ = rf.MakeTexture2D(frame_buffer_->Width(), frame_buffer_->Height(), 1, frame_buffer_->Format());
+		blurx_tex_ = rf.MakeTexture2D(frame_buffer_->Width(), frame_buffer_->Height(), 1, frame_buffer_->Format(), EAH_GPU_Read | EAH_GPU_Write);
 
 		FrameBufferPtr blur_x_fb = rf.MakeFrameBuffer();
 		blur_x_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blurx_tex_, 0));

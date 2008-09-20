@@ -85,11 +85,11 @@ namespace KlayGE
 		return box_;
 	}
 
-	void StaticMesh::AddVertexStream(void const * buf, uint32_t size, vertex_element const & ve)
+	void StaticMesh::AddVertexStream(void const * buf, uint32_t size, vertex_element const & ve, uint32_t access_hint)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static);
+		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, access_hint);
 		vb->Resize(size);
 		{
 			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
@@ -119,11 +119,11 @@ namespace KlayGE
 		}
 	}
 
-	void StaticMesh::AddIndexStream(void const * buf, uint32_t size, ElementFormat format)
+	void StaticMesh::AddIndexStream(void const * buf, uint32_t size, ElementFormat format, uint32_t access_hint)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static);
+		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, access_hint);
 		ib->Resize(size);
 		{
 			GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);

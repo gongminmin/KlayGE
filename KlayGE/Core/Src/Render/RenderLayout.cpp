@@ -144,7 +144,7 @@ namespace KlayGE
 		if (!hint)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			hint = rf.MakeVertexBuffer(BU_Dynamic);
+			hint = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read);
 		}
 
 		std::vector<uint8_t> instance_buffer(instance_stream_.stream->Size());

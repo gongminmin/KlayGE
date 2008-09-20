@@ -75,7 +75,7 @@ namespace KlayGE
 		rl_ = rf.MakeRenderLayout();
 		rl_->TopologyType(RenderLayout::TT_PointList);
 
-		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static);
+		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 		vb->Resize(sizeof(v));
 		{
 			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
@@ -114,7 +114,7 @@ namespace KlayGE
 		rl_ = rf.MakeRenderLayout();
 		rl_->TopologyType(RenderLayout::TT_LineList);
 
-		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static);
+		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 		vb->Resize(sizeof(xyzs));
 		{
 			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
@@ -153,7 +153,7 @@ namespace KlayGE
 		rl_ = rf.MakeRenderLayout();
 		rl_->TopologyType(RenderLayout::TT_TriangleList);
 
-		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static);
+		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 		vb->Resize(sizeof(xyzs));
 		{
 			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
@@ -204,7 +204,7 @@ namespace KlayGE
 		rl_ = rf.MakeRenderLayout();
 		rl_->TopologyType(RenderLayout::TT_TriangleList);
 
-		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static);
+		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 		vb->Resize(sizeof(xyzs));
 		{
 			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
@@ -212,7 +212,7 @@ namespace KlayGE
 		}
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
-		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static);
+		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 		ib->Resize(sizeof(indices));
 		{
 			GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
@@ -258,7 +258,7 @@ namespace KlayGE
 		rl_ = rf.MakeRenderLayout();
 		rl_->TopologyType(RenderLayout::TT_LineList);
 
-		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static);
+		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 		vb->Resize(sizeof(xyzs));
 		{
 			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
@@ -266,7 +266,7 @@ namespace KlayGE
 		}
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
-		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static);
+		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 		ib->Resize(sizeof(indices));
 		{
 			GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
@@ -303,7 +303,7 @@ namespace KlayGE
 		rl_ = rf.MakeRenderLayout();
 		rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
-		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static);
+		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 		vb->Resize(sizeof(xyzs));
 		{
 			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
@@ -353,7 +353,7 @@ namespace KlayGE
 			}
 		}
 
-		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static);
+		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 		pos_vb->Resize(static_cast<uint32_t>(sizeof(pos[0]) * pos.size()));
 		{
 			GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
@@ -373,7 +373,7 @@ namespace KlayGE
 				}
 			}
 
-			GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static);
+			GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 			tex_vb->Resize(static_cast<uint32_t>(sizeof(tex[0]) * tex.size()));
 			{
 				GraphicsBuffer::Mapper mapper(*tex_vb, BA_Write_Only);
@@ -397,7 +397,7 @@ namespace KlayGE
 			}
 		}
 
-		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static);
+		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 		ib->Resize(static_cast<uint32_t>(index.size() * sizeof(index[0])));
 		{
 			GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);

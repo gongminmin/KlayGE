@@ -113,7 +113,7 @@ namespace
 			rl_ = rf.MakeRenderLayout();
 			rl_->TopologyType(RenderLayout::TT_TriangleList);
 
-			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static);
+			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 			pos_vb->Resize(static_cast<uint32_t>(vertices.size() * sizeof(vertices[0])));
 			{
 				GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
@@ -121,7 +121,7 @@ namespace
 			}
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
-			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static);
+			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 			ib->Resize(static_cast<uint32_t>(indices.size() * sizeof(indices[0])));
 			{
 				GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
@@ -134,7 +134,7 @@ namespace
 				&indices[0], &indices[0] + indices.size(),
 				&vertices[0], &vertices[0] + vertices.size());
 
-			GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static);
+			GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
 			normal_vb->Resize(static_cast<uint32_t>(normal.size() * sizeof(normal[0])));
 			{
 				GraphicsBuffer::Mapper mapper(*normal_vb, BA_Write_Only);
@@ -144,7 +144,7 @@ namespace
 
 			box_ = MathLib::compute_bounding_box<float>(&vertices[0], &vertices[0] + vertices.size());
 
-			*(technique_->Effect().ParameterByName("grass_sampler")) = LoadTexture("grass.dds");
+			*(technique_->Effect().ParameterByName("grass_sampler")) = LoadTexture("grass.dds", EAH_CPU_Write | EAH_GPU_Read);
 		}
 
 		void OnRenderBegin()
@@ -184,11 +184,11 @@ namespace
 
 			rl_ = rf.MakeRenderLayout();
 			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
-			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Static), boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
-			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Dynamic),
+			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read), boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read),
 				boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_ABGR32F)),
 				RenderLayout::ST_Instance);
-			rl_->BindIndexStream(rf.MakeIndexBuffer(BU_Static), EF_R16);
+			rl_->BindIndexStream(rf.MakeIndexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read), EF_R16);
 
 			float2 texs[] =
 			{
@@ -218,7 +218,7 @@ namespace
 			technique_ = rf.LoadEffect("ParticleSystem.kfx")->TechniqueByName("Particle");
 
 			*(technique_->Effect().ParameterByName("point_radius")) = 0.04f;
-			*(technique_->Effect().ParameterByName("particle_sampler")) = LoadTexture("particle.dds");
+			*(technique_->Effect().ParameterByName("particle_sampler")) = LoadTexture("particle.dds", EAH_CPU_Write | EAH_GPU_Read);
 		}
 
 		void SceneTexture(TexturePtr tex)
@@ -294,7 +294,7 @@ namespace
 
 		try
 		{
-			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, EF_ABGR16F);
+			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write);
 			rf.Make2DRenderView(*temp_tex, 0);
 		}
 		catch (...)
@@ -414,7 +414,7 @@ void ParticleSystemApp::InitObjects()
 	input_handler->connect(boost::bind(&ParticleSystemApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	height_img_.reset(new HeightImg(-2, -2, 2, 2, LoadTexture("grcanyon.dds"), 1));
+	height_img_.reset(new HeightImg(-2, -2, 2, 2, LoadTexture("grcanyon.dds", EAH_CPU_Write | EAH_GPU_Read), 1));
 	particles_.reset(new ParticlesObject);
 	particles_->AddToSceneManager();
 
@@ -453,7 +453,7 @@ void ParticleSystemApp::OnResize(uint32_t width, uint32_t height)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 
-	scene_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F);
+	scene_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write);
 	scene_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*scene_tex_, 0));
 	scene_buffer_->Attach(FrameBuffer::ATT_DepthStencil, re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil));
 
