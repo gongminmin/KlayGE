@@ -19,7 +19,6 @@
 #include <KlayGE/Math.hpp>
 #include <KlayGE/COMPtr.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEffect.hpp>
@@ -334,10 +333,10 @@ namespace
 	};
 
 	template <>
-	class SetD3D9ShaderParameter<Sampler, Sampler>
+	class SetD3D9ShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr>, std::pair<TexturePtr, SamplerStateObjectPtr> >
 	{
 	public:
-		SetD3D9ShaderParameter(SamplerPtr& sampler, RenderEffectParameterPtr const & param)
+		SetD3D9ShaderParameter(std::pair<TexturePtr, SamplerStateObjectPtr>& sampler, RenderEffectParameterPtr const & param)
 			: sampler_(&sampler), param_(param)
 		{
 		}
@@ -348,7 +347,7 @@ namespace
 		}
 
 	private:
-		SamplerPtr* sampler_;
+		std::pair<TexturePtr, SamplerStateObjectPtr>* sampler_;
 		RenderEffectParameterPtr param_;
 	};
 }
@@ -798,7 +797,7 @@ namespace KlayGE
 		case REDT_sampler3D:
 		case REDT_samplerCUBE:
 			BOOST_ASSERT(p_handle.register_index < samplers_[p_handle.shader_type].size());
-			ret.func = SetD3D9ShaderParameter<Sampler, Sampler>(samplers_[p_handle.shader_type][p_handle.register_index], param);
+			ret.func = SetD3D9ShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr>, std::pair<TexturePtr, SamplerStateObjectPtr> >(samplers_[p_handle.shader_type][p_handle.register_index], param);
 			break;
 
 		default:
@@ -873,60 +872,14 @@ namespace KlayGE
 					stage += D3DVERTEXTEXTURESAMPLER0;
 				}
 
-				SamplerPtr const & sampler = samplers_[type][j];
-				if (!sampler || !sampler->texture)
+				std::pair<TexturePtr, SamplerStateObjectPtr> const & sampler = samplers_[type][j];
+				if (!sampler.first || !sampler.second)
 				{
 					re.SetTexture(stage, NULL);
 				}
 				else
 				{
-					D3D9Texture const & d3d9Tex = *checked_pointer_cast<D3D9Texture>(sampler->texture);
-					re.SetTexture(stage, d3d9Tex.D3DBaseTexture().get());
-					re.SetSamplerState(stage, D3DSAMP_SRGBTEXTURE, IsSRGB(sampler->texture->Format()));
-
-					re.SetSamplerState(stage, D3DSAMP_BORDERCOLOR, D3D9Mapping::MappingToUInt32Color(sampler->border_clr));
-
-					re.SetSamplerState(stage, D3DSAMP_ADDRESSU, D3D9Mapping::Mapping(sampler->addr_mode_u));
-					re.SetSamplerState(stage, D3DSAMP_ADDRESSV, D3D9Mapping::Mapping(sampler->addr_mode_v));
-					re.SetSamplerState(stage, D3DSAMP_ADDRESSW, D3D9Mapping::Mapping(sampler->addr_mode_w));
-
-					switch (sampler->filter)
-					{
-					case Sampler::TFO_Point:
-						re.SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_POINT);
-						re.SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
-						re.SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
-						break;
-
-					case Sampler::TFO_Bilinear:
-						re.SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-						re.SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-						re.SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
-						break;
-
-					case Sampler::TFO_Trilinear:
-						re.SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-						re.SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-						re.SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
-						break;
-
-					case Sampler::TFO_Anisotropic:
-						re.SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC);
-						re.SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-						re.SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
-						break;
-
-					default:
-						BOOST_ASSERT(false);
-						re.SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_POINT);
-						re.SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
-						re.SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
-						break;
-					}
-
-					re.SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, sampler->anisotropy);
-					re.SetSamplerState(stage, D3DSAMP_MAXMIPLEVEL, sampler->max_mip_level);
-					re.SetSamplerState(stage, D3DSAMP_MIPMAPLODBIAS, float_to_uint32(sampler->mip_map_lod_bias));
+					sampler.second->Active(stage, sampler.first);
 				}
 			}
 		}

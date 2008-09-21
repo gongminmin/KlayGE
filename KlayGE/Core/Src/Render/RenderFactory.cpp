@@ -1,8 +1,11 @@
 // RenderFactory.cpp
 // KlayGE 渲染工厂类 实现文件
-// Ver 2.8.0
-// 版权所有(C) 龚敏敏, 2003-2005
+// Ver 3.8.0
+// 版权所有(C) 龚敏敏, 2003-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.8.0
+// 增加了MakeSamplerStateObject (2008.9.21)
 //
 // 2.8.0
 // 增加了LoadEffect (2005.7.25)
@@ -14,7 +17,6 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/Math.hpp>
-#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/Query.hpp>
@@ -135,6 +137,11 @@ namespace KlayGE
 		{
 			return BlendStateObject::NullObject();
 		}
+
+		SamplerStateObjectPtr DoMakeSamplerStateObject(SamplerStateDesc const & /*desc*/)
+		{
+			return SamplerStateObject::NullObject();
+		}
 	};
 
 
@@ -235,6 +242,24 @@ namespace KlayGE
 		{
 			ret = this->DoMakeBlendStateObject(desc);
 			bs_pool_.insert(std::make_pair(desc, ret));
+		}
+		else
+		{
+			ret = iter->second;
+		}
+
+		return ret;
+	}
+
+	SamplerStateObjectPtr RenderFactory::MakeSamplerStateObject(SamplerStateDesc const & desc)
+	{
+		SamplerStateObjectPtr ret;
+
+		BOOST_AUTO(iter, ss_pool_.find(desc));
+		if (iter == ss_pool_.end())
+		{
+			ret = this->DoMakeSamplerStateObject(desc);
+			ss_pool_.insert(std::make_pair(desc, ret));
 		}
 		else
 		{

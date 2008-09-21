@@ -60,7 +60,7 @@ namespace KlayGE
 		boost::array<parameter_binds_t, ST_NumShaderTypes> param_binds_;
 		boost::array<bool, ST_NumShaderTypes> is_shader_validate_;
 
-		boost::array<std::vector<SamplerPtr>, ST_NumShaderTypes> samplers_;
+		boost::array<std::vector<std::pair<TexturePtr, SamplerStateObjectPtr> >, ST_NumShaderTypes> samplers_;
 	};
 
 	typedef boost::shared_ptr<OGLShaderObject> OGLShaderObjectPtr;

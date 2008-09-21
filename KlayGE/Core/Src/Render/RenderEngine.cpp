@@ -36,7 +36,6 @@
 #include <KlayGE/Viewport.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
-#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEffect.hpp>
 
@@ -129,8 +128,10 @@ namespace KlayGE
 
 	// 设置当前渲染状态对象
 	/////////////////////////////////////////////////////////////////////////////////
-	void RenderEngine::SetStateObjects(RasterizerStateObjectPtr const & rs_obj, DepthStencilStateObjectPtr const & dss_obj, uint16_t front_stencil_ref, uint16_t back_stencil_ref,
-		BlendStateObjectPtr const & bs_obj, ShaderObjectPtr const & shader_obj)
+	void RenderEngine::SetStateObjects(RasterizerStateObjectPtr const & rs_obj,
+		DepthStencilStateObjectPtr const & dss_obj, uint16_t front_stencil_ref, uint16_t back_stencil_ref,
+		BlendStateObjectPtr const & bs_obj, Color const & blend_factor, uint32_t sample_mask,
+		ShaderObjectPtr const & shader_obj)
 	{
 		if (cur_rs_obj_ != rs_obj)
 		{
@@ -146,7 +147,7 @@ namespace KlayGE
 
 		if (cur_bs_obj_ != bs_obj)
 		{
-			bs_obj->Active();
+			bs_obj->Active(blend_factor, sample_mask);
 			cur_bs_obj_ = bs_obj;
 		}
 

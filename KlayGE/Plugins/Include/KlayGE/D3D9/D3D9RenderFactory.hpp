@@ -77,6 +77,7 @@ namespace KlayGE
 		RasterizerStateObjectPtr DoMakeRasterizerStateObject(RasterizerStateDesc const & desc);
 		DepthStencilStateObjectPtr DoMakeDepthStencilStateObject(DepthStencilStateDesc const & desc);
 		BlendStateObjectPtr DoMakeBlendStateObject(BlendStateDesc const & desc);
+		SamplerStateObjectPtr D3D9RenderFactory::DoMakeSamplerStateObject(SamplerStateDesc const & desc);
 
 	private:
 		std::vector<boost::weak_ptr<D3D9Resource> > resource_pool_;

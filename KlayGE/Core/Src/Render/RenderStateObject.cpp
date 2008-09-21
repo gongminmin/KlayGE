@@ -1,8 +1,11 @@
 // RenderStateObject.cpp
 // KlayGE 渲染状态对象类 实现文件
-// Ver 3.7.0
+// Ver 3.8.0
 // 版权所有(C) 龚敏敏, 2006-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.8.0
+// 增加了SamplerStateObject (2008.9.21)
 //
 // 3.7.0
 // 把RenderStateObject拆成三部分 (2008.6.29)
@@ -86,6 +89,21 @@ namespace KlayGE
 		return std::memcmp(&lhs, &rhs, sizeof(lhs)) < 0;
 	}
 
+	SamplerStateDesc::SamplerStateDesc()
+		: border_clr(0, 0, 0, 0),
+			addr_mode_u(TAM_Wrap), addr_mode_v(TAM_Wrap), addr_mode_w(TAM_Wrap),
+			filter(TFO_Point),
+			anisotropy(1),
+			max_mip_level(1),
+			mip_map_lod_bias(0)
+	{
+	}
+
+	bool operator<(SamplerStateDesc const & lhs, SamplerStateDesc const & rhs)
+	{
+		return std::memcmp(&lhs, &rhs, sizeof(lhs)) < 0;
+	}
+
 
 	RasterizerStateObjectPtr RasterizerStateObject::NullObject()
 	{
@@ -102,6 +120,12 @@ namespace KlayGE
 	BlendStateObjectPtr BlendStateObject::NullObject()
 	{
 		static BlendStateObjectPtr obj(Context::Instance().RenderFactoryInstance().MakeBlendStateObject(BlendStateDesc()));
+		return obj;
+	}
+
+	SamplerStateObjectPtr SamplerStateObject::NullObject()
+	{
+		static SamplerStateObjectPtr obj(Context::Instance().RenderFactoryInstance().MakeSamplerStateObject(SamplerStateDesc()));
 		return obj;
 	}
 }

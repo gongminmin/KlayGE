@@ -51,7 +51,6 @@
 #include <string>
 #include <algorithm>
 
-#include <boost/type_traits.hpp>
 #include <boost/utility.hpp>
 
 #include <KlayGE/RenderEngine.hpp>
@@ -104,7 +103,7 @@ namespace KlayGE
 		virtual RenderVariable& operator=(float3 const & value);
 		virtual RenderVariable& operator=(float4 const & value);
 		virtual RenderVariable& operator=(float4x4 const & value);
-		virtual RenderVariable& operator=(SamplerPtr const & value);
+		virtual RenderVariable& operator=(std::pair<TexturePtr, SamplerStateObjectPtr> const & value);
 		virtual RenderVariable& operator=(std::string const & value);
 		virtual RenderVariable& operator=(shader_desc const & value);
 		virtual RenderVariable& operator=(std::vector<bool> const & value);
@@ -120,7 +119,7 @@ namespace KlayGE
 		virtual void Value(float3& val) const;
 		virtual void Value(float4& val) const;
 		virtual void Value(float4x4& val) const;
-		virtual void Value(SamplerPtr& val) const;
+		virtual void Value(std::pair<TexturePtr, SamplerStateObjectPtr>& val) const;
 		virtual void Value(std::string& val) const;
 		virtual void Value(shader_desc& val) const;
 		virtual void Value(std::vector<bool>& val) const;
@@ -135,20 +134,6 @@ namespace KlayGE
 	{
 	public:
 		RenderVariablePtr Clone()
-		{
-			return this->Clone(boost::is_same<T, SamplerPtr>());
-		}
-
-		RenderVariablePtr Clone(boost::true_type)
-		{
-			RenderVariablePtr ret(new RenderVariableConcrete<T>);
-			SamplerPtr val;
-			this->Value(val);
-			SamplerPtr new_sampler(new Sampler(*val));
-			*ret = new_sampler;
-			return ret;
-		}
-		RenderVariablePtr Clone(boost::false_type)
 		{
 			RenderVariablePtr ret(new RenderVariableConcrete<T>);
 			T val;
@@ -179,7 +164,7 @@ namespace KlayGE
 	typedef RenderVariableConcrete<float3> RenderVariableFloat3;
 	typedef RenderVariableConcrete<float4> RenderVariableFloat4;
 	typedef RenderVariableConcrete<float4x4> RenderVariableFloat4x4;
-	typedef RenderVariableConcrete<SamplerPtr> RenderVariableSampler;
+	typedef RenderVariableConcrete<std::pair<TexturePtr, SamplerStateObjectPtr>> RenderVariableSampler;
 	typedef RenderVariableConcrete<std::string> RenderVariableString;
 	typedef RenderVariableConcrete<shader_desc> RenderVariableShader;
 	typedef RenderVariableConcrete<std::vector<bool> > RenderVariableBoolArray;
@@ -410,6 +395,8 @@ namespace KlayGE
 		DepthStencilStateObjectPtr depth_stencil_state_obj_;
 		uint16_t front_stencil_ref_, back_stencil_ref_;
 		BlendStateObjectPtr blend_state_obj_;
+		Color blend_factor_;
+		uint32_t sample_mask_;
 		ShaderObjectPtr shader_obj_;
 
 		bool is_validate_;
@@ -481,7 +468,7 @@ namespace KlayGE
 		virtual void Value(float3& val) const;
 		virtual void Value(float4& val) const;
 		virtual void Value(float4x4& val) const;
-		virtual void Value(SamplerPtr& val) const;
+		virtual void Value(std::pair<TexturePtr, SamplerStateObjectPtr>& val) const;
 		virtual void Value(std::vector<bool>& val) const;
 		virtual void Value(std::vector<int>& val) const;
 		virtual void Value(std::vector<float>& val) const;

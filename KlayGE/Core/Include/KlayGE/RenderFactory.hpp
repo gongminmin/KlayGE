@@ -1,8 +1,11 @@
 // RenderFactory.hpp
 // KlayGE 渲染工厂类 头文件
-// Ver 3.0.0
-// 版权所有(C) 龚敏敏, 2003-2005
+// Ver 3.8.0
+// 版权所有(C) 龚敏敏, 2003-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.8.0
+// 增加了MakeSamplerStateObject (2008.9.21)
 //
 // 3.0.0
 // 增加了MakeVertexBuffer (2005.9.7)
@@ -71,12 +74,14 @@ namespace KlayGE
 		RasterizerStateObjectPtr MakeRasterizerStateObject(RasterizerStateDesc const & desc);
 		DepthStencilStateObjectPtr MakeDepthStencilStateObject(DepthStencilStateDesc const & desc);
 		BlendStateObjectPtr MakeBlendStateObject(BlendStateDesc const & desc);
+		SamplerStateObjectPtr MakeSamplerStateObject(SamplerStateDesc const & desc);
 		virtual ShaderObjectPtr MakeShaderObject() = 0;
 
 	private:
 		virtual RasterizerStateObjectPtr DoMakeRasterizerStateObject(RasterizerStateDesc const & desc) = 0;
 		virtual DepthStencilStateObjectPtr DoMakeDepthStencilStateObject(DepthStencilStateDesc const & desc) = 0;
 		virtual BlendStateObjectPtr DoMakeBlendStateObject(BlendStateDesc const & desc) = 0;
+		virtual SamplerStateObjectPtr DoMakeSamplerStateObject(SamplerStateDesc const & desc) = 0;
 
 	protected:
 		std::map<std::string, std::vector<RenderEffectPtr> > effect_pool_;
@@ -84,6 +89,7 @@ namespace KlayGE
 		std::map<RasterizerStateDesc, RasterizerStateObjectPtr> rs_pool_;
 		std::map<DepthStencilStateDesc, DepthStencilStateObjectPtr> dss_pool_;
 		std::map<BlendStateDesc, BlendStateObjectPtr> bs_pool_;
+		std::map<SamplerStateDesc, SamplerStateObjectPtr> ss_pool_;
 	};
 }
 

@@ -133,6 +133,8 @@ render_states_define = [
 	("src_blend_alpha", "int"),
 	("dest_blend_alpha", "int"),
 	("color_write_mask", "int"),
+	("blend_factor", "float4"),
+	("sample_mask", "int"),
 
 	("depth_enable", "bool"),
 	("depth_write_mask", "bool"),
@@ -617,6 +619,13 @@ class render_state:
 			except:
 				self.value = stencil_operation_enum[value_str]
 		elif "color_mask" == self.name:
+			self.value = int(value_str)
+		elif "blend_factor" == self.name:
+			self.x = float(tag.getAttribute('r'))
+			self.y = float(tag.getAttribute('g'))
+			self.z = float(tag.getAttribute('b'))
+			self.w = float(tag.getAttribute('a'))
+		elif "sample_mask" == self.name:
 			self.value = int(value_str)
 		else:
 			print "Wrong render state name:", self.name

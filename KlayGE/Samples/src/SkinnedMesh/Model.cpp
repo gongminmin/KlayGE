@@ -4,13 +4,11 @@
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/RenderEngine.hpp>
-#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/ResLoader.hpp>
-#include <KlayGE/Sampler.hpp>
 #include <KlayGE/Camera.hpp>
 
 #include "Model.hpp"

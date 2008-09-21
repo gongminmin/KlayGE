@@ -20,7 +20,6 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Matrix.hpp>
-#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 
@@ -341,10 +340,10 @@ namespace
 	};
 
 	template <>
-	class SetOGLShaderParameter<Sampler>
+	class SetOGLShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr>>
 	{
 	public:
-		SetOGLShaderParameter(SamplerPtr& sampler, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(std::pair<TexturePtr, SamplerStateObjectPtr>& sampler, RenderEffectParameterPtr const & param)
 			: sampler_(&sampler), param_(param)
 		{
 		}
@@ -355,7 +354,7 @@ namespace
 		}
 
 	private:
-		SamplerPtr* sampler_;
+		std::pair<TexturePtr, SamplerStateObjectPtr>* sampler_;
 		RenderEffectParameterPtr param_;
 	};
 }
@@ -627,7 +626,7 @@ namespace KlayGE
 				uint32_t index = cgGLGetTextureEnum(cg_param) - GL_TEXTURE0;
 				BOOST_ASSERT(index < samplers_[type].size());
 
-				ret.func = SetOGLShaderParameter<Sampler>(samplers_[type][index], param);
+				ret.func = SetOGLShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >(samplers_[type][index], param);
 			}
 			break;
 
@@ -641,8 +640,6 @@ namespace KlayGE
 
 	void OGLShaderObject::Active()
 	{
-		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
 		cgGLBindProgram(shaders_[ST_VertexShader]);
 		cgGLEnableProfile(profiles_[ST_VertexShader]);
 		cgGLBindProgram(shaders_[ST_PixelShader]);
@@ -655,12 +652,12 @@ namespace KlayGE
 				pb.func();
 			}
 
-			std::vector<SamplerPtr> const & samplers = samplers_[i];
+			std::vector<std::pair<TexturePtr, SamplerStateObjectPtr> > const & samplers = samplers_[i];
 
 			for (uint32_t stage = 0, num_stage = static_cast<uint32_t>(samplers.size()); stage < num_stage; ++ stage)
 			{
-				SamplerPtr const & sampler = samplers[stage];
-				if (!sampler || !sampler->texture)
+				std::pair<TexturePtr, SamplerStateObjectPtr> const & sampler = samplers[stage];
+				if (!sampler.first || !sampler.second)
 				{
 					glActiveTexture(GL_TEXTURE0 + stage);
 
@@ -668,55 +665,7 @@ namespace KlayGE
 				}
 				else
 				{
-					glActiveTexture(GL_TEXTURE0 + stage);
-
-					OGLTexture& gl_tex = *checked_pointer_cast<OGLTexture>(sampler->texture);
-					GLenum tex_type = gl_tex.GLType();
-
-					glBindTexture(tex_type, gl_tex.GLTexture());
-
-					re.TexParameter(tex_type, GL_TEXTURE_WRAP_S, OGLMapping::Mapping(sampler->addr_mode_u));
-					re.TexParameter(tex_type, GL_TEXTURE_WRAP_T, OGLMapping::Mapping(sampler->addr_mode_v));
-					re.TexParameter(tex_type, GL_TEXTURE_WRAP_R, OGLMapping::Mapping(sampler->addr_mode_w));
-
-					{
-						float tmp[4];
-						glGetTexParameterfv(tex_type, GL_TEXTURE_BORDER_COLOR, tmp);
-						if ((tmp[0] != sampler->border_clr.r())
-							|| (tmp[1] != sampler->border_clr.g())
-							|| (tmp[2] != sampler->border_clr.b())
-							|| (tmp[3] != sampler->border_clr.a()))
-						{
-							glTexParameterfv(tex_type, GL_TEXTURE_BORDER_COLOR, &sampler->border_clr.r());
-						}
-					}
-
-					switch (sampler->filter)
-					{
-					case Sampler::TFO_Point:
-						re.TexParameter(tex_type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-						re.TexParameter(tex_type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-						break;
-
-					case Sampler::TFO_Bilinear:
-						re.TexParameter(tex_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-						re.TexParameter(tex_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-						break;
-
-					case Sampler::TFO_Trilinear:
-					case Sampler::TFO_Anisotropic:
-						re.TexParameter(tex_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-						re.TexParameter(tex_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-						break;
-
-					default:
-						BOOST_ASSERT(false);
-						break;
-					}
-
-					re.TexParameter(tex_type, GL_TEXTURE_MAX_ANISOTROPY_EXT, sampler->anisotropy);
-					re.TexParameter(tex_type, GL_TEXTURE_MAX_LEVEL, sampler->max_mip_level);
-					re.TexEnv(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, sampler->mip_map_lod_bias);
+					sampler.second->Active(stage, sampler.first);
 				}
 			}
 		}

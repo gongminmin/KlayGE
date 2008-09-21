@@ -57,7 +57,7 @@ namespace KlayGE
 	public:
 		explicit D3D9BlendStateObject(BlendStateDesc const & desc);
 
-		void Active();
+		void Active(Color const & blend_factor, uint32_t sample_mask);
 
 	private:
 		uint32_t d3d9_blend_op_;
@@ -70,6 +70,20 @@ namespace KlayGE
 		uint32_t d3d9_color_write_mask_1_;
 		uint32_t d3d9_color_write_mask_2_;
 		uint32_t d3d9_color_write_mask_3_;
+	};
+
+	class D3D9SamplerStateObject : public SamplerStateObject
+	{
+	public:
+		explicit D3D9SamplerStateObject(SamplerStateDesc const & desc);
+
+		void Active(uint32_t no, TexturePtr texture);
+
+	private:
+		uint32_t d3d9_border_clr_;
+		uint32_t d3d9_addr_mode_u_;
+		uint32_t d3d9_addr_mode_v_;
+		uint32_t d3d9_addr_mode_w_;
 	};
 }
 

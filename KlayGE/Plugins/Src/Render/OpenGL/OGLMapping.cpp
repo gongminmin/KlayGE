@@ -211,20 +211,20 @@ namespace KlayGE
 		}
 	}
 
-	GLint OGLMapping::Mapping(Sampler::TexAddressingMode mode)
+	GLint OGLMapping::Mapping(TexAddressingMode mode)
 	{
 		switch (mode)
 		{
-		case Sampler::TAM_Wrap:
+		case TAM_Wrap:
 			return GL_REPEAT;
 
-		case Sampler::TAM_Mirror:
+		case TAM_Mirror:
 			return GL_MIRRORED_REPEAT;
 
-		case Sampler::TAM_Clamp:
+		case TAM_Clamp:
 			return GL_CLAMP_TO_EDGE;
 
-		case Sampler::TAM_Border:
+		case TAM_Border:
 			return GL_CLAMP_TO_BORDER;
 
 		default:

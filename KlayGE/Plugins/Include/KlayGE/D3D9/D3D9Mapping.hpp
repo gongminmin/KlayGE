@@ -21,7 +21,6 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderEngine.hpp>
-#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderLayout.hpp>
 
 namespace KlayGE
@@ -45,7 +44,7 @@ namespace KlayGE
 		static uint32_t Mapping(PolygonMode mode);
 		static uint32_t Mapping(ShadeMode mode);
 		static uint32_t Mapping(BlendOperation bo);
-		static uint32_t Mapping(Sampler::TexAddressingMode mode);
+		static uint32_t Mapping(TexAddressingMode mode);
 
 		static void Mapping(D3DPRIMITIVETYPE& primType, uint32_t& primCount, RenderLayout const & rl);
 		static void Mapping(std::vector<D3DVERTEXELEMENT9>& elements, size_t stream, vertex_elements_type const & vet);

@@ -364,10 +364,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Render\Sampler.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\Core\Src\Render\SATPostProcess.cpp"
 					>
 				</File>
@@ -473,10 +469,6 @@
 				</File>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\RenderView.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\Core\Include\KlayGE\Sampler.hpp"
 					>
 				</File>
 				<File

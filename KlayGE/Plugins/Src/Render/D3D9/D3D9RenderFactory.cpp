@@ -215,6 +215,11 @@ namespace KlayGE
 		return BlendStateObjectPtr(new D3D9BlendStateObject(desc));
 	}
 
+	SamplerStateObjectPtr D3D9RenderFactory::DoMakeSamplerStateObject(SamplerStateDesc const & desc)
+	{
+		return SamplerStateObjectPtr(new D3D9SamplerStateObject(desc));
+	}
+
 	RenderFactory& D3D9RenderFactoryInstance()
 	{
 		static D3D9RenderFactory renderFactory;

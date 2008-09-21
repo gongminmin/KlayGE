@@ -18,6 +18,7 @@
 
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9Mapping.hpp>
+#include <KlayGE/D3D9/D3D9Texture.hpp>
 #include <KlayGE/D3D9/D3D9RenderStateObject.hpp>
 
 namespace KlayGE
@@ -121,7 +122,7 @@ namespace KlayGE
 	{
 	}
 
-	void D3D9BlendStateObject::Active()
+	void D3D9BlendStateObject::Active(Color const & blend_factor, uint32_t /*sample_mask*/)
 	{
 		D3D9RenderEngine& re = *checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
@@ -149,5 +150,68 @@ namespace KlayGE
 		re.SetRenderState(D3DRS_COLORWRITEENABLE1, d3d9_color_write_mask_1_);
 		re.SetRenderState(D3DRS_COLORWRITEENABLE2, d3d9_color_write_mask_2_);
 		re.SetRenderState(D3DRS_COLORWRITEENABLE3, d3d9_color_write_mask_3_);
+
+		re.SetRenderState(D3DRS_BLENDFACTOR, blend_factor.ARGB());
+	}
+
+	D3D9SamplerStateObject::D3D9SamplerStateObject(SamplerStateDesc const & desc)
+		: SamplerStateObject(desc),
+			d3d9_border_clr_(D3D9Mapping::MappingToUInt32Color(desc.border_clr)),
+			d3d9_addr_mode_u_(D3D9Mapping::Mapping(desc.addr_mode_u)),
+			d3d9_addr_mode_v_(D3D9Mapping::Mapping(desc.addr_mode_v)),
+			d3d9_addr_mode_w_(D3D9Mapping::Mapping(desc.addr_mode_w))
+	{
+	}
+
+	void D3D9SamplerStateObject::Active(uint32_t stage, TexturePtr texture)
+	{
+		D3D9RenderEngine& re = *checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+		re.SetTexture(stage, checked_pointer_cast<D3D9Texture>(texture)->D3DBaseTexture().get());
+		re.SetSamplerState(stage, D3DSAMP_SRGBTEXTURE, IsSRGB(texture->Format()));
+
+		re.SetSamplerState(stage, D3DSAMP_BORDERCOLOR, d3d9_border_clr_);
+
+		re.SetSamplerState(stage, D3DSAMP_ADDRESSU, d3d9_addr_mode_u_);
+		re.SetSamplerState(stage, D3DSAMP_ADDRESSV, d3d9_addr_mode_v_);
+		re.SetSamplerState(stage, D3DSAMP_ADDRESSW, d3d9_addr_mode_w_);
+
+		switch (desc_.filter)
+		{
+		case TFO_Point:
+			re.SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+			re.SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+			re.SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
+			break;
+
+		case TFO_Bilinear:
+			re.SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+			re.SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+			re.SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
+			break;
+
+		case TFO_Trilinear:
+			re.SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+			re.SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+			re.SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
+			break;
+
+		case TFO_Anisotropic:
+			re.SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC);
+			re.SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+			re.SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			re.SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+			re.SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+			re.SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
+			break;
+		}
+
+		re.SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, desc_.anisotropy);
+		re.SetSamplerState(stage, D3DSAMP_MAXMIPLEVEL, desc_.max_mip_level);
+		re.SetSamplerState(stage, D3DSAMP_MIPMAPLODBIAS, float_to_uint32(desc_.mip_map_lod_bias));
 	}
 }

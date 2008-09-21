@@ -80,7 +80,7 @@ namespace KlayGE
 		boost::array<std::vector<BOOL4>, ST_NumShaderTypes> bool_registers_;
 		boost::array<std::vector<int4>, ST_NumShaderTypes> int_registers_;
 		boost::array<std::vector<float4>, ST_NumShaderTypes> float_registers_;
-		boost::array<std::vector<SamplerPtr>, ST_NumShaderTypes> samplers_;
+		boost::array<std::vector<std::pair<TexturePtr, SamplerStateObjectPtr> >, ST_NumShaderTypes> samplers_;
 	};
 
 	typedef boost::shared_ptr<D3D9ShaderObject> D3D9ShaderObjectPtr;

@@ -37,7 +37,6 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Math.hpp>
-#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderStateObject.hpp>
 #include <KlayGE/ShaderObject.hpp>
@@ -173,34 +172,35 @@ namespace
 		case REDT_samplerCUBE:
 			{
 				var.reset(new RenderVariableSampler);
-				SamplerPtr s(new Sampler);
+
+				SamplerStateDesc desc;
 
 				uint32_t tmp_int;
 				source->read(reinterpret_cast<char*>(&tmp_int), sizeof(tmp_int));
-				s->filter = static_cast<Sampler::TexFilterOp>(tmp_int);
+				desc.filter = static_cast<TexFilterOp>(tmp_int);
 
 				source->read(reinterpret_cast<char*>(&tmp_int), sizeof(tmp_int));
-				s->addr_mode_u = static_cast<Sampler::TexAddressingMode>(tmp_int);
+				desc.addr_mode_u = static_cast<TexAddressingMode>(tmp_int);
 				source->read(reinterpret_cast<char*>(&tmp_int), sizeof(tmp_int));
-				s->addr_mode_v = static_cast<Sampler::TexAddressingMode>(tmp_int);
+				desc.addr_mode_v = static_cast<TexAddressingMode>(tmp_int);
 				source->read(reinterpret_cast<char*>(&tmp_int), sizeof(tmp_int));
-				s->addr_mode_w = static_cast<Sampler::TexAddressingMode>(tmp_int);
+				desc.addr_mode_w = static_cast<TexAddressingMode>(tmp_int);
 
 				source->read(reinterpret_cast<char*>(&tmp_int), sizeof(tmp_int));
-				s->anisotropy = static_cast<uint8_t>(tmp_int);
+				desc.anisotropy = static_cast<uint8_t>(tmp_int);
 
 				source->read(reinterpret_cast<char*>(&tmp_int), sizeof(tmp_int));
-				s->max_mip_level = static_cast<uint8_t>(tmp_int);
+				desc.max_mip_level = static_cast<uint8_t>(tmp_int);
 
 				float tmp_float;
 				source->read(reinterpret_cast<char*>(&tmp_float), sizeof(tmp_float));
-				s->mip_map_lod_bias = tmp_float;
+				desc.mip_map_lod_bias = tmp_float;
 
 				Color border_clr;
 				source->read(reinterpret_cast<char*>(&border_clr), sizeof(border_clr));
-				s->border_clr = border_clr;
+				desc.border_clr = border_clr;
 
-				*var = s;
+				*var = std::make_pair(TexturePtr(), Context::Instance().RenderFactoryInstance().MakeSamplerStateObject(desc));
 			}
 			break;
 
@@ -576,7 +576,8 @@ namespace KlayGE
 
 			if (REDT_shader != type)
 			{
-				uint32_t state_val;
+				uint32_t state_val = 0;
+				float4 state_val_f4(0, 0, 0, 0);
 				switch (type)
 				{
 				case REDT_bool:
@@ -600,6 +601,12 @@ namespace KlayGE
 						float tmp;
 						var->Value(tmp);
 						state_val = float_to_uint32(tmp);
+					}
+					break;
+
+				case REDT_float4:
+					{
+						var->Value(state_val_f4);
 					}
 					break;
 
@@ -681,6 +688,14 @@ namespace KlayGE
 				if (0 == state_name.find("color_write_mask"))
 				{
 					bs_desc.color_write_mask[get_index_from_state_name(state_name)] = static_cast<uint8_t>(state_val);
+				}
+				if (0 == state_name.find("blend_factor"))
+				{
+					blend_factor_ = Color(state_val_f4.x(), state_val_f4.y(), state_val_f4.z(), state_val_f4.w());
+				}
+				if (0 == state_name.find("sample_mask"))
+				{
+					sample_mask_ = state_val;
 				}
 
 				if ("depth_enable" == state_name)
@@ -811,7 +826,7 @@ namespace KlayGE
 	void RenderPass::Apply()
 	{
 		RenderEngine& render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		render_eng.SetStateObjects(rasterizer_state_obj_, depth_stencil_state_obj_, front_stencil_ref_, back_stencil_ref_, blend_state_obj_, shader_obj_);
+		render_eng.SetStateObjects(rasterizer_state_obj_, depth_stencil_state_obj_, front_stencil_ref_, back_stencil_ref_, blend_state_obj_, blend_factor_, sample_mask_, shader_obj_);
 	}
 
 	std::string RenderPass::GenShaderText() const
@@ -876,7 +891,7 @@ namespace KlayGE
 		{
 			return *this;
 		}
-		RenderEffectParameter& operator=(SamplerPtr const & /*value*/)
+		RenderEffectParameter& operator=(std::pair<TexturePtr, SamplerStateObjectPtr> const & /*value*/)
 		{
 			return *this;
 		}
@@ -929,9 +944,10 @@ namespace KlayGE
 		{
 			val = float4x4::Identity();
 		}
-		void Value(SamplerPtr& val) const
+		void Value(std::pair<TexturePtr, SamplerStateObjectPtr>& val) const
 		{
-			val = SamplerPtr();
+			val.first = TexturePtr();
+			val.second = SamplerStateObject::NullObject();
 		}
 		void Value(std::vector<bool>& val) const
 		{
@@ -1061,11 +1077,9 @@ namespace KlayGE
 
 	RenderEffectParameter& RenderEffectParameter::operator=(TexturePtr const & value)
 	{
-		SamplerPtr s;
+		std::pair<TexturePtr, SamplerStateObjectPtr> s;
 		var_->Value(s);
-		BOOST_ASSERT(s);
-
-		s->texture = value;
+		*var_ = std::make_pair(value, s.second);
 		return *this;
 	}
 
@@ -1134,7 +1148,7 @@ namespace KlayGE
 		var_->Value(val);
 	}
 
-	void RenderEffectParameter::Value(SamplerPtr& val) const
+	void RenderEffectParameter::Value(std::pair<TexturePtr, SamplerStateObjectPtr>& val) const
 	{
 		var_->Value(val);
 	}
@@ -1224,7 +1238,7 @@ namespace KlayGE
 		return *this;
 	}
 
-	RenderVariable& RenderVariable::operator=(SamplerPtr const & /*value*/)
+	RenderVariable& RenderVariable::operator=(std::pair<TexturePtr, SamplerStateObjectPtr> const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 		return *this;
@@ -1307,7 +1321,7 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void RenderVariable::Value(SamplerPtr& /*value*/) const
+	void RenderVariable::Value(std::pair<TexturePtr, SamplerStateObjectPtr>& /*value*/) const
 	{
 		BOOST_ASSERT(false);
 	}

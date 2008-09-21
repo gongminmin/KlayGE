@@ -47,7 +47,6 @@
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderStateObject.hpp>
-#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderSettings.hpp>
 
@@ -215,6 +214,7 @@ namespace KlayGE
 		RasterizerStateDesc default_rs_desc;
 		DepthStencilStateDesc default_dss_desc;
 		BlendStateDesc default_bs_desc;
+		SamplerStateDesc default_ss_desc;
 
 		d3dDevice_->SetRenderState(D3DRS_FILLMODE, D3D9Mapping::Mapping(default_rs_desc.polygon_mode));
 		d3dDevice_->SetRenderState(D3DRS_SHADEMODE, D3D9Mapping::Mapping(default_rs_desc.shade_mode));
@@ -332,7 +332,6 @@ namespace KlayGE
 		render_states_cache_[D3DRS_COLORWRITEENABLE2] = D3D9Mapping::MappingColorMask(default_bs_desc.color_write_mask[2]);
 		render_states_cache_[D3DRS_COLORWRITEENABLE3] = D3D9Mapping::MappingColorMask(default_bs_desc.color_write_mask[3]);
 
-		Sampler default_sampler;
 		samplers_cache_[0].resize(this->DeviceCaps().max_vertex_texture_units);
 		samplers_cache_[1].resize(this->DeviceCaps().max_texture_units);
 		for (int type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
@@ -347,20 +346,20 @@ namespace KlayGE
 
 				d3dDevice_->SetTexture(stage, NULL);
 				d3dDevice_->SetSamplerState(stage, D3DSAMP_SRGBTEXTURE, false);
-				d3dDevice_->SetSamplerState(stage, D3DSAMP_BORDERCOLOR, D3D9Mapping::MappingToUInt32Color(default_sampler.border_clr));
-				d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSU, D3D9Mapping::Mapping(default_sampler.addr_mode_u));
-				d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSV, D3D9Mapping::Mapping(default_sampler.addr_mode_v));
-				d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSW, D3D9Mapping::Mapping(default_sampler.addr_mode_w));
+				d3dDevice_->SetSamplerState(stage, D3DSAMP_BORDERCOLOR, D3D9Mapping::MappingToUInt32Color(default_ss_desc.border_clr));
+				d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSU, D3D9Mapping::Mapping(default_ss_desc.addr_mode_u));
+				d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSV, D3D9Mapping::Mapping(default_ss_desc.addr_mode_v));
+				d3dDevice_->SetSamplerState(stage, D3DSAMP_ADDRESSW, D3D9Mapping::Mapping(default_ss_desc.addr_mode_w));
 				samplers_cache_[type][i].first = NULL;
 				samplers_cache_[type][i].second[D3DSAMP_SRGBTEXTURE] = false;
-				samplers_cache_[type][i].second[D3DSAMP_BORDERCOLOR] = D3D9Mapping::MappingToUInt32Color(default_sampler.border_clr);
-				samplers_cache_[type][i].second[D3DSAMP_ADDRESSU] = D3D9Mapping::Mapping(default_sampler.addr_mode_u);
-				samplers_cache_[type][i].second[D3DSAMP_ADDRESSV] = D3D9Mapping::Mapping(default_sampler.addr_mode_v);
-				samplers_cache_[type][i].second[D3DSAMP_ADDRESSW] = D3D9Mapping::Mapping(default_sampler.addr_mode_w);
+				samplers_cache_[type][i].second[D3DSAMP_BORDERCOLOR] = D3D9Mapping::MappingToUInt32Color(default_ss_desc.border_clr);
+				samplers_cache_[type][i].second[D3DSAMP_ADDRESSU] = D3D9Mapping::Mapping(default_ss_desc.addr_mode_u);
+				samplers_cache_[type][i].second[D3DSAMP_ADDRESSV] = D3D9Mapping::Mapping(default_ss_desc.addr_mode_v);
+				samplers_cache_[type][i].second[D3DSAMP_ADDRESSW] = D3D9Mapping::Mapping(default_ss_desc.addr_mode_w);
 
-				switch (default_sampler.filter)
+				switch (default_ss_desc.filter)
 				{
-				case Sampler::TFO_Point:
+				case TFO_Point:
 					d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_POINT);
 					d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
 					d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
@@ -369,7 +368,7 @@ namespace KlayGE
 					samplers_cache_[type][i].second[D3DSAMP_MIPFILTER] = D3DTEXF_POINT;
 					break;
 
-				case Sampler::TFO_Bilinear:
+				case TFO_Bilinear:
 					d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
 					d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 					d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
@@ -378,7 +377,7 @@ namespace KlayGE
 					samplers_cache_[type][i].second[D3DSAMP_MIPFILTER] = D3DTEXF_POINT;
 					break;
 
-				case Sampler::TFO_Trilinear:
+				case TFO_Trilinear:
 					d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
 					d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 					d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
@@ -387,7 +386,7 @@ namespace KlayGE
 					samplers_cache_[type][i].second[D3DSAMP_MIPFILTER] = D3DTEXF_LINEAR;
 					break;
 
-				case Sampler::TFO_Anisotropic:
+				case TFO_Anisotropic:
 					d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC);
 					d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 					d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
@@ -407,12 +406,12 @@ namespace KlayGE
 					break;
 				}
 
-				d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, default_sampler.anisotropy);
-				d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXMIPLEVEL, default_sampler.max_mip_level);
-				d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPMAPLODBIAS, float_to_uint32(default_sampler.mip_map_lod_bias));
-				samplers_cache_[type][i].second[D3DSAMP_MAXANISOTROPY] = default_sampler.anisotropy;
-				samplers_cache_[type][i].second[D3DSAMP_MAXMIPLEVEL] = default_sampler.max_mip_level;
-				samplers_cache_[type][i].second[D3DSAMP_MIPMAPLODBIAS] = float_to_uint32(default_sampler.mip_map_lod_bias);
+				d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, default_ss_desc.anisotropy);
+				d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXMIPLEVEL, default_ss_desc.max_mip_level);
+				d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPMAPLODBIAS, float_to_uint32(default_ss_desc.mip_map_lod_bias));
+				samplers_cache_[type][i].second[D3DSAMP_MAXANISOTROPY] = default_ss_desc.anisotropy;
+				samplers_cache_[type][i].second[D3DSAMP_MAXMIPLEVEL] = default_ss_desc.max_mip_level;
+				samplers_cache_[type][i].second[D3DSAMP_MIPMAPLODBIAS] = float_to_uint32(default_ss_desc.mip_map_lod_bias);
 			}
 		}
 

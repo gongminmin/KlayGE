@@ -49,7 +49,6 @@
 #include <KlayGE/Viewport.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/Texture.hpp>
-#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Renderable.hpp>
@@ -58,7 +57,6 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Box.hpp>
 #include <KlayGE/ResLoader.hpp>
-#include <KlayGE/Sampler.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/ClosedHashMap.hpp>
 #include <KlayGE/MapVector.hpp>

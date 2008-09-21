@@ -18,6 +18,7 @@
 
 #include <KlayGE/OpenGL/OGLRenderEngine.hpp>
 #include <KlayGE/OpenGL/OGLMapping.hpp>
+#include <KlayGE/OpenGL/OGLTexture.hpp>
 #include <KlayGE/OpenGL/OGLRenderStateObject.hpp>
 
 namespace KlayGE
@@ -122,7 +123,7 @@ namespace KlayGE
 	{
 	}
 
-	void OGLBlendStateObject::Active()
+	void OGLBlendStateObject::Active(Color const & blend_factor, uint32_t /*sample_mask*/)
 	{
 		if (desc_.alpha_to_coverage_enable)
 		{
@@ -147,5 +148,68 @@ namespace KlayGE
 					(desc_.color_write_mask[0] & CMASK_Green) != 0,
 					(desc_.color_write_mask[0] & CMASK_Blue) != 0,
 					(desc_.color_write_mask[0] & CMASK_Alpha) != 0);
+
+		glBlendColor(blend_factor.r(), blend_factor.g(), blend_factor.b(), blend_factor.a());
+	}
+
+	OGLSamplerStateObject::OGLSamplerStateObject(SamplerStateDesc const & desc)
+		: SamplerStateObject(desc)
+	{
+	}
+
+	void OGLSamplerStateObject::Active(uint32_t stage, TexturePtr texture)
+	{
+		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+
+		glActiveTexture(GL_TEXTURE0 + stage);
+
+		OGLTexture& gl_tex = *checked_pointer_cast<OGLTexture>(texture);
+		GLenum tex_type = gl_tex.GLType();
+
+		glBindTexture(tex_type, gl_tex.GLTexture());
+
+		re.TexParameter(tex_type, GL_TEXTURE_WRAP_S, OGLMapping::Mapping(desc_.addr_mode_u));
+		re.TexParameter(tex_type, GL_TEXTURE_WRAP_T, OGLMapping::Mapping(desc_.addr_mode_v));
+		re.TexParameter(tex_type, GL_TEXTURE_WRAP_R, OGLMapping::Mapping(desc_.addr_mode_w));
+
+		{
+			float tmp[4];
+			glGetTexParameterfv(tex_type, GL_TEXTURE_BORDER_COLOR, tmp);
+			if ((tmp[0] != desc_.border_clr.r())
+				|| (tmp[1] != desc_.border_clr.g())
+				|| (tmp[2] != desc_.border_clr.b())
+				|| (tmp[3] != desc_.border_clr.a()))
+			{
+				glTexParameterfv(tex_type, GL_TEXTURE_BORDER_COLOR, &desc_.border_clr.r());
+			}
+		}
+
+		switch (desc_.filter)
+		{
+		case TFO_Point:
+			re.TexParameter(tex_type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			re.TexParameter(tex_type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			break;
+
+		case TFO_Bilinear:
+			re.TexParameter(tex_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			re.TexParameter(tex_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+			break;
+
+		case TFO_Trilinear:
+		case TFO_Anisotropic:
+			re.TexParameter(tex_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			re.TexParameter(tex_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
+		}
+
+		re.TexParameter(tex_type, GL_TEXTURE_MAX_ANISOTROPY_EXT, desc_.anisotropy);
+		re.TexParameter(tex_type, GL_TEXTURE_MAX_LEVEL, desc_.max_mip_level);
+		re.TexEnv(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, desc_.mip_map_lod_bias);
 	}
 }

@@ -39,7 +39,15 @@ namespace KlayGE
 	public:
 		explicit OGLBlendStateObject(BlendStateDesc const & desc);
 
-		void Active();
+		void Active(Color const & blend_factor, uint32_t sample_mask);
+	};
+
+	class OGLSamplerStateObject : public SamplerStateObject
+	{
+	public:
+		explicit OGLSamplerStateObject(SamplerStateDesc const & desc);
+
+		void Active(uint32_t stage, TexturePtr texture);
 	};
 }
 

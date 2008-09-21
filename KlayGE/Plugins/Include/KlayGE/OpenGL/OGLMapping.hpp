@@ -19,7 +19,6 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderStateObject.hpp>
 #include <KlayGE/RenderLayout.hpp>
-#include <KlayGE/Sampler.hpp>
 
 #include <glloader/glloader.h>
 
@@ -38,7 +37,7 @@ namespace KlayGE
 		static GLenum Mapping(PolygonMode mode);
 		static GLenum Mapping(ShadeMode mode);
 		static GLenum Mapping(BlendOperation bo);
-		static GLint Mapping(Sampler::TexAddressingMode mode);
+		static GLint Mapping(TexAddressingMode mode);
 
 		static void Mapping(GLenum& primType, uint32_t& primCount, RenderLayout const & rl);
 

@@ -153,6 +153,11 @@ namespace KlayGE
 		return BlendStateObjectPtr(new OGLBlendStateObject(desc));
 	}
 
+	SamplerStateObjectPtr OGLRenderFactory::DoMakeSamplerStateObject(SamplerStateDesc const & desc)
+	{
+		return SamplerStateObjectPtr(new OGLSamplerStateObject(desc));
+	}
+
 	RenderFactory& OGLRenderFactoryInstance()
 	{
 		static OGLRenderFactory renderFactory;

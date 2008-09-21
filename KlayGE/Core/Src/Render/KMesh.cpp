@@ -19,7 +19,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Texture.hpp>
-#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>

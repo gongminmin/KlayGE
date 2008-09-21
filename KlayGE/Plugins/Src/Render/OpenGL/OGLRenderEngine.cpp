@@ -43,7 +43,6 @@
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/FrameBuffer.hpp>
-#include <KlayGE/Sampler.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/SceneManager.hpp>
@@ -194,7 +193,7 @@ namespace KlayGE
 		cur_bs_obj_ = rf.MakeBlendStateObject(BlendStateDesc());
 		cur_rs_obj_->Active();
 		cur_dss_obj_->Active(0, 0);
-		cur_bs_obj_->Active();
+		cur_bs_obj_->Active(Color(1, 1, 1, 1), 0xFFFFFFFF);
 	}
 
 	void OGLRenderEngine::TexParameter(GLenum target, GLenum pname, GLint param)
@@ -674,7 +673,7 @@ namespace KlayGE
 		glGetIntegerv(GL_MAX_ELEMENTS_INDICES, &temp);
 		caps_.max_indices = temp;
 
-		caps_.texture_2d_filter_caps = Sampler::TFO_Point | Sampler::TFO_Bilinear | Sampler::TFO_Trilinear | Sampler::TFO_Anisotropic;
+		caps_.texture_2d_filter_caps = TFO_Point | TFO_Bilinear | TFO_Trilinear | TFO_Anisotropic;
 		caps_.texture_1d_filter_caps = caps_.texture_2d_filter_caps;
 		caps_.texture_3d_filter_caps = caps_.texture_2d_filter_caps;
 		caps_.texture_cube_filter_caps = caps_.texture_2d_filter_caps;
