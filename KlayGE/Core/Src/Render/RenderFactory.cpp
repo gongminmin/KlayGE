@@ -22,6 +22,7 @@
 #include <KlayGE/Query.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Font.hpp>
+#include <KlayGE/RenderStateObject.hpp>
 #include <KlayGE/ShaderObject.hpp>
 #include <KlayGE/RenderLayout.hpp>
 

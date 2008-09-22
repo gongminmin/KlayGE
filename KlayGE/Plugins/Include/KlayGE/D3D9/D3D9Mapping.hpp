@@ -21,6 +21,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/RenderStateObject.hpp>
 #include <KlayGE/RenderLayout.hpp>
 
 namespace KlayGE

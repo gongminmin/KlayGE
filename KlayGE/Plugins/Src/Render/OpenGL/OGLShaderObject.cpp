@@ -340,7 +340,7 @@ namespace
 	};
 
 	template <>
-	class SetOGLShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr>>
+	class SetOGLShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >
 	{
 	public:
 		SetOGLShaderParameter(std::pair<TexturePtr, SamplerStateObjectPtr>& sampler, RenderEffectParameterPtr const & param)

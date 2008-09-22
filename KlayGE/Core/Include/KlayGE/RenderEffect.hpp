@@ -164,7 +164,7 @@ namespace KlayGE
 	typedef RenderVariableConcrete<float3> RenderVariableFloat3;
 	typedef RenderVariableConcrete<float4> RenderVariableFloat4;
 	typedef RenderVariableConcrete<float4x4> RenderVariableFloat4x4;
-	typedef RenderVariableConcrete<std::pair<TexturePtr, SamplerStateObjectPtr>> RenderVariableSampler;
+	typedef RenderVariableConcrete<std::pair<TexturePtr, SamplerStateObjectPtr> > RenderVariableSampler;
 	typedef RenderVariableConcrete<std::string> RenderVariableString;
 	typedef RenderVariableConcrete<shader_desc> RenderVariableShader;
 	typedef RenderVariableConcrete<std::vector<bool> > RenderVariableBoolArray;

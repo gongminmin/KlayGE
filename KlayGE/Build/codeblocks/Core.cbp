@@ -199,7 +199,6 @@
 		<Unit filename="..\..\Core\Include\KlayGE\Renderable.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\RenderableHelper.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\ResLoader.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Sampler.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\SceneManager.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\SceneNode.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\SceneObject.hpp" />
@@ -286,7 +285,6 @@
 		<Unit filename="..\..\Core\Src\Render\Renderable.cpp" />
 		<Unit filename="..\..\Core\Src\Render\RenderableHelper.cpp" />
 		<Unit filename="..\..\Core\Src\Render\SATPostProcess.cpp" />
-		<Unit filename="..\..\Core\Src\Render\Sampler.cpp" />
 		<Unit filename="..\..\Core\Src\Render\ShaderObject.cpp" />
 		<Unit filename="..\..\Core\Src\Render\Texture.cpp" />
 		<Unit filename="..\..\Core\Src\Scene\SceneManager.cpp" />
