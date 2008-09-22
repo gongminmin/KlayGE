@@ -88,4 +88,12 @@ namespace KlayGE
 	{
 		glBindBuffer(target_, vb_);
 	}
+
+	void OGLGraphicsBuffer::CopyToBuffer(GraphicsBuffer& rhs)
+	{
+		GraphicsBuffer::Mapper lhs_mapper(*this, BA_Read_Only);
+		GraphicsBuffer::Mapper rhs_mapper(rhs, BA_Write_Only);
+		std::copy(lhs_mapper.Pointer<uint8_t>(), lhs_mapper.Pointer<uint8_t>() + size_in_byte_,
+			rhs_mapper.Pointer<uint8_t>());
+	}
 }

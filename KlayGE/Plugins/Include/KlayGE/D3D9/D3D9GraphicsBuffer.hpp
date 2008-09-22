@@ -52,6 +52,8 @@ namespace KlayGE
 	public:
 		explicit D3D9IndexBuffer(BufferUsage usage, uint32_t access_hint);
 
+		void CopyToBuffer(GraphicsBuffer& rhs);
+
 		ID3D9IndexBufferPtr D3D9Buffer() const;
 		void SwitchFormat(ElementFormat format);
 
@@ -78,6 +80,8 @@ namespace KlayGE
 	{
 	public:
 		explicit D3D9VertexBuffer(BufferUsage usage, uint32_t access_hint);
+
+		void CopyToBuffer(GraphicsBuffer& rhs);
 
 		ID3D9VertexBufferPtr D3D9Buffer() const;
 

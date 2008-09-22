@@ -84,6 +84,14 @@ namespace KlayGE
 		buffer_->Unlock();
 	}
 
+	void D3D9VertexBuffer::CopyToBuffer(GraphicsBuffer& rhs)
+	{
+		GraphicsBuffer::Mapper lhs_mapper(*this, BA_Read_Only);
+		GraphicsBuffer::Mapper rhs_mapper(rhs, BA_Write_Only);
+		std::copy(lhs_mapper.Pointer<uint8_t>(), lhs_mapper.Pointer<uint8_t>() + size_in_byte_,
+			rhs_mapper.Pointer<uint8_t>());
+	}
+
 	ID3D9VertexBufferPtr D3D9VertexBuffer::D3D9Buffer() const
 	{
 		return buffer_;

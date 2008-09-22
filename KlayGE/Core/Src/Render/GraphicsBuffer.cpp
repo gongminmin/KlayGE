@@ -47,6 +47,10 @@ namespace KlayGE
 		{
 		}
 
+		void CopyToBuffer(GraphicsBuffer& /*rhs*/)
+		{
+		}
+
 		void DoResize()
 		{
 		}
@@ -76,13 +80,5 @@ namespace KlayGE
 	{
 		size_in_byte_ = size_in_byte;
 		this->DoResize();
-	}
-
-	void GraphicsBuffer::CopyToBuffer(GraphicsBuffer& rhs)
-	{
-		GraphicsBuffer::Mapper lhs_mapper(*this, BA_Read_Only);
-		GraphicsBuffer::Mapper rhs_mapper(rhs, BA_Write_Only);
-		std::copy(lhs_mapper.Pointer<uint8_t>(), lhs_mapper.Pointer<uint8_t>() + size_in_byte_,
-			rhs_mapper.Pointer<uint8_t>());
 	}
 }

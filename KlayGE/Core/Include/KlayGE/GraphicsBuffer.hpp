@@ -112,7 +112,7 @@ namespace KlayGE
 			return usage_;
 		}
 
-		void CopyToBuffer(GraphicsBuffer& rhs);
+		virtual void CopyToBuffer(GraphicsBuffer& rhs) = 0;
 
 	private:
 		virtual void DoResize() = 0;

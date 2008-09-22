@@ -29,7 +29,7 @@ namespace KlayGE
 		void Begin();
 		void End();
 
-		uint32_t SamplesPassed();
+		uint64_t SamplesPassed();
 
 	private:
 		GLuint query_;

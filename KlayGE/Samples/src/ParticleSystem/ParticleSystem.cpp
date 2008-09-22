@@ -498,7 +498,7 @@ uint32_t ParticleSystemApp::DoUpdate(uint32_t pass)
 
 	default:
 		re.BindFrameBuffer(FrameBufferPtr());
-		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
 
 		copy_pp_->Apply();
 

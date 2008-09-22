@@ -418,9 +418,7 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 
 			checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(true);
 			re.BindFrameBuffer(peeling_fbs_[0]);
-			peeled_views_[0]->Clear(Color(0, 0, 0, 0));
-			depth_view_->Clear(Color(0, 0, 0, 0));
-			default_depth_view_->Clear(1.0f);
+			peeling_fbs_[0]->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
 			return App3DFramework::URV_Need_Flush;
 		}
 		else
@@ -428,8 +426,7 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 			checked_pointer_cast<PolygonObject>(polygon_)->DepthPeelingEnabled(false);
 
 			re.BindFrameBuffer(FrameBufferPtr());
-			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
-			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 
 			UIManager::Instance().Render();
 
@@ -481,8 +478,7 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 
 	default:
 		re.BindFrameBuffer(FrameBufferPtr());
-		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0.2f, 0.4f, 0.6f, 1));
-		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 		for (size_t i = 0; i < num_layers_; ++ i)
 		{
 			blend_pp_->Source(peeled_texs_[num_layers_ - 1 - i],

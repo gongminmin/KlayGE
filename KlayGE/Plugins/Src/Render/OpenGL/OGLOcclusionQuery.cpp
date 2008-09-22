@@ -41,10 +41,10 @@ namespace KlayGE
 		glEndQuery(GL_SAMPLES_PASSED);
 	}
 
-	uint32_t OGLOcclusionQuery::SamplesPassed()
+	uint64_t OGLOcclusionQuery::SamplesPassed()
 	{
 		GLuint ret;
 		glGetQueryObjectuiv(query_, GL_QUERY_RESULT, &ret);
-		return static_cast<uint32_t>(ret);
+		return static_cast<uint64_t>(ret);
 	}
 }

@@ -39,6 +39,8 @@ namespace KlayGE
 		explicit OGLGraphicsBuffer(BufferUsage usage, uint32_t access_hint, GLenum target);
 		~OGLGraphicsBuffer();
 
+		void CopyToBuffer(GraphicsBuffer& rhs);
+
 		void Active();
 
 		GLuint OGLvbo() const

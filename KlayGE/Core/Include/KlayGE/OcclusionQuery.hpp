@@ -28,7 +28,7 @@ namespace KlayGE
 		{
 		}
 
-		virtual uint32_t SamplesPassed() = 0;
+		virtual uint64_t SamplesPassed() = 0;
 	};
 }
 
