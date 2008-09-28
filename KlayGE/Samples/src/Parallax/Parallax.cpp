@@ -16,6 +16,7 @@
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 
+#include <KlayGE/D3D10/D3D10RenderFactory.hpp>
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
 #include <KlayGE/OpenGL/OGLRenderFactory.hpp>
 
@@ -199,6 +200,10 @@ int main()
 			if (vm.count("context.render_factory"))
 			{
 				std::string rf_name = vm["context.render_factory"].as<std::string>();
+				if ("D3D10" == rf_name)
+				{
+					Context::Instance().RenderFactoryInstance(D3D10RenderFactoryInstance());
+				}
 				if ("D3D9" == rf_name)
 				{
 					Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());

@@ -1,0 +1,87 @@
+// D3D10ShaderObject.hpp
+// KlayGE D3D10 shader对象类 头文件
+// Ver 3.8.0
+// 版权所有(C) 龚敏敏, 2008
+// Homepage: http://klayge.sourceforge.net
+//
+// 3.8.0
+// 初次建立 (2008.9.21)
+//
+// 修改记录
+/////////////////////////////////////////////////////////////////////////////////
+
+#ifndef _D3D10SHADEROBJECT_HPP
+#define _D3D10SHADEROBJECT_HPP
+
+#include <KlayGE/PreDeclare.hpp>
+#include <KlayGE/ShaderObject.hpp>
+#include <KlayGE/MapVector.hpp>
+
+#include <boost/function.hpp>
+
+#include <KlayGE/D3D10/D3D10Typedefs.hpp>
+
+namespace KlayGE
+{
+#ifdef KLAYGE_PLATFORM_WINDOWS
+#pragma pack(push, 2)
+#endif
+	struct D3D10ShaderParameterHandle
+	{
+		uint32_t shader_type;
+
+		D3D10_SHADER_VARIABLE_CLASS param_class;
+	    D3D10_SHADER_VARIABLE_TYPE param_type;
+
+		uint32_t offset;
+		uint32_t elements;
+		uint8_t rows;
+		uint8_t columns;
+	};
+#ifdef KLAYGE_PLATFORM_WINDOWS
+#pragma pack(pop)
+#endif
+
+	class D3D10ShaderObject : public ShaderObject
+	{
+	public:
+		D3D10ShaderObject();
+
+		void SetShader(RenderEffect& effect, ShaderType type, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs,
+			boost::shared_ptr<std::string> const & shader_text);
+		ShaderObjectPtr Clone(RenderEffect& effect);
+
+		void Active();
+
+		ID3D10BlobPtr VSCode() const
+		{
+			return vs_code_;
+		}
+
+	private:
+		struct parameter_bind_t
+		{
+			RenderEffectParameterPtr param;
+			D3D10ShaderParameterHandle p_handle;
+			boost::function<void()> func;
+		};
+		typedef std::vector<parameter_bind_t> parameter_binds_t;
+
+		parameter_bind_t GetBindFunc(D3D10ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
+
+	private:
+		boost::array<parameter_binds_t, ST_NumShaderTypes> param_binds_;
+		boost::array<bool, ST_NumShaderTypes> is_shader_validate_;
+
+		ID3D10VertexShaderPtr vertex_shader_;
+		ID3D10PixelShaderPtr pixel_shader_;
+		ID3D10BlobPtr vs_code_;
+
+		boost::array<std::vector<uint8_t>, ST_NumShaderTypes> cbufs_;
+		boost::array<std::vector<std::pair<TexturePtr, SamplerStateObjectPtr> >, ST_NumShaderTypes> samplers_;
+	};
+
+	typedef boost::shared_ptr<D3D10ShaderObject> D3D10ShaderObjectPtr;
+}
+
+#endif			// _D3D10SHADEROBJECT_HPP
