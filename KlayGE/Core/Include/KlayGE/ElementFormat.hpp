@@ -62,12 +62,14 @@ namespace KlayGE
 		EF_SIGNED_BGR8,
 		// 32-bit element format, 8 bits for alpha, red, green and blue.
 		EF_ARGB8,
+		// 32-bit element format, 8 bits for alpha, red, green and blue.
+		EF_ABGR8,
 		// 32-bit element format, 8 bits for signed alpha, red, green and blue.
 		EF_SIGNED_ABGR8,
 		// 32-bit element format, 2 bits for alpha, 10 bits for red, green and blue.
-		EF_A2RGB10,
+		EF_A2BGR10,
 		// 32-bit element format, 2 bits for alpha, 10 bits for signed red, green and blue.
-		EF_SIGNED_A2RGB10,
+		EF_SIGNED_A2BGR10,
 
 		// 16-bit element format, 16 bits for red.
 		EF_R16,
@@ -145,10 +147,12 @@ namespace KlayGE
 		// 32-bit element format, 24 bits depth and 8 bits stencil
 		EF_D24S8,
 		// 32-bit element format, 32 bits depth
-		EF_D32,
+		EF_D32F,
 
 		// 32-bit element format, 8 bits for alpha, red, green and blue. Standard RGB (gamma = 2.2).
 		EF_ARGB8_SRGB,
+		// 32-bit element format, 8 bits for alpha, red, green and blue. Standard RGB (gamma = 2.2).
+		EF_ABGR8_SRGB,
 		// BC1 compression element format. Standard RGB (gamma = 2.2).
 		EF_BC1_SRGB,
 		// BC2 compression element format. Standard RGB (gamma = 2.2).
@@ -195,10 +199,12 @@ namespace KlayGE
 
 		case EF_AL16:
 		case EF_ARGB8:
+		case EF_ABGR8:
 		case EF_SIGNED_ABGR8:
 		case EF_ARGB8_SRGB:
-		case EF_A2RGB10:
-		case EF_SIGNED_A2RGB10:
+		case EF_ABGR8_SRGB:
+		case EF_A2BGR10:
+		case EF_SIGNED_A2BGR10:
 		case EF_GR16:
 		case EF_SIGNED_GR16:
 		case EF_GR16F:
@@ -215,7 +221,7 @@ namespace KlayGE
 		case EF_SIGNED_BC5:
 		case EF_BC5_SRGB:
 		case EF_D24S8:
-		case EF_D32:
+		case EF_D32F:
 			return 32;
 
 		case EF_BGR16:
@@ -305,7 +311,7 @@ namespace KlayGE
 		{
 		case EF_D16:
 		case EF_D24S8:
-		case EF_D32:
+		case EF_D32F:
 			return true;
 
 		default:
@@ -331,6 +337,7 @@ namespace KlayGE
 	{
 		switch (format)
 		{
+		case EF_ABGR8_SRGB:
 		case EF_ARGB8_SRGB:
 		case EF_BC1_SRGB:
 		case EF_BC2_SRGB:
@@ -350,7 +357,7 @@ namespace KlayGE
 		case EF_SIGNED_GR8:
 		case EF_SIGNED_BGR8:
 		case EF_SIGNED_ABGR8:
-		case EF_SIGNED_A2RGB10:
+		case EF_SIGNED_A2BGR10:
 		case EF_SIGNED_R16:
 		case EF_SIGNED_GR16:
 		case EF_SIGNED_BGR16:
@@ -379,6 +386,9 @@ namespace KlayGE
 		case EF_ARGB8:
 			return EF_ARGB8_SRGB;
 
+		case EF_ABGR8:
+			return EF_ABGR8_SRGB;
+
 		case EF_BC1:
 			return EF_BC1_SRGB;
 
@@ -400,6 +410,9 @@ namespace KlayGE
 		{
 		case EF_ARGB8_SRGB:
 			return EF_ARGB8;
+
+		case EF_ABGR8_SRGB:
+			return EF_ABGR8;
 
 		case EF_BC1_SRGB:
 			return EF_BC1;
@@ -426,11 +439,11 @@ namespace KlayGE
 		case EF_RGB8:
 			return EF_SIGNED_BGR8;
 
-		case EF_ARGB8:
+		case EF_ABGR8:
 			return EF_SIGNED_ABGR8;
 
-		case EF_A2RGB10:
-			return EF_SIGNED_A2RGB10;
+		case EF_A2BGR10:
+			return EF_SIGNED_A2BGR10;
 
 		case EF_R16:
 			return EF_SIGNED_R16;
@@ -490,8 +503,8 @@ namespace KlayGE
 		case EF_SIGNED_ABGR8:
 			return EF_ARGB8;
 
-		case EF_SIGNED_A2RGB10:
-			return EF_A2RGB10;
+		case EF_SIGNED_A2BGR10:
+			return EF_A2BGR10;
 
 		case EF_SIGNED_R16:
 			return EF_R16;
@@ -548,7 +561,7 @@ namespace KlayGE
 		case EF_D24S8:
 			return 24;
 
-		case EF_D32:
+		case EF_D32F:
 			return 32;
 
 		default:
@@ -584,7 +597,7 @@ namespace KlayGE
 		case EF_R16F:
 		case EF_R32F:
 		case EF_D16:
-		case EF_D32:
+		case EF_D32F:
 			return 1;
 
 		case EF_AL4:
@@ -612,9 +625,10 @@ namespace KlayGE
 
 		case EF_ARGB4:
 		case EF_ARGB8:
+		case EF_ABGR8:
 		case EF_SIGNED_ABGR8:
-		case EF_A2RGB10:
-		case EF_SIGNED_A2RGB10:
+		case EF_A2BGR10:
+		case EF_SIGNED_A2BGR10:
 		case EF_ABGR16:
 		case EF_SIGNED_ABGR16:
 		case EF_ABGR32:
@@ -628,6 +642,7 @@ namespace KlayGE
 		case EF_BC3:
 		case EF_SIGNED_BC3:
 		case EF_ARGB8_SRGB:
+		case EF_ABGR8_SRGB:
 		case EF_BC1_SRGB:
 		case EF_BC2_SRGB:
 		case EF_BC3_SRGB:
@@ -654,8 +669,10 @@ namespace KlayGE
 		case EF_RG8:
 		case EF_SIGNED_GR8:
 		case EF_ARGB8:
+		case EF_ABGR8:
 		case EF_SIGNED_ABGR8:
 		case EF_ARGB8_SRGB:
+		case EF_ABGR8_SRGB:
 			return 8;
 
 		case EF_L16:
@@ -675,7 +692,7 @@ namespace KlayGE
 		case EF_GR32F:
 		case EF_BGR32F:
 		case EF_ABGR32F:
-		case EF_D32:
+		case EF_D32F:
 			return 32;
 
 		default:

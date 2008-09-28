@@ -618,10 +618,10 @@ namespace KlayGE
 		case EF_SIGNED_ABGR8:
 			return D3DFMT_Q8W8V8U8;
 
-		case EF_A2RGB10:
+		case EF_A2BGR10:
 			return D3DFMT_A2B10G10R10;
 
-		case EF_SIGNED_A2RGB10:
+		case EF_SIGNED_A2BGR10:
 			return D3DFMT_A2W10V10U10;
 
 		case EF_GR16:
@@ -680,9 +680,6 @@ namespace KlayGE
 		case EF_D24S8:
 			return D3DFMT_D24S8;
 
-		case EF_D32:
-			return D3DFMT_D32;
-
 		default:
 			BOOST_ASSERT(false);
 			return D3DFMT_UNKNOWN;
@@ -730,10 +727,10 @@ namespace KlayGE
 			return EF_SIGNED_ABGR8;
 
 		case D3DFMT_A2B10G10R10:
-			return EF_A2RGB10;
+			return EF_A2BGR10;
 
 		case D3DFMT_A2W10V10U10:
-			return EF_SIGNED_A2RGB10;
+			return EF_SIGNED_A2BGR10;
 
 		case D3DFMT_G16R16:
 			return EF_GR16;
@@ -786,9 +783,6 @@ namespace KlayGE
 		case D3DFMT_D24X8:
 		case D3DFMT_D24S8:
 			return EF_D24S8;
-
-		case D3DFMT_D32:
-			return EF_D32;
 
 		default:
 			BOOST_ASSERT(false);

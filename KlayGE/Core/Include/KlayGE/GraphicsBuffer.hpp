@@ -112,6 +112,11 @@ namespace KlayGE
 			return usage_;
 		}
 
+		uint32_t AccessHint() const
+		{
+			return access_hint_;
+		}
+
 		virtual void CopyToBuffer(GraphicsBuffer& rhs) = 0;
 
 	private:

@@ -832,6 +832,12 @@ namespace KlayGE
 	std::string RenderPass::GenShaderText() const
 	{
 		std::stringstream ss;
+
+		ss << "#ifdef CONSTANT_BUFFER" << std::endl;
+		ss << "cbuffer global_cb" << std::endl;
+		ss << "{" << std::endl;
+		ss << "#endif" << std::endl;
+
 		for (uint32_t i = 0; i < effect_.NumParameters(); ++ i)
 		{
 			RenderEffectParameter& param = *effect_.ParameterByIndex(i);
@@ -844,6 +850,10 @@ namespace KlayGE
 
 			ss << ";" << std::endl;
 		}
+
+		ss << "#ifdef CONSTANT_BUFFER" << std::endl;
+		ss << "};" << std::endl;
+		ss << "#endif" << std::endl << std::endl;
 
 		for (uint32_t i = 0; i < effect_.NumShaders(); ++ i)
 		{

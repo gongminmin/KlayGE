@@ -279,7 +279,7 @@ namespace KlayGE
 							&& (0x000FFC00 == desc.pixel_format.g_bit_mask)
 							&& (0x000003FF == desc.pixel_format.b_bit_mask))
 						{
-							format = EF_A2RGB10;
+							format = EF_A2BGR10;
 						}
 						else
 						{
@@ -371,7 +371,7 @@ namespace KlayGE
 									&& (0x000FFC00 == desc.pixel_format.g_bit_mask)
 									&& (0x000003FF == desc.pixel_format.b_bit_mask))
 								{
-									format = EF_SIGNED_A2RGB10;
+									format = EF_SIGNED_A2BGR10;
 								}
 								else
 								{
@@ -802,6 +802,18 @@ namespace KlayGE
 				desc.pixel_format.b_bit_mask = 0x000000FF;
 				break;
 
+			case EF_ABGR8:
+			case EF_ABGR8_SRGB:
+				desc.pixel_format.flags |= DDSPF_RGB;
+				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
+				desc.pixel_format.rgb_bit_count = 32;
+
+				desc.pixel_format.rgb_alpha_bit_mask = 0xFF000000;
+				desc.pixel_format.r_bit_mask = 0x000000FF;
+				desc.pixel_format.g_bit_mask = 0x0000FF00;
+				desc.pixel_format.b_bit_mask = 0x00FF0000;
+				break;
+
 			case EF_SIGNED_ABGR8:
 				desc.pixel_format.flags |= DDSPF_BUMPDUDV;
 				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
@@ -813,25 +825,25 @@ namespace KlayGE
 				desc.pixel_format.b_bit_mask = 0x00FF0000;
 				break;
 
-			case EF_A2RGB10:
+			case EF_A2BGR10:
 				desc.pixel_format.flags |= DDSPF_RGB;
 				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
 				desc.pixel_format.rgb_bit_count = 32;
 
 				desc.pixel_format.rgb_alpha_bit_mask = 0xC0000000;
-				desc.pixel_format.r_bit_mask = 0x3FF00000;
+				desc.pixel_format.r_bit_mask = 0x000003FF;
 				desc.pixel_format.g_bit_mask = 0x000FFC00;
-				desc.pixel_format.b_bit_mask = 0x000003FF;
+				desc.pixel_format.b_bit_mask = 0x3FF00000;
 				break;
 
-			case EF_SIGNED_A2RGB10:
+			case EF_SIGNED_A2BGR10:
 				desc.pixel_format.flags |= DDSPF_BUMPDUDV;
 				desc.pixel_format.rgb_bit_count = 32;
 
 				desc.pixel_format.rgb_alpha_bit_mask = 0xC0000000;
-				desc.pixel_format.r_bit_mask = 0x3FF00000;
+				desc.pixel_format.r_bit_mask = 0x000003FF;
 				desc.pixel_format.g_bit_mask = 0x000FFC00;
-				desc.pixel_format.b_bit_mask = 0x000003FF;
+				desc.pixel_format.b_bit_mask = 0x3FF00000;
 				break;
 
 			case EF_GR16:
