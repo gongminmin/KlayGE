@@ -366,13 +366,15 @@ namespace KlayGE
 			uint32_t const height = present_sys_mem_tex_->Height(0);
 
 			uint8_t const * src = static_cast<uint8_t const *>(d3dlocked_rc.pBits);
-			Texture::Mapper mapper(*present_sys_mem_tex_, 0, TMA_Write_Only, 0, 0, width, height);
-			uint8_t* dst = mapper.Pointer<uint8_t>();
-			for (uint32_t y = 0; y < height; ++ y)
 			{
-				memcpy(dst, src, width * present_sys_mem_tex_->Bpp() / 8);
-				dst += mapper.RowPitch();
-				src += d3dlocked_rc.Pitch;
+				Texture::Mapper mapper(*present_sys_mem_tex_, 0, TMA_Write_Only, 0, 0, width, height);
+				uint8_t* dst = mapper.Pointer<uint8_t>();
+				for (uint32_t y = 0; y < height; ++ y)
+				{
+					memcpy(dst, src, width * present_sys_mem_tex_->Bpp() / 8);
+					dst += mapper.RowPitch();
+					src += d3dlocked_rc.Pitch;
+				}
 			}
 
 			TIF(cache_surf_->UnlockRect());

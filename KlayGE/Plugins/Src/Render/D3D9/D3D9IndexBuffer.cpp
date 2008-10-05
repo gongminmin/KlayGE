@@ -32,10 +32,6 @@ namespace KlayGE
 		if (init_data != NULL)
 		{
 			uint32_t usage = 0;
-			if ((access_hint_ & EAH_CPU_Write) && !(access_hint_ & EAH_CPU_Read))
-			{
-				usage = D3DUSAGE_WRITEONLY;
-			}
 
 			D3D9RenderEngine const & renderEngine(*checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 			d3d_device_ = renderEngine.D3DDevice();
@@ -61,10 +57,6 @@ namespace KlayGE
 		if (format_ != format)
 		{
 			uint32_t usage = 0;
-			if ((access_hint_ & EAH_CPU_Write) && !(access_hint_ & EAH_CPU_Read))
-			{
-				usage = D3DUSAGE_WRITEONLY;
-			}
 
 			ElementFormat old_format = format_;
 			format_ = format;
@@ -123,10 +115,6 @@ namespace KlayGE
 		if (this->Size() > hw_buf_size_)
 		{
 			uint32_t usage = 0;
-			if ((access_hint_ & EAH_CPU_Write) && !(access_hint_ & EAH_CPU_Read))
-			{
-				usage = D3DUSAGE_WRITEONLY;
-			}
 
 			D3D9RenderEngine const & renderEngine(*checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 			d3d_device_ = renderEngine.D3DDevice();
