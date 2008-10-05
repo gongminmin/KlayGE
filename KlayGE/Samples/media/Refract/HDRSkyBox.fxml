@@ -6,15 +6,15 @@
 	<parameter type="float4x4" name="inv_mvp"/>
 	<parameter type="samplerCUBE" name="skybox_cubeMapSampler">
 		<state name="filtering" value="bilinear"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
-		<state name="address_w" value="clamp"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+		<state name="address_w" value="wrap"/>
 	</parameter>
 	<parameter type="samplerCUBE" name="skybox_CcubeMapSampler">
 		<state name="filtering" value="bilinear"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
-		<state name="address_w" value="clamp"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+		<state name="address_w" value="wrap"/>
 	</parameter>
 
 	<shader>

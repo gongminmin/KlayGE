@@ -404,12 +404,13 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(d3d_device_);
 
-		caps_.max_vertex_texture_units = 128;
+		caps_.max_vertex_texture_units = 16;
 		caps_.max_shader_model = 4;
-		caps_.max_texture_depth = caps_.max_texture_height = caps_.max_texture_width = 8192;
+		caps_.max_texture_height = caps_.max_texture_width = 8192;
+		caps_.max_texture_depth = 2048;
 		caps_.max_texture_cube_size = 8192;
 		caps_.max_texture_array_length = 0;
-		caps_.max_texture_units = 128;
+		caps_.max_texture_units = 16;
 		caps_.max_texture_anisotropy = 16;
 		caps_.max_simultaneous_rts = 8;
 		caps_.max_vertices = 8388607;
