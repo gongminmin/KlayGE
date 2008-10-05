@@ -17,28 +17,13 @@
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Util.hpp>
 
-#include <KlayGE/D3D9/D3D9RenderFactory.hpp>
-#include <KlayGE/OpenGL/OGLRenderFactory.hpp>
-
-#include <KlayGE/Input.hpp>
-#include <KlayGE/DInput/DInputFactory.hpp>
-
-#include <KlayGE/OCTree/OCTree.hpp>
+#include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/InputFactory.hpp>
 
 #include <numeric>
 #include <sstream>
-#include <fstream>
 #include <boost/assert.hpp>
 #include <boost/bind.hpp>
-
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4251 4275 4512 4702)
-#endif
-#include <boost/program_options.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
 #include "ascii_lums_builder.hpp"
 #include "AsciiArts.hpp"
@@ -136,7 +121,7 @@ namespace
 	{
 		int const ASCII_IN_A_ROW = 16;
 
-		TexturePtr ascii_tex = LoadTexture(tex_name, EAH_CPU_Write | EAH_GPU_Read);
+		TexturePtr ascii_tex = LoadTexture(tex_name, EAH_CPU_Read);
 		BOOST_ASSERT(EF_L8 == ascii_tex->Format());
 
 		std::vector<ascii_tile_type> ret(INPUT_NUM_ASCII);
@@ -173,7 +158,10 @@ namespace
 	{
 		BOOST_ASSERT(OUTPUT_NUM_ASCII == ascii_lums.size());
 
-		std::vector<uint8_t> temp_data(OUTPUT_NUM_ASCII * ASCII_WIDTH * ASCII_HEIGHT);
+		ElementInitData init_data;
+		init_data.data.resize(OUTPUT_NUM_ASCII * ASCII_WIDTH * ASCII_HEIGHT);
+		init_data.row_pitch = OUTPUT_NUM_ASCII * ASCII_WIDTH;
+		init_data.slice_pitch = 0;
 
 		for (size_t i = 0; i < OUTPUT_NUM_ASCII; ++ i)
 		{
@@ -181,24 +169,14 @@ namespace
 			{
 				for (size_t x = 0; x < ASCII_WIDTH; ++ x)
 				{
-					temp_data[y * OUTPUT_NUM_ASCII * ASCII_WIDTH + i * ASCII_WIDTH + x]
+					init_data.data[y * OUTPUT_NUM_ASCII * ASCII_WIDTH + i * ASCII_WIDTH + x]
 						= ascii_lums[i][y * ASCII_WIDTH + x];
 				}
 			}
 		}
 
-		TexturePtr ret = Context::Instance().RenderFactoryInstance().MakeTexture2D(OUTPUT_NUM_ASCII * ASCII_WIDTH,
-			ASCII_HEIGHT, 1, EF_L8, EAH_CPU_Write | EAH_GPU_Read);
-		{
-			Texture::Mapper mapper(*ret, 0, TMA_Write_Only, 0, 0, OUTPUT_NUM_ASCII * ASCII_WIDTH, ASCII_HEIGHT);
-			uint8_t* data = mapper.Pointer<uint8_t>();
-			for (uint32_t y = 0; y < ASCII_HEIGHT; ++ y)
-			{
-				memcpy(data, &temp_data[y * OUTPUT_NUM_ASCII * ASCII_WIDTH], OUTPUT_NUM_ASCII * ASCII_WIDTH);
-				data += mapper.RowPitch();
-			}
-		}
-		return ret;
+		return Context::Instance().RenderFactoryInstance().MakeTexture2D(OUTPUT_NUM_ASCII * ASCII_WIDTH,
+			ASCII_HEIGHT, 1, EF_L8, EAH_GPU_Read, &init_data);
 	}
 
 	enum
@@ -238,85 +216,8 @@ int main()
 	ResLoader::Instance().AddPath("../../media/AsciiArts");
 
 	RenderSettings settings;
-	SceneManagerPtr sm;
-
-	{
-		int octree_depth = 3;
-		int width = 800;
-		int height = 600;
-		int color_fmt = 13; // EF_ARGB8
-		bool full_screen = false;
-
-		boost::program_options::options_description desc("Configuration");
-		desc.add_options()
-			("context.render_factory", boost::program_options::value<std::string>(), "Render Factory")
-			("context.input_factory", boost::program_options::value<std::string>(), "Input Factory")
-			("context.scene_manager", boost::program_options::value<std::string>(), "Scene Manager")
-			("octree.depth", boost::program_options::value<int>(&octree_depth)->default_value(3), "Octree depth")
-			("screen.width", boost::program_options::value<int>(&width)->default_value(800), "Screen Width")
-			("screen.height", boost::program_options::value<int>(&height)->default_value(600), "Screen Height")
-			("screen.color_fmt", boost::program_options::value<int>(&color_fmt)->default_value(13), "Screen Color Format")
-			("screen.fullscreen", boost::program_options::value<bool>(&full_screen)->default_value(false), "Full Screen");
-
-		std::ifstream cfg_fs(ResLoader::Instance().Locate("KlayGE.cfg").c_str());
-		if (cfg_fs)
-		{
-			boost::program_options::variables_map vm;
-			boost::program_options::store(boost::program_options::parse_config_file(cfg_fs, desc), vm);
-			boost::program_options::notify(vm);
-
-			if (vm.count("context.render_factory"))
-			{
-				std::string rf_name = vm["context.render_factory"].as<std::string>();
-				if ("D3D9" == rf_name)
-				{
-					Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
-				}
-				if ("OpenGL" == rf_name)
-				{
-					Context::Instance().RenderFactoryInstance(OGLRenderFactoryInstance());
-				}
-			}
-			else
-			{
-				Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
-			}
-
-			if (vm.count("context.input_factory"))
-			{
-				std::string if_name = vm["context.input_factory"].as<std::string>();
-				if ("DInput" == if_name)
-				{
-					Context::Instance().InputFactoryInstance(DInputFactoryInstance());
-				}
-			}
-			else
-			{
-				Context::Instance().InputFactoryInstance(DInputFactoryInstance());
-			}
-
-			if (vm.count("context.scene_manager"))
-			{
-				std::string sm_name = vm["context.scene_manager"].as<std::string>();
-				if ("Octree" == sm_name)
-				{
-					sm.reset(new OCTree(octree_depth));
-					Context::Instance().SceneManagerInstance(*sm);
-				}
-			}
-		}
-		else
-		{
-			Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
-			Context::Instance().InputFactoryInstance(DInputFactoryInstance());
-		}
-
-		settings.width = width;
-		settings.height = height;
-		settings.color_fmt = static_cast<ElementFormat>(color_fmt);
-		settings.full_screen = full_screen;
-		settings.ConfirmDevice = ConfirmDevice;
-	}
+	SceneManagerPtr sm = Context::Instance().LoadCfg(settings, "KlayGE.cfg");
+	settings.ConfirmDevice = ConfirmDevice;
 
 	AsciiArtsApp app("ASCII Arts", settings);
 	app.Create();
@@ -349,7 +250,7 @@ void AsciiArtsApp::InitObjects()
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-	obj_.reset(new SceneObjectHelper(LoadKModel("teapot.kmodel", EAH_CPU_Write | EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<KMesh>()),
+	obj_.reset(new SceneObjectHelper(LoadKModel("teapot.kmodel", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<KMesh>()),
 		SceneObject::SOA_Cullable));
 	obj_->AddToSceneManager();
 
@@ -384,12 +285,12 @@ void AsciiArtsApp::OnResize(uint32_t width, uint32_t height)
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	rendered_tex_ = rf.MakeTexture2D(width, height, 1, EF_ARGB8, EAH_GPU_Read | EAH_GPU_Write);
+	rendered_tex_ = rf.MakeTexture2D(width, height, 1, EF_ARGB8, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	render_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_, 0));
 	render_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));
 
 	downsample_tex_ = rf.MakeTexture2D(width / CELL_WIDTH, height / CELL_HEIGHT,
-		1, EF_ARGB8, EAH_GPU_Read | EAH_GPU_Write);
+		1, EF_ARGB8, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 	FrameBufferPtr fb = rf.MakeFrameBuffer();
 	fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*downsample_tex_, 0));

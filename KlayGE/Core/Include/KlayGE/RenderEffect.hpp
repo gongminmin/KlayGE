@@ -214,20 +214,20 @@ namespace KlayGE
 		{
 			prototype_effect_ = prototype_effect;
 		}
-		RenderEffectPtr PrototypeEffect() const
+		RenderEffectPtr const & PrototypeEffect() const
 		{
 			return prototype_effect_;
 		}
 
-		static RenderEffectPtr NullObject();
+		static RenderEffectPtr const & NullObject();
 
 		uint32_t NumParameters() const
 		{
 			return static_cast<uint32_t>(params_.size());
 		}
-		RenderEffectParameterPtr ParameterBySemantic(std::string const & semantic) const;
-		RenderEffectParameterPtr ParameterByName(std::string const & name) const;
-		RenderEffectParameterPtr ParameterByIndex(uint32_t n) const
+		RenderEffectParameterPtr const & ParameterBySemantic(std::string const & semantic) const;
+		RenderEffectParameterPtr const & ParameterByName(std::string const & name) const;
+		RenderEffectParameterPtr const & ParameterByIndex(uint32_t n) const
 		{
 			BOOST_ASSERT(n < this->NumParameters());
 			return params_[n];
@@ -237,8 +237,8 @@ namespace KlayGE
 		{
 			return static_cast<uint32_t>(techniques_.size());
 		}
-		RenderTechniquePtr TechniqueByName(std::string const & name) const;
-		RenderTechniquePtr TechniqueByIndex(uint32_t n) const
+		RenderTechniquePtr const & TechniqueByName(std::string const & name) const;
+		RenderTechniquePtr const & TechniqueByIndex(uint32_t n) const
 		{
 			BOOST_ASSERT(n < this->NumTechniques());
 			return techniques_[n];
@@ -274,7 +274,7 @@ namespace KlayGE
 		void Load(ResIdentifierPtr const & source);
 		RenderTechniquePtr Clone(RenderEffect& effect);
 
-		static RenderTechniquePtr NullObject();
+		static RenderTechniquePtr const & NullObject();
 
 		std::string const & Name() const
 		{
@@ -290,7 +290,7 @@ namespace KlayGE
 		{
 			return annotations_ ? static_cast<uint32_t>(annotations_->size()) : 0;
 		}
-		RenderEffectAnnotationPtr Annotation(uint32_t n) const
+		RenderEffectAnnotationPtr const & Annotation(uint32_t n) const
 		{
 			BOOST_ASSERT(n < this->NumAnnotations());
 			return (*annotations_)[n];
@@ -300,7 +300,7 @@ namespace KlayGE
 		{
 			return static_cast<uint32_t>(passes_.size());
 		}
-		RenderPassPtr Pass(uint32_t n) const
+		RenderPassPtr const & Pass(uint32_t n) const
 		{
 			BOOST_ASSERT(n < this->NumPasses());
 			return passes_[n];
@@ -332,11 +332,13 @@ namespace KlayGE
 	{
 	public:
 		explicit RenderPass(RenderEffect& effect)
-			: effect_(effect)
+			: effect_(effect),
+				front_stencil_ref_(0), back_stencil_ref_(0),
+				blend_factor_(1, 1, 1, 1), sample_mask_(0xFFFFFFFF)
 		{
 		}
 
-		static RenderPassPtr NullObject();
+		static RenderPassPtr const & NullObject();
 
 		void Load(ResIdentifierPtr const & source);
 		RenderPassPtr Clone(RenderEffect& effect);
@@ -346,26 +348,27 @@ namespace KlayGE
 			return *name_;
 		}
 
-		void Apply();
+		void Bind();
+		void Unbind();
 
 		bool Validate() const
 		{
 			return is_validate_;
 		}
 
-		RasterizerStateObjectPtr GetRasterizerStateObject() const
+		RasterizerStateObjectPtr const & GetRasterizerStateObject() const
 		{
 			return rasterizer_state_obj_;
 		}
-		DepthStencilStateObjectPtr GetDepthStencilStateObject() const
+		DepthStencilStateObjectPtr const & GetDepthStencilStateObject() const
 		{
 			return depth_stencil_state_obj_;
 		}
-		BlendStateObjectPtr GetBlendStateObject() const
+		BlendStateObjectPtr const & GetBlendStateObject() const
 		{
 			return blend_state_obj_;
 		}
-		ShaderObjectPtr GetShaderObject() const
+		ShaderObjectPtr const & GetShaderObject() const
 		{
 			return shader_obj_;
 		}
@@ -374,7 +377,7 @@ namespace KlayGE
 		{
 			return annotations_ ? static_cast<uint32_t>(annotations_->size()) : 0;
 		}
-		RenderEffectAnnotationPtr Annotation(uint32_t n) const
+		RenderEffectAnnotationPtr const & Annotation(uint32_t n) const
 		{
 			BOOST_ASSERT(n < this->NumAnnotations());
 			return (*annotations_)[n];
@@ -408,7 +411,7 @@ namespace KlayGE
 		explicit RenderEffectParameter(RenderEffect& effect);
 		virtual ~RenderEffectParameter();
 
-		static RenderEffectParameterPtr NullObject();
+		static RenderEffectParameterPtr const & NullObject();
 
 		void Load(ResIdentifierPtr const & source);
 		RenderEffectParameterPtr Clone(RenderEffect& effect);
@@ -441,7 +444,7 @@ namespace KlayGE
 		{
 			return annotations_ ? static_cast<uint32_t>(annotations_->size()) : 0;
 		}
-		RenderEffectAnnotationPtr Annotation(uint32_t n)
+		RenderEffectAnnotationPtr const & Annotation(uint32_t n)
 		{
 			BOOST_ASSERT(n < this->NumAnnotations());
 			return (*annotations_)[n];

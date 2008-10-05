@@ -103,6 +103,72 @@ namespace KlayGE
 		return 0;
 	}
 
+	void D3D10Texture::GetD3DFlags(D3D10_USAGE& usage, UINT& bind_flags, UINT& cpu_access_flags, UINT& misc_flags)
+	{
+		if (EAH_CPU_Write == access_hint_)
+		{
+			usage = D3D10_USAGE_STAGING;
+		}
+		else
+		{
+			if (!(access_hint_ & EAH_CPU_Read) && !(access_hint_ & EAH_CPU_Write))
+			{
+				usage = D3D10_USAGE_DEFAULT;
+			}
+			else
+			{
+				if (!(access_hint_ & EAH_CPU_Read) && !(access_hint_ & EAH_GPU_Write) && !(access_hint_ & EAH_GPU_Read) && (access_hint_ & EAH_CPU_Write))
+				{
+					if (numMipMaps_ != 1)
+					{
+						usage = D3D10_USAGE_STAGING;
+					}
+					else
+					{
+						usage = D3D10_USAGE_DYNAMIC;
+					}
+				}
+				else
+				{
+					usage = D3D10_USAGE_STAGING;
+				}
+			}
+		}
+
+		bind_flags = 0;
+		if ((access_hint_ & EAH_GPU_Read) || (D3D10_USAGE_DYNAMIC == usage))
+		{
+			bind_flags |= D3D10_BIND_SHADER_RESOURCE;
+		}
+		if (access_hint_ & EAH_GPU_Write)
+		{
+			if (IsDepthFormat(format_))
+			{
+				bind_flags |= D3D10_BIND_DEPTH_STENCIL;
+			}
+			else
+			{
+				bind_flags |= D3D10_BIND_RENDER_TARGET;
+			}
+		}
+
+		cpu_access_flags = 0;
+		if (access_hint_ & EAH_CPU_Read)
+		{
+			cpu_access_flags |= D3D10_CPU_ACCESS_READ;
+		}
+		if (access_hint_ & EAH_CPU_Write)
+		{
+			cpu_access_flags |= D3D10_CPU_ACCESS_WRITE;
+		}
+
+		misc_flags = 0;
+		if ((access_hint_ & EAH_GPU_Read) && (access_hint_ & EAH_GPU_Write))
+		{
+			misc_flags |= D3D10_RESOURCE_MISC_GENERATE_MIPS;
+		}
+	}
+
 	void D3D10Texture::Map1D(int /*level*/, TextureMapAccess /*tma*/,
 			uint32_t /*x_offset*/, uint32_t /*width*/,
 			void*& /*data*/)

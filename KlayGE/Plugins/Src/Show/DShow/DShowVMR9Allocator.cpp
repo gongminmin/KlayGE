@@ -146,7 +146,8 @@ namespace KlayGE
 
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		present_tex_ = rf.MakeTexture2D(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight, 1, EF_ARGB8, EAH_CPU_Write | EAH_GPU_Read);
+		present_tex_ = rf.MakeTexture2D(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight, 1, EF_ARGB8, EAH_GPU_Read, NULL);
+		present_sys_mem_tex_ = rf.MakeTexture2D(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight, 1, EF_ARGB8, EAH_CPU_Write, NULL);
 
 		IDirect3DSurface9* surf;
 		TIF(d3d_device_->CreateOffscreenPlainSurface(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight,
@@ -361,20 +362,22 @@ namespace KlayGE
 			D3DLOCKED_RECT d3dlocked_rc;
 			TIF(cache_surf_->LockRect(&d3dlocked_rc, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
 
-			uint32_t const width = present_tex_->Width(0);
-			uint32_t const height = present_tex_->Height(0);
+			uint32_t const width = present_sys_mem_tex_->Width(0);
+			uint32_t const height = present_sys_mem_tex_->Height(0);
 
 			uint8_t const * src = static_cast<uint8_t const *>(d3dlocked_rc.pBits);
-			Texture::Mapper mapper(*present_tex_, 0, TMA_Write_Only, 0, 0, width, height);
+			Texture::Mapper mapper(*present_sys_mem_tex_, 0, TMA_Write_Only, 0, 0, width, height);
 			uint8_t* dst = mapper.Pointer<uint8_t>();
 			for (uint32_t y = 0; y < height; ++ y)
 			{
-				memcpy(dst, src, width * present_tex_->Bpp() / 8);
+				memcpy(dst, src, width * present_sys_mem_tex_->Bpp() / 8);
 				dst += mapper.RowPitch();
 				src += d3dlocked_rc.Pitch;
 			}
 
 			TIF(cache_surf_->UnlockRect());
+
+			present_sys_mem_tex_->CopyToTexture(*present_tex_);
 		}
 
 		return present_tex_;

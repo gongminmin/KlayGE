@@ -42,7 +42,7 @@
 
 namespace KlayGE
 {
-	D3D9TextureCube::D3D9TextureCube(uint32_t size, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint)
+	D3D9TextureCube::D3D9TextureCube(uint32_t size, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 					: D3D9Texture(TT_Cube, access_hint),
 						auto_gen_mipmaps_(false)
 	{
@@ -71,6 +71,50 @@ namespace KlayGE
 
 		this->QueryBaseTexture();
 		this->UpdateParams();
+
+		if (init_data != NULL)
+		{
+			if (access_hint & EAH_GPU_Write)
+			{
+				TexturePtr sys_mem = Context::Instance().RenderFactoryInstance().MakeTextureCube(widths_[0],
+					numMipMaps_, format_, EAH_CPU_Write, init_data);
+				sys_mem->CopyToTexture(*this);
+			}
+			else
+			{
+				for (uint32_t face = Texture::CF_Positive_X; face <= Texture::CF_Negative_Z; ++ face)
+				{
+					for (int level = 0; level < numMipMaps_; ++ level)
+					{
+						Texture::Mapper mapper(*this, static_cast<Texture::CubeFaces>(face), level, TMA_Write_Only, 0, 0, widths_[level], widths_[level]);
+			
+						if (IsCompressedFormat(format_))
+						{
+							int block_size;
+							if (EF_BC1 == format)
+							{
+								block_size = 8;
+							}
+							else
+							{
+								block_size = 16;
+							}
+
+							memcpy(mapper.Pointer<uint8_t>(), &init_data[level].data[0], 
+								((widths_[level] + 3) / 4) * ((widths_[level] + 3) / 4) * block_size);
+						}
+						else
+						{
+							for (uint32_t h = 0; h < widths_[level]; ++ h)
+							{
+								memcpy(mapper.Pointer<uint8_t>() + mapper.RowPitch() * h, &init_data[level].data[init_data[level].row_pitch * h],
+									std::min(mapper.RowPitch(), init_data[level].row_pitch));
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	uint32_t D3D9TextureCube::Width(int level) const

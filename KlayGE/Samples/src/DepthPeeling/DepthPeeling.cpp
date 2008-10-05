@@ -18,28 +18,13 @@
 #include <KlayGE/OcclusionQuery.hpp>
 #include <KlayGE/PostProcess.hpp>
 
-#include <KlayGE/D3D9/D3D9RenderFactory.hpp>
-#include <KlayGE/OpenGL/OGLRenderFactory.hpp>
-
-#include <KlayGE/OCTree/OCTree.hpp>
-
-#include <KlayGE/Input.hpp>
-#include <KlayGE/DInput/DInputFactory.hpp>
+#include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/InputFactory.hpp>
 
 #include <vector>
 #include <sstream>
-#include <fstream>
 #include <ctime>
-#include <boost/tuple/tuple.hpp>
 #include <boost/bind.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4251 4275 4512 4702)
-#endif
-#include <boost/program_options.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
 #include "DepthPeeling.hpp"
 
@@ -97,6 +82,9 @@ namespace
 			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
 			*(technique_->Effect().ParameterByName("mvp")) = model * view * proj;
+			*(technique_->Effect().ParameterByName("mv")) = model * view;
+			*(technique_->Effect().ParameterByName("depth_min")) = app.ActiveCamera().NearPlane();
+			*(technique_->Effect().ParameterByName("inv_depth_range")) = 1 / (app.ActiveCamera().FarPlane() - app.ActiveCamera().NearPlane());
 
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2;
@@ -117,7 +105,7 @@ namespace
 		PolygonObject()
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadKModel("teapot.kmodel", EAH_CPU_Write | EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderPolygon>());
+			renderable_ = LoadKModel("teapot.kmodel", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderPolygon>());
 		}
 
 		void LightPos(float3 const & light_pos)
@@ -198,7 +186,7 @@ namespace
 
 		try
 		{
-			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, EF_R32F, EAH_GPU_Read | EAH_GPU_Write);
+			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, EF_R32F, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			rf.Make2DRenderView(*temp_tex, 0);
 		}
 		catch (...)
@@ -217,85 +205,8 @@ int main()
 	ResLoader::Instance().AddPath("../../media/DepthPeeling");
 
 	RenderSettings settings;
-	SceneManagerPtr sm;
-
-	{
-		int octree_depth = 3;
-		int width = 800;
-		int height = 600;
-		int color_fmt = 13; // EF_ARGB8
-		bool full_screen = false;
-
-		boost::program_options::options_description desc("Configuration");
-		desc.add_options()
-			("context.render_factory", boost::program_options::value<std::string>(), "Render Factory")
-			("context.input_factory", boost::program_options::value<std::string>(), "Input Factory")
-			("context.scene_manager", boost::program_options::value<std::string>(), "Scene Manager")
-			("octree.depth", boost::program_options::value<int>(&octree_depth)->default_value(3), "Octree depth")
-			("screen.width", boost::program_options::value<int>(&width)->default_value(800), "Screen Width")
-			("screen.height", boost::program_options::value<int>(&height)->default_value(600), "Screen Height")
-			("screen.color_fmt", boost::program_options::value<int>(&color_fmt)->default_value(13), "Screen Color Format")
-			("screen.fullscreen", boost::program_options::value<bool>(&full_screen)->default_value(false), "Full Screen");
-
-		std::ifstream cfg_fs(ResLoader::Instance().Locate("KlayGE.cfg").c_str());
-		if (cfg_fs)
-		{
-			boost::program_options::variables_map vm;
-			boost::program_options::store(boost::program_options::parse_config_file(cfg_fs, desc), vm);
-			boost::program_options::notify(vm);
-
-			if (vm.count("context.render_factory"))
-			{
-				std::string rf_name = vm["context.render_factory"].as<std::string>();
-				if ("D3D9" == rf_name)
-				{
-					Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
-				}
-				if ("OpenGL" == rf_name)
-				{
-					Context::Instance().RenderFactoryInstance(OGLRenderFactoryInstance());
-				}
-			}
-			else
-			{
-				Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
-			}
-
-			if (vm.count("context.input_factory"))
-			{
-				std::string if_name = vm["context.input_factory"].as<std::string>();
-				if ("DInput" == if_name)
-				{
-					Context::Instance().InputFactoryInstance(DInputFactoryInstance());
-				}
-			}
-			else
-			{
-				Context::Instance().InputFactoryInstance(DInputFactoryInstance());
-			}
-
-			if (vm.count("context.scene_manager"))
-			{
-				std::string sm_name = vm["context.scene_manager"].as<std::string>();
-				if ("Octree" == sm_name)
-				{
-					sm.reset(new OCTree(octree_depth));
-					Context::Instance().SceneManagerInstance(*sm);
-				}
-			}
-		}
-		else
-		{
-			Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
-			Context::Instance().InputFactoryInstance(DInputFactoryInstance());
-		}
-
-		settings.width = width;
-		settings.height = height;
-		settings.color_fmt = static_cast<ElementFormat>(color_fmt);
-		settings.full_screen = full_screen;
-		settings.ConfirmDevice = ConfirmDevice;
-	}
+	SceneManagerPtr sm = Context::Instance().LoadCfg(settings, "KlayGE.cfg");
+	settings.ConfirmDevice = ConfirmDevice;
 
 	DepthPeelingApp app("DepthPeeling", settings);
 	app.Create();
@@ -365,15 +276,15 @@ void DepthPeelingApp::OnResize(uint32_t width, uint32_t height)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 
-	depth_texs_[0] = rf.MakeTexture2D(width, height, 1, EF_R32F, EAH_GPU_Read | EAH_GPU_Write);
-	depth_texs_[1] = rf.MakeTexture2D(width, height, 1, EF_R32F, EAH_GPU_Read | EAH_GPU_Write);
+	depth_texs_[0] = rf.MakeTexture2D(width, height, 1, EF_R32F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	depth_texs_[1] = rf.MakeTexture2D(width, height, 1, EF_R32F, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	depth_view_ = rf.Make2DRenderView(*depth_texs_[0], 0);
 
 	default_depth_view_ = re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil);
 
 	for (size_t i = 0; i < peeling_fbs_.size(); ++ i)
 	{
-		peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, EF_ARGB8, EAH_GPU_Read | EAH_GPU_Write);
+		peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, EF_ABGR8, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		peeled_views_[i] = rf.Make2DRenderView(*peeled_texs_[i], 0);
 
 		peeling_fbs_[i]->Attach(FrameBuffer::ATT_Color0, peeled_views_[i]);

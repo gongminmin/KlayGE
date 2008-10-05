@@ -43,7 +43,7 @@
 namespace KlayGE
 {
 	D3D9Texture2D::D3D9Texture2D(uint32_t width, uint32_t height,
-								uint16_t numMipMaps, ElementFormat format, uint32_t access_hint)
+								uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 					: D3D9Texture(TT_2D, access_hint),
 						auto_gen_mipmaps_(false)
 	{
@@ -73,6 +73,47 @@ namespace KlayGE
 
 		this->QueryBaseTexture();
 		this->UpdateParams();
+
+		if (init_data != NULL)
+		{
+			if (access_hint & EAH_GPU_Write)
+			{
+				TexturePtr sys_mem = Context::Instance().RenderFactoryInstance().MakeTexture2D(widths_[0],
+					heights_[0], numMipMaps_, format_, EAH_CPU_Write, init_data);
+				sys_mem->CopyToTexture(*this);
+			}
+			else
+			{
+				for (int level = 0; level < numMipMaps_; ++ level)
+				{
+					Texture::Mapper mapper(*this, level, TMA_Write_Only, 0, 0, widths_[level], heights_[level]);
+		
+					if (IsCompressedFormat(format_))
+					{
+						int block_size;
+						if (EF_BC1 == format)
+						{
+							block_size = 8;
+						}
+						else
+						{
+							block_size = 16;
+						}
+
+						memcpy(mapper.Pointer<uint8_t>(), &init_data[level].data[0], 
+							((widths_[level] + 3) / 4) * ((heights_[level] + 3) / 4) * block_size);
+					}
+					else
+					{
+						for (uint32_t h = 0; h < heights_[level]; ++ h)
+						{
+							memcpy(mapper.Pointer<uint8_t>() + mapper.RowPitch() * h, &init_data[level].data[init_data[level].row_pitch * h],
+								std::min(mapper.RowPitch(), init_data[level].row_pitch));
+						}
+					}
+				}
+			}
+		}
 	}
 
 	uint32_t D3D9Texture2D::Width(int level) const

@@ -33,7 +33,11 @@ namespace KlayGE
 			return ShaderObject::NullObject();
 		}
 
-		void Active()
+		void Bind()
+		{
+		}
+
+		void Unbind()
 		{
 		}
 	};

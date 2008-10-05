@@ -206,6 +206,9 @@ namespace KlayGE
 	{
 		switch (mode)
 		{
+		case PM_Point:
+			return D3D10_FILL_WIREFRAME;
+
 		case PM_Line:
 			return D3D10_FILL_WIREFRAME;
 
@@ -381,6 +384,10 @@ namespace KlayGE
 			// Blend Indices
 			case VEU_BlendIndex:
 				element.SemanticName = "BLENDINDICES";
+				if (EF_ABGR8 == vs_elem.format)
+				{
+					element.Format = DXGI_FORMAT_R8G8B8A8_UINT;
+				}
 				break;
 
 			// Do texture coords
@@ -413,6 +420,9 @@ namespace KlayGE
 
 		case EF_L16:
 			return DXGI_FORMAT_R16_UNORM;
+
+		case EF_R16:
+			return DXGI_FORMAT_R16_UINT;
 
 		case EF_R5G6B5:
 			return DXGI_FORMAT_B5G6R5_UNORM;
@@ -462,6 +472,9 @@ namespace KlayGE
 
 		case EF_GR32F:
 			return DXGI_FORMAT_R32G32_FLOAT;
+
+		case EF_BGR32F:
+			return DXGI_FORMAT_R32G32B32_FLOAT;
 
 		case EF_ABGR32F:
 			return DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -528,6 +541,9 @@ namespace KlayGE
 		case DXGI_FORMAT_R16_UNORM:
 			return EF_L16;
 
+		case DXGI_FORMAT_R16_UINT:
+			return EF_R16;
+
 		case DXGI_FORMAT_B5G6R5_UNORM:
 			return EF_R5G6B5;
 
@@ -576,6 +592,9 @@ namespace KlayGE
 
 		case DXGI_FORMAT_R32G32_FLOAT:
 			return EF_GR32F;
+
+		case DXGI_FORMAT_R32G32B32_FLOAT:
+			return EF_BGR32F;
 
 		case DXGI_FORMAT_R32G32B32A32_FLOAT:
 			return EF_ABGR32F;

@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/COMPtr.hpp>
 #include <KlayGE/Math.hpp>
@@ -35,7 +36,7 @@ namespace KlayGE
 		d3d_desc.DepthBias = static_cast<int>(desc.polygon_offset_units);
 		d3d_desc.DepthBiasClamp = desc.polygon_offset_units;
 		d3d_desc.SlopeScaledDepthBias = desc.polygon_offset_factor;
-		d3d_desc.DepthClipEnable = false;
+		d3d_desc.DepthClipEnable = true;
 		d3d_desc.ScissorEnable = desc.scissor_enable;
 		d3d_desc.MultisampleEnable = desc.multisample_enable;
 		d3d_desc.AntialiasedLineEnable = desc.multisample_enable;
@@ -43,7 +44,7 @@ namespace KlayGE
 		ID3D10DevicePtr const & d3d_device = checked_cast<D3D10RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance())->D3DDevice();
 
 		ID3D10RasterizerState* rasterizer_state;
-		d3d_device->CreateRasterizerState(&d3d_desc, &rasterizer_state);
+		TIF(d3d_device->CreateRasterizerState(&d3d_desc, &rasterizer_state));
 		rasterizer_state_ = MakeCOMPtr(rasterizer_state);
 	}
 
@@ -75,7 +76,7 @@ namespace KlayGE
 		ID3D10DevicePtr const & d3d_device = checked_cast<D3D10RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance())->D3DDevice();
 
 		ID3D10DepthStencilState* ds_state;
-		d3d_device->CreateDepthStencilState(&d3d_desc, &ds_state);
+		TIF(d3d_device->CreateDepthStencilState(&d3d_desc, &ds_state));
 		depth_stencil_state_ = MakeCOMPtr(ds_state);
 	}
 
@@ -105,7 +106,7 @@ namespace KlayGE
 		ID3D10DevicePtr const & d3d_device = checked_cast<D3D10RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance())->D3DDevice();
 
 		ID3D10BlendState* blend_state;
-		d3d_device->CreateBlendState(&d3d_desc, &blend_state);
+		TIF(d3d_device->CreateBlendState(&d3d_desc, &blend_state));
 		blend_state_ = MakeCOMPtr(blend_state);
 	}
 
@@ -136,7 +137,7 @@ namespace KlayGE
 		ID3D10DevicePtr const & d3d_device = checked_cast<D3D10RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance())->D3DDevice();
 
 		ID3D10SamplerState* sampler_state;
-		d3d_device->CreateSamplerState(&d3d_desc, &sampler_state);
+		TIF(d3d_device->CreateSamplerState(&d3d_desc, &sampler_state));
 		sampler_state_ = MakeCOMPtr(sampler_state);
 	}
 

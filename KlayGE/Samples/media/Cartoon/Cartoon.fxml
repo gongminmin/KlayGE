@@ -29,7 +29,7 @@ void NormalDepthVS(float4 pos : POSITION,
 	oViewVec = eye_in_model - pos.xyz;
 }
 
-void NormalDepthPS(float4 normal : TEXCOORD0,
+void NormalDepthPS(float4 pos : POSITION, float4 normal : TEXCOORD0,
 			float3 light_vec : TEXCOORD1, float3 view_vec : TEXCOORD2,
 			out half4 oClr : COLOR0, out half4 oNormalDepth : COLOR1)
 {
@@ -108,7 +108,8 @@ void PostToonVS(float4 pos : POSITION,
 	oTc4 = oTc0.xyxy + float4(0, -inv_height, 0, +inv_height);
 }
 
-float4 PostToonPS(float2 tc0 : TEXCOORD0,
+float4 PostToonPS(float4 pos : POSITION,
+				float2 tc0 : TEXCOORD0,
 				float4 tc1 : TEXCOORD1,
 				float4 tc2 : TEXCOORD2,
 				float4 tc3 : TEXCOORD3,
@@ -145,7 +146,7 @@ float4 PostToonPS(float2 tc0 : TEXCOORD0,
 	dd = step(e_barrier.y, abs(2 * ndc.w - dd));
 	half de = (dot(dd, e_weights.y).x < 1) ? 1 : 0;
 
-	return tex2D(toonmap_sampler, float2(toon, 0.5f)) * de * ne;
+	return tex2D(toonmap_sampler, float2(toon, 0.5f)).r * de * ne;
 }
 		]]>
 	</shader>

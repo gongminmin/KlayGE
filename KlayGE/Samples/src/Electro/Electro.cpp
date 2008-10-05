@@ -16,21 +16,12 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/PerlinNoise.hpp>
 
-#include <KlayGE/D3D9/D3D9RenderFactory.hpp>
-#include <KlayGE/OpenGL/OGLRenderFactory.hpp>
+#include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/InputFactory.hpp>
 
 #include <vector>
 #include <sstream>
-#include <fstream>
 #include <ctime>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4251 4275 4512 4702)
-#endif
-#include <boost/program_options.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
 #include "Electro.hpp"
 
@@ -56,8 +47,11 @@ namespace
 			float const YSCALE = 0.08f;
 			float const ZSCALE = 0.08f;
 
-			std::vector<uint8_t> turbBuffer;
-			turbBuffer.reserve(XSIZE * YSIZE * ZSIZE);
+			ElementInitData init_data;
+			init_data.data.reserve(XSIZE * YSIZE * ZSIZE);
+			init_data.row_pitch = XSIZE;
+			init_data.slice_pitch = XSIZE * YSIZE;
+
 			uint16_t min = 255, max = 0;
 			for (int z = 0; z < ZSIZE; ++ z)
 			{
@@ -77,29 +71,16 @@ namespace
 							min = t;
 						}
 
-						turbBuffer.push_back(t);
+						init_data.data.push_back(t);
 					}
 				}
 			}
 			for (uint32_t i = 0; i < XSIZE * YSIZE * ZSIZE; ++ i)
 			{
-				turbBuffer[i] = static_cast<uint8_t>((255 * (turbBuffer[i] - min)) / (max - min));
+				init_data.data[i] = static_cast<uint8_t>((255 * (init_data.data[i] - min)) / (max - min));
 			}
 
-			TexturePtr electro_tex = rf.MakeTexture3D(XSIZE, YSIZE, ZSIZE, 1, EF_L8, EAH_CPU_Write | EAH_GPU_Read);
-			{
-				Texture::Mapper mapper(*electro_tex, 0, TMA_Write_Only, 0, 0, 0, XSIZE, YSIZE, ZSIZE);
-				uint8_t* data = mapper.Pointer<uint8_t>();
-				for (uint32_t z = 0; z < ZSIZE; ++ z)
-				{
-					for (uint32_t y = 0; y < YSIZE; ++ y)
-					{
-						memcpy(data, &turbBuffer[z * XSIZE * YSIZE + y * XSIZE], XSIZE);
-						data += mapper.RowPitch();
-					}
-					data += mapper.SlicePitch() - mapper.RowPitch() * YSIZE;
-				}
-			}
+			TexturePtr electro_tex = rf.MakeTexture3D(XSIZE, YSIZE, ZSIZE, 1, EF_L8, EAH_GPU_Read, &init_data);
 
 			technique_ = rf.LoadEffect("Electro.kfx")->TechniqueByName("Electro");
 			*(technique_->Effect().ParameterByName("electroSampler")) = electro_tex;
@@ -123,18 +104,18 @@ namespace
 			rl_ = rf.MakeRenderLayout();
 			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
-			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
-			pos_vb->Resize(sizeof(xyzs));
-			{
-				GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
-				std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
-			}
-			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
+			init_data.row_pitch = sizeof(xyzs);
+			init_data.slice_pitch = 0;
+			init_data.data.resize(init_data.row_pitch);
+			memcpy(&init_data.data[0], xyzs, init_data.row_pitch);
+			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+			
+			init_data.row_pitch = sizeof(texs);
+			init_data.slice_pitch = 0;
+			init_data.data.resize(init_data.row_pitch);
+			memcpy(&init_data.data[0], texs, init_data.row_pitch);
+			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			tex0_vb->Resize(sizeof(texs));
-			{
-				GraphicsBuffer::Mapper mapper(*tex0_vb, BA_Write_Only);
-				std::copy(&texs[0], &texs[0] + sizeof(texs) / sizeof(texs[0]), mapper.Pointer<float3>());
-			}
 
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 			rl_->BindVertexStream(tex0_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_BGR32F)));
@@ -169,61 +150,8 @@ int main()
 	ResLoader::Instance().AddPath("../../media/Electro");
 
 	RenderSettings settings;
-	SceneManagerPtr sm;
-
-	{
-		int octree_depth = 3;
-		int width = 800;
-		int height = 600;
-		int color_fmt = 13; // EF_ARGB8
-		bool full_screen = false;
-
-		boost::program_options::options_description desc("Configuration");
-		desc.add_options()
-			("context.render_factory", boost::program_options::value<std::string>(), "Render Factory")
-			("context.input_factory", boost::program_options::value<std::string>(), "Input Factory")
-			("context.scene_manager", boost::program_options::value<std::string>(), "Scene Manager")
-			("octree.depth", boost::program_options::value<int>(&octree_depth)->default_value(3), "Octree depth")
-			("screen.width", boost::program_options::value<int>(&width)->default_value(800), "Screen Width")
-			("screen.height", boost::program_options::value<int>(&height)->default_value(600), "Screen Height")
-			("screen.color_fmt", boost::program_options::value<int>(&color_fmt)->default_value(13), "Screen Color Format")
-			("screen.fullscreen", boost::program_options::value<bool>(&full_screen)->default_value(false), "Full Screen");
-
-		std::ifstream cfg_fs(ResLoader::Instance().Locate("KlayGE.cfg").c_str());
-		if (cfg_fs)
-		{
-			boost::program_options::variables_map vm;
-			boost::program_options::store(boost::program_options::parse_config_file(cfg_fs, desc), vm);
-			boost::program_options::notify(vm);
-
-			if (vm.count("context.render_factory"))
-			{
-				std::string rf_name = vm["context.render_factory"].as<std::string>();
-				if ("D3D9" == rf_name)
-				{
-					Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
-				}
-				if ("OpenGL" == rf_name)
-				{
-					Context::Instance().RenderFactoryInstance(OGLRenderFactoryInstance());
-				}
-			}
-			else
-			{
-				Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
-			}
-		}
-		else
-		{
-			Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
-		}
-
-		settings.width = width;
-		settings.height = height;
-		settings.color_fmt = static_cast<ElementFormat>(color_fmt);
-		settings.full_screen = full_screen;
-		settings.ConfirmDevice = ConfirmDevice;
-	}
+	SceneManagerPtr sm = Context::Instance().LoadCfg(settings, "KlayGE.cfg");
+	settings.ConfirmDevice = ConfirmDevice;
 
 	Electro app("Electro", settings);
 	app.Create();

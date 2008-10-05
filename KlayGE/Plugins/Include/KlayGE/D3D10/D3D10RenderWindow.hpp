@@ -28,7 +28,7 @@ namespace KlayGE
 	class D3D10RenderWindow : public D3D10FrameBuffer
 	{
 	public:
-		D3D10RenderWindow(IDXGIFactoryPtr const & gi_factory, D3D10Adapter const & adapter,
+		D3D10RenderWindow(IDXGIFactoryPtr const & gi_factory, D3D10AdapterPtr const & adapter,
 			std::string const & name, RenderSettings const & settings);
 		~D3D10RenderWindow();
 
@@ -91,7 +91,7 @@ namespace KlayGE
 
 		//D3DMULTISAMPLE_TYPE multiSample_;
 
-		D3D10Adapter			adapter_;
+		D3D10AdapterPtr			adapter_;
 
 		// Pointer to the 3D device specific for this window
 		IDXGIFactoryPtr			gi_factory_;

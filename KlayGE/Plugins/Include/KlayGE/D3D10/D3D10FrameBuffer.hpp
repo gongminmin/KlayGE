@@ -33,6 +33,7 @@ namespace KlayGE
 		virtual std::wstring const & Description() const;
 
 		virtual void OnBind();
+		virtual void OnUnbind();
 
 		bool RequiresFlipping() const
 		{

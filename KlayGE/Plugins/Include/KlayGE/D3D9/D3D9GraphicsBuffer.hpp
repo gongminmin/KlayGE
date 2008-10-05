@@ -50,7 +50,7 @@ namespace KlayGE
 	class D3D9IndexBuffer : public D3D9GraphicsBuffer
 	{
 	public:
-		explicit D3D9IndexBuffer(BufferUsage usage, uint32_t access_hint);
+		explicit D3D9IndexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data);
 
 		void CopyToBuffer(GraphicsBuffer& rhs);
 
@@ -79,7 +79,7 @@ namespace KlayGE
 	class D3D9VertexBuffer : public D3D9GraphicsBuffer
 	{
 	public:
-		explicit D3D9VertexBuffer(BufferUsage usage, uint32_t access_hint);
+		explicit D3D9VertexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data);
 
 		void CopyToBuffer(GraphicsBuffer& rhs);
 

@@ -16,20 +16,11 @@
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderSettings.hpp>
 
-#include <KlayGE/D3D9/D3D9RenderFactory.hpp>
-#include <KlayGE/OpenGL/OGLRenderFactory.hpp>
+#include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/InputFactory.hpp>
 
 #include <vector>
 #include <sstream>
-#include <fstream>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4251 4275 4512 4702)
-#endif
-#include <boost/program_options.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
 #include "Fractal.hpp"
 
@@ -72,18 +63,18 @@ namespace
 			rl_ = rf.MakeRenderLayout();
 			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
-			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
-			pos_vb->Resize(sizeof(xyzs));
-			{
-				GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
-				std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
-			}
-			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
-			tex0_vb->Resize(sizeof(texs));
-			{
-				GraphicsBuffer::Mapper mapper(*tex0_vb, BA_Write_Only);
-				std::copy(&texs[0], &texs[0] + sizeof(texs) / sizeof(texs[0]), mapper.Pointer<float2>());
-			}
+			ElementInitData init_data;
+			init_data.row_pitch = sizeof(xyzs);
+			init_data.slice_pitch = 0;
+			init_data.data.resize(init_data.row_pitch);
+			memcpy(&init_data.data[0], xyzs, init_data.row_pitch);
+			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+
+			init_data.row_pitch = sizeof(texs);
+			init_data.slice_pitch = 0;
+			init_data.data.resize(init_data.row_pitch);
+			memcpy(&init_data.data[0], texs, init_data.row_pitch);
+			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 			rl_->BindVertexStream(tex0_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
@@ -126,18 +117,18 @@ namespace
 			rl_ = rf.MakeRenderLayout();
 			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
-			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
-			pos_vb->Resize(sizeof(xyzs));
-			{
-				GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
-				std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
-			}
-			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
-			tex0_vb->Resize(sizeof(texs));
-			{
-				GraphicsBuffer::Mapper mapper(*tex0_vb, BA_Write_Only);
-				std::copy(&texs[0], &texs[0] + sizeof(texs) / sizeof(texs[0]), mapper.Pointer<float2>());
-			}
+			ElementInitData init_data;
+			init_data.row_pitch = sizeof(xyzs);
+			init_data.slice_pitch = 0;
+			init_data.data.resize(init_data.row_pitch);
+			memcpy(&init_data.data[0], xyzs, init_data.row_pitch);
+			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+
+			init_data.row_pitch = sizeof(texs);
+			init_data.slice_pitch = 0;
+			init_data.data.resize(init_data.row_pitch);
+			memcpy(&init_data.data[0], texs, init_data.row_pitch);
+			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 			rl_->BindVertexStream(tex0_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
@@ -163,7 +154,7 @@ namespace
 
 		try
 		{
-			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, EF_GR16F, EAH_GPU_Read | EAH_GPU_Write);
+			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, EF_GR16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			rf.Make2DRenderView(*temp_tex, 0);
 		}
 		catch (...)
@@ -181,61 +172,8 @@ int main()
 	ResLoader::Instance().AddPath("../../media/Fractal");
 
 	RenderSettings settings;
-	SceneManagerPtr sm;
-
-	{
-		int octree_depth = 3;
-		int width = 800;
-		int height = 600;
-		int color_fmt = 13; // EF_ARGB8
-		bool full_screen = false;
-
-		boost::program_options::options_description desc("Configuration");
-		desc.add_options()
-			("context.render_factory", boost::program_options::value<std::string>(), "Render Factory")
-			("context.input_factory", boost::program_options::value<std::string>(), "Input Factory")
-			("context.scene_manager", boost::program_options::value<std::string>(), "Scene Manager")
-			("octree.depth", boost::program_options::value<int>(&octree_depth)->default_value(3), "Octree depth")
-			("screen.width", boost::program_options::value<int>(&width)->default_value(800), "Screen Width")
-			("screen.height", boost::program_options::value<int>(&height)->default_value(600), "Screen Height")
-			("screen.color_fmt", boost::program_options::value<int>(&color_fmt)->default_value(13), "Screen Color Format")
-			("screen.fullscreen", boost::program_options::value<bool>(&full_screen)->default_value(false), "Full Screen");
-
-		std::ifstream cfg_fs(ResLoader::Instance().Locate("KlayGE.cfg").c_str());
-		if (cfg_fs)
-		{
-			boost::program_options::variables_map vm;
-			boost::program_options::store(boost::program_options::parse_config_file(cfg_fs, desc), vm);
-			boost::program_options::notify(vm);
-
-			if (vm.count("context.render_factory"))
-			{
-				std::string rf_name = vm["context.render_factory"].as<std::string>();
-				if ("D3D9" == rf_name)
-				{
-					Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
-				}
-				if ("OpenGL" == rf_name)
-				{
-					Context::Instance().RenderFactoryInstance(OGLRenderFactoryInstance());
-				}
-			}
-			else
-			{
-				Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
-			}
-		}
-		else
-		{
-			Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
-		}
-
-		settings.width = width;
-		settings.height = height;
-		settings.color_fmt = static_cast<ElementFormat>(color_fmt);
-		settings.full_screen = full_screen;
-		settings.ConfirmDevice = ConfirmDevice;
-	}
+	SceneManagerPtr sm = Context::Instance().LoadCfg(settings, "KlayGE.cfg");
+	settings.ConfirmDevice = ConfirmDevice;
 
 	Fractal app("Fractal", settings);
 	app.Create();
@@ -270,24 +208,14 @@ void Fractal::OnResize(uint32_t width, uint32_t height)
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	TexturePtr tmp_texture = rf.MakeTexture2D(width, height, 1, EF_GR16F, EAH_CPU_Write);
-	{
-		Texture::Mapper mapper(*tmp_texture, 0, TMA_Write_Only, 0, 0, width, height);
-		uint8_t* data = mapper.Pointer<uint8_t>();
-		for (uint32_t y = 0; y < height; ++ y)
-		{
-			for (uint32_t x = 0; x < width * 4; ++ x)
-			{
-				data[x] = 0;
-			}
-			data += mapper.RowPitch();
-		}
-	}
+	ElementInitData init_data;
+	init_data.data.assign(width * height * NumFormatBytes(EF_GR16F), 0);
+	init_data.row_pitch = width * NumFormatBytes(EF_GR16F);
+	init_data.slice_pitch = 0;
 
 	for (int i = 0; i < 2; ++ i)
 	{
-		rendered_tex_[i] = rf.MakeTexture2D(width, height, 1, EF_GR16F, EAH_GPU_Read | EAH_GPU_Write);
-		tmp_texture->CopyToTexture(*rendered_tex_[i]);
+		rendered_tex_[i] = rf.MakeTexture2D(width, height, 1, EF_GR16F, EAH_GPU_Read | EAH_GPU_Write, &init_data);
 		render_buffer_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_[i], 0));
 	}
 }

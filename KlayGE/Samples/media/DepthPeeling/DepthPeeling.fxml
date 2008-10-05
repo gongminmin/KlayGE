@@ -3,9 +3,12 @@
 <effect>
 	<include name="../../../RenderFX/Lighting.fxml"/>
 	<include name="../../../RenderFX/PostProcess.fxml"/>
-	
+
 	<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>
+	<parameter type="float4x4" name="mv" semantic="WORLDVIEW"/>
 	<parameter type="float3" name="light_pos"/>
+	<parameter type="float" name="depth_min"/>
+	<parameter type="float" name="inv_depth_range"/>
 
 	<parameter type="float2" name="offset"/>
 	<parameter type="sampler2D" name="last_depth_sampler">
@@ -24,44 +27,47 @@ void DepthPeelingVS(float4 pos				: POSITION,
 {
 	oPos = mul(pos, mvp);
 	oClr = float4(point_lighting(light_pos, pos.xyz, normal).xxx, 0.5f);
+	float4 pos_es = mul(pos, mv);
 	oPosSS = oPos;
+	oPosSS.z = pos_es.z;
 }
 
-void DepthPeeling1stPS(float4 pos_ss : TEXCOORD0,
+void DepthPeeling1stPS(float4 pos : POSITION,
+					float4 pos_ss : TEXCOORD0,
 					float4 clr : COLOR0,
 					out float4 oClr : COLOR0,
 					out float4 oDepth : COLOR1)
 {
 	oClr = clr;
-	oDepth = pos_ss.z / pos_ss.w;
+	oDepth = (pos_ss.z - depth_min) * inv_depth_range;
 }
 
-void DepthPeelingNthPS(float4 pos_ss : TEXCOORD0,
+void DepthPeelingNthPS(float4 pos : POSITION,
+					float4 pos_ss : TEXCOORD0,
 					float4 clr : COLOR0,
 					out float4 oClr : COLOR0,
 					out float4 oDepth : COLOR1)
 {
-	pos_ss /= pos_ss.w;
-	   
-	float2 tex_coord = pos_ss.xy;
+	oDepth = (pos_ss.z - depth_min) * inv_depth_range;
+  
+	float2 tex_coord = pos_ss.xy / pos_ss.w;
 	tex_coord.y = -tex_coord.y;
 	tex_coord += float2(-offset.x, offset.y);
 	tex_coord = tex_coord / 2 + 0.5f;
 
 	float last_depth = tex2D(last_depth_sampler, tex_coord).r;
-	if (pos_ss.z <= last_depth)
+	if (oDepth.r <= last_depth)
 	{
 		clip(-1);
 	}
 	else
 	{
 		oClr = clr;
-		oDepth = pos_ss.z;
 	}
 }
 		]]>
 	</shader>
-	
+
 	<technique name="DepthPeeling1st">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
@@ -88,7 +94,7 @@ void DepthPeelingNthPS(float4 pos_ss : TEXCOORD0,
 
 	<shader>
 		<![CDATA[
-float4 BlendPS(float2 tex : TEXCOORD0) : COLOR
+float4 BlendPS(float4 pos : POSITION, float2 tex : TEXCOORD0) : COLOR
 {
 	return tex2D(src_sampler, tex);
 }
@@ -100,7 +106,7 @@ float4 BlendPS(float2 tex : TEXCOORD0) : COLOR
 			<state name="blend_enable" value="true"/>
 			<state name="src_blend" value="src_alpha"/>
 			<state name="dest_blend" value="inv_src_alpha"/>
-			
+
 			<state name="depth_write_mask" value="false"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
@@ -110,7 +116,7 @@ float4 BlendPS(float2 tex : TEXCOORD0) : COLOR
 
 	<shader>
 		<![CDATA[
-void NoDepthPeelingPS(float4 clr : COLOR0,
+void NoDepthPeelingPS(float4 pos : POSITION, float4 clr : COLOR0,
 					out float4 oClr : COLOR0)
 {
 	oClr = clr;

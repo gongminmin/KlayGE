@@ -25,6 +25,11 @@ namespace KlayGE
 
 		void Active();
 
+		ID3D10RasterizerStatePtr const & D3DRasterizerState() const
+		{
+			return rasterizer_state_;
+		}
+
 	private:
 		ID3D10RasterizerStatePtr rasterizer_state_;
 	};
@@ -36,6 +41,11 @@ namespace KlayGE
 
 		void Active(uint16_t front_stencil_ref, uint16_t back_stencil_ref);
 
+		ID3D10DepthStencilStatePtr const & D3DDepthStencilState() const
+		{
+			return depth_stencil_state_;
+		}
+
 	private:
 		ID3D10DepthStencilStatePtr depth_stencil_state_;
 	};
@@ -46,6 +56,11 @@ namespace KlayGE
 		explicit D3D10BlendStateObject(BlendStateDesc const & desc);
 
 		void Active(Color const & blend_factor, uint32_t sample_mask);
+
+		ID3D10BlendStatePtr const & D3DBlendState() const
+		{
+			return blend_state_;
+		}
 
 	private:
 		ID3D10BlendStatePtr blend_state_;

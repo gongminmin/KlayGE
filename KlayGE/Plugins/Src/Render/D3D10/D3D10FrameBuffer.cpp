@@ -100,7 +100,7 @@ namespace KlayGE
 			}
 		}
 
-		d3d_device->OMSetRenderTargets(rt_view.size(), &rt_view[0], this->D3DDSView().get());
+		d3d_device->OMSetRenderTargets(static_cast<UINT>(rt_view.size()), &rt_view[0], this->D3DDSView().get());
 
 		D3D10_VIEWPORT d3d_viewport;
 		d3d_viewport.Width = viewport_.width;
@@ -110,6 +110,14 @@ namespace KlayGE
 		d3d_viewport.TopLeftX = 0;
 		d3d_viewport.TopLeftY = 0;
 		d3d_device->RSSetViewports(1, &d3d_viewport);
+	}
+
+	void D3D10FrameBuffer::OnUnbind()
+	{
+		D3D10RenderEngine const & re = *checked_cast<D3D10RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		ID3D10DevicePtr const & d3d_device = re.D3DDevice();
+
+		d3d_device->OMSetRenderTargets(0, NULL, NULL);
 	}
 
 	void D3D10FrameBuffer::Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil)

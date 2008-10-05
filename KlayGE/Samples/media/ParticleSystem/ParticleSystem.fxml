@@ -59,7 +59,8 @@ void ParticleVS(float4 pos			: TEXCOORD0,
 	oViewDir = texcoord_to_view(float2(oPosSS.x, -oPosSS.y) / 2 + 0.5f);
 }
 
-float4 ParticlePS(float4 clr    : COLOR0,
+float4 ParticlePS(float4 pos : POSITION,
+						float4 clr : COLOR0,
 						float4 PosSS : TEXCOORD0,
 						float4 CenterView : TEXCOORD1,
 						float3 view_dir : TEXCOORD2) : COLOR
@@ -133,12 +134,13 @@ void TerrainVS(float4 Position : POSITION,
 	oTex0 = Position.xz;
 }
 
-float4 TerrainPS(float2 tex0 : TEXCOORD0,
-					float3 pos : TEXCOORD1,
+float4 TerrainPS(float4 pos : POSITION,
+					float2 tex0 : TEXCOORD0,
+					float3 pos_os : TEXCOORD1,
 					float3 normal : TEXCOORD2,
 					float2 depth : TEXCOORD3) : COLOR 
 {
-	return float4(tex2D(grass_sampler, tex0).rgb * dot(normalize(LightPos - pos), normal),
+	return float4(tex2D(grass_sampler, tex0).rgb * dot(normalize(LightPos - pos_os), normal),
 				(depth.x / depth.y - depth_min) * inv_depth_range);
 }
 		]]>
@@ -159,7 +161,7 @@ float4 TerrainPS(float2 tex0 : TEXCOORD0,
 	
 	<shader>
 		<![CDATA[
-float4 CopyPS(float2 tex : TEXCOORD0) : COLOR
+float4 CopyPS(float4 pos : POSITION, float2 tex : TEXCOORD0) : COLOR
 {
 	float4 s = tex2D(src_sampler, tex);
 	return float4(s.rgb, 1);

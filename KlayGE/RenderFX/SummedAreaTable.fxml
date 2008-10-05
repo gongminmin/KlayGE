@@ -23,7 +23,7 @@
 
 	<shader>
 		<![CDATA[
-float4 SATScanXUpSweepPS(float2 tex_coord0 : TEXCOORD0) : COLOR
+float4 SATScanXUpSweepPS(float4 pos : POSITION, float2 tex_coord0 : TEXCOORD0) : COLOR
 {
 	float tar_x = tex_coord0.x * scale;
 	return tex2D(src_sampler, float2(tar_x - addr_offset.y, tex_coord0.y))
@@ -32,7 +32,7 @@ float4 SATScanXUpSweepPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 				+ tex2D(src_sampler, float2(tar_x + addr_offset.y, tex_coord0.y));
 }
 
-float4 SATScanXDownSweepPS(float2 tex_coord0 : TEXCOORD0) : COLOR
+float4 SATScanXDownSweepPS(float4 pos : POSITION, float2 tex_coord0 : TEXCOORD0) : COLOR
 {
 	float4 clr;
 	float x = floor(tex_coord0.x * length);
@@ -60,7 +60,7 @@ float4 SATScanXDownSweepPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 	return clr;
 }
 
-float4 SATScanYUpSweepPS(float2 tex_coord0 : TEXCOORD0) : COLOR
+float4 SATScanYUpSweepPS(float4 pos : POSITION, float2 tex_coord0 : TEXCOORD0) : COLOR
 {
 	float tar_y = tex_coord0.y * scale;
 	return tex2D(src_sampler, float2(tex_coord0.x, tar_y - addr_offset.y))
@@ -69,7 +69,7 @@ float4 SATScanYUpSweepPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 				+ tex2D(src_sampler, float2(tex_coord0.x, tar_y + addr_offset.y));
 }
 
-float4 SATScanYDownSweepPS(float2 tex_coord0 : TEXCOORD0) : COLOR
+float4 SATScanYDownSweepPS(float4 pos : POSITION, float2 tex_coord0 : TEXCOORD0) : COLOR
 {
 	float4 clr;
 	float y = floor(tex_coord0.y * length);

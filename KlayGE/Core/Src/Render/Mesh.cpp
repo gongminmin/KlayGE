@@ -89,13 +89,12 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, access_hint);
-		vb->Resize(size);
-		{
-			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
-			std::copy(static_cast<uint8_t const *>(buf), static_cast<uint8_t const *>(buf) + size,
-				mapper.Pointer<uint8_t>());
-		}
+		ElementInitData init_data;
+		init_data.data.resize(size);
+		std::copy(static_cast<uint8_t const *>(buf), static_cast<uint8_t const *>(buf) + size, init_data.data.begin());
+		init_data.row_pitch = size;
+		init_data.slice_pitch = 0;
+		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, access_hint, &init_data);
 		rl_->BindVertexStream(vb, boost::make_tuple(ve));
 
 		if (VEU_Position == ve.usage)
@@ -123,13 +122,12 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, access_hint);
-		ib->Resize(size);
-		{
-			GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
-			std::copy(static_cast<uint8_t const *>(buf), static_cast<uint8_t const *>(buf) + size,
-				mapper.Pointer<uint8_t>());
-		}
+		ElementInitData init_data;
+		init_data.data.resize(size);
+		std::copy(static_cast<uint8_t const *>(buf), static_cast<uint8_t const *>(buf) + size, init_data.data.begin());
+		init_data.row_pitch = size;
+		init_data.slice_pitch = 0;
+		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, access_hint, &init_data);
 		rl_->BindIndexStream(ib, format);
 	}
 

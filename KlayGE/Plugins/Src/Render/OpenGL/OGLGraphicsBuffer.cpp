@@ -31,13 +31,23 @@
 
 namespace KlayGE
 {
-	OGLGraphicsBuffer::OGLGraphicsBuffer(BufferUsage usage, uint32_t access_hint, GLenum target)
+	OGLGraphicsBuffer::OGLGraphicsBuffer(BufferUsage usage, uint32_t access_hint, GLenum target, ElementInitData* init_data)
 			: GraphicsBuffer(usage, access_hint),
 				target_(target)
 	{
 		BOOST_ASSERT((GL_ARRAY_BUFFER == target) || (GL_ELEMENT_ARRAY_BUFFER == target));
 
 		glGenBuffers(1, &vb_);
+
+		if (init_data != NULL)
+		{
+			size_in_byte_ = init_data->row_pitch;
+
+			glBindBuffer(target_, vb_);
+			glBufferData(target_,
+					static_cast<GLsizeiptr>(size_in_byte_), &init_data->data[0],
+					(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+		}
 	}
 
 	OGLGraphicsBuffer::~OGLGraphicsBuffer()

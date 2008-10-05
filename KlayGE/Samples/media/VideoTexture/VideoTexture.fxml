@@ -19,7 +19,7 @@ void ObjectVS(float4 Position : POSITION,
 	oTex0 = Tex0;
 }
 
-float4 ObjectPS(float2 Tex0 : TEXCOORD0) : COLOR 
+float4 ObjectPS(float4 pos : POSITION, float2 Tex0 : TEXCOORD0) : COLOR 
 {
 	return tex2D(video_sampler, Tex0);
 }

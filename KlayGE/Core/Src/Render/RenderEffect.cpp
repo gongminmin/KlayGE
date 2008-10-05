@@ -403,13 +403,13 @@ namespace KlayGE
 		return ret;
 	}
 
-	RenderEffectPtr RenderEffect::NullObject()
+	RenderEffectPtr const & RenderEffect::NullObject()
 	{
 		static RenderEffectPtr obj(new NullRenderEffect);
 		return obj;
 	}
 
-	RenderEffectParameterPtr RenderEffect::ParameterByName(std::string const & name) const
+	RenderEffectParameterPtr const & RenderEffect::ParameterByName(std::string const & name) const
 	{
 		BOOST_FOREACH(BOOST_TYPEOF(params_)::const_reference param, params_)
 		{
@@ -421,7 +421,7 @@ namespace KlayGE
 		return RenderEffectParameter::NullObject();
 	}
 
-	RenderEffectParameterPtr RenderEffect::ParameterBySemantic(std::string const & semantic) const
+	RenderEffectParameterPtr const & RenderEffect::ParameterBySemantic(std::string const & semantic) const
 	{
 		BOOST_FOREACH(BOOST_TYPEOF(params_)::const_reference param, params_)
 		{
@@ -433,7 +433,7 @@ namespace KlayGE
 		return RenderEffectParameter::NullObject();
 	}
 
-	RenderTechniquePtr RenderEffect::TechniqueByName(std::string const & name) const
+	RenderTechniquePtr const & RenderEffect::TechniqueByName(std::string const & name) const
 	{
 		BOOST_FOREACH(BOOST_TYPEOF(techniques_)::const_reference tech, techniques_)
 		{
@@ -469,7 +469,7 @@ namespace KlayGE
 		}
 	};
 
-	RenderTechniquePtr RenderTechnique::NullObject()
+	RenderTechniquePtr const & RenderTechnique::NullObject()
 	{
 		static RenderTechniquePtr obj(new NullRenderTechnique);
 		return obj;
@@ -534,7 +534,7 @@ namespace KlayGE
 		}
 	};
 
-	RenderPassPtr RenderPass::NullObject()
+	RenderPassPtr const & RenderPass::NullObject()
 	{
 		static RenderPassPtr obj(new NullRenderPass);
 		return obj;
@@ -823,10 +823,18 @@ namespace KlayGE
 		return ret;
 	}
 
-	void RenderPass::Apply()
+	void RenderPass::Bind()
 	{
 		RenderEngine& render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		render_eng.SetStateObjects(rasterizer_state_obj_, depth_stencil_state_obj_, front_stencil_ref_, back_stencil_ref_, blend_state_obj_, blend_factor_, sample_mask_, shader_obj_);
+		render_eng.SetStateObjects(rasterizer_state_obj_, depth_stencil_state_obj_,
+			front_stencil_ref_, back_stencil_ref_, blend_state_obj_, blend_factor_, sample_mask_);
+
+		shader_obj_->Bind();
+	}
+
+	void RenderPass::Unbind()
+	{
+		shader_obj_->Unbind();
 	}
 
 	std::string RenderPass::GenShaderText() const
@@ -842,18 +850,53 @@ namespace KlayGE
 		{
 			RenderEffectParameter& param = *effect_.ParameterByIndex(i);
 
-			ss << type_define::instance().type_name(param.type()) << " " << *param.Name();
-			if (param.ArraySize() != 0)
+			switch (param.type())
 			{
-				ss << "[" << param.ArraySize() << "]";
-			}
+			case REDT_sampler1D:
+			case REDT_sampler2D:
+			case REDT_sampler3D:
+			case REDT_samplerCUBE:
+				break;
 
-			ss << ";" << std::endl;
+			default:
+				ss << type_define::instance().type_name(param.type()) << " " << *param.Name();
+				if (param.ArraySize() != 0)
+				{
+					ss << "[" << param.ArraySize() << "]";
+				}
+
+				ss << ";" << std::endl;
+				break;
+			}
 		}
 
 		ss << "#ifdef CONSTANT_BUFFER" << std::endl;
 		ss << "};" << std::endl;
 		ss << "#endif" << std::endl << std::endl;
+
+		for (uint32_t i = 0; i < effect_.NumParameters(); ++ i)
+		{
+			RenderEffectParameter& param = *effect_.ParameterByIndex(i);
+
+			switch (param.type())
+			{
+			case REDT_sampler1D:
+			case REDT_sampler2D:
+			case REDT_sampler3D:
+			case REDT_samplerCUBE:
+				ss << type_define::instance().type_name(param.type()) << " " << *param.Name();
+				if (param.ArraySize() != 0)
+				{
+					ss << "[" << param.ArraySize() << "]";
+				}
+
+				ss << ";" << std::endl;
+				break;
+
+			default:
+				break;
+			}
+		}
 
 		for (uint32_t i = 0; i < effect_.NumShaders(); ++ i)
 		{
@@ -1037,7 +1080,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	RenderEffectParameterPtr RenderEffectParameter::NullObject()
+	RenderEffectParameterPtr const & RenderEffectParameter::NullObject()
 	{
 		static RenderEffectParameterPtr obj(new NullRenderEffectParameter);
 		return obj;

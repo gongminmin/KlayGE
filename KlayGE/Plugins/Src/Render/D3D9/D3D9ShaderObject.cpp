@@ -808,7 +808,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	void D3D9ShaderObject::Active()
+	void D3D9ShaderObject::Bind()
 	{
 		D3D9RenderEngine& re = *checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
@@ -883,5 +883,9 @@ namespace KlayGE
 				}
 			}
 		}
+	}
+
+	void D3D9ShaderObject::Unbind()
+	{
 	}
 }

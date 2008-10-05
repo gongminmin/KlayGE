@@ -62,6 +62,7 @@ namespace KlayGE
 	class SceneObject;
 	typedef boost::shared_ptr<SceneObject> SceneObjectPtr;
 
+	struct ElementInitData;
 	class Camera;
 	typedef boost::shared_ptr<Camera> CameraPtr;
 	class FirstPersonCameraController;

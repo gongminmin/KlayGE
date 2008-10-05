@@ -56,7 +56,8 @@ void BlurYVS(float4 pos : POSITION,
 	oTex3 = tex[3];
 }
 
-float4 BlurPS(float4 iTex0 : TEXCOORD0,
+float4 BlurPS(float4 iPos : POSITION,
+				float4 iTex0 : TEXCOORD0,
 				float4 iTex1 : TEXCOORD1,
 				float4 iTex2 : TEXCOORD2,
 				float4 iTex3 : TEXCOORD3) : COLOR0

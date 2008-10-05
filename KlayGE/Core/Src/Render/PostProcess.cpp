@@ -38,17 +38,19 @@ namespace KlayGE
 		rl_ = rf.MakeRenderLayout();
 		rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
-		pos_vb_ = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
-		pos_vb_->Resize(sizeof(float2) * 4);
+		float2 pos[] = 
 		{
-			GraphicsBuffer::Mapper mapper(*pos_vb_, BA_Write_Only);
-			float2* addr = mapper.Pointer<float2>();
-			addr[0] = float2(-1, +1);
-			addr[1] = float2(+1, +1);
-			addr[2] = float2(-1, -1);
-			addr[3] = float2(+1, -1);
-			box_ = Box(float3(-1, -1, -1), float3(1, 1, 1));
-		}
+			float2(-1, +1),
+			float2(+1, +1),
+			float2(-1, -1),
+			float2(+1, -1)
+		};
+		box_ = Box(float3(-1, -1, -1), float3(1, 1, 1));
+		ElementInitData init_data;
+		init_data.row_pitch = sizeof(pos);
+		init_data.data.resize(init_data.row_pitch);
+		memcpy(&init_data.data[0], &pos[0], init_data.row_pitch);
+		pos_vb_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 		rl_->BindVertexStream(pos_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
 		technique_ = tech;
@@ -229,7 +231,7 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		blurx_tex_ = rf.MakeTexture2D(frame_buffer_->Width(), frame_buffer_->Height(), 1, frame_buffer_->Format(), EAH_GPU_Read | EAH_GPU_Write);
+		blurx_tex_ = rf.MakeTexture2D(frame_buffer_->Width(), frame_buffer_->Height(), 1, frame_buffer_->Format(), EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 		FrameBufferPtr blur_x_fb = rf.MakeFrameBuffer();
 		blur_x_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blurx_tex_, 0));

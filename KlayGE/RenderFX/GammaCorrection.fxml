@@ -12,7 +12,7 @@
 
 	<shader>
 		<![CDATA[
-float4 GammaCorrectionPS(float2 tex : TEXCOORD0) : COLOR
+float4 GammaCorrectionPS(float4 pos : POSITION, float2 tex : TEXCOORD0) : COLOR
 {
 	return pow(tex2D(src_sampler, tex), inv_gamma);
 }

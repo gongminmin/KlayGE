@@ -29,7 +29,7 @@ void InstanceVS(float4 pos			: POSITION,
 	oClr = float4(clr.rgb * point_lighting(light_in_world, pos_ws, normal), clr.a);
 }
 
-float4 PS(float4 clr : COLOR) : COLOR
+float4 PS(float4 pos : POSITION, float4 clr : COLOR) : COLOR
 {
 	return clr;
 }

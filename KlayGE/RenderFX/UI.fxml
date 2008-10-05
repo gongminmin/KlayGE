@@ -29,7 +29,7 @@ void UIVS(float4 position : POSITION,
 	oTexCoord = texCoord;
 }
 
-float4 UIPS(float4 clr : COLOR, float2 texCoord : TEXCOORD0) : COLOR0
+float4 UIPS(float4 pos : POSITION, float2 texCoord : TEXCOORD0, float4 clr : COLOR) : COLOR0
 {
 	clr *= tex2D(texUISampler, texCoord);
 	return clr;

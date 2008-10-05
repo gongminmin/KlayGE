@@ -5,12 +5,12 @@
 <title>KlayGE Readme</title>
 </head>
 <body>
-<h1>粘土游戏引擎(KlayGE) 3.7.0 Readme</h1>
+<h1>粘土游戏引擎(KlayGE) 3.8.0 Readme</h1>
 <p>龚敏敏<br />
 	Homepage: <a href="http://klayge.sourceforge.net" target="_blank">http://klayge.sourceforge.net</a><br />
 	E-Mail:	  <a href="mailto:enginedev@163.com">enginedev@163.com</a><br />
 	QQ:       33611210</p>
-<p>欢迎使用粘土游戏引擎 3.7.0<br />
+<p>欢迎使用粘土游戏引擎 3.8.0<br />
 	压缩包中包含的组件：KlayGE头文件，KlayGE源代码，KlayGE的构建工程文件</p>
 <p>KlayGE是一个开放源代码的，跨平台的，基于插件结构的游戏引擎。</p>
 <p>本引擎的设计目的是用最先进的技术武装引擎，它所提供框架使游戏的开发、测试、移植得到简化。</p>
@@ -33,11 +33,11 @@
 <h2><a id="installation">安装</a></h2>
 <ol>
 	<li>把KlayGE.7z解压缩到一个目录，比如说 F:\KlayGE</li>
-	<li>设置路径。这里拿VS 2005举例，其他环境请参考它们的帮助文件。
+	<li>设置路径。这里拿Visual Studio 2008举例，其他环境请参考它们的帮助文件。
 		<ol>
 			<li>打开“Tools”-&gt;“Options”-&gt;“Projects and Solutions”-&gt;&quot;VC++ Directories&quot;，在“Show directories for:”下拉框中选择“Include files”，在下面添加F:\KlayGE\Core\Include、F:\KlayGE\AppLayer\Include和F:\KlayGE\Plugins\Include</li>
 			<li>在“Show directories for:”下拉框中选择&quot;Library files&quot;，在下面添加F:\KlayGE\Lib\Win32 (如果要用x64的版本，就把Win32换成x64)</li>
-			<li>点“确定”按钮，建议关闭VS 2005 IDE以保存设置</li>
+			<li>点“确定”按钮，建议关闭VS 2008 IDE以保存设置</li>
 		</ol>
 	</li>
 </ol>
@@ -79,6 +79,9 @@
 <p>另外，用VC8及以上编译Release版的Boost需要定义_SECURE_SCL=0宏，方法之一是在bjam的命令行中加上define=_SECURE_SCL=0。</p>
 <hr />
 <h2><a id="history">发展历程</a></h2>
+<p><strong>3.8.0</strong><br />
+	支持DX10<br />
+	增加了ElementAccessHint和ElementInitData</p>
 <p><strong>3.7.0 (2008.7.17)</strong><br />
 	改进了Clear<br />
 	增加了Depth Peeling例子<br />

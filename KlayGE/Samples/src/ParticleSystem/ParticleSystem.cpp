@@ -19,15 +19,11 @@
 
 #include <KlayGE/Heightmap/Heightmap.hpp>
 
-#include <KlayGE/D3D9/D3D9RenderFactory.hpp>
-#include <KlayGE/OpenGL/OGLRenderFactory.hpp>
-
-#include <KlayGE/Input.hpp>
-#include <KlayGE/DInput/DInputFactory.hpp>
+#include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/InputFactory.hpp>
 
 #include <vector>
 #include <sstream>
-#include <fstream>
 #include <ctime>
 #include <boost/tuple/tuple.hpp>
 #pragma warning(push)
@@ -35,14 +31,6 @@
 #include <boost/random.hpp>
 #pragma warning(pop)
 #include <boost/bind.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4251 4275 4512 4702)
-#endif
-#include <boost/program_options.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
 #include "ParticleSystem.hpp"
 
@@ -112,20 +100,19 @@ namespace
 			rl_ = rf.MakeRenderLayout();
 			rl_->TopologyType(RenderLayout::TT_TriangleList);
 
-			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
-			pos_vb->Resize(static_cast<uint32_t>(vertices.size() * sizeof(vertices[0])));
-			{
-				GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
-				std::copy(&vertices[0], &vertices[0] + vertices.size(), mapper.Pointer<float3>());
-			}
+			ElementInitData init_data;
+			init_data.row_pitch = vertices.size() * sizeof(vertices[0]);
+			init_data.slice_pitch = 0;
+			init_data.data.resize(init_data.row_pitch);
+			memcpy(&init_data.data[0], &vertices[0], init_data.row_pitch);
+			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
-			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
-			ib->Resize(static_cast<uint32_t>(indices.size() * sizeof(indices[0])));
-			{
-				GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
-				std::copy(&indices[0], &indices[0] + indices.size(), mapper.Pointer<uint16_t>());
-			}
+			init_data.row_pitch = indices.size() * sizeof(indices[0]);
+			init_data.slice_pitch = 0;
+			init_data.data.resize(init_data.row_pitch);
+			memcpy(&init_data.data[0], &indices[0], init_data.row_pitch);
+			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindIndexStream(ib, EF_R16);
 
 			std::vector<float3> normal(vertices.size());
@@ -133,17 +120,16 @@ namespace
 				&indices[0], &indices[0] + indices.size(),
 				&vertices[0], &vertices[0] + vertices.size());
 
-			GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
-			normal_vb->Resize(static_cast<uint32_t>(normal.size() * sizeof(normal[0])));
-			{
-				GraphicsBuffer::Mapper mapper(*normal_vb, BA_Write_Only);
-				std::copy(&normal[0], &normal[0] + normal.size(), mapper.Pointer<float3>());
-			}
+			init_data.row_pitch = normal.size() * sizeof(normal[0]);
+			init_data.slice_pitch = 0;
+			init_data.data.resize(init_data.row_pitch);
+			memcpy(&init_data.data[0], &normal[0], init_data.row_pitch);
+			GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
 
 			box_ = MathLib::compute_bounding_box<float>(&vertices[0], &vertices[0] + vertices.size());
 
-			*(technique_->Effect().ParameterByName("grass_sampler")) = LoadTexture("grass.dds", EAH_CPU_Write | EAH_GPU_Read);
+			*(technique_->Effect().ParameterByName("grass_sampler")) = LoadTexture("grass.dds", EAH_GPU_Read);
 		}
 
 		void OnRenderBegin()
@@ -181,14 +167,6 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
-			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read), boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
-			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read),
-				boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_ABGR32F)),
-				RenderLayout::ST_Instance);
-			rl_->BindIndexStream(rf.MakeIndexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read), EF_R16);
-
 			float2 texs[] =
 			{
 				float2(0.0f, 0.0f),
@@ -202,22 +180,34 @@ namespace
 				0, 1, 2, 3,
 			};
 
-			rl_->GetVertexStream(0)->Resize(sizeof(texs));
-			{
-				GraphicsBuffer::Mapper mapper(*rl_->GetVertexStream(0), BA_Write_Only);
-				std::copy(&texs[0], &texs[4], mapper.Pointer<float2>());
-			}
+			rl_ = rf.MakeRenderLayout();
+			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
-			rl_->GetIndexStream()->Resize(sizeof(indices));
-			{
-				GraphicsBuffer::Mapper mapper(*rl_->GetIndexStream(), BA_Write_Only);
-				std::copy(&indices[0], &indices[4], mapper.Pointer<uint16_t>());
-			}
+			ElementInitData init_data;
+			init_data.row_pitch = sizeof(texs);
+			init_data.slice_pitch = 0;
+			init_data.data.resize(init_data.row_pitch);
+			memcpy(&init_data.data[0], &texs[0], init_data.row_pitch);
+			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+
+			GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read, NULL);
+			rl_->BindVertexStream(tex_vb,
+				boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_ABGR32F)),
+				RenderLayout::ST_Instance);
+			rl_->InstanceStreamSysMem() = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write, NULL);
+
+			init_data.row_pitch = sizeof(indices);
+			init_data.slice_pitch = 0;
+			init_data.data.resize(init_data.row_pitch);
+			memcpy(&init_data.data[0], &indices[0], init_data.row_pitch);
+			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+			rl_->BindIndexStream(ib, EF_R16);
 
 			technique_ = rf.LoadEffect("ParticleSystem.kfx")->TechniqueByName("Particle");
 
 			*(technique_->Effect().ParameterByName("point_radius")) = 0.04f;
-			*(technique_->Effect().ParameterByName("particle_sampler")) = LoadTexture("particle.dds", EAH_CPU_Write | EAH_GPU_Read);
+			*(technique_->Effect().ParameterByName("particle_sampler")) = LoadTexture("particle.dds", EAH_GPU_Read);
 		}
 
 		void SceneTexture(TexturePtr tex)
@@ -293,7 +283,7 @@ namespace
 
 		try
 		{
-			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write);
+			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			rf.Make2DRenderView(*temp_tex, 0);
 		}
 		catch (...)
@@ -312,75 +302,11 @@ int main()
 	ResLoader::Instance().AddPath("../../media/ParticleSystem");
 
 	RenderSettings settings;
-	SceneManagerPtr sm;
+	SceneManagerPtr sm = Context::Instance().LoadCfg(settings, "KlayGE.cfg");
+	settings.ConfirmDevice = ConfirmDevice;
 
-	{
-		int octree_depth = 3;
-		int width = 800;
-		int height = 600;
-		int color_fmt = 13; // EF_ARGB8
-		bool full_screen = false;
-
-		boost::program_options::options_description desc("Configuration");
-		desc.add_options()
-			("context.render_factory", boost::program_options::value<std::string>(), "Render Factory")
-			("context.input_factory", boost::program_options::value<std::string>(), "Input Factory")
-			("context.scene_manager", boost::program_options::value<std::string>(), "Scene Manager")
-			("octree.depth", boost::program_options::value<int>(&octree_depth)->default_value(3), "Octree depth")
-			("screen.width", boost::program_options::value<int>(&width)->default_value(800), "Screen Width")
-			("screen.height", boost::program_options::value<int>(&height)->default_value(600), "Screen Height")
-			("screen.color_fmt", boost::program_options::value<int>(&color_fmt)->default_value(13), "Screen Color Format")
-			("screen.fullscreen", boost::program_options::value<bool>(&full_screen)->default_value(false), "Full Screen");
-
-		std::ifstream cfg_fs(ResLoader::Instance().Locate("KlayGE.cfg").c_str());
-		if (cfg_fs)
-		{
-			boost::program_options::variables_map vm;
-			boost::program_options::store(boost::program_options::parse_config_file(cfg_fs, desc), vm);
-			boost::program_options::notify(vm);
-
-			if (vm.count("context.render_factory"))
-			{
-				std::string rf_name = vm["context.render_factory"].as<std::string>();
-				if ("D3D9" == rf_name)
-				{
-					Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
-				}
-				if ("OpenGL" == rf_name)
-				{
-					Context::Instance().RenderFactoryInstance(OGLRenderFactoryInstance());
-				}
-			}
-			else
-			{
-				Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
-			}
-
-			if (vm.count("context.input_factory"))
-			{
-				std::string if_name = vm["context.input_factory"].as<std::string>();
-				if ("DInput" == if_name)
-				{
-					Context::Instance().InputFactoryInstance(DInputFactoryInstance());
-				}
-			}
-			else
-			{
-				Context::Instance().InputFactoryInstance(DInputFactoryInstance());
-			}
-		}
-		else
-		{
-			Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
-			Context::Instance().InputFactoryInstance(DInputFactoryInstance());
-		}
-
-		settings.width = width;
-		settings.height = height;
-		settings.color_fmt = static_cast<ElementFormat>(color_fmt);
-		settings.full_screen = full_screen;
-		settings.ConfirmDevice = ConfirmDevice;
-	}
+	sm = SceneManager::NullObject();
+	Context::Instance().SceneManagerInstance(*sm);
 
 	ParticleSystemApp app("Particle System", settings);
 	app.Create();
@@ -413,7 +339,7 @@ void ParticleSystemApp::InitObjects()
 	input_handler->connect(boost::bind(&ParticleSystemApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	height_img_.reset(new HeightImg(-2, -2, 2, 2, LoadTexture("grcanyon.dds", EAH_CPU_Write | EAH_GPU_Read), 1));
+	height_img_.reset(new HeightImg(-2, -2, 2, 2, LoadTexture("grcanyon.dds", EAH_CPU_Read), 1));
 	particles_.reset(new ParticlesObject);
 	particles_->AddToSceneManager();
 
@@ -452,7 +378,7 @@ void ParticleSystemApp::OnResize(uint32_t width, uint32_t height)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 
-	scene_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write);
+	scene_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	scene_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*scene_tex_, 0));
 	scene_buffer_->Attach(FrameBuffer::ATT_DepthStencil, re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil));
 
@@ -527,9 +453,9 @@ uint32_t ParticleSystemApp::DoUpdate(uint32_t pass)
 
 			uint32_t const num_pars = static_cast<uint32_t>(active_particles.size());
 			RenderLayoutPtr rl = particles_->GetRenderable()->GetRenderLayout();
-			rl->InstanceStream()->Resize(sizeof(float4) * num_pars);
+			rl->InstanceStreamSysMem()->Resize(sizeof(float4) * num_pars);
 			{
-				GraphicsBuffer::Mapper mapper(*rl->InstanceStream(), BA_Write_Only);
+				GraphicsBuffer::Mapper mapper(*rl->InstanceStreamSysMem(), BA_Write_Only);
 				float4* instance_data = mapper.Pointer<float4>();
 				for (uint32_t i = 0; i < num_pars; ++ i, ++ instance_data)
 				{
@@ -539,6 +465,8 @@ uint32_t ParticleSystemApp::DoUpdate(uint32_t pass)
 					instance_data->w() = active_particles[i].first.life;
 				}
 			}
+			rl->InstanceStream()->Resize(sizeof(float4) * num_pars);
+			rl->InstanceStreamSysMem()->CopyToBuffer(*rl->InstanceStream());
 
 			for (uint32_t i = 0; i < rl->NumVertexStreams(); ++ i)
 			{

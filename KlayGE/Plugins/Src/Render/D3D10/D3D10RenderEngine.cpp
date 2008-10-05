@@ -32,6 +32,7 @@
 #include <KlayGE/D3D10/D3D10GraphicsBuffer.hpp>
 #include <KlayGE/D3D10/D3D10Mapping.hpp>
 #include <KlayGE/D3D10/D3D10RenderLayout.hpp>
+#include <KlayGE/D3D10/D3D10RenderStateObject.hpp>
 #include <KlayGE/D3D10/D3D10ShaderObject.hpp>
 
 #include <algorithm>
@@ -102,7 +103,7 @@ namespace KlayGE
 
 	// 获取当前适配器
 	/////////////////////////////////////////////////////////////////////////////////
-	D3D10Adapter const & D3D10RenderEngine::ActiveAdapter() const
+	D3D10AdapterPtr const & D3D10RenderEngine::ActiveAdapter() const
 	{
 		return adapterList_.Adapter(adapterList_.CurrentAdapterIndex());
 	}
@@ -182,9 +183,16 @@ namespace KlayGE
 		cur_dss_obj_ = rf.MakeDepthStencilStateObject(default_dss_desc);
 		cur_bs_obj_ = rf.MakeBlendStateObject(default_bs_desc);
 
-		cur_rs_obj_->Active();
-		cur_dss_obj_->Active(0, 0);
-		cur_bs_obj_->Active(Color(1, 1, 1, 1), 0xFFFFFFFF);
+		rasterizer_state_cache_ = checked_pointer_cast<D3D10RasterizerStateObject>(cur_rs_obj_)->D3DRasterizerState();
+		depth_stencil_state_cache_ = checked_pointer_cast<D3D10DepthStencilStateObject>(cur_dss_obj_)->D3DDepthStencilState();
+		stencil_ref_cache_ = 0;
+		blend_state_cache_ = checked_pointer_cast<D3D10BlendStateObject>(cur_bs_obj_)->D3DBlendState();
+		blend_factor_cache_ = Color(1, 1, 1, 1);
+		sample_mask_cache_ = 0xFFFFFFFF;
+
+		d3d_device_->RSSetState(rasterizer_state_cache_.get());
+		d3d_device_->OMSetDepthStencilState(depth_stencil_state_cache_.get(), stencil_ref_cache_);
+		d3d_device_->OMSetBlendState(blend_state_cache_.get(), &blend_factor_cache_.r(), sample_mask_cache_);
 	}
 
 	// 设置当前渲染目标
@@ -230,7 +238,7 @@ namespace KlayGE
 			offsets[number] = 0;
 		}
 
-		d3d_device_->IASetVertexBuffers(0, rl.NumVertexStreams(), &vbs[0], &strides[0], &offsets[0]);
+		d3d_device_->IASetVertexBuffers(0, this_num_vertex_stream, &vbs[0], &strides[0], &offsets[0]);
 
 		this->RenderRL(tech, rl);
 	}
@@ -276,28 +284,65 @@ namespace KlayGE
 		D3D10RenderLayout const & d3d_rl(*checked_cast<D3D10RenderLayout const *>(&rl));
 		d3d_device_->IASetInputLayout(d3d_rl.InputLayout(checked_pointer_cast<D3D10ShaderObject>(tech.Pass(0)->GetShaderObject())->VSCode()).get());
 
-		uint32_t num_passes = tech.NumPasses();
-		if (rl.UseIndices())
+		uint32_t const num_passes = tech.NumPasses();
+		if (rl.InstanceStream())
 		{
-			D3D10GraphicsBuffer& d3dib(*checked_pointer_cast<D3D10GraphicsBuffer>(rl.GetIndexStream()));
-			d3d_device_->IASetIndexBuffer(d3dib.D3DBuffer().get(), D3D10Mapping::MappingFormat(rl.IndexStreamFormat()), 0);
-
-			for (uint32_t i = 0; i < num_passes; ++ i)
+			if (rl.UseIndices())
 			{
-				tech.Pass(i)->Apply();
+				D3D10GraphicsBuffer& d3dib(*checked_pointer_cast<D3D10GraphicsBuffer>(rl.GetIndexStream()));
+				d3d_device_->IASetIndexBuffer(d3dib.D3DBuffer().get(), D3D10Mapping::MappingFormat(rl.IndexStreamFormat()), 0);
 
-				d3d_device_->DrawIndexed(rl.NumIndices(), 0, 0);
+				for (uint32_t i = 0; i < num_passes; ++ i)
+				{
+					RenderPassPtr pass = tech.Pass(i);
+
+					pass->Bind();
+					d3d_device_->DrawIndexedInstanced(rl.NumIndices(), rl.NumInstance(), 0, 0, 0);
+					pass->Unbind();
+				}
+			}
+			else
+			{
+				d3d_device_->IASetIndexBuffer(NULL, DXGI_FORMAT_R16_UINT, 0);
+
+				for (uint32_t i = 0; i < num_passes; ++ i)
+				{
+					RenderPassPtr pass = tech.Pass(i);
+
+					pass->Bind();
+					d3d_device_->DrawInstanced(rl.NumVertices(), rl.NumInstance(), 0, 0);
+					pass->Unbind();
+				}
 			}
 		}
 		else
 		{
-			d3d_device_->IASetIndexBuffer(NULL, DXGI_FORMAT_R16_UINT, 0);
-
-			for (uint32_t i = 0; i < num_passes; ++ i)
+			if (rl.UseIndices())
 			{
-				tech.Pass(i)->Apply();
+				D3D10GraphicsBuffer& d3dib(*checked_pointer_cast<D3D10GraphicsBuffer>(rl.GetIndexStream()));
+				d3d_device_->IASetIndexBuffer(d3dib.D3DBuffer().get(), D3D10Mapping::MappingFormat(rl.IndexStreamFormat()), 0);
 
-				d3d_device_->Draw(rl.NumVertices(), 0);
+				for (uint32_t i = 0; i < num_passes; ++ i)
+				{
+					RenderPassPtr pass = tech.Pass(i);
+
+					pass->Bind();
+					d3d_device_->DrawIndexed(rl.NumIndices(), 0, 0);
+					pass->Unbind();
+				}
+			}
+			else
+			{
+				d3d_device_->IASetIndexBuffer(NULL, DXGI_FORMAT_R16_UINT, 0);
+
+				for (uint32_t i = 0; i < num_passes; ++ i)
+				{
+					RenderPassPtr pass = tech.Pass(i);
+
+					pass->Bind();
+					d3d_device_->Draw(rl.NumVertices(), 0);
+					pass->Unbind();
+				}
 			}
 		}
 	}
@@ -306,7 +351,6 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D10RenderEngine::EndFrame()
 	{
-		BOOST_ASSERT(d3d_device_);
 	}
 
 	// 获取模板位数

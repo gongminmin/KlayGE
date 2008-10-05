@@ -167,6 +167,7 @@ namespace KlayGE
 		}
 
 		GraphicsBufferPtr InstanceStream() const;
+		GraphicsBufferPtr& InstanceStreamSysMem();
 		vertex_elements_type const & InstanceStreamFormat() const
 		{
 			return instance_stream_.format;
@@ -207,6 +208,7 @@ namespace KlayGE
 
 		std::vector<StreamUnit> vertex_streams_;
 		StreamUnit instance_stream_;
+		GraphicsBufferPtr instance_stream_sys_mem_;
 
 		GraphicsBufferPtr index_stream_;
 		ElementFormat index_format_;

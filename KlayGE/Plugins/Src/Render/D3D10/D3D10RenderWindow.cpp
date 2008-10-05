@@ -39,7 +39,7 @@
 
 namespace KlayGE
 {
-	D3D10RenderWindow::D3D10RenderWindow(IDXGIFactoryPtr const & gi_factory, D3D10Adapter const & adapter,
+	D3D10RenderWindow::D3D10RenderWindow(IDXGIFactoryPtr const & gi_factory, D3D10AdapterPtr const & adapter,
 			std::string const & name, RenderSettings const & settings)
 						: hWnd_(NULL),
                             ready_(false), closed_(false),
@@ -105,7 +105,7 @@ namespace KlayGE
 		}
 		else
 		{
-			back_buffer_format_ = adapter_.DesktopFormat();
+			back_buffer_format_ = adapter_->DesktopFormat();
 		}
 
 		std::memset(&sc_desc_, 0, sizeof(sc_desc_));
@@ -144,7 +144,7 @@ namespace KlayGE
 		viewport_.height	= height_;
 
 
-		description_ = adapter_.Description() + L' ';
+		description_ = adapter_->Description() + L' ';
 
 		D3D10RenderEngine& re(*checked_cast<D3D10RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		if (re.D3DDevice())
@@ -164,7 +164,7 @@ namespace KlayGE
 			create_device_flags |= D3D10_CREATE_DEVICE_DEBUG;
 #endif
 
-			bool use_nvperfhud = (adapter_.Description() == L"NVIDIA PerfHUD");
+			bool use_nvperfhud = (adapter_->Description() == L"NVIDIA PerfHUD");
 
 			std::vector<boost::tuple<D3D10_DRIVER_TYPE, std::wstring> > dev_type_behaviors;
 			if (use_nvperfhud)
@@ -182,7 +182,12 @@ namespace KlayGE
 			{
 				IDXGISwapChain* sc = NULL;
 				ID3D10Device* d3d_device = NULL;
-				if (SUCCEEDED(D3D10CreateDeviceAndSwapChain(adapter_.Adapter().get(), boost::get<0>(dev_type_beh), NULL, create_device_flags,
+				IDXGIAdapter* dx_adapter = NULL;
+				if (D3D10_DRIVER_TYPE_HARDWARE == boost::get<0>(dev_type_beh))
+				{
+					dx_adapter = adapter_->Adapter().get();
+				}
+				if (SUCCEEDED(D3D10CreateDeviceAndSwapChain(dx_adapter, boost::get<0>(dev_type_beh), NULL, create_device_flags,
 					D3D10_SDK_VERSION, &sc_desc_, &sc, &d3d_device)))
 				{
 					swap_chain_ = MakeCOMPtr(sc);
@@ -197,6 +202,20 @@ namespace KlayGE
 					}
 					else
 					{
+						if (boost::get<0>(dev_type_beh) != D3D10_DRIVER_TYPE_HARDWARE)
+						{
+							IDXGIDevice* dxgi_device = NULL;
+							HRESULT hr = d3d_device_->QueryInterface(IID_IDXGIDevice, reinterpret_cast<void**>(&dxgi_device));
+							if (SUCCEEDED(hr) && (dxgi_device != NULL))
+							{
+								IDXGIAdapter* ada;
+								dxgi_device->GetAdapter(&ada);
+								adapter_->ResetAdapter(MakeCOMPtr(ada));
+							}
+							dxgi_device->Release();
+						}
+						adapter_->Enumerate();
+
 						description_ += boost::get<1>(dev_type_beh);
 						break;
 					}
@@ -381,7 +400,7 @@ namespace KlayGE
 				colorDepth_ = ::GetDeviceCaps(hdc, BITSPIXEL);
 				::ReleaseDC(hWnd_, hdc);
 
-				back_buffer_format_	= adapter_.DesktopFormat();
+				back_buffer_format_	= adapter_->DesktopFormat();
 
 				style = WS_OVERLAPPEDWINDOW;
 			}
@@ -416,7 +435,7 @@ namespace KlayGE
 
 	D3D10Adapter const & D3D10RenderWindow::Adapter() const
 	{
-		return adapter_;
+		return *adapter_;
 	}
 
 	ID3D10DevicePtr D3D10RenderWindow::D3DDevice() const
@@ -509,7 +528,7 @@ namespace KlayGE
 	{
 		if (d3d_device_)
 		{
-			swap_chain_->Present(0, 0);
+			TIF(swap_chain_->Present(0, 0));
 		}
 	}
 

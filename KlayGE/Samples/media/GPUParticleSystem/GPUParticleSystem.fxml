@@ -86,7 +86,8 @@ void ParticlesVS(float2 tex_pos		: POSITION,
 	}
 }
 
-float4 ParticlesPS(float4 clr    : COLOR0,
+float4 ParticlesPS(float4 pos : POSITION,
+						float4 clr : COLOR0,
 						float4 PosSS : TEXCOORD0,
 						float4 CenterView : TEXCOORD1,
 						float3 view_dir : TEXCOORD2) : COLOR
@@ -192,7 +193,8 @@ void UpdateVS(float4 pos			: POSITION,
 	oTex = float2(tex.x, 1 - tex.y);
 }
 
-void UpdatePS(float2 tex : TEXCOORD0,
+void UpdatePS(float4 pos : POSITION,
+				float2 tex : TEXCOORD0,
 				out float4 out_pos : COLOR0,
 				out float4 out_vel : COLOR1)
 {
@@ -278,10 +280,10 @@ void TerrainVS(float4 pos			: POSITION,
 	oDepth = pos_es.zw;
 }
 
-float4 TerrainPS(float4 tex : TEXCOORD0, float3 pos : TEXCOORD1, float2 depth : TEXCOORD2) : COLOR0
+float4 TerrainPS(float4 pos : POSITION, float4 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float2 depth : TEXCOORD2) : COLOR0
 {
 	float3 normal = decompress_normal(tex2D(normal_map_sampler, tex.xy)).xzy;
-	return float4(tex2D(grass_sampler, tex.zw).rgb * dot(normalize(LightPos - pos), normal),
+	return float4(tex2D(grass_sampler, tex.zw).rgb * dot(normalize(LightPos - pos_os), normal),
 		(depth.x / depth.y - depth_min) * inv_depth_range);
 }
 		]]>
@@ -307,7 +309,7 @@ float4 TerrainPS(float4 tex : TEXCOORD0, float3 pos : TEXCOORD1, float2 depth : 
 
 	<shader>
 		<![CDATA[
-float4 BlendPS(float2 tex : TEXCOORD0) : COLOR
+float4 BlendPS(float4 pos : POSITION, float2 tex : TEXCOORD0) : COLOR
 {
 	float4 a = tex2D(tex_with_alpha_sampler, tex);
 	a.a = saturate(a.a);

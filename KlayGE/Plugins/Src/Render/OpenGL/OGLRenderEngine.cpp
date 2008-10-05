@@ -533,19 +533,23 @@ namespace KlayGE
 
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
-					tech.Pass(i)->Apply();
-
+					RenderPassPtr pass = tech.Pass(i);
+					
+					pass->Bind();
 					glDrawElements(mode, static_cast<GLsizei>(rl.NumIndices()),
 						index_type, 0);
+					pass->Unbind();
 				}
 			}
 			else
 			{
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
-					tech.Pass(i)->Apply();
-
+					RenderPassPtr pass = tech.Pass(i);
+					
+					pass->Bind();
 					glDrawArrays(mode, 0, static_cast<GLsizei>(rl.NumVertices()));
+					pass->Unbind();
 				}
 			}
 		}

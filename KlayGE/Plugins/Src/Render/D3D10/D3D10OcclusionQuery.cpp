@@ -31,7 +31,7 @@ namespace KlayGE
 
 		D3D10_QUERY_DESC desc;
 		desc.Query = D3D10_QUERY_OCCLUSION;
-		desc.MiscFlags = D3D10_QUERY_MISC_PREDICATEHINT;
+		desc.MiscFlags = 0;
 
 		ID3D10Query* query;
 		d3d_device->CreateQuery(&desc, &query);

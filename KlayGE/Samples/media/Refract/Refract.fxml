@@ -76,7 +76,8 @@ void RefractVS(float4 pos			: POSITION,
 	dir_ss = mul(half4(refract_vec.xyz, 0), mvp);
 }
 
-float4 RefractPS(float3 normal			: TEXCOORD0,
+float4 RefractPS(float4 pos : POSITION, 
+					float3 normal			: TEXCOORD0,
 					float4 incident		: TEXCOORD1,
 					float4 refract_vec	: TEXCOORD2,
 					float4 pos_ss		: TEXCOORD3,
@@ -141,7 +142,7 @@ void RefractBackFaceVS(float4 pos : POSITION,
 	pos_es = mul(pos, model).xyz - eye_pos;
 }
 
-float4 RefractBackFacePS(float3 normal : TEXCOORD0,
+float4 RefractBackFacePS(float4 pos : POSITION, float3 normal : TEXCOORD0,
 							float3 pos_es : TEXCOORD1) : COLOR
 {
 	return float4(-normalize(normal), length(pos_es));

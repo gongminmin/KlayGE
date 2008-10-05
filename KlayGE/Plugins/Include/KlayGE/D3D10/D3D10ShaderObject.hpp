@@ -51,7 +51,8 @@ namespace KlayGE
 			boost::shared_ptr<std::string> const & shader_text);
 		ShaderObjectPtr Clone(RenderEffect& effect);
 
-		void Active();
+		void Bind();
+		void Unbind();
 
 		ID3D10BlobPtr VSCode() const
 		{
@@ -76,9 +77,14 @@ namespace KlayGE
 		ID3D10VertexShaderPtr vertex_shader_;
 		ID3D10PixelShaderPtr pixel_shader_;
 		ID3D10BlobPtr vs_code_;
+		bool dirty_;
 
 		boost::array<std::vector<uint8_t>, ST_NumShaderTypes> cbufs_;
-		boost::array<std::vector<std::pair<TexturePtr, SamplerStateObjectPtr> >, ST_NumShaderTypes> samplers_;
+		boost::array<std::vector<TexturePtr>, ST_NumShaderTypes> textures_;
+		boost::array<std::vector<SamplerStateObjectPtr>, ST_NumShaderTypes> samplers_;
+
+		boost::array<ID3D10BufferPtr, ST_NumShaderTypes> d3d_cbufs_;
+		boost::array<ID3D10BufferPtr, ST_NumShaderTypes> d3d_cbufs_sys_mem_;
 	};
 
 	typedef boost::shared_ptr<D3D10ShaderObject> D3D10ShaderObjectPtr;

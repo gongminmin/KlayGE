@@ -12,7 +12,7 @@ void HelperVS(float4 position : POSITION,
 	oPosition = mul(position, matViewProj);
 }
 
-float4 HelperPS() : COLOR0
+float4 HelperPS(float4 pos : POSITION) : COLOR0
 {
 	return color;
 }
@@ -77,7 +77,7 @@ void SkyBoxVS(float4 pos : POSITION,
 	texcoord0 = mul(pos, inv_mvp);
 }
 
-float4 SkyBoxPS(float3 texCoord0 : TEXCOORD0) : COLOR
+float4 SkyBoxPS(float4 pos : POSITION, float3 texCoord0 : TEXCOORD0) : COLOR
 {
 	return texCUBE(skybox_cubeMapSampler, texCoord0);
 }

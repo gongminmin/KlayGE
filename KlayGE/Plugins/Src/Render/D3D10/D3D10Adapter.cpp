@@ -78,20 +78,22 @@ namespace KlayGE
 				BOOST_FOREACH(BOOST_TYPEOF(formats)::reference format, formats)
 				{
 					UINT num;
-					output->GetDisplayModeList(format, 0, &num, 0);
-
-					std::vector<DXGI_MODE_DESC> mode_descs(num);
-					output->GetDisplayModeList(format, 0, &num, &mode_descs[0]);
-
-					BOOST_FOREACH(BOOST_TYPEOF(mode_descs)::reference mode_desc, mode_descs)
+					output->GetDisplayModeList(format, DXGI_ENUM_MODES_SCALING, &num, 0);
+					if (num > 0)
 					{
-						D3D10VideoMode const video_mode(mode_desc.Width, mode_desc.Height,
-							mode_desc.Format);
+						std::vector<DXGI_MODE_DESC> mode_descs(num);
+						output->GetDisplayModeList(format, DXGI_ENUM_MODES_SCALING, &num, &mode_descs[0]);
 
-						// 如果找到一个新模式, 加入模式列表
-						if (std::find(modes_.begin(), modes_.end(), video_mode) == modes_.end())
+						BOOST_FOREACH(BOOST_TYPEOF(mode_descs)::reference mode_desc, mode_descs)
 						{
-							modes_.push_back(video_mode);
+							D3D10VideoMode const video_mode(mode_desc.Width, mode_desc.Height,
+								mode_desc.Format);
+
+							// 如果找到一个新模式, 加入模式列表
+							if (std::find(modes_.begin(), modes_.end(), video_mode) == modes_.end())
+							{
+								modes_.push_back(video_mode);
+							}
 						}
 					}
 				}
@@ -103,5 +105,11 @@ namespace KlayGE
 		}
 
 		std::sort(modes_.begin(), modes_.end());
+	}
+
+	void D3D10Adapter::ResetAdapter(IDXGIAdapterPtr const & ada)
+	{
+		adapter_ = ada;
+		adapter_->GetDesc(&adapter_desc_);
 	}
 }

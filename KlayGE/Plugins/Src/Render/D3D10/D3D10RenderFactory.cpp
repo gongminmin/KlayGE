@@ -45,24 +45,24 @@ namespace KlayGE
 	}
 
 	TexturePtr D3D10RenderFactory::MakeTexture1D(uint32_t width, uint16_t numMipMaps,
-			ElementFormat format, uint32_t access_hint)
+			ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 	{
-		return TexturePtr(new D3D10Texture1D(width, numMipMaps, format, access_hint));
+		return TexturePtr(new D3D10Texture1D(width, numMipMaps, format, access_hint, init_data));
 	}
 	TexturePtr D3D10RenderFactory::MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps,
-			ElementFormat format, uint32_t access_hint)
+			ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 	{
-		return TexturePtr(new D3D10Texture2D(width, height, numMipMaps, format, access_hint));
+		return TexturePtr(new D3D10Texture2D(width, height, numMipMaps, format, access_hint, init_data));
 	}
 	TexturePtr D3D10RenderFactory::MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth,
-			uint16_t numMipMaps, ElementFormat format, uint32_t access_hint)
+			uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 	{
-		return TexturePtr(new D3D10Texture3D(width, height, depth, numMipMaps, format, access_hint));
+		return TexturePtr(new D3D10Texture3D(width, height, depth, numMipMaps, format, access_hint, init_data));
 	}
 	TexturePtr D3D10RenderFactory::MakeTextureCube(uint32_t size, uint16_t numMipMaps,
-		ElementFormat format, uint32_t access_hint)
+		ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 	{
-		return TexturePtr(new D3D10TextureCube(size, numMipMaps, format, access_hint));
+		return TexturePtr(new D3D10TextureCube(size, numMipMaps, format, access_hint, init_data));
 	}
 
 	FrameBufferPtr D3D10RenderFactory::MakeFrameBuffer()
@@ -75,14 +75,14 @@ namespace KlayGE
 		return RenderLayoutPtr(new D3D10RenderLayout);
 	}
 
-	GraphicsBufferPtr D3D10RenderFactory::MakeVertexBuffer(BufferUsage usage, uint32_t access_hint)
+	GraphicsBufferPtr D3D10RenderFactory::MakeVertexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data)
 	{
-		return GraphicsBufferPtr(new D3D10GraphicsBuffer(usage, access_hint, D3D10_BIND_VERTEX_BUFFER));
+		return GraphicsBufferPtr(new D3D10GraphicsBuffer(usage, access_hint, D3D10_BIND_VERTEX_BUFFER, init_data));
 	}
 
-	GraphicsBufferPtr D3D10RenderFactory::MakeIndexBuffer(BufferUsage usage, uint32_t access_hint)
+	GraphicsBufferPtr D3D10RenderFactory::MakeIndexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data)
 	{
-		return GraphicsBufferPtr(new D3D10GraphicsBuffer(usage, access_hint, D3D10_BIND_INDEX_BUFFER));
+		return GraphicsBufferPtr(new D3D10GraphicsBuffer(usage, access_hint, D3D10_BIND_INDEX_BUFFER, init_data));
 	}
 
 	QueryPtr D3D10RenderFactory::MakeOcclusionQuery()

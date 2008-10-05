@@ -21,7 +21,7 @@ void MandelbrotVS(float4 pos : POSITION,
 	oTexcoord1 = texcoord0 * 2.4 - float2(1.8, 1.2);
 }
 
-half4 MandelbrotPS(float2 texcoord0 : TEXCOORD0,
+half4 MandelbrotPS(float4 pos : POSITION, float2 texcoord0 : TEXCOORD0,
 				float2 texcoord1 : TEXCOORD1) : COLOR
 {
 	half2 z = tex2D(fractal_sampler, texcoord0).rg;
@@ -52,7 +52,7 @@ void ShowVS(float4 pos : POSITION,
 	oTexcoord0 = float3(texcoord0, 1);
 }
 
-float4 ShowPS(float3 texCoord0 : TEXCOORD0) : COLOR
+float4 ShowPS(float4 pos : POSITION, float3 texCoord0 : TEXCOORD0) : COLOR
 {
 	half2 z = tex2D(fractal_sampler, texCoord0).rg;
 	return float4((dot(z, z) >= 4) * texCoord0, 1);

@@ -15,7 +15,7 @@ void GenShadowMapVS(float4 Position : POSITION,
     oLightWorldPos = mul(Position, obj_model_to_light_model);
 }
 
-half4 GenShadowMapPS(half4 LightWorldPos : TEXCOORD0) : COLOR
+half4 GenShadowMapPS(float4 pos : POSITION, float4 LightWorldPos : TEXCOORD0) : COLOR
 {
 	LightWorldPos /= LightWorldPos.w;
 	half dist = length(LightWorldPos.xyz);
@@ -63,7 +63,7 @@ void RenderSceneVS(float4 Position : POSITION,
     oDiffuse = dot(normalize(light_pos - world_pos.xyz), world_normal);
 }
 
-float4 RenderScenePS(half3 diffuse : COLOR0,
+float4 RenderScenePS(float4 pos : POSITION, float3 diffuse : COLOR0,
 				float3 LightWorldPos : TEXCOORD0) : COLOR 
 {
 	half2 moments = texCUBE(shadow_map_sampler, LightWorldPos);

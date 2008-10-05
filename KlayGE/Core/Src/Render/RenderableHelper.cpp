@@ -74,12 +74,13 @@ namespace KlayGE
 		rl_ = rf.MakeRenderLayout();
 		rl_->TopologyType(RenderLayout::TT_PointList);
 
-		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
-		vb->Resize(sizeof(v));
-		{
-			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
-			std::copy(&v, &v + 1, mapper.Pointer<float3>());
-		}
+		ElementInitData init_data;
+		init_data.row_pitch = sizeof(v);
+		init_data.slice_pitch = 0;
+		init_data.data.resize(init_data.row_pitch);
+		memcpy(&init_data.data[0], &v, init_data.row_pitch);
+
+		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 		box_ = MathLib::compute_bounding_box<float>(&v, &v + 1);
@@ -110,15 +111,16 @@ namespace KlayGE
 			v0, v1
 		};
 
+		ElementInitData init_data;
+		init_data.row_pitch = sizeof(xyzs);
+		init_data.slice_pitch = 0;
+		init_data.data.resize(init_data.row_pitch);
+		memcpy(&init_data.data[0], xyzs, init_data.row_pitch);
+
 		rl_ = rf.MakeRenderLayout();
 		rl_->TopologyType(RenderLayout::TT_LineList);
 
-		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
-		vb->Resize(sizeof(xyzs));
-		{
-			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
-			std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
-		}
+		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 		box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
@@ -149,15 +151,16 @@ namespace KlayGE
 			v0, v1, v2
 		};
 
+		ElementInitData init_data;
+		init_data.row_pitch = sizeof(xyzs);
+		init_data.slice_pitch = 0;
+		init_data.data.resize(init_data.row_pitch);
+		memcpy(&init_data.data[0], xyzs, init_data.row_pitch);
+
 		rl_ = rf.MakeRenderLayout();
 		rl_->TopologyType(RenderLayout::TT_TriangleList);
 
-		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
-		vb->Resize(sizeof(xyzs));
-		{
-			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
-			std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
-		}
+		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 		box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
@@ -203,20 +206,21 @@ namespace KlayGE
 		rl_ = rf.MakeRenderLayout();
 		rl_->TopologyType(RenderLayout::TT_TriangleList);
 
-		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
-		vb->Resize(sizeof(xyzs));
-		{
-			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
-			std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
-		}
+		ElementInitData init_data;
+		init_data.row_pitch = sizeof(xyzs);
+		init_data.slice_pitch = 0;
+		init_data.data.resize(init_data.row_pitch);
+		memcpy(&init_data.data[0], xyzs, init_data.row_pitch);
+
+		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
-		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
-		ib->Resize(sizeof(indices));
-		{
-			GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
-			std::copy(indices, indices + sizeof(indices) / sizeof(indices[0]), mapper.Pointer<uint16_t>());
-		}
+		init_data.row_pitch = sizeof(indices);
+		init_data.slice_pitch = 0;
+		init_data.data.resize(init_data.row_pitch);
+		memcpy(&init_data.data[0], indices, init_data.row_pitch);
+
+		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 		rl_->BindIndexStream(ib, EF_R16);
 	}
 
@@ -257,20 +261,21 @@ namespace KlayGE
 		rl_ = rf.MakeRenderLayout();
 		rl_->TopologyType(RenderLayout::TT_LineList);
 
-		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
-		vb->Resize(sizeof(xyzs));
-		{
-			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
-			std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
-		}
+		ElementInitData init_data;
+		init_data.row_pitch = sizeof(xyzs);
+		init_data.slice_pitch = 0;
+		init_data.data.resize(init_data.row_pitch);
+		memcpy(&init_data.data[0], xyzs, init_data.row_pitch);
+
+		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
-		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
-		ib->Resize(sizeof(indices));
-		{
-			GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
-			std::copy(indices, indices + sizeof(indices) / sizeof(indices[0]), mapper.Pointer<uint16_t>());
-		}
+		init_data.row_pitch = sizeof(indices);
+		init_data.slice_pitch = 0;
+		init_data.data.resize(init_data.row_pitch);
+		memcpy(&init_data.data[0], indices, init_data.row_pitch);
+
+		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 		rl_->BindIndexStream(ib, EF_R16);
 	}
 
@@ -299,15 +304,16 @@ namespace KlayGE
 			float3(-1.0f, -1.0f, 1.0f),
 		};
 
+		ElementInitData init_data;
+		init_data.row_pitch = sizeof(xyzs);
+		init_data.slice_pitch = 0;
+		init_data.data.resize(init_data.row_pitch);
+		memcpy(&init_data.data[0], xyzs, init_data.row_pitch);
+
 		rl_ = rf.MakeRenderLayout();
 		rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
-		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
-		vb->Resize(sizeof(xyzs));
-		{
-			GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
-			std::copy(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]), mapper.Pointer<float3>());
-		}
+		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 		box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[4]);
@@ -352,12 +358,13 @@ namespace KlayGE
 			}
 		}
 
-		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
-		pos_vb->Resize(static_cast<uint32_t>(sizeof(pos[0]) * pos.size()));
-		{
-			GraphicsBuffer::Mapper mapper(*pos_vb, BA_Write_Only);
-			std::copy(pos.begin(), pos.end(), mapper.Pointer<float3>());
-		}
+		ElementInitData init_data;
+		init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
+		init_data.slice_pitch = 0;
+		init_data.data.resize(init_data.row_pitch);
+		memcpy(&init_data.data[0], &pos[0], init_data.row_pitch);
+
+		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 		rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 		if (has_tex_coord)
@@ -372,12 +379,12 @@ namespace KlayGE
 				}
 			}
 
-			GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
-			tex_vb->Resize(static_cast<uint32_t>(sizeof(tex[0]) * tex.size()));
-			{
-				GraphicsBuffer::Mapper mapper(*tex_vb, BA_Write_Only);
-				std::copy(tex.begin(), tex.end(), mapper.Pointer<float2>());
-			}
+			init_data.row_pitch = static_cast<uint32_t>(tex.size() * sizeof(tex[0]));
+			init_data.slice_pitch = 0;
+			init_data.data.resize(init_data.row_pitch);
+			memcpy(&init_data.data[0], &tex[0], init_data.row_pitch);
+
+			GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 		}
 
@@ -396,12 +403,12 @@ namespace KlayGE
 			}
 		}
 
-		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
-		ib->Resize(static_cast<uint32_t>(index.size() * sizeof(index[0])));
-		{
-			GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
-			std::copy(index.begin(), index.end(), mapper.Pointer<uint16_t>());
-		}
+		init_data.row_pitch = static_cast<uint32_t>(index.size() * sizeof(index[0]));
+		init_data.slice_pitch = 0;
+		init_data.data.resize(init_data.row_pitch);
+		memcpy(&init_data.data[0], &index[0], init_data.row_pitch);
+
+		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 		rl_->BindIndexStream(ib, EF_R16);
 
 		box_ = MathLib::compute_bounding_box<float>(pos.begin(), pos.end());

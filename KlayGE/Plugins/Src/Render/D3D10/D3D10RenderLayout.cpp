@@ -58,7 +58,7 @@ namespace KlayGE
 			}
 
 			ID3D10InputLayout* input_layout;
-			TIF(d3d_device->CreateInputLayout(&elems[0], elems.size(), vs_code->GetBufferPointer(), vs_code->GetBufferSize(), &input_layout));
+			TIF(d3d_device->CreateInputLayout(&elems[0], static_cast<UINT>(elems.size()), vs_code->GetBufferPointer(), vs_code->GetBufferSize(), &input_layout));
 			input_layout_ = MakeCOMPtr(input_layout);
 
 			dirty_decl_ = false;

@@ -27,7 +27,7 @@ void SkyBoxVS(float4 pos : POSITION,
 	texcoord0 = mul(pos, inv_mvp);
 }
 
-float4 HDRSkyBoxPS(float3 texCoord0 : TEXCOORD0) : COLOR
+float4 HDRSkyBoxPS(float4 pos : POSITION, float3 texCoord0 : TEXCOORD0) : COLOR
 {
 	float3 rgb = decode_hdr_yc(texCUBE(skybox_cubeMapSampler, texCoord0).r,
 					texCUBE(skybox_CcubeMapSampler, texCoord0).ga);

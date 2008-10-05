@@ -32,13 +32,13 @@ namespace KlayGE
 		void Enumerate(IDXGIFactoryPtr const & gi_factory);
 
 		size_t NumAdapter() const;
-		D3D10Adapter const & Adapter(size_t index) const;
+		D3D10AdapterPtr const & Adapter(size_t index) const;
 
 		uint32_t CurrentAdapterIndex() const;
 		void CurrentAdapterIndex(uint32_t index);
 
 	private:
-		std::vector<D3D10Adapter> adapters_;
+		std::vector<D3D10AdapterPtr> adapters_;
 		uint32_t			current_adapter_;
 	};
 

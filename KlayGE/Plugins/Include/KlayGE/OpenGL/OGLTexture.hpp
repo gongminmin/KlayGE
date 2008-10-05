@@ -103,7 +103,7 @@ namespace KlayGE
 	class OGLTexture1D : public OGLTexture
 	{
 	public:
-		OGLTexture1D(uint32_t width, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint);
+		OGLTexture1D(uint32_t width, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data);
 
 		uint32_t Width(int level) const;
 
@@ -120,7 +120,7 @@ namespace KlayGE
 		void UpdateParams();
 
 	private:
-		std::vector<uint32_t> widths_;
+		std::vector<uint32_t> widthes_;
 
 		uint32_t last_width_;
 		uint32_t last_x_offset_;
@@ -129,7 +129,7 @@ namespace KlayGE
 	class OGLTexture2D : public OGLTexture
 	{
 	public:
-		OGLTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint);
+		OGLTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
@@ -149,7 +149,7 @@ namespace KlayGE
 		void UpdateParams();
 
 	private:
-		std::vector<uint32_t> widths_;
+		std::vector<uint32_t> widthes_;
 		std::vector<uint32_t> heights_;
 
 		uint32_t last_width_, last_height_;
@@ -159,7 +159,7 @@ namespace KlayGE
 	class OGLTexture3D : public OGLTexture
 	{
 	public:
-		OGLTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint);
+		OGLTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
@@ -183,9 +183,9 @@ namespace KlayGE
 		void UpdateParams();
 
 	private:
-		std::vector<uint32_t> widths_;
+		std::vector<uint32_t> widthes_;
 		std::vector<uint32_t> heights_;
-		std::vector<uint32_t> depths_;
+		std::vector<uint32_t> depthes_;
 
 		uint32_t last_width_, last_height_, last_depth_;
 		uint32_t last_x_offset_, last_y_offset_, last_z_offset_;
@@ -194,7 +194,7 @@ namespace KlayGE
 	class OGLTextureCube : public OGLTexture
 	{
 	public:
-		OGLTextureCube(uint32_t size, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint);
+		OGLTextureCube(uint32_t size, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
@@ -214,7 +214,7 @@ namespace KlayGE
 		void UpdateParams();
 
 	private:
-		std::vector<uint32_t> widths_;
+		std::vector<uint32_t> widthes_;
 
 		uint32_t last_width_, last_height_;
 		uint32_t last_x_offset_, last_y_offset_;

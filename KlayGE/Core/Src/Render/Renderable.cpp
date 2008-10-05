@@ -102,11 +102,13 @@ namespace KlayGE
 			RenderLayoutPtr rl = this->GetRenderLayout();
 
 			GraphicsBufferPtr inst_stream = rl->InstanceStream();
+			GraphicsBufferPtr& instance_stream_sys_mem = rl->InstanceStreamSysMem();
 			if (!inst_stream)
 			{
 				RenderFactory& rf(Context::Instance().RenderFactoryInstance());
 
-				inst_stream = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read);
+				instance_stream_sys_mem = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write, NULL);
+				inst_stream = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read, NULL);
 				rl->BindVertexStream(inst_stream, instances_[0].lock()->InstanceFormat(), RenderLayout::ST_Instance, 1);
 			}
 			else
@@ -119,15 +121,17 @@ namespace KlayGE
 
 			uint32_t const size = rl->InstanceSize();
 
+			instance_stream_sys_mem->Resize(static_cast<uint32_t>(size * instances_.size()));
 			inst_stream->Resize(static_cast<uint32_t>(size * instances_.size()));
 			{
-				GraphicsBuffer::Mapper mapper(*inst_stream, BA_Write_Only);
+				GraphicsBuffer::Mapper mapper(*instance_stream_sys_mem, BA_Write_Only);
 				for (size_t i = 0; i < instances_.size(); ++ i)
 				{
 					uint8_t const * src = static_cast<uint8_t const *>(instances_[i].lock()->InstanceData());
 					std::copy(src, src + size, mapper.Pointer<uint8_t>() + i * size);
 				}
 			}
+			instance_stream_sys_mem->CopyToBuffer(*inst_stream);
 
 			for (uint32_t i = 0; i < rl->NumVertexStreams(); ++ i)
 			{

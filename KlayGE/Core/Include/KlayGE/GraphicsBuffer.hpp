@@ -6,6 +6,7 @@
 //
 // 3.8.0
 // 增加了access_hint (2008.9.20)
+// 增加了ElementInitData (2008.10.1)
 //
 // 3.2.0
 // 把IndexStream和VertexStream合并成GraphicsBuffer (2006.1.9)

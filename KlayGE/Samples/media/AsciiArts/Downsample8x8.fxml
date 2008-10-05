@@ -38,7 +38,8 @@ void Downsample8x8VS(float4 pos : POSITION,
 	oTex7 = tex_base.xyxy + tex_coord_offset[7];
 }
 
-float4 Downsample8x8PS(float4 oTex0 : TEXCOORD0,
+float4 Downsample8x8PS(float4 pos : POSITION,
+					float4 oTex0 : TEXCOORD0,
 					float4 oTex1 : TEXCOORD1,
 					float4 oTex2 : TEXCOORD2,
 					float4 oTex3 : TEXCOORD3,

@@ -36,6 +36,7 @@ namespace KlayGE
 
 		// ∑√Œ …Ë±∏√Ë ˆ◊÷∑˚¥Æ
 		std::wstring const Description() const;
+		void ResetAdapter(IDXGIAdapterPtr const & ada);
 
 		uint32_t AdapterNo() const
 		{
@@ -67,6 +68,8 @@ namespace KlayGE
 		typedef std::vector<D3D10VideoMode> ModeType;
 		ModeType modes_;
 	};
+
+	typedef boost::shared_ptr<D3D10Adapter> D3D10AdapterPtr;
 }
 
 #endif			// _D3D10ADAPTER_HPP

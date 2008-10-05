@@ -36,7 +36,7 @@
 namespace KlayGE
 {
 	OGLTextureCube::OGLTextureCube(uint32_t size, uint16_t numMipMaps,
-								ElementFormat format, uint32_t access_hint)
+								ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 					: OGLTexture(TT_Cube, access_hint)
 	{
 		if (!glloader_GL_EXT_texture_sRGB())
@@ -95,7 +95,14 @@ namespace KlayGE
 					glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[face * numMipMaps_ + level]);
 					glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW);
 					uint8_t* p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
-					memset(p, 0, image_size);
+					if (NULL == init_data)
+					{
+						memset(p, 0, image_size);
+					}
+					else
+					{
+						memcpy(p, &init_data->data[0], image_size);
+					}
 					glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
 					glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glinternalFormat,
@@ -108,7 +115,17 @@ namespace KlayGE
 					glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[face * numMipMaps_ + level]);
 					glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW);
 					uint8_t* p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
-					memset(p, 0, image_size);
+					if (NULL == init_data)
+					{
+						memset(p, 0, image_size);
+					}
+					else
+					{
+						for (uint32_t h = 0; h < size; ++ h)
+						{
+							memcpy(p + h * size * bpp_ / 8, &init_data->data[h * init_data->row_pitch], size * bpp_ / 8);
+						}
+					}
 					glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
 					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glinternalFormat,
@@ -126,7 +143,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(level < numMipMaps_);
 
-		return static_cast<GLint>(widths_[level]);
+		return widthes_[level];
 	}
 
 	uint32_t OGLTextureCube::Height(int level) const
@@ -372,13 +389,13 @@ namespace KlayGE
 	{
 		GLint w;
 
-		widths_.resize(numMipMaps_);
+		widthes_.resize(numMipMaps_);
 
 		glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
 		for (uint16_t level = 0; level < numMipMaps_; ++ level)
 		{
 			glGetTexLevelParameteriv(GL_TEXTURE_CUBE_MAP_POSITIVE_X, level, GL_TEXTURE_WIDTH, &w);
-			widths_[level] = w;
+			widthes_[level] = w;
 		}
 	}
 }

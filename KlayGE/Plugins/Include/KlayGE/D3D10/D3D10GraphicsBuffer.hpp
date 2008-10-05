@@ -20,6 +20,7 @@
 
 #include <d3d10.h>
 
+#include <KlayGE/ElementFormat.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/D3D10/D3D10Typedefs.hpp>
 
@@ -28,11 +29,14 @@ namespace KlayGE
 	class D3D10GraphicsBuffer : public GraphicsBuffer
 	{
 	public:
-		D3D10GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t bind_flags);
+		D3D10GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t bind_flags, ElementInitData* init_data);
 
 		ID3D10BufferPtr D3DBuffer() const;
 
 		void CopyToBuffer(GraphicsBuffer& rhs);
+
+	protected:
+		void GetD3DFlags(D3D10_USAGE& usage, UINT& cpu_access_flags);
 
 	private:
 		void DoResize();

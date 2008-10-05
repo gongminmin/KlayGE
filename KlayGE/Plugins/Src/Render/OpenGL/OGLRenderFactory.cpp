@@ -55,27 +55,27 @@ namespace KlayGE
 		return renderEngine;
 	}
 
-	TexturePtr OGLRenderFactory::MakeTexture1D(uint32_t width, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint)
+	TexturePtr OGLRenderFactory::MakeTexture1D(uint32_t width, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 	{
-		return TexturePtr(new OGLTexture1D(width, numMipMaps, format, access_hint));
+		return TexturePtr(new OGLTexture1D(width, numMipMaps, format, access_hint, init_data));
 	}
 
 	TexturePtr OGLRenderFactory::MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps,
-				ElementFormat format, uint32_t access_hint)
+				ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 	{
-		return TexturePtr(new OGLTexture2D(width, height, numMipMaps, format, access_hint));
+		return TexturePtr(new OGLTexture2D(width, height, numMipMaps, format, access_hint, init_data));
 	}
 
 	TexturePtr OGLRenderFactory::MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth,
-				uint16_t numMipMaps, ElementFormat format, uint32_t access_hint)
+				uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 	{
-		return TexturePtr(new OGLTexture3D(width, height, depth, numMipMaps, format, access_hint));
+		return TexturePtr(new OGLTexture3D(width, height, depth, numMipMaps, format, access_hint, init_data));
 	}
 
 	TexturePtr OGLRenderFactory::MakeTextureCube(uint32_t size, uint16_t numMipMaps,
-				ElementFormat format, uint32_t access_hint)
+				ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 	{
-		return TexturePtr(new OGLTextureCube(size, numMipMaps, format, access_hint));
+		return TexturePtr(new OGLTextureCube(size, numMipMaps, format, access_hint, init_data));
 	}
 
 	FrameBufferPtr OGLRenderFactory::MakeFrameBuffer()
@@ -88,14 +88,14 @@ namespace KlayGE
 		return RenderLayoutPtr(new OGLRenderLayout);
 	}
 
-	GraphicsBufferPtr OGLRenderFactory::MakeVertexBuffer(BufferUsage usage, uint32_t access_hint)
+	GraphicsBufferPtr OGLRenderFactory::MakeVertexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data)
 	{
-		return GraphicsBufferPtr(new OGLGraphicsBuffer(usage, access_hint, GL_ARRAY_BUFFER));
+		return GraphicsBufferPtr(new OGLGraphicsBuffer(usage, access_hint, GL_ARRAY_BUFFER, init_data));
 	}
 
-	GraphicsBufferPtr OGLRenderFactory::MakeIndexBuffer(BufferUsage usage, uint32_t access_hint)
+	GraphicsBufferPtr OGLRenderFactory::MakeIndexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data)
 	{
-		return GraphicsBufferPtr(new OGLGraphicsBuffer(usage, access_hint, GL_ELEMENT_ARRAY_BUFFER));
+		return GraphicsBufferPtr(new OGLGraphicsBuffer(usage, access_hint, GL_ELEMENT_ARRAY_BUFFER, init_data));
 	}
 
 	QueryPtr OGLRenderFactory::MakeOcclusionQuery()

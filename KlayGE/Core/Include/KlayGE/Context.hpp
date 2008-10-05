@@ -37,6 +37,8 @@ namespace KlayGE
 			return context;
 		}
 
+		SceneManagerPtr LoadCfg(RenderSettings& settings, std::string const & cfg_file);
+
 		void AppInstance(App3DFramework& app)
 			{ app_ = &app; }
 		App3DFramework& AppInstance()

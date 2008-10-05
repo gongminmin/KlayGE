@@ -45,22 +45,23 @@ namespace KlayGE
 			rl_ = rf.MakeRenderLayout();
 			rl_->TopologyType(RenderLayout::TT_TriangleList);
 
-			GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
-			vb->Resize(static_cast<uint32_t>(vertices.size() * sizeof(vertices[0])));
-			{
-				GraphicsBuffer::Mapper mapper(*vb, BA_Write_Only);
-				std::copy(vertices.begin(), vertices.end(), mapper.Pointer<UIManager::VertexFormat>());
-			}
+			ElementInitData init_data;
+			init_data.row_pitch = static_cast<uint32_t>(vertices.size() * sizeof(vertices[0]));
+			init_data.slice_pitch = 0;
+			init_data.data.resize(init_data.row_pitch);
+			memcpy(&init_data.data[0], &vertices[0], init_data.row_pitch);
+
+			GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
 												vertex_element(VEU_Diffuse, 0, EF_ABGR32F),
 												vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 
-			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Write | EAH_GPU_Read);
-			ib->Resize(static_cast<uint32_t>(indices.size() * sizeof(indices[0])));
-			{
-				GraphicsBuffer::Mapper mapper(*ib, BA_Write_Only);
-				std::copy(indices.begin(), indices.end(), mapper.Pointer<uint16_t>());
-			}
+			init_data.row_pitch = static_cast<uint32_t>(indices.size() * sizeof(indices[0]));
+			init_data.slice_pitch = 0;
+			init_data.data.resize(init_data.row_pitch);
+			memcpy(&init_data.data[0], &indices[0], init_data.row_pitch);
+
+			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindIndexStream(ib, EF_R16);
 
 			if (texture)
@@ -400,7 +401,7 @@ namespace KlayGE
 	{
 		if (!control_tex)
 		{
-			control_tex = LoadTexture("ui.dds", EAH_CPU_Write | EAH_GPU_Read);
+			control_tex = LoadTexture("ui.dds", EAH_GPU_Read);
 		}
 
 		this->SetTexture(0, control_tex);

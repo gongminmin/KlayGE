@@ -37,7 +37,7 @@
 namespace KlayGE
 {
 	OGLTexture3D::OGLTexture3D(uint32_t width, uint32_t height, uint32_t depth,
-								uint16_t numMipMaps, ElementFormat format, uint32_t access_hint)
+								uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 					: OGLTexture(TT_3D, access_hint)
 	{
 		if (!glloader_GL_EXT_texture_sRGB())
@@ -98,7 +98,14 @@ namespace KlayGE
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[level]);
 				glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW);
 				uint8_t* p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
-				memset(p, 0, image_size);
+				if (NULL == init_data)
+				{
+					memset(p, 0, image_size);
+				}
+				else
+				{
+					memcpy(p, &init_data->data[0], image_size);
+				}
 				glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
 				glCompressedTexImage3D(GL_TEXTURE_3D, level, glinternalFormat,
@@ -111,7 +118,21 @@ namespace KlayGE
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[level]);
 				glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW);
 				uint8_t* p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
-				memset(p, 0, image_size);
+				if (NULL == init_data)
+				{
+					memset(p, 0, image_size);
+				}
+				else
+				{
+					for (uint32_t d = 0; d < depth; ++ d)
+					{
+						for (uint32_t h = 0; h < height; ++ h)
+						{
+							memcpy(p + (d * height + h) * width * bpp_ / 8,
+								&init_data->data[d * init_data->slice_pitch + h * init_data->row_pitch], width * bpp_ / 8);
+						}
+					}
+				}
 				glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
 				glTexImage3D(GL_TEXTURE_3D, level, glinternalFormat,
@@ -131,17 +152,17 @@ namespace KlayGE
 
 	uint32_t OGLTexture3D::Width(int level) const
 	{
-		return static_cast<GLint>(widths_[level]);
+		return widthes_[level];
 	}
 
 	uint32_t OGLTexture3D::Height(int level) const
 	{
-		return static_cast<GLint>(heights_[level]);
+		return heights_[level];
 	}
 
 	uint32_t OGLTexture3D::Depth(int level) const
 	{
-		return static_cast<GLint>(depths_[level]);
+		return depthes_[level];
 	}
 
 	void OGLTexture3D::CopyToTexture(Texture& target)
@@ -393,21 +414,21 @@ namespace KlayGE
 	{
 		GLint w, h, d;
 
-		widths_.resize(numMipMaps_);
+		widthes_.resize(numMipMaps_);
 		heights_.resize(numMipMaps_);
-		depths_.resize(numMipMaps_);
+		depthes_.resize(numMipMaps_);
 
 		glBindTexture(GL_TEXTURE_3D, texture_);
 		for (uint16_t level = 0; level < numMipMaps_; ++ level)
 		{
 			glGetTexLevelParameteriv(GL_TEXTURE_3D, level, GL_TEXTURE_WIDTH, &w);
-			widths_[level] = w;
+			widthes_[level] = w;
 
 			glGetTexLevelParameteriv(GL_TEXTURE_3D, level, GL_TEXTURE_HEIGHT, &h);
 			heights_[level] = h;
 
 			glGetTexLevelParameteriv(GL_TEXTURE_3D, level, GL_TEXTURE_DEPTH, &d);
-			depths_[level] = d;
+			depthes_[level] = d;
 		}
 	}
 }

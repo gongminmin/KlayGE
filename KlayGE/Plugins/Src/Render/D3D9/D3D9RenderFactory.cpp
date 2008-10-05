@@ -51,30 +51,30 @@ namespace KlayGE
 	}
 
 	TexturePtr D3D9RenderFactory::MakeTexture1D(uint32_t width, uint16_t numMipMaps,
-			ElementFormat format, uint32_t access_hint)
+			ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 	{
-		D3D9TexturePtr ret(new D3D9Texture1D(width, numMipMaps, format, access_hint));
+		D3D9TexturePtr ret(new D3D9Texture1D(width, numMipMaps, format, access_hint, init_data));
 		resource_pool_.push_back(ret);
 		return ret;
 	}
 	TexturePtr D3D9RenderFactory::MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps,
-			ElementFormat format, uint32_t access_hint)
+			ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 	{
-		D3D9TexturePtr ret(new D3D9Texture2D(width, height, numMipMaps, format, access_hint));
+		D3D9TexturePtr ret(new D3D9Texture2D(width, height, numMipMaps, format, access_hint, init_data));
 		resource_pool_.push_back(ret);
 		return ret;
 	}
 	TexturePtr D3D9RenderFactory::MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth,
-			uint16_t numMipMaps, ElementFormat format, uint32_t access_hint)
+			uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 	{
-		D3D9TexturePtr ret(new D3D9Texture3D(width, height, depth, numMipMaps, format, access_hint));
+		D3D9TexturePtr ret(new D3D9Texture3D(width, height, depth, numMipMaps, format, access_hint, init_data));
 		resource_pool_.push_back(ret);
 		return ret;
 	}
 	TexturePtr D3D9RenderFactory::MakeTextureCube(uint32_t size, uint16_t numMipMaps,
-		ElementFormat format, uint32_t access_hint)
+		ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 	{
-		D3D9TexturePtr ret(new D3D9TextureCube(size, numMipMaps, format, access_hint));
+		D3D9TexturePtr ret(new D3D9TextureCube(size, numMipMaps, format, access_hint, init_data));
 		resource_pool_.push_back(ret);
 		return ret;
 	}
@@ -91,16 +91,16 @@ namespace KlayGE
 		return RenderLayoutPtr(new D3D9RenderLayout);
 	}
 
-	GraphicsBufferPtr D3D9RenderFactory::MakeVertexBuffer(BufferUsage usage, uint32_t access_hint)
+	GraphicsBufferPtr D3D9RenderFactory::MakeVertexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data)
 	{
-		D3D9VertexBufferPtr ret(new D3D9VertexBuffer(usage, access_hint));
+		D3D9VertexBufferPtr ret(new D3D9VertexBuffer(usage, access_hint, init_data));
 		resource_pool_.push_back(ret);
 		return ret;
 	}
 
-	GraphicsBufferPtr D3D9RenderFactory::MakeIndexBuffer(BufferUsage usage, uint32_t access_hint)
+	GraphicsBufferPtr D3D9RenderFactory::MakeIndexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data)
 	{
-		D3D9IndexBufferPtr ret(new D3D9IndexBuffer(usage, access_hint));
+		D3D9IndexBufferPtr ret(new D3D9IndexBuffer(usage, access_hint, init_data));
 		resource_pool_.push_back(ret);
 		return ret;
 	}

@@ -56,9 +56,10 @@ void DistanceMappingVS(float4 pos		: POSITION,
 	oV = vTanView;
 }
 
-half4 DistanceMappingPS(half3 texCoord0	: TEXCOORD0,
-						half3 L		: TEXCOORD1,
-						half3 V		: TEXCOORD2) : COLOR
+half4 DistanceMappingPS(float4 pos			: POSITION,
+						float3 texCoord0	: TEXCOORD0,
+						float3 L		: TEXCOORD1,
+						float3 V		: TEXCOORD2) : COLOR
 {
 	half3 view = normalize(V) * half3(1, 1, 16) * 0.06;
 
@@ -85,9 +86,10 @@ half4 DistanceMappingPS(half3 texCoord0	: TEXCOORD0,
 	return half4(diffuse * diffuse_factor, 1);
 }
 
-half4 DistanceMappingPS_20(half3 texCoord0	: TEXCOORD0,
-						half3 L		: TEXCOORD1,
-						half3 V		: TEXCOORD2) : COLOR
+half4 DistanceMappingPS_20(float4 pos			: POSITION,
+            float3 texCoord0	: TEXCOORD0,
+						float3 L		: TEXCOORD1,
+						float3 V		: TEXCOORD2) : COLOR
 {
 	half3 view = normalize(V) * half3(1, 1, 16) * 0.06;
 

@@ -638,7 +638,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	void OGLShaderObject::Active()
+	void OGLShaderObject::Bind()
 	{
 		cgGLBindProgram(shaders_[ST_VertexShader]);
 		cgGLEnableProfile(profiles_[ST_VertexShader]);
@@ -669,5 +669,11 @@ namespace KlayGE
 				}
 			}
 		}
+	}
+
+	void OGLShaderObject::Unbind()
+	{
+		cgGLUnbindProgram(profiles_[ST_VertexShader]);
+		cgGLUnbindProgram(profiles_[ST_PixelShader]);
 	}
 }

@@ -89,7 +89,7 @@ namespace KlayGE
 
 	private:
 		D3D10AdapterList const & D3DAdapters() const;
-		D3D10Adapter const & ActiveAdapter() const;
+		D3D10AdapterPtr const & ActiveAdapter() const;
 
 		// Direct3D rendering device
 		// Only created after top-level window created

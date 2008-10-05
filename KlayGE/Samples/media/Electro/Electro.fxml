@@ -22,7 +22,7 @@ void ElectroVS(float4 pos				: POSITION,
 	oTexcoord0 = texcoord0 + float3(0, y, z);
 }
 
-half4 ElectroPS(float3 texCoord0	: TEXCOORD0) : COLOR
+half4 ElectroPS(float4 pos : POSITION, float3 texCoord0	: TEXCOORD0) : COLOR
 {
 	half turb = tex3D(electroSampler, texCoord0).r * 2 - 1;
 	half4 grow = (1 - pow(turb, 0.2)) * half4(1.70, 1.48, 1.78, 1);

@@ -62,6 +62,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderDeviceCaps.hpp>
+#include <KlayGE/Color.hpp>
 
 namespace KlayGE
 {
@@ -87,7 +88,7 @@ namespace KlayGE
 		virtual void CreateRenderWindow(std::string const & name, RenderSettings const & settings) = 0;
 
 		void SetStateObjects(RasterizerStateObjectPtr const & rs_obj, DepthStencilStateObjectPtr const & dss_obj, uint16_t front_stencil_ref, uint16_t back_stencil_ref,
-			BlendStateObjectPtr const & bs_obj, Color const & blend_factor, uint32_t sample_mask, ShaderObjectPtr const & shader_obj);
+			BlendStateObjectPtr const & bs_obj, Color const & blend_factor, uint32_t sample_mask);
 
 		void BindFrameBuffer(FrameBufferPtr fb);
 		FrameBufferPtr CurFrameBuffer() const;
@@ -124,7 +125,11 @@ namespace KlayGE
 
 		RasterizerStateObjectPtr cur_rs_obj_;
 		DepthStencilStateObjectPtr cur_dss_obj_;
+		uint16_t cur_front_stencil_ref_;
+		uint16_t cur_back_stencil_ref_;
 		BlendStateObjectPtr cur_bs_obj_;
+		Color cur_blend_factor_;
+		uint32_t cur_sample_mask_;
 	};
 }
 

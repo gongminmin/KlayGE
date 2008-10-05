@@ -41,7 +41,7 @@
 
 namespace KlayGE
 {
-	D3D10Texture1D::D3D10Texture1D(uint32_t width, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint)
+	D3D10Texture1D::D3D10Texture1D(uint32_t width, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 					: D3D10Texture(TT_1D, access_hint)
 	{
 		D3D10RenderEngine& renderEngine(*checked_cast<D3D10RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
@@ -59,60 +59,21 @@ namespace KlayGE
 		desc.ArraySize = 1;
 		desc.Format = D3D10Mapping::MappingFormat(format_);
 
-		if (!(access_hint_ & EAH_CPU_Read) && !(access_hint_ & EAH_CPU_Write))
-		{
-			desc.Usage = D3D10_USAGE_DEFAULT;
-		}
-		else
-		{
-			if (!(access_hint_ & EAH_CPU_Read) && !(access_hint_ & EAH_GPU_Write) && !(access_hint_ & EAH_GPU_Read) && (access_hint_ & EAH_CPU_Write))
-			{
-				desc.Usage = D3D10_USAGE_DYNAMIC;
-			}
-			else
-			{
-				desc.Usage = D3D10_USAGE_STAGING;
-			}
-		}
+		this->GetD3DFlags(desc.Usage, desc.BindFlags, desc.CPUAccessFlags, desc.MiscFlags);
 
-		desc.BindFlags = 0;
-		if (access_hint_ & EAH_GPU_Read)
+		D3D10_SUBRESOURCE_DATA subres_data;
+		if (init_data != NULL)
 		{
-			desc.BindFlags |= D3D10_BIND_SHADER_RESOURCE;
-		}
-		if (access_hint_ & EAH_GPU_Write)
-		{
-			if (IsDepthFormat(format_))
-			{
-				desc.BindFlags |= D3D10_BIND_DEPTH_STENCIL;
-			}
-			else
-			{
-				desc.BindFlags |= D3D10_BIND_RENDER_TARGET;
-			}
-		}
-
-		desc.CPUAccessFlags = 0;
-		if (access_hint_ & EAH_CPU_Read)
-		{
-			desc.CPUAccessFlags |= D3D10_CPU_ACCESS_READ;
-		}
-		if (access_hint_ & EAH_CPU_Read)
-		{
-			desc.CPUAccessFlags |= D3D10_CPU_ACCESS_WRITE;
-		}
-
-		desc.MiscFlags = 0;
-		if ((access_hint_ & EAH_GPU_Read) && (access_hint_ & EAH_GPU_Write))
-		{
-			desc.MiscFlags |= D3D10_RESOURCE_MISC_GENERATE_MIPS;
+			subres_data.pSysMem = &init_data->data[0];
+			subres_data.SysMemPitch = init_data->row_pitch;
+			subres_data.SysMemSlicePitch = init_data->slice_pitch;
 		}
 
 		ID3D10Texture1D* d3d_tex;
-		TIF(d3d_device_->CreateTexture1D(&desc, NULL, &d3d_tex));
+		TIF(d3d_device_->CreateTexture1D(&desc, (init_data != NULL) ? &subres_data : NULL, &d3d_tex));
 		d3dTexture1D_ = MakeCOMPtr(d3d_tex);
 
-		if ((access_hint_ & EAH_GPU_Read) && (access_hint_ & EAH_GPU_Write))
+		if (access_hint_ & EAH_GPU_Read)
 		{
 			ID3D10ShaderResourceView* d3d_sr_view;
 			d3d_device_->CreateShaderResourceView(d3dTexture1D_.get(), NULL, &d3d_sr_view);
@@ -135,7 +96,7 @@ namespace KlayGE
 
 		D3D10Texture1D& other(*checked_cast<D3D10Texture1D*>(&target));
 
-		if ((this->Width(0) == target.Width(0)) && (this->NumMipMaps() == target.NumMipMaps()))
+		if ((this->Width(0) == target.Width(0)) && (this->Format() == target.Format()) && (this->NumMipMaps() == target.NumMipMaps()))
 		{
 			d3d_device_->CopyResource(other.D3DTexture().get(), d3dTexture1D_.get());
 		}
@@ -174,7 +135,7 @@ namespace KlayGE
 
 		D3D10Texture1D& other(*checked_cast<D3D10Texture1D*>(&target));
 
-		if (src_width == dst_width)
+		if ((src_width == dst_width) && (this->Format() == target.Format()))
 		{
 			D3D10_BOX src_box;
 			src_box.left = src_xOffset;
@@ -236,7 +197,7 @@ namespace KlayGE
 			void*& data)
 	{
 		uint8_t* p;
-		d3dTexture1D_->Map(D3D10CalcSubresource(level, 0, 1), D3D10Mapping::Mapping(tma), 0, reinterpret_cast<void**>(&p));
+		TIF(d3dTexture1D_->Map(D3D10CalcSubresource(level, 0, 1), D3D10Mapping::Mapping(tma), 0, reinterpret_cast<void**>(&p)));
 		data = p + x_offset * NumFormatBytes(format_);
 	}
 

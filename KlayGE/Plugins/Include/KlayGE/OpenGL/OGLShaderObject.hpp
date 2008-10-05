@@ -37,7 +37,8 @@ namespace KlayGE
 			boost::shared_ptr<std::string> const & shader_text);
 		ShaderObjectPtr Clone(RenderEffect& effect);
 
-		void Active();
+		void Bind();
+		void Unbind();
 
 	private:
 		struct parameter_bind_t

@@ -36,7 +36,7 @@
 namespace KlayGE
 {
 	OGLTexture1D::OGLTexture1D(uint32_t width, uint16_t numMipMaps,
-								ElementFormat format, uint32_t access_hint)
+								ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 					: OGLTexture(TT_1D, access_hint)
 	{
 		if (!glloader_GL_EXT_texture_sRGB())
@@ -93,7 +93,14 @@ namespace KlayGE
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[level]);
 				glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW);
 				uint8_t* p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
-				memset(p, 0, image_size);
+				if (NULL == init_data)
+				{
+					memset(p, 0, image_size);
+				}
+				else
+				{
+					memcpy(p, &init_data->data[0], image_size);
+				}
 				glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
 				glCompressedTexImage1D(GL_TEXTURE_1D, level, glinternalFormat,
@@ -106,7 +113,14 @@ namespace KlayGE
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[level]);
 				glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW);
 				uint8_t* p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
-				memset(p, 0, image_size);
+				if (NULL == init_data)
+				{
+					memset(p, 0, image_size);
+				}
+				else
+				{
+					memcpy(p, &init_data->data[0], image_size);
+				}
 				glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
 				glTexImage1D(GL_TEXTURE_1D, level, glinternalFormat,
@@ -126,7 +140,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(level < numMipMaps_);
 
-		return static_cast<GLint>(widths_[level]);
+		return widthes_[level];
 	}
 
 	void OGLTexture1D::CopyToTexture(Texture& target)
@@ -338,13 +352,13 @@ namespace KlayGE
 	{
 		GLint w;
 
-		widths_.resize(numMipMaps_);
+		widthes_.resize(numMipMaps_);
 
 		glBindTexture(GL_TEXTURE_1D, texture_);
 		for (uint16_t level = 0; level < numMipMaps_; ++ level)
 		{
 			glGetTexLevelParameteriv(GL_TEXTURE_1D, level, GL_TEXTURE_WIDTH, &w);
-			widths_[level] = w;
+			widthes_[level] = w;
 		}
 	}
 }

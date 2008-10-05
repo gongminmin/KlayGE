@@ -37,7 +37,7 @@ namespace KlayGE
 
 	// ªÒ»°œ‘ø®
 	/////////////////////////////////////////////////////////////////////////////////
-	D3D10Adapter const & D3D10AdapterList::Adapter(size_t index) const
+	D3D10AdapterPtr const & D3D10AdapterList::Adapter(size_t index) const
 	{
 		BOOST_ASSERT(index < adapters_.size());
 
@@ -77,13 +77,8 @@ namespace KlayGE
 					current_adapter_ = adapter_no;
 				}
 
-				D3D10Adapter adapter(adapter_no, MakeCOMPtr(adapter));
-				adapter.Enumerate();
-
-				if (adapter.NumVideoMode() != 0)
-				{
-					adapters_.push_back(adapter);
-				}
+				D3D10AdapterPtr adapter(new D3D10Adapter(adapter_no, MakeCOMPtr(adapter)));
+				adapters_.push_back(adapter);
 			}
 
 			++ adapter_no;

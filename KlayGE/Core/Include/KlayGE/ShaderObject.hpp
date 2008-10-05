@@ -57,7 +57,8 @@ namespace KlayGE
 			boost::shared_ptr<std::string> const & shader_text) = 0;
 		virtual ShaderObjectPtr Clone(RenderEffect& effect) = 0;
 
-		virtual void Active() = 0;
+		virtual void Bind() = 0;
+		virtual void Unbind() = 0;
 
 		bool Validate() const
 		{

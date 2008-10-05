@@ -34,7 +34,7 @@ void ColorDepthVS(float4 pos			: POSITION,
 	oClr = saturate(clr.rgb * point_lighting(light_in_world, pos_ws.xyz, mul(normal, (float3x3)model))) - 0.5f;
 }
 
-float4 ColorDepthPS(float3 clr : COLOR,
+float4 ColorDepthPS(float4 pos		: POSITION, float3 clr : COLOR,
 				float2 depth : TEXCOORD0) : COLOR
 {
 	return float4(clr, (depth.x / depth.y - depth_min) * inv_depth_range);
@@ -67,7 +67,7 @@ float4 ColorDepthPS(float3 clr : COLOR,
 
 	<shader>
 		<![CDATA[
-float4 DepthOfFieldPS(float2 tex_coord0 : TEXCOORD0) : COLOR
+float4 DepthOfFieldPS(float4 pos : POSITION, float2 tex_coord0 : TEXCOORD0) : COLOR
 {
 	float blur_factor = saturate(abs(tex2D(src_sampler, tex_coord0).a - focus_plane) * inv_focus_range);
 	if (show_blur_factor)
@@ -101,7 +101,7 @@ float4 DepthOfFieldPS(float2 tex_coord0 : TEXCOORD0) : COLOR
 	<parameter type="float4" name="clear_clr"/>
 	<shader>
 		<![CDATA[
-float4 ClearFloatPS() : COLOR
+float4 ClearFloatPS(float4 pos : POSITION, float2 tex_coord0 : TEXCOORD0) : COLOR
 {
 	return clear_clr;
 }

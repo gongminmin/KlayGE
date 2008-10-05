@@ -58,6 +58,9 @@ namespace KlayGE
 			return d3d_sr_view_;
 		}
 
+	protected:
+		void GetD3DFlags(D3D10_USAGE& usage, UINT& bind_flags, UINT& cpu_access_flags, UINT& misc_flags);
+
 	private:
 		virtual void Map1D(int level, TextureMapAccess tma,
 			uint32_t width, uint32_t x_offset,
@@ -89,7 +92,7 @@ namespace KlayGE
 	class D3D10Texture1D : public D3D10Texture
 	{
 	public:
-		D3D10Texture1D(uint32_t width, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint);
+		D3D10Texture1D(uint32_t width, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data);
 
 		uint32_t Width(int level) const;
 
@@ -120,7 +123,7 @@ namespace KlayGE
 	class D3D10Texture2D : public D3D10Texture
 	{
 	public:
-		D3D10Texture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint);
+		D3D10Texture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
@@ -155,7 +158,7 @@ namespace KlayGE
 	class D3D10Texture3D : public D3D10Texture
 	{
 	public:
-		D3D10Texture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint);
+		D3D10Texture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
@@ -195,7 +198,7 @@ namespace KlayGE
 	class D3D10TextureCube : public D3D10Texture
 	{
 	public:
-		D3D10TextureCube(uint32_t size, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint);
+		D3D10TextureCube(uint32_t size, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;

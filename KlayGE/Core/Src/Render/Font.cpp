@@ -155,7 +155,8 @@ namespace
 			RenderEngine const & renderEngine = rf.RenderEngineInstance();
 			RenderDeviceCaps const & caps = renderEngine.DeviceCaps();
 			dist_texture_ = rf.MakeTexture2D(std::min<uint32_t>(2048, caps.max_texture_width) / kfont_char_size_ * kfont_char_size_,
-				std::min<uint32_t>(2048, caps.max_texture_height) / kfont_char_size_ * kfont_char_size_, 1, EF_L8, EAH_CPU_Write | EAH_GPU_Read);
+				std::min<uint32_t>(2048, caps.max_texture_height) / kfont_char_size_ * kfont_char_size_, 1, EF_L8, EAH_GPU_Read, NULL);
+			a_char_texture_ = rf.MakeTexture2D(kfont_char_size_, kfont_char_size_, 1, EF_L8, EAH_CPU_Write, NULL);
 
 			effect_ = rf.LoadEffect("Font.kfx");
 			*(effect_->ParameterByName("distance_sampler")) = dist_texture_;
@@ -165,12 +166,14 @@ namespace
 			texel_to_pixel_offset_ep_ = effect_->ParameterByName("texel_to_pixel_offset");
 			mvp_ep_ = effect_->ParameterByName("mvp");
 
-			vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read);
+			vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read, NULL);
+			vb_sys_mem_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write, NULL);
 			rl_->BindVertexStream(vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
-											vertex_element(VEU_Diffuse, 0, EF_ARGB8),
+											vertex_element(VEU_Diffuse, 0, EF_ABGR8),
 											vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 
-			ib_ = rf.MakeIndexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read);
+			ib_ = rf.MakeIndexBuffer(BU_Dynamic, EAH_GPU_Read, NULL);
+			ib_sys_mem_ = rf.MakeIndexBuffer(BU_Dynamic, EAH_CPU_Write, NULL);
 			rl_->BindIndexStream(ib_, EF_R16);
 
 			box_ = Box(float3(0, 0, 0), float3(0, 0, 0));
@@ -190,17 +193,21 @@ namespace
 
 		void OnRenderBegin()
 		{
+			vb_sys_mem_->Resize(static_cast<uint32_t>(vertices_.size() * sizeof(vertices_[0])));
 			vb_->Resize(static_cast<uint32_t>(vertices_.size() * sizeof(vertices_[0])));
 			{
-				GraphicsBuffer::Mapper mapper(*vb_, BA_Write_Only);
+				GraphicsBuffer::Mapper mapper(*vb_sys_mem_, BA_Write_Only);
 				std::copy(vertices_.begin(), vertices_.end(), mapper.Pointer<FontVert>());
 			}
+			vb_sys_mem_->CopyToBuffer(*vb_);
 
+			ib_sys_mem_->Resize(static_cast<uint32_t>(indices_.size() * sizeof(indices_[0])));
 			ib_->Resize(static_cast<uint32_t>(indices_.size() * sizeof(indices_[0])));
 			{
-				GraphicsBuffer::Mapper mapper(*rl_->GetIndexStream(), BA_Write_Only);
+				GraphicsBuffer::Mapper mapper(*ib_sys_mem_, BA_Write_Only);
 				std::copy(indices_.begin(), indices_.end(), mapper.Pointer<uint16_t>());
 			}
+			ib_sys_mem_->CopyToBuffer(*ib_);
 
 			if (!three_dim_)
 			{
@@ -583,8 +590,8 @@ namespace
 						charInfo.bottom()	= charInfo.top() + static_cast<float>(height) / tex_height;
 
 						{
-							Texture::Mapper mapper(*dist_texture_, 0, TMA_Write_Only,
-								char_pos.x(), char_pos.y(), kfont_char_size_, kfont_char_size_);
+							Texture::Mapper mapper(*a_char_texture_, 0, TMA_Write_Only,
+								0, 0, kfont_char_size_, kfont_char_size_);
 							uint8_t* tex_data = mapper.Pointer<uint8_t>();
 							uint8_t const * char_data = &distances_[iter->second * kfont_char_size_ * kfont_char_size_];
 							for (uint32_t y = 0; y < kfont_char_size_; ++ y)
@@ -594,6 +601,10 @@ namespace
 								char_data += kfont_char_size_;
 							}
 						}
+
+						a_char_texture_->CopyToTexture2D(*dist_texture_, 0,
+							kfont_char_size_, kfont_char_size_, char_pos.x(), char_pos.y(),
+							kfont_char_size_, kfont_char_size_, 0, 0);
 
 						charInfoMap_.insert(std::make_pair(ch, charInfo));
 						charLRU_.push_front(ch);
@@ -638,9 +649,12 @@ namespace
 		std::vector<uint16_t>	indices_;
 
 		GraphicsBufferPtr vb_;
+		GraphicsBufferPtr vb_sys_mem_;
 		GraphicsBufferPtr ib_;
+		GraphicsBufferPtr ib_sys_mem_;
 
 		TexturePtr		dist_texture_;
+		TexturePtr		a_char_texture_;
 		RenderEffectPtr	effect_;
 
 		RenderEffectParameterPtr half_width_height_ep_;

@@ -6,6 +6,7 @@
 //
 // 3.8.0
 // 增加了access_hint (2008.9.20)
+// 增加了ElementInitData (2008.10.1)
 //
 // 3.6.0
 // 可以通过Map直接访问纹理内容 (2007.7.7)
@@ -45,6 +46,7 @@
 #include <KlayGE/ElementFormat.hpp>
 
 #include <string>
+#include <vector>
 #include <boost/assert.hpp>
 #include <boost/utility.hpp>
 

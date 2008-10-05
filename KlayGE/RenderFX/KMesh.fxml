@@ -25,12 +25,12 @@ void MeshVS(float4 pos	: POSITION,
 	oClr = float4(dot(normal, light - pos.xyz).xxx, 1);
 }
 
-float4 MeshPS(float4 clr : COLOR0, float2 uv : TEXCOORD0) : COLOR
+float4 MeshPS(float4 pos : POSITION, float2 uv : TEXCOORD0, float4 clr : COLOR0) : COLOR
 {
 	return clr * tex2D(texSampler, uv);
 }
 
-float4 MeshNoTexPS(float4 clr : COLOR0) : COLOR
+float4 MeshNoTexPS(float4 pos : POSITION, float2 uv : TEXCOORD0, float4 clr : COLOR0) : COLOR
 {
 	return clr;
 }

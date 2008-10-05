@@ -87,7 +87,7 @@ namespace KlayGE
 		TexturePtr tex;
 		if (!texture_slots_.empty())
 		{
-			tex = LoadTexture(texture_slots_[0].second, EAH_CPU_Write | EAH_GPU_Read);
+			tex = LoadTexture(texture_slots_[0].second, EAH_GPU_Read);
 		}
 
 		if (tex)
@@ -208,7 +208,7 @@ namespace KlayGE
 						break;
 
 					case 4:
-						ve.format = EF_ARGB8;
+						ve.format = EF_ABGR8;
 						break;
 					}
 				}

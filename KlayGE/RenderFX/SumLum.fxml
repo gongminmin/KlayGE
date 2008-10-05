@@ -33,7 +33,7 @@ void SumLumVS(float4 pos : POSITION,
 	oTex1 = tex.xyxy + tex_coord_offset[1];
 }
 
-float4 SumLum4x4LogPS(float4 iTex0 : TEXCOORD0,
+float4 SumLum4x4LogPS(float4 pos : POSITION, float4 iTex0 : TEXCOORD0,
 						float4 iTex1 : TEXCOORD1) : COLOR
 {
 	const half3 RGB_TO_LUM = half3(0.27, 0.67, 0.06);
@@ -49,7 +49,7 @@ float4 SumLum4x4LogPS(float4 iTex0 : TEXCOORD0,
 	return s / 4;
 }
 
-float4 SumLum4x4IterativePS(float4 iTex[2] : TEXCOORD) : COLOR
+float4 SumLum4x4IterativePS(float4 pos : POSITION, float4 iTex[2] : TEXCOORD) : COLOR
 {
 	half s = 0;
 	for (int i = 0; i < 2; ++ i)
@@ -61,7 +61,9 @@ float4 SumLum4x4IterativePS(float4 iTex[2] : TEXCOORD) : COLOR
 	return s / 4;
 }
 
-float4 AdaptedLumPS() : COLOR
+float4 AdaptedLumPS(float4 pos : POSITION,
+				float4 tex0 : TEXCOORD0,
+				float4 tex1 : TEXCOORD1) : COLOR
 {
 	float adapted_lum = tex2D(last_lum_sampler, float2(0.5f, 0.5f)).r;
 	float current_lum = exp(tex2D(src_sampler, float2(0.5f, 0.5f)).r);

@@ -6,6 +6,7 @@
 //
 // 3.8.0
 // 增加了access_hint的标志 (2008.9.20)
+// 增加了ElementInitData (2008.10.1)
 //
 // 3.5.0
 // 支持有符号格式 (2007.2.12)
@@ -25,6 +26,7 @@
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
 
+#include <vector>
 #include <boost/assert.hpp>
 
 namespace KlayGE
@@ -708,6 +710,13 @@ namespace KlayGE
 		EAH_CPU_Write = 1UL << 1,
 		EAH_GPU_Read = 1UL << 2,
 		EAH_GPU_Write = 1UL << 3,
+	};
+
+	struct ElementInitData
+	{
+		std::vector<uint8_t> data;
+		uint32_t row_pitch;
+		uint32_t slice_pitch;
 	};
 }
 
