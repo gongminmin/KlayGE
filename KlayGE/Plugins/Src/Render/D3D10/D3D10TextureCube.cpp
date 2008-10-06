@@ -63,6 +63,7 @@ namespace KlayGE
 		desc.SampleDesc.Quality = 0;
 
 		this->GetD3DFlags(desc.Usage, desc.BindFlags, desc.CPUAccessFlags, desc.MiscFlags);
+		desc.MiscFlags |= D3D10_RESOURCE_MISC_TEXTURECUBE;
 
 		D3D10_SUBRESOURCE_DATA subres_data;
 		if (init_data != NULL)

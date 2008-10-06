@@ -53,6 +53,7 @@ namespace KlayGE
 			float time = 0;
 			BOOST_FOREACH(typename BOOST_TYPEOF(particles_)::reference particle, particles_)
 			{
+				particle.life = -1;
 				particle.birth_time = time;
 				time += inv_emit_freq_;
 			}
