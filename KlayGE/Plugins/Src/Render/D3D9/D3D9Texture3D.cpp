@@ -14,6 +14,7 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/COMPtr.hpp>
 #include <KlayGE/ThrowErr.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -101,7 +102,7 @@ namespace KlayGE
 							block_size = 16;
 						}
 
-						memcpy(mapper.Pointer<uint8_t>(), &init_data[level].data[0], 
+						memcpy(mapper.Pointer<uint8_t>(), &init_data[level].data[0],
 							((widths_[level] + 3) / 4) * ((heights_[level] + 3) / 4) * depth * block_size);
 					}
 					else

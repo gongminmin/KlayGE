@@ -14,6 +14,7 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/COMPtr.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
@@ -39,7 +40,7 @@ namespace KlayGE
 			size_in_byte_ = init_data->row_pitch;
 
 			IDirect3DIndexBuffer9* buffer;
-			TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->Size()), 
+			TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->Size()),
 				usage, (EF_R32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_MANAGED, &buffer, NULL));
 			buffer_ = MakeCOMPtr(buffer);
 			hw_buf_size_ = init_data->row_pitch;
@@ -64,7 +65,7 @@ namespace KlayGE
 			if (EF_R16 == old_format)
 			{
 				IDirect3DIndexBuffer9* buffer;
-				TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->Size() * (sizeof(uint32_t) / sizeof(uint16_t))), 
+				TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->Size() * (sizeof(uint32_t) / sizeof(uint16_t))),
 					usage, (EF_R32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_MANAGED, &buffer, NULL));
 
 				uint16_t* src;
@@ -87,7 +88,7 @@ namespace KlayGE
 				BOOST_ASSERT(EF_R32 == old_format);
 
 				IDirect3DIndexBuffer9* buffer;
-				TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->Size() / (sizeof(uint32_t) / sizeof(uint16_t))), 
+				TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->Size() / (sizeof(uint32_t) / sizeof(uint16_t))),
 					usage, (EF_R32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_MANAGED, &buffer, NULL));
 
 				uint32_t* src;
@@ -120,7 +121,7 @@ namespace KlayGE
 			d3d_device_ = renderEngine.D3DDevice();
 
 			IDirect3DIndexBuffer9* buffer;
-			TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->Size()), 
+			TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->Size()),
 				usage, (EF_R32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_MANAGED, &buffer, NULL));
 			buffer_ = MakeCOMPtr(buffer);
 			hw_buf_size_ = this->Size();

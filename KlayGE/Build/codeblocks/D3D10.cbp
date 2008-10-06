@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="D3D10 Rendering System" />
+		<Option platforms="Windows;" />
+		<Option pch_mode="0" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug_win_x86">
+				<Option platforms="Windows;" />
+				<Option output="..\..\lib\win\x86\libKlayGE_RenderEngine_D3D10_d.a" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="..\..\Debug\win\x86" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option projectResourceIncludeDirsRelation="2" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-O0" />
+					<Add option="-DWIN32" />
+					<Add option="-D_DEBUG" />
+					<Add option="-D_LIB" />
+					<Add option="-DSTRICT" />
+				</Compiler>
+			</Target>
+			<Target title="Release_win_x86">
+				<Option platforms="Windows;" />
+				<Option output="..\..\lib\win\x86\libKlayGE_RenderEngine_D3D10.a" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="..\..\Release\win\x86" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option projectResourceIncludeDirsRelation="2" />
+				<Compiler>
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-O2" />
+					<Add option="-Wall" />
+					<Add option="-DWIN32" />
+					<Add option="-DNDEBUG" />
+					<Add option="-D_LIB" />
+					<Add option="-DSTRICT" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<VirtualTargets>
+			<Add alias="All_Win" targets="Debug_win_x86;Release_win_x86;" />
+		</VirtualTargets>
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D10\D3D10Adapter.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D10\D3D10AdapterList.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D10\D3D10FrameBuffer.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D10\D3D10GraphicsBuffer.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D10\D3D10Mapping.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D10\D3D10OcclusionQuery.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D10\D3D10RenderEngine.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D10\D3D10RenderFactory.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D10\D3D10RenderLayout.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D10\D3D10RenderStateObject.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D10\D3D10RenderView.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D10\D3D10RenderWindow.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D10\D3D10ShaderObject.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D10\D3D10Texture.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D10\D3D10Typedefs.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\D3D10\D3D10VideoMode.hpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D10\D3D10Adapter.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D10\D3D10AdapterList.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D10\D3D10FrameBuffer.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D10\D3D10GraphicsBuffer.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D10\D3D10Mapping.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D10\D3D10OcclusionQuery.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D10\D3D10RenderEngine.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D10\D3D10RenderFactory.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D10\D3D10RenderLayout.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D10\D3D10RenderStateObject.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D10\D3D10RenderView.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D10\D3D10RenderWindow.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D10\D3D10ShaderObject.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D10\D3D10Texture.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D10\D3D10Texture1D.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D10\D3D10Texture2D.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D10\D3D10Texture3D.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D10\D3D10TextureCube.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\D3D10\D3D10VideoMode.cpp" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

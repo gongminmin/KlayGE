@@ -26,6 +26,8 @@
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderLayout.hpp>
 
+#include <cstring>
+
 #include <KlayGE/PostProcess.hpp>
 
 namespace KlayGE
@@ -38,7 +40,7 @@ namespace KlayGE
 		rl_ = rf.MakeRenderLayout();
 		rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
-		float2 pos[] = 
+		float2 pos[] =
 		{
 			float2(-1, +1),
 			float2(+1, +1),
@@ -49,7 +51,7 @@ namespace KlayGE
 		ElementInitData init_data;
 		init_data.row_pitch = sizeof(pos);
 		init_data.data.resize(init_data.row_pitch);
-		memcpy(&init_data.data[0], &pos[0], init_data.row_pitch);
+		std::memcpy(&init_data.data[0], &pos[0], init_data.row_pitch);
 		pos_vb_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 		rl_->BindVertexStream(pos_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 

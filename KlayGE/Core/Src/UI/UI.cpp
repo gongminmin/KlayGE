@@ -27,6 +27,7 @@
 
 #include <KlayGE/Input.hpp>
 
+#include <cstring>
 #include <boost/bind.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
@@ -49,7 +50,7 @@ namespace KlayGE
 			init_data.row_pitch = static_cast<uint32_t>(vertices.size() * sizeof(vertices[0]));
 			init_data.slice_pitch = 0;
 			init_data.data.resize(init_data.row_pitch);
-			memcpy(&init_data.data[0], &vertices[0], init_data.row_pitch);
+			std::memcpy(&init_data.data[0], &vertices[0], init_data.row_pitch);
 
 			GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
@@ -59,7 +60,7 @@ namespace KlayGE
 			init_data.row_pitch = static_cast<uint32_t>(indices.size() * sizeof(indices[0]));
 			init_data.slice_pitch = 0;
 			init_data.data.resize(init_data.row_pitch);
-			memcpy(&init_data.data[0], &indices[0], init_data.row_pitch);
+			std::memcpy(&init_data.data[0], &indices[0], init_data.row_pitch);
 
 			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindIndexStream(ib, EF_R16);

@@ -14,6 +14,7 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/COMPtr.hpp>
 #include <KlayGE/ThrowErr.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -87,7 +88,7 @@ namespace KlayGE
 					for (int level = 0; level < numMipMaps_; ++ level)
 					{
 						Texture::Mapper mapper(*this, static_cast<Texture::CubeFaces>(face), level, TMA_Write_Only, 0, 0, widths_[level], widths_[level]);
-			
+
 						if (IsCompressedFormat(format_))
 						{
 							int block_size;
@@ -100,7 +101,7 @@ namespace KlayGE
 								block_size = 16;
 							}
 
-							memcpy(mapper.Pointer<uint8_t>(), &init_data[level].data[0], 
+							memcpy(mapper.Pointer<uint8_t>(), &init_data[level].data[0],
 								((widths_[level] + 3) / 4) * ((widths_[level] + 3) / 4) * block_size);
 						}
 						else

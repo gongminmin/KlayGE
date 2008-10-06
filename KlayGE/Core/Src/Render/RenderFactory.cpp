@@ -14,9 +14,9 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Texture.hpp>
-#include <KlayGE/Math.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/Query.hpp>

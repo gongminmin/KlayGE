@@ -22,6 +22,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenGL Rendering System", "
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OCTree Scene Management", "OCTree.vcproj", "{6D03BA3A-EDF0-47EF-A008-23A87502AD55}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "D3D10 Rendering System", "D3D10.vcproj", "{B6655D46-44F4-4B48-ADCC-557F5BD4CBD3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -118,6 +120,12 @@ Global
 		{6D03BA3A-EDF0-47EF-A008-23A87502AD55}.Release|Win32.Build.0 = Release|Win32
 		{6D03BA3A-EDF0-47EF-A008-23A87502AD55}.Release|x64.ActiveCfg = Release|x64
 		{6D03BA3A-EDF0-47EF-A008-23A87502AD55}.Release|x64.Build.0 = Release|x64
+		{B6655D46-44F4-4B48-ADCC-557F5BD4CBD3}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B6655D46-44F4-4B48-ADCC-557F5BD4CBD3}.Debug|Win32.Build.0 = Debug|Win32
+		{B6655D46-44F4-4B48-ADCC-557F5BD4CBD3}.Debug|x64.ActiveCfg = Debug|Win32
+		{B6655D46-44F4-4B48-ADCC-557F5BD4CBD3}.Release|Win32.ActiveCfg = Release|Win32
+		{B6655D46-44F4-4B48-ADCC-557F5BD4CBD3}.Release|Win32.Build.0 = Release|Win32
+		{B6655D46-44F4-4B48-ADCC-557F5BD4CBD3}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

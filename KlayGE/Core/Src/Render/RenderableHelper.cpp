@@ -29,6 +29,7 @@
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/Camera.hpp>
 
+#include <cstring>
 #include <boost/tuple/tuple.hpp>
 
 #include <KlayGE/RenderableHelper.hpp>
@@ -78,7 +79,7 @@ namespace KlayGE
 		init_data.row_pitch = sizeof(v);
 		init_data.slice_pitch = 0;
 		init_data.data.resize(init_data.row_pitch);
-		memcpy(&init_data.data[0], &v, init_data.row_pitch);
+		std::memcpy(&init_data.data[0], &v, init_data.row_pitch);
 
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
@@ -115,7 +116,7 @@ namespace KlayGE
 		init_data.row_pitch = sizeof(xyzs);
 		init_data.slice_pitch = 0;
 		init_data.data.resize(init_data.row_pitch);
-		memcpy(&init_data.data[0], xyzs, init_data.row_pitch);
+		std::memcpy(&init_data.data[0], xyzs, init_data.row_pitch);
 
 		rl_ = rf.MakeRenderLayout();
 		rl_->TopologyType(RenderLayout::TT_LineList);
@@ -155,7 +156,7 @@ namespace KlayGE
 		init_data.row_pitch = sizeof(xyzs);
 		init_data.slice_pitch = 0;
 		init_data.data.resize(init_data.row_pitch);
-		memcpy(&init_data.data[0], xyzs, init_data.row_pitch);
+		std::memcpy(&init_data.data[0], xyzs, init_data.row_pitch);
 
 		rl_ = rf.MakeRenderLayout();
 		rl_->TopologyType(RenderLayout::TT_TriangleList);
@@ -210,7 +211,7 @@ namespace KlayGE
 		init_data.row_pitch = sizeof(xyzs);
 		init_data.slice_pitch = 0;
 		init_data.data.resize(init_data.row_pitch);
-		memcpy(&init_data.data[0], xyzs, init_data.row_pitch);
+		std::memcpy(&init_data.data[0], xyzs, init_data.row_pitch);
 
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
@@ -218,7 +219,7 @@ namespace KlayGE
 		init_data.row_pitch = sizeof(indices);
 		init_data.slice_pitch = 0;
 		init_data.data.resize(init_data.row_pitch);
-		memcpy(&init_data.data[0], indices, init_data.row_pitch);
+		std::memcpy(&init_data.data[0], indices, init_data.row_pitch);
 
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 		rl_->BindIndexStream(ib, EF_R16);
@@ -265,7 +266,7 @@ namespace KlayGE
 		init_data.row_pitch = sizeof(xyzs);
 		init_data.slice_pitch = 0;
 		init_data.data.resize(init_data.row_pitch);
-		memcpy(&init_data.data[0], xyzs, init_data.row_pitch);
+		std::memcpy(&init_data.data[0], xyzs, init_data.row_pitch);
 
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
@@ -273,7 +274,7 @@ namespace KlayGE
 		init_data.row_pitch = sizeof(indices);
 		init_data.slice_pitch = 0;
 		init_data.data.resize(init_data.row_pitch);
-		memcpy(&init_data.data[0], indices, init_data.row_pitch);
+		std::memcpy(&init_data.data[0], indices, init_data.row_pitch);
 
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 		rl_->BindIndexStream(ib, EF_R16);
@@ -308,7 +309,7 @@ namespace KlayGE
 		init_data.row_pitch = sizeof(xyzs);
 		init_data.slice_pitch = 0;
 		init_data.data.resize(init_data.row_pitch);
-		memcpy(&init_data.data[0], xyzs, init_data.row_pitch);
+		std::memcpy(&init_data.data[0], xyzs, init_data.row_pitch);
 
 		rl_ = rf.MakeRenderLayout();
 		rl_->TopologyType(RenderLayout::TT_TriangleStrip);
@@ -362,7 +363,7 @@ namespace KlayGE
 		init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
 		init_data.slice_pitch = 0;
 		init_data.data.resize(init_data.row_pitch);
-		memcpy(&init_data.data[0], &pos[0], init_data.row_pitch);
+		std::memcpy(&init_data.data[0], &pos[0], init_data.row_pitch);
 
 		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 		rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
@@ -382,7 +383,7 @@ namespace KlayGE
 			init_data.row_pitch = static_cast<uint32_t>(tex.size() * sizeof(tex[0]));
 			init_data.slice_pitch = 0;
 			init_data.data.resize(init_data.row_pitch);
-			memcpy(&init_data.data[0], &tex[0], init_data.row_pitch);
+			std::memcpy(&init_data.data[0], &tex[0], init_data.row_pitch);
 
 			GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
@@ -406,7 +407,7 @@ namespace KlayGE
 		init_data.row_pitch = static_cast<uint32_t>(index.size() * sizeof(index[0]));
 		init_data.slice_pitch = 0;
 		init_data.data.resize(init_data.row_pitch);
-		memcpy(&init_data.data[0], &index[0], init_data.row_pitch);
+		std::memcpy(&init_data.data[0], &index[0], init_data.row_pitch);
 
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 		rl_->BindIndexStream(ib, EF_R16);

@@ -16,6 +16,8 @@
 #include <windows.h>
 #endif
 
+#include <cstring>
+
 #include "BSTR.hpp"
 
 namespace KlayGE
@@ -33,9 +35,9 @@ namespace KlayGE
 		uint32_t strLen = sz.size();
 		size_t len = (strLen + 1) * sizeof(sz[0]);
 		uint8_t* p = new uint8_t[len + sizeof(uint32_t)];
-		memcpy(p, &strLen, sizeof(strLen));
+		std::memcpy(p, &strLen, sizeof(strLen));
 		BSTR bstr = reinterpret_cast<BSTR>(p + sizeof(strLen));
-		memmove(bstr, sz.c_str(), len);
+		std::memmove(bstr, sz.c_str(), len);
 		return bstr;
 #endif
 	}

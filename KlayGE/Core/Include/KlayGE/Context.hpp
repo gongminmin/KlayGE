@@ -24,6 +24,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
+#include <string>
 #include <boost/assert.hpp>
 
 namespace KlayGE
