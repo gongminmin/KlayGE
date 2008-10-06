@@ -2,9 +2,11 @@
 
 <effect>
 	<include name="2D.fxml"/>
-	
-	<parameter type="float2" name="half_width_height"/>
-	<parameter type='float4' name='texel_to_pixel_offset'/>
+
+	<cbuffer name="per_frame">
+		<parameter type="float2" name="half_width_height"/>
+		<parameter type='float4' name='texel_to_pixel_offset'/>
+	</cbuffer>
 
 	<parameter type="float4x4" name="mvp"/>
 

@@ -294,7 +294,7 @@ namespace KlayGE
 
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
-					RenderPassPtr pass = tech.Pass(i);
+					RenderPassPtr const & pass = tech.Pass(i);
 
 					pass->Bind();
 					d3d_device_->DrawIndexedInstanced(rl.NumIndices(), rl.NumInstance(), 0, 0, 0);
@@ -307,7 +307,7 @@ namespace KlayGE
 
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
-					RenderPassPtr pass = tech.Pass(i);
+					RenderPassPtr const & pass = tech.Pass(i);
 
 					pass->Bind();
 					d3d_device_->DrawInstanced(rl.NumVertices(), rl.NumInstance(), 0, 0);
@@ -324,7 +324,7 @@ namespace KlayGE
 
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
-					RenderPassPtr pass = tech.Pass(i);
+					RenderPassPtr const & pass = tech.Pass(i);
 
 					pass->Bind();
 					d3d_device_->DrawIndexed(rl.NumIndices(), 0, 0);
@@ -337,7 +337,7 @@ namespace KlayGE
 
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
-					RenderPassPtr pass = tech.Pass(i);
+					RenderPassPtr const & pass = tech.Pass(i);
 
 					pass->Bind();
 					d3d_device_->Draw(rl.NumVertices(), 0);

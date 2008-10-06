@@ -356,7 +356,7 @@ namespace KlayGE
 			fxml_header header;
 			source->read(reinterpret_cast<char*>(&header), sizeof(header));
 			BOOST_ASSERT((MakeFourCC<'F', 'X', 'M', 'L'>::value == header.fourcc));
-			BOOST_ASSERT(1 == header.ver);
+			BOOST_ASSERT(2 == header.ver);
 
 			for (uint32_t i = 0; i < header.num_parameters; ++ i)
 			{
@@ -369,7 +369,7 @@ namespace KlayGE
 			{
 				(*cbuffers_)[i].first = read_short_string(source);
 				
-				uint8_t len;
+				uint32_t len;
 				source->read(reinterpret_cast<char*>(&len), sizeof(len));
 				(*cbuffers_)[i].second.resize(len);
 				source->read(reinterpret_cast<char*>(&(*cbuffers_)[i].second[0]), len * sizeof((*cbuffers_)[i].second[0]));

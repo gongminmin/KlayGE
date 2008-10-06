@@ -792,7 +792,7 @@ class effect:
 		for var in vars:
 			p = parameter(var)
 
-			if p.type != "sampler1D" and p.type != "sampler2D" and p.type != "sampler3D" and p.type != "samplerCube":
+			if p.type != "sampler1D" and p.type != "sampler2D" and p.type != "sampler3D" and p.type != "samplerCUBE":
 				found = False
 				for m in self.cbuffers:
 					if m[0] == p.cbuff:
@@ -821,7 +821,7 @@ class effect:
 
 	def write(self, stream):
 		stream.write('FXML')
-		stream.write(struct.pack('I', 1))
+		stream.write(struct.pack('I', 2))
 		stream.write(struct.pack('I', len(self.parameters)))
 		stream.write(struct.pack('I', len(self.cbuffers)))
 		stream.write(struct.pack('I', len(self.shaders)))

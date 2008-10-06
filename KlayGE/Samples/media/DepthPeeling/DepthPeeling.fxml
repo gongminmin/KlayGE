@@ -4,13 +4,17 @@
 	<include name="../../../RenderFX/Lighting.fxml"/>
 	<include name="../../../RenderFX/PostProcess.fxml"/>
 
-	<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>
-	<parameter type="float4x4" name="mv" semantic="WORLDVIEW"/>
 	<parameter type="float3" name="light_pos"/>
-	<parameter type="float" name="depth_min"/>
-	<parameter type="float" name="inv_depth_range"/>
 
-	<parameter type="float2" name="offset"/>
+	<cbuffer name="per_frame">
+		<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>
+		<parameter type="float4x4" name="mv" semantic="WORLDVIEW"/>
+		<parameter type="float" name="depth_min"/>
+		<parameter type="float" name="inv_depth_range"/>
+
+		<parameter type="float2" name="offset"/>
+	</cbuffer>
+	
 	<parameter type="sampler2D" name="last_depth_sampler">
 		<state name="filtering" value="point"/>
 		<state name="address_u" value="clamp"/>

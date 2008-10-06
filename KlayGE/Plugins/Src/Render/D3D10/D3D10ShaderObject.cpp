@@ -372,13 +372,14 @@ namespace KlayGE
 				dirty_[type].resize(desc.ConstantBuffers);
 				d3d_cbufs_[type].resize(desc.ConstantBuffers);
 				d3d_cbufs_sys_mem_[type].resize(desc.ConstantBuffers);
+				cbufs_[type].resize(desc.ConstantBuffers);
 				for (UINT c = 0; c < desc.ConstantBuffers; ++ c)
 				{
 					ID3D10ShaderReflectionConstantBuffer* reflection_cb = reflection->GetConstantBufferByIndex(c);
 
 					D3D10_SHADER_BUFFER_DESC cb_desc;
 					reflection_cb->GetDesc(&cb_desc);
-					cbufs_[type].resize(cb_desc.Size);
+					cbufs_[type][c].resize(cb_desc.Size);
 
 					for (UINT v = 0; v < cb_desc.Variables; ++ v)
 					{
@@ -395,6 +396,7 @@ namespace KlayGE
 							p_handle.shader_type = static_cast<uint8_t>(type);
 							p_handle.param_class = type_desc.Class;
 							p_handle.param_type = type_desc.Type;
+							p_handle.cbuff = c;
 							p_handle.offset = var_desc.StartOffset;
 							p_handle.rows = static_cast<uint8_t>(type_desc.Rows);
 							p_handle.columns = static_cast<uint8_t>(type_desc.Columns);
@@ -494,10 +496,10 @@ namespace KlayGE
 		ret->vs_code_ = vs_code_;
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
-			ret->cbufs_[i].resize(cbufs_[i].size());
 			ret->textures_[i].resize(textures_[i].size());
 			ret->samplers_[i].resize(samplers_[i].size());
 
+			ret->cbufs_[i] = cbufs_[i];
 			ret->dirty_[i] = dirty_[i];
 			ret->d3d_cbufs_[i] = d3d_cbufs_[i];
 			ret->d3d_cbufs_sys_mem_[i] = d3d_cbufs_sys_mem_[i];
