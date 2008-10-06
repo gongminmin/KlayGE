@@ -444,6 +444,11 @@ class parameter:
 		else:
 			self.array_size = int(tag.getAttribute('array_size'))
 
+		if "cbuffer" == tag.parentNode.tagName:
+			self.cbuff = tag.parentNode.getAttribute('name')
+		else:
+			self.cbuff = "global_cb"
+
 		self.annotations = []
 		anns = tag.getElementsByTagName('annotation')			
 		for ann in anns:
@@ -780,10 +785,24 @@ class technique:
 
 class effect:
 	def __init__(self, tag):
+		self.cbuffers = []
+
 		self.parameters = []
 		vars = tag.getElementsByTagName('parameter')
 		for var in vars:
-			self.parameters.append(parameter(var))
+			p = parameter(var)
+
+			if p.type != "sampler1D" and p.type != "sampler2D" and p.type != "sampler3D" and p.type != "samplerCube":
+				found = False
+				for m in self.cbuffers:
+					if m[0] == p.cbuff:
+						m[1].append(len(self.parameters))
+						found = True
+						break
+				if not found:
+					self.cbuffers.append([p.cbuff, [len(self.parameters)]])
+
+			self.parameters.append(p)
 
 		render_state_blocks = []
 		sblocks = tag.getElementsByTagName('state_block')
@@ -804,11 +823,18 @@ class effect:
 		stream.write('FXML')
 		stream.write(struct.pack('I', 1))
 		stream.write(struct.pack('I', len(self.parameters)))
+		stream.write(struct.pack('I', len(self.cbuffers)))
 		stream.write(struct.pack('I', len(self.shaders)))
 		stream.write(struct.pack('I', len(self.techniques)))
 
 		for var in self.parameters:
 			var.write(stream)
+
+		for cbuff in self.cbuffers:
+			write_short_string(stream, cbuff[0])
+			stream.write(struct.pack('I', len(cbuff[1])))
+			for p in cbuff[1]:
+				stream.write(struct.pack('I', p))
 
 		for shader in self.shaders:
 			shader.write(stream)

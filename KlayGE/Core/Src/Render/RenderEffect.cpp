@@ -345,6 +345,7 @@ namespace KlayGE
 			uint32_t fourcc;
 			uint32_t ver;
 			uint32_t num_parameters;
+			uint32_t num_cbuffers;
 			uint32_t num_shaders;
 			uint32_t num_techniques;
 		};
@@ -361,6 +362,17 @@ namespace KlayGE
 			{
 				params_.push_back(RenderEffectParameterPtr(new RenderEffectParameter(*this)));
 				params_[i]->Load(source);
+			}
+
+			cbuffers_.reset(new BOOST_TYPEOF(*cbuffers_)(header.num_cbuffers));
+			for (uint32_t i = 0; i < header.num_cbuffers; ++ i)
+			{
+				(*cbuffers_)[i].first = read_short_string(source);
+				
+				uint8_t len;
+				source->read(reinterpret_cast<char*>(&len), sizeof(len));
+				(*cbuffers_)[i].second.resize(len);
+				source->read(reinterpret_cast<char*>(&(*cbuffers_)[i].second[0]), len * sizeof((*cbuffers_)[i].second[0]));
 			}
 
 			if (header.num_shaders > 0)
@@ -393,6 +405,8 @@ namespace KlayGE
 		{
 			ret->params_[i] = params_[i]->Clone(*ret);
 		}
+
+		ret->cbuffers_ = cbuffers_;
 
 		ret->techniques_.resize(techniques_.size());
 		for (size_t i = 0; i < techniques_.size(); ++ i)
@@ -841,24 +855,18 @@ namespace KlayGE
 	{
 		std::stringstream ss;
 
-		ss << "#ifdef CONSTANT_BUFFER" << std::endl;
-		ss << "cbuffer global_cb" << std::endl;
-		ss << "{" << std::endl;
-		ss << "#endif" << std::endl;
-
-		for (uint32_t i = 0; i < effect_.NumParameters(); ++ i)
+		BOOST_AUTO(cbuffers, effect_.CBuffers());
+		BOOST_FOREACH(BOOST_TYPEOF(cbuffers)::const_reference cbuff, cbuffers)
 		{
-			RenderEffectParameter& param = *effect_.ParameterByIndex(i);
+			ss << "#ifdef CONSTANT_BUFFER" << std::endl;
+			ss << "cbuffer " << cbuff.first << std::endl;
+			ss << "{" << std::endl;
+			ss << "#endif" << std::endl;
 
-			switch (param.type())
+			BOOST_FOREACH(BOOST_TYPEOF(cbuff.second)::const_reference param_index, cbuff.second)
 			{
-			case REDT_sampler1D:
-			case REDT_sampler2D:
-			case REDT_sampler3D:
-			case REDT_samplerCUBE:
-				break;
+				RenderEffectParameter& param = *effect_.ParameterByIndex(param_index);
 
-			default:
 				ss << type_define::instance().type_name(param.type()) << " " << *param.Name();
 				if (param.ArraySize() != 0)
 				{
@@ -866,13 +874,12 @@ namespace KlayGE
 				}
 
 				ss << ";" << std::endl;
-				break;
 			}
-		}
 
-		ss << "#ifdef CONSTANT_BUFFER" << std::endl;
-		ss << "};" << std::endl;
-		ss << "#endif" << std::endl << std::endl;
+			ss << "#ifdef CONSTANT_BUFFER" << std::endl;
+			ss << "};" << std::endl;
+			ss << "#endif" << std::endl << std::endl;
+		}
 
 		for (uint32_t i = 0; i < effect_.NumParameters(); ++ i)
 		{

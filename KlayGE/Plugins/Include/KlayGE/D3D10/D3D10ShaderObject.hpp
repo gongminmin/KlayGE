@@ -33,6 +33,8 @@ namespace KlayGE
 		D3D10_SHADER_VARIABLE_CLASS param_class;
 	    D3D10_SHADER_VARIABLE_TYPE param_type;
 
+		uint32_t cbuff;
+
 		uint32_t offset;
 		uint32_t elements;
 		uint8_t rows;
@@ -77,14 +79,14 @@ namespace KlayGE
 		ID3D10VertexShaderPtr vertex_shader_;
 		ID3D10PixelShaderPtr pixel_shader_;
 		ID3D10BlobPtr vs_code_;
-		bool dirty_;
 
-		boost::array<std::vector<uint8_t>, ST_NumShaderTypes> cbufs_;
 		boost::array<std::vector<TexturePtr>, ST_NumShaderTypes> textures_;
 		boost::array<std::vector<SamplerStateObjectPtr>, ST_NumShaderTypes> samplers_;
 
-		boost::array<ID3D10BufferPtr, ST_NumShaderTypes> d3d_cbufs_;
-		boost::array<ID3D10BufferPtr, ST_NumShaderTypes> d3d_cbufs_sys_mem_;
+		boost::array<std::vector<char>, ST_NumShaderTypes> dirty_;
+		boost::array<std::vector<std::vector<uint8_t> >, ST_NumShaderTypes> cbufs_;
+		boost::array<std::vector<ID3D10BufferPtr>, ST_NumShaderTypes> d3d_cbufs_;
+		boost::array<std::vector<ID3D10BufferPtr>, ST_NumShaderTypes> d3d_cbufs_sys_mem_;
 	};
 
 	typedef boost::shared_ptr<D3D10ShaderObject> D3D10ShaderObjectPtr;

@@ -233,6 +233,11 @@ namespace KlayGE
 			return params_[n];
 		}
 
+		std::vector<std::pair<std::string, std::vector<uint32_t> > > const & CBuffers() const
+		{
+			return *cbuffers_;
+		}
+
 		uint32_t NumTechniques() const
 		{
 			return static_cast<uint32_t>(techniques_.size());
@@ -256,6 +261,7 @@ namespace KlayGE
 
 	protected:
 		std::vector<RenderEffectParameterPtr> params_;
+		boost::shared_ptr<std::vector<std::pair<std::string, std::vector<uint32_t> > > > cbuffers_;
 		std::vector<RenderTechniquePtr> techniques_;
 
 		boost::shared_ptr<std::vector<RenderShaderFunc> > shaders_;
