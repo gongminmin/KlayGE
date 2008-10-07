@@ -31,7 +31,10 @@ namespace KlayGE
 	public:
 		D3D10GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t bind_flags, ElementInitData* init_data);
 
-		ID3D10BufferPtr D3DBuffer() const;
+		ID3D10BufferPtr const & D3DBuffer() const
+		{
+			return buffer_;
+		}
 
 		void CopyToBuffer(GraphicsBuffer& rhs);
 

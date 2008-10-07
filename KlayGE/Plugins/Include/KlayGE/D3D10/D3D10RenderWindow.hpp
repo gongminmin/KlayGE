@@ -49,13 +49,19 @@ namespace KlayGE
 		bool FullScreen() const;
 		void FullScreen(bool fs);
 
-		D3D10Adapter const & Adapter() const;
-		ID3D10DevicePtr D3DDevice() const;
-		ID3D10Texture2DPtr D3DBackBuffer() const
+		D3D10Adapter const & Adapter() const
+		{
+			return *adapter_;
+		}
+		ID3D10DevicePtr const & D3DDevice() const
+		{
+			return d3d_device_;
+		}
+		ID3D10Texture2DPtr const & D3DBackBuffer() const
 		{
 			return back_buffer_;
 		}
-		ID3D10Texture2DPtr D3DDepthStencilBuffer() const
+		ID3D10Texture2DPtr const & D3DDepthStencilBuffer() const
 		{
 			return depth_stencil_;
 		}

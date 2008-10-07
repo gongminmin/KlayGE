@@ -276,15 +276,15 @@ void DepthPeelingApp::OnResize(uint32_t width, uint32_t height)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 
-	depth_texs_[0] = rf.MakeTexture2D(width, height, 1, EF_R32F, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	depth_texs_[1] = rf.MakeTexture2D(width, height, 1, EF_R32F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	depth_texs_[0] = rf.MakeTexture2D(width, height, 1, EF_GR32F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	depth_texs_[1] = rf.MakeTexture2D(width, height, 1, EF_GR32F, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	depth_view_ = rf.Make2DRenderView(*depth_texs_[0], 0);
 
 	default_depth_view_ = re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil);
 
 	for (size_t i = 0; i < peeling_fbs_.size(); ++ i)
 	{
-		peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, EF_ARGB8, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		peeled_views_[i] = rf.Make2DRenderView(*peeled_texs_[i], 0);
 
 		peeling_fbs_[i]->Attach(FrameBuffer::ATT_Color0, peeled_views_[i]);

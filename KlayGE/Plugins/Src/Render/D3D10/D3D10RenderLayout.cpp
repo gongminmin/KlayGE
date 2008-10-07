@@ -34,7 +34,7 @@ namespace KlayGE
 	{
 	}
 
-	ID3D10InputLayoutPtr D3D10RenderLayout::InputLayout(ID3D10BlobPtr const & vs_code) const
+	ID3D10InputLayoutPtr const & D3D10RenderLayout::InputLayout(ID3D10BlobPtr const & vs_code) const
 	{
 		if (dirty_decl_)
 		{

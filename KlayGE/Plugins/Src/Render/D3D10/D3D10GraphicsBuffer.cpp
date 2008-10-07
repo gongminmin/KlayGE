@@ -151,11 +151,6 @@ namespace KlayGE
 		buffer_->Unmap();
 	}
 
-	ID3D10BufferPtr D3D10GraphicsBuffer::D3DBuffer() const
-	{
-		return buffer_;
-	}
-
 	void D3D10GraphicsBuffer::CopyToBuffer(GraphicsBuffer& rhs)
 	{
 		BOOST_ASSERT(this->Size() == rhs.Size());

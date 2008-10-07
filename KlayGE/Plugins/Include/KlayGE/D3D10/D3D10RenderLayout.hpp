@@ -31,7 +31,7 @@ namespace KlayGE
 	public:
 		D3D10RenderLayout();
 		
-		ID3D10InputLayoutPtr InputLayout(ID3D10BlobPtr const & vs_code) const;
+		ID3D10InputLayoutPtr const & InputLayout(ID3D10BlobPtr const & vs_code) const;
 
 	private:
 		typedef std::vector<D3D10_INPUT_ELEMENT_DESC> input_elems_type;

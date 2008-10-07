@@ -4,9 +4,12 @@
 	<include name="../../../RenderFX/util.fxml"/>
 	<include name="../../../RenderFX/Lighting.fxml"/>
 
-	<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>
-	<parameter type="float3" name="light_pos"/>
-	<parameter type="float3" name="eye_pos"/>
+	<cbuffer name="per_frame">
+		<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>
+		<parameter type="float3" name="eye_pos"/>
+		<parameter type="float3" name="light_pos"/>
+	</cbuffer>
+
 	<parameter type="float" name="parallax_scale"/>
 	<parameter type="float" name="parallax_bias"/>
 

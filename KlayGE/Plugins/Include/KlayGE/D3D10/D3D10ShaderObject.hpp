@@ -56,7 +56,7 @@ namespace KlayGE
 		void Bind();
 		void Unbind();
 
-		ID3D10BlobPtr VSCode() const
+		ID3D10BlobPtr const & VSCode() const
 		{
 			return vs_code_;
 		}

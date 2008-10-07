@@ -89,8 +89,10 @@ void NormalDepthPS(float4 pos : POSITION, float4 normal : TEXCOORD0,
 		<state name="address_v" value="clamp"/>
 	</parameter>
 
-	<parameter type="float2" name="e_barrier"/>
-	<parameter type="float2" name="e_weights" x="0.25" y="1.0"/>
+	<cbuffer name="per_frame">
+		<parameter type="float2" name="e_barrier"/>
+		<parameter type="float2" name="e_weights" x="0.25" y="1.0"/>
+	</cbuffer>
 
 	<shader>
 		<![CDATA[

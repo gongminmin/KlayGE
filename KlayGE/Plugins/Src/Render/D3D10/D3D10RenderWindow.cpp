@@ -433,16 +433,6 @@ namespace KlayGE
 		}
 	}
 
-	D3D10Adapter const & D3D10RenderWindow::Adapter() const
-	{
-		return *adapter_;
-	}
-
-	ID3D10DevicePtr D3D10RenderWindow::D3DDevice() const
-	{
-		return d3d_device_;
-	}
-
 	void D3D10RenderWindow::WindowMovedOrResized()
 	{
 		::RECT rect;

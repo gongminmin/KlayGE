@@ -53,7 +53,7 @@ namespace KlayGE
 		virtual uint32_t Height(int level) const;
 		virtual uint32_t Depth(int level) const;
 
-		ID3D10ShaderResourceViewPtr D3DShaderResourceView() const
+		ID3D10ShaderResourceViewPtr const & D3DShaderResourceView() const
 		{
 			return d3d_sr_view_;
 		}
@@ -102,7 +102,7 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
-		ID3D10Texture1DPtr D3DTexture() const
+		ID3D10Texture1DPtr const & D3DTexture() const
 		{
 			return d3dTexture1D_;
 		}
@@ -135,7 +135,7 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
-		ID3D10Texture2DPtr D3DTexture() const
+		ID3D10Texture2DPtr const & D3DTexture() const
 		{
 			return d3dTexture2D_;
 		}
@@ -173,7 +173,7 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
-		ID3D10Texture3DPtr D3DTexture() const
+		ID3D10Texture3DPtr const & D3DTexture() const
 		{
 			return d3dTexture3D_;
 		}
@@ -210,7 +210,7 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
-		ID3D10TextureCubePtr D3DTexture() const
+		ID3D10TextureCubePtr const & D3DTexture() const
 		{
 			return d3dTextureCube_;
 		}

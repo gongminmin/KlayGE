@@ -52,8 +52,10 @@ float4 ColorDepthPS(float4 pos		: POSITION, float3 clr : COLOR,
 	</technique>
 
 
-	<parameter type="float" name="focus_plane"/>
-	<parameter type="float" name="inv_focus_range"/>
+	<cbuffer name="per_frame2">
+		<parameter type="float" name="focus_plane"/>
+		<parameter type="float" name="inv_focus_range"/>
+	</cbuffer>
 	<parameter type="float4" name="sat_size"/>
 	<parameter type="bool" name="show_blur_factor"/>
 	<parameter type="sampler2D" name="src_sampler">

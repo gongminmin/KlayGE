@@ -56,8 +56,11 @@ namespace
 			SrcType v;
 			param_->Value(v);
 
-			*target_ = static_cast<DstType>(v);
-			*dirty_ = true;
+			if (*target_ != static_cast<DstType>(v))
+			{
+				*target_ = static_cast<DstType>(v);
+				*dirty_ = true;
+			}
 		}
 
 	private:
@@ -80,8 +83,11 @@ namespace
 			float2 v;
 			param_->Value(v);
 
-			*target_ = v;
-			*dirty_ = true;
+			if (*target_ != v)
+			{
+				*target_ = v;
+				*dirty_ = true;
+			}
 		}
 
 	private:
@@ -104,8 +110,11 @@ namespace
 			float3 v;
 			param_->Value(v);
 
-			*target_ = v;
-			*dirty_ = true;
+			if (*target_ != v)
+			{
+				*target_ = v;
+				*dirty_ = true;
+			}
 		}
 
 	private:
@@ -128,8 +137,11 @@ namespace
 			float4 v;
 			param_->Value(v);
 
-			*target_ = v;
-			*dirty_ = true;
+			if (*target_ != v)
+			{
+				*target_ = v;
+				*dirty_ = true;
+			}
 		}
 
 	private:

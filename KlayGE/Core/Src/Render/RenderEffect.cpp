@@ -1,8 +1,11 @@
 // RenderEffect.cpp
 // KlayGE 渲染效果类 实现文件
-// Ver 3.6.0
-// 版权所有(C) 龚敏敏, 2003-2007
+// Ver 3.8.0
+// 版权所有(C) 龚敏敏, 2003-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.8.0
+// 支持CBuffer (2008.10.6)
 //
 // 3.6.0
 // 增加了Clone (2007.6.11)

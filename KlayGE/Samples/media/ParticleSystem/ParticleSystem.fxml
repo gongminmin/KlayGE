@@ -3,20 +3,22 @@
 <effect>
 	<include name="../../../RenderFX/PostProcess.fxml"/>
 
-	<parameter type="float4x4" name="View"/>
-	<parameter type="float4x4" name="Proj"/>
-
 	<parameter type="float" name="point_radius"/>
 
-	<parameter type="float3" name="upper_left"/>
-	<parameter type="float3" name="upper_right"/>
-	<parameter type="float3" name="lower_left"/>
-	<parameter type="float3" name="lower_right"/>
+	<cbuffer name="per_frame">
+		<parameter type="float4x4" name="View"/>
+		<parameter type="float4x4" name="Proj"/>
 
-	<parameter type="float" name="depth_min"/>
-	<parameter type="float" name="inv_depth_range"/>
+		<parameter type="float3" name="upper_left"/>
+		<parameter type="float3" name="upper_right"/>
+		<parameter type="float3" name="lower_left"/>
+		<parameter type="float3" name="lower_right"/>
 
-	<parameter type="float2" name="offset"/>
+		<parameter type="float" name="depth_min"/>
+		<parameter type="float" name="inv_depth_range"/>
+
+		<parameter type="float2" name="offset"/>
+	</cbuffer>
 	<parameter type="sampler2D" name="particle_sampler">
 		<state name="filtering" value="bilinear"/>
 		<state name="address_u" value="wrap"/>
