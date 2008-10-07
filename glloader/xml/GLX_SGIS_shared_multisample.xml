@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLX_SGIS_shared_multisample">
+	<tokens>
+		<token name="GLX_MULTISAMPLE_SUB_RECT_WIDTH_SGIS" value="0x8026"/>
+		<token name="GLX_MULTISAMPLE_SUB_RECT_HEIGHT_SGIS" value="0x8027"/>
+	</tokens>
+</gl_extension>

@@ -1,0 +1,149 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_SGIX_fragment_lighting">
+	<tokens>
+		<token name="GL_FRAGMENT_LIGHTING_SGIX" value="0x8400"/>
+		<token name="GL_FRAGMENT_COLOR_MATERIAL_SGIX" value="0x8401"/>
+		<token name="GL_FRAGMENT_COLOR_MATERIAL_FACE_SGIX" value="0x8402"/>
+		<token name="GL_FRAGMENT_COLOR_MATERIAL_PARAMETER_SGIX" value="0x8403"/>
+		<token name="GL_MAX_FRAGMENT_LIGHTS_SGIX" value="0x8404"/>
+		<token name="GL_MAX_ACTIVE_LIGHTS_SGIX" value="0x8405"/>
+		<token name="GL_CURRENT_RASTER_NORMAL_SGIX" value="0x8406"/>
+		<token name="GL_LIGHT_ENV_MODE_SGIX" value="0x8407"/>
+		<token name="GL_FRAGMENT_LIGHT_MODEL_LOCAL_VIEWER_SGIX" value="0x8408"/>
+		<token name="GL_FRAGMENT_LIGHT_MODEL_TWO_SIDE_SGIX" value="0x8409"/>
+		<token name="GL_FRAGMENT_LIGHT_MODEL_AMBIENT_SGIX" value="0x840A"/>
+		<token name="GL_FRAGMENT_LIGHT_MODEL_NORMAL_INTERPOLATION_SGIX" value="0x840B"/>
+		<token name="GL_FRAGMENT_LIGHT0_SGIX" value="0x840C"/>
+		<token name="GL_FRAGMENT_LIGHT1_SGIX" value="0x840D"/>
+		<token name="GL_FRAGMENT_LIGHT2_SGIX" value="0x840E"/>
+		<token name="GL_FRAGMENT_LIGHT3_SGIX" value="0x840F"/>
+		<token name="GL_FRAGMENT_LIGHT4_SGIX" value="0x8410"/>
+		<token name="GL_FRAGMENT_LIGHT5_SGIX" value="0x8411"/>
+		<token name="GL_FRAGMENT_LIGHT6_SGIX" value="0x8412"/>
+		<token name="GL_FRAGMENT_LIGHT7_SGIX" value="0x8413"/>
+	</tokens>
+
+	<functions>
+ 		<function name="glFragmentColorMaterialSGIX" return="void">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+ 		<function name="glFragmentLightfSGIX" return="void">
+			<params>
+				<param type="GLenum" name="light"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+ 		<function name="glFragmentLightfvSGIX" return="void">
+			<params>
+				<param type="GLenum" name="light"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+		</function>
+ 		<function name="glFragmentLightiSGIX" return="void">
+			<params>
+				<param type="GLenum" name="light"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+ 		<function name="glFragmentLightivSGIX" return="void">
+			<params>
+				<param type="GLenum" name="light"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+ 		<function name="glFragmentLightModelfSGIX" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+ 		<function name="glFragmentLightModelfvSGIX" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+		</function>
+ 		<function name="glFragmentLightModeliSGIX" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+ 		<function name="glFragmentLightModelivSGIX" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+ 		<function name="glFragmentMaterialfSGIX" return="void">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+ 		<function name="glFragmentMaterialfvSGIX" return="void">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+		</function>
+ 		<function name="glFragmentMaterialiSGIX" return="void">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+ 		<function name="glFragmentMaterialivSGIX" return="void">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+ 		<function name="glGetFragmentLightfvSGIX" return="void">
+			<params>
+				<param type="GLenum" name="light"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+ 		<function name="glGetFragmentLightivSGIX" return="void">
+			<params>
+				<param type="GLenum" name="light"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="param"/>
+			</params>
+		</function>
+ 		<function name="glGetFragmentMaterialfvSGIX" return="void">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+ 		<function name="glGetFragmentMaterialivSGIX" return="void">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+ 		<function name="glLightEnviSGIX" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

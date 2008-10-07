@@ -1,0 +1,12 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_SGIX_igloo_interface">
+	<functions>
+ 		<function name="glIglooInterfaceSGIX" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLvoid*" name="params"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

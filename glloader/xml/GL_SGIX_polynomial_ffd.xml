@@ -1,0 +1,59 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_SGIX_polynomial_ffd">
+	<tokens>
+		<token name="GL_GEOMETRY_DEFORMATION_SGIX" value="0x8194"/>
+		<token name="GL_TEXTURE_DEFORMATION_SGIX" value="0x8195"/>
+		<token name="GL_DEFORMATIONS_MASK_SGIX" value="0x8196"/>
+		<token name="GL_MAX_DEFORMATION_ORDER_SGIX" value="0x8197"/>
+	</tokens>
+
+	<functions>
+ 		<function name="glDeformationMap3dSGIX" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLdouble" name="u1"/>
+				<param type="GLdouble" name="u2"/>
+				<param type="GLint" name="ustride"/>
+				<param type="GLint" name="uorder"/>
+				<param type="GLdouble" name="v1"/>
+				<param type="GLdouble" name="v2"/>
+				<param type="GLint" name="vstride"/>
+				<param type="GLint" name="vorder"/>
+				<param type="GLdouble" name="w1"/>
+				<param type="GLdouble" name="w2"/>
+				<param type="GLint" name="wstride"/>
+				<param type="GLint" name="worder"/>
+				<param type="const GLdouble*" name="points"/>
+			</params>
+		</function>
+ 		<function name="glDeformationMap3fSGIX" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLfloat" name="u1"/>
+				<param type="GLfloat" name="u2"/>
+				<param type="GLint" name="ustride"/>
+				<param type="GLint" name="uorder"/>
+				<param type="GLfloat" name="v1"/>
+				<param type="GLfloat" name="v2"/>
+				<param type="GLint" name="vstride"/>
+				<param type="GLint" name="vorder"/>
+				<param type="GLfloat" name="w1"/>
+				<param type="GLfloat" name="w2"/>
+				<param type="GLint" name="wstride"/>
+				<param type="GLint" name="worder"/>
+				<param type="const GLfloat*" name="points"/>
+			</params>
+		</function>
+ 		<function name="glDeformSGIX" return="void">
+			<params>
+				<param type="GLbitfield" name="mask"/>
+			</params>
+		</function>
+ 		<function name="glLoadIdentityDeformationMapSGIX" return="void">
+			<params>
+				<param type="GLbitfield" name="mask"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>
