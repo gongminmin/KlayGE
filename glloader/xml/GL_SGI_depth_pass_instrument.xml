@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_SGI_depth_pass_instrument">
+	<tokens>
+		<token name="GL_DEPTH_PASS_INSTRUMENT_SGI" value="0x8310"/>
+		<token name="GL_DEPTH_PASS_INSTRUMENT_COUNTERS_SGI" value="0x8311"/>
+		<token name="GL_DEPTH_PASS_INSTRUMENT_MAX_SGI" value="0x8312"/>
+	</tokens>
+</gl_extension>

@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_SGIX_ycrcba">
+	<tokens>
+		<token name="GL_YCRCB_SGIX" value="0x8318"/>
+		<token name="GL_YCRCBA_SGIX" value="0x8319"/>
+	</tokens>
+</gl_extension>

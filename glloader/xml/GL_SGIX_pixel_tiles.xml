@@ -1,0 +1,14 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_SGIX_pixel_tiles">
+	<tokens>
+		<token name="GL_PIXEL_TILE_BEST_ALIGNMENT_SGIX" value="0x813E"/>
+		<token name="GL_PIXEL_TILE_CACHE_INCREMENT_SGIX" value="0x813F"/>
+		<token name="GL_PIXEL_TILE_WIDTH_SGIX" value="0x8140"/>
+		<token name="GL_PIXEL_TILE_HEIGHT_SGIX" value="0x8141"/>
+		<token name="GL_PIXEL_TILE_GRID_WIDTH_SGIX" value="0x8142"/>
+		<token name="GL_PIXEL_TILE_GRID_HEIGHT_SGIX" value="0x8143"/>
+		<token name="GL_PIXEL_TILE_GRID_DEPTH_SGIX" value="0x8144"/>
+		<token name="GL_PIXEL_TILE_CACHE_SIZE_SGIX" value="0x8145"/>
+	</tokens>
+</gl_extension>

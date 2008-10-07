@@ -16,6 +16,9 @@
 				<param type="GLenum" name="sfactorAlpha"/>
 				<param type="GLenum" name="dfactorAlpha"/>
 			</params>
+			<mappings>
+				<mapping from="GL_INGR_blend_func_separate" name="glBlendFuncSeparateINGR"/>
+			</mappings>
 		</function>
 	</functions>
 </gl_extension>

@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_SGIX_fog_scale">
+	<tokens>
+		<token name="GL_FOG_SCALE_SGIX" value="0x81FC"/>
+		<token name="GL_FOG_SCALE_VALUE_SGIX" value="0x81FD"/>
+	</tokens>
+</gl_extension>

@@ -1,0 +1,11 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_SGIX_subsample">
+	<tokens>
+		<token name="GL_PACK_SUBSAMPLE_RATE_SGIX" value="0x85A0"/>
+		<token name="GL_UNPACK_SUBSAMPLE_RATE_SGIX" value="0x85A1"/>
+		<token name="GL_PIXEL_SUBSAMPLE_4444_SGIX" value="0x85A2"/>
+		<token name="GL_PIXEL_SUBSAMPLE_2424_SGIX" value="0x85A3"/>
+		<token name="GL_PIXEL_SUBSAMPLE_4242_SGIX" value="0x85A4"/>
+	</tokens>
+</gl_extension>

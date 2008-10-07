@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_SGIX_scalebias_hint">
+	<tokens>
+		<token name="GL_SCALEBIAS_HINT_SGIX" value="0x8322"/>
+	</tokens>
+</gl_extension>

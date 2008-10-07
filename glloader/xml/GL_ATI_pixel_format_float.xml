@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ATI_pixel_format_float" reg_no="278">
+	<tokens>
+		<token name="GL_RGBA_FLOAT_MODE_ATI" value="0x8820"/>
+		<token name="GL_COLOR_CLEAR_UNCLAMPED_VALUE_ATI" value="0x8835"/>
+	</tokens>
+</gl_extension>

@@ -16,6 +16,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_EXT_point_parameters" name="glPointParameterfEXT"/>
+				<mapping from="GL_SGIS_point_parameters" name="glPointParameterfSGIS"/>
 			</mappings>
 		</function>
 		<function name="glPointParameterfvARB" return="void">
@@ -25,6 +26,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_EXT_point_parameters" name="glPointParameterfvEXT"/>
+				<mapping from="GL_SGIS_point_parameters" name="glPointParameterfvSGIS"/>
 			</mappings>
 		</function>
 	</functions>

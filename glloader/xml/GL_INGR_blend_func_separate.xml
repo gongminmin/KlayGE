@@ -1,0 +1,14 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_INGR_blend_func_separate" prefer="GL_EXT_blend_func_separate">
+	<functions>
+		<function name="glBlendFuncSeparateINGR" return="void">
+			<params>
+				<param type="GLenum" name="sfactorRGB"/>
+				<param type="GLenum" name="dfactorRGB"/>
+				<param type="GLenum" name="sfactorAlpha"/>
+				<param type="GLenum" name="dfactorAlpha"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

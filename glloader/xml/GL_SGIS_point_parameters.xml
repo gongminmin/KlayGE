@@ -1,0 +1,25 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_SGIS_point_parameters" prefer="GL_EXT_point_parameters">
+	<tokens>
+		<token name="GL_POINT_SIZE_MIN_SGIS" value="0x8126"/>
+		<token name="GL_POINT_SIZE_MAX_SGIS" value="0x8127"/>
+		<token name="GL_POINT_FADE_THRESHOLD_SIZE_SGIS" value="0x8128"/>
+		<token name="GL_POINT_DISTANCE_ATTENUATION_SGIS" value="0x8129"/>
+	</tokens>
+
+	<functions>
+		<function name="glPointParameterfSGIS" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+		<function name="glPointParameterfvSGIS" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

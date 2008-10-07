@@ -1,0 +1,142 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_OES_byte_coordinates" reg_no="291">
+	<functions>
+		<function name="glVertex2bOES" return="void">
+			<params>
+				<param type="GLbyte" name="x"/>
+				<param type="GLbyte" name="y"/>
+			</params>
+		</function>
+		<function name="glVertex3bOES" return="void">
+			<params>
+				<param type="GLbyte" name="x"/>
+				<param type="GLbyte" name="y"/>
+				<param type="GLbyte" name="z"/>
+			</params>
+		</function>
+		<function name="glVertex4bOES" return="void">
+			<params>
+				<param type="GLbyte" name="x"/>
+				<param type="GLbyte" name="y"/>
+				<param type="GLbyte" name="z"/>
+				<param type="GLbyte" name="w"/>
+			</params>
+		</function>
+		<function name="glVertex2bvOES" return="void">
+			<params>
+				<param type="GLbyte*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertex3bvOES" return="void">
+			<params>
+				<param type="GLbyte*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertex4bvOES" return="void">
+			<params>
+				<param type="GLbyte*" name="v"/>
+			</params>
+		</function>
+		<function name="glTexCoord1bOES" return="void">
+			<params>
+				<param type="GLbyte" name="s"/>
+			</params>
+		</function>
+		<function name="glTexCoord2bOES" return="void">
+			<params>
+				<param type="GLbyte" name="s"/>
+				<param type="GLbyte" name="t"/>
+			</params>
+		</function>
+		<function name="glTexCoord3bOES" return="void">
+			<params>
+				<param type="GLbyte" name="s"/>
+				<param type="GLbyte" name="t"/>
+				<param type="GLbyte" name="r"/>
+			</params>
+		</function>
+		<function name="glTexCoord4bOES" return="void">
+			<params>
+				<param type="GLbyte" name="s"/>
+				<param type="GLbyte" name="t"/>
+				<param type="GLbyte" name="r"/>
+				<param type="GLbyte" name="q"/>
+			</params>
+		</function>
+		<function name="glTexCoord1bvOES" return="void">
+			<params>
+				<param type="GLbyte*" name="v"/>
+			</params>
+		</function>
+		<function name="glTexCoord2bvOES" return="void">
+			<params>
+				<param type="GLbyte*" name="v"/>
+			</params>
+		</function>
+		<function name="glTexCoord3bvOES" return="void">
+			<params>
+				<param type="GLbyte*" name="v"/>
+			</params>
+		</function>
+		<function name="glTexCoord4bvOES" return="void">
+			<params>
+				<param type="GLbyte*" name="v"/>
+			</params>
+		</function>
+		<function name="glMultiTexCoord1bOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLbyte" name="s"/>
+			</params>
+		</function>
+		<function name="glMultiTexCoord2bOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLbyte" name="s"/>
+				<param type="GLbyte" name="t"/>
+			</params>
+		</function>
+		<function name="glMultiTexCoord3bOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLbyte" name="s"/>
+				<param type="GLbyte" name="t"/>
+				<param type="GLbyte" name="r"/>
+			</params>
+		</function>
+		<function name="glMultiTexCoord4bOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLbyte" name="s"/>
+				<param type="GLbyte" name="t"/>
+				<param type="GLbyte" name="r"/>
+				<param type="GLbyte" name="q"/>
+			</params>
+		</function>
+		<function name="glMultiTexCoord1bvOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLbyte*" name="v"/>
+			</params>
+		</function>
+		<function name="glMultiTexCoord2bvOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLbyte*" name="v"/>
+			</params>
+		</function>
+		<function name="glMultiTexCoord3bvOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLbyte*" name="v"/>
+			</params>
+		</function>
+		<function name="glMultiTexCoord4bvOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLbyte*" name="v"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

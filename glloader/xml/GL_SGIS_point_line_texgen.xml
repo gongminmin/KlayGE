@@ -1,0 +1,14 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_SGIS_point_line_texgen">
+	<tokens>
+		<token name="GL_EYE_DISTANCE_TO_POINT_SGIS" value="0x81F0"/>
+		<token name="GL_OBJECT_DISTANCE_TO_POINT_SGIS" value="0x81F1"/>
+		<token name="GL_EYE_DISTANCE_TO_LINE_SGIS" value="0x81F2"/>
+		<token name="GL_OBJECT_DISTANCE_TO_LINE_SGIS" value="0x81F3"/>
+		<token name="GL_EYE_POINT_SGIS" value="0x81F4"/>
+		<token name="GL_OBJECT_POINT_SGIS" value="0x81F5"/>
+		<token name="GL_EYE_LINE_SGIS" value="0x81F6"/>
+		<token name="GL_OBJECT_LINE_SGIS" value="0x81F7"/>
+	</tokens>
+</gl_extension>

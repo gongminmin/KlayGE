@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+
+<gl_extension name="WGL_NV_vertex_array_range" reg_no="190">
+	<functions>
+		<function name="wglAllocateMemoryNV" return="void*">
+			<params>
+				<param type="GLsizei" name="size"/>
+				<param type="GLfloat" name="readFrequency"/>
+				<param type="GLfloat" name="writeFrequency"/>
+				<param type="GLfloat" name="priority"/>
+			</params>
+		</function>
+		<function name="wglFreeMemoryNV" return="void">
+			<params>
+				<param type="void*" name="pointer"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

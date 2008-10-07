@@ -1,0 +1,13 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_SGIX_impact_pixel_texture">
+	<tokens>
+		<token name="GL_PIXEL_TEX_GEN_Q_CEILING_SGIX" value="0x8184"/>
+		<token name="GL_PIXEL_TEX_GEN_Q_ROUND_SGIX" value="0x8185"/>
+		<token name="GL_PIXEL_TEX_GEN_Q_FLOOR_SGIX" value="0x8186"/>
+		<token name="GL_PIXEL_TEX_GEN_ALPHA_REPLACE_SGIX" value="0x8187"/>
+		<token name="GL_PIXEL_TEX_GEN_ALPHA_NO_REPLACE_SGIX" value="0x8188"/>
+		<token name="GL_PIXEL_TEX_GEN_ALPHA_LS_SGIX" value="0x8189"/>
+		<token name="GL_PIXEL_TEX_GEN_ALPHA_MS_SGIX" value="0x818A"/>
+	</tokens>
+</gl_extension>

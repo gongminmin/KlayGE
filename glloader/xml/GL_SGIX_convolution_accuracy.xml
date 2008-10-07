@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_SGIX_convolution_accuracy">
+	<tokens>
+		<token name="GL_CONVOLUTION_HINT_SGIX" value="0x8316"/>
+	</tokens>
+</gl_extension>

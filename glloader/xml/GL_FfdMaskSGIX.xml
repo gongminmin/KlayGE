@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_FfdMaskSGIX">
+	<tokens>
+		<token name="GL_TEXTURE_DEFORMATION_BIT_SGIX" value="0x00000001"/>
+		<token name="GL_GEOMETRY_DEFORMATION_BIT_SGIX" value="0x00000002"/>
+	</tokens>
+</gl_extension>

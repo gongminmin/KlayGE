@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_SGIX_calligraphic_fragment">
+	<tokens>
+		<token name="GL_CALLIGRAPHIC_FRAGMENT_SGIX" value="0x8183"/>
+	</tokens>
+</gl_extension>

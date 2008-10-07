@@ -14,12 +14,18 @@
 				<param type="GLenum" name="pname"/>
 				<param type="GLfloat" name="param"/>
 			</params>
+			<mappings>
+				<mapping from="GL_SGIS_point_parameters" name="glPointParameterfSGIS"/>
+			</mappings>
 		</function>
 		<function name="glPointParameterfvEXT" return="void">
 			<params>
 				<param type="GLenum" name="pname"/>
 				<param type="const GLfloat*" name="params"/>
 			</params>
+			<mappings>
+				<mapping from="GL_SGIS_point_parameters" name="glPointParameterfvSGIS"/>
+			</mappings>
 		</function>
 	</functions>
 </gl_extension>
