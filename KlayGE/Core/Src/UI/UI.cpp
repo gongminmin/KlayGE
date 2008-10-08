@@ -39,31 +39,22 @@ namespace KlayGE
 	class UIRectRenderable : public RenderableHelper
 	{
 	public:
-		UIRectRenderable(std::vector<UIManager::VertexFormat> const & vertices, std::vector<uint16_t> const & indices, TexturePtr texture, RenderEffectPtr effect)
+		UIRectRenderable(TexturePtr texture, RenderEffectPtr effect)
 			: RenderableHelper(L"UIRect")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			rl_ = rf.MakeRenderLayout();
 			rl_->TopologyType(RenderLayout::TT_TriangleList);
 
-			ElementInitData init_data;
-			init_data.row_pitch = static_cast<uint32_t>(vertices.size() * sizeof(vertices[0]));
-			init_data.slice_pitch = 0;
-			init_data.data.resize(init_data.row_pitch);
-			std::memcpy(&init_data.data[0], &vertices[0], init_data.row_pitch);
-
-			GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-			rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
+			vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read, NULL);
+			vb_sys_mem_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write, NULL);
+			rl_->BindVertexStream(vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
 												vertex_element(VEU_Diffuse, 0, EF_ABGR32F),
 												vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 
-			init_data.row_pitch = static_cast<uint32_t>(indices.size() * sizeof(indices[0]));
-			init_data.slice_pitch = 0;
-			init_data.data.resize(init_data.row_pitch);
-			std::memcpy(&init_data.data[0], &indices[0], init_data.row_pitch);
-
-			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-			rl_->BindIndexStream(ib, EF_R16);
+			ib_ = rf.MakeIndexBuffer(BU_Dynamic, EAH_GPU_Read, NULL);
+			ib_sys_mem_ = rf.MakeIndexBuffer(BU_Dynamic, EAH_CPU_Write, NULL);
+			rl_->BindIndexStream(ib_, EF_R16);
 
 			if (texture)
 			{
@@ -79,9 +70,49 @@ namespace KlayGE
 			texel_to_pixel_offset_ep_ = technique_->Effect().ParameterByName("texel_to_pixel_offset");
 		}
 
+		void Clear()
+		{
+			vertices_.resize(0);
+			indices_.resize(0);
+		}
+
+		bool Empty() const
+		{
+			return indices_.empty();
+		}
+
+		std::vector<UIManager::VertexFormat>& Vertices()
+		{
+			return vertices_;
+		}
+
+		std::vector<uint16_t>& Indices()
+		{
+			return indices_;
+		}
+
 		void OnRenderBegin()
 		{
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+			vb_sys_mem_->Resize(vertices_.size() * sizeof(vertices_[0]));
+			vb_->Resize(vertices_.size() * sizeof(vertices_[0]));
+			{
+				GraphicsBuffer::Mapper mapper(*vb_sys_mem_, BA_Write_Only);
+				std::memcpy(mapper.Pointer<uint8_t>(), &vertices_[0], vb_sys_mem_->Size());
+			}
+
+			ib_sys_mem_->Resize(indices_.size() * sizeof(indices_[0]));
+			ib_->Resize(indices_.size() * sizeof(indices_[0]));
+			{
+				GraphicsBuffer::Mapper mapper(*ib_sys_mem_, BA_Write_Only);
+				std::memcpy(mapper.Pointer<uint8_t>(), &indices_[0], ib_sys_mem_->Size());
+			}
+
+			vb_sys_mem_->CopyToBuffer(*vb_);
+			ib_sys_mem_->CopyToBuffer(*ib_);
+
+			RenderEngine& re = rf.RenderEngineInstance();
 			float const half_width = re.CurFrameBuffer()->Width() / 2.0f;
 			float const half_height = re.CurFrameBuffer()->Height() / 2.0f;
 
@@ -105,7 +136,25 @@ namespace KlayGE
 	private:
 		RenderEffectParameterPtr half_width_height_ep_;
 		RenderEffectParameterPtr texel_to_pixel_offset_ep_;
+
+		std::vector<UIManager::VertexFormat> vertices_;
+		std::vector<uint16_t> indices_;
+
+		GraphicsBufferPtr vb_;
+		GraphicsBufferPtr ib_;
+		GraphicsBufferPtr vb_sys_mem_;
+		GraphicsBufferPtr ib_sys_mem_;
 	};
+
+	class UIRectObject : public SceneObjectHelper
+	{
+	public:
+		UIRectObject(RenderablePtr renderable, uint32_t attrib)
+			: SceneObjectHelper(renderable, attrib)
+		{
+		}
+	};
+
 
 	void UIStatesColor::Init(Color const & default_color,
 			Color const & disabled_color,
@@ -285,8 +334,7 @@ namespace KlayGE
 	{
 		BOOST_FOREACH(BOOST_TYPEOF(rects_)::reference rect, rects_)
 		{
-			rect.second.first.clear();
-			rect.second.second.clear();
+			checked_pointer_cast<UIRectRenderable>(rect.second)->Clear();
 		}
 		BOOST_FOREACH(BOOST_TYPEOF(strings_)::reference string, strings_)
 		{
@@ -300,10 +348,10 @@ namespace KlayGE
 
 		BOOST_FOREACH(BOOST_TYPEOF(rects_)::reference rect, rects_)
 		{
-			if (!rect.second.first.empty() && !rect.second.second.empty())
+			if (!checked_pointer_cast<UIRectRenderable>(rect.second)->Empty())
 			{
-				boost::shared_ptr<UIRectRenderable> rect_renderable(new UIRectRenderable(rect.second.first, rect.second.second, rect.first, effect_));
-				rect_renderable->AddToRenderQueue();
+				boost::shared_ptr<UIRectObject> ui_rect_obj(new UIRectObject(rect.second, SceneObject::SOA_ShortAge));
+				ui_rect_obj->AddToSceneManager();
 			}
 		}
 		BOOST_FOREACH(BOOST_TYPEOF(strings_)::reference string, strings_)
@@ -331,25 +379,38 @@ namespace KlayGE
 			texcoord = Rect(0, 0, 0, 0);
 		}
 
-		std::pair<std::vector<UIManager::VertexFormat>, std::vector<uint16_t> >& rect = rects_[texture];
-		rect.first.reserve(rect.first.size() + 4);
-		rect.second.reserve(rect.second.size() + 6);
+		boost::shared_ptr<UIRectRenderable> renderable;
+		if (rects_.find(texture) == rects_.end())
+		{
+			renderable.reset(new UIRectRenderable(texture, effect_));
+			rects_[texture] = renderable;
+		}
+		else
+		{
+			renderable = checked_pointer_cast<UIRectRenderable>(rects_[texture]);
+		}
+		BOOST_ASSERT(renderable);
 
-		uint16_t const last_index = static_cast<uint16_t>(rect.first.size());
-		rect.second.push_back(last_index + 0);
-		rect.second.push_back(last_index + 1);
-		rect.second.push_back(last_index + 2);
-		rect.second.push_back(last_index + 2);
-		rect.second.push_back(last_index + 3);
-		rect.second.push_back(last_index + 0);
+		std::vector<VertexFormat>& vertices = renderable->Vertices();
+		std::vector<uint16_t>& indices = renderable->Indices();
+		vertices.reserve(vertices.size() + 4);
+		indices.reserve(indices.size() + 6);
 
-		rect.first.push_back(UIManager::VertexFormat(pos + float3(0, 0, 0),
+		uint16_t const last_index = static_cast<uint16_t>(vertices.size());
+		indices.push_back(last_index + 0);
+		indices.push_back(last_index + 1);
+		indices.push_back(last_index + 2);
+		indices.push_back(last_index + 2);
+		indices.push_back(last_index + 3);
+		indices.push_back(last_index + 0);
+
+		vertices.push_back(VertexFormat(pos + float3(0, 0, 0),
 			clrs[0], float2(texcoord.left(), texcoord.top())));
-		rect.first.push_back(UIManager::VertexFormat(pos + float3(width, 0, 0),
+		vertices.push_back(VertexFormat(pos + float3(width, 0, 0),
 			clrs[1], float2(texcoord.right(), texcoord.top())));
-		rect.first.push_back(UIManager::VertexFormat(pos + float3(width, height, 0),
+		vertices.push_back(VertexFormat(pos + float3(width, height, 0),
 			clrs[2], float2(texcoord.right(), texcoord.bottom())));
-		rect.first.push_back(UIManager::VertexFormat(pos + float3(0, height, 0),
+		vertices.push_back(VertexFormat(pos + float3(0, height, 0),
 			clrs[3], float2(texcoord.left(), texcoord.bottom())));
 	}
 

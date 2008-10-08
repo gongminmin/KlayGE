@@ -658,8 +658,7 @@ namespace KlayGE
 
 		boost::array<std::vector<Rect_T<int32_t> >, UICT_Num_Control_Types> elem_texture_rcs_;
 
-		std::map<TexturePtr,
-			std::pair<std::vector<VertexFormat>, std::vector<uint16_t> > > rects_;
+		std::map<TexturePtr, RenderablePtr> rects_;
 
 		struct string_cache
 		{
