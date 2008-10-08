@@ -33,7 +33,7 @@ namespace KlayGE
 
 		static D3D10_STENCIL_OP Mapping(StencilOperation op);
 
-		static D3D10_MAP Mapping(TextureMapAccess tma);
+		static D3D10_MAP Mapping(TextureMapAccess tma, Texture::TextureType type, uint32_t access_hint, uint32_t numMipMaps);
 
 		static D3D10_BLEND Mapping(AlphaBlendFactor factor);
 		static D3D10_CULL_MODE Mapping(CullMode mode);

@@ -383,7 +383,6 @@ namespace KlayGE
 
 				dirty_[type].resize(desc.ConstantBuffers);
 				d3d_cbufs_[type].resize(desc.ConstantBuffers);
-				d3d_cbufs_sys_mem_[type].resize(desc.ConstantBuffers);
 				cbufs_[type].resize(desc.ConstantBuffers);
 				for (UINT c = 0; c < desc.ConstantBuffers; ++ c)
 				{
@@ -430,12 +429,6 @@ namespace KlayGE
 					ID3D10Buffer* tmp_buf;
 					TIF(d3d_device->CreateBuffer(&desc, NULL, &tmp_buf));
 					d3d_cbufs_[type][c] = MakeCOMPtr(tmp_buf);
-
-					desc.Usage = D3D10_USAGE_STAGING;
-					desc.BindFlags = 0;
-					desc.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
-					TIF(d3d_device->CreateBuffer(&desc, NULL, &tmp_buf));
-					d3d_cbufs_sys_mem_[type][c] = MakeCOMPtr(tmp_buf);
 				}
 
 				std::map<std::string, int> texture_bind_point;
@@ -514,7 +507,6 @@ namespace KlayGE
 			ret->cbufs_[i] = cbufs_[i];
 			ret->dirty_[i] = dirty_[i];
 			ret->d3d_cbufs_[i] = d3d_cbufs_[i];
-			ret->d3d_cbufs_sys_mem_[i] = d3d_cbufs_sys_mem_[i];
 
 			ret->param_binds_[i].reserve(param_binds_[i].size());
 			BOOST_FOREACH(BOOST_TYPEOF(param_binds_[i])::const_reference pb, param_binds_[i])
@@ -772,19 +764,14 @@ namespace KlayGE
 			d3d_device->PSSetSamplers(0, static_cast<UINT>(sss.size()), &sss[0]);
 		}
 
-		for (size_t i = 0; i < d3d_cbufs_sys_mem_.size(); ++ i)
+		for (size_t i = 0; i < d3d_cbufs_.size(); ++ i)
 		{
-			for (size_t j = 0; j < d3d_cbufs_sys_mem_[i].size(); ++ j)
+			for (size_t j = 0; j < d3d_cbufs_[i].size(); ++ j)
 			{
 				if (dirty_[i][j])
 				{
-					BOOST_ASSERT(d3d_cbufs_sys_mem_[i][j]);
-
-					void* p;
-					TIF(d3d_cbufs_sys_mem_[i][j]->Map(D3D10_MAP_WRITE, 0, &p));
-					memcpy(p, &cbufs_[i][j][0], cbufs_[i][j].size());
-					d3d_cbufs_sys_mem_[i][j]->Unmap();
-					d3d_device->CopyResource(d3d_cbufs_[i][j].get(), d3d_cbufs_sys_mem_[i][j].get());
+					d3d_device->UpdateSubresource(d3d_cbufs_[i][j].get(), D3D10CalcSubresource(0, 0, 1), NULL, &cbufs_[i][j][0],
+						static_cast<UINT>(cbufs_[i][j].size()), static_cast<UINT>(cbufs_[i][j].size()));
 				}
 
 				dirty_[i][j] = false;

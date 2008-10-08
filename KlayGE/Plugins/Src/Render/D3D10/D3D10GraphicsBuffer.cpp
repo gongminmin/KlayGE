@@ -60,7 +60,7 @@ namespace KlayGE
 	{
 		if (EAH_CPU_Write == access_hint_)
 		{
-			usage = D3D10_USAGE_STAGING;
+			usage = D3D10_USAGE_DYNAMIC;
 		}
 		else
 		{
@@ -70,14 +70,7 @@ namespace KlayGE
 			}
 			else
 			{
-				if (!(access_hint_ & EAH_CPU_Read) && !(access_hint_ & EAH_GPU_Write) && !(access_hint_ & EAH_GPU_Read) && (access_hint_ & EAH_CPU_Write))
-				{
-					usage = D3D10_USAGE_DYNAMIC;
-				}
-				else
-				{
-					usage = D3D10_USAGE_STAGING;
-				}
+				usage = D3D10_USAGE_STAGING;
 			}
 		}
 
@@ -126,7 +119,14 @@ namespace KlayGE
 			break;
 
 		case BA_Write_Only:
-			type = D3D10_MAP_WRITE;
+			if (EAH_CPU_Write == access_hint_)
+			{
+				type = D3D10_MAP_WRITE_DISCARD;
+			}
+			else
+			{
+				type = D3D10_MAP_WRITE;
+			}
 			break;
 
 		case BA_Read_Write:

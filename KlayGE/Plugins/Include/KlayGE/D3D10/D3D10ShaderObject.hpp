@@ -86,7 +86,6 @@ namespace KlayGE
 		boost::array<std::vector<char>, ST_NumShaderTypes> dirty_;
 		boost::array<std::vector<std::vector<uint8_t> >, ST_NumShaderTypes> cbufs_;
 		boost::array<std::vector<ID3D10BufferPtr>, ST_NumShaderTypes> d3d_cbufs_;
-		boost::array<std::vector<ID3D10BufferPtr>, ST_NumShaderTypes> d3d_cbufs_sys_mem_;
 	};
 
 	typedef boost::shared_ptr<D3D10ShaderObject> D3D10ShaderObjectPtr;

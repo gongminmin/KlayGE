@@ -197,7 +197,7 @@ namespace KlayGE
 			void*& data)
 	{
 		uint8_t* p;
-		TIF(d3dTexture1D_->Map(D3D10CalcSubresource(level, 0, 1), D3D10Mapping::Mapping(tma), 0, reinterpret_cast<void**>(&p)));
+		TIF(d3dTexture1D_->Map(D3D10CalcSubresource(level, 0, 1), D3D10Mapping::Mapping(tma, type_, access_hint_, numMipMaps_), 0, reinterpret_cast<void**>(&p)));
 		data = p + x_offset * NumFormatBytes(format_);
 	}
 

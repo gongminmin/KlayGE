@@ -107,7 +107,14 @@ namespace KlayGE
 	{
 		if (EAH_CPU_Write == access_hint_)
 		{
-			usage = D3D10_USAGE_STAGING;
+			if ((numMipMaps_ != 1) || (TT_Cube == type_))
+			{
+				usage = D3D10_USAGE_STAGING;
+			}
+			else
+			{
+				usage = D3D10_USAGE_DYNAMIC;
+			}
 		}
 		else
 		{
@@ -117,21 +124,7 @@ namespace KlayGE
 			}
 			else
 			{
-				if (!(access_hint_ & EAH_CPU_Read) && !(access_hint_ & EAH_GPU_Write) && !(access_hint_ & EAH_GPU_Read) && (access_hint_ & EAH_CPU_Write))
-				{
-					if (numMipMaps_ != 1)
-					{
-						usage = D3D10_USAGE_STAGING;
-					}
-					else
-					{
-						usage = D3D10_USAGE_DYNAMIC;
-					}
-				}
-				else
-				{
-					usage = D3D10_USAGE_STAGING;
-				}
+				usage = D3D10_USAGE_STAGING;
 			}
 		}
 

@@ -221,7 +221,7 @@ namespace KlayGE
 			void*& data, uint32_t& row_pitch, uint32_t& slice_pitch)
 	{
 		D3D10_MAPPED_TEXTURE3D mapped;
-		TIF(d3dTexture3D_->Map(D3D10CalcSubresource(level, 0, 1), D3D10Mapping::Mapping(tma), 0, &mapped));
+		TIF(d3dTexture3D_->Map(D3D10CalcSubresource(level, 0, 1), D3D10Mapping::Mapping(tma, type_, access_hint_, numMipMaps_), 0, &mapped));
 		uint8_t* p = static_cast<uint8_t*>(mapped.pData);
 		data = p + (z_offset * mapped.DepthPitch + y_offset * mapped.RowPitch + x_offset) * NumFormatBytes(format_);
 		row_pitch = mapped.RowPitch;

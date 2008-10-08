@@ -121,7 +121,7 @@ namespace KlayGE
 		};
 	}
 
-	D3D10_MAP D3D10Mapping::Mapping(TextureMapAccess tma)
+	D3D10_MAP D3D10Mapping::Mapping(TextureMapAccess tma, Texture::TextureType type, uint32_t access_hint, uint32_t numMipMaps)
 	{
 		switch (tma)
 		{
@@ -129,7 +129,14 @@ namespace KlayGE
 			return D3D10_MAP_READ;
 
 		case TMA_Write_Only:
-			return D3D10_MAP_WRITE;
+			if ((EAH_CPU_Write == access_hint) && (1 == numMipMaps) && (type != Texture::TT_Cube))
+			{
+				return D3D10_MAP_WRITE_DISCARD;
+			}
+			else
+			{
+				return D3D10_MAP_WRITE;
+			}
 
 		case TMA_Read_Write:
 			return D3D10_MAP_READ_WRITE;
