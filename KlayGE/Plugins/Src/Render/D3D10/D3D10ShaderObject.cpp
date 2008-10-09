@@ -154,8 +154,8 @@ namespace
 	class SetD3D10ShaderParameter<float4x4, float>
 	{
 	public:
-		SetD3D10ShaderParameter(uint8_t* target, uint32_t elements, RenderEffectParameterPtr const & param, char* dirty)
-			: target_(reinterpret_cast<float4*>(target)), size_(elements * sizeof(float4)), param_(param), dirty_(dirty)
+		SetD3D10ShaderParameter(uint8_t* target, uint32_t rows, RenderEffectParameterPtr const & param, char* dirty)
+			: target_(reinterpret_cast<float4*>(target)), size_(rows * sizeof(float4)), param_(param), dirty_(dirty)
 		{
 		}
 
@@ -409,6 +409,7 @@ namespace KlayGE
 							p_handle.param_type = type_desc.Type;
 							p_handle.cbuff = c;
 							p_handle.offset = var_desc.StartOffset;
+							p_handle.elements = type_desc.Elements;
 							p_handle.rows = static_cast<uint8_t>(type_desc.Rows);
 							p_handle.columns = static_cast<uint8_t>(type_desc.Columns);
 
@@ -650,7 +651,7 @@ namespace KlayGE
 		case REDT_float4x4:
 			if (param->ArraySize() != 0)
 			{
-				ret.func = SetD3D10ShaderParameter<float4x4*, float>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
+				ret.func = SetD3D10ShaderParameter<float4x4*, float>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.rows, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 			}
 			else
 			{
