@@ -26,7 +26,6 @@
 #include <KlayGE/D3D10/D3D10Texture.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
-#pragma comment(lib, "d3d10.lib")
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "d3dx10d.lib")
 #else

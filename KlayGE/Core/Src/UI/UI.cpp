@@ -95,15 +95,15 @@ namespace KlayGE
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			vb_sys_mem_->Resize(vertices_.size() * sizeof(vertices_[0]));
-			vb_->Resize(vertices_.size() * sizeof(vertices_[0]));
+			vb_sys_mem_->Resize(static_cast<uint32_t>(vertices_.size() * sizeof(vertices_[0])));
+			vb_->Resize(vb_sys_mem_->Size());
 			{
 				GraphicsBuffer::Mapper mapper(*vb_sys_mem_, BA_Write_Only);
 				std::memcpy(mapper.Pointer<uint8_t>(), &vertices_[0], vb_sys_mem_->Size());
 			}
 
-			ib_sys_mem_->Resize(indices_.size() * sizeof(indices_[0]));
-			ib_->Resize(indices_.size() * sizeof(indices_[0]));
+			ib_sys_mem_->Resize(static_cast<uint32_t>(indices_.size() * sizeof(indices_[0])));
+			ib_->Resize(ib_sys_mem_->Size());
 			{
 				GraphicsBuffer::Mapper mapper(*ib_sys_mem_, BA_Write_Only);
 				std::memcpy(mapper.Pointer<uint8_t>(), &indices_[0], ib_sys_mem_->Size());

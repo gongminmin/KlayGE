@@ -101,14 +101,14 @@ namespace
 			rl_->TopologyType(RenderLayout::TT_TriangleList);
 
 			ElementInitData init_data;
-			init_data.row_pitch = vertices.size() * sizeof(vertices[0]);
+			init_data.row_pitch = static_cast<uint32_t>(vertices.size() * sizeof(vertices[0]));
 			init_data.slice_pitch = 0;
 			init_data.data.resize(init_data.row_pitch);
 			memcpy(&init_data.data[0], &vertices[0], init_data.row_pitch);
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
-			init_data.row_pitch = indices.size() * sizeof(indices[0]);
+			init_data.row_pitch = static_cast<uint32_t>(indices.size() * sizeof(indices[0]));
 			init_data.slice_pitch = 0;
 			init_data.data.resize(init_data.row_pitch);
 			memcpy(&init_data.data[0], &indices[0], init_data.row_pitch);
@@ -120,7 +120,7 @@ namespace
 				&indices[0], &indices[0] + indices.size(),
 				&vertices[0], &vertices[0] + vertices.size());
 
-			init_data.row_pitch = normal.size() * sizeof(normal[0]);
+			init_data.row_pitch = static_cast<uint32_t>(normal.size() * sizeof(normal[0]));
 			init_data.slice_pitch = 0;
 			init_data.data.resize(init_data.row_pitch);
 			memcpy(&init_data.data[0], &normal[0], init_data.row_pitch);

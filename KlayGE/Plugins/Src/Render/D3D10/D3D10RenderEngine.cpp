@@ -43,19 +43,29 @@
 
 #include <KlayGE/D3D10/D3D10RenderEngine.hpp>
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma comment(lib, "d3d10.lib")
-#pragma comment(lib, "DXGI.lib")
-#endif
-
 namespace KlayGE
 {
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D10RenderEngine::D3D10RenderEngine()
 	{
+		mod_dxgi_ = ::LoadLibraryW(L"dxgi.dll");
+		mod_d3d10_ = ::LoadLibraryW(L"d3d10.dll");
+
+		if (mod_dxgi_ != NULL)
+		{
+			DynamicCreateDXGIFactory_ = reinterpret_cast<CreateDXGIFactoryFunc>(::GetProcAddress(mod_dxgi_, "CreateDXGIFactory"));
+		}
+
+		if (mod_d3d10_ != NULL)
+		{
+			DynamicD3D10CreateDeviceAndSwapChain_ = reinterpret_cast<D3D10CreateDeviceAndSwapChainFunc>(::GetProcAddress(mod_d3d10_, "D3D10CreateDeviceAndSwapChain"));
+			DynamicD3D10GetVertexShaderProfile_ = reinterpret_cast<D3D10GetVertexShaderProfileFunc>(::GetProcAddress(mod_d3d10_, "D3D10GetVertexShaderProfile"));
+			DynamicD3D10GetPixelShaderProfile_ = reinterpret_cast<D3D10GetVertexShaderProfileFunc>(::GetProcAddress(mod_d3d10_, "D3D10GetPixelShaderProfile"));
+		}
+
 		IDXGIFactory* gi_factory; 
-		TIF(CreateDXGIFactory(IID_IDXGIFactory, reinterpret_cast<void**>(&gi_factory)));
+		TIF(DynamicCreateDXGIFactory_(IID_IDXGIFactory, reinterpret_cast<void**>(&gi_factory)));
 		gi_factory_ = MakeCOMPtr(gi_factory);
 
 		adapterList_.Enumerate(gi_factory_);
@@ -70,6 +80,9 @@ namespace KlayGE
 
 		d3d_device_.reset();
 		gi_factory_.reset();
+
+		::FreeLibrary(mod_d3d10_);
+		::FreeLibrary(mod_dxgi_);
 	}
 
 	// 返回渲染系统的名字

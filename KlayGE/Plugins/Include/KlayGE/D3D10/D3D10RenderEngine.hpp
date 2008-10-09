@@ -72,6 +72,23 @@ namespace KlayGE
 		bool FullScreen() const;
 		void FullScreen(bool fs);
 
+		HRESULT D3D10CreateDeviceAndSwapChain(IDXGIAdapter* pAdapter,
+								D3D10_DRIVER_TYPE DriverType, HMODULE Software, UINT Flags, UINT SDKVersion,
+								DXGI_SWAP_CHAIN_DESC* pSwapChainDesc, IDXGISwapChain** ppSwapChain,
+								ID3D10Device** ppDevice) const
+		{
+			return DynamicD3D10CreateDeviceAndSwapChain_(pAdapter, DriverType, Software, Flags, SDKVersion,
+				pSwapChainDesc, ppSwapChain, ppDevice);
+		}
+		LPCSTR D3D10GetVertexShaderProfile(ID3D10Device* pDevice) const
+		{
+			return DynamicD3D10GetVertexShaderProfile_(pDevice);
+		}
+		LPCSTR D3D10GetPixelShaderProfile(ID3D10Device* pDevice) const
+		{
+			return DynamicD3D10GetPixelShaderProfile_(pDevice);
+		}
+
 		void RSSetState(ID3D10RasterizerStatePtr const & ras);
 		void OMSetDepthStencilState(ID3D10DepthStencilStatePtr const & ds, uint16_t stencil_ref);
 		void OMSetBlendState(ID3D10BlendStatePtr const & bs, Color const & blend_factor, uint32_t sample_mask);
@@ -90,6 +107,23 @@ namespace KlayGE
 	private:
 		D3D10AdapterList const & D3DAdapters() const;
 		D3D10AdapterPtr const & ActiveAdapter() const;
+
+		HMODULE mod_dxgi_;
+		HMODULE mod_d3d10_;
+
+		typedef HRESULT (WINAPI *CreateDXGIFactoryFunc)(REFIID riid, void** ppFactory);
+		typedef HRESULT (WINAPI *D3D10CreateDeviceAndSwapChainFunc)(IDXGIAdapter* pAdapter,
+								D3D10_DRIVER_TYPE DriverType, HMODULE Software, UINT Flags, UINT SDKVersion,
+								DXGI_SWAP_CHAIN_DESC* pSwapChainDesc, IDXGISwapChain** ppSwapChain,
+								ID3D10Device** ppDevice);
+		typedef LPCSTR (WINAPI *D3D10GetVertexShaderProfileFunc)(ID3D10Device* pDevice);
+		typedef LPCSTR (WINAPI *D3D10GetPixelShaderProfileFunc)(ID3D10Device* pDevice);
+
+		CreateDXGIFactoryFunc DynamicCreateDXGIFactory_;
+		D3D10CreateDeviceAndSwapChainFunc DynamicD3D10CreateDeviceAndSwapChain_;
+		D3D10GetVertexShaderProfileFunc DynamicD3D10GetVertexShaderProfile_;
+		D3D10GetPixelShaderProfileFunc DynamicD3D10GetPixelShaderProfile_;
+
 
 		// Direct3D rendering device
 		// Only created after top-level window created

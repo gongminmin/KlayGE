@@ -309,14 +309,14 @@ namespace KlayGE
 		case ST_VertexShader:
 			if ("auto" == shader_profile)
 			{
-				shader_profile = D3D10GetVertexShaderProfile(d3d_device.get());
+				shader_profile = render_eng.D3D10GetVertexShaderProfile(d3d_device.get());
 			}
 			break;
 
 		case ST_PixelShader:
 			if ("auto" == shader_profile)
 			{
-				shader_profile = D3D10GetPixelShaderProfile(d3d_device.get());
+				shader_profile = render_eng.D3D10GetPixelShaderProfile(d3d_device.get());
 			}
 			break;
 
