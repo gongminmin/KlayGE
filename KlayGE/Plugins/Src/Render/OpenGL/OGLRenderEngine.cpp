@@ -503,7 +503,7 @@ namespace KlayGE
 			}
 			else
 			{
-				GLenum targets[] = { GL_BACK };
+				GLenum targets[] = { GL_BACK_LEFT };
 				glDrawBuffers(1, &targets[0]);
 			}
 

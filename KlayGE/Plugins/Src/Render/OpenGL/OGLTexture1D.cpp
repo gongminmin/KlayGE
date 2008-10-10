@@ -158,6 +158,7 @@ namespace KlayGE
 			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width, uint32_t src_xOffset)
 	{
 		BOOST_ASSERT(type_ == target.Type());
+		BOOST_ASSERT(format_ == target.Format());
 
 		OGLTexture1D& other = static_cast<OGLTexture1D&>(target);
 
@@ -171,20 +172,60 @@ namespace KlayGE
 		GLenum gl_target_type;
 		OGLMapping::MappingFormat(gl_target_internal_format, gl_target_format, gl_target_type, target.Format());
 
-		std::vector<uint8_t> data_in(src_width * this->Bpp() / 8);
-		std::vector<uint8_t> data_out(dst_width * other.Bpp() / 8);
-
+		if (IsCompressedFormat(format_))
 		{
-			Texture::Mapper mapper(*this, level, TMA_Read_Only, src_xOffset, src_width);
-			memcpy(&data_in[0], mapper.Pointer<uint8_t*>(), data_in.size() * sizeof(data_in[0]));
+			BOOST_ASSERT((0 == src_xOffset) && (0 == dst_xOffset));
+			BOOST_ASSERT((src_width == dst_width));
+
+			Texture::Mapper mapper_src(*this, level, TMA_Read_Only, src_xOffset, src_width);
+			Texture::Mapper mapper_dst(target, level, TMA_Write_Only, dst_xOffset, dst_width);
+
+			int block_size;
+			if (EF_BC1 == format_)
+			{
+				block_size = 8;
+			}
+			else
+			{
+				block_size = 16;
+			}
+
+			GLsizei const image_size = ((dst_width + 3) / 4) * block_size;
+
+			memcpy(mapper_dst.Pointer<uint8_t>(), mapper_src.Pointer<uint8_t>(), image_size);
 		}
-
-		gluScaleImage(gl_format, src_width, 1, gl_type, &data_in[0],
-			dst_width, 1, gl_target_type, &data_out[0]);
-
+		else
 		{
-			Texture::Mapper mapper(other, level, TMA_Write_Only, dst_xOffset, dst_width);
-			memcpy(mapper.Pointer<uint8_t*>(), &data_out[0], data_out.size() * sizeof(data_out[0]));
+			size_t const src_format_size = NumFormatBytes(format_);
+			size_t const dst_format_size = NumFormatBytes(target.Format());
+
+			if (src_width != dst_width)
+			{
+				std::vector<uint8_t> data_in(src_width * src_format_size);
+				std::vector<uint8_t> data_out(dst_width * dst_format_size);
+
+				{
+					Texture::Mapper mapper(*this, level, TMA_Read_Only, src_xOffset, src_width);
+					memcpy(&data_in[0], mapper.Pointer<uint8_t*>(), data_in.size() * sizeof(data_in[0]));
+				}
+
+				gluScaleImage(gl_format, src_width, 1, gl_type, &data_in[0],
+					dst_width, 1, gl_target_type, &data_out[0]);
+
+				{
+					Texture::Mapper mapper(other, level, TMA_Write_Only, dst_xOffset, dst_width);
+					memcpy(mapper.Pointer<uint8_t*>(), &data_out[0], data_out.size() * sizeof(data_out[0]));
+				}
+			}
+			else
+			{
+				Texture::Mapper mapper_src(*this, level, TMA_Read_Only, src_xOffset, src_width);
+				Texture::Mapper mapper_dst(target, level, TMA_Write_Only, dst_xOffset, dst_width);
+				uint8_t const * s = mapper_src.Pointer<uint8_t>();
+				uint8_t* d = mapper_dst.Pointer<uint8_t>();
+				
+				memcpy(d, s, src_width * src_format_size);
+			}
 		}
 	}
 
@@ -195,6 +236,25 @@ namespace KlayGE
 		last_width_ = width;
 
 		uint32_t const size_fmt = NumFormatBytes(format_);
+		GLsizei image_size;
+		if (IsCompressedFormat(format_))
+		{
+			int block_size;
+			if (EF_BC1 == format_)
+			{
+				block_size = 8;
+			}
+			else
+			{
+				block_size = 16;
+			}
+
+			image_size = ((width + 3) / 4) * block_size;
+		}
+		else
+		{
+			image_size = width * size_fmt;
+		}
 
 		switch (tma)
 		{
@@ -208,10 +268,17 @@ namespace KlayGE
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[level]);
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-				glBufferData(GL_PIXEL_PACK_BUFFER, width * size_fmt, NULL, GL_STREAM_READ);
+				glBufferData(GL_PIXEL_PACK_BUFFER, image_size, NULL, GL_STREAM_READ);
 
 				glBindTexture(GL_TEXTURE_1D, texture_);
-				glGetTexImage(GL_TEXTURE_1D, level, gl_format, gl_type, NULL);
+				if (IsCompressedFormat(format_))
+				{
+					glGetCompressedTexImage(GL_TEXTURE_1D, level, NULL);
+				}
+				else
+				{
+					glGetTexImage(GL_TEXTURE_1D, level, gl_format, gl_type, NULL);
+				}
 
 				data = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
 			}
@@ -221,8 +288,8 @@ namespace KlayGE
 			{
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[level]);
-				std::vector<uint8_t> zero(width * size_fmt);
-				glBufferSubData(GL_PIXEL_UNPACK_BUFFER, 0, width * size_fmt, &zero[0]);
+				std::vector<uint8_t> zero(image_size);
+				glBufferSubData(GL_PIXEL_UNPACK_BUFFER, 0, image_size, &zero[0]);
 				data = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
 			}
 			break;
@@ -238,10 +305,17 @@ namespace KlayGE
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[level]);
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-				glBufferData(GL_PIXEL_PACK_BUFFER, width * size_fmt, NULL, GL_STREAM_READ);
+				glBufferData(GL_PIXEL_PACK_BUFFER, image_size, NULL, GL_STREAM_READ);
 
 				glBindTexture(GL_TEXTURE_1D, texture_);
-				glGetTexImage(GL_TEXTURE_1D, level, gl_format, gl_type, NULL);
+				if (IsCompressedFormat(format_))
+				{
+					glGetCompressedTexImage(GL_TEXTURE_1D, level, NULL);
+				}
+				else
+				{
+					glGetTexImage(GL_TEXTURE_1D, level, gl_format, gl_type, NULL);
+				}
 
 				data = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_WRITE);
 			}

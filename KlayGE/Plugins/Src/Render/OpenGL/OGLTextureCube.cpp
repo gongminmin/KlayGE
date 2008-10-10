@@ -171,6 +171,7 @@ namespace KlayGE
 			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset)
 	{
 		BOOST_ASSERT(type_ == target.Type());
+		BOOST_ASSERT(format_ == target.Format());
 
 		GLint gl_internalFormat;
 		GLenum gl_format;
@@ -182,38 +183,80 @@ namespace KlayGE
 		GLenum gl_target_type;
 		OGLMapping::MappingFormat(gl_target_internal_format, gl_target_format, gl_target_type, target.Format());
 
-		size_t const src_format_size = this->Bpp() / 8;
-		size_t const dst_format_size = target.Bpp() / 8;
-
-		std::vector<uint8_t> data_in(src_width * src_height * src_format_size);
-		std::vector<uint8_t> data_out(dst_width * dst_height * dst_format_size);
-
+		if (IsCompressedFormat(format_))
 		{
-			Texture::Mapper mapper(*this, face, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
-			uint8_t const * s = mapper.Pointer<uint8_t>();
-			uint8_t* d = &data_in[0];
-			for (uint32_t y = 0; y < src_height; ++ y)
-			{
-				memcpy(d, s, src_width * src_format_size);
+			BOOST_ASSERT((0 == src_xOffset) && (0 == src_yOffset) && (0 == dst_xOffset) && (0 == dst_yOffset));
+			BOOST_ASSERT((src_width == dst_width) && (src_height == dst_height));
 
-				s += mapper.RowPitch();
-				d += src_width * src_format_size;
+			Texture::Mapper mapper_src(*this, face, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
+			Texture::Mapper mapper_dst(target, face, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
+
+			int block_size;
+			if (EF_BC1 == format_)
+			{
+				block_size = 8;
 			}
-		}
-
-		gluScaleImage(gl_format, src_width, src_height, gl_type, &data_in[0],
-			dst_width, dst_height, gl_target_type, &data_out[0]);
-
-		{
-			Texture::Mapper mapper(target, face, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
-			uint8_t const * s = &data_out[0];
-			uint8_t* d = mapper.Pointer<uint8_t>();
-			for (uint32_t y = 0; y < src_height; ++ y)
+			else
 			{
-				memcpy(d, s, src_width * src_format_size);
+				block_size = 16;
+			}
 
-				s += src_width * src_format_size;
-				d += mapper.RowPitch();
+			GLsizei const image_size = ((dst_width + 3) / 4) * ((dst_height + 3) / 4) * block_size;
+
+			memcpy(mapper_dst.Pointer<uint8_t>(), mapper_src.Pointer<uint8_t>(), image_size);
+		}
+		else
+		{
+			size_t const src_format_size = NumFormatBytes(format_);
+			size_t const dst_format_size = NumFormatBytes(target.Format());
+
+			if ((src_width != dst_width) || (src_height != dst_height))
+			{
+				std::vector<uint8_t> data_in(src_width * src_height * src_format_size);
+				std::vector<uint8_t> data_out(dst_width * dst_height * dst_format_size);
+
+				{
+					Texture::Mapper mapper(*this, face, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
+					uint8_t const * s = mapper.Pointer<uint8_t>();
+					uint8_t* d = &data_in[0];
+					for (uint32_t y = 0; y < src_height; ++ y)
+					{
+						memcpy(d, s, src_width * src_format_size);
+
+						s += mapper.RowPitch();
+						d += src_width * src_format_size;
+					}
+				}
+
+				gluScaleImage(gl_format, src_width, src_height, gl_type, &data_in[0],
+					dst_width, dst_height, gl_target_type, &data_out[0]);
+
+				{
+					Texture::Mapper mapper(target, face, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
+					uint8_t const * s = &data_out[0];
+					uint8_t* d = mapper.Pointer<uint8_t>();
+					for (uint32_t y = 0; y < src_height; ++ y)
+					{
+						memcpy(d, s, dst_width * dst_format_size);
+
+						s += src_width * src_format_size;
+						d += mapper.RowPitch();
+					}
+				}
+			}
+			else
+			{
+				Texture::Mapper mapper_src(*this, face, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
+				Texture::Mapper mapper_dst(target, face, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
+				uint8_t const * s = mapper_src.Pointer<uint8_t>();
+				uint8_t* d = mapper_dst.Pointer<uint8_t>();
+				for (uint32_t y = 0; y < src_height; ++ y)
+				{
+					memcpy(d, s, src_width * src_format_size);
+
+					s += mapper_src.RowPitch();
+					d += mapper_dst.RowPitch();
+				}
 			}
 		}
 	}
@@ -229,6 +272,25 @@ namespace KlayGE
 		last_height_ = height;
 
 		uint32_t const size_fmt = NumFormatBytes(format_);
+		GLsizei image_size;
+		if (IsCompressedFormat(format_))
+		{
+			int block_size;
+			if (EF_BC1 == format_)
+			{
+				block_size = 8;
+			}
+			else
+			{
+				block_size = 16;
+			}
+
+			image_size = ((width + 3) / 4) * ((height + 3) / 4) * block_size;
+		}
+		else
+		{
+			image_size = width * height * size_fmt;
+		}
 
 		switch (tma)
 		{
@@ -241,11 +303,17 @@ namespace KlayGE
 
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[face * numMipMaps_ + level]);
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-
-				glBufferData(GL_PIXEL_PACK_BUFFER, width * height * size_fmt, NULL, GL_STREAM_READ);
+				glBufferData(GL_PIXEL_PACK_BUFFER, image_size, NULL, GL_STREAM_READ);
 
 				glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
-				glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, gl_format, gl_type, NULL);
+				if (IsCompressedFormat(format_))
+				{
+					glGetCompressedTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, NULL);
+				}
+				else
+				{
+					glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, gl_format, gl_type, NULL);
+				}
 
 				data = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
 			}
@@ -255,8 +323,8 @@ namespace KlayGE
 			{
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[face * numMipMaps_ + level]);
-				std::vector<uint8_t> zero(width * height * size_fmt);
-				glBufferSubData(GL_PIXEL_UNPACK_BUFFER, 0, width * height * size_fmt, &zero[0]);
+				std::vector<uint8_t> zero(image_size);
+				glBufferSubData(GL_PIXEL_UNPACK_BUFFER, 0, image_size, &zero[0]);
 				data = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
 			}
 			break;
@@ -272,10 +340,17 @@ namespace KlayGE
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[face * numMipMaps_ + level]);
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-				glBufferData(GL_PIXEL_PACK_BUFFER, width * height * size_fmt, NULL, GL_STREAM_READ);
+				glBufferData(GL_PIXEL_PACK_BUFFER, image_size, NULL, GL_STREAM_READ);
 
 				glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
-				glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, gl_format, gl_type, NULL);
+				if (IsCompressedFormat(format_))
+				{
+					glGetCompressedTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, NULL);
+				}
+				else
+				{
+					glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, gl_format, gl_type, NULL);
+				}
 
 				data = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_WRITE);
 			}
@@ -285,7 +360,8 @@ namespace KlayGE
 			BOOST_ASSERT(false);
 			break;
 		}
-		row_pitch = width * bpp_ / 8;
+
+		row_pitch = width * size_fmt;
 	}
 
 	void OGLTextureCube::UnmapCube(CubeFaces face, int level)

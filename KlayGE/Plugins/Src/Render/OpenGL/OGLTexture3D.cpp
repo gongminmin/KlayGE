@@ -185,6 +185,7 @@ namespace KlayGE
 		UNREF_PARAM(dst_depth);
 
 		BOOST_ASSERT(type_ == target.Type());
+		BOOST_ASSERT(format_ == target.Format());
 		// fix me
 		BOOST_ASSERT(src_depth == dst_depth);
 
@@ -198,8 +199,8 @@ namespace KlayGE
 		GLenum gl_target_type;
 		OGLMapping::MappingFormat(gl_target_internal_format, gl_target_format, gl_target_type, target.Format());
 
-		size_t const src_format_size = this->Bpp() / 8;
-		size_t const dst_format_size = target.Bpp() / 8;
+		size_t const src_format_size = NumFormatBytes(format_);
+		size_t const dst_format_size = NumFormatBytes(target.Format());
 
 		std::vector<uint8_t> data_in(src_width * src_height * src_format_size);
 		std::vector<uint8_t> data_out(dst_width * dst_height * dst_format_size);
@@ -230,7 +231,7 @@ namespace KlayGE
 				uint8_t* d = mapper.Pointer<uint8_t>();
 				for (uint32_t y = 0; y < src_height; ++ y)
 				{
-					memcpy(d, s, src_width * src_format_size);
+					memcpy(d, s, dst_width * dst_format_size);
 
 					s += src_width * src_format_size;
 					d += mapper.RowPitch();
@@ -309,7 +310,8 @@ namespace KlayGE
 			BOOST_ASSERT(false);
 			break;
 		}
-		row_pitch = width * bpp_ / 8;
+
+		row_pitch = width * size_fmt;
 		slice_pitch = row_pitch * height;
 	}
 
