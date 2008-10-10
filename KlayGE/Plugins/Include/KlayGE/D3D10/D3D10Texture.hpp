@@ -18,6 +18,7 @@
 
 #include <boost/smart_ptr.hpp>
 
+#include <KlayGE/D3D10/D3D10MinGWDefs.hpp>
 #include <d3d10.h>
 #include <d3dx10.h>
 

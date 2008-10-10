@@ -29,6 +29,7 @@
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
 
+#include <KlayGE/D3D10/D3D10MinGWDefs.hpp>
 #include <d3d10.h>
 
 #include <KlayGE/D3D10/D3D10RenderEngine.hpp>

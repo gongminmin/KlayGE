@@ -19,6 +19,7 @@
 #include <boost/smart_ptr.hpp>
 
 #include <vector>
+#include <KlayGE/D3D10/D3D10MinGWDefs.hpp>
 #include <d3d10.h>
 
 #include <KlayGE/RenderLayout.hpp>
@@ -30,7 +31,7 @@ namespace KlayGE
 	{
 	public:
 		D3D10RenderLayout();
-		
+
 		ID3D10InputLayoutPtr const & InputLayout(ID3D10BlobPtr const & vs_code) const;
 
 	private:

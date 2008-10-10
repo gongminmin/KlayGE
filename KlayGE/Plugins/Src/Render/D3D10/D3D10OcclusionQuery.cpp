@@ -14,9 +14,11 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/COMPtr.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 
+#include <KlayGE/D3D10/D3D10MinGWDefs.hpp>
 #include <d3d10.h>
 
 #include <KlayGE/D3D10/D3D10RenderEngine.hpp>

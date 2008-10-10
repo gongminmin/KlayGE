@@ -43,7 +43,7 @@ namespace KlayGE
 		static D3D10_FILTER Mapping(TexFilterOp filter);
 		static D3D10_DEPTH_WRITE_MASK Mapping(bool depth_write_mask);
 
-		static D3D10_PRIMITIVE_TOPOLOGY D3D10Mapping::Mapping(RenderLayout::topology_type tt);
+		static D3D10_PRIMITIVE_TOPOLOGY Mapping(RenderLayout::topology_type tt);
 		static void Mapping(std::vector<D3D10_INPUT_ELEMENT_DESC>& elements, size_t stream, vertex_elements_type const & vet, RenderLayout::stream_type type, uint32_t freq);
 
 		static DXGI_FORMAT MappingFormat(ElementFormat pf);

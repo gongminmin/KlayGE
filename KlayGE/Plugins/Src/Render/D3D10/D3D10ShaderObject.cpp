@@ -29,6 +29,7 @@
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
 
+#include <KlayGE/D3D10/D3D10MinGWDefs.hpp>
 #include <d3d10_1.h>
 #include <d3dx10.h>
 
@@ -245,7 +246,7 @@ namespace
 		{
 			std::vector<float4x4> v;
 			param_->Value(v);
-								
+
 
 			size_t start = 0;
 			BOOST_FOREACH(BOOST_TYPEOF(v)::reference mat, v)

@@ -64,20 +64,20 @@ namespace KlayGE
 	{
 		// 枚举系统中的适配器
 		UINT adapter_no = 0;
-		IDXGIAdapter* adapter = NULL;
-		while (gi_factory->EnumAdapters(adapter_no, &adapter) != DXGI_ERROR_NOT_FOUND)
+		IDXGIAdapter* dxgi_adapter = NULL;
+		while (gi_factory->EnumAdapters(adapter_no, &dxgi_adapter) != DXGI_ERROR_NOT_FOUND)
 		{
-			if (adapter != NULL)
+			if (dxgi_adapter != NULL)
 			{
 				DXGI_ADAPTER_DESC ad;
-				adapter->GetDesc(&ad);
+				dxgi_adapter->GetDesc(&ad);
 
 				if (0 == wcscmp(ad.Description, L"NVIDIA PerfHUD"))
 				{
 					current_adapter_ = adapter_no;
 				}
 
-				D3D10AdapterPtr adapter(new D3D10Adapter(adapter_no, MakeCOMPtr(adapter)));
+				D3D10AdapterPtr adapter(new D3D10Adapter(adapter_no, MakeCOMPtr(dxgi_adapter)));
 				adapters_.push_back(adapter);
 			}
 
