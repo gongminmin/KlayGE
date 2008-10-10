@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
@@ -526,8 +527,7 @@ namespace KlayGE
 			return DXGI_FORMAT_D32_FLOAT;
 
 		default:
-			BOOST_ASSERT(false);
-			return DXGI_FORMAT_UNKNOWN;
+			THR(boost::system::posix_error::not_supported);
 		}
 	}
 
@@ -646,8 +646,7 @@ namespace KlayGE
 			return EF_D32F;
 
 		default:
-			BOOST_ASSERT(false);
-			return EF_Unknown;
+			THR(boost::system::posix_error::not_supported);
 		}
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)

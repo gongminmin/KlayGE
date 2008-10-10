@@ -14,6 +14,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Vector.hpp>
 #include <KlayGE/Matrix.hpp>
@@ -266,8 +267,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			THR(boost::system::posix_error::not_supported);
 		}
 	}
 
@@ -504,8 +504,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			THR(boost::system::posix_error::not_supported);
 		}
 	}
 }
