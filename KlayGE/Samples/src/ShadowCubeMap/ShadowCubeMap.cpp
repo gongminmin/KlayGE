@@ -40,7 +40,8 @@ namespace
 	{
 	public:
 		ShadowMapped(uint32_t shadow_map_size)
-			: shadow_map_size_(shadow_map_size)
+			: shadow_map_size_(shadow_map_size),
+				light_view_proj_mat_(6)
 		{
 		}
 
@@ -54,7 +55,7 @@ namespace
 			gen_sm_pass_ = gen_sm;
 		}
 
-		void LightMatrices(float4x4 const & model)
+		void LightMatrices(int pass, float4x4 const & model)
 		{
 			light_pos_ = transform_coord(float3(0, 0, 0), model);
 
@@ -63,11 +64,13 @@ namespace
 			App3DFramework const & app = Context::Instance().AppInstance();
 			light_view_ = app.ActiveCamera().ViewMatrix();
 			light_proj_ = app.ActiveCamera().ProjMatrix();
+
+			light_view_proj_mat_[pass] = light_view_ * light_proj_;
 		}
 
-		void ShadowMapTexture(TexturePtr tex)
+		void ShadowMapTexture(TexturePtr tex[6])
 		{
-			sm_tex_ = tex;
+			sm_tex_.assign(&tex[0], &tex[6]);
 		}
 
 		void LampTexture(TexturePtr tex)
@@ -96,7 +99,14 @@ namespace
 				*(effect->ParameterByName("light_pos")) = light_pos_;
 
 				*(effect->ParameterByName("lamp_sampler")) = lamp_tex_;
-				*(effect->ParameterByName("shadow_map_sampler")) = sm_tex_;
+				*(effect->ParameterByName("shadow_map_x_pos_sampler")) = sm_tex_[0];
+				*(effect->ParameterByName("shadow_map_x_neg_sampler")) = sm_tex_[1];
+				*(effect->ParameterByName("shadow_map_y_pos_sampler")) = sm_tex_[2];
+				*(effect->ParameterByName("shadow_map_y_neg_sampler")) = sm_tex_[3];
+				*(effect->ParameterByName("shadow_map_z_pos_sampler")) = sm_tex_[4];
+				*(effect->ParameterByName("shadow_map_z_neg_sampler")) = sm_tex_[5];
+
+				*(effect->ParameterByName("light_view_proj")) = light_view_proj_mat_;
 			}
 		}
 
@@ -104,7 +114,8 @@ namespace
 		uint32_t shadow_map_size_;
 
 		bool gen_sm_pass_;
-		TexturePtr sm_tex_;
+		std::vector<TexturePtr> sm_tex_;
+		std::vector<float4x4> light_view_proj_mat_;
 
 		float3 light_pos_;
 		float4x4 inv_light_model_;
@@ -353,12 +364,12 @@ void ShadowCubeMap::InitObjects()
 	checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->LampTexture(lamp_tex_);
 
 	RenderViewPtr depth_view = rf.MakeDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, EF_D16, 0);
-	shadow_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, EF_GR16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	for (int i = 0; i < 6; ++ i)
 	{
+		shadow_tex_[i] = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, EF_GR16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+
 		shadow_buffers_[i] = rf.MakeFrameBuffer();
-		shadow_buffers_[i]->Attach(FrameBuffer::ATT_Color0,
-			rf.Make2DRenderView(*shadow_tex_, static_cast<Texture::CubeFaces>(i), 0));
+		shadow_buffers_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadow_tex_[i], 0));
 		shadow_buffers_[i]->Attach(FrameBuffer::ATT_DepthStencil, depth_view);
 
 		CameraPtr camera = shadow_buffers_[i]->GetViewport().camera;
@@ -426,8 +437,8 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			renderEngine.BindFrameBuffer(shadow_buffers_[pass]);
 			renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
-			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->LightMatrices(light_model_);
-			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->LightMatrices(light_model_);
+			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->LightMatrices(pass, light_model_);
+			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->LightMatrices(pass, light_model_);
 		}
 		return App3DFramework::URV_Need_Flush;
 

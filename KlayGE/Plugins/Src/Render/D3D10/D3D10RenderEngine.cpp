@@ -49,6 +49,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D10RenderEngine::D3D10RenderEngine()
 	{
+		// Dynamic loading because these dlls can't be loaded on WinXP
 		mod_dxgi_ = ::LoadLibraryW(L"dxgi.dll");
 		mod_d3d10_ = ::LoadLibraryW(L"d3d10.dll");
 
@@ -81,8 +82,9 @@ namespace KlayGE
 		d3d_device_.reset();
 		gi_factory_.reset();
 
-		::FreeLibrary(mod_d3d10_);
-		::FreeLibrary(mod_dxgi_);
+		// Some other resources may still alive, so don't free them
+		//::FreeLibrary(mod_d3d10_);
+		//::FreeLibrary(mod_dxgi_);
 	}
 
 	// 返回渲染系统的名字
