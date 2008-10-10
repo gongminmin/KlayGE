@@ -79,6 +79,7 @@ namespace KlayGE
 		cur_frame_buffer_.reset();
 		default_frame_buffer_.reset();
 
+		d3d_device_->ClearState();
 		d3d_device_.reset();
 		gi_factory_.reset();
 

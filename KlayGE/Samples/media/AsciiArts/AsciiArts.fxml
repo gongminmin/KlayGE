@@ -22,7 +22,7 @@
 		<![CDATA[
 float4 AsciiArtsPS(float4 pos : POSITION, float2 tex_coord0 : TEXCOORD0) : COLOR
 {
-	half lum = saturate(tex2D(src_sampler, tex_coord0).r);
+	half lum = tex2D(src_sampler, tex_coord0).r;
 	half2 t = half2(floor(lum * 31) / 32, 0) + frac(tex_coord0 / cell_per_row_line) / half2(32, 1);
 	return lum * tex2D(lums_sampler, t).r;
 }
