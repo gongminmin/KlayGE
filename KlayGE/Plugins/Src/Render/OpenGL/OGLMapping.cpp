@@ -365,11 +365,11 @@ namespace KlayGE
 			gltype = GL_HALF_FLOAT_ARB;
 			break;
 
-		case EF_GR16F:
+		/*case EF_GR16F:
 			internalFormat = GL_LUMINANCE_ALPHA16F_ARB;
 			glformat = GL_LUMINANCE_ALPHA;
 			gltype = GL_HALF_FLOAT_ARB;
-			break;
+			break;*/
 
 		case EF_BGR16F:
 			internalFormat = GL_RGB16F_ARB;
@@ -389,11 +389,11 @@ namespace KlayGE
 			gltype = GL_FLOAT;
 			break;
 
-		case EF_GR32F:
+		/*case EF_GR32F:
 			internalFormat = GL_LUMINANCE_ALPHA32F_ARB;
 			glformat = GL_LUMINANCE_ALPHA;
 			gltype = GL_FLOAT;
-			break;
+			break;*/
 
 		case EF_BGR32F:
 			internalFormat = GL_RGB32F_ARB;

@@ -171,7 +171,14 @@ namespace KlayGE
 		int len = 1;
 		for (size_t i = 0; i < sum_lums_.size() + 1; ++ i)
 		{
-			lum_texs_.push_back(rf.MakeTexture2D(len, len, 1, EF_GR16F, EAH_GPU_Read | EAH_GPU_Write, NULL));
+			try
+			{
+				lum_texs_.push_back(rf.MakeTexture2D(len, len, 1, EF_R16F, EAH_GPU_Read | EAH_GPU_Write, NULL));
+			}
+			catch (...)
+			{
+				lum_texs_.push_back(rf.MakeTexture2D(len, len, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write, NULL));
+			}
 			len *= 4;
 		}
 		std::reverse(lum_texs_.begin(), lum_texs_.end());

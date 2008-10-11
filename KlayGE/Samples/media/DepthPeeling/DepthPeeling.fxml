@@ -62,6 +62,7 @@ void DepthPeelingNthPS(float4 pos : POSITION,
 	float last_depth = tex2D(last_depth_sampler, tex_coord).r;
 	if (oDepth.r <= last_depth)
 	{
+		oClr = 0;
 		clip(-1);
 	}
 	else

@@ -274,29 +274,28 @@ void DepthPeelingApp::OnResize(uint32_t width, uint32_t height)
 	App3DFramework::OnResize(width, height);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	RenderEngine& re = rf.RenderEngineInstance();
 
-	depth_texs_[0] = rf.MakeTexture2D(width, height, 1, EF_GR32F, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	depth_texs_[1] = rf.MakeTexture2D(width, height, 1, EF_GR32F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	try
+	{
+		depth_texs_[0] = rf.MakeTexture2D(width, height, 1, EF_GR32F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	}
+	catch (...)
+	{
+		depth_texs_[0] = rf.MakeTexture2D(width, height, 1, EF_ABGR32F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	}
+	depth_texs_[1] = rf.MakeTexture2D(width, height, 1, depth_texs_[0]->Format(), EAH_GPU_Read | EAH_GPU_Write, NULL);
 	depth_view_ = rf.Make2DRenderView(*depth_texs_[0], 0);
 
-	default_depth_view_ = re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil);
+	peeled_depth_view_ = rf.MakeDepthStencilRenderView(width, height, EF_D16, 0);
 
 	for (size_t i = 0; i < peeling_fbs_.size(); ++ i)
 	{
-		try
-		{
-			peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, EF_ARGB8, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		}
-		catch (...)
-		{
-			peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, EF_ABGR8, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		}
+		peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, (EF_ABGR32F == depth_texs_[0]->Format()) ? EF_ABGR32F : EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		peeled_views_[i] = rf.Make2DRenderView(*peeled_texs_[i], 0);
 
 		peeling_fbs_[i]->Attach(FrameBuffer::ATT_Color0, peeled_views_[i]);
 		peeling_fbs_[i]->Attach(FrameBuffer::ATT_Color1, depth_view_);
-		peeling_fbs_[i]->Attach(FrameBuffer::ATT_DepthStencil, default_depth_view_);
+		peeling_fbs_[i]->Attach(FrameBuffer::ATT_DepthStencil, peeled_depth_view_);
 	}
 
 	blend_pp_->Destinate(FrameBufferPtr());
@@ -372,7 +371,7 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 			{
 				re.BindFrameBuffer(peeling_fbs_[i + j]);
 				peeled_views_[i + j]->Clear(Color(0, 0, 0, 0));
-				default_depth_view_->Clear(1.0f);
+				peeled_depth_view_->Clear(1.0f);
 				depth_texs_[0]->CopyToTexture(*depth_texs_[1]);
 
 				oc_queries_[j]->Begin();

@@ -34,7 +34,7 @@
 void SkinnedMeshVS(float2 tex0 : TEXCOORD0,
 				float4 pos : POSITION,
 				float4 blend_weights : BLENDWEIGHT,
-				byte4 blend_indices : BLENDINDICES,
+				int4 blend_indices : BLENDINDICES,
 				float3 T	: TANGENT,	// in object space
 				float3 B	: BINORMAL,	// in object space
 				

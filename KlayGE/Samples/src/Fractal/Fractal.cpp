@@ -209,13 +209,25 @@ void Fractal::OnResize(uint32_t width, uint32_t height)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 	ElementInitData init_data;
-	init_data.data.assign(width * height * NumFormatBytes(EF_GR16F), 0);
 	init_data.row_pitch = width * NumFormatBytes(EF_GR16F);
+	init_data.data.assign(init_data.row_pitch * height, 0);
 	init_data.slice_pitch = 0;
+
+	try
+	{
+		rendered_tex_[0] = rf.MakeTexture2D(width, height, 1, EF_GR16F, EAH_GPU_Read | EAH_GPU_Write, &init_data);
+	}
+	catch (...)
+	{
+		init_data.row_pitch = width * NumFormatBytes(EF_ABGR16F);
+		init_data.data.resize(init_data.row_pitch * height, 0);
+
+		rendered_tex_[0] = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write, &init_data);
+	}
+	rendered_tex_[1] = rf.MakeTexture2D(width, height, 1, rendered_tex_[0]->Format(), EAH_GPU_Read | EAH_GPU_Write, &init_data);
 
 	for (int i = 0; i < 2; ++ i)
 	{
-		rendered_tex_[i] = rf.MakeTexture2D(width, height, 1, EF_GR16F, EAH_GPU_Read | EAH_GPU_Write, &init_data);
 		render_buffer_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_[i], 0));
 	}
 }

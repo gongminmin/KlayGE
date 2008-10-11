@@ -277,13 +277,15 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
+	RenderViewPtr ds_view = rf.MakeDepthStencilRenderView(width, height, EF_D16, 0);
+
 	render_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	render_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*render_tex_, 0));
-	render_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));
+	render_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 	hdr_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	hdr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0));
-	hdr_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.RenderEngineInstance().CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil));
+	hdr_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 	hdr_->Source(hdr_tex_, hdr_buffer_->RequiresFlipping());
 	hdr_->Destinate(FrameBufferPtr());

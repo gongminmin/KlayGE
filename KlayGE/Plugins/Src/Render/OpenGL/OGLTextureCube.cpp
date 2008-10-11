@@ -53,7 +53,7 @@ namespace KlayGE
 			{
 				++ numMipMaps_;
 
-				size /= 2;
+				s /= 2;
 			}
 		}
 		else
@@ -76,6 +76,7 @@ namespace KlayGE
 
 		for (int face = 0; face < 6; ++ face)
 		{
+			uint32_t s = size;
 			for (uint16_t level = 0; level < numMipMaps_; ++ level)
 			{
 				if (IsCompressedFormat(format_))
@@ -90,7 +91,7 @@ namespace KlayGE
 						block_size = 16;
 					}
 
-					GLsizei const image_size = ((size + 3) / 4) * ((size + 3) / 4) * block_size;
+					GLsizei const image_size = ((s + 3) / 4) * ((s + 3) / 4) * block_size;
 
 					glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[face * numMipMaps_ + level]);
 					glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW);
@@ -106,11 +107,11 @@ namespace KlayGE
 					glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
 					glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glinternalFormat,
-						size, size, 0, image_size, NULL);
+						s, s, 0, image_size, NULL);
 				}
 				else
 				{
-					GLsizei const image_size = size * size * bpp_ / 8;
+					GLsizei const image_size = s * s * bpp_ / 8;
 
 					glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[face * numMipMaps_ + level]);
 					glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW);
@@ -121,18 +122,18 @@ namespace KlayGE
 					}
 					else
 					{
-						for (uint32_t h = 0; h < size; ++ h)
+						for (uint32_t h = 0; h < s; ++ h)
 						{
-							memcpy(p + h * size * bpp_ / 8, &init_data->data[h * init_data->row_pitch], size * bpp_ / 8);
+							memcpy(p + h * s * bpp_ / 8, &init_data->data[h * init_data->row_pitch], s * bpp_ / 8);
 						}
 					}
 					glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
 					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glinternalFormat,
-						size, size, 0, glformat, gltype, NULL);
+						s, s, 0, glformat, gltype, NULL);
 				}
 
-				size /= 2;
+				s /= 2;
 			}
 		}
 

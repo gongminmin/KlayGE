@@ -533,7 +533,7 @@ namespace KlayGE
 
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
-					RenderPassPtr pass = tech.Pass(i);
+					RenderPassPtr const & pass = tech.Pass(i);
 					
 					pass->Bind();
 					glDrawElements(mode, static_cast<GLsizei>(rl.NumIndices()),
@@ -545,7 +545,7 @@ namespace KlayGE
 			{
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
-					RenderPassPtr pass = tech.Pass(i);
+					RenderPassPtr const & pass = tech.Pass(i);
 					
 					pass->Bind();
 					glDrawArrays(mode, 0, static_cast<GLsizei>(rl.NumVertices()));

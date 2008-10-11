@@ -69,7 +69,10 @@ namespace KlayGE
 
 	OGLTexture::~OGLTexture()
 	{
-		glDeleteBuffers(static_cast<GLsizei>(pbos_.size()), &pbos_[0]);
+		if (!pbos_.empty())
+		{
+			glDeleteBuffers(static_cast<GLsizei>(pbos_.size()), &pbos_[0]);
+		}
 		glDeleteTextures(1, &texture_);
 	}
 
