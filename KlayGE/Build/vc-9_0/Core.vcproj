@@ -416,10 +416,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\OcclusionQuery.hpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\Core\Include\KlayGE\ParticleSystem.hpp"
 					>
 				</File>

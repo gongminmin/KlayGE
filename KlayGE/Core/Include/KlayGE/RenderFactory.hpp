@@ -6,6 +6,7 @@
 //
 // 3.8.0
 // 增加了MakeSamplerStateObject (2008.9.21)
+// 增加了MakeConditionalRender (2008.10.11)
 //
 // 3.0.0
 // 增加了MakeVertexBuffer (2005.9.7)
@@ -63,6 +64,7 @@ namespace KlayGE
 		virtual GraphicsBufferPtr MakeIndexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data) = 0;
 
 		virtual QueryPtr MakeOcclusionQuery() = 0;
+		virtual QueryPtr MakeConditionalRender() = 0;
 
 		virtual RenderViewPtr Make1DRenderView(Texture& texture, int level) = 0;
 		virtual RenderViewPtr Make2DRenderView(Texture& texture, int level) = 0;

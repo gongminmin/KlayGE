@@ -16,7 +16,7 @@
 #define KLAYGE_LIB_NAME KlayGE_RenderEngine_OpenGL
 #include <KlayGE/config/auto_link.hpp>
 
-#include <KlayGE/OcclusionQuery.hpp>
+#include <KlayGE/Query.hpp>
 
 namespace KlayGE
 {
@@ -34,6 +34,22 @@ namespace KlayGE
 	private:
 		GLuint query_;
 	};
+
+	class OGLConditionalRender : public ConditionalRender
+	{
+	public:
+		OGLConditionalRender();
+		~OGLConditionalRender();
+
+		void Begin();
+		void End();
+
+		void BeginConditionalRender();
+		void EndConditionalRender();
+
+	private:
+		GLuint query_;
+	};
 }
 
-#endif		// _OGLOCCLUSIONQUERY_HPP
+#endif		// _OGLQUERY_HPP

@@ -89,6 +89,11 @@ namespace KlayGE
 			return Query::NullObject();
 		}
 
+		QueryPtr MakeConditionalRender()
+		{
+			return Query::NullObject();
+		}
+
 		RenderViewPtr Make1DRenderView(Texture& /*texture*/, int /*level*/)
 		{
 			return RenderView::NullObject();

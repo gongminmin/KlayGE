@@ -1,8 +1,11 @@
 // Query.hpp
 // KlayGE 查询抽象类 实现文件
-// Ver 3.0.0
-// 版权所有(C) 龚敏敏, 2005
+// Ver 3.8.0
+// 版权所有(C) 龚敏敏, 2005-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.8.0
+// 增加ConditionalRender (2008.10.11)
 //
 // 3.0.0
 // 初次建立 (2005.10.18)
@@ -31,6 +34,27 @@ namespace KlayGE
 
 		virtual void Begin() = 0;
 		virtual void End() = 0;
+	};
+
+	class OcclusionQuery : public Query
+	{
+	public:
+		virtual ~OcclusionQuery()
+		{
+		}
+
+		virtual uint64_t SamplesPassed() = 0;
+	};
+
+	class ConditionalRender : public Query
+	{
+	public:
+		virtual ~ConditionalRender()
+		{
+		}
+
+		virtual void BeginConditionalRender() = 0;
+		virtual void EndConditionalRender() = 0;
 	};
 }
 

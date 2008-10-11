@@ -1,5 +1,5 @@
-// D3D10OcclusionQuery.hpp
-// KlayGE D3D10遮挡检测类 实现文件
+// D3D10Query.hpp
+// KlayGE D3D10查询类 实现文件
 // Ver 3.8.0
 // 版权所有(C) 龚敏敏, 2008
 // Homepage: http://klayge.sourceforge.net
@@ -16,7 +16,7 @@
 #define KLAYGE_LIB_NAME KlayGE_RenderEngine_D3D10
 #include <KlayGE/config/auto_link.hpp>
 
-#include <KlayGE/OcclusionQuery.hpp>
+#include <KlayGE/Query.hpp>
 
 namespace KlayGE
 {
@@ -33,6 +33,21 @@ namespace KlayGE
 	private:
 		ID3D10QueryPtr query_;
 	};
+
+	class D3D10ConditionalRender : public ConditionalRender
+	{
+	public:
+		D3D10ConditionalRender();
+
+		void Begin();
+		void End();
+
+		void BeginConditionalRender();
+		void EndConditionalRender();
+
+	private:
+		ID3D10PredicatePtr predicate_;
+	};
 }
 
-#endif		// _D3D10OCCLUSIONQUERY_HPP
+#endif		// _D3D10QUERY_HPP

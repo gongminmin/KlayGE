@@ -24,7 +24,7 @@
 #include <KlayGE/D3D9/D3D9FrameBuffer.hpp>
 #include <KlayGE/D3D9/D3D9RenderLayout.hpp>
 #include <KlayGE/D3D9/D3D9GraphicsBuffer.hpp>
-#include <KlayGE/D3D9/D3D9OcclusionQuery.hpp>
+#include <KlayGE/D3D9/D3D9Query.hpp>
 #include <KlayGE/D3D9/D3D9Resource.hpp>
 #include <KlayGE/D3D9/D3D9RenderView.hpp>
 #include <KlayGE/D3D9/D3D9RenderStateObject.hpp>
@@ -108,6 +108,11 @@ namespace KlayGE
 	QueryPtr D3D9RenderFactory::MakeOcclusionQuery()
 	{
 		return QueryPtr(new D3D9OcclusionQuery);
+	}
+
+	QueryPtr D3D9RenderFactory::MakeConditionalRender()
+	{
+		return QueryPtr(new D3D9ConditionalRender);
 	}
 
 	RenderViewPtr D3D9RenderFactory::Make1DRenderView(Texture& texture, int level)

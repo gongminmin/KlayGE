@@ -19,7 +19,7 @@
 #include <KlayGE/OpenGL/OGLFrameBuffer.hpp>
 #include <KlayGE/OpenGL/OGLRenderLayout.hpp>
 #include <KlayGE/OpenGL/OGLGraphicsBuffer.hpp>
-#include <KlayGE/OpenGL/OGLOcclusionQuery.hpp>
+#include <KlayGE/OpenGL/OGLQuery.hpp>
 #include <KlayGE/OpenGL/OGLRenderView.hpp>
 #include <KlayGE/OpenGL/OGLRenderStateObject.hpp>
 #include <KlayGE/OpenGL/OGLShaderObject.hpp>
@@ -101,6 +101,11 @@ namespace KlayGE
 	QueryPtr OGLRenderFactory::MakeOcclusionQuery()
 	{
 		return QueryPtr(new OGLOcclusionQuery);
+	}
+
+	QueryPtr OGLRenderFactory::MakeConditionalRender()
+	{
+		return QueryPtr(new OGLConditionalRender);
 	}
 
 	RenderViewPtr OGLRenderFactory::Make1DRenderView(Texture& texture, int level)

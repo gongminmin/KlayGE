@@ -19,7 +19,7 @@
 #include <KlayGE/D3D10/D3D10FrameBuffer.hpp>
 #include <KlayGE/D3D10/D3D10RenderLayout.hpp>
 #include <KlayGE/D3D10/D3D10GraphicsBuffer.hpp>
-#include <KlayGE/D3D10/D3D10OcclusionQuery.hpp>
+#include <KlayGE/D3D10/D3D10Query.hpp>
 #include <KlayGE/D3D10/D3D10RenderView.hpp>
 #include <KlayGE/D3D10/D3D10RenderStateObject.hpp>
 #include <KlayGE/D3D10/D3D10ShaderObject.hpp>
@@ -88,6 +88,11 @@ namespace KlayGE
 	QueryPtr D3D10RenderFactory::MakeOcclusionQuery()
 	{
 		return QueryPtr(new D3D10OcclusionQuery);
+	}
+
+	QueryPtr D3D10RenderFactory::MakeConditionalRender()
+	{
+		return QueryPtr(new D3D10ConditionalRender);
 	}
 
 	RenderViewPtr D3D10RenderFactory::Make1DRenderView(Texture& texture, int level)

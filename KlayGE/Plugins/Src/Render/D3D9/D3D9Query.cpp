@@ -1,8 +1,11 @@
-// D3D9OcclusionQuery.hpp
-// KlayGE D3D9遮挡检测类 实现文件
-// Ver 3.0.0
-// 版权所有(C) 龚敏敏, 2005
+// D3D9Query.hpp
+// KlayGE D3D9查询类 实现文件
+// Ver 3.8.0
+// 版权所有(C) 龚敏敏, 2005-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.8.0
+// 加入ConditionalRender (2008.10.11)
 //
 // 3.0.0
 // 初次建立 (2005.9.27)
@@ -20,7 +23,7 @@
 #include <d3d9.h>
 
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
-#include <KlayGE/D3D9/D3D9OcclusionQuery.hpp>
+#include <KlayGE/D3D9/D3D9Query.hpp>
 
 namespace KlayGE
 {
@@ -49,5 +52,26 @@ namespace KlayGE
 		uint32_t ret;
 		while (S_FALSE == query_->GetData(&ret, sizeof(ret), D3DGETDATA_FLUSH));
 		return ret;
+	}
+
+
+	D3D9ConditionalRender::D3D9ConditionalRender()
+	{
+	}
+
+	void D3D9ConditionalRender::Begin()
+	{
+	}
+
+	void D3D9ConditionalRender::End()
+	{
+	}
+
+	void D3D9ConditionalRender::BeginConditionalRender()
+	{
+	}
+
+	void D3D9ConditionalRender::EndConditionalRender()
+	{
 	}
 }

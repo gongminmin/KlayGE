@@ -311,7 +311,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9OcclusionQuery.cpp"
+				RelativePath="..\..\Plugins\Src\Render\D3D9\D3D9Query.cpp"
 				>
 			</File>
 			<File
@@ -397,7 +397,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9OcclusionQuery.hpp"
+				RelativePath="..\..\Plugins\Include\KlayGE\D3d9\D3D9Query.hpp"
 				>
 			</File>
 			<File

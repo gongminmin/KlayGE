@@ -47,6 +47,7 @@ namespace KlayGE
 		GraphicsBufferPtr MakeIndexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data);
 
 		QueryPtr MakeOcclusionQuery();
+		QueryPtr MakeConditionalRender();
 
 		RenderViewPtr Make1DRenderView(Texture& texture, int level);
 		RenderViewPtr Make2DRenderView(Texture& texture, int level);
