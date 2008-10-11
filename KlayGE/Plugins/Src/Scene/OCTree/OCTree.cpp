@@ -30,6 +30,13 @@
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/SceneObject.hpp>
 #include <KlayGE/RenderableHelper.hpp>
+#ifdef KLAYGE_DEBUG
+#include <KlayGE/App3D.hpp>
+#include <KlayGE/Context.hpp>
+#include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/SceneObjectHelper.hpp>
+#endif
 
 #include <algorithm>
 #include <functional>
@@ -37,6 +44,61 @@
 #include <boost/foreach.hpp>
 
 #include <KlayGE/OCTree/OCTree.hpp>
+
+#ifdef KLAYGE_DEBUG
+namespace
+{
+	using namespace KlayGE;
+
+	class NodeRenderable : public RenderableLineBox
+	{
+	public:
+		NodeRenderable()
+			: RenderableLineBox(Box(float3(-1, -1, -1), float3(1, 1, 1)), Color(1, 1, 1, 1))
+		{
+		}
+
+		void Render()
+		{
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+
+			this->OnRenderBegin();
+
+			App3DFramework const & app = Context::Instance().AppInstance();
+
+			float4x4 const & view = app.ActiveCamera().ViewMatrix();
+			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
+			float4x4 view_proj = view * proj;
+
+			*(technique_->Effect().ParameterByName("color")) = float4(1, 1, 1, 1);
+			for (uint32_t i = 0; i < instances_.size(); ++ i)
+			{
+				*(technique_->Effect().ParameterByName("matViewProj")) = instances_[i] * view_proj;
+
+				re.Render(*technique_, *rl_);
+			}
+
+			this->OnRenderEnd();
+		}
+
+		void ClearInstances()
+		{
+			instances_.resize(0);
+		}
+
+		void AddInstance(float4x4 const & mat)
+		{
+			instances_.push_back(mat);
+		}
+
+	private:
+		std::vector<float4x4> instances_;
+	};
+
+	boost::shared_ptr<NodeRenderable> node_renderable;
+}
+#endif
+
 
 namespace KlayGE
 {
@@ -159,6 +221,14 @@ namespace KlayGE
 			rebuild_tree_ = false;
 		}
 
+#ifdef KLAYGE_DEBUG
+		if (!node_renderable)
+		{
+			node_renderable.reset(new NodeRenderable);
+		}
+		node_renderable->ClearInstances();
+		node_renderable->AddToRenderQueue();
+#endif
 		if (!octree_.empty())
 		{
 			Frustum frustum(camera.ViewMatrix() * camera.ProjMatrix());
@@ -245,8 +315,7 @@ namespace KlayGE
 #ifdef KLAYGE_DEBUG
 		if ((vis != Frustum::VIS_NO) && (-1 == node.first_child_index))
 		{
-			RenderablePtr box_helper(new RenderableLineBox(Box(node.bb_center - node.bb_half_size, node.bb_center + node.bb_half_size), Color(1, 1, 1, 1)));
-			box_helper->AddToRenderQueue();
+			node_renderable->AddInstance(MathLib::scaling(node.bb_half_size) * MathLib::translation(node.bb_center));
 		}
 #endif
 	}
