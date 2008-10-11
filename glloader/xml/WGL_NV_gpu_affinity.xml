@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="WGL_NV_gpu_affinity">
+<gl_extension name="WGL_NV_gpu_affinity" reg_no="355">
 	<typedefs>
 		<typedef type="struct HGPUNV__ { int unused; }" synonym="*HGPUNV"/>
 		<typedef type="struct { DWORD cb; CHAR DeviceName[32]; CHAR DeviceString[128]; DWORD Flags; RECT rcVirtualScreen; }" synonym="GPU_DEVICE"/>
