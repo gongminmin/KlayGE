@@ -67,6 +67,11 @@ namespace KlayGE
 			return target_type_;
 		}
 
+		GLuint GLPbo(int level) const
+		{
+			return pbos_[level];
+		}
+
 	private:
 		virtual void Map1D(int level, TextureMapAccess tma,
 			uint32_t width, uint32_t x_offset,

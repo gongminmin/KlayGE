@@ -97,15 +97,15 @@ namespace
 
 					normal = MathLib::normalize(normal);
 
-					init_data.data[((z * vol_size + y) * vol_size + x) * 4 + 2] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((normal.x() / 2 + 0.5f) * 255.0f), 0, 255));
+					init_data.data[((z * vol_size + y) * vol_size + x) * 4 + 0] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((normal.x() / 2 + 0.5f) * 255.0f), 0, 255));
 					init_data.data[((z * vol_size + y) * vol_size + x) * 4 + 1] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((normal.y() / 2 + 0.5f) * 255.0f), 0, 255));
-					init_data.data[((z * vol_size + y) * vol_size + x) * 4 + 0] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((normal.z() / 2 + 0.5f) * 255.0f), 0, 255));
+					init_data.data[((z * vol_size + y) * vol_size + x) * 4 + 2] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((normal.z() / 2 + 0.5f) * 255.0f), 0, 255));
 				}
 			}
 		}
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		return rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, EF_ARGB8, EAH_GPU_Read, &init_data);
+		return rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, EF_ABGR8, EAH_GPU_Read, &init_data);
 	}
 
 	struct Particle
@@ -578,15 +578,16 @@ void GPUParticleSystemApp::OnResize(uint32_t width, uint32_t height)
 	App3DFramework::OnResize(width, height);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	RenderEngine& re = rf.RenderEngineInstance();
+
+	RenderViewPtr ds_view = rf.MakeDepthStencilRenderView(width, height, EF_D16, 0);
 
 	scene_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	scene_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*scene_tex_, 0));
-	scene_buffer_->Attach(FrameBuffer::ATT_DepthStencil, re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil));
+	scene_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 	fog_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	fog_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*fog_tex_, 0));
-	fog_buffer_->Attach(FrameBuffer::ATT_DepthStencil, re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil));
+	fog_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 	checked_pointer_cast<RenderParticles>(particles_->GetRenderable())->SceneTexture(scene_tex_);
 

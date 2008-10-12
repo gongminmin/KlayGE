@@ -35,6 +35,7 @@ half4 GenShadowMapPS(float4 pos : POSITION, float4 LightWorldPos : TEXCOORD0) : 
 	</technique>
 
 	<parameter type="float3" name="light_pos"/>
+	<parameter type="int" name="flip"/>
 	<parameter type="float4x4" name="light_view_proj" array_size="6"/>
 
 	<parameter type="samplerCUBE" name="lamp_sampler">
@@ -113,7 +114,7 @@ float4 RenderScenePS(float4 pos : POSITION, float3 diffuse : COLOR0,
 	for (int i = 0; i < 6; ++ i)
 	{
 		LightProjPos[i].xy /= LightProjPos[i].w;
-		LightProjPos[i].y = -LightProjPos[i].y;
+		LightProjPos[i].y *= flip;
 		LightProjPos[i].xy = LightProjPos[i].xy / 2 + 0.5f;
 	}
 	

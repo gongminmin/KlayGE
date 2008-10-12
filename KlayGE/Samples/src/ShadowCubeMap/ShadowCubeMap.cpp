@@ -68,9 +68,10 @@ namespace
 			light_view_proj_mat_[pass] = light_view_ * light_proj_;
 		}
 
-		void ShadowMapTexture(TexturePtr tex[6])
+		void ShadowMapTexture(TexturePtr tex[6], bool flip)
 		{
 			sm_tex_.assign(&tex[0], &tex[6]);
+			flip_ = flip;
 		}
 
 		void LampTexture(TexturePtr tex)
@@ -97,6 +98,7 @@ namespace
 
 				*(effect->ParameterByName("model_view_proj")) = model * view * proj;
 				*(effect->ParameterByName("light_pos")) = light_pos_;
+				*(effect->ParameterByName("flip")) = flip_ ? -1 : 1;
 
 				*(effect->ParameterByName("lamp_sampler")) = lamp_tex_;
 				*(effect->ParameterByName("shadow_map_x_pos_sampler")) = sm_tex_[0];
@@ -116,6 +118,7 @@ namespace
 		bool gen_sm_pass_;
 		std::vector<TexturePtr> sm_tex_;
 		std::vector<float4x4> light_view_proj_mat_;
+		bool flip_;
 
 		float3 light_pos_;
 		float4x4 inv_light_model_;
@@ -471,8 +474,8 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 
 			//SaveTexture(shadow_cube_tex_, "shadow_tex.dds");
 
-			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->ShadowMapTexture(shadow_tex_);
-			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->ShadowMapTexture(shadow_tex_);
+			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->ShadowMapTexture(shadow_tex_, shadow_buffers_[0]->RequiresFlipping());
+			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->ShadowMapTexture(shadow_tex_, shadow_buffers_[0]->RequiresFlipping());
 
 			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->GenShadowMapPass(false);
 			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->GenShadowMapPass(false);

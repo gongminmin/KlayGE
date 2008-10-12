@@ -118,9 +118,10 @@ namespace
 			}
 		}
 
-		void BackFaceTexture(TexturePtr const & bf_tex)
+		void BackFaceTexture(TexturePtr const & bf_tex, bool flip)
 		{
 			*(technique_->Effect().ParameterByName("BackFace_Sampler")) = bf_tex;
+			*(technique_->Effect().ParameterByName("flip")) = flip ? -1 : 1;
 		}
 
 		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)
@@ -169,9 +170,9 @@ namespace
 			checked_pointer_cast<RefractorRenderable>(renderable_)->Pass(pass);
 		}
 
-		void BackFaceTexture(TexturePtr const & bf_tex)
+		void BackFaceTexture(TexturePtr const & bf_tex, bool flip)
 		{
-			checked_pointer_cast<RefractorRenderable>(renderable_)->BackFaceTexture(bf_tex);
+			checked_pointer_cast<RefractorRenderable>(renderable_)->BackFaceTexture(bf_tex, flip);
 		}
 	};
 
@@ -322,7 +323,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
 		checked_pointer_cast<RefractorObject>(refractor_)->Pass(1);
-		checked_pointer_cast<RefractorObject>(refractor_)->BackFaceTexture(render_tex_);
+		checked_pointer_cast<RefractorObject>(refractor_)->BackFaceTexture(render_tex_, render_buffer_->RequiresFlipping());
 
 		sky_box_->Visible(true);
 		return App3DFramework::URV_Need_Flush;

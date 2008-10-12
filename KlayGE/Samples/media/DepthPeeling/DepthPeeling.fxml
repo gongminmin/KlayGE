@@ -13,6 +13,7 @@
 		<parameter type="float" name="inv_depth_range"/>
 
 		<parameter type="float2" name="offset"/>
+		<parameter type="int" name="flip"/>
 	</cbuffer>
 	
 	<parameter type="sampler2D" name="last_depth_sampler">
@@ -30,7 +31,7 @@ void DepthPeelingVS(float4 pos				: POSITION,
 					out float4 oClr			: COLOR0)
 {
 	oPos = mul(pos, mvp);
-	oClr = float4(point_lighting(light_pos, pos.xyz, normal).xxx, 0.5f);
+	oClr = float4(max(point_lighting(light_pos, pos.xyz, normal), 0).xxx, 0.5f);
 	float4 pos_es = mul(pos, mv);
 	oPosSS = oPos;
 	oPosSS.z = pos_es.z;
@@ -54,9 +55,8 @@ void DepthPeelingNthPS(float4 pos : POSITION,
 {
 	oDepth = (pos_ss.z - depth_min) * inv_depth_range;
   
-	float2 tex_coord = pos_ss.xy / pos_ss.w;
-	tex_coord.y = -tex_coord.y;
-	tex_coord += float2(-offset.x, offset.y);
+	float2 tex_coord = pos_ss.xy / pos_ss.w - offset;
+	tex_coord.y *= flip;
 	tex_coord = tex_coord / 2 + 0.5f;
 
 	float last_depth = tex2D(last_depth_sampler, tex_coord).r;

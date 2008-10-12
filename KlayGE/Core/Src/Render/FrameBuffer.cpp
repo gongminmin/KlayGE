@@ -231,12 +231,6 @@ namespace KlayGE
 					viewport_.width		= width_;
 					viewport_.height	= height_;
 				}
-				else
-				{
-					BOOST_ASSERT(clr_views_[min_clr_index]->Width() == view->Width());
-					BOOST_ASSERT(clr_views_[min_clr_index]->Height() == view->Height());
-					BOOST_ASSERT(clr_views_[min_clr_index]->Bpp() == view->Bpp());
-				}
 			}
 			break;
 		}

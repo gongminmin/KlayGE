@@ -1,8 +1,11 @@
 // OGLTexture3D.hpp
 // KlayGE OpenGL 3D纹理类 实现文件
-// Ver 3.6.0
-// 版权所有(C) 龚敏敏, 2006-2007
+// Ver 3.8.0
+// 版权所有(C) 龚敏敏, 2006-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.8.0
+// 通过EXT_framebuffer_blit加速CopyTexture (2008.10.12)
 //
 // 3.6.0
 // 用pbo加速 (2007.3.13)
@@ -14,18 +17,20 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/ThrowErr.hpp>
+#include <KlayGE/Context.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Texture.hpp>
-#include <KlayGE/Util.hpp>
 
 #include <cstring>
 
 #include <glloader/glloader.h>
 #include <GL/glu.h>
 
+#include <KlayGE/OpenGL/OGLRenderEngine.hpp>
 #include <KlayGE/OpenGL/OGLMapping.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 
@@ -185,56 +190,85 @@ namespace KlayGE
 		UNREF_PARAM(dst_depth);
 
 		BOOST_ASSERT(type_ == target.Type());
-		BOOST_ASSERT(format_ == target.Format());
 		// fix me
 		BOOST_ASSERT(src_depth == dst_depth);
 
-		GLint gl_internalFormat;
-		GLenum gl_format;
-		GLenum gl_type;
-		OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
-
-		GLint gl_target_internal_format;
-		GLenum gl_target_format;
-		GLenum gl_target_type;
-		OGLMapping::MappingFormat(gl_target_internal_format, gl_target_format, gl_target_type, target.Format());
-
-		size_t const src_format_size = NumFormatBytes(format_);
-		size_t const dst_format_size = NumFormatBytes(target.Format());
-
-		std::vector<uint8_t> data_in(src_width * src_height * src_format_size);
-		std::vector<uint8_t> data_out(dst_width * dst_height * dst_format_size);
-
-		for (uint32_t z = 0; z < src_depth; ++ z)
+		if (!IsCompressedFormat(format_) && (4 == NumComponents(format_)) && glloader_GL_EXT_framebuffer_blit())
 		{
-			{
-				Texture::Mapper mapper(*this, level, TMA_Read_Only, src_xOffset, src_yOffset, src_zOffset + z,
-					src_width, src_height, 1);
-				uint8_t const * s = mapper.Pointer<uint8_t>();
-				uint8_t* d = &data_in[0];
-				for (uint32_t y = 0; y < src_height; ++ y)
-				{
-					memcpy(d, s, src_width * src_format_size);
+			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-					s += mapper.RowPitch();
-					d += src_width * src_format_size;
-				}
+			GLuint fbo_src, fbo_dst;
+			re.GetFBOForBlit(fbo_src, fbo_dst);
+
+			GLint old_fbo;
+			glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &old_fbo);
+
+			for (uint32_t depth = 0; depth < src_depth; ++ depth)
+			{
+				glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, fbo_src);
+				glFramebufferTexture3DEXT(GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_3D, texture_, level, src_zOffset + depth);
+
+				glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, fbo_dst);
+				glFramebufferTexture3DEXT(GL_DRAW_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_3D, checked_cast<OGLTexture*>(&target)->GLTexture(), level, dst_zOffset + depth);
+
+				glBlitFramebufferEXT(src_xOffset, src_yOffset, src_xOffset + src_width, src_yOffset + src_height,
+								dst_xOffset, dst_yOffset, dst_xOffset + dst_width, dst_yOffset + dst_height,
+								GL_COLOR_BUFFER_BIT, GL_LINEAR);
 			}
 
-			gluScaleImage(gl_format, src_width, src_height, gl_type, &data_in[0],
-				dst_width, dst_height, gl_target_type, &data_out[0]);
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, old_fbo);
+		}
+		else
+		{
+			BOOST_ASSERT(format_ == target.Format());
 
+			GLint gl_internalFormat;
+			GLenum gl_format;
+			GLenum gl_type;
+			OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
+
+			GLint gl_target_internal_format;
+			GLenum gl_target_format;
+			GLenum gl_target_type;
+			OGLMapping::MappingFormat(gl_target_internal_format, gl_target_format, gl_target_type, target.Format());
+
+			size_t const src_format_size = NumFormatBytes(format_);
+			size_t const dst_format_size = NumFormatBytes(target.Format());
+
+			std::vector<uint8_t> data_in(src_width * src_height * src_format_size);
+			std::vector<uint8_t> data_out(dst_width * dst_height * dst_format_size);
+
+			for (uint32_t z = 0; z < src_depth; ++ z)
 			{
-				Texture::Mapper mapper(target, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_zOffset + z,
-					dst_width, dst_height, 1);
-				uint8_t const * s = &data_out[0];
-				uint8_t* d = mapper.Pointer<uint8_t>();
-				for (uint32_t y = 0; y < src_height; ++ y)
 				{
-					memcpy(d, s, dst_width * dst_format_size);
+					Texture::Mapper mapper(*this, level, TMA_Read_Only, src_xOffset, src_yOffset, src_zOffset + z,
+						src_width, src_height, 1);
+					uint8_t const * s = mapper.Pointer<uint8_t>();
+					uint8_t* d = &data_in[0];
+					for (uint32_t y = 0; y < src_height; ++ y)
+					{
+						memcpy(d, s, src_width * src_format_size);
 
-					s += src_width * src_format_size;
-					d += mapper.RowPitch();
+						s += mapper.RowPitch();
+						d += src_width * src_format_size;
+					}
+				}
+
+				gluScaleImage(gl_format, src_width, src_height, gl_type, &data_in[0],
+					dst_width, dst_height, gl_target_type, &data_out[0]);
+
+				{
+					Texture::Mapper mapper(target, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_zOffset + z,
+						dst_width, dst_height, 1);
+					uint8_t const * s = &data_out[0];
+					uint8_t* d = mapper.Pointer<uint8_t>();
+					for (uint32_t y = 0; y < src_height; ++ y)
+					{
+						memcpy(d, s, dst_width * dst_format_size);
+
+						s += src_width * src_format_size;
+						d += mapper.RowPitch();
+					}
 				}
 			}
 		}

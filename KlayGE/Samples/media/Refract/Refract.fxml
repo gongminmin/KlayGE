@@ -10,6 +10,7 @@
 		<parameter type="float4x4" name="modelit"/>
 		<parameter type="float4x4" name="inv_vp"/>
 		<parameter type="float3" name="eye_pos"/>
+		<parameter type="int" name="flip"/>
 	</cbuffer>
 	<parameter type="float3" name="eta_ratio"/>
 
@@ -89,12 +90,12 @@ float4 RefractPS(float4 pos : POSITION,
 	incident.xyz = normalize(incident.xyz);
 
 	half2 tex = pos_ss.xy / pos_ss.w;
-	tex.y = -tex.y;
+	tex.y *= flip;
 	tex = tex / 2 + 0.5f;
 	pos_ss += dir_ss * (tex2D(BackFace_Sampler, tex).w - incident.w);
 
 	tex = pos_ss.xy / pos_ss.w;
-	tex.y = -tex.y;
+	tex.y *= flip;
 	tex = tex / 2 + 0.5f;
 	half3 back_face_normal = tex2D(BackFace_Sampler, tex).xyz;
 

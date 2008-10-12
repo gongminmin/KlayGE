@@ -15,7 +15,7 @@
 #include <KlayGE/KMesh.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
-#include <KlayGE/OcclusionQuery.hpp>
+#include <KlayGE/Query.hpp>
 #include <KlayGE/PostProcess.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
@@ -68,9 +68,10 @@ namespace
 			}
 		}
 
-		void LastDepth(TexturePtr depth_tex)
+		void LastDepth(TexturePtr depth_tex, bool flip)
 		{
 			*(technique_->Effect().ParameterByName("last_depth_sampler")) = depth_tex;
+			*(technique_->Effect().ParameterByName("flip")) = flip ? -1 : 1;
 		}
 
 		void OnRenderBegin()
@@ -97,6 +98,9 @@ namespace
 		{
 			*(technique_->Effect().ParameterByName("light_pos")) = light_pos;
 		}
+
+	private:
+		bool flip;
 	};
 
 	class PolygonObject : public SceneObjectHelper
@@ -135,12 +139,12 @@ namespace
 			}
 		}
 
-		void LastDepth(TexturePtr depth_tex)
+		void LastDepth(TexturePtr depth_tex, bool flip)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
 			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->LastDepth(depth_tex);
+				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->LastDepth(depth_tex, flip);
 			}
 		}
 	};
@@ -364,7 +368,7 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 
 	case 1:
 		checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(false);
-		checked_pointer_cast<PolygonObject>(polygon_)->LastDepth(depth_texs_[1]);
+		checked_pointer_cast<PolygonObject>(polygon_)->LastDepth(depth_texs_[1], peeling_fbs_[pass - 1]->RequiresFlipping());
 		for (size_t i = 1; i < peeled_texs_.size(); i += oc_queries_.size())
 		{
 			for (size_t j = 0; j < oc_queries_.size(); ++ j)
@@ -373,6 +377,10 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 				peeled_views_[i + j]->Clear(Color(0, 0, 0, 0));
 				peeled_depth_view_->Clear(1.0f);
 				depth_texs_[0]->CopyToTexture(*depth_texs_[1]);
+
+				/*stringstream stream;
+				stream << "depth_texs_" << i + j << ".dds";
+				SaveTexture(depth_texs_[0], stream.str());*/
 
 				oc_queries_[j]->Begin();
 				sceneMgr.Flush();

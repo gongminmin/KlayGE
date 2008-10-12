@@ -62,6 +62,12 @@ namespace KlayGE
 	void OGLFrameBuffer::OnBind()
 	{
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
+
+		GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+		if (status != GL_FRAMEBUFFER_COMPLETE_EXT)
+		{
+			THR(boost::system::posix_error::not_supported);
+		}
 	}
 
 	void OGLFrameBuffer::Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil)

@@ -76,12 +76,22 @@ namespace KlayGE
 		void TexParameter(GLenum target, GLenum pname, GLint param);
 		void TexEnv(GLenum target, GLenum pname, GLfloat param);
 
+		void GetFBOForBlit(GLuint& src, GLuint& dst)
+		{
+			src = fbo_blit_src_;
+			dst = fbo_blit_dst_;
+		}
+
 	private:
 		void DoBindFrameBuffer(FrameBufferPtr fb);
 		void DoRender(RenderTechnique const & tech, RenderLayout const & rl);
 
 		void FillRenderDeviceCaps();
 		void InitRenderStates();
+
+	private:
+		GLuint fbo_blit_src_;
+		GLuint fbo_blit_dst_;
 	};
 
 	typedef boost::shared_ptr<OGLRenderEngine> OGLRenderEnginePtr;

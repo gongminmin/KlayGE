@@ -31,6 +31,7 @@
 		<parameter type="float3" name="lower_right"/>
 
 		<parameter type="float2" name="offset"/>
+		<parameter type="int" name="flip"/>
 	</cbuffer>
 
 	<parameter type="sampler2D" name="particle_sampler">

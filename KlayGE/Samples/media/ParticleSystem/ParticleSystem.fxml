@@ -18,6 +18,7 @@
 		<parameter type="float" name="inv_depth_range"/>
 
 		<parameter type="float2" name="offset"/>
+		<parameter type="int" name="flip"/>
 	</cbuffer>
 	<parameter type="sampler2D" name="particle_sampler">
 		<state name="filtering" value="bilinear"/>
@@ -81,7 +82,7 @@ float4 ParticlePS(float4 pos : POSITION,
 	else
 	{
 		float2 tex_coord = PosSS.xy + offset;
-		tex_coord.y = -tex_coord.y;
+		tex_coord.y *= flip;
 		tex_coord = tex_coord / 2 + 0.5f;
 
 		float depth = tex2D(scene_sampler, tex_coord).a;

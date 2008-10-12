@@ -210,9 +210,10 @@ namespace
 			*(technique_->Effect().ParameterByName("particle_sampler")) = LoadTexture("particle.dds", EAH_GPU_Read);
 		}
 
-		void SceneTexture(TexturePtr tex)
+		void SceneTexture(TexturePtr tex, bool flip)
 		{
 			*(technique_->Effect().ParameterByName("scene_sampler")) = tex;
+			*(technique_->Effect().ParameterByName("flip")) = flip ? -1 : 1;
 		}
 
 		void OnRenderBegin()
@@ -382,7 +383,7 @@ void ParticleSystemApp::OnResize(uint32_t width, uint32_t height)
 	scene_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*scene_tex_, 0));
 	scene_buffer_->Attach(FrameBuffer::ATT_DepthStencil, re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil));
 
-	checked_pointer_cast<RenderParticles>(particles_->GetRenderable())->SceneTexture(scene_tex_);
+	checked_pointer_cast<RenderParticles>(particles_->GetRenderable())->SceneTexture(scene_tex_, scene_buffer_->RequiresFlipping());
 
 	copy_pp_->Source(scene_tex_, scene_buffer_->RequiresFlipping());
 	copy_pp_->Destinate(FrameBufferPtr());
