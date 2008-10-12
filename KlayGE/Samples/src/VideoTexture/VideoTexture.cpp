@@ -108,8 +108,7 @@ int main()
 	ResLoader::Instance().AddPath("../../media/Common");
 	ResLoader::Instance().AddPath("../../media/VideoTexture");
 
-	RenderSettings settings;
-	SceneManagerPtr sm = Context::Instance().LoadCfg(settings, "KlayGE.cfg");
+	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
 	settings.ConfirmDevice = ConfirmDevice;
 
 	VideoTextureApp app("Video Texture", settings);

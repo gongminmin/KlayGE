@@ -56,6 +56,7 @@
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9Mapping.hpp>
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
+#include <KlayGE/D3D9/D3D9RenderFactoryInternal.hpp>
 #include <KlayGE/D3D9/D3D9RenderWindow.hpp>
 
 namespace KlayGE

@@ -215,8 +215,7 @@ int main()
 	ResLoader::Instance().AddPath("../../media/Common");
 	ResLoader::Instance().AddPath("../../media/AsciiArts");
 
-	RenderSettings settings;
-	SceneManagerPtr sm = Context::Instance().LoadCfg(settings, "KlayGE.cfg");
+	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
 	settings.ConfirmDevice = ConfirmDevice;
 
 	AsciiArtsApp app("ASCII Arts", settings);

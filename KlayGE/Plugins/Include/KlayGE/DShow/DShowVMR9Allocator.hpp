@@ -96,6 +96,7 @@ namespace KlayGE
 		HWND			wnd_;
 		atomic<int32_t>	ref_count_;
 
+		HMODULE				mod_d3d9_;
 		ID3D9Ptr			d3d_;
 		ID3D9DevicePtr		d3d_device_;
 

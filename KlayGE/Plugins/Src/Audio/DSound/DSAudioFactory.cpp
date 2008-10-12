@@ -11,16 +11,17 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/DSound/DSAudio.hpp>
+#include <KlayGE/AudioFactory.hpp>
 
+#include <KlayGE/DSound/DSAudio.hpp>
 #include <KlayGE/DSound/DSAudioFactory.hpp>
 
 namespace KlayGE
 {
-	AudioFactory& DSAudioFactoryInstance()
+	AudioFactoryPtr const & DSAudioFactoryInstance()
 	{
-		static ConcreteAudioFactory<DSAudioEngine,
-			DSSoundBuffer, DSMusicBuffer> audioFactory(L"DirectSound Audio Factory");
-		return audioFactory;
+		static AudioFactoryPtr af(new ConcreteAudioFactory<DSAudioEngine,
+			DSSoundBuffer, DSMusicBuffer>(L"DirectSound Audio Factory"));
+		return af;
 	}	
 }

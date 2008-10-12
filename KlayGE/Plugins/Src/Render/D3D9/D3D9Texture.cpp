@@ -47,14 +47,13 @@
 #include <cstring>
 #include <boost/assert.hpp>
 
-#include <d3dx9.h>
+#include <d3d9.h>
 #include <d3dx9.h>
 #include <dxerr9.h>
 
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
-#pragma comment(lib, "d3d9.lib")
 #ifdef KLAYGE_DEBUG
 	#pragma comment(lib, "d3dx9d.lib")
 #else

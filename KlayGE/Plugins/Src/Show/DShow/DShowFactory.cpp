@@ -11,15 +11,16 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/DShow/DShow.hpp>
+#include <KlayGE/ShowFactory.hpp>
 
+#include <KlayGE/DShow/DShow.hpp>
 #include <KlayGE/DShow/DShowFactory.hpp>
 
 namespace KlayGE
 {
-	ShowFactory& DShowFactoryInstance()
+	ShowFactoryPtr const & DShowFactoryInstance()
 	{
-		static ConcreteShowFactory<DShowEngine> showFactory(L"DirectShow Show Factory");
-		return showFactory;
+		static ShowFactoryPtr sf(new ConcreteShowFactory<DShowEngine>(L"DirectShow Show Factory"));
+		return sf;
 	}
 }

@@ -10,6 +10,7 @@
 // ÐÞ¸Ä¼ÇÂ¼
 /////////////////////////////////////////////////////////////////////////////////
 
+#define INITGUID
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/COMPtr.hpp>
 #include <KlayGE/ThrowErr.hpp>
@@ -22,7 +23,6 @@
 #include <KlayGE/DSound/DSAudio.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
-#pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "dsound.lib")
 #endif
 

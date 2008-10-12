@@ -511,12 +511,10 @@ int main()
 	ResLoader::Instance().AddPath("../../media/Common");
 	ResLoader::Instance().AddPath("../../media/GPUParticleSystem");
 
-	RenderSettings settings;
-	SceneManagerPtr sm = Context::Instance().LoadCfg(settings, "KlayGE.cfg");
+	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
 	settings.ConfirmDevice = ConfirmDevice;
 
-	sm = SceneManager::NullObject();
-	Context::Instance().SceneManagerInstance(*sm);
+	Context::Instance().SceneManagerInstance(SceneManager::NullObject());
 
 	GPUParticleSystemApp app("GPU Particle System", settings);
 	app.Create();

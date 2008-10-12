@@ -118,6 +118,8 @@ namespace KlayGE
 		D3D9AdapterList const & D3DAdapters() const;
 		D3D9Adapter const & ActiveAdapter() const;
 
+		HMODULE mod_d3d9_;
+
 		// Direct3D rendering device
 		// Only created after top-level window created
 		ID3D9Ptr		d3d_;

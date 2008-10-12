@@ -1,8 +1,11 @@
 // Contex.hpp
 // KlayGE 引擎场景类 头文件
-// Ver 2.4.0
-// 版权所有(C) 龚敏敏, 2003-2005
-// Homepage: http://klayge.sourceforge.nets
+// Ver 3.8.0
+// 版权所有(C) 龚敏敏, 2007-2008
+// Homepage: http://klayge.sourceforge.net
+//
+// 3.8.0
+// 增加了LoadCfg (2008.10.12)
 //
 // 2.4.0
 // 增加了BOOST_ASSERT
@@ -38,67 +41,79 @@ namespace KlayGE
 			return context;
 		}
 
-		SceneManagerPtr LoadCfg(RenderSettings& settings, std::string const & cfg_file);
+		RenderSettings LoadCfg(std::string const & cfg_file);
 
 		void AppInstance(App3DFramework& app)
-			{ app_ = &app; }
+		{
+			app_ = &app;
+		}
 		App3DFramework& AppInstance()
 		{
-			BOOST_ASSERT(app_ != NULL);
+			BOOST_ASSERT(app_);
 			return *app_;
 		}
 
-		void SceneManagerInstance(SceneManager& mgr)
-			{ sceneMgr_ = &mgr; }
+		void SceneManagerInstance(SceneManagerPtr const & mgr)
+		{
+			sceneMgr_ = mgr;
+		}
 		SceneManager& SceneManagerInstance()
 		{
-			BOOST_ASSERT(sceneMgr_ != NULL);
+			BOOST_ASSERT(sceneMgr_);
 			return *sceneMgr_;
 		}
 
-		void RenderFactoryInstance(RenderFactory& factory)
-			{ renderFactory_ = &factory; }
+		void RenderFactoryInstance(RenderFactoryPtr const & factory)
+		{
+			renderFactory_ = factory;
+		}
 		RenderFactory& RenderFactoryInstance()
 		{
-			BOOST_ASSERT(renderFactory_ != NULL);
+			BOOST_ASSERT(renderFactory_);
 			return *renderFactory_;
 		}
 
-		void AudioFactoryInstance(AudioFactory& factory)
-			{ audioFactory_ = &factory; }
+		void AudioFactoryInstance(AudioFactoryPtr const & factory)
+		{
+			audioFactory_ = factory;
+		}
 		AudioFactory& AudioFactoryInstance()
 		{
-			BOOST_ASSERT(audioFactory_ != NULL);
+			BOOST_ASSERT(audioFactory_);
 			return *audioFactory_;
 		}
 
-		void InputFactoryInstance(InputFactory& factory)
-			{ inputFactory_ = &factory; }
+		void InputFactoryInstance(InputFactoryPtr const & factory)
+		{
+			inputFactory_ = factory;
+		}
 		InputFactory& InputFactoryInstance()
 		{
-			BOOST_ASSERT(inputFactory_ != NULL);
+			BOOST_ASSERT(inputFactory_);
 			return *inputFactory_;
 		}
 
-		void ShowFactoryInstance(ShowFactory& factory)
-			{ showFactory_ = &factory; }
+		void ShowFactoryInstance(ShowFactoryPtr const & factory)
+		{
+			showFactory_ = factory;
+		}
 		ShowFactory& ShowFactoryInstance()
 		{
-			BOOST_ASSERT(showFactory_ != NULL);
+			BOOST_ASSERT(showFactory_);
 			return *showFactory_;
 		}
 
 	private:
 		Context();
 
-		App3DFramework* app_;
+		App3DFramework*		app_;
 
-		SceneManager* sceneMgr_;
+		SceneManagerPtr		sceneMgr_;
 
-		RenderFactory*	renderFactory_;
-		AudioFactory*	audioFactory_;
-		InputFactory*	inputFactory_;
-		ShowFactory*    showFactory_;
+		RenderFactoryPtr	renderFactory_;
+		AudioFactoryPtr		audioFactory_;
+		InputFactoryPtr		inputFactory_;
+		ShowFactoryPtr		showFactory_;
 	};
 }
 

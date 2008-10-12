@@ -19,12 +19,9 @@
 #define KLAYGE_LIB_NAME KlayGE_InputEngine_DInput
 #include <KlayGE/config/auto_link.hpp>
 
-#include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/InputFactory.hpp>
-
 namespace KlayGE
 {
-	InputFactory& DInputFactoryInstance();
+	InputFactoryPtr const & DInputFactoryInstance();
 }
 
 #endif			// _DINPUTFACTORY_HPP

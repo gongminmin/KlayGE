@@ -409,6 +409,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\D3D9\D3D9RenderFactoryInternal.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Plugins\Include\KlayGE\D3D9\D3D9RenderLayout.hpp"
 				>
 			</File>

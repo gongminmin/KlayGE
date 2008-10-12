@@ -25,6 +25,7 @@
 #include <KlayGE/D3D10/D3D10ShaderObject.hpp>
 
 #include <KlayGE/D3D10/D3D10RenderFactory.hpp>
+#include <KlayGE/D3D10/D3D10RenderFactoryInternal.hpp>
 
 namespace KlayGE
 {
@@ -152,9 +153,9 @@ namespace KlayGE
 		return SamplerStateObjectPtr(new D3D10SamplerStateObject(desc));
 	}
 
-	RenderFactory& D3D10RenderFactoryInstance()
+	RenderFactoryPtr const & D3D10RenderFactoryInstance()
 	{
-		static D3D10RenderFactory renderFactory;
-		return renderFactory;
+		static RenderFactoryPtr rf(new D3D10RenderFactory);
+		return rf;
 	}
 }

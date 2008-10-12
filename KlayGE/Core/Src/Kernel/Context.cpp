@@ -1,8 +1,11 @@
 // Context.cpp
 // KlayGE 引擎场景类 实现文件
-// Ver 3.7.0
-// 版权所有(C) 龚敏敏, 2007
+// Ver 3.8.0
+// 版权所有(C) 龚敏敏, 2007-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.8.0
+// 增加了LoadCfg (2008.10.12)
 //
 // 3.7.0
 // 初次建立 (2007.12.19)
@@ -36,6 +39,9 @@
 #include <KlayGE/D3D10/D3D10RenderFactory.hpp>
 #include <KlayGE/OpenGL/OGLRenderFactory.hpp>
 
+#include <KlayGE/OpenAL/OALAudioFactory.hpp>
+#include <KlayGE/DSound/DSAudioFactory.hpp>
+
 #include <KlayGE/OCTree/OCTree.hpp>
 
 #include <KlayGE/DInput/DInputFactory.hpp>
@@ -52,18 +58,16 @@ namespace KlayGE
 #endif
 #endif
 
-		sceneMgr_ = SceneManager::NullObject().get();
+		sceneMgr_ = SceneManager::NullObject();
 
-		renderFactory_ = RenderFactory::NullObject().get();
-		audioFactory_ = AudioFactory::NullObject().get();
-		inputFactory_ = InputFactory::NullObject().get();
-		showFactory_ = ShowFactory::NullObject().get();
+		renderFactory_ = RenderFactory::NullObject();
+		audioFactory_ = AudioFactory::NullObject();
+		inputFactory_ = InputFactory::NullObject();
+		showFactory_ = ShowFactory::NullObject();
 	}
 
-	SceneManagerPtr Context::LoadCfg(RenderSettings& settings, std::string const & cfg_file)
+	RenderSettings Context::LoadCfg(std::string const & cfg_file)
 	{
-		SceneManagerPtr sm;
-
 		int octree_depth = 3;
 		int width = 800;
 		int height = 600;
@@ -73,6 +77,7 @@ namespace KlayGE
 		boost::program_options::options_description desc("Configuration");
 		desc.add_options()
 			("context.render_factory", boost::program_options::value<std::string>(), "Render Factory")
+			("context.audio_factory", boost::program_options::value<std::string>(), "Audio Factory")
 			("context.input_factory", boost::program_options::value<std::string>(), "Input Factory")
 			("context.show_factory", boost::program_options::value<std::string>(), "Show Factory")
 			("context.scene_manager", boost::program_options::value<std::string>(), "Scene Manager")
@@ -81,6 +86,12 @@ namespace KlayGE
 			("screen.height", boost::program_options::value<int>(&height)->default_value(600), "Screen Height")
 			("screen.color_fmt", boost::program_options::value<int>(&color_fmt)->default_value(13), "Screen Color Format")
 			("screen.fullscreen", boost::program_options::value<bool>(&full_screen)->default_value(false), "Full Screen");
+
+		std::string rf_name;
+		std::string af_name;
+		std::string if_name;
+		std::string sf_name;
+		std::string sm_name;
 
 		std::ifstream cfg_fs(ResLoader::Instance().Locate(cfg_file).c_str());
 		if (cfg_fs)
@@ -91,78 +102,109 @@ namespace KlayGE
 
 			if (vm.count("context.render_factory"))
 			{
-				std::string rf_name = vm["context.render_factory"].as<std::string>();
-				if ("D3D10" == rf_name)
-				{
-					Context::Instance().RenderFactoryInstance(D3D10RenderFactoryInstance());
-				}
-				if ("D3D9" == rf_name)
-				{
-					Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
-				}
-				if ("OpenGL" == rf_name)
-				{
-					Context::Instance().RenderFactoryInstance(OGLRenderFactoryInstance());
-				}
+				rf_name = vm["context.render_factory"].as<std::string>();
 			}
 			else
 			{
-				Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
+#ifdef KLAYGE_PLATFORM_WINDOWS
+				rf_name = "D3D9";
+#else
+				rf_name = "OpenGL";
+#endif
 			}
+
+			if (vm.count("context.audio_factory"))
+			{
+				af_name = vm["context.audio_factory"].as<std::string>();
+			}
+			else
+			{
+				af_name = "OpenAL";
+			}
+
 
 			if (vm.count("context.input_factory"))
 			{
-				std::string if_name = vm["context.input_factory"].as<std::string>();
-				if ("DInput" == if_name)
-				{
-					Context::Instance().InputFactoryInstance(DInputFactoryInstance());
-				}
+				if_name = vm["context.input_factory"].as<std::string>();
 			}
 			else
 			{
-				Context::Instance().InputFactoryInstance(DInputFactoryInstance());
+#ifdef KLAYGE_PLATFORM_WINDOWS
+				if_name = "DInput";
+#endif
 			}
 
 			if (vm.count("context.show_factory"))
 			{
-				std::string sf_name = vm["context.show_factory"].as<std::string>();
-				if ("DShow" == sf_name)
-				{
-					Context::Instance().ShowFactoryInstance(DShowFactoryInstance());
-				}
+				sf_name = vm["context.show_factory"].as<std::string>();
+				
 			}
 			else
 			{
-				Context::Instance().ShowFactoryInstance(DShowFactoryInstance());
+#ifdef KLAYGE_PLATFORM_WINDOWS
+				sf_name = "DShow";
+#endif
 			}
 
 			if (vm.count("context.scene_manager"))
 			{
-				std::string sm_name = vm["context.scene_manager"].as<std::string>();
-				if ("Default" == sm_name)
-				{
-					sm = SceneManager::NullObject();
-					Context::Instance().SceneManagerInstance(*sm);
-				}
-				if ("Octree" == sm_name)
-				{
-					sm.reset(new OCTree(octree_depth));
-					Context::Instance().SceneManagerInstance(*sm);
-				}
+				sm_name = vm["context.scene_manager"].as<std::string>();
 			}
 		}
-		else
+
+		
+#ifdef KLAYGE_PLATFORM_WINDOWS
+		if ("D3D10" == rf_name)
+		{
+			Context::Instance().RenderFactoryInstance(D3D10RenderFactoryInstance());
+		}
+		if ("D3D9" == rf_name)
 		{
 			Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
-			Context::Instance().InputFactoryInstance(DInputFactoryInstance());
-			Context::Instance().ShowFactoryInstance(DShowFactoryInstance());
+		}
+#endif
+		if ("OpenGL" == rf_name)
+		{
+			Context::Instance().RenderFactoryInstance(OGLRenderFactoryInstance());
 		}
 
+		if ("OpenAL" == rf_name)
+		{
+			Context::Instance().AudioFactoryInstance(OALAudioFactoryInstance());
+		}
+#ifdef KLAYGE_PLATFORM_WINDOWS
+		if ("DSound" == rf_name)
+		{
+			Context::Instance().AudioFactoryInstance(DSAudioFactoryInstance());
+		}
+#endif
+
+#ifdef KLAYGE_PLATFORM_WINDOWS
+		if ("DInput" == if_name)
+		{
+			Context::Instance().InputFactoryInstance(DInputFactoryInstance());
+		}
+#endif
+
+#ifdef KLAYGE_PLATFORM_WINDOWS
+		if ("DShow" == sf_name)
+		{
+			Context::Instance().ShowFactoryInstance(DShowFactoryInstance());
+		}
+#endif
+
+		if ("Octree" == sm_name)
+		{
+			SceneManagerPtr sm(new OCTree(octree_depth));
+			Context::Instance().SceneManagerInstance(sm);
+		}
+
+		RenderSettings settings;
 		settings.width = width;
 		settings.height = height;
 		settings.color_fmt = static_cast<ElementFormat>(color_fmt);
 		settings.full_screen = full_screen;
 
-		return sm;
+		return settings;
 	}
 }

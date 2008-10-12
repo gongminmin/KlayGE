@@ -25,6 +25,7 @@
 #include <KlayGE/OpenGL/OGLShaderObject.hpp>
 
 #include <KlayGE/OpenGL/OGLRenderFactory.hpp>
+#include <KlayGE/OpenGL/OGLRenderFactoryInternal.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma comment(lib, "Cg.lib")
@@ -163,9 +164,9 @@ namespace KlayGE
 		return SamplerStateObjectPtr(new OGLSamplerStateObject(desc));
 	}
 
-	RenderFactory& OGLRenderFactoryInstance()
+	RenderFactoryPtr const & OGLRenderFactoryInstance()
 	{
-		static OGLRenderFactory renderFactory;
-		return renderFactory;
+		static RenderFactoryPtr rf(new OGLRenderFactory);
+		return rf;
 	}
 }

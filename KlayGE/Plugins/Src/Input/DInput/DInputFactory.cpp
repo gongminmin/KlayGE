@@ -14,15 +14,16 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/DInput/DInput.hpp>
+#include <KlayGE/InputFactory.hpp>
 
+#include <KlayGE/DInput/DInput.hpp>
 #include <KlayGE/DInput/DInputFactory.hpp>
 
 namespace KlayGE
 {
-	InputFactory& DInputFactoryInstance()
+	InputFactoryPtr const & DInputFactoryInstance()
 	{
-		static ConcreteInputFactory<DInputEngine> inputFactory(L"DirectInput Input Factory");
-		return inputFactory;
+		static InputFactoryPtr ifactory(new ConcreteInputFactory<DInputEngine>(L"DirectInput Input Factory"));
+		return ifactory;
 	}
 }

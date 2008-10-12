@@ -14,16 +14,17 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/OpenAL/OALAudio.hpp>
+#include <KlayGE/AudioFactory.hpp>
 
+#include <KlayGE/OpenAL/OALAudio.hpp>
 #include <KlayGE/OpenAL/OALAudioFactory.hpp>
 
 namespace KlayGE
 {
-	AudioFactory& OALAudioFactoryInstance()
+	AudioFactoryPtr const & OALAudioFactoryInstance()
 	{
-		static ConcreteAudioFactory<OALAudioEngine,
-			OALSoundBuffer, OALMusicBuffer> audioFactory(L"OpenAL Audio Factory");
-		return audioFactory;
+		static AudioFactoryPtr af(new ConcreteAudioFactory<OALAudioEngine,
+			OALSoundBuffer, OALMusicBuffer>(L"OpenAL Audio Factory"));
+		return af;
 	}
 }

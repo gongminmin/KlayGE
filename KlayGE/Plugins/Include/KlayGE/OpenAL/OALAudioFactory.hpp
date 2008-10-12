@@ -19,12 +19,9 @@
 #define KLAYGE_LIB_NAME KlayGE_AudioEngine_OpenAL
 #include <KlayGE/config/auto_link.hpp>
 
-#include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/AudioFactory.hpp>
-
 namespace KlayGE
 {
-	AudioFactory& OALAudioFactoryInstance();
+	AudioFactoryPtr const & OALAudioFactoryInstance();
 }
 
 #endif			// _OALAUDIOFACTORY_HPP

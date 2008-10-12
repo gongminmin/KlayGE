@@ -381,6 +381,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderFactoryInternal.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderLayout.hpp"
 				>
 			</File>

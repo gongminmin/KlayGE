@@ -31,6 +31,7 @@
 #include <KlayGE/D3D9/D3D9ShaderObject.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderFactory.hpp>
+#include <KlayGE/D3D9/D3D9RenderFactoryInternal.hpp>
 
 namespace KlayGE
 {
@@ -225,9 +226,9 @@ namespace KlayGE
 		return SamplerStateObjectPtr(new D3D9SamplerStateObject(desc));
 	}
 
-	RenderFactory& D3D9RenderFactoryInstance()
+	RenderFactoryPtr const & D3D9RenderFactoryInstance()
 	{
-		static D3D9RenderFactory renderFactory;
-		return renderFactory;
+		static RenderFactoryPtr rf(new D3D9RenderFactory());
+		return rf;
 	}
 }

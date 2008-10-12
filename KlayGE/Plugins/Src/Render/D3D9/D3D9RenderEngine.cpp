@@ -34,6 +34,7 @@
 // 修改记录
 //////////////////////////////////////////////////////////////////////////////////
 
+#define INITGUID
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Math.hpp>
@@ -66,11 +67,6 @@
 
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma comment(lib, "dxguid.lib")
-#pragma comment(lib, "d3d9.lib")
-#endif
-
 namespace KlayGE
 {
 	// 构造函数
@@ -79,8 +75,17 @@ namespace KlayGE
 		: last_num_vertex_stream_(0),
 			vertex_shader_cache_(NULL), pixel_shader_cache_(NULL)
 	{
+		mod_d3d9_ = ::LoadLibraryW(L"d3d9.dll");
+
+		typedef IDirect3D9* (WINAPI *Direct3DCreate9Func)(UINT SDKVersion);
+		Direct3DCreate9Func DynamicDirect3DCreate9 = NULL;
+		if (mod_d3d9_ != NULL)
+		{
+			DynamicDirect3DCreate9 = reinterpret_cast<Direct3DCreate9Func>(::GetProcAddress(mod_d3d9_, "Direct3DCreate9"));
+		}
+
 		// Create our Direct3D object
-		d3d_ = MakeCOMPtr(Direct3DCreate9(D3D_SDK_VERSION));
+		d3d_ = MakeCOMPtr(DynamicDirect3DCreate9(D3D_SDK_VERSION));
 		Verify(d3d_ != ID3D9Ptr());
 
 		adapterList_.Enumerate(d3d_);
@@ -95,6 +100,8 @@ namespace KlayGE
 
 		d3dDevice_.reset();
 		d3d_.reset();
+
+		//::FreeLibrary(mod_d3d9_);
 	}
 
 	// 返回渲染系统的名字

@@ -259,8 +259,7 @@ int main()
 	ResLoader::Instance().AddPath("../../media/Common");
 	ResLoader::Instance().AddPath("../../media/DepthOfField");
 
-	RenderSettings settings;
-	SceneManagerPtr sm = Context::Instance().LoadCfg(settings, "KlayGE.cfg");
+	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
 	settings.ConfirmDevice = ConfirmDevice;
 
 	DepthOfFieldApp app("Depth of field", settings);

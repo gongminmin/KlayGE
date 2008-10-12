@@ -16,12 +16,9 @@
 #define KLAYGE_LIB_NAME KlayGE_ShowEngine_DShow
 #include <KlayGE/config/auto_link.hpp>
 
-#include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/ShowFactory.hpp>
-
 namespace KlayGE
 {
-	ShowFactory& DShowFactoryInstance();
+	ShowFactoryPtr const & DShowFactoryInstance();
 }
 
 #endif			// _DSHOWFACTORY_HPP

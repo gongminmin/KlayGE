@@ -19,12 +19,9 @@
 #define KLAYGE_LIB_NAME KlayGE_AudioEngine_DSound
 #include <KlayGE/config/auto_link.hpp>
 
-#include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/AudioFactory.hpp>
-
 namespace KlayGE
 {
-	AudioFactory& DSAudioFactoryInstance();
+	AudioFactoryPtr const & DSAudioFactoryInstance();
 }
 
 #endif			// _DSAUDIOFACTORY_HPP

@@ -208,8 +208,7 @@ int main()
 	ResLoader::Instance().AddPath("../../media/Common");
 	ResLoader::Instance().AddPath("../../media/DepthPeeling");
 
-	RenderSettings settings;
-	SceneManagerPtr sm = Context::Instance().LoadCfg(settings, "KlayGE.cfg");
+	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
 	settings.ConfirmDevice = ConfirmDevice;
 
 	DepthPeelingApp app("DepthPeeling", settings);
@@ -279,13 +278,16 @@ void DepthPeelingApp::OnResize(uint32_t width, uint32_t height)
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
+	ElementFormat peel_format;
 	try
 	{
-		depth_texs_[0] = rf.MakeTexture2D(width, height, 1, EF_GR32F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		depth_texs_[0] = rf.MakeTexture2D(width, height, 1, EF_R32F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		peel_format = EF_ARGB8;
 	}
 	catch (...)
 	{
 		depth_texs_[0] = rf.MakeTexture2D(width, height, 1, EF_ABGR32F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		peel_format = EF_ABGR32F;
 	}
 	depth_texs_[1] = rf.MakeTexture2D(width, height, 1, depth_texs_[0]->Format(), EAH_GPU_Read | EAH_GPU_Write, NULL);
 	depth_view_ = rf.Make2DRenderView(*depth_texs_[0], 0);
@@ -294,7 +296,15 @@ void DepthPeelingApp::OnResize(uint32_t width, uint32_t height)
 
 	for (size_t i = 0; i < peeling_fbs_.size(); ++ i)
 	{
-		peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, (EF_ABGR32F == depth_texs_[0]->Format()) ? EF_ABGR32F : EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		try
+		{
+			peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, peel_format, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		}
+		catch (...)
+		{
+			peel_format = EF_ABGR8;
+			peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, peel_format, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		}
 		peeled_views_[i] = rf.Make2DRenderView(*peeled_texs_[i], 0);
 
 		peeling_fbs_[i]->Attach(FrameBuffer::ATT_Color0, peeled_views_[i]);

@@ -35,6 +35,7 @@
 #include <KlayGE/D3D10/D3D10RenderEngine.hpp>
 #include <KlayGE/D3D10/D3D10Mapping.hpp>
 #include <KlayGE/D3D10/D3D10RenderFactory.hpp>
+#include <KlayGE/D3D10/D3D10RenderFactoryInternal.hpp>
 #include <KlayGE/D3D10/D3D10RenderView.hpp>
 #include <KlayGE/D3D10/D3D10RenderWindow.hpp>
 
