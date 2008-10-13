@@ -135,6 +135,8 @@ namespace KlayGE
 		void SetListenerOri(float3 const & face, float3 const & up);
 
 	private:
+		HMODULE mod_dsound_;
+
 		boost::shared_ptr<IDirectSound>				dsound_;
 		boost::shared_ptr<IDirectSound3DListener>	ds3dListener_;
 	};

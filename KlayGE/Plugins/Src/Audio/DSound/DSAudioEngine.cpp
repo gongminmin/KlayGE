@@ -22,10 +22,6 @@
 
 #include <KlayGE/DSound/DSAudio.hpp>
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma comment(lib, "dsound.lib")
-#endif
-
 namespace KlayGE
 {
 	// 从AudioDataSource获取WAVEFORMATEX
@@ -95,8 +91,17 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	DSAudioEngine::DSAudioEngine()
 	{
+		mod_dsound_ = ::LoadLibraryW(L"dsound.dll");
+
+		typedef HRESULT (WINAPI *DirectSoundCreateFunc)(LPCGUID pcGuidDevice, LPDIRECTSOUND* ppDS, LPUNKNOWN pUnkOuter);
+		DirectSoundCreateFunc DynamicDirectSoundCreate = NULL;
+		if (mod_dsound_ != NULL)
+		{
+			DynamicDirectSoundCreate = reinterpret_cast<DirectSoundCreateFunc>(::GetProcAddress(mod_dsound_, "DirectSoundCreate"));
+		}
+
 		IDirectSound* dsound(NULL);
-		TIF(DirectSoundCreate(&DSDEVID_DefaultPlayback, &dsound, NULL));
+		TIF(DynamicDirectSoundCreate(&DSDEVID_DefaultPlayback, &dsound, NULL));
 		dsound_ = MakeCOMPtr(dsound);
 
 		TIF(dsound_->SetCooperativeLevel(::GetForegroundWindow(), DSSCL_PRIORITY));
@@ -138,6 +143,10 @@ namespace KlayGE
 	DSAudioEngine::~DSAudioEngine()
 	{
 		audioBufs_.clear();
+		ds3dListener_.reset();
+		dsound_.reset();
+
+		//::FreeLibrary(mod_dsound_);
 	}
 
 	// 音频引擎名字

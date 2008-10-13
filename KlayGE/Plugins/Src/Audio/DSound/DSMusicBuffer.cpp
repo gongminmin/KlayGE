@@ -27,10 +27,6 @@
 
 #include <KlayGE/DSound/DSAudio.hpp>
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma comment(lib, "winmm.lib")
-#endif
-
 namespace KlayGE
 {
 	// 构造函数。建立一个可以用于流式播放的缓冲区
