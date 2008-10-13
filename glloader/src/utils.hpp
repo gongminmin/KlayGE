@@ -21,8 +21,8 @@
 #include <string>
 #include <vector>
 
-#define LOAD_FUNC1(f) f = (##f##FUNC)(::glloader_get_gl_proc_address(#f));
-#define LOAD_FUNC2(f, name) f = (##f##FUNC)(::glloader_get_gl_proc_address(#name));
+#define LOAD_FUNC1(f) f = (f##FUNC)(::glloader_get_gl_proc_address(#f));
+#define LOAD_FUNC2(f, name) f = (f##FUNC)(::glloader_get_gl_proc_address(#name));
 
 namespace glloader
 {
