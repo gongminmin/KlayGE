@@ -178,7 +178,6 @@
 		<Unit filename="..\..\Core\Include\KlayGE\Matrix.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\Mesh.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\NetMsg.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\OcclusionQuery.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\ParticleSystem.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\PerlinNoise.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\Plane.hpp" />

@@ -132,8 +132,10 @@
 		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLGraphicsBuffer.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLMapping.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLOcclusionQuery.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLQuery.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderEngine.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderFactory.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderFactoryInternal.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderLayout.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderStateObject.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderView.hpp" />
@@ -143,7 +145,7 @@
 		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLFrameBuffer.cpp" />
 		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLGraphicsBuffer.cpp" />
 		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLMapping.cpp" />
-		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLOcclusionQuery.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLQuery.cpp" />
 		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLRenderEngine.cpp" />
 		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLRenderFactory.cpp" />
 		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLRenderStateObject.cpp" />

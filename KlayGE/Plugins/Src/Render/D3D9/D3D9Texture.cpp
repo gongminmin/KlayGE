@@ -40,6 +40,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/ThrowErr.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Texture.hpp>
@@ -235,7 +236,7 @@ namespace KlayGE
 		src->LockRect(&src_locked_rect, NULL, D3DLOCK_READONLY | D3DLOCK_NOSYSLOCK);
 		D3DLOCKED_RECT dst_locked_rect;
 		dst->LockRect(&dst_locked_rect, NULL, D3DLOCK_NOSYSLOCK);
-		
+
 		uint8_t* src_ptr = static_cast<uint8_t*>(src_locked_rect.pBits);
 		uint8_t* dst_ptr = static_cast<uint8_t*>(dst_locked_rect.pBits);
 		uint32_t line_size;

@@ -15,6 +15,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
+#include <string>
 #include <boost/utility.hpp>
 
 namespace KlayGE

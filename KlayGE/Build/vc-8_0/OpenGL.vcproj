@@ -304,7 +304,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLOcclusionQuery.cpp"
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLQuery.cpp"
 				>
 			</File>
 			<File
@@ -370,7 +370,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLOcclusionQuery.hpp"
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLQuery.hpp"
 				>
 			</File>
 			<File
@@ -379,6 +379,10 @@
 			</File>
 			<File
 				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderFactory.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderFactoryInternal.hpp"
 				>
 			</File>
 			<File

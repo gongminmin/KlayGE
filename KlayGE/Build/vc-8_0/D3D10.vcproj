@@ -312,7 +312,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Src\Render\D3D10\D3D10OcclusionQuery.cpp"
+				RelativePath="..\..\Plugins\Src\Render\D3D10\D3D10Query.cpp"
 				>
 			</File>
 			<File
@@ -394,7 +394,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\Plugins\Include\KlayGE\D3D10\D3D10OcclusionQuery.hpp"
+				RelativePath="..\..\Plugins\Include\KlayGE\D3D10\D3D10Query.hpp"
 				>
 			</File>
 			<File
@@ -403,6 +403,10 @@
 			</File>
 			<File
 				RelativePath="..\..\Plugins\Include\KlayGE\D3D10\D3D10RenderFactory.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\D3D10\D3D10RenderFactoryInternal.hpp"
 				>
 			</File>
 			<File

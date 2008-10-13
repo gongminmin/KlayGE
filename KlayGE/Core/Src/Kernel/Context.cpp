@@ -46,7 +46,9 @@
 
 #include <KlayGE/DInput/DInputFactory.hpp>
 
+#ifdef KLAYGE_COMPILER_MSVC
 #include <KlayGE/DShow/DShowFactory.hpp>
+#endif
 
 namespace KlayGE
 {
@@ -136,8 +138,10 @@ namespace KlayGE
 
 			if (vm.count("context.show_factory"))
 			{
+#ifdef KLAYGE_COMPILER_MSVC
+				// DShow plugin can only be compiled by vc for now
 				sf_name = vm["context.show_factory"].as<std::string>();
-				
+#endif
 			}
 			else
 			{
@@ -152,7 +156,7 @@ namespace KlayGE
 			}
 		}
 
-		
+
 #ifdef KLAYGE_PLATFORM_WINDOWS
 		if ("D3D10" == rf_name)
 		{
@@ -187,10 +191,12 @@ namespace KlayGE
 #endif
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_COMPILER_MSVC
 		if ("DShow" == sf_name)
 		{
 			Context::Instance().ShowFactoryInstance(DShowFactoryInstance());
 		}
+#endif
 #endif
 
 		if ("Octree" == sm_name)
