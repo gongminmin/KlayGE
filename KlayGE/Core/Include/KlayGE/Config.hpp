@@ -32,6 +32,7 @@
 	#endif
 #elif defined(_MSC_VER)
 	#define KLAYGE_COMPILER_MSVC
+	#define KLAYGE_COMPILER_NAME "vc"
 
 	#if _MSC_VER >= 1500
 		#define KLAYGE_COMPILER_VERSION 90
@@ -95,15 +96,27 @@
 	#endif
 
 	#if defined(__MINGW32__)
+		#define KLAYGE_COMPILER_NAME "mgw"
 		#include <_mingw.h>
 	#endif
 #elif defined(__CYGWIN__)
 	#define KLAYGE_PLATFORM_CYGWIN
+	#define KLAYGE_COMPILER_NAME "cyg"
 #elif defined(linux) || defined(__linux) || defined(__linux__)
 	#define KLAYGE_PLATFORM_LINUX
+	#define KLAYGE_COMPILER_NAME "gcc"
 #else
 	#error Unknown platform.
 #endif
+
+#define KLAYGE_STRINGIZE(X) KLAYGE_DO_STRINGIZE(X)
+#define KLAYGE_DO_STRINGIZE(X) #X
+
+#define KLAYGE_JOIN(X, Y) KLAYGE_DO_JOIN(X, Y)
+#define KLAYGE_DO_JOIN(X, Y) KLAYGE_DO_JOIN2(X, Y)
+#define KLAYGE_DO_JOIN2(X, Y) X##Y
+
+#define KLAYGE_COMPILER_TOOLSET KLAYGE_JOIN(KLAYGE_COMPILER_NAME, KLAYGE_COMPILER_VERSION)
 
 // Defines supported CPUs
 #if defined(KLAYGE_COMPILER_MSVC)
