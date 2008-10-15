@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_workspace_file>
 	<Workspace title="Samples workspace">
-		<Project filename="Cartoon.cbp" />
+		<Project filename="Cartoon.cbp" active="1" />
 		<Project filename="Parallax.cbp" />
 		<Project filename="VertexDisplacement.cbp" />
 		<Project filename="DistanceMapping.cbp" />
@@ -16,6 +16,6 @@
 		<Project filename="ParticleSystem.cbp" />
 		<Project filename="GPUParticleSystem.cbp" />
 		<Project filename="DepthOfField.cbp" />
-		<Project filename="DepthPeeling.cbp" active="1" />
+		<Project filename="DepthPeeling.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>

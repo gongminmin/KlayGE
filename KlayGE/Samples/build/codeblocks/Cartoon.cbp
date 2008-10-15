@@ -20,20 +20,30 @@
 					<Add option="-D_CONSOLE" />
 				</Compiler>
 				<Linker>
+					<Add library="libKlayGE_Core_d.a" />
 					<Add library="libKlayGE_RenderEngine_D3D9_d.a" />
+					<Add library="libKlayGE_RenderEngine_D3D10_d.a" />
+					<Add library="libKlayGE_RenderEngine_OpenGL_d.a" />
+					<Add library="libKlayGE_AudioEngine_OpenAL_d.a" />
+					<Add library="libKlayGE_AudioEngine_DSound_d.a" />
 					<Add library="libKlayGE_AppLayer_d.a" />
 					<Add library="libKlayGE_InputEngine_DInput_d.a" />
-					<Add library="libKlayGE_Core_d.a" />
 					<Add library="libKlayGE_Scene_OCTree_d.a" />
-					<Add library="boost_signals-mgw43-mt-d" />
 					<Add library="boost_system-mgw43-mt-d" />
+					<Add library="boost_signals-mgw43-mt-d" />
 					<Add library="boost_thread-mgw43-mt-d" />
-					<Add library="libd3d9.a" />
+					<Add library="boost_program_options-mgw43-mt-d" />
 					<Add library="libd3dx9.a" />
-					<Add library="libdxguid.a" />
 					<Add library="libgdi32.a" />
 					<Add library="liboleaut32.a" />
-					<Add library="libdinput8.a" />
+					<Add library="libd3dx10.a" />
+					<Add library="libglloader_d.a" />
+					<Add library="libcg.a" />
+					<Add library="libcgGL.a" />
+					<Add library="libopengl32.a" />
+					<Add library="libglu32.a" />
+					<Add library="libOpenAL32.a" />
+					<Add library="libdsound.a" />
 				</Linker>
 			</Target>
 			<Target title="Release">
