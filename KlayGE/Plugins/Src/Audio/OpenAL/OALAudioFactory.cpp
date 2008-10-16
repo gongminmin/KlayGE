@@ -14,6 +14,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/AudioFactory.hpp>
 
 #include <KlayGE/OpenAL/OALAudio.hpp>
@@ -23,8 +24,8 @@ namespace KlayGE
 {
 	AudioFactoryPtr const & OALAudioFactoryInstance()
 	{
-		static AudioFactoryPtr af(new ConcreteAudioFactory<OALAudioEngine,
-			OALSoundBuffer, OALMusicBuffer>(L"OpenAL Audio Factory"));
+		static AudioFactoryPtr af = MakeSharedPtr<ConcreteAudioFactory<OALAudioEngine,
+			OALSoundBuffer, OALMusicBuffer> >(L"OpenAL Audio Factory");
 		return af;
 	}
 }

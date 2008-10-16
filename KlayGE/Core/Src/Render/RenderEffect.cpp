@@ -142,7 +142,7 @@ namespace
 		case REDT_bool:
 			if (0 == array_size)
 			{
-				var.reset(new RenderVariableBool);
+				var = MakeSharedPtr<RenderVariableBool>();
 
 				bool tmp;
 				source->read(reinterpret_cast<char*>(&tmp), sizeof(tmp));
@@ -154,7 +154,7 @@ namespace
 		case REDT_int:
 			if (0 == array_size)
 			{
-				var.reset(new RenderVariableInt);
+				var = MakeSharedPtr<RenderVariableInt>();
 
 				int tmp;
 				source->read(reinterpret_cast<char*>(&tmp), sizeof(tmp));
@@ -164,7 +164,7 @@ namespace
 
 		case REDT_string:
 			{
-				var.reset(new RenderVariableString);
+				var = MakeSharedPtr<RenderVariableString>();
 				*var = read_short_string(source);
 			}
 			break;
@@ -174,7 +174,7 @@ namespace
 		case REDT_sampler3D:
 		case REDT_samplerCUBE:
 			{
-				var.reset(new RenderVariableSampler);
+				var = MakeSharedPtr<RenderVariableSampler>();
 
 				SamplerStateDesc desc;
 
@@ -209,7 +209,7 @@ namespace
 
 		case REDT_shader:
 			{
-				var.reset(new RenderVariableShader);
+				var = MakeSharedPtr<RenderVariableShader>();
 
 				shader_desc desc;
 
@@ -225,7 +225,7 @@ namespace
 		case REDT_float:
 			if (0 == array_size)
 			{
-				var.reset(new RenderVariableFloat);
+				var = MakeSharedPtr<RenderVariableFloat>();
 
 				float tmp;
 				source->read(reinterpret_cast<char*>(&tmp), sizeof(tmp));
@@ -233,13 +233,13 @@ namespace
 			}
 			else
 			{
-				var.reset(new RenderVariableFloatArray);
+				var = MakeSharedPtr<RenderVariableFloatArray>();
 			}
 			break;
 
 		case REDT_float2:
 			{
-				var.reset(new RenderVariableFloat2);
+				var = MakeSharedPtr<RenderVariableFloat2>();
 
 				float2 tmp;
 				source->read(reinterpret_cast<char*>(&tmp), sizeof(tmp));
@@ -249,7 +249,7 @@ namespace
 
 		case REDT_float3:
 			{
-				var.reset(new RenderVariableFloat3);
+				var = MakeSharedPtr<RenderVariableFloat3>();
 
 				float3 tmp;
 				source->read(reinterpret_cast<char*>(&tmp), sizeof(tmp));
@@ -260,7 +260,7 @@ namespace
 		case REDT_float4:
 			if (0 == array_size)
 			{
-				var.reset(new RenderVariableFloat4);
+				var = MakeSharedPtr<RenderVariableFloat4>();
 
 				float4 tmp;
 				source->read(reinterpret_cast<char*>(&tmp), sizeof(tmp));
@@ -268,14 +268,14 @@ namespace
 			}
 			else
 			{
-				var.reset(new RenderVariableFloat4Array);
+				var = MakeSharedPtr<RenderVariableFloat4Array>();
 			}
 			break;
 
 		case REDT_float4x4:
 			if (0 == array_size)
 			{
-				var.reset(new RenderVariableFloat4x4);
+				var = MakeSharedPtr<RenderVariableFloat4x4>();
 
 				float4x4 tmp;
 				source->read(reinterpret_cast<char*>(&tmp), sizeof(tmp));
@@ -283,7 +283,7 @@ namespace
 			}
 			else
 			{
-				var.reset(new RenderVariableFloat4x4Array);
+				var = MakeSharedPtr<RenderVariableFloat4x4Array>();
 			}
 			break;
 
@@ -363,11 +363,11 @@ namespace KlayGE
 
 			for (uint32_t i = 0; i < header.num_parameters; ++ i)
 			{
-				params_.push_back(RenderEffectParameterPtr(new RenderEffectParameter(*this)));
+				params_.push_back(MakeSharedPtr<RenderEffectParameter>(*this));
 				params_[i]->Load(source);
 			}
 
-			cbuffers_.reset(new BOOST_TYPEOF(*cbuffers_)(header.num_cbuffers));
+			cbuffers_ = MakeSharedPtr<BOOST_TYPEOF(*cbuffers_)>(header.num_cbuffers);
 			for (uint32_t i = 0; i < header.num_cbuffers; ++ i)
 			{
 				(*cbuffers_)[i].first = read_short_string(source);
@@ -380,7 +380,7 @@ namespace KlayGE
 
 			if (header.num_shaders > 0)
 			{
-				shaders_.reset(new BOOST_TYPEOF(*shaders_));
+				shaders_ = MakeSharedPtr<BOOST_TYPEOF(*shaders_)>();
 				for (uint32_t i = 0; i < header.num_shaders; ++ i)
 				{
 					shaders_->push_back(RenderShaderFunc());
@@ -390,7 +390,7 @@ namespace KlayGE
 
 			for (uint32_t i = 0; i < header.num_techniques; ++ i)
 			{
-				techniques_.push_back(RenderTechniquePtr(new RenderTechnique(*this)));
+				techniques_.push_back(MakeSharedPtr<RenderTechnique>(*this));
 				techniques_[i]->Load(source);
 			}
 		}
@@ -398,7 +398,7 @@ namespace KlayGE
 
 	RenderEffectPtr RenderEffect::Clone()
 	{
-		RenderEffectPtr ret(new RenderEffect);
+		RenderEffectPtr ret = MakeSharedPtr<RenderEffect>();
 
 		ret->prototype_effect_ = prototype_effect_;
 		ret->shaders_ = shaders_;
@@ -422,7 +422,7 @@ namespace KlayGE
 
 	RenderEffectPtr const & RenderEffect::NullObject()
 	{
-		static RenderEffectPtr obj(new NullRenderEffect);
+		static RenderEffectPtr obj = MakeSharedPtr<NullRenderEffect>();
 		return obj;
 	}
 
@@ -488,23 +488,23 @@ namespace KlayGE
 
 	RenderTechniquePtr const & RenderTechnique::NullObject()
 	{
-		static RenderTechniquePtr obj(new NullRenderTechnique);
+		static RenderTechniquePtr obj = MakeSharedPtr<NullRenderTechnique>();
 		return obj;
 	}
 
 	void RenderTechnique::Load(ResIdentifierPtr const & source)
 	{
-		name_.reset(new BOOST_TYPEOF(*name_)(read_short_string(source)));
+		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(read_short_string(source));
 		source->read(reinterpret_cast<char*>(&weight_), sizeof(weight_));
 
 		uint32_t len;
 		source->read(reinterpret_cast<char*>(&len), sizeof(len));
 		if (len > 0)
 		{
-			annotations_.reset(new BOOST_TYPEOF(*annotations_));
+			annotations_ = MakeSharedPtr<BOOST_TYPEOF(*annotations_)>();
 			for (size_t i = 0; i < len; ++ i)
 			{
-				annotations_->push_back(RenderEffectAnnotationPtr(new RenderEffectAnnotation));
+				annotations_->push_back(MakeSharedPtr<RenderEffectAnnotation>());
 				(*annotations_)[i]->Load(source);
 			}
 		}
@@ -514,7 +514,7 @@ namespace KlayGE
 		source->read(reinterpret_cast<char*>(&len), sizeof(len));
 		for (uint32_t i = 0; i < len; ++ i)
 		{
-			passes_.push_back(RenderPassPtr(new RenderPass(effect_)));
+			passes_.push_back(MakeSharedPtr<RenderPass>(effect_));
 			passes_[i]->Load(source);
 
 			is_validate_ &= passes_[i]->Validate();
@@ -523,7 +523,7 @@ namespace KlayGE
 
 	RenderTechniquePtr RenderTechnique::Clone(RenderEffect& effect)
 	{
-		RenderTechniquePtr ret(new RenderTechnique(effect));
+		RenderTechniquePtr ret = MakeSharedPtr<RenderTechnique>(effect);
 
 		ret->name_ = name_;
 
@@ -553,7 +553,7 @@ namespace KlayGE
 
 	RenderPassPtr const & RenderPass::NullObject()
 	{
-		static RenderPassPtr obj(new NullRenderPass);
+		static RenderPassPtr obj = MakeSharedPtr<NullRenderPass>();
 		return obj;
 	}
 
@@ -561,16 +561,16 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		name_.reset(new BOOST_TYPEOF(*name_)(read_short_string(source)));
+		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(read_short_string(source));
 
 		uint32_t len;
 		source->read(reinterpret_cast<char*>(&len), sizeof(len));
 		if (len > 0)
 		{
-			annotations_.reset(new BOOST_TYPEOF(*annotations_));
+			annotations_ = MakeSharedPtr<BOOST_TYPEOF(*annotations_)>();
 			for (size_t i = 0; i < len; ++ i)
 			{
-				annotations_->push_back(RenderEffectAnnotationPtr(new RenderEffectAnnotation));
+				annotations_->push_back(MakeSharedPtr<RenderEffectAnnotation>());
 				(*annotations_)[i]->Load(source);
 			}
 		}
@@ -580,7 +580,7 @@ namespace KlayGE
 		BlendStateDesc bs_desc;
 		shader_obj_ = rf.MakeShaderObject();
 
-		shader_descs_.reset(new BOOST_TYPEOF(*shader_descs_));
+		shader_descs_ = MakeSharedPtr<BOOST_TYPEOF(*shader_descs_)>();
 		shader_descs_->resize(ShaderObject::ST_NumShaderTypes);
 
 		source->read(reinterpret_cast<char*>(&len), sizeof(len));
@@ -812,7 +812,7 @@ namespace KlayGE
 		depth_stencil_state_obj_ = rf.MakeDepthStencilStateObject(dss_desc);
 		blend_state_obj_ = rf.MakeBlendStateObject(bs_desc);
 
-		shader_text_.reset(new BOOST_TYPEOF(*shader_text_)(this->GenShaderText()));
+		shader_text_ = MakeSharedPtr<BOOST_TYPEOF(*shader_text_)>(this->GenShaderText());
 		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
 		{
 			shader_obj_->SetShader(effect_, static_cast<ShaderObject::ShaderType>(i), shader_descs_, shader_text_);
@@ -823,7 +823,7 @@ namespace KlayGE
 
 	RenderPassPtr RenderPass::Clone(RenderEffect& effect)
 	{
-		RenderPassPtr ret(new RenderPass(effect));
+		RenderPassPtr ret = MakeSharedPtr<RenderPass>(effect);
 
 		ret->name_ = name_;
 		ret->annotations_ = annotations_;
@@ -1056,27 +1056,27 @@ namespace KlayGE
 	{
 		source->read(reinterpret_cast<char*>(&array_size_), sizeof(array_size_));
 		source->read(reinterpret_cast<char*>(&type_), sizeof(type_));
-		name_.reset(new BOOST_TYPEOF(*name_)(read_short_string(source)));
+		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(read_short_string(source));
 		var_ = read_var(source, type_, array_size_);
 
 		uint32_t len;
 		source->read(reinterpret_cast<char*>(&len), sizeof(len));
 		if (len > 0)
 		{
-			annotations_.reset(new BOOST_TYPEOF(*annotations_));
+			annotations_ = MakeSharedPtr<BOOST_TYPEOF(*annotations_)>();
 			for (size_t i = 0; i < len; ++ i)
 			{
-				annotations_->push_back(RenderEffectAnnotationPtr(new RenderEffectAnnotation));
+				annotations_->push_back(MakeSharedPtr<RenderEffectAnnotation>());
 				(*annotations_)[i]->Load(source);
 			}
 		}
 
-		semantic_.reset(new BOOST_TYPEOF(*semantic_)(read_short_string(source)));
+		semantic_ = MakeSharedPtr<BOOST_TYPEOF(*semantic_)>(read_short_string(source));
 	}
 
 	RenderEffectParameterPtr RenderEffectParameter::Clone(RenderEffect& effect)
 	{
-		RenderEffectParameterPtr ret(new RenderEffectParameter(effect));
+		RenderEffectParameterPtr ret = MakeSharedPtr<RenderEffectParameter>(effect);
 
 		ret->name_ = name_;
 		ret->semantic_ = semantic_;
@@ -1092,7 +1092,7 @@ namespace KlayGE
 
 	RenderEffectParameterPtr const & RenderEffectParameter::NullObject()
 	{
-		static RenderEffectParameterPtr obj(new NullRenderEffectParameter);
+		static RenderEffectParameterPtr obj = MakeSharedPtr<NullRenderEffectParameter>();
 		return obj;
 	}
 

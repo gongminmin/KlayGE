@@ -22,10 +22,10 @@
 
 namespace KlayGE
 {
-	uint32_t Find7z(boost::shared_ptr<std::istream> const & archive_is,
+	uint32_t Find7z(ResIdentifierPtr const & archive_is,
 		std::string const & password,
 		std::string const & extract_file_path);
-	void Extract7z(boost::shared_ptr<std::istream> const & archive_is,
+	void Extract7z(ResIdentifierPtr const & archive_is,
 		std::string const & password,
 		std::string const & extract_file_path,
 		boost::shared_ptr<std::ostream> const & os);

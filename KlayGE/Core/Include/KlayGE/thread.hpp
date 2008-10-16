@@ -38,6 +38,8 @@
 #include <exception>
 #include <vector>
 
+#include <KlayGE/Util.hpp>
+
 
 namespace KlayGE
 {
@@ -326,10 +328,10 @@ namespace KlayGE
 			typedef typename joiner_impl_t::result_opt				result_opt;
 			typedef detail::threaded<Threadable, joiner_impl_t>		threaded_t;
 
-			boost::shared_ptr<result_opt> myreturn(new result_opt);
-			boost::shared_ptr<threaded_t> mythreaded(new threaded_t(function, myreturn));
-			boost::shared_ptr<joiner_impl_base<result_t> > myjoiner_data(new joiner_impl_t(myreturn,
-				boost::bind(&threaded_t::needle, mythreaded)));
+			boost::shared_ptr<result_opt> myreturn = MakeSharedPtr<result_opt>();
+			boost::shared_ptr<threaded_t> mythreaded = MakeSharedPtr<threaded_t>(function, myreturn);
+			boost::shared_ptr<joiner_impl_base<result_t> > myjoiner_data = MakeSharedPtr<joiner_impl_t>(myreturn,
+				boost::bind(&threaded_t::needle, mythreaded));
 
 			return joiner_t(myjoiner_data);
 		}
@@ -566,7 +568,7 @@ namespace KlayGE
 			{
 				for (size_t i = 0; i < number; ++ i)
 				{
-					boost::shared_ptr<thread_pool_thread_info> th_info(new thread_pool_thread_info(data));
+					boost::shared_ptr<thread_pool_thread_info> th_info = MakeSharedPtr<thread_pool_thread_info>(data);
 					joiner<void> j = data->threader_(wait_function(th_info));
 					th_info->set_thread_id(threadof(j));
 					data->threads_.push_back(th_info);
@@ -654,7 +656,7 @@ namespace KlayGE
 			joiner_thread_pool_impl(boost::shared_ptr<thread_pool_common_data_t> data,
 						boost::shared_ptr<typename joiner_impl_base<result_type>::result_opt> const & result_op,
 						Threadable const & func)
-				: thread_pool_join_info_(new thread_pool_join_info)
+				: thread_pool_join_info_(MakeSharedPtr<thread_pool_join_info>())
 			{
 				joiner_impl_base<result_type>::result_ = result_op;
 
@@ -695,7 +697,7 @@ namespace KlayGE
 
 	public:
 		thread_pool(size_t num_min_cached_threads, size_t num_max_cached_threads)
-			: data_(new thread_pool_common_data_t(num_min_cached_threads, num_max_cached_threads))
+			: data_(MakeSharedPtr<thread_pool_common_data_t>(num_min_cached_threads, num_max_cached_threads))
 		{
 			BOOST_ASSERT(num_max_cached_threads >= num_min_cached_threads);
 
@@ -717,10 +719,10 @@ namespace KlayGE
 			typedef typename joiner_impl_t::result_opt				result_opt;
 			typedef detail::threaded<Threadable, joiner_impl_t>		threaded_t;
 
-			boost::shared_ptr<result_opt> myreturn(new result_opt);
-			boost::shared_ptr<threaded_t> mythreaded(new threaded_t(function, myreturn));
-			boost::shared_ptr<joiner_impl_base<result_t> > myjoiner_data(new joiner_impl_t(data_,
-				myreturn, boost::bind(&threaded_t::needle, mythreaded)));
+			boost::shared_ptr<result_opt> myreturn = MakeSharedPtr<result_opt>();
+			boost::shared_ptr<threaded_t> mythreaded = MakeSharedPtr<threaded_t>(function, myreturn);
+			boost::shared_ptr<joiner_impl_base<result_t> > myjoiner_data = MakeSharedPtr<joiner_impl_t>(data_,
+				myreturn, boost::bind(&threaded_t::needle, mythreaded));
 
 			return joiner_t(myjoiner_data);
 		}

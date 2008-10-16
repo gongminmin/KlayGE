@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/AudioFactory.hpp>
 
 #include <KlayGE/DSound/DSAudio.hpp>
@@ -20,8 +21,8 @@ namespace KlayGE
 {
 	AudioFactoryPtr const & DSAudioFactoryInstance()
 	{
-		static AudioFactoryPtr af(new ConcreteAudioFactory<DSAudioEngine,
-			DSSoundBuffer, DSMusicBuffer>(L"DirectSound Audio Factory"));
+		static AudioFactoryPtr af = MakeSharedPtr<ConcreteAudioFactory<DSAudioEngine,
+			DSSoundBuffer, DSMusicBuffer> >(L"DirectSound Audio Factory");
 		return af;
 	}	
 }

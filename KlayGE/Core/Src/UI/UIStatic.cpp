@@ -51,7 +51,7 @@ namespace KlayGE
 			Element.SetFont(0);
 			Element.FontColor().States[UICS_Disabled] = Color(200.0f / 255, 200.0f / 255, 200.0f / 255, 200.0f / 255);
 
-			elements_.push_back(UIElementPtr(new UIElement(Element)));
+			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
 	}
 

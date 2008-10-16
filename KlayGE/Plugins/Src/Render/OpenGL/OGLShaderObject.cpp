@@ -484,7 +484,7 @@ namespace KlayGE
 
 	ShaderObjectPtr OGLShaderObject::Clone(RenderEffect& effect)
 	{
-		OGLShaderObjectPtr ret(new OGLShaderObject);
+		OGLShaderObjectPtr ret = MakeSharedPtr<OGLShaderObject>();
 
 		ret->shader_descs_ = shader_descs_;
 		ret->shader_text_ = shader_text_;

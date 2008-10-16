@@ -177,18 +177,18 @@ namespace KlayGE
 	void OGLRenderEngine::CreateRenderWindow(std::string const & name,
 		RenderSettings const & settings)
 	{
-		FrameBufferPtr win(new OGLRenderWindow(name, settings));
+		FrameBufferPtr win = MakeSharedPtr<OGLRenderWindow>(name, settings);
 		default_frame_buffer_ = win;
 
 		this->FillRenderDeviceCaps();
 		this->InitRenderStates();
 
 		win->Attach(FrameBuffer::ATT_Color0,
-			OGLScreenColorRenderViewPtr(new OGLScreenColorRenderView(win->Width(), win->Height(), win->Format())));
+			MakeSharedPtr<OGLScreenColorRenderView>(win->Width(), win->Height(), win->Format()));
 		if (win->DepthBits() > 0)
 		{
 			win->Attach(FrameBuffer::ATT_DepthStencil,
-				OGLScreenDepthStencilRenderViewPtr(new OGLScreenDepthStencilRenderView(win->Width(), win->Height(), settings.depth_stencil_fmt)));
+				MakeSharedPtr<OGLScreenDepthStencilRenderView>(win->Width(), win->Height(), settings.depth_stencil_fmt));
 		}
 
 		this->BindFrameBuffer(win);

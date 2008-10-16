@@ -14,6 +14,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Texture.hpp>
 
 #include <KlayGE/Show.hpp>
@@ -70,7 +71,7 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	ShowEnginePtr ShowEngine::NullObject()
 	{
-		static ShowEnginePtr obj(new NullShowEngine);
+		static ShowEnginePtr obj = MakeSharedPtr<NullShowEngine>();
 		return obj;
 	}
 

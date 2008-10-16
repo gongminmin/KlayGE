@@ -266,55 +266,55 @@ namespace KlayGE
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 0));
 
-			elements_.push_back(UIElementPtr(new UIElement(Element)));
+			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
 
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 1));
 
-			elements_.push_back(UIElementPtr(new UIElement(Element)));
+			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
 
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 2));
 
-			elements_.push_back(UIElementPtr(new UIElement(Element)));
+			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
 
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 3));
 
-			elements_.push_back(UIElementPtr(new UIElement(Element)));
+			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
 
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 4));
 
-			elements_.push_back(UIElementPtr(new UIElement(Element)));
+			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
 
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 5));
 
-			elements_.push_back(UIElementPtr(new UIElement(Element)));
+			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
 
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 6));
 
-			elements_.push_back(UIElementPtr(new UIElement(Element)));
+			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
 
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 7));
 
-			elements_.push_back(UIElementPtr(new UIElement(Element)));
+			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
 
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 8));
 
-			elements_.push_back(UIElementPtr(new UIElement(Element)));
+			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
 
 		key_down_event_.connect(boost::bind(&UIEditBox::KeyDownHandler, this, _1, _2));

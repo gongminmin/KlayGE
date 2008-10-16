@@ -544,10 +544,10 @@ namespace KlayGE
 			d3d_swap_chain_ = MakeCOMPtr(sc);
 
 			this->UpdateSurfacesPtrs();
-			this->Attach(ATT_Color0, D3D9SurfaceRenderViewPtr(new D3D9SurfaceRenderView(renderSurface_)));
+			this->Attach(ATT_Color0, MakeSharedPtr<D3D9SurfaceRenderView>(renderSurface_));
 			if (renderZBuffer_)
 			{
-				this->Attach(ATT_DepthStencil, D3D9SurfaceRenderViewPtr(new D3D9SurfaceRenderView(renderZBuffer_)));
+				this->Attach(ATT_DepthStencil, MakeSharedPtr<D3D9SurfaceRenderView>(renderZBuffer_));
 			}
 
 			factory.OnResetDevice();

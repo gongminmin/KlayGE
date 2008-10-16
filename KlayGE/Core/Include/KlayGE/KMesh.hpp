@@ -53,7 +53,7 @@ namespace KlayGE
 	{
 		StaticMeshPtr operator()(RenderModelPtr model, std::wstring const & name)
 		{
-			return StaticMeshPtr(new T(model, name));
+			return MakeSharedPtr<T>(model, name);
 		}
 	};
 
@@ -62,7 +62,7 @@ namespace KlayGE
 	{
 		RenderModelPtr operator()(std::wstring const & name)
 		{
-			return RenderModelPtr(new T(name));
+			return MakeSharedPtr<T>(name);
 		}
 	};
 

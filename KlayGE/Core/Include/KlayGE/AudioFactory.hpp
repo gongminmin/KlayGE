@@ -57,14 +57,14 @@ namespace KlayGE
 
 		AudioBufferPtr MakeSoundBuffer(AudioDataSourcePtr const & dataSource, uint32_t numSource = 1)
 		{
-			return AudioBufferPtr(new SoundBufferType(dataSource, numSource,
-				this->AudioEngineInstance().SoundVolume()));
+			return MakeSharedPtr<SoundBufferType>(dataSource, numSource,
+				this->AudioEngineInstance().SoundVolume());
 		}
 
 		AudioBufferPtr MakeMusicBuffer(AudioDataSourcePtr const & dataSource, uint32_t bufferSeconds = 2)
 		{
-			return AudioBufferPtr(new MusicBufferType(dataSource, bufferSeconds,
-				this->AudioEngineInstance().MusicVolume()));
+			return MakeSharedPtr<MusicBufferType>(dataSource, bufferSeconds,
+				this->AudioEngineInstance().MusicVolume());
 		}
 
 	private:

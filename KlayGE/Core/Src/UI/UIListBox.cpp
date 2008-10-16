@@ -75,7 +75,7 @@ namespace KlayGE
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ListBox, 0));
 			Element.SetFont(0, Color(0, 0, 0, 1), Font::FA_Hor_Left | Font::FA_Ver_Top);
 
-			elements_.push_back(UIElementPtr(new UIElement(Element)));
+			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
 
 		// Selection
@@ -83,7 +83,7 @@ namespace KlayGE
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ListBox, 1));
 			Element.SetFont(0, Color(1, 1, 1, 1), Font::FA_Hor_Left | Font::FA_Ver_Top);
 
-			elements_.push_back(UIElementPtr(new UIElement(Element)));
+			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
 
 		key_down_event_.connect(boost::bind(&UIListBox::KeyDownHandler, this, _1, _2));
@@ -128,7 +128,7 @@ namespace KlayGE
 
 	void UIListBox::AddItem(std::wstring const & strText, boost::any const & data)
 	{
-		boost::shared_ptr<UIListBoxItem> pNewItem(new UIListBoxItem);
+		boost::shared_ptr<UIListBoxItem> pNewItem = MakeSharedPtr<UIListBoxItem>();
 		pNewItem->strText = strText;
 		pNewItem->data = data;
 		pNewItem->rcActive = Rect_T<int32_t>(0, 0, 0, 0);
@@ -140,7 +140,7 @@ namespace KlayGE
 
 	void UIListBox::InsertItem(int nIndex, std::wstring const & strText, boost::any const & data)
 	{
-		boost::shared_ptr<UIListBoxItem> pNewItem(new UIListBoxItem);
+		boost::shared_ptr<UIListBoxItem> pNewItem = MakeSharedPtr<UIListBoxItem>();
 		pNewItem->strText = strText;
 		pNewItem->data = data;
 		pNewItem->rcActive = Rect_T<int32_t>(0, 0, 0, 0);

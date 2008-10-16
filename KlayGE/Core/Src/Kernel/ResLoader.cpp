@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Extract7z.hpp>
 
 #include <fstream>
@@ -68,7 +69,7 @@ namespace KlayGE
 					pkt_name = pkt_name.substr(0, password_offset - 1);
 					std::string const file_name = res_name.substr(pkt_offset + 2);
 
-					boost::shared_ptr<std::istream> pkt_file(new std::ifstream(pkt_name.c_str(), std::ios_base::binary));
+					ResIdentifierPtr pkt_file = MakeSharedPtr<std::ifstream>(pkt_name.c_str(), std::ios_base::binary);
 					if (*pkt_file)
 					{
 						if (Find7z(pkt_file, password, file_name))
@@ -89,7 +90,7 @@ namespace KlayGE
 		{
 			std::string const res_name(path + name);
 
-			ResIdentifierPtr ret(new std::ifstream(res_name.c_str(), std::ios_base::binary));
+			ResIdentifierPtr ret = MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary);
 
 			if (!ret->fail())
 			{
@@ -106,10 +107,10 @@ namespace KlayGE
 					pkt_name = pkt_name.substr(0, password_offset - 1);
 					std::string const file_name = res_name.substr(pkt_offset + 2);
 
-					boost::shared_ptr<std::istream> pkt_file(new std::ifstream(pkt_name.c_str(), std::ios_base::binary));
+					ResIdentifierPtr pkt_file = MakeSharedPtr<std::ifstream>(pkt_name.c_str(), std::ios_base::binary);
 					if (*pkt_file)
 					{
-						boost::shared_ptr<std::iostream> packet_file(new std::stringstream);
+						boost::shared_ptr<std::iostream> packet_file = MakeSharedPtr<std::stringstream>();
 						Extract7z(pkt_file, password, file_name, packet_file);
 						return packet_file;
 					}

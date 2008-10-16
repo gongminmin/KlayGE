@@ -179,7 +179,7 @@ namespace
 
 
 	std::pair<boost::shared_ptr<IInArchive>, uint32_t> GetArchiveIndex(
-								boost::shared_ptr<std::istream> const & archive_is,
+								ResIdentifierPtr const & archive_is,
 								std::string const & password,
 								std::string const & extract_file_path)
 	{
@@ -249,14 +249,14 @@ namespace
 
 namespace KlayGE
 {
-	uint32_t Find7z(boost::shared_ptr<std::istream> const & archive_is,
+	uint32_t Find7z(ResIdentifierPtr const & archive_is,
 								std::string const & password,
 								std::string const & extract_file_path)
 	{
 		return GetArchiveIndex(archive_is, password, extract_file_path).second;
 	}
 
-	void Extract7z(boost::shared_ptr<std::istream> const & archive_is,
+	void Extract7z(ResIdentifierPtr const & archive_is,
 							   std::string const & password,
 							   std::string const & extract_file_path,
 							   boost::shared_ptr<std::ostream> const & os)

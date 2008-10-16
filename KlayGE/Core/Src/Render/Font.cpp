@@ -700,7 +700,7 @@ namespace
 			}
 			else
 			{
-				RenderablePtr ret(new FontRenderable(font_name));
+				RenderablePtr ret = MakeSharedPtr<FontRenderable>(font_name);
 				font_renderables_.insert(std::make_pair(font_name, ret));
 				return ret;
 			}
@@ -771,7 +771,7 @@ namespace KlayGE
 	{
 		if (!text.empty())
 		{
-			boost::shared_ptr<FontObject> font_obj(new FontObject(font_renderable_, fso_attrib_));
+			boost::shared_ptr<FontObject> font_obj = MakeSharedPtr<FontObject>(font_renderable_, fso_attrib_);
 			checked_pointer_cast<FontRenderable>(font_renderable_)->AddText2D(
 				x, y, z, xScale, yScale, clr, text, font_height_);
 			font_obj->AddToSceneManager();
@@ -786,7 +786,7 @@ namespace KlayGE
 	{
 		if (!text.empty())
 		{
-			boost::shared_ptr<FontObject> font_obj(new FontObject(font_renderable_, fso_attrib_));
+			boost::shared_ptr<FontObject> font_obj = MakeSharedPtr<FontObject>(font_renderable_, fso_attrib_);
 			checked_pointer_cast<FontRenderable>(font_renderable_)->AddText2D(
 				rc, z, xScale, yScale, clr, text, font_height_, align);
 			font_obj->AddToSceneManager();
@@ -799,7 +799,7 @@ namespace KlayGE
 	{
 		if (!text.empty())
 		{
-			boost::shared_ptr<FontObject> font_obj(new FontObject(font_renderable_, fso_attrib_));
+			boost::shared_ptr<FontObject> font_obj = MakeSharedPtr<FontObject>(font_renderable_, fso_attrib_);
 			checked_pointer_cast<FontRenderable>(font_renderable_)->AddText3D(mvp, clr, text, font_height_);
 			font_obj->AddToSceneManager();
 		}

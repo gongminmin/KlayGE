@@ -59,7 +59,7 @@ namespace KlayGE
 
 	FrameBufferPtr FrameBuffer::NullObject()
 	{
-		static FrameBufferPtr obj(new NullFrameBuffer);
+		static FrameBufferPtr obj = MakeSharedPtr<NullFrameBuffer>();
 		return obj;
 	}
 

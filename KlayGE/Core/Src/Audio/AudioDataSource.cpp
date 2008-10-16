@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 
 #include <KlayGE/AudioDataSource.hpp>
 
@@ -39,7 +40,7 @@ namespace KlayGE
 
 	AudioDataSourcePtr AudioDataSource::NullObject()
 	{
-		static AudioDataSourcePtr obj(new NullAudioDataSource);
+		static AudioDataSourcePtr obj = MakeSharedPtr<NullAudioDataSource>();
 		return obj;
 	}
 

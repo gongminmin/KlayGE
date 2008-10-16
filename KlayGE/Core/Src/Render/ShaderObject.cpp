@@ -11,6 +11,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 
 #include <string>
 #include <vector>
@@ -44,7 +45,7 @@ namespace KlayGE
 
 	ShaderObjectPtr ShaderObject::NullObject()
 	{
-		static ShaderObjectPtr obj(new NullShaderObject);
+		static ShaderObjectPtr obj = MakeSharedPtr<NullShaderObject>();
 		return obj;
 	}
 }

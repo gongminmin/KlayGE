@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Audio.hpp>
 #include <KlayGE/AudioFactory.hpp>
 
@@ -43,7 +44,7 @@ namespace KlayGE
 
 	AudioFactoryPtr AudioFactory::NullObject()
 	{
-		static AudioFactoryPtr obj(new NullAudioFactory);
+		static AudioFactoryPtr obj = MakeSharedPtr<NullAudioFactory>();
 		return obj;
 	}
 }

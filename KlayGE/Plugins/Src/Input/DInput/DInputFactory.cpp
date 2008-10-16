@@ -14,6 +14,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/InputFactory.hpp>
 
 #include <KlayGE/DInput/DInput.hpp>
@@ -23,7 +24,7 @@ namespace KlayGE
 {
 	InputFactoryPtr const & DInputFactoryInstance()
 	{
-		static InputFactoryPtr ifactory(new ConcreteInputFactory<DInputEngine>(L"DirectInput Input Factory"));
+		static InputFactoryPtr ifactory = MakeSharedPtr<ConcreteInputFactory<DInputEngine> >(L"DirectInput Input Factory");
 		return ifactory;
 	}
 }

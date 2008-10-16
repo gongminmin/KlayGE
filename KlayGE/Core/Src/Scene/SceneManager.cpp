@@ -128,7 +128,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	SceneManagerPtr SceneManager::NullObject()
 	{
-		static SceneManagerPtr obj(new NullSceneManager);
+		static SceneManagerPtr obj = MakeSharedPtr<NullSceneManager>();
 		return obj;
 	}
 

@@ -74,7 +74,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	AudioEnginePtr AudioEngine::NullObject()
 	{
-		static AudioEnginePtr obj(new NullAudioEngine);
+		static AudioEnginePtr obj = MakeSharedPtr<NullAudioEngine>();
 		return obj;
 	}
 

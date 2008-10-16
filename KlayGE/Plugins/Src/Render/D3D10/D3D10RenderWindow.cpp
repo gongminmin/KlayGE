@@ -507,12 +507,12 @@ namespace KlayGE
 		TIF(d3d_device_->CreateDepthStencilView(depth_stencil_.get(), &dsv_desc, &depth_stencil_view));
 		depth_stencil_view_ = MakeCOMPtr(depth_stencil_view);
 
-		this->Attach(ATT_Color0, D3D10RenderTargetRenderViewPtr(new D3D10RenderTargetRenderView(render_target_view_,
-			this->Width(), this->Height(), D3D10Mapping::MappingFormat(back_buffer_format_))));
+		this->Attach(ATT_Color0, MakeSharedPtr<D3D10RenderTargetRenderView>(render_target_view_,
+			this->Width(), this->Height(), D3D10Mapping::MappingFormat(back_buffer_format_)));
 		if (depth_stencil_view_)
 		{
-			this->Attach(ATT_DepthStencil, D3D10DepthStencilRenderViewPtr(new D3D10DepthStencilRenderView(depth_stencil_view_,
-				this->Width(), this->Height(), D3D10Mapping::MappingFormat(depth_stencil_format_))));
+			this->Attach(ATT_DepthStencil, MakeSharedPtr<D3D10DepthStencilRenderView>(depth_stencil_view_,
+				this->Width(), this->Height(), D3D10Mapping::MappingFormat(depth_stencil_format_)));
 		}
 	}
 

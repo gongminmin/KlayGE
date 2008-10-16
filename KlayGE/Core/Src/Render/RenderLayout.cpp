@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/MapVector.hpp>
@@ -41,7 +42,7 @@ namespace KlayGE
 
 	RenderLayoutPtr RenderLayout::NullObject()
 	{
-		static RenderLayoutPtr obj(new NullRenderLayout);
+		static RenderLayoutPtr obj = MakeSharedPtr<NullRenderLayout>();
 		return obj;
 	}
 

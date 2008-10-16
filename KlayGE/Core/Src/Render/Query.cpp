@@ -11,6 +11,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Query.hpp>
 
 namespace KlayGE
@@ -28,7 +29,7 @@ namespace KlayGE
 
 	QueryPtr Query::NullObject()
 	{
-		static QueryPtr obj(new NullQuery);
+		static QueryPtr obj = MakeSharedPtr<NullQuery>();
 		return obj;
 	}
 }

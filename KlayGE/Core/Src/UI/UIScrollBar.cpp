@@ -89,7 +89,7 @@ namespace KlayGE
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ScrollBar, 0));
 			Element.TextureColor().States[UICS_Disabled] = Color(200.0f / 255, 200.0f / 255, 200.0f / 255, 1);
 
-			elements_.push_back(UIElementPtr(new UIElement(Element)));
+			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
 
 		// Up Arrow
@@ -97,7 +97,7 @@ namespace KlayGE
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ScrollBar, 1));
 			Element.TextureColor().States[UICS_Disabled] = Color(200.0f / 255, 200.0f / 255, 200.0f / 255, 1);
 
-			elements_.push_back(UIElementPtr(new UIElement(Element)));
+			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
 
 		// Down Arrow
@@ -105,14 +105,14 @@ namespace KlayGE
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ScrollBar, 2));
 			Element.TextureColor().States[UICS_Disabled] = Color(200.0f / 255, 200.0f / 255, 200.0f / 255, 1);
 
-			elements_.push_back(UIElementPtr(new UIElement(Element)));
+			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
 
 		// Button
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ScrollBar, 3));
 
-			elements_.push_back(UIElementPtr(new UIElement(Element)));
+			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
 
 		mouse_over_event_.connect(boost::bind(&UIScrollBar::MouseOverHandler, this, _1, _2));

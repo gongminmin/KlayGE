@@ -21,6 +21,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/InputFactory.hpp>
 
@@ -89,7 +90,7 @@ namespace KlayGE
 		KlayGE::InputActionMap actionMap;
 		actionMap.AddActions(actions.begin(), actions.end());
 
-		action_handler_t input_handler(new input_signal);
+		action_handler_t input_handler = MakeSharedPtr<input_signal>();
 		input_handler->connect(boost::bind(&FirstPersonCameraController::InputHandler, this, _1, _2));
 		inputEngine.ActionMap(actionMap, input_handler, true);
 	}

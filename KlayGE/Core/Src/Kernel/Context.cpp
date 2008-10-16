@@ -14,6 +14,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -201,7 +202,7 @@ namespace KlayGE
 
 		if ("Octree" == sm_name)
 		{
-			SceneManagerPtr sm(new OCTree(octree_depth));
+			SceneManagerPtr sm = MakeSharedPtr<OCTree>(octree_depth);
 			Context::Instance().SceneManagerInstance(sm);
 		}
 

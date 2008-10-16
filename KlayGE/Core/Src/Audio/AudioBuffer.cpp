@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <KlayGE/Audio.hpp>
@@ -68,7 +69,7 @@ namespace KlayGE
 
 	AudioBufferPtr AudioBuffer::NullObject()
 	{
-		static AudioBufferPtr obj(new NullAudioBuffer);
+		static AudioBufferPtr obj = MakeSharedPtr<NullAudioBuffer>();
 		return obj;
 	}
 }

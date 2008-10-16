@@ -20,6 +20,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderView.hpp>
 #include <KlayGE/MapVector.hpp>
@@ -72,7 +73,7 @@ namespace KlayGE
 
 	GraphicsBufferPtr GraphicsBuffer::NullObject()
 	{
-		static GraphicsBufferPtr obj(new NullGraphicsBuffer);
+		static GraphicsBufferPtr obj = MakeSharedPtr<NullGraphicsBuffer>();
 		return obj;
 	}
 

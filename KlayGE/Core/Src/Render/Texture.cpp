@@ -160,7 +160,7 @@ namespace KlayGE
 	// 载入DDS格式文件
 	TexturePtr LoadTexture(std::string const & tex_name, uint32_t access_hint)
 	{
-		boost::shared_ptr<std::istream> file(ResLoader::Instance().Load(tex_name));
+		ResIdentifierPtr file(ResLoader::Instance().Load(tex_name));
 
 		uint32_t magic;
 		file->read(reinterpret_cast<char*>(&magic), sizeof(magic));
@@ -1305,7 +1305,7 @@ namespace KlayGE
 
 	TexturePtr Texture::NullObject()
 	{
-		static TexturePtr obj(new NullTexture(TT_2D, 0));
+		static TexturePtr obj = MakeSharedPtr<NullTexture>(TT_2D, 0);
 		return obj;
 	}
 

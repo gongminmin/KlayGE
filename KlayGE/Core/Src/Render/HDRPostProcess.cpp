@@ -131,7 +131,7 @@ namespace KlayGE
 	ToneMappingPostProcess::ToneMappingPostProcess()
 			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("ToneMapping.kfx")->TechniqueByName("ToneMapping20"))
 	{
-		RenderEffect& effect = technique_->Effect();
+		RenderEffect const & effect = technique_->Effect();
 		if (effect.TechniqueByName("ToneMapping30")->Validate())
 		{
 			technique_ = effect.TechniqueByName("ToneMapping30");

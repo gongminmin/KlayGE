@@ -127,7 +127,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderEnginePtr RenderEngine::NullObject()
 	{
-		static RenderEnginePtr obj(new NullRenderEngine);
+		static RenderEnginePtr obj = MakeSharedPtr<NullRenderEngine>();
 		return obj;
 	}
 

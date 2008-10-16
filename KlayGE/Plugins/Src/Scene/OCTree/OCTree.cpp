@@ -23,6 +23,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Vector.hpp>
 #include <KlayGE/Matrix.hpp>
@@ -224,7 +225,7 @@ namespace KlayGE
 #ifdef KLAYGE_DEBUG
 		if (!node_renderable)
 		{
-			node_renderable.reset(new NodeRenderable);
+			node_renderable = MakeSharedPtr<NodeRenderable>();
 		}
 		node_renderable->ClearInstances();
 		node_renderable->AddToRenderQueue();

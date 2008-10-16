@@ -58,115 +58,115 @@ namespace KlayGE
 
 	TexturePtr OGLRenderFactory::MakeTexture1D(uint32_t width, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 	{
-		return TexturePtr(new OGLTexture1D(width, numMipMaps, format, access_hint, init_data));
+		return MakeSharedPtr<OGLTexture1D>(width, numMipMaps, format, access_hint, init_data);
 	}
 
 	TexturePtr OGLRenderFactory::MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps,
 				ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 	{
-		return TexturePtr(new OGLTexture2D(width, height, numMipMaps, format, access_hint, init_data));
+		return MakeSharedPtr<OGLTexture2D>(width, height, numMipMaps, format, access_hint, init_data);
 	}
 
 	TexturePtr OGLRenderFactory::MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth,
 				uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 	{
-		return TexturePtr(new OGLTexture3D(width, height, depth, numMipMaps, format, access_hint, init_data));
+		return MakeSharedPtr<OGLTexture3D>(width, height, depth, numMipMaps, format, access_hint, init_data);
 	}
 
 	TexturePtr OGLRenderFactory::MakeTextureCube(uint32_t size, uint16_t numMipMaps,
 				ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 	{
-		return TexturePtr(new OGLTextureCube(size, numMipMaps, format, access_hint, init_data));
+		return MakeSharedPtr<OGLTextureCube>(size, numMipMaps, format, access_hint, init_data);
 	}
 
 	FrameBufferPtr OGLRenderFactory::MakeFrameBuffer()
 	{
-		return FrameBufferPtr(new OGLFrameBuffer(true));
+		return MakeSharedPtr<OGLFrameBuffer>(true);
 	}
 
 	RenderLayoutPtr OGLRenderFactory::MakeRenderLayout()
 	{
-		return RenderLayoutPtr(new OGLRenderLayout);
+		return MakeSharedPtr<OGLRenderLayout>();
 	}
 
 	GraphicsBufferPtr OGLRenderFactory::MakeVertexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data)
 	{
-		return GraphicsBufferPtr(new OGLGraphicsBuffer(usage, access_hint, GL_ARRAY_BUFFER, init_data));
+		return MakeSharedPtr<OGLGraphicsBuffer>(usage, access_hint, GL_ARRAY_BUFFER, init_data);
 	}
 
 	GraphicsBufferPtr OGLRenderFactory::MakeIndexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data)
 	{
-		return GraphicsBufferPtr(new OGLGraphicsBuffer(usage, access_hint, GL_ELEMENT_ARRAY_BUFFER, init_data));
+		return MakeSharedPtr<OGLGraphicsBuffer>(usage, access_hint, GL_ELEMENT_ARRAY_BUFFER, init_data);
 	}
 
 	QueryPtr OGLRenderFactory::MakeOcclusionQuery()
 	{
-		return QueryPtr(new OGLOcclusionQuery);
+		return MakeSharedPtr<OGLOcclusionQuery>();
 	}
 
 	QueryPtr OGLRenderFactory::MakeConditionalRender()
 	{
-		return QueryPtr(new OGLConditionalRender);
+		return MakeSharedPtr<OGLConditionalRender>();
 	}
 
 	RenderViewPtr OGLRenderFactory::Make1DRenderView(Texture& texture, int level)
 	{
-		return RenderViewPtr(new OGLTexture1DRenderView(texture, level));
+		return MakeSharedPtr<OGLTexture1DRenderView>(texture, level);
 	}
 
 	RenderViewPtr OGLRenderFactory::Make2DRenderView(Texture& texture, int level)
 	{
-		return RenderViewPtr(new OGLTexture2DRenderView(texture, level));
+		return MakeSharedPtr<OGLTexture2DRenderView>(texture, level);
 	}
 
 	RenderViewPtr OGLRenderFactory::Make2DRenderView(Texture& texture, Texture::CubeFaces face, int level)
 	{
-		return RenderViewPtr(new OGLTextureCubeRenderView(texture, face, level));
+		return MakeSharedPtr<OGLTextureCubeRenderView>(texture, face, level);
 	}
 
 	RenderViewPtr OGLRenderFactory::Make3DRenderView(Texture& texture, uint32_t slice, int level)
 	{
-		return RenderViewPtr(new OGLTexture3DRenderView(texture, slice, level));
+		return MakeSharedPtr<OGLTexture3DRenderView>(texture, slice, level);
 	}
 
 	RenderViewPtr OGLRenderFactory::MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer, uint32_t width, uint32_t height, ElementFormat pf)
 	{
-		return RenderViewPtr(new OGLGraphicsBufferRenderView(gbuffer, width, height, pf));
+		return MakeSharedPtr<OGLGraphicsBufferRenderView>(gbuffer, width, height, pf);
 	}
 
 	RenderViewPtr OGLRenderFactory::MakeDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t multi_sample)
 	{
-		return RenderViewPtr(new OGLDepthStencilRenderView(width, height, pf, multi_sample));
+		return MakeSharedPtr<OGLDepthStencilRenderView>(width, height, pf, multi_sample);
 	}
 
 	ShaderObjectPtr OGLRenderFactory::MakeShaderObject()
 	{
-		return ShaderObjectPtr(new OGLShaderObject);
+		return MakeSharedPtr<OGLShaderObject>();
 	}
 
 	RasterizerStateObjectPtr OGLRenderFactory::DoMakeRasterizerStateObject(RasterizerStateDesc const & desc)
 	{
-		return RasterizerStateObjectPtr(new OGLRasterizerStateObject(desc));
+		return MakeSharedPtr<OGLRasterizerStateObject>(desc);
 	}
 	
 	DepthStencilStateObjectPtr OGLRenderFactory::DoMakeDepthStencilStateObject(DepthStencilStateDesc const & desc)
 	{
-		return DepthStencilStateObjectPtr(new OGLDepthStencilStateObject(desc));
+		return MakeSharedPtr<OGLDepthStencilStateObject>(desc);
 	}
 
 	BlendStateObjectPtr OGLRenderFactory::DoMakeBlendStateObject(BlendStateDesc const & desc)
 	{
-		return BlendStateObjectPtr(new OGLBlendStateObject(desc));
+		return MakeSharedPtr<OGLBlendStateObject>(desc);
 	}
 
 	SamplerStateObjectPtr OGLRenderFactory::DoMakeSamplerStateObject(SamplerStateDesc const & desc)
 	{
-		return SamplerStateObjectPtr(new OGLSamplerStateObject(desc));
+		return MakeSharedPtr<OGLSamplerStateObject>(desc);
 	}
 
 	RenderFactoryPtr const & OGLRenderFactoryInstance()
 	{
-		static RenderFactoryPtr rf(new OGLRenderFactory);
+		static RenderFactoryPtr rf = MakeSharedPtr<OGLRenderFactory>();
 		return rf;
 	}
 }

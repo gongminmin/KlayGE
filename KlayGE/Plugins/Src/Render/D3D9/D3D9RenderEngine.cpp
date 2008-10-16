@@ -185,14 +185,14 @@ namespace KlayGE
 	void D3D9RenderEngine::CreateRenderWindow(std::string const & name,
 		RenderSettings const & settings)
 	{
-		D3D9RenderWindowPtr win(new D3D9RenderWindow(d3d_, this->ActiveAdapter(),
-			name, settings));
+		D3D9RenderWindowPtr win = MakeSharedPtr<D3D9RenderWindow>(d3d_, this->ActiveAdapter(),
+			name, settings);
 		default_frame_buffer_ = win;
 
-		win->Attach(FrameBuffer::ATT_Color0, D3D9SurfaceRenderViewPtr(new D3D9SurfaceRenderView(win->D3DBackBuffer())));
+		win->Attach(FrameBuffer::ATT_Color0, MakeSharedPtr<D3D9SurfaceRenderView>(win->D3DBackBuffer()));
 		if (win->D3DDepthStencilBuffer())
 		{
-			win->Attach(FrameBuffer::ATT_DepthStencil, D3D9SurfaceRenderViewPtr(new D3D9SurfaceRenderView(win->D3DDepthStencilBuffer())));
+			win->Attach(FrameBuffer::ATT_DepthStencil, MakeSharedPtr<D3D9SurfaceRenderView>(win->D3DDepthStencilBuffer()));
 		}
 
 		this->BindFrameBuffer(win);

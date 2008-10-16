@@ -21,7 +21,7 @@
 
 namespace KlayGE
 {
-	void CInStream::Attach(boost::shared_ptr<std::istream> const & is)
+	void CInStream::Attach(ResIdentifierPtr const & is)
 	{
 		BOOST_ASSERT(*is);
 

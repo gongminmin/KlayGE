@@ -42,7 +42,7 @@ namespace KlayGE
 	}
 
 	SceneObjectSkyBox::SceneObjectSkyBox()
-		: SceneObjectHelper(RenderablePtr(new RenderableSkyBox), 0)
+		: SceneObjectHelper(MakeSharedPtr<RenderableSkyBox>(), 0)
 	{
 	}
 

@@ -79,7 +79,7 @@ namespace KlayGE
 			Element.FontColor().States[UICS_Pressed] = Color(0, 0, 0, 1);
 			Element.FontColor().States[UICS_Disabled] = Color(200.0f / 255, 200.0f / 255, 200.0f / 255, 200.0f / 255);
 
-			elements_.push_back(UIElementPtr(new UIElement(Element)));
+			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
 
 		// Button
@@ -90,7 +90,7 @@ namespace KlayGE
 			Element.TextureColor().States[UICS_Focus] = Color(1, 1, 1, 200.0f / 255);
 			Element.TextureColor().States[UICS_Disabled] = Color(1, 1, 1, 70.0f / 255);
 
-			elements_.push_back(UIElementPtr(new UIElement(Element)));
+			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
 
 		// Dropdown
@@ -98,7 +98,7 @@ namespace KlayGE
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ComboBox, 2));
 			Element.SetFont(0, Color(0, 0, 0, 1), Font::FA_Hor_Left | Font::FA_Ver_Top);
 
-			elements_.push_back(UIElementPtr(new UIElement(Element)));
+			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
 
 		// Selection
@@ -106,7 +106,7 @@ namespace KlayGE
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ComboBox, 3));
 			Element.SetFont(0, Color(1, 1, 1, 1), Font::FA_Hor_Left | Font::FA_Ver_Top);
 
-			elements_.push_back(UIElementPtr(new UIElement(Element)));
+			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
 
 		key_down_event_.connect(boost::bind(&UIComboBox::KeyDownHandler, this, _1, _2));
@@ -582,7 +582,7 @@ namespace KlayGE
 		assert(!strText.empty());
 
 		// Create a new item and set the data
-		boost::shared_ptr<UIComboBoxItem> pItem(new UIComboBoxItem);
+		boost::shared_ptr<UIComboBoxItem> pItem = MakeSharedPtr<UIComboBoxItem>();
 		pItem->strText = strText;
 		pItem->data = data;
 		pItem->rcActive = Rect_T<int32_t>(0, 0, 0, 0);

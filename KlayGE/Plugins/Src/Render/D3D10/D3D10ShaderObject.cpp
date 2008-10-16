@@ -495,7 +495,7 @@ namespace KlayGE
 
 	ShaderObjectPtr D3D10ShaderObject::Clone(RenderEffect& effect)
 	{
-		D3D10ShaderObjectPtr ret(new D3D10ShaderObject);
+		D3D10ShaderObjectPtr ret = MakeSharedPtr<D3D10ShaderObject>();
 		ret->is_validate_ = is_validate_;
 		ret->is_shader_validate_ = is_shader_validate_;
 		ret->vertex_shader_ = vertex_shader_;

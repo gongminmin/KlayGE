@@ -54,92 +54,92 @@ namespace KlayGE
 	TexturePtr D3D9RenderFactory::MakeTexture1D(uint32_t width, uint16_t numMipMaps,
 			ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 	{
-		D3D9TexturePtr ret(new D3D9Texture1D(width, numMipMaps, format, access_hint, init_data));
+		D3D9TexturePtr ret = MakeSharedPtr<D3D9Texture1D>(width, numMipMaps, format, access_hint, init_data);
 		resource_pool_.push_back(ret);
 		return ret;
 	}
 	TexturePtr D3D9RenderFactory::MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps,
 			ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 	{
-		D3D9TexturePtr ret(new D3D9Texture2D(width, height, numMipMaps, format, access_hint, init_data));
+		D3D9TexturePtr ret = MakeSharedPtr<D3D9Texture2D>(width, height, numMipMaps, format, access_hint, init_data);
 		resource_pool_.push_back(ret);
 		return ret;
 	}
 	TexturePtr D3D9RenderFactory::MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth,
 			uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 	{
-		D3D9TexturePtr ret(new D3D9Texture3D(width, height, depth, numMipMaps, format, access_hint, init_data));
+		D3D9TexturePtr ret = MakeSharedPtr<D3D9Texture3D>(width, height, depth, numMipMaps, format, access_hint, init_data);
 		resource_pool_.push_back(ret);
 		return ret;
 	}
 	TexturePtr D3D9RenderFactory::MakeTextureCube(uint32_t size, uint16_t numMipMaps,
 		ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 	{
-		D3D9TexturePtr ret(new D3D9TextureCube(size, numMipMaps, format, access_hint, init_data));
+		D3D9TexturePtr ret = MakeSharedPtr<D3D9TextureCube>(size, numMipMaps, format, access_hint, init_data);
 		resource_pool_.push_back(ret);
 		return ret;
 	}
 
 	FrameBufferPtr D3D9RenderFactory::MakeFrameBuffer()
 	{
-		D3D9FrameBufferPtr ret(new D3D9FrameBuffer);
+		D3D9FrameBufferPtr ret = MakeSharedPtr<D3D9FrameBuffer>();
 		resource_pool_.push_back(ret);
 		return ret;
 	}
 
 	RenderLayoutPtr D3D9RenderFactory::MakeRenderLayout()
 	{
-		return RenderLayoutPtr(new D3D9RenderLayout);
+		return MakeSharedPtr<D3D9RenderLayout>();
 	}
 
 	GraphicsBufferPtr D3D9RenderFactory::MakeVertexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data)
 	{
-		D3D9VertexBufferPtr ret(new D3D9VertexBuffer(usage, access_hint, init_data));
+		D3D9VertexBufferPtr ret = MakeSharedPtr<D3D9VertexBuffer>(usage, access_hint, init_data);
 		resource_pool_.push_back(ret);
 		return ret;
 	}
 
 	GraphicsBufferPtr D3D9RenderFactory::MakeIndexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data)
 	{
-		D3D9IndexBufferPtr ret(new D3D9IndexBuffer(usage, access_hint, init_data));
+		D3D9IndexBufferPtr ret = MakeSharedPtr<D3D9IndexBuffer>(usage, access_hint, init_data);
 		resource_pool_.push_back(ret);
 		return ret;
 	}
 
 	QueryPtr D3D9RenderFactory::MakeOcclusionQuery()
 	{
-		return QueryPtr(new D3D9OcclusionQuery);
+		return MakeSharedPtr<D3D9OcclusionQuery>();
 	}
 
 	QueryPtr D3D9RenderFactory::MakeConditionalRender()
 	{
-		return QueryPtr(new D3D9ConditionalRender);
+		return MakeSharedPtr<D3D9ConditionalRender>();
 	}
 
 	RenderViewPtr D3D9RenderFactory::Make1DRenderView(Texture& texture, int level)
 	{
-		D3D9RenderViewPtr ret(new D3D9Texture1DRenderView(texture, level));
+		D3D9RenderViewPtr ret = MakeSharedPtr<D3D9Texture1DRenderView>(texture, level);
 		resource_pool_.push_back(ret);
 		return ret;
 	}
 
 	RenderViewPtr D3D9RenderFactory::Make2DRenderView(Texture& texture, int level)
 	{
-		D3D9RenderViewPtr ret(new D3D9Texture2DRenderView(texture, level));
+		D3D9RenderViewPtr ret = MakeSharedPtr<D3D9Texture2DRenderView>(texture, level);
 		resource_pool_.push_back(ret);
 		return ret;
 	}
 
 	RenderViewPtr D3D9RenderFactory::Make2DRenderView(Texture& texture, Texture::CubeFaces face, int level)
 	{
-		D3D9RenderViewPtr ret(new D3D9TextureCubeRenderView(texture, face, level));
+		D3D9RenderViewPtr ret = MakeSharedPtr<D3D9TextureCubeRenderView>(texture, face, level);
 		resource_pool_.push_back(ret);
 		return ret;
 	}
 
 	RenderViewPtr D3D9RenderFactory::Make3DRenderView(Texture& texture, uint32_t slice, int level)
 	{
-		D3D9RenderViewPtr ret(new D3D9Texture3DRenderView(texture, slice, level));
+		D3D9RenderViewPtr ret = MakeSharedPtr<D3D9Texture3DRenderView>(texture, slice, level);
 		resource_pool_.push_back(ret);
 		return ret;
 	}
@@ -147,7 +147,7 @@ namespace KlayGE
 	RenderViewPtr D3D9RenderFactory::MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer,
 		uint32_t width, uint32_t height, ElementFormat pf)
 	{
-		D3D9RenderViewPtr ret(new D3D9GraphicsBufferRenderView(gbuffer, width, height, pf));
+		D3D9RenderViewPtr ret = MakeSharedPtr<D3D9GraphicsBufferRenderView>(gbuffer, width, height, pf);
 		resource_pool_.push_back(ret);
 		return ret;
 	}
@@ -155,15 +155,14 @@ namespace KlayGE
 	RenderViewPtr D3D9RenderFactory::MakeDepthStencilRenderView(uint32_t width, uint32_t height,
 		ElementFormat pf, uint32_t multi_sample)
 	{
-		D3D9RenderViewPtr ret(new D3D9DepthStencilRenderView(width, height, pf, multi_sample));
+		D3D9RenderViewPtr ret = MakeSharedPtr<D3D9DepthStencilRenderView>(width, height, pf, multi_sample);
 		resource_pool_.push_back(ret);
 		return ret;
 	}
 
 	ShaderObjectPtr D3D9RenderFactory::MakeShaderObject()
 	{
-		D3D9ShaderObjectPtr ret(new D3D9ShaderObject);
-		return ret;
+		return MakeSharedPtr<D3D9ShaderObject>();
 	}
 
 	void D3D9RenderFactory::OnLostDevice()
@@ -208,27 +207,27 @@ namespace KlayGE
 
 	RasterizerStateObjectPtr D3D9RenderFactory::DoMakeRasterizerStateObject(RasterizerStateDesc const & desc)
 	{
-		return RasterizerStateObjectPtr(new D3D9RasterizerStateObject(desc));
+		return MakeSharedPtr<D3D9RasterizerStateObject>(desc);
 	}
 	
 	DepthStencilStateObjectPtr D3D9RenderFactory::DoMakeDepthStencilStateObject(DepthStencilStateDesc const & desc)
 	{
-		return DepthStencilStateObjectPtr(new D3D9DepthStencilStateObject(desc));
+		return MakeSharedPtr<D3D9DepthStencilStateObject>(desc);
 	}
 
 	BlendStateObjectPtr D3D9RenderFactory::DoMakeBlendStateObject(BlendStateDesc const & desc)
 	{
-		return BlendStateObjectPtr(new D3D9BlendStateObject(desc));
+		return MakeSharedPtr<D3D9BlendStateObject>(desc);
 	}
 
 	SamplerStateObjectPtr D3D9RenderFactory::DoMakeSamplerStateObject(SamplerStateDesc const & desc)
 	{
-		return SamplerStateObjectPtr(new D3D9SamplerStateObject(desc));
+		return MakeSharedPtr<D3D9SamplerStateObject>(desc);
 	}
 
 	RenderFactoryPtr const & D3D9RenderFactoryInstance()
 	{
-		static RenderFactoryPtr rf(new D3D9RenderFactory());
+		static RenderFactoryPtr rf = MakeSharedPtr<D3D9RenderFactory>();
 		return rf;
 	}
 }

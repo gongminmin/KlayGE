@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Input.hpp>
 
 #include <string>
@@ -36,7 +37,7 @@ namespace KlayGE
 
 	InputFactoryPtr InputFactory::NullObject()
 	{
-		static InputFactoryPtr obj(new NullInputFactory);
+		static InputFactoryPtr obj = MakeSharedPtr<NullInputFactory>();
 		return obj;
 	}
 }

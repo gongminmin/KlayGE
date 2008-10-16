@@ -17,6 +17,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/MapVector.hpp>
 
 #include <vector>
@@ -54,7 +55,7 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	InputEnginePtr InputEngine::NullObject()
 	{
-		static InputEnginePtr obj(new NullInputEngine);
+		static InputEnginePtr obj = MakeSharedPtr<NullInputEngine>();
 		return obj;
 	}
 

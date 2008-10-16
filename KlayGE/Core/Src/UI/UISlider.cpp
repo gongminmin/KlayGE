@@ -63,14 +63,14 @@ namespace KlayGE
 			Element.TextureColor().States[UICS_Focus] = Color(1, 1, 1, 200.0f / 255);
 			Element.TextureColor().States[UICS_Disabled] = Color(1, 1, 1, 70.0f / 255);
 
-			elements_.push_back(UIElementPtr(new UIElement(Element)));
+			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
 
 		// Button
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_Slider, 1));
 
-			elements_.push_back(UIElementPtr(new UIElement(Element)));
+			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
 
 		key_down_event_.connect(boost::bind(&UISlider::KeyDownHandler, this, _1, _2));

@@ -138,7 +138,7 @@ namespace KlayGE
 	public:
 		RenderVariablePtr Clone()
 		{
-			RenderVariablePtr ret(new RenderVariableConcrete<T>);
+			RenderVariablePtr ret = MakeSharedPtr<RenderVariableConcrete<T> >();
 			T val;
 			this->Value(val);
 			*ret = val;

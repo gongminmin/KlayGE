@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/COMPtr.hpp>
 
@@ -77,7 +78,7 @@ namespace KlayGE
 					current_adapter_ = adapter_no;
 				}
 
-				D3D10AdapterPtr adapter(new D3D10Adapter(adapter_no, MakeCOMPtr(dxgi_adapter)));
+				D3D10AdapterPtr adapter = MakeSharedPtr<D3D10Adapter>(adapter_no, MakeCOMPtr(dxgi_adapter));
 				adapters_.push_back(adapter);
 			}
 

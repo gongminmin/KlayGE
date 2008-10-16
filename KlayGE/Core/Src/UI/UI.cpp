@@ -247,7 +247,7 @@ namespace KlayGE
 
 	UIDialogPtr UIManager::MakeDialog(TexturePtr control_tex)
 	{
-		UIDialogPtr ret(new UIDialog(control_tex));
+		UIDialogPtr ret = MakeSharedPtr<UIDialog>(control_tex);
 		this->RegisterDialog(ret);
 		return ret;
 	}
@@ -350,7 +350,7 @@ namespace KlayGE
 		{
 			if (!checked_pointer_cast<UIRectRenderable>(rect.second)->Empty())
 			{
-				boost::shared_ptr<UIRectObject> ui_rect_obj(new UIRectObject(rect.second, SceneObject::SOA_ShortAge));
+				boost::shared_ptr<UIRectObject> ui_rect_obj = MakeSharedPtr<UIRectObject>(rect.second, SceneObject::SOA_ShortAge);
 				ui_rect_obj->AddToSceneManager();
 			}
 		}
@@ -382,7 +382,7 @@ namespace KlayGE
 		boost::shared_ptr<UIRectRenderable> renderable;
 		if (rects_.find(texture) == rects_.end())
 		{
-			renderable.reset(new UIRectRenderable(texture, effect_));
+			renderable = MakeSharedPtr<UIRectRenderable>(texture, effect_);
 			rects_[texture] = renderable;
 		}
 		else

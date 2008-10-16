@@ -170,8 +170,8 @@ namespace KlayGE
 	void D3D10RenderEngine::CreateRenderWindow(std::string const & name,
 		RenderSettings const & settings)
 	{
-		D3D10RenderWindowPtr win(new D3D10RenderWindow(gi_factory_, this->ActiveAdapter(),
-			name, settings));
+		D3D10RenderWindowPtr win = MakeSharedPtr<D3D10RenderWindow>(gi_factory_, this->ActiveAdapter(),
+			name, settings);
 		default_frame_buffer_ = win;
 
 		this->BindFrameBuffer(win);

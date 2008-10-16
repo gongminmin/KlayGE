@@ -17,6 +17,7 @@
 #include <KlayGE/config/auto_link.hpp>
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Camera.hpp>
 
 namespace KlayGE
@@ -24,13 +25,13 @@ namespace KlayGE
 	struct Viewport
 	{
 		Viewport()
-			: camera(new Camera)
+			: camera(MakeSharedPtr<Camera>())
 		{
 		}
 		Viewport(int _left, int _top, int _width, int _height)
 			: left(_left), top(_top),
 				width(_width), height(_height),
-				camera(new Camera)
+				camera(MakeSharedPtr<Camera>())
 		{
 		}
 

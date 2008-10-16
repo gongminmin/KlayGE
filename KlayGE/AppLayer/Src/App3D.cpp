@@ -75,7 +75,7 @@ namespace KlayGE
 	WindowPtr App3DFramework::MakeWindow(std::string const & name, int32_t left, int32_t top,
 			uint32_t width, uint32_t height)
 	{
-		return WindowPtr(new Window(name, left, top, width, height));
+		return MakeSharedPtr<Window>(name, left, top, width, height);
 	}
 
 	void App3DFramework::Run()

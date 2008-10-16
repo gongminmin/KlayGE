@@ -274,7 +274,7 @@ namespace KlayGE
 			// Make certain the array is this large
 			for (uint32_t i = static_cast<uint32_t>(elements_.size()); i <= iElement; ++ i)
 			{
-				elements_.push_back(UIElementPtr(new UIElement));
+				elements_.push_back(MakeSharedPtr<UIElement>());
 			}
 
 			// Update the data

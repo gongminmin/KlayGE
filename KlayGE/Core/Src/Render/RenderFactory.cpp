@@ -157,7 +157,7 @@ namespace KlayGE
 
 	RenderFactoryPtr RenderFactory::NullObject()
 	{
-		static RenderFactoryPtr obj(new NullRenderFactory);
+		static RenderFactoryPtr obj = MakeSharedPtr<NullRenderFactory>();
 		return obj;
 	}
 
@@ -168,7 +168,7 @@ namespace KlayGE
 		BOOST_AUTO(fiter, font_pool_.find(std::make_pair(fontName, fontHeight)));
 		if (fiter == font_pool_.end())
 		{
-			ret.reset(new Font(fontName, fontHeight, flags));
+			ret = MakeSharedPtr<Font>(fontName, fontHeight, flags);
 			font_pool_.insert(std::make_pair(std::make_pair(fontName, fontHeight), ret));
 		}
 		else
@@ -186,7 +186,7 @@ namespace KlayGE
 		BOOST_AUTO(iter, effect_pool_.find(effectName));
 		if (iter == effect_pool_.end())
 		{
-			prototype.reset(new RenderEffect);
+			prototype = MakeSharedPtr<RenderEffect>();
 			prototype->Load(ResLoader::Instance().Load(effectName));
 			effect_pool_[effectName].push_back(prototype);
 		}

@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/ShowFactory.hpp>
 
 #include <KlayGE/DShow/DShow.hpp>
@@ -20,7 +21,7 @@ namespace KlayGE
 {
 	ShowFactoryPtr const & DShowFactoryInstance()
 	{
-		static ShowFactoryPtr sf(new ConcreteShowFactory<DShowEngine>(L"DirectShow Show Factory"));
+		static ShowFactoryPtr sf = MakeSharedPtr<ConcreteShowFactory<DShowEngine> >(L"DirectShow Show Factory");
 		return sf;
 	}
 }

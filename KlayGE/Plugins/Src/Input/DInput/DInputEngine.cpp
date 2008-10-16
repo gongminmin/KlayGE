@@ -12,6 +12,7 @@
 
 #define INITGUID
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/COMPtr.hpp>
 #include <KlayGE/Context.hpp>
@@ -93,15 +94,15 @@ namespace KlayGE
 		switch (GET_DIDEVICE_TYPE(didi->dwDevType))
 		{
 		case DI8DEVTYPE_KEYBOARD:
-			device = InputDevicePtr(new DInputKeyboard(didi->guidInstance, inputEng));
+			device = MakeSharedPtr<DInputKeyboard>(didi->guidInstance, inputEng);
 			break;
 
 		case DI8DEVTYPE_MOUSE:
-			device = InputDevicePtr(new DInputMouse(didi->guidInstance, inputEng));
+			device = MakeSharedPtr<DInputMouse>(didi->guidInstance, inputEng);
 			break;
 
 		case DI8DEVTYPE_JOYSTICK:
-			device = InputDevicePtr(new DInputJoystick(didi->guidInstance, inputEng));
+			device = MakeSharedPtr<DInputJoystick>(didi->guidInstance, inputEng);
 			break;
 		}
 

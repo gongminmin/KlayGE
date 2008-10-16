@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Show.hpp>
 
 #include <string>
@@ -36,7 +37,7 @@ namespace KlayGE
 
 	ShowFactoryPtr ShowFactory::NullObject()
 	{
-		static ShowFactoryPtr obj(new NullShowFactory);
+		static ShowFactoryPtr obj = MakeSharedPtr<NullShowFactory>();
 		return obj;
 	}
 }

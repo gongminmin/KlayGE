@@ -13,6 +13,7 @@
 #ifndef _STREAMS_HPP
 #define _STREAMS_HPP
 
+#include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/atomic.hpp>
 
 #include <fstream>
@@ -75,7 +76,7 @@ namespace KlayGE
 		{
 		}
 
-		void Attach(boost::shared_ptr<std::istream> const & is);
+		void Attach(ResIdentifierPtr const & is);
 
 		STDMETHOD(Read)(void* data, uint32_t size, uint32_t* processedSize);
 		STDMETHOD(Seek)(int64_t offset, uint32_t seekOrigin, uint64_t* newPosition);
@@ -85,7 +86,7 @@ namespace KlayGE
 	private:
 		atomic<int32_t> ref_count_;
 
-		boost::shared_ptr<std::istream> is_;
+		ResIdentifierPtr is_;
 		uint64_t stream_size_;
 	};
 

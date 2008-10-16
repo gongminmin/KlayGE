@@ -11,6 +11,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/RenderView.hpp>
 
 namespace KlayGE
@@ -53,7 +54,7 @@ namespace KlayGE
 
 	RenderViewPtr RenderView::NullObject()
 	{
-		static RenderViewPtr obj(new NullRenderView);
+		static RenderViewPtr obj = MakeSharedPtr<NullRenderView>();
 		return obj;
 	}
 

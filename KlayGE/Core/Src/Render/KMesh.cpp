@@ -267,7 +267,7 @@ namespace KlayGE
 			joints.push_back(joint);
 		}
 
-		boost::shared_ptr<KeyFramesType> kfs(new KeyFramesType);
+		boost::shared_ptr<KeyFramesType> kfs = MakeSharedPtr<KeyFramesType>();
 		for (uint8_t i = 0; i < header.num_key_frames; ++ i)
 		{
 			std::string name = ReadShortString(*file);

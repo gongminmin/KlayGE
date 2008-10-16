@@ -67,14 +67,14 @@ namespace KlayGE
 			Element.TextureColor().States[UICS_Focus] = Color(1, 1, 1, 200.0f / 255);
 			Element.TextureColor().States[UICS_Pressed] = Color(1, 1, 1, 1);
 
-			elements_.push_back(UIElementPtr(new UIElement(Element)));
+			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
 
 		// Check
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_RadioButton, 1));
 
-			elements_.push_back(UIElementPtr(new UIElement(Element)));
+			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
 
 		key_down_event_.connect(boost::bind(&UIRadioButton::KeyDownHandler, this, _1, _2));
