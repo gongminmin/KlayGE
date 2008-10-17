@@ -30,7 +30,7 @@ namespace KlayGE
 		AF_Unknown,
 	};
 
-	class AudioDataSource
+	class KLAYGE_CORE_API AudioDataSource
 	{
 	public:
 		static AudioDataSourcePtr NullObject();

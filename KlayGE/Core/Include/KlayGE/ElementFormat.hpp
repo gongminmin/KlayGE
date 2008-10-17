@@ -23,9 +23,6 @@
 #ifndef _ELEMENTFORMAT_HPP
 #define _ELEMENTFORMAT_HPP
 
-#define KLAYGE_LIB_NAME KlayGE_Core
-#include <KlayGE/config/auto_link.hpp>
-
 #include <vector>
 #include <boost/assert.hpp>
 

@@ -13,9 +13,6 @@
 #ifndef _OGLMAPPING_HPP
 #define _OGLMAPPING_HPP
 
-#define KLAYGE_LIB_NAME KlayGE_RenderEngine_OpenGL
-#include <KlayGE/config/auto_link.hpp>
-
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderStateObject.hpp>
 #include <KlayGE/RenderLayout.hpp>

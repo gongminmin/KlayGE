@@ -13,9 +13,6 @@
 #ifndef _DSHOW_HPP
 #define _DSHOW_HPP
 
-#define KLAYGE_LIB_NAME KlayGE_ShowEngine_DShow
-#include <KlayGE/config/auto_link.hpp>
-
 #include <windows.h>
 #include <control.h>
 #include <d3d9.h>

@@ -16,14 +16,16 @@
 #ifndef _QUERY_HPP
 #define _QUERY_HPP
 
+#ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
 
 #include <KlayGE/PreDeclare.hpp>
 
 namespace KlayGE
 {
-	class Query
+	class KLAYGE_CORE_API Query
 	{
 	public:
 		virtual ~Query()
@@ -36,7 +38,7 @@ namespace KlayGE
 		virtual void End() = 0;
 	};
 
-	class OcclusionQuery : public Query
+	class KLAYGE_CORE_API OcclusionQuery : public Query
 	{
 	public:
 		virtual ~OcclusionQuery()
@@ -46,7 +48,7 @@ namespace KlayGE
 		virtual uint64_t SamplesPassed() = 0;
 	};
 
-	class ConditionalRender : public Query
+	class KLAYGE_CORE_API ConditionalRender : public Query
 	{
 	public:
 		virtual ~ConditionalRender()

@@ -13,12 +13,7 @@
 #ifndef _RENDERDEVICECAPS_HPP
 #define _RENDERDEVICECAPS_HPP
 
-#define KLAYGE_LIB_NAME KlayGE_Core
-#include <KlayGE/config/auto_link.hpp>
-
 #include <KlayGE/PreDeclare.hpp>
-
-#include <vector>
 
 namespace KlayGE
 {

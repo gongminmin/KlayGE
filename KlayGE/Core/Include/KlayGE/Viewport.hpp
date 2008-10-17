@@ -13,8 +13,10 @@
 #ifndef _VIEWPORT_HPP
 #define _VIEWPORT_HPP
 
+#ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Util.hpp>
@@ -22,7 +24,7 @@
 
 namespace KlayGE
 {
-	struct Viewport
+	struct KLAYGE_CORE_API Viewport
 	{
 		Viewport()
 			: camera(MakeSharedPtr<Camera>())

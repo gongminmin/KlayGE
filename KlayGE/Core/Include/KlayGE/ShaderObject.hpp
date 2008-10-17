@@ -35,7 +35,7 @@ namespace KlayGE
 		}
 	};
 
-	class ShaderObject
+	class KLAYGE_CORE_API ShaderObject
 	{
 	public:
 		enum ShaderType

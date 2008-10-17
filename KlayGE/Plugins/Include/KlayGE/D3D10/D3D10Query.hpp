@@ -13,9 +13,6 @@
 #ifndef _D3D10OCCLUSIONQUERY_HPP
 #define _D3D10OCCLUSIONQUERY_HPP
 
-#define KLAYGE_LIB_NAME KlayGE_RenderEngine_D3D10
-#include <KlayGE/config/auto_link.hpp>
-
 #include <KlayGE/Query.hpp>
 
 namespace KlayGE

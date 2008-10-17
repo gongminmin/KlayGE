@@ -23,6 +23,7 @@
 #include <KlayGE/ShowFactory.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
+#include <KlayGE/DllLoader.hpp>
 
 #include <fstream>
 #ifdef KLAYGE_COMPILER_MSVC
@@ -33,26 +34,25 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
+#include <boost/filesystem.hpp>
 
 #include <KlayGE/Context.hpp>
 
-#include <KlayGE/D3D9/D3D9RenderFactory.hpp>
-#include <KlayGE/D3D10/D3D10RenderFactory.hpp>
-#include <KlayGE/OpenGL/OGLRenderFactory.hpp>
-
-#include <KlayGE/OpenAL/OALAudioFactory.hpp>
-#include <KlayGE/DSound/DSAudioFactory.hpp>
-
-#include <KlayGE/OCTree/OCTree.hpp>
-
-#include <KlayGE/DInput/DInputFactory.hpp>
-
-#ifdef KLAYGE_COMPILER_MSVC
-#include <KlayGE/DShow/DShowFactory.hpp>
-#endif
-
 namespace KlayGE
 {
+	DllLoader render_loader;
+	DllLoader audio_loader;
+	DllLoader input_loader;
+	DllLoader show_loader;
+	DllLoader sm_loader;
+
+	typedef std::string const & (*NameFunc)();
+	typedef RenderFactoryPtr const & (*RenderFactoryInstanceFunc)();
+	typedef AudioFactoryPtr const & (*AudioFactoryInstanceFunc)();
+	typedef InputFactoryPtr const & (*InputFactoryInstanceFunc)();
+	typedef ShowFactoryPtr const & (*ShowFactoryInstanceFunc)();
+	typedef SceneManagerPtr const & (*SceneManagerFactoryInstanceFunc)(boost::program_options::variables_map const & vm);
+
 	Context::Context()
 	{
 #ifdef KLAYGE_COMPILER_MSVC
@@ -96,10 +96,11 @@ namespace KlayGE
 		std::string sf_name;
 		std::string sm_name;
 
+		boost::program_options::variables_map vm;
+
 		std::ifstream cfg_fs(ResLoader::Instance().Locate(cfg_file).c_str());
 		if (cfg_fs)
 		{
-			boost::program_options::variables_map vm;
 			boost::program_options::store(boost::program_options::parse_config_file(cfg_fs, desc), vm);
 			boost::program_options::notify(vm);
 
@@ -158,52 +159,109 @@ namespace KlayGE
 		}
 
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
-		if ("D3D10" == rf_name)
+		std::string render_path = ResLoader::Instance().Locate("bin/Render");
+		for (boost::filesystem::directory_iterator iter(render_path); iter != boost::filesystem::directory_iterator(); ++ iter)
 		{
-			Context::Instance().RenderFactoryInstance(D3D10RenderFactoryInstance());
-		}
-		if ("D3D9" == rf_name)
-		{
-			Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
-		}
-#endif
-		if ("OpenGL" == rf_name)
-		{
-			Context::Instance().RenderFactoryInstance(OGLRenderFactoryInstance());
+			std::string fn = render_path + "/" + iter->path().filename();
+			if (".dll" == fn.substr(fn.length() - 4))
+			{
+				render_loader.Load(fn);
+
+				NameFunc name_func = (NameFunc)render_loader.GetProcAddress("Name");
+				if ((name_func != NULL) && (rf_name == name_func()))
+				{
+					RenderFactoryInstanceFunc rfi = (RenderFactoryInstanceFunc)render_loader.GetProcAddress("RenderFactoryInstance");
+					Context::Instance().RenderFactoryInstance(rfi());
+				}
+				else
+				{
+					render_loader.Free();
+				}
+			}
 		}
 
-		if ("OpenAL" == rf_name)
+		std::string audio_path = ResLoader::Instance().Locate("bin/Audio");
+		for (boost::filesystem::directory_iterator iter(audio_path); iter != boost::filesystem::directory_iterator(); ++ iter)
 		{
-			Context::Instance().AudioFactoryInstance(OALAudioFactoryInstance());
-		}
-#ifdef KLAYGE_PLATFORM_WINDOWS
-		if ("DSound" == rf_name)
-		{
-			Context::Instance().AudioFactoryInstance(DSAudioFactoryInstance());
-		}
-#endif
+			std::string fn = audio_path + "/" + iter->path().filename();
+			if (".dll" == fn.substr(fn.length() - 4))
+			{
+				audio_loader.Load(fn);
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
-		if ("DInput" == if_name)
-		{
-			Context::Instance().InputFactoryInstance(DInputFactoryInstance());
+				NameFunc name_func = (NameFunc)audio_loader.GetProcAddress("Name");
+				if ((name_func != NULL) && (af_name == name_func()))
+				{
+					AudioFactoryInstanceFunc afi = (AudioFactoryInstanceFunc)audio_loader.GetProcAddress("AudioFactoryInstance");
+					Context::Instance().AudioFactoryInstance(afi());
+				}
+				else
+				{
+					audio_loader.Free();
+				}
+			}
 		}
-#endif
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
-#ifdef KLAYGE_COMPILER_MSVC
-		if ("DShow" == sf_name)
+		std::string input_path = ResLoader::Instance().Locate("bin/Input");
+		for (boost::filesystem::directory_iterator iter(input_path); iter != boost::filesystem::directory_iterator(); ++ iter)
 		{
-			Context::Instance().ShowFactoryInstance(DShowFactoryInstance());
+			std::string fn = input_path + "/" + iter->path().filename();
+			if (".dll" == fn.substr(fn.length() - 4))
+			{
+				input_loader.Load(fn);
+
+				NameFunc name_func = (NameFunc)input_loader.GetProcAddress("Name");
+				if ((name_func != NULL) && (if_name == name_func()))
+				{
+					InputFactoryInstanceFunc ifi = (InputFactoryInstanceFunc)input_loader.GetProcAddress("InputFactoryInstance");
+					Context::Instance().InputFactoryInstance(ifi());
+				}
+				else
+				{
+					input_loader.Free();
+				}
+			}
 		}
-#endif
-#endif
 
-		if ("Octree" == sm_name)
+		std::string show_path = ResLoader::Instance().Locate("bin/Show");
+		for (boost::filesystem::directory_iterator iter(show_path); iter != boost::filesystem::directory_iterator(); ++ iter)
 		{
-			SceneManagerPtr sm = MakeSharedPtr<OCTree>(octree_depth);
-			Context::Instance().SceneManagerInstance(sm);
+			std::string fn = show_path + "/" + iter->path().filename();
+			if (".dll" == fn.substr(fn.length() - 4))
+			{
+				show_loader.Load(fn);
+
+				NameFunc name_func = (NameFunc)show_loader.GetProcAddress("Name");
+				if ((name_func != NULL) && (sf_name == name_func()))
+				{
+					ShowFactoryInstanceFunc sfi = (ShowFactoryInstanceFunc)show_loader.GetProcAddress("ShowFactoryInstance");
+					Context::Instance().ShowFactoryInstance(sfi());
+				}
+				else
+				{
+					show_loader.Free();
+				}
+			}
+		}
+
+		std::string sm_path = ResLoader::Instance().Locate("bin/Scene");
+		for (boost::filesystem::directory_iterator iter(show_path); iter != boost::filesystem::directory_iterator(); ++ iter)
+		{
+			std::string fn = show_path + "/" + iter->path().filename();
+			if (".dll" == fn.substr(fn.length() - 4))
+			{
+				sm_loader.Load(fn);
+
+				NameFunc name_func = (NameFunc)sm_loader.GetProcAddress("Name");
+				if ((name_func != NULL) && (sm_name == name_func()))
+				{
+					SceneManagerFactoryInstanceFunc smi = (SceneManagerFactoryInstanceFunc)sm_loader.GetProcAddress("SceneManagerFactoryInstance");
+					Context::Instance().SceneManagerInstance(smi(vm));
+				}
+				else
+				{
+					sm_loader.Free();
+				}
+			}
 		}
 
 		RenderSettings settings;

@@ -19,8 +19,10 @@
 #ifndef _INPUT_HPP
 #define _INPUT_HPP
 
+#ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
 
 #include <KlayGE/PreDeclare.hpp>
 
@@ -260,7 +262,7 @@ namespace KlayGE
 
 	// 输入动作格式
 	/////////////////////////////////////////////////////////////////////////////////
-	class InputActionMap
+	class KLAYGE_CORE_API InputActionMap
 	{
 	public:
 		void AddAction(InputActionDefine const & action_define);
@@ -290,7 +292,7 @@ namespace KlayGE
 
 	// 输入引擎
 	/////////////////////////////////////////////////////////////////////////////////
-	class InputEngine
+	class KLAYGE_CORE_API InputEngine
 	{
 		typedef std::vector<std::pair<InputActionMap, action_handler_t> > action_handlers_t;
 
@@ -322,7 +324,7 @@ namespace KlayGE
 		float elapsed_time_;
 	};
 
-	class InputDevice
+	class KLAYGE_CORE_API InputDevice
 	{
 	public:
 		virtual ~InputDevice();
@@ -338,7 +340,7 @@ namespace KlayGE
 		action_maps_t actionMaps_;
 	};
 
-	class InputKeyboard : public InputDevice
+	class KLAYGE_CORE_API InputKeyboard : public InputDevice
 	{
 	public:
 		InputKeyboard();
@@ -359,7 +361,7 @@ namespace KlayGE
 		bool index_;
 	};
 
-	class InputMouse : public InputDevice
+	class KLAYGE_CORE_API InputMouse : public InputDevice
 	{
 	public:
 		InputMouse();
@@ -392,7 +394,7 @@ namespace KlayGE
 		bool index_;
 	};
 
-	class InputJoystick : public InputDevice
+	class KLAYGE_CORE_API InputJoystick : public InputDevice
 	{
 	public:
 		InputJoystick();

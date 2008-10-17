@@ -30,9 +30,6 @@
 #ifndef _OGLRENDERENGINE_HPP
 #define _OGLRENDERENGINE_HPP
 
-#define KLAYGE_LIB_NAME KlayGE_RenderEngine_OpenGL
-#include <KlayGE/config/auto_link.hpp>
-
 #include <KlayGE/Vector.hpp>
 
 #include <vector>

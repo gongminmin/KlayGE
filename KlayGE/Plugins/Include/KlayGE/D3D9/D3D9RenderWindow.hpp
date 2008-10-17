@@ -16,9 +16,6 @@
 #ifndef _D3D9RENDERWINDOW_HPP
 #define _D3D9RENDERWINDOW_HPP
 
-#define KLAYGE_LIB_NAME KlayGE_RenderEngine_D3D9
-#include <KlayGE/config/auto_link.hpp>
-
 #include <d3d9.h>
 #include <boost/smart_ptr.hpp>
 #include <KlayGE/D3D9/D3D9FrameBuffer.hpp>

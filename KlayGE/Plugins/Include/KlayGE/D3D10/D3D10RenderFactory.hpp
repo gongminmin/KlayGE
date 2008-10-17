@@ -13,12 +13,20 @@
 #ifndef _D3D10RENDERFACTORY_HPP
 #define _D3D10RENDERFACTORY_HPP
 
-#define KLAYGE_LIB_NAME KlayGE_RenderEngine_D3D10
-#include <KlayGE/config/auto_link.hpp>
+#ifdef KLAYGE_HAS_DECLSPEC
+	#ifdef KLAYGE_D3D10_RE_SOURCE				// Build dll
+		#define KLAYGE_D3D10_RE_API __declspec(dllexport)
+	#else										// Use dll
+		#define KLAYGE_D3D10_RE_API __declspec(dllimport)
+	#endif
+#else
+	#define KLAYGE_D3D10_RE_API
+#endif // KLAYGE_HAS_DECLSPEC
 
-namespace KlayGE
+extern "C"
 {
-	RenderFactoryPtr const & D3D10RenderFactoryInstance();
+	KLAYGE_D3D10_RE_API KlayGE::RenderFactoryPtr const & RenderFactoryInstance();
+	KLAYGE_D3D10_RE_API std::string const & Name();
 }
 
 #endif			// _D3D10RENDERFACTORY_HPP

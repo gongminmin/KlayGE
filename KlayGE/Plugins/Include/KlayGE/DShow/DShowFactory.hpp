@@ -13,12 +13,20 @@
 #ifndef _DSHOWFACTORY_HPP
 #define _DSHOWFACTORY_HPP
 
-#define KLAYGE_LIB_NAME KlayGE_ShowEngine_DShow
-#include <KlayGE/config/auto_link.hpp>
+#ifdef KLAYGE_HAS_DECLSPEC
+	#ifdef KLAYGE_DSHOW_SE_SOURCE				// Build dll
+		#define KLAYGE_DSHOW_SE_API __declspec(dllexport)
+	#else										// Use dll
+		#define KLAYGE_DSHOW_SE_API __declspec(dllimport)
+	#endif
+#else
+	#define KLAYGE_DSHOW_SE_API
+#endif // KLAYGE_HAS_DECLSPEC
 
-namespace KlayGE
+extern "C"
 {
-	ShowFactoryPtr const & DShowFactoryInstance();
+	KLAYGE_DSHOW_SE_API KlayGE::ShowFactoryPtr const & ShowFactoryInstance();
+	KLAYGE_DSHOW_SE_API std::string const & Name();
 }
 
 #endif			// _DSHOWFACTORY_HPP

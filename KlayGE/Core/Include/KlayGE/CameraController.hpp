@@ -19,8 +19,10 @@
 #ifndef _CAMERACONTROLLER_HPP
 #define _CAMERACONTROLLER_HPP
 
+#ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
 
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Camera.hpp>
@@ -31,7 +33,7 @@ namespace KlayGE
 {
 	// ÉãÏñ»ú¿ØÖÆÆ÷
 	//////////////////////////////////////////////////////////////////////////////////
-	class CameraController
+	class KLAYGE_CORE_API CameraController
 	{
 	public:
 		CameraController();
@@ -49,7 +51,7 @@ namespace KlayGE
 		Camera*		camera_;
 	};
 
-	class FirstPersonCameraController : public CameraController
+	class KLAYGE_CORE_API FirstPersonCameraController : public CameraController
 	{
 	public:
 		FirstPersonCameraController();

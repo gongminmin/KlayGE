@@ -212,6 +212,7 @@ namespace
 
 int main()
 {
+	ResLoader::Instance().AddPath("../../../");
 	ResLoader::Instance().AddPath("../../media/Common");
 	ResLoader::Instance().AddPath("../../media/AsciiArts");
 

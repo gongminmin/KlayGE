@@ -14,8 +14,10 @@
 #ifndef _UI_HPP
 #define _UI_HPP
 
+#ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Font.hpp>
@@ -60,7 +62,7 @@ namespace KlayGE
 		UICT_Num_Control_Types
 	};
 
-	struct UIStatesColor
+	struct KLAYGE_CORE_API UIStatesColor
 	{
 		void Init(Color const & default_color,
 			Color const & disabled_color = Color(0.5f, 0.5f, 0.5f, 0.78f),
@@ -72,7 +74,7 @@ namespace KlayGE
 		Color Current;
 	};
 
-	class UIElement
+	class KLAYGE_CORE_API UIElement
 	{
 	public:
 		void SetTexture(uint32_t tex_index, Rect_T<int32_t> const & tex_rect, Color const & default_texture_color = Color(1, 1, 1, 1));
@@ -131,7 +133,7 @@ namespace KlayGE
 		UIStatesColor font_color_;
 	};
 
-	class UIControl : public boost::enable_shared_from_this<UIControl>
+	class KLAYGE_CORE_API UIControl : public boost::enable_shared_from_this<UIControl>
 	{
 	public:
 		UIControl(uint32_t type, UIDialogPtr dialog)
@@ -400,7 +402,7 @@ namespace KlayGE
 		Rect_T<int32_t> bounding_box_;		// Rectangle defining the active region of the control
 	};
 
-	class UIDialog
+	class KLAYGE_CORE_API UIDialog
 	{
 		friend class UIManager;
 
@@ -573,7 +575,7 @@ namespace KlayGE
 		float depth_base_;
 	};
 
-	class UIManager
+	class KLAYGE_CORE_API UIManager
 	{
 	public:
 		struct VertexFormat
@@ -671,7 +673,7 @@ namespace KlayGE
 		std::map<FontPtr, std::vector<string_cache> > strings_;
 	};
 
-	class UIStatic : public UIControl
+	class KLAYGE_CORE_API UIStatic : public UIControl
 	{
 	public:
 		enum
@@ -697,7 +699,7 @@ namespace KlayGE
 		std::wstring text_;			// Window text
 	};
 
-	class UIButton : public UIControl
+	class KLAYGE_CORE_API UIButton : public UIControl
 	{
 	public:
 		enum
@@ -751,7 +753,7 @@ namespace KlayGE
 		std::wstring text_;			// Window text
 	};
 
-	class UICheckBox : public UIControl
+	class KLAYGE_CORE_API UICheckBox : public UIControl
 	{
 	public:
 		enum
@@ -814,7 +816,7 @@ namespace KlayGE
 		std::wstring text_;      // Window text
 	};
 
-	class UIRadioButton : public UIControl
+	class KLAYGE_CORE_API UIRadioButton : public UIControl
 	{
 	public:
 		enum
@@ -882,7 +884,7 @@ namespace KlayGE
 		std::wstring text_;      // Window text
 	};
 
-	class UISlider : public UIControl
+	class KLAYGE_CORE_API UISlider : public UIControl
 	{
 	public:
 		enum
@@ -954,7 +956,7 @@ namespace KlayGE
 		Rect_T<int32_t> slider_rc_;
 	};
 
-	class UIScrollBar : public UIControl
+	class KLAYGE_CORE_API UIScrollBar : public UIControl
 	{
 	public:
 		enum
@@ -1025,7 +1027,7 @@ namespace KlayGE
 		static Timer timer_;
 	};
 
-	struct UIListBoxItem
+	struct KLAYGE_CORE_API UIListBoxItem
 	{
 		std::wstring strText;
 		boost::any data;
@@ -1034,7 +1036,7 @@ namespace KlayGE
 		bool  bSelected;
 	};
 
-	class UIListBox : public UIControl
+	class KLAYGE_CORE_API UIListBox : public UIControl
 	{
 	public:
 		enum
@@ -1133,7 +1135,7 @@ namespace KlayGE
 		bool  bVisible;
 	};
 
-	class UIComboBox : public UIControl
+	class KLAYGE_CORE_API UIComboBox : public UIControl
 	{
 	public:
 		enum
@@ -1234,7 +1236,7 @@ namespace KlayGE
 	};
 
 	// UniBuffer class for the edit control
-	class UniBuffer
+	class KLAYGE_CORE_API UniBuffer
 	{
 	public:
 		explicit UniBuffer(int nInitialSize = 1);
@@ -1272,7 +1274,7 @@ namespace KlayGE
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 	// EditBox control
-	class UIEditBox : public UIControl
+	class KLAYGE_CORE_API UIEditBox : public UIControl
 	{
 	public:
 		enum

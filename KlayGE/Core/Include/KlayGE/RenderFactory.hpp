@@ -26,6 +26,7 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
+#include <KlayGE/RenderStateObject.hpp>
 
 #include <string>
 #include <map>
@@ -34,7 +35,7 @@
 
 namespace KlayGE
 {
-	class RenderFactory
+	class KLAYGE_CORE_API RenderFactory
 	{
 	public:
 		virtual ~RenderFactory();

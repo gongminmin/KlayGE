@@ -23,7 +23,7 @@
 
 namespace KlayGE
 {
-	class Timer
+	class KLAYGE_CORE_API Timer
 	{
 	public:
 		Timer()

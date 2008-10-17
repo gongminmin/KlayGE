@@ -22,7 +22,7 @@
 
 namespace KlayGE
 {
-	class SumLumPostProcess : public PostProcess
+	class KLAYGE_CORE_API SumLumPostProcess : public PostProcess
 	{
 	public:
 		explicit SumLumPostProcess(std::string const & tech);
@@ -39,19 +39,19 @@ namespace KlayGE
 		RenderEffectParameterPtr tex_coord_offset_ep_;
 	};
 
-	class SumLumLogPostProcess : public SumLumPostProcess
+	class KLAYGE_CORE_API SumLumLogPostProcess : public SumLumPostProcess
 	{
 	public:
 		SumLumLogPostProcess();
 	};
 
-	class SumLumIterativePostProcess : public SumLumPostProcess
+	class KLAYGE_CORE_API SumLumIterativePostProcess : public SumLumPostProcess
 	{
 	public:
 		SumLumIterativePostProcess();
 	};
 
-	class AdaptedLumPostProcess : public PostProcess
+	class KLAYGE_CORE_API AdaptedLumPostProcess : public PostProcess
 	{
 	public:
 		AdaptedLumPostProcess();
@@ -72,7 +72,7 @@ namespace KlayGE
 		RenderEffectParameterPtr frame_delta_ep_;
 	};
 
-	class ToneMappingPostProcess : public PostProcess
+	class KLAYGE_CORE_API ToneMappingPostProcess : public PostProcess
 	{
 	public:
 		ToneMappingPostProcess();
@@ -85,7 +85,7 @@ namespace KlayGE
 	};
 
 
-	class HDRPostProcess : public PostProcess
+	class KLAYGE_CORE_API HDRPostProcess : public PostProcess
 	{
 		enum
 		{

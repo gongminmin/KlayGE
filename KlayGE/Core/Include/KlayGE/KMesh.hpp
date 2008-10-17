@@ -19,8 +19,10 @@
 #ifndef _KMESH_HPP
 #define _KMESH_HPP
 
+#ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Mesh.hpp>
@@ -29,7 +31,7 @@
 
 namespace KlayGE
 {
-	class KMesh : public StaticMesh
+	class KLAYGE_CORE_API KMesh : public StaticMesh
 	{
 	public:
 		KMesh(RenderModelPtr model, std::wstring const & name);
@@ -83,10 +85,10 @@ namespace KlayGE
 #pragma pack(pop)
 #endif
 
-	RenderModelPtr LoadKModel(std::string const & kmodel_name, uint32_t access_hint,
+	KLAYGE_CORE_API RenderModelPtr LoadKModel(std::string const & kmodel_name, uint32_t access_hint,
 		boost::function<RenderModelPtr (std::wstring const &)> CreateModelFactoryFunc = CreateKModelFactory<RenderModel>(),
 		boost::function<StaticMeshPtr (RenderModelPtr, std::wstring const &)> CreateMeshFactoryFunc = CreateKMeshFactory<StaticMesh>());
-	void SaveKModel(RenderModelPtr model, std::string const & kmodel_name);
+	KLAYGE_CORE_API void SaveKModel(RenderModelPtr model, std::string const & kmodel_name);
 }
 
 #endif			// _KMESH_HPP

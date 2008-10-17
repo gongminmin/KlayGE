@@ -1,8 +1,11 @@
 // App3D.hpp
 // KlayGE App3D类 头文件
-// Ver 3.7.0
-// 版权所有(C) 龚敏敏, 2003-2007
+// Ver 3.8.0
+// 版权所有(C) 龚敏敏, 2003-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.8.0
+// 移入Core (2008.10.16)
 //
 // 3.7.0
 // 改进了Update (2007.8.14)
@@ -28,9 +31,6 @@
 #ifndef _APP3D_HPP
 #define _APP3D_HPP
 
-#define KLAYGE_LIB_NAME KlayGE_AppLayer
-#include <KlayGE/config/auto_link.hpp>
-
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Timer.hpp>
 #include <KlayGE/RenderSettings.hpp>
@@ -44,7 +44,7 @@ namespace KlayGE
 	//			Update()				- 刷新场景
 	//			DelObjects()			- 清除3D场景
 	/////////////////////////////////////////////////////////////////////////////////
-	class App3DFramework
+	class KLAYGE_CORE_API App3DFramework
 	{
 		friend class SceneManager;
 

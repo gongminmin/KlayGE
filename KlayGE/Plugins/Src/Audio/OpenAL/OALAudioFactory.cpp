@@ -20,12 +20,18 @@
 #include <KlayGE/OpenAL/OALAudio.hpp>
 #include <KlayGE/OpenAL/OALAudioFactory.hpp>
 
-namespace KlayGE
+extern "C"
 {
-	AudioFactoryPtr const & OALAudioFactoryInstance()
+	KlayGE::AudioFactoryPtr const & AudioFactoryInstance()
 	{
-		static AudioFactoryPtr af = MakeSharedPtr<ConcreteAudioFactory<OALAudioEngine,
-			OALSoundBuffer, OALMusicBuffer> >(L"OpenAL Audio Factory");
+		static KlayGE::AudioFactoryPtr af = KlayGE::MakeSharedPtr<KlayGE::ConcreteAudioFactory<KlayGE::OALAudioEngine,
+			KlayGE::OALSoundBuffer, KlayGE::OALMusicBuffer> >(L"OpenAL Audio Factory");
 		return af;
+	}
+
+	std::string const & Name()
+	{
+		static std::string const name("OpenAL");
+		return name;
 	}
 }

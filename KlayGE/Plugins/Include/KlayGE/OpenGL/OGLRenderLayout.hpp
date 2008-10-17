@@ -13,9 +13,6 @@
 #ifndef _OGLRENDERLAYOUT_HPP
 #define _OGLRENDERLAYOUT_HPP
 
-#define KLAYGE_LIB_NAME KlayGE_RenderEngine_OpenGL
-#include <KlayGE/config/auto_link.hpp>
-
 #include <KlayGE/RenderLayout.hpp>
 
 namespace KlayGE

@@ -44,13 +44,13 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;KLAYGE_BUILD_DLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				TreatWChar_tAsBuiltInType="true"
-				ProgramDataBaseFileName="$(IntDir)\$(TargetFileName).pdb"
+				ProgramDataBaseFileName="$(IntDir)\$(TargetName).pdb"
 				WarningLevel="4"
 				DebugInformationFormat="4"
 			/>
@@ -65,7 +65,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_Terrain_HeightMap_d.lib"
+				OutputFile="$(OutDir)/KlayGE_Terrain_HeightMap_vc90_x86_d.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -109,13 +109,13 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN64;_DEBUG;_LIB"
+				PreprocessorDefinitions="WIN64;_DEBUG;_LIB;KLAYGE_BUILD_DLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				TreatWChar_tAsBuiltInType="true"
-				ProgramDataBaseFileName="$(IntDir)\$(TargetFileName).pdb"
+				ProgramDataBaseFileName="$(IntDir)\$(TargetName).pdb"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
@@ -130,7 +130,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_Terrain_HeightMap_d.lib"
+				OutputFile="$(OutDir)/KlayGE_Terrain_HeightMap_vc90_x64_d.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -182,7 +182,7 @@
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				FloatingPointModel="2"
-				ProgramDataBaseFileName="$(IntDir)\$(TargetFileName).pdb"
+				ProgramDataBaseFileName="$(IntDir)\$(TargetName).pdb"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
@@ -197,7 +197,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_Terrain_HeightMap.lib"
+				OutputFile="$(OutDir)/KlayGE_Terrain_HeightMap_vc90_x86.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -246,11 +246,11 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
-				PreprocessorDefinitions="WIN64;NDEBUG;_LIB"
+				PreprocessorDefinitions="WIN64;NDEBUG;_LIB;KLAYGE_BUILD_DLL"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				FloatingPointModel="2"
-				ProgramDataBaseFileName="$(IntDir)\$(TargetFileName).pdb"
+				ProgramDataBaseFileName="$(IntDir)\$(TargetName).pdb"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
@@ -265,7 +265,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_Terrain_HeightMap.lib"
+				OutputFile="$(OutDir)/KlayGE_Terrain_HeightMap_vc90_x64.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"

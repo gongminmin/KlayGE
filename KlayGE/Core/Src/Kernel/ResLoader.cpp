@@ -18,6 +18,7 @@
 #include <sstream>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
+#include <boost/filesystem.hpp>
 
 #include <KlayGE/ResLoader.hpp>
 
@@ -52,9 +53,7 @@ namespace KlayGE
 		{
 			std::string const res_name(path + name);
 
-			std::ifstream ifs(res_name.c_str(), std::ios_base::binary);
-
-			if (!ifs.fail())
+			if (boost::filesystem::exists(res_name))
 			{
 				return res_name;
 			}

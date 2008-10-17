@@ -23,7 +23,7 @@
 
 namespace KlayGE
 {
-	class InputFactory
+	class KLAYGE_CORE_API InputFactory
 	{
 	public:
 		virtual ~InputFactory()

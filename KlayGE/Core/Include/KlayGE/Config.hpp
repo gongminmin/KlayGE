@@ -25,8 +25,6 @@
 		#elif __GNUC_MINOR__ >= 0
 			#define KLAYGE_COMPILER_VERSION 40
 		#endif
-	#elif __GNUC__ >= 3
-		#define KLAYGE_COMPILER_VERSION 30
 	#else
 		#error Unknown compiler.
 	#endif
@@ -34,9 +32,11 @@
 	#define KLAYGE_COMPILER_MSVC
 	#define KLAYGE_COMPILER_NAME "vc"
 
+	#define KLAYGE_HAS_DECLSPEC
+
 	#if _MSC_VER >= 1500
 		#define KLAYGE_COMPILER_VERSION 90
-		#pragma warning(disable: 4819)
+		#pragma warning(disable: 4251 4275 4819)
 
 		#ifndef _CRT_SECURE_NO_DEPRECATE
 			#define _CRT_SECURE_NO_DEPRECATE
@@ -50,7 +50,7 @@
 		#endif
 	#elif _MSC_VER >= 1400
 		#define KLAYGE_COMPILER_VERSION 80
-		#pragma warning(disable: 4819)
+		#pragma warning(disable: 4251 4275 4819)
 
 		#ifndef _CRT_SECURE_NO_DEPRECATE
 			#define _CRT_SECURE_NO_DEPRECATE
@@ -62,8 +62,6 @@
 		#ifndef KLAYGE_DEBUG
 			#define _SECURE_SCL 0
 		#endif
-	#elif _MSC_VER >= 1310
-		#define KLAYGE_COMPILER_VERSION 71
 	#else
 		#error Unknown compiler.
 	#endif
@@ -78,6 +76,10 @@
 	#endif
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 	#define KLAYGE_PLATFORM_WINDOWS
+
+	#if !defined(__GNUC__) && !defined(KLAYGE_HAS_DECLSPEC)
+		#define KLAYGE_HAS_DECLSPEC
+	#endif
 
 	#if defined(_WIN64)
 		#define KLAYGE_PLATFORM_WIN64
@@ -109,31 +111,27 @@
 	#error Unknown platform.
 #endif
 
-#define KLAYGE_STRINGIZE(X) KLAYGE_DO_STRINGIZE(X)
-#define KLAYGE_DO_STRINGIZE(X) #X
-
-#define KLAYGE_JOIN(X, Y) KLAYGE_DO_JOIN(X, Y)
-#define KLAYGE_DO_JOIN(X, Y) KLAYGE_DO_JOIN2(X, Y)
-#define KLAYGE_DO_JOIN2(X, Y) X##Y
-
-#define KLAYGE_COMPILER_TOOLSET KLAYGE_JOIN(KLAYGE_COMPILER_NAME, KLAYGE_COMPILER_VERSION)
-
 // Defines supported CPUs
 #if defined(KLAYGE_COMPILER_MSVC)
 	#if defined(KLAYGE_PLATFORM_XBOX360)
 		#define KLAYGE_CPU_PPC
+		#define KLAYGE_COMPILER_TARGET "ppc"
 	#elif defined(_M_X64)
 		#define KLAYGE_CPU_X64
+		#define KLAYGE_COMPILER_TARGET "x64"
 	#elif defined(_M_IX86)
 		#define KLAYGE_CPU_X86
+		#define KLAYGE_COMPILER_TARGET "x86"
 	#else
 		#error Unknown CPU type.
 	#endif
 #elif defined(KLAYGE_COMPILER_GCC)
 	#if defined(__x86_64__)
 		#define KLAYGE_CPU_X64
+		#define KLAYGE_COMPILER_TARGET "x64"
 	#elif defined(__i386__)
 		#define KLAYGE_CPU_X86
+		#define KLAYGE_COMPILER_TARGET "x86"
 	#else
 		#error Unknown CPU type.
 	#endif
@@ -182,5 +180,24 @@
 		#endif
 	#endif
 #endif
+
+#define KLAYGE_STRINGIZE(X) KLAYGE_DO_STRINGIZE(X)
+#define KLAYGE_DO_STRINGIZE(X) #X
+
+#define KLAYGE_JOIN(X, Y) KLAYGE_DO_JOIN(X, Y)
+#define KLAYGE_DO_JOIN(X, Y) KLAYGE_DO_JOIN2(X, Y)
+#define KLAYGE_DO_JOIN2(X, Y) X##Y
+
+#define KLAYGE_COMPILER_TOOLSET KLAYGE_JOIN(KLAYGE_COMPILER_NAME, KLAYGE_COMPILER_VERSION)
+
+#ifdef KLAYGE_HAS_DECLSPEC
+	#ifdef KLAYGE_CORE_SOURCE		// Build dll
+		#define KLAYGE_CORE_API __declspec(dllexport)
+	#else							// Use dll
+		#define KLAYGE_CORE_API __declspec(dllimport)
+	#endif
+#else
+	#define KLAYGE_CORE_API
+#endif // KLAYGE_HAS_DECLSPEC
 
 #endif		// _CONFIG_HPP

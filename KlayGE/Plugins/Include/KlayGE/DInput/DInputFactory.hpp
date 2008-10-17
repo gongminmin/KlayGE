@@ -16,12 +16,20 @@
 #ifndef _DINPUTFACTORY_HPP
 #define _DINPUTFACTORY_HPP
 
-#define KLAYGE_LIB_NAME KlayGE_InputEngine_DInput
-#include <KlayGE/config/auto_link.hpp>
+#ifdef KLAYGE_HAS_DECLSPEC
+	#ifdef KLAYGE_DINPUT_IE_SOURCE			// Build dll
+		#define KLAYGE_DINPUT_IE_API __declspec(dllexport)
+	#else									// Use dll
+		#define KLAYGE_DINPUT_IE_API __declspec(dllimport)
+	#endif
+#else
+	#define KLAYGE_DINPUT_IE_API
+#endif // KLAYGE_HAS_DECLSPEC
 
-namespace KlayGE
+extern "C"
 {
-	InputFactoryPtr const & DInputFactoryInstance();
+	KLAYGE_DINPUT_IE_API KlayGE::InputFactoryPtr const & InputFactoryInstance();
+	KLAYGE_DINPUT_IE_API std::string const & Name();
 }
 
 #endif			// _DINPUTFACTORY_HPP

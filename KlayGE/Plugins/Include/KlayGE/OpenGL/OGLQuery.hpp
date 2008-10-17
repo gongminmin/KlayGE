@@ -13,9 +13,6 @@
 #ifndef _OGLOCCLUSIONQUERY_HPP
 #define _OGLOCCLUSIONQUERY_HPP
 
-#define KLAYGE_LIB_NAME KlayGE_RenderEngine_OpenGL
-#include <KlayGE/config/auto_link.hpp>
-
 #include <KlayGE/Query.hpp>
 
 namespace KlayGE

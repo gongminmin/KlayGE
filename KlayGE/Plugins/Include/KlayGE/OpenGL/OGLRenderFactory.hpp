@@ -13,12 +13,20 @@
 #ifndef _OGLRENDERFACTORY_HPP
 #define _OGLRENDERFACTORY_HPP
 
-#define KLAYGE_LIB_NAME KlayGE_RenderEngine_OpenGL
-#include <KlayGE/config/auto_link.hpp>
+#ifdef KLAYGE_HAS_DECLSPEC
+	#ifdef KLAYGE_OGL_RE_SOURCE					// Build dll
+		#define KLAYGE_OGL_RE_API __declspec(dllexport)
+	#else										// Use dll
+		#define KLAYGE_OGL_RE_API __declspec(dllimport)
+	#endif
+#else
+	#define KLAYGE_OGL_RE_API
+#endif // KLAYGE_HAS_DECLSPEC
 
-namespace KlayGE
+extern "C"
 {
-	RenderFactoryPtr const & OGLRenderFactoryInstance();
+	KLAYGE_OGL_RE_API KlayGE::RenderFactoryPtr const & RenderFactoryInstance();
+	KLAYGE_OGL_RE_API std::string const & Name();
 }
 
 #endif			// _OGLRENDERFACTORY_HPP

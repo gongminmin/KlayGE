@@ -19,7 +19,7 @@
 
 namespace KlayGE
 {
-	class SATSeparableScanSweepPostProcess : public PostProcess
+	class KLAYGE_CORE_API SATSeparableScanSweepPostProcess : public PostProcess
 	{
 	public:
 		SATSeparableScanSweepPostProcess(RenderTechniquePtr tech, bool dir);
@@ -39,7 +39,7 @@ namespace KlayGE
 		RenderEffectParameterPtr scale_ep_;
 	};
 
-	class SummedAreaTablePostProcess : public PostProcess
+	class KLAYGE_CORE_API SummedAreaTablePostProcess : public PostProcess
 	{
 	public:
 		SummedAreaTablePostProcess();

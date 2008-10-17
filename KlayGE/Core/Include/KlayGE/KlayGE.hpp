@@ -1,8 +1,11 @@
 // KlayGE.hpp
 // KlayGE 头文件
-// Ver 2.2.0
-// 版权所有(C) 龚敏敏, 2003-2004
+// Ver 3.8.0
+// 版权所有(C) 龚敏敏, 2003-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.8.0
+// 改成DLL的形式 (2008.10.17)
 //
 // 2.2.0
 // 去掉了Safe*函数 (2004.10.31)
@@ -23,9 +26,9 @@
 #include <KlayGE/Types.hpp>
 
 #define KLAYGE_VER_MAJOR	3
-#define KLAYGE_VER_MINOR	7
+#define KLAYGE_VER_MINOR	8
 #define KLAYGE_VER_RELEASE	0
-#define KLAYGE_VER_STR		"KlayGE 3.7.0"
+#define KLAYGE_VER_STR		"KlayGE 3.8.0"
 
 #include <boost/config/requires_threads.hpp>
 

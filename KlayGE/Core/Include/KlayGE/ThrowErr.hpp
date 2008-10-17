@@ -36,7 +36,7 @@ typedef long HRESULT;
 
 namespace KlayGE
 {
-	std::string CombineFileLine(std::string const & file, int line);
+	KLAYGE_CORE_API std::string CombineFileLine(std::string const & file, int line);
 }
 
 #define THR(x)			{ throw boost::system::system_error(boost::system::posix_error::make_error_code(x), KlayGE::CombineFileLine(__FILE__, __LINE__)); }

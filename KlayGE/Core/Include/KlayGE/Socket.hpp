@@ -16,8 +16,10 @@
 #ifndef	_SOCKET_HPP
 #define	_SOCKET_HPP
 
+#ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
 
 #include <string>
 
@@ -41,13 +43,13 @@
 
 namespace KlayGE
 {
-	SOCKADDR_IN TransAddr(std::string const & address, uint16_t port);
-	std::string TransAddr(SOCKADDR_IN const & sockAddr, uint16_t& port);
-	IN_ADDR Host();
+	KLAYGE_CORE_API SOCKADDR_IN TransAddr(std::string const & address, uint16_t port);
+	KLAYGE_CORE_API std::string TransAddr(SOCKADDR_IN const & sockAddr, uint16_t& port);
+	KLAYGE_CORE_API IN_ADDR Host();
 
 	// Í¬²½Ì×½Ó×Ö
 	///////////////////////////////////////////////////////////////////////////////
-	class Socket
+	class KLAYGE_CORE_API Socket
 	{
 	public:
 		Socket();

@@ -16,12 +16,20 @@
 #ifndef _OALAUDIOFACTORY_HPP
 #define _OALAUDIOFACTORY_HPP
 
-#define KLAYGE_LIB_NAME KlayGE_AudioEngine_OpenAL
-#include <KlayGE/config/auto_link.hpp>
+#ifdef KLAYGE_HAS_DECLSPEC
+	#ifdef KLAYGE_OAL_AE_SOURCE				// Build dll
+		#define KLAYGE_OAL_AE_API __declspec(dllexport)
+	#else									// Use dll
+		#define KLAYGE_OAL_AE_API __declspec(dllimport)
+	#endif
+#else
+	#define KLAYGE_OAL_AE_API
+#endif // KLAYGE_HAS_DECLSPEC
 
-namespace KlayGE
+extern "C"
 {
-	AudioFactoryPtr const & OALAudioFactoryInstance();
+	KLAYGE_OAL_AE_API KlayGE::AudioFactoryPtr const & AudioFactoryInstance();
+	KLAYGE_OAL_AE_API std::string const & Name();
 }
 
 #endif			// _OALAUDIOFACTORY_HPP

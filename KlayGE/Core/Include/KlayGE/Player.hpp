@@ -16,8 +16,10 @@
 #ifndef _PLAYER_HPP
 #define _PLAYER_HPP
 
+#ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
 
 #include <list>
 #include <vector>
@@ -37,7 +39,7 @@ namespace KlayGE
 		SOCKADDR_IN		addr;
 	};
 
-	class Player
+	class KLAYGE_CORE_API Player
 	{
 	public:
 		Player();

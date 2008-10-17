@@ -20,7 +20,7 @@
 
 namespace KlayGE
 {
-	class ShowFactory
+	class KLAYGE_CORE_API ShowFactory
 	{
 	public:
 		virtual ~ShowFactory()

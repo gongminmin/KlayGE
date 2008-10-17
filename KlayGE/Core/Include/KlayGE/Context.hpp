@@ -22,8 +22,10 @@
 #ifndef _CONTEXT_HPP
 #define _CONTEXT_HPP
 
+#ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
 
 #include <KlayGE/PreDeclare.hpp>
 
@@ -32,7 +34,7 @@
 
 namespace KlayGE
 {
-	class Context
+	class KLAYGE_CORE_API Context
 	{
 	public:
 		static Context& Instance()

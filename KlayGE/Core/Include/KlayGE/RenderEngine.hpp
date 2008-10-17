@@ -57,8 +57,10 @@
 #ifndef _RENDERENGINE_HPP
 #define _RENDERENGINE_HPP
 
+#ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderDeviceCaps.hpp>
@@ -66,7 +68,7 @@
 
 namespace KlayGE
 {
-	class RenderEngine
+	class KLAYGE_CORE_API RenderEngine
 	{
 	public:
 		RenderEngine();

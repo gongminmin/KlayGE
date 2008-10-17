@@ -19,7 +19,7 @@
 
 namespace KlayGE
 {
-	class SceneObjectHelper : public SceneObject
+	class KLAYGE_CORE_API SceneObjectHelper : public SceneObject
 	{
 	public:
 		SceneObjectHelper(uint32_t attrib);
@@ -29,7 +29,7 @@ namespace KlayGE
 		}
 	};
 
-	class SceneObjectSkyBox : public SceneObjectHelper
+	class KLAYGE_CORE_API SceneObjectSkyBox : public SceneObjectHelper
 	{
 	public:
 		SceneObjectSkyBox();

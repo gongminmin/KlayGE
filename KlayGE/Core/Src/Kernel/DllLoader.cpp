@@ -1,8 +1,11 @@
-// Dll.cpp
-// KlayGE 打包系统DLL载入器 实现文件
-// Ver 3.6.0
-// 版权所有(C) 龚敏敏, 2007
+// DllLoader.cpp
+// KlayGE DLL载入器 实现文件
+// Ver 3.8.0
+// 版权所有(C) 龚敏敏, 2007-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.8.0
+// 移到Kernel (2008.10.14)
 //
 // 3.6.0
 // 初次建立 (2007.5.24)
@@ -19,7 +22,7 @@
 #include <dlfcn.h>
 #endif
 
-#include "Dll.hpp"
+#include <KlayGE/DllLoader.hpp>
 
 namespace KlayGE
 {

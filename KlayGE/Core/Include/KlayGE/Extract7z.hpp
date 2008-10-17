@@ -13,8 +13,10 @@
 #ifndef _EXTRACT7Z_HPP
 #define _EXTRACT7Z_HPP
 
+#ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
 
 #include <KlayGE/PreDeclare.hpp>
 
@@ -22,10 +24,10 @@
 
 namespace KlayGE
 {
-	uint32_t Find7z(ResIdentifierPtr const & archive_is,
+	KLAYGE_CORE_API uint32_t Find7z(ResIdentifierPtr const & archive_is,
 		std::string const & password,
 		std::string const & extract_file_path);
-	void Extract7z(ResIdentifierPtr const & archive_is,
+	KLAYGE_CORE_API void Extract7z(ResIdentifierPtr const & archive_is,
 		std::string const & password,
 		std::string const & extract_file_path,
 		boost::shared_ptr<std::ostream> const & os);

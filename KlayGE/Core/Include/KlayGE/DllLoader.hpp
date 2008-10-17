@@ -1,8 +1,11 @@
-// Dll.hpp
-// KlayGE 打包系统DLL载入器 头文件
-// Ver 3.6.0
-// 版权所有(C) 龚敏敏, 2007
+// DllLoader.hpp
+// KlayGE DLL载入器 头文件
+// Ver 3.8.0
+// 版权所有(C) 龚敏敏, 2007-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.8.0
+// 移到Kernel (2008.10.14)
 //
 // 3.6.0
 // 初次建立 (2007.5.24)
@@ -10,14 +13,14 @@
 // 修改记录
 /////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _DLL_HPP
-#define _DLL_HPP
+#ifndef _DLLLOADER_HPP
+#define _DLLLOADER_HPP
 
 #include <string>
 
 namespace KlayGE
 {
-	class DllLoader
+	class KLAYGE_CORE_API DllLoader
 	{
 	public:
 		DllLoader();
@@ -33,4 +36,4 @@ namespace KlayGE
 	};
 }
 
-#endif		// _DLL_HPP
+#endif		// _DLLLOADER_HPP

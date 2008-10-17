@@ -23,7 +23,7 @@
 
 namespace KlayGE
 {
-	class AudioFactory
+	class KLAYGE_CORE_API AudioFactory
 	{
 	public:
 		virtual ~AudioFactory()

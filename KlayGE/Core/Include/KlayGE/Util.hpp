@@ -1,8 +1,11 @@
 // Util.hpp
 // KlayGE 实用函数库 头文件
-// Ver 3.6.0
-// 版权所有(C) 龚敏敏, 2003-2007
+// Ver 3.8.0
+// 版权所有(C) 龚敏敏, 2003-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.8.0
+// 增加了MakeSharedPtr (2008.10.17)
 //
 // 3.6.0
 // 增加了identity, project1st和project2nd (2007.4.15)
@@ -26,8 +29,10 @@
 #ifndef _UTIL_HPP
 #define _UTIL_HPP
 
+#ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
 
 #include <string>
 #include <functional>
@@ -99,24 +104,24 @@ namespace KlayGE
 	};
 
 	// Unicode函数, 用于string, wstring之间的转换
-	std::string& Convert(std::string& strDest, std::string const & strSrc);
-	std::string& Convert(std::string& strDest, std::wstring const & wstrSrc);
-	std::wstring& Convert(std::wstring& wstrDest, std::string const & strSrc);
-	std::wstring& Convert(std::wstring& wstrDest, std::wstring const & wstrSrc);
+	KLAYGE_CORE_API std::string& Convert(std::string& strDest, std::string const & strSrc);
+	KLAYGE_CORE_API std::string& Convert(std::string& strDest, std::wstring const & wstrSrc);
+	KLAYGE_CORE_API std::wstring& Convert(std::wstring& wstrDest, std::string const & strSrc);
+	KLAYGE_CORE_API std::wstring& Convert(std::wstring& wstrDest, std::wstring const & wstrSrc);
 
 	// 暂停几毫秒
-	void Sleep(uint32_t ms);
+	KLAYGE_CORE_API void Sleep(uint32_t ms);
 
 	// Endian的转换
 	template <int size>
 	void EndianSwitch(void* p);
 
 	template <>
-	void EndianSwitch<2>(void* p);
+	KLAYGE_CORE_API void EndianSwitch<2>(void* p);
 	template <>
-	void EndianSwitch<4>(void* p);
+	KLAYGE_CORE_API void EndianSwitch<4>(void* p);
 	template <>
-	void EndianSwitch<8>(void* p);
+	KLAYGE_CORE_API void EndianSwitch<8>(void* p);
 
 	template <int size>
 	void NativeToBigEndian(void* p)
@@ -165,7 +170,7 @@ namespace KlayGE
 		return boost::static_pointer_cast<To>(p);
 	}
 
-	uint32_t LastError();
+	KLAYGE_CORE_API uint32_t LastError();
 
 #ifdef _IDENTITY_SUPPORT
 	template <typename arg_type>

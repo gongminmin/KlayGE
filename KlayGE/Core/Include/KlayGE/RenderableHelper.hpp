@@ -28,7 +28,7 @@
 
 namespace KlayGE
 {
-	class RenderableHelper : public Renderable
+	class KLAYGE_CORE_API RenderableHelper : public Renderable
 	{
 	public:
 		RenderableHelper(std::wstring const & name);
@@ -55,7 +55,7 @@ namespace KlayGE
 		RenderEffectParameterPtr matViewProj_ep_;
 	};
 
-	class RenderablePoint : public RenderableHelper
+	class KLAYGE_CORE_API RenderablePoint : public RenderableHelper
 	{
 	public:
 		RenderablePoint(float3 const & v, Color const & clr);
@@ -66,7 +66,7 @@ namespace KlayGE
 		void OnRenderBegin();
 	};
 
-	class RenderableLine : public RenderableHelper
+	class KLAYGE_CORE_API RenderableLine : public RenderableHelper
 	{
 	public:
 		explicit RenderableLine(float3 const & v0, float3 const & v1, Color const & clr);
@@ -77,7 +77,7 @@ namespace KlayGE
 		void OnRenderBegin();
 	};
 
-	class RenderableTriangle : public RenderableHelper
+	class KLAYGE_CORE_API RenderableTriangle : public RenderableHelper
 	{
 	public:
 		RenderableTriangle(float3 const & v0, float3 const & v1, float3 const & v2, Color const & clr);
@@ -88,7 +88,7 @@ namespace KlayGE
 		void OnRenderBegin();
 	};
 
-	class RenderableTriBox : public RenderableHelper
+	class KLAYGE_CORE_API RenderableTriBox : public RenderableHelper
 	{
 	public:
 		explicit RenderableTriBox(Box const & box, Color const & clr);
@@ -99,7 +99,7 @@ namespace KlayGE
 		void OnRenderBegin();
 	};
 
-	class RenderableLineBox : public RenderableHelper
+	class KLAYGE_CORE_API RenderableLineBox : public RenderableHelper
 	{
 	public:
 		explicit RenderableLineBox(Box const & box, Color const & clr);
@@ -110,7 +110,7 @@ namespace KlayGE
 		void OnRenderBegin();
 	};
 
-	class RenderableSkyBox : public RenderableHelper
+	class KLAYGE_CORE_API RenderableSkyBox : public RenderableHelper
 	{
 	public:
 		RenderableSkyBox();
@@ -127,7 +127,7 @@ namespace KlayGE
 		RenderEffectParameterPtr skybox_cubeMapSampler_ep_;
 	};
 
-	class RenderablePlane : public RenderableHelper
+	class KLAYGE_CORE_API RenderablePlane : public RenderableHelper
 	{
 	public:
 		RenderablePlane(float length, float width, int length_segs, int width_segs, bool has_tex_coord);

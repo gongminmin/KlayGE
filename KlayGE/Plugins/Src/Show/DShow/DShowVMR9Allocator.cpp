@@ -387,11 +387,31 @@ namespace KlayGE
 			{
 				Texture::Mapper mapper(*present_sys_mem_tex_, 0, TMA_Write_Only, 0, 0, width, height);
 				uint8_t* dst = mapper.Pointer<uint8_t>();
-				for (uint32_t y = 0; y < height; ++ y)
+				if (EF_ARGB8 == present_tex_->Format())
 				{
-					memcpy(dst, src, width * present_sys_mem_tex_->Bpp() / 8);
-					dst += mapper.RowPitch();
-					src += d3dlocked_rc.Pitch;
+					for (uint32_t y = 0; y < height; ++ y)
+					{
+						memcpy(dst, src, width * present_sys_mem_tex_->Bpp() / 8);
+						dst += mapper.RowPitch();
+						src += d3dlocked_rc.Pitch;
+					}
+				}
+				else
+				{
+					BOOST_ASSERT(EF_ABGR8 == present_tex_->Format());
+
+					for (uint32_t y = 0; y < height; ++ y)
+					{
+						for (uint32_t x = 0; x < width; ++ x)
+						{
+							dst[x * 4 + 0] = src[x * 4 + 2];
+							dst[x * 4 + 1] = src[x * 4 + 1];
+							dst[x * 4 + 2] = src[x * 4 + 0];
+							dst[x * 4 + 3] = src[x * 4 + 3];
+						}
+						dst += mapper.RowPitch();
+						src += d3dlocked_rc.Pitch;
+					}
 				}
 			}
 

@@ -163,10 +163,19 @@ namespace KlayGE
 	{
 		return MakeSharedPtr<OGLSamplerStateObject>(desc);
 	}
+}
 
-	RenderFactoryPtr const & OGLRenderFactoryInstance()
+extern "C"
+{
+	KlayGE::RenderFactoryPtr const & RenderFactoryInstance()
 	{
-		static RenderFactoryPtr rf = MakeSharedPtr<OGLRenderFactory>();
+		static KlayGE::RenderFactoryPtr rf = KlayGE::MakeSharedPtr<KlayGE::OGLRenderFactory>();
 		return rf;
+	}
+
+	std::string const & Name()
+	{
+		static std::string const name("OpenGL");
+		return name;
 	}
 }

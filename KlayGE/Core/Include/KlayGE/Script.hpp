@@ -13,8 +13,10 @@
 #ifndef _SCRIPT_HPP
 #define _SCRIPT_HPP
 
+#ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
 
 #include <Python.h>
 #include <vector>
@@ -143,7 +145,7 @@ namespace KlayGE
 
 	// 从一个.py载入模块
 	/////////////////////////////////////////////////////////////////////////////////
-	class ScriptModule
+	class KLAYGE_CORE_API ScriptModule
 	{
 	private:
 		template <typename TupleType>
@@ -209,7 +211,7 @@ namespace KlayGE
 
 	// 注册一个可以在Python中调用的模块
 	/////////////////////////////////////////////////////////////////////////////////
-	class RegisterModule
+	class KLAYGE_CORE_API RegisterModule
 	{
 	public:
 		typedef PyObject *(*PyCallback)(PyObject*, PyObject*);
@@ -234,7 +236,7 @@ namespace KlayGE
 
 	// 实现脚本引擎的功能
 	/////////////////////////////////////////////////////////////////////////////////
-	class ScriptEngine : boost::noncopyable
+	class KLAYGE_CORE_API ScriptEngine : boost::noncopyable
 	{
 	public:
 		ScriptEngine();

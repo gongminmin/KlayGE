@@ -224,10 +224,19 @@ namespace KlayGE
 	{
 		return MakeSharedPtr<D3D9SamplerStateObject>(desc);
 	}
+}
 
-	RenderFactoryPtr const & D3D9RenderFactoryInstance()
+extern "C"
+{
+	KlayGE::RenderFactoryPtr const & RenderFactoryInstance()
 	{
-		static RenderFactoryPtr rf = MakeSharedPtr<D3D9RenderFactory>();
+		static KlayGE::RenderFactoryPtr rf = KlayGE::MakeSharedPtr<KlayGE::D3D9RenderFactory>();
 		return rf;
+	}
+
+	std::string const & Name()
+	{
+		static std::string const name("D3D9");
+		return name;
 	}
 }

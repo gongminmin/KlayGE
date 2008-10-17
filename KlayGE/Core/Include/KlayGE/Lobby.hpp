@@ -16,8 +16,10 @@
 #ifndef _LOBBY_HPP
 #define _LOBBY_HPP
 
+#ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
 
 #include <vector>
 #include <list>
@@ -59,7 +61,7 @@ namespace KlayGE
 		SendQueueType	msgs;
 	};
 
-	class Lobby
+	class KLAYGE_CORE_API Lobby
 	{
 		typedef std::vector<std::pair<uint32_t, PlayerDes> >	PlayerAddrs;
 		typedef PlayerAddrs::iterator		PlayerAddrsIter;

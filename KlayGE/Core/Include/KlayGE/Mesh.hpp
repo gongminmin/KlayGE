@@ -25,8 +25,10 @@
 #ifndef _MESH_HPP
 #define _MESH_HPP
 
+#ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Renderable.hpp>
@@ -38,7 +40,7 @@
 
 namespace KlayGE
 {
-	class StaticMesh : public Renderable
+	class KLAYGE_CORE_API StaticMesh : public Renderable
 	{
 	public:
 		typedef std::vector<std::pair<std::string, std::string> > TextureSlotsType;
@@ -104,7 +106,7 @@ namespace KlayGE
 		boost::weak_ptr<RenderModel> model_;
 	};
 
-	class RenderModel : public Renderable
+	class KLAYGE_CORE_API RenderModel : public Renderable
 	{
 	public:
 		explicit RenderModel(std::wstring const & name);
@@ -214,7 +216,7 @@ namespace KlayGE
 	};
 	typedef MapVector<std::string, KeyFrames> KeyFramesType;
 
-	class SkinnedModel : public RenderModel
+	class KLAYGE_CORE_API SkinnedModel : public RenderModel
 	{
 	public:
 		typedef std::vector<Joint> JointsType;
@@ -309,7 +311,7 @@ namespace KlayGE
 		uint32_t frame_rate_;
 	};
 
-	class SkinnedMesh : public StaticMesh
+	class KLAYGE_CORE_API SkinnedMesh : public StaticMesh
 	{
 	public:
 		SkinnedMesh(RenderModelPtr model, std::wstring const & name);

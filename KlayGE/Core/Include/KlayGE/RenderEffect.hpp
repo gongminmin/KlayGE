@@ -46,8 +46,10 @@
 #ifndef _RENDEREFFECT_HPP
 #define _RENDEREFFECT_HPP
 
+#ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
 
 #include <KlayGE/PreDeclare.hpp>
 #include <vector>
@@ -91,7 +93,7 @@ namespace KlayGE
 		REDT_float4x4
 	};
 
-	class RenderVariable
+	class KLAYGE_CORE_API RenderVariable
 	{
 	public:
 		RenderVariable();
@@ -177,7 +179,7 @@ namespace KlayGE
 	typedef RenderVariableConcrete<std::vector<float4x4> >  RenderVariableFloat4x4Array;
 
 
-	class RenderEffectAnnotation
+	class KLAYGE_CORE_API RenderEffectAnnotation
 	{
 	public:
 		void Load(ResIdentifierPtr const & source);
@@ -189,7 +191,7 @@ namespace KlayGE
 		boost::shared_ptr<RenderVariable> var_;
 	};
 
-	class RenderShaderFunc
+	class KLAYGE_CORE_API RenderShaderFunc
 	{
 	public:
 		void Load(ResIdentifierPtr const & source);
@@ -205,7 +207,7 @@ namespace KlayGE
 
 	// äÖÈ¾Ð§¹û
 	//////////////////////////////////////////////////////////////////////////////////
-	class RenderEffect
+	class KLAYGE_CORE_API RenderEffect
 	{
 	public:
 		RenderEffect();
@@ -272,7 +274,7 @@ namespace KlayGE
 		RenderEffectPtr prototype_effect_;
 	};
 
-	class RenderTechnique : boost::noncopyable
+	class KLAYGE_CORE_API RenderTechnique : boost::noncopyable
 	{
 	public:
 		explicit RenderTechnique(RenderEffect& effect)
@@ -337,7 +339,7 @@ namespace KlayGE
 		bool is_validate_;
 	};
 
-	class RenderPass : boost::noncopyable
+	class KLAYGE_CORE_API RenderPass : boost::noncopyable
 	{
 	public:
 		explicit RenderPass(RenderEffect& effect)
@@ -414,7 +416,7 @@ namespace KlayGE
 		bool is_validate_;
 	};
 
-	class RenderEffectParameter : boost::noncopyable
+	class KLAYGE_CORE_API RenderEffectParameter : boost::noncopyable
 	{
 	public:
 		explicit RenderEffectParameter(RenderEffect& effect);

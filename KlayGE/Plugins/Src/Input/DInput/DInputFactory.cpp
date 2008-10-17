@@ -20,11 +20,17 @@
 #include <KlayGE/DInput/DInput.hpp>
 #include <KlayGE/DInput/DInputFactory.hpp>
 
-namespace KlayGE
+extern "C"
 {
-	InputFactoryPtr const & DInputFactoryInstance()
+	KlayGE::InputFactoryPtr const & InputFactoryInstance()
 	{
-		static InputFactoryPtr ifactory = MakeSharedPtr<ConcreteInputFactory<DInputEngine> >(L"DirectInput Input Factory");
+		static KlayGE::InputFactoryPtr ifactory = KlayGE::MakeSharedPtr<KlayGE::ConcreteInputFactory<KlayGE::DInputEngine> >(L"DirectInput Input Factory");
 		return ifactory;
+	}
+
+	std::string const & Name()
+	{
+		static std::string const name("DInput");
+		return name;
 	}
 }

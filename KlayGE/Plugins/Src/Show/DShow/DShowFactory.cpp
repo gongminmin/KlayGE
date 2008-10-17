@@ -17,11 +17,17 @@
 #include <KlayGE/DShow/DShow.hpp>
 #include <KlayGE/DShow/DShowFactory.hpp>
 
-namespace KlayGE
+extern "C"
 {
-	ShowFactoryPtr const & DShowFactoryInstance()
+	KlayGE::ShowFactoryPtr const & ShowFactoryInstance()
 	{
-		static ShowFactoryPtr sf = MakeSharedPtr<ConcreteShowFactory<DShowEngine> >(L"DirectShow Show Factory");
+		static KlayGE::ShowFactoryPtr sf = KlayGE::MakeSharedPtr<KlayGE::ConcreteShowFactory<KlayGE::DShowEngine> >(L"DirectShow Show Factory");
 		return sf;
+	}
+
+	std::string const & Name()
+	{
+		static std::string const name("DShow");
+		return name;
 	}
 }

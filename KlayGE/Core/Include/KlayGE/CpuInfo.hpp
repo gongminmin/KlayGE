@@ -17,7 +17,7 @@
 
 namespace KlayGE
 {
-	class CPUInfo
+	class KLAYGE_CORE_API CPUInfo
 	{
 	public:
 		enum CPUFeature

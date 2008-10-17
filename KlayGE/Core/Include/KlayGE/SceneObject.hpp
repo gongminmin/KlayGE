@@ -13,8 +13,10 @@
 #ifndef _SCENEOBJECT_HPP
 #define _SCENEOBJECT_HPP
 
+#ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderLayout.hpp>
@@ -23,7 +25,7 @@
 
 namespace KlayGE
 {
-	class SceneObject : public boost::enable_shared_from_this<SceneObject>
+	class KLAYGE_CORE_API SceneObject : public boost::enable_shared_from_this<SceneObject>
 	{
 	public:
 		enum SOAttrib

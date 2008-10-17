@@ -13,8 +13,10 @@
 #ifndef _CAMERA_HPP
 #define _CAMERA_HPP
 
+#ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
 
 #include <KlayGE/Vector.hpp>
 #include <KlayGE/Matrix.hpp>
@@ -23,7 +25,7 @@ namespace KlayGE
 {
 	// 3DÉãÏñ»ú²Ù×÷
 	//////////////////////////////////////////////////////////////////////////////////
-	class Camera
+	class KLAYGE_CORE_API Camera
 	{
 	public:
 		float3 const & EyePos() const

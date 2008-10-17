@@ -20,9 +20,6 @@
 #ifndef _OGLTEXTURE_HPP
 #define _OGLTEXTURE_HPP
 
-#define KLAYGE_LIB_NAME KlayGE_RenderEngine_OpenGL
-#include <KlayGE/config/auto_link.hpp>
-
 #include <KlayGE/Texture.hpp>
 
 #include <glloader/glloader.h>

@@ -19,8 +19,10 @@
 #ifndef _RENDERABLE_HPP
 #define _RENDERABLE_HPP
 
+#ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
 
 #include <KlayGE/PreDeclare.hpp>
 #include <vector>
@@ -28,7 +30,7 @@
 namespace KlayGE
 {
 	// Abstract class defining the interface all renderable objects must implement.
-	class Renderable : public boost::enable_shared_from_this<Renderable>
+	class KLAYGE_CORE_API Renderable : public boost::enable_shared_from_this<Renderable>
 	{
 	public:
 		virtual ~Renderable();

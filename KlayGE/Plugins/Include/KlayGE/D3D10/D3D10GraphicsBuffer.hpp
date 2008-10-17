@@ -13,9 +13,6 @@
 #ifndef _D3D10GRAPHICSBUFFER_HPP
 #define _D3D10GRAPHICSBUFFER_HPP
 
-#define KLAYGE_LIB_NAME KlayGE_RenderEngine_D3D10
-#include <KlayGE/config/auto_link.hpp>
-
 #include <boost/smart_ptr.hpp>
 
 #include <KlayGE/D3D10/D3D10MinGWDefs.hpp>

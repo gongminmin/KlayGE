@@ -16,9 +16,6 @@
 #ifndef _OALAUDIO_HPP
 #define _OALAUDIO_HPP
 
-#define KLAYGE_LIB_NAME KlayGE_AudioEngine_OpenAL
-#include <KlayGE/config/auto_link.hpp>
-
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/thread.hpp>
 

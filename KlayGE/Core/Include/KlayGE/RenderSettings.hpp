@@ -16,9 +16,6 @@
 #ifndef _RENDERSETTINGS_HPP
 #define _RENDERSETTINGS_HPP
 
-#define KLAYGE_LIB_NAME KlayGE_Core
-#include <KlayGE/config/auto_link.hpp>
-
 #include <boost/function.hpp>
 
 #include <KlayGE/ElementFormat.hpp>
@@ -36,7 +33,7 @@ namespace KlayGE
 		{
 		}
 
-		boost::function<bool ()> ConfirmDevice;
+		boost::function<bool()> ConfirmDevice;
 
 		bool	full_screen;
 		int		left;

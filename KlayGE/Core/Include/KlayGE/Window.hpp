@@ -1,8 +1,11 @@
 // Window.hpp
 // KlayGE Window类 头文件
-// Ver 3.7.0
+// Ver 3.8.0
 // 版权所有(C) 龚敏敏, 2007-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.8.0
+// 移入Core (2008.10.16)
 //
 // 3.7.0
 // 实验性的linux支持 (2008.5.19)
@@ -15,9 +18,6 @@
 
 #ifndef _WINDOW_HPP
 #define _WINDOW_HPP
-
-#define KLAYGE_LIB_NAME KlayGE_AppLayer
-#include <KlayGE/config/auto_link.hpp>
 
 #include <KlayGE/PreDeclare.hpp>
 
@@ -39,7 +39,7 @@
 
 namespace KlayGE
 {
-	class Window
+	class KLAYGE_CORE_API Window
 	{
 	public:
 		Window(std::string const & name, int32_t left, int32_t top,

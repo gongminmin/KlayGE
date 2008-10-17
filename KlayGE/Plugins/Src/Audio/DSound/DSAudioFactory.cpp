@@ -17,12 +17,18 @@
 #include <KlayGE/DSound/DSAudio.hpp>
 #include <KlayGE/DSound/DSAudioFactory.hpp>
 
-namespace KlayGE
+extern "C"
 {
-	AudioFactoryPtr const & DSAudioFactoryInstance()
+	KlayGE::AudioFactoryPtr const & AudioFactoryInstance()
 	{
-		static AudioFactoryPtr af = MakeSharedPtr<ConcreteAudioFactory<DSAudioEngine,
-			DSSoundBuffer, DSMusicBuffer> >(L"DirectSound Audio Factory");
+		static KlayGE::AudioFactoryPtr af = KlayGE::MakeSharedPtr<KlayGE::ConcreteAudioFactory<KlayGE::DSAudioEngine,
+			KlayGE::DSSoundBuffer, KlayGE::DSMusicBuffer> >(L"DirectSound Audio Factory");
 		return af;
 	}	
+
+	std::string const & Name()
+	{
+		static std::string const name("DSound");
+		return name;
+	}
 }

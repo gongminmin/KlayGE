@@ -39,8 +39,10 @@
 #ifndef _TEXTURE_HPP
 #define _TEXTURE_HPP
 
+#ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/ElementFormat.hpp>
@@ -66,7 +68,7 @@ namespace KlayGE
 	// This class represents the commonalities, and is the one 'used'
 	// by programmers even though the real implementation could be
 	// different in reality.
-	class Texture
+	class KLAYGE_CORE_API Texture
 	{
 	public:
 		// Enum identifying the texture type
@@ -264,8 +266,8 @@ namespace KlayGE
 		uint32_t		access_hint_;
 	};
 
-	TexturePtr LoadTexture(std::string const & tex_name, uint32_t access_hint);
-	void SaveTexture(TexturePtr texture, std::string const & tex_name);
+	KLAYGE_CORE_API TexturePtr LoadTexture(std::string const & tex_name, uint32_t access_hint);
+	KLAYGE_CORE_API void SaveTexture(TexturePtr texture, std::string const & tex_name);
 
 	// 返回立方环境映射的lookat和up向量
 	//////////////////////////////////////////////////////////////////////////////////

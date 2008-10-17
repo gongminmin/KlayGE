@@ -16,12 +16,20 @@
 #ifndef _DSAUDIOFACTORY_HPP
 #define _DSAUDIOFACTORY_HPP
 
-#define KLAYGE_LIB_NAME KlayGE_AudioEngine_DSound
-#include <KlayGE/config/auto_link.hpp>
+#ifdef KLAYGE_HAS_DECLSPEC
+	#ifdef KLAYGE_DSOUND_AE_SOURCE				// Build dll
+		#define KLAYGE_DSOUND_AE_API __declspec(dllexport)
+	#else										// Use dll
+		#define KLAYGE_DSOUND_AE_API __declspec(dllimport)
+	#endif
+#else
+	#define KLAYGE_DSOUND_AE_API
+#endif // KLAYGE_HAS_DECLSPEC
 
-namespace KlayGE
+extern "C"
 {
-	AudioFactoryPtr const & DSAudioFactoryInstance();
+	KLAYGE_DSOUND_AE_API KlayGE::AudioFactoryPtr const & AudioFactoryInstance();
+	KLAYGE_DSOUND_AE_API std::string const & Name();
 }
 
 #endif			// _DSAUDIOFACTORY_HPP

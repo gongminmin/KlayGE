@@ -16,9 +16,6 @@
 #ifndef _OGLRENDERWINDOW_HPP
 #define _OGLRENDERWINDOW_HPP
 
-#define KLAYGE_LIB_NAME KlayGE_RenderEngine_OpenGL
-#include <KlayGE/config/auto_link.hpp>
-
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/OpenGL/OGLFrameBuffer.hpp>
 

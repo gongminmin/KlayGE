@@ -24,7 +24,7 @@
 
 namespace KlayGE
 {
-	class PostProcess : public RenderableHelper
+	class KLAYGE_CORE_API PostProcess : public RenderableHelper
 	{
 	public:
 		explicit PostProcess(RenderTechniquePtr tech);
@@ -52,7 +52,7 @@ namespace KlayGE
 		RenderEffectParameterPtr flipping_ep_;
 	};
 
-	class GammaCorrectionProcess : public PostProcess
+	class KLAYGE_CORE_API GammaCorrectionProcess : public PostProcess
 	{
 	public:
 		explicit GammaCorrectionProcess();
@@ -63,7 +63,7 @@ namespace KlayGE
 		RenderEffectParameterPtr inv_gamma_ep_;
 	};
 	
-	class SeparableBlurPostProcess : public PostProcess
+	class KLAYGE_CORE_API SeparableBlurPostProcess : public PostProcess
 	{
 	public:
 		SeparableBlurPostProcess(std::string const & tech, int kernel_radius, float multiplier);
@@ -81,19 +81,19 @@ namespace KlayGE
 		RenderEffectParameterPtr tex_coord_offset_ep_;
 	};
 
-	class Downsampler2x2PostProcess : public PostProcess
+	class KLAYGE_CORE_API Downsampler2x2PostProcess : public PostProcess
 	{
 	public:
 		Downsampler2x2PostProcess();
 	};
 
-	class BrightPassDownsampler2x2PostProcess : public PostProcess
+	class KLAYGE_CORE_API BrightPassDownsampler2x2PostProcess : public PostProcess
 	{
 	public:
 		BrightPassDownsampler2x2PostProcess();
 	};
 
-	class BlurXPostProcess : public SeparableBlurPostProcess
+	class KLAYGE_CORE_API BlurXPostProcess : public SeparableBlurPostProcess
 	{
 	public:
 		BlurXPostProcess(int kernel_radius, float multiplier);
@@ -101,7 +101,7 @@ namespace KlayGE
 		void Source(TexturePtr const & src_tex, bool flipping);
 	};
 
-	class BlurYPostProcess : public SeparableBlurPostProcess
+	class KLAYGE_CORE_API BlurYPostProcess : public SeparableBlurPostProcess
 	{
 	public:
 		BlurYPostProcess(int kernel_radius, float multiplier);
@@ -109,7 +109,7 @@ namespace KlayGE
 		void Source(TexturePtr const & src_tex, bool flipping);
 	};
 
-	class BlurPostProcess : public PostProcess
+	class KLAYGE_CORE_API BlurPostProcess : public PostProcess
 	{
 	public:
 		BlurPostProcess(int kernel_radius, float multiplier);

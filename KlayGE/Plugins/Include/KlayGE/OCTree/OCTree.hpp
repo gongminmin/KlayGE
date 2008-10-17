@@ -22,9 +22,6 @@
 #ifndef _OCTREE_HPP
 #define _OCTREE_HPP
 
-#define KLAYGE_LIB_NAME KlayGE_Scene_OCTree
-#include <KlayGE/config/auto_link.hpp>
-
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/SceneNode.hpp>
 #include <KlayGE/SceneManager.hpp>
@@ -41,8 +38,6 @@
 #endif
 
 #include <vector>
-#include <map>
-#include <string>
 
 namespace KlayGE
 {

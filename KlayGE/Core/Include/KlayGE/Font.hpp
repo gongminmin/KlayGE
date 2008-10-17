@@ -28,8 +28,10 @@
 #ifndef _FONT_HPP
 #define _FONT_HPP
 
+#ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
 
 #include <KlayGE/PreDeclare.hpp>
 
@@ -52,7 +54,7 @@ namespace KlayGE
 {
 	// 在3D环境中画出文字
 	/////////////////////////////////////////////////////////////////////////////////
-	class Font
+	class KLAYGE_CORE_API Font
 	{
 	public:
 		// 字体建立标志

@@ -16,15 +16,17 @@
 #ifndef _RENDERVIEW_HPP
 #define _RENDERVIEW_HPP
 
+#ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Texture.hpp>
 
 namespace KlayGE
 {	
-	class RenderView
+	class KLAYGE_CORE_API RenderView
 	{
 	public:
 		virtual ~RenderView()

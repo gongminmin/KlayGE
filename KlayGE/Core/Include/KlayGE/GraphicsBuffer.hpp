@@ -40,8 +40,10 @@
 #ifndef _GRAPHICSBUFFER_HPP
 #define _GRAPHICSBUFFER_HPP
 
+#ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
 
 #include <KlayGE/PreDeclare.hpp>
 #include <vector>
@@ -62,7 +64,7 @@ namespace KlayGE
 		BA_Read_Write
 	};
 
-	class GraphicsBuffer
+	class KLAYGE_CORE_API GraphicsBuffer
 	{
 	public:
 		class Mapper : boost::noncopyable

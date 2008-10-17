@@ -16,9 +16,6 @@
 #ifndef _D3D9MAPPING_HPP
 #define _D3D9MAPPING_HPP
 
-#define KLAYGE_LIB_NAME KlayGE_RenderEngine_D3D9
-#include <KlayGE/config/auto_link.hpp>
-
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderStateObject.hpp>

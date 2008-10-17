@@ -6,7 +6,7 @@
 
 namespace KlayGE
 {
-	class SceneNode
+	class KLAYGE_CORE_API SceneNode
 	{
 	public:
 		virtual ~SceneNode()

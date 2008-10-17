@@ -156,7 +156,7 @@ namespace KlayGE
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #pragma pack(push, 1)
 #endif
-	struct RasterizerStateDesc
+	struct KLAYGE_CORE_API RasterizerStateDesc
 	{
 		PolygonMode			polygon_mode;
 		ShadeMode			shade_mode;
@@ -172,7 +172,7 @@ namespace KlayGE
 		friend bool operator<(RasterizerStateDesc const & lhs, RasterizerStateDesc const & rhs);
 	};
 
-	struct DepthStencilStateDesc
+	struct KLAYGE_CORE_API DepthStencilStateDesc
 	{
 		bool				depth_enable;
 		bool				depth_write_mask;
@@ -199,7 +199,7 @@ namespace KlayGE
 		friend bool operator<(DepthStencilStateDesc const & lhs, DepthStencilStateDesc const & rhs);
 	};
 
-	struct BlendStateDesc
+	struct KLAYGE_CORE_API BlendStateDesc
 	{
 		bool				alpha_to_coverage_enable;
 		bool				independent_blend_enable;
@@ -218,7 +218,7 @@ namespace KlayGE
 		friend bool operator<(BlendStateDesc const & lhs, BlendStateDesc const & rhs);
 	};
 
-	struct SamplerStateDesc
+	struct KLAYGE_CORE_API SamplerStateDesc
 	{
 		Color border_clr;
 
@@ -240,7 +240,7 @@ namespace KlayGE
 #pragma pack(pop)
 #endif
 
-	class RasterizerStateObject
+	class KLAYGE_CORE_API RasterizerStateObject
 	{
 	public:
 		explicit RasterizerStateObject(RasterizerStateDesc const & desc)
@@ -265,7 +265,7 @@ namespace KlayGE
 		RasterizerStateDesc desc_;
 	};
 
-	class DepthStencilStateObject
+	class KLAYGE_CORE_API DepthStencilStateObject
 	{
 	public:
 		explicit DepthStencilStateObject(DepthStencilStateDesc const & desc)
@@ -290,7 +290,7 @@ namespace KlayGE
 		DepthStencilStateDesc desc_;
 	};
 
-	class BlendStateObject
+	class KLAYGE_CORE_API BlendStateObject
 	{
 	public:
 		explicit BlendStateObject(BlendStateDesc const & desc)
@@ -315,7 +315,7 @@ namespace KlayGE
 		BlendStateDesc desc_;
 	};
 
-	class SamplerStateObject
+	class KLAYGE_CORE_API SamplerStateObject
 	{
 	public:
 		explicit SamplerStateObject(SamplerStateDesc const & desc)

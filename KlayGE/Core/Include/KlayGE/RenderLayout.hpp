@@ -16,8 +16,10 @@
 #ifndef _RENDERLAYOUT_HPP
 #define _RENDERLAYOUT_HPP
 
+#ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
 
 #include <KlayGE/PreDeclare.hpp>
 
@@ -83,7 +85,7 @@ namespace KlayGE
 	typedef std::vector<vertex_element> vertex_elements_type;
 
 
-	class RenderLayout
+	class KLAYGE_CORE_API RenderLayout
 	{
 	public:
 		enum topology_type

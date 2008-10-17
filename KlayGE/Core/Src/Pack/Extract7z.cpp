@@ -18,7 +18,7 @@
 
 #include "BaseDefines.hpp"
 
-#include "Dll.hpp"
+#include <KlayGE/DllLoader.hpp>
 
 #include <string>
 #include <algorithm>

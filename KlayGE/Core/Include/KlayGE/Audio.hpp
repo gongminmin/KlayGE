@@ -16,8 +16,10 @@
 #ifndef _AUDIO_HPP
 #define _AUDIO_HPP
 
+#ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Vector.hpp>
@@ -30,7 +32,7 @@ namespace KlayGE
 {
 	// 声音缓冲区抽象接口
 	/////////////////////////////////////////////////////////////////////////////////
-	class AudioBuffer
+	class KLAYGE_CORE_API AudioBuffer
 	{
 	public:
 		AudioBuffer(AudioDataSourcePtr const & dataSource);
@@ -63,7 +65,7 @@ namespace KlayGE
 
 	// 声音缓冲区
 	/////////////////////////////////////////////////////////////////////////////////
-	class SoundBuffer : public AudioBuffer
+	class KLAYGE_CORE_API SoundBuffer : public AudioBuffer
 	{
 	public:
 		SoundBuffer(AudioDataSourcePtr const & dataSource);
@@ -79,7 +81,7 @@ namespace KlayGE
 
 	// 音乐缓冲区，流式结构
 	/////////////////////////////////////////////////////////////////////////////////
-	class MusicBuffer : public AudioBuffer
+	class KLAYGE_CORE_API MusicBuffer : public AudioBuffer
 	{
 	public:
 		MusicBuffer(AudioDataSourcePtr const & dataSource);
@@ -102,7 +104,7 @@ namespace KlayGE
 
 	// 管理音频播放
 	/////////////////////////////////////////////////////////////////////////////////
-	class AudioEngine
+	class KLAYGE_CORE_API AudioEngine
 	{
 		typedef std::map<size_t, AudioBufferPtr>	AudioBufs;
 		typedef AudioBufs::iterator					AudioBufsIter;

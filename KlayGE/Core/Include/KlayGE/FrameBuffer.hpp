@@ -22,8 +22,10 @@
 #ifndef _FRAMEBUFFER_HPP
 #define _FRAMEBUFFER_HPP
 
+#ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
 
 #include <KlayGE/PreDeclare.hpp>
 
@@ -34,7 +36,7 @@
 
 namespace KlayGE
 {
-	class FrameBuffer
+	class KLAYGE_CORE_API FrameBuffer
 	{
 	public:
 		enum Attachment

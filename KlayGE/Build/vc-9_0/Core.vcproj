@@ -23,7 +23,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="../../lib/$(PlatformName)"
 			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
-			ConfigurationType="4"
+			ConfigurationType="2"
 			CharacterSet="1"
 			>
 			<Tool
@@ -44,12 +44,12 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
+				PreprocessorDefinitions="WIN32;_DEBUG;_USRDLL;KLAYGE_BUILD_DLL;KLAYGE_CORE_SOURCE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
-				ProgramDataBaseFileName="$(IntDir)\$(TargetFileName).pdb"
+				ProgramDataBaseFileName="$(IntDir)\$(TargetName).pdb"
 				WarningLevel="4"
 				DebugInformationFormat="4"
 			/>
@@ -63,11 +63,16 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_Core_d.lib"
+				Name="VCLinkerTool"
+				OutputFile="$(OutDir)/KlayGE_Core_vc90_x86_d.dll"
+				LinkIncremental="2"
+				ImportLibrary="../../lib/$(PlatformName)/$(TargetName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -79,6 +84,9 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -86,7 +94,7 @@
 			Name="Debug|x64"
 			OutputDirectory="../../lib/$(PlatformName)"
 			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
-			ConfigurationType="4"
+			ConfigurationType="2"
 			CharacterSet="1"
 			>
 			<Tool
@@ -108,12 +116,12 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN64;_DEBUG;_LIB"
+				PreprocessorDefinitions="WIN64;_DEBUG;_USRDLL;KLAYGE_BUILD_DLL;KLAYGE_CORE_SOURCE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
-				ProgramDataBaseFileName="$(IntDir)\$(TargetFileName).pdb"
+				ProgramDataBaseFileName="$(IntDir)\$(TargetName).pdb"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
@@ -127,11 +135,16 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_Core_d.lib"
+				Name="VCLinkerTool"
+				OutputFile="$(OutDir)/KlayGE_Core_vc90_x64_d.dll"
+				LinkIncremental="2"
+				ImportLibrary="../../lib/$(PlatformName)/$(TargetName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -143,6 +156,9 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -150,7 +166,7 @@
 			Name="Release|Win32"
 			OutputDirectory="../../lib/$(PlatformName)"
 			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
-			ConfigurationType="4"
+			ConfigurationType="2"
 			CharacterSet="1"
 			WholeProgramOptimization="0"
 			>
@@ -176,11 +192,11 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
+				PreprocessorDefinitions="WIN32;NDEBUG;_USRDLL;KLAYGE_BUILD_DLL;KLAYGE_CORE_SOURCE"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				FloatingPointModel="2"
-				ProgramDataBaseFileName="$(IntDir)\$(TargetFileName).pdb"
+				ProgramDataBaseFileName="$(IntDir)\$(TargetName).pdb"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
@@ -194,11 +210,15 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_Core.lib"
+				Name="VCLinkerTool"
+				OutputFile="$(OutDir)/KlayGE_Core_vc90_x86.dll"
+				ImportLibrary="../../lib/$(PlatformName)/$(TargetName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -210,6 +230,9 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -217,7 +240,7 @@
 			Name="Release|x64"
 			OutputDirectory="../../lib/$(PlatformName)"
 			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
-			ConfigurationType="4"
+			ConfigurationType="2"
 			CharacterSet="1"
 			WholeProgramOptimization="0"
 			>
@@ -244,11 +267,11 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
-				PreprocessorDefinitions="WIN64;NDEBUG;_LIB"
+				PreprocessorDefinitions="WIN64;NDEBUG;_USRDLL;KLAYGE_BUILD_DLL;KLAYGE_CORE_SOURCE"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				FloatingPointModel="2"
-				ProgramDataBaseFileName="$(IntDir)\$(TargetFileName).pdb"
+				ProgramDataBaseFileName="$(IntDir)\$(TargetName).pdb"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
@@ -262,11 +285,15 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_Core.lib"
+				Name="VCLinkerTool"
+				OutputFile="$(OutDir)/KlayGE_Core_vc90_x64.dll"
+				ImportLibrary="../../lib/$(PlatformName)/$(TargetName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -276,6 +303,9 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -1252,6 +1282,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Src\Kernel\DllLoader.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Src\Kernel\ResLoader.cpp"
 					>
 				</File>
@@ -1357,6 +1391,10 @@
 				</File>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\CpuInfo.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\DllLoader.hpp"
 					>
 				</File>
 				<File
@@ -1720,10 +1758,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Pack\Dll.hpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\Core\Include\KlayGE\Extract7z.hpp"
 					>
 				</File>
@@ -1761,10 +1795,6 @@
 				</File>
 				<File
 					RelativePath="..\..\Core\Src\Pack\BSTR.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\Core\Src\Pack\Dll.cpp"
 					>
 				</File>
 				<File
@@ -1878,6 +1908,34 @@
 							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
 						/>
 					</FileConfiguration>
+				</File>
+			</Filter>
+		</Filter>
+		<Filter
+			Name="App Layer"
+			>
+			<Filter
+				Name="Header Files"
+				>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\App3D.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\Window.hpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Source Files"
+				>
+				<File
+					RelativePath="..\..\Core\Src\AppLayer\App3D.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Src\AppLayer\Window.cpp"
+					>
 				</File>
 			</Filter>
 		</Filter>
