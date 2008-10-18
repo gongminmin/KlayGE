@@ -12,6 +12,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/MapVector.hpp>
@@ -148,7 +149,7 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		uint32_t const num_vertices = this->NumVertices();
-		
+
 		if (!hint)
 		{
 			hint = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read, NULL);
