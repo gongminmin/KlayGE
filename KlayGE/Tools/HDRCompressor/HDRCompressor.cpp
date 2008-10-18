@@ -131,8 +131,8 @@ namespace
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		uint32_t const size = tex->Width(0);
-		TexturePtr y_cube_map = rf.MakeTextureCube(size, 1, EF_L16);
-		TexturePtr c_cube_map = rf.MakeTextureCube(size / 2, 1, EF_ARGB8);
+		TexturePtr y_cube_map = rf.MakeTextureCube(size, 1, EF_L16, EAH_CPU_Read | EAH_CPU_Write, NULL);
+		TexturePtr c_cube_map = rf.MakeTextureCube(size / 2, 1, EF_ARGB8, EAH_CPU_Read | EAH_CPU_Write, NULL);
 		std::vector<float> hdr_data(size * size * 4);
 		std::vector<uint16_t> y_data(size * size);
 		std::vector<uint8_t> c_data(size / 2 * size / 2 * 4);
@@ -171,12 +171,12 @@ namespace
 			}
 		}
 
-		TexturePtr c_cube_map_bc3 = rf.MakeTextureCube(size / 2, 1, EF_BC3);
+		TexturePtr c_cube_map_bc3 = rf.MakeTextureCube(size / 2, 1, EF_BC3, EAH_CPU_Read | EAH_CPU_Write, NULL);
 		c_cube_map->CopyToTexture(*c_cube_map_bc3);
 
 		float mse = 0;
 		{
-			TexturePtr c_cube_map_restored = rf.MakeTextureCube(size / 2, 1, EF_ARGB8);
+			TexturePtr c_cube_map_restored = rf.MakeTextureCube(size / 2, 1, EF_ARGB8, EAH_CPU_Read | EAH_CPU_Write, NULL);
 			c_cube_map_bc3->CopyToTexture(*c_cube_map_restored);
 
 			std::vector<float> restored_hdr_data(size * size * 4);
@@ -241,8 +241,8 @@ namespace
 
 		uint32_t const width = tex->Width(0);
 		uint32_t const height = tex->Height(0);
-		TexturePtr y_map = rf.MakeTexture2D(width, height, 1, EF_L16);
-		TexturePtr c_map = rf.MakeTexture2D(width / 2, height / 2, 1, EF_ARGB8);
+		TexturePtr y_map = rf.MakeTexture2D(width, height, 1, EF_L16, EAH_CPU_Read | EAH_CPU_Write, NULL);
+		TexturePtr c_map = rf.MakeTexture2D(width / 2, height / 2, 1, EF_ARGB8, EAH_CPU_Read | EAH_CPU_Write, NULL);
 		std::vector<float> hdr_data(width * height * 4);
 		std::vector<uint16_t> y_data(width * height);
 		std::vector<uint8_t> c_data(width / 2 * height / 2 * 4);
@@ -276,12 +276,12 @@ namespace
 			}
 		}
 
-		TexturePtr c_map_bc3 = rf.MakeTexture2D(width / 2, height / 2, 1, EF_BC3);
+		TexturePtr c_map_bc3 = rf.MakeTexture2D(width / 2, height / 2, 1, EF_BC3, EAH_CPU_Read | EAH_CPU_Write, NULL);
 		c_map->CopyToTexture(*c_map_bc3);
 
 		float mse = 0;
 		{
-			TexturePtr c_map_restored = rf.MakeTexture2D(width / 2, height / 2, 1, EF_ARGB8);
+			TexturePtr c_map_restored = rf.MakeTexture2D(width / 2, height / 2, 1, EF_ARGB8, EAH_CPU_Read | EAH_CPU_Write, NULL);
 			c_map_bc3->CopyToTexture(*c_map_restored);
 
 			std::vector<float> restored_hdr_data(width * height * 4);
@@ -346,7 +346,7 @@ namespace
 		case Texture::TT_2D:
 			{
 				TexturePtr temp = Context::Instance().RenderFactoryInstance().MakeTexture2D(
-					tex->Width(0), tex->Height(0), 1, EF_ABGR32F);
+					tex->Width(0), tex->Height(0), 1, EF_ABGR32F, EAH_CPU_Read | EAH_CPU_Write, NULL);
 				tex->CopyToTexture(*temp);
 				ret = CompressHDR2D(temp);
 			}
@@ -355,7 +355,7 @@ namespace
 		case Texture::TT_Cube:
 			{
 				TexturePtr temp = Context::Instance().RenderFactoryInstance().MakeTextureCube(
-					tex->Width(0), 1, EF_ABGR32F);
+					tex->Width(0), 1, EF_ABGR32F, EAH_CPU_Read | EAH_CPU_Write, NULL);
 				tex->CopyToTexture(*temp);
 				ret = CompressHDRCube(temp);
 			}
@@ -406,7 +406,7 @@ int main(int argc, char* argv[])
 	EmptyApp app("HDRCompressor", settings);
 	app.Create();
 
-	std::pair<TexturePtr, TexturePtr> new_texs = CompressHDR(LoadTexture(argv[1]));
+	std::pair<TexturePtr, TexturePtr> new_texs = CompressHDR(LoadTexture(argv[1], EAH_CPU_Read | EAH_CPU_Write));
 
 	path output_path(argv[1]);
 	std::string y_file = basename(output_path) + "_y" + extension(output_path);

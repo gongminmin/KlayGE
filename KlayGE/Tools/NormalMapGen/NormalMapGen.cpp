@@ -72,7 +72,7 @@ namespace
 			}
 		}
 
-		TexturePtr normal_map = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, EF_ARGB8);
+		TexturePtr normal_map = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, EF_ARGB8, EAH_CPU_Read | EAH_CPU_Write, NULL);
 		{
 			Texture::Mapper mapper(*normal_map, 0, TMA_Write_Only, 0, 0, width, height);
 			uint8_t* data = mapper.Pointer<uint8_t>();
@@ -122,8 +122,8 @@ int main(int argc, char* argv[])
 	EmptyApp app("NormalMapGen", settings);
 	app.Create();
 
-	TexturePtr temp = LoadTexture(argv[1]);
-	TexturePtr height_map = Context::Instance().RenderFactoryInstance().MakeTexture2D(temp->Width(0), temp->Height(0), 1, EF_L8);
+	TexturePtr temp = LoadTexture(argv[1], EAH_CPU_Read | EAH_CPU_Write);
+	TexturePtr height_map = Context::Instance().RenderFactoryInstance().MakeTexture2D(temp->Width(0), temp->Height(0), 1, EF_L8, EAH_CPU_Read | EAH_CPU_Write, NULL);
 	temp->CopyToTexture(*height_map);
 	TexturePtr normal_map = CreateNormalMap(height_map);
 	SaveTexture(normal_map, argv[2]);

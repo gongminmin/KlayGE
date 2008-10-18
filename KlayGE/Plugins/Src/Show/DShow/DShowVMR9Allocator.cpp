@@ -34,22 +34,17 @@
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 #include <KlayGE/DShow/DShowVMR9Allocator.hpp>
 
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma comment(lib, "d3d9.lib")
+#endif
+
 namespace KlayGE
 {
 	DShowVMR9Allocator::DShowVMR9Allocator(HWND wnd)
 					: wnd_(wnd), ref_count_(1),
 						cur_surf_index_(0xFFFFFFFF)
 	{
-		mod_d3d9_ = ::LoadLibraryW(L"d3d9.dll");
-
-		typedef IDirect3D9* (WINAPI *Direct3DCreate9Func)(UINT SDKVersion);
-		Direct3DCreate9Func DynamicDirect3DCreate9 = NULL;
-		if (mod_d3d9_ != NULL)
-		{
-			DynamicDirect3DCreate9 = reinterpret_cast<Direct3DCreate9Func>(::GetProcAddress(mod_d3d9_, "Direct3DCreate9"));
-		}
-
-		d3d_ = MakeCOMPtr(DynamicDirect3DCreate9(D3D_SDK_VERSION));
+		d3d_ = MakeCOMPtr(Direct3DCreate9(D3D_SDK_VERSION));
 
 		this->CreateDevice();
 	}
@@ -57,8 +52,6 @@ namespace KlayGE
 	DShowVMR9Allocator::~DShowVMR9Allocator()
 	{
 		this->DeleteSurfaces();
-
-		//::FreeLibrary(mod_d3d9_);
 	}
 
 	void DShowVMR9Allocator::CreateDevice()

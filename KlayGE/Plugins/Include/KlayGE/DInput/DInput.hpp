@@ -44,8 +44,6 @@ namespace KlayGE
 		HWND HWnd() const;
 
 	private:
-		HMODULE mod_dinput_;
-
 		boost::shared_ptr<IDirectInput8W> dinput_;
 		HWND hwnd_;
 

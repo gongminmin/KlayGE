@@ -47,7 +47,7 @@ namespace
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		uint32_t const size = normal_map->Width(0);
-		TexturePtr new_normal_map = rf.MakeTextureCube(size, 1, EF_ARGB8);
+		TexturePtr new_normal_map = rf.MakeTextureCube(size, 1, EF_ARGB8, EAH_CPU_Read | EAH_CPU_Write, NULL);
 		std::vector<uint8_t> normals(size * size * 4);
 
 		for (int i = 0; i < 6; ++ i)
@@ -75,12 +75,12 @@ namespace
 			}
 		}
 
-		TexturePtr com_normal_map = rf.MakeTextureCube(size, 1, new_format);
+		TexturePtr com_normal_map = rf.MakeTextureCube(size, 1, new_format, EAH_CPU_Read | EAH_CPU_Write, NULL);
 		new_normal_map->CopyToTexture(*com_normal_map);
 
 		float mse = 0;
 		{
-			TexturePtr normal_map_restored = rf.MakeTextureCube(size, 1, EF_ARGB8);
+			TexturePtr normal_map_restored = rf.MakeTextureCube(size, 1, EF_ARGB8, EAH_CPU_Read | EAH_CPU_Write, NULL);
 			com_normal_map->CopyToTexture(*normal_map_restored);
 
 			std::vector<uint8_t> restored_normals(size * size * 4);
@@ -134,7 +134,7 @@ namespace
 
 		uint32_t const width = normal_map->Width(0);
 		uint32_t const height = normal_map->Height(0);
-		TexturePtr new_normal_map = rf.MakeTexture2D(width, height, 1, EF_ARGB8);
+		TexturePtr new_normal_map = rf.MakeTexture2D(width, height, 1, EF_ARGB8, EAH_CPU_Read | EAH_CPU_Write, NULL);
 		std::vector<uint8_t> normals(width * height * 4);
 
 		{
@@ -161,12 +161,12 @@ namespace
 			}
 		}
 
-		TexturePtr com_normal_map = rf.MakeTexture2D(width, height, 1, new_format);
+		TexturePtr com_normal_map = rf.MakeTexture2D(width, height, 1, new_format, EAH_CPU_Read | EAH_CPU_Write, NULL);
 		new_normal_map->CopyToTexture(*com_normal_map);
 
 		float mse = 0;
 		{
-			TexturePtr normal_map_restored = rf.MakeTexture2D(width, height, 1, EF_ARGB8);
+			TexturePtr normal_map_restored = rf.MakeTexture2D(width, height, 1, EF_ARGB8, EAH_CPU_Read | EAH_CPU_Write, NULL);
 			com_normal_map->CopyToTexture(*normal_map_restored);
 
 			std::vector<uint8_t> restored_normals(width * height * 4);
@@ -220,7 +220,7 @@ namespace
 		case Texture::TT_2D:
 			{
 				TexturePtr temp = Context::Instance().RenderFactoryInstance().MakeTexture2D(
-					normal_map->Width(0), normal_map->Height(0), 1, EF_ARGB8);
+					normal_map->Width(0), normal_map->Height(0), 1, EF_ARGB8, EAH_CPU_Read | EAH_CPU_Write, NULL);
 				normal_map->CopyToTexture(*temp);
 				new_normal_map = CompressNormalMap2D(temp, new_format);
 			}
@@ -229,7 +229,7 @@ namespace
 		case Texture::TT_Cube:
 			{
 				TexturePtr temp = Context::Instance().RenderFactoryInstance().MakeTextureCube(
-					normal_map->Width(0), 1, EF_ARGB8);
+					normal_map->Width(0), 1, EF_ARGB8, EAH_CPU_Read | EAH_CPU_Write, NULL);
 				normal_map->CopyToTexture(*temp);
 				new_normal_map = CompressNormalMapCube(temp, new_format);
 			}
@@ -289,7 +289,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	TexturePtr new_normal_map = CompressNormalMap(LoadTexture(argv[1]), new_format);
+	TexturePtr new_normal_map = CompressNormalMap(LoadTexture(argv[1], EAH_CPU_Read | EAH_CPU_Write), new_format);
 	SaveTexture(new_normal_map, argv[2]);
 
 	cout << "Normal map is saved to " << argv[2] << endl;

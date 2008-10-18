@@ -77,7 +77,7 @@ TexturePtr CreateCubeMap(int cube_size)
 {
 	RenderFactory& render_factory(Context::Instance().RenderFactoryInstance());
 
-	TexturePtr cube = render_factory.MakeTextureCube(cube_size, 1, EF_ARGB8);
+	TexturePtr cube = render_factory.MakeTextureCube(cube_size, 1, EF_ARGB8, EAH_CPU_Read | EAH_CPU_Write, NULL);
 
 	for (int face = 0; face < 6; ++ face)
 	{
